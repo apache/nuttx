@@ -48,6 +48,47 @@
 #endif
 
 /****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static void nrf91_modem_fault_handler(struct nrf_modem_fault_info *info);
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* Modem library parameters - must be allocated in data segment */
+
+static const struct nrf_modem_init_params g_init_params =
+{
+  .shmem =
+  {
+    .ctrl =
+    {
+      .base = NRF91_SHMEM_CTRL_BASE,
+      .size = NRF91_SHMEM_CTRL_SIZE
+    },
+    .tx =
+    {
+      .base = NRF91_SHMEM_TX_BASE,
+      .size = NRF91_SHMEM_TX_SIZE
+    },
+    .rx =
+    {
+      .base = NRF91_SHMEM_RX_BASE,
+      .size = NRF91_SHMEM_RX_SIZE
+    },
+    .trace =
+    {
+      .base = NRF91_SHMEM_TRACE_BASE,
+      .size = NRF91_SHMEM_TRACE_SIZE
+    }
+  },
+  .ipc_irq_prio  = NVIC_SYSH_PRIORITY_DEFAULT,
+  .fault_handler = nrf91_modem_fault_handler
+};
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -71,25 +112,11 @@ static void nrf91_modem_fault_handler(struct nrf_modem_fault_info *info)
 
 int nrf91_modem_initialize(void)
 {
-  struct nrf_modem_init_params init_params;
-  int                          ret = OK;
-
-  /* Modem parameters */
-
-  init_params.shmem.ctrl.base  = NRF91_SHMEM_CTRL_BASE;
-  init_params.shmem.ctrl.size  = NRF91_SHMEM_CTRL_SIZE;
-  init_params.shmem.tx.base    = NRF91_SHMEM_TX_BASE;
-  init_params.shmem.tx.size    = NRF91_SHMEM_TX_SIZE;
-  init_params.shmem.rx.base    = NRF91_SHMEM_RX_BASE;
-  init_params.shmem.rx.size    = NRF91_SHMEM_RX_SIZE;
-  init_params.shmem.trace.base = NRF91_SHMEM_TRACE_BASE;
-  init_params.shmem.trace.size = NRF91_SHMEM_TRACE_SIZE;
-  init_params.ipc_irq_prio     = NVIC_SYSH_PRIORITY_DEFAULT;
-  init_params.fault_handler    = nrf91_modem_fault_handler;
+  int ret = OK;
 
   /* Initialize modem */
 
-  ret = nrf_modem_init(&init_params);
+  ret = nrf_modem_init(&g_init_params);
   if (ret < 0)
     {
       nerr("nrf_modem_init failed %d\n", ret);
