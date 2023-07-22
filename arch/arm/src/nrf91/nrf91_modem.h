@@ -24,6 +24,8 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/mm/mm.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -32,12 +34,16 @@
 
 #define NRF91_SHMEM_CTRL_SIZE  (0x4e8)
 
+/* REVISIT: heap overhead */
+
+#define HEAP_OVERHEAD          (400)
+
 /* Shared memory configuration */
 
 #define NRF91_SHMEM_START_ADDR (CONFIG_RAM_START)
 #define NRF91_SHMEM_CTRL_BASE  (NRF91_SHMEM_START_ADDR)
 #define NRF91_SHMEM_TX_BASE    (NRF91_SHMEM_CTRL_BASE+NRF91_SHMEM_CTRL_SIZE)
-#define NRF91_SHMEM_TX_SIZE    (CONFIG_NRF91_MODEM_SHMEM_TX_SIZE)
+#define NRF91_SHMEM_TX_SIZE    (CONFIG_NRF91_MODEM_SHMEM_TX_SIZE-HEAP_OVERHEAD)
 #define NRF91_SHMEM_RX_BASE    (NRF91_SHMEM_TX_BASE+NRF91_SHMEM_TX_SIZE)
 #define NRF91_SHMEM_RX_SIZE    (CONFIG_NRF91_MODEM_SHMEM_RX_SIZE)
 #define NRF91_SHMEM_TRACE_BASE (NRF91_SHMEM_RX_BASE+NRF91_SHMEM_RX_SIZE)
