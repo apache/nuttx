@@ -65,6 +65,7 @@ struct nrf91_modem_os_s
 {
   sem_t   sem[NRF_MODEM_OS_NUM_SEM_REQUIRED];
   uint8_t sem_cntr;
+  mutex_t waiting_lock;
   struct nrf91_modem_os_waiting_s waiting[NRF91_MODEM_WAITING_PREALLOC];
 };
 
@@ -92,6 +93,8 @@ struct nrf91_modem_os_waiting_s *nrf_waiting_get(void)
   struct nrf91_modem_os_waiting_s *ret = NULL;
   int                              i   = 0;
 
+  nxmutex_lock(&g_nrf91_modem_os.waiting_lock);
+
   for (i = 0; i < NRF91_MODEM_WAITING_PREALLOC; i++)
     {
       if (g_nrf91_modem_os.waiting[i].waiting == false)
@@ -102,6 +105,8 @@ struct nrf91_modem_os_waiting_s *nrf_waiting_get(void)
         }
     }
 
+  nxmutex_unlock(&g_nrf91_modem_os.waiting_lock);
+
   return ret;
 }
 
@@ -111,9 +116,13 @@ struct nrf91_modem_os_waiting_s *nrf_waiting_get(void)
 
 void nrf_waiting_free(struct nrf91_modem_os_waiting_s *w)
 {
+  nxmutex_lock(&g_nrf91_modem_os.waiting_lock);
+
   sem_destroy(&w->sem);
   w->context = 0;
   w->waiting = false;
+
+  nxmutex_unlock(&g_nrf91_modem_os.waiting_lock);
 }
 
 /****************************************************************************
@@ -137,6 +146,8 @@ void nrf_modem_os_init(void)
   g_shmtxheap = mm_initialize("shmtx",
                               (void *) NRF91_SHMEM_TX_BASE,
                               NRF91_SHMEM_TX_SIZE);
+
+  nxmutex_init(&g_nrf91_modem_os.waiting_lock);
 }
 
 /****************************************************************************
@@ -154,6 +165,8 @@ void nrf_modem_os_shutdown(void)
 {
   struct nrf91_modem_os_waiting_s *waiting = NULL;
   int                              i       = 0;
+
+  /* TODO: send AT+CFUN=0 */
 
   /* Wake up all waiting semaphores */
 
@@ -194,7 +207,7 @@ void *nrf_modem_os_shm_tx_alloc(size_t bytes)
 
 void nrf_modem_os_shm_tx_free(void *mem)
 {
-  return mm_free(g_shmtxheap, mem);
+  mm_free(g_shmtxheap, mem);
 }
 
 /****************************************************************************
@@ -251,7 +264,7 @@ int32_t nrf_modem_os_timedwait(uint32_t context, int32_t *timeout)
   struct timespec                  abstime;
   int32_t                          remaining = 0;
   int32_t                          diff      = 0;
-  int                              ret       = OK;
+  int                              ret       = -EAGAIN;
 
   /* Modem is not initialized or was shut down */
 
@@ -286,7 +299,6 @@ int32_t nrf_modem_os_timedwait(uint32_t context, int32_t *timeout)
 
       sem_wait(&waiting->sem);
       ret = OK;
-      goto errout;
     }
   else
     {
@@ -310,20 +322,25 @@ int32_t nrf_modem_os_timedwait(uint32_t context, int32_t *timeout)
       goto errout;
     }
 
-  clock_systime_timespec(&ts_now);
+  /* Handle timeout */
 
-  diff = ((ts_now.tv_sec - waiting->ts_start.tv_sec) * 1000 +
-          (ts_now.tv_nsec - waiting->ts_start.tv_nsec) / 1000000);
-
-  remaining = *timeout - diff;
-
-  /* Return remaining timeout */
-
-  *timeout = (remaining > 0) ? remaining : 0;
-
-  if (*timeout == 0)
+  if (ret < 0)
     {
-      ret = -EAGAIN;
+      clock_systime_timespec(&ts_now);
+
+      diff = ((ts_now.tv_sec - waiting->ts_start.tv_sec) * 1000 +
+              (ts_now.tv_nsec - waiting->ts_start.tv_nsec) / 1000000);
+
+      remaining = *timeout - diff;
+
+      /* Return remaining timeout */
+
+      *timeout = (remaining > 0) ? remaining : 0;
+
+      if (*timeout == 0)
+        {
+          ret = -EAGAIN;
+        }
     }
 
 errout:
