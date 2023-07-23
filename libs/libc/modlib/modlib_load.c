@@ -324,12 +324,10 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
       loadinfo->textalloc = (uintptr_t)
                             up_textheap_memalign(loadinfo->textalign,
                                                  loadinfo->textsize +
-                                                 loadinfo->datasize +
                                                  loadinfo->segpad);
 #else
       loadinfo->textalloc = (uintptr_t)lib_memalign(loadinfo->textalign,
                                                     loadinfo->textsize +
-                                                    loadinfo->datasize +
                                                     loadinfo->segpad);
 #endif
       if (!loadinfo->textalloc)
@@ -342,9 +340,14 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
 
   if (loadinfo->datasize > 0)
     {
-      loadinfo->datastart = loadinfo->textalloc +
-                            loadinfo->textsize +
-                            loadinfo->segpad;
+      loadinfo->datastart = (uintptr_t)lib_memalign(loadinfo->dataalign,
+                                                    loadinfo->datasize);
+      if (!loadinfo->datastart)
+        {
+          berr("ERROR: Failed to allocate memory for the module data\n");
+          ret = -ENOMEM;
+          goto errout_with_buffers;
+        }
     }
 
   /* Load ELF section data into memory */

@@ -263,8 +263,8 @@ static int modlib_relocate(FAR struct module_s *modp,
 
           /* Read the symbol table entry into memory */
 
-          ret = modlib_symvalue(modp, loadinfo, sym,
-                           loadinfo->shdr[loadinfo->strtabidx].sh_offset);
+          ret = modlib_readsym(loadinfo, symidx, sym,
+                               &loadinfo->shdr[loadinfo->symtabidx]);
           if (ret < 0)
             {
               berr("ERROR: Section %d reloc %d: "
@@ -862,7 +862,7 @@ int modlib_bind(FAR struct module_s *modp,
            * sections that were not loaded into memory.
            */
 
-          if ((loadinfo->shdr[i].sh_flags & SHF_ALLOC) == 0)
+          if ((loadinfo->shdr[infosec].sh_flags & SHF_ALLOC) == 0)
             {
                 continue;
             }
