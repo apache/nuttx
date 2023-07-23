@@ -54,6 +54,11 @@ void nrf52_board_initialize(void)
 #ifdef CONFIG_ARCH_LEDS
   board_autoled_initialize();
 #endif
+
+  /* If I2C 0 is enabled and we are master, engage pullup resistor. */
+#ifdef CONFIG_NRF52_I2C0_MASTER
+  nrf52_gpio_config(BOARD_I2C0_PULLUP_PIN);
+#endif
 }
 
 /****************************************************************************

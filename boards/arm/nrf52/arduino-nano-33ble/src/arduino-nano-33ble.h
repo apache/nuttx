@@ -81,5 +81,17 @@
 
 int nrf52_bringup(void);
 
+/****************************************************************************
+ * Name: nrf52_lsm6dsl_initialize
+ *
+ * Description:
+ *   Initialize I2C-based LSM6DSL.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_LSM9DS1
+int nrf52_lsm9ds1_initialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_NRF52_ARDUINO_NANO_33BLE_SRC_ARDUINO_NANO_33BLE_H */

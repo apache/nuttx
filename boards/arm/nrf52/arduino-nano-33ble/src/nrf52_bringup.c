@@ -27,13 +27,71 @@
 #include <sys/types.h>
 #include <syslog.h>
 
+#include <nuttx/board.h>
+#include <arch/board/board.h>
+
 #ifdef CONFIG_USERLED
 #  include <nuttx/leds/userled.h>
 #endif
 
+#include "arduino-nano-33ble.h"
+
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: nrf52_i2c_register
+ *
+ * Description:
+ *   Register one I2C drivers for the I2C tool.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_I2C) && defined(CONFIG_SYSTEM_I2CTOOL)
+static void nrf52_i2c_register(int bus)
+{
+  struct i2c_master_s *i2c;
+  int ret;
+
+  i2c = nrf52_i2cbus_initialize(bus);
+  if (i2c == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to get I2C%d interface\n", bus);
+    }
+  else
+    {
+      ret = i2c_register(i2c, bus);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n",
+                 bus, ret);
+          nrf52_i2cbus_uninitialize(i2c);
+        }
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: nrf52_i2ctool
+ *
+ * Description:
+ *   Register I2C drivers for the I2C tool.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_I2C) && defined(CONFIG_SYSTEM_I2CTOOL)
+static void nrf52_i2ctool(void)
+{
+#ifdef CONFIG_NRF52_I2C0
+  nrf52_i2c_register(0);
+#endif
+#ifdef CONFIG_NRF52_I2C1
+  nrf52_i2c_register(1);
+#endif
+}
+#endif
 
 /****************************************************************************
  * Name: nrf52_bringup
@@ -62,6 +120,21 @@ int nrf52_bringup(void)
       syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
     }
 #endif
+
+  /* If I2C 0 is enabled and we are master, engage pullup resistor. */
+#ifdef CONFIG_NRF52_I2C0_MASTER
+  nrf52_gpio_config(BOARD_I2C0_PULLUP_PIN);
+#endif
+
+#ifdef CONFIG_SENSORS_LSM9DS1
+  ret = nrf52_lsm9ds1_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize LSM9DS1 driver: %d\n",
+             ret);
+    }
+#endif /* CONFIG_SENSORS_LSM6DSL */
 
   UNUSED(ret);
   return OK;
