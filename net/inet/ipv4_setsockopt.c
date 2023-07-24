@@ -179,6 +179,9 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
 #ifdef NET_UDP_HAVE_STACK
       case IP_MULTICAST_TTL:          /* Set/read the time-to-live value of
                                        * outgoing multicast packets */
+#endif
+      case IP_TTL:                    /* The IP TTL (time to live) of IP
+                                       * packets sent by the network stack */
         {
           FAR struct socket_conn_s *conn;
           int ttl;
@@ -204,7 +207,6 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
             }
         }
         break;
-#endif
 
       /* The following IPv4 socket options are defined, but not implemented */
 
