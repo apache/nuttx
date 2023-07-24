@@ -230,19 +230,26 @@ RUN mkdir wamrc && \
 FROM ubuntu:20.04
 LABEL maintainer="dev@nuttx.apache.org"
 
+RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -qq \
+  build-essential \
+  curl \
+  gcc \
+  libssl-dev
+
+RUN mkdir -p cmake && \
+    curl -s -L wget https://cmake.org/files/v3.26/cmake-3.26.0.tar.gz \
+    | tar -C cmake --strip-components=1 -xz && \
+    cd cmake && ./bootstrap && make && make install && rm -rf cmake
+
 RUN dpkg --add-architecture i386
 # This is used for the final images so make sure to not store apt cache
 # Note: xtensa-esp32-elf-gdb is linked to libpython2.7
 RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -qq --no-install-recommends \
   -o APT::Immediate-Configure=0 \
   avr-libc \
-  build-essential \
   ccache \
   clang \
   clang-tidy \
-  cmake \
-  curl \
-  gcc \
   gcc-avr \
   gcc-multilib \
   genromfs \
