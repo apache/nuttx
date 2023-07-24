@@ -1,22 +1,22 @@
-############################################################################
+# ##############################################################################
 # arch/arm/src/nrf53/CMakeLists.txt
 #
-# Licensed to the Apache Software Foundation (ASF) under one or more
-# contributor license agreements.  See the NOTICE file distributed with
-# this work for additional information regarding copyright ownership.  The
-# ASF licenses this file to you under the Apache License, Version 2.0 (the
-# "License"); you may not use this file except in compliance with the
-# License.  You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more contributor
+# license agreements.  See the NOTICE file distributed with this work for
+# additional information regarding copyright ownership.  The ASF licenses this
+# file to you under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License.  You may obtain a copy of
+# the License at
 #
-#   http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
-# License for the specific language governing permissions and limitations
-# under the License.
+# License for the specific language governing permissions and limitations under
+# the License.
 #
-############################################################################
+# ##############################################################################
 
 set(SRCS
     nrf53_start.c
@@ -60,7 +60,7 @@ if(CONFIG_NRF53_IPC)
   list(APPEND SRCS nrf53_ipc.c)
 endif()
 
-if(CONFIG_NRF53_RPTUN)
+if(CONFIG_RPTUN)
   list(APPEND SRCS nrf53_rptun.c)
 endif()
 
@@ -106,59 +106,63 @@ endif()
 
 if(CONFIG_NRF53_SOFTDEVICE_CONTROLLER)
 
-set(NRFXLIB_VER "2.3.0")
-set(NRFXLIB_URL "https://github.com/nrfconnect/sdk-nrfxlib/archive")
+  set(NRFXLIB_VER "2.3.0")
+  set(NRFXLIB_URL "https://github.com/nrfconnect/sdk-nrfxlib/archive")
 
-if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdk-nrfxlib)
-  FetchContent_Declare(
-    sdk-nrfxlib
-    DOWNLOAD_NAME "sdk-nrfxlib-v${NRFXLIB_VER}.tar.gz"
-    DOWNLOAD_DIR ${CMAKE_CURRENT_LIST_DIR}
-    URL "${NRFXLIB_URL}/v${NRFXLIB_VER}.tar.gz"
-        SOURCE_DIR
-        ${CMAKE_CURRENT_LIST_DIR}/sdk-nrfxlib
-        BINARY_DIR
-        ${CMAKE_BINARY_DIR}/arch/sdk-nrfxlib
-        CONFIGURE_COMMAND
-        ""
-        BUILD_COMMAND
-        ""
-        INSTALL_COMMAND
-        ""
-        TEST_COMMAND
-        ""
-    DOWNLOAD_NO_PROGRESS true
-    TIMEOUT 30)
+  if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdk-nrfxlib)
+    FetchContent_Declare(
+      sdk-nrfxlib
+      DOWNLOAD_NAME "sdk-nrfxlib-v${NRFXLIB_VER}.tar.gz"
+      DOWNLOAD_DIR ${CMAKE_CURRENT_LIST_DIR}
+      URL "${NRFXLIB_URL}/v${NRFXLIB_VER}.tar.gz"
+          SOURCE_DIR
+          ${CMAKE_CURRENT_LIST_DIR}/sdk-nrfxlib
+          BINARY_DIR
+          ${CMAKE_BINARY_DIR}/arch/sdk-nrfxlib
+          CONFIGURE_COMMAND
+          ""
+          BUILD_COMMAND
+          ""
+          INSTALL_COMMAND
+          ""
+          TEST_COMMAND
+          ""
+      DOWNLOAD_NO_PROGRESS true
+      TIMEOUT 30)
 
-  FetchContent_GetProperties(sdk-nrfxlib)
+    FetchContent_GetProperties(sdk-nrfxlib)
 
-  if(NOT sdk-nrfxlib_POPULATED)
-    FetchContent_Populate(sdk-nrfxlib)
+    if(NOT sdk-nrfxlib_POPULATED)
+      FetchContent_Populate(sdk-nrfxlib)
+    endif()
   endif()
-endif()
 
-set(NRFXLIB_DIR "${NUTTX_CHIP_ABS_DIR}/sdk-nrfxlib")
+  set(NRFXLIB_DIR "${NUTTX_CHIP_ABS_DIR}/sdk-nrfxlib")
 
-target_include_directories(arch PRIVATE ${NUTTX_CHIP_ABS_DIR}/sdc)
-target_include_directories(arch PRIVATE ${NRFXLIB_DIR}/mpsl/include)
-target_include_directories(arch PRIVATE ${NRFXLIB_DIR}/softdevice_controller/include)
+  target_include_directories(arch PRIVATE ${NUTTX_CHIP_ABS_DIR}/sdc)
+  target_include_directories(arch PRIVATE ${NRFXLIB_DIR}/mpsl/include)
+  target_include_directories(
+    arch PRIVATE ${NRFXLIB_DIR}/softdevice_controller/include)
 
-list(APPEND SRCS nrf53_sdc.c)
+  list(APPEND SRCS nrf53_sdc.c)
 
-add_compile_options(-DNRF53_SERIES)
+  add_compile_options(-DNRF53_SERIES)
 
-if(CONFIG_ARCH_FPU)
-  set(NRFXLIB_LIB_VARIANT hard-float)
-else ()
-  set(NRFXLIB_LIB_VARIANT soft-float)
-endif()
+  if(CONFIG_ARCH_FPU)
+    set(NRFXLIB_LIB_VARIANT hard-float)
+  else()
+    set(NRFXLIB_LIB_VARIANT soft-float)
+  endif()
 
-set(SOFTDEVICE_LIB_VARIANT libsoftdevice_controller_multirole.a)
+  set(SOFTDEVICE_LIB_VARIANT libsoftdevice_controller_multirole.a)
 
-target_link_libraries(arch
-  ${NRFXLIB_DIR}/mpsl/lib/cortex-m33+nodsp/${NRFXLIB_LIB_VARIANT}/libmpsl.a)
-target_link_libraries(arch
-  ${NRFXLIB_DIR}/softdevice_controller/lib/cortex-m33+nodsp/${NRFXLIB_LIB_VARIANT}/${SOFTDEVICE_LIB_VARIANT})
+  target_link_libraries(
+    arch
+    ${NRFXLIB_DIR}/mpsl/lib/cortex-m33+nodsp/${NRFXLIB_LIB_VARIANT}/libmpsl.a)
+  target_link_libraries(
+    arch
+    ${NRFXLIB_DIR}/softdevice_controller/lib/cortex-m33+nodsp/${NRFXLIB_LIB_VARIANT}/${SOFTDEVICE_LIB_VARIANT}
+  )
 
 endif()
 
