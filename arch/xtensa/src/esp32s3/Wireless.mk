@@ -20,8 +20,8 @@
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ESP_HAL_3RDPARTY_PATH   = $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)
-ifndef ESP_HAL_3RDPARTY_BRANCH
-	ESP_HAL_3RDPARTY_BRANCH = release/v5.1
+ifndef ESP_HAL_3RDPARTY_VERSION
+	ESP_HAL_3RDPARTY_VERSION = 34267b5cc6f95ef35582a6bb3ea2476bf80b5cb1
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL
@@ -30,14 +30,15 @@ endif
 
 chip/$(ESP_HAL_3RDPARTY_REPO):
 	$(Q) echo "Cloning: ESP Wireless Drivers"
-	$(Q) git clone --depth=1 --branch $(ESP_HAL_3RDPARTY_BRANCH) $(ESP_HAL_3RDPARTY_URL) chip/$(ESP_HAL_3RDPARTY_REPO)
+	$(Q) git clone $(ESP_HAL_3RDPARTY_URL) chip/$(ESP_HAL_3RDPARTY_REPO)
+	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) checkout $(ESP_HAL_3RDPARTY_VERSION)
 
 # Silent preprocessor warnings
 
 CFLAGS += -Wno-undef -Wno-unused-variable
 
 context:: chip/$(ESP_HAL_3RDPARTY_REPO)
-	$(Q) echo "ESP Wireless Drivers: ${ESP_HAL_3RDPARTY_BRANCH}"
+	$(Q) echo "ESP Wireless Drivers: ${ESP_HAL_3RDPARTY_VERSION}"
 	$(Q) echo "Initializing submodules.."
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule update --init --depth=1 components/mbedtls/mbedtls components/esp_phy/lib components/esp_wifi/lib
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO)/components/mbedtls/mbedtls reset --hard
