@@ -259,6 +259,18 @@ static int shmfs_map_object(FAR struct shmfs_object_s *object,
 }
 
 /****************************************************************************
+ * Name: shmfs_add_map
+ ****************************************************************************/
+
+static int shmfs_add_map(FAR struct mm_map_entry_s *entry,
+                         FAR struct inode *inode)
+{
+  entry->munmap = shmfs_munmap;
+  entry->priv.p = (FAR void *)inode;
+  return mm_map_add(get_current_mm(), entry);
+}
+
+/****************************************************************************
  * Name: shmfs_mmap
  ****************************************************************************/
 
@@ -294,15 +306,10 @@ static int shmfs_mmap(FAR struct file *filep,
           ret = -EINVAL;
         }
 
-      if (ret < 0)
+      if (ret < 0 ||
+          (ret = shmfs_add_map(entry, filep->f_inode)) < 0)
         {
           inode_release(filep->f_inode);
-        }
-      else
-        {
-          entry->munmap = shmfs_munmap;
-          entry->priv.p = (FAR void *)filep->f_inode;
-          ret = mm_map_add(get_current_mm(), entry);
         }
     }
 
@@ -349,6 +356,7 @@ static int shmfs_munmap(FAR struct task_group_s *group,
                         FAR void *start,
                         size_t length)
 {
+  FAR struct inode *inode;
   int ret;
 
   /* Partial unmap is not supported yet */
@@ -357,6 +365,8 @@ static int shmfs_munmap(FAR struct task_group_s *group,
     {
       return -EINVAL;
     }
+
+  inode = (FAR struct inode *)entry->priv.p;
 
   /* Unmap the virtual memory area from the user's address space */
 
@@ -369,13 +379,17 @@ static int shmfs_munmap(FAR struct task_group_s *group,
 
   if (ret == OK)
     {
-      ret = shmfs_release((FAR struct inode *)entry->priv.p);
+      ret = shmfs_release(inode);
     }
 
-  /* Remove the mapping. */
+  /* Unkeep the inode when unmapped, decrease refcount */
 
   if (ret == OK)
     {
+      inode_release(inode);
+
+      /* Remove the mapping. */
+
       ret = mm_map_remove(get_group_mm(group), entry);
     }
 
