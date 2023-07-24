@@ -36,8 +36,8 @@ CMake,stm32f777zit6-meadow:nsh
 
 # CMake,nucleo-h743zi:composite
 # CMake,nucleo-h743zi:elf
-# CMake,nucleo-h743zi:mcuboot-app
-# CMake,nucleo-h743zi:mcuboot-loader
+CMake,nucleo-h743zi:mcuboot-app
+CMake,nucleo-h743zi:mcuboot-loader
 CMake,nucleo-h743zi:netnsh
 CMake,nucleo-h743zi:nsh
 # CMake,nucleo-h743zi:nxlines_oled
