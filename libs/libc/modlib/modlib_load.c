@@ -79,13 +79,13 @@ static void modlib_elfsize(struct mod_loadinfo_s *loadinfo)
   textsize = 0;
   datasize = 0;
 
-  if (loadinfo->ehdr.e_phnum > 0) 
+  if (loadinfo->ehdr.e_phnum > 0)
     {
       for (i = 0; i < loadinfo->ehdr.e_phnum; i++)
         {
           FAR Elf_Phdr *phdr = &loadinfo->phdr[i];
           FAR void *textaddr = NULL;
-    
+
           if (phdr->p_type == PT_LOAD)
             {
               if (phdr->p_flags & PF_X)
@@ -108,17 +108,17 @@ static void modlib_elfsize(struct mod_loadinfo_s *loadinfo)
       for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
         {
           FAR Elf_Shdr *shdr = &loadinfo->shdr[i];
-    
+
           /* SHF_ALLOC indicates that the section requires memory during
            * execution.
            */
-    
+
           if ((shdr->sh_flags & SHF_ALLOC) != 0)
             {
               /* SHF_WRITE indicates that the section address space is write-
                * able
                */
-    
+
               if ((shdr->sh_flags & SHF_WRITE) != 0)
                 {
                   datasize = _ALIGN_UP(datasize, shdr->sh_addralign);
@@ -181,7 +181,7 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
       for (i = 0; i < loadinfo->ehdr.e_phnum; i++)
         {
           FAR Elf_Phdr *phdr = &loadinfo->phdr[i];
-    
+
           if (phdr->p_type == PT_LOAD)
             {
               if (phdr->p_flags & PF_X)
@@ -197,7 +197,7 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
                   memset((FAR void *)((uintptr_t) data + phdr->p_filesz), 0,
                          bssSize);
                 }
-    
+
               if (ret < 0)
                 {
                   berr("ERROR: Failed to read section %d: %d\n", i, ret);
@@ -211,20 +211,20 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
       for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
         {
           FAR Elf_Shdr *shdr = &loadinfo->shdr[i];
-    
+
           /* SHF_ALLOC indicates that the section requires memory during
            * execution
            */
-    
+
           if ((shdr->sh_flags & SHF_ALLOC) == 0)
             {
               continue;
             }
-    
+
           /* SHF_WRITE indicates that the section address space is write-
            * able
            */
-    
+
           if ((shdr->sh_flags & SHF_WRITE) != 0)
             {
               pptr = &data;
@@ -233,43 +233,45 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
             {
               pptr = &text;
             }
-    
-          *pptr = (FAR uint8_t *)_ALIGN_UP((uintptr_t)*pptr, shdr->sh_addralign);
-    
+
+          *pptr = (FAR uint8_t *)_ALIGN_UP((uintptr_t)*pptr,
+                                           shdr->sh_addralign);
+
           /* SHT_NOBITS indicates that there is no data in the file for the
            * section.
            */
-    
+
           if (shdr->sh_type != SHT_NOBITS)
             {
               /* Read the section data from sh_offset to the memory region */
-    
-              ret = modlib_read(loadinfo, *pptr, shdr->sh_size, shdr->sh_offset);
+
+              ret = modlib_read(loadinfo, *pptr, shdr->sh_size,
+                                shdr->sh_offset);
               if (ret < 0)
                 {
                   berr("ERROR: Failed to read section %d: %d\n", i, ret);
                   return ret;
                 }
             }
-    
+
           /* If there is no data in an allocated section, then the allocated
            * section must be cleared.
            */
-    
+
           else
             {
               memset(*pptr, 0, shdr->sh_size);
             }
-    
+
           /* Update sh_addr to point to copy in memory */
-    
+
           binfo("%d. %08lx->%08lx\n", i,
                 (unsigned long)shdr->sh_addr, (unsigned long)*pptr);
-    
+
           shdr->sh_addr = (uintptr_t)*pptr;
-    
+
           /* Setup the memory pointer for the next time through the loop */
-    
+
           *pptr += ELF_ALIGNUP(shdr->sh_size);
         }
     }
