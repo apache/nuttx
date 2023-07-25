@@ -77,6 +77,16 @@ config ALLOW_BSDNORDIC_COMPONENTS
 		NOTE: Please check that the license for each enabled
 		component matches your project license.
 
+config ALLOW_ECLIPSE_COMPONENTS
+	bool "Use components that have Eclipse Public Licenses"
+	default n
+	---help---
+		When this option is enabled the project will allow the use
+		of components that have EPL licenses.
+
+		NOTE: Please check that the license for each enabled
+		component matches your project license.
+
 endmenu # License Setup
 
 menu "Build Setup"
