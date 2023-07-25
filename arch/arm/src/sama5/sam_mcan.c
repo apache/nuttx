@@ -130,44 +130,40 @@
 
 #ifdef CONFIG_SAMA5_MCAN0
 
-/* Bit timing */
+  /* Bit timing */
 
-#  define MCAN0_TSEG1  (CONFIG_SAMA5_MCAN0_PROPSEG + CONFIG_SAMA5_MCAN0_PHASESEG1 - 1)
-#  define MCAN0_TSEG2  (CONFIG_SAMA5_MCAN0_PHASESEG2 - 1)
-#  define MCAN0_BRP    ((uint32_t)(((float)SAMA5_MCANCLK_FREQUENCY / \
-                       ((float)(MCAN0_TSEG1 + MCAN0_TSEG2 + 3) * \
-                        (float)CONFIG_SAMA5_MCAN0_BITRATE)) - 1))
+#  define MCAN0_NTSEG1  (CONFIG_SAMA5_MCAN0_PROPSEG + CONFIG_SAMA5_MCAN0_PHASESEG1 - 1)
+#  define MCAN0_NTSEG2  (CONFIG_SAMA5_MCAN0_PHASESEG2 - 1)
+#  define MCAN0_NBRP    ((uint32_t)(((float)SAMA5_MCANCLK_FREQUENCY / \
+                         ((float)(MCAN0_NTSEG1 + MCAN0_NTSEG2 + 3) * \
+                          (float)CONFIG_SAMA5_MCAN0_BITRATE)) - 1))
 
-#  define MCAN0_SJW    (CONFIG_SAMA5_MCAN0_FSJW - 1)
+#  define MCAN0_NSJW    (CONFIG_SAMA5_MCAN0_SJW - 1)
 
-/* NB: errata sheet states TSEG1 must not be programmed as 0 */
-
-#  if ((MCAN0_TSEG1 > 256) || (MCAN0_TSEG1 < 2))
+#  if ((MCAN0_NTSEG1 > 255) || (MCAN0_NTSEG1 < 1))
 #    error Invalid MCAN0 TSEG1
 #  endif
-#  if MCAN0_TSEG2 > 128
+#  if MCAN0_NTSEG2 > 127
 #    error Invalid MCAN0 TSEG2
 #  endif
-#  if MCAN0_SJW > 128
+#  if MCAN0_NSJW > 127
 #    error Invalid MCAN0 SJW
 #  endif
 
 #  define MCAN0_FTSEG1 (CONFIG_SAMA5_MCAN0_FPROPSEG + CONFIG_SAMA5_MCAN0_FPHASESEG1 - 1)
 #  define MCAN0_FTSEG2 (CONFIG_SAMA5_MCAN0_FPHASESEG2 - 1)
 #  define MCAN0_FBRP   ((uint32_t)(((float)SAMA5_MCANCLK_FREQUENCY / \
-                       ((float)(MCAN0_FTSEG1 + MCAN0_FTSEG2 + 3) * \
-                        (float)CONFIG_SAMA5_MCAN0_FBITRATE)) - 1))
-#  define MCAN0_FSJW   (CONFIG_SAMA5_MCAN0_FFSJW - 1)
+                        ((float)(MCAN0_FTSEG1 + MCAN0_FTSEG2 + 3) * \
+                         (float)CONFIG_SAMA5_MCAN0_FBITRATE)) - 1))
+#  define MCAN0_FSJW   (CONFIG_SAMA5_MCAN0_FSJW - 1)
 
-/* NB: errata sheet states TSEG1 must not be programmed as 0 */
-
-#  if ((MCAN0_FTSEG1 > 32) || (MCAN0_FTSEG1 < 2))
+#  if ((MCAN0_FTSEG1 > 31) || (MCAN0_FTSEG1 < 1))
 #    error Invalid MCAN0 FTSEG1
 #  endif
-#  if MCAN0_FTSEG2 > 17
+#  if MCAN0_FTSEG2 > 15
 #    error Invalid MCAN0 FTSEG2
 #  endif
-#  if MCAN0_FSJW > 8
+#  if MCAN0_FSJW > 7
 #    error Invalid MCAN0 FSJW
 #  endif
 
@@ -420,41 +416,43 @@
 /* MCAN1 Configuration */
 
 #ifdef CONFIG_SAMA5_MCAN1
+
   /* Bit timing */
 
-#  define MCAN1_TSEG1  (CONFIG_SAMA5_MCAN1_PROPSEG + CONFIG_SAMA5_MCAN1_PHASESEG1)
-#  define MCAN1_TSEG2  CONFIG_SAMA5_MCAN1_PHASESEG2
-#  define MCAN1_BRP    ((uint32_t)(((float)SAMA5_MCANCLK_FREQUENCY / \
-                       ((float)(MCAN1_TSEG1 + MCAN1_TSEG2 + 3) * \
-                        (float)CONFIG_SAMA5_MCAN1_BITRATE)) - 1))
-#  define MCAN1_SJW    (CONFIG_SAMA5_MCAN1_FSJW - 1)
+#  define MCAN1_NTSEG1  (CONFIG_SAMA5_MCAN1_PROPSEG + CONFIG_SAMA5_MCAN1_PHASESEG1 - 1)
+#  define MCAN1_NTSEG2  (CONFIG_SAMA5_MCAN1_PHASESEG2 - 1)
+#  define MCAN1_NBRP    ((uint32_t)(((float)SAMA5_MCANCLK_FREQUENCY / \
+                         ((float)(MCAN1_NTSEG1 + MCAN1_NTSEG2 + 3) * \
+                          (float)CONFIG_SAMA5_MCAN1_BITRATE)) - 1))
 
-#  if MCAN1_TSEG1 > 63
+#  define MCAN1_NSJW    (CONFIG_SAMA5_MCAN1_SJW - 1)
+
+#  if ((MCAN1_NTSEG1 > 255) || (MCAN1_NTSEG1 < 1))
 #    error Invalid MCAN1 TSEG1
 #  endif
-#  if MCAN1_TSEG2 > 15
+#  if MCAN1_NTSEG2 > 127
 #    error Invalid MCAN1 TSEG2
 #  endif
-#  if MCAN1_SJW > 15
+#  if MCAN1_NSJW > 127
 #    error Invalid MCAN1 SJW
 #  endif
 
-#  define MCAN1_FTSEG1 (CONFIG_SAMA5_MCAN1_FPROPSEG + CONFIG_SAMA5_MCAN1_FPHASESEG1)
-#  define MCAN1_FTSEG2 (CONFIG_SAMA5_MCAN1_FPHASESEG2)
+#  define MCAN1_FTSEG1 (CONFIG_SAMA5_MCAN1_FPROPSEG + CONFIG_SAMA5_MCAN1_FPHASESEG1 - 1)
+#  define MCAN1_FTSEG2 (CONFIG_SAMA5_MCAN1_FPHASESEG2 - 1)
 #  define MCAN1_FBRP   ((uint32_t)(((float)SAMA5_MCANCLK_FREQUENCY / \
                        ((float)(MCAN1_FTSEG1 + MCAN1_FTSEG2 + 3) * \
                         (float)CONFIG_SAMA5_MCAN1_FBITRATE)) - 1))
-#  define MCAN1_FSJW   (CONFIG_SAMA5_MCAN1_FFSJW - 1)
+#  define MCAN1_FSJW   (CONFIG_SAMA5_MCAN1_FSJW - 1)
 
-#if MCAN1_FTSEG1 > 15
-#  error Invalid MCAN1 FTSEG1
-#endif
-#if MCAN1_FTSEG2 > 7
-#  error Invalid MCAN1 FTSEG2
-#endif
-#if MCAN1_FSJW > 3
-#  error Invalid MCAN1 FSJW
-#endif
+#  if ((MCAN1_FTSEG1 > 31) || (MCAN1_FTSEG1 < 1))
+#    error Invalid MCAN1 FTSEG1
+#  endif
+#  if MCAN1_FTSEG2 > 15
+#    error Invalid MCAN1 FTSEG2
+#  endif
+#  if MCAN1_FSJW > 7
+#    error Invalid MCAN FSJW
+#  endif
 
 /* MCAN1 RX FIFO0 element size */
 
@@ -1004,10 +1002,10 @@ static const struct sam_config_s g_mcan0const =
   .txpinset         = PIO_CAN0_TX,
   .base             = SAM_MCAN0_VBASE,
   .baud             = CONFIG_SAMA5_MCAN0_BITRATE,
-  .btp              = MCAN_BTP_BRP(MCAN0_BRP) |
-                      MCAN_BTP_TSEG1(MCAN0_TSEG1) |
-                      MCAN_BTP_TSEG2(MCAN0_TSEG2) |
-                      MCAN_BTP_SJW(MCAN0_SJW),
+  .btp              = MCAN_BTP_BRP(MCAN0_NBRP) |
+                      MCAN_BTP_TSEG1(MCAN0_NTSEG1) |
+                      MCAN_BTP_TSEG2(MCAN0_NTSEG2) |
+                      MCAN_BTP_SJW(MCAN0_NSJW),
   .fbtp             = MCAN_FBTP_FBRP(MCAN0_FBRP) |
                       MCAN_FBTP_FTSEG1(MCAN0_FTSEG1) |
                       MCAN_FBTP_FTSEG2(MCAN0_FTSEG2) |
@@ -1095,10 +1093,10 @@ static const struct sam_config_s g_mcan1const =
   .txpinset         = PIO_CAN1_TX,
   .base             = SAM_MCAN1_VBASE,
   .baud             = CONFIG_SAMA5_MCAN1_BITRATE,
-  .btp              = MCAN_BTP_BRP(MCAN1_BRP) |
-                      MCAN_BTP_TSEG1(MCAN1_TSEG1) |
-                      MCAN_BTP_TSEG2(MCAN1_TSEG2) |
-                      MCAN_BTP_SJW(MCAN1_SJW),
+  .btp              = MCAN_BTP_BRP(MCAN1_NBRP) |
+                      MCAN_BTP_TSEG1(MCAN1_NTSEG1) |
+                      MCAN_BTP_TSEG2(MCAN1_NTSEG2) |
+                      MCAN_BTP_SJW(MCAN1_NSJW),
   .fbtp             = MCAN_FBTP_FBRP(MCAN1_FBRP) |
                       MCAN_FBTP_FTSEG1(MCAN1_FTSEG1) |
                       MCAN_FBTP_FTSEG2(MCAN1_FTSEG2) |
@@ -1155,7 +1153,7 @@ static struct sam_mcan_s g_mcan1priv =
 {
   .config           = &g_mcan1const,
   .lock             = NXMUTEX_INITIALIZER,
-  .txfsem           = SEM_INITIALIZER(CONFIG_SAMA5_MCAN0_TXFIFOQ_SIZE),
+  .txfsem           = SEM_INITIALIZER(CONFIG_SAMA5_MCAN1_TXFIFOQ_SIZE),
 };
 
 static struct can_dev_s g_mcan1dev =
