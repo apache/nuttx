@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <ctype.h>
 #include <sys/types.h>
 #include <sys/ioctl.h>
 #include <stdbool.h>
@@ -36,6 +37,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/ascii.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
@@ -73,6 +75,7 @@ struct pty_dev_s
   struct file pd_src;           /* Provides data to read() method (pipe output) */
   struct file pd_sink;          /* Accepts data from write() method (pipe input) */
   bool pd_master;               /* True: this is the master */
+  uint8_t pd_escape;            /* Number of the character to be escaped */
   tcflag_t pd_iflag;            /* Terminal input modes */
   tcflag_t pd_lflag;            /* Terminal local modes */
   tcflag_t pd_oflag;            /* Terminal output modes */
@@ -473,7 +476,66 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   if ((dev->pd_lflag & ECHO) && (ntotal > 0))
     {
-      pty_write(filep, buffer, ntotal);
+      size_t n = 0;
+
+      for (i = j = 0; i < ntotal; i++)
+        {
+          ch = buffer[i];
+
+          /* Check for the beginning of a VT100 escape sequence, 3 byte */
+
+          if (ch == ASCII_ESC)
+            {
+              /* Mark that we should skip 2 more bytes */
+
+              dev->pd_escape = 2;
+              continue;
+            }
+          else if (dev->pd_escape == 2 && ch != ASCII_LBRACKET)
+            {
+              /* It's not an <esc>[x 3 byte sequence, show it */
+
+              dev->pd_escape = 0;
+            }
+          else if (dev->pd_escape > 0)
+            {
+              /* Skipping character count down */
+
+              if (--dev->pd_escape > 0)
+                {
+                  continue;
+                }
+            }
+
+          /* Echo if the character in batch */
+
+          if (ch == '\n' || (n != 0 && j + n != i))
+            {
+              if (n != 0)
+                {
+                  pty_write(filep, buffer + j, n);
+                  n = 0;
+                }
+
+              if (ch == '\n')
+                {
+                  pty_write(filep, "\r\n", 2);
+                  continue;
+                }
+            }
+
+          /* Record the character can be echo */
+
+          if (!iscntrl(ch & 0xff) && n++ == 0)
+            {
+              j = i;
+            }
+        }
+
+      if (n != 0)
+        {
+          pty_write(filep, buffer + j, n);
+        }
     }
 
   return ntotal;
