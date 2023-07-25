@@ -26,6 +26,7 @@
 
 #include <nuttx/sched.h>
 #include <arch/irq.h>
+#include <sys/param.h>
 
 /****************************************************************************
  * Private Data
@@ -120,7 +121,7 @@ const struct tcbinfo_s g_tcbinfo =
   .stack_size_off = TCB_STACK_SIZE_OFF,
   .regs_off       = TCB_REGS_OFF,
   .basic_num      = 33,
-  .total_num      = sizeof(g_reg_offs) / sizeof(g_reg_offs[0]),
+  .total_num      = nitems(g_reg_offs),
   {
     .p = g_reg_offs,
   },
