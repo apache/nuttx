@@ -56,7 +56,7 @@ void arm64_init_signal_process(struct tcb_s *tcb, struct regs_context *regs)
   struct regs_context  *pctx = (regs != NULL) ? regs :
   (struct regs_context *)tcb->xcp.regs;
   struct regs_context  *psigctx;
-  char   *stack_ptr = (char *)pctx->sp_elx;
+  char *stack_ptr = (char *)pctx->sp_elx - sizeof(struct regs_context);
 
 #ifdef CONFIG_ARCH_FPU
   struct fpu_reg      *pfpuctx;
@@ -75,7 +75,7 @@ void arm64_init_signal_process(struct tcb_s *tcb, struct regs_context *regs)
   /* Keep using SP_EL1 */
 
   psigctx->spsr      = SPSR_MODE_EL1H | DAIF_FIQ_BIT | DAIF_IRQ_BIT;
-  psigctx->sp_elx    = (uint64_t)psigctx;
+  psigctx->sp_elx    = (uint64_t)stack_ptr;
   psigctx->sp_el0    = (uint64_t)psigctx;
   psigctx->exe_depth = 1;
   psigctx->tpidr_el0 = (uint64_t)tcb;
