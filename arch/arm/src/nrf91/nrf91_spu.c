@@ -185,9 +185,11 @@ void nrf91_spu_configure(void)
 
   sau_control(false, true);
 
+#if defined(CONFIG_NRF91_SPU_NONSECURE)
+  /* Make all interrupts non-secure */
+
   up_secure_irq_all(false);
 
-#if defined(CONFIG_NRF91_SPU_NONSECURE)
   /* Peripheral configuration */
 
   nrf91_spu_periph();
