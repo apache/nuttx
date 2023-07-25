@@ -143,6 +143,8 @@ static ssize_t nfs_read(FAR struct file *filep, FAR char *buffer,
                         size_t buflen);
 static ssize_t nfs_write(FAR struct file *filep, FAR const char *buffer,
                    size_t buflen);
+static off_t   nfs_seek(FAR struct file *filep, off_t offset, int whence);
+static int     nfs_sync(FAR struct file *filep);
 static int     nfs_dup(FAR const struct file *oldp, FAR struct file *newp);
 static int     nfs_fsinfo(FAR struct nfsmount *nmp);
 static int     nfs_fstat(FAR const struct file *filep, FAR struct stat *buf);
@@ -196,12 +198,12 @@ const struct mountpt_operations g_nfs_operations =
   nfs_close,                    /* close */
   nfs_read,                     /* read */
   nfs_write,                    /* write */
-  NULL,                         /* seek */
+  nfs_seek,                     /* seek */
   NULL,                         /* ioctl */
   NULL,                         /* mmap */
   nfs_truncate,                 /* truncate */
 
-  NULL,                         /* sync */
+  nfs_sync,                     /* sync */
   nfs_dup,                      /* dup */
   nfs_fstat,                    /* fstat */
   nfs_fchstat,                  /* fchstat */
@@ -1211,6 +1213,84 @@ static ssize_t nfs_write(FAR struct file *filep, FAR const char *buffer,
 errout_with_lock:
   nxmutex_unlock(&nmp->nm_lock);
   return byteswritten > 0 ? byteswritten : ret;
+}
+
+/****************************************************************************
+ * Name: nfs_seek
+ *
+ * Returned Value:
+ *   Returns the resulting offset location as measured in bytes from the
+ *   beginning of the file.
+ *
+ ****************************************************************************/
+
+static off_t nfs_seek(FAR struct file *filep, off_t offset, int whence)
+{
+  FAR struct nfsmount *nmp;
+  FAR struct nfsnode  *np;
+  off_t                ret;
+
+  /* Sanity checks */
+
+  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+
+  /* Recover our private data from the struct file instance */
+
+  nmp = (FAR struct nfsmount *)filep->f_inode->i_private;
+  np  = (FAR struct nfsnode *)filep->f_priv;
+
+  DEBUGASSERT(nmp != NULL);
+
+  ret = nxmutex_lock(&nmp->nm_lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Map the offset according to the whence option */
+
+  switch (whence)
+    {
+      case SEEK_SET:
+          break;
+
+      case SEEK_CUR:
+          offset += filep->f_pos;
+          break;
+
+      case SEEK_END:
+          offset += np->n_size;
+          break;
+
+      default:
+          nxmutex_unlock(&nmp->nm_lock);
+          return -EINVAL;
+    }
+
+  if (offset >= 0)
+    {
+      filep->f_pos = offset;
+    }
+  else
+    {
+      ret = -EINVAL;
+    }
+
+  nxmutex_unlock(&nmp->nm_lock);
+  return ret < 0 ? ret : offset;
+}
+
+/****************************************************************************
+ * Name: nfs_sync
+ *
+ * Description:
+ *   Synchronize the file state on disk to match internal, in memory state.
+ *
+ ****************************************************************************/
+
+static int nfs_sync(FAR struct file *filep)
+{
+  return 0;
 }
 
 /****************************************************************************
