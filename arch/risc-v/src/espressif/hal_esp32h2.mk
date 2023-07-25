@@ -94,6 +94,7 @@ CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/efuse_hal.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/gpio_hal.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/ledc_hal.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/ledc_hal_iram.c
+CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/lp_timer_hal.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/timer_hal.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/timer_hal_iram.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/uart_hal.c
