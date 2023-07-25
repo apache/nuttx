@@ -1269,8 +1269,8 @@ int mpfs_ihc_init(void)
 
   /* Thread initialization */
 
-  snprintf(arg1, sizeof(arg1), "0x%" PRIxPTR,
-          (uintptr_t)g_mpfs_virtqueue_table);
+  snprintf(arg1, sizeof(arg1), "%p",
+          g_mpfs_virtqueue_table);
   argv[0] = "mpfs_ihc_thread";
   argv[1] = arg1;
   argv[2] = NULL;

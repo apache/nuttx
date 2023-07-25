@@ -601,7 +601,7 @@ static int nuttx_task_hook(int argc, char *argv[])
   struct task_struct *task;
   struct nthread_wrapper *wrap;
   task = (struct task_struct *)
-         ((uintptr_t)strtoul(argv[1], NULL, 0));
+         ((uintptr_t)strtoul(argv[1], NULL, 16));
   if (!task || !task->priv)
     {
       return 0;
@@ -624,7 +624,7 @@ int rtw_create_task(struct task_struct *task, const char *name,
   char *argv[2];
   char arg1[16];
   int pid;
-  snprintf(arg1, 16, "0x%" PRIxPTR, (uintptr_t)task);
+  snprintf(arg1, 16, "%p", task);
   argv[0] = arg1;
   argv[1] = NULL;
   wrap = malloc(sizeof(*wrap));

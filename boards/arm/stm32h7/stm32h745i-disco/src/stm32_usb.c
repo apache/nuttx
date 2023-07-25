@@ -231,7 +231,7 @@ int stm32_usbhost_initialize(void)
 
       pid = kthread_create("usbhost", CONFIG_USBHOST_DEFPRIO,
                            CONFIG_USBHOST_STACKSIZE,
-                           (main_t)usbhost_waiter, (FAR char * const *)NULL);
+                           usbhost_waiter, NULL);
       return pid < 0 ? -ENOEXEC : OK;
     }
 

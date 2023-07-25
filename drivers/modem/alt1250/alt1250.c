@@ -1098,7 +1098,7 @@ static int alt1250_start_rxthread(FAR struct alt1250_dev_s *dev,
                        SCHED_PRIORITY_DEFAULT,
                        CONFIG_DEFAULT_TASK_STACKSIZE,
                        altcom_recvthread,
-                       (FAR char * const *)NULL);
+                       NULL);
 
   if (ret < 0)
     {

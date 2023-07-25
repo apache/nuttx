@@ -270,7 +270,7 @@ static int rptun_thread(int argc, FAR char *argv[])
 {
   FAR struct rptun_priv_s *priv;
 
-  priv = (FAR struct rptun_priv_s *)((uintptr_t)strtoul(argv[2], NULL, 0));
+  priv = (FAR struct rptun_priv_s *)((uintptr_t)strtoul(argv[2], NULL, 16));
   priv->tid = nxsched_gettid();
 
   while (1)
@@ -1213,7 +1213,7 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
       nxsem_init(&priv->semrx, 0, 0);
     }
 
-  snprintf(arg1, sizeof(arg1), "0x%" PRIxPTR, (uintptr_t)priv);
+  snprintf(arg1, sizeof(arg1), "%p", priv);
   argv[0] = (void *)RPTUN_GET_CPUNAME(dev);
   argv[1] = arg1;
   argv[2] = NULL;

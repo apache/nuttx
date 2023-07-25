@@ -505,7 +505,7 @@ err_out:
 static int ltr308_thread(int argc, char** argv)
 {
   FAR struct ltr308_dev_s *priv = (FAR struct ltr308_dev_s *)
-        ((uintptr_t)strtoul(argv[1], NULL, 0));
+        ((uintptr_t)strtoul(argv[1], NULL, 16));
   struct sensor_light light;
   uint32_t data = 0;
   bool data_pending;
@@ -628,7 +628,7 @@ int ltr308_register(int devno, FAR struct i2c_master_s *i2c)
 
   /* Create thread for polling sensor data */
 
-  snprintf(arg1, 16, "0x%" PRIxPTR, (uintptr_t)priv);
+  snprintf(arg1, 16, "%p", priv);
   argv[0] = arg1;
   argv[1] = NULL;
   ret = kthread_create("ltr308_thread", SCHED_PRIORITY_DEFAULT,

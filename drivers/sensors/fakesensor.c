@@ -304,7 +304,7 @@ void fakesensor_push_event(FAR struct sensor_lowerhalf_s *lower,
 static int fakesensor_thread(int argc, char** argv)
 {
   FAR struct fakesensor_s *sensor = (FAR struct fakesensor_s *)
-        ((uintptr_t)strtoul(argv[1], NULL, 0));
+        ((uintptr_t)strtoul(argv[1], NULL, 16));
   int ret;
 
   while (true)
