@@ -25,7 +25,7 @@ CMN_CSRCS += sparc_getintstack.c sparc_idle.c sparc_initialize.c
 CMN_CSRCS += sparc_lowputs.c sparc_mdelay.c sparc_modifyreg8.c
 CMN_CSRCS += sparc_modifyreg16.c sparc_modifyreg32.c sparc_nputs.c
 CMN_CSRCS += sparc_releasestack.c sparc_stackframe.c
-CMN_CSRCS += sparc_udelay.c sparc_usestack.c
+CMN_CSRCS += sparc_udelay.c sparc_usestack.c sparc_tcbinfo.c
 
 # Configuration-dependent common files
 
