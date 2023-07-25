@@ -26,30 +26,47 @@ define_property(
   BRIEF_DOCS "NuttX application libs"
   FULL_DOCS "List of all NuttX application libraries")
 
+# ~~~
 # nuttx_add_application
 #
-# Description: Declares a NuttX application as a static library. The
-# corresponding target will be named apps_<NAME>. The first entry into the
-# source list is assumed to be the one containing main() and will thus receive a
-# -Dmain=app_main definition during build.
+# Description:
+#   Declares a NuttX application as a static library. The corresponding target
+#   will be named apps_<NAME>. The first entry into the source list is assumed
+#   to be the one containing main() and will thus receive a -Dmain=app_main
+#   definition during build.
 #
-# Usage: nuttx_add_application( NAME <string> [ PRIORITY <string> ] [ STACKSIZE
-# <string> ] [ COMPILE_FLAGS <list> ] [ INCLUDE_DIRECTORIES <list> ] [ DEPENDS
-# <string> ] [ MODULE <string> ] [ SRCS <list> ] )
+# Usage:
+#   nuttx_add_application( NAME <string> [ PRIORITY <string> ]
+#     [ STACKSIZE <string> ] [ COMPILE_FLAGS <list> ]
+#     [ INCLUDE_DIRECTORIES <list> ] [ DEPENDS <string> ]
+#     [ DEFINITIONS <string> ] [ MODULE <string> ] [ SRCS <list> ] )
 #
-# Parameters: NAME          : unique name of application PRIORITY      :
-# priority STACKSIZE     : stack size COMPILE_FLAGS : compile flags SRCS :
-# source files MODULE        : if "m", build module (designed to received
-# CONFIG_<app> value) DEPENDS       : targets which this module depends on
-# NO_MAIN_ALIAS : do not add a main=<app>_main alias(*)
+# Parameters:
+#   NAME                : unique name of application
+#   PRIORITY            :  priority
+#   STACKSIZE           : stack size
+#   COMPILE_FLAGS       : compile flags
+#   INCLUDE_DIRECTORIES : include directories
+#   DEPENDS             : targets which this module depends on
+#   DEFINITIONS         : optional compile definitions
+#   MODULE              : if "m", build module (designed to received
+#                         CONFIG_<app> value)
+#   SRCS                : source files
+#   NO_MAIN_ALIAS       : do not add a main=<app>_main alias(*)
 #
 # (*) This is only really needed in convoluted cases where a single .c file
 # contains differently named <app>_main() entries for different <app>. This
 # situation should really be changed into a separate main file per actual app
 # using a shared user library.
 #
-# Example: nuttx_add_application( NAME test SRCS file.cpp STACKSIZE 1024 DEPENDS
-# nshlib MODULE ${CONFIG_EXAMPLES_TEST} )
+# Example:
+#   nuttx_add_application(
+#     NAME test
+#     SRCS file.cpp
+#     STACKSIZE 1024
+#     DEPENDS nshlib
+#     MODULE ${CONFIG_EXAMPLES_TEST})
+# ~~~
 
 function(nuttx_add_application)
 
@@ -68,6 +85,7 @@ function(nuttx_add_application)
     INCLUDE_DIRECTORIES
     SRCS
     DEPENDS
+    DEFINITIONS
     OPTIONS
     NO_MAIN_ALIAS
     REQUIRED
@@ -170,6 +188,12 @@ function(nuttx_add_application)
     target_compile_options(${TARGET} PRIVATE ${COMPILE_FLAGS})
   endif()
 
+  # compile definitions
+
+  if(DEFINITIONS)
+    target_compile_definitions(${TARGET} PRIVATE ${DEFINITIONS})
+  endif()
+
   if(INCLUDE_DIRECTORIES)
     foreach(inc ${INCLUDE_DIRECTORIES})
       target_include_directories(${TARGET} PRIVATE ${inc})
@@ -183,7 +207,7 @@ function(nuttx_add_application)
     # interface include and libraries
     foreach(dep ${DEPENDS})
       get_target_property(dep_type ${dep} TYPE)
-      if (${dep_type} STREQUAL "STATIC_LIBRARY")
+      if(${dep_type} STREQUAL "STATIC_LIBRARY")
         target_link_libraries(${TARGET} PRIVATE ${dep})
       else()
         add_dependencies(${TARGET} ${dep})
