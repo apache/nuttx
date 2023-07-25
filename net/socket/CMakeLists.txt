@@ -36,6 +36,7 @@ set(SRCS
     net_close.c
     recvmsg.c
     sendmsg.c
+    shutdown.c
     net_dup2.c
     net_sockif.c
     net_poll.c
