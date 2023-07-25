@@ -1809,72 +1809,72 @@ config SAMA5_MCAN0_LOOPBACK
 		Enable the MCAN0 local loopback mode for testing purposes.
 
 config SAMA5_MCAN0_BITRATE
-	int "MCAN0 bitrate"
+	int "MCAN0 nominal bitrate"
 	default 500000
 	---help---
 		MCAN0 bitrate in bits per second.  Required if SAMA5_MCAN0 is defined.
 
 config SAMA5_MCAN0_PROPSEG
-	int "MCAN0 PropSeg"
-	default 2
-	range 1 8
+	int "MCAN0 nominal PropSeg"
+	default 3
+	range 1 256
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
 config SAMA5_MCAN0_PHASESEG1
-	int "MCAN0 PhaseSeg1"
-	default 11
-	range 1 255
+	int "MCAN0 nominal PhaseSeg1"
+	default 8
+	range 1 256
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 		PhaseSeg1+PropSeg must be between 2 and 256
 
 config SAMA5_MCAN0_PHASESEG2
-	int "MCAN0 PhaseSeg2"
-	default 2
+	int "MCAN0 nominal PhaseSeg2"
+	default 4
 	range 1 128
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
-config SAMA5_MCAN0_FSJW
-	int "MCAN0 synchronization jump width"
-	default 1
+config SAMA5_MCAN0_SJW
+	int "MCAN0 nominal synchronization jump width"
+	default 7
 	range 1 128
 	---help---
-		The duration of a synchronization jump is Tcan_clk x FSJW.
+		The duration of a synchronization jump is Tcan_clk x SJW.
 
 config SAMA5_MCAN0_FBITRATE
-	int "MCAN0 fast bitrate"
-	default 2000000
+	int "MCAN0 data bitrate"
+	default SAMA5_MCAN0_BITRATE
 	---help---
-		MCAN0 bitrate in bits per second.  Required if SAMA5_MCAN0 is
+		MCAN0 data bitrate in bits per second.  Required if SAMA5_MCAN0 is
 		defined.
 
 config SAMA5_MCAN0_FPROPSEG
-	int "MCAN0 fast PropSeg"
-	default 2
+	int "MCAN0 data PropSeg"
+	default SAMA5_MCAN0_PROPSEG
 	range 1 63
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
 config SAMA5_MCAN0_FPHASESEG1
-	int "MCAN0 fast PhaseSeg1"
-	default 4
+	int "MCAN0 data PhaseSeg1"
+	default SAMA5_MCAN0_PHASESEG1
 	range 1 63
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
 config SAMA5_MCAN0_FPHASESEG2
-	int "MCAN0 fast PhaseSeg2"
-	default 4
+	int "MCAN0 data PhaseSeg2"
+	default SAMA5_MCAN0_PHASESEG2
 	range 1 63
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
-config SAMA5_MCAN0_FFSJW
-	int "MCAN0 fast synchronization jump width"
-	default 2
-	range 1 5
+config SAMA5_MCAN0_FSJW
+	int "MCAN0 data synchronization jump width"
+	default SAMA5_MCAN0_SJW
+	range 1 8
 	---help---
 		The duration of a synchronization jump is Tcan_clk x FSJW.
 
@@ -2097,9 +2097,9 @@ menu "MCAN1 device driver options"
 
 choice
 	prompt "MCAN1 mode"
-	default SAMA5_MCAN1_ISO11899_1
+	default SAMA5_MCAN1_ISO11898_1
 
-config SAMA5_MCAN1_ISO11899_1
+config SAMA5_MCAN1_ISO11898_1
 	bool "ISO11898-1"
 	---help---
 		Enable ISO11898-1 mode
@@ -2125,72 +2125,72 @@ config SAMA5_MCAN1_LOOPBACK
 		Enable the MCAN1 local loopback mode for testing purposes.
 
 config SAMA5_MCAN1_BITRATE
-	int "MCAN1 bitrate"
+	int "MCAN1 nominal bitrate"
 	default 500000
 	---help---
 		MCAN1 bitrate in bits per second.  Required if SAMA5_MCAN1 is
 		defined.
 
 config SAMA5_MCAN1_PROPSEG
-	int "MCAN1 PropSeg"
-	default 2
-	range 1 63
+	int "MCAN1 nominal PropSeg"
+	default 3
+	range 1 256
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
 config SAMA5_MCAN1_PHASESEG1
-	int "MCAN1 PhaseSeg1"
-	default 11
-	range 1 63
+	int "MCAN1 nominal PhaseSeg1"
+	default 8
+	range 1 256
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
 config SAMA5_MCAN1_PHASESEG2
-	int "MCAN1 PhaseSeg2"
-	default 2
-	range 1 63
+	int "MCAN1 nominal PhaseSeg2"
+	default 4
+	range 1 128
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
-config SAMA5_MCAN1_FSJW
-	int "MCAN1 synchronization jump width"
-	default 1
-	range 1 5
+config SAMA5_MCAN1_SJW
+	int "MCAN1 nominal synchronization jump width"
+	default 7
+	range 1 128
 	---help---
-		The duration of a synchronization jump is Tcan_clk x FSJW.
+		The duration of a synchronization jump is Tcan_clk x SJW.
 
 config SAMA5_MCAN1_FBITRATE
-	int "MCAN1 fast bitrate"
-	default 2000000
+	int "MCAN1 data bitrate"
+	default SAMA5_MCAN1_BITRATE
 	---help---
 		MCAN1 bitrate in bits per second.  Required if SAMA5_MCAN1 is
 		defined.
 
 config SAMA5_MCAN1_FPROPSEG
-	int "MCAN1 fast PropSeg"
-	default 2
+	int "MCAN1 data PropSeg"
+	default SAMA5_MCAN1_PROPSEG
 	range 1 63
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
 config SAMA5_MCAN1_FPHASESEG1
-	int "MCAN1 fast PhaseSeg1"
-	default 4
+	int "MCAN1 data PhaseSeg1"
+	default SAMA5_MCAN1_PHASESEG1
 	range 1 63
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
 config SAMA5_MCAN1_FPHASESEG2
-	int "MCAN1 fast PhaseSeg2"
-	default 4
+	int "MCAN1 data PhaseSeg2"
+	default SAMA5_MCAN1_PHASESEG2
 	range 1 63
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
-config SAMA5_MCAN1_FFSJW
-	int "MCAN1 fast synchronization jump width"
-	default 2
-	range 1 5
+config SAMA5_MCAN1_FSJW
+	int "MCAN1 data synchronization jump width"
+	default SAMA5_MCAN1_SJW
+	range 1 8
 	---help---
 		The duration of a synchronization jump is Tcan_clk x FSJW.
 
