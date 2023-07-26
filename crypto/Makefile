@@ -30,7 +30,9 @@ CRYPTO_CSRCS += crypto.c testmngr.c
 
 ifeq ($(CONFIG_CRYPTO_CRYPTODEV),y)
   CRYPTO_CSRCS += cryptodev.c
+ifeq ($(CONFIG_CRYPTO_CRYPTODEV_SOFTWARE),y)
   CRYPTO_CSRCS += cryptosoft.c
+endif
   CRYPTO_CSRCS += xform.c
   CRYPTO_CSRCS += aes.c
   CRYPTO_CSRCS += blf.c
