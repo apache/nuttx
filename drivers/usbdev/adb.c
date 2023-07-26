@@ -1053,22 +1053,6 @@ static void usbclass_unbind(FAR struct usbdevclass_driver_s *driver,
 
       usbclass_resetconfig(priv);
 
-      /* Free the bulk IN endpoint */
-
-      if (priv->epbulkin)
-        {
-          DEV_FREEEP(dev, priv->epbulkin);
-          priv->epbulkin = NULL;
-        }
-
-      /* Free the bulk OUT endpoint */
-
-      if (priv->epbulkout)
-        {
-          DEV_FREEEP(dev, priv->epbulkout);
-          priv->epbulkout = NULL;
-        }
-
       /* Free write requests that are not in use (which should be all
        * of them
        */
@@ -1093,6 +1077,22 @@ static void usbclass_unbind(FAR struct usbdevclass_driver_s *driver,
             {
               usbdev_freereq(priv->epbulkin, wrcontainer->req);
             }
+        }
+
+      /* Free the bulk IN endpoint */
+
+      if (priv->epbulkin)
+        {
+          DEV_FREEEP(dev, priv->epbulkin);
+          priv->epbulkin = NULL;
+        }
+
+      /* Free the bulk OUT endpoint */
+
+      if (priv->epbulkout)
+        {
+          DEV_FREEEP(dev, priv->epbulkout);
+          priv->epbulkout = NULL;
         }
     }
 }
