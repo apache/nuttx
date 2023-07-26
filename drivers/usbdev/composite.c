@@ -531,7 +531,7 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
                       static const uint8_t msft_response[16] =
                       {
                         'M', 0, 'S', 0, 'F', 0, 'T', 0, '1', 0, '0', 0,
-                        '0', 0, 0xff, 0
+                        '0', 0, USB_REQ_GETMSFTOSDESCRIPTOR, 0
                       };
 
                       buf->len = 18;
