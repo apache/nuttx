@@ -569,7 +569,7 @@ int32_t ipv6_fragout(FAR struct net_driver_s *dev, uint16_t mtu)
   uint16_t hdroff;
   uint16_t hdrtype;
   FAR struct iob_s *frag;
-  FAR struct ipv6_hdr_s *ref;
+  FAR struct ipv6_hdr_s *ref = NULL;
   FAR struct ipv6_fragment_extension_s *fraghdr;
   struct iob_queue_s fragq =
     {
