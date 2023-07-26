@@ -255,23 +255,14 @@ SECTIONS
   {
     . = ALIGN(4);
     *(.rtc.literal .rtc.text)
-  } >rtc_seg
-
-  /* This section is required to skip rtc.text area because the text and
-   * data segments reflect the same address space on different buses.
-   */
-
-  .rtc.dummy :
-  {
-    . = SIZEOF(.rtc.text);
-  } >rtc_seg
+  } >rtc_iram_seg
 
   /* RTC BSS section. */
 
   .rtc.bss (NOLOAD) :
   {
     *(.rtc.bss)
-  } >rtc_seg
+  } >rtc_iram_seg
 
   /* RTC data section holds RTC wake stub data/rodata. */
 
@@ -279,11 +270,27 @@ SECTIONS
   {
     *(.rtc.data)
     *(.rtc.rodata)
+  } >rtc_iram_seg
 
-   /* Whatever is left from the RTC memory is used as a special heap. */
+  /* This section holds RTC data that should have fixed addresses.
+   * The data are not initialized at power-up and are retained during deep sleep.
+   */
+  .rtc_reserved (NOLOAD):
+  {
+    . = ALIGN(4);
+    _rtc_reserved_start = ABSOLUTE(.);
+    /* New data can only be added here to ensure existing data are not moved.
+       Because data have adhered to the end of the segment and code is relied on it.
+       >> put new data here << */
 
-    _srtcheap = ABSOLUTE(.);
+    *(.rtc_timer_data_in_rtc_mem .rtc_timer_data_in_rtc_mem.*)
+    KEEP(*(.bootloader_data_rtc_mem .bootloader_data_rtc_mem.*))
+    _rtc_reserved_end = ABSOLUTE(.);
+  } > rtc_reserved_seg
 
-  } >rtc_seg
+  _rtc_reserved_length = _rtc_reserved_end - _rtc_reserved_start;
+  ASSERT((_rtc_reserved_length <= LENGTH(rtc_reserved_seg)),
+          "RTC reserved segment data does not fit.")
+
 }
 
