@@ -95,7 +95,7 @@ config MPFS_HART1_ENTRYPOINT
 config MPFS_HART2_ENTRYPOINT
 	hex "Application entry point for HART2"
 	depends on MPFS_BOOTLOADER
-	default 0xafb00000
+	default 0xffffffffffffffff
 	---help---
 		The default address of the entry point for HART2
 
