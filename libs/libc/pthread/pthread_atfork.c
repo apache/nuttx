@@ -50,7 +50,7 @@
  *
  * Returned Value:
  *   On success, pthread_atfork() returns 0.
- *   On error, pthread_atfork() returns -1.
+ *   On error, pthread_atfork() returns errno.
  *
  * Assumptions:
  *
