@@ -205,3 +205,9 @@ config ARMV7A_ICACHE_DISABLE
 config ARMV7A_AFE_ENABLE
 	bool "Enable Access Flag at __start"
 	default n
+
+config ARMV7A_MONITOR_STACK_SIZE
+	int "monitor stack size"
+	default DEFAULT_TASK_STACKSIZE
+	---help---
+		The size of the monitor stack in armv7-a platform.

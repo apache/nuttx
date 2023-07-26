@@ -430,6 +430,15 @@ __cpu3_start:
 	bne		1b				/* Bottom of the loop */
 #endif
 
+#ifdef CONFIG_ARCH_TRUSTZONE_SECURE
+	/* Perform init the secure monitor runtime. As the following arm_boot may
+	 * using smc to perform psci related func, so the secure monitor init
+	 * procedure should be placed before arm_boot
+	 */
+
+	bl		arm_sm_init
+#endif
+
 	/* Branch to continue C level CPU initialization */
 
 	mov		fp, #0				/* Clear framepointer */

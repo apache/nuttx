@@ -678,6 +678,15 @@ __cpu0_start:
 	bl		arm_data_initialize
 #endif
 
+#ifdef CONFIG_ARCH_TRUSTZONE_SECURE
+	/* Perform init the secure monitor runtime. As the following arm_boot may
+	 * using smc to perform psci related func, so the secure monitor init
+	 * procedure should be placed before arm_boot
+	 */
+
+	bl		arm_sm_init
+#endif
+
 	/* Perform early C-level, platform-specific initialization.  Logic
 	 * within arm_boot() must configure SDRAM and call arm_data_initialize().
 	 */
