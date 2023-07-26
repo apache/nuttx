@@ -9,7 +9,7 @@ fs/unionfs/README.txt
 
   1) Mount file system 1 at some location, say /mnt/file1
   2) Mount file system 2 at some location, say /mnt/file2
-  3) Call unionfs_mount() to combine and overly /mnt/file1 and mnt/file2
+  3) Call mount() to combine and overly /mnt/file1 and mnt/file2
      as a new mount point, say /mnt/unionfs.
 
   /mnt/file1 and /mnt/file2 will disappear and be replaced by the single
