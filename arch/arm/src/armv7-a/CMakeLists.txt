@@ -79,6 +79,10 @@ else()
   list(APPEND SRCS arm_head.S)
 endif()
 
+if(CONFIG_ARCH_TRUSTZONE_SECURE)
+  list(APPEND SRCS arm_sm_runtime.c arm_sm_vector.S)
+endif()
+
 if(CONFIG_ARCH_ADDRENV)
   list(
     APPEND
