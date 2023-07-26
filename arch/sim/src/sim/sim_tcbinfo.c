@@ -67,7 +67,7 @@ static const uint16_t g_reg_offs[] =
   UINT16_MAX,            /* RDX */
   TCB_REG_OFF(JB_EBX),   /* RBX */
   TCB_REG_OFF(JB_ESP),   /* ESP */
-  UINT16_MAX,            /* EBP */
+  TCB_REG_OFF(JB_EBP),   /* EBP */
   TCB_REG_OFF(JB_ESI),   /* ESI */
   TCB_REG_OFF(JB_EDI),   /* EDI */
   TCB_REG_OFF(JB_EIP),   /* EIP */
