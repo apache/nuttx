@@ -44,6 +44,8 @@
 #include <nuttx/fs/procfs.h>
 #include <nuttx/net/netdev.h>
 
+#include <nuttx/lib/lib.h>
+
 #include "netdev/netdev.h"
 #include "procfs/procfs.h"
 
@@ -244,7 +246,7 @@ static int netprocfs_open(FAR struct file *filep, FAR const char *relpath,
 
       devname = basename(copy);
       dev     = netdev_findbyname(devname);
-      kmm_free(copy);
+      lib_free(copy);
 
       if (dev == NULL)
         {
@@ -670,7 +672,7 @@ static int netprocfs_stat(FAR const char *relpath, FAR struct stat *buf)
 
       devname = basename(copy);
       dev     = netdev_findbyname(devname);
-      kmm_free(copy);
+      lib_free(copy);
 
       if (dev == NULL)
         {
