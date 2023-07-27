@@ -29,19 +29,19 @@ ifndef ESP_HAL_3RDPARTY_URL
 endif
 
 chip/$(ESP_HAL_3RDPARTY_REPO):
-	$(Q) echo "Cloning: ESP Wireless Drivers"
-	$(Q) git clone $(ESP_HAL_3RDPARTY_URL) chip/$(ESP_HAL_3RDPARTY_REPO)
-	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) checkout $(ESP_HAL_3RDPARTY_VERSION)
+	$(Q) echo "Cloning Espressif HAL for 3rd Party Platforms"
+	$(Q) git clone --quiet $(ESP_HAL_3RDPARTY_URL) chip/$(ESP_HAL_3RDPARTY_REPO)
+	$(Q) echo "Espressif HAL for 3rd Party Platforms: checking out to ${ESP_HAL_3RDPARTY_VERSION}"
+	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) checkout --quiet $(ESP_HAL_3RDPARTY_VERSION)
 
 # Silent preprocessor warnings
 
 CFLAGS += -Wno-undef -Wno-unused-variable
 
 context:: chip/$(ESP_HAL_3RDPARTY_REPO)
-	$(Q) echo "ESP Wireless Drivers: ${ESP_HAL_3RDPARTY_VERSION}"
-	$(Q) echo "Initializing submodules.."
-	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule update --init --depth=1 components/mbedtls/mbedtls components/esp_phy/lib components/esp_wifi/lib
-	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO)/components/mbedtls/mbedtls reset --hard
+	$(Q) echo "Espressif HAL for 3rd Party Platforms: initializing submodules..."
+	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule --quiet update --init --depth=1 components/mbedtls/mbedtls components/esp_phy/lib components/esp_wifi/lib
+	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO)/components/mbedtls/mbedtls reset --quiet --hard
 	$(Q) echo "Applying patches..."
 	$(Q) cd chip/$(ESP_HAL_3RDPARTY_REPO)/components/mbedtls/mbedtls && git apply ../../../nuttx/patches/components/mbedtls/mbedtls/*.patch
 
