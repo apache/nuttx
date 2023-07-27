@@ -138,9 +138,9 @@ int reset_control_status(FAR struct reset_control *rstc);
  *   parameters retrun a reset control.
  *
  * Input Parameters:
- *   name - The reset controller name
- *   index - The reset controller in reset controller device
- *   shared - Is this a shared (1), or an exclusive (0) reset_control
+ *   name     - The reset controller name
+ *   index    - The reset controller in reset controller device
+ *   shared   - Is this a shared (1), or an exclusive (0) reset_control
  *   acquired - flags that used to get a exculsive reset control
  *
  * Returned Value:
@@ -210,8 +210,8 @@ int reset_control_device_reset(FAR const char *name);
  *   Get a list of reset controls using device node.
  *
  * Input Parameters:
- *   name - The reset controller name
- *   shared - Whether reset controls are shared or not
+ *   name     - The reset controller name
+ *   shared   - Whether reset controls are shared or not
  *   acquired - Only one reset control may be acquired for a given controller
  *   and ID
  *
@@ -308,7 +308,7 @@ reset_control_get_shared(FAR const char *name)
  *   This is to be used to perform a list of resets for a device or power
  *   domain in whatever order. Returns a struct reset_control or NULL errno.
  * Input Parameters:
- *   name - The controller name symble
+ *   name  - The controller name symble
  *   index - Index of the reset controller
  *
  * Returned Value:
@@ -342,7 +342,7 @@ reset_control_get_exclusive_by_index(FAR const char *name, int index)
  *   domain in whatever order. Returns a struct reset_control or NULL errno.
  *
  * Input Parameters:
- *   node - Device to be reset by the controller
+ *   node  - Device to be reset by the controller
  *   index - Index of the reset controller
  *
  * Returned Value:
