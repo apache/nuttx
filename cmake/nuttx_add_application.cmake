@@ -43,7 +43,7 @@ define_property(
 #
 # Parameters:
 #   NAME                : unique name of application
-#   PRIORITY            :  priority
+#   PRIORITY            : priority
 #   STACKSIZE           : stack size
 #   COMPILE_FLAGS       : compile flags
 #   INCLUDE_DIRECTORIES : include directories

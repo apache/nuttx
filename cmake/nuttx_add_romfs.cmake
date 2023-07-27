@@ -18,14 +18,19 @@
 #
 # ##############################################################################
 
-# nuttx_add_romfs Generates a ROMFS image in a C array, which is built to an
-# OBJECT library.
+# ~~~
+# nuttx_add_romfs
 #
-# Parameters: - NAME: determines the romfs label and name of target
-# (romfs_${NAME}) - HEADER: option to indicate that a .h file is to be generated
-# instead of a .c - PREFIX: optional prefix to add to image name (as
-# romfs_${PREFIX}.img) - NONCONST: option to indicate the array should be
-# non-const - DEPENDS: list of targets that should be depended on
+# Description:
+#   Generates a ROMFS image in a C array, which is built to an OBJECT library.
+#
+# Parameters:
+#   NAME    : determines the romfs label and name of target (romfs_${NAME})
+#   HEADER  : option to indicate that a .h file is to be generated instead of a .c
+#   PREFIX  : optional prefix to add to image name (as romfs_${PREFIX}.img)
+#   NONCONST: option to indicate the array should be non-const
+#   DEPENDS : list of targets that should be depended on
+# ~~~
 
 function(nuttx_add_romfs)
   nuttx_parse_function_args(
