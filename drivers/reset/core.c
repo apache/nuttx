@@ -236,9 +236,9 @@ reset_control_array_release(FAR struct reset_control_array *resets)
  *   acquired parameters.
  *
  * Input Parameters:
- *   rcdev - An instance of reset_controller_dev type.
- *   index - ID of the reset controller in the reset controller device.
- *   shared - Is this a shared (1), or an exclusive (0) reset_control.
+ *   rcdev    - An instance of reset_controller_dev type.
+ *   index    - ID of the reset controller in the reset controller device.
+ *   shared   - Is this a shared (1), or an exclusive (0) reset_control.
  *   acquired - Only one reset_control may be acquired for a given rcdev and
  *   index.
  *
@@ -393,9 +393,9 @@ reset_controller_get_by_name(FAR const char *name)
  *   parameters retrun a reset control.
  *
  * Input Parameters:
- *   name - The reset controller name
- *   index - The reset controller in reset controller device
- *   shared - Is this a shared (1), or an exclusive (0) reset_control
+ *   name     - The reset controller name
+ *   index    - The reset controller in reset controller device
+ *   shared   - Is this a shared (1), or an exclusive (0) reset_control
  *   acquired - Flags that used to get a exculsive reset control
  *
  * Returned Value:
@@ -666,7 +666,7 @@ int reset_control_deassert(FAR struct reset_control *rstc)
    * that it handles self-deasserting reset lines via .reset(). In that
    * case, the reset lines are deasserted by default. If that is not the
    * case, the reset controller driver should implement .deassert() and
-   * return -ENOTSUPP.
+   * return -ENOTSUP.
    */
 
   if (!rstc->rcdev->ops->deassert)
@@ -851,8 +851,8 @@ void reset_control_put(FAR struct reset_control *rstc)
  *   Get a list of reset controls using device node.
  *
  * Input Parameters:
- *   name - The reset controller name
- *   shared - Whether reset controls are shared or not
+ *   name     - The reset controller name
+ *   shared   - Whether reset controls are shared or not
  *   acquired - Only one reset control may be acquired for a given controller
  *   and ID
  *
