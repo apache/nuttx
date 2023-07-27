@@ -37,6 +37,55 @@
 #include "exc_return.h"
 
 /****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: arm_from_thread
+ *
+ * Description:
+ *   If not defined CONFIG_ARCH_HAVE_TRUSTZONE
+ *   Return true if interrupt return to thread mode, false otherwise.
+ *
+ *   If defined CONFIG_ARCH_HAVE_TRUSTZONE
+ *   Return true if interrupt return to thread mode, or if it is the first
+ *   interrupt from TEE to REE, or REE to TEE, false otherwise.
+ *
+ *   Interrupt nesting between TEE and REE can be determined based
+ *   on the S and ES bits of EXC_RETURN
+ *   If TEE interrupts REE, then EXC_RETURN.S=0, EXC_RETURN.ES=1;
+ *   Conversely, EXC_RETURN.S=1, EXC_RETURN.ES=0.
+ *
+ *   But only one level nesting between TEE and REE is supported, and
+ *   recursive nesting between TEE and REE is not supported.
+ *
+ ****************************************************************************/
+
+static inline bool arm_from_thread(uint32_t excret)
+{
+  if (excret & EXC_RETURN_THREAD_MODE)
+    {
+      return true;
+    }
+
+#ifdef CONFIG_ARCH_HAVE_TRUSTZONE
+  if (!(excret & EXC_RETURN_SECURE_STACK) &&
+      (excret & EXC_RETURN_EXC_SECURE))
+    {
+      return true;
+    }
+
+  if (!(excret & EXC_RETURN_EXC_SECURE) &&
+      (excret & EXC_RETURN_SECURE_STACK))
+    {
+      return true;
+    }
+#endif
+
+  return false;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -47,7 +96,7 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
   PANIC();
 #else
 
-  if (regs[REG_EXC_RETURN] & EXC_RETURN_THREAD_MODE)
+  if (arm_from_thread(regs[REG_EXC_RETURN]))
     {
       CURRENT_REGS = regs;
     }
@@ -66,7 +115,7 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
    * switch occurred during interrupt processing.
    */
 
-  if (regs[REG_EXC_RETURN] & EXC_RETURN_THREAD_MODE)
+  if (arm_from_thread(regs[REG_EXC_RETURN]))
     {
       /* Restore the cpu lock */
 
