@@ -50,12 +50,13 @@ static int local_event_pollsetup(FAR struct local_conn_s *conn,
   int ret = OK;
   int i;
 
-  net_lock();
   if (setup)
     {
       /* This is a request to set up the poll.  Find an available
        * slot for the poll structure reference
        */
+
+      nxmutex_lock(&conn->lc_polllock);
 
       for (i = 0; i < LOCAL_NPOLLWAITERS; i++)
         {
@@ -71,11 +72,12 @@ static int local_event_pollsetup(FAR struct local_conn_s *conn,
             }
         }
 
+      nxmutex_unlock(&conn->lc_polllock);
+
       if (i >= LOCAL_NPOLLWAITERS)
         {
           fds->priv = NULL;
-          ret = -EBUSY;
-          goto errout;
+          return -EBUSY;
         }
 
       eventset = 0;
@@ -93,20 +95,19 @@ static int local_event_pollsetup(FAR struct local_conn_s *conn,
 
       struct pollfd **slot = (struct pollfd **)fds->priv;
 
-      if (!slot)
-        {
-          ret = -EIO;
-          goto errout;
-        }
+      nxmutex_lock(&conn->lc_polllock);
 
       /* Remove all memory of the poll setup */
 
-      *slot = NULL;
-      fds->priv = NULL;
+      if (slot != NULL)
+        {
+          *slot = NULL;
+          fds->priv = NULL;
+        }
+
+      nxmutex_unlock(&conn->lc_polllock);
     }
 
-errout:
-  net_unlock();
   return ret;
 }
 
@@ -135,7 +136,9 @@ void local_event_pollnotify(FAR struct local_conn_s *conn,
                             pollevent_t eventset)
 {
 #ifdef CONFIG_NET_LOCAL_STREAM
+  nxmutex_lock(&conn->lc_polllock);
   poll_notify(conn->lc_event_fds, LOCAL_NPOLLWAITERS, eventset);
+  nxmutex_unlock(&conn->lc_polllock);
 #endif
 }
 
@@ -197,7 +200,7 @@ int local_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
           /* Find shadow pollfds. */
 
-          net_lock();
+          nxmutex_lock(&conn->lc_polllock);
 
           shadowfds = conn->lc_inout_fds;
           while (shadowfds->fd != 0)
@@ -205,7 +208,7 @@ int local_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
               shadowfds += 2;
               if (shadowfds >= &conn->lc_inout_fds[2*LOCAL_NPOLLWAITERS])
                 {
-                  net_unlock();
+                  nxmutex_unlock(&conn->lc_polllock);
                   return -ENOMEM;
                 }
             }
@@ -222,7 +225,7 @@ int local_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
           shadowfds[1].arg     = fds;
           shadowfds[1].events &= ~POLLIN;
 
-          net_unlock();
+          nxmutex_unlock(&conn->lc_polllock);
 
           /* Setup poll for both shadow pollfds. */
 
