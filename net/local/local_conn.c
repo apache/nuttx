@@ -129,6 +129,7 @@ FAR struct local_conn_s *local_alloc(void)
        */
 
       nxmutex_init(&conn->lc_sendlock);
+      nxmutex_init(&conn->lc_polllock);
 
 #ifdef CONFIG_NET_LOCAL_SCM
       conn->lc_cred.pid = nxsched_getpid();
@@ -217,6 +218,7 @@ void local_free(FAR struct local_conn_s *conn)
   /* Destory sem associated with the connection */
 
   nxmutex_destroy(&conn->lc_sendlock);
+  nxmutex_destroy(&conn->lc_polllock);
 
   /* And free the connection structure */
 
