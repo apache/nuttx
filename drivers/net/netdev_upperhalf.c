@@ -381,6 +381,18 @@ static void eth_input(FAR struct net_driver_s *dev)
       NETDEV_RXDROPPED(dev);
       dev->d_len = 0;
     }
+
+  /* If the above function invocation resulted in data
+   * that should be sent out on the network,
+   * the field d_len will set to a value > 0.
+   */
+
+  if (dev->d_len > 0)
+    {
+      /* And send the packet */
+
+      netdev_upper_txpoll(dev);
+    }
 }
 #endif
 
@@ -453,18 +465,6 @@ static void netdev_upper_rxpoll_work(FAR struct netdev_upperhalf_s *upper)
         default:
           nerr("Unknown link type %d\n", dev->d_lltype);
           break;
-        }
-
-      /* If the above function invocation resulted in data
-       * that should be sent out on the network,
-       * the field d_len will set to a value > 0.
-       */
-
-      if (dev->d_len > 0)
-        {
-          /* And send the packet */
-
-          netdev_upper_txpoll(dev);
         }
     }
 }
