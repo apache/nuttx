@@ -69,8 +69,7 @@ riscv_fpuconfig:
   li           a0, MSTATUS_FS_INIT
   csrs         CSR_STATUS, a0
 
-  fsflags      zero
-  fsrm         zero
+  fscsr        zero
 
   fence.i
   ret
