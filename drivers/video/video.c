@@ -52,9 +52,6 @@
 
 #define VIDEO_REMAINING_CAPNUM_INFINITY (-1)
 
-#define VIDEO_SCENE_MAX (sizeof(g_video_scene_parameter) / \
-                         sizeof(video_scene_params_t))
-
 #define VIDEO_ID(x, y) (((x) << 16) | (y))
 
 /****************************************************************************
@@ -125,17 +122,6 @@ struct video_type_inf_s
 
 typedef struct video_type_inf_s video_type_inf_t;
 
-struct video_mng_s
-{
-  FAR char           *devpath;     /* Parameter of video_initialize() */
-  mutex_t            lock_open_num;
-  uint8_t            open_num;
-  video_type_inf_t   video_inf;
-  video_type_inf_t   still_inf;
-};
-
-typedef struct video_mng_s video_mng_t;
-
 struct video_scene_params_s
 {
   uint8_t mode;   /* enum v4l2_scene_mode */
@@ -187,6 +173,24 @@ struct video_parameter_name_s
 
 typedef struct video_parameter_name_s video_parameter_name_t;
 
+struct video_mng_s
+{
+  /* Parameter of video_initialize() */
+
+  FAR char                 *devpath;
+  mutex_t                  lock_open_num;
+  uint8_t                  open_num;
+  video_type_inf_t         video_inf;
+  video_type_inf_t         still_inf;
+  FAR struct imgdata_s     *imgdata;
+  FAR struct imgsensor_s   *imgsensor;
+  enum v4l2_scene_mode     video_scene_mode;
+  uint8_t                  video_scence_num;
+  FAR video_scene_params_t *video_scene_param[V4L2_SCENE_MODE_MAX];
+};
+
+typedef struct video_mng_s video_mng_t;
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -218,12 +222,14 @@ static bool is_taking_still_picture(FAR video_mng_t *vmng);
 static bool is_bufsize_sufficient(FAR video_mng_t *vmng, uint32_t bufsize);
 static void cleanup_resources(FAR video_mng_t *vmng);
 static bool is_sem_waited(FAR sem_t *sem);
-static int save_scene_param(enum v4l2_scene_mode mode,
+static int save_scene_param(FAR video_mng_t *vmng,
+                            enum v4l2_scene_mode mode,
                             uint32_t id,
                             struct v4l2_ext_control *control);
 static int video_complete_capture(uint8_t err_code, uint32_t datasize,
                                   FAR const struct timeval *ts);
-static int validate_frame_setting(enum v4l2_buf_type type,
+static int validate_frame_setting(FAR video_mng_t *vmng,
+                                  enum v4l2_buf_type type,
                                   uint8_t nr_fmt,
                                   FAR video_format_t *vfmt,
                                   FAR struct v4l2_rect *clip,
@@ -232,9 +238,11 @@ static size_t get_bufsize(FAR video_format_t *vf);
 
 /* Internal function for each cmds of ioctl */
 
-static int video_querycap(FAR struct v4l2_capability *cap);
+static int video_querycap(FAR video_mng_t *vmng,
+                          FAR struct v4l2_capability *cap);
 static int video_g_input(FAR int *num);
-static int video_enum_input(FAR struct v4l2_input *input);
+static int video_enum_input(FAR video_mng_t *vmng,
+                            FAR struct v4l2_input *input);
 static int video_reqbufs(FAR struct video_mng_s *vmng,
                          FAR struct v4l2_requestbuffers *reqbufs);
 static int video_qbuf(FAR struct video_mng_s *vmng,
@@ -264,9 +272,12 @@ static int video_takepict_start(FAR struct video_mng_s *vmng,
                                 int32_t                capture_num);
 static int video_takepict_stop(FAR struct video_mng_s *vmng,
                                bool halfpush);
-static int video_queryctrl(FAR struct v4l2_queryctrl *ctrl);
-static int video_query_ext_ctrl(FAR struct v4l2_query_ext_ctrl *ctrl);
-static int video_querymenu(FAR struct v4l2_querymenu *menu);
+static int video_queryctrl(FAR video_mng_t *vmng,
+                           FAR struct v4l2_queryctrl *ctrl);
+static int video_query_ext_ctrl(FAR video_mng_t *vmng,
+                                FAR struct v4l2_query_ext_ctrl *ctrl);
+static int video_querymenu(FAR video_mng_t *vmng,
+                           FAR struct v4l2_querymenu *menu);
 static int video_g_ctrl(FAR struct video_mng_s *priv,
                         FAR struct v4l2_control *ctrl);
 static int video_s_ctrl(FAR struct video_mng_s *priv,
@@ -275,11 +286,14 @@ static int video_g_ext_ctrls(FAR struct video_mng_s *priv,
                              FAR struct v4l2_ext_controls *ctrls);
 static int video_s_ext_ctrls(FAR struct video_mng_s *priv,
                              FAR struct v4l2_ext_controls *ctrls);
-static int video_query_ext_ctrl_scene(FAR struct v4s_query_ext_ctrl_scene
-                                      *ctrl);
-static int video_querymenu_scene(FAR struct v4s_querymenu_scene *menu);
-static int video_g_ext_ctrls_scene(FAR struct v4s_ext_controls_scene *ctrls);
-static int video_s_ext_ctrls_scene(FAR struct v4s_ext_controls_scene *ctrls);
+static int video_query_ext_ctrl_scene(FAR video_mng_t *vmng,
+                   FAR struct v4s_query_ext_ctrl_scene *ctrl);
+static int video_querymenu_scene(FAR video_mng_t *vmng,
+                                 FAR struct v4s_querymenu_scene *menu);
+static int video_g_ext_ctrls_scene(FAR video_mng_t *vmng,
+                                   FAR struct v4s_ext_controls_scene *ctrls);
+static int video_s_ext_ctrls_scene(FAR video_mng_t *vmng,
+                                   FAR struct v4s_ext_controls_scene *ctrls);
 
 /****************************************************************************
  * Private Data
@@ -299,79 +313,6 @@ static const struct file_operations g_video_fops =
 };
 
 static bool g_video_initialized = false;
-
-static enum v4l2_scene_mode g_video_scene_mode = V4L2_SCENE_MODE_NONE;
-static video_scene_params_t g_video_scene_parameter[] =
-{
-    {
-      V4L2_SCENE_MODE_NONE
-    },
-#ifdef CONFIG_VIDEO_SCENE_BACKLIGHT
-    {
-      V4L2_SCENE_MODE_BACKLIGHT
-    },
-#endif /* CONFIG_VIDEO_SCENE_BACKLIGHT */
-#ifdef CONFIG_VIDEO_SCENE_BEACHSNOW
-    {
-      V4L2_SCENE_MODE_BEACH_SNOW
-    },
-#endif /* CONFIG_VIDEO_SCENE_BEACHSNOW */
-#ifdef CONFIG_VIDEO_SCENE_CANDLELIGHT
-    {
-      V4L2_SCENE_MODE_CANDLE_LIGHT
-    },
-#endif /* CONFIG_VIDEO_SCENE_CANDLELIGHT */
-#ifdef CONFIG_VIDEO_SCENE_DAWNDUSK
-    {
-      V4L2_SCENE_MODE_DAWN_DUSK
-    },
-#endif /* CONFIG_VIDEO_SCENE_DAWNDUSK */
-#ifdef CONFIG_VIDEO_SCENE_FALLCOLORS
-    {
-      V4L2_SCENE_MODE_FALL_COLORS,
-    },
-#endif /* CONFIG_VIDEO_SCENE_FALLCOLORS */
-#ifdef CONFIG_VIDEO_SCENE_FIREWORKS
-    {
-      V4L2_SCENE_MODE_FIREWORKS
-    },
-#endif /* CONFIG_VIDEO_SCENE_FIREWORKS */
-#ifdef CONFIG_VIDEO_SCENE_LANDSCAPE
-    {
-      V4L2_SCENE_MODE_LANDSCAPE
-    },
-#endif /* CONFIG_VIDEO_SCENE_LANDSCAPE */
-#ifdef CONFIG_VIDEO_SCENE_NIGHT
-    {
-      V4L2_SCENE_MODE_NIGHT
-    },
-#endif /* CONFIG_VIDEO_SCENE_NIGHT */
-#ifdef CONFIG_VIDEO_SCENE_PARTYINDOOR
-    {
-      V4L2_SCENE_MODE_PARTY_INDOOR
-    },
-#endif /* CONFIG_VIDEO_SCENE_PARTYINDOOR */
-#ifdef CONFIG_VIDEO_SCENE_PORTRAIT
-    {
-      V4L2_SCENE_MODE_PORTRAIT
-    },
-#endif /* CONFIG_VIDEO_SCENE_PORTRAIT */
-#ifdef CONFIG_VIDEO_SCENE_SPORTS
-    {
-      V4L2_SCENE_MODE_SPORTS
-    },
-#endif /* CONFIG_VIDEO_SCENE_SPORTS */
-#ifdef CONFIG_VIDEO_SCENE_SUNSET
-    {
-      V4L2_SCENE_MODE_SUNSET
-    },
-#endif /* CONFIG_VIDEO_SCENE_SUNSET */
-#ifdef CONFIG_VIDEO_SCENE_TEXT
-    {
-      V4L2_SCENE_MODE_TEXT
-    },
-#endif /* CONFIG_VIDEO_SCENE_TEXT */
-};
 
 static const video_parameter_name_t g_video_parameter_name[] =
 {
@@ -423,7 +364,6 @@ static const video_parameter_name_t g_video_parameter_name[] =
 static FAR void *g_video_handler;
 static FAR struct imgsensor_s **g_video_registered_sensor;
 static int g_video_registered_sensor_num;
-static FAR struct imgsensor_s *g_video_sensor;
 static FAR struct imgdata_s *g_video_data;
 
 /****************************************************************************
@@ -652,7 +592,8 @@ static void get_clipped_format(uint8_t              nr_fmt,
     }
 }
 
-static int start_capture(enum v4l2_buf_type type,
+static int start_capture(FAR video_mng_t *vmng,
+                         enum v4l2_buf_type type,
                          uint8_t nr_fmt,
                          FAR video_format_t *fmt,
                          FAR struct v4l2_rect *clip,
@@ -665,7 +606,7 @@ static int start_capture(enum v4l2_buf_type type,
   imgdata_interval_t di;
   imgsensor_interval_t si;
 
-  ASSERT(fmt && interval && g_video_sensor && g_video_data);
+  ASSERT(fmt && interval && vmng->imgsensor && vmng->imgdata);
 
   get_clipped_format(nr_fmt, fmt, clip, c_fmt);
 
@@ -676,23 +617,22 @@ static int start_capture(enum v4l2_buf_type type,
   convert_to_imgsensorfmt(&fmt[VIDEO_FMT_SUB], &sf[IMGSENSOR_FMT_SUB]);
   convert_to_imgsensorinterval(interval, &si);
 
-  IMGSENSOR_START_CAPTURE(g_video_sensor,
+  IMGSENSOR_START_CAPTURE(vmng->imgsensor,
      type == V4L2_BUF_TYPE_VIDEO_CAPTURE ?
      IMGSENSOR_STREAM_TYPE_VIDEO : IMGSENSOR_STREAM_TYPE_STILL,
      nr_fmt, sf, &si);
-  IMGDATA_START_CAPTURE(g_video_data,
+  IMGDATA_START_CAPTURE(vmng->imgdata,
      nr_fmt, df, &di, video_complete_capture);
-  IMGDATA_SET_BUF(g_video_data, (FAR uint8_t *)bufaddr, bufsize);
-
+  IMGDATA_SET_BUF(vmng->imgdata, (FAR uint8_t *)bufaddr, bufsize);
   return OK;
 }
 
-static void stop_capture(enum v4l2_buf_type type)
+static void stop_capture(FAR video_mng_t *vmng, enum v4l2_buf_type type)
 {
-  ASSERT(g_video_sensor && g_video_data);
+  ASSERT(vmng->imgsensor && vmng->imgdata);
 
-  IMGDATA_STOP_CAPTURE(g_video_data);
-  IMGSENSOR_STOP_CAPTURE(g_video_sensor,
+  IMGDATA_STOP_CAPTURE(vmng->imgdata);
+  IMGSENSOR_STOP_CAPTURE(vmng->imgsensor,
      type == V4L2_BUF_TYPE_VIDEO_CAPTURE ?
      IMGSENSOR_STREAM_TYPE_VIDEO : IMGSENSOR_STREAM_TYPE_STILL);
 }
@@ -711,7 +651,8 @@ static void change_video_state(FAR video_mng_t    *vmng,
       if (container != NULL)
         {
           vmng->video_inf.seqnum = 0;
-          start_capture(V4L2_BUF_TYPE_VIDEO_CAPTURE,
+          start_capture(vmng,
+                        V4L2_BUF_TYPE_VIDEO_CAPTURE,
                         vmng->video_inf.nr_fmt,
                         vmng->video_inf.fmt,
                         &vmng->video_inf.clip,
@@ -727,7 +668,7 @@ static void change_video_state(FAR video_mng_t    *vmng,
   else if (current_state == VIDEO_STATE_CAPTURE &&
            next_state    != VIDEO_STATE_CAPTURE)
     {
-          stop_capture(V4L2_BUF_TYPE_VIDEO_CAPTURE);
+          stop_capture(vmng, V4L2_BUF_TYPE_VIDEO_CAPTURE);
     }
 
   vmng->video_inf.state = updated_next_state;
@@ -774,19 +715,19 @@ static void initialize_streamresources(FAR video_type_inf_t *type_inf)
   video_framebuff_init(&type_inf->bufinf);
 }
 
-static int32_t get_default_value(uint32_t id)
+static int32_t get_default_value(FAR video_mng_t *vmng, uint32_t id)
 {
   imgsensor_supported_value_t value;
   int ret;
 
-  if (g_video_sensor == NULL)
+  if (vmng->imgsensor == NULL)
     {
       /* Don't care(unsupported parameter) */
 
       return 0;
     }
 
-  ret = IMGSENSOR_GET_SUPPORTED_VALUE(g_video_sensor, id, &value);
+  ret = IMGSENSOR_GET_SUPPORTED_VALUE(vmng->imgsensor, id, &value);
   if (ret != OK)
     {
       /* Don't care(unsupported parameter) */
@@ -812,7 +753,7 @@ static int32_t get_default_value(uint32_t id)
     }
 }
 
-static int32_t initialize_scene_gamma(uint8_t **gamma)
+static int32_t initialize_scene_gamma(FAR video_mng_t *vmng, uint8_t **gamma)
 {
   imgsensor_supported_value_t sup_val;
   imgsensor_value_t val;
@@ -821,9 +762,9 @@ static int32_t initialize_scene_gamma(uint8_t **gamma)
 
   *gamma = NULL;
 
-  ASSERT(g_video_sensor);
+  ASSERT(vmng->imgsensor);
 
-  ret = IMGSENSOR_GET_SUPPORTED_VALUE(g_video_sensor,
+  ret = IMGSENSOR_GET_SUPPORTED_VALUE(vmng->imgsensor,
           IMGSENSOR_ID_GAMMA_CURVE, &sup_val);
   if (ret != OK)
     {
@@ -870,66 +811,134 @@ static int32_t initialize_scene_gamma(uint8_t **gamma)
 
   *gamma = kmm_malloc(sz);
   val.p_u8 = (FAR uint8_t *)*gamma;
-  IMGSENSOR_GET_VALUE(g_video_sensor, IMGSENSOR_ID_GAMMA_CURVE, sz, &val);
+  IMGSENSOR_GET_VALUE(vmng->imgsensor, IMGSENSOR_ID_GAMMA_CURVE, sz, &val);
   return sz;
 }
 
-static void initialize_scene_parameter(video_scene_params_t *sp)
+static int initialize_scene_parameter(FAR video_mng_t *vmng,
+                                      enum v4l2_scene_mode mode,
+                                      video_scene_params_t **vsp)
 {
-  ASSERT(sp);
+  video_scene_params_t *sp =
+    (FAR video_scene_params_t *)kmm_malloc(sizeof(video_scene_params_t));
+  if (!sp)
+    {
+      return -ENOMEM;
+    }
 
-  sp->brightness      = get_default_value(IMGSENSOR_ID_BRIGHTNESS);
-  sp->contrast        = get_default_value(IMGSENSOR_ID_CONTRAST);
-  sp->saturation      = get_default_value(IMGSENSOR_ID_SATURATION);
-  sp->hue             = get_default_value(IMGSENSOR_ID_HUE);
-  sp->awb             = get_default_value(IMGSENSOR_ID_AUTO_WHITE_BALANCE);
-  sp->red             = get_default_value(IMGSENSOR_ID_RED_BALANCE);
-  sp->blue            = get_default_value(IMGSENSOR_ID_BLUE_BALANCE);
-  sp->gamma           = get_default_value(IMGSENSOR_ID_GAMMA);
-  sp->gamma_curve_sz  = initialize_scene_gamma(&sp->gamma_curve);
-  sp->ev              = get_default_value(IMGSENSOR_ID_EXPOSURE);
-  sp->hflip_video     = get_default_value(IMGSENSOR_ID_HFLIP_VIDEO);
-  sp->vflip_video     = get_default_value(IMGSENSOR_ID_VFLIP_VIDEO);
-  sp->hflip_still     = get_default_value(IMGSENSOR_ID_HFLIP_STILL);
-  sp->vflip_still     = get_default_value(IMGSENSOR_ID_VFLIP_STILL);
-  sp->sharpness       = get_default_value(IMGSENSOR_ID_SHARPNESS);
-  sp->colorfx         = get_default_value(IMGSENSOR_ID_COLORFX);
-  sp->auto_brightness = get_default_value(IMGSENSOR_ID_AUTOBRIGHTNESS);
-  sp->rotate          = get_default_value(IMGSENSOR_ID_ROTATE);
-  sp->ae              = get_default_value(IMGSENSOR_ID_EXPOSURE_AUTO);
-  sp->exposure_time   = get_default_value(IMGSENSOR_ID_EXPOSURE_ABSOLUTE);
-  sp->focus           = get_default_value(IMGSENSOR_ID_FOCUS_ABSOLUTE);
-  sp->af              = get_default_value(IMGSENSOR_ID_FOCUS_AUTO);
-  sp->zoom            = get_default_value(IMGSENSOR_ID_ZOOM_ABSOLUTE);
-  sp->iris            = get_default_value(IMGSENSOR_ID_IRIS_ABSOLUTE);
-  sp->wb              = get_default_value(IMGSENSOR_ID_AUTO_N_PRESET_WB);
-  sp->wdr             = get_default_value(IMGSENSOR_ID_WIDE_DYNAMIC_RANGE);
-  sp->stabilization   = get_default_value(IMGSENSOR_ID_IMG_STABILIZATION);
-  sp->iso_auto        = get_default_value(IMGSENSOR_ID_ISO_SENSITIVITY_AUTO);
-  sp->iso             = get_default_value(IMGSENSOR_ID_ISO_SENSITIVITY);
-  sp->meter           = get_default_value(IMGSENSOR_ID_EXPOSURE_METERING);
-  sp->spot_pos        = get_default_value(IMGSENSOR_ID_SPOT_POSITION);
-  sp->threea_lock     = get_default_value(IMGSENSOR_ID_3A_LOCK);
-  sp->led             = get_default_value(IMGSENSOR_ID_FLASH_LED_MODE);
-  sp->jpeg_quality    = get_default_value(IMGSENSOR_ID_JPEG_QUALITY);
+  sp->brightness      = get_default_value(vmng, IMGSENSOR_ID_BRIGHTNESS);
+  sp->contrast        = get_default_value(vmng, IMGSENSOR_ID_CONTRAST);
+  sp->saturation      = get_default_value(vmng, IMGSENSOR_ID_SATURATION);
+  sp->hue             = get_default_value(vmng, IMGSENSOR_ID_HUE);
+  sp->awb             = get_default_value(vmng,
+                                          IMGSENSOR_ID_AUTO_WHITE_BALANCE);
+  sp->red             = get_default_value(vmng, IMGSENSOR_ID_RED_BALANCE);
+  sp->blue            = get_default_value(vmng, IMGSENSOR_ID_BLUE_BALANCE);
+  sp->gamma           = get_default_value(vmng, IMGSENSOR_ID_GAMMA);
+  sp->gamma_curve_sz  = initialize_scene_gamma(vmng, &sp->gamma_curve);
+  sp->ev              = get_default_value(vmng, IMGSENSOR_ID_EXPOSURE);
+  sp->hflip_video     = get_default_value(vmng, IMGSENSOR_ID_HFLIP_VIDEO);
+  sp->vflip_video     = get_default_value(vmng, IMGSENSOR_ID_VFLIP_VIDEO);
+  sp->hflip_still     = get_default_value(vmng, IMGSENSOR_ID_HFLIP_STILL);
+  sp->vflip_still     = get_default_value(vmng, IMGSENSOR_ID_VFLIP_STILL);
+  sp->sharpness       = get_default_value(vmng, IMGSENSOR_ID_SHARPNESS);
+  sp->colorfx         = get_default_value(vmng, IMGSENSOR_ID_COLORFX);
+  sp->auto_brightness = get_default_value(vmng, IMGSENSOR_ID_AUTOBRIGHTNESS);
+  sp->rotate          = get_default_value(vmng, IMGSENSOR_ID_ROTATE);
+  sp->ae              = get_default_value(vmng, IMGSENSOR_ID_EXPOSURE_AUTO);
+  sp->exposure_time   = get_default_value(vmng,
+                                         IMGSENSOR_ID_EXPOSURE_ABSOLUTE);
+  sp->focus           = get_default_value(vmng, IMGSENSOR_ID_FOCUS_ABSOLUTE);
+  sp->af              = get_default_value(vmng, IMGSENSOR_ID_FOCUS_AUTO);
+  sp->zoom            = get_default_value(vmng, IMGSENSOR_ID_ZOOM_ABSOLUTE);
+  sp->iris            = get_default_value(vmng, IMGSENSOR_ID_IRIS_ABSOLUTE);
+  sp->wb              = get_default_value(vmng,
+                                          IMGSENSOR_ID_AUTO_N_PRESET_WB);
+  sp->wdr             = get_default_value(vmng,
+                                          IMGSENSOR_ID_WIDE_DYNAMIC_RANGE);
+  sp->stabilization   = get_default_value(vmng,
+                                          IMGSENSOR_ID_IMG_STABILIZATION);
+  sp->iso_auto        = get_default_value(vmng,
+                                          IMGSENSOR_ID_ISO_SENSITIVITY_AUTO);
+  sp->iso             = get_default_value(vmng,
+                                          IMGSENSOR_ID_ISO_SENSITIVITY);
+  sp->meter           = get_default_value(vmng,
+                                          IMGSENSOR_ID_EXPOSURE_METERING);
+  sp->threea_lock     = get_default_value(vmng, IMGSENSOR_ID_3A_LOCK);
+  sp->led             = get_default_value(vmng, IMGSENSOR_ID_FLASH_LED_MODE);
+  sp->jpeg_quality    = get_default_value(vmng, IMGSENSOR_ID_JPEG_QUALITY);
+
+  *vsp = sp;
+
+  return OK;
 }
 
-static void initialize_scenes_parameter(void)
+static void initialize_scenes_parameter(FAR video_mng_t *vmng)
 {
-  video_scene_params_t *sp = &g_video_scene_parameter[0];
-  int i;
+  memset(vmng->video_scene_param,
+         0, sizeof(vmng->video_scene_param));
 
-  for (i = 0; i < VIDEO_SCENE_MAX; i++)
-    {
-      initialize_scene_parameter(sp++);
-    }
+  initialize_scene_parameter(vmng, V4L2_SCENE_MODE_NONE,
+      &vmng->video_scene_param[vmng->video_scence_num++]);
+#ifdef CONFIG_VIDEO_SCENE_BACKLIGHT
+  initialize_scene_parameter(vmng, V4L2_SCENE_MODE_BACKLIGHT,
+           &vmng->video_scene_param[vmng->video_scence_num++]);
+#endif /* CONFIG_VIDEO_SCENE_BACKLIGHT */
+#ifdef CONFIG_VIDEO_SCENE_BEACHSNOW
+  initialize_scene_parameter(vmng, CONFIG_VIDEO_SCENE_BEACHSNOW,
+              &vmng->video_scene_param[vmng->video_scence_num++]);
+#endif /* CONFIG_VIDEO_SCENE_BEACHSNOW */
+#ifdef CONFIG_VIDEO_SCENE_CANDLELIGHT
+  initialize_scene_parameter(vmng, CONFIG_VIDEO_SCENE_CANDLELIGHT,
+                &vmng->video_scene_param[vmng->video_scence_num++]);
+#endif /* CONFIG_VIDEO_SCENE_CANDLELIGHT */
+#ifdef CONFIG_VIDEO_SCENE_DAWNDUSK
+  initialize_scene_parameter(vmng, CONFIG_VIDEO_SCENE_DAWNDUSK,
+             &vmng->video_scene_param[vmng->video_scence_num++]);
+#endif /* CONFIG_VIDEO_SCENE_DAWNDUSK */
+#ifdef CONFIG_VIDEO_SCENE_FALLCOLORS
+  initialize_scene_parameter(vmng, CONFIG_VIDEO_SCENE_FALLCOLORS,
+               &vmng->video_scene_param[vmng->video_scence_num++]);
+#endif /* CONFIG_VIDEO_SCENE_FALLCOLORS */
+#ifdef CONFIG_VIDEO_SCENE_FIREWORKS
+  initialize_scene_parameter(vmng, CONFIG_VIDEO_SCENE_FIREWORKS,
+              &vmng->video_scene_param[vmng->video_scence_num++]);
+#endif /* CONFIG_VIDEO_SCENE_FIREWORKS */
+#ifdef CONFIG_VIDEO_SCENE_LANDSCAPE
+  initialize_scene_parameter(vmng, CONFIG_VIDEO_SCENE_LANDSCAPE,
+              &vmng->video_scene_param[vmng->video_scence_num++]);
+#endif /* CONFIG_VIDEO_SCENE_LANDSCAPE */
+#ifdef CONFIG_VIDEO_SCENE_NIGHT
+  initialize_scene_parameter(vmng, CONFIG_VIDEO_SCENE_NIGHT,
+          &vmng->video_scene_param[vmng->video_scence_num++]);
+#endif /* CONFIG_VIDEO_SCENE_NIGHT */
+#ifdef CONFIG_VIDEO_SCENE_PARTYINDOOR
+  initialize_scene_parameter(vmng, CONFIG_VIDEO_SCENE_PARTYINDOOR,
+                &vmng->video_scene_param[vmng->video_scence_num++]);
+#endif /* CONFIG_VIDEO_SCENE_PARTYINDOOR */
+#ifdef CONFIG_VIDEO_SCENE_PORTRAIT
+  initialize_scene_parameter(vmng, CONFIG_VIDEO_SCENE_PORTRAIT,
+             &vmng->video_scene_param[vmng->video_scence_num++]);
+#endif /* CONFIG_VIDEO_SCENE_PORTRAIT */
+#ifdef CONFIG_VIDEO_SCENE_SPORTS
+  initialize_scene_parameter(vmng, CONFIG_VIDEO_SCENE_SPORTS,
+           &vmng->video_scene_param[vmng->video_scence_num++]);
+#endif /* CONFIG_VIDEO_SCENE_SPORTS */
+#ifdef CONFIG_VIDEO_SCENE_SUNSET
+  initialize_scene_parameter(vmng, CONFIG_VIDEO_SCENE_SUNSET,
+           &vmng->video_scene_param[vmng->video_scence_num++]);
+#endif /* CONFIG_VIDEO_SCENE_SUNSET */
+#ifdef CONFIG_VIDEO_SCENE_TEXT
+  initialize_scene_parameter(vmng, CONFIG_VIDEO_SCENE_TEXT,
+         &vmng->video_scene_param[vmng->video_scence_num++]);
+#endif /* CONFIG_VIDEO_SCENE_TEXT */
 }
 
 static void initialize_resources(FAR video_mng_t *vmng)
 {
   initialize_streamresources(&vmng->video_inf);
   initialize_streamresources(&vmng->still_inf);
-  initialize_scenes_parameter();
+  initialize_scenes_parameter(vmng);
 }
 
 static void cleanup_streamresources(FAR video_type_inf_t *type_inf)
@@ -944,8 +953,9 @@ static void cleanup_streamresources(FAR video_type_inf_t *type_inf)
     }
 }
 
-static void cleanup_scene_parameter(video_scene_params_t *sp)
+static void cleanup_scene_parameter(FAR video_scene_params_t **vsp)
 {
+  FAR video_scene_params_t *sp = *vsp;
   ASSERT(sp);
 
   if (sp->gamma_curve != NULL)
@@ -954,17 +964,21 @@ static void cleanup_scene_parameter(video_scene_params_t *sp)
       sp->gamma_curve = NULL;
       sp->gamma_curve_sz = 0;
     }
+
+  kmm_free(sp);
+  *vsp = NULL;
 }
 
-static void cleanup_scenes_parameter(void)
+static void cleanup_scenes_parameter(FAR video_mng_t *vmng)
 {
-  video_scene_params_t *sp = &g_video_scene_parameter[0];
   int i;
 
-  for (i = 0; i < VIDEO_SCENE_MAX; i++)
+  for (i = 0; i < vmng->video_scence_num; i++)
     {
-      cleanup_scene_parameter(sp++);
+      cleanup_scene_parameter(&vmng->video_scene_param[i]);
     }
+
+  vmng->video_scence_num = 0;
 }
 
 static void cleanup_resources(FAR video_mng_t *vmng)
@@ -973,19 +987,19 @@ static void cleanup_resources(FAR video_mng_t *vmng)
 
   if (vmng->video_inf.state == VIDEO_STATE_CAPTURE)
     {
-      stop_capture(V4L2_BUF_TYPE_VIDEO_CAPTURE);
+      stop_capture(vmng, V4L2_BUF_TYPE_VIDEO_CAPTURE);
     }
 
   if (vmng->still_inf.state == VIDEO_STATE_CAPTURE)
     {
-      stop_capture(V4L2_BUF_TYPE_STILL_CAPTURE);
+      stop_capture(vmng, V4L2_BUF_TYPE_STILL_CAPTURE);
     }
 
   /* Clean up resource */
 
   cleanup_streamresources(&vmng->video_inf);
   cleanup_streamresources(&vmng->still_inf);
-  cleanup_scenes_parameter();
+  cleanup_scenes_parameter(vmng);
 }
 
 static bool is_sem_waited(FAR sem_t *sem)
@@ -1024,13 +1038,13 @@ static int video_open(FAR struct file *filep)
     {
       /* Only in first execution, open device */
 
-      g_video_sensor = get_connected_imgsensor();
-      if (g_video_sensor != NULL)
+      priv->imgsensor = get_connected_imgsensor();
+      if (priv->imgsensor != NULL)
         {
-          ret = IMGSENSOR_INIT(g_video_sensor);
+          ret = IMGSENSOR_INIT(priv->imgsensor);
           if (ret == OK)
             {
-              ret = IMGDATA_INIT(g_video_data);
+              ret = IMGDATA_INIT(priv->imgdata);
               if (ret == OK)
                 {
                   initialize_resources(priv);
@@ -1069,8 +1083,8 @@ static int video_close(FAR struct file *filep)
   if (--priv->open_num == 0)
     {
       cleanup_resources(priv);
-      IMGSENSOR_UNINIT(g_video_sensor);
-      IMGDATA_UNINIT(g_video_data);
+      IMGSENSOR_UNINIT(priv->imgsensor);
+      IMGDATA_UNINIT(priv->imgdata);
     }
 
   nxmutex_unlock(&priv->lock_open_num);
@@ -1089,18 +1103,19 @@ static ssize_t video_write(FAR struct file *filep,
   return -ENOTSUP;
 }
 
-static int video_querycap(FAR struct v4l2_capability *cap)
+static int video_querycap(FAR video_mng_t *vmng,
+                          FAR struct v4l2_capability *cap)
 {
   FAR const char *name;
 
-  ASSERT(g_video_sensor);
+  ASSERT(vmng->imgsensor);
 
   if (cap == NULL)
     {
       return -EINVAL;
     }
 
-  name = IMGSENSOR_GET_DRIVER_NAME(g_video_sensor);
+  name = IMGSENSOR_GET_DRIVER_NAME(vmng->imgsensor);
   if (name == NULL)
     {
       return -ENOTTY;
@@ -1122,18 +1137,19 @@ static int video_g_input(FAR int *num)
   return OK;
 }
 
-static int video_enum_input(FAR struct v4l2_input *input)
+static int video_enum_input(FAR video_mng_t *vmng,
+                            FAR struct v4l2_input *input)
 {
   FAR const char *name;
 
-  ASSERT(g_video_sensor);
+  ASSERT(vmng->imgsensor);
 
   if (input->index > 0)
     {
       return -EINVAL;
     }
 
-  name = IMGSENSOR_GET_DRIVER_NAME(g_video_sensor);
+  name = IMGSENSOR_GET_DRIVER_NAME(vmng->imgsensor);
   if (name == NULL)
     {
       return -ENOTTY;
@@ -1292,7 +1308,8 @@ static int video_qbuf(FAR struct video_mng_s *vmng,
           if (container != NULL)
             {
               type_inf->seqnum = 0;
-              start_capture(buf->type,
+              start_capture(vmng,
+                            buf->type,
                             type_inf->nr_fmt,
                             type_inf->fmt,
                             &type_inf->clip,
@@ -1438,7 +1455,7 @@ static int video_s_selection(FAR struct video_mng_s    *vmng,
   int32_t id;
   int ret;
 
-  ASSERT(g_video_sensor && vmng);
+  ASSERT(vmng && vmng->imgsensor);
 
   if (clip == NULL)
     {
@@ -1461,7 +1478,8 @@ static int video_s_selection(FAR struct video_mng_s    *vmng,
       return -EINVAL;
     }
 
-  ret = validate_frame_setting(clip->type,
+  ret = validate_frame_setting(vmng,
+                               clip->type,
                                type_inf->nr_fmt,
                                type_inf->fmt,
                                &clip->r,
@@ -1480,7 +1498,7 @@ static int video_s_selection(FAR struct video_mng_s    *vmng,
   p_u32[IMGSENSOR_CLIP_INDEX_HEIGHT] = clip->r.height;
 
   val.p_u32 = p_u32;
-  ret = IMGSENSOR_SET_VALUE(g_video_sensor, id, sizeof(p_u32), val);
+  ret = IMGSENSOR_SET_VALUE(vmng->imgsensor, id, sizeof(p_u32), val);
   if (ret != OK)
     {
       return ret;
@@ -1512,7 +1530,8 @@ static int video_g_selection(FAR struct video_mng_s    *vmng,
   return OK;
 }
 
-static int validate_frame_setting(enum v4l2_buf_type type,
+static int validate_frame_setting(FAR video_mng_t *vmng,
+                                  enum v4l2_buf_type type,
                                   uint8_t nr_fmt,
                                   FAR video_format_t *vfmt,
                                   FAR struct v4l2_rect *clip,
@@ -1525,7 +1544,7 @@ static int validate_frame_setting(enum v4l2_buf_type type,
   imgsensor_interval_t si;
   int ret;
 
-  ASSERT(vfmt && interval && g_video_sensor && g_video_data);
+  ASSERT(vfmt && interval && vmng->imgsensor && vmng->imgdata);
 
   /* Return OK only in case both image data driver and
    * image sensor driver support.
@@ -1540,7 +1559,7 @@ static int validate_frame_setting(enum v4l2_buf_type type,
   convert_to_imgsensorfmt(&vfmt[VIDEO_FMT_SUB], &sf[IMGSENSOR_FMT_SUB]);
   convert_to_imgsensorinterval(interval, &si);
 
-  ret = IMGSENSOR_VALIDATE_FRAME_SETTING(g_video_sensor,
+  ret = IMGSENSOR_VALIDATE_FRAME_SETTING(vmng->imgsensor,
             type == V4L2_BUF_TYPE_VIDEO_CAPTURE ?
               IMGSENSOR_STREAM_TYPE_VIDEO : IMGSENSOR_STREAM_TYPE_STILL,
             nr_fmt, sf, &si);
@@ -1549,7 +1568,7 @@ static int validate_frame_setting(enum v4l2_buf_type type,
       return ret;
     }
 
-  return IMGDATA_VALIDATE_FRAME_SETTING(g_video_data, nr_fmt, df, &di);
+  return IMGDATA_VALIDATE_FRAME_SETTING(vmng->imgdata, nr_fmt, df, &di);
 }
 
 static size_t get_bufsize(FAR video_format_t *vf)
@@ -1581,7 +1600,7 @@ static int video_try_fmt(FAR struct video_mng_s *priv,
   video_format_t vf[MAX_VIDEO_FMT];
   uint8_t nr_fmt;
 
-  ASSERT(priv && g_video_sensor && g_video_data);
+  ASSERT(priv && priv->imgsensor && priv->imgdata);
 
   if (v4l2 == NULL)
     {
@@ -1633,7 +1652,8 @@ static int video_try_fmt(FAR struct video_mng_s *priv,
         return -EINVAL;
     }
 
-  return validate_frame_setting(v4l2->type,
+  return validate_frame_setting(priv,
+                                v4l2->type,
                                 nr_fmt,
                                 vf,
                                 &type_inf->clip,
@@ -1717,7 +1737,7 @@ static int video_s_parm(FAR struct video_mng_s *priv,
   FAR video_type_inf_t *type_inf;
   int ret;
 
-  ASSERT(g_video_sensor && g_video_data);
+  ASSERT(priv->imgsensor && priv->imgdata);
 
   type_inf = get_video_type_inf(priv, parm->type);
   if (type_inf == NULL)
@@ -1730,7 +1750,8 @@ static int video_s_parm(FAR struct video_mng_s *priv,
       return -EBUSY;
     }
 
-  ret = validate_frame_setting(parm->type,
+  ret = validate_frame_setting(priv,
+                               parm->type,
                                type_inf->nr_fmt,
                                type_inf->fmt,
                                &type_inf->clip,
@@ -1753,7 +1774,7 @@ static int video_g_parm(FAR struct video_mng_s *vmng,
   FAR video_type_inf_t *type_inf;
   int ret = -EINVAL;
 
-  DEBUGASSERT(vmng && g_video_sensor);
+  DEBUGASSERT(vmng && vmng->imgsensor);
 
   type_inf = get_video_type_inf(vmng, parm->type);
   if (type_inf == NULL)
@@ -1769,7 +1790,7 @@ static int video_g_parm(FAR struct video_mng_s *vmng,
        * query lower driver.
        */
 
-      ret = IMGSENSOR_GET_FRAME_INTERVAL(g_video_sensor, parm->type,
+      ret = IMGSENSOR_GET_FRAME_INTERVAL(vmng->imgsensor, parm->type,
               (imgsensor_interval_t *)&parm->parm.capture.timeperframe);
     }
 
@@ -1940,7 +1961,8 @@ static int video_takepict_start(FAR struct video_mng_s *vmng,
         {
           /* Start still stream capture */
 
-          start_capture(V4L2_BUF_TYPE_STILL_CAPTURE,
+          start_capture(vmng,
+                        V4L2_BUF_TYPE_STILL_CAPTURE,
                         vmng->still_inf.nr_fmt,
                         vmng->still_inf.fmt,
                         &vmng->still_inf.clip,
@@ -1983,7 +2005,7 @@ static int video_takepict_stop(FAR struct video_mng_s *vmng, bool halfpush)
       flags = enter_critical_section();
       if (vmng->still_inf.state == VIDEO_STATE_CAPTURE)
         {
-          stop_capture(V4L2_BUF_TYPE_STILL_CAPTURE);
+          stop_capture(vmng, V4L2_BUF_TYPE_STILL_CAPTURE);
         }
 
       leave_critical_section(flags);
@@ -2004,7 +2026,8 @@ static int video_takepict_stop(FAR struct video_mng_s *vmng, bool halfpush)
   return ret;
 }
 
-static int video_queryctrl(FAR struct v4l2_queryctrl *ctrl)
+static int video_queryctrl(FAR video_mng_t *vmng,
+                           FAR struct v4l2_queryctrl *ctrl)
 {
   struct v4l2_query_ext_ctrl ext_ctrl;
   int                        ret;
@@ -2019,7 +2042,7 @@ static int video_queryctrl(FAR struct v4l2_queryctrl *ctrl)
   ext_ctrl.ctrl_class = ctrl->ctrl_class;
   ext_ctrl.id         = ctrl->id;
 
-  ret = video_query_ext_ctrl(&ext_ctrl);
+  ret = video_query_ext_ctrl(vmng, &ext_ctrl);
   if (ret != OK)
     {
       return ret;
@@ -2069,7 +2092,8 @@ static void set_parameter_name(uint32_t id, char *name)
   strlcpy(name, g_video_parameter_name[cnt].name, 32);
 }
 
-static int video_query_ext_ctrl(FAR struct v4l2_query_ext_ctrl *attr)
+static int video_query_ext_ctrl(FAR struct video_mng_s *vmng,
+                                FAR struct v4l2_query_ext_ctrl *attr)
 {
   imgsensor_supported_value_t value;
   imgsensor_capability_range_t *range = &value.u.range;
@@ -2077,7 +2101,7 @@ static int video_query_ext_ctrl(FAR struct v4l2_query_ext_ctrl *attr)
   imgsensor_capability_elems_t *elem = &value.u.elems;
   int ret;
 
-  ASSERT(g_video_sensor);
+  ASSERT(vmng->imgsensor);
 
   if (attr == NULL)
     {
@@ -2096,14 +2120,14 @@ static int video_query_ext_ctrl(FAR struct v4l2_query_ext_ctrl *attr)
 
       attr->type          = V4L2_CTRL_TYPE_INTEGER_MENU;
       attr->minimum       = 0;
-      attr->maximum       = VIDEO_SCENE_MAX - 1;
+      attr->maximum       = vmng->video_scence_num - 1;
       attr->step          = 1;
       attr->default_value = 0;
       strlcpy(attr->name, "Scene Mode", 32);
     }
   else
     {
-      ret = IMGSENSOR_GET_SUPPORTED_VALUE(g_video_sensor,
+      ret = IMGSENSOR_GET_SUPPORTED_VALUE(vmng->imgsensor,
               VIDEO_ID(attr->ctrl_class, attr->id),
               &value);
       if (ret < 0)
@@ -2146,12 +2170,13 @@ static int video_query_ext_ctrl(FAR struct v4l2_query_ext_ctrl *attr)
   return OK;
 }
 
-static int video_querymenu(FAR struct v4l2_querymenu *menu)
+static int video_querymenu(FAR video_mng_t *vmng,
+                           FAR struct v4l2_querymenu *menu)
 {
   imgsensor_supported_value_t value;
   int ret;
 
-  ASSERT(g_video_sensor);
+  ASSERT(vmng->imgsensor);
 
   if (menu == NULL)
     {
@@ -2163,16 +2188,16 @@ static int video_querymenu(FAR struct v4l2_querymenu *menu)
     {
       /* Scene mode is processed in only video driver. */
 
-      if (menu->index > VIDEO_SCENE_MAX - 1)
+      if (menu->index > vmng->video_scence_num - 1)
         {
           return -EINVAL;
         }
 
-      menu->value = g_video_scene_parameter[menu->index].mode;
+      menu->value = vmng->video_scene_param[menu->index]->mode;
     }
   else
     {
-      ret = IMGSENSOR_GET_SUPPORTED_VALUE(g_video_sensor,
+      ret = IMGSENSOR_GET_SUPPORTED_VALUE(vmng->imgsensor,
               VIDEO_ID(menu->ctrl_class, menu->id),
               &value);
       if (ret < 0)
@@ -2265,7 +2290,7 @@ static int video_g_ext_ctrls(FAR struct video_mng_s *priv,
   int ret = OK;
   int cnt;
 
-  ASSERT(g_video_sensor);
+  ASSERT(priv->imgsensor);
 
   if (priv == NULL || ctrls == NULL)
     {
@@ -2276,7 +2301,7 @@ static int video_g_ext_ctrls(FAR struct video_mng_s *priv,
        cnt < ctrls->count;
        cnt++, control++)
     {
-      ret = IMGSENSOR_GET_VALUE(g_video_sensor,
+      ret = IMGSENSOR_GET_VALUE(priv->imgsensor,
               VIDEO_ID(ctrls->ctrl_class, control->id),
               control->size,
               (imgsensor_value_t *)&control->value64);
@@ -2292,47 +2317,50 @@ static int video_g_ext_ctrls(FAR struct video_mng_s *priv,
   return ret;
 }
 
-static int set_intvalue(uint32_t id, int32_t value32)
+static int set_intvalue(FAR video_mng_t *vmng,
+                        uint32_t id, int32_t value32)
 {
   imgsensor_value_t value;
 
-  ASSERT(g_video_sensor);
+  ASSERT(vmng->imgsensor);
 
   value.value32 = value32;
-  return IMGSENSOR_SET_VALUE(g_video_sensor, id, sizeof(int32_t), value);
+  return IMGSENSOR_SET_VALUE(vmng->imgsensor, id, sizeof(int32_t), value);
 }
 
-static int set_pvalue(uint32_t id, int size, void *pval)
+static int set_pvalue(FAR video_mng_t *vmng,
+                      uint32_t id, int size, void *pval)
 {
   imgsensor_value_t value;
 
-  ASSERT(g_video_sensor);
+  ASSERT(vmng->imgsensor);
 
   value.p_u8 = (FAR uint8_t *)pval;
-  return IMGSENSOR_SET_VALUE(g_video_sensor, id, size, value);
+  return IMGSENSOR_SET_VALUE(vmng->imgsensor, id, size, value);
 }
 
-static video_scene_params_t *search_scene_param(enum v4l2_scene_mode mode)
+static video_scene_params_t *search_scene_param(FAR video_mng_t *vmng,
+                                                enum v4l2_scene_mode mode)
 {
-  video_scene_params_t *sp = &g_video_scene_parameter[0];
   int i;
 
-  for (i = 0; i < VIDEO_SCENE_MAX; i++, sp++)
+  for (i = 0; i < vmng->video_scence_num; i++)
     {
-      if (sp->mode == mode)
+      if (vmng->video_scene_param[i]->mode == mode)
         {
-          return sp;
+          return vmng->video_scene_param[i];
         }
     }
 
   return NULL;
 }
 
-static int reflect_scene_parameter(enum v4l2_scene_mode mode)
+static int reflect_scene_parameter(FAR video_mng_t *vmng,
+                                   enum v4l2_scene_mode mode)
 {
   video_scene_params_t *sp;
 
-  sp = search_scene_param(mode);
+  sp = search_scene_param(vmng, mode);
   if (sp == NULL)
     {
       /* Unsupported scene mode */
@@ -2340,56 +2368,56 @@ static int reflect_scene_parameter(enum v4l2_scene_mode mode)
       return -EINVAL;
     }
 
-  set_intvalue(IMGSENSOR_ID_BRIGHTNESS, sp->brightness);
-  set_intvalue(IMGSENSOR_ID_CONTRAST, sp->contrast);
-  set_intvalue(IMGSENSOR_ID_SATURATION, sp->saturation);
-  set_intvalue(IMGSENSOR_ID_HUE , sp->hue);
-  set_intvalue(IMGSENSOR_ID_AUTO_WHITE_BALANCE, sp->awb);
-  set_intvalue(IMGSENSOR_ID_RED_BALANCE , sp->red);
-  set_intvalue(IMGSENSOR_ID_BLUE_BALANCE, sp->blue);
-  set_intvalue(IMGSENSOR_ID_GAMMA, sp->gamma);
-  set_pvalue(IMGSENSOR_ID_GAMMA_CURVE, sp->gamma_curve_sz, sp->gamma_curve);
-  set_intvalue(IMGSENSOR_ID_EXPOSURE, sp->ev);
-  set_intvalue(IMGSENSOR_ID_HFLIP_VIDEO, sp->hflip_video);
-  set_intvalue(IMGSENSOR_ID_VFLIP_VIDEO, sp->vflip_video);
-  set_intvalue(IMGSENSOR_ID_HFLIP_STILL, sp->hflip_still);
-  set_intvalue(IMGSENSOR_ID_VFLIP_STILL, sp->vflip_still);
-  set_intvalue(IMGSENSOR_ID_SHARPNESS, sp->sharpness);
-  set_intvalue(IMGSENSOR_ID_COLORFX, sp->colorfx);
-  set_intvalue(IMGSENSOR_ID_AUTOBRIGHTNESS, sp->auto_brightness);
-  set_intvalue(IMGSENSOR_ID_ROTATE, sp->rotate);
-  set_intvalue(IMGSENSOR_ID_EXPOSURE_AUTO, sp->ae);
+  set_intvalue(vmng, IMGSENSOR_ID_BRIGHTNESS, sp->brightness);
+  set_intvalue(vmng, IMGSENSOR_ID_CONTRAST, sp->contrast);
+  set_intvalue(vmng, IMGSENSOR_ID_SATURATION, sp->saturation);
+  set_intvalue(vmng, IMGSENSOR_ID_HUE , sp->hue);
+  set_intvalue(vmng, IMGSENSOR_ID_AUTO_WHITE_BALANCE, sp->awb);
+  set_intvalue(vmng, IMGSENSOR_ID_RED_BALANCE , sp->red);
+  set_intvalue(vmng, IMGSENSOR_ID_BLUE_BALANCE, sp->blue);
+  set_intvalue(vmng, IMGSENSOR_ID_GAMMA, sp->gamma);
+  set_pvalue(vmng, IMGSENSOR_ID_GAMMA_CURVE,
+             sp->gamma_curve_sz, sp->gamma_curve);
+  set_intvalue(vmng, IMGSENSOR_ID_EXPOSURE, sp->ev);
+  set_intvalue(vmng, IMGSENSOR_ID_HFLIP_VIDEO, sp->hflip_video);
+  set_intvalue(vmng, IMGSENSOR_ID_VFLIP_VIDEO, sp->vflip_video);
+  set_intvalue(vmng, IMGSENSOR_ID_HFLIP_STILL, sp->hflip_still);
+  set_intvalue(vmng, IMGSENSOR_ID_VFLIP_STILL, sp->vflip_still);
+  set_intvalue(vmng, IMGSENSOR_ID_SHARPNESS, sp->sharpness);
+  set_intvalue(vmng, IMGSENSOR_ID_COLORFX, sp->colorfx);
+  set_intvalue(vmng, IMGSENSOR_ID_AUTOBRIGHTNESS, sp->auto_brightness);
+  set_intvalue(vmng, IMGSENSOR_ID_ROTATE, sp->rotate);
+  set_intvalue(vmng, IMGSENSOR_ID_EXPOSURE_AUTO, sp->ae);
   if (sp->ae == V4L2_EXPOSURE_MANUAL ||
       sp->ae == V4L2_EXPOSURE_SHUTTER_PRIORITY)
     {
-      set_intvalue(IMGSENSOR_ID_EXPOSURE_ABSOLUTE, sp->exposure_time);
+      set_intvalue(vmng, IMGSENSOR_ID_EXPOSURE_ABSOLUTE, sp->exposure_time);
     }
 
-  set_intvalue(IMGSENSOR_ID_FOCUS_ABSOLUTE, sp->focus);
-  set_intvalue(IMGSENSOR_ID_FOCUS_AUTO, sp->af);
-  set_intvalue(IMGSENSOR_ID_ZOOM_ABSOLUTE, sp->zoom);
+  set_intvalue(vmng, IMGSENSOR_ID_FOCUS_ABSOLUTE, sp->focus);
+  set_intvalue(vmng, IMGSENSOR_ID_FOCUS_AUTO, sp->af);
+  set_intvalue(vmng, IMGSENSOR_ID_ZOOM_ABSOLUTE, sp->zoom);
   if (sp->ae == V4L2_EXPOSURE_MANUAL ||
       sp->ae == V4L2_EXPOSURE_APERTURE_PRIORITY)
     {
-      set_intvalue(IMGSENSOR_ID_IRIS_ABSOLUTE, sp->iris);
+      set_intvalue(vmng, IMGSENSOR_ID_IRIS_ABSOLUTE, sp->iris);
     }
 
-  set_intvalue(IMGSENSOR_ID_AUTO_N_PRESET_WB, sp->wb);
-  set_intvalue(IMGSENSOR_ID_WIDE_DYNAMIC_RANGE, sp->wdr);
-  set_intvalue(IMGSENSOR_ID_IMG_STABILIZATION, sp->stabilization);
-  set_intvalue(IMGSENSOR_ID_ISO_SENSITIVITY_AUTO, sp->iso_auto);
+  set_intvalue(vmng, IMGSENSOR_ID_AUTO_N_PRESET_WB, sp->wb);
+  set_intvalue(vmng, IMGSENSOR_ID_WIDE_DYNAMIC_RANGE, sp->wdr);
+  set_intvalue(vmng, IMGSENSOR_ID_IMG_STABILIZATION, sp->stabilization);
+  set_intvalue(vmng, IMGSENSOR_ID_ISO_SENSITIVITY_AUTO, sp->iso_auto);
   if (sp->iso_auto == V4L2_ISO_SENSITIVITY_MANUAL)
     {
-      set_intvalue(IMGSENSOR_ID_ISO_SENSITIVITY, sp->iso);
+      set_intvalue(vmng, IMGSENSOR_ID_ISO_SENSITIVITY, sp->iso);
     }
 
-  set_intvalue(IMGSENSOR_ID_EXPOSURE_METERING, sp->meter);
-  set_intvalue(IMGSENSOR_ID_SPOT_POSITION, sp->spot_pos);
-  set_intvalue(IMGSENSOR_ID_3A_LOCK, sp->threea_lock);
-  set_intvalue(IMGSENSOR_ID_FLASH_LED_MODE, sp->led);
-  set_intvalue(IMGSENSOR_ID_JPEG_QUALITY, sp->jpeg_quality);
+  set_intvalue(vmng, IMGSENSOR_ID_EXPOSURE_METERING, sp->meter);
+  set_intvalue(vmng, IMGSENSOR_ID_3A_LOCK, sp->threea_lock);
+  set_intvalue(vmng, IMGSENSOR_ID_FLASH_LED_MODE, sp->led);
+  set_intvalue(vmng, IMGSENSOR_ID_JPEG_QUALITY, sp->jpeg_quality);
 
-  g_video_scene_mode = mode;
+  vmng->video_scene_mode = mode;
   return OK;
 }
 
@@ -2400,7 +2428,7 @@ static int video_s_ext_ctrls(FAR struct video_mng_s *priv,
   int ret = OK;
   int cnt;
 
-  ASSERT(g_video_sensor);
+  ASSERT(priv->imgsensor);
 
   if (priv == NULL || ctrls == NULL)
     {
@@ -2414,19 +2442,19 @@ static int video_s_ext_ctrls(FAR struct video_mng_s *priv,
       if (ctrls->ctrl_class == V4L2_CTRL_CLASS_CAMERA &&
           control->id == V4L2_CID_SCENE_MODE)
         {
-          ret = reflect_scene_parameter(control->value);
+          ret = reflect_scene_parameter(priv, control->value);
         }
       else
         {
-          ret = IMGSENSOR_SET_VALUE(g_video_sensor,
+          ret = IMGSENSOR_SET_VALUE(priv->imgsensor,
                   VIDEO_ID(ctrls->ctrl_class, control->id),
                   control->size,
                   (imgsensor_value_t)control->value64);
           if (ret == 0)
             {
-              if (g_video_scene_mode == V4L2_SCENE_MODE_NONE)
+              if (priv->video_scene_mode == V4L2_SCENE_MODE_NONE)
                 {
-                  save_scene_param(V4L2_SCENE_MODE_NONE,
+                  save_scene_param(priv, V4L2_SCENE_MODE_NONE,
                     VIDEO_ID(ctrls->ctrl_class, control->id),
                     control);
                 }
@@ -2445,7 +2473,7 @@ static int video_s_ext_ctrls(FAR struct video_mng_s *priv,
   return ret;
 }
 
-static int video_query_ext_ctrl_scene(
+static int video_query_ext_ctrl_scene(FAR video_mng_t *vmng,
              FAR struct v4s_query_ext_ctrl_scene *attr)
 {
   if (attr == NULL)
@@ -2453,20 +2481,22 @@ static int video_query_ext_ctrl_scene(
       return -EINVAL;
     }
 
-  return video_query_ext_ctrl(&attr->control);
+  return video_query_ext_ctrl(vmng, &attr->control);
 }
 
-static int video_querymenu_scene(FAR struct v4s_querymenu_scene *menu)
+static int video_querymenu_scene(FAR video_mng_t *vmng,
+                                 FAR struct v4s_querymenu_scene *menu)
 {
   if (menu == NULL)
     {
       return -EINVAL;
     }
 
-  return video_querymenu(&menu->menu);
+  return video_querymenu(vmng, &menu->menu);
 }
 
-static int read_scene_param(enum v4l2_scene_mode mode,
+static int read_scene_param(FAR struct video_mng_s *vmng,
+                            enum v4l2_scene_mode mode,
                             uint32_t id,
                             struct v4l2_ext_control *control)
 {
@@ -2474,14 +2504,14 @@ static int read_scene_param(enum v4l2_scene_mode mode,
   video_scene_params_t *sp;
   int ret = OK;
 
-  ASSERT(g_video_sensor);
+  ASSERT(vmng->imgsensor);
 
   if (control == NULL)
     {
       return -EINVAL;
     }
 
-  sp = search_scene_param(mode);
+  sp = search_scene_param(vmng, mode);
   if (sp == NULL)
     {
       /* Unsupported scene mode */
@@ -2489,7 +2519,7 @@ static int read_scene_param(enum v4l2_scene_mode mode,
       return -EINVAL;
     }
 
-  ret = IMGSENSOR_GET_SUPPORTED_VALUE(g_video_sensor, id, &value);
+  ret = IMGSENSOR_GET_SUPPORTED_VALUE(vmng->imgsensor, id, &value);
   if (ret < 0)
     {
       /* Unsupported camera parameter */
@@ -2649,7 +2679,8 @@ static int read_scene_param(enum v4l2_scene_mode mode,
   return ret;
 }
 
-static int video_g_ext_ctrls_scene(FAR struct v4s_ext_controls_scene *ctrls)
+static int video_g_ext_ctrls_scene(FAR video_mng_t *vmng,
+                                   FAR struct v4s_ext_controls_scene *ctrls)
 {
   FAR struct v4l2_ext_control *control;
   int ret = OK;
@@ -2664,7 +2695,7 @@ static int video_g_ext_ctrls_scene(FAR struct v4s_ext_controls_scene *ctrls)
        cnt < ctrls->control.count;
        cnt++, control++)
     {
-      ret = read_scene_param(ctrls->mode,
+      ret = read_scene_param(vmng, ctrls->mode,
                VIDEO_ID(ctrls->control.ctrl_class, control->id),
                control);
       if (ret != OK)
@@ -2691,7 +2722,8 @@ static int check_range(int64_t value,
   return OK;
 }
 
-static int save_scene_param(enum v4l2_scene_mode mode,
+static int save_scene_param(FAR video_mng_t *vmng,
+                            enum v4l2_scene_mode mode,
                             uint32_t id,
                             struct v4l2_ext_control *control)
 {
@@ -2703,9 +2735,9 @@ static int save_scene_param(enum v4l2_scene_mode mode,
   int ret;
   int i;
 
-  ASSERT(g_video_sensor);
+  ASSERT(vmng->imgsensor);
 
-  sp = search_scene_param(mode);
+  sp = search_scene_param(vmng, mode);
   if (sp == NULL)
     {
       /* Unsupported scene mode */
@@ -2713,7 +2745,7 @@ static int save_scene_param(enum v4l2_scene_mode mode,
       return -EINVAL;
     }
 
-  ret = IMGSENSOR_GET_SUPPORTED_VALUE(g_video_sensor, id, &value);
+  ret = IMGSENSOR_GET_SUPPORTED_VALUE(vmng->imgsensor, id, &value);
   if (ret < 0)
     {
       /* Unsupported camera parameter */
@@ -2963,7 +2995,8 @@ static int save_scene_param(enum v4l2_scene_mode mode,
   return OK;
 }
 
-static int video_s_ext_ctrls_scene(FAR struct v4s_ext_controls_scene *ctrls)
+static int video_s_ext_ctrls_scene(FAR struct video_mng_s *vmng,
+                                   FAR struct v4s_ext_controls_scene *ctrls)
 {
   FAR struct v4l2_ext_control *control;
   int ret = OK;
@@ -2978,7 +3011,7 @@ static int video_s_ext_ctrls_scene(FAR struct v4s_ext_controls_scene *ctrls)
        cnt < ctrls->control.count;
        cnt++, control++)
     {
-      ret = save_scene_param(ctrls->mode,
+      ret = save_scene_param(vmng, ctrls->mode,
                VIDEO_ID(ctrls->control.ctrl_class, control->id),
                control);
       if (ret != OK)
@@ -3008,7 +3041,7 @@ static int video_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   switch (cmd)
     {
       case VIDIOC_QUERYCAP:
-        ret = video_querycap((FAR struct v4l2_capability *)arg);
+        ret = video_querycap(priv, (FAR struct v4l2_capability *)arg);
         break;
 
       case VIDIOC_G_INPUT:
@@ -3016,7 +3049,7 @@ static int video_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
 
       case VIDIOC_ENUMINPUT:
-        ret = video_enum_input((FAR struct v4l2_input *)arg);
+        ret = video_enum_input(priv, (FAR struct v4l2_input *)arg);
         break;
 
       case VIDIOC_REQBUFS:
@@ -3090,15 +3123,16 @@ static int video_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
 
       case VIDIOC_QUERYCTRL:
-        ret = video_queryctrl((FAR struct v4l2_queryctrl *)arg);
+        ret = video_queryctrl(priv, (FAR struct v4l2_queryctrl *)arg);
         break;
 
       case VIDIOC_QUERY_EXT_CTRL:
-        ret = video_query_ext_ctrl((FAR struct v4l2_query_ext_ctrl *)arg);
+        ret = video_query_ext_ctrl(priv,
+                                   (FAR struct v4l2_query_ext_ctrl *)arg);
         break;
 
       case VIDIOC_QUERYMENU:
-        ret = video_querymenu((FAR struct v4l2_querymenu *)arg);
+        ret = video_querymenu(priv, (FAR struct v4l2_querymenu *)arg);
         break;
 
       case VIDIOC_G_CTRL:
@@ -3126,21 +3160,22 @@ static int video_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
 
       case V4SIOC_QUERY_EXT_CTRL_SCENE:
-        ret = video_query_ext_ctrl_scene(
+        ret = video_query_ext_ctrl_scene(priv,
                 (FAR struct v4s_query_ext_ctrl_scene *)arg);
         break;
 
       case V4SIOC_QUERYMENU_SCENE:
-        ret = video_querymenu_scene((FAR struct v4s_querymenu_scene *)arg);
+        ret = video_querymenu_scene(priv,
+                (FAR struct v4s_querymenu_scene *)arg);
         break;
 
       case V4SIOC_G_EXT_CTRLS_SCENE:
-        ret = video_g_ext_ctrls_scene(
+        ret = video_g_ext_ctrls_scene(priv,
                 (FAR struct v4s_ext_controls_scene *)arg);
         break;
 
       case V4SIOC_S_EXT_CTRLS_SCENE:
-        ret = video_s_ext_ctrls_scene(
+        ret = video_s_ext_ctrls_scene(priv,
                 (FAR struct v4s_ext_controls_scene *)arg);
         break;
 
@@ -3361,7 +3396,7 @@ static int video_complete_capture(uint8_t err_code, uint32_t datasize,
 
   if (type_inf->remaining_capnum == 0)
     {
-      stop_capture(buf_type);
+      stop_capture(vmng, buf_type);
       type_inf->state = VIDEO_STATE_STREAMOFF;
 
       /* If stop still stream, notify it to video stream */
@@ -3379,12 +3414,12 @@ static int video_complete_capture(uint8_t err_code, uint32_t datasize,
       container = video_framebuff_get_vacant_container(&type_inf->bufinf);
       if (container == NULL)
         {
-          stop_capture(buf_type);
+          stop_capture(vmng, buf_type);
           type_inf->state = VIDEO_STATE_STREAMON;
         }
       else
         {
-          IMGDATA_SET_BUF(g_video_data,
+          IMGDATA_SET_BUF(vmng->imgdata,
             (FAR uint8_t *)container->buf.m.userptr,
             container->buf.length);
           container->buf.sequence = type_inf->seqnum++;
