@@ -168,7 +168,7 @@ static int bch_close(FAR struct file *filep)
 
   /* Flush any dirty pages remaining in the cache */
 
-  bchlib_flushsector(bch);
+  bchlib_flushsector(bch, false);
 
   /* Decrement the reference count (I don't use bchlib_decref() because I
    * want the entire close operation to be atomic wrt other driver
@@ -424,7 +424,7 @@ static int bch_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           /* Flush any dirty pages remaining in the cache */
 
-          ret = bchlib_flushsector(bch);
+          ret = bchlib_flushsector(bch, false);
         }
         break;
 
