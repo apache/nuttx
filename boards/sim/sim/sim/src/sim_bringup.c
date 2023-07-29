@@ -499,7 +499,9 @@ int sim_bringup(void)
   rc_dummy_initialize(0);
 #endif
 
-#if defined(CONFIG_USBADB) && !defined(CONFIG_USBADB_COMPOSITE)
+#if defined(CONFIG_USBADB) && \
+    !defined(CONFIG_USBADB_COMPOSITE) && \
+    !defined(CONFIG_BOARDCTL_USBDEVCTRL)
   usbdev_adb_initialize();
 #endif
 

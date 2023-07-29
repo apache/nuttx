@@ -1929,18 +1929,29 @@ static void adb_char_on_connect(FAR struct usbdev_adb_s *priv, int connect)
  *   Initialize the Android Debug Bridge USB device driver.
  *
  * Returned Value:
- *   0 on success, -errno on failure
+ *   A non-NULL "handle" is returned on success.
  *
  ****************************************************************************/
 
-int usbdev_adb_initialize(void)
+FAR void *usbdev_adb_initialize(void)
 {
   struct composite_devdesc_s devdesc;
-  FAR void *cdev;
 
   usbdev_adb_get_composite_devdesc(&devdesc);
-  cdev = composite_initialize(1, &devdesc);
-  return cdev != NULL ? OK : -EINVAL;
+  return composite_initialize(1, &devdesc);
+}
+
+/****************************************************************************
+ * Name: usbdev_adb_uninitialize
+ *
+ * Description:
+ *   Uninitialize the Android Debug Bridge USB device driver.
+ *
+ ****************************************************************************/
+
+void usbdev_adb_uninitialize(FAR void *handle)
+{
+  composite_uninitialize(handle);
 }
 
 /****************************************************************************
