@@ -185,13 +185,6 @@ config ARCH_CHIP
 	default "qemu"      if ARCH_CHIP_QEMU
 	default "fvp-v8r"   if ARCH_CHIP_FVP_ARMV8R
 
-config ARCH_HAVE_TRUSTZONE
-	bool
-	default n
-	---help---
-		Automatically selected to indicate that the ARM CPU supports
-		TrustZone.
-
 config ARM_HAVE_NEON
 	bool
 	default n
