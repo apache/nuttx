@@ -1043,7 +1043,7 @@ config ARCH_HAVE_TRUSTZONE
 
 choice
 	prompt "TrustZone Configuration"
-	default ARCH_TRUSTZONE_SECURE
+	default ARCH_TRUSTZONE_NONSECURE
 	depends on ARCH_HAVE_TRUSTZONE
 
 config ARCH_TRUSTZONE_SECURE
