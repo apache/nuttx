@@ -38,24 +38,24 @@
 
 enum hall3_120deg_position_e
 {
-  HALL3_120DEG_POS_1 = 0b001,
-  HALL3_120DEG_POS_2 = 0b011,
-  HALL3_120DEG_POS_3 = 0b010,
-  HALL3_120DEG_POS_4 = 0b110,
-  HALL3_120DEG_POS_5 = 0b100,
-  HALL3_120DEG_POS_6 = 0b101
+  HALL3_120DEG_POS_1 = 1, /* 0b001 */
+  HALL3_120DEG_POS_2 = 3, /* 0b011 */
+  HALL3_120DEG_POS_3 = 2, /* 0b010 */
+  HALL3_120DEG_POS_4 = 6, /* 0b110 */
+  HALL3_120DEG_POS_5 = 4, /* 0b100 */
+  HALL3_120DEG_POS_6 = 5  /* 0b101 */
 };
 
 /* 60-degree Hall effect sensors positions */
 
 enum hall3_60deg_position_e
 {
-  HALL3_60DEG_POS_1 = 0b000,
-  HALL3_60DEG_POS_2 = 0b001,
-  HALL3_60DEG_POS_3 = 0b101,
-  HALL3_60DEG_POS_4 = 0b111,
-  HALL3_60DEG_POS_5 = 0b110,
-  HALL3_60DEG_POS_6 = 0b010
+  HALL3_60DEG_POS_1 = 0, /* 0b000 */
+  HALL3_60DEG_POS_2 = 1, /* 0b001 */
+  HALL3_60DEG_POS_3 = 5, /* 0b101 */
+  HALL3_60DEG_POS_4 = 7, /* 0b111 */
+  HALL3_60DEG_POS_5 = 6, /* 0b110 */
+  HALL3_60DEG_POS_6 = 2  /* 0b010 */
 };
 
 /* This structure provides the "lower-half" driver operations available to

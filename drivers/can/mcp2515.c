@@ -1209,7 +1209,7 @@ static void mcp2515_reset_lowlevel(FAR struct mcp2515_can_s *priv)
   /* Make sure that all buffers are released. */
 
   nxsem_reset(&priv->txfsem, MCP2515_NUM_TX_BUFFERS);
-  priv->txbuffers = 0b111;
+  priv->txbuffers = (1 << MCP2515_NUM_TX_BUFFERS) - 1;
 
   /* Define the current state and unlock */
 
@@ -2540,7 +2540,7 @@ FAR struct mcp2515_can_s *
 
   /* Initialize bitmask */
 
-  priv->txbuffers = (1 << MCP2515_NUM_TX_BUFFERS)-1;
+  priv->txbuffers = (1 << MCP2515_NUM_TX_BUFFERS) - 1;
 
   /* And put the hardware in the initial state */
 
