@@ -246,7 +246,7 @@ static int fxos8700cq_open(FAR struct file *filep)
   if (ret < 0)
     {
       snerr("ERROR: %02x\n", regval);
-      return (ret);
+      return ret;
     }
 
   /* m_hms[1:0]: Hybrid mode, both accelerometer and magnetometer
@@ -266,7 +266,7 @@ static int fxos8700cq_open(FAR struct file *filep)
   ret = fxos8700cq_putreg8(priv, FXOS8700CQ_M_CTRL_REG1, regval);
   if (ret < 0)
     {
-      return (ret);
+      return ret;
     }
 
   /* hyb_autoinc_mode */
@@ -275,7 +275,7 @@ static int fxos8700cq_open(FAR struct file *filep)
   ret = fxos8700cq_putreg8(priv, FXOS8700CQ_M_CTRL_REG2, regval);
   if (ret < 0)
     {
-      return (ret);
+      return ret;
     }
 
   /* fs[1:0]: Accelerometer full-scale range : 4G */
@@ -284,7 +284,7 @@ static int fxos8700cq_open(FAR struct file *filep)
   ret = fxos8700cq_putreg8(priv, FXOS8700CQ_XYZ_DATA_CFG, regval);
   if (ret < 0)
     {
-      return (ret);
+      return ret;
     }
 
   /* active ,  lnoise ,  dr[2:0] */
@@ -296,7 +296,7 @@ static int fxos8700cq_open(FAR struct file *filep)
   ret = fxos8700cq_putreg8(priv, FXOS8700CQ_CTRL_REG1, regval);
   if (ret < 0)
     {
-      return (ret);
+      return ret;
     }
 
   return OK;
@@ -319,7 +319,7 @@ static int fxos8700cq_close(FAR struct file *filep)
   int ret = fxos8700cq_putreg8(priv, FXOS8700CQ_CTRL_REG1, regval);
   if (ret < 0)
     {
-      return (ret);
+      return ret;
     }
 
   return OK;
