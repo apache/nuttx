@@ -885,10 +885,19 @@ static ssize_t uart_read(FAR struct file *filep,
 
                   dev->escape = 0;
                 }
+              else  if (dev->escape > 0)
+                {
+                  /* Skipping character count down */
+
+                  if (--dev->escape > 0)
+                    {
+                      continue;
+                    }
+                }
 
               /* Echo if the character is not a control byte */
 
-              if ((!iscntrl(ch & 0xff) || (ch == '\n')) && dev->escape == 0)
+              if (!iscntrl(ch & 0xff) || ch == '\n')
                 {
                   if (ch == '\n')
                     {
@@ -903,13 +912,6 @@ static ssize_t uart_read(FAR struct file *filep,
                    */
 
                   echoed = true;
-                }
-
-              /* Skipping character count down */
-
-              if (dev->escape > 0)
-                {
-                  dev->escape--;
                 }
             }
         }
