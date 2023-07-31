@@ -58,14 +58,14 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev,
   FAR struct iob_s *iob;
   int ret;
 #ifdef CONFIG_NET_IPv6
-  FAR struct sockaddr_in6 src_addr6 =
+  struct sockaddr_in6 src_addr6 =
   {
     0
   };
 #endif
 
 #ifdef CONFIG_NET_IPv4
-  FAR struct sockaddr_in src_addr4 =
+  struct sockaddr_in src_addr4 =
   {
     0
   };
