@@ -84,7 +84,7 @@ enum accel_config_bit
   ACCEL_FS_SEL_2G  = 0, /* 0b00000 */
   ACCEL_FS_SEL_4G  = 1, /* 0b01000 */
   ACCEL_FS_SEL_8G  = 2, /* 0b10000 */
-  ACCEL_FS_SEL_16G = 3, /* 0b11000 */
+  ACCEL_FS_SEL_16G = 3  /* 0b11000 */
 };
 
 /* These structures are defined elsewhere, and we don't need their
