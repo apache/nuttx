@@ -238,10 +238,11 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
                  intstack_base,
                  intstack_size,
 #ifdef CONFIG_STACK_COLORATION
-                 up_check_intstack());
+                 up_check_intstack()
 #else
-                 0);
+                 0
 #endif
+                 );
 
       tcbstack_sp = up_getusrsp((FAR void *)CURRENT_REGS);
       if (tcbstack_sp < tcbstack_base || tcbstack_sp >= tcbstack_top)
@@ -271,10 +272,11 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
                  tcbstack_base,
                  tcbstack_size,
 #ifdef CONFIG_STACK_COLORATION
-                 up_check_tcbstack(rtcb));
+                 up_check_tcbstack(rtcb)
 #else
-                 0);
+                 0
 #endif
+                 );
     }
 }
 
