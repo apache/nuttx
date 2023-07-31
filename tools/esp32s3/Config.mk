@@ -80,7 +80,7 @@ ifdef ESPTOOL_BINDIR
 endif
 
 ifeq ($(CONFIG_ESP32S3_APP_FORMAT_LEGACY),y)
-	APP_OFFSET     := 0x10000
+	APP_OFFSET     := $(CONFIG_ESP32S3_KERNEL_OFFSET)
 	APP_IMAGE      := nuttx.bin
 	FLASH_APP      := $(APP_OFFSET) $(APP_IMAGE)
 else ifeq ($(CONFIG_ESP32S3_APP_FORMAT_MCUBOOT),y)
@@ -103,7 +103,7 @@ endif
 ESPTOOL_BINS += $(FLASH_APP)
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
-	ESPTOOL_BINS += $(CONFIG_ESP32S3_USER_IMAGE_OFFSET) nuttx_user.bin
+	ESPTOOL_BINS += $(shell printf "%#x\n" $$(( $(CONFIG_ESP32S3_KERNEL_OFFSET) + $(CONFIG_ESP32S3_KERNEL_IMAGE_SIZE) ))) nuttx_user.bin
 endif
 
 # MERGEBIN -- Merge raw binary files into a single file
@@ -156,6 +156,16 @@ define MKIMAGE
 	imgtool sign $(IMGTOOL_SIGN_ARGS) nuttx.hex nuttx.bin
 	$(Q) echo nuttx.bin >> nuttx.manifest
 	$(Q) echo "Generated: nuttx.bin (MCUboot compatible)"
+endef
+endif
+
+# PREBUILD -- Perform pre build operations
+
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+define PREBUILD
+	$(Q) echo "CONFIG_NUTTX_USERSPACE=$(shell printf "%#x\n" $$(( 0x3c000030 + $(CONFIG_ESP32S3_KERNEL_IMAGE_SIZE) )))" > $(1)/.config.tmp
+	$(Q) kconfig-merge -m $(1)/.config $(1)/.config.tmp
+	$(Q)rm -f $(1)/.config.tmp
 endef
 endif
 
