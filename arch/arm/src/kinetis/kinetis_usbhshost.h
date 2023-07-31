@@ -74,7 +74,7 @@ extern "C"
  *
  ****************************************************************************/
 
-extern void kinetis_usbhost_vbusdrive(int rhport, bool enable);
+void kinetis_usbhost_vbusdrive(int rhport, bool enable);
 
 /****************************************************************************
  * Name: kinetis_setup_overcurrent
@@ -93,7 +93,7 @@ extern void kinetis_usbhost_vbusdrive(int rhport, bool enable);
  *
  ****************************************************************************/
 
-extern int kinetis_setup_overcurrent(xcpt_t handler, void *arg);
+int kinetis_setup_overcurrent(xcpt_t handler, void *arg);
 
 /****************************************************************************
  * Name: kinetis_ehci_initialize
