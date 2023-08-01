@@ -45,6 +45,7 @@
 #define IMGDATA_PIX_FMT_SUBIMG_RGB565    (5)
 #define IMGDATA_PIX_FMT_YUYV             (6)
 #define IMGDATA_PIX_FMT_YUV420P          (7)
+#define IMGDATA_PIX_FMT_NV12             (8)
 
 /* Method access helper macros */
 
