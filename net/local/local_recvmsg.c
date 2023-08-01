@@ -224,6 +224,25 @@ psock_stream_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       return -ENOTCONN;
     }
 
+  /* If it is non-blocking mode, the data in fifo is 0 and
+   * returns directly
+   */
+
+  if (flags & MSG_DONTWAIT)
+    {
+      int data_len = 0;
+      ret = file_ioctl(&conn->lc_infile, FIONREAD, &data_len);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      if (data_len == 0)
+        {
+          return -EAGAIN;
+        }
+    }
+
   /* Read the packet */
 
   ret = psock_fifo_read(psock, buf, &readlen, true);
