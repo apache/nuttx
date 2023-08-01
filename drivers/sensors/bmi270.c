@@ -79,8 +79,8 @@
 #define BMI270_SC_OUT_1         (0x1f) /* Step counting value */
 #define BMI270_WR_GEST_ACT      (0x20) /* Wrist gesture and activity detection */
 #define BMI270_INTERNAL_STAT    (0x21) /* Internal status */
-#define BMI160_TEMPERATURE_0    (0x22) /* Temperature */
-#define BMI160_TEMPERATURE_1    (0x23)
+#define BMI270_TEMPERATURE_0    (0x22) /* Temperature */
+#define BMI270_TEMPERATURE_1    (0x23)
 #define BMI270_FIFO_LENGTH_0    (0x24) /* FIFO length */
 #define BMI270_FIFO_LENGTH_1    (0x25)
 #define BMI270_FIFO_DATA        (0x26)
