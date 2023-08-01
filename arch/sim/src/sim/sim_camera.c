@@ -141,6 +141,10 @@ static uint32_t imgdata_fmt_to_v4l2(uint32_t pixelformat)
   uint32_t fourcc;
   switch (pixelformat)
     {
+      case IMGDATA_PIX_FMT_NV12:
+        fourcc = V4L2_PIX_FMT_NV12;
+        break;
+
       case IMGDATA_PIX_FMT_YUV420P:
         fourcc = V4L2_PIX_FMT_YUV420;
         break;
