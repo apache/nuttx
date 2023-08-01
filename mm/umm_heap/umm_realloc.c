@@ -91,7 +91,7 @@ FAR void *realloc(FAR void *oldmem, size_t size)
   FAR void *ret;
 
   ret = mm_realloc(USR_HEAP, oldmem, size);
-  if (!ret)
+  if (ret == NULL)
     {
       set_errno(ENOMEM);
     }
