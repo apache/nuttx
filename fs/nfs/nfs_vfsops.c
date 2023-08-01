@@ -1252,19 +1252,19 @@ static off_t nfs_seek(FAR struct file *filep, off_t offset, int whence)
   switch (whence)
     {
       case SEEK_SET:
-          break;
+        break;
 
       case SEEK_CUR:
-          offset += filep->f_pos;
-          break;
+        offset += filep->f_pos;
+        break;
 
       case SEEK_END:
-          offset += np->n_size;
-          break;
+        offset += np->n_size;
+        break;
 
       default:
-          nxmutex_unlock(&nmp->nm_lock);
-          return -EINVAL;
+        nxmutex_unlock(&nmp->nm_lock);
+        return -EINVAL;
     }
 
   if (offset >= 0)
