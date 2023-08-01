@@ -114,6 +114,24 @@ int esp32s3_setup_irq(int cpu, int periphid, int priority, int type);
 
 void esp32s3_teardown_irq(int cpu, int periphid, int cpuint);
 
+/****************************************************************************
+ * Name:  esp32s3_getirq
+ *
+ * Description:
+ *   This function returns the IRQ associated with a CPU interrupt
+ *
+ * Input Parameters:
+ *   cpu      - The CPU to receive the interrupt 0=PRO CPU 1=APP CPU
+ *   cpuint   - The CPU interrupt associated to the IRQ
+ *
+ * Returned Value:
+ *   The IRQ associated with such CPU interrupt or CPUINT_UNASSIGNED if
+ *   IRQ is not yet assigned to a CPU interrupt.
+ *
+ ****************************************************************************/
+
+int esp32s3_getirq(int cpu, int cpuint);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
