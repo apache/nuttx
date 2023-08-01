@@ -346,27 +346,14 @@ static int esp32s3_alloc_cpuint(int priority, int type)
 
   DEBUGASSERT(priority >= ESP32S3_MIN_PRIORITY &&
               priority <= ESP32S3_MAX_PRIORITY);
-  DEBUGASSERT(type == ESP32S3_CPUINT_LEVEL ||
-              type == ESP32S3_CPUINT_EDGE);
+  DEBUGASSERT(type == ESP32S3_CPUINT_LEVEL);
 
-  if (type == ESP32S3_CPUINT_LEVEL)
-    {
-      /* Check if there are any level CPU interrupts available at the
-       * requested interrupt priority.
-       */
+  /* Check if there are any level CPU interrupts available at the
+   * requested interrupt priority.
+   */
 
-      mask = g_priority[ESP32S3_PRIO_INDEX(priority)] &
-              ESP32S3_CPUINT_LEVELSET;
-    }
-  else
-    {
-      /* Check if there are any edge CPU interrupts available at the
-       * requested interrupt priority.
-       */
-
-      mask = g_priority[ESP32S3_PRIO_INDEX(priority)] &
-              ESP32S3_CPUINT_EDGESET;
-    }
+  mask = g_priority[ESP32S3_PRIO_INDEX(priority)] &
+          ESP32S3_CPUINT_LEVELSET;
 
   return esp32s3_getcpuint(mask);
 }
@@ -832,6 +819,42 @@ void esp32s3_teardown_irq(int cpu, int periphid, int cpuint)
   putreg32(NO_CPUINT, regaddr);
 
   leave_critical_section(irqstate);
+}
+
+/****************************************************************************
+ * Name:  esp32s3_getirq
+ *
+ * Description:
+ *   This function returns the IRQ associated with a CPU interrupt
+ *
+ * Input Parameters:
+ *   cpu      - The CPU to receive the interrupt 0=PRO CPU 1=APP CPU
+ *   cpuint   - The CPU interrupt associated to the IRQ
+ *
+ * Returned Value:
+ *   The IRQ associated with such CPU interrupt or CPUINT_UNASSIGNED if
+ *   IRQ is not yet assigned to a CPU interrupt.
+ *
+ ****************************************************************************/
+
+int esp32s3_getirq(int cpu, int cpuint)
+{
+  uint8_t *intmap;
+
+#ifdef CONFIG_SMP
+  /* Select PRO or APP CPU interrupt mapping table */
+
+  if (cpu != 0)
+    {
+      intmap = g_cpu1_intmap;
+    }
+  else
+#endif
+    {
+      intmap = g_cpu0_intmap;
+    }
+
+  return CPUINT_GETIRQ(intmap[cpuint]);
 }
 
 /****************************************************************************
