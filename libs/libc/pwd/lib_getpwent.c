@@ -154,7 +154,7 @@ int getpwent_r(FAR struct passwd *pwd,
     }
 
   ret = getpwbuf_r(ROOT_UID, ROOT_GID, ROOT_NAME, ROOT_NAME, ROOT_DIR,
-                    ROOT_SHELL, pwd, buf, buflen, result);
+                   ROOT_SHELL, pwd, buf, buflen, result);
   if (ret == 0)
     {
       g_passwd_index++;

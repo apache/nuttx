@@ -41,7 +41,7 @@
  *
  ****************************************************************************/
 
-int sigaltstack(const stack_t *ss, stack_t *oss)
+int sigaltstack(FAR const stack_t *ss, FAR stack_t *oss)
 {
   if (ss)
     {

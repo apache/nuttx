@@ -68,7 +68,7 @@ FAR void *zalloc(size_t size)
   /* Use mm_zalloc() because it implements the clear */
 
   ret = mm_zalloc(USR_HEAP, size);
-  if (!ret)
+  if (ret == NULL)
     {
       set_errno(ENOMEM);
     }

@@ -62,7 +62,7 @@ FAR void *malloc(size_t size)
   /* Use mm_malloc() because it implements the clear */
 
   ret = mm_malloc(USR_HEAP, size);
-  if (!ret)
+  if (ret == NULL)
     {
       set_errno(ENOMEM);
     }
