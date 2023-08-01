@@ -835,7 +835,7 @@ static int goldfish_pipe_open(FAR struct file *filep)
   count = &dev->buffers->open_command_params.rw_params_max_count;
   ptr = &dev->buffers->open_command_params.command_buffer_ptr;
   *count = MAX_BUFFERS_PER_COMMAND;
-  *ptr = (uint64_t)pipe->command_buffer;
+  *ptr = (uintptr_t)pipe->command_buffer;
 
   status = goldfish_pipe_cmd_locked(pipe, PIPE_CMD_OPEN);
   spin_unlock_irqrestore(&dev->lock, flags);
@@ -897,8 +897,8 @@ static const struct file_operations g_goldfishpipe_fops =
 
 static void write_pa_addr(void *addr, void *portl, void *porth)
 {
-  putreg32(upper_32_bits((uint64_t)addr), porth);
-  putreg32(lower_32_bits((uint64_t)addr), portl);
+  putreg32(upper_32_bits((uintptr_t)addr), porth);
+  putreg32(lower_32_bits((uintptr_t)addr), portl);
 }
 
 /****************************************************************************
