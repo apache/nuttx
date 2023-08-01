@@ -297,6 +297,25 @@ config PCF8574_INT_POLLDELAY
 
 endif # IOEXPANDER_PCF8574
 
+config IOEXPANDER_PCF8575
+	bool "PCF8575 I2C IO expander"
+	default n
+	depends on I2C
+	---help---
+		Enable support for 16 bit PCF8575 IO Expander. Software driver
+		interrupt is currently not supported therefore decated HW interrupt
+		pin should be used.
+
+if IOEXPANDER_PCF8575
+
+config PCF8575_MULTIPLE
+	bool "Multiple PCF8575 Devices"
+	default n
+	---help---
+		Can be defined to support multiple PCF8575 devices on board.
+
+endif # IOEXPANDER_PCF8575
+
 config IOEXPANDER_SX1509
 	bool "SX1509 I2C IO expander"
 	default n
