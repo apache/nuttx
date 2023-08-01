@@ -296,7 +296,8 @@ static ssize_t ftl_mtd_bread(FAR struct ftl_struct_s *dev, off_t startblock,
           break;
         }
 
-      count = ftl_get_cblock(dev, starteraseblock, (nblocks + mask) & ~mask);
+      count = ftl_get_cblock(dev, starteraseblock,
+                             (nblocks + mask) / dev->blkper);
       count = MIN(count * dev->blkper, nblocks);
       startphysicalblock = dev->lptable[starteraseblock] *
                            dev->blkper + (startblock & mask);
