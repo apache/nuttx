@@ -46,6 +46,7 @@
 
 #include "chip.h"
 #include "exc_return.h"
+#include "psr.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -177,6 +178,13 @@ exception_common:
 	ite		eq
 	vstmdbeq	r1!, {s16-s31}			/* Save the non-volatile FP context */
 	subne		r1, #(4*SW_FPU_REGS)
+
+	/* the FPSCR[18:16] LTPSIZE field must be set to 0b100 for
+	 * "Tail predication not applied" as it's reset value.
+	 */
+
+	mov		r0, #ARMV8M_FPSCR_LTPSIZE_NONE
+	vmsr		fpscr, r0
 #endif
 
 	stmdb		r1!, {r2-r12,r14}		/* Save the remaining registers plus the SP/PRIMASK values */
