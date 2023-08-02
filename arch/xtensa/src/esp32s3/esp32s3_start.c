@@ -37,6 +37,7 @@
 #include "esp32s3_lowputc.h"
 #include "esp32s3_clockconfig.h"
 #include "esp32s3_region.h"
+#include "esp32s3_periph.h"
 #include "esp32s3_spiram.h"
 #include "esp32s3_wdt.h"
 #ifdef CONFIG_BUILD_PROTECTED
@@ -324,6 +325,10 @@ void noreturn_function IRAM_ATTR __esp32s3_start(void)
   /* Set CPU frequency configured in board.h */
 
   esp32s3_clockconfig();
+
+  /* Initialize peripherals parameters */
+
+  esp32s3_perip_clk_init();
 
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
   /* Configure the UART so we can get debug output */
