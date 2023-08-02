@@ -1346,6 +1346,25 @@ static int rpmsg_socket_close(FAR struct socket *psock)
   return 0;
 }
 
+static void rpmsg_socket_path(FAR struct rpmsg_socket_conn_s *conn,
+                              FAR char *buf, size_t len)
+{
+  if (conn->backlog) /* Server */
+    {
+      snprintf(buf, len,
+               "rpmsg:[%s:[%s%s]<->%s]",
+               CONFIG_RPTUN_LOCAL_CPUNAME, conn->rpaddr.rp_name,
+               conn->nameid, conn->rpaddr.rp_cpu);
+    }
+  else /* Client */
+    {
+      snprintf(buf, len,
+               "rpmsg:[%s<->%s:[%s%s]]",
+               CONFIG_RPTUN_LOCAL_CPUNAME, conn->rpaddr.rp_cpu,
+               conn->rpaddr.rp_name, conn->nameid);
+    }
+}
+
 static int rpmsg_socket_ioctl(FAR struct socket *psock,
                               int cmd, unsigned long arg)
 {
@@ -1360,6 +1379,10 @@ static int rpmsg_socket_ioctl(FAR struct socket *psock,
 
       case FIONSPACE:
         *(FAR int *)((uintptr_t)arg) = rpmsg_socket_get_space(conn);
+        break;
+
+      case FIOC_FILEPATH:
+        rpmsg_socket_path(conn, (FAR char *)(uintptr_t)arg, PATH_MAX);
         break;
 
       default:

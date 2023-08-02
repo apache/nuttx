@@ -154,7 +154,6 @@ int tcp_ioctl(FAR struct tcp_conn_s *conn, int cmd, unsigned long arg)
         break;
       case FIOC_FILEPATH:
         tcp_path(conn, (FAR char *)(uintptr_t)arg, PATH_MAX);
-        ret = OK;
         break;
       default:
         ret = -ENOTTY;
