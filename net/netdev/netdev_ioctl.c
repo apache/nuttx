@@ -1591,6 +1591,9 @@ ssize_t net_ioctl_arglen(int cmd)
       case FIONREAD:
         return sizeof(int);
 
+      case FIOC_FILEPATH:
+        return PATH_MAX;
+
       case SIOCGIFCONF:
         return sizeof(struct ifconf);
 

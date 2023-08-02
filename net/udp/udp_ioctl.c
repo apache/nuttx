@@ -149,7 +149,6 @@ int udp_ioctl(FAR struct udp_conn_s *conn, int cmd, unsigned long arg)
         break;
       case FIOC_FILEPATH:
         udp_path(conn, (FAR char *)(uintptr_t)arg, PATH_MAX);
-        ret = OK;
         break;
       default:
         ret = -ENOTTY;
