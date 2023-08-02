@@ -882,6 +882,11 @@ static int local_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
             ret = -ENOTCONN;
           }
         break;
+      case FIOC_FILEPATH:
+        snprintf((FAR char *)(uintptr_t)arg, PATH_MAX, "local:[%s]",
+                 conn->lc_path);
+        ret = OK;
+        break;
       case BIOC_FLUSH:
         ret = -EINVAL;
         break;
