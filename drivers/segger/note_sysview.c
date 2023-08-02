@@ -370,6 +370,7 @@ unsigned long note_sysview_get_timestamp(void)
 int note_sysview_initialize(void)
 {
   unsigned long freq = up_perf_getfreq();
+  int ret;
 
   static const SEGGER_SYSVIEW_OS_API g_sysview_trace_api =
     {
@@ -391,9 +392,9 @@ int note_sysview_initialize(void)
 #endif
 
   SEGGER_SYSVIEW_Start();
-  note_driver_register(&g_note_sysview_driver.driver);
+  ret = note_driver_register(&g_note_sysview_driver.driver);
   syslog(LOG_NOTICE, "SEGGER RTT Control Block Address: %#" PRIxPTR "\n",
                       (uintptr_t)&_SEGGER_RTT +
                       CONFIG_SEGGER_RTT_UNCACHED_OFF);
-  return 0;
+  return ret;
 }
