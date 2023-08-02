@@ -75,7 +75,8 @@ int file_fsync(FAR struct file *filep)
         }
       else
 #endif
-      if (inode->u.i_ops && inode->u.i_ops->ioctl)
+      if ((INODE_IS_BLOCK(inode) || INODE_IS_MTD(inode)) &&
+          inode->u.i_ops && inode->u.i_ops->ioctl)
         {
           ret = inode->u.i_ops->ioctl(filep, BIOC_FLUSH, 0);
           return ret >= 0 ? 0 : ret;
