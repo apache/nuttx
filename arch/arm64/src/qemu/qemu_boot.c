@@ -121,6 +121,19 @@ uint64_t arm64_get_mpid(int cpu)
   return CORE_TO_MPID(cpu, 0);
 }
 
+/****************************************************************************
+ * Name: arm64_get_cpuid
+ *
+ * Description:
+ *   The function from mpid to get cpu id
+ *
+ ****************************************************************************/
+
+int arm64_get_cpuid(uint64_t mpid)
+{
+  return MPID_TO_CORE(mpid, 0);
+}
+
 #endif /* CONFIG_SMP */
 
 /****************************************************************************
