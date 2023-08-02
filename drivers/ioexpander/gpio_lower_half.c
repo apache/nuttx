@@ -364,30 +364,18 @@ static int gplh_setpintype(FAR struct gpio_dev_s *gpio,
 }
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: gpio_lower_half
+ * Name: gpio_lower_half_internal
  *
  * Description:
- *   Create a GPIO pin device driver instance for an I/O expander pin.
- *   The I/O expander pin must have already been configured by the caller
- *   for the particular pintype.
- *
- * Input Parameters:
- *   ioe     - An instance of the I/O expander interface
- *   pin     - The I/O expander pin number for the driver
- *   pintype - See enum gpio_pintype_e
- *   minor   - The minor device number to use when registering the device
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
+ *   Internal handler for gpio_lower_half and gpio_lower_half_byname
+ *   functions. Initializes gplh_dev_s structure and sets pin type.
  *
  ****************************************************************************/
 
-int gpio_lower_half(FAR struct ioexpander_dev_s *ioe, unsigned int pin,
-                    enum gpio_pintype_e pintype, int minor)
+static FAR struct gplh_dev_s *
+gpio_lower_half_internal(FAR struct ioexpander_dev_s *ioe,
+                         unsigned int pin,
+                         enum gpio_pintype_e pintype)
 {
   FAR struct gplh_dev_s *priv;
   FAR struct gpio_dev_s *gpio;
@@ -409,8 +397,8 @@ int gpio_lower_half(FAR struct ioexpander_dev_s *ioe, unsigned int pin,
   priv = (FAR struct gplh_dev_s *)kmm_zalloc(sizeof(struct gplh_dev_s));
   if (priv == NULL)
     {
-      gpioerr("ERROR: Failed to allocate driver state\n");
-      return -ENOMEM;
+      gpioerr("ERROR: Failed to allocate driver state %d\n", -ENOMEM);
+      return NULL;
     }
 
   /* Initialize the non-zero elements of the newly allocated instance */
@@ -427,8 +415,104 @@ int gpio_lower_half(FAR struct ioexpander_dev_s *ioe, unsigned int pin,
     {
       gpioerr("ERROR: gplh_setpintype() failed: %d\n", ret);
       kmm_free(priv);
-      return ret;
+      return NULL;
     }
+
+  return priv;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: gpio_lower_half_byname
+ *
+ * Description:
+ *   Create a GPIO pin device driver instance for an I/O expander pin.
+ *   The I/O expander pin must have already been configured by the caller
+ *   for the particular pintype.
+ *
+ * Input Parameters:
+ *   ioe     - An instance of the I/O expander interface
+ *   pin     - The I/O expander pin number for the driver
+ *   pintype - See enum gpio_pintype_e
+ *   name    - gpio device name
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int gpio_lower_half_byname(FAR struct ioexpander_dev_s *ioe,
+                           unsigned int pin, enum gpio_pintype_e pintype,
+                           FAR char *name)
+{
+  FAR struct gplh_dev_s *priv;
+  FAR struct gpio_dev_s *gpio;
+  int ret;
+
+  DEBUGASSERT(name != NULL);
+
+  /* Initialize gplh_dev_s structure and set pin type */
+
+  priv = gpio_lower_half_internal(ioe, pin, pintype);
+  if (priv == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  gpio         = &priv->gpio;
+  gpio->gp_ops = &g_gplh_ops;
+
+  /* Register GPIO device by name */
+
+  ret = gpio_pin_register_byname(gpio, name);
+  if (ret < 0)
+    {
+      gpioerr("ERROR: gpio_pin_register_byname() failed: %d\n", ret);
+      kmm_free(priv);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: gpio_lower_half
+ *
+ * Description:
+ *   Create a GPIO pin device driver instance for an I/O expander pin.
+ *   The I/O expander pin must have already been configured by the caller
+ *   for the particular pintype.
+ *
+ * Input Parameters:
+ *   ioe     - An instance of the I/O expander interface
+ *   pin     - The I/O expander pin number for the driver
+ *   pintype - See enum gpio_pintype_e
+ *   minor   - The minor device number to use when registering the device,
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int gpio_lower_half(FAR struct ioexpander_dev_s *ioe, unsigned int pin,
+                    enum gpio_pintype_e pintype, int minor)
+{
+  FAR struct gplh_dev_s *priv;
+  FAR struct gpio_dev_s *gpio;
+  int ret;
+
+  /* Initialize gplh_dev_s structure and set pin type */
+
+  priv = gpio_lower_half_internal(ioe, pin, pintype);
+  if (priv == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  gpio         = &priv->gpio;
+  gpio->gp_ops = &g_gplh_ops;
 
   /* Register the GPIO driver */
 
