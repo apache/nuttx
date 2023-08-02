@@ -22,6 +22,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <debug.h>
+
 #include <nuttx/note/note_driver.h>
 #include <nuttx/note/noteram_driver.h>
 #include <nuttx/note/notectl_driver.h>
@@ -56,6 +58,7 @@ int note_initialize(void)
   ret = noteram_register();
   if (ret < 0)
     {
+      serr("noteram_register failed %d\n", ret);
       return ret;
     }
 #endif
@@ -64,6 +67,7 @@ int note_initialize(void)
   ret = notertt_register();
   if (ret < 0)
     {
+      serr("notertt_register failed %d\n", ret);
       return ret;
     }
 #endif
@@ -72,6 +76,7 @@ int note_initialize(void)
   ret = notectl_register();
   if (ret < 0)
     {
+      serr("notectl_register failed %d\n", ret);
       return ret;
     }
 #endif
@@ -80,6 +85,7 @@ int note_initialize(void)
   ret = note_sysview_initialize();
   if (ret < 0)
     {
+      serr("note_sysview_initialize failed %d\n", ret);
       return ret;
     }
 #endif
@@ -88,6 +94,7 @@ int note_initialize(void)
   ret = notesnap_register();
   if (ret < 0)
     {
+      serr("notesnap_register failed %d\n", ret);
       return ret;
     }
 #endif
