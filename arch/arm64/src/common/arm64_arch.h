@@ -571,6 +571,18 @@ uint64_t arm64_get_mpid(int cpu);
 #  define arm64_get_mpid(cpu) GET_MPIDR()
 #endif /* CONFIG_SMP */
 
+/****************************************************************************
+ * Name: arm64_get_cpuid
+ *
+ * Description:
+ *   The function from mpid to get cpu id
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+int arm64_get_cpuid(uint64_t mpid);
+#endif
+
 #endif /* __ASSEMBLY__ */
 
 #endif /* ___ARCH_ARM64_SRC_COMMON_ARM64_ARCH_H */
