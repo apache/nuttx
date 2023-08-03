@@ -122,9 +122,9 @@ struct local_conn_s
   char lc_path[UNIX_PATH_MAX];   /* Path assigned by bind() */
   int32_t lc_instance_id;        /* Connection instance ID for stream
                                   * server<->client connection pair */
-#ifdef CONFIG_NET_LOCAL_SCM
   FAR struct local_conn_s *
                         lc_peer; /* Peer connection instance */
+#ifdef CONFIG_NET_LOCAL_SCM
   uint16_t lc_cfpcount;          /* Control file pointer counter */
   FAR struct file *
      lc_cfps[LOCAL_NCONTROLFDS]; /* Socket message control filep */
