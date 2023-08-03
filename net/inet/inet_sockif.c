@@ -1137,9 +1137,37 @@ static int inet_listen(FAR struct socket *psock, int backlog)
 #ifdef NET_TCP_HAVE_STACK
   conn = psock->s_conn;
 
-  if (conn->lport <= 0)
+  if (conn->lport == 0)
     {
-      return -EOPNOTSUPP;
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+      if (conn->domain == PF_INET)
+#endif
+        {
+          /* Select a port that is unique for this IPv4 local address
+           * (network order).
+           */
+
+          conn->lport = tcp_selectport(PF_INET,
+                                (FAR const union ip_addr_u *)
+                                &conn->u.ipv4.laddr, 0);
+        }
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+      else
+#endif
+        {
+          /* Select a port that is unique for this IPv6 local address
+           * (network order).
+           */
+
+          conn->lport = tcp_selectport(PF_INET6,
+                                (FAR const union ip_addr_u *)
+                                conn->u.ipv6.laddr, 0);
+        }
+#endif /* CONFIG_NET_IPv6 */
     }
 
 #ifdef CONFIG_NET_TCPBACKLOG
