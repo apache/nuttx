@@ -167,7 +167,7 @@ int up_backtrace(struct tcb_s *tcb,
   else
     {
       flags = enter_critical_section();
-      p_regs = (struct regs_context *)CURRENT_REGS;
+      p_regs = (struct regs_context *)tcb->xcp.regs;
 
       ret = backtrace(tcb->stack_base_ptr,
                       tcb->stack_base_ptr + tcb->adj_stack_size,
