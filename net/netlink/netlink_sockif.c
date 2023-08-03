@@ -424,7 +424,6 @@ static void netlink_response_available(FAR void *arg)
    * condition?
    */
 
-  sched_lock();
   net_lock();
 
   if (conn->fds != NULL)
@@ -443,7 +442,6 @@ static void netlink_response_available(FAR void *arg)
   conn->fds = NULL;
 
   net_unlock();
-  sched_unlock();
 }
 
 /****************************************************************************
