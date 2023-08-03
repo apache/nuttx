@@ -33,16 +33,12 @@
 
 #ifdef LIBC_BUILD_STRING
 
-#include "arm_asm.h"
-
 	.thumb
 	.syntax unified
 	.global memset
 	.type	memset, %function
-	.fnstart
-	.cfi_startproc
 memset:
-	prologue 4 6
+	push	{r4, r5, r6}
 	lsls	r4, r0, #30
 	beq	10f
 	subs	r4, r2, #1
@@ -107,16 +103,12 @@ memset:
 	cmp	r3, r4
 	bne	8b
 9:
-	.cfi_remember_state
-	epilogue 4 6
+	pop	{r4, r5, r6}
+	bx	lr
 10:
-	.cfi_restore_state
 	mov	r4, r2
 	mov	r3, r0
 	b	3b
-	.cfi_endproc
-	.cantunwind
-	.fnend
 	.size memset, . - memset
 
 #endif
