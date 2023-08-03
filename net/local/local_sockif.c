@@ -463,7 +463,82 @@ static int local_getpeername(FAR struct socket *psock,
                              FAR struct sockaddr *addr,
                              FAR socklen_t *addrlen)
 {
-  return local_getsockname(psock, addr, addrlen);
+  FAR struct sockaddr_un *unaddr = (FAR struct sockaddr_un *)addr;
+  FAR struct local_conn_s *conn;
+  FAR struct local_conn_s *peer;
+
+  DEBUGASSERT(psock != NULL && psock->s_conn != NULL &&
+              unaddr != NULL && addrlen != NULL);
+
+  if (*addrlen < sizeof(sa_family_t))
+    {
+      /* This is apparently not an error */
+
+      *addrlen = 0;
+      return OK;
+    }
+
+  /* Verify that the socket has been connected */
+
+  conn = psock->s_conn;
+
+  if (conn->lc_state != LOCAL_STATE_CONNECTED)
+    {
+      return -ENOTCONN;
+    }
+
+  peer = conn->lc_peer;
+
+  /* Save the address family */
+
+  unaddr->sun_family = AF_LOCAL;
+  if (*addrlen > sizeof(sa_family_t))
+    {
+      /* Now copy the address description.  */
+
+      if (peer->lc_type == LOCAL_TYPE_UNNAMED)
+        {
+          /* Zero-length sun_path... This is an abstract Unix domain socket */
+
+          *addrlen = sizeof(sa_family_t);
+        }
+      else /* conn->lc_type = LOCAL_TYPE_PATHNAME */
+        {
+          /* Get the full length of the socket name (incl. null terminator) */
+
+          size_t namelen = strlen(peer->lc_path) + 1 +
+                           (peer->lc_type == LOCAL_TYPE_ABSTRACT);
+
+          /* Get the available length in the user-provided buffer. */
+
+          size_t pathlen = *addrlen - sizeof(sa_family_t);
+
+          /* Clip the socket name size so that if fits in the user buffer */
+
+          if (pathlen < namelen)
+            {
+              namelen = pathlen;
+            }
+
+          /* Copy the path into the user address structure */
+
+          if (peer->lc_type == LOCAL_TYPE_ABSTRACT)
+            {
+              unaddr->sun_path[0] = '\0';
+              strlcpy(&unaddr->sun_path[1],
+                      peer->lc_path, namelen - 1);
+            }
+          else
+            {
+               strlcpy(unaddr->sun_path,
+                      peer->lc_path, namelen);
+            }
+
+          *addrlen = sizeof(sa_family_t) + namelen;
+        }
+    }
+
+  return OK;
 }
 
 #ifdef CONFIG_NET_SOCKOPTS
