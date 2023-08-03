@@ -195,7 +195,7 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
           ttl = (value_len >= sizeof(int)) ?
             *(FAR int *)value : (int)*(FAR unsigned char *)value;
 
-          if (ttl <= 0 || ttl > 255)
+          if (ttl < 0 || ttl > 255)
             {
               ret = -EINVAL;
             }
