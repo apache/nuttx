@@ -55,6 +55,12 @@
 #define IMXRT_CAN_CBT_OFFSET      0x0050 /* CAN Bit Timing Register */
 
 #define IMXRT_CAN_MB_OFFSET       0x0080 /* CAN MB register */
+#define IMXRT_CAN_MB_SIZE         0x0A60
+#define IMXRT_CAN_MB_END          (IMXRT_CAN_MB_OFFSET + IMXRT_CAN_MB_SIZE)
+
+#define IMXRT_CAN_MB2_OFFSET      0x0F28 /* CAN MB2 register */
+#define IMXRT_CAN_MB2_SIZE        0x00D8
+#define IMXRT_CAN_MB2_END         (IMXRT_CAN_MB2_OFFSET + IMXRT_CAN_MB2_SIZE)
 
 #define IMXRT_CAN_RXIMR_OFFSET(n) (0x0880+((n)<<2)) /* Rn Individual Mask Registers */
 #define IMXRT_CAN_RXIMR0_OFFSET   0x0880            /* R0 Individual Mask Registers */

@@ -163,6 +163,7 @@
 #define SIGXFSZ         25
 #define SIGVTALRM       26
 #define SIGPROF         27
+#define SIGWINCH        28
 #define SIGPOLL         29
 
 #define SIGIO           SIGPOLL
@@ -218,6 +219,16 @@
 #ifdef CONFIG_SIG_EVTHREAD
 #  define SIGEV_THREAD  3 /* A notification function is called */
 #endif
+
+/* sigaltstack stack size */
+
+#define MINSIGSTKSZ     CONFIG_PTHREAD_STACK_MIN     /* Smallest signal stack size */
+#define SIGSTKSZ        CONFIG_PTHREAD_STACK_DEFAULT /* Default signal stack size */
+
+/* define signal handlers stack on an alternate stack or the current thread */
+
+#define SS_ONSTACK      1
+#define SS_DISABLE      2
 
 /* Special values of sa_handler used by sigaction and sigset.  They are all
  * treated like NULL for now.  This is okay for SIG_DFL and SIG_IGN because
@@ -340,6 +351,15 @@ struct sigaction
 #define sa_handler   sa_u._sa_handler
 #define sa_sigaction sa_u._sa_sigaction
 
+/* Structure describing a signal stack.  */
+
+typedef struct
+{
+  FAR void *ss_sp;
+  int ss_flags;
+  size_t ss_size;
+} stack_t;
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -384,6 +404,7 @@ int  sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *value,
                   FAR const struct timespec *timeout);
 int  sigsuspend(FAR const sigset_t *sigmask);
 int  sigwaitinfo(FAR const sigset_t *set, FAR struct siginfo *value);
+int  sigaltstack(FAR const stack_t *ss, FAR stack_t *oss);
 
 #undef EXTERN
 #ifdef __cplusplus

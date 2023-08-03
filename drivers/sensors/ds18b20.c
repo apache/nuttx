@@ -811,7 +811,7 @@ static int ds18b20_thread(int argc, char** argv)
 {
   uint16_t orawdata;
   FAR struct ds18b20_dev_s *priv = (FAR struct ds18b20_dev_s *)
-        ((uintptr_t)strtoul(argv[1], NULL, 0));
+        ((uintptr_t)strtoul(argv[1], NULL, 16));
 
   /* Set initial value to out of measurement range to ensure that the first
    * data read leads to an upper notification.
@@ -971,7 +971,7 @@ int ds18b20_register(int devno, FAR struct onewire_master_s *onewire,
 
   /* Create thread for polling sensor data */
 
-  snprintf(arg1, 16, "0x%" PRIxPTR, (uintptr_t)priv);
+  snprintf(arg1, 16, "%p", priv);
   argv[0] = arg1;
   argv[1] = NULL;
   ret = kthread_create("ds18b20_thread", SCHED_PRIORITY_DEFAULT,

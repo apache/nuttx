@@ -85,7 +85,7 @@ typedef struct
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
   _stack_t interrupt;
 #endif
-} stack_t;
+} crash_stack_t;
 
 /* Flags to identify what is in the dump */
 
@@ -106,7 +106,7 @@ typedef struct
   int           lineno;                 /* __LINE__ to up_assert */
   pid_t         pid;                    /* Process ID */
   uint32_t      regs[XCPTCONTEXT_REGS]; /* Interrupt register save area */
-  stack_t       stacks;                 /* Stack info */
+  crash_stack_t stacks;                 /* Stack info */
 #if CONFIG_TASK_NAME_SIZE > 0
   char          name[CONFIG_TASK_NAME_SIZE + 1]; /* Task name (with NULL
                                                   * terminator) */

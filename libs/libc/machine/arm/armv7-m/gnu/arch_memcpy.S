@@ -66,12 +66,18 @@
 #if __OPT_BIG_BLOCK_SIZE == 16
 #define BEGIN_UNROLL_BIG_BLOCK \
   .irp offset, 0,4,8,12
+#define BEGIN_UNROLL_BIG_BLOCK_X4 \
+  .irp offset, 0
 #elif __OPT_BIG_BLOCK_SIZE == 32
 #define BEGIN_UNROLL_BIG_BLOCK \
   .irp offset, 0,4,8,12,16,20,24,28
+#define BEGIN_UNROLL_BIG_BLOCK_X4 \
+  .irp offset, 0,16
 #elif __OPT_BIG_BLOCK_SIZE == 64
 #define BEGIN_UNROLL_BIG_BLOCK \
   .irp offset, 0,4,8,12,16,20,24,28,32,36,40,44,48,52,56,60
+#define BEGIN_UNROLL_BIG_BLOCK_X4 \
+  .irp offset, 0,16,32,48
 #else
 #error "Illegal __OPT_BIG_BLOCK_SIZE"
 #endif
@@ -112,6 +118,21 @@ memcpy:
 	orr	r3, r1, r0
 	ands	r3, r3, #3
 	bne	.Lmisaligned_copy
+
+.Lbig_aligned:
+	subs	r2, __OPT_BIG_BLOCK_SIZE
+	blo	.Lmid_block
+
+	stmfd	sp!, {r4-r7}
+.Lbig_aligned_loop:
+	BEGIN_UNROLL_BIG_BLOCK_X4
+	ldmia	r1!, {r4, r5, r6, r7}
+	stmia	r0!, {r4, r5, r6, r7}
+	END_UNROLL
+	subs	r2, __OPT_BIG_BLOCK_SIZE
+	bhs .Lbig_aligned_loop
+	ldmfd	sp!, {r4-r7}
+	b	.Lmid_block
 
 .Lbig_block:
 	subs	r2, __OPT_BIG_BLOCK_SIZE

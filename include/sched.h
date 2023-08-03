@@ -267,8 +267,13 @@ bool   sched_idletask(void);
 
 /* Task Backtrace */
 
+#ifdef CONFIG_SCHED_BACKTRACE
 int    sched_backtrace(pid_t tid, FAR void **buffer, int size, int skip);
 void   sched_dumpstack(pid_t tid);
+#else
+#  define sched_backtrace(tid, buffer, size, skip) 0
+#  define sched_dumpstack(tid)
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

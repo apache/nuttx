@@ -98,6 +98,7 @@ FAR char *strsignal(int signum)
       CASE_SIG_STR(SIGXFSZ,   "File size limit exceeded");
       CASE_SIG_STR(SIGVTALRM, "Virtual timer expired");
       CASE_SIG_STR(SIGPROF,   "Profiling timer expired");
+      CASE_SIG_STR(SIGWINCH,  "Window resize signal");
       CASE_SIG_STR(SIGPOLL,   "Pollable event occurred");
       CASE_SIG_STR(SIGSYS,    "Bad system call");
 

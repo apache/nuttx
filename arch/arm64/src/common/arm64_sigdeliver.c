@@ -71,6 +71,7 @@ void arm64_sigdeliver(void)
   struct regs_context  *pctx =
                 (struct regs_context *)rtcb->xcp.saved_reg;
   flags = (pctx->spsr & SPSR_DAIF_MASK);
+  enter_critical_section();
 #endif
 
   sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
@@ -163,6 +164,10 @@ retry:
   /* Then restore the correct state for this thread of execution. */
 
 #ifdef CONFIG_SMP
+  /* We need to keep the IRQ lock until task switching */
+
+  rtcb->irqcount++;
+  leave_critical_section(flags);
   rtcb->irqcount--;
 #endif
   arm64_fullcontextrestore(rtcb->xcp.regs);

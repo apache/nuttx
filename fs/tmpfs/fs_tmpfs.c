@@ -1643,6 +1643,49 @@ static off_t tmpfs_seek(FAR struct file *filep, off_t offset, int whence)
   return position;
 }
 
+static int tmpfs_unmap(FAR struct task_group_s *group,
+                       FAR struct mm_map_entry_s *entry,
+                       FAR void *start, size_t length)
+{
+  FAR struct file *filep = entry->priv.p;
+  off_t offset;
+  int ret;
+
+  offset = (uintptr_t)start - (uintptr_t)entry->vaddr;
+  if (offset + length < entry->length)
+    {
+      ferr("ERROR: Cannot umap without unmapping to the end\n");
+      return -ENOSYS;
+    }
+
+  /* Okay.. the region is being unmapped to the end.  Make sure the length
+   * indicates that.
+   */
+
+  length = entry->length - offset;
+
+  /* Are we unmapping the entire region (offset == 0)? */
+
+  if (length >= entry->length)
+    {
+      /* Then remove the mapping from the list */
+
+      ret = mm_map_remove(get_group_mm(group), entry);
+    }
+
+  /* No.. We have been asked to "unmap' only a portion of the memory
+   * (offset > 0).
+   */
+
+  else
+    {
+      entry->length = length;
+      ret = tmpfs_mmap(filep, entry);
+    }
+
+  return ret;
+}
+
 static int tmpfs_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
 {
   FAR struct tmpfs_file_s *tfo;
@@ -1660,7 +1703,9 @@ static int tmpfs_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
       map->length && map->offset + map->length <= tfo->tfo_size)
     {
       map->vaddr = tfo->tfo_data + map->offset;
-      ret = OK;
+      map->priv.p = filep;
+      map->munmap = tmpfs_unmap;
+      ret = mm_map_add(get_current_mm(), map);
     }
 
   return ret;

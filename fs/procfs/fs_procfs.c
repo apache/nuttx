@@ -170,15 +170,15 @@ static const struct procfs_entry_s g_procfs_entries[] =
   { "self/**",      &g_proc_operations,     PROCFS_UNKOWN_TYPE },
 #endif
 
-#if defined(CONFIG_DEBUG_TCBINFO) && !defined(CONFIG_FS_PROCFS_EXCLUDE_TCBINFO)
+#if defined(CONFIG_ARCH_HAVE_TCBINFO) && !defined(CONFIG_FS_PROCFS_EXCLUDE_TCBINFO)
   { "tcbinfo",      &g_tcbinfo_operations,  PROCFS_FILE_TYPE   },
 #endif
 
-#if !defined(CONFIG_FS_PROCFS_EXCLUDE_UPTIME)
+#ifndef CONFIG_FS_PROCFS_EXCLUDE_UPTIME
   { "uptime",       &g_uptime_operations,   PROCFS_FILE_TYPE   },
 #endif
 
-#if !defined(CONFIG_FS_PROCFS_EXCLUDE_VERSION)
+#ifndef CONFIG_FS_PROCFS_EXCLUDE_VERSION
   { "version",      &g_version_operations,  PROCFS_FILE_TYPE   },
 #endif
 };
@@ -421,6 +421,7 @@ static int procfs_open(FAR struct file *filep, FAR const char *relpath,
 static int procfs_close(FAR struct file *filep)
 {
   FAR struct procfs_file_s *attr;
+  int ret = OK;
 
   /* Recover our private data from the struct file instance */
 
@@ -429,9 +430,17 @@ static int procfs_close(FAR struct file *filep)
 
   /* Release the file attributes structure */
 
-  kmm_free(attr);
+  if (attr->procfsentry->ops->close != NULL)
+    {
+      ret = attr->procfsentry->ops->close(filep);
+    }
+  else
+    {
+      kmm_free(attr);
+    }
+
   filep->f_priv = NULL;
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -1172,8 +1181,6 @@ int procfs_register(FAR const struct procfs_entry_s *entry)
   newcount = g_procfs_entrycount + 1;
   newsize  = newcount * sizeof(struct procfs_entry_s);
 
-  sched_lock();
-
   newtable = (FAR struct procfs_entry_s *)
     kmm_realloc(g_procfs_entries, newsize);
   if (newtable != NULL)
@@ -1190,7 +1197,6 @@ int procfs_register(FAR const struct procfs_entry_s *entry)
       ret = OK;
     }
 
-  sched_unlock();
   return ret;
 }
 #endif

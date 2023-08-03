@@ -564,6 +564,11 @@ static int sim_audio_flush(struct audio_lowerhalf_s *dev)
   struct sim_audio_s *priv = (struct sim_audio_s *)dev;
   int ret;
 
+  if (!priv->pcm)
+    {
+      return 0;
+    }
+
   ret = nxmutex_lock(&priv->pendlock);
   if (ret < 0)
     {
@@ -585,6 +590,48 @@ static int sim_audio_flush(struct audio_lowerhalf_s *dev)
   nxmutex_unlock(&priv->pendlock);
 
   return 0;
+}
+
+static int sim_alsa_get_latency(struct audio_lowerhalf_s *dev,
+                                unsigned long arg)
+{
+  struct sim_audio_s *priv = (struct sim_audio_s *)dev;
+  long *latency = (long *)arg;
+  struct ap_buffer_s *apb;
+  dq_entry_t *cur;
+  long remain = 0;
+  int ret;
+
+  if (!priv->pcm)
+    {
+      return -ENXIO;
+    }
+
+  ret = snd_pcm_delay(priv->pcm, latency);
+  if (ret < 0)
+    {
+      return ret;
+    }
+  else
+    {
+      remain = priv->aux->nbytes - priv->aux->curbyte;
+      ret = nxmutex_lock(&priv->pendlock);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      for (cur = dq_peek(&priv->pendq); cur; cur = dq_next(cur))
+        {
+          apb = (struct ap_buffer_s *)cur;
+          remain += apb->nbytes - apb->curbyte;
+        }
+
+      nxmutex_unlock(&priv->pendlock);
+      *latency += remain / priv->frame_size;
+    }
+
+  return ret;
 }
 
 static int sim_audio_enqueuebuffer(struct audio_lowerhalf_s *dev,
@@ -612,11 +659,6 @@ static int sim_audio_ioctl(struct audio_lowerhalf_s *dev, int cmd,
 {
   struct sim_audio_s *priv = (struct sim_audio_s *)dev;
   int ret = 0;
-
-  if (!priv->pcm)
-    {
-      return -ENXIO;
-    }
 
   switch (cmd)
     {
@@ -655,34 +697,10 @@ static int sim_audio_ioctl(struct audio_lowerhalf_s *dev, int cmd,
 
         case AUDIOIOC_GETLATENCY:
           {
-            long *latency = (long *)arg;
-            long remain = 0;
-            dq_entry_t *cur;
-
-            ret = snd_pcm_delay(priv->pcm, latency);
+            ret = sim_alsa_get_latency(dev, arg);
             if (ret < 0)
               {
                 return ret;
-              }
-            else
-              {
-                remain = priv->aux->nbytes - priv->aux->curbyte;
-
-                ret = nxmutex_lock(&priv->pendlock);
-                if (ret < 0)
-                  {
-                    return ret;
-                  }
-
-                for (cur = dq_peek(&priv->pendq); cur; cur = dq_next(cur))
-                  {
-                    struct ap_buffer_s *apb = (struct ap_buffer_s *)cur;
-                    remain += apb->nbytes - apb->curbyte;
-                  }
-
-                nxmutex_unlock(&priv->pendlock);
-
-                *latency += remain / priv->frame_size;
               }
           }
           break;

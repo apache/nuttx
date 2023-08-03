@@ -891,12 +891,6 @@ static int nrf91_usrsock_recvfrom_handler(struct nrf91_usrsock_s *usrsock,
       buflen = sizeof(usrsock->out) - sizeof(*ack) - inaddrlen;
     }
 
-  if (outaddrlen != 0)
-    {
-      tmp = (struct sockaddr *)(ack + 1);
-      nx2nrf_sockaddr(tmp, (struct nrf_sockaddr *)&address);
-    }
-
   ret = nrf_recvfrom(req->usockid,
                      (void *)(ack + 1) + inaddrlen,
                      buflen,
@@ -907,6 +901,12 @@ static int nrf91_usrsock_recvfrom_handler(struct nrf91_usrsock_s *usrsock,
     {
       nerr("nrf_recvfrom failed %d", errno);
       ret = -errno;
+    }
+
+  if (outaddrlen != 0)
+    {
+      tmp = (struct sockaddr *)(ack + 1);
+      nrf2nx_sockaddr((struct nrf_sockaddr *)&address, tmp);
     }
 
   recvlen = ret;

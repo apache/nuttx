@@ -51,7 +51,7 @@
 #define RDFLAG_USER            (RDFLAG_WRENABLED | RDFLAG_FUNLINK)
 
 #define RDFLAG_IS_WRENABLED(f) (((f) & RDFLAG_WRENABLED) != 0)
-#define RDFLAG_IS_FUNLINK(f)   (((f) & RDFLAG_WRENABLED) != 0)
+#define RDFLAG_IS_FUNLINK(f)   (((f) & RDFLAG_FUNLINK) != 0)
 
 /* Flag set when the RAM disk block driver is unlink */
 
@@ -143,7 +143,10 @@ static void rd_destroy(FAR struct rd_struct_s *dev)
     {
       /* Yes.. do it */
 
-      kmm_free(dev->rd_buffer);
+      if (dev->rd_flags & RDFLAG_USER)
+        {
+          kmm_free(dev->rd_buffer);
+        }
     }
 
   /* And free the block driver itself */

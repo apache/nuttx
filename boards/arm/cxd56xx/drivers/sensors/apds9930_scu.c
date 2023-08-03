@@ -135,9 +135,7 @@
  * Private Type Definitions
  ****************************************************************************/
 
-/**
- * @brief Structure for apds9930 device
- */
+/* Structure for apds9930 device */
 
 struct apds9930_dev_s
 {

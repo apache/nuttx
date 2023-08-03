@@ -266,7 +266,7 @@ struct imxrt_driver_s
   bool canfd_capable;
   int mb_address_offset;
 #ifdef TX_TIMEOUT_WQ
-  WDOG_ID txtimeout[TXMBCOUNT]; /* TX timeout timer */
+  struct wdog_s txtimeout[TXMBCOUNT]; /* TX timeout timer */
 #endif
   struct work_s irqwork;            /* For deferring interrupt work to the wq */
   struct work_s pollwork;           /* For deferring poll work to the work wq */
@@ -486,7 +486,7 @@ static int  imxrt_flexcan_interrupt(int irq, void *context,
 /* Watchdog timer expirations */
 #ifdef TX_TIMEOUT_WQ
 static void imxrt_txtimeout_work(void *arg);
-static void imxrt_txtimeout_expiry(int argc, uint32_t arg, ...);
+static void imxrt_txtimeout_expiry(wdparm_t arg);
 #endif
 
 /* NuttX callback functions */
@@ -726,8 +726,8 @@ static int imxrt_transmit(struct imxrt_driver_s *priv)
 
   if (timeout > 0)
     {
-      wd_start(priv->txtimeout[mbi], timeout + 1, imxrt_txtimeout_expiry,
-                1, (wdparm_t)priv);
+      wd_start(&priv->txtimeout[mbi - RXMBCOUNT], timeout + 1,
+               imxrt_txtimeout_expiry, (wdparm_t)priv);
     }
 #endif
 
@@ -1004,7 +1004,7 @@ static void imxrt_txdone(struct imxrt_driver_s *priv)
            */
 
           wd_cancel(&priv->txtimeout[mbi]);
-          struct mb_s *mb = &priv->tx[mbi];
+          struct mb_s *mb = flexcan_get_mb(priv, mbi + RXMBCOUNT);
           mb->cs.code = CAN_TXMB_INACTIVE;
 #endif
         }
@@ -1155,7 +1155,7 @@ static void imxrt_txtimeout_work(void *arg)
               putreg32(mb_bit, priv->base + IMXRT_CAN_IFLAG1_OFFSET);
             }
 
-          struct mb_s *mb = &priv->tx[mbi];
+          struct mb_s *mb = flexcan_get_mb(priv, mbi + RXMBCOUNT);
           mb->cs.code = CAN_TXMB_ABORT;
           priv->txmb[mbi].pending = TX_ABORT;
         }
@@ -1170,8 +1170,7 @@ static void imxrt_txtimeout_work(void *arg)
  *   The last TX never completed.  Reset the hardware and start again.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -1181,7 +1180,7 @@ static void imxrt_txtimeout_work(void *arg)
  *
  ****************************************************************************/
 
-static void imxrt_txtimeout_expiry(int argc, uint32_t arg, ...)
+static void imxrt_txtimeout_expiry(wdparm_t arg)
 {
   struct imxrt_driver_s *priv = (struct imxrt_driver_s *)arg;
 
@@ -1533,6 +1532,63 @@ static int imxrt_ioctl(struct net_driver_s *dev, int cmd,
 }
 #endif /* CONFIG_NETDEV_IOCTL */
 
+#ifdef CONFIG_IMXRT_FLEXCAN_ECC
+
+/****************************************************************************
+ * Function: imxrt_init_eccram
+ *
+ * Description:
+ *   Initialize FLEXCAN ECC RAM
+ *
+ * Input Parameters:
+ *   priv - Reference to the private FLEXCAN driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static int imxrt_init_eccram(struct imxrt_driver_s *priv)
+{
+  uint32_t i;
+  uint32_t regval;
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
+  regval = getreg32(priv->base + IMXRT_CAN_CTRL2_OFFSET);
+
+  /* Set WRMFRZ bit in CTRL2 Register to grant write access to memory */
+
+  regval |= CAN_CTRL2_WRMFRZ;
+
+  putreg32(regval, priv->base + IMXRT_CAN_CTRL2_OFFSET);
+
+  for (i = IMXRT_CAN_MB_OFFSET; i < IMXRT_CAN_MB_END; i += 4)
+    {
+      putreg32(0, priv->base + i);
+    }
+
+  for (i = IMXRT_CAN_MB2_OFFSET; i < IMXRT_CAN_MB2_END; i += 4)
+    {
+      putreg32(0, priv->base + i);
+    }
+
+  regval = getreg32(priv->base + IMXRT_CAN_CTRL2_OFFSET);
+
+  /* Clear WRMFRZ bit in CTRL2 Register */
+
+  regval &= ~CAN_CTRL2_WRMFRZ;
+
+  leave_critical_section(flags);
+
+  return 0;
+}
+
+#endif
+
 /****************************************************************************
  * Function: imxrt_initalize
  *
@@ -1556,17 +1612,11 @@ static int imxrt_initialize(struct imxrt_driver_s *priv)
 
   /* initialize CAN device */
 
-#ifdef CONFIG_IMXRT_FLEXCAN3
-  imxrt_setenable(priv->base, 0);
-
-  /* Set SYS_CLOCK src */
-
-  regval  = getreg32(priv->base + IMXRT_CAN_CTRL1_OFFSET);
-  regval |= (CAN_CTRL1_CLKSRC);
-  putreg32(regval, priv->base + IMXRT_CAN_CTRL1_OFFSET);
-#endif
-
   imxrt_setenable(priv->base, 1);
+
+#ifdef CONFIG_IMXRT_FLEXCAN_ECC
+  imxrt_init_eccram(priv);
+#endif
 
   imxrt_reset(priv);
 
@@ -1575,7 +1625,7 @@ static int imxrt_initialize(struct imxrt_driver_s *priv)
   imxrt_setfreeze(priv->base, 1);
   if (!imxrt_waitfreezeack_change(priv->base, 1))
     {
-      ninfo("FLEXCAN: freeze fail\n");
+      nerr("FLEXCAN: freeze fail\n");
       return -1;
     }
 
@@ -1687,7 +1737,7 @@ static int imxrt_initialize(struct imxrt_driver_s *priv)
   imxrt_setfreeze(priv->base, 0);
   if (!imxrt_waitfreezeack_change(priv->base, 0))
     {
-      ninfo("FLEXCAN: unfreeze fail\n");
+      nerr("FLEXCAN: unfreeze fail\n");
       return -1;
     }
 
@@ -1790,9 +1840,6 @@ int imxrt_caninitialize(int intf)
 {
   struct imxrt_driver_s *priv;
   int ret;
-#ifdef TX_TIMEOUT_WQ
-  uint32_t i;
-#endif
 
   switch (intf)
     {
@@ -1804,13 +1851,25 @@ int imxrt_caninitialize(int intf)
       memset(priv, 0, sizeof(struct imxrt_driver_s));
       priv->base         = IMXRT_CAN1_BASE;
       priv->config       = &imxrt_flexcan1_config;
+#  if defined(CONFIG_NET_CAN_CANFD) && defined(CONFIG_IMXRT_FLEXCAN1_FD)
+      priv->canfd_capable = true;
+      priv->mb_address_offset = 14;
+#  else
       priv->canfd_capable = false;
       priv->mb_address_offset = 0;
+#  endif
 
       /* Default bitrate configuration */
 
+#  if defined(CONFIG_NET_CAN_CANFD) && defined(CONFIG_IMXRT_FLEXCAN1_FD)
+      priv->arbi_timing.bitrate = CONFIG_FLEXCAN1_ARBI_BITRATE;
+      priv->arbi_timing.samplep = CONFIG_FLEXCAN1_ARBI_SAMPLEP;
+      priv->data_timing.bitrate = CONFIG_FLEXCAN1_DATA_BITRATE;
+      priv->data_timing.samplep = CONFIG_FLEXCAN1_DATA_SAMPLEP;
+#  else
       priv->arbi_timing.bitrate = CONFIG_FLEXCAN1_BITRATE;
       priv->arbi_timing.samplep = CONFIG_FLEXCAN1_SAMPLEP;
+#  endif
       break;
 #endif
 
@@ -1822,13 +1881,25 @@ int imxrt_caninitialize(int intf)
       memset(priv, 0, sizeof(struct imxrt_driver_s));
       priv->base   = IMXRT_CAN2_BASE;
       priv->config = &imxrt_flexcan2_config;
+#  if defined(CONFIG_NET_CAN_CANFD) && defined(CONFIG_IMXRT_FLEXCAN2_FD)
+      priv->canfd_capable = true;
+      priv->mb_address_offset = 14;
+#  else
       priv->canfd_capable = false;
       priv->mb_address_offset = 0;
+#  endif
 
       /* Default bitrate configuration */
 
+#  if defined(CONFIG_NET_CAN_CANFD) && defined(CONFIG_IMXRT_FLEXCAN2_FD)
+      priv->arbi_timing.bitrate = CONFIG_FLEXCAN2_ARBI_BITRATE;
+      priv->arbi_timing.samplep = CONFIG_FLEXCAN2_ARBI_SAMPLEP;
+      priv->data_timing.bitrate = CONFIG_FLEXCAN2_DATA_BITRATE;
+      priv->data_timing.samplep = CONFIG_FLEXCAN2_DATA_SAMPLEP;
+#  else
       priv->arbi_timing.bitrate = CONFIG_FLEXCAN2_BITRATE;
       priv->arbi_timing.samplep = CONFIG_FLEXCAN2_SAMPLEP;
+#  endif
       break;
 #endif
 
@@ -1903,14 +1974,6 @@ int imxrt_caninitialize(int intf)
   priv->dev.d_ioctl   = imxrt_ioctl;     /* Support CAN ioctl() calls */
 #endif
   priv->dev.d_private = (void *)priv;      /* Used to recover private state from dev */
-
-#ifdef TX_TIMEOUT_WQ
-  for (i = 0; i < TXMBCOUNT; i++)
-    {
-      priv->txtimeout[i] = wd_create();    /* Create TX timeout timer */
-    }
-
-#endif
 
   /* Put the interface in the down state.  This usually amounts to resetting
    * the device and/or calling imxrt_ifdown().

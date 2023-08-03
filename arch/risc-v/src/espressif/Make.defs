@@ -84,7 +84,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = 34267b5cc6f95ef35582a6bb3ea2476bf80b5cb1
+	ESP_HAL_3RDPARTY_VERSION = 56fd5fee26de81a321f46dfd930298c43dcec909
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL
@@ -92,9 +92,10 @@ ifndef ESP_HAL_3RDPARTY_URL
 endif
 
 chip/$(ESP_HAL_3RDPARTY_REPO):
-	$(Q) echo "Cloning: Espressif HAL for 3rd Party Platforms"
-	$(Q) git clone $(ESP_HAL_3RDPARTY_URL) chip/$(ESP_HAL_3RDPARTY_REPO)
-	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) checkout $(ESP_HAL_3RDPARTY_VERSION)
+	$(Q) echo "Cloning Espressif HAL for 3rd Party Platforms"
+	$(Q) git clone --quiet $(ESP_HAL_3RDPARTY_URL) chip/$(ESP_HAL_3RDPARTY_REPO)
+	$(Q) echo "Espressif HAL for 3rd Party Platforms: ${ESP_HAL_3RDPARTY_VERSION}"
+	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) checkout --quiet $(ESP_HAL_3RDPARTY_VERSION)
 
 # Silent preprocessor warnings
 

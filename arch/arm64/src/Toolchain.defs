@@ -80,6 +80,10 @@ ifeq ($(CONFIG_MM_UBSAN_TRAP_ON_ERROR),y)
   ARCHOPTIMIZATION += -fsanitize-undefined-trap-on-error
 endif
 
+ifeq ($(CONFIG_MM_KASAN_ALL),y)
+  ARCHOPTIMIZATION += -fsanitize=kernel-address
+endif
+
 ifeq ($(CONFIG_ARCH_FPU),y)
   ARCHCXXFLAGS += -D_LDBL_EQ_DBL
   ARCHCFLAGS   += -D_LDBL_EQ_DBL

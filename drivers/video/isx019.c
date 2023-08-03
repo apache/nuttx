@@ -3521,7 +3521,7 @@ static int validate_range(int32_t val,
 
   if (!VALIDATE_RANGE(val, range->minimum, range->maximum, range->step))
     {
-      ret = -EINVAL;
+      ret = -ERANGE;
     }
 
   return ret;

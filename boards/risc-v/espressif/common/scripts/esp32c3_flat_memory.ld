@@ -29,7 +29,7 @@
  *
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include "common.ld"
 
 #define SRAM_IRAM_START     0x4037c000
 #define SRAM_DRAM_START     0x3fc7c000
@@ -84,10 +84,27 @@ MEMORY
 
   drom0_0_seg (R) :      org = 0x3c000020, len = 0x800000 - 0x20
 
-  /* RTC fast memory. Persists over deep sleep. */
+  /* RTC fast memory (executable). Persists over deep sleep. */
 
-  rtc_seg(RWX) :          org = 0x50000000, len = 0x2000
+  rtc_iram_seg(RWX) :    org = 0x50000000, len = 0x2000 - RESERVE_RTC_MEM
+
+  /* We reduced the size of rtc_iram_seg by RESERVE_RTC_MEM value.
+   * It reserves the amount of RTC fast memory that we use for this memory segment.
+   * This segment is intended for keeping:
+   *   - (lower addr) rtc timer data (s_rtc_timer_retain_mem, see esp_clk.c files).
+   *   - (higher addr) bootloader rtc data (s_bootloader_retain_mem, when a Kconfig option is on).
+   * The aim of this is to keep data that will not be moved around and have a fixed address.
+   */
+  rtc_reserved_seg(RW) : org = 0x50000000 + 0x2000 - RESERVE_RTC_MEM, len = RESERVE_RTC_MEM
 }
+
+/*  The lines below define location alias for .rtc.data section
+ *  As C3 only has RTC fast memory, this is not configurable like on other targets
+ */
+
+REGION_ALIAS("rtc_data_seg", rtc_iram_seg );
+REGION_ALIAS("rtc_slow_seg", rtc_iram_seg );
+REGION_ALIAS("rtc_data_location", rtc_iram_seg );
 
 #if CONFIG_ESPRESSIF_RUN_IRAM
   REGION_ALIAS("default_rodata_seg", dram0_0_seg);
@@ -96,7 +113,3 @@ MEMORY
   REGION_ALIAS("default_rodata_seg", drom0_0_seg);
   REGION_ALIAS("default_code_seg", irom0_0_seg);
 #endif /* CONFIG_ESPRESSIF_RUN_IRAM */
-
-/* Mark the end of the RTC heap (top of the RTC region) */
-
-_ertcheap = 0x50001fff;

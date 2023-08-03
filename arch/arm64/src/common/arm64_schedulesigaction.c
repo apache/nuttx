@@ -310,13 +310,6 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                   CURRENT_REGS = tcb->xcp.regs;
                 }
 
-              /* Increment the IRQ lock count so that when the task is
-               * restarted, it will hold the IRQ spinlock.
-               */
-
-              DEBUGASSERT(tcb->irqcount < INT16_MAX);
-              tcb->irqcount++;
-
               /* NOTE: If the task runs on another CPU(cpu), adjusting
                * global IRQ controls will be done in the pause handler
                * on the CPU(cpu) by taking a critical section.
@@ -353,13 +346,6 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
           /* create signal process context */
 
           arm64_init_signal_process(tcb, NULL);
-
-          /* Increment the IRQ lock count so that when the task is restarted,
-           * it will hold the IRQ spinlock.
-           */
-
-          DEBUGASSERT(tcb->irqcount < INT16_MAX);
-          tcb->irqcount++;
         }
     }
 }

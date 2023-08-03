@@ -1355,13 +1355,36 @@ config ESP32S3_PARTITION_TABLE_OFFSET
 	default 0x8000
 	depends on ESP32S3_APP_FORMAT_LEGACY
 
+config ESP32S3_KERNEL_OFFSET
+	hex
+	default 0x10000
+	depends on ESP32S3_APP_FORMAT_LEGACY
+
 if BUILD_PROTECTED
 
-config ESP32S3_USER_IMAGE_OFFSET
-	hex "User image offset"
-	default 0x90000
+config ESP32S3_KERNEL_IMAGE_SIZE
+	hex "Kernel Image Size"
+	default 0x100000
+	depends on ESP32S3_APP_FORMAT_LEGACY
 	---help---
-		Offset in SPI Flash for flashing the User application firmware image.
+		Max size of the kernel image. This parameter is used to 1) write to
+		the SPI flash, 2) calculate the offset for the user image and 3) set
+		the KIROM, KDROM, UIROM and UDROM parameters in the linker. Please
+		check boards/xtensa/esp32s3/common/scripts/protected_memory.ld for
+		more information.
+
+config ESP32S3_KERNEL_RAM_SIZE
+	hex "Kernel Allocated RAM"
+	default 0x29000
+	range 0x10000 0x54700
+	depends on ESP32S3_APP_FORMAT_LEGACY
+	---help---
+		Selects the amount of RAM available to the kernel from the total
+		available amount (337,75KiB). The rest of the memory will be
+		allocated to the user space. Respectively, this config will set the
+		KDRAM and UDRAM parameters of the linker. Please check
+		boards/xtensa/esp32s3/common/scripts/protected_memory.ld for more
+		information.
 
 endif # BUILD_PROTECTED
 

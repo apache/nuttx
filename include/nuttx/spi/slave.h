@@ -294,6 +294,22 @@
 #define SPIS_DEV_RECEIVE(d,v,l)  ((d)->ops->receive(d,v,l))
 
 /****************************************************************************
+ * Name: SPIS_DEV_NOTIFY
+ *
+ * Description:
+ *   This is a SPI device callback that is used when the SPI controller
+ *   receives and sends complete or fail to notify spi slave upper half.
+ *   And this callback can call in interrupt handler.
+ *
+ * Input Parameters:
+ *   dev   - SPI Slave device interface instance
+ *   state - The Receive and send state, type of state is spi_slave_state_t
+ *
+ ****************************************************************************/
+
+#define SPIS_DEV_NOTIFY(d,s)  ((d)->ops->notify(d,s))
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 
@@ -475,6 +491,15 @@ enum spi_slave_mode_e
   SPISLAVE_MODE3          /* CPOL=1 CPHA=1 */
 };
 
+/* The SPI slave transfer state */
+
+typedef enum
+{
+  SPISLAVE_RX_COMPLETE = 0,
+  SPISLAVE_TX_COMPLETE,
+  SPISLAVE_TRANSFER_FAILED
+} spi_slave_state_t;
+
 /* The SPI slave controller driver vtable */
 
 struct spi_slave_ctrlr_s; /* Forward reference */
@@ -516,6 +541,8 @@ struct spi_slave_devops_s
                            FAR const void **data);
   CODE size_t   (*receive)(FAR struct spi_slave_dev_s *sdev,
                            FAR const void *data, size_t nwords);
+  CODE void     (*notify)(FAR struct spi_slave_dev_s *sdev,
+                          spi_slave_state_t state);
 };
 
 /* SPI slave device private data. This structure only defines the initial

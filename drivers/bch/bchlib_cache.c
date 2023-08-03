@@ -103,7 +103,7 @@ static int bch_cypher(FAR struct bchlib_s *bch, int encrypt)
  *
  ****************************************************************************/
 
-int bchlib_flushsector(FAR struct bchlib_s *bch)
+int bchlib_flushsector(FAR struct bchlib_s *bch, bool discard)
 {
   FAR struct inode *inode;
   ssize_t ret = OK;
@@ -144,6 +144,11 @@ int bchlib_flushsector(FAR struct bchlib_s *bch)
       bch->dirty = false;
     }
 
+  if (discard)
+    {
+      bch->sector = (size_t)-1;
+    }
+
   return (int)ret;
 }
 
@@ -151,7 +156,7 @@ int bchlib_flushsector(FAR struct bchlib_s *bch)
  * Name: bchlib_readsector
  *
  * Description:
- *   Flush the current contents of the sector buffer (if dirty)
+ *   Read the current sector contents into buffer
  *
  * Assumptions:
  *   Caller must assume mutual exclusion
@@ -167,14 +172,12 @@ int bchlib_readsector(FAR struct bchlib_s *bch, size_t sector)
     {
       inode = bch->inode;
 
-      ret = bchlib_flushsector(bch);
+      ret = bchlib_flushsector(bch, true);
       if (ret < 0)
         {
           ferr("Flush failed: %zd\n", ret);
           return (int)ret;
         }
-
-      bch->sector = (size_t)-1;
 
       ret = inode->u.i_bops->read(inode, bch->buffer, sector, 1);
       if (ret < 0)

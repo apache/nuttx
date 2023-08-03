@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/fs/unionfs.h
+ * boards/xtensa/esp32/common/include/esp32_bme680.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_FS_UNIONFS_H
-#define __INCLUDE_NUTTX_FS_UNIONFS_H
+#ifndef __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_ESP32_BME680_H
+#define __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_ESP32_BME680_H
 
 /****************************************************************************
  * Included Files
@@ -27,14 +27,16 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_FS_UNIONFS
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
  * Type Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
@@ -50,39 +52,34 @@ extern "C"
 #endif
 
 /****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: unionfs_mount
+ * Name: board_bme680_initialize
  *
  * Description:
- *   Create and mount a union file system
+ *   Initialize and register the BME680 BME680 Temperature, Pressure,
+ * Humidity and Gas Resistance sensor.
  *
  * Input Parameters:
- *   fspath1 - The full path to the first file system mountpoint
- *   prefix1 - An optiona prefix that may be applied to make the first
- *             file system appear a some path below the unionfs mountpoint,
- *   fspath2 - The full path to the second file system mountpoint
- *   prefix2 - An optiona prefix that may be applied to make the first
- *             file system appear a some path below the unionfs mountpoint,
- *   mountpt - The full path to the mountpoint for the union file system
+ *   devno - The device number, used to build the device path as /dev/pressN
+ *   busno - The I2C bus number
  *
  * Returned Value:
- *   Zero (OK) is returned if the union file system was correctly created and
- *   mounted.  On any failure, a negated error value will be returned to
- *   indicate the nature of the failure.
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int unionfs_mount(FAR const char *fspath1, FAR const char *prefix1,
-                  FAR const char *fspath2, FAR const char *prefix2,
-                  FAR const char *mountpt);
+int board_bme680_initialize(int devno, int busno);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* CONFIG_FS_UNIONFS */
-#endif /* __INCLUDE_NUTTX_FS_UNIONFS_H */
+#endif /* __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_ESP32_BME680_H */

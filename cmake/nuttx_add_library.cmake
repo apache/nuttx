@@ -180,7 +180,6 @@ endfunction()
 #
 function(nuttx_library_import library_name library_path)
   add_library(${library_name} STATIC IMPORTED GLOBAL)
-  set_target_properties(${library_name}
-    PROPERTIES IMPORTED_LOCATION
-    ${library_path})
+  set_target_properties(${library_name} PROPERTIES IMPORTED_LOCATION
+                                                   ${library_path})
 endfunction()

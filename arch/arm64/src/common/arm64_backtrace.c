@@ -116,6 +116,11 @@ int up_backtrace(struct tcb_s *tcb,
   irqstate_t flags;
   int ret;
 
+  if (rtcb == NULL)
+    {
+      rtcb = running_task();
+    }
+
   if (size <= 0 || !buffer)
     {
       return 0;

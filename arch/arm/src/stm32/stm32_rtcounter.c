@@ -394,41 +394,44 @@ int up_rtc_initialize(void)
 
       modifyreg32(STM32_RCC_BDCR, 0, RCC_BDCR_BDRST);
       modifyreg32(STM32_RCC_BDCR, RCC_BDCR_BDRST, 0);
+
+      modifyreg16(STM32_RCC_BDCR, 0, RCC_BDCR_LSEON);
+
+      /* Wait for the LSE clock to be ready */
+
+      while ((getreg16(STM32_RCC_BDCR) & RCC_BDCR_LSERDY) == 0)
+        {
+          stm32_waste();
+        }
+
+      /* Select the lower power external 32,768Hz (Low-Speed External, LSE)
+       * oscillator as RTC Clock Source and enable the Clock.
+       */
+
+      modifyreg16(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_LSE);
+
+      /* Enable RTC and wait for RSF */
+
+      modifyreg16(STM32_RCC_BDCR, 0, RCC_BDCR_RTCEN);
+      stm32_rtc_waitlasttask();
+
+      stm32_rtc_wait4rsf();
+      stm32_rtc_waitlasttask();
+
+      /* Configure prescaler, note that these are write-only registers */
+
+      stm32_rtc_beginwr();
+      putreg16(STM32_RTC_PRESCALAR_VALUE >> 16,    STM32_RTC_PRLH);
+      putreg16(STM32_RTC_PRESCALAR_VALUE & 0xffff, STM32_RTC_PRLL);
+      stm32_rtc_endwr();
+
+      stm32_rtc_wait4rsf();
+      stm32_rtc_waitlasttask();
+
+      /* Write the magic register after RTC initialization. */
+
       putreg16(RTC_MAGIC, RTC_MAGIC_REG);
     }
-
-  modifyreg16(STM32_RCC_BDCR, 0, RCC_BDCR_LSEON);
-
-  /* Wait for the LSE clock to be ready */
-
-  while ((getreg16(STM32_RCC_BDCR) & RCC_BDCR_LSERDY) == 0)
-    {
-      stm32_waste();
-    }
-
-  /* Select the lower power external 32,768Hz (Low-Speed External, LSE)
-   * oscillator as RTC Clock Source and enable the Clock.
-   */
-
-  modifyreg16(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_LSE);
-
-  /* Enable RTC and wait for RSF */
-
-  modifyreg16(STM32_RCC_BDCR, 0, RCC_BDCR_RTCEN);
-  stm32_rtc_waitlasttask();
-
-  stm32_rtc_wait4rsf();
-  stm32_rtc_waitlasttask();
-
-  /* Configure prescaler, note that these are write-only registers */
-
-  stm32_rtc_beginwr();
-  putreg16(STM32_RTC_PRESCALAR_VALUE >> 16,    STM32_RTC_PRLH);
-  putreg16(STM32_RTC_PRESCALAR_VALUE & 0xffff, STM32_RTC_PRLL);
-  stm32_rtc_endwr();
-
-  stm32_rtc_wait4rsf();
-  stm32_rtc_waitlasttask();
 
 #ifdef CONFIG_RTC_HIRES
   /* Enable overflow interrupt - alarm interrupt is enabled in

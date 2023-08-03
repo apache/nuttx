@@ -32,6 +32,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <arch/board/board.h>
+#include <sched/sched.h>
 
 #include "riscv_internal.h"
 
@@ -89,9 +90,9 @@ uintptr_t *riscv_doirq(int irq, uintptr_t *regs)
    * returning from the interrupt.
    */
 
-#ifdef CONFIG_ARCH_ADDRENV
   if (regs != CURRENT_REGS)
     {
+#ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously
        * running task is closed down gracefully (data caches dump,
        * MMU flushed) and set up the address environment for the new
@@ -99,11 +100,15 @@ uintptr_t *riscv_doirq(int irq, uintptr_t *regs)
        */
 
       addrenv_switch(NULL);
-    }
 #endif
 
-  if (regs != CURRENT_REGS)
-    {
+      /* Record the new "running" task when context switch occurred.
+       * g_running_tasks[] is only used by assertion logic for reporting
+       * crashes.
+       */
+
+      g_running_tasks[this_cpu()] = this_task();
+
       /* Restore the cpu lock */
 
       restore_critical_section();

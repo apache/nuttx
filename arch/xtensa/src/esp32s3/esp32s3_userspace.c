@@ -52,7 +52,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define USER_IMAGE_OFFSET   CONFIG_ESP32S3_USER_IMAGE_OFFSET
+#define USER_IMAGE_OFFSET   CONFIG_ESP32S3_KERNEL_OFFSET + CONFIG_ESP32S3_KERNEL_IMAGE_SIZE
 
 #define MMU_BLOCK0_VADDR    SOC_DROM_LOW
 #define MMU_SIZE            0x3f0000

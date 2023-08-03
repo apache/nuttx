@@ -94,6 +94,13 @@ config PSEUDOFS_SOFTLINKS
 		to link a directory in the pseudo-file system, such as /bin, to
 		to a directory in a mounted volume, say /mnt/sdcard/bin.
 
+config PSEUDOFS_FILE
+	bool "Pseudo file support"
+	default n
+	depends on !DISABLE_PSEUDOFS_OPERATIONS
+	---help---
+		Support to create a file on pseudo filesystem.
+
 config SENDFILE_BUFSIZE
 	int "sendfile() buffer size"
 	default 512

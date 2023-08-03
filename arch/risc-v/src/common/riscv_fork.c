@@ -52,7 +52,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_fork
+ * Name: riscv_fork
  *
  * Description:
  *   The fork() function has the same effect as posix fork(), except that the
@@ -65,8 +65,8 @@
  *   The overall sequence is:
  *
  *   1) User code calls fork().  fork() collects context information and
- *      transfers control up up_fork().
- *   2) up_fork() and calls nxtask_setup_fork().
+ *      transfers control up riscv_fork().
+ *   2) riscv_fork() and calls nxtask_setup_fork().
  *   3) nxtask_setup_fork() allocates and configures the child task's TCB.
  *     This consists of:
  *      - Allocation of the child task's TCB.
@@ -75,10 +75,11 @@
  *      - Allocate and initialize the stack
  *      - Setup the input parameters for the task.
  *      - Initialization of the TCB (including call to up_initial_state())
- *   4) up_fork() provides any additional operating context. up_fork must:
+ *   4) riscv_fork() provides any additional operating context. riscv_fork
+ *      must:
  *      - Initialize special values in any CPU registers that were not
  *        already configured by up_initial_state()
- *   5) up_fork() then calls nxtask_start_fork()
+ *   5) riscv_fork() then calls nxtask_start_fork()
  *   6) nxtask_start_fork() then executes the child thread.
  *
  * nxtask_abort_fork() may be called if an error occurs between steps 3
@@ -97,7 +98,7 @@
 
 #ifdef CONFIG_ARCH_HAVE_FORK
 
-pid_t up_fork(const struct fork_s *context)
+pid_t riscv_fork(const struct fork_s *context)
 {
   struct tcb_s *parent = this_task();
   struct task_tcb_s *child;
@@ -108,6 +109,9 @@ pid_t up_fork(const struct fork_s *context)
   uintptr_t newtop;
   uintptr_t stacktop;
   uintptr_t stackutil;
+#ifdef CONFIG_ARCH_FPU
+  uintptr_t *fregs;
+#endif
 
   sinfo("s0:%" PRIxREG " s1:%" PRIxREG " s2:%" PRIxREG " s3:%" PRIxREG ""
         " s4:%" PRIxREG "\n",
@@ -227,18 +231,19 @@ pid_t up_fork(const struct fork_s *context)
   child->cmn.xcp.regs[REG_GP]   = newsp;        /* Global pointer */
 #endif
 #ifdef CONFIG_ARCH_FPU
-  child->cmn.xcp.regs[REG_FS0]  = context->fs0;  /* Saved register fs1 */
-  child->cmn.xcp.regs[REG_FS1]  = context->fs1;  /* Saved register fs1 */
-  child->cmn.xcp.regs[REG_FS2]  = context->fs2;  /* Saved register fs2 */
-  child->cmn.xcp.regs[REG_FS3]  = context->fs3;  /* Saved register fs3 */
-  child->cmn.xcp.regs[REG_FS4]  = context->fs4;  /* Saved register fs4 */
-  child->cmn.xcp.regs[REG_FS5]  = context->fs5;  /* Saved register fs5 */
-  child->cmn.xcp.regs[REG_FS6]  = context->fs6;  /* Saved register fs6 */
-  child->cmn.xcp.regs[REG_FS7]  = context->fs7;  /* Saved register fs7 */
-  child->cmn.xcp.regs[REG_FS8]  = context->fs8;  /* Saved register fs8 */
-  child->cmn.xcp.regs[REG_FS9]  = context->fs9;  /* Saved register fs9 */
-  child->cmn.xcp.regs[REG_FS10] = context->fs10; /* Saved register fs10 */
-  child->cmn.xcp.regs[REG_FS11] = context->fs11; /* Saved register fs11 */
+  fregs                         = riscv_fpuregs(&child->cmn);
+  fregs[REG_FS0]                = context->fs0;  /* Saved register fs1 */
+  fregs[REG_FS1]                = context->fs1;  /* Saved register fs1 */
+  fregs[REG_FS2]                = context->fs2;  /* Saved register fs2 */
+  fregs[REG_FS3]                = context->fs3;  /* Saved register fs3 */
+  fregs[REG_FS4]                = context->fs4;  /* Saved register fs4 */
+  fregs[REG_FS5]                = context->fs5;  /* Saved register fs5 */
+  fregs[REG_FS6]                = context->fs6;  /* Saved register fs6 */
+  fregs[REG_FS7]                = context->fs7;  /* Saved register fs7 */
+  fregs[REG_FS8]                = context->fs8;  /* Saved register fs8 */
+  fregs[REG_FS9]                = context->fs9;  /* Saved register fs9 */
+  fregs[REG_FS10]               = context->fs10; /* Saved register fs10 */
+  fregs[REG_FS11]               = context->fs11; /* Saved register fs11 */
 #endif
 
 #ifdef CONFIG_LIB_SYSCALL

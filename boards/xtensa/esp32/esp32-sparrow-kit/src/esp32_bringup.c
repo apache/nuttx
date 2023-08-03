@@ -84,6 +84,10 @@
 #  include "esp32_bmp180.h"
 #endif
 
+#ifdef CONFIG_SENSORS_BME680
+#  include "esp32_bme680.h"
+#endif
+
 #ifdef CONFIG_SENSORS_LTR308
 #  include "esp32_ltr308.h"
 #endif
@@ -347,6 +351,17 @@ int esp32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize BMP180 driver: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_BME680
+  /* Try to register BME680 device in I2C0 */
+
+  ret = board_bme680_initialize(0, 0);
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize BME680 driver: %d\n", ret);
     }
 #endif
 

@@ -74,6 +74,13 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
    */
 
 #ifdef CONFIG_DEBUG_FEATURES
+  /* A flags with MAP_PRIVATE and MAP_SHARED is invalid. */
+
+  if ((flags & MAP_PRIVATE) && (flags & MAP_SHARED))
+    {
+      return -EINVAL;
+    }
+
   /* Fixed mappings and protections are not currently supported.  These
    * options could be supported in the KERNEL build with an MMU, but that
    * logic is not in place.

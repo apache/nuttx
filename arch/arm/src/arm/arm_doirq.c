@@ -32,6 +32,7 @@
 #include <nuttx/addrenv.h>
 #include <nuttx/board.h>
 #include <arch/board/board.h>
+#include <sched/sched.h>
 
 #include "arm_internal.h"
 
@@ -79,7 +80,6 @@ void arm_doirq(int irq, uint32_t *regs)
 
   irq_dispatch(irq, regs);
 
-#ifdef CONFIG_ARCH_ADDRENV
   /* Check for a context switch.  If a context switch occurred, then
    * CURRENT_REGS will have a different value than it did on entry.  If an
    * interrupt level context switch has occurred, then restore the floating
@@ -89,6 +89,7 @@ void arm_doirq(int irq, uint32_t *regs)
 
   if (regs != CURRENT_REGS)
     {
+#ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously
        * running task is closed down gracefully (data caches dump,
        * MMU flushed) and set up the address environment for the new
@@ -96,8 +97,15 @@ void arm_doirq(int irq, uint32_t *regs)
        */
 
       addrenv_switch(NULL);
-    }
 #endif
+
+      /* Record the new "running" task when context switch occurred.
+       * g_running_tasks[] is only used by assertion logic for reporting
+       * crashes.
+       */
+
+      g_running_tasks[this_cpu()] = this_task();
+    }
 
   /* Set CURRENT_REGS to NULL to indicate that we are no longer in an
    * interrupt handler.

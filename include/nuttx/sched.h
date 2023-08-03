@@ -173,20 +173,18 @@
 #  define _SCHED_ERRVAL(r)           (-errno)
 #endif
 
-#ifdef CONFIG_DEBUG_TCBINFO
-#  define TCB_PID_OFF                offsetof(struct tcb_s, pid)
-#  define TCB_STATE_OFF              offsetof(struct tcb_s, task_state)
-#  define TCB_PRI_OFF                offsetof(struct tcb_s, sched_priority)
+#define TCB_PID_OFF                  offsetof(struct tcb_s, pid)
+#define TCB_STATE_OFF                offsetof(struct tcb_s, task_state)
+#define TCB_PRI_OFF                  offsetof(struct tcb_s, sched_priority)
 #if CONFIG_TASK_NAME_SIZE > 0
 #  define TCB_NAME_OFF               offsetof(struct tcb_s, name)
 #else
 #  define TCB_NAME_OFF               0
 #endif
-#  define TCB_REGS_OFF               offsetof(struct tcb_s, xcp.regs)
-#  define TCB_REG_OFF(reg)           (reg * sizeof(uintptr_t))
-#  define TCB_STACK_OFF              offsetof(struct tcb_s, stack_base_ptr)
-#  define TCB_STACK_SIZE_OFF         offsetof(struct tcb_s, adj_stack_size)
-#endif
+#define TCB_REGS_OFF                 offsetof(struct tcb_s, xcp.regs)
+#define TCB_REG_OFF(reg)             (reg * sizeof(uintptr_t))
+#define TCB_STACK_OFF                offsetof(struct tcb_s, stack_base_ptr)
+#define TCB_STACK_SIZE_OFF           offsetof(struct tcb_s, adj_stack_size)
 
 /* Get a pointer to the process' memory map struct from the task_group */
 
@@ -710,7 +708,6 @@ struct pthread_tcb_s
  * debuggers to parse the tcb information
  */
 
-#ifdef CONFIG_DEBUG_TCBINFO
 begin_packed_struct struct tcbinfo_s
 {
   uint16_t pid_off;                      /* Offset of tcb.pid               */
@@ -739,7 +736,6 @@ begin_packed_struct struct tcbinfo_s
   }
   end_packed_struct reg_off;
 } end_packed_struct;
-#endif
 
 /* This is the callback type used by nxsched_foreach() */
 
@@ -768,9 +764,7 @@ EXTERN unsigned long g_premp_max[CONFIG_SMP_NCPUS];
 EXTERN unsigned long g_crit_max[CONFIG_SMP_NCPUS];
 #endif /* CONFIG_SCHED_CRITMONITOR */
 
-#ifdef CONFIG_DEBUG_TCBINFO
 EXTERN const struct tcbinfo_s g_tcbinfo;
-#endif
 
 /****************************************************************************
  * Public Function Prototypes

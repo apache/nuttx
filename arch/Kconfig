@@ -18,6 +18,7 @@ config ARCH_ARM
 	select ARCH_HAVE_SETJMP if !ARCH_TOOLCHAIN_IAR
 	select ARCH_HAVE_SYSCALL_HOOKS
 	select ARCH_HAVE_RDWR_MEM_CPU_RUN
+	select ARCH_HAVE_TCBINFO
 	select ARCH_HAVE_THREAD_LOCAL
 	---help---
 		The ARM architectures
@@ -31,8 +32,10 @@ config ARCH_ARM64
 	select ARCH_HAVE_STACKCHECK
 	select ARCH_HAVE_CUSTOMOPT
 	select ARCH_HAVE_STDARG_H
+	select ARCH_HAVE_SETJMP
 	select ARCH_HAVE_SYSCALL_HOOKS
 	select ARCH_HAVE_RDWR_MEM_CPU_RUN
+	select ARCH_HAVE_TCBINFO
 	select ARCH_HAVE_THREAD_LOCAL
 	select ARCH_HAVE_PERF_EVENTS
 	select ONESHOT
@@ -88,7 +91,9 @@ config ARCH_RISCV
 	select ARCH_HAVE_STDARG_H
 	select ARCH_HAVE_SYSCALL_HOOKS
 	select ARCH_HAVE_RDWR_MEM_CPU_RUN
+	select ARCH_HAVE_TCBINFO
 	select ARCH_HAVE_THREAD_LOCAL
+	select ARCH_HAVE_LAZYFPU if ARCH_HAVE_FPU
 	---help---
 		RISC-V 32 and 64-bit RV32 / RV64 architectures.
 
@@ -105,6 +110,7 @@ config ARCH_SIM
 	select ARCH_HAVE_FORK if !HOST_WINDOWS
 	select ARCH_HAVE_SETJMP
 	select ARCH_HAVE_CUSTOMOPT
+	select ARCH_HAVE_TCBINFO
 	select ARCH_HAVE_TEXT_HEAP
 	select ARCH_SETJMP_H
 	select ALARM_ARCH
@@ -117,11 +123,13 @@ config ARCH_SIM
 
 config ARCH_X86
 	bool "x86"
+	select ARCH_HAVE_TCBINFO
 	---help---
 		Intel x86 architectures.
 
 config ARCH_X86_64
 	bool "x86_64"
+	select ARCH_HAVE_TCBINFO
 	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF
 	---help---
 		x86-64 architectures.
@@ -133,6 +141,7 @@ config ARCH_XTENSA
 	select ARCH_HAVE_INTERRUPTSTACK
 	select ARCH_HAVE_STACKCHECK
 	select ARCH_HAVE_CUSTOMOPT
+	select ARCH_HAVE_TCBINFO
 	select ARCH_HAVE_STDARG_H
 	select ARCH_HAVE_SETJMP if ARCH_TOOLCHAIN_GNU
 	select ARCH_HAVE_SYSCALL_HOOKS
@@ -161,6 +170,7 @@ config ARCH_SPARC
 	bool "SPARC"
 	select ARCH_HAVE_INTERRUPTSTACK
 	select ARCH_HAVE_CUSTOMOPT
+	select ARCH_HAVE_TCBINFO
 	---help---
 		SPARC architectures (SPARC V8)
 
@@ -407,6 +417,11 @@ config ARCH_HAVE_DPFPU
 	default n
 	select ARCH_HAVE_FPU
 
+config ARCH_HAVE_LAZYFPU
+	bool
+	default n
+	depends on ARCH_HAVE_FPU
+
 config ARCH_HAVE_MMU
 	bool
 	default n
@@ -483,6 +498,10 @@ config ARCH_HAVE_CPUINFO
 	bool
 	default n
 
+config ARCH_HAVE_TCBINFO
+	bool
+	default n
+
 config ARCH_HAVE_ELF_EXECUTABLE
 	bool
 	default n
@@ -502,6 +521,41 @@ config ARCH_DPFPU
 	---help---
 		Enable toolchain support for double precision (64-bit) floating
 		point if both the toolchain and the hardware support it.
+
+config ARCH_LAZYFPU
+	bool "Enable lazy FPU state save / restore"
+	default n
+	depends on ARCH_FPU && ARCH_HAVE_LAZYFPU
+	---help---
+		Enable lazy FPU state save and restore. Normally FPU state is saved
+		and restored with the integer context registers, if the task is using
+		FPU. The state is typically saved into the task's user stack upon
+		exception entry or context switch out, and restored when the
+		exception returns or context switches back in.
+
+		As the kernel does not use FPU, this can be optimized with the help
+		of the FPU hardware status and a bit of code logic inside the kernel.
+		The logic keeps track of the FPU state, which can be "unused",
+		"dirty"	or "clean". A clean state means the FPU has not been used
+		since the last state save, while the dirty state indicates that the
+		FPU has been used.
+
+		The optimization saves / restores FPU registers only if:
+		- A context change has happened, save and restore does not happen
+		  during exception entry / return to the same task
+		- FPU is in use (state is not unused) and
+		- FPU status is dirty, i.e. FPU has been used after the last
+		- FPU restore happens when status is in dirty or clean
+
+		This saves CPU time as the FPU registers do not have to be moved in
+		and out when handling an exception that does not result in a context
+		switch.
+
+		The tradeoff with the lazy FPU feature is that it requires a static
+		memory allocation from the task's TCB to store the FPU registers,
+		while the non-lazy style can use stack memory for storing the FPU
+		registers, saving memory as the stack frame for the FPU registers can
+		be skipped if the FPU is not in use.
 
 config ARCH_USE_MMU
 	bool "Enable MMU"

@@ -33,6 +33,7 @@
 #include <nuttx/board.h>
 
 #include <arch/irq.h>
+#include <sched/sched.h>
 
 #include "chip/switch.h"
 #include "z80_internal.h"
@@ -69,13 +70,13 @@ FAR chipreg_t *z80_doirq(uint8_t irq, FAR chipreg_t *regs)
 
       irq_dispatch(irq, regs);
 
-#ifdef CONFIG_ARCH_ADDRENV
       /* If a context switch occurred, 'newregs' will hold the new context */
 
       newregs = IRQ_STATE();
 
       if (newregs != regs)
         {
+#ifdef CONFIG_ARCH_ADDRENV
           /* Make sure that the address environment for the previously
            * running task is closed down gracefully and set up the
            * address environment for the new thread at the head of the
@@ -83,15 +84,17 @@ FAR chipreg_t *z80_doirq(uint8_t irq, FAR chipreg_t *regs)
            */
 
           addrenv_switch(NULL);
+#endif
+
+          /* Record the new "running" task when context switch occurred.
+           * g_running_tasks[] is only used by assertion logic for reporting
+           * crashes.
+           */
+
+          g_running_tasks[this_cpu()] = this_task();
         }
 
       regs = newregs;
-
-#else
-      /* If a context switch occurred, 'regs' will hold the new context */
-
-      regs = IRQ_STATE();
-#endif
 
       /* Indicate that we are no longer in interrupt processing logic */
 

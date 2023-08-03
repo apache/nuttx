@@ -63,12 +63,8 @@ AOBJS = $(ASRCS:.S=$(OBJEXT))
 CSRCS  = sim_initialize.c sim_idle.c sim_doirq.c sim_initialstate.c
 CSRCS += sim_createstack.c sim_usestack.c sim_releasestack.c sim_stackframe.c
 CSRCS += sim_exit.c sim_schedulesigaction.c sim_switchcontext.c sim_heap.c
-CSRCS += sim_uart.c sim_copyfullstate.c sim_sigdeliver.c
+CSRCS += sim_uart.c sim_copyfullstate.c sim_sigdeliver.c sim_tcbinfo.c
 CSRCS += sim_registerdump.c sim_saveusercontext.c sim_textheap.c
-
-ifeq ($(CONFIG_DEBUG_TCBINFO),y)
-CSRCS += sim_tcbinfo.c
-endif
 
 ifeq ($(CONFIG_SCHED_BACKTRACE),y)
 CSRCS += sim_backtrace.c
@@ -95,6 +91,10 @@ HOSTCFLAGS += ${INCDIR_PREFIX}$(ARCH_SRCDIR)
 HOSTCFLAGS += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)chip
 ifeq ($(CONFIG_HOST_MACOS),y)
   HOSTCFLAGS += -Wno-deprecated-declarations
+endif
+
+ifeq ($(CONFIG_FS_LARGEFILE),y)
+  HOSTCFLAGS += -D_FILE_OFFSET_BITS=64
 endif
 
 HOSTSRCS = sim_hostirq.c sim_hostmemory.c sim_hostmisc.c sim_hosttime.c sim_hostuart.c

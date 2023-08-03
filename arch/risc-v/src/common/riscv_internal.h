@@ -29,6 +29,7 @@
 
 #ifndef __ASSEMBLY__
 #  include <nuttx/compiler.h>
+#  include <nuttx/sched.h>
 #  include <sys/types.h>
 #  include <stdint.h>
 #  include <syscall.h>
@@ -203,9 +204,53 @@ void riscv_exception_attach(void);
 
 #ifdef CONFIG_ARCH_FPU
 void riscv_fpuconfig(void);
+void riscv_savefpu(uintptr_t *regs, uintptr_t *fregs);
+void riscv_restorefpu(uintptr_t *regs, uintptr_t *fregs);
+
+/* Get FPU register save area */
+
+static inline uintptr_t *riscv_fpuregs(struct tcb_s *tcb)
+{
+#ifdef CONFIG_ARCH_LAZYFPU
+  /* With lazy FPU the registers are simply in tcb */
+
+  return tcb->xcp.fregs;
+#else
+  /* Otherwise they are after the integer registers */
+
+  return (uintptr_t *)((uintptr_t)tcb->xcp.regs + INT_XCPT_SIZE);
+#endif
+}
 #else
 #  define riscv_fpuconfig()
+#  define riscv_savefpu(regs, fregs)
+#  define riscv_restorefpu(regs, fregs)
+#  define riscv_fpuregs(tcb)
 #endif
+
+/* Save / restore context of task */
+
+static inline void riscv_savecontext(struct tcb_s *tcb)
+{
+  tcb->xcp.regs = (uintptr_t *)CURRENT_REGS;
+
+#ifdef CONFIG_ARCH_FPU
+  /* Save current process FPU state to TCB */
+
+  riscv_savefpu(tcb->xcp.regs, riscv_fpuregs(tcb));
+#endif
+}
+
+static inline void riscv_restorecontext(struct tcb_s *tcb)
+{
+  CURRENT_REGS = (uintptr_t *)tcb->xcp.regs;
+
+#ifdef CONFIG_ARCH_FPU
+  /* Restore FPU state for next process */
+
+  riscv_restorefpu(tcb->xcp.regs, riscv_fpuregs(tcb));
+#endif
+}
 
 /* RISC-V PMP Config ********************************************************/
 
@@ -304,19 +349,19 @@ void *riscv_perform_syscall(uintptr_t *regs);
 
 /* SYS call 1:
  *
- * void riscv_fullcontextrestore(uintptr_t *restoreregs) noreturn_function;
+ * void riscv_fullcontextrestore(struct tcb_s *next) noreturn_function;
  */
 
-#define riscv_fullcontextrestore(restoreregs) \
-  sys_call1(SYS_restore_context, (uintptr_t)restoreregs)
+#define riscv_fullcontextrestore(next) \
+  sys_call1(SYS_restore_context, (uintptr_t)next)
 
 /* SYS call 2:
  *
- * void riscv_switchcontext(uintptr_t *saveregs, uintptr_t *restoreregs);
+ * riscv_switchcontext(struct tcb_s *prev, struct tcb_s *next);
  */
 
-#define riscv_switchcontext(saveregs, restoreregs) \
-  sys_call2(SYS_switch_context, (uintptr_t)saveregs, (uintptr_t)restoreregs)
+#define riscv_switchcontext(prev, next) \
+  sys_call2(SYS_switch_context, (uintptr_t)prev, (uintptr_t)next)
 
 #ifdef CONFIG_BUILD_KERNEL
 /* SYS call 3:

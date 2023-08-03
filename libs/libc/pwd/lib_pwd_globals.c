@@ -32,6 +32,7 @@
 
 /* Data for non-reentrant group functions */
 
+int g_passwd_index;
 struct passwd g_passwd;
 char g_passwd_buffer[CONFIG_LIBC_PASSWD_LINESIZE];
 

@@ -231,8 +231,8 @@ struct bmi160_dev_s
 {
 #ifdef CONFIG_SENSORS_BMI160_SCU_I2C
   struct i2c_master_s *i2c; /* I2C interface */
-  uint8_t addr;             /* BMP280 I2C address */
-  int freq;                 /* BMP280 Frequency <= 3.4MHz */
+  uint8_t addr;             /* BMI160 I2C address */
+  int freq;                 /* BMI160 Frequency <= 3.4MHz */
   int port;                 /* I2C port */
   struct seq_s *seq;        /* Sequencer */
   int fifoid;               /* Sequencer id */

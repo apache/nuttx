@@ -26,7 +26,7 @@
 
 #include <stdlib.h>
 #include <unistd.h>
-
+#include <errno.h>
 #include <nuttx/mm/mm.h>
 
 #include "umm_heap/umm_heap.h"
@@ -88,6 +88,14 @@ FAR void *realloc(FAR void *oldmem, size_t size)
 
   return mem;
 #else
-  return mm_realloc(USR_HEAP, oldmem, size);
+  FAR void *ret;
+
+  ret = mm_realloc(USR_HEAP, oldmem, size);
+  if (ret == NULL)
+    {
+      set_errno(ENOMEM);
+    }
+
+  return ret;
 #endif
 }

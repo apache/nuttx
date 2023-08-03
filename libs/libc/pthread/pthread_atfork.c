@@ -22,21 +22,65 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/tls.h>
+#include <nuttx/lib/lib.h>
+
 #include <pthread.h>
+#include <errno.h>
+#include <stdlib.h>
 
 /****************************************************************************
  * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name:  pthread_atfork
+ *
+ * Description:
+ *    To register the methods that need to be executed when fork is called
+ *    by any thread in a process
+ *
+ * Input Parameters:
+ *   prepare - the method that is executed in the parent process before
+ *             fork() processing is started
+ *   parent  - the method that is executed in the parent process after fork()
+ *             processing completes
+ *   child   - the method that is executed in the child process after fork()
+ *             processing completes
+ *
+ * Returned Value:
+ *   On success, pthread_atfork() returns 0.
+ *   On error, pthread_atfork() returns errno.
+ *
+ * Assumptions:
+ *
  ****************************************************************************/
 
 int pthread_atfork(CODE void (*prepare)(void),
                    CODE void (*parent)(void),
                    CODE void (*child)(void))
 {
-  /* fork isn't supported yet, so the dummy implementation is enough. */
+#ifdef CONFIG_PTHREAD_ATFORK
+  FAR struct task_info_s *info = task_get_info();
+  FAR struct list_node *list = &info->ta_atfork;
+  FAR struct pthread_atfork_s *entry =
+                      (FAR struct pthread_atfork_s *)
+                      lib_malloc(sizeof(struct pthread_atfork_s));
 
-  UNUSED(prepare);
-  UNUSED(parent);
-  UNUSED(child);
+  if (entry == NULL)
+    {
+      return ENOMEM;
+    }
 
-  return 0;
+  list_initialize(&entry->node);
+  entry->prepare = prepare;
+  entry->parent = parent;
+  entry->child = child;
+
+  nxmutex_lock(&info->ta_lock);
+  list_add_head(list, &entry->node);
+  nxmutex_unlock(&info->ta_lock);
+#endif
+
+  return OK;
 }

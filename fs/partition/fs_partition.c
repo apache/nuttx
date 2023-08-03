@@ -74,6 +74,10 @@ static const partition_parser_t g_parser[] =
   parse_mbr_partition,
 #endif
 
+#ifdef CONFIG_TXTABLE_PARTITION
+  parse_txtable_partition,
+#endif
+
   NULL
 };
 

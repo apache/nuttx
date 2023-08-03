@@ -1849,7 +1849,7 @@ static void mpu9250_mag_data(FAR struct mpu9250_sensor_s *priv,
 static int mpu9250_thread(int argc, FAR char **argv)
 {
   FAR struct mpu9250_dev_s *dev = (FAR struct mpu9250_dev_s *)
-                                  ((uintptr_t)strtoul(argv[1], NULL, 0));
+                                  ((uintptr_t)strtoul(argv[1], NULL, 16));
   FAR struct mpu9250_sensor_s *accel = &dev->priv[MPU9250_ACCEL_IDX];
   FAR struct mpu9250_sensor_s *gyro = &dev->priv[MPU9250_GYRO_IDX];
   FAR struct mpu9250_sensor_s *mag = &dev->priv[MPU9250_MAG_IDX];
@@ -2019,7 +2019,7 @@ int mpu9250_register(int devno, FAR struct mpu9250_config_s *config)
 
   /* Create thread for polling sensor data */
 
-  snprintf(arg1, 16, "0x%" PRIxPTR, (uintptr_t)dev);
+  snprintf(arg1, 16, "%p", dev);
   argv[0] = arg1;
   argv[1] = NULL;
 

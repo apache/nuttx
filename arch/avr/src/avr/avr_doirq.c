@@ -31,6 +31,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <arch/board/board.h>
+#include <sched/sched.h>
 
 #include "avr_internal.h"
 
@@ -86,6 +87,16 @@ uint8_t *avr_doirq(uint8_t irq, uint8_t *regs)
    * from the input regs, then the lower level will know that a context
    * switch occurred during interrupt processing.
    */
+
+  if (regs != (uint8_t *)g_current_regs)
+    {
+      /* Record the new "running" task when context switch occurred.
+       * g_running_tasks[] is only used by assertion logic for reporting
+       * crashes.
+       */
+
+      g_running_tasks[this_cpu()] = this_task();
+    }
 
   regs = (uint8_t *)g_current_regs;   /* Cast removes volatile attribute */
 

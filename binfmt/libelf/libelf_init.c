@@ -89,14 +89,6 @@ static inline int elf_filelen(FAR struct elf_loadinfo_s *loadinfo)
       return ret;
     }
 
-  /* Verify that it is a regular file */
-
-  if (!S_ISREG(buf.st_mode))
-    {
-      berr("Not a regular file.  mode: %d\n", buf.st_mode);
-      return -ENOENT;
-    }
-
   /* Return the size of the file in the loadinfo structure */
 
   loadinfo->filelen = buf.st_size;

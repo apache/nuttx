@@ -65,6 +65,10 @@ int task_init_info(FAR struct task_group_s *group)
   nxmutex_init(&info->ta_lock);
   group->tg_info = info;
 
+#ifdef CONFIG_PTHREAD_ATFORK
+  list_initialize(&info->ta_atfork);
+#endif
+
 #ifdef CONFIG_FILE_STREAM
   /* Initialize file streams for the task group */
 

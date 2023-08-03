@@ -179,6 +179,33 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
           pptr = &text;
         }
 
+      if (*pptr == NULL)
+        {
+          if (shdr->sh_type != SHT_NOBITS)
+            {
+              /* Read the section data from sh_offset to specified region */
+
+              ret = elf_read(loadinfo, (FAR uint8_t *)shdr->sh_addr,
+                             shdr->sh_size, shdr->sh_offset);
+              if (ret < 0)
+                {
+                  berr("ERROR: Failed to read section %d: %d\n", i, ret);
+                  return ret;
+                }
+            }
+
+          /* If there is no data in an allocated section, then the
+           * allocated section must be cleared.
+           */
+
+          else
+            {
+              memset((FAR uint8_t *)shdr->sh_addr, 0, shdr->sh_size);
+            }
+
+          continue;
+        }
+
       *pptr = (FAR uint8_t *)_ALIGN_UP((uintptr_t)*pptr, shdr->sh_addralign);
 
       /* SHT_NOBITS indicates that there is no data in the file for the

@@ -185,14 +185,25 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
   pid_t pid;
   int ret;
   bool group_joined = false;
+  pthread_attr_t default_attr = g_default_pthread_attr;
 
   DEBUGASSERT(trampoline != NULL);
+
+  parent = this_task();
+  DEBUGASSERT(parent != NULL);
 
   /* If attributes were not supplied, use the default attributes */
 
   if (!attr)
     {
-      attr = &g_default_pthread_attr;
+      /* Inherit parent priority by default. except idle */
+
+      if (!is_idle_task(parent))
+        {
+          default_attr.priority = parent->sched_priority;
+        }
+
+      attr = &default_attr;
     }
 
   /* Allocate a TCB for the new task. */
@@ -394,9 +405,6 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
       ptcb->cmn.affinity = attr->affinity;
     }
 #endif
-
-  parent = this_task();
-  DEBUGASSERT(parent != NULL);
 
   /* Configure the TCB for a pthread receiving on parameter
    * passed by value

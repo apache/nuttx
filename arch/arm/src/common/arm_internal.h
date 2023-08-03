@@ -358,9 +358,9 @@ uintptr_t arm_intstack_top(void);
 #if defined(__ICCARM__)
 /* _vectors replaced on __vector_table for IAR C-SPY Simulator */
 
-extern const void *__vector_table[];
+EXTERN const void *__vector_table[];
 #else
-extern const void * const _vectors[];
+EXTERN const void * const _vectors[];
 #endif
 
 /* Interrupt acknowledge and dispatch */

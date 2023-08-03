@@ -267,7 +267,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 #endif
     }
 #ifdef CONFIG_DEBUG_MM
-  else
+  else if (MM_INTERNAL_HEAP(heap))
     {
 #ifdef CONFIG_MM_DUMP_ON_FAILURE
       struct mallinfo minfo;

@@ -33,6 +33,12 @@ ifneq ($(CONFIG_PSEUDOFS_SOFTLINKS),0)
 CSRCS += fs_link.c fs_symlink.c fs_readlink.c
 endif
 
+# Pseudofile support
+
+ifeq ($(CONFIG_PSEUDOFS_FILE),y)
+CSRCS += fs_pseudofile.c
+endif
+
 # Stream support
 
 ifeq ($(CONFIG_FILE_STREAM),y)
