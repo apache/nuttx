@@ -541,6 +541,13 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
   conn = psock->s_conn;
   DEBUGASSERT(conn);
 
+  /* The length of a datagram to be up to 65,535 octets */
+
+  if (len > 65535)
+    {
+      return -EMSGSIZE;
+    }
+
   /* If the UDP socket was previously assigned a remote peer address via
    * connect(), then as with connection-mode socket, sendto() may not be
    * used with a non-NULL destination address.  Normally send() would be
