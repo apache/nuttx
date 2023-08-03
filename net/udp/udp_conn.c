@@ -806,6 +806,7 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
 {
   uint16_t portno;
   int ret;
+  FAR struct net_driver_s *dev;
 
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
   if (conn->domain != addr->sa_family)
@@ -823,6 +824,29 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
     {
       FAR const struct sockaddr_in *inaddr =
         (FAR const struct sockaddr_in *)addr;
+
+      if (!net_ipv4addr_cmp(inaddr->sin_addr.s_addr, INADDR_ANY) &&
+        !net_ipv4addr_cmp(inaddr->sin_addr.s_addr, HTONL(INADDR_LOOPBACK)) &&
+        !net_ipv4addr_cmp(inaddr->sin_addr.s_addr, INADDR_BROADCAST) &&
+        !IN_MULTICAST(NTOHL(inaddr->sin_addr.s_addr)))
+        {
+          ret = -EADDRNOTAVAIL;
+
+          for (dev = g_netdevices; dev; dev = dev->flink)
+            {
+              if (net_ipv4addr_cmp(inaddr->sin_addr.s_addr, dev->d_ipaddr))
+                {
+                  ret = 0;
+                  break;
+                }
+            }
+
+          if (ret == -EADDRNOTAVAIL)
+            {
+              net_unlock();
+              return ret;
+            }
+        }
 
       /* Get the port number that we are binding to */
 
@@ -844,6 +868,33 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
     {
       FAR const struct sockaddr_in6 *inaddr =
         (FAR const struct sockaddr_in6 *)addr;
+
+      if (!net_ipv6addr_cmp(inaddr->sin6_addr.in6_u.u6_addr16,
+                        g_ipv6_unspecaddr) &&
+      !net_ipv6addr_cmp(inaddr->sin6_addr.in6_u.u6_addr16,
+                        g_ipv6_loopback) &&
+      !net_ipv6addr_cmp(inaddr->sin6_addr.in6_u.u6_addr16,
+                        g_ipv6_allnodes) &&
+      !net_ipv6addr_cmp(inaddr->sin6_addr.in6_u.u6_addr16, g_ipv6_allnodes))
+        {
+          ret = -EADDRNOTAVAIL;
+
+          for (dev = g_netdevices; dev; dev = dev->flink)
+            {
+              if (net_ipv6addr_cmp(inaddr->sin6_addr.in6_u.u6_addr16,
+                                  dev->d_ipv6addr))
+                {
+                  ret = 0;
+                  break;
+                }
+            }
+
+          if (ret == -EADDRNOTAVAIL)
+            {
+              net_unlock();
+              return ret;
+            }
+        }
 
       /* Get the port number that we are binding to */
 

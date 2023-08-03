@@ -71,6 +71,7 @@ extern "C"
 
 #ifdef CONFIG_NET_IPv6
 EXTERN const net_ipv6addr_t g_ipv6_unspecaddr;       /* An address of all zeroes */
+EXTERN const net_ipv6addr_t g_ipv6_loopback;         /* An address of loopback */
 EXTERN const net_ipv6addr_t g_ipv6_allnodes;         /* All link local nodes */
 
 #if defined(CONFIG_NET_ICMPv6_AUTOCONF) || defined(CONFIG_NET_ICMPv6_ROUTER) || \
