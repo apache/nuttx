@@ -74,7 +74,7 @@ int board_bh1750_initialize(int devno, int busno)
       return -ENODEV;
     }
 
-  /* Then register the barometer sensor */
+  /* Then register the ambient light sensor */
 
   ret = bh1750fvi_register(devpath, i2c, BH1750FVI_I2C_ADDR);
   if (ret < 0)
