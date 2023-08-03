@@ -325,6 +325,12 @@ static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
 
   net_lock();
 
+  if (conn->lport != 0)
+    {
+      net_unlock();
+      return -EINVAL;
+    }
+
   /* Verify or select a local port (network byte order) */
 
   port = tcp_selectport(PF_INET,
@@ -389,6 +395,12 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
   /* Verify or select a local port and address */
 
   net_lock();
+
+  if (conn->lport != 0)
+    {
+      net_unlock();
+      return -EINVAL;
+    }
 
   /* Verify or select a local port (network byte order) */
 
