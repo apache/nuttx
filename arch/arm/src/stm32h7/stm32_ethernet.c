@@ -578,11 +578,7 @@
 #define ETH_DMAINT_XMIT_ENABLE    (ETH_DMACIER_NIE | ETH_DMACIER_TIE)
 #define ETH_DMAINT_XMIT_DISABLE   (ETH_DMACIER_TIE)
 
-#ifdef CONFIG_DEBUG_NET
-#  define ETH_DMAINT_ERROR_ENABLE (ETH_DMACIER_AIE | ETH_DMAINT_ABNORMAL)
-#else
-#  define ETH_DMAINT_ERROR_ENABLE (0)
-#endif
+#define ETH_DMAINT_ERROR_ENABLE (ETH_DMACIER_AIE | ETH_DMAINT_ABNORMAL)
 
 /* Helpers ******************************************************************/
 
@@ -2246,21 +2242,27 @@ static void stm32_interrupt_work(void *arg)
 
       stm32_putreg(ETH_DMACSR_AIS, STM32_ETH_DMACSR);
 
-      /* As per the datasheet's recommendation, the MAC
-       * needs to be reset for all abnormal events. The
-       * scheduled job will take the interface down and
-       * up again.
-       */
+      /* In case of any error that stops the DMA, reset the MAC. */
 
-      work_queue(ETHWORK, &priv->irqwork, stm32_txtimeout_work, priv, 0);
+      if (dmasr & (ETH_DMACIER_CDEE | ETH_DMACSR_FBE |
+          ETH_DMACSR_RPS | ETH_DMACSR_TPS))
+        {
+          /* As per the datasheet's recommendation, the MAC
+           * needs to be reset for all fatal errors. The
+           * scheduled job will take the interface down and
+           * up again.
+           */
 
-      /* Interrupts need to remain disabled, no other
-       * processing will take place. After reset
-       * everything will be restored.
-       */
+          work_queue(ETHWORK, &priv->irqwork, stm32_txtimeout_work, priv, 0);
 
-      net_unlock();
-      return;
+          /* Interrupts need to remain disabled, no other
+           * processing will take place. After reset
+           * everything will be restored.
+           */
+
+          net_unlock();
+          return;
+        }
     }
 
   net_unlock();
