@@ -21,3 +21,4 @@ Guides
   cortexmhardfaults.rst
   coredump.rst
   gdbwithpython.rst
+  ofloader.rst
