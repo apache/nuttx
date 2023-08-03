@@ -3542,7 +3542,7 @@ FAR void *gs2200m_register(FAR const char *devpath,
 
 errout:
   nxmutex_destroy(&dev->dev_lock);
-  lib_free(dev->path);
+  kmm_free(dev->path);
   kmm_free(dev);
   return NULL;
 }

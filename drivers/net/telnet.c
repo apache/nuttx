@@ -720,7 +720,7 @@ static int telnet_close(FAR struct file *filep)
                 }
             }
 
-          lib_free(devpath);
+          kmm_free(devpath);
         }
 
       for (i = 0; i < CONFIG_TELNET_MAXLCLIENTS; i++)
