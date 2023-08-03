@@ -65,6 +65,3 @@ endif
 
 DEPPATH += --dep-path machine/arm
 VPATH += :machine/arm
-
-AFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)machine$(DELIM)arm
-CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)machine$(DELIM)arm
