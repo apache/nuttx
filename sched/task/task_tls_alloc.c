@@ -114,12 +114,13 @@ void task_tls_destruct(void)
       if ((g_tlsset & mask) != 0)
         {
           elem = info->ta_telem[candidate];
-          info->ta_telem[candidate] = 0;
           dtor = g_tlsdtor[candidate];
           if (dtor != NULL && elem != 0)
             {
               dtor((void *)elem);
             }
+
+         info->ta_telem[candidate] = 0;
         }
     }
 }
