@@ -269,7 +269,11 @@ static void wlan_ipv6multicast(struct wlan_priv_s *priv);
 
 static inline void wlan_cache_txpkt_tail(struct wlan_priv_s *priv)
 {
-    iob_tryadd_queue(priv->dev.d_iob, &priv->txb);
+  if (priv->dev.d_iob)
+    {
+      iob_tryadd_queue(priv->dev.d_iob, &priv->txb);
+    }
+
   netdev_iob_clear(&priv->dev);
 }
 
