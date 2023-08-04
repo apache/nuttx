@@ -44,6 +44,9 @@ extern "C"
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define VIDEO_MAX_FRAME               32
+#define VIDEO_MAX_PLANES               8
+
 /* Query device capability
  * Address pointing to struct v4l2_capability
  */
@@ -156,6 +159,10 @@ extern "C"
 
 #define VIDIOC_S_INPUT                _VIDIOC(0x0027)
 
+/* Set video crop and scale */
+
+#define VIDIOC_CROPCAP                _VIDIOC(0x003a)
+
 /* Query video standard */
 
 #define VIDIOC_QUERYSTD               _VIDIOC(0x003f)
@@ -190,6 +197,18 @@ extern "C"
 
 #define VIDIOC_ENUM_FRAMEINTERVALS    _VIDIOC(0x004b)
 
+/* Execute an encoder command */
+
+#define VIDIOC_ENCODER_CMD            _VIDIOC(0x004d)
+
+/* Dequeue event */
+
+#define VIDIOC_DQEVENT                _VIDIOC(0x0059)
+
+/* Subscribe or unsubscribe event */
+
+#define VIDIOC_SUBSCRIBE_EVENT        _VIDIOC(0x005a)
+
 /* Get clip
  * Address pointing to struct v4l2_selection
  */
@@ -201,6 +220,10 @@ extern "C"
  */
 
 #define VIDIOC_S_SELECTION            _VIDIOC(0x005f)
+
+/* Execute an decoder command */
+
+#define VIDIOC_DECODER_CMD            _VIDIOC(0x0060)
 
 /* Query control */
 
@@ -437,6 +460,7 @@ extern "C"
 #define V4L2_PIX_FMT_VC1_ANNEX_L v4l2_fourcc('V', 'C', '1', 'L')
 #define V4L2_PIX_FMT_VP8      v4l2_fourcc('V', 'P', '8', '0')
 #define V4L2_PIX_FMT_VP9      v4l2_fourcc('V', 'P', '9', '0')
+#define V4L2_PIX_FMT_HEVC     v4l2_fourcc('H', 'E', 'V', 'C')
 
 /* JPEG + sub image */
 
@@ -723,9 +747,24 @@ enum v4l2_buf_type
   V4L2_BUF_TYPE_SDR_CAPTURE          = 11,   /* Software Defined Radio capture stream */
   V4L2_BUF_TYPE_SDR_OUTPUT           = 12,   /* Software Defined Radio output stream */
   V4L2_BUF_TYPE_META_CAPTURE         = 13,   /* Metadata capture */
+  V4L2_BUF_TYPE_META_OUTPUT          = 14,   /* Metadata output */
   V4L2_BUF_TYPE_PRIVATE              = 0x80, /* Deprecated, do not use */
   V4L2_BUF_TYPE_STILL_CAPTURE        = 0x81  /* Single-planar still capture stream */
 };
+
+#define V4L2_TYPE_IS_MULTIPLANAR(type)             \
+  ((type) == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE    \
+   || (type) == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE)
+
+#define V4L2_TYPE_IS_OUTPUT(type)                  \
+  ((type) == V4L2_BUF_TYPE_VIDEO_OUTPUT            \
+   || (type) == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE  \
+   || (type) == V4L2_BUF_TYPE_VIDEO_OVERLAY        \
+   || (type) == V4L2_BUF_TYPE_VIDEO_OUTPUT_OVERLAY \
+   || (type) == V4L2_BUF_TYPE_VBI_OUTPUT           \
+   || (type) == V4L2_BUF_TYPE_SLICED_VBI_OUTPUT    \
+   || (type) == V4L2_BUF_TYPE_SDR_OUTPUT           \
+   || (type) == V4L2_BUF_TYPE_META_OUTPUT)
 
 /* Memory I/O method. Currently, support only V4L2_MEMORY_USERPTR. */
 
@@ -735,6 +774,179 @@ enum v4l2_memory
   V4L2_MEMORY_USERPTR      = 2,  /* User pointer I/O  */
   V4L2_MEMORY_OVERLAY      = 3,  /* Overlay I/O */
   V4L2_MEMORY_DMABUF       = 4,  /* DMA shared buffer I/O */
+};
+
+/* See also http://vektor.theorem.ca/graphics/ycbcr/ */
+
+enum v4l2_colorspace
+{
+  /* Default colorspace, i.e. let the driver figure it out.
+   *  Can only be used with video capture.
+   */
+
+  V4L2_COLORSPACE_DEFAULT       = 0,
+
+  /* SMPTE 170M: used for broadcast NTSC/PAL SDTV */
+
+  V4L2_COLORSPACE_SMPTE170M     = 1,
+
+  /* Obsolete pre-1998 SMPTE 240M HDTV standard, superseded by Rec 709 */
+
+  V4L2_COLORSPACE_SMPTE240M     = 2,
+
+  /* Rec.709: used for HDTV */
+
+  V4L2_COLORSPACE_REC709        = 3,
+
+  /* Deprecated, do not use. No driver will ever return this. This was
+   *  based on a misunderstanding of the bt878 datasheet.
+   */
+
+  V4L2_COLORSPACE_BT878         = 4,
+
+  /* NTSC 1953 colorspace. This only makes sense when dealing with
+   *  really, really old NTSC recordings. Superseded by SMPTE 170M.
+   */
+
+  V4L2_COLORSPACE_470_SYSTEM_M  = 5,
+
+  /* EBU Tech 3213 PAL/SECAM colorspace. This only makes sense when
+   * dealing with really old PAL/SECAM recordings. Superseded by
+   * SMPTE 170M.
+   */
+
+  V4L2_COLORSPACE_470_SYSTEM_BG = 6,
+
+  /* Effectively shorthand for V4L2_COLORSPACE_SRGB, V4L2_YCBCR_ENC_601
+   *  and V4L2_QUANTIZATION_FULL_RANGE. To be used for (Motion-)JPEG.
+   */
+
+  V4L2_COLORSPACE_JPEG          = 7,
+
+  /* For RGB colorspaces such as produces by most webcams. */
+
+  V4L2_COLORSPACE_SRGB          = 8,
+
+  /* opRGB colorspace */
+
+  V4L2_COLORSPACE_OPRGB         = 9,
+
+  /* BT.2020 colorspace, used for UHDTV. */
+
+  V4L2_COLORSPACE_BT2020        = 10,
+
+  /* Raw colorspace: for RAW unprocessed images */
+
+  V4L2_COLORSPACE_RAW           = 11,
+
+  /* DCI-P3 colorspace, used by cinema projectors */
+
+  V4L2_COLORSPACE_DCI_P3        = 12,
+};
+
+/* Determine how COLORSPACE_DEFAULT should map to a proper colorspace.
+ * This depends on whether this is a SDTV image (use SMPTE 170M), an
+ * HDTV image (use Rec. 709), or something else (use sRGB).
+ */
+
+#define V4L2_MAP_COLORSPACE_DEFAULT(is_sdtv, is_hdtv) \
+        ((is_sdtv) ? V4L2_COLORSPACE_SMPTE170M : \
+        ((is_hdtv) ? V4L2_COLORSPACE_REC709 : V4L2_COLORSPACE_SRGB))
+
+enum v4l2_xfer_func
+{
+/* Mapping of V4L2_XFER_FUNC_DEFAULT to actual transfer functions
+ * for the various colorspaces:
+ *
+ * V4L2_COLORSPACE_SMPTE170M, V4L2_COLORSPACE_470_SYSTEM_M,
+ * V4L2_COLORSPACE_470_SYSTEM_BG, V4L2_COLORSPACE_REC709 and
+ * V4L2_COLORSPACE_BT2020: V4L2_XFER_FUNC_709
+ *
+ * V4L2_COLORSPACE_SRGB, V4L2_COLORSPACE_JPEG: V4L2_XFER_FUNC_SRGB
+ *
+ * V4L2_COLORSPACE_OPRGB: V4L2_XFER_FUNC_OPRGB
+ *
+ * V4L2_COLORSPACE_SMPTE240M: V4L2_XFER_FUNC_SMPTE240M
+ *
+ * V4L2_COLORSPACE_RAW: V4L2_XFER_FUNC_NONE
+ *
+ * V4L2_COLORSPACE_DCI_P3: V4L2_XFER_FUNC_DCI_P3
+ */
+
+  V4L2_XFER_FUNC_DEFAULT     = 0,
+  V4L2_XFER_FUNC_709         = 1,
+  V4L2_XFER_FUNC_SRGB        = 2,
+  V4L2_XFER_FUNC_OPRGB       = 3,
+  V4L2_XFER_FUNC_SMPTE240M   = 4,
+  V4L2_XFER_FUNC_NONE        = 5,
+  V4L2_XFER_FUNC_DCI_P3      = 6,
+  V4L2_XFER_FUNC_SMPTE2084   = 7,
+};
+
+enum v4l2_ycbcr_encoding
+{
+/* Mapping of V4L2_YCBCR_ENC_DEFAULT to actual encodings for the
+ * various colorspaces:
+ *
+ * V4L2_COLORSPACE_SMPTE170M, V4L2_COLORSPACE_470_SYSTEM_M,
+ * V4L2_COLORSPACE_470_SYSTEM_BG, V4L2_COLORSPACE_SRGB,
+ * V4L2_COLORSPACE_OPRGB and V4L2_COLORSPACE_JPEG: V4L2_YCBCR_ENC_601
+ *
+ * V4L2_COLORSPACE_REC709 and V4L2_COLORSPACE_DCI_P3: V4L2_YCBCR_ENC_709
+ *
+ * V4L2_COLORSPACE_BT2020: V4L2_YCBCR_ENC_BT2020
+ *
+ * V4L2_COLORSPACE_SMPTE240M: V4L2_YCBCR_ENC_SMPTE240M
+ */
+
+  V4L2_YCBCR_ENC_DEFAULT        = 0,
+
+  /* ITU-R 601 -- SDTV */
+
+  V4L2_YCBCR_ENC_601            = 1,
+
+  /* Rec. 709 -- HDTV */
+
+  V4L2_YCBCR_ENC_709            = 2,
+
+  /* ITU-R 601/EN 61966-2-4 Extended Gamut -- SDTV */
+
+  V4L2_YCBCR_ENC_XV601          = 3,
+
+  /* Rec. 709/EN 61966-2-4 Extended Gamut -- HDTV */
+
+  V4L2_YCBCR_ENC_XV709          = 4,
+
+/* sYCC (Y'CbCr encoding of sRGB), identical to ENC_601. It was added
+ * originally due to a misunderstanding of the sYCC standard. It should
+ * not be used, instead use V4L2_YCBCR_ENC_601.
+ */
+
+  V4L2_YCBCR_ENC_SYCC           = 5,
+
+  /* BT.2020 Non-constant Luminance Y'CbCr */
+
+  V4L2_YCBCR_ENC_BT2020         = 6,
+
+  /* BT.2020 Constant Luminance Y'CbcCrc */
+
+  V4L2_YCBCR_ENC_BT2020_CONST_LUM = 7,
+
+  /* SMPTE 240M -- Obsolete HDTV */
+
+  V4L2_YCBCR_ENC_SMPTE240M      = 8,
+};
+
+enum v4l2_quantization
+{
+/* The default for R'G'B' quantization is always full range.
+ * For Y'CbCr the quantization is always limited range, except
+ * for COLORSPACE_JPEG: this is full range.
+ */
+
+  V4L2_QUANTIZATION_DEFAULT     = 0,
+  V4L2_QUANTIZATION_FULL_RANGE  = 1,
+  V4L2_QUANTIZATION_LIM_RANGE   = 2,
 };
 
 /* Field order. Currently, support only V4L2_FIELD_ANY */
@@ -831,6 +1043,14 @@ struct v4l2_buffer
 };
 
 typedef struct v4l2_buffer v4l2_buffer_t;
+
+/* Image is a keyframe (I-frame) */
+
+#define V4L2_BUF_FLAG_KEYFRAME                  0x00000008
+
+/* mem2mem encoder/decoder */
+
+#define V4L2_BUF_FLAG_LAST                      0x00100000
 
 struct v4l2_fmtdesc
 {
@@ -945,12 +1165,62 @@ struct v4l2_pix_format
 
 typedef struct v4l2_pix_format v4l2_pix_format_t;
 
-struct v4l2_format
+/* struct v4l2_plane_pix_format - additional, per-plane format definition
+ * @sizeimage: maximum size in bytes required for data, for which
+ * this plane will be used
+ * @bytesperline: distance in bytes between the leftmost pixels in two
+ * adjacent lines
+ */
+
+struct v4l2_plane_pix_format
 {
-  uint32_t  type;               /* enum #v4l2_buf_type. */
+  uint32_t  sizeimage;
+  uint32_t  bytesperline;
+  uint16_t  reserved[6];
+};
+
+/* struct v4l2_pix_format_mplane - multiplanar format definition
+ * @width: image width in pixels
+ * @height: image height in pixels
+ * @pixelformat: little endian four character code (fourcc)
+ * @field: enum v4l2_field; field order (for interlaced video)
+ * @colorspace: enum v4l2_colorspace; supplemental to pixelformat
+ * @plane_fmt: per-plane information
+ * @num_planes: number of planes for this format
+ * @flags: format flags (V4L2_PIX_FMT_FLAG_*)
+ * @ycbcr_enc: enum v4l2_ycbcr_encoding, Y'CbCr encoding
+ * @quantization: enum v4l2_quantization, colorspace quantization
+ * @xfer_func: enum v4l2_xfer_func, colorspace transfer function
+ */
+
+struct v4l2_pix_format_mplane
+{
+  uint32_t      width;
+  uint32_t      height;
+  uint32_t      pixelformat;
+  uint32_t      field;
+  uint32_t      colorspace;
+
+  struct v4l2_plane_pix_format plane_fmt[VIDEO_MAX_PLANES];
+  uint8_t                      num_planes;
+  uint8_t                      flags;
   union
   {
-    struct v4l2_pix_format pix; /* Image format */
+    uint8_t                    ycbcr_enc;
+    uint8_t                    hsv_enc;
+  };
+  uint8_t                      quantization;
+  uint8_t                      xfer_func;
+  uint8_t                      reserved[7];
+};
+
+struct v4l2_format
+{
+  uint32_t  type;                         /* enum #v4l2_buf_type. */
+  union
+  {
+    struct v4l2_pix_format        pix;    /* Image format */
+    struct v4l2_pix_format_mplane pix_mp; /* V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE */
   } fmt;
 };
 
@@ -963,6 +1233,14 @@ struct v4l2_captureparm
   struct v4l2_fract  timeperframe;  /*  Time per frame in seconds */
   uint32_t           extendedmode;  /*  Driver-specific extensions */
   uint32_t           readbuffers;   /*  # of buffers for read */
+};
+
+struct v4l2_cropcap
+{
+  uint32_t                type; /* enum v4l2_buf_type */
+  struct v4l2_rect        bounds;
+  struct v4l2_rect        defrect;
+  struct v4l2_fract       pixelaspect;
 };
 
 /*  Flags for 'capability' and 'capturemode' fields */
@@ -984,6 +1262,106 @@ struct v4l2_streamparm
   {
     struct v4l2_captureparm capture;
   } parm;
+};
+
+/* E V E N T S */
+
+#define V4L2_EVENT_ALL                          0
+#define V4L2_EVENT_VSYNC                        1
+#define V4L2_EVENT_EOS                          2
+#define V4L2_EVENT_CTRL                         3
+#define V4L2_EVENT_FRAME_SYNC                   4
+#define V4L2_EVENT_SOURCE_CHANGE                5
+#define V4L2_EVENT_MOTION_DET                   6
+#define V4L2_EVENT_PRIVATE_START                0x08000000
+
+/* Payload for V4L2_EVENT_VSYNC */
+
+struct v4l2_event_vsync
+{
+  /* Can be V4L2_FIELD_ANY, _NONE, _TOP or _BOTTOM */
+
+  uint8_t field;
+};
+
+/* Payload for V4L2_EVENT_CTRL */
+
+#define V4L2_EVENT_CTRL_CH_VALUE                (1 << 0)
+#define V4L2_EVENT_CTRL_CH_FLAGS                (1 << 1)
+#define V4L2_EVENT_CTRL_CH_RANGE                (1 << 2)
+
+struct v4l2_event_ctrl
+{
+  uint32_t changes;
+  uint32_t type;
+  union
+  {
+    int32_t value;
+    int64_t value64;
+  };
+  uint32_t flags;
+  int32_t minimum;
+  int32_t maximum;
+  int32_t step;
+  int32_t default_value;
+};
+
+struct v4l2_event_frame_sync
+{
+  uint32_t frame_sequence;
+};
+
+#define V4L2_EVENT_SRC_CH_RESOLUTION        (1 << 0)
+
+struct v4l2_event_src_change
+{
+  uint32_t changes;
+};
+
+#define V4L2_EVENT_MD_FL_HAVE_FRAME_SEQ     (1 << 0)
+
+/* struct v4l2_event_motion_det - motion detection event
+ * @flags:             if V4L2_EVENT_MD_FL_HAVE_FRAME_SEQ is set, then the
+ *                     frame_sequence field is valid.
+ * @frame_sequence:    the frame sequence number associated with this event.
+ * @region_mask:       which regions detected motion.
+ */
+
+struct v4l2_event_motion_det
+{
+  uint32_t flags;
+  uint32_t frame_sequence;
+  uint32_t region_mask;
+};
+
+struct v4l2_event
+{
+  uint32_t        type;
+  union
+  {
+    struct v4l2_event_vsync       vsync;
+    struct v4l2_event_ctrl        ctrl;
+    struct v4l2_event_frame_sync  frame_sync;
+    struct v4l2_event_src_change  src_change;
+    struct v4l2_event_motion_det  motion_det;
+    uint8_t                       data[64];
+  } u;
+  uint32_t        pending;
+  uint32_t        sequence;
+  struct timespec timestamp;
+  uint32_t        id;
+  uint32_t        reserved[8];
+};
+
+#define V4L2_EVENT_SUB_FL_SEND_INITIAL   (1 << 0)
+#define V4L2_EVENT_SUB_FL_ALLOW_FEEDBACK (1 << 1)
+
+struct v4l2_event_subscription
+{
+  uint32_t       type;
+  uint32_t       id;
+  uint32_t       flags;
+  uint32_t       reserved[5];
 };
 
 enum v4l2_ctrl_type
@@ -1216,6 +1594,70 @@ struct v4s_querymenu_scene
 {
   enum v4l2_scene_mode       mode;     /* Scene mode to be queried */
   struct v4l2_querymenu      menu;     /* Same as VIDIOC_QUERYMENU */
+};
+
+#define V4L2_ENC_CMD_START      (0)
+#define V4L2_ENC_CMD_STOP       (1)
+#define V4L2_ENC_CMD_PAUSE      (2)
+#define V4L2_ENC_CMD_RESUME     (3)
+
+/* Flags for V4L2_ENC_CMD_STOP */
+
+#define V4L2_ENC_CMD_STOP_AT_GOP_END (1 << 0)
+
+struct v4l2_encoder_cmd
+{
+  uint32_t cmd;
+  uint32_t flags;
+  union
+  {
+    struct
+    {
+      uint32_t data[8];
+    } raw;
+  };
+};
+
+/* Decoder commands */
+
+#define V4L2_DEC_CMD_START       (0)
+#define V4L2_DEC_CMD_STOP        (1)
+#define V4L2_DEC_CMD_PAUSE       (2)
+#define V4L2_DEC_CMD_RESUME      (3)
+
+/* The structure must be zeroed before use by the application
+ *  This ensures it can be extended safely in the future.
+ */
+
+struct v4l2_decoder_cmd
+{
+  uint32_t cmd;
+  uint32_t flags;
+  union
+  {
+    struct
+    {
+      uint64_t pts;
+    } stop;
+
+    struct
+    {
+/* 0 or 1000 specifies normal speed,
+ * 1 specifies forward single stepping,
+ * -1 specifies backward single stepping,
+ * >1: playback at speed/1000 of the normal speed,
+ * <-1: reverse playback at (-speed/1000) of the normal speed.
+ */
+
+      int32_t speed;
+      uint32_t format;
+    } start;
+
+    struct
+    {
+      uint32_t data[16];
+    } raw;
+  };
 };
 
 /****************************************************************************
