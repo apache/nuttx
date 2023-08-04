@@ -36,6 +36,10 @@ ifeq ($(CONFIG_IOEXPANDER_ISO1H812G),y)
   CSRCS += iso1h812g.c
 endif
 
+ifeq ($(CONFIG_IOEXPANDER_ISO1I813T),y)
+  CSRCS += iso1i813t.c
+endif
+
 ifeq ($(CONFIG_IOEXPANDER_PCA9555),y)
   CSRCS += pca9555.c
 endif
