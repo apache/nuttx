@@ -73,6 +73,23 @@ config ISO1H812G_MULTIPLE
 
 endif # IOEXPANDER_ISO1H812G
 
+config IOEXPANDER_ISO1I813T
+	bool "ISO1I813T SPI IO expander"
+	default n
+	depends on SPI
+	---help---
+		Enable support for the ISO1I813T SPI IO expander.
+
+if IOEXPANDER_ISO1I813T
+
+config ISO1I813T_MULTIPLE
+	bool "Multiple ISO1I813T Devices"
+	default n
+	---help---
+		Can be defined to support multiple ISO1I813T devices on board.
+
+endif # IOEXPANDER_ISO1I813T
+
 config IOEXPANDER_MCP23X17
 	bool "MCP23017/MCP23S17 I2C/SPI IO expander"
 	default n
