@@ -253,6 +253,8 @@ int    sched_setaffinity(pid_t pid, size_t cpusetsize,
 int    sched_getaffinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask);
 int    sched_cpucount(FAR const cpu_set_t *set);
 int    sched_getcpu(void);
+#else
+#  define sched_getcpu() 0
 #endif /* CONFIG_SMP */
 
 /* Task Switching Interfaces (non-standard) */
