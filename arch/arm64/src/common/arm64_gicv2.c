@@ -617,7 +617,7 @@
 #define GIC_IRQ_SPI              32 /* First SPI interrupt ID */
 
 /****************************************************************************
- * Private Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -646,6 +646,62 @@ static inline unsigned int arm_gic_nlines(void)
   field  = (regval & GIC_ICDICTR_ITLINES_MASK) >> GIC_ICDICTR_ITLINES_SHIFT;
   return (field + 1) << 5;
 }
+
+#ifdef CONFIG_ARCH_HAVE_TRUSTZONE
+/****************************************************************************
+ * Name: up_set_secure_irq
+ *
+ * Description:
+ *   Secure an IRQ
+ *
+ ****************************************************************************/
+
+void up_secure_irq(int irq, bool secure)
+{
+  unsigned int val;
+
+  if (secure)
+    {
+      val = getreg32(GIC_ICDISR(irq)) & (~GIC_ICDISR_INT(irq));  /* group 0 */
+    }
+  else
+    {
+      val = getreg32(GIC_ICDISR(irq)) | GIC_ICDISR_INT(irq);     /* group 1 */
+    }
+
+  putreg32(val, GIC_ICDISR(irq));
+}
+
+/****************************************************************************
+ * Name: up_secure_irq_all
+ *
+ * Description:
+ *   Secure all IRQ
+ *
+ ****************************************************************************/
+
+void up_secure_irq_all(bool secure)
+{
+  unsigned int nlines = arm_gic_nlines();
+  unsigned int irq;
+
+  for (irq = 0; irq < nlines; irq += 32)
+    {
+      if (secure)
+        {
+          putreg32(0x00000000, GIC_ICDISR(irq));   /* group 0 */
+        }
+      else
+        {
+          putreg32(0xffffffff, GIC_ICDISR(irq));   /* group 1 */
+        }
+    }
+}
+#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: arm_cpu_sgi
@@ -866,7 +922,13 @@ static void arm_gic_initialize(void)
 
   /* Registers with 1-bit per interrupt */
 
-  putreg32(0x00000000, GIC_ICDISR(0));      /* SGIs and PPIs secure */
+  /* per-CPU inerrupts config:
+   * ID0-ID7(SGI)  for Non-secure interrupts
+   * ID8-ID15(SGI)  for Secure interrupts.
+   * All PPI config as secure interrupts.
+   */
+
+  putreg32(0x000000ff, GIC_ICDISR(0));
   putreg32(0xfe000000, GIC_ICDICER(0));     /* PPIs disabled */
 
   /* Registers with 8-bits per interrupt */
@@ -1021,6 +1083,58 @@ uint64_t *arm64_decodeirq(uint64_t * regs)
    */
 
   DEBUGASSERT(irq < NR_IRQS || irq >= 1022);
+  if (irq < NR_IRQS)
+    {
+      /* Dispatch the interrupt */
+
+      regs = arm64_doirq(irq, regs);
+    }
+
+  /* Write to the end-of-interrupt register */
+
+#ifdef CONFIG_ARM_GIC_EOIMODE
+  putreg32(regval, GIC_ICCDIR);
+#else
+  putreg32(regval, GIC_ICCEOIR);
+#endif
+  return regs;
+}
+
+/****************************************************************************
+ * Name: arm64_decodefiq
+ *
+ * Description:
+ *   This function is called from the FIQ vector handler in arm_vectors.S.
+ *   At this point, the interrupt has been taken and the registers have
+ *   been saved on the stack.  This function simply needs to determine the
+ *   the irq number of the interrupt and then to call arm_doirq to dispatch
+ *   the interrupt.
+ *
+ *  Input Parameters:
+ *   regs - A pointer to the register save area on the stack.
+ *
+ ****************************************************************************/
+
+uint64_t *arm64_decodefiq(uint64_t *regs)
+{
+  uint32_t regval;
+  int irq;
+
+  /* Read the interrupt acknowledge register and get the interrupt ID */
+
+  regval = getreg32(GIC_ICCIAR);
+  irq    = (regval & GIC_ICCIAR_INTID_MASK) >> GIC_ICCIAR_INTID_SHIFT;
+
+#ifdef CONFIG_ARM_GIC_EOIMODE
+  putreg32(regval, GIC_ICCEOIR);
+#endif
+
+  /* Ignore spurions IRQs.  ICCIAR will report 1023 if there is no pending
+   * interrupt.
+   */
+
+  DEBUGASSERT(irq < NR_IRQS || irq >= 1022);
+
   if (irq < NR_IRQS)
     {
       /* Dispatch the interrupt */
