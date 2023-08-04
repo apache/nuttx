@@ -18,7 +18,6 @@
 #
 ############################################################################
 
-include chip/Bootloader.mk
 include common/Make.defs
 
 # The start-up, "head", file. May be either a .S or a .c file.
@@ -115,3 +114,5 @@ distclean::
 	$(call DELFILE,../include/chip/gpio_sig_map.h)
 	$(call DELFILE,../include/chip/irq.h)
 	$(call DELDIR,chip/$(ESP_HAL_3RDPARTY_REPO))
+
+include chip/Bootloader.mk

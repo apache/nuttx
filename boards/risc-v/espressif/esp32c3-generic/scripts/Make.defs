@@ -31,9 +31,13 @@ CHIP_SERIES = $(patsubst "%",%,$(CONFIG_ESPRESSIF_CHIP_SERIES))
 # pick the common linker scripts.
 
 ARCHSCRIPT += $(BOARD_COMMON_DIR)/scripts/$(CHIP_SERIES)_aliases.ld
-
 ARCHSCRIPT += $(call FINDSCRIPT,$(CHIP_SERIES)_flat_memory.ld)
-ARCHSCRIPT += $(call FINDSCRIPT,$(CHIP_SERIES)_legacy_sections.ld)
+
+ifeq ($(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT),y)
+  ARCHSCRIPT += $(call FINDSCRIPT,$(CHIP_SERIES)_mcuboot_sections.ld)
+else
+  ARCHSCRIPT += $(call FINDSCRIPT,$(CHIP_SERIES)_legacy_sections.ld)
+endif
 
 ARCHPICFLAGS = -fpic
 
