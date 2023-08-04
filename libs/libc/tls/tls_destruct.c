@@ -68,13 +68,14 @@ void tls_destruct(void)
       if (tlsset & mask)
         {
           tls_elem_ptr = (FAR void *)tls->tl_elem[candidate];
-          tls->tl_elem[candidate] = 0;
           destructor = info->ta_tlsdtor[candidate];
           if (tls_elem_ptr && destructor)
             {
               destructor(tls_elem_ptr);
             }
         }
+
+      tls->tl_elem[candidate] = 0;
     }
 }
 
