@@ -58,21 +58,51 @@ else ifeq ($(CONFIG_ESPRESSIF_FLASH_FREQ_20M),y)
 	FLASH_FREQ := 20m
 endif
 
+ifeq ($(CONFIG_ESPRESSIF_FLASH_DETECT),y)
+	ESPTOOL_WRITEFLASH_OPTS := -fs detect -fm dio -ff $(FLASH_FREQ)
+else
+	ESPTOOL_WRITEFLASH_OPTS := -fs $(FLASH_SIZE) -fm dio -ff $(FLASH_FREQ)
+endif
+
 # Configure the variables according to build environment
 
 ifdef ESPTOOL_BINDIR
-	BL_OFFSET       := 0x0
-	PT_OFFSET       := $(CONFIG_ESPRESSIF_PARTITION_TABLE_OFFSET)
-	BOOTLOADER      := $(ESPTOOL_BINDIR)/bootloader-$(CHIP_SERIES).bin
-	PARTITION_TABLE := $(ESPTOOL_BINDIR)/partition-table-$(CHIP_SERIES).bin
-	FLASH_BL        := $(BL_OFFSET) $(BOOTLOADER)
-	FLASH_PT        := $(PT_OFFSET) $(PARTITION_TABLE)
-	ESPTOOL_BINS    := $(FLASH_BL) $(FLASH_PT)
+	ifeq ($(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT),y)
+		BL_OFFSET       := 0x0000
+		BOOTLOADER      := $(ESPTOOL_BINDIR)/mcuboot-$(CHIP_SERIES).bin
+		FLASH_BL        := $(BL_OFFSET) $(BOOTLOADER)
+		ESPTOOL_BINS    := $(FLASH_BL)
+	else
+		BL_OFFSET       := 0x0
+		PT_OFFSET       := $(CONFIG_ESPRESSIF_PARTITION_TABLE_OFFSET)
+		BOOTLOADER      := $(ESPTOOL_BINDIR)/bootloader-$(CHIP_SERIES).bin
+		PARTITION_TABLE := $(ESPTOOL_BINDIR)/partition-table-$(CHIP_SERIES).bin
+		FLASH_BL        := $(BL_OFFSET) $(BOOTLOADER)
+		FLASH_PT        := $(PT_OFFSET) $(PARTITION_TABLE)
+		ESPTOOL_BINS    := $(FLASH_BL) $(FLASH_PT)
+	endif
 endif
 
-APP_OFFSET := 0x10000
-APP_IMAGE  := nuttx.bin
-FLASH_APP  := $(APP_OFFSET) $(APP_IMAGE)
+ifeq ($(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT),y)
+	ifeq ($(CONFIG_ESPRESSIF_ESPTOOL_TARGET_PRIMARY),y)
+		VERIFIED   := --confirm
+		APP_OFFSET := $(CONFIG_ESPRESSIF_OTA_PRIMARY_SLOT_OFFSET)
+	else ifeq ($(CONFIG_ESPRESSIF_ESPTOOL_TARGET_SECONDARY),y)
+		VERIFIED   :=
+		APP_OFFSET := $(CONFIG_ESPRESSIF_OTA_SECONDARY_SLOT_OFFSET)
+	endif
+
+	APP_IMAGE      := nuttx.bin
+	FLASH_APP      := $(APP_OFFSET) $(APP_IMAGE)
+	IMGTOOL_ALIGN_ARGS := --align 4
+	IMGTOOL_SIGN_ARGS  := --pad $(VERIFIED) $(IMGTOOL_ALIGN_ARGS) -v 0 -s auto \
+		-H $(CONFIG_ESPRESSIF_APP_MCUBOOT_HEADER_SIZE) --pad-header \
+		-S $(CONFIG_ESPRESSIF_OTA_SLOT_SIZE)
+else
+	APP_OFFSET     := 0x10000
+	APP_IMAGE      := nuttx.bin
+	FLASH_APP      := $(APP_OFFSET) $(APP_IMAGE)
+endif
 
 ESPTOOL_BINS += $(FLASH_APP)
 
@@ -99,6 +129,21 @@ endef
 
 # MKIMAGE -- Convert an ELF file into a compatible binary file
 
+ifeq ($(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT),y)
+define MKIMAGE
+	$(Q) echo "MKIMAGE: NuttX binary"
+	$(Q) if ! imgtool version 1>/dev/null 2>&1; then \
+		echo ""; \
+		echo "imgtool not found.  Please run: \"pip install imgtool\""; \
+		echo ""; \
+		echo "Run make again to create the nuttx.bin image."; \
+		exit 1; \
+	fi
+	imgtool sign $(IMGTOOL_SIGN_ARGS) nuttx.hex nuttx.bin
+	$(Q) echo nuttx.bin >> nuttx.manifest
+	$(Q) echo "Generated: nuttx.bin (MCUboot compatible)"
+endef
+else
 define MKIMAGE
 	$(Q) echo "MKIMAGE: NuttX binary"
 	$(Q) if ! esptool.py version 1>/dev/null 2>&1; then \
@@ -117,6 +162,7 @@ define MKIMAGE
 	$(Q) echo nuttx.bin >> nuttx.manifest
 	$(Q) echo "Generated: nuttx.bin"
 endef
+endif
 
 # POSTBUILD -- Perform post build operations
 
@@ -139,6 +185,6 @@ define FLASH
 	fi
 
 	$(eval ESPTOOL_OPTS := -c $(CHIP_SERIES) -p $(ESPTOOL_PORT) -b $(ESPTOOL_BAUD) $(if $(CONFIG_ESPRESSIF_ESPTOOLPY_NO_STUB),--no-stub))
-	$(eval WRITEFLASH_OPTS := $(if $(CONFIG_ESPRESSIF_MERGE_BINS),0x0 nuttx.merged.bin,$(if $(CONFIG_ESPRESSIF_FLASH_DETECT),-fs detect) -fm dio $(ESPTOOL_BINS)))
+	$(eval WRITEFLASH_OPTS := $(if $(CONFIG_ESPRESSIF_MERGE_BINS),0x0 nuttx.merged.bin,$(ESPTOOL_WRITEFLASH_OPTS) $(ESPTOOL_BINS)))
 	esptool.py $(ESPTOOL_OPTS) write_flash $(WRITEFLASH_OPTS)
 endef
