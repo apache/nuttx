@@ -3051,6 +3051,13 @@ Espressif ESP32-C6 Devkit board.
 Please, refer to the :doc:`ESP32-C6 </platforms/risc-v/esp32c6/index>` on NuttX for
 further information.
 
+StarFive JH7110
+---------------
+
+The basic port has been completed for the following StarFive JH7110 board:
+
+-  **PINE64 Star64**: Refer to :doc:`PINE64 Star64 </platforms/risc-v/jh7110/boards/star64/index>` for further information.
+
 ESP32 (Dual Xtensa LX6)
 =======================
 
