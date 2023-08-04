@@ -448,27 +448,21 @@ static int wlan_rx_done(struct wlan_priv_s *priv, void *buffer,
       goto out;
     }
 
+out:
+
   if (eb != NULL)
     {
       esp_wifi_free_eb(eb);
+    }
+
+  if (ret != OK && iob != NULL)
+    {
+      iob_free_chain(iob);
     }
 
   if (work_available(&priv->rxwork))
     {
       work_queue(WLAN_WORK, &priv->rxwork, wlan_rxpoll, priv, 0);
-    }
-
-  return 0;
-
-out:
-  if (iob != NULL)
-    {
-      iob_free_chain(iob);
-    }
-
-  if (eb != NULL)
-    {
-      esp_wifi_free_eb(eb);
     }
 
   wlan_txavail(&priv->dev);
