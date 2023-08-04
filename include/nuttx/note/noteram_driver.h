@@ -27,8 +27,6 @@
 
 #include <nuttx/config.h>
 #include <nuttx/fs/ioctl.h>
-#include <nuttx/note/note_driver.h>
-#include <nuttx/spinlock.h>
 #include <sys/types.h>
 
 /****************************************************************************
@@ -85,8 +83,6 @@ struct noteram_get_taskname_s
   char taskname[CONFIG_TASK_NAME_SIZE + 1];
 };
 #endif
-
-struct noteram_driver_s;
 
 /****************************************************************************
  * Public Data
