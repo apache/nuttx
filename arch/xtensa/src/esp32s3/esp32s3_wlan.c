@@ -638,11 +638,7 @@ static int wlan_txpoll(struct net_driver_s *dev)
   wlan_cache_txpkt_tail(priv);
   wlan_transmit(priv);
 
-  /* If zero is returned, the polling will continue until
-   * all connections have been examined.
-   */
-
-  return 1;
+  return OK;
 }
 
 /****************************************************************************
