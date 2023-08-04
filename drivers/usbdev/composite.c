@@ -579,9 +579,17 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
 
         case USB_REQ_SETCONFIGURATION:
           {
-            if (ctrl->type == 0 && value != priv->config)
+            if (ctrl->type == 0)
               {
                 int i;
+
+                if (priv->config == value)
+                  {
+                    /* Already configured -- Do nothing */
+
+                    ret = OK;
+                    break;
+                  }
 
                 /* Save the configuration and inform the constituent
                  * classes
