@@ -546,6 +546,8 @@ struct fb_overlayinfo_s
   fb_coord_t stride;          /* Length of a line in bytes */
   uint8_t    overlay;         /* Overlay number */
   uint8_t    bpp;             /* Bits per pixel */
+  uint32_t   xres;            /* Horizontal resolution in pixel columns */
+  uint32_t   yres;            /* Vertical resolution in pixel rows */
   uint32_t   xres_virtual;    /* Virtual Horizontal resolution in pixel columns */
   uint32_t   yres_virtual;    /* Virtual Vertical resolution in pixel rows */
   uint32_t   xoffset;         /* Offset from virtual to visible resolution */
