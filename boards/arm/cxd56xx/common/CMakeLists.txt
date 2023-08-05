@@ -23,11 +23,7 @@ if(CONFIG_ARCH_BOARD_COMMON)
 
   list(APPEND SRCS src/cxd56_boot.c)
 
-  if(CONFIG_AUDIO_CXD56)
-    list(APPEND SRCS src/cxd56_audio.c)
-  endif()
-
-  if(CONFIG_CXD56_AUDIO)
+  if(CONFIG_AUDIO_CXD56 OR CONFIG_CXD56_AUDIO)
     list(APPEND SRCS src/cxd56_audio.c)
   endif()
 

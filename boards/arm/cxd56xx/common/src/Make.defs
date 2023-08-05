@@ -24,9 +24,7 @@ CSRCS += cxd56_boot.c
 
 ifeq ($(CONFIG_AUDIO_CXD56),y)
 CSRCS += cxd56_audio.c
-endif
-
-ifeq ($(CONFIG_CXD56_AUDIO),y)
+else ifeq ($(CONFIG_CXD56_AUDIO),y)
 CSRCS += cxd56_audio.c
 endif
 
