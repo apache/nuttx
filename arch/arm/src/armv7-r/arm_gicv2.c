@@ -177,7 +177,7 @@ void arm_gic_initialize(void)
 
   iccicr  = getreg32(GIC_ICCICR);
 
-#if defined(CONFIG_ARCH_TRUSTZONE_SECURE) || defined(CONFIG_ARCH_TRUSTZONE_BOTH)
+#if defined(CONFIG_ARCH_TRUSTZONE_SECURE)
   /* Clear secure state ICCICR bits to be configured below */
 
   iccicr &= ~(GIC_ICCICRS_FIQEN | GIC_ICCICRS_ACKTCTL | GIC_ICCICRS_CBPR |
@@ -186,7 +186,7 @@ void arm_gic_initialize(void)
               GIC_ICCICRS_FIQBYPDISGRP0 | GIC_ICCICRS_IRQBYPDISGRP0 |
               GIC_ICCICRS_FIQBYPDISGRP1 | GIC_ICCICRS_IRQBYPDISGRP1);
 
-#elif defined(CONFIG_ARCH_TRUSTZONE_NONSECURE)
+#else
   /* Clear non-secure state ICCICR bits to be configured below */
 
   iccicr &= ~(GIC_ICCICRU_EOIMODENS | GIC_ICCICRU_ENABLEGRP1 |
@@ -201,31 +201,8 @@ void arm_gic_initialize(void)
    * REVISIT: Do I need to do this?
    */
 
-  /* iccicr |= GIC_ICCICRS_FIQEN; */
-
-#elif defined(CONFIG_ARCH_TRUSTZONE_BOTH)
-  /* Set FIQn=1 if secure interrupts are to signal using nfiq_c.
-   *
-   * NOTE:  Only for processors that operate in secure state.
-   * REVISIT: Do I need to do this?
-   */
-
   iccicr |= GIC_ICCICRS_FIQEN;
-#endif
 
-#if defined(CONFIG_ARCH_TRUSTZONE_SECURE)
-  /* Program the AckCtl bit to select the required interrupt acknowledge
-   * behavior.
-   *
-   * NOTE: Only for processors that operate in both secure and non-secure
-   * state.
-   * REVISIT: This is here only for superstitious reasons.  I don't think
-   * I need this setting in this configuration.
-   */
-
-  iccicr |= GIC_ICCICRS_ACKTCTL;
-
-#elif defined(CONFIG_ARCH_TRUSTZONE_BOTH)
   /* Program the AckCtl bit to select the required interrupt acknowledge
    * behavior.
    *
@@ -234,80 +211,28 @@ void arm_gic_initialize(void)
    */
 
   iccicr |= GIC_ICCICRS_ACKTCTL;
-
-  /* Program the SBPR bit to select the required binary pointer behavior.
-   *
-   * NOTE: Only for processors that operate in both secure and non-secure
-   * state.
-   */
-
-  iccicr |= GIC_ICCICRS_CBPR;
 #endif
 
 #ifdef CONFIG_ARMV7R_GIC_EOIMODE
-#  if defined(CONFIG_ARCH_TRUSTZONE_SECURE) || defined(CONFIG_ARCH_TRUSTZONE_BOTH)
+#  if defined(CONFIG_ARCH_TRUSTZONE_SECURE)
   /* Set EnableS=1 to enable CPU interface to signal secure interrupts.
    *
    * NOTE:  Only for processors that operate in secure state.
    */
 
   iccicr |= GIC_ICCICRS_EOIMODES;
-#  endif
-
-#  if defined(CONFIG_ARCH_TRUSTZONE_NONSECURE)
+#  else
   /* Set EnableNS=1 to enable the CPU to signal non-secure interrupts.
    *
    * NOTE:  Only for processors that operate in non-secure state.
    */
 
   iccicr |= GIC_ICCICRU_EOIMODENS;
-
-#  elif defined(CONFIG_ARCH_TRUSTZONE_BOTH)
-  /* Set EnableNS=1 to enable the CPU to signal non-secure interrupts.
-   *
-   * NOTE:  Only for processors that operate in non-secure state.
-   */
-
-  iccicr |= GIC_ICCICRS_EOIMODENS;
 #  endif
 #endif
 
- #ifdef CONFIG_ARCH_TRUSTZONE_BOTH
-  /* If the processor operates in both security states and SBPR=0, then it
-   * must switch to the other security state and repeat the programming of
-   * the binary point register so that the binary point will be programmed
-   * for interrupts in both security states.
-   */
-
-#  warning Missing logic
-#endif
-
-#if !defined(CONFIG_ARCH_HAVE_TRUSTZONE)
-  /* Enable the distributor by setting the Enable bit in the enable
-   * register (no security extensions).
-   */
-
-  iccicr |= GIC_ICCICR_ENABLE;
-  icddcr  = GIC_ICDDCR_ENABLE;
-
-#elif defined(CONFIG_ARCH_TRUSTZONE_SECURE)
+#if defined(CONFIG_ARCH_TRUSTZONE_SECURE)
   /* Enable the Group 0 interrupts, FIQEn and disable Group 0/1
-   * bypass.
-   */
-
-#if 0 /* REVISIT -- I don't know why this needs to be like this */
-  iccicr |= (GIC_ICCICRS_ENABLEGRP0 | GIC_ICCICRS_FIQBYPDISGRP0 |
-             GIC_ICCICRS_IRQBYPDISGRP0 | GIC_ICCICRS_FIQBYPDISGRP1 |
-             GIC_ICCICRS_IRQBYPDISGRP1);
-#else
-  iccicr |= (GIC_ICCICRS_ENABLEGRP0 | GIC_ICCICRS_ENABLEGRP1 |
-             GIC_ICCICRS_FIQBYPDISGRP0 | GIC_ICCICRS_IRQBYPDISGRP0 |
-             GIC_ICCICRS_FIQBYPDISGRP1 | GIC_ICCICRS_IRQBYPDISGRP1);
-#endif
-  icddcr  = GIC_ICDDCR_ENABLEGRP0;
-
-#elif defined(CONFIG_ARCH_TRUSTZONE_BOTH)
-  /* Enable the Group 0/1 interrupts, FIQEn and disable Group 0/1
    * bypass.
    */
 
@@ -316,7 +241,7 @@ void arm_gic_initialize(void)
              GIC_ICCICRS_FIQBYPDISGRP1 | GIC_ICCICRS_IRQBYPDISGRP1);
   icddcr  = (GIC_ICDDCR_ENABLEGRP0 | GIC_ICDDCR_ENABLEGRP1);
 
-#else /* defined(CONFIG_ARCH_TRUSTZONE_NONSECURE) */
+#else
   /* Enable the Group 1 interrupts and disable Group 1 bypass. */
 
   iccicr |= (GIC_ICCICRU_ENABLEGRP1 | GIC_ICCICRU_FIQBYPDISGRP1 |
@@ -328,16 +253,6 @@ void arm_gic_initialize(void)
   /* Write the final ICCICR value to enable the GIC. */
 
   putreg32(iccicr, GIC_ICCICR);
-
-#ifdef CONFIG_ARCH_TRUSTZONE_BOTH
-  /* A processor in the secure state must then switch to the non-secure
-   * a repeat setting of the enable bit in the enable register.  This
-   * enables distributor to respond to interrupt in both security states.
-   * REVISIT: Initial implementation operates only in secure state.
-   */
-
-#  warning Missing logic
-#endif
 
   /* Write the ICDDCR value to enable the forwarding of interrupt by the
    * distributor.
@@ -380,7 +295,7 @@ uint32_t *arm_decodeirq(uint32_t *regs)
    * interrupt.
    */
 
-  DEBUGASSERT(irq < NR_IRQS || irq == 1023);
+  DEBUGASSERT(irq < NR_IRQS || irq >= 1022);
   if (irq < NR_IRQS)
     {
       /* Dispatch the interrupt */
