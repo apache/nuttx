@@ -34,6 +34,8 @@
 #  include <nuttx/leds/userled.h>
 #endif
 
+#include "hardware/nrf52_clock.h"
+#include "arm_internal.h"
 #include "arduino-nano-33ble.h"
 
 
@@ -121,9 +123,10 @@ int nrf52_bringup(void)
     }
 #endif
 
-  /* If I2C 0 is enabled and we are master, engage pullup resistor. */
+  /* If I2C 0 is enabled and we are master, engage pullup resistor and disable trace. */
 #ifdef CONFIG_NRF52_I2C0_MASTER
   nrf52_gpio_config(BOARD_I2C0_PULLUP_PIN);
+  putreg32(0, NRF52_CLOCK_TRACECONFIG);
 #endif
 
 #ifdef CONFIG_SENSORS_LSM9DS1
