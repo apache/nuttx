@@ -532,9 +532,6 @@ config ARCH_TRUSTZONE_SECURE
 config ARCH_TRUSTZONE_NONSECURE
 	bool "All CPUs operate non-secure state"
 
-config ARCH_TRUSTZONE_BOTH
-	bool "CPUs operate in both secure and non-secure states"
-
 endchoice # TrustZone Configuration
 
 config ARCH_FPU
