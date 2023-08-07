@@ -4,9 +4,35 @@
 
 # Boards build by CMake
 
+CMake,b-l072z-lrwan1:adc
+CMake,b-l072z-lrwan1:nsh
+#CMake,b-l072z-lrwan1:nxlines_oled
+CMake,b-l072z-lrwan1:sx127x
+
+CMake,nucleo-f072rb:nsh
+
+CMake,nucleo-f091rc:nsh
+CMake,nucleo-f091rc:sx127x
+
+CMake,nucleo-g070rb:nsh
+
+CMake,nucleo-g071rb:nsh
+
+CMake,nucleo-l073rz:nsh
+CMake,nucleo-l073rz:sx127x
+
+CMake,stm32f051-discovery:nsh
+
+CMake,stm32f072-discovery:nsh
+
+CMake,stm32g071b-disco:nsh
+#CMake,stm32g071b-disco:oled
+
+CMake,stm32l0538-disco:nsh
+
 CMake,nucleo-144:f722-can
 CMake,nucleo-144:f722-cansock
-# CMake,nucleo-144:f722-composite
+CMake,nucleo-144:f722-composite
 CMake,nucleo-144:f746-evalos
 CMake,nucleo-144:f746-nsh
 CMake,nucleo-144:f746-pysim
@@ -34,7 +60,7 @@ CMake,stm32f769i-disco:nsh
 CMake,stm32f777zit6-meadow:nsh
 # CMake,stm32f777zit6-meadow:sdram
 
-# CMake,nucleo-h743zi:composite
+CMake,nucleo-h743zi:composite
 # CMake,nucleo-h743zi:elf
 CMake,nucleo-h743zi:mcuboot-app
 CMake,nucleo-h743zi:mcuboot-loader
@@ -43,7 +69,7 @@ CMake,nucleo-h743zi:nsh
 # CMake,nucleo-h743zi:nxlines_oled
 CMake,nucleo-h743zi:otg_fs_host
 CMake,nucleo-h743zi:pwm
-# CMake,nucleo-h743zi:rndis
+CMake,nucleo-h743zi:rndis
 
 # CMake,nucleo-h743zi2:jumbo
 CMake,nucleo-h743zi2:netnsh
