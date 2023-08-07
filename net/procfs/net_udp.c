@@ -60,16 +60,13 @@ static ssize_t netprocfs_udpstats(FAR struct netprocfs_file_s *priv,
   int addrlen = (domain == PF_INET) ?
                 INET_ADDRSTRLEN : INET6_ADDRSTRLEN;
   FAR struct udp_conn_s *conn = NULL;
-  char remote[INET6_ADDRSTRLEN + 1];
-  char local[INET6_ADDRSTRLEN + 1];
+  char remote[INET6_ADDRSTRLEN];
+  char local[INET6_ADDRSTRLEN];
   int len = 0;
-  void *laddr;
-  void *raddr;
+  FAR void *laddr;
+  FAR void *raddr;
 
   net_lock();
-
-  local[addrlen] = '\0';
-  remote[addrlen] = '\0';
 
   while ((conn = udp_nextconn(conn)) != NULL)
     {
@@ -90,25 +87,8 @@ static ssize_t netprocfs_udpstats(FAR struct netprocfs_file_s *priv,
           break;
         }
 
-#ifdef CONFIG_NET_IPv4
-#  ifdef CONFIG_NET_IPv6
-      if (domain == PF_INET)
-#  endif /* CONFIG_NET_IPv6 */
-        {
-          laddr = &conn->u.ipv4.laddr;
-          raddr = &conn->u.ipv4.raddr;
-        }
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-#  ifdef CONFIG_NET_IPv4
-      else
-#  endif /* CONFIG_NET_IPv4 */
-        {
-          laddr = &conn->u.ipv6.laddr;
-          raddr = &conn->u.ipv6.raddr;
-        }
-#endif /* CONFIG_NET_IPv6 */
+      laddr = net_ip_binding_laddr(&conn->u, domain);
+      raddr = net_ip_binding_raddr(&conn->u, domain);
 
       len += snprintf(buffer + len, buflen - len,
                       "    %2" PRIu8
