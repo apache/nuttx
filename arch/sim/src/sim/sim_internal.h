@@ -168,6 +168,10 @@ int  host_backtrace(void** array, int size);
 void host_init_cwd(void);
 #endif
 
+pid_t host_posix_spawn(const char *path,
+                       char *const argv[], char *const envp[]);
+int   host_waitpid(pid_t pid);
+
 /* sim_hostmemory.c *********************************************************/
 
 void *host_allocheap(size_t sz);

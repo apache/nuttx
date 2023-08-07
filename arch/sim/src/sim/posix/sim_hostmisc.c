@@ -22,11 +22,15 @@
  * Included Files
  ****************************************************************************/
 
+#include <errno.h>
 #include <limits.h>
 #include <stdio.h>
+#include <spawn.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/wait.h>
+#include <sys/types.h>
 
 #include "sim_internal.h"
 
@@ -138,3 +142,38 @@ void host_init_cwd(void)
   chdir(path);
 }
 #endif
+
+/****************************************************************************
+ * Name: host_posix_spawn
+ ****************************************************************************/
+
+pid_t host_posix_spawn(const char *path,
+                       char *const argv[], char *const envp[])
+{
+  int ret;
+  pid_t pid;
+  char *default_argv[] =
+  {
+    NULL
+  };
+
+  if (!argv)
+    {
+      argv = default_argv;
+    }
+
+  ret = posix_spawn(&pid, path, NULL, NULL, argv, envp);
+  return ret > 0 ? -ret : pid;
+}
+
+/****************************************************************************
+ * Name: host_wait
+ ****************************************************************************/
+
+int host_waitpid(pid_t pid)
+{
+  int status;
+
+  pid = waitpid(pid, &status, 0);
+  return pid < 0 ? -errno : status;
+}
