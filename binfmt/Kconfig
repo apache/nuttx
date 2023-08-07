@@ -5,7 +5,7 @@
 
 config BINFMT_DISABLE
 	bool "Disable BINFMT support"
-	default n
+	default DEFAULT_SMALL
 	---help---
 		By default, support for loadable binary formats is built.  This logic
 		may be suppressed by defining this setting.

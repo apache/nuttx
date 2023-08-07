@@ -5,6 +5,7 @@
 # You can then do "make savedefconfig" to generate a new defconfig file that includes your
 # modifications.
 #
+# CONFIG_BINFMT_DISABLE is not set
 # CONFIG_DISABLE_OS_API is not set
 # CONFIG_FS_PROCFS_EXCLUDE_BLOCKS is not set
 # CONFIG_FS_PROCFS_EXCLUDE_ENVIRON is not set
