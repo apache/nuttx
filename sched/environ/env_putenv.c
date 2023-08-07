@@ -31,7 +31,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include <nuttx/kmalloc.h>
+#include <nuttx/lib/lib.h>
 
 /****************************************************************************
  * Public Functions
@@ -61,8 +61,8 @@
 
 int putenv(FAR const char *string)
 {
-  char *pname;
-  char *pequal;
+  FAR char *pname;
+  FAR char *pequal;
   int ret = OK;
 
   /* Verify that a string was passed */
@@ -91,7 +91,7 @@ int putenv(FAR const char *string)
       ret = setenv(pname, pequal + 1, TRUE);
     }
 
-  kmm_free(pname);
+  lib_free(pname);
   return ret;
 
 errout:

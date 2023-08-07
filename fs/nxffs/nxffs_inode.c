@@ -31,7 +31,7 @@
 #include <debug.h>
 
 #include <nuttx/crc32.h>
-#include <nuttx/kmalloc.h>
+#include <nuttx/lib/lib.h>
 #include <nuttx/mtd/mtd.h>
 
 #include "nxffs.h"
@@ -212,7 +212,7 @@ void nxffs_freeentry(FAR struct nxffs_entry_s *entry)
 {
   if (entry->name)
     {
-      kmm_free(entry->name);
+      lib_free(entry->name);
       entry->name = NULL;
     }
 }

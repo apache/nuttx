@@ -36,7 +36,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/kmalloc.h>
+#include <nuttx/lib/lib.h>
 #include <nuttx/mutex.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/fat.h>
@@ -1048,7 +1048,7 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
       ptr = strtok_r(NULL, ",", &saveptr);
     }
 
-  kmm_free(options);
+  lib_free(options);
 
   /* Take the lock for the mount */
 

@@ -36,7 +36,7 @@
 #include <debug.h>
 #include <limits.h>
 
-#include <nuttx/kmalloc.h>
+#include <nuttx/lib/lib.h>
 #include <nuttx/mutex.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
@@ -1108,7 +1108,7 @@ static int rpmsgfs_bind(FAR struct inode *blkdriver, FAR const void *data,
     }
 
   ret = rpmsgfs_client_bind(&fs->handle, cpuname);
-  kmm_free(options);
+  lib_free(options);
   if (ret < 0)
     {
       kmm_free(fs);

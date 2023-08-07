@@ -36,7 +36,7 @@
 #include <assert.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/kmalloc.h>
+#include <nuttx/lib/lib.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/mutex.h>
 #include <nuttx/syslog/syslog.h>
@@ -781,7 +781,7 @@ void syslog_dev_uninitialize(FAR struct syslog_channel_s *channel)
 
   if (syslog_dev->sl_devpath != NULL)
     {
-      kmm_free(syslog_dev->sl_devpath);
+      lib_free(syslog_dev->sl_devpath);
     }
 
   /* Free the channel structure */
