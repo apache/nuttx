@@ -27,10 +27,11 @@
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 
-#include <string.h>
 #include <assert.h>
-#include <errno.h>
 #include <debug.h>
+#include <errno.h>
+#include <stdio.h>
+#include <string.h>
 
 #include <nuttx/net/net.h>
 #include <nuttx/net/ip.h>
@@ -1536,7 +1537,18 @@ static int netdev_ioctl(FAR struct socket *psock, int cmd,
 
         break;
 
-      default:
+      case FIOC_FILEPATH:
+        if (ret == -ENOTTY)
+          {
+            snprintf((FAR char *)(uintptr_t)arg, PATH_MAX, "socket:["
+                     "domain %" PRIu8 ", type %" PRIu8 ", proto %" PRIu8 "]",
+                     psock->s_domain, psock->s_type, psock->s_proto);
+            ret = OK;
+          }
+
+        break;
+
+    default:
         break;
     }
 
