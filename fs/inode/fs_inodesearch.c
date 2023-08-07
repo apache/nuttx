@@ -67,7 +67,7 @@ FAR struct inode *g_root_inode = NULL;
 
 static int _inode_compare(FAR const char *fname, FAR struct inode *node)
 {
-  char *nname = node->i_name;
+  FAR char *nname = node->i_name;
 
   if (!nname)
     {
@@ -351,7 +351,7 @@ static int _inode_search(FAR struct inode_search_s *desc)
 
                               if (*desc->relpath != '\0')
                                 {
-                                  char *buffer = NULL;
+                                  FAR char *buffer = NULL;
 
                                   ret = asprintf(&buffer,
                                                  "%s/%s", desc->relpath,
