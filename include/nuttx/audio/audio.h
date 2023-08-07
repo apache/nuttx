@@ -154,6 +154,7 @@
 #define AUDIO_FMT_MIDI              0x09
 #define AUDIO_FMT_OGG_VORBIS        0x0a
 #define AUDIO_FMT_FLAC              0x0b
+#define AUDIO_FMT_SBC               0x0c
 
 /* Audio Sub-Format Types ***************************************************/
 
