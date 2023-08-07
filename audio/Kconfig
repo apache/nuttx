@@ -105,10 +105,10 @@ config AUDIO_FORMAT_MP3
 		Build in support for MP3 Audio format.
 
 config AUDIO_FORMAT_SBC
-        bool "Bluetooth SubBand Coding"
-        default y
-        ---help---
-                Build in support for SBC Audio format.
+	bool "Bluetooth SubBand Coding"
+	default y
+	---help---
+		Build in support for SBC Audio format.
 
 config AUDIO_FORMAT_MIDI
 	bool "Midi Format"
