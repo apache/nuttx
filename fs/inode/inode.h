@@ -35,6 +35,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/lib/lib.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -58,7 +59,7 @@
     { \
       if ((d)->buffer != NULL) \
         { \
-          kmm_free((d)->buffer); \
+          lib_free((d)->buffer); \
           (d)->buffer  = NULL; \
         } \
     } \
