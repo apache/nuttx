@@ -37,6 +37,7 @@
 #include <errno.h>
 #include <assert.h>
 
+#include <nuttx/lib/lib.h>
 #include <nuttx/lib/xorshift128.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>

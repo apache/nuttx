@@ -33,6 +33,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/lib/lib.h>
 #include <nuttx/tls.h>
 
 #include "inode/inode.h"
