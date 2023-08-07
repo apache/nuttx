@@ -33,7 +33,7 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/kmalloc.h>
+#include <nuttx/lib/lib.h>
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/mutex.h>
 
@@ -187,6 +187,6 @@ int mtd_proxy(FAR const char *mtddev, int mountflags,
 out_with_fltdev:
   nx_unlink(blkdev);
 out_with_blkdev:
-  kmm_free(blkdev);
+  lib_free(blkdev);
   return ret;
 }

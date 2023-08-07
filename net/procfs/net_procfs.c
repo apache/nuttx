@@ -39,7 +39,7 @@
 
 #include <sys/param.h>
 
-#include <nuttx/kmalloc.h>
+#include <nuttx/lib/lib.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
 #include <nuttx/net/netdev.h>
@@ -244,7 +244,7 @@ static int netprocfs_open(FAR struct file *filep, FAR const char *relpath,
 
       devname = basename(copy);
       dev     = netdev_findbyname(devname);
-      kmm_free(copy);
+      lib_free(copy);
 
       if (dev == NULL)
         {
@@ -670,7 +670,7 @@ static int netprocfs_stat(FAR const char *relpath, FAR struct stat *buf)
 
       devname = basename(copy);
       dev     = netdev_findbyname(devname);
-      kmm_free(copy);
+      lib_free(copy);
 
       if (dev == NULL)
         {

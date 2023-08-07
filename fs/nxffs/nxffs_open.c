@@ -33,7 +33,7 @@
 #include <debug.h>
 
 #include <nuttx/crc32.h>
-#include <nuttx/kmalloc.h>
+#include <nuttx/lib/lib.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/mtd/mtd.h>
 
@@ -654,7 +654,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
   return OK;
 
 errout_with_name:
-  kmm_free(wrfile->ofile.entry.name);
+  lib_free(wrfile->ofile.entry.name);
 errout_with_ofile:
 #ifndef CONFIG_NXFFS_PREALLOCATED
   kmm_free(wrfile);
