@@ -50,6 +50,10 @@
 #  include "esp32s3_ble.h"
 #endif
 
+#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+#  include "esp32s3_wifi_adapter.h"
+#endif
+
 #ifdef CONFIG_ESP32S3_RT_TIMER
 #  include "esp32s3_rt_timer.h"
 #endif

@@ -70,6 +70,13 @@
 #  include "esp32s3_pm.h"
 #endif
 
+#ifdef CONFIG_ESP32S3_BLE
+#  include "esp32s3_ble_adapter.h"
+#  ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+#    include "esp_coexist_internal.h"
+#  endif
+#endif
+
 #include "esp_hal_wifi.h"
 
 /****************************************************************************
@@ -96,6 +103,18 @@
 #define RTC_CLK_CAL_FRACT  19  //!< Number of fractional bits in values returned by rtc_clk_cal
 
 #define ets_timer       _ETSTIMER_
+
+/* CONFIG_POWER_SAVE_MODEM */
+
+#if defined(CONFIG_ESP32S3_POWER_SAVE_MIN_MODEM)
+#  define DEFAULT_PS_MODE WIFI_PS_MIN_MODEM
+#elif defined(CONFIG_ESP32S3_POWER_SAVE_MAX_MODEM)
+#  define DEFAULT_PS_MODE WIFI_PS_MAX_MODEM
+#elif defined(CONFIG_ESP32S3_POWER_SAVE_NONE)
+#  define DEFAULT_PS_MODE WIFI_PS_NONE
+#else
+#  define DEFAULT_PS_MODE WIFI_PS_NONE
+#endif
 
 /****************************************************************************
  * Private Types
@@ -166,6 +185,12 @@ struct nvs_adpt
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
+#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+static int semphr_take_from_isr_wrapper(void *semphr, void *hptw);
+static int semphr_give_from_isr_wrapper(void *semphr, void *hptw);
+static int is_in_isr_wrapper(void);
+#endif /* CONFIG_ESP32S3_WIFI_BT_COEXIST */
 
 static bool wifi_env_is_chip(void);
 static void wifi_set_intr(int32_t cpu_no, uint32_t intr_source,
@@ -280,31 +305,30 @@ static void *esp_wifi_calloc(size_t n, size_t size);
 static void *esp_wifi_zalloc(size_t size);
 static void *esp_wifi_create_queue(int32_t queue_len, int32_t item_size);
 static void esp_wifi_delete_queue(void *queue);
-static int wifi_coex_init(void);
-static void wifi_coex_deinit(void);
-static int wifi_coex_enable(void);
-static void wifi_coex_disable(void);
-static uint32_t esp_coex_status_get(void);
-static void esp_coex_condition_set(uint32_t type, bool dissatisfy);
-static int32_t esp_coex_wifi_request(uint32_t event, uint32_t latency,
+static int coex_init_wrapper(void);
+static void coex_deinit_wrapper(void);
+static int coex_enable_wrapper(void);
+static void coex_disable_wrapper(void);
+static uint32_t coex_status_get_wrapper(void);
+static int32_t coex_wifi_request_wrapper(uint32_t event, uint32_t latency,
                                      uint32_t duration);
-static int32_t esp_coex_wifi_release(uint32_t event);
+static int32_t coex_wifi_release_wrapper(uint32_t event);
 static unsigned long esp_random_ulong(void);
-static int wifi_coex_wifi_set_channel(uint8_t primary, uint8_t secondary);
-static int wifi_coex_get_event_duration(uint32_t event,
+static int coex_wifi_channel_set_wrapper(uint8_t primary, uint8_t secondary);
+static int coex_event_duration_get_wrapper(uint32_t event,
                                         uint32_t *duration);
-static int wifi_coex_get_pti(uint32_t event, uint8_t *pti);
-static void wifi_coex_clear_schm_status_bit(uint32_t type,
+static int coex_pti_get_wrapper(uint32_t event, uint8_t *pti);
+static void coex_schm_status_bit_clear_wrapper(uint32_t type,
                                             uint32_t status);
-static void wifi_coex_set_schm_status_bit(uint32_t type,
+static void coex_schm_status_bit_set_wrapper(uint32_t type,
                                           uint32_t status);
-static int wifi_coex_set_schm_interval(uint32_t interval);
-static uint32_t wifi_coex_get_schm_interval(void);
-static uint8_t wifi_coex_get_schm_curr_period(void);
-static void *wifi_coex_get_schm_curr_phase(void);
-static int wifi_coex_register_start_cb_wrapper(int (* cb)(void));
-static int wifi_coex_schm_process_restart_wrapper(void);
-static int wifi_coex_schm_register_cb_wrapper(int type, int(*cb)(int));
+static int coex_schm_interval_set_wrapper(uint32_t interval);
+static uint32_t coex_schm_interval_get_wrapper(void);
+static uint8_t coex_schm_curr_period_get_wrapper(void);
+static void *coex_schm_curr_phase_get_wrapper(void);
+static int coex_register_start_cb_wrapper(int (* cb)(void));
+static int coex_schm_process_restart_wrapper(void);
+static int coex_schm_register_cb_wrapper(int type, int(*cb)(int));
 
 /****************************************************************************
  * Public Functions declaration
@@ -314,7 +338,6 @@ int64_t esp_timer_get_time(void);
 void esp_fill_random(void *buf, size_t len);
 uint32_t esp_log_timestamp(void);
 uint8_t esp_crc8(const uint8_t *p, uint32_t len);
-void intr_matrix_set(int cpu_no, uint32_t model_num, uint32_t intr_num);
 
 /****************************************************************************
  * Private Data
@@ -378,6 +401,31 @@ static spinlock_t g_lock;
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
+/* Wi-Fi and BT coexistence OS adapter data */
+
+#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+coex_adapter_funcs_t g_coex_adapter_funcs =
+{
+  ._version = COEX_ADAPTER_VERSION,
+  ._task_yield_from_isr = esp_task_yield_from_isr,
+  ._semphr_create = esp_semphr_create,
+  ._semphr_delete = esp_semphr_delete,
+  ._semphr_take_from_isr = semphr_take_from_isr_wrapper,
+  ._semphr_give_from_isr = semphr_give_from_isr_wrapper,
+  ._semphr_take = esp_semphr_take,
+  ._semphr_give = esp_semphr_give,
+  ._is_in_isr = is_in_isr_wrapper,
+  ._malloc_internal =  esp_malloc_internal,
+  ._free = esp_free,
+  ._esp_timer_get_time = esp_timer_get_time,
+  ._timer_disarm = esp_timer_disarm,
+  ._timer_done = esp32s3_timer_done,
+  ._timer_setfn = esp_timer_setfn,
+  ._timer_arm_us = esp_timer_arm_us,
+  ._magic = COEX_ADAPTER_MAGIC,
+};
+#endif /* CONFIG_ESP32S3_WIFI_BT_COEXIST */
 
 /* Wi-Fi OS adapter data */
 
@@ -481,26 +529,25 @@ wifi_osi_funcs_t g_wifi_osi_funcs =
   ._wifi_zalloc = esp_wifi_zalloc,
   ._wifi_create_queue = esp_wifi_create_queue,
   ._wifi_delete_queue = esp_wifi_delete_queue,
-  ._coex_init = wifi_coex_init,
-  ._coex_deinit = wifi_coex_deinit,
-  ._coex_enable = wifi_coex_enable,
-  ._coex_disable = wifi_coex_disable,
-  ._coex_status_get = esp_coex_status_get,
-  ._coex_condition_set = esp_coex_condition_set,
-  ._coex_wifi_request = esp_coex_wifi_request,
-  ._coex_wifi_release = esp_coex_wifi_release,
-  ._coex_wifi_channel_set = wifi_coex_wifi_set_channel,
-  ._coex_event_duration_get = wifi_coex_get_event_duration,
-  ._coex_pti_get = wifi_coex_get_pti,
-  ._coex_schm_status_bit_clear = wifi_coex_clear_schm_status_bit,
-  ._coex_schm_status_bit_set = wifi_coex_set_schm_status_bit,
-  ._coex_schm_interval_set = wifi_coex_set_schm_interval,
-  ._coex_schm_interval_get = wifi_coex_get_schm_interval,
-  ._coex_schm_curr_period_get = wifi_coex_get_schm_curr_period,
-  ._coex_schm_curr_phase_get = wifi_coex_get_schm_curr_phase,
-  ._coex_register_start_cb = wifi_coex_register_start_cb_wrapper,
-  ._coex_schm_process_restart = wifi_coex_schm_process_restart_wrapper,
-  ._coex_schm_register_cb = wifi_coex_schm_register_cb_wrapper,
+  ._coex_init = coex_init_wrapper,
+  ._coex_deinit = coex_deinit_wrapper,
+  ._coex_enable = coex_enable_wrapper,
+  ._coex_disable = coex_disable_wrapper,
+  ._coex_status_get = coex_status_get_wrapper,
+  ._coex_wifi_request = coex_wifi_request_wrapper,
+  ._coex_wifi_release = coex_wifi_release_wrapper,
+  ._coex_wifi_channel_set = coex_wifi_channel_set_wrapper,
+  ._coex_event_duration_get = coex_event_duration_get_wrapper,
+  ._coex_pti_get = coex_pti_get_wrapper,
+  ._coex_schm_status_bit_clear = coex_schm_status_bit_clear_wrapper,
+  ._coex_schm_status_bit_set = coex_schm_status_bit_set_wrapper,
+  ._coex_schm_interval_set = coex_schm_interval_set_wrapper,
+  ._coex_schm_interval_get = coex_schm_interval_get_wrapper,
+  ._coex_schm_curr_period_get = coex_schm_curr_period_get_wrapper,
+  ._coex_schm_curr_phase_get = coex_schm_curr_phase_get_wrapper,
+  ._coex_register_start_cb = coex_register_start_cb_wrapper,
+  ._coex_schm_process_restart = coex_schm_process_restart_wrapper,
+  ._coex_schm_register_cb = coex_schm_register_cb_wrapper,
   ._magic = ESP_WIFI_OS_ADAPTER_MAGIC,
 };
 
@@ -957,7 +1004,7 @@ static void IRAM_ATTR esp_wifi_int_restore(void *wifi_int_mux, uint32_t tmp)
  * Name: esp_task_yield_from_isr
  *
  * Description:
- *   Do nothing in NuttX
+ *   Perform a solicited context switch on FreeRTOS. Do nothing in NuttX.
  *
  * Input Parameters:
  *   None
@@ -969,7 +1016,6 @@ static void IRAM_ATTR esp_wifi_int_restore(void *wifi_int_mux, uint32_t tmp)
 
 static void IRAM_ATTR esp_task_yield_from_isr(void)
 {
-  /* Do nothing */
 }
 
 /****************************************************************************
@@ -1496,7 +1542,7 @@ static int32_t esp_queue_send(void *queue, void *item, uint32_t ticks)
  * Input Parameters:
  *   queue - Message queue data pointer
  *   item  - Message data pointer
- *   hptw  - No mean
+ *   hptw  - Unused.
  *
  * Returned Value:
  *   True if success or false if fail
@@ -1505,9 +1551,7 @@ static int32_t esp_queue_send(void *queue, void *item, uint32_t ticks)
 
 static int32_t esp_queue_send_from_isr(void *queue, void *item, void *hptw)
 {
-  /* Force to set the value to be false */
-
-  *((int *)hptw) = false;
+  *(int *)hptw = 0;
 
   return esp_queue_send_generic(queue, item, 0, 0);
 }
@@ -2064,6 +2108,7 @@ static void esp_evt_work_cb(void *arg)
   irqstate_t flags;
   struct evt_adpt *evt_adpt;
   struct wifi_notify *notify;
+  wifi_ps_type_t ps_type = DEFAULT_PS_MODE;
 
   while (1)
     {
@@ -2088,11 +2133,27 @@ static void esp_evt_work_cb(void *arg)
             wlinfo("Wi-Fi sta start\n");
 
             g_sta_connected = false;
-            ret = esp_wifi_set_ps(WIFI_PS_NONE);
+
+#ifdef CONFIG_ESP32S3_BLE
+            if (esp32s3_bt_controller_get_status() !=
+                ESP_BT_CONTROLLER_STATUS_IDLE)
+              {
+                if (ps_type == WIFI_PS_NONE)
+                  {
+                    ps_type = WIFI_PS_MIN_MODEM;
+                  }
+              }
+#endif
+            ret = esp_wifi_set_ps(ps_type);
+
             if (ret)
               {
                 wlerr("Failed to set power save type\n");
                 break;
+              }
+            else
+              {
+                wlinfo("INFO: Set ps type=%d\n", ps_type);
               }
 
             ret = esp_wifi_get_config(WIFI_IF_STA, &g_sta_wifi_cfg);
@@ -2141,6 +2202,29 @@ static void esp_evt_work_cb(void *arg)
 #ifdef ESP32S3_WLAN_HAS_SOFTAP
           case WIFI_ADPT_EVT_AP_START:
             wlinfo("INFO: Wi-Fi softap start\n");
+
+#ifdef CONFIG_ESP32S3_BLE
+            if (esp32s3_bt_controller_get_status() !=
+                ESP_BT_CONTROLLER_STATUS_IDLE)
+              {
+                if (ps_type == WIFI_PS_NONE)
+                  {
+                    ps_type = WIFI_PS_MIN_MODEM;
+                  }
+              }
+#endif
+            ret = esp_wifi_set_ps(ps_type);
+
+            if (ret)
+              {
+                wlerr("Failed to set power save type\n");
+                break;
+              }
+            else
+              {
+                wlinfo("INFO: Set ps type=%d\n", ps_type);
+              }
+
             ret = esp_wifi_get_config(WIFI_IF_AP, &g_softap_wifi_cfg);
             if (ret)
               {
@@ -2184,6 +2268,73 @@ static void esp_evt_work_cb(void *arg)
     }
 }
 
+#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+
+/****************************************************************************
+ * Name: semphr_take_from_isr_wrapper
+ *
+ * Description:
+ *   Take a semaphore from an ISR
+ *
+ * Input Parameters:
+ *   semphr - Semaphore data pointer.
+ *   hptw   - Unused.
+ *
+ * Returned Value:
+ *   True if success or false if fail
+ *
+ ****************************************************************************/
+
+static int IRAM_ATTR semphr_take_from_isr_wrapper(void *semphr, void *hptw)
+{
+  *(int *)hptw = 0;
+
+  return esp_semphr_take(semphr, 0);
+}
+
+/****************************************************************************
+ * Name: semphr_give_from_isr_wrapper
+ *
+ * Description:
+ *   Post semaphore
+ *
+ * Input Parameters:
+ *   semphr - Semaphore data pointer
+ *   hptw   - Unused.
+ *
+ * Returned Value:
+ *   True if success or false if fail
+ *
+ ****************************************************************************/
+
+static int IRAM_ATTR semphr_give_from_isr_wrapper(void *semphr, void *hptw)
+{
+  *(int *)hptw = 0;
+
+  return esp_semphr_give(semphr);
+}
+
+/****************************************************************************
+ * Name: is_in_isr_wrapper
+ *
+ * Description:
+ *   Check current is in interrupt
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   true if in interrupt or false if not
+ *
+ ****************************************************************************/
+
+static int IRAM_ATTR is_in_isr_wrapper(void)
+{
+  return up_interrupt_context();
+}
+
+#endif /* CONFIG_ESP32S3_WIFI_BT_COEXIST */
+
 /****************************************************************************
  * Name: wifi_env_is_chip
  *
@@ -2223,10 +2374,6 @@ static void wifi_set_intr(int32_t cpu_no, uint32_t intr_source,
   wlinfo("cpu_no=%" PRId32 ", intr_source=%" PRIu32
          ", intr_num=%" PRIu32 ", intr_prio=%" PRId32 "\n",
          cpu_no, intr_source, intr_num, intr_prio);
-
-  /* Force to bind Wi-Fi interrupt to CPU0 */
-
-  intr_matrix_set(0, intr_source, intr_num);
 }
 
 /****************************************************************************
@@ -3484,274 +3631,468 @@ static void esp_wifi_delete_queue(void *queue)
 }
 
 /****************************************************************************
- * Name: wifi_coex_init
+ * Name: coex_init_wrapper
  *
  * Description:
- *   Don't support
+ *   Init software coexist
+ *
+ * Input Parameters:
+ *   none
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success. A negated errno value is returned
+ *   on failure.
  *
  ****************************************************************************/
 
-static int wifi_coex_init(void)
+static int coex_init_wrapper(void)
 {
+#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+  return coex_init();
+#else
   return 0;
+#endif
 }
 
 /****************************************************************************
- * Name: wifi_coex_deinit
+ * Name: coex_deinit_wrapper
  *
  * Description:
- *   Don't support
+ *   De-init software coexist
+ *
+ * Input Parameters:
+ *   none
+ *
+ * Returned Value:
+ *   none
  *
  ****************************************************************************/
 
-static void wifi_coex_deinit(void)
+static void coex_deinit_wrapper(void)
 {
-  return;
+#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+  coex_deinit();
+#endif
 }
 
 /****************************************************************************
- * Name: wifi_coex_enable
+ * Name: coex_enable_wrapper
  *
  * Description:
- *   Don't support
+ *   Enable software coexist
+ *
+ * Input Parameters:
+ *   none
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success. A negated errno value is returned
+ *   on failure.
  *
  ****************************************************************************/
 
-static int wifi_coex_enable(void)
+static int coex_enable_wrapper(void)
 {
+#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+  return coex_enable();
+#else
   return 0;
+#endif
 }
 
 /****************************************************************************
- * Name: wifi_coex_disable
+ * Name: coex_disable_wrapper
  *
  * Description:
- *   Don't support
+ *   Disable software coexist
+ *
+ * Input Parameters:
+ *   none
+ *
+ * Returned Value:
+ *   none
  *
  ****************************************************************************/
 
-static void wifi_coex_disable(void)
+static void coex_disable_wrapper(void)
 {
-  return;
+#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+  coex_disable();
+#endif
 }
 
 /****************************************************************************
- * Name: esp_coex_status_get
+ * Name: coex_status_get_wrapper
  *
  * Description:
- *   Don't support
+ *   Get software coexist status.
+ *
+ * Input Parameters:
+ *   none
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success. A negated errno value is returned
+ *   on failure.
  *
  ****************************************************************************/
 
-static uint32_t esp_coex_status_get(void)
+static IRAM_ATTR uint32_t coex_status_get_wrapper(void)
 {
+#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+  return coex_status_get();
+#else
   return 0;
+#endif
 }
 
 /****************************************************************************
- * Name: esp_coex_condition_set
+ * Name: coex_wifi_request_wrapper
  *
  * Description:
- *   Don't support
+ *   Request Wi-Fi coexistence.
+ *
+ * Input Parameters:
+ *   event    - WiFi event
+ *   latency  - WiFi will request coexistence after latency
+ *   duration - duration for WiFi to request coexistence
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success. A negated errno value is returned
+ *   on failure.
  *
  ****************************************************************************/
 
-static void esp_coex_condition_set(uint32_t type, bool dissatisfy)
+static int32_t coex_wifi_request_wrapper(uint32_t event, uint32_t latency,
+                                         uint32_t duration)
 {
-  return;
-}
-
-/****************************************************************************
- * Name: esp_coex_wifi_request
- *
- * Description:
- *   Don't support
- *
- ****************************************************************************/
-
-static int32_t esp_coex_wifi_request(uint32_t event, uint32_t latency,
-                                     uint32_t duration)
-{
+#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+  return coex_wifi_request(event, latency, duration);
+#else
   return 0;
+#endif
 }
 
 /****************************************************************************
- * Name: esp_coex_wifi_release
+ * Name: coex_wifi_release_wrapper
  *
  * Description:
- *   Don't support
+ *   Release Wi-Fi coexistence.
+ *
+ * Input Parameters:
+ *   event    - WiFi event
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success. A negated errno value is returned
+ *   on failure.
  *
  ****************************************************************************/
 
-static int32_t esp_coex_wifi_release(uint32_t event)
+static IRAM_ATTR int32_t coex_wifi_release_wrapper(uint32_t event)
 {
+#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+  return coex_wifi_release(event);
+#else
   return 0;
+#endif
 }
 
 /****************************************************************************
- * Name: wifi_coex_wifi_set_channel
+ * Name: coex_wifi_channel_set_wrapper
  *
  * Description:
- *   Don't support
+ *   Set Wi-Fi channel to coexistence module.
+ *
+ * Input Parameters:
+ *   primary   - WiFi primary channel
+ *   secondary - WiFi secondary channel
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success. A negated errno value is returned
+ *   on failure.
  *
  ****************************************************************************/
 
-static int wifi_coex_wifi_set_channel(uint8_t primary, uint8_t secondary)
+static int coex_wifi_channel_set_wrapper(uint8_t primary, uint8_t secondary)
 {
+#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+  return coex_wifi_channel_set(primary, secondary);
+#else
   return 0;
+#endif
 }
 
 /****************************************************************************
- * Name: wifi_coex_get_event_duration
+ * Name: coex_event_duration_get_wrapper
  *
  * Description:
- *   Don't support
+ *   Get coexistence event duration.
+ *
+ * Input Parameters:
+ *   event    - Coexistence event
+ *   duration - Coexistence event duration
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success. A negated errno value is returned
+ *   on failure.
  *
  ****************************************************************************/
 
-static int wifi_coex_get_event_duration(uint32_t event, uint32_t *duration)
+static int coex_event_duration_get_wrapper(uint32_t event,
+                                           uint32_t *duration)
 {
+#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+  return coex_event_duration_get(event, duration);
+#else
   return 0;
+#endif
 }
 
 /****************************************************************************
- * Name: wifi_coex_get_pti
+ * Name: coex_pti_get_wrapper
  *
  * Description:
- *   Don't support
+ *   Get coexistence event priority.
+ *
+ * Input Parameters:
+ *   event - Coexistence event
+ *   pti   - Coexistence event priority
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success. A negated errno value is returned
+ *   on failure.
  *
  ****************************************************************************/
 
-static int wifi_coex_get_pti(uint32_t event, uint8_t *pti)
+static int coex_pti_get_wrapper(uint32_t event, uint8_t *pti)
 {
+#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+  return coex_pti_get(event, pti);
+#else
   return 0;
+#endif
 }
 
 /****************************************************************************
- * Name: wifi_coex_clear_schm_status_bit
+ * Name: coex_schm_status_bit_clear_wrapper
  *
  * Description:
- *   Don't support
+ *   Clear coexistence status.
+ *
+ * Input Parameters:
+ *   type   - Coexistence status type
+ *   status - Coexistence status
+ *
+ * Returned Value:
+ *   none
  *
  ****************************************************************************/
 
-static void wifi_coex_clear_schm_status_bit(uint32_t type, uint32_t status)
+static void coex_schm_status_bit_clear_wrapper(uint32_t type,
+                                               uint32_t status)
 {
-  return;
+#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+  coex_schm_status_bit_clear(type, status);
+#endif
 }
 
 /****************************************************************************
- * Name: wifi_coex_set_schm_status_bit
+ * Name: coex_schm_status_bit_set_wrapper
  *
  * Description:
- *   Don't support
+ *   Set coexistence status.
+ *
+ * Input Parameters:
+ *   type   - Coexistence status type
+ *   status - Coexistence status
+ *
+ * Returned Value:
+ *   none
  *
  ****************************************************************************/
 
-static void wifi_coex_set_schm_status_bit(uint32_t type, uint32_t status)
+static void coex_schm_status_bit_set_wrapper(uint32_t type, uint32_t status)
 {
-  return;
+#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+  coex_schm_status_bit_set(type, status);
+#endif
 }
 
 /****************************************************************************
- * Name: wifi_coex_set_schm_interval
+ * Name: coex_schm_interval_set_wrapper
  *
  * Description:
- *   Don't support
+ *   Set coexistence scheme interval.
+ *
+ * Input Parameters:
+ *   interval - Coexistence scheme interval
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success. A negated errno value is returned
+ *   on failure.
  *
  ****************************************************************************/
 
-static int wifi_coex_set_schm_interval(uint32_t interval)
+static IRAM_ATTR int coex_schm_interval_set_wrapper(uint32_t interval)
 {
+#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+  return coex_schm_interval_set(interval);
+#else
   return 0;
+#endif
 }
 
 /****************************************************************************
- * Name: wifi_coex_get_schm_interval
+ * Name: coex_schm_interval_get_wrapper
  *
  * Description:
- *   Don't support
+ *   Get coexistence scheme interval.
+ *
+ * Input Parameters:
+ *   none
+ *
+ * Returned Value:
+ *   Coexistence scheme interval
  *
  ****************************************************************************/
 
-static uint32_t wifi_coex_get_schm_interval(void)
+static uint32_t coex_schm_interval_get_wrapper(void)
 {
+#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+  return coex_schm_interval_get();
+#else
   return 0;
+#endif
 }
 
 /****************************************************************************
- * Name: wifi_coex_get_schm_curr_period
+ * Name: coex_schm_curr_period_get_wrapper
  *
  * Description:
- *   Don't support
+ *   Get current coexistence scheme period.
+ *
+ * Input Parameters:
+ *   none
+ *
+ * Returned Value:
+ *   Coexistence scheme period
  *
  ****************************************************************************/
 
-static uint8_t wifi_coex_get_schm_curr_period(void)
+static uint8_t coex_schm_curr_period_get_wrapper(void)
 {
+#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+  return coex_schm_curr_period_get();
+#else
   return 0;
+#endif
 }
 
 /****************************************************************************
- * Name: wifi_coex_get_schm_curr_phase
+ * Name: coex_schm_curr_phase_get_wrapper
  *
  * Description:
- *   Don't support
+ *   Get current coexistence scheme phase.
+ *
+ * Input Parameters:
+ *   none
+ *
+ * Returned Value:
+ *   Coexistence scheme phase
  *
  ****************************************************************************/
 
-static void *wifi_coex_get_schm_curr_phase(void)
+static void *coex_schm_curr_phase_get_wrapper(void)
 {
-  DEBUGPANIC();
-
+#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+  return coex_schm_curr_phase_get();
+#else
   return NULL;
+#endif
 }
 
 /****************************************************************************
- * Name: wifi_coex_register_start_cb_wrapper
+ * Name: coex_register_start_cb_wrapper
  *
  * Description:
- *   Don't support
+ *   Register Wi-Fi callback for coexistence starts.
+ *
+ * Input Parameters:
+ *   cb - WiFi callback
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success. A negated errno value is returned
+ *   on failure.
  *
  ****************************************************************************/
 
-static int wifi_coex_register_start_cb_wrapper(int (* cb)(void))
+static int coex_register_start_cb_wrapper(int (* cb)(void))
 {
+#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+  return coex_register_start_cb(cb);
+#else
   return 0;
+#endif
 }
 
 /****************************************************************************
- * Name: wifi_coex_schm_process_restart_wrapper
+ * Name: coex_schm_process_restart_wrapper
  *
  * Description:
- *   Don't support
+ *   Restart current coexistence scheme.
+ *
+ * Input Parameters:
+ *   none
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success. A negated errno value is returned
+ *   on failure.
  *
  ****************************************************************************/
 
-static int wifi_coex_schm_process_restart_wrapper(void)
+static int coex_schm_process_restart_wrapper(void)
 {
+#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+  return coex_schm_process_restart();
+#else
   return 0;
+#endif
 }
 
 /****************************************************************************
- * Name: wifi_coex_schm_register_cb_wrapper
+ * Name: coex_schm_register_cb_wrapper
  *
  * Description:
- *   Don't support
+ *   Register callback for coexistence scheme.
+ *
+ * Input Parameters:
+ *   type     - callback type
+ *   callback - callback
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success. A negated errno value is returned
+ *   on failure.
  *
  ****************************************************************************/
 
-static int wifi_coex_schm_register_cb_wrapper(int type, int(*cb)(int))
+static int coex_schm_register_cb_wrapper(int type, int(*cb)(int))
 {
+#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+  return coex_schm_register_callback(type, cb);
+#else
   return 0;
+#endif
 }
 
 /****************************************************************************
  * Name: esp_random_ulong
  *
  * Description:
- *   A simpler wrapper of esp_random.
- *   Just convert the return value from uint32_t to unsigned long.
+ *   Get random value and convert to unsigned long.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Random value
  *
  ****************************************************************************/
 
@@ -3765,6 +4106,16 @@ static unsigned long esp_random_ulong(void)
  *
  * Description:
  *   Wi-Fi TX done callback function.
+ *
+ * Input Parameters:
+ *   ifidx    - The interface id that the tx callback has been triggered from
+ *   data     - Pointer to the data transmitted
+ *   data_len - Length of the data transmitted
+ *   txstatus - True:if the data was transmitted sucessfully False: if data
+ *              transmission failed
+ *
+ * Returned Value:
+ *   none
  *
  ****************************************************************************/
 
@@ -3807,7 +4158,7 @@ static IRAM_ATTR void esp_wifi_tx_done_cb(uint8_t ifidx, uint8_t *data,
  *   wifi_auth - ESP32-S3 authenticate mode
  *
  * Returned Value:
- *     authenticate mode
+ *   authenticate mode
  *
  ****************************************************************************/
 
@@ -3853,7 +4204,7 @@ static int esp_wifi_auth_trans(uint32_t wifi_auth)
  *   wifi_cipher - ESP32-S3 cipher type
  *
  * Returned Value:
- *     cipher type
+ *   cipher type
  *
  ****************************************************************************/
 
@@ -3973,7 +4324,7 @@ static int esp_freq_to_channel(uint16_t freq)
  *   format - format string
  *
  * Returned Value:
- *   0
+ *   Zero (OK)
  *
  ****************************************************************************/
 
@@ -4004,7 +4355,7 @@ int pp_printf(const char *format, ...)
  *   format - format string
  *
  * Returned Value:
- *   0
+ *   Zero (OK)
  *
  ****************************************************************************/
 
@@ -4022,22 +4373,34 @@ int net80211_printf(const char *format, ...)
 }
 
 /****************************************************************************
- * Functions needed by libmesh.a
+ * Functions needed by libcoexist.a
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp_mesh_send_event_internal
+ * Name: coexist_printf
  *
  * Description:
- *   Don't support
+ *   Output format string and its arguments
+ *
+ * Input Parameters:
+ *   format - format string
+ *
+ * Returned Value:
+ *   Zero (OK)
  *
  ****************************************************************************/
 
-int esp_mesh_send_event_internal(int32_t event_id,
-                                 void *event_data,
-                                 size_t event_data_size)
+int coexist_printf(const char *format, ...)
 {
-  return -1;
+#ifdef CONFIG_DEBUG_WIRELESS_INFO
+  va_list arg;
+
+  va_start(arg, format);
+  vsyslog(LOG_INFO, format, arg);
+  va_end(arg);
+#endif
+
+  return 0;
 }
 
 /****************************************************************************
@@ -4098,14 +4461,14 @@ int32_t esp_wifi_init(const wifi_init_config_t *config)
 {
   int32_t ret;
 
-  modifyreg32(SYSTEM_WIFI_CLK_EN_REG, 0, SYSTEM_WIFI_CLK_EN);
-
-  modifyreg32(RTC_CNTL_DIG_PWC_REG, RTC_CNTL_WIFI_FORCE_PD, 0);
-
-  modifyreg32(SYSCON_WIFI_RST_EN_REG, 0, MODEM_RESET_FIELD_WHEN_PU);
-  modifyreg32(SYSCON_WIFI_RST_EN_REG, MODEM_RESET_FIELD_WHEN_PU, 0);
-
-  modifyreg32(RTC_CNTL_DIG_ISO_REG, RTC_CNTL_WIFI_FORCE_ISO, 0);
+#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+  ret = coex_init();
+  if (ret)
+    {
+      wlerr("ERROR: Failed to initialize coex error=%d\n", ret);
+      return ret;
+    }
+#endif
 
   esp_wifi_internal_set_log_level(WIFI_LOG_DEBUG);
 
@@ -6374,10 +6737,12 @@ int esp_wifi_softap_rssi(struct iwreq *iwr, bool set)
 #ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
 int esp32s3_wifi_bt_coexist_init(void)
 {
-#error "BT and WiFi coexst not implemented!!!"
-  return ERROR;
+  esp_coex_adapter_register(&g_coex_adapter_funcs);
+  coex_pre_init();
+
+  return 0;
 }
-#endif
+#endif /* CONFIG_ESP32S3_WIFI_BT_COEXIST */
 
 /****************************************************************************
  * Name: esp_wifi_stop_callback
