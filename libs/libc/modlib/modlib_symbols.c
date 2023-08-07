@@ -484,7 +484,7 @@ int modlib_insertsymtab(FAR struct module_s *modp,
   if (modp->modinfo.exports != NULL)
     {
       bwarn("Module export information already present - replacing");
-      modlib_freesymtab((FAR void *) modp);
+      modlib_freesymtab((FAR void *)modp);
     }
 
   /* Count the "live" symbols */
@@ -513,13 +513,14 @@ int modlib_insertsymtab(FAR struct module_s *modp,
                   ret = modlib_symname(loadinfo, &sym[i], strtab->sh_offset);
                   if (ret < 0)
                     {
-                      lib_free((FAR void *) modp->modinfo.exports);
+                      lib_free((FAR void *)modp->modinfo.exports);
                       modp->modinfo.exports = NULL;
                       return ret;
                     }
 
-                  symbol[j].sym_name = strdup((char *) loadinfo->iobuffer);
-                  symbol[j].sym_value = (FAR const void *) sym[i].st_value;
+                  symbol[j].sym_name =
+                      strdup((FAR char *)loadinfo->iobuffer);
+                  symbol[j].sym_value = (FAR const void *)sym[i].st_value;
                   j++;
                 }
             }
@@ -606,14 +607,15 @@ void *modlib_findglobal(FAR struct module_s *modp,
 void modlib_freesymtab(FAR struct module_s *modp)
 {
   FAR const struct symtab_s *symbol;
+  int i;
 
-  if ((symbol = modp->modinfo.exports))
+  if ((symbol = modp->modinfo.exports) != NULL)
     {
-      for (int i = 0; i < modp->modinfo.nexports; i++)
+      for (i = 0; i < modp->modinfo.nexports; i++)
         {
-          lib_free((FAR void *) symbol[i].sym_name);
+          lib_free((FAR void *)symbol[i].sym_name);
         }
 
-      lib_free((FAR void *) symbol);
+      lib_free((FAR void *)symbol);
     }
 }
