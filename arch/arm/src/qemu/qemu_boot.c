@@ -29,6 +29,10 @@
 #include "qemu_irq.h"
 #include "qemu_memorymap.h"
 
+#ifdef CONFIG_DEVICE_TREE
+#  include <nuttx/fdt.h>
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -46,6 +50,10 @@ void arm_boot(void)
   /* Set the page table for section */
 
   qemu_setupmappings();
+
+#ifdef CONFIG_DEVICE_TREE
+  fdt_register((FAR const char *)0x40000000);
+#endif
 
 #ifdef USE_EARLYSERIALINIT
   /* Perform early serial initialization if we are going to use the serial
