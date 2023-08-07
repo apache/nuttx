@@ -6,6 +6,7 @@
 # modifications.
 #
 # CONFIG_ARCH_RAMFUNCS is not set
+# CONFIG_BINFMT_DISABLE is not set
 CONFIG_ARCH="sparc"
 CONFIG_ARCH_BOARD="xx3823"
 CONFIG_ARCH_BOARD_XX3823=y

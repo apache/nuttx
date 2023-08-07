@@ -5,6 +5,7 @@
 # You can then do "make savedefconfig" to generate a new defconfig file that includes your
 # modifications.
 #
+# CONFIG_BINFMT_DISABLE is not set
 # CONFIG_DISABLE_ENVIRON is not set
 # CONFIG_DISABLE_POSIX_TIMERS is not set
 # CONFIG_DISABLE_PSEUDOFS_OPERATIONS is not set
