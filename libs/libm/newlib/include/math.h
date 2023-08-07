@@ -44,6 +44,27 @@ extern "C"
 # endif
 #endif /* __GNUC_PREREQ */
 
+#ifndef __has_extension
+# ifdef __has_feature
+#  define __has_extension __has_feature
+# else
+#  define __has_extension(x) 0
+# endif
+#endif
+
+#if !__has_extension(c_thread_local)
+/* XXX: Some compilers (Clang 3.3, GCC 4.7) falsely announce C++11 mode
+ * without actually supporting the thread_local keyword. Don't check for
+ * the presence of C++11 when defining _Thread_local.
+ */
+# if /* (defined(__cplusplus) && __cplusplus >= 201103L) || */ \
+    __has_extension(cxx_thread_local)
+#  define _Thread_local thread_local
+# else
+#  define _Thread_local __thread
+# endif
+#endif
+
 /* Newlib doesn't fully support long double math functions so far.
  * On platforms where long double equals double the long double functions
  * let's define _LDBL_EQ_DBL to simply call the double functions.
