@@ -927,11 +927,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
         req->ifr_mtu = NETDEV_PKTSIZE(dev) - dev->d_llhdrlen;
         break;
       case SIOCSIFMTU:   /* Set MTU size */
-        dev = netdev_ifr_dev(req);
-        if (dev)
-          {
-            NETDEV_PKTSIZE(dev) = req->ifr_mtu + dev->d_llhdrlen;
-          }
+        NETDEV_PKTSIZE(dev) = req->ifr_mtu + dev->d_llhdrlen;
         break;
 
 #ifdef CONFIG_NET_ICMPv6_AUTOCONF
