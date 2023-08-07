@@ -141,10 +141,10 @@ void board_late_initialize(void)
       return;
     }
 
-  mtd = s25fl5_initialize(qspi, true);
+  mtd = w25qxxxjv_initialize(qspi, true);
   if (!mtd)
     {
-      syslog(LOG_ERR, "ERROR: s25fl5_initialize failed\n");
+      syslog(LOG_ERR, "ERROR: w25qxxxjv_initialize failed\n");
     }
 
   ret = ftl_initialize(0, mtd);
@@ -153,17 +153,20 @@ void board_late_initialize(void)
       ferr("ERROR: Initialize the FTL layer\n");
     }
 
-    meminfo.flags = QSPIMEM_READ | QSPIMEM_QUADIO;
-    meminfo.addrlen = 3;
-    meminfo.dummies = 6;
-    meminfo.cmd = 0xeb; /* S25FL1_FAST_READ_QUADIO; */
-    meminfo.addr = 0;
-    meminfo.buflen = 0;
-    meminfo.buffer = NULL;
+  meminfo.flags = QSPIMEM_READ | QSPIMEM_QUADIO;
+  meminfo.addrlen = 3;
+  meminfo.dummies = 6;
+  meminfo.cmd = 0xeb; /* S25FL1_FAST_READ_QUADIO; */
+  meminfo.addr = 0;
+  meminfo.buflen = 0;
+  meminfo.buffer = NULL;
 
-    stm32f7_qspi_enter_memorymapped(qspi, &meminfo, 80000000);
+  stm32f7_qspi_enter_memorymapped(qspi, &meminfo, 80000000);
 
-    stm32_mpu_uheap((uintptr_t)0x90000000, 0x4000000);
+  /* FIXME: stm32_mpu_uheap depends on PROTECTED && MPU
+   *
+   * stm32_mpu_uheap((uintptr_t)0x90000000, 0x4000000);
+   */
 #endif
 
 #if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_BOARDCTL)
