@@ -422,6 +422,33 @@ extern "C"
    (ipv6addr)->s6_addr16[5] == 0xffff)
 
 /****************************************************************************
+ * Macro: net_ip_binding_laddr, net_ip_binding_raddr
+ *
+ * Description:
+ *   Get the laddr/raddr pointer form an ip_binding_u.
+ *
+ * Input Parameters:
+ *   u      - The union of address binding.
+ *   domain - The domain of address.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+#  define net_ip_binding_laddr(u, domain) \
+    (((domain) == PF_INET) ? (FAR void *)(&(u)->ipv4.laddr) : \
+                             (FAR void *)(&(u)->ipv6.laddr))
+#  define net_ip_binding_raddr(u, domain) \
+    (((domain) == PF_INET) ? (FAR void *)(&(u)->ipv4.raddr) : \
+                             (FAR void *)(&(u)->ipv6.raddr))
+#elif defined(CONFIG_NET_IPv4)
+#  define net_ip_binding_laddr(u, domain) ((FAR void *)(&(u)->ipv4.laddr))
+#  define net_ip_binding_raddr(u, domain) ((FAR void *)(&(u)->ipv4.raddr))
+#else
+#  define net_ip_binding_laddr(u, domain) ((FAR void *)(&(u)->ipv6.laddr))
+#  define net_ip_binding_raddr(u, domain) ((FAR void *)(&(u)->ipv6.raddr))
+#endif
+
+/****************************************************************************
  * Macro: net_ipv4addr_copy, net_ipv4addr_hdrcopy, net_ipv6addr_copy, and
  *        net_ipv6addr_hdrcopy
  *
