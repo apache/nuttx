@@ -54,7 +54,7 @@ CMake,nucleo-g431rb:nsh
 CMake,nucleo-g431rb:pwm
 CMake,nucleo-g431rb:qenco
 
-# CMake,nucleo-g474re:nsh
+CMake,nucleo-g474re:nsh
 # CMake,nucleo-g474re:usbserial
 
 # CMake,nucleo-l152re:lcd
