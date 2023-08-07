@@ -1220,7 +1220,7 @@ int bt_gatt_read_multiple(FAR struct bt_conn_s *conn,
   FAR struct bt_buf_s *buf;
   uint8_t i;
 
-  if (!conn && conn->state != BT_CONN_CONNECTED)
+  if (!conn || conn->state != BT_CONN_CONNECTED)
     {
       return -ENOTCONN;
     }
