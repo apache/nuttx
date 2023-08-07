@@ -2663,6 +2663,10 @@ error:
     }
 #endif
 
+#if CONFIG_ESP32S3_WIFI_BT_COEXIST
+    coex_disable();
+#endif
+
   return ret;
 }
 

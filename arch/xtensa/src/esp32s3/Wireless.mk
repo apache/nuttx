@@ -48,6 +48,7 @@ context:: chip/$(ESP_HAL_3RDPARTY_REPO)
 distclean::
 	$(call DELDIR, chip/$(ESP_HAL_3RDPARTY_REPO))
 
+INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_coex$(DELIM)include
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_common$(DELIM)include
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)bt$(DELIM)include$(DELIM)esp32c3$(DELIM)include
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_event$(DELIM)include
@@ -103,13 +104,19 @@ INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY
 CFLAGS += ${DEFINE_PREFIX}MBEDTLS_CONFIG_FILE="<mbedtls/esp_config.h>"
 
 CHIP_CSRCS += aes.c
+CHIP_CSRCS += aria.c
 CHIP_CSRCS += bignum_core.c
 CHIP_CSRCS += bignum.c
+CHIP_CSRCS += ccm.c
+CHIP_CSRCS += cipher.c
+CHIP_CSRCS += cipher_wrap.c
+CHIP_CSRCS += cmac.c
 CHIP_CSRCS += constant_time.c
 CHIP_CSRCS += ctr_drbg.c
 CHIP_CSRCS += ecp_curves.c
 CHIP_CSRCS += ecp.c
 CHIP_CSRCS += entropy.c
+CHIP_CSRCS += gcm.c
 CHIP_CSRCS += md.c
 CHIP_CSRCS += pkcs5.c
 CHIP_CSRCS += platform_util.c
