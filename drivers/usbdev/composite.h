@@ -40,7 +40,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_COMPOSITE
-#  define NUM_DEVICES_TO_HANDLE       (8)
+#  define NUM_DEVICES_TO_HANDLE       (CONFIG_COMPOSITE_DEVICES)
 #else
 #  define NUM_DEVICES_TO_HANDLE       (1)
 #endif
