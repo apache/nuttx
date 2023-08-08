@@ -27,6 +27,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/mutex.h>
+#include <nuttx/mm/circbuf.h>
 #include <sys/types.h>
 
 #include <stdint.h>
@@ -114,20 +115,18 @@ typedef uint8_t pipe_ndx_t;   /*  8-bit index */
 
 struct pipe_dev_s
 {
-  mutex_t    d_bflock;      /* Used to serialize access to d_buffer and indices */
-  sem_t      d_rdsem;       /* Empty buffer - Reader waits for data write AND
-                             * block O_RDONLY open until there is at least one writer */
-  sem_t      d_wrsem;       /* Full buffer - Writer waits for data read AND
-                             * block O_WRONLY open until there is at least one reader */
-  pipe_ndx_t d_wrndx;       /* Index in d_buffer to save next byte written */
-  pipe_ndx_t d_rdndx;       /* Index in d_buffer to return the next byte read */
-  pipe_ndx_t d_bufsize;     /* allocated size of d_buffer in bytes */
-  pipe_ndx_t d_pollinthrd;  /* Buffer threshold for POLLIN to occur */
-  pipe_ndx_t d_polloutthrd; /* Buffer threshold for POLLOUT to occur */
-  uint8_t    d_nwriters;    /* Number of reference counts for write access */
-  uint8_t    d_nreaders;    /* Number of reference counts for read access */
-  uint8_t    d_flags;       /* See PIPE_FLAG_* definitions */
-  uint8_t   *d_buffer;      /* Buffer allocated when device opened */
+  mutex_t          d_bflock;      /* Used to serialize access to d_buffer and indices */
+  sem_t            d_rdsem;       /* Empty buffer - Reader waits for data write AND
+                                   * block O_RDONLY open until there is at least one writer */
+  sem_t            d_wrsem;       /* Full buffer - Writer waits for data read AND
+                                   * block O_WRONLY open until there is at least one reader */
+  pipe_ndx_t       d_bufsize;     /* allocated size of d_buffer in bytes */
+  pipe_ndx_t       d_pollinthrd;  /* Buffer threshold for POLLIN to occur */
+  pipe_ndx_t       d_polloutthrd; /* Buffer threshold for POLLOUT to occur */
+  uint8_t          d_nwriters;    /* Number of reference counts for write access */
+  uint8_t          d_nreaders;    /* Number of reference counts for read access */
+  uint8_t          d_flags;       /* See PIPE_FLAG_* definitions */
+  struct circbuf_s d_buffer;      /* Buffer allocated when device opened */
 
   /* The following is a list if poll structures of threads waiting for
    * driver events. The 'struct pollfd' reference for each open is also
