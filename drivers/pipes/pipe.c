@@ -285,7 +285,6 @@ int pipe2(int fd[2], int flags)
 {
   char devname[32];
   int ret;
-  bool blocking;
 
   /* Register a new pipe device */
 
@@ -295,10 +294,6 @@ int pipe2(int fd[2], int flags)
       set_errno(-ret);
       return ERROR;
     }
-
-  /* Check for the O_NONBLOCK bit on flags */
-
-  blocking = (flags & O_NONBLOCK) == 0;
 
   /* Get a write file descriptor setting O_NONBLOCK temporarily */
 
@@ -310,7 +305,7 @@ int pipe2(int fd[2], int flags)
 
   /* Clear O_NONBLOCK if it was set previously */
 
-  if (blocking)
+  if ((flags & O_NONBLOCK) == 0)
     {
       ret = fcntl(fd[1], F_SETFL, flags & (~O_NONBLOCK));
       if (ret < 0)
