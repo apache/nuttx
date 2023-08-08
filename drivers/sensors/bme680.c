@@ -53,35 +53,35 @@
 /* Sub-sensor definitions */
 
 #ifdef CONFIG_BME680_DISABLE_PRESS_MEAS
-#define BME680_TEMP_IDX (0)
+#  define BME680_TEMP_IDX (0)
 #else
-#define BME680_TEMP_IDX (-1)
+#  define BME680_TEMP_IDX (-1)
 #endif
 
 #define BME680_TEMP_IDX_OFF BME680_TEMP_IDX
 
 #ifndef CONFIG_BME680_DISABLE_PRESS_MEAS
-#   define BME680_PRESS_IDX (BME680_TEMP_IDX_OFF + (1))
-#   define BME680_PRESS_IDX_OFF BME680_PRESS_IDX
+#  define BME680_PRESS_IDX (BME680_TEMP_IDX_OFF + (1))
+#  define BME680_PRESS_IDX_OFF BME680_PRESS_IDX
 #else
-#   define BME680_PRESS_IDX (-1)
-#   define BME680_PRESS_IDX_OFF BME680_TEMP_IDX_OFF
+#  define BME680_PRESS_IDX (-1)
+#  define BME680_PRESS_IDX_OFF BME680_TEMP_IDX_OFF
 #endif
 
 #ifndef CONFIG_BME680_DISABLE_HUM_MEAS
-#   define BME680_HUM_IDX (BME680_PRESS_IDX_OFF + (1))
-#   define BME680_HUM_IDX_OFF BME680_HUM_IDX
+#  define BME680_HUM_IDX (BME680_PRESS_IDX_OFF + (1))
+#  define BME680_HUM_IDX_OFF BME680_HUM_IDX
 #else
-#   define BME680_HUM_IDX (-1)
-#   define BME680_HUM_IDX_OFF BME680_PRESS_IDX_OFF
+#  define BME680_HUM_IDX (-1)
+#  define BME680_HUM_IDX_OFF BME680_PRESS_IDX_OFF
 #endif
 
 #ifndef CONFIG_BME680_DISABLE_GAS_MEAS
-#   define BME680_GAS_IDX (BME680_HUM_IDX_OFF + (1))
-#   define BME680_GAS_IDX_OFF BME680_GAS_IDX
+#  define BME680_GAS_IDX (BME680_HUM_IDX_OFF + (1))
+#  define BME680_GAS_IDX_OFF BME680_GAS_IDX
 #else
-#   define BME680_GAS_IDX (-1)
-#   define BME680_GAS_IDX_OFF BME680_HUM_IDX_OFF
+#  define BME680_GAS_IDX (-1)
+#  define BME680_GAS_IDX_OFF BME680_HUM_IDX_OFF
 #endif
 
 #define BME680_SENSORS_COUNT (BME680_GAS_IDX_OFF + (1))
@@ -235,34 +235,36 @@
 /* Possible gas range values */
 
 const uint32_t const_array1_int[16] =
-    {(2147483647), (2147483647), (2147483647), (2147483647),
-     (2147483647), (2126008810), (2147483647), (2130303777),
-     (2147483647), (2147483647), (2143188679), (2136746228),
-     (2147483647), (2126008810), (2147483647), (2147483647)
-    };
+{
+  2147483647, 2147483647, 2147483647, 2147483647,
+  2147483647, 2126008810, 2147483647, 2130303777,
+  2147483647, 2147483647, 2143188679, 2136746228,
+  2147483647, 2126008810, 2147483647, 2147483647
+};
 
 const uint32_t const_array2_int[16] =
-    {(4096000000), (2048000000), (1024000000), (512000000),
-     (255744255), (127110228), (64000000), (32258064), (16016016),
-     (8000000), (4000000), (2000000), (1000000), (500000),
-     (250000), (125000)
-    };
+{
+  4096000000, 2048000000, 1024000000, 512000000,
+  255744255, 127110228, 64000000, 32258064, 16016016,
+  8000000, 4000000, 2000000, 1000000, 500000,
+  250000, 125000
+};
 
 const float const_array1[16] =
-    {1.0, 1.0, 1.0, 1.0, 1.0, 0.99, 1.0,
-     0.992, 1.0, 1.0, 0.998, 0.995, 1.0,
-     0.99, 1.0, 1.0
-    };
+{
+  1.0, 1.0, 1.0, 1.0, 1.0, 0.99, 1.0, 0.992, 1.0, 1.0,
+  0.998, 0.995, 1.0, 0.99, 1.0, 1.0
+};
 
 const float const_array2[16] =
-    {8000000.0, 4000000.0, 2000000.0, 1000000.0,
-     499500.4995, 248262.1648, 125000.0, 63004.03226,
-     31281.28128, 15625.0, 7812.5, 3906.25, 1953.125,
-     976.5625, 488.28125, 244.140625
-    };
+{
+  8000000.0, 4000000.0, 2000000.0, 1000000.0, 499500.4995,
+  248262.1648, 125000.0, 63004.03226, 31281.28128, 15625.0,
+  7812.5, 3906.25, 1953.125, 976.5625, 488.28125, 244.140625
+};
 
 #define CHECK_OS_BOUNDS(type) \
-  (type >= BME680_OS_SKIPPED && type <= BME680_OS_16X)
+  ((type) >= BME680_OS_SKIPPED && (type) <= BME680_OS_16X)
 
 /****************************************************************************
  * Private Type Definitions
@@ -396,36 +398,34 @@ static int bme680_control(FAR struct sensor_lowerhalf_s *lower,
  ****************************************************************************/
 
 static const push_data_func deliver_data[BME680_SENSORS_COUNT] =
-    {
+{
 #ifndef CONFIG_BME680_DISABLE_PRESS_MEAS
-        bme680_push_press_data
+  bme680_push_press_data
 #else
-        bme680_push_temp_data
+  bme680_push_temp_data
 #endif
 
 #ifndef CONFIG_BME680_DISABLE_HUM_MEAS
-        ,
-        bme680_push_hum_data
+  , bme680_push_hum_data
 #endif
 
 #ifndef CONFIG_BME680_DISABLE_GAS_MEAS
-        ,
-        bme680_push_gas_data
+  , bme680_push_gas_data
 #endif
 };
 
 static const struct sensor_ops_s g_sensor_ops =
-    {
-        NULL,             /* open */
-        NULL,             /* close */
-        bme680_activate,  /* activate */
-        NULL,             /* set_interval */
-        NULL,             /* batch */
-        NULL,             /* fetch */
-        NULL,             /* selftest */
-        NULL,             /* set_calibvalue */
-        bme680_calibrate, /* calibrate */
-        bme680_control    /* control */
+{
+  NULL,             /* open */
+  NULL,             /* close */
+  bme680_activate,  /* activate */
+  NULL,             /* set_interval */
+  NULL,             /* batch */
+  NULL,             /* fetch */
+  NULL,             /* selftest */
+  NULL,             /* set_calibvalue */
+  bme680_calibrate, /* calibrate */
+  bme680_control    /* control */
 };
 
 /****************************************************************************
@@ -814,8 +814,7 @@ static int bme680_push_temp_data(FAR struct bme680_dev_s *priv,
   temp_data.timestamp = data->timestamp;
   temp_data.temperature = data->temperature;
 
-  ret = lower.push_event(lower.priv, &temp_data,
-                         sizeof(struct sensor_temp));
+  ret = lower.push_event(lower.priv, &temp_data, sizeof(struct sensor_temp));
 
   if (ret < 0)
     {
@@ -839,8 +838,7 @@ static int bme680_push_hum_data(FAR struct bme680_dev_s *priv,
   hum_data.timestamp = data->timestamp;
   hum_data.humidity = data->humidity;
 
-  ret = lower.push_event(lower.priv, &hum_data,
-                         sizeof(struct sensor_humi));
+  ret = lower.push_event(lower.priv, &hum_data, sizeof(struct sensor_humi));
 
   if (ret < 0)
     {
@@ -864,8 +862,7 @@ static int bme680_push_gas_data(FAR struct bme680_dev_s *priv,
   gas_data.timestamp = data->timestamp;
   gas_data.gas_resistance = data->gas_resistance / 1000.f;
 
-  ret = lower.push_event(lower.priv, &gas_data,
-                         sizeof(struct sensor_gas));
+  ret = lower.push_event(lower.priv, &gas_data, sizeof(struct sensor_gas));
 
   if (ret < 0)
     {
@@ -884,7 +881,7 @@ static int bme680_push_gas_data(FAR struct bme680_dev_s *priv,
  *
  ****************************************************************************/
 
-static uint8_t calc_heater_res(const struct bme680_dev_s *priv)
+static uint8_t calc_heater_res(FAR const struct bme680_dev_s *priv)
 {
   uint8_t res_heat;
   int32_t var1;
@@ -902,7 +899,9 @@ static uint8_t calc_heater_res(const struct bme680_dev_s *priv)
   temp = dev.config.target_temp;
 
   if (temp > 400)
-    temp = 400;
+    {
+      temp = 400;
+    }
 
   amb_temp = dev.config.amb_temp;
 
@@ -926,7 +925,7 @@ static uint8_t calc_heater_res(const struct bme680_dev_s *priv)
  *
  ****************************************************************************/
 
-static uint8_t calc_heater_dur(const struct bme680_dev_s *priv)
+static uint8_t calc_heater_dur(FAR const struct bme680_dev_s *priv)
 {
   uint16_t heat_dur = priv->dev.config.heater_duration;
   uint8_t gas_wait_val;
@@ -946,7 +945,7 @@ static uint8_t calc_heater_dur(const struct bme680_dev_s *priv)
   while (heat_dur > 0x3f)
     {
       heat_dur = heat_dur / 4;
-      factor += 1;
+      factor++;
     }
 
   gas_wait_val = (factor << 6) | heat_dur;
@@ -1073,9 +1072,9 @@ err_out:
 static float bme680_comp_temp(FAR struct bme680_dev_s *priv,
                               uint32_t adc_temp)
 {
-  float var1 = 0;
-  float var2 = 0;
-  float calc_temp = 0;
+  float var1 = 0.0f;
+  float var2 = 0.0f;
+  float calc_temp = 0.0f;
 
   struct bme680_sensor_s dev = priv->dev;
 
@@ -1090,7 +1089,7 @@ static float bme680_comp_temp(FAR struct bme680_dev_s *priv,
 
   /* Compensated temperature data */
 
-  calc_temp = ((priv->dev.calib.t_fine) / 5120.0f);
+  calc_temp = (priv->dev.calib.t_fine) / 5120.0f;
 
   return calc_temp;
 }
@@ -1099,10 +1098,10 @@ static float bme680_comp_temp(FAR struct bme680_dev_s *priv,
 static float bme680_comp_press(FAR struct bme680_dev_s *priv,
                                uint32_t adc_press)
 {
-  float var1 = 0;
-  float var2 = 0;
-  float var3 = 0;
-  float calc_pres = 0;
+  float var1 = 0.0f;
+  float var2 = 0.0f;
+  float var3 = 0.0f;
+  float calc_pres = 0.0f;
 
   struct bme680_sensor_s dev = priv->dev;
 
@@ -1136,11 +1135,11 @@ static float bme680_comp_press(FAR struct bme680_dev_s *priv,
 static float bme680_comp_hum(FAR struct bme680_dev_s *priv,
                              uint16_t adc_hum)
 {
-  float calc_hum = 0;
-  float var1 = 0;
-  float var2 = 0;
-  float var3 = 0;
-  float var4 = 0;
+  float calc_hum = 0.0f;
+  float var1 = 0.0f;
+  float var2 = 0.0f;
+  float var3 = 0.0f;
+  float var4 = 0.0f;
   float temp_comp;
 
   struct bme680_sensor_s dev = priv->dev;
@@ -1163,9 +1162,13 @@ static float bme680_comp_hum(FAR struct bme680_dev_s *priv,
   calc_hum = var2 + ((var3 + (var4 * temp_comp)) * var2 * var2);
 
   if (calc_hum > 100.0f)
-    calc_hum = 100.0f;
+    {
+      calc_hum = 100.0f;
+    }
   else if (calc_hum < 0.0f)
-    calc_hum = 0.0f;
+    {
+      calc_hum = 0.0f;
+    }
 
   return calc_hum;
 }
@@ -1176,7 +1179,7 @@ static float bme680_calc_gas_res(FAR struct bme680_dev_s *priv,
                                  uint16_t adc_gas_res, uint8_t gas_range)
 {
   float calc_gas_res;
-  float var1 = 0;
+  float var1 = 0.0f;
 
   struct bme680_sensor_s dev = priv->dev;
 
@@ -1223,8 +1226,7 @@ static int bme680_read_measurements(FAR struct bme680_dev_s *priv,
 
   uint8_t data_regs[BME680_DATA_LEN];
 
-  ret = bme680_getregs(priv, BME680_DATA_ADDR,
-                       data_regs, BME680_DATA_LEN);
+  ret = bme680_getregs(priv, BME680_DATA_ADDR, data_regs, BME680_DATA_LEN);
 
   if (ret < 0)
     {
@@ -1309,9 +1311,9 @@ static uint16_t bme680_get_tphg_dur(FAR struct bme680_dev_s *priv)
   uint32_t meas_cycles;
   uint16_t duration;
   uint8_t os_to_meas_cycles[6] =
-      {
-        0, 1, 2, 4, 8, 16
-      };
+  {
+    0, 1, 2, 4, 8, 16
+  };
 
   meas_cycles = os_to_meas_cycles[priv->dev.config.temp_os];
 
@@ -1325,17 +1327,17 @@ static uint16_t bme680_get_tphg_dur(FAR struct bme680_dev_s *priv)
 
   /* TPH measurement duration */
 
-  tph_dur = meas_cycles * (1963);
-  tph_dur += (477 * 4); /* TPH switching duration */
+  tph_dur = meas_cycles * 1963;
+  tph_dur += 477 * 4; /* TPH switching duration */
 
 #ifndef CONFIG_BME680_DISABLE_GAS_MEAS
-  tph_dur += (477 * 5); /* Gas measurement duration */
+  tph_dur += 477 * 5; /* Gas measurement duration */
 #endif
 
-  tph_dur += (500);
-  tph_dur /= (1000); /* Convert to ms */
+  tph_dur += 500;
+  tph_dur /= 1000; /* Convert to ms */
 
-  tph_dur += (1); /* Wake up duration of 1ms */
+  tph_dur += 1; /* Wake up duration of 1ms */
 
   duration = (uint16_t)tph_dur;
 
@@ -1349,10 +1351,11 @@ static uint16_t bme680_get_tphg_dur(FAR struct bme680_dev_s *priv)
 }
 
 static int bme680_activate(FAR struct sensor_lowerhalf_s *lower,
-                           FAR struct file *filep,
-                           bool enable)
+                           FAR struct file *filep, bool enable)
 {
   int offset;
+  FAR struct bme680_sensor_s *dev;
+  FAR struct bme680_dev_s *priv;
 
   /* Get offset inside array of lowerhalfs */
 
@@ -1360,38 +1363,35 @@ static int bme680_activate(FAR struct sensor_lowerhalf_s *lower,
     {
       case SENSOR_TYPE_AMBIENT_TEMPERATURE:
         offset = BME680_TEMP_IDX;
-      break;
+        break;
 
       case SENSOR_TYPE_BAROMETER:
         offset = BME680_PRESS_IDX;
-      break;
+        break;
 
       case SENSOR_TYPE_RELATIVE_HUMIDITY:
         offset = BME680_HUM_IDX;
-      break;
+        break;
 
       case SENSOR_TYPE_GAS:
         offset = BME680_GAS_IDX;
-      break;
+        break;
 
       default:
         offset = 0;
-      break;
+        break;
     }
 
-  FAR struct bme680_sensor_s *dev =
-        (FAR struct bme680_sensor_s *)
+  dev = (FAR struct bme680_sensor_s *)
         ((uintptr_t)lower - offset * sizeof(*lower));
 
-  FAR struct bme680_dev_s *priv = container_of(dev,
-                                               FAR struct bme680_dev_s,
-                                               dev);
+  priv = container_of(dev, FAR struct bme680_dev_s, dev);
 
   /* Wake the thread only once (the activate method will be called
    *  multiple times for the bme680 sub-sensors)
    */
 
-  if (priv->enabled == false && enable == true)
+  if (!priv->enabled && enable)
     {
       dev->calibrated = false;
       priv->enabled = enable;
@@ -1409,10 +1409,13 @@ static int bme680_activate(FAR struct sensor_lowerhalf_s *lower,
 }
 
 static int bme680_calibrate(FAR struct sensor_lowerhalf_s *lower,
-                            FAR struct file *filep,
-                            unsigned long arg)
+                            FAR struct file *filep, unsigned long arg)
 {
   int offset;
+  FAR struct bme680_sensor_s *dev;
+  FAR struct bme680_dev_s *priv;
+  FAR struct bme680_config_s *calibval = (FAR struct bme680_config_s *)arg;
+  int ret;
 
   /* Get offset inside array of lowerhalfs */
 
@@ -1420,36 +1423,29 @@ static int bme680_calibrate(FAR struct sensor_lowerhalf_s *lower,
     {
       case SENSOR_TYPE_AMBIENT_TEMPERATURE:
         offset = BME680_TEMP_IDX;
-      break;
+        break;
 
       case SENSOR_TYPE_BAROMETER:
         offset = BME680_PRESS_IDX;
-      break;
+        break;
 
       case SENSOR_TYPE_RELATIVE_HUMIDITY:
         offset = BME680_HUM_IDX;
-      break;
+        break;
 
       case SENSOR_TYPE_GAS:
         offset = BME680_GAS_IDX;
-      break;
+        break;
 
       default:
         offset = 0;
-      break;
+        break;
     }
 
-  FAR struct bme680_sensor_s *dev =
-        (FAR struct bme680_sensor_s *)
+  dev = (FAR struct bme680_sensor_s *)
         ((uintptr_t)lower - offset * sizeof(*lower));
 
-  FAR struct bme680_dev_s *priv = container_of(dev,
-                                               FAR struct bme680_dev_s,
-                                               dev);
-  FAR struct bme680_config_s *calibval =
-      (FAR struct bme680_config_s *)arg;
-
-  int ret;
+  priv = container_of(dev, FAR struct bme680_dev_s, dev);
 
   /* Sanity checks */
 
@@ -1495,8 +1491,7 @@ static int bme680_calibrate(FAR struct sensor_lowerhalf_s *lower,
 
   /* Update config in priv */
 
-  memcpy(&priv->dev.config, calibval,
-         sizeof(struct bme680_config_s));
+  memcpy(&priv->dev.config, calibval, sizeof(struct bme680_config_s));
 
   ret = bme680_write_config(priv);
 
@@ -1559,7 +1554,9 @@ static int bme680_thread(int argc, char **argv)
 
   while (true)
     {
-      if (priv->enabled == false)
+      int sensor;
+
+      if (!priv->enabled)
         {
           /* Wait for the sensor to be enabled */
 
@@ -1568,7 +1565,7 @@ static int bme680_thread(int argc, char **argv)
 
       /* No measurements are done unless the sensor is calibrated */
 
-      if (priv->dev.calibrated == false)
+      if (!priv->dev.calibrated)
         {
           sninfo("The sensor is not calibrated!\n");
           goto thread_sleep;
@@ -1593,7 +1590,7 @@ static int bme680_thread(int argc, char **argv)
 
       data.timestamp = sensor_get_timestamp();
 
-      for (int sensor = 0; sensor < BME680_SENSORS_COUNT; sensor++)
+      for (sensor = 0; sensor < BME680_SENSORS_COUNT; sensor++)
         {
           deliver_data[sensor](priv, &data);
         }
@@ -1629,6 +1626,7 @@ int bme680_register(int devno, FAR struct i2c_master_s *i2c)
   FAR char *argv[2];
   char arg1[32];
   int ret = OK;
+  int i;
 
   DEBUGASSERT(i2c != NULL);
 
@@ -1675,8 +1673,7 @@ int bme680_register(int devno, FAR struct i2c_master_s *i2c)
   ret = sensor_register(lower, devno);
   if (ret < 0)
     {
-      snerr("ERROR: Failed to register barometer \
-              driver (err = %d)\n",
+      snerr("ERROR: Failed to register barometer driver (err = %d)\n",
             ret);
       goto err_init;
     }
@@ -1690,8 +1687,7 @@ int bme680_register(int devno, FAR struct i2c_master_s *i2c)
   ret = sensor_register(lower, devno);
   if (ret < 0)
     {
-      snerr("ERROR: Failed to register temperature \
-              driver (err = %d)\n",
+      snerr("ERROR: Failed to register temperature driver (err = %d)\n",
             ret);
       goto err_init;
     }
@@ -1707,8 +1703,7 @@ int bme680_register(int devno, FAR struct i2c_master_s *i2c)
   ret = sensor_register(lower, devno);
   if (ret < 0)
     {
-      snerr("ERROR: Failed to register humidity \
-              driver (err = %d)\n",
+      snerr("ERROR: Failed to register humidity driver (err = %d)\n",
             ret);
       goto err_init;
     }
@@ -1724,8 +1719,7 @@ int bme680_register(int devno, FAR struct i2c_master_s *i2c)
   ret = sensor_register(lower, devno);
   if (ret < 0)
     {
-      snerr("ERROR: Failed to register gas \
-              driver (err = %d)\n",
+      snerr("ERROR: Failed to register gas driver (err = %d)\n",
             ret);
       goto err_init;
     }
@@ -1749,7 +1743,7 @@ int bme680_register(int devno, FAR struct i2c_master_s *i2c)
   return OK;
 
 err_register:
-  for (int i = 0; i < BME680_SENSORS_COUNT; i++)
+  for (i = 0; i < BME680_SENSORS_COUNT; i++)
     {
       sensor_unregister(&priv->dev.lower[i], devno);
     }
