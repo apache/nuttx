@@ -431,6 +431,7 @@ void up_irqinitialize(void)
 
 #ifdef CONFIG_ESP32S3_WIFI
   g_irqmap[ESP32S3_IRQ_MAC] = IRQ_MKMAP(0, ESP32S3_CPUINT_MAC);
+  g_irqmap[ESP32S3_IRQ_PWR] = IRQ_MKMAP(0, ESP32S3_CPUINT_PWR);
 #endif
 
 #ifdef CONFIG_ESP32S3_BLE
@@ -445,7 +446,8 @@ void up_irqinitialize(void)
   /* Reserve CPU0 interrupt for some special drivers */
 
 #ifdef CONFIG_ESP32S3_WIFI
-  g_cpu0_intmap[ESP32S3_CPUINT_MAC]  = CPUINT_ASSIGN(ESP32S3_IRQ_MAC);
+  g_cpu0_intmap[ESP32S3_CPUINT_MAC] = CPUINT_ASSIGN(ESP32S3_IRQ_MAC);
+  g_cpu0_intmap[ESP32S3_CPUINT_PWR] = CPUINT_ASSIGN(ESP32S3_IRQ_PWR);
   xtensa_enable_cpuint(&g_intenable[0], 1 << ESP32S3_CPUINT_MAC);
 #endif
 

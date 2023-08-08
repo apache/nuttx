@@ -446,6 +446,7 @@
 #define ESP32S3_CPUINT_NMISET         0x00004000
 
 #define ESP32S3_CPUINT_MAC            0
+#define ESP32S3_CPUINT_PWR            0
 #define ESP32S3_CPUINT_RWBLE          5
 #define ESP32S3_CPUINT_TIMER0         6
 #define ESP32S3_CPUINT_SOFTWARE0      7
