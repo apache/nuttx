@@ -37,17 +37,20 @@
 #define I2C_MST_ANA_CONF0_REG          0x6000E040
 #define I2C_MST_BBPLL_STOP_FORCE_HIGH  (BIT(2))
 #define I2C_MST_BBPLL_STOP_FORCE_LOW   (BIT(3))
+#define I2C_MST_BBPLL_CAL_DONE         (BIT(24))
 
 /* ROM functions which read/write internal control bus */
 
-extern uint8_t rom_i2c_readreg(uint8_t block, uint8_t host_id,
-                               uint8_t reg_add);
-extern uint8_t rom_i2c_readreg_mask(uint8_t block, uint8_t host_id,
-                        uint8_t reg_add, uint8_t msb, uint8_t lsb);
-extern void rom_i2c_writereg(uint8_t block, uint8_t host_id,
-                             uint8_t reg_add, uint8_t data);
-extern void rom_i2c_writereg_mask(uint8_t block, uint8_t host_id,
-                   uint8_t reg_add, uint8_t msb, uint8_t lsb, uint8_t data);
+extern uint8_t esp_rom_regi2c_read(uint8_t block, uint8_t host_id,
+                                   uint8_t reg_add);
+extern uint8_t esp_rom_regi2c_read_mask(uint8_t block, uint8_t host_id,
+                                        uint8_t reg_add, uint8_t msb,
+                                        uint8_t lsb);
+extern void esp_rom_regi2c_write(uint8_t block, uint8_t host_id,
+                                 uint8_t reg_add, uint8_t data);
+extern void esp_rom_regi2c_write_mask(uint8_t block, uint8_t host_id,
+                                      uint8_t reg_add, uint8_t msb,
+                                      uint8_t lsb, uint8_t data);
 
 /* Convenience macros for the above functions, these use register
  * definitions from regi2c_bbpll.h/regi2c_dig_reg.h/regi2c_lp_bias.h/
@@ -55,15 +58,15 @@ extern void rom_i2c_writereg_mask(uint8_t block, uint8_t host_id,
  */
 
 #define REGI2C_WRITE_MASK(block, reg_add, indata) \
-      rom_i2c_writereg_mask(block, block##_HOSTID,  reg_add,  reg_add##_MSB,  reg_add##_LSB,  indata)
+      esp_rom_regi2c_write_mask(block, block##_HOSTID,  reg_add,  reg_add##_MSB,  reg_add##_LSB,  indata)
 
 #define REGI2C_READ_MASK(block, reg_add) \
-      rom_i2c_readreg_mask(block, block##_HOSTID,  reg_add,  reg_add##_MSB,  reg_add##_LSB)
+      esp_rom_regi2c_read_mask(block, block##_HOSTID,  reg_add,  reg_add##_MSB,  reg_add##_LSB)
 
 #define REGI2C_WRITE(block, reg_add, indata) \
-      rom_i2c_writereg(block, block##_HOSTID,  reg_add, indata)
+      esp_rom_regi2c_write(block, block##_HOSTID,  reg_add, indata)
 
 #define REGI2C_READ(block, reg_add) \
-      rom_i2c_readreg(block, block##_HOSTID,  reg_add)
+      esp_rom_regi2c_read(block, block##_HOSTID,  reg_add)
 
 #endif /* __ARCH_XTENSA_SRC_ESP32S3_HARDWARE_REGI2C_CTRL_H */
