@@ -740,14 +740,14 @@ static void esp_set_isr(int32_t n, void *f, void *arg)
   struct irq_adpt *adapter;
   int irq = n + XTENSA_IRQ_FIRSTPERIPH;
 
-  wlinfo("n=%d f=%p arg=%p irq=%d\n", n, f, arg, irq);
+  wlinfo("n=%d f=%p arg=%p", n, f, arg);
 
   if (g_irqvector[irq].handler &&
       g_irqvector[irq].handler != irq_unexpected_isr)
     {
       wlinfo("irq=%d has been set handler=%p\n", irq,
              g_irqvector[irq].handler);
-      return ;
+      return;
     }
 
   tmp = sizeof(struct irq_adpt);
@@ -756,18 +756,26 @@ static void esp_set_isr(int32_t n, void *f, void *arg)
     {
       wlerr("Failed to alloc %d memory\n", tmp);
       assert(0);
-      return ;
+      return;
     }
 
   adapter->func = f;
   adapter->arg = arg;
 
-  ret = irq_attach(irq, esp_int_adpt_cb, adapter);
+  ret = irq_attach(ESP32S3_IRQ_MAC, esp_int_adpt_cb, adapter);
   if (ret)
     {
       wlerr("Failed to attach IRQ %d\n", irq);
       assert(0);
-      return ;
+      return;
+    }
+
+  ret = irq_attach(ESP32S3_IRQ_PWR, esp_int_adpt_cb, adapter);
+  if (ret)
+    {
+      wlerr("Failed to attach IRQ %d\n", irq);
+      assert(0);
+      return;
     }
 }
 
@@ -792,6 +800,7 @@ static void esp32s3_ints_on(uint32_t mask)
   wlinfo("INFO mask=%08x irq=%d\n", mask, irq);
 
   up_enable_irq(ESP32S3_IRQ_MAC);
+  up_enable_irq(ESP32S3_IRQ_PWR);
 }
 
 /****************************************************************************
