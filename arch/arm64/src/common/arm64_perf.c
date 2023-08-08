@@ -26,6 +26,8 @@
 
 #include "arm64_pmu.h"
 
+#ifdef CONFIG_ARCH_PERF_EVENTS
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -58,3 +60,4 @@ void up_perf_convert(unsigned long elapsed, struct timespec *ts)
   left        = elapsed - ts->tv_sec * cpu_freq;
   ts->tv_nsec = NSEC_PER_SEC * left / cpu_freq;
 }
+#endif

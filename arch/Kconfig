@@ -488,6 +488,13 @@ config ARCH_HAVE_PERF_EVENTS
 	bool
 	default n
 	---help---
+		The architecture supports hardware performance counting.
+
+config ARCH_PERF_EVENTS
+	bool "Configure hardware performance counting"
+	default y
+	depends on ARCH_HAVE_PERF_EVENTS
+	---help---
 		Enable hardware performance counter support for perf events. If
 		disabled, perf events will use software events only.
 
