@@ -1591,6 +1591,44 @@ config DEBUG_PWM_INFO
 
 endif # DEBUG_PWM
 
+config DEBUG_CAPTURE
+	bool "CAPTURE Debug Features"
+	default n
+	depends on CAPTURE
+	---help---
+		Enable CAPTURE debug features.
+
+		Support for this debug option is architecture-specific and may not
+		be available for some MCUs.
+
+if DEBUG_CAPTURE
+
+config DEBUG_CAPTURE_ERROR
+	bool "CAPTURE Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable CAPTURE driver error output to SYSLOG.
+
+		Support for this debug option is architecture-specific and may not
+		be available for some MCUs.
+
+config DEBUG_CAPTURE_WARN
+	bool "CAPTURE Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable CAPTURE driver warning output to SYSLOG.
+
+config DEBUG_CAPTURE_INFO
+	bool "CAPTURE Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable CAPTURE driver informational output to SYSLOG.
+
+endif # DEBUG_CAPTURE
+
 config DEBUG_RC
 	bool "RC Debug Features"
 	default n
