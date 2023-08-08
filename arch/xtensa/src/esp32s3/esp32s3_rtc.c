@@ -34,6 +34,9 @@
 #include "esp32s3_clockconfig.h"
 #include "esp32s3_rt_timer.h"
 
+#include "hardware/esp32s3_bb.h"
+#include "hardware/esp32s3_nrx.h"
+#include "hardware/esp32s3_fe.h"
 #include "hardware/esp32s3_rtccntl.h"
 #include "hardware/esp32s3_rtc_io.h"
 #include "hardware/esp32s3_system.h"
@@ -110,10 +113,6 @@
 #define RTC_FAST_CLK_FREQ_APPROX    17500000
 #define RCT_FAST_D256_FREQ_APPROX   (RTC_FAST_CLK_FREQ_APPROX / 256)
 #define RTC_SLOW_CLK_FREQ_APPROX    32768
-
-/* Number of fractional bits in values returned by rtc_clk_cal */
-
-#define RTC_CLK_CAL_FRACT           19
 
 /* Disable logging from the ROM code. */
 
@@ -421,10 +420,30 @@ extern void ets_update_cpu_frequency(uint32_t ticks_per_us);
 static void IRAM_ATTR
         esp32s3_rtc_sleep_pu(struct esp32s3_rtc_sleep_pu_config_s cfg)
 {
+  REG_SET_FIELD(RTC_CNTL_DIG_PWC_REG,
+                RTC_CNTL_LSLP_MEM_FORCE_PU, cfg.dig_fpu);
+  REG_SET_FIELD(RTC_CNTL_RTC_PWC_REG,
+                RTC_CNTL_RTC_FASTMEM_FORCE_LPU, cfg.rtc_fpu);
+  REG_SET_FIELD(RTC_CNTL_RTC_PWC_REG,
+                RTC_CNTL_RTC_SLOWMEM_FORCE_LPU, cfg.rtc_fpu);
+  REG_SET_FIELD(SYSCON_FRONT_END_MEM_PD_REG,
+                SYSCON_DC_MEM_FORCE_PU, cfg.fe_fpu);
+  REG_SET_FIELD(SYSCON_FRONT_END_MEM_PD_REG,
+                SYSCON_PBUS_MEM_FORCE_PU, cfg.fe_fpu);
+  REG_SET_FIELD(SYSCON_FRONT_END_MEM_PD_REG,
+                SYSCON_AGC_MEM_FORCE_PU, cfg.fe_fpu);
+  REG_SET_FIELD(BBPD_CTRL, BB_FFT_FORCE_PU, cfg.bb_fpu);
+  REG_SET_FIELD(BBPD_CTRL, BB_DC_EST_FORCE_PU, cfg.bb_fpu);
+  REG_SET_FIELD(NRXPD_CTRL, NRX_RX_ROT_FORCE_PU, cfg.nrx_fpu);
+  REG_SET_FIELD(NRXPD_CTRL, NRX_VIT_FORCE_PU, cfg.nrx_fpu);
+  REG_SET_FIELD(NRXPD_CTRL, NRX_DEMAP_FORCE_PU, cfg.nrx_fpu);
+  REG_SET_FIELD(FE_GEN_CTRL, FE_IQ_EST_FORCE_PU, cfg.fe_fpu);
+  REG_SET_FIELD(FE2_TX_INTERP_CTRL, FE2_TX_INF_FORCE_PU, cfg.fe_fpu);
+
   if (cfg.sram_fpu)
     {
-      REG_SET_FIELD(SYSCON_MEM_POWER_UP_REG, SYSCON_SRAM_POWER_UP,
-                    SYSCON_SRAM_POWER_UP);
+      REG_SET_FIELD(SYSCON_MEM_POWER_UP_REG,
+                    SYSCON_SRAM_POWER_UP, SYSCON_SRAM_POWER_UP);
     }
   else
     {
@@ -1496,6 +1515,14 @@ void IRAM_ATTR esp32s3_rtc_init(void)
 
   /* set wifi timer */
 
+  REG_SET_FIELD(RTC_CNTL_RTC_TIMER3_REG, RTC_CNTL_WIFI_POWERUP_TIMER, 1);
+  REG_SET_FIELD(RTC_CNTL_RTC_TIMER3_REG, RTC_CNTL_WIFI_WAIT_TIMER, 1);
+
+  /* set bt timer */
+
+  REG_SET_FIELD(RTC_CNTL_RTC_TIMER3_REG, RTC_CNTL_BT_POWERUP_TIMER, 1);
+  REG_SET_FIELD(RTC_CNTL_RTC_TIMER3_REG, RTC_CNTL_BT_WAIT_TIMER, 1);
+
   /* Reset RTC bias to default value (needed if waking up from deep sleep) */
 
   REGI2C_WRITE_MASK(I2C_DIG_REG, I2C_DIG_REG_EXT_RTC_DREG_SLEEP,
@@ -2507,13 +2534,6 @@ int up_rtc_settime(const struct timespec *ts)
 
 int up_rtc_initialize(void)
 {
-#ifndef CONFIG_PM
-  /* Initialize RTC controller parameters */
-
-  esp32s3_rtc_init();
-  esp32s3_rtc_clk_set();
-#endif
-
   g_rtc_save = &rtc_saved_data;
 
   /* If saved data is invalid, clear offset information */
