@@ -448,6 +448,7 @@ function u-boot-tools {
   if ! type mkimage &> /dev/null; then
     case ${os} in
       Darwin)
+        rm -f /usr/local/bin/openssl
         brew install u-boot-tools
         ;;
       Linux)
