@@ -276,8 +276,14 @@ static int cryptof_ioctl(FAR struct file *filep,
             case CRYPTO_SHA1:
               thash = &auth_hash_sha1;
               break;
+            case CRYPTO_SHA2_224:
+              thash = &auth_hash_sha2_224;
+              break;
             case CRYPTO_SHA2_256:
               thash = &auth_hash_sha2_256;
+              break;
+            case CRYPTO_SHA2_384:
+              thash = &auth_hash_sha2_384;
               break;
             case CRYPTO_SHA2_512:
               thash = &auth_hash_sha2_512;
