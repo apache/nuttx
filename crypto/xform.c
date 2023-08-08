@@ -113,6 +113,7 @@ void aes_gcm_reinit(caddr_t, FAR uint8_t *);
 int md5update_int(FAR void *, FAR const uint8_t *, uint16_t);
 int sha1update_int(FAR void *, FAR const uint8_t *, uint16_t);
 int rmd160update_int(FAR void *, FAR const uint8_t *, uint16_t);
+int sha224update_int(FAR void *, FAR const uint8_t *, uint16_t);
 int sha256update_int(FAR void *, FAR const uint8_t *, uint16_t);
 int sha384update_int(FAR void *, FAR const uint8_t *, uint16_t);
 int sha512update_int(FAR void *, FAR const uint8_t *, uint16_t);
@@ -351,6 +352,15 @@ const struct auth_hash auth_hash_sha1 =
   (void (*) (FAR uint8_t *, FAR void *)) sha1final
 };
 
+const struct auth_hash auth_hash_sha2_224 =
+{
+  CRYPTO_SHA2_224, "SHA2-224",
+  0, 28, 16, sizeof(SHA2_CTX), SHA224_BLOCK_LENGTH,
+  (void (*)(FAR void *)) sha224init, NULL, NULL,
+  sha224update_int,
+  (void (*)(FAR uint8_t *, FAR void *)) sha224final
+};
+
 const struct auth_hash auth_hash_sha2_256 =
 {
   CRYPTO_SHA2_256, "SHA2-256",
@@ -358,6 +368,15 @@ const struct auth_hash auth_hash_sha2_256 =
   (void (*)(FAR void *)) sha256init, NULL, NULL,
   sha256update_int,
   (void (*)(FAR uint8_t *, FAR void *)) sha256final
+};
+
+const struct auth_hash auth_hash_sha2_384 =
+{
+  CRYPTO_SHA2_384, "SHA2-384",
+  0, 48, 24, sizeof(SHA2_CTX), HMAC_SHA2_384_BLOCK_LEN,
+  (void (*)(FAR void *)) sha384init, NULL, NULL,
+  sha384update_int,
+  (void (*)(FAR uint8_t *, FAR void *)) sha384final
 };
 
 const struct auth_hash auth_hash_sha2_512 =
@@ -636,6 +655,12 @@ int md5update_int(FAR void *ctx, FAR const uint8_t *buf, uint16_t len)
 int sha1update_int(FAR void *ctx, FAR const uint8_t *buf, uint16_t len)
 {
   sha1update(ctx, buf, len);
+  return 0;
+}
+
+int sha224update_int(FAR void *ctx, FAR const uint8_t *buf, uint16_t len)
+{
+  sha224update(ctx, buf, len);
   return 0;
 }
 
