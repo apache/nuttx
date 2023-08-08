@@ -281,13 +281,15 @@ static void slip_transmit(FAR struct slip_driver_s *self)
 
   if (self->txlen > 0)
     {
+      int i;
+
       /* Transmission of previous packet is still pending.  This might happen
        * in the 'slip_receive' -> 'slip_reply' -> 'slip_transmit' case.  Try
        * to forward pending packet into UART's transmit buffer.  Timeout on
        * packet if not forwarded within a second.
        */
 
-      for (int i = 0; (i < 10) && (self->txsent != self->txlen); )
+      for (i = 0; (i < 10) && (self->txsent != self->txlen); )
         {
           ssz = file_write(&self->tty,
                            &self->txbuf[self->txsent],
