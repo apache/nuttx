@@ -265,6 +265,12 @@ config COMPOSITE_MSFT_OS_DESCRIPTORS
 		Enabling this feature in composite driver will pass these requests
 		onwards to the interface drivers.
 
+config COMPOSITE_DEVICES
+	int "Max class object for composite device"
+	default 8
+	---help---
+		Composite device class object number.
+
 endif
 
 config PL2303
