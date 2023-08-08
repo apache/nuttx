@@ -611,6 +611,24 @@
 #  define pwminfo     _none
 #endif
 
+#ifdef CONFIG_DEBUG_CAPTURE_ERROR
+#  define cperr       _err
+#else
+#  define cperr      _none
+#endif
+
+#ifdef CONFIG_DEBUG_CAPTURE_WARN
+#  define cpwarn     _warn
+#else
+#  define cpwarn     _none
+#endif
+
+#ifdef CONFIG_DEBUG_CAPTURE_INFO
+#  define cpinfo     _info
+#else
+#  define cpinfo     _none
+#endif
+
 #ifdef CONFIG_DEBUG_RC_ERROR
 #  define rcerr        _err
 #else

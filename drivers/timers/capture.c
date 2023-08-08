@@ -262,7 +262,7 @@ static int cap_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct cap_lowerhalf_s *lower;
   int                        ret;
 
-  snprintf("cmd: %d arg: %ld\n", cmd, arg);
+  cpinfo("cmd: %d arg: %ld\n", cmd, arg);
   upper = inode->i_private;
   DEBUGASSERT(upper != NULL);
   lower = upper->lower;
@@ -310,7 +310,7 @@ static int cap_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       default:
         {
-          snprintf("Forwarding unrecognized cmd: %d arg: %ld\n", cmd, arg);
+          cperr("Forwarding unrecognized cmd: %d arg: %ld\n", cmd, arg);
         }
         break;
     }
