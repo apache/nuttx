@@ -167,8 +167,10 @@ mpfs_global_pointer:
 
   /*  Restore GP */
 
-  la      a0, mpfs_global_pointer
-  ld      gp, 0(a0)
+  .option push
+  .option norelax
+  la      gp, __global_pointer$
+  .option pop
 
   /* Call C routine */
 
