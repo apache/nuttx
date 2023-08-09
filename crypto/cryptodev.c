@@ -78,9 +78,9 @@ struct csession
   uint32_t ses;
 
   uint32_t cipher;
-  FAR const struct enc_xform *txform;
   uint32_t mac;
-  FAR const struct auth_hash *thash;
+  bool txform;
+  bool thash;
 
   caddr_t key;
   int keylen;
@@ -167,8 +167,7 @@ FAR struct csession *cseadd(FAR struct fcrypt *, FAR struct csession *);
 FAR struct csession *csecreate(FAR struct fcrypt *, uint64_t,
                                caddr_t, uint64_t,
                                caddr_t, uint64_t, uint32_t,
-                               uint32_t, FAR const struct enc_xform *,
-                               FAR const struct auth_hash *);
+                               uint32_t, bool, bool);
 int csefree(FAR struct csession *);
 
 int cryptodev_op(FAR struct csession *,
@@ -206,8 +205,8 @@ static int cryptof_ioctl(FAR struct file *filep,
   FAR struct csession *cse;
   FAR struct session_op *sop;
   FAR struct crypt_op *cop;
-  FAR const struct enc_xform *txform = NULL;
-  FAR const struct auth_hash *thash = NULL;
+  bool txform = false;
+  bool thash = false;
   uint64_t sid;
   uint32_t ses;
   int error = 0;
@@ -221,25 +220,13 @@ static int cryptof_ioctl(FAR struct file *filep,
             case 0:
               break;
             case CRYPTO_3DES_CBC:
-              txform = &enc_xform_3des;
-              break;
             case CRYPTO_BLF_CBC:
-              txform = &enc_xform_blf;
-              break;
             case CRYPTO_CAST_CBC:
-              txform = &enc_xform_cast5;
-              break;
             case CRYPTO_AES_CBC:
-              txform = &enc_xform_aes;
-              break;
             case CRYPTO_AES_CTR:
-              txform = &enc_xform_aes_ctr;
-              break;
             case CRYPTO_AES_XTS:
-              txform = &enc_xform_aes_xts;
-              break;
             case CRYPTO_NULL:
-              txform = &enc_xform_null;
+              txform = true;
               break;
             default:
               return -EINVAL;
@@ -250,43 +237,19 @@ static int cryptof_ioctl(FAR struct file *filep,
             case 0:
               break;
             case CRYPTO_MD5_HMAC:
-              thash = &auth_hash_hmac_md5_96;
-              break;
             case CRYPTO_SHA1_HMAC:
-              thash = &auth_hash_hmac_sha1_96;
-              break;
             case CRYPTO_RIPEMD160_HMAC:
-              thash = &auth_hash_hmac_ripemd_160_96;
-              break;
             case CRYPTO_SHA2_256_HMAC:
-              thash = &auth_hash_hmac_sha2_256_128;
-              break;
             case CRYPTO_SHA2_384_HMAC:
-              thash = &auth_hash_hmac_sha2_384_192;
-              break;
             case CRYPTO_SHA2_512_HMAC:
-              thash = &auth_hash_hmac_sha2_512_256;
-              break;
             case CRYPTO_AES_128_GMAC:
-              thash = &auth_hash_gmac_aes_128;
-              break;
             case CRYPTO_MD5:
-              thash = &auth_hash_md5;
-              break;
             case CRYPTO_SHA1:
-              thash = &auth_hash_sha1;
-              break;
             case CRYPTO_SHA2_224:
-              thash = &auth_hash_sha2_224;
-              break;
             case CRYPTO_SHA2_256:
-              thash = &auth_hash_sha2_256;
-              break;
             case CRYPTO_SHA2_384:
-              thash = &auth_hash_sha2_384;
-              break;
             case CRYPTO_SHA2_512:
-              thash = &auth_hash_sha2_512;
+              thash = true;
               break;
             default:
               return -EINVAL;
@@ -297,14 +260,8 @@ static int cryptof_ioctl(FAR struct file *filep,
 
         if (txform)
           {
-            crie.cri_alg = txform->type;
+            crie.cri_alg = sop->cipher;
             crie.cri_klen = sop->keylen * 8;
-            if (sop->keylen > txform->maxkey ||
-                sop->keylen < txform->minkey)
-              {
-                error = -EINVAL;
-                goto bail;
-              }
 
             crie.cri_key = kmm_malloc(crie.cri_klen / 8);
             if (crie.cri_key == NULL)
@@ -322,13 +279,8 @@ static int cryptof_ioctl(FAR struct file *filep,
 
         if (thash)
           {
-            cria.cri_alg = thash->type;
+            cria.cri_alg = sop->mac;
             cria.cri_klen = sop->mackeylen * 8;
-            if (sop->mackeylen > thash->keysize)
-              {
-                error = -EINVAL;
-                goto bail;
-              }
 
             if (cria.cri_klen)
               {
@@ -431,7 +383,7 @@ int cryptodev_op(FAR struct csession *cse,
 
   if (cse->txform)
     {
-      if (cop->len == 0 || (cop->len % cse->txform->blocksize) != 0)
+      if (cop->len == 0)
         {
           return -EINVAL;
         }
@@ -439,7 +391,7 @@ int cryptodev_op(FAR struct csession *cse,
 
   /* number of requests, not logical and */
 
-  crp = crypto_getreq((cse->txform != NULL) + (cse->thash != NULL));
+  crp = crypto_getreq(cse->txform + cse->thash);
   if (crp == NULL)
     {
       error = -ENOMEM;
@@ -515,19 +467,7 @@ int cryptodev_op(FAR struct csession *cse,
           goto bail;
         }
 
-      if (!(crde->crd_flags & CRD_F_IV_EXPLICIT))
-        {
-          memcpy(cse->tmp_iv, cop->iv, cse->txform->ivsize);
-          bcopy(cse->tmp_iv, crde->crd_iv, cse->txform->ivsize);
-          crde->crd_flags |= CRD_F_IV_EXPLICIT | CRD_F_IV_PRESENT;
-          crde->crd_skip = 0;
-        }
-    }
-  else if (crde)
-    {
-      crde->crd_flags |= CRD_F_IV_PRESENT;
-      crde->crd_skip = cse->txform->blocksize;
-      crde->crd_len -= cse->txform->blocksize;
+      crp->crp_iv = cop->iv;
     }
 
   if (cop->dst)
@@ -859,8 +799,7 @@ FAR struct csession *csecreate(FAR struct fcrypt *fcr, uint64_t sid,
                                caddr_t key, uint64_t keylen,
                                caddr_t mackey, uint64_t mackeylen,
                                uint32_t cipher, uint32_t mac,
-                               FAR const struct enc_xform *txform,
-                               FAR const struct auth_hash *thash)
+                               bool txform, bool thash)
 {
   FAR struct csession *cse;
 

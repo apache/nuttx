@@ -208,6 +208,7 @@ struct cryptop
 
   caddr_t crp_mac;
   caddr_t crp_dst;
+  caddr_t crp_iv;
 };
 
 #define CRYPTO_BUF_IOV 0x1

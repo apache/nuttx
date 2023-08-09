@@ -681,6 +681,13 @@ int swcr_newsession(FAR uint32_t *sid, FAR struct cryptoini *cri)
                   }
               }
 
+            if (cri->cri_klen / 8 > txf->maxkey ||
+                cri->cri_klen / 8 < txf->minkey)
+              {
+                swcr_freesession(i);
+                return -EINVAL;
+              }
+
             if (txf->setkey((*swd)->sw_kschedule,
                 (FAR uint8_t *)cri->cri_key,
                 cri->cri_klen / 8) < 0)
@@ -722,6 +729,12 @@ int swcr_newsession(FAR uint32_t *sid, FAR struct cryptoini *cri)
               {
                 swcr_freesession(i);
                 return -ENOBUFS;
+              }
+
+            if (cri->cri_klen / 8 > axf->keysize)
+              {
+                swcr_freesession(i);
+                return -EINVAL;
               }
 
             for (k = 0; k < cri->cri_klen / 8; k++)
@@ -934,6 +947,7 @@ int swcr_freesession(uint64_t tid)
 
 int swcr_process(struct cryptop *crp)
 {
+  FAR const struct enc_xform *txf;
   FAR struct cryptodesc *crd;
   FAR struct swcr_data *sw;
   uint32_t lid;
@@ -996,6 +1010,30 @@ int swcr_process(struct cryptop *crp)
           case CRYPTO_RIJNDAEL128_CBC:
           case CRYPTO_AES_CTR:
           case CRYPTO_AES_XTS:
+            txf = sw->sw_exf;
+
+            if ((crd->crd_len % txf->blocksize) != 0)
+              {
+                crp->crp_etype = -EINVAL;
+                goto done;
+              }
+
+            if (crp->crp_iv)
+              {
+                if (!(crd->crd_flags & CRD_F_IV_EXPLICIT))
+                  {
+                    bcopy(crp->crp_iv, crd->crd_iv, txf->ivsize);
+                    crd->crd_flags |= CRD_F_IV_EXPLICIT | CRD_F_IV_PRESENT;
+                    crd->crd_skip = 0;
+                  }
+              }
+            else
+              {
+                crd->crd_flags |= CRD_F_IV_PRESENT;
+                crd->crd_skip = txf->blocksize;
+                crd->crd_len -= txf->blocksize;
+              }
+
             if ((crp->crp_etype = swcr_encdec(crp, crd, sw,
                 crp->crp_buf)) != 0)
               {
