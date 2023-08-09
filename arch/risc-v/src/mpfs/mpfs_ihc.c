@@ -187,7 +187,6 @@ static struct mpfs_rptun_shmem_s   g_shmem;
 static struct rpmsg_device        *g_mpfs_rpmsg_device;
 static struct rpmsg_virtio_device *g_mpfs_virtio_device;
 
-static sem_t  g_mpfs_ack_sig       = SEM_INITIALIZER(0);
 #ifdef MPFS_RPTUN_USE_THREAD
 static sem_t  g_mpfs_rx_sig        = SEM_INITIALIZER(0);
 #else
@@ -441,43 +440,30 @@ static uint32_t mpfs_ihc_context_to_local_hart_id(ihc_channel_t channel)
  * Name: mpfs_ihc_rx_handler
  *
  * Description:
- *   This handles the received information and either lets the vq to proceed
- *   via posting g_mpfs_ack_sig, or lets the mpfs_rptun_thread() run as it
- *   waits for the g_mpfs_rx_sig.  virtqueue_notification() cannot be called
- *   from the interrupt context, thus the thread that will perform it.
+ *   This handles the received information and lets the vq to proceed.
+ *   virtqueue_notification() cannot be called from the interrupt context,
+ *   thus the thread or work queue that will perform it.
  *
  * Input Parameters:
  *   message   - Pointer to the incoming message
- *   is_ack    - Boolean indicating whether an ack is received
- *   is_msg    - Boolean indicating message presence
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void mpfs_ihc_rx_handler(uint32_t *message, bool is_ack, bool is_msg)
+static void mpfs_ihc_rx_handler(uint32_t *message)
 {
-  if (is_ack)
-    {
-      /* Received the ack */
+  g_vq_idx = message[0];
 
-      nxsem_post(&g_mpfs_ack_sig);
-    }
-
-  if (is_msg)
-    {
-      g_vq_idx = message[0];
-
-      DEBUGASSERT((g_vq_idx == VRING0_NOTIFYID) ||
-                  (g_vq_idx == VRING1_NOTIFYID));
+  DEBUGASSERT((g_vq_idx == VRING0_NOTIFYID) ||
+              (g_vq_idx == VRING1_NOTIFYID));
 
 #ifdef MPFS_RPTUN_USE_THREAD
-      nxsem_post(&g_mpfs_rx_sig);
+  nxsem_post(&g_mpfs_rx_sig);
 #else
-      work_queue(HPWORK, &g_rptun_work, mpfs_rptun_worker, NULL, 0);
+  work_queue(HPWORK, &g_rptun_work, mpfs_rptun_worker, NULL, 0);
 #endif
-    }
 }
 
 /****************************************************************************
@@ -527,8 +513,6 @@ static void mpfs_ihc_worker(void *arg)
  *   channel  - Enum that describes the channel used.
  *   mhartid  - Context hart id, not necessarily the absolute mhartid but
  *              rather, the primary hartid of the set of harts.
- *   is_ack   - Boolean indicating an ack message
- *   is_msg   - Boolean indicating message presence
  *   msg      - For storing data, could be NULL
  *
  * Returned Value:
@@ -537,72 +521,54 @@ static void mpfs_ihc_worker(void *arg)
  ****************************************************************************/
 
 static void mpfs_ihc_rx_message(ihc_channel_t channel, uint32_t mhartid,
-                                bool is_ack, bool is_msg, uint32_t *msg)
+                                uint32_t *msg)
 {
   uint32_t rhartid  = mpfs_ihc_context_to_remote_hart_id(channel);
   uint32_t ctrl_reg = getreg32(MPFS_IHC_CTRL(mhartid, rhartid));
 
-  if (is_ack && !is_msg)
-    {
-      if (mhartid == CONTEXTB_HARTID)
-        {
-          uintptr_t msg_in = MPFS_IHC_MSG_IN(mhartid, rhartid);
-          DEBUGASSERT(msg == NULL);
-          mpfs_ihc_rx_handler((uint32_t *)msg_in, is_ack, is_msg);
-        }
-      else
-        {
-          /* This path is meant for the OpenSBI vendor extension only */
+  /* Check if we have a message */
 
-          DEBUGPANIC();
-        }
+  if (mhartid == CONTEXTB_HARTID)
+    {
+      uintptr_t msg_in = MPFS_IHC_MSG_IN(mhartid, rhartid);
+      DEBUGASSERT(msg == NULL);
+      mpfs_ihc_rx_handler((uint32_t *)msg_in);
     }
-  else if (is_msg)
+  else
     {
-      /* Check if we have a message */
+      /* This path is meant for the OpenSBI vendor extension only */
 
-      if (mhartid == CONTEXTB_HARTID)
-        {
-          uintptr_t msg_in = MPFS_IHC_MSG_IN(mhartid, rhartid);
-          DEBUGASSERT(msg == NULL);
-          mpfs_ihc_rx_handler((uint32_t *)msg_in, is_ack, is_msg);
-        }
-      else
-        {
-          /* This path is meant for the OpenSBI vendor extension only */
+      DEBUGPANIC();
+    }
 
-          DEBUGPANIC();
-        }
+  /* Set MP to 0. Note this generates an interrupt on the other hart
+   * if it has RMPIE bit set in the control register
+   */
 
-      /* Set MP to 0. Note this generates an interrupt on the other hart
-       * if it has RMPIE bit set in the control register
+  ctrl_reg = getreg32(MPFS_IHC_CTRL(mhartid, rhartid));
+  if (ctrl_reg & RMP_MESSAGE_PRESENT)
+    {
+      /* If we send the ACK here, Linux will have the ACK and the
+       * MP flags sets.  IHC_AVOID_ACK_AND_MP assures only one
+       * is present at once.
        */
 
-      ctrl_reg = getreg32(MPFS_IHC_CTRL(mhartid, rhartid));
-      if (ctrl_reg & RMP_MESSAGE_PRESENT)
-        {
-          /* If we send the ACK here, Linux will have the ACK and the
-           * MP flags sets.  IHC_AVOID_ACK_AND_MP assures only one
-           * is present at once.
-           */
-
 #ifdef IHC_AVOID_ACK_AND_MP
-          g_work_arg.mhartid = mhartid;
-          g_work_arg.rhartid = rhartid;
-          modifyreg32(MPFS_IHC_CTRL(mhartid, rhartid), MP_MASK, 0);
-          work_queue(HPWORK, &g_ihc_work, mpfs_ihc_worker, NULL, 0);
+      g_work_arg.mhartid = mhartid;
+      g_work_arg.rhartid = rhartid;
+      modifyreg32(MPFS_IHC_CTRL(mhartid, rhartid), MP_MASK, 0);
+      work_queue(HPWORK, &g_ihc_work, mpfs_ihc_worker, NULL, 0);
 #else
-          modifyreg32(MPFS_IHC_CTRL(mhartid, rhartid), MP_MASK, 0);
-          modifyreg32(MPFS_IHC_CTRL(mhartid, rhartid), 0, ACK_INT);
+      modifyreg32(MPFS_IHC_CTRL(mhartid, rhartid), MP_MASK, 0);
+      modifyreg32(MPFS_IHC_CTRL(mhartid, rhartid), 0, ACK_INT);
 #endif
-        }
-      else
-        {
-          /* We can send the ACK now and clear the MP */
+    }
+  else
+    {
+      /* We can send the ACK now and clear the MP */
 
-          modifyreg32(MPFS_IHC_CTRL(mhartid, rhartid), MP_MASK, 0);
-          modifyreg32(MPFS_IHC_CTRL(mhartid, rhartid), 0, ACK_INT);
-        }
+      modifyreg32(MPFS_IHC_CTRL(mhartid, rhartid), MP_MASK, 0);
+      modifyreg32(MPFS_IHC_CTRL(mhartid, rhartid), 0, ACK_INT);
     }
 }
 
@@ -649,7 +615,10 @@ static void mpfs_ihc_message_present_isr(void)
 
       /* Process incoming packet */
 
-      mpfs_ihc_rx_message(origin_hart, mhartid, is_ack, is_msg, NULL);
+      if (is_msg)
+        {
+          mpfs_ihc_rx_message(origin_hart, mhartid, NULL);
+        }
 
       if (is_ack)
         {
@@ -787,15 +756,11 @@ static int mpfs_ihc_tx_message(ihc_channel_t channel, uint32_t *message)
     {
       ctrl_reg = getreg32(MPFS_IHC_CTRL(mhartid, rhartid));
     }
-  while ((ctrl_reg & (RMP_MESSAGE_PRESENT | ACK_INT)) && --retries);
+  while ((ctrl_reg & (RMP_MESSAGE_PRESENT)) && --retries);
 
   /* Return if RMP bit 1 indicating busy */
 
   if (RMP_MESSAGE_PRESENT == (ctrl_reg & RMP_MASK))
-    {
-      return -EBUSY;
-    }
-  else if (ACK_INT == (ctrl_reg & ACK_INT_MASK))
     {
       return -EBUSY;
     }
@@ -820,19 +785,6 @@ static int mpfs_ihc_tx_message(ihc_channel_t channel, uint32_t *message)
       /* Set the MP bit. This will notify other of incoming hart message */
 
       modifyreg32(MPFS_IHC_CTRL(mhartid, rhartid), 0, RMP_MESSAGE_PRESENT);
-
-      /* Wait for the ACK to arrive to maintain the logic */
-
-      if (mhartid == CONTEXTB_HARTID)
-        {
-          /* With some probability, an ACK is lost.  Only wait for some
-           * descent amount of time and continue.  Otherwise, this will
-           * hang and never proceed.
-           */
-
-          nxsem_tickwait_uninterruptible(&g_mpfs_ack_sig,
-                                         MSEC2TICK(10));
-        }
     }
 
   return OK;
