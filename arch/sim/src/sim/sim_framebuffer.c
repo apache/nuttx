@@ -421,10 +421,21 @@ void sim_x11loop(void)
 #ifdef CONFIG_SIM_X11FB
   static clock_t last;
   clock_t now = clock_systime_ticks();
+  union fb_paninfo_u info;
 
   if (now - last >= MSEC2TICK(16))
     {
       last = now;
+      if (fb_paninfo_count(&g_fbobject, FB_NO_OVERLAY) > 1)
+        {
+          fb_remove_paninfo(&g_fbobject, FB_NO_OVERLAY);
+        }
+
+      if (fb_peek_paninfo(&g_fbobject, &info, FB_NO_OVERLAY) == OK)
+        {
+          sim_x11setoffset(info.planeinfo.yoffset * info.planeinfo.stride);
+        }
+
       sim_x11update();
     }
 #endif
@@ -451,9 +462,12 @@ int up_fbinitialize(int display)
   int ret = OK;
 
 #ifdef CONFIG_SIM_X11FB
+  g_planeinfo.xres_virtual = CONFIG_SIM_FBWIDTH;
+  g_planeinfo.yres_virtual = CONFIG_SIM_FBHEIGHT * CONFIG_SIM_FRAMEBUFFER_COUNT;
   ret = sim_x11initialize(CONFIG_SIM_FBWIDTH, CONFIG_SIM_FBHEIGHT,
                           &g_planeinfo.fbmem, &g_planeinfo.fblen,
-                          &g_planeinfo.bpp, &g_planeinfo.stride);
+                          &g_planeinfo.bpp, &g_planeinfo.stride,
+                          CONFIG_SIM_FRAMEBUFFER_COUNT);
 #endif
 
   return ret;

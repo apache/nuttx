@@ -355,6 +355,14 @@ config SIM_FBBPP
 		If you use the X11 display emulation, the selected BPP must match the BPP
 		of your graphics hardware (probably 32 bits).  Default: 8
 
+config SIM_FRAMEBUFFER_COUNT
+	int "Framebuffer count"
+	depends on SIM_FRAMEBUFFER
+	default 2
+	---help---
+		Framebuffer count.
+		Simulated frambuffer count.  Default: 2
+
 endmenu
 
 choice
