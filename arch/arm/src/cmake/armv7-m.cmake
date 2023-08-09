@@ -55,18 +55,18 @@ if(CONFIG_ARCH_TOOLCHAIN_CLANG)
 
   if(CONFIG_ARCH_CORTEXM4)
     if(CONFIG_ARCH_FPU)
-      string(APPEND ARCHFLAGS "--config armv7em_hard_fpv4_sp_d16_nosys")
+      string(APPEND ARCHFLAGS "--config armv7em_hard_fpv4_sp_d16.cfg")
     else()
-      string(APPEND ARCHFLAGS "--config armv7em_soft_nofp_nosys")
+      string(APPEND ARCHFLAGS "--config armv7em_soft_nofp.cfg")
     endif()
   elseif(CONFIG_ARCH_CORTEXM7)
     if(CONFIG_ARCH_FPU)
-      string(APPEND ARCHFLAGS "--config armv7em_hard_fpv5_d16_nosys")
+      string(APPEND ARCHFLAGS "--config armv7em_hard_fpv5.cfg")
     else()
-      string(APPEND ARCHFLAGS "--config armv7em_soft_nofp_nosys")
+      string(APPEND ARCHFLAGS "--config armv7em_soft_nofp.cfg")
     endif()
   else()
-    string(APPEND ARCHFLAGS "--config armv7em_soft_nofp_nosys")
+    string(APPEND ARCHFLAGS "--config armv7em_soft_nofp.cfg")
   endif()
 
   if(NOT "${CMAKE_C_FLAGS}" STREQUAL "" AND NOT "${ARCHFLAGS}" STREQUAL "")
@@ -75,13 +75,13 @@ if(CONFIG_ARCH_TOOLCHAIN_CLANG)
 
   if(NOT EXISTS_FLAGS)
     set(CMAKE_ASM_FLAGS
-        "${CMAKE_ASM_FLAGS}${ARCHFLAGS}"
+        "${CMAKE_ASM_FLAGS} ${ARCHFLAGS}"
         CACHE STRING "" FORCE)
     set(CMAKE_C_FLAGS
-        "${CMAKE_C_FLAGS}${ARCHFLAGS}"
+        "${CMAKE_C_FLAGS} ${ARCHFLAGS}"
         CACHE STRING "" FORCE)
     set(CMAKE_CXX_FLAGS
-        "${CMAKE_CXX_FLAGS}${ARCHFLAGS}"
+        "${CMAKE_CXX_FLAGS} ${ARCHFLAGS}"
         CACHE STRING "" FORCE)
   endif()
 endif()

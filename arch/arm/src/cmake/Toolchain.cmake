@@ -89,15 +89,13 @@ endif()
 
 # override the ARCHIVE command
 
-set(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> rcs -o <TARGET> <LINK_FLAGS> <OBJECTS>")
-set(CMAKE_CXX_ARCHIVE_CREATE
-    "<CMAKE_AR> rcs -o <TARGET> <LINK_FLAGS> <OBJECTS>")
-set(CMAKE_ASM_ARCHIVE_CREATE
-    "<CMAKE_AR> rcs -o <TARGET> <LINK_FLAGS> <OBJECTS>")
+set(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
+set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
+set(CMAKE_ASM_ARCHIVE_CREATE "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
 
 # Architecture flags
 
-add_link_options(--entry=__start)
+add_link_options(-Wl,--entry=__start)
 add_link_options(-nostdlib)
 add_compile_options(-fno-common)
 add_compile_options(-Wall -Wshadow -Wundef)
@@ -200,13 +198,13 @@ endif()
 
 if(NOT EXISTS_FLAGS)
   set(CMAKE_ASM_FLAGS
-      "${CMAKE_ASM_FLAGS}${ARCHCFLAGS}"
+      "${CMAKE_ASM_FLAGS} ${ARCHCFLAGS}"
       CACHE STRING "" FORCE)
   set(CMAKE_C_FLAGS
-      "${CMAKE_C_FLAGS}${ARCHCFLAGS}"
+      "${CMAKE_C_FLAGS} ${ARCHCFLAGS}"
       CACHE STRING "" FORCE)
   set(CMAKE_CXX_FLAGS
-      "${CMAKE_CXX_FLAGS}${ARCHCXXFLAGS}"
+      "${CMAKE_CXX_FLAGS} ${ARCHCXXFLAGS}"
       CACHE STRING "" FORCE)
 endif()
 
