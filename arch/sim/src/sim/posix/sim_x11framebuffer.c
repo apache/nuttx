@@ -55,7 +55,7 @@ static XShmSegmentInfo g_xshminfo;
 static int g_xerror;
 #endif
 static XImage *g_image;
-static unsigned char *g_framebuffer;
+static char *g_framebuffer;
 static unsigned short g_fbpixelwidth;
 static unsigned short g_fbpixelheight;
 static int g_shmcheckpoint = 0;
@@ -206,6 +206,9 @@ static void sim_x11uninit(void)
 
   if (g_shmcheckpoint > 1)
     {
+#ifdef CONFIG_SIM_X11NOSHM
+      g_image->data = g_framebuffer;
+#endif
       XDestroyImage(g_image);
     }
 
@@ -247,7 +250,8 @@ static void sim_x11uninitialize(void)
  ****************************************************************************/
 
 static inline int sim_x11mapsharedmem(Display *display,
-                                      int depth, unsigned int fblen)
+                                      int depth, unsigned int fblen,
+                                      int fbcount)
 {
 #ifndef CONFIG_SIM_X11NOSHM
   Status result;
@@ -282,8 +286,9 @@ static inline int sim_x11mapsharedmem(Display *display,
       g_shmcheckpoint++;
 
       g_xshminfo.shmid = shmget(IPC_PRIVATE,
-                              g_image->bytes_per_line * g_image->height,
-                              IPC_CREAT | 0777);
+                                g_image->bytes_per_line *
+                                g_image->height * fbcount,
+                                IPC_CREAT | 0777);
       if (g_xshminfo.shmid < 0)
         {
           sim_x11uninitialize();
@@ -312,7 +317,7 @@ static inline int sim_x11mapsharedmem(Display *display,
           goto shmerror;
         }
 
-      g_framebuffer = (unsigned char *)g_image->data;
+      g_framebuffer = g_image->data;
       g_shmcheckpoint++;
     }
   else
@@ -324,10 +329,10 @@ shmerror:
 #endif
       b_useshm = 0;
 
-      g_framebuffer = malloc(fblen);
+      g_framebuffer = malloc(fblen * fbcount);
 
       g_image = XCreateImage(display, DefaultVisual(display, g_screen),
-                             depth, ZPixmap, 0, (char *)g_framebuffer,
+                             depth, ZPixmap, 0, g_framebuffer,
                              g_fbpixelwidth, g_fbpixelheight,
                              8, 0);
 
@@ -357,7 +362,7 @@ shmerror:
 
 int sim_x11initialize(unsigned short width, unsigned short height,
                      void **fbmem, size_t *fblen, unsigned char *bpp,
-                     unsigned short *stride)
+                     unsigned short *stride, int fbcount)
 {
   XWindowAttributes windowattributes;
   Display *display;
@@ -397,7 +402,7 @@ int sim_x11initialize(unsigned short width, unsigned short height,
 
   /* Map the window to shared memory */
 
-  sim_x11mapsharedmem(display, windowattributes.depth, *fblen);
+  sim_x11mapsharedmem(display, windowattributes.depth, *fblen, fbcount);
 
   *fbmem  = (void *)g_framebuffer;
   g_display = display;
@@ -434,6 +439,22 @@ int sim_x11closewindow(void)
 
   XUnmapWindow(g_display, g_window);
   XSync(g_display, 0);
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: sim_x11setoffset
+ ****************************************************************************/
+
+int sim_x11setoffset(unsigned int offset)
+{
+  if (g_display == NULL)
+    {
+      return -ENODEV;
+    }
+
+  g_image->data = g_framebuffer + offset;
 
   return 0;
 }
