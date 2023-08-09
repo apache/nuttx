@@ -606,12 +606,6 @@ static ssize_t ft5x06_waitsample(FAR struct ft5x06_dev_s *priv,
 {
   int ret;
 
-  /* Disable pre-emption to prevent other threads from getting control while
-   * we muck with the semaphores.
-   */
-
-  sched_lock();
-
   /* Now release the semaphore that manages mutually exclusive access to
    * the device structure.  This may cause other tasks to become ready to
    * run, but they cannot run yet because pre-emption is disabled.
@@ -659,13 +653,6 @@ static ssize_t ft5x06_waitsample(FAR struct ft5x06_dev_s *priv,
     }
 
 errout:
-  /* Restore pre-emption.  We might get suspended here but that is okay
-   * because we already have our sample.  Note:  this means that if there
-   * were two threads reading from the FT5x06 for some reason, the data
-   * might be read out of order.
-   */
-
-  sched_unlock();
   return ret;
 }
 
