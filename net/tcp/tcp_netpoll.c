@@ -344,6 +344,7 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
        * exceptional event.
        */
 
+      _SO_CONN_SETERRNO(conn, ENOTCONN);
       eventset |= POLLERR | POLLHUP;
     }
   else if (_SS_ISCONNECTED(conn->sconn.s_flags) &&
