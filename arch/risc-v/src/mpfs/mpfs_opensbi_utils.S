@@ -121,13 +121,6 @@ mpfs_opensbi_prepare_hart:
   la   t0, mpfs_exception_opensbi
   csrw mtvec, t0
 
-  /* la gp, __global_pointer$ will not work. We want to have the gp as seen
-   * in the .map file exactly. We need to restore gp in the trap handler.
-   */
-
-  la   t0, mpfs_global_pointer
-  ld   gp, 0(t0)
-
   /* Setup stacks per hart, the stack top is the end of the hart's scratch */
 
   csrr a0, mhartid
