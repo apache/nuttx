@@ -239,12 +239,13 @@ static inline int stmpe811_waitsample(FAR struct stmpe811_dev_s *priv,
                                       FAR struct stmpe811_sample_s *sample)
 {
   int ret;
+  irqstate_t flags;
 
   /* Disable pre-emption to prevent the worker thread from running
    * asynchronously.
    */
 
-  sched_lock();
+  flags = enter_critical_section();
 
   /* Now release the semaphore that manages mutually exclusive access to
    * the device structure.  This may cause other tasks to become ready to
@@ -282,13 +283,12 @@ static inline int stmpe811_waitsample(FAR struct stmpe811_dev_s *priv,
   ret = nxmutex_lock(&priv->lock);
 
 errout:
-  /* Restore pre-emption.  We might get suspended here but that is okay
-   * because we already have our sample.  Note:  this means that if there
-   * were two threads reading from the STMPE811 for some reason, the data
-   * might be read out of order.
+  /* Then re-enable interrupts.  We might get interrupt here and there
+   * could be a new sample.  But no new threads will run because we still
+   * have pre-emption disabled.
    */
 
-  sched_unlock();
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -955,6 +955,10 @@ void stmpe811_tscworker(FAR struct stmpe811_dev_s *priv, uint8_t intsta)
 
   pendown = !!(stmpe811_getreg8(priv, STMPE811_TSC_CTRL) & TSC_CTRL_TSC_STA);
 
+  /* Get exclusive access to the driver data structure */
+
+  nxmutex_lock(&priv->lock);
+
   /* Handle the change from pen down to pen up */
 
   if (!pendown)
@@ -1089,6 +1093,7 @@ void stmpe811_tscworker(FAR struct stmpe811_dev_s *priv, uint8_t intsta)
    */
 
 ignored:
+  nxmutex_unlock(&priv->lock);
   if (priv->sample.contact == CONTACT_DOWN ||
       priv->sample.contact == CONTACT_MOVE)
     {

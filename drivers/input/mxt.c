@@ -1264,12 +1264,6 @@ static ssize_t mxt_read(FAR struct file *filep, FAR char *buffer, size_t len)
       return ret;
     }
 
-  /* Locking the scheduler will prevent the worker thread from running
-   * until we finish here.
-   */
-
-  sched_lock();
-
   /* Try to read sample data. */
 
   ret = mxt_checksample(priv);
@@ -1455,7 +1449,6 @@ static ssize_t mxt_read(FAR struct file *filep, FAR char *buffer, size_t len)
   ret = samplesize;
 
 errout:
-  sched_unlock();
   nxmutex_unlock(&priv->devlock);
   return ret;
 }
