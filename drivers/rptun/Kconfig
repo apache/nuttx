@@ -12,6 +12,15 @@ menuconfig RPTUN
 
 if RPTUN
 
+config RPTUN_SECURE
+	bool "rptun secure support"
+	default n
+	---help---
+		This is a rptun driver for communications between secure (TEE)
+		and non-secure (REE) environments. With this driver, REE and
+		TEE and communicate with each other by using the native rpmsg
+		or various Rpmsg services have been implemented in NuttX.
+
 config RPTUN_IVSHMEM
 	bool "rptun ivshmem support"
 	default n
