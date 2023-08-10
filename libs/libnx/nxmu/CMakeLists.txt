@@ -29,7 +29,6 @@ if(CONFIG_NX)
       nx_disconnect.c
       nx_eventhandler.c
       nx_eventnotify.c
-      nxmu_semtake.c
       nx_block.c
       nx_synch.c
       nx_kbdchin.c
