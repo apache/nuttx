@@ -161,6 +161,8 @@ static uint16_t icmpv6_neighbor_eventhandler(FAR struct net_driver_s *dev,
  *   ICMPv6 Neighbor Advertisement.
  *
  * Input Parameters:
+ *   dev      The suggested device driver structure to do the solicitation,
+ *            can be NULL for auto decision, must set for link-local ipaddr.
  *   ipaddr   The IPv6 address to be queried.
  *
  * Returned Value:
@@ -176,9 +178,9 @@ static uint16_t icmpv6_neighbor_eventhandler(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
+int icmpv6_neighbor(FAR struct net_driver_s *dev,
+                    const net_ipv6addr_t ipaddr)
 {
-  FAR struct net_driver_s *dev;
   struct icmpv6_notify_s notify;
   struct icmpv6_neighbor_s state;
   net_ipv6addr_t lookup;
@@ -202,7 +204,11 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
 
   /* Get the device that can route this request */
 
-  dev = netdev_findby_ripv6addr(g_ipv6_unspecaddr, ipaddr);
+  if (!dev)
+    {
+      dev = netdev_findby_ripv6addr(g_ipv6_unspecaddr, ipaddr);
+    }
+
   if (!dev)
     {
       nerr("ERROR: Unreachable: %08lx\n", (unsigned long)ipaddr);
@@ -212,7 +218,8 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
 
   /* Check if the destination address is on the local network. */
 
-  if (net_ipv6addr_maskcmp(ipaddr, dev->d_ipv6addr, dev->d_ipv6netmask))
+  if (net_ipv6addr_maskcmp(ipaddr, dev->d_ipv6addr, dev->d_ipv6netmask) ||
+      net_is_addr_linklocal(ipaddr))
     {
       /* Yes.. use the input address for the lookup */
 

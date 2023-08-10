@@ -213,7 +213,7 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
   /* Make sure that the IP address mapping is in the Neighbor Table */
 
-  ret = icmpv6_neighbor(to6->sin6_addr.in6_u.u6_addr16);
+  ret = icmpv6_neighbor(dev, to6->sin6_addr.in6_u.u6_addr16);
   if (ret < 0)
     {
       nerr("ERROR: Not reachable\n");

@@ -205,6 +205,8 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen);
  *   ICMPv6 Neighbor Advertisement.
  *
  * Input Parameters:
+ *   dev      The suggested device driver structure to do the solicitation,
+ *            can be NULL for auto decision, must set for link-local ipaddr.
  *   ipaddr   The IPv6 address to be queried.
  *
  * Returned Value:
@@ -221,9 +223,10 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
-int icmpv6_neighbor(const net_ipv6addr_t ipaddr);
+int icmpv6_neighbor(FAR struct net_driver_s *dev,
+                    const net_ipv6addr_t ipaddr);
 #else
-#  define icmpv6_neighbor(i) (0)
+#  define icmpv6_neighbor(d,i) (0)
 #endif
 
 /****************************************************************************
