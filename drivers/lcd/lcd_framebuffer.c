@@ -400,7 +400,7 @@ static int lcdfb_putcmap(FAR struct fb_vtable_s *vtable,
 
 #ifdef CONFIG_FB_HWCURSOR
 static int lcdfb_getcursor(FAR struct fb_vtable_s *vtable,
-                        FAR struct fb_cursorattrib_s *attrib)
+                           FAR struct fb_cursorattrib_s *attrib)
 {
   lcdinfo("vtable=%p attrib=%p\n", vtable, attrib);
   FAR struct lcdfb_dev_s *priv;
@@ -435,7 +435,7 @@ static int lcdfb_getcursor(FAR struct fb_vtable_s *vtable,
 
 #ifdef CONFIG_FB_HWCURSOR
 static int lcdfb_setcursor(FAR struct fb_vtable_s *vtable,
-                       FAR struct fb_setcursor_s *settings)
+                           FAR struct fb_setcursor_s *settings)
 {
   FAR struct lcdfb_dev_s *priv;
   FAR struct lcd_dev_s *lcd;
@@ -486,6 +486,38 @@ static int lcdfb_setpower(FAR struct fb_vtable_s *vtable, FAR int power)
       if (ret < 0)
         {
           lcderr("ERROR: LCD setpower() failed: %d\n", ret);
+        }
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: lcdfb_ioctl
+ ****************************************************************************/
+
+static int lcdfb_ioctl(FAR struct fb_vtable_s *vtable,
+                       int cmd, unsigned long arg)
+{
+  int ret = -EINVAL;
+  FAR struct lcdfb_dev_s *priv;
+  FAR struct lcd_dev_s *lcd;
+
+  DEBUGASSERT(vtable != NULL);
+
+  priv = (FAR struct lcdfb_dev_s *)vtable;
+
+  if (priv != NULL)
+    {
+      lcd = priv->lcd;
+
+      if (lcd->ioctl)
+        {
+          ret = lcd->ioctl(lcd, cmd, arg);
+        }
+      else
+        {
+          ret = -ENOTTY;
         }
     }
 
@@ -548,6 +580,7 @@ int up_fbinitialize(int display)
 #endif
   priv->vtable.updatearea   = lcdfb_updateearea,
   priv->vtable.setpower     = lcdfb_setpower,
+  priv->vtable.ioctl        = lcdfb_ioctl,
 
 #ifdef CONFIG_LCD_EXTERNINIT
   /* Use external graphics driver initialization */
