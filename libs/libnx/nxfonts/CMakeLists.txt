@@ -18,13 +18,15 @@
 #
 # ##############################################################################
 function(add_font name id)
-  string(REPLACE "-" "_" prefix "g_${name}")
-  configure_file(nxfonts_bitmaps.c.in nxfonts_bitmaps_${name}.c)
+  string(REPLACE "-" "_" prefix "g_${name}_")
+  configure_file(nxfonts_bitmaps.c nxfonts_bitmaps_${name}.c)
   target_sources(nxfonts
                  PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/nxfonts_bitmaps_${name}.c)
-  set_source_files_properties(
-    ${CMAKE_CURRENT_BINARY_DIR}/nxfonts_bitmaps_${name}.c
-    PROPERTIES COMPILE_FLAGS -DNXFONTS_FONTID=${id})
+  set(CUSTOM_DEFINES NXFONTS_FONTID=${id} NXFONTS_PREFIX=${prefix})
+  set_property(
+    SOURCE ${CMAKE_CURRENT_BINARY_DIR}/nxfonts_bitmaps_${name}.c
+    APPEND
+    PROPERTY COMPILE_DEFINITIONS ${CUSTOM_DEFINES})
 endfunction()
 
 if(CONFIG_NXFONTS)
@@ -45,11 +47,14 @@ if(CONFIG_NXFONTS)
       24
       32)
   foreach(bpp ${BPPS})
-    configure_file(nxfonts_convert.c.in nxfonts_convert_${bpp}bpp.c)
-    set_source_files_properties(
-      ${CMAKE_CURRENT_BINARY_DIR}/nxfonts_convert_${bpp}bpp.c
-      PROPERTIES COMPILE_FLAGS -DNXFONTS_BITSPERPIXEL=${bpp})
-    list(APPEND SRCS ${CMAKE_CURRENT_BINARY_DIR}/nxfonts_convert_${bpp}bpp.c)
+    set(BPP_SUFFIX _${bpp}bpp)
+    configure_file(nxfonts_convert.c nxfonts_convert${BPP_SUFFIX}.c)
+    set(CUSTOM_DEFINES NXFONTS_BITSPERPIXEL=${bpp} NXFONTS_SUFFIX=${BPP_SUFFIX})
+    set_property(
+      SOURCE ${CMAKE_CURRENT_BINARY_DIR}/nxfonts_convert${BPP_SUFFIX}.c
+      APPEND
+      PROPERTY COMPILE_DEFINITIONS ${CUSTOM_DEFINES})
+    list(APPEND SRCS ${CMAKE_CURRENT_BINARY_DIR}/nxfonts_convert${BPP_SUFFIX}.c)
   endforeach()
 
   target_sources(nxfonts PRIVATE ${SRCS})

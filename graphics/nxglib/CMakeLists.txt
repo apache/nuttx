@@ -19,6 +19,7 @@
 # ##############################################################################
 
 nuttx_add_aux_library(nxglib)
+
 set(SRCS)
 
 set(OPERATIONS setpixel fillrectangle getrectangle filltrapezoid moverectangle
@@ -26,8 +27,8 @@ set(OPERATIONS setpixel fillrectangle getrectangle filltrapezoid moverectangle
 set(BPPS
     1
     2
-    8
     4
+    8
     16
     24
     32)
@@ -40,22 +41,29 @@ endif()
 
 foreach(op ${OPERATIONS})
   foreach(bpp ${BPPS})
-    configure_file(${BLITDIR}/nxglib_${op}.c.in nxglib_${op}_${bpp}bpp.c)
-    set_source_files_properties(
-      ${CMAKE_CURRENT_BINARY_DIR}/nxglib_${op}_${bpp}bpp.c
-      PROPERTIES COMPILE_FLAGS -DNXGLIB_BITSPERPIXEL=${bpp})
-    list(APPEND SRCS ${CMAKE_CURRENT_BINARY_DIR}/nxglib_${op}_${bpp}bpp.c)
+    set(BPP_SUFFIX _${bpp}bpp)
+    configure_file(${BLITDIR}/nxglib_${op}.c nxglib_${op}${BPP_SUFFIX}.c
+                   COPYONLY)
+    set(CUSTOM_DEFINES NXGLIB_BITSPERPIXEL=${bpp} NXGLIB_SUFFIX=${BPP_SUFFIX})
+    set_property(
+      SOURCE ${CMAKE_CURRENT_BINARY_DIR}/nxglib_${op}${BPP_SUFFIX}.c
+      APPEND
+      PROPERTY COMPILE_DEFINITIONS ${CUSTOM_DEFINES})
+    list(APPEND SRCS ${CMAKE_CURRENT_BINARY_DIR}/nxglib_${op}${BPP_SUFFIX}.c)
   endforeach()
 endforeach()
 
 if(CONFIG_NX_RAMBACKED)
   foreach(op ${OPERATIONS})
     foreach(bpp ${BPPS})
-      configure_file(pwfb/pwfb_${op}.c.in pwfb_${op}_${bpp}bpp.c)
-      set_source_files_properties(
-        ${CMAKE_CURRENT_BINARY_DIR}/pwfb_${op}_${bpp}bpp.c
-        PROPERTIES COMPILE_FLAGS -DNXGLIB_BITSPERPIXEL=${bpp})
-      list(APPEND SRCS ${CMAKE_CURRENT_BINARY_DIR}/pwfb_${op}_${bpp}bpp.c)
+      set(BPP_SUFFIX _${bpp}bpp)
+      configure_file(pwfb/pwfb_${op}.c pwfb_${op}${BPP_SUFFIX}.c COPYONLY)
+      set(CUSTOM_DEFINES NXGLIB_BITSPERPIXEL=${bpp} NXGLIB_SUFFIX=${BPP_SUFFIX})
+      set_property(
+        SOURCE ${CMAKE_CURRENT_BINARY_DIR}/pwfb_${op}${BPP_SUFFIX}.c
+        APPEND
+        PROPERTY COMPILE_DEFINITIONS ${CUSTOM_DEFINES})
+      list(APPEND SRCS ${CMAKE_CURRENT_BINARY_DIR}/pwfb_${op}${BPP_SUFFIX}.c)
     endforeach()
   endforeach()
 endif()
@@ -66,13 +74,16 @@ if(CONFIG_NX_SWCURSOR)
 
   foreach(op ${CURSOR_OPS})
     foreach(bpp ${CURSOR_BPPS})
-      configure_file(cursor/nxglib_cursor_${op}.c.in
-                     nxglib_cursor_${op}_${bpp}bpp.c)
-      set_source_files_properties(
-        ${CMAKE_CURRENT_BINARY_DIR}/nxglib_cursor_${op}_${bpp}bpp.c
-        PROPERTIES COMPILE_FLAGS -DNXGLIB_BITSPERPIXEL=${bpp})
+      set(BPP_SUFFIX _${bpp}bpp)
+      configure_file(cursor/nxglib_cursor_${op}.c
+                     nxglib_cursor_${op}${BPP_SUFFIX}.c COPYONLY)
+      set(CUSTOM_DEFINES NXGLIB_BITSPERPIXEL=${bpp} NXGLIB_SUFFIX=${BPP_SUFFIX})
+      set_property(
+        SOURCE ${CMAKE_CURRENT_BINARY_DIR}/nxglib_cursor_${op}${BPP_SUFFIX}.c
+        APPEND
+        PROPERTY COMPILE_DEFINITIONS ${CUSTOM_DEFINES})
       list(APPEND SRCS
-           ${CMAKE_CURRENT_BINARY_DIR}/nxglib_cursor_${op}_${bpp}bpp.c)
+           ${CMAKE_CURRENT_BINARY_DIR}/nxglib_cursor_${op}${BPP_SUFFIX}.c)
     endforeach()
   endforeach()
 endif()
