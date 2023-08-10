@@ -27,6 +27,8 @@
 
 #include <nuttx/config.h>
 #include <nuttx/fs/ioctl.h>
+
+#include <stdbool.h>
 #include <sys/types.h>
 
 /****************************************************************************
