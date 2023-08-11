@@ -177,8 +177,7 @@ FAR static struct note_driver_s *
 static struct note_taskname_s g_note_taskname;
 #endif
 
-#if defined(CONFIG_SCHED_INSTRUMENTATION_FILTER) || \
-    (CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE > 0)
+#if defined(CONFIG_SCHED_INSTRUMENTATION_FILTER)
 static spinlock_t g_note_lock;
 #endif
 
@@ -1933,39 +1932,29 @@ void sched_note_filter_tag(FAR struct note_filter_tag_s *oldf,
  *
  * Input Parameters:
  *   PID - Task ID
- *   name - Task name buffer
- *          this buffer must be greater than CONFIG_TASK_NAME_SIZE + 1
  *
  * Returned Value:
- *   Retrun OK if task name can be retrieved, otherwise -ESRCH
- *
+ *   Retrun name if task name can be retrieved, otherwise NULL
  ****************************************************************************/
 
-int note_get_taskname(pid_t pid, FAR char *buffer)
+FAR const char *note_get_taskname(pid_t pid)
 {
   FAR struct note_taskname_info_s *ti;
   FAR struct tcb_s *tcb;
-  irqstate_t irq_mask;
 
-  irq_mask = spin_lock_irqsave_wo_note(&g_note_lock);
   tcb = nxsched_get_tcb(pid);
   if (tcb != NULL)
     {
-      strlcpy(buffer, tcb->name, CONFIG_TASK_NAME_SIZE + 1);
-      spin_unlock_irqrestore_wo_note(&g_note_lock, irq_mask);
-      return OK;
+      return tcb->name;
     }
 
   ti = note_find_taskname(pid);
   if (ti != NULL)
     {
-      strlcpy(buffer, ti->name, CONFIG_TASK_NAME_SIZE + 1);
-      spin_unlock_irqrestore_wo_note(&g_note_lock, irq_mask);
-      return OK;
+      return ti->name;
     }
 
-  spin_unlock_irqrestore_wo_note(&g_note_lock, irq_mask);
-  return -ESRCH;
+  return NULL;
 }
 
 #endif
