@@ -64,10 +64,10 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: elf_filelen
+ * Name: elf_fileinfo
  *
  * Description:
- *  Get the size of the ELF file
+ *  Get some stats info of the ELF file
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
@@ -75,7 +75,7 @@
  *
  ****************************************************************************/
 
-static inline int elf_filelen(FAR struct elf_loadinfo_s *loadinfo)
+static inline int elf_fileinfo(FAR struct elf_loadinfo_s *loadinfo)
 {
   struct stat buf;
   int ret;
@@ -89,9 +89,12 @@ static inline int elf_filelen(FAR struct elf_loadinfo_s *loadinfo)
       return ret;
     }
 
-  /* Return the size of the file in the loadinfo structure */
+  /* Return some stats info of the file in the loadinfo structure */
 
-  loadinfo->filelen = buf.st_size;
+  loadinfo->filelen  = buf.st_size;
+  loadinfo->fileuid  = buf.st_uid;
+  loadinfo->filegid  = buf.st_gid;
+  loadinfo->filemode = buf.st_mode;
   return OK;
 }
 
@@ -131,12 +134,12 @@ int elf_init(FAR const char *filename, FAR struct elf_loadinfo_s *loadinfo)
       return ret;
     }
 
-  /* Get the length of the file. */
+  /* Get some stats info of the file. */
 
-  ret = elf_filelen(loadinfo);
+  ret = elf_fileinfo(loadinfo);
   if (ret < 0)
     {
-      berr("elf_filelen failed: %d\n", ret);
+      berr("elf_fileinfo failed: %d\n", ret);
       return ret;
     }
 

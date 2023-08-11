@@ -318,6 +318,14 @@ static int elf_loadbinary(FAR struct binary_s *binp,
   binp->ndtors    = loadinfo.ndtors;
 #endif
 
+#ifdef CONFIG_SCHED_USER_IDENTITY
+  /* Save IDs and mode from file system */
+
+  binp->uid  = loadinfo.fileuid;
+  binp->gid  = loadinfo.filegid;
+  binp->mode = loadinfo.filemode;
+#endif
+
   elf_dumpentrypt(binp, &loadinfo);
   elf_uninit(&loadinfo);
   return OK;
