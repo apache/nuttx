@@ -95,19 +95,11 @@ struct noteram_dump_cpu_context_s
   uint8_t next_priority;    /* Task Priority of the next line */
 };
 
-struct noteram_dump_task_context_s
-{
-  FAR struct noteram_dump_task_context_s *next;
-  pid_t pid;                            /* Task PID */
-  int syscall_nest;                     /* Syscall nest level */
-};
-
 struct noteram_dump_context_s
 {
   int buflen;           /* The length of the dumped data */
   char buffer[256];     /* Buffer to hold the line to be dumped */
   struct noteram_dump_cpu_context_s cpu[NCPUS];
-  FAR struct noteram_dump_task_context_s *task;
 };
 
 /****************************************************************************
@@ -124,8 +116,6 @@ static void noteram_add(FAR struct note_driver_s *drv,
 
 static void
 noteram_dump_init_context(FAR struct noteram_dump_context_s *ctx);
-static void
-noteram_dump_fini_context(FAR struct noteram_dump_context_s *ctx);
 static int noteram_dump_one(FAR uint8_t *p,
                             FAR struct noteram_dump_context_s *ctx);
 
@@ -475,7 +465,6 @@ static int noteram_open(FAR struct file *filep)
 int noteram_close(FAR struct file *filep)
 {
   FAR struct noteram_dump_context_s *ctx = filep->f_priv;
-  noteram_dump_fini_context(ctx);
   kmm_free(ctx);
   return OK;
 }
@@ -742,62 +731,6 @@ static void noteram_dump_init_context(FAR struct noteram_dump_context_s *ctx)
       ctx->cpu[cpu].current_priority = -1;
       ctx->cpu[cpu].next_priority = -1;
     }
-
-  ctx->task = NULL;
-}
-
-/****************************************************************************
- * Name: noteram_dump_fini_context
- ****************************************************************************/
-
-static void noteram_dump_fini_context(FAR struct noteram_dump_context_s *ctx)
-{
-  FAR struct noteram_dump_task_context_s *tctx;
-  FAR struct noteram_dump_task_context_s *ntctx;
-
-  /* Finalize the trace dump context */
-
-  tctx = ctx->task;
-  ctx->task = NULL;
-  while (tctx != NULL)
-    {
-      ntctx = tctx->next;
-      free(tctx);
-      tctx = ntctx;
-    }
-}
-
-/****************************************************************************
- * Name: get_task_context
- ****************************************************************************/
-
-FAR static struct noteram_dump_task_context_s *
-get_task_context(pid_t pid, FAR struct noteram_dump_context_s *ctx)
-{
-  FAR struct noteram_dump_task_context_s **tctxp;
-  tctxp = &ctx->task;
-  while (*tctxp != NULL)
-    {
-      if ((*tctxp)->pid == pid)
-        {
-          return *tctxp;
-        }
-
-      tctxp = &((*tctxp)->next);
-    }
-
-  /* Create new trace dump task context */
-
-  *tctxp = (FAR struct noteram_dump_task_context_s *)malloc(
-      sizeof(struct noteram_dump_task_context_s));
-  if (*tctxp != NULL)
-    {
-      (*tctxp)->next = NULL;
-      (*tctxp)->pid = pid;
-      (*tctxp)->syscall_nest = 0;
-    }
-
-  return *tctxp;
 }
 
 /****************************************************************************
@@ -991,31 +924,9 @@ static int noteram_dump_one(FAR uint8_t *p,
     case NOTE_SYSCALL_ENTER:
       {
         FAR struct note_syscall_enter_s *nsc;
-        FAR struct noteram_dump_task_context_s *tctx;
         int i;
         int j;
         uintptr_t arg;
-
-        /* Exclude the case of syscall issued by an interrupt handler and
-         * nested syscalls to correct tracecompass display.
-         */
-
-        if (cctx->intr_nest > 0)
-          {
-            break;
-          }
-
-        tctx = get_task_context(pid, ctx);
-        if (tctx == NULL)
-          {
-            break;
-          }
-
-        tctx->syscall_nest++;
-        if (tctx->syscall_nest > 1)
-          {
-            break;
-          }
 
         nsc = (FAR struct note_syscall_enter_s *)p;
         if (nsc->nsc_nr < CONFIG_SYS_RESERVED ||
@@ -1048,31 +959,7 @@ static int noteram_dump_one(FAR uint8_t *p,
     case NOTE_SYSCALL_LEAVE:
       {
         FAR struct note_syscall_leave_s *nsc;
-        FAR struct noteram_dump_task_context_s *tctx;
         uintptr_t result;
-
-        /* Exclude the case of syscall issued by an interrupt handler and
-         * nested syscalls to correct tracecompass display.
-         */
-
-        if (cctx->intr_nest > 0)
-          {
-            break;
-          }
-
-        tctx = get_task_context(pid, ctx);
-        if (tctx == NULL)
-          {
-            break;
-          }
-
-        tctx->syscall_nest--;
-        if (tctx->syscall_nest > 0)
-          {
-            break;
-          }
-
-        tctx->syscall_nest = 0;
 
         nsc = (FAR struct note_syscall_leave_s *)p;
         if (nsc->nsc_nr < CONFIG_SYS_RESERVED ||
