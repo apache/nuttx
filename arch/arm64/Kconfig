@@ -36,6 +36,16 @@ config ARCH_CHIP_A64
 	---help---
 		Allwinner A64 SoC
 
+config ARCH_CHIP_RK3399
+	bool "Rockchip RK3399"
+	select ARCH_CORTEX_A53
+	select ARCH_HAVE_ADDRENV
+	select ARCH_HAVE_RESET
+	select ARCH_HAVE_PSCI
+	select ARCH_NEED_ADDRENV_MAPPING
+	---help---
+		Rockchip RK3399 SoC
+
 config ARCH_CHIP_QEMU
 	bool "QEMU virt platform (ARMv8a)"
 	select ARCH_HAVE_ADDRENV
@@ -190,6 +200,7 @@ config ARCH_FAMILY
 config ARCH_CHIP
 	string
 	default "a64"       if ARCH_CHIP_A64
+	default "rk3399"    if ARCH_CHIP_RK3399
 	default "qemu"      if ARCH_CHIP_QEMU
 	default "fvp-v8r"   if ARCH_CHIP_FVP_ARMV8R
 	default "imx8"      if ARCH_CHIP_IMX8
@@ -249,6 +260,10 @@ config ARM64_ICACHE_DISABLE
 
 if ARCH_CHIP_A64
 source "arch/arm64/src/a64/Kconfig"
+endif
+
+if ARCH_CHIP_RK3399
+source "arch/arm64/src/rk3399/Kconfig"
 endif
 
 if ARCH_CHIP_QEMU
