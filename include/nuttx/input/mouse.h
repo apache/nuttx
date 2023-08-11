@@ -47,9 +47,6 @@
 #define MOUSE_BUTTON_1       (1 << 0) /* True: Left mouse button pressed */
 #define MOUSE_BUTTON_2       (1 << 1) /* True: Right mouse button pressed */
 #define MOUSE_BUTTON_3       (1 << 2) /* True: Middle mouse button pressed */
-#define MOUSE_BUTTON_4       (1 << 3) /* True: Left mouse button released */
-#define MOUSE_BUTTON_5       (1 << 4) /* True: Right mouse button released */
-#define MOUSE_BUTTON_6       (1 << 5) /* True: Middle mouse button released */
 
 /****************************************************************************
  * Public Types
