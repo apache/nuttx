@@ -39,6 +39,7 @@
 #include <nuttx/note/note_driver.h>
 #include <nuttx/note/noteram_driver.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/streams.h>
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
 #  ifdef CONFIG_LIB_SYSCALL
@@ -97,8 +98,6 @@ struct noteram_dump_cpu_context_s
 
 struct noteram_dump_context_s
 {
-  int buflen;           /* The length of the dumped data */
-  char buffer[256];     /* Buffer to hold the line to be dumped */
   struct noteram_dump_cpu_context_s cpu[NCPUS];
 };
 
@@ -113,10 +112,9 @@ static ssize_t noteram_read(FAR struct file *filep,
 static int noteram_ioctl(struct file *filep, int cmd, unsigned long arg);
 static void noteram_add(FAR struct note_driver_s *drv,
                         FAR const void *note, size_t len);
-
 static void
 noteram_dump_init_context(FAR struct noteram_dump_context_s *ctx);
-static int noteram_dump_one(FAR uint8_t *p,
+static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
                             FAR struct noteram_dump_context_s *ctx);
 
 /****************************************************************************
@@ -394,51 +392,6 @@ static ssize_t noteram_get(FAR struct noteram_driver_s *drv,
 }
 
 /****************************************************************************
- * Name: noteram_size
- *
- * Description:
- *   Return the size of the next note at the read index of the circular
- *   buffer.
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   Zero is returned if the circular buffer is empty.  Otherwise, the size
- *   of the next note is returned.
- *
- ****************************************************************************/
-
-static ssize_t noteram_size(FAR struct noteram_driver_s *drv)
-{
-  FAR struct note_common_s *note;
-  unsigned int read;
-  ssize_t notelen;
-  size_t circlen;
-
-  /* Verify that the circular buffer is not empty */
-
-  circlen = noteram_unread_length(drv);
-  if (circlen <= 0)
-    {
-      return 0;
-    }
-
-  /* Get the read index of the circular buffer */
-
-  read = drv->ni_read;
-  DEBUGASSERT(read < drv->ni_bufsize);
-
-  /* Get the length of the note at the read index */
-
-  note    = (FAR struct note_common_s *)&drv->ni_buffer[read];
-  notelen = note->nc_length;
-  DEBUGASSERT(notelen <= circlen);
-
-  return notelen;
-}
-
-/****************************************************************************
  * Name: noteram_open
  ****************************************************************************/
 
@@ -476,35 +429,18 @@ int noteram_close(FAR struct file *filep)
 static ssize_t noteram_read(FAR struct file *filep, FAR char *buffer,
                             size_t buflen)
 {
-  ssize_t ret = -EFBIG;
-  ssize_t retlen = 0;
-  uint8_t note[32];
-  irqstate_t flags;
   FAR struct noteram_dump_context_s *ctx = filep->f_priv;
-  FAR struct noteram_driver_s *drv =
-    (FAR struct noteram_driver_s *)filep->f_inode->i_private;
+  FAR struct noteram_driver_s *drv = filep->f_inode->i_private;
+  FAR struct lib_memoutstream_s stream;
+  ssize_t ret;
 
-  /* If we have parsed but unread data last time,
-   * we should save the last data first
-   */
-
-  if (ctx->buflen > 0)
-    {
-      if (ctx->buflen > buflen)
-        {
-          goto errout;
-        }
-
-      strlcpy(buffer, ctx->buffer, buflen);
-      retlen = ctx->buflen;
-      buffer += ctx->buflen;
-      buflen -= ctx->buflen;
-    }
-
-  /* Then loop, adding as many notes as possible to the user buffer. */
+  lib_memoutstream(&stream, buffer, buflen);
 
   do
     {
+      irqstate_t flags;
+      uint8_t note[64];
+
       /* Get the next note (removing it from the buffer) */
 
       flags = spin_lock_irqsave_wo_note(&drv->lock);
@@ -512,48 +448,17 @@ static ssize_t noteram_read(FAR struct file *filep, FAR char *buffer,
       spin_unlock_irqrestore_wo_note(&drv->lock, flags);
       if (ret <= 0)
         {
-          ctx->buflen = 0;
-          break;
+          return ret;
         }
 
       /* Parse notes into text format */
 
-      ctx->buflen = noteram_dump_one(note, ctx);
-
-      /* If the remaining space is insufficient,
-       * return the read data directly first
-       */
-
-      if (ctx->buflen > buflen)
-        {
-          ret = -EFBIG;
-          break;
-        }
-
-      /* Update pointers from the note that was transferred */
-
-      strlcpy(buffer, ctx->buffer, buflen);
-
-      retlen += ctx->buflen;
-      buffer += ctx->buflen;
-      buflen -= ctx->buflen;
-      ctx->buflen = 0;
-
-      /* Will the next note fit?  There is a race here and even if the next
-       * note will fit, it may fail still when noteram_get() is called.
-       *
-       * It won't fit (or an error occurred).  Return what we have without
-       * trying to get the next note (which would cause it to be deleted).
-       */
-
-      ret = noteram_size(drv);
+      ret = noteram_dump_one(note, (FAR struct lib_outstream_s *)&stream,
+                             ctx);
     }
-  while (ret > 0);
+  while (ret == 0);
 
-  /* If no data is read, an error code is returned */
-
-errout:
-  return retlen ? retlen : ret;
+  return ret;
 }
 
 /****************************************************************************
@@ -754,7 +659,7 @@ static const char *get_task_name(pid_t pid)
  * Name: noteram_dump_header
  ****************************************************************************/
 
-static int noteram_dump_header(FAR char *offset,
+static int noteram_dump_header(FAR struct lib_outstream_s *s,
                                FAR struct note_common_s *note,
                                FAR struct noteram_dump_context_s *ctx)
 {
@@ -773,8 +678,8 @@ static int noteram_dump_header(FAR char *offset,
 
   noteram_dump_unflatten(&pid, note->nc_pid, sizeof(pid));
 
-  ret = sprintf(offset, "%8s-%-3u [%d] %3" PRIu32 ".%09" PRIu32 ": ",
-                get_task_name(pid), get_pid(pid), cpu, sec, nsec);
+  ret = lib_sprintf(s, "%8s-%-3u [%d] %3" PRIu32 ".%09" PRIu32 ": ",
+                    get_task_name(pid), get_pid(pid), cpu, sec, nsec);
   return ret;
 }
 
@@ -784,7 +689,7 @@ static int noteram_dump_header(FAR char *offset,
  * Name: noteram_dump_sched_switch
  ****************************************************************************/
 
-static int noteram_dump_sched_switch(FAR char *offset,
+static int noteram_dump_sched_switch(FAR struct lib_outstream_s *s,
                                      FAR struct note_common_s *note,
                                      FAR struct noteram_dump_context_s *ctx)
 {
@@ -807,14 +712,13 @@ static int noteram_dump_sched_switch(FAR char *offset,
   current_priority = cctx->current_priority;
   next_priority = cctx->next_priority;
 
-  ret = sprintf(offset,
-                "sched_switch: "
-                "prev_comm=%s prev_pid=%u prev_prio=%u prev_state=%c ==> "
-                "next_comm=%s next_pid=%u next_prio=%u\n",
-                get_task_name(current_pid), get_pid(current_pid),
-                current_priority, get_task_state(cctx->current_state),
-                get_task_name(next_pid), get_pid(next_pid),
-                next_priority);
+  ret = lib_sprintf(s, "sched_switch: prev_comm=%s prev_pid=%u "
+                    "prev_prio=%u prev_state=%c ==> "
+                    "next_comm=%s next_pid=%u next_prio=%u\n",
+                    get_task_name(current_pid), get_pid(current_pid),
+                    current_priority, get_task_state(cctx->current_state),
+                    get_task_name(next_pid), get_pid(next_pid),
+                    next_priority);
 
   cctx->current_pid = cctx->next_pid;
   cctx->current_priority = cctx->next_priority;
@@ -827,13 +731,12 @@ static int noteram_dump_sched_switch(FAR char *offset,
  * Name: noteram_dump_one
  ****************************************************************************/
 
-static int noteram_dump_one(FAR uint8_t *p,
+static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
                             FAR struct noteram_dump_context_s *ctx)
 {
   FAR struct note_common_s *note = (FAR struct note_common_s *)p;
   FAR struct noteram_dump_cpu_context_s *cctx;
-  FAR char *buffer = (FAR char *)ctx->buffer;
-  FAR char *offset = (FAR char *)ctx->buffer;
+  int ret = 0;
   pid_t pid;
 #ifdef CONFIG_SMP
   int cpu = note->nc_cpu;
@@ -855,10 +758,10 @@ static int noteram_dump_one(FAR uint8_t *p,
     {
     case NOTE_START:
       {
-        offset += noteram_dump_header(offset, note, ctx);
-        offset += sprintf(offset,
-                          "sched_wakeup_new: comm=%s pid=%d target_cpu=%d\n",
-                          get_task_name(pid), get_pid(pid), cpu);
+        ret += noteram_dump_header(s, note, ctx);
+        ret += lib_sprintf(s, "sched_wakeup_new: comm=%s pid=%d "
+                           "target_cpu=%d\n",
+                           get_task_name(pid), get_pid(pid), cpu);
       }
       break;
 
@@ -900,8 +803,8 @@ static int noteram_dump_one(FAR uint8_t *p,
              * executed immediately.
              */
 
-            offset += noteram_dump_header(offset, note, ctx);
-            offset += noteram_dump_sched_switch(offset, note, ctx);
+            ret += noteram_dump_header(s, note, ctx);
+            ret += noteram_dump_sched_switch(s, note, ctx);
           }
         else
           {
@@ -909,11 +812,11 @@ static int noteram_dump_one(FAR uint8_t *p,
              * until leaving the interrupt handler.
              */
 
-            offset += noteram_dump_header(offset, note, ctx);
-            offset += sprintf(offset,
-                              "sched_waking: comm=%s pid=%d target_cpu=%d\n",
-                              get_task_name(cctx->next_pid),
-                              get_pid(cctx->next_pid), cpu);
+            ret += noteram_dump_header(s, note, ctx);
+            ret += lib_sprintf(s, "sched_waking: comm=%s "
+                               "pid=%d target_cpu=%d\n",
+                               get_task_name(cctx->next_pid),
+                               get_pid(cctx->next_pid), cpu);
             cctx->pendingswitch = true;
           }
       }
@@ -935,24 +838,24 @@ static int noteram_dump_one(FAR uint8_t *p,
             break;
           }
 
-        offset += noteram_dump_header(offset, note, ctx);
-        offset += sprintf(offset, "sys_%s(",
-                          g_funcnames[nsc->nsc_nr - CONFIG_SYS_RESERVED]);
+        ret += noteram_dump_header(s, note, ctx);
+        ret += lib_sprintf(s, "sys_%s(",
+                           g_funcnames[nsc->nsc_nr - CONFIG_SYS_RESERVED]);
 
         for (i = j = 0; i < nsc->nsc_argc; i++)
           {
             noteram_dump_unflatten(&arg, nsc->nsc_args, sizeof(arg));
             if (i == 0)
               {
-                offset += sprintf(offset, "arg%d: 0x%" PRIxPTR, i, arg);
+                ret += lib_sprintf(s, "arg%d: 0x%" PRIxPTR, i, arg);
               }
             else
               {
-                offset += sprintf(offset, ", arg%d: 0x%" PRIxPTR, i, arg);
+                ret += lib_sprintf(s, ", arg%d: 0x%" PRIxPTR, i, arg);
               }
           }
 
-        offset += sprintf(offset, ")\n");
+        ret += lib_sprintf(s, ")\n");
       }
       break;
 
@@ -968,9 +871,9 @@ static int noteram_dump_one(FAR uint8_t *p,
             break;
           }
 
-        offset += noteram_dump_header(offset, note, ctx);
+        ret += noteram_dump_header(s, note, ctx);
         noteram_dump_unflatten(&result, nsc->nsc_result, sizeof(result));
-        offset += sprintf(offset, "sys_%s -> 0x%" PRIxPTR "\n",
+        ret += lib_sprintf(s, "sys_%s -> 0x%" PRIxPTR "\n",
                           g_funcnames[nsc->nsc_nr - CONFIG_SYS_RESERVED],
                           result);
       }
@@ -983,8 +886,8 @@ static int noteram_dump_one(FAR uint8_t *p,
         FAR struct note_irqhandler_s *nih;
 
         nih = (FAR struct note_irqhandler_s *)p;
-        offset += noteram_dump_header(offset, note, ctx);
-        offset += sprintf(offset, "irq_handler_entry: irq=%u name=%d\n",
+        ret += noteram_dump_header(s, note, ctx);
+        ret += lib_sprintf(s, "irq_handler_entry: irq=%u name=%d\n",
                           nih->nih_irq, nih->nih_irq);
         cctx->intr_nest++;
       }
@@ -995,9 +898,9 @@ static int noteram_dump_one(FAR uint8_t *p,
         FAR struct note_irqhandler_s *nih;
 
         nih = (FAR struct note_irqhandler_s *)p;
-        offset += noteram_dump_header(offset, note, ctx);
-        offset += sprintf(offset, "irq_handler_exit: irq=%u ret=handled\n",
-                nih->nih_irq);
+        ret += noteram_dump_header(s, note, ctx);
+        ret += lib_sprintf(s, "irq_handler_exit: irq=%u ret=handled\n",
+                           nih->nih_irq);
         cctx->intr_nest--;
 
         if (cctx->intr_nest <= 0)
@@ -1007,8 +910,8 @@ static int noteram_dump_one(FAR uint8_t *p,
               {
                 /* If the pending task switch exists, it is executed here */
 
-                offset += noteram_dump_header(offset, note, ctx);
-                offset += noteram_dump_sched_switch(offset, note, ctx);
+                ret += noteram_dump_header(s, note, ctx);
+                ret += noteram_dump_sched_switch(s, note, ctx);
               }
           }
       }
@@ -1021,10 +924,8 @@ static int noteram_dump_one(FAR uint8_t *p,
       {
         struct note_csection_s *ncs;
         ncs = (FAR struct note_csection_s *)p;
-        offset += noteram_dump_header(offset, &ncs->ncs_cmn, ctx);
-        offset += sprintf(offset,
-                          "tracing_mark_write: %c|%d|"
-                          "critical_section\n",
+        ret += noteram_dump_header(s, &ncs->ncs_cmn, ctx);
+        ret += lib_sprintf(s, "tracing_mark_write: %c|%d|critical_section\n",
                            note->nc_type == NOTE_CSECTION_ENTER ?
                            'B' : 'E', pid);
       }
@@ -1039,8 +940,8 @@ static int noteram_dump_one(FAR uint8_t *p,
         int16_t count;
         npr = (FAR struct note_preempt_s *)p;
         noteram_dump_unflatten(&count, npr->npr_count, sizeof(count));
-        offset += noteram_dump_header(offset, &npr->npr_cmn, ctx);
-        offset += sprintf(offset, "tracing_mark_write: "
+        ret += noteram_dump_header(s, &npr->npr_cmn, ctx);
+        ret += lib_sprintf(s,  "tracing_mark_write: "
                           "%c|%d|sched_lock:%d\n",
                           note->nc_type == NOTE_PREEMPT_LOCK ?
                           'B' : 'E', pid, count);
@@ -1055,19 +956,19 @@ static int noteram_dump_one(FAR uint8_t *p,
         uintptr_t ip;
 
         nst = (FAR struct note_string_s *)p;
-        offset += noteram_dump_header(offset, note, ctx);
+        ret += noteram_dump_header(s, note, ctx);
         noteram_dump_unflatten(&ip, nst->nst_ip, sizeof(ip));
 
         if (nst->nst_data[1] == '\0' &&
             (nst->nst_data[0] == 'B' || nst->nst_data[0] == 'E'))
           {
-            offset += sprintf(offset, "tracing_mark_write: %c|%d|%pS\n",
-                              nst->nst_data[0], pid, (FAR void *)ip);
+            ret += lib_sprintf(s, "tracing_mark_write: %c|%d|%pS\n",
+                               nst->nst_data[0], pid, (FAR void *)ip);
           }
         else
           {
-            offset += sprintf(offset, "tracing_mark_write: %s\n",
-                    nst->nst_data);
+            ret += lib_sprintf(s, "tracing_mark_write: %s\n",
+                               nst->nst_data);
           }
       }
       break;
@@ -1080,19 +981,19 @@ static int noteram_dump_one(FAR uint8_t *p,
         int i;
 
         nbi = (FAR struct note_binary_s *)p;
-        offset += noteram_dump_header(offset, note, ctx);
+        ret += noteram_dump_header(s, note, ctx);
         count = note->nc_length - sizeof(struct note_binary_s) + 1;
 
         noteram_dump_unflatten(&ip, nbi->nbi_ip, sizeof(ip));
 
-        offset += sprintf(offset, "0x%" PRIdPTR ": event=%u count=%u", ip,
-                          nbi->nbi_event, count);
+        ret += lib_sprintf(s, "0x%" PRIdPTR ": event=%u count=%u", ip,
+                           nbi->nbi_event, count);
         for (i = 0; i < count; i++)
           {
-            offset += sprintf(offset, " 0x%x", nbi->nbi_data[i]);
+            ret += lib_sprintf(s, " 0x%x", nbi->nbi_data[i]);
           }
 
-        offset += sprintf(offset, "\n");
+        ret += lib_sprintf(s, "\n");
       }
       break;
 #endif
@@ -1103,7 +1004,7 @@ static int noteram_dump_one(FAR uint8_t *p,
 
   /* Return the length of the processed note */
 
-  return offset - buffer;
+  return ret;
 }
 
 /****************************************************************************
