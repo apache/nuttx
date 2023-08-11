@@ -323,6 +323,112 @@
 #define GPIO_ETH_RMII_TXD1    (GPIO_ETH_RMII_TXD1_1 | GPIO_SPEED_100MHz)
 #define GPIO_ETH_RMII_TX_EN   (GPIO_ETH_RMII_TX_EN_2 | GPIO_SPEED_100MHz)
 
+/* SDRAM FMC definitions ****************************************************/
+
+/* The following settings correspond to MT48LC4M32B2B5-6AIT:L SDRAM
+ * part-number ("-6A" speed grade) and FMC_SDCLK frequency of 100 MHz
+ * (period is 10 ns).
+ * The following STM32H745I-DISCO board revisions are known to have
+ * MT48LC4M32B2B5-6AIT:L SDRAM populated: B-01, B-02.
+ */
+
+/* Though MT48LC4M32B2B5-6AIT:L SDRAM itself provides 32-bit data bus,
+ * STM32H745I-DISCO board routes only DQ[15:0] bits. Thus only half
+ * of the memory can be accessed: the accessible memory configuration
+ * is only 1 Meg x 16 x 4 banks instead of 1 Meg x 32 x 4 banks.
+ * Thus the accessible memory size is 8 MBytes.
+ */
+
+#define BOARD_FMC_CLK                   RCC_D1CCIPR_FMCSEL_HCLK
+
+#if CONFIG_STM32H7_FMC
+#  define FMC_SDCLK_FREQUENCY  (STM32_HCLK_FREQUENCY / 2)
+#  if FMC_SDCLK_FREQUENCY > 100000000
+#    error "FMC SDRAM settings need to be adjusted for a higher FMC_SDCLK frequency"
+#  elif FMC_SDCLK_FREQUENCY < 100000000
+#    warning "The current FMC SDRAM settings may not be optimal for a lower FMC_SDCLK frequency"
+#  endif
+#endif
+
+#define BOARD_SDRAM2_SIZE               (8*1024*1024)
+
+/* BOARD_FMC_SDCR[1..2] - Initial value for SDRAM control registers for SDRAM
+ *      bank 1-2. Note that some bits in SDCR1 influence both SDRAM banks and
+ *      are unused in SDCR2!
+ */
+
+#define BOARD_FMC_SDCR1  (FMC_SDCR_SDCLK_2X |   /* sdclk = 2 hclk */ \
+                          FMC_SDCR_BURST_READ | /* enable burst read */ \
+                          FMC_SDCR_RPIPE_0)     /* rpipe = 0 hclk */
+
+#define BOARD_FMC_SDCR2  (FMC_SDCR_COLBITS_8 |  /* numcols = 8 bits */ \
+                          FMC_SDCR_ROWBITS_12 | /* numrows = 12 bits */ \
+                          FMC_SDCR_WIDTH_16 |   /* width = 16 bits */ \
+                          FMC_SDCR_BANKS_4 |    /* 4 internal banks */ \
+                          FMC_SDCR_CASLAT_3)    /* cas latency = 3 cycles */
+
+/* BOARD_FMC_SDTR[1..2] - Initial value for SDRAM timing registers for SDRAM
+ *      bank 1-2. Note that some bits in SDTR1 influence both SDRAM banks and
+ *      are unused in SDTR2!
+ */
+
+#define BOARD_FMC_SDTR1  (FMC_SDTR_TRC(7) |     /* tRC  min = 60ns */ \
+                          FMC_SDTR_TRP(2))      /* tRP  min = 18ns */
+
+#define BOARD_FMC_SDTR2  (FMC_SDTR_TMRD(2) |    /* tMRD     = 2CLK */ \
+                          FMC_SDTR_TXSR(7) |    /* tXSR min = 67ns */ \
+                          FMC_SDTR_TRAS(5) |    /* tRAS min = 42ns */ \
+                          FMC_SDTR_TWR(2) |     /* tWR      = 12ns or 1CLK+7ns */ \
+                          FMC_SDTR_TRCD(2))     /* tRCD min = 18ns */
+
+#define BOARD_FMC_SDRAM_REFR_CYCLES  4096
+#define BOARD_FMC_SDRAM_REFR_PERIOD  64
+#define BOARD_FMC_SDRAM_AUTOREFRESH  8
+#define BOARD_FMC_SDRAM_MODE         (FMC_SDCMR_MRD_BURST_LENGTH_1 | \
+                                      FMC_SDCMR_MRD_BURST_TYPE_SEQUENTIAL | \
+                                      FMC_SDCMR_MRD_CAS_LATENCY_3 | \
+                                      FMC_SDCMR_MRD_WRITEBURST_MODE_SINGLE)
+
+#define BOARD_FMC_GPIO_CONFIGS \
+  (GPIO_FMC_A0_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_A1_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_A2_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_A3_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_A4_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_A5_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_A6_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_A7_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_A8_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_A9_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_A10_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_A11_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_D0_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_D1_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_D2_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_D3_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_D4_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_D5_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_D6_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_D7_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_D8_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_D9_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_D10_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_D11_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_D12_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_D13_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_D14_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_D15_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_NBL0_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_NBL1_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_BA0_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_BA1_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_SDNCAS_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_SDNRAS_0 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_SDNWE_3 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_SDNE1_2 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_SDCKE1_2 | GPIO_SPEED_100MHz), \
+  (GPIO_FMC_SDCLK_0 | GPIO_SPEED_100MHz)
+
 /* LED definitions **********************************************************/
 
 /* The board has 4 user LEDs.
