@@ -28,6 +28,10 @@ ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CSRCS += lib_builtin_setlist.c
 endif
 
+ifeq ($(CONFIG_SCHED_USER_IDENTITY),y)
+CSRCS += lib_builtin_getuid.c lib_builtin_getgid.c lib_builtin_getmode.c
+endif
+
 # Hook the builtin subdirectory into the build
 
 DEPPATH += --dep-path builtin
