@@ -373,8 +373,10 @@ static int parse_sack(FAR struct tcp_conn_s *conn, FAR struct tcp_hdr_s *tcp,
 
           for (i = 0; i < nsack; i++)
             {
-              segs[i].left = tcp_getsequence((uint8_t *)&sacks[i].left);
-              segs[i].right = tcp_getsequence((uint8_t *)&sacks[i].right);
+              /* Use the pointer to avoid the error of 4 byte alignment. */
+
+              segs[i].left = tcp_getsequence((uint8_t *)&sacks[i]);
+              segs[i].right = tcp_getsequence((uint8_t *)&sacks[i] + 4);
             }
 
           tcp_reorder_ofosegs(nsack, segs);
