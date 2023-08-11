@@ -36,16 +36,30 @@
 
 /* Configuration ************************************************************/
 
-/* LED.  User LD2: the green LED is a user LED connected to Arduino signal
- * D13 corresponding to MCU I/O PA5 (pin 21) or PB13 (pin 34) depending on
- * the STM32 target.
+/* User LED.
  *
  * - When the I/O is HIGH value, the LED is on.
  * - When the I/O is LOW, the LED is off.
  */
 
-#define GPIO_LD2 \
+/* User LD3: The orange LED is a user LED connected to the I/O PD13 */
+#define GPIO_LD3 \
+  (GPIO_PORTD | GPIO_PIN13 | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | GPIO_PULLUP | \
+   GPIO_SPEED_50MHz)
+
+/* User LD4: The green LED is a user LED connected to the I/O PD12 */
+#define GPIO_LD4 \
   (GPIO_PORTD | GPIO_PIN12 | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | GPIO_PULLUP | \
+   GPIO_SPEED_50MHz)
+
+/* User LD5: The red LED is a user LED connected to the I/O PD14 */
+#define GPIO_LD5 \
+  (GPIO_PORTD | GPIO_PIN14 | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | GPIO_PULLUP | \
+   GPIO_SPEED_50MHz)
+
+/* User LD6: The blue LED is a user LED connected to the I/O PD15 */
+#define GPIO_LD6 \
+  (GPIO_PORTD | GPIO_PIN15 | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | GPIO_PULLUP | \
    GPIO_SPEED_50MHz)
 
 /* Buttons
