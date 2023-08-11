@@ -366,15 +366,18 @@ reset_controller_get_by_name(FAR const char *name)
 {
   FAR struct reset_controller_dev *rcdev;
 
+  nxmutex_lock(&g_reset_list_mutex);
   list_for_every_entry(&g_reset_controller_list, rcdev,
                        struct reset_controller_dev, list)
   {
     if (!strcmp(name, rcdev->name))
       {
+        nxmutex_unlock(&g_reset_list_mutex);
         return rcdev;
       }
   }
 
+  nxmutex_unlock(&g_reset_list_mutex);
   return NULL;
 }
 
