@@ -296,7 +296,7 @@ static int hostfs_open(FAR struct file *filep, FAR const char *relpath,
 
   if ((oflags & (O_APPEND | O_WRONLY)) == (O_APPEND | O_WRONLY))
     {
-      ret = host_lseek(hf->fd, 0, SEEK_END);
+      ret = host_lseek(hf->fd, 0, 0, SEEK_END);
       if (ret >= 0)
         {
           filep->f_pos = ret;
@@ -557,7 +557,7 @@ static off_t hostfs_seek(FAR struct file *filep, off_t offset, int whence)
 
   /* Call our internal routine to perform the seek */
 
-  ret = host_lseek(hf->fd, offset, whence);
+  ret = host_lseek(hf->fd, filep->f_pos, offset, whence);
   if (ret >= 0)
     {
       filep->f_pos = ret;

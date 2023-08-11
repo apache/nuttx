@@ -185,7 +185,7 @@ ssize_t host_write(int fd, const void *buf, size_t count)
   return ret < 0 ? ret : count - ret;
 }
 
-off_t host_lseek(int fd, off_t offset, int whence)
+off_t host_lseek(int fd, off_t pos, off_t offset, int whence)
 {
   off_t ret = -ENOSYS;
 
@@ -197,6 +197,11 @@ off_t host_lseek(int fd, off_t offset, int whence)
           offset += ret;
           whence = SEEK_SET;
         }
+    }
+  else if (whence == SEEK_CUR)
+    {
+      offset += pos;
+      whence = SEEK_SET;
     }
 
   if (whence == SEEK_SET)

@@ -49,7 +49,7 @@ ssize_t up_show_cpuinfo(char *buf, size_t buf_size, off_t file_off)
       return fd;
     }
 
-  ret = host_lseek(fd, file_off, SEEK_SET);
+  ret = host_lseek(fd, 0, file_off, SEEK_SET);
   if (ret < 0)
     {
       host_close(fd);

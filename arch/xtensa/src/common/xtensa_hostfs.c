@@ -126,7 +126,7 @@ ssize_t host_write(int fd, const void *buf, size_t count)
   return host_call(SIMCALL_SYS_WRITE, fd, (int)buf, count);
 }
 
-off_t host_lseek(int fd, off_t offset, int whence)
+off_t host_lseek(int fd, off_t pos, off_t offset, int whence)
 {
   return host_call(SIMCALL_SYS_LSEEK, fd, offset, whence);
 }
@@ -155,9 +155,9 @@ int host_fstat(int fd, struct stat *buf)
    *    hostfs_lock provides enough serialization.
    */
 
-  off_t saved_off = host_lseek(fd, 0, SEEK_CUR);
-  off_t size = host_lseek(fd, 0, SEEK_END);
-  host_lseek(fd, saved_off, SEEK_SET);
+  off_t saved_off = host_lseek(fd, 0, 0, SEEK_CUR);
+  off_t size = host_lseek(fd, 0, 0, SEEK_END);
+  host_lseek(fd, 0, saved_off, SEEK_SET);
 
   memset(buf, 0, sizeof(*buf));
   buf->st_mode = S_IFREG | 0777;
