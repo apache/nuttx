@@ -70,6 +70,18 @@ void drivers_initialize(void);
 void devnull_register(void);
 
 /****************************************************************************
+ * Name: devascii_register
+ *
+ * Description:
+ *   Register /dev/ascii
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_ASCII
+void devascii_register(void);
+#endif
+
+/****************************************************************************
  * Name: devrandom_register
  *
  * Description:
