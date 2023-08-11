@@ -100,7 +100,6 @@ struct noteram_dump_task_context_s
   FAR struct noteram_dump_task_context_s *next;
   pid_t pid;                            /* Task PID */
   int syscall_nest;                     /* Syscall nest level */
-  char name[CONFIG_TASK_NAME_SIZE + 1]; /* Task name (with NULL terminator) */
 };
 
 struct noteram_dump_context_s
@@ -769,35 +768,6 @@ static void noteram_dump_fini_context(FAR struct noteram_dump_context_s *ctx)
 }
 
 /****************************************************************************
- * Name: copy_task_name
- ****************************************************************************/
-
-#if CONFIG_TASK_NAME_SIZE > 0
-static void copy_task_name(FAR char *dst, FAR const char *src)
-{
-  char c;
-  int i;
-
-  /* Replace space to underline
-   * Text trace data format cannot use a space as a task name.
-   */
-
-  for (i = 0; i < CONFIG_TASK_NAME_SIZE; i++)
-    {
-      c = *src++;
-      if (c == '\0')
-        {
-          break;
-        }
-
-      *dst++ = (c == ' ') ? '_' : c;
-    }
-
-  *dst = '\0';
-}
-#endif
-
-/****************************************************************************
  * Name: get_task_context
  ****************************************************************************/
 
@@ -825,19 +795,6 @@ get_task_context(pid_t pid, FAR struct noteram_dump_context_s *ctx)
       (*tctxp)->next = NULL;
       (*tctxp)->pid = pid;
       (*tctxp)->syscall_nest = 0;
-      (*tctxp)->name[0] = '\0';
-
-#ifdef CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE
-        {
-          FAR const char *taskname;
-
-          taskname = note_get_taskname(pid);
-          if (taskname != NULL)
-            {
-              copy_task_name((*tctxp)->name, taskname);
-            }
-        }
-#endif
     }
 
   return *tctxp;
@@ -847,15 +804,14 @@ get_task_context(pid_t pid, FAR struct noteram_dump_context_s *ctx)
  * Name: get_task_name
  ****************************************************************************/
 
-static const char *get_task_name(pid_t pid,
-                                 FAR struct noteram_dump_context_s *ctx)
+static const char *get_task_name(pid_t pid)
 {
-  FAR struct noteram_dump_task_context_s *tctx;
+  FAR const char *taskname;
 
-  tctx = get_task_context(pid, ctx);
-  if (tctx != NULL && tctx->name[0] != '\0')
+  taskname = note_get_taskname(pid);
+  if (taskname != NULL)
     {
-      return tctx->name;
+      return taskname;
     }
 
   return "<noname>";
@@ -885,7 +841,7 @@ static int noteram_dump_header(FAR char *offset,
   noteram_dump_unflatten(&pid, note->nc_pid, sizeof(pid));
 
   ret = sprintf(offset, "%8s-%-3u [%d] %3" PRIu32 ".%09" PRIu32 ": ",
-                get_task_name(pid, ctx), get_pid(pid), cpu, sec, nsec);
+                get_task_name(pid), get_pid(pid), cpu, sec, nsec);
   return ret;
 }
 
@@ -922,9 +878,9 @@ static int noteram_dump_sched_switch(FAR char *offset,
                 "sched_switch: "
                 "prev_comm=%s prev_pid=%u prev_prio=%u prev_state=%c ==> "
                 "next_comm=%s next_pid=%u next_prio=%u\n",
-                get_task_name(current_pid, ctx), get_pid(current_pid),
+                get_task_name(current_pid), get_pid(current_pid),
                 current_priority, get_task_state(cctx->current_state),
-                get_task_name(next_pid, ctx), get_pid(next_pid),
+                get_task_name(next_pid), get_pid(next_pid),
                 next_priority);
 
   cctx->current_pid = cctx->next_pid;
@@ -966,21 +922,10 @@ static int noteram_dump_one(FAR uint8_t *p,
     {
     case NOTE_START:
       {
-#if CONFIG_TASK_NAME_SIZE > 0
-        FAR struct note_start_s *nst = (FAR struct note_start_s *)p;
-        FAR struct noteram_dump_task_context_s *tctx;
-
-        tctx = get_task_context(pid, ctx);
-        if (tctx != NULL)
-          {
-            copy_task_name(tctx->name, nst->nst_name);
-          }
-#endif
-
         offset += noteram_dump_header(offset, note, ctx);
         offset += sprintf(offset,
                           "sched_wakeup_new: comm=%s pid=%d target_cpu=%d\n",
-                          get_task_name(pid, ctx), get_pid(pid), cpu);
+                          get_task_name(pid), get_pid(pid), cpu);
       }
       break;
 
@@ -1034,7 +979,7 @@ static int noteram_dump_one(FAR uint8_t *p,
             offset += noteram_dump_header(offset, note, ctx);
             offset += sprintf(offset,
                               "sched_waking: comm=%s pid=%d target_cpu=%d\n",
-                              get_task_name(cctx->next_pid, ctx),
+                              get_task_name(cctx->next_pid),
                               get_pid(cctx->next_pid), cpu);
             cctx->pendingswitch = true;
           }
