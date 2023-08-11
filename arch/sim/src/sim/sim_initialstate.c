@@ -113,7 +113,7 @@ void up_initial_state(struct tcb_s *tcb)
 
   /* Mask the interrupt until switching to the new task */
 
-  memset(&tcb->xcp.regs[JB_FLAG], 0xff, sizeof(xcpt_reg_t) * 2);
+  memset(&tcb->xcp.regs[JB_FLAG], 0xff, sizeof(uint32_t) * 2);
 
   tcb->xcp.regs[JB_PC] = (xcpt_reg_t)pre_start;
 
