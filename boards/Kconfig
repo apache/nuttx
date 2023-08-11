@@ -1918,6 +1918,14 @@ config ARCH_BOARD_SABRE_6QUAD
 		This options selects support for NuttX on the NXP/Freescale Sabre
 		board featuring the iMX 6Quad CPU.
 
+config ARCH_BOARD_QEMU_ARMV7A
+	bool "Qemu ARMv7a CPUs board"
+	depends on ARCH_CHIP_QEMU_ARM
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This options selects support for NuttX on the QEMU ARMv7a + virt
+		board featuring the qemu ARMv7a CPUs.
+
 config ARCH_BOARD_QEMU_ARMV8A
 	bool "Qemu ARMv8a CPUs board"
 	depends on ARCH_CHIP_QEMU
@@ -3081,6 +3089,7 @@ config ARCH_BOARD
 	default "rv-virt"                   if ARCH_BOARD_QEMU_RV_VIRT
 	default "star64"                    if ARCH_BOARD_JH7110_STAR64
 	default "sabre-6quad"               if ARCH_BOARD_SABRE_6QUAD
+	default "qemu-armv7a"               if ARCH_BOARD_QEMU_ARMV7A
 	default "qemu-armv8a"               if ARCH_BOARD_QEMU_ARMV8A
 	default "pinephone"                 if ARCH_BOARD_PINEPHONE
 	default "fvp-armv8r"                if ARCH_BOARD_FVP_ARMV8R
@@ -3274,6 +3283,9 @@ source "boards/arm/s32k3xx/mr-canhubk3/Kconfig"
 endif
 if ARCH_BOARD_SABRE_6QUAD
 source "boards/arm/imx6/sabre-6quad/Kconfig"
+endif
+if ARCH_BOARD_QEMU_ARMV7A
+source "boards/arm/qemu/qemu-armv7a/Kconfig"
 endif
 if ARCH_BOARD_QEMU_ARMV8A
 source "boards/arm64/qemu/qemu-armv8a/Kconfig"
