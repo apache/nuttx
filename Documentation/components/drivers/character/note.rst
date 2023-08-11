@@ -237,15 +237,6 @@ Noteram Device (``/dev/note``)
   :return: If success, 0 (``OK``) is returned and the given overwriter mode is set as the current settings.
     If failed, a negated ``errno`` is returned.
 
-.. c:macro:: NOTERAM_GETTASKNAME
-
-  Get task name string
-
-  :argument: A writable pointer to :c:struct:`noteram_get_taskname_s`
-
-  :return: If success, 0 (``OK``) is returned and the task name corresponding to given pid is stored into the given pointer.
-           If failed, a negated ``errno`` is returned.
-
 Filter control APIs
 ===================
 
