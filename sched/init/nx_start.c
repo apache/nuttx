@@ -278,9 +278,9 @@ static struct task_tcb_s g_idletcb[CONFIG_SMP_NCPUS];
 
 #if CONFIG_TASK_NAME_SIZE <= 0 || !defined(CONFIG_SMP)
 #  ifdef CONFIG_SMP
-static const char g_idlename[] = "CPU Idle";
+static const char g_idlename[] = "CPU_Idle";
 #  else
-static const char g_idlename[] = "Idle Task";
+static const char g_idlename[] = "Idle_Task";
 #  endif
 #endif
 
