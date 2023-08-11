@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f103-minimum/src/stm32_userleds.c
+ * boards/arm/stm32/stm32f411e-disco/src/stm32_autoleds.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -28,73 +28,105 @@
 #include <stdbool.h>
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
+#include "arm_internal.h"
 #include "stm32.h"
-#include "stm32f103_minimum.h"
+#include "stm32f411e-disco.h"
 
-#ifndef CONFIG_ARCH_LEDS
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/* This array maps an LED number to GPIO pin configuration */
-
-static const uint32_t g_ledcfg[BOARD_NLEDS] =
-{
-  GPIO_LED1,
-};
+#ifdef CONFIG_ARCH_LEDS
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_userled_initialize
+ * Name: board_autoled_initialize
  ****************************************************************************/
 
-uint32_t board_userled_initialize(void)
+void board_autoled_initialize(void)
 {
-  int i;
+  /* Configure LED GPIO for output */
 
-  /* Configure LED GPIOs for output */
-
-  for (i = 0; i < BOARD_NLEDS; i++)
-    {
-      stm32_configgpio(g_ledcfg[i]);
-    }
-
-  return BOARD_NLEDS;
+  stm32_configgpio(GPIO_LD3);
+  stm32_configgpio(GPIO_LD4);
+  stm32_configgpio(GPIO_LD5);
+  stm32_configgpio(GPIO_LD6);
 }
 
 /****************************************************************************
- * Name: board_userled
+ * Name: board_autoled_on
  ****************************************************************************/
 
-void board_userled(int led, bool ledon)
+void board_autoled_on(int led)
 {
-  if ((unsigned)led < BOARD_NLEDS)
+    switch (led)
     {
-      stm32_gpiowrite(g_ledcfg[led], ledon);
+      case LED_HEAPALLOCATE:
+        {
+          stm32_gpiowrite(GPIO_LD3, true);
+          stm32_gpiowrite(GPIO_LD4, false);
+        }
+        break;
+
+      case LED_IRQSENABLED:
+        {
+          stm32_gpiowrite(GPIO_LD3, false);
+          stm32_gpiowrite(GPIO_LD4, true);
+        }
+        break;
+
+      case LED_STACKCREATED:
+        {
+          stm32_gpiowrite(GPIO_LD3, true);
+          stm32_gpiowrite(GPIO_LD4, true);
+        }
+        break;
+
+      case LED_ASSERTION:
+        {
+          stm32_gpiowrite(GPIO_LD5, true);
+        }
+        break;
+
+      case LED_PANIC:
+        {
+          stm32_gpiowrite(GPIO_LD3, true);
+          stm32_gpiowrite(GPIO_LD4, true);
+        }
+        break;
+
+      case LED_IDLE:
+        {
+          stm32_gpiowrite(GPIO_LD6, true);
+        }
+        break;
     }
 }
 
 /****************************************************************************
- * Name: board_userled_all
+ * Name: board_autoled_off
  ****************************************************************************/
 
-void board_userled_all(uint32_t ledset)
+void board_autoled_off(int led)
 {
-  int i;
-
-  /* Configure LED GPIOs for output */
-
-  for (i = 0; i < BOARD_NLEDS; i++)
+  switch (led)
     {
-      stm32_gpiowrite(g_ledcfg[i], (ledset & (1 << i)) != 0);
+      case LED_PANIC:
+        {
+          stm32_gpiowrite(GPIO_LD3, false);
+          stm32_gpiowrite(GPIO_LD4, false);
+        }
+        break;
+
+      case LED_IDLE:
+        {
+          stm32_gpiowrite(GPIO_LD6, false);
+        }
+        break;
     }
 }
 
-#endif /* !CONFIG_ARCH_LEDS */
+#endif /* CONFIG_ARCH_LEDS */

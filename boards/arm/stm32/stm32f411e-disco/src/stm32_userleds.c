@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f411e-disco/src/stm32_bringup.c
+ * boards/arm/stm32/stm32f411e-disco/src/stm32_userleds.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,73 +24,80 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+#include <stdbool.h>
 #include <debug.h>
 
-#include <nuttx/fs/fs.h>
+#include <arch/board/board.h>
 
+#include "chip.h"
 #include "stm32.h"
-
-#ifdef CONFIG_STM32_OTGFS
-#  include "stm32_usbhost.h"
-#endif
-
 #include "stm32f411e-disco.h"
+
+#ifndef CONFIG_ARCH_LEDS
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* This array maps an LED number to GPIO pin configuration */
+
+static const uint32_t g_ledcfg[BOARD_NLEDS] =
+{
+  GPIO_LD3,
+  GPIO_LD4,
+  GPIO_LD5,
+  GPIO_LD6,
+};
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_bringup
- *
- * Description:
- *   Perform architecture-specific initialization
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_BOARDCTL=y :
- *     Called from the NSH library
- *
+ * Name: board_userled_initialize
  ****************************************************************************/
 
-int stm32_bringup(void)
+uint32_t board_userled_initialize(void)
 {
-  int ret = OK;
+  int i;
 
-#if defined(CONFIG_STM32_OTGFS) && defined(CONFIG_USBHOST)
-  /* Initialize USB host operation.  stm32_usbhost_initialize() starts
-   * a thread will monitor for USB connection and disconnection events.
-   */
+  /* Configure LED GPIOs for output */
 
-  ret = stm32_usbhost_initialize();
-  if (ret != OK)
+  for (i = 0; i < BOARD_NLEDS; i++)
     {
-      uerr("ERROR: Failed to initialize USB host: %d\n", ret);
-      return ret;
+      stm32_configgpio(g_ledcfg[i]);
     }
-#endif
 
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = nx_mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      ferr("ERROR: Failed to mount procfs at %s: %d\n",
-           STM32_PROCFS_MOUNTPOINT, ret);
-    }
-#endif
-
-#ifdef CONFIG_USERLED
-  /* Register the LED driver */
-
-  ret = userled_lower_initialize("/dev/userleds");
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
-    }
-#endif
-
-  return ret;
+  return BOARD_NLEDS;
 }
+
+/****************************************************************************
+ * Name: board_userled
+ ****************************************************************************/
+
+void board_userled(int led, bool ledon)
+{
+  if ((unsigned)led < BOARD_NLEDS)
+    {
+      stm32_gpiowrite(g_ledcfg[led], ledon);
+    }
+}
+
+/****************************************************************************
+ * Name: board_userled_all
+ ****************************************************************************/
+
+void board_userled_all(uint32_t ledset)
+{
+  int i;
+
+  /* Configure LED GPIOs for output */
+
+  for (i = 0; i < BOARD_NLEDS; i++)
+    {
+      stm32_gpiowrite(g_ledcfg[i], (ledset & (1 << i)) != 0);
+    }
+}
+
+#endif /* !CONFIG_ARCH_LEDS */
