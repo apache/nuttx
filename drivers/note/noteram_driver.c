@@ -829,11 +829,10 @@ get_task_context(pid_t pid, FAR struct noteram_dump_context_s *ctx)
 
 #ifdef CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE
         {
-          char taskname[CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE];
-          int res;
+          FAR const char *taskname;
 
-          res = note_get_taskname(pid, taskname);
-          if (res == 0)
+          taskname = note_get_taskname(pid);
+          if (taskname != NULL)
             {
               copy_task_name((*tctxp)->name, taskname);
             }
