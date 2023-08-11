@@ -596,8 +596,8 @@ static ssize_t gdb_bin2hex(FAR void *buf, size_t buf_len,
  *
  ****************************************************************************/
 
-static int gdb_hex2bin(FAR void *buf, size_t buf_len,
-                       FAR const void *data, size_t data_len)
+static ssize_t gdb_hex2bin(FAR void *buf, size_t buf_len,
+                           FAR const void *data, size_t data_len)
 {
   FAR const char *in = data;
   FAR char *out = buf;
@@ -1220,12 +1220,12 @@ static int gdb_query(FAR struct gdb_state_s *state)
       nxsched_get_stateinfo(tcb, thread_state, sizeof(thread_state));
 #if CONFIG_TASK_NAME_SIZE > 0
       snprintf(thread_info, sizeof(thread_info),
-               "Name: %s, State: %s, Priority: %d, Stack: %d",
+               "Name: %s, State: %s, Priority: %d, Stack: %zu",
                 tcb->name, thread_state, tcb->sched_priority,
                 tcb->adj_stack_size);
 #else
       snprintf(thread_info, sizeof(thread_info),
-               "State: %s, Priority: %d, Stack: %d",
+               "State: %s, Priority: %d, Stack: %zu",
                thread_state, tcb->sched_priority,
                tcb->adj_stack_size);
 #endif
@@ -1557,3 +1557,4 @@ int gdb_process(FAR struct gdb_state_s *state)
 
   return ret;
 }
+
