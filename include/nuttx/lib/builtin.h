@@ -40,6 +40,11 @@ struct builtin_s
   int         priority;     /* Use: SCHED_PRIORITY_DEFAULT */
   int         stacksize;    /* Desired stack size */
   main_t      main;         /* Entry point: main(int argc, char *argv[]) */
+#ifdef CONFIG_SCHED_USER_IDENTITY
+  uid_t       uid;          /* File owner user identity */
+  gid_t       gid;          /* File owner group identity */
+  int         mode;         /* File mode added to */
+#endif
 };
 
 /****************************************************************************
@@ -170,6 +175,64 @@ FAR const char *builtin_getname(int index);
  ****************************************************************************/
 
 FAR const struct builtin_s *builtin_for_index(int index);
+
+#ifdef CONFIG_SCHED_USER_IDENTITY
+
+/****************************************************************************
+ * Name: builtin_getuid
+ *
+ * Description:
+ *   Returns file uid of the application at 'index' in the table
+ *   of built-in applications.
+ *
+ * Input Parameters:
+ *   index - From 0 and on ...
+ *
+ * Returned Value:
+ *   Returns valid uid for app if index is valid.
+ *   Otherwise 0 is returned.
+ *
+ ****************************************************************************/
+
+uid_t builtin_getuid(int index);
+
+/****************************************************************************
+ * Name: builtin_getgid
+ *
+ * Description:
+ *   Returns file gid of the application at 'index' in the table
+ *   of built-in applications.
+ *
+ * Input Parameters:
+ *   index - From 0 and on ...
+ *
+ * Returned Value:
+ *   Returns valid gid for app if index is valid.
+ *   Otherwise 0 is returned.
+ *
+ ****************************************************************************/
+
+gid_t builtin_getgid(int index);
+
+/****************************************************************************
+ * Name: builtin_getmode
+ *
+ * Description:
+ *   Returns file mode of the application at 'index' in the table
+ *   of built-in applications.
+ *
+ * Input Parameters:
+ *   index - From 0 and on ...
+ *
+ * Returned Value:
+ *   Returns valid mode for app if index is valid.
+ *   Otherwise 0 is returned.
+ *
+ ****************************************************************************/
+
+int builtin_getmode(int index);
+
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)
