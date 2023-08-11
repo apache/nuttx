@@ -334,10 +334,14 @@ static int rpmsgblk_unlink_handler(FAR struct rpmsg_endpoint *ept,
                                    FAR void *data, size_t len,
                                    uint32_t src, FAR void *priv)
 {
-  FAR struct rpmsgblk_server_s *server = ept->priv;
   FAR struct rpmsgblk_unlink_s *msg = data;
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  FAR struct rpmsgblk_server_s *server = ept->priv;
 
   msg->header.result = server->bops->unlink(server->blknode);
+#else
+  msg->header.result = -ENXIO;
+#endif
 
   return rpmsg_send(ept, msg, len);
 }
