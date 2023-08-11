@@ -1943,6 +1943,14 @@ config ARCH_BOARD_PINEPHONE
 		This options selects support for NuttX on PINE64 PinePhone based
 		on Allwinner A64 SoC with ARM Cortex-A53.
 
+config ARCH_BOARD_PINEPHONE_PRO
+	bool "PINE64 PinePhonePro"
+	depends on ARCH_CHIP_RK3399
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This options selects support for NuttX on PINE64 PinePhone based
+		on Rockchip RK3399 SoC with ARM Cortex-A53
 config ARCH_BOARD_FVP_ARMV8R
 	bool "FVP ARM-v8r CPUs board"
 	depends on ARCH_CHIP_FVP_ARMV8R
@@ -3100,6 +3108,7 @@ config ARCH_BOARD
 	default "qemu-armv7a"               if ARCH_BOARD_QEMU_ARMV7A
 	default "qemu-armv8a"               if ARCH_BOARD_QEMU_ARMV8A
 	default "pinephone"                 if ARCH_BOARD_PINEPHONE
+	default "pinephonepro"              if ARCH_BOARD_PINEPHONE_PRO
 	default "fvp-armv8r"                if ARCH_BOARD_FVP_ARMV8R
 	default "fvp-armv8r-aarch32"        if ARCH_BOARD_FVP_ARMV8R_AARCH32
 	default "imx8qm-mek"                if ARCH_BOARD_IMX8QM_MEK
@@ -3301,6 +3310,9 @@ source "boards/arm64/qemu/qemu-armv8a/Kconfig"
 endif
 if ARCH_BOARD_PINEPHONE
 source "boards/arm64/a64/pinephone/Kconfig"
+endif
+if ARCH_BOARD_PINEPHONE_PRO
+source "boards/arm64/rk3399/pinephonepro/Kconfig"
 endif
 if ARCH_BOARD_FVP_ARMV8R
 source "boards/arm64/fvp-v8r/fvp-armv8r/Kconfig"
