@@ -627,30 +627,6 @@ static int noteram_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           }
         break;
 
-#ifdef NOTERAM_GETTASKNAME
-      /* NOTERAM_GETTASKNAME
-       *      - Get task name string
-       *        Argument: A writable pointer to struct note_get_taskname_s
-       *        Result:   If -ESRCH, the corresponding task name doesn't
-       *                  exist.
-       */
-
-      case NOTERAM_GETTASKNAME:
-        {
-          FAR struct noteram_get_taskname_s *param;
-
-          if (arg == 0)
-            {
-              ret = -EINVAL;
-              break;
-            }
-
-          param = (FAR struct noteram_get_taskname_s *)arg;
-          ret = note_get_taskname(param->pid, param->taskname);
-        }
-        break;
-#endif
-
       default:
           break;
     }
@@ -851,15 +827,15 @@ get_task_context(pid_t pid, FAR struct noteram_dump_context_s *ctx)
       (*tctxp)->syscall_nest = 0;
       (*tctxp)->name[0] = '\0';
 
-#ifdef NOTERAM_GETTASKNAME
+#ifdef CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE
         {
-          struct noteram_get_taskname_s tnm;
+          char taskname[CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE];
           int res;
 
-          res = note_get_taskname(pid, tnm.taskname);
+          res = note_get_taskname(pid, taskname);
           if (res == 0)
             {
-              copy_task_name((*tctxp)->name, tnm.taskname);
+              copy_task_name((*tctxp)->name, taskname);
             }
         }
 #endif
