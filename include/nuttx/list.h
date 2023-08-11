@@ -92,6 +92,8 @@
 #define list_entry(ptr, type, member) container_of(ptr, type, member)
 #define list_first_entry(list, type, member) container_of((list)->next, type, member)
 #define list_last_entry(list, type, member) container_of((list)->prev, type, member)
+#define list_next_entry(list, type, member) container_of((list)->member.next, type, member)
+#define list_prev_entry(list, type, member) container_of((list)->member.prev, type, member)
 
 #define list_add_after(entry, new_entry) list_add_head(entry, new_entry)
 #define list_add_head(list, item) \
@@ -126,6 +128,14 @@
       __item->next->prev = __item->prev; \
       __item->prev->next = __item->next; \
       __item->prev = __item->next = NULL; \
+    } \
+  while (0)
+
+#define list_delete_init(item) \
+  do \
+    { \
+      list_delete(item); \
+      list_initialize(item); \
     } \
   while (0)
 
@@ -246,6 +256,11 @@
       temp = container_of(entry->member.next, type, member); \
       &entry->member != (list); entry = temp, \
       temp = container_of(temp->member.next, type, member))
+
+#define list_for_every_entry_continue(list, head, type, member)    \
+  for ((list) = list_next_entry(list, type, member); \
+       &(list)->member != (head); \
+       (list) = list_next_entry(list, type, member))
 
 /* iterates over the list in reverse order, entry should be the container
  * structure type
