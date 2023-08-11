@@ -174,6 +174,10 @@ void arm64_chip_boot(void)
 
   arm64_mmu_init(true);
 
+#ifdef CONFIG_ARCH_HAVE_PSCI
+  arm64_psci_init("smc");
+#endif
+
   /* Perform board-specific device initialization. This would include
    * configuration of board specific resources such as GPIOs, LEDs, etc.
    */
