@@ -39,4 +39,4 @@ ifeq ($(CONFIG_TMS570_GIO_IRQ),y)
 CHIP_CSRCS += tms570_gioirq.c
 endif
 
-CMN_CSRCS := $(filter-out arm_gicv2.c, $(CMN_CSRCS))
+CMN_CSRCS := $(filter-out arm_gicv2.c arm_gicv2_dump.c, $(CMN_CSRCS))
