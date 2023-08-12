@@ -145,7 +145,7 @@ void arm_gic_initialize(void)
   /* Registers with 1-bit per interrupt */
 
   putreg32(0x00000000, GIC_ICDISR(0));      /* SGIs and PPIs secure */
-  putreg32(0xf8000000, GIC_ICDICER(0));     /* PPIs disabled */
+  putreg32(0xfe000000, GIC_ICDICER(0));     /* PPIs disabled */
 
   /* Registers with 8-bits per interrupt */
 
@@ -153,7 +153,7 @@ void arm_gic_initialize(void)
   putreg32(0x80808080, GIC_ICDIPR(4));      /* SGI[4:7] priority */
   putreg32(0x80808080, GIC_ICDIPR(8));      /* SGI[8:11] priority */
   putreg32(0x80808080, GIC_ICDIPR(12));     /* SGI[12:15] priority */
-  putreg32(0x80000000, GIC_ICDIPR(24));     /* PPI[0] priority */
+  putreg32(0x80808000, GIC_ICDIPR(24));     /* PPI[0] priority */
   putreg32(0x80808080, GIC_ICDIPR(28));     /* PPI[1:4] priority */
 
   /* Set the binary point register.
@@ -501,10 +501,10 @@ int up_prioritize_irq(int irq, int priority)
        * distributor Interrupt Priority Register (GIC_ICDIPR).
        */
 
-      regaddr  = GIC_ICDIPR(irq);
-      regval   = getreg32(regaddr);
-      regval  &= ~GIC_ICDIPR_ID_MASK(irq);
-      regval  |= GIC_ICDIPR_ID(irq, priority);
+      regaddr = GIC_ICDIPR(irq);
+      regval  = getreg32(regaddr);
+      regval &= ~GIC_ICDIPR_ID_MASK(irq);
+      regval |= GIC_ICDIPR_ID(irq, priority);
       putreg32(regval, regaddr);
 
       arm_gic_dump("Exit up_prioritize_irq", false, irq);

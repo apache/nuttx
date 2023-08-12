@@ -226,7 +226,7 @@ static inline void arm_gic_dump_distributor(bool all, int irq, int nlines)
       arm_gic_dump4("IPTR", GIC_ICDIPTR(0), nlines);
       arm_gic_dump16("ICFR", GIC_ICDICFR(0), nlines);
       arm_gic_dump32("PPSIR/SPISR", GIC_ICDPPISR, nlines);
-      arm_gic_dump32("NSACR", GIC_ICDNSACR(0), nlines);
+      arm_gic_dump16("NSACR", GIC_ICDNSACR(0), nlines);
       arm_gic_dump8("SCPR/SSPR", GIC_ICDSCPR(0), nlines);
     }
   else
