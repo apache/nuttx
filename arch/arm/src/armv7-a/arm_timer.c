@@ -279,8 +279,8 @@ struct oneshot_lowerhalf_s *arm_timer_initialize(unsigned int freq)
   arm_timer_set_ctrl(ctrl);
 
 #if defined(CONFIG_ARCH_TRUSTZONE_SECURE) || defined(CONFIG_ARCH_TRUSTZONE_BOTH)
-  irq_attach(GIC_IRQ_SEPTM, arm_timer_interrupt, lower);
-  up_enable_irq(GIC_IRQ_SEPTM);
+  irq_attach(GIC_IRQ_STM, arm_timer_interrupt, lower);
+  up_enable_irq(GIC_IRQ_STM);
 #else
   irq_attach(GIC_IRQ_PTM, arm_timer_interrupt, lower);
   up_enable_irq(GIC_IRQ_PTM);
