@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/signal.h>
 
 #include <assert.h>
 #include <errno.h>
@@ -373,7 +374,7 @@ static int nrf52_i2c_transfer(struct i2c_master_s *dev,
           /* Write number of bytes in TXD buffer */
 
           regval = priv->dcnt;
-          nrf52_i2c_putreg(priv, NRF52_TWIM_TXMAXCNT_OFFSET, regval);
+          nrf52_i2c_putreg(priv, NRF52_TWIM_TXDMAXCNT_OFFSET, regval);
 
           /* Start TX sequence */
 
