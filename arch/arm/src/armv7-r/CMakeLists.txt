@@ -47,7 +47,7 @@ list(
   cp15_cacheops.c)
 
 if(NOT CONFIG_ARCH_CHIP STREQUAL tms570)
-  list(APPEND SRCS arm_gicv2.c)
+  list(APPEND SRCS arm_gicv2.c arm_gicv2_dump.c)
 endif()
 
 if(CONFIG_ARMV7R_HAVE_PTM)
