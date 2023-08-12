@@ -717,6 +717,14 @@ config NRF52_I2C_MASTER_COPY_BUF_SIZE
 		transaction will fit otherwise it will fall back
 		on malloc.
 
+config NRF52_I2C_MASTER_WORKAROUND_400KBPS_TIMING
+	bool "Master 400Kbps timing anomaly workaround"
+	depends on ARCH_CHIP_NRF52840
+	default y
+	---help---
+		Enable the workaround to fix I2C Master 400Kbps timing bug
+		which occurs in all NRF52840 revisions to date.
+
 endif # NRF52_I2C_MASTER
 
 endmenu
