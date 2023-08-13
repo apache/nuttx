@@ -423,7 +423,7 @@ static int nrf53_i2c_transfer(struct i2c_master_s *dev,
           /* Write number of bytes in TXD buffer */
 
           regval = priv->dcnt;
-          nrf53_i2c_putreg(priv, NRF53_TWIM_TXMAXCNT_OFFSET, regval);
+          nrf53_i2c_putreg(priv, NRF53_TWIM_TXDMAXCNT_OFFSET, regval);
 
           /* Start TX sequence */
 
