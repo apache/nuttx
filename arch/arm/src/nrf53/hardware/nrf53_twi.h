@@ -156,7 +156,11 @@
 
 #define TWIM_FREQUENCY_100KBPS              (0x01980000) /* 100 kbps */
 #define TWIM_FREQUENCY_250KBPS              (0x04000000) /* 250 kbps */
-#define TWIM_FREQUENCY_400KBPS              (0x06400000) /* 400 kbps */
+#ifdef CONFIG_NRF53_I2C_MASTER_WORKAROUND_400KBPS_TIMING
+#  define TWIM_FREQUENCY_400KBPS            (0x06200000) /* 390 kbps */
+#else
+#  define TWIM_FREQUENCY_400KBPS            (0x06400000) /* 400 kbps */
+#endif
 #define TWIM_FREQUENCY_1000KBPS             (0x0ff00000) /* 1000 kbps */
 
 /* RXDMAXCNT Register */
