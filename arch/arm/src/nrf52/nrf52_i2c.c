@@ -23,7 +23,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/signal.h>
 
 #include <assert.h>
 #include <errno.h>
