@@ -3052,9 +3052,8 @@ static void nrf53_hwinitialize(struct nrf53_usbdev_s *priv)
 {
   /* Wait for VBUS */
 
-  /* TODO: connect to POWER USB events */
-
-  while (getreg32(NRF53_USBREG_EVENTS_USBDETECTED) == 0);
+  while ((getreg32(NRF53_USBREG_USBREGSTATUS) &
+          USBREG_USBREGSTATUS_VBUSDETECT) == 0);
 
   /* Enable the USB controller */
 
