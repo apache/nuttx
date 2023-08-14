@@ -876,11 +876,11 @@ void stm32_stdclockconfig(void)
       regval = getreg32(STM32_PWR_CR3);
       regval &= ~(STM32_PWR_CR3_BYPASS | STM32_PWR_CR3_LDOEN |
           STM32_PWR_CR3_SMPSEXTHP | STM32_PWR_CR3_SMPSLEVEL_MASK);
-      regval |= STM32_PWR_CR3_LDOESCUEN;
+      regval |= STM32_PWR_CR3_SCUEN;
       putreg32(regval, STM32_PWR_CR3);
 #else
       regval = getreg32(STM32_PWR_CR3);
-      regval |= STM32_PWR_CR3_LDOEN | STM32_PWR_CR3_LDOESCUEN;
+      regval |= STM32_PWR_CR3_LDOEN | STM32_PWR_CR3_SCUEN;
       putreg32(regval, STM32_PWR_CR3);
 #endif
 
