@@ -73,10 +73,10 @@ function(nuttx_add_user_library target)
   nuttx_add_library_internal(${target} ${ARGN})
 
   # link to final libapps
-  target_link_libraries(apps INTERFACE ${target})
+  target_link_libraries(apps PRIVATE ${target})
 
   # add apps/include to include path
-  target_include_directories(${target} INTERFACE ${NUTTX_APPS_DIR}/include)
+  target_include_directories(${target} PRIVATE ${NUTTX_APPS_DIR}/include)
 endfunction()
 
 # System Libraries
@@ -172,6 +172,11 @@ function(nuttx_add_library target)
   add_library(${target} ${ARGN})
 
   set_property(GLOBAL APPEND PROPERTY NUTTX_EXTRA_LIBRARIES ${target})
+
+  get_target_property(target_type ${target} TYPE)
+  if(${target_type} STREQUAL "STATIC_LIBRARY")
+    install(TARGETS ${target} ARCHIVE DESTINATION ${CMAKE_BINARY_DIR}/staging)
+  endif()
 
   nuttx_add_library_internal(${target})
 endfunction()
