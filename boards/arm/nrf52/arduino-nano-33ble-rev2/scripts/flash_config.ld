@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/nrf52/arduino-nano-33ble/scripts/flash_config.ld
+ * boards/arm/nrf52/arduino-nano-33ble-rev2/scripts/flash_config.ld
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -19,7 +19,7 @@
  ****************************************************************************/
 #include <nuttx/config.h>
 
-#if CONFIG_ARDUINONANO33BLE_ARDUINO_BOOTLOADER
+#if CONFIG_ARDUINONANO33BLEREV2_ARDUINO_BOOTLOADER
 #  define FLASH_START_ADDR 0x00010000
 #  define FLASH_LENGTH 960K
 #else

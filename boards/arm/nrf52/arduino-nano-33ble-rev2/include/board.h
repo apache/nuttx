@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/nrf52/arduino-nano-33ble/include/board.h
+ * boards/arm/nrf52/arduino-nano-33ble-rev2/include/board.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_NRF52_ARDUINO_NANO_33BLE_INCLUDE_BOARD_H
-#define __BOARDS_ARM_NRF52_ARDUINO_NANO_33BLE_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_NRF52_ARDUINO_NANO_33BLE_REV2_INCLUDE_BOARD_H
+#define __BOARDS_ARM_NRF52_ARDUINO_NANO_33BLE_REV2_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -122,4 +122,4 @@
 #define BOARD_I2C1_SCL_PIN (GPIO_OUTPUT | GPIO_PORT0 | GPIO_PIN(2))
 #define BOARD_I2C1_SDA_PIN (GPIO_INPUT  | GPIO_PORT0 | GPIO_PIN(31))
 
-#endif /* __BOARDS_ARM_NRF52_ARDUINO_NANO_33BLE_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_NRF52_ARDUINO_NANO_33BLE_REV2_INCLUDE_BOARD_H */

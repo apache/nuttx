@@ -1111,6 +1111,13 @@ config ARCH_BOARD_ARDUINO_NANO_33BLE
 	---help---
 		Arduino Nano 33 BLE Sense based on Nordic nRF52840
 
+config ARCH_BOARD_ARDUINO_NANO_33BLE_REV2
+	bool "Arduino Nano 33 BLE Sense Rev2 based on Nordic nRF52840"
+	depends on ARCH_CHIP_NRF52
+	select ARCH_HAVE_LEDS
+	---help---
+		Arduino Nano 33 BLE Sense Rev2 based on Nordic nRF52840
+
 config ARCH_BOARD_THINGY52
 	bool "Nordic Thingy:52 Prototyping platform"
 	depends on ARCH_CHIP_NRF52
@@ -2887,6 +2894,7 @@ config ARCH_BOARD
 	default "arduino-due"               if ARCH_BOARD_ARDUINO_DUE
 	default "arduino-m0"                if ARCH_BOARD_ARDUINO_M0
 	default "arduino-nano-33ble"        if ARCH_BOARD_ARDUINO_NANO_33BLE
+	default "arduino-nano-33ble-rev2"   if ARCH_BOARD_ARDUINO_NANO_33BLE_REV2
 	default "arty_a7"                   if ARCH_BOARD_ARTY_A7
 	default "avr32dev1"                 if ARCH_BOARD_AVR32DEV1
 	default "axoloti"                   if ARCH_BOARD_AXOLOTI
@@ -3455,6 +3463,9 @@ source "boards/arm/samd2l2/arduino-m0/Kconfig"
 endif
 if ARCH_BOARD_ARDUINO_NANO_33BLE
 source "boards/arm/nrf52/arduino-nano-33ble/Kconfig"
+endif
+if ARCH_BOARD_ARDUINO_NANO_33BLE_REV2
+source "boards/arm/nrf52/arduino-nano-33ble-rev2/Kconfig"
 endif
 if ARCH_BOARD_CIRCUIT_EXPRESS
 source "boards/arm/samd2l2/circuit-express/Kconfig"

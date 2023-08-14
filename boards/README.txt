@@ -450,6 +450,9 @@ boards/hc/mcs92s12ne6/ne64badge
 boards/arm/nrf52/arduino-nano-33ble
   NuttX port to the Arduino Nano 33 BLE Sense board
 
+boards/arm/nrf52/arduino-nano-33ble-rev2
+  NuttX port to the Arduino Nano 33 BLE Sense Rev2 board
+
 boards/arm/nrf52/nrf52-feather
   NuttX port to the Adafruit nRF52832 Feather board
 
