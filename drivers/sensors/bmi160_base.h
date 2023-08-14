@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/sensors/bmi160.h
+ * drivers/sensors/bmi160_base.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -27,17 +27,17 @@
 
 #include <nuttx/config.h>
 
-#include <stdlib.h>
-#include <fixedmath.h>
-#include <assert.h>
-#include <errno.h>
-#include <debug.h>
-
-#include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/bmi160.h>
+
+#include <stdlib.h>
+#include <assert.h>
+#include <errno.h>
+#include <debug.h>
+#include <fixedmath.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -211,10 +211,8 @@
 #define MAG_PM_LOWPOWER       (0x1A)
 
 /****************************************************************************
- * Private Types
+ * Public Types
  ****************************************************************************/
-
-/* Device struct */
 
 struct bmi160_dev_s
 {
@@ -230,7 +228,7 @@ struct bmi160_dev_s
 };
 
 /****************************************************************************
- * Private Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 uint8_t bmi160_getreg8(FAR struct bmi160_dev_s *priv, uint8_t regaddr);
