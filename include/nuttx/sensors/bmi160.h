@@ -131,10 +131,30 @@ extern "C"
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SENSORS_BMI160_I2C
+#ifndef CONFIG_SENSORS_BMI160_SCU
+
+#  ifdef CONFIG_SENSORS_BMI160_I2C
 int bmi160_register(FAR const char *devpath, FAR struct i2c_master_s *dev);
-#else /* CONFIG_BMI160_SPI */
+#  else /* CONFIG_BMI160_SPI */
 int bmi160_register(FAR const char *devpath, FAR struct spi_dev_s *dev);
+#  endif
+
+#else /* CONFIG_SENSORS_BMI160_SCU */
+
+#  ifdef CONFIG_SENSORS_BMI160_I2C
+int bmi160_init(FAR struct i2c_master_s *dev, int port);
+int bmi160gyro_register(FAR const char *devpath, int minor,
+                        FAR struct i2c_master_s *dev, int port);
+int bmi160accel_register(FAR const char *devpath, int minor,
+                         FAR struct i2c_master_s *dev, int port);
+#  else /* CONFIG_SENSORS_BMI160_SPI */
+int bmi160_init(FAR struct spi_dev_s *dev);
+int bmi160gyro_register(FAR const char *devpath, int minor,
+                        FAR struct spi_dev_s *dev);
+int bmi160accel_register(FAR const char *devpath, int minor,
+                         FAR struct spi_dev_s *dev);
+#  endif
+
 #endif
 
 #undef EXTERN
