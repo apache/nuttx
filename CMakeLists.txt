@@ -42,7 +42,7 @@ endif()
 
 # Avoid warning about DOWNLOAD_EXTRACT_TIMESTAMP in CMake 3.24:
 
-if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
   cmake_policy(SET CMP0135 NEW)
 endif()
 
@@ -373,6 +373,8 @@ include(nuttx_add_application)
 include(nuttx_add_romfs)
 include(nuttx_add_symtab)
 include(nuttx_add_module)
+include(nuttx_add_dependencies)
+include(nuttx_export_header)
 include(menuconfig)
 
 include(ExternalProject)
