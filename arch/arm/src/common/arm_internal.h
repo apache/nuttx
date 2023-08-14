@@ -323,6 +323,8 @@ void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
 
 void arm_boot(void);
 
+int arm_psci_init(const char *method);
+
 /* Context switching */
 
 uint32_t *arm_decodeirq(uint32_t *regs);
