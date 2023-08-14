@@ -101,5 +101,7 @@ uint32_t psci_version(void);
 int psci_cpu_off(void);
 int psci_cpu_reset(void);
 int psci_cpu_on(unsigned long cpuid, uintptr_t entry_point);
+int psci_sys_poweroff(void);
+int psci_sys_reset(void);
 
 #endif /* __ARCH_ARM64_SRC_COMMON_ARM64_CPU_PSCI_H */
