@@ -43,6 +43,12 @@
 
 #include "sched/sched.h"
 
+#if defined(CONFIG_DRIVERS_NOTERAM) +  defined(CONFIG_DRIVERS_NOTELOG) + \
+    defined(CONFIG_DRIVERS_NOTESNAP) + defined(CONFIG_DRIVERS_NOTERTT) + \
+    defined(CONFIG_SEGGER_SYSVIEW) > CONFIG_DRIVERS_NOTE_MAX
+#  error "Maximum channel number exceeds. "
+#endif
+
 #define note_add(drv, note, notelen)                                         \
   ((drv)->ops->add(drv, note, notelen))
 #define note_start(drv, tcb)                                                 \
