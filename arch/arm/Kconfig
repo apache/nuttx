@@ -645,11 +645,17 @@ config ARCH_CHIP_TLSR82
 
 config ARCH_CHIP_QEMU_ARM
 	bool "QEMU virt platform (ARMv7a)"
+	select ARCH_HAVE_PSCI
+	select ARCH_HAVE_POWEROFF
+	select ARCH_HAVE_RESET
 	---help---
 		QEMU virt platform (ARMv7a)
 
 config ARCH_CHIP_GOLDFISH_ARM
 	bool "GOLDFISH virt platform (ARMv7a)"
+	select ARCH_HAVE_PSCI
+	select ARCH_HAVE_POWEROFF
+	select ARCH_HAVE_RESET
 	---help---
 		GOLDFISH virt platform (ARMv7a)
 
@@ -1063,6 +1069,16 @@ config ARCH_CHIP
 config ARM_THUMB
 	bool "Thumb Mode"
 	default n
+
+config ARCH_HAVE_PSCI
+	bool "ARM PCSI (Power State Coordination Interface) Support"
+	default n
+	---help---
+		This Power State Coordination Interface (PSCI) defines
+		a standard interface for power management. the PCSI need
+		to implement handling firmware at EL2 or EL3. The option
+		maybe not applicable for arm core without PCSI firmware
+		interface implement
 
 config ARM_HAVE_WFE_SEV
 	bool
