@@ -51,6 +51,8 @@ config ARCH_CHIP_QEMU
 	select ARCH_HAVE_ADDRENV
 	select ARCH_HAVE_PSCI
 	select ARCH_NEED_ADDRENV_MAPPING
+	select ARCH_HAVE_POWEROFF
+	select ARCH_HAVE_RESET
 	---help---
 		QEMU virt platform (ARMv8a)
 
@@ -62,6 +64,8 @@ config ARCH_CHIP_GOLDFISH
 	select ARMV8A_HAVE_GICv2
 	select ARCH_HAVE_ADDRENV
 	select ARCH_HAVE_IRQTRIGGER
+	select ARCH_HAVE_POWEROFF
+	select ARCH_HAVE_RESET
 	select ARCH_NEED_ADDRENV_MAPPING
 	---help---
 		Android GoldFish platform for NuttX (ARMv8a),

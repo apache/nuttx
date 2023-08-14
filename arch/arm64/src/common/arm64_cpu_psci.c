@@ -193,7 +193,35 @@ int psci_cpu_on(unsigned long cpuid, uintptr_t entry_point)
   return psci_to_dev_err(ret);
 }
 
-int arm64_psci_init(const char *method)
+int psci_sys_reset(void)
+{
+  int ret;
+
+  if (psci_data.conduit == SMCCC_CONDUIT_NONE)
+    {
+      return -EINVAL;
+    }
+
+  ret = psci_data.invoke_psci_fn(PSCI_0_2_FN_SYSTEM_RESET, 0, 0, 0);
+
+  return psci_to_dev_err(ret);
+}
+
+int psci_sys_poweroff(void)
+{
+  int ret;
+
+  if (psci_data.conduit == SMCCC_CONDUIT_NONE)
+    {
+      return -EINVAL;
+    }
+
+  ret = psci_data.invoke_psci_fn(PSCI_0_2_FN_SYSTEM_OFF, 0, 0, 0);
+
+  return psci_to_dev_err(ret);
+}
+
+int arm64_psci_init(const char * method)
 {
   psci_data.conduit = SMCCC_CONDUIT_NONE;
 
