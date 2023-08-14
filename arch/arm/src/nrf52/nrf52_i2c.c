@@ -42,14 +42,6 @@
 #include "hardware/nrf52_utils.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* I2C errors not functional yet */
-
-#undef CONFIG_NRF52_I2C_ERRORS
-
-/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -412,6 +404,7 @@ static int nrf52_i2c_transfer(struct i2c_master_s *dev,
 
           if (priv->status < 0)
             {
+              ret = priv->status;
               goto errout;
             }
 #endif
@@ -464,6 +457,7 @@ static int nrf52_i2c_transfer(struct i2c_master_s *dev,
 
           if (priv->status < 0)
             {
+              ret = priv->status;
               goto errout;
             }
 #endif
@@ -511,6 +505,7 @@ static int nrf52_i2c_transfer(struct i2c_master_s *dev,
 
   if (priv->status < 0)
     {
+      ret = priv->status;
       goto errout;
     }
 #endif
@@ -560,6 +555,7 @@ static int nrf52_i2c_reset(struct i2c_master_s *dev)
 static int nrf52_i2c_isr(int irq, void *context, void *arg)
 {
   struct nrf52_i2c_priv_s *priv = (struct nrf52_i2c_priv_s *)arg;
+  uint32_t                 regval = 0;
 
   /* Reset I2C status */
 
@@ -613,14 +609,26 @@ static int nrf52_i2c_isr(int irq, void *context, void *arg)
       nrf52_i2c_putreg(priv, NRF52_TWIM_EVENTS_STOPPED_OFFSET, 0);
     }
 
-#ifdef CONFIG_NRF52_I2C_ERRORS
   if (nrf52_i2c_getreg(priv, NRF52_TWIM_EVENTS_ERROR_OFFSET) == 1)
     {
-      i2cerr("I2C ERROR\n");
+      regval = nrf52_i2c_getreg(priv, NRF52_TWIM_ERRORSRC_OFFSET) & 0x7;
+
+      i2cerr("Error SRC: 0x%08" PRIx32 "\n", regval);
 
       /* Set ERROR status */
 
-      priv->status = ERROR;
+      if (regval & TWIM_ERRORSRC_OVERRUN)
+        {
+          /* Overrun error */
+
+          priv->status = -EIO;
+        }
+      else
+        {
+          /* NACK */
+
+          priv->status = -ENXIO;
+        }
 
       /* ERROR event */
 
@@ -629,8 +637,8 @@ static int nrf52_i2c_isr(int irq, void *context, void *arg)
       /* Clear event */
 
       nrf52_i2c_putreg(priv, NRF52_TWIM_EVENTS_ERROR_OFFSET, 0);
+      nrf52_i2c_putreg(priv, NRF52_TWIM_ERRORSRC_OFFSET, 0x7);
     }
-#endif
 
   return OK;
 }
@@ -684,12 +692,8 @@ static int nrf52_i2c_init(struct nrf52_i2c_priv_s *priv)
 #ifndef CONFIG_I2C_POLLED
   /* Enable I2C interrupts */
 
-#ifdef CONFIG_NRF52_I2C_ERRORS
   regval = (TWIM_INT_LASTRX | TWIM_INT_LASTTX | TWIM_INT_STOPPED |
             TWIM_INT_ERROR);
-#else
-  regval = (TWIM_INT_LASTRX | TWIM_INT_LASTTX | TWIM_INT_STOPPED);
-#endif
   nrf52_i2c_putreg(priv, NRF52_TWIM_INTEN_OFFSET, regval);
 
   /* Attach error and event interrupts to the ISRs */
