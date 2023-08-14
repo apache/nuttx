@@ -746,13 +746,13 @@ static void composite_disconnect(FAR struct usbdevclass_driver_s *driver,
    */
 
   flags = enter_critical_section();
-  priv->config = COMPOSITE_CONFIGIDNONE;
 
   for (i = 0; i < priv->ndevices; i++)
     {
       CLASS_DISCONNECT(priv->device[i].dev, dev);
     }
 
+  priv->config = COMPOSITE_CONFIGIDNONE;
   leave_critical_section(flags);
 
   /* Perform the soft connect function so that we will we can be
