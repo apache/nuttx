@@ -185,9 +185,9 @@ irqstate_t enter_critical_section(void)
    * the local CPU.
    */
 
-try_again:
   ret = up_irq_save();
 
+try_again:
   /* Verify that the system has sufficiently initialized so that the task
    * lists are valid.
    */
@@ -355,7 +355,8 @@ try_again_in_irq:
                    * request.
                    */
 
-                  up_irq_restore(ret);
+                  up_irq_enable();
+                  up_irq_save();
                   goto try_again;
                 }
 
