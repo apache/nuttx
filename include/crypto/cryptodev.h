@@ -111,16 +111,19 @@
 #define CRYPTO_AES_192_GMAC     18
 #define CRYPTO_AES_256_GMAC     19
 #define CRYPTO_AES_GMAC         20
-#define CRYPTO_CHACHA20_POLY1305 21
-#define CRYPTO_CHACHA20_POLY1305_MAC 22
-#define CRYPTO_MD5              23
-#define CRYPTO_SHA1             24
-#define CRYPTO_SHA2_224         25
-#define CRYPTO_SHA2_256         26
-#define CRYPTO_SHA2_384         27
-#define CRYPTO_SHA2_512         28
-#define CRYPTO_ESN              29 /* Support for Extended Sequence Numbers */
-#define CRYPTO_ALGORITHM_MAX    29 /* Keep updated */
+#define CRYPTO_AES_OFB          21
+#define CRYPTO_AES_CFB_8        22
+#define CRYPTO_AES_CFB_128      23
+#define CRYPTO_CHACHA20_POLY1305 24
+#define CRYPTO_CHACHA20_POLY1305_MAC 25
+#define CRYPTO_MD5              26
+#define CRYPTO_SHA1             27
+#define CRYPTO_SHA2_224         28
+#define CRYPTO_SHA2_256         29
+#define CRYPTO_SHA2_384         30
+#define CRYPTO_SHA2_512         31
+#define CRYPTO_ESN              32 /* Support for Extended Sequence Numbers */
+#define CRYPTO_ALGORITHM_MAX    32 /* Keep updated */
 
 /* Algorithm flags */
 

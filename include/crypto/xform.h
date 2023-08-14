@@ -39,6 +39,7 @@
 #define AESCTR_NONCESIZE   4
 #define AESCTR_IVSIZE      8
 #define AESCTR_BLOCKSIZE   16
+#define AESOFB_IVSIZE      16
 
 #define AES_XTS_BLOCKSIZE  16
 #define AES_XTS_IVSIZE     8
@@ -103,6 +104,9 @@ extern const struct enc_xform enc_xform_aes_ctr;
 extern const struct enc_xform enc_xform_aes_gcm;
 extern const struct enc_xform enc_xform_aes_gmac;
 extern const struct enc_xform enc_xform_aes_xts;
+extern const struct enc_xform enc_xform_aes_ofb;
+extern const struct enc_xform enc_xform_aes_cfb_8;
+extern const struct enc_xform enc_xform_aes_cfb_128;
 extern const struct enc_xform enc_xform_chacha20_poly1305;
 extern const struct enc_xform enc_xform_null;
 
