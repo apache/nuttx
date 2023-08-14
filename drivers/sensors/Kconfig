@@ -161,6 +161,14 @@ config SENSORS_BMI160
 
 if SENSORS_BMI160
 
+config SENSORS_BMI160_UORB
+	bool "BMI160 UORB Interface"
+	default n
+	select UORB
+	---help---
+	Enables Work with the UORB or Character Device interface.
+	If not set, the Character Device is used by default.
+
 choice
 	prompt "BMI160 Interface"
 	default SENSORS_BMI160_SPI

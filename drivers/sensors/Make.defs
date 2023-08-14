@@ -137,7 +137,11 @@ ifeq ($(CONFIG_SENSORS_BMG160),y)
 endif
 
 ifeq ($(CONFIG_SENSORS_BMI160),y)
+ifeq ($(CONFIG_SENSORS_BMI160_UORB),y)
+  CSRCS += bmi160_uorb.c
+else
   CSRCS += bmi160.c
+endif
 endif
 
 ifeq ($(CONFIG_SENSORS_BMI270),y)
