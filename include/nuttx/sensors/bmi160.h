@@ -134,9 +134,17 @@ extern "C"
 #ifndef CONFIG_SENSORS_BMI160_SCU
 
 #  ifdef CONFIG_SENSORS_BMI160_I2C
+#    ifdef CONFIG_SENSORS_BMI160_UORB
+int bmi160_register_uorb(int devno, FAR struct i2c_master_s *dev);
+#    else
 int bmi160_register(FAR const char *devpath, FAR struct i2c_master_s *dev);
+#    endif /* CONFIG_SENSORS_BMI160_UORB */
 #  else /* CONFIG_BMI160_SPI */
+#    ifdef CONFIG_SENSORS_BMI160_UORB
+int bmi160_register_uorb(int devno, FAR struct spi_dev_s *dev);
+#    else
 int bmi160_register(FAR const char *devpath, FAR struct spi_dev_s *dev);
+#    endif /* CONFIG_SENSORS_BMI160_UORB */
 #  endif
 
 #else /* CONFIG_SENSORS_BMI160_SCU */
