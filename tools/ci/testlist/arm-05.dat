@@ -7,6 +7,12 @@
 
 # Boards build by CMake
 
+CMake,arduino-nano-33ble:nsh
+CMake,arduino-nano-33ble:usbnsh
+
+CMake,arduino-nano-33ble-rev2:nsh
+CMake,arduino-nano-33ble-rev2:usbnsh
+
 CMake,nrf52832-dk:buttons
 CMake,nrf52832-dk:mcuboot_app
 CMake,nrf52832-dk:mcuboot_loader
