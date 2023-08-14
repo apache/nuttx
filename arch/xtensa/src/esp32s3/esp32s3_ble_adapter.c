@@ -2317,7 +2317,7 @@ int esp32s3_bt_controller_init(void)
       else
         {
           wlerr("Internal 150kHz RC oscillator not detected.");
-          assert(0);
+          PANIC();
         }
 #endif
 
