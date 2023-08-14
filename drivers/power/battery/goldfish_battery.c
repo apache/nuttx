@@ -45,47 +45,47 @@
 
 enum
 {
-    /* Status register */
+  /* Status register */
 
-    BATTERY_INT_STATUS = 0x00,
+  BATTERY_INT_STATUS = 0x00,
 
-    /* Set this to enable IRQ */
+  /* Set this to enable IRQ */
 
-    BATTERY_INT_ENABLE = 0x04,
-    BATTERY_AC_ONLINE = 0x08,
-    BATTERY_STATUS = 0x0c,
-    BATTERY_HEALTH = 0x10,
-    BATTERY_PRESENT = 0x14,
-    BATTERY_CAPACITY = 0x18,
-    BATTERY_VOLTAGE = 0x1c,
-    BATTERY_TEMP = 0x20,
-    BATTERY_CHARGE_COUNTER = 0x24,
-    BATTERY_VOLTAGE_MAX = 0x28,
-    BATTERY_CURRENT_MAX = 0x2c,
-    BATTERY_CURRENT_NOW = 0x30,
-    BATTERY_CURRENT_AVG = 0x34,
-    BATTERY_CHARGE_FULL_UAH = 0x38,
-    BATTERY_CYCLE_COUNT = 0x40,
-    BATTERY_STATUS_CHANGED = 1u << 0,
-    AC_STATUS_CHANGED = 1u << 1,
-    BATTERY_INT_MASK = BATTERY_STATUS_CHANGED | AC_STATUS_CHANGED,
+  BATTERY_INT_ENABLE = 0x04,
+  BATTERY_AC_ONLINE = 0x08,
+  BATTERY_STATUS = 0x0c,
+  BATTERY_HEALTH = 0x10,
+  BATTERY_PRESENT = 0x14,
+  BATTERY_CAPACITY = 0x18,
+  BATTERY_VOLTAGE = 0x1c,
+  BATTERY_TEMP = 0x20,
+  BATTERY_CHARGE_COUNTER = 0x24,
+  BATTERY_VOLTAGE_MAX = 0x28,
+  BATTERY_CURRENT_MAX = 0x2c,
+  BATTERY_CURRENT_NOW = 0x30,
+  BATTERY_CURRENT_AVG = 0x34,
+  BATTERY_CHARGE_FULL_UAH = 0x38,
+  BATTERY_CYCLE_COUNT = 0x40,
+  BATTERY_STATUS_CHANGED = 1u << 0,
+  AC_STATUS_CHANGED = 1u << 1,
+  BATTERY_INT_MASK = BATTERY_STATUS_CHANGED | AC_STATUS_CHANGED,
 };
 
 enum
 {
-    POWER_SUPPLY_STATUS_UNKNOWN,
-    POWER_SUPPLY_STATUS_CHARGING,
-    POWER_SUPPLY_STATUS_DISCHARGING,
-    POWER_SUPPLY_STATUS_NOT_CHARGING,
-    POWER_SUPPLY_STATUS_FULL,
+  POWER_SUPPLY_STATUS_UNKNOWN,
+  POWER_SUPPLY_STATUS_CHARGING,
+  POWER_SUPPLY_STATUS_DISCHARGING,
+  POWER_SUPPLY_STATUS_NOT_CHARGING,
+  POWER_SUPPLY_STATUS_FULL,
 };
 
 struct goldfish_battery_data_s
 {
-    FAR void *reg_base;
-    int irq;
-    struct battery_gauge_dev_s battery;
-    struct work_s work;
+  FAR void *reg_base;
+  int irq;
+  struct battery_gauge_dev_s battery;
+  struct work_s work;
 };
 
 /****************************************************************************
@@ -111,12 +111,13 @@ static int goldfish_battery_temp(FAR struct battery_gauge_dev_s *dev,
 
 static const struct battery_gauge_operations_s g_goldfish_gauge_ops =
 {
-  .online = goldfish_charger_online,
-  .state = goldfish_battery_state,
-  .voltage = goldfish_battery_voltage,
-  .current = goldfish_battery_current,
-  .capacity = goldfish_battery_capacity,
-  .temp = goldfish_battery_temp,
+  goldfish_battery_state,
+  goldfish_charger_online,
+  goldfish_battery_voltage,
+  goldfish_battery_capacity,
+  goldfish_battery_current,
+  goldfish_battery_temp,
+  NULL,
 };
 
 /****************************************************************************
@@ -145,23 +146,23 @@ static int goldfish_battery_state(FAR struct battery_gauge_dev_s *dev,
   switch (regval)
   {
     case POWER_SUPPLY_STATUS_UNKNOWN:
-        *status = BATTERY_UNKNOWN;
-        break;
+      *status = BATTERY_UNKNOWN;
+      break;
     case POWER_SUPPLY_STATUS_CHARGING:
-        *status = BATTERY_CHARGING;
-        break;
+      *status = BATTERY_CHARGING;
+      break;
     case POWER_SUPPLY_STATUS_DISCHARGING:
-        *status = BATTERY_DISCHARGING;
-        break;
+      *status = BATTERY_DISCHARGING;
+      break;
     case POWER_SUPPLY_STATUS_NOT_CHARGING:
-        *status = BATTERY_IDLE;
-        break;
+      *status = BATTERY_IDLE;
+      break;
     case POWER_SUPPLY_STATUS_FULL:
-        *status = BATTERY_FULL;
-        break;
+      *status = BATTERY_FULL;
+      break;
     default:
-        *status = BATTERY_UNKNOWN;
-        break;
+      *status = BATTERY_UNKNOWN;
+      break;
   }
 
   return OK;
