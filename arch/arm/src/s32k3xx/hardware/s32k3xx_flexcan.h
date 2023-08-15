@@ -2669,7 +2669,8 @@
                                                 /* Bit 13: Reserved */
 #define CAN_CTRL1_ERRMSK              (1 << 14) /* Bit 14: Error Interrupt Mask (ERRMSK) */
 #define CAN_CTRL1_BOFFMSK             (1 << 15) /* Bit 15: Bus Off Interrupt Mask (BOFFMSK) */
-#define CAN_CTRL1_TIMINGMSK           (0xffff << 16)
+#define CAN_CTRL1_TIMINGMSK           ((0xffff << 16) | CAN_CTRL1_PROPSEG_MASK)
+                                                /* Bitmask for propseg, pseg1/2, rjw & presdiv */
 #define CAN_CTRL1_PSEG2_SHIFT         (16)      /* Bits 16-18: Phase Segment 2 (PSEG2) */
 #define CAN_CTRL1_PSEG2_MASK          (0x07 << CAN_CTRL1_PSEG2_SHIFT)
 #define CAN_CTRL1_PSEG2(x)            (((x) << CAN_CTRL1_PSEG2_SHIFT) & CAN_CTRL1_PSEG2_MASK)
