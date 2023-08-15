@@ -166,6 +166,16 @@ __start:
 
 .continue_boot:
 
+  /* L2 needs to be zeroed before ECC (error correction) is enabled later. */
+
+  la  a4, __l2lim_start
+  la  a5, __l2lim_end
+
+.clear_l2lim:
+  sd   x0, 0(a4)
+  add  a4, a4, 8
+  blt  a4, a5, .clear_l2lim
+
   /* Clear PMP */
 
   csrw pmpcfg0, zero
