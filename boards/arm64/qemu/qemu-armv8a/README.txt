@@ -71,6 +71,21 @@ Getting Started
      -device virtio-blk-device,bus=virtio-mmio-bus.3,drive=hd \
      -mon chardev=con,mode=readline -kernel ./nuttx
 
+  3.1.2 Single Core with virtio gpu driver (GICv3)
+  Configuring NuttX and compile:
+   $ ./tools/configure.sh qemu-armv8a:fb
+   $ make -j
+   Running with qemu
+   $ qemu-system-aarch64 -cpu cortex-a53 \
+    -machine virt,virtualization=on,gic-version=3 \
+    -chardev stdio,id=con,mux=on -serial chardev:con \
+    -global virtio-mmio.force-legacy=false \
+    -device virtio-gpu-device,xres=640,yres=480,bus=virtio-mmio-bus.0 \
+    -mon chardev=con,mode=readline -kernel ./nuttx
+
+   NuttShell (NSH) NuttX-10.4.0
+   nsh> fb
+
   3.2 SMP (GICv3)
    Configuring NuttX and compile:
    $ ./tools/configure.sh -l qemu-armv8a:nsh_smp
@@ -324,7 +339,7 @@ save/restore FPU context directly maybe become a solution. Linux kernel introduc
 kernel_neon_begin/kernel_neon_end function for this case. Similar function will
 be add to NuttX if this issue need to be handle.
 
-3. More reading 
+3. More reading
 for Linux kernel, please reference:
 - https://www.kernel.org/doc/html/latest/arm/kernel_mode_neon.html
 
