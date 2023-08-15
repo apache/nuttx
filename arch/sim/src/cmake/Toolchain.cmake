@@ -65,6 +65,10 @@ if(CONFIG_STACK_USAGE)
   add_compile_options(-fstack-usage)
 endif()
 
+if(CONFIG_STACK_USAGE_WARNING)
+  add_compile_options(-Wstack-usage=${CONFIG_STACK_USAGE_WARNING})
+endif()
+
 if(CONFIG_ARCH_COVERAGE)
   add_compile_options(-fprofile-generate -ftest-coverage)
 endif()
