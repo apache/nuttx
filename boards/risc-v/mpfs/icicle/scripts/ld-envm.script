@@ -35,6 +35,9 @@ ENTRY(_stext)
 EXTERN(__start)
 SECTIONS
 {
+    PROVIDE(__l2lim_start = ORIGIN(lim));
+    PROVIDE(__l2lim_end   = ORIGIN(lim) + LENGTH(lim));
+
     .text : {
         _stext = ABSOLUTE(.);
         *(.start .start.*)
