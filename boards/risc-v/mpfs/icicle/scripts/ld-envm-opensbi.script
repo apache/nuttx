@@ -32,6 +32,9 @@ ENTRY(_stext)
 EXTERN(__start)
 SECTIONS
 {
+    PROVIDE(__l2lim_start = ORIGIN(l2lim));
+    PROVIDE(__l2lim_end   = ORIGIN(l2lim) + LENGTH(l2lim));
+
     .text.sbi : {
       sbi*
       riscv_atomic*
