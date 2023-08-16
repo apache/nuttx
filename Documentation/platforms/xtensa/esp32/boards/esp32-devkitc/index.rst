@@ -461,6 +461,13 @@ Pin   Signal
 The MCP2515 interrupt (INT) pin is connected to the pin 22 of the
 ESP32-Devkit.
 
+mcuboot_nsh
+--------------------
+
+This configuration is the same as the ``nsh`` configuration, but it generates the application
+image in a format that can be used by MCUboot. It also makes the ``make bootloader`` command to
+build the MCUboot bootloader image using the Espressif HAL.
+
 mcuboot_slot_confirm
 --------------------
 
