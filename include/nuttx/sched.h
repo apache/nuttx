@@ -1456,7 +1456,7 @@ void nxsched_get_stateinfo(FAR struct tcb_s *tcb, FAR char *state,
  * Input Parameters:
  *   pid - The task ID of the thread to waid for
  *   stat_loc - The location to return the exit status
- *   options - ignored
+ *   options - Modifiable behavior, see sys/wait.h.
  *
  * Returned Value:
  *   If nxsched_waitpid() returns because the status of a child process is
