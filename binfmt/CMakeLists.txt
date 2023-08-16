@@ -51,6 +51,10 @@ if(CONFIG_ELF)
   list(APPEND SRCS elf.c)
 endif()
 
+if(CONFIG_NXFLAT)
+  list(APPEND SRCS nxflat.c)
+endif()
+
 # Builtin application interfaces
 
 if(CONFIG_BUILTIN)

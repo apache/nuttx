@@ -17,4 +17,10 @@
 # the License.
 #
 # ##############################################################################
-nuttx_add_subdirectory()
+if(CONFIG_MOTOR_FOC)
+  nuttx_add_subdirectory()
+endif()
+
+if(CONFIG_MOTOR_UPPER)
+  target_sources(drivers PRIVATE motor.c)
+endif()
