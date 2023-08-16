@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/litex/litex_timerisr.c
+ * arch/risc-v/src/litex/litex_ticked.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,17 +23,17 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/clock.h>
-#include <nuttx/timers/arch_alarm.h>
-#include <nuttx/init.h>
 
-#include <debug.h>
+#include <stdint.h>
+#include <stdbool.h>
+
+#include "chip.h"
+
 #include "riscv_internal.h"
 
 #include "litex.h"
 #include "litex_clockconfig.h"
 #include "hardware/litex_timer.h"
-#include "riscv_mtimer.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -41,37 +41,17 @@
 
 #define TICK_COUNT (litex_get_hfclk() / TICK_PER_SEC)
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+#if !defined(CONFIG_SCHED_TICKLESS)
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name:  litex_timerisr
- ****************************************************************************/
-
-#ifdef CONFIG_LITEX_CORE_VEXRISCV_SMP
-static void litex_mtimer_initialise(void)
-{
-  struct oneshot_lowerhalf_s *lower = riscv_mtimer_initialize(
-    LITEX_CLINT_MTIME, LITEX_CLINT_MTIMECMP,
-    RISCV_IRQ_TIMER, litex_get_hfclk());
-
-  DEBUGASSERT(lower);
-
-  up_alarm_set_lowerhalf(lower);
-}
-
-#else
-
 static int litex_timerisr(int irq, void *context, void *arg)
 {
   /* Clear timer interrupt */
 
-  putreg32(0xffffffff, LITEX_TIMER0_EV_PENDING);
+  putreg32(1 << LITEX_TIMER0_TIMEOUT_EV_OFFSET, LITEX_TIMER0_EV_PENDING);
 
   /* Process timer interrupt */
 
@@ -79,39 +59,12 @@ static int litex_timerisr(int irq, void *context, void *arg)
   return 0;
 }
 
-static void litex_timer0_initialize(void)
-{
-  /* Disable the timer and clear any pending interrupt */
-
-  putreg32(0, LITEX_TIMER0_EN);
-  putreg32(getreg32(LITEX_TIMER0_EV_PENDING), LITEX_TIMER0_EV_PENDING);
-
-  /* Set the timer period */
-
-  putreg32(TICK_COUNT, LITEX_TIMER0_RELOAD);
-  putreg32(getreg32(LITEX_TIMER0_RELOAD), LITEX_TIMER0_LOAD);
-
-  /* Attach timer interrupt handler */
-
-  irq_attach(LITEX_IRQ_TIMER0, litex_timerisr, NULL);
-
-  /* Enable the timer */
-
-  putreg32(1, LITEX_TIMER0_EN);
-
-  /* And enable the timer interrupt */
-
-  putreg32(1, LITEX_TIMER0_EV_ENABLE);
-  up_enable_irq(LITEX_IRQ_TIMER0);
-}
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_timer_initialize
+ * Function:  up_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize
@@ -121,9 +74,27 @@ static void litex_timer0_initialize(void)
 
 void up_timer_initialize(void)
 {
-#ifdef CONFIG_LITEX_CORE_VEXRISCV_SMP
-  litex_mtimer_initialise();
-#else
-  litex_timer0_initialize();
-#endif
+  /* Disable the timer and clear any pending interrupt */
+
+  putreg32(0, LITEX_TIMER0_EN);
+  putreg32(1 << LITEX_TIMER0_TIMEOUT_EV_OFFSET, LITEX_TIMER0_EV_PENDING);
+
+  /* Set the timer period */
+
+  putreg32(TICK_COUNT, LITEX_TIMER0_RELOAD);
+
+  /* Attach timer interrupt handler */
+
+  irq_attach(LITEX_IRQ_TIMER0, litex_timerisr, NULL);
+
+  /* Enable the timer */
+
+  putreg32(LITEX_TIMER0_ENABLE_BIT, LITEX_TIMER0_EN);
+
+  /* And enable the timer interrupt */
+
+  putreg32(1 << LITEX_TIMER0_TIMEOUT_EV_OFFSET, LITEX_TIMER0_EV_ENABLE);
+  up_enable_irq(LITEX_IRQ_TIMER0);
 }
+
+#endif /* !defind(CONFIG_SCHED_TICKLESS) */
