@@ -27,6 +27,10 @@ if(CONFIG_USBMISC)
     list(APPEND SRCS fusb301.c)
   endif()
 
+  if(CONFIG_FUSB302)
+    list(APPEND SRCS fusb302.c)
+  endif()
+
   if(CONFIG_FUSB303)
     list(APPEND SRCS fusb303.c)
   endif()

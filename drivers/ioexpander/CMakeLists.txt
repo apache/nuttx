@@ -50,10 +50,17 @@ if(CONFIG_IOEXPANDER)
     list(APPEND SRCS pcf8574.c)
   endif()
 
+  if(CONFIG_IOEXPANDER_PCF8575)
+    list(APPEND SRCS pcf8575.c)
+  endif()
+
   if(CONFIG_IOEXPANDER_MCP23X17)
     list(APPEND SRCS mcp23x17.c)
   endif()
 
+  if(CONFIG_IOEXPANDER_SX1509)
+    list(APPEND SRCS sx1509.c)
+  endif()
 endif()
 
 # GPIO test device driver (independent of IOEXPANDERS)

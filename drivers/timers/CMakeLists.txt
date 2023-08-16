@@ -49,8 +49,16 @@ if(CONFIG_RTC_PCF85263)
   list(APPEND SRCS pcf85263.c)
 endif()
 
+if(CONFIG_RTC_PL031)
+  list(APPEND SRCS pl031.c)
+endif()
+
 if(CONFIG_RTC_MCP794XX)
   list(APPEND SRCS mcp794xx.c)
+endif()
+
+if(CONFIG_RTC_RX8010SJ)
+  list(APPEND SRCS rx8010.c)
 endif()
 
 if(CONFIG_RTC_RPMSG)
@@ -71,6 +79,10 @@ endif()
 
 if(CONFIG_PWM)
   list(APPEND SRCS pwm.c)
+endif()
+
+if(CONFIG_CAPTURE)
+  list(APPEND SRCS capture.c)
 endif()
 
 target_sources(drivers PRIVATE ${SRCS})

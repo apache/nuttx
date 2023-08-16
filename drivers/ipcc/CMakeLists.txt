@@ -1,5 +1,5 @@
 # ##############################################################################
-# drivers/serial/CMakeLists.txt
+# drivers/ipcc/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -18,41 +18,15 @@
 #
 # ##############################################################################
 
-# Include serial drivers
+if(CONFIG_IPCC)
 
-set(SRCS serial.c serial_io.c)
+  set(SRCS ipcc_poll.c ipcc_read.c ipcc_write.c ipcc_register.c ipcc_open.c
+           ipcc_close.c)
 
-if(CONFIG_UART_PL011)
-  list(APPEND SRCS serial_pl011.c)
-endif()
-
-if(CONFIG_SERIAL_RXDMA)
-  list(APPEND SRCS serial_dma.c)
-elseif(CONFIG_SERIAL_TXDMA)
-  list(APPEND SRCS serial_dma.c)
-endif()
-
-if(CONFIG_16550_UART)
-  list(APPEND SRCS uart_16550.c)
-endif()
-
-if(CONFIG_RPMSG_UART)
-  list(APPEND SRCS uart_rpmsg.c)
-endif()
-
-# Pseudo-terminal support
-
-if(CONFIG_PSEUDOTERM)
-  list(APPEND SRCS pty.c)
-  if(CONFIG_PSEUDOTERM_SUSV1)
-    list(APPEND SRCS ptmx.c)
+  if(NOT CONFIG_DISABLE_PSEUDOFS_OPERATIONS)
+    list(APPEND SRCS ipcc_unlink.c)
   endif()
+
+  target_sources(drivers PRIVATE ${SRCS})
+
 endif()
-
-# Bluetooth H:4 UART driver
-
-if(CONFIG_UART_BTH4)
-  list(APPEND SRCS uart_bth4.c)
-endif()
-
-target_sources(drivers PRIVATE ${SRCS})

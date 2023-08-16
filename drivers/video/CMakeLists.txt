@@ -50,6 +50,13 @@ if(CONFIG_DRIVERS_VIDEO)
 
   endif()
 
+  if(CONFIG_GOLDFISH_FB)
+    list(APPEND SRCS goldfish_fb.c)
+  endif()
+
+  if(CONFIG_GOLDFISH_CAMERA)
+    list(APPEND SRCS goldfish_camera.c)
+  endif()
   # These video drivers depend on SPI support
 
   if(CONFIG_SPI)

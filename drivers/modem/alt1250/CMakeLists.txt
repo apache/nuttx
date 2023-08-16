@@ -1,5 +1,5 @@
 # ##############################################################################
-# drivers/serial/CMakeLists.txt
+# drivers/modem/alt1250/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -18,41 +18,28 @@
 #
 # ##############################################################################
 
-# Include serial drivers
+if(CONFIG_MODEM_ALT1250)
+  set(SRCS
+      alt1250.c
+      altcom_pkt.c
+      altcom_hdlr.c
+      altcom_hdlr_pdn.c
+      altcom_hdlr_radio.c
+      altcom_hdlr_net.c
+      altcom_hdlr_psave.c
+      altcom_hdlr_sim.c
+      altcom_hdlr_pin.c
+      altcom_hdlr_socket.c
+      altcom_hdlr_sms.c
+      altcom_hdlr_firmware.c
+      altcom_hdlr_log.c
+      altcom_hdlr_other.c
+      altcom_lwm2m_hdlr.c
+      altcom_errno.c
+      altmdm.c
+      altmdm_event.c
+      altmdm_spi.c
+      altmdm_timer.c)
 
-set(SRCS serial.c serial_io.c)
-
-if(CONFIG_UART_PL011)
-  list(APPEND SRCS serial_pl011.c)
+  target_sources(drivers PRIVATE ${SRCS})
 endif()
-
-if(CONFIG_SERIAL_RXDMA)
-  list(APPEND SRCS serial_dma.c)
-elseif(CONFIG_SERIAL_TXDMA)
-  list(APPEND SRCS serial_dma.c)
-endif()
-
-if(CONFIG_16550_UART)
-  list(APPEND SRCS uart_16550.c)
-endif()
-
-if(CONFIG_RPMSG_UART)
-  list(APPEND SRCS uart_rpmsg.c)
-endif()
-
-# Pseudo-terminal support
-
-if(CONFIG_PSEUDOTERM)
-  list(APPEND SRCS pty.c)
-  if(CONFIG_PSEUDOTERM_SUSV1)
-    list(APPEND SRCS ptmx.c)
-  endif()
-endif()
-
-# Bluetooth H:4 UART driver
-
-if(CONFIG_UART_BTH4)
-  list(APPEND SRCS uart_bth4.c)
-endif()
-
-target_sources(drivers PRIVATE ${SRCS})

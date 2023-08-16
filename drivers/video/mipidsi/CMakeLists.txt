@@ -1,5 +1,5 @@
 # ##############################################################################
-# drivers/serial/CMakeLists.txt
+# drivers/video/mipidsi/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -18,41 +18,12 @@
 #
 # ##############################################################################
 
-# Include serial drivers
+if(CONFIG_MIPI_DSI)
+  set(SRCS mipi_dsi_device.c mipi_dsi_host.c mipi_dsi_packet.c)
 
-set(SRCS serial.c serial_io.c)
-
-if(CONFIG_UART_PL011)
-  list(APPEND SRCS serial_pl011.c)
-endif()
-
-if(CONFIG_SERIAL_RXDMA)
-  list(APPEND SRCS serial_dma.c)
-elseif(CONFIG_SERIAL_TXDMA)
-  list(APPEND SRCS serial_dma.c)
-endif()
-
-if(CONFIG_16550_UART)
-  list(APPEND SRCS uart_16550.c)
-endif()
-
-if(CONFIG_RPMSG_UART)
-  list(APPEND SRCS uart_rpmsg.c)
-endif()
-
-# Pseudo-terminal support
-
-if(CONFIG_PSEUDOTERM)
-  list(APPEND SRCS pty.c)
-  if(CONFIG_PSEUDOTERM_SUSV1)
-    list(APPEND SRCS ptmx.c)
+  if(CONFIG_MIPI_DSI_DRIVER)
+    list(APPEND SRCS mipi_dsi_device_driver.c mipi_dsi_host_driver.c)
   endif()
+
+  target_sources(drivers PRIVATE ${SRCS})
 endif()
-
-# Bluetooth H:4 UART driver
-
-if(CONFIG_UART_BTH4)
-  list(APPEND SRCS uart_bth4.c)
-endif()
-
-target_sources(drivers PRIVATE ${SRCS})
