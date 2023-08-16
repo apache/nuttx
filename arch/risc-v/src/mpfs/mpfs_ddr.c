@@ -3997,6 +3997,11 @@ static int mpfs_ddr_setup(struct mpfs_ddr_priv_s *priv)
     }
   while (retval == -EAGAIN);
 
+  if (retval)
+    {
+      return retval;
+    }
+
   /* DDR_FULL_MTC_CHECK */
 
   retval = mpfs_training_full_mtc_test();
