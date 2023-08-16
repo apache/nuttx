@@ -628,7 +628,7 @@ static int goldfish_camera_data_uninit(FAR struct imgdata_s *data)
 
   priv->streaming = false;
   nxsem_post(&priv->run);
-  nxsched_waitpid(priv->pid, NULL, 0, 0);
+  nxsched_waitpid(priv->pid, NULL, 0);
 
   nxsem_destroy(&priv->run);
   file_close(&priv->file);

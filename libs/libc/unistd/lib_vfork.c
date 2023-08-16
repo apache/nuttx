@@ -63,7 +63,7 @@ pid_t vfork(void)
        * until running finished or performing exec
        */
 
-      ret = waitpid(pid, &status, 0);
+      ret = waitpid(pid, &status, WNOWAIT);
       if (ret < 0)
         {
           serr("ERROR: waitpid failed: %d\n", get_errno());
