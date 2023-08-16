@@ -2478,6 +2478,11 @@ config ESP32_ESPTOOL_TARGET_SECONDARY
 
 endchoice
 
+config ESP32_MCUBOOT_VERSION
+	string "MCUboot version"
+	depends on ESP32_APP_FORMAT_MCUBOOT
+	default "b206b99b1555ca15f790a3287e57dc98ef3df2ac"
+
 config ESP32_APP_MCUBOOT_HEADER_SIZE
 	int "Application image header size (in bytes)"
 	default 32
