@@ -2487,13 +2487,6 @@ static void mpfs_ddr_manual_addcmd_training(struct mpfs_ddr_priv_s *priv)
   bclk90_phase = ((priv->bclk_answer + SW_TRAINING_BCLK_SCLK_OFFSET + 2) &
                   0x07) << 11;
 
-  putreg32((0x00004003 | bclk_phase | bclk90_phase),
-           MPFS_IOSCB_DDR_PLL_PHADJ);
-  putreg32((0x00000003 | bclk_phase | bclk90_phase),
-           MPFS_IOSCB_DDR_PLL_PHADJ);
-  putreg32((0x00004003 | bclk_phase | bclk90_phase),
-           MPFS_IOSCB_DDR_PLL_PHADJ);
-
   /* Store DRV & VREF initial values (to be re-applied after
    * CA training)
    */
@@ -3201,6 +3194,8 @@ static int mpfs_set_mode_vs_bits(struct mpfs_ddr_priv_s *priv)
   return 0;
 }
 
+#ifdef CONFIG_MPFS_DDR_MANUAL_BCLSCLK_TRAINING
+
 /****************************************************************************
  * Name: mpfs_bclksclk_sw
  *
@@ -3276,7 +3271,23 @@ static void mpfs_bclksclk_sw(struct mpfs_ddr_priv_s *priv)
             }
         }
     }
+
+  /* Apply offset & load the phase */
+
+  bclk_phase = ((priv->bclk_answer + SW_TRAINING_BCLK_SCLK_OFFSET) &
+                0x07) << 8;
+  bclk90_phase = ((priv->bclk_answer + SW_TRAINING_BCLK_SCLK_OFFSET + 2) &
+                  0x07) << 11;
+
+  putreg32((0x00004003 | bclk_phase | bclk90_phase),
+           MPFS_IOSCB_DDR_PLL_PHADJ);
+  putreg32((0x00000003 | bclk_phase | bclk90_phase),
+           MPFS_IOSCB_DDR_PLL_PHADJ);
+  putreg32((0x00004003 | bclk_phase | bclk90_phase),
+           MPFS_IOSCB_DDR_PLL_PHADJ);
 }
+
+#endif
 
 /****************************************************************************
  * Name: mpfs_training_start
@@ -3359,6 +3370,11 @@ static int mpfs_training_start_check(struct mpfs_ddr_priv_s *priv)
 static int mpfs_training_bclksclk(struct mpfs_ddr_priv_s *priv)
 {
   uint32_t retries = MPFS_DEFAULT_RETRIES;
+
+  if (LIBERO_SETTING_TRAINING_SKIP_SETTING & BCLK_SCLK_BIT)
+    {
+      return 0;
+    }
 
   while (!(getreg32(MPFS_CFG_DDR_SGMII_PHY_TRAINING_STATUS) & BCLK_SCLK_BIT)
          && --retries);
@@ -3873,7 +3889,11 @@ static int mpfs_ddr_setup(struct mpfs_ddr_priv_s *priv)
       return retval;
     }
 
+  /* DDR_MANUAL_BCLSCLK_TRAINING_SW */
+
+#ifdef CONFIG_MPFS_DDR_MANUAL_BCLSCLK_TRAINING
   mpfs_bclksclk_sw(priv);
+#endif
 
   /* DDR_MANUAL_ADDCMD_TRAINING_SW */
 
