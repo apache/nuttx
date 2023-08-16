@@ -1192,14 +1192,14 @@ static void esp_semphr_delete(void *semphr)
  *
  * Input Parameters:
  *   semphr - Semaphore data pointer
- *   ticks  - Wait system ticks
+ *   block_time_ms  - Wait time
  *
  * Returned Value:
  *   True if success or false if fail
  *
  ****************************************************************************/
 
-static int32_t esp_semphr_take(void *semphr, uint32_t ticks)
+static int32_t esp_semphr_take(void *semphr, uint32_t block_time_ms)
 {
   int ret;
   sem_t *sem = (sem_t *)semphr;
@@ -1214,7 +1214,7 @@ static int32_t esp_semphr_take(void *semphr, uint32_t ticks)
     }
   else
     {
-      ret = nxsem_tickwait(sem, ticks);
+      ret = nxsem_tickwait(sem, MSEC2TICK(block_time_ms));
       if (ret)
         {
           wlerr("ERROR: Failed to wait sem in %lu ticks\n", ticks);
