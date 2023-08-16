@@ -918,14 +918,16 @@ static int rpmsg_socket_poll(FAR struct socket *psock,
 
           nxmutex_unlock(&conn->recvlock);
         }
-      else if (!_SS_ISCONNECTED(conn->sconn.s_flags) &&
-               _SS_ISNONBLOCK(conn->sconn.s_flags))
+      else /* !_SS_ISCONNECTED(conn->sconn.s_flags) */
         {
-          ret = OK;
-        }
-      else
-        {
-          eventset |= POLLERR;
+          if (!conn->ept.rdev || conn->unbind)
+            {
+              eventset |= POLLHUP;
+            }
+          else
+            {
+              ret = OK;
+            }
         }
 
       rpmsg_socket_poll_notify(conn, eventset);
