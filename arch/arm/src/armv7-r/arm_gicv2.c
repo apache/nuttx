@@ -196,6 +196,7 @@ void arm_gic_initialize(void)
 
   /* Registers with 1-bit per interrupt */
 
+#ifdef CONFIG_ARCH_TRUSTZONE_SECURE
   /* per-CPU inerrupts config:
    * ID0-ID7(SGI)  for Non-secure interrupts
    * ID8-ID15(SGI)  for Secure interrupts.
@@ -203,6 +204,9 @@ void arm_gic_initialize(void)
    */
 
   putreg32(0x000000ff, GIC_ICDISR(0));
+#else
+  putreg32(0x00000000, GIC_ICDISR(0));      /* SGIs and PPIs secure */
+#endif
   putreg32(0xfe000000, GIC_ICDICER(0));     /* PPIs disabled */
 
   /* Registers with 8-bits per interrupt */
