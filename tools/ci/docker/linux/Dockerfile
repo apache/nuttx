@@ -30,7 +30,7 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   bison \
   cmake \
   flex \
-  g++ \
+  g++-11 \
   gawk \
   git \
   gperf \
@@ -114,8 +114,8 @@ FROM nuttx-toolchain-base AS nuttx-toolchain-renesas
 RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -qq \
   bison \
   flex \
-  g++ \
-  gcc \
+  g++-11 \
+  gcc-11 \
   libncurses5-dev \
   m4 \
   make \
@@ -233,7 +233,7 @@ LABEL maintainer="dev@nuttx.apache.org"
 RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -qq \
   build-essential \
   curl \
-  gcc \
+  gcc-11 \
   libssl-dev
 
 RUN mkdir -p cmake && \
@@ -251,7 +251,7 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   clang \
   clang-tidy \
   gcc-avr \
-  gcc-multilib \
+  gcc-11-multilib \
   genromfs \
   gettext \
   git \
