@@ -161,6 +161,26 @@ int main(int argc, char **argv)
       fprintf(stderr, "Buffer1 does not match buffer2\n");
     }
 
+  nbytes = iob->io_pktlen;
+
+  iob_reserve(iob, 55);
+  printf("Reserve: adjust offset to 55\n");
+  dump_chain(iob);
+
+  if (iob->io_offset != 55 || iob->io_pktlen + 55 != nbytes)
+    {
+      fprintf(stderr, "Offset or packet length wrong\n");
+    }
+
+  iob_reserve(iob, 28);
+  printf("Reserve: adjust offset to 28\n");
+  dump_chain(iob);
+
+  if (iob->io_offset != 28 || iob->io_pktlen + 28 != nbytes)
+    {
+      fprintf(stderr, "Offset or packet length wrong\n");
+    }
+
   while (iob) iob = iob_free(iob);
   return EXIT_SUCCESS;
 }
