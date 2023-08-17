@@ -41,20 +41,11 @@
 
 void iob_reserve(FAR struct iob_s *iob, unsigned int reserved)
 {
+  FAR struct iob_s *head = iob;
   unsigned int offset;
+  int trimlen;
 
-  /* Empty iob buffer is allowed, update packet length. */
-
-  if (iob->io_pktlen > reserved)
-    {
-      iob->io_pktlen -= reserved;
-    }
-  else
-    {
-      iob->io_pktlen = 0;
-    }
-
-  /* Update offset and reducing the tail room */
+  /* Update offset and adjust packet length. */
 
   while (iob != NULL && reserved > 0)
     {
@@ -67,16 +58,19 @@ void iob_reserve(FAR struct iob_s *iob, unsigned int reserved)
           offset = reserved;
         }
 
-      if (iob->io_len > offset)
+      trimlen = offset - iob->io_offset;
+
+      /* At most trim iob->io_len to 0. */
+
+      if ((int)(iob->io_len - trimlen) < 0)
         {
-          iob->io_len -= offset;
-        }
-      else
-        {
-          iob->io_len = 0;
+          trimlen = iob->io_len;
         }
 
-      iob->io_offset = offset;
+      head->io_pktlen -= trimlen;
+      iob->io_len     -= trimlen;
+      iob->io_offset   = offset;
+
       iob = iob->io_flink;
       reserved -= offset;
     }
