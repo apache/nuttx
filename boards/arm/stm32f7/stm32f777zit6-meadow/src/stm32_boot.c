@@ -70,10 +70,6 @@ extern FAR struct qspi_dev_s *stm32f7_qspi_initialize(int intf);
  *
  ****************************************************************************/
 
-void up_netinitialize(void)
-{
-}
-
 void stm32_boardinitialize(void)
 {
 #if defined(CONFIG_STM32F7_SPI1) || defined(CONFIG_STM32F7_SPI2) || \

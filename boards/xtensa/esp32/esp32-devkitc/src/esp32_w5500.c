@@ -179,7 +179,7 @@ static void up_reset(const struct w5500_lower_s *lower, bool reset)
  * Name: arm_netinitialize
  ****************************************************************************/
 
-void up_netinitialize(void)
+void riscv_netinitialize(void)
 {
   struct spi_dev_s *spi;
   int ret;
