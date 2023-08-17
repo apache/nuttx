@@ -2441,7 +2441,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
                  * logic in the composite device implementation.
                  */
 
-#ifndef CONFIG_CDCACM_COMPOSITE
+#ifndef CONFIG_RNDIS_COMPOSITE
 #  ifdef CONFIG_USBDEV_DUALSPEED
                 case USB_DESC_TYPE_OTHERSPEEDCONFIG:
 #  endif /* CONFIG_USBDEV_DUALSPEED */
@@ -2457,7 +2457,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
                   break;
 #endif
 
-#ifndef CONFIG_CDCACM_COMPOSITE
+#ifndef CONFIG_RNDIS_COMPOSITE
                 case USB_DESC_TYPE_STRING:
                   {
                     /* index == language code. */
@@ -2492,7 +2492,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
            * logic in the composite device implementation.
            */
 
-#ifndef CONFIG_CDCACM_COMPOSITE
+#ifndef CONFIG_RNDIS_COMPOSITE
           case USB_REQ_GETCONFIGURATION:
             {
               if (ctrl->type == USB_DIR_IN)
@@ -2644,7 +2644,7 @@ static void usbclass_disconnect(FAR struct usbdevclass_driver_s *driver,
    * re-enumerated (unless we are part of a composite device)
    */
 
-#ifndef CONFIG_CDCACM_COMPOSITE
+#ifndef CONFIG_RNDIS_COMPOSITE
   DEV_CONNECT(dev);
 #endif
 }
@@ -2882,7 +2882,7 @@ static void usbclass_uninitialize(FAR struct usbdevclass_driver_s *classdev)
   FAR struct rndis_alloc_s *alloc = (FAR struct rndis_alloc_s *)drvr->dev;
   if (!alloc->dev.registered)
     {
-#ifdef CONFIG_USBADB_COMPOSITE
+#ifdef CONFIG_RNDIS_COMPOSITE
       kmm_free(alloc);
 #endif
       return;
