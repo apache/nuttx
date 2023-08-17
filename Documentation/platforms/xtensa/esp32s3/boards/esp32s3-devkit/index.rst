@@ -139,9 +139,9 @@ Flash and PSRAM).
 mcuboot_nsh
 -----------
 
-Similar configuration as nsh, except that it enables booting from
-MCUboot and the experimental features configuration.
-You can find more information on the `example's documentation <https://github.com/apache/nuttx-apps/blob/master/examples/mcuboot/swap_test/README.md>`_.
+This configuration is the same as the ``nsh`` configuration, but it generates the application
+image in a format that can be used by MCUboot. It also makes the ``make bootloader`` command to
+build the MCUboot bootloader image using the Espressif HAL.
 
 nsh
 ---
