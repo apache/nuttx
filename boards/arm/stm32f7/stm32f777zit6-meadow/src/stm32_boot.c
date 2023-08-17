@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <debug.h>
+#include <assert.h>
 
 #include <nuttx/board.h>
 #include <arch/board/board.h>
@@ -163,8 +164,20 @@ void board_late_initialize(void)
    *
    * stm32_mpu_uheap((uintptr_t)0x90000000, 0x4000000);
    */
-#endif
 
+#endif
+#if defined(MEADOW_OS)
+  /* Initialize Meadow HCOM nuttx */
+
+  int ret;
+  ret = hcom_nx_setup_mgr(mtd);
+  if (ret < 0)
+    {
+      syslog(LOG_EMERG, "ERROR: HCOM proxy initialization failed!\n");
+      PANIC();
+    }
+
+#endif
 #if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_BOARDCTL)
   /* Perform NSH initialization here instead of from the NSH.  This
    * alternative NSH initialization is necessary when NSH is ran in
