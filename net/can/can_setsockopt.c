@@ -153,6 +153,14 @@ int can_setsockopt(FAR struct socket *psock, int level, int option,
         break;
 
       case CAN_RAW_ERR_FILTER:
+#ifdef CONFIG_NET_CAN_ERRORS
+        if (value_len != sizeof(can_err_mask_t))
+          {
+            return -EINVAL;
+          }
+
+        conn->err_mask = *(FAR can_err_mask_t *)value & CAN_ERR_MASK;
+#endif
         break;
 
       case CAN_RAW_LOOPBACK:
