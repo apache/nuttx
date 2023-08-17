@@ -45,6 +45,10 @@
 #include "goldfish_boot.h"
 #include "goldfish_serial.h"
 
+#ifdef CONFIG_DEVICE_TREE
+#  include <nuttx/fdt.h>
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -173,6 +177,10 @@ void arm64_chip_boot(void)
   /* MAP IO and DRAM, enable MMU. */
 
   arm64_mmu_init(true);
+
+#ifdef CONFIG_DEVICE_TREE
+  fdt_register((const char *)0x40000000);
+#endif
 
 #ifdef CONFIG_ARCH_HAVE_PSCI
   arm64_psci_init("smc");
