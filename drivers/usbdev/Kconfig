@@ -963,10 +963,10 @@ menuconfig RNDIS
 		- "Remote NDIS To USB Mapping"
 
 		This option may required CONFIG_NETDEV_LATEINIT=y otherwise, the
-		power-up initialization may call the non-existent up_netinitialize().
+		power-up initialization may call the non-existent xxx_netinitialize().
 		This option is not automatically selected because it may be that
 		you have an additional network device that requires the early
-		up_netinitialize() call.
+		xxx_netinitialize() call.
 
 if RNDIS
 
@@ -1102,10 +1102,10 @@ menuconfig NET_CDCECM
 		   Revision 1.2, February 9, 2007"
 
 		This option may require CONFIG_NETDEV_LATEINIT=y, otherwise the
-		power-up initialization may call the non-existent up_netinitialize().
+		power-up initialization may call the non-existent xxx_netinitialize().
 		This option is not automatically selected because it may be that
 		you have an additional network device that requires the early
-		up_netinitialize() call.
+		xxx_netinitialize() call.
 
 if NET_CDCECM
 
