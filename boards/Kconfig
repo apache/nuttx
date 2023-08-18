@@ -439,6 +439,24 @@ config ARCH_BOARD_ESP32S3_EYE
 		featuring the ESP32-S3 CPU with a 2-Megapixel camera, an LCD display,
 		a microphone, an 8 MB Octal PSRAM and an 8 MB flash.
 
+config ARCH_BOARD_ESP32S3_LCD_EV
+	bool "Espressif ESP32-S3-LCD-EV Board"
+	depends on ARCH_CHIP_ESP32S3WROOM2
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS if ESP32S3_GPIO_IRQ
+	---help---
+		ESP32-S3-LCD-EV is an ESP32-S3-based development board with a touchscreen.
+		Together with different subboards, ESP32-S3-LCD-EV-Board can drive LCDs with IIC,
+		SPI, 8080, and RGB interfaces.
+		It houses dual array microphones, supports voice recognition and near/far-field
+		voice wake-up, and features screen and voice interaction.
+		The board caters to development needs for touchscreen products with different resolutions
+		and interfaces. Currently, we have two boards available:
+			
+			1. ESP32-S3-LCD-EV-Board with 480x480 LCD
+			2. ESP32-S3-LCD-EV-Board with 800x480 LCD
+
 config ARCH_BOARD_ESP32S3_MEADOW
 	bool "WildernessLabs ESP32S3-Meadow Board"
 	depends on ARCH_CHIP_ESP32S3WROOM1
@@ -2955,6 +2973,7 @@ config ARCH_BOARD
 	default "esp32s3-devkit"            if ARCH_BOARD_ESP32S3_DEVKIT
 	default "esp32s3-eye"               if ARCH_BOARD_ESP32S3_EYE
 	default "esp32s3-meadow"            if ARCH_BOARD_ESP32S3_MEADOW
+	default "esp32s3-lcd-ev"            if ARCH_BOARD_ESP32S3_LCD_EV
 	default "esp32c6-devkit"            if ARCH_BOARD_ESP32C6_DEVKIT
 	default "esp32c6-generic"           if ARCH_BOARD_ESP32C6_GENERIC
 	default "esp32h2-generic"           if ARCH_BOARD_ESP32H2_GENERIC
@@ -3994,6 +4013,9 @@ source "boards/xtensa/esp32s3/esp32s3-eye/Kconfig"
 endif
 if ARCH_BOARD_ESP32S3_MEADOW
 source "boards/xtensa/esp32s3/esp32s3-meadow/Kconfig"
+endif
+if ARCH_BOARD_ESP32S3_LCD_EV
+source "boards/xtensa/esp32s3/esp32s3-lcd-ev/Kconfig"
 endif
 if ARCH_BOARD_ESP32C6_DEVKIT
 source "boards/risc-v/esp32c6/esp32c6-devkit/Kconfig"
