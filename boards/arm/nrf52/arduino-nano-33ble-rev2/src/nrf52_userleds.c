@@ -62,14 +62,14 @@ static const uint32_t g_ledcfg[BOARD_NLEDS] =
   GPIO_LED5
 };
 
-static const uint32_t g_ledoff[BOARD_NLEDS] =
+static const bool g_ledoff[BOARD_NLEDS] =
 {
-  0, 0, 1, 1, 1
+  false, false, true, true, true
 };
 
-static const uint32_t g_ledon[BOARD_NLEDS] =
+static const bool g_ledon[BOARD_NLEDS] =
 {
-  1, 1, 0, 0, 0
+  true, true, false, false, false
 };
 
 /****************************************************************************
