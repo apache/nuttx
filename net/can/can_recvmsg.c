@@ -344,7 +344,10 @@ static uint16_t can_recvfrom_eventhandler(FAR struct net_driver_s *dev,
            * when is valid then complete the read action.
            */
 #ifdef CONFIG_NET_CANPROTO_OPTIONS
-          if (can_recv_filter(conn, (canid_t) *dev->d_appdata) == 0)
+          canid_t can_id;
+          memcpy(&can_id, dev->d_appdata, sizeof(canid_t));
+
+          if (can_recv_filter(conn, can_id) == 0)
             {
               flags &= ~CAN_NEWDATA;
               return flags;
