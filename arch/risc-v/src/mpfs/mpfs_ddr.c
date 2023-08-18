@@ -225,16 +225,10 @@ typedef struct
 
 struct mpfs_ddr_priv_s
 {
-  int                    error;
-  uint32_t               timeout;
-  uint32_t               retry_count;
   uint32_t               tip_cfg_params;
   uint32_t               dpc_bits;
   uint32_t               rpc_166_fifo_offset;
-  uint8_t                last_sweep_status;
-  uint8_t                num_rpc_166_retires;
   uint32_t               bclk_answer;
-  uint32_t               ret_status;
   uint8_t                number_of_lanes_to_calibrate;
   uint8_t                refclk_sweep_index;
   bool                   en_addcmd0_ovrt9;
@@ -3012,9 +3006,6 @@ static void mpfs_ddr_sm_init(struct mpfs_ddr_priv_s *priv)
   priv->tip_cfg_params      = LIBERO_SETTING_TIP_CFG_PARAMS;
   priv->dpc_bits            = LIBERO_SETTING_DPC_BITS;
   priv->rpc_166_fifo_offset = DEFAULT_RPC_166_VALUE;
-  priv->error               = 0;
-  priv->retry_count         = 0;
-  priv->num_rpc_166_retires = 0;
   priv->refclk_sweep_index  = 0xf;
 
   priv->number_of_lanes_to_calibrate = mpfs_get_num_lanes();
@@ -3206,7 +3197,6 @@ static int mpfs_set_mode_vs_bits(struct mpfs_ddr_priv_s *priv)
    */
 
   putreg32(priv->tip_cfg_params, MPFS_CFG_DDR_SGMII_PHY_TIP_CFG_PARAMS);
-  priv->timeout = 0xffff;
 
   return 0;
 }
@@ -3320,8 +3310,6 @@ static void mpfs_training_start(struct mpfs_ddr_priv_s *priv)
   putreg32(1, MPFS_DDR_CSR_APB_PHY_DFI_INIT_START);
   putreg32(0, MPFS_DDR_CSR_APB_CTRLR_INIT);
   putreg32(1, MPFS_DDR_CSR_APB_CTRLR_INIT);
-
-  priv->timeout = 0xffff;
 }
 
 /****************************************************************************
