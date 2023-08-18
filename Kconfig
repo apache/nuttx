@@ -2114,7 +2114,7 @@ config STACK_USAGE
 config STACK_USAGE_WARNING
 	int "Detect use of large stack variables"
 	default 0
-	help
+	---help---
 		Set the stack warning threshold, if the stack usage exceeds the
 		threshold, a warning will be generated
 

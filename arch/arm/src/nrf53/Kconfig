@@ -343,7 +343,7 @@ config NRF53_LFCLK_RC
 config NRF53_LFCLK_SYNTH
 	bool "Synthesized from HFCLK"
 
-endchoice
+endchoice # LFCLK source
 
 endif # NRF53_USE_LFCLK
 
@@ -369,7 +369,7 @@ config NRF53_HFCLK192M_96
 config NRF53_HFCLK192M_48
 	bool "HFCLK192M is 48MHz"
 
-endchoice
+endchoice # HFCLK192M source
 
 endif # NRF53_USE_HFCLK192M
 
@@ -418,7 +418,7 @@ config NRF53_SYSTIMER_RTC
 	---help---
 		Use RTC timer in tickless mode.
 
-endchoice
+endchoice # System Timer Source
 
 if NRF53_SYSTIMER_RTC
 
@@ -430,7 +430,7 @@ config NRF53_SYSTIMER_RTC_INSTANCE
 	---help---
 		Which RTC instance to use to drive the system timer
 
-endif
+endif # NRF53_SYSTIMER_RTC
 
 endmenu # System Timer
 
@@ -656,9 +656,9 @@ config NRF53_SPI_MASTER_INTERRUPTS
 	bool "SPI Master interrupts support"
 	default n
 
-endif #  NRF53_SPI_MASTER
+endif # NRF53_SPI_MASTER
 
-endmenu
+endmenu # SPI Configuration
 
 menu "I2C Master Configuration"
 
@@ -696,7 +696,7 @@ config NRF53_I2C_MASTER_WORKAROUND_400KBPS_TIMING
 
 endif # NRF53_I2C_MASTER
 
-endmenu
+endmenu # I2C Master Configuration
 
 menu "QSPI Configuration"
 
@@ -776,7 +776,7 @@ config NRF53_SDC_SCAN_BUFFER_COUNT
 	---help---
 		The minimum allowed number of buffers is 2.
 
-endif
+endif # NRF53_SDC_SCANNING
 
 config NRF53_SDC_LE_2M_PHY
 	bool "Support LE 2M PHY"
@@ -804,4 +804,4 @@ config NRF53_SDC_PUB_ADDR
 	hex "Configure BT public address"
 	default 0x0000000000
 
-endif
+endif # NRF53_SOFTDEVICE_CONTROLLER
