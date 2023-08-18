@@ -203,27 +203,79 @@ reg_table = {
         "T6": 31,
         "PC": 32,
     },
-    "xtensa": {
+    # use xtensa-esp32s3-elf-gdb register table
+    "esp32s3": {
         "PC": 0,
-        "SAR": 68,
         "PS": 73,
-        "SCOM": 29,
-        "A0": 21,
-        "A1": 22,
-        "A2": 23,
-        "A3": 24,
-        "A4": 25,
-        "A5": 26,
-        "A6": 27,
-        "A7": 28,
-        "A8": 29,
-        "A9": 30,
-        "A10": 31,
-        "A11": 32,
-        "A12": 33,
-        "A13": 34,
-        "A14": 35,
-        "A15": 36,
+        "A0": 1,
+        "A1": 2,
+        "A2": 3,
+        "A3": 4,
+        "A4": 5,
+        "A5": 6,
+        "A6": 7,
+        "A7": 8,
+        "A8": 9,
+        "A9": 10,
+        "A10": 11,
+        "A11": 12,
+        "A12": 13,
+        "A13": 14,
+        "A14": 15,
+        "A15": 16,
+        "WINDOWBASE": 69,
+        "WINDOWSTART": 70,
+        "CAUSE": 190,
+        "VADDR": 196,
+        "LBEG": 65,
+        "LEND": 66,
+        "LCNT": 67,
+        "SAR": 68,
+        "SCOM": 76,
+    },
+    # use xt-gdb register table
+    "xtensa": {
+        "PC": 32,
+        "PS": 742,
+        "A0": 256,
+        "A1": 257,
+        "A2": 258,
+        "A3": 259,
+        "A4": 260,
+        "A5": 261,
+        "A6": 262,
+        "A7": 263,
+        "A8": 264,
+        "A9": 265,
+        "A10": 266,
+        "A11": 267,
+        "A12": 268,
+        "A13": 269,
+        "A14": 270,
+        "A15": 271,
+        "WINDOWBASE": 584,
+        "WINDOWSTART": 585,
+        "CAUSE": 744,
+        "VADDR": 750,
+        "LBEG": 512,
+        "LEND": 513,
+        "LCNT": 514,
+        "SAR": 515,
+        "SCOM": 524,
+    },
+}
+
+# make sure the a0-a15 can be remapped to the correct register
+reg_fix_value = {
+    "esp32s3": {
+        "WINDOWBASE": 0,
+        "WINDOWSTART": 1,
+        "PS": 0x40000,
+    },
+    "xtensa": {
+        "WINDOWBASE": 0,
+        "WINDOWSTART": 1,
+        "PS": 0x40000,
     },
 }
 
@@ -289,6 +341,12 @@ class dump_log_file:
                             )
                         line = line[tmp.span()[1] :]
                     continue
+
+                if self.arch in reg_fix_value:
+                    for register in reg_fix_value[self.arch].keys():
+                        self.registers[reg_table[self.arch][register]] = reg_fix_value[
+                            self.arch
+                        ][register]
 
                 tmp = re.search("stack_dump:", line)
                 if tmp is not None:
@@ -427,11 +485,15 @@ class gdb_stub:
         self.put_gdb_packet(pkt)
 
     def handle_register_single_read_packet(self, pkt):
-        # Mark registers as "<unavailable>".
-        # 'p' packets are usually used for registers
-        # other than the general ones (e.g. eax, ebx)
-        # so we can safely reply "xxxxxxxx" here.
-        self.put_gdb_packet(b"x" * 8)
+        reg_fmt = "<I"
+        logger.debug(f"pkt: {pkt}")
+
+        reg = int("0x" + pkt[1:].decode("utf8"), 16)
+        if reg < len(self.logfile.registers) and self.logfile.registers[reg] != b"x":
+            bval = struct.pack(reg_fmt, self.logfile.registers[reg])
+            self.put_gdb_packet(binascii.hexlify(bval))
+        else:
+            self.put_gdb_packet(b"x" * 8)
 
     def handle_register_group_write_packet(self):
         # the 'G' packet for writing to a group of registers
@@ -546,7 +608,7 @@ if __name__ == "__main__":
         "--arch",
         help="select architecture,if not use this options,\
                         The architecture will be inferred from the logfile",
-        choices=['arm', 'arm-a', 'arm-t', 'riscv', 'xtensa']
+        choices=[arch for arch in reg_table.keys()],
     )
 
     parser.add_argument("-p", "--port", help="gdbport", type=int, default=1234)
