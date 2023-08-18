@@ -732,6 +732,7 @@ config ARCH_ARM1176JZ
 config ARCH_ARMV6M
 	bool
 	default n
+	select ARCH_HAVE_CPUINFO
 
 config ARCH_CORTEXM0
 	bool
