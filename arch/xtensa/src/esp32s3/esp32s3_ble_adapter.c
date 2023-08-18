@@ -894,8 +894,9 @@ static void semphr_delete_wrapper(void *semphr)
 
 static int IRAM_ATTR semphr_take_from_isr_wrapper(void *semphr, void *hptw)
 {
-  DEBUGPANIC();
-  return false;
+  *(int *)hptw = 0;
+
+  return esp_errno_trans(nxsem_trywait(semphr));
 }
 
 /****************************************************************************
@@ -988,7 +989,8 @@ static int semphr_take_wrapper(void *semphr, uint32_t block_time_ms)
 
   if (ret)
     {
-      wlerr("Failed to take sem error=%d\n", ret);
+      wlerr("ERROR: Failed to wait sem in %u ticks. Error=%d\n",
+            MSEC2TICK(block_time_ms), ret);
     }
 
   return esp_errno_trans(ret);
