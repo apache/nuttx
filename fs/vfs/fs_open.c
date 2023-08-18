@@ -38,6 +38,7 @@
 
 #include "inode/inode.h"
 #include "driver/driver.h"
+#include "notify/notify.h"
 
 /****************************************************************************
  * Private Functions
@@ -196,7 +197,15 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
 
       /* Get the file structure of the opened character driver proxy */
 
-      return block_proxy(filep, path, oflags);
+      ret = block_proxy(filep, path, oflags);
+#ifdef CONFIG_FS_NOTIFY
+      if (ret >= 0)
+        {
+          notify_open(path, filep->f_oflags);
+        }
+#endif
+
+      return ret;
     }
 #endif
 
@@ -255,6 +264,9 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
     }
 
   RELEASE_SEARCH(&desc);
+#ifdef CONFIG_FS_NOTIFY
+  notify_open(path, filep->f_oflags);
+#endif
   return OK;
 
 errout_with_inode:

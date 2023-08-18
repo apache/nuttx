@@ -286,6 +286,15 @@ SYSCALL_LOOKUP(munmap,                     2)
   SYSCALL_LOOKUP(shm_unlink,               1)
 #endif
 
+/* The following are defined if the file system notify is enabled */
+
+#ifdef CONFIG_FS_NOTIFY
+  SYSCALL_LOOKUP(inotify_add_watch,        3)
+  SYSCALL_LOOKUP(inotify_init,             0)
+  SYSCALL_LOOKUP(inotify_init1,            1)
+  SYSCALL_LOOKUP(inotify_rm_watch,         2)
+#endif
+
 /* The following are defined if pthreads are enabled */
 
 #ifndef CONFIG_DISABLE_PTHREAD

@@ -31,6 +31,7 @@
 
 #include <nuttx/fs/fs.h>
 
+#include "notify/notify.h"
 #include "inode/inode.h"
 
 /****************************************************************************
@@ -190,6 +191,13 @@ int file_fchstat(FAR struct file *filep, FAR struct stat *buf, int flags)
 
       ret = inode_chstat(inode, buf, flags, 0);
     }
+
+#ifdef CONFIG_FS_NOTIFY
+  if (ret >= 0)
+    {
+      notify_chstat(filep);
+    }
+#endif
 
   return ret;
 }
