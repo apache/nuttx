@@ -31,6 +31,7 @@
 #include <nuttx/sched_note.h>
 
 #include "inode/inode.h"
+#include "notify/notify.h"
 
 /****************************************************************************
  * Public Functions
@@ -89,7 +90,11 @@ int register_driver(FAR const char *path,
 
       node->u.i_ops   = fops;
       node->i_private = priv;
-      ret             = OK;
+      inode_unlock();
+#ifdef CONFIG_FS_NOTIFY
+      notify_create(path);
+#endif
+      return OK;
     }
 
   inode_unlock();

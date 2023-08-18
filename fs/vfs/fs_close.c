@@ -32,6 +32,7 @@
 
 #include <nuttx/fs/fs.h>
 
+#include "notify/notify.h"
 #include "inode/inode.h"
 #include "vfs/lock.h"
 

@@ -33,8 +33,9 @@
 
 #include <nuttx/fs/fs.h>
 
-#include "inode/inode.h"
 #include "driver/driver.h"
+#include "inode/inode.h"
+#include "notify/notify.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -494,6 +495,9 @@ int nx_mount(FAR const char *source, FAR const char *target,
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   RELEASE_SEARCH(&desc);
+#endif
+#ifdef CONFIG_FS_NOTIFY
+  notify_create(target);
 #endif
   return OK;
 
