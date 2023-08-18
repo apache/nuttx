@@ -1983,7 +1983,7 @@ static int cxd56_power_on_analog_output(FAR struct cxd56_dev_s *dev)
 }
 
 static int cxd56_set_mic_gains(uint8_t gain, enum cxd56_mic_type_e mic_dev,
-                                struct cxd56_aca_pwinput_param_s *param)
+                               struct cxd56_aca_pwinput_param_s *param)
 {
   int i;
   uint32_t mic_gain = (gain >= CXD56_MIC_GAIN_MAX) ?  CXD56_MIC_GAIN_MAX :
@@ -2002,13 +2002,13 @@ static int cxd56_set_mic_gains(uint8_t gain, enum cxd56_mic_type_e mic_dev,
     }
 
   if (fw_as_acacontrol(CXD56_ACA_CTL_INIT_AMIC,
-                     (uint32_t)param) != 0)
+                       (uint32_t)param) != 0)
     {
       return -EBUSY;
     }
 
   if (fw_as_acacontrol(CXD56_ACA_CTL_POWER_ON_INPUT,
-                     (uint32_t)param) != 0)
+                       (uint32_t)param) != 0)
     {
       return -EBUSY;
     }
@@ -2805,7 +2805,7 @@ static int cxd56_configure(FAR struct audio_lowerhalf_s *lower,
             audinfo("    Mic gain: %d\n", priv->mic_gain);
 
             if (priv->state != CXD56_DEV_STATE_OFF &&
-                priv->state != CXD56_DEV_STATE_STOPPED )
+                priv->state != CXD56_DEV_STATE_STOPPED)
               {
                 struct cxd56_aca_pwinput_param_s param;
                 if (cxd56_set_mic_gains(priv->mic_gain,
@@ -2854,7 +2854,7 @@ static int cxd56_configure(FAR struct audio_lowerhalf_s *lower,
 
         audinfo("Configured output using %d:\n", priv->dma_handle);
         audinfo("  Channels:    %d\n", priv->channels);
-        audinfo("  Samplerate:  %ld\n", priv->samplerate);
+        audinfo("  Samplerate:  %" PRIu32 "\n", priv->samplerate);
         audinfo("  Bit width:   %d\n", priv->bitwidth);
       }
       break;
@@ -2874,7 +2874,7 @@ static int cxd56_configure(FAR struct audio_lowerhalf_s *lower,
 
         audinfo("Configured input using %d:\n", priv->dma_handle);
         audinfo("  Channels:    %d\n", priv->channels);
-        audinfo("  Samplerate:  %ld\n", priv->samplerate);
+        audinfo("  Samplerate:  %" PRIu32 "\n", priv->samplerate);
         audinfo("  Bit width:   %d\n", priv->bitwidth);
       }
       break;

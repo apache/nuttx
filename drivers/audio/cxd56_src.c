@@ -425,9 +425,9 @@ int cxd56_src_init(FAR struct cxd56_dev_s *dev,
   g_src.channels = dev->channels;
   g_src.float_in_offset = 0;
   snprintf(g_src.mqname, sizeof(g_src.mqname), "/tmp/%X",
-           (unsigned int) &g_src);
+           (unsigned int)&g_src);
 
-  audinfo("SRC: Init (rate = %ld, channels = %d, width = %d)\n",
+  audinfo("SRC: Init (rate = %" PRIu32 ", channels = %d, width = %d)\n",
           dev->samplerate, g_src.channels, g_src.bytewidth);
 
   m_attr.mq_maxmsg  = 16;
