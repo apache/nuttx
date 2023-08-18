@@ -305,6 +305,12 @@
                                            *      to return sector size.
                                            * OUT: Data return in user-provided
                                            *      buffer. */
+#define BIOC_BLKGETSIZE _BIOC(0x0010)     /* Get block device sector numbers.
+                                           * IN:  Pointer to writable instance
+                                           *      of sector numbers in which
+                                           *      to return sector numbers.
+                                           * OUT: Data return in user-provided
+                                           *      buffer. */
 
 /* NuttX MTD driver ioctl definitions ***************************************/
 
