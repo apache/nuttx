@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/driver/fs_unregisterblockdriver.c
+ * fs/notify/notify.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,44 +18,41 @@
  *
  ****************************************************************************/
 
+#ifndef __FS_NOTIFY_NOTIFY_H
+#define __FS_NOTIFY_NOTIFY_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
 #include <nuttx/fs/fs.h>
 
-#include "inode/inode.h"
-#include "notify/notify.h"
-
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: unregister_blockdriver
- *
- * Description:
- *   Remove the block driver inode at 'path' from the pseudo-file system
- *
+ * Public Type Definitions
  ****************************************************************************/
 
-int unregister_blockdriver(FAR const char *path)
-{
-  int ret;
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
-  ret = inode_lock();
-  if (ret >= 0)
-    {
-      ret = inode_remove(path);
-      inode_unlock();
-#ifdef CONFIG_FS_NOTIFY
-      notify_unlink(path);
+/* These are internal OS interface and are not available to applications */
+
+void notify_open(FAR const char *path, int oflags);
+void notify_close(FAR struct file *filep);
+void notify_close2(FAR struct inode *inode);
+void notify_read(FAR struct file *filep);
+void notify_write(FAR struct file *filep);
+void notify_chstat(FAR struct file *filep);
+void notify_unlink(FAR const char *path);
+void notify_unmount(FAR const char *path);
+void notify_mkdir(FAR const char *path);
+void notify_create(FAR const char *path);
+void notify_rename(FAR const char *oldpath, bool oldisdir,
+                   FAR const char *newpath, bool newisdir);
+void notify_initialize(void);
+
 #endif
-      return OK;
-    }
-
-  inode_unlock();
-  return ret;
-}
