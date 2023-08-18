@@ -32,3 +32,8 @@ int isdigit(int c)
 {
   return c >= '0' && c <= '9';
 }
+
+int isdigit_l(int c, locale_t locale)
+{
+  return isdigit(c);
+}

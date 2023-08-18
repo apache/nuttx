@@ -32,3 +32,9 @@ int toupper(int c)
 {
   return (c >= 'a' && c <= 'z') ? c - 'a' + 'A' : c;
 }
+
+int toupper_l(int c, locale_t locale)
+{
+  return toupper(c);
+}
+
