@@ -29,6 +29,7 @@
 
 #include <nuttx/compiler.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/net/ip.h>
 #include <nuttx/net/netdev_lowerhalf.h>
 #include <nuttx/virtio/virtio.h>
 
@@ -232,11 +233,9 @@ static int virtio_net_ifup(FAR struct netdev_lowerhalf_s *dev)
   FAR struct virtio_net_priv_s *priv = (FAR struct virtio_net_priv_s *)dev;
 
 #ifdef CONFIG_NET_IPv4
-  vrtinfo("Bringing up: %d.%d.%d.%d\n",
-          (int)dev->netdev.d_ipaddr & 0xff,
-          (int)(dev->netdev.d_ipaddr >> 8) & 0xff,
-          (int)(dev->netdev.d_ipaddr >> 16) & 0xff,
-          (int)dev->netdev.d_ipaddr >> 24);
+  vrtinfo("Bringing up: %u.%u.%u.%u\n",
+          ip4_addr1(dev->netdev.d_ipaddr), ip4_addr2(dev->netdev.d_ipaddr),
+          ip4_addr3(dev->netdev.d_ipaddr), ip4_addr4(dev->netdev.d_ipaddr));
 #endif
 #ifdef CONFIG_NET_IPv6
   vrtinfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
