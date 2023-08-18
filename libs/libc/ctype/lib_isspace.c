@@ -33,3 +33,8 @@ int isspace(int c)
   return c == ' ' || c == '\t' || c == '\n' || c == '\r' ||
          c == '\f' || c == '\v';
 }
+
+int isspace_l(int c, locale_t locale)
+{
+  return isspace(c);
+}
