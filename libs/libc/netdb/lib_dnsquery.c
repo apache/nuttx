@@ -59,6 +59,7 @@
 
 #include <nuttx/lib/lib.h>
 #include <nuttx/net/net.h>
+#include <nuttx/net/ip.h>
 #include <nuttx/net/dns.h>
 
 #include "netdb/lib_dns.h"
@@ -502,11 +503,11 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int naddr,
 
           nameptr += 10 + 4;
 
-          ninfo("IPv4 address: %d.%d.%d.%d\n",
-                (int)((ans->u.ipv4.s_addr) & 0xff),
-                (int)((ans->u.ipv4.s_addr >> 8) & 0xff),
-                (int)((ans->u.ipv4.s_addr >> 16) & 0xff),
-                (int)((ans->u.ipv4.s_addr >> 24) & 0xff));
+          ninfo("IPv4 address: %u.%u.%u.%u\n",
+                ip4_addr1(ans->u.ipv4.s_addr),
+                ip4_addr2(ans->u.ipv4.s_addr),
+                ip4_addr3(ans->u.ipv4.s_addr),
+                ip4_addr4(ans->u.ipv4.s_addr));
 
           inaddr                  = &addr[naddr_read].ipv4;
           inaddr->sin_family      = AF_INET;

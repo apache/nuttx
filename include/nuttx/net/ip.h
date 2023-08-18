@@ -314,17 +314,17 @@ extern "C"
 #ifdef CONFIG_ENDIAN_BIG
   /* Big-endian byte order: 11223344 */
 
-#  define ip4_addr1(ipaddr) (((ipaddr) >> 24) & 0xff)
-#  define ip4_addr2(ipaddr) (((ipaddr) >> 16) & 0xff)
-#  define ip4_addr3(ipaddr) (((ipaddr) >>  8) & 0xff)
-#  define ip4_addr4(ipaddr)  ((ipaddr)        & 0xff)
+#  define ip4_addr1(ipaddr) ((uint8_t)(((ipaddr) >> 24) & 0xff))
+#  define ip4_addr2(ipaddr) ((uint8_t)(((ipaddr) >> 16) & 0xff))
+#  define ip4_addr3(ipaddr) ((uint8_t)(((ipaddr) >>  8) & 0xff))
+#  define ip4_addr4(ipaddr)  ((uint8_t)((ipaddr)        & 0xff))
 #else
   /* Little endian byte order: 44223311 */
 
-#  define ip4_addr1(ipaddr)  ((ipaddr)        & 0xff)
-#  define ip4_addr2(ipaddr) (((ipaddr) >>  8) & 0xff)
-#  define ip4_addr3(ipaddr) (((ipaddr) >> 16) & 0xff)
-#  define ip4_addr4(ipaddr) (((ipaddr) >> 24) & 0xff)
+#  define ip4_addr1(ipaddr)  ((uint8_t)((ipaddr)        & 0xff))
+#  define ip4_addr2(ipaddr) ((uint8_t)(((ipaddr) >>  8) & 0xff))
+#  define ip4_addr3(ipaddr) ((uint8_t)(((ipaddr) >> 16) & 0xff))
+#  define ip4_addr4(ipaddr) ((uint8_t)(((ipaddr) >> 24) & 0xff))
 #endif
 
 /****************************************************************************
@@ -470,14 +470,18 @@ extern "C"
 
 #ifdef CONFIG_NET_IPv4
 #  define net_ipv4addr_copy(dest, src) \
-   do { \
-     (dest) = (in_addr_t)(src); \
-   } while (0)
+   do \
+     { \
+       (dest) = (in_addr_t)(src); \
+     } \
+   while (0)
 #  define net_ipv4addr_hdrcopy(dest, src) \
-   do { \
-     ((FAR uint16_t *)(dest))[0] = ((FAR uint16_t *)(src))[0]; \
-     ((FAR uint16_t *)(dest))[1] = ((FAR uint16_t *)(src))[1]; \
-   } while (0)
+   do \
+     { \
+       ((FAR uint16_t *)(dest))[0] = ((FAR uint16_t *)(src))[0]; \
+       ((FAR uint16_t *)(dest))[1] = ((FAR uint16_t *)(src))[1]; \
+     } \
+   while (0)
 #endif
 
 #ifdef CONFIG_NET_IPv6
@@ -605,8 +609,8 @@ bool net_ipv6addr_maskcmp(const net_ipv6addr_t addr1,
  ****************************************************************************/
 
 #define net_ipv4addr_broadcast(addr, mask) \
-   (((in_addr_t)(addr) & ~(in_addr_t)(mask)) == \
-    ((in_addr_t)(0xffffffff) & ~(in_addr_t)(mask)))
+  (((in_addr_t)(addr) & ~(in_addr_t)(mask)) == \
+   ((in_addr_t)(0xffffffff) & ~(in_addr_t)(mask)))
 
 /****************************************************************************
  * Name: net_ipv6addr_prefixcmp

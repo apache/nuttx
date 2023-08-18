@@ -46,6 +46,7 @@
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/mii.h>
+#include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
 
 #ifdef CONFIG_NET_PKT
@@ -1928,9 +1929,9 @@ static int ez80emac_ifup(FAR struct net_driver_s *dev)
         dev->d_mac.ether.ether_addr_octet[3],
         dev->d_mac.ether.ether_addr_octet[4],
         dev->d_mac.ether.ether_addr_octet[5]);
-  ninfo("             IP  %d.%d.%d.%d\n",
-        dev->d_ipaddr >> 24,       (dev->d_ipaddr >> 16) & 0xff,
-       (dev->d_ipaddr >> 8) & 0xff, dev->d_ipaddr & 0xff);
+  ninfo("             IP  %u.%u.%u.%u\n",
+        ip4_addr1(dev->d_ipaddr), ip4_addr2(dev->d_ipaddr),
+        ip4_addr3(dev->d_ipaddr), ip4_addr4(dev->d_ipaddr));
 
   /* Bring up the interface -- Must be down right now */
 
