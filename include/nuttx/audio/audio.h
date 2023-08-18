@@ -355,6 +355,10 @@
 #define AUDIO_APB_DEQUEUED          (1 << 2)
 #define AUDIO_APB_FINAL             (1 << 3) /* Last buffer in the stream */
 
+/* Audio channels range wrapper macro */
+
+#define AUDIO_CHANNELS_RANGE(min, max) ((uint8_t)(((min) << 4) | ((max) & 0xf)))
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
