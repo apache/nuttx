@@ -228,7 +228,6 @@ struct mpfs_ddr_priv_s
   int                    error;
   uint32_t               timeout;
   uint32_t               retry_count;
-  uint32_t               write_latency;
   uint32_t               tip_cfg_params;
   uint32_t               dpc_bits;
   uint32_t               rpc_166_fifo_offset;
@@ -3010,7 +3009,6 @@ static void mpfs_ddr_manual_addcmd_training(struct mpfs_ddr_priv_s *priv)
 
 static void mpfs_ddr_sm_init(struct mpfs_ddr_priv_s *priv)
 {
-  priv->write_latency       = LIBERO_SETTING_CFG_WRITE_LATENCY_SET;
   priv->tip_cfg_params      = LIBERO_SETTING_TIP_CFG_PARAMS;
   priv->dpc_bits            = LIBERO_SETTING_DPC_BITS;
   priv->rpc_166_fifo_offset = DEFAULT_RPC_166_VALUE;
@@ -3703,6 +3701,7 @@ static int mpfs_dq_dqs(void)
 static int mpfs_training_write_calibration(struct mpfs_ddr_priv_s *priv)
 {
   int error;
+  uint32_t write_latency = LIBERO_SETTING_CFG_WRITE_LATENCY_SET;
 
   /* Now start the write calibration as training has been successful */
 
@@ -3722,47 +3721,21 @@ static int mpfs_training_write_calibration(struct mpfs_ddr_priv_s *priv)
 
 #endif
 
-  error = mpfs_write_calibration_using_mtc(priv);
+  /* Find the proper write latency by using mtc test */
+
+  do
+    {
+      putreg32(write_latency, MPFS_DDR_CSR_APB_CFG_DFI_T_PHY_WRLAT);
+      error = mpfs_write_calibration_using_mtc(priv);
+    }
+  while (error && ++write_latency <= WR_LATENCY_MAX);
+
+  /* Return error if mtc test failed on all allowed latency values */
+
   if (error)
     {
-      merr("Will retry..\n");
-      return -EAGAIN;
-    }
-
-  return 0;
-}
-
-/****************************************************************************
- * Name: mpfs_training_write_calib_retry
- *
- * Description:
- *   Increases the write latency value before retrying the process
- *
- * Input Parameters:
- *   priv    - Instance of the ddr private state structure
- *
- * Returned Value:
- *   Zero is returned on success. Nonzero indicates a failure
- *
- ****************************************************************************/
-
-static int mpfs_training_write_calib_retry(struct mpfs_ddr_priv_s *priv)
-{
-  memset(&calib_data, 0, sizeof(calib_data));
-
-  /* Try the next write latency value */
-
-  priv->write_latency++;
-  if (priv->write_latency > WR_LATENCY_MAX)
-    {
-      priv->write_latency = WR_LATENCY_MIN;
       merr("Write calib fail!\n");
       return -EIO;
-    }
-  else
-    {
-      putreg32(priv->write_latency,
-               MPFS_DDR_CSR_APB_CFG_DFI_T_PHY_WRLAT);
     }
 
   return 0;
@@ -3987,17 +3960,7 @@ static int mpfs_ddr_setup(struct mpfs_ddr_priv_s *priv)
 
   /* DDR_TRAINING_WRITE_CALIBRATION */
 
-  do
-    {
-      retval = mpfs_training_write_calibration(priv);
-      if (retval == -EAGAIN)
-        {
-          /* On success process is continued (0 returned) */
-
-          retval |= mpfs_training_write_calib_retry(priv);
-        }
-    }
-  while (retval == -EAGAIN);
+  retval = mpfs_training_write_calibration(priv);
 
   if (retval)
     {
