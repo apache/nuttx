@@ -1191,34 +1191,39 @@ static void esp_semphr_delete(void *semphr)
  *   Wait semaphore within a certain period of time
  *
  * Input Parameters:
- *   semphr - Semaphore data pointer
- *   ticks  - Wait system ticks
+ *   semphr          - Semaphore data pointer
+ *   block_time_tick - Wait system ticks
  *
  * Returned Value:
  *   True if success or false if fail
  *
  ****************************************************************************/
 
-static int32_t esp_semphr_take(void *semphr, uint32_t ticks)
+static int32_t esp_semphr_take(void *semphr, uint32_t block_time_tick)
 {
   int ret;
   sem_t *sem = (sem_t *)semphr;
 
-  if (ticks == OSI_FUNCS_TIME_BLOCKING)
+  if (block_time_tick == OSI_FUNCS_TIME_BLOCKING)
     {
       ret = nxsem_wait(sem);
-      if (ret)
-        {
-          wlerr("ERROR: Failed to wait sem\n");
-        }
     }
   else
     {
-      ret = nxsem_tickwait(sem, ticks);
-      if (ret)
+      if (block_time_tick > 0)
         {
-          wlerr("ERROR: Failed to wait sem in %lu ticks\n", ticks);
+          ret = nxsem_tickwait(sem, block_time_tick);
         }
+      else
+        {
+          ret = nxsem_trywait(sem);
+        }
+    }
+
+  if (ret)
+    {
+      wlerr("ERROR: Failed to wait sem in %lu ticks. Error=%d\n",
+            block_time_tick, ret);
     }
 
   return osi_errno_trans(ret);
@@ -1271,7 +1276,7 @@ static int32_t esp_semphr_take_from_isr(void *semphr, void *hptw)
 {
   *(int *)hptw = 0;
 
-  return esp_semphr_take(semphr, 0);
+  return esp_errno_trans(nxsem_trywait(semphr));
 }
 
 /****************************************************************************
