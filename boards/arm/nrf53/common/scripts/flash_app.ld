@@ -53,6 +53,7 @@ MEMORY
                     LENGTH = FLASH_IMG_SIZE
     datamem (rwx) : ORIGIN = RAM_CPUAPP_START_ADDR,
                     LENGTH = CONFIG_NRF53_CPUAPP_MEM_RAM_SIZE - RPTUN_SHMEM
+    shmem (rw)    : ORIGIN = 0x20078000, LENGTH = RPTUN_SHMEM
 }
 
 OUTPUT_ARCH(arm)
@@ -119,6 +120,15 @@ SECTIONS
         . = ALIGN(4);
         _ebss = ABSOLUTE(.);
     } > datamem
+
+    /* Shmem */
+
+    .shmem :
+    {
+        . = ALIGN(4);
+        *(.shmem);
+        KEEP(*(.shmem))
+    } > shmem
 
     /* Stabs debugging sections. */
 

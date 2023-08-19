@@ -30,6 +30,7 @@ MEMORY
 {
     progmem (rx)  : ORIGIN = 0x00000000, LENGTH = 1024K
     datamem (rwx) : ORIGIN = 0x20000000, LENGTH = 512K - RPTUN_SHMEM
+    shmem (rw)    : ORIGIN = 0x20078000, LENGTH = RPTUN_SHMEM
 }
 
 OUTPUT_ARCH(arm)
@@ -96,6 +97,15 @@ SECTIONS
         . = ALIGN(4);
         _ebss = ABSOLUTE(.);
     } > datamem
+
+    /* Shmem */
+
+    .shmem :
+    {
+        . = ALIGN(4);
+        *(.shmem);
+        KEEP(*(.shmem))
+    } > shmem
 
     /* Stabs debugging sections. */
 
