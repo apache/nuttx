@@ -1219,8 +1219,8 @@ static void sensor_rpmsg_ns_unbind_cb(FAR struct rpmsg_endpoint *ept)
   nxrmutex_unlock(&g_ept_lock);
 
   nxrmutex_destroy(&sre->lock);
-  kmm_free(sre);
   rpmsg_destroy_ept(ept);
+  kmm_free(sre);
 }
 
 static void sensor_rpmsg_device_ns_bound(FAR struct rpmsg_endpoint *ept)
