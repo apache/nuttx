@@ -528,3 +528,43 @@ int nrf53_rptun_init(const char *shmemname, const char *cpuname)
 errout:
   return ret;
 }
+
+/****************************************************************************
+ * Name: up_addrenv_va_to_pa
+ *
+ * Description:
+ *   This is needed by openamp/libmetal/lib/system/nuttx/io.c:78. The
+ *   physical memory is mapped as virtual.
+ *
+ * Input Parameters:
+ *   va_
+ *
+ * Returned Value:
+ *   va
+ *
+ ****************************************************************************/
+
+uintptr_t up_addrenv_va_to_pa(void *va)
+{
+  return (uintptr_t)va;
+}
+
+/****************************************************************************
+ * Name: up_addrenv_pa_to_va
+ *
+ * Description:
+ *   This is needed by openamp/libmetal/lib/system/nuttx/io.c. The
+ *   physical memory is mapped as virtual.
+ *
+ * Input Parameters:
+ *   pa
+ *
+ * Returned Value:
+ *   pa
+ *
+ ****************************************************************************/
+
+void *up_addrenv_pa_to_va(uintptr_t pa)
+{
+  return (void *)pa;
+}
