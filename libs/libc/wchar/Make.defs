@@ -27,7 +27,7 @@ CSRCS += lib_wcscoll.c lib_wcstol.c lib_wcstoll.c lib_wcstoul.c
 CSRCS += lib_wcstoull.c lib_wcstold.c lib_wcstof.c lib_wcstod.c
 CSRCS += lib_swprintf.c lib_mbsnrtowcs.c lib_wcsnrtombs.c lib_mbsinit.c
 CSRCS += lib_mbrlen.c lib_mbsrtowcs.c lib_wcsrtombs.c lib_wcscpy.c
-CSRCS += lib_wcscat.c lib_wcslcat.c lib_wcsncat.c
+CSRCS += lib_wcscat.c lib_wcslcat.c lib_wcsncat.c lib_wcsrchr.c
 
 # Add the wchar directory to the build
 
