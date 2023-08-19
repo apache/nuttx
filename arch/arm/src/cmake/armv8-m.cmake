@@ -20,16 +20,22 @@
 
 set(PLATFORM_FLAGS)
 
+if(CONFIG_ARM_DSP)
+  set(EXTCPUFLAGS +dsp)
+endif()
+
 if(CONFIG_ARCH_CORTEXM23)
   list(APPEND PLATFORM_FLAGS -mtune=cortex-m23 -march=armv8-m.main
        -mfloat-abi=soft)
 elseif(CONFIG_ARCH_CORTEXM33)
-  list(APPEND PLATFORM_FLAGS -mtune=cortex-m33 -march=armv8-m.main+dsp)
+  list(APPEND PLATFORM_FLAGS -mtune=cortex-m33
+       -march=armv8-m.main${EXTCPUFLAGS})
   if(CONFIG_ARCH_FPU)
     list(APPEND PLATFORM_FLAGS -mfpu=fpv5-sp-d16)
   endif()
 elseif(CONFIG_ARCH_CORTEXM35P)
-  list(APPEND PLATFORM_FLAGS -mtune=cortex-m35p -march=armv8-m.main+dsp)
+  list(APPEND PLATFORM_FLAGS -mtune=cortex-m35p
+       -march=armv8-m.main${EXTCPUFLAGS})
   if(CONFIG_ARCH_FPU)
     list(APPEND PLATFORM_FLAGS -mfpu=fpv5-sp-d16)
   endif()
@@ -38,7 +44,7 @@ elseif(CONFIG_ARCH_CORTEXM55)
   if(CONFIG_ARM_HAVE_MVE)
     list(APPEND PLATFORM_FLAGS -march=armv8.1-m.main+mve.fp+fp.dp)
   else()
-    list(APPEND PLATFORM_FLAGS -march=armv8.1-m.main+dsp)
+    list(APPEND PLATFORM_FLAGS -march=armv8.1-m.main${EXTCPUFLAGS})
   endif()
   if(CONFIG_ARCH_FPU)
     list(APPEND PLATFORM_FLAGS -mfpu=fpv5-d16)
