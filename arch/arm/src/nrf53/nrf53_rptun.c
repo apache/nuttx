@@ -33,7 +33,6 @@
 #include <nuttx/semaphore.h>
 
 #include "arm_internal.h"
-#include "hardware/nrf53_spu.h"
 
 #include "nrf53_ipc.h"
 
@@ -492,12 +491,6 @@ int nrf53_rptun_init(const char *shmemname, const char *cpuname)
   dev->master = true;
 #else
   dev->master = false;
-#endif
-
-#ifdef CONFIG_NRF53_APPCORE
-  /* Set secure domain - this allows net core to access shared mem */
-
-  putreg32(SPU_EXTDOMAIN_SECUREMAPPING_SECATTR, NRF53_SPU_EXTDOMAIN(0));
 #endif
 
   /* Subscribe to IPC */
