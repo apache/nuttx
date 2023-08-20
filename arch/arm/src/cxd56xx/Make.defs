@@ -120,6 +120,13 @@ ifeq ($(CONFIG_CXD56_CHARGER),y)
 CHIP_CSRCS += cxd56_charger.c
 endif
 
+ifeq ($(CONFIG_AUDIO_CXD56),y)
+CHIP_CSRCS += cxd56_nxaudio.c
+ifeq ($(CONFIG_AUDIO_CXD56_SRC),y)
+CHIP_CSRCS += cxd56_nxaudio_src.c
+endif
+endif
+
 ifeq ($(CONFIG_CXD56_GE2D),y)
 CHIP_CSRCS += cxd56_ge2d.c
 endif

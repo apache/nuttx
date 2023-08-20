@@ -292,6 +292,49 @@ config CXD56_CHARGER_TEMP_PRECISE
 		This option requires libm.
 endif
 
+comment "NuttX style Audio Driver Support"
+
+menu "NX Audio Driver Support"
+
+config AUDIO_CXD56
+	bool "CXD56 audio driver"
+	default n
+	depends on AUDIO
+	select AUDIO_DRIVER_SPECIFIC_BUFFERS
+	---help---
+		Enable support for audio playback using the CXD5247 chip on the
+		CXD56 Spresense board.
+
+if AUDIO_CXD56
+
+if AUDIO_DRIVER_SPECIFIC_BUFFERS
+
+config AUDIO_CXD56_SRC
+	bool "CXD56 audio sample rate converter"
+	select AUDIO_SRC
+	default n
+	---help---
+		Enable support for audio playback using the CXD5247 chip on the
+		CXD56 Spresense board with sample rate converter.
+
+config CXD56_AUDIO_NUM_BUFFERS
+	int "Number of audio buffers to use"
+	default 4
+
+config CXD56_AUDIO_BUFFER_SIZE
+	int "Size of each audio buffer"
+	default 4096
+
+endif # AUDIO_DRIVER_SPECIFIC_BUFFERS
+
+config CXD56_AUDIO_WORKER_STACKSIZE
+	int "Worker thread stack size"
+	default 768
+
+endif # AUDIO_CXD56
+
+endmenu # menu "NX Audio Driver Support"
+
 comment "Peripheral Support"
 
 menu "Peripheral Support"
