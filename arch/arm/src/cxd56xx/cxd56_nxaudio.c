@@ -43,10 +43,10 @@
 #include <arch/chip/audio.h>
 #include <arch/chip/chip.h>
 
-#include "cxd56.h"
+#include "cxd56_nxaudio.h"
 
 #ifdef CONFIG_AUDIO_CXD56_SRC
-#include "cxd56_src.h"
+#include "cxd56_nxaudio_src.h"
 #endif
 
 /****************************************************************************

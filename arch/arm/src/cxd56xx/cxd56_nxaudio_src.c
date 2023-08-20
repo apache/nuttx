@@ -35,8 +35,8 @@
 #include <nuttx/mqueue.h>
 #include <nuttx/queue.h>
 
-#include "cxd56.h"
-#include "cxd56_src.h"
+#include "cxd56_nxaudio.h"
+#include "cxd56_nxaudio_src.h"
 
 /****************************************************************************
  * Pre-processor Definitions

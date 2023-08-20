@@ -33,10 +33,10 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/audio/audio.h>
-#include <nuttx/audio/cxd56.h>
 #include <nuttx/audio/pcm.h>
 #include <nuttx/signal.h>
 #include <arch/chip/audio.h>
+#include <arch/chip/nxaudio.h>
 
 #include "chip.h"
 #include "arm_internal.h"
