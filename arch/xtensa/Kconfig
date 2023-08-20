@@ -307,7 +307,7 @@ config XTENSA_TOOLCHAIN_XCC
 
 config XTENSA_TOOLCHAIN_XCLANG
 	bool "Xtensa Toolchain use CLANG as front end"
-	select ARCH_TOOLCHAIN_GNU
+	select ARCH_TOOLCHAIN_CLANG
 
 config XTENSA_TOOLCHAIN_ESP
 	bool "ESP toolchain for xtensa"
