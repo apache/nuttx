@@ -436,7 +436,8 @@ endmenu # System Timer
 
 config NRF53_FLASH_PREFETCH
 	bool "Enable FLASH Pre-fetch"
-	default y
+	depends on NRF53_NETCORE
+	default n
 	---help---
 		Enable FLASH prefetch
 
