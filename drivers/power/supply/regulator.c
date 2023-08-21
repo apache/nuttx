@@ -964,6 +964,12 @@ regulator_register(FAR const struct regulator_desc_s *regulator_desc,
       return NULL;
     }
 
+  if (regulator_dev_lookup(regulator_desc->name))
+    {
+      pwrerr("regulator name is registered\n");
+      return NULL;
+    }
+
   if (regulator_ops->get_voltage && regulator_ops->get_voltage_sel)
     {
       pwrerr("get_voltage and get_voltage_sel are both assigned\n");
