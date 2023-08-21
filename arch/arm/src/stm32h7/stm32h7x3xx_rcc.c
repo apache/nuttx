@@ -76,6 +76,8 @@
 #    else
 #      define BOARD_FLASH_PROGDELAY  2
 #    endif
+#  else
+#    define BOARD_FLASH_PROGDELAY    2
 #  endif
 #endif
 
