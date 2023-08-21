@@ -1639,6 +1639,14 @@ config ARCH_BOARD_NUCLEO_H743ZI2
 	---help---
 		STMicro Nucleo H743ZI2 board based on the STMicro STM32H743ZI MCU.
 
+config ARCH_BOARD_NUCLEO_H745ZI
+	bool "STM32H745 Nucleo H745ZI"
+	depends on ARCH_CHIP_STM32H745ZI
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	---help---
+		STMicro Nucleo H745ZI board based on the STMicro STM32H745ZI MCU.
+
 config ARCH_BOARD_STM32H745I_DISCO
 	bool "STM32H745I-DISCO board"
 	depends on ARCH_CHIP_STM32H745XI
@@ -3071,7 +3079,8 @@ config ARCH_BOARD
 	default "nucleo-g071rb"             if ARCH_BOARD_NUCLEO_G071RB
 	default "nucleo-h743zi"             if ARCH_BOARD_NUCLEO_H743ZI
 	default "nucleo-h743zi2"            if ARCH_BOARD_NUCLEO_H743ZI2
-	default "stm32h745i-disco"         if ARCH_BOARD_STM32H745I_DISCO
+	default "nucleo-h745zi"             if ARCH_BOARD_NUCLEO_H745ZI
+	default "stm32h745i-disco"          if ARCH_BOARD_STM32H745I_DISCO
 	default "nucleo-l073rz"             if ARCH_BOARD_NUCLEO_L073RZ
 	default "nucleo-l152re"             if ARCH_BOARD_NUCLEO_L152RE
 	default "nucleo-l432kc"             if ARCH_BOARD_NUCLEO_L432KC
@@ -3660,6 +3669,9 @@ source "boards/arm/stm32h7/nucleo-h743zi/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_H743ZI2
 source "boards/arm/stm32h7/nucleo-h743zi2/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_H745ZI
+source "boards/arm/stm32h7/nucleo-h745zi/Kconfig"
 endif
 if ARCH_BOARD_STM32H745I_DISCO
 source "boards/arm/stm32h7/stm32h745i-disco/Kconfig"

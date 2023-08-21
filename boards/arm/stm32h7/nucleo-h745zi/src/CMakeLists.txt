@@ -1,5 +1,5 @@
 # ##############################################################################
-# boards/arm/stm32h7/stm32h745i-disco/src/CMakeLists.txt
+# boards/arm/stm32h7/nucleo-h745zi/src/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -26,30 +26,35 @@ else()
   list(APPEND SRCS stm32_userleds.c)
 endif()
 
-if(CONFIG_STM32H7_OTGFS)
-  list(APPEND SRCS stm32_usb.c)
-endif()
-
 if(CONFIG_BOARDCTL)
   list(APPEND SRCS stm32_appinitialize.c)
 endif()
 
-if(CONFIG_TESTING_OSTEST)
-  list(APPEND SRCS stm32_ostest.c)
-endif()
-
-if(CONFIG_BOARDCTL_RESET)
-  list(APPEND SRCS stm32_reset.c)
-endif()
-
-if(CONFIG_INPUT_FT5X06)
-  list(APPEND SRCS stm32_ft5x06.c)
-endif()
-
-if(CONFIG_STM32H7_LTDC)
-  list(APPEND SRCS stm32_lcd.c)
-endif()
-
 target_sources(board PRIVATE ${SRCS})
 
-set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/flash.ld")
+if(CONFIG_ARCH_CHIP_STM32H7_CORTEXM7)
+  if(CONFIG_STM32_APP_FORMAT_MCUBOOT)
+    if(CONFIG_MCUBOOT_BOOTLOADER)
+      set_property(
+        GLOBAL PROPERTY LD_SCRIPT
+                        "${NUTTX_BOARD_DIR}/scripts/flash-mcuboot-loader.ld")
+    else()
+      set_property(
+        GLOBAL PROPERTY LD_SCRIPT
+                        "${NUTTX_BOARD_DIR}/scripts/flash-mcuboot-app.ld")
+    endif()
+  else()
+    set_property(GLOBAL PROPERTY LD_SCRIPT
+                                 "${NUTTX_BOARD_DIR}/scripts/flash.ld")
+  endif()
+else()
+  set_property(GLOBAL PROPERTY LD_SCRIPT
+                               "${NUTTX_BOARD_DIR}/scripts/flash_m4.ld")
+endif()
+
+if(NOT CONFIG_BUILD_FLAT)
+  add_subdirectory(${NUTTX_BOARD_DIR}/kernel)
+  set_property(
+    GLOBAL PROPERTY LD_SCRIPT_USER ${NUTTX_BOARD_DIR}/scripts/memory.ld
+                    ${NUTTX_BOARD_DIR}/scripts/user-space.ld)
+endif()
