@@ -2090,6 +2090,15 @@ config STM32H7_QSPI_REGDEBUG
 
 endmenu
 
+config STM32H7_BYPASS_CLOCKCONFIG
+	bool "Bypass clock configuration"
+	depends on ARCH_STM32H7_DUALCORE
+	default n if ARCH_CHIP_STM32H7_CORTEXM7
+	default y if ARCH_CHIP_STM32H7_CORTEXM4
+	---help---
+		Bypass clock configuration. For dual core chips only one core
+		should configure clocks
+
 config STM32H7_CUSTOM_CLOCKCONFIG
 	bool "Custom clock configuration"
 	default n
