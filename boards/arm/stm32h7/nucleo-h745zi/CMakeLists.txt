@@ -1,5 +1,5 @@
 # ##############################################################################
-# boards/arm/stm32h7/stm32h745i-disco/src/CMakeLists.txt
+# boards/arm/stm32h7/nucleo-h745zi/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -18,38 +18,4 @@
 #
 # ##############################################################################
 
-set(SRCS stm32_boot.c stm32_bringup.c)
-
-if(CONFIG_ARCH_LEDS)
-  list(APPEND SRCS stm32_autoleds.c)
-else()
-  list(APPEND SRCS stm32_userleds.c)
-endif()
-
-if(CONFIG_STM32H7_OTGFS)
-  list(APPEND SRCS stm32_usb.c)
-endif()
-
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinitialize.c)
-endif()
-
-if(CONFIG_TESTING_OSTEST)
-  list(APPEND SRCS stm32_ostest.c)
-endif()
-
-if(CONFIG_BOARDCTL_RESET)
-  list(APPEND SRCS stm32_reset.c)
-endif()
-
-if(CONFIG_INPUT_FT5X06)
-  list(APPEND SRCS stm32_ft5x06.c)
-endif()
-
-if(CONFIG_STM32H7_LTDC)
-  list(APPEND SRCS stm32_lcd.c)
-endif()
-
-target_sources(board PRIVATE ${SRCS})
-
-set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/flash.ld")
+add_subdirectory(src)

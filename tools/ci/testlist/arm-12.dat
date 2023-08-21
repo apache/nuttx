@@ -81,3 +81,8 @@ CMake,nucleo-h743zi2:socketcan
 CMake,stm32h745i-disco:netnsh
 CMake,stm32h745i-disco:nsh
 CMake,stm32h745i-disco:touchtest
+
+CMake,nucleo-h745zi:nsh_cm4
+CMake,nucleo-h745zi:nsh_cm4_rptun
+CMake,nucleo-h745zi:nsh_cm7
+CMake,nucleo-h745zi:nsh_cm7_rptun
