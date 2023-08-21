@@ -468,7 +468,6 @@ config ARCH_CHIP_STM32F7
 
 config ARCH_CHIP_STM32H7
 	bool "STMicro STM32 H7"
-	select ARCH_CORTEXM7
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_I2CRESET
 	select ARCH_HAVE_PROGMEM
@@ -479,11 +478,8 @@ config ARCH_CHIP_STM32H7
 	select ARCH_HAVE_TICKLESS
 	select ARCH_HAVE_TIMEKEEPING
 	---help---
-		STMicro STM32H7 architectures (ARM Cortex-M7).
-
-		BEWARE: This is a work-in-progress and not yet ready for general
-		usage.  See boards/arm/stm32/nucleo-h743zi/README.txt for the
-		current state of the port.
+		STMicro STM32H7 architectures (ARM Cortex-M7 or
+		dual ARM Cortex-M7 Cortex-M4).
 
 config ARCH_CHIP_STM32L4
 	bool "STMicro STM32 L4"

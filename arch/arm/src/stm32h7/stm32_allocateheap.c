@@ -44,12 +44,20 @@
 #include "arm_internal.h"
 #include "hardware/stm32_memorymap.h"
 #include "stm32_mpuinit.h"
-#include "stm32_dtcm.h"
+
+#ifdef CONFIG_ARCH_CHIP_STM32H7_CORTEXM7
+#  include "stm32_dtcm.h"
+#endif
 #include "stm32_fmc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#if defined(CONFIG_ARCH_CHIP_STM32H7_CORTEXM7) && \
+    !defined(CONFIG_STM32H7_CORTEXM4_ENABLED)
+
+/* Configuration for M7 core and M4 core support disabled */
 
 /* At startup the kernel will invoke arm_addregion() so that platform code
  * may register available memories for use as part of system heap.
@@ -100,11 +108,33 @@
 
 /* Set the start and end of the SRAMs */
 
-#define SRAM_START STM32_AXISRAM_BASE
-#define SRAM_END   (SRAM_START + STM32H7_SRAM_SIZE)
+#  define SRAM_START STM32_AXISRAM_BASE
+#  define SRAM_END   (SRAM_START + STM32H7_SRAM_SIZE)
 
-#define SRAM123_START STM32_SRAM123_BASE
-#define SRAM123_END   (SRAM123_START + STM32H7_SRAM123_SIZE)
+#  define SRAM123_START STM32_SRAM123_BASE
+#  define SRAM123_END   (SRAM123_START + STM32H7_SRAM123_SIZE)
+
+#elif defined(CONFIG_ARCH_CHIP_STM32H7_CORTEXM7) && \
+      defined(CONFIG_STM32H7_CORTEXM4_ENABLED)
+
+/* Configuration for M7 core and M4 core support enabled */
+
+#  define SRAM_START STM32_AXISRAM_BASE
+#  define SRAM_END   (SRAM_START + STM32H7_SRAM_SIZE)
+
+/* Exclude SRAM123 */
+
+#  undef SRAM123_START
+#  undef SRAM123_END
+
+#elif defined(CONFIG_ARCH_CHIP_STM32H7_CORTEXM4)
+
+/* Configuration for M4 core support enabled */
+
+#  define SRAM_START STM32_SRAM123_BASE
+#  define SRAM_END   (SRAM_START + STM32H7_SRAM123_SIZE - \
+                      STM32H7_SRAM3_SIZE)
+#endif
 
 #undef HAVE_SRAM4
 #if !defined(CONFIG_STM32H7_SRAM4EXCLUDE)
@@ -128,6 +158,12 @@
 
 #ifdef CONFIG_STM32H7_DTCMEXCLUDE
 #  undef HAVE_DTCM
+#endif
+
+#if defined(SRAM123_START) || defined(HAVE_SRAM4) ||                    \
+    defined(BOARD_SDRAM1_SIZE) || defined(BOARD_SDRAM2_SIZE) ||           \
+    defined(CONFIG_ARCH_HAVE_HEAP2)
+#  define HAVE_MMREGIONS 1
 #endif
 
 /****************************************************************************
@@ -201,6 +237,7 @@ static inline void up_heap_color(void *start, size_t size)
 void up_allocate_heap(void **heap_start, size_t *heap_size)
 {
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
+
   /* Get the unaligned size and position of the user-space heap.
    * This heap begins after the user-space .bss section at an offset
    * of CONFIG_MM_KERNEL_HEAPSIZE (subject to alignment).
@@ -310,7 +347,7 @@ void up_allocate_kheap(void **heap_start, size_t *heap_size)
  *
  ****************************************************************************/
 
-static void addregion (uintptr_t start, uint32_t size, const char *desc)
+static void addregion(uintptr_t start, uint32_t size, const char *desc)
 {
   /* Display memory ranges to help debugging */
 
@@ -321,7 +358,6 @@ static void addregion (uintptr_t start, uint32_t size, const char *desc)
   /* Allow user-mode access to the SRAM123 heap */
 
   stm32_mpu_uheap(start, size);
-
 #endif
 
   /* Colorize the heap for debug */
@@ -348,11 +384,13 @@ void arm_addregion(void)
 
   unsigned mm_regions = 1;
 
+#ifdef SRAM123_START
   if (mm_regions < CONFIG_MM_REGIONS)
     {
       addregion (SRAM123_START, SRAM123_END - SRAM123_START, "SRAM1,2,3");
       mm_regions++;
     }
+#endif
 
 #ifdef HAVE_SRAM4
   if (mm_regions < CONFIG_MM_REGIONS)

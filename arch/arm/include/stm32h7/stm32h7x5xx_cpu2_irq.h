@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/include/stm32h7/stm32h7x5xx_irq.h
+ * arch/arm/include/stm32h7/stm32h7x5xx_cpu2_irq.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,7 +22,7 @@
  * only indirectly through arch/irq.h
  */
 
-#ifndef __ARCH_ARM_INCLUDE_STM32H7_STM32H7X5XX_IRQ_H
+#ifndef __ARCH_ARM_INCLUDE_STM32H7_STM32H7X5XX_CPU2_IRQ_H
 
 /****************************************************************************
  * Included Files
@@ -47,7 +47,7 @@
  * External interrupts (vectors >= 16)
  */
 
-#define STM32_IRQ_WWDG1        (STM32_IRQ_FIRST + 0)    /*  0: Window Watchdog interrupt */
+#define STM32_IRQ_WWDG2        (STM32_IRQ_FIRST + 0)    /*  0: Window Watchdog interrupt */
 #define STM32_IRQ_PVDPVM       (STM32_IRQ_FIRST + 1)    /*  1: PVD through EXTI line detection interrupt */
 #define STM32_IRQ_RTC          (STM32_IRQ_FIRST + 2)    /*  2: RTC tamper, timestamp */
 #define STM32_IRQ_CSSLSE       (STM32_IRQ_FIRST + 2)    /*  2: CSS LSE */
@@ -116,8 +116,8 @@
 #define STM32_IRQ_ETH          (STM32_IRQ_FIRST + 61)   /* 61: Ethernet global interrupt */
 #define STM32_IRQ_ETHWKUP      (STM32_IRQ_FIRST + 62)   /* 62: Ethernet wakeup through EXTI line interrupt */
 #define STM32_IRQ_FDCANCAL     (STM32_IRQ_FIRST + 63)   /* 63: CAN2TX interrupts */
-#define STM32_IRQ_CM7SEND      (STM32_IRQ_FIRST + 64)   /* 64: Cortex-M7 Send event interrupt */
-#define STM32_IRQ_RESERVED65   (STM32_IRQ_FIRST + 65)   /* 65: Reserved */
+#define STM32_IRQ_RESERVED64   (STM32_IRQ_FIRST + 64)   /* 64: Reserved */
+#define STM32_IRQ_CM4SEND      (STM32_IRQ_FIRST + 65)   /* 64: Cortex-M4 Send event interrupt */
 #define STM32_IRQ_RESERVED66   (STM32_IRQ_FIRST + 66)   /* 66: Reserved */
 #define STM32_IRQ_RESERVED67   (STM32_IRQ_FIRST + 67)   /* 67: Reserved */
 #define STM32_IRQ_DMA2S5       (STM32_IRQ_FIRST + 68)   /* 68: DMA2 Stream5 interrupt */
@@ -178,8 +178,8 @@
 #define STM32_IRQ_MDMA         (STM32_IRQ_FIRST + 122)  /* 122: MDMA */
 #define STM32_IRQ_JPEG         (STM32_IRQ_FIRST + 123)  /* 123: JPEG */
 #define STM32_IRQ_SDMMC2       (STM32_IRQ_FIRST + 124)  /* 124: SDMMC2 global interrupt */
-#define STM32_IRQ_HSEM0        (STM32_IRQ_FIRST + 125)  /* 125: HSEM global interrupt 0 */
-#define STM32_IRQ_RESERVED126  (STM32_IRQ_FIRST + 126)  /* 126: Reserved */
+#define STM32_IRQ_RESERVED125  (STM32_IRQ_FIRST + 125)  /* 125: Reserved */
+#define STM32_IRQ_HSEM1        (STM32_IRQ_FIRST + 126)  /* 126: HSEM global interrupt 1 */
 #define STM32_IRQ_ADC3         (STM32_IRQ_FIRST + 127)  /* 127: ADC3 global interrupt */
 #define STM32_IRQ_DMAMUX2OVR   (STM32_IRQ_FIRST + 128)  /* 128: DMAMUX2 overrun interrupt */
 #define STM32_IRQ_BDMACH1      (STM32_IRQ_FIRST + 129)  /* 129: BDMA channel 1 interrupt */
@@ -196,7 +196,7 @@
 #define STM32_IRQ_LPTIM4       (STM32_IRQ_FIRST + 140)  /* 140: LPTIM2 timer interrupt */
 #define STM32_IRQ_LPTIM5       (STM32_IRQ_FIRST + 141)  /* 141: LPTIM2 timer interrupt */
 #define STM32_IRQ_LPUART       (STM32_IRQ_FIRST + 142)  /* 142: LPUART global interrupt */
-#define STM32_IRQ_WWDG2RST     (STM32_IRQ_FIRST + 143)  /* 143: Window Watchdog 2 interrupt */
+#define STM32_IRQ_WWDG1RST     (STM32_IRQ_FIRST + 143)  /* 143: Window Watchdog 1 interrupt */
 #define STM32_IRQ_CRS          (STM32_IRQ_FIRST + 144)  /* 144: Clock Recovery System global interrupt */
 #define STM32_IRQ_ECC          (STM32_IRQ_FIRST + 145)  /* 145: ECC */
 #define STM32_IRQ_SAI4         (STM32_IRQ_FIRST + 146)  /* 146: SAI4  global interrupt */
@@ -207,4 +207,4 @@
 #define STM32_IRQ_NEXTINTS     150
 #define NR_IRQS                (STM32_IRQ_FIRST + STM32_IRQ_NEXTINTS)
 
-#endif /* __ARCH_ARM_INCLUDE_STM32H7_STM32H7X5XX_IRQ_H */
+#endif /* __ARCH_ARM_INCLUDE_STM32H7_STM32H7X5XX_CPU2_IRQ_H */
