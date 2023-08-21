@@ -27,6 +27,19 @@ First, install the following set of system dependencies according to your Operat
       libgmp-dev libmpc-dev libmpfr-dev libisl-dev binutils-dev libelf-dev \
       libexpat-dev gcc-multilib g++-multilib picocom u-boot-tools util-linux
 
+.. tab:: Linux (Fdora / RPM based)
+
+    Run the following command to install packages:
+
+    .. code-block:: console
+
+      sudo dnf install \
+    bison flex gettext texinfo ncurses-devel ncurses ncurses-compat-libs \
+    gperf automake libtool pkgconfig @development-tools gperf genromfs \
+    gmp-devel mpfr-devel libmpc-devel isl-devel binutils-devel elfutils-libelf-devel \
+    expat-devel gcc-c++ g++ picocom uboot-tools util-linux
+
+
   .. tab:: macOS
   
     Run the following command to install packages:  
