@@ -29,6 +29,10 @@ ifeq ($(CONFIG_STM32H7_PROGMEM),y)
 CHIP_CSRCS += stm32_flash.c
 endif
 
+ifeq ($(CONFIG_STM32H7_HSEM),y)
+CHIP_CSRCS += stm32_hsem.c
+endif
+
 # Required STM32H7 files
 
 CHIP_CSRCS += stm32_allocateheap.c stm32_exti_gpio.c stm32_gpio.c stm32_irq.c
