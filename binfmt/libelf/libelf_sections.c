@@ -166,6 +166,65 @@ static inline int elf_sectname(FAR struct elf_loadinfo_s *loadinfo,
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: elf_loadphdrs
+ *
+ * Description:
+ *   Loads program headers into memory.
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int elf_loadphdrs(FAR struct elf_loadinfo_s *loadinfo)
+{
+  size_t phdrsize;
+  int ret;
+
+  DEBUGASSERT(loadinfo->phdr == NULL);
+
+  /* Verify that there are programs */
+
+  if (loadinfo->ehdr.e_phnum < 1)
+    {
+      berr("No programs(?)\n");
+      return -EINVAL;
+    }
+
+  /* Get the total size of the program header table */
+
+  phdrsize = (size_t)loadinfo->ehdr.e_phentsize *
+             (size_t)loadinfo->ehdr.e_phnum;
+  if (loadinfo->ehdr.e_phoff + phdrsize > loadinfo->filelen)
+    {
+      berr("Insufficient space in file for program header table\n");
+      return -ESPIPE;
+    }
+
+  /* Allocate memory to hold a working copy of the program header table */
+
+  loadinfo->phdr = (FAR FAR Elf_Phdr *)kmm_malloc(phdrsize);
+  if (!loadinfo->phdr)
+    {
+      berr("Failed to allocate the program header table. Size: %ld\n",
+           (long)phdrsize);
+      return -ENOMEM;
+    }
+
+  /* Read the program header table into memory */
+
+  ret = elf_read(loadinfo, (FAR uint8_t *)loadinfo->phdr, phdrsize,
+                 loadinfo->ehdr.e_phoff);
+  if (ret < 0)
+    {
+      berr("Failed to read program header table: %d\n", ret);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: elf_loadshdrs
  *
  * Description:

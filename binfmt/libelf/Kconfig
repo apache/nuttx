@@ -73,3 +73,11 @@ config ELF_COREDUMP
 		The memory state embeds a snapshot of all segments mapped in the
 		memory space of the program. The CPU state contains register values
 		when the core dump has been generated.
+
+config ELF_LOADTO_LMA
+	bool "ELF load sections to LMA"
+	default n
+	---help---
+		Load all section to LMA not VMA, so the startup code(e.g. start.S) need
+		relocate .data section to the final address(VMA) and zero .bss section
+		by self.
