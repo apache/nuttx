@@ -165,7 +165,7 @@ int lib_mode2oflags(FAR const char *mode)
     {
       switch (*mode)
         {
-          /* Open for read access ("r{b|x|+}") */
+          /* Open for read access ("r{m|b|x|+}") */
 
           case 'r' :
             if (state == MODE_NONE)
@@ -261,6 +261,15 @@ int lib_mode2oflags(FAR const char *mode)
                 default:
                   goto errout;
                   break;
+              }
+            break;
+
+          /* Attempt to access the file using mmap. */
+
+          case 'm' :
+            if (state != MODE_R)
+              {
+                goto errout;
               }
             break;
 
