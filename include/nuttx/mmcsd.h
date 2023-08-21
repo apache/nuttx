@@ -61,6 +61,19 @@ enum rpmb_op_type
   MMC_RPMB_READ_RESP = 0x05
 };
 
+struct rpmb_frame
+{
+  uint8_t  stuff[196];
+  uint8_t  key_mac[32];
+  uint8_t  data[256];
+  uint8_t  nonce[16];
+  uint32_t write_counter;
+  uint16_t addr;
+  uint16_t block_count;
+  uint16_t result;
+  uint16_t req_resp;
+};
+
 struct mmc_ioc_cmd
 {
   /* Direction of data: nonzero = write, zero = read.
@@ -107,19 +120,6 @@ struct mmc_ioc_multi_cmd
 {
   uint64_t num_of_cmds;
   struct mmc_ioc_cmd cmds[1];
-};
-
-struct mmc_rpmb_frame_s
-{
-  uint8_t  stuff[196];
-  uint8_t  key_mac[32];
-  uint8_t  data[256];
-  uint8_t  nonce[16];
-  uint32_t write_counter;
-  uint16_t addr;
-  uint16_t block_count;
-  uint16_t result;
-  uint16_t req_resp;
 };
 
 /****************************************************************************
