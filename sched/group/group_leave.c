@@ -128,7 +128,7 @@ static void group_remove(FAR struct task_group_s *group)
 
 static inline void group_release(FAR struct task_group_s *group)
 {
-#if CONFIG_TLS_TASK_NELEM > 0
+#if defined(CONFIG_TLS_TASK_NELEM) && CONFIG_TLS_TASK_NELEM > 0
   task_tls_destruct();
 #endif
 

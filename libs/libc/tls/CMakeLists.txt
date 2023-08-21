@@ -21,7 +21,7 @@
 set(SRCS task_getinfo.c tls_getinfo.c)
 
 if(NOT CONFIG_TLS_TASK_NELEM EQUAL 0)
-  list(APPEND SRCS task_tls.c)
+  list(APPEND SRCS task_tls.c task_tls_destruct.c)
 endif()
 
 if(NOT CONFIG_TLS_NELEM EQUAL 0)

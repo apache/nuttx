@@ -64,7 +64,7 @@ void pthread_exit(FAR void *exit_value)
   pthread_cleanup_popall(tls_get_info());
 #endif
 
-#if CONFIG_TLS_NELEM > 0
+#if defined(CONFIG_TLS_NELEM) && CONFIG_TLS_NELEM > 0
   tls_destruct();
 #endif
 
