@@ -44,6 +44,7 @@ config TLS_LOG2_MAXSTACK
 
 config TLS_NELEM
 	int "Number of TLS elements"
+	depends on !DISABLE_PTHREAD
 	default 0
 	range 0 255
 	---help---
@@ -56,6 +57,7 @@ config TLS_NELEM
 
 config TLS_TASK_NELEM
 	int "Number of Task Local Storage elements"
+	depends on !BUILD_KERNEL
 	default 0
 	range 0 255
 	---help---

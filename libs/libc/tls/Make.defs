@@ -21,7 +21,7 @@
 CSRCS += task_getinfo.c tls_getinfo.c
 
 ifneq ($(CONFIG_TLS_TASK_NELEM),0)
-CSRCS += task_tls.c
+CSRCS += task_tls.c task_tls_destruct.c
 endif
 
 ifneq ($(CONFIG_TLS_NELEM),0)

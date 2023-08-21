@@ -96,7 +96,7 @@ NXSYMBOLS(pthread_cond_init)
 NXSYMBOLS(pthread_cond_signal)
 NXSYMBOLS(pthread_cond_wait)
 NXSYMBOLS(pthread_create)
-#if CONFIG_TLS_NELEM > 0
+#if defined(CONFIG_TLS_NELEM) && CONFIG_TLS_NELEM > 0
 NXSYMBOLS(pthread_getspecific)
 NXSYMBOLS(pthread_key_create)
 #endif
@@ -105,7 +105,7 @@ NXSYMBOLS(pthread_mutex_destroy)
 NXSYMBOLS(pthread_mutex_init)
 NXSYMBOLS(pthread_mutex_lock)
 NXSYMBOLS(pthread_mutex_unlock)
-#if CONFIG_TLS_NELEM > 0
+#if defined(CONFIG_TLS_NELEM) && CONFIG_TLS_NELEM > 0
 NXSYMBOLS(pthread_setspecific)
 #endif
 NXSYMBOLS(pthread_sigmask)

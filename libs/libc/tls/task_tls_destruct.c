@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/task/task_tls_alloc.c
+ * libs/libc/tls/task_tls_destruct.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -34,7 +34,7 @@
  * Private Data
  ****************************************************************************/
 
-#if CONFIG_TLS_TASK_NELEM > 0
+#if defined(CONFIG_TLS_TASK_NELEM) && CONFIG_TLS_TASK_NELEM > 0
 
 static mutex_t g_tlslock = NXMUTEX_INITIALIZER;
 static tls_dtor_t g_tlsdtor[CONFIG_TLS_TASK_NELEM];
@@ -57,7 +57,7 @@ static void tls_dtor(FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: task_tls_allocs
+ * Name: task_tls_alloc
  *
  * Description:
  *   Allocate a global-unique task local storage data index
