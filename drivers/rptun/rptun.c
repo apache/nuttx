@@ -743,6 +743,8 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
         {
           cb->device_created(&priv->rvdev.rdev, cb->priv);
         }
+
+      rptun_update_rx(priv);
     }
 
   nxrmutex_unlock(&g_rptun_lockcb);
