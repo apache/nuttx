@@ -17,9 +17,9 @@
 # the License.
 #
 # ##############################################################################
-if(CONFIG_LIBFDT)
+if(CONFIG_LIBC_FDT)
 
-  set(VERSION CONFIG_LIBFDT_DTC_VERSION)
+  set(VERSION CONFIG_LIBC_FDT_DTC_VERSION)
 
   FetchContent_Declare(
     dtc URL https://github.com/dgibson/dtc/archive/v$(VERSION).zip)
