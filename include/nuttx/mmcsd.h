@@ -73,6 +73,11 @@ struct mmc_ioc_cmd
   unsigned int blksz;
   unsigned int blocks;
 
+  /* Override driver-computed timeouts.  Note the difference in units! */
+
+  unsigned int data_timeout_ns;
+  unsigned int cmd_timeout_ms;
+
   /* For 64-bit machines, the next member, ``uint64_t data_ptr``, wants to
    * be 8-byte aligned.  Make sure this struct is the same size when
    * built for 32-bit.
