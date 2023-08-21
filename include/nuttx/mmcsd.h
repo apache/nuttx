@@ -43,17 +43,23 @@
 #define MMC_IOC_MAX_CMDS        255
 #define mmc_ioc_cmd_set_data(ic, ptr) (ic).data_ptr = (uint64_t)(unsigned long)(ptr)
 
-/* rpmb request */
-
-#define MMC_RPMB_WRITE_KEY      0x01
-#define MMC_RPMB_READ_CNT       0x02
-#define MMC_RPMB_WRITE          0x03
-#define MMC_RPMB_READ           0x04
-#define MMC_RPMB_READ_RESP      0x05
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+/* rpmb request */
+
+enum rpmb_op_type
+{
+  MMC_RPMB_WRITE_KEY = 0x01,
+  MMC_RPMB_READ_CNT  = 0x02,
+  MMC_RPMB_WRITE     = 0x03,
+  MMC_RPMB_READ      = 0x04,
+
+  /* For internal usage only, do not use it directly */
+
+  MMC_RPMB_READ_RESP = 0x05
+};
 
 struct mmc_ioc_cmd
 {
