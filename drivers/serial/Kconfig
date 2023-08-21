@@ -679,6 +679,75 @@ source "drivers/serial/Kconfig-lpuart"
 source "drivers/serial/Kconfig-usart"
 source "drivers/serial/Kconfig-sci"
 
+config RAM_UART
+	bool "RAM uart driver"
+	select SERIAL_RXDMA
+	select SERIAL_TXDMA
+	default n
+	---help---
+		It uses the memory block in the kernel as a communication medium,
+		which can communicate between different processes or different CPUs
+
+if RAM_UART
+config RAM_UART_POLLING_INTERVAL
+	int "RAM uart buffer check interval"
+	default USEC_PER_TICK
+	---help---
+		Interval in milliseconds to check for new data on uart ram buffer
+
+config RAM_UART_BUFSIZE
+	int "RAM_UART buffer size"
+	default 1024
+	---help---
+		The size of the RAM_UART buffer in bytes
+
+config RAM_UART0
+	bool "RAM uart driver 0"
+	default n
+	---help---
+		RAM_UART device 0
+
+config RAM_UART0_SLAVE
+	bool "RAM_UART0 is slave"
+	depends on RAM_UART0
+	default n
+	---help---
+		The RAM uart0 is slave
+
+config RAM_UART1
+	bool "RAM uart driver 1"
+	default n
+	---help---
+		RAM uart device 1
+
+config RAM_UART1_SLAVE
+	bool "RAM uart1 is slave"
+	depends on RAM_UART1
+	default n
+	---help---
+		The RAM uart1 is slave
+
+config RAM_UART2
+	bool "RAM uart driver 2"
+	default n
+	---help---
+		RAM uart device 2
+
+config RAM_UART2_SLAVE
+	bool "RAM uart2 is slave"
+	depends on RAM_UART2
+	default n
+	---help---
+		The RAM uart2 is slave
+
+config RAM_UART_BUFFER_SECTION
+	string "RAM uart buffer section name"
+	depends on RAM_UART0 || RAM_UART1 || RAM_UART2
+	---help---
+		The name of the section in the kernel memory block
+
+endif # RAM_UART
+
 menuconfig PSEUDOTERM
 	bool "Pseudo-Terminal (PTY) support"
 	default n

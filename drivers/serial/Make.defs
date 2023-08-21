@@ -61,6 +61,11 @@ ifeq ($(CONFIG_UART_BTH5),y)
   CSRCS += uart_bth5.c
 endif
 
+# RAM uart support
+
+ifeq ($(CONFIG_RAM_UART),y)
+  CSRCS += uart_ram.c
+endif
 
 # Include serial build support
 
