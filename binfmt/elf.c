@@ -142,6 +142,23 @@ static void elf_dumploadinfo(FAR struct elf_loadinfo_s *loadinfo)
   binfo("  e_shnum:      %d\n",    loadinfo->ehdr.e_shnum);
   binfo("  e_shstrndx:   %d\n",    loadinfo->ehdr.e_shstrndx);
 
+  if (loadinfo->phdr && loadinfo->ehdr.e_phnum > 0)
+    {
+      for (i = 0; i < loadinfo->ehdr.e_phnum; i++)
+        {
+          FAR Elf_Phdr *phdr = &loadinfo->phdr[i];
+          binfo("Programs %d:\n", i);
+          binfo("  p_type:       %08jx\n", (uintmax_t)phdr->p_type);
+          binfo("  p_offset:     %08jx\n", (uintmax_t)phdr->p_offset);
+          binfo("  p_vaddr:      %08jx\n", (uintmax_t)phdr->p_vaddr);
+          binfo("  p_paddr:      %08jx\n", (uintmax_t)phdr->p_paddr);
+          binfo("  p_filesz:     %08jx\n", (uintmax_t)phdr->p_filesz);
+          binfo("  p_memsz:      %08jx\n", (uintmax_t)phdr->p_memsz);
+          binfo("  p_flags:      %08jx\n", (uintmax_t)phdr->p_flags);
+          binfo("  p_align:      %08x\n",  phdr->p_align);
+        }
+    }
+
   if (loadinfo->shdr && loadinfo->ehdr.e_shnum > 0)
     {
       for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
