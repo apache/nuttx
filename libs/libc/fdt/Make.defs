@@ -18,16 +18,17 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_LIBFDT),y)
+ifeq ($(CONFIG_LIBC_FDT),y)
 
-VERSION=$(CONFIG_LIBFDT_DTC_VERSION)
+VERSION=$(CONFIG_LIBC_FDT_DTC_VERSION)
 
 # Download and unpack tarball if no git repo found
-ifeq ($(wildcard dtc/.git),)
+ifeq ($(wildcard fdt/dtc/.git),)
 dtc:
 	$(call DOWNLOAD,https://github.com/dgibson/dtc/archive,v$(VERSION).zip,dtc.zip)
-	$(Q) unzip -o dtc.zip
-	$(Q) mv dtc-$(VERSION) dtc
+	$(Q) mv dtc.zip fdt/dtc.zip
+	$(Q) unzip -o fdt/dtc.zip -d fdt
+	$(Q) mv fdt/dtc-$(VERSION) fdt/dtc
 else
 dtc:
 endif
@@ -45,16 +46,16 @@ CSRCS += fdt_addresses.c
 CSRCS += fdt_overlay.c
 CSRCS += fdt_check.c
 
-CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)dtc$(DELIM)libfdt$(DELIM)
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)fdt$(DELIM)dtc$(DELIM)libfdt
 
-VPATH += dtc/libfdt
-SUBDIRS += dtc/libfdt
-DEPPATH += --dep-path dtc/libfdt
+VPATH += fdt/dtc/libfdt
+SUBDIRS += fdt/dtc/libfdt
+DEPPATH += --dep-path fdt/dtc/libfdt
 
 distclean::
-ifeq ($(wildcard dtc/.git),)
-	$(call DELDIR, dtc)
-	$(call DELFILE, dtc.zip)
+ifeq ($(wildcard fdt/dtc/.git),)
+	$(call DELDIR, fdt/dtc)
+	$(call DELFILE, fdt/dtc.zip)
 endif
 
 endif

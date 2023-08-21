@@ -3,18 +3,18 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-config LIBFDT
+config LIBC_FDT
 	bool "Flattened Device Tree Library"
 	default n
 	---help---
 		Enable or disable Flattened Device Tree Library features.
 
-if LIBFDT
+if LIBC_FDT
 
-config LIBFDT_DTC_VERSION
-	string "LIBFDT DTC Version"
+config LIBC_FDT_DTC_VERSION
+	string "LIBC FDT DTC Version"
 	default "1.7.0"
 	---help---
 		Version of DTC source code to download from github.
 
-endif # LIBFDT
+endif # LIBC_FDT
