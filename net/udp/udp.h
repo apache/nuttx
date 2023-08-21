@@ -147,6 +147,10 @@ struct udp_conn_s
   FAR struct devif_callback_s *sndcb;
 #endif
 
+#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_MLD)
+  struct ip_mreqn mreq;
+#endif
+
   /* The following is a list of poll structures of threads waiting for
    * socket events.
    */
