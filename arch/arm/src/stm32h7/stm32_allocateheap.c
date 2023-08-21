@@ -57,7 +57,7 @@
 #if defined(CONFIG_ARCH_CHIP_STM32H7_CORTEXM7) && \
     !defined(CONFIG_STM32H7_CORTEXM4_ENABLED)
 
-/* Configuration for M7 core and M4 core support disabled */
+/* Configuration for M7 core when M4 core support disabled */
 
 /* At startup the kernel will invoke arm_addregion() so that platform code
  * may register available memories for use as part of system heap.
@@ -117,7 +117,7 @@
 #elif defined(CONFIG_ARCH_CHIP_STM32H7_CORTEXM7) && \
       defined(CONFIG_STM32H7_CORTEXM4_ENABLED)
 
-/* Configuration for M7 core and M4 core support enabled */
+/* Configuration for M7 core when M4 core support enabled */
 
 #  define SRAM_START STM32_AXISRAM_BASE
 #  define SRAM_END   (SRAM_START + STM32H7_SRAM_SIZE)

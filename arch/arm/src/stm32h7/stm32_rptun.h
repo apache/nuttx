@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/stm32_mpuinit.h
+ * arch/arm/src/stm32h7/stm32_rptun.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H7_STM32_MPUINIT_H
-#define __ARCH_ARM_SRC_STM32H7_STM32_MPUINIT_H
+#ifndef __ARCH_ARM_SRC_STM32H7_STM32_RPTUN_H
+#define __ARCH_ARM_SRC_STM32H7_STM32_RPTUN_H
 
 /****************************************************************************
  * Included Files
@@ -27,10 +27,11 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <stdint.h>
-
 #ifndef __ASSEMBLY__
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -46,32 +47,10 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_mpuinitialize
- *
- * Description:
- *   Configure the MPU.
- *
+ * Name: stm32_rptun_init
  ****************************************************************************/
 
-#ifdef CONFIG_ARM_MPU
-void stm32_mpuinitialize(void);
-#else
-#  define stm32_mpuinitialize()
-#endif
-
-/****************************************************************************
- * Name: stm32_mpu_uheap
- *
- * Description:
- *  Map the user heap region.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_BUILD_PROTECTED
-void stm32_mpu_uheap(uintptr_t start, size_t size);
-#else
-#  define stm32_mpu_uheap(start,size)
-#endif
+int stm32_rptun_init(const char *shmemname, const char *cpuname);
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -79,4 +58,4 @@ void stm32_mpu_uheap(uintptr_t start, size_t size);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_STM32H7_STM32_MPUINIT_H */
+#endif /* __ARCH_ARM_SRC_STM32H7_STM32_RPTUN_H */

@@ -87,10 +87,6 @@ void stm32_userspace(void)
     {
       *dest++ = *src++;
     }
-
-  /* Configure the MPU to permit user-space access to its FLASH and RAM */
-
-  stm32_mpuinitialize();
 }
 
 #endif /* CONFIG_BUILD_PROTECTED */

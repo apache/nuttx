@@ -36,6 +36,9 @@
 #include "barriers.h"
 #include "nvic.h"
 #include "mpu.h"
+#ifdef CONFIG_ARM_MPU
+#  include "stm32_mpuinit.h"
+#endif
 
 #include "stm32_rcc.h"
 #include "stm32_userspace.h"
@@ -281,6 +284,12 @@ void __start(void)
 
 #ifdef CONFIG_BUILD_PROTECTED
   stm32_userspace();
+#endif
+
+#ifdef CONFIG_ARM_MPU
+  /* Configure the MPU */
+
+  stm32_mpuinitialize();
 #endif
   showprogress('E');
 

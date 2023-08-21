@@ -522,13 +522,13 @@ endif
 
 config STM32H7_CORTEXM7_FLASH_SIZE
 	int "Flash reserved for M7 core"
-	default 1048576 if STM32_CORTEXM4_ENABLED || ARCH_CHIP_STM32H7_CORTEXM4
+	default 1048576 if STM32H7_CORTEXM4_ENABLED || ARCH_CHIP_STM32H7_CORTEXM4
 	default 2097152
 
 config STM32H7_CORTEXM7_SHMEM
 	bool
 	select ARM_MPU if ARCH_CHIP_STM32H7_CORTEXM7
-	default y if STM32H7_CORTEXM4_ENABLED
+	default y if STM32H7_CORTEXM4_ENABLED || ARCH_CHIP_STM32H7_CORTEXM4
 	default n
 
 config STM32H7_SHMEM_SRAM3
@@ -2156,6 +2156,7 @@ config STM32H7_CUSTOM_CLOCKCONFIG
 
 config STM32H7_SRAM4EXCLUDE
 	bool "Exclude SRAM4 from the heap"
+	default y if RPTUN
 	default n
 	---help---
 		Exclude SRAM4 from the HEAP in order to use this 64 KB region
