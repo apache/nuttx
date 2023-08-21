@@ -633,6 +633,10 @@ config STM32H7_LPTIM
 	bool
 	default n
 
+config STM32H7_HSEM
+	bool "Hardware semaphore"
+	default n
+
 config STM32H7_RTC
 	bool "RTC"
 	default n

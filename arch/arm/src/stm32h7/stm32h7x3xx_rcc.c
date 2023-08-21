@@ -416,6 +416,12 @@ static inline void rcc_enableahb4(void)
   regval |= RCC_AHB4ENR_BKPSRAMEN;
 #endif
 
+#ifdef CONFIG_STM32H7_HSEM
+  /* HSEM clock enable */
+
+  regval |= RCC_AHB4ENR_HSEMEN;
+#endif
+
   putreg32(regval, STM32_RCC_AHB4ENR);   /* Enable peripherals */
 }
 
