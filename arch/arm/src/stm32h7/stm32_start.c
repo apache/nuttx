@@ -247,7 +247,7 @@ void __start(void)
   showprogress('C');
 
 #if defined(CONFIG_SCHED_IRQMONITOR) || defined(CONFIG_SEGGER_SYSVIEW)
-  up_perf_init((void *)STM32_SYSCLK_FREQUENCY);
+  up_perf_init((void *)STM32_CPUCLK_FREQUENCY);
 #endif
 
   /* Perform early serial initialization */
