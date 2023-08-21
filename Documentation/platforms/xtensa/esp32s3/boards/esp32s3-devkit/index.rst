@@ -173,6 +173,38 @@ was successfull by running ``cxxtest``::
     Invalid file! /invalid
     File /proc/version exists!
 
+gpio
+----
+
+This is a test for the GPIO driver. Three GPIOS are defined: 1) GPIO15 is
+set as an output, 2) GPIO18 as input and, 3) GPIO21 as an input triggered
+by a rising edge.
+
+This example also builds the ``EXAMPLES_GPIO`` application from the
+``nuttx-apps``.
+
+To write to the GPIO (GPIO 15, as defined by the board implementation)::
+
+    nsh> gpio -o 1 /dev/gpio0
+    nsh> gpio -o 0 /dev/gpio0
+
+To read from the GPIO (GPIO 18, as defined by the board implementation)::
+
+    nsh> gpio /dev/gpio1
+    Driver: /dev/gpio1
+      Input pin:     Value=1
+
+Finally, we can use the interrupt pin (GPIO21) to send a signal when the
+interrupt fires::
+
+    nsh> gpio -w 14 /dev/gpio2
+    Driver: /dev/gpio2
+      Interrupt pin: Value=0
+      Verify:        Value=1
+
+The pin is configured to trigger an interrupt on the rising edge, so after
+issuing the above command, connect it to 3.3V.
+
 i2c
 ---
 

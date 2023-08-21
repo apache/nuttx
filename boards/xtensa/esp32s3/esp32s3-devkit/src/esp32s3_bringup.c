@@ -343,6 +343,14 @@ int esp32s3_bringup(void)
 
 #endif
 
+#ifdef CONFIG_DEV_GPIO
+  ret = esp32s3_gpio_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_VIDEO_FB
   ret = fb_register(0, 0);
   if (ret < 0)
