@@ -46,8 +46,7 @@ static int g_chargerinitialized = 0;
  * Public Functions
  ****************************************************************************/
 
-int board_charger_initialize(const char *devpath,
-                             int16_t *gaugemeter)
+int board_charger_initialize(const char *devpath)
 {
   int ret;
 
