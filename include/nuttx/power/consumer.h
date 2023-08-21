@@ -57,7 +57,7 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-FAR struct regulator_s *regulator_get(const char *id);
+FAR struct regulator_s *regulator_get(FAR const char *id);
 void regulator_put(FAR struct regulator_s *regulator);
 int regulator_is_enabled(FAR struct regulator_s *regulator);
 int regulator_enable(FAR struct regulator_s *regulator);
