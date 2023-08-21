@@ -43,4 +43,10 @@
 
 #define BOARD_NLEDS             1
 
+/* GPIO pins used by the GPIO Subsystem */
+
+#define BOARD_NGPIOOUT    1 /* Amount of GPIO Output pins */
+#define BOARD_NGPIOIN     1 /* Amount of GPIO Input without Interruption */
+#define BOARD_NGPIOINT    1 /* Amount of GPIO Input w/ Interruption pins */
+
 #endif /* __BOARDS_XTENSA_ESP32S3_ESP32S3_DEVKIT_INCLUDE_BOARD_H */

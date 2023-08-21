@@ -75,6 +75,22 @@
 int esp32s3_bringup(void);
 
 /****************************************************************************
+ * Name: esp32s3_gpio_init
+ *
+ * Description:
+ *   Configure the GPIO driver.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_GPIO
+int esp32s3_gpio_init(void);
+#endif
+
+/****************************************************************************
  * Name: board_spiflash_init
  *
  * Description:
