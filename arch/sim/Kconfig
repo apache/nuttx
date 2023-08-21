@@ -625,6 +625,55 @@ config SIM_UART3_NAME
 		A UART port must also exist on the host system
 		with the exact same name specified here.
 
+config SIM_RAM_UART
+	bool "SIM RAM UART Device"
+	depends on RAM_UART
+	default n
+	---help---
+		SIM RAM UART. It emulates a UART device but using a RAM memory
+		instead a physical peripheral.
+
+if SIM_RAM_UART
+config SIM_RAM_UART0
+	bool "SIM RAM UART Device 0"
+	default n
+	---help---
+		sim ram uart device 0
+
+config SIM_RAM_UART0_SLAVE
+	bool "SIM_RAM_UART0 is slave"
+	depends on SIM_RAM_UART0
+	default n
+	---help---
+		The sim ram uart0 is slave
+
+config SIM_RAM_UART1
+	bool "SIM RAM UART Device 1"
+	default n
+	---help---
+		sim ram uart device 1
+
+config SIM_RAM_UART1_SLAVE
+	bool "SIM_RAM_UART1 is slave"
+	depends on SIM_RAM_UART1
+	default n
+	---help---
+		The sim ram uart1 is slave
+
+config SIM_RAM_UART2
+	bool "SIM RAM UART Device 2"
+	default n
+	---help---
+		sim ram uart device 2
+
+config SIM_RAM_UART2_SLAVE
+	bool "SIM_RAM_UART2 is slave"
+	depends on SIM_RAM_UART2
+	default n
+	---help---
+		The sim ram uart2 is slave
+endif
+
 endmenu
 
 config SIM_USB_DEV
