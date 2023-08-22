@@ -183,12 +183,14 @@ ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
     ARCHTYPE = rv64
     ARCHABITYPE = lp64
     LLVM_ARCHTYPE := riscv64
+    # https://www.sifive.com/blog/all-aboard-part-4-risc-v-code-models
+    ARCHCPUFLAGS = -mcmodel=medany
   endif
 
   # Construct arch flags
 
   ARCHCPUEXTFLAGS = i$(ARCHRVISAM)$(ARCHRVISAA)$(ARCHRVISAF)$(ARCHRVISAD)$(ARCHRVISAC)$(ARCHRVISAZ)
-  ARCHCPUFLAGS = -march=$(ARCHTYPE)$(ARCHCPUEXTFLAGS)
+  ARCHCPUFLAGS += -march=$(ARCHTYPE)$(ARCHCPUEXTFLAGS)
 
   # Construct arch abi flags
 
