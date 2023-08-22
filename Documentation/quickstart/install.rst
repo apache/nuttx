@@ -39,7 +39,6 @@ First, install the following set of system dependencies according to your Operat
     gmp-devel mpfr-devel libmpc-devel isl-devel binutils-devel elfutils-libelf-devel \
     expat-devel gcc-c++ g++ picocom uboot-tools util-linux
 
-
   .. tab:: macOS
   
     Run the following command to install packages:  
@@ -82,26 +81,41 @@ NuttX configuration system uses `KConfig <https://www.kernel.org/doc/Documentati
 
          $ sudo apt install kconfig-frontends
 
-      .. code-tab:: console MacOS, Ubuntu 18.04 LTS and earlier
+      .. code-tab:: console Ubuntu 18.04 LTS and earlier
 
          $ git clone https://bitbucket.org/nuttx/tools.git
          $ cd tools/kconfig-frontends
-         $ # on MacOS do the following:
+         $ ./configure --enable-mconf --disable-nconf --disable-gconf --disable-qconf
+         $ make
+         $ make install
+
+      .. code-tab:: console Fedora
+
+        $ git clone https://bitbucket.org/nuttx/tools.git
+        $ cd tools/kconfig-frontends
+        $ ./configure --enable-mconf --disable-nconf --disable-gconf --disable-qconf
+        $ aclocal
+        $ automake
+        $ make
+        $ sudo make install
+
+      .. code-tab:: console MacOS
+
+         $ git clone https://bitbucket.org/nuttx/tools.git
+         $ cd tools/kconfig-frontends
          $ patch < ../kconfig-macos.diff -p 1
          $ ./configure --enable-mconf --disable-shared --enable-static --disable-gconf --disable-qconf --disable-nconf
-         $ # on Linux do the following:
-         $ ./configure --enable-mconf --disable-nconf --disable-gconf --disable-qconf
          $ make
          $ make install
 
 NuttX also supports `kconfiglib <https://github.com/ulfalizer/Kconfiglib>` by default, which is a Kconfig tool implemented in Python 2/3. Compared with kconfig-frontends, kconfiglib provides NuttX with the possibility of multi-platform support(configure NuttX in Winodws native/Visual Studio), and also kconfiglib has a stronger Kconfig syntax check, this will help developers to avoid some Kconfig syntax errors.  Install kconfiglib via following command:
 
-   .. tabs::
+   .. code-tab::
          $ pip install kconfiglib
 
 If you are a working on Windows, which also need the support of windows-curses:
 
-   .. tabs::
+   .. code-tab::
          $ pip install windows-curses
 
 .. tip::
