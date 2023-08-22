@@ -16,6 +16,7 @@ on:
   pull_request:
     paths-ignore:
       - 'Documentation/**'
+      - 'tools/ci/docker/linux/**'
   push:
     paths-ignore:
       - 'Documentation/**'
