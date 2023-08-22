@@ -26,4 +26,6 @@ ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += qemu_appinit.c
 endif
 
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)fdt$(DELIM)dtc$(DELIM)libfdt
+
 include $(TOPDIR)/boards/Board.mk
