@@ -29,7 +29,7 @@ typedef struct poly1305_state
   unsigned char final;
 } poly1305_state;
 
-void poly1305_init(FAR poly1305_state *, FAR const unsigned char *);
+void poly1305_begin(FAR poly1305_state *, FAR const unsigned char *);
 void poly1305_update(FAR poly1305_state *,
                      FAR const unsigned char *, size_t);
 void poly1305_finish(FAR poly1305_state *, FAR unsigned char *);
