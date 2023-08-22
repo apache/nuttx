@@ -228,6 +228,7 @@ static inline void rpmsg_socket_poll_notify(
 static FAR struct rpmsg_socket_conn_s *rpmsg_socket_alloc(void)
 {
   FAR struct rpmsg_socket_conn_s *conn;
+  int ret;
 
   conn = kmm_zalloc(sizeof(struct rpmsg_socket_conn_s));
   if (!conn)
@@ -235,7 +236,12 @@ static FAR struct rpmsg_socket_conn_s *rpmsg_socket_alloc(void)
       return NULL;
     }
 
-  circbuf_init(&conn->recvbuf, NULL, 0);
+  ret = circbuf_init(&conn->recvbuf, NULL, 0);
+  if (ret < 0)
+    {
+      kmm_free(conn);
+      return NULL;
+    }
 
   nxmutex_init(&conn->polllock);
   nxmutex_init(&conn->sendlock);
