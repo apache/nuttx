@@ -46,5 +46,5 @@ LDMODULEFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
 CELFFLAGS = $(CFLAGS)
 CXXELFFLAGS = $(CXXFLAGS)
 
-LDELFFLAGS = -r -e main
+LDELFFLAGS = -melf64lriscv -r -e main
 LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/binfmt/libelf/gnu-elf.ld)
