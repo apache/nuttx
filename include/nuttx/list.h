@@ -70,36 +70,9 @@
   ((item)->next != (list) ? (item)->next : \
    (item)->next->next != (list) ? (item)->next->next : NULL)
 
-/**
- * list_entry - get the struct for this entry
- * @ptr: the &struct list_head pointer.
- * @type: the type of the struct this is embedded in.
- * @member: the name of the list_head within the struct.
- */
-#define list_entry(ptr, type, member) \
-           container_of(ptr, type, member)
-
-/**
- * list_first_entry - get the first element from a list
- * @list: the list head to take the element from.
- * @type: the type of the struct this is embedded in.
- * @member: the name of the list_head within the struct.
- *
- * Note, that list is expected to be not empty.
- */
-#define list_first_entry(list, type, member) \
-             list_entry((list)->next, type, member)
-
-/**
- * list_last_entry - get the last element from a list
- * @list: the list head to take the element from.
- * @type: the type of the struct this is embedded in.
- * @member: the name of the list_head within the struct.
- *
- * Note, that list is expected to be not empty.
- */
-#define list_last_entry(list, type, member) \
-           list_entry((list)->prev, type, member)
+#define list_entry(ptr, type, member) container_of(ptr, type, member)
+#define list_first_entry(list, type, member) container_of((list)->next, type, member)
+#define list_last_entry(list, type, member) container_of((list)->prev, type, member)
 
 #define list_add_after(entry, new_entry) list_add_head(entry, new_entry)
 #define list_add_head(list, item) \
