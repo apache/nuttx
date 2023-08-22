@@ -34,6 +34,7 @@ CMake,nucleo-f446re:ihm08m1_f32
 CMake,nucleo-f446re:nsh
 CMake,nucleo-f446re:pwm
 CMake,nucleo-f446re:qenco
+CMake,nucleo-f446re:systemview
 
 CMake,nucleo-f4x1re:f401-fb
 CMake,nucleo-f4x1re:f401-nsh
