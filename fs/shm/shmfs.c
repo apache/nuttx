@@ -119,7 +119,7 @@ static ssize_t shmfs_read(FAR struct file *filep, FAR char *buffer,
 
   if (sho->paddr != NULL)
     {
-      memcpy(buffer, sho->paddr + startpos, nread);
+      memcpy(buffer, (FAR char *)sho->paddr + startpos, nread);
       filep->f_pos += nread;
     }
   else
@@ -163,7 +163,7 @@ static ssize_t shmfs_write(FAR struct file *filep, FAR const char *buffer,
 
   if (sho->paddr != NULL)
     {
-      memcpy(sho->paddr + startpos, buffer, nwritten);
+      memcpy((FAR char *)sho->paddr + startpos, buffer, nwritten);
       filep->f_pos += nwritten;
     }
   else
