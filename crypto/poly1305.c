@@ -47,7 +47,7 @@ static void U32TO8(FAR unsigned char *p, unsigned long v)
  * Public Functions
  ****************************************************************************/
 
-void poly1305_init(FAR poly1305_state *st, FAR const unsigned char *key)
+void poly1305_begin(FAR poly1305_state *st, FAR const unsigned char *key)
 {
   /* r &= 0xffffffc0ffffffc0ffffffc0fffffff */
 

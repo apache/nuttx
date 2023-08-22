@@ -101,7 +101,7 @@ void chacha20_poly1305_reinit(FAR void *xctx, FAR const uint8_t *iv,
   chacha_ivsetup((FAR chacha_ctx *)&ctx->chacha, iv, ctx->nonce);
   chacha_encrypt_bytes((FAR chacha_ctx *)&ctx->chacha, ctx->key, ctx->key,
                         POLY1305_KEYLEN);
-  poly1305_init((FAR poly1305_state *)&ctx->poly, ctx->key);
+  poly1305_begin((FAR poly1305_state *)&ctx->poly, ctx->key);
 }
 
 int chacha20_poly1305_update(FAR void *xctx, FAR const uint8_t *data,
@@ -160,7 +160,7 @@ void chacha20poly1305_encrypt(
   chacha_keysetup(&ctx, key, CHACHA20POLY1305_KEY_SIZE * 8);
   chacha_ivsetup(&ctx, (FAR uint8_t *) &le_nonce, NULL);
   chacha_encrypt_bytes(&ctx, b.b0, b.b0, sizeof(b.b0));
-  poly1305_init(&poly1305_ctx, b.b0);
+  poly1305_begin(&poly1305_ctx, b.b0);
 
   poly1305_update(&poly1305_ctx, ad, ad_len);
   poly1305_update(&poly1305_ctx, pad0, (0x10 - ad_len) & 0xf);
@@ -214,7 +214,7 @@ int chacha20poly1305_decrypt(
   chacha_keysetup(&ctx, key, CHACHA20POLY1305_KEY_SIZE * 8);
   chacha_ivsetup(&ctx, (FAR uint8_t *) &le_nonce, NULL);
   chacha_encrypt_bytes(&ctx, b.b0, b.b0, sizeof(b.b0));
-  poly1305_init(&poly1305_ctx, b.b0);
+  poly1305_begin(&poly1305_ctx, b.b0);
 
   poly1305_update(&poly1305_ctx, ad, ad_len);
   poly1305_update(&poly1305_ctx, pad0, (0x10 - ad_len) & 0xf);
