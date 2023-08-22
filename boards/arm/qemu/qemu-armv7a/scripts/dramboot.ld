@@ -25,7 +25,7 @@ PHDRS
 }
 SECTIONS
 {
-  . = 0x40000000;
+  . = 0x40101000;
   .text : {
         _stext = .;            /* Text section */
        *(.vectors)
