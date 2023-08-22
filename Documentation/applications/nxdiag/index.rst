@@ -41,5 +41,4 @@ An example output can be observed `here <https://pastebin.com/HSw1EvhR>`_.
   :maxdepth: 2
   :caption: Contents
 
-  nxdiag.rst
   config.rst
