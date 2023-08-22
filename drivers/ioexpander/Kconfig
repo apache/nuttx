@@ -56,6 +56,23 @@ config IOEXPANDER_DUMMY_INT_POLLDELAY
 
 endif # IOEXPANDER_DUMMY
 
+config IOEXPANDER_ISO1H812G
+	bool "ISO1H812G SPI IO expander"
+	default n
+	depends on SPI
+	---help---
+		Enable support for the ISO1H812G SPI IO expander.
+
+if IOEXPANDER_ISO1H812G
+
+config ISO1H812G_MULTIPLE
+	bool "Multiple ISO1H812G Devices"
+	default n
+	---help---
+		Can be defined to support multiple ISO1H812G devices on board.
+
+endif # IOEXPANDER_ISO1H812G
+
 config IOEXPANDER_MCP23X17
 	bool "MCP23017/MCP23S17 I2C/SPI IO expander"
 	default n
