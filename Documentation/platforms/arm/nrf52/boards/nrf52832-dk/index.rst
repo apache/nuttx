@@ -25,6 +25,7 @@ LEDs and Buttons
 
 LEDs
 ----
+
 The PCA10040 has 4 user-controllable LEDs:
 
 ====  =======
