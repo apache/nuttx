@@ -16,7 +16,7 @@ CONFIGURATION
 
     CONFIG_DISABLE_IDLE_LOOP=y
     CONFIG_SYSTEM_OFLOADER=y
-    CONFIG_SYSTEM_OFLOADER_TABLE="/dev/flash,0x08000000,0x20000"，0
+    CONFIG_SYSTEM_OFLOADER_TABLE="/dev/flash,0x08000000,0x20000",0
 
 ```CONFIG_DISABLE_IDLE_LOOP`` is used to disable the idle loop in NuttX.
 ```CONFIG_SYSTEM_OFLOADER``` is used to enable the Open Flash Loader.
