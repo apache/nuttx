@@ -45,7 +45,7 @@
 #else
 #  define QEMU_VIRTIO_MMIO_IRQ   28
 #endif
-#define QEMU_VIRTIO_MMIO_NUM     4
+#define QEMU_VIRTIO_MMIO_NUM     8
 
 /****************************************************************************
  * Private Functions
