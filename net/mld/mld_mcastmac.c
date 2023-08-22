@@ -55,8 +55,9 @@ static void mld_mcastmac(FAR const net_ipv6addr_t ipaddr, FAR uint8_t *mac)
   FAR uint8_t *ipaddr8 = (FAR uint8_t *)ipaddr;
 
   mldinfo("Mcast IP: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-          ipaddr[0], ipaddr[1], ipaddr[2], ipaddr[3],
-          ipaddr[4], ipaddr[5], ipaddr[6], ipaddr[7]);
+          NTOHS(ipaddr[0]), NTOHS(ipaddr[1]), NTOHS(ipaddr[2]),
+          NTOHS(ipaddr[3]), NTOHS(ipaddr[4]), NTOHS(ipaddr[5]),
+          NTOHS(ipaddr[6]), NTOHS(ipaddr[7]));
 
   /* For the MAC address by insert the low 32 Bits of the multicast IPv6
    * Address into the Ethernet Address .  This mapping is from the IETF
