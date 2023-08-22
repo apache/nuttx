@@ -352,6 +352,25 @@ void mpu_configure_region(uintptr_t base, size_t size,
     } while (0)
 
 /****************************************************************************
+ * Name: mpu_priv_shmem
+ *
+ * Description:
+ *   Configure a region as privileged shared memory
+ *
+ ****************************************************************************/
+
+#define mpu_priv_shmem(base, size)                  \
+  do                                                \
+    {                                               \
+      /* The configure the region */                \
+      mpu_configure_region(base, size,              \
+                           MPU_RBAR_AP_RWNO,        \
+                           MPU_RLAR_NONCACHEABLE |  \
+                           MPU_RBAR_SH_INNER |      \
+                           MPU_RLAR_PXN);           \
+    } while (0)
+
+/****************************************************************************
  * Name: mpu_user_extsram
  *
  * Description:
