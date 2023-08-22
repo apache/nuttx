@@ -98,9 +98,23 @@ static inline void elf_dumpreaddata(FAR char *buffer, size_t buflen)
 int elf_read(FAR struct elf_loadinfo_s *loadinfo, FAR uint8_t *buffer,
              size_t readsize, off_t offset)
 {
-  size_t  nsize = readsize;
-  ssize_t nbytes;      /* Number of bytes read */
-  off_t   rpos;        /* Position returned by lseek */
+  size_t  nsize = readsize;   /* Bytes to read from the object file */
+  ssize_t nbytes;             /* Number of bytes read */
+  off_t   rpos;               /* Position returned by lseek */
+  int     ret = OK;           /* Return value */
+
+#ifdef CONFIG_ARCH_USE_COPY_SECTION
+  FAR uint8_t *dest = buffer; /* Destination address - `buffer` */
+
+  /* Redirect `buffer` to temporary allocated memory */
+
+  buffer = kmm_malloc(readsize);
+  if (buffer == NULL)
+    {
+      berr("ERROR: Failed to allocate memory\n");
+      return -ENOMEM;
+    }
+#endif
 
   binfo("Read %zu bytes from offset %" PRIdOFF "\n", readsize, offset);
 
@@ -115,7 +129,8 @@ int elf_read(FAR struct elf_loadinfo_s *loadinfo, FAR uint8_t *buffer,
         {
           berr("Failed to seek to position %" PRIdOFF ": %" PRIdOFF "\n",
                offset, rpos);
-          return rpos;
+          ret = rpos;
+          goto errout;
         }
 
       /* Read the file data at offset into the user buffer */
@@ -130,13 +145,15 @@ int elf_read(FAR struct elf_loadinfo_s *loadinfo, FAR uint8_t *buffer,
             {
               berr("Read from offset %" PRIdOFF " failed: %zd\n",
                    offset, nbytes);
-              return nbytes;
+              ret = nbytes;
+              goto errout;
             }
         }
       else if (nbytes == 0)
         {
           berr("Unexpected end of file\n");
-          return -ENODATA;
+          ret = -ENODATA;
+          goto errout;
         }
       else
         {
@@ -145,6 +162,25 @@ int elf_read(FAR struct elf_loadinfo_s *loadinfo, FAR uint8_t *buffer,
         }
     }
 
+#ifdef CONFIG_ARCH_USE_COPY_SECTION
+  /* Copy the requested data from temporary memory to destination */
+
+  ret = up_copy_section(dest, buffer, nsize);
+  if (ret < 0)
+    {
+      berr("ERROR: Failed to copy section at offset %"PRIdOFF"\n", offset);
+      goto errout;
+    }
+#endif
+
   elf_dumpreaddata(buffer, nsize);
-  return OK;
+
+errout:
+#ifdef CONFIG_ARCH_USE_COPY_SECTION
+  /* Free the temporary memory */
+
+  kmm_free(buffer);
+#endif
+
+  return ret;
 }
