@@ -401,6 +401,12 @@ config ARCH_HAVE_TEXT_HEAP
 	---help---
 		Special memory region for dynamic code loading
 
+config ARCH_HAVE_COPY_SECTION
+	bool
+	default n
+	---help---
+		Section copying for dynamic code loading
+
 config ARCH_HAVE_MULTICPU
 	bool
 	default n
@@ -622,6 +628,15 @@ menuconfig ARCH_ADDRENV
 	---help---
 		Support per-task address environments using the MMU... i.e., support
 		"processes"
+
+config ARCH_USE_COPY_SECTION
+	bool "Enable arch copy section by self for dynamic code loading"
+	default n
+	depends on ARCH_HAVE_COPY_SECTION
+	---help---
+		This option enables architecture-specific memory copy for
+		dynamic code loading. For example, Ambiq has MRAM regions
+		for instruction which can't load by the memcpy directly.
 
 if ARCH_ADDRENV && ARCH_NEED_ADDRENV_MAPPING
 
