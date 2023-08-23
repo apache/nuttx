@@ -1,5 +1,6 @@
-README
-======
+=======================
+ST STM32F411E-Discovery
+=======================
 
 This README discusses issues unique to NuttX configurations for the STMicro
 STM32F411E-Discovery board.  See

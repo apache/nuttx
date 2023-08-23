@@ -1,5 +1,6 @@
-README
-======
+=================
+Olimex STM32-P207
+=================
 
 The NuttX configuration for the Olimex STM32-H405 is based on the configuration
 Olimex STM32-P207.
@@ -15,14 +16,13 @@ Make sure that '# CONFIG_NSH_CONDEV is not set' is in the .config file - it defa
 to '/dev/console' which makes problems with the shell over USB.
 
 The following peripherals are enabled in this configuration.
- - LED:        Shows the system status
+- LED: Shows the system status
 
- - Button:     Built in app 'buttons' works.
+- Button: Built in app 'buttons' works.
 
- - ADC:        ADC1 samples ADC_IN1. Built in app 'adc' works.
+- ADC: ADC1 samples ADC_IN1. Built in app 'adc' works.
 
- - USB-FS-OTG: The console is running on the virtual serial port. Note that you
-               have to press enter three times until NSH appears.
+- USB-FS-OTG: The console is running on the virtual serial port. Note that you
+  have to press enter three times until NSH appears.
 
- - CAN:        Built in app 'can' is enabled but not tested, since no CAN transceiver
-               is on board.
+- CAN:Built in app 'can' is enabled but not tested, since no CAN transceiver is on board.

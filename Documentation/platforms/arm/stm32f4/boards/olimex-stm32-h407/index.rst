@@ -1,5 +1,6 @@
-README
-======
+=================
+Olimex STM32-H407
+=================
 
 The Olimex STM32-H407 configuration is based on
 stm32Fdiscovery and Olimex STM32-H405.
@@ -9,13 +10,6 @@ This release provides baseline for H407 12MHZ clock in include/board.h
 
 nsh - Only basic shell response tested on USART2
 nsh_uext - Basic shell response tested on USART6 (UEXT)
-
-Development Environment
-=======================
-
-Either Linux or Cygwin on Windows can be used for the development environment.
-The source has been built only using the GNU toolchain (see below).  Other
-toolchains will likely cause problems.
 
 LEDs
 ====
@@ -37,6 +31,3 @@ or you can use USART6 exposed via UEXT connector.
 
 Olimex offers MOD-RS232 voltage level converter for the UEXT so it can be
 attached to computer serial port.
-
-STM32-H407-specific Configuration Options
-===============================================
