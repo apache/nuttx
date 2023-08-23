@@ -79,12 +79,10 @@
  * interface, the majority of the functionality is implemented in driver
  * ioctl calls.  The PWM ioctl commands are listed below:
  *
- * PWMIOC_SETCHARACTERISTICS - Set the characteristics of the next pulsed
- *  output.  This command will neither start nor stop the pulsed output.
- *  It will either setup the configuration that will be used when the
- *  output is started; or it will change the characteristics of the pulsed
- *  output on the fly if the timer is already started.  This command will
- *  set the PWM characteristics and return immediately.
+ * PWMIOC_SETCHARACTERISTICS - Set the characteristics of the next
+ *  pulsed output and start the pulsed output. It will change the
+ *  characteristics of the pulsed output on the fly if the timer is
+ *  already started.
  *
  *  ioctl argument: A read-only reference to struct pwm_info_s that provides
  *  the characteristics of the pulsed output.
