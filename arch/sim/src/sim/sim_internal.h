@@ -120,6 +120,27 @@
       }                                                         \
     while (0)
 
+#define host_uninterruptible(func, ...)                         \
+    ({                                                          \
+        extern uint64_t up_irq_save(void);                      \
+        extern void up_irq_restore(uint64_t flags);             \
+        uint64_t flags_ = up_irq_save();                        \
+        typeof(func(__VA_ARGS__)) ret_ = func(__VA_ARGS__);     \
+        up_irq_restore(flags_);                                 \
+        ret_;                                                   \
+    })
+
+#define host_uninterruptible_no_return(func, ...)               \
+    do                                                          \
+      {                                                         \
+        extern uint64_t up_irq_save(void);                      \
+        extern void up_irq_restore(uint64_t flags);             \
+        uint64_t flags_ = up_irq_save();                        \
+        func(__VA_ARGS__);                                      \
+        up_irq_restore(flags_);                                 \
+      }                                                         \
+    while (0)
+
 /* File System Definitions **************************************************/
 
 /* These definitions characterize the compressed filesystem image */
