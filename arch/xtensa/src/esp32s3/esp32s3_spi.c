@@ -904,8 +904,8 @@ static void esp32s3_spi_dma_exchange(struct esp32s3_spi_priv_s *priv,
       esp32s3_spi_set_regbits(SPI_DMA_CONF_REG(priv->config->id),
                               SPI_DMA_TX_ENA_M);
 
-      n = esp32s3_dma_setup(channel, true, priv->dma_txdesc,
-                            SPI_DMA_DESC_NUM, tp, bytes);
+      n = esp32s3_dma_setup(priv->dma_txdesc, SPI_DMA_DESC_NUM, tp, bytes);
+      esp32s3_dma_load(priv->dma_txdesc, channel, true);
       esp32s3_dma_enable(channel, true);
 
       putreg32((n * 8 - 1), SPI_MS_DLEN_REG(priv->config->id));
@@ -921,8 +921,8 @@ static void esp32s3_spi_dma_exchange(struct esp32s3_spi_priv_s *priv,
           esp32s3_spi_set_regbits(SPI_DMA_CONF_REG(priv->config->id),
                                   SPI_DMA_RX_ENA_M);
 
-          esp32s3_dma_setup(channel, false, priv->dma_rxdesc,
-                            SPI_DMA_DESC_NUM, rp, bytes);
+          esp32s3_dma_setup(priv->dma_rxdesc, SPI_DMA_DESC_NUM, rp, bytes);
+          esp32s3_dma_load(priv->dma_rxdesc, channel, false);
           esp32s3_dma_enable(channel, false);
 
           esp32s3_spi_set_regbits(SPI_USER_REG(priv->config->id),
