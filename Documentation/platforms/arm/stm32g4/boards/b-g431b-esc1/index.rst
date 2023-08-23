@@ -1,32 +1,37 @@
-README
-======
+==============
+ST B-G431B-ESC
+==============
 
-The B-G431B-ESC Discovery kit board is based on the STM32G431CB microcontroller,
+The B-G431B-ESC board is based on the STM32G431CB microcontroller,
 the L6387 driver and STL180N6F7 power MOSFETs.
 
 UART/USART PINS
 ---------------
 
-USART2 is accessible through J3 pads and ST LINK Virtual Console:
+USART2 is accessible through J3 pads and ST LINK Virtual Console::
+
   USART2_TX - PB3
   USART2_RX - PB4
 
 Configuration Sub-directories
--------------------------
+-----------------------------
 
-  nsh:
-  ---
-    Configures the NuttShell (nsh) located at apps/examples/nsh.  The
-    Configuration enables the serial interfaces on USART2.
+nsh:
+----
 
-  foc_f32 and foc_b16:
-  ---------------------
-    FOC examples based on hardware on board.
+Configures the NuttShell (nsh) located at apps/examples/nsh.  The
+Configuration enables the serial interfaces on USART2.
 
-    Pin configuration:
+foc_f32 and foc_b16:
+---------------------
 
+FOC examples based on hardware on board.
+
+Pin configuration:
+
+    ==============   ==============     ===============
     Board Function   Chip Function      Chip Pin Number
-    --------------   --------------     ---------------
+    ==============   ==============     ===============
     Phase U high     TIM1_CH1           PA8
     Phase U low      TIM1_CH1N          PC13
     Phase V high     TIM1_CH2           PA9
@@ -55,6 +60,7 @@ Configuration Sub-directories
     BEMF1            ADC2_IN17          PA4
     BEMF2            ADC2_IN5           PC4
     BEMF3            ADC2_IN14          PB11
+    ==============   ==============     ===============
 
     Current shunt resistance          = 0.003
     PGA gain                          = 16
