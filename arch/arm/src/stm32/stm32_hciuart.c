@@ -240,7 +240,7 @@ struct hciuart_state_s
   volatile uint16_t txtail;
   volatile bool rxwaiting;           /* A thread is waiting for more Rx data */
   volatile bool txwaiting;           /* A thread is waiting for space in the Tx buffer */
-#ifndef CONFIG_STM32_HCIUART_SW_RXFLOW
+#ifdef CONFIG_STM32_HCIUART_SW_RXFLOW
   bool rxflow;                       /* True: software flow control is enable */
 #endif
 
@@ -266,7 +266,7 @@ struct hciuart_config_s
 #endif
   uint16_t rxbufsize;                /* Size of the Rx buffer */
   uint16_t txbufsize;                /* Size of the tx buffer */
-#ifndef CONFIG_STM32_HCIUART_SW_RXFLOW
+#ifdef CONFIG_STM32_HCIUART_SW_RXFLOW
   uint16_t rxupper;                  /* Upper watermark to enable Rx flow control */
   uint16_t rxlower;                  /* Lower watermark to disable Rx flow control */
 #endif
@@ -369,14 +369,14 @@ static struct hciuart_state_s g_hciusart1_state =
 static const struct hciuart_config_s g_hciusart1_config =
 {
   .lower         =
-  {
+    {
     .rxattach    = hciuart_rxattach,
     .rxenable    = hciuart_rxenable,
     .setbaud     = hciuart_setbaud,
     .read        = hciuart_read,
     .write       = hciuart_write,
     .rxdrain     = hciuart_rxdrain,
-  },
+    },
   .state         = &g_hciusart1_state,
 
   .rxbuffer      = g_usart1_rxbuffer,
@@ -433,14 +433,14 @@ static struct hciuart_state_s g_hciusart2_state =
 static const struct hciuart_config_s g_hciusart2_config =
 {
   .lower         =
-  {
+    {
     .rxattach    = hciuart_rxattach,
     .rxenable    = hciuart_rxenable,
     .setbaud     = hciuart_setbaud,
     .read        = hciuart_read,
     .write       = hciuart_write,
     .rxdrain     = hciuart_rxdrain,
-  },
+    },
   .state         = &g_hciusart2_state,
 
   .rxbuffer      = g_usart2_rxbuffer,
@@ -493,14 +493,14 @@ static struct hciuart_state_s g_hciusart3_state =
 static const struct hciuart_config_s g_hciusart3_config =
 {
   .lower         =
-  {
+    {
     .rxattach    = hciuart_rxattach,
     .rxenable    = hciuart_rxenable,
     .setbaud     = hciuart_setbaud,
     .read        = hciuart_read,
     .write       = hciuart_write,
     .rxdrain     = hciuart_rxdrain,
-  },
+    },
   .state         = &g_hciusart3_state,
 
   .rxbuffer      = g_usart3_rxbuffer,
@@ -553,14 +553,14 @@ static struct hciuart_state_s g_hciusart6_state =
 static const struct hciuart_config_s g_hciusart6_config =
 {
   .lower         =
-  {
+    {
     .rxattach    = hciuart_rxattach,
     .rxenable    = hciuart_rxenable,
     .setbaud     = hciuart_setbaud,
     .read        = hciuart_read,
     .write       = hciuart_write,
     .rxdrain     = hciuart_rxdrain,
-  },
+    },
   .state         = &g_hciusart6_state,
 
   .rxbuffer      = g_usart6_rxbuffer,
@@ -613,14 +613,14 @@ static struct hciuart_state_s g_hciuart7_state =
 static const struct hciuart_config_s g_hciuart7_config =
 {
   .lower         =
-  {
+    {
     .rxattach    = hciuart_rxattach,
     .rxenable    = hciuart_rxenable,
     .setbaud     = hciuart_setbaud,
     .read        = hciuart_read,
     .write       = hciuart_write,
     .rxdrain     = hciuart_rxdrain,
-  },
+    },
   .state         = &g_hciuart7_state,
 
   .rxbuffer      = g_uart7_rxbuffer,
@@ -673,14 +673,14 @@ static struct hciuart_state_s g_hciuart8_state =
 static const struct hciuart_config_s g_hciuart8_config =
 {
   .lower         =
-  {
+    {
     .rxattach    = hciuart_rxattach,
     .rxenable    = hciuart_rxenable,
     .setbaud     = hciuart_setbaud,
     .read        = hciuart_read,
     .write       = hciuart_write,
     .rxdrain     = hciuart_rxdrain,
-  },
+    },
   .state         = &g_hciuart8_state,
 
   .rxbuffer      = g_uart8_rxbuffer,
@@ -985,9 +985,9 @@ static void hciuart_rxflow_enable(const struct hciuart_config_s *config)
 
   if (!state->rxflow)
     {
-      uin16_t inused = hciuart_rxinuse(config);
+      uint16_t inused = hciuart_rxinuse(config);
 
-      if (inuse >= config->rxupper)
+      if (inused >= config->rxupper)
         {
           wlinfo("Enable RTS flow control\n");
 
@@ -1022,7 +1022,7 @@ static void hciuart_rxflow_disable(const struct hciuart_config_s *config)
     {
       uint16_t inused = hciuart_rxinuse(config);
 
-      if (inuse <= config->rxlower)
+      if (inused <= config->rxlower)
         {
           wlinfo("Disable RTS flow control\n");
 
@@ -1613,7 +1613,7 @@ static int hciuart_configure(const struct hciuart_config_s *config)
    */
 
   regval = GPIO_MODE_MASK | GPIO_PUPD_MASK | GPIO_OPENDRAIN | GPIO_EXTI;
-  pinset = (config & ~regval) | GPIO_OUTPUT | GPIO_OUTPUT_SET;
+  pinset = (config->rts_gpio & ~regval) | GPIO_OUTPUT | GPIO_OUTPUT_SET;
 #endif
   stm32_configgpio(pinset);
 
