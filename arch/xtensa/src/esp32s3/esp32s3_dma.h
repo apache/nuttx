@@ -44,6 +44,16 @@ extern "C"
  * Pre-processor Macros
  ****************************************************************************/
 
+/* The offset between different input/output GDMA channels' registers */
+
+#define GDMA_REG_OFFSET  (DMA_OUT_CONF0_CH1_REG - DMA_OUT_CONF0_CH0_REG)
+
+#define SET_GDMA_CH_REG(_r, _ch, _v)    putreg32((_v), (_r) + (_ch) * GDMA_REG_OFFSET)
+#define GET_GDMA_CH_REG(_r, _ch)        getreg32((_r) + (_ch) * GDMA_REG_OFFSET)
+
+#define SET_GDMA_CH_BITS(_r, _ch, _b)   modifyreg32((_r) + (_ch) * GDMA_REG_OFFSET, 0, (_b))
+#define CLR_GDMA_CH_BITS(_r, _ch, _b)   modifyreg32((_r) + (_ch) * GDMA_REG_OFFSET, (_b), 0)
+
 /* DMA max data length */
 
 #define ESP32S3_DMA_DATALEN_MAX       (0x1000 - 4)

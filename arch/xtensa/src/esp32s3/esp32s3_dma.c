@@ -48,14 +48,6 @@
  * Pre-processor Macros
  ****************************************************************************/
 
-#define REG_OFF  (DMA_OUT_CONF0_CH1_REG - DMA_OUT_CONF0_CH0_REG)
-
-#define SET_REG(_r, _ch, _v)    putreg32((_v), (_r) + (_ch) * REG_OFF)
-#define GET_REG(_r, _ch)        getreg32((_r) + (_ch) * REG_OFF)
-
-#define SET_BITS(_r, _ch, _b)   modifyreg32((_r) + (_ch) * REG_OFF, 0, (_b))
-#define CLR_BITS(_r, _ch, _b)   modifyreg32((_r) + (_ch) * REG_OFF, (_b), 0)
-
 #ifndef ALIGN_UP
 #  define ALIGN_UP(num, align) (((num) + ((align) - 1)) & ~((align) - 1))
 #endif
@@ -129,42 +121,46 @@ int32_t esp32s3_dma_request(enum esp32s3_dma_periph_e periph,
     {
       /* Enable DMA channel M2M mode */
 
-      SET_BITS(DMA_IN_CONF0_CH0_REG, chan, DMA_MEM_TRANS_EN_CH0_M);
+      SET_GDMA_CH_BITS(DMA_IN_CONF0_CH0_REG, chan, DMA_MEM_TRANS_EN_CH0_M);
 
       /* Just setting a valid value to the register */
 
-      SET_REG(DMA_OUT_PERI_SEL_CH0_REG, chan, 0);
-      SET_REG(DMA_IN_PERI_SEL_CH0_REG, chan, 0);
+      SET_GDMA_CH_REG(DMA_OUT_PERI_SEL_CH0_REG, chan, 0);
+      SET_GDMA_CH_REG(DMA_IN_PERI_SEL_CH0_REG, chan, 0);
     }
   else
     {
       /* Disable DMA channel M2M mode */
 
-      CLR_BITS(DMA_IN_CONF0_CH0_REG, chan, DMA_MEM_TRANS_EN_CH0_M);
+      CLR_GDMA_CH_BITS(DMA_IN_CONF0_CH0_REG, chan, DMA_MEM_TRANS_EN_CH0_M);
 
       /* Connect DMA TX/RX channels to a given peripheral */
 
-      SET_REG(DMA_OUT_PERI_SEL_CH0_REG, chan, periph);
-      SET_REG(DMA_IN_PERI_SEL_CH0_REG, chan, periph);
+      SET_GDMA_CH_REG(DMA_OUT_PERI_SEL_CH0_REG, chan, periph);
+      SET_GDMA_CH_REG(DMA_IN_PERI_SEL_CH0_REG, chan, periph);
     }
 
   if (burst_en)
     {
       /* Enable DMA TX/RX channels burst sending data */
 
-      SET_BITS(DMA_OUT_CONF0_CH0_REG, chan, DMA_OUT_DATA_BURST_EN_CH0_M);
-      SET_BITS(DMA_IN_CONF0_CH0_REG, chan, DMA_IN_DATA_BURST_EN_CH0_M);
+      SET_GDMA_CH_BITS(DMA_OUT_CONF0_CH0_REG, chan,
+                       DMA_OUT_DATA_BURST_EN_CH0_M);
+      SET_GDMA_CH_BITS(DMA_IN_CONF0_CH0_REG, chan,
+                       DMA_IN_DATA_BURST_EN_CH0_M);
 
       /* Enable DMA TX/RX channels burst reading descriptor link */
 
-      SET_BITS(DMA_OUT_CONF0_CH0_REG, chan, DMA_OUTDSCR_BURST_EN_CH0_M);
-      SET_BITS(DMA_IN_CONF0_CH0_REG, chan, DMA_INDSCR_BURST_EN_CH0_M);
+      SET_GDMA_CH_BITS(DMA_OUT_CONF0_CH0_REG, chan,
+                       DMA_OUTDSCR_BURST_EN_CH0_M);
+      SET_GDMA_CH_BITS(DMA_IN_CONF0_CH0_REG, chan,
+                       DMA_INDSCR_BURST_EN_CH0_M);
     }
 
   /* Set priority for DMA TX/RX channels */
 
-  SET_REG(DMA_OUT_PRI_CH0_REG, chan, tx_prio);
-  SET_REG(DMA_IN_PRI_CH0_REG, chan, rx_prio);
+  SET_GDMA_CH_REG(DMA_OUT_PRI_CH0_REG, chan, tx_prio);
+  SET_GDMA_CH_REG(DMA_IN_PRI_CH0_REG, chan, rx_prio);
 
   nxmutex_unlock(&g_dma_lock);
   return chan;
@@ -260,27 +256,27 @@ void esp32s3_dma_load(struct esp32s3_dmadesc_s *dmadesc, int chan, bool tx)
     {
       /* Reset DMA TX channel FSM and FIFO pointer */
 
-      SET_BITS(DMA_OUT_CONF0_CH0_REG, chan, DMA_OUT_RST_CH0_M);
-      CLR_BITS(DMA_OUT_CONF0_CH0_REG, chan, DMA_OUT_RST_CH0_M);
+      SET_GDMA_CH_BITS(DMA_OUT_CONF0_CH0_REG, chan, DMA_OUT_RST_CH0_M);
+      CLR_GDMA_CH_BITS(DMA_OUT_CONF0_CH0_REG, chan, DMA_OUT_RST_CH0_M);
 
       /* Set the descriptor link base address for TX channel */
 
       regval = (uint32_t)dmadesc & DMA_OUTLINK_ADDR_CH0;
-      CLR_BITS(DMA_OUT_LINK_CH0_REG, chan, DMA_OUTLINK_ADDR_CH0);
-      SET_BITS(DMA_OUT_LINK_CH0_REG, chan, regval);
+      CLR_GDMA_CH_BITS(DMA_OUT_LINK_CH0_REG, chan, DMA_OUTLINK_ADDR_CH0);
+      SET_GDMA_CH_BITS(DMA_OUT_LINK_CH0_REG, chan, regval);
     }
   else
     {
       /* Reset DMA RX channel FSM and FIFO pointer */
 
-      SET_BITS(DMA_IN_CONF0_CH0_REG, chan, DMA_IN_RST_CH0_M);
-      CLR_BITS(DMA_IN_CONF0_CH0_REG, chan, DMA_IN_RST_CH0_M);
+      SET_GDMA_CH_BITS(DMA_IN_CONF0_CH0_REG, chan, DMA_IN_RST_CH0_M);
+      CLR_GDMA_CH_BITS(DMA_IN_CONF0_CH0_REG, chan, DMA_IN_RST_CH0_M);
 
       /* Set the descriptor link base address for RX channel */
 
       regval = (uint32_t)dmadesc & DMA_INLINK_ADDR_CH0;
-      CLR_BITS(DMA_IN_LINK_CH0_REG, chan, DMA_INLINK_ADDR_CH0);
-      SET_BITS(DMA_IN_LINK_CH0_REG, chan, regval);
+      CLR_GDMA_CH_BITS(DMA_IN_LINK_CH0_REG, chan, DMA_INLINK_ADDR_CH0);
+      SET_GDMA_CH_BITS(DMA_IN_LINK_CH0_REG, chan, regval);
     }
 }
 
@@ -303,11 +299,11 @@ void esp32s3_dma_enable(int chan, bool tx)
 {
   if (tx)
     {
-      SET_BITS(DMA_OUT_LINK_CH0_REG, chan, DMA_OUTLINK_START_CH0_M);
+      SET_GDMA_CH_BITS(DMA_OUT_LINK_CH0_REG, chan, DMA_OUTLINK_START_CH0_M);
     }
   else
     {
-      SET_BITS(DMA_IN_LINK_CH0_REG, chan, DMA_INLINK_START_CH0_M);
+      SET_GDMA_CH_BITS(DMA_IN_LINK_CH0_REG, chan, DMA_INLINK_START_CH0_M);
     }
 }
 
@@ -330,11 +326,11 @@ void esp32s3_dma_disable(int chan, bool tx)
 {
   if (tx)
     {
-      SET_BITS(DMA_OUT_LINK_CH0_REG, chan, DMA_OUTLINK_STOP_CH0_M);
+      SET_GDMA_CH_BITS(DMA_OUT_LINK_CH0_REG, chan, DMA_OUTLINK_STOP_CH0_M);
     }
   else
     {
-      SET_BITS(DMA_IN_LINK_CH0_REG, chan, DMA_INLINK_STOP_CH0_M);
+      SET_GDMA_CH_BITS(DMA_IN_LINK_CH0_REG, chan, DMA_INLINK_STOP_CH0_M);
     }
 }
 
@@ -361,12 +357,12 @@ void esp32s3_dma_wait_idle(int chan, bool tx)
 
   if (tx)
     {
-      regaddr  = DMA_OUT_LINK_CH0_REG + chan * REG_OFF;
+      regaddr  = DMA_OUT_LINK_CH0_REG + chan * GDMA_REG_OFFSET;
       waitbits = DMA_OUTLINK_PARK_CH0;
     }
   else
     {
-      regaddr  = DMA_IN_LINK_CH0_REG + chan * REG_OFF;
+      regaddr  = DMA_IN_LINK_CH0_REG + chan * GDMA_REG_OFFSET;
       waitbits = DMA_INLINK_PARK_CH0;
     }
 
