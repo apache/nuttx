@@ -61,5 +61,7 @@ if(CONFIG_BUILTIN)
   list(APPEND SRCS builtin.c)
 endif()
 
+target_include_directories(binfmt PRIVATE ${CMAKE_SOURCE_DIR}/sched)
+
 target_sources(binfmt PRIVATE ${SRCS})
 target_include_directories(binfmt PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
