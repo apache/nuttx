@@ -52,8 +52,6 @@ void __gcov_dump(void);
  * Public Functions
  ****************************************************************************/
 
-extern uint64_t up_irq_save(void);
-extern void up_irq_restore(uint64_t flags);
 extern int backtrace(void **array, int size);
 
 /****************************************************************************
@@ -68,19 +66,15 @@ extern int backtrace(void **array, int size);
 
 void host_abort(int status)
 {
-  uint64_t flags = up_irq_save();
-
 #ifdef CONFIG_ARCH_COVERAGE
   /* Dump gcov data. */
 
-  __gcov_dump();
+  host_uninterruptible_no_return(__gcov_dump);
 #endif
 
   /* exit the simulation */
 
-  exit(status);
-
-  up_irq_restore(flags);
+  host_uninterruptible_no_return(exit, status);
 }
 
 /****************************************************************************
@@ -99,13 +93,7 @@ int host_backtrace(void** array, int size)
 #ifdef CONFIG_WINDOWS_CYGWIN
   return 0;
 #else
-  uint64_t flags = up_irq_save();
-  int ret;
-
-  ret = backtrace(array, size);
-
-  up_irq_restore(flags);
-  return ret;
+  return host_uninterruptible(backtrace, array, size);
 #endif
 }
 
@@ -130,7 +118,6 @@ int host_system(char *buf, size_t len, const char *fmt, ...)
 {
   FILE *fp;
   int ret;
-  uint64_t flags;
   char cmd[512];
   va_list vars;
 
@@ -144,21 +131,18 @@ int host_system(char *buf, size_t len, const char *fmt, ...)
 
   if (buf == NULL)
     {
-      ret = system(cmd);
+      ret = host_uninterruptible(system, cmd);
     }
   else
     {
-      flags = up_irq_save();
-      fp = popen(cmd, "r");
+      fp = host_uninterruptible(popen, cmd, "r");
       if (fp == NULL)
         {
-          up_irq_restore(flags);
           return -errno;
         }
 
-      ret = fread(buf, sizeof(char), len, fp);
-      pclose(fp);
-      up_irq_restore(flags);
+      ret = host_uninterruptible(fread, buf, 1, len, fp);
+      host_uninterruptible(pclose, fp);
     }
 
   return ret < 0 ? -errno : ret;
@@ -178,10 +162,10 @@ void host_init_cwd(void)
   /* Get the absolute path of the executable file */
 
 #  ifdef CONFIG_HOST_LINUX
-  len = readlink("/proc/self/exe", path, len);
+  len = host_uninterruptible(readlink, "/proc/self/exe", path, len);
   if (len < 0)
     {
-      perror("readlink  failed");
+      host_uninterruptible_no_return(perror, "readlink failed");
       return;
     }
 #  else
@@ -195,7 +179,7 @@ void host_init_cwd(void)
   path[len] = '\0';
   name = strrchr(path, '/');
   *++name = '\0';
-  chdir(path);
+  host_uninterruptible(chdir, path);
 }
 #endif
 
@@ -218,7 +202,8 @@ pid_t host_posix_spawn(const char *path,
       argv = default_argv;
     }
 
-  ret = posix_spawn(&pid, path, NULL, NULL, argv, envp);
+  ret = host_uninterruptible(posix_spawn, &pid, path,
+                             NULL, NULL, argv, envp);
   return ret > 0 ? -ret : pid;
 }
 
@@ -230,6 +215,6 @@ int host_waitpid(pid_t pid)
 {
   int status;
 
-  pid = waitpid(pid, &status, 0);
+  pid = host_uninterruptible(waitpid, pid, &status, 0);
   return pid < 0 ? -errno : status;
 }
