@@ -607,7 +607,8 @@ static int rpmsg_socket_setaddr(FAR struct rpmsg_socket_conn_s *conn,
 
   if (suffix)
     {
-      snprintf(conn->nameid, sizeof(conn->nameid), ":%llx", g_rpmsg_id++);
+      snprintf(conn->nameid, sizeof(conn->nameid), ":%" PRIx64,
+               g_rpmsg_id++);
     }
   else
     {
