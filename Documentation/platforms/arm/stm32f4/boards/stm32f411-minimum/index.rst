@@ -1,18 +1,9 @@
-README
-======
+=================
+stm32f411-minimum
+=================
 
 This README discusses issues unique to NuttX configurations for the
 WeAct Studio MiniF4 minimum system development board.
-
-Contents
-========
-
-  - Board information
-  - LEDs
-  - UARTs
-  - USB
-  - SPI NOR Flash
-  - Configurations
 
 Board information
 =================
@@ -34,14 +25,14 @@ https://stm32-base.org/boards/STM32F401CEU6-WeAct-Black-Pill-V3.0.html
 
 The board features:
 
-  - On-board 64 Mbits (8 MBytes) External SPI-NOR Flash (optional),
-  - nRST reset button and BOOT0 ST BootROM entry button,
-  - One user LED and one user push-button,
-  - HSE 25 Mhz and LSE 32.768 kHz,
-  - USB OTG FS with micro-AB connector,
-  - Around 30 remappable GPIOs on 2.54mm headers (after excluding 7 power pins,
-    two LSE pins, the LED pin, NRST, BOOT1 and the SWD header),
-  - Serial Wire Debug header for use with an external SWD/JTAG adapter.
+- On-board 64 Mbits (8 MBytes) External SPI-NOR Flash (optional),
+- nRST reset button and BOOT0 ST BootROM entry button,
+- One user LED and one user push-button,
+- HSE 25 Mhz and LSE 32.768 kHz,
+- USB OTG FS with micro-AB connector,
+- Around 30 remappable GPIOs on 2.54mm headers (after excluding 7 power pins,
+  two LSE pins, the LED pin, NRST, BOOT1 and the SWD header),
+- Serial Wire Debug header for use with an external SWD/JTAG adapter.
 
 As F4 series have a USB DFuSe-capable BootROM [AN2606], the board can be flashed
 via `dfu-util` over USB, or via `stm32flash` over UART without any debuggers.
@@ -49,33 +40,43 @@ via `dfu-util` over USB, or via `stm32flash` over UART without any debuggers.
 LEDs
 ====
 
-  The STM32F411 Minimum board has only one software controllable LED on PC13.
-  This LED can be used by the board port when CONFIG_ARCH_LEDS option is
-  enabled.
+The STM32F411 Minimum board has only one software controllable LED on PC13.
+This LED can be used by the board port when CONFIG_ARCH_LEDS option is
+enabled.
 
-  If enabled the LED is simply turned on when the board boots
-  successfully, and is blinking on panic / assertion failed.
+If enabled the LED is simply turned on when the board boots
+successfully, and is blinking on panic / assertion failed.
 
 UARTs
 =====
 
-  UART/USART PINS
-  ---------------
+USART1
+------
 
-  USART1
-    TX      PA9
-    RX      PA10
-  USART2
-    CTS     PA0
-    RTS     PA1
-    TX      PA2
-    RX      PA3
-    CK      PA4
+  ========== =====
+  UART/USART PINS
+  ========== =====
+  TX         PA9
+  RX         PA10
+  ========== =====
+
+USART2
+------
+
+  ========== =====
+  UART/USART PINS
+  ========== =====
+  CTS        PA0
+  RTS        PA1
+  TX         PA2
+  RX         PA3
+  CK         PA4
+  ========== =====
 
 Default USART/UART Configuration
 --------------------------------
 
-  USART1 (RX & TX only) is available through pins PA9 (TX) and PA10 (RX).
+USART1 (RX & TX only) is available through pins PA9 (TX) and PA10 (RX).
 
 USB
 ===
@@ -105,17 +106,18 @@ Configurations
 ==============
 
 Each stm32f411-minimum configuration is maintained in a sub-directory and
-can be selected as follow:
+can be selected as follow::
 
     tools/configure.sh stm32f411-minimum:<subdir>
 
   Where <subdir> is one of the following:
 
 
-  Configuration Directories
-  -------------------------
+Configuration Directories
+-------------------------
 
-  nsh:
-  ---
-    Configures the NuttShell (nsh) located at apps/examples/nsh. This
-    configuration enables a serial console on UART1.
+nsh
+---
+
+Configures the NuttShell (nsh) located at apps/examples/nsh. This
+configuration enables a serial console on UART1.

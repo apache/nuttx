@@ -1,5 +1,6 @@
-README
-======
+=======
+Axoloti
+=======
 
 This README discusses issues unique to NuttX configurations for the
 Axoloti open source synthesizer board featuring the STM32F427IGH6
