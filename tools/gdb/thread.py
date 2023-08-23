@@ -287,7 +287,7 @@ class Nxcontinue(gdb.Command):
 
 # We can't use a user command to rename continue it will recursion
 gdb.execute("define c\n nxcontinue \n end\n")
-gdb.write("\nif use thread command, plase don't use 'continue', use 'c' inside !!!\n")
+gdb.write("\nif use thread command, please don't use 'continue', use 'c' instead !!!\n")
 
 Nxsetregs()
 Nxinfothreads()
