@@ -39,6 +39,9 @@ if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/libcxxabi)
         ""
         TEST_COMMAND
         ""
+    PATCH_COMMAND
+      patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
+      ${CMAKE_CURRENT_LIST_DIR}/0001-libc-abi-avoid-the-waring-__EXCEPTIONS-is-not-define.patch
     DOWNLOAD_NO_PROGRESS true
     TIMEOUT 30)
 
@@ -47,19 +50,6 @@ if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/libcxxabi)
   if(NOT libcxxabi_POPULATED)
     FetchContent_Populate(libcxxabi)
   endif()
-endif()
-
-add_custom_target(libcxxabi_patch)
-
-if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/libcxxabi/.libcxxabi_patch)
-  add_custom_command(
-    TARGET libcxxabi_patch
-    PRE_BUILD
-    COMMAND touch ${CMAKE_CURRENT_LIST_DIR}/libcxxabi/.libcxxabi_patch
-    COMMAND
-      patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-      ${CMAKE_CURRENT_LIST_DIR}/0001-libc-abi-avoid-the-waring-__EXCEPTIONS-is-not-define.patch
-      > /dev/null || (exit 0) DEPENDS libcxxabi)
 endif()
 
 nuttx_add_system_library(libcxxabi)
@@ -112,5 +102,3 @@ foreach(src ${SRCS})
 endforeach()
 
 target_sources(libcxxabi PRIVATE ${TARGET_SRCS})
-
-add_dependencies(libcxxabi libcxxabi_patch)
