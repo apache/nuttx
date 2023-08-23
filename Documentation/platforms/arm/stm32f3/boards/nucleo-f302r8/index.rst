@@ -1,46 +1,26 @@
-Nucleo-64 Boards
+================
+ST Nucleo F302R8
 ================
 
-The Nucleo-F302R8 is a member of the Nucleo-64 board family.  The Nucleo-64
-is a standard board for use with several STM32 parts in the LQFP64 package.
-Variants include
-
-  Order code    Targeted STM32
-  ------------- --------------
-  NUCLEO-F030R8 STM32F030R8T6
-  NUCLEO-F070RB STM32F070RBT6
-  NUCLEO-F072RB STM32F072RBT6
-  NUCLEO-F091RC STM32F091RCT6
-  NUCLEO-F103RB STM32F103RBT6
-  NUCLEO-F302R8 STM32F302R8T6
-  NUCLEO-F303RE STM32F303RET6
-  NUCLEO-F334R8 STM32F334R8T6
-  NUCLEO-F401RE STM32F401RET6
-  NUCLEO-F410RB STM32F410RBT6
-  NUCLEO-F411RE STM32F411RET6
-  NUCLEO-F446RE STM32F446RET6
-  NUCLEO-L053R8 STM32L053R8T6
-  NUCLEO-L073RZ STM32L073RZT6
-  NUCLEO-L152RE STM32L152RET6
-  NUCLEO-L452RE STM32L452RET6
-  NUCLEO-L476RG STM32L476RGT6
+The Nucleo F302R8 is a member of the Nucleo-64 board family.
 
 Configurations
 ==============
 
-  ihm07m1_f32 and ihm07m1_b16:
-  ----------------------------
+ihm07m1_f32 and ihm07m1_b16:
+----------------------------
 
-    These examples are dedicated for the X-NUCLEO-IHM07M1 expansion board
-    based on L6230 DMOS driver for three-phase brushless DC motors.
+These examples are dedicated for the X-NUCLEO-IHM07M1 expansion board
+based on L6230 DMOS driver for three-phase brushless DC motors.
 
-    X-NUCLEO-IHM07M1 must be configured to work with FOC and 3-shunt
-    resistors. See ST documentation for details.
+X-NUCLEO-IHM07M1 must be configured to work with FOC and 3-shunt
+resistors. See ST documentation for details.
 
-    Pin configuration for the X-NUCLEO-IHM07M1 (TIM1 configuration):
+Pin configuration for the X-NUCLEO-IHM07M1 (TIM1 configuration):
 
+    ==============   ================   =================
     Board Function   Chip Function      Chip Pin Number
-    -------------   ----------------   -----------------
+    ==============   ================   =================
     Phase U high     TIM1_CH1           PA8
     Phase U enable   GPIO_PC10          PC10
     Phase V high     TIM1_CH2           PA9
@@ -76,6 +56,7 @@ Configurations
     DEBUG2           GPIO               PC6
     DEBUG3           GPIO               PC5
     DEBUG4           GPIO               PC8
+    ==============   ================   =================
 
     Current shunt resistance              = 0.33
     Current sense gain                    = -1.53 (inverted current)
