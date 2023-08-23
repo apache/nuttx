@@ -174,23 +174,21 @@ int32_t esp32s3_dma_request(enum esp32s3_dma_periph_e periph,
  * Name: esp32s3_dma_setup
  *
  * Description:
- *   Set up DMA descriptor with given parameters.
+ *   Initialize the DMA inlink/outlink (linked list) and bind the target
+ *   buffer to its DMA descriptors.
  *
  * Input Parameters:
- *   chan    - DMA channel
- *   tx      - true: TX mode; false: RX mode
- *   dmadesc - DMA descriptor pointer
- *   num     - DMA descriptor number
- *   pbuf    - Buffer pointer
- *   len     - Buffer length by byte
+ *   dmadesc - Pointer to the DMA descriptors
+ *   num     - Number of DMA descriptors
+ *   pbuf    - RX/TX buffer pointer
+ *   len     - RX/TX buffer length
  *
  * Returned Value:
- *   Bind pbuf data bytes.
+ *   Bound pbuf data bytes
  *
  ****************************************************************************/
 
-uint32_t esp32s3_dma_setup(int chan, bool tx,
-                           struct esp32s3_dmadesc_s *dmadesc, uint32_t num,
+uint32_t esp32s3_dma_setup(struct esp32s3_dmadesc_s *dmadesc, uint32_t num,
                            uint8_t *pbuf, uint32_t len)
 {
   int i;
@@ -200,7 +198,6 @@ uint32_t esp32s3_dma_setup(int chan, bool tx,
   uint32_t data_len;
   uint32_t buf_len;
 
-  DEBUGASSERT(chan >= 0);
   DEBUGASSERT(dmadesc != NULL);
   DEBUGASSERT(num > 0);
   DEBUGASSERT(pbuf != NULL);
@@ -232,6 +229,33 @@ uint32_t esp32s3_dma_setup(int chan, bool tx,
   dmadesc[i].ctrl |= ESP32S3_DMA_CTRL_EOF;
   dmadesc[i].next  = NULL;
 
+  return len - bytes;
+}
+
+/****************************************************************************
+ * Name: esp32s3_dma_load
+ *
+ * Description:
+ *   Load the address of the first DMA descriptor of an already bound
+ *   inlink/outlink to the corresponding GDMA_<IN/OUT>LINK_ADDR_CHn register
+ *
+ * Input Parameters:
+ *   chan    - DMA channel of the receiver/transmitter
+ *   tx      - true: TX mode (transmitter); false: RX mode (receiver)
+ *   dmadesc - Pointer of the previously bound inlink/outlink
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp32s3_dma_load(struct esp32s3_dmadesc_s *dmadesc, int chan, bool tx)
+{
+  uint32_t regval;
+
+  DEBUGASSERT(chan >= 0);
+  DEBUGASSERT(dmadesc != NULL);
+
   if (tx)
     {
       /* Reset DMA TX channel FSM and FIFO pointer */
@@ -258,8 +282,6 @@ uint32_t esp32s3_dma_setup(int chan, bool tx,
       CLR_BITS(DMA_IN_LINK_CH0_REG, chan, DMA_INLINK_ADDR_CH0);
       SET_BITS(DMA_IN_LINK_CH0_REG, chan, regval);
     }
-
-  return len - bytes;
 }
 
 /****************************************************************************

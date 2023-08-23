@@ -975,12 +975,11 @@ static int esp32s3_qspi_memory(struct qspi_dev_s *dev,
           user_reg |= SPI_FWRITE_QUAD_M;
         }
 
-      esp32s3_dma_setup(priv->dma_channel,
-                        true,
-                        priv->dma_desc,
+      esp32s3_dma_setup(priv->dma_desc,
                         QSPI_DMA_DESC_NUM,
                         (uint8_t *)meminfo->buffer,
                         meminfo->buflen);
+      esp32s3_dma_load(priv->dma_desc, priv->dma_channel, true);
       esp32s3_dma_enable(priv->dma_channel, true);
     }
   else if (QSPIMEM_ISREAD(meminfo->flags))
@@ -991,12 +990,11 @@ static int esp32s3_qspi_memory(struct qspi_dev_s *dev,
 
       user_reg |= SPI_USR_MISO_M;
 
-      esp32s3_dma_setup(priv->dma_channel,
-                        false,
-                        priv->dma_desc,
+      esp32s3_dma_setup(priv->dma_desc,
                         QSPI_DMA_DESC_NUM,
                         (uint8_t *)meminfo->buffer,
                         meminfo->buflen);
+      esp32s3_dma_load(priv->dma_desc, priv->dma_channel, false);
       esp32s3_dma_enable(priv->dma_channel, false);
     }
 
