@@ -42,6 +42,17 @@
 
 #define malloc_usable_size malloc_size
 
+/* mallopt options that actually do something */
+
+#define M_TRIM_THRESHOLD    -1
+#define M_TOP_PAD           -2
+#define M_MMAP_THRESHOLD    -3
+#define M_MMAP_MAX          -4
+#define M_CHECK_ACTION      -5
+#define M_PERTURB           -6
+#define M_ARENA_TEST        -7
+#define M_ARENA_MAX         -8
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -83,6 +94,7 @@ extern "C"
 {
 #endif
 
+int mallopt(int param, int value);
 struct mallinfo mallinfo(void);
 size_t malloc_size(FAR void *ptr);
 struct mallinfo_task mallinfo_task(FAR const struct malltask *task);
