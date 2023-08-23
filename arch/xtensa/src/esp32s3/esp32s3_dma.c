@@ -242,6 +242,7 @@ uint32_t esp32s3_dma_setup(int chan, bool tx,
       /* Set the descriptor link base address for TX channel */
 
       regval = (uint32_t)dmadesc & DMA_OUTLINK_ADDR_CH0;
+      CLR_BITS(DMA_OUT_LINK_CH0_REG, chan, DMA_OUTLINK_ADDR_CH0);
       SET_BITS(DMA_OUT_LINK_CH0_REG, chan, regval);
     }
   else
@@ -254,6 +255,7 @@ uint32_t esp32s3_dma_setup(int chan, bool tx,
       /* Set the descriptor link base address for RX channel */
 
       regval = (uint32_t)dmadesc & DMA_INLINK_ADDR_CH0;
+      CLR_BITS(DMA_IN_LINK_CH0_REG, chan, DMA_INLINK_ADDR_CH0);
       SET_BITS(DMA_IN_LINK_CH0_REG, chan, regval);
     }
 
