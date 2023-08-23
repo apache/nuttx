@@ -1,5 +1,6 @@
-README
-======
+===================
+ST STM32F769I-DISCO
+===================
 
 This README discusses issues unique to NuttX configurations for the
 STMicro STM32F769I-DISCO development board featuring the STM32F769NIH6
@@ -58,22 +59,24 @@ Development Environment
 LEDs and Buttons
 ================
 
-  LEDs
-  ----
-  The STM32F769I-DISCO board has numerous LEDs but only one, LD3 located
-  near the reset button, that can be controlled by software.
+LEDs
+----
 
-  LD3 is controlled by PI1 which is also the SPI2_SCK at the Arduino
-  interface.  One end of LD3 is grounded so a high output on PI1 will
-  illuminate the LED.
+The STM32F769I-DISCO board has numerous LEDs but only one, LD3 located
+near the reset button, that can be controlled by software.
 
-  This LED is not used by the board port unless CONFIG_ARCH_LEDS is defined.
-  In that case, the usage by the board port is defined in include/board.h
-  and src/stm32_leds.c. The LEDs are used to encode OS-related events as
-  follows:
+LD3 is controlled by PI1 which is also the SPI2_SCK at the Arduino
+interface.  One end of LD3 is grounded so a high output on PI1 will
+illuminate the LED.
 
+This LED is not used by the board port unless CONFIG_ARCH_LEDS is defined.
+In that case, the usage by the board port is defined in include/board.h
+and src/stm32_leds.c. The LEDs are used to encode OS-related events as
+follows:
+
+    =================== ======================= ======
     SYMBOL              Meaning                 LD3
-    ------------------- ----------------------- ------
+    =================== ======================= ======
     LED_STARTED         NuttX has been started  OFF
     LED_HEAPALLOCATE    Heap has been allocated OFF
     LED_IRQSENABLED     Interrupts enabled      OFF
@@ -82,47 +85,51 @@ LEDs and Buttons
     LED_SIGNAL          In a signal handler     N/C
     LED_ASSERTION       An assertion failed     N/C
     LED_PANIC           The system has crashed  FLASH
+    =================== ======================= ======
 
-  Thus is LD3 is statically on, NuttX has successfully  booted and is,
-  apparently, running normally.  If LD3 is flashing at approximately
-  2Hz, then a fatal error has been detected and the system has halted.
+Thus is LD3 is statically on, NuttX has successfully  booted and is,
+apparently, running normally.  If LD3 is flashing at approximately
+2Hz, then a fatal error has been detected and the system has halted.
 
-  Buttons
-  -------
-  Pushbutton B1, labelled "User", is connected to GPIO PI11.  A high
-  value will be sensed when the button is depressed.
+Buttons
+-------
+
+Pushbutton B1, labelled "User", is connected to GPIO PI11.  A high
+value will be sensed when the button is depressed.
 
 Serial Console
 ==============
 
-  Use the serial interface the ST/LINK provides to the USB host.
+Use the serial interface the ST/LINK provides to the USB host.
 
 Configurations
 ==============
 
-  Common Configuration Information
-  --------------------------------
-  Each STM32F769I-DISCO configuration is maintained in a sub-directory and
-  can be selected as follow:
+Common Configuration Information
+--------------------------------
+
+Each STM32F769I-DISCO configuration is maintained in a sub-directory and
+can be selected as follow::
 
     tools/configure.sh stm32f769i-disco:<subdir>
 
-  Where <subdir> is one of the sub-directories listed below.
+Where <subdir> is one of the sub-directories listed below.
 
 Configuration Directories
 -------------------------
 
-  nsh:
-  ---
-    Configures the NuttShell (NSH) located at apps/examples/nsh.  The
-    Configuration enables the serial interfaces on UART1.
-    Otherwise nothing is enabled, so that config is a starting point
-    for initial testing.
-    Support for builtin applications is enabled, but in the base
-    configuration no builtin applications are selected.
+nsh
+---
 
-    1. This config supports the PWM test (apps/examples/pwm) but this must
-       be manually enabled by selecting:
+Configures the NuttShell (NSH) located at apps/examples/nsh.  The
+Configuration enables the serial interfaces on UART1.
+Otherwise nothing is enabled, so that config is a starting point
+for initial testing.
+Support for builtin applications is enabled, but in the base
+configuration no builtin applications are selected.
+
+1. This config supports the PWM test (apps/examples/pwm) but this must
+   be manually enabled by selecting::
 
        CONFIG_PWM=y              : Enable the generic PWM infrastructure
        CONFIG_EXAMPLES_PWM=y     : Enable the PWM example app
@@ -133,7 +140,8 @@ Configuration Directories
        CONFIG_STM32F7_TIM1_PWM=y
        CONFIG_STM32F7_TIM1_CHANNEL=4
 
-  nsh-ehternet:
-  ---
-    Same as above but a lot more hardware peripherals enabled,
-    in particular ethernet, as well as networking stuff.
+nsh-ehternet
+------------
+
+Same as above but a lot more hardware peripherals enabled,
+in particular ethernet, as well as networking stuff.
