@@ -13,7 +13,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-FROM ubuntu:20.04 AS builder-base
+FROM ubuntu:22.04 AS builder-base
 # NOTE WE ARE NOT REMOVEING APT CACHE.
 # This should only be used for temp build images that artifacts will be copied from
 RUN apt-get update -qq && apt-get install -y -qq \
@@ -120,17 +120,18 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   m4 \
   make \
   texinfo \
-  wget
+  wget \
+  bzip2
 
 # Download toolchain source code
 RUN mkdir -p /tools/renesas-tools/source/binutils && \
-  curl -s -L "https://gcc-renesas.com/downloads/d.php?f=rx/binutils/4.8.4.201803-gnurx/rx_binutils2.24_2018Q3.tar.gz" \
+  curl -s -L "https://llvm-gcc-renesas.com/downloads/d.php?f=rx/binutils/8.3.0.202305-gnurx/binutils-2.36.1.tar.gz" \
   | tar -C renesas-tools/source/binutils --strip-components=1 -xz
 RUN mkdir -p /tools/renesas-tools/source/gcc && \
-  curl -s -L "https://gcc-renesas.com/downloads/d.php?f=rx/gcc/4.8.4.201803-gnurx/rx_gcc_4.8.4_2018Q3.tar.gz" \
+  curl -s -L "https://llvm-gcc-renesas.com/downloads/d.php?f=rx/gcc/8.3.0.202305-gnurx/gcc-8.3.0.tar.gz" \
   | tar -C renesas-tools/source/gcc --strip-components=1 -xz
 RUN mkdir -p /tools/renesas-tools/source/newlib && \
-  curl -s -L "https://gcc-renesas.com/downloads/d.php?f=rx/newlib/4.8.4.201803-gnurx/rx_newlib2.2.0_2018Q3.tar.gz" \
+  curl -s -L "https://llvm-gcc-renesas.com/downloads/d.php?f=rx/newlib/8.3.0.202305-gnurx/newlib-4.1.0.tar.gz" \
   | tar -C renesas-tools/source/newlib --strip-components=1 -xz
 
 # Install binutils
