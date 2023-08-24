@@ -34,6 +34,9 @@
 #ifdef CONFIG_ARCH_CHIP_DEBUG_H
 #  include <arch/chip/debug.h>
 #endif
+#ifdef CONFIG_ARCH_BOARD_DEBUG_H
+#  include <arch/board/debug.h>
+#endif
 
 #include <syslog.h>
 #include <sys/uio.h>
