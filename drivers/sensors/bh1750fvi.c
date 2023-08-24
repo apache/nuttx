@@ -70,8 +70,6 @@ static int     bh1750fvi_write8(FAR struct bh1750fvi_dev_s *priv,
 
 /* Character driver methods */
 
-static int     bh1750fvi_open(FAR struct file *filep);
-static int     bh1750fvi_close(FAR struct file *filep);
 static ssize_t bh1750fvi_read(FAR struct file *filep, FAR char *buffer,
                               size_t buflen);
 static ssize_t bh1750fvi_write(FAR struct file *filep,
