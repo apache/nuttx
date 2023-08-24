@@ -83,25 +83,6 @@ struct ak09912_sensadj_s
   uint8_t z;
 };
 
-#ifdef CONFIG_SENSORS_AK09912_SCU
-/****************************************************************************
- * Name: ak09912_init
- *
- * Description:
- *   Initialize AK09912 magnetometer device
- *
- * Input Parameters:
- *   i2c     - An instance of the I2C interface to use to communicate with
- *             AK09912
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-int ak09912_init(FAR struct i2c_master_s *i2c, int port);
-#endif
-
 /****************************************************************************
  * Name: ak09912_register
  *
@@ -117,12 +98,8 @@ int ak09912_init(FAR struct i2c_master_s *i2c, int port);
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
-#ifdef CONFIG_SENSORS_AK09912_SCU
-int ak09912_register(FAR const char *devpath, int minor,
-                     FAR struct i2c_master_s *i2c, int port);
-#else
+
 int ak09912_register(FAR const char *devpath, FAR struct i2c_master_s *i2c);
-#endif
 
 #undef EXTERN
 #ifdef __cplusplus
