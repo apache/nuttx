@@ -1722,10 +1722,10 @@ static void mpfs_load_dq(uint8_t lane)
  *
  ****************************************************************************/
 
-static uint8_t mpfs_mtc_test(uint8_t mask, uint64_t start_address,
-                             uint32_t size,
-                             enum mtc_pattern_e data_pattern,
-                             enum mtc_add_pattern_e add_pattern)
+static int mpfs_mtc_test(uint8_t mask, uint64_t start_address,
+                         uint32_t size,
+                         enum mtc_pattern_e data_pattern,
+                         enum mtc_add_pattern_e add_pattern)
 {
   /* Write calibration:
    *  Configure common memory test interface by writing registers:
@@ -1899,6 +1899,65 @@ static uint8_t mpfs_mtc_test(uint8_t mask, uint64_t start_address,
 }
 
 /****************************************************************************
+ * Name: mpfs_mtc_test_all
+ *
+ * Description:
+ *   This performs a memory test with the NWL memory test core
+ *   using all available test patterns.
+ *
+ * Input Parameters:
+ *   mask             - Test bitmask
+ *   start_address    - Test start address
+ *   size             - Size of the area to test
+ *   add_pattern      - Data modifier pattern
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success. A nonzero value indicates a fail.
+ *
+ ****************************************************************************/
+
+static int mpfs_mtc_test_all(uint8_t mask, uint64_t start_address,
+                             uint32_t size,
+                             enum mtc_add_pattern_e add_pattern)
+{
+  int result;
+  enum mtc_pattern_e test_pattern;
+
+  /* Read once to flush MTC. During write calibration the first MTC
+   * read must be discarded as it is unreliable after a series of
+   * bad writes. Only check -ETIMEDOUT; if that occurs, we'll bail out
+   */
+
+  result = mpfs_mtc_test(mask, start_address, size,
+                         MTC_COUNTING_PATTERN,
+                         add_pattern);
+  if (result == -ETIMEDOUT)
+    {
+      return result;
+    }
+
+  /* Test all patterns except MTC_USER */
+
+  for (test_pattern = MTC_COUNTING_PATTERN;
+       test_pattern <= MTC_PSEUDO_RANDOM_8BIT && result == 0;
+       test_pattern++)
+    {
+      if (test_pattern == MTC_USER)
+        {
+          continue;
+        }
+
+      /* Read using different patterns */
+
+      result = mpfs_mtc_test(mask, start_address, size,
+                              test_pattern,
+                              add_pattern);
+    }
+
+  return result;
+}
+
+/****************************************************************************
  * Name: mpfs_set_write_calib
  *
  * Description:
@@ -1962,8 +2021,8 @@ static void mpfs_set_write_calib(struct mpfs_ddr_priv_s *priv)
 static int mpfs_write_calibration_using_mtc(struct mpfs_ddr_priv_s *priv)
 {
   uint64_t start_address = 0x00;
-  uint32_t size          = ONE_MB_MTC;
-  uint32_t result        = 0;
+  uint32_t size = ONE_MB_MTC;
+  int result = 0;
   uint8_t lane_to_test;
   uint32_t cal_data;
   uint32_t lanes;
@@ -1983,44 +2042,18 @@ static int mpfs_write_calibration_using_mtc(struct mpfs_ddr_priv_s *priv)
    * with the respect to the address and command for each lane.
    */
 
-  for (cal_data = 0x00000; cal_data < 0xfffff; cal_data += 0x11111)
+  for (cal_data = 0x00000; cal_data < 0xfffff && result != -ETIMEDOUT;
+       cal_data += 0x11111)
     {
       putreg32(cal_data, MPFS_CFG_DDR_SGMII_PHY_EXPERT_WRCALIB);
 
-      for (lane_to_test = 0x00; lane_to_test < lanes; lane_to_test++)
+      for (lane_to_test = 0x00;
+           lane_to_test < lanes && result != -ETIMEDOUT;
+           lane_to_test++)
         {
-          /* Read once to flush MTC. During write calibration the first MTC
-           * read must be discarded as it is unreliable after a series of
-           * bad writes.
-           */
-
           uint8_t mask = (uint8_t)(1 << lane_to_test);
-
-          result = mpfs_mtc_test(mask, start_address, size,
-                        MTC_COUNTING_PATTERN, MTC_ADD_SEQUENTIAL);
-
-          /* Read using different patterns */
-
-          result |= mpfs_mtc_test(mask, start_address, size,
-                                  MTC_COUNTING_PATTERN,
-                                  MTC_ADD_SEQUENTIAL);
-          result |= mpfs_mtc_test(mask, start_address, size,
-                                  MTC_WALKING_ONE, MTC_ADD_SEQUENTIAL);
-          result |= mpfs_mtc_test(mask, start_address, size,
-                                  MTC_PSEUDO_RANDOM, MTC_ADD_SEQUENTIAL);
-          result |= mpfs_mtc_test(mask, start_address, size,
-                                  MTC_NO_REPEATING_PSEUDO_RANDOM,
-                                  MTC_ADD_SEQUENTIAL);
-          result |= mpfs_mtc_test(mask, start_address, size,
-                                  MTC_ALT_ONES_ZEROS, MTC_ADD_SEQUENTIAL);
-          result |= mpfs_mtc_test(mask, start_address, size,
-                                  MTC_ALT_5_A, MTC_ADD_SEQUENTIAL);
-          result |= mpfs_mtc_test(mask, start_address, size,
-                                  MTC_PSEUDO_RANDOM_16BIT,
-                                  MTC_ADD_SEQUENTIAL);
-          result |= mpfs_mtc_test(mask, start_address, size,
-                                  MTC_PSEUDO_RANDOM_8BIT,
-                                  MTC_ADD_SEQUENTIAL);
+          result = mpfs_mtc_test_all(mask, start_address, size,
+                                     MTC_ADD_SEQUENTIAL);
 
           if (result == 0) /* if passed for this lane */
             {
@@ -3766,7 +3799,7 @@ static int mpfs_training_write_calibration(struct mpfs_ddr_priv_s *priv)
 
 static int mpfs_training_full_mtc_test(void)
 {
-  uint32_t error = 0;
+  int error = 0;
   uint8_t mask;
 
   if (mpfs_get_num_lanes() <= 3)
@@ -3778,48 +3811,16 @@ static int mpfs_training_full_mtc_test(void)
       mask = 0xf;
     }
 
-  /* Read once to flush MTC. During write calibration the first MTC read
-   * must be discarded as it is unreliable after a series of bad writes.
-   */
+  /* Test sequential additions */
 
-  mpfs_mtc_test(mask, 0x00, ONE_MB_MTC, MTC_COUNTING_PATTERN,
-                MTC_ADD_SEQUENTIAL);
+  error = mpfs_mtc_test_all(mask, 0x00, ONE_MB_MTC, MTC_ADD_SEQUENTIAL);
 
-  /* Read using different patterns */
+  if (error == 0)
+    {
+      /* Test random additions */
 
-  error |= mpfs_mtc_test(mask, 0x00, ONE_MB_MTC, MTC_COUNTING_PATTERN,
-                         MTC_ADD_SEQUENTIAL);
-  error |= mpfs_mtc_test(mask, 0x00, ONE_MB_MTC, MTC_WALKING_ONE,
-                         MTC_ADD_SEQUENTIAL);
-  error |= mpfs_mtc_test(mask, 0x00, ONE_MB_MTC, MTC_PSEUDO_RANDOM,
-                         MTC_ADD_SEQUENTIAL);
-  error |= mpfs_mtc_test(mask, 0x00, ONE_MB_MTC,
-                         MTC_NO_REPEATING_PSEUDO_RANDOM, MTC_ADD_SEQUENTIAL);
-  error |= mpfs_mtc_test(mask, 0x00, ONE_MB_MTC, MTC_ALT_ONES_ZEROS,
-                         MTC_ADD_SEQUENTIAL);
-  error |= mpfs_mtc_test(mask, 0x00, ONE_MB_MTC, MTC_ALT_5_A,
-                         MTC_ADD_SEQUENTIAL);
-  error |= mpfs_mtc_test(mask, 0x00, ONE_MB_MTC, MTC_PSEUDO_RANDOM_16BIT,
-                         MTC_ADD_SEQUENTIAL);
-  error |= mpfs_mtc_test(mask, 0x00, ONE_MB_MTC, MTC_PSEUDO_RANDOM_8BIT,
-                         MTC_ADD_SEQUENTIAL);
-
-  error |= mpfs_mtc_test(mask, 0x00, ONE_MB_MTC, MTC_COUNTING_PATTERN,
-                         MTC_ADD_RANDOM);
-  error |= mpfs_mtc_test(mask, 0x00, ONE_MB_MTC, MTC_WALKING_ONE,
-                         MTC_ADD_RANDOM);
-  error |= mpfs_mtc_test(mask, 0x00, ONE_MB_MTC, MTC_PSEUDO_RANDOM,
-                         MTC_ADD_RANDOM);
-  error |= mpfs_mtc_test(mask, 0x00, ONE_MB_MTC,
-                         MTC_NO_REPEATING_PSEUDO_RANDOM, MTC_ADD_RANDOM);
-  error |= mpfs_mtc_test(mask, 0x00, ONE_MB_MTC, MTC_ALT_ONES_ZEROS,
-                         MTC_ADD_RANDOM);
-  error |= mpfs_mtc_test(mask, 0x00, ONE_MB_MTC, MTC_ALT_5_A,
-                         MTC_ADD_RANDOM);
-  error |= mpfs_mtc_test(mask, 0x00, ONE_MB_MTC, MTC_PSEUDO_RANDOM_16BIT,
-                         MTC_ADD_RANDOM);
-  error |= mpfs_mtc_test(mask, 0x00, ONE_MB_MTC, MTC_PSEUDO_RANDOM_8BIT,
-                         MTC_ADD_RANDOM);
+      error = mpfs_mtc_test_all(mask, 0x00, ONE_MB_MTC, MTC_ADD_RANDOM);
+    }
 
   if (error)
     {
