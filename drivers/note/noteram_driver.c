@@ -440,7 +440,7 @@ static ssize_t noteram_read(FAR struct file *filep, FAR char *buffer,
   do
     {
       irqstate_t flags;
-      uint8_t note[64];
+      uint8_t note[256];
 
       /* Get the next note (removing it from the buffer) */
 
