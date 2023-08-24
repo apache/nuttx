@@ -71,75 +71,14 @@ struct composite_devobj_s
 
 struct composite_dev_s
 {
-  FAR struct usbdev_s      *usbdev;                         /* usbdev driver pointer */
-  FAR struct usbdev_req_s  *ctrlreq;                        /* Allocated control request */
-  int                       cfgdescsize;                    /* Total size of the configuration descriptor: */
-  int                       ninterfaces;                    /* The total number of interfaces in this composite device */
-  uint8_t                   config;                         /* Configuration number */
-  uint8_t                   ndevices;                       /* Num devices in this composite device */
-  struct composite_devobj_s device[NUM_DEVICES_TO_HANDLE];  /* Device class object */
+  FAR struct usbdev_s                *usbdev;                        /* usbdev driver pointer */
+  FAR struct usbdev_req_s            *ctrlreq;                       /* Allocated control request */
+  int                                 cfgdescsize;                   /* Total size of the configuration descriptor */
+  int                                 ninterfaces;                   /* The total number of interfaces in this composite device */
+  uint8_t                             config;                        /* Configuration number */
+  uint8_t                             ndevices;                      /* Num devices in this composite device */
+  struct composite_devobj_s           device[NUM_DEVICES_TO_HANDLE]; /* Device class object */
+  FAR const struct usbdev_devdescs_s *descs;                         /* Device descriptors */
 };
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifdef CONFIG_USBDEV_COMPOSITE
-extern const char g_compvendorstr[];
-extern const char g_compproductstr[];
-extern const char g_compserialstr[];
-#endif
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: composite_mkstrdesc
- *
- * Description:
- *   Construct a string descriptor
- *
- ****************************************************************************/
-
-int composite_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc);
-
-/****************************************************************************
- * Name: composite_getepdesc
- *
- * Description:
- *   Return a pointer to the composite device descriptor
- *
- ****************************************************************************/
-
-FAR const struct usb_devdesc_s *composite_getdevdesc(void);
-
-/****************************************************************************
- * Name: composite_mkcfgdesc
- *
- * Description:
- *   Construct the composite configuration descriptor
- *
- ****************************************************************************/
-
-#ifdef CONFIG_USBDEV_DUALSPEED
-int16_t composite_mkcfgdesc(FAR struct composite_dev_s *priv,
-                            FAR uint8_t *buf, uint8_t speed, uint8_t type);
-#else
-int16_t composite_mkcfgdesc(FAR struct composite_dev_s *priv,
-                            FAR uint8_t *buf);
-#endif
-
-/****************************************************************************
- * Name: composite_getqualdesc
- *
- * Description:
- *   Return a pointer to the composite qual descriptor
- *
- ****************************************************************************/
-
-#ifdef CONFIG_USBDEV_DUALSPEED
-FAR const struct usb_qualdesc_s *composite_getqualdesc(void);
-#endif
 
 #endif /* __DRIVERS_USBDEV_COMPOSITE_H */
