@@ -2,7 +2,7 @@
 Shenzhou IV
 ===========
 
-This README discusses issues unique to NuttX configurations for the Shenzhou
+This page discusses issues unique to NuttX configurations for the Shenzhou
 IV development board from www.armjishu.com featuring the STMicro STM32F107VCT
 MCU.  As of this writing, there are five models of the Shenzhou board:
 

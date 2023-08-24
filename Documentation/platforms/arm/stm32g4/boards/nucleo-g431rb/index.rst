@@ -2,7 +2,7 @@
 ST Nucleo G431RB
 ================
 
-The Nucleo-G431RB is a member of the Nucleo-64 board family.
+The Nucleo G431RB is a member of the Nucleo-64 board family.
 
 Configurations
 ==============

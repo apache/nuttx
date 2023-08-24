@@ -2,7 +2,7 @@
 Axoloti
 =======
 
-This README discusses issues unique to NuttX configurations for the
+This page discusses issues unique to NuttX configurations for the
 Axoloti open source synthesizer board featuring the STM32F427IGH6
 MCU. The STM32F427IGH6 has a 180MHz Cortex-M4 core with 1MiB Flash
 memory and 256KiB of SRAM. The board features:

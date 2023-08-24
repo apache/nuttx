@@ -2,7 +2,7 @@
 CloudController
 ===============
 
-This README discusses issues unique to NuttX configurations for the CloudController
+This page discusses issues unique to NuttX configurations for the CloudController
 development board featuring the STMicro STM32F107VCT MCU.
 
 Features of the CloudController board include:

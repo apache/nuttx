@@ -1,8 +1,8 @@
 ================
-ST NUCLEO-WB55RG
+ST Nucleo WB55RG
 ================
 
-This README file discusses the port of NuttX to the STMicroelectronics
+This page file discusses the port of NuttX to the STMicroelectronics
 NUCLEO-WB55RG board.  That board features the multi-protocol wireless and
 ultra-low-power STM32WB55RGV6 MCU with 1MiB of Flash and 256KiB of SRAM.
 A dedicated M0+ coprocessor is responsible for performing the real-time

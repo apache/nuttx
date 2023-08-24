@@ -2,7 +2,7 @@
 ST Nucleo F722ZE
 ================
 
-This README discusses issues unique to NuttX configurations for the STMicro
+This page discusses issues unique to NuttX configurations for the STMicro
 Nucleo-144 board.  See ST document STM32 Nucleo-144 boards (UM1974):
 
 https://www.st.com/resource/en/user_manual/dm00244518.pdf

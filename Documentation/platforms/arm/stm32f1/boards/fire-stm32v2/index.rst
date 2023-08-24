@@ -2,7 +2,7 @@
 fire-stm2v2
 ===========
 
-This README discusses issues unique to NuttX configurations for the M3
+This page discusses issues unique to NuttX configurations for the M3
 Wildfire development board (STM32F103VET6).  See http://firestm32.taobao.com
 
 This configuration should support both the version 2 and version 3 of the

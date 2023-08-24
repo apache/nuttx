@@ -2,59 +2,50 @@
 ST STM32F769I-DISCO
 ===================
 
-This README discusses issues unique to NuttX configurations for the
+This page discusses issues unique to NuttX configurations for the
 STMicro STM32F769I-DISCO development board featuring the STM32F769NIH6
 MCU. The STM32F769NIH6 is a 216MHz Cortex-M7 operating with 2048K Flash
 memory and 512Kb SRAM. The board features:
 
-  - On-board ST-LINK/V2 for programming and debugging,
-  - Mbed-enabled (mbed.org)
-  - 4-inch 800x472 color LCD-TFT with capacitive touch screen
-  - SAI audio codec
-  - Audio line in and line out jack
-  - Two ST MEMS microphones
-  - SPDIF RCA input connector
-  - Two pushbuttons (user and reset)
-  - 512-Mbit Quad-SPI Flash memory
-  - 128-Mbit SDRAM
-  - Connector for microSD card
-  - RF-EEPROM daughterboard connector
-  - USB OTG HS with Micro-AB connectors
-  - Ethernet connector compliant with IEEE-802.3-2002 and PoE
+- On-board ST-LINK/V2 for programming and debugging,
+- Mbed-enabled (mbed.org)
+- 4-inch 800x472 color LCD-TFT with capacitive touch screen
+- SAI audio codec
+- Audio line in and line out jack
+- Two ST MEMS microphones
+- SPDIF RCA input connector
+- Two pushbuttons (user and reset)
+- 512-Mbit Quad-SPI Flash memory
+- 128-Mbit SDRAM
+- Connector for microSD card
+- RF-EEPROM daughterboard connector
+- USB OTG HS with Micro-AB connectors
+- Ethernet connector compliant with IEEE-802.3-2002 and PoE
 
 Refer to the http://www.st.com website for further information about this
 board (search keyword: stm32f769i-disco)
 
-Contents
-========
-
-  - STATUS
-  - Development Environment
-  - LEDs and Buttons
-  - Serial Console
-  - Configurations
-
 STATUS
 ======
 
-  2019-06: PWM support has been tested as working.
+2019-06: PWM support has been tested as working.
 
-  2017-07:  The basic NSH configuration is functional using a serial
-    console on USART1, which is connected to the "virtual com port"
-    of the ST/LINK USB adapter.
+2017-07:  The basic NSH configuration is functional using a serial
+console on USART1, which is connected to the "virtual com port"
+of the ST/LINK USB adapter.
 
-  2017-07:  STM32 F7 Ethernet appears to be functional, but has had
-    only light testing.
+2017-07:  STM32 F7 Ethernet appears to be functional, but has had
+only light testing.
 
-  Work in progress: Use LCD over DSI interface, rest of board.
+Work in progress: Use LCD over DSI interface, rest of board.
 
 Development Environment
 =======================
 
-  The Development environments for the STM32F769I-DISCO board are identical
-  to the environments for other STM32F boards.  For full details on the
-  environment options and setup, see the README.txt file in the
-  boards/arm/stm32f7/stm32f769i-disco directory.
+The Development environments for the STM32F769I-DISCO board are identical
+to the environments for other STM32F boards.  For full details on the
+environment options and setup, see the README.txt file in the
+boards/arm/stm32f7/stm32f769i-disco directory.
 
 LEDs and Buttons
 ================

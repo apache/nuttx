@@ -2,7 +2,7 @@
 ST STM32L0538-DISO
 ==================
 
-This README discusses issues unique to NuttX configurations for the
+This page discusses issues unique to NuttX configurations for the
 STMicro STM32L0538-DISO development board.  The STM32L0538-DISO board
 is based on the STM32L053C8 MCU (64Kbytes FLASH, 8Kbytes of SRAM and
 6Kbytes of EEPROM).

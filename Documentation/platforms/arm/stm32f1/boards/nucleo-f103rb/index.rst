@@ -2,7 +2,7 @@
 ST Nucleo F103RB
 ================
 
-The Nucleo-F103RB is a member of the Nucleo-64 board family.
+The Nucleo F103RB is a member of the Nucleo-64 board family.
 
 Configurations
 ==============

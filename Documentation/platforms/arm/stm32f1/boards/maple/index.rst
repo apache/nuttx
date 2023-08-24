@@ -2,15 +2,15 @@
 maple
 =====
 
-This README discusses issues unique to NuttX configurations for the
+This page discusses issues unique to NuttX configurations for the
 maple board from LeafLabs (http://leaflabs.com).
 
-Microprocessor: 32-bit ARM Cortex M3 at 72MHz STM32F103RBT6 (STM32F103CBT6 for mini version)
-Memory:         120 KB Flash and 20 KB SRAM
-I/O Pins Out:   43 (34 for mini version)
-ADCs:           9 (at 12-bit resolution)
-Peripherals:    4 timers, 2 I2Cs, 2 SPI ports, 3 USARTs
-Other:          Sleep, stop, and standby modes; serial wire debug and JTAG interfaces
+- Microprocessor: 32-bit ARM Cortex M3 at 72MHz STM32F103RBT6 (STM32F103CBT6 for mini version)
+- Memory: 120 KB Flash and 20 KB SRAM
+- I/O Pins Out: 43 (34 for mini version)
+- ADCs: 9 (at 12-bit resolution)
+- Peripherals: 4 timers, 2 I2Cs, 2 SPI ports, 3 USARTs
+- Other: Sleep, stop, and standby modes; serial wire debug and JTAG interfaces
 
 Please see below link for a list of maple devices and documentations.
 

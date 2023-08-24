@@ -2,7 +2,7 @@
 ST Nucleo F401RE
 ================
 
-This README discusses issues unique to NuttX configurations for the ST
+This page discusses issues unique to NuttX configurations for the ST
 NucleoF401RE and NucleoF411RE boards from ST Micro.  See
 
   http://www.st.com/web/catalog/mmc/FM141/SC1169/SS1577/LN1810/PF258797

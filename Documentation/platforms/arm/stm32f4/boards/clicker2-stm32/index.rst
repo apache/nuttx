@@ -2,7 +2,7 @@
 Mikroe Clicker2 STM32
 =====================
 
-This is the README file for the port of NuttX to the Mikroe Clicker2 STM32
+This is the page file for the port of NuttX to the Mikroe Clicker2 STM32
 board based on the STMicro STM32F407VGT6 MCU.
 
 Reference: https://shop.mikroe.com/development-boards/starter/clicker-2/stm32f4

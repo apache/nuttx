@@ -1,6 +1,6 @@
-=============
-STM3220G-EVAL
-=============
+================
+ST STM3220G-EVAL
+================
 
 This page discusses issues unique to NuttX configurations for the
 STMicro STM3220G-EVAL development board.

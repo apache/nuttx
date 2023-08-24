@@ -2,7 +2,7 @@
 ViewTool STM32F103/F107
 =======================
 
-This README discusses issues unique to NuttX configurations for the
+This page discusses issues unique to NuttX configurations for the
 ViewTool STM32F103/F107 V1.2 board.  This board may be fitted with either
 
 - STM32F107VCT6, or

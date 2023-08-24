@@ -2,7 +2,7 @@
 stm32f411-minimum
 =================
 
-This README discusses issues unique to NuttX configurations for the
+This page discusses issues unique to NuttX configurations for the
 WeAct Studio MiniF4 minimum system development board.
 
 Board information

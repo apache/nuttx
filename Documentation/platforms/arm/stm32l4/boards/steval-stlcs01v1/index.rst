@@ -2,7 +2,7 @@
 ST STEVAL-STLCS01V1
 ===================
 
-This README discusses issues unique to NuttX configurations for the ST
+This page discusses issues unique to NuttX configurations for the ST
 STEVAL-STLCS01V1 board (SensorTile module) from ST Micro based on
 STM32L476JG MCU. The board features:
 

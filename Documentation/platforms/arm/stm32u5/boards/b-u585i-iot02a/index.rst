@@ -1,13 +1,14 @@
-==============
-B-U585I-IOT02A
-==============
+=================
+ST B-U585I-IOT02A
+=================
 
-This README file discusses the port of NuttX to the STMicroelectronics
+This page discusses the port of NuttX to the STMicroelectronics
 B-U585I-IOT02A board.  That board features the STM32U585AII6QU MCU with 2MiB
 of Flash and 768KiB of SRAM.
 
 Status
 ======
+
 2022-02-13: With TrustedFirmware-M from STM32CubeU5 and signing the Apache
 NuttX binary image to get a tfm_ns_init.bin, the board now boots and the
 basic NSH configuration works with Apache NuttX as the OS running in the

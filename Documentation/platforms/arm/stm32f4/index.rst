@@ -15,75 +15,65 @@ The following list indicates peripherals supported in NuttX:
 ==========  =======  =====
 Peripheral  Support  Notes
 ==========  =======  =====
-IRQs        Yes
-GPIO        Yes
-EXTI        Yes
-HSE         Yes
-PLL         Yes      
-HSI         Yes      
-MSI         Yes      
-LSE         Yes      
-RCC         Yes      
-SYSCFG      Yes      
-USART       Yes
 FLASH       Yes
+CRC         Yes
+PM          ?
+RCC         Yes      
+GPIO        Yes
+SYSCFG      Yes
 DMA         Yes
-SPI         Yes
-I2C         Yes
-I2S         Yes
-FMPI2C      No
-SPDIFRX     No
-SAI         No
-RTC         Yes
-Timers      Yes
-PM          Yes
-RNG         Yes
-CRC         No
-HASH        No
+DMA2D       Yes
+EXTI        Yes
+FMC         Yes
+QUADSPI     Yes
 ADC         Yes
 DAC         Yes
-WWDG        Yes
-IWDG        Yes
-CAN         Yes
-USB FS      Yes
-USB HS      Yes
-ETH         Yes
-FMC         Yes
-QSPI        Yes
 DCMI        No
-AES         Yes
-HDMI-CED    No
-SDIO        Yes
+LTDC        Yes
+DSI         No
+RNG         Yes
+CRYP        Yes
+HASH        ?
+TIM         Yes
+IWDG        Yes
+WWDG        Yes
+RTC         Yes
+I2C         Yes
+USART       Yes
+SPI         Yes
+I2S         ?
+SAI         No
+SDIO        ?
+CAN         Yes
+OTG_FS      Yes
+OTG_HS      Yes
+ETH         Yes
 ==========  =======  =====
 
 Memory
 ------
 
-CONFIG_RAM_SIZE - Describes the installed DRAM (SRAM in this case):
+- CONFIG_RAM_SIZE - Describes the installed DRAM (SRAM in this case)
 
-CONFIG_RAM_SIZE=16384 (16Kb)
+- CONFIG_RAM_START - The start address of installed DRAM
 
-CONFIG_RAM_START - The start address of installed DRAM
+- CONFIG_STM32_CCMEXCLUDE - Exclude CCM SRAM from the HEAP
 
-CONFIG_RAM_START=0x20000000
-
-CONFIG_STM32_CCMEXCLUDE - Exclude CCM SRAM from the HEAP
-
-CONFIG_ARCH_INTERRUPTSTACK - This architecture supports an interrupt
-stack. If defined, this symbol is the size of the interrupt
-stack in bytes.  If not defined, the user task stacks will be
-used during interrupt handling.
+- CONFIG_ARCH_INTERRUPTSTACK - This architecture supports an interrupt
+  stack. If defined, this symbol is the size of the interrupt
+  stack in bytes.  If not defined, the user task stacks will be
+  used during interrupt handling.
 
 Clock
 -----
 
-CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG - Enables special STM32 clock
-configuration features.::
+- CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG - Enables special STM32 clock
+  configuration features.::
 
-       CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG=n
+    CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG=n
 
-CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
-of delay loops
+- CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
+  of delay loops
 
 TIMER
 -----
@@ -96,16 +86,20 @@ or DAC conversion. Note that ADC/DAC require two definition:  Not only do you ha
 to assign the timer (n) for used by the ADC or DAC, but then you also have to
 configure which ADC or DAC (m) it is assigned to.
 
-    CONFIG_STM32_TIMn_PWM   Reserve timer n for use by PWM, n=1,..,14
-    CONFIG_STM32_TIMn_ADC   Reserve timer n for use by ADC, n=1,..,14
-    CONFIG_STM32_TIMn_ADCm  Reserve timer n to trigger ADCm, n=1,..,14, m=1,..,3
-    CONFIG_STM32_TIMn_DAC   Reserve timer n for use by DAC, n=1,..,14
-    CONFIG_STM32_TIMn_DACm  Reserve timer n to trigger DACm, n=1,..,14, m=1,..,2
+- CONFIG_STM32_TIMn_PWM   Reserve timer n for use by PWM, n=1,..,14
+
+- CONFIG_STM32_TIMn_ADC   Reserve timer n for use by ADC, n=1,..,14
+
+- CONFIG_STM32_TIMn_ADCm  Reserve timer n to trigger ADCm, n=1,..,14, m=1,..,3
+
+- CONFIG_STM32_TIMn_DAC   Reserve timer n for use by DAC, n=1,..,14
+
+- CONFIG_STM32_TIMn_DACm  Reserve timer n to trigger DACm, n=1,..,14, m=1,..,2
 
 For each timer that is enabled for PWM usage, we need the following additional
 configuration settings:
 
-    CONFIG_STM32_TIMx_CHANNEL - Specifies the timer output channel {1,..,4}
+- CONFIG_STM32_TIMx_CHANNEL - Specifies the timer output channel {1,..,4}
 
 NOTE: The STM32 timers are each capable of generating different signals on
 each of the four channels with different duty cycles.  That capability is
@@ -114,121 +108,118 @@ not supported by this driver:  Only one output channel per timer.
 JTAG
 ----
 
-CONFIG_STM32_JTAG_FULL_ENABLE - Enables full SWJ (JTAG-DP + SW-DP)
+- CONFIG_STM32_JTAG_FULL_ENABLE - Enables full SWJ (JTAG-DP + SW-DP)
 
-CONFIG_STM32_JTAG_NOJNTRST_ENABLE - Enables full SWJ (JTAG-DP + SW-DP)
-but without JNTRST.
+- CONFIG_STM32_JTAG_NOJNTRST_ENABLE - Enables full SWJ (JTAG-DP + SW-DP)
+  but without JNTRST.
 
-CONFIG_STM32_JTAG_SW_ENABLE - Set JTAG-DP disabled and SW-DP enabled
+- CONFIG_STM32_JTAG_SW_ENABLE - Set JTAG-DP disabled and SW-DP enabled
 
 USART
 -----
 
-CONFIG_U[S]ARTn_SERIAL_CONSOLE - selects the USARTn (n=1,2,3) or UART
-m (m=4,5) for the console and ttys0 (default is the USART1).
+- CONFIG_U[S]ARTn_SERIAL_CONSOLE - selects the USARTn (n=1,2,3) or UART
+  m (m=4,5) for the console and ttys0 (default is the USART1).
 
-CONFIG_U[S]ARTn_RXBUFSIZE - Characters are buffered as received.
-This specific the size of the receive buffer
+- CONFIG_U[S]ARTn_RXBUFSIZE - Characters are buffered as received.
+  This specific the size of the receive buffer
 
-CONFIG_U[S]ARTn_TXBUFSIZE - Characters are buffered before
-being sent.  This specific the size of the transmit buffer
+- CONFIG_U[S]ARTn_TXBUFSIZE - Characters are buffered before
+  being sent.  This specific the size of the transmit buffer
 
-CONFIG_U[S]ARTn_BAUD - The configure BAUD of the UART.  Must be
+- CONFIG_U[S]ARTn_BAUD - The configure BAUD of the UART.  Must be
 
-CONFIG_U[S]ARTn_BITS - The number of bits.  Must be either 7 or 8.
+- CONFIG_U[S]ARTn_BITS - The number of bits.  Must be either 7 or 8.
 
-CONFIG_U[S]ARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
+- CONFIG_U[S]ARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
 
-CONFIG_U[S]ARTn_2STOP - Two stop bits
+- CONFIG_U[S]ARTn_2STOP - Two stop bits
 
 CAN
 ---
 
-CONFIG_CAN - Enables CAN support (one or both of CONFIG_STM32_CAN1 or
-CONFIG_STM32_CAN2 must also be defined)
+- CONFIG_CAN - Enables CAN support (one or both of CONFIG_STM32_CAN1 or
+  CONFIG_STM32_CAN2 must also be defined)
 
-CONFIG_CAN_EXTID - Enables support for the 29-bit extended ID.  Default
-Standard 11-bit IDs.
+- CONFIG_CAN_EXTID - Enables support for the 29-bit extended ID.  Default
+  Standard 11-bit IDs.
 
-CONFIG_CAN_FIFOSIZE - The size of the circular buffer of CAN messages.
-Default: 8
+- CONFIG_CAN_FIFOSIZE - The size of the circular buffer of CAN messages.
+  Default: 8
 
-CONFIG_CAN_NPENDINGRTR - The size of the list of pending RTR requests.
-Default: 4
+- CONFIG_CAN_NPENDINGRTR - The size of the list of pending RTR requests.
+  Default: 4
 
-CONFIG_CAN_LOOPBACK - A CAN driver may or may not support a loopback
-mode for testing. The STM32 CAN driver does support loopback mode.
+- CONFIG_CAN_LOOPBACK - A CAN driver may or may not support a loopback
+  mode for testing. The STM32 CAN driver does support loopback mode.
 
-CONFIG_STM32_CAN1_BAUD - CAN1 BAUD rate.  Required if CONFIG_STM32_CAN1
-is defined.
+- CONFIG_STM32_CAN1_BAUD - CAN1 BAUD rate.  Required if CONFIG_STM32_CAN1
+  is defined.
 
-CONFIG_STM32_CAN2_BAUD - CAN1 BAUD rate.  Required if CONFIG_STM32_CAN2
-is defined.
+- CONFIG_STM32_CAN2_BAUD - CAN1 BAUD rate.  Required if CONFIG_STM32_CAN2
+  is defined.
 
-CONFIG_STM32_CAN_TSEG1 - The number of CAN time quanta in segment 1.
-Default: 6
+- CONFIG_STM32_CAN_TSEG1 - The number of CAN time quanta in segment 1.
+  Default: 6
 
-CONFIG_STM32_CAN_TSEG2 - the number of CAN time quanta in segment 2.
-Default: 7
+- CONFIG_STM32_CAN_TSEG2 - the number of CAN time quanta in segment 2.
+  Default: 7
 
-CONFIG_STM32_CAN_REGDEBUG - If CONFIG_DEBUG_FEATURES is set, this will generate an
-dump of all CAN registers.
+- CONFIG_STM32_CAN_REGDEBUG - If CONFIG_DEBUG_FEATURES is set, this will generate an
+  dump of all CAN registers.
 
 SPI
 ---
 
-CONFIG_STM32_SPI_INTERRUPTS - Select to enable interrupt driven SPI
-      support. Non-interrupt-driven, poll-waiting is recommended if the
-      interrupt rate would be to high in the interrupt driven case.
+- CONFIG_STM32_SPI_INTERRUPTS - Select to enable interrupt driven SPI
+  support. Non-interrupt-driven, poll-waiting is recommended if the
+  interrupt rate would be to high in the interrupt driven case.
 
-CONFIG_STM32_SPIx_DMA - Use DMA to improve SPIx transfer performance.
-      Cannot be used with CONFIG_STM32_SPI_INTERRUPT.
+- CONFIG_STM32_SPIx_DMA - Use DMA to improve SPIx transfer performance.
+  Cannot be used with CONFIG_STM32_SPI_INTERRUPT.
 
-DMA
----
+SDIO
+----
 
-CONFIG_SDIO_DMA - Support DMA data transfers.  Requires CONFIG_STM32_SDIO and CONFIG_STM32_DMA2.
-CONFIG_STM32_SDIO_PRI - Select SDIO interrupt priority.  Default: 128
+- CONFIG_SDIO_DMA - Support DMA data transfers.  Requires CONFIG_STM32_SDIO and CONFIG_STM32_DMA2.
 
-CONFIG_STM32_SDIO_DMAPRIO - Select SDIO DMA interrupt priority. Default:  Medium
+- CONFIG_STM32_SDIO_PRI - Select SDIO interrupt priority.  Default: 128
 
-CONFIG_STM32_SDIO_WIDTH_D1_ONLY - Select 1-bit transfer mode.  Default:
-4-bit transfer mode.
+- CONFIG_STM32_SDIO_DMAPRIO - Select SDIO DMA interrupt priority. Default:  Medium
+
+- CONFIG_STM32_SDIO_WIDTH_D1_ONLY - Select 1-bit transfer mode.  Default:
+  4-bit transfer mode.
 
 USB
 ---
 
 STM32 USB OTG FS Host Driver Support
 
-Pre-requisites::
+Pre-requisites:
 
-   CONFIG_USBDEV          - Enable USB device support
-   CONFIG_USBHOST         - Enable USB host support
-   CONFIG_STM32_OTGFS     - Enable the STM32 USB OTG FS block
-   CONFIG_STM32_SYSCFG    - Needed
-   CONFIG_SCHED_WORKQUEUE - Worker thread support is required
+- CONFIG_USBHOST      - Enable general USB host support
+- CONFIG_STM32_OTGFS  - Enable the STM32 USB OTG FS block
+- CONFIG_STM32_SYSCFG - Needed
 
-Options:
+- CONFIG_STM32_OTGFS_RXFIFO_SIZE - Size of the RX FIFO in 32-bit words.
+  Default 128 (512 bytes)
 
-CONFIG_STM32_OTGFS_RXFIFO_SIZE - Size of the RX FIFO in 32-bit words.
-Default 128 (512 bytes)
+- CONFIG_STM32_OTGFS_NPTXFIFO_SIZE - Size of the non-periodic Tx FIFO
+  in 32-bit words.  Default 96 (384 bytes)
 
-CONFIG_STM32_OTGFS_NPTXFIFO_SIZE - Size of the non-periodic Tx FIFO
-in 32-bit words.  Default 96 (384 bytes)
+- CONFIG_STM32_OTGFS_PTXFIFO_SIZE - Size of the periodic Tx FIFO in 32-bit
+  words.  Default 96 (384 bytes)
 
-CONFIG_STM32_OTGFS_PTXFIFO_SIZE - Size of the periodic Tx FIFO in 32-bit
-words.  Default 96 (384 bytes)
+- CONFIG_STM32_OTGFS_DESCSIZE - Maximum size of a descriptor.  Default: 128
 
-CONFIG_STM32_OTGFS_DESCSIZE - Maximum size of a descriptor.  Default: 128
+- CONFIG_STM32_OTGFS_SOFINTR - Enable SOF interrupts.  Why would you ever
+  want to do that?
 
-CONFIG_STM32_OTGFS_SOFINTR - Enable SOF interrupts.  Why would you ever
-want to do that?
+- CONFIG_STM32_USBHOST_REGDEBUG - Enable very low-level register access
+  debug.  Depends on CONFIG_DEBUG_FEATURES.
 
-CONFIG_STM32_USBHOST_REGDEBUG - Enable very low-level register access
-debug.  Depends on CONFIG_DEBUG_FEATURES.
-
-CONFIG_STM32_USBHOST_PKTDUMP - Dump all incoming and outgoing USB
-packets. Depends on CONFIG_DEBUG_FEATURES.
+- CONFIG_STM32_USBHOST_PKTDUMP - Dump all incoming and outgoing USB
+  packets. Depends on CONFIG_DEBUG_FEATURES.
 
 LTDC hardware acceleration
 --------------------------
@@ -236,15 +227,17 @@ LTDC hardware acceleration
 The LTDC driver provides two 2 LTDC overlays and supports the following hardware
 acceleration and features:
 
-Configured at build time
+Configured at build time:
+
 - background color
+
 - default color (outside visible screen)
 
-Configurable by nuttx framebuffer interface
+Configurable by nuttx framebuffer interface:
 
 - cmap support (color table is shared by both LTDC overlays and DMA2D when enabled)
 
-Configurable via the nuttx framebuffer interface (for each layer separately)
+Configurable via the nuttx framebuffer interface (for each layer separately):
 
 - chromakey
 
@@ -270,11 +263,11 @@ DMA2D hardware acceleration
 
 The DMA2D driver implements the following hardware acceleration:
 
-Configurable via the nuttx framebuffer interface
+Configurable via the nuttx framebuffer interface:
 
 - cmap support (color table is shared by all DMA2D overlays and LTDC overlays)
 
-Configurable via the nuttx framebuffer interface (for each layer separately)
+Configurable via the nuttx framebuffer interface (for each layer separately):
 
 - color (fill memory region with a specific ARGB8888 color immediately), if
   cmap is disabled

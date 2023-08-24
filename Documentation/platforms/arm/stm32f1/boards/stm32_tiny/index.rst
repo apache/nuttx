@@ -2,22 +2,12 @@
 STM32 Tiny
 ==========
 
-This README discusses issues unique to NuttX configurations for the
+This page discusses issues unique to NuttX configurations for the
 STM32 Tiny development board.
 
 This board is available from several vendors on the net, and may
 be sold under different names. It is based on a STM32 F103C8T6 MCU, and
 is (always ?) bundled with a nRF24L01 wireless communication module.
-
-Contents
-========
-
-  - LEDs
-  - PWM
-  - UARTs
-  - Timer Inputs/Outputs
-  - STM32 Tiny -specific Configuration Options
-  - Configurations
 
 LEDs
 ====
