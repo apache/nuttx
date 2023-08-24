@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdio/lib_wrflush.c
+ * libs/libc/stdio/lib_rdflush_unlocked.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,36 +24,37 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
-#include <fcntl.h>
+#include <sys/types.h>
+#include <stdio.h>
+#include <unistd.h>
 #include <errno.h>
 
 #include "libc.h"
+
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_wrflush
+ * Name: lib_rdflush_unlocked
  *
  * Description:
- *   This is simply a version of fflush that does not report an error if
- *   the file is not open for writing.
+ *   Flush read data from the I/O buffer and adjust the file pointer to
+ *   account for the unread data
  *
  ****************************************************************************/
 
-int lib_wrflush(FAR FILE *stream)
+int lib_rdflush_unlocked(FAR FILE *stream)
 {
-#ifndef CONFIG_STDIO_DISABLE_BUFFERING
-  /* Verify that we were passed a valid (i.e., non-NULL) stream */
+  /* Sanity checking */
 
-#ifdef CONFIG_DEBUG_FEATURES
   if (stream == NULL)
     {
-      return -EINVAL;
+      set_errno(EBADF);
+      return ERROR;
     }
-#endif
 
   /* Do nothing if there is no I/O buffer */
 
@@ -62,38 +63,42 @@ int lib_wrflush(FAR FILE *stream)
       return OK;
     }
 
-  /* Verify that the stream is opened for writing... lib_fflush will
-   * return an error if it is called for a stream that is not opened for
-   * writing.  Check that first so that this function will not fail in
-   * that case.
+  /* If the buffer is currently being used for read access, then discard all
+   * of the read-ahead data. We do not support concurrent buffered read/write
+   * access.
    */
 
-  if ((stream->fs_oflags & O_WROK) == 0)
+  if (stream->fs_bufread != stream->fs_bufstart)
     {
-      /* Report that the success was successful if we attempt to flush a
-       * read-only stream.
+      /* Now adjust the stream pointer to account for the read-ahead data
+       * that was not actually read by the user.
        */
 
-      return OK;
-    }
-
-  /* Flush the stream.   Return success if there is no buffered write data
-   * -- i.e., that the stream is opened for writing and  that all of the
-   * buffered write data was successfully flushed by lib_fflush().
-   */
-
-  return lib_fflush(stream, true);
-
+#if CONFIG_NUNGET_CHARS > 0
+      off_t rdoffset = stream->fs_bufread - stream->fs_bufpos +
+                       stream->fs_nungotten;
 #else
-  /* Verify that we were passed a valid (i.e., non-NULL) stream */
-
-#ifdef CONFIG_DEBUG_FEATURES
-  if (!stream)
-    {
-      return -EINVAL;
-    }
+      off_t rdoffset = stream->fs_bufread - stream->fs_bufpos;
 #endif
+      /* Mark the buffer as empty (do this before calling fseek() because
+       * fseek() also calls this function).
+       */
+
+      stream->fs_bufpos = stream->fs_bufread = stream->fs_bufstart;
+#if CONFIG_NUNGET_CHARS > 0
+      stream->fs_nungotten = 0;
+#endif
+      /* Then seek to the position corresponding to the last data read by the
+       * user
+       */
+
+      if (fseek(stream, -rdoffset, SEEK_CUR) < 0)
+        {
+          return ERROR;
+        }
+    }
 
   return OK;
-#endif
 }
+
+#endif /* CONFIG_STDIO_DISABLE_BUFFERING */
