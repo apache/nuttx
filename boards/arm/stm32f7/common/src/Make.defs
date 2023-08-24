@@ -20,6 +20,10 @@
 
 ifeq ($(CONFIG_ARCH_BOARD_COMMON),y)
 
+ifeq ($(CONFIG_SENSORS_BH1750FVI),y)
+  CSRCS += stm32_bh1750.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src
