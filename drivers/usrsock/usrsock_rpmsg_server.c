@@ -1023,6 +1023,7 @@ static void usrsock_rpmsg_ns_unbind(FAR struct rpmsg_endpoint *ept)
     }
 
   rpmsg_destroy_ept(ept);
+  kmm_free(ept);
 }
 
 static int usrsock_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
