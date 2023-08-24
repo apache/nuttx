@@ -812,6 +812,19 @@ void mpfs_setup_ddr_segments(enum seg_setup_e option)
 
 static void mpfs_init_ddrc(void)
 {
+  /* Turn on DDRC clock */
+
+  modifyreg32(MPFS_SYSREG_SUBBLK_CLOCK_CR, 0,
+              SYSREG_SUBBLK_CLOCK_CR_DDRC);
+
+  /* Remove soft reset */
+
+  modifyreg32(MPFS_SYSREG_SOFT_RESET_CR, 0,
+              SYSREG_SUBBLK_CLOCK_CR_DDRC);
+
+  modifyreg32(MPFS_SYSREG_SOFT_RESET_CR,
+              SYSREG_SUBBLK_CLOCK_CR_DDRC, 0);
+
   putreg32(LIBERO_SETTING_CFG_MANUAL_ADDRESS_MAP,
            MPFS_DDR_CSR_APB_CFG_MANUAL_ADDRESS_MAP);
   putreg32(LIBERO_SETTING_CFG_CHIPADDR_MAP,
@@ -3129,16 +3142,6 @@ static int mpfs_set_mode_vs_bits(struct mpfs_ddr_priv_s *priv)
   /* Configure Segments- address mapping, CFG0/CFG1 */
 
   mpfs_setup_ddr_segments(DEFAULT_SEG_SETUP);
-
-  /* Turn on DDRC clock */
-
-  modifyreg32(MPFS_SYSREG_SUBBLK_CLOCK_CR, 0,
-              SYSREG_SUBBLK_CLOCK_CR_DDRC);
-
-  /* Remove soft reset */
-
-  modifyreg32(MPFS_SYSREG_SOFT_RESET_CR,
-              SYSREG_SUBBLK_CLOCK_CR_DDRC, 0);
 
   /* Set-up DDRC */
 
