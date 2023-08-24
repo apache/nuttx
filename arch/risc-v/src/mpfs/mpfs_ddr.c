@@ -3725,14 +3725,22 @@ static int mpfs_training_write_calibration(struct mpfs_ddr_priv_s *priv)
 
 #endif
 
-  /* Find the proper write latency by using mtc test */
+  if (LIBERO_SETTING_CFG_WRITE_LATENCY_SET == 0)
+    {
+      /* Find the proper write latency by using mtc test */
 
-  do
+      do
+        {
+          putreg32(write_latency, MPFS_DDR_CSR_APB_CFG_DFI_T_PHY_WRLAT);
+          error = mpfs_write_calibration_using_mtc(priv);
+        }
+      while (error && ++write_latency <= WR_LATENCY_MAX);
+    }
+  else
     {
       putreg32(write_latency, MPFS_DDR_CSR_APB_CFG_DFI_T_PHY_WRLAT);
       error = mpfs_write_calibration_using_mtc(priv);
     }
-  while (error && ++write_latency <= WR_LATENCY_MAX);
 
   /* Return error if mtc test failed on all allowed latency values */
 
