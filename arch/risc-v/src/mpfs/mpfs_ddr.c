@@ -306,6 +306,14 @@ static const uint8_t refclk_offsets[][5] =
 
 #endif
 
+/* State of the seiran128 PRNG, with initial seed */
+
+static uint64_t prng_state[2] =
+  {
+    0x6c64f673ed93b6cc,
+    0x97c703d5f6c9d72b
+  };
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -2131,19 +2139,29 @@ static int mpfs_write_calibration_using_mtc(struct mpfs_ddr_priv_s *priv)
  * Name: mpfs_ddr_rand
  *
  * Description:
- *   This should return a random value.
+ *   This is adapted from seiran128
+ *   (https://github.com/andanteyk/prng-seiran)
  *
  * Returned Value:
- *   Always zero at the moment.
- *
- * Assumptions/Limitations:
- *   This doesn't return random values at the moment.
+ *   Non-cryptographically secure pseudo random number
  *
  ****************************************************************************/
 
+static inline uint64_t rotl(uint64_t x, int k)
+{
+  return (x << k) | (x >> (-k & 0x3f));
+}
+
 static int mpfs_ddr_rand(void)
 {
-  return 0;
+  uint64_t s0 = prng_state[0];
+  uint64_t s1 = prng_state[1];
+  uint64_t result = rotl((s0 + s1) * 9, 29) + s0;
+
+  prng_state[0] = s0 ^ rotl(s1, 29);
+  prng_state[1] = s0 ^ (s1 << 9);
+
+  return (int)result;
 }
 
 /****************************************************************************
