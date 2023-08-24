@@ -1,16 +1,10 @@
-README
-======
+===================
+ST STM32VLDiscovery
+===================
 
 This README discusses issues unique to NuttX configurations for the STMicro
 STM32VLDiscovery (Value Line Discovery) board.
 
-Contents
-========
-
-  - LEDs
-  - UARTs
-  - "STMicro STM32F100RB generic" specific Configuration Options
-  - Configurations
 
 LEDs
 ====
@@ -20,7 +14,7 @@ You should configure the port and pin number in
 boards/arm/stm32/stm32vldiscovery/src/stm32vldiscovery.h. This LED is not used by
 the board port unless CONFIG_ARCH_LEDS is defined.  In that case, the usage by
 the board port is defined in include/board.h and src/up_leds.c. The LED is used
-to encode OS-related events as follows:
+to encode OS-related events as follows::
 
   SYMBOL                Meaning                 LED1*
                                                 green
@@ -42,13 +36,15 @@ UART
 Default USART/UART Configuration
 --------------------------------
 
-USART1 is enabled in all configurations (see */defconfig).  RX and TX are
+USART1 is enabled in all configurations (see \*/defconfig).  RX and TX are
 configured on pins PA10 and PA9, respectively. Then connect the RX pin of
 your USB/Serial adapter to TX pin (PA9) and the TX pin of your adapter to
 RX pin (PA10) of your board besides, of course, the GND pin.
 
 "STMicro STM32F100RB generic" specific Configuration Options
 ============================================================
+
+::
 
     CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
        be set to:
@@ -109,51 +105,51 @@ RX pin (PA10) of your board besides, of course, the GND pin.
 
     CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
 
-  Individual subsystems can be enabled:
+  Individual subsystems can be enabled::
 
-    AHB
-    ----
-    CONFIG_STM32_CRC
-    CONFIG_STM32_DMA1
-    CONFIG_STM32_DMA2
+       AHB
+       ----
+       CONFIG_STM32_CRC
+       CONFIG_STM32_DMA1
+       CONFIG_STM32_DMA2
 
-    APB1
-    ----
-    CONFIG_STM32_TIM2
-    CONFIG_STM32_TIM3
-    CONFIG_STM32_TIM4
-    CONFIG_STM32_TIM5
-    CONFIG_STM32_TIM6
-    CONFIG_STM32_TIM7
-    CONFIG_STM32_TIM12
-    CONFIG_STM32_TIM13
-    CONFIG_STM32_TIM14
-	CONFIG_STM32_RTC
-    CONFIG_STM32_WWDG
-    CONFIG_STM32_IWDG
-    CONFIG_STM32_SPI2
-    CONFIG_STM32_SPI3
-    CONFIG_STM32_USART2
-    CONFIG_STM32_USART3
-    CONFIG_STM32_UART4
-    CONFIG_STM32_UART5
-    CONFIG_STM32_I2C1
-    CONFIG_STM32_I2C2
-	CONFIG_STM32_PWR -- Required for RTC
-	CONFIG_STM32_BKP -- Required for RTC
-    CONFIG_STM32_DAC1
-    CONFIG_STM32_DAC2
-	CONFIG_STM32_CEC
+       APB1
+       ----
+       CONFIG_STM32_TIM2
+       CONFIG_STM32_TIM3
+       CONFIG_STM32_TIM4
+       CONFIG_STM32_TIM5
+       CONFIG_STM32_TIM6
+       CONFIG_STM32_TIM7
+       CONFIG_STM32_TIM12
+       CONFIG_STM32_TIM13
+       CONFIG_STM32_TIM14
+       CONFIG_STM32_RTC
+       CONFIG_STM32_WWDG
+       CONFIG_STM32_IWDG
+       CONFIG_STM32_SPI2
+       CONFIG_STM32_SPI3
+       CONFIG_STM32_USART2
+       CONFIG_STM32_USART3
+       CONFIG_STM32_UART4
+       CONFIG_STM32_UART5
+       CONFIG_STM32_I2C1
+       CONFIG_STM32_I2C2
+       CONFIG_STM32_PWR -- Required for RTC
+       CONFIG_STM32_BKP -- Required for RTC
+       CONFIG_STM32_DAC1
+       CONFIG_STM32_DAC2
+       CONFIG_STM32_CEC
 
-    APB2
-    ----
-	CONFIG_STM32_ADC1
-    CONFIG_STM32_TIM1
-	CONFIG_STM32_SPI1
-    CONFIG_STM32_USART1
-    CONFIG_STM32_TIM15
-	CONFIG_STM32_TIM16
-	CONFIG_STM32_TIM17
+       APB2
+       ----
+       CONFIG_STM32_ADC1
+       CONFIG_STM32_TIM1
+       CONFIG_STM32_SPI1
+       CONFIG_STM32_USART1
+       CONFIG_STM32_TIM15
+       CONFIG_STM32_TIM16
+       CONFIG_STM32_TIM17
 
   Timer devices may be used for different purposes.  One special purpose is
   to generate modulated outputs for such things as motor control.  If CONFIG_STM32_TIMn
@@ -202,17 +198,18 @@ Configurations
 ==============
 
 Each STMicro STM32F100RB generic configuration is maintained in a sub-directory
-and can be selected as follow:
+and can be selected as follow::
 
     tools/configure.sh stm32vldiscovery:<subdir>
 
 Where <subdir> is one of the following:
 
-  nsh:
-  ---
-    Configures the NuttShell (nsh) located at apps/examples/nsh.  The
-    Configuration enables only the serial NSH interfaces.
+nsh
+---
 
-    Default toolchain:
+Configures the NuttShell (nsh) located at apps/examples/nsh.  The
+Configuration enables only the serial NSH interfaces.
+
+Default toolchain::
 
     CONFIG_ARM_TOOLCHAIN_GNU_EABI=y      : GNU EABI toolchain for Linux
