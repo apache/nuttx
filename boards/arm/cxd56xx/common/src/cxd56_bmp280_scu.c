@@ -31,6 +31,7 @@
 #include <nuttx/board.h>
 
 #include <nuttx/sensors/bmp280.h>
+#include <arch/board/cxd56_bmp280.h>
 #include <arch/chip/scu.h>
 
 #include "cxd56_i2c.h"
