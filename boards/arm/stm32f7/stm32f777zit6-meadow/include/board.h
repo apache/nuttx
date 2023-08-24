@@ -462,14 +462,13 @@
 #define GPIO_ETH_RMII_TXD1    (GPIO_ETH_RMII_TXD1_2|GPIO_SPEED_100MHz)
 
 /* I2C Mapping
- * I2C #4 is connected to the LCD daughter board
- * and the WM8994 audio codec.
  *
- * I2C4_SCL - PD12
- * I2C4_SDA - PB7
+ * I2C1_SCL - PB6
+ * I2C1_SDA - PB7
  */
-#define GPIO_I2C4_SCL        (GPIO_I2C4_SCL_1|GPIO_SPEED_50MHz)
-#define GPIO_I2C4_SDA        (GPIO_I2C4_SDA_5|GPIO_SPEED_50MHz)
+
+#define GPIO_I2C1_SCL        (GPIO_I2C1_SCL_1|GPIO_SPEED_50MHz)
+#define GPIO_I2C1_SDA        (GPIO_I2C1_SDA_1|GPIO_SPEED_50MHz)
 
 /* QSPI Mapping  */
 
