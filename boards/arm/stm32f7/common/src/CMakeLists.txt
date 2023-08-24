@@ -20,4 +20,8 @@
 
 set(SRCS)
 
+if(CONFIG_SENSORS_BH1750FVI)
+  list(APPEND SRCS stm32_bh1750.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
