@@ -2,16 +2,16 @@
 ET-STM32 Stamp
 ==============
 
-This README discusses issues/thoughts unique to NuttX configuration(s) for the
+This page discusses issues/thoughts unique to NuttX configuration(s) for the
 ET-STM32 Stamp board from Futurlec (https://www.futurlec.com/ET-STM32_Stamp.shtml).
 
-Microprocessor: 32-bit ARM Cortex M3 at 72MHz STM32F103RET6
-Memory:         512 KB Flash and 64 KB SRAM
-I/O Pins Out:   48
-ADCs:           16 (at 12-bit resolution)
-DACs:           2 (at 12-bit resolution)
-Peripherals:    RTC, 4 timers, 2 I2Cs, 3 SPI ports, 1 on-board UART (upto 5 channels)
-Other:          Sleep, stop, and standby modes; serial wire debug and JTAG interfaces
+- Microprocessor: 32-bit ARM Cortex M3 at 72MHz STM32F103RET6
+- Memory: 512 KB Flash and 64 KB SRAM
+- I/O Pins Out: 48
+- ADCs: 16 (at 12-bit resolution)
+- DACs: 2 (at 12-bit resolution)
+- Peripherals: RTC, 4 timers, 2 I2Cs, 3 SPI ports, 1 on-board UART (upto 5 channels)
+- Other: Sleep, stop, and standby modes; serial wire debug and JTAG interfaces
 
 Please see link below for board specific details:
 

@@ -2,7 +2,7 @@
 stm32f103-minimum
 =================
 
-This README discusses issues unique to NuttX configurations for the
+This page discusses issues unique to NuttX configurations for the
 STM32F103C8T6 Minimum System Development Board for ARM Microcontroller.
 
 STM32F103C8T6 Minimum System Development Boards:

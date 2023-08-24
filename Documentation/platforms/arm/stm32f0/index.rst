@@ -25,36 +25,31 @@ The following list indicates peripherals supported in NuttX:
 ==========  =======  =====
 Peripheral  Support  Notes
 ==========  =======  =====
-IRQs        Yes
-GPIO        Yes
-EXTI        Yes
-HSE         Yes
-PLL         Yes      
-HSI         Yes      
-MSI         Yes      
-LSE         Yes      
-RCC         Yes      
-SYSCFG      Yes      
-USART       Yes
 FLASH       No
-DMA         Yes
-SPI         Yes
-I2S         No
-I2C         Yes
-RTC         No
-Timers      Yes
-IRTIM       No
-PM          No
-RNG         Yes
 CRC         No
+PM          No
+RCC         Yes      
+CSR         No
+GPIO        Yes
+SYSCFG      Yes      
+DMA         Yes
+EXTI        Yes
 ADC         Yes
 DAC         No
 COMP        No
-WWDG        No
+TSC         No
+TIM         Yes
+IRTIM       No
 IWDG        No
+WWDG        No
+RTC         No
+I2C         Yes
+USART       Yes
+SPI         Yes
+I2S         No
 CAN         No
-HDMI-CEC    No
 USB         Yes
+HDMI-CEC    No
 ==========  =======  =====
 
 Supported Boards

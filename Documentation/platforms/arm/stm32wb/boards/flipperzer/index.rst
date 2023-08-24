@@ -2,7 +2,7 @@
 Flipper Zero
 ============
 
-This README file discusses the port of NuttX to the Flipper Zero multi-tool
+This page file discusses the port of NuttX to the Flipper Zero multi-tool
 device. See https://flipperzero.one/ for device details.
 
 Device features

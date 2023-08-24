@@ -2,7 +2,7 @@
 HY-MiniSTM32V
 =============
 
-This README discusses issues unique to NuttX configurations for the
+This page discusses issues unique to NuttX configurations for the
 HY-MiniSTM32V development board.
 
 ST Bootloader

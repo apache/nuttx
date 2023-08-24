@@ -2,7 +2,7 @@
 ST STM3210E-EVAL
 ================
 
-This README discusses issues unique to NuttX configurations for the
+This page discusses issues unique to NuttX configurations for the
 STMicro STM3210E-EVAL development board.
 
 DFU and JTAG

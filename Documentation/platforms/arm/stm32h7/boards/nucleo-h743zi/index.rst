@@ -2,7 +2,7 @@
 ST Nucle H743ZI
 ===============
 
-This README discusses issues unique to NuttX configurations for the
+This page discusses issues unique to NuttX configurations for the
 STMicro NUCLEO-H743ZI development board featuring the STM32H743ZI
 MCU. The STM32H743ZI is a 400MHz Cortex-M7 operation with 2MBytes Flash
 memory and 1MByte SRAM. The board features:

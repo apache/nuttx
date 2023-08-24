@@ -2,7 +2,7 @@
 ST B-G474E-DPOW1
 ================
 
-This is the README file for a port of NuttX to the ST Micro B-G474E-DPOW1
+This page is for a port of NuttX to the ST Micro B-G474E-DPOW1
 Discovery kit with STM32G474RE MCU. For more information about this board,
 see:
 

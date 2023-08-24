@@ -2,9 +2,8 @@
 ST STM32VLDiscovery
 ===================
 
-This README discusses issues unique to NuttX configurations for the STMicro
+This page discusses issues unique to NuttX configurations for the STMicro
 STM32VLDiscovery (Value Line Discovery) board.
-
 
 LEDs
 ====

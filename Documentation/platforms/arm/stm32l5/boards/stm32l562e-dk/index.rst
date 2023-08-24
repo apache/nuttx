@@ -1,6 +1,6 @@
-=============
-STM32L562E-DK
-=============
+================
+ST STM32L562E-DK
+================
 
 This page discusses the port of NuttX to the STMicro STM32L562E-DK
 board.  That board features the STM32L562QEI6QU MCU with 512KiB of FLASH

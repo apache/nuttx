@@ -2,7 +2,7 @@
 ST STM32F746G-DISCO
 ===================
 
-This README discusses issues unique to NuttX configurations for the
+This page discusses issues unique to NuttX configurations for the
 STMicro STM32F746G-DISCO development board featuring the STM32F746NGH6
 MCU. The STM32F746NGH6  is a 216MHz Cortex-M7 operation with 1024Kb Flash
 memory and 300Kb SRAM. The board features:
