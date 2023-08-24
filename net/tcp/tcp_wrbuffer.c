@@ -73,10 +73,7 @@ struct wrbuffer_s
 
 /* This is the state of the global write buffer resource */
 
-static struct wrbuffer_s g_wrbuffer =
-{
-  SEM_INITIALIZER(CONFIG_NET_TCP_NWRBCHAINS),
-};
+static struct wrbuffer_s g_wrbuffer;
 
 /****************************************************************************
  * Public Functions
@@ -96,6 +93,10 @@ static struct wrbuffer_s g_wrbuffer =
 void tcp_wrbuffer_initialize(void)
 {
   int i;
+
+  sq_init(&g_wrbuffer.freebuffers);
+
+  nxsem_init(&g_wrbuffer.sem, 0, CONFIG_NET_TCP_NWRBCHAINS);
 
   for (i = 0; i < CONFIG_NET_TCP_NWRBCHAINS; i++)
     {
