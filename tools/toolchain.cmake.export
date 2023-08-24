@@ -1,0 +1,32 @@
+set(CMAKE_SYSTEM_NAME Generic)
+set(CMAKE_SYSTEM_VERSION 1)
+
+set(NUTTX_PATH ${CMAKE_CURRENT_LIST_DIR}/..)
+include(${NUTTX_PATH}/scripts/target.cmake)
+
+set(LINKER_SCRIPT ${NUTTX_PATH}/scripts/${LDNAME})
+
+set(CMAKE_C_FLAGS "${ARCHCPUFLAGS} ${ARCHCFLAGS}   -D__NuttX__")
+set(CMAKE_CXX_FLAGS "${ARCHCPUFLAGS} ${ARCHCXXFLAGS} -D__NuttX__")
+
+set(CMAKE_C_STANDARD_INCLUDE_DIRECTORIES ${NUTTX_PATH}/include
+                                         ${NUTTX_PATH}/arch/chip)
+
+set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES
+    ${NUTTX_PATH}/include/libcxx ${NUTTX_PATH}/include ${NUTTX_PATH}/arch/chip)
+
+add_compile_options(-nostdlib)
+add_compile_options(-ffunction-sections -fdata-sections)
+
+link_libraries(
+  "-L${NUTTX_PATH}/libs -Wl,--start-group ${LDLIBS} ${EXTRA_LIBS} -Wl,--end-group"
+)
+add_link_options(-Wl,--entry=__start)
+add_link_options(-nostdlib)
+add_link_options(-Wl,--gc-sections)
+add_link_options(-T${LINKER_SCRIPT})
+
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
