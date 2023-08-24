@@ -1,47 +1,25 @@
-README
-======
+=======================
+ViewTool STM32F103/F107
+=======================
 
-  This README discusses issues unique to NuttX configurations for the
-  ViewTool STM32F103/F107 V1.2 board.  This board may be fitted with either
+This README discusses issues unique to NuttX configurations for the
+ViewTool STM32F103/F107 V1.2 board.  This board may be fitted with either
 
-    - STM32F107VCT6, or
-    - STM32F103VCT6
+- STM32F107VCT6, or
+- STM32F103VCT6
 
-  The board is very modular with connectors for a variety of peripherals.
-  Features on the base board include:
+The board is very modular with connectors for a variety of peripherals.
+Features on the base board include:
 
-    - User and Wake-Up Keys
-    - LEDs
+- User and Wake-Up Keys
+- LEDs
 
-  See http://www.viewtool.com/ for further information.
-
-Contents
-========
-
-  o User and Wake-Up keys
-  o LEDs
-  o Serial Console
-    - Console Configuration
-    - J5 - USART1
-    - PL-2013 USB-to-Serial Interface
-    - RS-232 Module
-  o USB Interface
-  o microSD Card Interface
-  o ViewTool DP83848 Ethernet Module
-  o Freescale MPL115A barometer sensor
-  o LCD/Touchscreen Interface
-  o FT80x Integration
-  o MAX3421E Integration
-  o Toolchains
-    - NOTE about Windows native toolchains
-  o Configurations
-    - Information Common to All Configurations
-    - Configuration Sub-directories
+See http://www.viewtool.com/ for further information.
 
 User and Wake-Up keys
 =====================
 
-  All pulled high and will be sensed low when depressed.
+All pulled high and will be sensed low when depressed.::
 
     SW2 PC11  Needs J42 closed
     SW3 PC12  Needs J43 closed
@@ -50,19 +28,19 @@ User and Wake-Up keys
 LEDs
 ====
 
-  There are four LEDs on the ViewTool STM32F103/F107 board that can be controlled
-  by software:  LED1 through LED4.  All pulled high and can be illuminated by
-  driving the output to low
+There are four LEDs on the ViewTool STM32F103/F107 board that can be controlled
+by software:  LED1 through LED4.  All pulled high and can be illuminated by
+driving the output to low::
 
     LED1 PA6
     LED2 PA7
     LED3 PB12
     LED4 PB13
 
-  These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
-  defined.  In that case, the usage by the board port is defined in
-  include/board.h and src/stm32_leds.c. The LEDs are used to encode OS-related
-  events as follows:
+These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
+defined.  In that case, the usage by the board port is defined in
+include/board.h and src/stm32_leds.c. The LEDs are used to encode OS-related
+events as follows::
 
     SYMBOL            Meaning                      LED state
                                                LED1 LED2 LED3 LED4
@@ -77,24 +55,26 @@ LEDs
     LED_PANIC         The system has crashed   N/C  N/C  N/C  2Hz Flashing
     LED_IDLE          MCU is is sleep mode         Not used
 
-  After booting, LED1-3 are not longer used by the system and can be used for
-  other purposes by the application (Of course, all LEDs are available to the
-  application if CONFIG_ARCH_LEDS is not defined.
+After booting, LED1-3 are not longer used by the system and can be used for
+other purposes by the application (Of course, all LEDs are available to the
+application if CONFIG_ARCH_LEDS is not defined.
 
 Serial Console
 ==============
 
-  Console Configuration
-  ---------------------
-  The NuttX console is configured by default on USART1 at 115200 BAUD 8N1
-  (8-bits, not parity, one stop bit).  These setting can, of course, easily
-  be changed by reconfiguring NuttX.
+Console Configuration
+---------------------
 
-  J5 - USART1
-  -----------
-  The boards come with a PL-2303 based USB-to-serial board.  Also available
-  as an option is an RS-232 board.  Both have the same pin out on a 6-pin
-  connector that mates with the upper row of J5.
+The NuttX console is configured by default on USART1 at 115200 BAUD 8N1
+(8-bits, not parity, one stop bit).  These setting can, of course, easily
+be changed by reconfiguring NuttX.
+
+J5 - USART1
+-----------
+
+The boards come with a PL-2303 based USB-to-serial board.  Also available
+as an option is an RS-232 board.  Both have the same pin out on a 6-pin
+connector that mates with the upper row of J5.::
 
     PIN MODULE BOARD J5
     --- ------ ---------------------------
@@ -105,119 +85,130 @@ Serial Console
      5   RTS?  9  CTS?  PA12    USART1_RTS
      6   CTS?  11 RTS?  PA11    USART1_CTS
 
-  PL-2013 USB-to-Serial Interface
-  -------------------------------
+PL-2013 USB-to-Serial Interface
+-------------------------------
 
-    J37 - CON4.  Jumper Settings:
+J37 - CON4.  Jumper Settings::
+
       1 <-> 3 : Connects PA9 to the RXD1 output pin
       2 <-> 4 : Connects PA10 to the TXD1 input pin
 
-    J35 - CON2.  Jumper Setting:
+J35 - CON2.  Jumper Setting::
+
       Open.  the PL2303 adapter receives its power from the USB host.
 
-  RS-232 Module
-  -------------
+RS-232 Module
+-------------
 
-    J37 - CON4.  Jumper Settings:
+J37 - CON4.  Jumper Settings::
+
       1 <-> 3 : Connects PA9 to the RXD1 output pin
       2 <-> 4 : Connects PA10 to the TXD1 input pin
 
-    J35 - CON2.  Jumper Setting:
+J35 - CON2.  Jumper Setting::
+
       1 <-> 2 : Proves 3.3V to the RS-232 module.
 
 USB Interface
 =============
 
-  USB Connector
-  -------------
+USB Connector
+-------------
 
-  The Viewtool base board has a USB Mini-B connector.  Only USB device can
-  be supported with this connector.
+The Viewtool base board has a USB Mini-B connector.  Only USB device can
+be supported with this connector.::
 
-  ------------------------- ------------------------------------
-         USB Connector
-         J10 mini-USB       GPIO CONFIGURATION(s)
-  --- --------- ----------- ------------------------------------
-  Pin Signal
-  --- --------- ----------- ------------------------------------
-   1  USB_VBUS  VDD_USB     (No sensing available)
-   2  OTG_DM    PA11        GPIO_OTGFS_DM (F107) GPIO_USB_DM (F103)
-   3  OTG_DP    PA12        GPIO_OTGFS_DP (F107) GPIO_USB_DP (F103)
-   4  OTG_ID    PA10        GPIO_OTGFS_ID (F107)
-   5  Shield    N/A         N/A
-   6  Shield    N/A         N/A
-   7  Shield    N/A         N/A
-   8  Shield    N/A         N/A
-   9  Shield    N/A         N/A
-                PE11 USB_EN   GPIO controlled soft pull-up (if J51 closed)
+        ------------------------- ------------------------------------
+               USB Connector
+               J10 mini-USB       GPIO CONFIGURATION(s)
+        --- --------- ----------- ------------------------------------
+        Pin Signal
+        --- --------- ----------- ------------------------------------
+         1  USB_VBUS  VDD_USB     (No sensing available)
+         2  OTG_DM    PA11        GPIO_OTGFS_DM (F107) GPIO_USB_DM (F103)
+         3  OTG_DP    PA12        GPIO_OTGFS_DP (F107) GPIO_USB_DP (F103)
+         4  OTG_ID    PA10        GPIO_OTGFS_ID (F107)
+         5  Shield    N/A         N/A
+         6  Shield    N/A         N/A
+         7  Shield    N/A         N/A
+         8  Shield    N/A         N/A
+         9  Shield    N/A         N/A
+                      PE11 USB_EN   GPIO controlled soft pull-up (if J51 closed)
 
-   NOTES:
-   1. GPIO_OTGFS_VBUS (F107) should not be configured.  No VBUS sensing
-   2. GPIO_OTGFS_SOF (F107) is not used
-   3. The OTG FS module has is own, internal soft pull-up logic.  J51 should
-      be open so that PE11 activity does effect USB.
+         NOTES:
+         1. GPIO_OTGFS_VBUS (F107) should not be configured.  No VBUS sensing
+         2. GPIO_OTGFS_SOF (F107) is not used
+         3. The OTG FS module has is own, internal soft pull-up logic.  J51 should
+            be open so that PE11 activity does effect USB.
 
-  STM32F103 Configuration
-  -----------------------
+STM32F103 Configuration
+-----------------------
 
-    System Type -> STM32 Peripheral Support
+System Type -> STM32 Peripheral Support::
+
       CONFIG_STM32_USB=y                 : Enable USB FS device
 
-    Device Drivers
+Device Drivers::
+
       CONFIG_USBDEV                      : USB device support
 
-    STATUS:  All of the code is in place, but no testing has been performed.
+STATUS:  All of the code is in place, but no testing has been performed.
 
-  STM32F107 Configuration
-  -----------------------
+STM32F107 Configuration
+-----------------------
 
-    System Type -> STM32 Peripheral Support
+System Type -> STM32 Peripheral Support::
+
       CONFIG_STM32_OTGFS=y               : Enable OTG FS
 
-    Device Drivers
+Device Drivers::
+
       CONFIG_USBDEV                      : USB device support
 
-    STATUS:  All of the code is in place, but USB is not yet functional.
+STATUS:  All of the code is in place, but USB is not yet functional.
 
-  CDC/ACM Configuration
-  ---------------------
+CDC/ACM Configuration
+---------------------
 
-  This will select the CDC/ACM serial device.  Defaults for the other
-  options should be okay.
+This will select the CDC/ACM serial device.  Defaults for the other
+options should be okay.::
 
     Device Drivers -> USB Device Driver Support
       CONFIG_CDCACM=y                     : Enable the CDC/ACM device
 
-  The following setting enables an example that can can be used to control
-  the CDC/ACM device.  It will add two new NSH commands:
+The following setting enables an example that can can be used to control
+the CDC/ACM device.  It will add two new NSH commands:
 
-    a. sercon will connect the USB serial device (creating /dev/ttyACM0), and
-    b. serdis which will disconnect the USB serial device (destroying
-        /dev/ttyACM0).
+a. sercon will connect the USB serial device (creating /dev/ttyACM0), and
+b. serdis which will disconnect the USB serial device (destroying
+   /dev/ttyACM0).
 
-    Application Configuration -> Examples:
+Application Configuration -> Examples::
+
       CONFIG_SYSTEM_CDCACM=y              : Enable an CDC/ACM example
 
-  USB MSC Configuration
-  ---------------------
-  [WARNING: This configuration has not yet been verified]
+USB MSC Configuration
+---------------------
 
-  The Mass Storage Class (MSC) class driver can be selected in order to
-  export the microSD card to the host computer.  MSC support is selected:
+[WARNING: This configuration has not yet been verified]
+
+The Mass Storage Class (MSC) class driver can be selected in order to
+export the microSD card to the host computer.  MSC support is selected:::
 
     Device Drivers -> USB Device Driver Support
       CONFIG_USBMSC=y                       : Enable the USB MSC class driver
       CONFIG_USBMSC_EPBULKOUT=1             : Use EP1 for the BULK OUT endpoint
       CONFIG_USBMSC_EPBULKIN=2              : Use EP2 for the BULK IN endpoint
 
-  The following setting enables an add-on that can can be used to control
-  the USB MSC device.  It will add two new NSH commands:
+The following setting enables an add-on that can can be used to control
+the USB MSC device.  It will add two new NSH commands:
 
-    a. msconn will connect the USB serial device and export the microSD
-       card to the host, and
-    b. msdis which will disconnect the USB serial device.
+a. msconn will connect the USB serial device and export the microSD
+   card to the host, and
+b. msdis which will disconnect the USB serial device.
 
-    Application Configuration -> System Add-Ons:
+Application Configuration -> System Add-Ons::
+
       CONFIG_SYSTEM_USBMSC=y                : Enable the USBMSC add-on
       CONFIG_SYSTEM_USBMSC_NLUNS=1          : One LUN
       CONFIG_SYSTEM_USBMSC_DEVMINOR1=0      : Minor device zero
@@ -225,15 +216,15 @@ USB Interface
                                             : Use a single, LUN:  The microSD
                                             : block driver.
 
-    NOTES:
+NOTES:
 
-    a. To prevent file system corruption, make sure that the microSD is un-
-       mounted *before* exporting the mass storage device to the host:
+a. To prevent file system corruption, make sure that the microSD is un-
+   mounted *before* exporting the mass storage device to the host::
 
          nsh> umount /mnt/sdcard
          nsh> mscon
 
-       The microSD can be re-mounted after the mass storage class is disconnected:
+   The microSD can be re-mounted after the mass storage class is disconnected::
 
         nsh> msdis
         nsh> mount -t vfat /dev/mtdblock0 /mnt/at25
@@ -241,8 +232,10 @@ USB Interface
 microSD Card Interface
 ======================
 
-  microSD Connector
-  -----------------
+microSD Connector
+-----------------
+
+::
 
     ----------------------------- ------------------------- --------------------------------
            Connector J17            GPIO CONFIGURATION(s)
@@ -264,11 +257,12 @@ microSD Card Interface
        cannot be used with the STM32F107 (unless the pin-out just happens to match up
        with an SPI-based card interface???)
 
-  Configuration (STM32F103 only)
-  ------------------------------
+Configuration (STM32F103 only)
+------------------------------
+
   [WARNING: This configuration has not yet been verified]
 
-  Enabling SDIO-based MMC/SD support:
+  Enabling SDIO-based MMC/SD support::
 
     System Type->STM32 Peripheral Support
       CONFIG_STM32_SDIO=y                   : Enable SDIO support
@@ -306,50 +300,53 @@ microSD Card Interface
 ViewTool DP83848 Ethernet Module
 ================================
 
-  Ethernet Connector
-  ------------------
+Ethernet Connector
+------------------
 
-    ----------------------------- ------------------------ --------------------------------
-           Connector J2            GPIO CONFIGURATION(s)
-    PIN SIGNAL        LEGEND         (no remapping)                 DP83848C Board
-    --- ------------- ----------- ------------------------ --------------------------------
-    1   PA0           MII_CRS     N/A                      N/C
-    2   PB11/SDA2     COM_TX_EN   GPIO_ETH_RMII_TX_EN      TX_EN
-    3   PA3/LED_G2    MII_COL     N/A                      N/C
-    4   PB12/NSS2     COM_TXD0    GPIO_ETH_RMII_TXD0       TXD0
-    5   PA1           MII_RX_CLK  GPIO_ETH_RMII_REF_CLK    OSCIN
-    6   PB13/SCK2     COM_TXD1    GPIO_ETH_RMII_TXD1       TXD1
-    7   PB1/CD_RESET  MII_RXD3    N/A                      N/C
-    8   PC4/LCDTP     COM_RXD0    GPIO_ETH_RMII_RXD0       RXD0
-    9   PB0/BL_PWM    MII_RXD2    N/A                      N/C
-    10  PC5           COM_RXD1    GPIO_ETH_RMII_RXD1       RXD1
-    11  PB8/CAN1_RX   MII_TXD3    N/A                      N/C
-    12  PC1/LED_R1    COM_MDC     GPIO_ETH_MDC             MDC
-    13  PC2/LED_R2    MII_TXD2    N/A                      N/C
-    14  PA2/LED_G1    COM_MDIO    GPIO_ETH_MDIO            MDIO
-    15  PC3/ONEW      MII_TX_CLK  N/A                      N/C
-    16  PB10/SCL2     RX_ER       N/A                      N/C
-    17  PD2           GPIO1       N/A                      N/C
-    18  PA7/MOSI1     COM_RX_DV   GPIO_ETH_RMII_CRS_DV     CRS_DIV
-    19  PD3           GPIO2       N/A                      N/C
-    20  PB5           COM_PPS_OUT N/A                      N/C
-    21  VDD 3.3       VDD_3.3     N/A                      3.3V
-    22  VDD 3.3       VDD_3.3     N/A                      3.3V
-    23  GND           GND         N/A                      GND
-    24  GND           GND         N/A                      GND
-    --- ------------- ----------- ------------------------ --------------------------------
+..
+   ----------------------------- ------------------------ --------------------------------
+   Connector J2            GPIO CONFIGURATION(s)
+   PIN SIGNAL        LEGEND         (no remapping)                 DP83848C Board
+   --- ------------- ----------- ------------------------ --------------------------------
+   1   PA0           MII_CRS     N/A                      N/C
+   2   PB11/SDA2     COM_TX_EN   GPIO_ETH_RMII_TX_EN      TX_EN
+   3   PA3/LED_G2    MII_COL     N/A                      N/C
+   4   PB12/NSS2     COM_TXD0    GPIO_ETH_RMII_TXD0       TXD0
+   5   PA1           MII_RX_CLK  GPIO_ETH_RMII_REF_CLK    OSCIN
+   6   PB13/SCK2     COM_TXD1    GPIO_ETH_RMII_TXD1       TXD1
+   7   PB1/CD_RESET  MII_RXD3    N/A                      N/C
+   8   PC4/LCDTP     COM_RXD0    GPIO_ETH_RMII_RXD0       RXD0
+   9   PB0/BL_PWM    MII_RXD2    N/A                      N/C
+   10  PC5           COM_RXD1    GPIO_ETH_RMII_RXD1       RXD1
+   11  PB8/CAN1_RX   MII_TXD3    N/A                      N/C
+   12  PC1/LED_R1    COM_MDC     GPIO_ETH_MDC             MDC
+   13  PC2/LED_R2    MII_TXD2    N/A                      N/C
+   14  PA2/LED_G1    COM_MDIO    GPIO_ETH_MDIO            MDIO
+   15  PC3/ONEW      MII_TX_CLK  N/A                      N/C
+   16  PB10/SCL2     RX_ER       N/A                      N/C
+   17  PD2           GPIO1       N/A                      N/C
+   18  PA7/MOSI1     COM_RX_DV   GPIO_ETH_RMII_CRS_DV     CRS_DIV
+   19  PD3           GPIO2       N/A                      N/C
+   20  PB5           COM_PPS_OUT N/A                      N/C
+   21  VDD 3.3       VDD_3.3     N/A                      3.3V
+   22  VDD 3.3       VDD_3.3     N/A                      3.3V
+   23  GND           GND         N/A                      GND
+   24  GND           GND         N/A                      GND
+   --- ------------- ----------- ------------------------ --------------------------------
 
-    NOTES:
-    1. RMII interface is used
-    2. There is a 50MHz clock on board the DP83848.  No MCO clock need be provided.
+   NOTES:
+   1. RMII interface is used
+   2. There is a 50MHz clock on board the DP83848.  No MCO clock need be provided.
 
-  Configuration
-  -------------
+Configuration
+-------------
 
-    System Type -> STM32 Peripheral Support
+System Type -> STM32 Peripheral Support::
+
       CONFIG_STM32_ETHMAC=y                  : Enable Ethernet driver
 
-    System Type -> Ethernet MAC Configuration
+System Type -> Ethernet MAC Configuration::
+
       CONFIG_STM32_RMII=y                    : Configuration RM-II DP83848C PHY
       CONFIG_STM32_AUTONEG=y
       CONFIG_STM32_PHYADDR=1
@@ -360,15 +357,18 @@ ViewTool DP83848 Ethernet Module
       CONFIG_STM32_PHYSR_FULLDUPLEX=0x0004
       CONFIG_STM32_RMII_EXTCLK=y
 
-    Device Drivers -> Networking Devices
+Device Drivers -> Networking Devices::
+
       CONFIG_NETDEVICES=y                    : More PHY stuff
       CONFIG_ETH0_PHY_DP83848C=y
 
-    Networking (required)
+Networking (required)::
+
       CONFIG_NET=y                           : Enabled networking support
       CONFIG_NSH_NOMAC=y
 
-    Networking (recommended/typical)
+Networking (recommended/typical)::
+
       CONFIG_NET_SOCKOPTS=y
 
       CONFIG_NET_ETH_PKTSIZE=650             : Maximum packet size
@@ -386,7 +386,8 @@ ViewTool DP83848 Ethernet Module
       CONFIG_NSH_IPADDR=0x0a000002
       CONFIG_NSH_NETMASK=0xffffff00
 
-    Network Utilities (basic)
+Network Utilities (basic)::
+
       CONFIG_NETUTILS_TFTPC=y                : Needed by NSH unless to disable TFTP commands
       CONFIG_NETUTILS_DHCPC=y                : Fun stuff
       CONFIG_NETUTILS_TELNETD=y              : Support for a Telnet NSH console
@@ -398,12 +399,12 @@ ViewTool DP83848 Ethernet Module
 Freescale MPL115A barometer sensor
 ==================================
 
-  This board support package includes hooks that can be used to enable
-  testing of a Freescale MPL115A barometer sensor connected via SPI3 with
-  chip select on PB6,
+This board support package includes hooks that can be used to enable
+testing of a Freescale MPL115A barometer sensor connected via SPI3 with
+chip select on PB6,
 
-  Here are the configuration settings that would have to be included to
-  enabled support for the barometer:
+Here are the configuration settings that would have to be included to
+enabled support for the barometer::
 
     System Type -> Peripherals
       CONFIG_STM32_SPI3=y
@@ -417,8 +418,8 @@ Freescale MPL115A barometer sensor
       CONFIG_SENSORS_MPL115A=y
       CONFIG_NSH_ARCHINIT=y
 
-  Note: this driver uses SPI3 then since PB3 pin is also use to JTAG TDO you
-  need to disable JTAG support to get this driver working:
+Note: this driver uses SPI3 then since PB3 pin is also use to JTAG TDO you
+need to disable JTAG support to get this driver working::
 
     System Type
       CONFIG_STM32_JTAG_DISABLE=y
@@ -426,14 +427,16 @@ Freescale MPL115A barometer sensor
 LCD/Touchscreen Interface
 =========================
 
-  An LCD may be connected via J11.  Only the STM32F103 supports the FSMC signals
-  needed to drive the LCD.
+An LCD may be connected via J11.  Only the STM32F103 supports the FSMC signals
+needed to drive the LCD.
 
-  The LCD features an (1) HY32D module with built-in SSD1289 LCD controller, and (a)
-  a XPT2046 touch screen controller.
+The LCD features an (1) HY32D module with built-in SSD1289 LCD controller, and (a)
+a XPT2046 touch screen controller.
 
-  LCD Connector
-  -------------
+LCD Connector
+-------------
+
+todo::
 
     ----------------------------- ------------------------ --------------------------------
            Connector J11           GPIO CONFIGURATION(s)
@@ -497,13 +500,14 @@ LCD/Touchscreen Interface
 FT80x Integration
 =================
 
-  I have used the ViewTool F107 for initial testing of the three displays
-  based on FTDI/BridgeTek FT80x GUIs:
+I have used the ViewTool F107 for initial testing of the three displays
+based on FTDI/BridgeTek FT80x GUIs:
 
-  Haoyu 5"
-  --------
-  I purchased a Haoyu 5" FT800 display on eBay.  Pin out and board
-  connectivity is as follows:
+Haoyu 5"
+--------
+
+I purchased a Haoyu 5" FT800 display on eBay.  Pin out and board
+connectivity is as follows::
 
   2x5 Connector J2 using SPI1:
   PIN  NAME   VIEWTOOL    STM32      PIN  NAME   VIEWTOOL   STM32
@@ -535,8 +539,10 @@ FT80x Integration
     CONFIG_LCD_FT80X_AUDIO_NOSHUTDOWN=y
     CONFIG_EXAMPLES_FT80X_DEVPATH="/dev/ft800"
 
-  MikroElektronkia ConnectEVE FT800
-  ---------------------------------
+MikroElektronkia ConnectEVE FT800
+---------------------------------
+
+todo::
 
   2x5 Connector CN2 using SPI1:
   ---- ------ ----------- ---------- ---- ------ ---------- ----------
@@ -696,8 +702,10 @@ FT80x Integration
 MAX3421E Integration
 ====================
 
-  Board Connections
-  -----------------
+Board Connections
+-----------------
+
+todo::
 
   USBHostShield-v13 (See schematic).
 
@@ -780,52 +788,53 @@ MAX3421E Integration
 Toolchains
 ==========
 
-  NOTE about Windows native toolchains
-  ------------------------------------
+NOTE about Windows native toolchains
+------------------------------------
 
-  There are several limitations to using a Windows based toolchain in a
-  Cygwin environment.  The three biggest are:
+There are several limitations to using a Windows based toolchain in a
+Cygwin environment.  The three biggest are:
 
-  1. The Windows toolchain cannot follow Cygwin paths.  Path conversions are
-     performed automatically in the Cygwin makefiles using the 'cygpath'
-     utility but you might easily find some new path problems.  If so, check
-     out 'cygpath -w'
+1. The Windows toolchain cannot follow Cygwin paths.  Path conversions are
+   performed automatically in the Cygwin makefiles using the 'cygpath'
+   utility but you might easily find some new path problems.  If so, check
+   out 'cygpath -w'
 
-  2. Windows toolchains cannot follow Cygwin symbolic links.  Many symbolic
-     links are used in NuttX (e.g., include/arch).  The make system works
-     around these problems for the Windows tools by copying directories
-     instead of linking them.  But this can also cause some confusion for
-     you:  For example, you may edit a file in a "linked" directory and find
-     that your changes had no effect.  That is because you are building the
-     copy of the file in the "fake" symbolic directory.  If you use a\
-     Windows toolchain, you should get in the habit of making like this:
+2. Windows toolchains cannot follow Cygwin symbolic links.  Many symbolic
+   links are used in NuttX (e.g., include/arch).  The make system works
+   around these problems for the Windows tools by copying directories
+   instead of linking them.  But this can also cause some confusion for
+   you:  For example, you may edit a file in a "linked" directory and find
+   that your changes had no effect.  That is because you are building the
+   copy of the file in the "fake" symbolic directory.  If you use a\
+   Windows toolchain, you should get in the habit of making like this::
 
        make clean_context all
 
-     An alias in your .bashrc file might make that less painful.
+   An alias in your .bashrc file might make that less painful.
 
 Configurations
 ==============
 
-  Information Common to All Configurations
-  ----------------------------------------
-  Each SAM3U-EK configuration is maintained in a sub-directory and
-  can be selected as follow:
+Information Common to All Configurations
+----------------------------------------
+
+Each SAM3U-EK configuration is maintained in a sub-directory and
+can be selected as follow::
 
     tools/configure.sh viewtool-stm32f107:<subdir>
 
-  Before starting the build, make sure that your PATH environment variable
-  includes the correct path to your toolchain.
+Before starting the build, make sure that your PATH environment variable
+includes the correct path to your toolchain.
 
-  And then build NuttX by simply typing the following.  At the conclusion of
-  the make, the nuttx binary will reside in an ELF file called, simply, nuttx.
+And then build NuttX by simply typing the following.  At the conclusion of
+the make, the nuttx binary will reside in an ELF file called, simply, nuttx.::
 
     make
 
-  The <subdir> that is provided above as an argument to the tools/configure.sh
-  must be is one of the following.
+The <subdir> that is provided above as an argument to the tools/configure.sh
+must be is one of the following.
 
-  NOTES:
+NOTES::
 
   1. These configurations use the mconf-based configuration tool.  To
     change any of these configurations using that tool, you should:
@@ -866,19 +875,20 @@ Configurations
      setup to use the DFU bootloader but should be easily reconfigured to
      use that bootloader if so desired.
 
-  Configuration Sub-directories
-  -----------------------------
+Configuration Sub-directories
+-----------------------------
 
-  f80x:
+f80x
+-----
 
-    This configuration was added in order to verify the FTDI/Bridgetick
-    Ft80x driver using apps/examples/ft80x with apps/graphics/ft80x.  It
-    is very similar to the NSH configuration with support for the FTDI
-    FT80x LCD enabled on SPI1.
+This configuration was added in order to verify the FTDI/Bridgetick
+Ft80x driver using apps/examples/ft80x with apps/graphics/ft80x.  It
+is very similar to the NSH configuration with support for the FTDI
+FT80x LCD enabled on SPI1.
 
-    This configuration is properly setup for the MikroElektronika
-    ConnectEVE LCD.  To use the Reverdi FT801 LCD, the following changes
-    would be required to the configuration:
+This configuration is properly setup for the MikroElektronika
+ConnectEVE LCD.  To use the Reverdi FT801 LCD, the following changes
+would be required to the configuration::
 
       -CONFIG_LCD_FT800=y
       +CONFIG_LCD_FT801=y
@@ -890,7 +900,7 @@ Configurations
       -CONFIG_EXAMPLES_FT80X_DEVPATH="/dev/ft800"
       +CONFIG_EXAMPLES_FT80X_DEVPATH="/dev/ft801"
 
-    STATUS:
+STATUS::
     2018-03-09:  The ConnectEVE display is basically working.  There are
       some specific issues with some of the demos in apps/examples/ft80x
       that still need to be addressed.  I have the Riverdi display FT801
@@ -905,12 +915,13 @@ Configurations
     1028-03-10:  Most of issues have been worked out in the FT80x demos
       and the driver appears 100% functional.
 
-  netnsh:
+netnsh
+------
 
-    This configuration directory provide the NuttShell (NSH) with
-    networking support.
+This configuration directory provide the NuttShell (NSH) with
+networking support.
 
-    NOTES:
+NOTES::
     1. This configuration will work only on the version the viewtool
        board with the STM32F107VCT6 installed.  If you have a board
        with the STM32F103VCT6 installed, please use the nsh configuration
@@ -943,11 +954,13 @@ Configurations
     6. USB support is disabled by default.  See the section above entitled,
        "USB Interface"
 
-  nsh:
+nsh
+----
 
-    This configuration directory provide the basic NuttShell (NSH).
+This configuration directory provide the basic NuttShell (NSH).
 
-    NOTES:
+NOTES::
+
     1. This configuration will work with either the version of the board
        with STM32F107VCT6 or STM32F103VCT6 installed.  The default
        configuration is for the STM32F107VCT6.  To use this configuration
@@ -1069,29 +1082,35 @@ Configurations
 
        STATUS: Working
 
-  highpri:
+highpri
+-------
 
-    This configuration was used to verify the NuttX high priority, nested
-    interrupt feature.  This is a board-specific test and probably not
-    of much interest now other than for reference.
+This configuration was used to verify the NuttX high priority, nested
+interrupt feature.  This is a board-specific test and probably not
+of much interest now other than for reference.
 
-    This configuration targets the viewtool board with the STM32F103VCT6
+This configuration targets the viewtool board with the STM32F103VCT6
 
-  tcpblaster:
+tcpblaster
+----------
 
-    The tcpblaster example derives from the nettest example and basically
-    duplicates that application when the nettest PERFORMANCE option is selected.
-    tcpblaster has a little better reporting of performance stats, however.
+The tcpblaster example derives from the nettest example and basically
+duplicates that application when the nettest PERFORMANCE option is selected.
+tcpblaster has a little better reporting of performance stats, however.
 
-    This configuration derives directly from the netnsh configuration and most
-    of the notes there should apply equally here.
+This configuration derives directly from the netnsh configuration and most
+of the notes there should apply equally here.
 
-    General usage instructions:
+General usage instructions:
+1. On the host:
 
-    1. On the host:
-       a. cd to apps/examples/tcpblaster
-       b. Run the host tcpserver[.exe] program that was built in that directory
-    2. On the target:
-       a. Run the tcpclient built in application.
-    3. When you get tire of watch the numbers scroll by, just kill the tcpserver
-       on the host.
+   a. cd to apps/examples/tcpblaster
+
+   b. Run the host tcpserver[.exe] program that was built in that directory
+
+2. On the target:
+
+   a. Run the tcpclient built in application.
+
+3. When you get tire of watch the numbers scroll by, just kill the tcpserver
+   on the host.
