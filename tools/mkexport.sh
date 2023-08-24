@@ -256,6 +256,33 @@ echo "HOSTEXEEXT       = ${HOSTEXEEXT}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "LDNAME           = ${LDNAME}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "LDELFFLAGS       = ${LDELFFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
 
+echo "set(ARCHCFLAGS          \"${ARCHCFLAGS}\")"       > "${EXPORTDIR}/scripts/target.cmake"
+echo "set(ARCHCPUFLAGS        \"${ARCHCPUFLAGS}\")"     >>"${EXPORTDIR}/scripts/target.cmake"
+echo "set(ARCHCXXFLAGS        \"${ARCHCXXFLAGS}\")"     >>"${EXPORTDIR}/scripts/target.cmake"
+echo "set(ARCHPICFLAGS        \"${ARCHPICFLAGS}\")"     >>"${EXPORTDIR}/scripts/target.cmake"
+echo "set(ARCHWARNINGS        \"${ARCHWARNINGS}\")"     >>"${EXPORTDIR}/scripts/target.cmake"
+echo "set(ARCHWARNINGSXX      \"${ARCHWARNINGSXX}\")"   >>"${EXPORTDIR}/scripts/target.cmake"
+echo "set(ARCHOPTIMIZATION    \"${ARCHOPTIMIZATION}\")" >>"${EXPORTDIR}/scripts/target.cmake"
+echo "set(CROSSDEV            \"${CROSSDEV}\")"         >>"${EXPORTDIR}/scripts/target.cmake"
+echo "set(CMAKE_C_COMPILER    \"${CC}\")"               >>"${EXPORTDIR}/scripts/target.cmake"
+echo "set(CMAKE_CXX_COMPILER  \"${CXX}\")"              >>"${EXPORTDIR}/scripts/target.cmake"
+echo "set(CMAKE_LINKER        \"${LD}\")"               >>"${EXPORTDIR}/scripts/target.cmake"
+echo "set(CMAKE_OBJCOPY       \"${OBJCOPY}\")"          >>"${EXPORTDIR}/scripts/target.cmake"
+echo "set(CMAKE_OBJDUMP       \"${OBJDUMP}\")"          >>"${EXPORTDIR}/scripts/target.cmake"
+echo "set(NXFLATLDFLAGS1      \"${NXFLATLDFLAGS1}\")"   >>"${EXPORTDIR}/scripts/target.cmake"
+echo "set(NXFLATLDFLAGS2      \"${NXFLATLDFLAGS2}\")"   >>"${EXPORTDIR}/scripts/target.cmake"
+echo "set(OBJEXT              \"${OBJEXT}\")"           >>"${EXPORTDIR}/scripts/target.cmake"
+echo "set(LIBEXT              \"${LIBEXT}\")"           >>"${EXPORTDIR}/scripts/target.cmake"
+echo "set(EXEEXT              \"${EXEEXT}\")"           >>"${EXPORTDIR}/scripts/target.cmake"
+echo "set(HOSTCC              \"${HOSTCC}\")"           >>"${EXPORTDIR}/scripts/target.cmake"
+echo "set(HOSTINCLUDES        \"${HOSTINCLUDES}\")"     >>"${EXPORTDIR}/scripts/target.cmake"
+echo "set(HOSTCFLAGS          \"${HOSTCFLAGS}\")"       >>"${EXPORTDIR}/scripts/target.cmake"
+echo "set(HOSTLDFLAGS         \"${HOSTLDFLAGS}\")"      >>"${EXPORTDIR}/scripts/target.cmake"
+echo "set(HOSTEXEEXT          \"${HOSTEXEEXT}\")"       >>"${EXPORTDIR}/scripts/target.cmake"
+echo "set(LDNAME              \"${LDNAME}\")"           >>"${EXPORTDIR}/scripts/target.cmake"
+echo "set(LDELFFLAGS          \"${LDELFFLAGS}\")"       >>"${EXPORTDIR}/scripts/target.cmake"
+
+
 # Additional compilation options when the kernel is built
 
 if [ "X${USRONLY}" != "Xy" ]; then
@@ -265,7 +292,18 @@ if [ "X${USRONLY}" != "Xy" ]; then
   echo "LDENDGROUP       = ${LDENDGROUP}" >>"${EXPORTDIR}/scripts/Make.defs"
   echo "LDFLAGS          = ${LDFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
   echo "LDSTARTGROUP     = ${LDSTARTGROUP}" >>"${EXPORTDIR}/scripts/Make.defs"
+
+  echo "set(EXTRA_LIBS       \"${EXTRA_LIBS}\")"   >>"${EXPORTDIR}/scripts/target.cmake"
+  echo "set(EXTRA_OBJS       \"${EXTRA_OBJS}\")"   >>"${EXPORTDIR}/scripts/target.cmake"
+  echo "set(HEAD_OBJ         \"${HEAD_OBJ}\")"     >>"${EXPORTDIR}/scripts/target.cmake"
+  echo "set(LDENDGROUP       \"${LDENDGROUP}\")"   >>"${EXPORTDIR}/scripts/target.cmake"
+  echo "set(LDFLAGS          \"${LDFLAGS}\")"      >>"${EXPORTDIR}/scripts/target.cmake"
+  echo "set(LDSTARTGROUP     \"${LDSTARTGROUP}\")" >>"${EXPORTDIR}/scripts/target.cmake"
 fi
+
+# Copy the CMake toolchain file
+
+cp "${TOPDIR}/tools/toolchain.cmake.export" "${EXPORTDIR}/scripts/toolchain.cmake"
 
 # Copy the system map file(s)
 
@@ -359,7 +397,9 @@ fi
 LDLIBS=`basename -a ${LIBLIST} | sed -e "s/lib/-l/g" -e "s/\.${LIBEXT:1}//g" | tr "\n" " "`
 
 if [ "X${USRONLY}" != "Xy" ]; then
-  echo "LDLIBS           = ${LDLIBS}" >>"${EXPORTDIR}/scripts/Make.defs"
+  echo "LDLIBS           = ${LDLIBS}" >> "${EXPORTDIR}/scripts/Make.defs"
+
+  echo "set(LDLIBS     \"${LDLIBS}\")" >>"${EXPORTDIR}/scripts/target.cmake"
 fi
 
 # Then process each library
