@@ -56,13 +56,12 @@
  *
  ****************************************************************************/
 
-ssize_t lib_fflush(FAR FILE *stream, bool bforce)
+ssize_t lib_fflush_unlocked(FAR FILE *stream, bool bforce)
 {
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
   FAR const unsigned char *src;
   ssize_t bytes_written;
   ssize_t nbuffer;
-  int ret;
 
   /* Return EBADF if the file is not opened for writing */
 
@@ -71,18 +70,13 @@ ssize_t lib_fflush(FAR FILE *stream, bool bforce)
       return -EBADF;
     }
 
-  /* Make sure that we have exclusive access to the stream */
-
-  flockfile(stream);
-
   /* Check if there is an allocated I/O buffer */
 
   if (stream->fs_bufstart == NULL)
     {
       /* No, then there can be nothing remaining in the buffer. */
 
-      ret = 0;
-      goto errout_with_lock;
+      return 0;
     }
 
   /* Make sure that the buffer holds valid data */
@@ -99,8 +93,7 @@ ssize_t lib_fflush(FAR FILE *stream, bool bforce)
            * remaining in the buffer."
            */
 
-          ret = 0;
-          goto errout_with_lock;
+          return 0;
         }
 
       /* How many bytes of write data are used in the buffer now */
@@ -122,8 +115,7 @@ ssize_t lib_fflush(FAR FILE *stream, bool bforce)
                */
 
               stream->fs_flags |= __FS_FLAG_ERROR;
-              ret = _NX_GETERRVAL(bytes_written);
-              goto errout_with_lock;
+              return _NX_GETERRVAL(bytes_written);
             }
 
           /* Handle partial writes.  fflush() must either return with
@@ -156,16 +148,23 @@ ssize_t lib_fflush(FAR FILE *stream, bool bforce)
    * remaining in the buffer.
    */
 
-  funlockfile(stream);
   return stream->fs_bufpos - stream->fs_bufstart;
-
-errout_with_lock:
-  funlockfile(stream);
-  return ret;
 
 #else
   /* Return no bytes remaining in the buffer */
 
   return 0;
 #endif
+}
+
+ssize_t lib_fflush(FAR FILE *stream, bool bforce)
+{
+  ssize_t ret;
+
+  /* Make sure that we have exclusive access to the stream */
+
+  flockfile(stream);
+  ret = lib_fflush_unlocked(stream, bforce);
+  funlockfile(stream);
+  return ret;
 }

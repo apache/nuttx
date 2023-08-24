@@ -235,14 +235,15 @@ FAR char *lib_fgets(FAR char *buf, size_t buflen, FILE *stream,
 /* Defined in lib_libfflush.c */
 
 ssize_t lib_fflush(FAR FILE *stream, bool bforce);
+ssize_t lib_fflush_unlocked(FAR FILE *stream, bool bforce);
 
-/* Defined in lib_rdflush.c */
+/* Defined in lib_rdflush_unlocked.c */
 
-int lib_rdflush(FAR FILE *stream);
+int lib_rdflush_unlocked(FAR FILE *stream);
 
-/* Defined in lib_wrflush.c */
+/* Defined in lib_wrflush_unlocked.c */
 
-int lib_wrflush(FAR FILE *stream);
+int lib_wrflush_unlocked(FAR FILE *stream);
 
 /* Defined in lib_libgetbase.c */
 

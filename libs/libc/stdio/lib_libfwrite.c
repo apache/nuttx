@@ -90,7 +90,7 @@ ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream)
    * buffered read/write access.
    */
 
-  if (lib_rdflush(stream) < 0)
+  if (lib_rdflush_unlocked(stream) < 0)
     {
       goto errout_with_lock;
     }
@@ -125,7 +125,7 @@ ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream)
         {
           /* Flush the buffered data to the IO stream */
 
-          int bytes_buffered = lib_fflush(stream, false);
+          int bytes_buffered = lib_fflush_unlocked(stream, false);
           if (bytes_buffered < 0)
             {
               goto errout_with_lock;

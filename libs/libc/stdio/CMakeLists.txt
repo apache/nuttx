@@ -79,8 +79,8 @@ if(CONFIG_FILE_STREAM)
     lib_fflush.c
     lib_libflushall.c
     lib_libfflush.c
-    lib_rdflush.c
-    lib_wrflush.c
+    lib_rdflush_unlocked.c
+    lib_wrflush_unlocked.c
     lib_putc.c
     lib_fputc.c
     lib_fputs.c

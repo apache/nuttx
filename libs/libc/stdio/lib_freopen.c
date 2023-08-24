@@ -100,13 +100,19 @@ FAR FILE *freopen(FAR const char *path, FAR const char *mode,
           return NULL;
         }
 
+      /* Make sure that we have exclusive access to the stream */
+
+      flockfile(stream);
+
       /* Flush the stream and invalidate the read buffer. */
 
-      fflush(stream);
+      lib_fflush_unlocked(stream, true);
 
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
-      lib_rdflush(stream);
+      lib_rdflush_unlocked(stream);
 #endif
+
+      funlockfile(stream);
 
       /* Duplicate the new fd to the stream. */
 

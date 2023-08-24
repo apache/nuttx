@@ -71,7 +71,7 @@ int puts(FAR const IPTR char *s)
 
           if ((stream->fs_flags & __FS_FLAG_LBF) != 0)
             {
-              ret = lib_fflush(stream, true);
+              ret = lib_fflush_unlocked(stream, true);
               if (ret < 0)
                 {
                   nput = EOF;
