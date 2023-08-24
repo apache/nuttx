@@ -273,7 +273,7 @@ static void *board_composite0_connect(int port)
   ifnobase += dev[1].devinfo.ninterfaces;
   strbase  += dev[1].devinfo.nstrings;
 
-  return composite_initialize(2, dev);
+  return composite_initialize(composite_getdevdescs(), dev, 2);
 }
 #endif
 
@@ -341,7 +341,7 @@ static void *board_composite1_connect(int port)
       strbase  += dev[i].devinfo.nstrings;
     }
 
-  return composite_initialize(2, dev);
+  return composite_initialize(composite_getdevdescs(), dev, 2);
 #else
   return NULL;
 #endif

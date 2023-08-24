@@ -126,7 +126,7 @@ void *board_composite0_connect(void)
   DEBUGASSERT(epin <= NRF53_NENDPOINTS);
   DEBUGASSERT(epout <= NRF53_NENDPOINTS);
 
-  return composite_initialize(dev_idx, dev);
+  return composite_initialize(composite_getdevdescs(), dev, dev_idx);
 }
 
 /****************************************************************************

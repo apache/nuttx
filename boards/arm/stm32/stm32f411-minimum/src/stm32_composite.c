@@ -265,7 +265,7 @@ void *board_composite_connect(int port, int configid)
       dev_idx++;
 #endif
 
-      return composite_initialize(dev_idx, dev);
+      return composite_initialize(composite_getdevdescs(), dev, dev_idx);
     }
   else
     {

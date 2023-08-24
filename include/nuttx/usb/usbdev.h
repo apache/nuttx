@@ -168,6 +168,28 @@
 
 /* USB Controller Structures ************************************************/
 
+struct usbdev_strdesc_s
+{
+  uint8_t         id;
+  FAR const char *string;
+};
+
+struct usbdev_strdescs_s
+{
+  uint16_t                            language;
+  FAR const struct usbdev_strdesc_s  *strdesc;
+};
+
+struct usbdev_devdescs_s
+{
+  FAR const struct usb_cfgdesc_s     *cfgdesc;
+  FAR const struct usbdev_strdescs_s *strdescs;
+  FAR const struct usb_devdesc_s     *devdesc;
+#ifdef CONFIG_USBDEV_DUALSPEED
+  FAR const struct usb_qualdesc_s    *qualdesc;
+#endif
+};
+
 /* usbdev_devinfo_s - describes the low level bindings of an usb device */
 
 struct usbdev_devinfo_s

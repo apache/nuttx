@@ -113,7 +113,7 @@ static void *board_composite0_connect(int port)
 
   /* Add other composite devices here */
 
-  return composite_initialize(dev_idx, dev);
+  return composite_initialize(composite_getdevdescs(), dev, dev_idx);
 }
 
 /****************************************************************************
