@@ -3532,7 +3532,7 @@ static int mpfs_training_verify(void)
 
       /* Check that DQ/DQS calculated window is above 5 taps. */
 
-      if (getreg32(MPFS_CFG_DDR_SGMII_PHY_DQDQS_STATUS1) < DQ_DQS_NUM_TAPS)
+      if (getreg32(MPFS_CFG_DDR_SGMII_PHY_DQDQS_STATUS2) < DQ_DQS_NUM_TAPS)
         {
           t_status |= 0x01;
         }
