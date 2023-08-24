@@ -601,6 +601,11 @@ config ARCH_CHIP_DEBUG_H
 	---help---
 		The debug.h under include/arch/chip contains architecture dependent debugging primitives
 
+config ARCH_BOARD_DEBUG_H
+	bool "board debug.h"
+	---help---
+		The debug.h under include/arch/board contains board dependent debugging primitives
+
 endchoice # debug.h selection
 
 endmenu # Customize Header Files
