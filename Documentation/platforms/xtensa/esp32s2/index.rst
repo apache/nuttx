@@ -98,7 +98,7 @@ Peripheral Support NOTES
 ========== ======= =====
 ADC          No
 AES          No
-CAN/TWAI     No
+CAN/TWAI     Yes
 DMA          Yes
 eFuse        No
 Ethernet     No

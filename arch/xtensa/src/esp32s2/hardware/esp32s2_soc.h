@@ -264,6 +264,7 @@
 #define DR_REG_SPI4_BASE                        0x3f437000
 #define DR_REG_USB_WRAP_BASE                    0x3f439000
 #define DR_REG_APB_SARADC_BASE                  0x3f440000
+#define DR_REG_TWAI_BASE                        0x6002B000
 #define DR_REG_USB_BASE                         0x60080000
 
 #define REG_UHCI_BASE(i)         (DR_REG_UHCI0_BASE)
