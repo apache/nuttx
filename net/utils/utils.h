@@ -188,6 +188,25 @@ uint8_t net_ipv4_mask2pref(in_addr_t mask);
 #endif
 
 /****************************************************************************
+ * Name: net_ipv6_common_pref
+ *
+ * Description:
+ *   Calculate the common prefix length of two IPv6 addresses.
+ *
+ * Input Parameters:
+ *   a1,a2   Points to IPv6 addresses in the form of uint16_t[8]
+ *
+ * Returned Value:
+ *   The common prefix length, range 0-128 on success;  This function will
+ *   not fail.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+uint8_t net_ipv6_common_pref(FAR const uint16_t *a1, FAR const uint16_t *a2);
+#endif
+
+/****************************************************************************
  * Name: net_ipv6_mask2pref
  *
  * Description:

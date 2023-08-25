@@ -42,4 +42,8 @@ if(CONFIG_NETDOWN_NOTIFIER)
   list(APPEND SRCS netdown_notifier.c)
 endif()
 
+if(CONFIG_NET_IPv6)
+  list(APPEND SRCS netdev_ipv6.c)
+endif()
+
 target_sources(net PRIVATE ${SRCS})
