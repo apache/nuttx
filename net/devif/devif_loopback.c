@@ -62,7 +62,7 @@ bool devif_is_loopback(FAR struct net_driver_s *dev)
 
 #ifdef CONFIG_NET_IPv6
       if ((IPv6BUF->vtc & IP_VERSION_MASK) == IPv6_VERSION &&
-          net_ipv6addr_hdrcmp(IPv6BUF->destipaddr, dev->d_ipv6addr))
+          NETDEV_IS_MY_V6ADDR(dev, IPv6BUF->destipaddr))
         {
           return true;
         }

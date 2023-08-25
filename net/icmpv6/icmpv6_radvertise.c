@@ -170,6 +170,9 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
   FAR struct icmpv6_srclladdr_s *srcaddr;
   FAR struct icmpv6_mtu_s *mtu;
   FAR struct icmpv6_prefixinfo_s *prefix;
+#ifndef CONFIG_NET_ICMPv6_ROUTER_MANUAL
+  FAR const struct netdev_ifaddr6_s *ifaddr;
+#endif
 #ifdef CONFIG_NET_ICMPv6_ROUTER_RDNSS
   FAR struct icmpv6_rdnss_s *rdnss;
   struct rdnss_add_dns_nameserver_s rndss_context;
@@ -183,12 +186,18 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
   lladdrsize   = netdev_lladdrsize(dev);
   l3size       = sizeof(struct icmpv6_router_advertise_s) +
                  SIZEOF_ICMPV6_SRCLLADDR_S(lladdrsize) +
-                 sizeof(struct icmpv6_mtu_s) +
-                 sizeof(struct icmpv6_prefixinfo_s);
+                 sizeof(struct icmpv6_mtu_s);
 
   /* Source IP address must be set to link-local IP */
 
-  icmpv6_linkipaddr(dev, srcv6addr);
+  if (netdev_ipv6_lladdr(dev) == NULL)
+    {
+      icmpv6_linkipaddr(dev, srcv6addr);
+    }
+  else
+    {
+      net_ipv6addr_copy(srcv6addr, netdev_ipv6_lladdr(dev));
+    }
 
   /* Set up the ICMPv6 Router Advertise response */
 
@@ -224,6 +233,16 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
   mtu->mtu[0]       = 0;
   mtu->mtu[1]       = HTONS(dev->d_pktsize - dev->d_llhdrlen);
 
+#ifndef CONFIG_NET_ICMPv6_ROUTER_MANUAL
+  /* We only anounce a prefix when we have one. */
+
+  ifaddr = netdev_ipv6_srcifaddr(dev, g_ipv6_unspecaddr);
+  if (net_ipv6addr_cmp(ifaddr->addr, g_ipv6_unspecaddr))
+    {
+      goto skip_prefix;
+    }
+#endif
+
   /* Set up the prefix option */
 
   prefix               = (FAR struct icmpv6_prefixinfo_s *)
@@ -238,6 +257,8 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
   prefix->reserved[0]  = 0;
   prefix->reserved[1]  = 0;
 
+  l3size              += sizeof(struct icmpv6_prefixinfo_s);
+
 #ifdef CONFIG_NET_ICMPv6_ROUTER_MANUAL
   /* Copy the configured prefex */
 
@@ -246,14 +267,14 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
 #else
   /* Set the prefix and prefix length based on net driver IP and netmask */
 
-  prefix->preflen     = net_ipv6_mask2pref(dev->d_ipv6netmask);
-  ipv6addr_mask(prefix->prefix, dev->d_ipv6addr, dev->d_ipv6netmask);
+  prefix->preflen     = net_ipv6_mask2pref(ifaddr->mask);
+  ipv6addr_mask(prefix->prefix, ifaddr->addr, ifaddr->mask);
+skip_prefix:
 #endif /* CONFIG_NET_ICMPv6_ROUTER_MANUAL */
 
 #ifdef CONFIG_NET_ICMPv6_ROUTER_RDNSS
   rdnss                  = (FAR struct icmpv6_rdnss_s *)
-                           ((FAR uint8_t *)prefix +
-                           sizeof(struct icmpv6_prefixinfo_s));
+                           ((FAR uint8_t *)adv + l3size);
   rndss_context.rdnss    = rdnss;
   rndss_context.nservers = 0;
 

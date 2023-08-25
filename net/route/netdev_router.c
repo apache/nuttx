@@ -167,8 +167,7 @@ static int net_ipv6_devmatch(FAR struct net_route_ipv6_s *route,
    */
 
   if (net_ipv6addr_maskcmp(route->target, match->target, route->netmask) &&
-      net_ipv6addr_maskcmp(route->router, dev->d_ipv6addr,
-                           dev->d_ipv6netmask))
+      NETDEV_V6ADDR_ONLINK(dev, route->router))
     {
 #ifdef CONFIG_ROUTE_IPv6_CACHEROUTE
       /* They match.. Copy the entire routing table entry */
