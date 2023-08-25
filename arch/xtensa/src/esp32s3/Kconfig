@@ -715,6 +715,16 @@ config ESP32S3_WCL
 	select ARCH_USE_MPU
 	select XTENSA_HAVE_GENERAL_EXCEPTION_HOOKS if BUILD_PROTECTED
 
+config ESP32S3_LCD
+	bool "LCD"
+	default n
+	select DRIVERS_VIDEO
+	select VIDEO_FB
+	select FB_UPDATE
+	help
+	---help---
+		LCD controller that outputs parallel data and supports RGB interface.
+
 endmenu # ESP32-S3 Peripheral Selection
 
 menuconfig ESP32S3_WIFI_BT_COEXIST
@@ -1712,6 +1722,153 @@ config ESP32S3_OTG_DEBUG_REGISTER
 	depends on DEBUG_USB_INFO
 
 endmenu # USB OTG Configuration
+
+menu "LCD Controller Configuration"
+	depends on ESP32S3_LCD
+
+menu "LCD Pin Configuration"
+
+config ESP32S3_LCD_PCLK_PIN
+	int "LCD Pixel Clock Signal Pin"
+	default 9
+
+config ESP32S3_LCD_VSYNC_PIN
+	int "LCD Vertical Synchronization Pin"
+	default 3
+
+config ESP32S3_LCD_HSYNC_PIN
+	int "LCD Horizontal Synchronization Pin"
+	default 46
+
+config ESP32S3_LCD_HE_PIN
+	int "LCD Horizontal Enable Pin"
+	default 17
+
+config ESP32S3_LCD_DATA0_PIN
+    int "LCD Parallel Output Data Bit-0 Pin"
+	default 10
+
+config ESP32S3_LCD_DATA1_PIN
+    int "LCD Parallel Output Data Bit-1 Pin"
+	default 11
+
+config ESP32S3_LCD_DATA2_PIN
+    int "LCD Parallel Output Data Bit-2 Pin"
+	default 12
+
+config ESP32S3_LCD_DATA3_PIN
+    int "LCD Parallel Output Data Bit-3 Pin"
+	default 13
+
+config ESP32S3_LCD_DATA4_PIN
+    int "LCD Parallel Output Data Bit-4 Pin"
+	default 14
+
+config ESP32S3_LCD_DATA5_PIN
+    int "LCD Parallel Output Data Bit-5 Pin"
+	default 21
+
+config ESP32S3_LCD_DATA6_PIN
+    int "LCD Parallel Output Data Bit-6 Pin"
+	default 47
+
+config ESP32S3_LCD_DATA7_PIN
+    int "LCD Parallel Output Data Bit-7 Pin"
+	default 48
+
+config ESP32S3_LCD_DATA8_PIN
+    int "LCD Parallel Output Data Bit-8 Pin"
+	default 45
+
+config ESP32S3_LCD_DATA9_PIN
+    int "LCD Parallel Output Data Bit-9 Pin"
+	default 38
+
+config ESP32S3_LCD_DATA10_PIN
+    int "LCD Parallel Output Data Bit-10 Pin"
+	default 39
+
+config ESP32S3_LCD_DATA11_PIN
+    int "LCD Parallel Output Data Bit-11 Pin"
+	default 40
+
+config ESP32S3_LCD_DATA12_PIN
+    int "LCD Parallel Output Data Bit-12 Pin"
+	default 41
+
+config ESP32S3_LCD_DATA13_PIN
+    int "LCD Parallel Output Data Bit-13 Pin"
+	default 42
+
+config ESP32S3_LCD_DATA14_PIN
+    int "LCD Parallel Output Data Bit-14 Pin"
+	default 2
+
+config ESP32S3_LCD_DATA15_PIN
+    int "LCD Parallel Output Data Bit-15 Pin"
+	default 1
+
+endmenu
+
+menu "LCD Display Configuration"
+	depends on ESP32S3_LCD
+
+config ESP32S3_LCD_VRES
+	int "LCD Vertical Resolution"
+	default 480
+
+config ESP32S3_LCD_HRES
+	int "LCD Horizontal Resolution"
+	default 480
+
+config ESP32S3_LCD_CLOCK_MHZ
+	int "LCD Pixel Clock Frequency in MHz"
+	default 2
+
+config ESP32S3_LCD_VFRONTPORCH
+	int "LCD Vertical Front Porch"
+	default 40
+
+config ESP32S3_LCD_VBACKPORCH
+	int "LCD Vertical Back Porch"
+	default 20
+
+config ESP32S3_LCD_VPULSEWIDTH
+	int "LCD Vertical Pulse Width"
+	default 13
+
+config ESP32S3_LCD_HFRONTPORCH
+	int "LCD Horizontal Front Porch"
+	default 40
+
+config ESP32S3_LCD_HBACKPORCH
+	int "LCD Horizontal Back Porch"
+	default 20
+
+config ESP32S3_LCD_HPULSEWIDTH
+	int "LCD Horizontal Pulse Width"
+	default 15
+
+config ESP32S3_LCD_BUFFER_LAYERS
+	int "LCD Buffer Layer Number"
+	default 1
+
+choice
+	prompt "LCD Data Width"
+	default ESP32S3_LCD_DATA_16BIT
+
+config ESP32S3_LCD_DATA_16BIT
+	bool "16-bit"
+
+endchoice # LCD Data Width
+
+endmenu
+
+config ESP32S3_LCD_REGDEBUG
+	bool "LCD Debug Registers"
+	default n
+
+endmenu
 
 menu "Application Image Configuration"
 

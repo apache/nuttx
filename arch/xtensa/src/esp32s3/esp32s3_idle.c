@@ -63,21 +63,32 @@
 
 void up_idle(void)
 {
-#if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_TIMER_INTS)
-  /* If the system is idle and there are no timer interrupts, then process
-   * "fake" timer interrupts. Hopefully, something will wake up.
-   */
+  /* Report loop explanation here */
 
-  nxsched_process_timer();
-#else
-
-  /* This would be an appropriate place to put some MCU-specific logic to
-   * sleep in a reduced power mode until an interrupt occurs to save power
-   */
-
-#if XCHAL_HAVE_INTERRUPTS
-  __asm__ __volatile__ ("waiti 0");
+#ifdef CONFIG_ESP32S3_SPEED_UP_ISR
+  for (; ; )
+    {
 #endif
 
+#if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_TIMER_INTS)
+      /* If the system is idle and there are no timer interrupts, then
+       * process "fake" timer interrupts. Hopefully, something will wake up.
+       */
+
+      nxsched_process_timer();
+#else
+
+      /* This would be an appropriate place to put some MCU-specific logic
+       * to sleep in a reduced power mode until an interrupt occurs to save
+       * power.
+       */
+
+#  if XCHAL_HAVE_INTERRUPTS
+      __asm__ __volatile__ ("waiti 0");
+#  endif
+#endif /* CONFIG_SUPPRESS_INTERRUPTS || CONFIG_SUPPRESS_TIMER_INTS */
+
+#ifdef CONFIG_ESP32S3_SPEED_UP_ISR
+    }
 #endif
 }
