@@ -64,7 +64,7 @@
 
 #include "libc.h"
 
-#if !defined(CONFIG_LIBC_ARCH_MEMCPY) && defined(LIBC_BUILD_STRING)
+#if !defined(CONFIG_LIBC_ARCH_MEMCPY) && defined(LIBC_BUILD_MEMCPY)
 
 /****************************************************************************
  * Pre-processor Definitions

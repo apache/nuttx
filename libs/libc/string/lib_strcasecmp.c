@@ -33,7 +33,7 @@
  * Public Functions
  ****************************************************************************/
 
-#if !defined(CONFIG_LIBC_ARCH_STRCASECMP) && defined(LIBC_BUILD_STRING)
+#if !defined(CONFIG_LIBC_ARCH_STRCASECMP) && defined(LIBC_BUILD_STRCASECMP)
 #undef strcasecmp /* See mm/README.txt */
 int strcasecmp(FAR const char *cs, FAR const char *ct)
 {

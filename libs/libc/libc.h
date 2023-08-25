@@ -56,9 +56,123 @@
 #define LIB_BUFLEN_UNKNOWN INT_MAX
 
 #if defined(CONFIG_BUILD_FLAT) || \
-    ((!defined(CONFIG_LIBC_PREVENT_STRING_USER) && !defined(__KERNEL__))  || \
-     (!defined(CONFIG_LIBC_PREVENT_STRING_KERNEL) && defined(__KERNEL__)))
-#  define LIBC_BUILD_STRING
+    ((!defined(CONFIG_LIBC_PREVENT_MEMCHR_USER) && !defined(__KERNEL__))  || \
+     (!defined(CONFIG_LIBC_PREVENT_MEMCHR_KERNEL) && defined(__KERNEL__)))
+#  define LIBC_BUILD_MEMCHR
+#endif
+
+#if defined(CONFIG_BUILD_FLAT) || \
+    ((!defined(CONFIG_LIBC_PREVENT_MEMCMP_USER) && !defined(__KERNEL__))  || \
+     (!defined(CONFIG_LIBC_PREVENT_MEMCMP_KERNEL) && defined(__KERNEL__)))
+#  define LIBC_BUILD_MEMCMP
+#endif
+
+#if defined(CONFIG_BUILD_FLAT) || \
+    ((!defined(CONFIG_LIBC_PREVENT_MEMCPY_USER) && !defined(__KERNEL__))  || \
+     (!defined(CONFIG_LIBC_PREVENT_MEMCPY_KERNEL) && defined(__KERNEL__)))
+#  define LIBC_BUILD_MEMCPY
+#endif
+
+#if defined(CONFIG_BUILD_FLAT) || \
+    ((!defined(CONFIG_LIBC_PREVENT_MEMMOVE_USER) && !defined(__KERNEL__))  || \
+     (!defined(CONFIG_LIBC_PREVENT_MEMMOVE_KERNEL) && defined(__KERNEL__)))
+#  define LIBC_BUILD_MEMMOVE
+#endif
+
+#if defined(CONFIG_BUILD_FLAT) || \
+    ((!defined(CONFIG_LIBC_PREVENT_MEMSET_USER) && !defined(__KERNEL__))  || \
+     (!defined(CONFIG_LIBC_PREVENT_MEMSET_KERNEL) && defined(__KERNEL__)))
+#  define LIBC_BUILD_MEMSET
+#endif
+
+#if defined(CONFIG_BUILD_FLAT) || \
+    ((!defined(CONFIG_LIBC_PREVENT_STRCAT_USER) && !defined(__KERNEL__))  || \
+     (!defined(CONFIG_LIBC_PREVENT_STRCAT_KERNEL) && defined(__KERNEL__)))
+#  define LIBC_BUILD_STRCAT
+#endif
+
+#if defined(CONFIG_BUILD_FLAT) || \
+    ((!defined(CONFIG_LIBC_PREVENT_STRCASECMP_USER) && !defined(__KERNEL__))  || \
+     (!defined(CONFIG_LIBC_PREVENT_STRCASECMP_KERNEL) && defined(__KERNEL__)))
+#  define LIBC_BUILD_STRCASECMP
+#endif
+
+#if defined(CONFIG_BUILD_FLAT) || \
+    ((!defined(CONFIG_LIBC_PREVENT_STRCHR_USER) && !defined(__KERNEL__))  || \
+     (!defined(CONFIG_LIBC_PREVENT_STRCHR_KERNEL) && defined(__KERNEL__)))
+#  define LIBC_BUILD_STRCHR
+#endif
+
+#if defined(CONFIG_BUILD_FLAT) || \
+    ((!defined(CONFIG_LIBC_PREVENT_STRCHRNUL_USER) && !defined(__KERNEL__))  || \
+     (!defined(CONFIG_LIBC_PREVENT_STRCHRNUL_KERNEL) && defined(__KERNEL__)))
+#  define LIBC_BUILD_STRCHRNUL
+#endif
+
+#if defined(CONFIG_BUILD_FLAT) || \
+    ((!defined(CONFIG_LIBC_PREVENT_STRCMP_USER) && !defined(__KERNEL__))  || \
+     (!defined(CONFIG_LIBC_PREVENT_STRCMP_KERNEL) && defined(__KERNEL__)))
+#  define LIBC_BUILD_STRCMP
+#endif
+
+#if defined(CONFIG_BUILD_FLAT) || \
+    ((!defined(CONFIG_LIBC_PREVENT_STRCPY_USER) && !defined(__KERNEL__))  || \
+     (!defined(CONFIG_LIBC_PREVENT_STRCPY_KERNEL) && defined(__KERNEL__)))
+#  define LIBC_BUILD_STRCPY
+#endif
+
+#if defined(CONFIG_BUILD_FLAT) || \
+    ((!defined(CONFIG_LIBC_PREVENT_STRLCAT_USER) && !defined(__KERNEL__))  || \
+     (!defined(CONFIG_LIBC_PREVENT_STRLCAT_KERNEL) && defined(__KERNEL__)))
+#  define LIBC_BUILD_STRLCAT
+#endif
+
+#if defined(CONFIG_BUILD_FLAT) || \
+    ((!defined(CONFIG_LIBC_PREVENT_STRLEN_USER) && !defined(__KERNEL__))  || \
+     (!defined(CONFIG_LIBC_PREVENT_STRLEN_KERNEL) && defined(__KERNEL__)))
+#  define LIBC_BUILD_STRLEN
+#endif
+
+#if defined(CONFIG_BUILD_FLAT) || \
+    ((!defined(CONFIG_LIBC_PREVENT_STRLCPY_USER) && !defined(__KERNEL__))  || \
+     (!defined(CONFIG_LIBC_PREVENT_STRLCPY_KERNEL) && defined(__KERNEL__)))
+#  define LIBC_BUILD_STRLCPY
+#endif
+
+#if defined(CONFIG_BUILD_FLAT) || \
+    ((!defined(CONFIG_LIBC_PREVENT_STRNCASECMP_USER) && !defined(__KERNEL__))  || \
+     (!defined(CONFIG_LIBC_PREVENT_STRNCASECMP_KERNEL) && defined(__KERNEL__)))
+#  define LIBC_BUILD_STRNCASECMP
+#endif
+
+#if defined(CONFIG_BUILD_FLAT) || \
+    ((!defined(CONFIG_LIBC_PREVENT_STRNCAT_USER) && !defined(__KERNEL__))  || \
+     (!defined(CONFIG_LIBC_PREVENT_STRNCAT_KERNEL) && defined(__KERNEL__)))
+#  define LIBC_BUILD_STRNCAT
+#endif
+
+#if defined(CONFIG_BUILD_FLAT) || \
+    ((!defined(CONFIG_LIBC_PREVENT_STRNLEN_USER) && !defined(__KERNEL__))  || \
+     (!defined(CONFIG_LIBC_PREVENT_STRNLEN_KERNEL) && defined(__KERNEL__)))
+#  define LIBC_BUILD_STRNLEN
+#endif
+
+#if defined(CONFIG_BUILD_FLAT) || \
+    ((!defined(CONFIG_LIBC_PREVENT_STRNCMP_USER) && !defined(__KERNEL__))  || \
+     (!defined(CONFIG_LIBC_PREVENT_STRNCMP_KERNEL) && defined(__KERNEL__)))
+#  define LIBC_BUILD_STRNCMP
+#endif
+
+#if defined(CONFIG_BUILD_FLAT) || \
+    ((!defined(CONFIG_LIBC_PREVENT_STRNCPY_USER) && !defined(__KERNEL__))  || \
+     (!defined(CONFIG_LIBC_PREVENT_STRNCPY_KERNEL) && defined(__KERNEL__)))
+#  define LIBC_BUILD_STRNCPY
+#endif
+
+#if defined(CONFIG_BUILD_FLAT) || \
+    ((!defined(CONFIG_LIBC_PREVENT_STRRCHR_USER) && !defined(__KERNEL__))  || \
+     (!defined(CONFIG_LIBC_PREVENT_STRRCHR_KERNEL) && defined(__KERNEL__)))
+#  define LIBC_BUILD_STRRCHR
 #endif
 
 /****************************************************************************

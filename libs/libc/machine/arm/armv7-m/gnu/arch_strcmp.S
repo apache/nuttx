@@ -31,7 +31,7 @@
 
 #include "libc.h"
 
-#ifdef LIBC_BUILD_STRING
+#ifdef LIBC_BUILD_STRCMP
 
 /* Very similar to the generic code, but uses Thumb2 as implemented
    in ARMv7-M.  */

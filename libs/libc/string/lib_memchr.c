@@ -46,7 +46,7 @@
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_LIBC_ARCH_MEMCHR) && defined(LIBC_BUILD_STRING)
+#if !defined(CONFIG_LIBC_ARCH_MEMCHR) && defined(LIBC_BUILD_MEMCHR)
 #undef memchr /* See mm/README.txt */
 FAR void *memchr(FAR const void *s, int c, size_t n)
 {

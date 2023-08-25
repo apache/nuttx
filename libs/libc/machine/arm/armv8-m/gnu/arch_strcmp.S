@@ -31,7 +31,7 @@
 
 #include "libc.h"
 
-#ifdef LIBC_BUILD_STRING
+#ifdef LIBC_BUILD_STRCMP
 
 #ifdef __ARM_BIG_ENDIAN
 #define S2LO lsl

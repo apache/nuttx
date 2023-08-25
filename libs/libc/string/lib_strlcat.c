@@ -46,7 +46,7 @@
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_LIBC_ARCH_STRLCAT) && defined(LIBC_BUILD_STRING)
+#if !defined(CONFIG_LIBC_ARCH_STRLCAT) && defined(LIBC_BUILD_STRLCAT)
 #undef strlcat /* See mm/README.txt */
 size_t strlcat(FAR char *dst, FAR const char *src, size_t dsize)
 {

@@ -35,7 +35,7 @@
 
 #include "libc.h"
 
-#ifdef LIBC_BUILD_STRING
+#ifdef LIBC_BUILD_MEMCPY
 
 /*
  * This memcpy routine is optimised for Cortex-A15 cores and takes advantage
