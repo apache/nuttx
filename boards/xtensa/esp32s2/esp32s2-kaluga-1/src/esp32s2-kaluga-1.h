@@ -167,6 +167,17 @@ int board_i2sdev_initialize(void);
 #endif
 
 /****************************************************************************
+ * Name: board_twai_setup
+ *
+ * Description:
+ *  Initialize TWAI and register the TWAI device
+ *
+ ****************************************************************************/
+#ifdef CONFIG_ESP32S2_TWAI
+int board_twai_setup(void);
+#endif
+
+/****************************************************************************
  * Name: esp32s2_es8311_initialize
  *
  * Description:

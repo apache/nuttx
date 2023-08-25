@@ -296,3 +296,21 @@ After successfully built and flashed, run on the boards' terminal::
   different audio formats, for instance::
 
     nxlooper> loopback 2 8 44100
+
+twai
+----
+
+This configuration enables the support for the TWAI (Two-Wire Automotive Interface) driver.
+You can test it by connecting TWAI RX and TWAI TX pins which are GPIO0 and GPIO2 by default
+to a external transceiver or connecting TWAI RX to TWAI TX pin by enabling
+the ``Device Drivers -> CAN Driver Support -> CAN loopback mode`` option and running the ``can`` example::
+
+    nsh> can
+    nmsgs: 0
+    min ID: 1 max ID: 2047
+    Bit timing:
+      Baud: 1000000
+      TSEG1: 15
+      TSEG2: 4
+        SJW: 3
+      ID:    1 DLC: 1

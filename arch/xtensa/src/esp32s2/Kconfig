@@ -446,6 +446,11 @@ config ESP32S2_I2C1
 	select ESP32S2_I2C
 	select I2C
 
+config ESP32S2_TWAI
+	bool "TWAI (CAN)"
+	default n
+	select CAN
+
 config ESP32S2_LEDC
 	bool "LEDC (PWM)"
 	default n
@@ -670,6 +675,57 @@ config ESP32S2_I2CTIMEOMS
 	default 500
 
 endmenu # I2C Configuration
+
+menu "TWAI driver options"
+	depends on ESP32S2_TWAI
+
+if ESP32S2_TWAI
+
+config ESP32S2_TWAI_TXPIN
+	int "TWAI TX Pin"
+	default 0
+
+config ESP32S2_TWAI_RXPIN
+	int "TWAI RX Pin"
+	default 2
+
+config ESP32S2_TWAI_BITRATE
+	int "TWAI bitrate"
+	default 1000000
+	---help---
+		TWAI bit rate.
+
+config ESP32S2_TWAI_SAMPLEP
+	int "TWAI sample point"
+	default 80
+	---help---
+		TWAI sample point location as a percent value.
+
+config ESP32S2_TWAI_SJW
+	int "TWAI synchronization jump width"
+	default 3
+	---help---
+		SJW limits the number of Time Quanta corrections during bit
+		Resynchronization.
+
+config ESP32S2_TWAI_SAM
+	bool "TWAI sampling"
+	default n
+	---help---
+		The bus is sampled 3 times (recommended for low to medium speed buses
+		to spikes on the bus-line).
+
+endif # ESP32S2_TWAI
+
+config ESP32S2_TWAI_REGDEBUG
+	bool "TWAI register level debug"
+	depends on DEBUG_CAN_INFO
+	default n
+	---help---
+		Output detailed register-level TWAI debug information. Requires also
+		CONFIG_DEBUG_CAN_INFO.
+
+endmenu #ESP32S2_TWAI
 
 menu "SPI Flash Configuration"
 
