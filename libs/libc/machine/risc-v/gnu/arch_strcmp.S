@@ -15,7 +15,7 @@
 
 #include "libc.h"
 
-#ifdef LIBC_BUILD_STRING
+#ifdef LIBC_BUILD_STRCMP
 
 #include "asm.h"
 

@@ -64,7 +64,7 @@
 
 #include "libc.h"
 
-#ifdef LIBC_BUILD_STRING
+#ifdef LIBC_BUILD_STRLEN
 
 #include "acle-compat.h"
 

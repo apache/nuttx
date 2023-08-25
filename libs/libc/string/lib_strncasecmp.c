@@ -34,7 +34,7 @@
  * Public Functions
  ****************************************************************************/
 
-#if !defined(CONFIG_LIBC_ARCH_STRNCASECMP) && defined(LIBC_BUILD_STRING)
+#if !defined(CONFIG_LIBC_ARCH_STRNCASECMP) && defined(LIBC_BUILD_STRNCASECMP)
 #undef strncasecmp /* See mm/README.txt */
 int strncasecmp(FAR const char *cs, FAR const char *ct, size_t nb)
 {

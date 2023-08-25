@@ -46,7 +46,7 @@
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_LIBC_ARCH_STRCHR) && defined(LIBC_BUILD_STRING)
+#if !defined(CONFIG_LIBC_ARCH_STRCHR) && defined(LIBC_BUILD_STRCHR)
 #undef strchr /* See mm/README.txt */
 FAR char *strchr(FAR const char *s, int c)
 {

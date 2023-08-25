@@ -36,7 +36,7 @@
  * Name: memcpy
  ****************************************************************************/
 
-#if !defined(CONFIG_LIBC_ARCH_MEMCPY) && defined(LIBC_BUILD_STRING)
+#if !defined(CONFIG_LIBC_ARCH_MEMCPY) && defined(LIBC_BUILD_MEMCPY)
 #undef memcpy /* See mm/README.txt */
 no_builtin("memcpy")
 FAR void *memcpy(FAR void *dest, FAR const void *src, size_t n)

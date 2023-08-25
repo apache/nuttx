@@ -29,7 +29,7 @@
 
 #include "libc.h"
 
-#ifdef LIBC_BUILD_STRING
+#ifdef LIBC_BUILD_MEMCPY
 
 /****************************************************************************
  * Pre-processor Macros

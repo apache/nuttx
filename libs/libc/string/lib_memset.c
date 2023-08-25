@@ -48,7 +48,7 @@
  * Public Functions
  ****************************************************************************/
 
-#if !defined(CONFIG_LIBC_ARCH_MEMSET) && defined(LIBC_BUILD_STRING)
+#if !defined(CONFIG_LIBC_ARCH_MEMSET) && defined(LIBC_BUILD_MEMSET)
 #undef memset /* See mm/README.txt */
 no_builtin("memset")
 FAR void *memset(FAR void *s, int c, size_t n)
