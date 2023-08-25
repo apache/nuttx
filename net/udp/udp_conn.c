@@ -882,8 +882,8 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
 
           for (dev = g_netdevices; dev; dev = dev->flink)
             {
-              if (net_ipv6addr_cmp(inaddr->sin6_addr.in6_u.u6_addr16,
-                                  dev->d_ipv6addr))
+              if (NETDEV_IS_MY_V6ADDR(dev,
+                                      inaddr->sin6_addr.in6_u.u6_addr16))
                 {
                   ret = 0;
                   break;

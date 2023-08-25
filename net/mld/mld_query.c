@@ -139,11 +139,21 @@ static clock_t mld_mrc2mrd(uint16_t mrc)
 static bool mld_cmpaddr(FAR struct net_driver_s *dev,
                         const net_ipv6addr_t srcaddr)
 {
+  FAR const uint16_t *lladdr = netdev_ipv6_lladdr(dev);
   int i;
+
+  if (lladdr == NULL)
+    {
+      /* If no link-local address presents, regard address as ::, then nobody
+       * can be less than it.
+       */
+
+      return false;
+    }
 
   for (i = 0; i < 8; i++)
     {
-      if (srcaddr[i] < dev->d_ipv6addr[i])
+      if (srcaddr[i] < lladdr[i])
         {
           return true;
         }
@@ -439,7 +449,7 @@ int mld_query(FAR struct net_driver_s *dev,
 
   /* Not sent to all systems.  Check for Unicast General Query */
 
-  else if (net_ipv6addr_cmp(ipv6->destipaddr, dev->d_ipv6addr))
+  else if (NETDEV_IS_MY_V6ADDR(dev, ipv6->destipaddr))
     {
       mldinfo("Unicast query\n");
       MLD_STATINCR(g_netstats.mld.ucast_query_received);

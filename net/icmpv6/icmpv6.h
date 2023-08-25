@@ -313,6 +313,7 @@ void icmpv6_rsolicit(FAR struct net_driver_s *dev);
  ****************************************************************************/
 
 void icmpv6_advertise(FAR struct net_driver_s *dev,
+                      const net_ipv6addr_t tgtaddr,
                       const net_ipv6addr_t destipaddr);
 
 /****************************************************************************

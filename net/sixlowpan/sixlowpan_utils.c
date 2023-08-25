@@ -319,8 +319,7 @@ int sixlowpan_destaddrfromip(FAR struct radio_driver_s *radio,
    */
 
   if (!sixlowpan_islinklocal(ipaddr) &&
-      !net_ipv6addr_maskcmp(radio->r_dev.d_ipv6addr, ipaddr,
-                            radio->r_dev.d_ipv6netmask))
+      !NETDEV_V6ADDR_ONLINK(&radio->r_dev, ipaddr))
     {
       return -EADDRNOTAVAIL;
     }
