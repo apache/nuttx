@@ -32,7 +32,7 @@
 #include <assert.h>
 #include <debug.h>
 
-#ifdef CONFIG_COMPOSITE_BOARD_SERIALSTR
+#ifdef CONFIG_BOARD_USBDEV_SERIALSTR
 #include <nuttx/board.h>
 #endif
 
@@ -183,7 +183,7 @@ static const struct usb_qualdesc_s g_qualdesc =
 
 const char g_compvendorstr[]  = CONFIG_COMPOSITE_VENDORSTR;
 const char g_compproductstr[] = CONFIG_COMPOSITE_PRODUCTSTR;
-#ifndef CONFIG_COMPOSITE_BOARD_SERIALSTR
+#ifndef CONFIG_BOARD_USBDEV_SERIALSTR
 const char g_compserialstr[]  = CONFIG_COMPOSITE_SERIALSTR;
 #endif
 
@@ -233,7 +233,7 @@ int composite_mkstrdesc(uint8_t id, FAR struct usb_strdesc_s *strdesc)
       break;
 
     case COMPOSITE_SERIALSTRID:
-#ifdef CONFIG_COMPOSITE_BOARD_SERIALSTR
+#ifdef CONFIG_BOARD_USBDEV_SERIALSTR
       str = board_usbdev_serialstr();
 #else
       str = g_compserialstr;

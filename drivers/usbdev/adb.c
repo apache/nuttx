@@ -40,7 +40,7 @@
 #include <nuttx/usb/adb.h>
 #include <nuttx/fs/fs.h>
 
-#ifdef CONFIG_USBADB_BOARD_SERIALSTR
+#ifdef CONFIG_BOARD_USBDEV_SERIALSTR
 #include <nuttx/board.h>
 #endif
 
@@ -837,7 +837,7 @@ static int usbclass_mkstrdesc(uint8_t id, FAR struct usb_strdesc_s *strdesc)
       break;
 
     case USBADB_SERIALSTRID:
-#ifdef CONFIG_USBADB_BOARD_SERIALSTR
+#ifdef CONFIG_BOARD_USBDEV_SERIALSTR
       str = board_usbdev_serialstr();
 #else
       str = CONFIG_USBADB_SERIALSTR;

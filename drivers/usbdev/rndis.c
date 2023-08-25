@@ -50,7 +50,7 @@
 #include <nuttx/usb/rndis.h>
 #include <nuttx/wqueue.h>
 
-#ifdef CONFIG_RNDIS_BOARD_SERIALSTR
+#ifdef CONFIG_BOARD_USBDEV_SERIALSTR
 #include <nuttx/board.h>
 #endif
 
@@ -1839,7 +1839,7 @@ static int usbclass_mkstrdesc(uint8_t id, FAR struct usb_strdesc_s *strdesc)
         break;
 
       case RNDIS_SERIALSTRID:
-#ifdef CONFIG_RNDIS_BOARD_SERIALSTR
+#ifdef CONFIG_BOARD_USBDEV_SERIALSTR
         str = board_usbdev_serialstr();
 #else
         str = CONFIG_RNDIS_SERIALSTR;

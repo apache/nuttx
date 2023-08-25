@@ -4429,5 +4429,7 @@ config BOARDCTL_IOCTL
 endif # BOARDCTL
 
 config BOARD_USBDEV_SERIALSTR
-	bool
+	bool "Board-specific usbdev serial string"
 	default n
+	---help---
+		Use board unique serial number to iSerialNumber in the device descriptor.
