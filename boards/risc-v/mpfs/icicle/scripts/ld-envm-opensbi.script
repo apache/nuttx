@@ -33,10 +33,10 @@ EXTERN(__start)
 SECTIONS
 {
     .text.sbi : {
-      sbi*
-      riscv_atomic*
-      riscv_locks*
-      riscv_asm*
+      */sbi*
+      */riscv_atomic*
+      */riscv_locks*
+      */riscv_asm*
     } > ddr
 
     .l2_scratchpad : ALIGN(0x10)
