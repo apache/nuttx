@@ -219,13 +219,13 @@ Apache NuttX is actively developed on GitHub. There are two main repositories, `
   .. tab:: Download stable release
   
     Go to `releases <https://nuttx.apache.org/download/>`_ and choose a version to download. The following
-    example uses version 10.1.0:
+    example uses version 12.2.1:
 
     .. code-block:: console
     
        $ mkdir nuttxspace
        $ cd nuttxspace
-       $ curl -L https://www.apache.org/dyn/closer.lua/nuttx/12.0.0/apache-nuttx-12.0.0.tar.gz?action=download -o nuttx.tar.gz
-       $ curl -L https://www.apache.org/dyn/closer.lua/nuttx/12.0.0/apache-nuttx-apps-12.0.0.tar.gz?action=download -o apps.tar.gz
+       $ curl -L https://www.apache.org/dyn/closer.lua/nuttx/12.2.1/apache-nuttx-12.2.1.tar.gz?action=download -o nuttx.tar.gz
+       $ curl -L https://www.apache.org/dyn/closer.lua/nuttx/12.2.1/apache-nuttx-apps-12.2.1.tar.gz?action=download -o apps.tar.gz
        $ tar zxf nuttx.tar.gz
        $ tar zxf apps.tar.gz
