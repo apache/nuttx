@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/audio/cxd56_src.h
+ * arch/arm/src/cxd56xx/cxd56_nxaudio_src.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
