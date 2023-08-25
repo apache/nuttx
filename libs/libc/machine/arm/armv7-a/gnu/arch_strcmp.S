@@ -32,7 +32,7 @@
 
 #include "libc.h"
 
-#ifdef LIBC_BUILD_STRING
+#ifdef LIBC_BUILD_STRCMP
 
 #ifdef __ARMEB__
 #define SHFT2LSB lsl

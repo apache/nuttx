@@ -31,7 +31,7 @@
 
 #include "libc.h"
 
-#ifdef LIBC_BUILD_STRING
+#ifdef LIBC_BUILD_MEMCPY
 
 /* This memcpy routine is optimised for Cortex-M3/M4 cores with/without
    unaligned access.

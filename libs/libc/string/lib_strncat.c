@@ -32,7 +32,7 @@
  * Public Functions
  ****************************************************************************/
 
-#if !defined(CONFIG_LIBC_ARCH_STRNCAT) && defined(LIBC_BUILD_STRING)
+#if !defined(CONFIG_LIBC_ARCH_STRNCAT) && defined(LIBC_BUILD_STRNCAT)
 #undef strncat /* See mm/README.txt */
 FAR char *strncat(FAR char *dest, FAR const char *src, size_t n)
 {
