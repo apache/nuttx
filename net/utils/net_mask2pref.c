@@ -207,4 +207,42 @@ uint8_t net_ipv6_mask2pref(FAR const uint16_t *mask)
   return preflen;
 }
 
+/****************************************************************************
+ * Name: net_ipv6_common_pref
+ *
+ * Description:
+ *   Calculate the common prefix length of two IPv6 addresses.
+ *
+ * Input Parameters:
+ *   a1,a2   Points to IPv6 addresses in the form of uint16_t[8]
+ *
+ * Returned Value:
+ *   The common prefix length, range 0-128 on success;  This function will
+ *   not fail.
+ *
+ ****************************************************************************/
+
+uint8_t net_ipv6_common_pref(FAR const uint16_t *a1, FAR const uint16_t *a2)
+{
+  uint8_t preflen;
+  int i;
+
+  /* Count the leading same 16-bit groups */
+
+  for (i = 0, preflen = 0; i < 8 && a1[i] == a2[i]; i++, preflen += 16);
+
+  /* Now i either, (1) indexes past the end of the mask, or (2) is the index
+   * to the first half-word that is not equal between the addresses.
+   */
+
+  if (i < 8)
+    {
+      preflen += net_msbits16(NTOHS(~(a1[i] ^ a2[i])));
+    }
+
+  /* Return the prefix length */
+
+  return preflen;
+}
+
 #endif /* CONFIG_NET_IPv6 */

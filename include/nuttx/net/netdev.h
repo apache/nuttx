@@ -168,6 +168,12 @@
 #define IPv4BUF ((FAR struct ipv4_hdr_s *)IPBUF(0))
 #define IPv6BUF ((FAR struct ipv6_hdr_s *)IPBUF(0))
 
+#ifdef CONFIG_NET_IPv6
+#  ifndef CONFIG_NETDEV_MAX_IPv6_ADDR
+#    define CONFIG_NETDEV_MAX_IPv6_ADDR 1
+#  endif
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -227,6 +233,14 @@ struct netdev_varaddr_s
 {
   uint8_t nv_addr[RADIO_MAX_ADDRLEN];
   uint8_t nv_addrlen;
+};
+#endif
+
+#ifdef CONFIG_NET_IPv6
+struct netdev_ifaddr6_s
+{
+  net_ipv6addr_t addr; /* Host IPv6 address */
+  net_ipv6addr_t mask; /* Network IPv6 subnet mask */
 };
 #endif
 
@@ -302,10 +316,30 @@ struct net_driver_s
 #endif
 
 #ifdef CONFIG_NET_IPv6
-  net_ipv6addr_t d_ipv6addr;    /* Host IPv6 address assigned to the network interface */
+  /* Host IPv6 addresses assigned to the network interface.
+   * For historical reason, we keep the old name d_ipv6addr and d_ipv6netmask
+   * for backward compatibility. Please use d_ipv6 for new drivers.
+   */
+
+#  if defined(CONFIG_HAVE_ANONYMOUS_STRUCT) && \
+      defined(CONFIG_HAVE_ANONYMOUS_UNION)
+  union /* Try to limit the scope of backward compatibility alias. */
+  {
+    struct netdev_ifaddr6_s d_ipv6[CONFIG_NETDEV_MAX_IPv6_ADDR];
+    struct
+    {
+      net_ipv6addr_t d_ipv6addr;    /* Compatible with previous usage */
+      net_ipv6addr_t d_ipv6netmask; /* Compatible with previous usage */
+    };
+  };
+#  else /* Without anonymous union/struct support, we can only use macros. */
+  struct netdev_ifaddr6_s d_ipv6[CONFIG_NETDEV_MAX_IPv6_ADDR];
+#    define d_ipv6addr    d_ipv6[0].addr /* Compatible with previous usage */
+#    define d_ipv6netmask d_ipv6[0].mask /* Compatible with previous usage */
+#  endif /* CONFIG_HAVE_ANONYMOUS_STRUCT && CONFIG_HAVE_ANONYMOUS_UNION */
+
   net_ipv6addr_t d_ipv6draddr;  /* Default router IPv6 address */
-  net_ipv6addr_t d_ipv6netmask; /* Network IPv6 subnet mask */
-#endif
+#endif /* CONFIG_NET_IPv6 */
   /* This is a new design that uses d_iob as packets input and output
    * buffer which used by some NICs such as celluler net driver. Case for
    * data input, note that d_iob maybe a linked chain only when using
@@ -445,6 +479,9 @@ struct net_driver_s
 };
 
 typedef CODE int (*devif_poll_callback_t)(FAR struct net_driver_s *dev);
+typedef CODE int (*devif_ipv6_callback_t)(FAR struct net_driver_s *dev,
+                                          FAR struct netdev_ifaddr6_s *addr,
+                                          FAR void *arg);
 
 /****************************************************************************
  * Public Function Prototypes
@@ -978,5 +1015,126 @@ void netdev_iob_clear(FAR struct net_driver_s *dev);
  ****************************************************************************/
 
 void netdev_iob_release(FAR struct net_driver_s *dev);
+
+/****************************************************************************
+ * Name: netdev_ipv6_add/del
+ *
+ * Description:
+ *   Add or delete an IPv6 address on the network device
+ *
+ * Returned Value:
+ *   OK             - Success
+ *   -EINVAL        - Invalid prefix length
+ *   -EADDRNOTAVAIL - Delete on non-existent address
+ *
+ * Assumptions:
+ *   The caller has locked the network.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+int netdev_ipv6_add(FAR struct net_driver_s *dev, const net_ipv6addr_t addr,
+                    unsigned int preflen);
+int netdev_ipv6_del(FAR struct net_driver_s *dev, const net_ipv6addr_t addr,
+                    unsigned int preflen);
+#endif
+
+/****************************************************************************
+ * Name: netdev_ipv6_srcaddr/srcifaddr
+ *
+ * Description:
+ *   Get the source IPv6 address (RFC6724).
+ *
+ * Returned Value:
+ *   A pointer to the IPv6 address is returned on success.  It will never be
+ *   NULL, but can be an address containing g_ipv6_unspecaddr.
+ *
+ * Assumptions:
+ *   The caller has locked the network.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+FAR const uint16_t *netdev_ipv6_srcaddr(FAR struct net_driver_s *dev,
+                                        const net_ipv6addr_t dst);
+FAR const struct netdev_ifaddr6_s *
+netdev_ipv6_srcifaddr(FAR struct net_driver_s *dev,
+                      const net_ipv6addr_t dst);
+#endif
+
+/****************************************************************************
+ * Name: netdev_ipv6_lladdr
+ *
+ * Description:
+ *   Get the link-local address of the network device.
+ *
+ * Returned Value:
+ *   A pointer to the link-local address is returned on success.
+ *   NULL is returned if the address is not found on the device.
+ *
+ * Assumptions:
+ *   The caller has locked the network.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+FAR const uint16_t *netdev_ipv6_lladdr(FAR struct net_driver_s *dev);
+#endif
+
+/****************************************************************************
+ * Name: netdev_ipv6_lookup
+ *
+ * Description:
+ *   Look up an IPv6 address in the network device's IPv6 addresses
+ *
+ * Input Parameters:
+ *   dev     - The network device to use in the lookup
+ *   addr    - The IPv6 address to be looked up
+ *   maskcmp - If true, then the IPv6 address is compared to the network
+ *             device's IPv6 addresses with mask compare.
+ *             If false, then the IPv6 address should be exactly the same as
+ *             the network device's IPv6 address.
+ *
+ * Returned Value:
+ *   A pointer to the matching IPv6 address entry is returned on success.
+ *   NULL is returned if the IPv6 address is not found in the device.
+ *
+ * Assumptions:
+ *   The caller has locked the network.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+FAR struct netdev_ifaddr6_s *
+netdev_ipv6_lookup(FAR struct net_driver_s *dev, const net_ipv6addr_t addr,
+                   bool maskcmp);
+#endif
+
+/****************************************************************************
+ * Name: netdev_ipv6_foreach
+ *
+ * Description:
+ *   Enumerate each IPv6 address on a network device.  This function will
+ *   terminate when either (1) all addresses have been enumerated or (2) when
+ *   a callback returns any non-zero value.
+ *
+ * Input Parameters:
+ *   dev      - The network device
+ *   callback - Will be called for each IPv6 address
+ *   arg      - Opaque user argument passed to callback()
+ *
+ * Returned Value:
+ *  Zero:     Enumeration completed
+ *  Non-zero: Enumeration terminated early by callback
+ *
+ * Assumptions:
+ *  The network is locked.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+int netdev_ipv6_foreach(FAR struct net_driver_s *dev,
+                        devif_ipv6_callback_t callback, FAR void *arg);
+#endif
 
 #endif /* __INCLUDE_NUTTX_NET_NETDEV_H */
