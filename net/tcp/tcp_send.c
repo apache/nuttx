@@ -181,7 +181,9 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
     {
       ninfo("do IPv6 IP header build!\n");
       ipv6_build_header(IPv6BUF, dev->d_len - IPv6_HDRLEN,
-                        IP_PROTO_TCP, dev->d_ipv6addr, conn->u.ipv6.raddr,
+                        IP_PROTO_TCP,
+                        netdev_ipv6_srcaddr(dev, conn->u.ipv6.raddr),
+                        conn->u.ipv6.raddr,
                         conn->sconn.ttl, conn->sconn.s_tclass);
 
       /* Calculate TCP checksum. */
@@ -476,7 +478,9 @@ void tcp_reset(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
       FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
 
       ipv6_build_header(ipv6, dev->d_len - IPv6_HDRLEN,
-                        IP_PROTO_TCP, dev->d_ipv6addr, ipv6->srcipaddr,
+                        IP_PROTO_TCP,
+                        netdev_ipv6_srcaddr(dev, ipv6->srcipaddr),
+                        ipv6->srcipaddr,
                         conn ? conn->sconn.ttl : IP_TTL_DEFAULT,
                         conn ? conn->sconn.s_tos : 0);
       tcp->tcpchksum = 0;

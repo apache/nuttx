@@ -40,6 +40,7 @@
 #include "netdev/netdev.h"
 #include "inet/inet.h"
 #include "icmpv6/icmpv6.h"
+#include "utils/utils.h"
 
 #ifdef CONFIG_NET_ICMPv6_AUTOCONF
 
@@ -139,9 +140,11 @@ static uint16_t icmpv6_router_eventhandler(FAR struct net_driver_s *dev,
 
       if (state->snd_advertise)
         {
-          /* Send the ICMPv6 Neighbor Advertisement message */
+          /* Send the ICMPv6 Neighbor Advertisement message, we should
+           * already have link-local address by previous logic.
+           */
 
-          icmpv6_advertise(dev, g_ipv6_allnodes);
+          icmpv6_advertise(dev, netdev_ipv6_lladdr(dev), g_ipv6_allnodes);
         }
       else
         {
@@ -311,6 +314,11 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
    *    will be derived from the link layer (MAC) address.
    */
 
+  if (netdev_ipv6_lladdr(dev) != NULL)
+    {
+      goto got_lladdr;
+    }
+
   icmpv6_linkipaddr(dev, lladdr);
 
   ninfo("lladdr=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
@@ -352,8 +360,13 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
    *    on the wider Internet (since link-local addresses are not routed).
    */
 
-  net_ipv6addr_copy(dev->d_ipv6addr, lladdr);
+  ret = netdev_ipv6_add(dev, lladdr, net_ipv6_mask2pref(g_ipv6_llnetmask));
+  if (ret < 0)
+    {
+      return ret;
+    }
 
+got_lladdr:
   /* 4. Router Contact: The node next attempts to contact a local router for
    *    more information on continuing the configuration. This is done either
    *    by listening for Router Advertisement messages sent periodically by
@@ -416,10 +429,6 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
       /* No off-link communications; No router address. */
 
       net_ipv6addr_copy(dev->d_ipv6draddr, g_ipv6_unspecaddr);
-
-      /* Set a netmask for the local link address */
-
-      net_ipv6addr_copy(dev->d_ipv6netmask, g_ipv6_llnetmask);
     }
 
   /* 5. Router Direction: The router provides direction to the node on how

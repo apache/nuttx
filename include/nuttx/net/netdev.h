@@ -172,6 +172,13 @@
 #  ifndef CONFIG_NETDEV_MAX_IPv6_ADDR
 #    define CONFIG_NETDEV_MAX_IPv6_ADDR 1
 #  endif
+#  define NETDEV_HAS_V6ADDR(dev) \
+     (!net_ipv6addr_cmp(netdev_ipv6_srcaddr(dev, g_ipv6_unspecaddr), \
+                        g_ipv6_unspecaddr))
+#  define NETDEV_IS_MY_V6ADDR(dev,addr) \
+     (netdev_ipv6_lookup(dev, addr, false) != NULL)
+#  define NETDEV_V6ADDR_ONLINK(dev,addr) \
+     (netdev_ipv6_lookup(dev, addr, true) != NULL)
 #endif
 
 /****************************************************************************

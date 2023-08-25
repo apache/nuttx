@@ -218,8 +218,7 @@ int icmpv6_neighbor(FAR struct net_driver_s *dev,
 
   /* Check if the destination address is on the local network. */
 
-  if (net_ipv6addr_maskcmp(ipaddr, dev->d_ipv6addr, dev->d_ipv6netmask) ||
-      net_is_addr_linklocal(ipaddr))
+  if (NETDEV_V6ADDR_ONLINK(dev, ipaddr) || net_is_addr_linklocal(ipaddr))
     {
       /* Yes.. use the input address for the lookup */
 

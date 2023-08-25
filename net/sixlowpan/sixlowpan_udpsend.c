@@ -247,7 +247,8 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
     }
   else
     {
-      net_ipv6addr_hdrcopy(ipv6udp.ipv6.srcipaddr, dev->d_ipv6addr);
+      net_ipv6addr_hdrcopy(ipv6udp.ipv6.srcipaddr,
+                          netdev_ipv6_srcaddr(dev, ipv6udp.ipv6.destipaddr));
     }
 
   ninfo("IPv6 length: %d\n",

@@ -78,7 +78,7 @@ static int check_dev_destipaddr(FAR struct net_driver_s *dev, FAR void *arg)
    * to this device.
    */
 
-  if (net_ipv6addr_cmp(ipv6->destipaddr, dev->d_ipv6addr))
+  if (NETDEV_IS_MY_V6ADDR(dev, ipv6->destipaddr))
     {
       return 1;
     }
@@ -389,7 +389,7 @@ static int ipv6_in(FAR struct net_driver_s *dev)
    * (the all zero address is the "unspecified" address.
    */
 
-  if (net_ipv6addr_cmp(dev->d_ipv6addr, g_ipv6_unspecaddr))
+  if (!NETDEV_HAS_V6ADDR(dev))
     {
       nwarn("WARNING: No IP address assigned\n");
       goto drop;

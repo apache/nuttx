@@ -322,7 +322,8 @@ int psock_tcp_connect(FAR struct socket *psock,
 #endif
           if (net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_unspecaddr))
             {
-              net_ipv6addr_copy(conn->u.ipv6.laddr, conn->dev->d_ipv6addr);
+              net_ipv6addr_copy(conn->u.ipv6.laddr,
+                        netdev_ipv6_srcaddr(conn->dev, conn->u.ipv6.raddr));
             }
 #endif /* CONFIG_NET_IPv6 */
 

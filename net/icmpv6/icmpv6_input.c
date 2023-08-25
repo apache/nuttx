@@ -299,7 +299,7 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
         /* Check if we are the target of the solicitation */
 
         sol = ICMPv6SOLICIT;
-        if (net_ipv6addr_cmp(sol->tgtaddr, dev->d_ipv6addr))
+        if (NETDEV_IS_MY_V6ADDR(dev, sol->tgtaddr))
           {
             if (sol->opttype == ICMPv6_OPT_SRCLLADDR)
               {
@@ -312,7 +312,7 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
              * solicitation came from.
              */
 
-            icmpv6_advertise(dev, ipv6->srcipaddr);
+            icmpv6_advertise(dev, sol->tgtaddr, ipv6->srcipaddr);
 
             /* All statistics have been updated.  Nothing to do but exit. */
 
@@ -341,7 +341,7 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
          */
 
         adv = ICMPv6ADVERTISE;
-        if (net_ipv6addr_cmp(ipv6->destipaddr, dev->d_ipv6addr))
+        if (NETDEV_IS_MY_V6ADDR(dev, ipv6->destipaddr))
           {
             /* This message is required to support the Target link-layer
              * address option.
@@ -544,7 +544,8 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
         icmpv6->type = ICMPv6_ECHO_REPLY;
 
         net_ipv6addr_copy(ipv6->destipaddr, ipv6->srcipaddr);
-        net_ipv6addr_copy(ipv6->srcipaddr, dev->d_ipv6addr);
+        net_ipv6addr_copy(ipv6->srcipaddr,
+                          netdev_ipv6_srcaddr(dev, ipv6->srcipaddr));
 
         icmpv6->chksum = 0;
         icmpv6->chksum = ~icmpv6_chksum(dev, iplen);

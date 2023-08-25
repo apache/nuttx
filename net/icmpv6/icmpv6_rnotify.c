@@ -75,6 +75,9 @@ void icmpv6_setaddresses(FAR struct net_driver_s *dev,
                          const net_ipv6addr_t prefix,
                          unsigned int preflen)
 {
+  FAR const uint16_t *curaddr;
+  net_ipv6addr_t addr;
+  net_ipv6addr_t mask;
   unsigned int i;
 
   /* Lock the network.
@@ -100,20 +103,28 @@ void icmpv6_setaddresses(FAR struct net_driver_s *dev,
       preflen = 128;
     }
 
-  net_ipv6_pref2mask(preflen, dev->d_ipv6netmask);
+  net_ipv6_pref2mask(preflen, mask);
 
   ninfo("preflen=%d netmask=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        preflen, NTOHS(dev->d_ipv6netmask[0]), NTOHS(dev->d_ipv6netmask[1]),
-        NTOHS(dev->d_ipv6netmask[2]), NTOHS(dev->d_ipv6netmask[3]),
-        NTOHS(dev->d_ipv6netmask[4]), NTOHS(dev->d_ipv6netmask[5]),
-        NTOHS(dev->d_ipv6netmask[6]), NTOHS(dev->d_ipv6netmask[7]));
+        preflen,
+        NTOHS(mask[0]), NTOHS(mask[1]), NTOHS(mask[2]), NTOHS(mask[3]),
+        NTOHS(mask[4]), NTOHS(mask[5]), NTOHS(mask[6]), NTOHS(mask[7]));
 
-  /* Copy prefix to the current IPv6 address, applying the mask */
+  /* Copy prefix to the current link local address, applying the mask.
+   * According to RFC4862, Section 5.5.3, Page 18, global address is formed
+   * by prefix + IID, and the IID is normally the link-local suffix.
+   */
+
+  curaddr = netdev_ipv6_lladdr(dev);
+  if (curaddr == NULL)
+    {
+      icmpv6_linkipaddr(dev, addr);
+      curaddr = addr;
+    }
 
   for (i = 0; i < 8; i++)
     {
-      dev->d_ipv6addr[i] = (dev->d_ipv6addr[i] & ~dev->d_ipv6netmask[i]) |
-                           (prefix[i] & dev->d_ipv6netmask[i]);
+      addr[i] = (curaddr[i] & ~mask[i]) | (prefix[i] & mask[i]);
     }
 
   ninfo("prefix=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
@@ -121,10 +132,10 @@ void icmpv6_setaddresses(FAR struct net_driver_s *dev,
         NTOHS(prefix[3]), NTOHS(prefix[4]), NTOHS(prefix[5]),
         NTOHS(prefix[6]), NTOHS(prefix[7]));
   ninfo("IP address=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        NTOHS(dev->d_ipv6addr[0]), NTOHS(dev->d_ipv6addr[1]),
-        NTOHS(dev->d_ipv6addr[2]), NTOHS(dev->d_ipv6addr[3]),
-        NTOHS(dev->d_ipv6addr[4]), NTOHS(dev->d_ipv6addr[5]),
-        NTOHS(dev->d_ipv6addr[6]), NTOHS(dev->d_ipv6addr[7]));
+        NTOHS(addr[0]), NTOHS(addr[1]), NTOHS(addr[2]), NTOHS(addr[3]),
+        NTOHS(addr[4]), NTOHS(addr[5]), NTOHS(addr[6]), NTOHS(addr[7]));
+
+  netdev_ipv6_add(dev, addr, preflen);
 
   /* Finally, copy the router address */
 

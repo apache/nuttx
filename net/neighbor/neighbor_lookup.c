@@ -66,7 +66,7 @@ static int neighbor_match(FAR struct net_driver_s *dev, FAR void *arg)
    * lookup.
    */
 
-  if (!net_ipv6addr_cmp(dev->d_ipv6addr, info->ni_ipaddr))
+  if (!NETDEV_IS_MY_V6ADDR(dev, info->ni_ipaddr))
     {
       return 0;
     }
