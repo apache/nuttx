@@ -242,6 +242,17 @@ int esp32s2_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_ESP32S2_TWAI
+
+  /* Initialize TWAI and register the TWAI driver. */
+
+  ret = board_twai_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_twai_setup failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_SENSORS_BMP180
   /* Try to register BMP180 device in I2C0 */
 

@@ -36,6 +36,10 @@ ifeq ($(CONFIG_ESP32S2_I2S),y)
   CSRCS += esp32s2_board_i2sdev.c
 endif
 
+ifeq ($(CONFIG_ESP32S2_TWAI),y)
+  CSRCS += esp32s2_board_twai.c
+endif
+
 ifeq ($(CONFIG_AUDIO_CS4344),y)
   CSRCS += esp32s2_cs4344.c
 endif

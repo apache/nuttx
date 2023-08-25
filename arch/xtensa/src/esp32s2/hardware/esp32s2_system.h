@@ -455,14 +455,14 @@
 #define SYSTEM_PWM1_CLK_EN_V  0x00000001
 #define SYSTEM_PWM1_CLK_EN_S  20
 
-/* SYSTEM_CAN_CLK_EN : R/W; bitpos: [19]; default: 0;
- * Set this bit to enable clock of CAN.
+/* SYSTEM_TWAI_CLK_EN : R/W; bitpos: [19]; default: 0;
+ * Set this bit to enable clock of TWAI.
  */
 
-#define SYSTEM_CAN_CLK_EN    (BIT(19))
-#define SYSTEM_CAN_CLK_EN_M  (SYSTEM_CAN_CLK_EN_V << SYSTEM_CAN_CLK_EN_S)
-#define SYSTEM_CAN_CLK_EN_V  0x00000001
-#define SYSTEM_CAN_CLK_EN_S  19
+#define SYSTEM_TWAI_CLK_EN   (BIT(19))
+#define SYSTEM_TWAI_CLK_EN_M (SYSTEM_TWAI_CLK_EN_V << SYSTEM_TWAI_CLK_EN_S)
+#define SYSTEM_TWAI_CLK_EN_V 0x00000001
+#define SYSTEM_TWAI_CLK_EN_S 19
 
 /* SYSTEM_I2C_EXT1_CLK_EN : R/W; bitpos: [18]; default: 0;
  * Set this bit to enable clock of I2C EXT1.
@@ -809,14 +809,14 @@
 #define SYSTEM_PWM1_RST_V  0x00000001
 #define SYSTEM_PWM1_RST_S  20
 
-/* SYSTEM_CAN_RST : R/W; bitpos: [19]; default: 0;
- * Set this bit to reset CAN.
+/* SYSTEM_TWAI_RST : R/W; bitpos: [19]; default: 0;
+ * Set this bit to reset TWAI.
  */
 
-#define SYSTEM_CAN_RST    (BIT(19))
-#define SYSTEM_CAN_RST_M  (SYSTEM_CAN_RST_V << SYSTEM_CAN_RST_S)
-#define SYSTEM_CAN_RST_V  0x00000001
-#define SYSTEM_CAN_RST_S  19
+#define SYSTEM_TWAI_RST   (BIT(19))
+#define SYSTEM_TWAI_RST_M (SYSTEM_TWAI_RST_V << SYSTEM_TWAI_RST_S)
+#define SYSTEM_TWAI_RST_V 0x00000001
+#define SYSTEM_TWAI_RST_S 19
 
 /* SYSTEM_I2C_EXT1_RST : R/W; bitpos: [18]; default: 0;
  * Set this bit to reset I2C EXT1.
