@@ -23,11 +23,12 @@ include(nuttx_parse_function_args)
 # export_relative_path_recursively
 #
 # Used to recursively add all header files under the `include_directory` to the
-# `prefix` directory and preserve their relative relationship
+# `include_path` directory and preserve their relative relationship
 #
 # When the target relative path is repeated and the original path is different
 # throws an exception and abort the build
-function(export_relative_path_recursively prefix include_directory)
+function(export_relative_path_recursively include_path export_path
+         include_directory)
   # recursively find header files under the path
   file(GLOB_RECURSE FOUND_FILES ${include_directory}/*.h)
   if(FOUND_FILES)
@@ -48,12 +49,12 @@ function(export_relative_path_recursively prefix include_directory)
         message(
           VERBOSE
           "NUTTX_ADD_APPS_HEADER: REL_FILE found: ${REL_FILE} in ${INCDIR}")
+        # create symbolic link for origin
+        file(CREATE_LINK ${FOUND_FILE} ${include_path}/${REL_FILE}
+             COPY_ON_ERROR SYMBOLIC)
         # do export to the BINAPPS/include directory
-        get_filename_component(DES_PATH ${prefix}/${REL_FILE} DIRECTORY)
-        file(
-          COPY ${FOUND_FILE}
-          DESTINATION ${DES_PATH}
-          FOLLOW_SYMLINK_CHAIN)
+        get_filename_component(DES_PATH ${export_path}/${REL_FILE} DIRECTORY)
+        install(FILES ${FOUND_FILE} DESTINATION ${DES_PATH})
       endif()
     endforeach()
   endif()
@@ -82,12 +83,12 @@ endfunction()
 #   set(INCDIRS foo/include)
 #   nuttx_export_header(TARGET foo INCLUDE_DIRECTORIES ${INCDIRS})
 #
-#   foo/include/                          build/apps/include/foo/
-#       ├── demo/                                   ├── demo/
-#       |   └── demo.h        export to             |   └── demo.h
-#       ├── test/           ============>           ├── test/
-#       |   └── test.h                              |   └── test.h
-#       └── foo.h                                   └── foo.h
+#   foo/include/                            build/apps/include/foo/
+#       ├── demo/                                     ├── demo/
+#       |   └── demo.h   cmake --build:origin link    |   └── demo.h
+#       ├── test/        =====================>       ├── test/
+#       |   └── test.h   cmake --install:export       |   └── test.h
+#       └── foo.h                                     └── foo.h
 # ~~~
 
 function(nuttx_export_header)
@@ -107,8 +108,10 @@ function(nuttx_export_header)
     ARGN
     ${ARGN})
 
-  # destination directory to be exported
-  set(PATH_PREFIX ${NUTTX_APPS_BINDIR}/include/${TARGET})
+  # destination directory to be exported by install
+  set(EXPORT_PATH_PREFIX ${CMAKE_BINARY_DIR}/staging/include/${TARGET})
+  # destination directory origin compile
+  set(INCLUDE_PATH_PREFIX ${NUTTX_APPS_BINDIR}/include/${TARGET})
 
   foreach(INCDIR ${INCLUDE_DIRECTORIES})
     if(NOT EXISTS ${INCDIR})
@@ -119,14 +122,13 @@ function(nuttx_export_header)
     else()
       if(IS_DIRECTORY ${INCDIR})
         # export relative path to directories
-        export_relative_path_recursively(${PATH_PREFIX} ${INCDIR})
+        export_relative_path_recursively(${INCLUDE_PATH_PREFIX}
+                                         ${EXPORT_PATH_PREFIX} ${INCDIR})
       else()
         # export single file
-        get_filename_component(DES_PATH ${prefix}/${REL_FILE} DIRECTORY)
-        file(
-          COPY ${FOUND_FILE}
-          DESTINATION ${DES_PATH}
-          FOLLOW_SYMLINK_CHAIN)
+        file(CREATE_LINK ${INCDIR} ${INCLUDE_PATH_PREFIX}/${INCDIR}
+             COPY_ON_ERROR SYMBOLIC)
+        install(FILES ${INCDIR} DESTINATION ${EXPORT_PATH_PREFIX})
       endif()
     endif()
   endforeach()
