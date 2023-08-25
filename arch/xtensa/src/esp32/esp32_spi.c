@@ -41,6 +41,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/spi/spi.h>
 
 #include <arch/board/board.h>
