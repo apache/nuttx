@@ -1516,7 +1516,7 @@ static int wlan_ioctl(struct net_driver_s *dev,
             ret = ops->disconnect();
             if (ret < 0)
               {
-                nerr("ERROR: Failed to connect\n");
+                nerr("ERROR: Failed to disconnect\n");
                 break;
               }
           }
