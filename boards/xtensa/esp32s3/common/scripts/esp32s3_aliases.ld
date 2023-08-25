@@ -27,3 +27,5 @@
   api_vhci_host_send_packet = API_vhci_host_send_packet;
   api_vhci_host_register_callback = API_vhci_host_register_callback;
 #endif
+
+PROVIDE( cache_writeback_addr = Cache_WriteBack_Addr );

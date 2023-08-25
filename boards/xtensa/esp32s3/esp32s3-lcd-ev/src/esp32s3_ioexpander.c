@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32s3/esp32s3-lcd-ev/src/esp32s3-lcd-ev.h
+ * boards/xtensa/esp32s3/esp32s3-lcd-ev/src/esp32s3_ioexpander.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,121 +18,59 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_XTENSA_ESP32S3_ESP32S3_LCD_EV_SRC_ESP32S3_LCD_EV_H
-#define __BOARDS_XTENSA_ESP32S3_ESP32S3_LCD_EV_SRC_ESP32S3_LCD_EV_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
-#include <stdint.h>
+
+#include <unistd.h>
+#include <stdlib.h>
+#include <debug.h>
+#include <assert.h>
+#include <nuttx/arch.h>
+#include <nuttx/board.h>
+
+#include "esp32s3_i2c.h"
+#include "esp32s3-lcd-ev.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* ESP32-S3-LCD-EV GPIOs ****************************************************/
+#define BOARD_IOEXPANDER_I2C_PORT       I2C_PORT
 
-/* BOOT Button */
+#define BOARD_IOEXPANDER_I2C_ADDR       (0x20)
+#define BOARD_IOEXPANDER_I2C_CLOCK      (400 * 1000)
 
-#define BUTTON_BOOT         0
-
-/* I2C Port */
-
-#define I2C_PORT            0
+#define BOARD_IOEXPANDER_SET_DIRECTION  (3)
+#define BOARD_IOEXPANDER_SET_OUTPUT     (1)
 
 /****************************************************************************
- * Public Types
+ * Private Types
  ****************************************************************************/
+
+struct ioexpander
+{
+  struct i2c_master_s *i2c;
+  uint8_t output_val;
+};
 
 /****************************************************************************
- * Public Data
+ * Private Data
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
+static const struct i2c_config_s g_i2c_config =
+{
+  .frequency = BOARD_IOEXPANDER_I2C_CLOCK,
+  .address   = BOARD_IOEXPANDER_I2C_ADDR,
+  .addrlen   = 7
+};
+static struct ioexpander g_ioexpander;
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: esp32s3_bringup
- *
- * Description:
- *   Perform architecture-specific initialization
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_BOARDCTL=y :
- *     Called from the NSH library via board_app_initialize()
- *
- ****************************************************************************/
-
-int esp32s3_bringup(void);
-
-/****************************************************************************
- * Name: board_spiflash_init
- *
- * Description:
- *   Initialize the SPIFLASH and register the MTD device.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ESP32S3_SPIFLASH
-int board_spiflash_init(void);
-#endif
-
-/****************************************************************************
- * Name:  board_ws2812_initialize
- *
- * Description:
- *   This function may called from application-specific logic during its
- *   to perform board-specific initialization of the ws2812 device
- *
- ****************************************************************************/
-
-#if defined(CONFIG_WS2812) && !defined(CONFIG_WS2812_NON_SPI_DRIVER)
-int board_ws2812_initialize(int devno, int spino, uint16_t nleds);
-#endif
-
-/****************************************************************************
- * Name: board_lcd_initialize
- *
- * Description:
- *   Initialize LCD.
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_ESP32S3_LCD) && defined(CONFIG_ESP32S3_BOARD_IOEXPANDER)
-int board_lcd_initialize(void);
-#endif
-
-/****************************************************************************
- * Name: board_touchscreen_initialize
- *
- * Description:
- *   Initialize touchpad.
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ESP32S3_BOARD_TOUCHPAD
-int board_touchscreen_initialize(void);
-#endif
 
 /****************************************************************************
  * Name: board_ioexpander_set_pin
@@ -151,9 +89,23 @@ int board_touchscreen_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32S3_BOARD_IOEXPANDER
-int board_ioexpander_set_pin(uint8_t input_mask, uint8_t output_mask);
-#endif
+int board_ioexpander_set_pin(uint8_t input_mask, uint8_t output_mask)
+{
+  uint8_t data[2] =
+  {
+    BOARD_IOEXPANDER_SET_DIRECTION, 0
+  };
+
+  if (input_mask & output_mask)
+    {
+      return -EINVAL;
+    }
+
+  data[1] |= input_mask;
+  data[1] &= ~output_mask;
+
+  return i2c_write(g_ioexpander.i2c, &g_i2c_config, data, 2);
+}
 
 /****************************************************************************
  * Name: board_ioexpander_output
@@ -170,9 +122,28 @@ int board_ioexpander_set_pin(uint8_t input_mask, uint8_t output_mask);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32S3_BOARD_IOEXPANDER
-int board_ioexpander_output(int pin, bool level);
-#endif
+int board_ioexpander_output(int pin, bool level)
+{
+  uint8_t data[2] =
+  {
+    BOARD_IOEXPANDER_SET_OUTPUT, 0
+  };
+
+  DEBUGASSERT(pin < 8);
+
+  if (level)
+    {
+      g_ioexpander.output_val |= 1 << pin;
+    }
+  else
+    {
+      g_ioexpander.output_val &= ~(1 << pin);
+    }
+
+  data[1] = g_ioexpander.output_val;
+
+  return i2c_write(g_ioexpander.i2c, &g_i2c_config, data, 2);
+}
 
 /****************************************************************************
  * Name: board_ioexpander_initialize
@@ -188,9 +159,13 @@ int board_ioexpander_output(int pin, bool level);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32S3_BOARD_IOEXPANDER
-int board_ioexpander_initialize(void);
-#endif
+int board_ioexpander_initialize(void)
+{
+  g_ioexpander.i2c = esp32s3_i2cbus_initialize(BOARD_IOEXPANDER_I2C_PORT);
+  if (!g_ioexpander.i2c)
+    {
+      return -EINVAL;
+    }
 
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_XTENSA_ESP32S3_ESP32S3_LCD_EV_SRC_ESP32S3_LCD_EV_H */
+  return 0;
+}

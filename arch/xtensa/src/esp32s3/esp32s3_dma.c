@@ -392,6 +392,47 @@ void esp32s3_dma_wait_idle(int chan, bool tx)
 }
 
 /****************************************************************************
+ * Name: esp32s3_dma_set_ext_memblk
+ *
+ * Description:
+ *   Configure DMA external memory block size.
+ *
+ * Input Parameters:
+ *   chan - DMA channel
+ *   tx   - true: TX mode; false: RX mode
+ *   type - block size type
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32s3_dma_set_ext_memblk(int chan, bool tx,
+                                enum esp32s3_dma_ext_memblk_e type)
+{
+  uint32_t val;
+
+  if (tx)
+    {
+      val = ((uint32_t)type << DMA_OUT_EXT_MEM_BK_SIZE_CH0_S);
+
+      CLR_GDMA_CH_BITS(DMA_OUT_CONF1_CH0_REG,
+                       chan,
+                       DMA_OUT_EXT_MEM_BK_SIZE_CH0_M);
+      SET_GDMA_CH_BITS(DMA_OUT_CONF1_CH0_REG, chan, val);
+    }
+  else
+    {
+      val = ((uint32_t)type << DMA_IN_EXT_MEM_BK_SIZE_CH0_S);
+
+      CLR_GDMA_CH_BITS(DMA_IN_CONF1_CH0_REG,
+                       chan,
+                       DMA_IN_EXT_MEM_BK_SIZE_CH0_M);
+      SET_GDMA_CH_BITS(DMA_IN_CONF1_CH0_REG, chan, val);
+    }
+}
+
+/****************************************************************************
  * Name: esp32s3_dma_init
  *
  * Description:

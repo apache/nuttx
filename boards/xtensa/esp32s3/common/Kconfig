@@ -11,3 +11,14 @@ config ESP32S3_MERGE_BINS
 		device.
 		This is only useful when the path to binary files (e.g. bootloader)
 		is provided via the ESPTOOL_BINDIR variable.
+
+config ESP32S3_SPEED_UP_ISR
+	bool "Speed up ISR"
+	default n
+	---help---
+		Move ESP32-S3's interrupt, OS timer tick, and scheduler functions
+		from Flash to IRAM. This can speed up interrupt service processing
+		and also reduce reading data from Flash.
+
+		If you run applications that need continue reading data from PSRAM,
+		such as LCD display, please select this option.

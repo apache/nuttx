@@ -158,6 +158,10 @@ ifeq ($(CONFIG_RTC_DRIVER),y)
 CHIP_CSRCS += esp32s3_rtc_lowerhalf.c
 endif
 
+ifeq ($(CONFIG_ESP32S3_LCD),y)
+CHIP_CSRCS += esp32s3_lcd.c
+endif
+
 #############################################################################
 # Espressif HAL for 3rd Party Platforms
 #############################################################################

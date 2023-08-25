@@ -41,6 +41,18 @@ ifeq ($(CONFIG_WS2812),y)
 CSRCS += esp32s3_ws2812.c
 endif
 
+ifeq ($(CONFIG_ESP32S3_BOARD_IOEXPANDER),y)
+CSRCS += esp32s3_ioexpander.c
+endif
+
+ifeq ($(CONFIG_ESP32S3_BOARD_LCD),y)
+CSRCS += esp32s3_lcd.c
+endif
+
+ifeq ($(CONFIG_ESP32S3_BOARD_TOUCHPAD),y)
+CSRCS += esp32s3_touchscreen.c
+endif
+
 DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board
