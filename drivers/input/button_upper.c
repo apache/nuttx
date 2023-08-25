@@ -630,7 +630,7 @@ static int btn_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
 
     default:
-      ierr("ERROR: Unrecognized command: %d\n", cmd);
+      iinfo("ERROR: Unrecognized command: %d\n", cmd);
       ret = -ENOTTY;
       break;
     }
