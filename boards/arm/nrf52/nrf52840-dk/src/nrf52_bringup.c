@@ -57,13 +57,18 @@
 #  include "nrf52_sdc.h"
 #endif
 
+#ifdef CONFIG_SENSORS_LSM9DS1
+#  include "nrf52_lsm9ds1.h"
+#endif
+
 #include "nrf52840-dk.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define NRF52_TIMER (0)
+#define NRF52_TIMER    (0)
+#define LMS9DS1_I2CBUS (0)
 
 /****************************************************************************
  * Public Functions
@@ -294,6 +299,15 @@ int nrf52_bringup(void)
       syslog(LOG_ERR, "ERROR: Failed to initialize MTD progmem: %d\n", ret);
     }
 #endif /* CONFIG_MTD */
+
+#ifdef CONFIG_SENSORS_LSM9DS1
+  ret = nrf52_lsm9ds1_initialize(LMS9DS1_I2CBUS);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize LSM9DS1 driver: %d\n",
+             ret);
+    }
+#endif /* CONFIG_SENSORS_LSM6DSL */
 
   UNUSED(ret);
   return OK;
