@@ -57,6 +57,14 @@
 
 struct i2c_master_s;
 
+struct lsm9ds1_config_s
+{
+  FAR struct i2c_master_s *i2c;
+  int                      addr_acc;
+  int                      addr_gyro;
+  int                      addr_mag;
+};
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -65,6 +73,8 @@ struct i2c_master_s;
 extern "C"
 {
 #endif
+
+#ifndef CONFIG_SENSORS_LSM9DS1_UORB
 
 /****************************************************************************
  * Name: lsm9ds1accel_register
@@ -125,6 +135,26 @@ int lsm9ds1gyro_register(FAR const char *devpath,
 int lsm9ds1mag_register(FAR const char *devpath,
                         FAR struct i2c_master_s *i2c,
                         uint8_t addr);
+
+#else
+
+/****************************************************************************
+ * Name: lsm9ds1_register_uorb
+ *
+ * Description:
+ *   Register the LSM9DS1 IMU as sensor device
+ *
+ * Input Parameters:
+ *   devno   - Instance number for driver
+ *   config  - configuratio
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int lsm9ds1_register_uorb(int devno, FAR struct lsm9ds1_config_s *config);
+#endif
 
 #ifdef __cplusplus
 }
