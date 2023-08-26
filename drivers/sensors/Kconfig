@@ -548,7 +548,7 @@ config LSM303AGR_I2C_FREQUENCY
 	int "LSM303AGR I2C frequency"
 	default 400000
 	range 1 400000
-	depends on SN_LSM303AGR
+	depends on SENSORS_LSM303AGR
 
 config SENSORS_LSM6DSL
 	bool "STMicro LSM6DSL support"
@@ -562,7 +562,7 @@ config LSM6DSL_I2C_FREQUENCY
 	int "LSM6DSL I2C frequency"
 	default 400000
 	range 1 400000
-	depends on SN_LSM6DSL
+	depends on SENSORS_LSM6DSL
 
 config SENSORS_LSM9DS1
 	bool "STMicro LSM9DS1 support"
@@ -582,7 +582,7 @@ config LSM9DS1_I2C_FREQUENCY
 	int "LSM9DS1 I2C frequency"
 	default 400000
 	range 1 400000
-	depends on SN_LSM9DS1
+	depends on SENSORS_LSM9DS1
 
 config SENSORS_LPS25H
 	bool "STMicro LPS25H pressure sensor"
