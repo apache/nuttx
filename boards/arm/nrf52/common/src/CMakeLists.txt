@@ -32,6 +32,10 @@ if(CONFIG_ARCH_BOARD_COMMON)
     list(APPEND SRCS nrf52_progmem.c)
   endif()
 
+  if(CONFIG_SENSORS_LSM9DS1)
+    list(APPEND SRCS nrf52_lsm9ds1.c)
+  endif()
+
   target_sources(board PRIVATE ${SRCS})
 
 endif()

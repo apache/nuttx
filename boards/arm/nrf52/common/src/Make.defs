@@ -32,6 +32,10 @@ ifeq ($(CONFIG_NRF52_PROGMEM),y)
   CSRCS += nrf52_progmem.c
 endif
 
+ifeq ($(CONFIG_SENSORS_LSM9DS1),y)
+CSRCS += nrf52_lsm9ds1.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src
