@@ -605,6 +605,36 @@ config SENSORS_LSM9DS1
 	---help---
 		Enable driver support for the STMicro LSM9DS1.
 
+config SENSORS_LSM9DS1_UORB
+	bool "LSM9DS1 UORB Interface"
+	default n
+	depends on SENSORS_LSM9DS1
+
+if SENSORS_LSM9DS1_UORB
+
+config SENSORS_LSM9DS1_POLL
+	bool "Enables polling sensor data"
+	default n
+	---help---
+		Enables polling of sensor.
+
+config SENSORS_LSM9DS1_POLL_INTERVAL
+	int "Polling interval in microseconds, default 1 sec"
+	depends on SENSORS_LSM9DS1_POLL
+	default 1000000
+	range 0 4294967295
+	---help---
+		The interval until a new sensor measurement will be triggered.
+
+config SENSORS_LSM9DS1_THREAD_STACKSIZE
+	int "Worker thread stack size"
+	depends on SENSORS_LSM9DS1_POLL
+	default 1024
+	---help---
+		The stack size for the worker thread.
+
+endif #SENSORS_LSM9DS1_UORB
+
 config SENSORS_MSA301
 	bool "MSA301 support"
 	default n
@@ -616,7 +646,7 @@ config LSM9DS1_I2C_FREQUENCY
 	int "LSM9DS1 I2C frequency"
 	default 400000
 	range 1 400000
-	depends on SENSORS_LSM9DS1
+	depends on SENSORS_LSM9DS1 || SENSORS_LSM9DS1_UORB
 
 config SENSORS_LPS25H
 	bool "STMicro LPS25H pressure sensor"

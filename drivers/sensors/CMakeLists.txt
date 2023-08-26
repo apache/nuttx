@@ -113,7 +113,12 @@ if(CONFIG_SENSORS)
     endif()
 
     if(CONFIG_SENSORS_LSM9DS1)
-      list(APPEND SRCS lsm9ds1.c)
+      list(APPEND SRCS lsm9ds1_base.c)
+      if(CONFIG_SENSORS_LSM9DS1_UORB)
+        list(APPEND SRCS lsm9ds1_uorb.c)
+      else()
+        list(APPEND SRCS lsm9ds1.c)
+      endif()
     endif()
 
     if(CONFIG_SENSORS_MSA301)
