@@ -121,7 +121,12 @@ ifeq ($(CONFIG_SENSORS_LSM6DSL),y)
 endif
 
 ifeq ($(CONFIG_SENSORS_LSM9DS1),y)
-  CSRCS += lsm9ds1.c
+  CSRCS += lsm9ds1_base.c
+  ifeq ($(CONFIG_SENSORS_LSM9DS1_UORB),y)
+    CSRCS += lsm9ds1_uorb.c
+  else
+    CSRCS += lsm9ds1.c
+  endif
 endif
 
 ifeq ($(CONFIG_SENSORS_MSA301),y)
