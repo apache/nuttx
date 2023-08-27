@@ -426,6 +426,33 @@ struct inode
 
 #define FSNODE_SIZE(n) (sizeof(struct inode) + (n))
 
+/* Definitions for custom stream operations with fopencookie. The
+ * implementation is as defined in Standard C library (libc). The only
+ * difference is that we use off_t instead of off64_t. This means
+ * off_t is int64_t if CONFIG_FS_LARGEFILE is defined and int32_t if not.
+ *
+ * These callbacks can either lead to custom functions if fopencookie is used
+ * or to standard file system functions if not.
+ */
+
+typedef CODE ssize_t cookie_read_function_t(FAR void *cookie, FAR char *buf,
+                                            size_t size);
+typedef CODE ssize_t cookie_write_function_t(FAR void *cookie,
+                                             FAR const char *buf,
+                                             size_t size);
+typedef CODE off_t cookie_seek_function_t(FAR void *cookie,
+                                          FAR off_t *offset,
+                                          int whence);
+typedef CODE int cookie_close_function_t(FAR void *cookie);
+
+typedef struct cookie_io_functions_t
+{
+  FAR cookie_read_function_t *read;
+  FAR cookie_write_function_t *write;
+  FAR cookie_seek_function_t *seek;
+  FAR cookie_close_function_t *close;
+} cookie_io_functions_t;
+
 /* This is the underlying representation of an open file.  A file
  * descriptor is an index into an array of such types. The type associates
  * the file descriptor to the file state and to a set of inode operations.
@@ -497,7 +524,8 @@ struct file_struct
 {
   FAR struct file_struct *fs_next;      /* Pointer to next file stream */
   rmutex_t                fs_lock;      /* Recursive lock */
-  int                     fs_fd;        /* File descriptor associated with stream */
+  cookie_io_functions_t   fs_iofunc;    /* Callbacks to user / system functions */
+  FAR void               *fs_cookie;    /* Pointer to file descriptor / cookie struct */
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
   FAR unsigned char      *fs_bufstart;  /* Pointer to start of buffer */
   FAR unsigned char      *fs_bufend;    /* Pointer to 1 past end of buffer */

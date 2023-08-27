@@ -131,14 +131,6 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
    * BEFORE any operations have been performed on the stream.
    */
 
-  /* Return EBADF if the file is not open */
-
-  if (stream->fs_fd < 0)
-    {
-      errcode = EBADF;
-      goto errout_with_lock;
-    }
-
   /* Return EBUSY if operations have already been performed on the buffer.
    * Here we really only verify that there is no valid data in the existing
    * buffer.

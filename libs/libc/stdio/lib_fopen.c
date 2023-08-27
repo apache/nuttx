@@ -141,7 +141,7 @@ FAR FILE *fdopen(int fd, FAR const char *mode)
    * file descriptor locks this stream.
    */
 
-  filep->fs_fd       = fd;
+  filep->fs_cookie   = (FAR void *)(intptr_t)fd;
   filep->fs_oflags   = oflags;
 
 #ifdef CONFIG_FDSAN
@@ -149,6 +149,13 @@ FAR FILE *fdopen(int fd, FAR const char *mode)
       android_fdsan_create_owner_tag(ANDROID_FDSAN_OWNER_TYPE_FILE,
                                      (uintptr_t)filep));
 #endif
+
+  /* Assign custom callbacks to NULL. */
+
+  filep->fs_iofunc.read  = NULL;
+  filep->fs_iofunc.write = NULL;
+  filep->fs_iofunc.seek  = NULL;
+  filep->fs_iofunc.close = NULL;
 
   return filep;
 
