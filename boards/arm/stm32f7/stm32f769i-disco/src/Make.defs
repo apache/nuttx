@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32f7/stm32f769i-disco/src/Makefile
+# boards/arm/stm32f7/stm32f769i-disco/src/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -48,4 +48,6 @@ ifeq ($(CONFIG_STM32F7_FMC),y)
 CSRCS += stm32_extmem.c
 endif
 
-include $(TOPDIR)/boards/Board.mk
+DEPPATH += --dep-path board
+VPATH += :board
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board
