@@ -192,37 +192,6 @@ enum ddr_access_size_e
     DDR_64_BIT
 };
 
-typedef struct
-{
-  uint32_t status_lower;
-  uint32_t status_upper;
-  uint32_t lower;
-  uint32_t upper;
-  uint32_t vref_result;
-} mss_ddr_vref_t;
-
-typedef struct
-{
-  uint32_t status_lower;
-  uint32_t lower[MAX_LANES];
-  uint32_t lane_calib_result;
-} mss_mpfs_ddr_write_calibration_t;
-
-typedef struct
-{
-  uint32_t lower[MAX_LANES];
-  uint32_t upper[MAX_LANES];
-  uint32_t calibration_found[MAX_LANES];
-} mss_lpddr4_dq_calibration_t;
-
-typedef struct
-{
-  mss_mpfs_ddr_write_calibration_t write_cal;
-  mss_lpddr4_dq_calibration_t      dq_cal;
-  mss_ddr_vref_t                   fpga_vref;
-  mss_ddr_vref_t                   mem_vref;
-} mss_ddr_calibration_t;
-
 struct mpfs_ddr_priv_s
 {
   uint32_t               tip_cfg_params;
@@ -237,8 +206,6 @@ struct mpfs_ddr_priv_s
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
-static mss_ddr_calibration_t calib_data;
 
 static struct mpfs_ddr_priv_s g_mpfs_ddr_priv =
 {
@@ -582,8 +549,8 @@ static void mpfs_set_ddr_rpc_regs(struct mpfs_ddr_priv_s *priv)
 
   putreg32(0x04, MPFS_CFG_DDR_SGMII_PHY_RPC98);
 
-  /* Write TXDLY offset data. 0x14 is a constant copied from HSS reference code, it is
-   * unknown whether this needs to be adjustable at the moment
+  /* Write TXDLY offset data. 0x14 is a constant copied from HSS reference
+   * code, it is unknown whether this needs to be adjustable at the moment
    */
 
   putreg32(0x14, MPFS_CFG_DDR_SGMII_PHY_RPC226);
@@ -1731,8 +1698,6 @@ static void mpfs_load_dq(uint8_t lane)
     {
       modifyreg32(MPFS_CFG_DDR_SGMII_PHY_EXPERT_DLYCNT_LOAD_REG1, 0x0f, 0);
     }
-
-  putreg32(0x08, MPFS_CFG_DDR_SGMII_PHY_EXPERT_MODE_EN);
 }
 #endif
 
@@ -1900,12 +1865,6 @@ static int mpfs_mtc_test(uint8_t mask, uint64_t start_address,
       modifyreg32(MPFS_DDR_CSR_APB_MT_ERROR_MASK_4, 0x0000f000, 0);
     }
 
-  /* MT_EN - Enables memory test. If asserted at end of memory test,
-   * will keep going.
-   */
-
-  putreg32(0, MPFS_DDR_CSR_APB_MT_EN);
-
   /* MT_EN_SINGLE - Will not repeat if this is set */
 
   putreg32(0, MPFS_DDR_CSR_APB_MT_EN_SINGLE);
@@ -1969,6 +1928,7 @@ static int mpfs_mtc_test_all(uint8_t mask, uint64_t start_address,
 
   /* Test all patterns except MTC_USER */
 
+  result = 0;
   for (test_pattern = MTC_COUNTING_PATTERN;
        test_pattern <= MTC_PSEUDO_RANDOM_8BIT && result == 0;
        test_pattern++)
@@ -1986,50 +1946,6 @@ static int mpfs_mtc_test_all(uint8_t mask, uint64_t start_address,
     }
 
   return result;
-}
-
-/****************************************************************************
- * Name: mpfs_set_write_calib
- *
- * Description:
- *   Sets and stores the calibrated values.
- *
- * Input Parameters:
- *   priv    - Instance of the ddr private state structure
- *
- * Returned Value:
- *   Zero (OK) is returned on success. A nonzero value indicates a fail.
- *
- ****************************************************************************/
-
-static void mpfs_set_write_calib(struct mpfs_ddr_priv_s *priv)
-{
-  uint32_t temp = 0;
-  uint8_t lane_to_set;
-  uint8_t shift = 0;
-  uint32_t lanes = priv->number_of_lanes_to_calibrate;
-
-  /* Calculate the calibrated value and write back */
-
-  calib_data.write_cal.lane_calib_result = 0;
-  for (lane_to_set = 0; lane_to_set < lanes; lane_to_set++)
-    {
-      temp = calib_data.write_cal.lower[lane_to_set];
-      calib_data.write_cal.lane_calib_result = \
-        calib_data.write_cal.lane_calib_result | (temp << (shift));
-      shift = (uint8_t)(shift + 0x04);
-    }
-
-  /* bit 3 must be set if we want to use the expert_wrcalib
-   * register.
-   */
-
-  putreg32(0x08, MPFS_CFG_DDR_SGMII_PHY_EXPERT_MODE_EN);
-
-  /* Set the calibrated value */
-
-  putreg32(calib_data.write_cal.lane_calib_result,
-           MPFS_CFG_DDR_SGMII_PHY_EXPERT_WRCALIB);
 }
 
 /****************************************************************************
@@ -2054,17 +1970,24 @@ static int mpfs_write_calibration_using_mtc(struct mpfs_ddr_priv_s *priv)
   uint64_t start_address = 0x00;
   uint32_t size = ONE_MB_MTC;
   int result = 0;
-  uint8_t lane_to_test;
+  uint8_t done = 0x0;
+  uint8_t lane;
   uint32_t cal_data;
-  uint32_t lanes;
+  int lanes;
+  uint8_t offset[MAX_LANES];
+  uint8_t done_mask;
 
-  calib_data.write_cal.status_lower = 0U;
+  /* Initialize number of lanes */
+
+  lanes = priv->number_of_lanes_to_calibrate;
 
   /* Bit 3 must be set if we want to use the expert_wrcalib register. */
 
   putreg32(0x08, MPFS_CFG_DDR_SGMII_PHY_EXPERT_MODE_EN);
 
-  lanes = priv->number_of_lanes_to_calibrate;
+  /* mask of as many 1 bits as there are lanes */
+
+  done_mask = 0xff >> (8 - lanes);
 
   /* Training carried out here: sweeping write calibration offset from 0 to F
    * Explanation: A register, expert_wrcalib, is described in MSS DDR TIP
@@ -2073,73 +1996,62 @@ static int mpfs_write_calibration_using_mtc(struct mpfs_ddr_priv_s *priv)
    * with the respect to the address and command for each lane.
    */
 
-  for (cal_data = 0x00000; cal_data < 0xfffff && result != -ETIMEDOUT;
+  for (cal_data = 0x00000;
+       cal_data < 0xfffff && done != done_mask && result != -ETIMEDOUT;
        cal_data += 0x11111)
     {
       putreg32(cal_data, MPFS_CFG_DDR_SGMII_PHY_EXPERT_WRCALIB);
 
-      for (lane_to_test = 0x00;
-           lane_to_test < lanes && result != -ETIMEDOUT;
-           lane_to_test++)
+      for (lane = 0; lane < lanes && result != -ETIMEDOUT; lane++)
         {
-          uint8_t mask = (uint8_t)(1 << lane_to_test);
-          result = mpfs_mtc_test_all(mask, start_address, size,
-                                     MTC_ADD_SEQUENTIAL);
+          uint8_t cal_value = cal_data & 0xf;
+          uint8_t mask = (uint8_t)(0x1 << lane);
 
-          if (result == 0) /* if passed for this lane */
+          /* Check if this lane is not yet done and the test passes */
+
+          if (!(done & (0x1 << lane)))
             {
-              if ((calib_data.write_cal.status_lower &
-                  (0x01 << lane_to_test)) == 0)
-                {
-                  /* Still looking for good value */
+              /* First passing value is the offset point, record it */
 
-                  calib_data.write_cal.lower[lane_to_test] =
-                    (cal_data & 0xf);
-                  calib_data.write_cal.status_lower       |=
-                    (0x01 << lane_to_test);
-                }
-
-              /* Check the result */
-
-              uint32_t lane_to_check;
-
-              for (lane_to_check = 0; lane_to_check < lanes;
-                   lane_to_check++)
-                {
-                  if (((calib_data.write_cal.status_lower) &
-                       (0x01 << lane_to_check)) == 0)
-                    {
-                      /* not finished, still looking */
-
-                      result = 1;
-                      break;
-                    }
-                }
-
+              result = mpfs_mtc_test_all(mask, start_address, size,
+                                         MTC_ADD_SEQUENTIAL);
               if (result == 0)
                 {
-                  /* We're good for all lanes, can stop */
-
-                  break;
+                  offset[lane] = cal_value;
+                  done |= 1 << lane;
                 }
             }
         }
-
-      if (result == 0)
-        {
-          /* if true, we are good for all lanes, can stop searching */
-
-          break;
-        }
     }
 
-  /* If calibration successful, calculate and set the value */
+  /* If calibration was successful, calculate and set the value */
 
-  if (result == 0)
+  if (done == done_mask)
     {
+      /* Calibration succeeded, set the result */
+
+      result = 0;
+
+      /* Create cal_data mask from individua lane offsets */
+
+      cal_data = 0x0;
+      for (lane = 0; lane < lanes; lane++)
+        {
+          cal_data |= offset[lane] << (lane * 4);
+        }
+
       /* Set the write calibration which has been calculated */
 
-      mpfs_set_write_calib(priv);
+      putreg32(cal_data,
+               MPFS_CFG_DDR_SGMII_PHY_EXPERT_WRCALIB);
+    }
+  else if (result == 0)
+    {
+      /* Just in case calibration is not done but last result from lane test
+       * was OK
+       */
+
+      result = 1;
     }
 
   return result;
@@ -3076,8 +2988,6 @@ static void mpfs_ddr_sm_init(struct mpfs_ddr_priv_s *priv)
   priv->refclk_sweep_index  = 0xf;
 
   priv->number_of_lanes_to_calibrate = mpfs_get_num_lanes();
-
-  memset(&calib_data, 0, sizeof(calib_data));
 }
 
 /****************************************************************************
@@ -3094,8 +3004,6 @@ static void mpfs_ddr_sm_init(struct mpfs_ddr_priv_s *priv)
 
 static void mpfs_ddr_fail(struct mpfs_ddr_priv_s *priv)
 {
-  memset(&calib_data, 0, sizeof(calib_data));
-
   putreg32(0, MPFS_DDR_CSR_APB_PHY_DFI_INIT_START);
 
   /* Reset controller */
@@ -3774,15 +3682,13 @@ static int mpfs_training_write_calibration(struct mpfs_ddr_priv_s *priv)
   /* Now start the write calibration as training has been successful */
 
 #ifdef CONFIG_MPFS_DDR_TYPE_LPDDR4
-  uint32_t nr_lanes;
   uint8_t lane;
 
   /* Changed default value to centre dq/dqs on window */
 
   putreg32(0x0c, MPFS_CFG_DDR_SGMII_PHY_RPC220);
 
-  nr_lanes = mpfs_get_num_lanes();
-  for (lane = 0; lane < nr_lanes; lane++)
+  for (lane = 0; lane < priv->number_of_lanes_to_calibrate; lane++)
     {
       mpfs_load_dq(lane);
     }
