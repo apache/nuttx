@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32f7/stm32f777zit6-meadow/src/Makefile
+# boards/arm/stm32f7/stm32f777zit6-meadow/src/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -181,4 +181,10 @@ CSRCS += $(MEADOW_OS_DIR)/meadow_os/meadow_os_config.c
 endif
 endif # MEADOW_OS
 
-include $(TOPDIR)/boards/Board.mk
+ifeq ($(CONFIG_BOARD_MEADOW_PROJECTLAB),y)
+CSRCS += board_projlab.c
+endif
+
+DEPPATH += --dep-path board
+VPATH += :board
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board
