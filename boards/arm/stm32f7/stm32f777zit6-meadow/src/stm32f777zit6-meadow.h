@@ -154,6 +154,18 @@ void stm32_sdram_initialize(void);
 void stm32_disablefmc(void);
 #endif
 
+/****************************************************************************
+ * Name: init_projectlab
+ *
+ * Description:
+ *   Initialize the fixed devices from ProjectLab board
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARD_MEADOW_PROJECTLAB
+int init_projectlab(void);
+#endif
+
 void stm32_quadspi_init(void);
 
 #endif /* __ASSEMBLY__ */

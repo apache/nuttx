@@ -64,4 +64,14 @@ config MEADOW_PWR_MGMT_SUPPORT
     default n
 
 
+config BOARD_MEADOW_PROJECTLAB
+	bool "ProjectLab Mainboard"
+	default n
+	select ARCH_BOARD_COMMON
+	---help---
+		ProjectLab is a main board with a Meadow F7Micro
+		module soldered on it. The projectLab has a lot of
+		sensors, RS485, a 3.2" TFT Display, and Grove, Qwiic
+		and mikroBUS connectors for expansion.
+
 endif # ARCH_BOARD_MEADOW_F7MICRO

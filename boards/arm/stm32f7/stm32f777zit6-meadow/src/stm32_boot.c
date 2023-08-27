@@ -134,8 +134,7 @@ void board_late_initialize(void)
   qspi = stm32f7_qspi_initialize(0);
   if (!qspi)
     {
-      syslog(LOG_ERR, "ERROR: sam_qspi_initialize muiled\n");
-      return;
+      syslog(LOG_ERR, "ERROR: sam_qspi_initialize failed\n");
     }
 
   mtd = w25qxxxjv_initialize(qspi, true);
@@ -185,6 +184,8 @@ void board_late_initialize(void)
    */
 
   board_app_initialize();
+#else
+  stm32_bringup();
 #endif
 }
 #endif
