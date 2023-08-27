@@ -46,13 +46,14 @@
 
 ssize_t lib_fread_unlocked(FAR void *ptr, size_t count, FAR FILE *stream)
 {
-  FAR unsigned char *dest = (FAR unsigned char *)ptr;
+  FAR char *dest = ptr;
   ssize_t bytes_read;
   size_t remaining = count;
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
   size_t gulp_size;
   int ret;
 #endif
+  int fd;
 
   /* Make sure that reading from this stream is allowed */
 
@@ -69,6 +70,7 @@ ssize_t lib_fread_unlocked(FAR void *ptr, size_t count, FAR FILE *stream)
     }
   else
     {
+      fd = (int)(intptr_t)stream->fs_cookie;
 #if CONFIG_NUNGET_CHARS > 0
       /* First, re-read any previously ungotten characters */
 
@@ -170,7 +172,17 @@ ssize_t lib_fread_unlocked(FAR void *ptr, size_t count, FAR FILE *stream)
 
                   if (remaining > buffer_available)
                     {
-                      bytes_read = _NX_READ(stream->fs_fd, dest, remaining);
+                      if (stream->fs_iofunc.read != NULL)
+                        {
+                          bytes_read = stream->fs_iofunc.read(
+                                                          stream->fs_cookie,
+                                                          dest, remaining);
+                        }
+                      else
+                        {
+                          bytes_read = _NX_READ(fd, dest, remaining);
+                        }
+
                       if (bytes_read < 0)
                         {
                           if (count - remaining > 0)
@@ -213,9 +225,19 @@ ssize_t lib_fread_unlocked(FAR void *ptr, size_t count, FAR FILE *stream)
                        * into the buffer.
                        */
 
-                      bytes_read = _NX_READ(stream->fs_fd,
-                                            stream->fs_bufread,
-                                            buffer_available);
+                      if (stream->fs_iofunc.read != NULL)
+                        {
+                          bytes_read = stream->fs_iofunc.read(
+                                              stream->fs_cookie,
+                                              (FAR char *)stream->fs_bufread,
+                                              buffer_available);
+                        }
+                      else
+                        {
+                          bytes_read = _NX_READ(fd, stream->fs_bufread,
+                                                buffer_available);
+                        }
+
                       if (bytes_read < 0)
                         {
                           if (count - remaining > 0)
@@ -258,7 +280,17 @@ ssize_t lib_fread_unlocked(FAR void *ptr, size_t count, FAR FILE *stream)
 
           while (remaining > 0)
             {
-              bytes_read = _NX_READ(stream->fs_fd, dest, remaining);
+              if (stream->fs_iofunc.read != NULL)
+                {
+                  bytes_read = stream->fs_iofunc.read(stream->fs_cookie,
+                                                      dest,
+                                                      remaining);
+                }
+              else
+                {
+                  bytes_read = _NX_READ(fd, dest, remaining);
+                }
+
               if (bytes_read < 0)
                 {
                   if (count - remaining > 0)

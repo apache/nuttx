@@ -244,6 +244,11 @@ int    dprintf(int fd, FAR const IPTR char *fmt, ...) printf_like(2, 3);
 int    vdprintf(int fd, FAR const IPTR char *fmt, va_list ap)
        printf_like(2, 0);
 
+/* Custom stream operation fopencookie. */
+
+FAR FILE *fopencookie(FAR void *cookie, FAR const char *mode,
+                      cookie_io_functions_t io_funcs);
+
 /* Operations on paths */
 
 FAR FILE *tmpfile(void) fopen_like;

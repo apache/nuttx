@@ -87,5 +87,14 @@ int fseeko(FAR FILE *stream, off_t offset, int whence)
 
   /* Perform the fseeko on the underlying file descriptor */
 
-  return lseek(stream->fs_fd, offset, whence) == (off_t)-1 ? ERROR : OK;
+  if (stream->fs_iofunc.seek != NULL)
+    {
+      return stream->fs_iofunc.seek(stream->fs_cookie, &offset,
+                                    whence) == (off_t)-1 ? ERROR : OK;
+    }
+  else
+    {
+      return lseek((int)(intptr_t)stream->fs_cookie, offset,
+                                    whence) == (off_t)-1 ? ERROR : OK;
+    }
 }

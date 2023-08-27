@@ -52,7 +52,7 @@ int ungetc(int c, FAR FILE *stream)
 
   /* Stream must be open for read access */
 
-  if ((stream->fs_fd < 0) || ((stream->fs_oflags & O_RDOK) == 0))
+  if ((stream->fs_oflags & O_RDOK) == 0)
     {
       return EOF;
     }

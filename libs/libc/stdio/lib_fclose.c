@@ -115,32 +115,33 @@ int fclose(FAR FILE *stream)
 
       nxmutex_unlock(&slist->sl_lock);
 
-      /* Check that the underlying file descriptor corresponds to an an open
-       * file.
-       */
+      /* Call user custom callback if it is not NULL. */
 
-      if (stream->fs_fd >= 0)
+      if (stream->fs_iofunc.close != NULL)
         {
-          /* Close the file descriptor and save the return status */
-
+          status = stream->fs_iofunc.close(stream->fs_cookie);
+        }
+      else
+        {
+          int fd = (int)(intptr_t)stream->fs_cookie;
 #ifdef CONFIG_FDSAN
           uint64_t tag;
           tag = android_fdsan_create_owner_tag(ANDROID_FDSAN_OWNER_TYPE_FILE,
                                                (uintptr_t)stream);
-          status = android_fdsan_close_with_tag(stream->fs_fd, tag);
+          status = android_fdsan_close_with_tag(fd, tag);
 #else
-          status = close(stream->fs_fd);
+          status = close(fd);
 #endif
+        }
 
-          /* If close() returns an error but flush() did not then make sure
-           * that we return the close() error condition.
-           */
+      /* If close() returns an error but flush() did not then make sure
+       * that we return the close() error condition.
+       */
 
-          if (ret == OK)
-            {
-              ret = status;
-              errcode = get_errno();
-            }
+      if (ret == OK)
+        {
+          ret = status;
+          errcode = get_errno();
         }
 
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING

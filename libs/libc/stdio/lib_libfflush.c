@@ -59,13 +59,13 @@
 ssize_t lib_fflush_unlocked(FAR FILE *stream, bool bforce)
 {
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
-  FAR const unsigned char *src;
+  FAR const char *src;
   ssize_t bytes_written;
   ssize_t nbuffer;
 
   /* Return EBADF if the file is not opened for writing */
 
-  if (stream->fs_fd < 0 || (stream->fs_oflags & O_WROK) == 0)
+  if ((stream->fs_oflags & O_WROK) == 0)
     {
       return -EBADF;
     }
@@ -102,12 +102,23 @@ ssize_t lib_fflush_unlocked(FAR FILE *stream, bool bforce)
 
       /* Try to write that amount */
 
-      src = stream->fs_bufstart;
+      src = (FAR const char *)stream->fs_bufstart;
       do
         {
           /* Perform the write */
 
-          bytes_written = _NX_WRITE(stream->fs_fd, src, nbuffer);
+          if (stream->fs_iofunc.write != NULL)
+            {
+              bytes_written = stream->fs_iofunc.write(stream->fs_cookie,
+                                                      src,
+                                                      nbuffer);
+            }
+          else
+            {
+              bytes_written = _NX_WRITE((int)(intptr_t)stream->fs_cookie,
+                                        src, nbuffer);
+            }
+
           if (bytes_written < 0)
             {
               /* Write failed.  The cause of the failure is in 'errno'.

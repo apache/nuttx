@@ -100,7 +100,7 @@ FAR char *lib_fgets_unlocked(FAR char *buf, size_t buflen, FILE *stream,
 
   /* Sanity checks */
 
-  if (!stream || !buf || stream->fs_fd < 0)
+  if (!stream || !buf)
     {
       return NULL;
     }
