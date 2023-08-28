@@ -384,6 +384,29 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
 int work_cancel(int qid, FAR struct work_s *work);
 
 /****************************************************************************
+ * Name: work_cancel_sync
+ *
+ * Description:
+ *   Blocked cancel previously queued user-mode work.  This removes work
+ *   from the user mode work queue.  After work has been cancelled, it may
+ *   be requeued by calling work_queue() again.
+ *
+ * Input Parameters:
+ *   qid    - The work queue ID (must be HPWORK or LPWORK)
+ *   work   - The previously queued work structure to cancel
+ *
+ * Returned Value:
+ *   Zero (OK) on success, a negated errno on failure.  This error may be
+ *   reported:
+ *
+ *   -ENOENT - There is no such work queued.
+ *   -EINVAL - An invalid work queue was specified
+ *
+ ****************************************************************************/
+
+int work_cancel_sync(int qid, FAR struct work_s *work);
+
+/****************************************************************************
  * Name: work_foreach
  *
  * Description:
