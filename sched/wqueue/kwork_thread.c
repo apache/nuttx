@@ -126,13 +126,19 @@ struct lp_wqueue_s g_lpwork =
 static int work_thread(int argc, FAR char *argv[])
 {
   FAR struct kwork_wqueue_s *wqueue;
+  FAR struct kworker_s *kworker;
   FAR struct work_s *work;
   worker_t worker;
   irqstate_t flags;
   FAR void *arg;
+  int semcount;
 
-  wqueue = (FAR struct kwork_wqueue_s *)
-           ((uintptr_t)strtoul(argv[1], NULL, 16));
+  /* Get the handle from argv */
+
+  wqueue  = (FAR struct kwork_wqueue_s *)
+            ((uintptr_t)strtoul(argv[1], NULL, 0));
+  kworker = (FAR struct kworker_s *)
+            ((uintptr_t)strtoul(argv[2], NULL, 0));
 
   flags = enter_critical_section();
 
@@ -168,6 +174,10 @@ static int work_thread(int argc, FAR char *argv[])
 
           work->worker = NULL;
 
+          /* Mark the thread busy */
+
+          kworker->work = work;
+
           /* Do the work.  Re-enable interrupts while the work is being
            * performed... we don't have any idea how long this will take!
            */
@@ -175,6 +185,18 @@ static int work_thread(int argc, FAR char *argv[])
           leave_critical_section(flags);
           CALL_WORKER(worker, arg);
           flags = enter_critical_section();
+
+          /* Mark the thread un-busy */
+
+          kworker->work = NULL;
+
+          /* Check if someone is waiting, if so, wakeup it */
+
+          nxsem_get_value(&kworker->wait, &semcount);
+          while (semcount++ < 0)
+            {
+              nxsem_post(&kworker->wait);
+            }
         }
 
       /* Then process queued work.  work_process will not return until: (1)
@@ -213,14 +235,11 @@ static int work_thread_create(FAR const char *name, int priority,
                               int stack_size, int nthread,
                               FAR struct kwork_wqueue_s *wqueue)
 {
-  FAR char *argv[2];
-  char args[32];
+  FAR char *argv[3];
+  char arg0[32];
+  char arg1[32];
   int wndx;
   int pid;
-
-  snprintf(args, sizeof(args), "%p", wqueue);
-  argv[0] = args;
-  argv[1] = NULL;
 
   /* Don't permit any of the threads to run until we have fully initialized
    * g_hpwork and g_lpwork.
@@ -230,6 +249,14 @@ static int work_thread_create(FAR const char *name, int priority,
 
   for (wndx = 0; wndx < nthread; wndx++)
     {
+      nxsem_init(&wqueue->worker[wndx].wait, 0, 0);
+
+      snprintf(arg0, sizeof(arg0), "%p", wqueue);
+      snprintf(arg1, sizeof(arg1), "%p", &wqueue->worker[wndx]);
+      argv[0] = arg0;
+      argv[1] = arg1;
+      argv[2] = NULL;
+
       pid = kthread_create(name, priority, stack_size,
                            work_thread, argv);
 
@@ -241,7 +268,7 @@ static int work_thread_create(FAR const char *name, int priority,
           return pid;
         }
 
-      wqueue->worker[wndx].pid  = pid;
+      wqueue->worker[wndx].pid = pid;
     }
 
   sched_unlock();
