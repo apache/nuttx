@@ -537,7 +537,7 @@ static int cdcwdm_poll(FAR struct file *filep, FAR struct pollfd *fds,
   int                           ret = OK;
   int                           i;
 
-  DEBUGASSERT(filep && filep->f_inode && fds);
+  DEBUGASSERT(fds);
   inode = filep->f_inode;
   priv  = inode->i_private;
 

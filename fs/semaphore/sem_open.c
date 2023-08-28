@@ -136,7 +136,6 @@ FAR sem_t *sem_open(FAR const char *name, int oflags, ...)
       /* Something exists at this path.  Get the search results */
 
       inode = desc.node;
-      DEBUGASSERT(inode != NULL);
 
       /* Verify that the inode is a semaphore */
 

@@ -553,7 +553,7 @@ static ssize_t cxd56_powermgr_procfs_read(struct file *filep,
   pminfo("READ buffer=%p buflen=%lu len=%lu\n", buffer,
          (unsigned long)buflen, g_powermg_procfs_len);
 
-  DEBUGASSERT(filep && filep->f_priv);
+  DEBUGASSERT(filep->f_priv);
 
   priv = (struct cxd56_powermgr_procfs_file_s *)filep->f_priv;
 

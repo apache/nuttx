@@ -572,7 +572,6 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
   struct up_dev_s   *priv;
   int                ret = OK;
 
-  DEBUGASSERT(filep, filep->f_inode);
   inode = filep->f_inode;
   dev   = inode->i_private;
 

@@ -1283,7 +1283,7 @@ static int tmpfs_open(FAR struct file *filep, FAR const char *relpath,
   int ret;
 
   finfo("filep: %p\n", filep);
-  DEBUGASSERT(filep->f_priv == NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv == NULL);
 
   /* Get the mountpoint inode reference from the file structure and the
    * mountpoint private data from the inode structure
@@ -1433,7 +1433,7 @@ static int tmpfs_close(FAR struct file *filep)
   int ret;
 
   finfo("filep: %p\n", filep);
-  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
 
   tfo = filep->f_priv;
 
@@ -1461,7 +1461,7 @@ static ssize_t tmpfs_read(FAR struct file *filep, FAR char *buffer,
 
   finfo("filep: %p buffer: %p buflen: %lu\n",
         filep, buffer, (unsigned long)buflen);
-  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
 
   /* Recover our private data from the struct file instance */
 
@@ -1527,7 +1527,7 @@ static ssize_t tmpfs_write(FAR struct file *filep, FAR const char *buffer,
 
   finfo("filep: %p buffer: %p buflen: %lu\n",
         filep, buffer, (unsigned long)buflen);
-  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
 
   /* Recover our private data from the struct file instance */
 
@@ -1590,7 +1590,7 @@ static off_t tmpfs_seek(FAR struct file *filep, off_t offset, int whence)
   off_t position;
 
   finfo("filep: %p\n", filep);
-  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
 
   /* Recover our private data from the struct file instance */
 
@@ -1678,7 +1678,7 @@ static int tmpfs_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
   FAR struct tmpfs_file_s *tfo;
   int ret = -EINVAL;
 
-  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
 
   /* Recover our private data from the struct file instance */
 
@@ -1767,11 +1767,11 @@ static int tmpfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
   int ret;
 
   finfo("Fstat %p\n", buf);
-  DEBUGASSERT(filep != NULL && buf != NULL);
+  DEBUGASSERT(buf != NULL);
 
   /* Recover our private data from the struct file instance */
 
-  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
   tfo = filep->f_priv;
 
   /* Get exclusive access to the file */
@@ -1803,7 +1803,7 @@ static int tmpfs_truncate(FAR struct file *filep, off_t length)
   int ret;
 
   finfo("filep: %p length: %ld\n", filep, (long)length);
-  DEBUGASSERT(filep != NULL && length >= 0);
+  DEBUGASSERT(length >= 0);
 
   /* Recover our private data from the struct file instance */
 

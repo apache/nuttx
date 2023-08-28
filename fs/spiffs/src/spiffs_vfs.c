@@ -305,7 +305,7 @@ static int spiffs_open(FAR struct file *filep, FAR const char *relpath,
   int ret;
 
   finfo("relpath=%s oflags; %04x\n", relpath, oflags);
-  DEBUGASSERT(filep->f_priv == NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv == NULL);
 
   /* Get the mountpoint inode reference from the file structure and the
    * mountpoint private data from the inode structure
@@ -465,7 +465,7 @@ static int spiffs_close(FAR struct file *filep)
   int ret;
 
   finfo("filep=%p\n", filep);
-  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
 
   /* Get the mountpoint inode reference from the file structure and the
    * volume state data from the inode structure
@@ -550,7 +550,7 @@ static ssize_t spiffs_read(FAR struct file *filep, FAR char *buffer,
 
   finfo("filep=%p buffer=%p buflen=%lu\n",
         filep, buffer, (unsigned long)buflen);
-  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
 
   /* Get the mountpoint inode reference from the file structure and the
    * volume state data from the inode structure
@@ -602,7 +602,7 @@ static ssize_t spiffs_write(FAR struct file *filep, FAR const char *buffer,
 
   finfo("filep=%p buffer=%p buflen=%zu\n",
         filep, buffer, buflen);
-  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
 
   /* Get the mountpoint inode reference from the file structure and the
    * volume state data from the inode structure
@@ -821,7 +821,7 @@ static off_t spiffs_seek(FAR struct file *filep, off_t offset, int whence)
   int ret;
 
   finfo("filep=%p offset=%ld whence=%d\n", filep, (long)offset, whence);
-  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
 
   /* Get the mountpoint inode reference from the file structure and the
    * volume state data from the inode structure
@@ -939,7 +939,7 @@ static int spiffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   int ret;
 
   finfo("filep=%p cmd=%d arg=%ld\n", filep, cmd, (long)arg);
-  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
 
   /* Get the mountpoint inode reference from the file structure and the
    * volume state data from the inode structure
@@ -1056,7 +1056,7 @@ static int spiffs_sync(FAR struct file *filep)
   int ret;
 
   finfo("filep=%p\n", filep);
-  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
 
   /* Get the mountpoint inode reference from the file structure and the
    * volume state data from the inode structure
@@ -1153,7 +1153,7 @@ static int spiffs_fstat(FAR const struct file *filep, FAR struct stat *buf)
   int ret;
 
   finfo("filep=%p buf=%p\n", filep, buf);
-  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL &&
+  DEBUGASSERT(filep->f_priv != NULL &&
               buf != NULL);
 
   /* Get the mountpoint inode reference from the file structure and the
@@ -1203,7 +1203,7 @@ static int spiffs_truncate(FAR struct file *filep, off_t length)
   int ret;
 
   finfo("filep=%p length=%ld\n", filep, (long)length);
-  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL &&
+  DEBUGASSERT(filep->f_priv != NULL &&
               length >= 0);
 
   /* Get the mountpoint inode reference from the file structure and the

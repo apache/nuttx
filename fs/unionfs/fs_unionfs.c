@@ -391,7 +391,7 @@ static int unionfs_tryopen(FAR struct file *filep, FAR const char *relpath,
 
   /* Yes.. try to open this directory */
 
-  DEBUGASSERT(filep->f_inode != NULL && filep->f_inode->u.i_mops != NULL);
+  DEBUGASSERT(filep->f_inode->u.i_mops != NULL);
   ops = filep->f_inode->u.i_mops;
 
   if (!ops->open)
@@ -852,7 +852,6 @@ static int unionfs_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Recover the open file data from the struct file instance */
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   ui = (FAR struct unionfs_inode_s *)filep->f_inode->i_private;
 
   finfo("Opening: ui_nopen=%d\n", ui->ui_nopen);
@@ -941,7 +940,6 @@ static int unionfs_close(FAR struct file *filep)
 
   /* Recover the open file data from the struct file instance */
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   ui = (FAR struct unionfs_inode_s *)filep->f_inode->i_private;
 
   /* Get exclusive access to the file system data structures */
@@ -1008,7 +1006,6 @@ static ssize_t unionfs_read(FAR struct file *filep, FAR char *buffer,
 
   /* Recover the open file data from the struct file instance */
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   ui = (FAR struct unionfs_inode_s *)filep->f_inode->i_private;
 
   DEBUGASSERT(ui != NULL && filep->f_priv != NULL);
@@ -1042,7 +1039,6 @@ static ssize_t unionfs_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Recover the open file data from the struct file instance */
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   ui = (FAR struct unionfs_inode_s *)filep->f_inode->i_private;
 
   DEBUGASSERT(ui != NULL && filep->f_priv != NULL);
@@ -1075,7 +1071,6 @@ static off_t unionfs_seek(FAR struct file *filep, off_t offset, int whence)
 
   /* Recover the open file data from the struct file instance */
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   ui = (FAR struct unionfs_inode_s *)filep->f_inode->i_private;
 
   DEBUGASSERT(ui != NULL && filep->f_priv != NULL);
@@ -1154,7 +1149,6 @@ static int unionfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Recover the open file data from the struct file instance */
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   ui = (FAR struct unionfs_inode_s *)filep->f_inode->i_private;
 
   DEBUGASSERT(ui != NULL && filep->f_priv != NULL);
@@ -1187,7 +1181,6 @@ static int unionfs_sync(FAR struct file *filep)
 
   /* Recover the open file data from the struct file instance */
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   ui = (FAR struct unionfs_inode_s *)filep->f_inode->i_private;
 
   DEBUGASSERT(ui != NULL && filep->f_priv != NULL);
@@ -1289,7 +1282,6 @@ static int unionfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 
   /* Recover the open file data from the struct file instance */
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   ui = (FAR struct unionfs_inode_s *)filep->f_inode->i_private;
 
   DEBUGASSERT(ui != NULL && filep->f_priv != NULL);
@@ -1328,7 +1320,6 @@ static int unionfs_fchstat(FAR const struct file *filep,
 
   /* Recover the open file data from the struct file instance */
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   ui = (FAR struct unionfs_inode_s *)filep->f_inode->i_private;
 
   DEBUGASSERT(ui != NULL && filep->f_priv != NULL);
@@ -1365,7 +1356,6 @@ static int unionfs_truncate(FAR struct file *filep, off_t length)
 
   /* Recover the open file data from the struct file instance */
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   ui = (FAR struct unionfs_inode_s *)filep->f_inode->i_private;
 
   DEBUGASSERT(ui != NULL && filep->f_priv != NULL);

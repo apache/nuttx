@@ -1000,7 +1000,7 @@ static int sps30_unlink(FAR struct inode *inode)
   FAR struct sps30_dev_s *priv;
   int ret;
 
-  DEBUGASSERT(inode != NULL && inode->i_private != NULL);
+  DEBUGASSERT(inode->i_private != NULL);
   priv = (FAR struct sps30_dev_s *)inode->i_private;
 
   /* Get exclusive access */

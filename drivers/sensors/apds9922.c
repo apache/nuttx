@@ -2037,12 +2037,10 @@ static ssize_t apds9922_als_read(FAR struct file *filep, FAR char *buffer,
   int *ptr;
   int ret;
 
-  DEBUGASSERT(filep);
-
   inode = filep->f_inode;
   priv = inode->i_private;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
 
   ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
@@ -2183,10 +2181,10 @@ static int apds9922_als_poll(FAR struct file *filep,
   int ret;
   int i;
 
-  DEBUGASSERT(filep && fds);
+  DEBUGASSERT(fds);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   priv = (FAR struct apds9922_dev_s *)inode->i_private;
 
   ret = nxmutex_lock(&priv->devlock);
@@ -2272,9 +2270,7 @@ static ssize_t apds9922_ps_read(FAR struct file *filep, FAR char *buffer,
   FAR struct apds9922_ps_data *ptr;
   int ret;
 
-  DEBUGASSERT(filep);
-
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
 
   if (buflen < sizeof(struct apds9922_ps_data))
     {
@@ -2410,10 +2406,10 @@ static int apds9922_ps_poll(FAR struct file *filep,
   int ret;
   int i;
 
-  DEBUGASSERT(filep && fds);
+  DEBUGASSERT(fds);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   priv = (FAR struct apds9922_dev_s *)inode->i_private;
 
   ret = nxmutex_lock(&priv->devlock);

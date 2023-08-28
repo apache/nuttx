@@ -1585,7 +1585,7 @@ static ssize_t proc_write(FAR struct file *filep, FAR const char *buffer,
   FAR struct tcb_s *tcb;
   ssize_t ret;
 
-  DEBUGASSERT(filep != NULL && buffer != NULL && buflen > 0);
+  DEBUGASSERT(buffer != NULL && buflen > 0);
 
   procfile = (FAR struct proc_file_s *)filep->f_priv;
   DEBUGASSERT(procfile != NULL);

@@ -699,10 +699,9 @@ static ssize_t gs2200m_read(FAR struct file *filep, FAR char *buffer,
   FAR struct gs2200m_dev_s *dev;
   int ret;
 
-  DEBUGASSERT(filep);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   dev = (FAR struct gs2200m_dev_s *)inode->i_private;
 
   ASSERT(1 == len);
@@ -2967,10 +2966,9 @@ static int gs2200m_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct gs2200m_dev_s *dev;
   int ret = -EINVAL;
 
-  DEBUGASSERT(filep);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   dev = (FAR struct gs2200m_dev_s *)inode->i_private;
 
   /* Lock the device */
@@ -3105,10 +3103,10 @@ static int gs2200m_poll(FAR struct file *filep, FAR struct pollfd *fds,
   int ret = OK;
 
   wlinfo("== setup:%d\n", (int)setup);
-  DEBUGASSERT(filep && fds);
+  DEBUGASSERT(fds);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   dev = (FAR struct gs2200m_dev_s *)inode->i_private;
 
   ret = nxmutex_lock(&dev->dev_lock);

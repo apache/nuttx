@@ -591,7 +591,7 @@ static int sht21_unlink(FAR struct inode *inode)
   FAR struct sht21_dev_s *priv;
   int ret;
 
-  DEBUGASSERT(inode != NULL && inode->i_private != NULL);
+  DEBUGASSERT(inode->i_private != NULL);
   priv = (FAR struct sht21_dev_s *)inode->i_private;
 
   /* Get exclusive access */

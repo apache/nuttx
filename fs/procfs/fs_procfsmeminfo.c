@@ -280,7 +280,7 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
 
   finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
-  DEBUGASSERT(filep != NULL && buffer != NULL && buflen > 0);
+  DEBUGASSERT(buffer != NULL && buflen > 0);
   offset = filep->f_pos;
 
   /* Recover our private data from the struct file instance */
@@ -408,7 +408,7 @@ static ssize_t memdump_read(FAR struct file *filep, FAR char *buffer,
 
   finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
-  DEBUGASSERT(filep != NULL && buffer != NULL && buflen > 0);
+  DEBUGASSERT(buffer != NULL && buflen > 0);
   offset = filep->f_pos;
 
   /* Recover our private data from the struct file instance */
@@ -467,7 +467,7 @@ static ssize_t memdump_write(FAR struct file *filep, FAR const char *buffer,
   FAR struct tcb_s *tcb;
 #endif
 
-  DEBUGASSERT(filep != NULL && buffer != NULL && buflen > 0);
+  DEBUGASSERT(buffer != NULL && buflen > 0);
 
   /* Recover our private data from the struct file instance */
 

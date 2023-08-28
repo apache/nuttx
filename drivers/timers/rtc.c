@@ -240,9 +240,8 @@ static int rtc_open(FAR struct file *filep)
    * structure.
    */
 
-  DEBUGASSERT(filep);
   inode = filep->f_inode;
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   upper = inode->i_private;
 
   /* Get exclusive access to the device structures */
@@ -277,9 +276,8 @@ static int rtc_close(FAR struct file *filep)
    * structure.
    */
 
-  DEBUGASSERT(filep);
   inode = filep->f_inode;
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   upper = inode->i_private;
 
   /* Get exclusive access to the device structures */
@@ -343,9 +341,8 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
    * structure.
    */
 
-  DEBUGASSERT(filep);
   inode = filep->f_inode;
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   upper = inode->i_private;
   DEBUGASSERT(upper->lower && upper->lower->ops);
 
@@ -766,7 +763,7 @@ static int rtc_unlink(FAR struct inode *inode)
    * structure.
    */
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   upper = inode->i_private;
 
   /* Get exclusive access to the device structures */

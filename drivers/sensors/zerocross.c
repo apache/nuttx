@@ -200,7 +200,6 @@ static int zc_open(FAR struct file *filep)
   FAR struct zc_open_s            *opriv;
   int ret;
 
-  DEBUGASSERT(filep && filep->f_inode);
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
   priv = (FAR struct zc_upperhalf_s *)inode->i_private;
@@ -258,7 +257,7 @@ static int zc_close(FAR struct file *filep)
   bool closing;
   int ret;
 
-  DEBUGASSERT(filep && filep->f_priv && filep->f_inode);
+  DEBUGASSERT(filep->f_priv);
   opriv = filep->f_priv;
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
@@ -386,7 +385,7 @@ static int zc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   int                        ret;
 
   sninfo("cmd: %d arg: %ld\n", cmd, arg);
-  DEBUGASSERT(filep && filep->f_priv && filep->f_inode);
+  DEBUGASSERT(filep->f_priv);
   opriv = filep->f_priv;
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);

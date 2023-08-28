@@ -538,7 +538,6 @@ int romfs_hwread(FAR struct romfs_mountpt_s *rm, FAR uint8_t *buffer,
       FAR struct inode *inode = rm->rm_blkdriver;
       ssize_t nsectorsread = -ENODEV;
 
-      DEBUGASSERT(inode);
       if (INODE_IS_MTD(inode))
         {
           nsectorsread =

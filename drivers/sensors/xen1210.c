@@ -101,10 +101,9 @@ static ssize_t xen1210_read(FAR struct file *filep, FAR char *buffer,
   int                       ret;
 
   sninfo("len=%d\n", len);
-  DEBUGASSERT(filep);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   priv  = (FAR struct xen1210_dev_s *)inode->i_private;
 
   /* Verify that the caller has provided a buffer large enough to receive

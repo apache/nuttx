@@ -1127,7 +1127,6 @@ static int alt1250_open(FAR struct file *filep)
 
   /* Get our private data structure */
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
 
   dev = (FAR struct alt1250_dev_s *)inode->i_private;
@@ -1174,7 +1173,6 @@ static int alt1250_close(FAR struct file *filep)
 
   /* Get our private data structure */
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
 
   dev = (FAR struct alt1250_dev_s *)inode->i_private;
@@ -1220,7 +1218,6 @@ static ssize_t alt1250_read(FAR struct file *filep, FAR char *buffer,
 
   /* Get our private data structure */
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
 
   dev = (FAR struct alt1250_dev_s *)inode->i_private;
@@ -1246,7 +1243,6 @@ static int alt1250_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get our private data structure */
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
 
   dev = (FAR struct alt1250_dev_s *)inode->i_private;
@@ -1311,7 +1307,6 @@ static int alt1250_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   /* Get our private data structure */
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
 
   dev = (FAR struct alt1250_dev_s *)inode->i_private;

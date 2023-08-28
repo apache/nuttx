@@ -608,7 +608,6 @@ static ssize_t phyplus_stub_write(struct file *filep,
 
   int ret = 0;
   static int cmd_pos = 0;
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private != NULL);
 
@@ -696,7 +695,6 @@ static int phyplus_stub_ioctl(struct file *filep, int cmd,
        * int j = 0;
        */
 
-    DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
     inode = filep->f_inode;
     DEBUGASSERT(inode->i_private != NULL);
 

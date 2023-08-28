@@ -63,7 +63,6 @@ int ipcc_close(FAR struct file *filep)
 
   /* Get our private data structure */
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   priv = filep->f_inode->i_private;
 
   /* Get exclusive access to the IPCC driver state structure */

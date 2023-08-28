@@ -970,10 +970,9 @@ static ssize_t sam_tsd_read(struct file *filep, char *buffer, size_t len)
   int ret;
 
   iinfo("buffer:%p len:%d\n", buffer, len);
-  DEBUGASSERT(filep);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   priv = (struct sam_tsd_s *)inode->i_private;
 
   /* Verify that the caller has provided a buffer large enough to receive
@@ -1105,10 +1104,9 @@ static int sam_tsd_ioctl(struct file *filep, int cmd, unsigned long arg)
   int regval;
 
   iinfo("cmd: %d arg: %ld\n", cmd, arg);
-  DEBUGASSERT(filep);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   priv = (struct sam_tsd_s *)inode->i_private;
 
   /* Get exclusive access to the driver data structure */
@@ -1164,10 +1162,10 @@ static int sam_tsd_poll(struct file *filep, struct pollfd *fds, bool setup)
   int i;
 
   iinfo("setup: %d\n", (int)setup);
-  DEBUGASSERT(filep && fds);
+  DEBUGASSERT(fds);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   priv = (struct sam_tsd_s *)inode->i_private;
 
   /* Get exclusive access to the ADC hardware */

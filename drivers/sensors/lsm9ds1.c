@@ -1216,10 +1216,8 @@ static ssize_t lsm9ds1_read(FAR struct file *filep, FAR char *buffer,
 
   /* Sanity check */
 
-  DEBUGASSERT(filep != NULL);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode != NULL);
   priv = (FAR struct lsm9ds1_dev_s *)inode->i_private;
 
   DEBUGASSERT(priv != NULL);
@@ -1339,10 +1337,8 @@ static int lsm9ds1_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Sanity check */
 
-  DEBUGASSERT(filep != NULL);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode != NULL);
   priv = (FAR struct lsm9ds1_dev_s *)inode->i_private;
 
   DEBUGASSERT(priv != NULL);

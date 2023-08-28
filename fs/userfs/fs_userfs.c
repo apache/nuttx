@@ -206,7 +206,7 @@ static int userfs_open(FAR struct file *filep, FAR const char *relpath,
 
   finfo("Open '%s'\n", relpath);
 
-  DEBUGASSERT(filep != NULL &&
+  DEBUGASSERT(
               filep->f_inode != NULL &&
               filep->f_inode->i_private != NULL);
   priv = filep->f_inode->i_private;
@@ -292,7 +292,7 @@ static int userfs_close(FAR struct file *filep)
   ssize_t nrecvd;
   int ret;
 
-  DEBUGASSERT(filep != NULL &&
+  DEBUGASSERT(
               filep->f_inode != NULL &&
               filep->f_inode->i_private != NULL);
   priv = filep->f_inode->i_private;
@@ -372,7 +372,7 @@ static ssize_t userfs_read(FAR struct file *filep, char *buffer,
 
   finfo("Read %zu bytes from offset %jd\n", buflen, (intmax_t)filep->f_pos);
 
-  DEBUGASSERT(filep != NULL &&
+  DEBUGASSERT(
               filep->f_inode != NULL &&
               filep->f_inode->i_private != NULL);
   priv = filep->f_inode->i_private;
@@ -463,7 +463,7 @@ static ssize_t userfs_write(FAR struct file *filep, FAR const char *buffer,
 
   finfo("Write %zu bytes to offset %jd\n", buflen, (intmax_t)filep->f_pos);
 
-  DEBUGASSERT(filep != NULL &&
+  DEBUGASSERT(
               filep->f_inode != NULL &&
               filep->f_inode->i_private != NULL);
   priv = filep->f_inode->i_private;
@@ -547,7 +547,7 @@ static off_t userfs_seek(FAR struct file *filep, off_t offset, int whence)
 
   finfo("Offset %lu bytes to whence=%d\n", (unsigned long)offset, whence);
 
-  DEBUGASSERT(filep != NULL &&
+  DEBUGASSERT(
               filep->f_inode != NULL &&
               filep->f_inode->i_private != NULL);
   priv = filep->f_inode->i_private;
@@ -622,7 +622,7 @@ static int userfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   finfo("cmd: %d arg: %08lx\n", cmd, arg);
 
-  DEBUGASSERT(filep != NULL &&
+  DEBUGASSERT(
               filep->f_inode != NULL &&
               filep->f_inode->i_private != NULL);
   priv = filep->f_inode->i_private;
@@ -695,7 +695,7 @@ static int userfs_sync(FAR struct file *filep)
   ssize_t nrecvd;
   int ret;
 
-  DEBUGASSERT(filep != NULL &&
+  DEBUGASSERT(
               filep->f_inode != NULL &&
               filep->f_inode->i_private != NULL);
   priv = filep->f_inode->i_private;
@@ -849,7 +849,7 @@ static int userfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
   ssize_t nrecvd;
   int ret;
 
-  DEBUGASSERT(filep != NULL &&
+  DEBUGASSERT(
               filep->f_inode != NULL &&
               filep->f_inode->i_private != NULL);
   priv = filep->f_inode->i_private;
@@ -930,7 +930,7 @@ static int userfs_fchstat(FAR const struct file *filep,
   ssize_t nrecvd;
   int ret;
 
-  DEBUGASSERT(filep != NULL &&
+  DEBUGASSERT(
               filep->f_inode != NULL &&
               filep->f_inode->i_private != NULL);
   priv = filep->f_inode->i_private;
@@ -1007,7 +1007,7 @@ static int userfs_truncate(FAR struct file *filep, off_t length)
   ssize_t nrecvd;
   int ret;
 
-  DEBUGASSERT(filep != NULL &&
+  DEBUGASSERT(
               filep->f_inode != NULL &&
               filep->f_inode->i_private != NULL);
   priv = filep->f_inode->i_private;
