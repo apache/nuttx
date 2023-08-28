@@ -771,7 +771,7 @@ struct spi_dev_s *sam_qspi_spi_initialize(int intf)
   /* The supported SAM parts have only a single QSPI port */
 
   spiinfo("intf: %d\n", intf);
-  DEBUGASSERT(intf >= 0 && intf < SAMV7_NQSPI_SPI);
+  DEBUGASSERT(intf >= 0 && intf < (SAMV7_NQSPI_SPI + SAMV7_NQSPI));
 
   /* Allocate a new state structure for this chip select. */
 
