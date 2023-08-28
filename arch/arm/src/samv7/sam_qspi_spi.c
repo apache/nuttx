@@ -775,7 +775,7 @@ struct spi_dev_s *sam_qspi_spi_initialize(int intf)
 
   /* Allocate a new state structure for this chip select. */
 
-  spics = (struct sam_spics_s *)kmm_zalloc(sizeof(struct sam_spics_s));
+  spics = kmm_zalloc(sizeof(struct sam_spics_s));
   if (!spics)
     {
       spierr("ERROR: Failed to allocate a chip select structure\n");

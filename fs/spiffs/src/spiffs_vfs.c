@@ -1382,7 +1382,7 @@ static int spiffs_bind(FAR struct inode *mtdinode, FAR const void *data,
 
   /* Create an instance of the SPIFFS file system */
 
-  fs = (FAR struct spiffs_s *)kmm_zalloc(sizeof(struct spiffs_s));
+  fs = kmm_zalloc(sizeof(struct spiffs_s));
   if (fs == NULL)
     {
       ferr("ERROR: Failed to allocate volume structure\n");
@@ -1424,7 +1424,7 @@ static int spiffs_bind(FAR struct inode *mtdinode, FAR const void *data,
   /* Allocate the cache */
 
   fs->cache_size = cache_size;
-  fs->cache      = (FAR void *)kmm_malloc(cache_size);
+  fs->cache      = kmm_malloc(cache_size);
 
   if (fs->cache == NULL)
     {
@@ -1445,7 +1445,7 @@ static int spiffs_bind(FAR struct inode *mtdinode, FAR const void *data,
    */
 
   work_size = 3 * SPIFFS_GEO_PAGE_SIZE(fs);
-  work      = (FAR uint8_t *)kmm_malloc(work_size);
+  work      = kmm_malloc(work_size);
 
   if (work == NULL)
     {

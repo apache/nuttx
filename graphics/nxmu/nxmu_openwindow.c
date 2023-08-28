@@ -132,7 +132,7 @@ void nxmu_openwindow(FAR struct nxbe_state_s *be,
        *      levels.
        */
 
-      wnd->fbmem = (FAR nxgl_mxpixel_t *)kumm_malloc(fbsize);
+      wnd->fbmem = kumm_malloc(fbsize);
       if (wnd->fbmem == NULL)
         {
           /* Fall back to no RAM back up */

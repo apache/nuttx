@@ -128,7 +128,7 @@ static FAR sigq_t *nxsig_alloc_block(sq_queue_t *siglist, uint16_t nsigs,
 
   /* Allocate a block of pending signal actions. */
 
-  sigqalloc = (FAR sigq_t *)kmm_malloc((sizeof(sigq_t)) * nsigs);
+  sigqalloc = kmm_malloc(sizeof(sigq_t) * nsigs);
   if (sigqalloc != NULL)
     {
       sigq = sigqalloc;
@@ -161,9 +161,7 @@ static sigpendq_t *nxsig_alloc_pendingsignalblock(sq_queue_t *siglist,
 
   /* Allocate a block of pending signal structures  */
 
-  sigpendalloc =
-    (FAR sigpendq_t *)kmm_malloc((sizeof(sigpendq_t)) * nsigs);
-
+  sigpendalloc = kmm_malloc(sizeof(sigpendq_t) * nsigs);
   if (sigpendalloc != NULL)
     {
       sigpend = sigpendalloc;

@@ -2008,7 +2008,7 @@ int lis2dh_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   DEBUGASSERT(devpath != NULL && i2c != NULL && config != NULL);
 
-  priv = (FAR struct lis2dh_dev_s *)kmm_zalloc(sizeof(struct lis2dh_dev_s));
+  priv = kmm_zalloc(sizeof(struct lis2dh_dev_s));
   if (!priv)
     {
       lis2dh_dbg("lis2dh: Failed to allocate instance\n");

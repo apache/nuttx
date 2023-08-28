@@ -780,7 +780,7 @@ static int cromfs_open(FAR struct file *filep, FAR const char *relpath,
    * file.
    */
 
-  ff = (FAR struct cromfs_file_s *)kmm_zalloc(sizeof(struct cromfs_file_s));
+  ff = kmm_zalloc(sizeof(struct cromfs_file_s));
   if (ff == NULL)
     {
       return -ENOMEM;
@@ -788,7 +788,7 @@ static int cromfs_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Create a file buffer to support partial sector accesses */
 
-  ff->ff_buffer = (FAR uint8_t *)kmm_malloc(fs->cv_bsize);
+  ff->ff_buffer = kmm_malloc(fs->cv_bsize);
   if (!ff->ff_buffer)
     {
       kmm_free(ff);
@@ -1117,7 +1117,7 @@ static int cromfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Create a file buffer to support partial sector accesses */
 
-  newff->ff_buffer = (FAR uint8_t *)kmm_malloc(fs->cv_bsize);
+  newff->ff_buffer = kmm_malloc(fs->cv_bsize);
   if (newff->ff_buffer == NULL)
     {
       kmm_free(newff);

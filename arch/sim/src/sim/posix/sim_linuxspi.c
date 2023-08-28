@@ -702,7 +702,7 @@ struct spi_dev_s *sim_spi_initialize(const char *filename)
 {
   struct linux_spi_dev_s *priv;
 
-  priv = (struct linux_spi_dev_s *)malloc(sizeof(*priv));
+  priv = malloc(sizeof(*priv));
   if (priv == NULL)
     {
       ERROR("Failed to allocate private spi master driver");

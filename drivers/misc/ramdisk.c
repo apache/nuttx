@@ -435,7 +435,7 @@ int ramdisk_register(int minor, FAR uint8_t *buffer, uint32_t nsectors,
 
   /* Allocate a ramdisk device structure */
 
-  dev = (struct rd_struct_s *)kmm_zalloc(sizeof(struct rd_struct_s));
+  dev = kmm_zalloc(sizeof(struct rd_struct_s));
   if (dev)
     {
       /* Initialize the ramdisk device structure */

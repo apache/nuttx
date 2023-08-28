@@ -207,7 +207,7 @@ static int rpmsgdev_open(FAR struct file *filep)
   dev = filep->f_inode->i_private;
   DEBUGASSERT(dev != NULL);
 
-  priv = (FAR struct rpmsgdev_priv_s *)kmm_zalloc(sizeof(*priv));
+  priv = kmm_zalloc(sizeof(*priv));
   if (priv == NULL)
     {
       return -ENOMEM;

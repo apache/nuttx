@@ -833,8 +833,7 @@ static int initialize_scene_parameter(FAR video_mng_t *vmng,
                                       enum v4l2_scene_mode mode,
                                       video_scene_params_t **vsp)
 {
-  video_scene_params_t *sp =
-    (FAR video_scene_params_t *)kmm_malloc(sizeof(video_scene_params_t));
+  FAR video_scene_params_t *sp = kmm_malloc(sizeof(video_scene_params_t));
   if (!sp)
     {
       return -ENOMEM;
@@ -3438,7 +3437,7 @@ int video_register(FAR const char *devpath,
 
   /* Initialize video device structure */
 
-  priv = (FAR video_mng_t *)kmm_zalloc(sizeof(video_mng_t));
+  priv = kmm_zalloc(sizeof(video_mng_t));
   if (priv == NULL)
     {
       verr("Failed to allocate instance\n");
@@ -3454,7 +3453,7 @@ int video_register(FAR const char *devpath,
 
   /* Save device path */
 
-  priv->devpath = (FAR char *)kmm_malloc(allocsize + 1);
+  priv->devpath = kmm_malloc(allocsize + 1);
   if (priv->devpath == NULL)
     {
       kmm_free(priv);

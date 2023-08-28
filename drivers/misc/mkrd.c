@@ -65,7 +65,7 @@ int mkrd(int minor, uint32_t nsectors, uint16_t sectsize, uint8_t rdflags)
 
   /* Allocate the memory backing up the ramdisk from the kernel heap */
 
-  buffer = (FAR uint8_t *)kmm_malloc(sectsize * nsectors);
+  buffer = kmm_malloc(sectsize * nsectors);
   if (buffer == NULL)
     {
       ferr("ERROR: kmm_malloc() failed, enable DEBUG_MM for more info!\n");

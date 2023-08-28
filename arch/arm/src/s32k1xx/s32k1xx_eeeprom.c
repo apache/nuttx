@@ -392,7 +392,7 @@ int s32k1xx_eeeprom_register(int minor, uint32_t size)
 
   /* Allocate a eeeprom device structure */
 
-  dev = (struct eeed_struct_s *)kmm_zalloc(sizeof(struct eeed_struct_s));
+  dev = kmm_zalloc(sizeof(struct eeed_struct_s));
   if (dev)
     {
       /* Initialize the eeeprom device structure */

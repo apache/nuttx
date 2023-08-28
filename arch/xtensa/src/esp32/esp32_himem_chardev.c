@@ -70,9 +70,9 @@ static struct file *g_mapped_filep; /* for multi device */
 
 static int himem_chardev_open(struct file *filep)
 {
-  struct himem_chardev_priv_s *priv;
+  struct himem_chardev_priv_s *priv =
+    kmm_malloc(sizeof(struct himem_chardev_priv_s));
 
-  priv = kmm_malloc(sizeof(struct himem_chardev_priv_s));
   if (priv == NULL)
     {
        merr("Failed to malloc.\n");
@@ -296,8 +296,8 @@ int himem_chardev_exit(void)
 int himem_chardev_register(char *name, size_t size)
 {
   int ret = 0;
-  struct himem_chardev_s *dev;
-  dev = (struct himem_chardev_s *)kmm_malloc(sizeof(struct himem_chardev_s));
+  struct himem_chardev_s *dev =
+    kmm_malloc(sizeof(struct himem_chardev_s));
   if (dev == NULL)
     {
       merr("Failed to malloc.\n");

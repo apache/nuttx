@@ -483,7 +483,7 @@ void *cxd56_pm_register_callback(uint32_t target,
 
   nxmutex_lock(&g_regcblock);
 
-  entry = (struct pm_cbentry_s *)kmm_malloc(sizeof(struct pm_cbentry_s));
+  entry = kmm_malloc(sizeof(struct pm_cbentry_s));
   if (entry == NULL)
     {
       nxmutex_unlock(&g_regcblock);

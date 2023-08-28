@@ -2534,7 +2534,7 @@ FAR struct audio_lowerhalf_s *
 
   /* Allocate a ES8388 device structure */
 
-  priv = (FAR struct es8388_dev_s *)kmm_zalloc(sizeof(struct es8388_dev_s));
+  priv = kmm_zalloc(sizeof(struct es8388_dev_s));
 
   if (priv)
     {

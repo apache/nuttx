@@ -1237,7 +1237,7 @@ uart_bth5_register(FAR const char *path, FAR struct bt_driver_s *drv)
   FAR struct uart_bth5_s *dev;
   int ret;
 
-  dev = (FAR struct uart_bth5_s *)kmm_zalloc(sizeof(struct uart_bth5_s));
+  dev = kmm_zalloc(sizeof(struct uart_bth5_s));
   if (dev == NULL)
     {
       return -ENOMEM;

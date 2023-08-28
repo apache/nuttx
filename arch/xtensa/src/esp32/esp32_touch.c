@@ -232,7 +232,7 @@ static void touch_init(void)
 {
   if (touch_mux == NULL)
     {
-      touch_mux = (mutex_t *) kmm_zalloc(sizeof(mutex_t));
+      touch_mux = kmm_zalloc(sizeof(mutex_t));
 
       if (touch_mux == NULL)
         {

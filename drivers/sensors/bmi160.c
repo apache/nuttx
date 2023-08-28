@@ -738,7 +738,7 @@ int bmi160_register(FAR const char *devpath, FAR struct spi_dev_s *dev)
   FAR struct bmi160_dev_s *priv;
   int ret;
 
-  priv = (FAR struct bmi160_dev_s *)kmm_malloc(sizeof(struct bmi160_dev_s));
+  priv = kmm_malloc(sizeof(struct bmi160_dev_s));
   if (!priv)
     {
       snerr("Failed to allocate instance\n");

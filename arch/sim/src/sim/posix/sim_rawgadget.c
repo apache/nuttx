@@ -231,7 +231,7 @@ static void host_raw_fifocreate(struct usb_raw_fifo_s *fifo,
   fifo->read = 0;
   fifo->elem_size = elem_size;
   fifo->elem_num = elem_num;
-  fifo->elems = (uint8_t *)malloc(elem_size * elem_num);
+  fifo->elems = malloc(elem_size * elem_num);
 }
 
 static void host_raw_fifodelete(struct usb_raw_fifo_s *fifo)

@@ -1066,7 +1066,7 @@ int fb_register(int display, int plane)
 
   /* Allocate a framebuffer state instance */
 
-  fb = (FAR struct fb_chardev_s *)kmm_zalloc(sizeof(struct fb_chardev_s));
+  fb = kmm_zalloc(sizeof(struct fb_chardev_s));
   if (fb == NULL)
     {
       return -ENOMEM;

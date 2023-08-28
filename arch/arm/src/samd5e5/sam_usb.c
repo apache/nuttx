@@ -2316,7 +2316,7 @@ static struct usbdev_req_s *sam_ep_allocreq(struct usbdev_ep_s *ep)
 
   usbtrace(TRACE_EPALLOCREQ, USB_EPNO(ep->eplog));
 
-  privreq = (struct sam_req_s *)kmm_zalloc(sizeof(struct sam_req_s));
+  privreq = kmm_zalloc(sizeof(struct sam_req_s));
   if (!privreq)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_ALLOCFAIL), 0);
@@ -7138,7 +7138,7 @@ static int sam_alloc(struct usbhost_driver_s *drvr,
 
   /* There is no special memory requirement for the SAM. */
 
-  alloc = (uint8_t *)kmm_malloc(CONFIG_SAM_DESCSIZE);
+  alloc = kmm_malloc(CONFIG_SAM_DESCSIZE);
   if (!alloc)
     {
       return -ENOMEM;
@@ -7225,7 +7225,7 @@ static int sam_ioalloc(struct usbhost_driver_s *drvr,
 
   /* There is no special memory requirement */
 
-  alloc = (uint8_t *)kmm_malloc(buflen);
+  alloc = kmm_malloc(buflen);
   if (!alloc)
     {
       return -ENOMEM;

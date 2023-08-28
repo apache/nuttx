@@ -1628,7 +1628,7 @@ int mfrc522_register(FAR const char *devpath, FAR struct spi_dev_s *spi)
 
   /* Initialize the MFRC522 device structure */
 
-  dev = (FAR struct mfrc522_dev_s *)kmm_malloc(sizeof(struct mfrc522_dev_s));
+  dev = kmm_malloc(sizeof(struct mfrc522_dev_s));
   if (!dev)
     {
       ctlserr("ERROR: Failed to allocate instance\n");

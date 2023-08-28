@@ -1834,7 +1834,7 @@ int mxt_register(FAR struct i2c_master_s *i2c,
 
   /* Create and initialize a maXTouch device driver instance */
 
-  priv = (FAR struct mxt_dev_s *)kmm_zalloc(sizeof(struct mxt_dev_s));
+  priv = kmm_zalloc(sizeof(struct mxt_dev_s));
   if (priv == NULL)
     {
       ierr("ERROR: Failed allocate device structure\n");

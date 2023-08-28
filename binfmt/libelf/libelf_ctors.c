@@ -138,7 +138,7 @@ int elf_loadctors(FAR struct elf_loadinfo_s *loadinfo)
         {
           /* Allocate memory to hold a copy of the .ctor section */
 
-          loadinfo->ctoralloc = (binfmt_ctor_t *)kumm_malloc(ctorsize);
+          loadinfo->ctoralloc = kumm_malloc(ctorsize);
           if (!loadinfo->ctoralloc)
             {
               berr("Failed to allocate memory for .ctors\n");

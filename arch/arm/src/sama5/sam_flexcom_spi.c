@@ -1857,8 +1857,7 @@ struct spi_dev_s *sam_flex_spibus_initialize(int port)
    * chip select structures.
    */
 
-  flex_spics = (struct sam_flex_spics_s *)kmm_zalloc(
-                sizeof(struct sam_flex_spics_s));
+  flex_spics = kmm_zalloc(sizeof(struct sam_flex_spics_s));
   if (!flex_spics)
     {
       spierr("ERROR: Failed to allocate a flexcom chip select structure\n");

@@ -572,7 +572,7 @@ static off_t mtdconfig_ramconsolidate(FAR struct mtdconfig_struct_s *dev)
 
   /* Allocate a consolidation buffer */
 
-  pbuf = (FAR uint8_t *)kmm_malloc(dev->erasesize);
+  pbuf = kmm_malloc(dev->erasesize);
   if (pbuf == NULL)
     {
       /* Unable to allocate buffer, can't consolidate! */
@@ -772,7 +772,7 @@ static off_t  mtdconfig_consolidate(FAR struct mtdconfig_struct_s *dev)
 
   /* Allocate a small buffer for moving data */
 
-  pbuf = (FAR uint8_t *)kmm_malloc(dev->blocksize);
+  pbuf = kmm_malloc(dev->blocksize);
   if (pbuf == NULL)
     {
       return 0;
@@ -1164,7 +1164,7 @@ static int mtdconfig_setconfig(FAR struct mtdconfig_struct_s *dev,
 
   /* Allocate a temp block buffer */
 
-  dev->buffer = (FAR uint8_t *)kmm_malloc(dev->blocksize);
+  dev->buffer = kmm_malloc(dev->blocksize);
   if (dev->buffer == NULL)
     {
       return -ENOMEM;
@@ -1392,7 +1392,7 @@ static int mtdconfig_getconfig(FAR struct mtdconfig_struct_s *dev,
 
   /* Allocate a temp block buffer */
 
-  dev->buffer = (FAR uint8_t *)kmm_malloc(dev->blocksize);
+  dev->buffer = kmm_malloc(dev->blocksize);
   if (dev->buffer == NULL)
     {
       return -ENOMEM;
@@ -1463,7 +1463,7 @@ static int mtdconfig_deleteconfig(FAR struct mtdconfig_struct_s *dev,
 
   /* Allocate a temp block buffer */
 
-  dev->buffer = (FAR uint8_t *)kmm_malloc(dev->blocksize);
+  dev->buffer = kmm_malloc(dev->blocksize);
   if (dev->buffer == NULL)
     {
       return -ENOMEM;
@@ -1511,7 +1511,7 @@ static int mtdconfig_firstconfig(FAR struct mtdconfig_struct_s *dev,
 
   /* Allocate a temp block buffer */
 
-  dev->buffer = (FAR uint8_t *)kmm_malloc(dev->blocksize);
+  dev->buffer = kmm_malloc(dev->blocksize);
   if (dev->buffer == NULL)
     {
       return -ENOMEM;
@@ -1579,7 +1579,7 @@ static int mtdconfig_nextconfig(FAR struct mtdconfig_struct_s *dev,
 
   /* Allocate a temp block buffer */
 
-  dev->buffer = (FAR uint8_t *)kmm_malloc(dev->blocksize);
+  dev->buffer = kmm_malloc(dev->blocksize);
   if (dev->buffer == NULL)
     {
       return -ENOMEM;

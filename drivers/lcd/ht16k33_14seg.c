@@ -403,7 +403,7 @@ static void lcd_scroll_up(FAR struct ht16k33_dev_s *priv)
   int currow;
   int curcol;
 
-  data = (FAR uint8_t *)kmm_malloc(HT16K33_MAX_COL);
+  data = kmm_malloc(HT16K33_MAX_COL);
   if (NULL == data)
     {
       lcdinfo("Failed to allocate buffer in lcd_scroll_up()\n");

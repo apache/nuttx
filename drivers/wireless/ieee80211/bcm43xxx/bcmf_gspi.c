@@ -794,7 +794,7 @@ static int bcmf_bus_gspi_initialize(FAR struct bcmf_dev_s *priv,
 
   /* Allocate gSPI bus structure */
 
-  gbus = (FAR bcmf_gspi_dev_t *)kmm_zalloc(sizeof(*gbus));
+  gbus = kmm_zalloc(sizeof(*gbus));
 
   if (!gspi)
     {

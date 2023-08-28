@@ -322,7 +322,7 @@ shmerror:
 #endif
       b_useshm = 0;
 
-      g_framebuffer = (unsigned char *)malloc(fblen);
+      g_framebuffer = malloc(fblen);
 
       g_image = XCreateImage(display, DefaultVisual(display, g_screen),
                              depth, ZPixmap, 0, (char *)g_framebuffer,

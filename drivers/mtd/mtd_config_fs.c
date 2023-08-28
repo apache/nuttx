@@ -2013,7 +2013,7 @@ int mtdconfig_register_by_path(FAR struct mtd_dev_s *mtd,
   int ret;
   FAR struct nvs_fs *fs;
 
-  fs = (FAR struct nvs_fs *)kmm_malloc(sizeof(struct nvs_fs));
+  fs = kmm_malloc(sizeof(struct nvs_fs));
   if (fs == NULL)
     {
       return -ENOMEM;

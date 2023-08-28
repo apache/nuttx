@@ -1640,7 +1640,7 @@ static int proc_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Allocate a new container to hold the task and node selection */
 
-  newfile = (FAR struct proc_file_s *)kmm_malloc(sizeof(struct proc_file_s));
+  newfile = kmm_malloc(sizeof(struct proc_file_s));
   if (newfile == NULL)
     {
       ferr("ERROR: Failed to allocate file container\n");
@@ -1733,7 +1733,7 @@ static int proc_opendir(FAR const char *relpath,
    * non-zero entries will need be initialized.
    */
 
-  procdir = (FAR struct proc_dir_s *)kmm_zalloc(sizeof(struct proc_dir_s));
+  procdir = kmm_zalloc(sizeof(struct proc_dir_s));
   if (procdir == NULL)
     {
       ferr("ERROR: Failed to allocate the directory structure\n");

@@ -4381,7 +4381,7 @@ static struct usbdev_req_s *esp32s3_ep_allocreq(struct usbdev_ep_s *ep)
 
   usbtrace(TRACE_EPALLOCREQ, ((struct esp32s3_ep_s *)ep)->epphy);
 
-  privreq = (struct esp32s3_req_s *)kmm_zalloc(sizeof(struct esp32s3_req_s));
+  privreq = kmm_zalloc(sizeof(struct esp32s3_req_s));
   if (!privreq)
     {
       usbtrace(TRACE_DEVERROR(ESP32S3_TRACEERR_ALLOCFAIL), 0);

@@ -315,7 +315,7 @@ static int btn_open(FAR struct file *filep)
 
   /* Allocate a new open structure */
 
-  opriv = (FAR struct btn_open_s *)kmm_zalloc(sizeof(struct btn_open_s));
+  opriv = kmm_zalloc(sizeof(struct btn_open_s));
   if (!opriv)
     {
       ierr("ERROR: Failed to allocate open structure\n");

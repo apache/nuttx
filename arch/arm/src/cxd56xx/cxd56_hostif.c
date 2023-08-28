@@ -392,8 +392,7 @@ static int hif_initialize(struct hostif_buff_s *buffer)
 
   /* Setup driver structure */
 
-  drv->dev =
-    (struct cxd56_hifdev_s *)kmm_malloc(sizeof(struct cxd56_hifdev_s) * num);
+  drv->dev = kmm_malloc(sizeof(struct cxd56_hifdev_s) * num);
   if (drv->dev == NULL)
     {
       hiferr("ERROR: hostif allocation failed\n");

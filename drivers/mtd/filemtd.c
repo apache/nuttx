@@ -740,7 +740,7 @@ FAR struct mtd_dev_s *filemtd_initialize(FAR const char *path, size_t offset,
 
   /* Create an instance of the FILE MTD device state structure */
 
-  priv = (FAR struct file_dev_s *)kmm_zalloc(sizeof(struct file_dev_s));
+  priv = kmm_zalloc(sizeof(struct file_dev_s));
   if (!priv)
     {
       ferr("ERROR: Failed to allocate the FILE MTD state structure\n");

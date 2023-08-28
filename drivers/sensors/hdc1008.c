@@ -944,7 +944,7 @@ int hdc1008_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   /* Initialize the driver structure */
 
   priv =
-    (FAR struct hdc1008_dev_s *)kmm_zalloc(sizeof(struct hdc1008_dev_s));
+    kmm_zalloc(sizeof(struct hdc1008_dev_s));
 
   if (priv == NULL)
     {

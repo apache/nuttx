@@ -651,7 +651,7 @@ static int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
 
   /* Allocate sdio bus structure */
 
-  sbus = (FAR struct bcmf_sdio_dev_s *)kmm_malloc(sizeof(*sbus));
+  sbus = kmm_malloc(sizeof(*sbus));
   if (!sbus)
     {
       return -ENOMEM;

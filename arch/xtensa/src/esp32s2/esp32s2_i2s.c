@@ -735,7 +735,7 @@ static int i2s_txdma_setup(struct esp32s2_i2s_s *priv,
    * carried from the last upper half audio buffer.
    */
 
-  bfcontainer->buf = (uint8_t *)calloc(bfcontainer->nbytes, 1);
+  bfcontainer->buf = calloc(bfcontainer->nbytes, 1);
 
   data_copied = 0;
   buf = bfcontainer->buf;

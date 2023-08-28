@@ -629,8 +629,7 @@ static inline FAR struct usbhost_cdcmbim_s *usbhost_allocclass(void)
   FAR struct usbhost_cdcmbim_s *priv;
 
   DEBUGASSERT(!up_interrupt_context());
-  priv = (FAR struct usbhost_cdcmbim_s *)kmm_malloc(
-                                         sizeof(struct usbhost_cdcmbim_s));
+  priv = kmm_malloc(sizeof(struct usbhost_cdcmbim_s));
   uinfo("Allocated: %p\n", priv);
   return priv;
 }

@@ -403,7 +403,7 @@ int mlx90614_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   /* Initialize the MLX90614 device structure */
 
   FAR struct mlx90614_dev_s *priv =
-    (FAR struct mlx90614_dev_s *)kmm_malloc(sizeof(struct mlx90614_dev_s));
+    kmm_malloc(sizeof(struct mlx90614_dev_s));
 
   if (priv == NULL)
     {

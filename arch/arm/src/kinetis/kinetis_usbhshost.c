@@ -4024,8 +4024,7 @@ static int kinetis_epalloc(struct usbhost_driver_s *drvr,
 
   /* Allocate a endpoint information structure */
 
-  epinfo = (struct kinetis_epinfo_s *)
-    kmm_zalloc(sizeof(struct kinetis_epinfo_s));
+  epinfo = kmm_zalloc(sizeof(struct kinetis_epinfo_s));
   if (!epinfo)
     {
       usbhost_trace1(EHCI_TRACE1_EPALLOC_FAILED, 0);
@@ -4136,8 +4135,7 @@ static int kinetis_alloc(struct usbhost_driver_s *drvr,
    * multiple of the cache line size in length.
    */
 
-  *buffer = (uint8_t *)kmm_memalign(ARMV7M_DCACHE_LINESIZE,
-                                    KINETIS_EHCI_BUFSIZE);
+  *buffer = kmm_memalign(ARMV7M_DCACHE_LINESIZE, KINETIS_EHCI_BUFSIZE);
   if (*buffer)
     {
       *maxlen = KINETIS_EHCI_BUFSIZE;
@@ -4225,7 +4223,7 @@ static int kinetis_ioalloc(struct usbhost_driver_s *drvr,
    */
 
   buflen  = (buflen + DCACHE_LINEMASK) & ~DCACHE_LINEMASK;
-  *buffer = (uint8_t *)kumm_memalign(ARMV7M_DCACHE_LINESIZE, buflen);
+  *buffer = kumm_memalign(ARMV7M_DCACHE_LINESIZE, buflen);
   return *buffer ? OK : -ENOMEM;
 }
 
@@ -5128,10 +5126,8 @@ struct usbhost_connection_s *kinetis_ehci_initialize(int controller)
 #  ifndef CONFIG_KINETIS_EHCI_PREALLOCATE
   /* Allocate a pool of free Queue Head (QH) structures */
 
-  g_qhpool =
-    (struct kinetis_qh_s *)kmm_memalign(32,
-                                      CONFIG_KINETIS_EHCI_NQHS *
-                                      sizeof(struct kinetis_qh_s));
+  g_qhpool = kmm_memalign(32, CONFIG_KINETIS_EHCI_NQHS *
+                              sizeof(struct kinetis_qh_s));
   if (!g_qhpool)
     {
       usbhost_trace1(EHCI_TRACE1_QHPOOLALLOC_FAILED, 0);
@@ -5151,10 +5147,8 @@ struct usbhost_connection_s *kinetis_ehci_initialize(int controller)
 #  ifndef CONFIG_KINETIS_EHCI_PREALLOCATE
   /* Allocate a pool of free Transfer Descriptor (qTD) structures */
 
-  g_qtdpool =
-    (struct kinetis_qtd_s *)kmm_memalign(32,
-                                       CONFIG_KINETIS_EHCI_NQTDS *
-                                       sizeof(struct kinetis_qtd_s));
+  g_qtdpool = kmm_memalign(32, CONFIG_KINETIS_EHCI_NQTDS *
+                               sizeof(struct kinetis_qtd_s));
   if (!g_qtdpool)
     {
       usbhost_trace1(EHCI_TRACE1_QTDPOOLALLOC_FAILED, 0);
@@ -5166,8 +5160,7 @@ struct usbhost_connection_s *kinetis_ehci_initialize(int controller)
 #  if !defined(CONFIG_KINETIS_EHCI_PREALLOCATE) && !defined(CONFIG_USBHOST_INT_DISABLE)
   /* Allocate the periodic framelist */
 
-  g_framelist = (uint32_t *)
-    kmm_memalign(4096, FRAME_LIST_SIZE * sizeof(uint32_t));
+  g_framelist = kmm_memalign(4096, FRAME_LIST_SIZE * sizeof(uint32_t));
   if (!g_framelist)
     {
       usbhost_trace1(EHCI_TRACE1_PERFLALLOC_FAILED, 0);

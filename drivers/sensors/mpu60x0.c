@@ -1145,7 +1145,7 @@ int mpu60x0_register(FAR const char *path, FAR struct mpu_config_s *config)
 
   /* Initialize the device structure. */
 
-  priv = (FAR struct mpu_dev_s *)kmm_malloc(sizeof(struct mpu_dev_s));
+  priv = kmm_malloc(sizeof(struct mpu_dev_s));
   if (priv == NULL)
     {
       snerr("ERROR: Failed to allocate mpu60x0 device instance\n");
