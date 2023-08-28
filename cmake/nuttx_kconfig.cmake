@@ -35,6 +35,11 @@ function(nuttx_export_kconfig_by_value kconfigfile config)
 endfunction()
 
 function(nuttx_export_kconfig kconfigfile)
+  # First delete the expired configuration items
+  get_property(expired_keys GLOBAL PROPERTY NUTTX_CONFIG_KEYS)
+  foreach(key ${expired_keys})
+    set(${key} PARENT_SCOPE)
+  endforeach()
   file(STRINGS ${kconfigfile} ConfigContents)
   foreach(NameAndValue ${ConfigContents})
     # Strip leading spaces
@@ -54,6 +59,7 @@ function(nuttx_export_kconfig kconfigfile)
       set(${Name}
           ${Value}
           PARENT_SCOPE)
+      set_property(GLOBAL APPEND PROPERTY NUTTX_CONFIG_KEYS ${Name})
     endif()
   endforeach()
 
