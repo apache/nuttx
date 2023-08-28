@@ -198,7 +198,6 @@ static int hif_open(struct file *filep)
   struct inode *inode;
   struct cxd56_hifdev_s *priv;
 
-  DEBUGASSERT(filep && filep->f_inode);
   inode = filep->f_inode;
 
   priv = (struct cxd56_hifdev_s *)inode->i_private;
@@ -253,7 +252,6 @@ static int hif_close(struct file *filep)
   struct inode *inode;
   struct cxd56_hifdev_s *priv;
 
-  DEBUGASSERT(filep && filep->f_inode);
   inode = filep->f_inode;
 
   priv = (struct cxd56_hifdev_s *)inode->i_private;
@@ -281,7 +279,6 @@ static ssize_t hif_read(struct file *filep, char *buffer, size_t len)
   struct cxd56_hifdev_s *priv;
   int ret;
 
-  DEBUGASSERT(filep && filep->f_inode);
   inode = filep->f_inode;
 
   priv = (struct cxd56_hifdev_s *)inode->i_private;
@@ -313,7 +310,6 @@ static ssize_t hif_write(struct file *filep,
   struct cxd56_hifdev_s *priv;
   int ret;
 
-  DEBUGASSERT(filep && filep->f_inode);
   inode = filep->f_inode;
 
   priv = (struct cxd56_hifdev_s *)inode->i_private;

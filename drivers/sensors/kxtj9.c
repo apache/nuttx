@@ -480,7 +480,7 @@ static ssize_t kxtj9_read(FAR struct file *filep, FAR char *buffer,
       return (ssize_t)-EINVAL;
     }
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL && buffer != NULL);
+  DEBUGASSERT(buffer != NULL);
   inode = filep->f_inode;
 
   priv = (FAR struct kxtj9_dev_s *)inode->i_private;
@@ -538,7 +538,6 @@ static int kxtj9_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Sanity check */
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
 
   priv = (FAR struct kxtj9_dev_s *)inode->i_private;

@@ -239,7 +239,6 @@ static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
       /* Something exists at this path.  Get the search results */
 
       inode = desc.node;
-      DEBUGASSERT(inode != NULL);
 
       /* Verify that the inode is a message queue */
 

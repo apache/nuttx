@@ -167,7 +167,7 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Sanity checks */
 
-  DEBUGASSERT(filep->f_priv == NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv == NULL);
 
   /* Get mountpoint private data from the inode reference from the file
    * structure
@@ -310,7 +310,7 @@ static int romfs_close(FAR struct file *filep)
 
   /* Sanity checks */
 
-  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
 
   /* Recover our private data from the struct file instance */
 
@@ -374,7 +374,7 @@ static ssize_t romfs_read(FAR struct file *filep, FAR char *buffer,
 
   /* Sanity checks */
 
-  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
 
   /* Recover our private data from the struct file instance */
 
@@ -508,7 +508,7 @@ static off_t romfs_seek(FAR struct file *filep, off_t offset, int whence)
 
   /* Sanity checks */
 
-  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
 
   /* Recover our private data from the struct file instance */
 
@@ -588,7 +588,7 @@ static int romfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Sanity checks */
 
-  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
 
   /* Recover our private data from the struct file instance */
 
@@ -614,7 +614,7 @@ static int romfs_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
 
   /* Sanity checks */
 
-  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
 
   /* Recover our private data from the struct file instance */
 
@@ -741,7 +741,7 @@ static int romfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 
   /* Sanity checks */
 
-  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
 
   /* Get mountpoint private data from the inode reference from the file
    * structure

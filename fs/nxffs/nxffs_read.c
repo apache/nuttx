@@ -142,7 +142,7 @@ ssize_t nxffs_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
 
   /* Sanity checks */
 
-  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
 
   /* Recover the open file state from the struct file instance */
 

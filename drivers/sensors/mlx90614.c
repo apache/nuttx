@@ -260,10 +260,9 @@ static ssize_t mlx90614_read(FAR struct file *filep, FAR char *buffer,
   uint8_t cmd;
   int ret;
 
-  DEBUGASSERT(filep);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   priv  = (FAR struct mlx90614_dev_s *)inode->i_private;
 
   /* Check if the user is reading the right size */

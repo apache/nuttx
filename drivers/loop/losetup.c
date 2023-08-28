@@ -110,7 +110,7 @@ static int loop_open(FAR struct inode *inode)
   FAR struct loop_struct_s *dev;
   int ret;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   dev = (FAR struct loop_struct_s *)inode->i_private;
 
   /* Make sure we have exclusive access to the state structure */
@@ -147,7 +147,7 @@ static int loop_close(FAR struct inode *inode)
   FAR struct loop_struct_s *dev;
   int ret;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   dev = (FAR struct loop_struct_s *)inode->i_private;
 
   /* Make sure we have exclusive access to the state structure */
@@ -187,7 +187,7 @@ static ssize_t loop_read(FAR struct inode *inode, FAR unsigned char *buffer,
   off_t offset;
   off_t ret;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   dev = (FAR struct loop_struct_s *)inode->i_private;
 
   if (start_sector + nsectors > dev->nsectors)
@@ -241,7 +241,7 @@ static ssize_t loop_write(FAR struct inode *inode,
   off_t offset;
   off_t ret;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   dev = (FAR struct loop_struct_s *)inode->i_private;
 
   /* Calculate the offset to write the sectors and seek to the position */
@@ -284,7 +284,6 @@ static int loop_geometry(FAR struct inode *inode,
 {
   FAR struct loop_struct_s *dev;
 
-  DEBUGASSERT(inode);
   if (geometry)
     {
       dev = (FAR struct loop_struct_s *)inode->i_private;

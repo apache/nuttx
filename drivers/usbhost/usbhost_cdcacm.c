@@ -2360,10 +2360,9 @@ static int usbhost_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   int ret = 0;
 
   uinfo("Entry\n");
-  DEBUGASSERT(filep && filep->f_inode);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   uartdev = (FAR struct uart_dev_s *)inode->i_private;
 
   DEBUGASSERT(uartdev && uartdev->priv);

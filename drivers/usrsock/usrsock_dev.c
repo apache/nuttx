@@ -154,8 +154,6 @@ static ssize_t usrsockdev_read(FAR struct file *filep, FAR char *buffer,
       return -EINVAL;
     }
 
-  DEBUGASSERT(inode);
-
   dev = inode->i_private;
 
   DEBUGASSERT(dev);
@@ -213,8 +211,6 @@ static off_t usrsockdev_seek(FAR struct file *filep, off_t offset,
     {
       return -EINVAL;
     }
-
-  DEBUGASSERT(inode);
 
   dev = inode->i_private;
 
@@ -287,8 +283,6 @@ static ssize_t usrsockdev_write(FAR struct file *filep,
       return -EINVAL;
     }
 
-  DEBUGASSERT(inode);
-
   dev = inode->i_private;
 
   DEBUGASSERT(dev);
@@ -321,8 +315,6 @@ static int usrsockdev_open(FAR struct file *filep)
   FAR struct usrsockdev_s *dev;
   int ret;
   int tmp;
-
-  DEBUGASSERT(inode);
 
   dev = inode->i_private;
 
@@ -367,8 +359,6 @@ static int usrsockdev_close(FAR struct file *filep)
   FAR struct usrsockdev_s *dev;
   int ret;
 
-  DEBUGASSERT(inode);
-
   dev = inode->i_private;
 
   DEBUGASSERT(dev);
@@ -408,8 +398,6 @@ static int usrsockdev_poll(FAR struct file *filep, FAR struct pollfd *fds,
   pollevent_t eventset;
   int ret;
   int i;
-
-  DEBUGASSERT(inode);
 
   dev = inode->i_private;
 

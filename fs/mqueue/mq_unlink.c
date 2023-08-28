@@ -123,7 +123,6 @@ int file_mq_unlink(FAR const char *mq_name)
   /* Get the search results */
 
   inode = desc.node;
-  DEBUGASSERT(inode != NULL);
 
   /* Verify that what we found is, indeed, a message queue */
 

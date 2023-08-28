@@ -212,7 +212,7 @@ static int ftl_open(FAR struct inode *inode)
 {
   FAR struct ftl_struct_s *dev;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   dev = (FAR struct ftl_struct_s *)inode->i_private;
 
   dev->refs++;
@@ -230,7 +230,7 @@ static int ftl_close(FAR struct inode *inode)
 {
   FAR struct ftl_struct_s *dev;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   dev = (FAR struct ftl_struct_s *)inode->i_private;
 
 #ifdef CONFIG_FTL_WRITEBUFFER
@@ -442,7 +442,7 @@ static ssize_t ftl_read(FAR struct inode *inode, unsigned char *buffer,
 
   finfo("sector: %" PRIuOFF " nsectors: %u\n", start_sector, nsectors);
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
 
   dev = (FAR struct ftl_struct_s *)inode->i_private;
 #ifdef FTL_HAVE_RWBUFFER
@@ -660,7 +660,7 @@ static ssize_t ftl_write(FAR struct inode *inode,
 
   finfo("sector: %" PRIuOFF " nsectors: %u\n", start_sector, nsectors);
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   dev = (struct ftl_struct_s *)inode->i_private;
 #ifdef FTL_HAVE_RWBUFFER
   return rwb_write(&dev->rwb, start_sector, nsectors, buffer);
@@ -683,7 +683,6 @@ static int ftl_geometry(FAR struct inode *inode,
 
   finfo("Entry\n");
 
-  DEBUGASSERT(inode);
   if (geometry)
     {
       dev = (struct ftl_struct_s *)inode->i_private;
@@ -720,7 +719,7 @@ static int ftl_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
   int ret;
 
   finfo("Entry\n");
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
 
   dev = (struct ftl_struct_s *)inode->i_private;
 
@@ -757,7 +756,7 @@ static int ftl_unlink(FAR struct inode *inode)
 {
   FAR struct ftl_struct_s *dev;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   dev = (FAR struct ftl_struct_s *)inode->i_private;
 
   dev->unlinked = true;

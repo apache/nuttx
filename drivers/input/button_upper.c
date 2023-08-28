@@ -309,7 +309,6 @@ static int btn_open(FAR struct file *filep)
   btn_buttonset_t supported;
   irqstate_t flags;
 
-  DEBUGASSERT(filep && filep->f_inode);
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
   priv = (FAR struct btn_upperhalf_s *)inode->i_private;
@@ -364,7 +363,7 @@ static int btn_close(FAR struct file *filep)
   FAR struct btn_open_s *prev;
   irqstate_t flags;
 
-  DEBUGASSERT(filep && filep->f_priv && filep->f_inode);
+  DEBUGASSERT(filep->f_priv);
   opriv = filep->f_priv;
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
@@ -432,7 +431,6 @@ static ssize_t btn_read(FAR struct file *filep, FAR char *buffer,
   FAR const struct btn_lowerhalf_s *lower;
   irqstate_t flags;
 
-  DEBUGASSERT(filep && filep->f_inode);
   opriv = filep->f_priv;
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
@@ -478,7 +476,6 @@ static ssize_t btn_write(FAR struct file *filep, FAR const char *buffer,
   irqstate_t flags;
   int ret;
 
-  DEBUGASSERT(filep && filep->f_inode);
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
   priv  = (FAR struct btn_upperhalf_s *)inode->i_private;
@@ -529,7 +526,7 @@ static int btn_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   irqstate_t flags;
   int ret = OK;
 
-  DEBUGASSERT(filep && filep->f_priv && filep->f_inode);
+  DEBUGASSERT(filep->f_priv);
   opriv = filep->f_priv;
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
@@ -656,7 +653,7 @@ static int btn_poll(FAR struct file *filep, FAR struct pollfd *fds,
   int ret = OK;
   int i;
 
-  DEBUGASSERT(filep && filep->f_priv && filep->f_inode);
+  DEBUGASSERT(filep->f_priv);
   opriv = filep->f_priv;
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);

@@ -304,7 +304,7 @@ static ssize_t syslog_rpmsg_file_read(FAR struct file *filep,
 
   /* Some sanity checking */
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   priv = (FAR struct syslog_rpmsg_s *)inode->i_private;
 
   flags = enter_critical_section();

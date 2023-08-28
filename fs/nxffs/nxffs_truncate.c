@@ -57,7 +57,7 @@ int nxffs_truncate(FAR struct file *filep, off_t length)
 
   /* Sanity checks */
 
-  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
 
   /* Recover the open file state from the struct file instance */
 

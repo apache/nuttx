@@ -598,8 +598,6 @@ static ssize_t hdc1008_read(FAR struct file *filep, FAR char *buffer,
   int len = 0;
   struct hdc1008_conv_data_s data;
 
-  DEBUGASSERT(filep != NULL);
-
   /* Sanity check of input buffer argument */
 
   if (buffer == NULL)

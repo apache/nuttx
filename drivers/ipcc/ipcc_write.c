@@ -128,7 +128,6 @@ ssize_t ipcc_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Get our private data structure */
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   priv = filep->f_inode->i_private;
 
   /* Get exclusive access to driver */
