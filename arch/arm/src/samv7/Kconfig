@@ -137,6 +137,7 @@ config ARCH_CHIP_SAME70Q
 	bool
 	default n
 	select ARCH_CHIP_SAME70
+	select SAMV7_QSPI_IS_SPI
 	select SAMV7_HAVE_MCAN1
 	select SAMV7_HAVE_DAC1 if !SAMV7_EMAC0
 	select SAMV7_HAVE_EBI
@@ -154,6 +155,7 @@ config ARCH_CHIP_SAME70N
 	bool
 	default n
 	select ARCH_CHIP_SAME70
+	select SAMV7_QSPI_IS_SPI
 	select SAMV7_HAVE_MCAN1
 	select SAMV7_HAVE_DAC1 if !SAMV7_EMAC0
 	select SAMV7_HAVE_HSMCI0
@@ -187,6 +189,7 @@ config ARCH_CHIP_SAMV71Q
 	bool
 	default n
 	select ARCH_CHIP_SAMV71
+	select SAMV7_QSPI_IS_SPI
 	select SAMV7_HAVE_MCAN1
 	select SAMV7_HAVE_DAC1 if !SAMV7_EMAC0
 	select SAMV7_HAVE_EBI
@@ -204,6 +207,7 @@ config ARCH_CHIP_SAMV71N
 	bool
 	default n
 	select ARCH_CHIP_SAMV71
+	select SAMV7_QSPI_IS_SPI
 	select SAMV7_HAVE_MCAN1
 	select SAMV7_HAVE_DAC1 if !SAMV7_EMAC0
 	select SAMV7_HAVE_HSMCI0
