@@ -68,6 +68,11 @@
 #define MPFS_I2C_DATA             (priv->hw_base + MPFS_I2C_DATA_OFFSET)
 #define MPFS_I2C_ADDR             (priv->hw_base + MPFS_I2C_SLAVE0ADR_OFFSET)
 
+/* Gives TTOA in microseconds, ~4.8% bias, +1 rounds up */
+
+#define I2C_TTOA_US(n, f)           ((((n) << 20) / (f)) + 1)
+#define I2C_TTOA_MARGIN             20
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -143,6 +148,7 @@ struct mpfs_i2c_priv_s
   uint32_t               frequency;   /* Current I2C frequency */
 
   uint8_t                msgid;       /* Current message ID */
+  uint8_t                msgc;        /* Message count */
   ssize_t                bytes;       /* Processed data bytes */
 
   uint8_t                ser_address; /* Own i2c address */
@@ -268,6 +274,7 @@ static struct mpfs_i2c_priv_s
 
 static int mpfs_i2c_setfrequency(struct mpfs_i2c_priv_s *priv,
                                   uint32_t frequency);
+static uint32_t mpfs_i2c_timeout(int msgc, struct i2c_msg_s *msgv);
 
 /****************************************************************************
  * Private Functions
@@ -400,7 +407,8 @@ static void mpfs_i2c_deinit(struct mpfs_i2c_priv_s *priv)
 
 static int mpfs_i2c_sem_waitdone(struct mpfs_i2c_priv_s *priv)
 {
-  return nxsem_tickwait_uninterruptible(&priv->sem_isr, SEC2TICK(1));
+  uint32_t timeout = mpfs_i2c_timeout(priv->msgc, priv->msgv);
+  return nxsem_tickwait_uninterruptible(&priv->sem_isr, USEC2TICK(timeout));
 }
 
 /****************************************************************************
@@ -667,6 +675,7 @@ static int mpfs_i2c_transfer(struct i2c_master_s *dev,
     }
 
   priv->msgv = msgs;
+  priv->msgc = count;
 
   for (int i = 0; i < count; i++)
     {
@@ -884,6 +893,37 @@ static int mpfs_i2c_setfrequency(struct mpfs_i2c_priv_s *priv,
     }
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: mpfs_i2c_timeout
+ *
+ * Description:
+ *   Calculate the time a full I2C transaction (message vector) will take
+ *   to transmit, used for bus timeout.
+ *
+ * Input Parameters:
+ *   msgc - Message count in message vector
+ *   msgv - Message vector containing the messages to send
+ *
+ * Returned Value:
+ *   I2C transaction timeout in microseconds (with some margin)
+ *
+ ****************************************************************************/
+
+static uint32_t mpfs_i2c_timeout(int msgc, struct i2c_msg_s *msgv)
+{
+  uint32_t usec = 0;
+  int i;
+
+  for (i = 0; i < msgc; i++)
+    {
+      /* start + stop + address is 12 bits, each byte is 9 bits */
+
+      usec += I2C_TTOA_US(12 + msgv[i].length * 9, msgv[i].frequency);
+    }
+
+  return usec + I2C_TTOA_MARGIN;
 }
 
 /****************************************************************************
