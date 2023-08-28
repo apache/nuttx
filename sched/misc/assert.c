@@ -442,7 +442,7 @@ static void dump_tasks(void)
          " --- --------"
          " ------- ---"
          " ------- ----------"
-         " --------"
+         " ----------------"
          " %p"
          "   %7u"
 #  ifdef CONFIG_STACK_COLORATION
