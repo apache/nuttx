@@ -32,6 +32,11 @@
 #  undef  __alloca
 #  define alloca(size)   __alloca(size)
 #  define __alloca(size) __builtin_alloca(size)
+#elif defined(_MSC_VER)
+#  undef  alloca
+#  undef  __alloca
+#  define alloca(size)   _alloca(size)
+#  define __alloca(size) _alloca(size)
 #endif
 
 #endif /* __INCLUDE_ALLOCA_H */
