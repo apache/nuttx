@@ -197,7 +197,7 @@
                                   * is delivered */
 #define SA_KERNELHAND   (1 << 7) /* Invoke the handler in kernel space directly */
 
-/* These are the possible values of the signfo si_code field */
+/* These are the possible values of the siginfo si_code field */
 
 #define SI_USER         0  /* Signal sent from kill, raise, or abort */
 #define SI_QUEUE        1  /* Signal sent from sigqueue */
@@ -211,6 +211,53 @@
 #define CLD_TRAPPED     8  /* Traced child has trapped (SIGCHLD only) */
 #define CLD_STOPPED     9  /* Child has stopped (SIGCHLD only) */
 #define CLD_CONTINUED   10 /* Stopped child had continued (SIGCHLD only) */
+
+/* SIGILL si_codes */
+
+#define ILL_ILLOPC      1 /* Illegal opcode */
+#define ILL_ILLOPN      2 /* Illegal operand */
+#define ILL_ILLADR      3 /* Illegal addressing mode */
+#define ILL_ILLTRP      4 /* Illegal trap */
+#define ILL_PRVOPC      5 /* Privileged opcode */
+#define ILL_PRVREG      6 /* Privileged register */
+#define ILL_COPROC      7 /* Coprocessor error */
+#define ILL_BADSTK      8 /* Internal stack error */
+
+/* SIGFPE si_codes */
+
+#define FPE_INTDIV      1 /* Integer divide by zero */
+#define FPE_INTOVF      2 /* Integer overflow */
+#define FPE_FLTDIV      3 /* Floating point divide by zero */
+#define FPE_FLTOVF      4 /* Floating point overflow */
+#define FPE_FLTUND      5 /* Floating point underflow */
+#define FPE_FLTRES      6 /* Floating point inexact result */
+#define FPE_FLTINV      7 /* Floating point invalid operation */
+#define FPE_FLTSUB      8 /* Subscript out of range */
+
+/* SIGSEGV si_codes */
+
+#define SEGV_MAPERR     1 /* Address not mapped to object */
+#define SEGV_ACCERR     2 /* Invalid permissions for mapped object */
+
+/* SIGBUS si_codes */
+
+#define BUS_ADRALN      1 /* Invalid address alignment */
+#define BUS_ADRERR      2 /* Non-existent physical address */
+#define BUS_OBJERR      3 /* Object specific hardware error */
+
+/* SIGTRAP si_codes */
+
+#define TRAP_BRKPT      1 /* Process breakpoint */
+#define TRAP_TRACE      2 /* Process trace trap */
+
+/* SIGPOLL si_codes */
+
+#define POLL_IN         1 /* Data input available */
+#define POLL_OUT        2 /* Output buffers available */
+#define POLL_MSG        3 /* Input message available */
+#define POLL_ERR        4 /* I/O error */
+#define POLL_PRI        5 /* High priority input available */
+#define POLL_HUP        6 /* Device disconnected */
 
 /* Values for the sigev_notify field of struct sigevent */
 
