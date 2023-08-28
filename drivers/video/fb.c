@@ -130,7 +130,6 @@ static int fb_open(FAR struct file *filep)
   FAR struct fb_chardev_s *fb;
   int ret;
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
   fb    = inode->i_private;
 
@@ -170,7 +169,6 @@ static int fb_close(FAR struct file *filep)
   FAR struct fb_chardev_s *fb;
   int ret;
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
   fb    = inode->i_private;
 
@@ -218,7 +216,6 @@ static ssize_t fb_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   /* Get the framebuffer instance */
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
   fb    = (FAR struct fb_chardev_s *)inode->i_private;
 
@@ -273,7 +270,6 @@ static ssize_t fb_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Get the framebuffer instance */
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
   fb    = (FAR struct fb_chardev_s *)inode->i_private;
 
@@ -333,7 +329,6 @@ static off_t fb_seek(FAR struct file *filep, off_t offset, int whence)
 
   /* Get the framebuffer instance */
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
   fb    = (FAR struct fb_chardev_s *)inode->i_private;
 
@@ -413,7 +408,6 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get the framebuffer instance */
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
   fb    = (FAR struct fb_chardev_s *)inode->i_private;
 
@@ -862,7 +856,6 @@ static int fb_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
 
   /* Get the framebuffer instance */
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
   fb    = (FAR struct fb_chardev_s *)inode->i_private;
 
@@ -902,7 +895,6 @@ static int fb_poll(FAR struct file *filep, struct pollfd *fds, bool setup)
 
   /* Get the framebuffer instance */
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
   fb    = (FAR struct fb_chardev_s *)inode->i_private;
 

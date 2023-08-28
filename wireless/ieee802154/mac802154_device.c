@@ -165,7 +165,6 @@ static int mac802154dev_open(FAR struct file *filep)
   FAR struct mac802154dev_open_s *opriv;
   int ret;
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
 
   dev   = inode->i_private;
@@ -226,7 +225,7 @@ static int mac802154dev_close(FAR struct file *filep)
   bool closing;
   int ret;
 
-  DEBUGASSERT(filep && filep->f_priv && filep->f_inode);
+  DEBUGASSERT(filep->f_priv);
   opriv = filep->f_priv;
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
@@ -338,7 +337,6 @@ static ssize_t mac802154dev_read(FAR struct file *filep, FAR char *buffer,
   struct ieee802154_get_req_s req;
   int ret;
 
-  DEBUGASSERT(filep && filep->f_inode);
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
   dev = (FAR struct mac802154_chardevice_s *)inode->i_private;
@@ -484,7 +482,6 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
   FAR struct iob_s *iob;
   int ret;
 
-  DEBUGASSERT(filep && filep->f_inode);
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
   dev  = (FAR struct mac802154_chardevice_s *)inode->i_private;
@@ -553,7 +550,7 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
     (FAR union ieee802154_macarg_u *)((uintptr_t)arg);
   int ret;
 
-  DEBUGASSERT(filep != NULL && filep->f_priv != NULL &&
+  DEBUGASSERT(filep->f_priv != NULL &&
               filep->f_inode != NULL);
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);

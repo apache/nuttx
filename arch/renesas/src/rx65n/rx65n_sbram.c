@@ -206,7 +206,7 @@ static int rx65n_sbram_open(struct file *filep)
   struct inode *inode = filep->f_inode;
   struct rx65n_sbram_s *bbr;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   bbr = (struct rx65n_sbram_s *)inode->i_private;
 
   /* Increment the reference count */
@@ -257,7 +257,7 @@ static int rx65n_sbram_close(struct file *filep)
   struct rx65n_sbram_s *bbr;
   int ret = OK;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   bbr = (struct rx65n_sbram_s *)inode->i_private;
 
   nxmutex_lock(&bbr->lock);
@@ -299,7 +299,7 @@ static off_t rx65n_sbram_seek(struct file *filep, off_t offset,
   off_t newpos;
   int ret;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   bbr = (struct rx65n_sbram_s *)inode->i_private;
 
   nxmutex_lock(&bbr->lock);
@@ -368,7 +368,7 @@ static ssize_t rx65n_sbram_read(struct file *filep, char *buffer,
   struct inode *inode = filep->f_inode;
   struct rx65n_sbram_s *bbr;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   bbr = (struct rx65n_sbram_s *)inode->i_private;
 
   nxmutex_lock(&bbr->lock);
@@ -410,7 +410,7 @@ static ssize_t rx65n_sbram_write(struct file *filep, const char *buffer,
   struct rx65n_sbram_s *bbr;
   int ret = -EFBIG;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   bbr = (struct rx65n_sbram_s *)inode->i_private;
 
   /* Forbid writes past the end of the device */
@@ -466,7 +466,7 @@ static int rx65n_sbram_ioctl(struct file *filep, int cmd, unsigned long arg)
   struct rx65n_sbram_s *bbr;
   int ret = -ENOTTY;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   bbr = (struct rx65n_sbram_s *)inode->i_private;
 
   if (cmd == RX65N_SBRAM_GETDESC_IOCTL)
@@ -513,7 +513,7 @@ static int rx65n_sbram_unlink(struct inode *inode)
 {
   struct rx65n_sbram_s *bbr;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   bbr = (struct rx65n_sbram_s *)inode->i_private;
 
   nxmutex_lock(&bbr->lock);

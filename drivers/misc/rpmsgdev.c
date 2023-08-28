@@ -200,10 +200,6 @@ static int rpmsgdev_open(FAR struct file *filep)
   struct rpmsgdev_open_s msg;
   int ret;
 
-  /* Sanity checks */
-
-  DEBUGASSERT(filep->f_inode != NULL);
-
   /* Get the mountpoint inode reference from the file structure and the
    * mountpoint private data from the inode structure
    */
@@ -262,10 +258,6 @@ static int rpmsgdev_close(FAR struct file *filep)
   FAR struct rpmsgdev_priv_s *priv;
   struct rpmsgdev_close_s msg;
   int ret;
-
-  /* Sanity checks */
-
-  DEBUGASSERT(filep->f_inode != NULL);
 
   /* Recover our private data from the struct file instance */
 
@@ -405,10 +397,6 @@ static ssize_t rpmsgdev_read(FAR struct file *filep, FAR char *buffer,
       return -EINVAL;
     }
 
-  /* Sanity checks */
-
-  DEBUGASSERT(filep->f_inode != NULL);
-
   /* Recover our private data from the struct file instance */
 
   dev  = filep->f_inode->i_private;
@@ -479,8 +467,6 @@ static ssize_t rpmsgdev_write(FAR struct file *filep, const char *buffer,
     {
       return -EINVAL;
     }
-
-  DEBUGASSERT(filep->f_inode != NULL);
 
   /* Recover our private data from the struct file instance */
 
@@ -589,10 +575,6 @@ static off_t rpmsgdev_seek(FAR struct file *filep, off_t offset, int whence)
   struct rpmsgdev_lseek_s msg;
   int ret;
 
-  /* Sanity checks */
-
-  DEBUGASSERT(filep->f_inode != NULL);
-
   /* Recover our private data from the struct file instance */
 
   dev  = filep->f_inode->i_private;
@@ -675,10 +657,6 @@ static int rpmsgdev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   size_t msglen;
   int ret;
 
-  /* Sanity checks */
-
-  DEBUGASSERT(filep->f_inode != NULL);
-
   /* Recover our private data from the struct file instance */
 
   dev  = filep->f_inode->i_private;
@@ -744,10 +722,6 @@ static int rpmsgdev_poll(FAR struct file *filep, FAR struct pollfd *fds,
   FAR struct rpmsgdev_s *dev;
   FAR struct rpmsgdev_priv_s *priv;
   struct rpmsgdev_poll_s msg;
-
-  /* Sanity checks */
-
-  DEBUGASSERT(filep->f_inode != NULL);
 
   /* Recover our private data from the struct file instance */
 

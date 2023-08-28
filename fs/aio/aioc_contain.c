@@ -74,8 +74,6 @@ FAR struct aio_container_s *aio_contain(FAR struct aiocb *aiocbp)
       goto errout;
     }
 
-  DEBUGASSERT(filep != NULL);
-
   /* Allocate the AIO control block container, waiting for one to become
    * available if necessary.  This should not fail except for in the case
    * where the calling thread is canceled.

@@ -131,7 +131,7 @@ static ssize_t mmcl_read(struct inode *inode, unsigned char *buffer,
 
   finfo("sector: %" PRIuOFF " nsectors: %u\n", start_sector, nsectors);
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   dev = (struct mmcl_dev_s *)inode->i_private;
 
   nread = MTD_BREAD(dev->mtd, start_sector, nsectors, buffer);
@@ -161,7 +161,7 @@ static ssize_t mmcl_write(struct inode *inode,
 
   finfo("sector: %" PRIuOFF " nsectors: %u\n", start_sector, nsectors);
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   dev = (struct mmcl_dev_s *)inode->i_private;
 
   nwrite = MTD_BWRITE(dev->mtd, start_sector, nsectors, buffer);
@@ -188,7 +188,6 @@ static int mmcl_geometry(struct inode *inode, struct geometry *geometry)
 
   finfo("Entry\n");
 
-  DEBUGASSERT(inode);
   if (geometry)
     {
       dev = (struct mmcl_dev_s *)inode->i_private;
@@ -226,7 +225,7 @@ static int mmcl_ioctl(struct inode *inode, int cmd, unsigned long arg)
   int ret;
   finfo("Entry\n");
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   dev = (struct mmcl_dev_s *)inode->i_private;
 
   ret = MTD_IOCTL(dev->mtd, cmd, arg);

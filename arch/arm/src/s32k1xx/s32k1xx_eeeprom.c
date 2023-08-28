@@ -156,7 +156,7 @@ static int eeed_open(struct inode *inode)
 {
   struct eeed_struct_s *dev;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   dev = (struct eeed_struct_s *)inode->i_private;
 
   /* Increment the open reference count */
@@ -181,7 +181,7 @@ static int eeed_close(struct inode *inode)
 {
   struct eeed_struct_s *dev;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   dev = (struct eeed_struct_s *)inode->i_private;
 
   /* Increment the open reference count */
@@ -206,7 +206,7 @@ static ssize_t eeed_read(struct inode *inode, unsigned char *buffer,
 {
   struct eeed_struct_s *dev;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   dev = (struct eeed_struct_s *)inode->i_private;
 
   finfo("sector: %" PRIu64 " nsectors: %u sectorsize: %d\n",
@@ -243,7 +243,7 @@ static ssize_t eeed_write(struct inode *inode,
 {
   struct eeed_struct_s *dev;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   dev = (struct eeed_struct_s *)inode->i_private;
 
   finfo("sector: %" PRIu64 " nsectors: %u sectorsize: %d\n",
@@ -288,7 +288,6 @@ static int eeed_geometry(struct inode *inode, struct geometry *geometry)
 
   finfo("Entry\n");
 
-  DEBUGASSERT(inode);
   if (geometry)
     {
       dev = (struct eeed_struct_s *)inode->i_private;
@@ -329,7 +328,7 @@ static int eeed_ioctl(struct inode *inode, int cmd, unsigned long arg)
 
   /* Only one ioctl command is supported */
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   if (cmd == BIOC_XIPBASE && ppv)
     {
       dev  = (struct eeed_struct_s *)inode->i_private;
@@ -355,7 +354,7 @@ static int eeed_unlink(struct inode *inode)
 {
   struct eeed_struct_s *dev;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   dev = (struct eeed_struct_s *)inode->i_private;
 
   /* And free the block driver itself */

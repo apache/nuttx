@@ -271,7 +271,7 @@ static int binfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
 static int binfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 {
-  DEBUGASSERT(filep != NULL && buf != NULL);
+  DEBUGASSERT(buf != NULL);
 
   /* It's a execute-only file system */
 

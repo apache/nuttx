@@ -453,7 +453,6 @@ static int spq10kbd_open(FAR struct file *filep)
   FAR struct inode          *inode;
   FAR struct spq10kbd_dev_s *priv;
 
-  DEBUGASSERT(filep && filep->f_inode);
   inode = filep->f_inode;
   priv  = inode->i_private;
 
@@ -477,7 +476,6 @@ static int spq10kbd_close(FAR struct file *filep)
   FAR struct inode          *inode;
   FAR struct spq10kbd_dev_s *priv;
 
-  DEBUGASSERT(filep && filep->f_inode);
   inode = filep->f_inode;
   priv  = inode->i_private;
 
@@ -507,7 +505,7 @@ static ssize_t spq10kbd_read(FAR struct file *filep, FAR char *buffer,
   uint16_t                   tail;
   int                        ret;
 
-  DEBUGASSERT(filep && filep->f_inode && buffer);
+  DEBUGASSERT(buffer);
   inode = filep->f_inode;
   priv  = inode->i_private;
 
@@ -607,7 +605,7 @@ static int spq10kbd_poll(FAR struct file *filep, FAR struct pollfd *fds,
   int                        ret;
   int                        i;
 
-  DEBUGASSERT(filep && filep->f_inode && fds);
+  DEBUGASSERT(fds);
   inode = filep->f_inode;
   priv  = inode->i_private;
 

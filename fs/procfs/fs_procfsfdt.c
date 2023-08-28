@@ -168,7 +168,7 @@ static ssize_t fdt_read(FAR struct file *filep, FAR char *buffer,
   ssize_t ret;
 
   finfo("buffer=%p buflen=%zu\n", buffer, buflen);
-  DEBUGASSERT(filep != NULL && buffer != NULL && buflen > 0);
+  DEBUGASSERT(buffer != NULL && buflen > 0);
 
   /* Load FDT and parse extents. */
 

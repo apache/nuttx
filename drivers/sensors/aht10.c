@@ -534,7 +534,7 @@ static int aht10_unlink(FAR struct inode *inode)
   FAR struct aht10_dev_s *priv;
   int ret;
 
-  DEBUGASSERT(inode != NULL && inode->i_private != NULL);
+  DEBUGASSERT(inode->i_private != NULL);
   priv = (FAR struct aht10_dev_s *)inode->i_private;
 
   /* Get exclusive access */

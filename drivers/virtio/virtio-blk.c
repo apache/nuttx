@@ -254,7 +254,7 @@ err:
 
 static int virtio_blk_open(FAR struct inode *inode)
 {
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   return OK;
 }
 
@@ -267,7 +267,7 @@ static int virtio_blk_open(FAR struct inode *inode)
 
 static int virtio_blk_close(FAR struct inode *inode)
 {
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   return OK;
 }
 
@@ -286,7 +286,7 @@ static ssize_t virtio_blk_read(FAR struct inode *inode,
 {
   FAR struct virtio_blk_priv_s *priv;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   priv = (FAR struct virtio_blk_priv_s *)inode->i_private;
   return virtio_blk_rdwr(priv, buffer, startsector, nsectors, false);
 }
@@ -306,7 +306,7 @@ static ssize_t virtio_blk_write(FAR struct inode *inode,
 {
   FAR struct virtio_blk_priv_s *priv;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   priv = (FAR struct virtio_blk_priv_s *)inode->i_private;
   return virtio_blk_rdwr(priv, (FAR void *)buffer, startsector, nsectors,
                          true);
@@ -325,7 +325,7 @@ static int virtio_blk_geometry(FAR struct inode *inode,
   FAR struct virtio_blk_priv_s *priv;
   int ret = -EINVAL;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   priv = (FAR struct virtio_blk_priv_s *)inode->i_private;
 
   if (geometry)
@@ -404,7 +404,7 @@ static int virtio_blk_ioctl(FAR struct inode *inode, int cmd,
   FAR struct virtio_blk_priv_s *priv;
   int ret = -ENOTTY;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   priv = (FAR struct virtio_blk_priv_s *)inode->i_private;
 
   switch (cmd)

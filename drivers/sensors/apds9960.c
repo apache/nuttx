@@ -1134,10 +1134,9 @@ static ssize_t apds9960_read(FAR struct file *filep, FAR char *buffer,
   FAR struct apds9960_dev_s *priv;
   int ret;
 
-  DEBUGASSERT(filep);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   priv  = (FAR struct apds9960_dev_s *)inode->i_private;
 
   /* Check if the user is reading the right size */

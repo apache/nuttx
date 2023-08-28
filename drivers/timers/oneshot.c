@@ -120,7 +120,6 @@ static ssize_t oneshot_read(FAR struct file *filep, FAR char *buffer,
   /* Return zero -- usually meaning end-of-file */
 
   tmrinfo("buflen=%ld\n", (unsigned long)buflen);
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   return 0;
 }
 
@@ -138,7 +137,6 @@ static ssize_t oneshot_write(FAR struct file *filep, FAR const char *buffer,
   /* Return a failure */
 
   tmrinfo("buflen=%ld\n", (unsigned long)buflen);
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   return -EPERM;
 }
 
@@ -158,7 +156,6 @@ static int oneshot_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   tmrinfo("cmd=%d arg=%08lx\n", cmd, (unsigned long)arg);
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
   priv  = (FAR struct oneshot_dev_s *)inode->i_private;
   DEBUGASSERT(priv != NULL);

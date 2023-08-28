@@ -175,8 +175,6 @@ static int spi_slave_open(FAR struct file *filep)
   FAR struct spi_slave_driver_s *priv;
   int ret;
 
-  DEBUGASSERT(filep != NULL);
-  DEBUGASSERT(filep->f_inode != NULL);
   DEBUGASSERT(filep->f_inode->i_private != NULL);
 
   spiinfo("filep: %p\n", filep);
@@ -225,8 +223,6 @@ static int spi_slave_close(FAR struct file *filep)
   FAR struct spi_slave_driver_s *priv;
   int ret;
 
-  DEBUGASSERT(filep != NULL);
-  DEBUGASSERT(filep->f_inode != NULL);
   DEBUGASSERT(filep->f_inode->i_private != NULL);
 
   spiinfo("filep: %p\n", filep);
@@ -514,7 +510,6 @@ static int spi_slave_unlink(FAR struct inode *inode)
   FAR struct spi_slave_driver_s *priv;
   int ret;
 
-  DEBUGASSERT(inode != NULL);
   DEBUGASSERT(inode->i_private != NULL);
 
   /* Get our private data structure */

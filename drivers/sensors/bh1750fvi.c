@@ -179,10 +179,9 @@ static ssize_t bh1750fvi_read(FAR struct file *filep, FAR char *buffer,
   FAR struct bh1750fvi_dev_s *priv;
   uint16_t lux = 0;
 
-  DEBUGASSERT(filep);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   priv  = (FAR struct bh1750fvi_dev_s *)inode->i_private;
 
   /* Check if the user is reading the right size */

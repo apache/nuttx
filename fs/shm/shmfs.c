@@ -94,7 +94,7 @@ static ssize_t shmfs_read(FAR struct file *filep, FAR char *buffer,
   off_t startpos;
   off_t endpos;
 
-  DEBUGASSERT(filep->f_inode != NULL && filep->f_inode->i_private != NULL);
+  DEBUGASSERT(filep->f_inode->i_private != NULL);
 
   sho = filep->f_inode->i_private;
 
@@ -142,7 +142,7 @@ static ssize_t shmfs_write(FAR struct file *filep, FAR const char *buffer,
   off_t startpos;
   off_t endpos;
 
-  DEBUGASSERT(filep->f_inode != NULL && filep->f_inode->i_private != NULL);
+  DEBUGASSERT(filep->f_inode->i_private != NULL);
 
   sho = filep->f_inode->i_private;
 
@@ -351,8 +351,6 @@ static int shmfs_mmap(FAR struct file *filep,
 {
   FAR struct shmfs_object_s *object;
   int ret = -EINVAL;
-
-  DEBUGASSERT(filep->f_inode != NULL);
 
   /* We don't support offset at the moment, just mapping the whole object
    * object is NULL if it hasn't been truncated yet
