@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/mx8mp/verdin-mx8mp/src/verdin-mx8mp.h
+ * arch/arm/src/mx8mp/mx8mp_i2c.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,52 +18,55 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_MX8MP_MX8MP_VERDIN_SRC_VERDIN_MX8MP_H
-#define __BOARDS_ARM_MX8MP_MX8MP_VERDIN_SRC_VERDIN_MX8MP_H
+#ifndef __ARCH_ARM_SRC_MX8MP_MX8MP_I2C_H
+#define __ARCH_ARM_SRC_MX8MP_MX8MP_I2C_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
+#include <nuttx/i2c/i2c_master.h>
+#include "hardware/mx8mp_i2c.h"
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mx8mp_bringup
+ * Name: mx8mp_i2cbus_initialize
  *
  * Description:
- *   Bring up board features
+ *   Initialize the selected I2C port. And return a unique instance of struct
+ *   struct i2c_master_s.  This function may be called to obtain multiple
+ *   instances of the interface, each of which may be set up with a
+ *   different frequency and slave address.
+ *
+ * Input Parameters:
+ *   Port number (for hardware that has multiple I2C interfaces)
+ *
+ * Returned Value:
+ *   Valid I2C device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 
-int mx8mp_bringup(void);
+struct i2c_master_s *mx8mp_i2cbus_initialize(int port);
 
 /****************************************************************************
- * Name: mx8mp_i2cdev_initialize
+ * Name: mx8mp_i2cbus_uninitialize
  *
  * Description:
- *   Called to configure all i2c
+ *   De-initialize the selected I2C port, and power down the device.
+ *
+ * Input Parameters:
+ *   Device structure as returned by the lpc43_i2cbus_initialize()
+ *
+ * Returned Value:
+ *   OK on success, ERROR when internal reference count mismatch or dev
+ *   points to invalid hardware device.
  *
  ****************************************************************************/
 
-int mx8mp_i2cdev_initialize(void);
+int mx8mp_i2cbus_uninitialize(struct i2c_master_s *dev);
 
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_MX8MP_MX8MP_VERDIN_SRC_VERDIN_MX8MP_H */
+#endif /* __ARCH_ARM_SRC_MX8MP_MX8MP_I2C_H */
