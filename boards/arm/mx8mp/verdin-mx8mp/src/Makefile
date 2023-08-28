@@ -23,7 +23,16 @@ include $(TOPDIR)/Make.defs
 CSRCS = mx8mp_boot.c mx8mp_bringup.c
 
 ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += mx8mp_appinit.c
+  CSRCS += mx8mp_appinit.c
 endif
+
+ifeq ($(CONFIG_SENSORS_INA219),y)
+  CSRCS += mx8mp_ina219.c
+endif
+
+ifeq ($(CONFIG_MX8MP_I2C_DRIVER),y)
+  CSRCS += mx8mp_i2cdev.c
+endif
+
 
 include $(TOPDIR)/boards/Board.mk

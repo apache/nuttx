@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/mx8mp/verdin-mx8mp/src/verdin-mx8mp.h
+ * boards/arm/mx8mp/verdin-mx8mp/src/mx8mp_ina219.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,13 +18,12 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_MX8MP_MX8MP_VERDIN_SRC_VERDIN_MX8MP_H
-#define __BOARDS_ARM_MX8MP_MX8MP_VERDIN_SRC_VERDIN_MX8MP_H
+#ifndef __BOARDS_ARM_MX8MP_MX8MP_VERDIN_INCLUDE_BOARD_H
+#define __BOARDS_ARM_MX8MP_MX8MP_VERDIN_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
-
 #include <nuttx/config.h>
 
 /****************************************************************************
@@ -39,31 +38,41 @@
  * Public Data
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mx8mp_bringup
+ * Name: board_ina219_initialize
  *
  * Description:
- *   Bring up board features
+ *   Initialize and register the INA219 voltage/current sensor.
+ *
+ * Input parameters:
+ *   busno - The I2C bus number
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int mx8mp_bringup(void);
+int board_ina219_initialize(int busno);
 
-/****************************************************************************
- * Name: mx8mp_i2cdev_initialize
- *
- * Description:
- *   Called to configure all i2c
- *
- ****************************************************************************/
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
 
-int mx8mp_i2cdev_initialize(void);
-
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_MX8MP_MX8MP_VERDIN_SRC_VERDIN_MX8MP_H */
+#endif /* __BOARDS_ARM_MX8MP_MX8MP_VERDIN_INCLUDE_BOARD_H  */

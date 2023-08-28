@@ -28,8 +28,14 @@
 #include <errno.h>
 #include <sys/types.h>
 
+#include "verdin-mx8mp.h"
+
 #ifdef CONFIG_USERLED
 #  include <nuttx/leds/userled.h>
+#endif
+
+#ifdef CONFIG_SENSORS_INA219
+#  include "mx8mp_ina219.h"
 #endif
 
 /****************************************************************************
@@ -55,6 +61,36 @@ int mx8mp_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_MX8MP_I2C_DRIVER
+  /* Initialize I2C buses */
+
+  ret = mx8mp_i2cdev_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: mx8mp_i2cdev_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_INA219
+  /* Configure and initialize the INA219 sensor in I2C4 */
+
+  ret = board_ina219_initialize(4);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: mx8mp_ina219_initialize() failed: %d\n", ret);
     }
 #endif
 

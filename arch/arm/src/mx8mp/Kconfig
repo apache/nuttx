@@ -31,6 +31,59 @@ config MX8MP_UART4
 	select UART4_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
+#####################################################################
+#  I2C Configuration (Master)
+#####################################################################
+
+config MX8MP_I2C
+	bool "I2C Master"
+	select I2C
+	---help---
+		Build in support for I2C master mode.
+
+if MX8MP_I2C
+
+	config MX8MP_I2C1
+		bool "I2C1"
+		default n
+		select I2C
+
+	config MX8MP_I2C2
+		bool "I2C2"
+		default n
+		select I2C
+
+	config MX8MP_I2C3
+		bool "I2C3"
+		default n
+		select I2C
+
+	config MX8MP_I2C4
+		bool "I2C4"
+		default n
+		select I2C
+
+	config MX8MP_I2C5
+		bool "I2C5"
+		default n
+		select I2C
+
+	config MX8MP_I2C6
+		bool "I2C6"
+		default n
+		select I2C
+
+	config MX8MP_I2C_DRIVER
+		bool "I2C character driver"
+		default n
+		select I2C_DRIVER
+		---help---
+			Build in support for a character driver at /dev/i2c[N] that may be
+			used to perform I2C bus transfers from applications.  The intent of
+			this driver is to support I2C testing.  It is not suitable for use
+			in any real driver application.
+
+endif # MX8MP_I2C
 endmenu
 
 # These "hidden" settings determine whether a peripheral option is available
