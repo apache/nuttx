@@ -452,6 +452,7 @@ int  sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *value,
 int  sigsuspend(FAR const sigset_t *sigmask);
 int  sigwaitinfo(FAR const sigset_t *set, FAR struct siginfo *value);
 int  sigaltstack(FAR const stack_t *ss, FAR stack_t *oss);
+int  siginterrupt(int signo, int flag);
 
 #undef EXTERN
 #ifdef __cplusplus
