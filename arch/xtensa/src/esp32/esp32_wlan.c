@@ -416,8 +416,7 @@ static inline struct wlan_pktbuf *wlan_alloc_buffer(struct wlan_priv_s *priv)
       return NULL;
     }
 
-  pktbuf = (struct wlan_pktbuf *)kmm_malloc(
-            sizeof(struct wlan_pktbuf) + WLAN_BUF_SIZE);
+  pktbuf = kmm_malloc(sizeof(struct wlan_pktbuf) + WLAN_BUF_SIZE);
 #else
   sq_entry_t *entry;
   irqstate_t flags = spin_lock_irqsave(&priv->lock);

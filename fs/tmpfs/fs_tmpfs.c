@@ -533,7 +533,7 @@ static FAR struct tmpfs_file_s *tmpfs_alloc_file(void)
 
   /* Create a new zero length file object */
 
-  tfo = (FAR struct tmpfs_file_s *)kmm_malloc(sizeof(*tfo));
+  tfo = kmm_malloc(sizeof(*tfo));
   if (tfo == NULL)
     {
       return NULL;
@@ -683,7 +683,7 @@ static FAR struct tmpfs_directory_s *tmpfs_alloc_directory(void)
 
   /* Create a new zero length directory object */
 
-  tdo = (FAR struct tmpfs_directory_s *)kmm_malloc(sizeof(*tdo));
+  tdo = kmm_malloc(sizeof(*tdo));
   if (tdo == NULL)
     {
       return NULL;
@@ -2054,7 +2054,7 @@ static int tmpfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   /* Create an instance of the tmpfs file system */
 
-  fs = (FAR struct tmpfs_s *)kmm_zalloc(sizeof(struct tmpfs_s));
+  fs = kmm_zalloc(sizeof(struct tmpfs_s));
   if (fs == NULL)
     {
       return -ENOMEM;

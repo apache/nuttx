@@ -386,7 +386,7 @@ static int sim_usbhost_epalloc(FAR struct usbhost_driver_s *drvr,
 
   /* Allocate a endpoint information structure */
 
-  epinfo = (struct sim_epinfo_s *)kmm_zalloc(sizeof(struct sim_epinfo_s));
+  epinfo = kmm_zalloc(sizeof(struct sim_epinfo_s));
   if (!epinfo)
     {
       return -ENOMEM;
@@ -443,7 +443,7 @@ static int sim_usbhost_alloc(FAR struct usbhost_driver_s *drvr,
 {
   DEBUGASSERT(drvr && buffer && maxlen);
 
-  *buffer = (uint8_t *)kmm_malloc(SIM_USBHOST_BUFSIZE);
+  *buffer = kmm_malloc(SIM_USBHOST_BUFSIZE);
   if (*buffer)
     {
       *maxlen = SIM_USBHOST_BUFSIZE;
@@ -475,7 +475,7 @@ static int sim_usbhost_ioalloc(FAR struct usbhost_driver_s *drvr,
 {
   DEBUGASSERT(drvr && buffer && buflen > 0);
 
-  *buffer = (uint8_t *)kumm_malloc(buflen);
+  *buffer = kumm_malloc(buflen);
   return *buffer ? OK : -ENOMEM;
 }
 

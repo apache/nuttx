@@ -249,7 +249,7 @@ static struct mmcl_dev_s *mmcl_allocdev(int number,
 
   /* Allocate a MMCL device structure */
 
-  dev = (struct mmcl_dev_s *)kmm_malloc(sizeof(struct mmcl_dev_s));
+  dev = kmm_malloc(sizeof(struct mmcl_dev_s));
   if (dev)
     {
       /* Initialize the MMCL device structure */

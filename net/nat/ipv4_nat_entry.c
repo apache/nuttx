@@ -307,7 +307,7 @@ ipv4_nat_entry_create(uint8_t protocol,
                       in_addr_t local_ip, uint16_t local_port)
 {
   FAR struct ipv4_nat_entry *entry =
-      (FAR struct ipv4_nat_entry *)kmm_malloc(sizeof(struct ipv4_nat_entry));
+      kmm_malloc(sizeof(struct ipv4_nat_entry));
   if (entry == NULL)
     {
       nwarn("WARNING: Failed to allocate IPv4 NAT entry\n");

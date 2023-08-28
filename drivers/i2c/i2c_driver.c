@@ -373,7 +373,7 @@ int i2c_register(FAR struct i2c_master_s *i2c, int bus)
 
   /* Allocate a I2C character device structure */
 
-  priv = (FAR struct i2c_driver_s *)kmm_zalloc(sizeof(struct i2c_driver_s));
+  priv = kmm_zalloc(sizeof(struct i2c_driver_s));
   if (priv)
     {
       /* Initialize the I2C character device structure */

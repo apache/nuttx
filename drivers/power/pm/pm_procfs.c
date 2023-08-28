@@ -183,7 +183,7 @@ static int pm_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Allocate a container to hold the file attributes */
 
-  pmfile = (FAR struct pm_file_s *)kmm_zalloc(sizeof(struct pm_file_s));
+  pmfile = kmm_zalloc(sizeof(struct pm_file_s));
   if (!pmfile)
     {
       ferr("ERROR: Failed to allocate file attributes\n");
@@ -414,7 +414,7 @@ static int pm_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Allocate a new container to hold the task and attribute selection */
 
-  newattr = (FAR struct pm_file_s *)kmm_malloc(sizeof(struct pm_file_s));
+  newattr = kmm_malloc(sizeof(struct pm_file_s));
   if (!newattr)
     {
       ferr("ERROR: Failed to allocate file attributes\n");

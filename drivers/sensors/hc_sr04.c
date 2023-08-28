@@ -406,7 +406,7 @@ int hcsr04_register(FAR const char *devpath,
   int ret = 0;
   FAR struct hcsr04_dev_s *priv;
 
-  priv = (struct hcsr04_dev_s *)kmm_zalloc(sizeof(struct hcsr04_dev_s));
+  priv = kmm_zalloc(sizeof(struct hcsr04_dev_s));
 
   if (!priv)
     {

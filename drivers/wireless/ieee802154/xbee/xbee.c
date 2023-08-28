@@ -1217,7 +1217,7 @@ XBEEHANDLE xbee_init(FAR struct spi_dev_s *spi,
 
   /* Allocate object */
 
-  priv = (FAR struct xbee_priv_s *) kmm_zalloc(sizeof(struct xbee_priv_s));
+  priv = kmm_zalloc(sizeof(struct xbee_priv_s));
   if (priv == NULL)
     {
       wlinfo("Failed allocation xbee_priv_s structure\n");

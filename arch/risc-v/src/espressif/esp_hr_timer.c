@@ -315,7 +315,7 @@ int esp_hr_timer_create(const struct esp_hr_timer_args_s *args,
 {
   struct esp_hr_timer_s *timer;
 
-  timer = (struct esp_hr_timer_s *)kmm_malloc(sizeof(*timer));
+  timer = kmm_malloc(sizeof(*timer));
   if (timer == NULL)
     {
       tmrerr("Failed to allocate %d bytes\n", sizeof(*timer));

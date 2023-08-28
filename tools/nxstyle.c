@@ -448,6 +448,7 @@ static const char *g_white_content_list[] =
   "XColor",
   "AsyncBoth",
   "CurrentTime",
+  "XUnmapWindow",
 
   /* Ref:
    * sim/posix/sim_deviceimage.c

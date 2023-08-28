@@ -465,7 +465,7 @@ static int ftl_alloc_eblock(FAR struct ftl_struct_s *dev)
     {
       /* Allocate one, in-memory erase block buffer */
 
-      dev->eblock = (FAR uint8_t *)kmm_malloc(dev->geo.erasesize);
+      dev->eblock = kmm_malloc(dev->geo.erasesize);
     }
 
   return dev->eblock != NULL ? OK : -ENOMEM;
@@ -809,7 +809,7 @@ int ftl_initialize_by_path(FAR const char *path, FAR struct mtd_dev_s *mtd)
 
   /* Allocate a FTL device structure */
 
-  dev = (FAR struct ftl_struct_s *)kmm_zalloc(sizeof(struct ftl_struct_s));
+  dev = kmm_zalloc(sizeof(struct ftl_struct_s));
   if (dev)
     {
       /* Initialize the FTL device structure */

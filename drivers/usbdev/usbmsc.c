@@ -1261,8 +1261,7 @@ int usbmsc_configure(unsigned int nluns, void **handle)
 
   /* Allocate the structures needed */
 
-  alloc = (FAR struct usbmsc_alloc_s *)
-    kmm_malloc(sizeof(struct usbmsc_alloc_s));
+  alloc = kmm_malloc(sizeof(struct usbmsc_alloc_s));
   if (!alloc)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_ALLOCDEVSTRUCT), 0);
@@ -1285,9 +1284,7 @@ int usbmsc_configure(unsigned int nluns, void **handle)
 
   /* Allocate the LUN table */
 
-  priv->luntab = (FAR struct usbmsc_lun_s *)
-    kmm_malloc(priv->nluns*sizeof(struct usbmsc_lun_s));
-
+  priv->luntab = kmm_malloc(priv->nluns*sizeof(struct usbmsc_lun_s));
   if (!priv->luntab)
     {
       ret = -ENOMEM;
@@ -1456,10 +1453,10 @@ int usbmsc_bindlun(FAR void *handle, FAR const char *drvrpath,
   if (!priv->iobuffer)
     {
 #ifdef CONFIG_USBMSC_WRMULTIPLE
-      priv->iobuffer = (FAR uint8_t *)kmm_malloc(geo.geo_sectorsize *
-                                                 CONFIG_USBMSC_NWRREQS);
+      priv->iobuffer = kmm_malloc(geo.geo_sectorsize *
+                                  CONFIG_USBMSC_NWRREQS);
 #else
-      priv->iobuffer = (FAR uint8_t *)kmm_malloc(geo.geo_sectorsize);
+      priv->iobuffer = kmm_malloc(geo.geo_sectorsize);
 #endif
       if (!priv->iobuffer)
         {
@@ -1478,7 +1475,7 @@ int usbmsc_bindlun(FAR void *handle, FAR const char *drvrpath,
     {
       FAR void *tmp;
 
-      tmp = (FAR void *)kmm_realloc(priv->iobuffer, geo.geo_sectorsize);
+      tmp = kmm_realloc(priv->iobuffer, geo.geo_sectorsize);
       if (!tmp)
         {
           usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_REALLOCIOBUFFER),

@@ -804,7 +804,7 @@ static int bmi160_devregister(const char *devpath,
   char path[12];
   int ret;
 
-  priv = (struct bmi160_dev_s *)kmm_malloc(sizeof(struct bmi160_dev_s));
+  priv = kmm_malloc(sizeof(struct bmi160_dev_s));
   if (!priv)
     {
       snerr("Failed to allocate instance\n");

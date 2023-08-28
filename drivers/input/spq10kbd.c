@@ -973,8 +973,7 @@ int spq10kbd_register(FAR struct i2c_master_s *i2c,
   DEBUGASSERT(config->attach != NULL && config->enable != NULL &&
               config->clear  != NULL);
 
-  priv = (FAR struct spq10kbd_dev_s *)kmm_zalloc(
-    sizeof(struct spq10kbd_dev_s));
+  priv = kmm_zalloc(sizeof(struct spq10kbd_dev_s));
   if (!priv)
     {
       ierr("ERROR: kmm_zalloc(%d) failed\n", sizeof(struct spq10kbd_dev_s));

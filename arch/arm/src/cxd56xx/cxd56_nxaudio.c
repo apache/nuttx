@@ -3783,7 +3783,7 @@ struct audio_lowerhalf_s *cxd56_initialize(
   FAR struct cxd56_dev_s *priv;
 
   audinfo("cxd56_initialize\n");
-  priv = (FAR struct cxd56_dev_s *)kmm_zalloc(sizeof(struct cxd56_dev_s));
+  priv = kmm_zalloc(sizeof(struct cxd56_dev_s));
   if (priv)
     {
       priv->dev.ops = &g_audioops;

@@ -615,7 +615,7 @@ FAR struct qe_lowerhalf_s *as5048a_initialize(FAR struct spi_dev_s *spi,
 
   /* Initialize the device's structure */
 
-  priv = (FAR struct as5048a_dev_s *)kmm_malloc(sizeof(*priv));
+  priv = kmm_malloc(sizeof(*priv));
   if (priv == NULL)
     {
       snerr("ERROR: Failed to allocate instance\n");

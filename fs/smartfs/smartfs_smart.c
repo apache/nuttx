@@ -209,7 +209,7 @@ static int smartfs_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Locate the directory entry for this path */
 
-  sf = (FAR struct smartfs_ofile_s *)kmm_malloc(sizeof *sf);
+  sf = kmm_malloc(sizeof *sf);
   if (sf == NULL)
     {
       ret = -ENOMEM;
@@ -219,7 +219,7 @@ static int smartfs_open(FAR struct file *filep, FAR const char *relpath,
   /* Allocate a sector buffer if CRC enabled in the MTD layer */
 
 #ifdef CONFIG_SMARTFS_USE_SECTOR_BUFFER
-  sf->buffer = (FAR uint8_t *)kmm_malloc(fs->fs_llformat.availbytes);
+  sf->buffer = kmm_malloc(fs->fs_llformat.availbytes);
   if (sf->buffer == NULL)
     {
       /* Error ... no memory */

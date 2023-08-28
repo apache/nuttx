@@ -2708,7 +2708,7 @@ static int mpfs_buffer_initialize(struct mpfs_ethmac_s *priv,
   memset(priv->queue[queue].rx_desc_tab, 0, allocsize);
 
   allocsize = CONFIG_MPFS_ETHMAC_NTXBUFFERS * GMAC_TX_UNITSIZE;
-  priv->queue[queue].txbuffer = (uint8_t *)kmm_memalign(8, allocsize);
+  priv->queue[queue].txbuffer = kmm_memalign(8, allocsize);
   if (priv->queue[queue].txbuffer == NULL)
     {
       nerr("ERROR: Failed to allocate TX buffer\n");
@@ -2717,7 +2717,7 @@ static int mpfs_buffer_initialize(struct mpfs_ethmac_s *priv,
     }
 
   allocsize = CONFIG_MPFS_ETHMAC_NRXBUFFERS * GMAC_RX_UNITSIZE;
-  priv->queue[queue].rxbuffer = (uint8_t *)kmm_memalign(8, allocsize);
+  priv->queue[queue].rxbuffer = kmm_memalign(8, allocsize);
   if (priv->queue[queue].rxbuffer == NULL)
     {
       nerr("ERROR: Failed to allocate RX buffer\n");

@@ -381,7 +381,7 @@ int main(int argc, char **argv, char **envp)
           ssize_t bufsize;
 
           bufsize = cygwin_conv_path(CCP_POSIX_TO_WIN_A, dirname, NULL, 0);
-          convpath = (char *)malloc(bufsize);
+          convpath = malloc(bufsize);
           if (convpath == NULL)
             {
               fprintf(stderr, "ERROR:  Failed to allocate buffer.\n");
@@ -461,7 +461,7 @@ int main(int argc, char **argv, char **envp)
       segsize   = ret;
       respsize += (response == NULL) ? segsize + 1 : segsize;
 
-      response = (char *)malloc(respsize);
+      response = malloc(respsize);
       if (response == NULL)
         {
           fprintf(stderr, "ERROR: Failed to allocate response.\n");

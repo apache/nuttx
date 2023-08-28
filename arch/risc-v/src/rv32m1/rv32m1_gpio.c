@@ -661,7 +661,7 @@ int rv32m1_gpio_irqattach(uint32_t cfgset, xcpt_t isr, void *arg)
       e = sq_next(e);
     }
 
-  priv = (struct rv32m1_isr_s *)kmm_malloc(sizeof(*priv));
+  priv = kmm_malloc(sizeof(*priv));
   if (priv)
     {
       /* If it is the first time to attach an isr, the generic gpio

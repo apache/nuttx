@@ -105,7 +105,7 @@ static int local_sendctl(FAR struct local_conn_s *conn,
               goto fail;
             }
 
-          filep2 = (FAR struct file *)kmm_zalloc(sizeof(*filep2));
+          filep2 = kmm_zalloc(sizeof(*filep2));
           if (!filep2)
             {
               ret = -ENOMEM;

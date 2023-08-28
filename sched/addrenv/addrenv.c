@@ -219,7 +219,7 @@ FAR struct addrenv_s *addrenv_allocate(void)
 {
   FAR struct addrenv_s *addrenv;
 
-  addrenv = (FAR struct addrenv_s *)kmm_zalloc(sizeof(struct addrenv_s));
+  addrenv = kmm_zalloc(sizeof(struct addrenv_s));
   if (addrenv)
     {
       /* Take reference so this won't get freed */

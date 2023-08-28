@@ -1291,7 +1291,7 @@ struct i2s_dev_s *rp2040_i2sbus_initialize(int port)
 
   i2sinfo("port: %d\n", port);
 
-  priv = (struct rp2040_i2s_s *)kmm_zalloc(sizeof(struct rp2040_i2s_s));
+  priv = kmm_zalloc(sizeof(struct rp2040_i2s_s));
   if (!priv)
     {
       i2serr("ERROR: Failed to allocate a chip select structure\n");

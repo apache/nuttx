@@ -1047,7 +1047,7 @@ int scd30_register_i2c(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   /* Initialize the device structure */
 
-  priv = (FAR struct scd30_dev_s *)kmm_zalloc(sizeof(struct scd30_dev_s));
+  priv = kmm_zalloc(sizeof(struct scd30_dev_s));
   if (priv == NULL)
     {
       scd30_dbg("ERROR: Failed to allocate instance\n");

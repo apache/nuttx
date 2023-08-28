@@ -770,9 +770,7 @@ int smbus_sbd_initialize(int minor, struct i2c_slave_s *i2c_slave_dev)
 
   /* Allocate an SMBus Smart Battery Data slave device structure */
 
-  smbus_sbd_dev =
-    (struct smbus_sbd_dev_s *)kmm_zalloc(sizeof(struct smbus_sbd_dev_s));
-
+  smbus_sbd_dev = kmm_zalloc(sizeof(struct smbus_sbd_dev_s));
   if (smbus_sbd_dev == NULL)
     {
       leave_critical_section(flags);
@@ -801,9 +799,7 @@ int smbus_sbd_initialize(int minor, struct i2c_slave_s *i2c_slave_dev)
 
   /* Allocate the SMBus Smart Battery Data slave data structure */
 
-  smbus_sbd_dev->data =
-    (struct smbus_sbd_data_s *)kmm_zalloc(sizeof(struct smbus_sbd_data_s));
-
+  smbus_sbd_dev->data = kmm_zalloc(sizeof(struct smbus_sbd_data_s));
   if (smbus_sbd_dev->data == NULL)
     {
       leave_critical_section(flags);

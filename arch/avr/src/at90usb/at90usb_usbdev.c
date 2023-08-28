@@ -2325,7 +2325,7 @@ static FAR struct usbdev_req_s *avr_epallocreq(FAR struct usbdev_ep_s *ep)
 
   usbtrace(TRACE_EPALLOCREQ, ((FAR struct avr_ep_s *)ep)->ep.eplog);
 
-  privreq = (FAR struct avr_req_s *)kmm_malloc(sizeof(struct avr_req_s));
+  privreq = kmm_malloc(sizeof(struct avr_req_s));
   if (!privreq)
     {
       usbtrace(TRACE_DEVERROR(AVR_TRACEERR_ALLOCFAIL), 0);

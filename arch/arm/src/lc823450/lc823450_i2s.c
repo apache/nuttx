@@ -1010,7 +1010,7 @@ struct i2s_dev_s *lc823450_i2sdev_initialize(void)
    * chip select structures.
    */
 
-  priv = (struct lc823450_i2s_s *)kmm_zalloc(sizeof(struct lc823450_i2s_s));
+  priv = kmm_zalloc(sizeof(struct lc823450_i2s_s));
   if (!priv)
     {
       i2serr("ERROR: Failed to allocate a chip select structure\n");

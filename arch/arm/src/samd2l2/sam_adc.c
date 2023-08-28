@@ -469,7 +469,7 @@ struct adc_dev_s *sam_adcinitialize(int genclk)
   g_sam_adc_dev.ad_ops = &sam_adc_ops;
 
   priv->num_channels = BOARD_ADC_NUM_CHANNELS;
-  priv->channels = (int *)kmm_malloc(priv->num_channels * sizeof(int));
+  priv->channels = kmm_malloc(priv->num_channels * sizeof(int));
 
 #if BOARD_ADC_REF == ADC_REFCTRL_REFSEL_VREFA
   sam_configport(PORT_ADC_VREFA);

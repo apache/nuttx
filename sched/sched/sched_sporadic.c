@@ -777,7 +777,7 @@ int nxsched_initialize_sporadic(FAR struct tcb_s *tcb)
    * sporadic scheduling parameters and state data.
    */
 
-  sporadic = (FAR struct sporadic_s *)kmm_zalloc(sizeof(struct sporadic_s));
+  sporadic = kmm_zalloc(sizeof(struct sporadic_s));
   if (sporadic == NULL)
     {
       serr("ERROR: Failed to allocate sporadic data structure\n");

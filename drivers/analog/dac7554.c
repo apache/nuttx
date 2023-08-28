@@ -245,12 +245,11 @@ FAR struct dac_dev_s *dac7554_initialize(FAR struct spi_dev_s *spi,
 
   /* Initialize the DAC7554 device structure */
 
-  priv =
-    (FAR struct dac7554_dev_s *)kmm_malloc(sizeof(struct dac7554_dev_s));
+  priv = kmm_malloc(sizeof(struct dac7554_dev_s));
   priv->spi = spi;
   priv->spidev = spidev;
 
-  g_dacdev = (FAR struct dac_dev_s *)kmm_malloc(sizeof(struct dac_dev_s));
+  g_dacdev = kmm_malloc(sizeof(struct dac_dev_s));
   g_dacdev->ad_ops = &g_dacops;
   g_dacdev->ad_priv = priv;
 

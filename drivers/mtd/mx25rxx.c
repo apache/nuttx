@@ -1113,7 +1113,7 @@ FAR struct mtd_dev_s *mx25rxx_initialize(FAR struct qspi_dev_s *qspi,
    * bus.
    */
 
-  dev = (FAR struct mx25rxx_dev_s *)kmm_zalloc(sizeof(*dev));
+  dev = kmm_zalloc(sizeof(*dev));
 
   if (dev == NULL)
     {

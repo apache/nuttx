@@ -313,7 +313,7 @@ static int fat_open(FAR struct file *filep, FAR const char *relpath,
    * file.
    */
 
-  ff = (FAR struct fat_file_s *)kmm_zalloc(sizeof(struct fat_file_s));
+  ff = kmm_zalloc(sizeof(struct fat_file_s));
   if (!ff)
     {
       ret = -ENOMEM;
@@ -1498,7 +1498,7 @@ static int fat_dup(FAR const struct file *oldp, FAR struct file *newp)
    * dup'ed file.
    */
 
-  newff = (FAR struct fat_file_s *)kmm_malloc(sizeof(struct fat_file_s));
+  newff = kmm_malloc(sizeof(struct fat_file_s));
   if (!newff)
     {
       ret = -ENOMEM;
@@ -2179,7 +2179,7 @@ static int fat_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   /* Create an instance of the mountpt state structure */
 
-  fs = (struct fat_mountpt_s *)kmm_zalloc(sizeof(struct fat_mountpt_s));
+  fs = kmm_zalloc(sizeof(struct fat_mountpt_s));
   if (!fs)
     {
       return -ENOMEM;

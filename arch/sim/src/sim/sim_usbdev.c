@@ -660,7 +660,7 @@ static struct usbdev_req_s *sim_ep_allocreq(struct usbdev_ep_s *ep)
 
   usbtrace(TRACE_EPALLOCREQ, USB_EPNO(ep->eplog));
 
-  privreq = (struct sim_req_s *)kmm_malloc(sizeof(struct sim_req_s));
+  privreq = kmm_malloc(sizeof(struct sim_req_s));
   if (!privreq)
     {
       usbtrace(TRACE_DEVERROR(SIM_TRACEERR_ALLOCFAIL), 0);

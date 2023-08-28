@@ -585,7 +585,7 @@ static int netlink_get_arptable(NETLINK_HANDLE handle,
   rspsize   = SIZEOF_NLROUTE_RECVFROM_RESPONSE_S(tabsize);
   allocsize = SIZEOF_NLROUTE_RECVFROM_RSPLIST_S(tabsize);
 
-  entry = (FAR struct getneigh_recvfrom_rsplist_s *)kmm_zalloc(allocsize);
+  entry = kmm_zalloc(allocsize);
   if (entry == NULL)
     {
       nerr("ERROR: Failed to allocate response buffer.\n");
@@ -668,7 +668,7 @@ static int netlink_get_nbtable(NETLINK_HANDLE handle,
   rspsize   = SIZEOF_NLROUTE_RECVFROM_RESPONSE_S(tabsize);
   allocsize = SIZEOF_NLROUTE_RECVFROM_RSPLIST_S(tabsize);
 
-  entry = (FAR struct getneigh_recvfrom_rsplist_s *)kmm_zalloc(allocsize);
+  entry = kmm_zalloc(allocsize);
   if (entry == NULL)
     {
       nerr("ERROR: Failed to allocate response buffer.\n");

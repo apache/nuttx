@@ -1632,7 +1632,7 @@ int bme680_register(int devno, FAR struct i2c_master_s *i2c)
 
   /* Initialize the BME680 device structure */
 
-  priv = (FAR struct bme680_dev_s *)kmm_zalloc(sizeof(struct bme680_dev_s));
+  priv = kmm_zalloc(sizeof(struct bme680_dev_s));
   if (priv == NULL)
     {
       snerr("ERROR: Failed to allocate instance (err = %d)\n", ret);

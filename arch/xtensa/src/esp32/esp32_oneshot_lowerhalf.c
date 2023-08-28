@@ -348,9 +348,7 @@ struct oneshot_lowerhalf_s *oneshot_initialize(int chan,
 
   /* Allocate an instance of the lower half driver */
 
-  priv = (struct esp32_oneshot_lowerhalf_s *)kmm_zalloc(
-          sizeof(struct esp32_oneshot_lowerhalf_s));
-
+  priv = kmm_zalloc(sizeof(struct esp32_oneshot_lowerhalf_s));
   if (priv == NULL)
     {
       tmrerr("ERROR: Failed to initialize oneshot state structure\n");

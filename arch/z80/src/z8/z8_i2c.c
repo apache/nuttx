@@ -638,7 +638,7 @@ FAR struct i2c_master_s *z8_i2cbus_initialize(int port)
 
   /* Now, allocate an I2C instance for this caller */
 
-  i2c = (FAR struct z8_i2cdev_s *)kmm_zalloc(sizeof(FAR struct z8_i2cdev_s));
+  i2c = kmm_zalloc(sizeof(struct z8_i2cdev_s));
   if (i2c)
     {
       /* Initialize the allocated instance */

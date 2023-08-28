@@ -1031,7 +1031,7 @@ FAR struct mtd_dev_s *gd25_initialize(FAR struct spi_dev_s *spi,
   FAR struct gd25_dev_s *priv;
   int ret;
 
-  priv = (FAR struct gd25_dev_s *)kmm_zalloc(sizeof(struct gd25_dev_s));
+  priv = kmm_zalloc(sizeof(struct gd25_dev_s));
   if (priv)
     {
       /* Initialize the allocated structure (unsupported methods were

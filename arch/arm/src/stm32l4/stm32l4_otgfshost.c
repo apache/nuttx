@@ -4272,7 +4272,7 @@ static int stm32l4_alloc(struct usbhost_driver_s *drvr,
 
   /* There is no special memory requirement for the STM32. */
 
-  alloc = (uint8_t *)kmm_malloc(CONFIG_STM32L4_OTGFS_DESCSIZE);
+  alloc = kmm_malloc(CONFIG_STM32L4_OTGFS_DESCSIZE);
   if (!alloc)
     {
       return -ENOMEM;
@@ -4359,7 +4359,7 @@ static int stm32l4_ioalloc(struct usbhost_driver_s *drvr,
 
   /* There is no special memory requirement */
 
-  alloc = (uint8_t *)kmm_malloc(buflen);
+  alloc = kmm_malloc(buflen);
   if (!alloc)
     {
       return -ENOMEM;

@@ -118,7 +118,7 @@ int gd32_at24_wr_test(int minor)
       return (int)nblocks;
     }
 
-  read_buf = (uint8_t *)kmm_malloc(BUFFSIZE);
+  read_buf = kmm_malloc(BUFFSIZE);
 
   /* Read the data write before */
 

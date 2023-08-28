@@ -302,7 +302,7 @@ static int rpmsgfs_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Allocate memory for the open file */
 
-  hf = (struct rpmsgfs_ofile_s *) kmm_malloc(sizeof *hf);
+  hf = kmm_malloc(sizeof *hf);
   if (hf == NULL)
     {
       ret = -ENOMEM;

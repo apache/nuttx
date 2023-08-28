@@ -477,7 +477,7 @@ int rt_timer_create(const struct rt_timer_args_s *args,
 {
   struct rt_timer_s *timer;
 
-  timer = (struct rt_timer_s *)kmm_malloc(sizeof(*timer));
+  timer = kmm_malloc(sizeof(*timer));
   if (!timer)
     {
       tmrerr("ERROR: Failed to allocate %d bytes\n", sizeof(*timer));

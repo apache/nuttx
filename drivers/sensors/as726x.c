@@ -387,6 +387,7 @@ static ssize_t as726x_write(FAR struct file *filep,
 
 int as726x_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
 {
+  FAR struct as726x_dev_s *priv;
   uint8_t _sensor_version;
   uint8_t value;
   int ret;
@@ -397,9 +398,7 @@ int as726x_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
 
   /* Initialize the AS726X device structure */
 
-  FAR struct as726x_dev_s *priv =
-    (FAR struct as726x_dev_s *)kmm_malloc(sizeof(struct as726x_dev_s));
-
+  priv = kmm_malloc(sizeof(struct as726x_dev_s));
   if (priv == NULL)
     {
       snerr("ERROR: Failed to allocate instance\n");

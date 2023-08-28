@@ -260,7 +260,7 @@ int vnc_server(int argc, FAR char *argv[])
    * the KMM allocator will align memory to 32-bits or better.
    */
 
-  fb = (FAR uint8_t *)kmm_zalloc(RFB_SIZE);
+  fb = kmm_zalloc(RFB_SIZE);
   if (fb == NULL)
     {
       gerr("ERROR: Failed to allocate framebuffer memory: %lu KB\n",

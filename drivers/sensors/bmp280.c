@@ -687,7 +687,7 @@ int bmp280_register(int devno, FAR struct i2c_master_s *i2c)
 
   /* Initialize the BMP280 device structure */
 
-  priv = (FAR struct bmp280_dev_s *)kmm_zalloc(sizeof(struct bmp280_dev_s));
+  priv = kmm_zalloc(sizeof(struct bmp280_dev_s));
   if (!priv)
     {
       snerr("Failed to allocate instance\n");

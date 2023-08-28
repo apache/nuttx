@@ -545,7 +545,7 @@ int l3gd20_register(int devno, FAR struct spi_dev_s *spi,
 
   /* Initialize the L3GD20 device structure */
 
-  priv = (FAR struct l3gd20_dev_s *)kmm_malloc(sizeof(struct l3gd20_dev_s));
+  priv = kmm_malloc(sizeof(struct l3gd20_dev_s));
   if (priv == NULL)
     {
       snerr("ERROR: Failed to allocate instance\n");

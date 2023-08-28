@@ -289,7 +289,7 @@ static int irq_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Allocate a container to hold the file attributes */
 
-  irqfile = (FAR struct irq_file_s *)kmm_zalloc(sizeof(struct irq_file_s));
+  irqfile = kmm_zalloc(sizeof(struct irq_file_s));
   if (!irqfile)
     {
       ferr("ERROR: Failed to allocate file attributes\n");
@@ -391,7 +391,7 @@ static int irq_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Allocate a new container to hold the task and attribute selection */
 
-  newattr = (FAR struct irq_file_s *)kmm_malloc(sizeof(struct irq_file_s));
+  newattr = kmm_malloc(sizeof(struct irq_file_s));
   if (!newattr)
     {
       ferr("ERROR: Failed to allocate file attributes\n");

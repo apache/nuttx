@@ -1320,7 +1320,7 @@ int lsm330_register(FAR const char *devpath_acl,
 
   /* Initialize the LSM330 accelerometer device structure. */
 
-  priv = (FAR struct lsm330_dev_s *)kmm_malloc(sizeof(struct lsm330_dev_s));
+  priv = kmm_malloc(sizeof(struct lsm330_dev_s));
   if (priv == NULL)
     {
       snerr("ERROR: Failed to allocate accelerometer instance\n");
@@ -1363,7 +1363,7 @@ int lsm330_register(FAR const char *devpath_acl,
 
   /* Initialize the LSM330 gyroscope device structure. */
 
-  priv = (FAR struct lsm330_dev_s *)kmm_malloc(sizeof(struct lsm330_dev_s));
+  priv = kmm_malloc(sizeof(struct lsm330_dev_s));
   if (priv == NULL)
     {
       snerr("ERROR: Failed to allocate gyroscope instance\n");

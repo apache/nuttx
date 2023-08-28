@@ -721,8 +721,8 @@ static int tda19988_fetch_edid(struct tda1988_dev_s *priv)
       unsigned int edid_len;
       int i;
 
-      edid_len =  EDID_LENGTH * (blocks + 1);
-      edid     = (FAR void *)kmm_realloc(priv->edid, edid_len);
+      edid_len = EDID_LENGTH * (blocks + 1);
+      edid     = kmm_realloc(priv->edid, edid_len);
 
       if (edid == NULL)
         {
@@ -1639,8 +1639,7 @@ TDA19988_HANDLE tda19988_register(FAR const char *devpath,
 
   /* Allocate an instance of the TDA19988 driver */
 
-  priv = (FAR struct tda1988_dev_s *)
-    kmm_zalloc(sizeof(struct tda1988_dev_s));
+  priv = kmm_zalloc(sizeof(struct tda1988_dev_s));
   if (priv == NULL)
     {
       lcderr("ERROR: Failed to allocate device structure\n");
@@ -1649,7 +1648,7 @@ TDA19988_HANDLE tda19988_register(FAR const char *devpath,
 
   /* Assume a single block in EDID */
 
-  priv->edid = (FAR uint8_t *)kmm_malloc(EDID_LENGTH);
+  priv->edid = kmm_malloc(EDID_LENGTH);
   if (priv->edid == NULL)
     {
       lcderr("ERROR: Failed to allocate EDID\n");

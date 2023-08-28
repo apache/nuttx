@@ -1405,7 +1405,7 @@ FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *spi)
    * have to be extended to handle multiple FLASH parts on the same SPI bus.
    */
 
-  priv = (FAR struct w25_dev_s *)kmm_zalloc(sizeof(struct w25_dev_s));
+  priv = kmm_zalloc(sizeof(struct w25_dev_s));
   if (priv)
     {
       /* Initialize the allocated structure (unsupported methods were
@@ -1453,7 +1453,7 @@ FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *spi)
 #ifdef CONFIG_W25_SECTOR512        /* Simulate a 512 byte sector */
           /* Allocate a buffer for the erase block cache */
 
-          priv->sector = (FAR uint8_t *)kmm_malloc(W25_SECTOR_SIZE);
+          priv->sector = kmm_malloc(W25_SECTOR_SIZE);
           if (!priv->sector)
             {
               /* Discard all of that work we just did and return NULL */

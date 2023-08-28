@@ -126,7 +126,7 @@ GRAN_HANDLE gran_initialize(FAR void *heapstart, size_t heapsize,
    * correct size.
    */
 
-  priv = (FAR struct gran_s *)kmm_zalloc(SIZEOF_GRAN_S(ngranules));
+  priv = kmm_zalloc(SIZEOF_GRAN_S(ngranules));
   if (priv)
     {
       /* Initialize non-zero elements of the granules heap info structure */

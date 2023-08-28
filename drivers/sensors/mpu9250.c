@@ -1938,7 +1938,7 @@ int mpu9250_register(int devno, FAR struct mpu9250_config_s *config)
 
   /* Initialize the device structure. */
 
-  dev = (FAR struct mpu9250_dev_s *)kmm_malloc(sizeof(struct mpu9250_dev_s));
+  dev = kmm_malloc(sizeof(struct mpu9250_dev_s));
   if (dev == NULL)
     {
       snerr("ERROR: Failed to allocate mpu9250 device instance\n");

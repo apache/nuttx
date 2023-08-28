@@ -146,7 +146,7 @@ int bm3803_am29lv_initialize(int minor)
   /* Create a RAM MTD device if configured */
 
 #if defined(CONFIG_RAMMTD) && defined(CONFIG_XX3803_RAMMTD)
-  uint8_t *start = (uint8_t *)kmm_malloc(CONFIG_XX3803_RAMMTD_SIZE * 1024);
+  uint8_t *start = kmm_malloc(CONFIG_XX3803_RAMMTD_SIZE * 1024);
   mtd = rammtd_initialize(start, CONFIG_XX3803_RAMMTD_SIZE * 1024);
   mtd->ioctl(mtd, MTDIOC_BULKERASE, 0);
 #endif /* CONFIG_RAMMTD && CONFIG_XX3803_RAMMTD */

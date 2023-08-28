@@ -5695,7 +5695,7 @@ static int smart_fsck_file(FAR struct smart_struct_s *dev,
   /* Allocate a bitmap table for sectors this file is using */
 
   mapsize = (dev->totalsectors + 7) / 8;
-  usedmap = (FAR uint8_t *)kmm_zalloc(mapsize);
+  usedmap = kmm_zalloc(mapsize);
   if (!usedmap)
     {
       ferr("ERROR: Out of memory used map\n");
@@ -5827,7 +5827,7 @@ static int smart_fsck_directory(FAR struct smart_struct_s *dev,
 
   /* Allocate sector buffer for Directory entry */
 
-  rwbuffer = (uint8_t *)kmm_malloc(dev->sectorsize);
+  rwbuffer = kmm_malloc(dev->sectorsize);
   if (!rwbuffer)
     {
       ferr("ERROR: Out of memory sector buffer\n");
@@ -6069,7 +6069,7 @@ static int smart_fsck(FAR struct smart_struct_s *dev)
   /* Allocate a bitmap table for filesystem check */
 
   mapsize = (dev->totalsectors + 7) / 8;
-  checkmap = (FAR uint8_t *)kmm_zalloc(mapsize);
+  checkmap = kmm_zalloc(mapsize);
   if (!checkmap)
     {
       ferr("ERROR: Out of memory fsck map\n");

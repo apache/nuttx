@@ -2533,7 +2533,7 @@ struct i2s_dev_s *stm32_i2sbus_initialize(int port)
    * chip select structures.
    */
 
-  priv = (struct stm32_i2s_s *)kmm_zalloc(sizeof(struct stm32_i2s_s));
+  priv = kmm_zalloc(sizeof(struct stm32_i2s_s));
   if (!priv)
     {
       i2serr("ERROR: Failed to allocate a chip select structure\n");

@@ -716,7 +716,7 @@ int esp32s3_rt_timer_create(const struct rt_timer_args_s *args,
   DEBUGASSERT(args != NULL);
   DEBUGASSERT(args->callback != NULL);
 
-  timer = (struct rt_timer_s *)kmm_malloc(sizeof(*timer));
+  timer = kmm_malloc(sizeof(*timer));
   if (timer == NULL)
     {
       tmrerr("ERROR: Failed to allocate %d bytes\n", sizeof(*timer));

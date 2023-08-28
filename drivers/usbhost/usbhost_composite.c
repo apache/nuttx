@@ -773,7 +773,7 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
    * configuration descriptor for each member class.
    */
 
-  cfgbuffer = (FAR uint8_t *)kmm_malloc(CUSTOM_CONFIG_BUFSIZE);
+  cfgbuffer = kmm_malloc(CUSTOM_CONFIG_BUFSIZE);
   if (cfgbuffer == NULL)
     {
       uerr("ERROR: Failed to allocate configuration buffer");

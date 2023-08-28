@@ -204,7 +204,7 @@ int elf_loadshdrs(FAR struct elf_loadinfo_s *loadinfo)
 
   /* Allocate memory to hold a working copy of the sector header table */
 
-  loadinfo->shdr = (FAR FAR Elf_Shdr *)kmm_malloc(shdrsize);
+  loadinfo->shdr = kmm_malloc(shdrsize);
   if (!loadinfo->shdr)
     {
       berr("Failed to allocate the section header table. Size: %zu\n",

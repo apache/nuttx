@@ -1553,7 +1553,7 @@ FAR struct mtd_dev_s *s25fl1_initialize(FAR struct qspi_dev_s *qspi,
    * bus.
    */
 
-  priv = (FAR struct s25fl1_dev_s *)kmm_zalloc(sizeof(struct s25fl1_dev_s));
+  priv = kmm_zalloc(sizeof(struct s25fl1_dev_s));
   if (priv)
     {
       /* Initialize the allocated structure (unsupported methods were

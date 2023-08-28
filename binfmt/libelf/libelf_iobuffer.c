@@ -69,7 +69,7 @@ int elf_allocbuffer(FAR struct elf_loadinfo_s *loadinfo)
     {
       /* No.. allocate one now */
 
-      loadinfo->iobuffer = (FAR uint8_t *)kmm_malloc(CONFIG_ELF_BUFFERSIZE);
+      loadinfo->iobuffer = kmm_malloc(CONFIG_ELF_BUFFERSIZE);
       if (!loadinfo->iobuffer)
         {
           berr("Failed to allocate an I/O buffer\n");

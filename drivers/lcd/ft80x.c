@@ -1512,7 +1512,7 @@ int ft80x_register(FAR struct i2c_master_s *i2c,
 
   /* Allocate the driver state structure */
 
-  priv = (FAR struct ft80x_dev_s *)kmm_zalloc(sizeof(struct ft80x_dev_s));
+  priv = kmm_zalloc(sizeof(struct ft80x_dev_s));
   if (priv == NULL)
     {
       lcderr("ERROR: Failed to allocate state structure\n");

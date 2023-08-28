@@ -619,7 +619,7 @@ static int phy_update_init_data(phy_init_data_type_t init_data_type)
   int ret;
   size_t length = sizeof(phy_init_magic_pre) +
       sizeof(esp_phy_init_data_t) + sizeof(phy_init_magic_post);
-  uint8_t *init_data_store = (uint8_t *)kmm_malloc(length);
+  uint8_t *init_data_store = kmm_malloc(length);
   if (init_data_store == NULL)
     {
       wlerr("ERROR: Failed to allocate memory for updated country code "
@@ -710,7 +710,7 @@ const esp_phy_init_data_t *esp_phy_get_init_data(void)
   int ret;
   size_t length = sizeof(phy_init_magic_pre) +
           sizeof(esp_phy_init_data_t) + sizeof(phy_init_magic_post);
-  uint8_t *init_data_store = (uint8_t *)kmm_malloc(length);
+  uint8_t *init_data_store = kmm_malloc(length);
   if (init_data_store == NULL)
     {
       wlerr("ERROR: Failed to allocate memory for PHY init data\n");

@@ -215,7 +215,7 @@ static int zc_open(FAR struct file *filep)
 
   /* Allocate a new open structure */
 
-  opriv = (FAR struct zc_open_s *)kmm_zalloc(sizeof(struct zc_open_s));
+  opriv = kmm_zalloc(sizeof(struct zc_open_s));
   if (!opriv)
     {
       snerr("ERROR: Failed to allocate open structure\n");

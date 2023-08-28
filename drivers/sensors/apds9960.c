@@ -1194,13 +1194,12 @@ static ssize_t apds9960_write(FAR struct file *filep,
 int apds9960_register(FAR const char *devpath,
                       FAR struct apds9960_config_s *config)
 {
+  FAR struct apds9960_dev_s *priv;
   int ret;
 
   /* Initialize the APDS9960 device structure */
 
-  FAR struct apds9960_dev_s *priv =
-    (FAR struct apds9960_dev_s *)kmm_zalloc(sizeof(struct apds9960_dev_s));
-
+  priv = kmm_zalloc(sizeof(struct apds9960_dev_s));
   if (priv == NULL)
     {
       snerr("ERROR: Failed to allocate instance\n");

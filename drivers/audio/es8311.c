@@ -2230,7 +2230,7 @@ FAR struct audio_lowerhalf_s *
 
   /* Allocate a ES8311 device structure */
 
-  priv = (FAR struct es8311_dev_s *)kmm_zalloc(sizeof(struct es8311_dev_s));
+  priv = kmm_zalloc(sizeof(struct es8311_dev_s));
 
   if (priv)
     {

@@ -124,7 +124,7 @@ void lib_rttoutstream_open(FAR struct lib_rttoutstream_s *stream,
   if (channel)
     {
       bufsize = bufsize ? bufsize : BUFFER_SIZE_UP;
-      stream->buffer = (FAR char *)kmm_malloc(bufsize);
+      stream->buffer = kmm_malloc(bufsize);
       DEBUGASSERT(stream->buffer);
       snprintf(stream->name, sizeof(stream->name), "rtt%d", channel);
       SEGGER_RTT_ConfigUpBuffer(channel, stream->name, stream->buffer,
@@ -172,7 +172,7 @@ void lib_rttinstream_open(FAR struct lib_rttinstream_s *stream,
   if (channel)
     {
       bufsize = bufsize ? bufsize : BUFFER_SIZE_DOWN;
-      stream->buffer = (FAR char *)kmm_malloc(bufsize);
+      stream->buffer = kmm_malloc(bufsize);
       DEBUGASSERT(stream->buffer);
       snprintf(stream->name, sizeof(stream->name), "rtt%d", channel);
       SEGGER_RTT_ConfigDownBuffer(channel, stream->name, stream->buffer,

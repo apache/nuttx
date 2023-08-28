@@ -184,7 +184,7 @@ FAR void *insmod(FAR const char *filename, FAR const char *modname)
 
   /* Allocate a module registry entry to hold the module data */
 
-  modp = (FAR struct module_s *)kmm_zalloc(sizeof(struct module_s));
+  modp = kmm_zalloc(sizeof(struct module_s));
   if (modp == NULL)
     {
       berr("Failed to allocate struct module_s\n");

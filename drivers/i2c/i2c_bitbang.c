@@ -379,7 +379,7 @@ FAR struct i2c_master_s *i2c_bitbang_initialize(
 
   DEBUGASSERT(lower && lower->ops);
 
-  dev = (FAR struct i2c_bitbang_dev_s *)kmm_zalloc(sizeof(*dev));
+  dev = kmm_zalloc(sizeof(*dev));
 
   if (!dev)
     {

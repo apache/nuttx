@@ -510,7 +510,7 @@ int bmg160_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
 
   /* Initialize the BMG160 device structure */
 
-  priv = (FAR struct bmg160_dev_s *)kmm_malloc(sizeof(struct bmg160_dev_s));
+  priv = kmm_malloc(sizeof(struct bmg160_dev_s));
   if (priv == NULL)
     {
       snerr("ERROR: Failed to allocate instance\n");

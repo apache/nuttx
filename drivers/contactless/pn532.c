@@ -1116,7 +1116,7 @@ int pn532_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
 
   /* Initialize the PN532 device structure */
 
-  dev = (FAR struct pn532_dev_s *)kmm_malloc(sizeof(struct pn532_dev_s));
+  dev = kmm_malloc(sizeof(struct pn532_dev_s));
   if (!dev)
     {
       ctlserr("ERROR: Failed to allocate instance\n");

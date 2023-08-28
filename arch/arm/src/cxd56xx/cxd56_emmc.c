@@ -950,7 +950,7 @@ int cxd56_emmcinitialize(void)
       return -EIO;
     }
 
-  buf = (uint8_t *)kmm_malloc(SECTOR_SIZE);
+  buf = kmm_malloc(SECTOR_SIZE);
   if (buf)
     {
       putreg32(SECTOR_SIZE, EMMC_BYTCNT);

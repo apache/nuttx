@@ -1353,7 +1353,7 @@ FAR struct ioexpander_dev_s *tca64_initialize(FAR struct i2c_master_s *i2c,
 #ifdef CONFIG_TCA64XX_MULTIPLE
   /* Allocate the device state structure */
 
-  priv = (FAR struct tca64_dev_s *)kmm_zalloc(sizeof(struct tca64_dev_s));
+  priv = kmm_zalloc(sizeof(struct tca64_dev_s));
   if (!priv)
     {
       gpioerr("ERROR: Failed to allocate driver instance\n");

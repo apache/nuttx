@@ -3920,7 +3920,7 @@ static int lpc43_alloc(struct usbhost_driver_s *drvr,
 
   /* There is no special requirements for transfer/descriptor buffers. */
 
-  *buffer = (uint8_t *)kmm_malloc(CONFIG_LPC43_EHCI_BUFSIZE);
+  *buffer = kmm_malloc(CONFIG_LPC43_EHCI_BUFSIZE);
   if (*buffer)
     {
       *maxlen = CONFIG_LPC43_EHCI_BUFSIZE;
@@ -4005,7 +4005,7 @@ static int lpc43_ioalloc(struct usbhost_driver_s *drvr,
    * buffering).
    */
 
-  *buffer = (uint8_t *)kumm_malloc(buflen);
+  *buffer = kumm_malloc(buflen);
   return *buffer ? OK : -ENOMEM;
 }
 

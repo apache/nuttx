@@ -907,7 +907,7 @@ static int cxd56_gnss_save_backup_data(struct file *filep,
   int         n = 0;
   int32_t     offset = 0;
 
-  buf = (char *)kmm_malloc(CONFIG_CXD56_GNSS_BACKUP_BUFFER_SIZE);
+  buf = kmm_malloc(CONFIG_CXD56_GNSS_BACKUP_BUFFER_SIZE);
   if (buf == NULL)
     {
       return -ENOMEM;
@@ -1054,7 +1054,7 @@ static int cxd56_gnss_check_cep_data(struct file *filep, unsigned long arg)
 
   if (g_ceplen > 0)
     {
-      g_cepdata = (char *)kmm_malloc(g_ceplen);
+      g_cepdata = kmm_malloc(g_ceplen);
     }
 
   if (!g_cepdata)
@@ -2267,7 +2267,7 @@ cxd56_gnss_read_cep_file(struct file *fp, int32_t offset,
       goto err0;
     }
 
-  buf = (char *)kmm_malloc(len);
+  buf = kmm_malloc(len);
   if (buf == NULL)
     {
       ret = -ENOMEM;
@@ -2326,7 +2326,7 @@ static void cxd56_gnss_read_backup_file(int *retval)
   size_t      n;
   int         ret = 0;
 
-  buf = (char *)kmm_malloc(CONFIG_CXD56_GNSS_BACKUP_BUFFER_SIZE);
+  buf = kmm_malloc(CONFIG_CXD56_GNSS_BACKUP_BUFFER_SIZE);
   if (buf == NULL)
     {
       ret = -ENOMEM;
@@ -3131,8 +3131,7 @@ static int cxd56_gnss_register(const char *devpath)
     }
   };
 
-  priv = (struct cxd56_gnss_dev_s *)kmm_zalloc(
-    sizeof(struct cxd56_gnss_dev_s));
+  priv = kmm_zalloc(sizeof(struct cxd56_gnss_dev_s));
   if (!priv)
     {
       gnsserr("Failed to allocate instance\n");

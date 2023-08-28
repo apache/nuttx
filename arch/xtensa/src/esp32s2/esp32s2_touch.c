@@ -254,7 +254,7 @@ static void touch_init(struct touch_config_s *config)
       return;
     }
 
-  touch_mux = (mutex_t *) kmm_zalloc(sizeof(mutex_t));
+  touch_mux = kmm_zalloc(sizeof(mutex_t));
 
   if (touch_mux == NULL)
     {

@@ -327,7 +327,7 @@ int stm32_bringup(void)
 
     {
       uint8_t *start =
-          (uint8_t *) kmm_malloc(CONFIG_STM32F429I_DISCO_RAMMTD_SIZE * 1024);
+          kmm_malloc(CONFIG_STM32F429I_DISCO_RAMMTD_SIZE * 1024);
       mtd = rammtd_initialize(start,
                               CONFIG_STM32F429I_DISCO_RAMMTD_SIZE * 1024);
       mtd->ioctl(mtd, MTDIOC_BULKERASE, 0);

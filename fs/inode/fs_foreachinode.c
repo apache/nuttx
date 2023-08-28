@@ -170,7 +170,7 @@ int foreach_inode(foreach_inode_t handler, FAR void *arg)
 
   /* Allocate the mountpoint info structure */
 
-  info = (FAR struct inode_path_s *)kmm_malloc(sizeof(struct inode_path_s));
+  info = kmm_malloc(sizeof(struct inode_path_s));
   if (!info)
     {
       return -ENOMEM;

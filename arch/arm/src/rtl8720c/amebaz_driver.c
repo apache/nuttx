@@ -1080,7 +1080,7 @@ static struct amebaz_dev_s *amebaz_allocate_device(int devnum)
 {
   struct amebaz_dev_s *priv;
 
-  priv = (struct amebaz_dev_s *)kmm_zalloc(sizeof(*priv));
+  priv = kmm_zalloc(sizeof(*priv));
   if (!priv)
     {
       return NULL;

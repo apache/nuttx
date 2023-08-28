@@ -60,7 +60,7 @@ int pthread_createjoininfo(FAR struct pthread_tcb_s *ptcb,
 {
   /* Allocate a detachable structure to support pthread_join logic */
 
-  *pjoin = (FAR struct join_s *)kmm_zalloc(sizeof(struct join_s));
+  *pjoin = kmm_zalloc(sizeof(struct join_s));
   if (*pjoin == NULL)
     {
       serr("ERROR: Failed to allocate join\n");

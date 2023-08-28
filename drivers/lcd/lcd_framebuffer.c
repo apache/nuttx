@@ -557,7 +557,7 @@ int up_fbinitialize(int display)
 
   /* Allocate the framebuffer state structure */
 
-  priv = (FAR struct lcdfb_dev_s *)kmm_zalloc(sizeof(struct lcdfb_dev_s));
+  priv = kmm_zalloc(sizeof(struct lcdfb_dev_s));
   if (priv == NULL)
     {
       lcderr("ERROR: Failed to allocate state structure\n");
@@ -641,7 +641,7 @@ int up_fbinitialize(int display)
   priv->stride = ((size_t)priv->xres * priv->pinfo.bpp + 7) >> 3;
   priv->fblen  = priv->stride * priv->yres;
 
-  priv->fbmem  = (FAR uint8_t *)kmm_zalloc(priv->fblen);
+  priv->fbmem  = kmm_zalloc(priv->fblen);
   if (priv->fbmem == NULL)
     {
       lcderr("ERROR: Failed to allocate frame buffer memory\n");

@@ -2207,7 +2207,7 @@ int esp32s3_bt_controller_init(void)
 
   btdm_controller_mem_init();
 
-  osi_funcs_p = (struct osi_funcs_s *)kmm_malloc(sizeof(struct osi_funcs_s));
+  osi_funcs_p = kmm_malloc(sizeof(struct osi_funcs_s));
   if (osi_funcs_p == NULL)
     {
       return -ENOMEM;

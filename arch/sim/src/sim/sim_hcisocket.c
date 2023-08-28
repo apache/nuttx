@@ -180,7 +180,7 @@ static struct bthcisock_s *bthcisock_alloc(int dev_id)
   struct bthcisock_s *dev;
   struct bt_driver_s *drv;
 
-  dev = (struct bthcisock_s *)kmm_zalloc(sizeof(*dev));
+  dev = kmm_zalloc(sizeof(*dev));
   if (dev == NULL)
     {
       return NULL;
