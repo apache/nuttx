@@ -175,6 +175,6 @@ int nxsig_notification(pid_t pid, FAR struct sigevent *event,
 #ifdef CONFIG_SIG_EVTHREAD
 void nxsig_cancel_notification(FAR struct sigwork_s *work)
 {
-  work_cancel(SIG_EVTHREAD_WORK, &work->work);
+  work_cancel_sync(SIG_EVTHREAD_WORK, &work->work);
 }
 #endif
