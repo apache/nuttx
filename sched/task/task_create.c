@@ -81,7 +81,7 @@ int nxthread_create(FAR const char *name, uint8_t ttype, int priority,
 
   /* Allocate a TCB for the new task. */
 
-  tcb = (FAR struct task_tcb_s *)kmm_zalloc(sizeof(struct task_tcb_s));
+  tcb = kmm_zalloc(sizeof(struct task_tcb_s));
   if (!tcb)
     {
       serr("ERROR: Failed to allocate TCB\n");

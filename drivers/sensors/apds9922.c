@@ -1883,7 +1883,7 @@ static int apds9922_i2c_write(FAR struct apds9922_dev_s *priv,
   irqstate_t          flags;
   uint8_t             *buffer;
 
-  buffer = (uint8_t *)kmm_malloc((len + 1) * sizeof(uint8_t));
+  buffer = kmm_malloc((len + 1) * sizeof(uint8_t));
   if (!buffer)
     {
       snerr("ERROR: Failed to create i2c  write buffer space\n");

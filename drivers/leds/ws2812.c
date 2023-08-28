@@ -657,7 +657,7 @@ int ws2812_leds_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
 
   /* Initialize the WS2812 device structure */
 
-  priv = (FAR struct ws2812_dev_s *)kmm_malloc(sizeof(struct ws2812_dev_s));
+  priv = kmm_malloc(sizeof(struct ws2812_dev_s));
   if (!priv)
     {
       lederr("ERROR: Failed to allocate instance\n");
@@ -665,7 +665,7 @@ int ws2812_leds_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
     }
 
   priv->nleds  = nleds;
-  priv->tx_buf = (FAR uint8_t *)kmm_zalloc(TXBUFF_SIZE(priv->nleds));
+  priv->tx_buf = kmm_zalloc(TXBUFF_SIZE(priv->nleds));
   if (!priv->tx_buf)
     {
       lederr("ERROR: Failed to allocate tx buffer\n");

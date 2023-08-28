@@ -159,7 +159,7 @@ int sim_bringup(void)
 #ifdef CONFIG_RAMMTD
   /* Create a RAM MTD device if configured */
 
-  ramstart = (uint8_t *)kmm_malloc(128 * 1024);
+  ramstart = kmm_malloc(128 * 1024);
   if (ramstart == NULL)
     {
       syslog(LOG_ERR, "ERROR: Allocation for RAM MTD failed\n");
@@ -240,7 +240,7 @@ int sim_bringup(void)
 #endif
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_BLK_RPMSG_SERVER)
-  ramdiskstart = (uint8_t *)kmm_malloc(512 * 2048);
+  ramdiskstart = kmm_malloc(512 * 2048);
   ret = ramdisk_register(1, ramdiskstart, 2048, 512,
                          RDFLAG_WRENABLED | RDFLAG_FUNLINK);
   if (ret < 0)

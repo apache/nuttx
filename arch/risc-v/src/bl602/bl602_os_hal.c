@@ -688,8 +688,7 @@ void *bl_os_mq_creat(uint32_t queue_len, uint32_t item_size)
   struct mq_adpt *mq_adpt;
   int ret;
 
-  mq_adpt = (struct mq_adpt *)kmm_malloc(sizeof(struct mq_adpt));
-
+  mq_adpt = kmm_malloc(sizeof(struct mq_adpt));
   if (!mq_adpt)
     {
       wlerr("ERROR: Failed to kmm_malloc\n");
@@ -931,10 +930,7 @@ static void bl_os_timer_callback(wdparm_t arg)
 
 void *bl_os_timer_create(void *func, void *argv)
 {
-  struct timer_adpt *timer;
-
-  timer = (struct timer_adpt *)kmm_malloc(sizeof(struct timer_adpt));
-
+  struct timer_adpt *timer = kmm_malloc(sizeof(struct timer_adpt));
   if (!timer)
     {
       assert(0);
@@ -1067,9 +1063,7 @@ int bl_os_timer_start_periodic(void *timerid, long t_sec, long t_nsec)
 
 void *bl_os_workqueue_create(void)
 {
-  struct work_s *work = NULL;
-  work = (struct work_s *)kmm_calloc(1, sizeof(struct work_s));
-
+  struct work_s *work = kmm_calloc(1, sizeof(struct work_s));
   if (!work)
     {
       assert(0);
@@ -1215,7 +1209,7 @@ void bl_os_irq_attach(int32_t n, void *f, void *arg)
 
   wlinfo("INFO: n=%ld f=%p arg=%p\n", n, f, arg);
 
-  adapter = (struct irq_adpt *)kmm_malloc(sizeof(struct irq_adpt));
+  adapter = kmm_malloc(sizeof(struct irq_adpt));
 
   if (!adapter)
     {
@@ -1286,7 +1280,7 @@ void *bl_os_mutex_create(void)
   int tmp;
 
   tmp = sizeof(mutex_t);
-  mutex = (mutex_t *)kmm_malloc(tmp);
+  mutex = kmm_malloc(tmp);
   if (!mutex)
     {
       wlerr("ERROR: Failed to alloc %d memory\n", tmp);
@@ -1404,7 +1398,7 @@ void *bl_os_sem_create(uint32_t init)
   int tmp;
 
   tmp = sizeof(sem_t);
-  sem = (sem_t *)kmm_malloc(tmp);
+  sem = kmm_malloc(tmp);
   if (!sem)
     {
       wlerr("ERROR: Failed to alloc %d memory\n", tmp);

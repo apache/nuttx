@@ -2281,7 +2281,7 @@ static struct usbdev_req_s *imxrt_epallocreq(struct usbdev_ep_s *ep)
 
   usbtrace(TRACE_EPALLOCREQ, ((struct imxrt_ep_s *)ep)->epphy);
 
-  privreq = (struct imxrt_req_s *)kmm_malloc(sizeof(struct imxrt_req_s));
+  privreq = kmm_malloc(sizeof(struct imxrt_req_s));
   if (!privreq)
     {
       usbtrace(TRACE_DEVERROR(IMXRT_TRACEERR_ALLOCFAIL), 0);

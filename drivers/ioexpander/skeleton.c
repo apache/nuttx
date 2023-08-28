@@ -780,7 +780,7 @@ FAR struct ioexpander_dev_s *skel_initialize(void)
 #ifdef CONFIG_skeleton_MULTIPLE
   /* Allocate the device state structure */
 
-  priv = (FAR struct skel_dev_s *)kmm_zalloc(sizeof(struct skel_dev_s));
+  priv = kmm_zalloc(sizeof(struct skel_dev_s));
   if (!priv)
     {
       gpioerr("ERROR: Failed to allocate driver instance\n");

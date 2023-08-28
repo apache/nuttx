@@ -336,7 +336,7 @@ int lcddev_register(int devno)
 
   /* Allocate a new lcd_dev driver instance */
 
-  priv = (FAR struct lcddev_dev_s *)kmm_zalloc(sizeof(struct lcddev_dev_s));
+  priv = kmm_zalloc(sizeof(struct lcddev_dev_s));
 
   if (!priv)
     {

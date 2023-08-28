@@ -182,8 +182,7 @@ static int xtensa_oneshot_interrupt(int irq, void *context, void *arg)
 struct oneshot_lowerhalf_s *
 xtensa_oneshot_initialize(uint32_t irq, uint32_t freq)
 {
-  struct xoneshot_lowerhalf_s *lower =
-      (struct xoneshot_lowerhalf_s *)kmm_zalloc(sizeof(*lower));
+  struct xoneshot_lowerhalf_s *lower = kmm_zalloc(sizeof(*lower));
 
   if (lower == NULL)
     {

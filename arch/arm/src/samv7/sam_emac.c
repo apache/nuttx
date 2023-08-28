@@ -1141,7 +1141,7 @@ static int sam_buffer_allocate(struct sam_emac_s *priv)
   priv->xfrq[0].nrxbuffers = priv->attr->nrxbuffers;
 
   allocsize = priv->attr->ntxbuffers * EMAC_TX_UNITSIZE;
-  priv->xfrq[0].txbuffer = (uint8_t *)kmm_memalign(EMAC_ALIGN, allocsize);
+  priv->xfrq[0].txbuffer = kmm_memalign(EMAC_ALIGN, allocsize);
   if (!priv->xfrq[0].txbuffer)
     {
       nerr("ERROR: Failed to allocate TX buffer\n");
@@ -1152,7 +1152,7 @@ static int sam_buffer_allocate(struct sam_emac_s *priv)
   priv->xfrq[0].txbufsize = EMAC_TX_UNITSIZE;
 
   allocsize = priv->attr->nrxbuffers * EMAC_RX_UNITSIZE;
-  priv->xfrq[0].rxbuffer = (uint8_t *)kmm_memalign(EMAC_ALIGN, allocsize);
+  priv->xfrq[0].rxbuffer = kmm_memalign(EMAC_ALIGN, allocsize);
   if (!priv->xfrq[0].rxbuffer)
     {
       nerr("ERROR: Failed to allocate RX buffer\n");
@@ -1188,7 +1188,7 @@ static int sam_buffer_allocate(struct sam_emac_s *priv)
   priv->xfrq[1].nrxbuffers = DUMMY_NBUFFERS;
 
   allocsize = DUMMY_NBUFFERS * DUMMY_BUFSIZE;
-  priv->xfrq[1].txbuffer = (uint8_t *)kmm_memalign(EMAC_ALIGN, allocsize);
+  priv->xfrq[1].txbuffer = kmm_memalign(EMAC_ALIGN, allocsize);
   if (!priv->xfrq[1].txbuffer)
     {
       nerr("ERROR: Failed to allocate TX buffer\n");
@@ -1199,7 +1199,7 @@ static int sam_buffer_allocate(struct sam_emac_s *priv)
   priv->xfrq[1].txbufsize = DUMMY_BUFSIZE;
 
   allocsize = DUMMY_NBUFFERS * DUMMY_BUFSIZE;
-  priv->xfrq[1].rxbuffer = (uint8_t *)kmm_memalign(EMAC_ALIGN, allocsize);
+  priv->xfrq[1].rxbuffer = kmm_memalign(EMAC_ALIGN, allocsize);
   if (!priv->xfrq[1].rxbuffer)
     {
       nerr("ERROR: Failed to allocate RX buffer\n");

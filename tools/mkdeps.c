@@ -212,7 +212,7 @@ static void append(char **base, const char *str)
     {
       alloclen = strlen(oldbase) + strlen(str) +
         sizeof((char) ' ') + sizeof((char) '\0');
-      newbase = (char *)malloc(alloclen);
+      newbase = malloc(alloclen);
       if (!newbase)
         {
           fprintf(stderr, "ERROR: Failed to allocate %d bytes\n", alloclen);

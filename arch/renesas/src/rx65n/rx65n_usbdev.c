@@ -3025,7 +3025,7 @@ static struct usbdev_req_s *rx65n_epallocreq(struct usbdev_ep_s *ep)
 #endif
   usbtrace(TRACE_EPALLOCREQ, USB_EPNO(ep->eplog));
 
-  privreq = (struct rx65n_req_s *)kmm_malloc(sizeof(struct rx65n_req_s));
+  privreq = kmm_malloc(sizeof(struct rx65n_req_s));
   if (!privreq)
     {
       usbtrace(TRACE_DEVERROR(RX65N_TRACEERR_ALLOCFAIL), 0);

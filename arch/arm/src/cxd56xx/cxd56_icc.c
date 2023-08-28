@@ -339,7 +339,7 @@ static struct iccdev_s *icc_devnew(void)
   struct iccdev_s *priv;
   int i;
 
-  priv = (struct iccdev_s *)kmm_malloc(sizeof(struct iccdev_s));
+  priv = kmm_malloc(sizeof(struct iccdev_s));
   if (!priv)
     {
       return NULL;

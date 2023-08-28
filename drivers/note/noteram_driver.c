@@ -1112,7 +1112,7 @@ noteram_initialize(FAR const char *devpath, size_t bufsize, bool overwrite)
   FAR struct noteram_driver_s *drv;
   int ret;
 
-  drv = (FAR struct noteram_driver_s *)kmm_malloc(sizeof(*drv) + bufsize);
+  drv = kmm_malloc(sizeof(*drv) + bufsize);
   if (drv == NULL)
     {
       return NULL;

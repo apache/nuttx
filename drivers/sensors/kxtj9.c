@@ -614,7 +614,7 @@ int kxtj9_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   /* Initialize the device's structure */
 
-  priv = (FAR struct kxtj9_dev_s *)kmm_zalloc(sizeof(struct kxtj9_dev_s));
+  priv = kmm_zalloc(sizeof(struct kxtj9_dev_s));
   if (priv == NULL)
     {
       snerr("ERROR: Failed to allocate driver instance\n");

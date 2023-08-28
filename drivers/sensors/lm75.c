@@ -547,7 +547,7 @@ int lm75_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   /* Initialize the LM-75 device structure */
 
-  priv = (FAR struct lm75_dev_s *)kmm_malloc(sizeof(struct lm75_dev_s));
+  priv = kmm_malloc(sizeof(struct lm75_dev_s));
   if (priv == NULL)
     {
       snerr("ERROR: Failed to allocate instance\n");

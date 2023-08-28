@@ -1425,7 +1425,7 @@ static int lsm9ds1_register(FAR const char *devpath,
 
   /* Initialize the device's structure */
 
-  priv = (FAR struct lsm9ds1_dev_s *)kmm_malloc(sizeof(*priv));
+  priv = kmm_malloc(sizeof(*priv));
   if (priv == NULL)
     {
       snerr("ERROR: Failed to allocate instance\n");

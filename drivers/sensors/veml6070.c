@@ -265,6 +265,7 @@ static ssize_t veml6070_write(FAR struct file *filep,
 int veml6070_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                        uint8_t addr)
 {
+  FAR struct veml6070_dev_s *priv;
   int ret;
 
   /* Sanity check */
@@ -273,9 +274,7 @@ int veml6070_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   /* Initialize the VEML6070 device structure */
 
-  FAR struct veml6070_dev_s *priv =
-    (FAR struct veml6070_dev_s *)kmm_malloc(sizeof(struct veml6070_dev_s));
-
+  priv = kmm_malloc(sizeof(struct veml6070_dev_s));
   if (priv == NULL)
     {
       snerr("ERROR: Failed to allocate instance\n");

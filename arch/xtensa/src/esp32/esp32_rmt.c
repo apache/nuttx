@@ -358,11 +358,8 @@ struct rmt_dev_s *esp32_rmtinitialize(void)
   rmt_reset(rmtdev);
   rmt_setup(rmtdev);
 
-  rmtdev->channels = kmm_zalloc(
-    sizeof(struct rmt_dev_channel_s)*
-    RMT_NUMBER_OF_CHANNELS
-  );
-
+  rmtdev->channels = kmm_zalloc(sizeof(struct rmt_dev_channel_s) *
+                                RMT_NUMBER_OF_CHANNELS);
   if (!rmtdev->channels)
     {
       rmterr("Failed to allocate memory for RMT Channels");

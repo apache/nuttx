@@ -1660,7 +1660,7 @@ static struct usbdev_req_s *mpfs_ep_allocreq(struct usbdev_ep_s *ep)
 {
   struct mpfs_req_s *privreq;
 
-  privreq = (struct mpfs_req_s *)kmm_malloc(sizeof(struct mpfs_req_s));
+  privreq = kmm_malloc(sizeof(struct mpfs_req_s));
   if (privreq == NULL)
     {
       usbtrace(TRACE_DEVERROR(MPFS_TRACEERR_ALLOCFAIL), 0);

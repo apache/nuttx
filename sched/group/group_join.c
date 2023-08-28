@@ -92,7 +92,7 @@ static inline int group_addmember(FAR struct task_group_s *group, pid_t pid)
           newmax = UINT8_MAX;
         }
 
-      newmembers = (FAR pid_t *)kmm_malloc(sizeof(pid_t) * newmax);
+      newmembers = kmm_malloc(sizeof(pid_t) * newmax);
 
       if (!newmembers)
         {

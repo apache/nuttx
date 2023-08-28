@@ -560,7 +560,7 @@ int bmp180_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
 
   /* Initialize the BMP180 device structure */
 
-  priv = (FAR struct bmp180_dev_s *)kmm_malloc(sizeof(struct bmp180_dev_s));
+  priv = kmm_malloc(sizeof(struct bmp180_dev_s));
   if (!priv)
     {
       snerr("ERROR: Failed to allocate instance\n");

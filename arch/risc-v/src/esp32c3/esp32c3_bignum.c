@@ -1296,7 +1296,7 @@ int esp32c3_mpi_grow(struct esp32c3_mpi_s *X, size_t nblimbs)
 
   if (X->n < nblimbs)
     {
-      if ((p = (uint32_t *)calloc(nblimbs, CIL)) == NULL)
+      if ((p = calloc(nblimbs, CIL)) == NULL)
         {
           return ESP32C3_ERR_MPI_ALLOC_FAILED;
         }
@@ -1365,7 +1365,7 @@ int esp32c3_mpi_shrink(struct esp32c3_mpi_s *X, size_t nblimbs)
       i = nblimbs;
     }
 
-  if ((p = (uint32_t *)calloc(i, CIL)) == NULL)
+  if ((p = calloc(i, CIL)) == NULL)
     {
       return ESP32C3_ERR_MPI_ALLOC_FAILED;
     }

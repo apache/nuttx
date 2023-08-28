@@ -139,7 +139,7 @@ int elf_loaddtors(FAR struct elf_loadinfo_s *loadinfo)
         {
           /* Allocate memory to hold a copy of the .dtor section */
 
-          loadinfo->dtoralloc = (binfmt_dtor_t *)kumm_malloc(dtorsize);
+          loadinfo->dtoralloc = kumm_malloc(dtorsize);
           if (!loadinfo->dtoralloc)
             {
               berr("Failed to allocate memory for .dtors\n");

@@ -110,7 +110,7 @@ FAR struct igmp_group_s *igmp_grpalloc(FAR struct net_driver_s *dev,
   FAR struct igmp_group_s *group;
 
   ninfo("addr: %08" PRIx32 " dev: %p\n", (uint32_t)*addr, dev);
-  group = (FAR struct igmp_group_s *)kmm_zalloc(sizeof(struct igmp_group_s));
+  group = kmm_zalloc(sizeof(struct igmp_group_s));
 
   grpinfo("group: %p\n", group);
 

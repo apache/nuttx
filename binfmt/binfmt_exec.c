@@ -83,7 +83,7 @@ int exec_spawn(FAR const char *filename, FAR char * const *argv,
 
   /* Allocate the load information */
 
-  bin = (FAR struct binary_s *)kmm_zalloc(sizeof(struct binary_s));
+  bin = kmm_zalloc(sizeof(struct binary_s));
   if (!bin)
     {
       berr("ERROR: Failed to allocate binary_s\n");
