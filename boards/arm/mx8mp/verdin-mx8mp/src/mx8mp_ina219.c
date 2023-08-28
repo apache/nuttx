@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/mx8mp/verdin-mx8mp/src/verdin-mx8mp.h
+ * boards/arm/mx8mp/verdin-mx8mp/src/mx8mp_ina219.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,52 +18,68 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_MX8MP_MX8MP_VERDIN_SRC_VERDIN_MX8MP_H
-#define __BOARDS_ARM_MX8MP_MX8MP_VERDIN_SRC_VERDIN_MX8MP_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <errno.h>
+#include <syslog.h>
+#include <debug.h>
+#include <stdio.h>
+
+#include <nuttx/spi/spi.h>
+#include <nuttx/sensors/ina219.h>
+
+#include "mx8mp_i2c.h"
+#include "mx8mp_ina219.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Types
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: mx8mp_bringup
+ * Name: board_ina219_initialize
  *
  * Description:
- *   Bring up board features
+ *   Initialize and register the INA219 voltage/current sensor.
+ *
+ * Input parameters:
+ *   devno - The device number, used to build the device path as /dev/inaN
+ *   busno - The I2C bus number
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int mx8mp_bringup(void);
+int board_ina219_initialize(int busno)
+{
+  struct i2c_master_s *i2c;
+  int ret;
 
-/****************************************************************************
- * Name: mx8mp_i2cdev_initialize
- *
- * Description:
- *   Called to configure all i2c
- *
- ****************************************************************************/
+  sninfo("Initializing INA219!\n");
 
-int mx8mp_i2cdev_initialize(void);
+  /* Initialize I2C */
 
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_MX8MP_MX8MP_VERDIN_SRC_VERDIN_MX8MP_H */
+  i2c = mx8mp_i2cbus_initialize(busno);
+  if (!i2c)
+    {
+      return -ENODEV;
+    }
+
+  /* Then register the sensor */
+
+  ret = ina219_register("/dev/ina219", i2c, 0x40, 10000, 0x00);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Error registering INA219\n");
+    }
+
+  return ret;
+}

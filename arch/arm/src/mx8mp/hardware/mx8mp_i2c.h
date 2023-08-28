@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/mx8mp/verdin-mx8mp/src/verdin-mx8mp.h
+ * arch/arm/src/mx8mp/hardware/mx8mp_i2c.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,52 +18,50 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_MX8MP_MX8MP_VERDIN_SRC_VERDIN_MX8MP_H
-#define __BOARDS_ARM_MX8MP_MX8MP_VERDIN_SRC_VERDIN_MX8MP_H
+#ifndef __ARCH_ARM_SRC_MX8MP_HARDWARE_MX8MP_I2C_H
+#define __ARCH_ARM_SRC_MX8MP_HARDWARE_MX8MP_I2C_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+/* I2C Register Offsets *****************************************************/
+
+#define IADR_OFFSET     0x0000
+#define IFDR_OFFSET     0x0004
+#define I2CR_OFFSET     0x0008
+#define I2SR_OFFSET     0x000c
+#define I2DR_OFFSET     0x0010
+
+/* I2C Register Bit Definitions *********************************************/
+
+#define IADR_SHIFT      1
+#define IADR_MASK       (0x7f << IADR_SHIFT)
+
+#define IFDR_SHIFT      0
+#define IFDR_MASK       (0x3f << IFDR_SHIFT)
+
+#define I2CR_IEN        (1 << 7)  /* enable */
+#define I2CR_IIEN       (1 << 6)  /* interrupt enable */
+#define I2CR_MSTA       (1 << 5)  /* master/start */
+#define I2CR_MTX        (1 << 4)  /* transmit */
+#define I2CR_TXAK       (1 << 3)  /* ACK/NACK on reception */
+#define I2CR_RSTA       (1 << 2)  /* repeated start */
+
+#define I2SR_ICF        (1 << 7)  /* transfer in progress */
+#define I2SR_IAAS       (1 << 6)  /* addressed as a slave */
+#define I2SR_IBB        (1 << 5)  /* is busy */
+#define I2SR_IAL        (1 << 4)  /* arbitration lost */
+#define I2SR_SRW        (1 << 2)  /* slave read/write (if in slave mode) */
+#define I2SR_IIF        (1 << 1)  /* interrupt is pending */
+#define I2SR_RXAK       (1 << 0)  /* no ack detected */
 
 /****************************************************************************
- * Public Data
+ * Inline Functions
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: mx8mp_bringup
- *
- * Description:
- *   Bring up board features
- *
- ****************************************************************************/
-
-int mx8mp_bringup(void);
-
-/****************************************************************************
- * Name: mx8mp_i2cdev_initialize
- *
- * Description:
- *   Called to configure all i2c
- *
- ****************************************************************************/
-
-int mx8mp_i2cdev_initialize(void);
-
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_MX8MP_MX8MP_VERDIN_SRC_VERDIN_MX8MP_H */
+#endif /* __ARCH_ARM_SRC_MX8MP_HARDWARE_MX8MP_I2C_H */
