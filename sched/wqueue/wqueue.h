@@ -53,6 +53,8 @@
 struct kworker_s
 {
   pid_t             pid;       /* The task ID of the worker thread */
+  FAR struct work_s *work;     /* The work structure */
+  sem_t             wait;      /* Sync waiting for worker done */
 };
 
 /* This structure defines the state of one kernel-mode work queue */
