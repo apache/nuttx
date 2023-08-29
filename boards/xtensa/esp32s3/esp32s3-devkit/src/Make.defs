@@ -41,6 +41,10 @@ ifeq ($(CONFIG_ESP32S3_SPI),y)
 CSRCS += esp32s3_board_spi.c
 endif
 
+ifeq ($(CONFIG_ESP32S3_TWAI),y)
+CSRCS += esp32s3_twai.c
+endif
+
 ifeq ($(CONFIG_PWM),y)
 CSRCS += esp32s3_ledc.c
 endif

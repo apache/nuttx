@@ -93,7 +93,7 @@ ADC          No
 AES          No
 Bluetooth    No
 CAMERA       No
-CAN/TWAI     No
+CAN/TWAI     Yes
 DMA          Yes
 eFuse        No
 GPIO         Yes

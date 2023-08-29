@@ -99,7 +99,7 @@
 #define ESP32S3_PERIPH_PWM1                                32
 #define ESP32S3_PERIPH_LEDC                                35
 #define ESP32S3_PERIPH_EFUSE                               36
-#define ESP32S3_PERIPH_CAN                                 37
+#define ESP32S3_PERIPH_TWAI                                37
 #define ESP32S3_PERIPH_USB                                 38
 #define ESP32S3_PERIPH_RTC_CORE                            39
 
@@ -239,7 +239,7 @@
 #define ESP32S3_IRQ_PWM1                                (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_PWM1)
 #define ESP32S3_IRQ_LEDC                                (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_LEDC)
 #define ESP32S3_IRQ_EFUSE                               (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_EFUSE)
-#define ESP32S3_IRQ_CAN                                 (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_CAN)
+#define ESP32S3_IRQ_TWAI                                (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_TWAI)
 #define ESP32S3_IRQ_USB                                 (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_USB)
 #define ESP32S3_IRQ_RTC_CORE                            (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_RTC_CORE)
 
