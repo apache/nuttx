@@ -373,12 +373,12 @@ static void mpfs_ddr_off_mode(void)
   putreg32(0x07, MPFS_CFG_DDR_SGMII_PHY_RPC97); /* dq */
   putreg32(0x07, MPFS_CFG_DDR_SGMII_PHY_RPC98); /* dqs */
 
-  /* SPARE_0:
+  /* UNUSED_SPACE0:
    *   bits 15:14 connect to ibufmx DQ/DQS/DM
    *   bits 13:12 connect to ibufmx CA/CK
    */
 
-  putreg32(0, MPFS_CFG_DDR_SGMII_PHY_SPARE_0);
+  putreg32(0, MPFS_CFG_DDR_SGMII_PHY_UNUSED_SPACE0);
 
   /* REG_POWERDOWN_B on PLL turn-off, in case was turned on */
 
@@ -530,21 +530,21 @@ static void mpfs_set_ddr_rpc_regs(struct mpfs_ddr_priv_s *priv)
     }
 
   putreg32(0x04, MPFS_CFG_DDR_SGMII_PHY_RPC98);
-  putreg32(0, MPFS_CFG_DDR_SGMII_PHY_SPARE_0);
+  putreg32(0, MPFS_CFG_DDR_SGMII_PHY_UNUSED_SPACE0);
 
 #elif defined(CONFIG_MPFS_DDR_TYPE_DDR4)
 
   putreg32(2, MPFS_CFG_DDR_SGMII_PHY_RPC10_ODT);
   putreg32(2, MPFS_CFG_DDR_SGMII_PHY_RPC11_ODT);
   putreg32(0x04, MPFS_CFG_DDR_SGMII_PHY_RPC98);
-  putreg32(0, MPFS_CFG_DDR_SGMII_PHY_SPARE_0);
+  putreg32(0, MPFS_CFG_DDR_SGMII_PHY_UNUSED_SPACE0);
 
 #elif defined(CONFIG_MPFS_DDR_TYPE_LPDDR3)
 
   putreg32(2, MPFS_CFG_DDR_SGMII_PHY_RPC10_ODT);
   putreg32(2, MPFS_CFG_DDR_SGMII_PHY_RPC11_ODT);
   putreg32(0x04, MPFS_CFG_DDR_SGMII_PHY_RPC98);
-  putreg32(0, MPFS_CFG_DDR_SGMII_PHY_SPARE_0);
+  putreg32(0, MPFS_CFG_DDR_SGMII_PHY_UNUSED_SPACE0);
 
 #elif defined(CONFIG_MPFS_DDR_TYPE_LPDDR4)
 
@@ -578,8 +578,18 @@ static void mpfs_set_ddr_rpc_regs(struct mpfs_ddr_priv_s *priv)
       putreg32(1, MPFS_CFG_DDR_SGMII_PHY_SPIO253);
     }
 
+  /* Write ibufmd_dqs. Value is a constant coped from HSS refenrece code */
+
   putreg32(0x04, MPFS_CFG_DDR_SGMII_PHY_RPC98);
-  putreg32(0xa000, MPFS_CFG_DDR_SGMII_PHY_SPARE_0);
+
+  /* Write TXDLY offset data. 0x14 is a constant copied from HSS reference code, it is
+   * unknown whether this needs to be adjustable at the moment
+   */
+
+  putreg32(0x14, MPFS_CFG_DDR_SGMII_PHY_RPC226);
+
+  putreg32(0xa000, MPFS_CFG_DDR_SGMII_PHY_UNUSED_SPACE0);
+  putreg32(0xa000, MPFS_CFG_DDR_SGMII_PHY_SPARE0);
 
 #endif
 
