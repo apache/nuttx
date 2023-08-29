@@ -885,11 +885,11 @@ static ssize_t uart_read(FAR struct file *filep,
 
                   dev->escape = 0;
                 }
-              else  if (dev->escape > 0)
+              else if (dev->escape > 0)
                 {
                   /* Skipping character count down */
 
-                  if (--dev->escape > 0)
+                  if (dev->escape-- > 0)
                     {
                       continue;
                     }
