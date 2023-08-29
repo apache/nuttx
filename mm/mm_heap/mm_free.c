@@ -50,6 +50,10 @@ static void add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
   tmp->flink = heap->mm_delaylist[up_cpu_index()];
   heap->mm_delaylist[up_cpu_index()] = tmp;
 
+#if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
+  heap->mm_delaycount[up_cpu_index()]++;
+#endif
+
   up_irq_restore(flags);
 #endif
 }
@@ -59,39 +63,20 @@ static void add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mm_free
+ * Name: mm_delayfree
  *
  * Description:
- *   Returns a chunk of memory to the list of free nodes,  merging with
- *   adjacent free chunks if possible.
+ *   Delay free memory if `delay` is true, otherwise free it immediately.
  *
  ****************************************************************************/
 
-void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
+void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem, bool delay)
 {
   FAR struct mm_freenode_s *node;
   FAR struct mm_freenode_s *prev;
   FAR struct mm_freenode_s *next;
   size_t nodesize;
   size_t prevsize;
-
-  minfo("Freeing %p\n", mem);
-
-  /* Protect against attempts to free a NULL reference */
-
-  if (!mem)
-    {
-      return;
-    }
-
-  DEBUGASSERT(mm_heapmember(heap, mem));
-
-#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
-  if (mempool_multiple_free(heap->mm_mpool, mem) >= 0)
-    {
-      return;
-    }
-#endif
 
   if (mm_lock(heap) < 0)
     {
@@ -109,6 +94,13 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
 #endif
 
   kasan_poison(mem, mm_malloc_size(heap, mem));
+
+  if (delay)
+    {
+      mm_unlock(heap);
+      add_delaylist(heap, mem);
+      return;
+    }
 
   /* Map the memory chunk into a free node */
 
@@ -201,4 +193,36 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
 
   mm_addfreechunk(heap, node);
   mm_unlock(heap);
+}
+
+/****************************************************************************
+ * Name: mm_free
+ *
+ * Description:
+ *   Returns a chunk of memory to the list of free nodes,  merging with
+ *   adjacent free chunks if possible.
+ *
+ ****************************************************************************/
+
+void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
+{
+  minfo("Freeing %p\n", mem);
+
+  /* Protect against attempts to free a NULL reference */
+
+  if (mem == NULL)
+    {
+      return;
+    }
+
+  DEBUGASSERT(mm_heapmember(heap, mem));
+
+#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+  if (mempool_multiple_free(heap->mm_mpool, mem) >= 0)
+    {
+      return;
+    }
+#endif
+
+  mm_delayfree(heap, mem, CONFIG_MM_FREE_DELAYCOUNT_MAX > 0);
 }
