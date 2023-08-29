@@ -2564,8 +2564,10 @@ static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
         }
     }
 #endif /* #ifdef CONFIG_MMCSD_MMCSUPPORT */
-  else
+  else if (!IS_SD(priv->type) && !IS_MMC(priv->type))
     {
+      /* Take this path when no MMC / SD is yet detected */
+
       fwarn("No card inserted.\n");
       SDIO_WIDEBUS(priv->dev, false);
       priv->widebus = false;
@@ -2577,8 +2579,17 @@ static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
 
   /* Configure the SDIO peripheral */
 
-  if ((priv->buswidth & MMCSD_SCR_BUSWIDTH_4BIT) != 0)
+  if ((IS_MMC(priv->type) && ((priv->caps & SDIO_CAPS_1BIT_ONLY) == 0)) ||
+      ((priv->buswidth & MMCSD_SCR_BUSWIDTH_4BIT) != 0))
     {
+      /* JEDEC specs: A.8.3 Changing the data bus width: 'Bus testing
+       * procedure' shows how mmc bus width may be detected.  This driver
+       * doesn't do it, so let the low level driver decide how to go with
+       * the widebus selection.  It may well be 1, 4 or 8 bits.
+       *
+       * For SD cards the priv->buswidth is set.
+       */
+
       finfo("Wide bus operation selected\n");
       SDIO_WIDEBUS(priv->dev, true);
       priv->widebus = true;
@@ -2768,15 +2779,14 @@ static int mmcsd_mmcinitialize(FAR struct mmcsd_state_s *priv)
 
   mmcsd_decode_csd(priv, csd);
 
-  if ((priv->caps & SDIO_CAPS_4BIT_ONLY) != 0)
-    {
-      /* Select width (4-bit) bus operation (if the card supports it) */
+  /* It's up to the driver to act on the widebus request.  mmcsd_widebus()
+   * enables the CLOCK_MMC_TRANSFER, so call it here always.
+   */
 
-      ret = mmcsd_widebus(priv);
-      if (ret != OK)
-        {
-          ferr("ERROR: Failed to set wide bus operation: %d\n", ret);
-        }
+  ret = mmcsd_widebus(priv);
+  if (ret != OK)
+    {
+      ferr("ERROR: Failed to set wide bus operation: %d\n", ret);
     }
 
   return OK;
