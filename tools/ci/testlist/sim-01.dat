@@ -51,3 +51,4 @@ CMake,sim:nettest
 CMake,sim:note
 CMake,sim:nsh
 CMake,sim:nxffs
+CMake,sim:cmake_porting_check
