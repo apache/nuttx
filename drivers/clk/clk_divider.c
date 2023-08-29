@@ -297,6 +297,11 @@ static int32_t divider_get_val(uint32_t rate, uint32_t parent_rate,
   uint32_t div;
   uint32_t value;
 
+  if (rate == 0)
+    {
+      return -EINVAL;
+    }
+
   div = DIV_ROUND_UP(parent_rate, rate);
 
   if ((flags & CLK_DIVIDER_POWER_OF_TWO) && !is_power_of_2(div))
