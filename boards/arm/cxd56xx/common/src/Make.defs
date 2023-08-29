@@ -88,6 +88,10 @@ ifeq ($(CONFIG_SENSORS_BMI160_SPI),y)
 CSRCS += cxd56_bmi160_spi.c
 endif
 
+ifeq ($(CONFIG_SENSORS_BMI270_I2C),y)
+CSRCS += cxd56_bmi270_i2c.c
+endif
+
 ifeq ($(CONFIG_SENSORS_BMP280),y)
 CSRCS += cxd56_bmp280_i2c.c
 endif

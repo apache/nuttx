@@ -53,6 +53,12 @@
 #  define _BMI160  0
 #endif
 
+#if defined(CONFIG_SENSORS_BMI270) || defined(CONFIG_SENSORS_BMI270_SCU)
+#  define _BMI270  1
+#else
+#  define _BMI270  0
+#endif
+
 #if defined(CONFIG_SENSORS_KX022) || defined(CONFIG_SENSORS_KX022_SCU)
 #  define _KX022  1
 #else
@@ -107,7 +113,7 @@
 #  define _RPR0521RS  0
 #endif
 
-#if (_BMI160 + _KX022) > 1
+#if (_BMI160 + _BMI270 + _KX022) > 1
 #  error "Duplicate accelerometer sensor device."
 #endif
 
@@ -181,6 +187,13 @@ static struct sensor_device_s sensor_device[] =
   _I2C_DEVICE_WOPATH(bmi160), /* Accel + Gyro */
 #  else /* CONFIG_SENSORS_BMI160_SPI */
   _SPI_DEVICE_WOPATH(bmi160),
+#  endif
+#endif
+#if defined(CONFIG_SENSORS_BMI270) || defined(CONFIG_SENSORS_BMI270_SCU)
+#  if defined(CONFIG_SENSORS_BMI270_I2C) || defined(CONFIG_SENSORS_BMI270_SCU_I2C)
+  _I2C_DEVICE_WOPATH(bmi270),
+#  else /* CONFIG_SENSORS_BMI270_SPI */
+  _SPI_DEVICE_WOPATH(bmi270),
 #  endif
 #endif
 #if defined(CONFIG_SENSORS_KX022) || defined(CONFIG_SENSORS_KX022_SCU)

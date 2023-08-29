@@ -57,6 +57,7 @@
 #include "cxd56_bm1383glv.h"
 #include "cxd56_bm1422gmv.h"
 #include "cxd56_bmi160.h"
+#include "cxd56_bmi270.h"
 #include "cxd56_bmp280.h"
 #include "cxd56_emmcdev.h"
 #include "cxd56_spisd.h"
