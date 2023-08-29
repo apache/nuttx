@@ -361,6 +361,7 @@ static int sim_audio_getcaps(struct audio_lowerhalf_s *dev, int type,
                                        AUDIO_SAMP_RATE_11K |
                                        AUDIO_SAMP_RATE_16K |
                                        AUDIO_SAMP_RATE_22K |
+                                       AUDIO_SAMP_RATE_24K |
                                        AUDIO_SAMP_RATE_32K |
                                        AUDIO_SAMP_RATE_44K |
                                        AUDIO_SAMP_RATE_48K;
