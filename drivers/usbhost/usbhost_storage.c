@@ -1876,7 +1876,7 @@ static int usbhost_open(FAR struct inode *inode)
 
   uinfo("Entry\n");
   DEBUGASSERT(inode->i_private);
-  priv = (FAR struct usbhost_state_s *)inode->i_private;
+  priv = inode->i_private;
 
   /* Make sure that we have exclusive access to the private data structure */
 
@@ -1930,7 +1930,7 @@ static int usbhost_close(FAR struct inode *inode)
 
   uinfo("Entry\n");
   DEBUGASSERT(inode->i_private);
-  priv = (FAR struct usbhost_state_s *)inode->i_private;
+  priv = inode->i_private;
 
   /* Decrement the reference count on the block driver */
 
@@ -1988,7 +1988,7 @@ static ssize_t usbhost_read(FAR struct inode *inode, unsigned char *buffer,
   int ret;
 
   DEBUGASSERT(inode->i_private);
-  priv = (FAR struct usbhost_state_s *)inode->i_private;
+  priv = inode->i_private;
 
   DEBUGASSERT(priv->usbclass.hport);
   hport = priv->usbclass.hport;
@@ -2103,7 +2103,7 @@ static ssize_t usbhost_write(FAR struct inode *inode,
   uinfo("sector: %" PRIuOFF " nsectors: %u\n", startsector, nsectors);
 
   DEBUGASSERT(inode->i_private);
-  priv = (FAR struct usbhost_state_s *)inode->i_private;
+  priv = inode->i_private;
 
   DEBUGASSERT(priv->usbclass.hport);
   hport = priv->usbclass.hport;
@@ -2203,7 +2203,7 @@ static int usbhost_geometry(FAR struct inode *inode,
 
   /* Check if the mass storage device is still connected */
 
-  priv = (FAR struct usbhost_state_s *)inode->i_private;
+  priv = inode->i_private;
   if (priv->disconnected)
     {
       /* No... the block driver is no longer bound to the class.  That means
@@ -2251,7 +2251,7 @@ static int usbhost_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 
   uinfo("Entry\n");
   DEBUGASSERT(inode->i_private);
-  priv = (FAR struct usbhost_state_s *)inode->i_private;
+  priv = inode->i_private;
 
   /* Check if the mass storage device is still connected */
 

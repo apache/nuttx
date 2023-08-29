@@ -229,7 +229,7 @@ static int mac802154dev_close(FAR struct file *filep)
   opriv = filep->f_priv;
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
-  dev = (FAR struct mac802154_chardevice_s *)inode->i_private;
+  dev = inode->i_private;
 
   /* Handle an improbable race conditions with the following atomic test
    * and set.
@@ -339,7 +339,7 @@ static ssize_t mac802154dev_read(FAR struct file *filep, FAR char *buffer,
 
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
-  dev = (FAR struct mac802154_chardevice_s *)inode->i_private;
+  dev = inode->i_private;
 
   /* Check to make sure the buffer is the right size for the struct */
 
@@ -484,7 +484,7 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
 
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
-  dev  = (FAR struct mac802154_chardevice_s *)inode->i_private;
+  dev  = inode->i_private;
 
   /* Check if the struct is the correct size */
 
@@ -554,7 +554,7 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
               filep->f_inode != NULL);
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
-  dev = (FAR struct mac802154_chardevice_s *)inode->i_private;
+  dev = inode->i_private;
 
   /* Get exclusive access to the driver structure */
 

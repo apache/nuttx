@@ -178,7 +178,7 @@ static ssize_t veml6070_read(FAR struct file *filep, FAR char *buffer,
   inode = filep->f_inode;
 
   DEBUGASSERT(inode->i_private);
-  priv  = (FAR struct veml6070_dev_s *)inode->i_private;
+  priv  = inode->i_private;
 
   /* Check if the user is reading the right size */
 

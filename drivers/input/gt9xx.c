@@ -762,7 +762,7 @@ static int gt9xx_poll(FAR struct file *filep, FAR struct pollfd *fds,
   DEBUGASSERT(fds);
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
-  priv = (FAR struct gt9xx_dev_s *)inode->i_private;
+  priv = inode->i_private;
 
   /* Begin Mutex: Lock to prevent concurrent update to Poll Waiters */
 

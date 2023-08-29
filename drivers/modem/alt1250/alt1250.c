@@ -1129,7 +1129,7 @@ static int alt1250_open(FAR struct file *filep)
 
   inode = filep->f_inode;
 
-  dev = (FAR struct alt1250_dev_s *)inode->i_private;
+  dev = inode->i_private;
   DEBUGASSERT(dev);
 
   nxmutex_lock(&dev->refslock);
@@ -1175,7 +1175,7 @@ static int alt1250_close(FAR struct file *filep)
 
   inode = filep->f_inode;
 
-  dev = (FAR struct alt1250_dev_s *)inode->i_private;
+  dev = inode->i_private;
   DEBUGASSERT(dev);
 
   nxmutex_lock(&dev->refslock);
@@ -1220,7 +1220,7 @@ static ssize_t alt1250_read(FAR struct file *filep, FAR char *buffer,
 
   inode = filep->f_inode;
 
-  dev = (FAR struct alt1250_dev_s *)inode->i_private;
+  dev = inode->i_private;
   DEBUGASSERT(dev);
 
   if (len != sizeof(struct alt_readdata_s))
@@ -1245,7 +1245,7 @@ static int alt1250_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   inode = filep->f_inode;
 
-  dev = (FAR struct alt1250_dev_s *)inode->i_private;
+  dev = inode->i_private;
   DEBUGASSERT(dev);
 
   switch (cmd)
@@ -1309,7 +1309,7 @@ static int alt1250_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   inode = filep->f_inode;
 
-  dev = (FAR struct alt1250_dev_s *)inode->i_private;
+  dev = inode->i_private;
   DEBUGASSERT(dev);
 
   /* Are we setting up the poll?  Or tearing it down? */

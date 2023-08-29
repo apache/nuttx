@@ -1097,7 +1097,7 @@ static int cromfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Recover our private data from the struct file instance */
 
-  fs = (FAR struct cromfs_volume_s *)oldp->f_inode->i_private;
+  fs = oldp->f_inode->i_private;
   DEBUGASSERT(fs != NULL);
 
   /* Get the open file instance from the file structure */

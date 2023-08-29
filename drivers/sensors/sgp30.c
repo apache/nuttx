@@ -990,7 +990,7 @@ static int sgp30_unlink(FAR struct inode *inode)
   int ret;
 
   DEBUGASSERT(inode->i_private != NULL);
-  priv = (FAR struct sgp30_dev_s *)inode->i_private;
+  priv = inode->i_private;
 
   /* Get exclusive access */
 

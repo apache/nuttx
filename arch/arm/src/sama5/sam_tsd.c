@@ -973,7 +973,7 @@ static ssize_t sam_tsd_read(struct file *filep, char *buffer, size_t len)
   inode = filep->f_inode;
 
   DEBUGASSERT(inode->i_private);
-  priv = (struct sam_tsd_s *)inode->i_private;
+  priv = inode->i_private;
 
   /* Verify that the caller has provided a buffer large enough to receive
    * the touch data.
@@ -1107,7 +1107,7 @@ static int sam_tsd_ioctl(struct file *filep, int cmd, unsigned long arg)
   inode = filep->f_inode;
 
   DEBUGASSERT(inode->i_private);
-  priv = (struct sam_tsd_s *)inode->i_private;
+  priv = inode->i_private;
 
   /* Get exclusive access to the driver data structure */
 
@@ -1166,7 +1166,7 @@ static int sam_tsd_poll(struct file *filep, struct pollfd *fds, bool setup)
   inode = filep->f_inode;
 
   DEBUGASSERT(inode->i_private);
-  priv = (struct sam_tsd_s *)inode->i_private;
+  priv = inode->i_private;
 
   /* Get exclusive access to the ADC hardware */
 

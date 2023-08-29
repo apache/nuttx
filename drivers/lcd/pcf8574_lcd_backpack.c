@@ -1026,7 +1026,7 @@ static int pcf8574_lcd_open(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct pcf8574_lcd_dev_s *priv =
-    (FAR struct pcf8574_lcd_dev_s *)inode->i_private;
+    inode->i_private;
 
   /* Increment the reference count */
 
@@ -1057,7 +1057,7 @@ static int pcf8574_lcd_close(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct pcf8574_lcd_dev_s *priv =
-    (FAR struct pcf8574_lcd_dev_s *)inode->i_private;
+    inode->i_private;
   int ret;
 
   /* Decrement the reference count */
@@ -1103,7 +1103,7 @@ static ssize_t pcf8574_lcd_read(FAR struct file *filep, FAR char *buffer,
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct pcf8574_lcd_dev_s *priv =
-    (FAR struct pcf8574_lcd_dev_s *)inode->i_private;
+    inode->i_private;
   int nidx;
   uint8_t addr;
   uint8_t row;
@@ -1185,7 +1185,7 @@ static ssize_t pcf8574_lcd_write(FAR struct file *filep,
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct pcf8574_lcd_dev_s *priv =
-    (FAR struct pcf8574_lcd_dev_s *)inode->i_private;
+    inode->i_private;
   struct lib_meminstream_s instream;
   uint8_t row;
   uint8_t col;
@@ -1342,7 +1342,7 @@ static off_t pcf8574_lcd_seek(FAR struct file *filep, off_t offset,
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct pcf8574_lcd_dev_s *priv =
-    (FAR struct pcf8574_lcd_dev_s *)inode->i_private;
+    inode->i_private;
   off_t pos;
   int maxpos;
 
@@ -1425,7 +1425,7 @@ static int pcf8574_lcd_ioctl(FAR struct file *filep, int cmd,
       {
         FAR struct inode *inode = filep->f_inode;
         FAR struct pcf8574_lcd_dev_s *priv =
-          (FAR struct pcf8574_lcd_dev_s *)inode->i_private;
+          inode->i_private;
         FAR struct slcd_attributes_s *attr =
           (FAR struct slcd_attributes_s *)((uintptr_t) arg);
 
@@ -1448,7 +1448,7 @@ static int pcf8574_lcd_ioctl(FAR struct file *filep, int cmd,
       {
         FAR struct inode *inode = filep->f_inode;
         FAR struct pcf8574_lcd_dev_s *priv =
-          (FAR struct pcf8574_lcd_dev_s *)inode->i_private;
+          inode->i_private;
         FAR struct slcd_curpos_s *attr =
           (FAR struct slcd_curpos_s *)((uintptr_t) arg);
         uint8_t row;
@@ -1468,7 +1468,7 @@ static int pcf8574_lcd_ioctl(FAR struct file *filep, int cmd,
       {
         FAR struct inode *inode = filep->f_inode;
         FAR struct pcf8574_lcd_dev_s *priv =
-          (FAR struct pcf8574_lcd_dev_s *)inode->i_private;
+          inode->i_private;
         bool bon;
 
         bon = (priv->bl_bit && priv->cfg.bl_active_high) ||
@@ -1481,7 +1481,7 @@ static int pcf8574_lcd_ioctl(FAR struct file *filep, int cmd,
       {
         FAR struct inode *inode = filep->f_inode;
         FAR struct pcf8574_lcd_dev_s *priv =
-          (FAR struct pcf8574_lcd_dev_s *)inode->i_private;
+          inode->i_private;
 
         nxmutex_lock(&priv->lock);
         lcd_backlight(priv, arg ? true : false);
@@ -1493,7 +1493,7 @@ static int pcf8574_lcd_ioctl(FAR struct file *filep, int cmd,
       {
         FAR struct inode *inode = filep->f_inode;
         FAR struct pcf8574_lcd_dev_s *priv =
-          (FAR struct pcf8574_lcd_dev_s *)inode->i_private;
+          inode->i_private;
         FAR struct slcd_createchar_s *attr =
           (FAR struct slcd_createchar_s *)((uintptr_t) arg);
 
@@ -1540,7 +1540,7 @@ static int pcf8574_lcd_poll(FAR struct file *filep, FAR struct pollfd *fds,
 static int pcf8574_lcd_unlink(FAR struct inode *inode)
 {
   FAR struct pcf8574_lcd_dev_s *priv =
-    (FAR struct pcf8574_lcd_dev_s *)inode->i_private;
+    inode->i_private;
   int ret = OK;
 
   nxmutex_lock(&priv->lock);

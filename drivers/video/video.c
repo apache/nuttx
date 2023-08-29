@@ -1046,7 +1046,7 @@ get_connected_imgsensor(FAR struct imgsensor_s **sensors,
 static int video_open(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR video_mng_t  *priv  = (FAR video_mng_t *)inode->i_private;
+  FAR video_mng_t  *priv  = inode->i_private;
   int ret = OK;
 
   nxmutex_lock(&priv->lock_open_num);
@@ -1083,7 +1083,7 @@ static int video_open(FAR struct file *filep)
 static int video_close(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR video_mng_t  *priv  = (FAR video_mng_t *)inode->i_private;
+  FAR video_mng_t  *priv  = inode->i_private;
 
   nxmutex_lock(&priv->lock_open_num);
 
@@ -1125,7 +1125,7 @@ static ssize_t video_write(FAR struct file *filep,
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int video_unlink(FAR struct inode *inode)
 {
-  FAR video_mng_t *priv = (FAR video_mng_t *)inode->i_private;
+  FAR video_mng_t *priv = inode->i_private;
   nxmutex_lock(&priv->lock_open_num);
   if (priv->open_num == 0)
     {
@@ -3080,7 +3080,7 @@ static int video_s_ext_ctrls_scene(FAR struct video_mng_s *vmng,
 static int video_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR video_mng_t  *priv  = (FAR video_mng_t *)inode->i_private;
+  FAR video_mng_t  *priv  = inode->i_private;
   int ret = OK;
 
   switch (cmd)
@@ -3236,7 +3236,7 @@ static int video_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 static int video_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
 {
   FAR struct inode     *inode    = filep->f_inode;
-  FAR video_mng_t      *priv     = (FAR video_mng_t *)inode->i_private;
+  FAR video_mng_t      *priv     = inode->i_private;
   FAR video_type_inf_t *type_inf = &priv->video_inf;
   size_t                heapsize = get_heapsize(type_inf);
   int                   ret      = -EINVAL;
@@ -3254,7 +3254,7 @@ static int video_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
 static int video_poll(FAR struct file *filep, struct pollfd *fds, bool setup)
 {
   FAR struct inode     *inode = filep->f_inode;
-  FAR video_mng_t      *priv  = (FAR video_mng_t *)inode->i_private;
+  FAR video_mng_t      *priv  = inode->i_private;
   FAR video_type_inf_t *type_inf;
   enum v4l2_buf_type   buf_type;
   irqstate_t           flags;

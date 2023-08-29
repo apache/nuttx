@@ -541,7 +541,7 @@ static int lis2dh_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   inode = filep->f_inode;
 
   DEBUGASSERT(inode->i_private);
-  priv = (FAR struct lis2dh_dev_s *)inode->i_private;
+  priv = inode->i_private;
 
   ret = nxmutex_lock(&dev->devlock);
   if (ret < 0)
@@ -668,7 +668,7 @@ static int lis2dh_poll(FAR struct file *filep, FAR struct pollfd *fds,
   inode = filep->f_inode;
 
   DEBUGASSERT(inode->i_private);
-  priv = (FAR struct lis2dh_dev_s *)inode->i_private;
+  priv = inode->i_private;
 
   ret = nxmutex_lock(&dev->devlock);
   if (ret < 0)

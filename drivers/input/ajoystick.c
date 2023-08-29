@@ -299,7 +299,7 @@ static int ajoy_open(FAR struct file *filep)
 
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
-  priv = (FAR struct ajoy_upperhalf_s *)inode->i_private;
+  priv = inode->i_private;
 
   /* Allocate a new open structure */
 
@@ -355,7 +355,7 @@ static int ajoy_close(FAR struct file *filep)
   opriv = filep->f_priv;
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
-  priv  = (FAR struct ajoy_upperhalf_s *)inode->i_private;
+  priv  = inode->i_private;
 
   flags = enter_critical_section();
 
@@ -417,7 +417,7 @@ static ssize_t ajoy_read(FAR struct file *filep, FAR char *buffer,
   opriv = filep->f_priv;
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
-  priv  = (FAR struct ajoy_upperhalf_s *)inode->i_private;
+  priv  = inode->i_private;
 
   /* Make sure that the buffer is sufficiently large to hold at least one
    * complete sample.
@@ -467,7 +467,7 @@ static int ajoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   opriv = filep->f_priv;
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
-  priv  = (FAR struct ajoy_upperhalf_s *)inode->i_private;
+  priv  = inode->i_private;
 
   /* Get exclusive access to the driver structure */
 

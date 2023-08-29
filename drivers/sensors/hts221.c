@@ -1067,7 +1067,7 @@ static int hts221_poll(FAR struct file *filep, FAR struct pollfd *fds,
   inode = filep->f_inode;
 
   DEBUGASSERT(inode->i_private);
-  priv = (FAR struct hts221_dev_s *)inode->i_private;
+  priv = inode->i_private;
 
   /* Get exclusive access */
 

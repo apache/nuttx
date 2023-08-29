@@ -1088,7 +1088,7 @@ static int mmcsd_open(FAR struct inode *inode)
 
   /* Extract our private data from the inode structure */
 
-  slot = (FAR struct mmcsd_slot_s *)inode->i_private;
+  slot = inode->i_private;
   spi  = slot->spi;
 
 #ifdef CONFIG_DEBUG_FEATURES
@@ -1188,7 +1188,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
 
   /* Extract our private data from the inode structure */
 
-  slot = (FAR struct mmcsd_slot_s *)inode->i_private;
+  slot = inode->i_private;
   spi  = slot->spi;
 
 #ifdef CONFIG_DEBUG_FEATURES
@@ -1371,7 +1371,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode,
 
   /* Extract our private data from the inode structure */
 
-  slot = (FAR struct mmcsd_slot_s *)inode->i_private;
+  slot = inode->i_private;
   spi  = slot->spi;
 
 #ifdef CONFIG_DEBUG_FEATURES
@@ -1575,7 +1575,7 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
 
   /* Extract our private data from the inode structure */
 
-  slot = (FAR struct mmcsd_slot_s *)inode->i_private;
+  slot = inode->i_private;
   spi  = slot->spi;
 
 #ifdef CONFIG_DEBUG_FEATURES

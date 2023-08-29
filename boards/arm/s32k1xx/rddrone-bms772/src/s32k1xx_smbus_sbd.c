@@ -127,7 +127,7 @@ static int smbus_sbd_open(struct file *filep)
   /* Retrieve the smbus_sbd_dev_s struct */
 
   DEBUGASSERT(filep->f_inode->i_private);
-  dev = (struct smbus_sbd_dev_s *)filep->f_inode->i_private;
+  dev = filep->f_inode->i_private;
 
   /* Increase the open reference count */
 
@@ -159,7 +159,7 @@ static int smbus_sbd_close(struct file *filep)
   /* Retrieve the smbus_sbd_dev_s struct */
 
   DEBUGASSERT(filep->f_inode->i_private);
-  dev = (struct smbus_sbd_dev_s *)filep->f_inode->i_private;
+  dev = filep->f_inode->i_private;
 
   /* Decrease the open reference count */
 
@@ -223,7 +223,7 @@ static ssize_t smbus_sbd_read(struct file *filep, char *buffer,
    */
 
   DEBUGASSERT(filep->f_inode->i_private);
-  dev = (struct smbus_sbd_dev_s *)filep->f_inode->i_private;
+  dev = filep->f_inode->i_private;
 
   DEBUGASSERT(buffer);
   read_data = (struct smbus_sbd_data_s *)buffer;
@@ -321,7 +321,7 @@ static ssize_t smbus_sbd_write(struct file *filep, const char *buffer,
    */
 
   DEBUGASSERT(filep->f_inode->i_private);
-  dev = (struct smbus_sbd_dev_s *)filep->f_inode->i_private;
+  dev = filep->f_inode->i_private;
 
   DEBUGASSERT(buffer);
   new_data = (struct smbus_sbd_data_s *)buffer;

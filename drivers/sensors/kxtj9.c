@@ -483,7 +483,7 @@ static ssize_t kxtj9_read(FAR struct file *filep, FAR char *buffer,
   DEBUGASSERT(buffer != NULL);
   inode = filep->f_inode;
 
-  priv = (FAR struct kxtj9_dev_s *)inode->i_private;
+  priv = inode->i_private;
   DEBUGASSERT(priv != NULL  && priv->i2c != NULL);
 
   /* Return all of the samples that will fit in the user-provided buffer */
@@ -540,7 +540,7 @@ static int kxtj9_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   inode = filep->f_inode;
 
-  priv = (FAR struct kxtj9_dev_s *)inode->i_private;
+  priv = inode->i_private;
   DEBUGASSERT(priv != NULL && priv->i2c != NULL);
 
   /* Handle ioctl commands */

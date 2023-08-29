@@ -988,7 +988,7 @@ static int mbr3108_poll(FAR struct file *filep, FAR struct pollfd *fds,
   inode = filep->f_inode;
 
   DEBUGASSERT(inode->i_private);
-  priv = (FAR struct mbr3108_dev_s *)inode->i_private;
+  priv = inode->i_private;
 
   ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)

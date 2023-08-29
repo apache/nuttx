@@ -709,7 +709,7 @@ static int max11802_open(FAR struct file *filep)
   inode = filep->f_inode;
 
   DEBUGASSERT(inode->i_private);
-  priv  = (FAR struct max11802_dev_s *)inode->i_private;
+  priv  = inode->i_private;
 
   /* Get exclusive access to the driver data structure */
 
@@ -762,7 +762,7 @@ static int max11802_close(FAR struct file *filep)
   inode = filep->f_inode;
 
   DEBUGASSERT(inode->i_private);
-  priv  = (FAR struct max11802_dev_s *)inode->i_private;
+  priv  = inode->i_private;
 
   /* Get exclusive access to the driver data structure */
 
@@ -805,7 +805,7 @@ static ssize_t max11802_read(FAR struct file *filep, FAR char *buffer,
   inode = filep->f_inode;
 
   DEBUGASSERT(inode->i_private);
-  priv  = (FAR struct max11802_dev_s *)inode->i_private;
+  priv  = inode->i_private;
 
   /* Verify that the caller has provided a buffer large enough to receive
    * the touch data.
@@ -931,7 +931,7 @@ static int max11802_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   inode = filep->f_inode;
 
   DEBUGASSERT(inode->i_private);
-  priv  = (FAR struct max11802_dev_s *)inode->i_private;
+  priv  = inode->i_private;
 
   /* Get exclusive access to the driver data structure */
 
@@ -987,7 +987,7 @@ static int max11802_poll(FAR struct file *filep, FAR struct pollfd *fds,
   inode = filep->f_inode;
 
   DEBUGASSERT(inode->i_private);
-  priv  = (FAR struct max11802_dev_s *)inode->i_private;
+  priv  = inode->i_private;
 
   /* Are we setting up the poll?  Or tearing it down? */
 

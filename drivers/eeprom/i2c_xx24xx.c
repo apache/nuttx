@@ -346,7 +346,7 @@ static int ee24xx_open(FAR struct file *filep)
   int ret = OK;
 
   DEBUGASSERT(inode->i_private);
-  eedev = (FAR struct ee24xx_dev_s *)inode->i_private;
+  eedev = inode->i_private;
 
   ret = nxmutex_lock(&eedev->lock);
   if (ret < 0)
@@ -383,7 +383,7 @@ static int ee24xx_close(FAR struct file *filep)
   int ret = OK;
 
   DEBUGASSERT(inode->i_private);
-  eedev = (FAR struct ee24xx_dev_s *)inode->i_private;
+  eedev = inode->i_private;
 
   ret = nxmutex_lock(&eedev->lock);
   if (ret < 0)
@@ -423,7 +423,7 @@ static off_t ee24xx_seek(FAR struct file *filep, off_t offset, int whence)
   FAR struct inode        *inode = filep->f_inode;
 
   DEBUGASSERT(inode->i_private);
-  eedev = (FAR struct ee24xx_dev_s *)inode->i_private;
+  eedev = inode->i_private;
 
   ret = nxmutex_lock(&eedev->lock);
   if (ret < 0)
@@ -499,7 +499,7 @@ static ssize_t ee24xx_read(FAR struct file *filep, FAR char *buffer,
   int                      ret;
 
   DEBUGASSERT(inode->i_private);
-  eedev = (FAR struct ee24xx_dev_s *)inode->i_private;
+  eedev = inode->i_private;
 
   ret = nxmutex_lock(&eedev->lock);
   if (ret < 0)
@@ -578,7 +578,7 @@ static ssize_t at24cs_read_uuid(FAR struct file *filep, FAR char *buffer,
   int                      ret;
 
   DEBUGASSERT(inode->i_private);
-  eedev = (FAR struct ee24xx_dev_s *)inode->i_private;
+  eedev = inode->i_private;
 
   ret = nxmutex_lock(&eedev->lock);
   if (ret < 0)
@@ -654,7 +654,7 @@ static ssize_t ee24xx_write(FAR struct file *filep, FAR const char *buffer,
   int                      savelen;
 
   DEBUGASSERT(inode->i_private);
-  eedev = (FAR struct ee24xx_dev_s *)inode->i_private;
+  eedev = inode->i_private;
 
   if (eedev->readonly)
     {
@@ -780,7 +780,7 @@ static int ee24xx_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   int                      ret   = 0;
 
   DEBUGASSERT(inode->i_private);
-  eedev = (FAR struct ee24xx_dev_s *)inode->i_private;
+  eedev = inode->i_private;
   UNUSED(eedev);
 
   switch (cmd)
