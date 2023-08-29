@@ -1241,7 +1241,7 @@ static int bmi270_init_seq(FAR struct bmi270_dev_s *priv)
   FAR uint8_t *tmp    = NULL;
   uint8_t      regval = 0;
 
-  /* Check if initalization already done */
+  /* Check if initialization already done */
 
   regval = bmi270_getreg8(priv, BMI270_INTERNAL_STAT);
   if ((regval & INTSTAT_MSG_MASK) == INTSTAT_MSG_INITOK)
