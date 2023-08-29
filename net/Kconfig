@@ -57,6 +57,18 @@ config NET_PROMISCUOUS
 		Force the Ethernet driver to operate in promiscuous mode (if supported
 		by the Ethernet driver).
 
+config NET_DEFAULT_MIN_PORT
+	int "Net Default Min Port"
+	default 4096
+	---help---
+		Default Network min port
+
+config NET_DEFAULT_MAX_PORT
+	int "Net Default Max Port"
+	default 32000
+	---help---
+		Default Network max port
+
 menu "Driver buffer configuration"
 
 config NET_ETH_PKTSIZE

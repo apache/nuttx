@@ -585,11 +585,11 @@ int tcp_selectport(uint8_t domain,
     {
       net_getrandom(&g_last_tcp_port, sizeof(uint16_t));
 
-      g_last_tcp_port = g_last_tcp_port % 32000;
+      g_last_tcp_port = g_last_tcp_port % CONFIG_NET_DEFAULT_MAX_PORT;
 
-      if (g_last_tcp_port < 4096)
+      if (g_last_tcp_port < CONFIG_NET_DEFAULT_MIN_PORT)
         {
-          g_last_tcp_port += 4096;
+          g_last_tcp_port += CONFIG_NET_DEFAULT_MIN_PORT;
         }
     }
 
@@ -608,9 +608,9 @@ int tcp_selectport(uint8_t domain,
            * is within range.
            */
 
-          if (++g_last_tcp_port >= 32000)
+          if (++g_last_tcp_port >= CONFIG_NET_DEFAULT_MAX_PORT)
             {
-              g_last_tcp_port = 4096;
+              g_last_tcp_port = CONFIG_NET_DEFAULT_MIN_PORT;
             }
 
           portno = HTONS(g_last_tcp_port);
