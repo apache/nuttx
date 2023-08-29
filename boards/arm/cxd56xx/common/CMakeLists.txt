@@ -79,6 +79,10 @@ if(CONFIG_ARCH_BOARD_COMMON)
     list(APPEND SRCS src/cxd56_bmi160_i2c.c)
   endif()
 
+  if(CONFIG_SENSORS_BMI270_I2C)
+    list(APPEND SRCS src/cxd56_bmi270_i2c.c)
+  endif()
+
   if(CONFIG_SENSORS_BMI160_SCU)
     list(APPEND SRCS src/cxd56_bmi160_scu.c)
   endif()
