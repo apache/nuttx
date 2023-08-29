@@ -491,18 +491,6 @@ static void clk_change_rate(FAR struct clk_s *clk, uint32_t best_parent_rate)
   FAR struct clk_s *old_parent;
   bool skip_set_rate = false;
 
-  list_for_every_entry(&clk->children, child, struct clk_s, node)
-    {
-      if (child->new_parent && child->new_parent != clk)
-        {
-          continue;
-        }
-      if (child->new_rate > __clk_get_rate(child))
-        {
-          clk_change_rate(child, clk->new_rate);
-        }
-    }
-
   old_parent = clk->parent;
 
   if (clk->new_parent && clk->new_parent != clk->parent)
