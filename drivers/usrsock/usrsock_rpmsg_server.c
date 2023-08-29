@@ -35,6 +35,7 @@
 #include <nuttx/mutex.h>
 #include <nuttx/net/dns.h>
 #include <nuttx/net/net.h>
+#include <nuttx/queue.h>
 #include <nuttx/rptun/openamp.h>
 #include <nuttx/usrsock/usrsock_rpmsg.h>
 #ifdef CONFIG_NETDEV_WIRELESS_IOCTL
@@ -53,11 +54,31 @@ struct usrsock_rpmsg_s
   struct pollfd             pfds[CONFIG_NET_USRSOCK_RPMSG_SERVER_NSOCKS];
 };
 
+/* Saving rpmsg requests to keep message order. */
+
+struct usrsock_rpmsg_req_s
+{
+  sq_entry_t flink;
+  FAR void  *data;
+  size_t     len;
+  uint32_t   src;
+};
+
 struct usrsock_rpmsg_ept_s
 {
   struct rpmsg_endpoint ept;
+
+  /* For sendto/recvfrom */
+
   struct iovec          iov[CONFIG_NET_USRSOCK_RPMSG_SERVER_NIOVEC];
   ssize_t               remain;
+
+  /* For keeping msg order, normally nIOVec is the max request we can get */
+
+  bool                       inuse;
+  sq_queue_t                 req_free;
+  sq_queue_t                 req_pending;
+  struct usrsock_rpmsg_req_s reqs[CONFIG_NET_USRSOCK_RPMSG_SERVER_NIOVEC];
 };
 
 /****************************************************************************
@@ -989,6 +1010,7 @@ static void usrsock_rpmsg_ns_bind(FAR struct rpmsg_device *rdev,
   FAR struct usrsock_rpmsg_s *priv = priv_;
   FAR struct usrsock_rpmsg_ept_s *uept;
   int ret;
+  int i;
 
   uept = kmm_zalloc(sizeof(*uept));
   if (!uept)
@@ -997,6 +1019,10 @@ static void usrsock_rpmsg_ns_bind(FAR struct rpmsg_device *rdev,
     }
 
   uept->ept.priv = priv;
+  for (i = 0; i < CONFIG_NET_USRSOCK_RPMSG_SERVER_NIOVEC; i++)
+    {
+      sq_addlast(&uept->reqs[i].flink, &uept->req_free);
+    }
 
   ret = rpmsg_create_ept(&uept->ept, rdev, USRSOCK_RPMSG_EPT_NAME,
                          RPMSG_ADDR_ANY, dest,
@@ -1042,26 +1068,82 @@ static void usrsock_rpmsg_ns_unbind(FAR struct rpmsg_endpoint *ept)
   kmm_free(ept);
 }
 
-static int usrsock_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
-                                FAR void *data, size_t len, uint32_t src,
-                                FAR void *priv_)
+static int usrsock_rpmsg_ept_do_cb(FAR struct usrsock_rpmsg_ept_s *uept,
+                                   FAR void *data, size_t len, uint32_t src,
+                                   FAR struct usrsock_rpmsg_s *priv)
 {
   FAR struct usrsock_request_common_s *common = data;
-  FAR struct usrsock_rpmsg_ept_s *uept =
-    (FAR struct usrsock_rpmsg_ept_s *)ept;
-  FAR struct usrsock_rpmsg_s *priv = priv_;
 
   if (uept->remain > 0)
     {
-      return usrsock_rpmsg_sendto_handler(ept, data, len, src, priv);
+      return usrsock_rpmsg_sendto_handler(&uept->ept, data, len, src, priv);
     }
   else if (common->reqid >= 0 && common->reqid <= USRSOCK_REQUEST__MAX)
     {
-      return g_usrsock_rpmsg_handler[common->reqid](ept, data, len,
+      return g_usrsock_rpmsg_handler[common->reqid](&uept->ept, data, len,
                                                     src, priv);
     }
 
   return -EINVAL;
+}
+
+static int usrsock_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
+                                FAR void *data, size_t len, uint32_t src,
+                                FAR void *priv_)
+{
+  FAR struct usrsock_rpmsg_s *priv = priv_;
+  FAR struct usrsock_rpmsg_ept_s *uept =
+    (FAR struct usrsock_rpmsg_ept_s *)ept;
+  FAR struct usrsock_rpmsg_req_s *req;
+  int ret;
+
+  /* This callback is called from only one thread per ept, so don't need any
+   * lock for `inuse` state.
+   */
+
+  if (uept->inuse)
+    {
+      /* Avoid recursive call. */
+
+      req = (FAR struct usrsock_rpmsg_req_s *)sq_remfirst(&uept->req_free);
+      if (req == NULL)
+        {
+          return -ENOMEM;
+        }
+
+      req->data = data;
+      req->len  = len;
+      req->src  = src;
+      sq_addlast(&req->flink, &uept->req_pending);
+
+      rpmsg_hold_rx_buffer(ept, data);
+      return OK;
+    }
+
+  uept->inuse = true;
+  ret = usrsock_rpmsg_ept_do_cb(uept, data, len, src, priv);
+
+  /* Pop pending requests to proceed. */
+
+  while ((req = (FAR struct usrsock_rpmsg_req_s *)
+                 sq_remfirst(&uept->req_pending)) != NULL)
+    {
+      data = req->data;
+      len  = req->len;
+      src  = req->src;
+      sq_addlast(&req->flink, &uept->req_free);
+
+      ret = usrsock_rpmsg_ept_do_cb(uept, data, len, src, priv);
+      if (ret < 0)
+        {
+          nerr("ERROR: usrsock got error %d!", ret);
+        }
+
+      rpmsg_release_rx_buffer(ept, data);
+    }
+
+  uept->inuse = false;
+  return ret;
 }
 
 static void usrsock_rpmsg_poll_setup(FAR struct pollfd *pfds,
