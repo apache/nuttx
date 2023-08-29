@@ -190,5 +190,9 @@ int esp32s3_djoy_initialize(void);
 int esp32s3_pwm_setup(void);
 #endif
 
+#ifdef CONFIG_ESP32S3_TWAI
+int esp32s3_twai_setup(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_XTENSA_ESP32S3_ESP32S3_DEVKIT_SRC_ESP32S3_DEVKIT_H */
