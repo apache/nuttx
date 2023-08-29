@@ -940,7 +940,7 @@ static int scd41_unlink(FAR struct inode *inode)
   int ret;
 
   DEBUGASSERT(inode->i_private != NULL);
-  priv = (FAR struct scd41_dev_s *)inode->i_private;
+  priv = inode->i_private;
 
   /* Get exclusive access */
 

@@ -1476,7 +1476,7 @@ static int fat_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Recover our private data from the struct file instance */
 
-  fs = (struct fat_mountpt_s *)oldp->f_inode->i_private;
+  fs = oldp->f_inode->i_private;
 
   DEBUGASSERT(fs != NULL);
 

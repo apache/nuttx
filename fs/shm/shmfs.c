@@ -366,7 +366,7 @@ static int shmfs_mmap(FAR struct file *filep,
   ret = inode_addref(filep->f_inode);
   if (ret >= 0)
     {
-      object = (FAR struct shmfs_object_s *)filep->f_inode->i_private;
+      object = filep->f_inode->i_private;
       if (object)
         {
           ret = shmfs_map_object(object, &entry->vaddr);

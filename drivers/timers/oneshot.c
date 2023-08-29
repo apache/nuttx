@@ -157,7 +157,7 @@ static int oneshot_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   tmrinfo("cmd=%d arg=%08lx\n", cmd, (unsigned long)arg);
 
   inode = filep->f_inode;
-  priv  = (FAR struct oneshot_dev_s *)inode->i_private;
+  priv  = inode->i_private;
   DEBUGASSERT(priv != NULL);
 
   /* Get exclusive access to the device structures */

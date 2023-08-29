@@ -126,7 +126,7 @@ static int i2cdrvr_open(FAR struct file *filep)
 
   inode = filep->f_inode;
 
-  priv = (FAR struct i2c_driver_s *)inode->i_private;
+  priv = inode->i_private;
   DEBUGASSERT(priv);
 
   /* Get exclusive access to the I2C driver state structure */
@@ -162,7 +162,7 @@ static int i2cdrvr_close(FAR struct file *filep)
 
   inode = filep->f_inode;
 
-  priv = (FAR struct i2c_driver_s *)inode->i_private;
+  priv = inode->i_private;
   DEBUGASSERT(priv);
 
   /* Get exclusive access to the I2C driver state structure */
@@ -231,7 +231,7 @@ static int i2cdrvr_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   inode = filep->f_inode;
 
-  priv = (FAR struct i2c_driver_s *)inode->i_private;
+  priv = inode->i_private;
   DEBUGASSERT(priv);
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
@@ -306,7 +306,7 @@ static int i2cdrvr_unlink(FAR struct inode *inode)
   /* Get our private data structure */
 
   DEBUGASSERT(inode->i_private != NULL);
-  priv = (FAR struct i2c_driver_s *)inode->i_private;
+  priv = inode->i_private;
 
   /* Get exclusive access to the I2C driver state structure */
 

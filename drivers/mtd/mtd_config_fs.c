@@ -1916,7 +1916,7 @@ static int mtdconfig_ioctl(FAR struct file *filep, int cmd,
                            unsigned long arg)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR struct nvs_fs *fs = (FAR struct nvs_fs *)inode->i_private;
+  FAR struct nvs_fs *fs = inode->i_private;
   FAR struct config_data_s *pdata = (FAR struct config_data_s *)arg;
   int ret = -ENOTTY;
 
@@ -2089,7 +2089,7 @@ int mtdconfig_unregister_by_path(FAR const char *path)
     }
 
   inode = file.f_inode;
-  fs = (FAR struct nvs_fs *)inode->i_private;
+  fs = inode->i_private;
   nxmutex_destroy(&fs->nvs_lock);
   kmm_free(fs);
   file_close(&file);

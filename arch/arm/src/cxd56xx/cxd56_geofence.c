@@ -555,7 +555,7 @@ static int cxd56_geofence_poll(struct file *filep,
   int                          i;
 
   inode = filep->f_inode;
-  priv  = (struct cxd56_geofence_dev_s *)inode->i_private;
+  priv  = inode->i_private;
 
   ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)

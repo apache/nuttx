@@ -119,7 +119,7 @@ static int bch_open(FAR struct file *filep)
   int ret = OK;
 
   DEBUGASSERT(inode->i_private);
-  bch = (FAR struct bchlib_s *)inode->i_private;
+  bch = inode->i_private;
 
   /* Increment the reference count */
 
@@ -156,7 +156,7 @@ static int bch_close(FAR struct file *filep)
   int ret = OK;
 
   DEBUGASSERT(inode->i_private);
-  bch = (FAR struct bchlib_s *)inode->i_private;
+  bch = inode->i_private;
 
   /* Get exclusive access */
 
@@ -225,7 +225,7 @@ static off_t bch_seek(FAR struct file *filep, off_t offset, int whence)
 
   DEBUGASSERT(inode->i_private);
 
-  bch = (FAR struct bchlib_s *)inode->i_private;
+  bch = inode->i_private;
   ret = nxmutex_lock(&bch->lock);
   if (ret < 0)
     {
@@ -295,7 +295,7 @@ static ssize_t bch_read(FAR struct file *filep, FAR char *buffer, size_t len)
   ssize_t ret;
 
   DEBUGASSERT(inode->i_private);
-  bch = (FAR struct bchlib_s *)inode->i_private;
+  bch = inode->i_private;
 
   ret = nxmutex_lock(&bch->lock);
   if (ret < 0)
@@ -325,7 +325,7 @@ static ssize_t bch_write(FAR struct file *filep, FAR const char *buffer,
   ssize_t ret = -EACCES;
 
   DEBUGASSERT(inode->i_private);
-  bch = (FAR struct bchlib_s *)inode->i_private;
+  bch = inode->i_private;
 
   if (!bch->readonly)
     {
@@ -362,7 +362,7 @@ static int bch_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   int ret = -ENOTTY;
 
   DEBUGASSERT(inode->i_private);
-  bch = (FAR struct bchlib_s *)inode->i_private;
+  bch = inode->i_private;
 
   /* Process the call according to the command */
 
@@ -474,7 +474,7 @@ static int bch_unlink(FAR struct inode *inode)
   int ret = OK;
 
   DEBUGASSERT(inode->i_private);
-  bch = (FAR struct bchlib_s *)inode->i_private;
+  bch = inode->i_private;
 
   /* Get exclusive access to the BCH device */
 
