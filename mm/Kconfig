@@ -358,4 +358,12 @@ config MM_PANIC_ON_FAILURE
 	default n
 	depends on DEBUG_MM
 
+config MM_FREE_DELAYCOUNT_MAX
+	int "Maximum memory nodes can be delayed to free"
+	default 0
+	---help---
+		Set to 0 to disable the delayed free mechanism. Otherwise,
+		the value decides the maximum number of memory nodes that
+		will be delayed to free.
+
 source "mm/iob/Kconfig"

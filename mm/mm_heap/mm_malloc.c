@@ -39,8 +39,23 @@
  * Private Functions
  ****************************************************************************/
 
-static void free_delaylist(FAR struct mm_heap_s *heap)
+/****************************************************************************
+ * Name: free_delaylist
+ *
+ * Description:
+ *  Free the memory in delay list either added because of mm_lock failed or
+ *  added because of CONFIG_MM_FREE_DELAYCOUNT_MAX.
+ *  Set force to true to free all the memory in delay list immediately, set
+ *  to false will only free delaylist when time is up if
+ *  CONFIG_MM_FREE_DELAYCOUNT_MAX is enabled.
+ *
+ *  Return true if there is memory freed.
+ *
+ ****************************************************************************/
+
+static bool free_delaylist(FAR struct mm_heap_s *heap, bool force)
 {
+  bool ret = false;
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   FAR struct mm_delaynode_s *tmp;
   irqstate_t flags;
@@ -50,11 +65,26 @@ static void free_delaylist(FAR struct mm_heap_s *heap)
   flags = up_irq_save();
 
   tmp = heap->mm_delaylist[up_cpu_index()];
+
+#if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
+  if (tmp == NULL ||
+      (!force &&
+        heap->mm_delaycount[up_cpu_index()] < CONFIG_MM_FREE_DELAYCOUNT_MAX))
+    {
+      up_irq_restore(flags);
+      return false;
+    }
+
+  heap->mm_delaycount[up_cpu_index()] = 0;
+#endif
+
   heap->mm_delaylist[up_cpu_index()] = NULL;
 
   up_irq_restore(flags);
 
   /* Test if the delayed is empty */
+
+  ret = tmp != NULL;
 
   while (tmp)
     {
@@ -69,9 +99,11 @@ static void free_delaylist(FAR struct mm_heap_s *heap)
        * 'while' condition above.
        */
 
-      mm_free(heap, address);
+      mm_delayfree(heap, address, false);
     }
+
 #endif
+  return ret;
 }
 
 #if CONFIG_MM_BACKTRACE >= 0
@@ -126,7 +158,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 
   /* Free the delay list first */
 
-  free_delaylist(heap);
+  free_delaylist(heap, false);
 
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
   ret = mempool_multiple_alloc(heap->mm_mpool, size);
@@ -279,6 +311,16 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
       minfo("Allocated %p, size %zu\n", ret, alignsize);
 #endif
     }
+
+#if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
+  /* Try again after free delay list */
+
+  else if (free_delaylist(heap, true))
+    {
+      return mm_malloc(heap, size);
+    }
+#endif
+
 #ifdef CONFIG_DEBUG_MM
   else if (MM_INTERNAL_HEAP(heap))
     {
