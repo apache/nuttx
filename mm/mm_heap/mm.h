@@ -260,6 +260,10 @@ struct mm_heap_s
 
   FAR struct mm_delaynode_s *mm_delaylist[CONFIG_SMP_NCPUS];
 
+#if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
+  size_t mm_delaycount[CONFIG_SMP_NCPUS];
+#endif
+
   /* The is a multiple mempool of the heap */
 
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
@@ -303,5 +307,9 @@ int mm_size2ndx(size_t size);
 
 void mm_foreach(FAR struct mm_heap_s *heap, mm_node_handler_t handler,
                 FAR void *arg);
+
+/* Functions contained in mm_free.c *****************************************/
+
+void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem, bool delay);
 
 #endif /* __MM_MM_HEAP_MM_H */
