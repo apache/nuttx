@@ -115,7 +115,7 @@ static int sph_open(struct file *filep)
 static int sph_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
   struct sph_dev_s *priv =
-    (struct sph_dev_s *)filep->f_inode->i_private;
+    filep->f_inode->i_private;
   int ret = -ENOTTY;
 
   hsinfo("cmd = %x\n", cmd);

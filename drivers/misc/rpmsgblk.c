@@ -166,7 +166,7 @@ static const rpmsg_ept_cb g_rpmsgblk_handler[] =
 
 static int rpmsgblk_open(FAR struct inode *inode)
 {
-  FAR struct rpmsgblk_s *priv = (FAR struct rpmsgblk_s *)inode->i_private;
+  FAR struct rpmsgblk_s *priv = inode->i_private;
   struct rpmsgblk_open_s msg;
   int ret;
 
@@ -216,7 +216,7 @@ static int rpmsgblk_open(FAR struct inode *inode)
 
 static int rpmsgblk_close(FAR struct inode *inode)
 {
-  FAR struct rpmsgblk_s *priv = (FAR struct rpmsgblk_s *)inode->i_private;
+  FAR struct rpmsgblk_s *priv = inode->i_private;
   struct rpmsgblk_close_s msg;
   int ret;
 
@@ -266,7 +266,7 @@ static ssize_t rpmsgblk_read(FAR struct inode *inode,
                              FAR unsigned char *buffer,
                              blkcnt_t start_sector, unsigned int nsectors)
 {
-  FAR struct rpmsgblk_s *priv = (FAR struct rpmsgblk_s *)inode->i_private;
+  FAR struct rpmsgblk_s *priv = inode->i_private;
   struct rpmsgblk_read_s msg;
   struct iovec iov;
   int ret;
@@ -326,7 +326,7 @@ static ssize_t rpmsgblk_write(FAR struct inode *inode,
                               FAR const unsigned char *buffer,
                               blkcnt_t start_sector, unsigned int nsectors)
 {
-  FAR struct rpmsgblk_s *priv = (FAR struct rpmsgblk_s *)inode->i_private;
+  FAR struct rpmsgblk_s *priv = inode->i_private;
   FAR struct rpmsgblk_write_s *msg;
   struct rpmsgblk_cookie_s cookie;
   uint32_t sectorsize;
@@ -434,7 +434,7 @@ out:
 static int rpmsgblk_geometry(FAR struct inode *inode,
                              FAR struct geometry *geometry)
 {
-  FAR struct rpmsgblk_s *priv = (FAR struct rpmsgblk_s *)inode->i_private;
+  FAR struct rpmsgblk_s *priv = inode->i_private;
   struct rpmsgblk_geometry_s *msg;
   uint32_t space;
   int msglen;
@@ -577,7 +577,7 @@ static ssize_t rpmsgblk_ioctl_arglen(int cmd, unsigned long arg)
 static int rpmsgblk_ioctl(FAR struct inode *inode, int cmd,
                           unsigned long arg)
 {
-  FAR struct rpmsgblk_s *priv = (FAR struct rpmsgblk_s *)inode->i_private;
+  FAR struct rpmsgblk_s *priv = inode->i_private;
   FAR struct rpmsgblk_ioctl_s *msg;
   uint32_t space;
   ssize_t arglen;
@@ -676,7 +676,7 @@ static int rpmsgblk_ioctl(FAR struct inode *inode, int cmd,
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int rpmsgblk_unlink(FAR struct inode *inode)
 {
-  FAR struct rpmsgblk_s *priv = (FAR struct rpmsgblk_s *)inode->i_private;
+  FAR struct rpmsgblk_s *priv = inode->i_private;
   struct rpmsgblk_unlink_s msg;
   int ret;
 

@@ -979,7 +979,7 @@ static ssize_t lsm6dsl_read(FAR struct file *filep,
 
   inode = filep->f_inode;
 
-  priv = (FAR struct lsm6dsl_dev_s *)inode->i_private;
+  priv = inode->i_private;
 
   DEBUGASSERT(priv != NULL);
   DEBUGASSERT(priv->datareg == LSM6DSL_OUTX_L_G_SHIFT ||
@@ -1099,7 +1099,7 @@ static int lsm6dsl_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   inode = filep->f_inode;
 
-  priv = (FAR struct lsm6dsl_dev_s *)inode->i_private;
+  priv = inode->i_private;
 
   DEBUGASSERT(priv != NULL);
 

@@ -173,7 +173,7 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
    * structure
    */
 
-  rm = (FAR struct romfs_mountpt_s *)filep->f_inode->i_private;
+  rm = filep->f_inode->i_private;
 
   DEBUGASSERT(rm != NULL);
 

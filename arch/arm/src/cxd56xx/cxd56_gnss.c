@@ -1031,7 +1031,7 @@ static int cxd56_gnss_check_cep_data(struct file *filep, unsigned long arg)
   struct cxd56_gnss_dev_s *priv;
 
   inode = filep->f_inode;
-  priv  = (struct cxd56_gnss_dev_s *)inode->i_private;
+  priv  = inode->i_private;
 
   /* Set a flag for checking CEP data  */
 
@@ -1569,7 +1569,7 @@ static int cxd56_gnss_set_signal(struct file *filep, unsigned long arg)
     }
 
   inode = filep->f_inode;
-  priv  = (struct cxd56_gnss_dev_s *)inode->i_private;
+  priv  = inode->i_private;
 
   ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
@@ -2570,7 +2570,7 @@ static int cxd56_gnss_cpufifo_api(struct file *filep, unsigned int api,
   int                      ret = OK;
 
   inode = filep->f_inode;
-  priv  = (struct cxd56_gnss_dev_s *)inode->i_private;
+  priv  = inode->i_private;
 
   type = CXD56_GNSS_CPUFIFOAPI_SET_DATA(api, data);
   cxd56_cpu1sigsend(CXD56_CPU1_DATA_TYPE_CPUFIFOAPI, type);
@@ -2711,7 +2711,7 @@ static int cxd56_gnss_open(struct file *filep)
   int                      retry = 50;
 
   inode = filep->f_inode;
-  priv  = (struct cxd56_gnss_dev_s *)inode->i_private;
+  priv  = inode->i_private;
 
   while (!g_rtc_enabled && 0 < retry--)
     {
@@ -2812,7 +2812,7 @@ static int cxd56_gnss_close(struct file *filep)
   int                     ret = OK;
 
   inode = filep->f_inode;
-  priv  = (struct cxd56_gnss_dev_s *)inode->i_private;
+  priv  = inode->i_private;
 
   ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
@@ -2954,7 +2954,7 @@ static int cxd56_gnss_ioctl(struct file *filep, int cmd,
   int ret;
 
   inode = filep->f_inode;
-  priv  = (struct cxd56_gnss_dev_s *)inode->i_private;
+  priv  = inode->i_private;
 
   if (cmd <= CXD56_GNSS_IOCTL_INVAL || cmd >= CXD56_GNSS_IOCTL_MAX)
     {
@@ -2998,7 +2998,7 @@ static int cxd56_gnss_poll(struct file *filep, struct pollfd *fds,
   int                      i;
 
   inode = filep->f_inode;
-  priv  = (struct cxd56_gnss_dev_s *)inode->i_private;
+  priv  = inode->i_private;
 
   ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)

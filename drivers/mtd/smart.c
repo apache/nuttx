@@ -907,7 +907,7 @@ static ssize_t smart_read(FAR struct inode *inode, unsigned char *buffer,
 #ifdef CONFIG_SMARTFS_MULTI_ROOT_DIRS
   dev = ((FAR struct smart_multiroot_device_s *)inode->i_private)->dev;
 #else
-  dev = (struct smart_struct_s *)inode->i_private;
+  dev = inode->i_private;
 #endif
   return smart_reload(dev, buffer, start_sector, nsectors);
 }
@@ -943,7 +943,7 @@ static ssize_t smart_write(FAR struct inode *inode,
 #ifdef CONFIG_SMARTFS_MULTI_ROOT_DIRS
   dev = ((FAR struct smart_multiroot_device_s *)inode->i_private)->dev;
 #else
-  dev = (FAR struct smart_struct_s *)inode->i_private;
+  dev = inode->i_private;
 #endif
 
   /* I think maybe we need to lock on a mutex here */
@@ -1054,7 +1054,7 @@ static int smart_geometry(FAR struct inode *inode, struct geometry *geometry)
 #ifdef CONFIG_SMARTFS_MULTI_ROOT_DIRS
       dev = ((FAR struct smart_multiroot_device_s *)inode->i_private)->dev;
 #else
-      dev = (FAR struct smart_struct_s *)inode->i_private;
+      dev = inode->i_private;
 #endif
       geometry->geo_available     = true;
       geometry->geo_mediachanged  = false;
@@ -5487,7 +5487,7 @@ static int smart_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 #ifdef CONFIG_SMARTFS_MULTI_ROOT_DIRS
   dev = ((FAR struct smart_multiroot_device_s *)inode->i_private)->dev;
 #else
-  dev = (FAR struct smart_struct_s *)inode->i_private;
+  dev = inode->i_private;
 #endif
 
   /* Process the ioctl's we care about first, pass any we don't respond
@@ -6433,7 +6433,7 @@ static int smart_loteardown(FAR const char *devname)
 
   /* Inode private data is a reference to the loop device structure */
 
-  dev = (FAR struct smart_struct_s *)inode->i_private;
+  dev = inode->i_private;
 
   /* Validate this is a filemtd backended device */
 

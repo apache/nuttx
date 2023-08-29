@@ -1809,7 +1809,7 @@ int mtdconfig_unregister(void)
     }
 
   inode = file.f_inode;
-  dev = (FAR struct mtdconfig_struct_s *)inode->i_private;
+  dev = inode->i_private;
   nxmutex_destroy(&dev->lock);
   kmm_free(dev);
 

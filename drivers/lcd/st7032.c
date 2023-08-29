@@ -821,7 +821,7 @@ static off_t st7032_seek(FAR struct file *filep, off_t offset, int whence)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct st7032_dev_s *priv =
-    (FAR struct st7032_dev_s *)inode->i_private;
+    inode->i_private;
   off_t maxpos;
   off_t pos;
 
@@ -924,7 +924,7 @@ static int st7032_ioctl(FAR struct file *filep, int cmd,
         {
           FAR struct inode *inode = filep->f_inode;
           FAR struct st7032_dev_s *priv =
-            (FAR struct st7032_dev_s *)inode->i_private;
+            inode->i_private;
           FAR struct slcd_curpos_s *attr =
             (FAR struct slcd_curpos_s *)((uintptr_t)arg);
 
@@ -937,7 +937,7 @@ static int st7032_ioctl(FAR struct file *filep, int cmd,
         {
           FAR struct inode *inode = filep->f_inode;
           FAR struct st7032_dev_s *priv =
-            (FAR struct st7032_dev_s *)inode->i_private;
+            inode->i_private;
 
           nxmutex_lock(&priv->lock);
           *(FAR int *)((uintptr_t)arg) = 1; /* Hardcoded */
@@ -949,7 +949,7 @@ static int st7032_ioctl(FAR struct file *filep, int cmd,
         {
           FAR struct inode *inode = filep->f_inode;
           FAR struct st7032_dev_s *priv =
-            (FAR struct st7032_dev_s *)inode->i_private;
+            inode->i_private;
 
           nxmutex_lock(&priv->lock);
 

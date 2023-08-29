@@ -1000,7 +1000,7 @@ int nxffs_open(FAR struct file *filep, FAR const char *relpath,
    * file structure
    */
 
-  volume = (FAR struct nxffs_volume_s *)filep->f_inode->i_private;
+  volume = filep->f_inode->i_private;
   DEBUGASSERT(volume != NULL);
 
   /* Limitation:  A file must be opened for reading or writing, but not both.
@@ -1066,7 +1066,7 @@ int nxffs_dup(FAR const struct file *oldp, FAR struct file *newp)
    * file structure
    */
 
-  volume = (FAR struct nxffs_volume_s *)oldp->f_inode->i_private;
+  volume = oldp->f_inode->i_private;
   DEBUGASSERT(volume != NULL);
 #endif
 
@@ -1124,7 +1124,7 @@ int nxffs_close(FAR struct file *filep)
 
   /* Recover the volume state from the open file */
 
-  volume = (FAR struct nxffs_volume_s *)filep->f_inode->i_private;
+  volume = filep->f_inode->i_private;
   DEBUGASSERT(volume != NULL);
 
   /* Get exclusive access to the volume.  Note that the volume lock
