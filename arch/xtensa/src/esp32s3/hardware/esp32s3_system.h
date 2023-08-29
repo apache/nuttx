@@ -300,7 +300,7 @@
 #define SYSTEM_PWM1_CLK_EN_S  20
 
 /* SYSTEM_TWAI_CLK_EN : R/W; bitpos: [19]; default: 0;
- * Set 1 to enable CAN clock
+ * Set 1 to enable TWAI clock
  */
 
 #define SYSTEM_TWAI_CLK_EN    (BIT(19))
@@ -699,7 +699,7 @@
 #define SYSTEM_PWM1_RST_S  20
 
 /* SYSTEM_TWAI_RST : R/W; bitpos: [19]; default: 0;
- * Set 1 to let CAN reset
+ * Set 1 to let TWAI reset
  */
 
 #define SYSTEM_TWAI_RST    (BIT(19))
