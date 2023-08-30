@@ -150,6 +150,7 @@ int32_t esp32s3_dma_request(enum esp32s3_dma_periph_e periph,
  *   num     - Number of DMA descriptors
  *   pbuf    - RX/TX buffer pointer
  *   len     - RX/TX buffer length
+ *   tx      - true: TX mode (transmitter); false: RX mode (receiver)
  *
  * Returned Value:
  *   Bound pbuf data bytes
@@ -157,7 +158,7 @@ int32_t esp32s3_dma_request(enum esp32s3_dma_periph_e periph,
  ****************************************************************************/
 
 uint32_t esp32s3_dma_setup(struct esp32s3_dmadesc_s *dmadesc, uint32_t num,
-                           uint8_t *pbuf, uint32_t len);
+                           uint8_t *pbuf, uint32_t len, bool tx);
 
 /****************************************************************************
  * Name: esp32s3_dma_load
@@ -167,9 +168,9 @@ uint32_t esp32s3_dma_setup(struct esp32s3_dmadesc_s *dmadesc, uint32_t num,
  *   inlink/outlink to the corresponding GDMA_<IN/OUT>LINK_ADDR_CHn register
  *
  * Input Parameters:
+ *   dmadesc - Pointer of the previously bound inlink/outlink
  *   chan    - DMA channel of the receiver/transmitter
  *   tx      - true: TX mode (transmitter); false: RX mode (receiver)
- *   dmadesc - Pointer of the previously bound inlink/outlink
  *
  * Returned Value:
  *   None
