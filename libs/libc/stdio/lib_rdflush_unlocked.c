@@ -92,7 +92,7 @@ int lib_rdflush_unlocked(FAR FILE *stream)
        * user
        */
 
-      if (fseek(stream, -rdoffset, SEEK_CUR) < 0)
+      if (lseek(stream->fs_fd, -rdoffset, SEEK_CUR) < 0)
         {
           return ERROR;
         }

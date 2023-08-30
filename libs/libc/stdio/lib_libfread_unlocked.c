@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdio/lib_libfread.c
+ * libs/libc/stdio/lib_libfread_unlocked.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -41,10 +41,10 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_fread
+ * Name: lib_fread_unlocked
  ****************************************************************************/
 
-ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
+ssize_t lib_fread_unlocked(FAR void *ptr, size_t count, FAR FILE *stream)
 {
   FAR unsigned char *dest = (FAR unsigned char *)ptr;
   ssize_t bytes_read;
@@ -69,10 +69,6 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
     }
   else
     {
-      /* The stream must be stable until we complete the read */
-
-      flockfile(stream);
-
 #if CONFIG_NUNGET_CHARS > 0
       /* First, re-read any previously ungotten characters */
 
@@ -102,7 +98,7 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
            * concurrent buffered read/write access.
            */
 
-          ret = lib_wrflush(stream);
+          ret = lib_wrflush_unlocked(stream);
           if (ret < 0)
             {
               if (count - remaining > 0)
@@ -318,7 +314,6 @@ shortread:
           stream->fs_flags |= __FS_FLAG_EOF;
         }
 
-      funlockfile(stream);
       return count - remaining;
     }
 
@@ -326,6 +321,5 @@ shortread:
 
 errout_with_errno:
   stream->fs_flags |= __FS_FLAG_ERROR;
-  funlockfile(stream);
   return ERROR;
 }
