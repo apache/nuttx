@@ -50,7 +50,7 @@
 #define LOCAL_SUFFIX_LEN   2
 
 #define LOCAL_FULLPATH_LEN (sizeof(CONFIG_NET_LOCAL_VFS_PATH) + \
-                            UNIX_PATH_MAX + LOCAL_SUFFIX_LEN + 2)
+                            UNIX_PATH_MAX + LOCAL_SUFFIX_LEN + 2 + 8)
 
 /****************************************************************************
  * Private Functions
