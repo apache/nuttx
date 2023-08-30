@@ -315,6 +315,8 @@ struct esp32s3_i2s_s
   bool rx_started;                /* RX channel started */
 #endif /* I2S_HAVE_RX */
 
+  bool streaming;                 /* Is I2S peripheral active? */
+
   /* Pre-allocated pool of buffer containers */
 
   sem_t bufsem;                         /* Buffer wait semaphore */
@@ -1303,7 +1305,10 @@ static void i2s_rx_worker(void *arg)
 
       DEBUGASSERT(bfcontainer && bfcontainer->callback);
 
-      /* Release the internal buffer used by the DMA inlink */
+      if (priv->streaming == false)
+        {
+          bfcontainer->apb->flags |= AUDIO_APB_FINAL;
+        }
 
       bfcontainer->callback(&priv->dev, bfcontainer->apb,
                             bfcontainer->arg, bfcontainer->result);
@@ -2902,9 +2907,28 @@ static int i2s_ioctl(struct i2s_dev_s *dev, int cmd, unsigned long arg)
         {
           i2sinfo("AUDIOIOC_START\n");
 
+          priv->streaming = true;
+
           ret = OK;
         }
         break;
+
+      /* AUDIOIOC_STOP - Stop the audio stream.
+       *
+       *   ioctl argument:  Audio session
+       */
+
+#ifndef CONFIG_AUDIO_EXCLUDE_STOP
+      case AUDIOIOC_STOP:
+        {
+          i2sinfo("AUDIOIOC_STOP\n");
+
+          priv->streaming = false;
+
+          ret = OK;
+        }
+        break;
+#endif /* CONFIG_AUDIO_EXCLUDE_STOP */
 
       /* AUDIOIOC_ALLOCBUFFER - Allocate an audio buffer
        *
