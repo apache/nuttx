@@ -108,7 +108,6 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   /* Some sanity checks */
 
-  DEBUGASSERT(psock && psock->s_conn);
   DEBUGASSERT(newsock && !newsock->s_conn);
 
   /* Is the socket a stream? */

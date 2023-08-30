@@ -290,8 +290,7 @@ ssize_t icmp_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   /* Some sanity checks */
 
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL &&
-              buf != NULL && to != NULL);
+  DEBUGASSERT(buf != NULL && to != NULL);
 
   if (len < ICMP_HDRLEN || tolen < sizeof(struct sockaddr_in))
     {

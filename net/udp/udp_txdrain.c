@@ -92,7 +92,6 @@ int udp_txdrain(FAR struct socket *psock, unsigned int timeout)
   sem_t waitsem;
   int ret;
 
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
   DEBUGASSERT(psock->s_type == SOCK_DGRAM);
 
   conn = psock->s_conn;
