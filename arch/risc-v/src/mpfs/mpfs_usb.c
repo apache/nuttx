@@ -129,6 +129,10 @@
 #  define MSB 1
 #endif
 
+#ifndef MPFS_USB_DMA_ADDR_UPPER_OFFSET
+#  define MPFS_USB_DMA_ADDR_UPPER_OFFSET 0x14u
+#endif
+
 #define MPFS_NUM_USB_PKT      1
 #define MPFS_MIN_EP_FIFO_SIZE 8
 #define MPFS_USB_REG_MAX      0x2000
@@ -3684,6 +3688,10 @@ static void mpfs_hw_setup(struct mpfs_usbdev_s *priv)
 
   modifyreg32(MPFS_SYSREG_SOFT_RESET_CR, SYSREG_SOFT_RESET_CR_USB |
               SYSREG_SOFT_RESET_CR_FPGA, 0);
+
+  /* Set USB upper address offset to enable USB DMA support for himen */
+
+  mpfs_putreg32(MPFS_USB_DMA_ADDR_UPPER_OFFSET, MPFS_USB_DMA_ADDR_UPPER_REG);
 
   /* Reset the controller */
 
