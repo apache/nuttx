@@ -80,8 +80,7 @@ int can_getsockopt(FAR struct socket *psock, int level, int option,
   FAR struct can_conn_s *conn;
   int ret = OK;
 
-  DEBUGASSERT(psock != NULL && value != NULL && value_len != NULL &&
-              psock->s_conn != NULL);
+  DEBUGASSERT(value != NULL && value_len != NULL);
   conn = psock->s_conn;
 
 #ifdef CONFIG_NET_TIMESTAMP

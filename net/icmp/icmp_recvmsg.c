@@ -104,7 +104,6 @@ static uint16_t recvfrom_eventhandler(FAR struct net_driver_s *dev,
         }
 
       psock = pstate->recv_sock;
-      DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
 
       /* Check if we have just received a ICMP ECHO reply. */
 
@@ -295,7 +294,7 @@ ssize_t icmp_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   /* Some sanity checks */
 
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL && buf != NULL);
+  DEBUGASSERT(buf != NULL);
 
   if (len < ICMP_HDRLEN)
     {

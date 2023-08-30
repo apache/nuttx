@@ -220,8 +220,6 @@ ssize_t usrsock_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   socklen_t outaddrlen = 0;
   ssize_t ret;
 
-  DEBUGASSERT(conn);
-
   if (fromlen)
     {
       if (*fromlen > 0 && from == NULL)

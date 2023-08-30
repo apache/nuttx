@@ -179,7 +179,7 @@ static ssize_t local_send(FAR struct socket *psock,
 
           /* Local TCP packet send */
 
-          DEBUGASSERT(psock && psock->s_conn && buf);
+          DEBUGASSERT(buf);
           peer = psock->s_conn;
 
           /* Verify that this is a connected peer socket and that it has

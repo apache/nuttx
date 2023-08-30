@@ -209,8 +209,6 @@ ssize_t usrsock_sendmsg(FAR struct socket *psock,
 
   ssize_t ret;
 
-  DEBUGASSERT(conn);
-
   net_lock();
 
   if (conn->state == USRSOCK_CONN_STATE_UNINITIALIZED ||

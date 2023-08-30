@@ -227,8 +227,6 @@ int usrsock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
   socklen_t outaddrlen = 0;
   int ret;
 
-  DEBUGASSERT(conn);
-
   if (addrlen)
     {
       if (*addrlen > 0 && addr == NULL)

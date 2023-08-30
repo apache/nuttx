@@ -101,7 +101,6 @@ static inline void sendto_ipselect(FAR struct net_driver_s *dev,
                                    FAR struct sendto_s *pstate)
 {
   FAR struct udp_conn_s *conn = pstate->st_conn;
-  DEBUGASSERT(conn);
 
   /* Which domain the socket support */
 

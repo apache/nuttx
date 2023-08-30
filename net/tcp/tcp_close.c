@@ -220,7 +220,6 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
   net_lock();
 
   conn = psock->s_conn;
-  DEBUGASSERT(conn != NULL);
 
   /* Discard our reference to the connection */
 

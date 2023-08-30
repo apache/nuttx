@@ -217,8 +217,6 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
   struct accept_s state;
   int ret;
 
-  DEBUGASSERT(psock && newconn);
-
   /* Check the backlog to see if there is a connection already pending for
    * this listener.
    */
