@@ -1017,55 +1017,6 @@ found:
     }
 #endif
 
-  /* Check if the sequence number of the incoming packet is what we are
-   * expecting next.  If not, we send out an ACK with the correct numbers
-   * in, unless we are in the SYN_RCVD state and receive a SYN, in which
-   * case we should retransmit our SYNACK (which is done further down).
-   */
-
-  if (!((((conn->tcpstateflags & TCP_STATE_MASK) == TCP_SYN_SENT) &&
-        ((tcp->flags & TCP_CTL) == (TCP_SYN | TCP_ACK))) ||
-        (((conn->tcpstateflags & TCP_STATE_MASK) == TCP_SYN_RCVD) &&
-        ((tcp->flags & TCP_CTL) == TCP_SYN))))
-    {
-      uint32_t seq;
-      uint32_t rcvseq;
-
-      seq = tcp_getsequence(tcp->seqno);
-      rcvseq = tcp_getsequence(conn->rcvseq);
-
-      if (seq != rcvseq)
-        {
-          /* Trim the head of the segment */
-
-          if (TCP_SEQ_LT(seq, rcvseq))
-            {
-              uint32_t trimlen = TCP_SEQ_SUB(rcvseq, seq);
-
-              if (tcp_trim_head(dev, tcp, trimlen))
-                {
-                  /* The segment was completely out of the window.
-                   * E.g. a retransmit which was not necessary.
-                   * E.g. a keep-alive segment.
-                   */
-
-                  tcp_send(dev, conn, TCP_ACK, tcpiplen);
-                  return;
-                }
-            }
-          else
-            {
-#ifdef CONFIG_NET_TCP_OUT_OF_ORDER
-              /* Queue out-of-order segments. */
-
-              tcp_input_ofosegs(dev, conn, iplen);
-#endif
-              tcp_send(dev, conn, TCP_ACK, tcpiplen);
-              return;
-            }
-        }
-    }
-
   /* Check if the incoming segment acknowledges any outstanding data. If so,
    * we update the sequence number, reset the length of the outstanding
    * data, calculate RTT estimations, and reset the retransmission timer.
@@ -1187,6 +1138,55 @@ found:
       /* Reset the retransmission timer. */
 
       tcp_update_retrantimer(conn, conn->rto);
+    }
+
+  /* Check if the sequence number of the incoming packet is what we are
+   * expecting next.  If not, we send out an ACK with the correct numbers
+   * in, unless we are in the SYN_RCVD state and receive a SYN, in which
+   * case we should retransmit our SYNACK (which is done further down).
+   */
+
+  if (!((((conn->tcpstateflags & TCP_STATE_MASK) == TCP_SYN_SENT) &&
+        ((tcp->flags & TCP_CTL) == (TCP_SYN | TCP_ACK))) ||
+        (((conn->tcpstateflags & TCP_STATE_MASK) == TCP_SYN_RCVD) &&
+        ((tcp->flags & TCP_CTL) == TCP_SYN))))
+    {
+      uint32_t seq;
+      uint32_t rcvseq;
+
+      seq = tcp_getsequence(tcp->seqno);
+      rcvseq = tcp_getsequence(conn->rcvseq);
+
+      if (seq != rcvseq)
+        {
+          /* Trim the head of the segment */
+
+          if (TCP_SEQ_LT(seq, rcvseq))
+            {
+              uint32_t trimlen = TCP_SEQ_SUB(rcvseq, seq);
+
+              if (tcp_trim_head(dev, tcp, trimlen))
+                {
+                  /* The segment was completely out of the window.
+                   * E.g. a retransmit which was not necessary.
+                   * E.g. a keep-alive segment.
+                   */
+
+                  tcp_send(dev, conn, TCP_ACK, tcpiplen);
+                  return;
+                }
+            }
+          else
+            {
+#ifdef CONFIG_NET_TCP_OUT_OF_ORDER
+              /* Queue out-of-order segments. */
+
+              tcp_input_ofosegs(dev, conn, iplen);
+#endif
+              tcp_send(dev, conn, TCP_ACK, tcpiplen);
+              return;
+            }
+        }
     }
 
   tcp_clear_zero_probe(conn, tcp);
