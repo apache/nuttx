@@ -590,6 +590,7 @@ endif # CDCACM
 menuconfig USBADB
 	bool "USB Android Debug Bridge (ADB) support"
 	default n
+	select USBDEV_FS
 	---help---
 		Enables USB Android Debug Bridge (ADB) support
 
@@ -716,12 +717,6 @@ config USBADB_CONFIGSTR
 config USBADB_INTERFACESTR
 	string "Interface descriptor string"
 	default "ADB Interface"
-
-config USBADB_NPOLLWAITERS
-	int "Number of ADB poll waiters"
-	default 1
-	---help---
-		Maximum number of threads that can be waiting on poll().
 
 endif # USBADB
 
