@@ -178,6 +178,7 @@ int32_t esp32s3_dma_request(enum esp32s3_dma_periph_e periph,
  *   num     - Number of DMA descriptors
  *   pbuf    - RX/TX buffer pointer
  *   len     - RX/TX buffer length
+ *   tx      - true: TX mode (transmitter); false: RX mode (receiver)
  *
  * Returned Value:
  *   Bound pbuf data bytes
@@ -185,7 +186,7 @@ int32_t esp32s3_dma_request(enum esp32s3_dma_periph_e periph,
  ****************************************************************************/
 
 uint32_t esp32s3_dma_setup(struct esp32s3_dmadesc_s *dmadesc, uint32_t num,
-                           uint8_t *pbuf, uint32_t len)
+                           uint8_t *pbuf, uint32_t len, bool tx)
 {
   int i;
   uint32_t regval;
@@ -207,9 +208,18 @@ uint32_t esp32s3_dma_setup(struct esp32s3_dmadesc_s *dmadesc, uint32_t num,
 
       buf_len = ALIGN_UP(data_len, sizeof(uintptr_t));
 
-      dmadesc[i].ctrl = (data_len << ESP32S3_DMA_CTRL_DATALEN_S) |
-                        (buf_len << ESP32S3_DMA_CTRL_BUFLEN_S) |
-                        ESP32S3_DMA_CTRL_OWN;
+      dmadesc[i].ctrl = ESP32S3_DMA_CTRL_OWN;
+
+      /* Only set Data Length if it's a TX buffer. Otherwise, it will be
+       * written automatically by hardware.
+       */
+
+      if (tx)
+        {
+          dmadesc[i].ctrl |= (data_len << ESP32S3_DMA_CTRL_DATALEN_S);
+        }
+
+      dmadesc[i].ctrl |= (buf_len << ESP32S3_DMA_CTRL_BUFLEN_S);
       dmadesc[i].pbuf = pdata;
       dmadesc[i].next = &dmadesc[i + 1];
 
@@ -222,7 +232,15 @@ uint32_t esp32s3_dma_setup(struct esp32s3_dmadesc_s *dmadesc, uint32_t num,
       pdata += data_len;
     }
 
-  dmadesc[i].ctrl |= ESP32S3_DMA_CTRL_EOF;
+  /* suc_eof (defined by ESP32S3_DMA_CTRL_EOF) is set by software
+   * only in transmit descriptor.
+   */
+
+  if (tx)
+    {
+      dmadesc[i].ctrl |= ESP32S3_DMA_CTRL_EOF;
+    }
+
   dmadesc[i].next  = NULL;
 
   return len - bytes;
@@ -236,9 +254,9 @@ uint32_t esp32s3_dma_setup(struct esp32s3_dmadesc_s *dmadesc, uint32_t num,
  *   inlink/outlink to the corresponding GDMA_<IN/OUT>LINK_ADDR_CHn register
  *
  * Input Parameters:
+ *   dmadesc - Pointer of the previously bound inlink/outlink
  *   chan    - DMA channel of the receiver/transmitter
  *   tx      - true: TX mode (transmitter); false: RX mode (receiver)
- *   dmadesc - Pointer of the previously bound inlink/outlink
  *
  * Returned Value:
  *   None
