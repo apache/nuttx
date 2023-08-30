@@ -364,6 +364,7 @@ static void           i2s_rx_schedule(struct esp32s3_i2s_s *priv,
 
 /* I2S methods (and close friends) */
 
+static int32_t  i2s_check_mclkfrequency(struct esp32s3_i2s_s *priv);
 static uint32_t i2s_set_datawidth(struct esp32s3_i2s_s *priv);
 static uint32_t i2s_set_clock(struct esp32s3_i2s_s *priv);
 static uint32_t i2s_getmclkfrequency(struct i2s_dev_s *dev);
@@ -1711,6 +1712,58 @@ static void i2s_configure(struct esp32s3_i2s_s *priv)
 }
 
 /****************************************************************************
+ * Name: i2s_check_mclkfrequency
+ *
+ * Description:
+ *   Check if MCLK frequency is compatible with the current data width and
+ *   bits/sample set. Master clock should be multiple of the sample rate and
+ *   bclk at the same time.
+ *
+ * Input Parameters:
+ *   priv - Initialized I2S device structure.
+ *
+ * Returned Value:
+ *   Returns the current master clock or a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int32_t i2s_check_mclkfrequency(struct esp32s3_i2s_s *priv)
+{
+  uint32_t mclk_freq;
+  uint32_t mclk_multiple = priv->mclk_multiple;
+  uint32_t bclk = priv->rate * priv->config->total_slot * priv->data_width;
+  int i;
+
+  /* If the master clock is divisible by both the sample rate and the bit
+   * clock, everything is as expected and we can return the current master
+   * clock frequency.
+   */
+
+  if (priv->mclk_freq % priv->rate == 0 && priv->mclk_freq % bclk == 0)
+    {
+      priv->mclk_multiple = priv->mclk_freq / priv->rate;
+      return priv->mclk_freq;
+    }
+
+  /* Select the lowest multiplier for setting the master clock */
+
+  for (mclk_multiple = I2S_MCLK_MULTIPLE_128;
+       mclk_multiple <= I2S_MCLK_MULTIPLE_512;
+       mclk_multiple += I2S_MCLK_MULTIPLE_128)
+    {
+      mclk_freq = priv->rate * mclk_multiple;
+      if (mclk_freq % priv->rate == 0 && mclk_freq % bclk == 0)
+        {
+          priv->mclk_multiple = mclk_multiple;
+          i2s_setmclkfrequency((struct i2s_dev_s *)priv, mclk_freq);
+          return priv->mclk_freq;
+        }
+    }
+
+  return -EINVAL;
+}
+
+/****************************************************************************
  * Name: i2s_set_datawidth
  *
  * Description:
@@ -2540,6 +2593,11 @@ static uint32_t i2s_txsamplerate(struct i2s_dev_s *dev, uint32_t rate)
 
       priv->rate = rate;
 
+      if (i2s_check_mclkfrequency(priv) < OK)
+        {
+          return 0;
+        }
+
       rate = i2s_set_clock(priv);
 
       i2s_tx_channel_start(priv);
@@ -2576,6 +2634,11 @@ static uint32_t i2s_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate)
       i2s_rx_channel_stop(priv);
 
       priv->rate = rate;
+
+      if (i2s_check_mclkfrequency(priv) < OK)
+        {
+          return 0;
+        }
 
       rate = i2s_set_clock(priv);
 
