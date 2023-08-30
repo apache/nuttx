@@ -541,7 +541,6 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
   /* Get the underlying the UDP connection structure.  */
 
   conn = psock->s_conn;
-  DEBUGASSERT(conn);
 
   /* The length of a datagram to be up to 65,535 octets */
 

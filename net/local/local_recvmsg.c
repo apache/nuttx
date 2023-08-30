@@ -509,7 +509,7 @@ ssize_t local_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   FAR void *buf = msg->msg_iov->iov_base;
   size_t len = msg->msg_iov->iov_len;
 
-  DEBUGASSERT(psock && psock->s_conn && buf);
+  DEBUGASSERT(buf);
 
   /* Check for a stream socket */
 
