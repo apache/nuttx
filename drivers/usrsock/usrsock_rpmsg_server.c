@@ -642,7 +642,7 @@ static int usrsock_rpmsg_recvfrom_handler(FAR struct rpmsg_endpoint *ept,
             events, req->head.xid, totlen, iov[i].iov_len);
     }
 
-  if (retr >= 0 && events == 0)
+  if (retr >= 0 && (ret > 0 || ret == -EAGAIN) && events == 0)
     {
       usrsock_rpmsg_poll_setup(&priv->pfds[req->usockid],
                                priv->pfds[req->usockid].events | POLLIN);
