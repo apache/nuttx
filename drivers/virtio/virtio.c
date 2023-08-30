@@ -33,6 +33,7 @@
 #include "virtio-input.h"
 #include "virtio-net.h"
 #include "virtio-rng.h"
+#include "virtio-rpmb.h"
 #include "virtio-serial.h"
 #include "virtio-snd.h"
 
@@ -173,6 +174,14 @@ void virtio_register_drivers(void)
   if (ret < 0)
     {
       vrterr("virtio_register_snd_driver failed, ret=%d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_DRIVERS_VIRTIO_RPMB
+  ret = virtio_register_rpmb_driver();
+  if (ret < 0)
+    {
+      vrterr("virtio_register_rpmb_driver failed, ret=%d\n", ret);
     }
 #endif
 
