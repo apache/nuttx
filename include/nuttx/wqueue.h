@@ -254,6 +254,9 @@ struct work_s
   } u;
   worker_t  worker;         /* Work callback */
   FAR void *arg;            /* Callback argument */
+#ifdef CONFIG_WQUEUE_TAG_WORKER_NAME
+  FAR const char *name_tag; /* Work callback name tag */
+#endif
 };
 
 /* This is an enumeration of the various events that may be
@@ -358,8 +361,18 @@ int work_usrstart(void);
  *
  ****************************************************************************/
 
-int work_queue(int qid, FAR struct work_s *work, worker_t worker,
-               FAR void *arg, clock_t delay);
+#if defined(CONFIG_LIB_USRWORK) && !defined(__KERNEL__)
+  int work_queue(int qid, FAR struct work_s *work, worker_t worker,
+                 FAR void *arg, clock_t delay);
+#else
+  int work_queue_nt(int qid, FAR struct work_s *work, worker_t worker,
+                    FAR void *arg, clock_t delay, FAR const char *name_tag);
+
+/* Stringify the worker name for debug purposes */
+
+#  define work_queue(qid, work, worker, arg, delay) \
+                     work_queue_nt(qid, work, worker, arg, delay, #worker)
+#endif
 
 /****************************************************************************
  * Name: work_cancel
