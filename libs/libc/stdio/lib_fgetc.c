@@ -33,12 +33,12 @@
  * fgetc
  ****************************************************************************/
 
-int fgetc(FAR FILE *stream)
+int fgetc_unlocked(FAR FILE *stream)
 {
   unsigned char ch;
   ssize_t ret;
 
-  ret = lib_fread(&ch, 1, stream);
+  ret = lib_fread_unlocked(&ch, 1, stream);
   if (ret > 0)
     {
       return ch;
@@ -47,4 +47,15 @@ int fgetc(FAR FILE *stream)
     {
       return EOF;
     }
+}
+
+int fgetc(FAR FILE *stream)
+{
+  int ret;
+
+  flockfile(stream);
+  ret = fgetc_unlocked(stream);
+  funlockfile(stream);
+
+  return ret;
 }

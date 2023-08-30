@@ -38,3 +38,13 @@ int putchar(int c)
   return write(STDOUT_FILENO, &tmp, 1) == 1 ? c : EOF;
 #endif
 }
+
+int putchar_unlocked(int c)
+{
+#ifdef CONFIG_FILE_STREAM
+  return fputc_unlocked(c, stdout);
+#else
+  unsigned char tmp = c;
+  return write(STDOUT_FILENO, &tmp, 1) == 1 ? c : EOF;
+#endif
+}

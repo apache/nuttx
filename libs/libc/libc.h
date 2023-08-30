@@ -217,10 +217,12 @@ int lib_mode2oflags(FAR const char *mode);
 /* Defined in lib_libfwrite.c */
 
 ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream);
+ssize_t lib_fwrite_unlocked(FAR const void *ptr, size_t count,
+                            FAR FILE *stream);
 
-/* Defined in lib_libfread.c */
+/* Defined in lib_libfread_unlocked.c */
 
-ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream);
+ssize_t lib_fread_unlocked(FAR void *ptr, size_t count, FAR FILE *stream);
 
 /* Defined in lib_libgets.c */
 
@@ -231,6 +233,8 @@ FAR char *lib_dgets(FAR char *buf, size_t buflen, int fd,
 
 FAR char *lib_fgets(FAR char *buf, size_t buflen, FILE *stream,
                     bool keepnl, bool consume);
+FAR char *lib_fgets_unlocked(FAR char *buf, size_t buflen, FILE *stream,
+                             bool keepnl, bool consume);
 
 /* Defined in lib_libfflush.c */
 

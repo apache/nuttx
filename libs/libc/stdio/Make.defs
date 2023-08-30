@@ -37,7 +37,7 @@ endif
 # The remaining sources files depend upon C streams
 
 ifeq ($(CONFIG_FILE_STREAM),y)
-CSRCS += lib_fopen.c lib_freopen.c lib_fclose.c lib_fread.c lib_libfread.c
+CSRCS += lib_fopen.c lib_freopen.c lib_fclose.c lib_fread.c lib_libfread_unlocked.c
 CSRCS += lib_fseek.c lib_fseeko.c lib_ftell.c lib_ftello.c lib_fsetpos.c
 CSRCS += lib_getdelim.c lib_fgetpos.c lib_getc.c lib_fgetc.c
 CSRCS += lib_fgets.c lib_libfgets.c lib_fwrite.c

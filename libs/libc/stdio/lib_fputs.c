@@ -45,7 +45,7 @@
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_ROMGETC)
-int fputs(FAR const IPTR char *s, FAR FILE *stream)
+int fputs_unlocked(FAR const IPTR char *s, FAR FILE *stream)
 {
   int nput;
   int ret;
@@ -57,7 +57,7 @@ int fputs(FAR const IPTR char *s, FAR FILE *stream)
     {
       /* Write the next character to the stream buffer */
 
-      ret = lib_fwrite(&ch, 1, stream);
+      ret = lib_fwrite_unlocked(&ch, 1, stream);
       if (ret <= 0)
         {
           return EOF;
@@ -67,7 +67,7 @@ int fputs(FAR const IPTR char *s, FAR FILE *stream)
 
       if (ch == '\n' && (stream->fs_flags & __FS_FLAG_LBF) != 0)
         {
-          ret = lib_fflush(stream, true);
+          ret = lib_fflush_unlocked(stream, true);
           if (ret < 0)
             {
               return EOF;
@@ -79,7 +79,7 @@ int fputs(FAR const IPTR char *s, FAR FILE *stream)
 }
 
 #else
-int fputs(FAR const IPTR char *s, FAR FILE *stream)
+int fputs_unlocked(FAR const IPTR char *s, FAR FILE *stream)
 {
   int nput;
 
@@ -97,7 +97,7 @@ int fputs(FAR const IPTR char *s, FAR FILE *stream)
         {
           /* Write the next character to the stream buffer */
 
-          ret = lib_fwrite(s, 1, stream);
+          ret = lib_fwrite_unlocked(s, 1, stream);
           if (ret <= 0)
             {
               return EOF;
@@ -107,7 +107,7 @@ int fputs(FAR const IPTR char *s, FAR FILE *stream)
 
           if (*s == '\n')
             {
-              ret = lib_fflush(stream, true);
+              ret = lib_fflush_unlocked(stream, true);
               if (ret < 0)
                 {
                   return EOF;
@@ -132,7 +132,7 @@ int fputs(FAR const IPTR char *s, FAR FILE *stream)
 
       /* Write the string */
 
-      nput = lib_fwrite(s, ntowrite, stream);
+      nput = lib_fwrite_unlocked(s, ntowrite, stream);
       if (nput < 0)
         {
           return EOF;
@@ -142,3 +142,14 @@ int fputs(FAR const IPTR char *s, FAR FILE *stream)
   return nput;
 }
 #endif
+
+int fputs(FAR const IPTR char *s, FAR FILE *stream)
+{
+  int ret;
+
+  flockfile(stream);
+  ret = fputs_unlocked(s, stream);
+  funlockfile(stream);
+
+  return ret;
+}

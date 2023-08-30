@@ -60,7 +60,7 @@ if(CONFIG_FILE_STREAM)
     lib_freopen.c
     lib_fclose.c
     lib_fread.c
-    lib_libfread.c
+    lib_libfread_unlocked.c
     lib_fseek.c
     lib_fseeko.c
     lib_ftell.c
