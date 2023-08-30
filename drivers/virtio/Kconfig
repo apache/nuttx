@@ -59,6 +59,10 @@ config DRIVERS_VIRTIO_RNG
 	default n
 	select ARCH_HAVE_RNG
 
+config DRIVERS_VIRTIO_RPMB
+	bool "Virtio RPMB support"
+	default n
+
 config DRIVERS_VIRTIO_SERIAL
 	bool "Virtio serial support"
 	depends on SERIAL
