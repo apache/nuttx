@@ -166,10 +166,10 @@ endif
 
 ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
   ifeq ($(GCCVER),)
-    export GCCVER := $(shell $(CC) --version | grep gcc | sed -r "s/.* ([0-9]+\.[0-9]+).*/\1/")
+    export GCCVER := $(shell $(CC) --version | grep gcc | sed -r "s/.* ([0-9]+\.[0-9]+).*/\1/" | cut -d'.' -f1)
   endif
 
-  ifeq ($(GCCVER),12.2)
+  ifeq ($(GCCVER),12)
     LDFLAGS += --no-warn-rwx-segments
   endif
 endif
