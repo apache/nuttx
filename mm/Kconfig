@@ -265,6 +265,23 @@ config MM_KASAN_ALL
 		to check. Enabling this option will get image size increased
 		and performance decreased significantly.
 
+config MM_KASAN_DISABLE_READS_CHECK
+	bool "Disable reads check"
+	depends on MM_KASAN
+	default n
+	---help---
+		This option disable kasan reads check. It speeds up performance
+		compared with default read/write check. Only disable it when you are
+		sure there's no need to do so. Or performance is too bad and only focus
+		on writes check.
+
+config MM_KASAN_DISABLE_WRITES_CHECK
+	bool "Disable writes check"
+	depends on MM_KASAN
+	default n
+	---help---
+		This option disable kasan writes check.
+
 config MM_UBSAN
 	bool "Undefined Behavior Sanitizer"
 	default n
