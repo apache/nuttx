@@ -4,7 +4,7 @@
 #
 
 config ARMV7A_STRING_FUNCTION
-	bool "Enable optimized ARMv7M specific string function"
+	bool "Enable optimized ARMv7A specific string function"
 	default n
 	depends on ARCH_TOOLCHAIN_GNU
 	select ARMV7A_MEMCHR
