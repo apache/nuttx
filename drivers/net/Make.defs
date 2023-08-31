@@ -80,6 +80,15 @@ ifeq ($(CONFIG_ARCH_PHY_INTERRUPT),y)
   CSRCS += phy_notify.c
 endif
 
+ifeq ($(CONFIG_NET_KSZ9477),y)
+  CSRCS += ksz9477.c
+
+ifeq ($(CONFIG_NET_KSZ9477_I2C),y)
+  CSRCS += ksz9477_i2c.c
+endif
+
+endif
+
 # Include network build support
 
 DEPPATH += --dep-path net
