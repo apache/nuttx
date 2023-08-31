@@ -78,11 +78,7 @@ class SymbolTables(object):
         for nsym, symbol in enumerate(symtable.iter_symbols()):
             if self.__symbol_filter(symbol) is not None:
                 symbol_name = cxxfilt.demangle(symbol.name)
-                func_name = re.sub(r"\(.*$", "", symbol_name)
-                if func_name[0] == "_" or func_name.find(".") != -1:
-                    continue
-
-                self.symbol_dict[symbol["st_value"] & ~0x01] = func_name
+                self.symbol_dict[symbol["st_value"] & ~0x01] = symbol_name
         self.addr_list = sorted(self.symbol_dict)
 
     def addr2symbol(self, addr: int):
