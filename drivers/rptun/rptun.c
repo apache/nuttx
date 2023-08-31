@@ -68,7 +68,6 @@ struct rptun_priv_s
   rmutex_t                     lock;
   struct metal_list            node;
   sem_t                        semtx;
-  unsigned long                cmd;
 #ifdef CONFIG_RPTUN_WORKQUEUE
   struct work_s                work;
 #else
@@ -223,33 +222,19 @@ static inline void rptun_pm_action(FAR struct rptun_priv_s *priv,
 #  define rptun_pm_action(priv, stay)
 #endif
 
+static void rptun_start_worker(FAR void *arg)
+{
+  FAR struct rptun_priv_s *priv = arg;
+
+  if (priv->rproc.state == RPROC_OFFLINE)
+    {
+      rptun_dev_start(&priv->rproc);
+    }
+}
+
 static void rptun_worker(FAR void *arg)
 {
   FAR struct rptun_priv_s *priv = arg;
-  unsigned long cmd = priv->cmd;
-
-  priv->cmd = RPTUNIOC_NONE;
-  switch (cmd)
-    {
-      case RPTUNIOC_START:
-        if (priv->rproc.state == RPROC_OFFLINE)
-          {
-            rptun_dev_start(&priv->rproc);
-          }
-        else
-          {
-            rptun_dev_stop(&priv->rproc, false);
-            rptun_dev_start(&priv->rproc);
-          }
-        break;
-
-      case RPTUNIOC_STOP:
-        if (priv->rproc.state != RPROC_OFFLINE)
-          {
-            rptun_dev_stop(&priv->rproc, true);
-          }
-        break;
-    }
 
   remoteproc_get_notification(&priv->rproc, RPTUN_NOTIFY_ALL);
 }
@@ -279,6 +264,11 @@ static int rptun_thread(int argc, FAR char *argv[])
 
   priv = (FAR struct rptun_priv_s *)((uintptr_t)strtoul(argv[2], NULL, 16));
   priv->tid = nxsched_gettid();
+
+  if (RPTUN_IS_AUTOSTART(priv->dev))
+    {
+      rptun_start_worker(priv);
+    }
 
   while (1)
     {
@@ -724,13 +714,16 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
   ret = remoteproc_start(rproc);
   if (ret)
     {
+      rpmsg_deinit_vdev(&priv->rvdev);
       remoteproc_remove_virtio(rproc, vdev);
+      remoteproc_shutdown(rproc);
       return ret;
     }
 
   /* Register callback to mbox for receiving remote message */
 
   RPTUN_REGISTER_CALLBACK(priv->dev, rptun_callback, priv);
+  rptun_wakeup_rx(priv);
 
   /* Broadcast device_created to all registers */
 
@@ -743,8 +736,6 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
         {
           cb->device_created(&priv->rvdev.rdev, cb->priv);
         }
-
-      rptun_update_rx(priv);
     }
 
   nxrmutex_unlock(&g_rptun_lockcb);
@@ -825,9 +816,21 @@ static int rptun_do_ioctl(FAR struct rptun_priv_s *priv, int cmd,
   switch (cmd)
     {
       case RPTUNIOC_START:
+        if (priv->rproc.state == RPROC_OFFLINE)
+          {
+            rptun_dev_start(&priv->rproc);
+          }
+        else
+          {
+            rptun_dev_stop(&priv->rproc, false);
+            rptun_dev_start(&priv->rproc);
+          }
+        break;
       case RPTUNIOC_STOP:
-        priv->cmd = cmd;
-        rptun_wakeup_rx(priv);
+        if (priv->rproc.state != RPROC_OFFLINE)
+          {
+            rptun_dev_stop(&priv->rproc, true);
+          }
         break;
       case RPTUNIOC_RESET:
         RPTUN_RESET(priv->dev, arg);
@@ -1230,21 +1233,11 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
 #ifdef CONFIG_RPTUN_WORKQUEUE
   if (RPTUN_IS_AUTOSTART(dev))
     {
-      priv->cmd = RPTUNIOC_START;
-      work_queue(HPWORK, &priv->work, rptun_worker, priv, 0);
+      work_queue(HPWORK, &priv->work, rptun_start_worker, priv, 0);
     }
 #else
-  if (RPTUN_IS_AUTOSTART(dev))
-    {
-      priv->cmd = RPTUNIOC_START;
-      nxsem_init(&priv->semrx, 0, 1);
-    }
-  else
-    {
-      nxsem_init(&priv->semrx, 0, 0);
-    }
-
-  snprintf(arg1, sizeof(arg1), "%p", priv);
+  nxsem_init(&priv->semrx, 0, 0);
+  snprintf(arg1, sizeof(arg1), "0x%" PRIxPTR, (uintptr_t)priv);
   argv[0] = (void *)RPTUN_GET_CPUNAME(dev);
   argv[1] = arg1;
   argv[2] = NULL;
@@ -1280,6 +1273,11 @@ err_mem:
 int rptun_boot(FAR const char *cpuname)
 {
   return rptun_ioctl_foreach(cpuname, RPTUNIOC_START, 0);
+}
+
+int rptun_poweroff(FAR const char *cpuname)
+{
+  return rptun_ioctl_foreach(cpuname, RPTUNIOC_STOP, 0);
 }
 
 int rptun_reset(FAR const char *cpuname, int value)
