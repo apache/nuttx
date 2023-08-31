@@ -747,6 +747,8 @@ config MPFS_MAC_NO_BROADCAST
 
 config MPFS_MAC_AUTONEG
 	bool "Use autonegotiation"
+	depends on !MPFS_ETH0_PHY_KSZ9477
+	depends on !MPFS_ETH1_PHY_KSZ9477
 	default y
 	---help---
 		Use PHY autonegotiation to determine speed and mode
@@ -765,6 +767,34 @@ config MPFS_PHYINIT
 	---help---
 		call mpfs_phy_boardinitialize() on init
 
+config MPFS_ETH0_PHY_KSZ9477
+	bool "Use ksz9477 switch as an SGMII PHY for ETH0"
+	default n
+	select NET_KSZ9477
+	---help---
+		Select to use ksz9477 connected to SGMII
+
+config MPFS_ETH1_PHY_KSZ9477
+	bool "Use ksz9477 switch as an SGMII PHY for ETH1"
+	default n
+	select NET_KSZ9477
+	---help---
+		Select to use ksz9477 connected to SGMII
+
+config MPFS_ETH0_PHY_KSZ9477_I2C_BUS
+	int "Management I2C bus number for ksz9477 switch"
+	depends on MPFS_ETH0_PHY_KSZ9477
+	default 5
+	---help---
+		The i2c port number for switch management
+
+config MPFS_ETH1_PHY_KSZ9477_I2C_BUS
+	int "Management I2C bus number for ksz9477 switch"
+	depends on MPFS_ETH1_PHY_KSZ9477
+	default 5
+	---help---
+		The i2c port number for switch management
+
 if !MPFS_MAC_AUTONEG
 
 config MPFS_MAC_ETHFD
@@ -776,6 +806,7 @@ config MPFS_MAC_ETHFD
 
 choice
 	prompt "MAC Speed"
+	default MPFS_MAC_ETH1000MBPS if MPFS_ETH0_PHY_KSZ9477 || MPFS_ETH1_PHY_KSZ9477
 	default MPFS_MAC_ETH100MBPS
 	---help---
 		If autonegotiation is not used, then you must select the fixed speed

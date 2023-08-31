@@ -50,10 +50,31 @@
 #  include <nuttx/net/pkt.h>
 #endif
 
+#include <nuttx/net/ksz9477.h>
+
 #include "riscv_internal.h"
 #include "mpfs_memorymap.h"
 #include "mpfs_ethernet.h"
 #include "mpfs_dsn.h"
+#include "mpfs_i2c.h"
+
+#if defined(CONFIG_MPFS_ETH0_PHY_KSZ9477) ||\
+    defined(CONFIG_MPFS_ETH1_PHY_KSZ9477)
+#  if !defined(CONFIG_MPFS_MAC_SGMII)
+#    error Using KSZ9477 as a PHY requires CONFIG_MPFS_MAC_SGMII to be set
+#  endif
+
+#  define ETH_HAS_KSZ_SWITCH
+
+#  ifdef CONFIG_MPFS_ETH0_PHY_KSZ9477
+#    define ETH_PHY_KSZ9477_I2C_BUS CONFIG_MPFS_ETH0_PHY_KSZ9477_I2C_BUS
+#  else
+#    define ETH_PHY_KSZ9477_I2C_BUS CONFIG_MPFS_ETH1_PHY_KSZ9477_I2C_BUS
+#  endif
+
+#else
+#  define ETH_HAS_MDIO_PHY
+#endif
 
 #if defined(CONFIG_NET) && defined(CONFIG_MPFS_ETHMAC)
 
@@ -90,7 +111,7 @@
 #  endif
 #endif
 
-#ifndef CONFIG_MPFS_PHYADDR
+#if defined(ETH_HAS_MDIO_PHY) && !defined(CONFIG_MPFS_PHYADDR)
 #  error "CONFIG_MPFS_PHYADDR must be defined in the NuttX configuration"
 #endif
 
@@ -253,7 +274,9 @@ struct mpfs_ethmac_s
   irq_t         mac_q_int[MPFS_MAC_QUEUE_COUNT]; /* irq numbers */
   uint8_t       ifup : 1;                        /* true:ifup false:ifdown */
   uint8_t       intf;                            /* Ethernet interface number */
+#ifdef ETH_HAS_MDIO_PHY
   uint8_t       phyaddr;                         /* PHY address */
+#endif
   struct wdog_s txtimeout;                       /* TX timeout timer */
   struct wdog_s rxtimeout;                       /* RX timeout timer */
   struct work_s irqwork;                         /* For deferring interrupt work to the work queue */
@@ -338,10 +361,13 @@ static int mpfs_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg);
 
 /* PHY Initialization */
 
+static int  mpfs_phyinit(struct mpfs_ethmac_s *priv);
+
+#ifdef ETH_HAS_MDIO_PHY
+
 static void mpfs_enablemdio(struct mpfs_ethmac_s *priv);
 static void mpfs_disablemdio(struct mpfs_ethmac_s *priv);
 static int  mpfs_phyreset(struct mpfs_ethmac_s *priv);
-static int  mpfs_phyinit(struct mpfs_ethmac_s *priv);
 static int  mpfs_phyread(struct mpfs_ethmac_s *priv, uint8_t phyaddr,
                          uint8_t regaddr, uint16_t *phyval);
 static int  mpfs_phywrite(struct mpfs_ethmac_s *priv, uint8_t phyaddr,
@@ -350,14 +376,19 @@ static int  mpfs_phywait(struct mpfs_ethmac_s *priv);
 static int  mpfs_phyfind(struct mpfs_ethmac_s *priv, uint8_t *phyaddr);
 #ifdef CONFIG_MPFS_MAC_AUTONEG
 static int  mpfs_autonegotiate(struct mpfs_ethmac_s *priv);
-#else
-static void mpfs_linkspeed(struct mpfs_ethmac_s *priv);
 #endif
 
-#if defined(CONFIG_DEBUG_NET) && defined(CONFIG_DEBUG_INFO)
+#endif /* ETH_HAS_MDIO_PHY */
+
+#if defined(CONFIG_DEBUG_NET) && defined(CONFIG_DEBUG_INFO) &&  \
+    defined(ETH_HAS_MDIO_PHY)
 static void mpfs_phydump(struct mpfs_ethmac_s *priv);
 #else
 #  define mpfs_phydump(priv)
+#endif
+
+#ifndef CONFIG_MPFS_MAC_AUTONEG
+static void mpfs_linkspeed(struct mpfs_ethmac_s *priv);
 #endif
 
 /* MAC/DMA Initialization */
@@ -1873,6 +1904,8 @@ static int mpfs_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 }
 #endif
 
+#ifdef ETH_HAS_MDIO_PHY
+
 /****************************************************************************
  * Function: mpfs_enablemdio
  *
@@ -2503,6 +2536,8 @@ errout:
 }
 #endif
 
+#endif /*  ETH_HAS_MDIO_PHY */
+
 /****************************************************************************
  * Function: mpfs_linkspeed
  *
@@ -2518,7 +2553,7 @@ errout:
  *
  ****************************************************************************/
 
-#ifndef CONFIG_MPFS_MAC_AUTONEG
+#if !defined(CONFIG_MPFS_MAC_AUTONEG) || !defined(ETH_HAS_MDIO_PHY)
 static void mpfs_linkspeed(struct mpfs_ethmac_s *priv)
 {
   uint32_t regval;
@@ -2594,7 +2629,7 @@ static void mpfs_linkspeed(struct mpfs_ethmac_s *priv)
 #ifdef CONFIG_NETDEV_IOCTL
 static int mpfs_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 {
-#ifdef CONFIG_NETDEV_PHY_IOCTL
+#if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(ETH_HAS_MDIO_PHY)
   struct mpfs_ethmac_s *priv = (struct mpfs_ethmac_s *)dev->d_private;
 #endif
   int ret;
@@ -2602,6 +2637,7 @@ static int mpfs_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
   switch (cmd)
     {
 #ifdef CONFIG_NETDEV_PHY_IOCTL
+#ifdef ETH_HAS_MDIO_PHY
 #ifdef CONFIG_ARCH_PHY_INTERRUPT
       case SIOCMIINOTIFY: /* Set up for PHY event notifications */
         {
@@ -2665,6 +2701,7 @@ static int mpfs_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
           mpfs_disablemdio(priv);
         }
         break;
+#endif /* ETH_HAS_MDIO_PHY */
 #endif /* CONFIG_NETDEV_PHY_IOCTL */
 
       default:
@@ -3239,6 +3276,8 @@ static int mpfs_macenable(struct mpfs_ethmac_s *priv)
  *
  ****************************************************************************/
 
+#ifdef ETH_HAS_MDIO_PHY
+
 static void mpfs_mdcclock(struct mpfs_ethmac_s *priv)
 {
   uint32_t ncfgr;
@@ -3293,6 +3332,8 @@ static void mpfs_mdcclock(struct mpfs_ethmac_s *priv)
   mac_putreg(priv, NETWORK_CONTROL, ncr);
 }
 
+#endif
+
 /****************************************************************************
  * Function: mpfs_phyinit
  *
@@ -3309,7 +3350,9 @@ static void mpfs_mdcclock(struct mpfs_ethmac_s *priv)
 
 static int mpfs_phyinit(struct mpfs_ethmac_s *priv)
 {
-  int ret;
+  int ret = -EINVAL;
+
+#ifdef ETH_HAS_MDIO_PHY
 
   /* Configure PHY clocking */
 
@@ -3328,7 +3371,20 @@ static int mpfs_phyinit(struct mpfs_ethmac_s *priv)
   /* We have a PHY address.  Reset the PHY */
 
   mpfs_phyreset(priv);
-  return OK;
+
+#elif defined(ETH_HAS_KSZ_SWITCH)
+  struct i2c_master_s *bus;
+
+  bus = mpfs_i2cbus_initialize(ETH_PHY_KSZ9477_I2C_BUS);
+
+  if (bus)
+    {
+      ret = ksz9477_i2c_init(bus, KSZ9477_PORT_SGMII);
+    }
+
+#endif
+
+  return ret;
 }
 
 /****************************************************************************
@@ -3346,6 +3402,8 @@ static int mpfs_phyinit(struct mpfs_ethmac_s *priv)
  * Assumptions:
  *
  ****************************************************************************/
+
+#ifdef ETH_HAS_MDIO_PHY
 
 static int mpfs_phyreset(struct mpfs_ethmac_s *priv)
 {
@@ -3415,6 +3473,8 @@ static int mpfs_phyreset(struct mpfs_ethmac_s *priv)
   mpfs_disablemdio(priv);
   return ret;
 }
+
+#endif
 
 /****************************************************************************
  * Function: mpfs_ethconfig
