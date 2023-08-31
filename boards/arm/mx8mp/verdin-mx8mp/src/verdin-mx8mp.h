@@ -26,10 +26,24 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include "mx8mp_gpio.h"
+#include "mx8mp_iomuxc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Board LEDs*/
+
+#define GPIO_LED_1         (GPIO_OUTPUT | GPIO_OUTPUT_ONE | GPIO_PORT1 | GPIO_PIN0)
+#define GPIO_LED_2         (GPIO_OUTPUT | GPIO_OUTPUT_ONE | GPIO_PORT1 | GPIO_PIN1)
+#define GPIO_LED_3         (GPIO_OUTPUT | GPIO_OUTPUT_ONE | GPIO_PORT1 | GPIO_PIN5)
+#define GPIO_LED_4         (GPIO_OUTPUT | GPIO_OUTPUT_ONE | GPIO_PORT1 | GPIO_PIN6)
+
+#define IOMUX_LED_1         IOMUXC_GPIO1_IO00_GPIO1_IO00, 0, GPIO_PAD_CTRL
+#define IOMUX_LED_2         IOMUXC_GPIO1_IO01_GPIO1_IO01, 0, GPIO_PAD_CTRL
+#define IOMUX_LED_3         IOMUXC_GPIO1_IO05_GPIO1_IO05, 0, GPIO_PAD_CTRL
+#define IOMUX_LED_4         IOMUXC_GPIO1_IO06_GPIO1_IO06, 0, GPIO_PAD_CTRL
 
 /****************************************************************************
  * Public Types

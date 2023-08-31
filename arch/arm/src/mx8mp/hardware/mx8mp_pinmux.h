@@ -879,28 +879,51 @@
 #define IOMUXC_HDMI_HPD_CAN2_RX                             0x3033024C, 0x4, 0x30330550, 0x3, 0x303304AC
 #define IOMUXC_HDMI_HPD_GPIO3_IO29                          0x3033024C, 0x5, 0x00000000, 0x0, 0x303304AC
 
-/* FSEL - Slew Rate Field
- *  0b0..Slow Slew Rate (SR=1)
- *  0b1..Fast Slew Rate (SR=0)
+
+/* DSE - Drive Strength Field
+ *  00   x1
+ *  10   x2
+ *  01   x4
+ *  11   x6
  */
-#define IOMUXC_SW_PAD_CTL_PAD_FSEL_MASK          (0x10U)
-#define IOMUXC_SW_PAD_CTL_PAD_FSEL_SHIFT         (4U)
-#define IOMUXC_SW_PAD_CTL_PAD_FSEL(x)            (((uint32_t)(((uint32_t)(x)) << IOMUXC_SW_PAD_CTL_PAD_FSEL_SHIFT)) & IOMUXC_SW_PAD_CTL_PAD_FSEL_MASK)
+#define PAD_CTL_DSE1            (0 << 1)
+#define PAD_CTL_DSE2            (2 << 1)
+#define PAD_CTL_DSE4            (1 << 1)
+#define PAD_CTL_DSE6            (3 << 1)
+
+/* FSEL - Slew Rate Field
+ *  0  Slow Slew Rate (SR=1)
+ *  1  Fast Slew Rate (SR=0)
+ */
+#define PAD_CTL_FSEL            (1 << 4)
+
+/* ODE - Open drain field
+ *  0  Disable
+ *  1  Enable
+ */
+#define PAD_CTL_ODE             (1 << 5)
 
 /* PUE - Pull Up / Down Config. Field
- *  0b0..Weak pull down
- *  0b1..Weak pull up
+ *  0  Weak pull down
+ *  1  Weak pull up
  */
-#define IOMUXC_SW_PAD_CTL_PAD_PUE_MASK           (0x40U)
-#define IOMUXC_SW_PAD_CTL_PAD_PUE_SHIFT          (6U)
-#define IOMUXC_SW_PAD_CTL_PAD_PUE(x)             (((uint32_t)(((uint32_t)(x)) << IOMUXC_SW_PAD_CTL_PAD_PUE_SHIFT)) & IOMUXC_SW_PAD_CTL_PAD_PUE_MASK)
+#define PAD_CTL_PUE             (1 << 6)
+
+/* HYS - Input Select Field
+ *  0  CMOS
+ *  1  Schmitt
+ */
+#define PAD_CTL_HYS             (1 << 7)
 
 /* PE - Pull Select Field
- *  0b0..Pull Disable
- *  0b1..Pull Enable
+ *  0  Pull Disable
+ *  1  Pull Enable
  */
-#define IOMUXC_SW_PAD_CTL_PAD_PE_MASK            (0x100U)
-#define IOMUXC_SW_PAD_CTL_PAD_PE_SHIFT           (8U)
-#define IOMUXC_SW_PAD_CTL_PAD_PE(x)              (((uint32_t)(((uint32_t)(x)) << IOMUXC_SW_PAD_CTL_PAD_PE_SHIFT)) & IOMUXC_SW_PAD_CTL_PAD_PE_MASK)
+#define PAD_CTL_PE              (1 << 8)
+
+/* Helpers for common configurations */
+
+#define GPIO_PAD_CTRL	(PAD_CTL_HYS | PAD_CTL_PUE | PAD_CTL_PE | PAD_CTL_DSE2)
+#define UART_PAD_CTRL	(PAD_CTL_PUE | PAD_CTL_PE)
 
 #endif /* __ARCH_ARM_SRC_MX8MP_HARDWARE_MX8MP_PINMUX_H */
