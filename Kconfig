@@ -423,7 +423,7 @@ menuconfig DFU_BINARY
 	bool "DFU binary format"
 	select RAW_BINARY
 	---help---
-	Create the dfu binary used with dfu-utils.
+		Create the dfu binary used with dfu-utils.
 
 if DFU_BINARY
 
