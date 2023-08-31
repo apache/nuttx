@@ -105,11 +105,12 @@
 #define MX8M_ECSPI2                  0x30830000u
 #define MX8M_ECSPI3                  0x30840000u
 
-#define MX8M_GPIO1                   0x30200000u
-#define MX8M_GPIO2                   0x30210000u
-#define MX8M_GPIO3                   0x30220000u
-#define MX8M_GPIO4                   0x30230000u
-#define MX8M_GPIO5                   0x30240000u
+#define MX8M_GPIO                    0x30200000u
+#define MX8M_GPIO1                   (MX8M_GPIO + 0x10000 * 0)
+#define MX8M_GPIO2                   (MX8M_GPIO + 0x10000 * 1)
+#define MX8M_GPIO3                   (MX8M_GPIO + 0x10000 * 2)
+#define MX8M_GPIO4                   (MX8M_GPIO + 0x10000 * 3)
+#define MX8M_GPIO5                   (MX8M_GPIO + 0x10000 * 4)
 
 #define MX8M_DDR                     0x40000000u
 #define MX8M_OCRAM                   0x00900000u

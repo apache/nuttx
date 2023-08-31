@@ -54,7 +54,7 @@ int mx8mp_bringup(void)
 {
   int ret = OK;
 
-#ifdef CONFIG_USERLED
+#if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
   /* Register the LED driver */
 
   ret = userled_lower_initialize("/dev/userleds");
