@@ -34,5 +34,11 @@ ifeq ($(CONFIG_MX8MP_I2C_DRIVER),y)
   CSRCS += mx8mp_i2cdev.c
 endif
 
+ifeq ($(CONFIG_ARCH_LEDS),y)
+#CSRCS += mx8mp_autoleds.c
+else
+CSRCS += mx8mp_userleds.c
+endif
+
 
 include $(TOPDIR)/boards/Board.mk

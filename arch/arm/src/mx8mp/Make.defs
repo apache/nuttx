@@ -24,7 +24,7 @@ include armv7-m/Make.defs
 
 CHIP_CSRCS  = mx8mp_start.c mx8mp_allocateheap.c mx8mp_iomuxc.c mx8mp_lowputc.c
 CHIP_CSRCS += mx8mp_clrpend.c mx8mp_irq.c mx8mp_mpuinit.c mx8mp_ccm.c
-CHIP_CSRCS += mx8mp_serial.c mx8mp_clockconfig.c
+CHIP_CSRCS += mx8mp_serial.c mx8mp_clockconfig.c mx8mp_gpio.c
 
 # Configuration-dependent files
 
