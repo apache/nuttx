@@ -34,6 +34,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/symtab.h>
+#include <nuttx/rptun/rptun.h>
 #include <nuttx/syslog/syslog_rpmsg.h>
 
 #include "sim_internal.h"
@@ -201,6 +202,10 @@ int main(int argc, char **argv, char **envp)
 #ifdef CONFIG_BOARDCTL_POWEROFF
 int board_power_off(int status)
 {
+#ifdef CONFIG_RPTUN
+  rptun_poweroff(NULL);
+#endif
+
   /* Abort simulator */
 
   host_abort(status);
