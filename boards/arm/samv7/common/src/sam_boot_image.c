@@ -36,6 +36,10 @@
 #include "arm_internal.h"
 #include "barriers.h"
 
+#ifdef CONFIG_ARM_MPU
+#  include "mpu.h"
+#endif
+
 #ifdef CONFIG_BOARDCTL_BOOT_IMAGE
 
 /****************************************************************************
