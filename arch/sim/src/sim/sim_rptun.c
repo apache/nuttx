@@ -59,7 +59,7 @@ struct sim_rptun_dev_s
   struct rptun_dev_s        rptun;
   rptun_callback_t          callback;
   void                     *arg;
-  bool                      master;
+  int                       master;
   unsigned int              seq;
   struct sim_rptun_shmem_s *shmem;
   struct simple_addrenv_s   addrenv[2];
@@ -179,13 +179,17 @@ static int sim_rptun_start(struct rptun_dev_s *dev)
                             struct sim_rptun_dev_s, rptun);
   pid_t pid;
 
-  pid = host_posix_spawn(sim_rptun_get_cpuname(dev), NULL, NULL);
-  if (pid < 0)
+  if (priv->master & SIM_RPTUN_BOOT)
     {
-      return pid;
+      pid = host_posix_spawn(sim_rptun_get_cpuname(dev), NULL, NULL);
+      if (pid < 0)
+        {
+          return pid;
+        }
+
+      priv->pid = pid;
     }
 
-  priv->pid = pid;
   return 0;
 }
 
@@ -194,12 +198,15 @@ static int sim_rptun_stop(struct rptun_dev_s *dev)
   struct sim_rptun_dev_s *priv = container_of(dev,
                               struct sim_rptun_dev_s, rptun);
 
-  priv->shmem->cmdm = SIM_RPTUN_STOP << SIM_RPTUN_SHIFT;
+  if (priv->master & SIM_RPTUN_BOOT)
+    {
+      priv->shmem->cmdm = SIM_RPTUN_STOP << SIM_RPTUN_SHIFT;
 
-  host_waitpid(priv->pid);
+      host_waitpid(priv->pid);
 
-  host_freeshmem(priv->shmem);
-  priv->shmem = NULL;
+      host_freeshmem(priv->shmem);
+      priv->shmem = NULL;
+    }
 
   return 0;
 }
@@ -321,7 +328,7 @@ static const struct rptun_ops_s g_sim_rptun_ops =
  * Public Functions
  ****************************************************************************/
 
-int sim_rptun_init(const char *shmemname, const char *cpuname, bool master)
+int sim_rptun_init(const char *shmemname, const char *cpuname, int master)
 {
   struct sim_rptun_dev_s *dev;
   int ret;
