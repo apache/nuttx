@@ -39,13 +39,13 @@ ifeq ($(CONFIG_ARCH_ARMV8R),y)
 endif
 
 ifeq ($(CONFIG_ARCH_CORTEX_A53),y)
-  ARCHCPUFLAGS += -mtune=cortex-a53
+  ARCHCPUFLAGS += -mcpu=cortex-a53
 else ifeq ($(CONFIG_ARCH_CORTEX_A57),y)
-  ARCHCPUFLAGS += -mtune=cortex-a57
+  ARCHCPUFLAGS += -mcpu=cortex-a57
 else ifeq ($(CONFIG_ARCH_CORTEX_A72),y)
-  ARCHCPUFLAGS += -mtune=cortex-a72
+  ARCHCPUFLAGS += -mcpu=cortex-a72
 else ifeq ($(CONFIG_ARCH_CORTEX_R82),y)
-  ARCHCPUFLAGS += -mtune=cortex-r82
+  ARCHCPUFLAGS += -mcpu=cortex-r82
 endif
 
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
