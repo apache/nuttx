@@ -191,7 +191,7 @@ static int rmt_setup(struct rmt_dev_s *dev)
  *
  * Description:
  *   Copies chunks of data from the buffer to the RMT device memory
- *   This function can also be called on the first transmition data chunk
+ *   This function can also be called on the first transmission data chunk
  *
  * Input Parameters:
  *   channel - Pointer to the channel to be reloaded
@@ -298,7 +298,7 @@ IRAM_ATTR static int rmt_interrupt(int irq, void *context, void *arg)
         }
       else if (regval & RMT_CHN_TX_END_INT_ST(ch_idx))
         {
-          /* end of transmition */
+          /* end of transmission */
 
           modifyreg32(RMT_INT_ENA_REG,
             RMT_CHN_TX_END_INT_ENA(ch_idx) |
