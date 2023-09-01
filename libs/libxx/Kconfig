@@ -37,6 +37,7 @@ config LIBCXX
 	bool "LLVM libc++ C++ Standard Library"
 	select HAVE_CXXINITIALIZE
 	select LIBC_LOCALE
+	select PTHREAD_MUTEX_TYPES
 	---help---
 		LLVM "libc++" C++ Standard Library
 		https://libcxx.llvm.org/
