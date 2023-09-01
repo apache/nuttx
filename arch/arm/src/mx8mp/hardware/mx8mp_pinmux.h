@@ -40,31 +40,31 @@
 
 /* General Purpose Registers */
 
-#define IMX_IOMUXC_GPR0_OFFSET                0x0000
-#define IMX_IOMUXC_GPR1_OFFSET                0x0004
-#define IMX_IOMUXC_GPR2_OFFSET                0x0008
-#define IMX_IOMUXC_GPR3_OFFSET                0x000c
-#define IMX_IOMUXC_GPR4_OFFSET                0x0010
-#define IMX_IOMUXC_GPR5_OFFSET                0x0014
-#define IMX_IOMUXC_GPR6_OFFSET                0x0018
-#define IMX_IOMUXC_GPR7_OFFSET                0x001c
-#define IMX_IOMUXC_GPR8_OFFSET                0x0020
-#define IMX_IOMUXC_GPR9_OFFSET                0x0024
-#define IMX_IOMUXC_GPR10_OFFSET               0x0028
-#define IMX_IOMUXC_GPR11_OFFSET               0x002c
-#define IMX_IOMUXC_GPR12_OFFSET               0x0030
-#define IMX_IOMUXC_GPR13_OFFSET               0x0034
-#define IMX_IOMUXC_GPR14_OFFSET               0x0038
-#define IMX_IOMUXC_GPR15_OFFSET               0x003c
-#define IMX_IOMUXC_GPR16_OFFSET               0x0040
-#define IMX_IOMUXC_GPR17_OFFSET               0x0044
-#define IMX_IOMUXC_GPR18_OFFSET               0x0048
-#define IMX_IOMUXC_GPR19_OFFSET               0x004c
-#define IMX_IOMUXC_GPR20_OFFSET               0x0050
-#define IMX_IOMUXC_GPR21_OFFSET               0x0054
-#define IMX_IOMUXC_GPR22_OFFSET               0x0058
-#define IMX_IOMUXC_GPR23_OFFSET               0x005c
-#define IMX_IOMUXC_GPR24_OFFSET               0x0060
+#define IOMUXC_GPR0_OFFSET                  0x0000
+#define IOMUXC_GPR1_OFFSET                  0x0004
+#define IOMUXC_GPR2_OFFSET                  0x0008
+#define IOMUXC_GPR3_OFFSET                  0x000c
+#define IOMUXC_GPR4_OFFSET                  0x0010
+#define IOMUXC_GPR5_OFFSET                  0x0014
+#define IOMUXC_GPR6_OFFSET                  0x0018
+#define IOMUXC_GPR7_OFFSET                  0x001c
+#define IOMUXC_GPR8_OFFSET                  0x0020
+#define IOMUXC_GPR9_OFFSET                  0x0024
+#define IOMUXC_GPR10_OFFSET                 0x0028
+#define IOMUXC_GPR11_OFFSET                 0x002c
+#define IOMUXC_GPR12_OFFSET                 0x0030
+#define IOMUXC_GPR13_OFFSET                 0x0034
+#define IOMUXC_GPR14_OFFSET                 0x0038
+#define IOMUXC_GPR15_OFFSET                 0x003c
+#define IOMUXC_GPR16_OFFSET                 0x0040
+#define IOMUXC_GPR17_OFFSET                 0x0044
+#define IOMUXC_GPR18_OFFSET                 0x0048
+#define IOMUXC_GPR19_OFFSET                 0x004c
+#define IOMUXC_GPR20_OFFSET                 0x0050
+#define IOMUXC_GPR21_OFFSET                 0x0054
+#define IOMUXC_GPR22_OFFSET                 0x0058
+#define IOMUXC_GPR23_OFFSET                 0x005c
+#define IOMUXC_GPR24_OFFSET                 0x0060
 
 /* The pin function ID is a tuple that contains in order:
  *  mux_register
@@ -878,7 +878,6 @@
 #define IOMUXC_HDMI_HPD_I2C6_SDA                            0x3033024C, 0x3, 0x303305D0, 0x3, 0x303304AC
 #define IOMUXC_HDMI_HPD_CAN2_RX                             0x3033024C, 0x4, 0x30330550, 0x3, 0x303304AC
 #define IOMUXC_HDMI_HPD_GPIO3_IO29                          0x3033024C, 0x5, 0x00000000, 0x0, 0x303304AC
-
 
 /* DSE - Drive Strength Field
  *  00   x1

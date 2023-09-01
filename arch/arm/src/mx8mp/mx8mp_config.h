@@ -70,4 +70,4 @@
 #error "MPU is requiered for proper behavior"
 #endif
 
-#endif /* __ARCH_ARM_SRC_MX8MP_IMX_CONFIG_H */
+#endif /* __ARCH_ARM_SRC_MX8MP_MX8MP_CONFIG_H */

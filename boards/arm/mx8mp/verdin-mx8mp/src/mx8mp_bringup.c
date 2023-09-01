@@ -23,16 +23,13 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/leds/userled.h>
+#include <nuttx/input/buttons.h>
 
 #include <debug.h>
-#include <errno.h>
-#include <sys/types.h>
 
 #include "verdin-mx8mp.h"
-
-#ifdef CONFIG_USERLED
-#  include <nuttx/leds/userled.h>
-#endif
+#include "mx8mp_gpio.h"
 
 #ifdef CONFIG_SENSORS_INA219
 #  include "mx8mp_ina219.h"
@@ -54,15 +51,39 @@ int mx8mp_bringup(void)
 {
   int ret = OK;
 
-#if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
+#if defined(CONFIG_USERLED) && !defined(CONFIG_ARCH_LEDS)
+#ifdef CONFIG_USERLED_LOWER
   /* Register the LED driver */
 
   ret = userled_lower_initialize("/dev/userleds");
-  if (ret < 0)
+  if (ret != OK)
     {
       syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+      return ret;
     }
-#endif
+#else
+  /* Enable USER LED support for some other purpose */
+
+  board_userled_initialize();
+#endif /* CONFIG_USERLED_LOWER */
+#endif /* CONFIG_USERLED && !CONFIG_ARCH_LEDS */
+
+#ifdef CONFIG_INPUT_BUTTONS
+#ifdef CONFIG_INPUT_BUTTONS_LOWER
+  /* Register the BUTTON driver */
+
+  ret = btn_lower_initialize("/dev/buttons");
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+      return ret;
+    }
+#else
+  /* Enable BUTTON support for some other purpose */
+
+  board_button_initialize();
+#endif /* CONFIG_INPUT_BUTTONS_LOWER */
+#endif /* CONFIG_INPUT_BUTTONS */
 
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */

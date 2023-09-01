@@ -62,7 +62,7 @@ static int mx8mp_timerisr(int irq, uint32_t *regs, void *arg);
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  imxrt_timerisr
+ * Function:  mx8mp_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for various portions
