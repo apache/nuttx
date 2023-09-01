@@ -37,6 +37,8 @@
 #include "ram_vectors.h"
 #include "arm_internal.h"
 
+#include "mx8mp_gpio.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -420,9 +422,15 @@ void up_irqinitialize(void)
   putreg32(regval, NVIC_DEMCR);
 #endif
 
+#ifndef CONFIG_SUPPRESS_INTERRUPTS
+  /* Initialize logic to support a second level of interrupt decoding for
+   * GPIO pins.
+   */
+
+  mx8mp_gpio_irq_initialize();
+
   /* And finally, enable interrupts */
 
-#ifndef CONFIG_SUPPRESS_INTERRUPTS
   up_irq_enable();
 #endif
 }

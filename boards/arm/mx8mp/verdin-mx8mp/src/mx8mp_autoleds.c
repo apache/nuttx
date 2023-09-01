@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/mx8mp/verdin-mx8mp/src/mx8mp_userleds.c
+ * boards/arm/mx8mp/verdin-mx8mp/src/mx8mp_autoleds.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,49 +24,23 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <debug.h>
-
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "chip.h"
-#include "arm_internal.h"
+#include "mx8mp_gpio.h"
 #include "verdin-mx8mp.h"
 
-#ifndef CONFIG_ARCH_LEDS
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: led_dumppins
- ****************************************************************************/
-
-#ifdef LED_VERBOSE
-static void led_dumppins(const char *msg)
-{
-  #warning Missing logic
-}
-#else
-#  define led_dumppins(m)
-#endif
+#ifdef CONFIG_ARCH_LEDS
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_userled_initialize
+ * Name: board_autoled_initialize
  ****************************************************************************/
 
-uint32_t board_userled_initialize(void)
+void board_autoled_initialize(void)
 {
   mx8mp_iomuxc_config(IOMUX_LED_1);
   mx8mp_iomuxc_config(IOMUX_LED_2);
@@ -77,61 +51,79 @@ uint32_t board_userled_initialize(void)
   mx8mp_gpio_config(GPIO_LED_2);
   mx8mp_gpio_config(GPIO_LED_3);
   mx8mp_gpio_config(GPIO_LED_4);
-
-  return BOARD_NLEDS;
 }
 
 /****************************************************************************
- * Name: board_userled
+ * Name: board_autoled_on
  ****************************************************************************/
 
-void board_userled(int led, bool on)
+void board_autoled_on(int led)
 {
-  gpio_pinset_t gpio;
-
   switch (led)
     {
-      case BOARD_LED_1:
+      case LED_HEAPALLOCATE:
         {
-          gpio = GPIO_LED_1;
+          mx8mp_gpio_write(GPIO_LED_1, true);
+          mx8mp_gpio_write(GPIO_LED_2, false);
         }
-      break;
+        break;
 
-      case BOARD_LED_2:
+      case LED_IRQSENABLED:
         {
-          gpio = GPIO_LED_2;
+          mx8mp_gpio_write(GPIO_LED_1, false);
+          mx8mp_gpio_write(GPIO_LED_2, true);
         }
-      break;
+        break;
 
-      case BOARD_LED_3:
+      case LED_STACKCREATED:
         {
-          gpio = GPIO_LED_3;
+          mx8mp_gpio_write(GPIO_LED_1, true);
+          mx8mp_gpio_write(GPIO_LED_2, true);
         }
-      break;
+        break;
 
-      case BOARD_LED_4:
+      case LED_ASSERTION:
         {
-          gpio = GPIO_LED_4;
+          mx8mp_gpio_write(GPIO_LED_3, true);
         }
-      break;
+        break;
 
-      default:
-        return;
+      case LED_PANIC:
+        {
+          mx8mp_gpio_write(GPIO_LED_1, true);
+          mx8mp_gpio_write(GPIO_LED_2, true);
+        }
+        break;
+
+      case LED_IDLE:
+        {
+          mx8mp_gpio_write(GPIO_LED_4, true);
+        }
+        break;
     }
-
-    mx8mp_gpio_write(gpio, on);
 }
 
 /****************************************************************************
- * Name: board_userled_all
+ * Name: board_autoled_off
  ****************************************************************************/
 
-void board_userled_all(uint32_t ledset)
+void board_autoled_off(int led)
 {
-  mx8mp_gpio_write(GPIO_LED_1, (ledset & BOARD_LED_1_BIT) == 0);
-  mx8mp_gpio_write(GPIO_LED_2, (ledset & BOARD_LED_2_BIT) == 0);
-  mx8mp_gpio_write(GPIO_LED_3, (ledset & BOARD_LED_3_BIT) == 0);
-  mx8mp_gpio_write(GPIO_LED_4, (ledset & BOARD_LED_4_BIT) == 0);
+  switch (led)
+    {
+      case LED_PANIC:
+        {
+          mx8mp_gpio_write(GPIO_LED_1, false);
+          mx8mp_gpio_write(GPIO_LED_2, false);
+        }
+        break;
+
+      case LED_IDLE:
+        {
+          mx8mp_gpio_write(GPIO_LED_4, false);
+        }
+        break;
+    }
 }
 
-#endif /* !CONFIG_ARCH_LEDS */
+#endif /* CONFIG_ARCH_LEDS */
