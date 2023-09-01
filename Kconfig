@@ -649,14 +649,14 @@ comment "Debug SYSLOG Output Controls"
 
 config DEBUG_ERROR
 	bool "Enable Error Output"
-	default n
+	default y
 	---help---
 		Enables output from [a-z]err() statements.  Errors are significant system
 		exceptions that require immediate attention.
 
 config DEBUG_WARN
 	bool "Enable Warnings Output"
-	default n
+	default y
 	depends on DEBUG_ERROR
 	---help---
 		Enables output from [a-z]warn() statements.  Warnings are considered to
@@ -665,7 +665,7 @@ config DEBUG_WARN
 
 config DEBUG_INFO
 	bool "Enable Informational Debug Output"
-	default n
+	default y
 	depends on DEBUG_WARN
 	---help---
 		Enables verbose "informational" debug output.  If you enable
