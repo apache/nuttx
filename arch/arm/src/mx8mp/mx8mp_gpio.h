@@ -84,7 +84,6 @@
 #define GPIO_INTBOTHCFG_MASK       (1 << GPIO_INTBOTHCFG_SHIFT)
 #  define GPIO_INTBOTH_EDGES       (1 << GPIO_INTBOTHCFG_SHIFT)
 
-
 /* GPIO Port Number
  *
  *   GPIO INPUT  00.. .... GGG. ....  .... .... .... ....
@@ -176,7 +175,7 @@ extern "C"
 int mx8mp_gpio_config(gpio_pinset_t pinset);
 
 /****************************************************************************
- * Name: imx_gpio_write
+ * Name: mx8mp_gpio_write
  *
  * Description:
  *   Write one or zero to the selected GPIO pin
@@ -196,6 +195,17 @@ void mx8mp_gpio_write(gpio_pinset_t pinset, bool value);
 bool mx8mp_gpio_read(gpio_pinset_t pinset);
 
 /****************************************************************************
+ * Name: mx8mp_gpio_irq_initialize
+ *
+ * Description:
+ *   Initialize logic to support a second level of interrupt decoding for
+ *   GPIO pins.
+ *
+ ****************************************************************************/
+
+void mx8mp_gpio_irq_initialize(void);
+
+/****************************************************************************
  * Name: mx8mp_gpio_configure_irq
  *
  * Description:
@@ -206,39 +216,24 @@ bool mx8mp_gpio_read(gpio_pinset_t pinset);
 void mx8mp_gpio_configure_irq(gpio_pinset_t pinset);
 
 /****************************************************************************
- * Name: imx_gpioirq_enable
+ * Name: mx8mp_gpio_irq_enable
  *
  * Description:
  *   Enable the interrupt for specified GPIO IRQ
  *
  ****************************************************************************/
 
-int mx8mp_gpio_enable_irq(int irq);
+void mx8mp_gpio_irq_enable(gpio_pinset_t pinset);
 
 /****************************************************************************
- * Name: imx_gpioirq_disable
+ * Name: mx8mp_gpio_irq_disable
  *
  * Description:
  *   Disable the interrupt for specified GPIO IRQ
  *
  ****************************************************************************/
 
-int mx8mp_gpio_disable_irq(int irq);
-
-/****************************************************************************
- * Function:  imx_dump_gpio
- *
- * Description:
- *   Dump all GPIO registers associated with the base address of the provided
- *   pinset.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_DEBUG_GPIO_INFO
-int mx8mp_dump_gpio(gpio_pinset_t pinset, const char *msg);
-#else
-#  define mx8mp_dump_gpio(p,m)
-#endif
+void mx8mp_gpio_irq_disable(gpio_pinset_t pinset);
 
 #undef EXTERN
 #if defined(__cplusplus)

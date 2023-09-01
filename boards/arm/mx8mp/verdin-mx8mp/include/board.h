@@ -43,8 +43,6 @@
 
 /* LED definitions **********************************************************/
 
-/* The Freedom K66F has a single RGB LED driven by the K66F as follows:
-
 /* LED index values for use with board_userled() */
 
 #define BOARD_LED_1       0
@@ -68,15 +66,30 @@
  *   -------------------  ----------------------------  --------------------
  */
 
-#define LED_STARTED       1 /* NuttX has been started    None  */
-#define LED_HEAPALLOCATE  2 /* Heap has been allocated   ON(1) */
-#define LED_IRQSENABLED   0 /* Interrupts enabled        ON(1) */
-#define LED_STACKCREATED  3 /* Idle stack created        ON(2) */
-#define LED_INIRQ         0 /* In an interrupt          (no change)  */
-#define LED_SIGNAL        0 /* In a signal handler      (no change)  */
-#define LED_ASSERTION     0 /* An assertion failed      (no change)  */
-#define LED_PANIC         5 /* The system has crashed    FLASH(3)    */
-#undef  LED_IDLE          4 /* idle loop                 FLASH(4)    */
+#define LED_STARTED       0 /* NuttX has been started    None  */
+#define LED_HEAPALLOCATE  1 /* Heap has been allocated   ON(1),  OFF(2) */
+#define LED_IRQSENABLED   2 /* Interrupts enabled        OFF(1), ON(2)  */
+#define LED_STACKCREATED  3 /* Idle stack created        ON(1), ON(2) */
+#define LED_INIRQ         4 /* In an interrupt          (no change) */
+#define LED_SIGNAL        5 /* In a signal handler      (no change) */
+#define LED_ASSERTION     6 /* An assertion failed       ON(3) */
+#define LED_PANIC         7 /* The system has crashed    FLASH(1,2) */
+#define LED_IDLE          8 /* idle loop                 FLASH(4) */
+
+/* Button definitions *******************************************************/
+
+/* The Verdin board has four switch buttons and four on/off buttons.
+ * They are not connected to the board by default: it is up to the user to
+ * connect them to one of the multiple available headers pins.
+ * Here we choose (arbitrary) to connect SW11 to GPIO_5_CSI header pin
+ *
+ * 1. SW11    GPIO1_7 (= GPIO_5_CSI)
+ */
+
+#define BUTTON_1          0
+#define NUM_BUTTONS       1
+
+#define BUTTON_1_BIT      (1 << BUTTON_1)
 
 /****************************************************************************
  * Public Data

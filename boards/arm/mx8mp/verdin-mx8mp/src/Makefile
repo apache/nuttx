@@ -35,9 +35,13 @@ ifeq ($(CONFIG_MX8MP_I2C_DRIVER),y)
 endif
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
-#CSRCS += mx8mp_autoleds.c
+  CSRCS += mx8mp_autoleds.c
 else
-CSRCS += mx8mp_userleds.c
+  CSRCS += mx8mp_userleds.c
+endif
+
+ifeq ($(CONFIG_ARCH_BUTTONS),y)
+  CSRCS += mx8mp_buttons.c
 endif
 
 

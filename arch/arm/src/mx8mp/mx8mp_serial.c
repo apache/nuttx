@@ -250,8 +250,6 @@ static char g_uart4rxbuffer[CONFIG_UART4_RXBUFSIZE];
 static char g_uart4txbuffer[CONFIG_UART4_TXBUFSIZE];
 #endif
 
-/* This describes the state of the IMX uart1 port. */
-
 #ifdef CONFIG_MX8MP_UART1
 static struct mx8mp_uart_s g_uart1priv =
 {
@@ -280,8 +278,6 @@ static struct uart_dev_s g_uart1port =
   .priv     = &g_uart1priv,
 };
 #endif
-
-/* This describes the state of the IMX uart2 port. */
 
 #ifdef CONFIG_MX8MP_UART2
 static struct mx8mp_uart_s g_uart2priv =

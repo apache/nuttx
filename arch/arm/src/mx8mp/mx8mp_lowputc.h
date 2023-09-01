@@ -54,7 +54,7 @@ struct uart_config_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: imx_uart_configure
+ * Name: mx8mp_uart_configure
  *
  * Description:
  *   Configure a UART for non-interrupt driven operation
@@ -66,7 +66,7 @@ int mx8mp_uart_configure(uint32_t base,
                          const struct uart_config_s *config);
 
 /****************************************************************************
- * Name: imx_lowsetup
+ * Name: mx8mp_lowsetup
  *
  * Description:
  *   Called at the very beginning of _start.  Performs low level
