@@ -72,6 +72,10 @@ struct can_recvfrom_s
  * Private Functions
  ****************************************************************************/
 
+#ifdef CONFIG_NET_CANPROTO_OPTIONS
+static int can_recv_filter(struct can_conn_s *conn, canid_t id);
+#endif
+
 /****************************************************************************
  * Name: can_add_recvlen
  *
@@ -233,6 +237,31 @@ static inline int can_readahead(struct can_recvfrom_s *pstate)
       pstate->pr_buflen > 0)
     {
       DEBUGASSERT(iob->io_pktlen > 0);
+
+#ifdef CONFIG_NET_CANPROTO_OPTIONS
+      /* Check receive filters */
+
+      canid_t can_id;
+      iob_copyout((uint8_t *)&can_id, iob, sizeof(canid_t), 0);
+
+      if (can_recv_filter(conn, can_id) == 0)
+        {
+          FAR struct iob_s *tmp;
+
+          /* Remove the I/O buffer chain from the head of the read-ahead
+           * buffer queue.
+           */
+
+          tmp = iob_remove_queue(&conn->readahead);
+          DEBUGASSERT(tmp == iob);
+          UNUSED(tmp);
+
+          /* And free the I/O buffer chain */
+
+          iob_free_chain(iob);
+          return 0;
+        }
+#endif
 
 #ifdef CONFIG_NET_TIMESTAMP
       if (conn->timestamp && pstate->pr_msglen == sizeof(struct timeval))
