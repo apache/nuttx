@@ -42,19 +42,19 @@ struct rmt_dev_channel_s
 {
   /* Parameters for each RMT channel */
 
-  int       open_count;
-  int       ch_idx;
-  int       output_pin;
-  int       next_buffer;
-  sem_t     tx_sem;
+  int       open_count;      /* Unused */
+  int       ch_idx;          /* RMT channel number (0-7) */
+  int       output_pin;      /* GPIO pin number attached to the RMT */
+  int       next_buffer;     /* Tracking buffer (0 or 1) used next reload */
+  sem_t     tx_sem;          /* Semaphore structure */
 
-  uint32_t  *src;
-  uint32_t  src_offset;
-  size_t    words_to_send;
-  uint32_t  available_words;
-  uint32_t  start_address;
-  uint32_t  reload_thresh;
-  void      *parent_dev;
+  uint32_t  *src;            /* Data to be copied to the internal buffer */
+  uint32_t  src_offset;      /* Offset pointer to the src */
+  size_t    words_to_send;   /* Number of 32-bit words to be sent */
+  uint32_t  available_words; /* Counter of available words in the src */
+  uint32_t  start_address;   /* Current RMT register buffer address */
+  uint32_t  reload_thresh;   /* Threshold for reloading the internal buffer */
+  void      *parent_dev;     /* Pointer to the parent RMT device structure */
 };
 
 struct rmt_dev_s
@@ -91,7 +91,7 @@ extern "C"
  *
  * Description:
  *   Copies chunks of data from the buffer to the RMT device memory
- *   This function can also be called on the first transmition data chunk
+ *   This function can also be called on the first transmission data chunk
  *
  * Input Parameters:
  *   channel - Pointer to the channel to be reloaded

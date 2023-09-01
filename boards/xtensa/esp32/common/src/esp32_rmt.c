@@ -262,7 +262,7 @@ int board_rmt_initialize(int channel, int output_pin)
 
   struct rmt_dev_channel_s *channel_data  = &(rmt_dev->channels[channel]);
 
-  /* Register the WS2812 driver at the specified location. */
+  /* Register the RMT driver at the specified location. */
 
   snprintf(devpath, sizeof(devpath), "/dev/rmt%d", channel);
 
