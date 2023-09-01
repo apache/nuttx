@@ -103,7 +103,7 @@ I2S          Yes
 LED_PWM      Yes
 MCPWM        No
 Pulse_CNT    No
-RMT          No
+RMT          Yes
 RNG          Yes
 RSA          No
 RTC          Yes
