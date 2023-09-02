@@ -90,6 +90,50 @@ config ISO1I813T_MULTIPLE
 
 endif # IOEXPANDER_ISO1I813T
 
+config IOEXPANDER_MCP23X08
+	bool "MCP23008/MCP23S08 I2C/SPI IO expander"
+	default n
+	depends on I2C
+	---help---
+		Enable support for the MCP23008/MCP23S08 IO Expander
+
+if IOEXPANDER_MCP23X08
+
+config MCP23X08_MULTIPLE
+	bool "Multiple MCP23x08 Devices"
+	default n
+	---help---
+		Can be defined to support multiple MCP23x08 devices on board.
+
+config MCP23X08_INT_ENABLE
+	bool "Enable MCP23x08 Interrupt Support"
+	default n
+	select IOEXPANDER_INT_ENABLE
+	---help---
+		Enable driver interrupt functionality
+
+config MCP23X08_INT_NCALLBACKS
+	int "Max number of interrupt callbacks"
+	default 4
+	depends on MCP23X08_INT_ENABLE
+	---help---
+		This is the maximum number of interrupt callbacks supported
+
+config MCP23X08_INT_POLL
+	bool "Enable interrupt poll"
+	default n
+	---help---
+		Enable polling for missed interrupts.
+
+config MCP23X08_INT_POLLDELAY
+	int "Interrupt poll delay (used)"
+	default 500000
+	depends on MCP23X08_INT_POLL
+	---help---
+		This microsecond delay defines the polling rate for missed interrupts.
+
+endif # IOEXPANDER_MCP23X08
+
 config IOEXPANDER_MCP23X17
 	bool "MCP23017/MCP23S17 I2C/SPI IO expander"
 	default n
