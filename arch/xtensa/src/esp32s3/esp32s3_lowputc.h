@@ -44,6 +44,8 @@
 #include "hardware/esp32s3_uart.h"
 #include "hardware/esp32s3_gpio_sigmap.h"
 
+#include "esp32s3_config.h"
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -121,6 +123,7 @@ struct esp32s3_uart_s
 
 extern struct esp32s3_uart_s g_uart0_config;
 extern struct esp32s3_uart_s g_uart1_config;
+extern struct esp32s3_uart_s g_uart2_config;
 
 /****************************************************************************
  * Public Function Prototypes

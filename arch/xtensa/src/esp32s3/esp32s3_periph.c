@@ -608,9 +608,6 @@ void IRAM_ATTR esp32s3_perip_clk_init(void)
 #ifndef CONFIG_UART1_SERIAL_CONSOLE
                          SYSTEM_UART1_CLK_EN |
 #endif
-#ifndef CONFIG_UART2_SERIAL_CONSOLE
-                         SYSTEM_UART2_CLK_EN |
-#endif
                          SYSTEM_USB_CLK_EN |
                          SYSTEM_SPI2_CLK_EN |
                          SYSTEM_I2C_EXT0_CLK_EN |
@@ -629,7 +626,9 @@ void IRAM_ATTR esp32s3_perip_clk_init(void)
                          SYSTEM_SPI3_DMA_CLK_EN |
                          SYSTEM_PWM2_CLK_EN |
                          SYSTEM_PWM3_CLK_EN;
-      common_perip_clk1 = 0;
+#ifndef CONFIG_UART2_SERIAL_CONSOLE
+      common_perip_clk1 = SYSTEM_UART2_CLK_EN;
+#endif
       hwcrypto_perip_clk = SYSTEM_CRYPTO_AES_CLK_EN |
                            SYSTEM_CRYPTO_SHA_CLK_EN |
                            SYSTEM_CRYPTO_RSA_CLK_EN;
@@ -651,9 +650,6 @@ void IRAM_ATTR esp32s3_perip_clk_init(void)
 #ifndef CONFIG_UART1_SERIAL_CONSOLE
                       SYSTEM_UART1_CLK_EN |
 #endif
-#ifndef CONFIG_UART2_SERIAL_CONSOLE
-                      SYSTEM_UART2_CLK_EN |
-#endif
                       SYSTEM_USB_CLK_EN |
                       SYSTEM_SPI2_CLK_EN |
                       SYSTEM_I2C_EXT0_CLK_EN |
@@ -666,7 +662,9 @@ void IRAM_ATTR esp32s3_perip_clk_init(void)
                       SYSTEM_I2S1_CLK_EN |
                       SYSTEM_SPI2_DMA_CLK_EN |
                       SYSTEM_SPI3_DMA_CLK_EN;
-  common_perip_clk1 = 0;
+#ifndef CONFIG_UART2_SERIAL_CONSOLE
+  common_perip_clk1 |= SYSTEM_UART2_CLK_EN;
+#endif
 
   /* Disable some peripheral clocks. */
 
