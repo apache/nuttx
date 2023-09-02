@@ -74,13 +74,17 @@
 
 #ifdef CONSOLE_UART
 #  if defined(CONFIG_UART0_SERIAL_CONSOLE)
-#    define CONSOLE_DEV         g_uart0_dev     /* UART0 is console */
-#    define TTYS0_DEV           g_uart0_dev     /* UART0 is ttyS0 */
+#    define CONSOLE_DEV         g_uart0_dev  /* UART0 is console */
+#    define TTYS0_DEV           g_uart0_dev  /* UART0 is ttyS0 */
 #    define UART0_ASSIGNED      1
 #  elif defined(CONFIG_UART1_SERIAL_CONSOLE)
 #    define CONSOLE_DEV         g_uart1_dev  /* UART1 is console */
 #    define TTYS0_DEV           g_uart1_dev  /* UART1 is ttyS0 */
 #    define UART1_ASSIGNED      1
+#  elif defined(CONFIG_UART2_SERIAL_CONSOLE)
+#    define CONSOLE_DEV         g_uart2_dev  /* UART2 is console */
+#    define TTYS0_DEV           g_uart2_dev  /* UART2 is ttyS0 */
+#    define UART2_ASSIGNED      1
 #  endif /* CONFIG_UART0_SERIAL_CONSOLE */
 #else /* No UART console */
 #  undef  CONSOLE_DEV
@@ -90,6 +94,9 @@
 #  elif defined(CONFIG_ESP32S3_UART1)
 #    define TTYS0_DEV           g_uart1_dev  /* UART1 is ttyS0 */
 #    define UART1_ASSIGNED      1
+#  elif defined(CONFIG_ESP32S3_UART2)
+#    define TTYS0_DEV           g_uart2_dev  /* UART2 is ttyS0 */
+#    define UART2_ASSIGNED      1
 #  endif
 #endif /* CONSOLE_UART */
 
@@ -106,6 +113,22 @@
 #elif defined(CONFIG_ESP32S3_UART1) && !defined(UART1_ASSIGNED)
 #  define TTYS1_DEV           g_uart1_dev  /* UART1 is ttyS1 */
 #  define UART1_ASSIGNED      1
+#elif defined(CONFIG_ESP32S3_UART2) && !defined(UART2_ASSIGNED)
+#  define TTYS1_DEV           g_uart2_dev  /* UART2 is ttyS1 */
+#  define UART2_ASSIGNED      1
+#endif
+
+/* Pick ttyS2 */
+
+#if defined(CONFIG_ESP32S3_UART0) && !defined(UART0_ASSIGNED)
+#  define TTYS2_DEV           g_uart0_dev  /* UART0 is ttyS2 */
+#  define UART0_ASSIGNED      1
+#elif defined(CONFIG_ESP32S3_UART1) && !defined(UART1_ASSIGNED)
+#  define TTYS2_DEV           g_uart1_dev  /* UART1 is ttyS2 */
+#  define UART1_ASSIGNED      1
+#elif defined(CONFIG_ESP32S3_UART2) && !defined(UART2_ASSIGNED)
+#  define TTYS2_DEV           g_uart2_dev  /* UART2 is ttyS2 */
+#  define UART2_ASSIGNED      1
 #endif
 
 #ifdef HAVE_UART_DEVICE
@@ -225,6 +248,39 @@ static uart_dev_t g_uart1_dev =
 
   .ops  = &g_uart_ops,
   .priv = &g_uart1_config
+};
+
+#endif
+
+/* UART 2 */
+
+#ifdef CONFIG_ESP32S3_UART2
+
+static char g_uart2_rxbuffer[CONFIG_UART2_RXBUFSIZE];
+static char g_uart2_txbuffer[CONFIG_UART2_TXBUFSIZE];
+
+/* Fill only the requested fields */
+
+static uart_dev_t g_uart2_dev =
+{
+#ifdef CONFIG_UART2_SERIAL_CONSOLE
+  .isconsole = true,
+#else
+  .isconsole = false,
+#endif
+  .xmit =
+  {
+    .size   = CONFIG_UART2_TXBUFSIZE,
+    .buffer = g_uart2_txbuffer,
+  },
+  .recv =
+  {
+    .size   = CONFIG_UART2_RXBUFSIZE,
+    .buffer = g_uart2_rxbuffer,
+  },
+
+  .ops  = &g_uart_ops,
+  .priv = &g_uart2_config
 };
 
 #endif
@@ -616,9 +672,9 @@ static bool esp32s3_rxavailable(struct uart_dev_s *dev)
   uint32_t bytes;
 
   status_reg = getreg32(UART_STATUS_REG(priv->id));
-  bytes = status_reg & UART_RXFIFO_CNT_M;
+  bytes = REG_MASK(status_reg, UART_RXFIFO_CNT);
 
-  return (bytes > 0);
+  return bytes > 0;
 }
 
 /****************************************************************************
@@ -665,9 +721,9 @@ static bool esp32s3_txempty(struct uart_dev_s *dev)
   struct esp32s3_uart_s *priv = dev->priv;
 
   reg = getreg32(UART_INT_RAW_REG(priv->id));
-  reg = reg & UART_TXFIFO_EMPTY_INT_RAW_M;
+  reg = REG_MASK(reg, UART_TX_DONE_INT_RAW);
 
-  return (reg > 0);
+  return reg > 0;
 }
 
 /****************************************************************************
@@ -709,8 +765,7 @@ static int esp32s3_receive(struct uart_dev_s *dev, unsigned int *status)
   uint32_t rx_fifo;
   struct esp32s3_uart_s *priv = dev->priv;
 
-  rx_fifo = getreg32(UART_FIFO_REG(priv->id));
-  rx_fifo = rx_fifo & UART_RXFIFO_RD_BYTE_M;
+  rx_fifo = REG_MASK(getreg32(UART_FIFO_REG(priv->id)), UART_RXFIFO_RD_BYTE);
 
   /* Since we don't have error bits associated with receipt, we set zero */
 
@@ -1056,6 +1111,10 @@ void xtensa_earlyserialinit(void)
   esp32s3_lowputc_disable_all_uart_int(TTYS1_DEV.priv, NULL);
 #endif
 
+#ifdef TTYS2_DEV
+  esp32s3_lowputc_disable_all_uart_int(TTYS2_DEV.priv, NULL);
+#endif
+
   /* Configure console in early step.
    * Setup for other serials will be perfomed when the serial driver is
    * open.
@@ -1089,6 +1148,10 @@ void xtensa_serialinit(void)
 
 #ifdef TTYS1_DEV
   uart_register("/dev/ttyS1", &TTYS1_DEV);
+#endif
+
+#ifdef TTYS2_DEV
+  uart_register("/dev/ttyS2", &TTYS2_DEV);
 #endif
 
 #ifdef CONFIG_ESP32S3_USBSERIAL
