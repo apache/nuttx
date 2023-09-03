@@ -40,7 +40,6 @@
 #define CLK_SET_RATE_GATE               0x01
 #define CLK_SET_PARENT_GATE             0x02
 #define CLK_SET_RATE_PARENT             0x04
-#define CLK_SET_RATE_NO_REPARENT        0x08
 #define CLK_GET_RATE_NOCACHE            0x10
 #define CLK_NAME_IS_STATIC              0x20
 #define CLK_PARENT_NAME_IS_STATIC       0x40
@@ -71,6 +70,7 @@
 #define CLK_MUX_HIWORD_MASK             0x01
 #define CLK_MUX_READ_ONLY               0x02
 #define CLK_MUX_ROUND_CLOSEST           0x04
+#define CLK_MUX_SET_RATE_NO_REPARENT    0x08
 
 #define CLK_PHASE_HIWORD_MASK           0x01
 
