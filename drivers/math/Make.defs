@@ -20,7 +20,7 @@
 
 # Include math acceleration support
 
-ifneq ($(CONFIG_MATH_CORDIC)$(CONFIG_MATH_FFT),)
+ifneq ($(CONFIG_MATH_CORDIC)$(CONFIG_MATH_FFT)$(CONFIG_MATH_MPI),)
 CSRCS += math.c
 endif
 
