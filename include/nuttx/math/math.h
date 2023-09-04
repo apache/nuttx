@@ -31,6 +31,9 @@
 #ifdef CONFIG_MATH_FFT
 #include <nuttx/math/fft.h>
 #endif
+#ifdef CONFIG_MATH_MPI
+#include <nuttx/math/mpi.h>
+#endif
 
 /****************************************************************************
  * Public Types
@@ -48,6 +51,9 @@ struct math_config_s
 #endif
 #ifdef CONFIG_MATH_FFT
   FAR struct fft_lowerhalf_s    *fft;
+#endif
+#ifdef CONFIG_MATH_MPI
+  FAR struct mpi_lowerhalf_s    *mpi;
 #endif
 };
 
