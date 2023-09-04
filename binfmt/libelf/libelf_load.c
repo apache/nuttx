@@ -123,41 +123,6 @@ static void elf_elfsize(FAR struct elf_loadinfo_s *loadinfo)
   loadinfo->datasize = datasize;
 }
 
-#ifdef CONFIG_ELF_LOADTO_LMA
-/****************************************************************************
- * Name: elf_vma2lma
- *
- * Description:
- *   Convert section`s VMA to LMA according to PhysAddr(p_paddr) of
- *   Program Header.
- *
- * Returned Value:
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- ****************************************************************************/
-
-static int elf_vma2lma(FAR struct elf_loadinfo_s *loadinfo,
-                       FAR Elf_Shdr *shdr, FAR Elf_Addr *lma)
-{
-  int i;
-
-  for (i = 0; i < loadinfo->ehdr.e_phnum; i++)
-    {
-      FAR Elf_Phdr *phdr = &loadinfo->phdr[i];
-
-      if (shdr->sh_addr >= phdr->p_vaddr &&
-          shdr->sh_addr < phdr->p_vaddr + phdr->p_memsz)
-        {
-          *lma = phdr->p_paddr + shdr->sh_addr - phdr->p_vaddr;
-          return 0;
-        }
-    }
-
-  return -ENOENT;
-}
-#endif
-
 /****************************************************************************
  * Name: elf_loadfile
  *
@@ -213,20 +178,9 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
         {
           if (shdr->sh_type != SHT_NOBITS)
             {
-              Elf_Addr addr = shdr->sh_addr;
-
-#ifdef CONFIG_ELF_LOADTO_LMA
-              ret = elf_vma2lma(loadinfo, shdr, &addr);
-              if (ret < 0)
-                {
-                  berr("ERROR: Failed to convert addr %d: %d\n", i, ret);
-                  return ret;
-                }
-#endif
-
               /* Read the section data from sh_offset to specified region */
 
-              ret = elf_read(loadinfo, (FAR uint8_t *)addr,
+              ret = elf_read(loadinfo, (FAR uint8_t *)shdr->sh_addr,
                              shdr->sh_size, shdr->sh_offset);
               if (ret < 0)
                 {
@@ -235,7 +189,6 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
                 }
             }
 
-#ifndef CONFIG_ELF_LOADTO_LMA
           /* If there is no data in an allocated section, then the
            * allocated section must be cleared.
            */
@@ -244,7 +197,6 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
             {
               memset((FAR uint8_t *)shdr->sh_addr, 0, shdr->sh_size);
             }
-#endif
 
           continue;
         }
@@ -331,15 +283,6 @@ int elf_load(FAR struct elf_loadinfo_s *loadinfo)
 
   binfo("loadinfo: %p\n", loadinfo);
   DEBUGASSERT(loadinfo && loadinfo->file.f_inode);
-
-  /* Load program headers into memory */
-
-  ret = elf_loadphdrs(loadinfo);
-  if (ret < 0)
-    {
-      berr("ERROR: elf_loadphdrs failed: %d\n", ret);
-      goto errout_with_buffers;
-    }
 
   /* Load section headers into memory */
 

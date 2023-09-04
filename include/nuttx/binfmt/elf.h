@@ -91,7 +91,6 @@ struct elf_loadinfo_s
   int                filemode;   /* Mode of the file system */
 
   Elf_Ehdr           ehdr;       /* Buffered ELF file header */
-  FAR Elf_Phdr      *phdr;       /* Buffered ELF program headers */
   FAR Elf_Shdr      *shdr;       /* Buffered ELF section headers */
   uint8_t           *iobuffer;   /* File I/O buffer */
 

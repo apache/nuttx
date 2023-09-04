@@ -94,12 +94,6 @@ int elf_freebuffers(FAR struct elf_loadinfo_s *loadinfo)
 {
   /* Release all working allocations  */
 
-  if (loadinfo->phdr)
-    {
-      kmm_free((FAR void *)loadinfo->phdr);
-      loadinfo->phdr = NULL;
-    }
-
   if (loadinfo->shdr)
     {
       kmm_free(loadinfo->shdr);

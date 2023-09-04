@@ -66,20 +66,6 @@ int elf_read(FAR struct elf_loadinfo_s *loadinfo, FAR uint8_t *buffer,
              size_t readsize, off_t offset);
 
 /****************************************************************************
- * Name: elf_loadphdrs
- *
- * Description:
- *   Loads program headers into memory.
- *
- * Returned Value:
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- ****************************************************************************/
-
-int elf_loadphdrs(FAR struct elf_loadinfo_s *loadinfo);
-
-/****************************************************************************
  * Name: elf_loadshdrs
  *
  * Description:
