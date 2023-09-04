@@ -232,6 +232,7 @@ static inline FAR void *dlinsert(FAR const char *filename)
 
   modp->textalloc = (FAR void *)loadinfo.textalloc;
   modp->dataalloc = (FAR void *)loadinfo.datastart;
+  modp->dynamic   = (loadinfo.ehdr.e_type == ET_DYN);
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
   modp->textsize  = loadinfo.textsize;
   modp->datasize  = loadinfo.datasize;
