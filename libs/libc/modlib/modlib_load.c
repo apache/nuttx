@@ -309,36 +309,62 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
 
   /* Allocate memory to hold the ELF image */
 
-  if (loadinfo->textsize > 0)
+  /* For Dynamic shared objects the relative positions between
+   * text and data must be maintained due to references to the
+   * GOT. Therefore we cannot do two different allocations.
+   */
+
+  if (loadinfo->ehdr.e_type == ET_REL)
     {
-#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
-      loadinfo->textalloc = (uintptr_t)
-                            up_textheap_memalign(loadinfo->textalign,
-                                                 loadinfo->textsize +
-                                                 loadinfo->segpad);
-#else
-      loadinfo->textalloc = (uintptr_t)lib_memalign(loadinfo->textalign,
-                                                    loadinfo->textsize +
-                                                    loadinfo->segpad);
-#endif
-      if (!loadinfo->textalloc)
+      if (loadinfo->textsize > 0)
         {
-          berr("ERROR: Failed to allocate memory for the module text\n");
-          ret = -ENOMEM;
-          goto errout_with_buffers;
+#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
+          loadinfo->textalloc = (uintptr_t)
+                                up_textheap_memalign(loadinfo->textalign,
+                                                     loadinfo->textsize +
+                                                     loadinfo->segpad);
+#else
+          loadinfo->textalloc = (uintptr_t)lib_memalign(loadinfo->textalign,
+                                                        loadinfo->textsize +
+                                                        loadinfo->segpad);
+#endif
+          if (!loadinfo->textalloc)
+            {
+              berr("ERROR: Failed to allocate memory for the module text\n");
+              ret = -ENOMEM;
+              goto errout_with_buffers;
+            }
+        }
+
+      if (loadinfo->datasize > 0)
+        {
+          loadinfo->datastart = (uintptr_t)lib_memalign(loadinfo->dataalign,
+                                                        loadinfo->datasize);
+          if (!loadinfo->datastart)
+            {
+              berr("ERROR: Failed to allocate memory for the module data\n");
+              ret = -ENOMEM;
+              goto errout_with_buffers;
+            }
         }
     }
-
-  if (loadinfo->datasize > 0)
+  else
     {
-      loadinfo->datastart = (uintptr_t)lib_memalign(loadinfo->dataalign,
-                                                    loadinfo->datasize);
-      if (!loadinfo->datastart)
+      loadinfo->textalloc = (uintptr_t)lib_memalign(loadinfo->textalign,
+                                                    loadinfo->textsize +
+                                                    loadinfo->datasize +
+                                                    loadinfo->segpad);
+
+      if (!loadinfo->textalloc)
         {
-          berr("ERROR: Failed to allocate memory for the module data\n");
+          berr("ERROR: Failed to allocate memory for the module\n");
           ret = -ENOMEM;
           goto errout_with_buffers;
         }
+
+      loadinfo->datastart = loadinfo->textalloc +
+                            loadinfo->textsize +
+                            loadinfo->segpad;
     }
 
   /* Load ELF section data into memory */
