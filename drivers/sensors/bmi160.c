@@ -251,7 +251,8 @@ int bmi160_register(FAR const char *devpath, FAR struct i2c_master_s *dev)
 int bmi160_register(FAR const char *devpath, FAR struct spi_dev_s *dev)
 #endif
 {
-  uint8_t devid = 0;
+  FAR struct bmi160_dev_s *priv;
+  int ret;
 
   priv = (FAR struct bmi160_dev_s *)kmm_malloc(sizeof(struct bmi160_dev_s));
   if (!priv)
