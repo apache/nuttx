@@ -351,6 +351,8 @@ static int sensor_rpmsg_ioctl(FAR struct sensor_rpmsg_dev_s *dev,
   FAR struct sensor_rpmsg_proxy_s *proxy;
   FAR struct sensor_rpmsg_proxy_s *ptmp;
   FAR struct sensor_rpmsg_ioctl_s *msg;
+  FAR struct rpmsg_endpoint *ept;
+  uint64_t pcookie;
   uint32_t space;
   int ret = -ENOTTY;
 
@@ -369,18 +371,20 @@ static int sensor_rpmsg_ioctl(FAR struct sensor_rpmsg_dev_s *dev,
   list_for_every_entry_safe(&dev->proxylist, proxy, ptmp,
                             struct sensor_rpmsg_proxy_s, node)
     {
-      msg = rpmsg_get_tx_payload_buffer(proxy->ept, &space, true);
+      ept = proxy->ept;
+      pcookie = proxy->cookie;
+      msg = rpmsg_get_tx_payload_buffer(ept, &space, true);
       if (!msg)
         {
           ret = -ENOMEM;
           snerr("ERROR: ioctl get buffer failed:%s, %s\n",
-                dev->path, rpmsg_get_cpuname(proxy->ept->rdev));
+                dev->path, rpmsg_get_cpuname(ept->rdev));
           break;
         }
 
       msg->command = SENSOR_RPMSG_IOCTL;
       msg->cookie  = wait ? (uint64_t)(uintptr_t)&cookie : 0;
-      msg->proxy   = proxy->cookie;
+      msg->proxy   = pcookie;
       msg->request = cmd;
       msg->arglen  = len;
       if (len > 0)
@@ -392,11 +396,11 @@ static int sensor_rpmsg_ioctl(FAR struct sensor_rpmsg_dev_s *dev,
           msg->arg = arg;
         }
 
-      ret = rpmsg_send_nocopy(proxy->ept, msg, sizeof(*msg) + len);
+      ret = rpmsg_send_nocopy(ept, msg, sizeof(*msg) + len);
       if (ret < 0)
         {
           snerr("ERROR: ioctl rpmsg send failed:%s, %d, %s\n",
-                dev->path, ret, rpmsg_get_cpuname(proxy->ept->rdev));
+                dev->path, ret, rpmsg_get_cpuname(ept->rdev));
           break;
         }
 
@@ -406,12 +410,12 @@ static int sensor_rpmsg_ioctl(FAR struct sensor_rpmsg_dev_s *dev,
         }
 
       sensor_rpmsg_unlock(dev);
-      ret = rpmsg_wait(proxy->ept, &cookie.sem);
+      ret = rpmsg_wait(ept, &cookie.sem);
       sensor_rpmsg_lock(dev);
       if (ret < 0)
         {
           snerr("ERROR: ioctl rpmsg wait failed:%s, %d, %s\n",
-                dev->path, ret, rpmsg_get_cpuname(proxy->ept->rdev));
+                dev->path, ret, rpmsg_get_cpuname(ept->rdev));
           break;
         }
 
