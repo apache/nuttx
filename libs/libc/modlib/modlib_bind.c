@@ -64,9 +64,10 @@ struct
   int stroff;           /* offset to string table */
   int symoff;           /* offset to symbol table */
   int lsymtab;          /* size of symbol table */
-  int relentsz;         /* size of relocation entry */
+  int relentsz[2];      /* size of relocation entry */
   int reloff[2];        /* offset to the relocation section */
   int relsz[2];         /* size of relocation table */
+  int relrela[2];       /* type of relocation type - 0: DT_REL / 1: DT_RELA */
 } reldata;
 
 /****************************************************************************
@@ -558,6 +559,8 @@ static int modlib_relocatedyn(FAR struct module_s *modp,
   FAR Elf_Dyn  *dyn = NULL;
   FAR Elf_Rel  *rels = NULL;
   FAR Elf_Rel  *rel;
+  FAR Elf_Rela *relas = NULL;
+  FAR Elf_Rela *rela;
   FAR Elf_Sym  *sym = NULL;
   uintptr_t     addr;
   int           ret;
@@ -574,7 +577,9 @@ static int modlib_relocatedyn(FAR struct module_s *modp,
       return ret;
     }
 
-  rels = lib_malloc(CONFIG_MODLIB_RELOCATION_BUFFERCOUNT * sizeof(Elf_Rel));
+  /* Assume DT_RELA to get maximum size required */
+
+  rels = lib_malloc(CONFIG_MODLIB_RELOCATION_BUFFERCOUNT * sizeof(Elf_Rela));
   if (!rels)
     {
       berr("Failed to allocate memory for elf relocation rels\n");
@@ -583,6 +588,7 @@ static int modlib_relocatedyn(FAR struct module_s *modp,
     }
 
   memset((void *)&reldata, 0, sizeof(reldata));
+  relas = (FAR Elf_Rela *)rels;
 
   for (i = 0; dyn[i].d_tag != DT_NULL; i++)
     {
@@ -595,7 +601,7 @@ static int modlib_relocatedyn(FAR struct module_s *modp,
             reldata.relsz[I_REL] = dyn[i].d_un.d_val;
             break;
           case DT_RELENT:
-            reldata.relentsz = dyn[i].d_un.d_val;
+            reldata.relentsz[I_REL] = dyn[i].d_un.d_val;
             break;
           case DT_SYMTAB:
             reldata.symoff = dyn[i].d_un.d_val;
@@ -608,6 +614,18 @@ static int modlib_relocatedyn(FAR struct module_s *modp,
             break;
           case DT_PLTRELSZ:
             reldata.relsz[I_PLT] = dyn[i].d_un.d_val;
+            break;
+          case DT_PLTREL:
+            if (dyn[i].d_un.d_val == DT_REL)
+              {
+                reldata.relentsz[I_PLT] = sizeof(Elf_Rel);
+                reldata.relrela[I_PLT] = 0;
+              }
+            else
+              {
+                reldata.relentsz[I_PLT] = sizeof(Elf_Rela);
+                reldata.relrela[I_PLT] = 1;
+              }
             break;
         }
     }
@@ -637,7 +655,9 @@ static int modlib_relocatedyn(FAR struct module_s *modp,
 
   for (idx_rel = 0; idx_rel < N_RELS; idx_rel++)
     {
-      if (reldata.reloff[idx_rel] == 0)
+      int lrelent;
+
+      if ((reldata.relsz[idx_rel] == 0) || (reldata.reloff[idx_rel] == 0))
         {
           continue;
         }
@@ -645,16 +665,30 @@ static int modlib_relocatedyn(FAR struct module_s *modp,
       /* Examine each relocation in the .rel.* section. */
 
       ret = OK;
+      lrelent = reldata.relsz[idx_rel] / reldata.relentsz[idx_rel];
 
-      for (i = 0; i < reldata.relsz[idx_rel] / reldata.relentsz; i++)
+      for (i = 0; i < lrelent; i++)
         {
-          /* Process each relocation entry */
+          /* Process each relocation entry
+           * - we cheat by using the fact the 1st two fields of Elf_Rel
+           *   and Elf_Rela are identical so can do things based on the
+           *   former until it's important
+           */
 
-          rel = &rels[i % CONFIG_MODLIB_RELOCATION_BUFFERCOUNT];
+          if (reldata.relrela[idx_rel] == 0)
+            {
+              rel = &rels[i % CONFIG_MODLIB_RELOCATION_BUFFERCOUNT];
+              rela = (Elf_Rela *)rel;  /* Just to keep the compiler happy */
+            }
+          else
+            {
+              rela = &relas[i % CONFIG_MODLIB_RELOCATION_BUFFERCOUNT];
+              rel = (Elf_Rel *)rela;
+            }
 
           if (!(i % CONFIG_MODLIB_RELOCATION_BUFFERCOUNT))
             {
-              size_t relsize = (sizeof(Elf_Rel) *
+              size_t relsize = (sizeof(Elf_Rela) *
                                CONFIG_MODLIB_RELOCATION_BUFFERCOUNT);
 
               if (reldata.relsz[idx_rel] < relsize)
@@ -713,6 +747,12 @@ static int modlib_relocatedyn(FAR struct module_s *modp,
                       }
 
                     addr = rel->r_offset + loadinfo->textalloc;
+
+                    if (reldata.relrela[idx_rel] == 1)
+                      {
+                        addr += rela->r_addend;
+                      }
+
                     *(FAR uintptr_t *)addr = (uintptr_t)ep;
                 }
             }
@@ -721,6 +761,11 @@ static int modlib_relocatedyn(FAR struct module_s *modp,
               Elf_Sym dynsym;
 
               addr = rel->r_offset - loadinfo->datasec + loadinfo->datastart;
+
+              if (reldata.relrela[idx_rel] == 1)
+                {
+                  addr += rela->r_addend;
+                }
 
               if ((*(FAR uint32_t *)addr) < loadinfo->datasec)
                 {
@@ -748,8 +793,8 @@ static int modlib_relocatedyn(FAR struct module_s *modp,
         }
     }
 
-  /* Iterate through the dynamic symbol table looking for global symbols to
-   * put in our own symbol table for use with dlgetsym()
+  /* Iterate through the dynamic symbol table looking for global symbols
+   * to put in our own symbol table for use with dlgetsym()
    */
 
   /* Relocate the entries in the table */
@@ -831,6 +876,7 @@ int modlib_bind(FAR struct module_s *modp,
 
       if (loadinfo->ehdr.e_type == ET_DYN)
         {
+          modp->dynamic = 1;
           switch (loadinfo->shdr[i].sh_type)
             {
               case SHT_DYNAMIC:
@@ -864,8 +910,10 @@ int modlib_bind(FAR struct module_s *modp,
         }
       else
         {
-          /* Make sure that the section is allocated.  We can't relocate
-           * sections that were not loaded into memory.
+          modp->dynamic = 0;
+
+          /* Make sure that the section is allocated.  We can't
+           * relocate sections that were not loaded into memory.
            */
 
           if ((loadinfo->shdr[infosec].sh_flags & SHF_ALLOC) == 0)
