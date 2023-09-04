@@ -188,8 +188,8 @@ int elf_loadphdrs(FAR struct elf_loadinfo_s *loadinfo)
 
   if (loadinfo->ehdr.e_phnum < 1)
     {
-      berr("No programs(?)\n");
-      return -EINVAL;
+      binfo("No programs(?)\n");
+      return 0;
     }
 
   /* Get the total size of the program header table */
