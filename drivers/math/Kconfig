@@ -32,4 +32,11 @@ config MATH_FFT
 		This selection enables building of the "upper-half" FFT driver.
 		See include/nuttx/math/fft.h for further FFT driver information.
 
+config MATH_MPI
+	bool "MATH MPI support"
+	default n
+	---help---
+		This selection enables building of the "upper-half" MPI driver.
+		See include/nuttx/math/mpi.h for further MPI driver information.
+
 endmenu # MATH Acceleration Information

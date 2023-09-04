@@ -156,6 +156,21 @@ static int math_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           break;
         }
 #endif
+
+#ifdef CONFIG_MATH_MPI
+      case MATHIOC_MPI_CALC:
+        {
+          FAR struct mpi_calc_s *calc =
+            (FAR struct mpi_calc_s *)((uintptr_t)arg);
+
+          if (upper->mpi != NULL)
+            {
+              ret = upper->mpi->ops->calc(upper->mpi, calc);
+            }
+
+          break;
+        }
+#endif
     }
 
   leave_critical_section(flags);
@@ -248,6 +263,27 @@ int fft_register(FAR const char *path,
 
   memset(&config, 0, sizeof(config));
   config.fft = lower;
+
+  return math_register(path, &config);
+}
+#endif
+
+/****************************************************************************
+ * Name: mpi_register
+ *
+ * Description:
+ *   Register a MPI driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MATH_MPI
+int mpi_register(FAR const char *path,
+                 FAR struct mpi_lowerhalf_s *lower)
+{
+  struct math_config_s config;
+
+  memset(&config, 0, sizeof(config));
+  config.mpi = lower;
 
   return math_register(path, &config);
 }
