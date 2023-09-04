@@ -80,7 +80,7 @@ int pwd_findby_name(FAR const char *uname, FAR struct passwd *entry,
 int pwd_findby_uid(uid_t uid, FAR struct passwd *entry, FAR char *buffer,
                    size_t buflen);
 int pwd_findby_index(int index, FAR struct passwd *entry,
-                     FAR char *buffer, size_t buflen)
+                     FAR char *buffer, size_t buflen);
 #endif
 
 #undef EXTERN
