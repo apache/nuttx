@@ -45,6 +45,10 @@
 
 static FAR struct oneshot_lowerhalf_s *g_oneshot_lower;
 
+#ifndef CONFIG_SCHED_TICKLESS
+static clock_t g_current_tick;
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -133,11 +137,10 @@ static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
 
   do
     {
-      static clock_t tick = 1;
       clock_t next;
 
       nxsched_process_timer();
-      next = ++tick;
+      next = ++g_current_tick;
       ONESHOT_TICK_CURRENT(g_oneshot_lower, &now);
       delta = next - now;
     }
@@ -163,6 +166,7 @@ void up_alarm_set_lowerhalf(FAR struct oneshot_lowerhalf_s *lower)
   ONESHOT_TICK_MAX_DELAY(g_oneshot_lower, &ticks);
   g_oneshot_maxticks = ticks < UINT32_MAX ? ticks : UINT32_MAX;
 #else
+  ONESHOT_TICK_CURRENT(g_oneshot_lower, &g_current_tick);
   ONESHOT_TICK_START(g_oneshot_lower, oneshot_callback, NULL, 1);
 #endif
 }
