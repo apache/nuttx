@@ -113,7 +113,7 @@ function avr-gcc-toolchain {
     case ${os} in
       Darwin)
         brew tap osx-cross/avr
-        brew install avr-gcc
+        brew install avr-gcc@12
         ;;
       Linux)
         apt-get install -y avr-libc gcc-avr
