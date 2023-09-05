@@ -104,6 +104,10 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
       return;
     }
 
+#ifdef CONFIG_MM_FILL_ALLOCATIONS
+  memset(mem, 0x55, mm_malloc_size(heap, mem));
+#endif
+
   kasan_poison(mem, mm_malloc_size(heap, mem));
 
   /* Map the memory chunk into a free node */
