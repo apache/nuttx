@@ -309,7 +309,7 @@ int up_rtc_getdatetime(FAR struct tm *tp)
       ret = I2C_TRANSFER(g_pcf85263.i2c, msg, 4);
       if (ret < 0)
         {
-          rtcerr("ERROR: I2C_TRANSFER failed: %d\n", ret)
+          rtcerr("ERROR: I2C_TRANSFER failed: %d\n", ret);
           return ret;
         }
     }
@@ -400,7 +400,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
 
   if (localtime_r(&newtime, &newtm) == NULL)
     {
-      rtcerr("ERROR: localtime_r failed\n")
+      rtcerr("ERROR: localtime_r failed\n");
       return -EINVAL;
     }
 
@@ -477,7 +477,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
       ret = I2C_TRANSFER(g_pcf85263.i2c, msg, 3);
       if (ret < 0)
         {
-          rtcerr("ERROR: I2C_TRANSFER failed: %d\n", ret)
+          rtcerr("ERROR: I2C_TRANSFER failed: %d\n", ret);
           return ret;
         }
     }
