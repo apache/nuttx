@@ -70,6 +70,8 @@
 #  undef CONFIG_ARCH_USBDUMP
 #endif
 
+#define DUMP_PTR(p, x) ((uintptr_t)(&(p)[(x)]) < stack_top ? (p)[(x)] : 0)
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -135,14 +137,16 @@ static void stack_dump(uintptr_t sp, uintptr_t stack_top)
 {
   uintptr_t stack;
 
-  for (stack = sp & ~0x1f; stack < (stack_top & ~0x1f); stack += 32)
+  for (stack = sp; stack <= stack_top; stack += 32)
     {
       FAR uint32_t *ptr = (FAR uint32_t *)stack;
+
       _alert("%p: %08" PRIx32 " %08" PRIx32 " %08" PRIx32
              " %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " %08" PRIx32
              " %08" PRIx32 "\n",
-             (FAR void *)stack, ptr[0], ptr[1], ptr[2], ptr[3],
-             ptr[4], ptr[5], ptr[6], ptr[7]);
+             (FAR void *)stack, DUMP_PTR(ptr, 0), DUMP_PTR(ptr , 1),
+             DUMP_PTR(ptr, 2), DUMP_PTR(ptr, 3), DUMP_PTR(ptr, 4),
+             DUMP_PTR(ptr, 5), DUMP_PTR(ptr , 6), DUMP_PTR(ptr, 7));
     }
 }
 
