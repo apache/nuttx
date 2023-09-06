@@ -241,6 +241,17 @@ config SENSORS_BMP180
 	---help---
 		Enable driver support for the Bosch BMP180 barometer sensor.
 
+if SENSORS_BMP180
+
+config SENSORS_BMP180_UORB
+	bool "BMP180 UORB Interface"
+	select UORB
+	---help---
+		Enables work with the UORB or Character Device interface.
+		If not set, the Character Device is used by default.
+
+endif #SENSORS_BMP180
+
 config SENSORS_BMP280
 	bool "Bosch BMP280 Barometric Pressure Sensor"
 	default n
