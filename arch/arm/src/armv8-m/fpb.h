@@ -61,6 +61,17 @@
 
 /* FPB_CTRL */
 
+/* REV
+ *
+ * Flash Patch and Breakpoint Unit revision number.
+ * 0000: Flash patch Breakpoint Unit revision 1
+ * 0001: Flash patch Breakpoint Unit revision 2. Supports breakpoints on
+ * any location in the 4GB address range.
+ */
+
+#define FPB_CTRL_REV_SHIFT        28
+#define FPB_CTRL_REV_MASK         0xF0000000
+
 /* NUM_CODE2
  *
  * Number of full banks of code comparators, sixteen comparators per bank.

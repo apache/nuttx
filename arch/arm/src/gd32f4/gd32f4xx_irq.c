@@ -138,8 +138,7 @@ static void gd32_dumpnvic(const char *msg, int irq)
 #endif
 
 /****************************************************************************
- * Name: gd32_nmi, gd32_pendsv,
- *       gd32_dbgmonitor, gd32_pendsv, gd32_reserved
+ * Name: gd32_nmi, gd32_pendsv, gd32_pendsv, gd32_reserved
  *
  * Description:
  *   Handlers for various exceptions.  None are handled and all are fatal
@@ -161,14 +160,6 @@ static int gd32_pendsv(int irq, void *context, void *arg)
 {
   up_irq_save();
   _err("PANIC!!! PendSV received\n");
-  PANIC();
-  return 0;
-}
-
-static int gd32_dbgmonitor(int irq, void *context, void *arg)
-{
-  up_irq_save();
-  _err("PANIC!!! Debug Monitor received\n");
   PANIC();
   return 0;
 }
@@ -370,7 +361,8 @@ void up_irqinitialize(void)
   irq_attach(GD32_IRQ_BUSFAULT, arm_busfault, NULL);
   irq_attach(GD32_IRQ_USAGEFAULT, arm_usagefault, NULL);
   irq_attach(GD32_IRQ_PENDSV, gd32_pendsv, NULL);
-  irq_attach(GD32_IRQ_DBGMONITOR, gd32_dbgmonitor, NULL);
+  arm_enable_dbgmonitor();
+  irq_attach(GD32_IRQ_DBGMONITOR, arm_dbgmonitor, NULL);
   irq_attach(GD32_IRQ_RESERVED, gd32_reserved, NULL);
 #endif
 

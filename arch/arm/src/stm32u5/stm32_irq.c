@@ -110,8 +110,7 @@ static void stm32_dumpnvic(const char *msg, int irq)
 #endif
 
 /****************************************************************************
- * Name: stm32_nmi, stm32_pendsv,
- *       stm32_dbgmonitor, stm32_pendsv, stm32_reserved
+ * Name: stm32_nmi, stm32_pendsv, stm32_pendsv, stm32_reserved
  *
  * Description:
  *   Handlers for various exceptions.  None are handled and all are fatal
@@ -133,14 +132,6 @@ static int stm32_pendsv(int irq, void *context, void *arg)
 {
   up_irq_save();
   _err("PANIC!!! PendSV received\n");
-  PANIC();
-  return 0;
-}
-
-static int stm32_dbgmonitor(int irq, void *context, void *arg)
-{
-  up_irq_save();
-  _err("PANIC!!! Debug Monitor received\n");
   PANIC();
   return 0;
 }
@@ -336,7 +327,8 @@ void up_irqinitialize(void)
   irq_attach(STM32_IRQ_BUSFAULT, arm_busfault, NULL);
   irq_attach(STM32_IRQ_USAGEFAULT, arm_usagefault, NULL);
   irq_attach(STM32_IRQ_PENDSV, stm32_pendsv, NULL);
-  irq_attach(STM32_IRQ_DBGMONITOR, stm32_dbgmonitor, NULL);
+  arm_enable_dbgmonitor();
+  irq_attach(STM32_IRQ_DBGMONITOR, arm_dbgmonitor, NULL);
   irq_attach(STM32_IRQ_RESERVED, stm32_reserved, NULL);
 #endif
 
