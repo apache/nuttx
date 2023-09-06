@@ -53,7 +53,7 @@ void mm_shrinkchunk(FAR struct mm_heap_s *heap,
                     FAR struct mm_allocnode_s *node, size_t size)
 {
   FAR struct mm_freenode_s *next;
-  size_t nodesize = SIZEOF_MM_NODE(node);
+  size_t nodesize = MM_SIZEOF_NODE(node);
 
   DEBUGASSERT((size & MM_GRAN_MASK) == 0);
 
@@ -67,7 +67,7 @@ void mm_shrinkchunk(FAR struct mm_heap_s *heap,
     {
       FAR struct mm_allocnode_s *andbeyond;
       FAR struct mm_freenode_s *newnode;
-      size_t nextsize = SIZEOF_MM_NODE(next);
+      size_t nextsize = MM_SIZEOF_NODE(next);
 
       /* Get the chunk next the next node (which could be the tail chunk) */
 

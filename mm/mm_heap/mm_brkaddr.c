@@ -54,5 +54,5 @@ FAR void *mm_brkaddr(FAR struct mm_heap_s *heap, int region)
 #endif
 
   brkaddr = (uintptr_t)heap->mm_heapend[region];
-  return brkaddr ? (FAR void *)(brkaddr + SIZEOF_MM_ALLOCNODE) : NULL;
+  return brkaddr ? (FAR void *)(brkaddr + MM_SIZEOF_ALLOCNODE) : NULL;
 }
