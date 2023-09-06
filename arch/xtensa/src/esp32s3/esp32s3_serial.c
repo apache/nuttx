@@ -45,6 +45,7 @@
 #include "esp32s3_config.h"
 #include "esp32s3_irq.h"
 #include "esp32s3_lowputc.h"
+#include "esp32s3_gpio.h"
 #include "hardware/esp32s3_uart.h"
 #include "hardware/esp32s3_system.h"
 
@@ -315,6 +316,18 @@ static int uart_handler(int irq, void *context, void *arg)
 
   int_status = getreg32(UART_INT_ST_REG(priv->id));
 
+#ifdef HAVE_RS485
+  if ((int_status & UART_TX_BRK_IDLE_DONE_INT_ST_M) != 0 &&
+      esp32s3_txempty(dev))
+    {
+      if (dev->xmit.tail == dev->xmit.head)
+        {
+          esp32s3_gpiowrite(priv->rs485_dir_gpio,
+                            !priv->rs485_dir_polarity);
+        }
+    }
+#endif
+
   /* Tx fifo empty interrupt or UART tx done int */
 
   if ((int_status & tx_mask) != 0)
@@ -445,9 +458,18 @@ static int esp32s3_setup(struct uart_dev_s *dev)
     }
 #endif
 
-  /* No Tx idle interval */
+#ifdef HAVE_RS485
+  if (priv->rs485_dir_gpio != 0)
+    {
+      esp32s3_lowputc_set_tx_idle_time(priv, 1);
+    }
+  else
+#endif
+    {
+      /* No Tx idle interval */
 
-  esp32s3_lowputc_set_tx_idle_time(priv, 0);
+      esp32s3_lowputc_set_tx_idle_time(priv, 0);
+    }
 
   /* Enable cores */
 
@@ -590,6 +612,18 @@ static void esp32s3_txint(struct uart_dev_s *dev, bool enable)
 
   if (enable)
     {
+      /* After all bytes physically transmitted in the RS485 bus
+       * the TX_BRK_IDLE will indicate we can disable the TX pin.
+       */
+
+#ifdef HAVE_RS485
+      if (priv->rs485_dir_gpio != 0)
+        {
+          modifyreg32(UART_INT_ENA_REG(priv->id),
+                      0, UART_TX_BRK_IDLE_DONE_INT_ENA);
+        }
+#endif
+
       /* Set to receive an interrupt when the TX holding register register
        * is empty
        */
@@ -740,7 +774,16 @@ static bool esp32s3_txempty(struct uart_dev_s *dev)
 
 static void esp32s3_send(struct uart_dev_s *dev, int ch)
 {
-  esp32s3_lowputc_send_byte(dev->priv, (char)ch);
+  struct esp32s3_uart_s *priv = dev->priv;
+
+#ifdef HAVE_RS485
+  if (priv->rs485_dir_gpio != 0)
+    {
+      esp32s3_gpiowrite(priv->rs485_dir_gpio, priv->rs485_dir_polarity);
+    }
+#endif
+
+  esp32s3_lowputc_send_byte(priv, (char)ch);
 }
 
 /****************************************************************************

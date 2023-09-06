@@ -101,6 +101,14 @@ struct esp32s3_uart_s g_uart0_config =
   .oflow = false,   /* output flow control (CTS) disabled */
 #endif
 #endif
+#ifdef CONFIG_ESP32S3_UART0_RS485
+  .rs485_dir_gpio = CONFIG_ESP32S3_UART0_RS485_DIR_PIN,
+#if (CONFIG_ESP32S3_UART0_RS485_DIR_POLARITY == 0)
+  .rs485_dir_polarity = false,
+#else
+  .rs485_dir_polarity = true,
+#endif
+#endif
 };
 
 #endif /* CONFIG_ESP32S3_UART0 */
@@ -140,6 +148,14 @@ struct esp32s3_uart_s g_uart1_config =
   .oflow = false,   /* output flow control (CTS) disabled */
 #endif
 #endif
+#ifdef CONFIG_ESP32S3_UART1_RS485
+  .rs485_dir_gpio = CONFIG_ESP32S3_UART1_RS485_DIR_PIN,
+#if (CONFIG_ESP32S3_UART1_RS485_DIR_POLARITY == 0)
+  .rs485_dir_polarity = false,
+#else
+  .rs485_dir_polarity = true,
+#endif
+#endif
 };
 
 #endif /* CONFIG_ESP32S3_UART1 */
@@ -177,6 +193,14 @@ struct esp32s3_uart_s g_uart2_config =
   .oflow = true,    /* output flow control (CTS) enabled */
 #else
   .oflow = false,   /* output flow control (CTS) disabled */
+#endif
+#endif
+#ifdef CONFIG_ESP32S3_UART2_RS485
+  .rs485_dir_gpio = CONFIG_ESP32S3_UART2_RS485_DIR_PIN,
+#if (CONFIG_ESP32S3_UART2_RS485_DIR_POLARITY == 0)
+  .rs485_dir_polarity = false,
+#else
+  .rs485_dir_polarity = true,
 #endif
 #endif
 };
@@ -900,6 +924,15 @@ void esp32s3_lowputc_config_pins(const struct esp32s3_uart_s *priv)
         }
 #endif
     }
+
+#ifdef HAVE_RS485
+  if (priv->rs485_dir_gpio != 0)
+    {
+      esp32s3_configgpio(priv->rs485_dir_gpio, OUTPUT);
+      esp32s3_gpio_matrix_out(priv->rs485_dir_gpio, SIG_GPIO_OUT_IDX, 0, 0);
+      esp32s3_gpiowrite(priv->rs485_dir_gpio, !priv->rs485_dir_polarity);
+    }
+#endif
 }
 
 /****************************************************************************
