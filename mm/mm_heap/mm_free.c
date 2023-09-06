@@ -112,8 +112,8 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
 
   /* Map the memory chunk into a free node */
 
-  node = (FAR struct mm_freenode_s *)((FAR char *)mem - SIZEOF_MM_ALLOCNODE);
-  nodesize = SIZEOF_MM_NODE(node);
+  node = (FAR struct mm_freenode_s *)((FAR char *)mem - MM_SIZEOF_ALLOCNODE);
+  nodesize = MM_SIZEOF_NODE(node);
 
   /* Sanity check against double-frees */
 
@@ -128,7 +128,7 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
   if ((next->size & MM_ALLOC_BIT) == 0)
     {
       FAR struct mm_allocnode_s *andbeyond;
-      size_t nextsize = SIZEOF_MM_NODE(next);
+      size_t nextsize = MM_SIZEOF_NODE(next);
 
       /* Get the node following the next node (which will
        * become the new next node). We know that we can never
@@ -171,7 +171,7 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
     {
       prev = (FAR struct mm_freenode_s *)
         ((FAR char *)node - node->preceding);
-      prevsize = SIZEOF_MM_NODE(prev);
+      prevsize = MM_SIZEOF_NODE(prev);
       DEBUGASSERT((prev->size & MM_ALLOC_BIT) == 0 &&
                   node->preceding == prevsize);
 
