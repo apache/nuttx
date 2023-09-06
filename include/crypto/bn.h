@@ -224,4 +224,16 @@ void bignum_assign(FAR struct bn *dst, FAR struct bn *src);
 void pow_mod_faster(FAR struct bn *a, FAR struct bn *b,
                     FAR struct bn *n, FAR struct bn *res);
 
+/* Return the number of less significant zero-bits */
+
+int bignum_lsb(FAR struct bn *a);
+
+/* g = gcd(a, b) */
+
+void bignum_gcd(FAR struct bn *a, FAR struct bn *b, FAR struct bn *g);
+
+/* Modular inverse: c = a^-1 mod n */
+
+int bignum_inv_mod(FAR struct bn *a, FAR struct bn *n, FAR struct bn *c);
+
 #endif /* __INCLUDE_CRYPTO_BIGNUM_H */

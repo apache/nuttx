@@ -514,7 +514,9 @@ void bignum_div(FAR struct bn *a, FAR struct bn *b, FAR struct bn *c)
 
   while (!bignum_is_zero(&current))             /* while (current != 0) */
     {
-      if (bignum_cmp_abs(&tmp, &denom) != SMALLER) /*   if (dividend >= denom) */
+      /* if (dividend >= denom) */
+
+      if (bignum_cmp_abs(&tmp, &denom) != SMALLER)
         {
           bignum_sub_abs(&tmp, &denom, &tmp); /*     dividend -= denom; */
           bignum_or(c, &current, c);          /*     answer |= current; */
@@ -872,7 +874,9 @@ void pow_mod_faster(FAR struct bn *a, FAR struct bn *b,
 
   while (1)
     {
-      if (tmpb.array[0] & 1)            /* if (b % 2) */
+      /* if (b % 2) */
+
+      if (tmpb.array[0] & 1)
         {
           bignum_mul(res, &tmpa, &tmp); /*   r = r * a % m */
           bignum_mod(&tmp, n, res);
@@ -889,4 +893,190 @@ void pow_mod_faster(FAR struct bn *a, FAR struct bn *b,
       bignum_mul(&tmpa, &tmpa, &tmp);
       bignum_mod(&tmp, n, &tmpa);
     }
+}
+
+int bignum_lsb(FAR struct bn *a)
+{
+  int i;
+  int j;
+  int count;
+
+  require(a, "n is null");
+
+  for (i = 0, count = 0; i < BN_ARRAY_SIZE; i++)
+    {
+      for (j = 0; j < WORD_SIZE * 8; j++, count++)
+        {
+          if (((a->array[i] >> j) & 1) != 0)
+            {
+              return count;
+            }
+        }
+    }
+
+  return 0;
+}
+
+void bignum_gcd(FAR struct bn *a, FAR struct bn *b, FAR struct bn *g)
+{
+  size_t lz;
+  size_t lzt;
+  struct bn ta;
+  struct bn tb;
+
+  require(a, "a is null");
+  require(b, "b is null");
+  require(g, "g is null");
+
+  bignum_init(&ta);
+  bignum_init(&tb);
+
+  bignum_assign(&ta, a);
+  bignum_assign(&tb, b);
+
+  lz = bignum_lsb(&ta);
+  lzt = bignum_lsb(&tb);
+
+  if (lzt == 0 && (tb.array[0] & 1) == 0)
+    {
+      bignum_assign(g, a);
+      return;
+    }
+
+  if (lzt < lz)
+    {
+      lz = lzt;
+    }
+
+  ta.s = tb.s = 1;
+
+  while (bignum_is_zero(&ta) != 1)
+    {
+      bignum_rshift(&ta, &ta, bignum_lsb(&ta));
+      bignum_rshift(&tb, &tb, bignum_lsb(&tb));
+
+      if (bignum_cmp(&ta, &tb) >= 0)
+        {
+          bignum_sub(&ta, &tb, &ta);
+          bignum_rshift(&ta, &ta, 1);
+        }
+      else
+        {
+          bignum_sub(&tb, &ta, &tb);
+          bignum_rshift(&tb, &tb, 1);
+        }
+    }
+
+  bignum_lshift(&tb, &tb, lz);
+  bignum_assign(g, &tb);
+}
+
+int bignum_inv_mod(FAR struct bn *a, FAR struct bn *n, FAR struct bn *c)
+{
+  struct bn g;
+  struct bn ta;
+  struct bn tu;
+  struct bn u1;
+  struct bn u2;
+  struct bn tb;
+  struct bn tv;
+  struct bn v1;
+  struct bn v2;
+  struct bn num_one;
+  struct bn num_zero;
+
+  require(a, "a is null");
+  require(n, "n is null");
+  require(c, "c is null");
+
+  bignum_init(&g);
+  bignum_init(&ta);
+  bignum_init(&tu);
+  bignum_init(&u1);
+  bignum_init(&u2);
+  bignum_init(&tb);
+  bignum_init(&tv);
+  bignum_init(&v1);
+  bignum_init(&v2);
+  bignum_init(&num_one);
+  bignum_init(&num_zero);
+  bignum_from_int(&num_one, 1);
+
+  if (bignum_cmp(n, &num_one) <= 0)
+    {
+      return -EINVAL;
+    }
+
+  bignum_gcd(a, n, &g);
+
+  if (bignum_cmp(&g, &num_one) != 0)
+    {
+      return -EFAULT;
+    }
+
+  bignum_mod(a, n, &ta);
+  bignum_assign(&tu, &ta);
+  bignum_assign(&tb, n);
+  bignum_assign(&tv, n);
+  bignum_from_int(&u1, 1);
+  bignum_from_int(&u2, 0);
+  bignum_from_int(&v1, 0);
+  bignum_from_int(&v2, 1);
+
+  do
+    {
+      while ((tu.array[0] & 1) == 0)
+        {
+          bignum_rshift(&tu, &tu, 1);
+
+          if ((u1.array[0] & 1) != 0 || (u2.array[0] & 1) != 0)
+            {
+              bignum_add(&u1, &tb, &u1);
+              bignum_sub(&u2, &ta, &u2);
+            }
+
+          bignum_rshift(&u1, &u1, 1);
+          bignum_rshift(&u2, &u2, 1);
+        }
+
+      while ((tv.array[0] & 1) == 0)
+        {
+          bignum_rshift(&tv, &tv, 1);
+          if ((v1.array[0] & 1) != 0 || (v2.array[0] & 1) != 0)
+            {
+              bignum_add(&v1, &tb, &v1);
+              bignum_sub(&v2, &ta, &v2);
+            }
+
+          bignum_rshift(&v1, &v1, 1);
+          bignum_rshift(&v2, &v2, 1);
+        }
+
+      if (bignum_cmp(&tu, &tv) >= 0)
+        {
+          bignum_sub(&tu, &tv, &tu);
+          bignum_sub(&u1, &v1, &u1);
+          bignum_sub(&u2, &v2, &u2);
+        }
+      else
+        {
+          bignum_sub(&tv, &tu, &tv);
+          bignum_sub(&v1, &u1, &v1);
+          bignum_sub(&v2, &u2, &v2);
+        }
+    }
+  while (bignum_is_zero(&tu) != 1);
+
+  while (bignum_cmp(&v1, &num_zero) < 0)
+    {
+      bignum_add(&v1, n, &v1);
+    }
+
+  while (bignum_cmp(&v1, n) >= 0)
+    {
+      bignum_sub(&v1, n, &v1);
+    }
+
+  bignum_assign(c, &v1);
+  return 0;
 }
