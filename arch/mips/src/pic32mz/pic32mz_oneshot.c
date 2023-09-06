@@ -126,7 +126,6 @@ static inline int pic32mz_allocate_handler(struct pic32mz_oneshot_s *oneshot)
 
   /* Search for an unused handler */
 
-  sched_lock();
   for (i = 0; i < CONFIG_PIC32MZ_ONESHOT_MAXTIMERS; i++)
     {
       /* Is this handler available? */
@@ -142,7 +141,6 @@ static inline int pic32mz_allocate_handler(struct pic32mz_oneshot_s *oneshot)
         }
     }
 
-  sched_unlock();
   return ret;
 
 #else
