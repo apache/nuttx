@@ -150,7 +150,12 @@ ifeq ($(CONFIG_SENSORS_BMI270),y)
 endif
 
 ifeq ($(CONFIG_SENSORS_BMP180),y)
+  CSRCS += bmp180_base.c
+ifeq ($(CONFIG_SENSORS_BMP180_UORB),y)
+  CSRCS += bmp180_uorb.c
+else
   CSRCS += bmp180.c
+endif
 endif
 
 ifeq ($(CONFIG_SENSORS_BMP280),y)
