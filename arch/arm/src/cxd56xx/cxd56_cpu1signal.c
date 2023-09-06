@@ -169,8 +169,6 @@ int cxd56_cpu1siginit(uint8_t sigtype, void *data)
       return -ENODEV;
     }
 
-  sched_lock();
-
   if (priv->sigtype[sigtype].use)
     {
       ret = -EBUSY;
@@ -187,8 +185,6 @@ int cxd56_cpu1siginit(uint8_t sigtype, void *data)
     }
 
   priv->ndev++;
-
-  sched_unlock();
 
   cxd56_iccinit(CXD56_PROTO_GNSS);
 
@@ -221,7 +217,6 @@ err0:
   return ret;
 
 err1:
-  sched_unlock();
   return ret;
 }
 
@@ -236,12 +231,9 @@ int cxd56_cpu1siguninit(uint8_t sigtype)
       return -ENODEV;
     }
 
-  sched_lock();
-
   if (!priv->sigtype[sigtype].use)
     {
       ret = -EBUSY;
-      sched_unlock();
       return ret;
     }
 
@@ -257,8 +249,6 @@ int cxd56_cpu1siguninit(uint8_t sigtype)
 
   pid             = priv->workerpid;
   priv->workerpid = INVALID_PROCESS_ID;
-
-  sched_unlock();
 
   ret = kthread_delete(pid);
 
