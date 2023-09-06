@@ -53,11 +53,11 @@
 static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
 {
   FAR const struct mm_memdump_s *dump = arg;
-  size_t nodesize = SIZEOF_MM_NODE(node);
+  size_t nodesize = MM_SIZEOF_NODE(node);
 
   if ((node->size & MM_ALLOC_BIT) != 0)
     {
-      DEBUGASSERT(nodesize >= SIZEOF_MM_ALLOCNODE);
+      DEBUGASSERT(nodesize >= MM_SIZEOF_ALLOCNODE);
 #if CONFIG_MM_BACKTRACE < 0
       if (dump->pid == PID_MM_ALLOC)
 #else
@@ -70,7 +70,7 @@ static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
 #if CONFIG_MM_BACKTRACE < 0
           syslog(LOG_INFO, "%12zu%*p\n",
                  nodesize, MM_PTR_FMT_WIDTH,
-                 ((FAR char *)node + SIZEOF_MM_ALLOCNODE));
+                 ((FAR char *)node + MM_SIZEOF_ALLOCNODE));
 #else
           char buf[CONFIG_MM_BACKTRACE * MM_PTR_FMT_WIDTH + 1] = "";
 
@@ -89,7 +89,7 @@ static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
           syslog(LOG_INFO, "%6d%12zu%12lu%*p%s\n",
                  node->pid, nodesize, node->seqno,
                  MM_PTR_FMT_WIDTH,
-                 ((FAR char *)node + SIZEOF_MM_ALLOCNODE), buf);
+                 ((FAR char *)node + MM_SIZEOF_ALLOCNODE), buf);
 #endif
         }
     }
@@ -99,16 +99,16 @@ static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
 
       DEBUGASSERT(nodesize >= MM_MIN_CHUNK);
       DEBUGASSERT(fnode->blink->flink == fnode);
-      DEBUGASSERT(SIZEOF_MM_NODE(fnode->blink) <= nodesize);
+      DEBUGASSERT(MM_SIZEOF_NODE(fnode->blink) <= nodesize);
       DEBUGASSERT(fnode->flink == NULL ||
                   fnode->flink->blink == fnode);
       DEBUGASSERT(fnode->flink == NULL ||
-                  SIZEOF_MM_NODE(fnode->flink) == 0 ||
-                  SIZEOF_MM_NODE(fnode->flink) >= nodesize);
+                  MM_SIZEOF_NODE(fnode->flink) == 0 ||
+                  MM_SIZEOF_NODE(fnode->flink) >= nodesize);
 
       syslog(LOG_INFO, "%12zu%*p\n",
              nodesize, MM_PTR_FMT_WIDTH,
-             ((FAR char *)node + SIZEOF_MM_ALLOCNODE));
+             ((FAR char *)node + MM_SIZEOF_ALLOCNODE));
     }
 }
 

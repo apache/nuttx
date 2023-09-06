@@ -48,7 +48,7 @@ void mm_addfreechunk(FAR struct mm_heap_s *heap,
 {
   FAR struct mm_freenode_s *next;
   FAR struct mm_freenode_s *prev;
-  size_t nodesize = SIZEOF_MM_NODE(node);
+  size_t nodesize = MM_SIZEOF_NODE(node);
   int ndx;
 
   DEBUGASSERT(nodesize >= MM_MIN_CHUNK);
@@ -62,7 +62,7 @@ void mm_addfreechunk(FAR struct mm_heap_s *heap,
 
   for (prev = &heap->mm_nodelist[ndx],
        next = heap->mm_nodelist[ndx].flink;
-       next && next->size && SIZEOF_MM_NODE(next) < nodesize;
+       next && next->size && MM_SIZEOF_NODE(next) < nodesize;
        prev = next, next = next->flink);
 
   /* Does it go in mid next or at the end? */

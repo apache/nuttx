@@ -56,11 +56,11 @@ size_t mm_malloc_size(FAR struct mm_heap_s *heap, FAR void *mem)
 
   /* Map the memory chunk into a free node */
 
-  node = (FAR struct mm_freenode_s *)((FAR char *)mem - SIZEOF_MM_ALLOCNODE);
+  node = (FAR struct mm_freenode_s *)((FAR char *)mem - MM_SIZEOF_ALLOCNODE);
 
   /* Sanity check against double-frees */
 
   DEBUGASSERT(node->size & MM_ALLOC_BIT);
 
-  return SIZEOF_MM_NODE(node) - OVERHEAD_MM_ALLOCNODE;
+  return MM_SIZEOF_NODE(node) - MM_ALLOCNODE_OVERHEAD;
 }

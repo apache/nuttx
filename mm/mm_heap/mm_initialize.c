@@ -65,7 +65,7 @@ static FAR void *mempool_memalign(FAR void *arg, size_t alignment,
   if (ret)
     {
       node = (FAR struct mm_allocnode_s *)
-      ((FAR char *)ret - SIZEOF_MM_ALLOCNODE);
+      ((FAR char *)ret - MM_SIZEOF_ALLOCNODE);
       node->pid = PID_MM_MEMPOOL;
     }
 
@@ -137,13 +137,13 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
 
   /* Adjust the provided heap start and size.
    *
-   * Note: (uintptr_t)node + SIZEOF_MM_ALLOCNODE is what's actually
+   * Note: (uintptr_t)node + MM_SIZEOF_ALLOCNODE is what's actually
    * returned to the malloc user, which should have natural alignment.
    * (that is, in this implementation, MM_MIN_CHUNK-alignment.)
    */
 
-  heapbase = MM_ALIGN_UP((uintptr_t)heapstart + 2 * SIZEOF_MM_ALLOCNODE) -
-             2 * SIZEOF_MM_ALLOCNODE;
+  heapbase = MM_ALIGN_UP((uintptr_t)heapstart + 2 * MM_SIZEOF_ALLOCNODE) -
+             2 * MM_SIZEOF_ALLOCNODE;
   heapend  = MM_ALIGN_DOWN((uintptr_t)heapstart + (uintptr_t)heapsize);
   heapsize = heapend - heapbase;
 
@@ -170,14 +170,14 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
 
   heap->mm_heapstart[IDX]          = (FAR struct mm_allocnode_s *)heapbase;
   MM_ADD_BACKTRACE(heap, heap->mm_heapstart[IDX]);
-  heap->mm_heapstart[IDX]->size    = SIZEOF_MM_ALLOCNODE | MM_ALLOC_BIT;
+  heap->mm_heapstart[IDX]->size    = MM_SIZEOF_ALLOCNODE | MM_ALLOC_BIT;
   node                             = (FAR struct mm_freenode_s *)
-                                     (heapbase + SIZEOF_MM_ALLOCNODE);
-  DEBUGASSERT((((uintptr_t)node + SIZEOF_MM_ALLOCNODE) % MM_ALIGN) == 0);
-  node->size                       = heapsize - 2 * SIZEOF_MM_ALLOCNODE;
+                                     (heapbase + MM_SIZEOF_ALLOCNODE);
+  DEBUGASSERT((((uintptr_t)node + MM_SIZEOF_ALLOCNODE) % MM_ALIGN) == 0);
+  node->size                       = heapsize - 2 * MM_SIZEOF_ALLOCNODE;
   heap->mm_heapend[IDX]            = (FAR struct mm_allocnode_s *)
-                                     (heapend - SIZEOF_MM_ALLOCNODE);
-  heap->mm_heapend[IDX]->size      = SIZEOF_MM_ALLOCNODE | MM_ALLOC_BIT |
+                                     (heapend - MM_SIZEOF_ALLOCNODE);
+  heap->mm_heapend[IDX]->size      = MM_SIZEOF_ALLOCNODE | MM_ALLOC_BIT |
                                      MM_PREVFREE_BIT;
   heap->mm_heapend[IDX]->preceding = node->size;
   MM_ADD_BACKTRACE(heap, heap->mm_heapend[IDX]);
@@ -238,7 +238,7 @@ FAR struct mm_heap_s *mm_initialize(FAR const char *name,
   heapsize -= sizeof(struct mm_heap_s);
   heapstart = (FAR char *)heap_adj + sizeof(struct mm_heap_s);
 
-  DEBUGASSERT(MM_MIN_CHUNK >= SIZEOF_MM_ALLOCNODE);
+  DEBUGASSERT(MM_MIN_CHUNK >= MM_SIZEOF_ALLOCNODE);
 
   /* Set up global variables */
 

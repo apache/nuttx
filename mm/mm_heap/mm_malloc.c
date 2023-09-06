@@ -141,12 +141,12 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
    * least MM_MIN_CHUNK.
    */
 
-  if (size < MM_MIN_CHUNK - OVERHEAD_MM_ALLOCNODE)
+  if (size < MM_MIN_CHUNK - MM_ALLOCNODE_OVERHEAD)
     {
-      size = MM_MIN_CHUNK - OVERHEAD_MM_ALLOCNODE;
+      size = MM_MIN_CHUNK - MM_ALLOCNODE_OVERHEAD;
     }
 
-  alignsize = MM_ALIGN_UP(size + OVERHEAD_MM_ALLOCNODE);
+  alignsize = MM_ALIGN_UP(size + MM_ALLOCNODE_OVERHEAD);
   if (alignsize < size)
     {
       /* There must have been an integer overflow */
@@ -172,7 +172,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
   for (node = heap->mm_nodelist[ndx].flink; node; node = node->flink)
     {
       DEBUGASSERT(node->blink->flink == node);
-      nodesize = SIZEOF_MM_NODE(node);
+      nodesize = MM_SIZEOF_NODE(node);
       if (nodesize >= alignsize)
         {
           break;
@@ -210,7 +210,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 
       /* Check if we have to split the free node into one of the allocated
        * size and another smaller freenode.  In some cases, the remaining
-       * bytes can be smaller (they may be SIZEOF_MM_ALLOCNODE).  In that
+       * bytes can be smaller (they may be MM_SIZEOF_ALLOCNODE).  In that
        * case, we will just carry the few wasted bytes at the end of the
        * allocation.
        */
@@ -249,7 +249,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
       /* Handle the case of an exact size match */
 
       node->size |= MM_ALLOC_BIT;
-      ret = (FAR void *)((FAR char *)node + SIZEOF_MM_ALLOCNODE);
+      ret = (FAR void *)((FAR char *)node + MM_SIZEOF_ALLOCNODE);
     }
 
   DEBUGASSERT(ret == NULL || mm_heapmember(heap, ret));
@@ -260,7 +260,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
       MM_ADD_BACKTRACE(heap, node);
       kasan_unpoison(ret, mm_malloc_size(heap, ret));
 #ifdef CONFIG_MM_FILL_ALLOCATIONS
-      memset(ret, 0xaa, alignsize - OVERHEAD_MM_ALLOCNODE);
+      memset(ret, 0xaa, alignsize - MM_ALLOCNODE_OVERHEAD);
 #endif
 #ifdef CONFIG_DEBUG_MM
       minfo("Allocated %p, size %zu\n", ret, alignsize);
