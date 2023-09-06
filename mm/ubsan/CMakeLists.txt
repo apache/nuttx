@@ -1,5 +1,5 @@
 # ##############################################################################
-# mm/kmm_heap/CMakeLists.txt
+# mm/ubsan/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -18,29 +18,8 @@
 #
 # ##############################################################################
 
-# Kernel heap allocator
+if(CONFIG_MM_UBSAN)
 
-if(CONFIG_MM_KERNEL_HEAP)
-
-  set(SRCS
-      kmm_initialize.c
-      kmm_addregion.c
-      kmm_malloc_size.c
-      kmm_brkaddr.c
-      kmm_calloc.c
-      kmm_extend.c
-      kmm_free.c
-      kmm_mallinfo.c
-      kmm_malloc.c
-      kmm_memalign.c
-      kmm_realloc.c
-      kmm_zalloc.c
-      kmm_heapmember.c)
-
-  if(CONFIG_DEBUG_MM)
-    list(APPEND SRCS kmm_checkcorruption.c)
-  endif()
-
-  target_sources(mm PRIVATE ${SRCS})
+  target_sources(mm PRIVATE ubsan.c)
 
 endif()

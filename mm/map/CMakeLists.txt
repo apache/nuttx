@@ -17,8 +17,7 @@
 # the License.
 #
 # ##############################################################################
-set(SRCS)
-list(APPEND SRCS mm_map.c)
+set(SRCS mm_map.c)
 
 if(CONFIG_ARCH_VMA_MAPPING)
   list(APPEND SRCS vm_region.c)
