@@ -96,7 +96,7 @@ void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size,
 
   /* The old node should already be marked as allocated */
 
-  DEBUGASSERT((oldnode->size & MM_ALLOC_BIT) != 0);
+  DEBUGASSERT(MM_NODE_IS_ALLOC(oldnode));
 
   /* Get and initialize the new terminal node in the heap */
 

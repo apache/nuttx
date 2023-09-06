@@ -52,11 +52,11 @@ static void mallinfo_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
 
   minfo("node=%p size=%zu preceding=%u (%c)\n",
         node, nodesize, (unsigned int)node->preceding,
-        (node->size & MM_ALLOC_BIT) ? 'A' : 'F');
+        MM_NODE_IS_ALLOC(node) ? 'A' : 'F');
 
   /* Check if the node corresponds to an allocated memory chunk */
 
-  if ((node->size & MM_ALLOC_BIT) != 0)
+  if (MM_NODE_IS_ALLOC(node))
     {
       DEBUGASSERT(nodesize >= MM_SIZEOF_ALLOCNODE);
       info->aordblks++;
@@ -94,7 +94,7 @@ static void mallinfo_task_handler(FAR struct mm_allocnode_s *node,
 
   /* Check if the node corresponds to an allocated memory chunk */
 
-  if ((node->size & MM_ALLOC_BIT) != 0)
+  if (MM_NODE_IS_ALLOC(node))
     {
       DEBUGASSERT(nodesize >= MM_SIZEOF_ALLOCNODE);
 #if CONFIG_MM_BACKTRACE < 0

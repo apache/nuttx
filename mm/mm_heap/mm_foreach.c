@@ -81,12 +81,12 @@ void mm_foreach(FAR struct mm_heap_s *heap, mm_node_handler_t handler,
           nodesize = MM_SIZEOF_NODE(node);
           minfo("region=%d node=%p size=%zu preceding=%u (%c %c)\n",
                 region, node, nodesize, (unsigned int)node->preceding,
-                (node->size & MM_PREVFREE_BIT) ? 'F' : 'A',
-                (node->size & MM_ALLOC_BIT) ? 'A' : 'F');
+                MM_PREVNODE_IS_FREE(node) ? 'F' : 'A',
+                MM_NODE_IS_ALLOC(node) ? 'A' : 'F');
 
           handler(node, arg);
 
-          DEBUGASSERT((node->size & MM_PREVFREE_BIT) == 0 ||
+          DEBUGASSERT(MM_PREVNODE_IS_ALLOC(node) ||
                       MM_SIZEOF_NODE(prev) == node->preceding);
           prev = node;
         }
