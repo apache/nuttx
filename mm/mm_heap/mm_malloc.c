@@ -204,8 +204,13 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
       /* Get a pointer to the next node in physical memory */
 
       next = (FAR struct mm_freenode_s *)(((FAR char *)node) + nodesize);
-      DEBUGASSERT((next->size & MM_ALLOC_BIT) != 0 &&
-                  (next->size & MM_PREVFREE_BIT) != 0 &&
+
+      /* Node next must be alloced, otherwise it should be merged.
+       * Its prenode(the founded node) must be free and preceding should
+       * match with nodesize.
+       */
+
+      DEBUGASSERT(MM_NODE_IS_ALLOC(next) && MM_PREVNODE_IS_FREE(next) &&
                   next->preceding == nodesize);
 
       /* Check if we have to split the free node into one of the allocated

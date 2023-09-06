@@ -130,7 +130,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
   /* We need to hold the MM mutex while we muck with the nodelist. */
 
   DEBUGVERIFY(mm_lock(heap));
-  DEBUGASSERT(oldnode->size & MM_ALLOC_BIT);
+  DEBUGASSERT(MM_NODE_IS_ALLOC(oldnode));
 
   /* Check if this is a request to reduce the size of the allocation. */
 
@@ -162,17 +162,17 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
    */
 
   next = (FAR struct mm_freenode_s *)((FAR char *)oldnode + oldsize);
-  if ((next->size & MM_ALLOC_BIT) == 0)
+  if (MM_NODE_IS_FREE(next))
     {
-      DEBUGASSERT((next->size & MM_PREVFREE_BIT) == 0);
+      DEBUGASSERT(MM_PREVNODE_IS_ALLOC(next));
       nextsize = MM_SIZEOF_NODE(next);
     }
 
-  if ((oldnode->size & MM_PREVFREE_BIT) != 0)
+  if (MM_PREVNODE_IS_FREE(oldnode))
     {
       prev = (FAR struct mm_freenode_s *)
         ((FAR char *)oldnode - oldnode->preceding);
-      DEBUGASSERT((prev->size & MM_ALLOC_BIT) == 0);
+      DEBUGASSERT(MM_NODE_IS_FREE(prev));
       prevsize = MM_SIZEOF_NODE(prev);
     }
 

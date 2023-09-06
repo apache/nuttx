@@ -60,7 +60,7 @@ size_t mm_malloc_size(FAR struct mm_heap_s *heap, FAR void *mem)
 
   /* Sanity check against double-frees */
 
-  DEBUGASSERT(node->size & MM_ALLOC_BIT);
+  DEBUGASSERT(MM_NODE_IS_ALLOC(node));
 
   return MM_SIZEOF_NODE(node) - MM_ALLOCNODE_OVERHEAD;
 }

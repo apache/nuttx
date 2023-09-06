@@ -194,7 +194,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
        * set up the node size.
        */
 
-      if ((node->size & MM_PREVFREE_BIT) != 0)
+      if (MM_PREVNODE_IS_FREE(node))
         {
           FAR struct mm_freenode_s *prev =
             (FAR struct mm_freenode_s *)((FAR char *)node - node->preceding);

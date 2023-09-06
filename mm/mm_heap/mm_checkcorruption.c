@@ -42,7 +42,7 @@ static void checkcorruption_handler(FAR struct mm_allocnode_s *node,
 {
   size_t nodesize = MM_SIZEOF_NODE(node);
 
-  if ((node->size & MM_ALLOC_BIT) != 0)
+  if (MM_NODE_IS_ALLOC(node))
     {
       assert(nodesize >= MM_SIZEOF_ALLOCNODE);
     }
