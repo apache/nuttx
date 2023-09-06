@@ -55,7 +55,7 @@ static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
   FAR const struct mm_memdump_s *dump = arg;
   size_t nodesize = MM_SIZEOF_NODE(node);
 
-  if ((node->size & MM_ALLOC_BIT) != 0)
+  if (MM_NODE_IS_ALLOC(node))
     {
       DEBUGASSERT(nodesize >= MM_SIZEOF_ALLOCNODE);
 #if CONFIG_MM_BACKTRACE < 0
