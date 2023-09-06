@@ -41,46 +41,47 @@ struct deadlock_info_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name:find_circular_lock
+ * Name: collect_deadlock
  ****************************************************************************/
 
 static void collect_deadlock(FAR struct tcb_s *tcb, FAR void *arg)
 {
-  FAR struct deadlock_info_s *info = arg;
-  size_t index;
-
-  for (index = 0; index < info->found; index++)
-    {
-      if (info->pid[index] == tcb->pid)
-        {
-          return;
-        }
-    }
-
-  for (index = info->found; index < info->count; index++)
+  if (tcb->task_state == TSTATE_WAIT_SEM)
     {
       FAR sem_t *sem = tcb->waitobj;
-      pid_t next;
-      size_t i;
 
-      if (tcb->task_state != TSTATE_WAIT_SEM || sem == NULL ||
-          !(sem->flags & SEM_TYPE_MUTEX))
+      if (sem != NULL && (sem->flags & SEM_TYPE_MUTEX) != 0)
         {
-          return;
-        }
+          FAR struct deadlock_info_s *info = arg;
+          size_t index;
 
-      next = ((FAR mutex_t *)sem)->holder;
-      for (i = info->found; i < index; i++)
-        {
-          if (info->pid[i] == next)
+          for (index = 0; index < info->found; index++)
             {
-              info->found = index;
-              return;
+              if (info->pid[index] == tcb->pid)
+                {
+                  return;
+                }
+            }
+
+          for (index = info->found; index < info->count; index++)
+            {
+              pid_t next;
+              size_t i;
+
+              next = ((FAR mutex_t *)sem)->holder;
+              for (i = info->found; i < index; i++)
+                {
+                  if (info->pid[i] == next)
+                    {
+                      info->found = index;
+                      return;
+                    }
+                }
+
+              info->pid[index] = tcb->pid;
+              tcb = nxsched_get_tcb(next);
             }
         }
-
-      info->pid[index] = tcb->pid;
-      tcb = nxsched_get_tcb(next);
     }
 }
 
