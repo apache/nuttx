@@ -214,8 +214,7 @@ static void imxrt_dumpnvic(const char *msg, int irq)
 #endif
 
 /****************************************************************************
- * Name: imxrt_nmi, imxrt_pendsv,
- *       imxrt_dbgmonitor, imxrt_pendsv, imxrt_reserved
+ * Name: imxrt_nmi, imxrt_pendsv, imxrt_pendsv, imxrt_reserved
  *
  * Description:
  *   Handlers for various exceptions.  None are handled and all are fatal
@@ -237,14 +236,6 @@ static int imxrt_pendsv(int irq, void *context, void *arg)
 {
   up_irq_save();
   _err("PANIC!!! PendSV received\n");
-  PANIC();
-  return 0;
-}
-
-static int imxrt_dbgmonitor(int irq, void *context, void *arg)
-{
-  up_irq_save();
-  _err("PANIC!!! Debug Monitor received\n");
   PANIC();
   return 0;
 }
@@ -505,7 +496,8 @@ void up_irqinitialize(void)
   irq_attach(IMXRT_IRQ_BUSFAULT, arm_busfault, NULL);
   irq_attach(IMXRT_IRQ_USAGEFAULT, arm_usagefault, NULL);
   irq_attach(IMXRT_IRQ_PENDSV, imxrt_pendsv, NULL);
-  irq_attach(IMXRT_IRQ_DBGMONITOR, imxrt_dbgmonitor, NULL);
+  arm_enable_dbgmonitor();
+  irq_attach(IMXRT_IRQ_DBGMONITOR, arm_dbgmonitor, NULL);
   irq_attach(IMXRT_IRQ_RESERVED, imxrt_reserved, NULL);
 #endif
 

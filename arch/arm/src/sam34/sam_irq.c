@@ -142,8 +142,7 @@ static void sam_dumpnvic(const char *msg, int irq)
 #endif
 
 /****************************************************************************
- * Name: sam_nmi, sam_pendsv, sam_dbgmonitor,
- *       sam_pendsv, sam_reserved
+ * Name: sam_nmi, sam_pendsv, sam_pendsv, sam_reserved
  *
  * Description:
  *   Handlers for various exceptions.  None are handled and all are fatal
@@ -165,14 +164,6 @@ static int sam_pendsv(int irq, void *context, void *arg)
 {
   up_irq_save();
   _err("PANIC!!! PendSV received\n");
-  PANIC();
-  return 0;
-}
-
-static int sam_dbgmonitor(int irq, void *context, void *arg)
-{
-  up_irq_save();
-  _err("PANIC!!! Debug Monitor received\n");
   PANIC();
   return 0;
 }
@@ -415,7 +406,8 @@ void up_irqinitialize(void)
   irq_attach(SAM_IRQ_BUSFAULT, arm_busfault, NULL);
   irq_attach(SAM_IRQ_USAGEFAULT, arm_usagefault, NULL);
   irq_attach(SAM_IRQ_PENDSV, sam_pendsv, NULL);
-  irq_attach(SAM_IRQ_DBGMONITOR, sam_dbgmonitor, NULL);
+  arm_enable_dbgmonitor();
+  irq_attach(SAM_IRQ_DBGMONITOR, arm_dbgmonitor, NULL);
   irq_attach(SAM_IRQ_RESERVED, sam_reserved, NULL);
 #endif
 

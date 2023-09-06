@@ -117,8 +117,7 @@ static void lpc17_40_dumpnvic(const char *msg, int irq)
 
 /****************************************************************************
  * Name: lpc17_40_nmi, lpc17_40_busfault, lpc17_40_usagefault,
- *       lpc17_40_pendsv, lpc17_40_dbgmonitor, lpc17_40_pendsv,
- *       lpc17_40_reserved
+ *       lpc17_40_pendsv, lpc17_40_pendsv, lpc17_40_reserved
  *
  * Description:
  *   Handlers for various exceptions.  None are handled and all are fatal
@@ -140,14 +139,6 @@ static int lpc17_40_pendsv(int irq, void *context, void *arg)
 {
   up_irq_save();
   _err("PANIC!!! PendSV received\n");
-  PANIC();
-  return 0;
-}
-
-static int lpc17_40_dbgmonitor(int irq, void *context, void *arg)
-{
-  up_irq_save();
-  _err("PANIC!!! Debug Monitor received\n");
   PANIC();
   return 0;
 }
@@ -361,7 +352,8 @@ void up_irqinitialize(void)
   irq_attach(LPC17_40_IRQ_BUSFAULT, arm_busfault, NULL);
   irq_attach(LPC17_40_IRQ_USAGEFAULT, arm_usagefault, NULL);
   irq_attach(LPC17_40_IRQ_PENDSV, lpc17_40_pendsv, NULL);
-  irq_attach(LPC17_40_IRQ_DBGMONITOR, lpc17_40_dbgmonitor, NULL);
+  arm_enable_dbgmonitor();
+  irq_attach(LPC17_40_IRQ_DBGMONITOR, arm_dbgmonitor, NULL);
   irq_attach(LPC17_40_IRQ_RESERVED, lpc17_40_reserved, NULL);
 #endif
 

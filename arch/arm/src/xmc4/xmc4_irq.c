@@ -143,8 +143,7 @@ static void xmc4_dump_nvic(const char *msg, int irq)
 #endif
 
 /****************************************************************************
- * Name: xmc4_nmi, xmc4_pendsv,
- *       xmc4_dbgmonitor, xmc4_pendsv, xmc4_reserved
+ * Name: xmc4_nmi, xmc4_pendsv, xmc4_pendsv, xmc4_reserved
  *
  * Description:
  *   Handlers for various exceptions.  None are handled and all are fatal
@@ -166,14 +165,6 @@ static int xmc4_pendsv(int irq, void *context, void *arg)
 {
   up_irq_save();
   _err("PANIC!!! PendSV received\n");
-  PANIC();
-  return 0;
-}
-
-static int xmc4_dbgmonitor(int irq, void *context, void *arg)
-{
-  up_irq_save();
-  _err("PANIC!!! Debug Monitor received\n");
   PANIC();
   return 0;
 }
@@ -393,7 +384,8 @@ void up_irqinitialize(void)
   irq_attach(XMC4_IRQ_BUSFAULT, arm_busfault, NULL);
   irq_attach(XMC4_IRQ_USAGEFAULT, arm_usagefault, NULL);
   irq_attach(XMC4_IRQ_PENDSV, xmc4_pendsv, NULL);
-  irq_attach(XMC4_IRQ_DBGMONITOR, xmc4_dbgmonitor, NULL);
+  arm_enable_dbgmonitor();
+  irq_attach(XMC4_IRQ_DBGMONITOR, arm_dbgmonitor, NULL);
   irq_attach(XMC4_IRQ_RESERVED, xmc4_reserved, NULL);
 #endif
 
