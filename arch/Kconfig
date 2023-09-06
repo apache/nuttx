@@ -499,6 +499,10 @@ config ARCH_HAVE_BACKTRACE
 	bool
 	default n
 
+config ARCH_HAVE_DEBUG
+	bool "Architecture have debug support"
+	default n
+
 config ARCH_HAVE_PERF_EVENTS
 	bool
 	default n

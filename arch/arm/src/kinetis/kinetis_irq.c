@@ -144,8 +144,7 @@ static void kinetis_dumpnvic(const char *msg, int irq)
 #endif
 
 /****************************************************************************
- * Name: kinetis_nmi, kinetis_pendsv,
- *       kinetis_dbgmonitor, kinetis_pendsv, kinetis_reserved
+ * Name: kinetis_nmi, kinetis_pendsv, kinetis_pendsv, kinetis_reserved
  *
  * Description:
  *   Handlers for various exceptions.  None are handled and all are fatal
@@ -167,14 +166,6 @@ static int kinetis_pendsv(int irq, void *context, void *arg)
 {
   up_irq_save();
   _err("PANIC!!! PendSV received\n");
-  PANIC();
-  return 0;
-}
-
-static int kinetis_dbgmonitor(int irq, void *context, void *arg)
-{
-  up_irq_save();
-  _err("PANIC!!! Debug Monitor received\n");
   PANIC();
   return 0;
 }
@@ -391,7 +382,8 @@ void up_irqinitialize(void)
   irq_attach(KINETIS_IRQ_BUSFAULT, arm_busfault, NULL);
   irq_attach(KINETIS_IRQ_USAGEFAULT, arm_usagefault, NULL);
   irq_attach(KINETIS_IRQ_PENDSV, kinetis_pendsv, NULL);
-  irq_attach(KINETIS_IRQ_DBGMONITOR, kinetis_dbgmonitor, NULL);
+  arm_enable_dbgmonitor();
+  irq_attach(KINETIS_IRQ_DBGMONITOR, arm_dbgmonitor, NULL);
   irq_attach(KINETIS_IRQ_RESERVED, kinetis_reserved, NULL);
 #endif
 

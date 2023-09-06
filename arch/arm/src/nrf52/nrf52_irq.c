@@ -123,8 +123,7 @@ static void nrf52_dumpnvic(const char *msg, int irq)
 #endif
 
 /****************************************************************************
- * Name: nrf52_nmi, nrf52_pendsv,
- *       nrf52_dbgmonitor, nrf52_pendsv, nrf52_reserved
+ * Name: nrf52_nmi, nrf52_pendsv, nrf52_pendsv, nrf52_reserved
  *
  * Description:
  *   Handlers for various exceptions.  None are handled and all are fatal
@@ -146,14 +145,6 @@ static int nrf52_pendsv(int irq, void *context, void *arg)
 {
   up_irq_save();
   _err("PANIC!!! PendSV received\n");
-  PANIC();
-  return 0;
-}
-
-static int nrf52_dbgmonitor(int irq, void *context, void *arg)
-{
-  up_irq_save();
-  _err("PANIC!!! Debug Monitor received\n");
   PANIC();
   return 0;
 }
@@ -358,7 +349,8 @@ void up_irqinitialize(void)
   irq_attach(NRF52_IRQ_BUSFAULT, arm_busfault, NULL);
   irq_attach(NRF52_IRQ_USAGEFAULT, arm_usagefault, NULL);
   irq_attach(NRF52_IRQ_PENDSV, nrf52_pendsv, NULL);
-  irq_attach(NRF52_IRQ_DBGMONITOR, nrf52_dbgmonitor, NULL);
+  arm_enable_dbgmonitor();
+  irq_attach(NRF52_IRQ_DBGMONITOR, arm_dbgmonitor, NULL);
   irq_attach(NRF52_IRQ_RESERVED, nrf52_reserved, NULL);
 #endif
 
