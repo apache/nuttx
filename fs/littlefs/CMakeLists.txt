@@ -26,18 +26,28 @@ if(CONFIG_FS_LITTLEFS)
       littlefs
       URL https://github.com/ARMmbed/littlefs/archive/v${LITTLEFS_VERSION}.tar.gz
           SOURCE_DIR
-          ${CMAKE_CURRENT_LIST_DIR}/littlefs)
+          ${CMAKE_CURRENT_LIST_DIR}/littlefs
+          BINARY_DIR
+          ${CMAKE_BINARY_DIR}/fs/littlefs/littlefs
+      PATCH_COMMAND patch -p2 -d ${CMAKE_CURRENT_LIST_DIR} <
+                    ${CMAKE_CURRENT_LIST_DIR}/lfs_util.patch)
     FetchContent_MakeAvailable(littlefs)
   endif()
 
   target_compile_definitions(
     fs
-    PRIVATE -DLFS_TRACE=finfo -DLFS_DEBUG=finfo -DLFS_WARN=fwarn
-            -DLFS_ERROR=ferr -DLFS_ASSERT=DEBUGASSERT
-            -DLFS_CONFIG=${CMAKE_CURRENT_LIST_DIR}/lfs_vfs.h)
+    PRIVATE -DLFS_TRACE=finfo
+            -DLFS_DEBUG=finfo
+            -DLFS_WARN=fwarn
+            -DLFS_ERROR=ferr
+            -DLFS_ASSERT=DEBUGASSERT
+            -DLFS_CONFIG=${CMAKE_CURRENT_LIST_DIR}/lfs_vfs.h
+            -DLFS_NAME_MAX=${CONFIG_FS_LITTLEFS_NAME_MAX}
+            -DLFS_FILE_MAX=${CONFIG_FS_LITTLEFS_FILE_MAX}
+            -DLFS_ATTR_MAX=${CONFIG_FS_LITTLEFS_ATTR_MAX})
 
   target_sources(fs PRIVATE lfs_vfs.c ${CMAKE_CURRENT_LIST_DIR}/littlefs/lfs.c
                             ${CMAKE_CURRENT_LIST_DIR}/littlefs/lfs_util.c)
 
-  target_include_directories(fs PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+  target_include_directories(fs PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 endif()
