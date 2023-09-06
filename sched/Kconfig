@@ -283,6 +283,16 @@ config PREALLOC_TIMERS
 		pool of preallocated timer structures to minimize dynamic allocations.  Set to
 		zero for all dynamic allocations.
 
+config PERF_OVERFLOW_CORRECTION
+	bool "Compensate perf count overflow"
+	depends on SYSTEM_TIME64 && (ALARM_ARCH || TIMER_ARCH || ARCH_PERF_EVENTS)
+	default n
+	---help---
+		If this option is enabled, then the perf event will be enabled
+		by default.
+		When enabled, it will always return an increasing count value to
+		avoid overflow on 32-bit platforms.
+
 endmenu # Clocks and Timers
 
 menu "Tasks and Scheduling"

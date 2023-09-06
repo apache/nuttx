@@ -663,6 +663,24 @@ struct timer_lowerhalf_s;
 void nxsched_period_extclk(FAR struct timer_lowerhalf_s *lower);
 #endif
 
+/****************************************************************************
+ * perf_gettime
+ ****************************************************************************/
+
+clock_t perf_gettime(void);
+
+/****************************************************************************
+ * perf_convert
+ ****************************************************************************/
+
+void perf_convert(clock_t elapsed, FAR struct timespec *ts);
+
+/****************************************************************************
+ * perf_gettfreq
+ ****************************************************************************/
+
+unsigned long perf_getfreq(void);
+
 #undef EXTERN
 #ifdef __cplusplus
 }
