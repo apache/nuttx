@@ -137,6 +137,7 @@ ssize_t lib_fread_unlocked(FAR void *ptr, size_t count, FAR FILE *stream)
 
                   remaining -= gulp_size;
                   stream->fs_bufpos += gulp_size;
+                  dest += gulp_size;
                 }
 
               /* The buffer is empty OR we have already supplied the number
