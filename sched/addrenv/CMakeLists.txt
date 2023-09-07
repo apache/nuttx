@@ -1,5 +1,5 @@
 # ##############################################################################
-# sched/task/CMakeLists.txt
+# sched/addrenv/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -18,51 +18,6 @@
 #
 # ##############################################################################
 
-set(SRCS
-    task_create.c
-    task_init.c
-    task_setup.c
-    task_activate.c
-    task_start.c
-    task_delete.c
-    task_exit.c
-    task_exithook.c
-    task_getgroup.c
-    task_getpid.c
-    task_prctl.c
-    task_recover.c
-    task_restart.c
-    task_spawnparms.c
-    task_setcancelstate.c
-    task_cancelpt.c
-    task_terminate.c
-    task_gettid.c
-    exit.c)
-
-if(CONFIG_SCHED_HAVE_PARENT)
-  list(APPEND SRCS task_getppid.c task_reparent.c)
+if(CONFIG_ARCH_ADDRENV)
+  target_sources(sched PRIVATE addrenv.c)
 endif()
-
-if(CONFIG_ARCH_HAVE_FORK)
-  list(APPEND SRCS task_fork.c)
-endif()
-
-if(NOT CONFIG_BUILD_KERNEL)
-  list(APPEND SRCS task_spawn.c)
-endif()
-
-if(CONFIG_CANCELLATION_POINTS)
-  list(APPEND SRCS task_setcanceltype.c task_testcancel.c)
-endif()
-
-if(NOT CONFIG_BINFMT_DISABLE)
-  if(CONFIG_LIBC_EXECFUNCS)
-    list(APPEND SRCS task_execve.c task_posixspawn.c)
-  endif()
-endif()
-
-if(CONFIG_SCHED_STARTHOOK)
-  list(APPEND SRCS task_starthook.c)
-endif()
-
-target_sources(sched PRIVATE ${SRCS})
