@@ -107,7 +107,7 @@ static void rmt_reset(struct rmt_dev_s *dev)
 
   flags = spin_lock_irqsave(&dev->lock);
 
-  modifyreg32(DPORT_PERIP_RST_EN_REG, DPORT_RMT_RST, 1);
+  modifyreg32(DPORT_PERIP_RST_EN_REG, 0, DPORT_RMT_RST);
   modifyreg32(DPORT_PERIP_RST_EN_REG, DPORT_RMT_RST, 0);
 
   /* Clear any spurious IRQ Flag   */
