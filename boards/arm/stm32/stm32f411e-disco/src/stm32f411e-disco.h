@@ -72,8 +72,8 @@
 #define MAX_IRQBUTTON   BUTTON_USER
 #define NUM_IRQBUTTONS  1
 
-#define GPIO_BTN_USER \
-  (GPIO_INPUT |GPIO_FLOAT |GPIO_EXTI | GPIO_PORTA | GPIO_PIN0)
+#define GPIO_BTN_USER      (GPIO_INPUT | GPIO_FLOAT | \
+                            GPIO_EXTI | GPIO_PORTA | GPIO_PIN0)
 
 /* SPI1 off */
 
