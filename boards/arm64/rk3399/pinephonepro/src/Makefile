@@ -24,6 +24,9 @@ CSRCS = pinephonepro_boardinit.c pinephonepro_bringup.c
 
 ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += pinephonepro_appinit.c
+ifeq ($(CONFIG_BOARDCTL_RESET),y)
+CSRCS += pinephonepro_reset.c
+endif
 endif
 
 include $(TOPDIR)/boards/Board.mk
