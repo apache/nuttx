@@ -2490,6 +2490,21 @@ endmenu # DAC device driver configuration
 menu "HSMCI device driver options"
 	depends on SAMV7_HSMCI
 
+config SAMV7_HSMCI_SW_CARDDETECT
+	bool "MMC/SD card detect is SW on CD/DAT3"
+	depends on MMCSD_HAVE_CARDDETECT
+	default n
+	---help---
+		Some SD card connectors do not have separate card detection pin. In that
+		case card detection has to be done on CD/DAT3 data line. This means software
+		(i.e. architecture level driver) has to take care of pin configuration switching
+		(pin has to be set as data pin in case of transfer and as interrupt card detection
+		pin when there is no action on data line). SAMv7 HSMCI driver offers this method
+		of SD card detection. Following macros have to be defined in include/board.h:
+
+			GPIO_HSMCI0_CD - detection pin (same as CD/DAT3 but with IRQ)
+			IRQ_HSMCI0_CD  - IRQ number for the pin
+
 config SAMV7_HSMCI_DMA
 	bool "Support DMA data transfers"
 	default y

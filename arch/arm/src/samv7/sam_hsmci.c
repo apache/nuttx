@@ -368,6 +368,11 @@ struct sam_dev_s
   int                ntimes;          /* Number of times */
 #endif
 
+#ifdef CONFIG_SAMV7_HSMCI_SW_CARDDETECT
+  uint32_t          cdgpio;
+  uint32_t          cdirq;
+#endif
+
   /* Register logging support */
 
 #if defined(CONFIG_SAMV7_HSMCI_CMDDEBUG) && defined(CONFIG_SAMV7_HSMCI_XFRDEBUG)
@@ -388,6 +393,13 @@ struct sam_dev_s
  ****************************************************************************/
 
 /* Low-level helpers ********************************************************/
+
+#ifdef CONFIG_SAMV7_HSMCI_SW_CARDDETECT
+static int sam_carddetect_enable(struct sam_dev_s *priv);
+static int sam_carddetect_disable(struct sam_dev_s *priv);
+static int sam_carddetect_handler(int irq, void *context,
+                                 void *arg);
+#endif
 
 #ifdef CONFIG_SAMV7_HSMCI_REGDEBUG
 static bool sam_checkreg(struct sam_dev_s *priv, bool wr,
@@ -574,12 +586,83 @@ static struct sam_dev_s g_hsmci0 =
   .waitsem            = SEM_INITIALIZER(0),
   .base               = SAM_HSMCI0_BASE,
   .hsmci              = 0,
+#ifdef CONFIG_SAMV7_HSMCI_SW_CARDDETECT
+  .cdgpio             = GPIO_HSMCI0_CD,
+  .cdirq              = IRQ_HSMCI0_CD,
+#endif
 };
 #endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: sam_carddetect_enable
+ *
+ * Description:
+ *   Enables card detection (switch CD/DAT3 to interrupt mode and enables it)
+ *
+ * Input Parameters:
+ *   priv       - A reference to the HSMCI device state structure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMV7_HSMCI_SW_CARDDETECT
+static int sam_carddetect_enable(struct sam_dev_s *priv)
+{
+  sam_configgpio(priv->cdgpio);
+  sam_gpioirq(priv->cdgpio);
+  irq_attach(priv->cdirq, sam_carddetect_handler, (void *)priv);
+  sam_gpioirqenable(priv->cdirq);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: sam_carddetect_disable
+ *
+ * Description:
+ *   Disables card detection (switch CD/DAT3 to data mode)
+ *
+ * Input Parameters:
+ *   priv       - A reference to the HSMCI device state structure
+ *
+ ****************************************************************************/
+
+static int sam_carddetect_disable(struct sam_dev_s *priv)
+{
+  sam_gpioirqdisable(priv->cdirq);
+  irq_detach(priv->cdirq);
+
+  sam_configgpio(GPIO_MCI0_DA3);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: sam_carddetect_handler
+ *
+ * Description:
+ *   Standard interrupt handler for CD/DAT3 pin. Calls sdio_mediachange
+ *   with current value of CD pin.
+ *
+ ****************************************************************************/
+
+static int sam_carddetect_handler(int irq, void *context,
+                                  void *arg)
+{
+  struct sam_dev_s *priv = (struct sam_dev_s *)arg;
+  bool inserted;
+
+  inserted = sam_gpioread(priv->cdgpio);
+  mcinfo("Inserted: %s\n", inserted ? "YES" : "NO");
+
+  sdio_mediachange(&priv->dev, inserted);
+
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Name: sam_checkreg
@@ -1390,6 +1473,14 @@ static void sam_notransfer(struct sam_dev_s *priv)
 
   priv->xfrbusy = false;
   priv->txbusy  = false;
+
+#ifdef CONFIG_SAMV7_HSMCI_SW_CARDDETECT
+  /* Transfer ended so switch CD/DAT3 do CD mode to detect card inserion
+   * or remove.
+   */
+
+  sam_carddetect_enable(priv);
+#endif
 }
 
 /****************************************************************************
@@ -1944,6 +2035,12 @@ static int sam_sendcmd(struct sdio_dev_s *dev,
   uint32_t regval;
   uint32_t cmdidx;
 
+#ifdef CONFIG_SAMV7_HSMCI_SW_CARDDETECT
+  /* Switch CD/DAT3 pin do data mode */
+
+  sam_carddetect_disable(priv);
+#endif
+
   sam_cmdsampleinit(priv);
 
   /* Set the HSMCI Argument value */
@@ -2122,6 +2219,12 @@ static int sam_recvsetup(struct sdio_dev_s *dev, uint8_t *buffer,
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
 
+#ifdef CONFIG_SAMV7_HSMCI_SW_CARDDETECT
+  /* Switch CD/DAT3 pin do data mode */
+
+  sam_carddetect_disable(priv);
+#endif
+
 #ifndef CONFIG_SAMV7_HSMCI_UNALIGNED
   /* Default behavior is to transfer 32-bit values only */
 
@@ -2191,6 +2294,12 @@ static int sam_sendsetup(struct sdio_dev_s *dev,
   irqstate_t flags;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
+
+#ifdef CONFIG_SAMV7_HSMCI_SW_CARDDETECT
+  /* Switch CD/DAT3 pin do data mode */
+
+  sam_carddetect_disable(priv);
+#endif
 
 #ifndef CONFIG_SAMV7_HSMCI_UNALIGNED
   /* Default behavior is to transfer 32-bit values only */
@@ -2381,6 +2490,12 @@ static int sam_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
   clock_t  watchtime;
   int32_t  timeout;
 
+#ifdef CONFIG_SAMV7_HSMCI_SW_CARDDETECT
+  /* Switch CD/DAT3 pin do data mode */
+
+  sam_carddetect_disable(priv);
+#endif
+
   switch (cmd & MMCSD_RESPONSE_MASK)
     {
     case MMCSD_R1_RESPONSE:
@@ -2496,6 +2611,12 @@ static int sam_recvshort(struct sdio_dev_s *dev,
   struct sam_dev_s *priv = (struct sam_dev_s *)dev;
   int ret = OK;
 
+#ifdef CONFIG_SAMV7_HSMCI_SW_CARDDETECT
+  /* Switch CD/DAT3 pin do data mode */
+
+  sam_carddetect_disable(priv);
+#endif
+
   /* These responses could have CRC errors:
    *
    * R1  Command response (48-bit)
@@ -2582,6 +2703,12 @@ static int sam_recvlong(struct sdio_dev_s *dev, uint32_t cmd,
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)dev;
   int ret = OK;
+
+#ifdef CONFIG_SAMV7_HSMCI_SW_CARDDETECT
+  /* Switch CD/DAT3 pin do data mode */
+
+  sam_carddetect_disable(priv);
+#endif
 
   /* R2  CID, CSD register (136-bit)
    *     135       0               Start bit
@@ -2861,6 +2988,15 @@ static void sam_callbackenable(struct sdio_dev_s *dev,
   mcinfo("eventset: %02x\n", eventset);
   DEBUGASSERT(priv != NULL);
 
+#ifdef CONFIG_SAMV7_HSMCI_SW_CARDDETECT
+  /* Calling callbackenable means that we expect the card to be inserted
+   * or removed, therefore we have to switch CD/DAT3 pin to detection
+   * mode.
+   */
+
+  sam_carddetect_enable(priv);
+#endif
+
   priv->cbevents = eventset;
   sam_callback(priv);
 }
@@ -2936,6 +3072,12 @@ static int sam_dmarecvsetup(struct sdio_dev_s *dev, uint8_t *buffer,
   unsigned int i;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
+
+#ifdef CONFIG_SAMV7_HSMCI_SW_CARDDETECT
+  /* Switch CD/DAT3 pin do data mode */
+
+  sam_carddetect_disable(priv);
+#endif
 
   /* 32-bit buffer alignment is required for DMA transfers */
 
@@ -3051,6 +3193,12 @@ static int sam_dmasendsetup(struct sdio_dev_s *dev,
   unsigned int i;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
+
+#ifdef CONFIG_SAMV7_HSMCI_SW_CARDDETECT
+  /* Switch CD/DAT3 pin do data mode */
+
+  sam_carddetect_disable(priv);
+#endif
 
   /* 32-bit buffer alignment is required for DMA transfers */
 
@@ -3278,7 +3426,9 @@ struct sdio_dev_s *sdio_initialize(int slotno)
       sam_configgpio(GPIO_MCI0_DA0);   /* Data 0 of Slot A */
       sam_configgpio(GPIO_MCI0_DA1);   /* Data 1 of Slot A */
       sam_configgpio(GPIO_MCI0_DA2);   /* Data 2 of Slot A */
+#ifndef CONFIG_SAMV7_HSMCI_SW_CARDDETECT
       sam_configgpio(GPIO_MCI0_DA3);   /* Data 3 of Slot A */
+#endif
       sam_configgpio(GPIO_MCI0_CK);    /* Common SD clock */
       sam_configgpio(GPIO_MCI0_CDA);   /* Command/Response of Slot A */
 
@@ -3301,6 +3451,19 @@ struct sdio_dev_s *sdio_initialize(int slotno)
 
   mcinfo("priv: %p base: %08" PRIx32 " hsmci: %d pid: %" PRId32 "\n",
          priv, priv->base, priv->hsmci, pid);
+
+#ifdef CONFIG_SAMV7_HSMCI_SW_CARDDETECT
+  /* We do not have separare card detect pin on SD card slot. This means
+   * card detection has to be done on CD/DAT3 pin. Generally we have to
+   * switch between configuration of the pin (once as a simple interrupt
+   * GPIO and then as data pin for SDIO driver).
+   *
+   * Lets start with CD pin configuration.
+   */
+
+  sam_carddetect_enable(priv);
+  sdio_mediachange(&priv->dev, sam_gpioread(priv->cdgpio));
+#endif
 
   /* Allocate a DMA channel */
 
