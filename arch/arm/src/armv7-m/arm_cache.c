@@ -574,10 +574,10 @@ void up_clean_dcache(uintptr_t start, uintptr_t end)
       start += ssize;
     }
   while (start < end);
+#endif /* !CONFIG_ARMV7M_DCACHE_WRITETHROUGH */
 
   ARM_DSB();
   ARM_ISB();
-#endif /* !CONFIG_ARMV7M_DCACHE_WRITETHROUGH */
 }
 #endif /* CONFIG_ARMV7M_DCACHE */
 
@@ -651,10 +651,10 @@ void up_clean_dcache_all(void)
       while (tmpways--);
     }
   while (sets--);
+#endif /* !CONFIG_ARMV7M_DCACHE_WRITETHROUGH */
 
   ARM_DSB();
   ARM_ISB();
-#endif /* !CONFIG_ARMV7M_DCACHE_WRITETHROUGH */
 }
 #endif /* CONFIG_ARMV7M_DCACHE */
 

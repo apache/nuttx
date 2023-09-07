@@ -1408,13 +1408,6 @@ static int sam_transmit(struct sam_emac_s *priv, int qid)
   regval |= EMAC_NCR_TSTART;
   sam_putreg(priv, SAM_EMAC_NCR_OFFSET, regval);
 
-  /* REVISIT: Sometimes TSTART is missed?  In this case, the symptom is
-   * that the packet is not sent until the next transfer when TXSTART
-   * is set again.
-   */
-
-  sam_putreg(priv, SAM_EMAC_NCR_OFFSET, regval);
-
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
   wd_start(&priv->txtimeout, SAM_TXTIMEOUT,
