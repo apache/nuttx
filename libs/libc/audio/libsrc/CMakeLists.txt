@@ -18,7 +18,7 @@
 #
 # ##############################################################################
 if(CONFIG_AUDIO_SRC)
-  set(LIBSRC_VERSION 0.1.9)
+  set(LIBSRC_VERSION 0.2.2)
 
   FetchContent_Declare(
     libsrc URL https://codeload.github.com/libsndfile/libsamplerate/zip/master)
