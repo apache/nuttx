@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm64/rk3399/pinephonepro/src/pinephonepro.h
+ * boards/arm64/rk3399/pinephonepro/src/pinephonepro_reset.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,32 +18,49 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM64_RK3399_PINEPHONE_SRC_PINEPHONEPRO_H
-#define __BOARDS_ARM64_RK3399_PINEPHONE_SRC_PINEPHONEPRO_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <stdint.h>
-#ifndef __ASSEMBLY__
+
+#include <nuttx/arch.h>
+#include <nuttx/board.h>
+
+#ifdef CONFIG_BOARDCTL_RESET
 
 /****************************************************************************
- * Public Functions Definitions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pinephonepro_bringup
+ * Public functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: board_reset
  *
  * Description:
- *   Bring up board features
+ *   Reset board.  Support for this function is required by board-level
+ *   logic if CONFIG_BOARDCTL_RESET is selected.
+ *
+ * Input Parameters:
+ *   status - Status information provided with the reset event.  This
+ *            meaning of this status information is board-specific.  If not
+ *            used by a board, the value zero may be provided in calls to
+ *            board_reset().
+ *
+ * Returned Value:
+ *   If this function returns, then it was not possible to power-off the
+ *   board due to some constraints.  The return value int this case is a
+ *   board-specific reason for the failure to shutdown.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_BOARDCTL) || defined(CONFIG_BOARD_LATE_INITIALIZE)
-int pinephonepro_bringup(void);
-#endif
+int board_reset(int status)
+{
+  up_systemreset();
+  return 0;
+}
 
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM64_RK3399_PINEPHONE_SRC_PINEPHONEPRO_H */
+#endif /* CONFIG_BOARDCTL_RESET */
