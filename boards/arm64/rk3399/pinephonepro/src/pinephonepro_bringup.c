@@ -37,14 +37,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pinephone_bringup
+ * Name: pinephonepro_bringup
  *
  * Description:
  *   Bring up board features
  *
  ****************************************************************************/
 
-int pinephone_bringup(void)
+int pinephonepro_bringup(void)
 {
   int ret = OK;
 
