@@ -1457,7 +1457,6 @@ void nxsched_get_stateinfo(FAR struct tcb_s *tcb, FAR char *state,
  *   pid - The task ID of the thread to waid for
  *   stat_loc - The location to return the exit status
  *   options - ignored
- *   release - Wheather release exited child process infomation
  *
  * Returned Value:
  *   If nxsched_waitpid() returns because the status of a child process is
@@ -1486,8 +1485,7 @@ void nxsched_get_stateinfo(FAR struct tcb_s *tcb, FAR char *state,
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_WAITPID
-pid_t nxsched_waitpid(pid_t pid, FAR int *stat_loc, int options,
-                      bool release);
+pid_t nxsched_waitpid(pid_t pid, FAR int *stat_loc, int options);
 #endif
 
 /****************************************************************************
