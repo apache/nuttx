@@ -23,7 +23,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/sched.h>
 
 #include <unistd.h>
 #include <sys/wait.h>
@@ -64,11 +63,10 @@ pid_t vfork(void)
        * until running finished or performing exec
        */
 
-      ret = nxsched_waitpid(pid, &status, 0, false);
+      ret = waitpid(pid, &status, 0);
       if (ret < 0)
         {
-          set_errno(-ret);
-          serr("ERROR: waitpid failed: %d\n", -ret);
+          serr("ERROR: waitpid failed: %d\n", get_errno());
         }
     }
 
