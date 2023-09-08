@@ -26,12 +26,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/board/board.h>
-
-#include "hardware/a1x_uart.h"
-
-#include "a1x_config.h"
-#include "a1x_pio.h"
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/k210/maix-bit/include/board.h
+ * boards/arm64/qemu/qemu-armv8a/include/board.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RISCV_K210_MAIX_BIT_INCLUDE_BOARD_H
-#define __BOARDS_RISCV_K210_MAIX_BIT_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM64_QEMU_QEMU_ARMV8A_INCLUDE_BOARD_H
+#define __BOARDS_ARM64_QEMU_QEMU_ARMV8A_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -27,44 +27,15 @@
 
 #include <nuttx/config.h>
 
-#ifndef __ASSEMBLY__
-#  include <stdint.h>
-#endif
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define BOARD_LED_PAD     14 /* Connected to red led */
-
-/* Map pad 14 to gpiohs io 0 */
-
-#define BOARD_LED_IO_FUNC K210_IO_FUNC_GPIOHS0
-#define BOARD_LED_IO      0
-
-#define LED_STARTED       0  /* N/C */
-#define LED_HEAPALLOCATE  1  /* N/C */
-#define LED_IRQSENABLED   2  /* N/C */
-#define LED_STACKCREATED  3  /* N/C */
-#define LED_INIRQ         4  /* N/C */
-#define LED_SIGNAL        5  /* N/C */
-#define LED_ASSERTION     6  /* N/C */
-#define LED_PANIC         7  /* blink */
-
-/* GPIO pins used by the GPIO Subsystem */
-
-#define BOARD_NGPIOOUT    2 /* Amount of GPIO Output pins */
-#define BOARD_NGPIOINT    0 /* Amount of GPIO Input */
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
+#ifndef __ASSEMBLY__
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -79,15 +50,10 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Name: k210_boardinitialize
- ****************************************************************************/
-
-void k210_boardinitialize(void);
-
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
+
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_RISC-V_K210_MAIX_BIT_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM64_QEMU_QEMU_ARMV8A_INCLUDE_BOARD_H */
