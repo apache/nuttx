@@ -360,14 +360,6 @@ config GOLDFISH_CAMERA_PIPE_PATH
 	string "Goldfish camera pipe path"
 	default "/dev/goldfish_pipe"
 
-config GOLDFISH_CAMERA_PRIORITY
-	int "Goldfish camera thread priority"
-	default 224
-
-config GOLDFISH_CAMERA_STACKSIZE
-	int "Goldfish camera stack size"
-	default DEFAULT_TASK_STACKSIZE
-
 endif
 
 source "drivers/video/vnc/Kconfig"
