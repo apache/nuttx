@@ -558,6 +558,7 @@ function install_tools {
   mkdir -p "${tools}"
 
 case ${os} in
+  # change file hash will recache ci tools
   Darwin)
     install="arm-gcc-toolchain arm64-gcc-toolchain avr-gcc-toolchain binutils bloaty elf-toolchain gen-romfs gperf kconfig-frontends mips-gcc-toolchain python-tools riscv-gcc-toolchain rust xtensa-esp32-gcc-toolchain u-boot-tools wasi-sdk c-cache"
     mkdir -p "${tools}"/homebrew
