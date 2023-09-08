@@ -61,6 +61,7 @@ int modlib_uninitialize(FAR struct mod_loadinfo_s *loadinfo)
   if (loadinfo->filfd >= 0)
     {
       _NX_CLOSE(loadinfo->filfd);
+      loadinfo->filfd = -1;
     }
 
   return OK;
