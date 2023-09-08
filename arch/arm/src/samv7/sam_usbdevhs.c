@@ -2005,6 +2005,13 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
   int                  nbytes = 0; /* Assume zero-length packet */
   int                  ret;
 
+  /* We want to pass pointer to response.b to sam_ctrlep_write function.
+   * Memset the union to avoid compilation warnings of uninitialized
+   * variable.
+   */
+
+  memset(&response, 0, sizeof(union wb_u));
+
   /* Terminate any pending requests */
 
   sam_req_cancel(ep0, -EPROTO);
