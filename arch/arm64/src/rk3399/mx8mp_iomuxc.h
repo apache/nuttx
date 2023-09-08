@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm64/src/rk3399/hardware/rk3399_memorymap.h
+ * arch/arm/src/mx8mp/mx8mp_iomuxc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,47 +18,36 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM64_SRC_RK3399_HARDWARE_RK3399_MEMORYMAP_H
-#define __ARCH_ARM64_SRC_RK3399_HARDWARE_RK3399_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_MX8MP_MX8MP_IOMUXC_H
+#define __ARCH_ARM_SRC_MX8MP_MX8MP_IOMUXC_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdint.h>
+#include "hardware/mx8mp_pinmux.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Peripheral Base Addresses */
-#define RK3399_GPIO0_ADDR        0xff720000
-#define RK3399_GPIO1_ADDR        0xff730000
-
-#define RK3399_GPIO2_ADDR        0xff780000
-#define RK3399_GPIO3_ADDR        0xff788000
-#define RK3399_GPIO4_ADDR        0xff790000
-
-#define RK3399_PIO_ADDR        RK3399_GPIO0_ADDR
-#define RK3399_PWM_ADDR        0xff430000
-#define RK3399_UART0_ADDR      0xff180000
-#define RK3399_UART1_ADDR      0xff190000
-#define RK3399_UART2_ADDR      0xff1a0000
-#define RK3399_UART3_ADDR      0xff1b0000
-#define RK3399_UART4_ADDR      0xff370000
-
-#define RK3399_GRF_ADDR             0xff770000
-#define GRF_GPIO4A_IOMUX_ADDR                   (RK3399_GRF_ADDR + 0x0e020)
-/****************************************************************************
- * Public Types
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Name: mx8mp_iomuxc_set_pin_config
+ *
+ * Description:
+ *   Congigure the IOMUXC pin configuration.
+ *   The first five parameters can be filled with the pin function ID macros.
+ *
  ****************************************************************************/
 
-/****************************************************************************
- * Public Functions Prototypes
- ****************************************************************************/
+void mx8mp_iomuxc_config(uint32_t mux_register,
+                         uint32_t mux_mode,
+                         uint32_t input_register,
+                         uint32_t input_daisy,
+                         uint32_t config_register,
+                         uint32_t sion,
+                         uint32_t config);
 
-#endif /* __ARCH_ARM64_SRC_RK3399_HARDWARE_RK3399_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_MX8MP_MX8MP_IOMUXC_H */
