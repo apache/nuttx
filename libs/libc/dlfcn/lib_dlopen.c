@@ -196,7 +196,7 @@ static inline FAR void *dlinsert(FAR const char *filename)
   if (ret != 0)
     {
       serr("ERROR: Failed to initialize to load module: %d\n", ret);
-      goto errout_with_lock;
+      goto errout_with_loadinfo;
     }
 
   /* Allocate a module registry entry to hold the module data */
@@ -296,7 +296,6 @@ errout_with_registry_entry:
   lib_free(modp);
 errout_with_loadinfo:
   modlib_uninitialize(&loadinfo);
-errout_with_lock:
   modlib_registry_unlock();
   set_errno(-ret);
   return NULL;
