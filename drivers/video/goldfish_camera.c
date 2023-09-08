@@ -597,8 +597,8 @@ static int goldfish_camera_data_init(FAR struct imgdata_s *data)
   argv[1] = NULL;
 
   ret = kthread_create("goldfish_camera_thread",
-                        CONFIG_GOLDFISH_CAMERA_PRIORITY,
-                        CONFIG_GOLDFISH_CAMERA_STACKSIZE,
+                        SCHED_PRIORITY_DEFAULT,
+                        CONFIG_DEFAULT_TASK_STACKSIZE,
                         goldfish_camera_thread, argv);
   if (ret < 0)
     {
