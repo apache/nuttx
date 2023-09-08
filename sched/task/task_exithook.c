@@ -66,7 +66,7 @@ static inline void nxtask_exitstatus(FAR struct task_group_s *group,
     {
       /* No.. Find the exit status entry for this task in the parent TCB */
 
-      child = group_find_child(group, nxsched_gettid());
+      child = group_find_child(group, nxsched_getpid());
       if (child)
         {
           /* Save the exit status..  For the case of HAVE_GROUP_MEMBERS,
@@ -107,7 +107,7 @@ static inline void nxtask_groupexit(FAR struct task_group_s *group)
     {
       /* No.. Find the exit status entry for this task in the parent TCB */
 
-      child = group_find_child(group, nxsched_gettid());
+      child = group_find_child(group, nxsched_getpid());
       if (child)
         {
           /* Mark that all members of the child task group has exited */

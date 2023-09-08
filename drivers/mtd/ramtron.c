@@ -204,6 +204,18 @@ static const struct ramtron_parts_s g_ramtron_parts[] =
 #endif
   },
   {
+    "FM25V02A-DGQ",               /* name */
+    0x22,                         /* id1 */
+    0x48,                         /* id2 */
+    32L * 1024L,                  /* size */
+    2,                            /* addr_len */
+    RAMTRON_INIT_CLK_MAX          /* speed */
+#ifdef CONFIG_RAMTRON_CHUNKING
+    , false,                      /* chunked */
+    RAMTRON_EMULATE_PAGE_SIZE     /* chunksize */
+#endif
+  },
+  {
     "FM25VN02",                   /* name */
     0x22,                         /* id1 */
     0x01,                         /* id2 */

@@ -412,7 +412,7 @@ static int apds9960_setdefault(FAR struct apds9960_dev_s *priv)
   ret = apds9960_i2c_write8(priv, APDS9960_GCONFIG4, DEFAULT_GCONFIG4);
   if (ret < 0)
     {
-      snerr("ERROR: Failed to write APDS9960_GCONFIG3!\n");
+      snerr("ERROR: Failed to write APDS9960_GCONFIG4!\n");
       return ret;
     }
 
@@ -1134,11 +1134,10 @@ static ssize_t apds9960_read(FAR struct file *filep, FAR char *buffer,
   FAR struct apds9960_dev_s *priv;
   int ret;
 
-  DEBUGASSERT(filep);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct apds9960_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  priv  = inode->i_private;
 
   /* Check if the user is reading the right size */
 
@@ -1195,13 +1194,12 @@ static ssize_t apds9960_write(FAR struct file *filep,
 int apds9960_register(FAR const char *devpath,
                       FAR struct apds9960_config_s *config)
 {
+  FAR struct apds9960_dev_s *priv;
   int ret;
 
   /* Initialize the APDS9960 device structure */
 
-  FAR struct apds9960_dev_s *priv =
-    (FAR struct apds9960_dev_s *)kmm_zalloc(sizeof(struct apds9960_dev_s));
-
+  priv = kmm_zalloc(sizeof(struct apds9960_dev_s));
   if (priv == NULL)
     {
       snerr("ERROR: Failed to allocate instance\n");

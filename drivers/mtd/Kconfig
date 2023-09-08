@@ -244,8 +244,7 @@ config MTD_NAND_BLOCKCHECK
 
 config MTD_NAND_SWECC
 	bool "Software ECC support"
-	default n if ARCH_NAND_HWECC
-	default y if !ARCH_NAND_HWECC
+	default !ARCH_NAND_HWECC
 	---help---
 		Build in logic to support software calculation of ECC.
 
@@ -1215,5 +1214,20 @@ config GD5F_SPIFREQUENCY
 	default 20000000
 
 endif # MTD_GD5F
+
+config MTD_DHARA
+	bool "MTD Nandflash use dhara map"
+	default n
+
+if MTD_DHARA
+
+config DHARA_GC_RATIO
+	int "dhara garbage collection ratio"
+	default 4
+
+config DHARA_READ_NCACHES
+	int "dhara read cache numbers"
+	default 4
+endif
 
 endif # MTD

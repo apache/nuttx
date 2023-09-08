@@ -41,6 +41,18 @@ ifeq ($(CONFIG_BUILTIN),y)
 CSRCS += builtin.c
 endif
 
+# ELF application interfaces
+
+ifeq ($(CONFIG_ELF),y)
+CSRCS += elf.c
+endif
+
+# NXFLAT application interfaces
+
+ifeq ($(CONFIG_NXFLAT),y)
+CSRCS += nxflat.c
+endif
+
 # Add configured binary modules
 
 include libnxflat/Make.defs

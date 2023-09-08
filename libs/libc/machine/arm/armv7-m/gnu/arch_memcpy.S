@@ -31,7 +31,7 @@
 
 #include "libc.h"
 
-#ifdef LIBC_BUILD_STRING
+#ifdef LIBC_BUILD_MEMCPY
 
 /* This memcpy routine is optimised for Cortex-M3/M4 cores with/without
    unaligned access.
@@ -53,8 +53,6 @@
      __OPT_BIG_BLOCK_SIZE: Size of big block in words.  Default to 64.
      __OPT_MID_BLOCK_SIZE: Size of big block in words.  Default to 16.
  */
-#include "arm_asm.h"
-
 #ifndef __OPT_BIG_BLOCK_SIZE
 #define __OPT_BIG_BLOCK_SIZE (4 * 16)
 #endif
@@ -66,12 +64,18 @@
 #if __OPT_BIG_BLOCK_SIZE == 16
 #define BEGIN_UNROLL_BIG_BLOCK \
   .irp offset, 0,4,8,12
+#define BEGIN_UNROLL_BIG_BLOCK_X4 \
+  .irp offset, 0
 #elif __OPT_BIG_BLOCK_SIZE == 32
 #define BEGIN_UNROLL_BIG_BLOCK \
   .irp offset, 0,4,8,12,16,20,24,28
+#define BEGIN_UNROLL_BIG_BLOCK_X4 \
+  .irp offset, 0,16
 #elif __OPT_BIG_BLOCK_SIZE == 64
 #define BEGIN_UNROLL_BIG_BLOCK \
   .irp offset, 0,4,8,12,16,20,24,28,32,36,40,44,48,52,56,60
+#define BEGIN_UNROLL_BIG_BLOCK_X4 \
+  .irp offset, 0,16,32,48
 #else
 #error "Illegal __OPT_BIG_BLOCK_SIZE"
 #endif
@@ -94,8 +98,6 @@
 	.global	memcpy
 	.thumb
 	.thumb_func
-	.fnstart
-	.cfi_startproc
 	.type	memcpy, %function
 memcpy:
 	@ r0: dst
@@ -104,14 +106,28 @@ memcpy:
 #ifdef __ARM_FEATURE_UNALIGNED
 	/* In case of UNALIGNED access supported, ip is not used in
 	   function body.  */
-	prologue push_ip=HAVE_PAC_LEAF
 	mov	ip, r0
 #else
-	prologue 0 push_ip=HAVE_PAC_LEAF
-#endif /* __ARM_FEATURE_UNALIGNED */
+	push	{r0}
+#endif
 	orr	r3, r1, r0
 	ands	r3, r3, #3
 	bne	.Lmisaligned_copy
+
+.Lbig_aligned:
+	subs	r2, __OPT_BIG_BLOCK_SIZE
+	blo	.Lmid_block
+
+	stmfd	sp!, {r4-r7}
+.Lbig_aligned_loop:
+	BEGIN_UNROLL_BIG_BLOCK_X4
+	ldmia	r1!, {r4, r5, r6, r7}
+	stmia	r0!, {r4, r5, r6, r7}
+	END_UNROLL
+	subs	r2, __OPT_BIG_BLOCK_SIZE
+	bhs .Lbig_aligned_loop
+	ldmfd	sp!, {r4-r7}
+	b	.Lmid_block
 
 .Lbig_block:
 	subs	r2, __OPT_BIG_BLOCK_SIZE
@@ -190,17 +206,15 @@ memcpy:
 #endif /* __ARM_FEATURE_UNALIGNED */
 
 .Ldone:
-	.cfi_remember_state
 #ifdef __ARM_FEATURE_UNALIGNED
 	mov	r0, ip
-	epilogue push_ip=HAVE_PAC_LEAF
 #else
-	epilogue 0 push_ip=HAVE_PAC_LEAF
-#endif /*  __ARM_FEATURE_UNALIGNED */
+	pop	{r0}
+#endif
+	bx	lr
 
 	.align 2
 .Lmisaligned_copy:
-	.cfi_restore_state
 #ifdef __ARM_FEATURE_UNALIGNED
 	/* Define label DST_ALIGNED to BIG_BLOCK.  It will go to aligned copy
 	   once destination is adjusted to aligned.  */
@@ -261,9 +275,6 @@ memcpy:
 	/* dst is aligned, but src isn't.  Misaligned copy.  */
 
 	push	{r4, r5}
-	.cfi_adjust_cfa_offset 8
-	.cfi_rel_offset 4, 0
-	.cfi_rel_offset 5, 4
 	subs	r2, #4
 
 	/* Backward r1 by misaligned bytes, to make r1 aligned.
@@ -316,9 +327,6 @@ memcpy:
 	adds	r2, #4
 	subs	r1, ip
 	pop	{r4, r5}
-	.cfi_restore 4
-	.cfi_restore 5
-	.cfi_adjust_cfa_offset -8
 
 #endif /* __ARM_FEATURE_UNALIGNED */
 
@@ -341,13 +349,11 @@ memcpy:
 
 #ifdef __ARM_FEATURE_UNALIGNED
 	mov	r0, ip
-	epilogue push_ip=HAVE_PAC_LEAF
 #else
-	epilogue 0 push_ip=HAVE_PAC_LEAF
-#endif /* __ARM_FEATURE_UNALIGNED */
-	.cfi_endproc
-	.cantunwind
-	.fnend
+	pop	{r0}
+#endif
+	bx	lr
+
 	.size	memcpy, .-memcpy
 
 #endif

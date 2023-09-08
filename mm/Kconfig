@@ -27,8 +27,7 @@ endchoice
 
 config MM_KERNEL_HEAP
 	bool "Kernel dedicated heap"
-	default n if BUILD_FLAT
-	default y if BUILD_PROTECTED || BUILD_KERNEL
+	default BUILD_PROTECTED || BUILD_KERNEL
 	---help---
 		Under Flat build, this option will enable a separate heap for the kernel.
 		By separating the kernel and userspace heaps, the user is granted more
@@ -98,6 +97,12 @@ config MM_REGIONS
 		memory to allocate from, this specifies the number of memory regions
 		that the memory manager must handle and enables the API
 		mm_addregion(heap, start, end);
+
+config MM_MAP_COUNT_MAX
+	int "The maximum number of memory map areas for each task"
+	default 1024
+	---help---
+		The maximum number of memory map areas for each task.
 
 config ARCH_HAVE_HEAP2
 	bool
@@ -229,6 +234,13 @@ config MM_HEAP_MEMPOOL_CHUNK_SIZE
 	---help---
 		This size describes the multiple mempool chunk size.
 
+config MM_HEAP_MEMPOOL_BACKTRACE_SKIP
+	int "The skip depth of backtrace for mempool"
+	default 6
+	depends on MM_HEAP_MEMPOOL_THRESHOLD != 0 && MM_BACKTRACE > 0
+	---help---
+		This number is the skipped backtrace depth for mempool.
+
 config FS_PROCFS_EXCLUDE_MEMPOOL
 	bool "Exclude mempool"
 	default DEFAULT_SMALL
@@ -252,6 +264,23 @@ config MM_KASAN_ALL
 		"-fsanitize=kernel-address" for the files/directories you want
 		to check. Enabling this option will get image size increased
 		and performance decreased significantly.
+
+config MM_KASAN_DISABLE_READS_CHECK
+	bool "Disable reads check"
+	depends on MM_KASAN
+	default n
+	---help---
+		This option disable kasan reads check. It speeds up performance
+		compared with default read/write check. Only disable it when you are
+		sure there's no need to do so. Or performance is too bad and only focus
+		on writes check.
+
+config MM_KASAN_DISABLE_WRITES_CHECK
+	bool "Disable writes check"
+	depends on MM_KASAN
+	default n
+	---help---
+		This option disable kasan writes check.
 
 config MM_UBSAN
 	bool "Undefined Behavior Sanitizer"
@@ -304,6 +333,11 @@ config MM_BACKTRACE
 		Config the depth of backtrace in memory block by specified this
 		config: disable backtrace by -1, only record pid info by zero and
 		enable record backtrace info by 8(fixed depth).
+
+config MM_BACKTRACE_SKIP
+	int "The skip depth of backtrace"
+	depends on MM_BACKTRACE > 0
+	default 3
 
 config MM_BACKTRACE_DEFAULT
 	bool "Enable the backtrace record by default"

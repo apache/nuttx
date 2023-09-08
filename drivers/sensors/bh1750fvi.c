@@ -70,8 +70,6 @@ static int     bh1750fvi_write8(FAR struct bh1750fvi_dev_s *priv,
 
 /* Character driver methods */
 
-static int     bh1750fvi_open(FAR struct file *filep);
-static int     bh1750fvi_close(FAR struct file *filep);
 static ssize_t bh1750fvi_read(FAR struct file *filep, FAR char *buffer,
                               size_t buflen);
 static ssize_t bh1750fvi_write(FAR struct file *filep,
@@ -179,11 +177,10 @@ static ssize_t bh1750fvi_read(FAR struct file *filep, FAR char *buffer,
   FAR struct bh1750fvi_dev_s *priv;
   uint16_t lux = 0;
 
-  DEBUGASSERT(filep);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct bh1750fvi_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  priv  = inode->i_private;
 
   /* Check if the user is reading the right size */
 
@@ -366,6 +363,7 @@ static int bh1750fvi_ioctl(FAR struct file *filep, int cmd,
 int bh1750fvi_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                        uint8_t addr)
 {
+  FAR struct bh1750fvi_dev_s *priv;
   int ret;
 
   /* Sanity check */
@@ -374,9 +372,7 @@ int bh1750fvi_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   /* Initialize the BH1750FVI device structure */
 
-  FAR struct bh1750fvi_dev_s *priv =
-    (FAR struct bh1750fvi_dev_s *)kmm_malloc(sizeof(struct bh1750fvi_dev_s));
-
+  priv = kmm_malloc(sizeof(struct bh1750fvi_dev_s));
   if (priv == NULL)
     {
       snerr("ERROR: Failed to allocate instance\n");

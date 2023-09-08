@@ -31,6 +31,18 @@
 #include "chip.h"
 #include "arm_internal.h"
 
+#ifndef IDLE_STACK_BASE
+  #ifdef CONFIG_BOOT_SDRAM_DATA
+    #define IDLE_STACK_BASE IDLE_STACK_VBASE
+  #elif defined(CONFIG_SMP)
+    #define IDLE_STACK_BASE _enoinit
+  #else
+    #define IDLE_STACK_BASE _ebss
+  #endif
+#endif
+
+#define IDLE_STACK_TOP  (IDLE_STACK_BASE + CONFIG_IDLETHREAD_STACKSIZE)
+
 #ifndef CONFIG_PAGING
 
 	.file	"arm_head.S"
@@ -752,13 +764,7 @@ arm_data_initialize:
 	.size	.Linitparms, . -.Linitparms
 
 .Lstackpointer:
-#ifdef CONFIG_BOOT_SDRAM_DATA
-	.long	IDLE_STACK_VBASE+CONFIG_IDLETHREAD_STACKSIZE
-#elif defined(CONFIG_SMP)
-	.long	_enoinit+CONFIG_IDLETHREAD_STACKSIZE
-#else
-	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE
-#endif
+	.long	IDLE_STACK_TOP
 	.size	.Lstackpointer, . -.Lstackpointer
 
 #ifdef CONFIG_BOOT_RUNFROMFLASH
@@ -786,13 +792,7 @@ arm_data_initialize:
 
 g_idle_topstack:
 
-#ifdef CONFIG_BOOT_SDRAM_DATA
-	.long	IDLE_STACK_VBASE+CONFIG_IDLETHREAD_STACKSIZE
-#elif defined(CONFIG_SMP)
-	.long	_enoinit+CONFIG_IDLETHREAD_STACKSIZE
-#else
-	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE
-#endif
+	.long	IDLE_STACK_TOP
 	.size	g_idle_topstack, .-g_idle_topstack
 	.end
 #endif

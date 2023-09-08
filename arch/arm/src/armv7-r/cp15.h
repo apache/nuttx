@@ -155,7 +155,7 @@
 #define CP15_CNTP_TVAL(r)  _CP15(0, r, c14, c2, 0)  /* PL1 Physical TimerValue register */
 #define CP15_CNTP_CTL(r)   _CP15(0, r, c14, c2, 1)  /* PL1 Physical Timer Control register */
 #define CP15_CNTV_TVAL(r)  _CP15(0, r, c14, c3, 0)  /* Virtual TimerValue register */
-#define CP15_CNTV_CTL(r)   _CP15(0, r, c14, c3, 0)  /* Virtual Timer Control register */
+#define CP15_CNTV_CTL(r)   _CP15(0, r, c14, c3, 1)  /* Virtual Timer Control register */
 
 #define CP15_CNTPCT(lo,hi) _CP15_64(0, lo, hi, c14)   /* Physical Count register */
 

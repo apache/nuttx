@@ -346,6 +346,10 @@ uintptr_t arm_intstack_alloc(void);
 uintptr_t arm_intstack_top(void);
 #endif
 
+#if CONFIG_ARCH_INTERRUPTSTACK > 7
+void weak_function arm_initialize_stack(void);
+#endif
+
 /* Exception handling logic unique to the Cortex-M family */
 
 #if defined(CONFIG_ARCH_ARMV6M) || defined(CONFIG_ARCH_ARMV7M) || \
@@ -358,9 +362,9 @@ uintptr_t arm_intstack_top(void);
 #if defined(__ICCARM__)
 /* _vectors replaced on __vector_table for IAR C-SPY Simulator */
 
-extern const void *__vector_table[];
+EXTERN const void *__vector_table[];
 #else
-extern const void * const _vectors[];
+EXTERN const void * const _vectors[];
 #endif
 
 /* Interrupt acknowledge and dispatch */
@@ -520,6 +524,12 @@ void arm_usbuninitialize(void);
 #ifdef CONFIG_STACK_COLORATION
 size_t arm_stack_check(void *stackbase, size_t nbytes);
 void arm_stack_color(void *stackbase, size_t nbytes);
+#endif
+
+#ifdef CONFIG_ARCH_TRUSTZONE_SECURE
+int arm_gen_nonsecurefault(int irq, uint32_t *regs);
+#else
+# define arm_gen_nonsecurefault(i, r)  (0)
 #endif
 
 #undef EXTERN

@@ -571,6 +571,75 @@ You can use the normal adb command from host::
     adb connect localhost:5555
     adb shell
 
+alsa
+----
+
+This configuration enables testing audio applications on NuttX by
+implementing an audio-like driver that uses ALSA to forward the audio to
+the host system. It also enables the `hostfs` to enable direct access to
+the host system's files mounted on the simulator. The ALSA audio driver
+allows uncompressed PCM files - as well as MP3 files - to be played.
+
+To check the audio devices::
+
+    $ ./nuttx
+    NuttShell (NSH) NuttX-10.4.0
+    nsh> ls /dev/audio
+    /dev/audio:
+    pcm0c
+    pcm0p
+    pcm1c
+    pcm1p
+
+- `pcm0c` represents the device to capture uncompressed PCM audio;
+- `pcm0p` represents the device to playback uncompressed PCM files;
+- `pcm1c` represents the device to capture MP3-encoded audio;
+- `pcm1p` represents the device to playback MP3-encoded files;
+
+Mounting Files from Host System
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To mount files from the host system and enable them to be played in the sim::
+
+    nsh> mount -t hostfs -o fs=/path/to/audio/files/ /host
+    nsh> ls /host
+    /host:
+    mother.mp3
+    mother.wav
+    .
+    ..
+
+Playing uncompressed-PCM files
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To play uncompressed-PCM files, we can use `nxplayer`'s `playraw` command.
+We need 1) select the appropriate audio device to playback this file and
+1) know in advance the file's parameters (channels, bits/sample and
+sampling rate)::
+
+    nsh> nxplayer
+    NxPlayer version 1.05
+    h for commands, q to exit
+
+    nxplayer> device /dev/audio/pcm0p
+    nxplayer> playraw /host/mother.wav 2 16 44100
+
+In this example, the file `mother.wav` is a stereo (2-channel),
+16 bits/sample and 44,1KHz PCM-encoded file.
+
+Playing MP3-encoded files
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To play MP3 files, we can use `nxplayer`'s `play` command directly.
+We only need to select the appropriate audio device to playback this file::
+
+    nsh> nxplayer
+    NxPlayer version 1.05
+    h for commands, q to exit
+
+    nxplayer> device /dev/audio/pcm1p
+    nxplayer> play /host/mother.mp3
+
 bluetooth
 ---------
 

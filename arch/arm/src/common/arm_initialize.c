@@ -97,6 +97,12 @@ static inline void arm_color_intstack(void)
 
 void up_initialize(void)
 {
+#if CONFIG_ARCH_INTERRUPTSTACK > 7
+  /* Reinitializes the stack pointer */
+
+  arm_initialize_stack();
+#endif
+
   /* Colorize the interrupt stack */
 
   arm_color_intstack();

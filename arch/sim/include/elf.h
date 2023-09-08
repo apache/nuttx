@@ -28,25 +28,14 @@
 /* 4.3.1 ELF Identification.  Should have:
  *
  * e_machine         = EM_386
- * e_ident[EI_CLASS] = ELFCLASS32
- * e_ident[EI_DATA]  = ELFDATA2LSB (little endian) or
- *                     ELFDATA2MSB (big endian)
  */
 
 #ifdef CONFIG_SIM_M32
-#  define EM_ARCH                EM_386
-#  define ELF_CLASS              ELFCLASS32
+#  define EM_ARCH      EM_386
 #else
-#  define EM_ARCH                EM_X86_64
-#  define ELF_CLASS              ELFCLASS32
+#  define EM_ARCH      EM_X86_64
 #endif
 
-#ifdef CONFIG_ENDIAN_BIG
-#  define ELF_DATA               ELFDATA2MSB
-#else
-#  define ELF_DATA               ELFDATA2LSB
-#endif
-
-#define EF_FLAG                  0
+#define EF_FLAG        0
 
 #endif /* __ARCH_SIM_INCLUDE_ELF_H */

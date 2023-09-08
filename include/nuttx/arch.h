@@ -169,6 +169,23 @@ extern initializer_t _einit[];
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: up_fork
+ *
+ * Description:
+ *   The up_fork() function is the base of fork() function that provided in
+ *   libc, and fork() is implemented as a wrapper of up_fork() function.
+ *
+ * Returned Value:
+ *   Upon successful completion, up_fork() returns 0 to the child process
+ *   and returns the process ID of the child process to the parent process.
+ *   Otherwise, -1 is returned to the parent, no child process is created,
+ *   and errno is set to indicate the error.
+ *
+ ****************************************************************************/
+
+pid_t up_fork(void);
+
+/****************************************************************************
  * Name: up_initialize
  *
  * Description:
@@ -753,6 +770,21 @@ void up_textheap_free(FAR void *p);
 
 #if defined(CONFIG_ARCH_USE_TEXT_HEAP)
 bool up_textheap_heapmember(FAR void *p);
+#endif
+
+/****************************************************************************
+ * Name: up_copy_section
+ *
+ * Description:
+ *   Copy section from general temporary buffer(src) to special addr(dest).
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_USE_COPY_SECTION)
+int up_copy_section(FAR void *dest, FAR const void *src, size_t n);
 #endif
 
 /****************************************************************************
@@ -1535,17 +1567,19 @@ void up_trigger_irq(int irq, cpu_set_t cpuset);
 int up_prioritize_irq(int irq, int priority);
 #endif
 
-#ifdef CONFIG_ARCH_HAVE_TRUSTZONE
-
 /****************************************************************************
- * Name: up_set_secure_irq
+ * Name: up_secure_irq
  *
  * Description:
  *   Secure an IRQ
  *
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_HAVE_TRUSTZONE
 void up_secure_irq(int irq, bool secure);
+#else
+# define up_secure_irq(i, s)
+#endif
 
 /****************************************************************************
  * Name: up_secure_irq_all
@@ -1555,8 +1589,10 @@ void up_secure_irq(int irq, bool secure);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_HAVE_TRUSTZONE
 void up_secure_irq_all(bool secure);
-
+#else
+# define up_secure_irq_all(s)
 #endif
 
 /****************************************************************************
@@ -2334,7 +2370,7 @@ void nxsched_alarm_tick_expiration(clock_t ticks);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SCHED_CPULOAD) && defined(CONFIG_SCHED_CPULOAD_EXTCLK)
+#ifdef CONFIG_SCHED_CPULOAD_EXTCLK
 void nxsched_process_cpuload_ticks(uint32_t ticks);
 #  define nxsched_process_cpuload() nxsched_process_cpuload_ticks(1)
 #endif

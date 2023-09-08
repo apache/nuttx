@@ -280,11 +280,11 @@ static int hcsr04_poll(FAR struct file *filep, FAR struct pollfd *fds,
   int ret = OK;
   int i;
 
-  DEBUGASSERT(filep && fds);
+  DEBUGASSERT(fds);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
-  priv = (FAR struct hcsr04_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  priv = inode->i_private;
 
   /* Get exclusive access */
 
@@ -406,7 +406,7 @@ int hcsr04_register(FAR const char *devpath,
   int ret = 0;
   FAR struct hcsr04_dev_s *priv;
 
-  priv = (struct hcsr04_dev_s *)kmm_zalloc(sizeof(struct hcsr04_dev_s));
+  priv = kmm_zalloc(sizeof(struct hcsr04_dev_s));
 
   if (!priv)
     {

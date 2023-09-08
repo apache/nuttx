@@ -2422,7 +2422,7 @@ static struct usbdev_req_s *nrf52_ep_allocreq(struct usbdev_ep_s *ep)
 
   usbtrace(TRACE_EPALLOCREQ, ((struct nrf52_ep_s *)ep)->epphy);
 
-  privreq = (struct nrf52_req_s *)kmm_malloc(sizeof(struct nrf52_req_s));
+  privreq = kmm_malloc(sizeof(struct nrf52_req_s));
   if (!privreq)
     {
       usbtrace(TRACE_DEVERROR(NRF52_TRACEERR_ALLOCFAIL), 0);
@@ -3052,9 +3052,8 @@ static void nrf52_hwinitialize(struct nrf52_usbdev_s *priv)
 {
   /* Wait for VBUS */
 
-  /* TODO: connect to POWER USB events */
-
-  while (getreg32(NRF52_POWER_EVENTS_USBDETECTED) == 0);
+  while ((getreg32(NRF52_POWER_USBREGSTATUS) &
+          NRF52_POWER_USBREGSTATUS_VBUSDETECT) == 0) ;
 
   /* Errata [187] USBD: USB cannot be enabled */
 

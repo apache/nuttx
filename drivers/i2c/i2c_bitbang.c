@@ -294,7 +294,7 @@ static int i2c_bitbang_wait_ack(FAR struct i2c_bitbang_dev_s *priv)
 static void i2c_bitbang_send(FAR struct i2c_bitbang_dev_s *priv,
                              uint8_t data)
 {
-  uint8_t bit = 0b10000000;
+  uint8_t bit = 1u << 7;
 
   while (bit)
     {
@@ -379,7 +379,7 @@ FAR struct i2c_master_s *i2c_bitbang_initialize(
 
   DEBUGASSERT(lower && lower->ops);
 
-  dev = (FAR struct i2c_bitbang_dev_s *)kmm_zalloc(sizeof(*dev));
+  dev = kmm_zalloc(sizeof(*dev));
 
   if (!dev)
     {

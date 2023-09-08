@@ -355,6 +355,10 @@ static int read_pseudodir(FAR struct fs_dirent_s *dir,
         {
           entry->d_type = DTYPE_SHM;
         }
+      else if (INODE_IS_PIPE(pdir->next))
+        {
+          entry->d_type = DTYPE_FIFO;
+        }
     }
 
   /* If the node has child node(s) or no operations, then we will say that
@@ -546,12 +550,15 @@ static off_t dir_seek(FAR struct file *filep, off_t offset, int whence)
 static int dir_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct fs_dirent_s *dir = filep->f_priv;
-  int ret = -ENOTTY;
+  int ret = OK;
 
   if (cmd == FIOC_FILEPATH)
     {
       strlcpy((FAR char *)(uintptr_t)arg, dir->fd_path, PATH_MAX);
-      ret = OK;
+    }
+  else if (cmd != BIOC_FLUSH)
+    {
+      ret = -ENOTTY;
     }
 
   return ret;

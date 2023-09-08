@@ -88,7 +88,6 @@ int find_blockdriver(FAR const char *pathname, int mountflags,
   /* Get the search results */
 
   inode = desc.node;
-  DEBUGASSERT(inode != NULL);
 
   /* Verify that the inode is a block driver. */
 

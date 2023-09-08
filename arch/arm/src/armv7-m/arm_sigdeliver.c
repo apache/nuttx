@@ -63,6 +63,8 @@ void arm_sigdeliver(void)
    */
 
   int16_t saved_irqcount;
+
+  enter_critical_section();
 #endif
 
   board_autoled_on(LED_SIGNAL);
@@ -158,6 +160,14 @@ retry:
 
   board_autoled_off(LED_SIGNAL);
 #ifdef CONFIG_SMP
+  /* We need to keep the IRQ lock until task switching */
+
+  rtcb->irqcount++;
+#ifdef CONFIG_ARMV7M_USEBASEPRI
+  leave_critical_section((uint8_t)regs[REG_BASEPRI]);
+#else
+  leave_critical_section((uint16_t)regs[REG_PRIMASK]);
+#endif
   rtcb->irqcount--;
 #endif
   arm_fullcontextrestore(regs);

@@ -32,7 +32,7 @@
 #include <assert.h>
 #include <errno.h>
 
-#include <nuttx/kmalloc.h>
+#include <nuttx/lib/lib.h>
 #include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
@@ -143,7 +143,7 @@ int symlink(FAR const char *path1, FAR const char *path2)
       ret = inode_lock();
       if (ret < 0)
         {
-          kmm_free(newpath2);
+          lib_free(newpath2);
           errcode = -ret;
           goto errout_with_search;
         }
@@ -153,7 +153,7 @@ int symlink(FAR const char *path1, FAR const char *path2)
 
       if (ret < 0)
         {
-          kmm_free(newpath2);
+          lib_free(newpath2);
           errcode = -ret;
           goto errout_with_search;
         }

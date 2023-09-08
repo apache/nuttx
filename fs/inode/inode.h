@@ -418,6 +418,32 @@ int foreach_inode(foreach_inode_t handler, FAR void *arg);
 
 int dir_allocate(FAR struct file *filep, FAR const char *relpath);
 
+/****************************************************************************
+ * Name: pseudofile_create
+ *
+ * Description:
+ *   Create the pseudo-file with specified path and mode, and alloc inode
+ *   of this pseudo-file.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PSEUDOFS_FILE
+int pseudofile_create(FAR struct inode **node, FAR const char *path,
+                      mode_t mode);
+#endif
+
+/****************************************************************************
+ * Name: inode_is_pseudofile
+ *
+ * Description:
+ *    Check inode whether is a pseudo file.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PSEUDOFS_FILE
+bool inode_is_pseudofile(FAR struct inode *inode);
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

@@ -95,7 +95,7 @@ config MPFS_HART1_ENTRYPOINT
 config MPFS_HART2_ENTRYPOINT
 	hex "Application entry point for HART2"
 	depends on MPFS_BOOTLOADER
-	default 0xafb00000
+	default 0xffffffffffffffff
 	---help---
 		The default address of the entry point for HART2
 
@@ -156,6 +156,19 @@ config MPFS_DDR_TYPE
 	default 2 if MPFS_DDR_TYPE_DDR4
 	default 3 if MPFS_DDR_TYPE_LPDDR3
 	default 4 if MPFS_DDR_TYPE_LPDDR4
+
+config MPFS_DDR_MANUAL_BCLSCLK_TRAINING
+	bool "Use manual bclk/sclk training"
+        default n
+	---help---
+		This adds code for manual bclk/sclk training. To use it also enable bit 0 in LIBERO_SETTING_TRAINING_SKIP_SETTING to skip the automatic one
+
+config MPFS_DDR_MANUAL_ADDCMD_TRAINING
+	bool "Use manual addcmd training"
+	depends on DDR_MANUAL_BCLSCLK_TRAINING
+	default n
+	---help---
+		This adds code for manual addcmd training. To use it also enable bit 1 in LIBERO_SETTING_TRAINING_SKIP_SETTING to skip the automatic one
 
 config MPFS_ENABLE_CACHE
 	bool "Enable L2 cache"
@@ -437,6 +450,43 @@ config MPFS_IHC_RPMSG_CH2
 	---help---
 		Use this only if using 2 x RPMSG channels.  This makes the NuttX work as the
 		RPMSG channel 2 client.
+
+config MPFS_IHC_WITH_HSS
+	bool "IHC with HSS"
+	depends on MPFS_IHC_CLIENT
+	default n
+	---help---
+		Set this to true if using IHC with HSS bootloader
+
+config MPFS_CH1_VRING_SHMEM_ADDR
+	hex "Channel 1 Vring shared memory start"
+	default 0xA2410000
+	depends on MPFS_IHC_CLIENT
+
+config MPFS_CH1_VRING0_DESC_ADDR
+	hex "Channel 1 Vring0 descriptor area"
+	default 0xA2400000
+	depends on MPFS_IHC_CLIENT
+
+config MPFS_CH1_VRING1_DESC_ADDR
+	hex "Channel 1 Vring1 descriptor area"
+	default 0xA2408000
+	depends on MPFS_IHC_CLIENT
+
+config MPFS_CH2_VRING_SHMEM_ADDR
+	hex "Channel 2 Vring shared memory start"
+	default 0xA2460000
+	depends on MPFS_IHC_CLIENT && MPFS_IHC_RPMSG_CH2
+
+config MPFS_CH2_VRING0_DESC_ADDR
+	hex "Channel 2 Vring0 descriptor area"
+	default 0xA2450000
+	depends on MPFS_IHC_CLIENT && MPFS_IHC_RPMSG_CH2
+
+config MPFS_CH2_VRING1_DESC_ADDR
+	hex "Channel 2 Vring1 descriptor area"
+	default 0xA2458000
+	depends on MPFS_IHC_CLIENT && MPFS_IHC_RPMSG_CH2
 
 config MPFS_ETHMAC
 	bool

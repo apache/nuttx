@@ -246,6 +246,8 @@ static int epoll_do_create(int size, int flags)
       list_add_tail(&eph->free, &epn[i].node);
     }
 
+  eph->crefs++;
+
   /* Alloc the file descriptor */
 
   fd = file_allocate(&g_epoll_inode, flags, 0, eph, 0, true);

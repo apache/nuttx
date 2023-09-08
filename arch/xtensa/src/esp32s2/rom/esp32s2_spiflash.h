@@ -144,17 +144,6 @@ typedef struct
 } esp_rom_spiflash_common_cmd_t;
 
 /**
- * Global ROM spiflash data, as used by legacy SPI flash functions
- */
-
-struct spiflash_legacy_data_s
-{
-  esp32s2_spiflash_chip_t chip;
-  uint8_t dummy_len_plus[3];
-  uint8_t sig_matrix;
-};
-
-/**
  * Structure holding SPI flash access critical sections management functions.
  *
  * Flash API uses two types of functions for flash access management:
@@ -484,7 +473,7 @@ esp_rom_spiflash_config_clk(uint8_t freqdiv,
  *
  *   Please do not call this function in SDK.
  *
- * Input Paramater:
+ * Input Parameter:
  *   esp_rom_spiflash_common_cmd_t *cmd : A struct to show the action of a
  *                                        command.
  *
@@ -1011,7 +1000,10 @@ void spi_flash_enable_cache(uint32_t cpuid);
  * Public Data
  *****************************************************************************/
 
-extern const struct spiflash_legacy_data_s *rom_spiflash_legacy_data;
+/* Global esp32s2_spiflash_chip_t structure used by ROM functions */
+
+extern esp32s2_spiflash_chip_t g_rom_flashchip;
+extern uint8_t g_rom_spiflash_dummy_len_plus[];
 
 #ifdef __cplusplus
 }

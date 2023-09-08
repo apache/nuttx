@@ -205,6 +205,8 @@
 #  include "hardware/stm32h7x3xx_dmamux.h"
 #elif defined(CONFIG_STM32H7_STM32H7B3XX)
 #  include "hardware/stm32h7x3xx_dmamux.h"
+#elif defined(CONFIG_STM32H7_STM32H7X5XX)
+#  include "hardware/stm32h7x3xx_dmamux.h"
 #elif defined(CONFIG_STM32H7_STM32H7X7XX)
 #  include "hardware/stm32h7x3xx_dmamux.h"
 #else

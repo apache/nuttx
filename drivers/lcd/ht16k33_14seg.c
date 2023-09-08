@@ -403,7 +403,7 @@ static void lcd_scroll_up(FAR struct ht16k33_dev_s *priv)
   int currow;
   int curcol;
 
-  data = (FAR uint8_t *)kmm_malloc(HT16K33_MAX_COL);
+  data = kmm_malloc(HT16K33_MAX_COL);
   if (NULL == data)
     {
       lcdinfo("Failed to allocate buffer in lcd_scroll_up()\n");
@@ -892,7 +892,7 @@ static off_t ht16k33_seek(FAR struct file *filep, off_t offset, int whence)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct ht16k33_dev_s *priv =
-    (FAR struct ht16k33_dev_s *)inode->i_private;
+    inode->i_private;
   off_t maxpos;
   off_t pos;
 
@@ -994,7 +994,7 @@ static int ht16k33_ioctl(FAR struct file *filep, int cmd,
         {
           FAR struct inode *inode = filep->f_inode;
           FAR struct ht16k33_dev_s *priv =
-            (FAR struct ht16k33_dev_s *)inode->i_private;
+            inode->i_private;
           FAR struct slcd_curpos_s *attr =
             (FAR struct slcd_curpos_s *)((uintptr_t)arg);
 
@@ -1007,7 +1007,7 @@ static int ht16k33_ioctl(FAR struct file *filep, int cmd,
         {
           FAR struct inode *inode = filep->f_inode;
           FAR struct ht16k33_dev_s *priv =
-            (FAR struct ht16k33_dev_s *)inode->i_private;
+            inode->i_private;
 
           nxmutex_lock(&priv->lock);
           *(FAR int *)((uintptr_t)arg) = 1; /* Hardcoded */
@@ -1019,7 +1019,7 @@ static int ht16k33_ioctl(FAR struct file *filep, int cmd,
         {
           FAR struct inode *inode = filep->f_inode;
           FAR struct ht16k33_dev_s *priv =
-            (FAR struct ht16k33_dev_s *)inode->i_private;
+            inode->i_private;
 
           nxmutex_lock(&priv->lock);
           ht16k33_setcontrast(priv, 0, (uint8_t)arg);

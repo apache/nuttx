@@ -56,6 +56,34 @@ config VIDEO_STREAM
 	---help---
 		Enable video Stream support
 
+config GOLDFISH_FB
+	bool "Goldfish Framebuffer character driver"
+	depends on VIDEO_FB
+	default n
+
+config GOLDFISH_FB_VIDEO_MODE
+	bool "Goldfish Framebuffer display mode"
+	depends on GOLDFISH_FB
+	default n
+	---help---
+		GOLDFISH_FB_VIDEO_MODE = y  enable video mode
+		GOLDFISH_FB_VIDEO_MODE = n  enable command mode
+
+config GOLDFISH_FB_IRQ
+	int "Goldfish fb irq"
+	depends on GOLDFISH_FB
+	default 48
+
+config GOLDFISH_FB_BASE
+	hex "Goldfish fb base"
+	depends on GOLDFISH_FB
+	default 0x0a020000
+
+config GOLDFISH_FB_FRAME_NBUFFER
+	int "Goldfish fb vsync size"
+	depends on GOLDFISH_FB
+	default 2
+
 if VIDEO_STREAM
 
 config VIDEO_REQBUFS_COUNT_MAX
@@ -318,6 +346,27 @@ config OV2640_REGDEBUG
 	depends on DEBUG_FEATURES
 	---help---
 		Enable details, register level debug output.
+
+endif
+
+config GOLDFISH_CAMERA
+	bool "Goldfish camera support"
+	depends on VIDEO
+	default n
+
+if GOLDFISH_CAMERA
+
+config GOLDFISH_CAMERA_PIPE_PATH
+	string "Goldfish camera pipe path"
+	default "/dev/goldfish_pipe"
+
+config GOLDFISH_CAMERA_PRIORITY
+	int "Goldfish camera thread priority"
+	default 224
+
+config GOLDFISH_CAMERA_STACKSIZE
+	int "Goldfish camera stack size"
+	default DEFAULT_TASK_STACKSIZE
 
 endif
 

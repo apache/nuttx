@@ -252,12 +252,12 @@ int sdio_io_rw_extended(FAR struct sdio_dev_s *dev, bool write,
   arg.cmd53.function_number  = function & 7;
   arg.cmd53.rw_flag          = write;
 
-  if (nblocks == 0 && blocklen < 512)
+  if (nblocks == 0)
     {
       /* Use byte mode */
 
       arg.cmd53.block_mode = 0;
-      arg.cmd53.byte_block_count = blocklen;
+      arg.cmd53.byte_block_count = (blocklen == 512) ? 0 : blocklen;
       nblocks = 1;
     }
   else

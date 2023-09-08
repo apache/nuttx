@@ -596,7 +596,7 @@
 #define PSEL6_P3_5_MASK      (0x00000c00)
 
 #define PSEL6_P3_6_GPIO      (0x00000000)
-#define PSEL6_P3_6_D6 		  (0x00001000)
+#define PSEL6_P3_6_D6        (0x00001000)
 #define PSEL6_P3_6_RSVD2     (0x00002000)
 #define PSEL6_P3_6_RSVD3     (0x00003000)
 #define PSEL6_P3_6_MASK      (0x00003000)

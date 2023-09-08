@@ -42,4 +42,8 @@ ifeq ($(CONFIG_LITEX_APPLICATION_RAMDISK),y)
 CSRCS += litex_ramdisk.c
 endif
 
+ifeq ($(CONFIG_BOARDCTL_RESET),y)
+CSRCS += litex_reset.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

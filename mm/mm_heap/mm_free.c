@@ -84,6 +84,8 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
       return;
     }
 
+  DEBUGASSERT(mm_heapmember(heap, mem));
+
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
   if (mempool_multiple_free(heap->mm_mpool, mem) >= 0)
     {
@@ -103,8 +105,6 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
     }
 
   kasan_poison(mem, mm_malloc_size(heap, mem));
-
-  DEBUGASSERT(mm_heapmember(heap, mem));
 
   /* Map the memory chunk into a free node */
 

@@ -36,11 +36,18 @@
 #include "barriers.h"
 #include "nvic.h"
 #include "mpu.h"
+#ifdef CONFIG_ARM_MPU
+#  include "stm32_mpuinit.h"
+#endif
 
 #include "stm32_rcc.h"
 #include "stm32_userspace.h"
 #include "stm32_lowputc.h"
 #include "stm32_start.h"
+
+#ifdef CONFIG_ARCH_STM32H7_DUALCORE
+#  include "stm32_dualcore.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -108,6 +115,7 @@ const uintptr_t g_idle_topstack = HEAP_BASE;
 void __start(void) noinstrument_function;
 #endif
 
+#ifdef CONFIG_ARCH_CHIP_STM32H7_CORTEXM7
 /****************************************************************************
  * Name: stm32_tcmenable
  *
@@ -157,6 +165,7 @@ static inline void stm32_tcmenable(void)
 #warning Missing logic
 #endif
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -182,11 +191,17 @@ void __start(void)
                    "r"(CONFIG_IDLETHREAD_STACKSIZE - 64) :);
 #endif
 
+#ifdef CONFIG_ARCH_CHIP_STM32H7_CORTEXM4
+  /* Wait for CM7 initialization done */
+
+  stm32h7_waitfor_cm7();
+#endif
+
   /* If enabled reset the MPU */
 
   mpu_early_reset();
 
-/* Clear .bss.  We'll do this inline (vs. calling memset) just to be
+  /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
    * certain that there are no issues with the state of global variables.
    */
 
@@ -231,23 +246,27 @@ void __start(void)
   stm32_lowsetup();
   showprogress('A');
 
+#ifdef CONFIG_ARCH_CHIP_STM32H7_CORTEXM7
   /* Enable/disable tightly coupled memories */
 
   stm32_tcmenable();
+#endif
 
   /* Initialize onboard resources */
 
   stm32_boardinitialize();
   showprogress('B');
 
+#ifdef CONFIG_ARCH_CHIP_STM32H7_CORTEXM7
   /* Enable I- and D-Caches */
 
   up_enable_icache();
   up_enable_dcache();
+#endif
   showprogress('C');
 
-#ifdef CONFIG_SCHED_IRQMONITOR
-  up_perf_init((void *)STM32_SYSCLK_FREQUENCY);
+#if defined(CONFIG_SCHED_IRQMONITOR) || defined(CONFIG_SEGGER_SYSVIEW)
+  up_perf_init((void *)STM32_CPUCLK_FREQUENCY);
 #endif
 
   /* Perform early serial initialization */
@@ -266,12 +285,27 @@ void __start(void)
 #ifdef CONFIG_BUILD_PROTECTED
   stm32_userspace();
 #endif
+
+#ifdef CONFIG_ARM_MPU
+  /* Configure the MPU */
+
+  stm32_mpuinitialize();
+#endif
   showprogress('E');
 
   /* Then start NuttX */
 
   showprogress('\r');
   showprogress('\n');
+
+#if defined(CONFIG_ARCH_STM32H7_DUALCORE) && \
+    defined(CONFIG_ARCH_CHIP_STM32H7_CORTEXM7) && \
+    defined(CONFIG_STM32H7_CORTEXM4_ENABLED)
+
+  /* Start CM4 core after clock configration is done */
+
+  stm32h7_start_cm4();
+#endif
 
   nx_start();
 

@@ -34,17 +34,25 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define ELF_CLASS          ELFCLASS32
+
 #define ELF32_ST_BIND(i)   ((i) >> 4)
 #define ELF32_ST_TYPE(i)   ((i) & 0xf)
 #define ELF32_ST_INFO(b,t) (((b) << 4) | ((t) & 0xf))
 
+/* Generic macro to abstract ELF32/ELF64 type/bind */
+
+#define ELF_ST_TYPE(a)     ELF32_ST_TYPE(a)
+#define ELF_ST_BIND(a)     ELF32_ST_BIND(a)
+
 /* Definitions for Elf32_Rel*::r_info */
 
-#define ELF32_R_SYM(i)    ((i) >> 8)
-#define ELF32_R_TYPE(i)   ((i) & 0xff)
-#define ELF32_R_INFO(s,t) (((s)<< 8) | ((t) & 0xff))
+#define ELF32_R_SYM(i)     ((i) >> 8)
+#define ELF32_R_TYPE(i)    ((i) & 0xff)
+#define ELF32_R_INFO(s,t)  (((s)<< 8) | ((t) & 0xff))
 
-#define ELF_R_SYM(i)      ELF32_R_SYM(i)
+#define ELF_R_SYM(i)       ELF32_R_SYM(i)
+#define ELF_R_TYPE(i)      ELF32_R_TYPE(i)
 
 /****************************************************************************
  * Public Type Definitions
@@ -52,11 +60,11 @@
 
 /* Figure 4.2: 32-Bit Data Types */
 
-typedef uint32_t  Elf32_Addr;  /* Unsigned program address */
-typedef uint16_t  Elf32_Half;  /* Unsigned medium integer */
-typedef uint32_t  Elf32_Off;   /* Unsigned file offset */
-typedef int32_t   Elf32_Sword; /* Signed large integer */
-typedef uint32_t  Elf32_Word;  /* Unsigned large integer */
+typedef uint32_t Elf32_Addr;  /* Unsigned program address */
+typedef uint16_t Elf32_Half;  /* Unsigned medium integer */
+typedef uint32_t Elf32_Off;   /* Unsigned file offset */
+typedef int32_t  Elf32_Sword; /* Signed large integer */
+typedef uint32_t Elf32_Word;  /* Unsigned large integer */
 
 /* Figure 4-3: ELF Header */
 
@@ -110,60 +118,62 @@ typedef struct
 
 typedef struct
 {
-  Elf32_Addr   r_offset;
-  Elf32_Word   r_info;
+  Elf32_Addr    r_offset;
+  Elf32_Word    r_info;
 } Elf32_Rel;
 
 typedef struct
 {
-  Elf32_Addr   r_offset;
-  Elf32_Word   r_info;
-  Elf32_Sword  r_addend;
+  Elf32_Addr    r_offset;
+  Elf32_Word    r_info;
+  Elf32_Sword   r_addend;
 } Elf32_Rela;
 
 /* Figure 5-1: Program Header */
 
 typedef struct
 {
-  Elf32_Word   p_type;
-  Elf32_Off    p_offset;
-  Elf32_Addr   p_vaddr;
-  Elf32_Addr   p_paddr;
-  Elf32_Word   p_filesz;
-  Elf32_Word   p_memsz;
-  Elf32_Word   p_flags;
-  Elf32_Word   p_align;
+  Elf32_Word    p_type;
+  Elf32_Off     p_offset;
+  Elf32_Addr    p_vaddr;
+  Elf32_Addr    p_paddr;
+  Elf32_Word    p_filesz;
+  Elf32_Word    p_memsz;
+  Elf32_Word    p_flags;
+  Elf32_Word    p_align;
 } Elf32_Phdr;
 
 /* Figure 5-7: Note Information */
 
 typedef struct
 {
-  Elf32_Word   n_namesz; /* Length of the note's name.  */
-  Elf32_Word   n_descsz; /* Length of the note's descriptor.  */
-  Elf32_Word   n_type;   /* Type of the note.  */
+  Elf32_Word    n_namesz; /* Length of the note's name.  */
+  Elf32_Word    n_descsz; /* Length of the note's descriptor.  */
+  Elf32_Word    n_type;   /* Type of the note.  */
 } Elf32_Nhdr;
 
 /* Figure 5-9: Dynamic Structure */
 
 typedef struct
 {
-  Elf32_Sword  d_tag;
+  Elf32_Sword   d_tag;
   union
   {
-    Elf32_Word d_val;
-    Elf32_Addr d_ptr;
+    Elf32_Word  d_val;
+    Elf32_Addr  d_ptr;
   } d_un;
 } Elf32_Dyn;
 
-typedef Elf32_Addr  Elf_Addr;
-typedef Elf32_Ehdr  Elf_Ehdr;
-typedef Elf32_Rel   Elf_Rel;
-typedef Elf32_Rela  Elf_Rela;
-typedef Elf32_Nhdr  Elf_Nhdr;
-typedef Elf32_Phdr  Elf_Phdr;
-typedef Elf32_Sym   Elf_Sym;
-typedef Elf32_Shdr  Elf_Shdr;
-typedef Elf32_Word  Elf_Word;
+typedef Elf32_Addr Elf_Addr;
+typedef Elf32_Ehdr Elf_Ehdr;
+typedef Elf32_Rel  Elf_Rel;
+typedef Elf32_Rela Elf_Rela;
+typedef Elf32_Nhdr Elf_Nhdr;
+typedef Elf32_Phdr Elf_Phdr;
+typedef Elf32_Sym  Elf_Sym;
+typedef Elf32_Shdr Elf_Shdr;
+typedef Elf32_Off  Elf_Off;
+typedef Elf32_Word Elf_Word;
+typedef Elf32_Dyn  Elf_Dyn;
 
 #endif /* __INCLUDE_ELF32_H */

@@ -25,7 +25,9 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/addrenv.h>
 #include <nuttx/config.h>
+#include <nuttx/userspace.h>
 
 #include <sys/types.h>
 #include <stdbool.h>
@@ -100,6 +102,36 @@
 #endif
 
 #define mm_memdump_s malltask
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
+/* In the kernel build, there are multiple user heaps; one for each task
+ * group.  In this build configuration, the user heap structure lies
+ * in a reserved region at the beginning of the .bss/.data address
+ * space (CONFIG_ARCH_DATA_VBASE).  The size of that region is given by
+ * ARCH_DATA_RESERVE_SIZE
+ */
+
+#  define USR_HEAP (ARCH_DATA_RESERVE->ar_usrheap)
+
+#elif defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)
+/* In the protected mode, there are two heaps:  A kernel heap and a single
+ * user heap.  Kernel code must obtain the address of the user heap data
+ * structure from the userspace interface.
+ */
+
+#  define USR_HEAP (*USERSPACE->us_heap)
+
+#else
+/* Otherwise, the user heap data structures are in common .bss */
+
+#  define USR_HEAP g_mmheap
+#endif
+
+#ifdef CONFIG_MM_KERNEL_HEAP
+#  define MM_INTERNAL_HEAP(heap) ((heap) == USR_HEAP || (heap) == g_kmmheap)
+#else
+#  define MM_INTERNAL_HEAP(heap) ((heap) == USR_HEAP)
+#endif
 
 /****************************************************************************
  * Public Types

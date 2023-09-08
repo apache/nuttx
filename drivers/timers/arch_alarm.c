@@ -36,8 +36,8 @@
 #define CONFIG_BOARD_LOOPSPER10USEC  ((CONFIG_BOARD_LOOPSPERMSEC+50)/100)
 #define CONFIG_BOARD_LOOPSPERUSEC    ((CONFIG_BOARD_LOOPSPERMSEC+500)/1000)
 
-#define timespec_to_usec(ts) \
-    ((uint64_t)(ts)->tv_sec * USEC_PER_SEC + (ts)->tv_nsec / NSEC_PER_USEC)
+#define timespec_to_nsec(ts) \
+    ((uint64_t)(ts)->tv_sec * NSEC_PER_SEC + (ts)->tv_nsec)
 
 /****************************************************************************
  * Private Data
@@ -45,16 +45,20 @@
 
 static FAR struct oneshot_lowerhalf_s *g_oneshot_lower;
 
+#ifndef CONFIG_SCHED_TICKLESS
+static clock_t g_current_tick;
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static inline void timespec_from_usec(FAR struct timespec *ts,
-                                      uint64_t microseconds)
+static inline void timespec_from_nsec(FAR struct timespec *ts,
+                                      uint64_t nanoseconds)
 {
-  ts->tv_sec    = microseconds / USEC_PER_SEC;
-  microseconds -= (uint64_t)ts->tv_sec * USEC_PER_SEC;
-  ts->tv_nsec   = microseconds * NSEC_PER_USEC;
+  ts->tv_sec    = nanoseconds / NSEC_PER_SEC;
+  nanoseconds -= (uint64_t)ts->tv_sec * NSEC_PER_SEC;
+  ts->tv_nsec   = nanoseconds;
 }
 
 static void udelay_accurate(useconds_t microseconds)
@@ -64,7 +68,7 @@ static void udelay_accurate(useconds_t microseconds)
   struct timespec delta;
 
   ONESHOT_CURRENT(g_oneshot_lower, &now);
-  timespec_from_usec(&delta, microseconds);
+  timespec_from_nsec(&delta, (uint64_t)microseconds * NSEC_PER_USEC);
   clock_timespec_add(&now, &delta, &end);
 
   while (clock_timespec_compare(&now, &end) < 0)
@@ -133,11 +137,10 @@ static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
 
   do
     {
-      static clock_t tick = 1;
       clock_t next;
 
       nxsched_process_timer();
-      next = ++tick;
+      next = ++g_current_tick;
       ONESHOT_TICK_CURRENT(g_oneshot_lower, &now);
       delta = next - now;
     }
@@ -163,6 +166,7 @@ void up_alarm_set_lowerhalf(FAR struct oneshot_lowerhalf_s *lower)
   ONESHOT_TICK_MAX_DELAY(g_oneshot_lower, &ticks);
   g_oneshot_maxticks = ticks < UINT32_MAX ? ticks : UINT32_MAX;
 #else
+  ONESHOT_TICK_CURRENT(g_oneshot_lower, &g_current_tick);
   ONESHOT_TICK_START(g_oneshot_lower, oneshot_callback, NULL, 1);
 #endif
 }
@@ -356,7 +360,13 @@ int weak_function up_alarm_tick_start(clock_t ticks)
  *   units.
  ****************************************************************************/
 
-unsigned long weak_function up_perf_gettime(void)
+#ifndef CONFIG_ARCH_PERF_EVENTS
+void up_perf_init(FAR void *arg)
+{
+  UNUSED(arg);
+}
+
+unsigned long up_perf_gettime(void)
 {
   unsigned long ret = 0;
 
@@ -365,22 +375,22 @@ unsigned long weak_function up_perf_gettime(void)
       struct timespec ts;
 
       ONESHOT_CURRENT(g_oneshot_lower, &ts);
-      ret = timespec_to_usec(&ts);
+      ret = timespec_to_nsec(&ts);
     }
 
   return ret;
 }
 
-unsigned long weak_function up_perf_getfreq(void)
+unsigned long up_perf_getfreq(void)
 {
-  return USEC_PER_SEC;
+  return NSEC_PER_SEC;
 }
 
-void weak_function up_perf_convert(unsigned long elapsed,
-                                   FAR struct timespec *ts)
+void up_perf_convert(unsigned long elapsed, FAR struct timespec *ts)
 {
-  timespec_from_usec(ts, elapsed);
+  timespec_from_nsec(ts, elapsed);
 }
+#endif /* CONFIG_ARCH_PERF_EVENTS */
 
 /****************************************************************************
  * Name: up_mdelay

@@ -306,7 +306,12 @@ ssize_t circbuf_peekat(FAR struct circbuf_s *circ, size_t pos,
       return 0;
     }
 
-  len = circbuf_used(circ);
+  if (circ->head - pos > circ->head - circ->tail)
+    {
+      pos = circ->tail;
+    }
+
+  len = circ->head - pos;
   off = pos % circ->size;
 
   if (bytes > len)

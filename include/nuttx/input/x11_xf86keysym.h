@@ -182,7 +182,7 @@
 #define XF86XK_Battery          0x1008FF93   /* Display battery information */
 #define XF86XK_Bluetooth        0x1008FF94   /* Enable/disable Bluetooth    */
 #define XF86XK_WLAN             0x1008FF95   /* Enable/disable WLAN         */
-#define XF86XK_UWB              0x1008FF96   /* Enable/disable UWB	    */
+#define XF86XK_UWB              0x1008FF96   /* Enable/disable UWB          */
 
 #define XF86XK_AudioForward     0x1008FF97   /* fast-forward audio track    */
 #define XF86XK_AudioRepeat      0x1008FF98   /* toggle repeat mode          */

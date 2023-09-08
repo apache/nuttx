@@ -467,8 +467,8 @@ static int ee25xx_open(FAR struct file *filep)
   FAR struct ee25xx_dev_s *eedev;
   int ret = OK;
 
-  DEBUGASSERT(inode && inode->i_private);
-  eedev = (FAR struct ee25xx_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  eedev = inode->i_private;
 
   ret = nxmutex_lock(&eedev->lock);
   if (ret < 0)
@@ -504,8 +504,8 @@ static int ee25xx_close(FAR struct file *filep)
   FAR struct ee25xx_dev_s *eedev;
   int ret = OK;
 
-  DEBUGASSERT(inode && inode->i_private);
-  eedev = (FAR struct ee25xx_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  eedev = inode->i_private;
 
   ret = nxmutex_lock(&eedev->lock);
   if (ret < 0)
@@ -544,8 +544,8 @@ static off_t ee25xx_seek(FAR struct file *filep, off_t offset, int whence)
   int                     ret;
   FAR struct inode        *inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
-  eedev = (FAR struct ee25xx_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  eedev = inode->i_private;
 
   ret = nxmutex_lock(&eedev->lock);
   if (ret < 0)
@@ -616,8 +616,8 @@ static ssize_t ee25xx_read(FAR struct file *filep, FAR char *buffer,
   FAR struct inode        *inode = filep->f_inode;
   int ret;
 
-  DEBUGASSERT(inode && inode->i_private);
-  eedev = (FAR struct ee25xx_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  eedev = inode->i_private;
 
   ret = nxmutex_lock(&eedev->lock);
   if (ret < 0)
@@ -668,8 +668,8 @@ static ssize_t ee25xx_write(FAR struct file *filep, FAR const char *buffer,
   FAR struct inode        *inode = filep->f_inode;
   int                     ret    = -EACCES;
 
-  DEBUGASSERT(inode && inode->i_private);
-  eedev = (FAR struct ee25xx_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  eedev = inode->i_private;
 
   if (eedev->readonly)
     {
@@ -765,8 +765,8 @@ static int ee25xx_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct inode        *inode = filep->f_inode;
   int                     ret    = 0;
 
-  DEBUGASSERT(inode && inode->i_private);
-  eedev = (FAR struct ee25xx_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  eedev = inode->i_private;
   UNUSED(eedev);
 
   switch (cmd)

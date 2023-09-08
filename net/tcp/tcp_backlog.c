@@ -97,7 +97,7 @@ int tcp_backlogcreate(FAR struct tcp_conn_s *conn, int nblg)
 
       /* Then allocate that much */
 
-      bls = (FAR struct tcp_backlog_s *)kmm_zalloc(size);
+      bls = kmm_zalloc(size);
       if (!bls)
         {
           nerr("ERROR: Failed to allocate backlog\n");

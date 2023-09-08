@@ -19,6 +19,7 @@
 ############################################################################
 
 CSRCS += fs_registerdriver.c fs_unregisterdriver.c
+CSRCS += fs_registerpipedriver.c fs_unregisterpipedriver.c
 
 # Don't built-in block driver support if there are no mountpoints
 

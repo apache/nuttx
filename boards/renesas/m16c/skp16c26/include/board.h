@@ -51,7 +51,7 @@
 
 /* Xin Freq */
 
-#define	M16C_XIN_FREQ	20000000	/* 20MHz */
+#define M16C_XIN_FREQ  20000000  /* 20MHz */
 
 /* Interrupt Priority Levels ************************************************/
 

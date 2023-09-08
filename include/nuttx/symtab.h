@@ -51,8 +51,8 @@
 
 struct symtab_s
 {
-  FAR const char *sym_name;          /* A pointer to the symbol name string */
-  FAR const void *sym_value;         /* The value associated with the string */
+  FAR const char *sym_name;  /* A pointer to the symbol name string */
+  FAR const void *sym_value; /* The value associated with the string */
 };
 
 /****************************************************************************

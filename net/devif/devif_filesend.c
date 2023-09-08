@@ -92,7 +92,7 @@ int devif_file_send(FAR struct net_driver_s *dev, FAR struct file *file,
       goto errout;
     }
 
-  iob_update_pktlen(dev->d_iob, target_offset);
+  iob_update_pktlen(dev->d_iob, target_offset, false);
 
   ret = file_seek(file, offset, SEEK_SET);
   if (ret < 0)
@@ -142,7 +142,7 @@ int devif_file_send(FAR struct net_driver_s *dev, FAR struct file *file,
         }
     }
 
-  iob_update_pktlen(dev->d_iob, target_offset + len);
+  iob_update_pktlen(dev->d_iob, target_offset + len, false);
 
   dev->d_sndlen = len;
   return len;

@@ -13,7 +13,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-FROM ubuntu:20.04 AS builder-base
+FROM ubuntu:22.04 AS builder-base
 # NOTE WE ARE NOT REMOVEING APT CACHE.
 # This should only be used for temp build images that artifacts will be copied from
 RUN apt-get update -qq && apt-get install -y -qq \
@@ -84,7 +84,7 @@ RUN mkdir clang-arm-none-eabi && \
 
 # Download the latest ARM GCC toolchain prebuilt by ARM
 RUN mkdir gcc-arm-none-eabi && \
-  curl -s -L  "https://developer.arm.com/-/media/Files/downloads/gnu/12.2.rel1/binrel/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi.tar.xz" \
+  curl -s -L  "https://developer.arm.com/-/media/Files/downloads/gnu/12.3.rel1/binrel/arm-gnu-toolchain-12.3.rel1-x86_64-arm-none-eabi.tar.xz" \
   | tar -C gcc-arm-none-eabi --strip-components 1 -xJ
 
 ###############################################################################
@@ -120,17 +120,18 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   m4 \
   make \
   texinfo \
-  wget
+  wget \
+  bzip2
 
 # Download toolchain source code
 RUN mkdir -p /tools/renesas-tools/source/binutils && \
-  curl -s -L "https://gcc-renesas.com/downloads/d.php?f=rx/binutils/4.8.4.201803-gnurx/rx_binutils2.24_2018Q3.tar.gz" \
+  curl -s -L "https://llvm-gcc-renesas.com/downloads/d.php?f=rx/binutils/8.3.0.202305-gnurx/binutils-2.36.1.tar.gz" \
   | tar -C renesas-tools/source/binutils --strip-components=1 -xz
 RUN mkdir -p /tools/renesas-tools/source/gcc && \
-  curl -s -L "https://gcc-renesas.com/downloads/d.php?f=rx/gcc/4.8.4.201803-gnurx/rx_gcc_4.8.4_2018Q3.tar.gz" \
+  curl -s -L "https://llvm-gcc-renesas.com/downloads/d.php?f=rx/gcc/8.3.0.202305-gnurx/gcc-8.3.0.tar.gz" \
   | tar -C renesas-tools/source/gcc --strip-components=1 -xz
 RUN mkdir -p /tools/renesas-tools/source/newlib && \
-  curl -s -L "https://gcc-renesas.com/downloads/d.php?f=rx/newlib/4.8.4.201803-gnurx/rx_newlib2.2.0_2018Q3.tar.gz" \
+  curl -s -L "https://llvm-gcc-renesas.com/downloads/d.php?f=rx/newlib/8.3.0.202305-gnurx/newlib-4.1.0.tar.gz" \
   | tar -C renesas-tools/source/newlib --strip-components=1 -xz
 
 # Install binutils
@@ -227,8 +228,19 @@ RUN mkdir wamrc && \
 # Final Docker image used for running CI system.  This includes all toolchains
 # supported by the CI system.
 ###############################################################################
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 LABEL maintainer="dev@nuttx.apache.org"
+
+RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -qq \
+  build-essential \
+  curl \
+  gcc \
+  libssl-dev
+
+RUN mkdir -p cmake && \
+    curl -s -L wget https://cmake.org/files/v3.26/cmake-3.26.0.tar.gz \
+    | tar -C cmake --strip-components=1 -xz && \
+    cd cmake && ./bootstrap && make && make install && rm -rf cmake
 
 RUN dpkg --add-architecture i386
 # This is used for the final images so make sure to not store apt cache
@@ -236,13 +248,9 @@ RUN dpkg --add-architecture i386
 RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -qq --no-install-recommends \
   -o APT::Immediate-Configure=0 \
   avr-libc \
-  build-essential \
   ccache \
   clang \
   clang-tidy \
-  cmake \
-  curl \
-  gcc \
   gcc-avr \
   gcc-multilib \
   genromfs \
@@ -286,8 +294,9 @@ ENV PIP_NO_CACHE_DIR=0
 # instead of requiring them to be compiled.
 RUN pip3 install setuptools
 RUN pip3 install wheel
+RUN pip3 install cmake-format
 # Install CodeChecker and use it to statically analyze the code.
-RUN pip3 install CodeChecker
+# RUN pip3 install CodeChecker
 # Install cvt2utf to check for non-UTF characters.
 RUN pip3 install cvt2utf
 # Install pytest
@@ -302,6 +311,7 @@ RUN pip3 install pytest==6.2.5
 RUN pip3 install pytest-json==0.4.0
 RUN pip3 install pytest-ordering==0.6
 RUN pip3 install pytest-repeat==0.9.1
+
 # Used to generate symbol table files
 
 RUN mkdir /tools
@@ -321,7 +331,7 @@ ENV PATH="/tools/rust/cargo/bin:$PATH"
 
 # ARM toolchain
 COPY --from=nuttx-toolchain-arm /tools/clang-arm-none-eabi/ clang-arm-none-eabi/
-RUN cp /usr/bin/clang-extdef-mapping-10 clang-arm-none-eabi/bin/clang-extdef-mapping
+# RUN cp /usr/bin/clang-extdef-mapping-10 clang-arm-none-eabi/bin/clang-extdef-mapping
 ENV PATH="/tools/clang-arm-none-eabi/bin:$PATH"
 
 COPY --from=nuttx-toolchain-arm /tools/gcc-arm-none-eabi/ gcc-arm-none-eabi/

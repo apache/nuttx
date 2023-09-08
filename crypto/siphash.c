@@ -54,8 +54,8 @@
 
 #include <crypto/siphash.h>
 
-static void	siphash_crounds(FAR SIPHASH_CTX *, int);
-static void	siphash_rounds(FAR SIPHASH_CTX *, int);
+static void siphash_crounds(FAR SIPHASH_CTX *, int);
+static void siphash_rounds(FAR SIPHASH_CTX *, int);
 
 /****************************************************************************
  * Public Functions

@@ -26,6 +26,8 @@
 
 #include "mpu.h"
 
+#if defined(XCHAL_MPU_ENTRIES) && XCHAL_MPU_ENTRIES > 0
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -136,3 +138,5 @@ void mpu_configure_region(uintptr_t base, size_t size,
 
   xtensa_mpu_base[region] = base;
 }
+
+#endif /* defined(XCHAL_MPU_ENTRIES) && XCHAL_MPU_ENTRIES > 0 */

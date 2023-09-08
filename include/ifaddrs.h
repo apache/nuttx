@@ -32,7 +32,10 @@
  ****************************************************************************/
 
 #ifndef ifa_broadaddr
-#define ifa_broadaddr ifa_dstaddr /* broadcast address interface */
+#  define ifa_broadaddr ifa_ifu.ifu_broadaddr /* Broadcast address of this interface. */
+#endif
+#ifndef ifa_dstaddr
+#  define ifa_dstaddr   ifa_ifu.ifu_dstaddr   /* Point-to-point destination address. */
 #endif
 
 /****************************************************************************
@@ -46,7 +49,17 @@ struct ifaddrs
   unsigned int         ifa_flags;
   FAR struct sockaddr *ifa_addr;
   FAR struct sockaddr *ifa_netmask;
-  FAR struct sockaddr *ifa_dstaddr;
+  union
+  {
+  /* At most one of the following two is valid. If the IFF_BROADCAST
+   * bit is set in `ifa_flags', then `ifa_broadaddr' is valid. If the
+   * IFF_POINTOPOINT bit is set, then `ifa_dstaddr' is valid.
+   * It is never the case that both these bits are set at once.
+   */
+
+    FAR struct sockaddr *ifu_broadaddr; /* Broadcast address of this interface. */
+    FAR struct sockaddr *ifu_dstaddr;   /* Point-to-point destination address. */
+  } ifa_ifu;
   FAR void            *ifa_data;
 };
 

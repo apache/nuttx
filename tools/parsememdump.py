@@ -92,6 +92,9 @@ if __name__ == "__main__":
         description=program_description, formatter_class=argparse.RawTextHelpFormatter
     )
     parser.add_argument("-f", "--file", help="dump file", nargs=1, required=True)
+    parser.add_argument(
+        "-p", "--prefix", help="addr2line program prefix", nargs=1, default=""
+    )
 
     parser.add_argument(
         "-e",
@@ -142,7 +145,7 @@ if __name__ == "__main__":
         log.output("\n")
         if args.elffile != "":
             addr2line_file = os.popen(
-                "addr2line -Cfe %s %s" % (args.elffile[0], memstr), "r"
+                "%saddr2line -Cfe %s %s" % (args.prefix, args.elffile[0], memstr), "r"
             )
             while 1:
                 add2line_str = addr2line_file.readline()

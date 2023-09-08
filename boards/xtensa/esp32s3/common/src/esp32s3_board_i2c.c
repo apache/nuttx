@@ -31,7 +31,6 @@
 #include <nuttx/i2c/i2c_master.h>
 
 #include "esp32s3_i2c.h"
-#include "esp32s3-devkit.h"
 
 /****************************************************************************
  * Public Functions

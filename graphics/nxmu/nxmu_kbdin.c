@@ -61,7 +61,7 @@ void nxmu_kbdin(FAR struct nxmu_state_s *nxmu, uint8_t nch, FAR uint8_t *ch)
    */
 
   size   = sizeof(struct nxclimsg_kbdin_s) + nch - 1;
-  outmsg = (FAR struct nxclimsg_kbdin_s *)kmm_malloc(size);
+  outmsg = kmm_malloc(size);
   if (outmsg)
     {
       /* Give the keypad input only to the top child */

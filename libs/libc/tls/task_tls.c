@@ -27,7 +27,7 @@
 #include <errno.h>
 #include <nuttx/tls.h>
 
-#if CONFIG_TLS_TASK_NELEM > 0
+#if defined(CONFIG_TLS_TASK_NELEM) && CONFIG_TLS_TASK_NELEM > 0
 
 /****************************************************************************
  * Public Functions

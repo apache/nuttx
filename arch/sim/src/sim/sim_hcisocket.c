@@ -36,7 +36,7 @@
 
 #include <nuttx/nuttx.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/queue.h>
+#include <nuttx/wqueue.h>
 #include <nuttx/net/bluetooth.h>
 #include <nuttx/wireless/bluetooth/bt_driver.h>
 #include <nuttx/wireless/bluetooth/bt_uart.h>
@@ -50,7 +50,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define BLUETOOTH_RX_FRAMELEN 1024
+#define SIM_BTHCI_RX_FRAMELEN 1024
+#define SIM_BTHCI_WORK_DELAY  USEC2TICK(1000)
 
 /****************************************************************************
  * Private Types
@@ -59,9 +60,12 @@
 struct bthcisock_s
 {
   struct bt_driver_s drv;
-  int                    id;
-  int                    fd;
-  sq_entry_t             link;
+  int                id;
+  int                fd;
+
+  /* Work queue for transmit */
+
+  struct work_s      worker;
 };
 
 /****************************************************************************
@@ -74,12 +78,6 @@ static int  bthcisock_send(struct bt_driver_s *drv,
 static int  bthcisock_open(struct bt_driver_s *drv);
 static void bthcisock_close(struct bt_driver_s *drv);
 static int  bthcisock_receive(struct bt_driver_s *drv);
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static sq_queue_t        g_bthcisock_list;
 
 /****************************************************************************
  * Private Functions
@@ -126,7 +124,7 @@ static void bthcisock_close(struct bt_driver_s *drv)
 static int bthcisock_receive(struct bt_driver_s *drv)
 {
   struct bthcisock_s *dev = (struct bthcisock_s *)drv;
-  char data[BLUETOOTH_RX_FRAMELEN];
+  char data[SIM_BTHCI_RX_FRAMELEN];
   enum bt_buf_type_e type;
   int ret;
 
@@ -182,7 +180,7 @@ static struct bthcisock_s *bthcisock_alloc(int dev_id)
   struct bthcisock_s *dev;
   struct bt_driver_s *drv;
 
-  dev = (struct bthcisock_s *)kmm_zalloc(sizeof(*dev));
+  dev = kmm_zalloc(sizeof(*dev));
   if (dev == NULL)
     {
       return NULL;
@@ -196,14 +194,11 @@ static struct bthcisock_s *bthcisock_alloc(int dev_id)
   drv->send         = bthcisock_send;
   drv->close        = bthcisock_close;
 
-  sq_addlast(&dev->link, &g_bthcisock_list);
-
   return dev;
 }
 
 static void bthcisock_free(struct bthcisock_s *dev)
 {
-  sq_rem((sq_entry_t *)&dev->link, &g_bthcisock_list);
   kmm_free(dev);
 }
 
@@ -226,6 +221,27 @@ static int bthcisock_driver_register(struct bt_driver_s *drv, int id,
 #else
   return bt_netdev_register(drv);
 #endif
+}
+
+/****************************************************************************
+ * Name: sim_bthcisock_work
+ *
+ * Description:
+ *   Feed pending packets on the host sockets into the Bluetooth stack.
+ *
+ ****************************************************************************/
+
+static void sim_bthcisock_work(void *arg)
+{
+  struct bthcisock_s *dev = arg;
+
+  if (host_bthcisock_avail(dev->fd))
+    {
+      bthcisock_receive(&dev->drv);
+    }
+
+  work_queue(HPWORK, &dev->worker,
+            sim_bthcisock_work, dev, SIM_BTHCI_WORK_DELAY);
 }
 
 /****************************************************************************
@@ -289,39 +305,8 @@ end:
   if (ret < 0)
     {
       bthcisock_free(dev);
+      return ret;
     }
 
-  return ret;
-}
-
-/****************************************************************************
- * Name: sim_bthcisock_loop
- *
- * Description:
- *   Feed pending packets on the host sockets into the Bluetooth stack.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   Zero is returned on success; a negated errno value is returned on any
- *   failure.
- *
- ****************************************************************************/
-
-int sim_bthcisock_loop(void)
-{
-  struct bthcisock_s *dev;
-  sq_entry_t *entry;
-
-  for (entry = sq_peek(&g_bthcisock_list); entry; entry = sq_next(entry))
-    {
-      dev = container_of(entry, struct bthcisock_s, link);
-      if (host_bthcisock_avail(dev->fd))
-        {
-          bthcisock_receive(&dev->drv);
-        }
-    }
-
-  return 0;
+  return work_queue(HPWORK, &dev->worker, sim_bthcisock_work, dev, 0);
 }

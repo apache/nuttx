@@ -40,8 +40,6 @@
 
 #include "composite.h"
 
-#ifdef CONFIG_USBDEV_COMPOSITE
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -74,10 +72,6 @@ static int     composite_classsetup(FAR struct composite_dev_s *priv,
                  FAR struct usbdev_s *dev,
                  FAR const struct usb_ctrlreq_s *ctrl, FAR uint8_t *dataout,
                  size_t outlen);
-static struct usbdev_req_s *composite_allocreq(FAR struct usbdev_ep_s *ep,
-                 uint16_t len);
-static void    composite_freereq(FAR struct usbdev_ep_s *ep,
-                 FAR struct usbdev_req_s *req);
 
 /* USB class device *********************************************************/
 
@@ -111,16 +105,6 @@ static const struct usbdevclass_driverops_s g_driverops =
   composite_suspend,    /* suspend */
   composite_resume,     /* resume */
 };
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-const char g_compvendorstr[]  = CONFIG_COMPOSITE_VENDORSTR;
-const char g_compproductstr[] = CONFIG_COMPOSITE_PRODUCTSTR;
-#ifndef CONFIG_COMPOSITE_BOARD_SERIALSTR
-const char g_compserialstr[]  = CONFIG_COMPOSITE_SERIALSTR;
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -282,53 +266,161 @@ static int composite_msftdescriptor(FAR struct composite_dev_s *priv,
 #endif
 
 /****************************************************************************
- * Name: composite_allocreq
+ * Name: composite_mkcfgdesc
  *
  * Description:
- *   Allocate a request instance along with its buffer
+ *   Construct the configuration descriptor
  *
  ****************************************************************************/
 
-static struct usbdev_req_s *composite_allocreq(FAR struct usbdev_ep_s *ep,
-                                               uint16_t len)
+#ifdef CONFIG_USBDEV_DUALSPEED
+static int16_t composite_mkcfgdesc(FAR struct usbdevclass_driver_s *driver,
+                                   FAR uint8_t *buf,
+                                   uint8_t speed, uint8_t type)
+#else
+static int16_t composite_mkcfgdesc(FAR struct usbdevclass_driver_s *driver,
+                                   FAR uint8_t *buf)
+#endif
 {
-  FAR struct usbdev_req_s *req;
+  FAR struct composite_dev_s *priv =
+    ((FAR struct composite_driver_s *)driver)->dev;
+  FAR struct usb_cfgdesc_s *cfgdesc;
+  int16_t len;
+  int16_t total;
+  int i;
 
-  req = EP_ALLOCREQ(ep);
-  if (req != NULL)
+  /* Configuration descriptor for the composite device */
+
+  memcpy(buf, priv->descs->cfgdesc, sizeof(struct usb_cfgdesc_s));
+
+  cfgdesc = (FAR struct usb_cfgdesc_s *)buf;
+  cfgdesc->totallen[0] = LSBYTE(priv->cfgdescsize);
+  cfgdesc->totallen[1] = MSBYTE(priv->cfgdescsize);
+  cfgdesc->ninterfaces = priv->ninterfaces;
+
+  /* Increment the size and buf to point right behind the information
+   * filled in
+   */
+
+  total = USB_SIZEOF_CFGDESC;
+  buf += USB_SIZEOF_CFGDESC;
+
+  /* Copy all contained interface descriptors into the buffer too */
+
+  for (i = 0; i < priv->ndevices; i++)
     {
-      req->len = len;
-      req->buf = EP_ALLOCBUFFER(ep, len);
-      if (!req->buf)
-        {
-          EP_FREEREQ(ep, req);
-          req = NULL;
-        }
+      FAR struct composite_devobj_s *devobj = &priv->device[i];
+
+#ifdef CONFIG_USBDEV_DUALSPEED
+      len = devobj->compdesc.mkconfdesc(buf,
+                                        &devobj->compdesc.devinfo,
+                                        speed, type);
+      total += len;
+      buf += len;
+#else
+      len = devobj->compdesc.mkconfdesc(buf,
+                                        &devobj->compdesc.devinfo);
+      total += len;
+      buf += len;
+#endif
     }
 
-  return req;
+  return total;
 }
 
 /****************************************************************************
- * Name: composite_freereq
+ * Name: composite_mkstrdesc
  *
  * Description:
- *   Free a request instance along with its buffer
+ *   Construct a string descriptor
  *
  ****************************************************************************/
 
-static void composite_freereq(FAR struct usbdev_ep_s *ep,
-                              FAR struct usbdev_req_s *req)
+static int composite_mkstrdesc(FAR struct usbdevclass_driver_s *driver,
+                               uint8_t id, FAR struct usb_strdesc_s *outdesc)
 {
-  if (ep != NULL && req != NULL)
-    {
-      if (req->buf != NULL)
-        {
-          EP_FREEBUFFER(ep, req->buf);
-        }
+  FAR struct composite_dev_s *priv =
+    ((FAR struct composite_driver_s *)driver)->dev;
+  FAR const struct usbdev_strdescs_s *strdescs = priv->descs->strdescs;
+  FAR const struct usbdev_strdesc_s *strdesc;
+  FAR uint8_t *data = (FAR uint8_t *)(outdesc + 1);
+  int i;
 
-      EP_FREEREQ(ep, req);
+  if (id == 0)
+    {
+      outdesc->len = 4;
+      outdesc->type = USB_DESC_TYPE_STRING;
+      data[0] = LSBYTE(strdescs->language);
+      data[1] = MSBYTE(strdescs->language);
+      return 4;
     }
+
+#ifdef CONFIG_COMPOSITE_MSFT_OS_DESCRIPTORS
+  if (id == USB_REQ_GETMSFTOSDESCRIPTOR)
+    {
+      /* Note: Windows has a habit of caching this response,
+       * so if you want to enable/disable it you'll usually
+       * need to change the device serial number afterwards.
+       */
+
+      static const uint8_t msft_response[16] =
+        {
+          'M', 0, 'S', 0, 'F', 0, 'T', 0, '1', 0, '0', 0,
+          '0', 0, USB_REQ_GETMSFTOSDESCRIPTOR, 0
+        };
+
+      outdesc->len = 18;
+      outdesc->type = USB_DESC_TYPE_STRING;
+      memcpy(data, msft_response, 16);
+      return outdesc->len;
+    }
+#endif
+
+  for (strdesc = strdescs->strdesc;
+       strdesc != NULL && strdesc->string != NULL; strdesc++)
+    {
+      if (strdesc->id == id)
+        {
+          FAR const char *strval = strdesc->string;
+          int ndata;
+          int len;
+
+#ifdef CONFIG_BOARD_USBDEV_SERIALSTR
+          if (strdesc->id == COMPOSITE_SERIALSTRID)
+            {
+              strval = board_usbdev_serialstr();
+            }
+#endif
+
+          len = strlen(strval);
+          for (i = 0, ndata = 0; i < len; i++, ndata += 2)
+            {
+              data[ndata]     = strval[i];
+              data[ndata + 1] = 0;
+            }
+
+          outdesc->len  = ndata + 2;
+          outdesc->type = USB_DESC_TYPE_STRING;
+          return outdesc->len;
+        }
+    }
+
+  for (i = 0; i < priv->ndevices; i++)
+    {
+      if (id >
+          priv->device[i].compdesc.devinfo.strbase &&
+          id <=
+          priv->device[i].compdesc.devinfo.strbase +
+          priv->device[i].compdesc.devinfo.nstrings)
+        {
+          return priv->device[i].compdesc.mkstrdesc(
+                   id -
+                   priv->device[i].compdesc.devinfo.strbase,
+                   outdesc);
+        }
+    }
+
+  return -EINVAL;
 }
 
 /****************************************************************************
@@ -366,7 +458,7 @@ static int composite_bind(FAR struct usbdevclass_driver_s *driver,
 
   /* Preallocate one control request */
 
-  priv->ctrlreq = composite_allocreq(dev->ep0, priv->cfgdescsize);
+  priv->ctrlreq = usbdev_allocreq(dev->ep0, priv->cfgdescsize);
   if (priv->ctrlreq == NULL)
     {
       usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_ALLOCCTRLREQ), 0);
@@ -460,7 +552,7 @@ static void composite_unbind(FAR struct usbdevclass_driver_s *driver,
       priv->config = COMPOSITE_CONFIGIDNONE;
       if (priv->ctrlreq != NULL)
         {
-          composite_freereq(dev->ep0, priv->ctrlreq);
+          usbdev_freereq(dev->ep0, priv->ctrlreq);
           priv->ctrlreq = NULL;
         }
 
@@ -547,7 +639,7 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
               case USB_DESC_TYPE_DEVICE:
                 {
                   ret = USB_SIZEOF_DEVDESC;
-                  memcpy(ctrlreq->buf, composite_getdevdesc(), ret);
+                  memcpy(ctrlreq->buf, priv->descs->devdesc, ret);
                 }
                 break;
 
@@ -555,7 +647,7 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
               case USB_DESC_TYPE_DEVICEQUALIFIER:
                 {
                   ret = USB_SIZEOF_QUALDESC;
-                  memcpy(ctrlreq->buf, composite_getqualdesc(), ret);
+                  memcpy(ctrlreq->buf, priv->descs->qualdesc, ret);
                 }
                 break;
 
@@ -565,10 +657,10 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
               case USB_DESC_TYPE_CONFIG:
                 {
 #ifdef CONFIG_USBDEV_DUALSPEED
-                    ret = composite_mkcfgdesc(priv, ctrlreq->buf, dev->speed,
-                                            ctrl->value[1]);
+                    ret = composite_mkcfgdesc(driver, ctrlreq->buf,
+                                              dev->speed, ctrl->value[1]);
 #else
-                    ret = composite_mkcfgdesc(priv, ctrlreq->buf);
+                    ret = composite_mkcfgdesc(driver, ctrlreq->buf);
 #endif
                 }
                 break;
@@ -581,50 +673,7 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
                   FAR struct usb_strdesc_s *buf =
                              (FAR struct usb_strdesc_s *)ctrlreq->buf;
 
-                  if (strid < COMPOSITE_NSTRIDS)
-                    {
-                      ret = composite_mkstrdesc(strid, buf);
-                    }
-#ifdef CONFIG_COMPOSITE_MSFT_OS_DESCRIPTORS
-                  else if (strid == USB_REQ_GETMSFTOSDESCRIPTOR)
-                    {
-                      /* Note: Windows has a habit of caching this response,
-                       * so if you want to enable/disable it you'll usually
-                       * need to change the device serial number afterwards.
-                       */
-
-                      static const uint8_t msft_response[16] =
-                      {
-                        'M', 0, 'S', 0, 'F', 0, 'T', 0, '1', 0, '0', 0,
-                        '0', 0, 0xff, 0
-                      };
-
-                      buf->len = 18;
-                      buf->type = USB_DESC_TYPE_STRING;
-                      memcpy(buf + 1, msft_response, 16);
-                      ret = buf->len;
-                    }
-#endif
-                  else
-                    {
-                      int i;
-
-                      for (i = 0; i < priv->ndevices; i++)
-                        {
-                          if (strid >
-                              priv->device[i].compdesc.devinfo.strbase &&
-                              strid <=
-                              priv->device[i].compdesc.devinfo.strbase +
-                              priv->device[i].compdesc.devinfo.nstrings)
-                            {
-                              ret = priv->device[i].compdesc.mkstrdesc(
-                                    strid -
-                                    priv->device[i].compdesc.devinfo.strbase,
-                                    buf);
-                              break;
-                            }
-                        }
-                    }
+                  ret = composite_mkstrdesc(driver, strid, buf);
                 }
                 break;
 
@@ -644,6 +693,14 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
             if (ctrl->type == 0)
               {
                 int i;
+
+                if (priv->config == value)
+                  {
+                    /* Already configured -- Do nothing */
+
+                    ret = OK;
+                    break;
+                  }
 
                 /* Save the configuration and inform the constituent
                  * classes
@@ -676,7 +733,7 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
         case USB_REQ_SETINTERFACE:
           {
             if (ctrl->type == USB_REQ_RECIPIENT_INTERFACE &&
-                priv->config == COMPOSITE_CONFIGID)
+                priv->config != COMPOSITE_CONFIGIDNONE)
               {
                 ret = composite_classsetup(priv, dev, ctrl, dataout, outlen);
                 dispatched = true;
@@ -734,7 +791,12 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
       /* Setup the request */
 
       ctrlreq->len   = MIN(len, ret);
-      ctrlreq->flags = USBDEV_REQFLAGS_NULLPKT;
+
+      /* Only when ret is less than len do zero length packet
+       * need to be sent
+       */
+
+      ctrlreq->flags = ret < len ? USBDEV_REQFLAGS_NULLPKT : 0;
 
       /* And submit the request to the USB controller driver */
 
@@ -795,13 +857,13 @@ static void composite_disconnect(FAR struct usbdevclass_driver_s *driver,
    */
 
   flags = enter_critical_section();
-  priv->config = COMPOSITE_CONFIGIDNONE;
 
   for (i = 0; i < priv->ndevices; i++)
     {
       CLASS_DISCONNECT(priv->device[i].dev, dev);
     }
 
+  priv->config = COMPOSITE_CONFIGIDNONE;
   leave_critical_section(flags);
 
   /* Perform the soft connect function so that we will we can be
@@ -932,8 +994,9 @@ static void composite_resume(FAR struct usbdevclass_driver_s *driver,
  *
  ****************************************************************************/
 
-FAR void *composite_initialize(uint8_t ndevices,
-                               FAR struct composite_devdesc_s *pdevices)
+FAR void *composite_initialize(FAR const struct usbdev_devdescs_s *devdescs,
+                               FAR struct composite_devdesc_s *pdevices,
+                               uint8_t ndevices)
 {
   FAR struct composite_alloc_s *alloc;
   FAR struct composite_dev_s *priv;
@@ -963,6 +1026,9 @@ FAR void *composite_initialize(uint8_t ndevices,
 
   memset(priv, 0, sizeof(struct composite_dev_s));
 
+  /* Initialize USB device descriptor */
+
+  priv->descs       = devdescs;
   priv->cfgdescsize = USB_SIZEOF_CFGDESC;
   priv->ninterfaces = 0;
 
@@ -970,13 +1036,14 @@ FAR void *composite_initialize(uint8_t ndevices,
 
   for (i = 0; i < ndevices; i++)
     {
-      memcpy(&priv->device[i].compdesc, &pdevices[i],
-             sizeof(struct composite_devdesc_s));
+      FAR struct composite_devobj_s *devobj = &priv->device[i];
+
+      devobj->compdesc = pdevices[i];
 
       ret =
-        priv->device[i].compdesc.classobject(priv->device[i].compdesc.minor,
-                                        &priv->device[i].compdesc.devinfo,
-                                        &priv->device[i].dev);
+        devobj->compdesc.classobject(devobj->compdesc.minor,
+                                     &devobj->compdesc.devinfo,
+                                     &devobj->dev);
       if (ret < 0)
         {
           usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_CLASSOBJECT),
@@ -984,8 +1051,8 @@ FAR void *composite_initialize(uint8_t ndevices,
           goto errout_with_alloc;
         }
 
-      priv->cfgdescsize += priv->device[i].compdesc.cfgdescsize;
-      priv->ninterfaces += priv->device[i].compdesc.devinfo.ninterfaces;
+      priv->cfgdescsize += devobj->compdesc.cfgdescsize;
+      priv->ninterfaces += devobj->compdesc.devinfo.ninterfaces;
     }
 
   priv->ndevices = ndevices;
@@ -1006,7 +1073,7 @@ FAR void *composite_initialize(uint8_t ndevices,
   if (ret < 0)
     {
       usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_DEVREGISTER),
-                             (uint16_t)-ret);
+               (uint16_t)-ret);
       goto errout_with_alloc;
     }
 
@@ -1047,6 +1114,11 @@ void composite_uninitialize(FAR void *handle)
   /* First phase uninitialization each of the member classes */
 
   priv = &alloc->dev;
+
+  for (i = 0; i < priv->ndevices; i++)
+    {
+      priv->device[i].compdesc.uninitialize(priv->device[i].dev);
+    }
 
   /* Then unregister and destroy the composite class */
 
@@ -1105,5 +1177,3 @@ int composite_ep0submit(FAR struct usbdevclass_driver_s *driver,
       return 0;
     }
 }
-
-#endif /* CONFIG_USBDEV_COMPOSITE */

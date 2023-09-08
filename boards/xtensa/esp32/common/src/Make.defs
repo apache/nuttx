@@ -80,6 +80,10 @@ ifeq ($(CONFIG_SENSORS_BMP280),y)
   CSRCS += esp32_bmp280.c
 endif
 
+ifeq ($(CONFIG_SENSORS_BME680),y)
+  CSRCS += esp32_bme680.c
+endif
+
 ifeq ($(CONFIG_SENSORS_SHT3X),y)
   CSRCS += esp32_sht3x.c
 endif
@@ -118,6 +122,14 @@ endif
 
 ifeq ($(CONFIG_LCD_SSD1680),y)
   CSRCS += esp32_ssd1680.c
+endif
+
+ifeq ($(CONFIG_RGBLED),y)
+  CSRCS += esp32_rgbled.c
+endif
+
+ifeq ($(CONFIG_ESP32_RMT),y)
+  CSRCS += esp32_rmt.c
 endif
 
 DEPPATH += --dep-path src

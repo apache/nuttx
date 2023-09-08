@@ -24,6 +24,13 @@ config SENSORS_RPMSG
 	---help---
 		Allow application to read or control remote sensor device by rpmsg.
 
+config SENSORS_GPS
+	bool "GPS Support"
+	default n
+	depends on GPSUTILS_MINMEA_LIB
+	---help---
+		Allow application to use gps by /dev/uorb/gps or /dev/ttyGPS
+
 config SENSORS_WTGAHRS2
 	bool "Wtgahrs2 Sensor Support"
 	default n
@@ -34,6 +41,7 @@ config SENSORS_WTGAHRS2
 
 config SENSORS_FAKESENSOR
 	bool "Fake Sensor Support"
+	depends on SENSORS_GPS
 	default n
 	---help---
 		Simulate physical sensor by reading data from csv file.
@@ -153,6 +161,14 @@ config SENSORS_BMI160
 
 if SENSORS_BMI160
 
+config SENSORS_BMI160_UORB
+	bool "BMI160 UORB Interface"
+	default n
+	select UORB
+	---help---
+	Enables Work with the UORB or Character Device interface.
+	If not set, the Character Device is used by default.
+
 choice
 	prompt "BMI160 Interface"
 	default SENSORS_BMI160_SPI
@@ -225,6 +241,17 @@ config SENSORS_BMP180
 	---help---
 		Enable driver support for the Bosch BMP180 barometer sensor.
 
+if SENSORS_BMP180
+
+config SENSORS_BMP180_UORB
+	bool "BMP180 UORB Interface"
+	select UORB
+	---help---
+		Enables work with the UORB or Character Device interface.
+		If not set, the Character Device is used by default.
+
+endif #SENSORS_BMP180
+
 config SENSORS_BMP280
 	bool "Bosch BMP280 Barometric Pressure Sensor"
 	default n
@@ -239,6 +266,63 @@ config BMP280_I2C_FREQUENCY
 	default 400000
 
 endif # SENSORS_BMP280
+
+config SENSORS_BME680
+	bool "Bosch BME680 Temperature, Gas, Humidity and Pressure Sensor"
+	default n
+	select I2C
+	---help---
+		Enable driver for the Bosch BME680 sensor.
+
+config BME680_I2C_FREQUENCY
+	int "BME680 I2C frequency"
+	depends on SENSORS_BME680
+	default 400000
+
+config BME680_DISABLE_PRESS_MEAS
+	bool "Disable Pressure Measurement"
+	depends on SENSORS_BME680
+	default n
+	---help---
+		If enabled, the sensor will not measure pressure.
+
+config BME680_DISABLE_HUM_MEAS
+	bool "Disable Humidity Measurement"
+	depends on SENSORS_BME680
+	default n
+	---help---
+		If enabled, the sensor will not measure humidity.
+
+config BME680_DISABLE_GAS_MEAS
+	bool "Disable Gas Measurement"
+	depends on SENSORS_BME680
+	default n
+	---help---
+		If enabled, the sensor will not measure gas.
+
+config BME680_ENABLE_IIR_FILTER
+	bool "Enable IIR Filter"
+	depends on SENSORS_BME680
+	default n
+	---help---
+		Enable IIR filtering for temperature and pressure
+		measurements.
+
+config SENSORS_BME680_POLL_INTERVAL
+	int "Polling interval in microseconds, default 3 sec"
+	depends on SENSORS_BME680
+	default 3000000
+	range 0 4294967295
+	---help---
+		The interval until a new sensor measurement will be triggered.
+
+config SENSORS_BME680_THREAD_STACKSIZE
+	int "Worker thread stack size"
+	depends on SENSORS_BME680
+	default 1024
+	---help---
+		The stack size for the worker thread.
+
 
 config SENSORS_DHTXX
 	bool "DHTxx humidity/temperature Sensor support"
@@ -483,7 +567,7 @@ config LSM303AGR_I2C_FREQUENCY
 	int "LSM303AGR I2C frequency"
 	default 400000
 	range 1 400000
-	depends on SN_LSM303AGR
+	depends on SENSORS_LSM303AGR
 
 config SENSORS_LSM6DSL
 	bool "STMicro LSM6DSL support"
@@ -497,7 +581,7 @@ config LSM6DSL_I2C_FREQUENCY
 	int "LSM6DSL I2C frequency"
 	default 400000
 	range 1 400000
-	depends on SN_LSM6DSL
+	depends on SENSORS_LSM6DSL
 
 config SENSORS_LSM9DS1
 	bool "STMicro LSM9DS1 support"
@@ -517,7 +601,7 @@ config LSM9DS1_I2C_FREQUENCY
 	int "LSM9DS1 I2C frequency"
 	default 400000
 	range 1 400000
-	depends on SN_LSM9DS1
+	depends on SENSORS_LSM9DS1
 
 config SENSORS_LPS25H
 	bool "STMicro LPS25H pressure sensor"
@@ -1008,7 +1092,7 @@ config SENSORS_LIS3MDL
 
 config LM75_I2C
 	bool
-	default y if LM75
+	default LM75
 
 config SENSORS_LM75
 	bool "STMicro LM-75 Temperature Sensor support"

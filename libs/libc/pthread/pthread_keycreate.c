@@ -31,7 +31,20 @@
 #include <nuttx/mutex.h>
 #include <nuttx/tls.h>
 
-#if CONFIG_TLS_NELEM > 0
+#if defined(CONFIG_TLS_NELEM) && CONFIG_TLS_NELEM > 0
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: pthread_destructor
+ ****************************************************************************/
+
+static void pthread_destructor(FAR void *arg)
+{
+  UNUSED(arg);
+}
 
 /****************************************************************************
  * Public Functions
@@ -95,13 +108,19 @@ int pthread_key_create(FAR pthread_key_t *key,
     {
       /* Is this candidate index available? */
 
-      tls_ndxset_t mask = (tls_ndxset_t)1 << candidate;
-      if ((info->ta_tlsset & mask) == 0)
+      if (info->ta_tlsdtor[candidate] == NULL)
         {
           /* Yes.. allocate the index and break out of the loop */
 
-          info->ta_tlsset |= mask;
-          info->ta_tlsdtor[candidate] = destructor;
+          if (destructor)
+            {
+              info->ta_tlsdtor[candidate] = destructor;
+            }
+          else
+            {
+              info->ta_tlsdtor[candidate] = pthread_destructor;
+            }
+
           *key = candidate;
           ret = OK;
           break;

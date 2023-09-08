@@ -20,17 +20,17 @@
 
 include armv7-m/Make.defs
 
-ifeq ($(CONFIG_NRF52_SYSTIMER_SYSTICK),y)
-CHIP_CSRCS += nrf52_systick.c
-else
-ifeq ($(CONFIG_NRF52_SYSTIMER_RTC),y)
-CHIP_CSRCS += nrf52_tickless_rtc.c
-endif
-endif
-
 CHIP_CSRCS += nrf52_start.c nrf52_clockconfig.c nrf52_irq.c nrf52_utils.c
 CHIP_CSRCS += nrf52_allocateheap.c nrf52_lowputc.c nrf52_gpio.c
 CHIP_CSRCS += nrf52_uid.c
+
+ifeq ($(CONFIG_NRF52_SYSTIMER_SYSTICK),y)
+CHIP_CSRCS += nrf52_systick.c
+endif
+
+ifeq ($(CONFIG_NRF52_SYSTIMER_RTC),y)
+CHIP_CSRCS += nrf52_tickless_rtc.c
+endif
 
 ifeq ($(CONFIG_ALLOW_BSD_COMPONENTS),y)
 CHIP_CSRCS += nrf52_nvmc.c
@@ -149,9 +149,7 @@ endif
 
 CHIP_CSRCS += nrf52_sdc.c
 
-NRFX_DIR = $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)nrfx
 NRFXLIB_DIR = $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)sdk-nrfxlib
-CMSIS_DIR = $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)CMSIS_5
 
 INCLUDES += \
 	${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)sdc \

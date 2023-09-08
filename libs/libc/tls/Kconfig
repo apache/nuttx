@@ -7,8 +7,7 @@ menu "Thread Local Storage (TLS)"
 
 config TLS_ALIGNED
 	bool "Require stack alignment"
-	default y if BUILD_KERNEL
-	default n if !BUILD_KERNEL
+	default BUILD_KERNEL
 	---help---
 		Aligned TLS works by fetching thread information from the beginning
 		of the stack memory allocation.  In order to do this, the memory
@@ -45,8 +44,9 @@ config TLS_LOG2_MAXSTACK
 
 config TLS_NELEM
 	int "Number of TLS elements"
-	default 4
-	range 0 64
+	depends on !DISABLE_PTHREAD
+	default 0
+	range 0 255
 	---help---
 		The number of unique TLS elements.  These can be accessed with
 		the user library functions tls_get_value() and tls_set_value()
@@ -57,8 +57,9 @@ config TLS_NELEM
 
 config TLS_TASK_NELEM
 	int "Number of Task Local Storage elements"
+	depends on !BUILD_KERNEL
 	default 0
-	range 0 64
+	range 0 255
 	---help---
 		The number of unique Task Local Storage elements similar with
 		Thread Local Storage.

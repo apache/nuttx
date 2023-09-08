@@ -111,6 +111,10 @@ int nx_smp_start(void)
   int ret;
   int cpu;
 
+  /* Flush dcache before start other CPUs. */
+
+  up_flush_dcache_all();
+
   /* Start all of the other CPUs.  CPU0 is already running. */
 
   for (cpu = 1; cpu < CONFIG_SMP_NCPUS; cpu++)

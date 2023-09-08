@@ -30,6 +30,10 @@ ifeq ($(CONFIG_DEV_ZERO),y)
   CSRCS += dev_zero.c
 endif
 
+ifeq ($(CONFIG_DEV_ASCII),y)
+  CSRCS += dev_ascii.c
+endif
+
 ifeq ($(CONFIG_LWL_CONSOLE),y)
   CSRCS += lwl_console.c
 endif

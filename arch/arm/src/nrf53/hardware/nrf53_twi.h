@@ -62,9 +62,9 @@
 #define NRF53_TWIM_RXDAMOUNT_OFFSET         0x053c /* Number of bytes transferred in the last RXD transaction */
 #define NRF53_TWIM_RXDLIST_OFFSET           0x0540 /* RX EasyDMA list type */
 #define NRF53_TWIM_TXDPTR_OFFSET            0x0544 /* TXD Data pointer */
-#define NRF53_TWIM_TXMAXCNT_OFFSET          0x0548 /* Maximum number of bytes in TXD buffer */
-#define NRF53_TWIM_TXAMOUNT_OFFSET          0x054c /* Number of bytes transferred in the last TXD transaction */
-#define NRF53_TWIM_TXLIST_OFFSET            0x0550 /* TX EasyDMA list type */
+#define NRF53_TWIM_TXDMAXCNT_OFFSET         0x0548 /* Maximum number of bytes in TXD buffer */
+#define NRF53_TWIM_TXDAMOUNT_OFFSET         0x054c /* Number of bytes transferred in the last TXD transaction */
+#define NRF53_TWIM_TXDLIST_OFFSET           0x0550 /* TX EasyDMA list type */
 #define NRF53_TWIM_ADDRESS_OFFSET           0x0588 /* TWIM address */
 
 /* Register offsets for TWI slave (TWIS) ************************************/
@@ -94,9 +94,9 @@
 #define NRF53_TWIS_RXDAMOUNT_OFFSET         0x053c /* Number of bytes transferred in the last RXD transaction */
 #define NRF53_TWIS_RXDLIST_OFFSET           0x0540 /* RX EasyDMA list type */
 #define NRF53_TWIS_TXDPTR_OFFSET            0x0544 /* TXD Data pointer */
-#define NRF53_TWIS_TXMAXCNT_OFFSET          0x0548 /* Maximum number of bytes in TXD buffer */
-#define NRF53_TWIS_TXAMOUNT_OFFSET          0x054c /* Number of bytes transferred in the last TXD transaction */
-#define NRF53_TWIS_TXLIST_OFFSET            0x0550 /* TX EasyDMA list type */
+#define NRF53_TWIS_TXDMAXCNT_OFFSET         0x0548 /* Maximum number of bytes in TXD buffer */
+#define NRF53_TWIS_TXDAMOUNT_OFFSET         0x054c /* Number of bytes transferred in the last TXD transaction */
+#define NRF53_TWIS_TXDLIST_OFFSET           0x0550 /* TX EasyDMA list type */
 #define NRF53_TWIS_ADDRESS0_OFFSET          0x0588 /* TWIS address 0 */
 #define NRF53_TWIS_ADDRESS1_OFFSET          0x058c /* TWIS address 1 */
 #define NRF53_TWIS_CONFIG_OFFSET            0x0594 /* Configuration register for the address match mechanism */
@@ -156,7 +156,11 @@
 
 #define TWIM_FREQUENCY_100KBPS              (0x01980000) /* 100 kbps */
 #define TWIM_FREQUENCY_250KBPS              (0x04000000) /* 250 kbps */
-#define TWIM_FREQUENCY_400KBPS              (0x06400000) /* 400 kbps */
+#ifdef CONFIG_NRF53_I2C_MASTER_WORKAROUND_400KBPS_TIMING
+#  define TWIM_FREQUENCY_400KBPS            (0x06200000) /* 390 kbps */
+#else
+#  define TWIM_FREQUENCY_400KBPS            (0x06400000) /* 400 kbps */
+#endif
 #define TWIM_FREQUENCY_1000KBPS             (0x0ff00000) /* 1000 kbps */
 
 /* RXDMAXCNT Register */

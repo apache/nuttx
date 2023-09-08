@@ -290,14 +290,31 @@
 
 #define SENSOR_TYPE_CAP                             32
 
+/* Gas sensor
+ * This sensor measures the gas resistance, indicating the presence
+ * of volatile organic compounds in the air.
+ */
+
+#define SENSOR_TYPE_GAS                             33
+
+/* Force
+ * A sensor of this type measures the force on it, and additionally
+ * compares the force with one or more specified thresholds. The sensor
+ * can output the force value directly. Moreover, it's usually applied
+ * as a press key. In that case, when it detects a force greater than
+ * some given threshold, a corresponding event is reported.
+ */
+
+#define SENSOR_TYPE_FORCE                           34
+
 /* The total number of sensor */
 
-#define SENSOR_TYPE_COUNT                           33
+#define SENSOR_TYPE_COUNT                           35
 
 /* The additional sensor open flags */
 
-#define SENSOR_REMOTE                               (1 << 31)
-#define SENSOR_PERSIST                              (1 << 30)
+#define SENSOR_REMOTE                               (1u << 31)
+#define SENSOR_PERSIST                              (1u << 30)
 
 /****************************************************************************
  * Inline Functions
@@ -593,6 +610,19 @@ struct sensor_cap           /* Type: Capacitance */
   uint64_t timestamp;       /* Unit is microseconds */
   int32_t status;           /* Detection status */
   int32_t rawdata[4];       /* in SI units pF */
+};
+
+struct sensor_gas           /* Type: Gas */
+{
+  uint64_t timestamp;       /* Units is microseconds */
+  float gas_resistance;     /* Gas resistance in kOhm */
+};
+
+struct sensor_force         /* Type: Force */
+{
+  uint64_t timestamp;       /* Unit is microseconds */
+  float force;              /* Force value, units is N */
+  int32_t event;            /* Force event */
 };
 
 /* The sensor lower half driver interface */

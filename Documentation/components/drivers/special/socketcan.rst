@@ -23,7 +23,7 @@ SocketCAN Device Drivers
 
   -  **Initialization sequence is as follows**.
 
-     #. up_netinitialize(void) is called on startup of NuttX in this
+     #. xxx_netinitialize(void) is called on startup of NuttX in this
         function you call your own init function to initialize your
         CAN driver
      #. In your own init function you create the net_driver_s

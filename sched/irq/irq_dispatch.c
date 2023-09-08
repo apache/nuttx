@@ -96,8 +96,8 @@
          if (CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQ > 0 && \
              elapsed > CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQ) \
            { \
-             serr("IRQ %d(%p), execute time too long %lu\n", \
-                  irq, vector, elapsed); \
+             CRITMONITOR_PANIC("IRQ %d(%p), execute time too long %lu\n", \
+                               irq, vector, elapsed); \
            } \
        } \
      while (0)
@@ -182,10 +182,4 @@ void irq_dispatch(int irq, FAR void *context)
       kmm_checkcorruption();
     }
 #endif
-
-  /* Record the new "running" task.  g_running_tasks[] is only used by
-   * assertion logic for reporting crashes.
-   */
-
-  g_running_tasks[this_cpu()] = this_task();
 }

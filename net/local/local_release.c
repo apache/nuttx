@@ -66,15 +66,32 @@ int local_release(FAR struct local_conn_s *conn)
 
   DEBUGASSERT(conn->lc_state != LOCAL_STATE_ACCEPT);
 
-  /* If the socket is connected (SOCK_STREAM client), then disconnect it */
-
-  if (conn->lc_state == LOCAL_STATE_CONNECTED ||
-      conn->lc_state == LOCAL_STATE_CONNECTING ||
-      conn->lc_state == LOCAL_STATE_DISCONNECTED)
+  if (conn->lc_state == LOCAL_STATE_CONNECTING)
     {
-      DEBUGASSERT(conn->lc_proto == SOCK_STREAM);
+      FAR struct local_conn_s *server = NULL;
+      FAR struct local_conn_s *client;
+      FAR dq_entry_t *waiter = NULL;
 
-      /* Just free the connection structure */
+      while ((server = local_nextconn(server)) && waiter == NULL)
+        {
+          if (server->lc_state == LOCAL_STATE_LISTENING)
+            {
+              for (waiter = dq_peek(&server->u.server.lc_waiters);
+                   waiter;
+                   waiter = dq_next(&client->u.client.lc_waiter))
+                {
+                  if (&conn->u.client.lc_waiter == waiter)
+                    {
+                      dq_rem(waiter, &server->u.server.lc_waiters);
+                      server->u.server.lc_pending--;
+                      break;
+                    }
+
+                  client = container_of(waiter, struct local_conn_s,
+                                        u.client.lc_waiter);
+                }
+            }
+        }
     }
 
   /* Is the socket is listening socket (SOCK_STREAM server) */

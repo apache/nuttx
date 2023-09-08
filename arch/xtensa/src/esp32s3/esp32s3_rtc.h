@@ -64,6 +64,10 @@ extern "C"
 
 #define EXT_OSC_FLAG    BIT(3)
 
+/* Number of fractional bits in values returned by rtc_clk_cal */
+
+#define RTC_CLK_CAL_FRACT  19
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -297,24 +301,6 @@ void esp32s3_rtc_update_to_xtal(int freq, int div);
  ****************************************************************************/
 
 void esp32s3_rtc_bbpll_enable(void);
-
-/****************************************************************************
- * Name: esp32s3_rtc_bbpll_configure
- *
- * Description:
- *   Configure main XTAL frequency values according to pll_freq.
- *
- * Input Parameters:
- *   xtal_freq -    XTAL frequency values
- *   pll_freq  -    PLL frequency values
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void IRAM_ATTR esp32s3_rtc_bbpll_configure(
-               enum esp32s3_rtc_xtal_freq_e xtal_freq, int pll_freq);
 
 /****************************************************************************
  * Name: esp32s3_rtc_clk_set

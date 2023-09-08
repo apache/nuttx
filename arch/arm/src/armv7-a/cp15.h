@@ -179,6 +179,7 @@
 
 #define CP15_VBAR(r)       _CP15(0, r, c12, c0, 0)  /* Vector Base Address Register */
 #define CP15_MVBAR(r)      _CP15(0, r, c12, c0, 1)  /* Monitor Vector Base Address Register */
+#define CP15_HVBAR(r)      _CP15(4, r, c12, c0, 0)  /* Hyp Vector Base Address Register */
 #define CP15_ISR(r)        _CP15(0, r, c12, c1, 0)  /* Interrupt Status Register */
 #define CP15_VIR(r)        _CP15(0, r, c12, c1, 1)  /* Virtualization Interrupt Register */
 
@@ -193,9 +194,12 @@
 #define CP15_CNTP_TVAL(r)  _CP15(0, r, c14, c2, 0)  /* PL1 Physical TimerValue register */
 #define CP15_CNTP_CTL(r)   _CP15(0, r, c14, c2, 1)  /* PL1 Physical Timer Control register */
 #define CP15_CNTV_TVAL(r)  _CP15(0, r, c14, c3, 0)  /* Virtual TimerValue register */
-#define CP15_CNTV_CTL(r)   _CP15(0, r, c14, c3, 0)  /* Virtual Timer Control register */
+#define CP15_CNTV_CTL(r)   _CP15(0, r, c14, c3, 1)  /* Virtual Timer Control register */
 
-#define CP15_CNTPCT(lo,hi) _CP15_64(0, lo, hi, c14)   /* Physical Count register */
+#define CP15_CNTPCT(lo,hi)    _CP15_64(0, lo, hi, c14)   /* Physical Count register */
+#define CP15_CNTVCT(lo,hi)    _CP15_64(1, lo, hi, c14)   /* Virtual Count register */
+#define CP15_CNTV_CVAL(lo,hi) _CP15_64(3, lo, hi, c14)   /* Virtual Timer CompareValue register */
+#define CP15_CNTP_CVAL(lo,hi) _CP15_64(2, lo, hi, c14)   /* Physical Timer CompareValue register */
 
 #define CP15_PWRCTRL(r)    _CP15(0, r, c15, c0, 0)  /* Power Control Register (Cortex-A9) */
 #define CP15_NEONBUSY(r)   _CP15(0, r, c15, c1, 1)  /* NEON Busy Register (Cortex-A9) */

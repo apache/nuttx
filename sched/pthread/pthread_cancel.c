@@ -65,6 +65,13 @@ int pthread_cancel(pthread_t thread)
       return ESRCH;
     }
 
+  /* Return ESRCH when thread was in exit processing */
+
+  if ((tcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0)
+    {
+      return ESRCH;
+    }
+
   /* Only pthreads should use this interface */
 
   DEBUGASSERT((tcb->flags & TCB_FLAG_TTYPE_MASK) ==

@@ -35,7 +35,7 @@ ifeq ($(CONFIG_USBMSC),y)
 endif
 
 ifeq ($(CONFIG_USBDEV_COMPOSITE),y)
-  CSRCS += composite.c composite_desc.c
+  CSRCS += composite_desc.c
 endif
 
 ifeq ($(CONFIG_USBDEV_TRACE_STRINGS),y)
@@ -58,6 +58,7 @@ ifeq ($(CONFIG_NET_CDCECM),y)
   CSRCS += cdcecm.c
 endif
 
+CSRCS += composite.c usbdev_req.c
 CSRCS += usbdev_trace.c usbdev_trprintf.c
 
 # Include USB device build support

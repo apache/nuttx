@@ -31,8 +31,10 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/symtab.h>
 #include <nuttx/lib/modlib.h>
 
+#include "libc.h"
 #include "modlib/modlib.h"
 
 /****************************************************************************
@@ -55,6 +57,19 @@ struct mod_exportinfo_s
   FAR const struct symtab_s *symbol; /* Symbol info returned (if found) */
 };
 
+struct eptable_s
+{
+  FAR uint8_t *epname;      /* Name of global symbol */
+  FAR void    *epaddr;      /* Address of global symbol */
+};
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+extern struct eptable_s global_table[];
+extern int nglobals;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -76,7 +91,7 @@ struct mod_exportinfo_s
  ****************************************************************************/
 
 static int modlib_symname(FAR struct mod_loadinfo_s *loadinfo,
-                          FAR const Elf_Sym *sym)
+                          FAR const Elf_Sym *sym, Elf_Off sh_offset)
 {
   FAR uint8_t *buffer;
   off_t  offset;
@@ -94,7 +109,18 @@ static int modlib_symname(FAR struct mod_loadinfo_s *loadinfo,
       return -ESRCH;
     }
 
-  offset = loadinfo->shdr[loadinfo->strtabidx].sh_offset + sym->st_name;
+  /* Allocate an I/O buffer.  This buffer is used by mod_symname() to
+   * accumulate the variable length symbol name.
+   */
+
+  ret = modlib_allocbuffer(loadinfo);
+  if (ret < 0)
+    {
+      berr("ERROR: modlib_allocbuffer failed: %d\n", ret);
+      return -ENOMEM;
+    }
+
+  offset = sh_offset + sym->st_name;
 
   /* Loop until we get the entire symbol name into memory */
 
@@ -145,6 +171,8 @@ static int modlib_symname(FAR struct mod_loadinfo_s *loadinfo,
           berr("ERROR: mod_reallocbuffer failed: %d\n", ret);
           return ret;
         }
+
+      offset += CONFIG_MODLIB_BUFFERINCR;
     }
 
   /* We will not get here */
@@ -258,9 +286,8 @@ int modlib_findsymtab(FAR struct mod_loadinfo_s *loadinfo)
  ****************************************************************************/
 
 int modlib_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
-                   FAR Elf_Sym *sym)
+                   FAR Elf_Sym *sym, FAR Elf_Shdr *symtab)
 {
-  FAR Elf_Shdr *symtab = &loadinfo->shdr[loadinfo->symtabidx];
   off_t offset;
 
   /* Verify that the symbol table index lies within symbol table */
@@ -288,9 +315,10 @@ int modlib_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
  *   in the st_value field of the symbol table entry.
  *
  * Input Parameters:
- *   modp     - Module state information
- *   loadinfo - Load state information
- *   sym      - Symbol table entry (value might be undefined)
+ *   modp      - Module state information
+ *   loadinfo  - Load state information
+ *   sym       - Symbol table entry (value might be undefined)
+ *   sh_offset - Offset of strtab
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
@@ -305,7 +333,8 @@ int modlib_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
  ****************************************************************************/
 
 int modlib_symvalue(FAR struct module_s *modp,
-                    FAR struct mod_loadinfo_s *loadinfo, FAR Elf_Sym *sym)
+                    FAR struct mod_loadinfo_s *loadinfo, FAR Elf_Sym *sym,
+                    Elf_Off sh_offset)
 {
   FAR const struct symtab_s *symbol;
   struct mod_exportinfo_s exportinfo;
@@ -335,7 +364,7 @@ int modlib_symvalue(FAR struct module_s *modp,
       {
         /* Get the name of the undefined symbol */
 
-        ret = modlib_symname(loadinfo, sym);
+        ret = modlib_symname(loadinfo, sym, sh_offset);
         if (ret < 0)
           {
             /* There are a few relocations for a few architectures that do
@@ -406,7 +435,8 @@ int modlib_symvalue(FAR struct module_s *modp,
       {
         secbase = loadinfo->shdr[sym->st_shndx].sh_addr;
 
-        binfo("Other: %08" PRIxPTR "+%08" PRIxPTR "=%08" PRIxPTR "\n",
+        binfo("Other[%d]: %08" PRIxPTR "+%08" PRIxPTR "=%08" PRIxPTR "\n",
+              sym->st_shndx,
               (uintptr_t)sym->st_value, secbase,
               (uintptr_t)(sym->st_value + secbase));
 
@@ -416,4 +446,176 @@ int modlib_symvalue(FAR struct module_s *modp,
     }
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: modlib_insertsymtab
+ *
+ * Description:
+ *   Insert a symbol into the modules exportinfo array.
+ *
+ * Input Parameters:
+ *   modp     - Module state information
+ *   loadinfo - Load state information
+ *   shdr     - Symbol table section header
+ *   sym      - Symbol table entry
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ *   EINVAL - There is something inconsistent in the symbol table
+ *            (should only happen if the file is corrupted).
+ *
+ ****************************************************************************/
+
+int modlib_insertsymtab(FAR struct module_s *modp,
+                        struct mod_loadinfo_s *loadinfo,
+                        FAR Elf_Shdr *shdr, FAR Elf_Sym *sym)
+{
+  FAR struct symtab_s *symbol;
+  FAR Elf_Shdr *strtab = &loadinfo->shdr[shdr->sh_link];
+  int ret = 0;
+  int i;
+  int j;
+  int nsym;
+  int symcount;
+
+  if (modp->modinfo.exports != NULL)
+    {
+      bwarn("Module export information already present - replacing");
+      modlib_freesymtab((FAR void *)modp);
+    }
+
+  /* Count the "live" symbols */
+
+  nsym = shdr->sh_size / sizeof(Elf_Sym);
+  for (i = 0, symcount = 0; i < nsym; i++)
+    {
+      if (sym[i].st_name != 0)
+          symcount++;
+    }
+
+  if (symcount > 0)
+    {
+      modp->modinfo.exports = symbol =
+                              loadinfo->exported =
+                              lib_malloc(sizeof(*symbol) * symcount);
+      if (modp->modinfo.exports)
+        {
+          /* Build out module's symbol table */
+
+          modp->modinfo.nexports = symcount;
+          for (i = 0, j = 0; i < nsym; i++)
+            {
+              if (sym[i].st_name != 0)
+                {
+                  ret = modlib_symname(loadinfo, &sym[i], strtab->sh_offset);
+                  if (ret < 0)
+                    {
+                      lib_free((FAR void *)modp->modinfo.exports);
+                      modp->modinfo.exports = NULL;
+                      return ret;
+                    }
+
+                  symbol[j].sym_name =
+                      strdup((FAR char *)loadinfo->iobuffer);
+                  symbol[j].sym_value = (FAR const void *)sym[i].st_value;
+                  j++;
+                }
+            }
+        }
+      else
+        {
+          berr("Unable to get memory for exported symbols table");
+          ret = -ENOMEM;
+        }
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: findep
+ *
+ * Description:
+ *   Binary search comparison function
+ *
+ * Input Parameters:
+ *   c1 - Comparand 1
+ *   c2 - Comparand 2
+ *
+ ****************************************************************************/
+
+static int findep(FAR const void *c1, FAR const void *c2)
+{
+  FAR const struct eptable_s *m1 = (FAR const struct eptable_s *)c1;
+  FAR const struct eptable_s *m2 = (FAR const struct eptable_s *)c2;
+  return strcmp((FAR const char *)m1->epname, (FAR const char *)m2->epname);
+}
+
+/****************************************************************************
+ * Name: modlib_findglobal
+ *
+ * Description:
+ *   Find a symbol in our library entry point table
+ *
+ * Input Parameters:
+ *   modp     - Module state information
+ *
+ ****************************************************************************/
+
+void *modlib_findglobal(FAR struct module_s *modp,
+                        FAR struct mod_loadinfo_s *loadinfo,
+                        FAR Elf_Shdr *shdr, FAR Elf_Sym *sym)
+{
+  FAR Elf_Shdr *strtab = &loadinfo->shdr[shdr->sh_link];
+  int ret;
+  struct eptable_s key;
+  FAR struct eptable_s *res;
+
+  ret = modlib_symname(loadinfo, sym, strtab->sh_offset);
+  if (ret < 0)
+    {
+      return NULL;
+    }
+
+  key.epname = loadinfo->iobuffer;
+  res = bsearch(&key, global_table, nglobals,
+                sizeof(struct eptable_s), findep);
+  if (res != NULL)
+    {
+      return res->epaddr;
+    }
+  else
+    {
+      return NULL;
+    }
+}
+
+/****************************************************************************
+ * Name: modlib_freesymtab
+ *
+ * Description:
+ *   Free a symbol table
+ *
+ * Input Parameters:
+ *   modp     - Module state information
+ *
+ ****************************************************************************/
+
+void modlib_freesymtab(FAR struct module_s *modp)
+{
+  FAR const struct symtab_s *symbol;
+  int i;
+
+  if ((symbol = modp->modinfo.exports) != NULL)
+    {
+      for (i = 0; i < modp->modinfo.nexports; i++)
+        {
+          lib_free((FAR void *)symbol[i].sym_name);
+        }
+
+      lib_free((FAR void *)symbol);
+    }
 }

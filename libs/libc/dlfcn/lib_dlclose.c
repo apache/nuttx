@@ -57,7 +57,9 @@
 static inline int dlremove(FAR void *handle)
 {
   FAR struct module_s *modp = (FAR struct module_s *)handle;
+  void (**array)(void);
   int ret;
+  int i;
 
   DEBUGASSERT(modp != NULL);
 
@@ -104,6 +106,15 @@ static inline int dlremove(FAR void *handle)
       /* Nullify so that the uninitializer cannot be called again */
 
       modp->modinfo.uninitializer = NULL;
+
+  /* Call any .fini_array entries in reverse order */
+
+  array = (void (**)(void)) modp->finiarr;
+  for (i = (modp->nfini - 1); i >= 0; i--)
+    {
+      array[i]();
+    }
+
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
       modp->initializer           = NULL;
       modp->modinfo.arg           = NULL;
@@ -118,7 +129,11 @@ static inline int dlremove(FAR void *handle)
     {
       /* Free the module memory */
 
-      lib_free((FAR void *)modp->textalloc);
+#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
+      up_textheap_free(modp->textalloc);
+#else
+      lib_free(modp->textalloc);
+#endif
 
       /* Nullify so that the memory cannot be freed again */
 
@@ -132,7 +147,7 @@ static inline int dlremove(FAR void *handle)
     {
       /* Free the module memory */
 
-      lib_free((FAR void *)modp->dataalloc);
+      lib_free(modp->dataalloc);
 
       /* Nullify so that the memory cannot be freed again */
 
@@ -141,6 +156,10 @@ static inline int dlremove(FAR void *handle)
       modp->datasize  = 0;
 #endif
     }
+
+  /* Free the modules exported symmbols table */
+
+  modlib_freesymtab(modp);
 
   /* Remove the module from the registry */
 

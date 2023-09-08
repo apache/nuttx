@@ -781,7 +781,7 @@ static int hyt271_set_interval(FAR struct sensor_lowerhalf_s *lower,
 static int hyt271_thread(int argc, char** argv)
 {
   FAR struct hyt271_dev_s *priv = (FAR struct hyt271_dev_s *)
-    ((uintptr_t)strtoul(argv[1], NULL, 0));
+    ((uintptr_t)strtoul(argv[1], NULL, 16));
   uint32_t orawdata = 0;
 
   while (true)
@@ -954,7 +954,7 @@ int hyt271_register(int devno, FAR struct i2c_master_s *i2c, uint8_t addr,
 #ifdef CONFIG_SENSORS_HYT271_POLL
   /* Create thread for sensor */
 
-  snprintf(arg1, 16, "0x%" PRIxPTR, (uintptr_t)priv);
+  snprintf(arg1, 16, "%p", priv);
   argv[0] = arg1;
   argv[1] = NULL;
   ret = kthread_create("hyt271_thread", SCHED_PRIORITY_DEFAULT,

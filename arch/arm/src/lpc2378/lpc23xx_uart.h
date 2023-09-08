@@ -64,10 +64,10 @@
  */
 
 /* Used only if CONFIG_UART_MULVAL is not defined */
-#define DIVADDVAL	0
-#define MULVAL 		1
-#define DLMVAL		1
-#define DLLVAL		119
+#define DIVADDVAL   0
+#define MULVAL      1
+#define DLMVAL      1
+#define DLLVAL      119
 
 /* UARTx PCLK divider valid values are 1,2,4 */
 #define U0_PCLKDIV           1
@@ -78,11 +78,11 @@
 
 /* #define U3_PCLKDIV       1 */
 
-#define U0_PCLK	(CCLK / U0_PCLKDIV)
+#define U0_PCLK (CCLK / U0_PCLKDIV)
 
 /* #define U1_PCLK  (CCLK / U1_PCLKDIV) */
 
-#define U2_PCLK	(CCLK / U2_PCLKDIV)
+#define U2_PCLK (CCLK / U2_PCLKDIV)
 
 /* #define U3_PCLK  (CCLK / U3_PCLKDIV) */
 

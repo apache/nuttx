@@ -29,11 +29,11 @@
  **************************************************************************/
 
 #ifdef __CYGWIN__
-# define SYMBOL(s) _##s
+#  define SYMBOL(s) _##s
 #elif defined(__ELF__)
-# define SYMBOL(s) s
+#  define SYMBOL(s) s
 #else
-# define SYMBOL(s) _##s
+#  define SYMBOL(s) _##s
 #endif
 
 /**************************************************************************

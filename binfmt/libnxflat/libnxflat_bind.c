@@ -36,7 +36,7 @@
 #include <arpa/inet.h>
 
 #include <nuttx/binfmt/nxflat.h>
-#include <nuttx/binfmt/symtab.h>
+#include <nuttx/symtab.h>
 
 #include "libnxflat.h"
 

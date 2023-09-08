@@ -38,3 +38,13 @@ int getchar(void)
   return read(STDIN_FILENO, &c, 1) == 1 ? c : EOF;
 #endif
 }
+
+int getchar_unlocked(void)
+{
+#ifdef CONFIG_FILE_STREAM
+  return fgetc_unlocked(stdin);
+#else
+  unsigned char c;
+  return read(STDIN_FILENO, &c, 1) == 1 ? c : EOF;
+#endif
+}

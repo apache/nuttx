@@ -44,6 +44,8 @@ config ARCH_CHIP_LITEX
 	select ARCH_RV_ISA_M
 	select ARCH_RV_ISA_A
 	select ARCH_DCACHE
+	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_RESET
 	---help---
 		Enjoy Digital LITEX VEXRISCV softcore processor (RV32IMA).
 
@@ -84,6 +86,7 @@ config ARCH_CHIP_ESP32C3
 	select LIBC_ARCH_STRNLEN
 	select ARCH_HAVE_TEXT_HEAP
 	select ARCH_HAVE_BOOTLOADER
+	select ARCH_HAVE_PERF_EVENTS
 	---help---
 		Espressif ESP32-C3 (RV32IMC).
 
@@ -162,6 +165,8 @@ config ARCH_CHIP_RV32M1
 
 config ARCH_CHIP_QEMU_RV
 	bool "QEMU RV"
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
 	select ARCH_HAVE_MULTICPU
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_MMU
@@ -185,6 +190,26 @@ config ARCH_CHIP_HPM6750
 	select ALARM_ARCH
 	---help---
 		Hpmicro HPM6750 processor (D45 RISC-V Core with MAC extensions).
+
+config ARCH_CHIP_JH7110
+	bool "StarFive JH7110"
+	select ARCH_RV64
+	select ARCH_RV_ISA_M
+	select ARCH_RV_ISA_A
+	select ARCH_RV_ISA_C
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
+	select ARCH_HAVE_MULTICPU
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_MMU
+	select ARCH_MMU_TYPE_SV39
+	select ARCH_HAVE_ADDRENV
+	select ARCH_NEED_ADDRENV_MAPPING
+	select ARCH_HAVE_S_MODE
+	select ONESHOT
+	select ALARM_ARCH
+	---help---
+		StarFive JH7110 SoC.
 
 config ARCH_CHIP_RISCV_CUSTOM
 	bool "Custom RISC-V chip"
@@ -235,6 +260,7 @@ config ARCH_CHIP
 	default "rv32m1"	if ARCH_CHIP_RV32M1
 	default "qemu-rv"	if ARCH_CHIP_QEMU_RV
 	default "hpm6750"	if ARCH_CHIP_HPM6750
+	default "jh7110"	if ARCH_CHIP_JH7110
 
 config ARCH_RISCV_INTXCPT_EXTENSIONS
 	bool "RISC-V Integer Context Extensions"
@@ -375,6 +401,7 @@ config LITEX_CORE_VEXRISCV_SMP
 	select ARCH_HAVE_ADDRENV
 	select ARCH_NEED_ADDRENV_MAPPING
 	select ARCH_HAVE_S_MODE
+	select ARCH_HAVE_ELF_EXECUTABLE
 
 endchoice
 
@@ -418,5 +445,8 @@ source "arch/risc-v/src/qemu-rv/Kconfig"
 endif
 if ARCH_CHIP_HPM6750
 source "arch/risc-v/src/hpm6750/Kconfig"
+endif
+if ARCH_CHIP_JH7110
+source "arch/risc-v/src/jh7110/Kconfig"
 endif
 endif

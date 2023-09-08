@@ -1203,8 +1203,8 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
   totalsize = 0;
 
   linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
-                               "\n%-3s %-8s %-8s %s\n",
-                               "FD", "POS", "OFLAGS", "PATH");
+                               "\n%-3s %-7s %-4s %-9s %s\n",
+                               "FD", "OFLAGS", "TYPE", "POS", "PATH");
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                              &offset);
 
@@ -1227,91 +1227,35 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
         {
           /* Is there an inode associated with the file descriptor? */
 
-          if (file->f_inode && !INODE_IS_SOCKET(file->f_inode))
+          if (file->f_inode == NULL)
             {
-              if (file_ioctl(file, FIOC_FILEPATH, path) < 0)
-                {
-                  path[0] = '\0';
-                }
+              continue;
+            }
 
-              linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
-                                    "%3d %8ld %8x",
-                                    i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK +
-                                    j, (long)file->f_pos,
-                                    file->f_oflags);
-              copysize   = procfs_memcpy(procfile->line, linesize, buffer,
-                                         remaining, &offset);
+          if (file_ioctl(file, FIOC_FILEPATH, path) < 0)
+            {
+              path[0] = '\0';
+            }
 
-              totalsize += copysize;
-              buffer    += copysize;
-              remaining -= copysize;
+          linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
+                                       "%-3d %-7d %-4x %-9ld %s\n",
+                                       i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK
+                                       + j, file->f_oflags,
+                                       INODE_GET_TYPE(file->f_inode),
+                                       (long)file->f_pos, path);
+          copysize   = procfs_memcpy(procfile->line, linesize,
+                                     buffer, remaining, &offset);
 
-              linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
-                                           " %s\n", path);
-              copysize   = procfs_memcpy(procfile->line, linesize, buffer,
-                                         remaining, &offset);
+          totalsize += copysize;
+          buffer    += copysize;
+          remaining -= copysize;
 
-              totalsize += copysize;
-              buffer    += copysize;
-              remaining -= copysize;
-
-              if (totalsize >= buflen)
-                {
-                  return totalsize;
-                }
+          if (totalsize >= buflen)
+            {
+              return totalsize;
             }
         }
     }
-
-#ifdef CONFIG_NET
-  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
-                               "\n%-3s %-2s %-3s %s\n",
-                               "SD", "RF", "TYP", "FLAGS");
-  copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
-                             &offset);
-
-  totalsize += copysize;
-  buffer    += copysize;
-  remaining -= copysize;
-
-  if (totalsize >= buflen)
-    {
-      return totalsize;
-    }
-
-  /* Examine each open socket descriptor */
-
-  for (i = 0; i < group->tg_filelist.fl_rows; i++)
-    {
-      for (j = 0, file = group->tg_filelist.fl_files[i];
-           j < CONFIG_NFILE_DESCRIPTORS_PER_BLOCK;
-           j++, file++)
-        {
-          /* Is there an connection associated with the socket descriptor? */
-
-          if (file->f_inode && INODE_IS_SOCKET(file->f_inode))
-            {
-              FAR struct socket *socket = file->f_priv;
-              FAR struct socket_conn_s *conn = socket->s_conn;
-              linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
-                                    "%3d %3d %02x",
-                                    i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK +
-                                    j, socket->s_type, conn->s_flags);
-              copysize   = procfs_memcpy(procfile->line, linesize, buffer,
-                                         remaining, &offset);
-
-              totalsize += copysize;
-              buffer    += copysize;
-              remaining -= copysize;
-
-              if (totalsize >= buflen)
-                {
-                  return totalsize;
-                }
-            }
-        }
-    }
-#endif
 
   return totalsize;
 }
@@ -1641,7 +1585,7 @@ static ssize_t proc_write(FAR struct file *filep, FAR const char *buffer,
   FAR struct tcb_s *tcb;
   ssize_t ret;
 
-  DEBUGASSERT(filep != NULL && buffer != NULL && buflen > 0);
+  DEBUGASSERT(buffer != NULL && buflen > 0);
 
   procfile = (FAR struct proc_file_s *)filep->f_priv;
   DEBUGASSERT(procfile != NULL);
@@ -1696,7 +1640,7 @@ static int proc_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Allocate a new container to hold the task and node selection */
 
-  newfile = (FAR struct proc_file_s *)kmm_malloc(sizeof(struct proc_file_s));
+  newfile = kmm_malloc(sizeof(struct proc_file_s));
   if (newfile == NULL)
     {
       ferr("ERROR: Failed to allocate file container\n");
@@ -1789,7 +1733,7 @@ static int proc_opendir(FAR const char *relpath,
    * non-zero entries will need be initialized.
    */
 
-  procdir = (FAR struct proc_dir_s *)kmm_zalloc(sizeof(struct proc_dir_s));
+  procdir = kmm_zalloc(sizeof(struct proc_dir_s));
   if (procdir == NULL)
     {
       ferr("ERROR: Failed to allocate the directory structure\n");

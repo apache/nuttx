@@ -261,7 +261,7 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
    */
 
   intersection = nxsig_pendingset(rtcb);
-  sigandset(&intersection, &intersection, (FAR sigset_t *)set);
+  sigandset(&intersection, &intersection, set);
   if (!sigisemptyset(&intersection))
     {
       /* One or more of the signals in intersections is sufficient to cause

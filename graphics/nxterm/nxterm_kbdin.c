@@ -83,7 +83,7 @@ ssize_t nxterm_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   /* Recover our private state structure */
 
-  DEBUGASSERT(filep && filep->f_priv);
+  DEBUGASSERT(filep->f_priv);
   priv = (FAR struct nxterm_state_s *)filep->f_priv;
 
   /* Get exclusive access to the driver structure */
@@ -128,7 +128,6 @@ ssize_t nxterm_read(FAR struct file *filep, FAR char *buffer, size_t len)
            * to wake us up.
            */
 
-          sched_lock();
           priv->nwaiters++;
           nxmutex_unlock(&priv->lock);
 
@@ -139,13 +138,6 @@ ssize_t nxterm_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
           ret = nxsem_wait(&priv->waitsem);
 
-          /* Pre-emption will be disabled when we return.  So the
-           * decrementing nwaiters here is safe.
-           */
-
-          priv->nwaiters--;
-          sched_unlock();
-
           /* Did we successfully get the waitsem? */
 
           if (ret >= 0)
@@ -154,6 +146,8 @@ ssize_t nxterm_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
               ret = nxmutex_lock(&priv->lock);
             }
+
+          priv->nwaiters--;
 
           /* Was the mutex wait successful? Did we successful re-take the
            * mutual exclusion mutex?
@@ -237,7 +231,7 @@ int nxterm_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 
   /* Some sanity checking */
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   priv = inode->i_private;
 
   /* Get exclusive access to the driver structure */
@@ -421,10 +415,6 @@ void nxterm_kbdin(NXTERM handle, FAR const uint8_t *buffer, uint8_t buflen)
     {
       int i;
 
-      /* Are there threads waiting for read data? */
-
-      sched_lock();
-
       /* Notify all poll/select waiters that they can read from the FIFO */
 
       nxterm_pollnotify(priv, POLLIN);
@@ -437,8 +427,6 @@ void nxterm_kbdin(NXTERM handle, FAR const uint8_t *buffer, uint8_t buflen)
 
           nxsem_post(&priv->waitsem);
         }
-
-      sched_unlock();
     }
 
   nxmutex_unlock(&priv->lock);

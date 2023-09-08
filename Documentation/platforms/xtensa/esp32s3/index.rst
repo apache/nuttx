@@ -93,12 +93,12 @@ ADC          No
 AES          No
 Bluetooth    No
 CAMERA       No
-CAN/TWAI     No
+CAN/TWAI     Yes
 DMA          Yes
 eFuse        No
 GPIO         Yes
 I2C          No
-I2S          No
+I2S          Yes
 LCD          No
 LED_PWM      No
 MCPWM        No

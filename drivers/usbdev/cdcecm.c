@@ -44,6 +44,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/cdc.h>
@@ -53,7 +54,7 @@
 #  include <nuttx/net/pkt.h>
 #endif
 
-#ifdef CONFIG_CDCECM_BOARD_SERIALSTR
+#ifdef CONFIG_BOARD_USBDEV_SERIALSTR
 #include <nuttx/board.h>
 #endif
 
@@ -201,11 +202,6 @@ static void cdcecm_disconnect(FAR struct usbdevclass_driver_s *driver,
                               FAR struct usbdev_s *dev);
 
 /* USB Device Class helpers */
-
-static struct usbdev_req_s *cdcecm_allocreq(FAR struct usbdev_ep_s *ep,
-              uint16_t len);
-static void cdcecm_freereq(FAR struct usbdev_ep_s *ep,
-              FAR struct usbdev_req_s *req);
 
 static void cdcecm_ep0incomplete(FAR struct usbdev_ep_s *ep,
               FAR struct usbdev_req_s *req);
@@ -590,11 +586,9 @@ static int cdcecm_ifup(FAR struct net_driver_s *dev)
     (FAR struct cdcecm_driver_s *)dev->d_private;
 
 #ifdef CONFIG_NET_IPv4
-  ninfo("Bringing up: %d.%d.%d.%d\n",
-        (int)(dev->d_ipaddr & 0xff),
-        (int)((dev->d_ipaddr >> 8) & 0xff),
-        (int)((dev->d_ipaddr >> 16) & 0xff),
-        (int)(dev->d_ipaddr >> 24));
+  ninfo("Bringing up: %u.%u.%u.%u\n",
+        ip4_addr1(dev->d_ipaddr), ip4_addr2(dev->d_ipaddr),
+        ip4_addr3(dev->d_ipaddr), ip4_addr4(dev->d_ipaddr));
 #endif
 #ifdef CONFIG_NET_IPv6
   ninfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
@@ -999,59 +993,6 @@ static void cdcecm_wrcomplete(FAR struct usbdev_ep_s *ep,
 }
 
 /****************************************************************************
- * Name: cdcecm_allocreq
- *
- * Description:
- *   Allocate a request instance along with its buffer
- *
- ****************************************************************************/
-
-static struct usbdev_req_s *cdcecm_allocreq(FAR struct usbdev_ep_s *ep,
-                                            uint16_t len)
-{
-  FAR struct usbdev_req_s *req;
-
-  req = EP_ALLOCREQ(ep);
-
-  if (req != NULL)
-    {
-      req->len   = len;
-      req->buf   = EP_ALLOCBUFFER(ep, len);
-      req->flags = USBDEV_REQFLAGS_NULLPKT;
-
-      if (req->buf == NULL)
-        {
-          EP_FREEREQ(ep, req);
-          req = NULL;
-        }
-    }
-
-  return req;
-}
-
-/****************************************************************************
- * Name: cdcecm_freereq
- *
- * Description:
- *   Free a request instance along with its buffer
- *
- ****************************************************************************/
-
-static void cdcecm_freereq(FAR struct usbdev_ep_s *ep,
-                           FAR struct usbdev_req_s *req)
-{
-  if (ep != NULL && req != NULL)
-    {
-      if (req->buf != NULL)
-        {
-          EP_FREEBUFFER(ep, req->buf);
-        }
-
-      EP_FREEREQ(ep, req);
-    }
-}
-
-/****************************************************************************
  * Name: cdcecm_resetconfig
  *
  * Description:
@@ -1232,7 +1173,7 @@ static int cdcecm_mkstrdesc(uint8_t id, FAR struct usb_strdesc_s *strdesc)
       break;
 
     case CDCECM_SERIALSTRID:
-#ifdef CONFIG_CDCECM_BOARD_SERIALSTR
+#ifdef CONFIG_BOARD_USBDEV_SERIALSTR
       str = board_usbdev_serialstr();
 #else
       str = "0";
@@ -1661,11 +1602,13 @@ static int cdcecm_bind(FAR struct usbdevclass_driver_s *driver,
 
   uinfo("\n");
 
+#ifndef CONFIG_CDCECM_COMPOSITE
   dev->ep0->priv = self;
+#endif
 
   /* Preallocate control request */
 
-  self->ctrlreq = cdcecm_allocreq(dev->ep0, CDCECM_MXDESCLEN);
+  self->ctrlreq = usbdev_allocreq(dev->ep0, CDCECM_MXDESCLEN);
 
   if (self->ctrlreq == NULL)
     {
@@ -1701,7 +1644,7 @@ static int cdcecm_bind(FAR struct usbdevclass_driver_s *driver,
 
   /* Pre-allocate read requests.  The buffer size is one full packet. */
 
-  self->rdreq = cdcecm_allocreq(self->epbulkout,
+  self->rdreq = usbdev_allocreq(self->epbulkout,
                   CONFIG_NET_ETH_PKTSIZE + CONFIG_NET_GUARDSIZE);
   if (self->rdreq == NULL)
     {
@@ -1714,7 +1657,7 @@ static int cdcecm_bind(FAR struct usbdevclass_driver_s *driver,
 
   /* Pre-allocate a single write request.  Buffer size is one full packet. */
 
-  self->wrreq = cdcecm_allocreq(self->epbulkin,
+  self->wrreq = usbdev_allocreq(self->epbulkin,
                   CONFIG_NET_ETH_PKTSIZE + CONFIG_NET_GUARDSIZE);
   if (self->wrreq == NULL)
     {
@@ -1792,7 +1735,7 @@ static void cdcecm_unbind(FAR struct usbdevclass_driver_s *driver,
 
   if (self->ctrlreq != NULL)
     {
-      cdcecm_freereq(dev->ep0, self->ctrlreq);
+      usbdev_freereq(dev->ep0, self->ctrlreq);
       self->ctrlreq = NULL;
     }
 
@@ -1802,7 +1745,7 @@ static void cdcecm_unbind(FAR struct usbdevclass_driver_s *driver,
 
   if (self->rdreq != NULL)
     {
-      cdcecm_freereq(self->epbulkout, self->rdreq);
+      usbdev_freereq(self->epbulkout, self->rdreq);
       self->rdreq = NULL;
     }
 
@@ -1820,7 +1763,7 @@ static void cdcecm_unbind(FAR struct usbdevclass_driver_s *driver,
 
   if (self->wrreq != NULL)
     {
-      cdcecm_freereq(self->epbulkin, self->wrreq);
+      usbdev_freereq(self->epbulkin, self->wrreq);
       self->wrreq = NULL;
     }
 

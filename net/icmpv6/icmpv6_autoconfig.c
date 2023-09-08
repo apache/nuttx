@@ -332,7 +332,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
    *    method must be employed.
    */
 
-  ret = icmpv6_neighbor(lladdr);
+  ret = icmpv6_neighbor(dev, lladdr);
   if (ret >= 0)
     {
       /* Hmmm... someone else responded to our Neighbor Solicitation.  We

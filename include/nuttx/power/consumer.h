@@ -57,7 +57,7 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-FAR struct regulator_s *regulator_get(const char *id);
+FAR struct regulator_s *regulator_get(FAR const char *id);
 void regulator_put(FAR struct regulator_s *regulator);
 int regulator_is_enabled(FAR struct regulator_s *regulator);
 int regulator_enable(FAR struct regulator_s *regulator);
@@ -67,6 +67,8 @@ int regulator_disable_deferred(FAR struct regulator_s *regulator, int ms);
 int regulator_set_voltage(FAR struct regulator_s *regulator, int min_uv,
                           int max_uv);
 int regulator_get_voltage(FAR struct regulator_s *regulator);
+int regulator_set_mode(FAR struct regulator_s *regulator,
+                       enum regulator_mode_e mode);
 
 #undef EXTERN
 #ifdef __cplusplus

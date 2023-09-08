@@ -5,6 +5,18 @@
 
 if ARCH_ARMV7M
 
+config ARMV7M_STRING_FUNCTION
+	bool "Enable optimized ARMv7M specific string function"
+	default n
+	depends on ARCH_TOOLCHAIN_GNU
+	select ARMV7M_MEMCHR
+	select ARMV7M_MEMCPY
+	select ARMV7M_MEMSET
+	select ARMV7M_MEMMOVE
+	select ARMV7M_STRCMP
+	select ARMV7M_STRCPY
+	select ARMV7M_STRLEN
+
 config ARMV7M_MEMCHR
 	bool "Enable optimized memchr() for ARMv7-M"
 	default n

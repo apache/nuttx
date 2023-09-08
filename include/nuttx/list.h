@@ -1,20 +1,39 @@
 /****************************************************************************
  * include/nuttx/list.h
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.  The
- * ASF licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the
- * License.  You may obtain a copy of the License at
+ * Extracted from logic originally written by Travis Geiselbrecht and
+ * released under a public domain license.  Re-released here under the 3-
+ * clause BSD license by Pinecone, Inc.
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   Copyright (C) 2008 Travis Geiselbrecht. All rights reserved.
+ *   Author: Travis Geiselbrecht <geist@foobox.com>
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
- * License for the specific language governing permissions and limitations
- * under the License.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ * 3. Neither the name NuttX nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
 
@@ -70,36 +89,9 @@
   ((item)->next != (list) ? (item)->next : \
    (item)->next->next != (list) ? (item)->next->next : NULL)
 
-/**
- * list_entry - get the struct for this entry
- * @ptr: the &struct list_head pointer.
- * @type: the type of the struct this is embedded in.
- * @member: the name of the list_head within the struct.
- */
-#define list_entry(ptr, type, member) \
-           container_of(ptr, type, member)
-
-/**
- * list_first_entry - get the first element from a list
- * @list: the list head to take the element from.
- * @type: the type of the struct this is embedded in.
- * @member: the name of the list_head within the struct.
- *
- * Note, that list is expected to be not empty.
- */
-#define list_first_entry(list, type, member) \
-             list_entry((list)->next, type, member)
-
-/**
- * list_last_entry - get the last element from a list
- * @list: the list head to take the element from.
- * @type: the type of the struct this is embedded in.
- * @member: the name of the list_head within the struct.
- *
- * Note, that list is expected to be not empty.
- */
-#define list_last_entry(list, type, member) \
-           list_entry((list)->prev, type, member)
+#define list_entry(ptr, type, member) container_of(ptr, type, member)
+#define list_first_entry(list, type, member) container_of((list)->next, type, member)
+#define list_last_entry(list, type, member) container_of((list)->prev, type, member)
 
 #define list_add_after(entry, new_entry) list_add_head(entry, new_entry)
 #define list_add_head(list, item) \
@@ -254,6 +246,15 @@
       temp = container_of(entry->member.next, type, member); \
       &entry->member != (list); entry = temp, \
       temp = container_of(temp->member.next, type, member))
+
+/* iterates over the list in reverse order, entry should be the container
+ * structure type
+ */
+
+#define list_for_every_entry_reverse(list, entry, type, member) \
+  for(entry = container_of((list)->prev, type, member); \
+      &entry->member != (list); \
+      entry = container_of(entry->member.next, type, member))
 
 /****************************************************************************
  * Public Type Definitions

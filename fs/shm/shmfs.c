@@ -89,7 +89,45 @@ const struct file_operations g_shmfs_operations =
 static ssize_t shmfs_read(FAR struct file *filep, FAR char *buffer,
                           size_t buflen)
 {
-  return -ENOSYS;
+  FAR struct shmfs_object_s *sho;
+  ssize_t nread;
+  off_t startpos;
+  off_t endpos;
+
+  DEBUGASSERT(filep->f_inode->i_private != NULL);
+
+  sho = filep->f_inode->i_private;
+
+  if (filep->f_pos > sho->length)
+    {
+      return 0;
+    }
+
+  /* Handle attempts to read beyond the end of the file. */
+
+  startpos = filep->f_pos;
+  nread    = buflen;
+  endpos   = startpos + buflen;
+
+  if (endpos > sho->length)
+    {
+      endpos = sho->length;
+      nread  = endpos - startpos;
+    }
+
+  /* Copy data from the memory object to the user buffer */
+
+  if (sho->paddr != NULL)
+    {
+      memcpy(buffer, (FAR char *)sho->paddr + startpos, nread);
+      filep->f_pos += nread;
+    }
+  else
+    {
+      DEBUGASSERT(sho->length == 0 && nread == 0);
+    }
+
+  return nread;
 }
 
 /****************************************************************************
@@ -99,7 +137,41 @@ static ssize_t shmfs_read(FAR struct file *filep, FAR char *buffer,
 static ssize_t shmfs_write(FAR struct file *filep, FAR const char *buffer,
                            size_t buflen)
 {
-  return -ENOSYS;
+  FAR struct shmfs_object_s *sho;
+  ssize_t nwritten;
+  off_t startpos;
+  off_t endpos;
+
+  DEBUGASSERT(filep->f_inode->i_private != NULL);
+
+  sho = filep->f_inode->i_private;
+
+  /* Handle attempts to write beyond the end of the file */
+
+  startpos = filep->f_pos;
+  nwritten = buflen;
+  endpos   = startpos + buflen;
+
+  /* Desn't support shm auto expand, truncate first */
+
+  if (endpos > sho->length)
+    {
+      return -EFBIG;
+    }
+
+  /* Copy data from the user buffer to the memory object */
+
+  if (sho->paddr != NULL)
+    {
+      memcpy((FAR char *)sho->paddr + startpos, buffer, nwritten);
+      filep->f_pos += nwritten;
+    }
+  else
+    {
+      DEBUGASSERT(sho->length == 0 && nwritten == 0);
+    }
+
+  return nwritten;
 }
 
 /****************************************************************************
@@ -259,6 +331,18 @@ static int shmfs_map_object(FAR struct shmfs_object_s *object,
 }
 
 /****************************************************************************
+ * Name: shmfs_add_map
+ ****************************************************************************/
+
+static int shmfs_add_map(FAR struct mm_map_entry_s *entry,
+                         FAR struct inode *inode)
+{
+  entry->munmap = shmfs_munmap;
+  entry->priv.p = (FAR void *)inode;
+  return mm_map_add(get_current_mm(), entry);
+}
+
+/****************************************************************************
  * Name: shmfs_mmap
  ****************************************************************************/
 
@@ -267,8 +351,6 @@ static int shmfs_mmap(FAR struct file *filep,
 {
   FAR struct shmfs_object_s *object;
   int ret = -EINVAL;
-
-  DEBUGASSERT(filep->f_inode != NULL);
 
   /* We don't support offset at the moment, just mapping the whole object
    * object is NULL if it hasn't been truncated yet
@@ -284,7 +366,7 @@ static int shmfs_mmap(FAR struct file *filep,
   ret = inode_addref(filep->f_inode);
   if (ret >= 0)
     {
-      object = (FAR struct shmfs_object_s *)filep->f_inode->i_private;
+      object = filep->f_inode->i_private;
       if (object)
         {
           ret = shmfs_map_object(object, &entry->vaddr);
@@ -294,15 +376,10 @@ static int shmfs_mmap(FAR struct file *filep,
           ret = -EINVAL;
         }
 
-      if (ret < 0)
+      if (ret < 0 ||
+          (ret = shmfs_add_map(entry, filep->f_inode)) < 0)
         {
           inode_release(filep->f_inode);
-        }
-      else
-        {
-          entry->munmap = shmfs_munmap;
-          entry->priv.p = (FAR void *)filep->f_inode;
-          mm_map_add(get_current_mm(), entry);
         }
     }
 
@@ -349,6 +426,7 @@ static int shmfs_munmap(FAR struct task_group_s *group,
                         FAR void *start,
                         size_t length)
 {
+  FAR struct inode *inode;
   int ret;
 
   /* Partial unmap is not supported yet */
@@ -357,6 +435,8 @@ static int shmfs_munmap(FAR struct task_group_s *group,
     {
       return -EINVAL;
     }
+
+  inode = (FAR struct inode *)entry->priv.p;
 
   /* Unmap the virtual memory area from the user's address space */
 
@@ -369,13 +449,17 @@ static int shmfs_munmap(FAR struct task_group_s *group,
 
   if (ret == OK)
     {
-      ret = shmfs_release((FAR struct inode *)entry->priv.p);
+      ret = shmfs_release(inode);
     }
 
-  /* Remove the mapping. */
+  /* Unkeep the inode when unmapped, decrease refcount */
 
   if (ret == OK)
     {
+      inode_release(inode);
+
+      /* Remove the mapping. */
+
       ret = mm_map_remove(get_group_mm(group), entry);
     }
 

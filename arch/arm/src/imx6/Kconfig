@@ -147,8 +147,7 @@ config IMX_ENET_NTXBUFFERS
 
 config IMX_ENET_ENHANCEDBD
 	bool # not optional
-	default n if ARMV7A_DCACHE_DISABLE
-	default y if !ARMV7A_DCACHE_DISABLE
+	default !ARMV7A_DCACHE_DISABLE
 
 config IMX_ENET_NETHIFS
 	int # Not optional

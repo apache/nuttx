@@ -31,6 +31,7 @@
 #include <nuttx/board.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/sensors/bmi160.h>
+#include <arch/board/cxd56_bmi160.h>
 #include <arch/chip/scu.h>
 
 #if defined(CONFIG_SENSORS_BMI160_SCU_SPI)

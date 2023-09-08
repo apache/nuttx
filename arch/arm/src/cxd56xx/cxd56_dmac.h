@@ -41,12 +41,12 @@
 #define CXD56_DMA_PERIPHERAL_SPI5_TX  (4)
 #define CXD56_DMA_PERIPHERAL_SPI5_RX  (5)
 
-#define CXD56_DMA_INTR_ITC (1u<<0) /**< Terminal count interrupt status */
-#define CXD56_DMA_INTR_ERR (1u<<1) /**< Error interrupt status */
+#define CXD56_DMA_INTR_ITC (1u<<0) /* Terminal count interrupt status */
+#define CXD56_DMA_INTR_ERR (1u<<1) /* Error interrupt status */
 
-#define CXD56_DMAC_WIDTH8   0      /**< 8 bit width */
-#define CXD56_DMAC_WIDTH16  1      /**< 16 bit width */
-#define CXD56_DMAC_WIDTH32  2      /**< 32 bit width */
+#define CXD56_DMAC_WIDTH8   0      /* 8 bit width */
+#define CXD56_DMAC_WIDTH16  1      /* 16 bit width */
+#define CXD56_DMAC_WIDTH32  2      /* 32 bit width */
 
 /****************************************************************************
  * Public Types

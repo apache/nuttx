@@ -105,6 +105,7 @@
 #define W25Q_JEDEC_MEMORY_TYPE_A   0x40  /* W25Q memory type */
 #define W25Q_JEDEC_MEMORY_TYPE_B   0x60  /* W25Q memory type */
 #define W25Q_JEDEC_MEMORY_TYPE_C   0x50  /* W25Q memory type */
+#define W25Q_JEDEC_MEMORY_TYPE_D   0x70  /* W25QJV memory type (backward compatible) */
 
 #define W25_JEDEC_CAPACITY_8MBIT   0x14  /* 256x4096  = 8Mbit memory capacity */
 #define W25_JEDEC_CAPACITY_16MBIT  0x15  /* 512x4096  = 16Mbit memory capacity */
@@ -394,7 +395,8 @@ static inline int w25_readid(struct w25_dev_s *priv)
       (memory == W25X_JEDEC_MEMORY_TYPE   ||
        memory == W25Q_JEDEC_MEMORY_TYPE_A ||
        memory == W25Q_JEDEC_MEMORY_TYPE_B ||
-       memory == W25Q_JEDEC_MEMORY_TYPE_C))
+       memory == W25Q_JEDEC_MEMORY_TYPE_C ||
+       memory == W25Q_JEDEC_MEMORY_TYPE_D))
     {
       /* Okay.. is it a FLASH capacity that we understand? If so, save
        * the FLASH capacity.
@@ -420,7 +422,7 @@ static inline int w25_readid(struct w25_dev_s *priv)
            priv->nsectors = NSECTORS_16MBIT;
         }
 
-      /* 32M-bit / M-byte (4,194,304)
+      /* 32M-bit / 4M-byte (4,194,304)
        *
        * W25X32, W25Q32BV, W25Q32DW
        */
@@ -1403,7 +1405,7 @@ FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *spi)
    * have to be extended to handle multiple FLASH parts on the same SPI bus.
    */
 
-  priv = (FAR struct w25_dev_s *)kmm_zalloc(sizeof(struct w25_dev_s));
+  priv = kmm_zalloc(sizeof(struct w25_dev_s));
   if (priv)
     {
       /* Initialize the allocated structure (unsupported methods were
@@ -1451,7 +1453,7 @@ FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *spi)
 #ifdef CONFIG_W25_SECTOR512        /* Simulate a 512 byte sector */
           /* Allocate a buffer for the erase block cache */
 
-          priv->sector = (FAR uint8_t *)kmm_malloc(W25_SECTOR_SIZE);
+          priv->sector = kmm_malloc(W25_SECTOR_SIZE);
           if (!priv->sector)
             {
               /* Discard all of that work we just did and return NULL */

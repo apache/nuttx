@@ -129,15 +129,15 @@ void up_initial_state(struct tcb_s *tcb)
 #endif
 #endif /* CONFIG_PIC */
 
-#ifdef CONFIG_BUILD_PROTECTED
   /* All tasks start via a stub function in kernel space.  So all
    * tasks must start in privileged thread mode.  If CONFIG_BUILD_PROTECTED
    * is defined, then that stub function will switch to unprivileged
    * mode before transferring control to the user task.
    */
 
-  xcp->regs[REG_EXC_RETURN] = EXC_RETURN_PRIVTHR;
-#endif
+  xcp->regs[REG_EXC_RETURN] = EXC_RETURN_THREAD;
+
+  xcp->regs[REG_CONTROL] = getcontrol() & ~CONTROL_NPRIV;
 
   /* Enable or disable interrupts, based on user configuration */
 
@@ -145,3 +145,46 @@ void up_initial_state(struct tcb_s *tcb)
   xcp->regs[REG_PRIMASK] = 1;
 #endif /* CONFIG_SUPPRESS_INTERRUPTS */
 }
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
+/****************************************************************************
+ * Name: arm_initialize_stack
+ *
+ * Description:
+ *   If interrupt stack is defined, the PSP and MSP need to be reinitialized.
+ *
+ ****************************************************************************/
+
+noinline_function void arm_initialize_stack(void)
+{
+#ifdef CONFIG_SMP
+  uint32_t stack = (uint32_t)arm_intstack_top();
+#else
+  uint32_t stack = (uint32_t)g_intstacktop;
+#endif
+  uint32_t tempa = 0;
+  uint32_t tempb = 2;
+
+  __asm__ __volatile__
+    (
+
+      /* Initialize PSP */
+
+      "mov %1, sp\n"
+      "msr psp, %1\n"
+
+      /* Select PSP */
+
+      "mrs %1, CONTROL\n"
+      "orr %1, %2\n"
+      "msr CONTROL, %1\n"
+      "isb sy\n"
+
+      /* Initialize MSP */
+
+      "msr msp, %0\n"
+      :
+      : "r" (stack), "r" (tempa), "r" (tempb)
+      : "memory");
+}
+#endif

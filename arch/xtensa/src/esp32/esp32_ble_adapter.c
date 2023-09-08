@@ -1192,6 +1192,8 @@ static void semphr_delete_wrapper(void *semphr)
 
 static int IRAM_ATTR semphr_take_from_isr_wrapper(void *semphr, void *hptw)
 {
+  *(int *)hptw = 0;
+
   return esp_errno_trans(nxsem_trywait(semphr));
 }
 
@@ -1267,14 +1269,23 @@ static int semphr_take_wrapper(void *semphr, uint32_t block_time_ms)
   if (block_time_ms == OSI_FUNCS_TIME_BLOCKING)
     {
       ret = nxsem_wait(sem);
-      if (ret)
-        {
-          wlerr("Failed to wait sem %d\n", ret);
-        }
     }
   else
     {
-      ret = nxsem_tickwait(sem, MSEC2TICK(block_time_ms));
+      if (block_time_ms > 0)
+        {
+          ret = nxsem_tickwait(sem, MSEC2TICK(block_time_ms));
+        }
+      else
+        {
+          ret = nxsem_trywait(sem);
+        }
+    }
+
+  if (ret)
+    {
+      wlerr("ERROR: Failed to wait sem in %u ticks. Error=%d\n",
+            MSEC2TICK(block_time_ms), ret);
     }
 
   return esp_errno_trans(ret);

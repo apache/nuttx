@@ -361,7 +361,7 @@ int32_t ipv4_fragout(FAR struct net_driver_s *dev, uint16_t mtu)
   uint16_t offset = 0;
   uint16_t hdrlen;
   FAR struct iob_s *frag;
-  FAR struct ipv4_hdr_s *ref;
+  FAR struct ipv4_hdr_s *ref = NULL;
   struct iob_queue_s fragq =
     {
       NULL, NULL

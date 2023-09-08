@@ -32,7 +32,6 @@
 #include <nuttx/sensors/bmp180.h>
 
 #include "esp32s3_i2c.h"
-#include "esp32s3-devkit.h"
 
 /****************************************************************************
  * Public Functions

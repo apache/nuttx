@@ -56,6 +56,84 @@ config IOEXPANDER_DUMMY_INT_POLLDELAY
 
 endif # IOEXPANDER_DUMMY
 
+config IOEXPANDER_ISO1H812G
+	bool "ISO1H812G SPI IO expander"
+	default n
+	depends on SPI
+	---help---
+		Enable support for the ISO1H812G SPI IO expander.
+
+if IOEXPANDER_ISO1H812G
+
+config ISO1H812G_MULTIPLE
+	bool "Multiple ISO1H812G Devices"
+	default n
+	---help---
+		Can be defined to support multiple ISO1H812G devices on board.
+
+endif # IOEXPANDER_ISO1H812G
+
+config IOEXPANDER_ISO1I813T
+	bool "ISO1I813T SPI IO expander"
+	default n
+	depends on SPI
+	---help---
+		Enable support for the ISO1I813T SPI IO expander.
+
+if IOEXPANDER_ISO1I813T
+
+config ISO1I813T_MULTIPLE
+	bool "Multiple ISO1I813T Devices"
+	default n
+	---help---
+		Can be defined to support multiple ISO1I813T devices on board.
+
+endif # IOEXPANDER_ISO1I813T
+
+config IOEXPANDER_MCP23X08
+	bool "MCP23008/MCP23S08 I2C/SPI IO expander"
+	default n
+	depends on I2C
+	---help---
+		Enable support for the MCP23008/MCP23S08 IO Expander
+
+if IOEXPANDER_MCP23X08
+
+config MCP23X08_MULTIPLE
+	bool "Multiple MCP23x08 Devices"
+	default n
+	---help---
+		Can be defined to support multiple MCP23x08 devices on board.
+
+config MCP23X08_INT_ENABLE
+	bool "Enable MCP23x08 Interrupt Support"
+	default n
+	select IOEXPANDER_INT_ENABLE
+	---help---
+		Enable driver interrupt functionality
+
+config MCP23X08_INT_NCALLBACKS
+	int "Max number of interrupt callbacks"
+	default 4
+	depends on MCP23X08_INT_ENABLE
+	---help---
+		This is the maximum number of interrupt callbacks supported
+
+config MCP23X08_INT_POLL
+	bool "Enable interrupt poll"
+	default n
+	---help---
+		Enable polling for missed interrupts.
+
+config MCP23X08_INT_POLLDELAY
+	int "Interrupt poll delay (used)"
+	default 500000
+	depends on MCP23X08_INT_POLL
+	---help---
+		This microsecond delay defines the polling rate for missed interrupts.
+
+endif # IOEXPANDER_MCP23X08
+
 config IOEXPANDER_MCP23X17
 	bool "MCP23017/MCP23S17 I2C/SPI IO expander"
 	default n
@@ -297,11 +375,82 @@ config PCF8574_INT_POLLDELAY
 
 endif # IOEXPANDER_PCF8574
 
+config IOEXPANDER_PCF8575
+	bool "PCF8575 I2C IO expander"
+	default n
+	depends on I2C
+	---help---
+		Enable support for 16 bit PCF8575 IO Expander. Software driver
+		interrupt is currently not supported therefore decated HW interrupt
+		pin should be used.
+
+if IOEXPANDER_PCF8575
+
+config PCF8575_MULTIPLE
+	bool "Multiple PCF8575 Devices"
+	default n
+	---help---
+		Can be defined to support multiple PCF8575 devices on board.
+
+endif # IOEXPANDER_PCF8575
+
+config IOEXPANDER_SX1509
+	bool "SX1509 I2C IO expander"
+	default n
+	depends on I2C
+	---help---
+		Enable support for the SX1509 IO Expander
+
+if IOEXPANDER_SX1509
+
+config SX1509_MULTIPLE
+	bool "Multiple SX1509 Devices"
+	default n
+	---help---
+		Can be defined to support multiple SX1509 devices on board.
+
+config SX1509_INT_ENABLE
+	bool "Enable SX1509 Interrupt Support"
+	default n
+	select IOEXPANDER_INT_ENABLE
+	---help---
+		Enable driver interrupt functionality
+
+config SX1509_LED_ENABLE
+	bool "Enable SX1509 LED Support"
+	default n
+	select IOEXPANDER_LED_ENABLE
+	---help---
+		Enable driver LED functionality
+
+config SX1509_INT_NCALLBACKS
+	int "Max number of interrupt callbacks"
+	default 4
+	depends on SX1509_INT_ENABLE
+	---help---
+		This is the maximum number of interrupt callbacks supported
+
+config SX1509_RETRY
+	bool "Retry to send commands and data at I2C communication errors"
+	default n
+	---help---
+		Retry to send commands and data if a I2C-communication
+		error occurs (eg. caused by EMC).
+
+endif # IOEXPANDER_SX1509
+
 config IOEXPANDER_INT_ENABLE
 	bool
 	default n
 	---help---
 		This is the global INT supported flag for io expanders
+
+config IOEXPANDER_LED_ENABLE
+	bool
+	default n
+	select USERLED
+	---help---
+		This is the global LED supported flag for io expanders
 
 config IOEXPANDER_NPINS
 	int "Number of pins"

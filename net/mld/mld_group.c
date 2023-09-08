@@ -103,7 +103,7 @@ FAR struct mld_group_s *mld_grpalloc(FAR struct net_driver_s *dev,
   FAR struct mld_group_s *group;
 
   mldinfo("addr: %08x dev: %p\n", *addr, dev);
-  group = (FAR struct mld_group_s *)kmm_zalloc(sizeof(struct mld_group_s));
+  group = kmm_zalloc(sizeof(struct mld_group_s));
 
   mldinfo("group: %p\n", group);
 

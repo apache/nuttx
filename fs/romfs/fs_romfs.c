@@ -160,20 +160,20 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
   struct romfs_nodeinfo_s     nodeinfo;
   FAR struct romfs_mountpt_s *rm;
   FAR struct romfs_file_s    *rf;
-  size_t                      size;
+  size_t                      len;
   int                         ret;
 
   finfo("Open '%s'\n", relpath);
 
   /* Sanity checks */
 
-  DEBUGASSERT(filep->f_priv == NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv == NULL);
 
   /* Get mountpoint private data from the inode reference from the file
    * structure
    */
 
-  rm = (FAR struct romfs_mountpt_s *)filep->f_inode->i_private;
+  rm = filep->f_inode->i_private;
 
   DEBUGASSERT(rm != NULL);
 
@@ -248,8 +248,8 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
    * file.
    */
 
-  size = strlen(relpath);
-  rf = kmm_zalloc(sizeof(struct romfs_file_s) + size);
+  len = strlen(relpath);
+  rf = kmm_zalloc(sizeof(struct romfs_file_s) + len);
   if (!rf)
     {
       ferr("ERROR: Failed to allocate private data\n");
@@ -263,7 +263,7 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
 
   rf->rf_size = nodeinfo.rn_size;
   rf->rf_type = (uint8_t)(nodeinfo.rn_next & RFNEXT_ALLMODEMASK);
-  strlcpy(rf->rf_path, relpath, size + 1);
+  strlcpy(rf->rf_path, relpath, len + 1);
 
   /* Get the start of the file data */
 
@@ -310,7 +310,7 @@ static int romfs_close(FAR struct file *filep)
 
   /* Sanity checks */
 
-  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
 
   /* Recover our private data from the struct file instance */
 
@@ -374,7 +374,7 @@ static ssize_t romfs_read(FAR struct file *filep, FAR char *buffer,
 
   /* Sanity checks */
 
-  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
 
   /* Recover our private data from the struct file instance */
 
@@ -508,7 +508,7 @@ static off_t romfs_seek(FAR struct file *filep, off_t offset, int whence)
 
   /* Sanity checks */
 
-  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
 
   /* Recover our private data from the struct file instance */
 
@@ -588,7 +588,7 @@ static int romfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Sanity checks */
 
-  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
 
   /* Recover our private data from the struct file instance */
 
@@ -614,7 +614,7 @@ static int romfs_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
 
   /* Sanity checks */
 
-  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
 
   /* Recover our private data from the struct file instance */
 
@@ -644,6 +644,7 @@ static int romfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   FAR struct romfs_mountpt_s *rm;
   FAR struct romfs_file_s *oldrf;
   FAR struct romfs_file_s *newrf;
+  size_t len;
   int ret;
 
   finfo("Dup %p->%p\n", oldp, newp);
@@ -684,7 +685,8 @@ static int romfs_dup(FAR const struct file *oldp, FAR struct file *newp)
    * dup'ed file.
    */
 
-  newrf = kmm_malloc(sizeof(struct romfs_file_s));
+  len   = strlen(oldrf->rf_path);
+  newrf = kmm_malloc(sizeof(struct romfs_file_s) + len);
   if (!newrf)
     {
       ferr("ERROR: Failed to allocate private data\n");
@@ -696,6 +698,8 @@ static int romfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   newrf->rf_startoffset = oldrf->rf_startoffset;
   newrf->rf_size        = oldrf->rf_size;
+  newrf->rf_type        = oldrf->rf_type;
+  strlcpy(newrf->rf_path, oldrf->rf_path, len + 1);
 
   /* Configure buffering to support access to this file */
 
@@ -737,7 +741,7 @@ static int romfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 
   /* Sanity checks */
 
-  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
 
   /* Get mountpoint private data from the inode reference from the file
    * structure

@@ -66,7 +66,7 @@
  *   returned.
  *
  *     EINVAL   Either msg or msgq is NULL or the value of prio is invalid.
- *     EPERM    Message queue opened not opened for writing.
+ *     EBADF    Message queue opened not opened for writing.
  *     EMSGSIZE 'msglen' was greater than the maxmsgsize attribute of the
  *               message queue.
  *
@@ -88,14 +88,14 @@ int nxmq_verify_send(FAR FAR struct file *mq, FAR const char *msg,
 
   /* Verify the input parameters */
 
-  if (msg == NULL || msgq == NULL || prio > MQ_PRIO_MAX)
+  if (msg == NULL || msgq == NULL || prio >= MQ_PRIO_MAX)
     {
       return -EINVAL;
     }
 
   if ((mq->f_oflags & O_WROK) == 0)
     {
-      return -EPERM;
+      return -EBADF;
     }
 
   if (msglen > (size_t)msgq->maxmsgsize)

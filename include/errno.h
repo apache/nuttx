@@ -124,12 +124,12 @@
 
 /* Sync with linux/include/asm-generic/errno.h */
 
-#define	EDEADLK             35
-#define	EDEADLK_STR         "Resource deadlock would occur"
-#define	ENAMETOOLONG        36
-#define	ENAMETOOLONG_STR    "File name too long"
-#define	ENOLCK              37
-#define	ENOLCK_STR          "No record locks available"
+#define EDEADLK             35
+#define EDEADLK_STR         "Resource deadlock would occur"
+#define ENAMETOOLONG        36
+#define ENAMETOOLONG_STR    "File name too long"
+#define ENOLCK              37
+#define ENOLCK_STR          "No record locks available"
 #define ENOSYS              38
 #define ENOSYS_STR          "Invalid system call number"
 #define ENOTEMPTY           39
@@ -283,11 +283,11 @@
 #define EHOSTUNREACH        113
 #define EHOSTUNREACH_STR    "No route to host"
 #define EALREADY            114
-#define EALREADY_STR        "Socket already connected"
+#define EALREADY_STR        "Operation already in progress"
 #define EINPROGRESS         115
 #define EINPROGRESS_STR     "Operation now in progress"
 #define ESTALE              116
-#define ESTALE_STR          "Stale NFS file handle"
+#define ESTALE_STR          "Stale file handle"
 #define EUCLEAN             117
 #define EUCLEAN_STR         "Structure needs cleaning"
 #define ENOTNAM             118
@@ -302,18 +302,18 @@
 #define EDQUOT_STR          "Quota exceeded"
 #define ENOMEDIUM           123                         /* Linux errno extension */
 #define ENOMEDIUM_STR       "No medium found"
-#define	EMEDIUMTYPE         124
-#define	EMEDIUMTYPE_STR     "Wrong medium type"
+#define EMEDIUMTYPE         124
+#define EMEDIUMTYPE_STR     "Wrong medium type"
 #define ECANCELED           125
 #define ECANCELED_STR       "Operation cancelled"
-#define	ENOKEY              126
-#define	ENOKEY_STR          "Required key not available"
-#define	EKEYEXPIRED         127
-#define	EKEYEXPIRED_STR     "Key has expired"
-#define	EKEYREVOKED         128
-#define	EKEYREVOKED_STR     "Key has been revoked"
-#define	EKEYREJECTED        129
-#define	EKEYREJECTED_STR    "Key was rejected by service"
+#define ENOKEY              126
+#define ENOKEY_STR          "Required key not available"
+#define EKEYEXPIRED         127
+#define EKEYEXPIRED_STR     "Key has expired"
+#define EKEYREVOKED         128
+#define EKEYREVOKED_STR     "Key has been revoked"
+#define EKEYREJECTED        129
+#define EKEYREJECTED_STR    "Key was rejected by service"
 #define EOWNERDEAD          130
 #define EOWNERDEAD_STR      "Previous owner died"
 #define ENOTRECOVERABLE     131

@@ -41,11 +41,12 @@
  * then only the first mode is supported.
  */
 
-#if  !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
+#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
 
   /* Domain-specific allocations */
 
 #  define lib_malloc(s)       kmm_malloc(s)
+#  define lib_calloc(n,s)     kmm_calloc(n,s)
 #  define lib_malloc_size(p)  kmm_malloc_size(p)
 #  define lib_zalloc(s)       kmm_zalloc(s)
 #  define lib_realloc(p,s)    kmm_realloc(p,s)
@@ -55,6 +56,7 @@
   /* User-accessible allocations */
 
 #  define lib_umalloc(s)      kumm_malloc(s)
+#  define lib_ucalloc(n,s)    kumm_calloc(n,s)
 #  define lib_umalloc_size(p) kumm_malloc_size(p)
 #  define lib_uzalloc(s)      kumm_zalloc(s)
 #  define lib_urealloc(p,s)   kumm_realloc(p,s)
@@ -66,6 +68,7 @@
   /* Domain-specific allocations */
 
 #  define lib_malloc(s)       malloc(s)
+#  define lib_calloc(n,s)     calloc(n,s)
 #  define lib_malloc_size(p)  malloc_size(p)
 #  define lib_zalloc(s)       zalloc(s)
 #  define lib_realloc(p,s)    realloc(p,s)
@@ -75,6 +78,7 @@
   /* User-accessible allocations */
 
 #  define lib_umalloc(s)      malloc(s)
+#  define lib_ucalloc(n,s)    calloc(n,s)
 #  define lib_umalloc_size(p) malloc_size(p)
 #  define lib_uzalloc(s)      zalloc(s)
 #  define lib_urealloc(p,s)   realloc(p,s)

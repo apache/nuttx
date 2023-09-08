@@ -39,8 +39,7 @@
 #endif
 
 #ifdef CONFIG_MODULE
-#  include "nuttx/symtab.h"
-#  include "nuttx/lib/modlib.h"
+#  include <nuttx/lib/modlib.h>
 #endif
 
 #ifdef CONFIG_STM32_OTGFS

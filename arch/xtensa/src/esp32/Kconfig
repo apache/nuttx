@@ -253,14 +253,16 @@ config ESP32_PCNT
 	bool "Pulse Counter (PCNT / QE) Module"
 	default n
 	---help---
-		No yet implemented
+		Pulse Counter is currently used to implement Quadracture
+		Encoder.
 
 config ESP32_RMT
 	bool "Remote Control Module (RMT)"
 	default n
 	depends on EXPERIMENTAL
 	---help---
-		No yet implemented
+		Remote Control Module is currently used to control WS2812
+		RGB LED normally used on LED strips.
 
 config ESP32_RNG
 	bool "Random Number Generator (RNG)"
@@ -2475,6 +2477,11 @@ config ESP32_ESPTOOL_TARGET_SECONDARY
 		of a secure firmware update workflow.
 
 endchoice
+
+config ESP32_MCUBOOT_VERSION
+	string "MCUboot version"
+	depends on ESP32_APP_FORMAT_MCUBOOT
+	default "b206b99b1555ca15f790a3287e57dc98ef3df2ac"
 
 config ESP32_APP_MCUBOOT_HEADER_SIZE
 	int "Application image header size (in bytes)"

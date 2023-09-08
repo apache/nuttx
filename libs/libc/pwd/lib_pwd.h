@@ -33,9 +33,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifndef CONFIG_LIBC_PASSWD_LINESIZE
+#  define CONFIG_LIBC_PASSWD_LINESIZE 80
+#endif
+
 #define ROOT_NAME  "root"
 #define ROOT_UID   0
 #define ROOT_GID   0
+#define ROOT_GEOCS "root"
 #define ROOT_DIR   "/root"
 #define ROOT_SHELL "/bin/nsh"
 
@@ -51,12 +56,11 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#ifdef CONFIG_LIBC_PASSWD_FILE
 /* Data for non-reentrant group functions */
 
+EXTERN int g_passwd_index;
 EXTERN struct passwd g_passwd;
 EXTERN char g_passwd_buffer[CONFIG_LIBC_PASSWD_LINESIZE];
-#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -75,6 +79,8 @@ int pwd_findby_name(FAR const char *uname, FAR struct passwd *entry,
                     FAR char *buffer, size_t buflen);
 int pwd_findby_uid(uid_t uid, FAR struct passwd *entry, FAR char *buffer,
                    size_t buflen);
+int pwd_findby_index(int index, FAR struct passwd *entry,
+                     FAR char *buffer, size_t buflen);
 #endif
 
 #undef EXTERN

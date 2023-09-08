@@ -175,6 +175,9 @@
 #define SHT_REL            9
 #define SHT_SHLIB          10
 #define SHT_DYNSYM         11
+#define SHT_INIT_ARRAY     14
+#define SHT_FINI_ARRAY     15
+#define SHT_PREINIT_ARRAY  16
 #define SHT_LOPROC         0x70000000
 #define SHT_HIPROC         0x7fffffff
 #define SHT_LOUSER         0x80000000
@@ -214,6 +217,13 @@
 #define PT_NOTE            4
 #define PT_SHLIB           5
 #define PT_PHDR            6
+
+/* GCC specific */
+
+#define PT_GNU_EH_FRAME    0x6474e550 /* GCC exception handler frame */
+#define PT_GNU_STACK       0x6474e551 /* Stack executability */
+#define PT_GNU_RELRO       0x6474e552 /* Read-only after relocation */
+
 #define PT_LOPROC          0x70000000
 #define PT_HIPROC          0x7fffffff
 
@@ -354,5 +364,11 @@
 /* Legal values for the note segment descriptor types for object files.  */
 
 #define NT_VERSION         1      /* Contains a version string.  */
+
+#ifdef CONFIG_ENDIAN_BIG
+#  define ELF_DATA         ELFDATA2MSB
+#else
+#  define ELF_DATA         ELFDATA2LSB
+#endif
 
 #endif /* __INCLUDE_ELF_H */

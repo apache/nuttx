@@ -48,25 +48,34 @@
 #define IOEXPANDER_DIRECTION_IN_PULLDOWN   2
 #define IOEXPANDER_DIRECTION_OUT           3  /* push-pull */
 #define IOEXPANDER_DIRECTION_OUT_OPENDRAIN 4
+#define IOEXPANDER_DIRECTION_OUT_LED       5  /* LED output */
 
 #define IOEXPANDER_PINMASK         (((ioe_pinset_t)1 << CONFIG_IOEXPANDER_NPINS) - 1)
 #define PINSET_ALL                 (~((ioe_pinset_t)0))
 
 /* Pin options */
 
-#define IOEXPANDER_OPTION_INVERT   1  /* Set the "active" level for a pin */
-#  define IOEXPANDER_VAL_NORMAL    0  /* Normal, no inversion */
-#  define IOEXPANDER_VAL_INVERT    1  /* Inverted */
+#define IOEXPANDER_OPTION_INVERT      1  /* Set the "active" level for a pin */
+#  define IOEXPANDER_VAL_NORMAL       0  /* Normal, no inversion */
+#  define IOEXPANDER_VAL_INVERT       1  /* Inverted */
 
-#define IOEXPANDER_OPTION_INTCFG   2  /* Configure interrupt for a pin */
-#  define IOEXPANDER_VAL_DISABLE   0  /* 0000 Disable pin  interrupts */
-#  define IOEXPANDER_VAL_LEVEL     1  /* xx01 Interrupt on level (vs. edge) */
-#    define IOEXPANDER_VAL_HIGH    5  /* 0101 Interrupt on high level */
-#    define IOEXPANDER_VAL_LOW     9  /* 1001 Interrupt on low level */
-#  define IOEXPANDER_VAL_EDGE      2  /* xx10 Interrupt on edge (vs. level) */
-#    define IOEXPANDER_VAL_RISING  6  /* 0110 Interrupt on rising edge */
-#    define IOEXPANDER_VAL_FALLING 10 /* 1010 Interrupt on falling edge */
-#    define IOEXPANDER_VAL_BOTH    14 /* 1110 Interrupt on both edges */
+#define IOEXPANDER_OPTION_INTCFG      2  /* Configure interrupt for a pin */
+#  define IOEXPANDER_VAL_DISABLE      0  /* 0000 Disable pin  interrupts */
+#  define IOEXPANDER_VAL_LEVEL        1  /* xx01 Interrupt on level (vs. edge) */
+#    define IOEXPANDER_VAL_HIGH       5  /* 0101 Interrupt on high level */
+#    define IOEXPANDER_VAL_LOW        9  /* 1001 Interrupt on low level */
+#  define IOEXPANDER_VAL_EDGE         2  /* xx10 Interrupt on edge (vs. level) */
+#    define IOEXPANDER_VAL_RISING     6  /* 0110 Interrupt on rising edge */
+#    define IOEXPANDER_VAL_FALLING    10 /* 1010 Interrupt on falling edge */
+#    define IOEXPANDER_VAL_BOTH       14 /* 1110 Interrupt on both edges */
+
+#define IOEXPANDER_OPTION_LEDCFG      3  /* Assign LED number to a pin */
+#define IOEXPANDER_OPTION_NONGENERIC  4  /* Non generic option interface. Some
+                                          * IO expanders have more advance
+                                          * options for pins and communication.
+                                          * This is used to pass driver dependend
+                                          * structure to expander driver.
+                                          */
 
 /* Access macros ************************************************************/
 

@@ -31,15 +31,23 @@
  * Pre-processor Prototypes
  ****************************************************************************/
 
-#if defined(CONFIG_STM32U5_STM32U585XX)
-#  define STM32_SRAM1_SIZE       (192*1024)  /* 192Kb SRAM1 on AHB bus Matrix */
-#  define STM32_SRAM2_SIZE       (64*1024)   /* 64kB  SRAM2 on AHB bus Matrix */
-#  define STM32_SRAM3_SIZE       (512*1024)  /* 512kB SRAM3 on AHB bus Matrix */
+#if defined(CONFIG_STM32U5_STM32U535XX) || defined(CONFIG_STM32U5_STM32U545XX)
+#  define STM32_SRAM1_SIZE       (0x00030000)   /* 192Kb SRAM1 */
+#  define STM32_SRAM2_SIZE       (0x00010000)   /* 64kB  SRAM2 */
+#elif defined(CONFIG_STM32U5_STM32U575XX) || defined(CONFIG_STM32U5_STM32U585XX)
+#  define STM32_SRAM1_SIZE       (0x00030000)   /* 192Kb SRAM1 */
+#  define STM32_SRAM2_SIZE       (0x00010000)   /* 64kB  SRAM2 */
+#  define STM32_SRAM3_SIZE       (0x00080000)   /* 512kB SRAM3 */
+#elif defined(CONFIG_STM32U5_STM32U59XX) || defined(CONFIG_STM32U5_STM32U59AXX) || defined(CONFIG_STM32U5_STM32U5A5XX) || defined(CONFIG_STM32U5_STM32U5A9XX)
+#  define STM32_SRAM1_SIZE       (0x000C0000)   /* 768Kb SRAM1 */
+#  define STM32_SRAM2_SIZE       (0x00010000)   /* 64kB  SRAM2 */
+#  define STM32_SRAM3_SIZE       (0x000d0000)   /* 832kB SRAM3 */
+#  define STM32_SRAM5_SIZE       (0x000d0000)   /* 832kB SRAM5 */
 #else
 #  error "Unsupported STM32U5 chip"
 #endif
 
-#if defined(CONFIG_STM32U5_STM32U585XX)
+#if defined(CONFIG_STM32U5_STM32U585XX) || defined(CONFIG_STM32U5_STM32U5A5XX)
 #  define STM32_NFSMC                    1   /* Have FSMC memory controller */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM32                  2   /* 32-bit general timers TIM2 and 5 with DMA */
@@ -69,6 +77,10 @@
 #  define STM32_NCOMP                    2   /* Comparators */
 #  define STM32_NOPAMP                   2   /* Operational Amplifiers */
 #endif /* CONFIG_STM32U5_STM32U585XX */
+
+#if defined(CONFIG_STM32U5_STM32U5A5ZJT)
+#  define STM32_NUSBOTGHS                1   /* USB OTG HS */
+#endif
 
 /* NVIC priority levels *****************************************************/
 

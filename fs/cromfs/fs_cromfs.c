@@ -736,7 +736,7 @@ static int cromfs_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Sanity checks */
 
-  DEBUGASSERT(filep->f_priv == NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv == NULL);
 
   /* Get the mountpoint inode reference from the file structure and the
    * volume private data from the inode structure
@@ -780,7 +780,7 @@ static int cromfs_open(FAR struct file *filep, FAR const char *relpath,
    * file.
    */
 
-  ff = (FAR struct cromfs_file_s *)kmm_zalloc(sizeof(struct cromfs_file_s));
+  ff = kmm_zalloc(sizeof(struct cromfs_file_s));
   if (ff == NULL)
     {
       return -ENOMEM;
@@ -788,7 +788,7 @@ static int cromfs_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Create a file buffer to support partial sector accesses */
 
-  ff->ff_buffer = (FAR uint8_t *)kmm_malloc(fs->cv_bsize);
+  ff->ff_buffer = kmm_malloc(fs->cv_bsize);
   if (!ff->ff_buffer)
     {
       kmm_free(ff);
@@ -815,7 +815,7 @@ static int cromfs_close(FAR struct file *filep)
   FAR struct cromfs_file_s *ff;
 
   finfo("Closing\n");
-  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
 
   /* Get the open file instance from the file structure */
 
@@ -853,7 +853,7 @@ static ssize_t cromfs_read(FAR struct file *filep, FAR char *buffer,
   unsigned int copyoffs;
 
   finfo("Read %zu bytes from offset %jd\n", buflen, (intmax_t)filep->f_pos);
-  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
 
   /* Get the mountpoint inode reference from the file structure and the
    * volume private data from the inode structure
@@ -1097,7 +1097,7 @@ static int cromfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Recover our private data from the struct file instance */
 
-  fs = (FAR struct cromfs_volume_s *)oldp->f_inode->i_private;
+  fs = oldp->f_inode->i_private;
   DEBUGASSERT(fs != NULL);
 
   /* Get the open file instance from the file structure */
@@ -1117,7 +1117,7 @@ static int cromfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Create a file buffer to support partial sector accesses */
 
-  newff->ff_buffer = (FAR uint8_t *)kmm_malloc(fs->cv_bsize);
+  newff->ff_buffer = kmm_malloc(fs->cv_bsize);
   if (newff->ff_buffer == NULL)
     {
       kmm_free(newff);
@@ -1153,7 +1153,7 @@ static int cromfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 
   /* Sanity checks */
 
-  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
 
   /* Get the mountpoint inode reference from the file structure and the
    * volume private data from the inode structure

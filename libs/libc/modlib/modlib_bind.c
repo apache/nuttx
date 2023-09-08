@@ -37,6 +37,14 @@
 #include "modlib/modlib.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define I_REL   0    /* Index into relxxx[] arrays for relocations */
+#define I_PLT   1    /* ... for PLTs */
+#define N_RELS  2    /* Number of relxxx[] indexes */
+
+/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -50,6 +58,16 @@ typedef struct
   Elf_Sym         sym;
   int             idx;
 } Elf_SymCache;
+
+struct
+{
+  int stroff;           /* offset to string table */
+  int symoff;           /* offset to symbol table */
+  int lsymtab;          /* size of symbol table */
+  int relentsz;         /* size of relocation entry */
+  int reloff[2];        /* offset to the relocation section */
+  int relsz[2];         /* size of relocation table */
+} reldata;
 
 /****************************************************************************
  * Private Functions
@@ -245,7 +263,8 @@ static int modlib_relocate(FAR struct module_s *modp,
 
           /* Read the symbol table entry into memory */
 
-          ret = modlib_readsym(loadinfo, symidx, sym);
+          ret = modlib_readsym(loadinfo, symidx, sym,
+                               &loadinfo->shdr[loadinfo->symtabidx]);
           if (ret < 0)
             {
               berr("ERROR: Section %d reloc %d: "
@@ -257,7 +276,8 @@ static int modlib_relocate(FAR struct module_s *modp,
 
           /* Get the value of the symbol (in sym.st_value) */
 
-          ret = modlib_symvalue(modp, loadinfo, sym);
+          ret = modlib_symvalue(modp, loadinfo, sym,
+                           loadinfo->shdr[loadinfo->strtabidx].sh_offset);
           if (ret < 0)
             {
               /* The special error -ESRCH is returned only in one condition:
@@ -433,7 +453,8 @@ static int modlib_relocateadd(FAR struct module_s *modp,
 
           /* Read the symbol table entry into memory */
 
-          ret = modlib_readsym(loadinfo, symidx, sym);
+          ret = modlib_readsym(loadinfo, symidx, sym,
+                               &loadinfo->shdr[loadinfo->symtabidx]);
           if (ret < 0)
             {
               berr("ERROR: Section %d reloc %d: "
@@ -445,7 +466,8 @@ static int modlib_relocateadd(FAR struct module_s *modp,
 
           /* Get the value of the symbol (in sym.st_value) */
 
-          ret = modlib_symvalue(modp, loadinfo, sym);
+          ret = modlib_symvalue(modp, loadinfo, sym,
+                           loadinfo->shdr[loadinfo->strtabidx].sh_offset);
           if (ret < 0)
             {
               /* The special error -ESRCH is returned only in one condition:
@@ -520,6 +542,241 @@ static int modlib_relocateadd(FAR struct module_s *modp,
 }
 
 /****************************************************************************
+ * Name: modlib_relocatedyn
+ *
+ * Description:
+ *   Perform all relocations associated with a dynamic section.
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+static int modlib_relocatedyn(FAR struct module_s *modp,
+                              FAR struct mod_loadinfo_s *loadinfo,
+                              int relidx)
+{
+  FAR Elf_Shdr *shdr = &loadinfo->shdr[relidx];
+  FAR Elf_Shdr *symhdr;
+  FAR Elf_Dyn  *dyn = NULL;
+  FAR Elf_Rel  *rels = NULL;
+  FAR Elf_Rel  *rel;
+  FAR Elf_Sym  *sym = NULL;
+  uintptr_t       addr;
+  int             ret;
+  int             i;
+  int             idx_rel;
+  int             idx_sym;
+
+  dyn = lib_malloc(shdr->sh_size);
+  ret = modlib_read(loadinfo, (FAR uint8_t *) dyn, shdr->sh_size,
+                    shdr->sh_offset);
+  if (ret < 0)
+    {
+      berr("Failed to read dynamic section header");
+      return ret;
+    }
+
+  rels = lib_malloc(CONFIG_MODLIB_RELOCATION_BUFFERCOUNT * sizeof(Elf_Rel));
+  if (!rels)
+    {
+      berr("Failed to allocate memory for elf relocation rels\n");
+      lib_free(dyn);
+      return -ENOMEM;
+    }
+
+  memset((void *) &reldata, 0, sizeof(reldata));
+
+  for (i = 0; dyn[i].d_tag != DT_NULL; i++)
+    {
+      switch (dyn[i].d_tag)
+        {
+          case DT_REL :
+            reldata.reloff[I_REL] = dyn[i].d_un.d_val;
+            break;
+          case DT_RELSZ :
+            reldata.relsz[I_REL] = dyn[i].d_un.d_val;
+            break;
+          case DT_RELENT :
+            reldata.relentsz = dyn[i].d_un.d_val;
+            break;
+          case DT_SYMTAB :
+            reldata.symoff = dyn[i].d_un.d_val;
+            break;
+          case DT_STRTAB :
+            reldata.stroff = dyn[i].d_un.d_val;
+            break;
+          case DT_JMPREL :
+            reldata.reloff[I_PLT] = dyn[i].d_un.d_val;
+            break;
+          case DT_PLTRELSZ :
+            reldata.relsz[I_PLT] = dyn[i].d_un.d_val;
+            break;
+        }
+    }
+
+  symhdr = &loadinfo->shdr[loadinfo->dsymtabidx];
+  sym = lib_malloc(symhdr->sh_size);
+  if (!sym)
+    {
+      berr("Error obtaining storage for dynamic symbol table");
+      lib_free(rels);
+      lib_free(dyn);
+      return -ENOMEM;
+    }
+
+  ret = modlib_read(loadinfo, (FAR uint8_t *)sym, symhdr->sh_size,
+                    symhdr->sh_offset);
+  if (ret < 0)
+    {
+      berr("Error reading dynamic symbol table - %d", ret);
+      lib_free(sym);
+      lib_free(rels);
+      lib_free(dyn);
+      return ret;
+    }
+
+  reldata.lsymtab = reldata.stroff - reldata.symoff;
+
+  for (idx_rel = 0; idx_rel < N_RELS; idx_rel++)
+    {
+      if (reldata.reloff[idx_rel] == 0)
+        {
+          continue;
+        }
+
+      /* Examine each relocation in the .rel.* section. */
+
+      ret = OK;
+
+      for (i = 0; i < reldata.relsz[idx_rel] / reldata.relentsz; i++)
+        {
+          /* Process each relocation entry */
+
+          rel = &rels[i % CONFIG_MODLIB_RELOCATION_BUFFERCOUNT];
+
+          if (!(i % CONFIG_MODLIB_RELOCATION_BUFFERCOUNT))
+            {
+              size_t relsize = (sizeof(Elf_Rel) *
+                               CONFIG_MODLIB_RELOCATION_BUFFERCOUNT);
+
+              if (reldata.relsz[idx_rel] < relsize)
+                {
+                  relsize = reldata.relsz[idx_rel];
+                }
+
+              ret = modlib_read(loadinfo, (FAR uint8_t *)rels,
+                                relsize,
+                                reldata.reloff[idx_rel] +
+                                i * sizeof(Elf_Rel));
+
+              if (ret < 0)
+                {
+                  berr("ERROR: Section %d reloc %d:"
+                       "Failed to read relocation entry: %d\n",
+                       relidx, i, ret);
+                  break;
+                }
+            }
+
+          /* Calculate the relocation address. */
+
+          if (rel->r_offset < 0)
+            {
+              berr("ERROR: Section %d reloc %d:"
+                   "Relocation address out of range, offset %u\n",
+                   relidx, i, (int) rel->r_offset);
+              ret = -EINVAL;
+              lib_free(sym);
+              lib_free(rels);
+              lib_free(dyn);
+              return ret;
+            }
+
+          /* Now perform the architecture-specific relocation */
+
+          if ((idx_sym = ELF_R_SYM(rel->r_info)) != 0)
+            {
+              if (sym[idx_sym].st_shndx == SHN_UNDEF) /* We have an external reference */
+                {
+                    void *ep;
+
+                    ep = modlib_findglobal(modp, loadinfo, symhdr,
+                                           &sym[idx_sym]);
+                    if ((ep == NULL) && (ELF_ST_BIND(sym[idx_sym].st_info)
+                        != STB_WEAK))
+                      {
+                        berr("ERROR: Unable to resolve addr of ext ref %s\n",
+                             loadinfo->iobuffer);
+                        ret = -EINVAL;
+                        lib_free(sym);
+                        lib_free(rels);
+                        lib_free(dyn);
+                        return ret;
+                      }
+
+                    addr = rel->r_offset + loadinfo->textalloc;
+                    *(FAR uintptr_t *)addr = (uintptr_t)ep;
+                }
+            }
+          else
+            {
+              Elf_Sym dynsym;
+
+              addr = rel->r_offset - loadinfo->datasec + loadinfo->datastart;
+
+              if ((*(FAR uint32_t *)addr) < loadinfo->datasec)
+                  dynsym.st_value = *(FAR uint32_t *)addr +
+                                    loadinfo->textalloc;
+              else
+                  dynsym.st_value = *(FAR uint32_t *)addr -
+                                    loadinfo->datasec + loadinfo->datastart;
+              ret = up_relocate(rel, &dynsym, addr);
+            }
+
+          if (ret < 0)
+            {
+              berr("ERROR: Section %d reloc %d: Relocation failed: %d\n",
+                   relidx, i, ret);
+              lib_free(sym);
+              lib_free(rels);
+              lib_free(dyn);
+              return ret;
+            }
+        }
+    }
+
+  /* Iterate through the dynamic symbol table looking for global symbols to
+   * put in our own symbol table for use with dlgetsym()
+   */
+
+  /* Relocate the entries in the table */
+
+  for (i = 0; i < (symhdr->sh_size / sizeof(Elf_Sym)); i++)
+    {
+      Elf_Shdr *s = &loadinfo->shdr[sym[i].st_shndx];
+
+      if (sym[i].st_shndx != SHN_UNDEF)
+        {
+          if (s->sh_addr < loadinfo->datasec)
+              sym[i].st_value = sym[i].st_value + loadinfo->textalloc;
+          else
+              sym[i].st_value = sym[i].st_value -
+                                loadinfo->datasec + loadinfo->datastart;
+        }
+    }
+
+  ret = modlib_insertsymtab(modp, loadinfo, symhdr, sym);
+
+  lib_free(sym);
+  lib_free(rels);
+  lib_free(dyn);
+
+  return ret;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -555,17 +812,6 @@ int modlib_bind(FAR struct module_s *modp,
       return ret;
     }
 
-  /* Allocate an I/O buffer.  This buffer is used by mod_symname() to
-   * accumulate the variable length symbol name.
-   */
-
-  ret = modlib_allocbuffer(loadinfo);
-  if (ret < 0)
-    {
-      berr("ERROR: modlib_allocbuffer failed: %d\n", ret);
-      return -ENOMEM;
-    }
-
   /* Process relocations in every allocated section */
 
   for (i = 1; i < loadinfo->ehdr.e_shnum; i++)
@@ -578,24 +824,61 @@ int modlib_bind(FAR struct module_s *modp,
           continue;
         }
 
-      /* Make sure that the section is allocated.  We can't relocate
-       * sections that were not loaded into memory.
-       */
-
-      if ((loadinfo->shdr[infosec].sh_flags & SHF_ALLOC) == 0)
+      if (loadinfo->ehdr.e_type == ET_DYN)
         {
-          continue;
+          switch (loadinfo->shdr[i].sh_type)
+            {
+              case SHT_DYNAMIC :
+                  ret = modlib_relocatedyn(modp, loadinfo, i);
+                  break;
+              case SHT_DYNSYM :
+                  loadinfo->dsymtabidx = i;
+                  break;
+              case SHT_INIT_ARRAY :
+                  loadinfo->initarr = loadinfo->shdr[i].sh_addr -
+                                      loadinfo->datasec +
+                                      loadinfo->datastart;
+                  loadinfo->ninit = loadinfo->shdr[i].sh_size /
+                                    sizeof(uintptr_t);
+                  break;
+              case SHT_FINI_ARRAY :
+                  loadinfo->finiarr = loadinfo->shdr[i].sh_addr -
+                                      loadinfo->datasec +
+                                      loadinfo->datastart;
+                  loadinfo->nfini = loadinfo->shdr[i].sh_size /
+                                    sizeof(uintptr_t);
+                  break;
+              case SHT_PREINIT_ARRAY :
+                  loadinfo->preiarr = loadinfo->shdr[i].sh_addr -
+                                      loadinfo->datasec +
+                                      loadinfo->datastart;
+                  loadinfo->nprei = loadinfo->shdr[i].sh_size /
+                                    sizeof(uintptr_t);
+                  break;
+            }
         }
-
-      /* Process the relocations by type */
-
-      if (loadinfo->shdr[i].sh_type == SHT_REL)
+      else
         {
-          ret = modlib_relocate(modp, loadinfo, i);
-        }
-      else if (loadinfo->shdr[i].sh_type == SHT_RELA)
-        {
-          ret = modlib_relocateadd(modp, loadinfo, i);
+          /* Make sure that the section is allocated.  We can't relocate
+           * sections that were not loaded into memory.
+           */
+
+          if ((loadinfo->shdr[infosec].sh_flags & SHF_ALLOC) == 0)
+            {
+                continue;
+            }
+
+          /* Process the relocations by type */
+
+          switch (loadinfo->shdr[i].sh_type)
+            {
+              case SHT_REL :
+                ret = modlib_relocate(modp, loadinfo, i);
+                break;
+              case SHT_RELA :
+                ret = modlib_relocateadd(modp, loadinfo, i);
+                break;
+            }
         }
 
       if (ret < 0)

@@ -60,8 +60,8 @@
  *
  ****************************************************************************/
 
-int fhex2mem(FAR FILE *instream, uint32_t baseaddr, uint32_t endpaddr,
-             enum hex2bin_swap_e swap)
+int fhex2mem(FAR FILE *instream, unsigned long baseaddr,
+             unsigned long endpaddr, enum hex2bin_swap_e swap)
 {
   struct lib_stdinstream_s stdinstream;
   struct lib_memsostream_s memoutstream;
@@ -81,7 +81,7 @@ int fhex2mem(FAR FILE *instream, uint32_t baseaddr, uint32_t endpaddr,
   /* And do the deed */
 
   return hex2bin(&stdinstream.public, &memoutstream.public,
-                 (uint32_t)baseaddr, (uint32_t)endpaddr,
+                 (unsigned long)baseaddr, (unsigned long)endpaddr,
                  (enum hex2bin_swap_e)swap);
 }
 

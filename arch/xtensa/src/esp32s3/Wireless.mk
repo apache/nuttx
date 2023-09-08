@@ -18,36 +18,19 @@
 #
 ############################################################################
 
-ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
-ESP_HAL_3RDPARTY_PATH   = $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)
-ifndef ESP_HAL_3RDPARTY_BRANCH
-	ESP_HAL_3RDPARTY_BRANCH = release/v5.1
-endif
-
-ifndef ESP_HAL_3RDPARTY_URL
-	ESP_HAL_3RDPARTY_URL	= https://github.com/espressif/esp-hal-3rdparty.git
-endif
-
-chip/$(ESP_HAL_3RDPARTY_REPO):
-	$(Q) echo "Cloning: ESP Wireless Drivers"
-	$(Q) git clone --depth=1 --branch $(ESP_HAL_3RDPARTY_BRANCH) $(ESP_HAL_3RDPARTY_URL) chip/$(ESP_HAL_3RDPARTY_REPO)
-
-# Silent preprocessor warnings
-
-CFLAGS += -Wno-undef -Wno-unused-variable
-
 context:: chip/$(ESP_HAL_3RDPARTY_REPO)
-	$(Q) echo "ESP Wireless Drivers: ${ESP_HAL_3RDPARTY_BRANCH}"
-	$(Q) echo "Initializing submodules.."
-	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule update --init --depth=1 components/mbedtls/mbedtls components/esp_phy/lib components/esp_wifi/lib
-	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO)/components/mbedtls/mbedtls reset --hard
+	$(Q) echo "Espressif HAL for 3rd Party Platforms: initializing submodules..."
+	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule --quiet update --init --depth=1 components/mbedtls/mbedtls components/esp_phy/lib components/esp_wifi/lib components/bt/controller/lib_esp32c3_family components/esp_coex/lib
+	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO)/components/mbedtls/mbedtls reset --quiet --hard
 	$(Q) echo "Applying patches..."
 	$(Q) cd chip/$(ESP_HAL_3RDPARTY_REPO)/components/mbedtls/mbedtls && git apply ../../../nuttx/patches/components/mbedtls/mbedtls/*.patch
 
 distclean::
 	$(call DELDIR, chip/$(ESP_HAL_3RDPARTY_REPO))
 
+INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_coex$(DELIM)include
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_common$(DELIM)include
+INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)bt$(DELIM)include$(DELIM)esp32c3$(DELIM)include
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_event$(DELIM)include
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_hw_support$(DELIM)include
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_phy$(DELIM)esp32s3$(DELIM)include
@@ -64,12 +47,19 @@ INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY
 
 EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_phy$(DELIM)lib$(DELIM)esp32s3
 EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_wifi$(DELIM)lib$(DELIM)esp32s3
+EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)bt$(DELIM)controller$(DELIM)lib_esp32c3_family$(DELIM)esp32s3
+EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_coex$(DELIM)lib$(DELIM)esp32s3
 
-EXTRA_LIBS += -lphy
+EXTRA_LIBS += -lphy -lcoexist
 
 # Wireless interfaces.
 
 CHIP_CSRCS += esp32s3_wireless.c
+
+ifeq ($(CONFIG_ESP32S3_BLE),y)
+CHIP_CSRCS += esp32s3_ble_adapter.c esp32s3_ble.c
+EXTRA_LIBS += -lbtbb -lbtdm_app
+endif
 
 ifeq ($(CONFIG_ESP32S3_WIFI),y)
 CHIP_CSRCS += esp32s3_wlan.c esp32s3_wifi_utils.c esp32s3_wifi_adapter.c
@@ -88,19 +78,24 @@ INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)mbedtls$(DELIM)port$(DELIM)include
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)nuttx$(DELIM)include$(DELIM)mbedtls
 
-
 ### Define Espressif's configs for mbedTLS
 
 CFLAGS += ${DEFINE_PREFIX}MBEDTLS_CONFIG_FILE="<mbedtls/esp_config.h>"
 
 CHIP_CSRCS += aes.c
+CHIP_CSRCS += aria.c
 CHIP_CSRCS += bignum_core.c
 CHIP_CSRCS += bignum.c
+CHIP_CSRCS += ccm.c
+CHIP_CSRCS += cipher.c
+CHIP_CSRCS += cipher_wrap.c
+CHIP_CSRCS += cmac.c
 CHIP_CSRCS += constant_time.c
 CHIP_CSRCS += ctr_drbg.c
 CHIP_CSRCS += ecp_curves.c
 CHIP_CSRCS += ecp.c
 CHIP_CSRCS += entropy.c
+CHIP_CSRCS += gcm.c
 CHIP_CSRCS += md.c
 CHIP_CSRCS += pkcs5.c
 CHIP_CSRCS += platform_util.c

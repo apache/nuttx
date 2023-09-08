@@ -140,7 +140,7 @@ int iob_clone_partial(FAR struct iob_s *iob1, unsigned int len,
   while (iob2 != NULL)
     {
       avail2 = CONFIG_IOB_BUFSIZE - iob2->io_offset;
-      if (offset2 < avail2)
+      if ((int)(offset2 - avail2) < 0)
         {
           break;
         }

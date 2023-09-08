@@ -148,6 +148,9 @@
  */
 
 #if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
+#  define _SCHED_GETTID()            nxsched_gettid()
+#  define _SCHED_GETPID()            nxsched_getpid()
+#  define _SCHED_GETPPID()           nxsched_getppid()
 #  define _SCHED_GETPARAM(t,p)       nxsched_get_param(t,p)
 #  define _SCHED_SETPARAM(t,p)       nxsched_set_param(t,p)
 #  define _SCHED_GETSCHEDULER(t)     nxsched_get_scheduler(t)
@@ -157,6 +160,9 @@
 #  define _SCHED_ERRNO(r)            (-(r))
 #  define _SCHED_ERRVAL(r)           (r)
 #else
+#  define _SCHED_GETTID()            gettid()
+#  define _SCHED_GETPID()            getpid()
+#  define _SCHED_GETPPID()           getppid()
 #  define _SCHED_GETPARAM(t,p)       sched_getparam(t,p)
 #  define _SCHED_SETPARAM(t,p)       sched_setparam(t,p)
 #  define _SCHED_GETSCHEDULER(t)     sched_getscheduler(t)
@@ -167,28 +173,18 @@
 #  define _SCHED_ERRVAL(r)           (-errno)
 #endif
 
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
-#  define _SCHED_GETTID()            nxsched_gettid()
-#  define _SCHED_GETPID()            nxsched_getpid()
-#  define _SCHED_GETPPID()           nxsched_getppid()
-#else
-#  define _SCHED_GETTID()            gettid()
-#  define _SCHED_GETPID()            getpid()
-#  define _SCHED_GETPPID()           getppid()
-#endif
-
-#ifdef CONFIG_DEBUG_TCBINFO
-#  define TCB_PID_OFF                offsetof(struct tcb_s, pid)
-#  define TCB_STATE_OFF              offsetof(struct tcb_s, task_state)
-#  define TCB_PRI_OFF                offsetof(struct tcb_s, sched_priority)
+#define TCB_PID_OFF                  offsetof(struct tcb_s, pid)
+#define TCB_STATE_OFF                offsetof(struct tcb_s, task_state)
+#define TCB_PRI_OFF                  offsetof(struct tcb_s, sched_priority)
 #if CONFIG_TASK_NAME_SIZE > 0
 #  define TCB_NAME_OFF               offsetof(struct tcb_s, name)
 #else
 #  define TCB_NAME_OFF               0
 #endif
-#  define TCB_REGS_OFF               offsetof(struct tcb_s, xcp.regs)
-#  define TCB_REG_OFF(reg)           (reg * sizeof(uint32_t))
-#endif
+#define TCB_REGS_OFF                 offsetof(struct tcb_s, xcp.regs)
+#define TCB_REG_OFF(reg)             (reg * sizeof(uintptr_t))
+#define TCB_STACK_OFF                offsetof(struct tcb_s, stack_base_ptr)
+#define TCB_STACK_SIZE_OFF           offsetof(struct tcb_s, adj_stack_size)
 
 /* Get a pointer to the process' memory map struct from the task_group */
 
@@ -431,6 +427,8 @@ struct task_group_s
 #ifdef CONFIG_SCHED_USER_IDENTITY
   uid_t   tg_uid;                   /* User identity                            */
   gid_t   tg_gid;                   /* User group identity                      */
+  uid_t   tg_euid;                  /* Effective user identity                  */
+  gid_t   tg_egid;                  /* Effective user group identity            */
 #endif
 
   /* Group membership *******************************************************/
@@ -712,13 +710,14 @@ struct pthread_tcb_s
  * debuggers to parse the tcb information
  */
 
-#ifdef CONFIG_DEBUG_TCBINFO
 begin_packed_struct struct tcbinfo_s
 {
   uint16_t pid_off;                      /* Offset of tcb.pid               */
   uint16_t state_off;                    /* Offset of tcb.task_state        */
   uint16_t pri_off;                      /* Offset of tcb.sched_priority    */
   uint16_t name_off;                     /* Offset of tcb.name              */
+  uint16_t stack_off;                    /* Offset of tcb.stack_alloc_ptr   */
+  uint16_t stack_size_off;               /* Offset of tcb.adj_stack_size    */
   uint16_t regs_off;                     /* Offset of tcb.regs              */
   uint16_t basic_num;                    /* Num of genernal regs            */
   uint16_t total_num;                    /* Num of regs in tcbinfo.reg_offs */
@@ -739,7 +738,6 @@ begin_packed_struct struct tcbinfo_s
   }
   end_packed_struct reg_off;
 } end_packed_struct;
-#endif
 
 /* This is the callback type used by nxsched_foreach() */
 
@@ -768,9 +766,7 @@ EXTERN unsigned long g_premp_max[CONFIG_SMP_NCPUS];
 EXTERN unsigned long g_crit_max[CONFIG_SMP_NCPUS];
 #endif /* CONFIG_SCHED_CRITMONITOR */
 
-#ifdef CONFIG_DEBUG_TCBINFO
 EXTERN const struct tcbinfo_s g_tcbinfo;
-#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -1082,12 +1078,12 @@ void nxtask_startup(main_t entrypt, int argc, FAR char *argv[]);
 #endif
 
 /****************************************************************************
- * Internal vfork support.  The overall sequence is:
+ * Internal fork support.  The overall sequence is:
  *
- * 1) User code calls vfork().  vfork() is provided in architecture-specific
+ * 1) User code calls fork().  fork() is provided in architecture-specific
  *    code.
- * 2) vfork()and calls nxtask_setup_vfork().
- * 3) nxtask_setup_vfork() allocates and configures the child task's TCB.
+ * 2) fork()and calls nxtask_setup_fork().
+ * 3) nxtask_setup_fork() allocates and configures the child task's TCB.
  *    This consists of:
  *    - Allocation of the child task's TCB.
  *    - Initialization of file descriptors and streams
@@ -1095,20 +1091,20 @@ void nxtask_startup(main_t entrypt, int argc, FAR char *argv[]);
  *    - Allocate and initialize the stack
  *    - Setup the input parameters for the task.
  *    - Initialization of the TCB (including call to up_initial_state())
- * 4) vfork() provides any additional operating context. vfork must:
+ * 4) fork() provides any additional operating context. fork must:
  *    - Initialize special values in any CPU registers that were not
  *      already configured by up_initial_state()
- * 5) vfork() then calls nxtask_start_vfork()
- * 6) nxtask_start_vfork() then executes the child thread.
+ * 5) fork() then calls nxtask_start_fork()
+ * 6) nxtask_start_fork() then executes the child thread.
  *
- * nxtask_abort_vfork() may be called if an error occurs between
+ * nxtask_abort_fork() may be called if an error occurs between
  * steps 3 and 6.
  *
  ****************************************************************************/
 
-FAR struct task_tcb_s *nxtask_setup_vfork(start_t retaddr);
-pid_t nxtask_start_vfork(FAR struct task_tcb_s *child);
-void nxtask_abort_vfork(FAR struct task_tcb_s *child, int errcode);
+FAR struct task_tcb_s *nxtask_setup_fork(start_t retaddr);
+pid_t nxtask_start_fork(FAR struct task_tcb_s *child);
+void nxtask_abort_fork(FAR struct task_tcb_s *child, int errcode);
 
 /****************************************************************************
  * Name: group_argvstr
@@ -1228,8 +1224,7 @@ void nxsched_suspend_scheduler(FAR struct tcb_s *tcb);
  *
  ****************************************************************************/
 
-struct sched_param;  /* Forward reference */
-int nxsched_get_param (pid_t pid, FAR struct sched_param *param);
+int nxsched_get_param(pid_t pid, FAR struct sched_param *param);
 
 /****************************************************************************
  * Name:  nxsched_set_param
@@ -1265,7 +1260,6 @@ int nxsched_get_param (pid_t pid, FAR struct sched_param *param);
  *
  ****************************************************************************/
 
-struct sched_param;  /* Forward reference */
 int nxsched_set_param(pid_t pid, FAR const struct sched_param *param);
 
 /****************************************************************************
@@ -1462,7 +1456,7 @@ void nxsched_get_stateinfo(FAR struct tcb_s *tcb, FAR char *state,
  * Input Parameters:
  *   pid - The task ID of the thread to waid for
  *   stat_loc - The location to return the exit status
- *   options - ignored
+ *   options - Modifiable behavior, see sys/wait.h.
  *
  * Returned Value:
  *   If nxsched_waitpid() returns because the status of a child process is

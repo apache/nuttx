@@ -48,15 +48,7 @@
 
 uid_t geteuid(void)
 {
-#ifdef CONFIG_SCHED_USER_IDENTITY
-  /* If we have real UID/GID support, then treat the real user ID as the
-   * effective user ID.
-   */
-
-  return getuid();
-#else
   /* Return the user identity 'root' with a uid value of 0. */
 
   return 0;
-#endif
 }

@@ -31,6 +31,8 @@
 
 #include <nuttx/config.h>
 
+#include "esp32s3_aliases.ld"
+
 #define SRAM_IRAM_START     0x40370000
 #define SRAM_DIRAM_I_START  0x40378000
 
@@ -41,10 +43,15 @@
  * Application Image properly.
  *
  * For more information, refer to the bootloader linker scripts:
- * https://github.com/espressif/esp-idf/blob/v4.4.2/components/bootloader/subproject/main/ld/esp32s3/bootloader.ld#L41-L47
+ * https://github.com/espressif/esp-idf/blob/v5.1/components/bootloader/subproject/main/ld/esp32s3/bootloader.ld#L46-L52
  */
 
+#ifdef CONFIG_ESP32S3_APP_FORMAT_MCUBOOT
+#define SRAM_IRAM_END       0x403ba000
+#else
 #define SRAM_IRAM_END       0x403cc700
+#endif
+
 #define I_D_SRAM_OFFSET     (SRAM_DIRAM_I_START - SRAM_DRAM_START)
 
 #define SRAM_DRAM_START     0x3fc88000
@@ -66,6 +73,8 @@
 #  define FLASH_SIZE        0x800000
 #elif defined (CONFIG_ESP32S3_FLASH_16M)
 #  define FLASH_SIZE        0x1000000
+#elif defined (CONFIG_ESP32S3_FLASH_32M)
+#  define FLASH_SIZE        0x2000000
 #endif
 
 MEMORY

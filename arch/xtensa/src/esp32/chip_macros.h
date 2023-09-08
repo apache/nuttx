@@ -87,7 +87,7 @@
 #ifdef __ASSEMBLY__
 
 #if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
-  .global	g_cpu_intstack_top
+  .global g_cpu_intstack_top
 #endif /* CONFIG_SMP && CONFIG_ARCH_INTERRUPTSTACK > 15 */
 
 #endif /* __ASSEMBLY__ */

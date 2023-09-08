@@ -76,6 +76,8 @@
 #    else
 #      define BOARD_FLASH_PROGDELAY  2
 #    endif
+#  else
+#    define BOARD_FLASH_PROGDELAY    2
 #  endif
 #endif
 
@@ -326,6 +328,12 @@ static inline void rcc_enableahb3(void)
   regval |= RCC_AHB3ENR_FMCEN;
 #endif
 
+#if defined(CONFIG_STM32H7_LTDC) && defined(CONFIG_STM32H7_DMA2D)
+  /* Enable DMA2D */
+
+  regval |= RCC_AHB3ENR_DMA2DEN;
+#endif
+
   /* TODO: ... */
 
   putreg32(regval, STM32_RCC_AHB3ENR);   /* Enable peripherals */
@@ -408,6 +416,12 @@ static inline void rcc_enableahb4(void)
   /* Backup SRAM clock enable */
 
   regval |= RCC_AHB4ENR_BKPSRAMEN;
+#endif
+
+#ifdef CONFIG_STM32H7_HSEM
+  /* HSEM clock enable */
+
+  regval |= RCC_AHB4ENR_HSEMEN;
 #endif
 
   putreg32(regval, STM32_RCC_AHB4ENR);   /* Enable peripherals */
@@ -543,7 +557,11 @@ static inline void rcc_enableapb3(void)
 
   regval = getreg32(STM32_RCC_APB3ENR);
 
-  /* TODO: ... */
+#ifdef CONFIG_STM32H7_LTDC
+  /* LTDC clock enable */
+
+  regval |= RCC_APB3ENR_LTDCEN;
+#endif
 
   putreg32(regval, STM32_RCC_APB3ENR);   /* Enable peripherals */
 }
@@ -866,11 +884,11 @@ void stm32_stdclockconfig(void)
       regval = getreg32(STM32_PWR_CR3);
       regval &= ~(STM32_PWR_CR3_BYPASS | STM32_PWR_CR3_LDOEN |
           STM32_PWR_CR3_SMPSEXTHP | STM32_PWR_CR3_SMPSLEVEL_MASK);
-      regval |= STM32_PWR_CR3_LDOESCUEN;
+      regval |= STM32_PWR_CR3_SCUEN;
       putreg32(regval, STM32_PWR_CR3);
 #else
       regval = getreg32(STM32_PWR_CR3);
-      regval |= STM32_PWR_CR3_LDOEN | STM32_PWR_CR3_LDOESCUEN;
+      regval |= STM32_PWR_CR3_LDOEN | STM32_PWR_CR3_SCUEN;
       putreg32(regval, STM32_PWR_CR3);
 #endif
 

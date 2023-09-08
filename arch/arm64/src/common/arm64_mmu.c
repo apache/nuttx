@@ -426,7 +426,7 @@ static void init_xlat_tables(const struct arm_mmu_region *region)
   uint64_t level_size;
 
 #ifdef CONFIG_MMU_DEBUG
-  sinfo("mmap: virt %llx phys %llx size %llx\n", virt, phys, size);
+  sinfo("mmap: virt %lux phys %lux size %lux\n", virt, phys, size);
 #endif
 
   /* check minimum alignment requirement for given mmap region */
@@ -541,7 +541,11 @@ static void enable_mmu_el1(unsigned int flags)
   /* Enable the MMU and data cache */
 
   value = read_sysreg(sctlr_el1);
-  write_sysreg((value | SCTLR_M_BIT | SCTLR_C_BIT), sctlr_el1);
+  write_sysreg((value | SCTLR_M_BIT
+#ifndef CONFIG_ARM64_DCACHE_DISABLE
+               | SCTLR_C_BIT
+#endif
+               ), sctlr_el1);
 
   /* Ensure the MMU enable takes effect immediately */
 

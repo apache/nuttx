@@ -3,6 +3,24 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+config ARM64_STRING_FUNCTION
+	bool "Enable optimized ARM64 specific string function"
+	default n
+	depends on ARCH_TOOLCHAIN_GNU
+	select ARM64_MEMCHR
+	select ARM64_MEMCMP
+	select ARM64_MEMCPY
+	select ARM64_MEMSET
+	select ARM64_MEMMOVE
+	select ARM64_STRCHR
+	select ARM64_STRCHRNUL
+	select ARM64_STRCMP
+	select ARM64_STRCPY
+	select ARM64_STRLEN
+	select ARM64_STRNCMP
+	select ARM64_STRNLEN
+	select ARM64_STRRCHR
+
 config ARM64_MEMCHR
 	bool "Enable optimized memchr() for ARM64"
 	default n

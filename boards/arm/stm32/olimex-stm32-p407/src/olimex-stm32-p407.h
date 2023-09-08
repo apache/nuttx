@@ -27,6 +27,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+#include <nuttx/symtab.h>
 #include <stdint.h>
 #include <arch/stm32/chip.h>
 

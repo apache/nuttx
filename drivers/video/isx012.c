@@ -139,7 +139,7 @@
 #define VALIDATE_VALUE(val, min, max, step) (((val >= min) && \
                                               (val <= max) && \
                                               (((val - min) % step) == 0) ? \
-                                              OK : -EINVAL))
+                                              OK : -ERANGE))
 
 #define ISX012_CHIPID_L (0x0000c460)
 #define ISX012_CHIPID_H (0x00005516)

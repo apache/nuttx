@@ -21,8 +21,15 @@ choice
 config MATH_CORDIC_USE_Q31
 	bool "CORDIC uses Q1.31"
 
-endchoice
+endchoice # MATH CORDIC numeric type
 
-endif
+endif # MATH_CORDIC
+
+config MATH_FFT
+	bool "MATH FFT support"
+	default n
+	---help---
+		This selection enables building of the "upper-half" FFT driver.
+		See include/nuttx/math/fft.h for further FFT driver information.
 
 endmenu # MATH Acceleration Information

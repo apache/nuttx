@@ -96,7 +96,7 @@ clk_mux_determine_rate(FAR struct clk_s *clk, uint32_t rate,
   uint32_t parent_rate;
   uint32_t best = 0;
 
-  if (clk->flags & CLK_SET_RATE_NO_REPARENT)
+  if (mux->flags & CLK_MUX_SET_RATE_NO_REPARENT)
     {
       parent = clk->parent;
       if (clk->flags & CLK_SET_RATE_PARENT)

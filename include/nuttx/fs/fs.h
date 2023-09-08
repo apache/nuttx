@@ -74,7 +74,7 @@
 #  define _NX_READ(f,b,s)      nx_read(f,b,s)
 #  define _NX_WRITE(f,b,s)     nx_write(f,b,s)
 #  define _NX_SEEK(f,o,w)      nx_seek(f,o,w)
-#  define _NX_STAT(p,s)        nx_stat(p,s,1)
+#  define _NX_STAT(f,s)        nx_fstat(f,s)
 #  define _NX_GETERRNO(r)      (-(r))
 #  define _NX_SETERRNO(r)      set_errno(-(r))
 #  define _NX_GETERRVAL(r)     (r)
@@ -84,7 +84,7 @@
 #  define _NX_READ(f,b,s)      read(f,b,s)
 #  define _NX_WRITE(f,b,s)     write(f,b,s)
 #  define _NX_SEEK(f,o,w)      lseek(f,o,w)
-#  define _NX_STAT(p,s)        stat(p,s)
+#  define _NX_STAT(f,s)        fstat(f,s)
 #  define _NX_GETERRNO(r)      errno
 #  define _NX_SETERRNO(r)      ((void)(r))
 #  define _NX_GETERRVAL(r)     (-errno)
@@ -114,6 +114,7 @@
 #define   FSNODEFLAG_TYPE_MTD       0x00000007 /*   Named MTD driver       */
 #define   FSNODEFLAG_TYPE_SOFTLINK  0x00000008 /*   Soft link              */
 #define   FSNODEFLAG_TYPE_SOCKET    0x00000009 /*   Socket                 */
+#define   FSNODEFLAG_TYPE_PIPE      0x0000000a /*   Pipe                   */
 #define FSNODEFLAG_DELETED          0x00000010 /* Unlinked                 */
 
 #define INODE_IS_TYPE(i,t) \
@@ -129,6 +130,7 @@
 #define INODE_IS_MTD(i)       INODE_IS_TYPE(i,FSNODEFLAG_TYPE_MTD)
 #define INODE_IS_SOFTLINK(i)  INODE_IS_TYPE(i,FSNODEFLAG_TYPE_SOFTLINK)
 #define INODE_IS_SOCKET(i)    INODE_IS_TYPE(i,FSNODEFLAG_TYPE_SOCKET)
+#define INODE_IS_PIPE(i)      INODE_IS_TYPE(i,FSNODEFLAG_TYPE_PIPE)
 
 #define INODE_GET_TYPE(i)     ((i)->i_flags & FSNODEFLAG_TYPE_MASK)
 #define INODE_SET_TYPE(i,t) \
@@ -147,6 +149,7 @@
 #define INODE_SET_MTD(i)      INODE_SET_TYPE(i,FSNODEFLAG_TYPE_MTD)
 #define INODE_SET_SOFTLINK(i) INODE_SET_TYPE(i,FSNODEFLAG_TYPE_SOFTLINK)
 #define INODE_SET_SOCKET(i)   INODE_SET_TYPE(i,FSNODEFLAG_TYPE_SOCKET)
+#define INODE_SET_PIPE(i)     INODE_SET_TYPE(i,FSNODEFLAG_TYPE_PIPE)
 
 /* The status change flags.
  * These should be or-ed together to figure out what want to change.
@@ -405,6 +408,9 @@ struct inode
   uint16_t          i_flags;    /* Flags for inode */
   union inode_ops_u u;          /* Inode operations */
   ino_t             i_ino;      /* Inode serial number */
+#ifdef CONFIG_PSEUDOFS_FILE
+  size_t            i_size;     /* The size of per inode driver */
+#endif
 #ifdef CONFIG_PSEUDOFS_ATTRIBUTES
   mode_t            i_mode;     /* Access mode flags */
   uid_t             i_owner;    /* Owner */
@@ -714,6 +720,47 @@ int register_mtdpartition(FAR const char *partition,
 #ifdef CONFIG_MTD
 int unregister_mtddriver(FAR const char *path);
 #endif
+
+#ifdef CONFIG_PIPES
+
+/****************************************************************************
+ * Name: register_pipedriver
+ *
+ * Description:
+ *   Register a pipe driver inode the pseudo file system.
+ *
+ * Input Parameters:
+ *   path - The path to the inode to create
+ *   fops - The file operations structure
+ *   mode - inmode privileges
+ *   priv - Private, user data that will be associated with the inode.
+ *
+ * Returned Value:
+ *   Zero on success (with the inode point in 'inode'); A negated errno
+ *   value is returned on a failure (all error values returned by
+ *   inode_reserve):
+ *
+ *   EINVAL - 'path' is invalid for this operation
+ *   EEXIST - An inode already exists at 'path'
+ *   ENOMEM - Failed to allocate in-memory resources for the operation
+ *
+ ****************************************************************************/
+
+int register_pipedriver(FAR const char *path,
+                        FAR const struct file_operations *fops,
+                        mode_t mode, FAR void *priv);
+
+/****************************************************************************
+ * Name: unregister_pipedriver
+ *
+ * Description:
+ *   Remove the pipe driver inode at 'path' from the pseudo-file system
+ *
+ ****************************************************************************/
+
+int unregister_pipedriver(FAR const char *path);
+
+#endif /* CONFIG_PIPES */
 
 /****************************************************************************
  * Name: nx_mount
@@ -1457,6 +1504,23 @@ int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup);
  ****************************************************************************/
 
 int file_fstat(FAR struct file *filep, FAR struct stat *buf);
+
+/****************************************************************************
+ * Name: nx_fstat
+ *
+ * Description:
+ *   nx_fstat() is similar to the standard 'fstat' interface except that is
+ *   not a cancellation point and it does not modify the errno variable.
+ *
+ *   nx_fstat() is an internal NuttX interface and should not be called from
+ *   applications.
+ *
+ * Returned Value:
+ *   Zero is returned on success; a negated value is returned on any failure.
+ *
+ ****************************************************************************/
+
+int nx_fstat(int fd, FAR struct stat *buf);
 
 /****************************************************************************
  * Name: nx_stat

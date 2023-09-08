@@ -35,6 +35,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/init.h>
 #include <nuttx/symtab.h>
+#include <nuttx/trace.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/kthread.h>
 #include <nuttx/userspace.h>
@@ -406,6 +407,8 @@ static inline void nx_create_initthread(void)
 
 int nx_bringup(void)
 {
+  sched_trace_begin();
+
 #ifndef CONFIG_DISABLE_ENVIRON
   /* Setup up the initial environment for the idle task.  At present, this
    * may consist of only the initial PATH variable and/or and init library
@@ -454,5 +457,6 @@ int nx_bringup(void)
   clearenv();
 #endif
 
+  sched_trace_end();
   return OK;
 }

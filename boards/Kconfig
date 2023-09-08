@@ -125,9 +125,9 @@ config ARCH_BOARD_DEMOS92S12NEC64
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	---help---
-	NXP/FreeScale DMO9S12NE64 board based on the MC9S12NE64 hcs12 cpu.  This
-	port uses the m9s12x GCC toolchain.  STATUS:  (Still) under development; it
-	is code complete but has not yet been verified.
+		NXP/FreeScale DMO9S12NE64 board based on the MC9S12NE64 hcs12 cpu.  This
+		port uses the m9s12x GCC toolchain.  STATUS:  (Still) under development; it
+		is code complete but has not yet been verified.
 
 config ARCH_BOARD_DK_TM4C129X
 	bool "Tiva DK-TM4C129x Connected Development Kit"
@@ -438,6 +438,24 @@ config ARCH_BOARD_ESP32S3_EYE
 		The ESP32-S3-EYE is a small-sized AI development board produced by Espressif
 		featuring the ESP32-S3 CPU with a 2-Megapixel camera, an LCD display,
 		a microphone, an 8 MB Octal PSRAM and an 8 MB flash.
+
+config ARCH_BOARD_ESP32S3_LCD_EV
+	bool "Espressif ESP32-S3-LCD-EV Board"
+	depends on ARCH_CHIP_ESP32S3WROOM2
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS if ESP32S3_GPIO_IRQ
+	---help---
+		ESP32-S3-LCD-EV is an ESP32-S3-based development board with a touchscreen.
+		Together with different subboards, ESP32-S3-LCD-EV-Board can drive LCDs with IIC,
+		SPI, 8080, and RGB interfaces.
+		It houses dual array microphones, supports voice recognition and near/far-field
+		voice wake-up, and features screen and voice interaction.
+		The board caters to development needs for touchscreen products with different resolutions
+		and interfaces. Currently, we have two boards available:
+
+			1. ESP32-S3-LCD-EV-Board with 480x480 LCD
+			2. ESP32-S3-LCD-EV-Board with 800x480 LCD
 
 config ARCH_BOARD_ESP32S3_MEADOW
 	bool "WildernessLabs ESP32S3-Meadow Board"
@@ -976,7 +994,6 @@ config ARCH_BOARD_METRO_M4
 	depends on ARCH_CHIP_SAMD51J19
 	select ARCH_HAVE_LEDS
 	---help---
-	---help---
 		This configuration is the port of NuttX to the Adafruit Metro M4.
 		The Metro M4 uses a Arduino form factor and and pinout.  It's powered
 		with an ATSAMD51J19
@@ -1105,6 +1122,20 @@ config ARCH_BOARD_NRF52840_DONGLE
 	---help---
 		This option selects the Nordic nRF52840 Dongle (PCA10059)
 
+config ARCH_BOARD_ARDUINO_NANO_33BLE
+	bool "Arduino Nano 33 BLE Sense based on Nordic nRF52840"
+	depends on ARCH_CHIP_NRF52
+	select ARCH_HAVE_LEDS
+	---help---
+		Arduino Nano 33 BLE Sense based on Nordic nRF52840
+
+config ARCH_BOARD_ARDUINO_NANO_33BLE_REV2
+	bool "Arduino Nano 33 BLE Sense Rev2 based on Nordic nRF52840"
+	depends on ARCH_CHIP_NRF52
+	select ARCH_HAVE_LEDS
+	---help---
+		Arduino Nano 33 BLE Sense Rev2 based on Nordic nRF52840
+
 config ARCH_BOARD_THINGY52
 	bool "Nordic Thingy:52 Prototyping platform"
 	depends on ARCH_CHIP_NRF52
@@ -1136,6 +1167,15 @@ config ARCH_BOARD_THINGY53
 	select ARCH_HAVE_BUTTONS
 	---help---
 		This option selects the Thingy:53 multi-protocol IoT prototyping platform
+
+config ARCH_BOARD_NRF9160_DK
+	bool "Nordic nRF9160 Development Kit (PCA10090)"
+	depends on ARCH_CHIP_NRF91
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This option selects the nRF9160 Development Kit (PCA10090)
 
 config ARCH_BOARD_NUTINY_NUC120
 	bool "Nuvoton NuTiny NUC120"
@@ -1599,6 +1639,23 @@ config ARCH_BOARD_NUCLEO_H743ZI2
 	---help---
 		STMicro Nucleo H743ZI2 board based on the STMicro STM32H743ZI MCU.
 
+config ARCH_BOARD_NUCLEO_H745ZI
+	bool "STM32H745 Nucleo H745ZI"
+	depends on ARCH_CHIP_STM32H745ZI
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	---help---
+		STMicro Nucleo H745ZI board based on the STMicro STM32H745ZI MCU.
+
+config ARCH_BOARD_STM32H745I_DISCO
+	bool "STM32H745I-DISCO board"
+	depends on ARCH_CHIP_STM32H745XI
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	---help---
+		STMicro STM32H745I-DISCO board based on the STMicro
+		STM32H745XI MCU.
+
 config ARCH_BOARD_NUCLEO_L152RE
 	bool "STM32L152 Nucleo L152RE"
 	depends on ARCH_CHIP_STM32L152RE
@@ -1792,6 +1849,13 @@ config ARCH_BOARD_QEMU_RV_VIRT
 		This is the board configuration for the port of NuttX to the
 		QEMU RV32 Virt board. This board features the QEMU RV32 CPU.
 
+config ARCH_BOARD_JH7110_STAR64
+	bool "PINE64 Star64"
+	depends on ARCH_CHIP_JH7110
+	---help---
+		This options selects support for NuttX on PINE64 Star64 based
+		on StarFive JH7110 SoC.
+
 config ARCH_BOARD_S32K118EVB
 	bool "NXP S32K118EVB"
 	depends on ARCH_CHIP_S32K118
@@ -1880,6 +1944,14 @@ config ARCH_BOARD_SABRE_6QUAD
 		This options selects support for NuttX on the NXP/Freescale Sabre
 		board featuring the iMX 6Quad CPU.
 
+config ARCH_BOARD_QEMU_ARMV7A
+	bool "Qemu ARMv7a CPUs board"
+	depends on ARCH_CHIP_QEMU_ARM
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This options selects support for NuttX on the QEMU ARMv7a + virt
+		board featuring the qemu ARMv7a CPUs.
+
 config ARCH_BOARD_QEMU_ARMV8A
 	bool "Qemu ARMv8a CPUs board"
 	depends on ARCH_CHIP_QEMU
@@ -1897,6 +1969,14 @@ config ARCH_BOARD_PINEPHONE
 		This options selects support for NuttX on PINE64 PinePhone based
 		on Allwinner A64 SoC with ARM Cortex-A53.
 
+config ARCH_BOARD_PINEPHONE_PRO
+	bool "PINE64 PinePhonePro"
+	depends on ARCH_CHIP_RK3399
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This options selects support for NuttX on PINE64 PinePhone based
+		on Rockchip RK3399 SoC with ARM Cortex-A53
 config ARCH_BOARD_FVP_ARMV8R
 	bool "FVP ARM-v8r CPUs board"
 	depends on ARCH_CHIP_FVP_ARMV8R
@@ -1912,6 +1992,14 @@ config ARCH_BOARD_FVP_ARMV8R_AARCH32
 	---help---
 		This options selects support for NuttX on the Armv8-R AEM FVP
 		configure board with ARM Cortex-R52.
+
+config ARCH_BOARD_IMX8QM_MEK
+	bool "NXP i.MX8 QuadMax CPUs MEK board"
+	depends on ARCH_CHIP_IMX8_QUADMAX
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This options selects support for NuttX on the NXP i.MX8 QuadMax CPUs MEK
+		configure board with ARM Cortex-A53.
 
 config ARCH_BOARD_SAMA5D2_XULT
 	bool "Atmel SAMA5D2 Xplained Ultra development board"
@@ -2410,6 +2498,14 @@ config ARCH_BOARD_B_U585I_IOT02A
 		MCU. The STM32U585AI is a Cortex-M33 optimised for low-power operation
 		at up to 160MHz operation with 2048Kb Flash memory and 768Kb SRAM.
 
+config ARCH_BOARD_NUCLEO_U5A5ZJ_Q
+	bool "STMicro NUCLEO-U5A5ZJ-Q board"
+	depends on ARCH_CHIP_STM32U5A5ZJT
+	---help---
+		STMicro development board featuring the STM32U5A5
+		MCU. The STM32U5A5 is a Cortex-M33 optimised for low-power operation
+		at up to 160MHz operation with 4MB Flash memory and 2.5MB SRAM.
+
 config ARCH_BOARD_STM32L476VG_DISCO
 	bool "STMicro STM32L476VG -Discovery board"
 	depends on ARCH_CHIP_STM32L476RG
@@ -2658,6 +2754,15 @@ config ARCH_BOARD_XMC4700RELAX
 	---help---
 		Infineon XMC4700 Relax
 
+config ARCH_BOARD_VERDIN_MX8MP
+	bool "Toradex Verdin i.MX8MP"
+	depends on ARCH_CHIP_MX8MP
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		Toradex Verdin i.MX8MP
+
 config ARCH_BOARD_Z16F2800100ZCOG
 	bool "Zilog Z16F2800100ZCOG Development Kit"
 	depends on ARCH_CHIP_Z16F2811
@@ -2847,6 +2952,8 @@ config ARCH_BOARD
 	default "arduino-mega2560"          if ARCH_BOARD_ARDUINO_MEGA2560
 	default "arduino-due"               if ARCH_BOARD_ARDUINO_DUE
 	default "arduino-m0"                if ARCH_BOARD_ARDUINO_M0
+	default "arduino-nano-33ble"        if ARCH_BOARD_ARDUINO_NANO_33BLE
+	default "arduino-nano-33ble-rev2"   if ARCH_BOARD_ARDUINO_NANO_33BLE_REV2
 	default "arty_a7"                   if ARCH_BOARD_ARTY_A7
 	default "avr32dev1"                 if ARCH_BOARD_AVR32DEV1
 	default "axoloti"                   if ARCH_BOARD_AXOLOTI
@@ -2883,6 +2990,7 @@ config ARCH_BOARD
 	default "esp32s3-devkit"            if ARCH_BOARD_ESP32S3_DEVKIT
 	default "esp32s3-eye"               if ARCH_BOARD_ESP32S3_EYE
 	default "esp32s3-meadow"            if ARCH_BOARD_ESP32S3_MEADOW
+	default "esp32s3-lcd-ev"            if ARCH_BOARD_ESP32S3_LCD_EV
 	default "esp32c6-devkit"            if ARCH_BOARD_ESP32C6_DEVKIT
 	default "esp32c6-generic"           if ARCH_BOARD_ESP32C6_GENERIC
 	default "esp32h2-generic"           if ARCH_BOARD_ESP32H2_GENERIC
@@ -2953,6 +3061,7 @@ config ARCH_BOARD
 	default "nrf5340-dk"                if ARCH_BOARD_NRF5340_DK
 	default "nrf5340-audio-dk"          if ARCH_BOARD_NRF5340_AUDIO_DK
 	default "thingy53"                  if ARCH_BOARD_THINGY53
+	default "nrf9160-dk"                if ARCH_BOARD_NRF9160_DK
 	default "ntosd-dm320"               if ARCH_BOARD_NTOSD_DM320
 	default "nucleo-144"                if ARCH_BOARD_NUCLEO_144
 	default "nucleo-f072rb"             if ARCH_BOARD_NUCLEO_F072RB
@@ -2973,6 +3082,8 @@ config ARCH_BOARD
 	default "nucleo-g071rb"             if ARCH_BOARD_NUCLEO_G071RB
 	default "nucleo-h743zi"             if ARCH_BOARD_NUCLEO_H743ZI
 	default "nucleo-h743zi2"            if ARCH_BOARD_NUCLEO_H743ZI2
+	default "nucleo-h745zi"             if ARCH_BOARD_NUCLEO_H745ZI
+	default "stm32h745i-disco"          if ARCH_BOARD_STM32H745I_DISCO
 	default "nucleo-l073rz"             if ARCH_BOARD_NUCLEO_L073RZ
 	default "nucleo-l152re"             if ARCH_BOARD_NUCLEO_L152RE
 	default "nucleo-l432kc"             if ARCH_BOARD_NUCLEO_L432KC
@@ -3029,11 +3140,15 @@ config ARCH_BOARD
 	default "mr-canhubk3"               if ARCH_BOARD_MR_CANHUBK3
 	default "rv32m1-vega"               if ARCH_BOARD_RV32M1_VEGA
 	default "rv-virt"                   if ARCH_BOARD_QEMU_RV_VIRT
+	default "star64"                    if ARCH_BOARD_JH7110_STAR64
 	default "sabre-6quad"               if ARCH_BOARD_SABRE_6QUAD
+	default "qemu-armv7a"               if ARCH_BOARD_QEMU_ARMV7A
 	default "qemu-armv8a"               if ARCH_BOARD_QEMU_ARMV8A
 	default "pinephone"                 if ARCH_BOARD_PINEPHONE
+	default "pinephonepro"              if ARCH_BOARD_PINEPHONE_PRO
 	default "fvp-armv8r"                if ARCH_BOARD_FVP_ARMV8R
 	default "fvp-armv8r-aarch32"        if ARCH_BOARD_FVP_ARMV8R_AARCH32
+	default "imx8qm-mek"                if ARCH_BOARD_IMX8QM_MEK
 	default "sama5d2-xult"              if ARCH_BOARD_SAMA5D2_XULT
 	default "giant-board"               if ARCH_BOARD_GIANT_BOARD
 	default "jupiter-nano"              if ARCH_BOARD_JUPITER_NANO
@@ -3086,6 +3201,7 @@ config ARCH_BOARD
 	default "b-l072z-lrwan1"            if ARCH_BOARD_B_L072Z_LRWAN1
 	default "b-l475e-iot01a"            if ARCH_BOARD_B_L475E_IOT01A
 	default "b-u585i-iot02a"            if ARCH_BOARD_B_U585I_IOT02A
+	default "nucleo-u5a5zj-q"           if ARCH_BOARD_NUCLEO_U5A5ZJ_Q
 	default "stm32l476vg-disco"         if ARCH_BOARD_STM32L476VG_DISCO
 	default "stm32l476-mdk"             if ARCH_BOARD_STM32L476_MDK
 	default "stm32l4r9ai-disco"         if ARCH_BOARD_STM32L4R9AI_DISCO
@@ -3113,6 +3229,7 @@ config ARCH_BOARD
 	default "viewtool-stm32f107"        if ARCH_BOARD_VIEWTOOL_STM32F107
 	default "xmc4500-relax"             if ARCH_BOARD_XMC4500RELAX
 	default "xmc4700-relax"             if ARCH_BOARD_XMC4700RELAX
+	default "verdin-mx8mp"              if ARCH_BOARD_VERDIN_MX8MP
 	default "z16f2800100zcog"           if ARCH_BOARD_Z16F2800100ZCOG
 	default "z20x"                      if ARCH_BOARD_Z20X
 	default "z80sim"                    if ARCH_BOARD_Z80SIM
@@ -3223,17 +3340,26 @@ endif
 if ARCH_BOARD_SABRE_6QUAD
 source "boards/arm/imx6/sabre-6quad/Kconfig"
 endif
+if ARCH_BOARD_QEMU_ARMV7A
+source "boards/arm/qemu/qemu-armv7a/Kconfig"
+endif
 if ARCH_BOARD_QEMU_ARMV8A
 source "boards/arm64/qemu/qemu-armv8a/Kconfig"
 endif
 if ARCH_BOARD_PINEPHONE
 source "boards/arm64/a64/pinephone/Kconfig"
 endif
+if ARCH_BOARD_PINEPHONE_PRO
+source "boards/arm64/rk3399/pinephonepro/Kconfig"
+endif
 if ARCH_BOARD_FVP_ARMV8R
 source "boards/arm64/fvp-v8r/fvp-armv8r/Kconfig"
 endif
 if ARCH_BOARD_FVP_ARMV8R_AARCH32
 source "boards/arm/fvp-v8r-aarch32/fvp-armv8r-aarch32/Kconfig"
+endif
+if ARCH_BOARD_IMX8QM_MEK
+source "boards/arm64/imx8/imx8qm-mek/Kconfig"
 endif
 if ARCH_BOARD_IMXRT1020_EVK
 source "boards/arm/imxrt/imxrt1020-evk/Kconfig"
@@ -3409,6 +3535,12 @@ endif
 if ARCH_BOARD_ARDUINO_M0
 source "boards/arm/samd2l2/arduino-m0/Kconfig"
 endif
+if ARCH_BOARD_ARDUINO_NANO_33BLE
+source "boards/arm/nrf52/arduino-nano-33ble/Kconfig"
+endif
+if ARCH_BOARD_ARDUINO_NANO_33BLE_REV2
+source "boards/arm/nrf52/arduino-nano-33ble-rev2/Kconfig"
+endif
 if ARCH_BOARD_CIRCUIT_EXPRESS
 source "boards/arm/samd2l2/circuit-express/Kconfig"
 endif
@@ -3541,11 +3673,20 @@ endif
 if ARCH_BOARD_NUCLEO_H743ZI2
 source "boards/arm/stm32h7/nucleo-h743zi2/Kconfig"
 endif
+if ARCH_BOARD_NUCLEO_H745ZI
+source "boards/arm/stm32h7/nucleo-h745zi/Kconfig"
+endif
+if ARCH_BOARD_STM32H745I_DISCO
+source "boards/arm/stm32h7/stm32h745i-disco/Kconfig"
+endif
 if ARCH_BOARD_B_L475E_IOT01A
 source "boards/arm/stm32l4/b-l475e-iot01a/Kconfig"
 endif
 if ARCH_BOARD_B_U585I_IOT02A
 source "boards/arm/stm32u5/b-u585i-iot02a/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_U5A5ZJ_Q
+source "boards/arm/stm32u5/nucleo-u5a5zj-q/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_L432KC
 source "boards/arm/stm32l4/nucleo-l432kc/Kconfig"
@@ -3775,6 +3916,9 @@ endif
 if ARCH_BOARD_XMC4700RELAX
 source "boards/arm/xmc4/xmc4700-relax/Kconfig"
 endif
+if ARCH_BOARD_VERDIN_MX8MP
+source "boards/arm/mx8mp/verdin-mx8mp/Kconfig"
+endif
 if ARCH_BOARD_AVR32DEV1
 source "boards/avr/at32uc3/avr32dev1/Kconfig"
 endif
@@ -3865,6 +4009,9 @@ endif
 if ARCH_BOARD_QEMU_RV_VIRT
 source "boards/risc-v/qemu-rv/rv-virt/Kconfig"
 endif
+if ARCH_BOARD_JH7110_STAR64
+source "boards/risc-v/jh7110/star64/Kconfig"
+endif
 if ARCH_BOARD_ESP32C3_DEVKIT
 source "boards/risc-v/esp32c3/esp32c3-devkit/Kconfig"
 endif
@@ -3891,6 +4038,9 @@ source "boards/xtensa/esp32s3/esp32s3-eye/Kconfig"
 endif
 if ARCH_BOARD_ESP32S3_MEADOW
 source "boards/xtensa/esp32s3/esp32s3-meadow/Kconfig"
+endif
+if ARCH_BOARD_ESP32S3_LCD_EV
+source "boards/xtensa/esp32s3/esp32s3-lcd-ev/Kconfig"
 endif
 if ARCH_BOARD_ESP32C6_DEVKIT
 source "boards/risc-v/esp32c6/esp32c6-devkit/Kconfig"
@@ -4045,6 +4195,9 @@ source "boards/arm/nrf52/common/Kconfig"
 endif
 if ARCH_CHIP_NRF53
 source "boards/arm/nrf53/common/Kconfig"
+endif
+if ARCH_CHIP_NRF91
+source "boards/arm/nrf91/common/Kconfig"
 endif
 endif
 
@@ -4279,5 +4432,7 @@ config BOARDCTL_IOCTL
 endif # BOARDCTL
 
 config BOARD_USBDEV_SERIALSTR
-	bool
+	bool "Board-specific usbdev serial string"
 	default n
+	---help---
+		Use board unique serial number to iSerialNumber in the device descriptor.

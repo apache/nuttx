@@ -5,6 +5,7 @@
 # You can then do "make savedefconfig" to generate a new defconfig file that includes your
 # modifications.
 #
+# CONFIG_BINFMT_DISABLE is not set
 # CONFIG_DISABLE_ENVIRON is not set
 # CONFIG_NSH_DISABLEBG is not set
 # CONFIG_NSH_DISABLE_CAT is not set
@@ -73,4 +74,3 @@ CONFIG_START_YEAR=2013
 CONFIG_STDIO_DISABLE_BUFFERING=y
 CONFIG_SYSTEM_NSH=y
 CONFIG_TASK_NAME_SIZE=0
-CONFIG_TLS_NELEM=0

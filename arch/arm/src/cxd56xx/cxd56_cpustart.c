@@ -97,6 +97,12 @@ static void appdsp_boot(void)
   cpu = up_cpu_index();
   DPRINTF("cpu = %d\n", cpu);
 
+#if CONFIG_ARCH_INTERRUPTSTACK > 7
+  /* Initializes the stack pointer */
+
+  arm_initialize_stack();
+#endif
+
   /* Setup NVIC */
 
   up_irqinitialize();

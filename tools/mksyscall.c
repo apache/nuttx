@@ -208,7 +208,7 @@ static void generate_proxy(int nfixed, int nparms)
       fprintf(stream, "#include <stdarg.h>\n");
     }
 
-  if (g_parm[HEADER_INDEX] && strlen(g_parm[HEADER_INDEX]) > 0)
+  if (strlen(g_parm[HEADER_INDEX]) > 0)
     {
       fprintf(stream, "#include <%s>\n", g_parm[HEADER_INDEX]);
     }
@@ -429,7 +429,7 @@ static void generate_stub(int nfixed, int nparms)
   fprintf(stream, "#include <nuttx/config.h>\n");
   fprintf(stream, "#include <stdint.h>\n");
 
-  if (g_parm[HEADER_INDEX] && strlen(g_parm[HEADER_INDEX]) > 0)
+  if (strlen(g_parm[HEADER_INDEX]) > 0)
     {
       fprintf(stream, "#include <%s>\n", g_parm[HEADER_INDEX]);
     }
@@ -588,7 +588,7 @@ static void generate_wrapper(int nfixed, int nparms)
       fprintf(stream, "#include <stdarg.h>\n");
     }
 
-  if (g_parm[HEADER_INDEX] && strlen(g_parm[HEADER_INDEX]) > 0)
+  if (strlen(g_parm[HEADER_INDEX]) > 0)
     {
       fprintf(stream, "#include <%s>\n", g_parm[HEADER_INDEX]);
     }

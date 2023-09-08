@@ -739,7 +739,7 @@ int lps25h_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   int ret = 0;
   FAR struct lps25h_dev_s *dev;
 
-  dev = (struct lps25h_dev_s *)kmm_zalloc(sizeof(struct lps25h_dev_s));
+  dev = kmm_zalloc(sizeof(struct lps25h_dev_s));
   if (!dev)
     {
       lps25h_dbg("Memory cannot be allocated for LPS25H sensor\n");

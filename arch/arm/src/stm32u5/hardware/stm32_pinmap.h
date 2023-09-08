@@ -28,8 +28,8 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32U5_STM32U585XX)
-#  include "hardware/stm32u585xx_pinmap.h"
+#if defined(CONFIG_STM32U5_STM32U585XX) || defined(CONFIG_STM32U5_STM32U5A5XX)
+#  include "hardware/stm32u5xx_pinmap.h"
 #else
 #  error "Unsupported STM32U5 pin map"
 #endif

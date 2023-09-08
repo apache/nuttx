@@ -126,8 +126,8 @@ static int smbus_sbd_open(struct file *filep)
 
   /* Retrieve the smbus_sbd_dev_s struct */
 
-  DEBUGASSERT(filep && filep->f_inode && filep->f_inode->i_private);
-  dev = (struct smbus_sbd_dev_s *)filep->f_inode->i_private;
+  DEBUGASSERT(filep->f_inode->i_private);
+  dev = filep->f_inode->i_private;
 
   /* Increase the open reference count */
 
@@ -158,8 +158,8 @@ static int smbus_sbd_close(struct file *filep)
 
   /* Retrieve the smbus_sbd_dev_s struct */
 
-  DEBUGASSERT(filep && filep->f_inode && filep->f_inode->i_private);
-  dev = (struct smbus_sbd_dev_s *)filep->f_inode->i_private;
+  DEBUGASSERT(filep->f_inode->i_private);
+  dev = filep->f_inode->i_private;
 
   /* Decrease the open reference count */
 
@@ -222,8 +222,8 @@ static ssize_t smbus_sbd_read(struct file *filep, char *buffer,
    * Battery Data slave driver.
    */
 
-  DEBUGASSERT(filep && filep->f_inode && filep->f_inode->i_private);
-  dev = (struct smbus_sbd_dev_s *)filep->f_inode->i_private;
+  DEBUGASSERT(filep->f_inode->i_private);
+  dev = filep->f_inode->i_private;
 
   DEBUGASSERT(buffer);
   read_data = (struct smbus_sbd_data_s *)buffer;
@@ -320,8 +320,8 @@ static ssize_t smbus_sbd_write(struct file *filep, const char *buffer,
    * Battery Data slave driver.
    */
 
-  DEBUGASSERT(filep && filep->f_inode && filep->f_inode->i_private);
-  dev = (struct smbus_sbd_dev_s *)filep->f_inode->i_private;
+  DEBUGASSERT(filep->f_inode->i_private);
+  dev = filep->f_inode->i_private;
 
   DEBUGASSERT(buffer);
   new_data = (struct smbus_sbd_data_s *)buffer;
@@ -770,9 +770,7 @@ int smbus_sbd_initialize(int minor, struct i2c_slave_s *i2c_slave_dev)
 
   /* Allocate an SMBus Smart Battery Data slave device structure */
 
-  smbus_sbd_dev =
-    (struct smbus_sbd_dev_s *)kmm_zalloc(sizeof(struct smbus_sbd_dev_s));
-
+  smbus_sbd_dev = kmm_zalloc(sizeof(struct smbus_sbd_dev_s));
   if (smbus_sbd_dev == NULL)
     {
       leave_critical_section(flags);
@@ -801,9 +799,7 @@ int smbus_sbd_initialize(int minor, struct i2c_slave_s *i2c_slave_dev)
 
   /* Allocate the SMBus Smart Battery Data slave data structure */
 
-  smbus_sbd_dev->data =
-    (struct smbus_sbd_data_s *)kmm_zalloc(sizeof(struct smbus_sbd_data_s));
-
+  smbus_sbd_dev->data = kmm_zalloc(sizeof(struct smbus_sbd_data_s));
   if (smbus_sbd_dev->data == NULL)
     {
       leave_critical_section(flags);

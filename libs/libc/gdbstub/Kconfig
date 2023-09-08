@@ -1,0 +1,20 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config LIB_GDBSTUB
+	tristate "GDBSTUB"
+	depends on ARCH_HAVE_TCBINFO
+	---help---
+		Enable support for gdbstub.
+
+if LIB_GDBSTUB
+
+config LIB_GDBSTUB_DEBUG
+	bool "Gdbstub Debug Info"
+	default n
+	---help---
+		Add debug info to gdbstub
+
+endif

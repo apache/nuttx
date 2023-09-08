@@ -519,4 +519,13 @@ config 16550_ADDRWIDTH
 		Default: 8
 		Note: 0 means auto detect address size (uintptr_t)
 
+config 16550_WAIT_LCR
+	bool "Wait for UART before setting LCR"
+	default n
+	---help---
+		Before setting the Line Control Register (LCR), wait until UART is
+		not busy.  This is required for Synopsys DesignWare 8250, which
+		will trigger spurious interrupts when setting the LCR without
+		waiting.  Default: n
+
 endif # 16550_UART

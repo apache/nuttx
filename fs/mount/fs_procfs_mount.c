@@ -301,7 +301,7 @@ static int usage_entry(FAR const char *mountpoint,
   if (!info->header)
     {
       mount_sprintf(info,
-        "  Filesystem    Size      Used  Available Mounted on\n");
+        "  Filesystem      Size      Used  Available Mounted on\n");
       info->header = true;
     }
 
@@ -349,7 +349,7 @@ static int usage_entry(FAR const char *mountpoint,
   /* Generate usage list one line at a time */
 
   mount_sprintf(info,
-    "  %-10s %" PRIuOFF "%c %8" PRIuOFF "%c  %8" PRIuOFF "%c %s\n",
+    "  %-10s %8" PRIuOFF "%c %8" PRIuOFF "%c  %8" PRIuOFF "%c %s\n",
     fstype, size, sizelabel, used, usedlabel, free, freelabel, mountpoint);
 
   return (info->totalsize >= info->buflen) ? 1 : 0;

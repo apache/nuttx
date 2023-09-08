@@ -42,10 +42,10 @@
 
 struct mq_attr
 {
-  size_t         mq_maxmsg;    /* Max number of messages in queue */
-  size_t         mq_msgsize;   /* Max message size */
-  unsigned       mq_flags;     /* Queue flags */
-  size_t         mq_curmsgs;   /* Number of messages currently in queue */
+  long    mq_maxmsg;    /* Max number of messages in queue */
+  long    mq_msgsize;   /* Max message size */
+  long    mq_flags;     /* Queue flags */
+  long    mq_curmsgs;   /* Number of messages currently in queue */
 };
 
 /* Message queue descriptor */

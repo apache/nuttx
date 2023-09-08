@@ -107,8 +107,7 @@ void nxmsg_initialize(void)
 {
   FAR struct msgbuf_s *msg;
 
-  msg = (FAR struct msgbuf_s *)kmm_malloc(sizeof(*msg) *
-                                          CONFIG_PREALLOC_MQ_MSGS);
+  msg = kmm_malloc(sizeof(*msg) * CONFIG_PREALLOC_MQ_MSGS);
   if (msg)
     {
       int i;

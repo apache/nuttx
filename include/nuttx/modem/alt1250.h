@@ -307,7 +307,7 @@ struct alt_readdata_s
 
 struct alt1250_lower_s
 {
-  FAR struct spi_dev_s * (*poweron)(void);
+  FAR struct spi_dev_s * (*poweron)(bool keep_on);
   void (*poweroff)(void);
   bool (*powerstatus)(void);
   int  (*hiber_mode)(bool);

@@ -159,7 +159,7 @@ int sim_bringup(void)
 #ifdef CONFIG_RAMMTD
   /* Create a RAM MTD device if configured */
 
-  ramstart = (uint8_t *)kmm_malloc(128 * 1024);
+  ramstart = kmm_malloc(128 * 1024);
   if (ramstart == NULL)
     {
       syslog(LOG_ERR, "ERROR: Allocation for RAM MTD failed\n");
@@ -240,7 +240,7 @@ int sim_bringup(void)
 #endif
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_BLK_RPMSG_SERVER)
-  ramdiskstart = (uint8_t *)kmm_malloc(512 * 2048);
+  ramdiskstart = kmm_malloc(512 * 2048);
   ret = ramdisk_register(1, ramdiskstart, 2048, 512,
                          RDFLAG_WRENABLED | RDFLAG_FUNLINK);
   if (ret < 0)
@@ -294,16 +294,17 @@ int sim_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_SIM_VIDEO
+#ifdef CONFIG_SIM_CAMERA
   /* Initialize and register the simulated video driver */
 
-  ret = video_initialize(CONFIG_SIM_VIDEO_DEV_PATH);
+  sim_camera_initialize();
+
+  ret = video_initialize(CONFIG_SIM_CAMERA_DEV_PATH);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: video_initialize() failed: %d\n", ret);
     }
 
-  sim_video_initialize();
 #endif
 
 #ifdef CONFIG_LCD
@@ -462,15 +463,16 @@ int sim_bringup(void)
 
 #ifdef CONFIG_RPTUN
 #ifdef CONFIG_SIM_RPTUN_MASTER
-  sim_rptun_init("server-proxy", "proxy", true);
+  sim_rptun_init("server-proxy", "proxy",
+                 SIM_RPTUN_MASTER | SIM_RPTUN_NOBOOT);
 #else
-  sim_rptun_init("server-proxy", "server", false);
+  sim_rptun_init("server-proxy", "server", SIM_RPTUN_SLAVE);
 #endif
 
 #ifdef CONFIG_DEV_RPMSG
-  rpmsgdev_register("server", "/dev/console", "/dev/server-console");
-  rpmsgdev_register("server", "/dev/null", "/dev/server-null");
-  rpmsgdev_register("server", "/dev/ttyUSB0", "/dev/ttyUSB0");
+  rpmsgdev_register("server", "/dev/console", "/dev/server-console", 0);
+  rpmsgdev_register("server", "/dev/null", "/dev/server-null", 0);
+  rpmsgdev_register("server", "/dev/ttyUSB0", "/dev/ttyUSB0", 0);
 #endif
 
 #ifdef CONFIG_BLK_RPMSG
@@ -498,7 +500,9 @@ int sim_bringup(void)
   rc_dummy_initialize(0);
 #endif
 
-#if defined(CONFIG_USBADB) && !defined(CONFIG_USBADB_COMPOSITE)
+#if defined(CONFIG_USBADB) && \
+    !defined(CONFIG_USBADB_COMPOSITE) && \
+    !defined(CONFIG_BOARDCTL_USBDEVCTRL)
   usbdev_adb_initialize();
 #endif
 

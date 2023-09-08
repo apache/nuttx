@@ -161,6 +161,7 @@ __cpu0_start:
 	/* Set up the stack pointer and clear the frame pointer. */
 
 	ldr		sp, .Lstackpointer
+	bic		sp, sp, #7			/* Get the stack pointer with 8-byte alignment */
 	mov		fp, #0
 
 	/* Invalidate caches and TLBs.

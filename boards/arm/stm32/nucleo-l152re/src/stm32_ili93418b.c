@@ -233,7 +233,7 @@ static inline void write_byte(uint8_t data)
   LCD_WR_SET;
 }
 
-/** references https://controllerstech.com/interface-tft-display-with-stm32/
+/* references https://controllerstech.com/interface-tft-display-with-stm32/
  * #define READ() (((getreg32(STM32_GPIOA_IDR) & (1 << GPIO_PIN9)) >> 9) |  \
  *                 ((getreg32(STM32_GPIOC_IDR) & (1 << GPIO_PIN7)) >> 6) |  \
  *                 ((getreg32(STM32_GPIOA_IDR) & (1 << GPIO_PIN10)) >> 8) | \
@@ -304,13 +304,13 @@ static inline uint8_t read_byte(void)
 static int stm32_ili93418b_recvblock(struct ili9341_lcd_s *lcd,
                                      uint16_t *wd, uint16_t nwords)
 {
-  /** ili9341 uses a 18-bit pixel format packed in a 24-bit stream per pixel.
-   *  The following format is transmitted: RRRRRR00 GGGGGG00 BBBBBB00
-   *  Convert it to:                       RRRRRGGG GGGBBBBB
+  /* ili9341 uses a 18-bit pixel format packed in a 24-bit stream per pixel.
+   * The following format is transmitted: RRRRRR00 GGGGGG00 BBBBBB00
+   * Convert it to:                       RRRRRGGG GGGBBBBB
    */
 
-  /**  8-bit parallel mode is enabled for pixel data operations.
-   *  Each pixel must be received by three read operations.
+  /* 8-bit parallel mode is enabled for pixel data operations.
+   * Each pixel must be received by three read operations.
    */
 
   uint16_t *dest = (uint16_t *)wd;

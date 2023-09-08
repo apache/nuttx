@@ -38,11 +38,15 @@
 	REG_PAIR (x29, x30, 80);	\
 	REG_ONE  (x16,      96)
 
-#define FPR_LAYOUT			\
+#ifdef CONFIG_ARCH_FPU
+#  define FPR_LAYOUT			\
 	REG_PAIR ( d8,  d9, 112);	\
 	REG_PAIR (d10, d11, 128);	\
 	REG_PAIR (d12, d13, 144);	\
 	REG_PAIR (d14, d15, 160);
+#else
+#  define FPR_LAYOUT
+#endif
 
 // int setjmp (jmp_buf)
 	.global	setjmp

@@ -211,6 +211,18 @@ config IMXRT_FLEXCAN
 	default n
 	select ARCH_HAVE_NETDEV_STATISTICS
 
+config IMXRT_FLEXCAN_ECC
+	bool
+	default n
+
+config IMXRT_FLEXCAN1_FD
+	bool
+	default n
+
+config IMXRT_FLEXCAN2_FD
+	bool
+	default n
+
 config IMXRT_FLEXPWM
 	bool
 	default n
@@ -536,11 +548,33 @@ menu "FLEXCAN1 Configuration"
 
 config FLEXCAN1_BITRATE
 	int "CAN bitrate"
+	depends on !(NET_CAN_CANFD && IMXRT_FLEXCAN1_FD)
 	default 1000000
 
 config FLEXCAN1_SAMPLEP
 	int "CAN sample point"
+	depends on !(NET_CAN_CANFD && IMXRT_FLEXCAN1_FD)
 	default 80
+
+config FLEXCAN1_ARBI_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD && IMXRT_FLEXCAN1_FD
+	default 1000000
+
+config FLEXCAN1_ARBI_SAMPLEP
+	int "CAN FD Arbitration phase sample point"
+	depends on NET_CAN_CANFD && IMXRT_FLEXCAN1_FD
+	default 80
+
+config FLEXCAN1_DATA_BITRATE
+	int "CAN FD Data phase bitrate"
+	depends on NET_CAN_CANFD && IMXRT_FLEXCAN1_FD
+	default 4000000
+
+config FLEXCAN1_DATA_SAMPLEP
+	int "CAN FD Data phase sample point"
+	depends on NET_CAN_CANFD && IMXRT_FLEXCAN1_FD
+	default 90
 
 endmenu # IMXRT_FLEXCAN1
 
@@ -549,11 +583,33 @@ menu "FLEXCAN2 Configuration"
 
 config FLEXCAN2_BITRATE
 	int "CAN bitrate"
+	depends on !(NET_CAN_CANFD && IMXRT_FLEXCAN2_FD)
 	default 1000000
 
 config FLEXCAN2_SAMPLEP
 	int "CAN sample point"
+	depends on !(NET_CAN_CANFD && IMXRT_FLEXCAN2_FD)
 	default 80
+
+config FLEXCAN2_ARBI_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD && IMXRT_FLEXCAN2_FD
+	default 1000000
+
+config FLEXCAN2_ARBI_SAMPLEP
+	int "CAN FD Arbitration phase sample point"
+	depends on NET_CAN_CANFD && IMXRT_FLEXCAN2_FD
+	default 80
+
+config FLEXCAN2_DATA_BITRATE
+	int "CAN FD Data phase bitrate"
+	depends on NET_CAN_CANFD && IMXRT_FLEXCAN2_FD
+	default 4000000
+
+config FLEXCAN2_DATA_SAMPLEP
+	int "CAN FD Data phase sample point"
+	depends on NET_CAN_CANFD && IMXRT_FLEXCAN2_FD
+	default 90
 
 endmenu # IMXRT_FLEXCAN2
 
@@ -2191,8 +2247,7 @@ config IMXRT_ENET_NTXBUFFERS
 
 config IMXRT_ENET_ENHANCEDBD
 	bool # not optional
-	default n if ARMV7M_DCACHE_WRITETHROUGH
-	default y if !ARMV7M_DCACHE_WRITETHROUGH
+	default !ARMV7M_DCACHE_WRITETHROUGH
 
 config IMXRT_ENET_NETHIFS
 	int # Not optional

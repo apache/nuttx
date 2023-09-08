@@ -2422,7 +2422,7 @@ static struct usbdev_req_s *nrf53_ep_allocreq(struct usbdev_ep_s *ep)
 
   usbtrace(TRACE_EPALLOCREQ, ((struct nrf53_ep_s *)ep)->epphy);
 
-  privreq = (struct nrf53_req_s *)kmm_malloc(sizeof(struct nrf53_req_s));
+  privreq = kmm_malloc(sizeof(struct nrf53_req_s));
   if (!privreq)
     {
       usbtrace(TRACE_DEVERROR(NRF53_TRACEERR_ALLOCFAIL), 0);
@@ -3052,9 +3052,8 @@ static void nrf53_hwinitialize(struct nrf53_usbdev_s *priv)
 {
   /* Wait for VBUS */
 
-  /* TODO: connect to POWER USB events */
-
-  while (getreg32(NRF53_USBREG_EVENTS_USBDETECTED) == 0);
+  while ((getreg32(NRF53_USBREG_USBREGSTATUS) &
+          USBREG_USBREGSTATUS_VBUSDETECT) == 0);
 
   /* Enable the USB controller */
 

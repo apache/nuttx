@@ -274,7 +274,7 @@ int spawn_file_actions(FAR struct tcb_s *tcb,
   /* Execute each file action */
 
   for (entry = (FAR struct spawn_general_file_action_s *)actions;
-       entry && ret == OK;
+       entry && ret >= 0;
        entry = entry->flink)
     {
       switch (entry->action)

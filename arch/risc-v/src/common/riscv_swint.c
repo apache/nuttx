@@ -135,12 +135,12 @@ int riscv_swint(int irq, void *context, void *arg)
       /* A0=SYS_restore_context: This a restore context command:
        *
        * void
-       * riscv_fullcontextrestore(uintptr_t *restoreregs) noreturn_function;
+       * void riscv_fullcontextrestore(struct tcb_s *prev) noreturn_function;
        *
        * At this point, the following values are saved in context:
        *
        *   A0 = SYS_restore_context
-       *   A1 = restoreregs
+       *   A1 = next
        *
        * In this case, we simply need to set CURRENT_REGS to restore register
        * area referenced in the saved A1. context == CURRENT_REGS is the
@@ -150,21 +150,23 @@ int riscv_swint(int irq, void *context, void *arg)
 
       case SYS_restore_context:
         {
+          struct tcb_s *next = (struct tcb_s *)regs[REG_A1];
+
           DEBUGASSERT(regs[REG_A1] != 0);
-          CURRENT_REGS = (uintptr_t *)regs[REG_A1];
+          riscv_restorecontext(next);
         }
         break;
 
       /* A0=SYS_switch_context: This a switch context command:
        *
        * void
-       * riscv_switchcontext(uintptr_t *saveregs, uintptr_t *restoreregs);
+       * riscv_switchcontext(struct tcb_s *prev, struct tcb_s *next);
        *
        * At this point, the following values are saved in context:
        *
        *   A0 = SYS_switch_context
-       *   A1 = saveregs
-       *   A2 = restoreregs
+       *   A1 = prev
+       *   A2 = next
        *
        * In this case, we save the context registers to the save register
        * area referenced by the saved contents of R5 and then set
@@ -174,9 +176,12 @@ int riscv_swint(int irq, void *context, void *arg)
 
       case SYS_switch_context:
         {
+          struct tcb_s *prev = (struct tcb_s *)regs[REG_A1];
+          struct tcb_s *next = (struct tcb_s *)regs[REG_A2];
+
           DEBUGASSERT(regs[REG_A1] != 0 && regs[REG_A2] != 0);
-          *(uintptr_t **)regs[REG_A1] = (uintptr_t *)regs;
-          CURRENT_REGS = (uintptr_t *)regs[REG_A2];
+          riscv_savecontext(prev);
+          riscv_restorecontext(next);
         }
         break;
 

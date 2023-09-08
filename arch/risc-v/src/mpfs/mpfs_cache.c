@@ -125,7 +125,7 @@ void mpfs_enable_cache(void)
            MPFS_CACHE_WAY_MASK_AXI4_SLAVE_PORT_3);
 
   putreg32(LIBERO_SETTING_WAY_MASK_E51_ICACHE,
-           MPFS_CACHE_WAY_MASK_E51_DCACHE);
+           MPFS_CACHE_WAY_MASK_E51_ICACHE);
 
   putreg32(LIBERO_SETTING_WAY_MASK_U54_1_DCACHE,
            MPFS_CACHE_WAY_MASK_U54_1_DCACHE);
@@ -159,7 +159,7 @@ void mpfs_enable_cache(void)
       for (inc = 0; inc < (MPFS_WAY_BYTE_LENGTH /
            MPFS_CACHE_BLOCK_BYTE_LENGTH); ++inc)
         {
-          *p_scratchpad = g_init_marker + inc;
+          *p_scratchpad = g_init_marker;
           p_scratchpad += MPFS_CACHE_BLOCK_BYTE_LENGTH / sizeof(uint64_t);
         }
 

@@ -213,8 +213,7 @@ static int automount_open(FAR struct file *filep)
 
   /* Allocate a new open structure */
 
-  opriv = (FAR struct automounter_open_s *)kmm_zalloc(
-      sizeof(struct automounter_open_s));
+  opriv = kmm_zalloc(sizeof(struct automounter_open_s));
   if (opriv == NULL)
     {
       ferr("ERROR: Failed to allocate open structure\n");
@@ -250,11 +249,11 @@ static int automount_close(FAR struct file *filep)
   FAR struct automounter_open_s *prev;
   int ret;
 
-  DEBUGASSERT(filep && filep->f_priv && filep->f_inode);
+  DEBUGASSERT(filep->f_priv);
   opriv = filep->f_priv;
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
-  priv  = (FAR struct automounter_state_s *)inode->i_private;
+  priv  = inode->i_private;
 
   /* Get exclusive access to the driver structure */
 
@@ -317,11 +316,11 @@ static int automount_ioctl(FAR struct file *filep, int cmd,
   FAR struct automounter_open_s *opriv;
   int ret;
 
-  DEBUGASSERT(filep && filep->f_priv && filep->f_inode);
+  DEBUGASSERT(filep->f_priv);
   opriv = filep->f_priv;
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
-  priv  = (FAR struct automounter_state_s *)inode->i_private;
+  priv  = inode->i_private;
 
   /* Get exclusive access to the driver structure */
 
@@ -819,9 +818,7 @@ FAR void *automount_initialize(FAR const struct automount_lower_s *lower)
 
   /* Allocate an auto-mounter state structure */
 
-  priv = (FAR struct automounter_state_s *)
-    kmm_zalloc(sizeof(struct automounter_state_s));
-
+  priv = kmm_zalloc(sizeof(struct automounter_state_s));
   if (priv == NULL)
     {
       ferr("ERROR: Failed to allocate state structure\n");

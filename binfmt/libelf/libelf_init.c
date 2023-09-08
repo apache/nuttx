@@ -45,7 +45,7 @@
  * be defined or CONFIG_ELF_DUMPBUFFER does nothing.
  */
 
-#if !defined(CONFIG_DEBUG_INFO) || !defined (CONFIG_DEBUG_BINFMT)
+#if !defined(CONFIG_DEBUG_INFO) || !defined(CONFIG_DEBUG_BINFMT)
 #  undef CONFIG_ELF_DUMPBUFFER
 #endif
 
@@ -64,10 +64,10 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: elf_filelen
+ * Name: elf_fileinfo
  *
  * Description:
- *  Get the size of the ELF file
+ *  Get some stats info of the ELF file
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
@@ -75,36 +75,26 @@
  *
  ****************************************************************************/
 
-static inline int elf_filelen(FAR struct elf_loadinfo_s *loadinfo,
-                              FAR const char *filename)
+static inline int elf_fileinfo(FAR struct elf_loadinfo_s *loadinfo)
 {
   struct stat buf;
   int ret;
 
   /* Get the file stats */
 
-  ret = nx_stat(filename, &buf, 1);
+  ret = file_fstat(&loadinfo->file, &buf);
   if (ret < 0)
     {
       berr("Failed to stat file: %d\n", ret);
       return ret;
     }
 
-  /* Verify that it is a regular file */
+  /* Return some stats info of the file in the loadinfo structure */
 
-  if (!S_ISREG(buf.st_mode))
-    {
-      berr("Not a regular file.  mode: %d\n", buf.st_mode);
-      return -ENOENT;
-    }
-
-  /* TODO:  Verify that the file is readable.  Not really important because
-   * we will detect this when we try to open the file read-only.
-   */
-
-  /* Return the size of the file in the loadinfo structure */
-
-  loadinfo->filelen = buf.st_size;
+  loadinfo->filelen  = buf.st_size;
+  loadinfo->fileuid  = buf.st_uid;
+  loadinfo->filegid  = buf.st_gid;
+  loadinfo->filemode = buf.st_mode;
   return OK;
 }
 
@@ -135,21 +125,21 @@ int elf_init(FAR const char *filename, FAR struct elf_loadinfo_s *loadinfo)
 
   memset(loadinfo, 0, sizeof(struct elf_loadinfo_s));
 
-  /* Get the length of the file. */
-
-  ret = elf_filelen(loadinfo, filename);
-  if (ret < 0)
-    {
-      berr("elf_filelen failed: %d\n", ret);
-      return ret;
-    }
-
   /* Open the binary file for reading (only) */
 
   ret = file_open(&loadinfo->file, filename, O_RDONLY);
   if (ret < 0)
     {
       berr("Failed to open ELF binary %s: %d\n", filename, ret);
+      return ret;
+    }
+
+  /* Get some stats info of the file. */
+
+  ret = elf_fileinfo(loadinfo);
+  if (ret < 0)
+    {
+      berr("elf_fileinfo failed: %d\n", ret);
       return ret;
     }
 

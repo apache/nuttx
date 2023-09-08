@@ -34,6 +34,7 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
+#include <nuttx/trace.h>
 
 #include "group/group.h"
 
@@ -58,10 +59,12 @@
 
 int group_setupidlefiles(FAR struct task_tcb_s *tcb)
 {
+  int ret = OK;
 #if defined(CONFIG_DEV_CONSOLE) || defined(CONFIG_DEV_NULL)
   int fd;
 #endif
 
+  sched_trace_begin();
   DEBUGASSERT(tcb->cmn.group != NULL);
 
   /* Open stdin, dup to get stdout and stderr. This should always
@@ -98,6 +101,7 @@ int group_setupidlefiles(FAR struct task_tcb_s *tcb)
           serr("ERROR: Failed to open stdin: %d\n", fd);
         }
 
+      sched_trace_end();
       return -ENFILE;
     }
 #else
@@ -114,8 +118,8 @@ int group_setupidlefiles(FAR struct task_tcb_s *tcb)
   /* Allocate file/socket streams for the TCB */
 
 #ifdef CONFIG_FILE_STREAM
-  return group_setupstreams(tcb);
-#else
-  return OK;
+  ret = group_setupstreams(tcb);
 #endif
+  sched_trace_end();
+  return ret;
 }

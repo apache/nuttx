@@ -32,6 +32,10 @@ ifeq ($(CONFIG_SENSORS_RPMSG),y)
 CSRCS += sensor_rpmsg.c
 endif
 
+ifeq ($(CONFIG_SENSORS_GPS),y)
+  CSRCS += gps.c
+endif
+
 ifeq ($(CONFIG_SENSORS_WTGAHRS2),y)
   CSRCS += wtgahrs2.c
 endif
@@ -133,7 +137,12 @@ ifeq ($(CONFIG_SENSORS_BMG160),y)
 endif
 
 ifeq ($(CONFIG_SENSORS_BMI160),y)
+  CSRCS += bmi160_base.c
+ifeq ($(CONFIG_SENSORS_BMI160_UORB),y)
+  CSRCS += bmi160_uorb.c
+else
   CSRCS += bmi160.c
+endif
 endif
 
 ifeq ($(CONFIG_SENSORS_BMI270),y)
@@ -141,11 +150,20 @@ ifeq ($(CONFIG_SENSORS_BMI270),y)
 endif
 
 ifeq ($(CONFIG_SENSORS_BMP180),y)
+  CSRCS += bmp180_base.c
+ifeq ($(CONFIG_SENSORS_BMP180_UORB),y)
+  CSRCS += bmp180_uorb.c
+else
   CSRCS += bmp180.c
+endif
 endif
 
 ifeq ($(CONFIG_SENSORS_BMP280),y)
   CSRCS += bmp280.c
+endif
+
+ifeq ($(CONFIG_SENSORS_BME680),y)
+  CSRCS += bme680.c
 endif
 
 ifeq ($(CONFIG_SENSORS_ISL29023),y)

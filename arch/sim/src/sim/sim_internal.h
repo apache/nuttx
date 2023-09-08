@@ -42,6 +42,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Determine master-slave relationship when configuring with multiple cores */
+
+#ifdef CONFIG_RPTUN
+#  define SIM_RPTUN_MASTER (1 << 0)  /* As the master */
+#  define SIM_RPTUN_SLAVE  (0 << 0)  /* As the slave */
+
+#  define SIM_RPTUN_BOOT   (1 << 1)  /* As the master and boot the slave  */
+#  define SIM_RPTUN_NOBOOT (0 << 1)  /* As the master but not boot the slave */
+#endif
+
 #ifndef CONFIG_SMP_NCPUS
 #  define CONFIG_SMP_NCPUS 1
 #endif
@@ -135,6 +145,12 @@
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
+ * Type Declarations
+ ****************************************************************************/
+
+typedef int pid_t;
+
+/****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
 
@@ -163,10 +179,15 @@ void *sim_doirq(int irq, void *regs);
 
 void host_abort(int status);
 int  host_backtrace(void** array, int size);
+int  host_system(char *buf, size_t len, const char *fmt, ...);
 
 #ifdef CONFIG_SIM_IMAGEPATH_AS_CWD
 void host_init_cwd(void);
 #endif
+
+pid_t host_posix_spawn(const char *path,
+                       char *const argv[], char *const envp[]);
+int   host_waitpid(pid_t pid);
 
 /* sim_hostmemory.c *********************************************************/
 
@@ -242,6 +263,8 @@ int sim_x11initialize(unsigned short width, unsigned short height,
                       void **fbmem, size_t *fblen, unsigned char *bpp,
                       unsigned short *stride);
 int sim_x11update(void);
+int sim_x11openwindow(void);
+int sim_x11closewindow(void);
 #ifdef CONFIG_FB_CMAP
 int sim_x11cmap(unsigned short first, unsigned short len,
                 unsigned char *red, unsigned char *green,
@@ -349,15 +372,13 @@ void sim_netdriver_loop(void);
 /* sim_rptun.c **************************************************************/
 
 #ifdef CONFIG_RPTUN
-int sim_rptun_init(const char *shmemname, const char *cpuname, bool master);
-void sim_rptun_loop(void);
+int sim_rptun_init(const char *shmemname, const char *cpuname, int master);
 #endif
 
 /* sim_hcisocket.c **********************************************************/
 
 #ifdef CONFIG_SIM_HCISOCKET
 int sim_bthcisock_register(int dev_id);
-int sim_bthcisock_loop(void);
 #endif
 
 /* sim_audio.c **************************************************************/
@@ -383,9 +404,9 @@ int sim_spi_uninitialize(struct spi_dev_s *dev);
 
 /* up_video.c ***************************************************************/
 
-#ifdef CONFIG_SIM_VIDEO
-int sim_video_initialize(void);
-void sim_video_loop(void);
+#ifdef CONFIG_SIM_CAMERA
+int sim_camera_initialize(void);
+void sim_camera_loop(void);
 #endif
 
 /* sim_usbdev.c *************************************************************/

@@ -370,7 +370,7 @@ static inline void baro_measure_read(FAR struct ms5611_dev_s *priv,
 static int ms5611_thread(int argc, char **argv)
 {
   FAR struct ms5611_dev_s *priv = (FAR struct ms5611_dev_s *)
-        ((uintptr_t)strtoul(argv[1], NULL, 0));
+        ((uintptr_t)strtoul(argv[1], NULL, 16));
 
   struct sensor_baro baro_data;
 
@@ -645,7 +645,7 @@ int ms5611_register(FAR struct i2c_master_s *i2c, int devno, uint8_t addr)
 
   /* Initialize the MS5611 device structure */
 
-  priv = (FAR struct ms5611_dev_s *)kmm_zalloc(sizeof(struct ms5611_dev_s));
+  priv = kmm_zalloc(sizeof(struct ms5611_dev_s));
   if (priv == NULL)
     {
       snerr("Failed to allocate instance\n");
@@ -687,7 +687,7 @@ int ms5611_register(FAR struct i2c_master_s *i2c, int devno, uint8_t addr)
 
   /* Create thread for polling sensor data */
 
-  snprintf(arg1, 16, "0x%" PRIxPTR, (uintptr_t)priv);
+  snprintf(arg1, 16, "%p", priv);
   argv[0] = arg1;
   argv[1] = NULL;
   ret = kthread_create("ms5611_thread", SCHED_PRIORITY_DEFAULT,

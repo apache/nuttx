@@ -461,6 +461,13 @@ Pin   Signal
 The MCP2515 interrupt (INT) pin is connected to the pin 22 of the
 ESP32-Devkit.
 
+mcuboot_nsh
+--------------------
+
+This configuration is the same as the ``nsh`` configuration, but it generates the application
+image in a format that can be used by MCUboot. It also makes the ``make bootloader`` command to
+build the MCUboot bootloader image using the Espressif HAL.
+
 mcuboot_slot_confirm
 --------------------
 
@@ -803,6 +810,24 @@ To test it, just run the following::
   nsh> timer -d /dev/timerx
 
 Where x in the timer instance.
+
+twai
+----
+
+This configuration enables the support for the TWAI (Two-Wire Automotive Interface) driver.
+You can test it by connecting TWAI RX and TWAI TX pins which are GPIO0 and GPIO2 by default
+to a external transceiver or connecting TWAI RX to TWAI TX pin by enabling
+the ``Device Drivers -> CAN Driver Support -> CAN loopback mode`` option and running the ``can`` example::
+
+    nsh> can
+    nmsgs: 0
+    min ID: 1 max ID: 2047
+    Bit timing:
+      Baud: 1000000
+      TSEG1: 15
+      TSEG2: 4
+        SJW: 3
+      ID:    1 DLC: 1
 
 wamr_wasi_debug
 ---------------

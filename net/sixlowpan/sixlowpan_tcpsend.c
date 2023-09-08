@@ -591,8 +591,6 @@ static int sixlowpan_send_packet(FAR struct socket *psock,
   struct sixlowpan_send_s sinfo;
 
   ninfo("len=%lu timeout=%u\n", (unsigned long)len, timeout);
-  DEBUGASSERT(psock != NULL && dev != NULL && conn != NULL && buf != NULL &&
-              destmac != NULL);
 
   memset(&sinfo, 0, sizeof(struct sixlowpan_send_s));
 
@@ -718,7 +716,6 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
   ninfo("buflen %lu\n", (unsigned long)buflen);
   sixlowpan_dumpbuffer("Outgoing TCP payload", buf, buflen);
 
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
   DEBUGASSERT(psock->s_type == SOCK_STREAM);
 
   /* Make sure that this is a valid socket */
@@ -774,7 +771,7 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
   /* Make sure that the IP address mapping is in the Neighbor Table */
 
-  ret = icmpv6_neighbor(conn->u.ipv6.raddr);
+  ret = icmpv6_neighbor(dev, conn->u.ipv6.raddr);
   if (ret < 0)
     {
       nerr("ERROR: Not reachable\n");

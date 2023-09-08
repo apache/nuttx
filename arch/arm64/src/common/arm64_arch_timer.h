@@ -36,9 +36,9 @@
 #define CONFIG_ARM_TIMER_VIRTUAL_IRQ        (GIC_PPI_INT_BASE + 11)
 #define CONFIG_ARM_TIMER_HYP_IRQ            (GIC_PPI_INT_BASE + 10)
 
-#define ARM_ARCH_TIMER_IRQ	CONFIG_ARM_TIMER_VIRTUAL_IRQ
-#define ARM_ARCH_TIMER_PRIO	IRQ_DEFAULT_PRIORITY
-#define ARM_ARCH_TIMER_FLAGS	IRQ_TYPE_LEVEL
+#define ARM_ARCH_TIMER_IRQ     CONFIG_ARM_TIMER_VIRTUAL_IRQ
+#define ARM_ARCH_TIMER_PRIO    IRQ_DEFAULT_PRIORITY
+#define ARM_ARCH_TIMER_FLAGS   IRQ_TYPE_LEVEL
 
 /****************************************************************************
  * Public Function Prototypes

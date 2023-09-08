@@ -128,10 +128,6 @@ static void group_remove(FAR struct task_group_s *group)
 
 static inline void group_release(FAR struct task_group_s *group)
 {
-#if CONFIG_TLS_TASK_NELEM > 0
-  task_tls_destruct();
-#endif
-
   task_uninit_info(group);
 
 #if defined(CONFIG_SCHED_HAVE_PARENT) && defined(CONFIG_SCHED_CHILD_STATUS)

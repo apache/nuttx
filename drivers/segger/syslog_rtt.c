@@ -32,12 +32,14 @@
 
 int syslog_rtt_putc(FAR struct syslog_channel_s *channel, int ch)
 {
-  SEGGER_RTT_PutChar(0, ch);
+  SEGGER_RTT_BLOCK_IF_FIFO_FULL(CONFIG_SYSLOG_RTT_CHANNEL);
+  SEGGER_RTT_PutChar(CONFIG_SYSLOG_RTT_CHANNEL, ch);
   return ch;
 }
 
 ssize_t syslog_rtt_write(FAR struct syslog_channel_s *channel,
                          FAR const char *buffer, size_t buflen)
 {
-  return SEGGER_RTT_Write(0, buffer, buflen);
+  SEGGER_RTT_BLOCK_IF_FIFO_FULL(CONFIG_SYSLOG_RTT_CHANNEL);
+  return SEGGER_RTT_Write(CONFIG_SYSLOG_RTT_CHANNEL, buffer, buflen);
 }

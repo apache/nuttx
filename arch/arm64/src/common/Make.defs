@@ -35,7 +35,7 @@ endif
 
 # Common assembly language files
 CMN_ASRCS  = arm64_vector_table.S arm64_vectors.S arm64_smccc.S
-CMN_ASRCS += arm64_cpu_idle.S arm64_vfork_func.S
+CMN_ASRCS += arm64_cpu_idle.S arm64_fork_func.S
 
 ifeq ($(CONFIG_ARCH_HAVE_TESTSET),y)
 CMN_ASRCS += arm64_testset.S
@@ -45,10 +45,10 @@ endif
 CMN_CSRCS =  arm64_initialize.c arm64_initialstate.c arm64_boot.c
 CMN_CSRCS += arm64_nputs.c arm64_idle.c arm64_copystate.c arm64_createstack.c
 CMN_CSRCS += arm64_releasestack.c arm64_stackframe.c arm64_usestack.c
-CMN_CSRCS += arm64_task_sched.c arm64_exit.c arm64_vfork.c arm64_switchcontext.c
+CMN_CSRCS += arm64_task_sched.c arm64_exit.c arm64_fork.c arm64_switchcontext.c
 CMN_CSRCS += arm64_schedulesigaction.c arm64_sigdeliver.c
 CMN_CSRCS += arm64_getintstack.c arm64_registerdump.c
-CMN_CSRCS += arm64_perf.c
+CMN_CSRCS += arm64_perf.c arm64_tcbinfo.c
 
 # Common C source files ( hardware BSP )
 CMN_CSRCS += arm64_arch_timer.c arm64_cache.c
@@ -118,4 +118,8 @@ endif
 
 ifeq ($(CONFIG_SCHED_BACKTRACE),y)
 CMN_CSRCS += arm64_backtrace.c
+endif
+
+ifeq ($(CONFIG_ARM64_SEMIHOSTING_HOSTFS),y)
+  CMN_CSRCS += arm64_hostfs.c
 endif

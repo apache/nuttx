@@ -9,11 +9,18 @@ config DEV_SIMPLE_ADDRENV
 
 config DEV_NULL
 	bool "Enable /dev/null"
-	default y
+	default !DEFAULT_SMALL
 
 config DEV_ZERO
 	bool "Enable /dev/zero"
 	default n
+
+config DEV_ASCII
+	bool "Enable /dev/ascii"
+	default n
+	---help---
+		Enable the /dev/ascii device driver.  This is a character driver
+		that will return all characters from 0x21-0x7f.
 
 config DEV_RPMSG
 	bool "RPMSG Device Client Support"
@@ -93,8 +100,7 @@ if DRVR_WRITEBUFFER || DRVR_READAHEAD
 
 config DRVR_READBYTES
 	bool "Support byte read method"
-	default y if MTD_BYTE_WRITE
-	default n if !MTD_BYTE_WRITE
+	default MTD_BYTE_WRITE
 
 config DRVR_REMOVABLE
 	bool "Support removable media"

@@ -81,10 +81,10 @@
 
 #define IPTOS_TOS_MASK    0x1e
 #define IPTOS_TOS(tos)    ((tos) & IPTOS_TOS_MASK)
-#define	IPTOS_LOWDELAY    0x10
-#define	IPTOS_THROUGHPUT  0x08
-#define	IPTOS_RELIABILITY 0x04
-#define	IPTOS_MINCOST     0x02
+#define IPTOS_LOWDELAY    0x10
+#define IPTOS_THROUGHPUT  0x08
+#define IPTOS_RELIABILITY 0x04
+#define IPTOS_MINCOST     0x02
 
 #define IPTOS_PREC_MASK            0xe0
 #define IPTOS_PREC(tos)            ((tos) & IPTOS_PREC_MASK)
@@ -314,17 +314,17 @@ extern "C"
 #ifdef CONFIG_ENDIAN_BIG
   /* Big-endian byte order: 11223344 */
 
-#  define ip4_addr1(ipaddr) (((ipaddr) >> 24) & 0xff)
-#  define ip4_addr2(ipaddr) (((ipaddr) >> 16) & 0xff)
-#  define ip4_addr3(ipaddr) (((ipaddr) >>  8) & 0xff)
-#  define ip4_addr4(ipaddr)  ((ipaddr)        & 0xff)
+#  define ip4_addr1(ipaddr) ((uint8_t)(((ipaddr) >> 24) & 0xff))
+#  define ip4_addr2(ipaddr) ((uint8_t)(((ipaddr) >> 16) & 0xff))
+#  define ip4_addr3(ipaddr) ((uint8_t)(((ipaddr) >>  8) & 0xff))
+#  define ip4_addr4(ipaddr)  ((uint8_t)((ipaddr)        & 0xff))
 #else
   /* Little endian byte order: 44223311 */
 
-#  define ip4_addr1(ipaddr)  ((ipaddr)        & 0xff)
-#  define ip4_addr2(ipaddr) (((ipaddr) >>  8) & 0xff)
-#  define ip4_addr3(ipaddr) (((ipaddr) >> 16) & 0xff)
-#  define ip4_addr4(ipaddr) (((ipaddr) >> 24) & 0xff)
+#  define ip4_addr1(ipaddr)  ((uint8_t)((ipaddr)        & 0xff))
+#  define ip4_addr2(ipaddr) ((uint8_t)(((ipaddr) >>  8) & 0xff))
+#  define ip4_addr3(ipaddr) ((uint8_t)(((ipaddr) >> 16) & 0xff))
+#  define ip4_addr4(ipaddr) ((uint8_t)(((ipaddr) >> 24) & 0xff))
 #endif
 
 /****************************************************************************
@@ -374,9 +374,8 @@ extern "C"
   do \
     { \
       memset(ipv6addr, 0, 5 * sizeof(uint16_t)); \
-      ipv6addr[5] = 0xffff; \
-      ipv6addr[6] = (uint16_t)((uint32_t)ipv4addr >> 16); \
-      ipv6addr[7] = (uint16_t)ipv4addr & 0xffff; \
+      (ipv6addr)[5] = 0xffff; \
+      net_ipv4addr_hdrcopy(&(ipv6addr)[6], &(ipv4addr)); \
     } \
   while (0)
 
@@ -395,11 +394,7 @@ extern "C"
  *
  ****************************************************************************/
 
-#define ip6_get_ipv4addr(ipv6addr) \
-  (((in_addr_t)(ipv6addr)->s6_addr[12]) | \
-   ((in_addr_t)(ipv6addr)->s6_addr[13] << 8) | \
-   ((in_addr_t)(ipv6addr)->s6_addr[14] << 16) | \
-   ((in_addr_t)(ipv6addr)->s6_addr[15] << 24))
+#define ip6_get_ipv4addr(ipv6addr) net_ip4addr_conv32(&(ipv6addr)[6])
 
 /****************************************************************************
  * Macro: ip6_is_ipv4addr
@@ -420,6 +415,33 @@ extern "C"
    (ipv6addr)->s6_addr32[1] == 0 && \
    (ipv6addr)->s6_addr16[4] == 0 && \
    (ipv6addr)->s6_addr16[5] == 0xffff)
+
+/****************************************************************************
+ * Macro: net_ip_binding_laddr, net_ip_binding_raddr
+ *
+ * Description:
+ *   Get the laddr/raddr pointer form an ip_binding_u.
+ *
+ * Input Parameters:
+ *   u      - The union of address binding.
+ *   domain - The domain of address.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+#  define net_ip_binding_laddr(u, domain) \
+    (((domain) == PF_INET) ? (FAR void *)(&(u)->ipv4.laddr) : \
+                             (FAR void *)(&(u)->ipv6.laddr))
+#  define net_ip_binding_raddr(u, domain) \
+    (((domain) == PF_INET) ? (FAR void *)(&(u)->ipv4.raddr) : \
+                             (FAR void *)(&(u)->ipv6.raddr))
+#elif defined(CONFIG_NET_IPv4)
+#  define net_ip_binding_laddr(u, domain) ((FAR void *)(&(u)->ipv4.laddr))
+#  define net_ip_binding_raddr(u, domain) ((FAR void *)(&(u)->ipv4.raddr))
+#else
+#  define net_ip_binding_laddr(u, domain) ((FAR void *)(&(u)->ipv6.laddr))
+#  define net_ip_binding_raddr(u, domain) ((FAR void *)(&(u)->ipv6.raddr))
+#endif
 
 /****************************************************************************
  * Macro: net_ipv4addr_copy, net_ipv4addr_hdrcopy, net_ipv6addr_copy, and
@@ -443,14 +465,18 @@ extern "C"
 
 #ifdef CONFIG_NET_IPv4
 #  define net_ipv4addr_copy(dest, src) \
-   do { \
-     (dest) = (in_addr_t)(src); \
-   } while (0)
+   do \
+     { \
+       (dest) = (in_addr_t)(src); \
+     } \
+   while (0)
 #  define net_ipv4addr_hdrcopy(dest, src) \
-   do { \
-     ((FAR uint16_t *)(dest))[0] = ((FAR uint16_t *)(src))[0]; \
-     ((FAR uint16_t *)(dest))[1] = ((FAR uint16_t *)(src))[1]; \
-   } while (0)
+   do \
+     { \
+       ((FAR uint16_t *)(dest))[0] = ((FAR uint16_t *)(src))[0]; \
+       ((FAR uint16_t *)(dest))[1] = ((FAR uint16_t *)(src))[1]; \
+     } \
+   while (0)
 #endif
 
 #ifdef CONFIG_NET_IPv6
@@ -578,8 +604,8 @@ bool net_ipv6addr_maskcmp(const net_ipv6addr_t addr1,
  ****************************************************************************/
 
 #define net_ipv4addr_broadcast(addr, mask) \
-   (((in_addr_t)(addr) & ~(in_addr_t)(mask)) == \
-    ((in_addr_t)(0xffffffff) & ~(in_addr_t)(mask)))
+  (((in_addr_t)(addr) & ~(in_addr_t)(mask)) == \
+   ((in_addr_t)(0xffffffff) & ~(in_addr_t)(mask)))
 
 /****************************************************************************
  * Name: net_ipv6addr_prefixcmp

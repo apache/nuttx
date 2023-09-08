@@ -36,15 +36,15 @@
 
 /* TWI register offsets *****************************************************/
 
-#define A64_TWI_ADDR_OFFSET    	    (0x00)  /* 31:8 bit reserved,7-1 bit for slave addr,0 bit for GCE */
-#define A64_TWI_XADDR_OFFSET   	    (0x04)  /* 31:8 bit reserved,7-0 bit for second addr in 10bit addr */
-#define A64_TWI_DATA_OFFSET    	    (0x08)  /* 31:8 bit reserved,7-0 bit send or receive data byte */
+#define A64_TWI_ADDR_OFFSET         (0x00)  /* 31:8 bit reserved,7-1 bit for slave addr,0 bit for GCE */
+#define A64_TWI_XADDR_OFFSET        (0x04)  /* 31:8 bit reserved,7-0 bit for second addr in 10bit addr */
+#define A64_TWI_DATA_OFFSET         (0x08)  /* 31:8 bit reserved,7-0 bit send or receive data byte */
 #define A64_TWI_CNTR_OFFSET         (0x0c)  /* 31:8 bit reserved, INT_EN, BUS_EN, M_STA, INT_FLAG, A_ACK */
-#define A64_TWI_STAT_OFFSET    	    (0x10) 	/* 28 interrupt types + 0xF8 normal type = 29 */
-#define A64_TWI_CCR_OFFSET     	    (0x14) 	/* 31:7 bit reserved,6-3bit,CLK_M,2-0bit CLK_N */
-#define A64_TWI_SRST_OFFSET    	    (0x18) 	/* 31:1 bit reserved;0bit,write 1 to clear 0. */
-#define A64_TWI_EFR_OFFSET     	    (0x1c)  /* 31:2 bit reserved,1:0 bit data byte follow read comand */
-#define A64_TWI_LCR_OFFSET     	    (0x20) 	/* 31:6 bits reserved  5:0 bit for sda&scl control*/
+#define A64_TWI_STAT_OFFSET         (0x10)  /* 28 interrupt types + 0xF8 normal type = 29 */
+#define A64_TWI_CCR_OFFSET          (0x14)  /* 31:7 bit reserved,6-3bit,CLK_M,2-0bit CLK_N */
+#define A64_TWI_SRST_OFFSET         (0x18)  /* 31:1 bit reserved;0bit,write 1 to clear 0. */
+#define A64_TWI_EFR_OFFSET          (0x1c)  /* 31:2 bit reserved,1:0 bit data byte follow read comand */
+#define A64_TWI_LCR_OFFSET          (0x20)  /* 31:6 bits reserved  5:0 bit for sda&scl control*/
 #define A64_TWI_DVFS_OFFSET         (0x24)  /* 31:3 bits reserved  2:0 bit for dvfs control. only A10 support */
 
 /* TWI register addresses ***************************************************/
@@ -93,8 +93,8 @@
 
 /* TWI address register */
 
-#define TWI_GCE_EN      	(0x1<<0)  /* general call address enable for slave mode */
-#define TWI_ADDR_MASK   	(0x7f<<1) /* 7:1 bits */
+#define TWI_GCE_EN      (0x1<<0)  /* general call address enable for slave mode */
+#define TWI_ADDR_MASK   (0x7f<<1) /* 7:1 bits */
 
 /* TWI extend address register */
 
@@ -150,21 +150,21 @@
 
 /* 7:0 bits use only,default is 0xF8 */
 
-#define TWI_STAT_BUS_ERR        (0x00) 	/* BUS ERROR */
+#define TWI_STAT_BUS_ERR        (0x00) /* BUS ERROR */
 
 /* Master mode use only */
 
-#define TWI_STAT_TX_STA     (0x08) 	/* START condition transmitted */
-#define TWI_STAT_TX_RESTA   (0x10) 	/* Repeated START condition transmitted */
-#define TWI_STAT_TX_AW_ACK  (0x18) 	/* Address+Write bit transmitted, ACK received */
-#define TWI_STAT_TX_AW_NAK  (0x20) 	/* Address+Write bit transmitted, ACK not received */
-#define TWI_STAT_TXD_ACK    (0x28) 	/* data byte transmitted in master mode,ack received */
-#define TWI_STAT_TXD_NAK    (0x30) 	/* data byte transmitted in master mode ,ack not received */
-#define TWI_STAT_ARBLOST    (0x38) 	/* arbitration lost in address or data byte */
-#define TWI_STAT_TX_AR_ACK  (0x40) 	/* Address+Read bit transmitted, ACK received */
-#define TWI_STAT_TX_AR_NAK  (0x48) 	/* Address+Read bit transmitted, ACK not received */
-#define TWI_STAT_RXD_ACK    (0x50) 	/* data byte received in master mode ,ack transmitted */
-#define TWI_STAT_RXD_NAK    (0x58) 	/* date byte received in master mode,not ack transmitted */
+#define TWI_STAT_TX_STA     (0x08)  /* START condition transmitted */
+#define TWI_STAT_TX_RESTA   (0x10)  /* Repeated START condition transmitted */
+#define TWI_STAT_TX_AW_ACK  (0x18)  /* Address+Write bit transmitted, ACK received */
+#define TWI_STAT_TX_AW_NAK  (0x20)  /* Address+Write bit transmitted, ACK not received */
+#define TWI_STAT_TXD_ACK    (0x28)  /* data byte transmitted in master mode,ack received */
+#define TWI_STAT_TXD_NAK    (0x30)  /* data byte transmitted in master mode ,ack not received */
+#define TWI_STAT_ARBLOST    (0x38)  /* arbitration lost in address or data byte */
+#define TWI_STAT_TX_AR_ACK  (0x40)  /* Address+Read bit transmitted, ACK received */
+#define TWI_STAT_TX_AR_NAK  (0x48)  /* Address+Read bit transmitted, ACK not received */
+#define TWI_STAT_RXD_ACK    (0x50)  /* data byte received in master mode ,ack transmitted */
+#define TWI_STAT_RXD_NAK    (0x58)  /* date byte received in master mode,not ack transmitted */
 
 /* Slave mode use only */
 

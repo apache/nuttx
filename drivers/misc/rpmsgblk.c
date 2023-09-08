@@ -38,6 +38,7 @@
 #include <nuttx/fs/smart.h>
 #include <nuttx/mtd/smart.h>
 #include <nuttx/mutex.h>
+#include <nuttx/mmcsd.h>
 #include <nuttx/rptun/openamp.h>
 
 #include "rpmsgblk.h"
@@ -86,7 +87,7 @@ static ssize_t rpmsgblk_write(FAR struct inode *inode,
                               blkcnt_t start_sector, unsigned int nsectors);
 static int     rpmsgblk_geometry(FAR struct inode *inode,
                                  FAR struct geometry *geometry);
-static ssize_t rpmsgblk_ioctl_arglen(int cmd);
+static ssize_t rpmsgblk_ioctl_arglen(int cmd, unsigned long arg);
 static int     rpmsgblk_ioctl(FAR struct inode *inode, int cmd,
                               unsigned long arg);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
@@ -165,7 +166,7 @@ static const rpmsg_ept_cb g_rpmsgblk_handler[] =
 
 static int rpmsgblk_open(FAR struct inode *inode)
 {
-  FAR struct rpmsgblk_s *priv = (FAR struct rpmsgblk_s *)inode->i_private;
+  FAR struct rpmsgblk_s *priv = inode->i_private;
   struct rpmsgblk_open_s msg;
   int ret;
 
@@ -215,7 +216,7 @@ static int rpmsgblk_open(FAR struct inode *inode)
 
 static int rpmsgblk_close(FAR struct inode *inode)
 {
-  FAR struct rpmsgblk_s *priv = (FAR struct rpmsgblk_s *)inode->i_private;
+  FAR struct rpmsgblk_s *priv = inode->i_private;
   struct rpmsgblk_close_s msg;
   int ret;
 
@@ -265,7 +266,7 @@ static ssize_t rpmsgblk_read(FAR struct inode *inode,
                              FAR unsigned char *buffer,
                              blkcnt_t start_sector, unsigned int nsectors)
 {
-  FAR struct rpmsgblk_s *priv = (FAR struct rpmsgblk_s *)inode->i_private;
+  FAR struct rpmsgblk_s *priv = inode->i_private;
   struct rpmsgblk_read_s msg;
   struct iovec iov;
   int ret;
@@ -325,7 +326,7 @@ static ssize_t rpmsgblk_write(FAR struct inode *inode,
                               FAR const unsigned char *buffer,
                               blkcnt_t start_sector, unsigned int nsectors)
 {
-  FAR struct rpmsgblk_s *priv = (FAR struct rpmsgblk_s *)inode->i_private;
+  FAR struct rpmsgblk_s *priv = inode->i_private;
   FAR struct rpmsgblk_write_s *msg;
   struct rpmsgblk_cookie_s cookie;
   uint32_t sectorsize;
@@ -433,7 +434,7 @@ out:
 static int rpmsgblk_geometry(FAR struct inode *inode,
                              FAR struct geometry *geometry)
 {
-  FAR struct rpmsgblk_s *priv = (FAR struct rpmsgblk_s *)inode->i_private;
+  FAR struct rpmsgblk_s *priv = inode->i_private;
   struct rpmsgblk_geometry_s *msg;
   uint32_t space;
   int msglen;
@@ -499,7 +500,7 @@ out:
  *
  ****************************************************************************/
 
-static ssize_t rpmsgblk_ioctl_arglen(int cmd)
+static ssize_t rpmsgblk_ioctl_arglen(int cmd, unsigned long arg)
 {
   switch (cmd)
     {
@@ -526,6 +527,32 @@ static ssize_t rpmsgblk_ioctl_arglen(int cmd)
         return sizeof(struct partition_info_s);
       case BIOC_BLKSSZGET:
         return sizeof(blksize_t);
+      case MMC_IOC_CMD:
+        {
+          FAR struct mmc_ioc_cmd *ioc =
+            (FAR struct mmc_ioc_cmd *)(uintptr_t)arg;
+
+          return sizeof(struct mmc_ioc_cmd) + ioc->blksz * ioc->blocks;
+        }
+
+      case MMC_IOC_MULTI_CMD:
+        {
+          FAR struct mmc_ioc_multi_cmd *mioc =
+            (FAR struct mmc_ioc_multi_cmd *)(uintptr_t)arg;
+          uint64_t num = mioc->num_of_cmds;
+          uint64_t i;
+          ssize_t arglen;
+
+          arglen = sizeof(struct mmc_ioc_multi_cmd) +
+                   num * sizeof(struct mmc_ioc_cmd);
+          for (i = 0; i < num; i++)
+            {
+              arglen += mioc->cmds[i].blksz * mioc->cmds[i].blocks;
+            }
+
+          return arglen;
+        }
+
       default:
         return -ENOTTY;
     }
@@ -550,7 +577,7 @@ static ssize_t rpmsgblk_ioctl_arglen(int cmd)
 static int rpmsgblk_ioctl(FAR struct inode *inode, int cmd,
                           unsigned long arg)
 {
-  FAR struct rpmsgblk_s *priv = (FAR struct rpmsgblk_s *)inode->i_private;
+  FAR struct rpmsgblk_s *priv = inode->i_private;
   FAR struct rpmsgblk_ioctl_s *msg;
   uint32_t space;
   ssize_t arglen;
@@ -562,7 +589,7 @@ static int rpmsgblk_ioctl(FAR struct inode *inode, int cmd,
 
   /* Call our internal routine to perform the ioctl */
 
-  arglen = rpmsgblk_ioctl_arglen(cmd);
+  arglen = rpmsgblk_ioctl_arglen(cmd, arg);
   if (arglen < 0)
     {
       return arglen;
@@ -576,13 +603,56 @@ static int rpmsgblk_ioctl(FAR struct inode *inode, int cmd,
       return -ENOMEM;
     }
 
+  DEBUGASSERT(space > msglen);
+
   msg->request = cmd;
   msg->arg     = arg;
   msg->arglen  = arglen;
 
   if (arglen > 0)
     {
-      memcpy(msg->buf, (FAR void *)(uintptr_t)arg, arglen);
+      /* If args include a usrspace buffer pointer, then the content of this
+       * pointer should also be copied into share memory and set after args.
+       */
+
+      if (cmd == MMC_IOC_CMD)
+        {
+          FAR struct mmc_ioc_cmd *ioc =
+            (FAR struct mmc_ioc_cmd *)(uintptr_t)arg;
+
+          memcpy(msg->buf, (FAR void *)(uintptr_t)arg, sizeof(*ioc));
+          if (ioc->data_ptr)
+            {
+              memcpy(msg->buf + sizeof(*ioc),
+                     (FAR void *)(uintptr_t)ioc->data_ptr,
+                     ioc->blksz * ioc->blocks);
+            }
+        }
+      else if (cmd == MMC_IOC_MULTI_CMD)
+        {
+          FAR struct mmc_ioc_multi_cmd *mioc =
+            (FAR struct mmc_ioc_multi_cmd *)(uintptr_t)arg;
+          uint64_t num = mioc->num_of_cmds;
+          ssize_t copy = sizeof(struct mmc_ioc_multi_cmd) +
+                         num * sizeof(struct mmc_ioc_cmd);
+          uint64_t i;
+
+          memcpy(msg->buf, (FAR void *)(uintptr_t)arg, copy);
+          for (i = 0; i < num; i++)
+            {
+              if (mioc->cmds[i].data_ptr)
+                {
+                  memcpy(msg->buf + copy,
+                         (FAR void *)(uintptr_t)mioc->cmds[i].data_ptr,
+                         mioc->cmds[i].blksz * mioc->cmds[i].blocks);
+                  copy += mioc->cmds[i].blksz * mioc->cmds[i].blocks;
+                }
+            }
+        }
+      else
+        {
+          memcpy(msg->buf, (FAR void *)(uintptr_t)arg, arglen);
+        }
     }
 
   return rpmsgblk_send_recv(priv, RPMSGBLK_IOCTL, false, &msg->header,
@@ -606,7 +676,7 @@ static int rpmsgblk_ioctl(FAR struct inode *inode, int cmd,
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int rpmsgblk_unlink(FAR struct inode *inode)
 {
-  FAR struct rpmsgblk_s *priv = (FAR struct rpmsgblk_s *)inode->i_private;
+  FAR struct rpmsgblk_s *priv = inode->i_private;
   struct rpmsgblk_unlink_s msg;
   int ret;
 
@@ -838,6 +908,7 @@ static int rpmsgblk_geometry_handler(FAR struct rpmsg_endpoint *ept,
       (FAR struct rpmsgblk_cookie_s *)(uintptr_t)header->cookie;
   FAR struct rpmsgblk_geometry_s *rsp = data;
 
+  cookie->result = header->result;
   if (cookie->result >= 0 && rsp->arglen > 0)
     {
       memcpy(cookie->data, rsp->buf, rsp->arglen);
@@ -874,9 +945,61 @@ static int rpmsgblk_ioctl_handler(FAR struct rpmsg_endpoint *ept,
       (FAR struct rpmsgblk_cookie_s *)(uintptr_t)header->cookie;
   FAR struct rpmsgblk_ioctl_s *rsp = data;
 
+  cookie->result = header->result;
   if (cookie->result >= 0 && rsp->arglen > 0)
     {
-      memcpy(cookie->data, rsp->buf, rsp->arglen);
+      switch (rsp->request)
+        {
+          case MMC_IOC_CMD:
+            {
+              FAR struct mmc_ioc_cmd *ioc =
+                (FAR struct mmc_ioc_cmd *)(uintptr_t)cookie->data;
+
+              /* Copy struct mmc_ioc_cmd back to the usrspace buffer
+               * except data_ptr which is another buffer pointer
+               */
+
+              memcpy(ioc, rsp->buf, sizeof(*ioc) - sizeof(ioc->data_ptr));
+              if (ioc->data_ptr)
+                {
+                  memcpy((FAR void *)(uintptr_t)ioc->data_ptr,
+                         rsp->buf + sizeof(*ioc),
+                         ioc->blksz * ioc->blocks);
+                }
+            }
+            break;
+
+          case MMC_IOC_MULTI_CMD:
+            {
+              FAR struct mmc_ioc_multi_cmd *mioc =
+                (FAR struct mmc_ioc_multi_cmd *)(uintptr_t)cookie->data;
+              FAR struct mmc_ioc_multi_cmd *mioc_rsp =
+                (FAR struct mmc_ioc_multi_cmd *)(uintptr_t)rsp->buf;
+              uint64_t num = mioc->num_of_cmds;
+              size_t off   = sizeof(struct mmc_ioc_multi_cmd) +
+                             num * sizeof(struct mmc_ioc_cmd);
+              uint64_t i;
+
+              for (i = 0; i < num; i++)
+                {
+                  memcpy(&mioc->cmds[i], &mioc_rsp->cmds[i],
+                         sizeof(struct mmc_ioc_cmd) -
+                         sizeof(mioc->cmds[i].data_ptr));
+                  if (mioc->cmds[i].data_ptr)
+                    {
+                      memcpy((FAR void *)(uintptr_t)mioc->cmds[i].data_ptr,
+                             rsp->buf + off,
+                             mioc->cmds[i].blksz * mioc->cmds[i].blocks);
+                      off += mioc->cmds[i].blksz * mioc->cmds[i].blocks;
+                    }
+                }
+            }
+            break;
+
+          default:
+            memcpy(cookie->data, rsp->buf, rsp->arglen);
+            break;
+        }
     }
 
   return rpmsg_post(ept, &cookie->sem);

@@ -26,6 +26,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/i2c/i2c_master.h>
 
 /****************************************************************************
  * Public Types
@@ -60,6 +61,69 @@ extern "C"
 
 #if defined(CONFIG_SENSORS_BMP280) || defined(CONFIG_SENSORS_BMP280_SCU)
 int board_bmp280_initialize(int bus);
+#endif
+
+#ifdef CONFIG_SENSORS_BMP280_SCU
+/****************************************************************************
+ * Name: bmp280_init
+ *
+ * Description:
+ *   Initialize BMP280 pressure device
+ *
+ * Input Parameters:
+ *   i2c     - An instance of the I2C interface to use to communicate with
+ *             BMP280
+ *   port    - I2C port number
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int bmp280_init(struct i2c_master_s *i2c, int port);
+
+/****************************************************************************
+ * Name: bmp280press_register
+ *
+ * Description:
+ *   Register the BMP280 pressure sensor character device as 'devpath'
+ *
+ * Input Parameters:
+ *   devpath - The base path to the driver to register. E.g., "/dev/press0"
+ *   minor   - The number of sequencer
+ *   i2c     - An instance of the I2C interface to use to communicate with
+ *             BMP280
+ *   port    - I2C port number
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int bmp280press_register(const char *devpath, int minor,
+                         struct i2c_master_s *i2c, int port);
+
+/****************************************************************************
+ * Name: bmp280temp_register
+ *
+ * Description:
+ *   Register the BMP280 temperature sensor character device as 'devpath'
+ *
+ * Input Parameters:
+ *   devpath - The base path to the driver to register. E.g., "/dev/temp"
+ *   minor   - The number of sequencer
+ *   i2c     - An instance of the I2C interface to use to communicate with
+ *             BMP280
+ *   port    - I2C port number
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int bmp280temp_register(const char *devpath, int minor,
+                        struct i2c_master_s *i2c, int port);
+
 #endif
 
 #undef EXTERN

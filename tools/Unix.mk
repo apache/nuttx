@@ -244,13 +244,13 @@ include/nuttx/version.h: $(TOPDIR)/.version tools/mkversion$(HOSTEXEEXT)
 # part of the overall NuttX configuration sequence. Notice that the
 # tools/mkconfig tool is built and used to create include/nuttx/config.h
 
-tools/mkconfig$(HOSTEXEEXT):
+tools/mkconfig$(HOSTEXEEXT): prebuild
 	$(Q) $(MAKE) -C tools -f Makefile.host mkconfig$(HOSTEXEEXT)
 
 include/nuttx/config.h: $(TOPDIR)/.config tools/mkconfig$(HOSTEXEEXT)
 	$(Q) grep -v "CONFIG_BASE_DEFCONFIG" "$(TOPDIR)/.config" > "$(TOPDIR)/.config.tmp"
 	$(Q) if ! cmp -s "$(TOPDIR)/.config.tmp" "$(TOPDIR)/.config.orig" ; then \
-		sed -i.bak "/CONFIG_BASE_DEFCONFIG/ { /-dirty/! s/\"$$/-dirty\"/ }" "$(TOPDIR)/.config"; \
+		sed -i.bak -e "/CONFIG_BASE_DEFCONFIG/ { /-dirty/! s/\"$$/-dirty\"/; }" "$(TOPDIR)/.config" ; \
 	else \
 		sed -i.bak "s/-dirty//g" "$(TOPDIR)/.config"; \
 	fi
@@ -485,6 +485,16 @@ clean_context: clean_dirlinks
 # build those libraries.
 
 include tools/LibTargets.mk
+
+# prebuild
+#
+# Some architectures require the use of special tools and special handling
+# BEFORE building NuttX. The `Make.defs` files for those architectures
+# should override the following define with the correct operations for
+# that platform.
+
+prebuild:
+	$(call PREBUILD, $(TOPDIR))
 
 # pass1 and pass2
 #

@@ -126,7 +126,7 @@ static void *cs4344_workerthread(pthread_addr_t pvarg);
 
 /* Initialization */
 
-static void cs4344_reset(FAR struct cs4344_dev_s *priv);
+static int cs4344_reset(FAR struct cs4344_dev_s *priv);
 
 /****************************************************************************
  * Private Data
@@ -1411,12 +1411,14 @@ static void *cs4344_workerthread(pthread_addr_t pvarg)
  *   priv - A reference to the driver state structure
  *
  * Returned Value:
- *   None
+ *   Returns OK or a negated errno value on failure.
  *
  ****************************************************************************/
 
-static void cs4344_reset(FAR struct cs4344_dev_s *priv)
+static int cs4344_reset(FAR struct cs4344_dev_s *priv)
 {
+  int ret;
+
   /* Put audio output back to its initial configuration */
 
   priv->samprate   = CS4344_DEFAULT_SAMPRATE;
@@ -1424,9 +1426,26 @@ static void cs4344_reset(FAR struct cs4344_dev_s *priv)
   priv->bpsamp     = CS4344_DEFAULT_BPSAMP;
   priv->mclk_freq  = 0;
 
+  ret = cs4344_setmclkfrequency(priv);
+  if (ret != OK)
+    {
+      if (ret != -ENOTTY)
+        {
+          auderr("ERROR: Unsupported combination of sample rate and"
+                 "data width\n");
+          return ret;
+        }
+      else
+        {
+          audwarn("WARNING: MCLK could not be set on lower half\n");
+        }
+    }
+
   /* Configure the FLL and the LRCLK */
 
   cs4344_setbitrate(priv);
+
+  return OK;
 }
 
 /****************************************************************************
@@ -1451,6 +1470,7 @@ static void cs4344_reset(FAR struct cs4344_dev_s *priv)
 FAR struct audio_lowerhalf_s *cs4344_initialize(FAR struct i2s_dev_s *i2s)
 {
   FAR struct cs4344_dev_s *priv;
+  int ret;
 
   /* Sanity check */
 
@@ -1458,7 +1478,7 @@ FAR struct audio_lowerhalf_s *cs4344_initialize(FAR struct i2s_dev_s *i2s)
 
   /* Allocate a CS4344 device structure */
 
-  priv = (FAR struct cs4344_dev_s *)kmm_zalloc(sizeof(struct cs4344_dev_s));
+  priv = kmm_zalloc(sizeof(struct cs4344_dev_s));
   if (priv)
     {
       /* Initialize the CS4344 device structure.  Since we used kmm_zalloc,
@@ -1474,7 +1494,13 @@ FAR struct audio_lowerhalf_s *cs4344_initialize(FAR struct i2s_dev_s *i2s)
 
       /* Reset and reconfigure the CS4344 hardware */
 
-      cs4344_reset(priv);
+      ret = cs4344_reset(priv);
+      if (ret != OK)
+        {
+          auderr("ERROR: Initialization failed: ret=%d\n", ret);
+          return NULL;
+        }
+
       return &priv->dev;
     }
 

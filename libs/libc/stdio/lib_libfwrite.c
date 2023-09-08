@@ -43,7 +43,8 @@
  * Name: lib_fwrite
  ****************************************************************************/
 
-ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream)
+ssize_t lib_fwrite_unlocked(FAR const void *ptr, size_t count,
+                            FAR FILE *stream)
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
 {
   FAR const unsigned char *start = ptr;
@@ -81,18 +82,14 @@ ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream)
       goto errout;
     }
 
-  /* Get exclusive access to the stream */
-
-  flockfile(stream);
-
   /* If the buffer is currently being used for read access, then
    * discard all of the read-ahead data.  We do not support concurrent
    * buffered read/write access.
    */
 
-  if (lib_rdflush(stream) < 0)
+  if (lib_rdflush_unlocked(stream) < 0)
     {
-      goto errout_with_lock;
+      goto errout;
     }
 
   /* Determine the number of bytes left in the buffer */
@@ -125,10 +122,10 @@ ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream)
         {
           /* Flush the buffered data to the IO stream */
 
-          int bytes_buffered = lib_fflush(stream, false);
+          int bytes_buffered = lib_fflush_unlocked(stream, false);
           if (bytes_buffered < 0)
             {
-              goto errout_with_lock;
+              goto errout;
             }
         }
     }
@@ -140,7 +137,7 @@ ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream)
         {
           _NX_SETERRNO(ret);
           ret = ERROR;
-          goto errout_with_lock;
+          goto errout;
         }
 
       src += ret;
@@ -155,9 +152,6 @@ ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream)
   /* Return the number of bytes written */
 
   ret = (uintptr_t)src - (uintptr_t)start;
-
-errout_with_lock:
-  funlockfile(stream);
 
 errout:
   if (ret < 0)
@@ -179,3 +173,14 @@ errout:
   return ret;
 }
 #endif /* CONFIG_STDIO_DISABLE_BUFFERING */
+
+ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream)
+{
+  ssize_t ret;
+
+  flockfile(stream);
+  ret = lib_fwrite_unlocked(ptr, count, stream);
+  funlockfile(stream);
+
+  return ret;
+}

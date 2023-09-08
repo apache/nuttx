@@ -231,7 +231,7 @@ include\nuttx\version.h: $(TOPDIR)\.version tools\mkversion$(HOSTEXEEXT)
 # part of the overall NuttX configuration sequence. Notice that the
 # tools\mkconfig tool is built and used to create include\nuttx\config.h
 
-tools\mkconfig$(HOSTEXEEXT):
+tools\mkconfig$(HOSTEXEEXT): prebuild
 	$(Q) $(MAKE) -C tools -f Makefile.host mkconfig$(HOSTEXEEXT)
 
 include\nuttx\config.h: $(TOPDIR)\.config tools\mkconfig$(HOSTEXEEXT)
@@ -472,6 +472,16 @@ clean_context:
 # build those libraries.
 
 include tools/LibTargets.mk
+
+# prebuild
+#
+# Some architectures require the use of special tools and special handling
+# BEFORE building NuttX. The `Make.defs` files for those architectures
+# should override the following define with the correct operations for
+# that platform.
+
+prebuild:
+	$(call PREBUILD, $(TOPDIR))
 
 # pass1 and pass2
 #

@@ -1058,7 +1058,7 @@ void xtensa_serialinit(void)
 
   uart_register("/dev/ttyS0", &TTYS0_DEV);
 
-#ifdef	TTYS1_DEV
+#ifdef TTYS1_DEV
   uart_register("/dev/ttyS1", &TTYS1_DEV);
 #endif
 }

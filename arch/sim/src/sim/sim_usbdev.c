@@ -219,6 +219,55 @@ static const struct usbdev_ops_s g_devops =
   .wakeup      = sim_usbdev_wakeup,
 };
 
+/* Device error strings that may be enabled for more descriptive USB trace
+ * output.
+ */
+
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+const struct trace_msg_t g_usb_trace_strings_deverror[] =
+{
+  TRACE_STR(SIM_TRACEERR_ALLOCFAIL),
+  TRACE_STR(SIM_TRACEERR_BADCLEARFEATURE),
+  TRACE_STR(SIM_TRACEERR_BADDEVGETSTATUS),
+  TRACE_STR(SIM_TRACEERR_BADEPGETSTATUS),
+  TRACE_STR(SIM_TRACEERR_BADEPNO),
+  TRACE_STR(SIM_TRACEERR_BADEPTYPE),
+  TRACE_STR(SIM_TRACEERR_BADGETCONFIG),
+  TRACE_STR(SIM_TRACEERR_BADGETSETDESC),
+  TRACE_STR(SIM_TRACEERR_BADGETSTATUS),
+  TRACE_STR(SIM_TRACEERR_BADSETADDRESS),
+  TRACE_STR(SIM_TRACEERR_BADSETCONFIG),
+  TRACE_STR(SIM_TRACEERR_BADSETFEATURE),
+  TRACE_STR(SIM_TRACEERR_BINDFAILED),
+  TRACE_STR(SIM_TRACEERR_DISPATCHSTALL),
+  TRACE_STR(SIM_TRACEERR_DRIVER),
+  TRACE_STR(SIM_TRACEERR_DRIVERREGISTERED),
+  TRACE_STR(SIM_TRACEERR_EP0BADCTR),
+  TRACE_STR(SIM_TRACEERR_EP0SETUPSTALLED),
+  TRACE_STR(SIM_TRACEERR_EPBUFFER),
+  TRACE_STR(SIM_TRACEERR_EPDISABLED),
+  TRACE_STR(SIM_TRACEERR_EPOUTNULLPACKET),
+  TRACE_STR(SIM_TRACEERR_EPRESERVE),
+  TRACE_STR(SIM_TRACEERR_INVALIDCTRLREQ),
+  TRACE_STR(SIM_TRACEERR_INVALIDPARMS),
+  TRACE_STR(SIM_TRACEERR_IRQREGISTRATION),
+  TRACE_STR(SIM_TRACEERR_NOTCONFIGURED),
+  TRACE_STR(SIM_TRACEERR_REQABORTED),
+  TRACE_STR_END
+};
+#endif
+
+/* Interrupt event strings that may be enabled for more descriptive USB trace
+ * output.
+ */
+
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+const struct trace_msg_t g_usb_trace_strings_intdecode[] =
+{
+  TRACE_STR_END
+};
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -611,7 +660,7 @@ static struct usbdev_req_s *sim_ep_allocreq(struct usbdev_ep_s *ep)
 
   usbtrace(TRACE_EPALLOCREQ, USB_EPNO(ep->eplog));
 
-  privreq = (struct sim_req_s *)kmm_malloc(sizeof(struct sim_req_s));
+  privreq = kmm_malloc(sizeof(struct sim_req_s));
   if (!privreq)
     {
       usbtrace(TRACE_DEVERROR(SIM_TRACEERR_ALLOCFAIL), 0);

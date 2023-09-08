@@ -458,6 +458,15 @@ define PRELINK
 endef
 endif
 
+# PREBUILD -- Perform pre build operations
+# Some architectures require the use of special tools and special handling
+# BEFORE building NuttX. The `Make.defs` files for those architectures
+# should override the following define with the correct operations for
+# that platform.
+
+define PREBUILD
+endef
+
 # POSTBUILD -- Perform post build operations
 # Some architectures require the use of special tools and special handling
 # AFTER building the NuttX binary.  Make.defs files for those architectures

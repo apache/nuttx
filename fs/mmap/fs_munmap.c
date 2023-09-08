@@ -60,12 +60,24 @@ static int file_munmap_(FAR void *start, size_t length, bool kernel)
   ret = mm_map_lock();
   if (ret == OK)
     {
-      while (ret == OK && (entry = mm_map_find(mm, start, length)))
+      entry = mm_map_find(mm, start, length);
+
+      /* If entry don't find, the start and length is invalid. */
+
+      if (entry == NULL)
+        {
+          ret = -EINVAL;
+          goto unlock;
+        }
+
+      do
         {
           DEBUGASSERT(entry->munmap);
           ret = entry->munmap(group, entry, start, length);
         }
+      while (ret == OK && (entry = mm_map_find(mm, start, length)));
 
+unlock:
       mm_map_unlock();
     }
 

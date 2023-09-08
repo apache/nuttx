@@ -75,7 +75,7 @@ int pthread_sem_take(FAR sem_t *sem, FAR const struct timespec *abs_timeout)
 }
 
 #ifdef CONFIG_PTHREAD_MUTEX_UNSAFE
-int pthread_sem_trytake(sem_t *sem)
+int pthread_sem_trytake(FAR sem_t *sem)
 {
   int ret = EINVAL;
 
@@ -94,7 +94,7 @@ int pthread_sem_trytake(sem_t *sem)
 }
 #endif
 
-int pthread_sem_give(sem_t *sem)
+int pthread_sem_give(FAR sem_t *sem)
 {
   int ret;
 

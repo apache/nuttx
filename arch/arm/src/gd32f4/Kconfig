@@ -691,7 +691,7 @@ config ARCH_BOARD_GD32F4_CUSTOM_CLOCKCONFIG
 
 config GD32F4_TCMEXCLUDE
 	bool "Exclude TCM SRAM from the heap"
-	default y if ARCH_DMA || LIBC_ARCH_ELF
+	default ARCH_DMA || LIBC_ARCH_ELF
 	depends on GD32F4_HAVE_TCM
 	---help---
 		Exclude TCM SRAM from the HEAP because it cannot be used for DMA
@@ -1192,8 +1192,7 @@ config GD32F4_ADC0_DMA
 config GD32F4_ADC0_SCAN
 	bool "ADC0 scan mode"
 	depends on GD32F4_ADC0
-	default y if GD32F4_ADC0_DMA
-	default n
+	default GD32F4_ADC0_DMA
 
 config GD32F4_ADC0_DMA_CFG
 	int "ADC0 DMA configuration"
@@ -1226,8 +1225,7 @@ config GD32F4_ADC1_DMA
 config GD32F4_ADC1_SCAN
 	bool "ADC1 scan mode"
 	depends on GD32F4_ADC1
-	default y if GD32F4_ADC1_DMA
-	default n
+	default GD32F4_ADC1_DMA
 
 config GD32F4_ADC1_DMA_CFG
 	int "ADC1 DMA configuration"
@@ -1260,8 +1258,7 @@ config GD32F4_ADC2_DMA
 config GD32F4_ADC2_SCAN
 	bool "ADC2 scan mode"
 	depends on GD32F4_ADC2
-	default y if GD32F4_ADC2_DMA
-	default n
+	default GD32F4_ADC2_DMA
 
 config GD32F4_ADC2_DMA_CFG
 	int "ADC2 DMA configuration"
@@ -2504,7 +2501,7 @@ config GD32F4_ENET_PTP
 
 config GD32F4_RMII
 	bool "Use the reduced media-independent interface (RMII) interface"
-	default y if !GD32F4_MII
+	default !GD32F4_MII
 	---help---
 		Select Ethernet MII interface. The application can only select one of
 		the MII or RMII mode.
@@ -2566,8 +2563,7 @@ comment "USB Device Configuration"
 
 config GD32F4_USB_ITRMP
 	bool "Re-map USB interrupt"
-	default n if !GD32F4_CAN1
-	default y if GD32F4_CAN1
+	default GD32F4_CAN1
 	depends on GD32F4_USB && GD32F4_GD32F4XX
 	---help---
 		The legacy USB in the F1 series shared interrupt lines with USB

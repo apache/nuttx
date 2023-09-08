@@ -130,7 +130,6 @@ static int fb_open(FAR struct file *filep)
   FAR struct fb_chardev_s *fb;
   int ret;
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
   fb    = inode->i_private;
 
@@ -170,7 +169,6 @@ static int fb_close(FAR struct file *filep)
   FAR struct fb_chardev_s *fb;
   int ret;
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
   fb    = inode->i_private;
 
@@ -218,9 +216,8 @@ static ssize_t fb_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   /* Get the framebuffer instance */
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
-  fb    = (FAR struct fb_chardev_s *)inode->i_private;
+  fb    = inode->i_private;
 
   /* Get panel info */
 
@@ -273,9 +270,8 @@ static ssize_t fb_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Get the framebuffer instance */
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
-  fb    = (FAR struct fb_chardev_s *)inode->i_private;
+  fb    = inode->i_private;
 
   /* Get panel info */
 
@@ -333,9 +329,8 @@ static off_t fb_seek(FAR struct file *filep, off_t offset, int whence)
 
   /* Get the framebuffer instance */
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
-  fb    = (FAR struct fb_chardev_s *)inode->i_private;
+  fb    = inode->i_private;
 
   /* Determine the new, requested file position */
 
@@ -413,9 +408,8 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get the framebuffer instance */
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
-  fb    = (FAR struct fb_chardev_s *)inode->i_private;
+  fb    = inode->i_private;
 
   /* Process the IOCTL command */
 
@@ -592,6 +586,17 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+      case FBIOSET_DESTAREA:  /* Set destination area on the primary FB */
+        {
+          FAR struct fb_overlayinfo_s *oinfo =
+            (FAR struct fb_overlayinfo_s *)((uintptr_t)arg);
+
+          DEBUGASSERT(oinfo != 0 && fb->vtable != NULL &&
+                      fb->vtable->setdestarea != NULL);
+          ret = fb->vtable->setdestarea(fb->vtable, oinfo);
+        }
+        break;
+
 #ifdef CONFIG_FB_OVERLAY_BLIT
       case FBIOSET_BLIT:  /* Blit operation between video overlays */
         {
@@ -615,6 +620,18 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 #endif
+
+      case FBIOPAN_OVERLAY:
+        {
+          FAR struct fb_overlayinfo_s *oinfo =
+            (FAR struct fb_overlayinfo_s *)((uintptr_t)arg);
+
+          DEBUGASSERT(oinfo != 0 && fb->vtable != NULL &&
+                      fb->vtable->panoverlay != NULL);
+          ret = fb->vtable->panoverlay(fb->vtable, oinfo);
+        }
+        break;
+
 #endif /* CONFIG_FB_OVERLAY */
 
       case FBIOSET_POWER:
@@ -839,9 +856,8 @@ static int fb_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
 
   /* Get the framebuffer instance */
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
-  fb    = (FAR struct fb_chardev_s *)inode->i_private;
+  fb    = inode->i_private;
 
   /* Get panel info */
 
@@ -879,9 +895,8 @@ static int fb_poll(FAR struct file *filep, struct pollfd *fds, bool setup)
 
   /* Get the framebuffer instance */
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
-  fb    = (FAR struct fb_chardev_s *)inode->i_private;
+  fb    = inode->i_private;
 
   if (setup)
     {
@@ -1051,7 +1066,7 @@ int fb_register(int display, int plane)
 
   /* Allocate a framebuffer state instance */
 
-  fb = (FAR struct fb_chardev_s *)kmm_zalloc(sizeof(struct fb_chardev_s));
+  fb = kmm_zalloc(sizeof(struct fb_chardev_s));
   if (fb == NULL)
     {
       return -ENOMEM;
@@ -1083,8 +1098,6 @@ int fb_register(int display, int plane)
       gerr("ERROR: up_fbgetvplane() failed, vplane=%d\n", plane);
       goto errout_with_fb;
     }
-
-  fb->vtable->priv = fb;
 
   /* Initialize the frame buffer instance. */
 
@@ -1150,6 +1163,8 @@ int fb_register(int display, int plane)
       gerr("ERROR: register_driver() failed: %d\n", ret);
       goto errout_with_fb;
     }
+
+  fb->vtable->priv = fb;
 
   return OK;
 

@@ -31,7 +31,7 @@
 #include <nuttx/mutex.h>
 #include <nuttx/tls.h>
 
-#if CONFIG_TLS_NELEM > 0
+#if defined(CONFIG_TLS_NELEM) && CONFIG_TLS_NELEM > 0
 
 /****************************************************************************
  * Public Functions
@@ -58,7 +58,6 @@
 int pthread_key_delete(pthread_key_t key)
 {
   FAR struct task_info_s *info = task_get_info();
-  tls_ndxset_t mask;
   int ret = EINVAL;
 
   DEBUGASSERT(info != NULL);
@@ -69,12 +68,10 @@ int pthread_key_delete(pthread_key_t key)
        * modification of the group TLS index set.
        */
 
-      mask = (tls_ndxset_t)1 << key;
       ret = nxmutex_lock(&info->ta_lock);
       if (ret == OK)
         {
-          DEBUGASSERT((info->ta_tlsset & mask) != 0);
-          info->ta_tlsset &= ~mask;
+          info->ta_tlsdtor[key] = NULL;
           nxmutex_unlock(&info->ta_lock);
         }
       else

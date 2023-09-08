@@ -217,12 +217,11 @@ static ssize_t i2schar_read(FAR struct file *filep, FAR char *buffer,
 
   /* Get our private data structure */
 
-  DEBUGASSERT(filep != NULL && buffer != NULL);
+  DEBUGASSERT(buffer != NULL);
 
   inode = filep->f_inode;
-  DEBUGASSERT(inode != NULL);
 
-  priv = (FAR struct i2schar_dev_s *)inode->i_private;
+  priv = inode->i_private;
   DEBUGASSERT(priv != NULL);
 
   /* Verify that the buffer refers to one, correctly sized audio buffer */
@@ -290,12 +289,11 @@ static ssize_t i2schar_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Get our private data structure */
 
-  DEBUGASSERT(filep && buffer);
+  DEBUGASSERT(buffer);
 
   inode = filep->f_inode;
-  DEBUGASSERT(inode);
 
-  priv = (FAR struct i2schar_dev_s *)inode->i_private;
+  priv = inode->i_private;
   DEBUGASSERT(priv);
 
   /* Verify that the buffer refers to one, correctly sized audio buffer */
@@ -358,12 +356,9 @@ static int i2schar_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get our private data structure */
 
-  DEBUGASSERT(filep != NULL);
-
   inode = filep->f_inode;
-  DEBUGASSERT(inode != NULL);
 
-  priv = (FAR struct i2schar_dev_s *)inode->i_private;
+  priv = inode->i_private;
   DEBUGASSERT(priv != NULL && priv->i2s && priv->i2s->ops);
 
   if (priv->i2s->ops->i2s_ioctl)
@@ -414,7 +409,7 @@ int i2schar_register(FAR struct i2s_dev_s *i2s, int minor)
   /* Allocate a I2S character device structure */
 
   size_t dev_size = sizeof(struct i2schar_dev_s);
-  priv = (FAR struct i2schar_dev_s *)kmm_zalloc(dev_size);
+  priv = kmm_zalloc(dev_size);
   if (priv)
     {
       /* Initialize the I2S character device structure */

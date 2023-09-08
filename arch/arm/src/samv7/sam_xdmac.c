@@ -1427,9 +1427,14 @@ static void sam_dmaterminate(struct sam_xdmach_s *xdmach, int result)
   sam_putdmac(xdmac, chanbit, SAM_XDMAC_GD_OFFSET);
   while ((sam_getdmac(xdmac, SAM_XDMAC_GS_OFFSET) & chanbit) != 0);
 
-  /* Free the linklist */
+  /* Free the linklist. Circular buffers do not use link list so any free
+   * operation should be handled in peripheral driver that calls DMA.
+   */
 
-  sam_freelinklist(xdmach);
+  if (!xdmach->circular)
+    {
+      sam_freelinklist(xdmach);
+    }
 
   /* Perform the DMA complete callback */
 

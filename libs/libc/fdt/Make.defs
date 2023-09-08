@@ -1,0 +1,61 @@
+############################################################################
+# libs/libc/fdt/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+ifeq ($(CONFIG_LIBC_FDT),y)
+
+VERSION=$(CONFIG_LIBC_FDT_DTC_VERSION)
+
+# Download and unpack tarball if no git repo found
+ifeq ($(wildcard fdt/dtc/.git),)
+dtc:
+	$(call DOWNLOAD,https://github.com/dgibson/dtc/archive,v$(VERSION).zip,dtc.zip)
+	$(Q) mv dtc.zip fdt/dtc.zip
+	$(Q) unzip -o fdt/dtc.zip -d fdt
+	$(Q) mv fdt/dtc-$(VERSION) fdt/dtc
+else
+dtc:
+endif
+
+context:: dtc
+
+CSRCS += fdt.c
+CSRCS += fdt_ro.c
+CSRCS += fdt_wip.c
+CSRCS += fdt_sw.c
+CSRCS += fdt_rw.c
+CSRCS += fdt_strerror.c
+CSRCS += fdt_empty_tree.c
+CSRCS += fdt_addresses.c
+CSRCS += fdt_overlay.c
+CSRCS += fdt_check.c
+
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)fdt$(DELIM)dtc$(DELIM)libfdt
+
+VPATH += fdt/dtc/libfdt
+SUBDIRS += fdt/dtc/libfdt
+DEPPATH += --dep-path fdt/dtc/libfdt
+
+distclean::
+ifeq ($(wildcard fdt/dtc/.git),)
+	$(call DELDIR, fdt/dtc)
+	$(call DELFILE, fdt/dtc.zip)
+endif
+
+endif

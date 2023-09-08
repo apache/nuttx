@@ -24,23 +24,81 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-
-#include <stdint.h>
-#include <string.h>
-#include <errno.h>
-#include <assert.h>
-#include <debug.h>
-
-#ifdef CONFIG_COMPOSITE_BOARD_SERIALSTR
-#include <nuttx/board.h>
-#endif
-
-#include <nuttx/usb/usbdev_trace.h>
+#include <nuttx/usb/usb.h>
+#include <nuttx/usb/usbdev.h>
 
 #include "composite.h"
 
 #ifdef CONFIG_USBDEV_COMPOSITE
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
+
+/* Packet sizes */
+
+#ifndef CONFIG_COMPOSITE_EP0MAXPACKET
+#  define CONFIG_COMPOSITE_EP0MAXPACKET 64
+#endif
+
+/* Vendor and product IDs and strings */
+
+#ifndef CONFIG_COMPOSITE_VENDORID
+#  warning "CONFIG_COMPOSITE_VENDORID not defined"
+#  define CONFIG_COMPOSITE_VENDORID     0x03eb
+#endif
+
+#ifndef CONFIG_COMPOSITE_PRODUCTID
+#  warning "CONFIG_COMPOSITE_PRODUCTID not defined"
+#  define CONFIG_COMPOSITE_PRODUCTID    0x2022
+#endif
+
+#ifndef CONFIG_COMPOSITE_VERSIONNO
+#  define CONFIG_COMPOSITE_VERSIONNO    (0x0101)
+#endif
+
+#ifndef CONFIG_COMPOSITE_VENDORSTR
+#  warning "No Vendor string specified"
+#  define CONFIG_COMPOSITE_VENDORSTR    "NuttX"
+#endif
+
+#ifndef CONFIG_COMPOSITE_PRODUCTSTR
+#  warning "No Product string specified"
+#  define CONFIG_COMPOSITE_PRODUCTSTR   "Composite Device"
+#endif
+
+#undef CONFIG_COMPOSITE_SERIALSTR
+#define CONFIG_COMPOSITE_SERIALSTR      "0101"
+
+#undef CONFIG_COMPOSITE_CONFIGSTR
+#define CONFIG_COMPOSITE_CONFIGSTR      "Composite"
+
+#ifdef CONFIG_USBDEV_SELFPOWERED
+#  define COMPOSITE_SELFPOWERED         USB_CONFIG_ATTR_SELFPOWER
+#else
+#  define COMPOSITE_SELFPOWERED         (0)
+#endif
+
+#ifdef CONFIG_USBDEV_REMOTEWAKEUP
+#  define COMPOSITE_REMOTEWAKEUP        USB_CONFIG_ATTR_WAKEUP
+#else
+#  define COMPOSITE_REMOTEWAKEUP        (0)
+#endif
+
+/* Descriptors **************************************************************/
+
+/* String language */
+
+#define COMPOSITE_STR_LANGUAGE          (0x0409) /* en-us */
+
+/* Descriptor strings */
+
+#define COMPOSITE_MANUFACTURERSTRID     (1)
+#define COMPOSITE_PRODUCTSTRID          (2)
+#define COMPOSITE_SERIALSTRID           (3)
+#define COMPOSITE_CONFIGSTRID           (4)
 
 /****************************************************************************
  * Private Data
@@ -56,7 +114,7 @@ static const struct usb_devdesc_s g_devdesc =
     LSBYTE(0x0200),
     MSBYTE(0x0200)
   },
-#ifndef CONFIG_COMPOSITE_IAD
+#ifdef CONFIG_COMPOSITE_IAD
   USB_CLASS_MISC,                               /* classid */
   2,                                            /* subclass */
   1,                                            /* protocol */
@@ -84,6 +142,38 @@ static const struct usb_devdesc_s g_devdesc =
   COMPOSITE_NCONFIGS                            /* nconfigs */
 };
 
+static const struct usbdev_strdesc_s g_strdesc[] =
+{
+  {COMPOSITE_MANUFACTURERSTRID, CONFIG_COMPOSITE_VENDORSTR},
+  {COMPOSITE_PRODUCTSTRID,      CONFIG_COMPOSITE_PRODUCTSTR},
+#ifdef CONFIG_COMPOSITE_SERIALSTR
+  {COMPOSITE_SERIALSTRID,       CONFIG_COMPOSITE_SERIALSTR},
+#else
+  {COMPOSITE_SERIALSTRID,       ""},
+#endif
+  {COMPOSITE_CONFIGSTRID,       CONFIG_COMPOSITE_CONFIGSTR},
+  {}
+};
+
+static const struct usbdev_strdescs_s g_strdescs =
+{
+  .language = COMPOSITE_STR_LANGUAGE,
+  .strdesc  = g_strdesc,
+};
+
+static const struct usb_cfgdesc_s g_cfgdesc =
+{
+  .len      = USB_SIZEOF_CFGDESC,              /* Descriptor length    */
+  .type     = USB_DESC_TYPE_CONFIG,            /* Descriptor type      */
+  .cfgvalue = COMPOSITE_CONFIGID,              /* Configuration value  */
+  .icfg     = COMPOSITE_CONFIGSTRID,           /* Configuration        */
+  .attr     = USB_CONFIG_ATTR_ONE   |
+              COMPOSITE_SELFPOWERED |
+              COMPOSITE_REMOTEWAKEUP,          /* Attributes           */
+
+  .mxpower  = (CONFIG_USBDEV_MAXPOWER + 1) / 2 /* Max power (mA/2) */
+};
+
 #ifdef CONFIG_USBDEV_DUALSPEED
 static const struct usb_qualdesc_s g_qualdesc =
 {
@@ -93,188 +183,56 @@ static const struct usb_qualdesc_s g_qualdesc =
      LSBYTE(0x0200),
      MSBYTE(0x0200)
   },
+#  ifdef CONFIG_COMPOSITE_IAD
+  USB_CLASS_MISC,                               /* classid */
+  2,                                            /* subclass */
+  1,                                            /* protocol */
+#  else
   USB_CLASS_VENDOR_SPEC,                        /* classid */
   0,                                            /* subclass */
   0,                                            /* protocol */
+#  endif
   CONFIG_COMPOSITE_EP0MAXPACKET,                /* mxpacketsize */
   COMPOSITE_NCONFIGS,                           /* nconfigs */
   0,                                            /* reserved */
 };
 #endif
 
+static const struct usbdev_devdescs_s g_composite_devdescs =
+{
+  &g_cfgdesc,
+  &g_strdescs,
+  &g_devdesc,
+#ifdef CONFIG_USBDEV_DUALSPEED
+  &g_qualdesc,
+#endif
+};
+
 /****************************************************************************
- * Private Functions
+ * Public Data
  ****************************************************************************/
+
+const char g_compvendorstr[]  = CONFIG_COMPOSITE_VENDORSTR;
+const char g_compproductstr[] = CONFIG_COMPOSITE_PRODUCTSTR;
+#ifndef CONFIG_COMPOSITE_BOARD_SERIALSTR
+const char g_compserialstr[]  = CONFIG_COMPOSITE_SERIALSTR;
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: composite_mkstrdesc
+ * Name: composite_getdevdescs
  *
  * Description:
- *   Construct a string descriptor
+ *   Return a pointer to the device descriptor
  *
  ****************************************************************************/
 
-int composite_mkstrdesc(uint8_t id, FAR struct usb_strdesc_s *strdesc)
+FAR const struct usbdev_devdescs_s *composite_getdevdescs(void)
 {
-  FAR uint8_t *data = (FAR uint8_t *)(strdesc + 1);
-  FAR const char *str;
-  int len;
-  int ndata;
-  int i;
-
-  switch (id)
-    {
-    case 0:
-      {
-        /* Descriptor 0 is the language id */
-
-        strdesc->len  = 4;
-        strdesc->type = USB_DESC_TYPE_STRING;
-        data[0] = LSBYTE(COMPOSITE_STR_LANGUAGE);
-        data[1] = MSBYTE(COMPOSITE_STR_LANGUAGE);
-        return 4;
-      }
-
-    case COMPOSITE_MANUFACTURERSTRID:
-      str = g_compvendorstr;
-      break;
-
-    case COMPOSITE_PRODUCTSTRID:
-      str = g_compproductstr;
-      break;
-
-    case COMPOSITE_SERIALSTRID:
-#ifdef CONFIG_COMPOSITE_BOARD_SERIALSTR
-      str = board_usbdev_serialstr();
-#else
-      str = g_compserialstr;
-#endif
-      break;
-
-    case COMPOSITE_CONFIGSTRID:
-      str = CONFIG_COMPOSITE_CONFIGSTR;
-      break;
-
-    default:
-      return -EINVAL;
-    }
-
-  /* The string is utf16-le.  The poor man's utf-8 to utf16-le
-   * conversion below will only handle 7-bit en-us ascii
-   */
-
-  len = strlen(str);
-  for (i = 0, ndata = 0; i < len; i++, ndata += 2)
-    {
-      data[ndata]     = str[i];
-      data[ndata + 1] = 0;
-    }
-
-  strdesc->len  = ndata + 2;
-  strdesc->type = USB_DESC_TYPE_STRING;
-  return strdesc->len;
+  return &g_composite_devdescs;
 }
-
-/****************************************************************************
- * Name: composite_getepdesc
- *
- * Description:
- *   Return a pointer to the raw device descriptor
- *
- ****************************************************************************/
-
-FAR const struct usb_devdesc_s *composite_getdevdesc(void)
-{
-  return &g_devdesc;
-}
-
-/****************************************************************************
- * Name: composite_mkcfgdesc
- *
- * Description:
- *   Construct the configuration descriptor
- *
- ****************************************************************************/
-
-#ifdef CONFIG_USBDEV_DUALSPEED
-int16_t composite_mkcfgdesc(FAR struct composite_dev_s *priv,
-                            FAR uint8_t *buf,
-                            uint8_t speed, uint8_t type)
-#else
-int16_t composite_mkcfgdesc(FAR struct composite_dev_s *priv,
-                            FAR uint8_t *buf)
-#endif
-{
-  FAR struct usb_cfgdesc_s *cfgdesc = (FAR struct usb_cfgdesc_s *)buf;
-  int16_t len;
-  int16_t total;
-  int i;
-
-  /* Configuration descriptor for the composite device */
-
-  /* Fill in the values directly into the buf */
-
-  cfgdesc->len         = USB_SIZEOF_CFGDESC;               /* Descriptor length */
-#ifdef CONFIG_USBDEV_DUALSPEED
-  cfgdesc->type        = type;                             /* Descriptor type */
-#else
-  cfgdesc->type        = USB_DESC_TYPE_CONFIG;             /* Descriptor type */
-#endif
-  cfgdesc->totallen[0] = LSBYTE(priv->cfgdescsize);        /* Lower Byte of Total length */
-  cfgdesc->totallen[1] = MSBYTE(priv->cfgdescsize);        /* High Byte of Total length */
-  cfgdesc->ninterfaces = priv->ninterfaces;                /* Number of interfaces */
-  cfgdesc->cfgvalue    = COMPOSITE_CONFIGID;               /* Configuration value */
-  cfgdesc->icfg        = COMPOSITE_CONFIGSTRID;            /* Configuration */
-  cfgdesc->attr        = USB_CONFIG_ATTR_ONE |             /* Attributes */
-                         COMPOSITE_SELFPOWERED |
-                         COMPOSITE_REMOTEWAKEUP;
-  cfgdesc->mxpower     = (CONFIG_USBDEV_MAXPOWER + 1) / 2; /* Max power (mA/2) */
-
-  /* increment the size and buf to point right behind the information
-   * filled in
-   */
-
-  total = USB_SIZEOF_CFGDESC;
-  buf += USB_SIZEOF_CFGDESC;
-
-  /* Copy all contained interface descriptors into the buffer too */
-
-  for (i = 0; i < priv->ndevices; i++)
-    {
-#ifdef CONFIG_USBDEV_DUALSPEED
-      len = priv->device[i].compdesc.mkconfdesc(buf,
-                                        &priv->device[i].compdesc.devinfo,
-                                        speed, type);
-      total += len;
-      buf += len;
-#else
-      len = priv->device[i].compdesc.mkconfdesc(buf,
-                                        &priv->device[i].compdesc.devinfo);
-      total += len;
-      buf += len;
-#endif
-    }
-
-  return total;
-}
-
-/****************************************************************************
- * Name: composite_getqualdesc
- *
- * Description:
- *   Return a pointer to the raw qual descriptor
- *
- ****************************************************************************/
-
-#ifdef CONFIG_USBDEV_DUALSPEED
-FAR const struct usb_qualdesc_s *composite_getqualdesc(void)
-{
-  return &g_qualdesc;
-}
-#endif
 
 #endif /* CONFIG_USBDEV_COMPOSITE */

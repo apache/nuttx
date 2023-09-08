@@ -25,7 +25,7 @@ CMN_CSRCS += arm_getintstack.c arm_initialize.c arm_lowputs.c
 CMN_CSRCS += arm_modifyreg8.c arm_modifyreg16.c arm_modifyreg32.c
 CMN_CSRCS += arm_nputs.c arm_releasestack.c arm_registerdump.c
 CMN_CSRCS += arm_stackframe.c arm_switchcontext.c
-CMN_CSRCS += arm_usestack.c arm_vfork.c
+CMN_CSRCS += arm_usestack.c arm_fork.c
 
 ifneq ($(CONFIG_ALARM_ARCH),y)
   ifneq ($(CONFIG_TIMER_ARCH),y)
@@ -73,7 +73,7 @@ ifeq ($(CONFIG_UNWINDER_ARM),y)
   CMN_CSRCS += arm_backtrace_unwind.c
 endif
 
-CMN_ASRCS += vfork.S
+CMN_ASRCS += fork.S
 
 ifeq ($(CONFIG_ARCH_HAVE_TESTSET),y)
   ifeq ($(CONFIG_ARCH_ARMV6M),)

@@ -23,7 +23,6 @@
  ****************************************************************************/
 
 #include <assert.h>
-#include <execinfo.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <syslog.h>
@@ -94,7 +93,9 @@ static inline void mempool_add_backtrace(FAR struct mempool_s *pool,
 #  if CONFIG_MM_BACKTRACE > 0
   if (pool->procfs.backtrace)
     {
-      int result = backtrace(buf->backtrace, CONFIG_MM_BACKTRACE);
+      int result = sched_backtrace(buf->pid, buf->backtrace,
+                                   CONFIG_MM_BACKTRACE,
+                                   CONFIG_MM_HEAP_MEMPOOL_BACKTRACE_SKIP);
       if (result < CONFIG_MM_BACKTRACE)
         {
           buf->backtrace[result] = NULL;
@@ -303,6 +304,9 @@ void mempool_free(FAR struct mempool_s *pool, FAR void *blk)
   FAR struct mempool_backtrace_s *buf =
     (FAR struct mempool_backtrace_s *)((FAR char *)blk + pool->blocksize);
 
+  /* Check double free */
+
+  DEBUGASSERT(list_in_list(&buf->node));
   list_delete(&buf->node);
 #else
   pool->nalloc--;
@@ -426,7 +430,7 @@ mempool_info_task(FAR struct mempool_s *pool,
                            node)
         {
           if ((task->pid == buf->pid || task->pid == PID_MM_ALLOC ||
-               (task->pid == PID_MM_LEAK && !!nxsched_get_tcb(buf->pid))) &&
+               (task->pid == PID_MM_LEAK && !nxsched_get_tcb(buf->pid))) &&
               buf->seqno >= task->seqmin && buf->seqno <= task->seqmax)
             {
               info.aordblks++;
@@ -489,7 +493,7 @@ void mempool_memdump(FAR struct mempool_s *pool,
                            struct mempool_backtrace_s, node)
         {
           if ((dump->pid == buf->pid || dump->pid == PID_MM_ALLOC ||
-               (dump->pid == PID_MM_LEAK && !!nxsched_get_tcb(buf->pid))) &&
+               (dump->pid == PID_MM_LEAK && !nxsched_get_tcb(buf->pid))) &&
               buf->seqno >= dump->seqmin && buf->seqno <= dump->seqmax)
             {
               char tmp[CONFIG_MM_BACKTRACE * MM_PTR_FMT_WIDTH + 1] = "";

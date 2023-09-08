@@ -57,7 +57,37 @@
  *
  ****************************************************************************/
 
+#if defined(CONFIG_GROUP_KILL_CHILDREN_TIMEOUT_MS) && \
+            CONFIG_GROUP_KILL_CHILDREN_TIMEOUT_MS != 0
 static int group_kill_children_handler(pid_t pid, FAR void *arg)
+{
+  /* Cancel all threads except for the one specified by the argument */
+
+  if (pid != (pid_t)((uintptr_t)arg))
+    {
+      pthread_kill(pid, SIGTERM);
+    }
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: group_cancel_children_handler
+ *
+ * Description:
+ *   Callback from group_foreachchild that handles one member of the group.
+ *
+ * Input Parameters:
+ *   pid - The ID of the group member that may be signaled.
+ *   arg - The PID of the thread to be retained.
+ *
+ * Returned Value:
+ *   0 (OK) always
+ *
+ ****************************************************************************/
+
+static int group_cancel_children_handler(pid_t pid, FAR void *arg)
 {
   FAR struct tcb_s *rtcb;
   int ret;
@@ -135,6 +165,11 @@ int group_kill_children(FAR struct tcb_s *tcb)
 
   DEBUGASSERT(tcb->group);
 
+  if (tcb->group->tg_flags & GROUP_FLAG_EXITING)
+    {
+      return 0;
+    }
+
 #ifdef CONFIG_SMP
   /* NOTE: sched_lock() is not enough for SMP
    * because tcb->group will be accessed from the child tasks
@@ -153,7 +188,35 @@ int group_kill_children(FAR struct tcb_s *tcb)
 
   tcb->group->tg_flags |= GROUP_FLAG_EXITING;
 
-  ret = group_foreachchild(tcb->group, group_kill_children_handler,
+#if defined(CONFIG_GROUP_KILL_CHILDREN_TIMEOUT_MS) && \
+            CONFIG_GROUP_KILL_CHILDREN_TIMEOUT_MS != 0
+  /* Send SIGTERM for each first */
+
+  group_foreachchild(tcb->group, group_kill_children_handler,
+                     (FAR void *)((uintptr_t)tcb->pid));
+
+  /* Wait a bit for child exit */
+
+  ret = CONFIG_GROUP_KILL_CHILDREN_TIMEOUT_MS;
+  while (1)
+    {
+      if (tcb->group->tg_nmembers <= 1)
+          break;
+
+      usleep(USEC_PER_MSEC);
+
+#  if CONFIG_GROUP_KILL_CHILDREN_TIMEOUT_MS > 0
+      if (--ret < 0)
+        {
+          break;
+        }
+#  endif
+    }
+#endif
+
+  /* Force cancel/delete again */
+
+  ret = group_foreachchild(tcb->group, group_cancel_children_handler,
                            (FAR void *)((uintptr_t)tcb->pid));
 
 #ifdef CONFIG_SMP

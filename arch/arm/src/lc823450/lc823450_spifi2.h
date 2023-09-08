@@ -78,7 +78,7 @@
 #define SF_CMD_READ_JID       0x9f
 
 #define SF_STATUS1_BUSY       (1 << 0)
-#define SF_STATUS2_QE    	    (1 << 1)
+#define SF_STATUS2_QE         (1 << 1)
 
 #define SF_JID_MID_MASK       0xff0000
 #define SF_JID_MID_WINBOND    0xef0000

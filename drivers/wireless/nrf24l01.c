@@ -942,11 +942,10 @@ static int nrf24l01_open(FAR struct file *filep)
 
   wlinfo("Opening nRF24L01 dev\n");
 
-  DEBUGASSERT(filep);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
-  dev = (FAR struct nrf24l01_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  dev = inode->i_private;
 
   /* Get exclusive access to the driver data structure */
 
@@ -986,11 +985,10 @@ static int nrf24l01_close(FAR struct file *filep)
   int ret;
 
   wlinfo("Closing nRF24L01 dev\n");
-  DEBUGASSERT(filep);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
-  dev  = (FAR struct nrf24l01_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  dev  = inode->i_private;
 
   /* Get exclusive access to the driver data structure */
 
@@ -1021,11 +1019,10 @@ static ssize_t nrf24l01_read(FAR struct file *filep, FAR char *buffer,
   FAR struct inode *inode;
   int ret;
 
-  DEBUGASSERT(filep);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
-  dev = (FAR struct nrf24l01_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  dev = inode->i_private;
 
   ret = nxmutex_lock(&dev->devlock);
   if (ret < 0)
@@ -1072,11 +1069,10 @@ static ssize_t nrf24l01_write(FAR struct file *filep, FAR const char *buffer,
   FAR struct inode *inode;
   int ret;
 
-  DEBUGASSERT(filep);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
-  dev = (FAR struct nrf24l01_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  dev = inode->i_private;
 
   ret = nxmutex_lock(&dev->devlock);
   if (ret < 0)
@@ -1101,11 +1097,10 @@ static int nrf24l01_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   int ret;
 
   wlinfo("cmd: %d arg: %ld\n", cmd, arg);
-  DEBUGASSERT(filep);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
-  dev  = (FAR struct nrf24l01_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  dev  = inode->i_private;
 
   /* Get exclusive access to the driver data structure */
 
@@ -1362,11 +1357,11 @@ static int nrf24l01_poll(FAR struct file *filep, FAR struct pollfd *fds,
   int ret;
 
   wlinfo("setup: %d\n", (int)setup);
-  DEBUGASSERT(filep && fds);
+  DEBUGASSERT(fds);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
-  dev  = (FAR struct nrf24l01_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  dev  = inode->i_private;
 
   /* Exclusive access */
 

@@ -15,7 +15,7 @@ config ARMV7M_HAVE_DCACHE
 
 config ARMV7M_USEBASEPRI
 	bool "Use BASEPRI Register"
-	default y if ARCH_HIPRI_INTERRUPT
+	default ARCH_HIPRI_INTERRUPT
 	depends on ARCH_CORTEXM3 || ARCH_CORTEXM4 || ARCH_CORTEXM7
 	---help---
 		Use the BASEPRI register to enable and disable interrupts. By
@@ -88,8 +88,7 @@ config ARMV7M_DTCM
 
 config ARMV7M_TARGET2_PREL
 	bool "R_ARM_TARGET2 is PC relative"
-	default n if !CXX_EXCEPTION
-	default y if CXX_EXCEPTION
+	default CXX_EXCEPTION
 	depends on LIBC_ARCH_ELF
 	---help---
 		Perform a PC relative relocation for relocation type R_ARM_TARGET2

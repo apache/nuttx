@@ -1000,8 +1000,8 @@ static int sps30_unlink(FAR struct inode *inode)
   FAR struct sps30_dev_s *priv;
   int ret;
 
-  DEBUGASSERT(inode != NULL && inode->i_private != NULL);
-  priv = (FAR struct sps30_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private != NULL);
+  priv = inode->i_private;
 
   /* Get exclusive access */
 
@@ -1065,7 +1065,7 @@ int sps30_register_i2c(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   /* Initialize the device structure */
 
-  priv = (FAR struct sps30_dev_s *)kmm_zalloc(sizeof(struct sps30_dev_s));
+  priv = kmm_zalloc(sizeof(struct sps30_dev_s));
   if (priv == NULL)
     {
       sps30_dbg("ERROR: Failed to allocate instance\n");

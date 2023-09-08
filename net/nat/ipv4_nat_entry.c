@@ -307,7 +307,7 @@ ipv4_nat_entry_create(uint8_t protocol,
                       in_addr_t local_ip, uint16_t local_port)
 {
   FAR struct ipv4_nat_entry *entry =
-      (FAR struct ipv4_nat_entry *)kmm_malloc(sizeof(struct ipv4_nat_entry));
+      kmm_malloc(sizeof(struct ipv4_nat_entry));
   if (entry == NULL)
     {
       nwarn("WARNING: Failed to allocate IPv4 NAT entry\n");
@@ -343,7 +343,8 @@ ipv4_nat_entry_create(uint8_t protocol,
 
 static void ipv4_nat_entry_delete(FAR struct ipv4_nat_entry *entry)
 {
-  ninfo("INFO: Removing NAT entry proto=%d, local=%x:%d, external=:%d\n",
+  ninfo("INFO: Removing NAT entry proto=%" PRIu8
+        ", local=%" PRIx32 ":%" PRIu16 ", external=:%" PRIu16 "\n",
         entry->protocol, entry->local_ip, entry->local_port,
         entry->external_port);
 
@@ -505,7 +506,7 @@ ipv4_nat_inbound_entry_find(uint8_t protocol, in_addr_t external_ip,
   if (refresh) /* false = a test of whether entry exists, no need to warn */
     {
       nwarn("WARNING: Failed to find IPv4 inbound NAT entry for "
-            "proto=%d, external=%x:%d\n",
+            "proto=%" PRIu8 ", external=%" PRIx32 ":%" PRIu16 "\n",
             protocol, external_ip, external_port);
     }
 
@@ -576,7 +577,7 @@ ipv4_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
   /* Failed to find the entry, create one. */
 
   ninfo("INFO: Failed to find IPv4 outbound NAT entry for "
-        "proto=%d, local=%x:%d, try creating one.\n",
+        "proto=%" PRIu8 ", local=%" PRIx32 ":%" PRIu16 ", try create one.\n",
         protocol, local_ip, local_port);
 
   uint16_t external_port = ipv4_nat_select_port(dev, protocol, local_port);

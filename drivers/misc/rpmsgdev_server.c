@@ -32,6 +32,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/wqueue.h>
 #include <nuttx/drivers/rpmsgdev.h>
 #include <nuttx/rptun/openamp.h>
 
@@ -62,6 +63,7 @@ struct rpmsgdev_server_s
   mutex_t               lock;  /* The mutex used to protect the list
                                 * operation
                                 */
+  struct work_s         work;  /* Poll notify work */
 };
 
 /****************************************************************************
@@ -88,6 +90,7 @@ static int  rpmsgdev_lseek_handler(FAR struct rpmsg_endpoint *ept,
 static int  rpmsgdev_ioctl_handler(FAR struct rpmsg_endpoint *ept,
                                    FAR void *data, size_t len,
                                    uint32_t src, FAR void *priv);
+static void rpmsgdev_poll_worker(FAR void *arg);
 static void rpmsgdev_poll_cb(FAR struct pollfd *fds);
 static int  rpmsgdev_poll_handler(FAR struct rpmsg_endpoint *ept,
                                   FAR void *data, size_t len,
@@ -112,13 +115,14 @@ static int  rpmsgdev_ept_cb(FAR struct rpmsg_endpoint *ept,
 
 static const rpmsg_ept_cb g_rpmsgdev_handler[] =
 {
-  [RPMSGDEV_OPEN]  = rpmsgdev_open_handler,
-  [RPMSGDEV_CLOSE] = rpmsgdev_close_handler,
-  [RPMSGDEV_READ]  = rpmsgdev_read_handler,
-  [RPMSGDEV_WRITE] = rpmsgdev_write_handler,
-  [RPMSGDEV_LSEEK] = rpmsgdev_lseek_handler,
-  [RPMSGDEV_IOCTL] = rpmsgdev_ioctl_handler,
-  [RPMSGDEV_POLL]  = rpmsgdev_poll_handler,
+  [RPMSGDEV_OPEN]        = rpmsgdev_open_handler,
+  [RPMSGDEV_CLOSE]       = rpmsgdev_close_handler,
+  [RPMSGDEV_READ]        = rpmsgdev_read_handler,
+  [RPMSGDEV_READ_NOFRAG] = rpmsgdev_read_handler,
+  [RPMSGDEV_WRITE]       = rpmsgdev_write_handler,
+  [RPMSGDEV_LSEEK]       = rpmsgdev_lseek_handler,
+  [RPMSGDEV_IOCTL]       = rpmsgdev_ioctl_handler,
+  [RPMSGDEV_POLL]        = rpmsgdev_poll_handler,
 };
 
 /****************************************************************************
@@ -224,7 +228,7 @@ static int rpmsgdev_read_handler(FAR struct rpmsg_endpoint *ept,
 
       rsp->header.result = ret;
       rpmsg_send_nocopy(ept, rsp, (ret < 0 ? 0 : ret) + sizeof(*rsp) - 1);
-      if (ret <= 0)
+      if (ret <= 0 || msg->header.command == RPMSGDEV_READ_NOFRAG)
         {
           break;
         }
@@ -309,17 +313,18 @@ static int rpmsgdev_ioctl_handler(FAR struct rpmsg_endpoint *ept,
 }
 
 /****************************************************************************
- * Name: rpmsgdev_poll_cb
+ * Name: rpmsgdev_poll_worker
  ****************************************************************************/
 
-static void rpmsgdev_poll_cb(FAR struct pollfd *fds)
+static void rpmsgdev_poll_worker(FAR void *arg)
 {
+  FAR struct pollfd *fds = arg;
   FAR struct rpmsgdev_server_s *server = fds->arg;
   FAR struct rpmsgdev_device_s *dev =
     container_of(fds, FAR struct rpmsgdev_device_s, fd);
   FAR struct rpmsgdev_notify_s msg;
 
-  DEBUGASSERT(fds != NULL && dev->cfd != 0);
+  DEBUGASSERT(dev->cfd != 0);
 
   msg.header.command = RPMSGDEV_NOTIFY;
   msg.revents = fds->revents;
@@ -328,6 +333,20 @@ static void rpmsgdev_poll_cb(FAR struct pollfd *fds)
   fds->revents = 0;
 
   rpmsg_send(&server->ept, &msg, sizeof(msg));
+}
+
+/****************************************************************************
+ * Name: rpmsgdev_poll_cb
+ ****************************************************************************/
+
+static void rpmsgdev_poll_cb(FAR struct pollfd *fds)
+{
+  FAR struct rpmsgdev_server_s *server;
+
+  DEBUGASSERT(fds != NULL);
+
+  server = fds->arg;
+  work_queue(HPWORK, &server->work, rpmsgdev_poll_worker, fds, 0);
 }
 
 /****************************************************************************

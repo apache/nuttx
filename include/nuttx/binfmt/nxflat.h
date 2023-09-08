@@ -113,51 +113,6 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: nxflat_initialize
- *
- * Description:
- *   In order to use the NxFLAT binary format, this function must be called
- *   during system initialization to register the NXFLAT binary
- *   format.
- *
- * Returned Value:
- *   This is a NuttX internal function so it follows the convention that
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- ****************************************************************************/
-
-int nxflat_initialize(void);
-
-/****************************************************************************
- * Name: nxflat_uninitialize
- *
- * Description:
- *   Unregister the NXFLAT binary loader
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void nxflat_uninitialize(void);
-
-/****************************************************************************
- * Name: nxflat_verifyheader
- *
- * Description:
- *   Given the header from a possible NXFLAT executable, verify that it is
- *   an NXFLAT executable.
- *
- * Returned Value:
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- ****************************************************************************/
-
-int nxflat_verifyheader(const struct nxflat_hdr_s *header);
-
-/****************************************************************************
  * Name: nxflat_init
  *
  * Description:

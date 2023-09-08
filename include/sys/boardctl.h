@@ -287,7 +287,7 @@ struct boardioc_romdisk_s
 struct symtab_s;  /* Forward reference */
 struct boardioc_symtab_s
 {
-  FAR struct symtab_s *symtab;
+  FAR const struct symtab_s *symtab;
   int nsymbols;
 };
 
@@ -331,6 +331,9 @@ struct boardioc_builtin_s
 enum boardioc_usbdev_identifier_e
 {
   BOARDIOC_USBDEV_NONE = 0        /* Not valid */
+#ifdef CONFIG_USBADB
+  , BOARDIOC_USBDEV_ADB           /* ADB */
+#endif
 #ifdef CONFIG_CDCACM
   , BOARDIOC_USBDEV_CDCACM        /* CDC/ACM */
 #endif

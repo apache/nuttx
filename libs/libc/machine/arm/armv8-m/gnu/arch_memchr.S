@@ -68,7 +68,7 @@
 
 #include "libc.h"
 
-#ifdef LIBC_BUILD_STRING
+#ifdef LIBC_BUILD_MEMCHR
 
 @ 2011-02-07 david.gilbert@linaro.org
 @    Extracted from local git a5b438d861
@@ -83,9 +83,6 @@
 @ This code requires armv6t2 or later.  Uses Thumb2.
 
 	.syntax unified
-
-#include "arm-acle-compat.h"
-#include "arm_asm.h"
 
 @ NOTE: This ifdef MUST match the one in memchr-stub.c
 #if defined (__ARM_NEON__) || defined (__ARM_NEON)
@@ -277,14 +274,10 @@ memchr:
 #elif __ARM_ARCH_ISA_THUMB >= 2 && defined (__ARM_FEATURE_DSP)
 
 #if __ARM_ARCH_PROFILE == 'M'
-#if __ARM_ARCH >= 8
-	/* keep config inherited from -march=.  */
+       .arch armv7e-m
 #else
-	.arch armv7e-m
-#endif /* __ARM_ARCH >= 8 */
-#else
-	.arch armv6t2
-#endif /* __ARM_ARCH_PROFILE == 'M' */
+       .arch armv6t2
+#endif
 
 @ this lets us check a flag in a 00/ff byte easily in either endianness
 #ifdef __ARMEB__
@@ -301,14 +294,11 @@ memchr:
 	.p2align 4,,15
 	.global memchr
 	.type memchr,%function
-	.fnstart
-	.cfi_startproc
 memchr:
 	@ r0 = start of memory to scan
 	@ r1 = character to look for
 	@ r2 = length
 	@ returns r0 = pointer to character or NULL if not found
-	prologue
 	and	r1,r1,#0xff	@ Don't trust the caller to pass a char
 
 	cmp	r2,#16		@ If short don't bother with anything clever
@@ -330,11 +320,6 @@ memchr:
 10:
 	@ We are aligned, we know we have at least 8 bytes to work with
 	push	{r4,r5,r6,r7}
-	.cfi_adjust_cfa_offset 16
-	.cfi_rel_offset 4, 0
-	.cfi_rel_offset 5, 4
-	.cfi_rel_offset 6, 8
-	.cfi_rel_offset 7, 12
 	orr	r1, r1, r1, lsl #8	@ expand the match word across all bytes
 	orr	r1, r1, r1, lsl #16
 	bic	r4, r2, #7	@ Number of double words to work with * 8
@@ -356,11 +341,6 @@ memchr:
 	bne	15b		@ (Flags from the subs above)
 
 	pop	{r4,r5,r6,r7}
-	.cfi_restore 7
-	.cfi_restore 6
-	.cfi_restore 5
-	.cfi_restore 4
-	.cfi_adjust_cfa_offset -16
 	and	r1,r1,#0xff	@ r1 back to a single character
 	and	r2,r2,#7	@ Leave the count remaining as the number
 				@ after the double words have been done
@@ -376,29 +356,17 @@ memchr:
 	bne	21b		@ on r2 flags
 
 40:
-	.cfi_remember_state
 	movs	r0,#0		@ not found
-	epilogue
+	bx	lr
 
 50:
-	.cfi_restore_state
-	.cfi_remember_state
 	subs	r0,r0,#1	@ found
-	epilogue
+	bx	lr
 
 60:  @ We're here because the fast path found a hit
      @ now we have to track down exactly which word it was
 	@ r0 points to the start of the double word after the one tested
 	@ r5 has the 00/ff pattern for the first word, r6 has the chained value
-	@ This point is reached from cbnz midway through label 15 prior to
-	@ popping r4-r7 off the stack.  .cfi_restore_state alone disregards
-	@ this, so we manually correct this.
-	.cfi_restore_state	@ Standard post-prologue state
-	.cfi_adjust_cfa_offset 16
-	.cfi_rel_offset 4, 0
-	.cfi_rel_offset 5, 4
-	.cfi_rel_offset 6, 8
-	.cfi_rel_offset 7, 12
 	cmp	r5, #0
 	itte	eq
 	moveq	r5, r6		@ the end is in the 2nd word
@@ -418,16 +386,8 @@ memchr:
 
 61:
 	pop	{r4,r5,r6,r7}
-	.cfi_restore 7
-	.cfi_restore 6
-	.cfi_restore 5
-	.cfi_restore 4
-	.cfi_adjust_cfa_offset -16
 	subs	r0,r0,#1
-	epilogue
-	.cfi_endproc
-	.cantunwind
-	.fnend
+	bx	lr
 #else
   /* Defined in memchr-stub.c.  */
 #endif

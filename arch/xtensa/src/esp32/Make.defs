@@ -18,7 +18,6 @@
 #
 ############################################################################
 
-include chip/Bootloader.mk
 include common/Make.defs
 
 # The start-up, "head", file.  May be either a .S or a .c file.
@@ -80,6 +79,10 @@ endif
 
 ifeq ($(CONFIG_ESP32_PCNT_AS_QE),y)
 CHIP_CSRCS += esp32_qencoder.c
+endif
+
+ifeq ($(CONFIG_ESP32_RMT),y)
+CHIP_CSRCS += esp32_rmt.c
 endif
 
 ifeq ($(CONFIG_ESP32_SPI),y)
@@ -233,9 +236,9 @@ CHIP_CSRCS += esp32_wlan.c esp32_wifi_utils.c esp32_wifi_adapter.c
 EXTRA_LIBS += -lcore -lnet80211 -lpp -lsmartconfig -lespnow -lwpa_supplicant
 
 ifeq ($(GCCVER),)
-  export GCCVER := $(shell $(CC) --version | grep gcc | sed -r 's/.* ([0-9]+\.[0-9]+).*/\1/')
+  export GCCVER := $(shell $(CC) --version | grep gcc | sed -r 's/.* ([0-9]+\.[0-9]+).*/\1/' | cut -d'.' -f1)
 endif
-ifeq ($(GCCVER),12.2)
+ifeq ($(GCCVER),12)
   chip/esp32_wifi_adapter.c_CFLAGS += -Wno-maybe-uninitialized
 endif
 endif
@@ -247,3 +250,33 @@ EXTRA_LIBS += -lbtdm_app
     EXTRA_LIBS += -lcoexist
   endif
 endif
+
+#############################################################################
+# Espressif HAL for 3rd Party Platforms
+#############################################################################
+
+# Fetch source files and add them to build
+
+ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
+ifndef ESP_HAL_3RDPARTY_VERSION
+	ESP_HAL_3RDPARTY_VERSION = 45c33111b441363e1267158186a60f42525228ca
+endif
+
+ifndef ESP_HAL_3RDPARTY_URL
+	ESP_HAL_3RDPARTY_URL	= https://github.com/espressif/esp-hal-3rdparty.git
+endif
+
+chip/$(ESP_HAL_3RDPARTY_REPO):
+	$(Q) echo "Cloning Espressif HAL for 3rd Party Platforms"
+	$(Q) git clone --quiet $(ESP_HAL_3RDPARTY_URL) chip/$(ESP_HAL_3RDPARTY_REPO)
+	$(Q) echo "Espressif HAL for 3rd Party Platforms: ${ESP_HAL_3RDPARTY_VERSION}"
+	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) checkout --quiet $(ESP_HAL_3RDPARTY_VERSION)
+
+# Silent preprocessor warnings
+
+CFLAGS += -Wno-undef -Wno-unused-variable
+
+include chip/Bootloader.mk
+
+distclean::
+	$(call DELDIR,chip/$(ESP_HAL_3RDPARTY_REPO))

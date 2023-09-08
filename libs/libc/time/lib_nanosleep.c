@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
 #include <time.h>
 
 /****************************************************************************
@@ -80,10 +81,22 @@
 
 int nanosleep(FAR const struct timespec *rqtp, FAR struct timespec *rmtp)
 {
+  int ret;
+
   /* Calling clock_nanosleep() with the value TIMER_ABSTIME not set in the
    * flags argument and with a clock_id of CLOCK_REALTIME is equivalent t
    * calling nanosleep() with the same rqtp and rmtp arguments.
+   * As clock_nanosleep() method return errno on fail, which is not
+   * compatible with nanosleep(), the nanosleep() need to return -1 on fail,
+   * so we need to convert the return value.
    */
 
-  return clock_nanosleep(CLOCK_REALTIME, 0, rqtp, rmtp);
+  ret = clock_nanosleep(CLOCK_REALTIME, 0, rqtp, rmtp);
+  if (ret != 0)
+    {
+      set_errno(ret);
+      ret = ERROR;
+    }
+
+  return ret;
 }

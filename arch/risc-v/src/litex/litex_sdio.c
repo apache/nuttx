@@ -1168,7 +1168,14 @@ static sdio_eventset_t litex_eventwait(struct sdio_dev_s *dev)
 {
   struct litex_dev_s *priv = (struct litex_dev_s *)dev;
   sdio_eventset_t wkupevent = 0;
+  irqstate_t flags;
   int ret;
+
+  /* Use critical section to attempt to handle the case that the event
+   * may have completed before it's waited on.
+   */
+
+  flags = enter_critical_section();
 
   DEBUGASSERT((priv->waitevents != 0 && priv->wkupevent == 0) ||
               (priv->waitevents == 0 && priv->wkupevent != 0));
@@ -1177,9 +1184,9 @@ static sdio_eventset_t litex_eventwait(struct sdio_dev_s *dev)
       ret = nxsem_wait_uninterruptible(&priv->waitsem);
       if (ret < 0)
         {
-          litex_configwaitints(priv, 0, 0, 0);
           wd_cancel(&priv->waitwdog);
-          return SDIOWAIT_ERROR;
+          wkupevent = SDIOWAIT_ERROR;
+          goto errout_with_waitints;
         }
 
       wkupevent = priv->wkupevent;
@@ -1189,7 +1196,9 @@ static sdio_eventset_t litex_eventwait(struct sdio_dev_s *dev)
         }
     }
 
+errout_with_waitints:
   litex_configwaitints(priv, 0, 0, 0);
+  leave_critical_section(flags);
   return wkupevent;
 }
 

@@ -69,6 +69,10 @@ ifeq ($(CONFIG_STACK_USAGE),y)
   ARCHOPTIMIZATION += -fstack-usage
 endif
 
+ifneq ($(CONFIG_STACK_USAGE_WARNING),0)
+  ARCHOPTIMIZATION += -Wstack-usage=$(CONFIG_STACK_USAGE_WARNING)
+endif
+
 ifeq ($(CONFIG_ARCH_COVERAGE_ALL),y)
   ARCHOPTIMIZATION += -fprofile-generate -ftest-coverage
 endif
@@ -76,8 +80,17 @@ endif
 ARCHCFLAGS += -fno-common
 ARCHCXXFLAGS += -fno-common -nostdinc++
 
-ARCHCFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wundef
-ARCHCXXFLAGS += -Wall -Wshadow -Wundef
+ARCHCFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wundef -Wno-attributes -Wno-unknown-pragmas
+ARCHCXXFLAGS += -Wall -Wshadow -Wundef -Wno-attributes -Wno-unknown-pragmas
+
+# When all C++ code is built using GCC 7.1 or a higher version,
+# we can safely disregard warnings of the type "parameter passing for X changed in GCC 7.1."
+# Refer to : https://stackoverflow.com/questions/48149323/what-does-the-gcc-warning-project-parameter-passing-for-x-changed-in-gcc-7-1-m
+
+ifneq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
+  ARCHCFLAGS += -Wno-psabi
+  ARCHCXXFLAGS += -Wno-psabi
+endif
 
 ifneq ($(CONFIG_CXX_STANDARD),)
   ARCHCXXFLAGS += -std=$(CONFIG_CXX_STANDARD)
@@ -150,6 +163,11 @@ ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
     ARCHRVISAD = d
   endif
 
+  GCC_VERSION = ${shell $(CROSSDEV)gcc --version | grep gcc | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | tail -n 1 | cut -d"." -f1 }
+  ifeq ($(shell expr $(GCC_VERSION) \>= 12), 1)
+    ARCHRVISAZ = _zicsr_zifencei
+  endif
+
   # Detect abi type
 
   ifeq ($(CONFIG_ARCH_RV32),y)
@@ -160,12 +178,14 @@ ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
     ARCHTYPE = rv64
     ARCHABITYPE = lp64
     LLVM_ARCHTYPE := riscv64
+    # https://www.sifive.com/blog/all-aboard-part-4-risc-v-code-models
+    ARCHCPUFLAGS = -mcmodel=medany
   endif
 
   # Construct arch flags
 
-  ARCHCPUEXTFLAGS = i$(ARCHRVISAM)$(ARCHRVISAA)$(ARCHRVISAF)$(ARCHRVISAD)$(ARCHRVISAC)
-  ARCHCPUFLAGS = -march=$(ARCHTYPE)$(ARCHCPUEXTFLAGS)
+  ARCHCPUEXTFLAGS = i$(ARCHRVISAM)$(ARCHRVISAA)$(ARCHRVISAF)$(ARCHRVISAD)$(ARCHRVISAC)$(ARCHRVISAZ)
+  ARCHCPUFLAGS += -march=$(ARCHTYPE)$(ARCHCPUEXTFLAGS)
 
   # Construct arch abi flags
 
@@ -210,6 +230,14 @@ ifeq ($(CONFIG_MM_KASAN_ALL),y)
   ARCHOPTIMIZATION += -fsanitize=kernel-address
 endif
 
+ifeq ($(CONFIG_MM_KASAN_DISABLE_READS_CHECK),y)
+  ARCHOPTIMIZATION += --param asan-instrument-reads=0
+endif
+
+ifeq ($(CONFIG_MM_KASAN_DISABLE_WRITES_CHECK),y)
+  ARCHOPTIMIZATION += --param asan-instrument-writes=0
+endif
+
 ifeq ($(CONFIG_MM_UBSAN_ALL),y)
   ARCHOPTIMIZATION += $(CONFIG_MM_UBSAN_OPTION)
 endif
@@ -227,7 +255,7 @@ STRIP   = $(CROSSDEV)strip --strip-unneeded
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
 LD      = $(CROSSDEV)ld
-AR      = $(CROSSDEV)ar rcs
+AR      = $(CROSSDEV)ar rcsP
 NM      = $(CROSSDEV)nm
 
 # Link Time Optimization
@@ -236,7 +264,7 @@ ifeq ($(CONFIG_LTO_FULL),y)
   ARCHOPTIMIZATION += -flto
   ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
     LD := $(CROSSDEV)gcc
-    AR := $(CROSSDEV)gcc-ar rcs
+    AR := $(CROSSDEV)gcc-ar rcsP
     NM := $(CROSSDEV)gcc-nm
     ARCHOPTIMIZATION += -fuse-linker-plugin
     ARCHOPTIMIZATION += -fno-builtin

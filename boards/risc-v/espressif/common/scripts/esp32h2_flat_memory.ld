@@ -29,7 +29,7 @@
  *
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include "common.ld"
 
 #define SRAM_IRAM_START       0x40800000
 #define SRAM_DRAM_START       0x40800000
@@ -93,7 +93,16 @@ MEMORY
 
   /* RTC fast memory (executable). Persists over deep sleep. */
 
-  lp_ram_seg  (RWX) :     org = 0x50000000, len = 0x1000
+  lp_ram_seg (RWX) :      org = 0x50000000, len = 0x1000 - RESERVE_RTC_MEM
+
+  /* We reduced the size of lp_ram_seg by RESERVE_RTC_MEM value.
+   * It reserves the amount of LP memory that we use for this memory segment.
+   * This segment is intended for keeping:
+   *   - (lower addr) rtc timer data (s_rtc_timer_retain_mem, see esp_clk.c files).
+   *   - (higher addr) bootloader rtc data (s_bootloader_retain_mem, when a Kconfig option is on).
+   * The aim of this is to keep data that will not be moved around and have a fixed address.
+   */
+  lp_reserved_seg (RW) :  org = 0x50000000 + 0x1000 - RESERVE_RTC_MEM, len = RESERVE_RTC_MEM
 }
 
 /* The lines below define location alias for .rtc.data section
@@ -106,6 +115,7 @@ REGION_ALIAS("rtc_iram_seg", lp_ram_seg);
 REGION_ALIAS("rtc_data_seg", rtc_iram_seg);
 REGION_ALIAS("rtc_slow_seg", rtc_iram_seg);
 REGION_ALIAS("rtc_data_location", rtc_iram_seg);
+REGION_ALIAS("rtc_reserved_seg", lp_reserved_seg );
 
 #if CONFIG_ESPRESSIF_RUN_IRAM
   REGION_ALIAS("default_rodata_seg", dram0_0_seg);

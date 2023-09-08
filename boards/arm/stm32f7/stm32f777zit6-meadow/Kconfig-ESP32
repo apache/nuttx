@@ -1,0 +1,31 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config MEADOW_ESPCP_MANAGER
+	bool "Enable ESP32 Coprocessor"
+	default y
+	---help---
+		Enable or disable ESP32 coprocessor support.
+
+if MEADOW_ESPCP_MANAGER
+
+config MEADOW_ESPCP_USE_EXTERNAL_ESP32_BOARD
+	bool "Use external ESP32 chip"
+	default n
+	---help---
+		Use an external ESP32 for debugging purposes.
+
+config MEADOW_ESPCP_RESET_ESP32_AT_STARTUP
+	bool "Reset the ESP32 at startup?"
+	default y
+	---help---
+		Should the ESP32 be reset as part of the startup process.  The default for production
+		is "Y".  For development it is sometimes necessary to attach a debugger to the ESP32
+		and in this case resetting the chip interferes with debugging.
+
+		For debugging set this to Y
+		For production set this to N (default).
+
+endif # MEADOW_ESPCP_MANAGER

@@ -26,19 +26,16 @@
 
 #include "pwd/lib_pwd.h"
 
-#ifdef CONFIG_LIBC_PASSWD_FILE
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
 /* Data for non-reentrant group functions */
 
+int g_passwd_index;
 struct passwd g_passwd;
 char g_passwd_buffer[CONFIG_LIBC_PASSWD_LINESIZE];
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-#endif /* CONFIG_LIBC_GROUP_FILE */

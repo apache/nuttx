@@ -297,19 +297,45 @@
 
 /* LEDs
  *
- * The STM32F411E Discovery board has four user leds but only one is
- * configured so far.
- * LD2 connected to PD12.
+ * The STM32F411E Discovery board has four user leds
+ * LD3 connected to PD13.
+ * LD4 connected to PD12.
+ * LD5 connected to PD14.
+ * LD6 connected to PD15.
  */
 
 /* LED index values for use with board_userled() */
 
-#define BOARD_LD2         0
-#define BOARD_NLEDS       1
+#define BOARD_LD3         0
+#define BOARD_LD4         1
+#define BOARD_LD5         2
+#define BOARD_LD6         3
+#define BOARD_NLEDS       4
 
 /* LED bits for use with board_userled_all() */
 
-#define BOARD_LD2_BIT     (1 << BOARD_LD2)
+#define BOARD_LD3_BIT     (1 << BOARD_LD3)
+#define BOARD_LD4_BIT     (1 << BOARD_LD4)
+#define BOARD_LD5_BIT     (1 << BOARD_LD5)
+#define BOARD_LD6_BIT     (1 << BOARD_LD6)
+
+/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on board.
+ * The following definitions describe how NuttX controls
+ * the LEDs:
+ *
+ *   SYMBOL                Meaning                      LED
+ *   -------------------  ----------------------------  --------------------
+ */
+
+#define LED_STARTED       0 /* NuttX has been started    None  */
+#define LED_HEAPALLOCATE  1 /* Heap has been allocated   ON(1),  OFF(2) */
+#define LED_IRQSENABLED   2 /* Interrupts enabled        OFF(1), ON(2)  */
+#define LED_STACKCREATED  3 /* Idle stack created        ON(1), ON(2) */
+#define LED_INIRQ         4 /* In an interrupt          (no change) */
+#define LED_SIGNAL        5 /* In a signal handler      (no change) */
+#define LED_ASSERTION     6 /* An assertion failed       ON(3) */
+#define LED_PANIC         7 /* The system has crashed    FLASH(1,2) */
+#define LED_IDLE          8 /* idle loop                 FLASH(4) */
 
 /* Buttons
  *

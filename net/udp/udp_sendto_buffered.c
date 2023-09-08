@@ -203,7 +203,9 @@ static inline void sendto_ipselect(FAR struct net_driver_s *dev,
 {
   /* Which domain the socket support */
 
-  if (conn->domain == PF_INET)
+  if (conn->domain == PF_INET ||
+      (conn->domain == PF_INET6 &&
+       ip6_is_ipv4addr((FAR struct in6_addr *)conn->u.ipv6.raddr)))
     {
       /* Select the IPv4 domain */
 
@@ -539,7 +541,13 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
   /* Get the underlying the UDP connection structure.  */
 
   conn = psock->s_conn;
-  DEBUGASSERT(conn);
+
+  /* The length of a datagram to be up to 65,535 octets */
+
+  if (len > 65535)
+    {
+      return -EMSGSIZE;
+    }
 
   /* If the UDP socket was previously assigned a remote peer address via
    * connect(), then as with connection-mode socket, sendto() may not be
@@ -644,7 +652,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
       /* Make sure that the IP address mapping is in the Neighbor Table */
 
-      ret = icmpv6_neighbor(destipaddr);
+      ret = icmpv6_neighbor(NULL, destipaddr);
     }
 #endif /* CONFIG_NET_ICMPv6_NEIGHBOR */
 
@@ -781,7 +789,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
       udpiplen = udpip_hdrsize(conn);
 
       iob_reserve(wrb->wb_iob, CONFIG_NET_LL_GUARDSIZE);
-      iob_update_pktlen(wrb->wb_iob, udpiplen);
+      iob_update_pktlen(wrb->wb_iob, udpiplen, false);
 
       /* Copy the user data into the write buffer.  We cannot wait for
        * buffer space if the socket was opened non-blocking.

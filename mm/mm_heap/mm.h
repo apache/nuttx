@@ -34,7 +34,6 @@
 #include <nuttx/mm/mempool.h>
 
 #include <assert.h>
-#include <execinfo.h>
 #include <sys/types.h>
 #include <stdbool.h>
 #include <string.h>
@@ -89,7 +88,8 @@
          tcb = nxsched_get_tcb(tmp->pid); \
          if ((heap)->mm_procfs.backtrace || (tcb && tcb->flags & TCB_FLAG_HEAP_DUMP)) \
            { \
-             int n = backtrace(tmp->backtrace, CONFIG_MM_BACKTRACE); \
+             int n = sched_backtrace(tmp->pid, tmp->backtrace, CONFIG_MM_BACKTRACE, \
+                                     CONFIG_MM_BACKTRACE_SKIP); \
              if (n < CONFIG_MM_BACKTRACE) \
                { \
                  tmp->backtrace[n] = NULL; \

@@ -70,6 +70,11 @@ static inline vbuf_container_t *dequeue_vbuf_unsafe(video_framebuff_t *fbuf)
     }
   else
     {
+      if (fbuf->mode == V4L2_BUF_MODE_RING)
+        {
+          fbuf->vbuf_tail->next = fbuf->vbuf_top->next;
+        }
+
       fbuf->vbuf_top = fbuf->vbuf_top->next;
     }
 
@@ -103,18 +108,26 @@ int video_framebuff_realloc_container(video_framebuff_t *fbuf, int sz)
       return OK;
     }
 
-  vbuf = kmm_realloc(fbuf->vbuf_alloced, sizeof(vbuf_container_t) * sz);
-  if (vbuf != NULL)
+  if (sz > 0)
     {
-      memset(vbuf, 0, sizeof(vbuf_container_t) * sz);
+      vbuf = kmm_realloc(fbuf->vbuf_alloced, sizeof(vbuf_container_t) * sz);
+      if (vbuf != NULL)
+        {
+          memset(vbuf, 0, sizeof(vbuf_container_t) * sz);
+          fbuf->vbuf_alloced = vbuf;
+          fbuf->container_size = sz;
+        }
+      else
+        {
+          return -ENOMEM;
+        }
     }
-  else if (sz != 0)
+  else
     {
-      return -ENOMEM;
+      kmm_free(fbuf->vbuf_alloced);
+      fbuf->vbuf_alloced = NULL;
+      fbuf->container_size = 0;
     }
-
-  fbuf->vbuf_alloced = vbuf;
-  fbuf->container_size = sz;
 
   init_buf_chain(fbuf);
   return OK;

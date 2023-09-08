@@ -158,6 +158,10 @@ config ESP32S2_FLASH_8M
 	bool
 	default n
 
+config ESP32S2_FLASH_16M
+	bool
+	default n
+
 config ESP32S2_PSRAM_2M
 	bool
 	default n
@@ -602,12 +606,12 @@ if ESP32S2_UART1
 
 config ESP32S2_UART1_TXPIN
 	int "UART1 Tx Pin"
-	default 37
+	default 17
 	range 0 46
 
 config ESP32S2_UART1_RXPIN
 	int "UART1 Rx Pin"
-	default 38
+	default 18
 	range 0 46
 
 config ESP32S2_UART1_RTSPIN
@@ -748,6 +752,35 @@ config ESP32S2_OTA_SCRATCH_DEVPATH
 	default "/dev/otascratch"
 
 endif
+
+if ESP32S2_SPIFLASH
+
+comment "General storage MTD configuration"
+
+config ESP32S2_MTD
+	bool "MTD driver"
+	default y 
+	select MTD
+	select MTD_BYTE_WRITE
+	select MTD_PARTITION
+	---help---
+		Initialize an MTD driver for the ESP32-S2 SPI Flash, which will
+		add an entry at /dev for application access from userspace.
+
+config ESP32S2_SPIFLASH_MTD_BLKSIZE
+	int "Storage MTD block size"
+	default 256
+	depends on ESP32S2_MTD
+
+config ESP32S2_STORAGE_MTD_DEBUG
+	bool "Storage MTD Debug"
+	default n
+	depends on ESP32S2_MTD && DEBUG_FS_INFO
+	---help---
+		If this option is enabled, Storage MTD driver read and write functions
+		will output input parameters and return values (if applicable).
+
+endif # ESP32S2_SPIFLASH
 
 endmenu # SPI Flash Configuration
 
@@ -1040,6 +1073,11 @@ config ESP32S2_ESPTOOL_TARGET_SECONDARY
 		of a secure firmware update workflow.
 
 endchoice
+
+config ESP32S2_MCUBOOT_VERSION
+	string "MCUboot version"
+	default "b206b99b1555ca15f790a3287e57dc98ef3df2ac"
+	depends on ESP32S2_APP_FORMAT_MCUBOOT
 
 config ESP32S2_APP_MCUBOOT_HEADER_SIZE
 	int "Application image header size (in bytes)"

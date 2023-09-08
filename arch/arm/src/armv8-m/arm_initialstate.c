@@ -148,7 +148,9 @@ void up_initial_state(struct tcb_s *tcb)
    * mode before transferring control to the user task.
    */
 
-  xcp->regs[REG_EXC_RETURN] = EXC_RETURN_PRIVTHR;
+  xcp->regs[REG_EXC_RETURN] = EXC_RETURN_THREAD;
+
+  xcp->regs[REG_CONTROL] = getcontrol() & ~CONTROL_NPRIV;
 
 #ifdef CONFIG_ARCH_FPU
   xcp->regs[REG_FPSCR]  |= ARMV8M_FPSCR_LTPSIZE_NONE;
@@ -172,3 +174,66 @@ void up_initial_state(struct tcb_s *tcb)
 
 #endif /* CONFIG_SUPPRESS_INTERRUPTS */
 }
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 7
+/****************************************************************************
+ * Name: arm_initialize_stack
+ *
+ * Description:
+ *   If interrupt stack is defined, the PSP and MSP need to be reinitialized.
+ *
+ ****************************************************************************/
+
+noinline_function void arm_initialize_stack(void)
+{
+#ifdef CONFIG_SMP
+  uint32_t stack = (uint32_t)arm_intstack_top();
+#ifdef CONFIG_ARMV8M_STACKCHECK_HARDWARE
+  uint32_t stacklim = (uint32_t)arm_intstack_alloc();
+#endif
+#else
+  uint32_t stack = (uint32_t)g_intstacktop;
+#ifdef CONFIG_ARMV8M_STACKCHECK_HARDWARE
+  uint32_t stacklim = (uint32_t)g_intstackalloc;
+#endif
+#endif
+  uint32_t temp = 0;
+
+  __asm__ __volatile__
+    (
+      "mrs %1, CONTROL\n"
+      "tst %1, #2\n"
+      "bne 1f\n"
+
+      /* Initialize PSP */
+
+      "mrs %1, msp\n"
+      "msr psp, %1\n"
+#ifdef CONFIG_ARMV8M_STACKCHECK_HARDWARE
+      "mrs %1, msplim\n"
+      "msr psplim, %1\n"
+#endif
+
+      /* Select PSP */
+
+      "mrs %1, CONTROL\n"
+      "orr %1, #2\n"
+      "msr CONTROL, %1\n"
+      "isb sy\n"
+
+      /* Initialize MSP */
+
+      "1:\n"
+      "msr msp, %0\n"
+#ifdef CONFIG_ARMV8M_STACKCHECK_HARDWARE
+      "msr msplim, %2\n"
+#endif
+      :
+#ifdef CONFIG_ARMV8M_STACKCHECK_HARDWARE
+      : "r" (stack), "r" (temp), "r" (stacklim)
+#else
+      : "r" (stack), "r" (temp)
+#endif
+      : "memory");
+}
+#endif

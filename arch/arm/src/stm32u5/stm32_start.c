@@ -60,8 +60,8 @@
  * 0x2003:ffff - End of internal SRAM2
  */
 
-#define SRAM2_START  STM32U5_SRAM2_BASE
-#define SRAM2_END    (SRAM2_START + STM32U5_SRAM2_SIZE)
+#define SRAM2_START  STM32_SRAM2_BASE
+#define SRAM2_END    (SRAM2_START + STM32_SRAM2_SIZE)
 
 #define HEAP_BASE  ((uintptr_t)_ebss + CONFIG_IDLETHREAD_STACKSIZE)
 
@@ -181,7 +181,7 @@ void __start(void)
 
   showprogress('C');
 
-#ifdef CONFIG_SCHED_IRQMONITOR
+#if defined(CONFIG_SCHED_IRQMONITOR) || defined(CONFIG_SEGGER_SYSVIEW)
   up_perf_init((void *)STM32_SYSCLK_FREQUENCY);
 #endif
 

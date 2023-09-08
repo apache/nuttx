@@ -82,17 +82,6 @@ int elf_loadctors(FAR struct elf_loadinfo_s *loadinfo)
 
   DEBUGASSERT(loadinfo->ctors == NULL);
 
-  /* Allocate an I/O buffer if necessary.  This buffer is used by
-   * elf_sectname() to accumulate the variable length symbol name.
-   */
-
-  ret = elf_allocbuffer(loadinfo);
-  if (ret < 0)
-    {
-      berr("elf_allocbuffer failed: %d\n", ret);
-      return -ENOMEM;
-    }
-
   /* Find the index to the section named ".ctors."  NOTE:  On old ABI system,
    * .ctors is the name of the section containing the list of constructors;
    * On newer systems, the similar section is called .init_array.  It is
@@ -124,7 +113,7 @@ int elf_loadctors(FAR struct elf_loadinfo_s *loadinfo)
   ctorsize         = shdr->sh_size;
   loadinfo->nctors = ctorsize / sizeof(binfmt_ctor_t);
 
-  binfo("ctoridx=%d ctorsize=%d sizeof(binfmt_ctor_t)=%d nctors=%d\n",
+  binfo("ctoridx=%d ctorsize=%zd sizeof(binfmt_ctor_t)=%zd nctors=%d\n",
         ctoridx, ctorsize,  sizeof(binfmt_ctor_t), loadinfo->nctors);
 
   /* Check if there are any constructors.  It is not an error if there
@@ -149,7 +138,7 @@ int elf_loadctors(FAR struct elf_loadinfo_s *loadinfo)
         {
           /* Allocate memory to hold a copy of the .ctor section */
 
-          loadinfo->ctoralloc = (binfmt_ctor_t *)kumm_malloc(ctorsize);
+          loadinfo->ctoralloc = kumm_malloc(ctorsize);
           if (!loadinfo->ctoralloc)
             {
               berr("Failed to allocate memory for .ctors\n");
@@ -179,9 +168,8 @@ int elf_loadctors(FAR struct elf_loadinfo_s *loadinfo)
                    ((FAR void *)(&loadinfo->ctors)[i]);
 
               binfo("ctor %d: "
-                    "%08" PRIxPTR " + %08" PRIxPTR " = %08" PRIxPTR "\n",
-                    i, *ptr, (uintptr_t)loadinfo->textalloc,
-                    (uintptr_t)(*ptr + loadinfo->textalloc));
+                    "%08" PRIxPTR " + %08" PRIxPTR " = %08" PRIxPTR "\n", i,
+                    *ptr, loadinfo->textalloc, (*ptr + loadinfo->textalloc));
 
               *ptr += loadinfo->textalloc;
             }

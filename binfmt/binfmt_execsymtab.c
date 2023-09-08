@@ -27,7 +27,7 @@
 #include <assert.h>
 
 #include <nuttx/irq.h>
-#include <nuttx/arch.h>
+#include <nuttx/symtab.h>
 #include <nuttx/binfmt/symtab.h>
 
 #ifdef CONFIG_LIBC_EXECFUNCS

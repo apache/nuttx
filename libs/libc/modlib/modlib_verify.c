@@ -28,18 +28,15 @@
 #include <debug.h>
 #include <errno.h>
 
-#include <nuttx/arch.h>
 #include <nuttx/elf.h>
-#include <nuttx/lib/modlib.h>
+
+#include "modlib/modlib.h"
 
 /****************************************************************************
  * Private Constant Data
  ****************************************************************************/
 
-static const char g_modmagic[EI_MAGIC_SIZE] =
-{
-    0x7f, 'E', 'L', 'F'
-};
+static const char g_modmagic[EI_MAGIC_SIZE] = EI_MAGIC;
 
 /****************************************************************************
  * Public Functions
@@ -82,7 +79,7 @@ int modlib_verifyheader(FAR const Elf_Ehdr *ehdr)
 
   /* Verify that this is a relocatable file */
 
-  if (ehdr->e_type != ET_REL)
+  if (ehdr->e_type != ET_REL && ehdr->e_type != ET_DYN)
     {
       berr("ERROR: Not a relocatable file: e_type=%d\n", ehdr->e_type);
       return -EINVAL;

@@ -270,7 +270,7 @@ static int rptun_thread(int argc, FAR char *argv[])
 {
   FAR struct rptun_priv_s *priv;
 
-  priv = (FAR struct rptun_priv_s *)((uintptr_t)strtoul(argv[2], NULL, 0));
+  priv = (FAR struct rptun_priv_s *)((uintptr_t)strtoul(argv[2], NULL, 16));
   priv->tid = nxsched_gettid();
 
   while (1)
@@ -765,7 +765,6 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc)
   /* Remove priv from list */
 
   nxrmutex_lock(&g_rptun_lockcb);
-  metal_list_del(&priv->node);
 
   /* Broadcast device_destroy to all registers */
 
@@ -786,8 +785,8 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc)
 
   /* Remote proc remove */
 
-  remoteproc_remove_virtio(rproc, priv->rvdev.vdev);
   rpmsg_deinit_vdev(&priv->rvdev);
+  remoteproc_remove_virtio(rproc, priv->rvdev.vdev);
 
   return 0;
 }
@@ -1161,6 +1160,7 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
 {
   struct metal_init_params params = METAL_INIT_DEFAULTS;
   FAR struct rptun_priv_s *priv;
+  static bool onceinit;
 #ifndef CONFIG_RPTUN_WORKQUEUE
   FAR char *argv[3];
   char arg1[19];
@@ -1168,10 +1168,15 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
   char name[32];
   int ret;
 
-  ret = metal_init(&params);
-  if (ret < 0)
+  if (!onceinit)
     {
-      return ret;
+      ret = metal_init(&params);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      onceinit = true;
     }
 
   priv = kmm_zalloc(sizeof(struct rptun_priv_s));
@@ -1213,7 +1218,7 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
       nxsem_init(&priv->semrx, 0, 0);
     }
 
-  snprintf(arg1, sizeof(arg1), "0x%" PRIxPTR, (uintptr_t)priv);
+  snprintf(arg1, sizeof(arg1), "%p", priv);
   argv[0] = (void *)RPTUN_GET_CPUNAME(dev);
   argv[1] = arg1;
   argv[2] = NULL;

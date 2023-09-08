@@ -1136,7 +1136,7 @@ FAR struct bcmf_dev_s *bcmf_allocate_device(void)
 
   /* Allocate a bcmf device structure */
 
-  priv = (FAR struct bcmf_dev_s *)kmm_malloc(sizeof(*priv));
+  priv = kmm_malloc(sizeof(*priv));
   if (!priv)
     {
       return NULL;

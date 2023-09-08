@@ -286,8 +286,7 @@ ssize_t icmpv6_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   /* Some sanity checks */
 
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL &&
-              buf != NULL && to != NULL);
+  DEBUGASSERT(buf != NULL && to != NULL);
 
   if (len < ICMPv6_HDRLEN || tolen < sizeof(struct sockaddr_in6))
     {
@@ -338,7 +337,7 @@ ssize_t icmpv6_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
   /* Make sure that the IP address mapping is in the Neighbor Table */
 
-  ret = icmpv6_neighbor(inaddr->sin6_addr.s6_addr16);
+  ret = icmpv6_neighbor(dev, inaddr->sin6_addr.s6_addr16);
   if (ret < 0)
     {
       nerr("ERROR: Not reachable\n");

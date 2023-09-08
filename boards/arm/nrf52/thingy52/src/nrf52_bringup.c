@@ -144,7 +144,6 @@ int nrf52_bringup(void)
 
 #ifdef CONFIG_NRF52_SOFTDEVICE_CONTROLLER
   ret = nrf52_sdc_initialize();
-
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: nrf52_sdc_initialize() failed: %d\n", ret);
@@ -153,6 +152,14 @@ int nrf52_bringup(void)
 
 #if defined(CONFIG_I2C) && defined(CONFIG_SYSTEM_I2CTOOL)
   nrf52_i2ctool();
+#endif
+
+#ifdef CONFIG_IOEXPANDER_SX1509
+  ret = nrf52_sx1509_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: nrf52_sx1509_initialize() failed: %d\n", ret);
+    }
 #endif
 
   UNUSED(ret);

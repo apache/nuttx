@@ -300,8 +300,8 @@ static int stm32_bbsram_open(struct file *filep)
   struct stm32_bbsram_s *bbr;
   int ret;
 
-  DEBUGASSERT(inode && inode->i_private);
-  bbr = (struct stm32_bbsram_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  bbr = inode->i_private;
 
   /* Increment the reference count */
 
@@ -355,8 +355,8 @@ static int stm32_bbsram_close(struct file *filep)
   struct stm32_bbsram_s *bbr;
   int ret = OK;
 
-  DEBUGASSERT(inode && inode->i_private);
-  bbr = (struct stm32_bbsram_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  bbr = inode->i_private;
 
   ret = nxmutex_lock(&bbr->lock);
   if (ret < 0)
@@ -403,8 +403,8 @@ static off_t stm32_bbsram_seek(struct file *filep, off_t offset,
   off_t newpos;
   int ret;
 
-  DEBUGASSERT(inode && inode->i_private);
-  bbr = (struct stm32_bbsram_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  bbr = inode->i_private;
 
   ret = nxmutex_lock(&bbr->lock);
   if (ret < 0)
@@ -473,8 +473,8 @@ static ssize_t stm32_bbsram_read(struct file *filep, char *buffer,
   struct stm32_bbsram_s *bbr;
   int ret;
 
-  DEBUGASSERT(inode && inode->i_private);
-  bbr = (struct stm32_bbsram_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  bbr = inode->i_private;
 
   ret = nxmutex_lock(&bbr->lock);
   if (ret < 0)
@@ -520,8 +520,8 @@ static ssize_t stm32_bbsram_write(struct file *filep,
   struct stm32_bbsram_s *bbr;
   int ret = -EFBIG;
 
-  DEBUGASSERT(inode && inode->i_private);
-  bbr = (struct stm32_bbsram_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  bbr = inode->i_private;
 
   /* Forbid writes past the end of the device */
 
@@ -584,8 +584,8 @@ static int stm32_bbsram_ioctl(struct file *filep, int cmd,
   struct stm32_bbsram_s *bbr;
   int ret = -ENOTTY;
 
-  DEBUGASSERT(inode && inode->i_private);
-  bbr = (struct stm32_bbsram_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  bbr = inode->i_private;
 
   if (cmd == STM32H7_BBSRAM_GETDESC_IOCTL)
     {
@@ -637,8 +637,8 @@ static int stm32_bbsram_unlink(struct inode *inode)
   struct stm32_bbsram_s *bbr;
   int ret;
 
-  DEBUGASSERT(inode && inode->i_private);
-  bbr = (struct stm32_bbsram_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  bbr = inode->i_private;
 
   ret = nxmutex_lock(&bbr->lock);
   if (ret < 0)

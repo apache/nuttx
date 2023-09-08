@@ -1228,6 +1228,8 @@ static int sam_dma_setup(struct uart_dev_s *dev)
        */
 
       priv->rxdmanext = 0;
+      priv->nextcache = 0;
+      priv->buf_idx = 0;
       priv->rxenable = true;
       priv->odd = false;
 

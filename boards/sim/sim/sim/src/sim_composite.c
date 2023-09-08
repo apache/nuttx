@@ -120,7 +120,7 @@ static void *board_composite0_connect(int port)
   dev_idx += 1;
 #endif
 
-  return composite_initialize(dev_idx, dev);
+  return composite_initialize(composite_getdevdescs(), dev, dev_idx);
 }
 
 /****************************************************************************
@@ -207,7 +207,7 @@ static void *board_composite1_connect(int port)
   dev_idx += 1;
 #endif
 
-  return composite_initialize(dev_idx, dev);
+  return composite_initialize(composite_getdevdescs(), dev, dev_idx);
 }
 
 /****************************************************************************

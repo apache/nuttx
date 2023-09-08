@@ -18,7 +18,6 @@
 #
 ############################################################################
 
-include chip/Bootloader.mk
 include common/Make.defs
 
 # The start-up, "head", file. May be either a .S or a .c file.
@@ -68,6 +67,14 @@ ifeq ($(CONFIG_ESPRESSIF_HR_TIMER),y)
   CHIP_CSRCS += esp_hr_timer.c
 endif
 
+ifeq ($(CONFIG_ESPRESSIF_LEDC),y)
+  CHIP_CSRCS += esp_ledc.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_USBSERIAL),y)
+  CHIP_CSRCS += esp_usbserial.c
+endif
+
 #############################################################################
 # Espressif HAL for 3rd Party Platforms
 #############################################################################
@@ -75,8 +82,8 @@ endif
 # Fetch source files and add them to build
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
-ifndef ESP_HAL_3RDPARTY_BRANCH
-	ESP_HAL_3RDPARTY_BRANCH = release/v5.1
+ifndef ESP_HAL_3RDPARTY_VERSION
+	ESP_HAL_3RDPARTY_VERSION = 45c33111b441363e1267158186a60f42525228ca
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL
@@ -84,9 +91,10 @@ ifndef ESP_HAL_3RDPARTY_URL
 endif
 
 chip/$(ESP_HAL_3RDPARTY_REPO):
-	$(Q) echo "Cloning: Espressif HAL for 3rd Party Platforms"
-	$(Q) git clone --depth=1 --branch $(ESP_HAL_3RDPARTY_BRANCH) $(ESP_HAL_3RDPARTY_URL) chip/$(ESP_HAL_3RDPARTY_REPO)
-	$(Q) touch chip/$(ESP_HAL_3RDPARTY_REPO)
+	$(Q) echo "Cloning Espressif HAL for 3rd Party Platforms"
+	$(Q) git clone --quiet $(ESP_HAL_3RDPARTY_URL) chip/$(ESP_HAL_3RDPARTY_REPO)
+	$(Q) echo "Espressif HAL for 3rd Party Platforms: ${ESP_HAL_3RDPARTY_VERSION}"
+	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) checkout --quiet $(ESP_HAL_3RDPARTY_VERSION)
 
 # Silent preprocessor warnings
 
@@ -106,3 +114,5 @@ distclean::
 	$(call DELFILE,../include/chip/gpio_sig_map.h)
 	$(call DELFILE,../include/chip/irq.h)
 	$(call DELDIR,chip/$(ESP_HAL_3RDPARTY_REPO))
+
+include chip/Bootloader.mk

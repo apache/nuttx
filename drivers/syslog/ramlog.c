@@ -38,6 +38,7 @@
 #include <assert.h>
 #include <debug.h>
 #include <ctype.h>
+#include <sys/boardctl.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
@@ -224,6 +225,10 @@ static void ramlog_pollnotify(FAR struct ramlog_dev_s *priv,
 static void ramlog_initbuf(void)
 {
   FAR struct ramlog_dev_s *priv = &g_sysdev;
+#ifdef CONFIG_BOARDCTL_RESET_CAUSE
+  struct boardioc_reset_cause_s cause;
+  int ret;
+#endif
   bool is_empty = true;
   char prev;
   char cur;
@@ -235,15 +240,27 @@ static void ramlog_initbuf(void)
       return;
     }
 
+#ifdef CONFIG_BOARDCTL_RESET_CAUSE
+  memset(&cause, 0, sizeof(cause));
+  ret = boardctl(BOARDIOC_RESET_CAUSE, (uintptr_t)&cause);
+  if (ret >= 0 && cause.cause == BOARDIOC_RESETCAUSE_SYS_CHIPPOR)
+    {
+      memset(priv->rl_buffer, 0, priv->rl_bufsize);
+      priv->rl_head = priv->rl_tail = 0;
+      return;
+    }
+#endif
+
   prev = priv->rl_buffer[priv->rl_bufsize - 1];
 
   for (i = 0; i < priv->rl_bufsize; i++)
     {
       cur = priv->rl_buffer[i];
 
-      if (!isascii(cur))
+      if (!isprint(cur) && !isspace(cur) && cur != '\0')
         {
           memset(priv->rl_buffer, 0, priv->rl_bufsize);
+          is_empty = true;
           break;
         }
       else if (prev && !cur)
@@ -259,7 +276,7 @@ static void ramlog_initbuf(void)
       prev = cur;
     }
 
-  if (i != priv->rl_bufsize || is_empty)
+  if (is_empty)
     {
       priv->rl_head = priv->rl_tail = 0;
     }
@@ -444,8 +461,8 @@ static ssize_t ramlog_file_read(FAR struct file *filep, FAR char *buffer,
 
   /* Some sanity checking */
 
-  DEBUGASSERT(inode && inode->i_private);
-  priv = (FAR struct ramlog_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  priv = inode->i_private;
 
   /* If the circular buffer is empty, then wait for something to be written
    * to it.  This function may NOT be called from an interrupt handler.
@@ -606,8 +623,8 @@ static ssize_t ramlog_file_write(FAR struct file *filep,
 
   /* Some sanity checking */
 
-  DEBUGASSERT(inode && inode->i_private);
-  priv = (FAR struct ramlog_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  priv = inode->i_private;
 
   return ramlog_addbuf(priv, buffer, len);
 }
@@ -623,8 +640,8 @@ static int ramlog_file_ioctl(FAR struct file *filep, int cmd,
   FAR struct ramlog_dev_s *priv;
   int ret;
 
-  DEBUGASSERT(inode && inode->i_private);
-  priv = (FAR struct ramlog_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  priv = inode->i_private;
 
   ret = nxmutex_lock(&priv->rl_lock);
   if (ret < 0)
@@ -663,8 +680,8 @@ static int ramlog_file_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   /* Some sanity checking */
 
-  DEBUGASSERT(inode && inode->i_private);
-  priv = (FAR struct ramlog_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  priv = inode->i_private;
 
   /* Get exclusive access to the poll structures */
 
@@ -780,7 +797,7 @@ int ramlog_register(FAR const char *devpath, FAR char *buffer, size_t buflen)
 
   /* Allocate a RAM logging device structure */
 
-  priv = (struct ramlog_dev_s *)kmm_zalloc(sizeof(struct ramlog_dev_s));
+  priv = kmm_zalloc(sizeof(struct ramlog_dev_s));
   if (priv != NULL)
     {
       /* Initialize the non-zero values in the RAM logging device structure */

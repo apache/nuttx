@@ -26,6 +26,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <sys/types.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -95,6 +96,7 @@
 #define _VIDIOCBASE     (0x3700) /* Video device ioctl commands */
 #define _CELLIOCBASE    (0x3800) /* Cellular device ioctl commands */
 #define _MIPIDSIBASE    (0x3900) /* Mipidsi device ioctl commands */
+#define _SYSLOGBASE     (0x3c00) /* Syslog device ioctl commands */
 #define _WLIOCBASE      (0x8b00) /* Wireless modules ioctl network commands */
 
 /* boardctl() commands share the same number space */
@@ -303,6 +305,12 @@
                                            *      to return sector size.
                                            * OUT: Data return in user-provided
                                            *      buffer. */
+#define BIOC_BLKGETSIZE _BIOC(0x0010)     /* Get block device sector numbers.
+                                           * IN:  Pointer to writable instance
+                                           *      of sector numbers in which
+                                           *      to return sector numbers.
+                                           * OUT: Data return in user-provided
+                                           *      buffer. */
 
 /* NuttX MTD driver ioctl definitions ***************************************/
 
@@ -445,6 +453,10 @@
                                                *     more bytes than
                                                *     threshold.
                                                * OUT: None */
+
+#define PIPEIOC_PEEK        _PIPEIOC(0x0004)  /* Pipe peek interface
+                                               * IN: pipe_peek_s
+                                               * OUT: Length of data */
 
 /* RTC driver ioctl definitions *********************************************/
 
@@ -639,6 +651,11 @@
 #define _MIPIDSIIOCVALID(c)    (_IOC_TYPE(c)==_MIPIDSIBASE)
 #define _MIPIDSIIOC(nr)        _IOC(_MIPIDSIBASE,nr)
 
+/* syslog driver ioctl definitions ******************************************/
+
+#define _SYSLOGVALID(c) (_IOC_TYPE(c)==_SYSLOGBASE)
+#define _SYSLOGIOC(nr)  _IOC(_SYSLOGBASE,nr)
+
 /* Wireless driver network ioctl definitions ********************************/
 
 /* (see nuttx/include/wireless/wireless.h */
@@ -654,6 +671,12 @@
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
+
+struct pipe_peek_s
+{
+  FAR void *buf;
+  size_t size;
+};
 
 /****************************************************************************
  * Public Data

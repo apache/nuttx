@@ -193,6 +193,23 @@ void net_ipv6_pref2mask(uint8_t preflen, net_ipv6addr_t mask);
 #endif
 
 /****************************************************************************
+ * Name: net_iob_concat
+ *
+ * Description:
+ *   Concatenate iob_s chain iob2 to iob1, if CONFIG_NET_RECV_PACK is
+ *   endabled, pack all data in the I/O buffer chain.
+ *
+ * Returned Value:
+ *   The number of bytes actually buffered is returned.  This will be either
+ *   zero or equal to iob1->io_pktlen.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MM_IOB
+uint16_t net_iob_concat(FAR struct iob_s **iob1, FAR struct iob_s **iob2);
+#endif
+
+/****************************************************************************
  * Name: net_chksum_adjust
  *
  * Description:

@@ -30,6 +30,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <arch/board/board.h>
+#include <sched/sched.h>
 
 #include "chip.h"
 #include "z16_internal.h"
@@ -83,6 +84,16 @@ FAR chipreg_t *z16_doirq(int irq, FAR chipreg_t *regs)
       /* Deliver the IRQ */
 
       irq_dispatch(irq, regs);
+
+      if (regs != g_current_regs)
+        {
+          /* Record the new "running" task when context switch occurred.
+           * g_running_tasks[] is only used by assertion logic for reporting
+           * crashes.
+           */
+
+          g_running_tasks[this_cpu()] = this_task();
+        }
 
       /* Restore the previous value of g_current_regs.  NULL would indicate
        * that we are no longer in an interrupt handler.  It will be non-NULL

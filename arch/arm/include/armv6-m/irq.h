@@ -69,17 +69,9 @@
 #define REG_R9              (7)  /* R9 */
 #define REG_R10             (8)  /* R10 */
 #define REG_R11             (9)  /* R11 */
-
-/* In the kernel build, we may return to either privileged or unprivileged
- * modes.
- */
-
-#ifdef CONFIG_BUILD_PROTECTED
-#  define REG_EXC_RETURN    (10) /* EXC_RETURN */
-#  define SW_XCPT_REGS      (11)
-#else
-#  define SW_XCPT_REGS      (10)
-#endif
+#define REG_CONTROL         (10) /* CONTROL */
+#define REG_EXC_RETURN      (11) /* EXC_RETURN */
+#define SW_XCPT_REGS        (12)
 
 /* The total number of registers saved by software */
 

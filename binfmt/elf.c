@@ -47,7 +47,7 @@
  * have to be defined or CONFIG_ELF_DUMPBUFFER does nothing.
  */
 
-#if !defined(CONFIG_DEBUG_INFO) || !defined (CONFIG_DEBUG_BINFMT)
+#if !defined(CONFIG_DEBUG_INFO) || !defined(CONFIG_DEBUG_BINFMT)
 #  undef CONFIG_ELF_DUMPBUFFER
 #endif
 
@@ -141,6 +141,23 @@ static void elf_dumploadinfo(FAR struct elf_loadinfo_s *loadinfo)
   binfo("  e_shentsize:  %d\n",    loadinfo->ehdr.e_shentsize);
   binfo("  e_shnum:      %d\n",    loadinfo->ehdr.e_shnum);
   binfo("  e_shstrndx:   %d\n",    loadinfo->ehdr.e_shstrndx);
+
+  if (loadinfo->phdr && loadinfo->ehdr.e_phnum > 0)
+    {
+      for (i = 0; i < loadinfo->ehdr.e_phnum; i++)
+        {
+          FAR Elf_Phdr *phdr = &loadinfo->phdr[i];
+          binfo("Programs %d:\n", i);
+          binfo("  p_type:       %08jx\n", (uintmax_t)phdr->p_type);
+          binfo("  p_offset:     %08jx\n", (uintmax_t)phdr->p_offset);
+          binfo("  p_vaddr:      %08jx\n", (uintmax_t)phdr->p_vaddr);
+          binfo("  p_paddr:      %08jx\n", (uintmax_t)phdr->p_paddr);
+          binfo("  p_filesz:     %08jx\n", (uintmax_t)phdr->p_filesz);
+          binfo("  p_memsz:      %08jx\n", (uintmax_t)phdr->p_memsz);
+          binfo("  p_flags:      %08jx\n", (uintmax_t)phdr->p_flags);
+          binfo("  p_align:      %08x\n",  phdr->p_align);
+        }
+    }
 
   if (loadinfo->shdr && loadinfo->ehdr.e_shnum > 0)
     {
@@ -277,6 +294,7 @@ static int elf_loadbinary(FAR struct binary_s *binp,
     {
       berr("Unexpected elf type %d\n", loadinfo.ehdr.e_type);
       ret = -ENOEXEC;
+      goto errout_with_load;
     }
 
   /* Return the load information */
@@ -299,22 +317,30 @@ static int elf_loadbinary(FAR struct binary_s *binp,
   binp->addrenv = loadinfo.addrenv;
 
 #else
-  binp->alloc[0]  = (FAR void *)loadinfo.textalloc;
-  binp->alloc[1]  = (FAR void *)loadinfo.dataalloc;
-#ifdef CONFIG_BINFMT_CONSTRUCTORS
-  binp->alloc[2]  = loadinfo.ctoralloc;
-  binp->alloc[3]  = loadinfo.dtoralloc;
-#endif
+  binp->alloc[0] = (FAR void *)loadinfo.textalloc;
+  binp->alloc[1] = (FAR void *)loadinfo.dataalloc;
+#  ifdef CONFIG_BINFMT_CONSTRUCTORS
+  binp->alloc[2] = loadinfo.ctoralloc;
+  binp->alloc[3] = loadinfo.dtoralloc;
+#  endif
 #endif
 
 #ifdef CONFIG_BINFMT_CONSTRUCTORS
   /* Save information about constructors and destructors. */
 
-  binp->ctors     = loadinfo.ctors;
-  binp->nctors    = loadinfo.nctors;
+  binp->ctors    = loadinfo.ctors;
+  binp->nctors   = loadinfo.nctors;
 
-  binp->dtors     = loadinfo.dtors;
-  binp->ndtors    = loadinfo.ndtors;
+  binp->dtors    = loadinfo.dtors;
+  binp->ndtors   = loadinfo.ndtors;
+#endif
+
+#ifdef CONFIG_SCHED_USER_IDENTITY
+  /* Save IDs and mode from file system */
+
+  binp->uid  = loadinfo.fileuid;
+  binp->gid  = loadinfo.filegid;
+  binp->mode = loadinfo.filemode;
 #endif
 
   elf_dumpentrypt(binp, &loadinfo);

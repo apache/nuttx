@@ -25,6 +25,7 @@ range=0
 spell=0
 encoding=0
 message=0
+cmake_warning_once=0
 
 usage() {
   echo "USAGE: ${0} [options] [list|-]"
@@ -58,6 +59,15 @@ is_rust_file() {
   fi
 }
 
+is_cmake_file() {
+  file_name=$(basename $@)
+  if [ "$file_name" == "CMakeLists.txt" ] || [[ "$file_name" =~ "cmake" ]]; then
+    echo 1
+  else
+    echo 0
+  fi
+}
+
 check_file() {
   if [ -x $@ ]; then
     case $@ in
@@ -74,6 +84,23 @@ check_file() {
     if ! command -v rustfmt &> /dev/null; then
       fail=1
     elif ! rustfmt --edition 2021 --check $@ 2>&1; then
+      fail=1
+    fi
+  elif [ "$(is_cmake_file $@)" == "1" ]; then
+    if ! command -v cmake-format &> /dev/null; then
+      if [ $cmake_warning_once == 0 ]; then
+        echo -e "\ncmake-format not found, run following command to install:"
+        echo "  $ pip install cmake-format"
+        cmake_warning_once=1
+      fi
+      fail=1
+    elif ! cmake-format --check $@ 2>&1; then
+      if [ $cmake_warning_once == 0 ]; then
+        echo -e "\ncmake-format check failed, run following command to update the style:"
+        echo -e "  $ cmake-format -o <src> <dst>\n"
+        cmake-format --check $@ 2>&1
+        cmake_warning_once=1
+      fi
       fail=1
     fi
   elif ! $TOOLDIR/nxstyle $@ 2>&1; then

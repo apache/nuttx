@@ -72,9 +72,11 @@ ssize_t up_show_cpuinfo(FAR char *buf, size_t buf_size, off_t file_off)
       procfs_sprintf(buf, buf_size, &file_off, "BogoMIPS\t: %u.%02u\n",
                      (CONFIG_BOARD_LOOPSPERMSEC / 1000),
                      (CONFIG_BOARD_LOOPSPERMSEC / 10) % 100);
+#if defined(CONFIG_ARCH_PERF_EVENTS)
       procfs_sprintf(buf, buf_size, &file_off, "cpu MHz\t\t: %lu.%02lu\n",
                      up_perf_getfreq() / 1000000,
                      (up_perf_getfreq() / 10000) % 100);
+#endif
 
       /* CPU Features */
 

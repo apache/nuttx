@@ -705,6 +705,14 @@ config LCD_ST7789
 	default n
 
 if LCD_ST7789
+config LCD_ST7789_3WIRE
+	bool "Use 3 wire interface"
+	default n
+	---help---
+		Specifies whether 3 wire or 4 wire (default) interface is
+		used. 3 wire interface drops CMD/DATA pin and uses 9th bit
+		to determine data/command message.
+
 config LCD_ST7789_XRES
 	int "ST7789 X Resolution"
 	default 240
@@ -952,7 +960,7 @@ config ST7565_MIRROR_X
 
 config ST7565_MIRROR_Y
 	bool "ST7565 apply mirror on Y"
-	default y if AQM_1248A
+	default AQM_1248A
 	default n
 	---help---
 		Mirror Y on LCD.

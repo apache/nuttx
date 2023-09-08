@@ -272,6 +272,32 @@ int gpio_pin_unregister_byname(FAR struct gpio_dev_s *dev,
                                FAR const char *pinname);
 
 /****************************************************************************
+ * Name: gpio_lower_half_byname
+ *
+ * Description:
+ *   Create a GPIO pin device driver instance for an I/O expander pin.
+ *   The I/O expander pin must have already been configured by the caller
+ *   for the particular pintype.
+ *
+ * Input Parameters:
+ *   ioe     - An instance of the I/O expander interface
+ *   pin     - The I/O expander pin number for the driver
+ *   pintype - See enum gpio_pintype_e
+ *   name    - gpio device name
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_GPIO_LOWER_HALF
+struct ioexpander_dev_s;
+int gpio_lower_half_byname(FAR struct ioexpander_dev_s *ioe,
+                           unsigned int pin, enum gpio_pintype_e pintype,
+                           FAR char *name);
+#endif
+
+/****************************************************************************
  * Name: gpio_lower_half
  *
  * Description:

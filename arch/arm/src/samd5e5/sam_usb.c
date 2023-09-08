@@ -398,37 +398,35 @@ enum sam_hoststate_e
 
 enum usb_h_pipe_state
 {
-  USB_H_PIPE_S_FREE = 0x00,  /** Pipe is free to allocate */
-  USB_H_PIPE_S_CFG = 0x01,   /** Pipe is in configuration */
-  USB_H_PIPE_S_IDLE = 0x02,  /** Pipe is allocated and idle */
-  USB_H_PIPE_S_SETUP = 0x03, /** Pipe in control setup stage */
-  USB_H_PIPE_S_DATI = 0x05,  /** Pipe in data IN stage */
-  USB_H_PIPE_S_DATO = 0x06,  /** Pipe in data OUT stage */
-  USB_H_PIPE_S_ZLPI = 0x07,  /** Pipe in data IN ZLP stage */
-  USB_H_PIPE_S_ZLPO = 0x08,  /** Pipe in data OUT ZLP stage */
-  USB_H_PIPE_S_STATI = 0x09, /** Pipe in control status IN stage */
-  USB_H_PIPE_S_STATO = 0x0a, /** Pipe in control status OUT stage */
-  USB_H_PIPE_S_TAKEN = 0x10  /** Taken by physical pipe (in process) */
+  USB_H_PIPE_S_FREE = 0x00,  /* Pipe is free to allocate */
+  USB_H_PIPE_S_CFG = 0x01,   /* Pipe is in configuration */
+  USB_H_PIPE_S_IDLE = 0x02,  /* Pipe is allocated and idle */
+  USB_H_PIPE_S_SETUP = 0x03, /* Pipe in control setup stage */
+  USB_H_PIPE_S_DATI = 0x05,  /* Pipe in data IN stage */
+  USB_H_PIPE_S_DATO = 0x06,  /* Pipe in data OUT stage */
+  USB_H_PIPE_S_ZLPI = 0x07,  /* Pipe in data IN ZLP stage */
+  USB_H_PIPE_S_ZLPO = 0x08,  /* Pipe in data OUT ZLP stage */
+  USB_H_PIPE_S_STATI = 0x09, /* Pipe in control status IN stage */
+  USB_H_PIPE_S_STATO = 0x0a, /* Pipe in control status OUT stage */
+  USB_H_PIPE_S_TAKEN = 0x10  /* Taken by physical pipe (in process) */
 };
 
-/**
- * @brief      USB HCD status code
- */
+/* USB HCD status code */
 
 enum usb_h_status
 {
-  USB_H_OK = 0,             /** OK */
-  USB_H_BUSY = -4,          /** Busy */
-  USB_H_DENIED = -17,       /** Denied */
-  USB_H_TIMEOUT = -8,       /** Timeout */
-  USB_H_ABORT = -3,         /** Abort */
-  USB_H_STALL = -25,        /** Stall protocol */
-  USB_H_RESET = -7,         /** Transfer reset by pipe re-configure */
-  USB_H_ERR_ARG = -13,      /** Argument error */
-  USB_H_ERR_UNSP_OP = -27,  /** Operation not supported */
-  USB_H_ERR_NO_RSC = -28,   /** No resource */
-  USB_H_ERR_NOT_INIT = -20, /** Not initialized */
-  USB_H_ERR = -6            /** Some general error */
+  USB_H_OK = 0,             /* OK */
+  USB_H_BUSY = -4,          /* Busy */
+  USB_H_DENIED = -17,       /* Denied */
+  USB_H_TIMEOUT = -8,       /* Timeout */
+  USB_H_ABORT = -3,         /* Abort */
+  USB_H_STALL = -25,        /* Stall protocol */
+  USB_H_RESET = -7,         /* Transfer reset by pipe re-configure */
+  USB_H_ERR_ARG = -13,      /* Argument error */
+  USB_H_ERR_UNSP_OP = -27,  /* Operation not supported */
+  USB_H_ERR_NO_RSC = -28,   /* No resource */
+  USB_H_ERR_NOT_INIT = -20, /* Not initialized */
+  USB_H_ERR = -6            /* Some general error */
 };
 
 /* The following enumeration represents the various states of the USB host
@@ -459,8 +457,7 @@ enum sam_chreason_e
   CHREASON_CANCELLED     /* Transfer cancelled */
 };
 
-/**
- * @brief      Transfer descriptor for control transfer
+/* Transfer descriptor for control transfer
  *
  * Timing in USB 2.0 spec.:
  * - 9.2.6.1 : USB sets an upper limit of 5 seconds as the upper
@@ -484,7 +481,7 @@ enum sam_chreason_e
  *    to the host within 500 ms of receipt of the request. For
  *    subsequent data packets, if any, the device must be able to
  *    return them within 500 ms of successful completion of the
- *    transmission of the previous packet. The device must then be
+ *    transmission of the previous packet.  The device must then be
  *    able to successfully complete the status stage
  *    within 50 ms after returning the last data packet.
  *    For standard device requests that require a data stage transfer
@@ -512,49 +509,43 @@ struct usb_h_ctrl_xfer
   int8_t status;        /* Last transfer status */
 };
 
-/**
- * Transfer descriptor for bulk / interrupt / iso transfer
- */
+/* Transfer descriptor for bulk / interrupt / iso transfer */
 
 struct usb_h_bulk_int_iso_xfer
 {
-  uint32_t size;  /** Expected transfer size */
-  uint32_t count; /** Transfer count */
-  uint8_t *data;  /** Pointer to transfer data */
+  uint32_t size;  /* Expected transfer size */
+  uint32_t count; /* Transfer count */
+  uint8_t *data;  /* Pointer to transfer data */
   uint16_t reserved[3];
-  uint8_t state;  /** Transfer state */
-  int8_t status;  /** Last transfer status */
+  uint8_t state;  /* Transfer state */
+  int8_t status;  /* Last transfer status */
 };
 
-/**
- * Transfer descriptor for periodic high bandwidth transfer
- */
+/* Transfer descriptor for periodic high bandwidth transfer */
 
 struct usb_h_high_bw_xfer
 {
-  uint32_t size;         /** Expected transfer size */
-  uint32_t count;        /** Transfer count */
-  uint8_t *data;         /** Pointer to transfer data */
-  uint16_t pkt_size[3];  /** Micro frame packet sizes */
-  uint8_t state;         /** Transfer state */
-  int8_t status;         /** Last transfer status */
+  uint32_t size;         /* Expected transfer size */
+  uint32_t count;        /* Transfer count */
+  uint8_t *data;         /* Pointer to transfer data */
+  uint16_t pkt_size[3];  /* Micro frame packet sizes */
+  uint8_t state;         /* Transfer state */
+  int8_t status;         /* Last transfer status */
 };
 
-/**
- * General transfer descriptor
- */
+/* General transfer descriptor */
 
 struct usb_h_xfer
 {
-  /** Reserved for different transfer */
+  /* Reserved for different transfer */
 
   union
   {
     uint16_t u16[9];
     uint8_t  u8[18];
   } reserved;
-  uint8_t state; /** Transfer state */
-  int8_t status; /** Last transfer status */
+  uint8_t state; /* Transfer state */
+  int8_t status; /* Last transfer status */
 };
 
 /* USB Host Controller Driver Pipe structure */
@@ -609,7 +600,7 @@ struct sam_pipe_s
   uint8_t dma : 1;            /* Uses DMA (on transfer) */
   uint8_t periodic_start : 1; /* Transfer periodic */
 
-  /** Transfer status */
+  /* Transfer status */
 
   union
   {
@@ -650,12 +641,12 @@ struct sam_usbhost_s
   uint8_t           xfrtype;   /* See enum _hxfrdn_e */
   sem_t             pscsem;    /* Semaphore to wait for a port event */
 
-  uint16_t pipes_unfreeze; /** Pipes to unfreeze after wakeup */
-  int8_t suspend_start;    /** Delayed suspend time in ms */
-  int8_t resume_start;     /** Delayed resume time in ms */
-  int8_t n_ctrl_req_user;  /** Control transfer request user count */
-  int8_t n_sof_user;       /** SOF user count (callback, suspend, resume, ctrl request) */
-  uint8_t pipe_pool_size;  /** Pipe pool size in number of pipes */
+  uint16_t pipes_unfreeze; /* Pipes to unfreeze after wakeup */
+  int8_t suspend_start;    /* Delayed suspend time in ms */
+  int8_t resume_start;     /* Delayed resume time in ms */
+  int8_t n_ctrl_req_user;  /* Control transfer request user count */
+  int8_t n_sof_user;       /* SOF user count (callback, suspend, resume, ctrl request) */
+  uint8_t pipe_pool_size;  /* Pipe pool size in number of pipes */
 
 #ifdef CONFIG_USBHOST_HUB
 
@@ -2325,7 +2316,7 @@ static struct usbdev_req_s *sam_ep_allocreq(struct usbdev_ep_s *ep)
 
   usbtrace(TRACE_EPALLOCREQ, USB_EPNO(ep->eplog));
 
-  privreq = (struct sam_req_s *)kmm_zalloc(sizeof(struct sam_req_s));
+  privreq = kmm_zalloc(sizeof(struct sam_req_s));
   if (!privreq)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_ALLOCFAIL), 0);
@@ -7147,7 +7138,7 @@ static int sam_alloc(struct usbhost_driver_s *drvr,
 
   /* There is no special memory requirement for the SAM. */
 
-  alloc = (uint8_t *)kmm_malloc(CONFIG_SAM_DESCSIZE);
+  alloc = kmm_malloc(CONFIG_SAM_DESCSIZE);
   if (!alloc)
     {
       return -ENOMEM;
@@ -7234,7 +7225,7 @@ static int sam_ioalloc(struct usbhost_driver_s *drvr,
 
   /* There is no special memory requirement */
 
-  alloc = (uint8_t *)kmm_malloc(buflen);
+  alloc = kmm_malloc(buflen);
   if (!alloc)
     {
       return -ENOMEM;

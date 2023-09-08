@@ -59,26 +59,6 @@
 	.file		"arm_exception.S"
 
 /****************************************************************************
- * Macro Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: setintstack
- *
- * Description:
- *   Set the current stack pointer to the  "top" the interrupt stack.  Single CPU
- *   case.  Must be provided by MCU-specific logic in the SMP case.
- *
- ****************************************************************************/
-
-#if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 3
-	.macro	setintstack, tmp1, tmp2
-	ldr		\tmp1, =g_intstacktop
-	mov		sp, \tmp1
-	.endm
-#endif
-
-/****************************************************************************
  * .text
  ****************************************************************************/
 
@@ -114,18 +94,17 @@ exception_common:
 	 * the context is on the MSP or PSP.
 	 */
 
-#ifdef CONFIG_BUILD_PROTECTED
 	mov		r0, r14					/* Copy high register to low register */
 	lsls		r0, #(31 - EXC_RETURN_PROCESS_BITNO)	/* Move to bit 31 */
 	bmi		1f					/* Test bit 31 */
 	mrs		r1, msp					/* R1=The main stack pointer */
+	subs		r1, #SW_XCPT_SIZE			/* R1=Beginning of context array on the stack */
+	msr		msp, r1					/* Reserved stack space */
 	b		2f
 
 1:
 	mrs		r1, psp					/* R1=The process stack pointer */
-#else
-	mrs		r1, msp					/* R1=The main stack pointer */
-#endif
+	subs		r1, #SW_XCPT_SIZE			/* R1=Beginning of context array on the stack */
 
 	/* R1 is the current stack pointer.  HW_XCPT_REGS were pushed onto the stack
 	 * when the interrupt was taken so (R1)+HW_XCPT_SIZE is the value of the
@@ -137,7 +116,6 @@ exception_common:
 2:
 	/* Save SP, PRIMASK, and R4-R7 in the context array */
 
-	subs		r1, #SW_XCPT_SIZE			/* R1=Beginning of context array on the stack */
 	movs		r2, #XCPTCONTEXT_SIZE			/* R2=Size of the context array */
 	add		r2, r1					/* R2=MSP/PSP before the interrupt was taken */
 								/* (ignoring the xPSR[9] alignment bit) */
@@ -145,18 +123,15 @@ exception_common:
 	mov		r0, r1					/* Copy the context array pointer */
 	stmia		r0!, {r2-r7}				/* Save the SP, PRIMASK, and R4-R7 in the context array */
 
-	/* Save R8-R11 and the EXEC_RETURN value in the context array */
+	/* Save R8-R11 control and the EXEC_RETURN value in the context array */
 
 	mov		r2, r8					/* Copy high registers to low */
 	mov		r3, r9
 	mov		r4, r10
 	mov		r5, r11
-#ifdef CONFIG_BUILD_PROTECTED
-	mov		r6, r14
-	stmia		r0!, {r2-r6}				/* Save the high registers r8-r11 and r14 */
-#else
-	stmia		r0!, {r2-r5}				/* Save the high registers r8-r11 */
-#endif
+	mrs		r6, control				/* R6=control */
+	mov		r7, r14
+	stmia		r0!, {r2-r7}				/* Save the high registers r8-r11 control and r14 */
 
 	/* Get the exception number in R0=IRQ, R1=register save area on stack */
 
@@ -167,9 +142,7 @@ exception_common:
 	 * Otherwise, we will use the stack that was current when the interrupt was taken.
 	 */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
-	setintstack	r7, r6					/* SP = IRQ stack top */
-#else
+#if CONFIG_ARCH_INTERRUPTSTACK < 3
 	/* If the interrupt stack is disabled, reserve xcpcontext to ensure
 	 * that signal processing can have a separate xcpcontext to handle
 	 * signal context (reference: arm_schedulesigaction.c):
@@ -181,9 +154,13 @@ exception_common:
 	 * also the sp should be restore after arm_doirq()
 	 */
 
+	mov		r2, r14
+	lsls		r2, #(31 - EXC_RETURN_THREAD_BITNO)	/* Move to bit 31 */
+	bpl		3f					/* Test bit 31 */
 	mov		r2, r1					/* Reserve signal context */
 	subs		r2, r2, #XCPTCONTEXT_SIZE
 	msr		msp, r2					/* We are using the main stack pointer */
+3:
 #endif
 
 	bl		arm_doirq				/* R0=IRQ, R1=register save area on stack */
@@ -196,20 +173,13 @@ exception_common:
 
 	movs		r2, #(4*REG_R8)				/* R2=Offset to R8 storage */
 	adds		r1, r0, r2				/* R1=Address of R8 storage */
-#ifdef CONFIG_BUILD_PROTECTED
-	ldmia		r1!, {r2-r6}				/* Recover R8-R11 and R14 (5 registers)*/
+	ldmia		r1!, {r2-r7}				/* Recover R8-R11 control and R14 (6 registers)*/
 	mov		r8, r2					/* Move to position in high registers */
 	mov		r9, r3
 	mov		r10, r4
 	mov		r11, r5
-	mov		r14, r6					/* EXEC_RETURN */
-#else
-	ldmia		r1!, {r2-r5}				/* Recover R8-R11 (4 registers)*/
-	mov		r8, r2					/* Move to position in high registers */
-	mov		r9, r3
-	mov		r10, r4
-	mov		r11, r5
-#endif
+	msr		control, r6
+	mov		r14, r7					/* EXEC_RETURN */
 
 	/* Recover SP (R2), PRIMASK (R3), and R4-R7. Determine the value of
 	 * the stack pointer as it was on entry to the exception handler.
@@ -223,22 +193,16 @@ exception_common:
 	 * context is on the MSP or PSP.
 	 */
 
-#ifdef CONFIG_BUILD_PROTECTED
 	mov		r0, r14					/* Copy high register to low register */
 	lsls		r0, #(31 - EXC_RETURN_PROCESS_BITNO)	/* Move to bit 31 */
-	bmi		3f					/* Test bit 31 */
+	bmi		4f					/* Test bit 31 */
 	msr		msp, r1					/* R1=The main stack pointer */
-	b		4f
-
-3:
-	msr		psp, r1					/* R1=The process stack pointer */
+	b		5f
 
 4:
-#else
-	msr		msp, r1					/* R1=The main stack pointer */
-	ldr		r0, =EXC_RETURN_PRIVTHR			/* R0=EXC_RETURN to privileged mode */
-	mov		r14, r0					/* R14=EXC_RETURN to privileged mode */
-#endif
+	msr		psp, r1					/* R1=The process stack pointer */
+
+5:
 
 	/* Restore the interrupt state */
 

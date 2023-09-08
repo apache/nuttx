@@ -71,7 +71,7 @@ int xmc4_max6675initialize(const char *devpath)
       return -ENODEV;
     }
 
-  /* Then register the barometer sensor */
+  /* Then register the temperature sensor */
 
   ret = max6675_register(devpath, spi);
   if (ret < 0)

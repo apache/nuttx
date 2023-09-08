@@ -104,7 +104,7 @@ int nxsig_notification(pid_t pid, FAR struct sigevent *event,
                        int code, FAR struct sigwork_s *work)
 {
   sinfo("pid=%" PRIu16 " signo=%d code=%d sival_ptr=%p\n",
-         pid, event->sigev_signo, code, event->sigev_value.sival_ptr);
+        pid, event->sigev_signo, code, event->sigev_value.sival_ptr);
 
   /* Notify client via a signal? */
 

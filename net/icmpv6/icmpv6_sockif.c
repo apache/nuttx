@@ -191,8 +191,6 @@ static void icmpv6_addref(FAR struct socket *psock)
 {
   FAR struct icmpv6_conn_s *conn;
 
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
-
   conn = psock->s_conn;
   DEBUGASSERT(conn->crefs > 0 && conn->crefs < 255);
   conn->crefs++;
@@ -255,7 +253,6 @@ static int icmpv6_close(FAR struct socket *psock)
 {
   FAR struct icmpv6_conn_s *conn;
 
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
   conn = psock->s_conn;
 
   /* Is this the last reference to the connection structure (there could be\

@@ -86,8 +86,6 @@
  * Public Types
  ****************************************************************************/
 
-extern const unsigned int num_of_peripheral_clocks_0;
-
 /* Clock Configuration ******************************************************/
 
 enum scg_system_clock_type_e
@@ -456,10 +454,6 @@ enum scg_system_clock_mode_e
 
 #ifndef __ASSEMBLY__
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
@@ -468,6 +462,12 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+EXTERN const unsigned int num_of_peripheral_clocks_0;
 
 /****************************************************************************
  * Public Function Prototypes

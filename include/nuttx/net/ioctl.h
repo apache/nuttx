@@ -121,10 +121,20 @@
 #define SIOCDCANEXTFILTER  _SIOC(0x002F)  /* Delete hardware-level exteneded ID filter */
 #define SIOCACANSTDFILTER  _SIOC(0x0030)  /* Add hardware-level standard ID filter */
 #define SIOCDCANSTDFILTER  _SIOC(0x0031)  /* Delete hardware-level standard ID filter */
+#define SIOCCANRECOVERY    _SIOC(0x0032)  /* Recovery can, work only when bus-off state */
 
 /* Network socket control ***************************************************/
 
 #define SIOCDENYINETSOCK _SIOC(0x0033) /* Deny network socket. */
+
+/* Bridge calls *************************************************************/
+
+#define SIOCBRADDBR        _SIOC(0x0036)  /* Create new bridge device */
+#define SIOCBRDELBR        _SIOC(0x0037)  /* Remove bridge device */
+#define SIOCBRADDIF        _SIOC(0x0038)  /* Add interface to bridge */
+#define SIOCBRDELIF        _SIOC(0x0039)  /* Remove interface from bridge */
+#define SIOCGIFBR          _SIOC(0x003A)  /* Bridging support */
+#define SIOCSIFBR          _SIOC(0x003B)  /* Set bridging options */
 
 /****************************************************************************
  * Public Type Definitions

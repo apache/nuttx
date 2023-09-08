@@ -219,7 +219,8 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   /* Non-blocking connection ? */
 
-  nonblock_conn = (conn->tcpstateflags == TCP_SYN_SENT &&
+  nonblock_conn = ((conn->tcpstateflags == TCP_ALLOCATED ||
+                    conn->tcpstateflags == TCP_SYN_SENT) &&
                    _SS_ISNONBLOCK(conn->sconn.s_flags));
 
   /* Find a container to hold the poll information */

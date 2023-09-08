@@ -373,8 +373,10 @@ static int parse_sack(FAR struct tcp_conn_s *conn, FAR struct tcp_hdr_s *tcp,
 
           for (i = 0; i < nsack; i++)
             {
-              segs[i].left = tcp_getsequence((uint8_t *)&sacks[i].left);
-              segs[i].right = tcp_getsequence((uint8_t *)&sacks[i].right);
+              /* Use the pointer to avoid the error of 4 byte alignment. */
+
+              segs[i].left = tcp_getsequence((uint8_t *)&sacks[i]);
+              segs[i].right = tcp_getsequence((uint8_t *)&sacks[i] + 4);
             }
 
           tcp_reorder_ofosegs(nsack, segs);
@@ -1117,6 +1119,10 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
           flags &= ~TCP_POLL;
         }
     }
+  else
+    {
+      tcp_set_zero_probe(conn, flags);
+    }
 
   /* Continue waiting */
 
@@ -1299,7 +1305,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
     {
       /* Make sure that the IP address mapping is in the Neighbor Table */
 
-      ret = icmpv6_neighbor(conn->u.ipv6.raddr);
+      ret = icmpv6_neighbor(NULL, conn->u.ipv6.raddr);
     }
 #endif /* CONFIG_NET_ICMPv6_NEIGHBOR */
 
@@ -1657,7 +1663,7 @@ int psock_tcp_cansend(FAR struct tcp_conn_s *conn)
 
   if (!_SS_ISCONNECTED(conn->sconn.s_flags))
     {
-      nerr("ERROR: Not connected\n");
+      nwarn("WARNING: Not connected\n");
       return -ENOTCONN;
     }
 

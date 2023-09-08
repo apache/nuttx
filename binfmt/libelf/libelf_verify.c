@@ -39,10 +39,7 @@
  * Private Constant Data
  ****************************************************************************/
 
-static const char g_elfmagic[EI_MAGIC_SIZE] =
-{
-  0x7f, 'E', 'L', 'F'
-};
+static const char g_elfmagic[EI_MAGIC_SIZE] = EI_MAGIC;
 
 /****************************************************************************
  * Private Functions
@@ -89,7 +86,7 @@ int elf_verifyheader(FAR const Elf_Ehdr *ehdr)
 
   /* Verify that this is a relocatable file */
 
-  if ((ehdr->e_type != ET_REL) && (ehdr->e_type != ET_EXEC))
+  if (ehdr->e_type != ET_REL && ehdr->e_type != ET_EXEC)
     {
       berr("Not a relocatable or executable file: e_type=%d\n",
            ehdr->e_type);

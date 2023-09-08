@@ -130,9 +130,7 @@
  * Private Type Definitions
  ****************************************************************************/
 
-/**
- * @brief Structure for lt1pa01 device
- */
+/* Structure for lt1pa01 device */
 
 struct lt1pa01_dev_s
 {

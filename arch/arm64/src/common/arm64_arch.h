@@ -184,7 +184,7 @@
   ({ \
     uint64_t __mpidr = GET_MPIDR(); \
     __mpidr &= ~(MPIDR_AFFLVL_MASK << MPIDR_AFF ## aff_level ## _SHIFT); \
-    __mpidr |= (cpu << MPIDR_AFF ## aff_level ## _SHIFT); \
+    __mpidr |= ((core) << MPIDR_AFF ## aff_level ## _SHIFT); \
     __mpidr &= MPIDR_ID_MASK; \
     __mpidr; \
   })
@@ -570,6 +570,18 @@ uint64_t arm64_get_mpid(int cpu);
 #else
 #  define arm64_get_mpid(cpu) GET_MPIDR()
 #endif /* CONFIG_SMP */
+
+/****************************************************************************
+ * Name: arm64_get_cpuid
+ *
+ * Description:
+ *   The function from mpid to get cpu id
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+int arm64_get_cpuid(uint64_t mpid);
+#endif
 
 #endif /* __ASSEMBLY__ */
 

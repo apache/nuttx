@@ -31,9 +31,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ETHMAC_RX0_BASE	ETHMAC_BASE
-#define ETHMAC_RX1_BASE	(ETHMAC_BASE+0x0800)
-#define ETHMAC_TX0_BASE	(ETHMAC_BASE+0x1000)
-#define ETHMAC_TX1_BASE	(ETHMAC_BASE+0x1800)
+#define ETHMAC_RX0_BASE  ETHMAC_BASE
+#define ETHMAC_RX1_BASE  (ETHMAC_BASE+0x0800)
+#define ETHMAC_TX0_BASE  (ETHMAC_BASE+0x1000)
+#define ETHMAC_TX1_BASE  (ETHMAC_BASE+0x1800)
 
 #endif /* __ARCH_MISOC_SRC_COMMON_HW_ETHMAC_MEM_H */

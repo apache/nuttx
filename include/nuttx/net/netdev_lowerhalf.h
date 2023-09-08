@@ -28,30 +28,28 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
+#include <nuttx/spinlock.h>
 
 #include <net/if.h>
 #include <netinet/in.h>
 
-/* Compiler may not have stdatomic.h before C11 or with __STDC_NO_ATOMICS__
- * But we can also get atomic support from libmetal.
- */
-
-#if defined(CONFIG_OPENAMP)
-#include <metal/atomic.h>
-#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L && \
-      !defined(__STDC_NO_ATOMICS__)
-#include <stdatomic.h>
+#ifdef CONFIG_HAVE_ATOMICS
+#  include <stdatomic.h>
 #endif
 
 #include <nuttx/net/ip.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/wireless/wireless.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* | <-------------- NETPKT_BUFLEN ---------------> |
+/* Layout for net packet:
+ *
+ * | <-------------- NETPKT_BUFLEN ---------------> |
  * +---------------------+-------------------+------+      +-------------+
  * | reserved for driver |       data        | free | ---> | next netpkt |
  * +---------------------+-------------------+------+      +-------------+
@@ -59,13 +57,18 @@
  * ^base                 ^data
  */
 
-#define NETPKT_BUFLEN   CONFIG_IOB_BUFSIZE
+/* Layout for linked net packet, you can get list of (data, len) by
+ * netpkt_to_iov() interface:
+ *
+ *            | <----------- datalen = sum(len) ------------> |
+ * +----------+-----------+     +-----------+     +-----------+------+
+ * | reserved |   data    | --> |   data    | --> |   data    | free |
+ * +----------+-----------+     +-----------+     +-----------+------+
+ * |          | <- len -> |     | <- len -> |     | <- len -> |
+ * ^base      ^data             ^data             ^data
+ */
 
-#if defined(CONFIG_OPENAMP) || \
-    (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L && \
-    !defined(__STDC_NO_ATOMICS__))
-#define HAVE_ATOMIC
-#endif
+#define NETPKT_BUFLEN   CONFIG_IOB_BUFSIZE
 
 /****************************************************************************
  * Public Types
@@ -98,16 +101,24 @@ enum netpkt_type_e
  */
 
 struct netdev_ops_s;
+struct wireless_ops_s;
 struct netdev_lowerhalf_s
 {
   FAR const struct netdev_ops_s *ops;
 
+  /* Extended operations. */
+
+#ifdef CONFIG_NETDEV_WIRELESS_HANDLER
+  FAR const struct wireless_ops_s *iw_ops;
+#endif
+
   /* Max # of buffer held by driver */
 
-#ifdef HAVE_ATOMIC
+#ifdef CONFIG_HAVE_ATOMICS
   atomic_int quota[NETPKT_TYPENUM];
 #else
   int quota[NETPKT_TYPENUM];
+  spinlock_t lock;
 #endif
 
   /* The structure used by net stack.
@@ -157,6 +168,46 @@ struct netdev_ops_s
                unsigned long arg);
 #endif
 };
+
+/* This structure is a set of wireless handlers, leave unsupported operations
+ * as NULL is OK.
+ */
+
+#ifdef CONFIG_NETDEV_WIRELESS_HANDLER
+typedef int (*iw_handler_rw)(FAR struct netdev_lowerhalf_s *dev,
+                             FAR struct iwreq *iwr, bool set);
+typedef int (*iw_handler_ro)(FAR struct netdev_lowerhalf_s *dev,
+                             FAR struct iwreq *iwr);
+
+struct wireless_ops_s
+{
+  /* Connect / disconnect operation, should exist if essid or bssid exists */
+
+  int (*connect)(FAR struct netdev_lowerhalf_s *dev);
+  int (*disconnect)(FAR struct netdev_lowerhalf_s *dev);
+
+  /* The following attributes need both set and get. */
+
+  iw_handler_rw essid;
+  iw_handler_rw bssid;
+  iw_handler_rw passwd;
+  iw_handler_rw mode;
+  iw_handler_rw auth;
+  iw_handler_rw freq;
+  iw_handler_rw bitrate;
+  iw_handler_rw txpower;
+  iw_handler_rw country;
+  iw_handler_rw sensitivity;
+
+  /* Scan operation: start scan (set=1) / get scan result (set=0). */
+
+  iw_handler_rw scan;
+
+  /* Get-only attributes. */
+
+  iw_handler_ro range;
+};
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -384,10 +435,13 @@ FAR uint8_t *netpkt_getbase(FAR netpkt_t *pkt);
  *   pkt    - The net packet
  *   len    - The length of data in netpkt
  *
+ * Returned Value:
+ *   The new effective data length, or a negated errno value on error.
+ *
  ****************************************************************************/
 
-void netpkt_setdatalen(FAR struct netdev_lowerhalf_s *dev,
-                       FAR netpkt_t *pkt, unsigned int len);
+int netpkt_setdatalen(FAR struct netdev_lowerhalf_s *dev,
+                      FAR netpkt_t *pkt, unsigned int len);
 
 /****************************************************************************
  * Name: netpkt_getdatalen
@@ -436,5 +490,25 @@ void netpkt_reset_reserved(FAR struct netdev_lowerhalf_s *dev,
  ****************************************************************************/
 
 bool netpkt_is_fragmented(FAR netpkt_t *pkt);
+
+/****************************************************************************
+ * Name: netpkt_to_iov
+ *
+ * Description:
+ *   Write each piece of data/len into iov array.
+ *
+ * Input Parameters:
+ *   dev    - The lower half device driver structure
+ *   pkt    - The net packet
+ *   iov    - The iov array to write
+ *   iovcnt - The number of elements in the iov array
+ *
+ * Returned Value:
+ *   The actual written count of iov entries.
+ *
+ ****************************************************************************/
+
+int netpkt_to_iov(FAR struct netdev_lowerhalf_s *dev, FAR netpkt_t *pkt,
+                  FAR struct iovec *iov, int iovcnt);
 
 #endif /* __INCLUDE_NUTTX_NET_NETDEV_LOWERHALF_H */

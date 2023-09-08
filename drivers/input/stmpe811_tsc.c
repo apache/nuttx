@@ -239,12 +239,13 @@ static inline int stmpe811_waitsample(FAR struct stmpe811_dev_s *priv,
                                       FAR struct stmpe811_sample_s *sample)
 {
   int ret;
+  irqstate_t flags;
 
   /* Disable pre-emption to prevent the worker thread from running
    * asynchronously.
    */
 
-  sched_lock();
+  flags = enter_critical_section();
 
   /* Now release the semaphore that manages mutually exclusive access to
    * the device structure.  This may cause other tasks to become ready to
@@ -282,13 +283,12 @@ static inline int stmpe811_waitsample(FAR struct stmpe811_dev_s *priv,
   ret = nxmutex_lock(&priv->lock);
 
 errout:
-  /* Restore pre-emption.  We might get suspended here but that is okay
-   * because we already have our sample.  Note:  this means that if there
-   * were two threads reading from the STMPE811 for some reason, the data
-   * might be read out of order.
+  /* Then re-enable interrupts.  We might get interrupt here and there
+   * could be a new sample.  But no new threads will run because we still
+   * have pre-emption disabled.
    */
 
-  sched_unlock();
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -308,11 +308,10 @@ static int stmpe811_open(FAR struct file *filep)
   uint8_t                   tmp;
   int                       ret;
 
-  DEBUGASSERT(filep);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct stmpe811_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  priv  = inode->i_private;
 
   /* Get exclusive access to the driver data structure */
 
@@ -365,11 +364,10 @@ static int stmpe811_close(FAR struct file *filep)
   FAR struct stmpe811_dev_s *priv;
   int                       ret;
 
-  DEBUGASSERT(filep);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct stmpe811_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  priv  = inode->i_private;
 
   /* Get exclusive access to the driver data structure */
 
@@ -413,11 +411,10 @@ static ssize_t stmpe811_read(FAR struct file *filep,
   int                        ret;
 
   iinfo("len=%d\n", len);
-  DEBUGASSERT(filep);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct stmpe811_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  priv  = inode->i_private;
 
   /* Verify that the caller has provided a buffer large enough to receive
    * the touch data.
@@ -538,11 +535,10 @@ static int stmpe811_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   int                        ret;
 
   iinfo("cmd: %d arg: %ld\n", cmd, arg);
-  DEBUGASSERT(filep);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct stmpe811_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  priv  = inode->i_private;
 
   /* Get exclusive access to the driver data structure */
 
@@ -573,6 +569,38 @@ static int stmpe811_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+      case TSIOC_GETOFFSETX:  /* arg: Pointer to int offsetx config value */
+        {
+          FAR int *ptr = (FAR int *)((uintptr_t)arg);
+          DEBUGASSERT(ptr != NULL);
+          *ptr = CONFIG_STMPE811_OFFSETX;
+        }
+        break;
+
+      case TSIOC_GETOFFSETY:  /* arg: Pointer to int offsety config value */
+        {
+          FAR int *ptr = (FAR int *)((uintptr_t)arg);
+          DEBUGASSERT(ptr != NULL);
+          *ptr = CONFIG_STMPE811_OFFSETY;
+        }
+        break;
+
+      case TSIOC_GETTHRESHX:  /* arg: Pointer to int threshx config value */
+        {
+          FAR int *ptr = (FAR int *)((uintptr_t)arg);
+          DEBUGASSERT(ptr != NULL);
+          *ptr = CONFIG_STMPE811_THRESHX;
+        }
+        break;
+
+      case TSIOC_GETTHRESHY:  /* arg: Pointer to int threshy config value */
+        {
+          FAR int *ptr = (FAR int *)((uintptr_t)arg);
+          DEBUGASSERT(ptr != NULL);
+          *ptr = CONFIG_STMPE811_THRESHY;
+        }
+        break;
+
       default:
         ret = -ENOTTY;
         break;
@@ -599,11 +627,11 @@ static int stmpe811_poll(FAR struct file *filep, FAR struct pollfd *fds,
   int                        i;
 
   iinfo("setup: %d\n", (int)setup);
-  DEBUGASSERT(filep && fds);
+  DEBUGASSERT(fds);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct stmpe811_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  priv  = inode->i_private;
 
   /* Are we setting up the poll?  Or tearing it down? */
 
@@ -923,6 +951,10 @@ void stmpe811_tscworker(FAR struct stmpe811_dev_s *priv, uint8_t intsta)
 
   pendown = !!(stmpe811_getreg8(priv, STMPE811_TSC_CTRL) & TSC_CTRL_TSC_STA);
 
+  /* Get exclusive access to the driver data structure */
+
+  nxmutex_lock(&priv->lock);
+
   /* Handle the change from pen down to pen up */
 
   if (!pendown)
@@ -1057,6 +1089,7 @@ void stmpe811_tscworker(FAR struct stmpe811_dev_s *priv, uint8_t intsta)
    */
 
 ignored:
+  nxmutex_unlock(&priv->lock);
   if (priv->sample.contact == CONTACT_DOWN ||
       priv->sample.contact == CONTACT_MOVE)
     {

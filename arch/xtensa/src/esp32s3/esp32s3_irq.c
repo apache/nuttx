@@ -113,6 +113,13 @@
 #  define ESP32S3_WIFI_RESERVE_INT  0
 #endif
 
+#ifdef CONFIG_ESP32S3_BLE
+#  define ESP32S3_BLE_RESERVE_INT ((1 << ESP32S3_CPUINT_BT_BB) | \
+                                   (1 << ESP32S3_CPUINT_RWBLE))
+#else
+#  define ESP32S3_BLE_RESERVE_INT 0
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -159,7 +166,8 @@ static uint32_t g_intenable[CONFIG_SMP_NCPUS];
  */
 
 static uint32_t g_cpu0_freeints = ESP32S3_CPUINT_PERIPHSET &
-                                  ~ESP32S3_WIFI_RESERVE_INT;
+                                  ~(ESP32S3_WIFI_RESERVE_INT |
+                                    ESP32S3_BLE_RESERVE_INT);
 
 #ifdef CONFIG_SMP
 static uint32_t g_cpu1_freeints = ESP32S3_CPUINT_PERIPHSET;
@@ -346,27 +354,14 @@ static int esp32s3_alloc_cpuint(int priority, int type)
 
   DEBUGASSERT(priority >= ESP32S3_MIN_PRIORITY &&
               priority <= ESP32S3_MAX_PRIORITY);
-  DEBUGASSERT(type == ESP32S3_CPUINT_LEVEL ||
-              type == ESP32S3_CPUINT_EDGE);
+  DEBUGASSERT(type == ESP32S3_CPUINT_LEVEL);
 
-  if (type == ESP32S3_CPUINT_LEVEL)
-    {
-      /* Check if there are any level CPU interrupts available at the
-       * requested interrupt priority.
-       */
+  /* Check if there are any level CPU interrupts available at the
+   * requested interrupt priority.
+   */
 
-      mask = g_priority[ESP32S3_PRIO_INDEX(priority)] &
-              ESP32S3_CPUINT_LEVELSET;
-    }
-  else
-    {
-      /* Check if there are any edge CPU interrupts available at the
-       * requested interrupt priority.
-       */
-
-      mask = g_priority[ESP32S3_PRIO_INDEX(priority)] &
-              ESP32S3_CPUINT_EDGESET;
-    }
+  mask = g_priority[ESP32S3_PRIO_INDEX(priority)] &
+          ESP32S3_CPUINT_LEVELSET;
 
   return esp32s3_getcpuint(mask);
 }
@@ -422,6 +417,7 @@ static void esp32s3_free_cpuint(int cpuint)
 void up_irqinitialize(void)
 {
   int i;
+
   for (i = 0; i < NR_IRQS; i++)
     {
       g_irqmap[i] = IRQ_UNMAPPED;
@@ -435,6 +431,12 @@ void up_irqinitialize(void)
 
 #ifdef CONFIG_ESP32S3_WIFI
   g_irqmap[ESP32S3_IRQ_MAC] = IRQ_MKMAP(0, ESP32S3_CPUINT_MAC);
+  g_irqmap[ESP32S3_IRQ_PWR] = IRQ_MKMAP(0, ESP32S3_CPUINT_PWR);
+#endif
+
+#ifdef CONFIG_ESP32S3_BLE
+  g_irqmap[ESP32S3_IRQ_BT_BB] = IRQ_MKMAP(0, ESP32S3_CPUINT_BT_BB);
+  g_irqmap[ESP32S3_IRQ_RWBLE] = IRQ_MKMAP(0, ESP32S3_CPUINT_RWBLE);
 #endif
 
   /* Initialize CPU interrupts */
@@ -444,8 +446,16 @@ void up_irqinitialize(void)
   /* Reserve CPU0 interrupt for some special drivers */
 
 #ifdef CONFIG_ESP32S3_WIFI
-  g_cpu0_intmap[ESP32S3_CPUINT_MAC]  = CPUINT_ASSIGN(ESP32S3_IRQ_MAC);
+  g_cpu0_intmap[ESP32S3_CPUINT_MAC] = CPUINT_ASSIGN(ESP32S3_IRQ_MAC);
+  g_cpu0_intmap[ESP32S3_CPUINT_PWR] = CPUINT_ASSIGN(ESP32S3_IRQ_PWR);
   xtensa_enable_cpuint(&g_intenable[0], 1 << ESP32S3_CPUINT_MAC);
+#endif
+
+#ifdef CONFIG_ESP32S3_BLE
+  g_cpu0_intmap[ESP32S3_CPUINT_BT_BB] = CPUINT_ASSIGN(ESP32S3_IRQ_BT_BB);
+  g_cpu0_intmap[ESP32S3_CPUINT_RWBLE] = CPUINT_ASSIGN(ESP32S3_IRQ_RWBLE);
+  xtensa_enable_cpuint(&g_intenable[0], 1 << ESP32S3_CPUINT_BT_BB);
+  xtensa_enable_cpuint(&g_intenable[0], 1 << ESP32S3_CPUINT_RWBLE);
 #endif
 
 #ifdef CONFIG_SMP
@@ -832,6 +842,42 @@ void esp32s3_teardown_irq(int cpu, int periphid, int cpuint)
   putreg32(NO_CPUINT, regaddr);
 
   leave_critical_section(irqstate);
+}
+
+/****************************************************************************
+ * Name:  esp32s3_getirq
+ *
+ * Description:
+ *   This function returns the IRQ associated with a CPU interrupt
+ *
+ * Input Parameters:
+ *   cpu      - The CPU to receive the interrupt 0=PRO CPU 1=APP CPU
+ *   cpuint   - The CPU interrupt associated to the IRQ
+ *
+ * Returned Value:
+ *   The IRQ associated with such CPU interrupt or CPUINT_UNASSIGNED if
+ *   IRQ is not yet assigned to a CPU interrupt.
+ *
+ ****************************************************************************/
+
+int esp32s3_getirq(int cpu, int cpuint)
+{
+  uint8_t *intmap;
+
+#ifdef CONFIG_SMP
+  /* Select PRO or APP CPU interrupt mapping table */
+
+  if (cpu != 0)
+    {
+      intmap = g_cpu1_intmap;
+    }
+  else
+#endif
+    {
+      intmap = g_cpu0_intmap;
+    }
+
+  return CPUINT_GETIRQ(intmap[cpuint]);
 }
 
 /****************************************************************************

@@ -84,7 +84,6 @@ static uint16_t icmp_poll_eventhandler(FAR struct net_driver_s *dev,
        */
 
       psock = info->psock;
-      DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
       conn  = psock->s_conn;
       if (dev != conn->dev)
         {

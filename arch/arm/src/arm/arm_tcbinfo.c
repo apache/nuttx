@@ -24,10 +24,9 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_DEBUG_TCBINFO
-
 #include <nuttx/sched.h>
 #include <arch/irq.h>
+#include <sys/param.h>
 
 /****************************************************************************
  * Private Data
@@ -60,21 +59,20 @@ static const uint16_t g_reg_offs[] =
 
 const struct tcbinfo_s g_tcbinfo =
 {
-  .pid_off   = TCB_PID_OFF,
-  .state_off = TCB_STATE_OFF,
-  .pri_off   = TCB_PRI_OFF,
-  .name_off  = TCB_NAME_OFF,
-  .regs_off  = TCB_REGS_OFF,
-  .basic_num = 17,
-  .total_num = sizeof(g_reg_offs) / sizeof(g_reg_offs[0]),
+  .pid_off        = TCB_PID_OFF,
+  .state_off      = TCB_STATE_OFF,
+  .pri_off        = TCB_PRI_OFF,
+  .name_off       = TCB_NAME_OFF,
+  .stack_off      = TCB_STACK_OFF,
+  .stack_size_off = TCB_STACK_SIZE_OFF,
+  .regs_off       = TCB_REGS_OFF,
+  .basic_num      = 17,
+  .total_num      = nitems(g_reg_offs),
   {
     .p = g_reg_offs,
   },
 };
 
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-

@@ -840,18 +840,13 @@ static void pcf8574_int_update(void *handle, uint8_t input)
 #endif
 
 /****************************************************************************
- * Name: tc64_update_registers
+ * Name: pcf8574_register_update
  *
  * Description:
  *   Read all pin states and update pending interrupts.
  *
  * Input Parameters:
- *   dev - Device-specific state data
- *   pins - The list of pin indexes to alter in this call
- *   val - The list of pin levels.
- *
- * Returned Value:
- *   0 on success, else a negative error code
+ *   priv - pointer to pcf8574_dev_s structure
  *
  ****************************************************************************/
 

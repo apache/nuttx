@@ -25,11 +25,6 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <sys/types.h>
-
-#include <nuttx/arch.h>
 #include <nuttx/lib/modlib.h>
 
 /****************************************************************************
@@ -83,7 +78,7 @@ int modlib_findsymtab(FAR struct mod_loadinfo_s *loadinfo);
  ****************************************************************************/
 
 int modlib_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
-                   FAR Elf_Sym *sym);
+                   FAR Elf_Sym *sym, FAR Elf_Shdr *shdr);
 
 /****************************************************************************
  * Name: modlib_symvalue
@@ -110,13 +105,64 @@ int modlib_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
  ****************************************************************************/
 
 int modlib_symvalue(FAR struct module_s *modp,
-                    FAR struct mod_loadinfo_s *loadinfo, FAR Elf_Sym *sym);
+                    FAR struct mod_loadinfo_s *loadinfo, FAR Elf_Sym *sym,
+                    Elf_Off offset);
 
 /****************************************************************************
- * Name: modlib_loadshdrs
+ * Name: modlib_insertsymtab
  *
  * Description:
- *   Loads section headers into memory.
+ *   Insert a symbol table for the current module.
+ *
+ * Input Parameters:
+ *   modp     - Module state information
+ *   loadinfo - Module load information
+ *   shdr     - Symbol table section header
+ *   sym      - Symbol table entry
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ *   ENOMEM - Symbol undefined and not provided via a symbol table
+ *
+ ****************************************************************************/
+
+int modlib_insertsymtab(FAR struct module_s *modp,
+                        FAR struct mod_loadinfo_s *loadinfo,
+                        FAR Elf_Shdr *shdr,
+                        FAR Elf_Sym *sym);
+
+/****************************************************************************
+ * Name: modlib_findglobal
+ *
+ * Description:
+ *   Find a symbol in the global symbol table
+ *
+ * Input Parameters:
+ *   modp     - Module state information
+ *   loadinfo - Module load information
+ *   shdr     - Symbol table section header
+ *   sym      - Symbol table entry
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ *   ENOMEM - Symbol undefined and not provided via a symbol table
+ *
+ ****************************************************************************/
+
+void *modlib_findglobal(FAR struct module_s *modp,
+                        FAR struct mod_loadinfo_s *loadinfo,
+                        FAR Elf_Shdr *shdr,
+                        FAR Elf_Sym *sym);
+
+/****************************************************************************
+ * Name: modlib_loadhdrs
+ *
+ * Description:
+ *   Loads program and section headers into memory.
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
@@ -124,7 +170,7 @@ int modlib_symvalue(FAR struct module_s *modp,
  *
  ****************************************************************************/
 
-int modlib_loadshdrs(FAR struct mod_loadinfo_s *loadinfo);
+int modlib_loadhdrs(FAR struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
  * Name: modlib_findsection

@@ -45,6 +45,7 @@
 #include <nuttx/signal.h>
 #include <nuttx/net/mii.h>
 #include <nuttx/net/phy.h>
+#include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
 
 #ifdef CONFIG_NET_PKT
@@ -260,6 +261,15 @@
 #  define MMD1                  1
 #  define MMD1_PMA_STATUS1      1
 #  define MMD1_PS1_RECEIVE_LINK_STATUS (1 << 2)
+#elif defined(CONFIG_ETH0_PHY_YT8512)
+#  define BOARD_PHY_NAME        "YT8512"
+#  define BOARD_PHYID1          MII_PHYID1_YT8512
+#  define BOARD_PHYID2          MII_PHYID2_YT8512
+#  define BOARD_PHY_STATUS      MII_YT8512_PHYSTS
+#  define BOARD_PHY_ADDR        (0)
+#  define BOARD_PHY_10BASET(s)  (((s) & MII_YT8512_PHYSTS_SPEED) == 0)
+#  define BOARD_PHY_100BASET(s) (((s) & MII_YT8512_PHYSTS_SPEED) != 0)
+#  define BOARD_PHY_ISDUPLEX(s) (((s) & MII_YT8512_PHYSTS_DUPLEX) != 0)
 #else
 #  error "Unrecognized or missing PHY selection"
 #endif
@@ -1304,11 +1314,9 @@ static int imxrt_ifup_action(struct net_driver_s *dev, bool resetphy)
   uint32_t regval;
   int ret;
 
-  ninfo("Bringing up: %d.%d.%d.%d\n",
-        (int)(dev->d_ipaddr & 0xff),
-        (int)((dev->d_ipaddr >> 8) & 0xff),
-        (int)((dev->d_ipaddr >> 16) & 0xff),
-        (int)(dev->d_ipaddr >> 24));
+  ninfo("Bringing up: %u.%u.%u.%u\n",
+        ip4_addr1(dev->d_ipaddr), ip4_addr2(dev->d_ipaddr),
+        ip4_addr3(dev->d_ipaddr), ip4_addr4(dev->d_ipaddr));
 
   /* Initialize ENET buffers */
 
@@ -1445,11 +1453,9 @@ static int imxrt_ifdown(struct net_driver_s *dev)
     (struct imxrt_driver_s *)dev->d_private;
   irqstate_t flags;
 
-  ninfo("Taking down: %d.%d.%d.%d\n",
-        (int)(dev->d_ipaddr & 0xff),
-        (int)((dev->d_ipaddr >> 8) & 0xff),
-        (int)((dev->d_ipaddr >> 16) & 0xff),
-        (int)(dev->d_ipaddr >> 24));
+  ninfo("Taking down: %u.%u.%u.%u\n",
+        ip4_addr1(dev->d_ipaddr), ip4_addr2(dev->d_ipaddr),
+        ip4_addr3(dev->d_ipaddr), ip4_addr4(dev->d_ipaddr));
 
   /* Flush and disable the Ethernet interrupts at the NVIC */
 
@@ -1852,10 +1858,11 @@ static int imxrt_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 #if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
 static int imxrt_phyintenable(struct imxrt_driver_s *priv)
 {
-#if defined(CONFIG_ETH0_PHY_KSZ8051) || defined(CONFIG_ETH0_PHY_KSZ8061) || \
-    defined(CONFIG_ETH0_PHY_KSZ8081) || defined(CONFIG_ETH0_PHY_DP83825I)
   uint16_t phyval;
   int ret;
+
+#if defined(CONFIG_ETH0_PHY_KSZ8051) || defined(CONFIG_ETH0_PHY_KSZ8061) || \
+    defined(CONFIG_ETH0_PHY_KSZ8081) || defined(CONFIG_ETH0_PHY_DP83825I)
 
   /* Read the interrupt status register in order to clear any pending
    * interrupts
@@ -1868,6 +1875,22 @@ static int imxrt_phyintenable(struct imxrt_driver_s *priv)
 
       ret = imxrt_writemii(priv, priv->phyaddr, MII_KSZ8081_INT,
                            (MII_KSZ80X1_INT_LDEN | MII_KSZ80X1_INT_LUEN));
+    }
+
+  return ret;
+#elif defined(CONFIG_ETH0_YT8512)
+
+  /* Read the interrupt status register in order to clear any pending
+   * interrupts
+   */
+
+  ret = imxrt_readmii(priv, priv->phyaddr, MII_YT8512_ISR, &phyval);
+  if (ret == OK)
+    {
+      /* Enable link up/down interrupts */
+
+      ret = imxrt_writemii(priv, priv->phyaddr, MII_YT8512_IMR,
+                           (MII_YT8512_IMR_LD_EN | MII_YT8512_IMR_LU_EN));
     }
 
   return ret;
@@ -2396,6 +2419,43 @@ static inline int imxrt_initphy(struct imxrt_driver_s *priv, bool renogphy)
 
       imxrt_writemii(priv, phyaddr, MII_DP83825I_RCSR,
                     MII_DP83825I_RCSC_ELAST_2 | MII_DP83825I_RCSC_RMIICS);
+
+      imxrt_writemii(priv, phyaddr, MII_ADVERTISE,
+                     MII_ADVERTISE_100BASETXFULL |
+                     MII_ADVERTISE_100BASETXHALF |
+                     MII_ADVERTISE_10BASETXFULL |
+                     MII_ADVERTISE_10BASETXHALF |
+                     MII_ADVERTISE_CSMA);
+
+#elif defined (CONFIG_ETH0_PHY_YT8512)
+
+      /* Reset PHY */
+
+      imxrt_writemii(priv, phyaddr, MII_MCR, MII_MCR_RESET);
+
+      /* Config LEDs */
+
+      imxrt_writemii(priv, phyaddr, MII_YT8512_DEBUG_ADDR_OFFSET,
+                     MII_YT8512_LED0);
+
+      imxrt_readmii(priv, phyaddr, MII_YT8512_DEBUG_DATA, &phydata);
+
+      imxrt_writemii(priv, phyaddr, MII_YT8512_DEBUG_ADDR_OFFSET,
+                     MII_YT8512_LED0);
+
+      imxrt_writemii(priv, phyaddr, MII_YT8512_DEBUG_DATA, 0x331);
+
+      imxrt_writemii(priv, phyaddr, MII_YT8512_DEBUG_ADDR_OFFSET,
+                     MII_YT8512_LED1);
+
+      imxrt_readmii(priv, phyaddr, MII_YT8512_DEBUG_DATA, &phydata);
+
+      imxrt_writemii(priv, phyaddr, MII_YT8512_DEBUG_ADDR_OFFSET,
+                     MII_YT8512_LED1);
+
+      imxrt_writemii(priv, phyaddr, MII_YT8512_DEBUG_DATA, 0x30);
+
+      /* Set negotiation */
 
       imxrt_writemii(priv, phyaddr, MII_ADVERTISE,
                      MII_ADVERTISE_100BASETXFULL |

@@ -30,10 +30,18 @@ endif
 
 # Specify our C code within this directory to be included
 CHIP_CSRCS  = litex_allocateheap.c litex_clockconfig.c
+CHIP_CSRCS += litex_ctrl.c litex_systemreset.c
 CHIP_CSRCS += litex_irq.c litex_irq_dispatch.c
 CHIP_CSRCS += litex_lowputc.c litex_serial.c
-CHIP_CSRCS += litex_start.c litex_timerisr.c
+CHIP_CSRCS += litex_start.c
 CHIP_ASRCS += litex_cache.S
+
+
+ifeq ($(CONFIG_SCHED_TICKLESS),y)
+CHIP_CSRCS += litex_tickless.c
+else
+CHIP_CSRCS += litex_ticked.c
+endif
 
 ifeq ($(CONFIG_BUILD_KERNEL),y)
 CHIP_CSRCS += litex_mm_init.c litex_pgalloc.c

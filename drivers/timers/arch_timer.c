@@ -395,7 +395,13 @@ int weak_function up_timer_tick_start(clock_t ticks)
  *   units.
  ****************************************************************************/
 
-unsigned long weak_function up_perf_gettime(void)
+#ifndef CONFIG_ARCH_PERF_EVENTS
+void up_perf_init(FAR void *arg)
+{
+  UNUSED(arg);
+}
+
+unsigned long up_perf_gettime(void)
 {
   unsigned long ret = 0;
 
@@ -407,16 +413,17 @@ unsigned long weak_function up_perf_gettime(void)
   return ret;
 }
 
-unsigned long weak_function up_perf_getfreq(void)
+unsigned long up_perf_getfreq(void)
 {
   return USEC_PER_SEC;
 }
 
-void weak_function up_perf_convert(unsigned long elapsed,
-                                   FAR struct timespec *ts)
+void up_perf_convert(unsigned long elapsed,
+                     FAR struct timespec *ts)
 {
   timespec_from_usec(ts, elapsed);
 }
+#endif /* CONFIG_ARCH_PERF_EVENTS */
 
 /****************************************************************************
  * Name: up_mdelay

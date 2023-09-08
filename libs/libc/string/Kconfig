@@ -30,7 +30,7 @@ config LIBC_STRERROR_SHORT
 
 config LIBC_STRERROR_ERRNUM
 	bool "Print unknown error code in strerror()"
-	default !LIBC_STRERROR
+	default !LIBC_STRERROR && !DEFAULT_SMALL
 	---help---
 		If this option is selected, then strerror() will print error code
 		for unknown errors like "Unknown error 101". Default enabled when

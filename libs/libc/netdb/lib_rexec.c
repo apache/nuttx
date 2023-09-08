@@ -31,6 +31,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <nuttx/lib/lib.h>
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -162,7 +164,7 @@ int rexec_af(FAR char **ahost, int inport, FAR const char *user,
 conn_out:
   close(sock);
 sock_out:
-  free(*ahost);
+  lib_free(*ahost);
 addr_out:
   freeaddrinfo(res);
   return -1;

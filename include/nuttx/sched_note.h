@@ -120,19 +120,15 @@
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
-#  define SCHED_NOTE_LABEL__(x, y) x ## y
-#  define SCHED_NOTE_LABEL_(x, y) SCHED_NOTE_LABEL__(x, y)
-#  define SCHED_NOTE_LABEL \
-          SCHED_NOTE_LABEL_(sched_note_here, __LINE__)
 #  define SCHED_NOTE_IP \
-          ({SCHED_NOTE_LABEL: (uintptr_t)&&SCHED_NOTE_LABEL;})
+          ({ __label__ __here; __here: (unsigned long)&&__here; })
 #  define sched_note_string(tag, buf) \
           sched_note_string_ip(tag, SCHED_NOTE_IP, buf)
 #  define sched_note_dump(tag, event, buf, len) \
           sched_note_dump_ip(tag, SCHED_NOTE_IP, event, buf, len)
 #  define sched_note_vprintf(tag, fmt, va) \
           sched_note_vprintf_ip(tag, SCHED_NOTE_IP, fmt, va)
-#  define sched_note_vbprintf(event, fmt, va) \
+#  define sched_note_vbprintf(tag, event, fmt, va) \
           sched_note_vbprintf_ip(tag, SCHED_NOTE_IP, event, fmt, va)
 #  define sched_note_printf(tag, fmt, ...) \
           sched_note_printf_ip(tag, SCHED_NOTE_IP, fmt, ##__VA_ARGS__)
@@ -143,6 +139,11 @@
           sched_note_printf_ip(tag, SCHED_NOTE_IP, "B|%d|%s", gettid(), str)
 #  define sched_note_endex(tag, str) \
           sched_note_printf_ip(tag, SCHED_NOTE_IP, "E|%d|%s", gettid(), str)
+#  define sched_note_mark(tag, str) \
+          sched_note_printf_ip(tag, SCHED_NOTE_IP, "I|%d|%s", gettid(), str)
+#  define sched_note_counter(tag, name, value) \
+          sched_note_printf_ip(tag, SCHED_NOTE_IP, "C|%d|%s|%" PRId32, \
+                               gettid(), name, value)
 #  define sched_note_begin(tag) \
           sched_note_string_ip(tag, SCHED_NOTE_IP, "B")
 #  define sched_note_end(tag) \
@@ -413,6 +414,7 @@ struct note_syscall_leave_s
 struct note_irqhandler_s
 {
   struct note_common_s nih_cmn; /* Common note parameters */
+  uintptr_t nih_handler;        /* IRQ handler address */
   uint8_t nih_irq;              /* IRQ number */
 };
 #endif /* CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER */
@@ -700,14 +702,14 @@ void sched_note_filter_tag(FAR struct note_filter_tag_s *oldf,
 
 #else /* CONFIG_SCHED_INSTRUMENTATION */
 
-#  define sched_note_string(buf)
-#  define sched_note_dump(event, buf, len)
-#  define sched_note_vprintf(fmt, va)
-#  define sched_note_vbprintf(event, fmt, va)
-#  define sched_note_printf(fmt, ...)
-#  define sched_note_bprintf(event, fmt, ...)
-#  define sched_note_begin()
-#  define sched_note_end()
+#  define sched_note_string(tag, buf)
+#  define sched_note_dump(tag, event, buf, len)
+#  define sched_note_vprintf(tag, fmt, va)
+#  define sched_note_vbprintf(tag, event, fmt, va)
+#  define sched_note_printf(tag, fmt, ...)
+#  define sched_note_bprintf(tag, event, fmt, ...)
+#  define sched_note_begin(tag)
+#  define sched_note_end(tag)
 
 #  define sched_note_start(t)
 #  define sched_note_stop(t)

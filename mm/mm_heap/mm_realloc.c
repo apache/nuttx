@@ -81,6 +81,8 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
       return mm_malloc(heap, size);
     }
 
+  DEBUGASSERT(mm_heapmember(heap, oldmem));
+
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
   newmem = mempool_multiple_realloc(heap->mm_mpool, oldmem, size);
   if (newmem != NULL)
@@ -129,7 +131,6 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 
   DEBUGVERIFY(mm_lock(heap));
   DEBUGASSERT(oldnode->size & MM_ALLOC_BIT);
-  DEBUGASSERT(mm_heapmember(heap, oldmem));
 
   /* Check if this is a request to reduce the size of the allocation. */
 

@@ -56,6 +56,14 @@ config FS_PROCFS_EXCLUDE_ENVIRON
 		Causes the environment variable information to be excluded from the
 		procfs system.  This will reduce code space slightly.
 
+config FS_PROCFS_EXCLUDE_FDT
+	bool "Exclude flattened device tree blob"
+	depends on DEVICE_TREE
+	default DEFAULT_SMALL
+	---help---
+		Causes the flatted device tree information to be excluded from the
+		procfs system.  This will reduce code space slightly.
+
 config FS_PROCFS_EXCLUDE_IOBINFO
 	bool "Exclude iobinfo"
 	depends on MM_IOB
@@ -126,7 +134,7 @@ config FS_PROCFS_EXCLUDE_SMARTFS
 
 config FS_PROCFS_EXCLUDE_TCBINFO
 	bool "Exclude tcbinfo procfs"
-	depends on DEBUG_TCBINFO
+	depends on ARCH_HAVE_TCBINFO
 	default DEFAULT_SMALL
 
 config FS_PROCFS_EXCLUDE_UPTIME

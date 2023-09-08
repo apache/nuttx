@@ -82,7 +82,7 @@ static FAR const char * const g_priority_str[] =
 int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 {
   struct lib_syslograwstream_s stream;
-  int ret;
+  int ret = 0;
 #if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_SYSLOG_PROCESS_NAME)
   FAR struct tcb_s *tcb = nxsched_get_tcb(nxsched_gettid());
 #endif
@@ -93,9 +93,6 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
   char date_buf[CONFIG_SYSLOG_TIMESTAMP_BUFFER];
 #  endif
 #endif
-  struct va_format vaf;
-  vaf.fmt = fmt;
-  vaf.va  = ap;
 
   /* Wrap the low-level output in a stream object and let lib_vsprintf
    * do the work.
@@ -148,107 +145,115 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 #  endif
 #endif
 
-  ret = lib_sprintf(&stream.public,
+#if defined(CONFIG_SYSLOG_COLOR_OUTPUT) || defined(CONFIG_SYSLOG_TIMESTAMP) || \
+    defined(CONFIG_SMP) || defined(CONFIG_SYSLOG_PROCESSID) || \
+    defined(CONFIG_SYSLOG_PRIORITY) || defined(CONFIG_SYSLOG_PREFIX) || \
+    defined(CONFIG_SYSLOG_PROCESS_NAME)
+
+  ret = lib_sprintf_internal(&stream.public,
 #if defined(CONFIG_SYSLOG_COLOR_OUTPUT)
   /* Reset the terminal style. */
 
-                    "\e[0m"
+                             "\e[0m"
 #endif
 
 #ifdef CONFIG_SYSLOG_TIMESTAMP
 #  if defined(CONFIG_SYSLOG_TIMESTAMP_FORMATTED)
 #    if defined(CONFIG_SYSLOG_TIMESTAMP_FORMAT_MICROSECOND)
-                    "[%s.%06ld] "
+                             "[%s.%06ld] "
 #    else
-                    "[%s] "
+                             "[%s] "
 #    endif
 #  else
-                    "[%5jd.%06ld] "
+                             "[%5jd.%06ld] "
 #  endif
 #endif
 
 #if defined(CONFIG_SMP)
-                    "[CPU%d] "
+                             "[CPU%d] "
 #endif
 
 #if defined(CONFIG_SYSLOG_PROCESSID)
   /* Prepend the Thread ID */
 
-                    "[%2d] "
+                             "[%2d] "
 #endif
 
 #if defined(CONFIG_SYSLOG_COLOR_OUTPUT)
   /* Set the terminal style according to message priority. */
 
-                    "%s"
+                             "%s"
 #endif
 
 #if defined(CONFIG_SYSLOG_PRIORITY)
   /* Prepend the message priority. */
 
-                    "[%6s] "
+                             "[%6s] "
 #endif
 
 #if defined(CONFIG_SYSLOG_PREFIX)
   /* Prepend the prefix, if available */
 
-                    "[%s] "
+                             "[%s] "
 #endif
 #if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_SYSLOG_PROCESS_NAME)
   /* Prepend the thread name */
 
-                    "%s: "
+                             "%s: "
 #endif
-                    "%pV"
 #ifdef CONFIG_SYSLOG_TIMESTAMP
 #  if defined(CONFIG_SYSLOG_TIMESTAMP_FORMATTED)
 #    if defined(CONFIG_SYSLOG_TIMESTAMP_FORMAT_MICROSECOND)
-                    , date_buf, ts.tv_nsec / NSEC_PER_USEC
+                             , date_buf, ts.tv_nsec / NSEC_PER_USEC
 #    else
-                    , date_buf
+                             , date_buf
 #    endif
 #  else
-                    , (uintmax_t)ts.tv_sec, ts.tv_nsec / NSEC_PER_USEC
+                             , (uintmax_t)ts.tv_sec
+                             , ts.tv_nsec / NSEC_PER_USEC
 #  endif
 #endif
 
 #if defined(CONFIG_SMP)
-                    , up_cpu_index()
+                             , up_cpu_index()
 #endif
 
 #if defined(CONFIG_SYSLOG_PROCESSID)
   /* Prepend the Thread ID */
 
-                    , (int)nxsched_gettid()
+                             , nxsched_gettid()
 #endif
 
 #if defined(CONFIG_SYSLOG_COLOR_OUTPUT)
   /* Set the terminal style according to message priority. */
 
-                    , g_priority_color[priority]
+                             , g_priority_color[priority]
 #endif
 
 #if defined(CONFIG_SYSLOG_PRIORITY)
   /* Prepend the message priority. */
 
-                    , g_priority_str[priority]
+                             , g_priority_str[priority]
 #endif
 
 #if defined(CONFIG_SYSLOG_PREFIX)
   /* Prepend the prefix, if available */
 
-                    , CONFIG_SYSLOG_PREFIX_STRING
+                             , CONFIG_SYSLOG_PREFIX_STRING
 #endif
 
 #if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_SYSLOG_PROCESS_NAME)
   /* Prepend the thread name */
 
-                    , tcb != NULL ? tcb->name : "(null)"
+                             , tcb != NULL ? tcb->name : "(null)"
 #endif
+                    );
+
+#endif /* CONFIG_SYSLOG_COLOR_OUTPUT || CONFIG_SYSLOG_TIMESTAMP || ... */
 
   /* Generate the output */
 
-                    , &vaf);
+  ret += lib_vsprintf_internal(&stream.public, fmt, *ap);
 
   if (stream.last_ch != '\n')
     {

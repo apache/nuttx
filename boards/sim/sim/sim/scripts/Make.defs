@@ -68,6 +68,10 @@ ifeq ($(CONFIG_STACK_USAGE),y)
   ARCHOPTIMIZATION += -fstack-usage
 endif
 
+ifneq ($(CONFIG_STACK_USAGE_WARNING),0)
+  ARCHOPTIMIZATION += -Wstack-usage=$(CONFIG_STACK_USAGE_WARNING)
+endif
+
 ifeq ($(CONFIG_ARCH_COVERAGE_ALL),y)
   ARCHOPTIMIZATION += -fprofile-generate -ftest-coverage
 endif
@@ -105,8 +109,8 @@ ARCHCXXFLAGS += -fvisibility=hidden
 ARCHCFLAGS += -ffunction-sections -fdata-sections
 ARCHCXXFLAGS += -ffunction-sections -fdata-sections
 
-ARCHCFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wundef
-ARCHCXXFLAGS += -Wall -Wshadow -Wundef
+ARCHCFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wundef -Wno-attributes -Wno-unknown-pragmas
+ARCHCXXFLAGS += -Wall -Wshadow -Wundef -Wno-attributes -Wno-unknown-pragmas
 
 ifneq ($(CONFIG_CXX_STANDARD),)
   ARCHCXXFLAGS += -std=$(CONFIG_CXX_STANDARD)
@@ -162,7 +166,7 @@ STRIP = $(CROSSDEV)strip
 AR = $(TOPDIR)/tools/macar-rcs.sh
 else
 STRIP = $(CROSSDEV)strip --strip-unneeded
-AR = $(CROSSDEV)ar rcs
+AR = $(CROSSDEV)ar rcsP
 endif
 NM = $(CROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
@@ -263,4 +267,11 @@ ifeq ($(CONFIG_SIM_M32),y)
   LDFLAGS += -m32
   LDMODULEFLAGS += -melf_i386
   LDELFFLAGS += -melf_i386
+endif
+
+# Let the symbol table link from 0x400000
+# which is more convenient for debugging.
+
+ifeq ($(CONFIG_HOST_MACOS),n)
+  LDFLAGS += -Wl,-Ttext-segment=0x400000
 endif

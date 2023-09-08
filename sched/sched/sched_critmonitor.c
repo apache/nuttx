@@ -56,8 +56,8 @@
          if (pid > 0 && \
              elapsed > CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION) \
            { \
-             serr("PID %d hold sched lock too long %"PRIu32"\n", \
-                   pid, elapsed); \
+             CRITMONITOR_PANIC("PID %d hold sched lock too long %"PRIu32"\n", \
+                               pid, elapsed); \
            } \
        } \
      while (0)
@@ -72,8 +72,8 @@
          if (pid > 0 && \
              elapsed > CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION) \
            { \
-             serr("PID %d hold critical section too long %"PRIu32"\n", \
-                   pid, elapsed); \
+             CRITMONITOR_PANIC("PID %d hold critical section too long %" \
+                               PRIu32 "\n", pid, elapsed); \
            } \
        } \
      while (0)
@@ -88,8 +88,8 @@
          if (pid > 0 && \
              elapsed > CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD) \
            { \
-             serr("PID %d execute too long %"PRIu32"\n", \
-                   pid, elapsed); \
+             CRITMONITOR_PANIC("PID %d execute too long %"PRIu32"\n", \
+                               pid, elapsed); \
            } \
        } \
      while (0)
@@ -296,6 +296,11 @@ void nxsched_suspend_critmon(FAR struct tcb_s *tcb)
 {
   unsigned long current = up_perf_gettime();
   unsigned long elapsed = current - tcb->run_start;
+
+#ifdef CONFIG_SCHED_CPULOAD_CRITMONITOR
+  unsigned long tick = elapsed * CLOCKS_PER_SEC / up_perf_getfreq();
+  nxsched_process_taskload_ticks(tcb, tick);
+#endif
 
   tcb->run_time += elapsed;
   if (elapsed > tcb->run_max)

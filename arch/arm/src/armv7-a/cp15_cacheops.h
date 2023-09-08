@@ -1091,10 +1091,10 @@ void cp15_flush_dcache(uintptr_t start, uintptr_t end);
 void cp15_flush_dcache_all(void);
 
 /****************************************************************************
- * Name: cp15_cache_size
+ * Name: cp15_icache_size
  *
  * Description:
- *   Get cp15 cache size in byte
+ *   Get cp15 icache size in byte
  *
  * Input Parameters:
  *   None
@@ -1104,23 +1104,55 @@ void cp15_flush_dcache_all(void);
  *
  ****************************************************************************/
 
-uint32_t cp15_cache_size(void);
+uint32_t cp15_icache_size(void);
 
 /****************************************************************************
- * Name: cp15_cache_linesize
+ * Name: cp15_cache_size
  *
  * Description:
- *   Get cp15 cache linesize in byte
+ *   Get cp15 dcache size in byte
  *
  * Input Parameters:
  *   None
  *
  * Returned Value:
- *   Cache linesize in byte
+ *   Cache size in byte
  *
  ****************************************************************************/
 
-uint32_t cp15_cache_linesize(void);
+uint32_t cp15_dcache_size(void);
+
+/****************************************************************************
+ * Name: cp15_icache_linesize
+ *
+ * Description:
+ *   Get cp15 icache linesize in byte
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   ICache linesize in byte
+ *
+ ****************************************************************************/
+
+uint32_t cp15_icache_linesize(void);
+
+/****************************************************************************
+ * Name: cp15_dcache_linesize
+ *
+ * Description:
+ *   Get cp15 dcache linesize in byte
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   DCache linesize in byte
+ *
+ ****************************************************************************/
+
+uint32_t cp15_dcache_linesize(void);
 
 #undef EXTERN
 #ifdef __cplusplus

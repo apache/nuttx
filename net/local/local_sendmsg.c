@@ -105,7 +105,7 @@ static int local_sendctl(FAR struct local_conn_s *conn,
               goto fail;
             }
 
-          filep2 = (FAR struct file *)kmm_zalloc(sizeof(*filep2));
+          filep2 = kmm_zalloc(sizeof(*filep2));
           if (!filep2)
             {
               ret = -ENOMEM;
@@ -170,12 +170,16 @@ static ssize_t local_send(FAR struct socket *psock,
     {
 #ifdef CONFIG_NET_LOCAL_STREAM
       case SOCK_STREAM:
+#endif /* CONFIG_NET_LOCAL_STREAM */
+#ifdef CONFIG_NET_LOCAL_DGRAM
+      case SOCK_DGRAM:
+#endif /* CONFIG_NET_LOCAL_DGRAM */
         {
           FAR struct local_conn_s *peer;
 
           /* Local TCP packet send */
 
-          DEBUGASSERT(psock && psock->s_conn && buf);
+          DEBUGASSERT(buf);
           peer = psock->s_conn;
 
           /* Verify that this is a connected peer socket and that it has
@@ -204,24 +208,11 @@ static ssize_t local_send(FAR struct socket *psock,
               return ret;
             }
 
-          ret = local_send_packet(&peer->lc_outfile, buf, len, false);
+          ret = local_send_packet(&peer->lc_outfile, buf, len,
+                                  psock->s_type == SOCK_DGRAM);
           nxmutex_unlock(&peer->lc_sendlock);
         }
         break;
-#endif /* CONFIG_NET_LOCAL_STREAM */
-
-#ifdef CONFIG_NET_LOCAL_DGRAM
-      case SOCK_DGRAM:
-        {
-          /* Local UDP packet send */
-
-          /* #warning Missing logic */
-
-          ret = -ENOSYS;
-        }
-        break;
-#endif /* CONFIG_NET_LOCAL_DGRAM */
-
       default:
         {
           /* EDESTADDRREQ.  Signifies that the socket is not connection-mode

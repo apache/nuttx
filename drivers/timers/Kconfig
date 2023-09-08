@@ -314,6 +314,10 @@ config PCF85263_I2C_FREQUENCY
 
 endif # RTC_PCF85263
 
+config RTC_PL031
+	bool "PL031 RTC Support"
+	default n
+
 config RTC_MCP794XX
 	bool "MCP794XX RTC Driver"
 	default n
@@ -391,6 +395,13 @@ config WATCHDOG_MAGIC_V
 	default y
 	---help---
 		The watchdog can be stopped by writing 'V' to the watchdog's device node
+
+config WATCHDOG_PANIC_NOTIFIER
+	bool "Enable watchdog panic notifier"
+	default n
+	---help---
+		When system PANIC, wdog_notifier() will be callled to disable the watchdog,
+		this is an useful option for debug if you want to keep crash scene.
 
 menuconfig WATCHDOG_AUTOMONITOR
 	bool "Auto-monitor"

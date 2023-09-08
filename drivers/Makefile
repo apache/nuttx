@@ -32,6 +32,7 @@ include bch/Make.defs
 include can/Make.defs
 include clk/Make.defs
 include crypto/Make.defs
+include devicetree/Make.defs
 include dma/Make.defs
 include math/Make.defs
 include motor/Make.defs
@@ -72,6 +73,7 @@ include rf/Make.defs
 include rc/Make.defs
 include segger/Make.defs
 include usrsock/Make.defs
+include reset/Make.defs
 
 ifeq ($(CONFIG_SPECIFIC_DRIVERS),y)
 -include platform/Make.defs

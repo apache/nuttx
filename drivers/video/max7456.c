@@ -1603,7 +1603,7 @@ int max7456_register(FAR const char *path, FAR struct mx7_config_s *config)
 
   /* Initialize the device structure. */
 
-  dev = (FAR struct mx7_dev_s *)kmm_malloc(sizeof(struct mx7_dev_s));
+  dev = kmm_malloc(sizeof(struct mx7_dev_s));
   if (dev == NULL)
     {
       return -ENOMEM;

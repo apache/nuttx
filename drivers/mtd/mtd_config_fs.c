@@ -1412,7 +1412,7 @@ static ssize_t nvs_read_entry(FAR struct nvs_fs *fs, FAR const uint8_t *key,
     }
   while (true);
 
-  if (data)
+  if (data && len)
     {
       rd_addr &= ADDR_BLOCK_MASK;
       rd_addr += wlk_ate.offset + wlk_ate.key_len;
@@ -1594,7 +1594,7 @@ static ssize_t nvs_write(FAR struct nvs_fs *fs,
 
       if (pdata->len == 0)
         {
-          return 0;
+          return -ENOENT;
         }
     }
 
@@ -1750,7 +1750,7 @@ static ssize_t nvs_read(FAR struct nvs_fs *fs,
   uint8_t key[sizeof(pdata->id) + sizeof(pdata->instance)];
 #endif
 
-  if (pdata == NULL || pdata->len == 0 || pdata->configdata == NULL)
+  if (pdata == NULL)
     {
       return -EINVAL;
     }
@@ -1916,7 +1916,7 @@ static int mtdconfig_ioctl(FAR struct file *filep, int cmd,
                            unsigned long arg)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR struct nvs_fs *fs = (FAR struct nvs_fs *)inode->i_private;
+  FAR struct nvs_fs *fs = inode->i_private;
   FAR struct config_data_s *pdata = (FAR struct config_data_s *)arg;
   int ret = -ENOTTY;
 
@@ -2000,19 +2000,20 @@ static int mtdconfig_poll(FAR struct file *filep, FAR struct pollfd *fds,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mtdconfig_register
+ * Name: mtdconfig_register_by_path
  *
  * Description:
- *   Register a /dev/config device backed by an fail-safe NVS.
+ *   Register a "path" device backed by an fail-safe NVS.
  *
  ****************************************************************************/
 
-int mtdconfig_register(FAR struct mtd_dev_s *mtd)
+int mtdconfig_register_by_path(FAR struct mtd_dev_s *mtd,
+                               FAR const char *path)
 {
   int ret;
   FAR struct nvs_fs *fs;
 
-  fs = (FAR struct nvs_fs *)kmm_malloc(sizeof(struct nvs_fs));
+  fs = kmm_malloc(sizeof(struct nvs_fs));
   if (fs == NULL)
     {
       return -ENOMEM;
@@ -2035,7 +2036,7 @@ int mtdconfig_register(FAR struct mtd_dev_s *mtd)
       goto mutex_err;
     }
 
-  ret = register_driver("/dev/config", &g_mtdnvs_fops, 0666, fs);
+  ret = register_driver(path, &g_mtdnvs_fops, 0666, fs);
   if (ret < 0)
     {
       ferr("ERROR: register mtd config failed: %d\n", ret);
@@ -2053,6 +2054,51 @@ errout:
 }
 
 /****************************************************************************
+ * Name: mtdconfig_register
+ *
+ * Description:
+ *   Register a /dev/config device backed by an fail-safe NVS.
+ *
+ ****************************************************************************/
+
+int mtdconfig_register(FAR struct mtd_dev_s *mtd)
+{
+  return mtdconfig_register_by_path(mtd, "/dev/config");
+}
+
+/****************************************************************************
+ * Name: mtdconfig_unregister_by_path
+ *
+ * Description:
+ *   Unregister a MTD device backed by an fail-safe NVS.
+ *
+ ****************************************************************************/
+
+int mtdconfig_unregister_by_path(FAR const char *path)
+{
+  int ret;
+  struct file file;
+  FAR struct inode *inode;
+  FAR struct nvs_fs *fs;
+
+  ret = file_open(&file, path, 0);
+  if (ret < 0)
+    {
+      ferr("ERROR: open file %s err: %d\n", path, ret);
+      return ret;
+    }
+
+  inode = file.f_inode;
+  fs = inode->i_private;
+  nxmutex_destroy(&fs->nvs_lock);
+  kmm_free(fs);
+  file_close(&file);
+  unregister_driver(path);
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: mtdconfig_unregister
  *
  * Description:
@@ -2062,25 +2108,5 @@ errout:
 
 int mtdconfig_unregister(void)
 {
-  int ret;
-  struct file file;
-  FAR struct inode *inode;
-  FAR struct nvs_fs *fs;
-
-  ret = file_open(&file, "/dev/config", 0);
-  if (ret < 0)
-    {
-      ferr("ERROR: open /dev/config failed: %d\n", ret);
-      return ret;
-    }
-
-  inode = file.f_inode;
-  fs = (FAR struct nvs_fs *)inode->i_private;
-  nxmutex_destroy(&fs->nvs_lock);
-  kmm_free(fs);
-  file_close(&file);
-  unregister_driver("/dev/config");
-
-  return OK;
+  return mtdconfig_unregister_by_path("/dev/config");
 }
-

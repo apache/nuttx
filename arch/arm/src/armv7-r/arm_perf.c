@@ -28,11 +28,13 @@
 #include "arm_internal.h"
 #include "sctlr.h"
 
+#ifdef CONFIG_ARCH_PERF_EVENTS
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static unsigned long g_cpu_freq;
+static unsigned long g_cpu_freq = ULONG_MAX;
 
 /****************************************************************************
  * Public Functions
@@ -85,3 +87,4 @@ void up_perf_convert(unsigned long elapsed, struct timespec *ts)
   left        = elapsed - ts->tv_sec * g_cpu_freq;
   ts->tv_nsec = NSEC_PER_SEC * (uint64_t)left / g_cpu_freq;
 }
+#endif

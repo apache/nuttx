@@ -70,10 +70,11 @@ int nxsem_trywait(FAR sem_t *sem)
   irqstate_t flags;
   int ret;
 
-  /* This API should not be called from interrupt handlers & idleloop */
+  /* This API should not be called from the idleloop */
 
-  DEBUGASSERT(sem != NULL && up_interrupt_context() == false);
-  DEBUGASSERT(!OSINIT_IDLELOOP() || !sched_idletask());
+  DEBUGASSERT(sem != NULL);
+  DEBUGASSERT(!OSINIT_IDLELOOP() || !sched_idletask() ||
+              up_interrupt_context());
 
   /* The following operations must be performed with interrupts disabled
    * because sem_post() may be called from an interrupt handler.

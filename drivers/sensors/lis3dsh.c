@@ -522,7 +522,7 @@ int lis3dsh_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
   /* Initialize the LIS3DSH device structure */
 
   priv =
-      (FAR struct lis3dsh_dev_s *)kmm_malloc(sizeof(struct lis3dsh_dev_s));
+      kmm_malloc(sizeof(struct lis3dsh_dev_s));
   if (priv == NULL)
     {
       snerr("ERROR: Failed to allocate instance\n");

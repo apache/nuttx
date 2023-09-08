@@ -912,7 +912,7 @@ int bmp280press_register(const char *devpath, int minor,
   char path[12];
   int ret;
 
-  priv = (struct bmp280_dev_s *)kmm_malloc(sizeof(struct bmp280_dev_s));
+  priv = kmm_malloc(sizeof(struct bmp280_dev_s));
   if (!priv)
     {
       snerr("Failed to allocate instance\n");
@@ -963,7 +963,7 @@ int bmp280temp_register(const char *devpath, int minor,
   char path[12];
   int ret;
 
-  priv = (struct bmp280_dev_s *)kmm_malloc(sizeof(struct bmp280_dev_s));
+  priv = kmm_malloc(sizeof(struct bmp280_dev_s));
   if (!priv)
     {
       snerr("Failed to allocate instance\n");

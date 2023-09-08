@@ -27,6 +27,7 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/mmcsd.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/rptun/openamp.h>
 
@@ -199,7 +200,7 @@ static int rpmsgblk_read_handler(FAR struct rpmsg_endpoint *ept,
         }
 
       ret = server->bops->read(server->blknode, (unsigned char *)rsp->buf,
-                               msg->startsector, msg->nsectors);
+                               msg->startsector, nsectors);
       rsp->header.result = ret;
       rpmsg_send_nocopy(ept, rsp, (ret < 0 ? 0 : ret * msg->sectorsize) +
                         sizeof(*rsp) - 1);
@@ -277,6 +278,46 @@ static int rpmsgblk_ioctl_handler(FAR struct rpmsg_endpoint *ept,
   FAR struct rpmsgblk_server_s *server = ept->priv;
   FAR struct rpmsgblk_ioctl_s *msg = data;
 
+  switch (msg->request)
+    {
+      case MMC_IOC_CMD:
+        {
+          FAR struct mmc_ioc_cmd *ioc =
+            (FAR struct mmc_ioc_cmd *)(uintptr_t)msg->buf;
+
+          if (ioc->data_ptr)
+            {
+              ioc->data_ptr = (uint64_t)(uintptr_t)
+                              ((FAR uint8_t *)ioc + sizeof(*ioc));
+            }
+        }
+        break;
+
+      case MMC_IOC_MULTI_CMD:
+        {
+          FAR struct mmc_ioc_multi_cmd *mioc =
+            (FAR struct mmc_ioc_multi_cmd *)(uintptr_t)msg->buf;
+          uint64_t num = mioc->num_of_cmds;
+          size_t off   = sizeof(struct mmc_ioc_multi_cmd) +
+                         num * sizeof(struct mmc_ioc_cmd);
+          uint64_t i;
+
+          for (i = 0; i < num; i++)
+            {
+              if (mioc->cmds[i].data_ptr)
+                {
+                  mioc->cmds[i].data_ptr = (uint64_t)(uintptr_t)
+                                           ((FAR uint8_t *)mioc + off);
+                  off += mioc->cmds[i].blksz * mioc->cmds[i].blocks;
+                }
+            }
+        }
+        break;
+
+      default:
+        break;
+    }
+
   msg->header.result = server->bops->ioctl(server->blknode, msg->request,
                                            msg->arglen > 0 ?
                                            (unsigned long)msg->buf :
@@ -293,10 +334,14 @@ static int rpmsgblk_unlink_handler(FAR struct rpmsg_endpoint *ept,
                                    FAR void *data, size_t len,
                                    uint32_t src, FAR void *priv)
 {
-  FAR struct rpmsgblk_server_s *server = ept->priv;
   FAR struct rpmsgblk_unlink_s *msg = data;
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  FAR struct rpmsgblk_server_s *server = ept->priv;
 
   msg->header.result = server->bops->unlink(server->blknode);
+#else
+  msg->header.result = -ENXIO;
+#endif
 
   return rpmsg_send(ept, msg, len);
 }

@@ -12,7 +12,7 @@ be run on the embedded board.
 Initialize Configuration
 ========================
 
-The first step is to initialize NuttX configuration for a given board, based from
+The first step is to initialize NuttX configuration for a given board, based on
 a pre-existing configuration. To list all supported configurations you can do:
 
     .. code-block:: console

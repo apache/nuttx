@@ -18,10 +18,10 @@
 #
 ############################################################################
 
-# Include CORDIC support
+# Include math acceleration support
 
-ifeq ($(CONFIG_MATH_CORDIC),y)
-CSRCS += cordic.c
+ifneq ($(CONFIG_MATH_CORDIC)$(CONFIG_MATH_FFT),)
+CSRCS += math.c
 endif
 
 # Include build support

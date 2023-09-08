@@ -1458,7 +1458,7 @@ static int wm8994_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
   return ret;
 }
 
-/** Name: wm8994_cancelbuffer
+/* Name: wm8994_cancelbuffer
  *
  * Description: Called when an enqueued buffer is being cancelled.
  *
@@ -2782,7 +2782,7 @@ FAR struct audio_lowerhalf_s *
 
   /* Allocate a WM8994 device structure */
 
-  priv = (FAR struct wm8994_dev_s *)kmm_zalloc(sizeof(struct wm8994_dev_s));
+  priv = kmm_zalloc(sizeof(struct wm8994_dev_s));
   if (priv)
     {
       /* Initialize the WM8994 device structure.  Since we used kmm_zalloc,

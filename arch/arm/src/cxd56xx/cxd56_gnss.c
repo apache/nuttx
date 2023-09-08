@@ -907,7 +907,7 @@ static int cxd56_gnss_save_backup_data(struct file *filep,
   int         n = 0;
   int32_t     offset = 0;
 
-  buf = (char *)kmm_malloc(CONFIG_CXD56_GNSS_BACKUP_BUFFER_SIZE);
+  buf = kmm_malloc(CONFIG_CXD56_GNSS_BACKUP_BUFFER_SIZE);
   if (buf == NULL)
     {
       return -ENOMEM;
@@ -1031,7 +1031,7 @@ static int cxd56_gnss_check_cep_data(struct file *filep, unsigned long arg)
   struct cxd56_gnss_dev_s *priv;
 
   inode = filep->f_inode;
-  priv  = (struct cxd56_gnss_dev_s *)inode->i_private;
+  priv  = inode->i_private;
 
   /* Set a flag for checking CEP data  */
 
@@ -1054,7 +1054,7 @@ static int cxd56_gnss_check_cep_data(struct file *filep, unsigned long arg)
 
   if (g_ceplen > 0)
     {
-      g_cepdata = (char *)kmm_malloc(g_ceplen);
+      g_cepdata = kmm_malloc(g_ceplen);
     }
 
   if (!g_cepdata)
@@ -1569,7 +1569,7 @@ static int cxd56_gnss_set_signal(struct file *filep, unsigned long arg)
     }
 
   inode = filep->f_inode;
-  priv  = (struct cxd56_gnss_dev_s *)inode->i_private;
+  priv  = inode->i_private;
 
   ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
@@ -2267,7 +2267,7 @@ cxd56_gnss_read_cep_file(struct file *fp, int32_t offset,
       goto err0;
     }
 
-  buf = (char *)kmm_malloc(len);
+  buf = kmm_malloc(len);
   if (buf == NULL)
     {
       ret = -ENOMEM;
@@ -2326,7 +2326,7 @@ static void cxd56_gnss_read_backup_file(int *retval)
   size_t      n;
   int         ret = 0;
 
-  buf = (char *)kmm_malloc(CONFIG_CXD56_GNSS_BACKUP_BUFFER_SIZE);
+  buf = kmm_malloc(CONFIG_CXD56_GNSS_BACKUP_BUFFER_SIZE);
   if (buf == NULL)
     {
       ret = -ENOMEM;
@@ -2570,7 +2570,7 @@ static int cxd56_gnss_cpufifo_api(struct file *filep, unsigned int api,
   int                      ret = OK;
 
   inode = filep->f_inode;
-  priv  = (struct cxd56_gnss_dev_s *)inode->i_private;
+  priv  = inode->i_private;
 
   type = CXD56_GNSS_CPUFIFOAPI_SET_DATA(api, data);
   cxd56_cpu1sigsend(CXD56_CPU1_DATA_TYPE_CPUFIFOAPI, type);
@@ -2711,7 +2711,7 @@ static int cxd56_gnss_open(struct file *filep)
   int                      retry = 50;
 
   inode = filep->f_inode;
-  priv  = (struct cxd56_gnss_dev_s *)inode->i_private;
+  priv  = inode->i_private;
 
   while (!g_rtc_enabled && 0 < retry--)
     {
@@ -2812,7 +2812,7 @@ static int cxd56_gnss_close(struct file *filep)
   int                     ret = OK;
 
   inode = filep->f_inode;
-  priv  = (struct cxd56_gnss_dev_s *)inode->i_private;
+  priv  = inode->i_private;
 
   ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
@@ -2954,7 +2954,7 @@ static int cxd56_gnss_ioctl(struct file *filep, int cmd,
   int ret;
 
   inode = filep->f_inode;
-  priv  = (struct cxd56_gnss_dev_s *)inode->i_private;
+  priv  = inode->i_private;
 
   if (cmd <= CXD56_GNSS_IOCTL_INVAL || cmd >= CXD56_GNSS_IOCTL_MAX)
     {
@@ -2998,7 +2998,7 @@ static int cxd56_gnss_poll(struct file *filep, struct pollfd *fds,
   int                      i;
 
   inode = filep->f_inode;
-  priv  = (struct cxd56_gnss_dev_s *)inode->i_private;
+  priv  = inode->i_private;
 
   ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
@@ -3131,8 +3131,7 @@ static int cxd56_gnss_register(const char *devpath)
     }
   };
 
-  priv = (struct cxd56_gnss_dev_s *)kmm_zalloc(
-    sizeof(struct cxd56_gnss_dev_s));
+  priv = kmm_zalloc(sizeof(struct cxd56_gnss_dev_s));
   if (!priv)
     {
       gnsserr("Failed to allocate instance\n");

@@ -59,25 +59,6 @@
 
 #define EP_DISABLE(ep)             (ep)->ops->disable(ep)
 
-/* Allocate/free I/O requests.
- * Should not be called from interrupt processing!
- */
-
-#define EP_ALLOCREQ(ep)            (ep)->ops->allocreq(ep)
-#define EP_FREEREQ(ep,req)         (ep)->ops->freereq(ep,req)
-
-/* Allocate/free an I/O buffer.
- * Should not be called from interrupt processing!
- */
-
-#ifdef CONFIG_USBDEV_DMA
-#  define EP_ALLOCBUFFER(ep,nb)    (ep)->ops->allocbuffer(ep,nb)
-#  define EP_FREEBUFFER(ep,buf)    (ep)->ops->freebuffer(ep,buf)
-#else
-#  define EP_ALLOCBUFFER(ep,nb)    kmm_malloc(nb)
-#  define EP_FREEBUFFER(ep,buf)    kmm_free(buf)
-#endif
-
 /* Submit an I/O request to the endpoint */
 
 #define EP_SUBMIT(ep,req)          (ep)->ops->submit(ep,req)
@@ -187,6 +168,28 @@
 
 /* USB Controller Structures ************************************************/
 
+struct usbdev_strdesc_s
+{
+  uint8_t         id;
+  FAR const char *string;
+};
+
+struct usbdev_strdescs_s
+{
+  uint16_t                            language;
+  FAR const struct usbdev_strdesc_s  *strdesc;
+};
+
+struct usbdev_devdescs_s
+{
+  FAR const struct usb_cfgdesc_s     *cfgdesc;
+  FAR const struct usbdev_strdescs_s *strdescs;
+  FAR const struct usb_devdesc_s     *devdesc;
+#ifdef CONFIG_USBDEV_DUALSPEED
+  FAR const struct usb_qualdesc_s    *qualdesc;
+#endif
+};
+
 /* usbdev_devinfo_s - describes the low level bindings of an usb device */
 
 struct usbdev_devinfo_s
@@ -201,7 +204,7 @@ struct usbdev_devinfo_s
   int epno[5];     /* Array holding the endpoint configuration for this device */
 };
 
-#ifdef CONFIG_USBDEV_COMPOSITE
+struct usbdevclass_driver_s;
 struct composite_devdesc_s
 {
 #ifdef CONFIG_USBDEV_DUALSPEED
@@ -232,7 +235,6 @@ struct composite_devdesc_s
 
   struct usbdev_devinfo_s devinfo;
 };
-#endif
 
 /* struct usbdev_req_s - describes one i/o request */
 
@@ -334,7 +336,6 @@ struct usbdev_s
 
 /* USB Device Class Implementations *****************************************/
 
-struct usbdevclass_driver_s;
 struct usbdevclass_driverops_s
 {
   CODE int  (*bind)(FAR struct usbdevclass_driver_s *driver,
@@ -374,6 +375,28 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: usbdev_allocreq
+ *
+ * Description:
+ *   Allocate a request instance along with its buffer
+ *
+ ****************************************************************************/
+
+FAR struct usbdev_req_s *usbdev_allocreq(FAR struct usbdev_ep_s *ep,
+                                         uint16_t len);
+
+/****************************************************************************
+ * Name: usbdev_freereq
+ *
+ * Description:
+ *   Free a request instance along with its buffer
+ *
+ ****************************************************************************/
+
+void usbdev_freereq(FAR struct usbdev_ep_s *ep,
+                    FAR struct usbdev_req_s *req);
 
 /****************************************************************************
  * Name: usbdevclass_register

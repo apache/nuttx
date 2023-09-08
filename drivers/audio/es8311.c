@@ -145,7 +145,7 @@ static int  es8311_release(FAR struct audio_lowerhalf_s *dev);
 static void *es8311_workerthread(pthread_addr_t pvarg);
 static void es8311_audio_output(FAR struct es8311_dev_s *priv);
 static void es8311_audio_input(FAR struct es8311_dev_s *priv);
-static int  es8311_reset(FAR struct es8311_dev_s *priv);
+static void es8311_reset(FAR struct es8311_dev_s *priv);
 static int  es8311_get_mclk_src(void);
 
 /****************************************************************************
@@ -819,21 +819,17 @@ static int es8311_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
         caps->ac_channels = 1;       /* Mono output */
 
-        switch (caps->ac_subtype)
+        if (caps->ac_subtype == AUDIO_TYPE_QUERY)
           {
-            case AUDIO_TYPE_QUERY:
-
               /* The types of audio units we implement */
 
               caps->ac_controls.b[0] = AUDIO_TYPE_INPUT |
                                        AUDIO_TYPE_OUTPUT |
                                        AUDIO_TYPE_FEATURE;
               break;
-
-            default:
-              caps->ac_controls.b[0] = AUDIO_SUBFMT_END;
-              break;
           }
+
+        caps->ac_controls.b[0] = AUDIO_SUBFMT_END;
 
         break;
 
@@ -843,10 +839,8 @@ static int es8311_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
         caps->ac_channels = 1;
 
-        switch (caps->ac_subtype)
+        if (caps->ac_subtype == AUDIO_TYPE_QUERY)
           {
-            case AUDIO_TYPE_QUERY:
-
               /* Report the Sample rates we support */
 
               /* 8kHz is hardware dependent */
@@ -857,10 +851,7 @@ static int es8311_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
                 AUDIO_SAMP_RATE_44K | AUDIO_SAMP_RATE_48K;
               caps->ac_controls.b[1] = 0;
               break;
-
-            default:
-              break;
-          }
+         }
 
         break;
 
@@ -868,10 +859,8 @@ static int es8311_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
         caps->ac_channels = 1;
 
-        switch (caps->ac_subtype)
+        if (caps->ac_subtype == AUDIO_TYPE_QUERY)
           {
-            case AUDIO_TYPE_QUERY:
-
               /* Report supported input sample rates */
 
               caps->ac_controls.b[0] =
@@ -880,10 +869,8 @@ static int es8311_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
                 AUDIO_SAMP_RATE_44K | AUDIO_SAMP_RATE_48K;
               caps->ac_controls.b[1] = 0;
               break;
+         }
 
-            default:
-              break;
-          }
         break;
 
       /* Provide capabilities of our FEATURE units */
@@ -978,11 +965,10 @@ static int es8311_configure(FAR struct audio_lowerhalf_s *dev,
             if (volume >= 0 && volume <= 1000)
               {
                 es8311_setvolume(priv, priv->audio_mode, volume);
+                break;
               }
-            else
-              {
-                ret = -EDOM;
-              }
+
+            ret = -EDOM;
           }
           break;
 #endif /* CONFIG_AUDIO_EXCLUDE_VOLUME */
@@ -1053,11 +1039,9 @@ static int es8311_configure(FAR struct audio_lowerhalf_s *dev,
         priv->bpsamp    = caps->ac_controls.b[2];
 
         es8311_audio_output(priv);
-        ret |= es8311_reset(priv);
+        es8311_reset(priv);
         es8311_setsamplerate(priv);
         es8311_setbitspersample(priv);
-
-        ret = OK;
       }
       break;
 
@@ -1099,8 +1083,6 @@ static int es8311_configure(FAR struct audio_lowerhalf_s *dev,
         es8311_reset(priv);
         es8311_setsamplerate(priv);
         es8311_setbitspersample(priv);
-
-        ret = OK;
       }
       break;
 
@@ -2143,12 +2125,14 @@ static void *es8311_workerthread(pthread_addr_t pvarg)
  *   priv - A reference to the driver state structure.
  *
  * Returned Value:
- *   OK on success; a negated errno value on failure.
+ *  None
  *
  ****************************************************************************/
 
-static int es8311_reset(FAR struct es8311_dev_s *priv)
+static void es8311_reset(FAR struct es8311_dev_s *priv)
 {
+  uint8_t regconfig;
+
   /* Put audio back to its initial configuration */
 
   audinfo("ES8311 reset triggered.\n");
@@ -2159,71 +2143,55 @@ static int es8311_reset(FAR struct es8311_dev_s *priv)
    * default state.
    */
 
-  uint8_t regconfig;
-  int ret = 0;
+  es8311_writereg(priv, ES8311_CLK_MANAGER_REG01, 0x30);
+  es8311_writereg(priv, ES8311_CLK_MANAGER_REG02, 0x00);
+  es8311_writereg(priv, ES8311_CLK_MANAGER_REG03, 0x10);
+  es8311_writereg(priv, ES8311_ADC_REG16,         0x24);
+  es8311_writereg(priv, ES8311_CLK_MANAGER_REG04, 0x10);
+  es8311_writereg(priv, ES8311_CLK_MANAGER_REG05, 0x00);
+  es8311_writereg(priv, ES8311_SYSTEM_REG0B,      0x00);
+  es8311_writereg(priv, ES8311_SYSTEM_REG0C,      0x00);
+  es8311_writereg(priv, ES8311_SYSTEM_REG10,      0x1f);
+  es8311_writereg(priv, ES8311_SYSTEM_REG11,      0x7f);
+  es8311_writereg(priv, ES8311_RESET_REG00,       0x80);
 
-  ret |= es8311_writereg(priv, ES8311_CLK_MANAGER_REG01, 0x30);
-  ret |= es8311_writereg(priv, ES8311_CLK_MANAGER_REG02, 0x00);
-  ret |= es8311_writereg(priv, ES8311_CLK_MANAGER_REG03, 0x10);
-  ret |= es8311_writereg(priv, ES8311_ADC_REG16,         0x24);
-  ret |= es8311_writereg(priv, ES8311_CLK_MANAGER_REG04, 0x10);
-  ret |= es8311_writereg(priv, ES8311_CLK_MANAGER_REG05, 0x00);
-  ret |= es8311_writereg(priv, ES8311_SYSTEM_REG0B,      0x00);
-  ret |= es8311_writereg(priv, ES8311_SYSTEM_REG0C,      0x00);
-  ret |= es8311_writereg(priv, ES8311_SYSTEM_REG10,      0x1f);
-  ret |= es8311_writereg(priv, ES8311_SYSTEM_REG11,      0x7f);
-  ret |= es8311_writereg(priv, ES8311_RESET_REG00,       0x80);
-
+  audinfo("ES8311 in Slave mode.\n");
   regconfig = es8311_readreg(priv, ES8311_RESET_REG00);
   regconfig &= 0xbf;
-  ret |= es8311_writereg(priv, ES8311_RESET_REG00, regconfig);
-  ret |= es8311_writereg(priv, ES8311_CLK_MANAGER_REG01, 0x3f);
+  es8311_writereg(priv, ES8311_RESET_REG00, regconfig);
+  es8311_writereg(priv, ES8311_CLK_MANAGER_REG01, 0x3f);
 
   if (es8311_get_mclk_src() == ES8311_MCLK_FROM_MCLK_PIN)
     {
       regconfig = es8311_readreg(priv, ES8311_CLK_MANAGER_REG01);
       regconfig &= 0x7f;
-      ret |= es8311_writereg(priv, ES8311_CLK_MANAGER_REG01, regconfig);
+      es8311_writereg(priv, ES8311_CLK_MANAGER_REG01, regconfig);
     }
   else
     {
       regconfig = es8311_readreg(priv, ES8311_CLK_MANAGER_REG01);
       regconfig |= 0x80;
-      ret |= es8311_writereg(priv, ES8311_CLK_MANAGER_REG01, regconfig);
+      es8311_writereg(priv, ES8311_CLK_MANAGER_REG01, regconfig);
     }
 
-  ret |= es8311_setsamplerate(priv);
-  ret |= es8311_setbitspersample(priv);
+  es8311_setsamplerate(priv);
+  es8311_setbitspersample(priv);
 
   regconfig = es8311_readreg(priv, ES8311_CLK_MANAGER_REG01);
   regconfig &= ~(0x40);
-  ret |= es8311_writereg(priv, ES8311_CLK_MANAGER_REG01, regconfig);
+  es8311_writereg(priv, ES8311_CLK_MANAGER_REG01, regconfig);
 
   regconfig = es8311_readreg(priv, ES8311_CLK_MANAGER_REG06);
   regconfig &= ~(0x20);
-  ret |= es8311_writereg(priv, ES8311_CLK_MANAGER_REG06, regconfig);
-
-  ret |= es8311_writereg(priv, ES8311_SYSTEM_REG13, 0x10);
-  ret |= es8311_writereg(priv, ES8311_ADC_REG1B, 0x0a);
-  ret |= es8311_writereg(priv, ES8311_ADC_REG1C, 0x6a);
-
-  ret |= es8311_setvolume(priv, ES_MODULE_ADC,
-                          CONFIG_ES8311_INPUT_INITVOLUME);
-  ret |= es8311_setvolume(priv, ES_MODULE_DAC,
-                          CONFIG_ES8311_OUTPUT_INITVOLUME);
+  es8311_writereg(priv, ES8311_CLK_MANAGER_REG06, regconfig);
+  es8311_writereg(priv, ES8311_SYSTEM_REG13, 0x10);
+  es8311_writereg(priv, ES8311_ADC_REG1B, 0x0a);
+  es8311_writereg(priv, ES8311_ADC_REG1C, 0x6a);
+  es8311_setvolume(priv, ES_MODULE_ADC, CONFIG_ES8311_INPUT_INITVOLUME);
+  es8311_setvolume(priv, ES_MODULE_DAC, CONFIG_ES8311_OUTPUT_INITVOLUME);
 
   es8311_dump_registers(&priv->dev, "After reset");
-
-  if (ret < 0)
-    {
-      auderr("Failed to reset the ES8311.\n");
-      return -EIO;
-    }
-  else
-    {
-      audinfo("ES8311 reset complete.\n");
-      return OK;
-    }
+  audinfo("ES8311 reset complete.\n");
 }
 
 /****************************************************************************
@@ -2262,7 +2230,7 @@ FAR struct audio_lowerhalf_s *
 
   /* Allocate a ES8311 device structure */
 
-  priv = (FAR struct es8311_dev_s *)kmm_zalloc(sizeof(struct es8311_dev_s));
+  priv = kmm_zalloc(sizeof(struct es8311_dev_s));
 
   if (priv)
     {

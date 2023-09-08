@@ -60,9 +60,9 @@
 #define NRF52_TWIM_RXDAMOUNT_OFFSET         0x053c /* Number of bytes transferred in the last RXD transaction */
 #define NRF52_TWIM_RXDLIST_OFFSET           0x0540 /* RX EasyDMA list type */
 #define NRF52_TWIM_TXDPTR_OFFSET            0x0544 /* TXD Data pointer */
-#define NRF52_TWIM_TXMAXCNT_OFFSET          0x0548 /* Maximum number of bytes in TXD buffer */
-#define NRF52_TWIM_TXAMOUNT_OFFSET          0x054c /* Number of bytes transferred in the last TXD transaction */
-#define NRF52_TWIM_TXLIST_OFFSET            0x0550 /* TX EasyDMA list type */
+#define NRF52_TWIM_TXDMAXCNT_OFFSET         0x0548 /* Maximum number of bytes in TXD buffer */
+#define NRF52_TWIM_TXDAMOUNT_OFFSET         0x054c /* Number of bytes transferred in the last TXD transaction */
+#define NRF52_TWIM_TXDLIST_OFFSET           0x0550 /* TX EasyDMA list type */
 #define NRF52_TWIM_ADDRESS_OFFSET           0x0588 /* TWIM address */
 
 /* Register offsets for TWI slave (TWIS) ************************************/
@@ -154,7 +154,11 @@
 
 #define TWIM_FREQUENCY_100KBPS              (0x01980000) /* 100 kbps */
 #define TWIM_FREQUENCY_250KBPS              (0x04000000) /* 250 kbps */
-#define TWIM_FREQUENCY_400KBPS              (0x06400000) /* 400 kbps */
+#ifdef CONFIG_NRF52_I2C_MASTER_WORKAROUND_400KBPS_TIMING
+#  define TWIM_FREQUENCY_400KBPS            (0x06200000) /* 390 kbps */
+#else
+#  define TWIM_FREQUENCY_400KBPS            (0x06400000) /* 400 kbps */
+#endif
 
 /* RXDMAXCNT Register */
 

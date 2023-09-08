@@ -82,6 +82,18 @@
 int esp32s2_bringup(void);
 
 /****************************************************************************
+ * Name: board_spiflash_init
+ *
+ * Description:
+ *   Initialize the SPIFLASH and register the MTD device.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S2_SPIFLASH
+int board_spiflash_init(void);
+#endif
+
+/****************************************************************************
  * Name: esp32s2_gpio_init
  *
  * Description:

@@ -409,9 +409,9 @@ static int sam_getstatus(struct watchdog_lowerhalf_s *lower,
   status->timeleft = 0;
 
   wdinfo("Status     :\n");
-  wdinfo("  flags    : %08x\n", status->flags);
-  wdinfo("  timeout  : %d\n", status->timeout);
-  wdinfo("  timeleft : %d\n", status->timeleft);
+  wdinfo("  flags    : %08" PRIx32 "\n", status->flags);
+  wdinfo("  timeout  : %" PRIu32 "\n", status->timeout);
+  wdinfo("  timeleft : %" PRIu32 "\n", status->timeleft);
   return OK;
 }
 
@@ -439,13 +439,13 @@ static int sam_settimeout(struct watchdog_lowerhalf_s *lower,
   uint32_t regval;
 
   DEBUGASSERT(priv);
-  wdinfo("Entry: timeout=%d\n", timeout);
+  wdinfo("Entry: timeout=%" PRIu32 "\n", timeout);
 
   /* Can this timeout be represented? */
 
   if (timeout < WDT_MINTIMEOUT || timeout >= WDT_MAXTIMEOUT)
     {
-      wderr("ERROR: Cannot represent timeout: %d < %d > %d\n",
+      wderr("ERROR: Cannot represent timeout: %d < %" PRIu32 " > %d\n",
             WDT_MINTIMEOUT, timeout, WDT_MAXTIMEOUT);
       return -ERANGE;
     }
@@ -478,7 +478,7 @@ static int sam_settimeout(struct watchdog_lowerhalf_s *lower,
 
   priv->reload = reload;
 
-  wdinfo("reload=%d timeout: %d->%d\n",
+  wdinfo("reload=%" PRIu32 " timeout: %" PRIu32 "->%" PRIu32 "\n",
          reload, timeout, priv->timeout);
 
   /* Set the WDT_MR according to calculated value
@@ -536,7 +536,7 @@ static int sam_settimeout(struct watchdog_lowerhalf_s *lower,
 
   priv->started = true;
 
-  wdinfo("Setup: CR: %08x MR: %08x SR: %08x\n",
+  wdinfo("Setup: CR: %08" PRIx32 " MR: %08" PRIx32 " SR: %08" PRIx32 "\n",
          sam_getreg(SAM_WDT_CR), sam_getreg(SAM_WDT_MR),
          sam_getreg(SAM_WDT_SR));
 
@@ -662,7 +662,7 @@ int sam_wdt_initialize(void)
 {
   struct sam_lowerhalf_s *priv = &g_wdtdev;
 
-  wdinfo("Entry: CR: %08x MR: %08x SR: %08x\n",
+  wdinfo("Entry: CR: %08" PRIx32 " MR: %08" PRIx32 " SR: %08" PRIx32 "\n",
          sam_getreg(SAM_WDT_CR), sam_getreg(SAM_WDT_MR),
          sam_getreg(SAM_WDT_SR));
 

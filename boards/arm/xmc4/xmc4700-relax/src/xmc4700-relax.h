@@ -41,12 +41,12 @@
  * LED2 P5.8, Pad type A1+ High output illuminates
  */
 
-#define GPIO_LED1    (GPIO_OUTPUT | GPIO_OUTPUT_PUSHPULL | \
-                      GPIO_PADA1P_STRONGSOFT | GPIO_PINCTRL_SOFTWARE | \
-                      GPIO_OUTPUT_CLEAR | GPIO_PORT5 | GPIO_PIN9)
-#define GPIO_LED2    (GPIO_OUTPUT | GPIO_OUTPUT_PUSHPULL | \
-                      GPIO_PADA1P_STRONGSOFT | GPIO_PINCTRL_SOFTWARE | \
-                      GPIO_OUTPUT_CLEAR | GPIO_PORT5 | GPIO_PIN8)
+#define GPIO_LED1 (GPIO_OUTPUT | GPIO_OUTPUT_PUSHPULL |             \
+                   GPIO_PADA1P_STRONGSOFT | GPIO_PINCTRL_SOFTWARE | \
+                   GPIO_OUTPUT_CLEAR | GPIO_PORT5 | GPIO_PIN9)
+#define GPIO_LED2 (GPIO_OUTPUT | GPIO_OUTPUT_PUSHPULL |             \
+                   GPIO_PADA1P_STRONGSOFT | GPIO_PINCTRL_SOFTWARE | \
+                   GPIO_OUTPUT_CLEAR | GPIO_PORT5 | GPIO_PIN8)
 
 /* BUTTONS
  *
@@ -60,6 +60,12 @@
                       GPIO_PORT15 | GPIO_PIN13)
 #define GPIO_BUTTON2 (GPIO_INPUT | GPIO_PINCTRL_SOFTWARE | \
                       GPIO_PORT15 | GPIO_PIN12)
+
+/* SPIs Chip select */
+
+#define GPIO_CS (GPIO_OUTPUT | GPIO_OUTPUT_PUSHPULL |             \
+                 GPIO_PADA1P_STRONGSOFT | GPIO_PINCTRL_SOFTWARE | \
+                 GPIO_OUTPUT_SET | GPIO_PORT3 | GPIO_PIN10)
 
 /****************************************************************************
  * Public Types

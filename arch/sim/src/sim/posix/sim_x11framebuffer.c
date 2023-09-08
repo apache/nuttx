@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <syslog.h>
+#include <errno.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <sys/ipc.h>
@@ -105,8 +106,8 @@ static inline Display *sim_x11createframe(void)
 
   XSetWMProperties(display, g_window, &winprop, &iconprop, argv, 1,
                    &hints, NULL, NULL);
-
-  XMapWindow(display, g_window);
+  XFree(winprop.value);
+  XFree(iconprop.value);
 
   /* Select window input events */
 
@@ -323,7 +324,7 @@ shmerror:
 #endif
       b_useshm = 0;
 
-      g_framebuffer = (unsigned char *)malloc(fblen);
+      g_framebuffer = malloc(fblen);
 
       g_image = XCreateImage(display, DefaultVisual(display, g_screen),
                              depth, ZPixmap, 0, (char *)g_framebuffer,
@@ -372,7 +373,7 @@ int sim_x11initialize(unsigned short width, unsigned short height,
   display = sim_x11createframe();
   if (display == NULL)
     {
-      return -1;
+      return -ENODEV;
     }
 
   /* Determine the supported pixel bpp of the current window */
@@ -404,6 +405,40 @@ int sim_x11initialize(unsigned short width, unsigned short height,
 }
 
 /****************************************************************************
+ * Name: sim_x11openwindow
+ ****************************************************************************/
+
+int sim_x11openwindow(void)
+{
+  if (g_display == NULL)
+    {
+      return -ENODEV;
+    }
+
+  XMapWindow(g_display, g_window);
+  XSync(g_display, 0);
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: sim_x11closewindow
+ ****************************************************************************/
+
+int sim_x11closewindow(void)
+{
+  if (g_display == NULL)
+    {
+      return -ENODEV;
+    }
+
+  XUnmapWindow(g_display, g_window);
+  XSync(g_display, 0);
+
+  return 0;
+}
+
+/****************************************************************************
  * Name: sim_x11cmap
  ****************************************************************************/
 
@@ -416,7 +451,7 @@ int sim_x11cmap(unsigned short first, unsigned short len,
 
   if (g_display == NULL)
     {
-      return -1;
+      return -ENODEV;
     }
 
   /* Convert each color to X11 scaling */
@@ -455,7 +490,7 @@ int sim_x11update(void)
 {
   if (g_display == NULL)
     {
-      return -1;
+      return -ENODEV;
     }
 
 #ifndef CONFIG_SIM_X11NOSHM

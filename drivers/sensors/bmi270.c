@@ -79,8 +79,8 @@
 #define BMI270_SC_OUT_1         (0x1f) /* Step counting value */
 #define BMI270_WR_GEST_ACT      (0x20) /* Wrist gesture and activity detection */
 #define BMI270_INTERNAL_STAT    (0x21) /* Internal status */
-#define BMI160_TEMPERATURE_0    (0x22) /* Temperature */
-#define BMI160_TEMPERATURE_1    (0x23)
+#define BMI270_TEMPERATURE_0    (0x22) /* Temperature */
+#define BMI270_TEMPERATURE_1    (0x23)
 #define BMI270_FIFO_LENGTH_0    (0x24) /* FIFO length */
 #define BMI270_FIFO_LENGTH_1    (0x25)
 #define BMI270_FIFO_DATA        (0x26)
@@ -184,20 +184,20 @@
 
 /* Register 0x7d - PWR_CONF */
 
-#define	PWRCONF_APS_ON          (1 << 0)
-#define	PWRCONF_FSW_ON          (1 << 1)
-#define	PWRCONF_FUP_ON          (1 << 2)
+#define PWRCONF_APS_ON          (1 << 0)
+#define PWRCONF_FSW_ON          (1 << 1)
+#define PWRCONF_FUP_ON          (1 << 2)
 
 /* Register 0x7d - PWR_CTRL */
 
-#define	PWRCTRL_AUX_EN          (1 << 0)
-#define	PWRCTRL_GYR_EN          (1 << 1)
-#define	PWRCTRL_ACC_EN          (1 << 2)
-#define	PWRCTRL_TEMP_EN         (1 << 3)
+#define PWRCTRL_AUX_EN          (1 << 0)
+#define PWRCTRL_GYR_EN          (1 << 1)
+#define PWRCTRL_ACC_EN          (1 << 2)
+#define PWRCTRL_TEMP_EN         (1 << 3)
 
 /* Register 0x7e - CMD */
 
-#define	CMD_SOFTRESET            (0xB6)
+#define CMD_SOFTRESET           (0xB6)
 
 /****************************************************************************
  * Private Types
@@ -1440,7 +1440,7 @@ int bmi270_register(FAR const char *devpath, FAR struct spi_dev_s *dev)
   FAR struct bmi270_dev_s *priv;
   int ret;
 
-  priv = (FAR struct bmi270_dev_s *)kmm_malloc(sizeof(struct bmi270_dev_s));
+  priv = kmm_malloc(sizeof(struct bmi270_dev_s));
   if (!priv)
     {
       snerr("Failed to allocate instance\n");

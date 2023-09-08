@@ -89,7 +89,7 @@ config LIBC_NUMBERED_ARGS
 
 config LIBC_NL_ARGMAX
 	int "Maximum number of numbered arguments for printf"
-	default 16
+	default 9
 	range 9 999999
 	depends on LIBC_NUMBERED_ARGS
 	---help---

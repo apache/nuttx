@@ -355,7 +355,7 @@ FAR struct mtd_dev_s *nullmtd_initialize(size_t mtdlen, int16_t sectsize,
 
   /* Create an instance of the RAM MTD device state structure */
 
-  priv = (FAR struct null_dev_s *)kmm_zalloc(sizeof(struct null_dev_s));
+  priv = kmm_zalloc(sizeof(struct null_dev_s));
   if (!priv)
     {
       ferr("ERROR: Failed to allocate the RAM MTD state structure\n");

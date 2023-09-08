@@ -1158,7 +1158,7 @@ FAR struct mtd_dev_s *m25p_initialize(FAR struct spi_dev_s *dev)
    * have to be extended to handle multiple FLASH parts on the same SPI bus.
    */
 
-  priv = (FAR struct m25p_dev_s *)kmm_zalloc(sizeof(struct m25p_dev_s));
+  priv = kmm_zalloc(sizeof(struct m25p_dev_s));
   if (priv)
     {
       /* Initialize the allocated structure. (unsupported methods were

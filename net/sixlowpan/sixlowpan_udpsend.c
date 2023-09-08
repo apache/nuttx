@@ -157,7 +157,7 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
 
   ninfo("buflen %lu\n", (unsigned long)buflen);
 
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL && to != NULL);
+  DEBUGASSERT(to != NULL);
   DEBUGASSERT(psock->s_type == SOCK_DGRAM);
 
   sixlowpan_dumpbuffer("Outgoing UDP payload", buf, buflen);
@@ -213,7 +213,7 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
   /* Make sure that the IP address mapping is in the Neighbor Table */
 
-  ret = icmpv6_neighbor(to6->sin6_addr.in6_u.u6_addr16);
+  ret = icmpv6_neighbor(dev, to6->sin6_addr.in6_u.u6_addr16);
   if (ret < 0)
     {
       nerr("ERROR: Not reachable\n");
@@ -336,7 +336,6 @@ ssize_t psock_6lowpan_udp_send(FAR struct socket *psock, FAR const void *buf,
 
   ninfo("buflen %lu\n", (unsigned long)buflen);
 
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
   DEBUGASSERT(psock->s_type == SOCK_DGRAM);
 
   sixlowpan_dumpbuffer("Outgoing UDP payload", buf, buflen);

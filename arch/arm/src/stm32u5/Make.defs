@@ -31,9 +31,9 @@ include armv8-m/Make.defs
 
 CHIP_ASRCS  =
 CHIP_CSRCS  = stm32_allocateheap.c stm32_exti_gpio.c stm32_gpio.c
-CHIP_CSRCS += stm32_irq.c stm32_lowputc.c stm32_rcc.c
+CHIP_CSRCS += stm32_irq.c stm32_lowputc.c stm32_rcc.c stm32_i2c.c
 CHIP_CSRCS += stm32_serial.c stm32_start.c stm32_waste.c stm32_uid.c
-CHIP_CSRCS += stm32_spi.c stm32_lse.c stm32_lsi.c
+CHIP_CSRCS += stm32_spi.c stm32_lse.c stm32_lsi.c stm32u5xx_rcc.c
 CHIP_CSRCS += stm32_pwr.c stm32_tim.c stm32_flash.c stm32_timerisr.c
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
@@ -54,6 +54,6 @@ endif
 
 # Required chip type specific files
 
-ifeq ($(CONFIG_STM32U5_STM32U585XX),y)
-CHIP_CSRCS += stm32u585xx_rcc.c
+ifeq ($(CONFIG_USBDEV),y)
+CHIP_CSRCS += stm32_otgdev.c
 endif

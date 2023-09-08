@@ -26,6 +26,7 @@
 
 #include <stdint.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/trace.h>
 
 #include "mqueue/mqueue.h"
 
@@ -108,6 +109,8 @@ mq_msgblockalloc(FAR struct list_node *list, uint16_t nmsgs,
 
 void nxmq_initialize(void)
 {
+  sched_trace_begin();
+
   /* Allocate a block of messages for general use */
 
   mq_msgblockalloc(&g_msgfree, CONFIG_PREALLOC_MQ_MSGS,
@@ -119,4 +122,6 @@ void nxmq_initialize(void)
 
   mq_msgblockalloc(&g_msgfreeirq, CONFIG_PREALLOC_MQ_IRQ_MSGS,
                    MQ_ALLOC_IRQ);
+
+  sched_trace_end();
 }

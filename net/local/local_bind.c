@@ -53,8 +53,7 @@ int psock_local_bind(FAR struct socket *psock,
   FAR const struct sockaddr_un *unaddr =
     (FAR const struct sockaddr_un *)addr;
 
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL &&
-              unaddr != NULL && unaddr->sun_family == AF_LOCAL);
+  DEBUGASSERT(unaddr->sun_family == AF_LOCAL);
 
   if (addrlen <= sizeof(sa_family_t) + 1)
     {

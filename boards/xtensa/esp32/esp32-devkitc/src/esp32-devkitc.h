@@ -66,6 +66,11 @@
 #define ONESHOT_TIMER         1
 #define ONESHOT_RESOLUTION_US 1
 
+/* RMT gpio */
+
+#define RMT_OUTPUT_PIN 4
+#define RMT_CHANNEL    0
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -200,6 +205,27 @@ int board_i2sdev_initialize(int port, bool enable_tx, bool enable_rx);
 #ifdef CONFIG_AUDIO_CS4344
 int esp32_cs4344_initialize(int port);
 #endif
+
+/****************************************************************************
+ * Name:  board_ws2812_initialize
+ *
+ * Description:
+ *   This function may called from application-specific logic during its
+ *   to perform board-specific initialization of the ws2812 device
+ *
+ *
+ ****************************************************************************/
+
+#  ifdef CONFIG_WS2812
+#    ifndef CONFIG_WS2812_NON_SPI_DRIVER
+int board_ws2812_initialize(int devno, int spino, uint16_t nleds);
+#    else
+int board_ws2812_initialize(
+    int devno,
+    uint16_t nleds,
+    void *dev);
+#    endif
+#  endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_XTENSA_ESP32_ESP32_DEVKITC_SRC_ESP32_DEVKITC_H */

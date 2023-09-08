@@ -123,7 +123,8 @@ int nx_unlink(FAR const char *pathname)
        * release all resources because it is no longer accessible.
        */
 
-      if (INODE_IS_DRIVER(inode) && inode->u.i_ops->unlink)
+      if ((INODE_IS_DRIVER(inode) || INODE_IS_SHM(inode) ||
+          INODE_IS_PIPE(inode)) && inode->u.i_ops->unlink)
         {
           /* Notify the character driver that it has been unlinked */
 

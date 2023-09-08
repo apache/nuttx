@@ -194,17 +194,13 @@
 
 /* Non-secure Access Control Registers, optional: 00xe00-0x0efc */
 
-#define GIC_ICDNSACR_OFFSET(n)     (0x0e00 + GIC_OFFSET32(n))
+#define GIC_ICDNSACR_OFFSET(n)     (0x0e00 + GIC_OFFSET16(n))
 
 /* Software Generated Interrupt Register: 0x0f00 */
 
 #define GIC_ICDSGIR_OFFSET         0x0f00    /* Software Generated Interrupt Register */
 
-/* 0x0f0c-0x0f0c: Reserved */
-
-/* Peripheral Identification Registers: 0x0fd0-0xfe8 */
-
-#define GIC_ICDPIDR_OFFSET(n)      (0x0fd0 + ((n) << 2))
+/* 0x0f04-0x0f0c: Reserved */
 
 /* SGI Clear-Pending Registers: 0x0f10-0x0f1c */
 
@@ -218,11 +214,13 @@
 
 /* 0x0fd0-0x0ffc: Implementation defined */
 
+/* Peripheral Identification Registers: 0x0fd0-0xfe8 */
+
+#define GIC_ICDPIDR_OFFSET(n)      (0x0fd0 + ((n) << 2))
+
 /* Component Identification Registers: 0x0ff0-0x0ffc */
 
 #define GIC_ICDCIDR_OFFSET(n)      (0x0ff0 + ((n) << 2))
-
-/* 0x0f04-0x0ffc: Reserved */
 
 /* GIC Register Addresses ***************************************************/
 
@@ -275,9 +273,9 @@
 #define GIC_ICDSPISR(n)            (MPCORE_ICD_VBASE+GIC_ICDSPISR_OFFSET(n))
 #define GIC_ICDNSACR(n)            (MPCORE_ICD_VBASE+GIC_ICDNSACR_OFFSET(n))
 #define GIC_ICDSGIR                (MPCORE_ICD_VBASE+GIC_ICDSGIR_OFFSET)
-#define GIC_ICDPIDR(n)             (MPCORE_ICD_VBASE+GIC_ICDPIDR_OFFSET(n))
 #define GIC_ICDSCPR(n)             (MPCORE_ICD_VBASE+GIC_ICDSCPR_OFFSET(n))
 #define GIC_ICDSSPR(n)             (MPCORE_ICD_VBASE+GIC_ICDSSPR_OFFSET(n))
+#define GIC_ICDPIDR(n)             (MPCORE_ICD_VBASE+GIC_ICDPIDR_OFFSET(n))
 #define GIC_ICDCIDR(n)             (MPCORE_ICD_VBASE+GIC_ICDCIDR_OFFSET(n))
 
 /* GIC Register Bit Definitions *********************************************/
@@ -338,8 +336,8 @@
 #define GIC_ICCBPR_MASK            (7 << GIC_ICCBPR_SHIFT)
 #  define GIC_ICCBPR_1_7           (0 << GIC_ICCBPR_SHIFT) /* Priority bits [7:1] compared for pre-emption */
 #  define GIC_ICCBPR_2_7           (1 << GIC_ICCBPR_SHIFT) /* Priority bits [7:2] compared for pre-emption */
-#  define GIC_ICCBPR_3_7           (2 << GIC_ICCBPR_SHIFT) /* Priority bits [7:2] compared for pre-emption */
-#  define GIC_ICCBPR_4_7           (3 << GIC_ICCBPR_SHIFT) /* Priority bits [7:2] compared for pre-emption */
+#  define GIC_ICCBPR_3_7           (2 << GIC_ICCBPR_SHIFT) /* Priority bits [7:3] compared for pre-emption */
+#  define GIC_ICCBPR_4_7           (3 << GIC_ICCBPR_SHIFT) /* Priority bits [7:4] compared for pre-emption */
 #  define GIC_ICCBPR_5_7           (4 << GIC_ICCBPR_SHIFT) /* Priority bits [7:5] compared for pre-emption */
 #  define GIC_ICCBPR_6_7           (5 << GIC_ICCBPR_SHIFT) /* Priority bits [7:6] compared for pre-emption */
 #  define GIC_ICCBPR_7_7           (6 << GIC_ICCBPR_SHIFT) /* Priority bit [7] compared for pre-emption */
@@ -360,6 +358,7 @@
 
 /* End of Interrupt Register */
 
+#define GIC_ICCEOIR_SPURIOUSNS     (0x3fe)
 #define GIC_ICCEOIR_SPURIOUS       (0x3ff)
 
 #define GIC_ICCEOIR_INTID_SHIFT    (0)       /* Bits 0-9: Interrupt ID */
@@ -373,9 +372,8 @@
 
 /* Running Interrupt Register */
 
-                                             /* Bits 0-3: Reserved */
-#define GIC_ICCRPR_PRIO_SHIFT      (4)       /* Bits 4-7: Priority mask */
-#define GIC_ICCRPR_PRIO_MASK       (15 << GIC_ICCRPR_PRIO_SHIFT)
+#define GIC_ICCRPR_PRIO_SHIFT      (0)       /* Bits 0-7: Priority mask */
+#define GIC_ICCRPR_PRIO_MASK       (0xff << GIC_ICCRPR_PRIO_SHIFT)
 #  define GIC_ICCRPR_PRIO_VALUE(n) ((uint32_t)(n) << GIC_ICCRPR_PRIO_SHIFT)
 
                                              /* Bits 8-31: Reserved */
@@ -391,39 +389,6 @@
 
                                              /* Bits 13-31: Reserved */
 
-/* Aliased Interrupt Acknowledge Register */
-#define GIC_ICCAIAR_
-
-/* Aliased End of Interrupt Register */
-#define GIC_ICCAEOIR_
-
-/* Aliased Highest Priority Pending Interrupt Register */
-#define GIC_ICCAHPIR_
-
-/* Active Priorities Register 1 */
-#define GIC_ICCAPR1_
-
-/* Active Priorities Register 2 */
-#define GIC_ICCAPR2_
-
-/* Active Priorities Register 3 */
-#define GIC_ICCAPR3_
-
-/* Active Priorities Register 4 */
-#define GIC_ICCAPR4_
-
-/* Non-secure Active Priorities Register 1 */
-#define GIC_ICCNSAPR1_
-
-/* Non-secure Active Priorities Register 2 */
-#define GIC_ICCNSAPR2_
-
-/* Non-secure Active Priorities Register 3 */
-#define GIC_ICCNSAPR3_
-
-/* Non-secure Active Priorities Register 4 */
-#define GIC_ICCNSAPR4_
-
 /* CPU Interface Implementer ID Register */
 
 #define GIC_ICCIDR_IMPL_SHIFT      (0)       /* Bits 0-11:  Implementer */
@@ -436,7 +401,13 @@
 #define GIC_ICCIDR_PARTNO_MASK     (0xfff << GIC_ICCIDR_PARTNO_SHIFT)
 
 /* Deactivate Interrupt Register */
-#define GIC_ICCDIR_
+
+#define GIC_ICCDIR_INTID_SHIFT     (0)       /* Bits 0-9: Interrupt ID */
+#define GIC_ICCDIR_INTID_MASK      (0x3ff << GIC_ICCHPIR_INTID_SHIFT)
+#  define GIC_ICCDIR_INTID(n)      ((uint32_t)(n) << GIC_ICCHPIR_INTID_SHIFT)
+#define GIC_ICCDIR_CPUSRC_SHIFT    (10)      /* Bits 10-12: CPU source ID */
+#define GIC_ICCDIR_CPUSRC_MASK     (7 << GIC_ICCHPIR_CPUSRC_SHIFT)
+#  define GIC_ICCDIR_CPUSRC(n)     ((uint32_t)(n) << GIC_ICCHPIR_CPUSRC_SHIFT)
 
 /* Distributor Registers */
 
@@ -467,10 +438,13 @@
 
 #define GIC_ICDIIDR_IMPL_SHIFT      (0)      /* Bits 0-11: Implementer */
 #define GIC_ICDIIDR_IMPL_MASK       (0xfff << GIC_ICDIIDR_IMPL_SHIFT)
-#define GIC_ICDIIDR_REVISION_SHIFT  (12)     /* Bits 12-23: Revision number */
-#define GIC_ICDIIDR_REVISION_MASK   (0xfff << GIC_ICDIIDR_REVISION_SHIFT)
-#define GIC_ICDIIDR_VERSION_SHIFT   (24)     /* Bits 24-31: Iimplementer version */
-#define GIC_ICDIIDR_VERSION_MASK    (0xff << GIC_ICDIIDR_VERSION_SHIFT)
+#define GIC_ICDIIDR_REVISION_SHIFT  (12)     /* Bits 12-15: Revision number */
+#define GIC_ICDIIDR_REVISION_MASK   (0xf << GIC_ICDIIDR_REVISION_SHIFT)
+#define GIC_ICDIIDR_VARIANT_SHIFT   (16)     /* Bits 16-19 Variant number */
+#define GIC_ICDIIDR_VARIANT_MASK    (0xf << GIC_ICDIIDR_VARIANT_SHIFT)
+                                             /* Bits 20-23: Reserved */
+#define GIC_ICDIIDR_PRODUCTID_SHIFT (24)     /* Bits 24-31: Product id */
+#define GIC_ICDIIDR_PRODUCTID_MASK  (0xff << GIC_ICDIIDR_PRODUCTID_SHIFT)
 
 /* Interrupt Security Registers: 0x0080-0x009c */
 
@@ -554,32 +528,35 @@
 
 /* Non-secure Access Control Registers, optional */
 
-#define GIC_ICDNSACR_INT(n)        GIC_MASK32(n)
+#define GIC_ICDNSACR_NONE          0
+#define GIC_ICDNSACR_SET           1
+#define GIC_ICDNSACR_CLEAR         2
+#define GIC_ICDNSACR_ROUTE         3
+
+#define GIC_ICDNSACR_ID_SHIFT(n)   GIC_SHIFT16(n)
+#define GIC_ICDNSACR_ID_MASK(n)    GIC_MASK16(n)
+#  define GIC_ICDNSACR_ID(n,p)     ((uint32_t)(p) << GIC_SHIFT16(n))
 
 /* Software Generated Interrupt Register */
 
 #define GIC_ICDSGIR_INTID_SHIFT       (0)    /* Bits 0-9: Interrupt ID */
 #define GIC_ICDSGIR_INTID_MASK        (0x3ff << GIC_ICDSGIR_INTID_SHIFT)
 #  define GIC_ICDSGIR_INTID(n)        ((uint32_t)(n) << GIC_ICDSGIR_INTID_SHIFT)
-                                             /* Bits 10-15: Reserved */
+                                             /* Bits 10-14: Reserved */
+#define GIC_ICDSGIR_NSATT             (1 << 15)
 #define GIC_ICDSGIR_CPUTARGET_SHIFT   (16)   /* Bits 16-23: CPU target */
 #define GIC_ICDSGIR_CPUTARGET_MASK    (0xff << GIC_ICDSGIR_CPUTARGET_SHIFT)
 #  define GIC_ICDSGIR_CPUTARGET(n)    ((uint32_t)(n) << GIC_ICDSGIR_CPUTARGET_SHIFT)
-                                             /* Bits 26-31: Reserved */
 #define GIC_ICDSGIR_TGTFILTER_SHIFT   (24)   /* Bits 24-25: Target filter */
 #define GIC_ICDSGIR_TGTFILTER_MASK    (3 << GIC_ICDSGIR_TGTFILTER_SHIFT)
 #  define GIC_ICDSGIR_TGTFILTER_LIST  (0 << GIC_ICDSGIR_TGTFILTER_SHIFT) /* Interrupt sent to CPUs CPU target list */
 #  define GIC_ICDSGIR_TGTFILTER_OTHER (1 << GIC_ICDSGIR_TGTFILTER_SHIFT) /* Interrupt is sent to all but requesting CPU */
 #  define GIC_ICDSGIR_TGTFILTER_THIS  (2 << GIC_ICDSGIR_TGTFILTER_SHIFT) /* Interrupt is sent to requesting CPU only */
-
-/* SGI Clear-Pending Registers */
-#define GIC_ICDSCPR_
-
-/* SGI Set-Pending Registers */
-#define GIC_ICDSSPR_
+                                                                         /* Bits 26-31: Reserved */
 
 /* Peripheral ID2 Register */
-#define GIC_ICPIDR2 (6)
+
+#define GIC_ICPIDR2                   (6)
 
 /* Interrupt IDs ************************************************************/
 
@@ -597,12 +574,50 @@
  * sources.
  */
 
-/* Shared Peripheral Interrupts (SPI) */
+/* Private Peripheral Interrupts (PPI) **************************************/
 
-#define GIC_IRQ_SPI              32  /* First SPI interrupt ID */
+/* Each Cortex-A9 processor has private interrupts, ID0-ID15, that can only
+ * be triggered by software. These interrupts are aliased so that there is
+ * no requirement for a requesting Cortex-A9 processor to determine its own
+ * CPU ID when it deals with SGIs.  The priority of an SGI depends on the
+ * value set by the receiving Cortex-A9 processor in the banked SGI priority
+ * registers, not the priority set by the sending Cortex-A9 processor.
+ *
+ * NOTE: If CONFIG_SMP is enabled then SGI1 and SGI2 are used for inter-CPU
+ * task management.
+ */
+
+#define GIC_IRQ_SGI0              0 /* Software Generated Interrupt (SGI) 0 */
+#define GIC_IRQ_SGI1              1 /* Software Generated Interrupt (SGI) 1 */
+#define GIC_IRQ_SGI2              2 /* Software Generated Interrupt (SGI) 2 */
+#define GIC_IRQ_SGI3              3 /* Software Generated Interrupt (SGI) 3 */
+#define GIC_IRQ_SGI4              4 /* Software Generated Interrupt (SGI) 4 */
+#define GIC_IRQ_SGI5              5 /* Software Generated Interrupt (SGI) 5 */
+#define GIC_IRQ_SGI6              6 /* Software Generated Interrupt (SGI) 6 */
+#define GIC_IRQ_SGI7              7 /* Software Generated Interrupt (SGI) 7 */
+#define GIC_IRQ_SGI8              8 /* Software Generated Interrupt (SGI) 8 */
+#define GIC_IRQ_SGI9              9 /* Software Generated Interrupt (SGI) 9 */
+#define GIC_IRQ_SGI10            10 /* Software Generated Interrupt (SGI) 10 */
+#define GIC_IRQ_SGI11            11 /* Software Generated Interrupt (SGI) 11 */
+#define GIC_IRQ_SGI12            12 /* Software Generated Interrupt (SGI) 12 */
+#define GIC_IRQ_SGI13            13 /* Software Generated Interrupt (SGI) 13 */
+#define GIC_IRQ_SGI14            14 /* Software Generated Interrupt (SGI) 14 */
+#define GIC_IRQ_SGI15            15 /* Software Generated Interrupt (SGI) 15 */
+
+#define GIC_IRQ_VM               25 /* Virtual Maintenance Interrupt (VM) PPI(6) */
+#define GIC_IRQ_HTM              26 /* Hypervisor Timer (HTM) PPI(5) */
+#define GIC_IRQ_VTM              27 /* Virtual Timer (VTM) PPI(4) */
+#define GIC_IRQ_FIQ              28 /* Fast Interrupt Request (nFIQ) PPI(0) */
+#define GIC_IRQ_STM              29 /* Secure Physical Timer (STM) PPI(1) */
+#define GIC_IRQ_PTM              30 /* Non-secure Physical Timer (PTM) PPI(2) */
+#define GIC_IRQ_IRQ              31 /* Interrupt Request (nIRQ) PPI(3) */
+
+/* Shared Peripheral Interrupts (SPI) follow */
+
+#define GIC_IRQ_SPI              32 /* First SPI interrupt ID */
 
 /****************************************************************************
- * Private Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -632,6 +647,62 @@ static inline unsigned int arm_gic_nlines(void)
   return (field + 1) << 5;
 }
 
+#ifdef CONFIG_ARCH_HAVE_TRUSTZONE
+/****************************************************************************
+ * Name: up_set_secure_irq
+ *
+ * Description:
+ *   Secure an IRQ
+ *
+ ****************************************************************************/
+
+void up_secure_irq(int irq, bool secure)
+{
+  unsigned int val;
+
+  if (secure)
+    {
+      val = getreg32(GIC_ICDISR(irq)) & (~GIC_ICDISR_INT(irq));  /* group 0 */
+    }
+  else
+    {
+      val = getreg32(GIC_ICDISR(irq)) | GIC_ICDISR_INT(irq);     /* group 1 */
+    }
+
+  putreg32(val, GIC_ICDISR(irq));
+}
+
+/****************************************************************************
+ * Name: up_secure_irq_all
+ *
+ * Description:
+ *   Secure all IRQ
+ *
+ ****************************************************************************/
+
+void up_secure_irq_all(bool secure)
+{
+  unsigned int nlines = arm_gic_nlines();
+  unsigned int irq;
+
+  for (irq = 0; irq < nlines; irq += 32)
+    {
+      if (secure)
+        {
+          putreg32(0x00000000, GIC_ICDISR(irq));   /* group 0 */
+        }
+      else
+        {
+          putreg32(0xffffffff, GIC_ICDISR(irq));   /* group 1 */
+        }
+    }
+}
+#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
 /****************************************************************************
  * Name: arm_cpu_sgi
  *
@@ -657,10 +728,10 @@ static inline void arm_cpu_sgi(int sgi, unsigned int cpuset)
   uint32_t regval;
 
 #ifdef CONFIG_SMP
-  regval = GIC_ICDSGIR_INTID(sgi) |  GIC_ICDSGIR_CPUTARGET(cpuset) |
+  regval = GIC_ICDSGIR_INTID(sgi) | GIC_ICDSGIR_CPUTARGET(cpuset) |
            GIC_ICDSGIR_TGTFILTER_LIST;
 #else
-  regval = GIC_ICDSGIR_INTID(sgi) |  GIC_ICDSGIR_CPUTARGET(0) |
+  regval = GIC_ICDSGIR_INTID(sgi) | GIC_ICDSGIR_CPUTARGET(0) |
            GIC_ICDSGIR_TGTFILTER_THIS;
 #endif
 
@@ -851,8 +922,18 @@ static void arm_gic_initialize(void)
 
   /* Registers with 1-bit per interrupt */
 
+#ifdef CONFIG_ARCH_TRUSTZONE_SECURE
+  /* per-CPU inerrupts config:
+   * ID0-ID7(SGI)  for Non-secure interrupts
+   * ID8-ID15(SGI)  for Secure interrupts.
+   * All PPI config as secure interrupts.
+   */
+
+  putreg32(0x000000ff, GIC_ICDISR(0));
+#else
   putreg32(0x00000000, GIC_ICDISR(0));      /* SGIs and PPIs secure */
-  putreg32(0xf8000000, GIC_ICDICER(0));     /* PPIs disabled */
+#endif
+  putreg32(0xfe000000, GIC_ICDICER(0));     /* PPIs disabled */
 
   /* Registers with 8-bits per interrupt */
 
@@ -860,7 +941,7 @@ static void arm_gic_initialize(void)
   putreg32(0x80808080, GIC_ICDIPR(4));      /* SGI[4:7] priority */
   putreg32(0x80808080, GIC_ICDIPR(8));      /* SGI[8:11] priority */
   putreg32(0x80808080, GIC_ICDIPR(12));     /* SGI[12:15] priority */
-  putreg32(0x80000000, GIC_ICDIPR(24));     /* PPI[0] priority */
+  putreg32(0x80808000, GIC_ICDIPR(24));     /* PPI[0] priority */
   putreg32(0x80808080, GIC_ICDIPR(28));     /* PPI[1:4] priority */
 
   /* Set the binary point register.
@@ -884,7 +965,7 @@ static void arm_gic_initialize(void)
 
   iccicr  = getreg32(GIC_ICCICR);
 
-#if defined(CONFIG_ARCH_TRUSTZONE_SECURE) || defined(CONFIG_ARCH_TRUSTZONE_BOTH)
+#if defined(CONFIG_ARCH_TRUSTZONE_SECURE)
   /* Clear secure state ICCICR bits to be configured below */
 
   iccicr &= ~(GIC_ICCICRS_FIQEN | GIC_ICCICRS_ACKTCTL | GIC_ICCICRS_CBPR |
@@ -893,10 +974,10 @@ static void arm_gic_initialize(void)
               GIC_ICCICRS_FIQBYPDISGRP0 | GIC_ICCICRS_IRQBYPDISGRP0 |
               GIC_ICCICRS_FIQBYPDISGRP1 | GIC_ICCICRS_IRQBYPDISGRP1);
 
-#elif defined(CONFIG_ARCH_TRUSTZONE_NONSECURE)
+#else
   /* Clear non-secure state ICCICR bits to be configured below */
 
-  iccicr &= ~(GIC_ICCICRS_EOIMODENS | GIC_ICCICRU_ENABLEGRP1 |
+  iccicr &= ~(GIC_ICCICRU_EOIMODENS | GIC_ICCICRU_ENABLEGRP1 |
               GIC_ICCICRU_FIQBYPDISGRP1 | GIC_ICCICRU_IRQBYPDISGRP1);
 
 #endif
@@ -908,31 +989,8 @@ static void arm_gic_initialize(void)
    * REVISIT: Do I need to do this?
    */
 
-  /* iccicr |= GIC_ICCICRS_FIQEN; */
-
-#elif defined(CONFIG_ARCH_TRUSTZONE_BOTH)
-  /* Set FIQn=1 if secure interrupts are to signal using nfiq_c.
-   *
-   * NOTE:  Only for processors that operate in secure state.
-   * REVISIT: Do I need to do this?
-   */
-
   iccicr |= GIC_ICCICRS_FIQEN;
-#endif
 
-#if defined(CONFIG_ARCH_TRUSTZONE_SECURE)
-  /* Program the AckCtl bit to select the required interrupt acknowledge
-   * behavior.
-   *
-   * NOTE: Only for processors that operate in both secure and non-secure
-   * state.
-   * REVISIT: This is here only for superstitious reasons.  I don't think
-   * I need this setting in this configuration.
-   */
-
-  iccicr |= GIC_ICCICRS_ACKTCTL;
-
-#elif defined(CONFIG_ARCH_TRUSTZONE_BOTH)
   /* Program the AckCtl bit to select the required interrupt acknowledge
    * behavior.
    *
@@ -941,35 +999,17 @@ static void arm_gic_initialize(void)
    */
 
   iccicr |= GIC_ICCICRS_ACKTCTL;
-
-  /* Program the SBPR bit to select the required binary pointer behavior.
-   *
-   * NOTE: Only for processors that operate in both secure and non-secure
-   * state.
-   */
-
-  iccicr |= GIC_ICCICRS_CBPR;
 #endif
 
 #ifdef CONFIG_ARM_GIC_EOIMODE
-#  if defined(CONFIG_ARCH_TRUSTZONE_SECURE) || defined(CONFIG_ARCH_TRUSTZONE_BOTH)
+#  if defined(CONFIG_ARCH_TRUSTZONE_SECURE)
   /* Set EnableS=1 to enable CPU interface to signal secure interrupts.
    *
    * NOTE:  Only for processors that operate in secure state.
    */
 
   iccicr |= GIC_ICCICRS_EOIMODES;
-#  endif
-
-#  if defined(CONFIG_ARCH_TRUSTZONE_NONSECURE)
-  /* Set EnableNS=1 to enable the CPU to signal non-secure interrupts.
-   *
-   * NOTE:  Only for processors that operate in non-secure state.
-   */
-
-  iccicr |= GIC_ICCICRS_EOIMODENS;
-
-#  elif defined(CONFIG_ARCH_TRUSTZONE_BOTH)
+#  else
   /* Set EnableNS=1 to enable the CPU to signal non-secure interrupts.
    *
    * NOTE:  Only for processors that operate in non-secure state.
@@ -979,42 +1019,8 @@ static void arm_gic_initialize(void)
 #  endif
 #endif
 
- #ifdef CONFIG_ARCH_TRUSTZONE_BOTH
-  /* If the processor operates in both security states and SBPR=0, then it
-   * must switch to the other security state and repeat the programming of
-   * the binary point register so that the binary point will be programmed
-   * for interrupts in both security states.
-   */
-
-#  warning Missing logic
-#endif
-
-#if !defined(CONFIG_ARCH_HAVE_TRUSTZONE)
-  /* Enable the distributor by setting the Enable bit in the enable
-   * register (no security extensions).
-   */
-
-  iccicr |= GIC_ICCICR_ENABLE;
-  icddcr  = GIC_ICDDCR_ENABLE;
-
-#elif defined(CONFIG_ARCH_TRUSTZONE_SECURE)
+#if defined(CONFIG_ARCH_TRUSTZONE_SECURE)
   /* Enable the Group 0 interrupts, FIQEn and disable Group 0/1
-   * bypass.
-   */
-
-#if 0 /* REVISIT -- I don't know why this needs to be like this */
-  iccicr |= (GIC_ICCICRS_ENABLEGRP0 | GIC_ICCICRS_FIQBYPDISGRP0 |
-             GIC_ICCICRS_IRQBYPDISGRP0 | GIC_ICCICRS_FIQBYPDISGRP1 |
-             GIC_ICCICRS_IRQBYPDISGRP1);
-#else
-  iccicr |= (GIC_ICCICRS_ENABLEGRP0 | GIC_ICCICRS_ENABLEGRP1 |
-             GIC_ICCICRS_FIQBYPDISGRP0 | GIC_ICCICRS_IRQBYPDISGRP0 |
-             GIC_ICCICRS_FIQBYPDISGRP1 | GIC_ICCICRS_IRQBYPDISGRP1);
-#endif
-  icddcr  = GIC_ICDDCR_ENABLEGRP0;
-
-#elif defined(CONFIG_ARCH_TRUSTZONE_BOTH)
-  /* Enable the Group 0/1 interrupts, FIQEn and disable Group 0/1
    * bypass.
    */
 
@@ -1023,7 +1029,7 @@ static void arm_gic_initialize(void)
              GIC_ICCICRS_FIQBYPDISGRP1 | GIC_ICCICRS_IRQBYPDISGRP1);
   icddcr  = (GIC_ICDDCR_ENABLEGRP0 | GIC_ICDDCR_ENABLEGRP1);
 
-#else /* defined(CONFIG_ARCH_TRUSTZONE_NONSECURE) */
+#else
   /* Enable the Group 1 interrupts and disable Group 1 bypass. */
 
   iccicr |= (GIC_ICCICRU_ENABLEGRP1 | GIC_ICCICRU_FIQBYPDISGRP1 |
@@ -1035,16 +1041,6 @@ static void arm_gic_initialize(void)
   /* Write the final ICCICR value to enable the GIC. */
 
   putreg32(iccicr, GIC_ICCICR);
-
-#ifdef CONFIG_ARCH_TRUSTZONE_BOTH
-  /* A processor in the secure state must then switch to the non-secure
-   * a repeat setting of the enable bit in the enable register.  This
-   * enables distributor to respond to interrupt in both security states.
-   * REVISIT: Initial implementation operates only in secure state.
-   */
-
-#  warning Missing logic
-#endif
 
   /* Write the ICDDCR value to enable the forwarding of interrupt by the
    * distributor.
@@ -1067,12 +1063,12 @@ static void arm_gic_initialize(void)
  *   the irq number of the interrupt and then to call arm_doirq to dispatch
  *   the interrupt.
  *
- * Input Parameters:
+ *  Input Parameters:
  *   regs - A pointer to the register save area on the stack.
  *
  ****************************************************************************/
 
-uint64_t * arm64_decodeirq(uint64_t * regs)
+uint64_t *arm64_decodeirq(uint64_t * regs)
 {
   uint32_t regval;
   int irq;
@@ -1090,7 +1086,59 @@ uint64_t * arm64_decodeirq(uint64_t * regs)
    * interrupt.
    */
 
-  DEBUGASSERT(irq < NR_IRQS || irq == 1023);
+  DEBUGASSERT(irq < NR_IRQS || irq >= 1022);
+  if (irq < NR_IRQS)
+    {
+      /* Dispatch the interrupt */
+
+      regs = arm64_doirq(irq, regs);
+    }
+
+  /* Write to the end-of-interrupt register */
+
+#ifdef CONFIG_ARM_GIC_EOIMODE
+  putreg32(regval, GIC_ICCDIR);
+#else
+  putreg32(regval, GIC_ICCEOIR);
+#endif
+  return regs;
+}
+
+/****************************************************************************
+ * Name: arm64_decodefiq
+ *
+ * Description:
+ *   This function is called from the FIQ vector handler in arm_vectors.S.
+ *   At this point, the interrupt has been taken and the registers have
+ *   been saved on the stack.  This function simply needs to determine the
+ *   the irq number of the interrupt and then to call arm_doirq to dispatch
+ *   the interrupt.
+ *
+ *  Input Parameters:
+ *   regs - A pointer to the register save area on the stack.
+ *
+ ****************************************************************************/
+
+uint64_t *arm64_decodefiq(uint64_t *regs)
+{
+  uint32_t regval;
+  int irq;
+
+  /* Read the interrupt acknowledge register and get the interrupt ID */
+
+  regval = getreg32(GIC_ICCIAR);
+  irq    = (regval & GIC_ICCIAR_INTID_MASK) >> GIC_ICCIAR_INTID_SHIFT;
+
+#ifdef CONFIG_ARM_GIC_EOIMODE
+  putreg32(regval, GIC_ICCEOIR);
+#endif
+
+  /* Ignore spurions IRQs.  ICCIAR will report 1023 if there is no pending
+   * interrupt.
+   */
+
+  DEBUGASSERT(irq < NR_IRQS || irq >= 1022);
+
   if (irq < NR_IRQS)
     {
       /* Dispatch the interrupt */
@@ -1207,10 +1255,10 @@ int up_prioritize_irq(int irq, int priority)
        * distributor Interrupt Priority Register (GIC_ICDIPR).
        */
 
-      regaddr  = GIC_ICDIPR(irq);
-      regval   = getreg32(regaddr);
-      regval  &= ~GIC_ICDIPR_ID_MASK(irq);
-      regval  |= GIC_ICDIPR_ID(irq, priority);
+      regaddr = GIC_ICDIPR(irq);
+      regval  = getreg32(regaddr);
+      regval &= ~GIC_ICDIPR_ID_MASK(irq);
+      regval |= GIC_ICDIPR_ID(irq, priority);
       putreg32(regval, regaddr);
 
       return OK;
@@ -1393,6 +1441,26 @@ void arm64_gic_secondary_init(void)
   arm_gic_initialize();
 }
 
+/****************************************************************************
+ * Name: arm64_gic_raise_sgi
+ *
+ * Description:
+ *   Raise software generated interrupt to the target
+ *
+ * Input Parameters
+ *   sgi    - The SGI interrupt ID (0-15)
+ *   cpuset - The set of CPUs to receive the SGI
+ *
+ * Returned Value:
+ *   OK is always returned at present.
+ *
+ ****************************************************************************/
+
+int arm64_gic_raise_sgi(unsigned int sgi, uint16_t cpuset)
+{
+  arm_cpu_sgi(sgi, cpuset);
+  return 0;
+}
 #endif /* CONFIG_SMP */
 
 #endif /* CONFIG_ARM_GIC_VERSION == 2 */

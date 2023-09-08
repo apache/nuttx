@@ -378,18 +378,18 @@ static inline void writedata(FAR struct lib_sostream_s *outstream,
  ****************************************************************************/
 
 int hex2bin(FAR struct lib_instream_s *instream,
-            FAR struct lib_sostream_s *outstream, uint32_t baseaddr,
-            uint32_t endpaddr, enum hex2bin_swap_e swap)
+            FAR struct lib_sostream_s *outstream, unsigned long baseaddr,
+            unsigned long endpaddr, enum hex2bin_swap_e swap)
 {
   FAR uint8_t *alloc;
   FAR uint8_t *line;
   FAR uint8_t *bin;
   int nbytes;
   int bytecount;
-  uint32_t address;
-  uint32_t endaddr;
-  uint32_t expected;
-  uint32_t extension;
+  unsigned long address;
+  unsigned long endaddr;
+  unsigned long expected;
+  unsigned long extension;
   uint16_t address16;
   uint8_t checksum;
   unsigned int lineno;
@@ -546,7 +546,7 @@ int hex2bin(FAR struct lib_instream_s *instream,
 
             /* Get and verify the full 32-bit address */
 
-            address = extension + (uint32_t)address16;
+            address = extension + (unsigned long)address16;
             endaddr = address + bytecount;
 
             if (address < baseaddr || (endpaddr != 0 && endaddr >= endpaddr))
@@ -621,7 +621,7 @@ int hex2bin(FAR struct lib_instream_s *instream,
               goto errout_with_einval;
             }
 
-          extension = (uint32_t)bin[DATA_BINNDX] << 12;
+          extension = (unsigned long)bin[DATA_BINNDX] << 12;
           break;
 
         case RECORD_START_SEGADDR: /* Start segment address record */
@@ -654,8 +654,8 @@ int hex2bin(FAR struct lib_instream_s *instream,
               goto errout_with_einval;
             }
 
-          extension = (uint32_t)bin[DATA_BINNDX] << 24 |
-                      (uint32_t)bin[DATA_BINNDX + 1] << 16;
+          extension = (unsigned long)bin[DATA_BINNDX] << 24 |
+                      (unsigned long)bin[DATA_BINNDX + 1] << 16;
           break;
 
         case RECORD_START_LINADDR: /* Start linear address record */

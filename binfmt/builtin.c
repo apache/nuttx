@@ -96,7 +96,7 @@ static int builtin_loadbinary(FAR struct binary_s *binp,
    * the priority.  That is a bug and needs to be fixed.
    */
 
-  builtin         = builtin_for_index(index);
+  builtin = builtin_for_index(index);
   if (builtin == NULL)
     {
       berr("ERROR: %s is not a builtin application\n", filename);
@@ -106,6 +106,12 @@ static int builtin_loadbinary(FAR struct binary_s *binp,
   binp->entrypt   = builtin->main;
   binp->stacksize = builtin->stacksize;
   binp->priority  = builtin->priority;
+#ifdef CONFIG_SCHED_USER_IDENTITY
+  binp->uid       = builtin->uid;
+  binp->gid       = builtin->gid;
+  binp->mode      = builtin->mode;
+#endif
+
   return OK;
 }
 

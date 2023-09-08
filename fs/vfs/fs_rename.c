@@ -33,6 +33,7 @@
 #include <errno.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/lib/lib.h>
 
 #include "inode/inode.h"
 
@@ -118,7 +119,7 @@ next_subdir:
 
           if (subdir != NULL)
             {
-              kmm_free(subdir);
+              lib_free(subdir);
               subdir = NULL;
             }
 
@@ -351,7 +352,7 @@ next_subdir:
 
               if (subdir != NULL)
                 {
-                   kmm_free(subdir);
+                   lib_free(subdir);
                    subdir = NULL;
                 }
 

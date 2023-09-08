@@ -111,7 +111,7 @@ static inline uint32_t arm_clz(unsigned int value)
  *   Get cache linesize
  *
  * Input Parameters:
- *   None
+ *   icache - Difference between icache and dcache.
  *
  * Returned Value:
  *   Cache line size
@@ -119,21 +119,78 @@ static inline uint32_t arm_clz(unsigned int value)
  ****************************************************************************/
 
 #if defined(CONFIG_ARMV8M_ICACHE) || defined(CONFIG_ARMV8M_DCACHE)
-static size_t up_get_cache_linesize(void)
+static size_t up_get_cache_linesize(bool icache)
 {
-  static uint32_t clsize;
+  uint32_t ccsidr;
+  uint32_t csselr;
+  uint32_t sshift;
 
-  if (clsize == 0)
+  csselr = getreg32(NVIC_CSSELR);
+
+  if (icache)
     {
-      uint32_t ccsidr;
-      uint32_t sshift;
-
-      ccsidr = getreg32(NVIC_CCSIDR);
-      sshift = CCSIDR_LSSHIFT(ccsidr) + 4;   /* log2(cache-line-size-in-bytes) */
-      clsize = 1 << sshift;
+      putreg32((csselr & ~NVIC_CSSELR_IND) |
+                NVIC_CSSELR_IND_ICACHE, NVIC_CSSELR);
+    }
+  else
+    {
+      putreg32((csselr & ~NVIC_CSSELR_IND) |
+                NVIC_CSSELR_IND_DCACHE, NVIC_CSSELR);
     }
 
-  return clsize;
+  ccsidr = getreg32(NVIC_CCSIDR);
+  sshift = CCSIDR_LSSHIFT(ccsidr) + 4;   /* log2(cache-line-size-in-bytes) */
+
+  putreg32(csselr, NVIC_CSSELR);    /* restore csselr */
+
+  return 1 << sshift;
+}
+
+/****************************************************************************
+ * Name: up_get_cache_size
+ *
+ * Description:
+ *   Get cache size
+ *
+ * Input Parameters:
+ *   level - Difference between icache and dcache.
+ *
+ * Returned Value:
+ *   Cache size
+ *
+ ****************************************************************************/
+
+static size_t up_get_cache_size(bool icache)
+{
+  uint32_t ccsidr;
+  uint32_t csselr;
+  uint32_t sshift;
+  uint32_t sets;
+  uint32_t ways;
+  uint32_t line;
+
+  csselr = getreg32(NVIC_CSSELR);
+
+  if (icache)
+    {
+      putreg32((csselr & ~NVIC_CSSELR_IND) |
+                NVIC_CSSELR_IND_ICACHE, NVIC_CSSELR);
+    }
+  else
+    {
+      putreg32((csselr & ~NVIC_CSSELR_IND) |
+                NVIC_CSSELR_IND_DCACHE, NVIC_CSSELR);
+    }
+
+  ccsidr = getreg32(NVIC_CCSIDR);
+  sets   = CCSIDR_SETS(ccsidr) + 1;
+  ways   = CCSIDR_WAYS(ccsidr) + 1;
+  sshift = CCSIDR_LSSHIFT(ccsidr) + 4;   /* log2(cache-line-size-in-bytes) */
+  line   = 1 << sshift;
+
+  putreg32(csselr, NVIC_CSSELR);    /* restore csselr */
+
+  return sets * ways * line;
 }
 #endif
 
@@ -158,7 +215,40 @@ static size_t up_get_cache_linesize(void)
 #ifdef CONFIG_ARMV8M_ICACHE
 size_t up_get_icache_linesize(void)
 {
-  return up_get_cache_linesize();
+  static uint32_t clsize;
+
+  if (clsize == 0)
+    {
+      clsize = up_get_cache_linesize(true);
+    }
+
+  return clsize;
+}
+
+/****************************************************************************
+ * Name: up_get_icache_size
+ *
+ * Description:
+ *   Get icache size
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Cache size
+ *
+ ****************************************************************************/
+
+size_t up_get_icache_size(void)
+{
+  static uint32_t csize;
+
+  if (csize == 0)
+    {
+      csize = up_get_cache_size(true);
+    }
+
+  return csize;
 }
 #endif
 
@@ -344,7 +434,40 @@ void up_invalidate_icache_all(void)
 #ifdef CONFIG_ARMV8M_DCACHE
 size_t up_get_dcache_linesize(void)
 {
-  return up_get_cache_linesize();
+  static uint32_t clsize;
+
+  if (clsize == 0)
+    {
+      clsize = up_get_cache_linesize(false);
+    }
+
+  return clsize;
+}
+
+/****************************************************************************
+ * Name: up_get_dcache_size
+ *
+ * Description:
+ *   Get icache size
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Cache size
+ *
+ ****************************************************************************/
+
+size_t up_get_dcache_size(void)
+{
+  static uint32_t csize;
+
+  if (csize == 0)
+    {
+      csize = up_get_cache_size(false);
+    }
+
+  return csize;
 }
 #endif
 
@@ -372,6 +495,14 @@ void up_enable_dcache(void)
   uint32_t sw;
   uint32_t sets;
   uint32_t ways;
+
+  /* If dcache is already enabled, disable it first. */
+
+  ccr = getreg32(NVIC_CFGCON);
+  if ((ccr & NVIC_CFGCON_DC) != 0)
+    {
+      up_disable_dcache();
+    }
 
   /* Get the characteristics of the D-Cache */
 
@@ -707,10 +838,10 @@ void up_clean_dcache(uintptr_t start, uintptr_t end)
       start += ssize;
     }
   while (start < end);
+#endif /* !CONFIG_ARMV8M_DCACHE_WRITETHROUGH */
 
   ARM_DSB();
   ARM_ISB();
-#endif /* !CONFIG_ARMV8M_DCACHE_WRITETHROUGH */
 }
 #endif /* CONFIG_ARMV8M_DCACHE */
 
@@ -784,10 +915,10 @@ void up_clean_dcache_all(void)
       while (tmpways--);
     }
   while (sets--);
+#endif /* !CONFIG_ARMV8M_DCACHE_WRITETHROUGH */
 
   ARM_DSB();
   ARM_ISB();
-#endif /* !CONFIG_ARMV8M_DCACHE_WRITETHROUGH */
 }
 #endif /* CONFIG_ARMV8M_DCACHE */
 

@@ -108,7 +108,6 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   /* Some sanity checks */
 
-  DEBUGASSERT(psock && psock->s_conn);
   DEBUGASSERT(newsock && !newsock->s_conn);
 
   /* Is the socket a stream? */
@@ -125,8 +124,7 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
   server = psock->s_conn;
 
   if (server->lc_proto != SOCK_STREAM ||
-      server->lc_state != LOCAL_STATE_LISTENING ||
-      server->lc_type  != LOCAL_TYPE_PATHNAME)
+      server->lc_state != LOCAL_STATE_LISTENING)
     {
       return -EOPNOTSUPP;
     }
@@ -170,10 +168,8 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
               conn->lc_type   = LOCAL_TYPE_PATHNAME;
               conn->lc_state  = LOCAL_STATE_CONNECTED;
               conn->lc_psock  = psock;
-#ifdef CONFIG_NET_LOCAL_SCM
               conn->lc_peer   = client;
               client->lc_peer = conn;
-#endif /* CONFIG_NET_LOCAL_SCM */
 
               strlcpy(conn->lc_path, client->lc_path, sizeof(conn->lc_path));
               conn->lc_instance_id = client->lc_instance_id;

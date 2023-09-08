@@ -78,7 +78,6 @@ int sem_unlink(FAR const char *name)
 
   SETUP_SEARCH(&desc, fullpath, false);
 
-  sched_lock();
   ret = inode_find(&desc);
   if (ret < 0)
     {
@@ -91,7 +90,6 @@ int sem_unlink(FAR const char *name)
   /* Get the search results */
 
   inode = desc.node;
-  DEBUGASSERT(inode != NULL);
 
   /* Verify that what we found is, indeed, a semaphore */
 
@@ -143,7 +141,6 @@ int sem_unlink(FAR const char *name)
   inode_unlock();
   ret = sem_close(&inode->u.i_nsem->ns_sem);
   RELEASE_SEARCH(&desc);
-  sched_unlock();
   return ret;
 
 errout_with_lock:
@@ -155,6 +152,5 @@ errout_with_inode:
 errout_with_search:
   RELEASE_SEARCH(&desc);
   set_errno(errcode);
-  sched_unlock();
   return ERROR;
 }

@@ -76,6 +76,18 @@
                                              * struct g_tscaldata_s
                                              */
 #define TSIOC_USESCALED      _TSIOC(0x0009) /* arg: bool, yes/no */
+#define TSIOC_GETOFFSETX     _TSIOC(0x000a) /* arg: Pointer to
+                                             * int X offset value
+                                             */
+#define TSIOC_GETOFFSETY     _TSIOC(0x000b) /* arg: Pointer to
+                                             * int Y offset value
+                                             */
+#define TSIOC_GETTHRESHX     _TSIOC(0x000c) /* arg: Pointer to
+                                             * int X threshold value
+                                             */
+#define TSIOC_GETTHRESHY     _TSIOC(0x000d) /* arg: Pointer to
+                                             * int Y threshold value
+                                             */
 
 #define TSC_FIRST            0x0001          /* First common command */
 #define TSC_NCMDS            6               /* Six common commands */

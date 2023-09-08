@@ -99,7 +99,7 @@
 #define ESP32S3_PERIPH_PWM1                                32
 #define ESP32S3_PERIPH_LEDC                                35
 #define ESP32S3_PERIPH_EFUSE                               36
-#define ESP32S3_PERIPH_CAN                                 37
+#define ESP32S3_PERIPH_TWAI                                37
 #define ESP32S3_PERIPH_USB                                 38
 #define ESP32S3_PERIPH_RTC_CORE                            39
 
@@ -208,8 +208,8 @@
 #define ESP32S3_IRQ_PWR                                 (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_PWR)
 #define ESP32S3_IRQ_BB                                  (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_BB)
 #define ESP32S3_IRQ_BT_MAC                              (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_BT_MAC)
-#define ESP32S3_IRQ_BT_BB                               (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_BB)
-#define ESP32S3_IRQ_BT_BB_NMI                           (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_BB_NMI)
+#define ESP32S3_IRQ_BT_BB                               (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_BT_BB)
+#define ESP32S3_IRQ_BT_BB_NMI                           (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_BT_BB_NMI)
 #define ESP32S3_IRQ_RWBT                                (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_RWBT)
 #define ESP32S3_IRQ_RWBLE                               (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_RWBLE)
 #define ESP32S3_IRQ_RWBT_NMI                            (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_RWBT_NMI)
@@ -239,7 +239,7 @@
 #define ESP32S3_IRQ_PWM1                                (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_PWM1)
 #define ESP32S3_IRQ_LEDC                                (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_LEDC)
 #define ESP32S3_IRQ_EFUSE                               (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_EFUSE)
-#define ESP32S3_IRQ_CAN                                 (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_CAN)
+#define ESP32S3_IRQ_TWAI                                (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_TWAI)
 #define ESP32S3_IRQ_USB                                 (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_USB)
 #define ESP32S3_IRQ_RTC_CORE                            (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_RTC_CORE)
 
@@ -438,23 +438,19 @@
 #define ESP32S3_CPUINT_LEVELPERIPH_20 31
 
 #define ESP32S3_CPUINT_NLEVELPERIPHS  21
-#define ESP32S3_CPUINT_LEVELSET       0x8fbe333f
+#define ESP32S3_CPUINT_LEVELSET       0xdffe373f
 
-#define ESP32S3_CPUINT_EDGEPERIPH_0   10
-#define ESP32S3_CPUINT_EDGEPERIPH_1   22
-#define ESP32S3_CPUINT_EDGEPERIPH_2   28
-#define ESP32S3_CPUINT_EDGEPERIPH_3   30
-
-#define ESP32S3_CPUINT_NEDGEPERIPHS   4
-#define ESP32S3_CPUINT_EDGESET        0x50400400
+#define ESP32S3_CPUINT_NEDGEPERIPHS   0
 
 #define ESP32S3_CPUINT_NNMIPERIPHS    1
 #define ESP32S3_CPUINT_NMISET         0x00004000
 
 #define ESP32S3_CPUINT_MAC            0
-#define ESP32S3_CPUINT_MAC_NMI        1
+#define ESP32S3_CPUINT_PWR            0
+#define ESP32S3_CPUINT_RWBLE          5
 #define ESP32S3_CPUINT_TIMER0         6
 #define ESP32S3_CPUINT_SOFTWARE0      7
+#define ESP32S3_CPUINT_BT_BB          8
 #define ESP32S3_CPUINT_PROFILING      11
 #define ESP32S3_CPUINT_TIMER1         15
 #define ESP32S3_CPUINT_TIMER2         16

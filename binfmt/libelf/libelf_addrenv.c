@@ -40,7 +40,7 @@
  ****************************************************************************/
 
 #define ELF_TEXT_WRE (PROT_READ | PROT_WRITE | PROT_EXEC)
-#define ELF_TEXT_WRD (PROT_READ | PROT_EXEC)
+#define ELF_TEXT_RE  (PROT_READ | PROT_EXEC)
 
 /****************************************************************************
  * Private Constant Data
@@ -137,16 +137,20 @@ errout_with_addrenv:
   addrenv_drop(loadinfo->addrenv, false);
   return ret;
 #else
+  if (loadinfo->ehdr.e_type == ET_EXEC)
+    {
+      return OK;
+    }
+
   /* Allocate memory to hold the ELF image */
 
-#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
+#  if defined(CONFIG_ARCH_USE_TEXT_HEAP)
   loadinfo->textalloc = (uintptr_t)
-                         up_textheap_memalign(loadinfo->textalign,
-                                              textsize);
-#else
-  loadinfo->textalloc = (uintptr_t)kumm_memalign(loadinfo->textalign,
-                                                 textsize);
-#endif
+                        up_textheap_memalign(loadinfo->textalign, textsize);
+#  else
+  loadinfo->textalloc = (uintptr_t)
+                        kumm_memalign(loadinfo->textalign, textsize);
+#  endif
 
   if (!loadinfo->textalloc)
     {
@@ -155,8 +159,8 @@ errout_with_addrenv:
 
   if (loadinfo->datasize > 0)
     {
-      loadinfo->dataalloc = (uintptr_t)kumm_memalign(loadinfo->dataalign,
-                                                     datasize);
+      loadinfo->dataalloc = (uintptr_t)
+                            kumm_memalign(loadinfo->dataalign, datasize);
       if (!loadinfo->dataalloc)
         {
           return -ENOMEM;
@@ -231,7 +235,7 @@ int elf_addrenv_restore(FAR struct elf_loadinfo_s *loadinfo)
   /* Remove write access to .text */
 
   ret = up_addrenv_mprot(&loadinfo->addrenv->addrenv, loadinfo->textalloc,
-                         loadinfo->textsize, ELF_TEXT_WRD);
+                         loadinfo->textsize, ELF_TEXT_RE);
   if (ret < 0)
     {
       berr("ERROR: up_addrenv_text_disable_write failed: %d\n", ret);
@@ -256,7 +260,7 @@ int elf_addrenv_restore(FAR struct elf_loadinfo_s *loadinfo)
  *
  * Description:
  *   Release the address environment previously created by
- *   elf_addrenv_alloc().  This function  is called only under certain error
+ *   elf_addrenv_alloc().  This function is called only under certain error
  *   conditions after the module has been loaded but not yet started.
  *   After the module has been started, the address environment will
  *   automatically be freed when the module exits.
@@ -280,18 +284,17 @@ void elf_addrenv_free(FAR struct elf_loadinfo_s *loadinfo)
 
   if (loadinfo->textalloc != 0)
     {
-#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
+#  if defined(CONFIG_ARCH_USE_TEXT_HEAP)
       up_textheap_free((FAR void *)loadinfo->textalloc);
-#else
+#  else
       kumm_free((FAR void *)loadinfo->textalloc);
-#endif
+#  endif
     }
 
   if (loadinfo->dataalloc != 0)
     {
       kumm_free((FAR void *)loadinfo->dataalloc);
     }
-
 #endif
 
   /* Clear out all indications of the allocated address environment */

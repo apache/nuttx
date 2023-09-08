@@ -40,8 +40,8 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
 
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS)
-#ifdef CONFIG_DEBUG_TCBINFO
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS) && \
+    defined(CONFIG_ARCH_HAVE_TCBINFO) && !defined(CONFIG_FS_PROCFS_EXCLUDE_TCBINFO)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -195,7 +195,7 @@ static ssize_t tcbinfo_read(FAR struct file *filep, FAR char *buffer,
   if (filep->f_pos == 0)
     {
       linesize = procfs_snprintf(attr->line, TCBINFO_LINELEN,
-                                 "pointer %p size %d\n", &g_tcbinfo,
+                                 "pointer %p size %zu\n", &g_tcbinfo,
                                   sizeof(struct tcbinfo_s));
 
       /* Save the linesize in case we are re-entered with f_pos > 0 */
@@ -277,5 +277,4 @@ static int tcbinfo_stat(FAR const char *relpath, FAR struct stat *buf)
  * Public Functions
  ****************************************************************************/
 
-#endif /* CONFIG_DEBUG_TCBINFO */
 #endif /* !CONFIG_DISABLE_MOUNTPOINT && CONFIG_FS_PROCFS */

@@ -606,12 +606,6 @@ static ssize_t ft5x06_waitsample(FAR struct ft5x06_dev_s *priv,
 {
   int ret;
 
-  /* Disable pre-emption to prevent other threads from getting control while
-   * we muck with the semaphores.
-   */
-
-  sched_lock();
-
   /* Now release the semaphore that manages mutually exclusive access to
    * the device structure.  This may cause other tasks to become ready to
    * run, but they cannot run yet because pre-emption is disabled.
@@ -659,13 +653,6 @@ static ssize_t ft5x06_waitsample(FAR struct ft5x06_dev_s *priv,
     }
 
 errout:
-  /* Restore pre-emption.  We might get suspended here but that is okay
-   * because we already have our sample.  Note:  this means that if there
-   * were two threads reading from the FT5x06 for some reason, the data
-   * might be read out of order.
-   */
-
-  sched_unlock();
   return ret;
 }
 
@@ -745,11 +732,10 @@ static int ft5x06_open(FAR struct file *filep)
   uint8_t tmp;
   int ret;
 
-  DEBUGASSERT(filep);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct ft5x06_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  priv  = inode->i_private;
 
   /* Get exclusive access to the driver data structure */
 
@@ -804,11 +790,10 @@ static int ft5x06_close(FAR struct file *filep)
   FAR struct ft5x06_dev_s *priv;
   int ret;
 
-  DEBUGASSERT(filep);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct ft5x06_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  priv  = inode->i_private;
 
   /* Get exclusive access to the driver data structure */
 
@@ -852,11 +837,10 @@ static ssize_t ft5x06_read(FAR struct file *filep, FAR char *buffer,
   FAR struct ft5x06_dev_s *priv;
   int ret;
 
-  DEBUGASSERT(filep);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct ft5x06_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  priv  = inode->i_private;
 
   /* Verify that the caller has provided a buffer large enough to receive
    * the touch data.
@@ -925,11 +909,10 @@ static int ft5x06_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   int                      ret;
 
   iinfo("cmd: %d arg: %ld\n", cmd, arg);
-  DEBUGASSERT(filep);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct ft5x06_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  priv  = inode->i_private;
 
   /* Get exclusive access to the driver data structure */
 
@@ -982,11 +965,11 @@ static int ft5x06_poll(FAR struct file *filep, FAR struct pollfd *fds,
   int                      i;
 
   iinfo("setup: %d\n", (int)setup);
-  DEBUGASSERT(filep && fds);
+  DEBUGASSERT(fds);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct ft5x06_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  priv  = inode->i_private;
 
   /* Are we setting up the poll?  Or tearing it down? */
 
@@ -1109,7 +1092,7 @@ int ft5x06_register(FAR struct i2c_master_s *i2c,
 
   /* Create and initialize a FT5x06 device driver instance */
 
-  priv = (FAR struct ft5x06_dev_s *)kmm_zalloc(sizeof(struct ft5x06_dev_s));
+  priv = kmm_zalloc(sizeof(struct ft5x06_dev_s));
   if (!priv)
     {
       ierr("ERROR: kmm_zalloc(%d) failed\n", sizeof(struct ft5x06_dev_s));

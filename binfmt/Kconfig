@@ -5,7 +5,7 @@
 
 config BINFMT_DISABLE
 	bool "Disable BINFMT support"
-	default n
+	default DEFAULT_SMALL
 	---help---
 		By default, support for loadable binary formats is built.  This logic
 		may be suppressed by defining this setting.
@@ -66,3 +66,22 @@ config BINFMT_CONSTRUCTORS
 	---help---
 		Built-in support for C++ constructors in loaded modules.  Currently
 		only support for ELF binary formats.
+
+choice
+	prompt "File output format"
+	default BINFMT_ELF_RELOCATABLE
+	---help---
+		Defines the type of ELF file produced by the NuttX build system.
+
+config BINFMT_ELF_RELOCATABLE
+	bool "Relocatable ELF"
+	---help---
+	  Produce a relocatable object as output. This is also known as partial linking.
+
+config BINFMT_ELF_EXECUTABLE
+	bool "Executable ELF"
+	depends on ARCH_HAVE_ELF_EXECUTABLE
+	---help---
+	   Produce a full linked executable object as output.
+
+endchoice

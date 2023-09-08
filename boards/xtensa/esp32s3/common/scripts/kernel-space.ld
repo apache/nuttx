@@ -102,6 +102,7 @@ SECTIONS
 
     _iram_text_start = ABSOLUTE(.);
     *(.iram1 .iram1.*)
+
     esp32s3_userspace.*(.literal .text .literal.* .text.*)
     *librtc.a:(.literal .text .literal.* .text.*)
     *libkarch.a:esp32s3_spiflash.*(.literal .text .literal.* .text.*)
@@ -116,6 +117,12 @@ SECTIONS
     *libsched.a:spinlock.*(.literal .text .literal.* .text.*)
     *libsched.a:irq_csection.*(.literal .text .literal.* .text.*)
     *libsched.a:irq_dispatch.*(.literal .text .literal.* .text.*)
+
+    *(.wifirxiram .wifirxiram.*)
+    *(.wifi0iram  .wifi0iram.*)
+    *(.wifiorslpiram .wifiorslpiram.*)
+    *(.wifislpiram .wifislpiram.*)
+    *(.wifislprxiram .wifislprxiram.*)
 
     /* align + add 16B for CPU dummy speculative instr. fetch */
 
@@ -263,6 +270,11 @@ SECTIONS
 
     *(.rodata)
     *(.rodata.*)
+    *(.rodata_wlog_verbose.*)
+    *(.rodata_wlog_debug.*)
+    *(.rodata_wlog_info.*)
+    *(.rodata_wlog_warning.*)
+    *(.rodata_wlog_error.*)
     *(.irom1.text) /* catch stray ICACHE_RODATA_ATTR */
     *(.gnu.linkonce.r.*)
     *(.rodata1)

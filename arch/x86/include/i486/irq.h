@@ -138,7 +138,7 @@
  *   change occurred.
  */
 
-#define TOP_PUSHA    	 REG_IRQNO
+#define TOP_PUSHA         REG_IRQNO
 #define BOTTOM_PRIO      (XCPTCONTEXT_REGS-REG_IRQNO)
 #define BOTTOM_NOPRIO    (REG_SP-REG_IRQNO)
 

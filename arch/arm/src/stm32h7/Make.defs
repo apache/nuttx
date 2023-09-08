@@ -29,6 +29,18 @@ ifeq ($(CONFIG_STM32H7_PROGMEM),y)
 CHIP_CSRCS += stm32_flash.c
 endif
 
+ifeq ($(CONFIG_ARCH_STM32H7_DUALCORE),y)
+CHIP_CSRCS += stm32_dualcore.c
+endif
+
+ifeq ($(CONFIG_STM32H7_HSEM),y)
+CHIP_CSRCS += stm32_hsem.c
+endif
+
+ifeq ($(CONFIG_RPTUN),y)
+CHIP_CSRCS += stm32_rptun.c
+endif
+
 # Required STM32H7 files
 
 CHIP_CSRCS += stm32_allocateheap.c stm32_exti_gpio.c stm32_gpio.c stm32_irq.c
@@ -45,8 +57,12 @@ ifeq ($(CONFIG_STM32H7_ONESHOT),y)
 CHIP_CSRCS += stm32_oneshot.c stm32_oneshot_lowerhalf.c
 endif
 
+ifeq ($(CONFIG_ARM_MPU),y)
+CHIP_CSRCS += stm32_mpuinit.c
+endif
+
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CHIP_CSRCS += stm32_userspace.c stm32_mpuinit.c
+CHIP_CSRCS += stm32_userspace.c
 endif
 
 ifeq ($(CONFIG_ARMV7M_DTCM),y)
@@ -120,6 +136,10 @@ endif
 
 ifeq ($(CONFIG_TIMER),y)
 CHIP_CSRCS += stm32_tim_lowerhalf.c
+endif
+
+ifeq ($(CONFIG_STM32H7_LTDC),y)
+CHIP_CSRCS += stm32_ltdc.c
 endif
 
 ifeq ($(CONFIG_USBDEV),y)

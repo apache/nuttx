@@ -190,8 +190,7 @@ static void pkt_addref(FAR struct socket *psock)
 {
   FAR struct pkt_conn_s *conn;
 
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL &&
-              (psock->s_type == SOCK_RAW || psock->s_type == SOCK_CTRL));
+  DEBUGASSERT(psock->s_type == SOCK_RAW || psock->s_type == SOCK_CTRL);
 
   conn = psock->s_conn;
   DEBUGASSERT(conn->crefs > 0 && conn->crefs < 255);

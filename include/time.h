@@ -106,16 +106,6 @@
  * Public Types
  ****************************************************************************/
 
-/* Scalar types */
-
-#ifdef CONFIG_SYSTEM_TIME64
-typedef uint64_t  time_t;         /* Holds time in seconds */
-#else
-typedef uint32_t  time_t;         /* Holds time in seconds */
-#endif
-typedef uint8_t   clockid_t;      /* Identifies one time base source */
-typedef FAR void *timer_t;        /* Represents one POSIX timer */
-
 /* struct timespec is the standard representation of time as seconds and
  * nanoseconds.
  */
@@ -201,6 +191,7 @@ clock_t clock(void);
 int clock_settime(clockid_t clockid, FAR const struct timespec *tp);
 int clock_gettime(clockid_t clockid, FAR struct timespec *tp);
 int clock_getres(clockid_t clockid, FAR struct timespec *res);
+int clock_getcpuclockid(pid_t pid, FAR clockid_t *clockid);
 int timespec_get(FAR struct timespec *t, int b);
 
 time_t timegm(FAR struct tm *tp);

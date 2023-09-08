@@ -1,122 +1,109 @@
 /****************************************************************************
  * libs/libc/machine/arm/armv7-m/gnu/arch_memset.S
  *
- * Copyright (c) 2015 ARM Ltd
+ * Copyright (C) 2008 The Android Open Source Project
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- * 1. Redistributions of source code must retain the above copyright
+ *  * Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. The name of the company may not be used to endorse or promote
- *    products derived from this software without specific prior written
- *    permission.
+ *  * Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
  *
- * THIS SOFTWARE IS PROVIDED BY ARM LTD ``AS IS'' AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL ARM LTD BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
- * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
  *
  ****************************************************************************/
 
 #include "libc.h"
 
-#ifdef LIBC_BUILD_STRING
-
-#include "arm_asm.h"
+#ifdef LIBC_BUILD_MEMSET
 
 	.thumb
 	.syntax unified
 	.global memset
 	.type	memset, %function
-	.fnstart
-	.cfi_startproc
 memset:
-	prologue 4 6
-	lsls	r4, r0, #30
-	beq	10f
-	subs	r4, r2, #1
-	cmp	r2, #0
-	beq	9f
-	uxtb	r5, r1
-	mov	r3, r0
-	b	2f
-1:
-	subs	r2, r4, #1
-	cbz	r4, 9f
-	mov	r4, r2
-2:
-	strb	r5, [r3], #1
-	lsls	r2, r3, #30
-	bne	1b
+	stmfd	sp!, {r0, r4-r7, lr}
+	rsb	r3, r0, #0
+	ands	r3, r3, #3
+	cmp	r3, r2
+	movhi	r3, r2
+
+	/* splat r1 */
+
+	mov	r1, r1, lsl #24
+	orr	r1, r1, r1, lsr #8
+	orr	r1, r1, r1, lsr #16
+
+	movs	r12, r3, lsl #31
+	strbcs	r1, [r0], #1
+	strbcs	r1, [r0], #1
+	strbmi	r1, [r0], #1
+	subs	r2, r2, r3
+	popls	{r0, r4-r7, pc}
+
+	/* align the destination to a cache-line */
+
+	mov	r12, r1
+	mov	lr, r1
+	mov	r4, r1
+	mov	r5, r1
+	mov	r6, r1
+	mov	r7, r1
+
+	rsb	r3, r0, #0
+	ands	r3, r3, #0x1C
+	beq	3f
+	cmp	r3, r2
+	andhi	r3, r2, #0x1C
+	sub	r2, r2, r3
+
+	/* conditionally writes 0 to 7 words (length in r3) */
+
+	movs	r3, r3, lsl #28
+	stmcs	r0!, {r1, lr}
+	stmcs	r0!, {r1, lr}
+	stmmi	r0!, {r1, lr}
+	movs	r3, r3, lsl #2
+	strcs	r1, [r0], #4
+
 3:
-	cmp	r4, #3
-	bls	7f
-	uxtb	r5, r1
-	orr	r5, r5, r5, lsl #8
-	cmp	r4, #15
-	orr	r5, r5, r5, lsl #16
-	bls	5f
-	mov	r6, r4
-	add	r2, r3, #16
-4:
-	subs	r6, r6, #16
-	cmp	r6, #15
-	str	r5, [r2, #-16]
-	str	r5, [r2, #-12]
-	str	r5, [r2, #-8]
-	str	r5, [r2, #-4]
-	add	r2, r2, #16
-	bhi	4b
-	sub	r2, r4, #16
-	bic	r2, r2, #15
-	and	r4, r4, #15
-	adds	r2, r2, #16
-	cmp	r4, #3
-	add	r3, r3, r2
-	bls	7f
-5:
-	mov	r6, r3
-	mov	r2, r4
-6:
-	subs	r2, r2, #4
-	cmp	r2, #3
-	str	r5, [r6], #4
-	bhi	6b
-	subs	r2, r4, #4
-	bic	r2, r2, #3
-	adds	r2, r2, #4
-	add	r3, r3, r2
-	and	r4, r4, #3
-7:
-	cbz	r4, 9f
-	uxtb	r1, r1
-	add	r4, r4, r3
-8:
-	strb	r1, [r3], #1
-	cmp	r3, r4
-	bne	8b
-9:
-	.cfi_remember_state
-	epilogue 4 6
-10:
-	.cfi_restore_state
-	mov	r4, r2
-	mov	r3, r0
-	b	3b
-	.cfi_endproc
-	.cantunwind
-	.fnend
+	subs	r2, r2, #32
+	mov	r3, r1
+	bmi	2f
+1:
+	subs	r2, r2, #32
+	stmia	r0!, {r1,r3,r4,r5,r6,r7,r12,lr}
+	bhs	1b
+2:
+	add	r2, r2, #32
+
+	/* conditionally stores 0 to 31 bytes */
+
+	movs	r2, r2, lsl #28
+	stmcs	r0!, {r1,r3,r12,lr}
+	stmmi	r0!, {r1, lr}
+	movs	r2, r2, lsl #2
+	strcs	r1, [r0], #4
+	strhmi	r1, [r0], #2
+	movs	r2, r2, lsl #2
+	strbcs	r1, [r0]
+	ldmfd	sp!, {r0, r4-r7, pc}
 	.size memset, . - memset
 
 #endif

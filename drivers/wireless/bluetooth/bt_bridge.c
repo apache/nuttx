@@ -589,7 +589,7 @@ int bt_bridge_register(FAR struct bt_driver_s *hcidrv,
       return -EINVAL;
     }
 
-  bridge = (FAR struct bt_bridge_s *)kmm_zalloc(sizeof(struct bt_bridge_s));
+  bridge = kmm_zalloc(sizeof(struct bt_bridge_s));
   if (!bridge)
     {
       return -ENOMEM;

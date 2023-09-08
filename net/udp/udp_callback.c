@@ -36,6 +36,7 @@
 
 #include "devif/devif.h"
 #include "udp/udp.h"
+#include "utils/utils.h"
 
 /****************************************************************************
  * Private Functions
@@ -57,31 +58,31 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev,
   FAR struct iob_s *iob;
   int ret;
 #ifdef CONFIG_NET_IPv6
-  FAR struct sockaddr_in6 src_addr6 =
+  struct sockaddr_in6 src_addr6 =
   {
     0
   };
 #endif
 
 #ifdef CONFIG_NET_IPv4
-  FAR struct sockaddr_in src_addr4 =
+  struct sockaddr_in src_addr4 =
   {
     0
   };
 #endif
 
   uint8_t src_addr_size;
-  FAR void  *src_addr;
-  uint8_t offset = 0;
+  FAR void *src_addr;
+  int offset;
 
 #if CONFIG_NET_RECV_BUFSIZE > 0
-  while (iob_get_queue_size(&conn->readahead) > conn->rcvbufs)
+  if (conn->readahead && conn->readahead->io_pktlen > conn->rcvbufs)
     {
-      iob = iob_remove_queue(&conn->readahead);
-      iob_free_chain(iob);
+      netdev_iob_release(dev);
 #ifdef CONFIG_NET_STATISTICS
       g_netstats.udp.drop++;
 #endif
+      return 0;
     }
 #endif
 
@@ -117,16 +118,16 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev,
 
       if (conn->domain == PF_INET6)
         {
-          FAR struct udp_hdr_s *udp   = UDPIPv6BUF;
-          FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
+          FAR struct udp_hdr_s *udp   = UDPIPv4BUF;
+          FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
           in_addr_t ipv4addr;
 
-          /* Encode the IPv4 address as an IPv-mapped IPv6 address */
+          /* Encode the IPv4 address as an IPv4-mapped IPv6 address */
 
           src_addr6.sin6_family = AF_INET6;
           src_addr6.sin6_port = udp->srcport;
 
-          ipv4addr = net_ip4addr_conv32(ipv6->srcipaddr);
+          ipv4addr = net_ip4addr_conv32(ipv4->srcipaddr);
           ip6_map_ipv4addr(ipv4addr, src_addr6.sin6_addr.s6_addr16);
 
           src_addr_size = sizeof(src_addr6);
@@ -151,44 +152,72 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev,
     }
 #endif /* CONFIG_NET_IPv4 */
 
-  /* Override the address info begin of io_data */
+  /* Copy the meta info into the I/O buffer chain, just before data.
+   * Layout: |datalen|ifindex|src_addr_size|src_addr|data|
+   */
 
-#ifdef CONFIG_NETDEV_IFINDEX
-  iob->io_data[offset++] = dev->d_ifindex;
-#endif
-  iob->io_data[offset++] = src_addr_size;
-  memcpy(&iob->io_data[offset], src_addr, src_addr_size);
+  offset = (dev->d_appdata - iob->io_data) - iob->io_offset;
 
-  /* Trim l3/l4 offset */
-
-  iob = iob_trimhead(iob, (dev->d_appdata - iob->io_data) -
-                          iob->io_offset);
-
-  /* Add the new I/O buffer chain to the tail of the read-ahead queue */
-
-  ret = iob_tryadd_queue(iob, &conn->readahead);
+  offset -= src_addr_size;
+  ret = iob_trycopyin(iob, src_addr, src_addr_size, offset, true);
   if (ret < 0)
     {
-      nerr("ERROR: Failed to queue the I/O buffer chain: %d\n", ret);
-
-      iob_free_chain(iob);
-      buflen = 0;
+      goto errout;
     }
-#ifdef CONFIG_NET_UDP_NOTIFIER
-  else
+
+  offset -= sizeof(src_addr_size);
+  ret = iob_trycopyin(iob, &src_addr_size, sizeof(src_addr_size),
+                      offset, true);
+  if (ret < 0)
     {
-      ninfo("Buffered %d bytes\n", buflen);
-
-      /* Provided notification(s) that additional UDP read-ahead data is
-       * available.
-       */
-
-      udp_readahead_signal(conn);
+      goto errout;
     }
+
+#ifdef CONFIG_NETDEV_IFINDEX
+  offset -= sizeof(dev->d_ifindex);
+  ret = iob_trycopyin(iob, &dev->d_ifindex, sizeof(dev->d_ifindex),
+                      offset, true);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+#endif
+
+  offset -= sizeof(buflen);
+  ret = iob_trycopyin(iob, (FAR const uint8_t *)&buflen, sizeof(buflen),
+                      offset, true);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  /* Reset new offset to point at start point. */
+
+  DEBUGASSERT(iob->io_offset + offset >= 0);
+  iob_reserve(iob, iob->io_offset + offset);
+
+  /* Concat the iob to readahead */
+
+  net_iob_concat(&conn->readahead, &iob);
+
+#ifdef CONFIG_NET_UDP_NOTIFIER
+  ninfo("Buffered %d bytes\n", buflen);
+
+  /* Provided notification(s) that additional UDP read-ahead data is
+   * available.
+   */
+
+  udp_readahead_signal(conn);
 #endif
 
   netdev_iob_clear(dev);
   return buflen;
+
+errout:
+  nerr("ERROR: Failed to queue the I/O buffer chain: %d\n", ret);
+
+  netdev_iob_release(dev);
+  return 0;
 }
 
 /****************************************************************************

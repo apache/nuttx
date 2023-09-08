@@ -60,6 +60,10 @@
     #define LITEX_SDPHY_BASE        0xf0005000
 #endif
 
+/* Litex core control block */
+
+#define LITEX_CTRL_BASE         0xf0000800
+
 /* GPIO peripheral definitions.
  *  - LITEX_GPIO_BASE is the first 32-bit address which contains a block
  *    of GPIO registers (peripheral). Each block can contain up to 32 pins.

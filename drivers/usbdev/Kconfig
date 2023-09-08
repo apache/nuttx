@@ -227,17 +227,10 @@ config COMPOSITE_PRODUCTSTR
 	---help---
 		The product ID code/string
 
-config COMPOSITE_BOARD_SERIALSTR
-	bool "Enable board unique ID to composite serial string"
-	default n
-	select BOARD_USBDEV_SERIALSTR
-	---help---
-		Use board unique serial number to iSerialNumber in the device descriptor.
-
 config COMPOSITE_SERIALSTR
 	string "Composite serial string"
 	default "001"
-	depends on !COMPOSITE_BOARD_SERIALSTR
+	depends on !BOARD_USBDEV_SERIALSTR
 	---help---
 		Device serial number string
 
@@ -264,6 +257,12 @@ config COMPOSITE_MSFT_OS_DESCRIPTORS
 		loading. See https://msdn.microsoft.com/en-us/windows/hardware/gg463179
 		Enabling this feature in composite driver will pass these requests
 		onwards to the interface drivers.
+
+config COMPOSITE_DEVICES
+	int "Max class object for composite device"
+	default 8
+	---help---
+		Composite device class object number.
 
 endif
 
@@ -359,13 +358,6 @@ config PL2303_PRODUCTID
 config PL2303_VENDORSTR
 	string "Vendor string"
 	default "NuttX"
-
-config PL2303_BOARD_SERIALSTR
-	bool "Enable board unique ID to PL2303 serial string"
-	default n
-	select BOARD_USBDEV_SERIALSTR
-	---help---
-		Use board unique serial number to iSerialNumber in the device descriptor.
 
 config PL2303_PRODUCTSTR
 	string "Product string"
@@ -592,13 +584,6 @@ config CDCACM_PRODUCTSTR
 	string "Product string"
 	default "CDC/ACM Serial"
 
-config CDCACM_BOARD_SERIALSTR
-	bool "Enable board unique ID to CDC/ACM serial string"
-	default n
-	select BOARD_USBDEV_SERIALSTR
-	---help---
-		Use board unique serial number to iSerialNumber in the device descriptor.
-
 endif # !CDCACM_COMPOSITE
 endif # CDCACM
 
@@ -717,17 +702,10 @@ config USBADB_PRODUCTSTR
 	string "Product string"
 	default "Debug Bridge"
 
-config USBADB_BOARD_SERIALSTR
-	bool "Enable board unique ID to USBADB serial string"
-	default n
-	select BOARD_USBDEV_SERIALSTR
-	---help---
-		Use board unique serial number to iSerialNumber in the device descriptor.
-
 config USBADB_SERIALSTR
 	string "Serial string"
 	default "1234"
-	depends on !USBADB_BOARD_SERIALSTR
+	depends on !BOARD_USBDEV_SERIALSTR
 
 endif # !USBADB_COMPOSITE
 
@@ -902,13 +880,6 @@ config USBMSC_PRODUCTSTR
 	string "Mass storage product string"
 	default "Mass Storage"
 
-config USBMSC_BOARD_SERIALSTR
-	bool "Enable board unique ID to mass storage serial string"
-	default n
-	select BOARD_USBDEV_SERIALSTR
-	---help---
-		Use board unique serial number to iSerialNumber in the device descriptor.
-
 endif # !USBMSC_COMPOSITE
 
 config USBMSC_VERSIONNO
@@ -957,10 +928,10 @@ menuconfig RNDIS
 		- "Remote NDIS To USB Mapping"
 
 		This option may required CONFIG_NETDEV_LATEINIT=y otherwise, the
-		power-up initialization may call the non-existent up_netinitialize().
+		power-up initialization may call the non-existent xxx_netinitialize().
 		This option is not automatically selected because it may be that
 		you have an additional network device that requires the early
-		up_netinitialize() call.
+		xxx_netinitialize() call.
 
 if RNDIS
 
@@ -1006,17 +977,10 @@ config RNDIS_PRODUCTSTR
 	string "RNDIS product string"
 	default "RNDIS gadget"
 
-config RNDIS_BOARD_SERIALSTR
-	bool "Enable board unique ID to RNDIS serial string"
-	default n
-	select BOARD_USBDEV_SERIALSTR
-	---help---
-		Use board unique serial number to iSerialNumber in the device descriptor.
-
 config RNDIS_SERIALSTR
 	string "RNDIS serial string"
 	default "1234"
-	depends on !RNDIS_BOARD_SERIALSTR
+	depends on !BOARD_USBDEV_SERIALSTR
 
 config RNDIS_VERSIONNO
 	hex "RNDIS Version Number"
@@ -1096,10 +1060,10 @@ menuconfig NET_CDCECM
 		   Revision 1.2, February 9, 2007"
 
 		This option may require CONFIG_NETDEV_LATEINIT=y, otherwise the
-		power-up initialization may call the non-existent up_netinitialize().
+		power-up initialization may call the non-existent xxx_netinitialize().
 		This option is not automatically selected because it may be that
 		you have an additional network device that requires the early
-		up_netinitialize() call.
+		xxx_netinitialize() call.
 
 if NET_CDCECM
 
@@ -1242,13 +1206,6 @@ config CDCECM_VENDORSTR
 config CDCECM_PRODUCTSTR
 	string "Product string"
 	default "CDC/ECM Ethernet"
-
-config CDCECM_BOARD_SERIALSTR
-	bool "Enable board unique ID to CDC/ECM serial string"
-	default n
-	select BOARD_USBDEV_SERIALSTR
-	---help---
-		Use board unique serial number to iSerialNumber in the device descriptor.
 
 endif # !CDCECM_COMPOSITE
 endif # CDCECM

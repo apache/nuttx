@@ -56,6 +56,7 @@ struct udp_recvfrom_s
   sem_t                    ir_sem;       /* Semaphore signals recv completion */
   ssize_t                  ir_recvlen;   /* The received length */
   int                      ir_result;    /* Success:OK, failure:negated errno */
+  int                      ir_flags;     /* Flags on received message.  */
 };
 
 /****************************************************************************
@@ -163,34 +164,56 @@ static inline void udp_readahead(struct udp_recvfrom_s *pstate)
 
   pstate->ir_recvlen = -1;
 
-  if ((iob = iob_peek_queue(&conn->readahead)) != NULL)
+  if ((iob = conn->readahead) != NULL)
     {
-      int recvlen = pstate->ir_msg->msg_iov->iov_len;
+      int recvlen;
+      int offset = 0;
+      uint16_t datalen;
       uint8_t src_addr_size;
-      uint8_t offset = 0;
-      FAR void *srcaddr;
       uint8_t ifindex;
+#ifdef CONFIG_NET_IPv6
+      uint8_t srcaddr[sizeof(struct sockaddr_in6)];
+#else
+      uint8_t srcaddr[sizeof(struct sockaddr_in)];
+#endif
 
-      /* Unflatten saved connection information */
+      /* Unflatten saved connection information
+       * Layout: |datalen|ifindex|src_addr_size|src_addr|data|
+       */
+
+      recvlen = iob_copyout((FAR uint8_t *)&datalen, iob,
+                            sizeof(datalen), offset);
+      offset += sizeof(datalen);
+      DEBUGASSERT(recvlen == sizeof(datalen));
 
 #ifdef CONFIG_NETDEV_IFINDEX
-      ifindex = iob->io_data[offset++];
+      recvlen = iob_copyout(&ifindex, iob, sizeof(ifindex), offset);
+      offset += sizeof(ifindex);
+      DEBUGASSERT(recvlen == sizeof(ifindex));
 #else
       ifindex = 1;
 #endif
-      src_addr_size = iob->io_data[offset++];
-      srcaddr = &iob->io_data[offset];
+      recvlen = iob_copyout(&src_addr_size, iob,
+                            sizeof(src_addr_size), offset);
+      offset += sizeof(src_addr_size);
+      DEBUGASSERT(recvlen == sizeof(src_addr_size));
+
+      recvlen = iob_copyout(srcaddr, iob, src_addr_size, offset);
+      offset += src_addr_size;
+      DEBUGASSERT(recvlen == src_addr_size);
 
       /* Copy to user */
 
-      recvlen = iob_copyout(pstate->ir_msg->msg_iov->iov_base,
-                            iob, recvlen, 0);
+      recvlen = iob_copyout(pstate->ir_msg->msg_iov->iov_base, iob,
+                            MIN(pstate->ir_msg->msg_iov->iov_len, datalen),
+                            offset);
 
       /* Update the accumulated size of the data read */
 
       pstate->ir_recvlen = recvlen;
 
-      ninfo("Received %d bytes (of %d)\n", recvlen, iob->io_pktlen);
+      ninfo("Received %d bytes (of %d, total %d)\n",
+            recvlen, datalen, iob->io_pktlen);
 
       if (pstate->ir_msg->msg_name)
         {
@@ -204,15 +227,20 @@ static inline void udp_readahead(struct udp_recvfrom_s *pstate)
 
       udp_recvpktinfo(pstate, srcaddr, ifindex);
 
-      /* Remove the I/O buffer chain from the head of the read-ahead
-       * buffer queue.
-       */
+      /* Remove the packet from the head of the I/O buffer chain. */
 
-      iob_remove_queue(&conn->readahead);
-
-      /* And free the I/O buffer chain */
-
-      iob_free_chain(iob);
+      if (!(pstate->ir_flags & MSG_PEEK))
+        {
+          if (offset + datalen >= iob->io_pktlen)
+            {
+              iob_free_chain(iob);
+              conn->readahead = NULL;
+            }
+          else
+            {
+              conn->readahead = iob_trimhead(iob, offset + datalen);
+            }
+        }
     }
 }
 
@@ -281,8 +309,8 @@ static inline void udp_sender(FAR struct net_driver_s *dev,
 
           FAR struct sockaddr_in6 *infrom6 =
             (FAR struct sockaddr_in6 *)srcaddr;
-          FAR struct udp_hdr_s *udp   = UDPIPv6BUF;
-          FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
+          FAR struct udp_hdr_s *udp   = UDPIPv4BUF;
+          FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
           in_addr_t ipv4addr;
 
           /* Encode the IPv4 address as an IPv4-mapped IPv6 address */
@@ -290,7 +318,7 @@ static inline void udp_sender(FAR struct net_driver_s *dev,
           infrom6->sin6_family = AF_INET6;
           infrom6->sin6_port = udp->srcport;
           fromlen  = sizeof(struct sockaddr_in6);
-          ipv4addr = net_ip4addr_conv32(ipv6->srcipaddr);
+          ipv4addr = net_ip4addr_conv32(ipv4->srcipaddr);
           ip6_map_ipv4addr(ipv4addr, infrom6->sin6_addr.s6_addr16);
         }
       else
@@ -422,13 +450,21 @@ static uint16_t udp_eventhandler(FAR struct net_driver_s *dev,
 
           udp_terminate(pstate, OK);
 
-          /* Indicate that the data has been consumed */
+          /* In read-ahead mode, UDP_NEWDATA and iob need to be reserved
+           * and let udp_callback to call net_dataevent and put this packet
+           * into conn->readahead
+           */
 
-          flags &= ~UDP_NEWDATA;
+          if (!(pstate->ir_flags & MSG_PEEK))
+            {
+              /* Indicate that the data has been consumed */
 
-          /* Indicate no data in the buffer */
+              flags &= ~UDP_NEWDATA;
 
-          netdev_iob_release(dev);
+              /* Indicate no data in the buffer */
+
+              netdev_iob_release(dev);
+            }
         }
     }
 
@@ -455,14 +491,16 @@ static uint16_t udp_eventhandler(FAR struct net_driver_s *dev,
 
 static void udp_recvfrom_initialize(FAR struct udp_conn_s *conn,
                                     FAR struct msghdr *msg,
-                                    FAR struct udp_recvfrom_s *pstate)
+                                    FAR struct udp_recvfrom_s *pstate,
+                                    int flags)
 {
   /* Initialize the state structure. */
 
   memset(pstate, 0, sizeof(struct udp_recvfrom_s));
   nxsem_init(&pstate->ir_sem, 0, 0); /* Doesn't really fail */
 
-  pstate->ir_msg  = msg;
+  pstate->ir_msg   = msg;
+  pstate->ir_flags = flags;
 
   /* Set up the start time for the timeout */
 
@@ -558,7 +596,7 @@ ssize_t psock_udp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
    */
 
   net_lock();
-  udp_recvfrom_initialize(conn, msg, &state);
+  udp_recvfrom_initialize(conn, msg, &state, flags);
 
   /* Copy the read-ahead data from the packet */
 

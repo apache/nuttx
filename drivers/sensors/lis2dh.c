@@ -517,7 +517,7 @@ static ssize_t lis2dh_read(FAR struct file *filep, FAR char *buffer,
 static ssize_t lis2dh_write(FAR struct file *filep, FAR const char *buffer,
                             size_t buflen)
 {
-  DEBUGASSERT(filep != NULL && buffer != NULL && buflen > 0);
+  DEBUGASSERT(buffer != NULL && buflen > 0);
 
   return -ENOSYS;
 }
@@ -538,11 +538,10 @@ static int lis2dh_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   int ret;
   uint8_t buf;
 
-  DEBUGASSERT(filep);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
-  priv = (FAR struct lis2dh_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  priv = inode->i_private;
 
   ret = nxmutex_lock(&dev->devlock);
   if (ret < 0)
@@ -665,11 +664,11 @@ static int lis2dh_poll(FAR struct file *filep, FAR struct pollfd *fds,
   int ret;
   int i;
 
-  DEBUGASSERT(filep && fds);
+  DEBUGASSERT(fds);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
-  priv = (FAR struct lis2dh_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  priv = inode->i_private;
 
   ret = nxmutex_lock(&dev->devlock);
   if (ret < 0)
@@ -2009,7 +2008,7 @@ int lis2dh_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   DEBUGASSERT(devpath != NULL && i2c != NULL && config != NULL);
 
-  priv = (FAR struct lis2dh_dev_s *)kmm_zalloc(sizeof(struct lis2dh_dev_s));
+  priv = kmm_zalloc(sizeof(struct lis2dh_dev_s));
   if (!priv)
     {
       lis2dh_dbg("lis2dh: Failed to allocate instance\n");

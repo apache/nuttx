@@ -274,7 +274,7 @@ config ARCH_CHIP_MOXART
 		MoxART family
 
 config ARCH_CHIP_NRF52
-	bool "Nordic NRF52"
+	bool "Nordic nRF52"
 	select ARCH_CORTEXM4
 	select ARCH_HAVE_TICKLESS
 	select ARMV7M_HAVE_STACKCHECK
@@ -285,15 +285,26 @@ config ARCH_CHIP_NRF52
 	select ARCH_HAVE_PWM_MULTICHAN
 	select ARCH_HAVE_SERIAL_TERMIOS
 	---help---
-		Nordic NRF52 architectures (ARM Cortex-M4).
+		Nordic nRF52 architectures (ARM Cortex-M4).
 
 config ARCH_CHIP_NRF53
-	bool "Nordic NRF53"
+	bool "Nordic nRF53"
 	select ARCH_CORTEXM33
 	select ARCH_HAVE_PWM_MULTICHAN
 	depends on EXPERIMENTAL
 	---help---
-		Nordic NRF53 architectures (ARM dual Cortex-M33).
+		Nordic nRF53 architectures (ARM dual Cortex-M33).
+
+config ARCH_CHIP_NRF91
+	bool "Nordic nRF91"
+	select ARCH_CORTEXM33
+	select ARCH_HAVE_PWM_MULTICHAN
+	select ARCH_HAVE_TRUSTZONE
+	select ARCH_HAVE_TICKLESS
+	depends on EXPERIMENTAL
+	---help---
+		Nordic nRF91 architectures (ARM Cortex-M33 with integrated
+		LTE-M/NB-IoT modem and GNSS).
 
 config ARCH_CHIP_NUC1XX
 	bool "Nuvoton NUC100/120"
@@ -457,7 +468,6 @@ config ARCH_CHIP_STM32F7
 
 config ARCH_CHIP_STM32H7
 	bool "STMicro STM32 H7"
-	select ARCH_CORTEXM7
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_I2CRESET
 	select ARCH_HAVE_PROGMEM
@@ -468,11 +478,8 @@ config ARCH_CHIP_STM32H7
 	select ARCH_HAVE_TICKLESS
 	select ARCH_HAVE_TIMEKEEPING
 	---help---
-		STMicro STM32H7 architectures (ARM Cortex-M7).
-
-		BEWARE: This is a work-in-progress and not yet ready for general
-		usage.  See boards/arm/stm32/nucleo-h743zi/README.txt for the
-		current state of the port.
+		STMicro STM32H7 architectures (ARM Cortex-M7 or
+		dual ARM Cortex-M7 Cortex-M4).
 
 config ARCH_CHIP_STM32L4
 	bool "STMicro STM32 L4"
@@ -512,6 +519,7 @@ config ARCH_CHIP_STM32U5
 	select ARM_HAVE_DSP
 	select ARCH_HAVE_FETCHADD
 	select ARCH_HAVE_HEAPCHECK
+	select ARCH_HAVE_HEAP2
 	select ARCH_HAVE_PROGMEM
 	select ARCH_HAVE_SPI_BITORDER
 	select ARCH_HAVE_TICKLESS
@@ -590,6 +598,22 @@ config ARCH_CHIP_XMC4
 	---help---
 		Infineon XMC4xxx(ARM Cortex-M4) architectures
 
+config ARCH_CHIP_MX8MP
+	bool "NXP i.MX8MP"
+	select ARCH_CORTEXM7
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_FETCHADD
+	select ARCH_HAVE_RAMFUNCS
+	select ARCH_HAVE_I2CRESET
+	select ARM_HAVE_MPU_UNIFIED
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+	select ARMV7M_HAVE_STACKCHECK
+	---help---
+		NXP i.MX8MP (ARM Cortex-M7) architectures
+
 config ARCH_CHIP_CXD56XX
 	bool "Sony CXD56xx"
 	select ARCH_CORTEXM4
@@ -618,6 +642,11 @@ config ARCH_CHIP_TLSR82
 	select LIBC_ARCH_ATOMIC
 	---help---
 		Telink tlsr82xx architectures (Customed armv6m)
+
+config ARCH_CHIP_QEMU_ARM
+	bool "QEMU virt platform (ARMv7a)"
+	---help---
+		QEMU virt platform (ARMv7a)
 
 config ARCH_CHIP_ARM_CUSTOM
 	bool "Custom ARM chip"
@@ -715,6 +744,7 @@ config ARCH_ARM1176JZ
 config ARCH_ARMV6M
 	bool
 	default n
+	select ARCH_HAVE_CPUINFO
 
 config ARCH_CORTEXM0
 	bool
@@ -729,6 +759,7 @@ config ARCH_ARMV7M
 	bool
 	default n
 	select ARCH_HAVE_CPUINFO
+	select ARCH_HAVE_PERF_EVENTS
 
 config ARCH_CORTEXM3
 	bool
@@ -783,6 +814,7 @@ config ARCH_ARMV7A
 	bool
 	default n
 	select ARCH_HAVE_CPUINFO
+	select ARCH_HAVE_PERF_EVENTS
 	select ARM_HAVE_WFE_SEV
 
 config ARCH_CORTEXA5
@@ -832,6 +864,7 @@ config ARCH_ARMV7R
 	bool
 	default n
 	select ARCH_HAVE_CPUINFO
+	select ARCH_HAVE_PERF_EVENTS
 
 config ARCH_CORTEXR4
 	bool
@@ -864,6 +897,7 @@ config ARCH_ARMV8M
 	bool
 	default n
 	select ARCH_HAVE_CPUINFO
+	select ARCH_HAVE_PERF_EVENTS
 
 config ARCH_CORTEXM23
 	bool
@@ -950,6 +984,7 @@ config ARCH_ARMV8R
 	bool
 	default n
 	select ARCH_HAVE_CPUINFO
+	select ARCH_HAVE_PERF_EVENTS
 	select ONESHOT
 	select ALARM_ARCH
 
@@ -991,6 +1026,7 @@ config ARCH_CHIP
 	default "moxart"	if ARCH_CHIP_MOXART
 	default "nrf52"		if ARCH_CHIP_NRF52
 	default "nrf53"		if ARCH_CHIP_NRF53
+	default "nrf91"		if ARCH_CHIP_NRF91
 	default "nuc1xx"	if ARCH_CHIP_NUC1XX
 	default "rp2040"	if ARCH_CHIP_RP2040
 	default "s32k1xx"	if ARCH_CHIP_S32K1XX
@@ -1012,32 +1048,11 @@ config ARCH_CHIP
 	default "str71x"	if ARCH_CHIP_STR71X
 	default "tms570"	if ARCH_CHIP_TMS570
 	default "xmc4"		if ARCH_CHIP_XMC4
+	default "mx8mp"		if ARCH_CHIP_MX8MP
 	default "cxd56xx"	if ARCH_CHIP_CXD56XX
 	default "phy62xx"	if ARCH_CHIP_PHY62XX
 	default "tlsr82"	if ARCH_CHIP_TLSR82
-
-config ARCH_HAVE_TRUSTZONE
-	bool
-	default n
-	---help---
-		Automatically selected to indicate that the ARM CPU supports
-		TrustZone.
-
-choice
-	prompt "TrustZone Configuration"
-	default ARCH_TRUSTZONE_SECURE
-	depends on ARCH_HAVE_TRUSTZONE
-
-config ARCH_TRUSTZONE_SECURE
-	bool "All CPUs operate secure state"
-
-config ARCH_TRUSTZONE_NONSECURE
-	bool "All CPUs operate non-secure state"
-
-config ARCH_TRUSTZONE_BOTH
-	bool "CPUs operate in both secure and non-secure states"
-
-endchoice # TrustZone Configuration
+	default "qemu"		if ARCH_CHIP_QEMU_ARM
 
 config ARM_THUMB
 	bool "Thumb Mode"
@@ -1428,6 +1443,9 @@ endif
 if ARCH_CHIP_NRF53
 source "arch/arm/src/nrf53/Kconfig"
 endif
+if ARCH_CHIP_NRF91
+source "arch/arm/src/nrf91/Kconfig"
+endif
 if ARCH_CHIP_NUC1XX
 source "arch/arm/src/nuc1xx/Kconfig"
 endif
@@ -1485,6 +1503,9 @@ endif
 if ARCH_CHIP_XMC4
 source "arch/arm/src/xmc4/Kconfig"
 endif
+if ARCH_CHIP_MX8MP
+source "arch/arm/src/mx8mp/Kconfig"
+endif
 if ARCH_CHIP_PHY62XX
 source "arch/arm/src/phy62xx/Kconfig"
 endif
@@ -1493,5 +1514,8 @@ source "arch/arm/src/cxd56xx/Kconfig"
 endif
 if ARCH_CHIP_TLSR82
 source "arch/arm/src/tlsr82/Kconfig"
+endif
+if ARCH_CHIP_QEMU_ARM
+source "arch/arm/src/qemu/Kconfig"
 endif
 endif # ARCH_ARM

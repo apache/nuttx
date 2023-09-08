@@ -31,7 +31,7 @@
 #include <debug.h>
 
 #include <nuttx/crc32.h>
-#include <nuttx/kmalloc.h>
+#include <nuttx/lib/lib.h>
 #include <nuttx/mtd/mtd.h>
 
 #include "nxffs.h"
@@ -108,7 +108,7 @@ static int nxffs_rdentry(FAR struct nxffs_volume_s *volume, off_t offset,
   /* Allocate memory to hold the variable-length file name */
 
   namlen = inode.namlen;
-  entry->name = (FAR char *)kmm_malloc(namlen + 1);
+  entry->name = kmm_malloc(namlen + 1);
   if (!entry->name)
     {
       ferr("ERROR: Failed to allocate name, namlen: %d\n", namlen);
@@ -212,7 +212,7 @@ void nxffs_freeentry(FAR struct nxffs_entry_s *entry)
 {
   if (entry->name)
     {
-      kmm_free(entry->name);
+      lib_free(entry->name);
       entry->name = NULL;
     }
 }

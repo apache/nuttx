@@ -1420,13 +1420,14 @@ static int usbhost_kbdpoll(int argc, char *argv[])
           priv->caps_lock = usbhost_get_capslock();
 
           leds = usbhost_get_capslock() ? USBHID_KBDOUT_CAPSLOCK : 0x00;
+          *priv->tbuffer = leds;
 
           /* Send a report request to change the LED */
 
           usbhost_send_request(priv, USB_REQ_DIR_OUT,
                                USBHID_REQUEST_SETREPORT,
                                USBHID_REPORTTYPE_OUTPUT << 8, 0, 1,
-                               &leds);
+                               priv->tbuffer);
 
 #ifdef CONFIG_HIDKBD_NOGETREPORT
           /* Setup to receive the next report */
@@ -1915,9 +1916,10 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
   priv->caps_lock = usbhost_get_capslock();
 
   leds = usbhost_get_capslock() ? USBHID_KBDOUT_CAPSLOCK : 0x00;
+  *priv->tbuffer = leds;
   usbhost_send_request(priv, USB_REQ_DIR_OUT, USBHID_REQUEST_SETREPORT,
                        USBHID_REPORTTYPE_OUTPUT << 8, 0, 1,
-                       &leds);
+                       priv->tbuffer);
 
 #ifdef CONFIG_HIDKBD_NOGETREPORT
 
@@ -2137,7 +2139,7 @@ static int usbhost_cralloc(FAR struct usbhost_state_s *priv)
   FAR struct usbhost_hubport_s *hport;
 
   DEBUGASSERT(priv != NULL && priv->usbclass.hport != NULL &&
-              priv->tbuffer == NULL);
+              priv->ctrlreq == NULL);
   hport = priv->usbclass.hport;
 
   return DRVR_ALLOC(hport->drvr, &priv->ctrlreq, &priv->ctrllen);
@@ -2494,7 +2496,6 @@ static int usbhost_open(FAR struct file *filep)
   int ret;
 
   uinfo("Entry\n");
-  DEBUGASSERT(filep && filep->f_inode);
   inode = filep->f_inode;
   priv  = inode->i_private;
 
@@ -2553,7 +2554,6 @@ static int usbhost_close(FAR struct file *filep)
   int ret;
 
   uinfo("Entry\n");
-  DEBUGASSERT(filep && filep->f_inode);
   inode = filep->f_inode;
   priv  = inode->i_private;
 
@@ -2652,7 +2652,7 @@ static ssize_t usbhost_read(FAR struct file *filep, FAR char *buffer,
   int                         ret;
 
   uinfo("Entry\n");
-  DEBUGASSERT(filep && filep->f_inode && buffer);
+  DEBUGASSERT(buffer);
   inode = filep->f_inode;
   priv  = inode->i_private;
 
@@ -2784,7 +2784,7 @@ static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
   int                         i;
 
   uinfo("Entry\n");
-  DEBUGASSERT(filep && filep->f_inode && fds);
+  DEBUGASSERT(fds);
   inode = filep->f_inode;
   priv  = inode->i_private;
 

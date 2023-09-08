@@ -344,7 +344,10 @@ static uint16_t can_recvfrom_eventhandler(FAR struct net_driver_s *dev,
            * when is valid then complete the read action.
            */
 #ifdef CONFIG_NET_CANPROTO_OPTIONS
-          if (can_recv_filter(conn, (canid_t) *dev->d_appdata) == 0)
+          canid_t can_id;
+          memcpy(&can_id, dev->d_appdata, sizeof(canid_t));
+
+          if (can_recv_filter(conn, can_id) == 0)
             {
               flags &= ~CAN_NEWDATA;
               return flags;
@@ -470,14 +473,12 @@ ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   struct can_recvfrom_s state;
   int ret;
 
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
-
   conn = psock->s_conn;
 
   if (psock->s_type != SOCK_RAW)
     {
       nerr("ERROR: Unsupported socket type: %d\n", psock->s_type);
-      ret = -ENOSYS;
+      return -ENOSYS;
     }
 
   net_lock();
