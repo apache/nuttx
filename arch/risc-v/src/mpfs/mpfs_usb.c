@@ -50,6 +50,7 @@
 #include <arch/board/board.h>
 
 #include "hardware/mpfs_usb.h"
+#include "mpfs_gpio.h"
 #include "riscv_internal.h"
 #include "chip.h"
 

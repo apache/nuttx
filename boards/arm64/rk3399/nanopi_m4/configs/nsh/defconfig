@@ -5,6 +5,7 @@
 # You can then do "make savedefconfig" to generate a new defconfig file that includes your
 # modifications.
 #
+# CONFIG_ARCH_LEDS is not set
 CONFIG_ARCH="arm64"
 CONFIG_ARCH_ARM64=y
 CONFIG_ARCH_BOARD="nanopi_m4"

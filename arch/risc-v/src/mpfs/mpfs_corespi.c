@@ -40,6 +40,7 @@
 
 #include <arch/board/board.h>
 
+#include "mpfs_gpio.h"
 #include "mpfs_corespi.h"
 #include "hardware/mpfs_corespi.h"
 #include "hardware/mpfs_sysreg.h"

@@ -31,7 +31,6 @@
 #include <nuttx/arch.h>
 
 #include <arch/irq.h>
-#include <arch/board/board.h>
 
 #include "arm_internal.h"
 #include "hardware/a1x_timer.h"

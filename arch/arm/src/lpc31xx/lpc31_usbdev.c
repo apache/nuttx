@@ -47,6 +47,7 @@
 #include "lpc31_usbotg.h"
 #include "lpc31_evntrtr.h"
 #include "lpc31_syscreg.h"
+#include "lpc31_cgudrvr.h"
 
 /****************************************************************************
  * Pre-processor Definitions

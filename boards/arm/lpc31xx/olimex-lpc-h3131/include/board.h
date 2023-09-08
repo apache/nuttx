@@ -28,7 +28,6 @@
 #include <nuttx/config.h>
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
-#  include "lpc31_cgudrvr.h"
 #endif
 
 /****************************************************************************

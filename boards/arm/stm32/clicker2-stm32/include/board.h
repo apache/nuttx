@@ -32,12 +32,6 @@
 #  include <stdbool.h>
 #endif
 
-#ifdef __KERNEL__
-#  include "stm32_rcc.h"
-#  include "stm32_sdio.h"
-#  include "stm32.h"
-#endif
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/

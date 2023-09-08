@@ -47,6 +47,7 @@
 #include "arm_internal.h"
 #include "chip.h"
 #include "hardware/a1x_uart.h"
+#include "a1x_config.h"
 #include "a1x_pio.h"
 #include "a1x_serial.h"
 

@@ -58,7 +58,6 @@
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #endif
-#include "chip.h"
 
 /****************************************************************************
  * Pre-processor Definitions

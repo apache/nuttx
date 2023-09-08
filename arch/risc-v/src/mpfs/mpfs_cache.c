@@ -31,6 +31,7 @@
 #include <arch/board/board.h>
 #include <arch/board/board_liberodefs.h>
 
+#include "mpfs_gpio.h"
 #include "riscv_internal.h"
 #include "hardware/mpfs_cache.h"
 
