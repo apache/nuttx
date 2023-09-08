@@ -32,6 +32,7 @@
 
 #include "chip.h"
 #include "arm_internal.h"
+#include "eoss3_gpio.h"
 
 #ifdef CONFIG_ARCH_LEDS
 
