@@ -356,6 +356,7 @@ void noreturn_function IRAM_ATTR __esp32s3_start(void)
   esp32s3_spi_timing_set_pin_drive_strength();
 #endif
 
+  esp32s3_spi_timing_set_mspi_flash_tuning();
 #if defined(CONFIG_ESP32S3_SPIRAM_BOOT_INIT)
   if (esp_spiram_init() != OK)
     {
