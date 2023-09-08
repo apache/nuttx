@@ -49,6 +49,10 @@ if(CONFIG_SENSORS)
     list(APPEND SRCS dhtxx.c)
   endif()
 
+  if(CONFIG_SENSORS_BMI270)
+    list(APPEND SRCS bmi270.c)
+  endif()
+
   # These drivers depend on I2C support
 
   if(CONFIG_I2C)
