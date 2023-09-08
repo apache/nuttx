@@ -173,8 +173,7 @@ int modlib_initialize(FAR const char *filename,
        */
 
       berr("ERROR: Bad ELF header: %d\n", ret);
-      return ret;
     }
 
-  return OK;
+  return ret;
 }
