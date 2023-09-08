@@ -603,6 +603,12 @@ int IRAM_ATTR psram_enable(int mode, int vaddrmode)
                  psram_reg.mr2.density == 0x5 ? PSRAM_SIZE_16MB :
                  psram_reg.mr2.density == 0x7 ? PSRAM_SIZE_32MB : 0;
 
+  /* Do PSRAM timing tuning, we use SPI1 to do the tuning, and set the SPI0
+   * PSRAM timing related registers accordingly
+   */
+
+  esp32s3_spi_timing_set_mspi_psram_tuning();
+
   /* Back to the high speed mode. Flash/PSRAM clocks are set to the clock
    * that user selected. SPI0/1 registers are all set correctly.
    */

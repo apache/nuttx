@@ -1008,7 +1008,7 @@ void spi_flash_enable_cache(uint32_t cpuid);
  * Public Data
  *****************************************************************************/
 
-extern const struct spiflash_legacy_data_s *rom_spiflash_legacy_data;
+extern struct spiflash_legacy_data_s *rom_spiflash_legacy_data;
 
 #ifdef __cplusplus
 }
