@@ -42,7 +42,7 @@ config CRYPTO_CRYPTODEV
 
 config CRYPTO_CRYPTODEV_SOFTWARE
 	bool "cryptodev software support"
-	depends on CRYPTO_CRYPTODEV
+	depends on CRYPTO_CRYPTODEV && CRYPTO_SW_AES
 	default n
 
 config CRYPTO_CRYPTODEV_HARDWARE
