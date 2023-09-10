@@ -71,7 +71,7 @@
 #include "esp32c3_clockconfig.h"
 
 #ifdef CONFIG_PM
-#include "esp32c3_pm.h"
+#  include "esp32c3_pm.h"
 #endif
 
 #include "espidf_wifi.h"
@@ -1654,7 +1654,7 @@ static int32_t esp_queue_send_generic(void *queue, void *item,
       if (ret < 0)
         {
           wlerr("ERROR: Failed to send message to mqueue error=%d\n",
-               ret);
+                ret);
         }
     }
   else
@@ -1676,7 +1676,7 @@ static int32_t esp_queue_send_generic(void *queue, void *item,
       if (ret < 0)
         {
           wlerr("ERROR: Failed to timedsend message to mqueue error=%d\n",
-               ret);
+                ret);
         }
     }
 
@@ -1825,7 +1825,7 @@ static int32_t esp_queue_recv(void *queue, void *item, uint32_t ticks)
       if (ret < 0)
         {
           wlerr("ERROR: Failed to timedreceive from mqueue error=%d\n",
-               ret);
+                ret);
         }
     }
 

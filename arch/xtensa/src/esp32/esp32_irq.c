@@ -317,7 +317,7 @@ static int esp32_getcpuint(uint32_t intmask)
            * that CPU interrupt is available.
            */
 
-          bitmask = (1ul << cpuint);
+          bitmask = 1ul << cpuint;
           if ((intset & bitmask) != 0)
             {
               /* Got it! */
@@ -335,7 +335,7 @@ static int esp32_getcpuint(uint32_t intmask)
 
   if (ret >= 0)
     {
-      xtensa_enable_cpuint(&g_intenable[cpu], (1ul << ret));
+      xtensa_enable_cpuint(&g_intenable[cpu], 1ul << ret);
     }
 
   return ret;
@@ -411,7 +411,7 @@ static void esp32_free_cpuint(int cpuint)
 
   /* Mark the CPU interrupt as available */
 
-  bitmask  = (1ul << cpuint);
+  bitmask = 1ul << cpuint;
 
 #ifdef CONFIG_SMP
   if (up_cpu_index() != 0)
@@ -469,7 +469,7 @@ void up_irqinitialize(void)
   /* Reserve CPU0 interrupt for some special drivers */
 
 #ifdef CONFIG_ESP32_WIFI
-  g_cpu0_intmap[ESP32_CPUINT_MAC]  = CPUINT_ASSIGN(ESP32_IRQ_MAC);
+  g_cpu0_intmap[ESP32_CPUINT_MAC] = CPUINT_ASSIGN(ESP32_IRQ_MAC);
   xtensa_enable_cpuint(&g_intenable[0], 1 << ESP32_CPUINT_MAC);
 #endif
 
@@ -556,7 +556,7 @@ void up_disable_irq(int irq)
         }
 #endif
 
-      xtensa_disable_cpuint(&g_intenable[cpu], (1ul << cpuint));
+      xtensa_disable_cpuint(&g_intenable[cpu], 1ul << cpuint);
     }
   else
     {
@@ -612,7 +612,7 @@ void up_enable_irq(int irq)
 
       /* Enable the CPU interrupt now for internal CPU. */
 
-      xtensa_enable_cpuint(&g_intenable[cpu], (1ul << cpuint));
+      xtensa_enable_cpuint(&g_intenable[cpu], 1ul << cpuint);
     }
   else
     {
@@ -956,7 +956,7 @@ uint32_t *xtensa_int_decode(uint32_t cpuints, uint32_t *regs)
 
   for (; bit < ESP32_NCPUINTS && cpuints != 0; bit++)
     {
-      mask = (1 << bit);
+      mask = 1 << bit;
       if ((cpuints & mask) != 0)
         {
           /* Extract the IRQ number from the mapping table */
