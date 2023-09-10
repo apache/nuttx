@@ -50,7 +50,7 @@ int vswprintf(FAR wchar_t *buf, size_t maxlen, FAR const wchar_t *fmt,
 
   /* Then let lib_vsprintf do the real work */
 
-  return lib_vsprintf((FAR struct lib_outstream_s *)&memoutstream.public,
+  return lib_vsprintf((FAR struct lib_outstream_s *)&memoutstream.common,
                       (FAR const char *)fmt, ap);
 }
 

@@ -873,7 +873,7 @@ static ssize_t slcd_write(struct file *filep,
   /* Decode and process every byte in the input buffer */
 
   options = 0;
-  while ((result = slcd_decode(&instream.public,
+  while ((result = slcd_decode(&instream.common,
                                &state, &ch, &count)) != SLCDRET_EOF)
     {
       lcdinfo("slcd_decode returned result=%d char=%d count=%d\n",

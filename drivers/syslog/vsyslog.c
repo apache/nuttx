@@ -150,7 +150,7 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
     defined(CONFIG_SYSLOG_PRIORITY) || defined(CONFIG_SYSLOG_PREFIX) || \
     defined(CONFIG_SYSLOG_PROCESS_NAME)
 
-  ret = lib_sprintf_internal(&stream.public,
+  ret = lib_sprintf_internal(&stream.common,
 #if defined(CONFIG_SYSLOG_COLOR_OUTPUT)
   /* Reset the terminal style. */
 
@@ -253,18 +253,18 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 
   /* Generate the output */
 
-  ret += lib_vsprintf_internal(&stream.public, fmt, *ap);
+  ret += lib_vsprintf_internal(&stream.common, fmt, *ap);
 
   if (stream.last_ch != '\n')
     {
-      lib_stream_putc(&stream.public, '\n');
+      lib_stream_putc(&stream.common, '\n');
       ret++;
     }
 
 #if defined(CONFIG_SYSLOG_COLOR_OUTPUT)
   /* Reset the terminal style back to normal. */
 
-  ret += lib_stream_puts(&stream.public, "\e[0m", sizeof("\e[0m"));
+  ret += lib_stream_puts(&stream.common, "\e[0m", sizeof("\e[0m"));
 #endif
 
   /* Flush and destroy the syslog stream buffer */
