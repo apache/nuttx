@@ -48,16 +48,17 @@
  */
 
 #if CONFIG_PAGING_PAGESIZE == 1024
-#  define PAGESIZE                 1024
 #  define PAGESHIFT                10
-#  define PAGEMASK                 0x000003ff
 #elif CONFIG_PAGING_PAGESIZE == 4096
-#  define PAGESIZE                 4096
 #  define PAGESHIFT                12
-#  define PAGEMASK                 0x00000fff
 #else
 #  error "Need extended definitions for CONFIG_PAGING_PAGESIZE"
 #endif
+
+/* Common page macros */
+
+#  define PAGESIZE                 (1 << PAGESHIFT)
+#  define PAGEMASK                 (PAGESIZE - 1)
 
 /* Alignment macros */
 
