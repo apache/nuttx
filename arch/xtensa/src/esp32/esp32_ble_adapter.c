@@ -76,8 +76,6 @@ do {\
 
 #define MSG_QUEUE_NAME_SIZE    16
 
-#define ESP_ERR_INVALID_STATE       0x103
-
 #define OSI_FUNCS_TIME_BLOCKING          0xffffffff
 #define OSI_VERSION                      0x00010002
 #define OSI_MAGIC_VALUE                  0xfadebead
@@ -323,8 +321,8 @@ static int  semphr_take_wrapper(void *semphr, uint32_t block_time_ms);
 static int  semphr_give_wrapper(void *semphr);
 static void *mutex_create_wrapper(void);
 static void mutex_delete_wrapper(void *mutex);
-static int mutex_lock_wrapper(void *mutex);
-static int mutex_unlock_wrapper(void *mutex);
+static int  mutex_lock_wrapper(void *mutex);
+static int  mutex_unlock_wrapper(void *mutex);
 static int IRAM_ATTR queue_send_from_isr_wrapper(void *queue, void *item,
                                                  void *hptw);
 static int IRAM_ATTR queue_recv_from_isr_wrapper(void *queue, void *item,
@@ -1815,7 +1813,7 @@ static uint32_t IRAM_ATTR btdm_us_2_lpcycles(uint32_t us)
 
 static void IRAM_ATTR btdm_sleep_exit_phase0(void *param)
 {
-  int event = (int) param;
+  int event = (int)param;
 
   DEBUGASSERT(g_lp_cntl.enable == true);
 
@@ -2358,17 +2356,17 @@ int esp32_bt_controller_init(void)
   if (btdm_controller_status != ESP_BT_CONTROLLER_STATUS_IDLE)
     {
       wlerr("Invalid controller status");
-      return -ERROR;
+      return ERROR;
     }
 
   if (btdm_osi_funcs_register(&g_osi_funcs) != 0)
     {
-      wlinfo("Error, probably invalid OSI Functions\n");
+      wlerr("Error, probably invalid OSI Functions\n");
       return -EINVAL;
     }
 
   wlinfo("BT controller compile version [%s]\n",
-                              btdm_controller_get_compile_version());
+         btdm_controller_get_compile_version());
 
   /* If all the bt available memory was already released,
    * cannot initialize bluetooth controller
@@ -2377,7 +2375,7 @@ int esp32_bt_controller_init(void)
   if (btdm_dram_available_region[0].mode == ESP_BT_MODE_IDLE)
     {
       wlerr("Error, bt available memory was released\n");
-      return ESP_ERR_INVALID_STATE;
+      return -EIO;
     }
 
   if (cfg == NULL)
@@ -2464,7 +2462,7 @@ int esp32_bt_controller_deinit(void)
 {
   if (btdm_controller_status != ESP_BT_CONTROLLER_STATUS_INITED)
     {
-      return -ERROR;
+      return ERROR;
     }
 
   btdm_controller_deinit();
@@ -2506,7 +2504,7 @@ int esp32_bt_controller_deinit(void)
 
   btdm_controller_status = ESP_BT_CONTROLLER_STATUS_IDLE;
   g_btdm_lpcycle_us = 0;
-  return 0;
+  return OK;
 }
 
 /****************************************************************************
@@ -2526,7 +2524,7 @@ int esp32_bt_controller_disable(void)
 {
   if (btdm_controller_status != ESP_BT_CONTROLLER_STATUS_ENABLED)
     {
-      return -ERROR;
+      return ERROR;
     }
 
   while (!btdm_power_state_active())
@@ -2574,18 +2572,18 @@ int esp32_bt_controller_disable(void)
 
 int esp32_bt_controller_enable(esp_bt_mode_t mode)
 {
-  int ret = 0;
+  int ret = OK;
 
   if (btdm_controller_status != ESP_BT_CONTROLLER_STATUS_INITED)
     {
-      return -ERROR;
+      return ERROR;
     }
 
   if (mode != btdm_controller_get_mode())
     {
       wlerr("invalid mode %d, controller support mode is %d",
                                   mode, btdm_controller_get_mode());
-      return -1;
+      return ERROR;
     }
 
   bt_phy_enable();
@@ -2617,7 +2615,7 @@ int esp32_bt_controller_enable(esp_bt_mode_t mode)
 
   if (btdm_controller_enable(mode) != 0)
     {
-      ret = -1;
+      ret = ERROR;
       goto error;
     }
 
@@ -2845,7 +2843,7 @@ void esp32_vhci_host_send_packet(uint8_t *data, uint16_t len)
 
 int esp32_vhci_register_callback(const esp_vhci_host_callback_t *callback)
 {
-  int ret = -ERROR;
+  int ret = ERROR;
   if (btdm_controller_status != ESP_BT_CONTROLLER_STATUS_ENABLED)
     {
       return ret;
