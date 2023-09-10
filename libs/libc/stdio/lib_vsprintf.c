@@ -46,6 +46,6 @@ int vsprintf(FAR char *dest, FAR const IPTR char *src, va_list ap)
 
   lib_memoutstream((FAR struct lib_memoutstream_s *)&memoutstream, dest,
                    LIB_BUFLEN_UNKNOWN);
-  return lib_vsprintf((FAR struct lib_outstream_s *)&memoutstream.public,
+  return lib_vsprintf((FAR struct lib_outstream_s *)&memoutstream.common,
                       src, ap);
 }

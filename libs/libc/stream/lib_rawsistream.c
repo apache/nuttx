@@ -40,20 +40,21 @@
  * Name: rawsistream_getc
  ****************************************************************************/
 
-static int rawsistream_getc(FAR struct lib_sistream_s *this)
+static int rawsistream_getc(FAR struct lib_sistream_s *self)
 {
-  FAR struct lib_rawsistream_s *rthis = (FAR struct lib_rawsistream_s *)this;
+  FAR struct lib_rawsistream_s *stream =
+                                       (FAR struct lib_rawsistream_s *)self;
   int nread;
   char ch;
 
-  DEBUGASSERT(this && rthis->fd >= 0);
+  DEBUGASSERT(self && stream->fd >= 0);
 
   /* Attempt to read one character */
 
-  nread = _NX_READ(rthis->fd, &ch, 1);
+  nread = _NX_READ(stream->fd, &ch, 1);
   if (nread == 1)
     {
-      this->nget++;
+      self->nget++;
       return ch;
     }
 
@@ -70,20 +71,21 @@ static int rawsistream_getc(FAR struct lib_sistream_s *this)
  * Name: rawsistream_gets
  ****************************************************************************/
 
-static int rawsistream_gets(FAR struct lib_instream_s *this,
+static int rawsistream_gets(FAR struct lib_instream_s *self,
                             FAR void *buffer, int len)
 {
-  FAR struct lib_rawsistream_s *rthis = (FAR struct lib_rawsistream_s *)this;
+  FAR struct lib_rawsistream_s *stream =
+                                       (FAR struct lib_rawsistream_s *)self;
   int nread;
 
-  DEBUGASSERT(this && rthis->fd >= 0);
+  DEBUGASSERT(self && stream->fd >= 0);
 
   /* Attempt to read a buffer */
 
-  nread = _NX_READ(rthis->fd, buffer, len);
+  nread = _NX_READ(stream->fd, buffer, len);
   if (nread >= 0)
     {
-      this->nget += nread;
+      self->nget += nread;
     }
   else
     {
@@ -97,13 +99,14 @@ static int rawsistream_gets(FAR struct lib_instream_s *this,
  * Name: rawsistream_seek
  ****************************************************************************/
 
-static off_t rawsistream_seek(FAR struct lib_sistream_s *this, off_t offset,
+static off_t rawsistream_seek(FAR struct lib_sistream_s *self, off_t offset,
                               int whence)
 {
-  FAR struct lib_rawsistream_s *mthis = (FAR struct lib_rawsistream_s *)this;
+  FAR struct lib_rawsistream_s *stream =
+                                       (FAR struct lib_rawsistream_s *)self;
 
-  DEBUGASSERT(this);
-  return _NX_SEEK(mthis->fd, offset, whence);
+  DEBUGASSERT(self);
+  return _NX_SEEK(stream->fd, offset, whence);
 }
 
 /****************************************************************************
@@ -117,21 +120,21 @@ static off_t rawsistream_seek(FAR struct lib_sistream_s *this, off_t offset,
  *   Initializes a stream for use with a file descriptor.
  *
  * Input Parameters:
- *   instream - User allocated, uninitialized instance of struct
- *              lib_rawsistream_s to be initialized.
- *   fd       - User provided file/socket descriptor (must have been opened
- *              for the correct access).
+ *   stream - User allocated, uninitialized instance of struct
+ *            lib_rawsistream_s to be initialized.
+ *   fd     - User provided file/socket descriptor (must have been opened
+ *            for the correct access).
  *
  * Returned Value:
  *   None (User allocated instance initialized).
  *
  ****************************************************************************/
 
-void lib_rawsistream(FAR struct lib_rawsistream_s *instream, int fd)
+void lib_rawsistream(FAR struct lib_rawsistream_s *stream, int fd)
 {
-  instream->public.getc = rawsistream_getc;
-  instream->public.gets = rawsistream_gets;
-  instream->public.seek = rawsistream_seek;
-  instream->public.nget = 0;
-  instream->fd          = fd;
+  stream->common.getc = rawsistream_getc;
+  stream->common.gets = rawsistream_gets;
+  stream->common.seek = rawsistream_seek;
+  stream->common.nget = 0;
+  stream->fd          = fd;
 }

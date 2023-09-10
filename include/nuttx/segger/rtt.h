@@ -40,7 +40,7 @@
 #ifdef CONFIG_STREAM_RTT
 struct lib_rttoutstream_s
 {
-  struct lib_outstream_s public;
+  struct lib_outstream_s common;
   char name[32];
   FAR char *buffer;
   int channel;
@@ -48,7 +48,7 @@ struct lib_rttoutstream_s
 
 struct lib_rttinstream_s
 {
-  struct lib_instream_s public;
+  struct lib_instream_s common;
   char name[32];
   FAR char *buffer;
   int channel;

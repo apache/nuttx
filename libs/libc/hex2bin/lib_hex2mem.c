@@ -80,7 +80,7 @@ int hex2mem(int fd, unsigned long baseaddr, unsigned long endpaddr,
 
   /* And do the deed */
 
-  return hex2bin(&rawinstream.public, &memoutstream.public,
+  return hex2bin(&rawinstream.common, &memoutstream.common,
                  (unsigned long)baseaddr, (unsigned long)endpaddr,
                  (enum hex2bin_swap_e)swap);
 }

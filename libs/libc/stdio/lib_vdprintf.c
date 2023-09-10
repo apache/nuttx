@@ -57,8 +57,8 @@ int vdprintf(int fd, FAR const IPTR char *fmt, va_list ap)
   /* Wrap the fd in a stream object and let lib_vsprintf do the work. */
 
   lib_rawoutstream(&rawoutstream, fd);
-  lib_bufferedoutstream(&outstream, &rawoutstream.public);
-  ret = lib_vsprintf(&outstream.public, fmt, ap);
-  lib_stream_flush(&outstream.public);
+  lib_bufferedoutstream(&outstream, &rawoutstream.common);
+  ret = lib_vsprintf(&outstream.common, fmt, ap);
+  lib_stream_flush(&outstream.common);
   return ret;
 }

@@ -50,7 +50,7 @@ int vsscanf(FAR const char *buf, FAR const IPTR char *fmt, va_list ap)
 
   /* Then let lib_vscanf do the real work */
 
-  n = lib_vscanf((FAR struct lib_instream_s *)&meminstream.public, NULL,
-                  fmt, ap);
+  n = lib_vscanf((FAR struct lib_instream_s *)&meminstream.common, NULL,
+                 fmt, ap);
   return n;
 }

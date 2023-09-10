@@ -1207,7 +1207,7 @@ static ssize_t pcf8574_lcd_write(FAR struct file *filep,
   /* Now decode and process every byte in the input buffer */
 
   memset(&state, 0, sizeof(struct slcdstate_s));
-  while ((result = slcd_decode(&instream.public,
+  while ((result = slcd_decode(&instream.common,
                                &state, &ch, &count)) != SLCDRET_EOF)
     {
       if (result == SLCDRET_CHAR)       /* A normal character was returned */

@@ -110,11 +110,11 @@ int vasprintf(FAR char **ptr, FAR const IPTR char *fmt, va_list ap)
   /* Then let lib_vsprintf do it's real thing */
 
 #ifdef va_copy
-  nbytes = lib_vsprintf((FAR struct lib_outstream_s *)&memoutstream.public,
+  nbytes = lib_vsprintf((FAR struct lib_outstream_s *)&memoutstream.common,
                         fmt, ap2);
   va_end(ap2);
 #else
-  nbytes = lib_vsprintf((FAR struct lib_outstream_s *)&memoutstream.public,
+  nbytes = lib_vsprintf((FAR struct lib_outstream_s *)&memoutstream.common,
                         fmt, ap);
 #endif
 

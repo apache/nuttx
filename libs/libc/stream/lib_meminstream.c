@@ -35,19 +35,20 @@
  * Name: meminstream_getc
  ****************************************************************************/
 
-static int meminstream_getc(FAR struct lib_instream_s *this)
+static int meminstream_getc(FAR struct lib_instream_s *self)
 {
-  FAR struct lib_meminstream_s *mthis = (FAR struct lib_meminstream_s *)this;
+  FAR struct lib_meminstream_s *stream =
+                                       (FAR struct lib_meminstream_s *)self;
   int ret;
 
-  DEBUGASSERT(this);
+  DEBUGASSERT(self);
 
   /* Get the next character (if any) from the buffer */
 
-  if (this->nget < mthis->buflen)
+  if (self->nget < stream->buflen)
     {
-      ret = mthis->buffer[this->nget];
-      this->nget++;
+      ret = stream->buffer[self->nget];
+      self->nget++;
     }
   else
     {
@@ -61,22 +62,23 @@ static int meminstream_getc(FAR struct lib_instream_s *this)
  * Name: meminstream_gets
  ****************************************************************************/
 
-static int meminstream_gets(FAR struct lib_instream_s *this,
+static int meminstream_gets(FAR struct lib_instream_s *self,
                             FAR void *buffer, int len)
 {
-  FAR struct lib_meminstream_s *mthis = (FAR struct lib_meminstream_s *)this;
+  FAR struct lib_meminstream_s *stream =
+                                       (FAR struct lib_meminstream_s *)self;
   int ret;
 
-  DEBUGASSERT(this);
+  DEBUGASSERT(self);
 
   /* Get the buffer (if any) from the stream */
 
-  if (this->nget < mthis->buflen)
+  if (self->nget < stream->buflen)
     {
-      ret = mthis->buflen - this->nget < len ?
-            mthis->buflen - this->nget : len;
-      this->nget += ret;
-      memcpy(buffer, mthis->buffer, ret);
+      ret = stream->buflen - self->nget < len ?
+            stream->buflen - self->nget : len;
+      self->nget += ret;
+      memcpy(buffer, stream->buffer, ret);
     }
   else
     {
@@ -97,22 +99,22 @@ static int meminstream_gets(FAR struct lib_instream_s *this,
  *   Initializes a stream for use with a fixed-size memory buffer.
  *
  * Input Parameters:
- *   instream    - User allocated, uninitialized instance of struct
- *                 lib_meminstream_s to be initialized.
- *   bufstart    - Address of the beginning of the fixed-size memory buffer
- *   buflen      - Size of the fixed-sized memory buffer in bytes
+ *   stream   - User allocated, uninitialized instance of struct
+ *              lib_meminstream_s to be initialized.
+ *   bufstart - Address of the beginning of the fixed-size memory buffer
+ *   buflen   - Size of the fixed-sized memory buffer in bytes
  *
  * Returned Value:
- *   None (instream initialized).
+ *   None (stream initialized).
  *
  ****************************************************************************/
 
-void lib_meminstream(FAR struct lib_meminstream_s *instream,
+void lib_meminstream(FAR struct lib_meminstream_s *stream,
                      FAR const char *bufstart, int buflen)
 {
-  instream->public.getc = meminstream_getc;
-  instream->public.gets = meminstream_gets;
-  instream->public.nget = 0;          /* Will be buffer index */
-  instream->buffer      = bufstart;   /* Start of buffer */
-  instream->buflen      = buflen;     /* Length of the buffer */
+  stream->common.getc = meminstream_getc;
+  stream->common.gets = meminstream_gets;
+  stream->common.nget = 0;          /* Will be buffer index */
+  stream->buffer      = bufstart;   /* Start of buffer */
+  stream->buflen      = buflen;     /* Length of the buffer */
 }

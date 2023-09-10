@@ -37,13 +37,13 @@
  * Name: stdoutstream_putc
  ****************************************************************************/
 
-static void stdoutstream_putc(FAR struct lib_outstream_s *this, int ch)
+static void stdoutstream_putc(FAR struct lib_outstream_s *self, int ch)
 {
-  FAR struct lib_stdoutstream_s *sthis =
-                               (FAR struct lib_stdoutstream_s *)this;
+  FAR struct lib_stdoutstream_s *stream =
+                                      (FAR struct lib_stdoutstream_s *)self;
   int result;
 
-  DEBUGASSERT(this && sthis->stream);
+  DEBUGASSERT(self && stream->handle);
 
   /* Loop until the character is successfully transferred or an irrecoverable
    * error occurs.
@@ -51,10 +51,10 @@ static void stdoutstream_putc(FAR struct lib_outstream_s *this, int ch)
 
   do
     {
-      result = fputc(ch, sthis->stream);
+      result = fputc(ch, stream->handle);
       if (result != EOF)
         {
-          this->nput++;
+          self->nput++;
           return;
         }
 
@@ -69,14 +69,14 @@ static void stdoutstream_putc(FAR struct lib_outstream_s *this, int ch)
  * Name: stdoutstream_puts
  ****************************************************************************/
 
-static int stdoutstream_puts(FAR struct lib_outstream_s *this,
+static int stdoutstream_puts(FAR struct lib_outstream_s *self,
                              FAR const void *buffer, int len)
 {
-  FAR struct lib_stdoutstream_s *sthis =
-                               (FAR struct lib_stdoutstream_s *)this;
+  FAR struct lib_stdoutstream_s *stream =
+                               (FAR struct lib_stdoutstream_s *)self;
   int result;
 
-  DEBUGASSERT(this && sthis->stream);
+  DEBUGASSERT(self && stream->handle);
 
   /* Loop until the buffer is successfully transferred or an irrecoverable
    * error occurs.
@@ -84,10 +84,10 @@ static int stdoutstream_puts(FAR struct lib_outstream_s *this,
 
   do
     {
-      result = fwrite(buffer, len, 1, sthis->stream);
+      result = fwrite(buffer, len, 1, stream->handle);
       if (result >= 0)
         {
-          this->nput += result;
+          self->nput += result;
           return result;
         }
 
@@ -107,13 +107,13 @@ static int stdoutstream_puts(FAR struct lib_outstream_s *this,
  ****************************************************************************/
 
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
-static int stdoutstream_flush(FAR struct lib_outstream_s *this)
+static int stdoutstream_flush(FAR struct lib_outstream_s *self)
 {
-  FAR struct lib_stdoutstream_s *sthis =
-                                (FAR struct lib_stdoutstream_s *)this;
+  FAR struct lib_stdoutstream_s *stream =
+                                (FAR struct lib_stdoutstream_s *)self;
 
-  DEBUGASSERT(sthis != NULL && sthis->stream != NULL);
-  return lib_fflush(sthis->stream, true);
+  DEBUGASSERT(stream != NULL && stream->handle != NULL);
+  return lib_fflush(stream->handle, true);
 }
 #endif
 
@@ -130,7 +130,7 @@ static int stdoutstream_flush(FAR struct lib_outstream_s *this)
  * Input Parameters:
  *   outstream - User allocated, uninitialized instance of struct
  *               lib_stdoutstream_s to be initialized.
- *   stream    - User provided stream instance (must have been opened for
+ *   handle    - User provided FILE instance (must have been opened for
  *               write access).
  *
  * Returned Value:
@@ -138,34 +138,34 @@ static int stdoutstream_flush(FAR struct lib_outstream_s *this)
  *
  ****************************************************************************/
 
-void lib_stdoutstream(FAR struct lib_stdoutstream_s *outstream,
-                      FAR FILE *stream)
+void lib_stdoutstream(FAR struct lib_stdoutstream_s *stream,
+                      FAR FILE *handle)
 {
   /* Select the putc operation */
 
-  outstream->public.putc = stdoutstream_putc;
-  outstream->public.puts = stdoutstream_puts;
+  stream->common.putc = stdoutstream_putc;
+  stream->common.puts = stdoutstream_puts;
 
   /* Select the correct flush operation.  This flush is only called when
-   * a newline is encountered in the output stream.  However, we do not
-   * want to support this line buffering behavior if the stream was
+   * a newline is encountered in the output file stream.  However, we do not
+   * want to support this line buffering behavior if the file was
    * opened in binary mode.  In binary mode, the newline has no special
    * meaning.
    */
 
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
-  if (stream->fs_bufstart != NULL && (stream->fs_oflags & O_TEXT) != 0)
+  if (handle->fs_bufstart != NULL && (handle->fs_oflags & O_TEXT) != 0)
     {
-      outstream->public.flush = stdoutstream_flush;
+      stream->common.flush = stdoutstream_flush;
     }
   else
 #endif
     {
-      outstream->public.flush = lib_noflush;
+      stream->common.flush = lib_noflush;
     }
 
-  /* Set the number of bytes put to zero and remember the stream */
+  /* Set the number of bytes put to zero and remember the handle */
 
-  outstream->public.nput = 0;
-  outstream->stream      = stream;
+  stream->common.nput = 0;
+  stream->handle      = handle;
 }

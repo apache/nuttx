@@ -57,7 +57,7 @@ int vfscanf(FAR FILE *stream, FAR const IPTR char *fmt, va_list ap)
 
       flockfile(stream);
 
-      n = lib_vscanf(&stdinstream.public, &lastc, fmt, ap);
+      n = lib_vscanf(&stdinstream.common, &lastc, fmt, ap);
 
       /* The lib_vscanf function reads always one character more, this
        * character needs to be written back.

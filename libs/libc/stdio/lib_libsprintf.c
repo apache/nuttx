@@ -33,7 +33,7 @@
  * Name: lib_sprintf
  ****************************************************************************/
 
-int lib_sprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *fmt,
+int lib_sprintf(FAR struct lib_outstream_s *stream, FAR const IPTR char *fmt,
                 ...)
 {
   va_list ap;
@@ -42,7 +42,7 @@ int lib_sprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *fmt,
   /* Let lib_vsprintf do the real work */
 
   va_start(ap, fmt);
-  n = lib_vsprintf(obj, fmt, ap);
+  n = lib_vsprintf(stream, fmt, ap);
   va_end(ap);
   return n;
 }

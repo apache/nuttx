@@ -45,15 +45,15 @@
  * Name: mtdoutstream_flush
  ****************************************************************************/
 
-static int mtdoutstream_flush(FAR struct lib_outstream_s *this)
+static int mtdoutstream_flush(FAR struct lib_outstream_s *self)
 {
   FAR struct lib_mtdoutstream_s *stream =
-    (FAR struct lib_mtdoutstream_s *)this;
+    (FAR struct lib_mtdoutstream_s *)self;
   size_t erasesize = stream->geo.erasesize;
   size_t nblkpererase = erasesize / stream->geo.blocksize;
   int ret = OK;
 
-  if (this->nput % erasesize > 0)
+  if (self->nput % erasesize > 0)
     {
 #ifdef CONFIG_MTD_BYTE_WRITE
       /* if byte write, flush won't be needed */
@@ -61,14 +61,14 @@ static int mtdoutstream_flush(FAR struct lib_outstream_s *this)
       if (stream->inode->u.i_mtd->write == NULL)
 #endif
         {
-          ret = MTD_ERASE(stream->inode->u.i_mtd, this->nput / erasesize, 1);
+          ret = MTD_ERASE(stream->inode->u.i_mtd, self->nput / erasesize, 1);
           if (ret < 0)
             {
               return ret;
             }
 
           ret = MTD_BWRITE(stream->inode->u.i_mtd,
-                           this->nput / erasesize * nblkpererase,
+                           self->nput / erasesize * nblkpererase,
                            nblkpererase, stream->cache);
         }
     }
@@ -80,11 +80,11 @@ static int mtdoutstream_flush(FAR struct lib_outstream_s *this)
  * Name: mtdoutstream_puts
  ****************************************************************************/
 
-static int mtdoutstream_puts(FAR struct lib_outstream_s *this,
+static int mtdoutstream_puts(FAR struct lib_outstream_s *self,
                              FAR const void *buf, int len)
 {
   FAR struct lib_mtdoutstream_s *stream =
-    (FAR struct lib_mtdoutstream_s *)this;
+    (FAR struct lib_mtdoutstream_s *)self;
   size_t erasesize = stream->geo.erasesize;
   size_t nblkpererase = erasesize / stream->geo.blocksize;
   FAR struct inode *inode = stream->inode;
@@ -92,7 +92,7 @@ static int mtdoutstream_puts(FAR struct lib_outstream_s *this,
   size_t remain = len;
   int ret;
 
-  if (this->nput + len > erasesize * stream->geo.neraseblocks)
+  if (self->nput + len > erasesize * stream->geo.neraseblocks)
     {
       return -ENOSPC;
     }
@@ -100,31 +100,31 @@ static int mtdoutstream_puts(FAR struct lib_outstream_s *this,
 #ifdef CONFIG_MTD_BYTE_WRITE
   if (stream->inode->u.i_mtd->write != NULL)
     {
-      if (this->nput % stream->geo.erasesize == 0)
+      if (self->nput % stream->geo.erasesize == 0)
         {
           ret = MTD_ERASE(inode->u.i_mtd,
-                          this->nput / stream->geo.erasesize, 1);
+                          self->nput / stream->geo.erasesize, 1);
           if (ret < 0)
             {
               return ret;
             }
         }
 
-      ret = MTD_WRITE(inode->u.i_mtd, this->nput, len, buf);
+      ret = MTD_WRITE(inode->u.i_mtd, self->nput, len, buf);
       if (ret < 0)
         {
           return ret;
         }
 
-      this->nput += len;
+      self->nput += len;
     }
   else
 #endif
     {
       while (remain > 0)
         {
-          size_t sblock = this->nput / erasesize;
-          size_t offset = this->nput % erasesize;
+          size_t sblock = self->nput / erasesize;
+          size_t offset = self->nput % erasesize;
 
           if (offset > 0)
             {
@@ -135,7 +135,7 @@ static int mtdoutstream_puts(FAR struct lib_outstream_s *this,
 
               ptr        += copyin;
               offset     += copyin;
-              this->nput += copyin;
+              self->nput += copyin;
               remain     -= copyin;
 
               if (offset == erasesize)
@@ -162,7 +162,7 @@ static int mtdoutstream_puts(FAR struct lib_outstream_s *this,
 
               memset(stream->cache, 0, stream->geo.erasesize);
               memcpy(stream->cache, ptr, remain);
-              this->nput += remain;
+              self->nput += remain;
               remain      = 0;
             }
           else if (remain >= erasesize)
@@ -185,7 +185,7 @@ static int mtdoutstream_puts(FAR struct lib_outstream_s *this,
                 }
 
               ptr        += copyin;
-              this->nput += copyin;
+              self->nput += copyin;
               remain     -= copyin;
             }
         }
@@ -198,10 +198,10 @@ static int mtdoutstream_puts(FAR struct lib_outstream_s *this,
  * Name: mtdoutstream_putc
  ****************************************************************************/
 
-static void mtdoutstream_putc(FAR struct lib_outstream_s *this, int ch)
+static void mtdoutstream_putc(FAR struct lib_outstream_s *self, int ch)
 {
   char tmp = ch;
-  mtdoutstream_puts(this, &tmp, 1);
+  mtdoutstream_puts(self, &tmp, 1);
 }
 
 /****************************************************************************
@@ -302,9 +302,9 @@ int lib_mtdoutstream_open(FAR struct lib_mtdoutstream_s *stream,
     }
 
   stream->inode        = node;
-  stream->public.putc  = mtdoutstream_putc;
-  stream->public.puts  = mtdoutstream_puts;
-  stream->public.flush = mtdoutstream_flush;
+  stream->common.putc  = mtdoutstream_putc;
+  stream->common.puts  = mtdoutstream_puts;
+  stream->common.flush = mtdoutstream_flush;
 
   return OK;
 }

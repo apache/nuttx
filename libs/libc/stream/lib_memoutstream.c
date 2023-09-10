@@ -34,27 +34,27 @@
  * Name: memoutstream_puts
  ****************************************************************************/
 
-static int memoutstream_puts(FAR struct lib_outstream_s *this,
+static int memoutstream_puts(FAR struct lib_outstream_s *self,
                              FAR const void *buf, int len)
 {
-  FAR struct lib_memoutstream_s *mthis =
-                                (FAR struct lib_memoutstream_s *)this;
+  FAR struct lib_memoutstream_s *stream =
+                                (FAR struct lib_memoutstream_s *)self;
   int ncopy;
 
-  DEBUGASSERT(this);
+  DEBUGASSERT(self);
 
   /* If this will not overrun the buffer, then write the character to the
-   * buffer.  Not that buflen was pre-decremented when the stream was
+   * buffer.  Note that buflen was pre-decremented when the stream was
    * created so it is okay to write past the end of the buflen by one.
    */
 
-  ncopy = mthis->buflen - this->nput >= len ?
-          len : mthis->buflen - this->nput;
+  ncopy = stream->buflen - self->nput >= len ?
+          len : stream->buflen - self->nput;
   if (ncopy > 0)
     {
-      memcpy(mthis->buffer + this->nput, buf, ncopy);
-      this->nput += ncopy;
-      mthis->buffer[this->nput] = '\0';
+      memcpy(stream->buffer + self->nput, buf, ncopy);
+      self->nput += ncopy;
+      stream->buffer[self->nput] = '\0';
     }
 
   return ncopy;
@@ -64,10 +64,10 @@ static int memoutstream_puts(FAR struct lib_outstream_s *this,
  * Name: memoutstream_putc
  ****************************************************************************/
 
-static void memoutstream_putc(FAR struct lib_outstream_s *this, int ch)
+static void memoutstream_putc(FAR struct lib_outstream_s *self, int ch)
 {
   char tmp = ch;
-  memoutstream_puts(this, &tmp, 1);
+  memoutstream_puts(self, &tmp, 1);
 }
 
 /****************************************************************************
@@ -94,10 +94,10 @@ static void memoutstream_putc(FAR struct lib_outstream_s *this, int ch)
 void lib_memoutstream(FAR struct lib_memoutstream_s *outstream,
                       FAR char *bufstart, int buflen)
 {
-  outstream->public.putc  = memoutstream_putc;
-  outstream->public.puts  = memoutstream_puts;
-  outstream->public.flush = lib_noflush;
-  outstream->public.nput  = 0;          /* Will be buffer index */
+  outstream->common.putc  = memoutstream_putc;
+  outstream->common.puts  = memoutstream_puts;
+  outstream->common.flush = lib_noflush;
+  outstream->common.nput  = 0;          /* Will be buffer index */
   outstream->buffer       = bufstart;   /* Start of buffer */
   outstream->buflen       = buflen - 1; /* Save space for null terminator */
   outstream->buffer[0]    = '\0';       /* Start with an empty string */

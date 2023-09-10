@@ -37,21 +37,21 @@
  * Name: syslogstream_putc
  ****************************************************************************/
 
-static void syslogstream_putc(FAR struct lib_outstream_s *this, int ch)
+static void syslogstream_putc(FAR struct lib_outstream_s *self, int ch)
 {
   FAR struct lib_syslogstream_s *stream =
-                                       (FAR struct lib_syslogstream_s *)this;
+                                       (FAR struct lib_syslogstream_s *)self;
 
   DEBUGASSERT(stream != NULL);
   syslog(stream->priority, "%c", ch);
-  stream->public.nput++;
+  stream->common.nput++;
 }
 
-static int syslogstream_puts(FAR struct lib_outstream_s *this,
+static int syslogstream_puts(FAR struct lib_outstream_s *self,
                              FAR const void *buff, int len)
 {
   FAR struct lib_syslogstream_s *stream =
-                                       (FAR struct lib_syslogstream_s *)this;
+                                       (FAR struct lib_syslogstream_s *)self;
 
   DEBUGASSERT(stream != NULL);
   if (len <= 0)
@@ -89,9 +89,9 @@ void lib_syslogstream(FAR struct lib_syslogstream_s *stream, int priority)
 
   /* Initialize the common fields */
 
-  stream->public.nput  = 0;
-  stream->public.putc  = syslogstream_putc;
-  stream->public.puts  = syslogstream_puts;
-  stream->public.flush = lib_noflush;
+  stream->common.nput  = 0;
+  stream->common.putc  = syslogstream_putc;
+  stream->common.puts  = syslogstream_puts;
+  stream->common.flush = lib_noflush;
   stream->priority     = priority;
 }
