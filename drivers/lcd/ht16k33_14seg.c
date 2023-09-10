@@ -779,7 +779,7 @@ static ssize_t ht16k33_write(FAR struct file *filep, FAR const char *buffer,
   /* Now decode and process every byte in the input buffer */
 
   memset(&state, 0, sizeof(struct slcdstate_s));
-  while ((result = slcd_decode(&instream.public,
+  while ((result = slcd_decode(&instream.common,
                                &state, &ch, &count)) != SLCDRET_EOF)
     {
       /* Is there some pending scroll? */

@@ -50,8 +50,8 @@
  *
  ****************************************************************************/
 
-int lib_noflush(FAR struct lib_outstream_s *this)
+int lib_noflush(FAR struct lib_outstream_s *self)
 {
-  UNUSED(this);
+  UNUSED(self);
   return OK;
 }

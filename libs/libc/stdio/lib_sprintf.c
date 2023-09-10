@@ -47,7 +47,7 @@ int sprintf(FAR char *buf, FAR const IPTR char *fmt, ...)
   /* Then let lib_vsprintf do the real work */
 
   va_start(ap, fmt);
-  n = lib_vsprintf((FAR struct lib_outstream_s *)&memoutstream.public,
+  n = lib_vsprintf((FAR struct lib_outstream_s *)&memoutstream.common,
                    fmt, ap);
   va_end(ap);
   return n;

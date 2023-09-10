@@ -80,7 +80,7 @@ int fhex2mem(FAR FILE *instream, unsigned long baseaddr,
 
   /* And do the deed */
 
-  return hex2bin(&stdinstream.public, &memoutstream.public,
+  return hex2bin(&stdinstream.common, &memoutstream.common,
                  (unsigned long)baseaddr, (unsigned long)endpaddr,
                  (enum hex2bin_swap_e)swap);
 }

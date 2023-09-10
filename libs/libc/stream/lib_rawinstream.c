@@ -40,20 +40,21 @@
  * Name: rawinstream_getc
  ****************************************************************************/
 
-static int rawinstream_getc(FAR struct lib_instream_s *this)
+static int rawinstream_getc(FAR struct lib_instream_s *self)
 {
-  FAR struct lib_rawinstream_s *rthis = (FAR struct lib_rawinstream_s *)this;
+  FAR struct lib_rawinstream_s *stream =
+                                       (FAR struct lib_rawinstream_s *)self;
   int nread;
   char ch;
 
-  DEBUGASSERT(this && rthis->fd >= 0);
+  DEBUGASSERT(self && stream->fd >= 0);
 
   /* Attempt to read one character */
 
-  nread = _NX_READ(rthis->fd, &ch, 1);
+  nread = _NX_READ(stream->fd, &ch, 1);
   if (nread == 1)
     {
-      this->nget++;
+      self->nget++;
       return ch;
     }
 
@@ -70,20 +71,21 @@ static int rawinstream_getc(FAR struct lib_instream_s *this)
  * Name: rawinstream_getc
  ****************************************************************************/
 
-static int rawinstream_gets(FAR struct lib_instream_s *this,
+static int rawinstream_gets(FAR struct lib_instream_s *self,
                             FAR void *buffer, int len)
 {
-  FAR struct lib_rawinstream_s *rthis = (FAR struct lib_rawinstream_s *)this;
+  FAR struct lib_rawinstream_s *stream =
+                                       (FAR struct lib_rawinstream_s *)self;
   int nread;
 
-  DEBUGASSERT(this && rthis->fd >= 0);
+  DEBUGASSERT(self && stream->fd >= 0);
 
   /* Attempt to read one character */
 
-  nread = _NX_READ(rthis->fd, buffer, len);
+  nread = _NX_READ(stream->fd, buffer, len);
   if (nread >= 0)
     {
-      this->nget += nread;
+      self->nget += nread;
     }
   else
     {
@@ -104,7 +106,7 @@ static int rawinstream_gets(FAR struct lib_instream_s *this,
  *   Initializes a stream for use with a file descriptor.
  *
  * Input Parameters:
- *   instream - User allocated, uninitialized instance of struct
+ *   stream   - User allocated, uninitialized instance of struct
  *              lib_rawinstream_s to be initialized.
  *   fd       - User provided file/socket descriptor (must have been opened
  *              for the correct access).
@@ -114,10 +116,10 @@ static int rawinstream_gets(FAR struct lib_instream_s *this,
  *
  ****************************************************************************/
 
-void lib_rawinstream(FAR struct lib_rawinstream_s *instream, int fd)
+void lib_rawinstream(FAR struct lib_rawinstream_s *stream, int fd)
 {
-  instream->public.getc = rawinstream_getc;
-  instream->public.gets = rawinstream_gets;
-  instream->public.nget = 0;
-  instream->fd          = fd;
+  stream->common.getc = rawinstream_getc;
+  stream->common.gets = rawinstream_gets;
+  stream->common.nget = 0;
+  stream->fd          = fd;
 }
