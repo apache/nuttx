@@ -72,11 +72,11 @@
 
 #if defined(CONFIG_ARM_MPU_NREGIONS) && defined(CONFIG_ARM_MPU)
 #  if CONFIG_ARM_MPU_NREGIONS <= 8
-#    define MPU_RNR_MASK            (0x00000007)
+#    define MPU_RNR_MASK        (0x00000007)
 #  elif CONFIG_ARM_MPU_NREGIONS <= 16
-#    define MPU_RNR_MASK            (0x0000000f)
+#    define MPU_RNR_MASK        (0x0000000f)
 #  elif CONFIG_ARM_MPU_NREGIONS <= 32
-#    define MPU_RNR_MASK            (0x0000001f)
+#    define MPU_RNR_MASK        (0x0000001f)
 #  else
 #    error "FIXME: Unsupported number of MPU regions"
 #  endif
@@ -94,7 +94,7 @@
 #define MPU_RASR_ENABLE         (1 << 0)                   /* Bit 0: Region enable */
 #define MPU_RASR_SIZE_SHIFT     (1)                        /* Bits 1-5: Size of the MPU protection region */
 #define MPU_RASR_SIZE_MASK      (31 << MPU_RASR_SIZE_SHIFT)
-#  define MPU_RASR_SIZE_LOG2(n) ((n-1) << MPU_RASR_SIZE_SHIFT)
+#  define MPU_RASR_SIZE_LOG2(n) ((n - 1) << MPU_RASR_SIZE_SHIFT)
 #define MPU_RASR_SRD_SHIFT      (8)                        /* Bits 8-15: Subregion disable */
 #define MPU_RASR_SRD_MASK       (0xff << MPU_RASR_SRD_SHIFT)
 #  define MPU_RASR_SRD_0        (0x01 << MPU_RASR_SRD_SHIFT)
@@ -115,7 +115,7 @@
 #    define MPU_RASR_TEX_SO     (0 << MPU_RASR_TEX_SHIFT) /* Strongly Ordered */
 #    define MPU_RASR_TEX_NOR    (1 << MPU_RASR_TEX_SHIFT) /* Normal           */
 #    define MPU_RASR_TEX_DEV    (2 << MPU_RASR_TEX_SHIFT) /* Device           */
-#    define MPU_RASR_TEX_BB(bb) ((4|(bb)) << MPU_RASR_TEX_SHIFT)
+#    define MPU_RASR_TEX_BB(bb) ((4 | (bb)) << MPU_RASR_TEX_SHIFT)
 #      define MPU_RASR_CP_NC    (0)                       /* Non-cacheable */
 #      define MPU_RASR_CP_WBRA  (1)                       /* Write back, write and Read- Allocate */
 #      define MPU_RASR_CP_WT    (2)                       /* Write through, no Write-Allocate */
@@ -142,7 +142,7 @@
 #if defined(CONFIG_MPU_RESET)
 void mpu_reset(void);
 #else
-#  define mpu_reset() do { } while (0)
+#  define mpu_reset()
 #endif
 
 /****************************************************************************
@@ -157,7 +157,7 @@ void mpu_reset(void);
 #if defined(CONFIG_ARM_MPU_EARLY_RESET)
 void mpu_early_reset(void);
 #else
-#  define mpu_early_reset() do { } while (0)
+#  define mpu_early_reset()
 #endif
 
 #ifdef CONFIG_ARM_MPU
@@ -246,8 +246,7 @@ void mpu_control(bool enable, bool hfnmiena, bool privdefena);
  *
  ****************************************************************************/
 
-void mpu_configure_region(uintptr_t base, size_t size,
-                                        uint32_t flags);
+void mpu_configure_region(uintptr_t base, size_t size, uint32_t flags);
 
 /****************************************************************************
  * Inline Functions
@@ -267,12 +266,13 @@ void mpu_configure_region(uintptr_t base, size_t size,
       { \
         uint32_t regval = getreg32(MPU_TYPE); \
         sinfo("%s MPU Regions: data=%d instr=%d\n", \
-          (regval & MPU_TYPE_SEPARATE) != 0 ? "Separate" : "Unified", \
-          (regval & MPU_TYPE_DREGION_MASK) >> MPU_TYPE_DREGION_SHIFT, \
-          (regval & MPU_TYPE_IREGION_MASK) >> MPU_TYPE_IREGION_SHIFT); \
-    } while (0)
+              (regval & MPU_TYPE_SEPARATE) != 0 ? "Separate" : "Unified", \
+              (regval & MPU_TYPE_DREGION_MASK) >> MPU_TYPE_DREGION_SHIFT, \
+              (regval & MPU_TYPE_IREGION_MASK) >> MPU_TYPE_IREGION_SHIFT); \
+      } \
+    while (0)
 #else
-#  define mpu_showtype() do { } while (0)
+#  define mpu_showtype()
 #endif
 
 /****************************************************************************
@@ -288,13 +288,14 @@ void mpu_configure_region(uintptr_t base, size_t size,
     { \
       /* The configure the region */ \
       mpu_configure_region(base, size, \
-                           MPU_RASR_TEX_SO   | /* Ordered            */ \
-                                               /* Not Cacheable      */ \
-                                               /* Not Bufferable     */ \
-                           MPU_RASR_S        | /* Shareable          */ \
-                           MPU_RASR_AP_RWNO    /* P:RW   U:None      */ \
-                                               /* Instruction access */); \
-    } while (0)
+                           MPU_RASR_TEX_SO  | /* Ordered            */ \
+                                              /* Not Cacheable      */ \
+                                              /* Not Bufferable     */ \
+                           MPU_RASR_S       | /* Shareable          */ \
+                           MPU_RASR_AP_RWNO   /* P:RW   U:None      */ \
+                                              /* Instruction access */); \
+    } \
+  while (0)
 
 /****************************************************************************
  * Name: mpu_user_flash
@@ -309,13 +310,14 @@ void mpu_configure_region(uintptr_t base, size_t size,
     { \
       /* The configure the region */ \
       mpu_configure_region(base, size, \
-                           MPU_RASR_TEX_SO   | /* Ordered            */ \
-                           MPU_RASR_C        | /* Cacheable          */ \
-                                               /* Not Bufferable     */ \
-                                               /* Not Shareable      */ \
-                           MPU_RASR_AP_RORO    /* P:RO   U:RO        */ \
-                                               /* Instruction access */); \
-    } while (0)
+                           MPU_RASR_TEX_SO  | /* Ordered            */ \
+                           MPU_RASR_C       | /* Cacheable          */ \
+                                              /* Not Bufferable     */ \
+                                              /* Not Shareable      */ \
+                           MPU_RASR_AP_RORO   /* P:RO   U:RO        */ \
+                                              /* Instruction access */); \
+    } \
+  while (0)
 
 /****************************************************************************
  * Name: mpu_priv_flash
@@ -336,7 +338,8 @@ void mpu_configure_region(uintptr_t base, size_t size,
                                                /* Not Shareable      */ \
                            MPU_RASR_AP_RONO    /* P:RO   U:None      */ \
                                                /* Instruction access */); \
-    } while (0)
+    } \
+  while (0)
 
 /****************************************************************************
  * Name: mpu_user_intsram
@@ -357,7 +360,8 @@ void mpu_configure_region(uintptr_t base, size_t size,
                            MPU_RASR_S        | /* Shareable          */ \
                            MPU_RASR_AP_RWRW    /* P:RW   U:RW        */ \
                                                /* Instruction access */); \
-    } while (0)
+    } \
+  while (0)
 
 /****************************************************************************
  * Name: mpu_priv_intsram
@@ -371,14 +375,15 @@ void mpu_configure_region(uintptr_t base, size_t size,
   do \
     { \
       /* The configure the region */ \
-      mpu_configure_region(base, size,\
-                           MPU_RASR_TEX_SO   | /* Ordered            */ \
-                           MPU_RASR_C        | /* Cacheable          */ \
-                                               /* Not Bufferable     */ \
-                           MPU_RASR_S        | /* Shareable          */ \
-                           MPU_RASR_AP_RWNO    /* P:RW   U:None      */ \
-                                               /* Instruction access */); \
-    } while (0)
+      mpu_configure_region(base, size, \
+                           MPU_RASR_TEX_SO  | /* Ordered            */ \
+                           MPU_RASR_C       | /* Cacheable          */ \
+                                              /* Not Bufferable     */ \
+                           MPU_RASR_S       | /* Shareable          */ \
+                           MPU_RASR_AP_RWNO   /* P:RW   U:None      */ \
+                                              /* Instruction access */); \
+    } \
+  while (0)
 
 /****************************************************************************
  * Name: mpu_priv_shmem
