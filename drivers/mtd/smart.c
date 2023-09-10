@@ -2797,7 +2797,6 @@ static int smart_relocate_static_data(FAR struct smart_struct_s *dev,
   uint16_t minblock;
   uint16_t nextsector;
   uint16_t newsector;
-  uint16_t mincount;
   int ret;
   FAR struct smart_sect_header_s *header;
 #ifdef CONFIG_MTD_SMART_ENABLE_CRC
@@ -2833,7 +2832,6 @@ static int smart_relocate_static_data(FAR struct smart_struct_s *dev,
 
       freecount = dev->sectorsperblk + 1;
       minblock = dev->geo.neraseblocks;
-      mincount = 0;
       for (x = 0; x < dev->geo.neraseblocks; x++)
         {
           if (smart_get_wear_level(dev, x) == dev->minwearlevel)
@@ -2842,8 +2840,6 @@ static int smart_relocate_static_data(FAR struct smart_struct_s *dev,
                * be moved into a worn block.  First get the format and
                * dir sectors.
                */
-
-              mincount++;
 
 #ifdef CONFIG_MTD_SMART_PACK_COUNTS
               if (smart_get_count(dev, dev->releasecount, x) +
