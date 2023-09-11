@@ -140,3 +140,13 @@ The default header file search path includes:
    CONFIG_XXX2=y
    #include "configs/system.config"
    #include "configs/net.config"
+
+Merge configuration
+--------------------------
+
+Multiple config fragments can be merged manually using the tools/merge_config.py script.
+
+.. code-block:: console
+
+   $ cd nuttx
+   $ ./tools/merge_config.py -o defconfig .config1 .config2
