@@ -51,7 +51,7 @@ config VIDEO_FB
 	default n
 
 config VIDEO_FB_NPOLLWAITERS
-	int "Video fb poll count of each layer"
+	int "Video fb poll count of each open structure"
 	depends on VIDEO_FB
 	default 2
 
