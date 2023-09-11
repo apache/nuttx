@@ -29,6 +29,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <assert.h>
+#include <debug.h>
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>
@@ -950,13 +951,21 @@ static int rpmsgfs_ept_cb(FAR struct rpmsg_endpoint *ept,
 {
   struct rpmsgfs_header_s *header = data;
   uint32_t command = header->command;
+  int ret;
 
-  if (command < nitems(g_rpmsgfs_handler))
+  if (command >= nitems(g_rpmsgfs_handler))
     {
-      return g_rpmsgfs_handler[command](ept, data, len, src, priv);
+      return -EINVAL;
     }
 
-  return -EINVAL;
+  ret = g_rpmsgfs_handler[command](ept, data, len, src, priv);
+  if (ret < 0)
+    {
+      ferr("ERROR: handle failed, ept=%p cmd=%" PRIu32 " ret=%d\n",
+           ept, command, ret);
+    }
+
+  return ret;
 }
 
 int rpmsgfs_server_init(void)
