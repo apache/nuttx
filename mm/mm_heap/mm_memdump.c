@@ -60,21 +60,30 @@ static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
       DEBUGASSERT(nodesize >= MM_SIZEOF_ALLOCNODE);
 #if CONFIG_MM_BACKTRACE < 0
       if (dump->pid == PID_MM_ALLOC)
-#else
-      if ((dump->pid == node->pid || dump->pid == PID_MM_ALLOC ||
-           (dump->pid == PID_MM_LEAK && node->pid >= 0 &&
-            !nxsched_get_tcb(node->pid))) &&
-          node->seqno >= dump->seqmin && node->seqno <= dump->seqmax)
-#endif
         {
-#if CONFIG_MM_BACKTRACE < 0
           syslog(LOG_INFO, "%12zu%*p\n",
                  nodesize, MM_PTR_FMT_WIDTH,
                  ((FAR char *)node + MM_SIZEOF_ALLOCNODE));
+        }
+#elif CONFIG_MM_BACKTRACE == 0
+      if ((MM_DUMP_ASSIGN(dump->pid, node->pid) ||
+           MM_DUMP_ALLOC(dump->pid, node->pid) ||
+           MM_DUMP_LEAK(dump->pid, node->pid)) &&
+          node->seqno >= dump->seqmin && node->seqno <= dump->seqmax)
+        {
+          syslog(LOG_INFO, "%6d%12zu%12lu%*p\n",
+                 node->pid, nodesize, node->seqno,
+                 MM_PTR_FMT_WIDTH,
+                 ((FAR char *)node + MM_SIZEOF_ALLOCNODE));
+        }
 #else
+      if ((MM_DUMP_ASSIGN(dump->pid, node->pid) ||
+           MM_DUMP_ALLOC(dump->pid, node->pid) ||
+           MM_DUMP_LEAK(dump->pid, node->pid)) &&
+          node->seqno >= dump->seqmin && node->seqno <= dump->seqmax)
+        {
           char buf[CONFIG_MM_BACKTRACE * MM_PTR_FMT_WIDTH + 1] = "";
 
-#  if CONFIG_MM_BACKTRACE > 0
           FAR const char *format = " %0*p";
           int i;
 
@@ -84,14 +93,13 @@ static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
                        sizeof(buf) - i * MM_PTR_FMT_WIDTH,
                        format, MM_PTR_FMT_WIDTH - 1, node->backtrace[i]);
             }
-#  endif
 
           syslog(LOG_INFO, "%6d%12zu%12lu%*p%s\n",
                  node->pid, nodesize, node->seqno,
                  MM_PTR_FMT_WIDTH,
                  ((FAR char *)node + MM_SIZEOF_ALLOCNODE), buf);
-#endif
         }
+#endif
     }
   else if (dump->pid == PID_MM_FREE)
     {

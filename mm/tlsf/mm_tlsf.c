@@ -297,10 +297,9 @@ static void mallinfo_task_handler(FAR void *ptr, size_t size, int used,
       FAR struct memdump_backtrace_s *buf =
         ptr + size - sizeof(struct memdump_backtrace_s);
 
-      if ((task->pid == buf->pid ||
-           (task->pid == PID_MM_ALLOC && buf->pid != PID_MM_MEMPOOL) ||
-           (task->pid == PID_MM_LEAK && buf->pid >= 0 &&
-            !nxsched_get_tcb(buf->pid))) &&
+      if ((MM_DUMP_ASSIGN(task->pid, buf->pid) ||
+           MM_DUMP_ALLOC(task->pid, buf->pid) ||
+           MM_DUMP_LEAK(task->pid, buf->pid)) &&
           buf->seqno >= task->seqmin && buf->seqno <= task->seqmax)
         {
           info->aordblks++;
@@ -407,23 +406,32 @@ static void memdump_handler(FAR void *ptr, size_t size, int used,
     {
 #if CONFIG_MM_BACKTRACE < 0
       if (dump->pid == PID_MM_ALLOC)
+        {
+          syslog(LOG_INFO, "%12zu%*p\n", size, MM_PTR_FMT_WIDTH, ptr);
+        }
+#elif CONFIG_MM_BACKTRACE == 0
+      FAR struct memdump_backtrace_s *buf =
+        ptr + size - sizeof(struct memdump_backtrace_s);
+
+      if ((MM_DUMP_ASSIGN(dump->pid, buf->pid) ||
+           MM_DUMP_ALLOC(dump->pid, buf->pid) ||
+           MM_DUMP_LEAK(dump->pid, buf->pid)) &&
+          buf->seqno >= dump->seqmin && buf->seqno <= dump->seqmax)
+        {
+          syslog(LOG_INFO, "%6d%12zu%12lu%*p\n",
+                 buf->pid, size, buf->seqno, MM_PTR_FMT_WIDTH, ptr);
+        }
 #else
       FAR struct memdump_backtrace_s *buf =
         ptr + size - sizeof(struct memdump_backtrace_s);
 
-      if ((dump->pid == buf->pid ||
-           (dump->pid == PID_MM_ALLOC && buf->pid != PID_MM_MEMPOOL) ||
-           (dump->pid == PID_MM_LEAK && buf->pid >= 0 &&
-            !nxsched_get_tcb(buf->pid))) &&
+      if ((MM_DUMP_ASSIGN(dump->pid, buf->pid) ||
+           MM_DUMP_ALLOC(dump->pid, buf->pid) ||
+           MM_DUMP_LEAK(dump->pid, buf->pid)) &&
           buf->seqno >= dump->seqmin && buf->seqno <= dump->seqmax)
-#endif
         {
-#if CONFIG_MM_BACKTRACE < 0
-          syslog(LOG_INFO, "%12zu%*p\n", size, MM_PTR_FMT_WIDTH, ptr);
-#else
           char tmp[CONFIG_MM_BACKTRACE * MM_PTR_FMT_WIDTH + 1] = "";
 
-#  if CONFIG_MM_BACKTRACE > 0
           FAR const char *format = " %0*p";
           int i;
 
@@ -433,13 +441,11 @@ static void memdump_handler(FAR void *ptr, size_t size, int used,
                        sizeof(tmp) - i * MM_PTR_FMT_WIDTH,
                        format, MM_PTR_FMT_WIDTH - 1, buf->backtrace[i]);
             }
-#  endif
 
-         syslog(LOG_INFO, "%6d%12zu%12lu%*p%s\n",
-                buf->pid, size, buf->seqno, MM_PTR_FMT_WIDTH,
-                ptr, tmp);
-#endif
+          syslog(LOG_INFO, "%6d%12zu%12lu%*p%s\n",
+                 buf->pid, size, buf->seqno, MM_PTR_FMT_WIDTH, ptr, tmp);
         }
+#endif
     }
   else if (dump->pid == PID_MM_FREE)
     {
