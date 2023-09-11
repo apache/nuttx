@@ -522,8 +522,16 @@ framework like GTK or Qt.  So this might be a trip down the rabbit hole.
 
 ### Using macOS
 
-You need to install at least the following tools specific to macOS
-if you want to build the sim:
+You need to install at least the following tools specific to macOS.
+
+  * flock (used by APPDIR build logic)
+
+A macOS port is available at: <https://github.com/discoteq/flock>
+
+    brew tap discoteq/discoteq
+    brew install flock
+
+  If you want to build the sim:
 
   * Xcode (the native compiler and the rest of the toolchain)
 

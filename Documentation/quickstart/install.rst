@@ -45,6 +45,8 @@ First, install the following set of system dependencies according to your Operat
 
     .. code-block:: console
 
+      $ brew tap discoteq/discoteq
+      $ brew install flock
       $ brew install x86_64-elf-gcc  # Used by simulator
       $ brew install u-boot-tools  # Some platform integrate with u-boot
 
