@@ -74,7 +74,7 @@
 
 #define CRC_CTRL_TCRC               (1 << 24) /* Bit 24: Width of CRC protocol */
 #  define CRC_CTRL_TCRC_16BIT       (0)       /*         16-bit CRC protocol */
-#  define CRC_CTRL_TCRC_16BIT       (1 << 24) /*         32-bit CRC protocol */
+#  define CRC_CTRL_TCRC_32BIT       (1 << 24) /*         32-bit CRC protocol */
 #define CRC_CTRL_WAS                (1 << 25) /* Bit 25: Write CRC Data Register As Seed */
 #define CRC_CTRL_FXOR               (1 << 26) /* Bit 26: Complement Read Of CRC Data Register */
 #define CRC_CTRL_TOTR_SHIFT         (28)      /* Bits 28-29:  Type Of Transpose For Read */
