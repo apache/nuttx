@@ -133,6 +133,12 @@
 #  define MM_INTERNAL_HEAP(heap) ((heap) == USR_HEAP)
 #endif
 
+#define MM_DUMP_ASSIGN(dump, pid) ((dump) == (pid))
+#define MM_DUMP_ALLOC(dump, pid) \
+    ((dump) == PID_MM_ALLOC && (pid) != PID_MM_MEMPOOL)
+#define MM_DUMP_LEAK(dump, pid) \
+    ((dump) == PID_MM_LEAK && (pid) >= 0 && nxsched_get_tcb(pid) == NULL)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

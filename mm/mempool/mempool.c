@@ -434,11 +434,12 @@ mempool_info_task(FAR struct mempool_s *pool,
     {
       FAR struct mempool_backtrace_s *buf;
 
-      list_for_every_entry(&pool->alist, buf, struct mempool_backtrace_s,
-                           node)
+      list_for_every_entry(&pool->alist, buf,
+                           struct mempool_backtrace_s, node)
         {
-          if ((task->pid == buf->pid || task->pid == PID_MM_ALLOC ||
-               (task->pid == PID_MM_LEAK && !nxsched_get_tcb(buf->pid))) &&
+          if ((MM_DUMP_ASSIGN(task->pid, buf->pid) ||
+               MM_DUMP_ALLOC(task->pid, buf->pid) ||
+               MM_DUMP_LEAK(task->pid, buf->pid)) &&
               buf->seqno >= task->seqmin && buf->seqno <= task->seqmax)
             {
               info.aordblks++;
@@ -500,8 +501,9 @@ void mempool_memdump(FAR struct mempool_s *pool,
       list_for_every_entry(&pool->alist, buf,
                            struct mempool_backtrace_s, node)
         {
-          if ((dump->pid == buf->pid || dump->pid == PID_MM_ALLOC ||
-               (dump->pid == PID_MM_LEAK && !nxsched_get_tcb(buf->pid))) &&
+          if ((MM_DUMP_ASSIGN(dump->pid, buf->pid) ||
+               MM_DUMP_ALLOC(dump->pid, buf->pid) ||
+               MM_DUMP_LEAK(dump->pid, buf->pid)) &&
               buf->seqno >= dump->seqmin && buf->seqno <= dump->seqmax)
             {
               char tmp[CONFIG_MM_BACKTRACE * MM_PTR_FMT_WIDTH + 1] = "";
