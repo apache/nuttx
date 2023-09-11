@@ -286,8 +286,6 @@ static int sim_audio_open(struct sim_audio_s *priv)
   return 0;
 
 fail:
-  snd_pcm_close(pcm);
-  up_irq_restore(flags);
   host_uninterruptible(snd_pcm_close, pcm);
   return ret;
 }
