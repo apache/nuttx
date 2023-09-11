@@ -57,7 +57,9 @@ CRYPTO_CSRCS += sha2.c
 CRYPTO_CSRCS += gmac.c
 CRYPTO_CSRCS += cmac.c
 CRYPTO_CSRCS += hmac.c
-CRYPTO_CSRCS += idgen.c
+ifeq ($(CONFIG_CRYPTO_RANDOM_POOL),y)
+  CRYPTO_CSRCS += idgen.c
+endif
 CRYPTO_CSRCS += key_wrap.c
 CRYPTO_CSRCS += siphash.c
 CRYPTO_CSRCS += hmac_buff.c
