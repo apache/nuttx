@@ -89,7 +89,7 @@ jobs:
           echo "app_ref=$APPS_REF" >> $GITHUB_OUTPUT
 
       - name: Checkout nuttx repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: apache/nuttx
           ref: ${{ steps.gittargets.outputs.os_ref }}
@@ -99,7 +99,7 @@ jobs:
         run: git -C sources/nuttx fetch --tags
 
       - name: Checkout apps repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: apache/nuttx-apps
           ref: ${{ steps.gittargets.outputs.apps_ref }}
