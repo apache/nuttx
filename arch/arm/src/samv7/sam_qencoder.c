@@ -118,7 +118,7 @@ static struct sam_lowerhalf_s g_tc0lower =
 static struct sam_lowerhalf_s g_tc1lower =
 {
   .ops      = &g_qecallbacks,
-  .timid    = 1,
+  .tcid     = 1,
   .inuse    = false,
 };
 #endif
