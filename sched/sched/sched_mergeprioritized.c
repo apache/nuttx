@@ -65,6 +65,7 @@ void nxsched_merge_prioritized(FAR dq_queue_t *list1, FAR dq_queue_t *list2,
                                uint8_t task_state)
 {
   dq_queue_t clone;
+  dq_queue_t tmp_q;
   FAR struct tcb_s *tcb1;
   FAR struct tcb_s *tcb2;
   FAR struct tcb_s *tmp;
@@ -122,38 +123,46 @@ void nxsched_merge_prioritized(FAR dq_queue_t *list1, FAR dq_queue_t *list2,
        * list1?
        */
 
-      if (tcb2 == NULL)
-        {
-          /* Yes..  Just append the remainder of list1 to the end of list2. */
-
-          dq_cat(&clone, list2);
-          break;
-        }
-
       /* Which TCB has higher priority? */
 
-      else if (tcb1->sched_priority > tcb2->sched_priority)
+      if (tcb1->sched_priority > tcb2->sched_priority)
         {
           /* The TCB from list1 has higher priority than the TCB from list2.
            * Remove the TCB from list1 and insert it before the TCB from
            * list2.
            */
 
-          tmp = (FAR struct tcb_s *)dq_remfirst(&clone);
-          DEBUGASSERT(tmp == tcb1);
+          tcb1 = (FAR struct tcb_s *)dq_next((dq_entry_t *)tcb1);
+          while (tcb1->sched_priority > tcb2->sched_priority)
+            {
+              tcb1 = (FAR struct tcb_s *)dq_next((dq_entry_t *)tcb1);
+            }
 
-          dq_addbefore((FAR dq_entry_t *)tcb2, (FAR dq_entry_t *)tmp,
-                       list2);
+          if (tcb1 != NULL)
+            {
+              dq_split((dq_entry_t *)tcb1, &clone, &tmp_q);
+              dq_cat(&clone, list2);
+              dq_move(&tmp_q, &clone);
+            }
+          else
+            {
+              dq_cat(&clone, list2);
+              break;
+            }
 
           tcb1 = (FAR struct tcb_s *)dq_peek(&clone);
+          tcb2 = (FAR struct tcb_s *)dq_next((FAR dq_entry_t *)tcb2);
+        }
+      else if (tcb2 == NULL)
+        {
+          /* Yes..  Just append the remainder of list1 to the end of list2. */
+
+          dq_cat(&clone, list2);
+          break;
         }
       else
         {
-          /* The TCB from list2 has higher (or same) priority as the TCB
-           * from list2.  Skip to the next, lower priority TCB in list2.
-           */
-
-          tcb2 = (FAR struct tcb_s *)dq_next((FAR dq_entry_t *)tcb2);
+          DEBUGASSERT(0);
         }
     }
   while (tcb1 != NULL);
