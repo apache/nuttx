@@ -188,6 +188,10 @@ static int shm_extend(int shmid, size_t size)
           break;
         }
 
+      /* Zero the allocated page. */
+
+      memset((void *)region->sr_pages[pgalloc], 0, MM_PGSIZE);
+
       /* Increment the number of pages successfully allocated */
 
       pgalloc++;
