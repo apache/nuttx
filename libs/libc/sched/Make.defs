@@ -20,7 +20,7 @@
 
 # Add the sched C files to the build
 
-CSRCS += sched_getprioritymax.c sched_getprioritymin.c
+CSRCS += sched_getprioritymax.c sched_getprioritymin.c sched_gettid.c
 CSRCS += clock_ticks2time.c clock_time2ticks.c
 CSRCS += clock_timespec_add.c clock_timespec_subtract.c
 CSRCS += clock_getcpuclockid.c clock_getres.c
