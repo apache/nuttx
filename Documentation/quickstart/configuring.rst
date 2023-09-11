@@ -124,3 +124,19 @@ This is also useful to script configuration changes that you perform often:
    kconfig-tweak --disable CONFIG_DEBUG_NOOPT
    kconfig-tweak --disable CONFIG_SYSLOG_TIMESTAMP
    make oldconfig
+
+Reference configuration
+--------------------------
+
+Defconfig supports the use of #include statements to reference other configuration files.
+The default header file search path includes:
+   ${current directory}
+   ${boards}/configs/comnon
+   ${boards}/common/configs
+
+.. code-block::
+
+   CONFIG_XXX1=y
+   CONFIG_XXX2=y
+   #include "configs/system.config"
+   #include "configs/net.config"
