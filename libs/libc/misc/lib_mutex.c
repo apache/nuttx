@@ -337,6 +337,7 @@ int nxmutex_unlock(FAR mutex_t *mutex)
     }
 
   DEBUGASSERT(nxmutex_is_hold(mutex));
+  ASSERT(mutex->holder == _SCHED_GETTID());
 
   mutex->holder = NXMUTEX_NO_HOLDER;
 
