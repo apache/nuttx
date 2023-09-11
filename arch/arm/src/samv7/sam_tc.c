@@ -514,7 +514,7 @@ static struct sam_tc_s g_tc345 =
 static struct sam_tc_s g_tc678 =
 {
   .lock    = NXMUTEX_INITIALIZER,
-  .base    = SAM_TC789_BASE,
+  .base    = SAM_TC678_BASE,
   .tc      = 2,
 };
 #endif
