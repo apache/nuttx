@@ -251,6 +251,27 @@
     } \
   while (0)
 
+#define dq_split(p, q1, q2) \
+  do \
+    { \
+      if (dq_peek(q1) == (p)) \
+        { \
+          dq_move(q1, q2); \
+        } \
+      else \
+        { \
+          (q2)->tail = (q1)->tail; \
+          (q2)->head = (p); \
+          (q1)->tail = (p)->blink; \
+          (p)->blink = NULL; \
+          if((q1)->tail) \
+            { \
+              (q1)->tail->flink = NULL; \
+            } \
+        } \
+    } \
+  while(0)
+
 #define sq_next(p)  ((p)->flink)
 #define dq_next(p)  ((p)->flink)
 #define dq_prev(p)  ((p)->blink)
