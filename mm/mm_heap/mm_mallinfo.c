@@ -104,10 +104,9 @@ static void mallinfo_task_handler(FAR struct mm_allocnode_s *node,
           info->uordblks += nodesize;
         }
 #else
-      if ((task->pid == node->pid ||
-           (task->pid == PID_MM_ALLOC && node->pid != PID_MM_MEMPOOL) ||
-           (task->pid == PID_MM_LEAK && node->pid >= 0 &&
-            !nxsched_get_tcb(node->pid))) &&
+      if ((MM_DUMP_ASSIGN(task->pid, node->pid) ||
+           MM_DUMP_ALLOC(task->pid, node->pid) ||
+           MM_DUMP_LEAK(task->pid, node->pid)) &&
           node->seqno >= task->seqmin && node->seqno <= task->seqmax)
         {
           info->aordblks++;
