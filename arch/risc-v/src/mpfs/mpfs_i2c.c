@@ -169,6 +169,7 @@ struct mpfs_i2c_priv_s
 
   bool                   initialized; /* Bus initialization status */
   bool                   fpga;        /* FPGA i2c */
+  bool                   inflight;    /* Transfer ongoing */
 };
 
 #ifndef CONFIG_MPFS_COREI2C
@@ -455,6 +456,8 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
           {
             priv->tx_idx = 0u;
           }
+
+        priv->inflight = true;
         break;
 
       case MPFS_I2C_ST_LOST_ARB:
@@ -487,7 +490,7 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
             clear_irq = 0u;
             modifyreg32(MPFS_I2C_CTRL, 0, MPFS_I2C_CTRL_STA_MASK);
 
-          /* Jump to the next message */
+            /* Jump to the next message */
 
             priv->msgid++;
           }
@@ -506,7 +509,7 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
                 clear_irq = 0u;
                 modifyreg32(MPFS_I2C_CTRL, 0, MPFS_I2C_CTRL_STA_MASK);
 
-               /* Jump to the next message */
+                /* Jump to the next message */
 
                 priv->msgid++;
               }
@@ -574,10 +577,31 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
         break;
 
       case MPFS_I2C_ST_IDLE:
-      case MPFS_I2C_ST_STOP_SENT:
 
         /* No activity, bus idle */
 
+        break;
+
+      case MPFS_I2C_ST_STOP_SENT:
+
+        /* FPGA driver terminates all transactions with STOP sent irq
+         * if there has been no errors, the transfer succeeded.
+         * Due to the IP bug that extra data & STOPs can be sent after
+         * the actual transaction, filter out any extra stops with
+         * priv->inflight flag
+         */
+
+        if (priv->inflight)
+          {
+            if (priv->status == MPFS_I2C_IN_PROGRESS)
+              {
+                priv->status = MPFS_I2C_SUCCESS;
+              }
+
+            nxsem_post(&priv->sem_isr);
+          }
+
+        priv->inflight = false;
         break;
 
       case MPFS_I2C_ST_RESET_ACTIVATED:
@@ -594,31 +618,12 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
         break;
     }
 
-  if (priv->fpga)
-    {
-      /* FPGA driver terminates all transactions with STOP sent irq */
+    if (!priv->fpga && priv->status != MPFS_I2C_IN_PROGRESS)
+      {
+        /* MSS I2C has no STOP sent irq */
 
-      if (status == MPFS_I2C_ST_STOP_SENT)
-        {
-          /* Don't post on a new request, STOPs possible initially */
-
-          if (!((priv->rx_idx == 0 && priv->rx_size > 0) ||
-             (priv->tx_idx == 0 && priv->tx_size > 0)))
-            {
-              nxsem_post(&priv->sem_isr);
-            }
-          else if (priv->status == MPFS_I2C_FAILED)
-            {
-              nxsem_post(&priv->sem_isr);
-            }
-        }
-    }
-  else if (priv->status != MPFS_I2C_IN_PROGRESS)
-    {
-      /* MSS I2C has no STOP SENT irq */
-
-      nxsem_post(&priv->sem_isr);
-    }
+        nxsem_post(&priv->sem_isr);
+      }
 
   if (clear_irq)
     {
@@ -650,7 +655,7 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
 static void mpfs_i2c_sendstart(struct mpfs_i2c_priv_s *priv)
 {
   up_enable_irq(priv->plic_irq);
-  modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_STA_MASK, MPFS_I2C_CTRL_STA_MASK);
+  modifyreg32(MPFS_I2C_CTRL, 0, MPFS_I2C_CTRL_STA_MASK);
 }
 
 static int mpfs_i2c_transfer(struct i2c_master_s *dev,
@@ -667,11 +672,6 @@ static int mpfs_i2c_transfer(struct i2c_master_s *dev,
   if (ret < 0)
     {
       return ret;
-    }
-
-  if (priv->status != MPFS_I2C_SUCCESS)
-    {
-      priv->status = MPFS_I2C_SUCCESS;
     }
 
   priv->msgv = msgs;
@@ -737,6 +737,7 @@ static int mpfs_i2c_transfer(struct i2c_master_s *dev,
       if (mpfs_i2c_sem_waitdone(priv) < 0)
         {
           i2cinfo("Message %" PRIu8 " timed out.\n", priv->msgid);
+          priv->inflight = false;
           ret = -ETIMEDOUT;
           break;
         }
@@ -750,7 +751,6 @@ static int mpfs_i2c_transfer(struct i2c_master_s *dev,
             }
           else
             {
-              priv->status = MPFS_I2C_SUCCESS;
               ret = OK;
             }
         }
@@ -793,6 +793,8 @@ static int mpfs_i2c_reset(struct i2c_master_s *dev)
 
   up_disable_irq(priv->plic_irq);
 
+  priv->inflight = false;
+  priv->status = MPFS_I2C_SUCCESS;
   priv->initialized = false;
 
   ret = mpfs_i2c_init(priv);
