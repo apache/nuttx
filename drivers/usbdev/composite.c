@@ -38,6 +38,10 @@
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbdev_trace.h>
 
+#ifdef CONFIG_BOARD_USBDEV_SERIALSTR
+#  include <nuttx/board.h>
+#endif
+
 #include "composite.h"
 
 /****************************************************************************

@@ -50,6 +50,13 @@
 #define COMPOSITE_CONFIGIDNONE        (0)  /* Config ID = 0 means to return to address mode */
 #define COMPOSITE_CONFIGID            (1)  /* The only supported configuration ID */
 
+/* Descriptor strings */
+
+#define COMPOSITE_MANUFACTURERSTRID   (1)
+#define COMPOSITE_PRODUCTSTRID        (2)
+#define COMPOSITE_SERIALSTRID         (3)
+#define COMPOSITE_CONFIGSTRID         (4)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
