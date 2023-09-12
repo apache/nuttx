@@ -39,6 +39,6 @@
 # https://opensource.apple.com/source/cctools/cctools-949.0.1/misc/
 
 set -e
-ar rcS "$@"
+ar qcS "$@"
 # Note: the following line is using bash process substitution
 ranlib -no_warning_for_no_symbols "$1" 2> >(grep -F -v "the table of contents is empty")
