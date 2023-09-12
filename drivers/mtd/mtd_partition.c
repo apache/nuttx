@@ -909,8 +909,11 @@ FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd,
 #ifdef CONFIG_MTD_BYTE_WRITE
   part->child.write   = mtd->write ? part_write : NULL;
 #endif
+#ifdef CONFIG_MTD_PARTITION_NAMES
+  part->child.name    = part->name;
+#else
   part->child.name    = "part";
-
+#endif
   part->parent        = mtd;
   part->firstblock    = erasestart * part->blkpererase;
   part->geo.neraseblocks = eraseend - erasestart;
