@@ -1677,7 +1677,11 @@ int psock_tcp_cansend(FAR struct tcp_conn_s *conn)
    * but we don't know how many more.
    */
 
-  if (tcp_wrbuffer_test() < 0 || iob_navail(true) <= 0)
+  if (tcp_wrbuffer_test() < 0 || iob_navail(true) <= 0
+#if CONFIG_NET_SEND_BUFSIZE > 0
+      || tcp_wrbuffer_inqueue_size(conn) >= conn->snd_bufs
+#endif
+     )
     {
       return -EWOULDBLOCK;
     }
