@@ -62,10 +62,6 @@
  * Description:
  *   Calculate total memory allocation for the ELF file.
  *
- * Returned Value:
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
  ****************************************************************************/
 
 static void modlib_elfsize(FAR struct mod_loadinfo_s *loadinfo)
