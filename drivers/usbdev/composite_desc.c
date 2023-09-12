@@ -93,13 +93,6 @@
 
 #define COMPOSITE_STR_LANGUAGE          (0x0409) /* en-us */
 
-/* Descriptor strings */
-
-#define COMPOSITE_MANUFACTURERSTRID     (1)
-#define COMPOSITE_PRODUCTSTRID          (2)
-#define COMPOSITE_SERIALSTRID           (3)
-#define COMPOSITE_CONFIGSTRID           (4)
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
