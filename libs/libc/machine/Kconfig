@@ -137,6 +137,12 @@ config LIBC_ARCH_ELF_64BIT
 	default n
 	depends on LIBC_ARCH_ELF
 
+config LIBC_PREVENT_STRING
+	bool
+	default n
+	select LIBC_PREVENT_STRING_KERNEL
+	select LIBC_PREVENT_STRING_USER
+
 config LIBC_PREVENT_STRING_KERNEL
 	bool
 	default n
@@ -185,6 +191,12 @@ config LIBC_PREVENT_STRING_USER
 	select LIBC_PREVENT_STRNCPY_USER
 	select LIBC_PREVENT_STRRCHR_USER
 
+config LIBC_PREVENT_MEMCHR
+	bool
+	default n
+	select LIBC_PREVENT_MEMCHR_KERNEL
+	select LIBC_PREVENT_MEMCHR_USER
+
 config LIBC_PREVENT_MEMCHR_KERNEL
 	bool
 	default n
@@ -207,6 +219,12 @@ config LIBC_PREVENT_MEMCHR_USER
 		in the userspace, including NuttX's software-defined version of the
 		libc memchr or any other architecture-specific version of it. A ROM-defined
 		version of the libc memchr may be linked to the userspace by the linker.
+
+config LIBC_PREVENT_MEMCMP
+	bool
+	default n
+	select LIBC_PREVENT_MEMCMP_KERNEL
+	select LIBC_PREVENT_MEMCMP_USER
 
 config LIBC_PREVENT_MEMCMP_KERNEL
 	bool
@@ -231,6 +249,12 @@ config LIBC_PREVENT_MEMCMP_USER
 		libc memcmp or any other architecture-specific version of it. A ROM-defined
 		version of the libc memcmp may be linked to the userspace by the linker.
 
+config LIBC_PREVENT_MEMCPY
+	bool
+	default n
+	select LIBC_PREVENT_MEMCPY_KERNEL
+	select LIBC_PREVENT_MEMCPY_USER
+
 config LIBC_PREVENT_MEMCPY_KERNEL
 	bool
 	default n
@@ -253,6 +277,12 @@ config LIBC_PREVENT_MEMCPY_USER
 		in the userspace, including NuttX's software-defined version of the
 		libc memcpy or any other architecture-specific version of it. A ROM-defined
 		version of the libc memcpy may be linked to the userspace by the linker.
+
+config LIBC_PREVENT_MEMMOVE
+	bool
+	default n
+	select LIBC_PREVENT_MEMMOVE_KERNEL
+	select LIBC_PREVENT_MEMMOVE_USER
 
 config LIBC_PREVENT_MEMMOVE_KERNEL
 	bool
@@ -277,6 +307,12 @@ config LIBC_PREVENT_MEMMOVE_USER
 		libc memmove or any other architecture-specific version of it. A ROM-defined
 		version of the libc memmove may be linked to the userspace by the linker.
 
+config LIBC_PREVENT_MEMSET
+	bool
+	default n
+	select LIBC_PREVENT_MEMSET_KERNEL
+	select LIBC_PREVENT_MEMSET_USER
+
 config LIBC_PREVENT_MEMSET_KERNEL
 	bool
 	default n
@@ -299,6 +335,12 @@ config LIBC_PREVENT_MEMSET_USER
 		in the userspace, including NuttX's software-defined version of the
 		libc memset or any other architecture-specific version of it. A ROM-defined
 		version of the libc memset may be linked to the userspace by the linker.
+
+config LIBC_PREVENT_STRCAT
+	bool
+	default n
+	select LIBC_PREVENT_STRCAT_KERNEL
+	select LIBC_PREVENT_STRCAT_USER
 
 config LIBC_PREVENT_STRCAT_KERNEL
 	bool
@@ -323,6 +365,12 @@ config LIBC_PREVENT_STRCAT_USER
 		libc strcat or any other architecture-specific version of it. A ROM-defined
 		version of the libc strcat may be linked to the userspace by the linker.
 
+config LIBC_PREVENT_STRCASECMP
+	bool
+	default n
+	select LIBC_PREVENT_STRCASECMP_KERNEL
+	select LIBC_PREVENT_STRCASECMP_USER
+
 config LIBC_PREVENT_STRCASECMP_KERNEL
 	bool
 	default n
@@ -345,6 +393,12 @@ config LIBC_PREVENT_STRCASECMP_USER
 		in the userspace, including NuttX's software-defined version of the
 		libc strcasecmp or any other architecture-specific version of it. A ROM-defined
 		version of the libc strcasecmp may be linked to the userspace by the linker.
+
+config LIBC_PREVENT_STRCHR
+	bool
+	default n
+	select LIBC_PREVENT_STRCHR_KERNEL
+	select LIBC_PREVENT_STRCHR_USER
 
 config LIBC_PREVENT_STRCHR_KERNEL
 	bool
@@ -369,6 +423,12 @@ config LIBC_PREVENT_STRCHR_USER
 		libc strchr or any other architecture-specific version of it. A ROM-defined
 		version of the libc strchr may be linked to the userspace by the linker.
 
+config LIBC_PREVENT_STRCHRNUL
+	bool
+	default n
+	select LIBC_PREVENT_STRCHRNUL_KERNEL
+	select LIBC_PREVENT_STRCHRNUL_USER
+
 config LIBC_PREVENT_STRCHRNUL_KERNEL
 	bool
 	default n
@@ -391,6 +451,12 @@ config LIBC_PREVENT_STRCHRNUL_USER
 		in the userspace, including NuttX's software-defined version of the
 		libc strchrnul or any other architecture-specific version of it. A ROM-defined
 		version of the libc strchrnul may be linked to the userspace by the linker.
+
+config LIBC_PREVENT_STRCMP
+	bool
+	default n
+	select LIBC_PREVENT_STRCMP_KERNEL
+	select LIBC_PREVENT_STRCMP_USER
 
 config LIBC_PREVENT_STRCMP_KERNEL
 	bool
@@ -415,6 +481,12 @@ config LIBC_PREVENT_STRCMP_USER
 		libc strcmp or any other architecture-specific version of it. A ROM-defined
 		version of the libc strcmp may be linked to the userspace by the linker.
 
+config LIBC_PREVENT_STRCPY
+	bool
+	default n
+	select LIBC_PREVENT_STRCPY_KERNEL
+	select LIBC_PREVENT_STRCPY_USER
+
 config LIBC_PREVENT_STRCPY_KERNEL
 	bool
 	default n
@@ -437,6 +509,12 @@ config LIBC_PREVENT_STRCPY_USER
 		in the userspace, including NuttX's software-defined version of the
 		libc strcpy or any other architecture-specific version of it. A ROM-defined
 		version of the libc strcpy may be linked to the userspace by the linker.
+
+config LIBC_PREVENT_STRLCAT
+	bool
+	default n
+	select LIBC_PREVENT_STRLCAT_KERNEL
+	select LIBC_PREVENT_STRLCAT_USER
 
 config LIBC_PREVENT_STRLCAT_KERNEL
 	bool
@@ -461,6 +539,12 @@ config LIBC_PREVENT_STRLCAT_USER
 		libc strlcat or any other architecture-specific version of it. A ROM-defined
 		version of the libc strlcat may be linked to the userspace by the linker.
 
+config LIBC_PREVENT_STRLEN
+	bool
+	default n
+	select LIBC_PREVENT_STRLEN_KERNEL
+	select LIBC_PREVENT_STRLEN_USER
+
 config LIBC_PREVENT_STRLEN_KERNEL
 	bool
 	default n
@@ -483,6 +567,12 @@ config LIBC_PREVENT_STRLEN_USER
 		in the userspace, including NuttX's software-defined version of the
 		libc strlen or any other architecture-specific version of it. A ROM-defined
 		version of the libc strlen may be linked to the userspace by the linker.
+
+config LIBC_PREVENT_STRLCPY
+	bool
+	default n
+	select LIBC_PREVENT_STRLCPY_KERNEL
+	select LIBC_PREVENT_STRLCPY_USER
 
 config LIBC_PREVENT_STRLCPY_KERNEL
 	bool
@@ -507,6 +597,12 @@ config LIBC_PREVENT_STRLCPY_USER
 		libc strlcpy or any other architecture-specific version of it. A ROM-defined
 		version of the libc strlcpy may be linked to the userspace by the linker.
 
+config LIBC_PREVENT_STRNCASECMP
+	bool
+	default n
+	select LIBC_PREVENT_STRNCASECMP_KERNEL
+	select LIBC_PREVENT_STRNCASECMP_USER
+
 config LIBC_PREVENT_STRNCASECMP_KERNEL
 	bool
 	default n
@@ -529,6 +625,12 @@ config LIBC_PREVENT_STRNCASECMP_USER
 		in the userspace, including NuttX's software-defined version of the
 		libc strncasecmp or any other architecture-specific version of it. A ROM-defined
 		version of the libc strncasecmp may be linked to the userspace by the linker.
+
+config LIBC_PREVENT_STRNCAT
+	bool
+	default n
+	select LIBC_PREVENT_STRNCAT_KERNEL
+	select LIBC_PREVENT_STRNCAT_USER
 
 config LIBC_PREVENT_STRNCAT_KERNEL
 	bool
@@ -553,6 +655,12 @@ config LIBC_PREVENT_STRNCAT_USER
 		libc strncat or any other architecture-specific version of it. A ROM-defined
 		version of the libc strncat may be linked to the userspace by the linker.
 
+config LIBC_PREVENT_STRNLEN
+	bool
+	default n
+	select LIBC_PREVENT_STRNLEN_KERNEL
+	select LIBC_PREVENT_STRNLEN_USER
+
 config LIBC_PREVENT_STRNLEN_KERNEL
 	bool
 	default n
@@ -575,6 +683,12 @@ config LIBC_PREVENT_STRNLEN_USER
 		in the userspace, including NuttX's software-defined version of the
 		libc strnlen or any other architecture-specific version of it. A ROM-defined
 		version of the libc strnlen may be linked to the userspace by the linker.
+
+config LIBC_PREVENT_STRNCMP
+	bool
+	default n
+	select LIBC_PREVENT_STRNCMP_KERNEL
+	select LIBC_PREVENT_STRNCMP_USER
 
 config LIBC_PREVENT_STRNCMP_KERNEL
 	bool
@@ -599,6 +713,12 @@ config LIBC_PREVENT_STRNCMP_USER
 		libc strncmp or any other architecture-specific version of it. A ROM-defined
 		version of the libc strncmp may be linked to the userspace by the linker.
 
+config LIBC_PREVENT_STRNCPY
+	bool
+	default n
+	select LIBC_PREVENT_STRNCPY_KERNEL
+	select LIBC_PREVENT_STRNCPY_USER
+
 config LIBC_PREVENT_STRNCPY_KERNEL
 	bool
 	default n
@@ -621,6 +741,12 @@ config LIBC_PREVENT_STRNCPY_USER
 		in the userspace, including NuttX's software-defined version of the
 		libc strncpy or any other architecture-specific version of it. A ROM-defined
 		version of the libc strncpy may be linked to the userspace by the linker.
+
+config LIBC_PREVENT_STRRCHR
+	bool
+	default n
+	select LIBC_PREVENT_STRRCHR_KERNEL
+	select LIBC_PREVENT_STRRCHR_USER
 
 config LIBC_PREVENT_STRRCHR_KERNEL
 	bool
