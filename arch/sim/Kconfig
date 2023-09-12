@@ -326,10 +326,10 @@ config SIM_X11FB
 	---help---
 		Use X11 to provide graphics and input emulation to interact with host.
 
+if SIM_X11FB
 config SIM_X11NOSHM
 	bool "Don't use shared memory with X11"
 	default n
-	depends on SIM_X11FB
 	---help---
 		Don't use shared memory with the X11 graphics device emulation.
 
@@ -383,13 +383,9 @@ config SIM_FRAMEBUFFER
 	---help---
 		Emulate a framebuffer
 
-config SIM_VNCSERVER
-	bool "VNC server"
-	depends on VNCSERVER
-	---help---
-		Serve a VNC server
-
 endchoice
+
+endif # SIM_X11FB
 
 if INPUT
 choice
