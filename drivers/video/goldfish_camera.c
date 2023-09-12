@@ -464,6 +464,11 @@ reload:
 
           DEBUGASSERT(ret == priv->buf_size);
 
+          if (priv->capture_cb == NULL)
+            {
+              return 0;
+            }
+
           clock_systime_timespec(&ts);
           TIMESPEC_TO_TIMEVAL(&tv, &ts);
           priv->capture_cb(0, priv->buf_size, &tv, priv->capture_arg);
