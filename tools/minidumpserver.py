@@ -22,6 +22,7 @@ import binascii
 import logging
 import os
 import re
+import shutil
 import socket
 import struct
 import sys
@@ -286,7 +287,7 @@ class DumpELFFile:
 
 
 class DumpLogFile:
-    def __init__(self, logfile: str):
+    def __init__(self, logfile):
         self.logfile = logfile
         self.registers = []
         self.__memories = list()
@@ -350,8 +351,11 @@ class DumpLogFile:
         data = bytes()
         start = 0
 
-        with open(self.logfile, "r") as f:
-            lines = f.readlines()
+        if isinstance(self.logfile, list):
+            lines = self.logfile
+        else:
+            with open(self.logfile, "r") as f:
+                lines = f.readlines()
 
         for line_num, line in enumerate(lines):
             if line == "":
@@ -614,6 +618,52 @@ def config_log(debug):
     logging.basicConfig(format="[%(levelname)s][%(name)s] %(message)s")
 
 
+def auto_parse_log_file(logfile):
+    with open(logfile, errors="ignore") as f:
+        dumps = []
+        tmp_dmp = []
+        start = False
+        for line in f.readlines():
+            line = line.strip()
+            if (
+                "up_dump_register" in line
+                or "dump_stack" in line
+                or "stack_dump" in line
+            ):
+                start = True
+            else:
+                if start:
+                    start = False
+                    dumps.append(tmp_dmp)
+                    tmp_dmp = []
+            if start:
+                tmp_dmp.append(line)
+
+        if start:
+            dumps.append(tmp_dmp)
+
+    terminal_width, _ = shutil.get_terminal_size()
+    terminal_width = max(terminal_width - 4, 0)
+
+    def get_one_line(lines):
+        return "    ".join(lines[:2])[:terminal_width]
+
+    if len(dumps) == 0:
+        logger.error(f"Cannot find any dump in {logfile}, exiting...")
+        sys.exit(1)
+
+    if len(dumps) == 1:
+        return dumps[0]
+
+    for i in range(len(dumps)):
+        print(f"{i}: {get_one_line(dumps[i])}")
+
+    index_input = input("Dump number[0]: ").strip()
+    if index_input == "":
+        index_input = 0
+    return dumps[int(index_input)]
+
+
 def main(args):
     if not os.path.isfile(args.elffile):
         logger.error(f"Cannot find file {args.elffile}, exiting...")
@@ -625,7 +675,9 @@ def main(args):
 
     config_log(args.debug)
 
-    log = DumpLogFile(args.logfile)
+    res = auto_parse_log_file(args.logfile)
+
+    log = DumpLogFile(res)
     log.parse(args.arch)
     elf = DumpELFFile(args.elffile)
     elf.parse()
