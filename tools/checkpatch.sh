@@ -80,7 +80,11 @@ check_file() {
     esac
   fi
 
-  if [ "$(is_rust_file $@)" == "1" ]; then
+  if [ ${@##*.} == 'py' ]; then
+    black --check $@
+    flake8 --config ${TOOLDIR}/../.github/linters/setup.cfg $@
+    isort $@
+  elif [ "$(is_rust_file $@)" == "1" ]; then
     if ! command -v rustfmt &> /dev/null; then
       fail=1
     elif ! rustfmt --edition 2021 --check $@ 2>&1; then
