@@ -402,7 +402,7 @@ static inline void rpmsg_socket_destroy_ept(
 
   if (conn->ept.rdev)
     {
-      if (conn->backlog)
+      if (conn->backlog > 0)
         {
           /* Listen socket */
 
