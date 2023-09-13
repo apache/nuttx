@@ -207,6 +207,22 @@ function elf-toolchain {
   command x86_64-elf-gcc --version
 }
 
+function util-linux {
+  if ! type flock &> /dev/null; then
+    case ${os} in
+      Darwin)
+        brew tap discoteq/discoteq
+        brew install flock
+        ;;
+      Linux)
+        apt-get install -y util-linux
+        ;;
+    esac
+  fi
+
+  command flock --version
+}
+
 function gen-romfs {
   if ! type genromfs &> /dev/null; then
     case ${os} in
@@ -559,7 +575,7 @@ function install_tools {
 
 case ${os} in
   Darwin)
-    install="arm-gcc-toolchain arm64-gcc-toolchain avr-gcc-toolchain binutils bloaty elf-toolchain gen-romfs gperf kconfig-frontends mips-gcc-toolchain python-tools riscv-gcc-toolchain rust xtensa-esp32-gcc-toolchain u-boot-tools wasi-sdk c-cache"
+    install="arm-gcc-toolchain arm64-gcc-toolchain avr-gcc-toolchain binutils bloaty elf-toolchain gen-romfs gperf kconfig-frontends mips-gcc-toolchain python-tools riscv-gcc-toolchain rust xtensa-esp32-gcc-toolchain u-boot-tools util-linux wasi-sdk c-cache"
     mkdir -p "${tools}"/homebrew
     export HOMEBREW_CACHE=${tools}/homebrew
     # https://github.com/apache/arrow/issues/15025
@@ -572,7 +588,7 @@ case ${os} in
     rm -f /usr/local/bin/openssl || :
     ;;
   Linux)
-    install="arm-clang-toolchain arm-gcc-toolchain arm64-gcc-toolchain avr-gcc-toolchain binutils bloaty clang-tidy gen-romfs gperf kconfig-frontends mips-gcc-toolchain python-tools riscv-gcc-toolchain rust rx-gcc-toolchain sparc-gcc-toolchain xtensa-esp32-gcc-toolchain u-boot-tools wasi-sdk c-cache"
+    install="arm-clang-toolchain arm-gcc-toolchain arm64-gcc-toolchain avr-gcc-toolchain binutils bloaty clang-tidy gen-romfs gperf kconfig-frontends mips-gcc-toolchain python-tools riscv-gcc-toolchain rust rx-gcc-toolchain sparc-gcc-toolchain xtensa-esp32-gcc-toolchain u-boot-tools util-linux wasi-sdk c-cache"
     ;;
 esac
 
