@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/sensors/fakesensor.c
+ * drivers/sensors/fakesensor_urob.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -317,7 +317,8 @@ static int fakesensor_thread(int argc, char** argv)
 
       /* Open csv file and init file handle */
 
-      ret = file_open(&sensor->data, sensor->file_path, O_RDONLY);
+      ret = file_open(&sensor->data, sensor->file_path,
+                      O_RDONLY | O_CLOEXEC);
       if (ret < 0)
         {
           snerr("Failed to open file:%s, err:%d", sensor->file_path, ret);

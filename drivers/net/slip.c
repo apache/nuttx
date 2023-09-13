@@ -998,7 +998,7 @@ int slip_initialize(int intf, FAR const char *devname)
   self->dev.d_txavail = slip_txavail; /* New TX data callback */
   self->dev.d_private = self;         /* Used to recover SLIP I/F instance */
 
-  ret = file_open(&self->tty, devname, O_RDWR | O_NONBLOCK);
+  ret = file_open(&self->tty, devname, O_RDWR | O_NONBLOCK | O_CLOEXEC);
 
   if (ret < 0)
     {

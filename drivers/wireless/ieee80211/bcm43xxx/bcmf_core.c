@@ -247,7 +247,7 @@ int bcmf_upload_file(FAR bcmf_interface_dev_t *ibus, uint32_t address,
 
   /* Open the file in the detached state */
 
-  ret = file_open(&finfo, path, O_RDONLY);
+  ret = file_open(&finfo, path, O_RDONLY | O_CLOEXEC);
   if (ret < 0)
     {
       wlerr("ERROR: Failed to open the FILE MTD file %s: %d\n", path, ret);
@@ -345,7 +345,7 @@ int bcmf_upload_nvram(FAR bcmf_interface_dev_t *ibus)
       goto out;
     }
 
-  ret = file_open(&finfo, nvfile, O_RDONLY);
+  ret = file_open(&finfo, nvfile, O_RDONLY | O_CLOEXEC);
   if (ret < 0)
     {
       goto out;
