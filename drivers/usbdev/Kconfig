@@ -39,7 +39,7 @@ config USBDEV_BUSPOWERED
 	---help---
 		Will cause USB features to indicate that the device is not self-powered
 
-endchoice
+endchoice # Select USB device powered
 
 config USBDEV_MAXPOWER
 	int "Maximum power consumption in mA"
@@ -264,7 +264,7 @@ config COMPOSITE_DEVICES
 	---help---
 		Composite device class object number.
 
-endif
+endif # USBDEV_COMPOSITE
 
 config PL2303
 	bool "Prolific PL2303 serial/USB converter emulation"
@@ -362,7 +362,8 @@ config PL2303_VENDORSTR
 config PL2303_PRODUCTSTR
 	string "Product string"
 	default "PL2303 Emulation"
-endif
+
+endif # PL2303
 
 menuconfig CDCACM
 	bool "USB Modem (CDC/ACM) support"
@@ -421,7 +422,7 @@ config CDCACM_EPINTIN
 		The logical 7-bit address of a hardware endpoint that supports
 		interrupt IN operation.  Default 1.
 
-endif
+endif # !CDCACM_COMPOSITE
 
 config CDCACM_EPINTIN_FSSIZE
 	int "Interrupt IN full speed MAXPACKET size"
@@ -453,7 +454,7 @@ config CDCACM_EPBULKOUT
 		The logical 7-bit address of a hardware endpoint that supports
 		bulk OUT operation.  Default: 3
 
-endif
+endif # !CDCACM_COMPOSITE
 
 config CDCACM_EPBULKOUT_FSSIZE
 	int "Bulk OUT full speed MAXPACKET size"
@@ -1161,7 +1162,7 @@ config CDCECM_EPBULKIN
 endif # !CDCECM_COMPOSITE
 
 config CDCECM_EPBULKIN_FSSIZE
-	int "Bulk IN full speed  MAXPACKET size"
+	int "Bulk IN full speed MAXPACKET size"
 	default 64
 	---help---
 		Max package size for the bulk IN endpoint if full speed mode.
@@ -1170,7 +1171,7 @@ config CDCECM_EPBULKIN_FSSIZE
 if USBDEV_DUALSPEED
 
 config CDCECM_EPBULKIN_HSSIZE
-	int "Bulk IN high speed  MAXPACKET size"
+	int "Bulk IN high speed MAXPACKET size"
 	default 512
 	---help---
 		Max package size for the bulk IN endpoint if high speed mode.

@@ -97,7 +97,7 @@ config ESP32S3_INSTRUCTION_CACHE_4WAYS
 config ESP32S3_INSTRUCTION_CACHE_8WAYS
 	bool "8 ways"
 
-endchoice
+endchoice # Instruction cache associated ways
 
 config ESP32S3_ICACHE_ASSOCIATED_WAYS
 	int
@@ -317,7 +317,7 @@ config ESP32S3_I2S0_ROLE_MASTER
 config ESP32S3_I2S0_ROLE_SLAVE
 	bool "Slave"
 
-endchoice
+endchoice # I2S0 role
 
 choice
 	prompt "Bit width"
@@ -339,7 +339,7 @@ config ESP32S3_I2S0_DATA_BIT_WIDTH_24BIT
 config ESP32S3_I2S0_DATA_BIT_WIDTH_32BIT
 	bool "32 bits"
 
-endchoice
+endchoice # Bit width
 
 config ESP32S3_I2S0_DATA_BIT_WIDTH
 	int
@@ -429,7 +429,7 @@ config ESP32S3_I2S1_ROLE_MASTER
 config ESP32S3_I2S1_ROLE_SLAVE
 	bool "Slave"
 
-endchoice
+endchoice # I2S1 role
 
 choice
 	prompt "Bit width"
@@ -1174,7 +1174,7 @@ config ESP32S3_I2CTIMEOMS
 endmenu # I2C Configuration
 
 menu "TWAI driver options"
-        depends on ESP32S3_TWAI
+	depends on ESP32S3_TWAI
 
 if ESP32S3_TWAI
 
@@ -1215,12 +1215,12 @@ config ESP32S3_TWAI_SAM
 endif # ESP32S3_TWAI
 
 config ESP32S3_TWAI_REGDEBUG
-    bool "TWAI register level debug"
-    depends on DEBUG_CAN_INFO
-    default n
-    ---help---
-        Output detailed register-level TWAI debug information. Requires also
-        CONFIG_DEBUG_CAN_INFO.
+	bool "TWAI register level debug"
+	depends on DEBUG_CAN_INFO
+	default n
+	---help---
+		Output detailed register-level TWAI debug information. Requires also
+		CONFIG_DEBUG_CAN_INFO.
 
 endmenu #ESP32S3_TWAI
 
