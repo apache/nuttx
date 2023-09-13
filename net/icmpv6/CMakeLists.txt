@@ -52,5 +52,9 @@ if(CONFIG_NET_ICMPv6 AND NOT CONFIG_NET_ICMPv6_NO_STACK)
     list(APPEND SRCS icmpv6_radvertise.c)
   endif()
 
+  if(NOT "${CONFIG_NET_ICMPv6_PMTU_ENTRIES}" STREQUAL "0")
+    list(APPEND SRCS icmpv6_pmtu.c)
+  endif()
+
   target_sources(net PRIVATE ${SRCS})
 endif()

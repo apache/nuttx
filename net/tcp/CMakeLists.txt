@@ -76,10 +76,18 @@ if(CONFIG_NET_TCP AND NOT CONFIG_NET_TCP_NO_STACK)
 
   if(CONFIG_NET_TCP_WRITE_BUFFERS)
     list(APPEND SRCS tcp_wrbuffer.c)
+  endif()
 
-    if(CONFIG_DEBUG_FEATURES)
-      list(APPEND SRCS tcp_dump.c)
-    endif()
+  # TCP congestion control
+
+  if(CONFIG_NET_TCP_CC_NEWRENO)
+    list(APPEND SRCS tcp_cc.c)
+  endif()
+
+  # TCP debug
+
+  if(CONFIG_DEBUG_FEATURES)
+    list(APPEND SRCS tcp_dump.c)
   endif()
 
   target_sources(net PRIVATE ${SRCS})

@@ -30,14 +30,6 @@ if(NOT CONFIG_DISABLE_MOUNTPOINT
 
   if(CONFIG_NET_STATISTICS)
     list(APPEND SRCS net_statistics.c)
-
-    if(CONFIG_NET_MLD)
-      list(APPEND SRCS net_mld.c)
-    endif()
-  endif()
-
-  if(CONFIG_NET_STATISTICS)
-    list(APPEND SRCS net_statistics.c)
     if(CONFIG_NET_MLD)
       list(APPEND SRCS net_mld.c)
     endif()
