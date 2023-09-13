@@ -90,7 +90,7 @@ config APDS9922_ALS_NPOLLWAITERS
 config APDS9922_PS_NPOLLWAITERS
 	int "APDS-9922 - number of PS poll waiters"
 	default 2
-	depends on SENSORS_APDS9922  
+	depends on SENSORS_APDS9922
 	---help---
 		Sets the number of poll waiters for the proximity sensor
 

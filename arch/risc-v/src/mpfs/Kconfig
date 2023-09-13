@@ -159,7 +159,7 @@ config MPFS_DDR_TYPE
 
 config MPFS_DDR_MANUAL_BCLSCLK_TRAINING
 	bool "Use manual bclk/sclk training"
-        default n
+	default n
 	---help---
 		This adds code for manual bclk/sclk training. To use it also enable bit 0 in LIBERO_SETTING_TRAINING_SKIP_SETTING to skip the automatic one
 
