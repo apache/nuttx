@@ -1,5 +1,5 @@
 /***************************************************************************
- * arch/arm/src/common/arm_cpu_psci.c
+ * arch/arm/src/armv7-a/arm_cpu_psci.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
