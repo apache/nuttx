@@ -734,6 +734,19 @@ menuconfig ESP32S3_WIFI_BT_COEXIST
 	depends on ESP32S3_WIFI && ESP32S3_BLE
 	select ESP32S3_WIFI_STA_DISCONNECT_PM
 
+menu "Interrupt Configuration"
+
+config ESP32S3_IRAM_ISR_DEBUG
+	bool "Enable debugging of the IRAM-enabled interrupts"
+	default n
+	---help---
+		This option enables keeping track of the IRAM-enabled interrupts by
+		registering its execution when non-IRAM interrupts are disabled. It
+		keeps track of the IRQ executed and register how many times since
+		boot it was executed.
+
+endmenu # Interrupt Configuration
+
 menu "SPI RAM Configuration"
 	depends on ESP32S3_SPIRAM
 
@@ -1604,6 +1617,17 @@ config ESP32S3_STORAGE_MTD_DEBUG
 	---help---
 		If this option is enabled, Storage MTD driver read and write functions
 		will output input parameters and return values (if applicable).
+
+config ESP32S3_SPIFLASH_OP_TASK_STACKSIZE
+	int "The SPI flash operation task stack size"
+	default 768
+	depends on SMP
+	---help---
+		When SMP is enabled, it is needed to create two tasks (one for each
+		core) to be able to run IRAM-enabled interrupts. These tasks ensures
+		that the core that isn't performing the SPI flash operation is able
+		to disable non-IRAM interrupts and wait for the SPI flash operation
+		to be finished.
 
 endif # ESP32S3_SPIFLASH
 
