@@ -2081,7 +2081,7 @@ int mtdconfig_unregister_by_path(FAR const char *path)
   FAR struct inode *inode;
   FAR struct nvs_fs *fs;
 
-  ret = file_open(&file, path, 0);
+  ret = file_open(&file, path, O_CLOEXEC);
   if (ret < 0)
     {
       ferr("ERROR: open file %s err: %d\n", path, ret);

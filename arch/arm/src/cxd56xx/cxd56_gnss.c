@@ -914,7 +914,7 @@ static int cxd56_gnss_save_backup_data(struct file *filep,
     }
 
   n = file_open(&file, CONFIG_CXD56_GNSS_BACKUP_FILENAME,
-                O_WRONLY | O_CREAT | O_TRUNC);
+                O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC);
   if (n < 0)
     {
       kmm_free(buf);
@@ -2333,7 +2333,8 @@ static void cxd56_gnss_read_backup_file(int *retval)
       goto err;
     }
 
-  ret = file_open(&file, CONFIG_CXD56_GNSS_BACKUP_FILENAME, O_RDONLY);
+  ret = file_open(&file, CONFIG_CXD56_GNSS_BACKUP_FILENAME,
+                  O_RDONLY | O_CLOEXEC);
   if (ret < 0)
     {
       kmm_free(buf);
@@ -2489,7 +2490,8 @@ static void cxd56_gnss_default_sighandler(uint32_t data, void *userdata)
           file_close(&priv->cepfp);
         }
 
-      file_open(&priv->cepfp, CONFIG_CXD56_GNSS_CEP_FILENAME, O_RDONLY);
+      file_open(&priv->cepfp, CONFIG_CXD56_GNSS_CEP_FILENAME,
+                O_RDONLY | O_CLOEXEC);
       return;
 
     case CXD56_GNSS_NOTIFY_TYPE_REQCEPCLOSE:

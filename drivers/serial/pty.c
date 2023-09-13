@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <poll.h>
+#include <fcntl.h>
 #include <assert.h>
 #include <errno.h>
 
@@ -201,7 +202,7 @@ static int pty_pipe(FAR struct pty_devpair_s *devpair)
   pipe_a[0] = &devpair->pp_master.pd_src;
   pipe_a[1] = &devpair->pp_slave.pd_sink;
 
-  ret = file_pipe(pipe_a, CONFIG_PSEUDOTERM_TXBUFSIZE, 0);
+  ret = file_pipe(pipe_a, CONFIG_PSEUDOTERM_TXBUFSIZE, O_CLOEXEC);
   if (ret < 0)
     {
       return ret;
@@ -210,7 +211,7 @@ static int pty_pipe(FAR struct pty_devpair_s *devpair)
   pipe_b[0] = &devpair->pp_slave.pd_src;
   pipe_b[1] = &devpair->pp_master.pd_sink;
 
-  ret = file_pipe(pipe_b, CONFIG_PSEUDOTERM_RXBUFSIZE, 0);
+  ret = file_pipe(pipe_b, CONFIG_PSEUDOTERM_RXBUFSIZE, O_CLOEXEC);
   if (ret < 0)
     {
       file_close(pipe_a[0]);

@@ -870,7 +870,7 @@ static int rptun_store_open(FAR void *store_,
   int len = 0x100;
   int ret;
 
-  ret = file_open(&store->file, path, O_RDONLY);
+  ret = file_open(&store->file, path, O_RDONLY | O_CLOEXEC);
   if (ret < 0)
     {
       return ret;

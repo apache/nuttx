@@ -372,7 +372,7 @@ int losetup(FAR const char *devname, FAR const char *filename,
   ret = -ENOSYS;
   if (!readonly)
     {
-      ret = file_open(&dev->devfile, filename, O_RDWR);
+      ret = file_open(&dev->devfile, filename, O_RDWR | O_CLOEXEC);
     }
 
   if (ret >= 0)
@@ -383,7 +383,7 @@ int losetup(FAR const char *devname, FAR const char *filename,
     {
       /* If that fails, then try to open the device read-only */
 
-      ret = file_open(&dev->devfile, filename, O_RDONLY);
+      ret = file_open(&dev->devfile, filename, O_RDONLY | O_CLOEXEC);
       if (ret < 0)
         {
           ferr("ERROR: Failed to open %s: %d\n", filename, ret);

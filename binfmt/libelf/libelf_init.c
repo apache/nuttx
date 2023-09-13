@@ -127,7 +127,7 @@ int elf_init(FAR const char *filename, FAR struct elf_loadinfo_s *loadinfo)
 
   /* Open the binary file for reading (only) */
 
-  ret = file_open(&loadinfo->file, filename, O_RDONLY);
+  ret = file_open(&loadinfo->file, filename, O_RDONLY | O_CLOEXEC);
   if (ret < 0)
     {
       berr("Failed to open ELF binary %s: %d\n", filename, ret);

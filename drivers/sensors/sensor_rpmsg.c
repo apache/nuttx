@@ -468,7 +468,7 @@ sensor_rpmsg_alloc_proxy(FAR struct sensor_rpmsg_dev_s *dev,
 
   proxy->ept = ept;
   proxy->cookie = msg->cookie;
-  ret = file_open(&file, dev->path, SENSOR_REMOTE);
+  ret = file_open(&file, dev->path, SENSOR_REMOTE | O_CLOEXEC);
   if (ret < 0)
     {
       kmm_free(proxy);
@@ -537,7 +537,7 @@ sensor_rpmsg_alloc_stub(FAR struct sensor_rpmsg_dev_s *dev,
   stub->ept = ept;
   stub->cookie = cookie;
   ret = file_open(&stub->file, dev->path,
-                  O_RDOK | O_NONBLOCK | SENSOR_REMOTE);
+                  O_RDOK | O_NONBLOCK | O_CLOEXEC | SENSOR_REMOTE);
   if (ret < 0)
     {
       kmm_free(stub);
@@ -1081,7 +1081,7 @@ static int sensor_rpmsg_publish_handler(FAR struct rpmsg_endpoint *ept,
           struct file file;
           int ret;
 
-          ret = file_open(&file, dev->path, SENSOR_REMOTE);
+          ret = file_open(&file, dev->path, SENSOR_REMOTE | O_CLOEXEC);
           if (ret >= 0)
             {
               file_ioctl(&file, SNIOC_SET_BUFFER_NUMBER, cell->nbuffer);

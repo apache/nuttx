@@ -37,6 +37,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <poll.h>
+#include <fcntl.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -1801,7 +1802,7 @@ int mtdconfig_unregister(void)
   FAR struct inode *inode;
   FAR struct mtdconfig_struct_s *dev;
 
-  ret = file_open(&file, "/dev/config", 0);
+  ret = file_open(&file, "/dev/config", O_CLOEXEC);
   if (ret < 0)
     {
       ferr("ERROR: open /dev/config failed: %d\n", ret);
