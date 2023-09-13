@@ -356,6 +356,10 @@ config SAMV7_HAVE_USBHS
 	bool
 	default n
 
+config SAMV7_1WIREDRIVER
+	bool
+	default n
+
 config SAMV7_HAVE_USART0
 	bool
 	default n
@@ -1186,6 +1190,10 @@ config SAMV7_UART0_SERIALDRIVER
 	select UART0_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
+config SAMV7_UART0_1WIREDRIVER
+	bool "1-Wire driver"
+	select SAMV7_1WIREDRIVER
+
 endchoice # "UART0 Driver Configuration"
 
 endif # SAMV7_UART0
@@ -1205,6 +1213,10 @@ config SAMV7_UART1_SERIALDRIVER
 	bool "Standard serial driver"
 	select UART1_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMV7_UART1_1WIREDRIVER
+	bool "1-Wire driver"
+	select SAMV7_1WIREDRIVER
 
 endchoice # "UART1 Driver Configuration"
 
@@ -1226,6 +1238,10 @@ config SAMV7_UART2_SERIALDRIVER
 	select UART2_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
+config SAMV7_UART2_1WIREDRIVER
+	bool "1-Wire driver"
+	select SAMV7_1WIREDRIVER
+
 endchoice # "UART2 Driver Configuration"
 
 endif # SAMV7_UART2
@@ -1246,6 +1262,10 @@ config SAMV7_UART3_SERIALDRIVER
 	select UART3_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
+config SAMV7_UART3_1WIREDRIVER
+	bool "1-Wire driver"
+	select SAMV7_1WIREDRIVER
+
 endchoice # "UART3 Driver Configuration"
 
 endif # SAMV7_UART3
@@ -1265,6 +1285,10 @@ config SAMV7_UART4_SERIALDRIVER
 	bool "Standard serial driver"
 	select UART4_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMV7_UART4_1WIREDRIVER
+	bool "1-Wire driver"
+	select SAMV7_1WIREDRIVER
 
 endchoice # "UART4 Driver Configuration"
 
@@ -1311,6 +1335,10 @@ config SAMV7_USART0_SERIALDRIVER
 	select USART0_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
+config SAMV7_USART0_1WIREDRIVER
+	bool "1-Wire driver"
+	select SAMV7_1WIREDRIVER
+
 endchoice # "USART0 Driver Configuration"
 
 if SAMV7_USART0_SERIALDRIVER
@@ -1344,6 +1372,10 @@ config SAMV7_USART1_SERIALDRIVER
 	select USART1_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
+config SAMV7_USART1_1WIREDRIVER
+	bool "1-Wire driver"
+	select SAMV7_1WIREDRIVER
+
 endchoice # "USART1 Driver Configuration"
 
 if SAMV7_USART1_SERIALDRIVER
@@ -1376,6 +1408,10 @@ config SAMV7_USART2_SERIALDRIVER
 	bool "Standard serial driver"
 	select USART2_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMV7_USART2_1WIREDRIVER
+	bool "1-Wire driver"
+	select SAMV7_1WIREDRIVER
 
 endchoice # "USART2 Driver Configuration"
 

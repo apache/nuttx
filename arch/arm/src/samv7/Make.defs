@@ -63,6 +63,10 @@ ifeq ($(CONFIG_SAMV7_SYSTEMRESET),y)
 CHIP_CSRCS += sam_systemreset.c
 endif
 
+ifeq ($(CONFIG_SAMV7_1WIREDRIVER),y)
+CHIP_CSRCS += sam_1wire.c
+endif
+
 ifeq ($(CONFIG_SAMV7_SPI_MASTER),y)
 CHIP_CSRCS += sam_spi.c
 endif
