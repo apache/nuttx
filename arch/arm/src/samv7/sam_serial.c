@@ -194,19 +194,24 @@
  * UART.
  */
 
-#if defined(CONFIG_SAMV7_UART0) && !defined(UART0_ASSIGNED)
+#if defined(CONFIG_SAMV7_UART0) && defined(CONFIG_UART0_SERIALDRIVER) && \
+     !defined(UART0_ASSIGNED)
 #  define TTYS1_DEV           g_uart0port  /* UART0 is ttyS1 */
 #  define UART0_ASSIGNED      1
-#elif defined(CONFIG_SAMV7_UART1) && !defined(UART1_ASSIGNED)
+#elif defined(CONFIG_SAMV7_UART1) && defined(CONFIG_UART1_SERIALDRIVER) && \
+     !defined(UART1_ASSIGNED)
 #  define TTYS1_DEV           g_uart1port  /* UART1 is ttyS1 */
 #  define UART1_ASSIGNED      1
-#elif defined(CONFIG_SAMV7_UART2) && !defined(UART2_ASSIGNED)
+#elif defined(CONFIG_SAMV7_UART2) && defined(CONFIG_UART2_SERIALDRIVER) && \
+     !defined(UART2_ASSIGNED)
 #  define TTYS1_DEV           g_uart2port  /* UART2 is ttyS1 */
 #  define UART2_ASSIGNED      1
-#elif defined(CONFIG_SAMV7_UART3) && !defined(UART3_ASSIGNED)
+#elif defined(CONFIG_SAMV7_UART3) && defined(CONFIG_UART3_SERIALDRIVER) && \
+     !defined(UART3_ASSIGNED)
 #  define TTYS1_DEV           g_uart3port  /* UART3 is ttyS1 */
 #  define UART3_ASSIGNED      1
-#elif defined(CONFIG_SAMV7_UART4) && !defined(UART4_ASSIGNED)
+#elif defined(CONFIG_SAMV7_UART4) && defined(CONFIG_UART4_SERIALDRIVER) && \
+     !defined(UART4_ASSIGNED)
 #  define TTYS1_DEV           g_uart4port  /* UART4 is ttyS1 */
 #  define UART4_ASSIGNED      1
 #elif defined(CONFIG_SAMV7_USART0) && defined(CONFIG_USART0_SERIALDRIVER) && \
@@ -228,16 +233,20 @@
  * could also be the console.
  */
 
-#if defined(CONFIG_SAMV7_UART1) && !defined(UART1_ASSIGNED)
+#if defined(CONFIG_SAMV7_UART1) && defined(CONFIG_UART1_SERIALDRIVER) && \
+     !defined(UART1_ASSIGNED)
 #  define TTYS2_DEV           g_uart1port  /* UART1 is ttyS2 */
 #  define UART1_ASSIGNED      1
-#elif defined(CONFIG_SAMV7_UART2) && !defined(UART2_ASSIGNED)
+#elif defined(CONFIG_SAMV7_UART2) && defined(CONFIG_UART2_SERIALDRIVER) && \
+     !defined(UART2_ASSIGNED)
 #  define TTYS2_DEV           g_uart2port  /* UART2 is ttyS2 */
 #  define UART2_ASSIGNED      1
-#elif defined(CONFIG_SAMV7_UART3) && !defined(UART3_ASSIGNED)
+#elif defined(CONFIG_SAMV7_UART3) && defined(CONFIG_UART3_SERIALDRIVER) && \
+     !defined(UART3_ASSIGNED)
 #  define TTYS2_DEV           g_uart3port  /* UART3 is ttyS2 */
 #  define UART3_ASSIGNED      1
-#elif defined(CONFIG_SAMV7_UART4) && !defined(UART4_ASSIGNED)
+#elif defined(CONFIG_SAMV7_UART4) && defined(CONFIG_UART4_SERIALDRIVER) && \
+     !defined(UART4_ASSIGNED)
 #  define TTYS2_DEV           g_uart4port  /* UART4 is ttyS2 */
 #  define UART4_ASSIGNED      1
 #elif defined(CONFIG_SAMV7_USART0) && defined(CONFIG_USART0_SERIALDRIVER) && \
@@ -259,13 +268,16 @@
  * these could also be the console.
  */
 
-#if defined(CONFIG_SAMV7_UART2) && !defined(UART2_ASSIGNED)
+#if defined(CONFIG_SAMV7_UART2) && defined(CONFIG_UART2_SERIALDRIVER) && \
+     !defined(UART2_ASSIGNED)
 #  define TTYS3_DEV           g_uart2port  /* UART2 is ttyS3 */
 #  define UART2_ASSIGNED      1
-#elif defined(CONFIG_SAMV7_UART3) && !defined(UART3_ASSIGNED)
+#elif defined(CONFIG_SAMV7_UART3) && defined(CONFIG_UART3_SERIALDRIVER) && \
+     !defined(UART3_ASSIGNED)
 #  define TTYS3_DEV           g_uart3port  /* UART3 is ttyS3 */
 #  define UART3_ASSIGNED      1
-#elif defined(CONFIG_SAMV7_UART4) && !defined(UART4_ASSIGNED)
+#elif defined(CONFIG_SAMV7_UART4) && defined(CONFIG_UART4_SERIALDRIVER) && \
+     !defined(UART4_ASSIGNED)
 #  define TTYS3_DEV           g_uart4port  /* UART4 is ttyS3 */
 #  define UART4_ASSIGNED      1
 #elif defined(CONFIG_SAMV7_USART0) && defined(CONFIG_USART0_SERIALDRIVER) && \
@@ -287,10 +299,12 @@
  * these could also be the console.
  */
 
-#if defined(CONFIG_SAMV7_UART3) && !defined(UART3_ASSIGNED)
+#if defined(CONFIG_SAMV7_UART3) && defined(CONFIG_UART3_SERIALDRIVER) && \
+     !defined(UART3_ASSIGNED)
 #  define TTYS4_DEV           g_uart3port  /* UART3 is ttyS4 */
 #  define UART3_ASSIGNED      1
-#elif defined(CONFIG_SAMV7_UART4) && !defined(UART4_ASSIGNED)
+#elif defined(CONFIG_SAMV7_UART4) && defined(CONFIG_UART4_SERIALDRIVER) && \
+     !defined(UART4_ASSIGNED)
 #  define TTYS4_DEV           g_uart4port  /* UART4 is ttyS4 */
 #  define UART4_ASSIGNED      1
 #elif defined(CONFIG_SAMV7_USART0) && defined(CONFIG_USART0_SERIALDRIVER) && \
@@ -312,7 +326,8 @@
  * of these could also be the console.
  */
 
-#if defined(CONFIG_SAMV7_UART4) && !defined(UART4_ASSIGNED)
+#if defined(CONFIG_SAMV7_UART4) && defined(CONFIG_UART4_SERIALDRIVER) && \
+     !defined(UART4_ASSIGNED)
 #  define TTYS5_DEV           g_uart4port  /* UART4 is ttyS5 */
 #  define UART4_ASSIGNED      1
 #elif defined(CONFIG_SAMV7_USART0) && defined(CONFIG_USART0_SERIALDRIVER) && \
@@ -502,23 +517,23 @@ static const struct uart_ops_s g_uart_rxdma_ops =
 
 /* I/O buffers */
 
-#ifdef CONFIG_SAMV7_UART0
+#if defined(CONFIG_SAMV7_UART0) && defined(CONFIG_UART0_SERIALDRIVER)
 static char g_uart0rxbuffer[CONFIG_UART0_RXBUFSIZE];
 static char g_uart0txbuffer[CONFIG_UART0_TXBUFSIZE];
 #endif
-#ifdef CONFIG_SAMV7_UART1
+#if defined(CONFIG_SAMV7_UART1) && defined(CONFIG_UART1_SERIALDRIVER)
 static char g_uart1rxbuffer[CONFIG_UART1_RXBUFSIZE];
 static char g_uart1txbuffer[CONFIG_UART1_TXBUFSIZE];
 #endif
-#ifdef CONFIG_SAMV7_UART2
+#if defined(CONFIG_SAMV7_UART2) && defined(CONFIG_UART2_SERIALDRIVER)
 static char g_uart2rxbuffer[CONFIG_UART2_RXBUFSIZE];
 static char g_uart2txbuffer[CONFIG_UART2_TXBUFSIZE];
 #endif
-#ifdef CONFIG_SAMV7_UART3
+#if defined(CONFIG_SAMV7_UART3) && defined(CONFIG_UART3_SERIALDRIVER)
 static char g_uart3rxbuffer[CONFIG_UART3_RXBUFSIZE];
 static char g_uart3txbuffer[CONFIG_UART3_TXBUFSIZE];
 #endif
-#ifdef CONFIG_SAMV7_UART4
+#if defined(CONFIG_SAMV7_UART4) && defined(CONFIG_UART4_SERIALDRIVER)
 static char g_uart4rxbuffer[CONFIG_UART4_RXBUFSIZE];
 static char g_uart4txbuffer[CONFIG_UART4_TXBUFSIZE];
 #endif
@@ -552,7 +567,7 @@ static struct chnext_view1_s g_usart2rxdesc[2];
 
 /* This describes the state of the UART0 port. */
 
-#ifdef CONFIG_SAMV7_UART0
+#if defined(CONFIG_SAMV7_UART0) && defined(CONFIG_UART0_SERIALDRIVER)
 static struct sam_dev_s g_uart0priv =
 {
   .usartbase      = SAM_UART0_BASE,
@@ -583,7 +598,7 @@ static uart_dev_t g_uart0port =
 
 /* This describes the state of the UART1 port. */
 
-#ifdef CONFIG_SAMV7_UART1
+#if defined(CONFIG_SAMV7_UART1) && defined(CONFIG_UART1_SERIALDRIVER)
 static struct sam_dev_s g_uart1priv =
 {
   .usartbase      = SAM_UART1_BASE,
@@ -614,7 +629,7 @@ static uart_dev_t g_uart1port =
 
 /* This describes the state of the UART2 port. */
 
-#ifdef CONFIG_SAMV7_UART2
+#if defined(CONFIG_SAMV7_UART2) && defined(CONFIG_UART2_SERIALDRIVER)
 static struct sam_dev_s g_uart2priv =
 {
   .usartbase      = SAM_UART2_BASE,
@@ -645,7 +660,7 @@ static uart_dev_t g_uart2port =
 
 /* This describes the state of the UART3 port. */
 
-#ifdef CONFIG_SAMV7_UART3
+#if defined(CONFIG_SAMV7_UART3) && defined(CONFIG_UART3_SERIALDRIVER)
 static struct sam_dev_s g_uart3priv =
 {
   .usartbase      = SAM_UART3_BASE,
@@ -676,7 +691,7 @@ static uart_dev_t g_uart3port =
 
 /* This describes the state of the UART4 port. */
 
-#ifdef CONFIG_SAMV7_UART4
+#if defined(CONFIG_SAMV7_UART4) && defined(CONFIG_UART4_SERIALDRIVER)
 static struct sam_dev_s g_uart4priv =
 {
   .usartbase      = SAM_UART4_BASE,
@@ -1055,10 +1070,10 @@ static int sam_setup(struct uart_dev_s *dev)
     }
 #ifdef HAVE_UART_DEVICE
   else if (priv->bits == 9
-#if defined(CONFIG_SAMV7_UART0)
+#if defined(CONFIG_SAMV7_UART0) && defined(CONFIG_UART0_SERIALDRIVER)
            && priv->usartbase != SAM_UART0_BASE
 #endif
-#if defined(CONFIG_SAMV7_UART1)
+#if defined(CONFIG_SAMV7_UART1) && defined(CONFIG_UART1_SERIALDRIVER)
            && priv->usartbase != SAM_UART1_BASE
 #endif
           )
