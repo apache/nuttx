@@ -224,12 +224,12 @@
 struct mmcsd_cid_s
 {
   uint8_t  mid;     /* 127:120  8-bit Manufacturer ID */
-  uint16_t oid;     /* 119:104 16-bit OEM/Application ID (ascii) */
-  uint8_t  pnm[6];  /* 103:64  40-bit Product Name (ascii) + null terminator */
-  uint8_t  prv;     /*  63:56   8-bit Product revision */
-  uint32_t psn;     /*  55:24  32-bit Product serial number */
-                    /*  23:20   4-bit (reserved) */
-  uint16_t mdt;     /*  19:8   12-bit Manufacturing date */
+  uint8_t  cbx;     /* 113:112  2-bit Device/BGA */
+  uint8_t  oid;     /* 111:104  8-bit OEM/Application ID (ascii) */
+  uint8_t  pnm[7];  /* 103:56   48-bit Product Name (ascii) + null terminator */
+  uint8_t  prv;     /*  55:48   8-bit Product revision */
+  uint32_t psn;     /*  47:16   32-bit Product serial number */
+  uint8_t  mdt;     /*  15:8    8-bit Manufacturing date */
   uint8_t  crc;     /*   7:1    7-bit CRC7 */
                     /*   0:0    1-bit (not used) */
 };

@@ -917,17 +917,19 @@ static void mmcsd_decode_cid(FAR struct mmcsd_state_s *priv, uint32_t cid[4])
 
   /* Word 1: Bits 127-96:
    *   mid - 127-120  8-bit Manufacturer ID
-   *   oid - 119-104 16-bit OEM/Application ID (ascii)
-   *   pnm - 103-64  40-bit Product Name (ascii) + null terminator
+   *   cbx - 113-112  2-bit Device/BGA
+   *   oid - 111-104  8-bit OEM/Application ID (ascii)
+   *   pnm - 103-56   48-bit Product Name (ascii) + null terminator
    *         pnm[0] 103:96
    */
 
   decoded.mid    =  cid[0] >> 24;
-  decoded.oid    = (cid[0] >> 8) & 0xffff;
+  decoded.cbx    = (cid[0] >> 16) & 0x3;
+  decoded.oid    = (cid[0] >> 8) & 0xff;
   decoded.pnm[0] =  cid[0] & 0xff;
 
   /* Word 2: Bits 64:95
-   *   pnm - 103-64  40-bit Product Name (ascii) + null terminator
+   *   pnm - 103-56  48-bit Product Name (ascii) + null terminator
    *         pnm[1] 95:88
    *         pnm[2] 87:80
    *         pnm[3] 79:72
@@ -938,30 +940,32 @@ static void mmcsd_decode_cid(FAR struct mmcsd_state_s *priv, uint32_t cid[4])
   decoded.pnm[2] = (cid[1] >> 16) & 0xff;
   decoded.pnm[3] = (cid[1] >> 8) & 0xff;
   decoded.pnm[4] =  cid[1] & 0xff;
-  decoded.pnm[5] = '\0';
 
   /* Word 3: Bits 32-63
-   *   prv -  63-56   8-bit Product revision
-   *   psn -  55-24  32-bit Product serial number
+   *         pnm[5] 63-56
+   *   prv    -  55-48   8-bit Product revision
+   *   psn    -  47-16   32-bit Product serial number
+   *         psn 47-32
    */
 
-  decoded.prv    = cid[2] >> 24;
-  decoded.psn    = cid[2] << 8;
+  decoded.pnm[5] = cid[2] >> 24;
+  decoded.pnm[6] = '\0';
+  decoded.prv    = (cid[2] >> 16) & 0xff;
+  decoded.psn    = cid[2] << 16;
 
   /* Word 4: Bits 0-31
-   *   psn -  55-24  32-bit Product serial number
-   *          23-20   4-bit (reserved)
-   *   mdt -  19:8   12-bit Manufacturing date
+   *          psn 31-16
+   *   mdt -  15:8    8-bit Manufacturing date
    *   crc -   7:1    7-bit CRC7
    */
 
-  decoded.psn   |=  cid[3] >> 24;
-  decoded.mdt    = (cid[3] >> 8) & 0x0fff;
+  decoded.psn   |=  cid[3] >> 16;
+  decoded.mdt    = (cid[3] >> 8) & 0xff;
   decoded.crc    = (cid[3] >> 1) & 0x7f;
 
-  finfo("mid: %02x oid: %04x pnm: %s prv: %d psn: %lu mdt: %02x crc: %02x\n",
-      decoded.mid, decoded.oid, decoded.pnm, decoded.prv,
-      (unsigned long)decoded.psn, decoded.mdt, decoded.crc);
+  finfo("mid: %02x cbx: %01x oid: %01x pnm: %s prv: %d psn: %08x mdt: %02x\
+         crc: %02x\n", decoded.mid, decoded.cbx, decoded.oid, decoded.pnm,
+         decoded.prv, (unsigned long)decoded.psn, decoded.mdt, decoded.crc);
 }
 #endif
 
