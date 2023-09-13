@@ -522,6 +522,19 @@ static inline bool IRAM_ATTR esp32s3_ptr_extram(const void *p)
 }
 
 /****************************************************************************
+ * Name: esp32s3_ptr_iram
+ *
+ * Description:
+ *   Check if the pointer is in IRAM
+ *
+ ****************************************************************************/
+
+static inline bool IRAM_ATTR esp32s3_ptr_iram(const void *p)
+{
+  return ((intptr_t)p >= SOC_IRAM_LOW && (intptr_t)p < SOC_IRAM_HIGH);
+}
+
+/****************************************************************************
  * Name: esp32s3_ptr_exec
  *
  * Description:
