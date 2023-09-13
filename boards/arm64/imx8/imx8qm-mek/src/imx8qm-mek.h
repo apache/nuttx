@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM64_IMX8_IMX8QM_MEK_SRC_IMX8_IMX8QM_MEK_H__
-#define __BOARDS_ARM64_IMX8_IMX8QM_MEK_SRC_IMX8_IMX8QM_MEK_H__
+#ifndef __BOARDS_ARM64_IMX8_IMX8QM_MEK_SRC_IMX8QM_MEK_H
+#define __BOARDS_ARM64_IMX8_IMX8QM_MEK_SRC_IMX8QM_MEK_H
 
 /****************************************************************************
  * Included Files
@@ -56,4 +56,4 @@ int imx8_bringup(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM64_IMX8_IMX8QM_MEK_SRC_IMX8_IMX8QM_MEK_H__ */
+#endif /* __BOARDS_ARM64_IMX8_IMX8QM_MEK_SRC_IMX8QM_MEK_H */
