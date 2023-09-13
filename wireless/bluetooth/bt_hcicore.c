@@ -1504,7 +1504,7 @@ static void cmd_queue_init(void)
    * the Tx queue and received by logic on the Tx kernel thread.
    */
 
-  ret = bt_queue_open(BT_HCI_TX, O_RDWR | O_CREAT,
+  ret = bt_queue_open(BT_HCI_TX, O_RDWR | O_CREAT | O_CLOEXEC,
                       CONFIG_BLUETOOTH_TXCMD_NMSGS, &g_btdev.tx_queue);
   DEBUGASSERT(ret >= 0);
 

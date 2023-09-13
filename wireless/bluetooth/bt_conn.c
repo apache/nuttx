@@ -559,7 +559,7 @@ void bt_conn_set_state(FAR struct bt_conn_s *conn,
         {
           int ret;
 
-          ret = bt_queue_open(BT_CONN_TX, O_RDWR | O_CREAT,
+          ret = bt_queue_open(BT_CONN_TX, O_RDWR | O_CREAT | O_CLOEXEC,
                               CONFIG_BLUETOOTH_TXCONN_NMSGS,
                               &conn->tx_queue);
           DEBUGASSERT(ret >= 0);
