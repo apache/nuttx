@@ -37,6 +37,16 @@
 
 #define ESP32S3_INT_PRIO_DEF        1
 
+/* CPU interrupt flags:
+ *   These flags can be used to specify which interrupt qualities the
+ *   code calling esp32s3_setup_irq needs.
+ */
+
+#define ESP32S3_CPUINT_FLAG_LEVEL   (1 << 0) /* Level-triggered interrupt */
+#define ESP32S3_CPUINT_FLAG_EDGE    (1 << 1) /* Edge-triggered interrupt */
+#define ESP32S3_CPUINT_FLAG_SHARED  (1 << 2) /* Interrupt can be shared between ISRs */
+#define ESP32S3_CPUINT_FLAG_IRAM    (1 << 3) /* ISR can be called if cache is disabled */
+
 /* Interrupt Matrix
  *
  * The Interrupt Matrix embedded in the ESP32-S3 independently allocates
@@ -386,17 +396,13 @@
  * 26 can be mapped to peripheral interrupts:
  *
  *   Level triggered peripherals (21 total):
- *     0-5, 8-9, 12-13, 17-18 - Priority 1
- *     19-21                  - Priority 2
- *     23, 27                 - Priority 3
- *     24-25                  - Priority 4
- *     26, 31                 - Priority 5
- *   Edge triggered peripherals (4 total):
- *     10                     - Priority 1
- *     22                     - Priority 3
- *     28, 30                 - Priority 4
+ *     0-5, 8-10, 12-13, 17-18 - Priority 1
+ *     19-21                   - Priority 2
+ *     22-23, 27               - Priority 3
+ *     24-25, 28, 30           - Priority 4
+ *     26, 31                  - Priority 5
  *   NMI (1 total):
- *     14                     - NMI
+ *     14                      - NMI
  *
  * CPU peripheral interrupts can be a assigned to a CPU interrupt using the
  * PRO_*_MAP_REG or APP_*_MAP_REG.  There are a pair of these registers for
