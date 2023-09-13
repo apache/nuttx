@@ -301,7 +301,7 @@ static ssize_t goldfish_camera_get_list(FAR goldfish_camera_priv_t **priv,
 
   ret = file_open(&file,
                   CONFIG_GOLDFISH_CAMERA_PIPE_PATH,
-                  O_RDWR);
+                  O_RDWR | O_CLOEXEC);
   if (ret < 0)
     {
       verr("Failed to open: %s: %d\n",
@@ -570,7 +570,7 @@ static int goldfish_camera_data_init(FAR struct imgdata_s *data)
 
   ret = file_open(&priv->file,
                   CONFIG_GOLDFISH_CAMERA_PIPE_PATH,
-                  O_RDWR);
+                  O_RDWR | O_CLOEXEC);
   if (ret < 0)
     {
       verr("Failed to open: %s: %d\n",
