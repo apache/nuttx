@@ -448,11 +448,6 @@ struct sensor_gps           /* Type: Gps */
 
   float course;
 
-  float hspeed_err;         /* Horizontal speed error RMS (m/s) */
-  float vspeed_err;         /* Vertical speed error RMS (m/s) */
-  float env_range_resid;    /* Environment RangeResid (meters) */
-  float altitude_err;       /* Altitude error RMS (meters) */
-
   uint32_t satellites_used; /* Number of satellites used */
 };
 
