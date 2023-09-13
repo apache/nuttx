@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_IMX8_IMX8QM_MEK_INCLUDE_BOARD_MEMORYMAP_H__
-#define __BOARDS_ARM_IMX8_IMX8QM_MEK_INCLUDE_BOARD_MEMORYMAP_H__
+#ifndef __BOARDS_ARM64_IMX8_IMX8QM_MEK_INCLUDE_BOARD_MEMORYMAP_H
+#define __BOARDS_ARM64_IMX8_IMX8QM_MEK_INCLUDE_BOARD_MEMORYMAP_H
 
 /****************************************************************************
  * Included Files
@@ -56,4 +56,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_IMX8_IMX8QM_MEK_INCLUDE_BOARD_MEMORYMAP_H__ */
+#endif /* __BOARDS_ARM64_IMX8_IMX8QM_MEK_INCLUDE_BOARD_MEMORYMAP_H */

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM64_VDK_ARMV8R_BASE_SRC_VDK_ARMV8R_H__
-#define __BOARDS_ARM64_VDK_ARMV8R_BASE_SRC_VDK_ARMV8R_H__
+#ifndef __BOARDS_ARM64_VDK_ARMV8R_BASE_SRC_VDK_ARMV8R_H
+#define __BOARDS_ARM64_VDK_ARMV8R_BASE_SRC_VDK_ARMV8R_H
 
 /****************************************************************************
  * Included Files
@@ -56,4 +56,4 @@ int fvp_bringup(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM64_VDK_ARMV8R_BASE_SRC_VDK_ARMV8R_H__ */
+#endif /* __BOARDS_ARM64_VDK_ARMV8R_BASE_SRC_VDK_ARMV8R_H */
