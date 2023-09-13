@@ -920,6 +920,10 @@ void tcp_free(FAR struct tcp_conn_s *conn)
 
   tcp_stop_timer(conn);
 
+  /* Make sure monitor is stopped. */
+
+  tcp_stop_monitor(conn, TCP_CLOSE);
+
   /* Free remaining callbacks, actually there should be only the send
    * callback for CONFIG_NET_TCP_WRITE_BUFFERS is left.
    */
