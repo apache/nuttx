@@ -30,7 +30,10 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/virtio/virtio-mmio.h>
 #include <nuttx/fdt.h>
-#include <libfdt.h>
+
+#ifdef CONFIG_LIBC_FDT
+#  include <libfdt.h>
+#endif
 
 #include "qemu-armv8a.h"
 
