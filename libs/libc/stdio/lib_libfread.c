@@ -130,11 +130,11 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
 
               if (gulp_size > 0)
                 {
-                  if (gulp_size > count)
+                  if (gulp_size > remaining)
                     {
                       /* Clip the gulp size to the requested byte count */
 
-                      gulp_size = count;
+                      gulp_size = remaining;
                     }
 
                   memcpy(dest, stream->fs_bufpos, gulp_size);
