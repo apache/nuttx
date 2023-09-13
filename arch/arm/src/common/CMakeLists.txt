@@ -55,11 +55,6 @@ if(NOT CONFIG_ARCH_IDLE_CUSTOM)
   list(APPEND SRCS arm_idle.c)
 endif()
 
-if(CONFIG_ARCH_HAVE_PSCI)
-  list(APPEND SRCS arm_smccc.S)
-  list(APPEND SRCS arm_cpu_psci.c)
-endif()
-
 if(CONFIG_BUILD_PROTECTED OR CONFIG_BUILD_KERNEL)
   list(APPEND SRCS arm_task_start.c arm_pthread_start.c arm_signal_dispatch.c)
 
