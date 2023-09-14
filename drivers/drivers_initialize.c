@@ -129,6 +129,10 @@ void drivers_initialize(void)
   devzero_register();   /* Standard /dev/zero */
 #endif
 
+#ifdef CONFIG_DEV_MEM
+  devmem_register();
+#endif
+
 #if defined(CONFIG_DEV_LOOP)
   loop_register();      /* Standard /dev/loop */
 #endif
