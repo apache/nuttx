@@ -584,11 +584,12 @@ define CLEAN
 	$(Q) if exist (del /f /q  .*.swp)
 	$(call DELFILE,$(subst /,\,$(OBJS)))
 	$(Q) if exist $(BIN) (del /f /q  $(subst /,\,$(BIN)))
+	$(Q) if exist $(BIN).lock (del /f /q  $(subst /,\,$(BIN).lock))
 	$(Q) if exist $(EXTRA) (del /f /q  $(subst /,\,$(EXTRA)))
 endef
 else
 define CLEAN
-	$(Q) rm -f *$(OBJEXT) *$(LIBEXT) *~ .*.swp $(OBJS) $(BIN) $(EXTRA)
+	$(Q) rm -f *$(OBJEXT) *$(LIBEXT) *~ .*.swp $(OBJS) $(BIN) $(BIN).lock $(EXTRA)
 endef
 endif
 
