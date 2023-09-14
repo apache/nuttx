@@ -252,4 +252,8 @@
 #define S32K3XX_MCM_BASE         (0xe0080000) /* Miscellaneous Control Module */
 #define S32K3XX_ROMTABLE_BASE    (0xe00ff000) /* Cortex-M7 PPB ROM Table */
 
+/* UTEST (OTP) */
+#define S32K3XX_UTEST_BASE       (0x1b000000) /* UTEST */
+#define S32K3XX_UTEST_UID        (0x1b000040) /* UTEST UID OTP */
+
 #endif /* __ARCH_ARM_SRC_S32K3XX_HARDWARE_S32K3XX_MEMORYMAP_H */
