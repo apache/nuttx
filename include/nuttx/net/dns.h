@@ -247,6 +247,16 @@ int dns_register_notify(dns_callback_t callback, FAR void *arg);
 
 int dns_unregister_notify(dns_callback_t callback, FAR void *arg);
 
+/****************************************************************************
+ * Name: dns_set_queryfamily
+ *
+ * Description:
+ *   Configure the address family to be used for queries.
+ *
+ ****************************************************************************/
+
+int dns_set_queryfamily(sa_family_t family);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
