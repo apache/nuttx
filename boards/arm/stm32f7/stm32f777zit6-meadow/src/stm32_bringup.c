@@ -139,6 +139,16 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_BOARD_MEADOW_F7_CORE_COMPUTE
+  /* Initialize all devices in the F7 Core Compute */
+
+  ret = init_corecomp();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: F7 Core Compute init failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_BOARD_MEADOW_PROJECTLAB
   /* Initialize all devices in the ProjectLab */
 
