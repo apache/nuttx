@@ -55,6 +55,7 @@ if(CONFIG_LIBC_NETDB)
     list(APPEND SRCS lib_dnsinit.c lib_dnsbind.c lib_dnsquery.c)
     list(APPEND SRCS lib_dnsaddserver.c lib_dnsdefaultserver.c)
     list(APPEND SRCS lib_dnsforeach.c lib_dnsnotify.c)
+    list(APPEND SRCS lib_dnsqueryfamily.c)
 
     if(NOT CONFIG_NETDB_DNSCLIENT_ENTRIES EQUAL 0)
       list(APPEND SRCS lib_dnscache.c)
