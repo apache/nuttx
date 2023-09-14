@@ -432,6 +432,62 @@ static int unwind_exec_content(struct unwind_ctrl_s *ctrl)
 
       ctrl->vrs[SP] += 0x204 + (uleb128 << 2);
     }
+  else if (content == 0xb3 || content == 0xc8 || content == 0xc9)
+    {
+      unsigned long reg_from;
+      unsigned long reg_to;
+      unsigned long mask;
+      unsigned long *vsp = (unsigned long *)ctrl->vrs[SP];
+      int i;
+
+      mask = unwind_get_byte(ctrl);
+      if (mask == 0)
+        {
+          return -1;
+        }
+
+      reg_from = (mask & 0xf0) >> 4;
+      reg_to = reg_from + (mask & 0x0f);
+
+      if (content == 0xc8)
+        {
+          reg_from += 16;
+          reg_to += 16;
+        }
+
+      for (i = reg_from; i <= reg_to; i++)
+        {
+          vsp += 2;
+        }
+
+      if (content == 0xb3)
+        {
+          vsp++;
+        }
+
+      ctrl->vrs[SP] = (unsigned long)vsp;
+    }
+  else if ((content & 0xf8) == 0xb8 || (content & 0xf8) == 0xd0)
+    {
+      unsigned long reg_to;
+      unsigned long mask = content & 0x07;
+      unsigned long *vsp = (unsigned long *)ctrl->vrs[SP];
+      int i;
+
+      reg_to = 8 + mask;
+
+      for (i = 8; i <= reg_to; i++)
+        {
+          vsp += 2;
+        }
+
+      if ((content & 0xf8) == 0xb8)
+        {
+          vsp++;
+        }
+
+      ctrl->vrs[SP] = (unsigned long)vsp;
+    }
   else
     {
       ret = -1;
