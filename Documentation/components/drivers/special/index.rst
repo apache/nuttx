@@ -25,6 +25,7 @@ following section.
   audio.rst
   clk.rst
   devicetree.rst
+  devmem.rst
   dma.rst
   framebuffer.rst
   i2c.rst

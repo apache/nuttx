@@ -15,6 +15,13 @@ config DEV_ZERO
 	bool "Enable /dev/zero"
 	default n
 
+config DEV_MEM
+	bool "Enable /dev/mem"
+	default n
+	---help---
+		It is a full image of physical memory and can be used to
+		access physical memory.
+
 config DEV_ASCII
 	bool "Enable /dev/ascii"
 	default n
