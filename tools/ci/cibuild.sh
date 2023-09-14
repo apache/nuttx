@@ -211,8 +211,7 @@ function util-linux {
   if ! type flock &> /dev/null; then
     case ${os} in
       Darwin)
-        brew tap discoteq/discoteq
-        brew install flock
+        brew install util-linux
         ;;
       Linux)
         apt-get install -y util-linux
