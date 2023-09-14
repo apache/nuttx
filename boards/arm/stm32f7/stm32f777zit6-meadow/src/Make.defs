@@ -67,7 +67,7 @@ CSRCS += stm32_idle.c
 endif
 
 ifeq ($(CONFIG_STM32F7_SDMMC2),y)
-CSRCS += meadow_sdmmc.c
+CSRCS += stm32_sdmmc.c
 endif
 
 ifdef MEADOW_OS
@@ -180,6 +180,10 @@ CSRCS += $(MEADOW_OS_DIR)/meadow_os/meadow_os_config.c
 
 endif
 endif # MEADOW_OS
+
+ifeq ($(CONFIG_BOARD_MEADOW_F7_CORE_COMPUTE),y)
+CSRCS += board_corecomp.c
+endif
 
 ifeq ($(CONFIG_BOARD_MEADOW_PROJECTLAB),y)
 CSRCS += board_projlab.c
