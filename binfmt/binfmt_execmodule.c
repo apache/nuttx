@@ -122,6 +122,7 @@ int exec_module(FAR struct binary_s *binp,
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   FAR struct arch_addrenv_s *addrenv = &binp->addrenv->addrenv;
   FAR void *vheap;
+  char name[CONFIG_PATH_MAX];
 #endif
   FAR void *stackaddr = NULL;
   pid_t pid;
@@ -166,6 +167,14 @@ int exec_module(FAR struct binary_s *binp,
     }
 
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
+  /* If there is no argument vector, the process name must be copied here */
+
+  if (argv == NULL)
+    {
+      strlcpy(name, filename, CONFIG_PATH_MAX);
+      filename = name;
+    }
+
   /* Instantiate the address environment containing the user heap */
 
   ret = addrenv_select(binp->addrenv, &binp->oldenv);
