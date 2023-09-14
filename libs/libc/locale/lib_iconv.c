@@ -420,6 +420,20 @@ size_t iconv(iconv_t cd, FAR char **in, FAR size_t *inb,
 
   to = extract_to(cd);
   from = extract_from(cd);
+  if (to > sizeof(g_charmaps) - 1)
+    {
+      /* Avoid going outside the range of the array */
+
+      to = sizeof(g_charmaps) - 1;
+    }
+
+  if (from > sizeof(g_charmaps) - 1)
+    {
+      /* Avoid going outside the range of the array */
+
+      from = sizeof(g_charmaps) - 1;
+    }
+
   map = g_charmaps + from + 1;
   tomap = g_charmaps + to + 1;
   type = map[0 - 1];
