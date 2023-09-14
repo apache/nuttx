@@ -63,15 +63,35 @@ config MEADOW_PWR_MGMT_SUPPORT
 	bool "Enables Meadow power management support"
 	default n
 
+choice
+        prompt "Select Main Board Model"
+        default BOARD_MEADOW_F7MICRO_DEFAULT
+        ---help---
+                Select the mainboard model
+
+config BOARD_MEADOW_F7MICRO_DEFAULT
+	bool "Meadow F7 Micro Default"
+	select ARCH_BOARD_COMMON
+	---help---
+		The default Meadow F7 Micro board with STM32F777,
+		ESP32 for WiFi/Bluetooth, External Flash and RAM.
 
 config BOARD_MEADOW_PROJECTLAB
 	bool "ProjectLab Mainboard"
-	default n
 	select ARCH_BOARD_COMMON
 	---help---
 		ProjectLab is a main board with a Meadow F7Micro
 		module soldered on it. The projectLab has a lot of
 		sensors, RS485, a 3.2" TFT Display, and Grove, Qwiic
 		and mikroBUS connectors for expansion.
+
+config BOARD_MEADOW_F7_CORE_COMPUTE
+	bool "F7 Core Compute Mainboard"
+	select ARCH_BOARD_COMMON
+	---help---
+		The F7 Core Compute is a modular mainboard with basic
+		features of F7-Micro, but with SDCard and Dual Ethernet.
+
+endchoice # "Main Board Model"
 
 endif # ARCH_BOARD_MEADOW_F7MICRO
