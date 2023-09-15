@@ -364,6 +364,7 @@ struct mountpt_operations
                        FAR struct stat *buf);
   CODE int     (*chstat)(FAR struct inode *mountpt, FAR const char *relpath,
                          FAR const struct stat *buf, int flags);
+  CODE int     (*syncfs)(FAR struct inode *mountpt);
 };
 #endif /* CONFIG_DISABLE_MOUNTPOINT */
 
@@ -1381,6 +1382,18 @@ off_t nx_seek(int fd, off_t offset, int whence);
  ****************************************************************************/
 
 int file_fsync(FAR struct file *filep);
+
+/****************************************************************************
+ * Name: file_syncfs
+ *
+ * Description:
+ *   Equivalent to the standard syncsf() function except that is accepts a
+ *   struct file instance instead of a fd descriptor and it does not set
+ *   the errno variable
+ *
+ ****************************************************************************/
+
+int file_syncfs(FAR struct file *filep);
 
 /****************************************************************************
  * Name: file_truncate

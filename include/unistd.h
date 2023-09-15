@@ -258,7 +258,6 @@
 
 /* Helpers and legacy compatibility definitions */
 
-#define syncfs(f)                        fsync(f)
 #define fdatasync(f)                     fsync(f)
 #define getdtablesize(f)                 ((int)sysconf(_SC_OPEN_MAX))
 #define getpagesize(f)                   ((int)sysconf(_SC_PAGESIZE))
@@ -441,6 +440,7 @@ int     setregid(gid_t rgid, gid_t egid);
 int     getentropy(FAR void *buffer, size_t length);
 
 void    sync(void);
+int     syncfs(int fd);
 
 #if CONFIG_FORTIFY_SOURCE > 0
 fortify_function(getcwd) FAR char *getcwd(FAR char *buf,
