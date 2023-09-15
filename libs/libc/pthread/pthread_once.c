@@ -28,7 +28,7 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <pthread.h>
-#include <sched.h>
+#include <nuttx/mutex.h>
 #include <debug.h>
 
 /****************************************************************************
@@ -61,6 +61,8 @@
  *
  ****************************************************************************/
 
+static rmutex_t g_lock = NXRMUTEX_INITIALIZER;
+
 int pthread_once(FAR pthread_once_t *once_control,
                  CODE void (*init_routine)(void))
 {
@@ -73,7 +75,7 @@ int pthread_once(FAR pthread_once_t *once_control,
 
   /* Prohibit pre-emption while we test and set the once_control. */
 
-  sched_lock();
+  nxrmutex_lock(&g_lock);
 
   if (!*once_control)
     {
@@ -81,8 +83,8 @@ int pthread_once(FAR pthread_once_t *once_control,
 
       /* Call the init_routine with pre-emption enabled. */
 
-      sched_unlock();
       init_routine();
+      nxrmutex_unlock(&g_lock);
       return OK;
     }
 
@@ -90,6 +92,6 @@ int pthread_once(FAR pthread_once_t *once_control,
    * Restore pre-emption and return.
    */
 
-  sched_unlock();
+  nxrmutex_unlock(&g_lock);
   return OK;
 }
