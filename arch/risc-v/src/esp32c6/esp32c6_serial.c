@@ -496,9 +496,9 @@ static bool esp32c6_txempty(struct uart_dev_s *dev)
   struct esp32c6_uart_s *priv = dev->priv;
 
   reg = getreg32(UART_INT_RAW_REG(priv->id));
-  reg = reg & UART_TXFIFO_EMPTY_INT_RAW_M;
+  reg = REG_MASK(reg, UART_TX_DONE_INT_RAW);
 
-  return (reg > 0) ? true : false;
+  return reg > 0;
 }
 
 /****************************************************************************

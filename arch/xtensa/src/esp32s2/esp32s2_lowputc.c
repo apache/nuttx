@@ -535,18 +535,9 @@ void esp32s2_lowputc_send_byte(const struct esp32s2_uart_s * priv,
 
 bool esp32s2_lowputc_is_tx_fifo_full(const struct esp32s2_uart_s *priv)
 {
-  uint32_t reg;
   uint32_t val;
-  reg = getreg32(UART_STATUS_REG(priv->id));
-  val = REG_MASK(reg, UART_TXFIFO_CNT);
-  if (val < (UART_TX_FIFO_SIZE -1))
-    {
-      return false;
-    }
-  else
-    {
-      return true;
-    }
+  val = REG_MASK(getreg32(UART_STATUS_REG(priv->id)), UART_TXFIFO_CNT);
+  return val >= (UART_TX_FIFO_SIZE - 1);
 }
 
 /****************************************************************************
