@@ -41,7 +41,7 @@
 #include "bcmf_interface.h"
 #include "bcmf_utils.h"
 
- #include "bcmf_netdev.h"
+#include "bcmf_netdev.h"
 
 #include "bcmf_sdio_regs.h"
 
