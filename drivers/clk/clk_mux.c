@@ -85,8 +85,8 @@ static int clk_mux_set_parent(FAR struct clk_s *clk, uint8_t index)
 
 static uint32_t
 clk_mux_determine_rate(FAR struct clk_s *clk, uint32_t rate,
-                       uint32_t *best_parent_rate,
-                       struct clk_s **best_parent_p)
+                       FAR uint32_t *best_parent_rate,
+                       FAR struct clk_s **best_parent_p)
 {
   FAR struct clk_mux_s *mux = to_clk_mux(clk);
   FAR struct clk_s *parent;
@@ -173,7 +173,7 @@ const struct clk_ops_s g_clk_mux_ro_ops =
  ****************************************************************************/
 
 FAR struct clk_s *clk_register_mux(FAR const char *name,
-                                   const char * const *parent_names,
+                                   FAR const char * const *parent_names,
                                    uint8_t num_parents,
                                    uint8_t flags, uint32_t reg,
                                    uint8_t shift, uint8_t width,
