@@ -266,7 +266,6 @@ static int nx_vopen(FAR struct tcb_s *tcb,
   if (fd < 0)
     {
       file_close(&filep);
-      return fd;
     }
 
   return fd;
