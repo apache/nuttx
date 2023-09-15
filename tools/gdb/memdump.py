@@ -20,7 +20,7 @@
 
 import gdb
 import utils
-from lists import list_for_each_entry, sq_for_every, sq_is_empty, sq_queue
+from lists import list_for_each_entry, sq_for_every, sq_queue
 
 mempool_backtrace = utils.CachedType("struct mempool_backtrace_s")
 
@@ -133,9 +133,10 @@ class Nxmemdump(gdb.Command):
 
         for node in mm_foreach(heap):
             if node["size"] & MM_ALLOC_BIT != 0:
-                if (pid == node["pid"] or (pid == PID_MM_ALLOC and node["pid"] != PID_MM_MEMPOOL)) and (
-                    node["seqno"] >= seqmin and node["seqno"] < seqmax
-                ):
+                if (
+                    pid == node["pid"]
+                    or (pid == PID_MM_ALLOC and node["pid"] != PID_MM_MEMPOOL)
+                ) and (node["seqno"] >= seqmin and node["seqno"] < seqmax):
                     charnode = gdb.Value(node).cast(gdb.lookup_type("char").pointer())
                     gdb.write(
                         "%6d%12u%12u%#*x"
@@ -161,7 +162,7 @@ class Nxmemdump(gdb.Command):
                                 )
                             )
 
-                        gdb.write("\n")
+                    gdb.write("\n")
 
                     self.aordblks += 1
                     self.uordblks += node["size"] & ~MM_MASK_BIT
