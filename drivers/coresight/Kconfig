@@ -1,0 +1,18 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menuconfig CORESIGHT
+	bool "Coresight Driver Support"
+	default n
+	---help---
+		Coresight drivers support.
+
+if CORESIGHT
+
+config CORESIGHT_MAX_OUTPORT_NUM
+	int "Max outport number of coresight device"
+	default 2
+
+endif # CORESIGHT

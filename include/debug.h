@@ -956,6 +956,24 @@
 #  define rpmsginfo     _none
 #endif
 
+#ifdef CONFIG_DEBUG_CORESIGHT_ERROR
+#  define cserr       _err
+#else
+#  define cserr      _none
+#endif
+
+#ifdef CONFIG_DEBUG_CORESIGHT_WARN
+#  define cswarn     _warn
+#else
+#  define cswarn     _none
+#endif
+
+#ifdef CONFIG_DEBUG_CORESIGHT_INFO
+#  define csinfo     _info
+#else
+#  define csinfo     _none
+#endif
+
 /* Buffer dumping macros do not depend on varargs */
 
 #ifdef CONFIG_DEBUG_ERROR
