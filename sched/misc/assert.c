@@ -166,6 +166,14 @@ static void dump_stack(FAR const char *tag, uintptr_t sp,
   if (sp != 0)
     {
       _alert("    sp: %p\n", (FAR void *)sp);
+
+      /* Get more information */
+
+      if (sp - 32 >= base)
+        {
+          sp -= 32;
+        }
+
       stack_dump(sp, top);
     }
   else
