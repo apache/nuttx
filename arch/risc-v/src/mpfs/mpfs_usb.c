@@ -326,7 +326,7 @@ static void mpfs_modifyreg16(uintptr_t addr, uint16_t clearbits,
  ****************************************************************************/
 
 static void mpfs_modifyreg8(uintptr_t addr, uint8_t clearbits,
-                             uint8_t setbits)
+                            uint8_t setbits)
 {
   irqstate_t flags;
   uint8_t    regval;

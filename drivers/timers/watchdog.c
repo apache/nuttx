@@ -112,11 +112,11 @@ struct watchdog_upperhalf_s
 static int     wdog_open(FAR struct file *filep);
 static int     wdog_close(FAR struct file *filep);
 static ssize_t wdog_read(FAR struct file *filep, FAR char *buffer,
-                 size_t buflen);
+                         size_t buflen);
 static ssize_t wdog_write(FAR struct file *filep, FAR const char *buffer,
-                 size_t buflen);
+                          size_t buflen);
 static int     wdog_ioctl(FAR struct file *filep, int cmd,
-                 unsigned long arg);
+                          unsigned long arg);
 
 /****************************************************************************
  * Private Data

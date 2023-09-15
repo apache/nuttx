@@ -464,7 +464,7 @@ static int can_close(FAR struct file *filep)
 
   while (dev->cd_xmit.tx_head != dev->cd_xmit.tx_tail)
     {
-       nxsig_usleep(HALF_SECOND_USEC);
+      nxsig_usleep(HALF_SECOND_USEC);
     }
 
   /* And wait for the TX hardware FIFO to drain */
