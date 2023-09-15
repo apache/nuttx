@@ -391,6 +391,9 @@ config MPFS_EMMCSD
 	select ARCH_HAVE_SDIO
 	select SDIO_BLOCKSETUP
 	select SDIO_DMA
+	select FAT_DMAMEMORY
+	select FAT_FORCE_INDIRECT
+	select GRAN
 	default n
 	---help---
 		Selects the MPFS eMMCSD driver.
