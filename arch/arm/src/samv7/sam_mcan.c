@@ -98,9 +98,9 @@
  * occur in multiples of full change lines.
  */
 
-#ifdef CONFIG_ARMV7M_DCACHE
+#ifdef CONFIG_ARCH_DCACHE
 #  define MCAN_ALIGN        ARMV7M_DCACHE_LINESIZE
-#  define MCAN_ALIGN_MASK   (MCAN_ALIGN-1)
+#  define MCAN_ALIGN_MASK   (MCAN_ALIGN - 1)
 #  define MCAN_ALIGN_UP(n)  (((n) + MCAN_ALIGN_MASK) & ~MCAN_ALIGN_MASK)
 
 #  ifndef CONFIG_ARMV7M_DCACHE_WRITETHROUGH
@@ -729,7 +729,7 @@
  */
 
 #define MCAN_RXCOMMON_INTS_REVA (MCAN_INT_CRCE | MCAN_INT_FOE | MCAN_INT_STE)
-#define MCAN_RXCOMMON_INTS (MCAN_INT_PEA | MCAN_INT_PED)
+#define MCAN_RXCOMMON_INTS      (MCAN_INT_PEA | MCAN_INT_PED)
 #define MCAN_RXFIFO0_INTS       (MCAN_INT_RF0N | MCAN_INT_RF0W | MCAN_INT_RF0L)
 #define MCAN_RXFIFO1_INTS       (MCAN_INT_RF1N | MCAN_INT_RF1W | MCAN_INT_RF1L)
 #define MCAN_RXFIFO_INTS        (MCAN_RXFIFO0_INTS | MCAN_RXFIFO1_INTS | \
@@ -738,7 +738,7 @@
 
 #define MCAN_RXERR_INTS_REVA    (MCAN_INT_RF0L | MCAN_INT_RF1L | MCAN_INT_CRCE | \
                                  MCAN_INT_FOE | MCAN_INT_STE)
-#define MCAN_RXERR_INTS    (MCAN_INT_RF0L | MCAN_INT_RF1L | MCAN_INT_PEA | \
+#define MCAN_RXERR_INTS         (MCAN_INT_RF0L | MCAN_INT_RF1L | MCAN_INT_PEA | \
                                  MCAN_INT_PED)
 
 /* TX FIFOQ mode interrupts
@@ -929,11 +929,11 @@ static uint8_t mcan_bytes2dlc(struct sam_mcan_s *priv, uint8_t nbytes);
 
 #ifdef CONFIG_CAN_EXTID
 static int mcan_add_extfilter(struct sam_mcan_s *priv,
-              struct canioc_extfilter_s *extconfig);
+                              struct canioc_extfilter_s *extconfig);
 static int mcan_del_extfilter(struct sam_mcan_s *priv, int ndx);
 #endif
 static int mcan_add_stdfilter(struct sam_mcan_s *priv,
-              struct canioc_stdfilter_s *stdconfig);
+                              struct canioc_stdfilter_s *stdconfig);
 static int mcan_del_stdfilter(struct sam_mcan_s *priv, int ndx);
 
 /* CAN driver methods */
@@ -944,7 +944,7 @@ static void mcan_shutdown(struct can_dev_s *dev);
 static void mcan_rxint(struct can_dev_s *dev, bool enable);
 static void mcan_txint(struct can_dev_s *dev, bool enable);
 static int  mcan_ioctl(struct can_dev_s *dev, int cmd,
-              unsigned long arg);
+                       unsigned long arg);
 static int  mcan_remoterequest(struct can_dev_s *dev, uint16_t id);
 static int  mcan_send(struct can_dev_s *dev, struct can_msg_s *msg);
 static bool mcan_txready(struct can_dev_s *dev);
@@ -954,7 +954,7 @@ static bool mcan_txempty(struct can_dev_s *dev);
 
 #if 0 /* Not Used */
 static bool mcan_dedicated_rxbuffer_available(struct sam_mcan_s *priv,
-              int bufndx);
+                                              int bufndx);
 #endif
 #ifdef CONFIG_CAN_ERRORS
 static void mcan_error(struct can_dev_s *dev, uint32_t status);
@@ -986,10 +986,11 @@ static const struct can_ops_s g_mcanops =
 };
 
 #ifdef CONFIG_SAMV7_MCAN0
-/* Message RAM allocation */
+
+/* MCAN0 message RAM allocation */
 
 static uint32_t g_mcan0_msgram[MCAN0_MSGRAM_WORDS]
-#ifdef CONFIG_ARMV7M_DCACHE
+#ifdef CONFIG_ARCH_DCACHE
   __attribute__((aligned(MCAN_ALIGN)));
 #else
   ;
@@ -1084,10 +1085,11 @@ static struct can_dev_s g_mcan0dev =
 #endif /* CONFIG_SAMV7_MCAN0 */
 
 #ifdef CONFIG_SAMV7_MCAN1
+
 /* MCAN1 message RAM allocation */
 
 static uint32_t g_mcan1_msgram[MCAN1_MSGRAM_WORDS]
-#ifdef CONFIG_ARMV7M_DCACHE
+#ifdef CONFIG_ARCH_DCACHE
   __attribute__((aligned(MCAN_ALIGN)));
 #else
   ;
@@ -1249,7 +1251,7 @@ static uint32_t mcan_getreg(struct sam_mcan_s *priv, int offset)
 
   /* Show the register value read */
 
-  caninfo("%08x->%08x\n", regaddr, regval);
+  caninfo("%08" PRIx32 "->%08" PRIx32 "\n", regaddr, regval);
   return regval;
 }
 
@@ -1287,7 +1289,7 @@ static void mcan_putreg(struct sam_mcan_s *priv, int offset,
 
   /* Show the register value being written */
 
-  caninfo("%08x<-%08x\n", regaddr, regval);
+  caninfo("%08" PRIx32 "<-%08" PRIx32 "\n", regaddr, regval);
 
   /* Write the value */
 
@@ -1299,6 +1301,7 @@ static void mcan_putreg(struct sam_mcan_s *priv, int offset,
                         uint32_t regval)
 {
   const struct sam_config_s *config = priv->config;
+
   putreg32(regval, config->base + offset);
 }
 
@@ -1601,7 +1604,7 @@ static void mcan_buffer_release(struct sam_mcan_s *priv)
   else
     {
       canerr("ERROR: txfsem would increment beyond %d\n",
-              priv->config->ntxfifoq);
+             priv->config->ntxfifoq);
     }
 }
 
@@ -2940,7 +2943,7 @@ static int mcan_send(struct can_dev_s *dev, struct can_msg_s *msg)
   config = priv->config;
 
   caninfo("MCAN%d\n", config->port);
-  caninfo("MCAN%d ID: %"PRIu32" DLC: %u\n",
+  caninfo("MCAN%d ID: %" PRIu32 " DLC: %u\n",
           config->port, (uint32_t)msg->cm_hdr.ch_id, msg->cm_hdr.ch_dlc);
 
   /* That that FIFO elements were configured.
@@ -3019,7 +3022,7 @@ static int mcan_send(struct can_dev_s *dev, struct can_msg_s *msg)
     }
 
   txbuffer[0] = regval;
-  reginfo("T0: %08x\n", regval);
+  reginfo("T0: %08" PRIx32 "\n", regval);
 
   /* Format word T1:
    *   Data Length Code (DLC)            - Value from message structure
@@ -3041,7 +3044,7 @@ static int mcan_send(struct can_dev_s *dev, struct can_msg_s *msg)
     }
 #endif
 
-  reginfo("T1: %08x\n", txbuffer[1]);
+  reginfo("T1: %08" PRIx32 "\n", txbuffer[1]);
 
   /* Followed by the amount of data corresponding to the DLC (T2..) */
 
@@ -3189,7 +3192,7 @@ static bool mcan_txempty(struct can_dev_s *dev)
    */
 
   regval = mcan_getreg(priv, SAM_MCAN_TXFQS_OFFSET);
-  if (((regval & MCAN_TXFQS_TFQF) != 0))
+  if ((regval & MCAN_TXFQS_TFQF) != 0)
     {
       nxmutex_unlock(&priv->lock);
       return false;
@@ -3371,9 +3374,9 @@ static void mcan_error(struct can_dev_s *dev, uint32_t status)
           data[3] |= (CAN_ERROR3_CRCSEQ | CAN_ERROR3_CRCDEL);
         }
 
-      if ((lec == MCAN_PSR_EC_BIT0_ERROR) || \
-          (lec == MCAN_PSR_EC_BIT1_ERROR) || \
-          (dlec == MCAN_PSR_EC_BIT0_ERROR) || \
+      if ((lec == MCAN_PSR_EC_BIT0_ERROR) ||
+          (lec == MCAN_PSR_EC_BIT1_ERROR) ||
+          (dlec == MCAN_PSR_EC_BIT0_ERROR) ||
           (dlec == MCAN_PSR_EC_BIT1_ERROR))
         {
           /* Bit Error */
@@ -3389,8 +3392,8 @@ static void mcan_error(struct can_dev_s *dev, uint32_t status)
           errbits |= CAN_ERROR_NOACK;
         }
 
-      if ((lec == MCAN_PSR_EC_FORM_ERROR) || \
-         (dlec == MCAN_PSR_EC_FORM_ERROR))
+      if ((lec == MCAN_PSR_EC_FORM_ERROR) ||
+          (dlec == MCAN_PSR_EC_FORM_ERROR))
         {
           /* Format Error */
 
@@ -3398,8 +3401,8 @@ static void mcan_error(struct can_dev_s *dev, uint32_t status)
           data[2] |= CAN_ERROR2_FORM;
         }
 
-      if ((lec == MCAN_PSR_EC_STUFF_ERROR) || \
-         (dlec == MCAN_PSR_EC_STUFF_ERROR))
+      if ((lec == MCAN_PSR_EC_STUFF_ERROR) ||
+          (dlec == MCAN_PSR_EC_STUFF_ERROR))
         {
           /* Stuff Error */
 
@@ -3465,10 +3468,10 @@ static void mcan_receive(struct can_dev_s *dev, uint32_t *rxbuffer,
 
   /* Format the CAN header */
 
-  /* Work R0 contains the CAN ID */
+  /* Word R0 contains the CAN ID */
 
   regval = *rxbuffer++;
-  reginfo("R0: %08x\n", regval);
+  reginfo("R0: %08" PRIx32 "\n", regval);
 
 #ifdef CONFIG_CAN_ERRORS
   hdr.ch_error  = 0;
@@ -3516,7 +3519,7 @@ static void mcan_receive(struct can_dev_s *dev, uint32_t *rxbuffer,
   /* Word R1 contains the DLC and timestamp */
 
   regval = *rxbuffer++;
-  reginfo("R1: %08x\n", regval);
+  reginfo("R1: %08" PRIx32 "\n", regval);
 
   hdr.ch_dlc = (regval & BUFFER_R1_DLC_MASK) >> BUFFER_R1_DLC_SHIFT;
 
@@ -3601,7 +3604,7 @@ static int mcan_interrupt(int irq, void *context, void *arg)
           if ((pending & MCAN_TXERR_INTS) != 0)
             {
               psr = mcan_getreg(priv, SAM_MCAN_PSR_OFFSET);
-              canerr("ERROR: TX %08"PRIx32", PSR %08"PRIx32"\n",
+              canerr("ERROR: TX %08" PRIx32 ", PSR %08" PRIx32 "\n",
                      pending & MCAN_TXERR_INTS, psr);
 
               /* An Acknowledge-Error will occur if for example the device
@@ -3645,7 +3648,7 @@ static int mcan_interrupt(int irq, void *context, void *arg)
           if ((pending & MCAN_RXERR_INTS) != 0)
             {
               psr = mcan_getreg(priv, SAM_MCAN_PSR_OFFSET);
-              canerr("ERROR: RX %08"PRIx32", PSR %08"PRIx32"\n",
+              canerr("ERROR: RX %08" PRIx32 ", PSR %08" PRIx32 "\n",
                      pending & MCAN_RXERR_INTS, psr);
 
               /* To prevent Interrupt-Flooding the current active
@@ -3688,8 +3691,8 @@ static int mcan_interrupt(int irq, void *context, void *arg)
                 ie |= MCAN_INT_ACKE;
                 mcan_putreg(priv, SAM_MCAN_IE_OFFSET, ie);
             }
-          else if ((priv->rev == 1) && \
-                  ((ie & (MCAN_INT_PEA | MCAN_INT_PED)) == 0))
+          else if ((priv->rev == 1) &&
+                   ((ie & (MCAN_INT_PEA | MCAN_INT_PED)) == 0))
             {
                 ie |= MCAN_INT_PEA | MCAN_INT_PED;
                 mcan_putreg(priv, SAM_MCAN_IE_OFFSET, ie);
@@ -3849,7 +3852,7 @@ static int mcan_interrupt(int irq, void *context, void *arg)
 
           if ((regval & MCAN_RXF0S_RF0L) != 0)
             {
-              canerr("ERROR: Message lost: %08"PRIx32"\n", regval);
+              canerr("ERROR: Message lost: %08" PRIx32 "\n", regval);
             }
           else
             {
