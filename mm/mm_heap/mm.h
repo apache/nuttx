@@ -151,11 +151,11 @@
 
 /* Check if node/prenode is free */
 
-#define MM_NODE_IS_ALLOC(node) ((node->size & MM_ALLOC_BIT) != 0)
-#define MM_NODE_IS_FREE(node) ((node->size & MM_ALLOC_BIT) == 0)
+#define MM_NODE_IS_ALLOC(node) (((node)->size & MM_ALLOC_BIT) != 0)
+#define MM_NODE_IS_FREE(node) (((node)->size & MM_ALLOC_BIT) == 0)
 
-#define MM_PREVNODE_IS_ALLOC(node) ((node->size & MM_PREVFREE_BIT) == 0)
-#define MM_PREVNODE_IS_FREE(node) ((node->size & MM_PREVFREE_BIT) != 0)
+#define MM_PREVNODE_IS_ALLOC(node) (((node)->size & MM_PREVFREE_BIT) == 0)
+#define MM_PREVNODE_IS_FREE(node) (((node)->size & MM_PREVFREE_BIT) != 0)
 
 /****************************************************************************
  * Public Types
