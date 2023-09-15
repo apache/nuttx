@@ -118,13 +118,13 @@ static int      sam_start(struct watchdog_lowerhalf_s *lower);
 static int      sam_stop(struct watchdog_lowerhalf_s *lower);
 static int      sam_keepalive(struct watchdog_lowerhalf_s *lower);
 static int      sam_getstatus(struct watchdog_lowerhalf_s *lower,
-                  struct watchdog_status_s *status);
+                              struct watchdog_status_s *status);
 static int      sam_settimeout(struct watchdog_lowerhalf_s *lower,
-                  uint32_t timeout);
+                               uint32_t timeout);
 static xcpt_t   sam_capture(struct watchdog_lowerhalf_s *lower,
-                  xcpt_t handler);
+                            xcpt_t handler);
 static int      sam_ioctl(struct watchdog_lowerhalf_s *lower, int cmd,
-                  unsigned long arg);
+                          unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -336,7 +336,7 @@ static int sam_stop(struct watchdog_lowerhalf_s *lower)
  * Description:
  *   Reset the watchdog timer to the current timeout value, prevent any
  *   imminent watchdog timeouts.  This is sometimes referred as "pinging"
- *   the atchdog timer or "petting the dog".
+ *   the watchdog timer or "petting the dog".
  *
  * Input Parameters:
  *   lower - A pointer the publicly visible representation of the
