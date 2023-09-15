@@ -92,7 +92,7 @@ int pthread_spin_init(FAR pthread_spinlock_t *lock, int pshared)
   DEBUGASSERT(lock != NULL);
   if (lock != NULL)
     {
-      lock->sp_lock   = SP_UNLOCKED;
+      spin_initialize(&lock->sp_lock, SP_UNLOCKED);
       lock->sp_holder = IMPOSSIBLE_THREAD;
       ret             = OK;
     }
@@ -304,14 +304,14 @@ int pthread_spin_unlock(pthread_spinlock_t *lock)
   pthread_t me = pthread_self();
 
   DEBUGASSERT(lock != NULL &&
-              lock->sp_lock == SP_LOCKED &&
+              spin_islocked(&lock->sp_lock) &&
               lock->sp_holder == me);
 
   if (lock == NULL)
     {
       return EINVAL;
     }
-  else if (lock->sp_lock != SP_LOCKED || lock->sp_holder != me)
+  else if (!spin_islocked(&lock->sp_lock) || lock->sp_holder != me)
     {
       return EPERM;
     }
@@ -319,7 +319,7 @@ int pthread_spin_unlock(pthread_spinlock_t *lock)
   /* Release the lock */
 
   lock->sp_holder = IMPOSSIBLE_THREAD;
-  lock->sp_lock   = SP_UNLOCKED;
+  spin_initialize(&lock->sp_lock, SP_UNLOCKED);
   return OK;
 }
 
