@@ -73,7 +73,7 @@ struct can_recvfrom_s
  ****************************************************************************/
 
 #ifdef CONFIG_NET_CANPROTO_OPTIONS
-static int can_recv_filter(struct can_conn_s *conn, canid_t id);
+static int can_recv_filter(FAR struct can_conn_s *conn, canid_t id);
 #endif
 
 /****************************************************************************
@@ -327,14 +327,14 @@ static inline int can_readahead(struct can_recvfrom_s *pstate)
 }
 
 #ifdef CONFIG_NET_CANPROTO_OPTIONS
-static int can_recv_filter(struct can_conn_s *conn, canid_t id)
+static int can_recv_filter(FAR struct can_conn_s *conn, canid_t id)
 {
   uint32_t i;
 
 #ifdef CONFIG_NET_CAN_ERRORS
   /* error message frame */
 
-  if (id & CAN_ERR_FLAG)
+  if ((id & CAN_ERR_FLAG) != 0)
     {
       return id & conn->err_mask ? 1 : 0;
     }
@@ -346,7 +346,7 @@ static int can_recv_filter(struct can_conn_s *conn, canid_t id)
         {
           if ((id & conn->filters[i].can_mask) !=
                 ((conn->filters[i].can_id & ~CAN_INV_FILTER) &
-                conn->filters[i].can_mask))
+                 conn->filters[i].can_mask))
             {
               return 1;
             }
