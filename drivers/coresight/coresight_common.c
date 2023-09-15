@@ -250,15 +250,14 @@ void coresight_put_system_trace_id(int traceid)
  *
  ****************************************************************************/
 
-int coresight_timeout(uintptr_t addr, uint32_t off,
-                      uint32_t bitmask, uint32_t val)
+int coresight_timeout(uint32_t val, uint32_t mask, uintptr_t addr)
 {
   int i;
 
   for (i = CONFIG_CORESIGHT_TIMEOUT; i > 0; i--)
     {
-      uint32_t value = coresight_get32(addr + off);
-      if ((value & bitmask) == val)
+      uint32_t value = coresight_get32(addr);
+      if ((value & mask) == val)
         {
           return 0;
         }

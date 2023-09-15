@@ -161,8 +161,7 @@ void coresight_put_system_trace_id(int traceid);
  *
  ****************************************************************************/
 
-int coresight_timeout(uintptr_t addr, uint32_t off,
-                      uint32_t bitmask, uint32_t val);
+int coresight_timeout(uint32_t val, uint32_t mask, uintptr_t addr);
 
 /****************************************************************************
  * Name: coresight_insert_barrier_packet

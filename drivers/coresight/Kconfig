@@ -19,6 +19,22 @@ config CORESIGHT_TIMEOUT
 	int "Timeout us for waiting register state change"
 	default 100
 
+config CORESIGHT_ETM
+	bool "ETM coresight device support"
+	default n
+
+if CORESIGHT_ETM
+
+config CORESIGHT_ETM_VERSION
+	string "Coresight ETM version"
+	default "v3"
+
+config CORESIGHT_ETM_USE_COPROCESSOR
+	bool "Whether use coprocessor to access ETM registers"
+	default n
+
+endif # CORESIGHT_ETM
+
 config CORESIGHT_FUNNEL
 	bool "Funnel coresight device support"
 	default n
