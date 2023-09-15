@@ -229,12 +229,17 @@ typedef CODE void (*dma_callback_t)(FAR struct dma_chan_s *chan,
  * direction - whether the data shall go in or out on this channel.
  * priority  - the bus priority compare with other active channel.
  * timeout   - abort if the source can't prepare data within this value.
+ * option    - used to configuration for this dma channel which is optional
  * dst_width - this is the width in bytes of destination target(TX) register
  *             where DMA data shall be read. If the source is memory this
  *             may be ignored. Legal values: 1, 2, 4, 8.
  * src_width - same as dst_width but for the source(RX) mutatis mutandis.
  * dst_drq   - physical destination DMA request ID for this channel.
  * src_drq   - physical source DMA request ID for this channel.
+ * dst_step  - after each DMA transfer, destination addr should increase
+ *             dst_step (> 0) or decrease dst_step (< 0)
+ * src_step  - after each DMA transfer, source addr should increase
+ *             dst_step (> 0) or decrease dst_step (< 0)
  *
  * Note: the special value zero means to keep the current value without
  *       change.
@@ -246,10 +251,13 @@ struct dma_config_s
   unsigned int direction;
   unsigned int priority;
   unsigned int timeout;
+  unsigned int option;
   unsigned int dst_width;
   unsigned int src_width;
   unsigned int dst_drq;
   unsigned int src_drq;
+  int dst_step;
+  int src_step;
 };
 
 #ifdef CONFIG_DMA_LINK
