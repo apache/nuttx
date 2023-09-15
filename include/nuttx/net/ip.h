@@ -279,10 +279,12 @@ extern "C"
  ****************************************************************************/
 
 #define net_ipaddr(addr, addr0, addr1, addr2, addr3) \
-  do { \
-    addr = HTONL((uint32_t)(addr0) << 24 | (uint32_t)(addr1) << 16 | \
-                 (uint32_t)(addr2) << 8  | (uint32_t)(addr3)); \
-  } while (0)
+  do \
+    { \
+      addr = HTONL((uint32_t)(addr0) << 24 | (uint32_t)(addr1) << 16 | \
+                   (uint32_t)(addr2) << 8  | (uint32_t)(addr3)); \
+    } \
+  while (0)
 
 /****************************************************************************
  * Macro: net_ip4addr_conv32
@@ -336,16 +338,18 @@ extern "C"
  ****************************************************************************/
 
 #define ip6_addr(addr,addr0,addr1,addr2,addr3,addr4,addr5,addr6,addr7) \
-  do { \
-    ((FAR uint16_t *)(addr))[0] = HTONS((addr0)); \
-    ((FAR uint16_t *)(addr))[1] = HTONS((addr1)); \
-    ((FAR uint16_t *)(addr))[2] = HTONS((addr2)); \
-    ((FAR uint16_t *)(addr))[3] = HTONS((addr3)); \
-    ((FAR uint16_t *)(addr))[4] = HTONS((addr4)); \
-    ((FAR uint16_t *)(addr))[5] = HTONS((addr5)); \
-    ((FAR uint16_t *)(addr))[6] = HTONS((addr6)); \
-    ((FAR uint16_t *)(addr))[7] = HTONS((addr7)); \
-  } while (0)
+  do \
+    { \
+      ((FAR uint16_t *)(addr))[0] = HTONS((addr0)); \
+      ((FAR uint16_t *)(addr))[1] = HTONS((addr1)); \
+      ((FAR uint16_t *)(addr))[2] = HTONS((addr2)); \
+      ((FAR uint16_t *)(addr))[3] = HTONS((addr3)); \
+      ((FAR uint16_t *)(addr))[4] = HTONS((addr4)); \
+      ((FAR uint16_t *)(addr))[5] = HTONS((addr5)); \
+      ((FAR uint16_t *)(addr))[6] = HTONS((addr6)); \
+      ((FAR uint16_t *)(addr))[7] = HTONS((addr7)); \
+    } \
+  while (0)
 
 /****************************************************************************
  * Macro: ip6_map_ipv4addr
