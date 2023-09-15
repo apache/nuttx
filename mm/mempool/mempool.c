@@ -186,7 +186,7 @@ int mempool_init(FAR struct mempool_s *pool, FAR const char *name)
       kasan_poison(base, size);
     }
 
-  spin_initialize(&pool->lock, 0);
+  spin_initialize(&pool->lock, SP_UNLOCKED);
   if (pool->wait && pool->expandsize == 0)
     {
       nxsem_init(&pool->waitsem, 0, 0);
