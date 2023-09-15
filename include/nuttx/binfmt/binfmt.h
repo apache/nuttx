@@ -270,8 +270,7 @@ int unload_module(FAR struct binary_s *bin);
 int exec_module(FAR struct binary_s *binp,
                 FAR const char *filename, FAR char * const *argv,
                 FAR char * const *envp,
-                FAR const posix_spawn_file_actions_t *actions,
-                bool spawn);
+                FAR const posix_spawn_file_actions_t *actions);
 
 /****************************************************************************
  * Name: exec
