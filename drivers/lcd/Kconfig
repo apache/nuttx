@@ -1148,6 +1148,13 @@ config MEMLCD_SPI_FREQUENCY
 	---help---
 		Define to use a different bus frequency, FIXME DEFAULT VALUE OK?
 
+config MEMLCD_BYTE_PER_PIXEL
+	bool "Byte-Per-Pixel Memory Model"
+	default n
+	---help---
+		Selects the Byte-Per-Pixel buffer model, instead of Bit-Per-Pixel.
+		LVGL Graphics Library uses Byte-Per-Pixel memory model.
+
 endif # LCD_SHARP_MEMLCD
 
 choice
