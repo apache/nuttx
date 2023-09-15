@@ -107,25 +107,22 @@ static int tpiu_hw_enable(FAR struct coresight_tpiu_dev_s *tpiudev)
 
 static void tpiu_hw_disable(FAR struct coresight_tpiu_dev_s *tpiudev)
 {
-  uint32_t ffcr;
-
   coresight_unlock(tpiudev->csdev.addr);
 
   /* Trigger a formatter stop event. */
 
-  ffcr = coresight_get32(tpiudev->csdev.addr + TPIU_FFCR);
-  ffcr |= TPIU_FFCR_STOP_FI;
-  coresight_put32(ffcr, tpiudev->csdev.addr + TPIU_FFCR);
-  ffcr |= TPIU_FFCR_FON_MAN;
-  coresight_put32(ffcr, tpiudev->csdev.addr + TPIU_FFCR);
-  if (coresight_timeout(tpiudev->csdev.addr, TPIU_FFCR,
-                        TPIU_FFCR_FON_MAN, 0) < 0)
+  coresight_modify32(TPIU_FFCR_STOP_FI, TPIU_FFCR_STOP_FI,
+                     tpiudev->csdev.addr + TPIU_FFCR);
+  coresight_modify32(TPIU_FFCR_FON_MAN, TPIU_FFCR_FON_MAN,
+                     tpiudev->csdev.addr + TPIU_FFCR);
+  if (coresight_timeout(0, TPIU_FFCR_FON_MAN,
+                        tpiudev->csdev.addr + TPIU_FFCR) < 0)
     {
       cserr("timeout while waiting for completion of Manual Flush\n");
     }
 
-  if (coresight_timeout(tpiudev->csdev.addr, TPIU_FFSR,
-                        TPIU_FFSR_FT_STOPPED, TPIU_FFSR_FT_STOPPED) < 0)
+  if (coresight_timeout(TPIU_FFSR_FT_STOPPED, TPIU_FFSR_FT_STOPPED,
+                        tpiudev->csdev.addr + TPIU_FFSR) < 0)
     {
       cserr("timeout while waiting for Formatter to Stop\n");
     }

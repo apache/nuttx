@@ -150,8 +150,8 @@ static void stm_hw_disable(FAR struct coresight_stm_dev_s *stmdev)
   coresight_put32(0x0, stmdev->csdev.addr + STM_HEER);
   coresight_put32(0x0, stmdev->csdev.addr + STM_HETER);
 
-  if (coresight_timeout(stmdev->csdev.addr, STM_TCSR,
-                        STM_TCSR_BUSY, 0) < 0)
+  if (coresight_timeout(0x0, STM_TCSR_BUSY,
+                        stmdev->csdev.addr + STM_TCSR) < 0)
     {
       cserr("timeout waiting for STM stopped\n");
     }

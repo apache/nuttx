@@ -24,6 +24,10 @@ ifeq ($(CONFIG_CORESIGHT),y)
 
 CSRCS += coresight_core.c coresight_common.c
 
+ifeq ($(CONFIG_CORESIGHT_ETM_VERSION),"v3")
+CSRCS += coresight_etm3.c
+endif
+
 ifeq ($(CONFIG_CORESIGHT_FUNNEL),y)
 CSRCS += coresight_funnel.c
 endif
