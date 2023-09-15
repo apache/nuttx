@@ -1655,7 +1655,7 @@ void up_timer_initialize(void);
  * set a time in the future and get an event when that alarm goes off.
  *
  *   int up_alarm_cancel(void):  Cancel the alarm.
- *   int up_alarm_start(FAR const struct timespec *ts): Enable (or re-anable
+ *   int up_alarm_start(FAR const struct timespec *ts): Enable (or re-enable
  *     the alarm.
  * #else
  *   int up_timer_cancel(void):  Cancels the interval timer.
