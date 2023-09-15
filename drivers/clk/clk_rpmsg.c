@@ -71,7 +71,7 @@ struct clk_rpmsg_server_s
 struct clk_rpmsg_s
 {
   FAR struct clk_s          *clk;
-  uint32_t                  count;
+  bool                      enable;
   struct list_node          node;
 };
 
@@ -314,20 +314,22 @@ static int clk_rpmsg_enable_handler(FAR struct rpmsg_endpoint *ept,
 {
   FAR struct clk_rpmsg_enable_s *msg = data;
   FAR struct clk_rpmsg_s *clkrp = clk_rpmsg_get_clk(ept, msg->name);
+  int ret = -ENOENT;
 
-  if (clkrp)
+  if (clkrp && !clkrp->enable)
     {
-      msg->header.result = clk_enable(clkrp->clk);
-      if (!msg->header.result)
+      ret = clk_enable(clkrp->clk);
+      if (ret >= 0)
         {
-          clkrp->count++;
+          clkrp->enable = true;
         }
     }
-  else
+  else if (clkrp && clkrp->enable)
     {
-      msg->header.result = -ENOENT;
+      ret = 0;
     }
 
+  msg->header.result = ret;
   return rpmsg_send(ept, msg, sizeof(*msg));
 }
 
@@ -337,18 +339,22 @@ static int clk_rpmsg_disable_handler(FAR struct rpmsg_endpoint *ept,
 {
   FAR struct clk_rpmsg_disable_s *msg = data;
   FAR struct clk_rpmsg_s *clkrp = clk_rpmsg_get_clk(ept, msg->name);
+  int ret = -ENOENT;
 
-  if (clkrp)
+  if (clkrp && clkrp->enable)
     {
-      clk_disable(clkrp->clk);
-      clkrp->count--;
-      msg->header.result = 0;
+      ret = clk_disable(clkrp->clk);
+      if (ret >= 0)
+        {
+          clkrp->enable = false;
+        }
     }
-  else
+  else if (clkrp && !clkrp->enable)
     {
-      msg->header.result = -ENOENT;
+      ret = 0;
     }
 
+  msg->header.result = ret;
   return rpmsg_send(ept, msg, sizeof(*msg));
 }
 
@@ -457,7 +463,7 @@ static int clk_rpmsg_isenabled_handler(FAR struct rpmsg_endpoint *ept,
 
   if (clkrp)
     {
-      msg->header.result = clk_is_enabled(clkrp->clk);
+      msg->header.result = clkrp->enable;
     }
   else
     {
@@ -536,7 +542,7 @@ static void clk_rpmsg_server_unbind(FAR struct rpmsg_endpoint *ept)
   list_for_every_entry_safe(&priv->clk_list, clkrp, clkrp_tmp,
                             struct clk_rpmsg_s, node)
     {
-      while (clkrp->count--)
+      if (clkrp->enable)
         {
           clk_disable(clkrp->clk);
         }

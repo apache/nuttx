@@ -114,10 +114,10 @@ struct clk_ops_s
   CODE int       (*is_enabled)(FAR struct clk_s *clk);
   CODE uint32_t  (*recalc_rate)(FAR struct clk_s *clk, uint32_t parent_rate);
   CODE uint32_t  (*round_rate)(FAR struct clk_s *clk,
-                               uint32_t rate, uint32_t *parent_rate);
+                               uint32_t rate, FAR uint32_t *parent_rate);
   CODE uint32_t  (*determine_rate)(FAR struct clk_s *clk, uint32_t rate,
-                                   uint32_t *best_parent_rate,
-                                   struct clk_s **best_parent_clk);
+                                   FAR uint32_t *best_parent_rate,
+                                   FAR struct clk_s **best_parent_clk);
   CODE int       (*set_parent)(FAR struct clk_s *clk, uint8_t index);
   CODE uint8_t   (*get_parent)(FAR struct clk_s *clk);
   CODE int       (*set_rate)(FAR struct clk_s *clk, uint32_t rate,
@@ -243,7 +243,7 @@ FAR struct clk_s *clk_register_multiplier(FAR const char *name,
                                           uint8_t clk_multiplier_flags);
 
 FAR struct clk_s *clk_register_mux(FAR const char *name,
-                                   const char * const *parent_names,
+                                   FAR const char * const *parent_names,
                                    uint8_t num_parents, uint8_t flags,
                                    uint32_t reg, uint8_t shift,
                                    uint8_t width, uint8_t clk_mux_flags);
