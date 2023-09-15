@@ -235,10 +235,31 @@ Show or set the date and time (date)
 
 **Synopsis**. Show or set the current date and time.
 
-Only one format is used both on display and when setting the
-date/time: ``MMM DD HH:MM:SS YYYY``. For example,
+To show the current system time and date, type in the ``date`` command.
+The output displays the day of the week, day of the month, month, year,
+current time. 24-hour time is used.
+Only one format is used, both on display and when setting the date/time.
+To change the system clock manually, type ``date -s MMM DD HH:MM:SS YYYY``. 
 
-24-hour time is used.
+  -  ``MMM``  Short month name (e.g., Sep).
+  -           Space separator.
+  -  ``DD``   Day of month (e.g., 01).
+  -           Space separator.
+  -  ``HH``   Hour (00-23).
+  -  ``:``    Colon separator.
+  -  ``MM``   Minute (00-59).
+  -  ``:``    Colon separator.
+  -  ``SS``   Second (00-60).
+  -           Space separator
+  -  ``YYYY`` Year (e.g., 2023).
+
+**Example**::
+
+  nsh> date
+  Thu, Jan 01 00:00:17 1970
+  nsh> date -s "Sep 15 11:30:00 2023"
+  nsh> date
+  Fri, Sep 15 11:30:03 2023
 
 .. _cmddd:
 
