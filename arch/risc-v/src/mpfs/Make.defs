@@ -62,6 +62,10 @@ ifeq ($(CONFIG_MPFS_EMMCSD),y)
 CHIP_CSRCS += mpfs_emmcsd.c
 endif
 
+ifeq ($(CONFIG_FAT_DMAMEMORY),y)
+CHIP_CSRCS += mpfs_dma_alloc.c
+endif
+
 ifeq ($(CONFIG_MPFS_COREMMC),y)
 CHIP_CSRCS += mpfs_coremmc.c
 endif
