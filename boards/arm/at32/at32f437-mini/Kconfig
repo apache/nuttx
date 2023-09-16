@@ -1,0 +1,13 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_AT32F437_MINI
+
+config HAVE_LEDS
+	bool "Have user leds"
+	default y
+	select ARCH_HAVE_LEDS
+
+endif

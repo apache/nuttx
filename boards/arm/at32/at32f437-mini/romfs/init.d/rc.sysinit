@@ -1,0 +1,15 @@
+#ifup can0
+
+if [ -b "/dev/mtdblock0" ]; then
+mount -t vfat /dev/mtdblock0 /flash
+fi
+
+if [ -b "/dev/mmcsd0" ]; then
+mount -t vfat /dev/mmcsd0 /sd
+fi
+
+#mount -t vfat /dev/mtdblock0 /mnt
+#mount -t vfat /dev/mmcsd0 /sdcard
+#mount -t vfat /dev/sda /usb
+
+

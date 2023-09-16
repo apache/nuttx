@@ -659,6 +659,21 @@ config ARCH_CHIP_GOLDFISH_ARM
 	---help---
 		GOLDFISH virt platform (ARMv7a)
 
+config ARCH_CHIP_AT32
+	bool "Artery AT32 F4"
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_FETCHADD
+	select ARCH_HAVE_I2CRESET
+	select ARCH_HAVE_HEAPCHECK
+	select ARCH_HAVE_PROGMEM
+	select ARCH_HAVE_SPI_BITORDER
+	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_TIMEKEEPING
+	select ARM_HAVE_MPU_UNIFIED
+	select ARMV7M_HAVE_STACKCHECK
+	---help---
+		Artery AT32 architectures (ARM Cortex-M4)
+
 config ARCH_CHIP_ARM_CUSTOM
 	bool "Custom ARM chip"
 	select ARCH_CHIP_CUSTOM
@@ -1065,6 +1080,7 @@ config ARCH_CHIP
 	default "tlsr82"	if ARCH_CHIP_TLSR82
 	default "qemu"		if ARCH_CHIP_QEMU_ARM
 	default "goldfish"	if ARCH_CHIP_GOLDFISH_ARM
+	default "at32"		if ARCH_CHIP_AT32
 
 config ARM_THUMB
 	bool "Thumb Mode"
@@ -1542,5 +1558,8 @@ source "arch/arm/src/qemu/Kconfig"
 endif
 if ARCH_CHIP_GOLDFISH_ARM
 source "arch/arm/src/goldfish/Kconfig"
+endif
+if ARCH_CHIP_AT32
+source "arch/arm/src/at32/Kconfig"
 endif
 endif # ARCH_ARM

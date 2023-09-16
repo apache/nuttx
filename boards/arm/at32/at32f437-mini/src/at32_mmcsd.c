@@ -1,0 +1,109 @@
+/****************************************************************************
+ * boards/arm/at32/at32f437-mini/src/at32_mmcsd.c
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+#include <stdio.h>
+#include <debug.h>
+#include <errno.h>
+
+#include <nuttx/sdio.h>
+#include <nuttx/mmcsd.h>
+
+#include "at32_sdio.h"
+#include "at32f437-mini.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
+
+#define HAVE_MMCSD           1 /* Assume that we have SD support */
+#define AT32_MMCSDSLOTNO     0 /* There is only one slot */
+
+/* Can't support MMC/SD features if the SDIO peripheral is disabled */
+
+#ifndef CONFIG_AT32_SDIO
+#  undef HAVE_MMCSD
+#endif
+
+/* Can't support MMC/SD features if mountpoints are disabled */
+
+#ifdef CONFIG_DISABLE_MOUNTPOINT
+#  undef HAVE_MMCSD
+#endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: at32_sdinitialize
+ *
+ * Description:
+ *   Initialize the SPI-based SD card.  Requires CONFIG_DISABLE_MOUNTPOINT=n
+ *   and CONFIG_AT32_SDIO=y
+ *
+ ****************************************************************************/
+
+int at32_sdinitialize(int minor)
+{
+#ifdef HAVE_MMCSD
+  struct sdio_dev_s *sdio;
+  int ret;
+
+  /* First, get an instance of the SDIO interface */
+
+  sdio = sdio_initialize(AT32_MMCSDSLOTNO);
+  if (!sdio)
+    {
+      ferr("ERROR: Failed to initialize SDIO slot %d\n", AT32_MMCSDSLOTNO);
+      return -ENODEV;
+    }
+
+  finfo("Initialized SDIO slot %d\n", AT32_MMCSDSLOTNO);
+
+  /* Now bind the SDIO interface to the MMC/SD driver */
+
+  ret = mmcsd_slotinitialize(minor, sdio);
+  if (ret != OK)
+    {
+      ferr("ERROR:");
+      ferr(" Failed to bind SDIO slot %d to the MMC/SD driver, minor=%d\n",
+              AT32_MMCSDSLOTNO, minor);
+    }
+
+  finfo("Bound SDIO slot %d to the MMC/SD driver, minor=%d\n",
+         AT32_MMCSDSLOTNO, minor);
+
+  /* Then let's guess and say that there is a card in the slot.
+   * I need to check to see if the M3 Wildfire board supports a GPIO to
+   * detect if there is a card in the slot.
+   */
+
+  sdio_mediachange(sdio, true);
+#endif
+  return OK;
+}
