@@ -1,0 +1,7683 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "AT32 Configuration Options"
+
+choice
+	prompt "AT32 Chip Selection"
+	default ARCH_CHIP_AT32F437VM
+	depends on ARCH_CHIP_AT32
+
+
+config ARCH_CHIP_AT32F437VM
+	bool "AT32F437VM"
+	select AT32_AT32F43XX
+	select AT32_AT32F437
+	---help---
+		AT32F43X 100-pin , 4032KB FLASH, 384KB SRAM
+
+config ARCH_CHIP_AT32F437RM
+	bool "AT32F437RM"
+	select AT32_AT32F43XX
+	select AT32_AT32F437
+	---help---
+		AT32F43X 64-pin , 4032KB FLASH, 384KB SRAM
+
+config ARCH_CHIP_AT32F437VG
+	bool "AT32F437VG"
+	select AT32_AT32F43XX
+	select AT32_AT32F437
+	---help---
+		AT32F43X 100-pin , 1024KB FLASH, 384KB SRAM
+
+config ARCH_CHIP_AT32F437RG
+	bool "AT32F437RG"
+	select AT32_AT32F43XX
+	select AT32_AT32F437
+	---help---
+		AT32F43X 64-pin , 1024KB FLASH, 384KB SRAM		
+
+config ARCH_CHIP_AT32F435VM
+	bool "AT32F435VM"
+	select AT32_AT32F43XX
+	select AT32_AT32F435
+	---help---
+		AT32F43X 100-pin , 4032KB FLASH, 384KB SRAM
+
+config ARCH_CHIP_AT32F435RM
+	bool "AT32F435RM"
+	select AT32_AT32F43XX
+	select AT32_AT32F435
+	---help---
+		AT32F43X 64-pin , 4032KB FLASH, 384KB SRAM
+
+config ARCH_CHIP_AT32F435VG
+	bool "AT32F435VG"
+	select AT32_AT32F43XX
+	select AT32_AT32F435
+	---help---
+		AT32F43X 100-pin , 1024KB FLASH, 384KB SRAM
+
+config ARCH_CHIP_AT32F435RG
+	bool "AT32F435RG"
+	select AT32_AT32F43XX
+	select AT32_AT32F435
+	---help---
+		AT32F43X 64-pin , 1024KB FLASH, 384KB SRAM
+
+endchoice
+
+choice
+	prompt "Override Flash Size Designator"
+	default AT32_FLASH_CONFIG_DEFAULT
+	depends on ARCH_CHIP_AT32
+	---help---
+		AT32F series parts numbering (sans the package type)
+		ends with a number or letter that designates the FLASH size.
+
+				Designator  Size in KiB
+				   8   	64
+				   B   	128
+				   C   	256
+				   E   	512
+				   G   	1024
+				   I   	2048
+				   M	4032
+
+		This configuration option defaults to using the configuration based
+		on that designator or the default smaller size if there is no last
+		character designator is present in the AT32 Chip Selection.
+
+		Examples:
+		   If the AT32F437VM is chosen, the Flash configuration would be
+		   'M', if a variant of the part with a 4032 KiB Flash is released
+		   in the future one could simply select the 'M' designator here.
+
+
+
+config AT32_FLASH_CONFIG_DEFAULT
+	bool "Default"
+
+config AT32_FLASH_CONFIG_8
+	bool "8 64KiB"
+
+config AT32_FLASH_CONFIG_B
+	bool "B 128KiB"
+
+config AT32_FLASH_CONFIG_C
+	bool "C 256KiB"
+
+config AT32_FLASH_CONFIG_E
+	bool "E 512KiB"
+
+config AT32_FLASH_CONFIG_G
+	bool "G 1024KiB"
+
+config AT32_FLASH_CONFIG_I
+	bool "I 2048KiB"
+
+config AT32_FLASH_CONFIG_M
+	bool "M 4032KiB"
+
+endchoice
+
+config AT32_AT32F43XX
+	bool
+	default n
+	select ARCH_CORTEXM4
+	select ARCH_HAVE_FPU
+	select AT32_HAVE_FLASH_ICACHE
+	select AT32_HAVE_FLASH_DCACHE
+	select AT32_HAVE_SPI2
+	select AT32_HAVE_I2C2
+	select AT32_HAVE_IOCOMPENSATION
+	select AT32_HAVE_IP_DBGMCU_V2
+	select AT32_HAVE_IP_TIMERS_V1
+	select AT32_HAVE_IP_ADC_V1
+	select AT32_HAVE_IP_DAC_V1
+	select AT32_HAVE_IP_DMA_V1
+	select AT32_HAVE_DMAMUX
+
+
+config AT32_AT32F435
+	bool
+	default n
+	select AT32_HAVE_FSMC
+	select AT32_HAVE_USART3
+	select AT32_HAVE_UART4
+	select AT32_HAVE_UART5
+	select AT32_HAVE_UART7
+	select AT32_HAVE_UART8	
+	select AT32_HAVE_USART6
+	select AT32_HAVE_TIM1
+	select AT32_HAVE_TIM3
+	select AT32_HAVE_TIM4
+	select AT32_HAVE_TIM5
+	select AT32_HAVE_TIM6
+	select AT32_HAVE_TIM7
+	select AT32_HAVE_TIM8
+	select AT32_HAVE_TIM9
+	select AT32_HAVE_TIM10
+	select AT32_HAVE_TIM11
+	select AT32_HAVE_TIM12
+	select AT32_HAVE_TIM13
+	select AT32_HAVE_TIM14
+	select AT32_HAVE_TIM20		
+	select AT32_HAVE_ADC2
+	select AT32_HAVE_ADC3
+	select AT32_HAVE_CAN1
+	select AT32_HAVE_CAN2
+	select AT32_HAVE_DAC1
+	select AT32_HAVE_DAC2
+	select AT32_HAVE_SPI3
+	select AT32_HAVE_I2S3
+	select AT32_HAVE_I2C3
+	select AT32_HAVE_OTGFS
+	select AT32_HAVE_OTGFS2	
+
+config AT32_AT32F437
+	bool
+	default n
+	select AT32_HAVE_FSMC
+	select AT32_HAVE_USART3
+	select AT32_HAVE_UART4
+	select AT32_HAVE_UART5
+	select AT32_HAVE_USART6
+	select AT32_HAVE_UART7
+	select AT32_HAVE_UART8
+	select AT32_HAVE_TIM1
+	select AT32_HAVE_TIM2
+	select AT32_HAVE_TIM3
+	select AT32_HAVE_TIM4
+	select AT32_HAVE_TIM5
+	select AT32_HAVE_TIM6
+	select AT32_HAVE_TIM7
+	select AT32_HAVE_TIM8
+	select AT32_HAVE_TIM9
+	select AT32_HAVE_TIM10
+	select AT32_HAVE_TIM11
+	select AT32_HAVE_TIM12
+	select AT32_HAVE_TIM13
+	select AT32_HAVE_TIM14
+	select AT32_HAVE_TIM20	
+	select AT32_HAVE_ADC2
+	select AT32_HAVE_ADC3
+	select AT32_HAVE_CAN1
+	select AT32_HAVE_CAN2
+	select AT32_HAVE_DAC1
+	select AT32_HAVE_SPI3
+	select AT32_HAVE_I2S3
+	select AT32_HAVE_I2C3
+	select AT32_HAVE_ETHMAC
+	select AT32_HAVE_OTGFS
+	select AT32_HAVE_OTGFS2
+	select AT32_HAVE_SDIO
+	select AT32_HAVE_SDIO2
+
+menu "AT32 Peripheral Support"
+
+# These "hidden" settings determine whether a peripheral option is available
+# for the selected MCU
+
+
+config AT32_HAVE_OVERDRIVE
+	bool
+	default n
+
+config AT32_HAVE_AES
+	bool
+	default n
+
+config AT32_HAVE_DMA1_CHAN8
+	bool
+	default n
+
+config AT32_HAVE_DMA2_CHAN678
+	bool
+	default n
+
+config AT32_HAVE_DMAMUX
+	bool
+	default n
+
+config AT32_HAVE_USBDEV
+	bool
+	default n
+
+config AT32_HAVE_USBFS
+	bool
+	default n
+
+config AT32_HAVE_OTGFS
+	bool
+	default n
+
+config AT32_HAVE_OTGFS2
+	bool
+	default n	
+
+config AT32_HAVE_FMC
+	bool
+	default n
+
+config AT32_HAVE_FMAC
+	bool
+	default n
+
+config AT32_HAVE_FSMC
+	bool
+	default n
+
+config AT32_HAVE_USART3
+	bool
+	default n
+
+config AT32_HAVE_UART4
+	bool
+	default n
+
+config AT32_HAVE_UART5
+	bool
+	default n
+
+config AT32_HAVE_USART6
+	bool
+	default n
+
+config AT32_HAVE_UART7
+	bool
+	default n
+
+config AT32_HAVE_UART8
+	bool
+	default n
+
+config AT32_HAVE_TIM1
+	bool
+	default n
+
+config AT32_HAVE_TIM2
+	bool
+	default n
+
+config AT32_HAVE_TIM3
+	bool
+	default n
+
+config AT32_HAVE_TIM4
+	bool
+	default n
+
+config AT32_HAVE_TIM5
+	bool
+	default n
+
+config AT32_HAVE_TIM6
+	bool
+	default n
+
+config AT32_HAVE_TIM7
+	bool
+	default n
+
+config AT32_HAVE_TIM8
+	bool
+	default n
+
+config AT32_HAVE_TIM9
+	bool
+	default n
+
+config AT32_HAVE_TIM10
+	bool
+	default n
+
+config AT32_HAVE_TIM11
+	bool
+	default n
+
+config AT32_HAVE_TIM12
+	bool
+	default n
+
+config AT32_HAVE_TIM13
+	bool
+	default n
+
+config AT32_HAVE_TIM14
+	bool
+	default n
+
+config AT32_HAVE_TIM15
+	bool
+	default n
+
+config AT32_HAVE_TIM16
+	bool
+	default n
+
+config AT32_HAVE_TIM17
+	bool
+	default n
+
+config AT32_HAVE_TIM18
+	bool
+	default n
+
+config AT32_HAVE_TIM19
+	bool
+	default n
+
+config AT32_HAVE_TIM20
+	bool
+	default n
+
+config AT32_HAVE_ADC1
+	bool
+	default y
+
+config AT32_HAVE_ADC2
+	bool
+	default n
+
+config AT32_HAVE_ADC3
+	bool
+	default n
+
+config AT32_HAVE_ADC4
+	bool
+	default n
+
+config AT32_HAVE_ADC5
+	bool
+	default n
+
+config AT32_HAVE_ADC1_DMA
+	bool
+	default n
+
+config AT32_HAVE_ADC2_DMA
+	bool
+	default n
+
+config AT32_HAVE_ADC3_DMA
+	bool
+	default n
+
+config AT32_HAVE_ADC4_DMA
+	bool
+	default n
+
+config AT32_HAVE_ADC5_DMA
+	bool
+	default n
+
+config AT32_HAVE_CAN1
+	bool
+	default n
+
+config AT32_HAVE_CAN2
+	bool
+	default n
+
+config AT32_HAVE_DAC1
+	bool
+	default n
+
+config AT32_HAVE_DAC2
+	bool
+	default n
+
+config AT32_HAVE_DAC3
+	bool
+	default n
+
+config AT32_HAVE_DAC4
+	bool
+	default n
+
+config AT32_HAVE_QSPI
+	bool
+	default n
+
+config AT32_HAVE_ETHMAC
+	bool
+	default n
+
+config AT32_HAVE_I2C2
+	bool
+	default n
+
+config AT32_HAVE_I2C3
+	bool
+	default n
+
+config AT32_HAVE_SPI2
+	bool
+	default n
+
+config AT32_HAVE_SPI3
+	bool
+	default n
+
+config AT32_HAVE_I2S3
+	bool
+	default n
+
+config AT32_HAVE_SPI4
+	bool
+	default n
+
+config AT32_HAVE_I2SPLL
+	bool
+	default n
+
+# These are AT32 peripherals IP blocks
+
+config AT32_HAVE_IP_DBGMCU_V1
+	bool
+	default n
+
+config AT32_HAVE_IP_DBGMCU_V2
+	bool
+	default n
+
+config AT32_HAVE_IP_DBGMCU_V3
+	bool
+	default n
+
+config AT32_HAVE_IP_DMA_V1
+	bool
+	default n
+
+config AT32_HAVE_IP_DMA_V2
+	bool
+	default n
+
+config AT32_HAVE_IP_TIMERS_V1
+	bool
+	default n
+
+config AT32_HAVE_IP_TIMERS_V2
+	bool
+	default n
+
+config AT32_HAVE_IP_TIMERS_V3
+	bool
+	default n
+
+config AT32_HAVE_IP_ADC_V1
+	bool
+	default n
+
+config AT32_HAVE_IP_ADC_V1_BASIC
+	bool
+	default n
+	select AT32_HAVE_IP_ADC_V1
+
+config AT32_HAVE_IP_ADC_V2
+	bool
+	default n
+
+config AT32_HAVE_IP_ADC_V2_BASIC
+	bool
+	default n
+	select AT32_HAVE_IP_ADC_V2
+
+config AT32_HAVE_IP_DAC_V1
+	bool
+	default n
+
+config AT32_HAVE_IP_DAC_V2
+	bool
+	default n
+
+# These are the peripheral selections proper
+
+config AT32_ADC1
+	bool "ADC1"
+	default n
+	select AT32_ADC
+	select AT32_HAVE_ADC1_DMA if AT32_DMAMUX && (AT32_DMA1 || AT32_DMA2)
+
+config AT32_ADC2
+	bool "ADC2"
+	default n
+	select AT32_ADC
+	depends on AT32_HAVE_ADC2
+	select AT32_HAVE_ADC2_DMA if AT32_DMA2
+	select AT32_HAVE_ADC2_DMA if AT32_DMAMUX
+
+config AT32_ADC3
+	bool "ADC3"
+	default n
+	select AT32_ADC
+	depends on AT32_HAVE_ADC3
+	select AT32_HAVE_ADC3_DMA if AT32_DMA2
+	select AT32_HAVE_ADC3_DMA if AT32_DMAMUX
+
+config AT32_ADC4
+	bool "ADC4"
+	default n
+	select AT32_ADC
+	depends on AT32_HAVE_ADC4
+	select AT32_HAVE_ADC4_DMA if AT32_DMA2
+	select AT32_HAVE_ADC4_DMA if AT32_DMAMUX
+
+config AT32_ADC5
+	bool "ADC5"
+	default n
+	select AT32_ADC
+	depends on AT32_HAVE_ADC5
+	select AT32_HAVE_ADC5_DMA if AT32_DMA2
+	select AT32_HAVE_ADC5_DMA if AT32_DMAMUX
+
+config AT32_CAN1
+	bool "CAN1"
+	default n
+	select AT32_CAN
+	depends on AT32_HAVE_CAN1
+
+config AT32_CAN2
+	bool "CAN2"
+	default n
+	select AT32_CAN
+	depends on AT32_HAVE_CAN2
+
+config AT32_CCMDATARAM
+	bool "CMD/DATA RAM"
+	default n
+	depends on AT32_AT32F43XX
+
+config AT32_AES
+	bool "128-bit AES"
+	default n
+	depends on AT32_HAVE_AES
+	select CRYPTO_AES192_DISABLE if CRYPTO_ALGTEST
+	select CRYPTO_AES256_DISABLE if CRYPTO_ALGTEST
+
+config AT32_CEC
+	bool "CEC"
+	default n
+	depends on AT32_VALUELINE
+
+config AT32_CRC
+	bool "CRC"
+	default n
+
+config AT32_CRS
+	bool "CRS (Clock Recovery System)"
+	default n
+	depends on AT32_HAVE_CRS
+
+config AT32_DMA1
+	bool "DMA1"
+	default n
+	select AT32_DMA
+	select ARCH_DMA
+
+config AT32_DMA2
+	bool "DMA2"
+	default n
+	select AT32_DMA
+	select ARCH_DMA
+	depends on !AT32_VALUELINE || (AT32_VALUELINE && AT32_HIGHDENSITY)
+
+config AT32_DMAMUX1
+	bool "DMAMUX1"
+	default n
+	depends on AT32_HAVE_DMAMUX
+	select AT32_DMAMUX
+
+config AT32_DMAMUX2
+	bool "DMAMUX2"
+	default n
+	depends on AT32_HAVE_DMAMUX
+	select AT32_DMAMUX
+
+config AT32_DAC1
+	bool "DAC1"
+	default n
+	depends on AT32_HAVE_DAC1
+	select AT32_DAC
+
+if AT32_DAC1
+
+config AT32_DAC1CH1
+	bool "DAC1CH1"
+	default n
+
+config AT32_DAC1CH2
+	bool "DAC1CH2"
+	default n
+
+endif #AT32_DAC1
+
+config AT32_DAC2
+	bool "DAC2"
+	default n
+	depends on AT32_HAVE_DAC2
+	select AT32_DAC
+
+if AT32_DAC2
+
+config AT32_DAC2CH1
+	bool "DAC2CH1"
+	default n
+
+endif #AT32_DAC2
+
+config AT32_DAC3
+	bool "DAC3"
+	default n
+	depends on AT32_HAVE_DAC3
+	select AT32_DAC
+
+if AT32_DAC3
+
+config AT32_DAC3CH1
+	bool "DAC3CH1 Internal"
+	default n
+
+config AT32_DAC3CH2
+	bool "DAC3CH2 Internal"
+	default n
+
+endif #AT32_DAC3
+
+config AT32_DAC4
+	bool "DAC4"
+	default n
+	depends on AT32_HAVE_DAC4
+	select AT32_DAC
+
+if AT32_DAC4
+
+config AT32_DAC4CH1
+	bool "DAC4CH1 Internal"
+	default n
+
+config AT32_DAC4CH2
+	bool "DAC4CH2 Internal"
+	default n
+
+endif #AT32_DAC4
+
+config AT32_DCMI
+	bool "DCMI"
+	default n
+	depends on AT32_AT32F43XX
+
+config AT32_ETHMAC
+	bool "Ethernet MAC"
+	default n
+	depends on AT32_HAVE_ETHMAC
+	select NETDEVICES
+	select ARCH_HAVE_PHY
+
+config AT32_FSMC
+	bool "FSMC"
+	default n
+	depends on AT32_HAVE_FSMC
+
+config AT32_FMC
+	bool "FMC"
+	default n
+	depends on AT32_HAVE_FMC
+
+config AT32_FMAC
+	bool "FMAC (Filter Math Accelerator)"
+	default n
+	depends on AT32_HAVE_FMAC
+
+config AT32_I2C1
+	bool "I2C1"
+	default n
+	select AT32_I2C
+
+config AT32_I2C2
+	bool "I2C2"
+	default n
+	depends on AT32_HAVE_I2C2
+	select AT32_I2C
+
+config AT32_I2C3
+	bool "I2C3"
+	default n
+	depends on AT32_HAVE_I2C3
+	select AT32_I2C
+
+config AT32_RTC
+	bool "RTC"
+	default n
+	select RTC
+
+config AT32_OTGFS
+	bool "OTG FS"
+	default n
+	depends on AT32_HAVE_OTGFS
+	select USBHOST_HAVE_ASYNCH if AT32_USBHOST
+
+config AT32_OTGFS2
+	bool "OTG FS2"
+	default n
+	depends on AT32_AT32F43XX
+	select USBHOST_HAVE_ASYNCH if AT32_USBHOST
+
+config AT32_PWR
+	bool "PWR"
+	default n
+
+config AT32_QSPI
+	bool "QSPI (QUADSPI)"
+	depends on AT32_HAVE_QSPI
+	default n
+
+config AT32_SDIO
+	bool "SDIO"
+	default n
+	depends on !AT32_CONNECTIVITYLINE && !AT32_VALUELINE
+	select ARCH_HAVE_SDIO
+	select ARCH_HAVE_SDIOWAIT_WRCOMPLETE
+	select ARCH_HAVE_SDIO_PREFLIGHT
+
+config AT32_SDIO2
+	bool "SDIO2"
+	default n
+	depends on !AT32_CONNECTIVITYLINE && !AT32_VALUELINE
+	select ARCH_HAVE_SDIO
+	select ARCH_HAVE_SDIOWAIT_WRCOMPLETE
+	select ARCH_HAVE_SDIO_PREFLIGHT	
+
+config AT32_SPI1
+	bool "SPI1"
+	default n
+	select SPI
+	select AT32_SPI
+
+config AT32_SPI2
+	bool "SPI2"
+	default n
+	depends on AT32_HAVE_SPI2
+	select SPI
+	select AT32_SPI
+
+config AT32_SPI3
+	bool "SPI3"
+	default n
+	depends on AT32_HAVE_SPI3
+	select SPI
+	select AT32_SPI
+
+config AT32_I2S3
+	bool "I2S3"
+	default n
+	depends on AT32_HAVE_I2S3
+	select I2S
+	select AT32_I2S
+
+config AT32_SPI4
+	bool "SPI4"
+	default n
+	depends on AT32_HAVE_SPI4
+	select SPI
+	select AT32_SPI
+
+config AT32_SYSCFG
+	bool "SYSCFG"
+	default y
+	depends on AT32_AT32F43XX || AT32_CONNECTIVITYLINE
+
+config AT32_TIM1
+	bool "TIM1"
+	default n
+	depends on AT32_HAVE_TIM1
+	select AT32_TIM
+
+config AT32_TIM2
+	bool "TIM2"
+	default n
+	select AT32_TIM
+
+config AT32_TIM3
+	bool "TIM3"
+	default n
+	depends on AT32_HAVE_TIM3
+	select AT32_TIM
+
+config AT32_TIM4
+	bool "TIM4"
+	default n
+	depends on AT32_HAVE_TIM4
+	select AT32_TIM
+
+config AT32_TIM5
+	bool "TIM5"
+	default n
+	depends on AT32_HAVE_TIM5
+	select AT32_TIM
+
+config AT32_TIM6
+	bool "TIM6"
+	default n
+	depends on AT32_HAVE_TIM6
+	select AT32_TIM
+
+config AT32_TIM7
+	bool "TIM7"
+	default n
+	depends on AT32_HAVE_TIM7
+	select AT32_TIM
+
+config AT32_TIM8
+	bool "TIM8"
+	default n
+	depends on AT32_HAVE_TIM8
+	select AT32_TIM
+
+config AT32_TIM9
+	bool "TIM9"
+	default n
+	depends on AT32_HAVE_TIM9
+	select AT32_TIM
+
+config AT32_TIM10
+	bool "TIM10"
+	default n
+	depends on AT32_HAVE_TIM10
+	select AT32_TIM
+
+config AT32_TIM11
+	bool "TIM11"
+	default n
+	depends on AT32_HAVE_TIM11
+	select AT32_TIM
+
+config AT32_TIM12
+	bool "TIM12"
+	default n
+	depends on AT32_HAVE_TIM12
+	select AT32_TIM
+
+config AT32_TIM13
+	bool "TIM13"
+	default n
+	depends on AT32_HAVE_TIM13
+	select AT32_TIM
+
+config AT32_TIM14
+	bool "TIM14"
+	default n
+	depends on AT32_HAVE_TIM14
+	select AT32_TIM
+
+config AT32_TIM15
+	bool "TIM15"
+	default n
+	depends on AT32_HAVE_TIM15
+	select AT32_TIM
+
+config AT32_TIM16
+	bool "TIM16"
+	default n
+	depends on AT32_HAVE_TIM16
+	select AT32_TIM
+
+config AT32_TIM17
+	bool "TIM17"
+	default n
+	depends on AT32_HAVE_TIM17
+	select AT32_TIM
+
+config AT32_TIM20
+	bool "TIM20"
+	default n
+	depends on AT32_HAVE_TIM20
+	select AT32_TIM	
+
+config AT32_USART1
+	bool "USART1"
+	default n
+	select AT32_USART
+
+config AT32_USART2
+	bool "USART2"
+	default n
+	select AT32_USART
+
+config AT32_USART3
+	bool "USART3"
+	default n
+	depends on AT32_HAVE_USART3
+	select AT32_USART
+
+config AT32_UART4
+	bool "UART4"
+	default n
+	depends on AT32_HAVE_UART4
+	select AT32_USART
+
+config AT32_UART5
+	bool "UART5"
+	default n
+	depends on AT32_HAVE_UART5
+	select AT32_USART
+
+config AT32_USART6
+	bool "USART6"
+	default n
+	depends on AT32_HAVE_USART6
+	select AT32_USART
+
+config AT32_UART7
+	bool "UART7"
+	default n
+	depends on AT32_HAVE_UART7
+	select AT32_USART
+
+config AT32_UART8
+	bool "UART8"
+	default n
+	depends on AT32_HAVE_UART8
+	select AT32_USART
+
+config AT32_USB
+	bool "USB Device"
+	default n
+	depends on AT32_HAVE_USBDEV
+	select USBDEV
+
+config AT32_USBFS
+	bool "USB Full Speed Device"
+	default n
+	depends on AT32_HAVE_USBFS
+	select USBDEV
+
+config AT32_UCPD
+	bool "UCPD (USB Type C Power Delivery)"
+	default n
+	depends on AT32_HAVE_UCPD
+	select USBDEV
+
+config AT32_IWDG
+	bool "IWDG"
+	default n
+	select WATCHDOG
+
+config AT32_WWDG
+	bool "WWDG"
+	default n
+	select WATCHDOG
+
+endmenu
+
+config AT32_ADC
+	bool
+	default n
+
+config AT32_DAC
+	bool
+	default n
+
+config AT32_DMA
+	bool
+	default n
+
+config AT32_DMAMUX
+	bool
+	default n
+
+config AT32_SPI
+	bool
+	default n
+
+config AT32_SPI_DMA
+	bool
+	default n
+
+config AT32_I2S
+	bool
+	default n
+	select AT32_SPI_DMA
+
+config AT32_I2C
+	bool
+	default n
+
+config AT32_CAN
+	bool
+	default n
+
+config AT32_TIM
+	bool
+	default n
+
+config AT32_PWM
+	bool
+	default n
+	select ARCH_HAVE_PWM_PULSECOUNT
+
+config AT32_CAP
+	bool
+	default n
+
+config AT32_NOEXT_VECTORS
+	bool "Disable the ARMv7-M EXT vectors"
+	default n
+	---help---
+		Sometimes you may not need any Vector support beyond SysTick
+		and wish to save memory. This applies only to ARMv7-M architectures.
+
+
+choice
+	prompt "JTAG Configuration"
+	default AT32_JTAG_DISABLE
+	---help---
+		JTAG Enable settings (by default JTAG-DP and SW-DP are disabled)
+
+config AT32_JTAG_DISABLE
+	bool "Disable all JTAG clocking"
+
+config AT32_JTAG_FULL_ENABLE
+	bool "Enable full SWJ (JTAG-DP + SW-DP)"
+
+config AT32_JTAG_NOJNTRST_ENABLE
+	bool "Enable full SWJ (JTAG-DP + SW-DP) but without JNTRST"
+
+config AT32_JTAG_SW_ENABLE
+	bool "Set JTAG-DP disabled and SW-DP enabled"
+
+endchoice
+
+config AT32_DISABLE_IDLE_SLEEP_DURING_DEBUG
+	bool "Disable IDLE Sleep (WFI) in debug mode"
+	default n
+	---help---
+		In debug configuration, disables the WFI instruction in the IDLE loop
+		to prevent the JTAG from disconnecting.  With some JTAG debuggers, such
+		as the ST-LINK2 with OpenOCD, if the ARM is put to sleep via the WFI
+		instruction, the debugger will disconnect, terminating the debug session.
+
+config AT32_FORCEPOWER
+	bool "Force power"
+	default n
+	---help---
+		Timer and I2C devices may need to the following to force power to be applied
+		unconditionally at power up.  (Otherwise, the device is powered when it is
+		initialized).
+
+config ARCH_BOARD_AT32_CUSTOM_CLOCKCONFIG
+	bool "Custom clock configuration"
+	default n
+	---help---
+		Enables special, board-specific AT32 clock configuration.
+
+
+config AT32_DMACAPABLE
+	bool "Workaround non-DMA capable memory"
+	depends on ARCH_DMA
+	default y if AT32_AT32F43XX && !AT32_CCMEXCLUDE
+	---help---
+		This option enables the DMA interface at32_dmacapable that can be
+		used to check if it is possible to do DMA from the selected address.
+		Drivers then may use this information to determine if they should
+		attempt the DMA or fall back to a different transfer method.
+
+config AT32_EXTERNAL_RAM
+	bool "External RAM on FSMC/FMC"
+	default n
+	depends on AT32_FSMC || AT32_FMC
+	select ARCH_HAVE_HEAP2
+	---help---
+		In addition to internal SRAM, external RAM may be available through the FSMC/FMC.
+
+config AT32_TICKLESS_SYSTICK
+	bool "Tickless via SysTick"
+	default n
+	depends on SCHED_TICKLESS
+	---help---
+		Use SysTick as Tickless clock.
+
+menu "Timer Configuration"
+	depends on AT32_TIM
+
+if SCHED_TICKLESS
+
+config AT32_TICKLESS_TIMER
+	int "Tickless hardware timer"
+	default 2
+	range 1 14
+	depends on !AT32_TICKLESS_SYSTICK
+	---help---
+		If the Tickless OS feature is enabled, then one clock must be
+		assigned to provided the timer needed by the OS.
+
+config AT32_TICKLESS_CHANNEL
+	int "Tickless timer channel"
+	default 1
+	range 1 4
+	---help---
+		If the Tickless OS feature is enabled, the one clock must be
+		assigned to provided the free-running timer needed by the OS
+		and one channel on that clock is needed to handle intervals.
+
+endif # SCHED_TICKLESS
+
+config AT32_ONESHOT
+	bool "TIM one-shot wrapper"
+	default n
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support one-shot timer.
+
+config AT32_FREERUN
+	bool "TIM free-running wrapper"
+	default n
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support a free-running timer.
+
+config AT32_ONESHOT_MAXTIMERS
+	int "Maximum number of oneshot timers"
+	default 1
+	range 1 8
+	depends on AT32_ONESHOT
+	---help---
+		Determines the maximum number of oneshot timers that can be
+		supported.  This setting pre-allocates some minimal support for each
+		of the timers and places an upper limit on the number of oneshot
+		timers that you can use.
+
+config AT32_PWM_LL_OPS
+	bool "PWM low-level operations"
+	default n
+	---help---
+		Enable low-level PWM ops.
+
+config AT32_TIM1_PWM
+	bool "TIM1 PWM"
+	default n
+	depends on AT32_TIM1
+	select AT32_PWM
+	---help---
+		Reserve timer 1 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If AT32_TIM1
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if AT32_TIM1_PWM
+
+config AT32_TIM1_MODE
+	int "TIM1 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+config AT32_TIM1_LOCK
+	int "TIM1 Lock Level Configuration"
+	default 0
+	range 0 3
+	---help---
+		Timer 1 lock level configuration
+
+config AT32_TIM1_TDTS
+	int "TIM1 t_DTS Division"
+	default 0
+	range 0 2
+	---help---
+		Timer 1 dead-time and sampling clock (t_DTS) division
+
+config AT32_TIM1_DEADTIME
+	int "TIM1 Initial Dead-time"
+	default 0
+	range 0 255
+	---help---
+		Timer 1 initial dead-time
+
+if AT32_PWM_MULTICHAN
+
+config AT32_TIM1_CHANNEL1
+	bool "TIM1 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if AT32_TIM1_CHANNEL1
+
+config AT32_TIM1_CH1MODE
+	int "TIM1 Channel 1 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM1_CH1OUT
+	bool "TIM1 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+config AT32_TIM1_CH1NOUT
+	bool "TIM1 Channel 1 Complementary Output"
+	default n
+	---help---
+		Enables channel 1 Complementary Output.
+
+endif # AT32_TIM1_CHANNEL1
+
+config AT32_TIM1_CHANNEL2
+	bool "TIM1 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if AT32_TIM1_CHANNEL2
+
+config AT32_TIM1_CH2MODE
+	int "TIM1 Channel 2 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM1_CH2OUT
+	bool "TIM1 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+config AT32_TIM1_CH2NOUT
+	bool "TIM1 Channel 2 Complementary Output"
+	default n
+	---help---
+		Enables channel 2 Complementary Output.
+
+endif # AT32_TIM1_CHANNEL2
+
+config AT32_TIM1_CHANNEL3
+	bool "TIM1 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if AT32_TIM1_CHANNEL3
+
+config AT32_TIM1_CH3MODE
+	int "TIM1 Channel 3 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM1_CH3OUT
+	bool "TIM1 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+config AT32_TIM1_CH3NOUT
+	bool "TIM1 Channel 3 Complementary Output"
+	default n
+	---help---
+		Enables channel 3 Complementary Output.
+
+endif # AT32_TIM1_CHANNEL3
+
+config AT32_TIM1_CHANNEL4
+	bool "TIM1 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if AT32_TIM1_CHANNEL4
+
+config AT32_TIM1_CH4MODE
+	int "TIM1 Channel 4 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM1_CH4OUT
+	bool "TIM1 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # AT32_TIM1_CHANNEL4
+
+config AT32_TIM1_CHANNEL5
+	bool "TIM1 Channel 5 (internal)"
+	default n
+	depends on AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Enables channel 5 (not available externally)
+
+if AT32_TIM1_CHANNEL5
+
+config AT32_TIM1_CH5MODE
+	int "TIM1 Channel 5 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM1_CH5OUT
+	bool "TIM1 Channel 5 Output"
+	default n
+	---help---
+		Enables channel 5 output.
+
+endif # AT32_TIM1_CHANNEL5
+
+config AT32_TIM1_CHANNEL6
+	bool "TIM1 Channel 6 (internal)"
+	default n
+	depends on AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Enables channel 6 (not available externally)
+
+if AT32_TIM1_CHANNEL6
+
+config AT32_TIM1_CH6MODE
+	int "TIM1 Channel 6 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM1_CH6OUT
+	bool "TIM1 Channel 6 Output"
+	default n
+	---help---
+		Enables channel 6 output.
+
+endif # AT32_TIM1_CHANNEL6
+
+endif # AT32_PWM_MULTICHAN
+
+if !AT32_PWM_MULTICHAN
+
+config AT32_TIM1_CHANNEL
+	int "TIM1 PWM Output Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM1 is enabled for PWM usage, you also need specifies the timer output
+		channel {1,..,4}
+
+if AT32_TIM1_CHANNEL = 1
+
+config AT32_TIM1_CH1OUT
+	bool "TIM1 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+config AT32_TIM1_CH1NOUT
+	bool "TIM1 Channel 1 Complementary Output"
+	default n
+	---help---
+		Enables channel 1 Complementary Output.
+
+endif # AT32_TIM1_CHANNEL = 1
+
+if AT32_TIM1_CHANNEL = 2
+
+config AT32_TIM1_CH2OUT
+	bool "TIM1 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+config AT32_TIM1_CH2NOUT
+	bool "TIM1 Channel 2 Complementary Output"
+	default n
+	---help---
+		Enables channel 2 Complementary Output.
+
+endif # AT32_TIM1_CHANNEL = 2
+
+if AT32_TIM1_CHANNEL = 3
+
+config AT32_TIM1_CH3OUT
+	bool "TIM1 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+config AT32_TIM1_CH3NOUT
+	bool "TIM1 Channel 3 Complementary Output"
+	default n
+	---help---
+		Enables channel 3 Complementary Output.
+
+endif # AT32_TIM1_CHANNEL = 3
+
+if AT32_TIM1_CHANNEL = 4
+
+config AT32_TIM1_CH4OUT
+	bool "TIM1 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # AT32_TIM1_CHANNEL = 4
+
+config AT32_TIM1_CHMODE
+	int "TIM1 Channel Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+endif # !AT32_PWM_MULTICHAN
+
+endif # AT32_TIM1_PWM
+
+config AT32_TIM2_PWM
+	bool "TIM2 PWM"
+	default n
+	depends on AT32_TIM2
+	select AT32_PWM
+	---help---
+		Reserve timer 2 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If AT32_TIM2
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if AT32_TIM2_PWM
+
+config AT32_TIM2_MODE
+	int "TIM2 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+if AT32_PWM_MULTICHAN
+
+config AT32_TIM2_CHANNEL1
+	bool "TIM2 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if AT32_TIM2_CHANNEL1
+
+config AT32_TIM2_CH1MODE
+	int "TIM2 Channel 1 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM2_CH1OUT
+	bool "TIM2 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # AT32_TIM2_CHANNEL1
+
+config AT32_TIM2_CHANNEL2
+	bool "TIM2 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if AT32_TIM2_CHANNEL2
+
+config AT32_TIM2_CH2MODE
+	int "TIM2 Channel 2 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM2_CH2OUT
+	bool "TIM2 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # AT32_TIM2_CHANNEL2
+
+config AT32_TIM2_CHANNEL3
+	bool "TIM2 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if AT32_TIM2_CHANNEL3
+
+config AT32_TIM2_CH3MODE
+	int "TIM2 Channel 3 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM2_CH3OUT
+	bool "TIM2 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # AT32_TIM2_CHANNEL3
+
+config AT32_TIM2_CHANNEL4
+	bool "TIM2 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if AT32_TIM2_CHANNEL4
+
+config AT32_TIM2_CH4MODE
+	int "TIM2 Channel 4 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM2_CH4OUT
+	bool "TIM2 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # AT32_TIM2_CHANNEL4
+
+endif # AT32_PWM_MULTICHAN
+
+if !AT32_PWM_MULTICHAN
+
+config AT32_TIM2_CHANNEL
+	int "TIM2 PWM Output Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM2 is enabled for PWM usage, you also need specifies the timer output
+		channel {1,..,4}
+
+if AT32_TIM2_CHANNEL = 1
+
+config AT32_TIM2_CH1OUT
+	bool "TIM2 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # AT32_TIM2_CHANNEL = 1
+
+if AT32_TIM2_CHANNEL = 2
+
+config AT32_TIM2_CH2OUT
+	bool "TIM2 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # AT32_TIM2_CHANNEL = 2
+
+if AT32_TIM2_CHANNEL = 3
+
+config AT32_TIM2_CH3OUT
+	bool "TIM2 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # AT32_TIM2_CHANNEL = 3
+
+if AT32_TIM2_CHANNEL = 4
+
+config AT32_TIM2_CH4OUT
+	bool "TIM2 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # AT32_TIM2_CHANNEL = 4
+
+config AT32_TIM2_CHMODE
+	int "TIM2 Channel Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+endif # !AT32_PWM_MULTICHAN
+
+endif # AT32_TIM2_PWM
+
+config AT32_TIM3_PWM
+	bool "TIM3 PWM"
+	default n
+	depends on AT32_TIM3
+	select AT32_PWM
+	---help---
+		Reserve timer 3 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If AT32_TIM3
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if AT32_TIM3_PWM
+
+config AT32_TIM3_MODE
+	int "TIM3 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+if AT32_PWM_MULTICHAN
+
+config AT32_TIM3_CHANNEL1
+	bool "TIM3 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if AT32_TIM3_CHANNEL1
+
+config AT32_TIM3_CH1MODE
+	int "TIM3 Channel 1 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM3_CH1OUT
+	bool "TIM3 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # AT32_TIM3_CHANNEL1
+
+config AT32_TIM3_CHANNEL2
+	bool "TIM3 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if AT32_TIM3_CHANNEL2
+
+config AT32_TIM3_CH2MODE
+	int "TIM3 Channel 2 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM3_CH2OUT
+	bool "TIM3 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # AT32_TIM3_CHANNEL2
+
+config AT32_TIM3_CHANNEL3
+	bool "TIM3 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if AT32_TIM3_CHANNEL3
+
+config AT32_TIM3_CH3MODE
+	int "TIM3 Channel 3 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM3_CH3OUT
+	bool "TIM3 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # AT32_TIM3_CHANNEL3
+
+config AT32_TIM3_CHANNEL4
+	bool "TIM3 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if AT32_TIM3_CHANNEL4
+
+config AT32_TIM3_CH4MODE
+	int "TIM3 Channel 4 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM3_CH4OUT
+	bool "TIM3 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # AT32_TIM3_CHANNEL4
+
+endif # AT32_PWM_MULTICHAN
+
+if !AT32_PWM_MULTICHAN
+
+config AT32_TIM3_CHANNEL
+	int "TIM3 PWM Output Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM3 is enabled for PWM usage, you also need specifies the timer output
+		channel {1,..,4}
+
+if AT32_TIM3_CHANNEL = 1
+
+config AT32_TIM3_CH1OUT
+	bool "TIM3 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # AT32_TIM3_CHANNEL = 1
+
+if AT32_TIM3_CHANNEL = 2
+
+config AT32_TIM3_CH2OUT
+	bool "TIM3 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # AT32_TIM3_CHANNEL = 2
+
+if AT32_TIM3_CHANNEL = 3
+
+config AT32_TIM3_CH3OUT
+	bool "TIM3 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # AT32_TIM3_CHANNEL = 3
+
+if AT32_TIM3_CHANNEL = 4
+
+config AT32_TIM3_CH4OUT
+	bool "TIM3 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # AT32_TIM3_CHANNEL = 4
+
+config AT32_TIM3_CHMODE
+	int "TIM3 Channel Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+endif # !AT32_PWM_MULTICHAN
+
+endif # AT32_TIM3_PWM
+
+config AT32_TIM4_PWM
+	bool "TIM4 PWM"
+	default n
+	depends on AT32_TIM4
+	select AT32_PWM
+	---help---
+		Reserve timer 4 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If AT32_TIM4
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if AT32_TIM4_PWM
+
+config AT32_TIM4_MODE
+	int "TIM4 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+if AT32_PWM_MULTICHAN
+
+config AT32_TIM4_CHANNEL1
+	bool "TIM4 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if AT32_TIM4_CHANNEL1
+
+config AT32_TIM4_CH1MODE
+	int "TIM4 Channel 1 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM4_CH1OUT
+	bool "TIM4 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # AT32_TIM4_CHANNEL1
+
+config AT32_TIM4_CHANNEL2
+	bool "TIM4 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if AT32_TIM4_CHANNEL2
+
+config AT32_TIM4_CH2MODE
+	int "TIM4 Channel 2 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM4_CH2OUT
+	bool "TIM4 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # AT32_TIM4_CHANNEL2
+
+config AT32_TIM4_CHANNEL3
+	bool "TIM4 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if AT32_TIM4_CHANNEL3
+
+config AT32_TIM4_CH3MODE
+	int "TIM4 Channel 3 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM4_CH3OUT
+	bool "TIM4 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # AT32_TIM4_CHANNEL3
+
+config AT32_TIM4_CHANNEL4
+	bool "TIM4 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if AT32_TIM4_CHANNEL4
+
+config AT32_TIM4_CH4MODE
+	int "TIM4 Channel 4 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM4_CH4OUT
+	bool "TIM4 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # AT32_TIM4_CHANNEL4
+
+endif # AT32_PWM_MULTICHAN
+
+if !AT32_PWM_MULTICHAN
+
+config AT32_TIM4_CHANNEL
+	int "TIM4 PWM Output Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM4 is enabled for PWM usage, you also need specifies the timer output
+		channel {1,..,4}
+
+if AT32_TIM4_CHANNEL = 1
+
+config AT32_TIM4_CH1OUT
+	bool "TIM4 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # AT32_TIM4_CHANNEL = 1
+
+if AT32_TIM4_CHANNEL = 2
+
+config AT32_TIM4_CH2OUT
+	bool "TIM4 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # AT32_TIM4_CHANNEL = 2
+
+if AT32_TIM4_CHANNEL = 3
+
+config AT32_TIM4_CH3OUT
+	bool "TIM4 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # AT32_TIM4_CHANNEL = 3
+
+if AT32_TIM4_CHANNEL = 4
+
+config AT32_TIM4_CH4OUT
+	bool "TIM4 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # AT32_TIM4_CHANNEL = 4
+
+config AT32_TIM4_CHMODE
+	int "TIM4 Channel Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+endif # !AT32_PWM_MULTICHAN
+
+endif # AT32_TIM4_PWM
+
+config AT32_TIM5_PWM
+	bool "TIM5 PWM"
+	default n
+	depends on AT32_TIM5
+	select AT32_PWM
+	---help---
+		Reserve timer 5 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If AT32_TIM5
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if AT32_TIM5_PWM
+
+config AT32_TIM5_MODE
+	int "TIM5 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+if AT32_PWM_MULTICHAN
+
+config AT32_TIM5_CHANNEL1
+	bool "TIM5 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if AT32_TIM5_CHANNEL1
+
+config AT32_TIM5_CH1MODE
+	int "TIM5 Channel 1 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM5_CH1OUT
+	bool "TIM5 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # AT32_TIM5_CHANNEL1
+
+config AT32_TIM5_CHANNEL2
+	bool "TIM5 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if AT32_TIM5_CHANNEL2
+
+config AT32_TIM5_CH2MODE
+	int "TIM5 Channel 2 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM5_CH2OUT
+	bool "TIM5 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # AT32_TIM5_CHANNEL2
+
+config AT32_TIM5_CHANNEL3
+	bool "TIM5 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if AT32_TIM5_CHANNEL3
+
+config AT32_TIM5_CH3MODE
+	int "TIM5 Channel 3 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM5_CH3OUT
+	bool "TIM5 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # AT32_TIM5_CHANNEL3
+
+config AT32_TIM5_CHANNEL4
+	bool "TIM5 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if AT32_TIM5_CHANNEL4
+
+config AT32_TIM5_CH4MODE
+	int "TIM5 Channel 4 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM5_CH4OUT
+	bool "TIM5 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # AT32_TIM5_CHANNEL4
+
+endif # AT32_PWM_MULTICHAN
+
+if !AT32_PWM_MULTICHAN
+
+config AT32_TIM5_CHANNEL
+	int "TIM5 PWM Output Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM5 is enabled for PWM usage, you also need specifies the timer output
+		channel {1,..,4}
+
+if AT32_TIM5_CHANNEL = 1
+
+config AT32_TIM5_CH1OUT
+	bool "TIM5 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # AT32_TIM5_CHANNEL = 1
+
+if AT32_TIM5_CHANNEL = 2
+
+config AT32_TIM5_CH2OUT
+	bool "TIM5 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # AT32_TIM5_CHANNEL = 2
+
+if AT32_TIM5_CHANNEL = 3
+
+config AT32_TIM5_CH3OUT
+	bool "TIM5 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # AT32_TIM5_CHANNEL = 3
+
+if AT32_TIM5_CHANNEL = 4
+
+config AT32_TIM5_CH4OUT
+	bool "TIM5 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # AT32_TIM5_CHANNEL = 4
+
+config AT32_TIM5_CHMODE
+	int "TIM5 Channel Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+endif # !AT32_PWM_MULTICHAN
+
+endif # AT32_TIM5_PWM
+
+config AT32_TIM8_PWM
+	bool "TIM8 PWM"
+	default n
+	depends on AT32_TIM8
+	select AT32_PWM
+	---help---
+		Reserve timer 8 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If AT32_TIM8
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if AT32_TIM8_PWM
+
+config AT32_TIM8_MODE
+	int "TIM8 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+config AT32_TIM8_LOCK
+	int "TIM8 Lock Level Configuration"
+	default 0
+	range 0 3
+	---help---
+		Timer 8 lock level configuration
+
+config AT32_TIM8_DEADTIME
+	int "TIM8 Initial Dead-time"
+	default 0
+	range 0 255
+	---help---
+		Timer 8 initial dead-time
+
+config AT32_TIM8_TDTS
+	int "TIM8 t_DTS Division"
+	default 0
+	range 0 2
+	---help---
+		Timer 8 dead-time and sampling clock (t_DTS) division
+
+if AT32_PWM_MULTICHAN
+
+config AT32_TIM8_CHANNEL1
+	bool "TIM8 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if AT32_TIM8_CHANNEL1
+
+config AT32_TIM8_CH1MODE
+	int "TIM8 Channel 1 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM8_CH1OUT
+	bool "TIM8 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+config AT32_TIM8_CH1NOUT
+	bool "TIM8 Channel 1 Complementary Output"
+	default n
+	---help---
+		Enables channel 1 Complementary Output.
+
+endif # AT32_TIM8_CHANNEL1
+
+config AT32_TIM8_CHANNEL2
+	bool "TIM8 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if AT32_TIM8_CHANNEL2
+
+config AT32_TIM8_CH2MODE
+	int "TIM8 Channel 2 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM8_CH2OUT
+	bool "TIM8 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+config AT32_TIM8_CH2NOUT
+	bool "TIM8 Channel 2 Complementary Output"
+	default n
+	---help---
+		Enables channel 2 Complementary Output.
+
+endif # AT32_TIM8_CHANNEL2
+
+config AT32_TIM8_CHANNEL3
+	bool "TIM8 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if AT32_TIM8_CHANNEL3
+
+config AT32_TIM8_CH3MODE
+	int "TIM8 Channel 3 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM8_CH3OUT
+	bool "TIM8 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+config AT32_TIM8_CH3NOUT
+	bool "TIM8 Channel 3 Complementary Output"
+	default n
+	---help---
+		Enables channel 3 Complementary Output.
+
+endif # AT32_TIM8_CHANNEL3
+
+config AT32_TIM8_CHANNEL4
+	bool "TIM8 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if AT32_TIM8_CHANNEL4
+
+config AT32_TIM8_CH4MODE
+	int "TIM8 Channel 4 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM8_CH4OUT
+	bool "TIM8 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # AT32_TIM8_CHANNEL4
+
+config AT32_TIM8_CHANNEL5
+	bool "TIM8 Channel 5 (internal)"
+	default n
+	depends on AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Enables channel 5 (not available externally)
+
+if AT32_TIM8_CHANNEL5
+
+config AT32_TIM8_CH5MODE
+	int "TIM8 Channel 5 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM8_CH5OUT
+	bool "TIM8 Channel 5 Output"
+	default n
+	---help---
+		Enables channel 5 output.
+
+endif # AT32_TIM8_CHANNEL5
+
+config AT32_TIM8_CHANNEL6
+	bool "TIM8 Channel 6 (internal)"
+	default n
+	depends on AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Enables channel 6 (not available externally)
+
+if AT32_TIM8_CHANNEL6
+
+config AT32_TIM8_CH6MODE
+	int "TIM8 Channel 6 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM8_CH6OUT
+	bool "TIM8 Channel 6 Output"
+	default n
+	---help---
+		Enables channel 6 output.
+
+endif # AT32_TIM8_CHANNEL6
+
+endif # AT32_PWM_MULTICHAN
+
+if !AT32_PWM_MULTICHAN
+
+config AT32_TIM8_CHANNEL
+	int "TIM8 PWM Output Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM8 is enabled for PWM usage, you also need specifies the timer output
+		channel {1,..,4}
+
+if AT32_TIM8_CHANNEL = 1
+
+config AT32_TIM8_CH1OUT
+	bool "TIM8 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+config AT32_TIM8_CH1NOUT
+	bool "TIM8 Channel 1 Complementary Output"
+	default n
+	---help---
+		Enables channel 1 Complementary Output.
+
+endif # AT32_TIM8_CHANNEL = 1
+
+if AT32_TIM8_CHANNEL = 2
+
+config AT32_TIM8_CH2OUT
+	bool "TIM8 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+config AT32_TIM8_CH2NOUT
+	bool "TIM8 Channel 2 Complementary Output"
+	default n
+	---help---
+		Enables channel 2 Complementary Output.
+
+endif # AT32_TIM8_CHANNEL = 2
+
+if AT32_TIM8_CHANNEL = 3
+
+config AT32_TIM8_CH3OUT
+	bool "TIM8 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+config AT32_TIM8_CH3NOUT
+	bool "TIM8 Channel 3 Complementary Output"
+	default n
+	---help---
+		Enables channel 3 Complementary Output.
+
+endif # AT32_TIM8_CHANNEL = 3
+
+if AT32_TIM8_CHANNEL = 4
+
+config AT32_TIM8_CH4OUT
+	bool "TIM8 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # AT32_TIM8_CHANNEL = 4
+
+config AT32_TIM8_CHMODE
+	int "TIM8 Channel Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+endif # !AT32_PWM_MULTICHAN
+
+endif # AT32_TIM8_PWM
+
+config AT32_TIM9_PWM
+	bool "TIM9 PWM"
+	default n
+	depends on AT32_TIM9
+	select AT32_PWM
+	---help---
+		Reserve timer 9 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If AT32_TIM9
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if AT32_TIM9_PWM
+
+if AT32_PWM_MULTICHAN
+
+config AT32_TIM9_CHANNEL1
+	bool "TIM9 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if AT32_TIM9_CHANNEL1
+
+config AT32_TIM9_CH1MODE
+	int "TIM9 Channel 1 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM9_CH1OUT
+	bool "TIM9 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # AT32_TIM9_CHANNEL1
+
+config AT32_TIM9_CHANNEL2
+	bool "TIM9 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if AT32_TIM9_CHANNEL2
+
+config AT32_TIM9_CH2MODE
+	int "TIM9 Channel 2 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM9_CH2OUT
+	bool "TIM9 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # AT32_TIM9_CHANNEL2
+
+endif # AT32_PWM_MULTICHAN
+
+if !AT32_PWM_MULTICHAN
+
+config AT32_TIM9_CHANNEL
+	int "TIM9 PWM Output Channel"
+	default 1
+	range 1 2
+	---help---
+		If TIM9 is enabled for PWM usage, you also need specifies the timer output
+		channel {1,2}
+
+if AT32_TIM9_CHANNEL = 1
+
+config AT32_TIM9_CH1OUT
+	bool "TIM9 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # AT32_TIM9_CHANNEL = 1
+
+if AT32_TIM9_CHANNEL = 2
+
+config AT32_TIM9_CH2OUT
+	bool "TIM9 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # AT32_TIM9_CHANNEL = 2
+
+config AT32_TIM9_CHMODE
+	int "TIM9 Channel Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+endif # !AT32_PWM_MULTICHAN
+
+endif # AT32_TIM9_PWM
+
+config AT32_TIM10_PWM
+	bool "TIM10 PWM"
+	default n
+	depends on AT32_TIM10
+	select AT32_PWM
+	---help---
+		Reserve timer 10 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If AT32_TIM10
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if AT32_TIM10_PWM
+
+if AT32_PWM_MULTICHAN
+
+config AT32_TIM10_CHANNEL1
+	bool "TIM10 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if AT32_TIM10_CHANNEL1
+
+config AT32_TIM10_CH1MODE
+	int "TIM10 Channel 1 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM10_CH1OUT
+	bool "TIM10 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # AT32_TIM10_CHANNEL1
+
+endif # AT32_PWM_MULTICHAN
+
+if !AT32_PWM_MULTICHAN
+
+config AT32_TIM10_CHANNEL
+	int "TIM10 PWM Output Channel"
+	default 1
+	range 1 1
+	---help---
+		If TIM10 is enabled for PWM usage, you also need specifies the timer output
+		channel {1}
+
+if AT32_TIM10_CHANNEL = 1
+
+config AT32_TIM10_CH1OUT
+	bool "TIM10 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # AT32_TIM10_CHANNEL = 1
+
+config AT32_TIM10_CHMODE
+	int "TIM10 Channel Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+endif # !AT32_PWM_MULTICHAN
+
+endif # AT32_TIM10_PWM
+
+config AT32_TIM11_PWM
+	bool "TIM11 PWM"
+	default n
+	depends on AT32_TIM11
+	select AT32_PWM
+	---help---
+		Reserve timer 11 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If AT32_TIM11
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if AT32_TIM11_PWM
+
+if AT32_PWM_MULTICHAN
+
+config AT32_TIM11_CHANNEL1
+	bool "TIM11 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if AT32_TIM11_CHANNEL1
+
+config AT32_TIM11_CH1MODE
+	int "TIM11 Channel 1 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM11_CH1OUT
+	bool "TIM11 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # AT32_TIM11_CHANNEL1
+
+endif # AT32_PWM_MULTICHAN
+
+if !AT32_PWM_MULTICHAN
+
+config AT32_TIM11_CHANNEL
+	int "TIM11 PWM Output Channel"
+	default 1
+	range 1 1
+	---help---
+		If TIM11 is enabled for PWM usage, you also need specifies the timer output
+		channel {1}
+
+if AT32_TIM11_CHANNEL = 1
+
+config AT32_TIM11_CH1OUT
+	bool "TIM11 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # AT32_TIM11_CHANNEL = 1
+
+config AT32_TIM11_CHMODE
+	int "TIM11 Channel Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+endif # !AT32_PWM_MULTICHAN
+
+endif # AT32_TIM11_PWM
+
+config AT32_TIM12_PWM
+	bool "TIM12 PWM"
+	default n
+	depends on AT32_TIM12
+	select AT32_PWM
+	---help---
+		Reserve timer 12 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If AT32_TIM12
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if AT32_TIM12_PWM
+
+if AT32_PWM_MULTICHAN
+
+config AT32_TIM12_CHANNEL1
+	bool "TIM12 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if AT32_TIM12_CHANNEL1
+
+config AT32_TIM12_CH1MODE
+	int "TIM12 Channel 1 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM12_CH1OUT
+	bool "TIM12 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # AT32_TIM12_CHANNEL1
+
+config AT32_TIM12_CHANNEL2
+	bool "TIM12 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if AT32_TIM12_CHANNEL2
+
+config AT32_TIM12_CH2MODE
+	int "TIM12 Channel 2 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM12_CH2OUT
+	bool "TIM12 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # AT32_TIM12_CHANNEL2
+
+endif # AT32_PWM_MULTICHAN
+
+if !AT32_PWM_MULTICHAN
+
+config AT32_TIM12_CHANNEL
+	int "TIM12 PWM Output Channel"
+	default 1
+	range 1 2
+	---help---
+		If TIM12 is enabled for PWM usage, you also need specifies the timer output
+		channel {1,2}
+
+if AT32_TIM12_CHANNEL = 1
+
+config AT32_TIM12_CH1OUT
+	bool "TIM12 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # AT32_TIM12_CHANNEL = 1
+
+if AT32_TIM12_CHANNEL = 2
+
+config AT32_TIM12_CH2OUT
+	bool "TIM12 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # AT32_TIM12_CHANNEL = 2
+
+config AT32_TIM12_CHMODE
+	int "TIM12 Channel Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+endif # !AT32_PWM_MULTICHAN
+
+endif # AT32_TIM12_PWM
+
+config AT32_TIM13_PWM
+	bool "TIM13 PWM"
+	default n
+	depends on AT32_TIM13
+	select AT32_PWM
+	---help---
+		Reserve timer 13 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If AT32_TIM13
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if AT32_TIM13_PWM
+
+if AT32_PWM_MULTICHAN
+
+config AT32_TIM13_CHANNEL1
+	bool "TIM13 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if AT32_TIM13_CHANNEL1
+
+config AT32_TIM13_CH1MODE
+	int "TIM13 Channel 1 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM13_CH1OUT
+	bool "TIM13 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # AT32_TIM13_CHANNEL1
+
+endif # AT32_PWM_MULTICHAN
+
+if !AT32_PWM_MULTICHAN
+
+config AT32_TIM13_CHANNEL
+	int "TIM13 PWM Output Channel"
+	default 1
+	range 1 1
+	---help---
+		If TIM13 is enabled for PWM usage, you also need specifies the timer output
+		channel {1}
+
+if AT32_TIM13_CHANNEL = 1
+
+config AT32_TIM13_CH1OUT
+	bool "TIM13 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # AT32_TIM13_CHANNEL = 1
+
+config AT32_TIM13_CHMODE
+	int "TIM13 Channel Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+endif # !AT32_PWM_MULTICHAN
+
+endif # AT32_TIM13_PWM
+
+config AT32_TIM14_PWM
+	bool "TIM14 PWM"
+	default n
+	depends on AT32_TIM14
+	select AT32_PWM
+	---help---
+		Reserve timer 14 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If AT32_TIM14
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if AT32_TIM14_PWM
+
+if AT32_PWM_MULTICHAN
+
+config AT32_TIM14_CHANNEL1
+	bool "TIM14 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if AT32_TIM14_CHANNEL1
+
+config AT32_TIM14_CH1MODE
+	int "TIM14 Channel 1 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM14_CH1OUT
+	bool "TIM14 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # AT32_TIM14_CHANNEL1
+
+endif # AT32_PWM_MULTICHAN
+
+if !AT32_PWM_MULTICHAN
+
+config AT32_TIM14_CHANNEL
+	int "TIM14 PWM Output Channel"
+	default 1
+	range 1 1
+	---help---
+		If TIM14 is enabled for PWM usage, you also need specifies the timer output
+		channel {1}
+
+if AT32_TIM14_CHANNEL = 1
+
+config AT32_TIM14_CH1OUT
+	bool "TIM14 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # AT32_TIM14_CHANNEL = 1
+
+config AT32_TIM14_CHMODE
+	int "TIM14 Channel Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+endif # !AT32_PWM_MULTICHAN
+
+endif # AT32_TIM14_PWM
+
+config AT32_TIM15_PWM
+	bool "TIM15 PWM"
+	default n
+	depends on AT32_TIM15
+	select AT32_PWM
+	---help---
+		Reserve timer 15 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If AT32_TIM15
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if AT32_TIM15_PWM
+
+config AT32_TIM15_LOCK
+	int "TIM15 Lock Level Configuration"
+	default 0
+	range 0 3
+	---help---
+		Timer 15 lock level configuration
+
+config AT32_TIM15_TDTS
+	int "TIM15 t_DTS Division"
+	default 0
+	range 0 2
+	---help---
+		Timer 15 dead-time and sampling clock (t_DTS) division
+
+config AT32_TIM15_DEADTIME
+	int "TIM15 Initial Dead-time"
+	default 0
+	range 0 255
+	---help---
+		Timer 15 initial dead-time
+
+if AT32_PWM_MULTICHAN
+
+config AT32_TIM15_CHANNEL1
+	bool "TIM15 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if AT32_TIM15_CHANNEL1
+
+config AT32_TIM15_CH1MODE
+	int "TIM15 Channel 1 Mode"
+	default 6
+	range 0 9 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM15_CH1OUT
+	bool "TIM15 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+config AT32_TIM15_CH1NOUT
+	bool "TIM15 Channel 1 Complementary Output"
+	default n
+	---help---
+		Enables channel 1 Complementary Output.
+
+endif # AT32_TIM15_CHANNEL1
+
+config AT32_TIM15_CHANNEL2
+	bool "TIM15 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if AT32_TIM15_CHANNEL2
+
+config AT32_TIM15_CH2MODE
+	int "TIM15 Channel 2 Mode"
+	default 6
+	range 0 9 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM15_CH2OUT
+	bool "TIM15 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # AT32_TIM15_CHANNEL2
+
+endif # AT32_PWM_MULTICHAN
+
+if !AT32_PWM_MULTICHAN
+
+config AT32_TIM15_CHANNEL
+	int "TIM15 PWM Output Channel"
+	default 1
+	range 1 2
+	---help---
+		If TIM15 is enabled for PWM usage, you also need specifies the timer output
+		channel {1,2}
+
+if AT32_TIM15_CHANNEL = 1
+
+config AT32_TIM15_CH1OUT
+	bool "TIM15 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+config AT32_TIM15_CH1NOUT
+	bool "TIM15 Channel 1 Complementary Output"
+	default n
+	---help---
+		Enables channel 1 Complementary Output.
+
+endif # AT32_TIM15_CHANNEL = 1
+
+if AT32_TIM15_CHANNEL = 2
+
+config AT32_TIM15_CH2OUT
+	bool "TIM15 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+config AT32_TIM15_CH2NOUT
+	bool "TIM15 Channel 2 Complementary Output"
+	default n
+	---help---
+		Enables channel 2 Complementary Output.
+
+endif # AT32_TIM15_CHANNEL = 2
+
+config AT32_TIM15_CHMODE
+	int "TIM15 Channel Mode"
+	default 6
+	range 0 9 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+endif # !AT32_PWM_MULTICHAN
+
+endif # AT32_TIM15_PWM
+
+config AT32_TIM16_PWM
+	bool "TIM16 PWM"
+	default n
+	depends on AT32_TIM16
+	select AT32_PWM
+	---help---
+		Reserve timer 16 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If AT32_TIM16
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if AT32_TIM16_PWM
+
+config AT32_TIM16_LOCK
+	int "TIM16 Lock Level Configuration"
+	default 0
+	range 0 3
+	---help---
+		Timer 16 lock level configuration
+
+config AT32_TIM16_TDTS
+	int "TIM16 t_DTS division"
+	default 0
+	range 0 2
+	---help---
+		Timer 16 dead-time and sampling clock (t_DTS) division
+
+config AT32_TIM16_DEADTIME
+	int "TIM16 Initial Dead-time"
+	default 0
+	range 0 255
+	---help---
+		Timer 16 initial dead-time
+
+if AT32_PWM_MULTICHAN
+
+config AT32_TIM16_CHANNEL1
+	bool "TIM16 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if AT32_TIM16_CHANNEL1
+
+config AT32_TIM16_CH1MODE
+	int "TIM16 Channel 1 Mode"
+	default 6
+	range 0 7
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM16_CH1OUT
+	bool "TIM16 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # AT32_TIM16_CHANNEL1
+
+endif # AT32_PWM_MULTICHAN
+
+if !AT32_PWM_MULTICHAN
+
+config AT32_TIM16_CHANNEL
+	int "TIM16 PWM Output Channel"
+	default 1
+	range 1 1
+	---help---
+		If TIM16 is enabled for PWM usage, you also need specifies the timer output
+		channel {1}
+
+if AT32_TIM16_CHANNEL = 1
+
+config AT32_TIM16_CH1OUT
+	bool "TIM16 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # AT32_TIM16_CHANNEL = 1
+
+config AT32_TIM16_CHMODE
+	int "TIM16 Channel Mode"
+	default 6
+	range 0 7
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+endif # !AT32_PWM_MULTICHAN
+
+endif # AT32_TIM16_PWM
+
+config AT32_TIM17_PWM
+	bool "TIM17 PWM"
+	default n
+	depends on AT32_TIM17
+	select AT32_PWM
+	---help---
+		Reserve timer 17 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If AT32_TIM17
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if AT32_TIM17_PWM
+
+config AT32_TIM17_LOCK
+	int "TIM17 Lock Level Configuration"
+	default 0
+	range 0 3
+	---help---
+		Timer 17 lock level configuration
+
+config AT32_TIM17_TDTS
+	int "TIM17 t_DTS Division"
+	default 0
+	range 0 2
+	---help---
+		Timer 17 dead-time and sampling clock (t_DTS) division
+
+config AT32_TIM17_DEADTIME
+	int "TIM17 Initial Dead-time"
+	default 0
+	range 0 255
+	---help---
+		Timer 17 initial dead-time
+
+if AT32_PWM_MULTICHAN
+
+config AT32_TIM17_CHANNEL1
+	bool "TIM17 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if AT32_TIM17_CHANNEL1
+
+config AT32_TIM17_CH1MODE
+	int "TIM17 Channel 1 Mode"
+	default 6
+	range 0 7
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM17_CH1OUT
+	bool "TIM17 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # AT32_TIM17_CHANNEL1
+
+endif # AT32_PWM_MULTICHAN
+
+if !AT32_PWM_MULTICHAN
+
+config AT32_TIM17_CHANNEL
+	int "TIM17 PWM Output Channel"
+	default 1
+	range 1 1
+	---help---
+		If TIM17 is enabled for PWM usage, you also need specifies the timer output
+		channel {1}
+
+if AT32_TIM17_CHANNEL = 1
+
+config AT32_TIM17_CH1OUT
+	bool "TIM17 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # AT32_TIM17_CHANNEL = 1
+
+config AT32_TIM17_CHMODE
+	int "TIM17 Channel Mode"
+	default 6
+	range 0 7
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+endif # !AT32_PWM_MULTICHAN
+
+endif # AT32_TIM17_PWM
+
+config AT32_TIM20_PWM
+	bool "TIM20 PWM"
+	default n
+	depends on AT32_TIM20
+	select AT32_PWM
+	---help---
+		Reserve timer 20 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If AT32_TIM20
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if AT32_TIM20_PWM
+
+config AT32_TIM20_MODE
+	int "TIM20 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+config AT32_TIM20_LOCK
+	int "TIM20 Lock Level Configuration"
+	default 0
+	range 0 3
+	---help---
+		Timer 1 lock level configuration
+
+config AT32_TIM20_TDTS
+	int "TIM20 t_DTS Division"
+	default 0
+	range 0 2
+	---help---
+		Timer 1 dead-time and sampling clock (t_DTS) division
+
+config AT32_TIM20_DEADTIME
+	int "TIM20 Initial Dead-time"
+	default 0
+	range 0 255
+	---help---
+		Timer 1 initial dead-time
+
+if AT32_PWM_MULTICHAN
+
+config AT32_TIM20_CHANNEL1
+	bool "TIM20 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if AT32_TIM20_CHANNEL1
+
+config AT32_TIM20_CH1MODE
+	int "TIM20 Channel 1 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM20_CH1OUT
+	bool "TIM20 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+config AT32_TIM20_CH1NOUT
+	bool "TIM20 Channel 1 Complementary Output"
+	default n
+	---help---
+		Enables channel 1 Complementary Output.
+
+endif # AT32_TIM20_CHANNEL1
+
+config AT32_TIM20_CHANNEL2
+	bool "TIM20 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if AT32_TIM20_CHANNEL2
+
+config AT32_TIM20_CH2MODE
+	int "TIM20 Channel 2 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM20_CH2OUT
+	bool "TIM20 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+config AT32_TIM20_CH2NOUT
+	bool "TIM20 Channel 2 Complementary Output"
+	default n
+	---help---
+		Enables channel 2 Complementary Output.
+
+endif # AT32_TIM20_CHANNEL2
+
+config AT32_TIM20_CHANNEL3
+	bool "TIM20 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if AT32_TIM20_CHANNEL3
+
+config AT32_TIM20_CH3MODE
+	int "TIM20 Channel 3 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM20_CH3OUT
+	bool "TIM20 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+config AT32_TIM20_CH3NOUT
+	bool "TIM20 Channel 3 Complementary Output"
+	default n
+	---help---
+		Enables channel 3 Complementary Output.
+
+endif # AT32_TIM20_CHANNEL3
+
+config AT32_TIM20_CHANNEL4
+	bool "TIM20 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if AT32_TIM20_CHANNEL4
+
+config AT32_TIM20_CH4MODE
+	int "TIM20 Channel 4 Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM20_CH4OUT
+	bool "TIM20 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # AT32_TIM20_CHANNEL4
+
+config AT32_TIM20_CHANNEL5
+	bool "TIM20 Channel 5 (internal)"
+	default n
+	depends on AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Enables channel 5 (not available externally)
+
+if AT32_TIM20_CHANNEL5
+
+config AT32_TIM20_CH5MODE
+	int "TIM20 Channel 5 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM20_CH5OUT
+	bool "TIM20 Channel 5 Output"
+	default n
+	---help---
+		Enables channel 5 output.
+
+endif # AT32_TIM20_CHANNEL5
+
+config AT32_TIM20_CHANNEL6
+	bool "TIM20 Channel 6 (internal)"
+	default n
+	depends on AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Enables channel 6 (not available externally)
+
+if AT32_TIM20_CHANNEL6
+
+config AT32_TIM20_CH6MODE
+	int "TIM20 Channel 6 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+config AT32_TIM20_CH6OUT
+	bool "TIM20 Channel 6 Output"
+	default n
+	---help---
+		Enables channel 6 output.
+
+endif # AT32_TIM20_CHANNEL6
+
+endif # AT32_PWM_MULTICHAN
+
+if !AT32_PWM_MULTICHAN
+
+config AT32_TIM20_CHANNEL
+	int "TIM20 PWM Output Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM20 is enabled for PWM usage, you also need specifies the timer output
+		channel {1,..,4}
+
+if AT32_TIM20_CHANNEL = 1
+
+config AT32_TIM20_CH1OUT
+	bool "TIM20 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+config AT32_TIM20_CH1NOUT
+	bool "TIM20 Channel 1 Complementary Output"
+	default n
+	---help---
+		Enables channel 1 Complementary Output.
+
+endif # AT32_TIM20_CHANNEL = 1
+
+if AT32_TIM20_CHANNEL = 2
+
+config AT32_TIM20_CH2OUT
+	bool "TIM20 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+config AT32_TIM20_CH2NOUT
+	bool "TIM20 Channel 2 Complementary Output"
+	default n
+	---help---
+		Enables channel 2 Complementary Output.
+
+endif # AT32_TIM20_CHANNEL = 2
+
+if AT32_TIM20_CHANNEL = 3
+
+config AT32_TIM20_CH3OUT
+	bool "TIM20 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+config AT32_TIM20_CH3NOUT
+	bool "TIM20 Channel 3 Complementary Output"
+	default n
+	---help---
+		Enables channel 3 Complementary Output.
+
+endif # AT32_TIM20_CHANNEL = 3
+
+if AT32_TIM20_CHANNEL = 4
+
+config AT32_TIM20_CH4OUT
+	bool "TIM20 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # AT32_TIM20_CHANNEL = 4
+
+config AT32_TIM20_CHMODE
+	int "TIM20 Channel Mode"
+	default 6
+	range 0 11 if AT32_HAVE_IP_TIMERS_V2
+	range 0 7 if !AT32_HAVE_IP_TIMERS_V2
+	---help---
+		Specifies the channel mode. See enum at32_pwm_chanmode_e in at32_pwm.h.
+
+endif # !AT32_PWM_MULTICHAN
+
+endif # AT32_TIM20_PWM
+
+config AT32_PWM_MULTICHAN
+	bool "PWM Multiple Output Channels"
+	default n
+	depends on AT32_PWM
+	select ARCH_HAVE_PWM_MULTICHAN
+	---help---
+		Specifies that the PWM driver supports multiple output
+		channels per timer.
+
+config AT32_PWM_TRGO
+	bool "TIM PWM TRGO support"
+	default n
+	depends on AT32_PWM
+	---help---
+		Enable TRGO support for PWM driver
+
+config AT32_TIM1_ADC
+	bool "TIM1 ADC"
+	default n
+	depends on AT32_TIM1 && AT32_ADC
+	---help---
+		Reserve timer 1 for use by ADC
+
+		Timer devices may be used for different purposes.  If AT32_TIM1 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for ADC conversion. Note that ADC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the ADC, but then you also have to configure which ADC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM1 ADC channel"
+	default AT32_TIM1_ADC1
+	depends on AT32_TIM1_ADC
+
+config AT32_TIM1_ADC1
+	bool "TIM1 ADC channel 1"
+	depends on AT32_ADC1
+	select AT32_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM1 to trigger ADC1
+
+config AT32_TIM1_ADC2
+	bool "TIM1 ADC channel 2"
+	depends on AT32_ADC2
+	select AT32_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM1 to trigger ADC2
+
+config AT32_TIM1_ADC3
+	bool "TIM1 ADC channel 3"
+	depends on AT32_ADC3
+	select AT32_HAVE_ADC3_TIMER
+	---help---
+		Reserve TIM1 to trigger ADC3
+
+endchoice
+
+config AT32_TIM2_ADC
+	bool "TIM2 ADC"
+	default n
+	depends on AT32_TIM2 && AT32_ADC
+	---help---
+		Reserve timer 1 for use by ADC
+
+		Timer devices may be used for different purposes.  If AT32_TIM2 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for ADC conversion. Note that ADC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the ADC, but then you also have to configure which ADC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM2 ADC channel"
+	default AT32_TIM2_ADC1
+	depends on AT32_TIM2_ADC
+
+config AT32_TIM2_ADC1
+	bool "TIM2 ADC channel 1"
+	depends on AT32_ADC1
+	select AT32_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM2 to trigger ADC1
+
+config AT32_TIM2_ADC2
+	bool "TIM2 ADC channel 2"
+	depends on AT32_ADC2
+	select AT32_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM2 to trigger ADC2
+
+config AT32_TIM2_ADC3
+	bool "TIM2 ADC channel 3"
+	depends on AT32_ADC3
+	select AT32_HAVE_ADC3_TIMER
+	---help---
+		Reserve TIM2 to trigger ADC3
+
+endchoice
+
+config AT32_TIM3_ADC
+	bool "TIM3 ADC"
+	default n
+	depends on AT32_TIM3 && AT32_ADC
+	---help---
+		Reserve timer 1 for use by ADC
+
+		Timer devices may be used for different purposes.  If AT32_TIM3 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for ADC conversion. Note that ADC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the ADC, but then you also have to configure which ADC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM3 ADC channel"
+	default AT32_TIM3_ADC1
+	depends on AT32_TIM3_ADC
+
+config AT32_TIM3_ADC1
+	bool "TIM3 ADC channel 1"
+	depends on AT32_ADC1
+	select AT32_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM3 to trigger ADC1
+
+config AT32_TIM3_ADC2
+	bool "TIM3 ADC channel 2"
+	depends on AT32_ADC2
+	select AT32_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM3 to trigger ADC2
+
+config AT32_TIM3_ADC3
+	bool "TIM3 ADC channel 3"
+	depends on AT32_ADC3
+	select AT32_HAVE_ADC3_TIMER
+	---help---
+		Reserve TIM3 to trigger ADC3
+
+endchoice
+
+config AT32_TIM4_ADC
+	bool "TIM4 ADC"
+	default n
+	depends on AT32_TIM4 && AT32_ADC
+	---help---
+		Reserve timer 1 for use by ADC
+
+		Timer devices may be used for different purposes.  If AT32_TIM4 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for ADC conversion. Note that ADC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the ADC, but then you also have to configure which ADC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM4 ADC channel"
+	default AT32_TIM4_ADC1
+	depends on AT32_TIM4_ADC
+
+config AT32_TIM4_ADC1
+	bool "TIM4 ADC channel 1"
+	depends on AT32_ADC1
+	select AT32_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM4 to trigger ADC1
+
+config AT32_TIM4_ADC2
+	bool "TIM4 ADC channel 2"
+	depends on AT32_ADC2
+	select AT32_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM4 to trigger ADC2
+
+config AT32_TIM4_ADC3
+	bool "TIM4 ADC channel 3"
+	depends on AT32_ADC3
+	select AT32_HAVE_ADC3_TIMER
+	---help---
+		Reserve TIM4 to trigger ADC3
+
+endchoice
+
+config AT32_TIM5_ADC
+	bool "TIM5 ADC"
+	default n
+	depends on AT32_TIM5 && AT32_ADC
+	---help---
+		Reserve timer 1 for use by ADC
+
+		Timer devices may be used for different purposes.  If AT32_TIM5 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for ADC conversion. Note that ADC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the ADC, but then you also have to configure which ADC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM5 ADC channel"
+	default AT32_TIM5_ADC1
+	depends on AT32_TIM5_ADC
+
+config AT32_TIM5_ADC1
+	bool "TIM5 ADC channel 1"
+	depends on AT32_ADC1
+	select AT32_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM5 to trigger ADC1
+
+config AT32_TIM5_ADC2
+	bool "TIM5 ADC channel 2"
+	depends on AT32_ADC2
+	select AT32_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM5 to trigger ADC2
+
+config AT32_TIM5_ADC3
+	bool "TIM5 ADC channel 3"
+	depends on AT32_ADC3
+	select AT32_HAVE_ADC3_TIMER
+	---help---
+		Reserve TIM5 to trigger ADC3
+
+endchoice
+
+config AT32_TIM8_ADC
+	bool "TIM8 ADC"
+	default n
+	depends on AT32_TIM8 && AT32_ADC
+	---help---
+		Reserve timer 1 for use by ADC
+
+		Timer devices may be used for different purposes.  If AT32_TIM8 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for ADC conversion. Note that ADC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the ADC, but then you also have to configure which ADC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM8 ADC channel"
+	default AT32_TIM8_ADC1
+	depends on AT32_TIM8_ADC
+
+config AT32_TIM8_ADC1
+	bool "TIM8 ADC channel 1"
+	depends on AT32_ADC1
+	select AT32_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM8 to trigger ADC1
+
+config AT32_TIM8_ADC2
+	bool "TIM8 ADC channel 2"
+	depends on AT32_ADC2
+	select AT32_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM8 to trigger ADC2
+
+config AT32_TIM8_ADC3
+	bool "TIM8 ADC channel 3"
+	depends on AT32_ADC3
+	select AT32_HAVE_ADC3_TIMER
+	---help---
+		Reserve TIM8 to trigger ADC3
+
+endchoice
+
+config AT32_HAVE_ADC1_TIMER
+	bool
+
+config AT32_HAVE_ADC2_TIMER
+	bool
+
+config AT32_HAVE_ADC3_TIMER
+	bool
+
+config AT32_HAVE_ADC4_TIMER
+	bool
+
+config AT32_HAVE_ADC5_TIMER
+	bool
+
+config AT32_ADC1_SAMPLE_FREQUENCY
+	int "ADC1 Sampling Frequency"
+	default 100
+	depends on AT32_HAVE_ADC1_TIMER
+	---help---
+		ADC1 sampling frequency.  Default:  100Hz
+
+config AT32_ADC1_TIMTRIG
+	int "ADC1 Timer Trigger"
+	default 0
+	range 0 4
+	depends on AT32_HAVE_ADC1_TIMER
+	---help---
+		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO
+
+config AT32_ADC2_SAMPLE_FREQUENCY
+	int "ADC2 Sampling Frequency"
+	default 100
+	depends on AT32_HAVE_ADC2_TIMER
+	---help---
+		ADC2 sampling frequency.  Default:  100Hz
+
+config AT32_ADC2_TIMTRIG
+	int "ADC2 Timer Trigger"
+	default 0
+	range 0 4
+	depends on AT32_HAVE_ADC2_TIMER
+	---help---
+		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO
+
+config AT32_ADC3_SAMPLE_FREQUENCY
+	int "ADC3 Sampling Frequency"
+	default 100
+	depends on AT32_HAVE_ADC3_TIMER
+	---help---
+		ADC3 sampling frequency.  Default:  100Hz
+
+config AT32_ADC3_TIMTRIG
+	int "ADC3 Timer Trigger"
+	default 0
+	range 0 4
+	depends on AT32_HAVE_ADC3_TIMER
+	---help---
+		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO
+
+config AT32_TIM1_DAC
+	bool "TIM1 DAC"
+	default n
+	depends on AT32_TIM1 && AT32_DAC
+	---help---
+		Reserve timer 1 for use by DAC
+
+		Timer devices may be used for different purposes.  If AT32_TIM1 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for DAC conversion. Note that DAC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the DAC, but then you also have to configure which DAC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM1 DAC channel"
+	default AT32_TIM1_DAC1
+	depends on AT32_TIM1_DAC
+
+config AT32_TIM1_DAC1
+	bool "TIM1 DAC channel 1"
+	---help---
+		Reserve TIM1 to trigger DAC1
+
+config AT32_TIM1_DAC2
+	bool "TIM1 DAC channel 2"
+	---help---
+		Reserve TIM1 to trigger DAC2
+
+endchoice
+
+config AT32_TIM2_DAC
+	bool "TIM2 DAC"
+	default n
+	depends on AT32_TIM2 && AT32_DAC
+	---help---
+		Reserve timer 2 for use by DAC
+
+		Timer devices may be used for different purposes.  If AT32_TIM2 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for DAC conversion. Note that DAC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the DAC, but then you also have to configure which DAC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM2 DAC channel"
+	default AT32_TIM2_DAC1
+	depends on AT32_TIM2_DAC
+
+config AT32_TIM2_DAC1
+	bool "TIM2 DAC channel 1"
+	---help---
+		Reserve TIM2 to trigger DAC1
+
+config AT32_TIM2_DAC2
+	bool "TIM2 DAC channel 2"
+	---help---
+		Reserve TIM2 to trigger DAC2
+
+endchoice
+
+config AT32_TIM3_DAC
+	bool "TIM3 DAC"
+	default n
+	depends on AT32_TIM3 && AT32_DAC
+	---help---
+		Reserve timer 3 for use by DAC
+
+		Timer devices may be used for different purposes.  If AT32_TIM3 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for DAC conversion. Note that DAC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the DAC, but then you also have to configure which DAC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM3 DAC channel"
+	default AT32_TIM3_DAC1
+	depends on AT32_TIM3_DAC
+
+config AT32_TIM3_DAC1
+	bool "TIM3 DAC channel 1"
+	---help---
+		Reserve TIM3 to trigger DAC1
+
+config AT32_TIM3_DAC2
+	bool "TIM3 DAC channel 2"
+	---help---
+		Reserve TIM3 to trigger DAC2
+
+endchoice
+
+config AT32_TIM4_DAC
+	bool "TIM4 DAC"
+	default n
+	depends on AT32_TIM4 && AT32_DAC
+	---help---
+		Reserve timer 4 for use by DAC
+
+		Timer devices may be used for different purposes.  If AT32_TIM4 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for DAC conversion. Note that DAC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the DAC, but then you also have to configure which DAC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM4 DAC channel"
+	default AT32_TIM4_DAC1
+	depends on AT32_TIM4_DAC
+
+config AT32_TIM4_DAC1
+	bool "TIM4 DAC channel 1"
+	---help---
+		Reserve TIM4 to trigger DAC1
+
+config AT32_TIM4_DAC2
+	bool "TIM4 DAC channel 2"
+	---help---
+		Reserve TIM4 to trigger DAC2
+
+endchoice
+
+config AT32_TIM5_DAC
+	bool "TIM5 DAC"
+	default n
+	depends on AT32_TIM5 && AT32_DAC
+	---help---
+		Reserve timer 5 for use by DAC
+
+		Timer devices may be used for different purposes.  If AT32_TIM5 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for DAC conversion. Note that DAC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the DAC, but then you also have to configure which DAC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM5 DAC channel"
+	default AT32_TIM5_DAC1
+	depends on AT32_TIM5_DAC
+
+config AT32_TIM5_DAC1
+	bool "TIM5 DAC channel 1"
+	---help---
+		Reserve TIM5 to trigger DAC1
+
+config AT32_TIM5_DAC2
+	bool "TIM5 DAC channel 2"
+	---help---
+		Reserve TIM5 to trigger DAC2
+
+endchoice
+
+config AT32_TIM6_DAC
+	bool "TIM6 DAC"
+	default n
+	depends on AT32_TIM6 && AT32_DAC
+	---help---
+		Reserve timer 6 for use by DAC
+
+		Timer devices may be used for different purposes.  If AT32_TIM6 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for DAC conversion. Note that DAC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the DAC, but then you also have to configure which DAC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM6 DAC channel"
+	default AT32_TIM6_DAC1
+	depends on AT32_TIM6_DAC
+
+config AT32_TIM6_DAC1
+	bool "TIM6 DAC channel 1"
+	---help---
+		Reserve TIM6 to trigger DAC1
+
+config AT32_TIM6_DAC2
+	bool "TIM6 DAC channel 2"
+	---help---
+		Reserve TIM6 to trigger DAC2
+
+endchoice
+
+config AT32_TIM7_DAC
+	bool "TIM7 DAC"
+	default n
+	depends on AT32_TIM7 && AT32_DAC
+	---help---
+		Reserve timer 7 for use by DAC
+
+		Timer devices may be used for different purposes.  If AT32_TIM7 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for DAC conversion. Note that DAC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the DAC, but then you also have to configure which DAC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM7 DAC channel"
+	default AT32_TIM7_DAC1
+	depends on AT32_TIM7_DAC
+
+config AT32_TIM7_DAC1
+	bool "TIM7 DAC channel 1"
+	---help---
+		Reserve TIM7 to trigger DAC1
+
+config AT32_TIM7_DAC2
+	bool "TIM7 DAC channel 2"
+	---help---
+		Reserve TIM7 to trigger DAC2
+
+endchoice
+
+config AT32_TIM8_DAC
+	bool "TIM8 DAC"
+	default n
+	depends on AT32_TIM8 && AT32_DAC
+	---help---
+		Reserve timer 8 for use by DAC
+
+		Timer devices may be used for different purposes.  If AT32_TIM8 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for DAC conversion. Note that DAC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the DAC, but then you also have to configure which DAC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM8 DAC channel"
+	default AT32_TIM8_DAC1
+	depends on AT32_TIM8_DAC
+
+config AT32_TIM8_DAC1
+	bool "TIM8 DAC channel 1"
+	---help---
+		Reserve TIM8 to trigger DAC1
+
+config AT32_TIM8_DAC2
+	bool "TIM8 DAC channel 2"
+	---help---
+		Reserve TIM8 to trigger DAC2
+
+endchoice
+
+config AT32_TIM9_DAC
+	bool "TIM9 DAC"
+	default n
+	depends on AT32_TIM9 && AT32_DAC
+	---help---
+		Reserve timer 9 for use by DAC
+
+		Timer devices may be used for different purposes.  If AT32_TIM9 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for DAC conversion. Note that DAC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the DAC, but then you also have to configure which DAC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM9 DAC channel"
+	default AT32_TIM9_DAC1
+	depends on AT32_TIM9_DAC
+
+config AT32_TIM9_DAC1
+	bool "TIM9 DAC channel 1"
+	---help---
+		Reserve TIM9 to trigger DAC1
+
+config AT32_TIM9_DAC2
+	bool "TIM9 DAC channel 2"
+	---help---
+		Reserve TIM9 to trigger DAC2
+
+endchoice
+
+config AT32_TIM10_DAC
+	bool "TIM10 DAC"
+	default n
+	depends on AT32_TIM10 && AT32_DAC
+	---help---
+		Reserve timer 10 for use by DAC
+
+		Timer devices may be used for different purposes.  If AT32_TIM10 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for DAC conversion. Note that DAC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the DAC, but then you also have to configure which DAC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM10 DAC channel"
+	default AT32_TIM10_DAC1
+	depends on AT32_TIM10_DAC
+
+config AT32_TIM10_DAC1
+	bool "TIM10 DAC channel 1"
+	---help---
+		Reserve TIM10 to trigger DAC1
+
+config AT32_TIM10_DAC2
+	bool "TIM10 DAC channel 2"
+	---help---
+		Reserve TIM10 to trigger DAC2
+
+endchoice
+
+config AT32_TIM11_DAC
+	bool "TIM11 DAC"
+	default n
+	depends on AT32_TIM11 && AT32_DAC
+	---help---
+		Reserve timer 11 for use by DAC
+
+		Timer devices may be used for different purposes.  If AT32_TIM11 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for DAC conversion. Note that DAC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the DAC, but then you also have to configure which DAC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM11 DAC channel"
+	default AT32_TIM11_DAC1
+	depends on AT32_TIM11_DAC
+
+config AT32_TIM11_DAC1
+	bool "TIM11 DAC channel 1"
+	---help---
+		Reserve TIM11 to trigger DAC1
+
+config AT32_TIM11_DAC2
+	bool "TIM11 DAC channel 2"
+	---help---
+		Reserve TIM11 to trigger DAC2
+
+endchoice
+
+config AT32_TIM12_DAC
+	bool "TIM12 DAC"
+	default n
+	depends on AT32_TIM12 && AT32_DAC
+	---help---
+		Reserve timer 12 for use by DAC
+
+		Timer devices may be used for different purposes.  If AT32_TIM12 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for DAC conversion. Note that DAC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the DAC, but then you also have to configure which DAC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM12 DAC channel"
+	default AT32_TIM12_DAC1
+	depends on AT32_TIM12_DAC
+
+config AT32_TIM12_DAC1
+	bool "TIM12 DAC channel 1"
+	---help---
+		Reserve TIM12 to trigger DAC1
+
+config AT32_TIM12_DAC2
+	bool "TIM12 DAC channel 2"
+	---help---
+		Reserve TIM12 to trigger DAC2
+
+endchoice
+
+config AT32_TIM13_DAC
+	bool "TIM13 DAC"
+	default n
+	depends on AT32_TIM13 && AT32_DAC
+	---help---
+		Reserve timer 13 for use by DAC
+
+		Timer devices may be used for different purposes.  If AT32_TIM13 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for DAC conversion. Note that DAC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the DAC, but then you also have to configure which DAC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM13 DAC channel"
+	default AT32_TIM13_DAC1
+	depends on AT32_TIM13_DAC
+
+config AT32_TIM13_DAC1
+	bool "TIM13 DAC channel 1"
+	---help---
+		Reserve TIM13 to trigger DAC1
+
+config AT32_TIM13_DAC2
+	bool "TIM13 DAC channel 2"
+	---help---
+		Reserve TIM13 to trigger DAC2
+
+endchoice
+
+config AT32_TIM14_DAC
+	bool "TIM14 DAC"
+	default n
+	depends on AT32_TIM14 && AT32_DAC
+	---help---
+		Reserve timer 14 for use by DAC
+
+		Timer devices may be used for different purposes.  If AT32_TIM14 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for DAC conversion. Note that DAC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the DAC, but then you also have to configure which DAC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM14 DAC channel"
+	default AT32_TIM14_DAC1
+	depends on AT32_TIM14_DAC
+
+config AT32_TIM14_DAC1
+	bool "TIM14 DAC channel 1"
+	---help---
+		Reserve TIM14 to trigger DAC1
+
+config AT32_TIM14_DAC2
+	bool "TIM14 DAC channel 2"
+	---help---
+		Reserve TIM14 to trigger DAC2
+
+endchoice
+
+config AT32_TIM1_CAP
+	bool "TIM1 Capture"
+	default n
+	depends on AT32_TIM1
+	select AT32_CAP
+	---help---
+		Reserve timer 1 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+if AT32_TIM1_CAP
+
+config AT32_TIM1_CHANNEL
+	int "TIM1 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM1 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config AT32_TIM1_CLOCK
+	int "TIM1 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # AT32_TIM1_CAP
+
+config AT32_TIM2_CAP
+	bool "TIM2 Capture"
+	default n
+	depends on AT32_TIM2
+	select AT32_CAP
+	---help---
+		Reserve timer 2 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+if AT32_TIM2_CAP
+
+config AT32_TIM2_CHANNEL
+	int "TIM2 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM2 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config AT32_TIM2_CLOCK
+	int "TIM2 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # AT32_TIM2_CAP
+
+config AT32_TIM3_CAP
+	bool "TIM3 Capture"
+	default n
+	depends on AT32_TIM3
+	select AT32_CAP
+	---help---
+		Reserve timer 3 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+if AT32_TIM3_CAP
+
+config AT32_TIM3_CHANNEL
+	int "TIM3 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM3 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config AT32_TIM3_CLOCK
+	int "TIM3 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # AT32_TIM3_CAP
+
+config AT32_TIM4_CAP
+	bool "TIM4 Capture"
+	default n
+	depends on AT32_TIM4
+	select AT32_CAP
+	---help---
+		Reserve timer 4 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+if AT32_TIM4_CAP
+
+config AT32_TIM4_CHANNEL
+	int "TIM4 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM4 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config AT32_TIM4_CLOCK
+	int "TIM4 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # AT32_TIM4_CAP
+
+config AT32_TIM5_CAP
+	bool "TIM5 Capture"
+	default n
+	depends on AT32_TIM5
+	select AT32_CAP
+	---help---
+		Reserve timer 5 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+if AT32_TIM5_CAP
+
+config AT32_TIM5_CHANNEL
+	int "TIM5 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM5 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config AT32_TIM5_CLOCK
+	int "TIM5 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # AT32_TIM5_CAP
+
+config AT32_TIM8_CAP
+	bool "TIM8 Capture"
+	default n
+	depends on AT32_TIM8
+	select AT32_CAP
+	---help---
+		Reserve timer 8 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+if AT32_TIM8_CAP
+
+config AT32_TIM8_CHANNEL
+	int "TIM8 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM8 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config AT32_TIM8_CLOCK
+	int "TIM8 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # AT32_TIM8_CAP
+
+config AT32_TIM9_CAP
+	bool "TIM9 Capture"
+	default n
+	depends on AT32_TIM9
+	select AT32_CAP
+	---help---
+		Reserve timer 9 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+if AT32_TIM9_CAP
+
+config AT32_TIM9_CHANNEL
+	int "TIM9 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM9 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config AT32_TIM9_CLOCK
+	int "TIM9 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # AT32_TIM9_CAP
+
+config AT32_TIM10_CAP
+	bool "TIM10 Capture"
+	default n
+	depends on AT32_TIM10
+	select AT32_CAP
+	---help---
+		Reserve timer 10 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+if AT32_TIM10_CAP
+
+config AT32_TIM10_CHANNEL
+	int "TIM10 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM10 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config AT32_TIM10_CLOCK
+	int "TIM10 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # AT32_TIM10_CAP
+
+config AT32_TIM11_CAP
+	bool "TIM11 Capture"
+	default n
+	depends on AT32_TIM11
+	select AT32_CAP
+	---help---
+		Reserve timer 11 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+if AT32_TIM11_CAP
+
+config AT32_TIM11_CHANNEL
+	int "TIM11 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM11 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config AT32_TIM11_CLOCK
+	int "TIM11 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # AT32_TIM11_CAP
+
+config AT32_TIM12_CAP
+	bool "TIM12 Capture"
+	default n
+	depends on AT32_TIM12
+	select AT32_CAP
+	---help---
+		Reserve timer 12 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+if AT32_TIM12_CAP
+
+config AT32_TIM12_CHANNEL
+	int "TIM12 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM12 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config AT32_TIM12_CLOCK
+	int "TIM12 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # AT32_TIM12_CAP
+
+config AT32_TIM13_CAP
+	bool "TIM13 Capture"
+	default n
+	depends on AT32_TIM13
+	select AT32_CAP
+	---help---
+		Reserve timer 13 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+if AT32_TIM13_CAP
+
+config AT32_TIM13_CHANNEL
+	int "TIM13 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM13 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config AT32_TIM13_CLOCK
+	int "TIM13 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # AT32_TIM13_CAP
+
+config AT32_TIM14_CAP
+	bool "TIM14 Capture"
+	default n
+	depends on AT32_TIM14
+	select AT32_CAP
+	---help---
+		Reserve timer 14 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+if AT32_TIM14_CAP
+
+config AT32_TIM14_CHANNEL
+	int "TIM14 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM14 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config AT32_TIM14_CLOCK
+	int "TIM14 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # AT32_TIM14_CAP
+
+menu "AT32 TIMx Outputs Configuration"
+
+config AT32_TIM1_CH1POL
+	int "TIM1 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM1_CH1OUT
+	---help---
+		TIM1 Channel 1 output polarity
+
+config AT32_TIM1_CH1IDLE
+	int "TIM1 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM1_CH1OUT
+	---help---
+		TIM1 Channel 1 output IDLE
+
+config AT32_TIM1_CH1NPOL
+	int "TIM1 Channel 1 Complementary Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM1_CH1NOUT
+	---help---
+		TIM1 Channel 1 Complementary Output polarity
+
+config AT32_TIM1_CH1NIDLE
+	int "TIM1 Channel 1 Complementary Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM1_CH1NOUT
+	---help---
+		TIM1 Channel 1 Complementary Output IDLE
+
+config AT32_TIM1_CH2POL
+	int "TIM1 Channel 2 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM1_CH2OUT
+	---help---
+		TIM1 Channel 2 output polarity
+
+config AT32_TIM1_CH2IDLE
+	int "TIM1 Channel 2 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM1_CH2OUT
+	---help---
+		TIM1 Channel 2 output IDLE
+
+config AT32_TIM1_CH2NPOL
+	int "TIM1 Channel 2 Complementary Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM1_CH2NOUT
+	---help---
+		TIM1 Channel 2 Complementary Output polarity
+
+config AT32_TIM1_CH2NIDLE
+	int "TIM1 Channel 2 Complementary Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM1_CH2NOUT
+	---help---
+		TIM1 Channel 2 Complementary Output IDLE
+
+config AT32_TIM1_CH3POL
+	int "TIM1 Channel 3 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM1_CH3OUT
+	---help---
+		TIM1 Channel 3 output polarity
+
+config AT32_TIM1_CH3IDLE
+	int "TIM1 Channel 3 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM1_CH3OUT
+	---help---
+		TIM1 Channel 3 output IDLE
+
+config AT32_TIM1_CH3NPOL
+	int "TIM1 Channel 3 Complementary Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM1_CH3NOUT
+	---help---
+		TIM1 Channel 3 Complementary Output polarity
+
+config AT32_TIM1_CH3NIDLE
+	int "TIM1 Channel 3 Complementary Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM1_CH3NOUT
+	---help---
+		TIM1 Channel 3 Complementary Output IDLE
+
+config AT32_TIM1_CH4POL
+	int "TIM1 Channel 4 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM1_CH4OUT
+	---help---
+		TIM1 Channel 4 output polarity
+
+config AT32_TIM1_CH4IDLE
+	int "TIM1 Channel 4 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM1_CH4OUT
+	---help---
+		TIM1 Channel 4 output IDLE
+
+config AT32_TIM1_CH5POL
+	int "TIM1 Channel 5 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM1_CH5OUT
+	---help---
+		TIM1 Channel 5 output polarity
+
+config AT32_TIM1_CH5IDLE
+	int "TIM1 Channel 5 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM1_CH5OUT
+	---help---
+		TIM1 Channel 5 output IDLE
+
+config AT32_TIM1_CH6POL
+	int "TIM1 Channel 6 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM1_CH6OUT
+	---help---
+		TIM1 Channel 6 output polarity
+
+config AT32_TIM1_CH6IDLE
+	int "TIM1 Channel 6 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM1_CH6OUT
+	---help---
+		TIM1 Channel 6 output IDLE
+
+config AT32_TIM2_CH1POL
+	int "TIM2 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM2_CH1OUT
+	---help---
+		TIM2 Channel 1 output polarity
+
+config AT32_TIM2_CH1IDLE
+	int "TIM2 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM2_CH1OUT
+	---help---
+		TIM2 Channel 1 output IDLE
+
+config AT32_TIM2_CH2POL
+	int "TIM2 Channel 2 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM2_CH2OUT
+	---help---
+		TIM2 Channel 2 output polarity
+
+config AT32_TIM2_CH2IDLE
+	int "TIM2 Channel 2 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM2_CH2OUT
+	---help---
+		TIM2 Channel 2 output IDLE
+
+config AT32_TIM2_CH3POL
+	int "TIM2 Channel 3 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM2_CH3OUT
+	---help---
+		TIM2 Channel 3 output polarity
+
+config AT32_TIM2_CH3IDLE
+	int "TIM2 Channel 3 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM2_CH3OUT
+	---help---
+		TIM2 Channel 3 output IDLE
+
+config AT32_TIM2_CH4POL
+	int "TIM2 Channel 4 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM2_CH4OUT
+	---help---
+		TIM2 Channel 4 output polarity
+
+config AT32_TIM2_CH4IDLE
+	int "TIM2 Channel 4 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM2_CH4OUT
+	---help---
+		TIM2 Channel 4 output IDLE
+
+config AT32_TIM3_CH1POL
+	int "TIM3 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM3_CH1OUT
+	---help---
+		TIM3 Channel 1 output polarity
+
+config AT32_TIM3_CH1IDLE
+	int "TIM3 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM3_CH1OUT
+	---help---
+		TIM3 Channel 1 output IDLE
+
+config AT32_TIM3_CH2POL
+	int "TIM3 Channel 2 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM3_CH2OUT
+	---help---
+		TIM3 Channel 2 output polarity
+
+config AT32_TIM3_CH2IDLE
+	int "TIM3 Channel 2 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM3_CH2OUT
+	---help---
+		TIM3 Channel 2 output IDLE
+
+config AT32_TIM3_CH3POL
+	int "TIM3 Channel 3 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM3_CH3OUT
+	---help---
+		TIM3 Channel 3 output polarity
+
+config AT32_TIM3_CH3IDLE
+	int "TIM3 Channel 3 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM3_CH3OUT
+	---help---
+		TIM3 Channel 3 output IDLE
+
+config AT32_TIM3_CH4POL
+	int "TIM3 Channel 4 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM3_CH4OUT
+	---help---
+		TIM3 Channel 4 output polarity
+
+config AT32_TIM3_CH4IDLE
+	int "TIM3 Channel 4 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM3_CH4OUT
+	---help---
+		TIM3 Channel 4 output IDLE
+
+config AT32_TIM4_CH1POL
+	int "TIM4 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM4_CH1OUT
+	---help---
+		TIM4 Channel 1 output polarity
+
+config AT32_TIM4_CH1IDLE
+	int "TIM4 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM4_CH1OUT
+	---help---
+		TIM4 Channel 1 output IDLE
+
+config AT32_TIM4_CH2POL
+	int "TIM4 Channel 2 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM4_CH2OUT
+	---help---
+		TIM4 Channel 2 output polarity
+
+config AT32_TIM4_CH2IDLE
+	int "TIM4 Channel 2 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM4_CH2OUT
+	---help---
+		TIM4 Channel 2 output IDLE
+
+config AT32_TIM4_CH3POL
+	int "TIM4 Channel 3 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM4_CH3OUT
+	---help---
+		TIM4 Channel 3 output polarity
+
+config AT32_TIM4_CH3IDLE
+	int "TIM4 Channel 3 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM4_CH3OUT
+	---help---
+		TIM4 Channel 3 output IDLE
+
+config AT32_TIM4_CH4POL
+	int "TIM4 Channel 4 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM4_CH4OUT
+	---help---
+		TIM4 Channel 4 output polarity
+
+config AT32_TIM4_CH4IDLE
+	int "TIM4 Channel 4 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM4_CH4OUT
+	---help---
+		TIM4 Channel 4 output IDLE
+
+config AT32_TIM5_CH1POL
+	int "TIM5 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM5_CH1OUT
+	---help---
+		TIM5 Channel 1 output polarity
+
+config AT32_TIM5_CH1IDLE
+	int "TIM5 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM5_CH1OUT
+	---help---
+		TIM5 Channel 1 output IDLE
+
+config AT32_TIM5_CH2POL
+	int "TIM5 Channel 2 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM5_CH2OUT
+	---help---
+		TIM5 Channel 2 output polarity
+
+config AT32_TIM5_CH2IDLE
+	int "TIM5 Channel 2 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM5_CH2OUT
+	---help---
+		TIM5 Channel 2 output IDLE
+
+config AT32_TIM5_CH3POL
+	int "TIM5 Channel 3 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM5_CH3OUT
+	---help---
+		TIM5 Channel 3 output polarity
+
+config AT32_TIM5_CH3IDLE
+	int "TIM5 Channel 3 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM5_CH3OUT
+	---help---
+		TIM5 Channel 3 output IDLE
+
+config AT32_TIM5_CH4POL
+	int "TIM5 Channel 4 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM5_CH4OUT
+	---help---
+		TIM5 Channel 4 output polarity
+
+config AT32_TIM5_CH4IDLE
+	int "TIM5 Channel 4 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM5_CH4OUT
+	---help---
+		TIM5 Channel 4 output IDLE
+
+config AT32_TIM8_CH1POL
+	int "TIM8 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM8_CH1OUT
+	---help---
+		TIM8 Channel 1 output polarity
+
+config AT32_TIM8_CH1IDLE
+	int "TIM8 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM8_CH1OUT
+	---help---
+		TIM8 Channel 1 output IDLE
+
+config AT32_TIM8_CH1NPOL
+	int "TIM8 Channel 1 Complementary Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM8_CH1NOUT
+	---help---
+		TIM8 Channel 1 Complementary Output polarity
+
+config AT32_TIM8_CH1NIDLE
+	int "TIM8 Channel 1 Complementary Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM8_CH1NOUT
+	---help---
+		TIM8 Channel 1 Complementary Output IDLE
+
+config AT32_TIM8_CH2POL
+	int "TIM8 Channel 2 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM8_CH2OUT
+	---help---
+		TIM8 Channel 2 output polarity
+
+config AT32_TIM8_CH2IDLE
+	int "TIM8 Channel 2 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM8_CH2OUT
+	---help---
+		TIM8 Channel 2 output IDLE
+
+config AT32_TIM8_CH2NPOL
+	int "TIM8 Channel 2 Complementary Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM8_CH2NOUT
+	---help---
+		TIM8 Channel 2 Complementary Output polarity
+
+config AT32_TIM8_CH2NIDLE
+	int "TIM8 Channel 2 Complementary Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM8_CH2NOUT
+	---help---
+		TIM8 Channel 2 Complementary Output IDLE
+
+config AT32_TIM8_CH3POL
+	int "TIM8 Channel 3 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM8_CH3OUT
+	---help---
+		TIM8 Channel 3 output polarity
+
+config AT32_TIM8_CH3IDLE
+	int "TIM8 Channel 3 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM8_CH3OUT
+	---help---
+		TIM8 Channel 3 output IDLE
+
+config AT32_TIM8_CH3NPOL
+	int "TIM8 Channel 3 Complementary Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM8_CH3NOUT
+	---help---
+		TIM8 Channel 3 Complementary Output polarity
+
+config AT32_TIM8_CH3NIDLE
+	int "TIM8 Channel 3 Complementary Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM8_CH3NOUT
+	---help---
+		TIM8 Channel 3 Complementary Output IDLE
+
+config AT32_TIM8_CH4POL
+	int "TIM8 Channel 4 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM8_CH4OUT
+	---help---
+		TIM8 Channel 4 output polarity
+
+config AT32_TIM8_CH4IDLE
+	int "TIM8 Channel 4 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM8_CH4OUT
+	---help---
+		TIM8 Channel 4 output IDLE
+
+config AT32_TIM8_CH5POL
+	int "TIM8 Channel 5 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM8_CH5OUT
+	---help---
+		TIM8 Channel 5 output polarity
+
+config AT32_TIM8_CH5IDLE
+	int "TIM8 Channel 5 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM8_CH5OUT
+	---help---
+		TIM8 Channel 5 output IDLE
+
+config AT32_TIM8_CH6POL
+	int "TIM8 Channel 6 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM8_CH6OUT
+	---help---
+		TIM8 Channel 6 output polarity
+
+config AT32_TIM8_CH6IDLE
+	int "TIM8 Channel 6 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM8_CH6OUT
+	---help---
+		TIM8 Channel 6 output IDLE
+
+config AT32_TIM9_CH1POL
+	int "TIM9 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM9_CH1OUT
+	---help---
+		TIM9 Channel 1 output polarity
+
+config AT32_TIM9_CH1IDLE
+	int "TIM9 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM9_CH1OUT
+	---help---
+		TIM9 Channel 1 output IDLE
+
+config AT32_TIM9_CH2POL
+	int "TIM9 Channel 2 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM9_CH2OUT
+	---help---
+		TIM9 Channel 2 output polarity
+
+config AT32_TIM9_CH2IDLE
+	int "TIM9 Channel 2 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM9_CH2OUT
+	---help---
+		TIM9 Channel 2 output IDLE
+
+config AT32_TIM10_CH1POL
+	int "TIM10 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM10_CH1OUT
+	---help---
+		TIM10 Channel 1 output polarity
+
+config AT32_TIM10_CH1IDLE
+	int "TIM10 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM10_CH1OUT
+	---help---
+		TIM10 Channel 1 output IDLE
+
+config AT32_TIM11_CH1POL
+	int "TIM11 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM11_CH1OUT
+	---help---
+		TIM11 Channel 1 output polarity
+
+config AT32_TIM11_CH1IDLE
+	int "TIM11 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM11_CH1OUT
+	---help---
+		TIM11 Channel 1 output IDLE
+
+config AT32_TIM12_CH1POL
+	int "TIM12 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM12_CH1OUT
+	---help---
+		TIM12 Channel 1 output polarity
+
+config AT32_TIM12_CH1IDLE
+	int "TIM12 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM12_CH1OUT
+	---help---
+		TIM12 Channel 1 output IDLE
+
+config AT32_TIM12_CH2POL
+	int "TIM12 Channel 2 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM12_CH2OUT
+	---help---
+		TIM12 Channel 2 output polarity
+
+config AT32_TIM12_CH2IDLE
+	int "TIM12 Channel 2 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM12_CH2OUT
+	---help---
+		TIM12 Channel 2 output IDLE
+
+config AT32_TIM13_CH1POL
+	int "TIM13 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM13_CH1OUT
+	---help---
+		TIM13 Channel 1 output polarity
+
+config AT32_TIM13_CH1IDLE
+	int "TIM13 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM13_CH1OUT
+	---help---
+		TIM13 Channel 1 output IDLE
+
+config AT32_TIM14_CH1POL
+	int "TIM14 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM14_CH1OUT
+	---help---
+		TIM14 Channel 1 output polarity
+
+config AT32_TIM14_CH1IDLE
+	int "TIM14 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM14_CH1OUT
+	---help---
+		TIM14 Channel 1 output IDLE
+
+config AT32_TIM15_CH1POL
+	int "TIM15 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM15_CH1OUT
+	---help---
+		TIM15 Channel 1 output polarity
+
+config AT32_TIM15_CH1IDLE
+	int "TIM15 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM15_CH1OUT
+	---help---
+		TIM15 Channel 1 output IDLE
+
+config AT32_TIM15_CH1NPOL
+	int "TIM15 Channel 1 Complementary Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM15_CH1NOUT
+	---help---
+		TIM15 Channel 1 Complementary Output polarity
+
+config AT32_TIM15_CH1NIDLE
+	int "TIM15 Channel 1 Complementary Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM15_CH1NOUT
+	---help---
+		TIM15 Channel 1 Complementary Output IDLE
+
+config AT32_TIM15_CH2POL
+	int "TIM15 Channel 2 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM15_CH2OUT
+	---help---
+		TIM15 Channel 2 output polarity
+
+config AT32_TIM15_CH2IDLE
+	int "TIM15 Channel 2 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM15_CH2OUT
+	---help---
+		TIM15 Channel 2 output IDLE
+
+config AT32_TIM15_CH2NPOL
+	int "TIM15 Channel 2 Complementary Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM15_CH2NOUT
+	---help---
+		TIM15 Channel 2 Complementary Output polarity
+
+config AT32_TIM15_CH2NIDLE
+	int "TIM15 Channel 2 Complementary Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM15_CH2NOUT
+	---help---
+		TIM15 Channel 2 Complementary Output IDLE
+
+config AT32_TIM16_CH1POL
+	int "TIM16 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM16_CH1OUT
+	---help---
+		TIM16 Channel 1 output polarity
+
+config AT32_TIM16_CH1IDLE
+	int "TIM16 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM16_CH1OUT
+	---help---
+		TIM16 Channel 1 output IDLE
+
+config AT32_TIM17_CH1POL
+	int "TIM17 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM17_CH1OUT
+	---help---
+		TIM17 Channel 1 output polarity
+
+config AT32_TIM17_CH1IDLE
+	int "TIM17 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM17_CH1OUT
+	---help---
+		TIM17 Channel 1 output IDLE
+
+config AT32_TIM20_CH1POL
+	int "TIM20 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM20_CH1OUT
+	---help---
+		TIM20 Channel 1 output polarity
+
+config AT32_TIM20_CH1IDLE
+	int "TIM20 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM20_CH1OUT
+	---help---
+		TIM20 Channel 1 output IDLE
+
+config AT32_TIM20_CH1NPOL
+	int "TIM20 Channel 1 Complementary Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM20_CH1NOUT
+	---help---
+		TIM20 Channel 1 Complementary Output polarity
+
+config AT32_TIM20_CH1NIDLE
+	int "TIM20 Channel 1 Complementary Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM20_CH1NOUT
+	---help---
+		TIM20 Channel 1 Complementary Output IDLE
+
+config AT32_TIM20_CH2POL
+	int "TIM20 Channel 2 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM20_CH2OUT
+	---help---
+		TIM20 Channel 2 output polarity
+
+config AT32_TIM20_CH2IDLE
+	int "TIM20 Channel 2 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM20_CH2OUT
+	---help---
+		TIM20 Channel 2 output IDLE
+
+config AT32_TIM20_CH2NPOL
+	int "TIM20 Channel 2 Complementary Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM20_CH2NOUT
+	---help---
+		TIM20 Channel 2 Complementary Output polarity
+
+config AT32_TIM20_CH2NIDLE
+	int "TIM20 Channel 2 Complementary Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM20_CH2NOUT
+	---help---
+		TIM20 Channel 2 Complementary Output IDLE
+
+config AT32_TIM20_CH3POL
+	int "TIM20 Channel 3 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM20_CH3OUT
+	---help---
+		TIM20 Channel 3 output polarity
+
+config AT32_TIM20_CH3IDLE
+	int "TIM20 Channel 3 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM20_CH3OUT
+	---help---
+		TIM20 Channel 3 output IDLE
+
+config AT32_TIM20_CH3NPOL
+	int "TIM20 Channel 3 Complementary Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM20_CH3NOUT
+	---help---
+		TIM20 Channel 3 Complementary Output polarity
+
+config AT32_TIM20_CH3NIDLE
+	int "TIM20 Channel 3 Complementary Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM20_CH3NOUT
+	---help---
+		TIM20 Channel 3 Complementary Output IDLE
+
+config AT32_TIM20_CH4POL
+	int "TIM20 Channel 4 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM20_CH4OUT
+	---help---
+		TIM20 Channel 4 output polarity
+
+config AT32_TIM20_CH4IDLE
+	int "TIM20 Channel 4 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM20_CH4OUT
+	---help---
+		TIM20 Channel 4 output IDLE
+
+config AT32_TIM20_CH5POL
+	int "TIM20 Channel 5 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM20_CH5OUT
+	---help---
+		TIM20 Channel 5 output polarity
+
+config AT32_TIM20_CH5IDLE
+	int "TIM20 Channel 5 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM20_CH5OUT
+	---help---
+		TIM20 Channel 5 output IDLE
+
+config AT32_TIM20_CH6POL
+	int "TIM20 Channel 6 Output polarity"
+	default 0
+	range 0 1
+	depends on AT32_TIM20_CH6OUT
+	---help---
+		TIM20 Channel 6 output polarity
+
+config AT32_TIM20_CH6IDLE
+	int "TIM20 Channel 6 Output IDLE"
+	default 0
+	range 0 1
+	depends on AT32_TIM20_CH6OUT
+	---help---
+		TIM20 Channel 6 output IDLE
+
+endmenu #AT32 TIMx Outputs Configuration
+
+endmenu # Timer Configuration
+
+menu "ADC Configuration"
+	depends on AT32_ADC
+
+config AT32_ADC1_RESOLUTION
+	int "ADC1 resolution"
+	depends on AT32_ADC1 && !AT32_HAVE_IP_ADC_V1_BASIC
+	default 0
+	range 0 3
+	---help---
+		ADC1 resolution. 0 - 12 bit, 1 - 10 bit, 2 - 8 bit, 3 - 6 bit
+
+config AT32_ADC2_RESOLUTION
+	int "ADC2 resolution"
+	depends on AT32_ADC2 && !AT32_HAVE_IP_ADC_V1_BASIC
+	default 0
+	range 0 3
+	---help---
+		ADC2 resolution. 0 - 12 bit, 1 - 10 bit, 2 - 8 bit, 3 - 6 bit
+
+config AT32_ADC3_RESOLUTION
+	int "ADC3 resolution"
+	depends on AT32_ADC3 && !AT32_HAVE_IP_ADC_V1_BASIC
+	default 0
+	range 0 3
+	---help---
+		ADC3 resolution. 0 - 12 bit, 1 - 10 bit, 2 - 8 bit, 3 - 6 bit
+
+config AT32_ADC4_RESOLUTION
+	int "ADC4 resolution"
+	depends on AT32_ADC4 && !AT32_HAVE_IP_ADC_V1_BASIC
+	default 0
+	range 0 3
+	---help---
+		ADC4 resolution. 0 - 12 bit, 1 - 10 bit, 2 - 8 bit, 3 - 6 bit
+
+config AT32_ADC5_RESOLUTION
+	int "ADC5 resolution"
+	depends on AT32_ADC5 && !AT32_HAVE_IP_ADC_V1_BASIC
+	default 0
+	range 0 3
+	---help---
+		ADC5 resolution. 0 - 12 bit, 1 - 10 bit, 2 - 8 bit, 3 - 6 bit
+
+config AT32_ADC_MAX_SAMPLES
+	int "The maximum number of channels that can be sampled"
+	default 16
+	---help---
+		The maximum number of samples which can be handled without
+		overrun depends on various factors. This is the user's
+		responsibility to correctly select this value.
+		Since the interface to update the sampling time is available
+		for all supported devices, the user can change the default
+		values in the board initialization logic and avoid ADC overrun.
+
+config AT32_ADC_NO_STARTUP_CONV
+	bool "Do not start conversion when opening ADC device"
+	default n
+	---help---
+		Do not start conversion when opening ADC device.
+
+config AT32_ADC_NOIRQ
+	bool "Do not use default ADC interrupts"
+	default n
+	---help---
+		Do not use default ADC interrupts handlers.
+
+config AT32_ADC_LL_OPS
+	bool "ADC low-level operations"
+	default n
+	---help---
+		Enable low-level ADC ops.
+
+config AT32_ADC_CHANGE_SAMPLETIME
+	bool "ADC sample time configuration"
+	default n
+	depends on AT32_ADC_LL_OPS
+	---help---
+		Enable ADC sample time configuration (SMPRx registers).
+
+config AT32_ADC1_DMA
+	bool "ADC1 DMA"
+	depends on AT32_ADC1 && AT32_HAVE_ADC1_DMA
+	default n
+	---help---
+		If DMA is selected, then the ADC may be configured to support
+		DMA transfer, which is necessary if multiple channels are read
+		or if very high trigger frequencies are used.
+
+config AT32_ADC1_SCAN
+	bool "ADC1 scan mode"
+	depends on AT32_ADC1 && AT32_HAVE_IP_ADC_V1
+	default y if AT32_ADC1_DMA
+	default n
+
+config AT32_ADC1_DMA_CFG
+	int "ADC1 DMA configuration"
+	depends on AT32_ADC1_DMA && !AT32_HAVE_IP_ADC_V1_BASIC
+	range 0 1
+	default 0
+	---help---
+		0 - ADC1 DMA in One Shot Mode, 1 - ADC1 DMA in Circular Mode
+
+config AT32_ADC1_ANIOC_TRIGGER
+	int "ADC1 software trigger (ANIOC_TRIGGER) configuration"
+	depends on AT32_ADC1
+	range 1 3
+	default 3
+	---help---
+		1 - ANIOC_TRIGGER only starts regular conversion
+		2 - ANIOC_TRIGGER only starts injected conversion
+		3 - ANIOC_TRIGGER starts both regular and injected conversions
+
+config AT32_ADC2_DMA
+	bool "ADC2 DMA"
+	depends on AT32_ADC2 && AT32_HAVE_ADC2_DMA
+	default n
+	---help---
+		If DMA is selected, then the ADC may be configured to support
+		DMA transfer, which is necessary if multiple channels are read
+		or if very high trigger frequencies are used.
+
+config AT32_ADC2_SCAN
+	bool "ADC2 scan mode"
+	depends on AT32_ADC2 && AT32_HAVE_IP_ADC_V1
+	default y if AT32_ADC2_DMA
+	default n
+
+config AT32_ADC2_DMA_CFG
+	int "ADC2 DMA configuration"
+	depends on AT32_ADC2_DMA && !AT32_HAVE_IP_ADC_V1_BASIC
+	range 0 1
+	default 0
+	---help---
+		0 - ADC2 DMA in One Shot Mode, 1 - ADC2 DMA in Circular Mode
+
+config AT32_ADC2_ANIOC_TRIGGER
+	int "ADC2 software trigger (ANIOC_TRIGGER) configuration"
+	depends on AT32_ADC2
+	range 1 3
+	default 3
+	---help---
+		1 - ANIOC_TRIGGER only starts regular conversion
+		2 - ANIOC_TRIGGER only starts injected conversion
+		3 - ANIOC_TRIGGER starts both regular and injected conversions
+
+config AT32_ADC3_DMA
+	bool "ADC3 DMA"
+	depends on AT32_ADC3 && AT32_HAVE_ADC3_DMA
+	default n
+	---help---
+		If DMA is selected, then the ADC may be configured to support
+		DMA transfer, which is necessary if multiple channels are read
+		or if very high trigger frequencies are used.
+
+config AT32_ADC3_SCAN
+	bool "ADC3 scan mode"
+	depends on AT32_ADC3 && AT32_HAVE_IP_ADC_V1
+	default y if AT32_ADC3_DMA
+	default n
+
+config AT32_ADC3_DMA_CFG
+	int "ADC3 DMA configuration"
+	depends on AT32_ADC3_DMA && !AT32_HAVE_IP_ADC_V1_BASIC
+	range 0 1
+	default 0
+	---help---
+		0 - ADC3 DMA in One Shot Mode, 1 - ADC3 DMA in Circular Mode
+
+config AT32_ADC3_ANIOC_TRIGGER
+	int "ADC3 software trigger (ANIOC_TRIGGER) configuration"
+	depends on AT32_ADC3
+	range 1 3
+	default 3
+	---help---
+		1 - ANIOC_TRIGGER only starts regular conversion
+		2 - ANIOC_TRIGGER only starts injected conversion
+		3 - ANIOC_TRIGGER starts both regular and injected conversions
+
+config AT32_ADC4_DMA
+	bool "ADC4 DMA"
+	depends on AT32_ADC4 && AT32_HAVE_ADC4_DMA
+	default n
+	---help---
+		If DMA is selected, then the ADC may be configured to support
+		DMA transfer, which is necessary if multiple channels are read
+		or if very high trigger frequencies are used.
+
+config AT32_ADC4_DMA_CFG
+	int "ADC4 DMA configuration"
+	depends on AT32_ADC4_DMA && !AT32_HAVE_IP_ADC_V1_BASIC
+	range 0 1
+	default 0
+	---help---
+		0 - ADC4 DMA in One Shot Mode, 1 - ADC4 DMA in Circular Mode
+
+config AT32_ADC4_ANIOC_TRIGGER
+	int "ADC4 software trigger (ANIOC_TRIGGER) configuration"
+	depends on AT32_ADC4
+	range 1 3
+	default 3
+	---help---
+		1 - ANIOC_TRIGGER only starts regular conversion
+		2 - ANIOC_TRIGGER only starts injected conversion
+		3 - ANIOC_TRIGGER starts both regular and injected conversions
+
+config AT32_ADC5_DMA
+	bool "ADC5 DMA"
+	depends on AT32_ADC5 && AT32_HAVE_ADC5_DMA
+	default n
+	---help---
+		If DMA is selected, then the ADC may be configured to support
+		DMA transfer, which is necessary if multiple channels are read
+		or if very high trigger frequencies are used.
+
+config AT32_ADC5_DMA_CFG
+	int "ADC5 DMA configuration"
+	depends on AT32_ADC5_DMA && !AT32_HAVE_IP_ADC_V1_BASIC
+	range 0 1
+	default 0
+	---help---
+		0 - ADC5 DMA in One Shot Mode, 1 - ADC5 DMA in Circular Mode
+
+config AT32_ADC1_INJECTED_CHAN
+	int "ADC1 injected channels"
+	depends on AT32_ADC1
+	range 0 4
+	default 0
+	---help---
+		Support for ADC1 injected channels.
+
+config AT32_ADC2_INJECTED_CHAN
+	int "ADC2 injected channels"
+	depends on AT32_ADC2
+	range 0 4
+	default 0
+	---help---
+		Support for ADC2 injected channels.
+
+config AT32_ADC3_INJECTED_CHAN
+	int "ADC3 injected channels"
+	depends on AT32_ADC3
+	range 0 4
+	default 0
+	---help---
+		Support for ADC3 injected channels.
+
+config AT32_ADC4_INJECTED_CHAN
+	int "ADC4 injected channels"
+	depends on AT32_ADC4
+	range 0 4
+	default 0
+	---help---
+		Support for ADC4 injected channels.
+
+config AT32_ADC5_INJECTED_CHAN
+	int "ADC5 injected channels"
+	depends on AT32_ADC5
+	range 0 4
+	default 0
+	---help---
+		Support for ADC5 injected channels.
+
+config AT32_ADC1_EXTSEL
+	bool "ADC1 external trigger for regular group"
+	depends on AT32_ADC1 && !AT32_HAVE_ADC1_TIMER
+	default n
+	---help---
+		Enable EXTSEL for ADC1.
+
+config AT32_ADC2_EXTSEL
+	bool "ADC2 external trigger for regular group"
+	depends on AT32_ADC2 && !AT32_HAVE_ADC2_TIMER
+	default n
+	---help---
+		Enable EXTSEL for ADC2.
+
+config AT32_ADC3_EXTSEL
+	bool "ADC3 external trigger for regular group"
+	depends on AT32_ADC3 && !AT32_HAVE_ADC3_TIMER
+	default n
+	---help---
+		Enable EXTSEL for ADC3.
+
+config AT32_ADC4_EXTSEL
+	bool "ADC4 external trigger for regular group"
+	depends on AT32_ADC4 && !AT32_HAVE_ADC4_TIMER
+	default n
+	---help---
+		Enable EXTSEL for ADC4.
+
+config AT32_ADC5_EXTSEL
+	bool "ADC5 external trigger for regular group"
+	depends on AT32_ADC5 && !AT32_HAVE_ADC5_TIMER
+	default n
+	---help---
+		Enable EXTSEL for ADC5.
+
+config AT32_ADC1_JEXTSEL
+	bool "ADC1 external trigger for injected group"
+	depends on AT32_ADC1
+	default n
+	---help---
+		Enable JEXTSEL for ADC1.
+
+config AT32_ADC2_JEXTSEL
+	bool "ADC2 external trigger for injected group"
+	depends on AT32_ADC2
+	default n
+	---help---
+		Enable JEXTSEL for ADC2.
+
+config AT32_ADC3_JEXTSEL
+	bool "ADC3 external trigger for injected group"
+	depends on AT32_ADC3
+	default n
+	---help---
+		Enable JEXTSEL for ADC3.
+
+config AT32_ADC4_JEXTSEL
+	bool "ADC4 external trigger for injected group"
+	depends on AT32_ADC4
+	default n
+	---help---
+		Enable JEXTSEL for ADC4.
+
+config AT32_ADC5_JEXTSEL
+	bool "ADC5 external trigger for injected group"
+	depends on AT32_ADC5
+	default n
+	---help---
+		Enable JEXTSEL for ADC5.
+
+endmenu
+
+
+config AT32_USART
+	bool
+	default n
+
+config AT32_USART_RXDMA
+	bool
+	default n
+
+config AT32_SERIALDRIVER
+	bool
+	default n
+
+config AT32_1WIREDRIVER
+	bool
+	default n
+
+config AT32_HCIUART
+	bool
+	default n
+
+config AT32_HCIUART_RXDMA
+	bool
+	default n
+
+menu "U[S]ART Configuration"
+	depends on AT32_USART
+
+comment "U[S]ART Device Configuration"
+
+choice
+	prompt "USART1 Driver Configuration"
+	default AT32_USART1_SERIALDRIVER
+	depends on AT32_USART1
+
+config AT32_USART1_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select AT32_SERIALDRIVER
+
+config AT32_USART1_1WIREDRIVER
+	bool "1-Wire driver"
+	select AT32_1WIREDRIVER
+
+config AT32_USART1_HCIUART
+	bool "Bluetooth HCI-UART"
+	select AT32_HCIUART
+	depends on WIRELESS_BLUETOOTH
+
+endchoice # USART1 Driver Configuration
+
+if AT32_USART1_SERIALDRIVER
+
+config USART1_RS485
+	bool "RS-485 on USART1"
+	default n
+	---help---
+		Enable RS-485 interface on USART1. Your board config will have to
+		provide GPIO_USART1_RS485_DIR pin definition. Currently it cannot be
+		used with USART1_RXDMA.
+
+config USART1_RS485_DIR_POLARITY
+	int "USART1 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART1_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART1. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config USART1_RXDMA
+	bool "USART1 Rx DMA"
+	default n
+	depends on  AT32_DMA1 || AT32_DMA2
+	select AT32_USART_RXDMA
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config USART1_TXDMA
+	bool "USART1 Tx DMA"
+	default n
+	depends on AT32_DMA1 || AT32_DMA2
+	select AT32_USART_TXDMA
+	---help---
+		In high data rate usage, Tx DMA may reduce CPU load
+
+endif # AT32_USART1_SERIALDRIVER
+
+if AT32_USART1_HCIUART
+
+config AT32_HCIUART1_RXBUFSIZE
+	int "HCI UART1 Rx buffer size"
+	default 80
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.  Ideally this should be at least
+		the size of the largest frame that can be received
+
+config AT32_HCIUART1_TXBUFSIZE
+	int "HCI UART1 Transmit buffer size"
+	default 80
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.  Ideally this should be at least
+		the size of the largest frame that can be sent
+
+config AT32_HCIUART1_BAUD
+	int "HCI UART1 initial BAUD rate"
+	default 115200
+	---help---
+		The configured initial BAUD of the HCIR USART used during bringup.
+		In most cases this initial rate can be increased by the upper half
+		HCI UART driver using vendor-specifi HCI UART commands.
+
+config AT32_HCIUART1_RXDMA
+	bool "HCI UART1 Rx DMA"
+	default n
+	depends on AT32_DMA1 || AT32_DMA2
+	select AT32_HCIUART_RXDMA
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # AT32_USART1_HCIUART
+
+choice
+	prompt "USART2 Driver Configuration"
+	default AT32_USART2_SERIALDRIVER
+	depends on AT32_USART2
+
+config AT32_USART2_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART2_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select AT32_SERIALDRIVER
+
+config AT32_USART2_1WIREDRIVER
+	bool "1-Wire driver"
+	select AT32_1WIREDRIVER
+
+config AT32_USART2_HCIUART
+	bool "Bluetooth HCI-UART"
+	select AT32_HCIUART
+	depends on WIRELESS_BLUETOOTH
+
+endchoice # USART2 Driver Configuration
+
+if AT32_USART2_SERIALDRIVER
+
+config USART2_RS485
+	bool "RS-485 on USART2"
+	default n
+	---help---
+		Enable RS-485 interface on USART2. Your board config will have to
+		provide GPIO_USART2_RS485_DIR pin definition. Currently it cannot be
+		used with USART2_RXDMA.
+
+config USART2_RS485_DIR_POLARITY
+	int "USART2 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART2_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART2. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config USART2_RXDMA
+	bool "USART2 Rx DMA"
+	default n
+	depends on AT32_DMA1
+	select AT32_USART_RXDMA
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config USART2_TXDMA
+	bool "USART2 Tx DMA"
+	default n
+	depends on AT32_DMA1
+	select AT32_USART_TXDMA
+	---help---
+		In high data rate usage, Tx DMA may reduce CPU load
+
+endif # AT32_USART2_SERIALDRIVER
+
+if AT32_USART2_HCIUART
+
+config AT32_HCIUART2_RXBUFSIZE
+	int "HCI UART2 Rx buffer size"
+	default 80
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.  Ideally this should be at least
+		the size of the largest frame that can be received
+
+config AT32_HCIUART2_TXBUFSIZE
+	int "HCI UART2 Transmit buffer size"
+	default 80
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.  Ideally this should be at least
+		the size of the largest frame that can be sent
+
+config AT32_HCIUART2_BAUD
+	int "HCI UART2 initial BAUD rate"
+	default 115200
+	---help---
+		The configured initial BAUD of the HCIR USART used during bringup.
+		In most cases this initial rate can be increased by the upper half
+		HCI UART driver using vendor-specifi HCI UART commands.
+
+config AT32_HCIUART2_RXDMA
+	bool "HCI UART2 Rx DMA"
+	default n
+	depends on AT32_DMA1
+	select AT32_HCIUART_RXDMA
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # AT32_USART2_HCIUART
+
+choice
+	prompt "USART3 Driver Configuration"
+	default AT32_USART3_SERIALDRIVER
+	depends on AT32_USART3
+
+config AT32_USART3_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART3_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select AT32_SERIALDRIVER
+
+config AT32_USART3_1WIREDRIVER
+	bool "1-Wire driver"
+	select AT32_1WIREDRIVER
+
+config AT32_USART3_HCIUART
+	bool "Bluetooth HCI-UART"
+	select AT32_HCIUART
+	depends on WIRELESS_BLUETOOTH
+
+endchoice # USART3 Driver Configuration
+
+if AT32_USART3_SERIALDRIVER
+
+config USART3_RS485
+	bool "RS-485 on USART3"
+	default n
+	---help---
+		Enable RS-485 interface on USART3. Your board config will have to
+		provide GPIO_USART3_RS485_DIR pin definition. Currently it cannot be
+		used with USART3_RXDMA.
+
+config USART3_RS485_DIR_POLARITY
+	int "USART3 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART3_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART3. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config USART3_RXDMA
+	bool "USART3 Rx DMA"
+	default n
+	depends on AT32_DMA1
+	select AT32_USART_RXDMA
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config USART3_TXDMA
+	bool "USART3 Tx DMA"
+	default n
+	depends on AT32_DMA1
+	select AT32_USART_TXDMA
+	---help---
+		In high data rate usage, Tx DMA may reduce CPU load
+
+endif # AT32_USART3_SERIALDRIVER
+
+if AT32_USART3_HCIUART
+
+config AT32_HCIUART3_RXBUFSIZE
+	int "HCI UART3 Rx buffer size"
+	default 80
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.  Ideally this should be at least
+		the size of the largest frame that can be received
+
+config AT32_HCIUART3_TXBUFSIZE
+	int "HCI UART3 Transmit buffer size"
+	default 80
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.  Ideally this should be at least
+		the size of the largest frame that can be sent
+
+config AT32_HCIUART3_BAUD
+	int "HCI UART3 initial BAUD rate"
+	default 115200
+	---help---
+		The configured initial BAUD of the HCIR USART used during bringup.
+		In most cases this initial rate can be increased by the upper half
+		HCI UART driver using vendor-specifi HCI UART commands.
+
+config AT32_HCIUART3_RXDMA
+	bool "HCI UART3 Rx DMA"
+	default n
+	depends on AT32_DMA1
+	select AT32_HCIUART_RXDMA
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # AT32_USART3_HCIUART
+
+choice
+	prompt "UART4 Driver Configuration"
+	default AT32_UART4_SERIALDRIVER
+	depends on AT32_UART4
+
+config AT32_UART4_SERIALDRIVER
+	bool "Standard serial driver"
+	select UART4_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select AT32_SERIALDRIVER
+
+config AT32_UART4_1WIREDRIVER
+	bool "1-Wire driver"
+	select AT32_1WIREDRIVER
+
+endchoice # UART1 Driver Configuration
+
+if AT32_UART4_SERIALDRIVER
+
+config UART4_RS485
+	bool "RS-485 on UART4"
+	default n
+	---help---
+		Enable RS-485 interface on UART4. Your board config will have to
+		provide GPIO_UART4_RS485_DIR pin definition. Currently it cannot be
+		used with UART4_RXDMA.
+
+config UART4_RS485_DIR_POLARITY
+	int "UART4 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on UART4_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on UART4. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config UART4_RXDMA
+	bool "UART4 Rx DMA"
+	default n
+	depends on AT32_DMA1
+	select AT32_USART_RXDMA
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config UART4_TXDMA
+	bool "UART4 Tx DMA"
+	default n
+	depends on AT32_DMA1
+	select AT32_USART_TXDMA
+	---help---
+		In high data rate usage, Tx DMA may reduce CPU load
+
+endif # AT32_UART4_SERIALDRIVER
+
+choice
+	prompt "UART5 Driver Configuration"
+	default AT32_UART5_SERIALDRIVER
+	depends on AT32_UART5
+
+config AT32_UART5_SERIALDRIVER
+	bool "Standard serial driver"
+	select UART5_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select AT32_SERIALDRIVER
+
+config AT32_UART5_1WIREDRIVER
+	bool "1-Wire driver"
+	select AT32_1WIREDRIVER
+
+endchoice # UART5 Driver Configuration
+
+if AT32_UART5_SERIALDRIVER
+
+config UART5_RS485
+	bool "RS-485 on UART5"
+	default n
+	---help---
+		Enable RS-485 interface on UART5. Your board config will have to
+		provide GPIO_UART5_RS485_DIR pin definition. Currently it cannot be
+		used with UART5_RXDMA.
+
+config UART5_RS485_DIR_POLARITY
+	int "UART5 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on UART5_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on UART5. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config UART5_RXDMA
+	bool "UART5 Rx DMA"
+	default n
+	depends on AT32_DMA1
+	select AT32_USART_RXDMA
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config UART5_TXDMA
+	bool "UART5 Tx DMA"
+	default n
+	depends on AT32_DMA1
+	select AT32_USART_TXDMA
+	---help---
+		In high data rate usage, Tx DMA may reduce CPU load
+
+endif # AT32_UART5_SERIALDRIVER
+
+choice
+	prompt "USART6 Driver Configuration"
+	default AT32_USART6_SERIALDRIVER
+	depends on AT32_USART6
+
+config AT32_USART6_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART6_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select AT32_SERIALDRIVER
+
+config AT32_USART6_1WIREDRIVER
+	bool "1-Wire driver"
+	select AT32_1WIREDRIVER
+
+config AT32_USART6_HCIUART
+	bool "Bluetooth HCI-UART"
+	select AT32_HCIUART
+	depends on WIRELESS_BLUETOOTH
+
+endchoice # USART6 Driver Configuration
+
+if AT32_USART6_SERIALDRIVER
+
+config USART6_RS485
+	bool "RS-485 on USART6"
+	default n
+	---help---
+		Enable RS-485 interface on USART6. Your board config will have to
+		provide GPIO_USART6_RS485_DIR pin definition. Currently it cannot be
+		used with USART6_RXDMA.
+
+config USART6_RS485_DIR_POLARITY
+	int "USART6 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART6_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART6. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config USART6_RXDMA
+	bool "USART6 Rx DMA"
+	default n
+	depends on AT32_DMA2
+	select AT32_USART_RXDMA
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config USART6_TXDMA
+	bool "USART6 Tx DMA"
+	default n
+	depends on AT32_DMA2
+	select AT32_USART_TXDMA
+	---help---
+		In high data rate usage, Tx DMA may reduce CPU load
+
+endif # AT32_USART6_SERIALDRIVER
+
+if AT32_USART6_HCIUART
+
+config AT32_HCIUART6_RXBUFSIZE
+	int "HCI UART6 Rx buffer size"
+	default 80
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.  Ideally this should be at least
+		the size of the largest frame that can be received
+
+config AT32_HCIUART6_TXBUFSIZE
+	int "HCI UART6 Transmit buffer size"
+	default 80
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.  Ideally this should be at least
+		the size of the largest frame that can be sent
+
+config AT32_HCIUART6_BAUD
+	int "HCI UART6 initial BAUD rate"
+	default 115200
+	---help---
+		The configured initial BAUD of the HCIR USART used during bringup.
+		In most cases this initial rate can be increased by the upper half
+		HCI UART driver using vendor-specifi HCI UART commands.
+
+config AT32_HCIUART6_RXDMA
+	bool "HCI UART6 Rx DMA"
+	default n
+	depends on AT32_DMA1
+	select AT32_HCIUART_RXDMA
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # AT32_USART6_HCIUART
+
+choice
+	prompt "UART7 Driver Configuration"
+	default AT32_UART7_SERIALDRIVER
+	depends on AT32_UART7
+
+config AT32_UART7_SERIALDRIVER
+	bool "Standard serial driver"
+	select UART7_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select AT32_SERIALDRIVER
+
+config AT32_UART7_1WIREDRIVER
+	bool "1-Wire driver"
+	select AT32_1WIREDRIVER
+
+config AT32_UART7_HCIUART
+	bool "Bluetooth HCI-UART"
+	select AT32_HCIUART
+	depends on WIRELESS_BLUETOOTH
+
+endchoice # UART7 Driver Configuration
+
+if AT32_UART7_SERIALDRIVER
+
+config UART7_RS485
+	bool "RS-485 on UART7"
+	default n
+	---help---
+		Enable RS-485 interface on UART7. Your board config will have to
+		provide GPIO_UART7_RS485_DIR pin definition. Currently it cannot be
+		used with UART7_RXDMA.
+
+config UART7_RS485_DIR_POLARITY
+	int "UART7 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on UART7_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on UART7. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config UART7_RXDMA
+	bool "UART7 Rx DMA"
+	default n
+	depends on AT32_DMA1
+	select AT32_USART_RXDMA
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config UART7_TXDMA
+	bool "UART7 Tx DMA"
+	default n
+	depends on AT32_DMA1
+	select AT32_USART_TXDMA
+	---help---
+		In high data rate usage, Tx DMA may reduce CPU load
+
+endif # AT32_UART7_SERIALDRIVER
+
+if AT32_UART7_HCIUART
+
+config AT32_HCIUART7_RXBUFSIZE
+	int "HCI UART7 Rx buffer size"
+	default 80
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.  Ideally this should be at least
+		the size of the largest frame that can be received
+
+config AT32_HCIUART7_TXBUFSIZE
+	int "HCI UART7 Transmit buffer size"
+	default 80
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.  Ideally this should be at least
+		the size of the largest frame that can be sent
+
+config AT32_HCIUART7_BAUD
+	int "HCI UART7 initial BAUD rate"
+	default 115200
+	---help---
+		The configured initial BAUD of the HCIR USART used during bringup.
+		In most cases this initial rate can be increased by the upper half
+		HCI UART driver using vendor-specifi HCI UART commands.
+
+config AT32_HCIUART7_RXDMA
+	bool "HCI UART7 Rx DMA"
+	default n
+	depends on AT32_DMA2
+	select AT32_HCIUART_RXDMA
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # AT32_UART7_HCIUART
+
+choice
+	prompt "UART8 Driver Configuration"
+	default AT32_UART8_SERIALDRIVER
+	depends on AT32_UART8
+
+config AT32_UART8_SERIALDRIVER
+	bool "Standard serial driver"
+	select UART8_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select AT32_SERIALDRIVER
+
+config AT32_UART8_1WIREDRIVER
+	bool "1-Wire driver"
+	select AT32_1WIREDRIVER
+
+config AT32_UART8_HCIUART
+	bool "Bluetooth HCI-UART"
+	select AT32_HCIUART
+	depends on WIRELESS_BLUETOOTH
+
+endchoice # UART8 Driver Configuration
+
+if AT32_UART8_SERIALDRIVER
+
+config UART8_RS485
+	bool "RS-485 on UART8"
+	default n
+	---help---
+		Enable RS-485 interface on UART8. Your board config will have to
+		provide GPIO_UART8_RS485_DIR pin definition. Currently it cannot be
+		used with UART8_RXDMA.
+
+config UART8_RS485_DIR_POLARITY
+	int "UART8 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on UART8_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on UART8. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config UART8_RXDMA
+	bool "UART8 Rx DMA"
+	default n
+	depends on AT32_DMA1
+	select AT32_USART_RXDMA
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config UART8_TXDMA
+	bool "UART8 Tx DMA"
+	default n
+	depends on AT32_DMA1
+	select AT32_USART_TXDMA
+	---help---
+		In high data rate usage, Tx DMA may reduce CPU load
+
+endif # AT32_UART8_SERIALDRIVER
+
+if AT32_UART8_HCIUART
+
+config AT32_HCIUART8_RXBUFSIZE
+	int "HCI UART8 Rx buffer size"
+	default 80
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.  Ideally this should be at least
+		the size of the largest frame that can be received
+
+config AT32_HCIUART8_TXBUFSIZE
+	int "HCI UART8 Transmit buffer size"
+	default 80
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.  Ideally this should be at least
+		the size of the largest frame that can be sent
+
+config AT32_HCIUART8_BAUD
+	int "HCI UART8 initial BAUD rate"
+	default 115200
+	---help---
+		The configured initial BAUD of the HCIR USART used during bringup.
+		In most cases this initial rate can be increased by the upper half
+		HCI UART driver using vendor-specifi HCI UART commands.
+
+config AT32_HCIUART8_RXDMA
+	bool "HCI UART8 Rx DMA"
+	default n
+	depends on AT32_DMA2
+	select AT32_HCIUART_RXDMA
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # AT32_UART8_HCIUART
+
+menu "Serial Driver Configuration"
+	depends on AT32_SERIALDRIVER
+
+config AT32_SERIAL_RXDMA_BUFFER_SIZE
+	int "Rx DMA buffer size"
+	default 32
+	range 32 4096
+	depends on AT32_USART_RXDMA
+	---help---
+		The DMA buffer size when using RX DMA to emulate a FIFO.
+
+		When streaming data, the generic serial layer will be called
+		every time the FIFO receives half or this number of bytes.
+
+		Value given here will be rounded up to next multiple of 4 bytes.
+
+config AT32_SERIAL_DISABLE_REORDERING
+	bool "Disable reordering of ttySx devices."
+	default n
+	---help---
+		NuttX per default reorders the serial ports (/dev/ttySx) so that the
+		console is always on /dev/ttyS0. If more than one UART is in use this
+		can, however, have the side-effect that all port mappings
+		(hardware USART1 -> /dev/ttyS0) change if the console is moved to another
+		UART. This is in particular relevant if a project uses the USB console
+		in some boards and a serial console in other boards, but does not
+		want the side effect of having all serial port names change when just
+		the console is moved from serial to USB.
+
+config AT32_FLOWCONTROL_BROKEN
+	bool "Use Software UART RTS flow control"
+	default n
+	---help---
+		Enable UART RTS flow control using Software. Because Artery
+		Current AT32 have broken HW based RTS behavior (they assert
+		nRTS after every byte received)  Enable this setting workaround
+		this issue by using software based management of RTS
+
+config AT32_USART_BREAKS
+	bool "Add TIOxSBRK to support sending Breaks"
+	default n
+	---help---
+		Add TIOCxBRK routines to send a line break per the AT32 manual, the
+		break will be a pulse based on the value M. This is not a BSD compatible
+		break.
+
+config AT32_SERIALBRK_BSDCOMPAT
+	bool "Use GPIO To send Break"
+	depends on AT32_USART_BREAKS
+	default n
+	---help---
+		Enable using GPIO on the TX pin to send a BSD compatible break:
+		TIOCSBRK will start the break and TIOCCBRK will end the break.
+		The current AT32 U[S]ARTS have no way to leave the break on
+		(TX=LOW) because software starts the break and then the hardware
+		automatically clears the break. This makes it difficult to send
+		a long break.
+
+config AT32_USART_SINGLEWIRE
+	bool "Single Wire Support"
+	default n
+	depends on AT32_USART
+	---help---
+		Enable single wire UART support.  The option enables support for the
+		TIOCSSINGLEWIRE ioctl in the AT32 serial driver.
+
+endmenu # Serial Driver Configuration
+
+menu "HCI UART Driver Configuration"
+	depends on AT32_SERIALDRIVER
+
+config AT32_HCIUART_RXDMA_BUFSIZE
+	int "Rx DMA buffer size"
+	default 32
+	range 32 4096
+	depends on AT32_HCIUART_RXDMA
+	---help---
+		The DMA buffer size when using RX DMA to emulate a FIFO.
+
+		When streaming data, the generic serial layer will be called
+		every time the FIFO receives half or this number of bytes.
+
+		Value given here will be rounded up to next multiple of 4 bytes.
+
+config AT32_HCIUART_RXDMAPRIO
+	hex "HCI UART DMA priority"
+	default 0x00001000
+	depends on AT32_HCIUART_RXDMA
+	---help---
+		Select HCI UART DMA priority.
+
+
+config AT32_HCIUART_SW_RXFLOW
+	bool "Use Software UART RTS flow control"
+	default n
+	---help---
+		Enable UART RTS flow control using Software.  Current AT32 have
+		broken HW based RTS behavior (they assert nRTS after every byte
+		received)  Enable this setting workaround this issue by using
+		software based management of RTS
+
+		If HCI UART DMA is enabled, this is probably the better selection
+		as well. In that case, the Rx DMA buffer will avoid Rx overrun due
+		to short, bursty activity.  Software RTS management will probably
+		result in overall better throughput and should still avoid Rx data
+		overrun conditions.
+
+config AT32_HCIUART_UPPER_WATERMARK
+	int "RTS flow control upper watermark (%)"
+	default 75
+	range 2 100
+	depends on AT32_HCIUART_SW_RXFLOW
+	---help---
+		If software RTS flow control is enable, then RTS will be asserted
+		when this amount of Rx data has been buffered.  The amount is
+		expressed as a percentage of the Rx buffer size.
+
+config AT32_HCIUART_LOWER_WATERMARK
+	int "RTS flow control lower watermark (%)"
+	default 25
+	range 1 99
+	depends on AT32_HCIUART_SW_RXFLOW
+	---help---
+		If software RTS flow control is enable, then RTS will be de-asserted
+		when there is less than this amount ofdata in the Rx buffere.  The
+		amount is expressed as a percentage of the Rx buffer size.
+
+endmenu # HCI UART Driver Configuration
+
+if PM
+
+config AT32_PM_SERIAL_ACTIVITY
+	int "PM serial activity"
+	default 10
+	---help---
+		PM activity reported to power management logic on every serial
+		interrupt.
+
+endif
+
+endmenu # U[S]ART Configuration
+
+menu "SPI Configuration"
+	depends on AT32_SPI
+
+config AT32_SPI_INTERRUPTS
+	bool "Interrupt driver SPI"
+	default n
+	---help---
+		Select to enable interrupt driven SPI support. Non-interrupt-driven,
+		poll-waiting is recommended if the interrupt rate would be to high in
+		the interrupt driven case.
+
+config AT32_SPI1_DMA
+	bool "SPI1 DMA"
+	default n
+	depends on AT32_SPI1 && !AT32_SPI_INTERRUPT
+	select AT32_SPI_DMA
+	---help---
+		Use DMA to improve SPI1 transfer performance.  Cannot be used with AT32_SPI_INTERRUPT.
+
+config AT32_SPI1_DMA_BUFFER
+	int "SPI1 DMA buffer size"
+	default 0
+	depends on AT32_SPI1_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI1.
+
+config AT32_SPI_DMATHRESHOLD
+	int "SPI DMA threshold"
+	default 4
+	depends on AT32_SPI_DMA
+	---help---
+		When SPI DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  But we need a threshold value to determine what
+		is small.
+
+config AT32_SPI2_DMA
+	bool "SPI2 DMA"
+	default n
+	depends on AT32_SPI2 && !AT32_SPI_INTERRUPT
+	select AT32_SPI_DMA
+	---help---
+		Use DMA to improve SPI2 transfer performance.  Cannot be used with AT32_SPI_INTERRUPT.
+
+config AT32_SPI2_DMA_BUFFER
+	int "SPI2 DMA buffer size"
+	default 0
+	depends on AT32_SPI2_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI2.
+
+config AT32_SPI3_DMA
+	bool "SPI3 DMA"
+	default n
+	depends on AT32_SPI3 && !AT32_SPI_INTERRUPT
+	select AT32_SPI_DMA
+	---help---
+		Use DMA to improve SPI3 transfer performance.  Cannot be used with AT32_SPI_INTERRUPT.
+
+config AT32_SPI3_DMA_BUFFER
+	int "SPI3 DMA buffer size"
+	default 0
+	depends on AT32_SPI3_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI3.
+
+config AT32_SPI4_DMA
+	bool "SPI4 DMA"
+	default n
+	depends on AT32_SPI4 && !AT32_SPI_INTERRUPT
+	select AT32_SPI_DMA
+	---help---
+		Use DMA to improve SPI4 transfer performance.  Cannot be used with AT32_SPI_INTERRUPT.
+
+config AT32_SPI4_DMA_BUFFER
+	int "SPI4 DMA buffer size"
+	default 0
+	depends on AT32_SPI4_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI4.
+
+endmenu # SPI Configuration
+
+
+menu "I2C Configuration"
+	depends on AT32_I2C
+
+config AT32_I2C_DYNTIMEO
+	bool "Use dynamic timeouts"
+	default n
+	depends on AT32_I2C
+
+config AT32_I2C_DYNTIMEO_USECPERBYTE
+	int "Timeout Microseconds per Byte"
+	default 500
+	depends on AT32_I2C_DYNTIMEO
+
+config AT32_I2C_DYNTIMEO_STARTSTOP
+	int "Timeout for Start/Stop (Milliseconds)"
+	default 1000
+	depends on AT32_I2C_DYNTIMEO
+
+config AT32_I2CTIMEOSEC
+	int "Timeout seconds"
+	default 0
+	depends on AT32_I2C
+
+config AT32_I2CTIMEOMS
+	int "Timeout Milliseconds"
+	default 500
+	depends on AT32_I2C && !AT32_I2C_DYNTIMEO
+
+config AT32_I2CTIMEOTICKS
+	int "Timeout for Done and Stop (ticks)"
+	default 500
+	depends on AT32_I2C && !AT32_I2C_DYNTIMEO
+
+config AT32_I2C_DUTY16_9
+	bool "Frequency with Tlow/Thigh = 16/9"
+	default n
+	depends on AT32_I2C
+
+config AT32_I2C_DMA
+	bool "I2C DMA Support"
+	default n
+	depends on AT32_I2C && AT32_AT32F43XX && (AT32_DMA1 || AT32_DMA2) && !I2C_POLLED
+	---help---
+		This option enables the DMA for I2C transfers.
+		Note: The user can define CONFIG_I2C_DMAPRIO: a custom priority value for the
+		I2C dma streams, else the default priority level is set to medium.
+
+endmenu
+
+menu "SDIO Configuration"
+	depends on (AT32_SDIO || AT32_SDIO2)
+
+config AT32_SDIO_CARD
+	bool "SDIO Card support"
+	default n
+	---help---
+		Build in additional support needed only for SDIO cards (vs. SD
+		memory cards)
+
+config AT32_SDIO_PULLUP
+	bool "Enable internal Pull-Ups"
+	default n
+	---help---
+		If you are using an external SDCard module that does not have the
+		pull-up resistors for the SDIO interface (like the Gadgeteer SD Card
+		Module) then enable this option to activate the internal pull-up
+		resistors.
+
+config AT32_SDIO_DMA
+	bool "Support DMA data transfers"
+	default y if AT32_DMA2
+	default n if !AT32_DMA2
+	select SDIO_DMA
+	depends on AT32_DMA2
+	---help---
+		Support DMA data transfers.  Requires AT32_SDIO and config AT32_DMA2.
+
+config AT32_SDIO_DMAPRIO
+	hex "SDIO DMA priority"
+	default 0x00001000
+	---help---
+		Select SDIO DMA priority.
+
+		For AT32 , options are: 0x00000000 low, 0x00001000 medium,
+		0x00002000 high, 0x00003000 very high.  Default: medium.
+
+
+config AT32_SDIO_WIDTH_D1_ONLY
+	bool "Use D1 only"
+	default n
+	---help---
+		Select 1-bit transfer mode.  Default: 4-bit transfer mode.
+
+endmenu
+
+
+config AT32_HAVE_RTC_COUNTER
+	bool
+	default n
+
+config AT32_HAVE_RTC_SUBSECONDS
+	bool
+	select ARCH_HAVE_RTC_SUBSECONDS
+	default n
+
+menu "RTC Configuration"
+	depends on AT32_RTC
+
+config AT32_RTC_MAGIC_REG
+	int "BKP register"
+	default 0
+	range  0 19
+	depends on !AT32_HAVE_RTC_COUNTER
+	---help---
+		The BKP register used to store/check the Magic value to determine if
+		RTC is already setup
+
+config AT32_RTC_MAGIC
+	hex "RTC Magic 1"
+	default 0xfacefeed
+	depends on !AT32_HAVE_RTC_COUNTER
+	---help---
+		Value used as Magic to determine if the RTC is already setup
+
+config AT32_RTC_MAGIC_TIME_SET
+	hex "RTC Magic 2"
+	default 0xf00dface
+	depends on !AT32_HAVE_RTC_COUNTER
+	---help---
+		Value used as Magic to determine if the RTC has been setup and has
+		time set
+
+choice
+	prompt "RTC clock source"
+	default AT32_RTC_LSECLOCK
+
+config AT32_RTC_LSECLOCK
+	bool "LSE clock"
+	---help---
+		Drive the RTC with the LSE clock
+
+config AT32_RTC_LSICLOCK
+	bool "LSI clock"
+	---help---
+		Drive the RTC with the LSI clock
+
+config AT32_RTC_HSECLOCK
+	bool "HSE clock"
+	---help---
+		Drive the RTC with the HSE clock, divided down to 1MHz.
+
+endchoice # RTC clock source
+endmenu # RTC configuration
+
+menu "Ethernet MAC configuration"
+	depends on AT32_ETHMAC
+
+config AT32_PHYADDR
+	int "PHY address"
+	default 1
+	---help---
+		The 5-bit address of the PHY on the board.  Default: 1
+
+config AT32_PHYINIT
+	bool "Board-specific PHY Initialization"
+	default n
+	---help---
+		Some boards require specialized initialization of the PHY before it can be used.
+		This may include such things as configuring GPIOs, resetting the PHY, etc.  If
+		AT32_PHYINIT is defined in the configuration then the board specific logic must
+		provide at32_phyinitialize();  The AT32 Ethernet driver will call this function
+		one time before it first uses the PHY.
+
+config AT32_MII
+	bool "Use MII interface"
+	default n
+	---help---
+		Support Ethernet MII interface.
+
+choice
+	prompt "MII clock configuration"
+	default AT32_MII_MCO1 if AT32_AT32F43XX
+	depends on AT32_MII
+
+config AT32_MII_MCO1
+	bool "Use MC01 as MII clock"
+	depends on  AT32_AT32F43XX
+	---help---
+		Use MCO1 to clock the MII interface.  Default:  Use MC01
+
+config AT32_MII_MCO2
+	bool "Use MC02 as MII clock"
+	depends on AT32_AT32F43XX
+	---help---
+		Use MCO2 to clock the MII interface.  Default:  Use MC01
+
+config AT32_MII_EXTCLK
+	bool "External MII clock"
+	---help---
+		Clocking is provided by external logic.  Don't use MCO for MII
+		clock.  Default:  Use MC0[1]
+
+endchoice
+
+config AT32_AUTONEG
+	bool "Use autonegotiation"
+	default y
+	---help---
+		Use PHY autonegotiation to determine speed and mode
+
+config AT32_ETHFD
+	bool "Full duplex"
+	default n
+	depends on !AT32_AUTONEG
+	---help---
+		If AT32_AUTONEG is not defined, then this may be defined to select full duplex
+		mode. Default: half-duplex
+
+config AT32_ETH100MBPS
+	bool "100 Mbps"
+	default n
+	depends on !AT32_AUTONEG
+	---help---
+		If AT32_AUTONEG is not defined, then this may be defined to select 100 MBps
+		speed.  Default: 10 Mbps
+
+config AT32_PHYSR
+	int "PHY Status Register Address (decimal)"
+	depends on AT32_AUTONEG
+	---help---
+		This must be provided if AT32_AUTONEG is defined.  The PHY status register
+		address may diff from PHY to PHY.  This configuration sets the address of
+		the PHY status register.
+
+config AT32_PHYSR_ALTCONFIG
+	bool "PHY Status Alternate Bit Layout"
+	default n
+	depends on AT32_AUTONEG
+	---help---
+		Different PHYs present speed and mode information in different ways.  Some
+		will present separate information for speed and mode (this is the default).
+		Those PHYs, for example, may provide a 10/100 Mbps indication and a separate
+		full/half duplex indication. This options selects an alternative representation
+		where speed and mode information are combined.  This might mean, for example,
+		separate bits for 10HD, 100HD, 10FD and 100FD.
+
+config AT32_PHYSR_SPEED
+	hex "PHY Speed Mask"
+	depends on AT32_AUTONEG && !AT32_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if AT32_AUTONEG is defined.  This provides bit mask
+		for isolating the 10 or 100MBps speed indication.
+
+config AT32_PHYSR_100MBPS
+	hex "PHY 100Mbps Speed Value"
+	depends on AT32_AUTONEG && !AT32_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if AT32_AUTONEG is defined.  This provides the value
+		of the speed bit(s) indicating 100MBps speed.
+
+config AT32_PHYSR_MODE
+	hex "PHY Mode Mask"
+	depends on AT32_AUTONEG && !AT32_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if AT32_AUTONEG is defined.  This provide bit mask
+		for isolating the full or half duplex mode bits.
+
+config AT32_PHYSR_FULLDUPLEX
+	hex "PHY Full Duplex Mode Value"
+	depends on AT32_AUTONEG && !AT32_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if AT32_AUTONEG is defined.  This provides the
+		value of the mode bits indicating full duplex mode.
+
+config AT32_PHYSR_ALTMODE
+	hex "PHY Mode Mask"
+	depends on AT32_AUTONEG && AT32_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if AT32_AUTONEG is defined.  This provide bit mask
+		for isolating the speed and full/half duplex mode bits.
+
+config AT32_PHYSR_10HD
+	hex "10MBase-T Half Duplex Value"
+	depends on AT32_AUTONEG && AT32_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if AT32_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 10Mbps, half duplex setting.
+
+config AT32_PHYSR_100HD
+	hex "100Base-T Half Duplex Value"
+	depends on AT32_AUTONEG && AT32_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if AT32_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 100Mbps, half duplex setting.
+
+config AT32_PHYSR_10FD
+	hex "10Base-T Full Duplex Value"
+	depends on AT32_AUTONEG && AT32_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if AT32_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 10Mbps, full duplex setting.
+
+config AT32_PHYSR_100FD
+	hex "100Base-T Full Duplex Value"
+	depends on AT32_AUTONEG && AT32_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if AT32_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 100Mbps, full duplex setting.
+
+config AT32_ETH_PTP
+	bool "Precision Time Protocol (PTP)"
+	default n
+	---help---
+		Precision Time Protocol (PTP).  Not supported but some hooks are indicated
+		with this condition.
+
+config AT32_RMII
+	bool
+	default y if !AT32_MII
+
+choice
+	prompt "RMII clock configuration"
+	default AT32_RMII_MCO1 if AT32_AT32F43XX
+	depends on AT32_RMII
+
+config AT32_RMII_MCO1
+	bool "Use MC01 as RMII clock"
+	depends on AT32_AT32F43XX
+	---help---
+		Use MCO1 to clock the RMII interface.  Default:  Use MC01
+
+config AT32_RMII_MCO2
+	bool "Use MC02 as RMII clock"
+	depends on AT32_AT32F43XX
+	---help---
+		Use MCO2 to clock the RMII interface.  Default:  Use MC01
+
+config AT32_RMII_EXTCLK
+	bool "External RMII clock"
+	---help---
+		Clocking is provided by external logic.  Don't use MCO for RMII
+		clock.  Default:  Use MC0[1]
+
+endchoice
+
+config AT32_ETHMAC_REGDEBUG
+	bool "Register-Level Debug"
+	default n
+	depends on DEBUG_NET_INFO
+	---help---
+		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_FEATURES.
+
+endmenu # Ethernet MAC configuration
+
+config AT32_USBHOST
+	bool "Enable USB Host Support"
+	depends on AT32_OTGFS || AT32_OTGFS2
+	default n
+	select USBHOST
+
+menu "USB FS Host Configuration"
+	depends on AT32_OTGFS && AT32_USBHOST
+
+config AT32_OTGFS_RXFIFO_SIZE
+	int "Rx Packet Size"
+	default 128
+	---help---
+		Size of the RX FIFO in 32-bit words. Default 128 (512 bytes)
+
+config AT32_OTGFS_NPTXFIFO_SIZE
+	int "Non-periodic Tx FIFO Size"
+	default 96
+	---help---
+		Size of the non-periodic Tx FIFO in 32-bit words.  Default 96 (384 bytes)
+
+config AT32_OTGFS_PTXFIFO_SIZE
+	int "Periodic Tx FIFO size"
+	default 128
+	---help---
+		Size of the periodic Tx FIFO in 32-bit words.  Default 96 (384 bytes)
+
+config AT32_OTGFS_DESCSIZE
+	int "Descriptor Size"
+	default 128
+	---help---
+		Maximum size to allocate for descriptor memory descriptor.  Default: 128
+
+config AT32_OTGFS_SOFINTR
+	bool "Enable SOF interrupts"
+	default n
+	---help---
+		Enable SOF interrupts.  Why would you ever want to do that?
+
+config AT32_OTGFS_VBUS_CONTROL
+	bool "Enable VBus Control"
+	default y
+	---help---
+		Enable VBus control.  Used when the board has VBus sensing and
+		a power switch for the OTG FS USB port.  Disable this config
+		if the board lacks this USB VBus control circuitry.
+
+endmenu
+
+menu "USB FS2 Host Configuration"
+	depends on AT32_OTGFS2 && AT32_USBHOST
+
+config AT32_OTGFS2_RXFIFO_SIZE
+	int "Rx Packet Size"
+	default 128
+	---help---
+		Size of the RX FIFO in 32-bit words. Default 128 (512 bytes)
+
+config AT32_OTGFS2_NPTXFIFO_SIZE
+	int "Non-periodic Tx FIFO Size"
+	default 96
+	---help---
+		Size of the non-periodic Tx FIFO in 32-bit words.  Default 96 (384 bytes)
+
+config AT32_OTGFS2_PTXFIFO_SIZE
+	int "Periodic Tx FIFO size"
+	default 128
+	---help---
+		Size of the periodic Tx FIFO in 32-bit words.  Default 96 (384 bytes)
+
+config AT32_OTGFS2_DESCSIZE
+	int "Descriptor Size"
+	default 128
+	---help---
+		Maximum size to allocate for descriptor memory descriptor.  Default: 128
+
+config AT32_OTGFS2_SOFINTR
+	bool "Enable SOF interrupts"
+	default n
+	---help---
+		Enable SOF interrupts.  Why would you ever want to do that?
+
+config AT32_OTGFS2_VBUS_CONTROL
+	bool "Enable VBus Control"
+	default y
+	---help---
+		Enable VBus control.  Used when the board has VBus sensing and
+		a power switch for the OTG FS2 USB port.  Disable this config
+		if the board lacks this USB VBus control circuitry.
+
+endmenu
+
+menu "USB Host Debug Configuration"
+	depends on AT32_USBHOST
+
+config AT32_USBHOST_REGDEBUG
+	bool "Register-Level Debug"
+	default n
+	depends on AT32_USBHOST && DEBUG_USB_INFO
+	---help---
+		Enable very low-level register access debug.
+
+config AT32_USBHOST_PKTDUMP
+	bool "Packet Dump Debug"
+	default n
+	depends on AT32_USBHOST && DEBUG_USB_INFO
+	---help---
+		Dump all incoming and outgoing USB packets.
+
+endmenu
+
+comment "USB Device Configuration"
+
+menu "USB Full Speed Debug Configuration"
+	depends on AT32_USBFS
+
+config AT32_USBFS_REGDEBUG
+	bool "Register-Level Debug"
+	default n
+	depends on AT32_USBFS && DEBUG_USB_INFO
+	---help---
+		Enable very low-level register access debug.
+
+endmenu
+
+menu "OTG Configuration"
+	depends on (AT32_OTGFS || AT32_OTGFS2)
+
+config OTG_ID_GPIO_DISABLE
+	bool "Disable the use of GPIO_OTG_ID pin."
+	default n
+	---help---
+		Disables/Enables the use of GPIO_OTG_ID pin. This allows non OTG use
+		cases to reuse this GPIO pin and ensure it is not set incorrectlty
+		during OS boot.
+
+endmenu
+
+
+menu "CAN driver configuration"
+	depends on AT32_CAN
+
+choice
+	prompt "CAN character driver or SocketCAN support"
+	default AT32_CAN_CHARDRIVER
+
+config AT32_CAN_CHARDRIVER
+	bool "AT32 CAN character driver support"
+	select ARCH_HAVE_CAN_ERRORS
+	select CAN
+
+config AT32_CAN_SOCKET
+	bool "AT32 CAN SocketCAN support"
+	select NET_CAN_HAVE_ERRORS
+
+endchoice # CAN character driver or SocketCAN support
+
+config AT32_CAN1_BAUD
+	int "CAN1 BAUD"
+	default 250000
+	depends on AT32_CAN1
+	---help---
+		CAN1 BAUD rate.  Required if CONFIG_AT32_CAN1 is defined.
+
+config AT32_CAN2_BAUD
+	int "CAN2 BAUD"
+	default 250000
+	depends on AT32_CAN2
+	---help---
+		CAN2 BAUD rate.  Required if CONFIG_AT32_CAN2 is defined.
+
+config AT32_CAN_TSEG1
+	int "TSEG1 quanta"
+	default 13
+	---help---
+		The number of CAN time quanta in segment 1. Default: 13
+
+config AT32_CAN_TSEG2
+	int "TSEG2 quanta"
+	default 2
+	---help---
+		The number of CAN time quanta in segment 2. Default: 2
+
+config AT32_CAN_REGDEBUG
+	bool "CAN Register level debug"
+	depends on DEBUG_CAN_INFO
+	default n
+	---help---
+		Output detailed register-level CAN device debug information.
+		Requires also CONFIG_DEBUG_CAN_INFO.
+
+endmenu # "CAN driver configuration"
+
+
+menu "AT32 QEncoder Driver"
+	depends on SENSORS_QENCODER
+	depends on AT32_TIM1 || AT32_TIM2 || AT32_TIM3 || AT32_TIM4 || AT32_TIM5 || AT32_TIM8
+
+config AT32_QENCODER_DISABLE_EXTEND16BTIMERS
+	bool "Disable QEncoder timers extension from 16-bit to 32-bit"
+	default n
+
+config AT32_QENCODER_INDEX_PIN
+	bool "Enable QEncoder timers support for index pin"
+	default n
+
+config AT32_TIM1_QE
+	bool "TIM1 QE"
+	default n
+	depends on AT32_TIM1
+	---help---
+		Reserve TIM1 for use by QEncoder.
+
+if AT32_TIM1_QE
+
+config AT32_TIM1_QEPSC
+	int "TIM1 QE pulse prescaler"
+	default 1
+	---help---
+		This prescaler divides the number of recorded encoder pulses,
+		limiting the count rate at the expense of resolution.
+
+endif
+
+config AT32_TIM2_QE
+	bool "TIM2 QE"
+	default n
+	depends on AT32_TIM2
+	---help---
+		Reserve TIM2 for use by QEncoder.
+
+if AT32_TIM2_QE
+
+config AT32_TIM2_QEPSC
+	int "TIM2 QE pulse prescaler"
+	default 1
+	---help---
+		This prescaler divides the number of recorded encoder pulses,
+		limiting the count rate at the expense of resolution.
+
+endif
+
+config AT32_TIM3_QE
+	bool "TIM3 QE"
+	default n
+	depends on AT32_TIM3
+	---help---
+		Reserve TIM3 for use by QEncoder.
+
+if AT32_TIM3_QE
+
+config AT32_TIM3_QEPSC
+	int "TIM3 QE pulse prescaler"
+	default 1
+	---help---
+		This prescaler divides the number of recorded encoder pulses,
+		limiting the count rate at the expense of resolution.
+
+endif
+
+config AT32_TIM4_QE
+	bool "TIM4 QE"
+	default n
+	depends on AT32_TIM4
+	---help---
+		Reserve TIM4 for use by QEncoder.
+
+if AT32_TIM4_QE
+
+config AT32_TIM4_QEPSC
+	int "TIM4 QE pulse prescaler"
+	default 1
+	---help---
+		This prescaler divides the number of recorded encoder pulses,
+		limiting the count rate at the expense of resolution.
+
+endif
+
+config AT32_TIM5_QE
+	bool "TIM5 QE"
+	default n
+	depends on AT32_TIM5
+	---help---
+		Reserve TIM5 for use by QEncoder.
+
+if AT32_TIM5_QE
+
+config AT32_TIM5_QEPSC
+	int "TIM5 QE pulse prescaler"
+	default 1
+	---help---
+		This prescaler divides the number of recorded encoder pulses,
+		limiting the count rate at the expense of resolution.
+
+endif
+
+config AT32_TIM8_QE
+	bool "TIM8 QE"
+	default n
+	depends on AT32_TIM8
+	---help---
+		Reserve TIM8 for use by QEncoder.
+
+if AT32_TIM8_QE
+
+config AT32_TIM8_QEPSC
+	int "TIM8 QE pulse prescaler"
+	default 1
+	---help---
+		This prescaler divides the number of recorded encoder pulses,
+		limiting the count rate at the expense of resolution.
+
+endif
+
+config AT32_QENCODER_FILTER
+	bool "Enable filtering on AT32 QEncoder input"
+	default y
+
+choice
+	depends on AT32_QENCODER_FILTER
+	prompt "Input channel sampling frequency"
+	default AT32_QENCODER_SAMPLE_FDTS_4
+
+config AT32_QENCODER_SAMPLE_FDTS
+	bool "fDTS"
+
+config AT32_QENCODER_SAMPLE_CKINT
+	bool "fCK_INT"
+
+config AT32_QENCODER_SAMPLE_FDTS_2
+	bool "fDTS/2"
+
+config AT32_QENCODER_SAMPLE_FDTS_4
+	bool "fDTS/4"
+
+config AT32_QENCODER_SAMPLE_FDTS_8
+	bool "fDTS/8"
+
+config AT32_QENCODER_SAMPLE_FDTS_16
+	bool "fDTS/16"
+
+config AT32_QENCODER_SAMPLE_FDTS_32
+	bool "fDTS/32"
+
+endchoice
+
+choice
+	depends on AT32_QENCODER_FILTER
+	prompt "Input channel event count"
+	default AT32_QENCODER_SAMPLE_EVENT_6
+
+config AT32_QENCODER_SAMPLE_EVENT_1
+	depends on AT32_QENCODER_SAMPLE_FDTS
+	bool "1"
+
+config AT32_QENCODER_SAMPLE_EVENT_2
+	depends on AT32_QENCODER_SAMPLE_CKINT
+	bool "2"
+
+config AT32_QENCODER_SAMPLE_EVENT_4
+	depends on AT32_QENCODER_SAMPLE_CKINT
+	bool "4"
+
+config AT32_QENCODER_SAMPLE_EVENT_5
+	depends on AT32_QENCODER_SAMPLE_FDTS_16 || AT32_QENCODER_SAMPLE_FDTS_32
+	bool "5"
+
+config AT32_QENCODER_SAMPLE_EVENT_6
+	depends on !AT32_QENCODER_SAMPLE_FDTS && !AT32_QENCODER_SAMPLE_CKINT
+	bool "6"
+
+config AT32_QENCODER_SAMPLE_EVENT_8
+	depends on !AT32_QENCODER_SAMPLE_FDTS
+	bool "8"
+
+endchoice
+
+endmenu
+
