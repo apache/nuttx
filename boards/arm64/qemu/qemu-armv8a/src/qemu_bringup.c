@@ -155,7 +155,7 @@ static void register_virtio_devices_from_fdt(const void *fdt)
       irqnum = fdt_get_irq(fdt, offset);
       if (addr > 0 && irqnum >= 0)
         {
-          virtio_register_mmio_device((FAR void *)addr, irqnum);
+          virtio_register_mmio_device((void *)addr, irqnum);
         }
     }
 }

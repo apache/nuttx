@@ -344,49 +344,50 @@ struct cxd56_aca_pwoutput_param_s
 /* Interface functions */
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-static int     cxd56_configure(FAR struct audio_lowerhalf_s *lower,
-                 FAR void *session, FAR const struct audio_caps_s *caps);
-static int     cxd56_start(FAR struct audio_lowerhalf_s *lower,
-                 FAR void *session);
+static int     cxd56_configure(struct audio_lowerhalf_s *lower,
+                               void *session,
+                               const struct audio_caps_s *caps);
+static int     cxd56_start(struct audio_lowerhalf_s *lower,
+                           void *session);
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
-static int     cxd56_stop(FAR struct audio_lowerhalf_s *lower,
-                 FAR void *session);
+static int     cxd56_stop(struct audio_lowerhalf_s *lower,
+                          void *session);
 #endif  /* CONFIG_AUDIO_EXCLUDE_STOP */
 #ifndef CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME
-static int     cxd56_pause(FAR struct audio_lowerhalf_s *lower,
-                 FAR void *session);
-static int     cxd56_resume(FAR struct audio_lowerhalf_s *lower,
-                 FAR void *session);
+static int     cxd56_pause(struct audio_lowerhalf_s *lower,
+                           void *session);
+static int     cxd56_resume(struct audio_lowerhalf_s *lower,
+                            void *session);
 #endif  /* CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME */
-static int     cxd56_reserve(FAR struct audio_lowerhalf_s *lower,
-                 FAR void** session);
-static int     cxd56_release(FAR struct audio_lowerhalf_s *lower,
-                 FAR void *session);
+static int     cxd56_reserve(struct audio_lowerhalf_s *lower,
+                             void **session);
+static int     cxd56_release(struct audio_lowerhalf_s *lower,
+                             void *session);
 #else
 
-static int     cxd56_configure(FAR struct audio_lowerhalf_s *lower,
-                 FAR const struct audio_caps_s *caps);
-static int     cxd56_start(FAR struct audio_lowerhalf_s *lower);
+static int     cxd56_configure(struct audio_lowerhalf_s *lower,
+                               const struct audio_caps_s *caps);
+static int     cxd56_start(struct audio_lowerhalf_s *lower);
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
-static int     cxd56_stop(FAR struct audio_lowerhalf_s *lower);
+static int     cxd56_stop(struct audio_lowerhalf_s *lower);
 #endif  /* CONFIG_AUDIO_EXCLUDE_STOP */
 #ifndef CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME
-static int     cxd56_pause(FAR struct audio_lowerhalf_s *lower);
-static int     cxd56_resume(FAR struct audio_lowerhalf_s *lower);
+static int     cxd56_pause(struct audio_lowerhalf_s *lower);
+static int     cxd56_resume(struct audio_lowerhalf_s *lower);
 #endif  /* CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME */
-static int     cxd56_reserve(FAR struct audio_lowerhalf_s *lower);
-static int     cxd56_release(FAR struct audio_lowerhalf_s *lower);
+static int     cxd56_reserve(struct audio_lowerhalf_s *lower);
+static int     cxd56_release(struct audio_lowerhalf_s *lower);
 #endif /* CONFIG_AUDIO_MULTI_SESSION */
 
-static int     cxd56_getcaps(FAR struct audio_lowerhalf_s *lower, int type,
-                 FAR struct audio_caps_s *caps);
-static int     cxd56_shutdown(FAR struct audio_lowerhalf_s *lower);
-static int     cxd56_enqueuebuffer(FAR struct audio_lowerhalf_s *lower,
-                 FAR struct ap_buffer_s *apb);
-static int     cxd56_cancelbuffer(FAR struct audio_lowerhalf_s *lower,
-                 FAR struct ap_buffer_s *apb);
-static int     cxd56_ioctl(FAR struct audio_lowerhalf_s *lower, int cmd,
-                 unsigned long arg);
+static int     cxd56_getcaps(struct audio_lowerhalf_s *lower, int type,
+                             struct audio_caps_s *caps);
+static int     cxd56_shutdown(struct audio_lowerhalf_s *lower);
+static int     cxd56_enqueuebuffer(struct audio_lowerhalf_s *lower,
+                                   struct ap_buffer_s *apb);
+static int     cxd56_cancelbuffer(struct audio_lowerhalf_s *lower,
+                                  struct ap_buffer_s *apb);
+static int     cxd56_ioctl(struct audio_lowerhalf_s *lower, int cmd,
+                           unsigned long arg);
 
 /* Non-interface functions */
 
@@ -396,30 +397,30 @@ static uint32_t cxd56_get_i2s_rate(uint32_t samplerate);
 static void cxd56_get_mic_config(uint8_t *count,
                                  uint8_t *dev,
                                  uint8_t *mode);
-static void cxd56_init_dma(FAR struct cxd56_dev_s *dev);
+static void cxd56_init_dma(struct cxd56_dev_s *dev);
 static void cxd56_init_i2s1_output(uint8_t bits);
 static void cxd56_init_mic_input(uint8_t mic_num, uint8_t bits);
-static int cxd56_init_worker(FAR struct audio_lowerhalf_s *lower);
+static int cxd56_init_worker(struct audio_lowerhalf_s *lower);
 static uint8_t cxd56_get_mic_mode(void);
-static int cxd56_power_off(FAR struct cxd56_dev_s *dev);
-static int cxd56_power_on(FAR struct cxd56_dev_s *dev);
+static int cxd56_power_off(struct cxd56_dev_s *dev);
+static int cxd56_power_on(struct cxd56_dev_s *dev);
 static int cxd56_power_on_aca(uint32_t samplerate);
-static int cxd56_power_on_analog_output(FAR struct cxd56_dev_s *dev);
+static int cxd56_power_on_analog_output(struct cxd56_dev_s *dev);
 static void cxd56_audio_power_on_cic(uint8_t mic_in,
-                                    uint8_t mic_mode,
-                                    uint8_t cic_num,
-                                    FAR struct cxd56_audio_mic_gain_s *gain);
+                                     uint8_t mic_mode,
+                                     uint8_t cic_num,
+                                     struct cxd56_audio_mic_gain_s *gain);
 static int cxd56_power_on_decim(uint8_t mic_mode, uint32_t samplerate);
-static void cxd56_power_on_i2s1(FAR struct cxd56_dev_s *dev);
-static int cxd56_power_on_input(FAR struct cxd56_dev_s *dev);
-static int cxd56_power_on_micbias(FAR struct cxd56_dev_s *dev);
-static int cxd56_start_dma(FAR struct cxd56_dev_s *dev);
-static int cxd56_stop_dma(FAR struct cxd56_dev_s *priv);
+static void cxd56_power_on_i2s1(struct cxd56_dev_s *dev);
+static int cxd56_power_on_input(struct cxd56_dev_s *dev);
+static int cxd56_power_on_micbias(struct cxd56_dev_s *dev);
+static int cxd56_start_dma(struct cxd56_dev_s *dev);
+static int cxd56_stop_dma(struct cxd56_dev_s *priv);
 static void cxd56_set_dma_int_en(bool enabled);
 static void cxd56_set_dma_running(cxd56_dmahandle_t handle, bool running);
 static int cxd56_set_mic_gains(uint8_t gain, enum cxd56_mic_type_e mic_dev,
                                struct cxd56_aca_pwinput_param_s *param);
-static void cxd56_set_mic_out_channel(FAR struct cxd56_dev_s *dev);
+static void cxd56_set_mic_out_channel(struct cxd56_dev_s *dev);
 static int cxd56_set_volume(enum cxd56_audio_volid_e id, int16_t vol);
 static void cxd56_swap_buffer_rl(uint32_t addr, uint16_t size);
 static void *cxd56_workerthread(pthread_addr_t pvarg);
@@ -1332,7 +1333,7 @@ static void _process_audio_with_src(cxd56_dmahandle_t hdl, uint16_t err_code)
           msg.msg_id = AUDIO_MSG_STOP;
           msg.u.data = 0;
           spin_unlock_irqrestore(&dev->lock, flags);
-          ret = file_mq_send(&dev->mq, (FAR const char *)&msg,
+          ret = file_mq_send(&dev->mq, (const char *)&msg,
                              sizeof(msg), CONFIG_CXD56_MSG_PRIO);
           flags = spin_lock_irqsave(&dev->lock);
           if (ret != OK)
@@ -1344,7 +1345,7 @@ static void _process_audio_with_src(cxd56_dmahandle_t hdl, uint16_t err_code)
 
   if (dq_count(&dev->down_runq) > 0)
     {
-      FAR struct ap_buffer_s *src_apb;
+      struct ap_buffer_s *src_apb;
 
       src_apb = (struct ap_buffer_s *) dq_get(&dev->down_runq);
       src_apb->nbytes = 0;
@@ -1366,7 +1367,7 @@ static void _process_audio_with_src(cxd56_dmahandle_t hdl, uint16_t err_code)
               msg.msg_id = AUDIO_MSG_STOP;
               msg.u.data = 0;
               spin_unlock_irqrestore(&dev->lock, flags);
-              ret = file_mq_send(&dev->mq, (FAR const char *)&msg,
+              ret = file_mq_send(&dev->mq, (const char *)&msg,
                                  sizeof(msg), CONFIG_CXD56_MSG_PRIO);
               flags = spin_lock_irqsave(&dev->lock);
               if (ret != OK)
@@ -1386,7 +1387,7 @@ static void _process_audio_with_src(cxd56_dmahandle_t hdl, uint16_t err_code)
       msg.msg_id = AUDIO_MSG_DATA_REQUEST;
       msg.u.data = 0;
       spin_unlock_irqrestore(&dev->lock, flags);
-      ret = file_mq_send(&dev->mq, (FAR const char *) &msg,
+      ret = file_mq_send(&dev->mq, (const char *) &msg,
                          sizeof(msg), CONFIG_CXD56_MSG_PRIO);
       flags = spin_lock_irqsave(&dev->lock);
       if (ret != OK)
@@ -1414,7 +1415,7 @@ static void _process_audio(cxd56_dmahandle_t hdl, uint16_t err_code)
 
   if (dq_count(&dev->up_runq) > 0)
     {
-      FAR struct ap_buffer_s *apb;
+      struct ap_buffer_s *apb;
 
       apb = (struct ap_buffer_s *) dq_get(&dev->up_runq);
       spin_unlock_irqrestore(&dev->lock, flags);
@@ -1435,7 +1436,7 @@ static void _process_audio(cxd56_dmahandle_t hdl, uint16_t err_code)
                  dq_count(&dev->up_pendq));
           msg.msg_id = AUDIO_MSG_STOP;
           msg.u.data = 0;
-          ret = file_mq_send(&dev->mq, (FAR const char *)&msg,
+          ret = file_mq_send(&dev->mq, (const char *)&msg,
                              sizeof(msg), CONFIG_CXD56_MSG_PRIO);
           if (ret != OK)
             {
@@ -1449,7 +1450,7 @@ static void _process_audio(cxd56_dmahandle_t hdl, uint16_t err_code)
 
       msg.msg_id = AUDIO_MSG_DATA_REQUEST;
       msg.u.data = 0;
-      ret = file_mq_send(&dev->mq, (FAR const char *) &msg,
+      ret = file_mq_send(&dev->mq, (const char *) &msg,
                          sizeof(msg), CONFIG_CXD56_MSG_PRIO);
       if (ret != OK)
         {
@@ -1755,7 +1756,7 @@ static void cxd56_set_dma_running(cxd56_dmahandle_t handle, bool running)
     }
 }
 
-static void cxd56_init_dma(FAR struct cxd56_dev_s *dev)
+static void cxd56_init_dma(struct cxd56_dev_s *dev)
 {
   uint8_t err;
   uint8_t ints;
@@ -1832,7 +1833,7 @@ static uint32_t cxd56_get_i2s_rate(uint32_t samplerate)
   return 3;       /* high */
 }
 
-static void cxd56_power_on_i2s1(FAR struct cxd56_dev_s *dev)
+static void cxd56_power_on_i2s1(struct cxd56_dev_s *dev)
 {
   uint32_t rate;
 
@@ -1914,7 +1915,7 @@ static int cxd56_power_on_aca(uint32_t samplerate)
   return OK;
 }
 
-static int cxd56_power_on_analog_output(FAR struct cxd56_dev_s *dev)
+static int cxd56_power_on_analog_output(struct cxd56_dev_s *dev)
 {
   struct cxd56_aca_smaster_param_s smaster_param;
   struct cxd56_aca_pwoutput_param_s pwon_param;
@@ -2084,7 +2085,7 @@ static uint8_t cxd56_get_mic_mode(void)
   return mode;
 }
 
-static int cxd56_power_on_micbias(FAR struct cxd56_dev_s *dev)
+static int cxd56_power_on_micbias(struct cxd56_dev_s *dev)
 {
   struct timespec start;
 
@@ -2111,7 +2112,7 @@ static int cxd56_power_on_micbias(FAR struct cxd56_dev_s *dev)
 static void cxd56_audio_power_on_cic(uint8_t mic_in,
                                      uint8_t mic_mode,
                                      uint8_t cic_num,
-                                     FAR struct cxd56_audio_mic_gain_s *gain)
+                                     struct cxd56_audio_mic_gain_s *gain)
 {
   /* Power on CIC. */
 
@@ -2258,7 +2259,7 @@ static int cxd56_power_on_decim(uint8_t mic_mode, uint32_t samplerate)
   return OK;
 }
 
-static void cxd56_set_mic_out_channel(FAR struct cxd56_dev_s *dev)
+static void cxd56_set_mic_out_channel(struct cxd56_dev_s *dev)
 {
   uint8_t i;
   uint8_t ch_sel[CXD56_IN_CHANNELS_MAX];
@@ -2298,7 +2299,7 @@ static void cxd56_set_mic_out_channel(FAR struct cxd56_dev_s *dev)
  *
  ****************************************************************************/
 
-static int cxd56_power_on_input(FAR struct cxd56_dev_s *dev)
+static int cxd56_power_on_input(struct cxd56_dev_s *dev)
 {
   uint8_t i;
   uint8_t cic_num;
@@ -2377,7 +2378,7 @@ static int cxd56_power_on_input(FAR struct cxd56_dev_s *dev)
   return ret;
 }
 
-static int cxd56_power_on(FAR struct cxd56_dev_s *dev)
+static int cxd56_power_on(struct cxd56_dev_s *dev)
 {
   uint8_t mic_mode;
 
@@ -2516,7 +2517,7 @@ static int cxd56_power_on(FAR struct cxd56_dev_s *dev)
   return OK;
 }
 
-static int cxd56_power_off(FAR struct cxd56_dev_s *dev)
+static int cxd56_power_off(struct cxd56_dev_s *dev)
 {
   /* Disable AHBMASTER. */
 
@@ -2581,8 +2582,8 @@ static int cxd56_power_off(FAR struct cxd56_dev_s *dev)
  *
  ****************************************************************************/
 
-static int cxd56_getcaps(FAR struct audio_lowerhalf_s *lower, int type,
-                 FAR struct audio_caps_s *caps)
+static int cxd56_getcaps(struct audio_lowerhalf_s *lower, int type,
+                         struct audio_caps_s *caps)
 {
   DEBUGASSERT(caps && caps->ac_len >= sizeof(struct audio_caps_s));
 
@@ -2697,10 +2698,10 @@ static int cxd56_getcaps(FAR struct audio_lowerhalf_s *lower, int type,
  *
  ****************************************************************************/
 
-static int cxd56_shutdown(FAR struct audio_lowerhalf_s *lower)
+static int cxd56_shutdown(struct audio_lowerhalf_s *lower)
 {
   int ret;
-  FAR struct cxd56_dev_s *priv = (FAR struct cxd56_dev_s *)lower;
+  struct cxd56_dev_s *priv = (struct cxd56_dev_s *)lower;
 
   if (priv->state != CXD56_DEV_STATE_OFF)
     {
@@ -2726,16 +2727,16 @@ static int cxd56_shutdown(FAR struct audio_lowerhalf_s *lower)
  ****************************************************************************/
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-static int cxd56_configure(FAR struct audio_lowerhalf_s *lower,
-                 FAR void *session, FAR const struct audio_caps_s *caps)
+static int cxd56_configure(struct audio_lowerhalf_s *lower,
+                           void *session, const struct audio_caps_s *caps)
 #else
-static int cxd56_configure(FAR struct audio_lowerhalf_s *lower,
-                 FAR const struct audio_caps_s *caps)
+static int cxd56_configure(struct audio_lowerhalf_s *lower,
+                           const struct audio_caps_s *caps)
 #endif
 {
   int ret = 0;
   uint8_t poweron = 0;
-  FAR struct cxd56_dev_s *priv = (FAR struct cxd56_dev_s *)lower;
+  struct cxd56_dev_s *priv = (struct cxd56_dev_s *)lower;
 
   switch (caps->ac_type)
     {
@@ -2907,14 +2908,13 @@ static int cxd56_configure(FAR struct audio_lowerhalf_s *lower,
  ****************************************************************************/
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-static int cxd56_start(FAR struct audio_lowerhalf_s *lower,
-                       FAR void *session)
+static int cxd56_start(struct audio_lowerhalf_s *lower, void *session)
 #else
-static int cxd56_start(FAR struct audio_lowerhalf_s *lower)
+static int cxd56_start(struct audio_lowerhalf_s *lower)
 #endif
 {
   int ret;
-  FAR struct cxd56_dev_s *priv = (FAR struct cxd56_dev_s *)lower;
+  struct cxd56_dev_s *priv = (struct cxd56_dev_s *)lower;
 
   /* Set audio path and enable analog input/output */
 
@@ -2988,7 +2988,7 @@ static int cxd56_start(FAR struct audio_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int cxd56_stop_dma(FAR struct cxd56_dev_s *priv)
+static int cxd56_stop_dma(struct cxd56_dev_s *priv)
 {
   int ret;
 
@@ -3050,21 +3050,21 @@ static int cxd56_stop_dma(FAR struct cxd56_dev_s *priv)
 
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-static int cxd56_stop(FAR struct audio_lowerhalf_s *lower, FAR void *session)
+static int cxd56_stop(struct audio_lowerhalf_s *lower, void *session)
 #else
-static int cxd56_stop(FAR struct audio_lowerhalf_s *lower)
+static int cxd56_stop(struct audio_lowerhalf_s *lower)
 #endif
 {
   int ret;
-  FAR void *value;
+  void *value;
   struct audio_msg_s msg;
-  FAR struct cxd56_dev_s *priv = (FAR struct cxd56_dev_s *)lower;
+  struct cxd56_dev_s *priv = (struct cxd56_dev_s *)lower;
 
   audinfo("cxd56_stop\n");
 
   msg.msg_id = AUDIO_MSG_STOP;
   msg.u.data = 0;
-  ret = file_mq_send(&priv->mq, (FAR const char *)&msg,
+  ret = file_mq_send(&priv->mq, (const char *)&msg,
                      sizeof(msg), CONFIG_CXD56_MSG_PRIO);
   if (ret != OK)
     {
@@ -3090,14 +3090,13 @@ static int cxd56_stop(FAR struct audio_lowerhalf_s *lower)
 
 #ifndef CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-static int cxd56_pause(FAR struct audio_lowerhalf_s *lower,
-                       FAR void *session)
+static int cxd56_pause(struct audio_lowerhalf_s *lower, void *session)
 #else
-static int cxd56_pause(FAR struct audio_lowerhalf_s *lower)
+static int cxd56_pause(struct audio_lowerhalf_s *lower)
 #endif
 {
   int ret;
-  FAR struct cxd56_dev_s *dev = (FAR struct cxd56_dev_s *)lower;
+  struct cxd56_dev_s *dev = (struct cxd56_dev_s *)lower;
 
   if (dev->state == CXD56_DEV_STATE_STARTED)
     {
@@ -3122,14 +3121,13 @@ static int cxd56_pause(FAR struct audio_lowerhalf_s *lower)
  ****************************************************************************/
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-static int cxd56_resume(FAR struct audio_lowerhalf_s *lower,
-                        FAR void *session)
+static int cxd56_resume(struct audio_lowerhalf_s *lower, void *session)
 #else
-static int cxd56_resume(FAR struct audio_lowerhalf_s *lower)
+static int cxd56_resume(struct audio_lowerhalf_s *lower)
 #endif
 {
   int ret;
-  FAR struct cxd56_dev_s *dev = (FAR struct cxd56_dev_s *)lower;
+  struct cxd56_dev_s *dev = (struct cxd56_dev_s *)lower;
 
   if (dev->state == CXD56_DEV_STATE_PAUSED ||
       dev->state == CXD56_DEV_STATE_BUFFERING)
@@ -3170,10 +3168,9 @@ static int cxd56_resume(FAR struct audio_lowerhalf_s *lower)
  ****************************************************************************/
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-static int cxd56_release(FAR struct audio_lowerhalf_s *lower,
-                  FAR void *session)
+static int cxd56_release(struct audio_lowerhalf_s *lower, void *session)
 #else
-static int cxd56_release(FAR struct audio_lowerhalf_s *lower)
+static int cxd56_release(struct audio_lowerhalf_s *lower)
 #endif
 {
   return OK;
@@ -3187,10 +3184,9 @@ static int cxd56_release(FAR struct audio_lowerhalf_s *lower)
  ****************************************************************************/
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-static int cxd56_reserve(FAR struct audio_lowerhalf_s *lower,
-                  FAR void **session)
+static int cxd56_reserve(struct audio_lowerhalf_s *lower, void **session)
 #else
-static int cxd56_reserve(FAR struct audio_lowerhalf_s *lower)
+static int cxd56_reserve(struct audio_lowerhalf_s *lower)
 #endif
 {
   return OK;
@@ -3214,19 +3210,19 @@ static void cxd56_swap_buffer_rl(uint32_t addr, uint16_t size)
     }
 }
 
-static void send_message_underrun(FAR struct cxd56_dev_s *dev)
+static void send_message_underrun(struct cxd56_dev_s *dev)
 {
   struct audio_msg_s msg;
 
   msg.msg_id = AUDIO_MSG_UNDERRUN;
   msg.u.ptr = NULL;
   dev->dev.upper(dev->dev.priv, AUDIO_CALLBACK_MESSAGE,
-                 (FAR struct ap_buffer_s *)&msg, OK);
+                 (struct ap_buffer_s *)&msg, OK);
 }
 
-static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
+static int cxd56_start_dma(struct cxd56_dev_s *dev)
 {
-  FAR struct ap_buffer_s *apb;
+  struct ap_buffer_s *apb;
   irqstate_t flags;
   int retry;
   int timeout;
@@ -3236,7 +3232,7 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
 
   flags = spin_lock_irqsave(&dev->lock);
 #ifdef CONFIG_AUDIO_CXD56_SRC
-  FAR struct ap_buffer_s *src_apb;
+  struct ap_buffer_s *src_apb;
 
   if (dq_count(&dev->down_pendq) == 0)
 #else
@@ -3449,7 +3445,7 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
               msg.u.data = 0;
 
               spin_unlock_irqrestore(&dev->lock, flags);
-              ret = file_mq_send(&dev->mq, (FAR const char *)&msg,
+              ret = file_mq_send(&dev->mq, (const char *)&msg,
                                  sizeof(msg), CONFIG_CXD56_MSG_PRIO);
               flags = spin_lock_irqsave(&dev->lock);
 
@@ -3476,10 +3472,10 @@ exit:
  *
  ****************************************************************************/
 
-static int cxd56_enqueuebuffer(FAR struct audio_lowerhalf_s *lower,
-                 FAR struct ap_buffer_s *apb)
+static int cxd56_enqueuebuffer(struct audio_lowerhalf_s *lower,
+                               struct ap_buffer_s *apb)
 {
-  FAR struct cxd56_dev_s *priv = (FAR struct cxd56_dev_s *)lower;
+  struct cxd56_dev_s *priv = (struct cxd56_dev_s *)lower;
   struct audio_msg_s msg;
   irqstate_t flags;
   int ret;
@@ -3505,7 +3501,7 @@ static int cxd56_enqueuebuffer(FAR struct audio_lowerhalf_s *lower,
           msg.msg_id = AUDIO_MSG_ENQUEUE;
           msg.u.data = 0;
 
-          ret = file_mq_send(&priv->mq, (FAR const char *) &msg,
+          ret = file_mq_send(&priv->mq, (const char *) &msg,
                              sizeof(msg), CONFIG_CXD56_MSG_PRIO);
           if (ret != OK)
             {
@@ -3527,8 +3523,8 @@ static int cxd56_enqueuebuffer(FAR struct audio_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int cxd56_cancelbuffer(FAR struct audio_lowerhalf_s *lower,
-                 FAR struct ap_buffer_s *apb)
+static int cxd56_cancelbuffer(struct audio_lowerhalf_s *lower,
+                              struct ap_buffer_s *apb)
 {
   return OK;
 }
@@ -3540,12 +3536,12 @@ static int cxd56_cancelbuffer(FAR struct audio_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int cxd56_ioctl(FAR struct audio_lowerhalf_s *lower, int cmd,
-                 unsigned long arg)
+static int cxd56_ioctl(struct audio_lowerhalf_s *lower, int cmd,
+                       unsigned long arg)
 {
   int ret = OK;
 #ifdef CONFIG_AUDIO_DRIVER_SPECIFIC_BUFFERS
-  FAR struct ap_buffer_info_s *bufinfo;
+  struct ap_buffer_info_s *bufinfo;
 #endif
 
   /* Handle ioctl commands from the upper-half driver */
@@ -3558,7 +3554,7 @@ static int cxd56_ioctl(FAR struct audio_lowerhalf_s *lower, int cmd,
       case AUDIOIOC_GETBUFFERINFO:
         {
           audinfo("AUDIOIOC_GETBUFFERINFO:\n");
-          bufinfo              = (FAR struct ap_buffer_info_s *) arg;
+          bufinfo              = (struct ap_buffer_info_s *) arg;
           bufinfo->buffer_size = CONFIG_CXD56_AUDIO_BUFFER_SIZE;
           bufinfo->nbuffers    = CONFIG_CXD56_AUDIO_NUM_BUFFERS;
         }
@@ -3584,7 +3580,7 @@ static int cxd56_ioctl(FAR struct audio_lowerhalf_s *lower, int cmd,
 
 static void *cxd56_workerthread(pthread_addr_t pvarg)
 {
-  FAR struct cxd56_dev_s *priv = (struct cxd56_dev_s *)pvarg;
+  struct cxd56_dev_s *priv = (struct cxd56_dev_s *)pvarg;
   struct audio_msg_s msg;
   unsigned int prio;
   int size;
@@ -3612,7 +3608,7 @@ static void *cxd56_workerthread(pthread_addr_t pvarg)
 
   while (priv->running)
     {
-      size = file_mq_receive(&priv->mq, (FAR char *)&msg,
+      size = file_mq_receive(&priv->mq, (char *)&msg,
                              sizeof(msg), &prio);
 
       /* Handle the case when we return with no message */
@@ -3666,7 +3662,7 @@ static void *cxd56_workerthread(pthread_addr_t pvarg)
                 audwarn("Buffering up_pendq=%d\n",
                         dq_count(&priv->up_pendq));
 
-                FAR struct ap_buffer_s *apb;
+                struct ap_buffer_s *apb;
                 apb = (struct ap_buffer_s *)(&priv->up_pendq)->tail;
 
                 bool final = (apb != NULL) &&
@@ -3679,7 +3675,7 @@ static void *cxd56_workerthread(pthread_addr_t pvarg)
                 if (CONFIG_CXD56_AUDIO_NUM_BUFFERS <=
                     dq_count(&priv->up_pendq) || final)
                   {
-                    cxd56_resume((FAR struct audio_lowerhalf_s *)priv);
+                    cxd56_resume((struct audio_lowerhalf_s *)priv);
                   }
               }
             break;
@@ -3712,9 +3708,9 @@ static void *cxd56_workerthread(pthread_addr_t pvarg)
 
 /* Setup worker thread and message queue */
 
-static int cxd56_init_worker(FAR struct audio_lowerhalf_s *dev)
+static int cxd56_init_worker(struct audio_lowerhalf_s *dev)
 {
-  FAR struct cxd56_dev_s *priv = (FAR struct cxd56_dev_s *)dev;
+  struct cxd56_dev_s *priv = (struct cxd56_dev_s *)dev;
   struct sched_param sparam;
   struct mq_attr m_attr;
   pthread_attr_t t_attr;
@@ -3777,10 +3773,9 @@ static int cxd56_init_worker(FAR struct audio_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-struct audio_lowerhalf_s *cxd56_initialize(
-                         FAR const struct cxd56_lower_s *lower)
+struct audio_lowerhalf_s *cxd56_initialize(const struct cxd56_lower_s *lower)
 {
-  FAR struct cxd56_dev_s *priv;
+  struct cxd56_dev_s *priv;
 
   audinfo("cxd56_initialize\n");
   priv = kmm_zalloc(sizeof(struct cxd56_dev_s));

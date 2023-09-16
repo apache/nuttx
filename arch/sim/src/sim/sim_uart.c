@@ -87,10 +87,10 @@ static bool tty_rxavailable(struct uart_dev_s *dev);
 static bool tty_rxflowcontrol(struct uart_dev_s *dev,
                               unsigned int nbuffered, bool upper);
 #ifdef CONFIG_SIM_UART_DMA
-static void tty_dmatxavail(FAR struct uart_dev_s *dev);
-static void tty_dmasend(FAR struct uart_dev_s *dev);
-static void tty_dmarxfree(FAR struct uart_dev_s *dev);
-static void tty_dmareceive(FAR struct uart_dev_s *dev);
+static void tty_dmatxavail(struct uart_dev_s *dev);
+static void tty_dmasend(struct uart_dev_s *dev);
+static void tty_dmarxfree(struct uart_dev_s *dev);
+static void tty_dmareceive(struct uart_dev_s *dev);
 #endif
 static void tty_send(struct uart_dev_s *dev, int ch);
 static void tty_txint(struct uart_dev_s *dev, bool enable);
@@ -509,7 +509,7 @@ static bool tty_rxflowcontrol(struct uart_dev_s *dev,
  *
  ****************************************************************************/
 
-static void tty_dmatxavail(FAR struct uart_dev_s *dev)
+static void tty_dmatxavail(struct uart_dev_s *dev)
 {
   if (uart_txready(dev))
     {
@@ -525,7 +525,7 @@ static void tty_dmatxavail(FAR struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static void tty_dmasend(FAR struct uart_dev_s *dev)
+static void tty_dmasend(struct uart_dev_s *dev)
 {
   struct tty_priv_s *priv = dev->priv;
   struct uart_dmaxfer_s *xfer = &dev->dmatx;
@@ -559,7 +559,7 @@ static void tty_dmasend(FAR struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static void tty_dmarxfree(FAR struct uart_dev_s *dev)
+static void tty_dmarxfree(struct uart_dev_s *dev)
 {
   if (uart_rxavailable(dev))
     {
@@ -575,7 +575,7 @@ static void tty_dmarxfree(FAR struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static void tty_dmareceive(FAR struct uart_dev_s *dev)
+static void tty_dmareceive(struct uart_dev_s *dev)
 {
   struct tty_priv_s *priv = dev->priv;
   struct uart_dmaxfer_s *xfer = &dev->dmarx;

@@ -71,12 +71,12 @@
  * Public Functions
  ****************************************************************************/
 
-static int rmt_open(FAR struct file *filep)
+static int rmt_open(struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct rmt_dev_channel_s *dev_data = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  struct rmt_dev_channel_s *dev_data = inode->i_private;
 
-  FAR struct rmt_dev_s *parent_dev =
+  struct rmt_dev_s *parent_dev =
     (struct rmt_dev_s *)dev_data->parent_dev;
   int ret;
   irqstate_t flags;
@@ -145,12 +145,12 @@ static int rmt_open(FAR struct file *filep)
   return ret;
 }
 
-static int rmt_close(FAR struct file *filep)
+static int rmt_close(struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct rmt_dev_channel_s *dev_data = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  struct rmt_dev_channel_s *dev_data = inode->i_private;
 
-  FAR struct rmt_dev_s *parent_dev =
+  struct rmt_dev_s *parent_dev =
     (struct rmt_dev_s *)dev_data->parent_dev;
 
   int ret;
@@ -168,14 +168,14 @@ static int rmt_close(FAR struct file *filep)
   return ret;
 }
 
-static ssize_t rmt_write(FAR struct file *filep,
-                        FAR const char *data,
-                        size_t len)
+static ssize_t rmt_write(struct file *filep,
+                         const char *data,
+                         size_t len)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct rmt_dev_channel_s *dev_data = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  struct rmt_dev_channel_s *dev_data = inode->i_private;
 
-  FAR struct rmt_dev_s *parent_dev =
+  struct rmt_dev_s *parent_dev =
     (struct rmt_dev_s *)dev_data->parent_dev;
 
   irqstate_t flags;

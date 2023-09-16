@@ -78,7 +78,7 @@ int board_bmi160_initialize(int bus);
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_BMI160_I2C
-int bmi160_init(FAR struct i2c_master_s *dev, int port);
+int bmi160_init(struct i2c_master_s *dev, int port);
 #else /* CONFIG_SENSORS_BMI160_SPI */
 int bmi160_init(struct spi_dev_s *dev);
 #endif

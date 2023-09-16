@@ -69,8 +69,8 @@
 
 struct stm32_ft5x06_config_s
 {
-  xcpt_t          handler;  /* The FT5x06 interrupt handler */
-  FAR void       *arg;      /* Interrupt handler argument */
+  xcpt_t      handler;  /* The FT5x06 interrupt handler */
+  void       *arg;      /* Interrupt handler argument */
 };
 
 /****************************************************************************
@@ -78,14 +78,14 @@ struct stm32_ft5x06_config_s
  ****************************************************************************/
 
 #ifndef CONFIG_FT5X06_POLLMODE
-static int  stm32_ft5x06_attach(FAR const struct ft5x06_config_s *config,
-                                xcpt_t isr, FAR void *arg);
-static void stm32_ft5x06_enable(FAR const struct ft5x06_config_s *config,
+static int  stm32_ft5x06_attach(const struct ft5x06_config_s *config,
+                                xcpt_t isr, void *arg);
+static void stm32_ft5x06_enable(const struct ft5x06_config_s *config,
                                 bool enable);
-static void stm32_ft5x06_clear(FAR const struct ft5x06_config_s *config);
+static void stm32_ft5x06_clear(const struct ft5x06_config_s *config);
 #endif
-static void stm32_ft5x06_wakeup(FAR const struct ft5x06_config_s *config);
-static void stm32_ft5x06_nreset(FAR const struct ft5x06_config_s *config,
+static void stm32_ft5x06_wakeup(const struct ft5x06_config_s *config);
+static void stm32_ft5x06_nreset(const struct ft5x06_config_s *config,
                                 bool state);
 
 /****************************************************************************
@@ -126,8 +126,8 @@ static struct stm32_ft5x06_config_s g_priv_config =
  ****************************************************************************/
 
 #ifndef CONFIG_FT5X06_POLLMODE
-static int  stm32_ft5x06_attach(FAR const struct ft5x06_config_s *config,
-                                xcpt_t isr, FAR void *arg)
+static int  stm32_ft5x06_attach(const struct ft5x06_config_s *config,
+                                xcpt_t isr, void *arg)
 {
   iinfo("Saving handler %p\n", isr);
 
@@ -164,7 +164,7 @@ static int  stm32_ft5x06_attach(FAR const struct ft5x06_config_s *config,
  ****************************************************************************/
 
 #ifndef CONFIG_FT5X06_POLLMODE
-static void stm32_ft5x06_enable(FAR const struct ft5x06_config_s *config,
+static void stm32_ft5x06_enable(const struct ft5x06_config_s *config,
                                 bool enable)
 {
   irqstate_t flags;
@@ -203,7 +203,7 @@ static void stm32_ft5x06_enable(FAR const struct ft5x06_config_s *config,
  ****************************************************************************/
 
 #ifndef CONFIG_FT5X06_POLLMODE
-static void stm32_ft5x06_clear(FAR const struct ft5x06_config_s *config)
+static void stm32_ft5x06_clear(const struct ft5x06_config_s *config)
 {
   /* Does nothing */
 }
@@ -218,7 +218,7 @@ static void stm32_ft5x06_clear(FAR const struct ft5x06_config_s *config)
  *
  ****************************************************************************/
 
-static void stm32_ft5x06_wakeup(FAR const struct ft5x06_config_s *config)
+static void stm32_ft5x06_wakeup(const struct ft5x06_config_s *config)
 {
   /* We do not have access to the WAKE pin in the implementation */
 }
@@ -231,7 +231,7 @@ static void stm32_ft5x06_wakeup(FAR const struct ft5x06_config_s *config)
  *
  ****************************************************************************/
 
-static void stm32_ft5x06_nreset(FAR const struct ft5x06_config_s *config,
+static void stm32_ft5x06_nreset(const struct ft5x06_config_s *config,
                                 bool nstate)
 {
   /* We do not have access to the RESET pin in the implementation */
@@ -260,7 +260,7 @@ static void stm32_ft5x06_nreset(FAR const struct ft5x06_config_s *config,
 
 int stm32_tsc_setup(int minor)
 {
-  FAR struct i2c_master_s *dev;
+  struct i2c_master_s *dev;
   int ret;
 
   iinfo("minor %d\n", minor);
