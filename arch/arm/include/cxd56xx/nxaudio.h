@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/audio/cxd56.h
+ * arch/arm/include/cxd56xx/nxaudio.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -59,8 +59,8 @@ extern "C"
 
 struct audio_lowerhalf_s;
 
-FAR struct audio_lowerhalf_s *
-  cxd56_initialize(FAR const struct cxd56_lower_s *lower);
+struct audio_lowerhalf_s *
+cxd56_initialize(const struct cxd56_lower_s *lower);
 
 #undef EXTERN
 #ifdef __cplusplus

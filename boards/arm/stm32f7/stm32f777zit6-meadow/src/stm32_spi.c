@@ -109,7 +109,7 @@ void stm32_spi2select(struct spi_dev_s *dev,
           );
 }
 
-uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t stm32_spi2status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }

@@ -65,7 +65,7 @@ static void qemu_virtio_register_mmio_devices(void)
 
   for (i = 0; i < QEMU_VIRTIO_MMIO_NUM; i++)
     {
-      virtio_register_mmio_device((FAR void *)(virtio + size * i), irq + i);
+      virtio_register_mmio_device((void *)(virtio + size * i), irq + i);
     }
 }
 #endif

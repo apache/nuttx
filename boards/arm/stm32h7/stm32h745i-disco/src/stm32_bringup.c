@@ -94,7 +94,7 @@ int stm32_bringup(void)
 {
   int ret;
 #ifdef CONFIG_RAMMTD
-  FAR uint8_t *ramstart;
+  uint8_t *ramstart;
 #endif
 
   UNUSED(ret);
@@ -156,7 +156,7 @@ int stm32_bringup(void)
     {
       /* Initialized the RAM MTD */
 
-      FAR struct mtd_dev_s *mtd = rammtd_initialize(ramstart, 128 * 1024);
+      struct mtd_dev_s *mtd = rammtd_initialize(ramstart, 128 * 1024);
       if (mtd == NULL)
         {
           syslog(LOG_ERR, "ERROR: rammtd_initialize failed\n");

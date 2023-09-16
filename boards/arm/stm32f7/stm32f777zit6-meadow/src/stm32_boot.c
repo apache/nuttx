@@ -45,7 +45,7 @@
 
 /* MEADOW FIXME: header clash? */
 
-extern FAR struct qspi_dev_s *stm32f7_qspi_initialize(int intf);
+extern struct qspi_dev_s *stm32f7_qspi_initialize(int intf);
 #endif
 
 /****************************************************************************
@@ -124,8 +124,8 @@ void stm32_boardinitialize(void)
 void board_late_initialize(void)
 {
 #ifdef CONFIG_STM32F7_QUADSPI
-  FAR struct qspi_dev_s *qspi;
-  FAR struct mtd_dev_s *mtd;
+  struct qspi_dev_s *qspi;
+  struct mtd_dev_s *mtd;
 
   struct qspi_meminfo_s meminfo;
 

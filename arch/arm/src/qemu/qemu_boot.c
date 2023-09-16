@@ -56,7 +56,7 @@ void arm_boot(void)
 #endif
 
 #ifdef CONFIG_DEVICE_TREE
-  fdt_register((FAR const char *)0x40000000);
+  fdt_register((const char *)0x40000000);
 #endif
 
 #ifdef USE_EARLYSERIALINIT

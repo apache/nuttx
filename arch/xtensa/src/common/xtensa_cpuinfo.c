@@ -83,7 +83,7 @@ static inline uint32_t xtensa_getconfig1(void)
  * name: up_show_cpuinfo
  ****************************************************************************/
 
-ssize_t up_show_cpuinfo(FAR char *buf, size_t buf_size, off_t file_off)
+ssize_t up_show_cpuinfo(char *buf, size_t buf_size, off_t file_off)
 {
   procfs_sprintf(buf, buf_size, &file_off,
                  "CPU count\t: %u\n"
