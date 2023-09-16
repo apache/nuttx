@@ -52,10 +52,10 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-int cxd56_src_init(FAR struct cxd56_dev_s *dev, FAR struct dq_queue_s *inq,
-                   FAR struct dq_queue_s *outq);
+int cxd56_src_init(struct cxd56_dev_s *dev, struct dq_queue_s *inq,
+                   struct dq_queue_s *outq);
 int cxd56_src_deinit(void);
-int cxd56_src_enqueue(FAR struct ap_buffer_s *apb);
+int cxd56_src_enqueue(struct ap_buffer_s *apb);
 int cxd56_src_stop(void);
 
 #endif /* CONFIG_AUDIO */

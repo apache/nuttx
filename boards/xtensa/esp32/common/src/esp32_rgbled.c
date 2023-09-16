@@ -66,9 +66,9 @@
 int esp32_rgbled_initialize(const char *devname)
 {
   static bool initialized = false;
-  FAR struct pwm_lowerhalf_s *ledr;
-  FAR struct pwm_lowerhalf_s *ledg;
-  FAR struct pwm_lowerhalf_s *ledb;
+  struct pwm_lowerhalf_s *ledr;
+  struct pwm_lowerhalf_s *ledg;
+  struct pwm_lowerhalf_s *ledb;
   int ret;
 
   /* Have we already initialized? */

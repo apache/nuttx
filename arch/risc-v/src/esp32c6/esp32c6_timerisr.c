@@ -51,7 +51,7 @@
  * Name: systimer_isr
  ****************************************************************************/
 
-static int systimer_isr(int irq, FAR void *context, FAR void *arg)
+static int systimer_isr(int irq, void *context, void *arg)
 {
   setbits(SYSTIMER_TARGET0_INT_CLR, SYSTIMER_INT_CLR_REG);
 

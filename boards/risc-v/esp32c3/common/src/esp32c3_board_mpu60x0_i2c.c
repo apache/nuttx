@@ -58,7 +58,7 @@ int board_mpu60x0_initialize(int devno, int busno)
 {
   struct i2c_master_s *i2c;
   char devpath[10];
-  FAR struct mpu_config_s *mpu_config;
+  struct mpu_config_s *mpu_config;
   int ret;
 
   sninfo("Initializing MPU60X0!\n");

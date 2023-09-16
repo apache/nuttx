@@ -68,7 +68,7 @@ static uint32_t g_saveregs[XCPTCONTEXT_REGS];
  * return the current FPU registers.
  */
 
-void arch_getfpu(FAR uint32_t *fpusave)
+void arch_getfpu(uint32_t *fpusave)
 {
   irqstate_t flags;
 
@@ -87,7 +87,7 @@ void arch_getfpu(FAR uint32_t *fpusave)
  * will compare them and return true if they are identical.
  */
 
-bool arch_cmpfpu(FAR const uint32_t *fpusave1, FAR const uint32_t *fpusave2)
+bool arch_cmpfpu(const uint32_t *fpusave1, const uint32_t *fpusave2)
 {
   return memcmp(fpusave1, fpusave2, (4*SW_FPU_REGS)) == 0;
 }

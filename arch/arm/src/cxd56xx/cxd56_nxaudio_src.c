@@ -136,7 +136,7 @@ static struct ap_buffer_s *cxd56_src_get_apb(void)
 
       src_apb->nmaxbytes = CONFIG_CXD56_AUDIO_BUFFER_SIZE;
       src_apb->nbytes = 0;
-      src_apb->samp = (FAR uint8_t *)(&src_apb->samp + 1);
+      src_apb->samp = (uint8_t *)(&src_apb->samp + 1);
     }
   else
     {
@@ -154,7 +154,7 @@ errorout_with_lock:
  * out queue accordingly.
  */
 
-static int cxd56_src_process(FAR struct ap_buffer_s *apb)
+static int cxd56_src_process(struct ap_buffer_s *apb)
 {
   int ret = OK;
   irqstate_t flags;
@@ -352,7 +352,7 @@ static void *cxd56_src_thread(pthread_addr_t pvarg)
 
   while (g_src.state == CXD56_SRC_RUNNING)
     {
-      size = file_mq_receive(&g_src.mq, (FAR char *)&msg,
+      size = file_mq_receive(&g_src.mq, (char *)&msg,
                              sizeof(msg), &prio);
 
       /* Handle the case when we return with no message */
@@ -402,9 +402,9 @@ static void *cxd56_src_thread(pthread_addr_t pvarg)
  *
  ****************************************************************************/
 
-int cxd56_src_init(FAR struct cxd56_dev_s *dev,
-                   FAR struct dq_queue_s *inq,
-                   FAR struct dq_queue_s *outq)
+int cxd56_src_init(struct cxd56_dev_s *dev,
+                   struct dq_queue_s *inq,
+                   struct dq_queue_s *outq)
 {
   struct sched_param sparam;
   struct mq_attr m_attr;
@@ -541,7 +541,7 @@ int cxd56_src_deinit(void)
  *
  ****************************************************************************/
 
-int cxd56_src_enqueue(FAR struct ap_buffer_s *apb)
+int cxd56_src_enqueue(struct ap_buffer_s *apb)
 {
   int ret;
   struct audio_msg_s msg;
@@ -550,7 +550,7 @@ int cxd56_src_enqueue(FAR struct ap_buffer_s *apb)
 
   msg.msg_id = AUDIO_MSG_ENQUEUE;
   msg.u.ptr = apb;
-  ret = file_mq_send(&g_src.mq, (FAR const char *)&msg,
+  ret = file_mq_send(&g_src.mq, (const char *)&msg,
                      sizeof(msg), CONFIG_CXD56_MSG_PRIO);
   if (ret != OK)
     {
@@ -577,7 +577,7 @@ int cxd56_src_stop(void)
 
   msg.msg_id = AUDIO_MSG_STOP;
   msg.u.data = 0;
-  ret = file_mq_send(&g_src.mq, (FAR const char *)&msg,
+  ret = file_mq_send(&g_src.mq, (const char *)&msg,
                      sizeof(msg), CONFIG_CXD56_MSG_PRIO);
   if (ret != OK)
     {

@@ -56,7 +56,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int board_alt1250_initialize(FAR const char *devpath);
+int board_alt1250_initialize(const char *devpath);
 
 /****************************************************************************
  * Name: board_alt1250_uninitialize

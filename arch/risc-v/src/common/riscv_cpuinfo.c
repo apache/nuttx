@@ -36,7 +36,7 @@
  * name: up_show_cpuinfo
  ****************************************************************************/
 
-ssize_t up_show_cpuinfo(FAR char *buf, size_t buf_size, off_t file_off)
+ssize_t up_show_cpuinfo(char *buf, size_t buf_size, off_t file_off)
 {
   int i;
 

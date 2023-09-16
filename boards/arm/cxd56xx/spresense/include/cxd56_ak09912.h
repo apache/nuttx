@@ -71,7 +71,7 @@ int board_ak09912_initialize(const char *devpath, int bus);
  *
  ****************************************************************************/
 
-int ak09912_init(FAR struct i2c_master_s *i2c, int port);
+int ak09912_init(struct i2c_master_s *i2c, int port);
 
 /****************************************************************************
  * Name: ak09912_scu_register

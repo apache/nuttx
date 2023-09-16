@@ -172,7 +172,7 @@ void arm64_chip_boot(void)
   arm64_mmu_init(true);
 
 #ifdef CONFIG_DEVICE_TREE
-  fdt_register((FAR const char *)0x40000000);
+  fdt_register((const char *)0x40000000);
 #endif
 
 #if defined(CONFIG_ARCH_CHIP_QEMU_WITH_HV)
