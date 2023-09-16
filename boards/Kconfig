@@ -2890,6 +2890,13 @@ config ARCH_BOARD_SIM
 		This port does not support interrupts or a real timer (and hence no
 		round robin scheduler)  Otherwise, it is complete.
 
+config ARCH_BOARD_AT32F437_MINI
+	bool "AT32F437-MINI board"
+	depends on ARCH_CHIP_AT32F437VM
+	select ARCH_HAVE_LEDS
+	---help---
+		AT32F437-MINI board based on the Artery AT32F437VMT7 MCU.
+
 config ARCH_BOARD_CUSTOM
 	bool "Custom development board"
 	---help---
@@ -3256,6 +3263,7 @@ config ARCH_BOARD
 	default "xx3823"                    if ARCH_BOARD_XX3823
 	default "s698pm-dkit"               if ARCH_BOARD_S698PM_DKIT
 	default "hpm6750evk2"               if ARCH_BOARD_HPM6750EVK2
+	default "at32f437-mini"  	    	if ARCH_BOARD_AT32F437_MINI
 
 comment "Common Board Options"
 
@@ -4163,6 +4171,9 @@ source "boards/arm/tlsr82/tlsr8278adk80d/Kconfig"
 endif
 if ARCH_BOARD_HPM6750EVK2
 source "boards/risc-v/hpm6750/hpm6750evk2/Kconfig"
+endif
+if ARCH_BOARD_AT32F437_MINI
+source "boards/arm/at32/at32f437-mini/Kconfig"
 endif
 
 comment "Board-Common Options"
