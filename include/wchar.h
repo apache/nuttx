@@ -159,6 +159,7 @@ size_t            mbsnrtowcs(FAR wchar_t *, FAR const char **, size_t,
 size_t            mbsrtowcs(FAR wchar_t *, FAR const char **, size_t,
                       FAR mbstate_t *);
 wint_t            putwc(wchar_t, FILE *);
+wint_t            putwc_unlocked(wchar_t, FAR FILE *);
 wint_t            putwchar(wchar_t);
 int               swprintf(FAR wchar_t *, size_t, FAR const wchar_t *, ...);
 int               swscanf(FAR const wchar_t *, FAR const wchar_t *, ...);
