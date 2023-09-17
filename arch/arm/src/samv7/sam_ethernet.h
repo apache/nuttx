@@ -227,13 +227,14 @@ int sam_emac_setmacaddr(int intf, uint8_t mac[6]);
  * Description:
  *   Some boards require specialized initialization of the PHY before it can
  *   be used. This may include such things as configuring GPIOs, resetting
- *   the PHY, etc.  If CONFIG_SAMV7_PHYINIT is defined in the configuration
- *   then the board specific logic must provide sam_phyinitialize();
+ *   the PHY, etc.  If CONFIG_SAMV7_EMAC0_PHYINIT or
+ *   CONFIG_SAMV7_EMAC1_PHYINIT is defined in the configuration then the
+ *   board specific logic must provide sam_phyinitialize();
  *   The SAMV7 Ethernet driver will call this function one time before it
  *   first uses the PHY.
  *
  * Input Parameters:
- *   intf - Always zero for now.
+ *   intf - 0 for EMAC0 and 1 for EMAC1.
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
@@ -242,7 +243,7 @@ int sam_emac_setmacaddr(int intf, uint8_t mac[6]);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAMV7_PHYINIT
+#if defined(CONFIG_SAMV7_EMAC0_PHYINIT) | defined(CONFIG_SAMV7_EMAC1_PHYINIT)
 int sam_phy_boardinitialize(int intf);
 #endif
 
