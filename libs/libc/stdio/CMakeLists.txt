@@ -44,7 +44,8 @@ set(SRCS
     lib_remove.c
     lib_tempnam.c
     lib_tmpnam.c
-    lib_ultoa_invert.c)
+    lib_ultoa_invert.c
+    lib_putwchar.c)
 
 if(CONFIG_LIBC_FLOATINGPOINT)
   list(APPEND SRCS lib_dtoa_engine.c lib_dtoa_data.c)
