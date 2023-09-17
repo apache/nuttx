@@ -62,4 +62,5 @@ target_sources(
           lib_wcsspn.c
           lib_wcsstr.c
           lib_wcstok.c
-          lib_wcswcs.c)
+          lib_wcswcs.c
+          lib_wcwidth.c)
