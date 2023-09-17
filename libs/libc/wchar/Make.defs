@@ -29,7 +29,7 @@ CSRCS += lib_swprintf.c lib_mbsnrtowcs.c lib_wcsnrtombs.c lib_mbsinit.c
 CSRCS += lib_mbrlen.c lib_mbsrtowcs.c lib_wcsrtombs.c lib_wcscpy.c
 CSRCS += lib_wcscat.c lib_wcslcat.c lib_wcsncat.c lib_wcsrchr.c lib_wcschr.c
 CSRCS += lib_wcsncpy.c lib_wcsncmp.c lib_wcscspn.c lib_wcspbrk.c lib_wcsspn.c
-CSRCS += lib_wcsstr.c lib_wcstok.c lib_wcswcs.c lib_wcwidth.c
+CSRCS += lib_wcsstr.c lib_wcstok.c lib_wcswcs.c lib_wcwidth.c lib_wcswidth.c
 
 # Add the wchar directory to the build
 
