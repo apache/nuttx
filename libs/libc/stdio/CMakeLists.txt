@@ -100,7 +100,8 @@ if(CONFIG_FILE_STREAM)
     lib_setvbuf.c
     lib_libstream.c
     lib_libfilelock.c
-    lib_libgetstreams.c)
+    lib_libgetstreams.c
+    lib_fputwc.c)
 endif()
 
 target_sources(c PRIVATE ${SRCS})
