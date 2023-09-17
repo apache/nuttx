@@ -58,4 +58,5 @@ target_sources(
           lib_wcsncpy.c
           lib_wcsncmp.c
           lib_wcscspn.c
-          lib_wcspbrk.c)
+          lib_wcspbrk.c
+          lib_wcsspn.c)
