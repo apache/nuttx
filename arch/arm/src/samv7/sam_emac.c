@@ -4022,6 +4022,30 @@ static int sam_phyinit(struct sam_emac_s *priv)
       regval |= EMAC_NCFGR_CLK_DIV8;  /* MCK divided by 8 (MCK up to 20 MHz) */
     }
 
+#ifdef CONFIG_SAMV7_EMAC0_PHYINIT
+  if (priv->attr->emac == EMAC0_INTF)
+    {
+      ret = sam_phy_boardinitialize(0);
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to initialize the PHY: %d\n", ret);
+          return ret;
+        }
+    }
+#endif
+
+#ifdef CONFIG_SAMV7_EMAC1_PHYINIT
+  if (priv->attr->emac == EMAC1_INTF)
+    {
+      ret = sam_phy_boardinitialize(1);
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to initialize the PHY: %d\n", ret);
+          return ret;
+        }
+    }
+#endif
+
   sam_putreg(priv, SAM_EMAC_NCFGR_OFFSET, regval);
 
   /* Check the PHY Address */
