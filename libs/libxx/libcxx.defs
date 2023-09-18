@@ -121,6 +121,16 @@ endif
 #          ~~~~~~~~~~^~~~~~~~~~~~
 libcxx/src/condition_variable.cpp_CXXFLAGS += -Wno-sign-compare
 
+# The following warning was observed with sim:libcxxtest compiled with
+# Apple clang version 14.0.3 (clang-1403.0.22.14.1)
+#
+# ...
+# libcxx/src/filesystem/directory_iterator.cpp:189:57: warning: unqualified call to 'std::move' [-Wunqualified-std-cast-call]
+#      __root_(move(other.__root_)),
+#              ^
+#              std::
+libcxx/src/filesystem/directory_iterator.cpp_CXXFLAGS += -Wno-unqualified-std-cast-call
+
 CPPSRCS += $(notdir $(wildcard libcxx/src/*.cpp))
 CPPSRCS += $(notdir $(wildcard libcxx/src/experimental/*.cpp))
 CPPSRCS += $(notdir $(wildcard libcxx/src/filesystem/*.cpp))
