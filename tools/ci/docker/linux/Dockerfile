@@ -93,7 +93,7 @@ RUN mkdir gcc-arm-none-eabi && \
 FROM nuttx-toolchain-base AS nuttx-toolchain-arm64
 # Download the latest ARM64 GCC toolchain prebuilt by ARM
 RUN mkdir gcc-aarch64-none-elf && \
-  curl -s -L  "https://developer.arm.com/-/media/Files/downloads/gnu/11.2-2022.02/binrel/gcc-arm-11.2-2022.02-x86_64-aarch64-none-elf.tar.xz" \
+  curl -s -L  "https://developer.arm.com/-/media/Files/downloads/gnu/12.3.rel1/binrel/arm-gnu-toolchain-12.3.rel1-x86_64-aarch64-none-elf.tar.xz" \
   | tar -C gcc-aarch64-none-elf --strip-components 1 -xJ
 
 ###############################################################################
