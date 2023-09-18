@@ -1,0 +1,40 @@
+From ea4cb25a98c0f2f0313c47257742cf6565c57dc7 Mon Sep 17 00:00:00 2001
+From: Xiang Xiao <xiaoxiang@xiaomi.com>
+Date: Wed, 5 Apr 2023 10:27:47 +0800
+Subject: [PATCH 1/2] =?UTF-8?q?Fix=20warning:=20function=20declaration=20i?=
+ =?UTF-8?q?sn=E2=80=99t=20a=20prototype=20[-Wstrict-prototypes]?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Xiang Xiao <xiaoxiang@xiaomi.com>
+Change-Id: Ie8f405c14d6bae5a5d25caa82e7190c4bcb4504f
+---
+ libm/common/tools.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/libmcs/libmcs/libm/common/tools.h libmcs/libmcs/libm/common/tools.h
+index 56bde02bb..b10aa173d 100644
+--- a/libmcs/libmcs/libm/common/tools.h
++++ libmcs/libmcs/libm/common/tools.h
+@@ -335,7 +335,7 @@ static inline float __forced_calculationf(float x) {
+     return r;
+ }
+ 
+-static inline double __raise_invalid() {
++static inline double __raise_invalid(void) {
+     double r = __forced_calculation(0.0 / 0.0);
+     return r;
+ }
+@@ -355,7 +355,7 @@ static inline double __raise_inexact(double x) {
+     return (__forced_calculation(huge - 1.0e-300) != 0.0) ? x : 0.0;
+ }
+ 
+-static inline float __raise_invalidf() {
++static inline float __raise_invalidf(void) {
+     double r = __forced_calculationf(0.0f / 0.0f);
+     return r;
+ }
+-- 
+2.40.1
+
