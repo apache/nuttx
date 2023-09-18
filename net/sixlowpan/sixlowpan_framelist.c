@@ -562,7 +562,7 @@ int sixlowpan_queue_frames(FAR struct radio_driver_s *radio,
        *   1. Datagram size describes the total (un-fragmented) payload.
        *   2. Datagram tag identifies the set of fragments and is used to
        *      match fragments of the same payload.
-       *   3. Datagram offset identifies the fragment’s offset within the
+       *   3. Datagram offset identifies the fragment's offset within the
        *      unfragmented payload.
        *
        * The fragment header length is 4 bytes for the first header and 5

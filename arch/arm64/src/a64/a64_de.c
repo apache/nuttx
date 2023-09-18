@@ -794,7 +794,7 @@ int a64_de_ui_channel_init(uint8_t channel,
    *   (Input Data Format is XRGB 8888 or ARGB 8888)
    * Set LAY_ALPHA_MODE (Bits 1 to 2) to 2
    *   (Global Alpha is mixed with Pixel Alpha)
-   *   (Input Alpha Value = Global Alpha Value * Pixel’s Alpha Value)
+   *   (Input Alpha Value = Global Alpha Value * Pixel's Alpha Value)
    * Set LAY_EN (Bit 0) to 1 (Enable Layer)
    */
 

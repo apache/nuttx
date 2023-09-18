@@ -288,7 +288,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev,
    * divisor in the range {2, 4, 8, 16, 32, 64, 128, 256, or 512).
    *
    *
-   * BaudRateDivisor = (SPPR + 1) × 2^(SPR + 1)
+   * BaudRateDivisor = (SPPR + 1) * 2^(SPR + 1)
    * BaudRate = BusClock / BaudRateDivisor
    *
    * The strategy is to pick the smallest divisor that yields an in-range
