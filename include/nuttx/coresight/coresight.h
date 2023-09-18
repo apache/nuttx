@@ -122,6 +122,10 @@ struct coresight_desc_s
   enum coresight_dev_type_e type;
   union coresight_dev_subtype_u subtype;
 
+  /* Used in funnel devices. */
+
+  int inport_num;
+
   /* Description of outports of current device. */
 
   int outport_num;
