@@ -457,6 +457,20 @@ config ARCH_BOARD_ESP32S3_LCD_EV
 			1. ESP32-S3-LCD-EV-Board with 480x480 LCD
 			2. ESP32-S3-LCD-EV-Board with 800x480 LCD
 
+config ARCH_BOARD_ESP32S3_BOX
+	bool "Espressif ESP32-S3-BOX"
+	depends on ARCH_CHIP_ESP32S3WROOM2
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS if ESP32S3_GPIO_IRQ
+	---help---
+		The ESP-BOX is an advanced AIoT, Edge AI, and IIoT applications development platform
+		released by Espressif Systems. The board is built on Espressif’s powerful ESP32-S3
+		Wi-Fi + Bluetooth 5 (LE) SoC and feature compact and beautiful enclosures.
+		Leveraging the multi-functional accessories and reliable examples from the repo’s,
+		these development boards cater to both prototyping new projects and building complex
+		IoT systems, providing a perfect balance of form and function.
+
 config ARCH_BOARD_ESP32S3_MEADOW
 	bool "WildernessLabs ESP32S3-Meadow Board"
 	depends on ARCH_CHIP_ESP32S3WROOM1
@@ -3021,6 +3035,7 @@ config ARCH_BOARD
 	default "esp32s3-eye"               if ARCH_BOARD_ESP32S3_EYE
 	default "esp32s3-meadow"            if ARCH_BOARD_ESP32S3_MEADOW
 	default "esp32s3-lcd-ev"            if ARCH_BOARD_ESP32S3_LCD_EV
+	default "esp32s3-box"               if ARCH_BOARD_ESP32S3_BOX
 	default "esp32c6-devkit"            if ARCH_BOARD_ESP32C6_DEVKIT
 	default "esp32c6-generic"           if ARCH_BOARD_ESP32C6_GENERIC
 	default "esp32h2-generic"           if ARCH_BOARD_ESP32H2_GENERIC
@@ -4075,6 +4090,9 @@ source "boards/xtensa/esp32s3/esp32s3-meadow/Kconfig"
 endif
 if ARCH_BOARD_ESP32S3_LCD_EV
 source "boards/xtensa/esp32s3/esp32s3-lcd-ev/Kconfig"
+endif
+if ARCH_BOARD_ESP32S3_BOX
+source "boards/xtensa/esp32s3/esp32s3-box/Kconfig"
 endif
 if ARCH_BOARD_ESP32C6_DEVKIT
 source "boards/risc-v/esp32c6/esp32c6-devkit/Kconfig"
