@@ -495,6 +495,12 @@ static void clk_change_rate(FAR struct clk_s *clk, uint32_t best_parent_rate)
 
   if (clk->new_parent && clk->new_parent != clk->parent)
     {
+      if (clk->flags & CLK_OPS_PARENT_ENABLE)
+        {
+          clk_enable(old_parent);
+          clk_enable(clk->new_parent);
+        }
+
       if (clk->enable_count)
         {
           clk_enable(clk->new_parent);
@@ -517,6 +523,12 @@ static void clk_change_rate(FAR struct clk_s *clk, uint32_t best_parent_rate)
       if (clk->enable_count)
         {
           clk_disable(clk);
+          clk_disable(old_parent);
+        }
+
+      if (clk->flags & CLK_OPS_PARENT_ENABLE)
+        {
+          clk_disable(clk->new_parent);
           clk_disable(old_parent);
         }
     }
@@ -789,9 +801,14 @@ static void clk_disable_unused_subtree(FAR struct clk_s *clk)
       clk_disable_unused_subtree(child);
     }
 
+  if (clk->flags & CLK_OPS_PARENT_ENABLE)
+    {
+      clk_enable(clk->parent);
+    }
+
   if (clk->enable_count)
     {
-      return;
+      goto out;
     }
 
   if (clk_is_enabled(clk))
@@ -804,6 +821,12 @@ static void clk_disable_unused_subtree(FAR struct clk_s *clk)
         {
           clk->ops->disable(clk);
         }
+    }
+
+out:
+  if (clk->flags & CLK_OPS_PARENT_ENABLE)
+    {
+       clk_disable(clk->parent);
     }
 }
 
@@ -1062,6 +1085,12 @@ int clk_set_parent(FAR struct clk_s *clk, FAR struct clk_s *parent)
 
   old_parent = clk->parent;
 
+  if (clk->flags & CLK_OPS_PARENT_ENABLE)
+    {
+      clk_enable(old_parent);
+      clk_enable(parent);
+    }
+
   if (clk->enable_count)
     {
       clk_enable(parent);
@@ -1085,12 +1114,24 @@ int clk_set_parent(FAR struct clk_s *clk, FAR struct clk_s *parent)
           clk_disable(parent);
         }
 
+      if (clk->flags & CLK_OPS_PARENT_ENABLE)
+        {
+          clk_disable(parent);
+          clk_disable(old_parent);
+        }
+
       goto out;
     }
 
   if (clk->enable_count)
     {
       clk_disable(clk);
+      clk_disable(old_parent);
+    }
+
+  if (clk->flags & CLK_OPS_PARENT_ENABLE)
+    {
+      clk_disable(parent);
       clk_disable(old_parent);
     }
 
