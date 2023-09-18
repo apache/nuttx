@@ -1,0 +1,104 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_ESP32S3_BOX
+
+config ESP32S3_STORAGE_MTD_OFFSET
+	hex "Storage MTD base address in SPI Flash"
+	default 0x180000 if !ESP32S3_HAVE_OTA_PARTITION
+	default 0x250000 if ESP32S3_HAVE_OTA_PARTITION
+	depends on ESP32S3_MTD
+	---help---
+		MTD base address in SPI Flash.
+
+config ESP32S3_STORAGE_MTD_SIZE
+	hex "Storage MTD size in SPI Flash"
+	default 0x100000
+	depends on ESP32S3_MTD
+	---help---
+		MTD size in SPI Flash.
+
+choice ESP32S3_SPIFLASH_FS
+	prompt "Mount SPI Flash MTD on bring-up"
+	default ESP32S3_SPIFLASH_SMARTFS
+	depends on ESP32S3_MTD
+	optional
+	---help---
+		Mount the SPI Flash MTD with the selected File System format on board
+		bring-up.
+		If not selected, the MTD will be registered as a device node on /dev.
+
+config ESP32S3_SPIFLASH_SMARTFS
+	bool "SmartFS"
+	select FS_SMARTFS
+	select MTD_SMART
+
+config ESP32S3_SPIFLASH_NXFFS
+	bool "NXFFS"
+	select FS_NXFFS
+
+config ESP32S3_SPIFLASH_SPIFFS
+	bool "SPIFFS"
+	select FS_SPIFFS
+
+config ESP32S3_SPIFLASH_LITTLEFS
+	bool "LittleFS"
+	select FS_LITTLEFS
+
+endchoice # ESP32S3_SPIFLASH_FS
+
+config ESP32S3_BOX_LCD
+	bool "Enable ESP32-S3 LCD"
+	default n
+	select ESP32S3_SPI2
+	select LCD
+	select LCD_DEV
+	select LCD_ST7789
+	---help---
+		Enable board LCD support, IC is LCD_ST7789V. 
+
+config ESP32S3_BOARD_TOUCHSCREEN
+	bool "Enable Board Touchscreen"
+	default n
+	select ESP32S3_I2C0
+	select INPUT
+	select INPUT_TOUCHSCREEN
+	---help---
+		Enable board touchscreen support, IC is TT21100. 
+
+menu "Board Touchscreen Configuration"
+	depends on ESP32S3_BOARD_TOUCHSCREEN
+
+config ESP32S3_BOARD_TOUCHSCREEN_PATH
+	string "Touchscreen Path for VFS"
+	default "/dev/input0"
+
+config ESP32S3_BOARD_TOUCHSCREEN_WIDTH
+	int "Touchscreen Width"
+	default 320
+
+config ESP32S3_BOARD_TOUCHSCREEN_HEIGHT
+	int "Touchscreen Height"
+	default 240
+
+config ESP32S3_BOARD_TOUCHSCREEN_SAMPLE_CACHES
+	int "Touchscreen Sample Cache Number"
+	default 64
+
+config ESP32S3_BOARD_TOUCHSCREEN_SAMPLE_DELAYS
+	int "Touchscreen Sample Delay Ticks"
+	default 20
+
+config ESP32S3_BOARD_TOUCHSCREEN_X_MIRROR
+	bool "Touchscreen X Mirror"
+	default y
+
+config ESP32S3_BOARD_TOUCHSCREEN_Y_MIRROR
+	bool "Touchscreen Y Mirror"
+	default n
+
+endmenu # Touchscreen Configuration
+
+endif # ARCH_BOARD_ESP32S3_BOX
