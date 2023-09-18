@@ -217,14 +217,6 @@ static FAR struct regulator_dev_s *regulator_dev_lookup(const char *supply)
     }
 
   regulator_unlock(&g_reg_lock, flags);
-
-#if defined(CONFIG_REGULATOR_RPMSG)
-  if (rdev_found == NULL && strchr(supply, '/'))
-    {
-      rdev_found = regulator_rpmsg_get(supply);
-    }
-#endif
-
   return rdev_found;
 }
 
@@ -569,6 +561,14 @@ FAR struct regulator_s *regulator_get(FAR const char *id)
     }
 
   rdev = regulator_dev_lookup(id);
+
+#if defined(CONFIG_REGULATOR_RPMSG)
+  if (rdev == NULL && strchr(id, '/'))
+    {
+      rdev = regulator_rpmsg_get(id);
+    }
+#endif
+
   if (rdev == NULL)
     {
       pwrerr("regulator %s not found\n", id);
