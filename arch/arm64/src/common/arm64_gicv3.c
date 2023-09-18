@@ -60,6 +60,15 @@
 
 #define IGROUPR_VAL  0xFFFFFFFFU
 
+#ifdef CONFIG_ARM64_DECODEFIQ
+
+/* Config SGI8 ~ SGI15 as group0, to signal fiq */
+
+#define IGROUPR_SGI_VAL  0xFFFF00FFU
+#else
+#define IGROUPR_SGI_VAL  0xFFFFFFFFU
+#endif
+
 /***************************************************************************
  * Private Data
  ***************************************************************************/
@@ -273,7 +282,7 @@ bool arm64_gic_irq_is_enabled(unsigned int intid)
   return (val & mask) != 0;
 }
 
-unsigned int arm64_gic_get_active(void)
+unsigned int arm64_gic_get_active_irq(void)
 {
   int intid;
 
@@ -284,7 +293,20 @@ unsigned int arm64_gic_get_active(void)
   return intid;
 }
 
-void arm64_gic_eoi(unsigned int intid)
+#ifdef CONFIG_ARM64_DECODEFIQ
+unsigned int arm64_gic_get_active_fiq(void)
+{
+  int intid;
+
+  /* (Pending -> Active / AP) or (AP -> AP) */
+
+  intid = read_sysreg(ICC_IAR0_EL1);
+
+  return intid;
+}
+#endif
+
+void aarm64_gic_eoi_irq(unsigned int intid)
 {
   /* Interrupt request deassertion from peripheral to GIC happens
    * by clearing interrupt condition by a write to the peripheral
@@ -304,6 +326,28 @@ void arm64_gic_eoi(unsigned int intid)
   write_sysreg(intid, ICC_EOIR1_EL1);
 }
 
+#ifdef CONFIG_ARM64_DECODEFIQ
+void arm64_gic_eoi_fiq(unsigned int intid)
+{
+  /* Interrupt request deassertion from peripheral to GIC happens
+   * by clearing interrupt condition by a write to the peripheral
+   * register. It is desired that the write transfer is complete
+   * before the core tries to change GIC state from 'AP/Active' to
+   * a new state on seeing 'EOI write'.
+   * Since ICC interface writes are not ordered against Device
+   * memory writes, a barrier is required to ensure the ordering.
+   * The dsb will also ensure *completion* of previous writes with
+   * DEVICE nGnRnE attribute.
+   */
+
+  ARM64_DSB();
+
+  /* (AP -> Pending) Or (Active -> Inactive) or (AP to AP) nested case */
+
+  write_sysreg(intid, ICC_EOIR0_EL1);
+}
+#endif
+
 static int arm64_gic_send_sgi(unsigned int sgi_id, uint64_t target_aff,
                               uint16_t target_list)
 {
@@ -311,7 +355,10 @@ static int arm64_gic_send_sgi(unsigned int sgi_id, uint64_t target_aff,
   uint32_t aff2;
   uint32_t aff1;
   uint64_t sgi_val;
+  uint32_t regval;
+  unsigned long base;
 
+  base = gic_get_rdist() + GICR_SGI_BASE_OFF;
   assert(GIC_IS_SGI(sgi_id));
 
   /* Extract affinity fields from target */
@@ -324,7 +371,18 @@ static int arm64_gic_send_sgi(unsigned int sgi_id, uint64_t target_aff,
                              target_list);
 
   ARM64_DSB();
-  write_sysreg(sgi_val, ICC_SGI1R);
+
+  regval = getreg32(IGROUPR(base, 0));
+
+  if (regval & BIT(sgi_id))
+    {
+      write_sysreg(sgi_val, ICC_SGI1R);     /* Group 1 */
+    }
+  else
+    {
+      write_sysreg(sgi_val, ICC_SGI0R_EL1); /* Group 0 */
+    }
+
   ARM64_ISB();
 
   return 0;
@@ -416,7 +474,7 @@ static void gicv3_cpuif_init(void)
    * All interrupts will be delivered as irq
    */
 
-  putreg32(IGROUPR_VAL, IGROUPR(base, 0));
+  putreg32(IGROUPR_SGI_VAL, IGROUPR(base, 0));
   putreg32(BIT64_MASK(GIC_NUM_INTR_PER_REG), IGROUPMODR(base, 0));
 
   /* Configure default priorities for SGI 0:15 and PPI 0:15. */
@@ -455,6 +513,10 @@ static void gicv3_cpuif_init(void)
   /* Allow group1 interrupts */
 
   write_sysreg(1, ICC_IGRPEN1_EL1);
+
+#ifdef CONFIG_ARM64_DECODEFIQ
+  write_sysreg(1, ICC_IGRPEN0_EL1);
+#endif
 }
 
 static void gicv3_dist_init(void)
@@ -462,6 +524,7 @@ static void gicv3_dist_init(void)
   unsigned int  num_ints;
   unsigned int  intid;
   unsigned int  idx;
+  unsigned int  regval;
   unsigned long base = GIC_DIST_BASE;
 
   num_ints  = getreg32(GICD_TYPER);
@@ -546,14 +609,24 @@ static void gicv3_dist_init(void)
    * BIT(1), we can reuse them.
    */
 
-  putreg32(BIT(GICD_CTRL_ARE_S) | BIT(GICD_CTLR_ENABLE_G1NS),
-                 GICD_CTLR);
+  regval = BIT(GICD_CTRL_ARE_S) | BIT(GICD_CTLR_ENABLE_G1NS);
+
+#ifdef CONFIG_ARM64_DECODEFIQ
+  regval |= BIT(GICD_CTLR_ENABLE_G0);
+#endif
+
+  putreg32(regval, GICD_CTLR);
 
 #else
   /* Enable distributor with ARE */
 
-  putreg32(BIT(GICD_CTRL_ARE_NS) | BIT(GICD_CTLR_ENABLE_G1NS),
-           GICD_CTLR);
+  regval = BIT(GICD_CTRL_ARE_NS) | BIT(GICD_CTLR_ENABLE_G1NS);
+
+#ifdef CONFIG_ARM64_DECODEFIQ
+  regval |= BIT(GICD_CTLR_ENABLE_G0);
+#endif
+
+  putreg32(regval, GICD_CTLR);
 #endif
 
 #ifdef CONFIG_SMP
@@ -682,7 +755,7 @@ uint64_t * arm64_decodeirq(uint64_t * regs)
 
   /* Read the interrupt acknowledge register and get the interrupt ID */
 
-  irq = arm64_gic_get_active();
+  irq = arm64_gic_get_active_irq();
 
   /* Ignore spurions IRQs.  ICCIAR will report 1023 if there is no pending
    * interrupt.
@@ -698,10 +771,39 @@ uint64_t * arm64_decodeirq(uint64_t * regs)
 
   /* Write to the end-of-interrupt register */
 
-  arm64_gic_eoi(irq);
+  aarm64_gic_eoi_irq(irq);
 
   return regs;
 }
+
+#ifdef CONFIG_ARM64_DECODEFIQ
+uint64_t * arm64_decodefiq(uint64_t * regs)
+{
+  int irq;
+
+  /* Read the interrupt acknowledge register and get the interrupt ID */
+
+  irq = arm64_gic_get_active_fiq();
+
+  /* Ignore spurions IRQs.  ICCIAR will report 1023 if there is no pending
+   * interrupt.
+   */
+
+  DEBUGASSERT(irq < NR_IRQS || irq == 1023);
+  if (irq < NR_IRQS)
+    {
+      /* Dispatch the interrupt */
+
+      regs = arm64_doirq(irq, regs);
+    }
+
+  /* Write to the end-of-interrupt register */
+
+  arm64_gic_eoi_fiq(irq);
+
+  return regs;
+}
+#endif
 
 static int gic_validate_dist_version(void)
 {

@@ -162,6 +162,12 @@ INIT_STACK_ARRAY_DEFINE_EXTERN(g_cpu_idlestackalloc, CONFIG_SMP_NCPUS,
                           SMP_STACK_SIZE);
 INIT_STACK_ARRAY_DEFINE_EXTERN(g_interrupt_stacks, CONFIG_SMP_NCPUS,
                           INTSTACK_SIZE);
+
+#ifdef CONFIG_ARM64_DECODEFIQ
+INIT_STACK_ARRAY_DEFINE_EXTERN(g_interrupt_fiq_stacks, CONFIG_SMP_NCPUS,
+                          INTSTACK_SIZE);
+#endif
+
 uintptr_t arm64_intstack_alloc(void);
 uintptr_t arm64_intstack_top(void);
 #else
@@ -169,6 +175,11 @@ uintptr_t arm64_intstack_top(void);
 
 INIT_STACK_DEFINE_EXTERN(g_idle_stack, CONFIG_IDLETHREAD_STACKSIZE);
 INIT_STACK_DEFINE_EXTERN(g_interrupt_stack, INTSTACK_SIZE);
+
+#ifdef CONFIG_ARM64_DECODEFIQ
+INIT_STACK_DEFINE_EXTERN(g_interrupt_fiq_stack, INTSTACK_SIZE);
+#endif
+
 #endif
 
 /* This is the beginning of heap as provided from arm64_head.S.

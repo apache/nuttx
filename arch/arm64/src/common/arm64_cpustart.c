@@ -78,6 +78,13 @@ volatile uint64_t *g_cpu_int_stacktop[CONFIG_SMP_NCPUS] =
   (uint64_t *)(g_interrupt_stacks[0] + INTSTACK_SIZE),
 };
 
+#ifdef CONFIG_ARM64_DECODEFIQ
+volatile uint64_t *g_cpu_int_fiq_stacktop[CONFIG_SMP_NCPUS] =
+{
+  (uint64_t *)(g_interrupt_fiq_stacks[0] + INTSTACK_SIZE),
+};
+#endif
+
 /****************************************************************************
  * Private data
  ****************************************************************************/
@@ -157,6 +164,11 @@ static void arm64_start_cpu(int cpu_num, char *stack, int stack_sz,
   cpu_boot_params.cpu_num   = cpu_num;
   g_cpu_int_stacktop[cpu_num] =
             (uint64_t *)(g_interrupt_stacks[cpu_num] + INTSTACK_SIZE);
+
+#ifdef CONFIG_ARM64_DECODEFIQ
+  g_cpu_int_fiq_stacktop[cpu_num] =
+            (uint64_t *)(g_interrupt_fiq_stacks[cpu_num] + INTSTACK_SIZE);
+#endif
 
   ARM64_DSB();
 
