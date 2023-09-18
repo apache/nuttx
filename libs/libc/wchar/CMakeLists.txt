@@ -48,4 +48,13 @@ target_sources(
           lib_mbsinit.c
           lib_mbrlen.c
           lib_mbsrtowcs.c
-          lib_wcsrtombs.c)
+          lib_wcsrtombs.c
+          lib_wcscpy.c
+          lib_wcscat.c
+          lib_wcslcat.c
+          lib_wcsncat.c
+          lib_wcsrchr.c
+          lib_wcschr.c
+          lib_wcsncpy.c
+          lib_wcsncmp.c
+          lib_wcscspn.c)
