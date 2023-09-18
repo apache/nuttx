@@ -260,6 +260,10 @@ ifeq ($(CONFIG_HOST_MACOS),y)
   LDFLAGS += -Wl,-dead_strip
 else
   LDFLAGS += -Wl,--gc-sections
+
+  # Let the symbol table link from 0x400000
+  # which is more convenient for debugging.
+  LDFLAGS += -Wl,-Ttext-segment=0x400000
 endif
 
 ifeq ($(CONFIG_SIM_M32),y)
@@ -267,11 +271,4 @@ ifeq ($(CONFIG_SIM_M32),y)
   LDFLAGS += -m32
   LDMODULEFLAGS += -melf_i386
   LDELFFLAGS += -melf_i386
-endif
-
-# Let the symbol table link from 0x400000
-# which is more convenient for debugging.
-
-ifeq ($(CONFIG_HOST_MACOS),n)
-  LDFLAGS += -Wl,-Ttext-segment=0x400000
 endif
