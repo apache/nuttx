@@ -379,11 +379,6 @@ int cryptodev_op(FAR struct csession *cse,
   int error = OK;
   uint32_t hid;
 
-  if (cop->len > 64 * 1024 - 4)
-    {
-      return -E2BIG;
-    }
-
   if (cse->txform)
     {
       if (cop->len == 0)

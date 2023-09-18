@@ -152,7 +152,7 @@ void aes_gmac_reinit(FAR void *xctx, FAR const uint8_t *iv, uint16_t ivlen)
   bcopy(iv, ctx->J + AESCTR_NONCESIZE, ivlen);
 }
 
-int aes_gmac_update(FAR void *xctx, FAR const uint8_t *data, uint16_t len)
+int aes_gmac_update(FAR void *xctx, FAR const uint8_t *data, size_t len)
 {
   FAR AES_GMAC_CTX *ctx = xctx;
   uint32_t blk[4] =
