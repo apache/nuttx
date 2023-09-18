@@ -21,5 +21,13 @@
 if(CONFIG_CORESIGHT)
   set(SRCS coresight_core.c coresight_common.c)
 
+  if(CONFIG_CORESIGHT_FUNNEL)
+    list(APPEND SRCS coresight_funnel.c)
+  endif()
+
+  if(CONFIG_CORESIGHT_REPLICATOR)
+    list(APPEND SRCS coresight_replicator.c)
+  endif()
+
   target_sources(drivers PRIVATE ${SRCS})
 endif()
