@@ -59,7 +59,7 @@ struct auth_hash
   CODE void (*init) (FAR void *);
   CODE void (*setkey) (FAR void *, FAR const uint8_t *, uint16_t);
   CODE void (*reinit) (FAR void *, FAR const uint8_t *, uint16_t);
-  CODE int  (*update) (FAR void *, FAR const uint8_t *, uint16_t);
+  CODE int  (*update) (FAR void *, FAR const uint8_t *, size_t);
   CODE void (*final) (FAR uint8_t *, FAR void *);
 };
 

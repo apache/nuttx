@@ -105,7 +105,7 @@ void chacha20_poly1305_reinit(FAR void *xctx, FAR const uint8_t *iv,
 }
 
 int chacha20_poly1305_update(FAR void *xctx, FAR const uint8_t *data,
-                             uint16_t len)
+                             size_t len)
 {
   static const unsigned char zeroes[POLY1305_BLOCK_LEN];
   FAR CHACHA20_POLY1305_CTX *ctx = xctx;

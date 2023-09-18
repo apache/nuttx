@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <errno.h>
+#include <stddef.h>
 #include <sys/queue.h>
 
 #include <crypto/cryptodev.h>
@@ -38,10 +39,10 @@
  ****************************************************************************/
 
 static void sha1_init(void *ctx);
-static int sha1_update(void *ctx, const uint8_t *in, uint16_t len);
+static int sha1_update(void *ctx, const uint8_t *in, size_t len);
 static void sha1_final(uint8_t *out, void *ctx);
 static void sha256_init(void *ctx);
-static int sha256_update(void *ctx, const uint8_t *in, uint16_t len);
+static int sha256_update(void *ctx, const uint8_t *in, size_t len);
 static void sha256_final(uint8_t *out, void *ctx);
 static int esp32c3_freesession(uint64_t tid);
 
@@ -104,7 +105,7 @@ static void sha1_init(void *ctx)
   esp32c3_sha1_starts(ctx);
 }
 
-static int sha1_update(void *ctx, const uint8_t *in, uint16_t len)
+static int sha1_update(void *ctx, const uint8_t *in, size_t len)
 {
   return esp32c3_sha1_update((struct esp32c3_sha1_context_s *)ctx,
                              (const unsigned char *)in,
@@ -122,7 +123,7 @@ static void sha256_init(void *ctx)
   esp32c3_sha256_starts(ctx, false);
 }
 
-static int sha256_update(void *ctx, const uint8_t *in, uint16_t len)
+static int sha256_update(void *ctx, const uint8_t *in, size_t len)
 {
   return esp32c3_sha256_update((struct esp32c3_sha256_context_s *)ctx,
                                (const unsigned char *)in,
