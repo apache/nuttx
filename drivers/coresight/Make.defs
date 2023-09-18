@@ -24,6 +24,14 @@ ifeq ($(CONFIG_CORESIGHT),y)
 
 CSRCS += coresight_core.c coresight_common.c
 
+ifeq ($(CONFIG_CORESIGHT_FUNNEL),y)
+CSRCS += coresight_funnel.c
+endif
+
+ifeq ($(CONFIG_CORESIGHT_REPLICATOR),y)
+CSRCS += coresight_replicator.c
+endif
+
 DEPPATH += --dep-path coresight
 VPATH += :coresight
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)coresight
