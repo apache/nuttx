@@ -905,9 +905,12 @@ mpfs_rptun_get_resource(struct rptun_dev_s *dev)
       rsc->rpmsg_vdev.gfeatures     = 1 << VIRTIO_RPMSG_F_NS  |
                                       1 << VIRTIO_RPMSG_F_ACK;
 
-      /* Set to VIRTIO_CONFIG_STATUS_DRIVER_OK when master is up */
+      /* If the master is up already, don't clear the status here */
 
-      rsc->rpmsg_vdev.status        = 0;
+      if (!g_shmem.master_up)
+        {
+          rsc->rpmsg_vdev.status    = 0;
+        }
 
       rsc->rpmsg_vdev.config_len    = sizeof(struct fw_rsc_config);
       rsc->rpmsg_vdev.num_of_vrings = VRINGS;
@@ -1349,6 +1352,18 @@ int mpfs_ihc_init(void)
   /* Initialize and wait for the master. This will block until. */
 
   ihcinfo("Waiting for the master online...\n");
+
+  /* Check if the remote is already up.  This is the case after reboot of
+   * this particular hart only.
+   */
+
+  if (getreg32((MPFS_IHC_CTRL(CONTEXTA_HARTID, CONTEXTB_HARTID)) & (MPIE_EN |
+      ACKIE_EN)) != 0)
+    {
+      g_shmem.master_up = true;
+      g_shmem.rsc.rpmsg_vdev.status |= VIRTIO_CONFIG_STATUS_DRIVER_OK;
+    }
+
   ret = mpfs_rptun_init(MPFS_RPTUN_SHMEM_NAME, MPFS_RPTUN_CPU_NAME);
   if (ret < 0)
     {
