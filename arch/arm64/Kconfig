@@ -233,6 +233,14 @@ config ARM_HAVE_NEON
 	---help---
 		Decide whether support NEON instruction
 
+config ARM64_DECODEFIQ
+	bool "FIQ Handler"
+	default n
+	---help---
+		Select this option if your platform supports the function
+		arm_decodefiq().  This is used primarily to support secure TrustZone
+		interrupts received on the FIQ vector.
+
 config ARM_GIC_VERSION
 	int "GIC version"
 	default 2           if ARCH_CHIP_A64

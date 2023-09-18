@@ -151,7 +151,7 @@ SECTION_SUBSEC_FUNC(exc_vector_table,_vector_table_section,_vector_table)
 
     .align 7
     arm64_enter_exception x0, x1
-    b     arm64_irq_spurious
+    b     arm64_fiq_handler
 
     /* Current EL with SP0 / SError */
 
@@ -175,7 +175,7 @@ SECTION_SUBSEC_FUNC(exc_vector_table,_vector_table_section,_vector_table)
 
     .align 7
     arm64_enter_exception x0, x1
-    b     arm64_irq_spurious
+    b     arm64_fiq_handler
 
     /* Current EL with SPx / SError */
 
@@ -199,7 +199,7 @@ SECTION_SUBSEC_FUNC(exc_vector_table,_vector_table_section,_vector_table)
 
     .align 7
     arm64_enter_exception x0, x1
-    b     arm64_irq_spurious
+    b     arm64_fiq_handler
 
     /* Lower EL using AArch64 / SError */
 
