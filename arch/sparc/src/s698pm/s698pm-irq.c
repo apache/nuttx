@@ -449,7 +449,7 @@ void sparc_clrpend_irq(int irq)
   if ((irq >= S698PM_IRQ_FIRST_INT && irq <= S698PM_IRQ_LAST_INT) ||
       (irq > S698PM_IRQ_LAST && irq < NR_IRQS))
     {
-      /* written with a ‘1’, in Interrupt Clear Register
+      /* written with a '1', in Interrupt Clear Register
        * will clear the corresponding bit(s) in the interrupt pending
        * register
        */

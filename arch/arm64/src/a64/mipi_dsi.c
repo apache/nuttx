@@ -183,7 +183,7 @@ ssize_t mipi_dsi_long_packet(uint8_t *pktbuf,
   const uint8_t dt = cmd;
   const uint8_t di = (vc << 6) | dt;
 
-  /* Word Count (WC) (2 bytes)：
+  /* Word Count (WC) (2 bytes):
    * Number of bytes in the Packet Payload
    */
 

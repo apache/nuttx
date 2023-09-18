@@ -54,7 +54,7 @@
  * Private Data
  ****************************************************************************/
 
-/* Values above M_E64 will never be used since it’s larger than FLT_MAX
+/* Values above M_E64 will never be used since it's larger than FLT_MAX
  *(3.402823e+38).
  */
 

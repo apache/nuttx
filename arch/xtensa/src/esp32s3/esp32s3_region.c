@@ -81,9 +81,9 @@ static inline void xtensa_write_itlb(uint32_t vpn, uint32_t attr)
  *   pages so we can catch weirdness.
  *
  *   Useful attribute values:
- *     0  — cached, RW
- *     2  — bypass cache, RWX (default value after CPU reset)
- *     15 — no access, raise exception
+ *     0  - cached, RW
+ *     2  - bypass cache, RWX (default value after CPU reset)
+ *     15 - no access, raise exception
  *
  ****************************************************************************/
 

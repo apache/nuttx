@@ -106,7 +106,7 @@ void xtensa_panic(int xptcode, uint32_t *regs)
  *      Level-1 interrupt as indicated by set level-1 bits in the INTERRUPT
  *      register.
  *   5  AllocaCause
- *      MOVSP instruction, if caller’s registers are not in the register
+ *      MOVSP instruction, if caller's registers are not in the register
  *      file.
  *   6  IntegerDivideByZeroCause
  *      QUOS, QUOU, REMS, or REMU divisor operand is zero.

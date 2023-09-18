@@ -2653,7 +2653,7 @@ int main(int argc, char **argv, char **envp)
                     {
                       /* "--" should be next to its operand. If there are
                        * whitespaces or non-operand characters on both left
-                       * and right (e.g. "a -- "， “a[i --]”, "(-- i)"),
+                       * and right (e.g. "a -- ", "a[i --]", "(-- i)"),
                        * there's an error.
                        */
 
@@ -2700,7 +2700,7 @@ int main(int argc, char **argv, char **envp)
                     {
                       /* "++" should be next to its operand. If there are
                        * whitespaces or non-operand characters on both left
-                       * and right (e.g. "a ++ "， “a[i ++]”, "(++ i)"),
+                       * and right (e.g. "a ++ ", "a[i ++]", "(++ i)"),
                        * there's an error.
                        */
 

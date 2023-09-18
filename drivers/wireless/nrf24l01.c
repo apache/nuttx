@@ -1805,10 +1805,10 @@ int nrf24l01_settxpower(FAR struct nrf24l01_dev_s *dev, int outpower)
 
   /* RF_PWR value  <->  Output power in dBm
    *
-   * '00' – -18dBm
-   * '01' – -12dBm
-   * '10' – -6dBm
-   * '11' – 0dBm
+   * '00' - -18dBm
+   * '01' - -12dBm
+   * '10' - -6dBm
+   * '11' - 0dBm
    */
 
   switch (outpower)

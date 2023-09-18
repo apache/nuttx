@@ -479,11 +479,11 @@ static inline void twi_disable(struct a64_twi_priv_s *priv)
  * Description:
  *   Enable i2c bus by A64_TWI_CNTR_REG
  *
- *   1’b0: The TWI bus inputs ISDA/ISCL are ignored and the TWI Controller
+ *   1'b0: The TWI bus inputs ISDA/ISCL are ignored and the TWI Controller
  *   will not respond to any address on the bus
- *   1’b1: The TWI will respond to calls to its slave address – and to
+ *   1'b1: The TWI will respond to calls to its slave address - and to
  *   the general call address if the GCE bit in the ADDR register is set.
- *   Notes: In master operation mode, this bit should be set to ‘1’
+ *   Notes: In master operation mode, this bit should be set to '1'
  *
  ****************************************************************************/
 
@@ -500,8 +500,8 @@ static inline void twi_enable(struct a64_twi_priv_s *priv)
  * Description:
  *   Enable i2c bus interrupt
  *   Interrupt Enable
- *   bit7: 1’b0: The interrupt line always low
- *   bit7: 1’b1: The interrupt line will go high when INT_FLAG is set.
+ *   bit7: 1'b0: The interrupt line always low
+ *   bit7: 1'b1: The interrupt line will go high when INT_FLAG is set.
  *
  ****************************************************************************/
 
@@ -526,8 +526,8 @@ static inline void twi_enable_irq(struct a64_twi_priv_s *priv)
  * Description:
  *   Disable i2c bus interrupt
  *
- *   bit7: 1’b0: The interrupt line always low
- *   bit7: 1’b1: The interrupt line will go high when INT_FLAG is set.
+ *   bit7: 1'b0: The interrupt line always low
+ *   bit7: 1'b1: The interrupt line will go high when INT_FLAG is set.
  *
  ****************************************************************************/
 
@@ -545,15 +545,15 @@ static inline void twi_disable_irq(struct a64_twi_priv_s *priv)
  * Description:
  *   Trigger start signal, the start bit will be cleared automatically
  *   Master Mode Start
- *   When M_STA is set to ‘1’, TWI Controller enters master mode and will
+ *   When M_STA is set to '1', TWI Controller enters master mode and will
  *   transmit a START condition on the bus when the bus is free.
- *   If the M_STA bit is set to ‘1’ when the TWI Controller is already
+ *   If the M_STA bit is set to '1' when the TWI Controller is already
  *   in master mode and one or more bytes have been transmitted, then a
  *   repeated START condition will be sent. If the M_STA bit is set to '1'
  *   when the TWI is being accessed in slave mode, the TWI will complete the
  *   data transfer in slave mode then enter master mode when the bus has been
  *   released.The M_STA bit is cleared automatically after a START condition
- *   has been sent,writing a ‘0’ to this bit has no effect.
+ *   has been sent,writing a '0' to this bit has no effect.
  *
  ****************************************************************************/
 
@@ -588,13 +588,13 @@ static inline unsigned int twi_get_start(struct a64_twi_priv_s *priv)
  * Description:
  *   Trigger stop signal, the stop bit will be cleared automatically
  *
- *   If M_STP is set to ‘1’ in master mode, a STOP condition is
- *   transmitted on the TWI bus. If the M_STP bit is set to ‘1’ in slave
+ *   If M_STP is set to '1' in master mode, a STOP condition is
+ *   transmitted on the TWI bus. If the M_STP bit is set to '1' in slave
  *   mode, the TWI will behave as if a STOP condition has been received,
  *   but no STOP condition will be transmitted on the TWI bus. If both
  *   M_STA and M_STP bits are set, the TWI will first transmit the STOP
  *   condition (if in master mode) then transmit the START condition.
- *   The M_STP bit is cleared automatically,writing a ‘0’ to this bit has
+ *   The M_STP bit is cleared automatically,writing a '0' to this bit has
  *   no effect.
  *
  ****************************************************************************/
@@ -643,7 +643,7 @@ static inline unsigned int twi_get_int_flag(struct a64_twi_priv_s *priv)
  *   clear the interrupt flag
  *
  *   INT_FLAG is automatically set to '1' when any of 28 (out of the
- *   possible 29) states is entered (see ‘STAT Register’ below). The only
+ *   possible 29) states is entered (see 'STAT Register' below). The only
  *   state that does not set INT_FLAG is state F8h. If the INT_EN bit is
  *   set, the interrupt line goes high when IFLG is set to '1'. If the TWI
  *   is operating in slave mode, data transfer is suspended when INT_FLAG
@@ -684,7 +684,7 @@ static inline unsigned int twi_get_status(struct a64_twi_priv_s *priv)
  * Description:
  *   Soft reset twi by A64_TWI_SRST_REG
  *
- *   Write ‘1’ to this bit to reset the TWI and clear to ‘0’ when
+ *   Write '1' to this bit to reset the TWI and clear to '0' when
  *   completing Soft Reset operation.
  *
  ****************************************************************************/
@@ -724,12 +724,12 @@ static inline void twi_disable_ack(struct a64_twi_priv_s *priv)
  * Description:
  *   When sending ack or nack, it will send ack automatically
  *
- *   When A_ACK is set to ‘1’, an Acknowledge (low level on SDA) will be
+ *   When A_ACK is set to '1', an Acknowledge (low level on SDA) will be
  *   sent during the acknowledge clock pulse on the TWI bus if:
  *   1. Either the whole of a matching 7-bit slave address or the first or
  *   the second byte of a matching 10-bit slave address has been received.
  *   2. The general call address has been received and the GCE bit in the
- *   ADDR register is set to ‘1’.
+ *   ADDR register is set to '1'.
  *   3. A data byte has been received in master or slave mode.
  *   When A_ACK is '0', a Not Acknowledge (high level on SDA) will be sent
  *   when a data byte is received in master or slave mode.
@@ -751,10 +751,10 @@ static inline void twi_enable_ack(struct a64_twi_priv_s *priv)
  *   Set Enhanced Feature Register
  *
  *   Data Byte number follow Read Command Control
- *   0— No Data Byte to be written after read command
- *   1— Only 1 byte data to be written after read command
- *   2— 2 bytes data can be written after read command
- *   3— 3 bytes data can be written after read command
+ *   0- No Data Byte to be written after read command
+ *   1- Only 1 byte data to be written after read command
+ *   2- 2 bytes data can be written after read command
+ *   3- 3 bytes data can be written after read command
  *
  ****************************************************************************/
 

@@ -279,7 +279,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
 
   /* Receive the ClientInit message
    *
-   * "Once the client and server are sure that they’re happy to talk to one
+   * "Once the client and server are sure that they're happy to talk to one
    *  another using the agreed security type, the protocol passes to the
    *  initialization phase. The client sends a ClientInit message followed
    *  by the server sending a ServerInit message."
@@ -307,7 +307,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   /* Send the ServerInit message
    *
    * "After receiving the ClientInit message, the server sends a ServerInit
-   *  message. This tells the client the width and height of the server’s
+   *  message. This tells the client the width and height of the server's
    *  framebuffer, its pixel format and the name associated with the
    *  desktop:"
    *

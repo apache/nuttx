@@ -30,14 +30,14 @@
 
 /* Settings for 868 MHz, GFSK at 100kbps
  *
- *  ISM Region 1 (Europe) only, Band 868–870 MHz
+ *  ISM Region 1 (Europe) only, Band 868-870 MHz
  *
  * Frequency          ERP         Duty Cycle  Bandwidth  Remarks
- * 868 – 868.6 MHz    +14 dBm     < 1%        No limits
- * 868.7 – 869.2 MHz  +14 dBm     < 0.1%      No limits
- * 869.3 – 869.4 MHz  +10 dBm     No limits   < 25 kHz   Appropriate access
+ * 868 - 868.6 MHz    +14 dBm     < 1%        No limits
+ * 868.7 - 869.2 MHz  +14 dBm     < 0.1%      No limits
+ * 869.3 - 869.4 MHz  +10 dBm     No limits   < 25 kHz   Appropriate access
  *                                                       protocol required
- * 869.4 – 869.65 MHz +27 dBm     < 10%       < 25 kHz   Channels may be
+ * 869.4 - 869.65 MHz +27 dBm     < 10%       < 25 kHz   Channels may be
  *                                                       combined to one
  *                                                       high speed channel
  * 869.7 -870 MHz     +7 dBm      No limits   No limits

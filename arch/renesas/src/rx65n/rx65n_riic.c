@@ -449,7 +449,7 @@ static void rx65n_riic_set_icier(struct rx65n_i2c_priv_s *priv,
  * Name: rx65n_riic_setclock
  *
  * Description:
- *   Sets the I2C bus clock frequency – frequency for the transfer
+ *   Sets the I2C bus clock frequency - frequency for the transfer
  *
  ****************************************************************************/
 
@@ -2150,11 +2150,11 @@ static void rx65n_riic_master_receive(struct rx65n_i2c_priv_s *priv)
  * Name: rx65n_riic_rxi0interrupt
  *
  * Description:
- *  Interrupt RIIC0 RXI0 handler – Received Data Full Interrupt Handler
+ *  Interrupt RIIC0 RXI0 handler - Received Data Full Interrupt Handler
  *
  * Occurs under following conditions:
  *  - Address/data transmission completed in Master Receive Mode
- *  - Reception of (last data – 1) completed in Master Receive Mode
+ *  - Reception of (last data - 1) completed in Master Receive Mode
  *  - Reception of last data completed in Master Receive Mode
  *
  ****************************************************************************/
@@ -2173,11 +2173,11 @@ static int rx65n_riic_rxi0interrupt(int irq, void *context, void *arg)
  * Name: rx65n_riic_rxi1interrupt
  *
  * Description:
- *  Interrupt RIIC1 RXI1 handler – Received Data Full Interrupt Handler
+ *  Interrupt RIIC1 RXI1 handler - Received Data Full Interrupt Handler
  *
  * Occurs under following conditions:
  *  - Address/data transmission completed in Master Receive Mode
- *  - Reception of (last data – 1) completed in Master Receive Mode
+ *  - Reception of (last data - 1) completed in Master Receive Mode
  *  - Reception of last data completed in Master Receive Mode
  *
  ****************************************************************************/
@@ -2196,11 +2196,11 @@ static int rx65n_riic_rxi1interrupt(int irq, void *context, void *arg)
  * Name: rx65n_i2c_rxi2interrupt
  *
  * Description:
- *  Interrupt RIIC2 RXI2 handler – Received Data Full Interrupt Handler
+ *  Interrupt RIIC2 RXI2 handler - Received Data Full Interrupt Handler
  *
  * Occurs under following conditions:
  *  - Address/data transmission completed in Master Receive Mode
- *  - Reception of (last data – 1) completed in Master Receive Mode
+ *  - Reception of (last data - 1) completed in Master Receive Mode
  *  - Reception of last data completed in Master Receive Mode
  *
  ****************************************************************************/
@@ -2218,7 +2218,7 @@ static int rx65n_riic_rxi2interrupt(int irq, void *context, void *arg)
  * Name: rx65n_riic_txi0interrupt
  *
  * Description:
- *  Interrupt RIIC0 TXI0 handler – Transmit Data Empty Interrupt Handler
+ *  Interrupt RIIC0 TXI0 handler - Transmit Data Empty Interrupt Handler
  *
  * Occurs under following conditions:
  *  - Transmit Buffer is empty
@@ -2244,7 +2244,7 @@ static int rx65n_riic_txi0interrupt(int irq, void *context, void *arg)
  * Name: rx65n_riic_txi1interrupt
  *
  * Description:
- *  Interrupt RIIC1 TXI1 handler – Transmit Data Empty Interrupt Handler
+ *  Interrupt RIIC1 TXI1 handler - Transmit Data Empty Interrupt Handler
  *
  * Occurs under following conditions:
  *  - Transmit Buffer is empty
@@ -2270,7 +2270,7 @@ static int rx65n_riic_txi1interrupt(int irq, void *context, void *arg)
  * Name: rx65n_riic_txi2interrupt
  *
  * Description:
- *  Interrupt RIIC2 TXI2 handler – Transmit Data Empty Interrupt Handler
+ *  Interrupt RIIC2 TXI2 handler - Transmit Data Empty Interrupt Handler
  *
  * Occurs under following conditions:
  *  - Transmit Buffer is empty
@@ -2296,7 +2296,7 @@ static int rx65n_riic_txi2interrupt(int irq, void *context, void *arg)
  * Name: rx65n_riic_tei0interrupt
  *
  * Description:
- *  Interrupt RIIC0 TEI0 handler – Transmission End Interrupt Handler
+ *  Interrupt RIIC0 TEI0 handler - Transmission End Interrupt Handler
  *
  * Occurs under following conditions:
  *  - Address/data transmission completed
@@ -2336,7 +2336,7 @@ static int rx65n_riic_tei0interrupt(int irq, void *context, void *arg)
  * Name: rx65n_riic_tei1interrupt
  *
  * Description:
- *  Interrupt RIIC1 TEI1 handler – Transmission End Interrupt Handler
+ *  Interrupt RIIC1 TEI1 handler - Transmission End Interrupt Handler
  *
  * Occurs under following conditions:
  *  - Address/data transmission completed
@@ -2372,7 +2372,7 @@ static int rx65n_riic_tei1interrupt(int irq, void *context, void *arg)
  * Name: rx65n_riic_tei2interrupt
  *
  * Description:
- *  Interrupt RIIC2 TEI2 handler – Transmission End Interrupt Handler
+ *  Interrupt RIIC2 TEI2 handler - Transmission End Interrupt Handler
  *
  * Occurs under following conditions:
  * - Address/data transmission completed
@@ -2408,7 +2408,7 @@ static int rx65n_riic_tei2interrupt(int irq, void *context, void *arg)
  * Name: rx65n_riic_eei0interrupt
  *
  * Description:
- *  Interrupt RIIC0 EEI0 handler – Event/Error Generation Interrupt Handler
+ *  Interrupt RIIC0 EEI0 handler - Event/Error Generation Interrupt Handler
  *
  * Occurs under following conditions:
  *  - START condition detected
@@ -2532,7 +2532,7 @@ static int rx65n_riic_eei0interrupt(int irq, void *context, void *arg)
  * Name: rx65n_riic_eei1interrupt
  *
  * Description:
- *  Interrupt RIIC1 EEI1 handler – Event/Error Generation Interrupt Handler
+ *  Interrupt RIIC1 EEI1 handler - Event/Error Generation Interrupt Handler
  *
  * Occurs under following conditions:
  *  - START condition detected
@@ -2652,7 +2652,7 @@ static int rx65n_riic_eei1interrupt(int irq, void *context, void *arg)
  * Name: rx65n_riic_eei2interrupt
  *
  * Description:
- *  Interrupt RIIC2 EEI2 handler – Event/Error Generation Interrupt Handler
+ *  Interrupt RIIC2 EEI2 handler - Event/Error Generation Interrupt Handler
  *
  * Occurs under following conditions:
  *  - START condition detected

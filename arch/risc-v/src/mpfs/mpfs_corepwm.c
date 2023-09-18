@@ -396,7 +396,7 @@ static int pwm_timer(struct mpfs_pwmtimer_s *priv,
    *
    * Example for clk = 25MHz, prescale 0 and 32 bit wide registers:
    *   PWM period granularity PWM_PG = (PRESCALE + 1) / pwmclk =
-   *   40 ns × 1 = 40 ns, so the smallest step is 40ns
+   *   40 ns * 1 = 40 ns, so the smallest step is 40ns
    *   pwmclk = clk / (PRESCALE + 1) = 25,000,000 / (PRESCALE + 1) =
    *     25,000,000
    *

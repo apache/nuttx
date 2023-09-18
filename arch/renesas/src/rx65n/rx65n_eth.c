@@ -3212,7 +3212,7 @@ static void rx65n_phy_preamble(void)
    * of "IEEE 802.3-2008_section2".
    */
 
-  /* Send 32 consecutive 1’s as per 34.3.4.1
+  /* Send 32 consecutive 1's as per 34.3.4.1
    * MII/RMII Management Frame Format
    */
 

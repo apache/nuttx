@@ -556,7 +556,7 @@ static int IRAM_ATTR esp32c3_sleep_start(uint32_t pd_flags)
   bool deep_sleep = pd_flags & RTC_SLEEP_PD_DIG;
 
   /* Stop UART output so that output is not lost due to APB frequency change.
-   * For light sleep, suspend UART output — it will resume after wakeup.
+   * For light sleep, suspend UART output - it will resume after wakeup.
    * For deep sleep, wait for the contents of UART FIFO to be sent.
    */
 
@@ -1060,7 +1060,7 @@ void esp32c3_pmstandby(uint64_t time_in_us)
   uint64_t hw_diff_us;
 #endif
 
-  /* don't power down XTAL — powering it up takes different time on. */
+  /* don't power down XTAL - powering it up takes different time on. */
 
   esp32c3_sleep_enable_rtc_timer_wakeup(time_in_us);
 #ifdef CONFIG_ESP32C3_RT_TIMER

@@ -137,11 +137,11 @@ int mrf24j40_setchannel(FAR struct mrf24j40_radio_s *dev, uint8_t chan)
       return -EINVAL;
     }
 
-  /* 15. Set channel – See Section 3.4 “Channel Selection”. */
+  /* 15. Set channel - See Section 3.4 "Channel Selection". */
 
   mrf24j40_setreg(dev->spi, MRF24J40_RFCON0, (chan - 11) << 4 | 0x03);
 
-  /* 17. RFCTL (0x36) = 0x04 – Reset RF state machine.
+  /* 17. RFCTL (0x36) = 0x04 - Reset RF state machine.
    * 18. RFCTL (0x36) = 0x00.
    */
 
