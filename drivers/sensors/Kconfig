@@ -164,7 +164,6 @@ if SENSORS_BMI160
 config SENSORS_BMI160_UORB
 	bool "BMI160 UORB Interface"
 	default n
-	select UORB
 	---help---
 	Enables Work with the UORB or Character Device interface.
 	If not set, the Character Device is used by default.
@@ -253,7 +252,6 @@ if SENSORS_BMP180
 
 config SENSORS_BMP180_UORB
 	bool "BMP180 UORB Interface"
-	select UORB
 	---help---
 		Enables work with the UORB or Character Device interface.
 		If not set, the Character Device is used by default.
