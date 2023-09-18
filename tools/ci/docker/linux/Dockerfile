@@ -168,10 +168,10 @@ RUN cd /tools/renesas-tools/build/gcc && \
 # Build image for tool required by RISCV builds
 ###############################################################################
 FROM nuttx-toolchain-base AS nuttx-toolchain-riscv
-# Download the latest RISCV GCC toolchain prebuilt by SiFive
-RUN mkdir riscv64-unknown-elf-gcc && \
-  curl -s -L "https://static.dev.sifive.com/dev-tools/freedom-tools/v2020.12/riscv64-unknown-elf-toolchain-10.2.0-2020.12.8-x86_64-linux-ubuntu14.tar.gz" \
-  | tar -C riscv64-unknown-elf-gcc --strip-components 1 -xz
+# Download the latest RISCV GCC toolchain prebuilt by xPack
+RUN mkdir riscv-none-elf-gcc && \
+  curl -s -L "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v13.2.0-1/xpack-riscv-none-elf-gcc-13.2.0-1-linux-x64.tar.gz" \
+  | tar -C riscv-none-elf-gcc --strip-components 1 -xz
 
 ###############################################################################
 # Build image for tool required by SPARC builds
@@ -350,8 +350,8 @@ COPY --from=nuttx-toolchain-renesas /tools/renesas-toolchain/rx-elf-gcc/ renesas
 ENV PATH="/tools/renesas-toolchain/rx-elf-gcc/bin:$PATH"
 
 # RISCV toolchain
-COPY --from=nuttx-toolchain-riscv /tools/riscv64-unknown-elf-gcc/ riscv64-unknown-elf-gcc/
-ENV PATH="/tools/riscv64-unknown-elf-gcc/bin:$PATH"
+COPY --from=nuttx-toolchain-riscv /tools/riscv-none-elf-gcc/ riscv-none-elf-gcc/
+ENV PATH="/tools/riscv-none-elf-gcc/bin:$PATH"
 
 # SPARC toolchain
 COPY --from=nuttx-toolchain-sparc /tools/sparc-gaisler-elf-gcc/ sparc-gaisler-elf-gcc/
@@ -393,8 +393,8 @@ RUN mkdir -p /tools/ccache/bin && \
   ln -sf `which ccache` /tools/ccache/bin/g++ && \
   ln -sf `which ccache` /tools/ccache/bin/p32-gcc && \
   ln -sf `which ccache` /tools/ccache/bin/rx-elf-gcc && \
-  ln -sf `which ccache` /tools/ccache/bin/riscv64-unknown-elf-gcc && \
-  ln -sf `which ccache` /tools/ccache/bin/riscv64-unknown-elf-g++ && \
+  ln -sf `which ccache` /tools/ccache/bin/riscv-none-elf-gcc && \
+  ln -sf `which ccache` /tools/ccache/bin/riscv-none-elf-g++ && \
   ln -sf `which ccache` /tools/ccache/bin/sparc-gaisler-elf-gcc && \
   ln -sf `which ccache` /tools/ccache/bin/sparc-gaisler-elf-g++ && \
   ln -sf `which ccache` /tools/ccache/bin/xtensa-esp32-elf-gcc && \
