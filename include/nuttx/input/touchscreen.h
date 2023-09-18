@@ -90,7 +90,12 @@
                                              */
 
 #define TSC_FIRST            0x0001          /* First common command */
-#define TSC_NCMDS            6               /* Six common commands */
+#define TSC_NCMDS            13              /* Thirteen common commands */
+
+/* Backward compatible IOCTL */
+
+#define TSIOC_SETCALIB       TSIOC_SETXRCAL
+#define TSIOC_GETCALIB       TSIOC_GETXRCAL
 
 /* User defined ioctl commands are also supported.  However, the
  * TSC driver must reserve a block of commands as follows in order
