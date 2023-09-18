@@ -21,6 +21,10 @@
 if(CONFIG_CORESIGHT)
   set(SRCS coresight_core.c coresight_common.c)
 
+  if(CONFIG_CORESIGHT_ETB)
+    list(APPEND SRCS coresight_etb.c)
+  endif()
+
   if(CONFIG_CORESIGHT_ETM_VERSION STREQUAL "v3")
     list(APPEND SRCS coresight_etm3.c)
   endif()
