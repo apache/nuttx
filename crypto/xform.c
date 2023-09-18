@@ -117,13 +117,13 @@ void aes_xts_reinit(caddr_t, FAR uint8_t *);
 void aes_gcm_reinit(caddr_t, FAR uint8_t *);
 void aes_ofb_reinit(caddr_t, FAR uint8_t *);
 
-int md5update_int(FAR void *, FAR const uint8_t *, uint16_t);
-int sha1update_int(FAR void *, FAR const uint8_t *, uint16_t);
-int rmd160update_int(FAR void *, FAR const uint8_t *, uint16_t);
-int sha224update_int(FAR void *, FAR const uint8_t *, uint16_t);
-int sha256update_int(FAR void *, FAR const uint8_t *, uint16_t);
-int sha384update_int(FAR void *, FAR const uint8_t *, uint16_t);
-int sha512update_int(FAR void *, FAR const uint8_t *, uint16_t);
+int md5update_int(FAR void *, FAR const uint8_t *, size_t);
+int sha1update_int(FAR void *, FAR const uint8_t *, size_t);
+int rmd160update_int(FAR void *, FAR const uint8_t *, size_t);
+int sha224update_int(FAR void *, FAR const uint8_t *, size_t);
+int sha256update_int(FAR void *, FAR const uint8_t *, size_t);
+int sha384update_int(FAR void *, FAR const uint8_t *, size_t);
+int sha512update_int(FAR void *, FAR const uint8_t *, size_t);
 
 struct aes_ctr_ctx
 {
@@ -789,43 +789,43 @@ void aes_cfb128_decrypt(caddr_t key, FAR uint8_t *data)
 
 /* And now for auth. */
 
-int rmd160update_int(FAR void *ctx, FAR const uint8_t *buf, uint16_t len)
+int rmd160update_int(FAR void *ctx, FAR const uint8_t *buf, size_t len)
 {
   rmd160update(ctx, buf, len);
   return 0;
 }
 
-int md5update_int(FAR void *ctx, FAR const uint8_t *buf, uint16_t len)
+int md5update_int(FAR void *ctx, FAR const uint8_t *buf, size_t len)
 {
   md5update(ctx, buf, len);
   return 0;
 }
 
-int sha1update_int(FAR void *ctx, FAR const uint8_t *buf, uint16_t len)
+int sha1update_int(FAR void *ctx, FAR const uint8_t *buf, size_t len)
 {
   sha1update(ctx, buf, len);
   return 0;
 }
 
-int sha224update_int(FAR void *ctx, FAR const uint8_t *buf, uint16_t len)
+int sha224update_int(FAR void *ctx, FAR const uint8_t *buf, size_t len)
 {
   sha224update(ctx, buf, len);
   return 0;
 }
 
-int sha256update_int(FAR void *ctx, FAR const uint8_t *buf, uint16_t len)
+int sha256update_int(FAR void *ctx, FAR const uint8_t *buf, size_t len)
 {
   sha256update(ctx, buf, len);
   return 0;
 }
 
-int sha384update_int(FAR void *ctx, FAR const uint8_t *buf, uint16_t len)
+int sha384update_int(FAR void *ctx, FAR const uint8_t *buf, size_t len)
 {
   sha384update(ctx, buf, len);
   return 0;
 }
 
-int sha512update_int(FAR void *ctx, FAR const uint8_t *buf, uint16_t len)
+int sha512update_int(FAR void *ctx, FAR const uint8_t *buf, size_t len)
 {
   sha512update(ctx, buf, len);
   return 0;

@@ -51,7 +51,7 @@ extern void (*ghash_update)(FAR GHASH_CTX *, FAR uint8_t *, size_t);
 void aes_gmac_init(FAR void *);
 void aes_gmac_setkey(FAR void *, FAR const uint8_t *, uint16_t);
 void aes_gmac_reinit(FAR void *, FAR const uint8_t *, uint16_t);
-int aes_gmac_update(FAR void *, FAR const uint8_t *, uint16_t);
+int aes_gmac_update(FAR void *, FAR const uint8_t *, size_t);
 void aes_gmac_final(FAR uint8_t *, FAR void *);
 
 #endif /* __INCLUDE_CRYPTO_GMAC_H */

@@ -64,7 +64,7 @@ CHACHA20_POLY1305_CTX;
 void chacha20_poly1305_init(FAR void *);
 void chacha20_poly1305_setkey(FAR void *, FAR const uint8_t *, uint16_t);
 void chacha20_poly1305_reinit(FAR void *, FAR const uint8_t *, uint16_t);
-int chacha20_poly1305_update(FAR void *, FAR const uint8_t *, uint16_t);
+int chacha20_poly1305_update(FAR void *, FAR const uint8_t *, size_t);
 void chacha20_poly1305_final(FAR uint8_t *, FAR void *);
 
 /* WireGuard crypto */
