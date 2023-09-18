@@ -454,10 +454,20 @@ static uint32_t mpfs_ihc_context_to_local_hart_id(ihc_channel_t channel)
 
 static void mpfs_ihc_rx_handler(uint32_t *message)
 {
-  g_vq_idx = message[0];
+  uint32_t msg = message[0];
 
-  DEBUGASSERT((g_vq_idx == VRING0_NOTIFYID) ||
-              (g_vq_idx == VRING1_NOTIFYID));
+  /* After a warm reboot, the message may be initially corrupt as the renote
+   * doesn't know we restarted and reinitialized the registers.
+   */
+
+  if ((msg == VRING0_NOTIFYID) || (msg == VRING1_NOTIFYID))
+    {
+      g_vq_idx = msg;
+    }
+  else
+    {
+      return;
+    }
 
 #ifdef MPFS_RPTUN_USE_THREAD
   nxsem_post(&g_mpfs_rx_sig);
@@ -905,9 +915,12 @@ mpfs_rptun_get_resource(struct rptun_dev_s *dev)
       rsc->rpmsg_vdev.gfeatures     = 1 << VIRTIO_RPMSG_F_NS  |
                                       1 << VIRTIO_RPMSG_F_ACK;
 
-      /* Set to VIRTIO_CONFIG_STATUS_DRIVER_OK when master is up */
+      /* If the master is up already, don't clear the status here */
 
-      rsc->rpmsg_vdev.status        = 0;
+      if (!g_shmem.master_up)
+        {
+          rsc->rpmsg_vdev.status    = 0;
+        }
 
       rsc->rpmsg_vdev.config_len    = sizeof(struct fw_rsc_config);
       rsc->rpmsg_vdev.num_of_vrings = VRINGS;
@@ -1236,6 +1249,13 @@ static void mpfs_rptun_worker(void *arg)
 {
   struct mpfs_queue_table_s *info;
 
+  /* Check whether the struct is initialized yet */
+
+  if (*(uintptr_t *)&g_mpfs_virtqueue_table[0] == 0)
+    {
+      return;
+    }
+
   DEBUGASSERT((g_vq_idx - VRING0_NOTIFYID) < VRINGS);
   info = &g_mpfs_virtqueue_table[g_vq_idx - VRING0_NOTIFYID];
   virtqueue_notification((struct virtqueue *)info->data);
@@ -1266,6 +1286,13 @@ static int mpfs_rptun_thread(int argc, char *argv[])
 
   while (1)
     {
+      /* Check whether the struct is initialized yet */
+
+      if (*(uintptr_t *)&g_mpfs_virtqueue_table[0] == 0)
+        {
+          return 0;
+        }
+
       DEBUGASSERT((g_vq_idx - VRING0_NOTIFYID) < VRINGS);
       info = &g_mpfs_virtqueue_table[g_vq_idx - VRING0_NOTIFYID];
       virtqueue_notification((struct virtqueue *)info->data);
@@ -1349,6 +1376,18 @@ int mpfs_ihc_init(void)
   /* Initialize and wait for the master. This will block until. */
 
   ihcinfo("Waiting for the master online...\n");
+
+  /* Check if the remote is already up.  This is the case after reboot of
+   * this particular hart only.
+   */
+
+  if ((getreg32(MPFS_IHC_CTRL(CONTEXTA_HARTID, CONTEXTB_HARTID)) & (MPIE_EN
+      | ACKIE_EN)) != 0)
+    {
+      g_shmem.master_up = true;
+      g_shmem.rsc.rpmsg_vdev.status |= VIRTIO_CONFIG_STATUS_DRIVER_OK;
+    }
+
   ret = mpfs_rptun_init(MPFS_RPTUN_SHMEM_NAME, MPFS_RPTUN_CPU_NAME);
   if (ret < 0)
     {
