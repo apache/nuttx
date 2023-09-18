@@ -195,6 +195,13 @@ static int spi_slave_open(FAR struct file *filep)
 
   /* Increment the count of open references on the driver */
 
+  if (priv->crefs == 0)
+    {
+      SPIS_CTRLR_BIND(priv->ctrlr, (FAR struct spi_slave_dev_s *)priv,
+                      CONFIG_SPI_SLAVE_DRIVER_MODE,
+                      CONFIG_SPI_SLAVE_DRIVER_WIDTH);
+    }
+
   priv->crefs++;
   DEBUGASSERT(priv->crefs > 0);
 
@@ -245,6 +252,11 @@ static int spi_slave_close(FAR struct file *filep)
 
   DEBUGASSERT(priv->crefs > 0);
   priv->crefs--;
+
+  if (priv->crefs == 0)
+    {
+      SPIS_CTRLR_UNBIND(priv->ctrlr);
+    }
 
   /* If the count has decremented to zero and the driver has been already
    * unlinked, then dispose of the driver resources.
@@ -529,6 +541,7 @@ static int spi_slave_unlink(FAR struct inode *inode)
 
   if (priv->crefs <= 0)
     {
+      SPIS_CTRLR_UNBIND(priv->ctrlr);
       nxmutex_destroy(&priv->lock);
       kmm_free(priv);
       inode->i_private = NULL;
@@ -797,10 +810,6 @@ int spi_slave_register(FAR struct spi_slave_ctrlr_s *ctrlr, int bus)
       nxmutex_destroy(&priv->lock);
       kmm_free(priv);
     }
-
-  SPIS_CTRLR_BIND(priv->ctrlr, (FAR struct spi_slave_dev_s *)priv,
-                  CONFIG_SPI_SLAVE_DRIVER_MODE,
-                  CONFIG_SPI_SLAVE_DRIVER_WIDTH);
 
   spiinfo("SPI Slave driver loaded successfully!\n");
 
