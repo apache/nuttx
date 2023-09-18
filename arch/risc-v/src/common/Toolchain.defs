@@ -133,12 +133,17 @@ endif
 
 ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
 
-  # Generic GNU RVG toolchain
+  # Generic GNU RVG toolchain, prefer to use riscv-none-elf-gcc from xPack
+  # if CROSSDEV is not defined.
 
-  ifeq ($(CONFIG_RISCV_TOOLCHAIN_GNU_RV32),y)
-    CROSSDEV ?= riscv32-unknown-elf-
+  ifeq ($(shell riscv-none-elf-gcc --version > /dev/null 2>&1; echo $$?), 0)
+    CROSSDEV ?= riscv-none-elf-
   else
-    CROSSDEV ?= riscv64-unknown-elf-
+    ifeq ($(CONFIG_RISCV_TOOLCHAIN_GNU_RV32),y)
+      CROSSDEV ?= riscv32-unknown-elf-
+    else
+      CROSSDEV ?= riscv64-unknown-elf-
+    endif
   endif
 
   # Detect cpu ISA support flags
