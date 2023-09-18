@@ -1862,9 +1862,9 @@ static int lpc17_40_addmac(struct net_driver_s *dev, const uint8_t *mac)
 
   /* Enabled multicast address filtering in the RxFilterControl register:
    *
-   *   AcceptUnicastHashEn: When set to ’1’, unicast frames that pass the
+   *   AcceptUnicastHashEn: When set to '1', unicast frames that pass the
    *     imperfect hash filter are accepted.
-   *   AcceptMulticastHashEn When set to ’1’, multicast frames that pass
+   *   AcceptMulticastHashEn When set to '1', multicast frames that pass
    *     the imperfect hash filter are accepted.
    */
 
@@ -1944,9 +1944,9 @@ static int lpc17_40_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 
   if (regval == 0 && lpc17_40_getreg(regaddr2) == 0)
     {
-      /*   AcceptUnicastHashEn: When set to ’1’, unicast frames that pass
+      /*   AcceptUnicastHashEn: When set to '1', unicast frames that pass
        *     the imperfect hash filter are accepted.
-       *   AcceptMulticastHashEn When set to ’1’, multicast frames that
+       *   AcceptMulticastHashEn When set to '1', multicast frames that
        *     pass the imperfect hash filter are accepted.
        */
 

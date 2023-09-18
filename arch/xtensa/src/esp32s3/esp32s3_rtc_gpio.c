@@ -285,7 +285,7 @@ int esp32s3_configrtcio(int rtcio_num, rtcio_pinattr_t attr)
       else if ((attr & RTC_PULLDOWN) != 0)
         {
           /* The pull-up value of the USB pins are controlled by the
-           * pins’ pull-up value together with USB pull-up value. USB DP
+           * pins' pull-up value together with USB pull-up value. USB DP
            * pin is default to PU enabled. Note that from ESP32-S2 ECO1,
            * USB_EXCHG_PINS feature has been supported. If this efuse is
            * burnt, the gpio pin which should be checked is

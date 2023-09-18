@@ -1086,7 +1086,7 @@ static ssize_t __read_cm(FAR struct mx7_dev_s *dev,
 
   while (len != 0)
     {
-      /* "2) Write CMAH[7:0] = xxH to select the character (0–255) to be
+      /* "2) Write CMAH[7:0] = xxH to select the character (0-255) to be
        *     read (Figures 10 and 13)."
        *
        * Put another way: CMAH is the row number in the EEPROM.
@@ -1103,7 +1103,7 @@ static ssize_t __read_cm(FAR struct mx7_dev_s *dev,
 
       __mx7_read_nvm(dev);
 
-      /* "4) Write CMAL[7:0] = xxH to select the 4-pixel byte (0–63) in
+      /* "4) Write CMAL[7:0] = xxH to select the 4-pixel byte (0-63) in
        *     the character to be read (Figures 10 and 13)."
        *
        * That means CMAL is the column number.

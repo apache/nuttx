@@ -131,7 +131,7 @@ int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req)
 
           /* ...after switching to the channel for a passive scan, the device
            * shall enable its receiver for at most
-           * [aBaseSuperframeDuration × (2 * n + 1)],
+           * [aBaseSuperframeDuration * (2 * n + 1)],
            * where n is the value of the ScanDuration parameter. [1] pg. 25
            */
 
@@ -299,7 +299,7 @@ void mac802154_edscan_onresult(FAR struct ieee802154_privmac_s *priv,
 
   /* ...after switching to the channel for a passive scan, the device
    * shall enable its receiver for at most
-   * [aBaseSuperframeDuration × (2 * n + 1)],
+   * [aBaseSuperframeDuration * (2 * n + 1)],
    * where n is the value of the ScanDuration parameter. [1] pg. 25
    */
 
@@ -353,7 +353,7 @@ static void mac802154_scantimeout(FAR void *arg)
 
   /* ...after switching to the channel for a passive scan, the device
    * shall enable its receiver for at most
-   * [aBaseSuperframeDuration × (2 * n + 1)],
+   * [aBaseSuperframeDuration * (2 * n + 1)],
    * where n is the value of the ScanDuration parameter. [1] pg. 25
    */
 
