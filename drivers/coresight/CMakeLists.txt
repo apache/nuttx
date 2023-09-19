@@ -29,5 +29,9 @@ if(CONFIG_CORESIGHT)
     list(APPEND SRCS coresight_replicator.c)
   endif()
 
+  if(CONFIG_CORESIGHT_TPIU)
+    list(APPEND SRCS coresight_tpiu.c)
+  endif()
+
   target_sources(drivers PRIVATE ${SRCS})
 endif()
