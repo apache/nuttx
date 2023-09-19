@@ -26,6 +26,8 @@ config IOB_NBUFFERS
 
 config IOB_BUFSIZE
 	int "Payload size of one I/O buffer"
+	range 196 65535 if NET_TCP_SELECTIVE_ACK && NET_IPv6 && RNDIS
+	range 128 65535 if NET_TCP_SELECTIVE_ACK && (NET_IPv4 || NET_IPv6)
 	default 196
 	---help---
 		Each packet is represented by a series of small I/O buffers in a
