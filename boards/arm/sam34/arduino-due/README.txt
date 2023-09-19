@@ -391,6 +391,9 @@ Loading Code
 
     C:\Program Files (x86)\Arduino\arduino-1.5.2\hardware\tools\bossac.exe
 
+    On Debian like distribution, BOSSA can be install through repository:
+    sudo apt install bossa-cli
+
   General Procedure
 
     1) Erase the FLASH and put the Due in bootloader mode
@@ -479,6 +482,10 @@ Loading Code
       Verify successful
       Set boot flash true
       CPU reset.
+
+    In Linux shell:
+
+      bossac -i --port=ttyACM0 -U false -e -w -v -b nuttx.bin -R
 
   Other useful bossac operations.
 
@@ -865,5 +872,5 @@ Configuration sub-directories
   nsh-leds:
     This configuration directory will build the NuttX Shell and enable the user
     LEDS (/dev/userleds). It will also enable the LED example program (leds).
-    Running the leds command will start up an LED daemon which will light up the 
-    L (user), TX, and RX LEDs in a binary sequence. 
+    Running the leds command will start up an LED daemon which will light up the
+    L (user), TX, and RX LEDs in a binary sequence.
