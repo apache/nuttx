@@ -324,26 +324,26 @@ function python-tools {
 }
 
 function riscv-gcc-toolchain {
-  add_path "${tools}"/riscv64-unknown-elf-gcc/bin
+  add_path "${tools}"/riscv-none-elf-gcc/bin
 
-  if [ ! -f "${tools}/riscv64-unknown-elf-gcc/bin/riscv64-unknown-elf-gcc" ]; then
+  if [ ! -f "${tools}/riscv-none-elf-gcc/bin/riscv-none-elf-gcc" ]; then
     local flavor
     case ${os} in
       Darwin)
-        flavor=x86_64-apple-darwin
+        flavor=darwin-x64
         ;;
       Linux)
-        flavor=x86_64-linux-ubuntu14
+        flavor=linux-x64
         ;;
     esac
     cd "${tools}"
-    wget --quiet https://static.dev.sifive.com/dev-tools/freedom-tools/v2020.12/riscv64-unknown-elf-toolchain-10.2.0-2020.12.8-${flavor}.tar.gz
-    tar zxf riscv64-unknown-elf-toolchain-10.2.0-2020.12.8-${flavor}.tar.gz
-    mv riscv64-unknown-elf-toolchain-10.2.0-2020.12.8-${flavor} riscv64-unknown-elf-gcc
-    rm riscv64-unknown-elf-toolchain-10.2.0-2020.12.8-${flavor}.tar.gz
+    wget --quiet https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v12.3.0-1/xpack-riscv-none-elf-gcc-12.3.0-1-${flavor}.tar.gz
+    tar zxf xpack-riscv-none-elf-gcc-12.3.0-1-${flavor}.tar.gz
+    mv xpack-riscv-none-elf-gcc-12.3.0-1 riscv-none-elf-gcc
+    rm xpack-riscv-none-elf-gcc-12.3.0-1-${flavor}.tar.gz
   fi
 
-  command riscv64-unknown-elf-gcc --version
+  command riscv-none-elf-gcc --version
 }
 
 function rust {
