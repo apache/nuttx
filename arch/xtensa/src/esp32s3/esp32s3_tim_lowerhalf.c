@@ -84,6 +84,8 @@ static int timer_lh_maxtimeout(struct timer_lowerhalf_s *lower,
                                uint32_t *timeout);
 static void timer_lh_setcallback(struct timer_lowerhalf_s *lower,
                                  tccb_t callback, void *arg);
+static int timer_lh_ioctl(struct timer_lowerhalf_s *lower,
+                          int cmd, unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -98,7 +100,7 @@ static const struct timer_ops_s g_esp32s3_timer_ops =
   .getstatus   = timer_lh_getstatus,
   .settimeout  = timer_lh_settimeout,
   .setcallback = timer_lh_setcallback,
-  .ioctl       = NULL,
+  .ioctl       = timer_lh_ioctl,
   .maxtimeout  = timer_lh_maxtimeout
 };
 
@@ -160,7 +162,7 @@ static int timer_lh_handler(int irq, void *context, void *arg)
 
   ESP32S3_TIM_ACKINT(priv->tim);        /* Clear the Interrupt */
 
-  if (priv->callback(&next_interval_us, priv->upper))
+  if (priv->callback(&next_interval_us, priv->arg))
     {
       if (next_interval_us > 0)
         {
@@ -497,6 +499,71 @@ static void timer_lh_setcallback(struct timer_lowerhalf_s *lower,
     {
       tmrerr("Error to set ISR: %d", ret);
     }
+}
+
+/****************************************************************************
+ * Name: timer_lh_ioctl
+ *
+ * Description:
+ *   The "lower-half" timer driver ioctl method.
+ *
+ * Input Parameters:
+ *   lower - A pointer to the publicly visible representation of the
+ *           "lower-half" driver state structure.
+ *   cmd   - One of the TCIOC_* ioctls
+ *   arg   - Second argument to the ioctl call.
+ *
+ * Returned value:
+ *   Zero on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+static int timer_lh_ioctl(struct timer_lowerhalf_s *lower,
+                          int cmd, unsigned long arg)
+{
+  int ret = OK;
+
+  tmrinfo("cmd: %d arg: %ld\n", cmd, arg);
+
+  /* Handle built-in ioctl commands */
+
+  switch (cmd)
+    {
+    /* cmd:         TCIOC_SETCALLBACK
+     * Description: Register a callback function to be called when the
+     *              timer expires.
+     * Argument:    timer interrupt callback
+     */
+
+    case TCIOC_SETCALLBACK:
+      {
+        struct timer_callback_s *callback =
+          (struct timer_callback_s *)((uintptr_t)arg);
+
+        if (callback != NULL)
+          {
+            if (lower->ops->setcallback != NULL)
+              {
+                lower->ops->setcallback(lower, callback->handle,
+                                        callback->arg);
+              }
+          }
+        else
+          {
+            ret = -EINVAL;
+          }
+      }
+      break;
+
+    default:
+      {
+        tmrinfo("Unrecognized cmd: %d arg: %ld\n", cmd, arg);
+        ret = -EINVAL;
+      }
+      break;
+    }
+
+  return ret;
 }
 
 /****************************************************************************

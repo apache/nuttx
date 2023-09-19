@@ -64,6 +64,12 @@
  *                      struct timer_notify_s.
  * TCIOC_MAXTIMEOUT   - Get the maximum supported timeout value
  *                      Argument: A 32-bit timeout value in microseconds.
+ * TCIOC_SETCALLBACK  - Register a callback function to be called when the
+ *                      timer expires.
+ *                      Argument: A pointer to the timer_callback_s object.
+ *                      Note: Setting a callback directly will deactivate any
+ *                      applications notified by signal previously set with
+ *                      TCIOC_NOTIFICATION.
  *
  * WARNING: May change TCIOC_SETTIMEOUT to pass pointer to 64bit nanoseconds
  * or timespec structure.
@@ -80,6 +86,7 @@
 #define TCIOC_SETTIMEOUT   _TCIOC(0x0004)
 #define TCIOC_NOTIFICATION _TCIOC(0x0005)
 #define TCIOC_MAXTIMEOUT   _TCIOC(0x0006)
+#define TCIOC_SETCALLBACK  _TCIOC(0x0007)
 
 /* Bit Settings *************************************************************/
 
@@ -149,6 +156,12 @@ struct timer_notify_s
   struct sigevent event;    /* Describe the way a task is to be notified */
   pid_t           pid;      /* The ID of the task/thread to receive the signal */
   bool            periodic; /* True for periodic notifications */
+};
+
+struct timer_callback_s
+{
+  tccb_t handle;            /* Upper half function handler */
+  void   *arg;              /* Argument to be passed to the upper half callback */
 };
 
 /* This structure provides the "lower-half" driver operations available to
