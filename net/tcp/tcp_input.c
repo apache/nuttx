@@ -456,10 +456,9 @@ static void tcp_input_ofosegs(FAR struct net_driver_s *dev,
   dev->d_iob = iob_trimhead(dev->d_iob, len);
   if (dev->d_iob == NULL || dev->d_iob->io_pktlen == 0)
     {
-      /* No available data, clear device buffer */
+      /* No available data, prepare device iob */
 
-      iob_free_chain(dev->d_iob);
-      goto clear;
+      goto prepare;
     }
 
   ofoseg.data = dev->d_iob;
@@ -517,10 +516,11 @@ static void tcp_input_ofosegs(FAR struct net_driver_s *dev,
 
   if (rebuild)
     {
-clear:
       netdev_iob_clear(dev);
-      netdev_iob_prepare(dev, false, 0);
     }
+
+prepare:
+  netdev_iob_prepare(dev, false, 0);
 }
 #endif /* CONFIG_NET_TCP_OUT_OF_ORDER */
 
