@@ -978,7 +978,7 @@ static int esp32s3_qspi_memory(struct qspi_dev_s *dev,
       esp32s3_dma_setup(priv->dma_desc,
                         QSPI_DMA_DESC_NUM,
                         (uint8_t *)meminfo->buffer,
-                        meminfo->buflen
+                        meminfo->buflen,
                         true);
       esp32s3_dma_load(priv->dma_desc, priv->dma_channel, true);
       esp32s3_dma_enable(priv->dma_channel, true);
@@ -994,7 +994,7 @@ static int esp32s3_qspi_memory(struct qspi_dev_s *dev,
       esp32s3_dma_setup(priv->dma_desc,
                         QSPI_DMA_DESC_NUM,
                         (uint8_t *)meminfo->buffer,
-                        meminfo->buflen
+                        meminfo->buflen,
                         false);
       esp32s3_dma_load(priv->dma_desc, priv->dma_channel, false);
       esp32s3_dma_enable(priv->dma_channel, false);
