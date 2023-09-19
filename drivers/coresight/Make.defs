@@ -32,6 +32,10 @@ ifeq ($(CONFIG_CORESIGHT_REPLICATOR),y)
 CSRCS += coresight_replicator.c
 endif
 
+ifeq ($(CONFIG_CORESIGHT_TPIU),y)
+CSRCS += coresight_tpiu.c
+endif
+
 DEPPATH += --dep-path coresight
 VPATH += :coresight
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)coresight
