@@ -26,6 +26,7 @@ config PM_NDOMAINS
 
 config PM_PROCFS
 	bool "PM proc fs support"
+	depends on FS_PROCFS_REGISTER
 	---help---
 		Enable procfs for pm.
 
