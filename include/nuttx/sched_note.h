@@ -136,14 +136,14 @@
           sched_note_bprintf_ip(tag, SCHED_NOTE_IP, event, \
                                 fmt, ##__VA_ARGS__)
 #  define sched_note_beginex(tag, str) \
-          sched_note_printf_ip(tag, SCHED_NOTE_IP, "B|%d|%s", gettid(), str)
+          sched_note_printf_ip(tag, SCHED_NOTE_IP, "B|%d|%s", _SCHED_GETTID(), str)
 #  define sched_note_endex(tag, str) \
-          sched_note_printf_ip(tag, SCHED_NOTE_IP, "E|%d|%s", gettid(), str)
+          sched_note_printf_ip(tag, SCHED_NOTE_IP, "E|%d|%s", _SCHED_GETTID(), str)
 #  define sched_note_mark(tag, str) \
-          sched_note_printf_ip(tag, SCHED_NOTE_IP, "I|%d|%s", gettid(), str)
+          sched_note_printf_ip(tag, SCHED_NOTE_IP, "I|%d|%s", _SCHED_GETTID(), str)
 #  define sched_note_counter(tag, name, value) \
           sched_note_printf_ip(tag, SCHED_NOTE_IP, "C|%d|%s|%" PRId32, \
-                               gettid(), name, value)
+                               _SCHED_GETTID(), name, value)
 #  define sched_note_begin(tag) \
           sched_note_string_ip(tag, SCHED_NOTE_IP, "B")
 #  define sched_note_end(tag) \
