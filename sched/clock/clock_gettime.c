@@ -153,7 +153,14 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
           tcb = nxsched_get_tcb(pid);
         }
 
-      up_perf_convert(tcb->run_time, tp);
+      if (tcb != NULL)
+        {
+          up_perf_convert(tcb->run_time, tp);
+        }
+      else
+        {
+          ret = -EFAULT;
+        }
     }
   else if (clock_type == CLOCK_PROCESS_CPUTIME_ID)
     {
@@ -174,18 +181,28 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
           tcb = nxsched_get_tcb(pid);
         }
 
-      group = tcb->group;
-      runtime = 0;
-
-      flags = enter_critical_section();
-      for (i = group->tg_nmembers - 1; i >= 0; i--)
+      if (tcb != NULL)
         {
-          tcb = nxsched_get_tcb(group->tg_members[i]);
-          runtime += tcb->run_time;
-        }
+          group = tcb->group;
+          runtime = 0;
 
-      leave_critical_section(flags);
-      up_perf_convert(runtime, tp);
+          flags = enter_critical_section();
+          for (i = group->tg_nmembers - 1; i >= 0; i--)
+            {
+              tcb = nxsched_get_tcb(group->tg_members[i]);
+              if (tcb != NULL)
+                {
+                  runtime += tcb->run_time;
+                }
+            }
+
+          leave_critical_section(flags);
+          up_perf_convert(runtime, tp);
+        }
+      else
+        {
+          ret = -EFAULT;
+        }
     }
 #endif
   else
