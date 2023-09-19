@@ -157,6 +157,7 @@
  */
 
 #  define offsetof(a, b) __builtin_offsetof(a, b)
+#  define return_address(x) __builtin_return_address(x)
 
 /* Attributes
  *
@@ -632,6 +633,7 @@
 #  undef  CONFIG_HAVE_LONG_DOUBLE
 
 #  define offsetof(a, b) ((size_t)(&(((a *)(0))->b)))
+#  define return_address(x) 0
 
 #  define no_builtin(n)
 
@@ -773,6 +775,7 @@
 #  undef  CONFIG_HAVE_LONG_DOUBLE
 
 #  define offsetof(a, b) ((size_t)(&(((a *)(0))->b)))
+#  define return_address(x) 0
 
 #  define no_builtin(n)
 
@@ -843,6 +846,7 @@
 #  define CONFIG_HAVE_FLOAT 1
 
 #  define offsetof(a, b) ((size_t)(&(((a *)(0))->b)))
+#  define return_address(x) 0
 
 #  define no_builtin(n)
 
@@ -920,6 +924,7 @@
 #  define UNUSED(a) ((void)(1 || &(a)))
 
 #  define offsetof(a, b) ((size_t)(&(((a *)(0))->b)))
+#  define return_address(x) 0
 
 #  define no_builtin(n)
 
@@ -988,6 +993,7 @@
 #  define UNUSED(a) ((void)(1 || &(a)))
 
 #  define offsetof(a, b) ((size_t)(&(((a *)(0))->b)))
+#  define return_address(x) 0
 
 #  define no_builtin(n)
 
