@@ -72,6 +72,7 @@ struct virtio_snd_dev_s
   struct audio_lowerhalf_s dev;
   uint32_t period_bytes;
   uint32_t index;
+  bool running;
   FAR void *priv;
 };
 
@@ -484,7 +485,7 @@ static int virtio_snd_query_info(FAR struct virtio_snd_s *priv,
     }
 
   ret = resp->code == VIRTIO_SND_S_OK ? OK : -EIO;
-  vrtinfo("send cmd:0x%x and resp:%d\n", cmd, ret);
+  vrtinfo("send cmd:0x%x and resp:0x%"PRIu32"\n", cmd, resp->code);
 
 out:
   virtio_free_buf(priv->vdev, req);
@@ -567,8 +568,8 @@ static int virtio_snd_set_params(FAR struct virtio_snd_dev_s *sdev,
 
   ret = resp->code == VIRTIO_SND_S_OK ? OK : -EIO;
 
-  vrtinfo("send cmd:0x%x and resp:%d\n",
-          VIRTIO_SND_R_PCM_SET_PARAMS, ret);
+  vrtinfo("send cmd:0x%x and resp:0x%"PRIu32"\n",
+          VIRTIO_SND_R_PCM_SET_PARAMS, resp->code);
 
 out:
   virtio_free_buf(priv->vdev, req);
@@ -628,7 +629,7 @@ static int virtio_snd_send_cmd(FAR struct virtio_snd_dev_s *sdev,
       vrterr("check response error:%d\n", ret);
     }
 
-  vrtinfo("send cmd:0x%x and resp:%d\n", cmd, ret);
+  vrtinfo("send cmd:0x%x and resp:0x%"PRIu32"\n", cmd, resp->code);
 
 out:
   virtio_free_buf(vdev, req);
@@ -768,8 +769,20 @@ static int virtio_snd_start(FAR struct audio_lowerhalf_s *dev)
 #endif
 {
   FAR struct virtio_snd_dev_s *sdev = (FAR struct virtio_snd_dev_s *)dev;
+  int ret = OK;
 
-  return virtio_snd_send_cmd(sdev, VIRTIO_SND_R_PCM_START);
+  if (!sdev->running)
+    {
+      ret = virtio_snd_send_cmd(sdev, VIRTIO_SND_R_PCM_START);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      sdev->running = true;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -789,9 +802,24 @@ static int virtio_snd_stop(FAR struct audio_lowerhalf_s *dev)
 #endif
 {
   FAR struct virtio_snd_dev_s *sdev = (FAR struct virtio_snd_dev_s *)dev;
+  int ret = OK;
 
-  virtio_snd_send_cmd(sdev, VIRTIO_SND_R_PCM_STOP);
-  virtio_snd_send_cmd(sdev, VIRTIO_SND_R_PCM_RELEASE);
+  if (sdev->running)
+    {
+      ret = virtio_snd_send_cmd(sdev, VIRTIO_SND_R_PCM_STOP);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      sdev->running = false;
+    }
+
+  ret = virtio_snd_send_cmd(sdev, VIRTIO_SND_R_PCM_RELEASE);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
   dev->upper(dev->priv, AUDIO_CALLBACK_COMPLETE, NULL, OK, NULL);
@@ -799,7 +827,7 @@ static int virtio_snd_stop(FAR struct audio_lowerhalf_s *dev)
   dev->upper(dev->priv, AUDIO_CALLBACK_COMPLETE, NULL, OK);
 #endif
 
-  return OK;
+  return ret;
 }
 #endif
 
@@ -819,8 +847,20 @@ static int virtio_snd_pause(FAR struct audio_lowerhalf_s *dev)
 #endif
 {
   FAR struct virtio_snd_dev_s *sdev = (FAR struct virtio_snd_dev_s *)dev;
+  int ret = OK;
 
-  return virtio_snd_send_cmd(sdev, VIRTIO_SND_R_PCM_STOP);
+  if (sdev->running)
+    {
+      ret = virtio_snd_send_cmd(sdev, VIRTIO_SND_R_PCM_STOP);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      sdev->running = false;
+    }
+
+  return ret;
 }
 #endif
 
@@ -840,8 +880,20 @@ static int virtio_snd_resume(FAR struct audio_lowerhalf_s *dev)
 #endif
 {
   FAR struct virtio_snd_dev_s *sdev = (FAR struct virtio_snd_dev_s *)dev;
+  int ret = OK;
 
-  return virtio_snd_send_cmd(sdev, VIRTIO_SND_R_PCM_START);
+  if (!sdev->running)
+    {
+      ret = virtio_snd_send_cmd(sdev, VIRTIO_SND_R_PCM_START);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      sdev->running = true;
+    }
+
+  return ret;
 }
 #endif
 
@@ -1098,6 +1150,7 @@ virtio_snd_register_audio_driver(FAR struct virtio_snd_s *priv)
         }
 
       priv->dev[i].index = i;
+      priv->dev[i].running = false;
       priv->dev[i].priv = priv;
       priv->dev[i].dev.ops = &g_virtio_snd_ops;
       ret = audio_register(devname, &priv->dev[i].dev);
