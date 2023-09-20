@@ -490,7 +490,7 @@ static ssize_t procfs_write(FAR struct file *filep, FAR const char *buffer,
   handler = (FAR struct procfs_file_s *)filep->f_priv;
   DEBUGASSERT(handler);
 
-  /* Call the handler's read routine */
+  /* Call the handler's write routine */
 
   if (handler->procfsentry->ops->write)
     {
