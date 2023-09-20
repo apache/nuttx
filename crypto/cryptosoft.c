@@ -29,6 +29,7 @@
 #include <errno.h>
 #include <endian.h>
 #include <nuttx/kmalloc.h>
+#include <crypto/bn.h>
 #include <crypto/cryptodev.h>
 #include <crypto/cryptosoft.h>
 #include <crypto/xform.h>
@@ -1097,11 +1098,72 @@ done:
   return 0;
 }
 
+int swcr_rsa_verify(struct cryptkop *krp)
+{
+  uint8_t *exp = (uint8_t *)krp->krp_param[0].crp_p;
+  uint8_t *modulus = (uint8_t *)krp->krp_param[1].crp_p;
+  uint8_t *sig = (uint8_t *)krp->krp_param[2].crp_p;
+  uint8_t *hash = (uint8_t *)krp->krp_param[3].crp_p;
+  uint8_t *padding = (uint8_t *)krp->krp_param[4].crp_p;
+  int exp_len = krp->krp_param[0].crp_nbits / 8;
+  int modulus_len = krp->krp_param[1].crp_nbits / 8;
+  int sig_len = krp->krp_param[2].crp_nbits / 8;
+  int hash_len = krp->krp_param[3].crp_nbits / 8;
+  int padding_len = krp->krp_param[4].crp_nbits / 8;
+  struct bn a;
+  struct bn e;
+  struct bn n;
+  struct bn r;
+
+  bignum_init(&a);
+  bignum_init(&e);
+  bignum_init(&n);
+  bignum_init(&r);
+  memcpy(e.array, exp, exp_len);
+  memcpy(n.array, modulus, modulus_len);
+  memcpy(a.array, sig, sig_len);
+  pow_mod_faster(&a, &e, &n, &r);
+  return !!memcmp(r.array, hash, hash_len) +
+         !!memcmp(r.array + hash_len, padding, padding_len);
+}
+
+int swcr_kprocess(struct cryptkop *krp)
+{
+  /* Sanity check */
+
+  if (krp == NULL)
+    {
+      return -EINVAL;
+    }
+
+  /* Go through crypto descriptors, processing as we go */
+
+  switch (krp->krp_op)
+    {
+      case CRK_RSA_PCKS15_VERIFY:
+        if ((krp->krp_status = swcr_rsa_verify(krp)) != 0)
+          {
+            goto done;
+          }
+        break;
+      default:
+
+        /* Unknown/unsupported algorithm */
+
+        krp->krp_status = -EINVAL;
+        goto done;
+    }
+
+done:
+  return 0;
+}
+
 /* Initialize the driver, called from the kernel main(). */
 
 void swcr_init(void)
 {
   int algs[CRYPTO_ALGORITHM_MAX + 1];
+  int kalgs[CRK_ALGORITHM_MAX + 1];
   int flags = CRYPTOCAP_F_SOFTWARE | CRYPTOCAP_F_ENCRYPT_MAC |
               CRYPTOCAP_F_MAC_ENCRYPT;
 
@@ -1146,4 +1208,7 @@ void swcr_init(void)
 
   crypto_register(swcr_id, algs, swcr_newsession,
                   swcr_freesession, swcr_process);
+
+  kalgs[CRK_RSA_PCKS15_VERIFY] = CRYPTO_ALG_FLAG_SUPPORTED;
+  crypto_kregister(swcr_id, kalgs, swcr_kprocess);
 }
