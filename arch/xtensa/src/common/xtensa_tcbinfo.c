@@ -58,7 +58,7 @@ static const uint16_t g_reg_offs[] =
  * Public Data
  ****************************************************************************/
 
-const struct tcbinfo_s g_tcbinfo =
+const struct tcbinfo_s g_tcbinfo used_data =
 {
   .pid_off        = TCB_PID_OFF,
   .state_off      = TCB_STATE_OFF,
