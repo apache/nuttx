@@ -87,6 +87,7 @@ struct lcddev_area_s
 {
   fb_coord_t row_start, row_end;
   fb_coord_t col_start, col_end;
+  fb_coord_t stride;
   FAR uint8_t *data;
 };
 
