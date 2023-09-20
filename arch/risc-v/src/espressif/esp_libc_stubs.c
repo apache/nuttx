@@ -243,52 +243,52 @@ void _lock_release_recursive(_lock_t *lock)
 #if ESP_ROM_HAS_RETARGETABLE_LOCKING
 void __retarget_lock_init(_LOCK_T *lock)
 {
-  _lock_init(lock);
+  _lock_init((_lock_t *)lock);
 }
 
 void __retarget_lock_init_recursive(_LOCK_T *lock)
 {
-  _lock_init_recursive(lock);
+  _lock_init_recursive((_lock_t *)lock);
 }
 
 void __retarget_lock_close(_LOCK_T lock)
 {
-  _lock_close(&lock);
+  _lock_close((_lock_t *)&lock);
 }
 
 void __retarget_lock_close_recursive(_LOCK_T lock)
 {
-  _lock_close_recursive(&lock);
+  _lock_close_recursive((_lock_t *)&lock);
 }
 
 void __retarget_lock_acquire(_LOCK_T lock)
 {
-  _lock_acquire(&lock);
+  _lock_acquire((_lock_t *)&lock);
 }
 
 void __retarget_lock_acquire_recursive(_LOCK_T lock)
 {
-  _lock_acquire_recursive(&lock);
+  _lock_acquire_recursive((_lock_t *)&lock);
 }
 
 int __retarget_lock_try_acquire(_LOCK_T lock)
 {
-  return _lock_try_acquire(&lock);
+  return _lock_try_acquire((_lock_t *)&lock);
 }
 
 int __retarget_lock_try_acquire_recursive(_LOCK_T lock)
 {
-  return _lock_try_acquire_recursive(&lock);
+  return _lock_try_acquire_recursive((_lock_t *)&lock);
 }
 
 void __retarget_lock_release(_LOCK_T lock)
 {
-  _lock_release(&lock);
+  _lock_release((_lock_t *)&lock);
 }
 
 void __retarget_lock_release_recursive(_LOCK_T lock)
 {
-  _lock_release_recursive(&lock);
+  _lock_release_recursive((_lock_t *)&lock);
 }
 #endif
 
