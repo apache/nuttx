@@ -48,6 +48,7 @@ following section.
   usrsock.rst
   mmcsd.rst
   net/index.rst
+  pinctrl.rst
   pipes.rst
   power/index.rst
   virtio.rst

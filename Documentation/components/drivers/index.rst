@@ -178,6 +178,10 @@ Subdirectories of ``nuttx/drivers``
 
   Note Driver Support.
 
+* ``pinctrl/`` :doc:`special/pinctrl`
+
+  Configure and manage pin.
+
 * ``pipes/`` :doc:`special/pipes`
 
   FIFO and named pipe drivers.

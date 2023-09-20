@@ -52,6 +52,7 @@ include eeprom/Make.defs
 include efuse/Make.defs
 include net/Make.defs
 include note/Make.defs
+include pinctrl/Make.defs
 include pipes/Make.defs
 include power/Make.defs
 include regmap/Make.defs
