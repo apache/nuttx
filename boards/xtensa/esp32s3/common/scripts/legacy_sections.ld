@@ -78,6 +78,7 @@ SECTIONS
 
     *libarch.a:esp32s3_cpuindex.*(.literal .text .literal.* .text.*)
     *libarch.a:esp32s3_irq.*(.literal .text .literal.* .text.*)
+    *libarch.a:esp32s3_user.*(.literal .text .literal.* .text.*)
     *libarch.a:esp32s3_spiflash.*(.literal .text .literal.* .text.*)
     *libarch.a:xtensa_assert.*(.literal .text .literal.* .text.*)
     *libarch.a:xtensa_cpuint.*(.literal .text .literal.* .text.*)
@@ -85,6 +86,10 @@ SECTIONS
     *libarch.a:xtensa_irqdispatch.*(.literal .text .literal.* .text.*)
     *libarch.a:xtensa_modifyreg32.*(.literal .text .literal.* .text.*)
     *libarch.a:xtensa_testset.*(.literal .text .literal.* .text.*)
+
+#ifdef CONFIG_ESP32S3_BLE
+    *libc.a:bin/sq_remlast.*(.literal .text .literal.* .text.*)
+#endif
 
     *libdrivers.a:syslog_flush.*(.literal .text .literal.* .text.*)
 
