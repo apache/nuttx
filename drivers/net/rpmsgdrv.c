@@ -1145,14 +1145,30 @@ int net_rpmsg_drv_init(FAR const char *cpuname,
 
   /* Register the device with the openamp */
 
-  rpmsg_register_callback(dev,
+  ret = rpmsg_register_callback(dev,
                           net_rpmsg_drv_device_created,
                           net_rpmsg_drv_device_destroy,
                           NULL,
                           NULL);
 
+  if (ret < 0)
+    {
+      kmm_free(priv);
+      return ret;
+    }
+
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
   ret = netdev_register(dev, lltype);
+  if (ret < 0)
+    {
+      rpmsg_unregister_callback(dev,
+                          net_rpmsg_drv_device_created,
+                          net_rpmsg_drv_device_destroy,
+                          NULL,
+                          NULL);
+      kmm_free(priv);
+    }
+
   return ret;
 }
