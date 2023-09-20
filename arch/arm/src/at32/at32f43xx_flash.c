@@ -290,7 +290,7 @@ ssize_t up_progmem_eraseblock(size_t block)
   flash_unlock();
 
   modifyreg32(flash_ctrl, 0, FLASH_CTRL_SECERS);
-  modifyreg32(flash_addr, 0, block * AT32_FLASH_PAGESIZE);
+  modifyreg32(flash_addr, 0, block * AT32_FLASH_PAGESIZE + AT32_FLASH_BASE);
   modifyreg32(flash_ctrl, 0, FLASH_CTRL_ERSTR);
 
   while (getreg32(flash_sts) & FLASH_STS_OBF)
