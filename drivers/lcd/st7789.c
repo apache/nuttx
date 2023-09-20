@@ -480,6 +480,10 @@ static void st7789_setorientation(FAR struct st7789_dev_s *dev)
   madctl ^= 0x80;
 #endif
 
+#ifdef CONFIG_LCD_ST7789_BGR
+  madctl |= 0x08;
+#endif
+
   SPI_SEND(dev->spi, LCD_ST7789_DATA_PREFIX | madctl);
 
   st7789_deselect(dev->spi);

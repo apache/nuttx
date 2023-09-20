@@ -752,6 +752,12 @@ config LCD_ST7789_INVCOLOR
 		Invert colors of the LCD display. This is useful for implementations
 		that assume that that colors are inverted by default.
 
+config LCD_ST7789_BGR
+	bool "ST7789 Use BGR Instead Of RGB"
+	default n
+	---help---
+		Use BGR color format instead of RGB color format.
+
 config LCD_ST7789_BPP
 	int "Bit Per Pixel (12 or 16)"
 	default 16
