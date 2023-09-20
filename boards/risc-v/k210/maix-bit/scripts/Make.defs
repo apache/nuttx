@@ -38,7 +38,7 @@ AFLAGS += $(CFLAGS) -D__ASSEMBLY__
 
 CMODULEFLAGS = $(CFLAGS)
 
-LDMODULEFLAGS = -r -e module_initialize
+LDMODULEFLAGS = -melf64lriscv -r -e module_initialize
 LDMODULEFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
 
 # ELF module definitions
