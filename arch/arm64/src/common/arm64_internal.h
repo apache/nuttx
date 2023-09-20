@@ -55,6 +55,9 @@
 #  elif defined(CONFIG_CONSOLE_SYSLOG)
 #    undef  USE_SERIALDRIVER
 #    undef  USE_EARLYSERIALINIT
+#  elif defined(CONFIG_SERIAL_RTT_CONSOLE)
+#    undef  USE_SERIALDRIVER
+#    undef  USE_EARLYSERIALINIT
 #  else
 #    define USE_SERIALDRIVER 1
 #    define USE_EARLYSERIALINIT 1
