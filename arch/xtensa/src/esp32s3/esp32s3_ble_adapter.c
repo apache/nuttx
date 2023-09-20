@@ -60,7 +60,6 @@
 #include "esp32s3_rtc.h"
 #include "esp32s3_spiflash.h"
 #include "esp32s3_wireless.h"
-#include "esp32s3_wireless.h"
 
 #include "esp32s3_ble_adapter.h"
 
@@ -89,6 +88,11 @@
 #define BTDM_LPCLK_SEL_XTAL32K           (1)
 #define BTDM_LPCLK_SEL_RTC_SLOW          (2)
 #define BTDM_LPCLK_SEL_8M                (3)
+
+#ifdef CONFIG_ESP32S3_SPIFLASH
+#  define BLE_TASK_EVENT_QUEUE_ITEM_SIZE  8
+#  define BLE_TASK_EVENT_QUEUE_LEN        1
+#endif
 
 /****************************************************************************
  * Private Types
@@ -157,6 +161,16 @@ enum btdm_wakeup_src_e
   BTDM_ASYNC_WAKEUP_SRC_DISA,
   BTDM_ASYNC_WAKEUP_SRC_TMR,
   BTDM_ASYNC_WAKEUP_SRC_MAX,
+};
+
+/* Superseded semaphore definition */
+
+struct bt_sem_s
+{
+  sem_t sem;
+#ifdef CONFIG_ESP32S3_SPIFLASH
+  struct esp_semcache_s sc;
+#endif
 };
 
 /* prototype of function to handle vendor dependent signals */
@@ -423,6 +437,13 @@ static DRAM_ATTR void * g_light_sleep_pm_lock;
 /* BT interrupt private data */
 
 static irqstate_t g_inter_flags;
+
+/* Cached queue control variables */
+
+#ifdef CONFIG_ESP32S3_SPIFLASH
+static struct esp_queuecache_s g_esp_queuecache;
+static uint8_t g_esp_queuecache_buffer[BLE_TASK_EVENT_QUEUE_ITEM_SIZE];
+#endif
 
 /****************************************************************************
  * Public Data
@@ -704,7 +725,6 @@ static int IRAM_ATTR esp_int_adpt_cb(int irq, void *context, void *arg)
 
 static void interrupt_handler_set_wrapper(int intr_num, void *fn, void *arg)
 {
-  int ret;
   struct irq_adpt_s *adapter;
   int irq = esp32s3_getirq(0, intr_num);
 
@@ -716,8 +736,7 @@ static void interrupt_handler_set_wrapper(int intr_num, void *fn, void *arg)
   adapter->func = fn;
   adapter->arg = arg;
 
-  ret = irq_attach(irq, esp_int_adpt_cb, adapter);
-  DEBUGASSERT(ret == OK);
+  DEBUGVERIFY(irq_attach(irq, esp_int_adpt_cb, adapter));
 }
 
 /****************************************************************************
@@ -727,7 +746,7 @@ static void interrupt_handler_set_wrapper(int intr_num, void *fn, void *arg)
  *   Enable Wi-Fi interrupt
  *
  * Input Parameters:
- *   intr_num - No mean
+ *   intr_num - The interrupt CPU number.
  *
  * Returned Value:
  *   None
@@ -736,7 +755,12 @@ static void interrupt_handler_set_wrapper(int intr_num, void *fn, void *arg)
 
 static void interrupt_on_wrapper(int intr_num)
 {
-  up_enable_irq(intr_num + XTENSA_IRQ_FIRSTPERIPH);
+  int cpuint = intr_num;
+  int irq = esp32s3_getirq(0, cpuint);
+
+  DEBUGVERIFY(esp32s3_irq_set_iram_isr(irq));
+
+  up_enable_irq(irq);
 }
 
 /****************************************************************************
@@ -834,26 +858,32 @@ static void IRAM_ATTR task_yield_from_isr(void)
 static void *semphr_create_wrapper(uint32_t max, uint32_t init)
 {
   int ret;
-  sem_t *sem;
+  struct bt_sem_s *bt_sem;
   int tmp;
 
-  tmp = sizeof(sem_t);
-  sem = kmm_malloc(tmp);
-  if (!sem)
+  tmp = sizeof(struct bt_sem_s);
+  bt_sem = kmm_malloc(tmp);
+  DEBUGASSERT(bt_sem);
+  if (!bt_sem)
     {
       wlerr("ERROR: Failed to alloc %d memory\n", tmp);
       return NULL;
     }
 
-  ret = nxsem_init(sem, 0, init);
+  ret = nxsem_init(&bt_sem->sem, 0, init);
+  DEBUGASSERT(ret == OK);
   if (ret)
     {
       wlerr("ERROR: Failed to initialize sem error=%d\n", ret);
-      kmm_free(sem);
+      kmm_free(bt_sem);
       return NULL;
     }
 
-  return sem;
+#ifdef CONFIG_ESP32S3_SPIFLASH
+  esp_init_semcache(&bt_sem->sc, &bt_sem->sem);
+#endif
+
+  return bt_sem;
 }
 
 /****************************************************************************
@@ -872,9 +902,9 @@ static void *semphr_create_wrapper(uint32_t max, uint32_t init)
 
 static void semphr_delete_wrapper(void *semphr)
 {
-  sem_t *sem = (sem_t *)semphr;
-  nxsem_destroy(sem);
-  kmm_free(sem);
+  struct bt_sem_s *bt_sem = (struct bt_sem_s *)semphr;
+  sem_destroy(&bt_sem->sem);
+  kmm_free(bt_sem);
 }
 
 /****************************************************************************
@@ -896,7 +926,8 @@ static int IRAM_ATTR semphr_take_from_isr_wrapper(void *semphr, void *hptw)
 {
   *(int *)hptw = 0;
 
-  return esp_errno_trans(nxsem_trywait(semphr));
+  DEBUGPANIC();
+  return 0;
 }
 
 /****************************************************************************
@@ -916,9 +947,24 @@ static int IRAM_ATTR semphr_take_from_isr_wrapper(void *semphr, void *hptw)
 
 static int IRAM_ATTR semphr_give_from_isr_wrapper(void *semphr, void *hptw)
 {
-  sem_t *sem = (sem_t *)semphr;
+  int ret;
+  struct bt_sem_s *bt_sem = (struct bt_sem_s *)semphr;
 
-  return esp_errno_trans(semphr_give_wrapper(sem));
+#ifdef CONFIG_ESP32S3_SPIFLASH
+  if (spi_flash_cache_enabled())
+    {
+      ret = semphr_give_wrapper(bt_sem);
+    }
+  else
+    {
+      esp_post_semcache(&bt_sem->sc);
+      ret = 0;
+    }
+#else
+  ret = semphr_give_wrapper(bt_sem);
+#endif
+
+  return esp_errno_trans(ret);
 }
 
 /****************************************************************************
@@ -969,21 +1015,21 @@ static void esp_update_time(struct timespec *timespec, uint32_t ticks)
 static int semphr_take_wrapper(void *semphr, uint32_t block_time_ms)
 {
   int ret;
-  sem_t *sem = (sem_t *)semphr;
+  struct bt_sem_s *bt_sem = (struct bt_sem_s *)semphr;
 
   if (block_time_ms == OSI_FUNCS_TIME_BLOCKING)
     {
-      ret = nxsem_wait(sem);
+      ret = nxsem_wait(&bt_sem->sem);
     }
   else
     {
       if (block_time_ms > 0)
         {
-          ret = nxsem_tickwait(sem, MSEC2TICK(block_time_ms));
+          ret = nxsem_tickwait(&bt_sem->sem, MSEC2TICK(block_time_ms));
         }
       else
         {
-          ret = nxsem_trywait(sem);
+          ret = nxsem_trywait(&bt_sem->sem);
         }
     }
 
@@ -1013,9 +1059,9 @@ static int semphr_take_wrapper(void *semphr, uint32_t block_time_ms)
 static int semphr_give_wrapper(void *semphr)
 {
   int ret;
-  sem_t *sem = (sem_t *)semphr;
+  struct bt_sem_s *bt_sem = (struct bt_sem_s *)semphr;
 
-  ret = nxsem_post(sem);
+  ret = nxsem_post(&bt_sem->sem);
   if (ret)
     {
       wlerr("Failed to post sem error=%d\n", ret);
@@ -1150,12 +1196,20 @@ static int mutex_unlock_wrapper(void *mutex)
  *
  ****************************************************************************/
 
-static int32_t esp_queue_send_generic(void *queue, void *item,
-                                      uint32_t ticks, int prio)
+static IRAM_ATTR int32_t esp_queue_send_generic(void *queue, void *item,
+                                                uint32_t ticks, int prio)
 {
   int ret;
   struct timespec timeout;
   struct mq_adpt_s *mq_adpt = (struct mq_adpt_s *)queue;
+
+#ifdef CONFIG_ESP32S3_SPIFLASH
+  if (!spi_flash_cache_enabled())
+    {
+      esp_send_queuecache(&g_esp_queuecache, item, mq_adpt->msgsize);
+      return esp_errno_trans(OK);
+    }
+#endif
 
   if (ticks == OSI_FUNCS_TIME_BLOCKING || ticks == 0)
     {
@@ -1239,6 +1293,18 @@ static void *queue_create_wrapper(uint32_t queue_len, uint32_t item_size)
     }
 
   mq_adpt->msgsize = item_size;
+
+#ifdef CONFIG_ESP32S3_SPIFLASH
+  if (queue_len == BLE_TASK_EVENT_QUEUE_LEN &&
+      item_size == BLE_TASK_EVENT_QUEUE_ITEM_SIZE)
+    {
+      esp_init_queuecache(&g_esp_queuecache,
+                          &mq_adpt->mq,
+                          g_esp_queuecache_buffer,
+                          BLE_TASK_EVENT_QUEUE_ITEM_SIZE);
+    }
+#endif
+
   return (void *)mq_adpt;
 }
 
@@ -1392,28 +1458,8 @@ static int IRAM_ATTR queue_recv_from_isr_wrapper(void *queue,
                                                  void *item,
                                                  void *hptw)
 {
-  ssize_t ret;
-  struct timespec timeout;
-  unsigned int prio;
-  struct mq_adpt_s *mq_adpt = (struct mq_adpt_s *)queue;
-
-  ret = clock_gettime(CLOCK_REALTIME, &timeout);
-
-  if (ret < 0)
-    {
-      wlerr("Failed to get time %d\n", ret);
-      return false;
-    }
-
-  ret = file_mq_timedreceive(&mq_adpt->mq, (char *)item,
-                             mq_adpt->msgsize, &prio, &timeout);
-
-  if (ret < 0 && ret != -ETIMEDOUT)
-    {
-      wlerr("Failed to timedreceive from mqueue error=%d\n", ret);
-    }
-
-  return ret > 0 ? true : false;
+  DEBUGPANIC();
+  return 0;
 }
 
 /****************************************************************************
@@ -2390,6 +2436,13 @@ int esp32s3_bt_controller_init(void)
   coex_pti_v2();
 
   btdm_controller_status = ESP_BT_CONTROLLER_STATUS_INITED;
+
+#ifdef CONFIG_ESP32S3_SPIFLASH
+  if (esp_wireless_init() != OK)
+    {
+      return -EIO;
+    }
+#endif
 
   return OK;
 

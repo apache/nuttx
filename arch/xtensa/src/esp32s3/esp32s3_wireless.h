@@ -24,8 +24,12 @@
 /****************************************************************************
  * Included Files
  ****************************************************************************/
+#include <semaphore.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 #include <nuttx/config.h>
+#include <nuttx/list.h>
 
 #include "xtensa_attr.h"
 #include "esp32s3_rt_timer.h"
@@ -44,6 +48,31 @@
 #define CONFIG_MAC_BB_PD                                    0
 
 #define MAC_LEN                                       (6)
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/* Semaphore Cache Data */
+
+struct esp_semcache_s
+{
+  struct list_node node;
+
+  sem_t *sem;
+  uint32_t count;
+};
+
+/* Queue Cache Data */
+
+struct esp_queuecache_s
+{
+  struct list_node node;
+
+  struct file *mq_ptr;
+  size_t size;
+  uint8_t *buffer;
+};
 
 /****************************************************************************
  * Public Function Prototypes
@@ -265,5 +294,114 @@ int32_t esp_timer_stop(esp_timer_handle_t timer);
  ****************************************************************************/
 
 int32_t esp_timer_delete(esp_timer_handle_t timer);
+
+/****************************************************************************
+ * Name: esp_init_semcache
+ *
+ * Description:
+ *   Initialize semaphore cache.
+ *
+ * Parameters:
+ *   sc  - Semaphore cache data pointer
+ *   sem - Semaphore data pointer
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp_init_semcache(struct esp_semcache_s *sc, sem_t *sem);
+
+/****************************************************************************
+ * Name: esp_post_semcache
+ *
+ * Description:
+ *   Store posting semaphore action into semaphore cache.
+ *
+ * Parameters:
+ *   sc  - Semaphore cache data pointer
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp_post_semcache(struct esp_semcache_s *sc);
+
+/****************************************************************************
+ * Name: esp_init_queuecache
+ *
+ * Description:
+ *   Initialize queue cache.
+ *
+ * Parameters:
+ *   qc     - Queue cache data pointer
+ *   mq_ptr - Queue data pointer
+ *   buffer - Queue cache buffer pointer
+ *   size   - Queue cache buffer size
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp_init_queuecache(struct esp_queuecache_s *qc,
+                         struct file *mq_ptr,
+                         uint8_t *buffer,
+                         size_t size);
+
+/****************************************************************************
+ * Name: esp32_wl_send_queuecache
+ *
+ * Description:
+ *   Store posting queue action and data into queue cache.
+ *
+ * Parameters:
+ *   qc     - Queue cache data pointer
+ *   buffer - Data buffer
+ *   size   - Buffer size
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp_send_queuecache(struct esp_queuecache_s *qc,
+                         uint8_t *buffer,
+                         int size);
+
+/****************************************************************************
+ * Name: esp_wireless_init
+ *
+ * Description:
+ *   Initialize ESP32 wireless common components for both BT and Wi-Fi.
+ *
+ * Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success. A negated errno value is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int esp_wireless_init(void);
+
+/****************************************************************************
+ * Name: esp_wireless_deinit
+ *
+ * Description:
+ *   De-initialize ESP32 wireless common components.
+ *
+ * Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success. A negated errno value is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int esp_wireless_deinit(void);
 
 #endif /* __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_WIRELESS_H */
