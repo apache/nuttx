@@ -43,8 +43,73 @@ extern "C"
 #endif
 
 /****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/* SPI Flash map request data */
+
+struct spiflash_map_req_s
+{
+  /* Request mapping SPI Flash base address */
+
+  uint32_t  src_addr;
+
+  /* Request mapping SPI Flash size */
+
+  uint32_t  size;
+
+  /* Mapped memory pointer */
+
+  void      *ptr;
+
+  /* Mapped started MMU page index */
+
+  uint32_t  start_page;
+
+  /* Mapped MMU page count */
+
+  uint32_t  page_cnt;
+};
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp32s3_mmap
+ *
+ * Description:
+ *   Mapped SPI Flash address to ESP32-S3's address bus, so that software
+ *   can read SPI Flash data by reading data from memory access.
+ *
+ *   If SPI Flash hardware encryption is enable, the read from mapped
+ *   address is decrypted.
+ *
+ * Input Parameters:
+ *   req - SPI Flash mapping requesting parameters
+ *
+ * Returned Value:
+ *   0 if success or a negative value if fail.
+ *
+ ****************************************************************************/
+
+int esp32s3_mmap(struct spiflash_map_req_s *req);
+
+/****************************************************************************
+ * Name: esp32s3_ummap
+ *
+ * Description:
+ *   Unmap SPI Flash address in ESP32-S3's address bus, and free resource.
+ *
+ * Input Parameters:
+ *   req - SPI Flash mapping requesting parameters
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32s3_ummap(const struct spiflash_map_req_s *req);
 
 /****************************************************************************
  * Name: spi_flash_read_encrypted
