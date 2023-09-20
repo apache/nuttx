@@ -240,18 +240,20 @@ struct crypt_kop
   struct crparam crk_param[CRK_MAXPARAM];
 };
 
-#define CRK_MOD_EXP        0
-#define CRK_MOD_EXP_CRT    1
-#define CRK_DSA_SIGN       2
-#define CRK_DSA_VERIFY     3
-#define CRK_DH_COMPUTE_KEY 4
-#define CRK_ALGORITHM_MAX  4 /* Keep updated */
+#define CRK_MOD_EXP           0
+#define CRK_MOD_EXP_CRT       1
+#define CRK_DSA_SIGN          2
+#define CRK_DSA_VERIFY        3
+#define CRK_DH_COMPUTE_KEY    4
+#define CRK_RSA_PCKS15_VERIFY 5
+#define CRK_ALGORITHM_MAX     5 /* Keep updated */
 
-#define CRF_MOD_EXP        (1 << CRK_MOD_EXP)
-#define CRF_MOD_EXP_CRT    (1 << CRK_MOD_EXP_CRT)
-#define CRF_DSA_SIGN       (1 << CRK_DSA_SIGN)
-#define CRF_DSA_VERIFY     (1 << CRK_DSA_VERIFY)
-#define CRF_DH_COMPUTE_KEY (1 << CRK_DH_COMPUTE_KEY)
+#define CRF_MOD_EXP           (1 << CRK_MOD_EXP)
+#define CRF_MOD_EXP_CRT       (1 << CRK_MOD_EXP_CRT)
+#define CRF_DSA_SIGN          (1 << CRK_DSA_SIGN)
+#define CRF_DSA_VERIFY        (1 << CRK_DSA_VERIFY)
+#define CRF_DH_COMPUTE_KEY    (1 << CRK_DH_COMPUTE_KEY)
+#define CRF_RSA_PCKS15_VERIFY (1 << CRK_RSA_PCKS15_VERIFY)
 
 struct cryptkop
 {
