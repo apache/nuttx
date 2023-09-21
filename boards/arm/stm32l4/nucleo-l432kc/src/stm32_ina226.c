@@ -80,10 +80,10 @@ int stm32_ina226initialize(const char *devpath)
 
   sninfo("Initializing INA226\n");
 
-  /* Configure D4(PA5) and D5(PA6) as input floating */
+  /* Configure A4(PA5) and A5(PA6) as input floating */
 
-  stm32l4_configgpio(GPIO_I2C1_D4);
-  stm32l4_configgpio(GPIO_I2C1_D5);
+  stm32l4_configgpio(GPIO_I2C1_A4);
+  stm32l4_configgpio(GPIO_I2C1_A5);
 
   /* Get an instance of the I2C1 interface */
 
