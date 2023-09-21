@@ -136,7 +136,7 @@
 
 /* Used to initialize a pthread_once_t */
 
-#define PTHREAD_ONCE_INIT             (false)
+#define PTHREAD_ONCE_INIT             {false, PTHREAD_MUTEX_INITIALIZER}
 
 /* This is returned by pthread_barrier_wait.  It must not match any errno
  * in errno.h
@@ -371,8 +371,14 @@ typedef struct pthread_barrier_s pthread_barrier_t;
 #  define __PTHREAD_BARRIER_T_DEFINED 1
 #endif
 
+struct pthread_once_s
+{
+  bool done;
+  pthread_mutex_t mutex;
+};
+
 #ifndef __PTHREAD_ONCE_T_DEFINED
-typedef bool pthread_once_t;
+typedef struct pthread_once_s pthread_once_t;
 #  define __PTHREAD_ONCE_T_DEFINED 1
 #endif
 
@@ -839,7 +845,8 @@ typedef FAR struct pthread_spinlock_s pthread_spinlock_t;
 #endif /* CONFIG_PTHREAD_SPINLOCKS */
 
 #ifndef __PTHREAD_ONCE_T_DEFINED
-typedef bool pthread_once_t;
+struct pthread_once_s;
+typedef struct pthread_once_s pthread_once_t;
 #  define __PTHREAD_ONCE_T_DEFINED 1
 #endif
 
