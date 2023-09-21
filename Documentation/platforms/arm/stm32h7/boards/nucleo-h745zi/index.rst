@@ -14,6 +14,28 @@ The commands to build ``nsh_xxx_rptun`` configurations are as follows::
   cmake --build build_h7m7
   cmake --build build_h7m4
 
+Serial Console
+--------------
+
+The STLINK virtual console uses Serial Port 3 (USART3) with TX on PD8
+and RX on PD9 and is used by the Cortex-M7 core by default.
+
+================= ===
+VCOM Signal       Pin
+================= ===
+SERIAL_RX         PD9
+SERIAL_TX         PD8
+================= ===
+
+Access to the Cortex-M4 core can be acheived using an additional UART port
+or via RPMSG UART by setting ``CONFIG_RPMSG_UART_CONSOLE=y`` in CM4 configuration.
+
+If the RPMSG UART console is enabled, we can connect to it from CM7 using ``cu``::
+
+  nsh-cm7> cu -l /dev/ttyproxy
+  NuttShell (NSH) NuttX-10.4.0
+  nsh-cm4>
+
 Tools
 -----
 
