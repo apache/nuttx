@@ -31,7 +31,6 @@
 #include "arm_internal.h"
 
 #include "stm32_dualcore.h"
-#include "stm32_hsem.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -77,6 +76,16 @@ static bool stm32_cm4_boot(void)
 #endif
 
 #ifdef CONFIG_ARCH_CHIP_STM32H7_CORTEXM4
+
+/****************************************************************************
+ * Name: stm32_cm4_busywait_lock_sem
+ ****************************************************************************/
+
+void stm32_cm4_busywait_lock_sem(uint8_t id)
+{
+  while ((getreg32(STM32_HSEM_RX(id)) & HSEM_SEMX_LOCK) == 0);
+}
+
 /****************************************************************************
  * Name: stm32_cpu2sem_wait
  ****************************************************************************/
@@ -89,12 +98,22 @@ static void stm32_cpu2sem_wait(void)
 
   /* Wait for CPU1 */
 
-  stm32_hsem_busywait_lock(CPU2_HOLD_HSEM);
+  stm32_cm4_busywait_lock_sem(CPU2_HOLD_HSEM);
 }
 #endif
 
 #if defined(CONFIG_ARCH_CHIP_STM32H7_CORTEXM7) && \
     defined(CONFIG_STM32H7_CORTEXM4_ENABLED)
+
+/****************************************************************************
+ * Name: stm32_cm7_take_sem
+ ****************************************************************************/
+
+static bool stm32_cm7_take_sem(uint8_t id)
+{
+  return (getreg32(STM32_HSEM_RLRX(id)) ==
+          ((HSEM_COREID_CPU1 << HSEM_SEMX_COREID_SHIFT) | HSEM_SEMX_LOCK));
+}
 
 /****************************************************************************
  * Name: stm32_cpu2sem_take
@@ -104,7 +123,7 @@ static void stm32_cpu2sem_take(void)
 {
   /* Take semaphore */
 
-  while (stm32_hsem_take(CPU2_HOLD_HSEM) == 0);
+  while (stm32_cm7_take_sem(CPU2_HOLD_HSEM) == 0);
 }
 #endif
 
