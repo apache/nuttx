@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/input/keyboard.h
+ * include/nuttx/input/goldfish_events.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_INPUT_KEYBOARD_H
-#define __INCLUDE_NUTTX_INPUT_KEYBOARD_H
+#ifndef __INCLUDE_NUTTX_GOLDFISH_EVENTS_H
+#define __INCLUDE_NUTTX_GOLDFISH_EVENTS_H
 
 /****************************************************************************
  * Included Files
@@ -27,37 +27,12 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/input/x11_keysym.h>
-#include <nuttx/input/x11_xf86keysym.h>
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define KEYBOARD_PRESS   0 /* Key press event */
-#define KEYBOARD_RELEASE 1 /* Key release event */
-
 /****************************************************************************
- * Public Types
- ****************************************************************************/
-
-struct keyboard_event_s
-{
-  uint32_t type;
-  uint32_t code;
-};
-
-struct keyboard_lowerhalf_s
-{
-  FAR void *priv;
-  CODE int (*open)(FAR struct keyboard_lowerhalf_s *lower);
-  CODE int (*close)(FAR struct keyboard_lowerhalf_s *lower);
-  CODE ssize_t (*write)(FAR struct keyboard_lowerhalf_s *lower,
-                        FAR const char *buffer, size_t buflen);
-};
-
-/****************************************************************************
- * Public Function Prototypes
+ * Public Data
  ****************************************************************************/
 
 #ifdef __cplusplus
@@ -69,35 +44,25 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: keyboard_event
+ * Public Function Prototypes
  ****************************************************************************/
-
-void keyboard_event(FAR struct keyboard_lowerhalf_s *lower, uint32_t keycode,
-                    uint32_t type);
 
 /****************************************************************************
- * Name: keyboard_register
+ * Name: goldfish_events_register
+ *
+ * Description:
+ *   register goldfish events.
+ *
+ * Returned Value:
+ *   None
+ *
  ****************************************************************************/
 
-int keyboard_register(FAR struct keyboard_lowerhalf_s *lower,
-                      FAR const char *path, uint8_t nums);
-
-/****************************************************************************
- * Name: keyboard_register
- ****************************************************************************/
-
-int keyboard_unregister(FAR struct keyboard_lowerhalf_s *lower,
-                        FAR const char *path);
-
-/****************************************************************************
- * Name: keyboard_translate_virtio_code
- ****************************************************************************/
-
-uint32_t keyboard_translate_virtio_code(uint16_t keycode);
+int goldfish_events_register(FAR void *base, int irq);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_INPUT_KEYBOARD_H */
+#endif /* __INCLUDE_NUTTX_GOLDFISH_EVENTS_H */

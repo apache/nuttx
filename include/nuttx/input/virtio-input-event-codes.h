@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/virtio/virtio-input-event-codes.h
+ * include/nuttx/input/virtio-input-event-codes.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

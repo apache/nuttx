@@ -13,6 +13,15 @@ menuconfig INPUT
 
 if INPUT
 
+config INPUT_GOLDFISH_EVENTS
+	bool "Goldfish input events driver"
+	default n
+
+config INPUT_GOLDFISH_NBUFFER
+	int "Number of goldfish events buffer"
+	depends on INPUT_GOLDFISH_EVENTS
+	default 8
+
 config INPUT_MOUSE
 	bool
 	default n
