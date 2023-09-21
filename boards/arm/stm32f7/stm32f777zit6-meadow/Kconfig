@@ -64,10 +64,10 @@ config MEADOW_PWR_MGMT_SUPPORT
 	default n
 
 choice
-        prompt "Select Main Board Model"
-        default BOARD_MEADOW_F7MICRO_DEFAULT
-        ---help---
-                Select the mainboard model
+	prompt "Select Main Board Model"
+	default BOARD_MEADOW_F7MICRO_DEFAULT
+	---help---
+		Select the mainboard model
 
 config BOARD_MEADOW_F7MICRO_DEFAULT
 	bool "Meadow F7 Micro Default"
@@ -92,6 +92,6 @@ config BOARD_MEADOW_F7_CORE_COMPUTE
 		The F7 Core Compute is a modular mainboard with basic
 		features of F7-Micro, but with SDCard and Dual Ethernet.
 
-endchoice # "Main Board Model"
+endchoice # Select Main Board Model
 
 endif # ARCH_BOARD_MEADOW_F7MICRO
