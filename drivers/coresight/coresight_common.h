@@ -56,8 +56,14 @@
         (*(FAR volatile uint16_t *)(addr) = (val))
 #define coresight_put32(val, addr) \
         (*(FAR volatile uint32_t *)(addr) = (val))
+#define coresight_put64(val, addr) \
+        (*(FAR volatile uint64_t *)(addr) = (val))
+
 #define coresight_get32(addr) \
         (*(FAR volatile uint32_t *)(addr))
+#define coresight_modify32(val, mask, addr) \
+        coresight_put32((coresight_get32(addr) & ~(mask)) | \
+        ((val) & (mask)), (addr))
 
 /****************************************************************************
  * Public Function Prototypes

@@ -27,6 +27,10 @@ config CORESIGHT_REPLICATOR
 	bool "Replicator coresight device support"
 	default n
 
+config CORESIGHT_STM
+	bool "STM coresight device support"
+	default n
+
 config CORESIGHT_TPIU
 	bool "TPIU coresight device support"
 	default n
