@@ -74,7 +74,7 @@ static int stm32_hsem_interrupt(int irq, void *context, void *args)
 
   regval = getreg32(STM32_HSEM_CXMISR(dev->block));
 
-  _info("HSEM interrupt 0x%" PRIx32 "\n", regval);
+  ipcinfo("HSEM interrupt 0x%" PRIx32 "\n", regval);
 
   for (i = 0; i < STM32_HSEM_CHANS; i++)
     {
@@ -112,7 +112,7 @@ void stm32_hsem_subscribe(uint8_t id, hsem_callback_t callback, void *args)
 
   DEBUGASSERT(id < STM32_HSEM_CHANS);
 
-  _info("HSEM subscribe %d\n", id);
+  ipcinfo("HSEM subscribe %d\n", id);
 
   /* Register callaback */
 
@@ -149,7 +149,7 @@ void stm32_hsem_signal(uint8_t id)
 {
   DEBUGASSERT(id < STM32_HSEM_CHANS);
 
-  _info("HSEM signal %d\n", id);
+  ipcinfo("HSEM signal %d\n", id);
 
   /* Lock semaphore */
 
@@ -172,7 +172,7 @@ void stm32_hsem_busywait_lock(uint8_t id)
 {
   DEBUGASSERT(id < STM32_HSEM_CHANS);
 
-  _info("HSEM busywait lock %d\n", id);
+  ipcinfo("HSEM busywait lock %d\n", id);
 
   /* Wait for semaphore lock */
 
@@ -191,7 +191,7 @@ void stm32_hsem_busywait_free(uint8_t id)
 {
   DEBUGASSERT(id < STM32_HSEM_CHANS);
 
-  _info("HSEM busywait free %d\n", id);
+  ipcinfo("HSEM busywait free %d\n", id);
 
   /* Wait for semaphore free */
 
@@ -210,7 +210,7 @@ void stm32_hsem_wait_take(uint8_t id)
 {
   DEBUGASSERT(id < STM32_HSEM_CHANS);
 
-  _info("HSEM wait take %d\n", id);
+  ipcinfo("HSEM wait take %d\n", id);
 
   stm32_hsem_busywait_free(id);
   while (stm32_hsem_take(id) == 0);
@@ -228,7 +228,7 @@ bool stm32_hsem_take(uint8_t id)
 {
   DEBUGASSERT(id < STM32_HSEM_CHANS);
 
-  _info("HSEM take %d\n", id);
+  ipcinfo("HSEM take %d\n", id);
 
   /* Take semaphore */
 
