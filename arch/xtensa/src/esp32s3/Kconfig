@@ -1745,67 +1745,67 @@ config ESP32S3_LCD_HE_PIN
 	default 17
 
 config ESP32S3_LCD_DATA0_PIN
-    int "LCD Parallel Output Data Bit-0 Pin"
+	int "LCD Parallel Output Data Bit-0 Pin"
 	default 10
 
 config ESP32S3_LCD_DATA1_PIN
-    int "LCD Parallel Output Data Bit-1 Pin"
+	int "LCD Parallel Output Data Bit-1 Pin"
 	default 11
 
 config ESP32S3_LCD_DATA2_PIN
-    int "LCD Parallel Output Data Bit-2 Pin"
+	int "LCD Parallel Output Data Bit-2 Pin"
 	default 12
 
 config ESP32S3_LCD_DATA3_PIN
-    int "LCD Parallel Output Data Bit-3 Pin"
+	int "LCD Parallel Output Data Bit-3 Pin"
 	default 13
 
 config ESP32S3_LCD_DATA4_PIN
-    int "LCD Parallel Output Data Bit-4 Pin"
+	int "LCD Parallel Output Data Bit-4 Pin"
 	default 14
 
 config ESP32S3_LCD_DATA5_PIN
-    int "LCD Parallel Output Data Bit-5 Pin"
+	int "LCD Parallel Output Data Bit-5 Pin"
 	default 21
 
 config ESP32S3_LCD_DATA6_PIN
-    int "LCD Parallel Output Data Bit-6 Pin"
+	int "LCD Parallel Output Data Bit-6 Pin"
 	default 47
 
 config ESP32S3_LCD_DATA7_PIN
-    int "LCD Parallel Output Data Bit-7 Pin"
+	int "LCD Parallel Output Data Bit-7 Pin"
 	default 48
 
 config ESP32S3_LCD_DATA8_PIN
-    int "LCD Parallel Output Data Bit-8 Pin"
+	int "LCD Parallel Output Data Bit-8 Pin"
 	default 45
 
 config ESP32S3_LCD_DATA9_PIN
-    int "LCD Parallel Output Data Bit-9 Pin"
+	int "LCD Parallel Output Data Bit-9 Pin"
 	default 38
 
 config ESP32S3_LCD_DATA10_PIN
-    int "LCD Parallel Output Data Bit-10 Pin"
+	int "LCD Parallel Output Data Bit-10 Pin"
 	default 39
 
 config ESP32S3_LCD_DATA11_PIN
-    int "LCD Parallel Output Data Bit-11 Pin"
+	int "LCD Parallel Output Data Bit-11 Pin"
 	default 40
 
 config ESP32S3_LCD_DATA12_PIN
-    int "LCD Parallel Output Data Bit-12 Pin"
+	int "LCD Parallel Output Data Bit-12 Pin"
 	default 41
 
 config ESP32S3_LCD_DATA13_PIN
-    int "LCD Parallel Output Data Bit-13 Pin"
+	int "LCD Parallel Output Data Bit-13 Pin"
 	default 42
 
 config ESP32S3_LCD_DATA14_PIN
-    int "LCD Parallel Output Data Bit-14 Pin"
+	int "LCD Parallel Output Data Bit-14 Pin"
 	default 2
 
 config ESP32S3_LCD_DATA15_PIN
-    int "LCD Parallel Output Data Bit-15 Pin"
+	int "LCD Parallel Output Data Bit-15 Pin"
 	default 1
 
 endmenu

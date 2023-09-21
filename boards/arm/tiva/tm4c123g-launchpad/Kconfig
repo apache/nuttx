@@ -18,7 +18,7 @@ config TM4C123G_LAUNCHPAD_AT24_BLOCKMOUNT
 		- VCC -- VCC
 		- GND -- GND
 		- PB2 -- SCL
-		- PB3  -- SDA
+		- PB3 -- SDA
 
 choice
 	prompt "AT24 serial EPPROM configuration"
@@ -75,4 +75,4 @@ config TM4C123G_LAUNCHPAD_CAN0TX_PE5
 
 endchoice # CAN0 TX pin selection
 
-endif
+endif # ARCH_BOARD_TM4C123G_LAUNCHPAD

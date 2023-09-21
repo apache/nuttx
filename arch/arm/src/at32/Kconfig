@@ -67,7 +67,7 @@ config ARCH_CHIP_AT32F435RG
 	---help---
 		AT32F43X 64-pin , 1024KB FLASH, 384KB SRAM
 
-endchoice
+endchoice # AT32 Chip Selection
 
 choice
 	prompt "Override Flash Size Designator"
@@ -95,8 +95,6 @@ choice
 		   'M', if a variant of the part with a 4032 KiB Flash is released
 		   in the future one could simply select the 'M' designator here.
 
-
-
 config AT32_FLASH_CONFIG_DEFAULT
 	bool "Default"
 
@@ -121,7 +119,7 @@ config AT32_FLASH_CONFIG_I
 config AT32_FLASH_CONFIG_M
 	bool "M 4032KiB"
 
-endchoice
+endchoice # Override Flash Size Designator
 
 config AT32_AT32F43XX
 	bool
@@ -140,7 +138,6 @@ config AT32_AT32F43XX
 	select AT32_HAVE_IP_DMA_V1
 	select AT32_HAVE_DMAMUX
 
-
 config AT32_AT32F435
 	bool
 	default n
@@ -149,7 +146,7 @@ config AT32_AT32F435
 	select AT32_HAVE_UART4
 	select AT32_HAVE_UART5
 	select AT32_HAVE_UART7
-	select AT32_HAVE_UART8	
+	select AT32_HAVE_UART8
 	select AT32_HAVE_USART6
 	select AT32_HAVE_TIM1
 	select AT32_HAVE_TIM3
@@ -164,7 +161,7 @@ config AT32_AT32F435
 	select AT32_HAVE_TIM12
 	select AT32_HAVE_TIM13
 	select AT32_HAVE_TIM14
-	select AT32_HAVE_TIM20		
+	select AT32_HAVE_TIM20
 	select AT32_HAVE_ADC2
 	select AT32_HAVE_ADC3
 	select AT32_HAVE_CAN1
@@ -175,7 +172,7 @@ config AT32_AT32F435
 	select AT32_HAVE_I2S3
 	select AT32_HAVE_I2C3
 	select AT32_HAVE_OTGFS
-	select AT32_HAVE_OTGFS2	
+	select AT32_HAVE_OTGFS2
 
 config AT32_AT32F437
 	bool
@@ -201,7 +198,7 @@ config AT32_AT32F437
 	select AT32_HAVE_TIM12
 	select AT32_HAVE_TIM13
 	select AT32_HAVE_TIM14
-	select AT32_HAVE_TIM20	
+	select AT32_HAVE_TIM20
 	select AT32_HAVE_ADC2
 	select AT32_HAVE_ADC3
 	select AT32_HAVE_CAN1
@@ -6089,7 +6086,7 @@ config USART1_RS485_DIR_POLARITY
 config USART1_RXDMA
 	bool "USART1 Rx DMA"
 	default n
-	depends on  AT32_DMA1 || AT32_DMA2
+	depends on AT32_DMA1 || AT32_DMA2
 	select AT32_USART_RXDMA
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
@@ -7059,7 +7056,7 @@ menu "RTC Configuration"
 config AT32_RTC_MAGIC_REG
 	int "BKP register"
 	default 0
-	range  0 19
+	range 0 19
 	depends on !AT32_HAVE_RTC_COUNTER
 	---help---
 		The BKP register used to store/check the Magic value to determine if
