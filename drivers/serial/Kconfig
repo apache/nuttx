@@ -81,6 +81,16 @@ config RPMSG_UART
 	select SERIAL_REMOVABLE
 	select SERIAL_IFLOWCONTROL
 
+config RPMSG_UART_CONSOLE
+	bool "UART rpmsg console support"
+	default n
+	depends on RPMSG_UART
+	---help---
+		Register the UART rpmsg device as /dev/console so that is will be used
+		as the console device.
+		NOTE: support for this option must be implemented in the board logic by
+		setting the \"isconsole\" argument in the uart_rpmsg_init() function to true.
+
 #
 # Standard serial driver configuration
 #
