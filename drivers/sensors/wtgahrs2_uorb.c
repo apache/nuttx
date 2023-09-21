@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/sensors/wtgahrs2.c
+ * drivers/sensors/wtgahrs2_uorb.c
  * Driver for the Wit-Motion WTGAHRS2 accelerometer, gyroscope, magnetic,
  * angle, barometer, temperature, gps sensors by serial interface with host
  *
