@@ -656,8 +656,8 @@
 
 /* (see nuttx/include/crypto/se05x.h */
 
-#define _SEIOCVALID(c)  	(_IOC_TYPE(c)==_SEIOCBASE)
-#define _SEIOC(nr)      	_IOC(_SEIOCBASE,nr)
+#define _SEIOCVALID(c)     (_IOC_TYPE(c)==_SEIOCBASE)
+#define _SEIOC(nr)         _IOC(_SEIOCBASE,nr)
 
 /* syslog driver ioctl definitions ******************************************/
 

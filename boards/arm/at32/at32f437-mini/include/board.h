@@ -198,7 +198,7 @@
  * board the AT32F437-MINI.  The following definitions describe how NuttX
  * controls the LEDs:
  *
- *   SYMBOL                Meaning                 LED state
+ *   SYMBOL                Meaning                   LED state
  *                                                   LED1     LED2
  *   -------------------  -----------------------  -------- --------
  *   LED_STARTED          NuttX has been started     OFF      OFF
@@ -221,13 +221,11 @@
 #define LED_ASSERTION            2
 #define LED_PANIC                3
 
-/* USB */
-
-/**
+/* USB
  * pll clock = AT32_HCLK_FREQUENCY(288MHz)
  * usb clock use pll
  * usb_clk = 288/6 = 48MHz
- * **/
+ */
 #define USB_CONFIG_USBDIV       (CRM_MISC2_USBDIV_6P0)  
 
 /* USART1 */
@@ -254,9 +252,9 @@
 
 /* ETH */
 
-#define GPIO_ETH_RMII_TX_EN GPIO_ETH_RMII_TX_EN_1			//PB11
-#define GPIO_ETH_RMII_TXD0  GPIO_ETH_RMII_TXD0_1			//PB12
-#define GPIO_ETH_RMII_TXD1  GPIO_ETH_RMII_TXD1_1			//PB13  
+#define GPIO_ETH_RMII_TX_EN GPIO_ETH_RMII_TX_EN_1    /* PB11 */
+#define GPIO_ETH_RMII_TXD0  GPIO_ETH_RMII_TXD0_1     /* PB12 */
+#define GPIO_ETH_RMII_TXD1  GPIO_ETH_RMII_TXD1_1     /* PB13 */
 
 /* I2C */
 
