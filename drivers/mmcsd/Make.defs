@@ -30,6 +30,10 @@ ifeq ($(CONFIG_MMCSD_SPI),y)
 CSRCS += mmcsd_spi.c mmcsd_debug.c
 endif
 
+ifeq ($(CONFIG_MMCSD_PROCFS),y)
+CSRCS += mmcsd_procfs.c
+endif
+
 # Include MMC/SD driver build support
 
 DEPPATH += --dep-path mmcsd
