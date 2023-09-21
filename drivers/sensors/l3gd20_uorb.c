@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/sensors/l3gd20.c
+ * drivers/sensors/l3gd20_uorb.c
  * Character driver for the ST L3GD20 3-Axis gyroscope.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more

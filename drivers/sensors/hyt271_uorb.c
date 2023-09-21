@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/sensors/hyt271.c
+ * drivers/sensors/hyt271_uorb.c
  * Character driver for HYT271 Digital Humidity and Temperature Module.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more

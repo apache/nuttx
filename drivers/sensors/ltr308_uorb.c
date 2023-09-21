@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/sensors/ltr308.c
+ * drivers/sensors/ltr308_uorb.c
  * Character driver for the LTR-308ALS-01 Lite-On ambient light sensor.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more

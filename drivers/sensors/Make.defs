@@ -33,19 +33,19 @@ CSRCS += sensor_rpmsg.c
 endif
 
 ifeq ($(CONFIG_SENSORS_GPS),y)
-  CSRCS += gps.c
+  CSRCS += gps_uorb.c
 endif
 
 ifeq ($(CONFIG_SENSORS_WTGAHRS2),y)
-  CSRCS += wtgahrs2.c
+  CSRCS += wtgahrs2_uorb.c
 endif
 
 ifeq ($(CONFIG_SENSORS_FAKESENSOR),y)
-  CSRCS += fakesensor.c
+  CSRCS += fakesensor_uorb.c
 endif
 
 ifeq ($(CONFIG_SENSORS_GOLDFISH_GPS),y)
-  CSRCS += goldfish_gps.c
+  CSRCS += goldfish_gps_uorb.c
 endif
 
 ifeq ($(CONFIG_SENSORS_HCSR04),y)
@@ -93,7 +93,7 @@ ifeq ($(CONFIG_SENSORS_FXOS8700CQ),y)
 endif
 
 ifeq ($(CONFIG_SENSORS_HYT271),y)
-  CSRCS += hyt271.c
+  CSRCS += hyt271_uorb.c
 endif
 
 ifeq ($(CONFIG_SENSORS_KXTJ9),y)
@@ -163,11 +163,11 @@ endif
 endif
 
 ifeq ($(CONFIG_SENSORS_BMP280),y)
-  CSRCS += bmp280.c
+  CSRCS += bmp280_uorb.c
 endif
 
 ifeq ($(CONFIG_SENSORS_BME680),y)
-  CSRCS += bme680.c
+  CSRCS += bme680_uorb.c
 endif
 
 ifeq ($(CONFIG_SENSORS_ISL29023),y)
@@ -207,7 +207,7 @@ ifeq ($(CONFIG_SENSORS_MLX90614),y)
 endif
 
 ifeq ($(CONFIG_SENSORS_MS5611),y)
-  CSRCS += ms5611.c
+  CSRCS += ms5611_uorb.c
 endif
 
 ifeq ($(CONFIG_SENSORS_MS58XX),y)
@@ -263,7 +263,7 @@ ifeq ($(CONFIG_SENSORS_T67XX),y)
 endif
 
 ifeq ($(CONFIG_SENSORS_LTR308),y)
-  CSRCS += ltr308.c
+  CSRCS += ltr308_uorb.c
 endif
 
 endif # CONFIG_I2C
@@ -309,7 +309,7 @@ ifeq ($(CONFIG_SENSORS_LSM330SPI),y)
 endif
 
 ifeq ($(CONFIG_SENSORS_L3GD20),y)
-  CSRCS += l3gd20.c
+  CSRCS += l3gd20_uorb.c
 endif
 
 ifeq ($(CONFIG_SENSORS_ADT7320),y)
@@ -327,7 +327,7 @@ endif # CONFIG_SPI
 ifeq ($(CONFIG_1WIRE),y)
 
 ifeq ($(CONFIG_SENSORS_DS18B20),y)
-  CSRCS += ds18b20.c
+  CSRCS += ds18b20_uorb.c
 endif
 
 endif # CONFIG_1WIRE
@@ -337,7 +337,7 @@ ifeq ($(CONFIG_SENSORS_MPU60X0),y)
 endif
 
 ifeq ($(CONFIG_SENSORS_MPU9250),y)
-  CSRCS += mpu9250.c
+  CSRCS += mpu9250_uorb.c
 endif
 
 # Quadrature encoder upper half
