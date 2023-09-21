@@ -31,5 +31,9 @@ if(CONFIG_MMCSD)
     list(APPEND SRCS mmcsd_spi.c mmcsd_debug.c)
   endif()
 
+  if(CONFIG_MMCSD_PROCFS)
+    list(APPEND SRCS mmcsd_procfs.c)
+  endif()
+
   target_sources(drivers PRIVATE ${SRCS})
 endif()

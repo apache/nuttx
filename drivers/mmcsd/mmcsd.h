@@ -26,6 +26,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/sdio.h>
 #include <stdint.h>
 #include <debug.h>
 
@@ -59,6 +60,43 @@
  * Public Types
  ****************************************************************************/
 
+/* This structure is contains the unique state of the MMC/SD block driver */
+
+struct mmcsd_state_s
+{
+  FAR struct sdio_dev_s *dev;      /* The SDIO device bound to this instance */
+  uint8_t  crefs;                  /* Open references on the driver */
+  mutex_t  lock;                   /* Assures mutually exclusive access to the slot */
+
+  /* Status flags */
+
+  uint8_t probed:1;                /* true: mmcsd_probe() discovered a card */
+  uint8_t widebus:1;               /* true: Wide 4-bit bus selected */
+  uint8_t mediachanged:1;          /* true: Media changed since last check */
+  uint8_t wrbusy:1;                /* true: Last transfer was a write, card may be busy */
+  uint8_t wrprotect:1;             /* true: Card is write protected (from CSD) */
+  uint8_t locked:1;                /* true: Media is locked (from R1) */
+  uint8_t dsrimp:1;                /* true: card supports CMD4/DSR setting (from CSD) */
+#ifdef CONFIG_SDIO_DMA
+  uint8_t dma:1;                   /* true: hardware supports DMA */
+#endif
+
+  uint8_t mode:2;                  /* (See MMCSDMODE_* definitions) */
+  uint8_t type:4;                  /* Card type (See MMCSD_CARDTYPE_* definitions) */
+  uint8_t buswidth:4;              /* Bus widths supported (SD only) */
+  sdio_capset_t caps;              /* SDIO driver capabilities/limitations */
+  uint32_t cid[4];                 /* CID register */
+  uint32_t csd[4];                 /* CSD register */
+  uint16_t selblocklen;            /* The currently selected block length */
+  uint16_t rca;                    /* Relative Card Address (RCS) register */
+
+  /* Memory card geometry (extracted from the CSD) */
+
+  uint8_t  blockshift;             /* Log2 of blocksize */
+  uint16_t blocksize;              /* Read block length (== block size) */
+  uint32_t nblocks;                /* Number of blocks */
+};
+
 /****************************************************************************
  * Public Functions Definitions
  ****************************************************************************/
@@ -70,6 +108,10 @@ extern "C"
 {
 #else
 #define EXTERN extern
+#endif
+
+#ifdef CONFIG_MMCSD_PROCFS
+void mmcsd_initialize_procfs(void);
 #endif
 
 #ifdef CONFIG_MMCSD_DUMPALL
