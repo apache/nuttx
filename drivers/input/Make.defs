@@ -108,6 +108,10 @@ ifeq ($(CONFIG_INPUT_SPQ10KBD),y)
   CSRCS += spq10kbd.c
 endif
 
+ifeq ($(CONFIG_INPUT_GOLDFISH_EVENTS),y)
+  CSRCS += goldfish_events.c
+endif
+
 # Include input device driver build support
 
 DEPPATH += --dep-path input
