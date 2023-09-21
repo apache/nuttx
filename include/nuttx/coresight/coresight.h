@@ -126,6 +126,13 @@ struct coresight_desc_s
 
   int inport_num;
 
+  /* Used in STM device: start address of extend stimulus port, this memory
+   * should be reserved for stm use.
+   * Size of this prealloced memory equals to (256 x number of ports).
+   */
+
+  uintptr_t stimulus_port_addr;
+
   /* Description of outports of current device. */
 
   int outport_num;
