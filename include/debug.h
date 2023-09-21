@@ -866,6 +866,24 @@
 #  define rstinfo     _none
 #endif
 
+#ifdef CONFIG_DEBUG_IPC_ERROR
+#  define ipcerr       _err
+#else
+#  define ipcerr      _none
+#endif
+
+#ifdef CONFIG_DEBUG_IPC_WARN
+#  define ipcwarn     _warn
+#else
+#  define ipcwarn     _none
+#endif
+
+#ifdef CONFIG_DEBUG_IPC_INFO
+#  define ipcinfo     _info
+#else
+#  define ipcinfo     _none
+#endif
+
 /* Buffer dumping macros do not depend on varargs */
 
 #ifdef CONFIG_DEBUG_ERROR

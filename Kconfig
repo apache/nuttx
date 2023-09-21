@@ -2078,6 +2078,37 @@ config DEBUG_RESET_INFO
 
 endif # DEBUG_RESET
 
+config DEBUG_IPC
+	bool "IPC (Interprocessor communication) Debug Features"
+	default n
+	---help---
+		Enable IPC debug features.
+
+if DEBUG_IPC
+
+config DEBUG_IPC_ERROR
+	bool "IPC Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable IPC error output to SYSLOG.
+
+config DEBUG_IPC_WARN
+	bool "IPC Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable IPC warning output to SYSLOG.
+
+config DEBUG_IPC_INFO
+	bool "IPC Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable IPC informational output to SYSLOG.
+
+endif # DEBUG_IPC
+
 endif # DEBUG_FEATURES
 
 config ARCH_HAVE_STACKCHECK

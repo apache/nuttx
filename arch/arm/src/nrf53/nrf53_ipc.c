@@ -79,7 +79,7 @@ static int nrf53_ipc_interrupt(int irq, void *context, void *args)
 
   regval = getreg32(NRF53_IPC_INTPEND);
 
-  _info("IPC interrupt 0x%" PRIx32 "\n", regval);
+  ipcinfo("IPC interrupt 0x%" PRIx32 "\n", regval);
 
   for (i = 0; i < NRF53_IPC_CHANS; i += 1)
     {
@@ -113,7 +113,7 @@ void nrf53_ipc_subscribe(int id, ipc_callback_t callback, void *args)
 
   DEBUGASSERT(id < NRF53_IPC_CHANS);
 
-  _info("IPC subscribe %d\n", id);
+  ipcinfo("IPC subscribe %d\n", id);
 
   /* Register callaback */
 
@@ -143,7 +143,7 @@ void nrf53_ipc_signal(int id)
 {
   DEBUGASSERT(id < NRF53_IPC_CHANS);
 
-  _info("IPC signal %d\n", id);
+  ipcinfo("IPC signal %d\n", id);
 
   putreg32(1, NRF53_IPC_TASKS_SEND(id));
 }
@@ -156,7 +156,7 @@ void nrf53_ipc_send_cfg(int id)
 {
   DEBUGASSERT(id < NRF53_IPC_CHANS);
 
-  _info("IPC send cfg %d\n", id);
+  ipcinfo("IPC send cfg %d\n", id);
 
   /* Enable send event on a single IPC channel */
 
