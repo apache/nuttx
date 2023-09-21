@@ -115,5 +115,15 @@ int mx8mp_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_MX8MP_SPI_DRIVER
+  /* Initialize SPI buses */
+
+  ret = mx8mp_spidev_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: spidev_initialize() failed: %d\n", ret);
+    }
+#endif
+
   return ret;
 }
