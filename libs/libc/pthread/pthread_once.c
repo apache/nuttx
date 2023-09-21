@@ -61,8 +61,6 @@
  *
  ****************************************************************************/
 
-static rmutex_t g_lock = NXRMUTEX_INITIALIZER;
-
 int pthread_once(FAR pthread_once_t *once_control,
                  CODE void (*init_routine)(void))
 {
@@ -73,25 +71,20 @@ int pthread_once(FAR pthread_once_t *once_control,
       return EINVAL;
     }
 
-  /* Prohibit pre-emption while we test and set the once_control. */
-
-  nxrmutex_lock(&g_lock);
-
-  if (!*once_control)
+  if (!once_control->done)
     {
-      *once_control = true;
+      pthread_mutex_lock(&once_control->mutex);
 
-      /* Call the init_routine with pre-emption enabled. */
+      if (!once_control->done)
+        {
+          /* Call the init_routine with pre-emption enabled. */
 
-      init_routine();
-      nxrmutex_unlock(&g_lock);
-      return OK;
+          init_routine();
+          once_control->done = true;
+        }
+
+      pthread_mutex_unlock(&once_control->mutex);
     }
 
-  /* The init_routine has already been called.
-   * Restore pre-emption and return.
-   */
-
-  nxrmutex_unlock(&g_lock);
   return OK;
 }
