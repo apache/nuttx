@@ -159,6 +159,14 @@
 
 #define ALTCOM_IPV6_V6ONLY         27 /* Refer to IPV6_V6ONLY on lwIP */
 
+/* Options for level ALTCOM_SHUT
+ * Referenced from sockets.h of lwIP-v2.02
+ */
+
+#define ALTCOM_SHUT_RD             0 /* Refer to SHUT_RD on lwIP */
+#define ALTCOM_SHUT_WR             1 /* Refer to SHUT_WR on lwIP */
+#define ALTCOM_SHUT_RDWR           2 /* Refer to SHUT_RDWR on lwIP */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
