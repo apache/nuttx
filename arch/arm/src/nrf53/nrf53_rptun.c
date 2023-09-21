@@ -365,7 +365,7 @@ static void nrf53_rptun_panic(struct rptun_dev_s *dev)
 
 static void nrf53_ipc_master_callback(int id, void *arg)
 {
-  _info("Rptun IPC master %d\n", id);
+  ipcinfo("Rptun IPC master %d\n", id);
 
   switch (id)
     {
@@ -404,7 +404,7 @@ static void nrf53_rptun_ipc_app(struct nrf53_rptun_dev_s *dev)
 
 static void nrf53_ipc_slave_callback(int id, void *arg)
 {
-  _info("Rptun IPC slave %d\n", id);
+  ipcinfo("Rptun IPC slave %d\n", id);
 
   switch (id)
     {
@@ -516,7 +516,7 @@ int nrf53_rptun_init(const char *shmemname, const char *cpuname)
   ret = rptun_initialize(&dev->rptun);
   if (ret < 0)
     {
-      _err("ERROR: rptun_initialize failed %d!\n", ret);
+      ipcerr("ERROR: rptun_initialize failed %d!\n", ret);
       goto errout;
     }
 
@@ -526,7 +526,7 @@ int nrf53_rptun_init(const char *shmemname, const char *cpuname)
                        CONFIG_RPTUN_STACKSIZE, nrf53_rptun_thread, NULL);
   if (ret < 0)
     {
-      _err("ERROR: kthread_create failed %d\n", ret);
+      ipcerr("ERROR: kthread_create failed %d\n", ret);
     }
 
 errout:
