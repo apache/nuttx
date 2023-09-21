@@ -51,6 +51,13 @@
 #define BUTTON_1_IRQ        MX8MP_IRQ_SOFT_GPIO1_7
 #define BUTTON_1_IOMUX      IOMUXC_GPIO1_IO07_GPIO1_IO07, 0, GPIO_PAD_CTRL
 
+/* SPIs */
+
+#define IOMUX_SPI1_CLK      IOMUXC_ECSPI1_SCLK_ECSPI1_SCLK, 0, SPI_PAD_CTRL
+#define IOMUX_SPI1_MOSI     IOMUXC_ECSPI1_MISO_ECSPI1_MISO, 0, SPI_PAD_CTRL
+#define IOMUX_SPI1_MISO     IOMUXC_ECSPI1_MOSI_ECSPI1_MOSI, 0, SPI_PAD_CTRL
+#define IOMUX_SPI1_CS       IOMUXC_ECSPI1_SS0_ECSPI1_SS0,   0, SPI_PAD_CTRL
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -84,6 +91,16 @@ int mx8mp_bringup(void);
  ****************************************************************************/
 
 int mx8mp_i2cdev_initialize(void);
+
+/****************************************************************************
+ * Name: mx8mp_spidev_initialize
+ *
+ * Description:
+ *   Called to configure all spi
+ *
+ ****************************************************************************/
+
+int mx8mp_spidev_initialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_MX8MP_MX8MP_VERDIN_SRC_VERDIN_MX8MP_H */
