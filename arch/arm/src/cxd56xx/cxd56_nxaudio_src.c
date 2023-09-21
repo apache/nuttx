@@ -446,8 +446,10 @@ int cxd56_src_init(struct cxd56_dev_s *dev,
 #ifdef DUMP_DATA
   nx_unlink(dump_name_pre);
   nx_unlink(dump_name_post);
-  file_open(&dump_file_pre, dump_name_pre, O_WRONLY | O_CREAT | O_APPEND);
-  file_open(&dump_file_post, dump_name_post, O_WRONLY | O_CREAT | O_APPEND);
+  file_open(&dump_file_pre, dump_name_pre, O_WRONLY | O_CREAT | O_APPEND,
+            0666);
+  file_open(&dump_file_post, dump_name_post, O_WRONLY | O_CREAT | O_APPEND,
+            0666);
 #endif
 
   /* Join any old worker threads to prevent memory leaks */
