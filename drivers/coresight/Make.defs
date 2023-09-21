@@ -32,6 +32,10 @@ ifeq ($(CONFIG_CORESIGHT_REPLICATOR),y)
 CSRCS += coresight_replicator.c
 endif
 
+ifeq ($(CONFIG_CORESIGHT_STM),y)
+CSRCS += coresight_stm.c
+endif
+
 ifeq ($(CONFIG_CORESIGHT_TPIU),y)
 CSRCS += coresight_tpiu.c
 endif

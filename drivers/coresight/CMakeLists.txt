@@ -29,6 +29,10 @@ if(CONFIG_CORESIGHT)
     list(APPEND SRCS coresight_replicator.c)
   endif()
 
+  if(CONFIG_CORESIGHT_STM)
+    list(APPEND SRCS coresight_stm.c)
+  endif()
+
   if(CONFIG_CORESIGHT_TPIU)
     list(APPEND SRCS coresight_tpiu.c)
   endif()
