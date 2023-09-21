@@ -646,13 +646,13 @@
 
 /* Capture/compare mode register 3 -- Output compare mode */
 
-#define ATIM_CCMR3_OC5FE        	(1 << 2)  /* Bit 2: Output Compare 5 Fast enable */
-#define ATIM_CCMR3_OC5PE        	(1 << 3)  /* Bit 3: Output Compare 5 Preload enable */
-#define ATIM_CCMR3_OC5M_SHIFT   	(4)       /* Bits 6-4: Output Compare 5 Mode */
-#define ATIM_CCMR3_OC5M_MASK    	(7 << ATIM_CCMR3_OC5M_SHIFT)
+#define ATIM_CCMR3_OC5FE            (1 << 2)  /* Bit 2: Output Compare 5 Fast enable */
+#define ATIM_CCMR3_OC5PE            (1 << 3)  /* Bit 3: Output Compare 5 Preload enable */
+#define ATIM_CCMR3_OC5M_SHIFT       (4)       /* Bits 6-4: Output Compare 5 Mode */
+#define ATIM_CCMR3_OC5M_MASK        (7 << ATIM_CCMR3_OC5M_SHIFT)
                                               /* (See common (unshifted) bit field definitions below) */
 
-#define ATIM_CCMR3_OC5CE        	(1 << 7)  /* Bit 7: Output Compare 5 Clear Enable */
+#define ATIM_CCMR3_OC5CE            (1 << 7)  /* Bit 7: Output Compare 5 Clear Enable */
 
 /* Capture/compare enable register */
 
