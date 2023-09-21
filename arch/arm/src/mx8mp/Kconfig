@@ -84,6 +84,45 @@ if MX8MP_I2C
 			in any real driver application.
 
 endif # MX8MP_I2C
+
+#####################################################################
+#  SPI Configuration (Master)
+#####################################################################
+
+config MX8MP_SPI
+	bool "SPI Master"
+	select SPI
+	---help---
+		Build in support for SPI master mode.
+
+if MX8MP_SPI
+
+	config MX8MP_SPI1
+		bool "SPI1"
+		default n
+		select SPI
+
+	config MX8MP_SPI2
+		bool "SPI2"
+		default n
+		select SPI
+
+	config MX8MP_SPI3
+		bool "SPI3"
+		default n
+		select SPI
+
+	config MX8MP_SPI_DRIVER
+		bool "SPI character driver"
+		default n
+		select SPI_DRIVER
+		---help---
+			Build in support for a character driver at /dev/spi[N] that may b
+			used to perform SPI bus transfers from applications.  The intent of
+			this driver is to support SPI testing.
+
+endif # MX8MP_SPI
+
 endmenu
 
 # These "hidden" settings determine whether a peripheral option is available

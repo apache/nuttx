@@ -22,12 +22,13 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/i2c/i2c_master.h>
 #include <nuttx/signal.h>
+#include <nuttx/i2c/i2c_master.h>
 
 #include "mx8mp_i2c.h"
 #include "mx8mp_ccm.h"
 #include "hardware/mx8mp_memorymap.h"
+#include "hardware/mx8mp_i2c.h"
 
 #include <debug.h>
 #include "arm_internal.h"
