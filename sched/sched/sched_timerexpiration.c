@@ -601,6 +601,16 @@ void nxsched_timer_expiration(void)
 {
   unsigned int elapsed;
   unsigned int nexttime;
+  irqstate_t flags;
+
+  /* If we are running on a single CPU architecture, then we know interrupts
+   * are disabled and there is no need to explicitly call
+   * enter_critical_section().  However, in the SMP case,
+   * enter_critical_section() is required prevent multiple cpu to enter
+   * oneshot_tick_start.
+   */
+
+  flags = enter_critical_section();
 
   /* Get the interval associated with last expiration */
 
@@ -617,6 +627,7 @@ void nxsched_timer_expiration(void)
 
   nexttime = nxsched_timer_process(elapsed, false);
   nxsched_timer_start(nexttime);
+  leave_critical_section(flags);
 }
 #endif
 

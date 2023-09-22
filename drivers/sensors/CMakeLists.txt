@@ -29,12 +29,20 @@ if(CONFIG_SENSORS)
     list(APPEND SRCS sensor_rpmsg.c)
   endif()
 
+  if(CONFIG_SENSORS_GPS)
+    list(APPEND SRCS gps_uorb.c)
+  endif()
+
   if(CONFIG_SENSORS_WTGAHRS2)
-    list(APPEND SRCS wtgahrs2.c)
+    list(APPEND SRCS wtgahrs2_uorb.c)
   endif()
 
   if(CONFIG_SENSORS_FAKESENSOR)
-    list(APPEND SRCS fakesensor.c)
+    list(APPEND SRCS fakesensor_uorb.c)
+  endif()
+
+  if(CONFIG_SENSORS_GOLDFISH_GPS)
+    list(APPEND SRCS goldfish_gps_uorb.c)
   endif()
 
   if(CONFIG_SENSORS_HCSR04)
@@ -47,6 +55,10 @@ if(CONFIG_SENSORS)
 
   if(CONFIG_SENSORS_DHTXX)
     list(APPEND SRCS dhtxx.c)
+  endif()
+
+  if(CONFIG_SENSORS_BMI270)
+    list(APPEND SRCS bmi270.c)
   endif()
 
   # These drivers depend on I2C support
@@ -74,7 +86,7 @@ if(CONFIG_SENSORS)
     endif()
 
     if(CONFIG_SENSORS_HYT271)
-      list(APPEND SRCS hyt271.c)
+      list(APPEND SRCS hyt271_uorb.c)
     endif()
 
     if(CONFIG_SENSORS_KXTJ9)
@@ -130,11 +142,11 @@ if(CONFIG_SENSORS)
     endif()
 
     if(CONFIG_SENSORS_BMP280)
-      list(APPEND SRCS bmp280.c)
+      list(APPEND SRCS bmp280_uorb.c)
     endif()
 
     if(CONFIG_SENSORS_BME680)
-      list(APPEND SRCS bme680.c)
+      list(APPEND SRCS bme680_uorb.c)
     endif()
 
     if(CONFIG_SENSORS_ISL29023)
@@ -174,7 +186,7 @@ if(CONFIG_SENSORS)
     endif()
 
     if(CONFIG_SENSORS_MS5611)
-      list(APPEND SRCS ms5611.c)
+      list(APPEND SRCS ms5611_uorb.c)
     endif()
 
     if(CONFIG_SENSORS_MS58XX)
@@ -229,6 +241,10 @@ if(CONFIG_SENSORS)
       list(APPEND SRCS t67xx.c)
     endif()
 
+    if(CONFIG_SENSORS_LTR308)
+      list(APPEND SRCS ltr308_uorb.c)
+    endif()
+
   endif() # CONFIG_I2C
 
   # These drivers depend on SPI support
@@ -272,7 +288,7 @@ if(CONFIG_SENSORS)
     endif()
 
     if(CONFIG_SENSORS_L3GD20)
-      list(APPEND SRCS l3gd20.c)
+      list(APPEND SRCS l3gd20_uorb.c)
     endif()
 
     if(CONFIG_SENSORS_ADT7320)
@@ -290,13 +306,17 @@ if(CONFIG_SENSORS)
   if(CONFIG_1WIRE)
 
     if(CONFIG_SENSORS_DS18B20)
-      list(APPEND SRCS ds18b20.c)
+      list(APPEND SRCS ds18b20_uorb.c)
     endif()
 
   endif() # CONFIG_1WIRE
 
   if(CONFIG_SENSORS_MPU60X0)
     list(APPEND SRCS mpu60x0.c)
+  endif()
+
+  if(CONFIG_SENSORS_MPU9250)
+    list(APPEND SRCS mpu9250_uorb.c)
   endif()
 
   # Quadrature encoder upper half

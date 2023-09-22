@@ -1793,7 +1793,7 @@ struct spi_dev_s *xmc4_spibus_initialize(int channel)
    * chip select structures.
    */
 
-  spics = (struct xmc4_spics_s *)kmm_zalloc(sizeof(struct xmc4_spics_s));
+  spics = kmm_zalloc(sizeof(struct xmc4_spics_s));
   if (!spics)
     {
       spierr("ERROR: Failed to allocate a chip select structure\n");

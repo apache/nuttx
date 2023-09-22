@@ -50,6 +50,11 @@ config VIDEO_FB
 	bool "Framebuffer character driver"
 	default n
 
+config VIDEO_FB_NPOLLWAITERS
+	int "Video fb poll count of each layer"
+	depends on VIDEO_FB
+	default 2
+
 config VIDEO_STREAM
 	bool "Video Stream Support"
 	default n
@@ -359,14 +364,6 @@ if GOLDFISH_CAMERA
 config GOLDFISH_CAMERA_PIPE_PATH
 	string "Goldfish camera pipe path"
 	default "/dev/goldfish_pipe"
-
-config GOLDFISH_CAMERA_PRIORITY
-	int "Goldfish camera thread priority"
-	default 224
-
-config GOLDFISH_CAMERA_STACKSIZE
-	int "Goldfish camera stack size"
-	default DEFAULT_TASK_STACKSIZE
 
 endif
 

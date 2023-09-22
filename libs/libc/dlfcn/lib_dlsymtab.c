@@ -27,7 +27,6 @@
 #include <dlfcn.h>
 #include <errno.h>
 
-#include <nuttx/module.h>
 #include <nuttx/lib/modlib.h>
 
 /****************************************************************************

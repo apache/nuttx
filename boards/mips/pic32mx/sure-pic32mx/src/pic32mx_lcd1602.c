@@ -230,7 +230,7 @@ static void lcd_dumpstream(const char *msg,
 {
   lcdinfo("%s:\n", msg);
   lcdinfo("  nget: %d nbytes: %d\n",
-          stream->public.nget, stream->buflen);
+          stream->common.nget, stream->buflen);
   lib_dumpbuffer("STREAM", stream->buffer, stream->buflen);
 }
 #endif
@@ -800,7 +800,7 @@ static ssize_t lcd_write(struct file *filep,  const char *buffer,
   /* Now decode and process every byte in the input buffer */
 
   memset(&state, 0, sizeof(struct slcdstate_s));
-  while ((result = slcd_decode(&instream.public,
+  while ((result = slcd_decode(&instream.common,
                                &state, &ch, &count)) != SLCDRET_EOF)
     {
       lcdinfo("slcd_decode returned result=%d char=%d count=%d\n",

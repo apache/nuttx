@@ -273,7 +273,7 @@ pl031_setrelative(FAR struct rtc_lowerhalf_s *lower,
 FAR struct rtc_lowerhalf_s *pl031_initialize(uintptr_t base, int irq)
 {
   FAR struct pl031_lowerhalf_s *rtc_lowerhalf =
-     (FAR struct pl031_lowerhalf_s *)kmm_zalloc(sizeof(*rtc_lowerhalf));
+     kmm_zalloc(sizeof(*rtc_lowerhalf));
 
   rtc_lowerhalf->ops = &g_rtc_ops;
   rtc_lowerhalf->base = base;

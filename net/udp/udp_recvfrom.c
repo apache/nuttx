@@ -309,8 +309,8 @@ static inline void udp_sender(FAR struct net_driver_s *dev,
 
           FAR struct sockaddr_in6 *infrom6 =
             (FAR struct sockaddr_in6 *)srcaddr;
-          FAR struct udp_hdr_s *udp   = UDPIPv6BUF;
-          FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
+          FAR struct udp_hdr_s *udp   = UDPIPv4BUF;
+          FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
           in_addr_t ipv4addr;
 
           /* Encode the IPv4 address as an IPv4-mapped IPv6 address */
@@ -318,7 +318,7 @@ static inline void udp_sender(FAR struct net_driver_s *dev,
           infrom6->sin6_family = AF_INET6;
           infrom6->sin6_port = udp->srcport;
           fromlen  = sizeof(struct sockaddr_in6);
-          ipv4addr = net_ip4addr_conv32(ipv6->srcipaddr);
+          ipv4addr = net_ip4addr_conv32(ipv4->srcipaddr);
           ip6_map_ipv4addr(ipv4addr, infrom6->sin6_addr.s6_addr16);
         }
       else

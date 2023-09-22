@@ -65,8 +65,7 @@ int up_addrenv_kstackalloc(struct tcb_s *tcb)
 
   /* Allocate the kernel stack */
 
-  tcb->xcp.kstack = (uintptr_t *)kmm_memalign(STACK_ALIGNMENT,
-                                              ARCH_KERNEL_STACKSIZE);
+  tcb->xcp.kstack = kmm_memalign(STACK_ALIGNMENT, ARCH_KERNEL_STACKSIZE);
   if (!tcb->xcp.kstack)
     {
       berr("ERROR: Failed to allocate the kernel stack\n");

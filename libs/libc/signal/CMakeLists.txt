@@ -29,6 +29,7 @@ target_sources(
           sig_orset.c
           sig_xorset.c
           sig_isemptyset.c
+          sig_interrupt.c
           sig_hold.c
           sig_ignore.c
           sig_ismember.c

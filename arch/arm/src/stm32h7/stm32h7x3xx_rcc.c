@@ -76,6 +76,8 @@
 #    else
 #      define BOARD_FLASH_PROGDELAY  2
 #    endif
+#  else
+#    define BOARD_FLASH_PROGDELAY    2
 #  endif
 #endif
 
@@ -414,6 +416,12 @@ static inline void rcc_enableahb4(void)
   /* Backup SRAM clock enable */
 
   regval |= RCC_AHB4ENR_BKPSRAMEN;
+#endif
+
+#ifdef CONFIG_STM32H7_HSEM
+  /* HSEM clock enable */
+
+  regval |= RCC_AHB4ENR_HSEMEN;
 #endif
 
   putreg32(regval, STM32_RCC_AHB4ENR);   /* Enable peripherals */

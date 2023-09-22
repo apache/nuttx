@@ -4175,7 +4175,7 @@ static int lpc31_ioalloc(struct usbhost_driver_s *drvr,
    */
 
   buflen  = (buflen + DCACHE_LINEMASK) & ~DCACHE_LINEMASK;
-  *buffer = (uint8_t *)kumm_memalign(ARM_DCACHE_LINESIZE, buflen);
+  *buffer = kumm_memalign(ARM_DCACHE_LINESIZE, buflen);
   return *buffer ? OK : -ENOMEM;
 }
 

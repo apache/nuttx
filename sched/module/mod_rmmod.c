@@ -116,16 +116,27 @@ int rmmod(FAR void *handle)
 
   if (modp->textalloc != NULL || modp->dataalloc != NULL)
     {
-      /* Free the module memory
-       * and nullify so that the memory cannot be freed again
+      /* Free the module memory and nullify so that the memory cannot
+       * be freed again
+       *
+       * NOTE: For dynamic shared objects there is only a single
+       * allocation: the text/data were allocated in one operation
        */
 
+      if (!modp->dynamic)
+        {
 #if defined(CONFIG_ARCH_USE_TEXT_HEAP)
-      up_textheap_free((FAR void *)modp->textalloc);
+          up_textheap_free((FAR void *)modp->textalloc);
 #else
-      kmm_free((FAR void *)modp->textalloc);
+          kmm_free((FAR void *)modp->textalloc);
 #endif
-      kmm_free((FAR void *)modp->dataalloc);
+          kmm_free((FAR void *)modp->dataalloc);
+        }
+      else
+        {
+          kmm_free((FAR void *)modp->textalloc);
+        }
+
       modp->textalloc = NULL;
       modp->dataalloc = NULL;
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)

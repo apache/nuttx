@@ -399,7 +399,7 @@ static int bt_bridge_open(FAR struct bt_driver_s *drv)
 
   if (atomic_fetch_add(&bridge->refs, 1) == 0)
     {
-      int ret  = driver->open(driver);
+      int ret = driver->open(driver);
       if (ret < 0)
         {
           atomic_fetch_sub(&bridge->refs, 1);
@@ -416,7 +416,7 @@ static int bt_bridge_send(FAR struct bt_driver_s *drv,
                           FAR void *data, size_t len)
 {
   FAR struct bt_bridge_device_s *device =
-          (FAR struct bt_bridge_device_s *)drv;
+    (FAR struct bt_bridge_device_s *)drv;
   FAR struct bt_bridge_s *bridge = device->bridge;
   FAR struct bt_driver_s *driver = bridge->driver;
   irqstate_t flags;
@@ -490,7 +490,7 @@ static int bt_bridge_ioctl(FAR struct bt_driver_s *drv, int cmd,
                            unsigned long arg)
 {
   FAR struct bt_bridge_device_s *device =
-          (FAR struct bt_bridge_device_s *)drv;
+    (FAR struct bt_bridge_device_s *)drv;
   FAR struct bt_bridge_s *bridge = device->bridge;
   int ret;
 
@@ -589,7 +589,7 @@ int bt_bridge_register(FAR struct bt_driver_s *hcidrv,
       return -EINVAL;
     }
 
-  bridge = (FAR struct bt_bridge_s *)kmm_zalloc(sizeof(struct bt_bridge_s));
+  bridge = kmm_zalloc(sizeof(struct bt_bridge_s));
   if (!bridge)
     {
       return -ENOMEM;

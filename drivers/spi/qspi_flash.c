@@ -573,7 +573,7 @@ static int qspi_flash_command(FAR struct qspi_dev_s *dev,
  *
  ****************************************************************************/
 
-FAR struct qspi_dev_s *qspi_flash_initialize()
+FAR struct qspi_dev_s *qspi_flash_initialize(void)
 {
   FAR struct qspi_flashdev_s *priv = NULL;
 

@@ -26,19 +26,40 @@ if(CONFIG_CRYPTO)
 
   if(CONFIG_CRYPTO_CRYPTODEV)
     list(APPEND SRCS cryptodev.c)
+    if(CONFIG_CRYPTO_CRYPTODEV_SOFTWARE)
+      list(APPEND SRCS cryptosoft.c)
+      list(APPEND SRCS xform.c)
+    endif()
   endif()
 
-  # Software AES library
+  # Software crypto library
 
   if(CONFIG_CRYPTO_SW_AES)
     list(APPEND SRCS aes.c)
   endif()
-
-  # BLAKE2s hash algorithm
-
-  if(CONFIG_CRYPTO_BLAKE2S)
-    list(APPEND SRCS blake2s.c)
+  list(APPEND SRCS blake2s.c)
+  list(APPEND SRCS blf.c)
+  list(APPEND SRCS cast.c)
+  list(APPEND SRCS chachapoly.c)
+  list(APPEND SRCS ecb_enc.c)
+  list(APPEND SRCS ecb3_enc.c)
+  list(APPEND SRCS set_key.c)
+  list(APPEND SRCS md5.c)
+  list(APPEND SRCS poly1305.c)
+  list(APPEND SRCS rijndael.c)
+  list(APPEND SRCS rmd160.c)
+  list(APPEND SRCS sha1.c)
+  list(APPEND SRCS sha2.c)
+  list(APPEND SRCS gmac.c)
+  list(APPEND SRCS cmac.c)
+  list(APPEND SRCS hmac.c)
+  if(CONFIG_CRYPTO_RANDOM_POOL)
+    list(APPEND SRCS idgen.c)
   endif()
+  list(APPEND SRCS key_wrap.c)
+  list(APPEND SRCS siphash.c)
+  list(APPEND SRCS hmac_buff.c)
+  list(APPEND SRCS curve25519.c)
 
   # Entropy pool random number generator
 

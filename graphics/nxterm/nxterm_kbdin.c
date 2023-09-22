@@ -83,7 +83,7 @@ ssize_t nxterm_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   /* Recover our private state structure */
 
-  DEBUGASSERT(filep && filep->f_priv);
+  DEBUGASSERT(filep->f_priv);
   priv = (FAR struct nxterm_state_s *)filep->f_priv;
 
   /* Get exclusive access to the driver structure */
@@ -231,7 +231,7 @@ int nxterm_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 
   /* Some sanity checking */
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   priv = inode->i_private;
 
   /* Get exclusive access to the driver structure */

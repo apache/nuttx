@@ -118,7 +118,7 @@ static struct sam_lowerhalf_s g_tc0lower =
 static struct sam_lowerhalf_s g_tc1lower =
 {
   .ops      = &g_qecallbacks,
-  .timid    = 1,
+  .tcid     = 1,
   .inuse    = false,
 };
 #endif
@@ -324,8 +324,8 @@ int sam_qeinitialize(const char *devpath, int tc)
   /* Allocate the timer/counter and select its mode of operation */
 
   mode = TC_CMR_TCCLKS_XC0 |     /* Use XC0 as an external TCCLKS value */
-         TC_CMR_ETRGEDG_RISING | /* Select ‘Rising edge’ as the External Trigger Edge */
-         TC_CMR_ABETRG |         /* Select ‘TIOAx’ as the External Trigger */
+         TC_CMR_ETRGEDG_RISING | /* Select 'Rising edge' as the External Trigger Edge */
+         TC_CMR_ABETRG |         /* Select 'TIOAx' as the External Trigger */
          TC_CMR_CAPTURE;         /* Select 'Capture mode' */
 
   priv->tch = sam_tc_allocate(tc * SAM_TC_NCHANNELS, mode);

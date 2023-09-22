@@ -85,6 +85,7 @@ static struct clk_s *__clk_lookup(FAR const char *name,
 static int __clk_register(FAR struct clk_s *clk);
 
 static void clk_disable_unused_subtree(FAR struct clk_s *clk);
+static FAR struct clk_s *clk_lookup(FAR const char *name);
 
 /* File system methods */
 
@@ -107,7 +108,7 @@ static int clk_procfs_stat(const char *relpath, struct stat *buf);
 
 #if !defined(CONFIG_FS_PROCFS_EXCLUDE_CLK) && defined(CONFIG_FS_PROCFS)
 
-const struct procfs_operations clk_procfsoperations =
+const struct procfs_operations g_clk_operations =
 {
   clk_procfs_open,       /* open */
   clk_procfs_close,      /* close */
@@ -491,22 +492,16 @@ static void clk_change_rate(FAR struct clk_s *clk, uint32_t best_parent_rate)
   FAR struct clk_s *old_parent;
   bool skip_set_rate = false;
 
-  list_for_every_entry(&clk->children, child, struct clk_s, node)
-    {
-      if (child->new_parent && child->new_parent != clk)
-        {
-          continue;
-        }
-      if (child->new_rate > __clk_get_rate(child))
-        {
-          clk_change_rate(child, clk->new_rate);
-        }
-    }
-
   old_parent = clk->parent;
 
   if (clk->new_parent && clk->new_parent != clk->parent)
     {
+      if (clk->flags & CLK_OPS_PARENT_ENABLE)
+        {
+          clk_enable(old_parent);
+          clk_enable(clk->new_parent);
+        }
+
       if (clk->enable_count)
         {
           clk_enable(clk->new_parent);
@@ -529,6 +524,12 @@ static void clk_change_rate(FAR struct clk_s *clk, uint32_t best_parent_rate)
       if (clk->enable_count)
         {
           clk_disable(clk);
+          clk_disable(old_parent);
+        }
+
+      if (clk->flags & CLK_OPS_PARENT_ENABLE)
+        {
+          clk_disable(clk->new_parent);
           clk_disable(old_parent);
         }
     }
@@ -729,6 +730,11 @@ static int __clk_register(FAR struct clk_s *clk)
       return -EINVAL;
     }
 
+  if (clk_lookup(clk->name))
+    {
+      return -EEXIST;
+    }
+
   if (clk->ops->set_rate &&
     !((clk->ops->round_rate || clk->ops->determine_rate) &&
       clk->ops->recalc_rate))
@@ -801,9 +807,14 @@ static void clk_disable_unused_subtree(FAR struct clk_s *clk)
       clk_disable_unused_subtree(child);
     }
 
+  if (clk->flags & CLK_OPS_PARENT_ENABLE)
+    {
+      clk_enable(clk->parent);
+    }
+
   if (clk->enable_count)
     {
-      return;
+      goto out;
     }
 
   if (clk_is_enabled(clk))
@@ -817,6 +828,42 @@ static void clk_disable_unused_subtree(FAR struct clk_s *clk)
           clk->ops->disable(clk);
         }
     }
+
+out:
+  if (clk->flags & CLK_OPS_PARENT_ENABLE)
+    {
+       clk_disable(clk->parent);
+    }
+}
+
+static FAR struct clk_s *clk_lookup(FAR const char *name)
+{
+  FAR struct clk_s *root_clk = NULL;
+  FAR struct clk_s *ret = NULL;
+  irqstate_t flags;
+
+  flags = clk_list_lock();
+  list_for_every_entry(&g_clk_root_list, root_clk, struct clk_s, node)
+    {
+      ret = __clk_lookup(name, root_clk);
+      if (ret)
+        {
+          goto out;
+        }
+    }
+
+  list_for_every_entry(&g_clk_orphan_list, root_clk, struct clk_s, node)
+    {
+      ret = __clk_lookup(name, root_clk);
+      if (ret)
+        {
+          goto out;
+        }
+    }
+
+out:
+  clk_list_unlock(flags);
+  return ret;
 }
 
 /****************************************************************************
@@ -993,46 +1040,23 @@ int clk_is_enabled(FAR struct clk_s *clk)
 
 FAR struct clk_s *clk_get(FAR const char *name)
 {
-  FAR struct clk_s *root_clk = NULL;
-  FAR struct clk_s *ret = NULL;
-  irqstate_t flags;
+  FAR struct clk_s *clk;
 
   if (!name)
     {
       return NULL;
     }
 
-  flags = clk_list_lock();
-
-  list_for_every_entry(&g_clk_root_list, root_clk, struct clk_s, node)
-    {
-      ret = __clk_lookup(name, root_clk);
-      if (ret)
-        {
-          goto out;
-        }
-    }
-
-  list_for_every_entry(&g_clk_orphan_list, root_clk, struct clk_s, node)
-    {
-      ret = __clk_lookup(name, root_clk);
-      if (ret)
-        {
-          goto out;
-        }
-    }
-
-out:
-  clk_list_unlock(flags);
+  clk = clk_lookup(name);
 
 #ifdef CONFIG_CLK_RPMSG
-  if (ret == NULL)
+  if (clk == NULL)
     {
-      ret = clk_register_rpmsg(name, CLK_GET_RATE_NOCACHE);
+      clk = clk_register_rpmsg(name, CLK_GET_RATE_NOCACHE);
     }
 #endif
 
-  return ret;
+  return clk;
 }
 
 int clk_set_parent(FAR struct clk_s *clk, FAR struct clk_s *parent)
@@ -1074,6 +1098,12 @@ int clk_set_parent(FAR struct clk_s *clk, FAR struct clk_s *parent)
 
   old_parent = clk->parent;
 
+  if (clk->flags & CLK_OPS_PARENT_ENABLE)
+    {
+      clk_enable(old_parent);
+      clk_enable(parent);
+    }
+
   if (clk->enable_count)
     {
       clk_enable(parent);
@@ -1097,12 +1127,24 @@ int clk_set_parent(FAR struct clk_s *clk, FAR struct clk_s *parent)
           clk_disable(parent);
         }
 
+      if (clk->flags & CLK_OPS_PARENT_ENABLE)
+        {
+          clk_disable(parent);
+          clk_disable(old_parent);
+        }
+
       goto out;
     }
 
   if (clk->enable_count)
     {
       clk_disable(clk);
+      clk_disable(old_parent);
+    }
+
+  if (clk->flags & CLK_OPS_PARENT_ENABLE)
+    {
+      clk_disable(parent);
       clk_disable(old_parent);
     }
 
@@ -1193,9 +1235,12 @@ FAR struct clk_s *clk_register(FAR const char *name,
   clk->num_parents = num_parents;
   clk->flags = flags;
 
-  clk->private_data = (char *)clk + off;
-  memcpy(clk->private_data, private_data, private_size);
-  off += private_size;
+  if (private_data)
+    {
+      clk->private_data = (char *)clk + off;
+      memcpy(clk->private_data, private_data, private_size);
+      off += private_size;
+    }
 
   for (i = 0; i < num_parents; i++)
     {

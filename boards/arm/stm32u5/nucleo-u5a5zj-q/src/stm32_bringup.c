@@ -43,8 +43,8 @@
 #if defined(CONFIG_I2C)
 
 #include "stm32_i2c.h"
-FAR struct i2c_master_s *i2c1_m;
-FAR struct i2c_master_s *i2c2_m;
+struct i2c_master_s *i2c1_m;
+struct i2c_master_s *i2c2_m;
 #  ifdef CONFIG_RTC_DSXXXX
 #    include <nuttx/timers/rtc.h>
 #    include <nuttx/timers/ds3231.h>

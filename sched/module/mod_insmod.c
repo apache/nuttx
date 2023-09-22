@@ -155,7 +155,9 @@ FAR void *insmod(FAR const char *filename, FAR const char *modname)
   struct mod_loadinfo_s loadinfo;
   FAR struct module_s *modp;
   mod_initializer_t initializer;
+  FAR void (**array)(void);
   int ret;
+  int i;
 
   DEBUGASSERT(filename != NULL && modname != NULL);
   binfo("Loading file: %s\n", filename);
@@ -184,10 +186,11 @@ FAR void *insmod(FAR const char *filename, FAR const char *modname)
 
   /* Allocate a module registry entry to hold the module data */
 
-  modp = (FAR struct module_s *)kmm_zalloc(sizeof(struct module_s));
+  modp = kmm_zalloc(sizeof(struct module_s));
   if (modp == NULL)
     {
       berr("Failed to allocate struct module_s\n");
+      ret = -ENOMEM;
       goto errout_with_loadinfo;
     }
 
@@ -218,11 +221,11 @@ FAR void *insmod(FAR const char *filename, FAR const char *modname)
 
   /* Save the load information */
 
-  modp->textalloc   = (FAR void *)loadinfo.textalloc;
-  modp->dataalloc   = (FAR void *)loadinfo.datastart;
+  modp->textalloc = (FAR void *)loadinfo.textalloc;
+  modp->dataalloc = (FAR void *)loadinfo.datastart;
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
-  modp->textsize    = loadinfo.textsize;
-  modp->datasize    = loadinfo.datasize;
+  modp->textsize  = loadinfo.textsize;
+  modp->datasize  = loadinfo.datasize;
 #endif
 
   /* Get the module initializer entry point */
@@ -236,11 +239,37 @@ FAR void *insmod(FAR const char *filename, FAR const char *modname)
 
   /* Call the module initializer */
 
-  ret = initializer(&modp->modinfo);
-  if (ret < 0)
+  switch (loadinfo.ehdr.e_type)
     {
-      binfo("Failed to initialize the module: %d\n", ret);
-      goto errout_with_load;
+      case ET_REL :
+          ret = initializer(&modp->modinfo);
+          if (ret < 0)
+            {
+              binfo("Failed to initialize the module: %d\n", ret);
+              goto errout_with_load;
+            }
+          break;
+      case ET_DYN :
+
+          /* Process any preinit_array entries */
+
+          array = (FAR void (**)(void))loadinfo.preiarr;
+          for (i = 0; i < loadinfo.nprei; i++)
+            {
+              array[i]();
+            }
+
+          /* Process any init_array entries */
+
+          array = (FAR void (**)(void))loadinfo.initarr;
+          for (i = 0; i < loadinfo.ninit; i++)
+            {
+              array[i]();
+            }
+
+          modp->finiarr = loadinfo.finiarr;
+          modp->nfini = loadinfo.nfini;
+          break;
     }
 
   /* Add the new module entry to the registry */
@@ -249,7 +278,7 @@ FAR void *insmod(FAR const char *filename, FAR const char *modname)
 
   modlib_uninitialize(&loadinfo);
   modlib_registry_unlock();
-  return (FAR void *)modp;
+  return modp;
 
 errout_with_load:
   modlib_unload(&loadinfo);

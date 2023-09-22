@@ -394,7 +394,7 @@ gpio_lower_half_internal(FAR struct ioexpander_dev_s *ioe,
 
   /* Allocate an new instance of the GPIO lower half driver */
 
-  priv = (FAR struct gplh_dev_s *)kmm_zalloc(sizeof(struct gplh_dev_s));
+  priv = kmm_zalloc(sizeof(struct gplh_dev_s));
   if (priv == NULL)
     {
       gpioerr("ERROR: Failed to allocate driver state %d\n", -ENOMEM);

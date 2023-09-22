@@ -32,11 +32,14 @@ ENTRY(_stext)
 EXTERN(__start)
 SECTIONS
 {
+    PROVIDE(__l2lim_start = ORIGIN(l2lim));
+    PROVIDE(__l2lim_end   = ORIGIN(l2lim) + LENGTH(l2lim));
+
     .text.sbi : {
-      sbi*
-      riscv_atomic*
-      riscv_locks*
-      riscv_asm*
+      */sbi*
+      */riscv_atomic*
+      */riscv_locks*
+      */riscv_asm*
     } > ddr
 
     .l2_scratchpad : ALIGN(0x10)
@@ -71,7 +74,8 @@ SECTIONS
 
     .init_section : ALIGN(4) {
         _sinit = ABSOLUTE(.);
-        KEEP(*(.init_array .init_array.*))
+        KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
+        KEEP(*(.init_array .ctors))
         _einit = ABSOLUTE(.);
     } > envm
 

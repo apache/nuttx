@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_netinitialize
+ * Name: x86_64_netinitialize
  *
  * Description:
  *   All x86 architectures must provide the following function to setup the
@@ -50,8 +50,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_NET
-void up_netinitialize(void)
+void x86_64_netinitialize(void)
 {
 }
 #endif
-

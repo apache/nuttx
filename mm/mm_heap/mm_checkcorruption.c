@@ -40,11 +40,11 @@
 static void checkcorruption_handler(FAR struct mm_allocnode_s *node,
                                     FAR void *arg)
 {
-  size_t nodesize = SIZEOF_MM_NODE(node);
+  size_t nodesize = MM_SIZEOF_NODE(node);
 
-  if ((node->size & MM_ALLOC_BIT) != 0)
+  if (MM_NODE_IS_ALLOC(node))
     {
-      assert(nodesize >= SIZEOF_MM_ALLOCNODE);
+      assert(nodesize >= MM_SIZEOF_ALLOCNODE);
     }
   else
     {
@@ -52,12 +52,12 @@ static void checkcorruption_handler(FAR struct mm_allocnode_s *node,
 
       assert(nodesize >= MM_MIN_CHUNK);
       assert(fnode->blink->flink == fnode);
-      assert(SIZEOF_MM_NODE(fnode->blink) <= nodesize);
+      assert(MM_SIZEOF_NODE(fnode->blink) <= nodesize);
       assert(fnode->flink == NULL ||
              fnode->flink->blink == fnode);
       assert(fnode->flink == NULL ||
-             SIZEOF_MM_NODE(fnode->flink) == 0 ||
-             SIZEOF_MM_NODE(fnode->flink) >= nodesize);
+             MM_SIZEOF_NODE(fnode->flink) == 0 ||
+             MM_SIZEOF_NODE(fnode->flink) >= nodesize);
     }
 }
 

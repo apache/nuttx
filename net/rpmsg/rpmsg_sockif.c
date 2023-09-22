@@ -228,6 +228,7 @@ static inline void rpmsg_socket_poll_notify(
 static FAR struct rpmsg_socket_conn_s *rpmsg_socket_alloc(void)
 {
   FAR struct rpmsg_socket_conn_s *conn;
+  int ret;
 
   conn = kmm_zalloc(sizeof(struct rpmsg_socket_conn_s));
   if (!conn)
@@ -235,7 +236,12 @@ static FAR struct rpmsg_socket_conn_s *rpmsg_socket_alloc(void)
       return NULL;
     }
 
-  circbuf_init(&conn->recvbuf, NULL, 0);
+  ret = circbuf_init(&conn->recvbuf, NULL, 0);
+  if (ret < 0)
+    {
+      kmm_free(conn);
+      return NULL;
+    }
 
   nxmutex_init(&conn->polllock);
   nxmutex_init(&conn->sendlock);
@@ -402,7 +408,7 @@ static inline void rpmsg_socket_destroy_ept(
 
   if (conn->ept.rdev)
     {
-      if (conn->backlog)
+      if (conn->backlog > 0)
         {
           /* Listen socket */
 
@@ -607,7 +613,8 @@ static int rpmsg_socket_setaddr(FAR struct rpmsg_socket_conn_s *conn,
 
   if (suffix)
     {
-      snprintf(conn->nameid, sizeof(conn->nameid), ":%llx", g_rpmsg_id++);
+      snprintf(conn->nameid, sizeof(conn->nameid), ":%" PRIx64,
+               g_rpmsg_id++);
     }
   else
     {
@@ -716,8 +723,10 @@ static int rpmsg_socket_connect_internal(FAR struct socket *psock)
       return ret;
     }
 
+  nxmutex_lock(&conn->recvlock);
   if (conn->sendsize == 0)
     {
+      nxmutex_unlock(&conn->recvlock);
       if (_SS_ISNONBLOCK(conn->sconn.s_flags))
         {
           return -EINPROGRESS;
@@ -734,6 +743,10 @@ static int rpmsg_socket_connect_internal(FAR struct socket *psock)
                                     NULL,
                                     NULL);
         }
+    }
+  else
+    {
+      nxmutex_unlock(&conn->recvlock);
     }
 
   return ret;
@@ -918,14 +931,16 @@ static int rpmsg_socket_poll(FAR struct socket *psock,
 
           nxmutex_unlock(&conn->recvlock);
         }
-      else if (!_SS_ISCONNECTED(conn->sconn.s_flags) &&
-               _SS_ISNONBLOCK(conn->sconn.s_flags))
+      else /* !_SS_ISCONNECTED(conn->sconn.s_flags) */
         {
-          ret = OK;
-        }
-      else
-        {
-          eventset |= POLLERR;
+          if (!conn->ept.rdev || conn->unbind)
+            {
+              eventset |= POLLHUP;
+            }
+          else
+            {
+              ret = OK;
+            }
         }
 
       rpmsg_socket_poll_notify(conn, eventset);

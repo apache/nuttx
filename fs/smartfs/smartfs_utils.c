@@ -242,8 +242,8 @@ int smartfs_mount(struct smartfs_mountpt_s *fs, bool writeable)
 
   if (nextfs == NULL)
     {
-      fs->fs_rwbuffer = (char *) kmm_malloc(fs->fs_llformat.availbytes);
-      fs->fs_workbuffer = (char *) kmm_malloc(WORKBUFFER_SIZE);
+      fs->fs_rwbuffer = kmm_malloc(fs->fs_llformat.availbytes);
+      fs->fs_workbuffer = kmm_malloc(WORKBUFFER_SIZE);
     }
 
   /* Now add ourselves to the linked list of SMART mounts */
@@ -266,8 +266,8 @@ int smartfs_mount(struct smartfs_mountpt_s *fs, bool writeable)
   g_mounthead = fs;
 #endif
 
-  fs->fs_rwbuffer = (char *) kmm_malloc(fs->fs_llformat.availbytes);
-  fs->fs_workbuffer = (char *) kmm_malloc(WORKBUFFER_SIZE);
+  fs->fs_rwbuffer = kmm_malloc(fs->fs_llformat.availbytes);
+  fs->fs_workbuffer = kmm_malloc(WORKBUFFER_SIZE);
   fs->fs_rootsector = SMARTFS_ROOT_DIR_SECTOR;
 
 #endif /* CONFIG_SMARTFS_MULTI_ROOT_DIRS */
@@ -1077,7 +1077,7 @@ int smartfs_createentry(FAR struct smartfs_mountpt_s *fs,
   direntry->datlen = 0;
   if (direntry->name == NULL)
     {
-      direntry->name = (FAR char *)kmm_malloc(fs->fs_llformat.namesize + 1);
+      direntry->name = kmm_malloc(fs->fs_llformat.namesize + 1);
     }
 
   memset(direntry->name, 0, fs->fs_llformat.namesize + 1);
@@ -1913,7 +1913,7 @@ int smartfs_extendfile(FAR struct smartfs_mountpt_s *fs,
    * will, unfortunately, need to allocate one.
    */
 
-  buffer = (FAR uint8_t *)kmm_malloc(SMARTFS_TRUNCBUFFER_SIZE);
+  buffer = kmm_malloc(SMARTFS_TRUNCBUFFER_SIZE);
   if (buffer == NULL)
     {
       return -ENOMEM;

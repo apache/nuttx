@@ -225,7 +225,7 @@ void parse_file(FILE *stream, struct variable_s **list)
                * variable name and the value.
                */
 
-              curr = (struct variable_s *)malloc(sizeof(struct variable_s) +
+              curr = malloc(sizeof(struct variable_s) +
                                           varlen + vallen - 1);
               if (curr)
                 {

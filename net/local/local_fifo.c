@@ -49,8 +49,8 @@
 #define LOCAL_HD_SUFFIX    "HD"  /* Name of the half duplex datagram FIFO */
 #define LOCAL_SUFFIX_LEN   2
 
-#define LOCAL_FULLPATH_LEN (strlen(CONFIG_NET_LOCAL_VFS_PATH) + \
-                            UNIX_PATH_MAX + LOCAL_SUFFIX_LEN + 2)
+#define LOCAL_FULLPATH_LEN (sizeof(CONFIG_NET_LOCAL_VFS_PATH) + \
+                            UNIX_PATH_MAX + LOCAL_SUFFIX_LEN + 2 + 8)
 
 /****************************************************************************
  * Private Functions
@@ -68,9 +68,9 @@ static void local_format_name(FAR const char *inpath, FAR char *outpath,
                               FAR const char *suffix, int32_t id)
 {
   if (strncmp(inpath, CONFIG_NET_LOCAL_VFS_PATH,
-              strlen(CONFIG_NET_LOCAL_VFS_PATH)) == 0)
+              sizeof(CONFIG_NET_LOCAL_VFS_PATH) - 1) == 0)
     {
-      inpath += strlen(CONFIG_NET_LOCAL_VFS_PATH);
+      inpath += sizeof(CONFIG_NET_LOCAL_VFS_PATH) - 1;
     }
 
   if (id < 0)
@@ -152,12 +152,11 @@ static bool local_fifo_exists(FAR const char *path)
       return false;
     }
 
-  /* FIFOs are character devices in NuttX.  Return true if what we found
-   * is a FIFO.  What if it is something else?  In that case, we will
-   * return false and mkfifo() will fail.
+  /* Return true if what we found is a FIFO. What if it is something else?
+   * In that case, we will return false and mkfifo() will fail.
    */
 
-  return (bool)S_ISCHR(buf.st_mode);
+  return (bool)S_ISFIFO(buf.st_mode);
 }
 
 /****************************************************************************

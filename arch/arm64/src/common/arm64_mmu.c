@@ -426,7 +426,7 @@ static void init_xlat_tables(const struct arm_mmu_region *region)
   uint64_t level_size;
 
 #ifdef CONFIG_MMU_DEBUG
-  sinfo("mmap: virt %llx phys %llx size %llx\n", virt, phys, size);
+  sinfo("mmap: virt %lux phys %lux size %lux\n", virt, phys, size);
 #endif
 
   /* check minimum alignment requirement for given mmap region */

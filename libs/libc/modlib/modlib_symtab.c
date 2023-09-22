@@ -28,6 +28,7 @@
 
 #include <nuttx/symtab.h>
 #include <nuttx/lib/modlib.h>
+#include <nuttx/symtab.h>
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -66,10 +66,8 @@
 static int elf_symname(FAR struct elf_loadinfo_s *loadinfo,
                        FAR const Elf_Sym *sym)
 {
-  FAR uint8_t *buffer;
   off_t  offset;
-  size_t readlen;
-  size_t bytesread;
+  size_t bytesread = 0;
   int ret;
 
   /* Get the file offset to the string that is the name of the symbol.  The
@@ -97,13 +95,13 @@ static int elf_symname(FAR struct elf_loadinfo_s *loadinfo,
 
   /* Loop until we get the entire symbol name into memory */
 
-  bytesread = 0;
-
   for (; ; )
     {
+      FAR uint8_t *buffer = &loadinfo->iobuffer[bytesread];
+      size_t readlen = loadinfo->buflen - bytesread;
+
       /* Get the number of bytes to read */
 
-      readlen = loadinfo->buflen - bytesread;
       if (offset + readlen > loadinfo->filelen)
         {
           if (loadinfo->filelen <= offset)
@@ -117,7 +115,6 @@ static int elf_symname(FAR struct elf_loadinfo_s *loadinfo,
 
       /* Read that number of bytes into the array */
 
-      buffer = &loadinfo->iobuffer[bytesread];
       ret = elf_read(loadinfo, buffer, readlen, offset + bytesread);
       if (ret < 0)
         {
@@ -320,7 +317,7 @@ int elf_symvalue(FAR struct elf_loadinfo_s *loadinfo, FAR Elf_Sym *sym,
               (uintptr_t)symbol->sym_value,
               (uintptr_t)(sym->st_value + (uintptr_t)symbol->sym_value));
 
-        sym->st_value += ((uintptr_t)symbol->sym_value);
+        sym->st_value += (uintptr_t)symbol->sym_value;
       }
       break;
 

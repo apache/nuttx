@@ -104,27 +104,31 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
       return;
     }
 
+#ifdef CONFIG_MM_FILL_ALLOCATIONS
+  memset(mem, 0x55, mm_malloc_size(heap, mem));
+#endif
+
   kasan_poison(mem, mm_malloc_size(heap, mem));
 
   /* Map the memory chunk into a free node */
 
-  node = (FAR struct mm_freenode_s *)((FAR char *)mem - SIZEOF_MM_ALLOCNODE);
-  nodesize = SIZEOF_MM_NODE(node);
+  node = (FAR struct mm_freenode_s *)((FAR char *)mem - MM_SIZEOF_ALLOCNODE);
+  nodesize = MM_SIZEOF_NODE(node);
 
   /* Sanity check against double-frees */
 
-  DEBUGASSERT(node->size & MM_ALLOC_BIT);
+  DEBUGASSERT(MM_NODE_IS_ALLOC(node));
 
   node->size &= ~MM_ALLOC_BIT;
 
   /* Check if the following node is free and, if so, merge it */
 
   next = (FAR struct mm_freenode_s *)((FAR char *)node + nodesize);
-  DEBUGASSERT((next->size & MM_PREVFREE_BIT) == 0);
-  if ((next->size & MM_ALLOC_BIT) == 0)
+  DEBUGASSERT(MM_PREVNODE_IS_ALLOC(next));
+  if (MM_NODE_IS_FREE(next))
     {
       FAR struct mm_allocnode_s *andbeyond;
-      size_t nextsize = SIZEOF_MM_NODE(next);
+      size_t nextsize = MM_SIZEOF_NODE(next);
 
       /* Get the node following the next node (which will
        * become the new next node). We know that we can never
@@ -132,8 +136,8 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
        */
 
       andbeyond = (FAR struct mm_allocnode_s *)((FAR char *)next + nextsize);
-      DEBUGASSERT((andbeyond->size & MM_PREVFREE_BIT) != 0 &&
-                   andbeyond->preceding == nextsize);
+      DEBUGASSERT(MM_PREVNODE_IS_FREE(andbeyond) &&
+                  andbeyond->preceding == nextsize);
 
       /* Remove the next node.  There must be a predecessor,
        * but there may not be a successor node.
@@ -163,13 +167,12 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
    * it with this node
    */
 
-  if ((node->size & MM_PREVFREE_BIT) != 0)
+  if (MM_PREVNODE_IS_FREE(node))
     {
       prev = (FAR struct mm_freenode_s *)
         ((FAR char *)node - node->preceding);
-      prevsize = SIZEOF_MM_NODE(prev);
-      DEBUGASSERT((prev->size & MM_ALLOC_BIT) == 0 &&
-                  node->preceding == prevsize);
+      prevsize = MM_SIZEOF_NODE(prev);
+      DEBUGASSERT(MM_NODE_IS_FREE(prev) && node->preceding == prevsize);
 
       /* Remove the node.  There must be a predecessor, but there may
        * not be a successor node.

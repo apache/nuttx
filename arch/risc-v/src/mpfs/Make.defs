@@ -32,7 +32,7 @@ CHIP_CSRCS += mpfs_irq.c mpfs_irq_dispatch.c
 CHIP_CSRCS += mpfs_lowputc.c mpfs_serial.c
 CHIP_CSRCS += mpfs_start.c mpfs_timerisr.c
 CHIP_CSRCS += mpfs_gpio.c mpfs_systemreset.c
-CHIP_CSRCS += mpfs_plic.c
+CHIP_CSRCS += mpfs_plic.c mpfs_dsn.c
 
 ifeq ($(CONFIG_MPFS_DMA),y)
 CHIP_CSRCS += mpfs_dma.c
@@ -62,6 +62,10 @@ ifeq ($(CONFIG_MPFS_EMMCSD),y)
 CHIP_CSRCS += mpfs_emmcsd.c
 endif
 
+ifeq ($(CONFIG_FAT_DMAMEMORY),y)
+CHIP_CSRCS += mpfs_dma_alloc.c
+endif
+
 ifeq ($(CONFIG_MPFS_COREMMC),y)
 CHIP_CSRCS += mpfs_coremmc.c
 endif
@@ -84,6 +88,7 @@ endif
 
 ifeq (${CONFIG_MPFS_OPENSBI},y)
 CHIP_ASRCS += mpfs_opensbi_utils.S
+CHIP_ASRCS += mpfs_opensbi_trap.S
 CHIP_CSRCS += mpfs_opensbi.c
 endif
 

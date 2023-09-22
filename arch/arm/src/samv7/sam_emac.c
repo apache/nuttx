@@ -48,6 +48,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/mii.h>
+#include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/phy.h>
 
@@ -1140,7 +1141,7 @@ static int sam_buffer_allocate(struct sam_emac_s *priv)
   priv->xfrq[0].nrxbuffers = priv->attr->nrxbuffers;
 
   allocsize = priv->attr->ntxbuffers * EMAC_TX_UNITSIZE;
-  priv->xfrq[0].txbuffer = (uint8_t *)kmm_memalign(EMAC_ALIGN, allocsize);
+  priv->xfrq[0].txbuffer = kmm_memalign(EMAC_ALIGN, allocsize);
   if (!priv->xfrq[0].txbuffer)
     {
       nerr("ERROR: Failed to allocate TX buffer\n");
@@ -1151,7 +1152,7 @@ static int sam_buffer_allocate(struct sam_emac_s *priv)
   priv->xfrq[0].txbufsize = EMAC_TX_UNITSIZE;
 
   allocsize = priv->attr->nrxbuffers * EMAC_RX_UNITSIZE;
-  priv->xfrq[0].rxbuffer = (uint8_t *)kmm_memalign(EMAC_ALIGN, allocsize);
+  priv->xfrq[0].rxbuffer = kmm_memalign(EMAC_ALIGN, allocsize);
   if (!priv->xfrq[0].rxbuffer)
     {
       nerr("ERROR: Failed to allocate RX buffer\n");
@@ -1187,7 +1188,7 @@ static int sam_buffer_allocate(struct sam_emac_s *priv)
   priv->xfrq[1].nrxbuffers = DUMMY_NBUFFERS;
 
   allocsize = DUMMY_NBUFFERS * DUMMY_BUFSIZE;
-  priv->xfrq[1].txbuffer = (uint8_t *)kmm_memalign(EMAC_ALIGN, allocsize);
+  priv->xfrq[1].txbuffer = kmm_memalign(EMAC_ALIGN, allocsize);
   if (!priv->xfrq[1].txbuffer)
     {
       nerr("ERROR: Failed to allocate TX buffer\n");
@@ -1198,7 +1199,7 @@ static int sam_buffer_allocate(struct sam_emac_s *priv)
   priv->xfrq[1].txbufsize = DUMMY_BUFSIZE;
 
   allocsize = DUMMY_NBUFFERS * DUMMY_BUFSIZE;
-  priv->xfrq[1].rxbuffer = (uint8_t *)kmm_memalign(EMAC_ALIGN, allocsize);
+  priv->xfrq[1].rxbuffer = kmm_memalign(EMAC_ALIGN, allocsize);
   if (!priv->xfrq[1].rxbuffer)
     {
       nerr("ERROR: Failed to allocate RX buffer\n");
@@ -1404,13 +1405,6 @@ static int sam_transmit(struct sam_emac_s *priv, int qid)
 
   regval  = sam_getreg(priv, SAM_EMAC_NCR_OFFSET);
   regval |= EMAC_NCR_TSTART;
-  sam_putreg(priv, SAM_EMAC_NCR_OFFSET, regval);
-
-  /* REVISIT: Sometimes TSTART is missed?  In this case, the symptom is
-   * that the packet is not sent until the next transfer when TXSTART
-   * is set again.
-   */
-
   sam_putreg(priv, SAM_EMAC_NCR_OFFSET, regval);
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
@@ -2523,11 +2517,9 @@ static int sam_ifup(struct net_driver_s *dev)
   int ret;
 
 #ifdef CONFIG_NET_IPv4
-  ninfo("Bringing up: %d.%d.%d.%d\n",
-        (int)(dev->d_ipaddr & 0xff),
-        (int)((dev->d_ipaddr >> 8) & 0xff),
-        (int)((dev->d_ipaddr >> 16) & 0xff),
-        (int)(dev->d_ipaddr >> 24));
+  ninfo("Bringing up: %u.%u.%u.%u\n",
+        ip4_addr1(dev->d_ipaddr), ip4_addr2(dev->d_ipaddr),
+        ip4_addr3(dev->d_ipaddr), ip4_addr4(dev->d_ipaddr));
 #endif
 #ifdef CONFIG_NET_IPv6
   ninfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
@@ -4029,6 +4021,30 @@ static int sam_phyinit(struct sam_emac_s *priv)
     {
       regval |= EMAC_NCFGR_CLK_DIV8;  /* MCK divided by 8 (MCK up to 20 MHz) */
     }
+
+#ifdef CONFIG_SAMV7_EMAC0_PHYINIT
+  if (priv->attr->emac == EMAC0_INTF)
+    {
+      ret = sam_phy_boardinitialize(0);
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to initialize the PHY: %d\n", ret);
+          return ret;
+        }
+    }
+#endif
+
+#ifdef CONFIG_SAMV7_EMAC1_PHYINIT
+  if (priv->attr->emac == EMAC1_INTF)
+    {
+      ret = sam_phy_boardinitialize(1);
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to initialize the PHY: %d\n", ret);
+          return ret;
+        }
+    }
+#endif
 
   sam_putreg(priv, SAM_EMAC_NCFGR_OFFSET, regval);
 

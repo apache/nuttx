@@ -26,17 +26,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+#include <nuttx/i2c/i2c_master.h>
 
 #ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
@@ -61,6 +53,48 @@ extern "C"
 #if defined (CONFIG_SENSORS_AK09912) || defined (CONFIG_SENSORS_AK09912_SCU)
 int board_ak09912_initialize(const char *devpath, int bus);
 #endif
+
+#ifdef CONFIG_SENSORS_AK09912_SCU
+/****************************************************************************
+ * Name: ak09912_init
+ *
+ * Description:
+ *   Initialize AK09912 magnetometer device
+ *
+ * Input Parameters:
+ *   i2c     - An instance of the I2C interface to use to communicate with
+ *             AK09912
+ *   port    - I2C port number
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int ak09912_init(struct i2c_master_s *i2c, int port);
+
+/****************************************************************************
+ * Name: ak09912_scu_register
+ *
+ * Description:
+ *   Register the AK09912 character device as 'devpath'
+ *
+ * Input Parameters:
+ *   devpath - The full path to the driver to register. E.g., "/dev/mag0"
+ *   minor   - The number of sequencer
+ *   i2c     - An instance of the I2C interface to use to communicate with
+ *             AK09912
+ *   port    - I2C port number
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int ak09912_scu_register(const char *devpath, int minor,
+                         struct i2c_master_s *i2c, int port);
+
+#endif /* CONFIG_SENSORS_AK09912_SCU */
 
 #undef EXTERN
 #if defined(__cplusplus)

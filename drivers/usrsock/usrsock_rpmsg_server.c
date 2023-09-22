@@ -562,6 +562,13 @@ static int usrsock_rpmsg_recvfrom_handler(FAR struct rpmsg_endpoint *ept,
                      (FAR void *)(ack + 1) + inaddrlen, ret);
             }
 
+          /* Hold net_lock to combine get_tx_payload and recvfrom together.
+           * Otherwise we may keep holding tx buffer when waiting net_lock in
+           * recvfrom, which may block rpmsg and may cause dead lock if
+           * another thread tries to get tx buffer with net_lock held.
+           */
+
+          net_lock();
           while (totlen < buflen &&
                  i < CONFIG_NET_USRSOCK_RPMSG_SERVER_NIOVEC)
             {
@@ -616,6 +623,8 @@ static int usrsock_rpmsg_recvfrom_handler(FAR struct rpmsg_endpoint *ept,
             {
               events |= USRSOCK_EVENT_RECVFROM_AVAIL;
             }
+
+          net_unlock();
         }
     }
 
@@ -642,7 +651,7 @@ static int usrsock_rpmsg_recvfrom_handler(FAR struct rpmsg_endpoint *ept,
             events, req->head.xid, totlen, iov[i].iov_len);
     }
 
-  if (retr >= 0 && events == 0)
+  if (retr >= 0 && (ret > 0 || ret == -EAGAIN) && events == 0)
     {
       usrsock_rpmsg_poll_setup(&priv->pfds[req->usockid],
                                priv->pfds[req->usockid].events | POLLIN);
@@ -1023,6 +1032,7 @@ static void usrsock_rpmsg_ns_unbind(FAR struct rpmsg_endpoint *ept)
     }
 
   rpmsg_destroy_ept(ept);
+  kmm_free(ept);
 }
 
 static int usrsock_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
@@ -1081,6 +1091,7 @@ static void usrsock_rpmsg_poll_setup(FAR struct pollfd *pfds,
     }
   else
     {
+      pfds->revents = 0;
       pfds->events = 0;
       ret = psock_poll(psock, pfds, false);
     }
@@ -1141,6 +1152,10 @@ static void usrsock_rpmsg_poll_cb(FAR struct pollfd *pfds)
         {
           events |= USRSOCK_EVENT_RECVFROM_AVAIL;
         }
+
+      /* Clear revents */
+
+      pfds->revents &= ~(POLLHUP | POLLERR);
     }
 
   if (oldevents != pfds->events)

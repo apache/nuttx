@@ -107,12 +107,10 @@ static int nxterm_open(FAR struct file *filep)
   FAR struct inode         *inode = filep->f_inode;
   FAR struct nxterm_state_s *priv = inode->i_private;
 
-  DEBUGASSERT(filep && filep->f_inode);
-
   /* Get the driver structure from the inode */
 
   inode = filep->f_inode;
-  priv  = (FAR struct nxterm_state_s *)inode->i_private;
+  priv  = inode->i_private;
   DEBUGASSERT(priv);
 
   /* Verify that the driver is opened for write-only access */
@@ -150,7 +148,7 @@ static int nxterm_close(FAR struct file *filep)
 
   /* Recover our private state structure */
 
-  DEBUGASSERT(filep != NULL && filep->f_priv != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
   priv = (FAR struct nxterm_state_s *)filep->f_priv;
 
   /* Get exclusive access */
@@ -202,7 +200,7 @@ static ssize_t nxterm_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Recover our private state structure */
 
-  DEBUGASSERT(filep != NULL && filep->f_priv != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
   priv = (FAR struct nxterm_state_s *)filep->f_priv;
 
   /* Get exclusive access */
@@ -327,7 +325,7 @@ static int nxterm_unlink(FAR struct inode *inode)
   FAR struct nxterm_state_s *priv;
   int ret;
 
-  DEBUGASSERT(inode != NULL && inode->i_private != NULL);
+  DEBUGASSERT(inode->i_private != NULL);
   priv = inode->i_private;
 
   /* Get exclusive access */

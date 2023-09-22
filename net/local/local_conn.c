@@ -109,7 +109,7 @@ FAR struct local_conn_s *local_peerconn(FAR struct local_conn_s *conn)
 FAR struct local_conn_s *local_alloc(void)
 {
   FAR struct local_conn_s *conn =
-    (FAR struct local_conn_s *)kmm_zalloc(sizeof(struct local_conn_s));
+    kmm_zalloc(sizeof(struct local_conn_s));
 
   if (conn != NULL)
     {

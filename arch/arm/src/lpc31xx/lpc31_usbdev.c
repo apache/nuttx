@@ -47,6 +47,7 @@
 #include "lpc31_usbotg.h"
 #include "lpc31_evntrtr.h"
 #include "lpc31_syscreg.h"
+#include "lpc31_cgudrvr.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -2136,7 +2137,7 @@ static struct usbdev_req_s *lpc31_epallocreq(struct usbdev_ep_s *ep)
 
   usbtrace(TRACE_EPALLOCREQ, ((struct lpc31_ep_s *)ep)->epphy);
 
-  privreq = (struct lpc31_req_s *)kmm_malloc(sizeof(struct lpc31_req_s));
+  privreq = kmm_malloc(sizeof(struct lpc31_req_s));
   if (!privreq)
     {
       usbtrace(TRACE_DEVERROR(LPC31_TRACEERR_ALLOCFAIL), 0);

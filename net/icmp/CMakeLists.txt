@@ -22,6 +22,10 @@ if(CONFIG_NET_ICMP AND NOT CONFIG_NET_ICMP_NO_STACK)
   # ICMP source files
   set(SRCS icmp_input.c icmp_reply.c)
 
+  if(NOT "${CONFIG_NET_ICMP_PMTU_ENTRIES}" STREQUAL "0")
+    list(APPEND SRCS icmp_pmtu.c)
+  endif()
+
   if(CONFIG_NET_ICMP_SOCKET)
     list(
       APPEND

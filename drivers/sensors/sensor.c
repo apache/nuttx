@@ -483,6 +483,14 @@ static ssize_t sensor_do_samples(FAR struct sensor_upperhalf_s *upper,
       generation = next_generation;
     }
 
+  if (pos - 1 == end && sensor_is_updated(upper, user))
+    {
+      generation = upper->state.generation - user->state.generation +
+                   (upper->state.min_interval >> 1);
+      user->state.generation += ROUND_DOWN(generation,
+                                           user->state.interval);
+    }
+
   return ret;
 }
 
@@ -811,6 +819,7 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               if (arg >= lower->nbuffer)
                 {
                   lower->nbuffer = arg;
+                  upper->state.nbuffer = arg;
                 }
               else
                 {

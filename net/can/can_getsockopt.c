@@ -80,8 +80,7 @@ int can_getsockopt(FAR struct socket *psock, int level, int option,
   FAR struct can_conn_s *conn;
   int ret = OK;
 
-  DEBUGASSERT(psock != NULL && value != NULL && value_len != NULL &&
-              psock->s_conn != NULL);
+  DEBUGASSERT(value != NULL && value_len != NULL);
   conn = psock->s_conn;
 
 #ifdef CONFIG_NET_TIMESTAMP
@@ -142,6 +141,18 @@ int can_getsockopt(FAR struct socket *psock, int level, int option,
         break;
 
       case CAN_RAW_ERR_FILTER:
+#ifdef CONFIG_NET_CAN_ERRORS
+        if (*value_len < sizeof(can_err_mask_t))
+          {
+            return -EINVAL;
+          }
+        else
+          {
+            FAR can_err_mask_t *mask = (FAR can_err_mask_t *)value;
+            *mask = conn->err_mask;
+            *value_len = sizeof(can_err_mask_t);
+          }
+#endif
         break;
 
       case CAN_RAW_LOOPBACK:

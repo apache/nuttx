@@ -22,24 +22,20 @@
 
 if(CONFIG_MM_KERNEL_HEAP)
 
-  set(SRCS)
-
-  list(
-    APPEND
-    SRCS
-    kmm_initialize.c
-    kmm_addregion.c
-    kmm_malloc_size.c
-    kmm_brkaddr.c
-    kmm_calloc.c
-    kmm_extend.c
-    kmm_free.c
-    kmm_mallinfo.c
-    kmm_malloc.c
-    kmm_memalign.c
-    kmm_realloc.c
-    kmm_zalloc.c
-    kmm_heapmember.c)
+  set(SRCS
+      kmm_initialize.c
+      kmm_addregion.c
+      kmm_malloc_size.c
+      kmm_brkaddr.c
+      kmm_calloc.c
+      kmm_extend.c
+      kmm_free.c
+      kmm_mallinfo.c
+      kmm_malloc.c
+      kmm_memalign.c
+      kmm_realloc.c
+      kmm_zalloc.c
+      kmm_heapmember.c)
 
   if(CONFIG_DEBUG_MM)
     list(APPEND SRCS kmm_checkcorruption.c)

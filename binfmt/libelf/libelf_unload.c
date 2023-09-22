@@ -62,7 +62,7 @@
  *
  ****************************************************************************/
 
-int elf_unload(struct elf_loadinfo_s *loadinfo)
+int elf_unload(FAR struct elf_loadinfo_s *loadinfo)
 {
   /* Free all working buffers */
 
@@ -75,7 +75,7 @@ int elf_unload(struct elf_loadinfo_s *loadinfo)
   /* Release memory used to hold static constructors and destructors */
 
 #ifdef CONFIG_BINFMT_CONSTRUCTORS
-#ifndef CONFIG_ARCH_ADDRENV
+#  ifndef CONFIG_ARCH_ADDRENV
   if (loadinfo->ctoralloc != 0)
     {
       kumm_free(loadinfo->ctoralloc);
@@ -85,7 +85,7 @@ int elf_unload(struct elf_loadinfo_s *loadinfo)
     {
       kumm_free(loadinfo->dtoralloc);
     }
-#endif
+#  endif
 
   loadinfo->ctoralloc = NULL;
   loadinfo->ctors     = NULL;

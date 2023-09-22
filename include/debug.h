@@ -34,6 +34,9 @@
 #ifdef CONFIG_ARCH_CHIP_DEBUG_H
 #  include <arch/chip/debug.h>
 #endif
+#ifdef CONFIG_ARCH_BOARD_DEBUG_H
+#  include <arch/board/debug.h>
+#endif
 
 #include <syslog.h>
 #include <sys/uio.h>
@@ -611,6 +614,24 @@
 #  define pwminfo     _none
 #endif
 
+#ifdef CONFIG_DEBUG_CAPTURE_ERROR
+#  define cperr       _err
+#else
+#  define cperr      _none
+#endif
+
+#ifdef CONFIG_DEBUG_CAPTURE_WARN
+#  define cpwarn     _warn
+#else
+#  define cpwarn     _none
+#endif
+
+#ifdef CONFIG_DEBUG_CAPTURE_INFO
+#  define cpinfo     _info
+#else
+#  define cpinfo     _none
+#endif
+
 #ifdef CONFIG_DEBUG_RC_ERROR
 #  define rcerr        _err
 #else
@@ -843,6 +864,24 @@
 #  define rstinfo     _info
 #else
 #  define rstinfo     _none
+#endif
+
+#ifdef CONFIG_DEBUG_IPC_ERROR
+#  define ipcerr       _err
+#else
+#  define ipcerr      _none
+#endif
+
+#ifdef CONFIG_DEBUG_IPC_WARN
+#  define ipcwarn     _warn
+#else
+#  define ipcwarn     _none
+#endif
+
+#ifdef CONFIG_DEBUG_IPC_INFO
+#  define ipcinfo     _info
+#else
+#  define ipcinfo     _none
 #endif
 
 /* Buffer dumping macros do not depend on varargs */

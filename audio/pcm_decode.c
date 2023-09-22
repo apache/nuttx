@@ -1388,7 +1388,7 @@ FAR struct audio_lowerhalf_s *
 
   /* Allocate an instance of our private data structure */
 
-  priv = (FAR struct pcm_decode_s *)kmm_zalloc(sizeof(struct pcm_decode_s));
+  priv = kmm_zalloc(sizeof(struct pcm_decode_s));
   if (!priv)
     {
       auderr("ERROR: Failed to allocate driver structure\n");

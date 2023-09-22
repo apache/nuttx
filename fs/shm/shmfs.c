@@ -94,7 +94,7 @@ static ssize_t shmfs_read(FAR struct file *filep, FAR char *buffer,
   off_t startpos;
   off_t endpos;
 
-  DEBUGASSERT(filep->f_inode != NULL && filep->f_inode->i_private != NULL);
+  DEBUGASSERT(filep->f_inode->i_private != NULL);
 
   sho = filep->f_inode->i_private;
 
@@ -119,7 +119,7 @@ static ssize_t shmfs_read(FAR struct file *filep, FAR char *buffer,
 
   if (sho->paddr != NULL)
     {
-      memcpy(buffer, sho->paddr + startpos, nread);
+      memcpy(buffer, (FAR char *)sho->paddr + startpos, nread);
       filep->f_pos += nread;
     }
   else
@@ -142,7 +142,7 @@ static ssize_t shmfs_write(FAR struct file *filep, FAR const char *buffer,
   off_t startpos;
   off_t endpos;
 
-  DEBUGASSERT(filep->f_inode != NULL && filep->f_inode->i_private != NULL);
+  DEBUGASSERT(filep->f_inode->i_private != NULL);
 
   sho = filep->f_inode->i_private;
 
@@ -163,7 +163,7 @@ static ssize_t shmfs_write(FAR struct file *filep, FAR const char *buffer,
 
   if (sho->paddr != NULL)
     {
-      memcpy(sho->paddr + startpos, buffer, nwritten);
+      memcpy((FAR char *)sho->paddr + startpos, buffer, nwritten);
       filep->f_pos += nwritten;
     }
   else
@@ -352,8 +352,6 @@ static int shmfs_mmap(FAR struct file *filep,
   FAR struct shmfs_object_s *object;
   int ret = -EINVAL;
 
-  DEBUGASSERT(filep->f_inode != NULL);
-
   /* We don't support offset at the moment, just mapping the whole object
    * object is NULL if it hasn't been truncated yet
    */
@@ -368,7 +366,7 @@ static int shmfs_mmap(FAR struct file *filep,
   ret = inode_addref(filep->f_inode);
   if (ret >= 0)
     {
-      object = (FAR struct shmfs_object_s *)filep->f_inode->i_private;
+      object = filep->f_inode->i_private;
       if (object)
         {
           ret = shmfs_map_object(object, &entry->vaddr);

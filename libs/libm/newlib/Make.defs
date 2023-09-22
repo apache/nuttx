@@ -18,21 +18,31 @@
 #
 ############################################################################
 
-NEWLIB_VERSION=4.3.0.20230120
+ifeq ($(CONFIG_ARCH_CHIP_ESP32),y)
+  NEWLIB_VERSION=esp-4.1.0_20230425
+  NEWLIB_BASENAME=newlib-esp32
+  NEWLIB_URL_BASE=https://github.com/espressif/newlib-esp32/archive
+  NEWLIB_TARBALL=$(NEWLIB_VERSION).tar.gz
+else
+  NEWLIB_VERSION=4.3.0.20230120
+  NEWLIB_BASENAME=newlib
+  NEWLIB_URL_BASE=ftp://sourceware.org/pub/newlib
+  NEWLIB_TARBALL=$(NEWLIB_BASENAME)-$(NEWLIB_VERSION).tar.gz
+endif
 
-newlib-$(NEWLIB_VERSION).tar.gz:
-	$(call DOWNLOAD,ftp://sourceware.org/pub/newlib,newlib-$(NEWLIB_VERSION).tar.gz)
+$(NEWLIB_BASENAME)-$(NEWLIB_VERSION).tar.gz:
+	$(call DOWNLOAD,$(NEWLIB_URL_BASE),$(NEWLIB_TARBALL),$(NEWLIB_BASENAME)-$(NEWLIB_VERSION).tar.gz)
 
-newlib/newlib: newlib-$(NEWLIB_VERSION).tar.gz
-	$(Q) tar -xf newlib-$(NEWLIB_VERSION).tar.gz
-	$(Q) mv newlib-$(NEWLIB_VERSION) newlib/newlib
+newlib/newlib: $(NEWLIB_BASENAME)-$(NEWLIB_VERSION).tar.gz
+	$(Q) tar -xf $(NEWLIB_BASENAME)-$(NEWLIB_VERSION).tar.gz
+	$(Q) mv $(NEWLIB_BASENAME)-$(NEWLIB_VERSION) newlib/newlib
 	$(Q) patch -p0 < newlib/0001-newlib-libm-fix-__RCSID-build-error.patch
 	$(Q) patch -p0 < newlib/0002-newlib-libm-remove-include-reent.h.patch
 	$(Q) touch $@
 
 ifeq ($(wildcard newlib/newlib/.git),)
 distclean::
-	$(call DELFILE, newlib-$(NEWLIB_VERSION).tar.gz)
+	$(call DELFILE, $(NEWLIB_BASENAME)-$(NEWLIB_VERSION).tar.gz)
 	$(call DELDIR, newlib/newlib)
 
 context:: newlib/newlib
@@ -85,6 +95,6 @@ endif
 
 CSRCS := $(shell echo $(notdir $(CSRCS) | tr " " "\n" | sort | uniq))
 
-CFLAGS += -Wno-undef -Wno-unused-but-set-variable
+CFLAGS += -Wno-undef -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-maybe-uninitialized
 CFLAGS += ${INCDIR_PREFIX}newlib/newlib/newlib/libm/common
 CFLAGS += -D__int32_t=int32_t -D__uint32_t=uint32_t -D_REENT=0 -D_REENT_THREAD_LOCAL=1

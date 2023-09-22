@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <unistd.h>
 #include <string.h>
@@ -52,19 +53,19 @@
  * Name: elf_dumpreaddata
  ****************************************************************************/
 
-#if defined(ELF_DUMP_READDATA)
-static inline void elf_dumpreaddata(FAR char *buffer, int buflen)
+#ifdef ELF_DUMP_READDATA
+static inline void elf_dumpreaddata(FAR char *buffer, size_t buflen)
 {
   FAR uint32_t *buf32 = (FAR uint32_t *)buffer;
-  int i;
-  int j;
+  size_t i;
+  size_t j;
 
   for (i = 0; i < buflen; i += 32)
     {
-      syslog(LOG_DEBUG, "%04x:", i);
+      syslog(LOG_DEBUG, "%04zx:", i);
       for (j = 0; j < 32; j += sizeof(uint32_t))
         {
-          syslog(LOG_DEBUG, "  %08x", *buf32++);
+          syslog(LOG_DEBUG, " %08" PRIx32, *buf32++);
         }
 
       syslog(LOG_DEBUG, "\n");
@@ -97,10 +98,25 @@ static inline void elf_dumpreaddata(FAR char *buffer, int buflen)
 int elf_read(FAR struct elf_loadinfo_s *loadinfo, FAR uint8_t *buffer,
              size_t readsize, off_t offset)
 {
-  ssize_t nbytes;      /* Number of bytes read */
-  off_t   rpos;        /* Position returned by lseek */
+  size_t  nsize = readsize;   /* Bytes to read from the object file */
+  ssize_t nbytes;             /* Number of bytes read */
+  off_t   rpos;               /* Position returned by lseek */
+  int     ret = OK;           /* Return value */
 
-  binfo("Read %ld bytes from offset %ld\n", (long)readsize, (long)offset);
+#ifdef CONFIG_ARCH_USE_COPY_SECTION
+  FAR uint8_t *dest = buffer; /* Destination address - `buffer` */
+
+  /* Redirect `buffer` to temporary allocated memory */
+
+  buffer = kmm_malloc(readsize);
+  if (buffer == NULL)
+    {
+      berr("ERROR: Failed to allocate memory\n");
+      return -ENOMEM;
+    }
+#endif
+
+  binfo("Read %zu bytes from offset %" PRIdOFF "\n", readsize, offset);
 
   /* Loop until all of the requested data has been read. */
 
@@ -111,38 +127,60 @@ int elf_read(FAR struct elf_loadinfo_s *loadinfo, FAR uint8_t *buffer,
       rpos = file_seek(&loadinfo->file, offset, SEEK_SET);
       if (rpos != offset)
         {
-          berr("Failed to seek to position %lu: %d\n",
-               (unsigned long)offset, (int)rpos);
-          return rpos;
+          berr("Failed to seek to position %" PRIdOFF ": %" PRIdOFF "\n",
+               offset, rpos);
+          ret = rpos;
+          goto errout;
         }
 
       /* Read the file data at offset into the user buffer */
 
-      nbytes = file_read(&loadinfo->file, buffer, readsize);
+      nbytes = file_read(&loadinfo->file,
+                         buffer + nsize - readsize, readsize);
       if (nbytes < 0)
         {
           /* EINTR just means that we received a signal */
 
           if (nbytes != -EINTR)
             {
-              berr("Read from offset %lu failed: %d\n",
-                   (unsigned long)offset, (int)nbytes);
-              return nbytes;
+              berr("Read from offset %" PRIdOFF " failed: %zd\n",
+                   offset, nbytes);
+              ret = nbytes;
+              goto errout;
             }
         }
       else if (nbytes == 0)
         {
           berr("Unexpected end of file\n");
-          return -ENODATA;
+          ret = -ENODATA;
+          goto errout;
         }
       else
         {
           readsize -= nbytes;
-          buffer   += nbytes;
           offset   += nbytes;
         }
     }
 
-  elf_dumpreaddata(buffer, readsize);
-  return OK;
+#ifdef CONFIG_ARCH_USE_COPY_SECTION
+  /* Copy the requested data from temporary memory to destination */
+
+  ret = up_copy_section(dest, buffer, nsize);
+  if (ret < 0)
+    {
+      berr("ERROR: Failed to copy section at offset %"PRIdOFF"\n", offset);
+      goto errout;
+    }
+#endif
+
+  elf_dumpreaddata(buffer, nsize);
+
+errout:
+#ifdef CONFIG_ARCH_USE_COPY_SECTION
+  /* Free the temporary memory */
+
+  kmm_free(buffer);
+#endif
+
+  return ret;
 }

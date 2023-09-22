@@ -54,6 +54,9 @@
 #  elif defined(CONFIG_CONSOLE_SYSLOG)
 #    undef  USE_SERIALDRIVER
 #    undef  USE_EARLYSERIALINIT
+#  elif defined(CONFIG_SERIAL_RTT_CONSOLE)
+#    undef  USE_SERIALDRIVER
+#    undef  USE_EARLYSERIALINIT
 #  else
 #    define USE_SERIALDRIVER 1
 #    define USE_EARLYSERIALINIT 1
@@ -322,6 +325,8 @@ void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
 /* Low level initialization provided by board-level logic *******************/
 
 void arm_boot(void);
+
+int arm_psci_init(const char *method);
 
 /* Context switching */
 

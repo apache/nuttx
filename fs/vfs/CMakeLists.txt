@@ -54,6 +54,12 @@ if(NOT "${CONFIG_PSEUDOFS_SOFTLINKS}" STREQUAL "0")
   list(APPEND SRCS fs_link.c fs_symlink.c fs_readlink.c)
 endif()
 
+# Pseudofile support
+
+if(CONFIG_PSEUDOFS_FILE)
+  list(APPEND SRCS fs_pseudofile.c)
+endif()
+
 # Stream support
 
 if(CONFIG_FILE_STREAM)

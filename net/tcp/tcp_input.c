@@ -456,10 +456,9 @@ static void tcp_input_ofosegs(FAR struct net_driver_s *dev,
   dev->d_iob = iob_trimhead(dev->d_iob, len);
   if (dev->d_iob == NULL || dev->d_iob->io_pktlen == 0)
     {
-      /* No available data, clear device buffer */
+      /* No available data, prepare device iob */
 
-      iob_free_chain(dev->d_iob);
-      goto clear;
+      goto prepare;
     }
 
   ofoseg.data = dev->d_iob;
@@ -517,10 +516,11 @@ static void tcp_input_ofosegs(FAR struct net_driver_s *dev,
 
   if (rebuild)
     {
-clear:
       netdev_iob_clear(dev);
-      netdev_iob_prepare(dev, false, 0);
     }
+
+prepare:
+  netdev_iob_prepare(dev, false, 0);
 }
 #endif /* CONFIG_NET_TCP_OUT_OF_ORDER */
 
@@ -630,6 +630,40 @@ static void tcp_parse_option(FAR struct net_driver_s *dev,
         }
 
       i += IPDATA(tcpiplen + 1 + i);
+    }
+}
+
+/****************************************************************************
+ * Name: tcp_clear_zero_probe
+ *
+ * Description:
+ *   clear the TCP zero window probe
+ *
+ * Input Parameters:
+ *   conn   - The TCP connection of interest
+ *   tcp    - Header of TCP structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+static void tcp_clear_zero_probe(FAR struct tcp_conn_s *conn,
+                                 FAR struct tcp_hdr_s *tcp)
+{
+  /* If the receive window is not 0,
+   * the zero window probe timer needs to be cleared
+   */
+
+  if ((tcp->wnd[0] || tcp->wnd[1]) && conn->zero_probe &&
+      (tcp->flags & TCP_ACK) != 0)
+    {
+      conn->zero_probe = false;
+      conn->nrtx = 0;
+      conn->timer = 0;
     }
 }
 
@@ -983,55 +1017,6 @@ found:
     }
 #endif
 
-  /* Check if the sequence number of the incoming packet is what we are
-   * expecting next.  If not, we send out an ACK with the correct numbers
-   * in, unless we are in the SYN_RCVD state and receive a SYN, in which
-   * case we should retransmit our SYNACK (which is done further down).
-   */
-
-  if (!((((conn->tcpstateflags & TCP_STATE_MASK) == TCP_SYN_SENT) &&
-        ((tcp->flags & TCP_CTL) == (TCP_SYN | TCP_ACK))) ||
-        (((conn->tcpstateflags & TCP_STATE_MASK) == TCP_SYN_RCVD) &&
-        ((tcp->flags & TCP_CTL) == TCP_SYN))))
-    {
-      uint32_t seq;
-      uint32_t rcvseq;
-
-      seq = tcp_getsequence(tcp->seqno);
-      rcvseq = tcp_getsequence(conn->rcvseq);
-
-      if (seq != rcvseq)
-        {
-          /* Trim the head of the segment */
-
-          if (TCP_SEQ_LT(seq, rcvseq))
-            {
-              uint32_t trimlen = TCP_SEQ_SUB(rcvseq, seq);
-
-              if (tcp_trim_head(dev, tcp, trimlen))
-                {
-                  /* The segment was completely out of the window.
-                   * E.g. a retransmit which was not necessary.
-                   * E.g. a keep-alive segment.
-                   */
-
-                  tcp_send(dev, conn, TCP_ACK, tcpiplen);
-                  return;
-                }
-            }
-          else
-            {
-#ifdef CONFIG_NET_TCP_OUT_OF_ORDER
-              /* Queue out-of-order segments. */
-
-              tcp_input_ofosegs(dev, conn, iplen);
-#endif
-              tcp_send(dev, conn, TCP_ACK, tcpiplen);
-              return;
-            }
-        }
-    }
-
   /* Check if the incoming segment acknowledges any outstanding data. If so,
    * we update the sequence number, reset the length of the outstanding
    * data, calculate RTT estimations, and reset the retransmission timer.
@@ -1154,6 +1139,57 @@ found:
 
       tcp_update_retrantimer(conn, conn->rto);
     }
+
+  /* Check if the sequence number of the incoming packet is what we are
+   * expecting next.  If not, we send out an ACK with the correct numbers
+   * in, unless we are in the SYN_RCVD state and receive a SYN, in which
+   * case we should retransmit our SYNACK (which is done further down).
+   */
+
+  if (!((((conn->tcpstateflags & TCP_STATE_MASK) == TCP_SYN_SENT) &&
+        ((tcp->flags & TCP_CTL) == (TCP_SYN | TCP_ACK))) ||
+        (((conn->tcpstateflags & TCP_STATE_MASK) == TCP_SYN_RCVD) &&
+        ((tcp->flags & TCP_CTL) == TCP_SYN))))
+    {
+      uint32_t seq;
+      uint32_t rcvseq;
+
+      seq = tcp_getsequence(tcp->seqno);
+      rcvseq = tcp_getsequence(conn->rcvseq);
+
+      if (seq != rcvseq)
+        {
+          /* Trim the head of the segment */
+
+          if (TCP_SEQ_LT(seq, rcvseq))
+            {
+              uint32_t trimlen = TCP_SEQ_SUB(rcvseq, seq);
+
+              if (tcp_trim_head(dev, tcp, trimlen))
+                {
+                  /* The segment was completely out of the window.
+                   * E.g. a retransmit which was not necessary.
+                   * E.g. a keep-alive segment.
+                   */
+
+                  tcp_send(dev, conn, TCP_ACK, tcpiplen);
+                  return;
+                }
+            }
+          else
+            {
+#ifdef CONFIG_NET_TCP_OUT_OF_ORDER
+              /* Queue out-of-order segments. */
+
+              tcp_input_ofosegs(dev, conn, iplen);
+#endif
+              tcp_send(dev, conn, TCP_ACK, tcpiplen);
+              return;
+            }
+        }
+    }
+
+  tcp_clear_zero_probe(conn, tcp);
 
   /* Update the connection's window size */
 

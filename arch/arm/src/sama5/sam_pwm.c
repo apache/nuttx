@@ -856,7 +856,7 @@ static int pwm_setup(struct pwm_lowerhalf_s *dev)
 {
   struct sam_pwm_chan_s *chan = (struct sam_pwm_chan_s *)dev;
 
-  pwminfo("Channel %d: H=%08x L=%08x FI=%08x\n",
+  pwminfo("Channel %d: H=%08" PRIx32 " L=%08" PRIx32 " FI=%08" PRIx32 "\n",
           chan->channel, chan->ohpincfg, chan->olpincfg, chan->fipincfg);
 
   /* Configure selected PWM pins */
@@ -1029,7 +1029,8 @@ static int pwm_start(struct pwm_lowerhalf_s *dev,
     }
 
   pwm_chan_putreg(chan, SAM_PWM_CDTY_OFFSET, regval);
-  pwminfo("Fsrc=%d cprd=%d cdty=%d\n", fsrc, cprd, regval);
+  pwminfo("Fsrc=%" PRIu32 " cprd=%" PRIi32 " cdty=%" PRIx32 "\n",
+           fsrc, cprd, regval);
 
   /* Enable the channel */
 

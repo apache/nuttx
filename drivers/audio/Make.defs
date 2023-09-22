@@ -22,13 +22,6 @@
 
 ifeq ($(CONFIG_DRIVERS_AUDIO),y)
 
-ifeq ($(CONFIG_AUDIO_CXD56),y)
-CSRCS += cxd56.c
-ifeq ($(CONFIG_AUDIO_CXD56_SRC),y)
-CSRCS += cxd56_src.c
-endif
-endif
-
 ifeq ($(CONFIG_AUDIO_VS1053),y)
 CSRCS += vs1053.c
 endif

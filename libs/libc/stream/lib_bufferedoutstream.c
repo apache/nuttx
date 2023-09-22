@@ -40,18 +40,18 @@
  * Name: bufferedoutstream_flush
  ****************************************************************************/
 
-static int bufferedoutstream_flush(FAR struct lib_outstream_s *this)
+static int bufferedoutstream_flush(FAR struct lib_outstream_s *self)
 {
-  FAR struct lib_bufferedoutstream_s *rthis =
-    (FAR struct lib_bufferedoutstream_s *)this;
+  FAR struct lib_bufferedoutstream_s *stream =
+    (FAR struct lib_bufferedoutstream_s *)self;
   int ret = OK;
 
-  ret = lib_stream_puts(rthis->backend, rthis->buffer,
-                        rthis->pending);
+  ret = lib_stream_puts(stream->backend, stream->buffer,
+                        stream->pending);
 
   if (ret >= 0)
     {
-      rthis->pending = 0;
+      stream->pending = 0;
     }
 
   return ret;
@@ -61,28 +61,28 @@ static int bufferedoutstream_flush(FAR struct lib_outstream_s *this)
  * Name: bufferedoutstream_puts
  ****************************************************************************/
 
-static int bufferedoutstream_puts(FAR struct lib_outstream_s *this,
+static int bufferedoutstream_puts(FAR struct lib_outstream_s *self,
                                  FAR const void *buf, int len)
 {
-  FAR struct lib_bufferedoutstream_s *rthis =
-    (FAR struct lib_bufferedoutstream_s *)this;
+  FAR struct lib_bufferedoutstream_s *stream =
+    (FAR struct lib_bufferedoutstream_s *)self;
   int ret = len;
 
-  if (rthis->pending + len <= CONFIG_STREAM_OUT_BUFFER_SIZE)
+  if (stream->pending + len <= CONFIG_STREAM_OUT_BUFFER_SIZE)
     {
       /* If buffer is enough to save incoming data, cache it */
 
-      memcpy(rthis->buffer + rthis->pending, buf, len);
-      rthis->pending += len;
+      memcpy(stream->buffer + stream->pending, buf, len);
+      stream->pending += len;
     }
   else
     {
       /* Or, for long data flush buffer and write it directly */
 
-      ret = lib_stream_flush(this);
+      ret = lib_stream_flush(self);
       if (ret >= 0)
         {
-          ret = lib_stream_puts(rthis->backend, buf, len);
+          ret = lib_stream_puts(stream->backend, buf, len);
         }
     }
 
@@ -93,11 +93,11 @@ static int bufferedoutstream_puts(FAR struct lib_outstream_s *this,
  * Name: bufferedoutstream_putc
  ****************************************************************************/
 
-static void bufferedoutstream_putc(FAR struct lib_outstream_s *this, int ch)
+static void bufferedoutstream_putc(FAR struct lib_outstream_s *self, int ch)
 {
   char c = ch;
 
-  bufferedoutstream_puts(this, &c, 1);
+  bufferedoutstream_puts(self, &c, 1);
 }
 
 /****************************************************************************
@@ -108,13 +108,13 @@ static void bufferedoutstream_putc(FAR struct lib_outstream_s *this, int ch)
  * Name: lib_bufferedoutstream
  ****************************************************************************/
 
-void lib_bufferedoutstream(FAR struct lib_bufferedoutstream_s *outstream,
+void lib_bufferedoutstream(FAR struct lib_bufferedoutstream_s *stream,
                            FAR struct lib_outstream_s *backend)
 {
-  outstream->public.putc  = bufferedoutstream_putc;
-  outstream->public.puts  = bufferedoutstream_puts;
-  outstream->public.flush = bufferedoutstream_flush;
-  outstream->public.nput  = 0;
-  outstream->backend      = backend;
-  outstream->pending      = 0;
+  stream->common.putc  = bufferedoutstream_putc;
+  stream->common.puts  = bufferedoutstream_puts;
+  stream->common.flush = bufferedoutstream_flush;
+  stream->common.nput  = 0;
+  stream->backend      = backend;
+  stream->pending      = 0;
 }

@@ -1063,11 +1063,11 @@ static int hts221_poll(FAR struct file *filep, FAR struct pollfd *fds,
   int ret = OK;
   int i;
 
-  DEBUGASSERT(filep && fds);
+  DEBUGASSERT(fds);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
-  priv = (FAR struct hts221_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  priv = inode->i_private;
 
   /* Get exclusive access */
 
@@ -1157,7 +1157,7 @@ int hts221_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   int ret = 0;
   FAR struct hts221_dev_s *priv;
 
-  priv = (struct hts221_dev_s *)kmm_zalloc(sizeof(struct hts221_dev_s));
+  priv = kmm_zalloc(sizeof(struct hts221_dev_s));
 
   if (!priv)
     {

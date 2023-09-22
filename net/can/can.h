@@ -106,6 +106,9 @@ struct can_conn_s
 #  endif
   struct can_filter filters[CONFIG_NET_CAN_RAW_FILTER_MAX];
   int32_t filter_count;
+#  ifdef CONFIG_NET_CAN_ERRORS
+  can_err_mask_t err_mask;
+#  endif
 #  ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE
   int32_t tx_deadline;
 #  endif

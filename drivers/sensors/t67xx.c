@@ -707,7 +707,7 @@ int t67xx_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   /* Initialize the t67xx device structure. */
 
-  priv = (FAR struct t67xx_dev_s *)kmm_malloc(sizeof(struct t67xx_dev_s));
+  priv = kmm_malloc(sizeof(struct t67xx_dev_s));
   if (priv == NULL)
     {
       snerr("ERROR: Failed to allocate instance\n");

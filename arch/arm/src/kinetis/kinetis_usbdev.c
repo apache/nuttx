@@ -3563,7 +3563,7 @@ static struct usbdev_req_s *khci_epallocreq(struct usbdev_ep_s *ep)
 
   usbtrace(TRACE_EPALLOCREQ, USB_EPNO(ep->eplog));
 
-  privreq = (struct khci_req_s *)kmm_malloc(sizeof(struct khci_req_s));
+  privreq = kmm_malloc(sizeof(struct khci_req_s));
   if (!privreq)
     {
       usbtrace(TRACE_DEVERROR(KHCI_TRACEERR_ALLOCFAIL), 0);

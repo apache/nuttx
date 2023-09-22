@@ -241,7 +241,7 @@ void sparc_clrpend_irq(int irq)
     {
       if (irq <= BM3823_IRQ_LAST_INTERRUPT)
         {
-      /* written with a ‘1’, in Interrupt Clear Register
+      /* written with a '1', in Interrupt Clear Register
        * will clear the corresponding bit(s) in the interrupt pending
        * register
        */

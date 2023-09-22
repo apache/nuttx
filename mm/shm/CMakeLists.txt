@@ -21,5 +21,5 @@
 # Shared memory allocator
 
 if(CONFIG_MM_SHM)
-  target_sources(mm PRIVATE shm_initialize.c shmat.c shmctl.c shmdt.c shmget.c)
+  target_sources(mm PRIVATE shmat.c shmctl.c shmdt.c shmget.c)
 endif()

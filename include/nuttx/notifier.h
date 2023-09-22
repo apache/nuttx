@@ -51,6 +51,14 @@
 #define BLOCKING_NOTIFIER_HEAD(name) \
   struct blocking_notifier_head name = BLOCKING_NOTIFIER_INIT(name)
 
+#define BLOCKING_INIT_NOTIFIER_HEAD(name) \
+  do \
+    { \
+      nxmutex_init(&(name)->mutex); \
+      (name)->head = NULL; \
+    } \
+  while (0)
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/

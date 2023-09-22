@@ -148,7 +148,7 @@ static void arm64_start_cpu(int cpu_num, char *stack, int stack_sz,
 
   /* Notify of the start event */
 
-  sched_note_cpu_start(this_task(), cpu);
+  sched_note_cpu_start(this_task(), cpu_num);
 #endif
 
   cpu_boot_params.boot_sp   = stack;

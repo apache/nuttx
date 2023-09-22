@@ -32,6 +32,14 @@ ifeq ($(CONFIG_IOEXPANDER_DUMMY),y)
   CSRCS += ioe_dummy.c
 endif
 
+ifeq ($(CONFIG_IOEXPANDER_ISO1H812G),y)
+  CSRCS += iso1h812g.c
+endif
+
+ifeq ($(CONFIG_IOEXPANDER_ISO1I813T),y)
+  CSRCS += iso1i813t.c
+endif
+
 ifeq ($(CONFIG_IOEXPANDER_PCA9555),y)
   CSRCS += pca9555.c
 endif
@@ -50,6 +58,10 @@ endif
 
 ifeq ($(CONFIG_IOEXPANDER_PCF8575),y)
   CSRCS += pcf8575.c
+endif
+
+ifeq ($(CONFIG_IOEXPANDER_MCP23X08),y)
+  CSRCS += mcp23x08.c
 endif
 
 ifeq ($(CONFIG_IOEXPANDER_MCP23X17),y)

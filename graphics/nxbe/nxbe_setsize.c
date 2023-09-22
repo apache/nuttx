@@ -129,7 +129,7 @@ static void nxbe_realloc(FAR struct nxbe_window_s *wnd,
 #else
       /* Re-allocate memory from the user space heap. */
 
-      newfb = (FAR nxgl_mxpixel_t *)kumm_malloc(newfbsize);
+      newfb = kumm_malloc(newfbsize);
       if (newfb == NULL)
         {
           /* Fall back to no RAM back up */

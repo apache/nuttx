@@ -68,7 +68,7 @@
 
 #include "libc.h"
 
-#ifdef LIBC_BUILD_STRING
+#ifdef LIBC_BUILD_MEMCHR
 
 @ 2011-02-07 david.gilbert@linaro.org
 @    Extracted from local git a5b438d861

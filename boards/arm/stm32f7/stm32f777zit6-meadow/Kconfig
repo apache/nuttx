@@ -5,4 +5,93 @@
 
 if ARCH_BOARD_MEADOW_F7MICRO
 
+config HCOM_FILESYSTEM_INIT
+	bool "Enables HCOM FS initialization support"
+	default y
+
+config HCOM_MTD_STRESS_TEST
+	bool "Enables HCOM MTD stress testing support"
+	default n
+
+config HCOM_MONO_STDERR_STDOUT
+	bool "Enables HCOM routing of Mono stdout and stderr to PC/Mac"
+	default y
+
+config HCOM_MONO_REMOTE_DEBUGGING
+	bool "Enables HCOM Mono remote debugging support"
+	default y
+
+config HCOM_COMMS_DEVICE_NAME
+	string "Specifies the device name for HCOM communications"
+	default "/dev/ttyACM0"
+
+config MEADOW_CLOUD
+	string "Enables Meadow Cloud support"
+	default y
+
+config MEADOW_ETHNET_INCLUDE_IN_BUILD
+	bool "Build Meadow and include Ethernet for compute module"
+	default n
+	---help---
+		This must be used with a 'defconfig' file that includes the correct Ethernet configuration.
+
+config HCOM_ESP32_COMMS
+	bool "Enables HCOM file download to the ESP32"
+	default y
+
+menu "ESP32 Coprocessor Configuration"
+source "boards/arm/stm32f7/stm32f777zit6-meadow/Kconfig-ESP32"
+endmenu
+
+config ARCH_BOARD_MEADOW
+	bool "Enables Meadow board features"
+	default y
+
+# See meadow-adc.c file, currently unused.
+config MEADOW_ADC
+	bool "Enables Meadow ADC support"
+
+config MEADOW_HCOM
+	bool "Enables Meadow HCOM support"
+	default n
+
+config MEADOW_TIMER_SUPPORT
+	bool "Enables Meadow timer support"
+	default n
+
+config MEADOW_PWR_MGMT_SUPPORT
+	bool "Enables Meadow power management support"
+	default n
+
+choice
+	prompt "Select Main Board Model"
+	default BOARD_MEADOW_F7MICRO_DEFAULT
+	---help---
+		Select the mainboard model
+
+config BOARD_MEADOW_F7MICRO_DEFAULT
+	bool "Meadow F7 Micro Default"
+	select ARCH_BOARD_COMMON
+	---help---
+		The default Meadow F7 Micro board with STM32F777,
+		ESP32 for WiFi/Bluetooth, External Flash and RAM.
+
+config BOARD_MEADOW_PROJECTLAB
+	bool "ProjectLab Mainboard"
+	select ARCH_BOARD_COMMON
+	---help---
+		ProjectLab is a main board with a Meadow F7Micro
+		module soldered on it. The projectLab has a lot of
+		sensors, RS485, a 3.2" TFT Display, and Grove, Qwiic
+		and mikroBUS connectors for expansion.
+
+config BOARD_MEADOW_F7_CORE_COMPUTE
+	bool "F7 Core Compute Mainboard"
+	select ARCH_BOARD_COMMON
+	---help---
+		The F7 Core Compute is a modular mainboard with basic
+		features of F7-Micro, but with SDCard and Dual Ethernet.
+
+endchoice # Select Main Board Model
+
 endif # ARCH_BOARD_MEADOW_F7MICRO

@@ -32,6 +32,7 @@
 #include <nuttx/compiler.h>
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/lib/math32.h>
 
 #include "riscv_internal.h"
 
@@ -160,11 +161,12 @@ static bool pmp_check_addrmatch_type(uintptr_t type)
  *
  ****************************************************************************/
 
-static bool pmp_check_region_attrs(uintptr_t base, uintptr_t size)
+static bool pmp_check_region_attrs(uintptr_t base, uintptr_t size,
+                                   uintptr_t type)
 {
   /* Check that the size is not too small */
 
-  if (size < MIN_BLOCK_SIZE)
+  if ((type != PMPCFG_A_TOR) && (size < MIN_BLOCK_SIZE))
     {
       return false;
     }
@@ -183,7 +185,23 @@ static bool pmp_check_region_attrs(uintptr_t base, uintptr_t size)
       return false;
     }
 
-  return OK;
+  /* Perform additional checks on base and size for NAPOT area */
+
+  if (type == PMPCFG_A_NAPOT)
+    {
+      /* Get the power-of-two for size, rounded up */
+
+      uintptr_t pot = LOG2_CEIL(size);
+
+      if ((base & ((UINT64_C(1) << pot) - 1)) != 0)
+        {
+          /* The start address is not properly aligned with size */
+
+          return false;
+        }
+    }
+
+  return true;
 }
 
 /****************************************************************************
@@ -455,7 +473,7 @@ int riscv_config_pmp_region(uintptr_t region, uintptr_t attr,
 
   /* Check the region attributes */
 
-  if (pmp_check_region_attrs(base, size))
+  if (pmp_check_region_attrs(base, size, type) == false)
     {
       return -EINVAL;
     }
@@ -463,7 +481,7 @@ int riscv_config_pmp_region(uintptr_t region, uintptr_t attr,
   /* Calculate new base address from type */
 
   addr = base >> 2;
-  if (PMPCFG_A_NAPOT == (attr & PMPCFG_A_MASK))
+  if (type == PMPCFG_A_NAPOT)
     {
       addr |= (size - 1) >> 3;
     }

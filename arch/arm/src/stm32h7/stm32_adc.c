@@ -1225,7 +1225,7 @@ static void adc_enable(struct stm32_dev_s *priv)
 
   up_udelay(20);
 
-  /* Enable ADC calibration. ADCALDIF == 0 so this is only for
+  /* Enable ADC calibration. ADCALDIF == 0 so this is only for
    * single-ended conversions, not for differential ones.
    */
 

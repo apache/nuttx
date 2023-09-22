@@ -771,11 +771,11 @@ struct spi_dev_s *sam_qspi_spi_initialize(int intf)
   /* The supported SAM parts have only a single QSPI port */
 
   spiinfo("intf: %d\n", intf);
-  DEBUGASSERT(intf >= 0 && intf < SAMV7_NQSPI_SPI);
+  DEBUGASSERT(intf >= 0 && intf < (SAMV7_NQSPI_SPI + SAMV7_NQSPI));
 
   /* Allocate a new state structure for this chip select. */
 
-  spics = (struct sam_spics_s *)kmm_zalloc(sizeof(struct sam_spics_s));
+  spics = kmm_zalloc(sizeof(struct sam_spics_s));
   if (!spics)
     {
       spierr("ERROR: Failed to allocate a chip select structure\n");

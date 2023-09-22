@@ -1,6 +1,6 @@
-=============
-Nucleo-WL55JC
-=============
+================
+ST Nucleo WL55JC
+================
 
 The `Nucleo-WL55JC <https://www.st.com/en/evaluation-tools/nucleo-wl55jc.html>`_
 is a development board for the STM32WL55 SoC from ST. It features 64 I/O,
@@ -11,17 +11,17 @@ via virtual serial port from usb.
 Features
 ========
 
-  - STM32WL55JC MCU, 256K FLASH, 64K SRAM
-  - 32768 Hz LSE crystal
-  - 32 MHz HSE crystal
-  - Embedded stlink-v3 debugger (debug/flash and virtual serial port)
-  - Reset button
-  - 3 user programmable LEDs
-  - 3 user programmable buttons
-  - Power indicator LED
-  - LoRa radio with antenna
-  - 64 Nucleo I/O
-  - Arduino compatible pinout
+- STM32WL55JC MCU, 256K FLASH, 64K SRAM
+- 32768 Hz LSE crystal
+- 32 MHz HSE crystal
+- Embedded stlink-v3 debugger (debug/flash and virtual serial port)
+- Reset button
+- 3 user programmable LEDs
+- 3 user programmable buttons
+- Power indicator LED
+- LoRa radio with antenna
+- 64 Nucleo I/O
+- Arduino compatible pinout
 
 Pin Mapping
 ===========

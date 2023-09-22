@@ -49,7 +49,7 @@ int vfprintf(FAR FILE *stream, FAR const IPTR char *fmt, va_list ap)
    */
 
   flockfile(stream);
-  n = lib_vsprintf(&stdoutstream.public, fmt, ap);
+  n = lib_vsprintf(&stdoutstream.common, fmt, ap);
   funlockfile(stream);
 
   return n;

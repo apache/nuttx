@@ -86,7 +86,7 @@ begin_packed_struct struct gpt_header_s
   uint64_t my_lba;                       /* Current LBA (location of this header copy) */
   uint64_t alternate_lba;                /* Backup LBA (location of the other header copy) */
   uint64_t first_usable_lba;             /* First usable LBA for partitions primary partition table last LBA + 1 */
-  uint64_t last_usable_lba;              /* Last usable LBA secondary partition table first LBA − 1 */
+  uint64_t last_usable_lba;              /* Last usable LBA secondary partition table first LBA - 1 */
   struct gpt_guid_s disk_guid;           /* Disk GUID in mixed endian */
   uint64_t partition_entry_lba;          /* Starting LBA of array of partition entries (always 2 in primary copy) */
   uint32_t num_partition_entries;        /* Number of partition entries in array */

@@ -143,27 +143,6 @@ udp_find_raddr_device(FAR struct udp_conn_s *conn,
         {
           in_addr_t raddr;
 
-          if (conn->u.ipv4.laddr != INADDR_ANY)
-            {
-              /* If the socket is bound to some non-zero, local address.
-               * Normal lookup using the verified local address.
-               */
-
-              return netdev_findby_lipv4addr(conn->u.ipv4.laddr);
-            }
-
-#ifdef CONFIG_NET_BINDTODEVICE
-          if (conn->sconn.s_boundto != 0)
-            {
-              /* If the socket is bound to a local network device.
-               * Select the network device that has been bound.
-               * If the index is invalid, return NULL.
-               */
-
-              return netdev_findbyindex(conn->sconn.s_boundto);
-            }
-#endif
-
           if (remote)
             {
               FAR const struct sockaddr_in *inaddr =
@@ -173,6 +152,40 @@ udp_find_raddr_device(FAR struct udp_conn_s *conn,
           else
             {
               net_ipv4addr_copy(raddr, conn->u.ipv4.raddr);
+            }
+
+#if defined(CONFIG_NET_IGMP) && defined(CONFIG_NET_BINDTODEVICE)
+          if (IN_MULTICAST(NTOHL(raddr)))
+            {
+              if ((conn->sconn.s_boundto == 0) &&
+                  (conn->mreq.imr_ifindex != 0))
+                {
+                  return netdev_findbyindex(conn->mreq.imr_ifindex);
+                }
+            }
+          else
+#endif
+            {
+              if (conn->u.ipv4.laddr != INADDR_ANY)
+                {
+                  /* If the socket is bound to some non-zero, local address.
+                   * Normal lookup using the verified local address.
+                   */
+
+                  return netdev_findby_lipv4addr(conn->u.ipv4.laddr);
+                }
+
+#ifdef CONFIG_NET_BINDTODEVICE
+              if (conn->sconn.s_boundto != 0)
+                {
+                  /* If the socket is bound to a local network device.
+                   * Select the network device that has been bound.
+                   * If the index is invalid, return NULL.
+                   */
+
+                  return netdev_findbyindex(conn->sconn.s_boundto);
+                }
+#endif
             }
 
           /* Normal lookup using the verified remote address */
@@ -186,43 +199,57 @@ udp_find_raddr_device(FAR struct udp_conn_s *conn,
       else
 #endif
         {
-          net_ipv6addr_t raddr;
-
-          if (!net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_unspecaddr))
-            {
-              /* If the socket is bound to some non-zero, local address.
-               * Normal lookup using the verified local address.
-               */
-
-              return netdev_findby_lipv6addr(conn->u.ipv6.laddr);
-            }
-
-#ifdef CONFIG_NET_BINDTODEVICE
-          if (conn->sconn.s_boundto != 0)
-            {
-              /* If the socket is bound to a local network device.
-               * Select the network device that has been bound.
-               * If the index is invalid, return NULL.
-               */
-
-              return netdev_findbyindex(conn->sconn.s_boundto);
-            }
-#endif
-
+          struct in6_addr raddr;
           if (remote)
             {
               FAR const struct sockaddr_in6 *inaddr =
                 (FAR const struct sockaddr_in6 *)remote;
-              net_ipv6addr_copy(raddr, inaddr->sin6_addr.s6_addr16);
+              net_ipv6addr_copy(raddr.in6_u.u6_addr16,
+                                inaddr->sin6_addr.s6_addr16);
             }
           else
             {
-              net_ipv6addr_copy(raddr, conn->u.ipv6.raddr);
+              net_ipv6addr_copy(raddr.in6_u.u6_addr16, conn->u.ipv6.raddr);
+            }
+
+#if defined(CONFIG_NET_MLD) && defined(CONFIG_NET_BINDTODEVICE)
+          if (IN6_IS_ADDR_MULTICAST(&raddr))
+            {
+              if ((conn->sconn.s_boundto == 0) &&
+                  (conn->mreq.imr_ifindex != 0))
+                {
+                  return netdev_findbyindex(conn->mreq.imr_ifindex);
+                }
+            }
+          else
+#endif
+            {
+              if (!net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_unspecaddr))
+                {
+                  /* If the socket is bound to some non-zero, local address.
+                   * Normal lookup using the verified local address.
+                   */
+
+                  return netdev_findby_lipv6addr(conn->u.ipv6.laddr);
+                }
+
+#ifdef CONFIG_NET_BINDTODEVICE
+              if (conn->sconn.s_boundto != 0)
+                {
+                  /* If the socket is bound to a local network device.
+                   * Select the network device that has been bound.
+                   * If the index is invalid, return NULL.
+                   */
+
+                  return netdev_findbyindex(conn->sconn.s_boundto);
+                }
+#endif
             }
 
           /* Normal lookup using the verified remote address */
 
-          return netdev_findby_ripv6addr(conn->u.ipv6.laddr, raddr);
+          return netdev_findby_ripv6addr(conn->u.ipv6.laddr,
+                                         raddr.in6_u.u6_addr16);
         }
 #endif
 }

@@ -124,7 +124,7 @@ void *board_composite_connect(int port, int configid)
   dev[1].devinfo.epno[CDCECM_EP_BULKIN_IDX]  = 11;
   dev[1].devinfo.epno[CDCECM_EP_BULKOUT_IDX] = 8;
 
-  return composite_initialize(2, dev);
+  return composite_initialize(composite_getdevdescs(), dev, 2);
 }
 
 #endif /* CONFIG_BOARDCTL_USBDEVCTRL && CONFIG_USBDEV_COMPOSITE */

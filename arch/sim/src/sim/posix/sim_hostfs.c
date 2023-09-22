@@ -255,7 +255,8 @@ nuttx_ssize_t host_write(int fd, const void *buf, nuttx_size_t count)
  * Name: host_lseek
  ****************************************************************************/
 
-nuttx_off_t host_lseek(int fd, nuttx_off_t offset, int whence)
+nuttx_off_t host_lseek(int fd, nuttx_off_t pos, nuttx_off_t offset,
+                       int whence)
 {
   /* Just call the lseek routine */
 

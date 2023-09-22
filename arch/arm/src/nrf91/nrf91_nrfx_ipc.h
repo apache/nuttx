@@ -18,6 +18,9 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_NRF91_NRF91_NRFX_IPC_H
+#define __ARCH_ARM_SRC_NRF91_NRF91_NRFX_IPC_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -83,3 +86,5 @@ void nrfx_ipc_receive_event_enable(uint8_t event_index);
  ****************************************************************************/
 
 void nrfx_ipc_receive_event_disable(uint8_t event_index);
+
+#endif /* __ARCH_ARM_SRC_NRF91_NRF91_NRFX_IPC_H */

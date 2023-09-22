@@ -228,7 +228,10 @@ static int lib_localhost(FAR const char *name, FAR struct hostent_s *host,
   FAR struct hostent_info_s *info;
   FAR char *dest;
   int namelen;
+
+#if defined(CONFIG_NET_IPv4) || defined(CONFIG_NET_IPv6)
   int i = 0;
+#endif
 
   if (strcmp(name, g_lo_hostname) == 0)
     {

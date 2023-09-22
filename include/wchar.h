@@ -145,7 +145,9 @@ int               fwscanf(FILE *, FAR const wchar_t *, ...);
 wint_t            fgetwc(FILE *);
 FAR wchar_t      *fgetws(wchar_t *, int, FILE *);
 wint_t            fputwc(wchar_t, FILE *);
+wint_t            fputwc_unlocked(wchar_t, FAR FILE *);
 int               fputws(FAR const wchar_t *, FILE *);
+int               fputws_unlocked(FAR const wchar_t *, FAR FILE *);
 int               fwide(FILE *, int);
 wint_t            getwc(FILE *);
 wint_t            getwchar(void);
@@ -158,6 +160,7 @@ size_t            mbsnrtowcs(FAR wchar_t *, FAR const char **, size_t,
 size_t            mbsrtowcs(FAR wchar_t *, FAR const char **, size_t,
                       FAR mbstate_t *);
 wint_t            putwc(wchar_t, FILE *);
+wint_t            putwc_unlocked(wchar_t, FAR FILE *);
 wint_t            putwchar(wchar_t);
 int               swprintf(FAR wchar_t *, size_t, FAR const wchar_t *, ...);
 int               swscanf(FAR const wchar_t *, FAR const wchar_t *, ...);

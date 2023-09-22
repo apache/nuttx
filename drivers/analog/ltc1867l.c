@@ -318,8 +318,7 @@ int ltc1867l_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
 
   /* Initialize the LTC1867L device structure */
 
-  adcpriv =
-    (FAR struct ltc1867l_dev_s *)kmm_malloc(sizeof(struct ltc1867l_dev_s));
+  adcpriv = kmm_malloc(sizeof(struct ltc1867l_dev_s));
   if (adcpriv == NULL)
     {
       aerr("ERROR: Failed to allocate ltc1867l_dev_s instance\n");
@@ -333,7 +332,7 @@ int ltc1867l_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
 
   nxmutex_init(&adcpriv->lock);
 
-  adcdev = (FAR struct adc_dev_s *)kmm_malloc(sizeof(struct adc_dev_s));
+  adcdev = kmm_malloc(sizeof(struct adc_dev_s));
   if (adcdev == NULL)
     {
       aerr("ERROR: Failed to allocate adc_dev_s instance\n");

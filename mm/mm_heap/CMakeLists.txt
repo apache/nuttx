@@ -22,29 +22,25 @@
 
 if(CONFIG_MM_DEFAULT_MANAGER)
 
-  set(SRCS)
-
-  list(
-    APPEND
-    SRCS
-    mm_initialize.c
-    mm_lock.c
-    mm_addfreechunk.c
-    mm_size2ndx.c
-    mm_malloc_size.c
-    mm_shrinkchunk.c
-    mm_brkaddr.c
-    mm_calloc.c
-    mm_extend.c
-    mm_free.c
-    mm_mallinfo.c
-    mm_malloc.c
-    mm_foreach.c
-    mm_memalign.c
-    mm_realloc.c
-    mm_zalloc.c
-    mm_heapmember.c
-    mm_memdump.c)
+  set(SRCS
+      mm_initialize.c
+      mm_lock.c
+      mm_addfreechunk.c
+      mm_size2ndx.c
+      mm_malloc_size.c
+      mm_shrinkchunk.c
+      mm_brkaddr.c
+      mm_calloc.c
+      mm_extend.c
+      mm_free.c
+      mm_mallinfo.c
+      mm_malloc.c
+      mm_foreach.c
+      mm_memalign.c
+      mm_realloc.c
+      mm_zalloc.c
+      mm_heapmember.c
+      mm_memdump.c)
 
   if(CONFIG_DEBUG_MM)
     list(APPEND SRCS mm_checkcorruption.c)

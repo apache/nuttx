@@ -25,6 +25,7 @@ if(CONFIG_FS_PROCFS)
       fs_procfscpuinfo.c
       fs_procfscpuload.c
       fs_procfscritmon.c
+      fs_procfsfdt.c
       fs_procfsiobinfo.c
       fs_procfsmeminfo.c
       fs_procfsproc.c

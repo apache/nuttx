@@ -40,6 +40,13 @@ config MMCSD_NSLOTS
 		Number of MMC/SD slots supported by the
 		driver. Default is one.
 
+config MMCSD_PROCFS
+	bool "MMCSD proc fs support"
+	default n
+	depends on FS_PROCFS_REGISTER
+	---help---
+		Enable procfs for mmcsd.
+
 config MMCSD_READONLY
 	bool "Disable MMC/SD write access"
 	default n

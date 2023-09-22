@@ -125,33 +125,44 @@ static inline int dlremove(FAR void *handle)
 
   /* Release resources held by the module */
 
-  if (modp->textalloc != NULL)
-    {
-      /* Free the module memory */
+  /* Dynamic shared objects have text and data allocated in one
+   * operation to keep the relative positions between the two
+   * areas relative otherwise references to the GOT will fail
+   */
 
+  if (!modp->dynamic)
+    {
+      if (modp->textalloc != NULL)
+        {
+          /* Free the module memory */
+
+#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
+          up_textheap_free((FAR void *)modp->textalloc);
+#else
+          lib_free((FAR void *)modp->textalloc);
+#endif
+        }
+
+      if (modp->dataalloc != NULL)
+        {
+          /* Free the module memory */
+
+          lib_free((FAR void *)modp->dataalloc);
+        }
+    }
+  else
+    {
       lib_free((FAR void *)modp->textalloc);
-
-      /* Nullify so that the memory cannot be freed again */
-
-      modp->textalloc = NULL;
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
-      modp->textsize  = 0;
-#endif
     }
 
-  if (modp->dataalloc != NULL)
-    {
-      /* Free the module memory */
+  /* Nullify so that the memory cannot be freed again */
 
-      lib_free((FAR void *)modp->dataalloc);
-
-      /* Nullify so that the memory cannot be freed again */
-
-      modp->dataalloc = NULL;
+  modp->textalloc = NULL;
+  modp->dataalloc = NULL;
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
-      modp->datasize  = 0;
+  modp->textsize  = 0;
+  modp->datasize  = 0;
 #endif
-    }
 
   /* Free the modules exported symmbols table */
 

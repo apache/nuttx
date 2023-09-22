@@ -162,12 +162,6 @@ restore_new:
     ldr    x4, [x0, #8 * REG_SP_ELX]
     sub    sp, x4, #8 * XCPTCONTEXT_GP_REGS
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
-    stp    xzr, x30, [sp, #-16]!
-    bl     arm64_trace_context_switch
-    ldp    xzr, x30, [sp], #16
-#endif
-
 #ifdef CONFIG_ARCH_FPU
     stp    xzr, x30, [sp, #-16]!
     bl     arm64_fpu_context_restore

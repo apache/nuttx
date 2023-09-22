@@ -43,6 +43,14 @@
 #  define HAVE_UART_DEVICE 1
 #endif
 
+/* Is RS-485 used? */
+
+#if defined(CONFIG_ESP32S3_UART0_RS485) || \
+    defined(CONFIG_ESP32S3_UART1_RS485) || \
+    defined(CONFIG_ESP32S3_UART2_RS485)
+#  define HAVE_RS485 1
+#endif
+
 /* Serial Console ***********************************************************/
 
 /* Is there a serial console?  There should be no more than one defined.  It
@@ -52,13 +60,20 @@
 #undef CONSOLE_UART
 #if defined(CONFIG_UART0_SERIAL_CONSOLE) && defined(CONFIG_ESP32S3_UART0)
 #  undef CONFIG_UART1_SERIAL_CONSOLE
+#  undef CONFIG_UART2_SERIAL_CONSOLE
 #  define CONSOLE_UART 1
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE) && defined(CONFIG_ESP32S3_UART1)
 #  undef CONFIG_UART0_SERIAL_CONSOLE
+#  undef CONFIG_UART2_SERIAL_CONSOLE
+#  define CONSOLE_UART 1
+#elif defined(CONFIG_UART2_SERIAL_CONSOLE) && defined(CONFIG_ESP32S3_UART2)
+#  undef CONFIG_UART0_SERIAL_CONSOLE
+#  undef CONFIG_UART1_SERIAL_CONSOLE
 #  define CONSOLE_UART 1
 #else
 #  undef CONFIG_UART0_SERIAL_CONSOLE
 #  undef CONFIG_UART1_SERIAL_CONSOLE
+#  undef CONFIG_UART2_SERIAL_CONSOLE
 #endif
 
 #ifdef CONFIG_ESP32S3_USBSERIAL

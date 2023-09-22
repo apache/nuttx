@@ -107,7 +107,7 @@
 
 #ifdef CONFIG_ARCH_DCACHE
 #  define MCAN_ALIGN        ARMV7A_DCACHE_LINESIZE
-#  define MCAN_ALIGN_MASK   (MCAN_ALIGN-1)
+#  define MCAN_ALIGN_MASK   (MCAN_ALIGN - 1)
 #  define MCAN_ALIGN_UP(n)  (((n) + MCAN_ALIGN_MASK) & ~MCAN_ALIGN_MASK)
 #  define SAM_MCAN_SFR_SHIFT 16
 #  define SAM_MCAN0_SFR_MASK 0xffff0000
@@ -207,7 +207,7 @@
 
 #  define MCAN0_RXFIFO0_BYTES \
      MCAN_ALIGN_UP(CONFIG_SAMA5_MCAN0_RXFIFO0_SIZE * \
-                   MCAN0_RXFIFO0_ELEMENT_SIZE + 8)
+                   (MCAN0_RXFIFO0_ELEMENT_SIZE + 8))
 #  define MCAN0_RXFIFO0_WORDS (MCAN0_RXFIFO0_BYTES >> 2)
 
 /* MCAN0 RX FIFO1 element size */
@@ -250,7 +250,7 @@
 
 #  define MCAN0_RXFIFO1_BYTES \
      MCAN_ALIGN_UP(CONFIG_SAMA5_MCAN0_RXFIFO1_SIZE * \
-                   MCAN0_RXFIFO1_ELEMENT_SIZE + 8)
+                   (MCAN0_RXFIFO1_ELEMENT_SIZE + 8))
 #  define MCAN0_RXFIFO1_WORDS (MCAN0_RXFIFO1_BYTES >> 2)
 
 /* MCAN0 Filters */
@@ -319,7 +319,7 @@
 
 #  define MCAN0_DEDICATED_RXBUFFER_BYTES \
      MCAN_ALIGN_UP(CONFIG_SAMA5_MCAN0_DEDICATED_RXBUFFER_SIZE * \
-                   MCAN0_RXBUFFER_ELEMENT_SIZE + 8)
+                   (MCAN0_RXBUFFER_ELEMENT_SIZE + 8))
 #  define MCAN0_DEDICATED_RXBUFFER_WORDS \
      (MCAN0_DEDICATED_RXBUFFER_BYTES >> 2)
 
@@ -359,7 +359,7 @@
 
 #  define MCAN0_DEDICATED_TXBUFFER_BYTES \
      MCAN_ALIGN_UP(CONFIG_SAMA5_MCAN0_DEDICATED_TXBUFFER_SIZE * \
-                   MCAN0_TXBUFFER_ELEMENT_SIZE + 8)
+                   (MCAN0_TXBUFFER_ELEMENT_SIZE + 8))
 #  define MCAN0_DEDICATED_TXBUFFER_WORDS \
      (MCAN0_DEDICATED_TXBUFFER_BYTES >> 2)
 
@@ -389,7 +389,7 @@
 
 #  define MCAN0_TXFIFIOQ_BYTES \
      MCAN_ALIGN_UP(CONFIG_SAMA5_MCAN0_TXFIFOQ_SIZE *  \
-                   MCAN0_TXBUFFER_ELEMENT_SIZE + 8)
+                   (MCAN0_TXBUFFER_ELEMENT_SIZE + 8))
 #  define MCAN0_TXFIFIOQ_WORDS (MCAN0_TXFIFIOQ_BYTES >> 2)
 
 /* MCAN0 Message RAM */
@@ -494,7 +494,7 @@
 
 #  define MCAN1_RXFIFO0_BYTES \
      MCAN_ALIGN_UP(CONFIG_SAMA5_MCAN1_RXFIFO0_SIZE * \
-                   MCAN1_RXFIFO0_ELEMENT_SIZE + 8)
+                   (MCAN1_RXFIFO0_ELEMENT_SIZE + 8))
 #  define MCAN1_RXFIFO0_WORDS (MCAN1_RXFIFO0_BYTES >> 2)
 
 /* MCAN1 RX FIFO1 element size */
@@ -537,7 +537,7 @@
 
 #  define MCAN1_RXFIFO1_BYTES \
      MCAN_ALIGN_UP(CONFIG_SAMA5_MCAN1_RXFIFO1_SIZE * \
-                   MCAN1_RXFIFO1_ELEMENT_SIZE + 8)
+                   (MCAN1_RXFIFO1_ELEMENT_SIZE + 8))
 #  define MCAN1_RXFIFO1_WORDS (MCAN1_RXFIFO1_BYTES >> 2)
 
 /* MCAN1 Filters */
@@ -606,7 +606,7 @@
 
 #  define MCAN1_DEDICATED_RXBUFFER_BYTES \
      MCAN_ALIGN_UP(CONFIG_SAMA5_MCAN1_DEDICATED_RXBUFFER_SIZE * \
-                   MCAN1_RXBUFFER_ELEMENT_SIZE + 8)
+                   (MCAN1_RXBUFFER_ELEMENT_SIZE + 8))
 #  define MCAN1_DEDICATED_RXBUFFER_WORDS \
      (MCAN1_DEDICATED_RXBUFFER_BYTES >> 2)
 
@@ -646,7 +646,7 @@
 
 #  define MCAN1_DEDICATED_TXBUFFER_BYTES \
      MCAN_ALIGN_UP(CONFIG_SAMA5_MCAN1_DEDICATED_TXBUFFER_SIZE * \
-                   MCAN1_TXBUFFER_ELEMENT_SIZE + 8)
+                   (MCAN1_TXBUFFER_ELEMENT_SIZE + 8))
 #  define MCAN1_DEDICATED_TXBUFFER_WORDS \
      (MCAN1_DEDICATED_TXBUFFER_BYTES >> 2)
 
@@ -676,7 +676,7 @@
 
 #  define MCAN1_TXFIFIOQ_BYTES \
      MCAN_ALIGN_UP(CONFIG_SAMA5_MCAN1_TXFIFOQ_SIZE *  \
-                   MCAN1_TXBUFFER_ELEMENT_SIZE + 8)
+                   (MCAN1_TXBUFFER_ELEMENT_SIZE + 8))
 #  define MCAN1_TXFIFIOQ_WORDS (MCAN1_TXFIFIOQ_BYTES >> 2)
 
 /* MCAN1 Message RAM */
@@ -862,7 +862,7 @@ struct sam_config_s
   uint8_t   txbufferecode; /* Encoded TX buffer element size */
   uint8_t   txbufferesize; /* TX buffer element size (words) */
 #ifdef SAMA5_MCAN_LOOPBACK
-  bool loopback;            /* True: Loopback mode */
+  bool      loopback;      /* True: Loopback mode */
 #endif
 
   /* MCAN message RAM layout */
@@ -985,7 +985,11 @@ static const struct can_ops_s g_mcanops =
   .co_txempty       = mcan_txempty,
 };
 
-static uint32_t g_mcan0_msgram[MCAN0_MSGRAM_WORDS] aligned_data(MCAN_ALIGN)
+#ifdef CONFIG_SAMA5_MCAN0
+
+/* MCAN0 message RAM allocation */
+
+static uint32_t g_mcan0_msgram[MCAN0_MSGRAM_WORDS]
 #ifdef CONFIG_ARCH_DCACHE
   __attribute__((aligned(MCAN_ALIGN)));
 #else
@@ -993,8 +997,6 @@ static uint32_t g_mcan0_msgram[MCAN0_MSGRAM_WORDS] aligned_data(MCAN_ALIGN)
 #endif
 
 /* Constant configuration */
-
-#ifdef CONFIG_SAMA5_MCAN0
 
 static const struct sam_config_s g_mcan0const =
 {
@@ -1078,7 +1080,7 @@ static struct can_dev_s g_mcan0dev =
 
 /* MCAN1 message RAM allocation */
 
-static uint32_t g_mcan1_msgram[MCAN1_MSGRAM_WORDS] aligned_data(MCAN_ALIGN)
+static uint32_t g_mcan1_msgram[MCAN1_MSGRAM_WORDS]
 #ifdef CONFIG_ARCH_DCACHE
   __attribute__((aligned(MCAN_ALIGN)));
 #else
@@ -1596,7 +1598,7 @@ static void mcan_buffer_release(struct sam_mcan_s *priv)
   else
     {
       canerr("ERROR: txfsem would increment beyond %d\n",
-              priv->config->ntxfifoq);
+             priv->config->ntxfifoq);
     }
 }
 

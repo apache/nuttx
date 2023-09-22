@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <debug.h>
+#include <assert.h>
 
 #include <nuttx/board.h>
 #include <arch/board/board.h>
@@ -44,7 +45,7 @@
 
 /* MEADOW FIXME: header clash? */
 
-extern FAR struct qspi_dev_s *stm32f7_qspi_initialize(int intf);
+extern struct qspi_dev_s *stm32f7_qspi_initialize(int intf);
 #endif
 
 /****************************************************************************
@@ -69,10 +70,6 @@ extern FAR struct qspi_dev_s *stm32f7_qspi_initialize(int intf);
  *   initialized.
  *
  ****************************************************************************/
-
-void up_netinitialize(void)
-{
-}
 
 void stm32_boardinitialize(void)
 {
@@ -127,8 +124,8 @@ void stm32_boardinitialize(void)
 void board_late_initialize(void)
 {
 #ifdef CONFIG_STM32F7_QUADSPI
-  FAR struct qspi_dev_s *qspi;
-  FAR struct mtd_dev_s *mtd;
+  struct qspi_dev_s *qspi;
+  struct mtd_dev_s *mtd;
 
   struct qspi_meminfo_s meminfo;
 
@@ -137,8 +134,7 @@ void board_late_initialize(void)
   qspi = stm32f7_qspi_initialize(0);
   if (!qspi)
     {
-      syslog(LOG_ERR, "ERROR: sam_qspi_initialize muiled\n");
-      return;
+      syslog(LOG_ERR, "ERROR: sam_qspi_initialize failed\n");
     }
 
   mtd = w25qxxxjv_initialize(qspi, true);
@@ -167,8 +163,20 @@ void board_late_initialize(void)
    *
    * stm32_mpu_uheap((uintptr_t)0x90000000, 0x4000000);
    */
-#endif
 
+#endif
+#if defined(MEADOW_OS)
+  /* Initialize Meadow HCOM nuttx */
+
+  int ret;
+  ret = hcom_nx_setup_mgr(mtd);
+  if (ret < 0)
+    {
+      syslog(LOG_EMERG, "ERROR: HCOM proxy initialization failed!\n");
+      PANIC();
+    }
+
+#endif
 #if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_BOARDCTL)
   /* Perform NSH initialization here instead of from the NSH.  This
    * alternative NSH initialization is necessary when NSH is ran in
@@ -176,6 +184,8 @@ void board_late_initialize(void)
    */
 
   board_app_initialize();
+#else
+  stm32_bringup();
 #endif
 }
 #endif

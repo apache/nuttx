@@ -75,6 +75,22 @@
 int esp32s3_bringup(void);
 
 /****************************************************************************
+ * Name: esp32s3_gpio_init
+ *
+ * Description:
+ *   Configure the GPIO driver.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_GPIO
+int esp32s3_gpio_init(void);
+#endif
+
+/****************************************************************************
  * Name: board_spiflash_init
  *
  * Description:
@@ -122,6 +138,51 @@ int board_bmp180_initialize(int devno, int busno);
 #endif
 
 /****************************************************************************
+ * Name: board_i2sdev_initialize
+ *
+ * Description:
+ *   This function is called by platform-specific, setup logic to configure
+ *   and register the generic I2S audio driver.  This function will register
+ *   the driver as /dev/audio/pcm[x] where x is determined by the I2S port
+ *   number.
+ *
+ * Input Parameters:
+ *   port       - The I2S port used for the device
+ *   enable_tx  - Register device as TX if true
+ *   enable_rx  - Register device as RX if true
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S3_I2S
+int board_i2sdev_initialize(int port, bool enable_tx, bool enable_rx);
+#endif
+
+/****************************************************************************
+ * Name: esp32s3_cs4344_initialize
+ *
+ * Description:
+ *   This function is called by platform-specific, setup logic to configure
+ *   and register the CS4344 device.  This function will register the driver
+ *   as /dev/audio/pcm[x] where x is determined by the I2S port number.
+ *
+ * Input Parameters:
+ *   port - The I2S port used for the device
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_AUDIO_CS4344
+int esp32s3_cs4344_initialize(int port);
+#endif
+
+/****************************************************************************
  * Name: esp32s3_djoy_initialize
  *
  * Description:
@@ -143,6 +204,10 @@ int esp32s3_djoy_initialize(void);
 
 #ifdef CONFIG_ESP32S3_LEDC
 int esp32s3_pwm_setup(void);
+#endif
+
+#ifdef CONFIG_ESP32S3_TWAI
+int esp32s3_twai_setup(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

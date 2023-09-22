@@ -122,7 +122,7 @@ int32_t altcom_errinfo_pkt_parse(FAR struct alt1250_dev_s *dev,
 
   info->err_indicator = in->indicator;
   info->err_result_code = ntohl(in->err_code);
-  info->err_no = altcom_errno2nuttx(ntohl(in->err_no));
+  info->err_no = altcom_geterrcode(in->err_no);
   memcpy(info->err_string, in->err_str, LTE_ERROR_STRING_MAX_LEN);
   info->err_string[LTE_ERROR_STRING_MAX_LEN - 1] = '\0';
 

@@ -877,7 +877,7 @@ FAR struct mtd_dev_s *at45db_initialize(FAR struct spi_dev_s *spi)
    * have to be extended to handle multiple FLASH parts on the same SPI bus.
    */
 
-  priv = (FAR struct at45db_dev_s *)kmm_zalloc(sizeof(struct at45db_dev_s));
+  priv = kmm_zalloc(sizeof(struct at45db_dev_s));
   if (priv)
     {
       /* Initialize the allocated structure. (unsupported methods were

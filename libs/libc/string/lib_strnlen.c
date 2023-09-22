@@ -32,7 +32,7 @@
  * Public Functions
  ****************************************************************************/
 
-#if !defined(CONFIG_LIBC_ARCH_STRNLEN) && defined(LIBC_BUILD_STRING)
+#if !defined(CONFIG_LIBC_ARCH_STRNLEN) && defined(LIBC_BUILD_STRNLEN)
 #undef strnlen /* See mm/README.txt */
 size_t strnlen(FAR const char *s, size_t maxlen)
 {

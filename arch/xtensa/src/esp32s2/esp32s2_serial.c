@@ -613,7 +613,7 @@ static bool esp32s2_rxavailable(struct uart_dev_s *dev)
 
 static bool esp32s2_txready(struct uart_dev_s *dev)
 {
-  return (esp32s2_lowputc_is_tx_fifo_full(dev->priv)) ? false : true;
+  return !esp32s2_lowputc_is_tx_fifo_full(dev->priv);
 }
 
 /****************************************************************************
@@ -639,10 +639,9 @@ static bool esp32s2_txempty(struct uart_dev_s *dev)
   struct esp32s2_uart_s *priv = dev->priv;
 
   reg = getreg32(UART_INT_RAW_REG(priv->id));
+  reg = REG_MASK(reg, UART_TX_DONE_INT_RAW);
 
-  reg =  REG_MASK(reg, UART_TXFIFO_EMPTY_INT_RAW);
-
-  return (reg > 0) ? true : false;
+  return reg > 0;
 }
 
 /****************************************************************************

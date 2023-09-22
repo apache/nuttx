@@ -155,6 +155,9 @@
 #define AUDIO_FMT_OGG_VORBIS        0x0a
 #define AUDIO_FMT_FLAC              0x0b
 #define AUDIO_FMT_SBC               0x0c
+#define AUDIO_FMT_AAC               0x0d
+#define AUDIO_FMT_MSBC              0x0e
+#define AUDIO_FMT_CVSD              0x0f
 
 /* Audio Sub-Format Types ***************************************************/
 
@@ -170,9 +173,13 @@
 #define AUDIO_SUBFMT_PCM_S16_BE     0x09
 #define AUDIO_SUBFMT_PCM_S16_LE     0x0a
 #define AUDIO_SUBFMT_PCM_U16_BE     0x0b
-#define AUDIO_SUBFMT_MIDI_0         0x0c
-#define AUDIO_SUBFMT_MIDI_1         0x0d
-#define AUDIO_SUBFMT_MIDI_2         0x0e
+#define AUDIO_SUBFMT_PCM_U32_LE     0x0c
+#define AUDIO_SUBFMT_PCM_U32_BE     0x0d
+#define AUDIO_SUBFMT_PCM_S32_LE     0x0e
+#define AUDIO_SUBFMT_PCM_S32_BE     0x0f
+#define AUDIO_SUBFMT_MIDI_0         0x10
+#define AUDIO_SUBFMT_MIDI_1         0x11
+#define AUDIO_SUBFMT_MIDI_2         0x12
 
 /* Audio Hardware-Format Types **********************************************/
 
@@ -205,18 +212,20 @@
 #define AUDIO_SAMP_RATE_11K         0x0002
 #define AUDIO_SAMP_RATE_16K         0x0004
 #define AUDIO_SAMP_RATE_22K         0x0008
-#define AUDIO_SAMP_RATE_32K         0x0010
-#define AUDIO_SAMP_RATE_44K         0x0020
-#define AUDIO_SAMP_RATE_48K         0x0040
-#define AUDIO_SAMP_RATE_88K         0x0080
-#define AUDIO_SAMP_RATE_96K         0x0100
-#define AUDIO_SAMP_RATE_128K        0x0200
-#define AUDIO_SAMP_RATE_160K        0x0400
-#define AUDIO_SAMP_RATE_172K        0x0800
-#define AUDIO_SAMP_RATE_192K        0x1000
+#define AUDIO_SAMP_RATE_24K         0x0010
+#define AUDIO_SAMP_RATE_32K         0x0020
+#define AUDIO_SAMP_RATE_44K         0x0040
+#define AUDIO_SAMP_RATE_48K         0x0080
+#define AUDIO_SAMP_RATE_88K         0x0100
+#define AUDIO_SAMP_RATE_96K         0x0200
+#define AUDIO_SAMP_RATE_128K        0x0400
+#define AUDIO_SAMP_RATE_160K        0x0800
+#define AUDIO_SAMP_RATE_172K        0x1000
+#define AUDIO_SAMP_RATE_192K        0x2000
 #define AUDIO_SAMP_RATE_DEF_ALL    (AUDIO_SAMP_RATE_8K   | AUDIO_SAMP_RATE_11K  | \
                                     AUDIO_SAMP_RATE_16K  | AUDIO_SAMP_RATE_22K  | \
-                                    AUDIO_SAMP_RATE_32K  | AUDIO_SAMP_RATE_44K  | \
+                                    AUDIO_SAMP_RATE_24K  | AUDIO_SAMP_RATE_32K  | \
+                                    AUDIO_SAMP_RATE_44K  | AUDIO_SAMP_RATE_48K  | \
                                     AUDIO_SAMP_RATE_88K  | AUDIO_SAMP_RATE_96K  | \
                                     AUDIO_SAMP_RATE_128K | AUDIO_SAMP_RATE_160K | \
                                     AUDIO_SAMP_RATE_172K | AUDIO_SAMP_RATE_192K )
@@ -351,6 +360,10 @@
 #define AUDIO_APB_OUTPUT_PROCESS    (1 << 1)
 #define AUDIO_APB_DEQUEUED          (1 << 2)
 #define AUDIO_APB_FINAL             (1 << 3) /* Last buffer in the stream */
+
+/* Audio channels range wrapper macro */
+
+#define AUDIO_CHANNELS_RANGE(min, max) ((uint8_t)(((min) << 4) | ((max) & 0xf)))
 
 /****************************************************************************
  * Public Types

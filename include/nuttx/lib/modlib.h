@@ -52,11 +52,11 @@
 #  define CONFIG_MODLIB_BUFFERINCR 32
 #endif
 
-/* CONFIG_DEBUG_INFO, and CONFIG_DEBUG_BINFMT have to be defined or
+/* CONFIG_DEBUG_INFO, and CONFIG_LIBC_MODLIB have to be defined or
  * CONFIG_MODLIB_DUMPBUFFER does nothing.
  */
 
-#if !defined(CONFIG_DEBUG_INFO) || !defined (CONFIG_DEBUG_BINFMT)
+#if !defined(CONFIG_DEBUG_INFO) || !defined(CONFIG_LIBC_MODLIB)
 #  undef CONFIG_MODLIB_DUMPBUFFER
 #endif
 
@@ -77,7 +77,7 @@
 
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
 #  define HAVE_MODLIB_NAMES
-#  define MODLIB_NAMEMAX 16
+#  define MODLIB_NAMEMAX NAME_MAX
 #endif
 
 /****************************************************************************
@@ -159,6 +159,7 @@ struct module_s
   struct mod_info_s modinfo;           /* Module information */
   FAR void *textalloc;                 /* Allocated kernel text memory */
   FAR void *dataalloc;                 /* Allocated kernel memory */
+  int dynamic;                         /* Module is a dynamic shared object */
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
   size_t textsize;                     /* Size of the kernel .text memory allocation */
   size_t datasize;                     /* Size of the kernel .bss/.data memory allocation */

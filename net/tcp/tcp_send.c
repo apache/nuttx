@@ -170,7 +170,7 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
 
   /* Update device buffer length before setup the IP header */
 
-  iob_update_pktlen(dev->d_iob, dev->d_len);
+  iob_update_pktlen(dev->d_iob, dev->d_len, false);
 
   /* Calculate chk & build L3 header */
 
@@ -464,7 +464,7 @@ void tcp_reset(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
 
   /* Update device buffer length before setup the IP header */
 
-  iob_update_pktlen(dev->d_iob, dev->d_len);
+  iob_update_pktlen(dev->d_iob, dev->d_len, false);
 
   /* Calculate chk & build L3 header */
 

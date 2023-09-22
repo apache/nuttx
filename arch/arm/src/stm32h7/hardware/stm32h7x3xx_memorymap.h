@@ -60,10 +60,24 @@
 
 #define STM32_DTCRAM_BASE    0x20000000     /* 0x20000000-0x2001ffff: DTCM-RAM on TCM interface */
 #define STM32_AXISRAM_BASE   0x24000000     /* 0x24000000-0x247fffff: System AXI SRAM */
-#define STM32_SRAM1_BASE     0x30000000     /* 0x30000000-0x3001ffff: System SRAM1 */
-#define STM32_SRAM2_BASE     0x30020000     /* 0x30020000-0x3003ffff: System SRAM2 */
-#define STM32_SRAM3_BASE     0x3004c000     /* 0x30040000-0x30047fff: System SRAM3 */
-#define STM32_SRAM123_BASE   0x30000000     /* 0x30000000-0x30047fff: System SRAM123 */
+
+#ifdef CONFIG_ARCH_CHIP_STM32H7_CORTEXM7
+#  define STM32_SRAM1_BASE   0x30000000     /* 0x30000000-0x3001ffff: System SRAM1 */
+#  define STM32_SRAM2_BASE   0x30020000     /* 0x30020000-0x3003ffff: System SRAM2 */
+#  define STM32_SRAM3_BASE   0x30040000     /* 0x30040000-0x30047fff: System SRAM3 */
+#  define STM32_SRAM123_BASE 0x30000000     /* 0x30000000-0x30047fff: System SRAM123 */
+#else
+
+/* The AHB SRAMs of the D2 domain are also aliased to an address range below
+ * 0x2000 0000 to maintain the Cortex®-M4 Harvard architecture.
+ * For details, see RM0399 section "2.4 Embedded SRAM".
+ */
+
+#  define STM32_SRAM1_BASE   0x10000000     /* 0x10000000-0x1001ffff: System SRAM1 */
+#  define STM32_SRAM2_BASE   0x10020000     /* 0x10020000-0x1003ffff: System SRAM2 */
+#  define STM32_SRAM3_BASE   0x10040000     /* 0x10040000-0x10047fff: System SRAM3 */
+#  define STM32_SRAM123_BASE 0x10000000     /* 0x10000000-0x10047fff: System SRAM123 */
+#endif
 #define STM32_SRAM4_BASE     0x38000000     /* 0x38000000-0x3800ffff: System SRAM4 */
 #define STM32_BBSRAM_BASE    0x38800000     /* 0x38800000-0x38800fff: System Backup SRAM */
 

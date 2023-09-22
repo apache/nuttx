@@ -2422,7 +2422,7 @@ static struct usbdev_req_s *nrf52_ep_allocreq(struct usbdev_ep_s *ep)
 
   usbtrace(TRACE_EPALLOCREQ, ((struct nrf52_ep_s *)ep)->epphy);
 
-  privreq = (struct nrf52_req_s *)kmm_malloc(sizeof(struct nrf52_req_s));
+  privreq = kmm_malloc(sizeof(struct nrf52_req_s));
   if (!privreq)
     {
       usbtrace(TRACE_DEVERROR(NRF52_TRACEERR_ALLOCFAIL), 0);

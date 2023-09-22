@@ -137,12 +137,565 @@ config LIBC_ARCH_ELF_64BIT
 	default n
 	depends on LIBC_ARCH_ELF
 
+config LIBC_PREVENT_STRING
+	bool
+	default n
+	select LIBC_PREVENT_STRING_KERNEL
+	select LIBC_PREVENT_STRING_USER
+
 config LIBC_PREVENT_STRING_KERNEL
 	bool
 	default n
+	select LIBC_PREVENT_MEMCHR_KERNEL
+	select LIBC_PREVENT_MEMCMP_KERNEL
+	select LIBC_PREVENT_MEMCPY_KERNEL
+	select LIBC_PREVENT_MEMMOVE_KERNEL
+	select LIBC_PREVENT_MEMSET_KERNEL
+	select LIBC_PREVENT_STRCAT_KERNEL
+	select LIBC_PREVENT_STRCASECMP_KERNEL
+	select LIBC_PREVENT_STRCHR_KERNEL
+	select LIBC_PREVENT_STRCHRNUL_KERNEL
+	select LIBC_PREVENT_STRCMP_KERNEL
+	select LIBC_PREVENT_STRCPY_KERNEL
+	select LIBC_PREVENT_STRLCAT_KERNEL
+	select LIBC_PREVENT_STRLEN_KERNEL
+	select LIBC_PREVENT_STRLCPY_KERNEL
+	select LIBC_PREVENT_STRNCASECMP_KERNEL
+	select LIBC_PREVENT_STRNCAT_KERNEL
+	select LIBC_PREVENT_STRNLEN_KERNEL
+	select LIBC_PREVENT_STRNCMP_KERNEL
+	select LIBC_PREVENT_STRNCPY_KERNEL
+	select LIBC_PREVENT_STRRCHR_KERNEL
+
+config LIBC_PREVENT_STRING_USER
+	bool
+	default n
+	select LIBC_PREVENT_MEMCHR_USER
+	select LIBC_PREVENT_MEMCMP_USER
+	select LIBC_PREVENT_MEMCPY_USER
+	select LIBC_PREVENT_MEMMOVE_USER
+	select LIBC_PREVENT_MEMSET_USER
+	select LIBC_PREVENT_STRCAT_USER
+	select LIBC_PREVENT_STRCASECMP_USER
+	select LIBC_PREVENT_STRCHR_USER
+	select LIBC_PREVENT_STRCHRNUL_USER
+	select LIBC_PREVENT_STRCMP_USER
+	select LIBC_PREVENT_STRCPY_USER
+	select LIBC_PREVENT_STRLCAT_USER
+	select LIBC_PREVENT_STRLEN_USER
+	select LIBC_PREVENT_STRLCPY_USER
+	select LIBC_PREVENT_STRNCASECMP_USER
+	select LIBC_PREVENT_STRNCAT_USER
+	select LIBC_PREVENT_STRNLEN_USER
+	select LIBC_PREVENT_STRNCMP_USER
+	select LIBC_PREVENT_STRNCPY_USER
+	select LIBC_PREVENT_STRRCHR_USER
+
+config LIBC_PREVENT_MEMCHR
+	bool
+	default n
+	select LIBC_PREVENT_MEMCHR_KERNEL
+	select LIBC_PREVENT_MEMCHR_USER
+
+config LIBC_PREVENT_MEMCHR_KERNEL
+	bool
+	default n
 	---help---
-		Prevent any implementation of the libc from being built and linked
-		in the kernel, including NuttX's software-defined version of the libc
+		Prevent any implementation of the libc memchr from being built and linked
+		in the kernel, including NuttX's software-defined version of the libc memchr
+		or any other architecture-specific version of it. The ROM-defined
+		version should be linked instead. This option is particularly useful
+		when it's required that the ROM-defined libc memchr to be used by the kernel
+		(for accessing some driver resource, for instance) but the userspace
+		is forbidden to use the same ROM-defined versions. In this case,
+		NuttX's software-defined version of the libc memchr or arch-specific
+		assembly version is built instead.
+
+config LIBC_PREVENT_MEMCHR_USER
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc memchr from being built and linked
+		in the userspace, including NuttX's software-defined version of the
+		libc memchr or any other architecture-specific version of it. A ROM-defined
+		version of the libc memchr may be linked to the userspace by the linker.
+
+config LIBC_PREVENT_MEMCMP
+	bool
+	default n
+	select LIBC_PREVENT_MEMCMP_KERNEL
+	select LIBC_PREVENT_MEMCMP_USER
+
+config LIBC_PREVENT_MEMCMP_KERNEL
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc memcmp from being built and linked
+		in the kernel, including NuttX's software-defined version of the libc memcmp
+		or any other architecture-specific version of it. The ROM-defined
+		version should be linked instead. This option is particularly useful
+		when it's required that the ROM-defined libc to be used by the kernel
+		(for accessing some driver resource, for instance) but the userspace
+		is forbidden to use the same ROM-defined versions. In this case,
+		NuttX's software-defined version of the libc memcmp or arch-specific
+		assembly version is built instead.
+
+config LIBC_PREVENT_MEMCMP_USER
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc memcmp from being built and linked
+		in the userspace, including NuttX's software-defined version of the
+		libc memcmp or any other architecture-specific version of it. A ROM-defined
+		version of the libc memcmp may be linked to the userspace by the linker.
+
+config LIBC_PREVENT_MEMCPY
+	bool
+	default n
+	select LIBC_PREVENT_MEMCPY_KERNEL
+	select LIBC_PREVENT_MEMCPY_USER
+
+config LIBC_PREVENT_MEMCPY_KERNEL
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc memcpy from being built and linked
+		in the kernel, including NuttX's software-defined version of the libc memcpy
+		or any other architecture-specific version of it. The ROM-defined
+		version should be linked instead. This option is particularly useful
+		when it's required that the ROM-defined libc memcpy to be used by the kernel
+		(for accessing some driver resource, for instance) but the userspace
+		is forbidden to use the same ROM-defined versions. In this case,
+		NuttX's software-defined version of the libc memcpy or arch-specific
+		assembly version is built instead.
+
+config LIBC_PREVENT_MEMCPY_USER
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc memcpy from being built and linked
+		in the userspace, including NuttX's software-defined version of the
+		libc memcpy or any other architecture-specific version of it. A ROM-defined
+		version of the libc memcpy may be linked to the userspace by the linker.
+
+config LIBC_PREVENT_MEMMOVE
+	bool
+	default n
+	select LIBC_PREVENT_MEMMOVE_KERNEL
+	select LIBC_PREVENT_MEMMOVE_USER
+
+config LIBC_PREVENT_MEMMOVE_KERNEL
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc memmove from being built and linked
+		in the kernel, including NuttX's software-defined version of the libc memmove
+		or any other architecture-specific version of it. The ROM-defined
+		version should be linked instead. This option is particularly useful
+		when it's required that the ROM-defined libc memmove to be used by the kernel
+		(for accessing some driver resource, for instance) but the userspace
+		is forbidden to use the same ROM-defined versions. In this case,
+		NuttX's software-defined version of the libc memmove or arch-specific
+		assembly version is built instead.
+
+config LIBC_PREVENT_MEMMOVE_USER
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc memmove from being built and linked
+		in the userspace, including NuttX's software-defined version of the
+		libc memmove or any other architecture-specific version of it. A ROM-defined
+		version of the libc memmove may be linked to the userspace by the linker.
+
+config LIBC_PREVENT_MEMSET
+	bool
+	default n
+	select LIBC_PREVENT_MEMSET_KERNEL
+	select LIBC_PREVENT_MEMSET_USER
+
+config LIBC_PREVENT_MEMSET_KERNEL
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc memset from being built and linked
+		in the kernel, including NuttX's software-defined version of the libc memset
+		or any other architecture-specific version of it. The ROM-defined
+		version should be linked instead. This option is particularly useful
+		when it's required that the ROM-defined libc to be used by the kernel
+		(for accessing some driver resource, for instance) but the userspace
+		is forbidden to use the same ROM-defined versions. In this case,
+		NuttX's software-defined version of the libc memset or arch-specific
+		assembly version is built instead.
+
+config LIBC_PREVENT_MEMSET_USER
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc memset from being built and linked
+		in the userspace, including NuttX's software-defined version of the
+		libc memset or any other architecture-specific version of it. A ROM-defined
+		version of the libc memset may be linked to the userspace by the linker.
+
+config LIBC_PREVENT_STRCAT
+	bool
+	default n
+	select LIBC_PREVENT_STRCAT_KERNEL
+	select LIBC_PREVENT_STRCAT_USER
+
+config LIBC_PREVENT_STRCAT_KERNEL
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc strcat from being built and linked
+		in the kernel, including NuttX's software-defined version of the libc strcat
+		or any other architecture-specific version of it. The ROM-defined
+		version should be linked instead. This option is particularly useful
+		when it's required that the ROM-defined libc strcat to be used by the kernel
+		(for accessing some driver resource, for instance) but the userspace
+		is forbidden to use the same ROM-defined versions. In this case,
+		NuttX's software-defined version of the libc strcat or arch-specific
+		assembly version is built instead.
+
+config LIBC_PREVENT_STRCAT_USER
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc strcat from being built and linked
+		in the userspace, including NuttX's software-defined version of the
+		libc strcat or any other architecture-specific version of it. A ROM-defined
+		version of the libc strcat may be linked to the userspace by the linker.
+
+config LIBC_PREVENT_STRCASECMP
+	bool
+	default n
+	select LIBC_PREVENT_STRCASECMP_KERNEL
+	select LIBC_PREVENT_STRCASECMP_USER
+
+config LIBC_PREVENT_STRCASECMP_KERNEL
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc strcasecmp from being built and linked
+		in the kernel, including NuttX's software-defined version of the libc strcasecmp
+		or any other architecture-specific version of it. The ROM-defined
+		version should be linked instead. This option is particularly useful
+		when it's required that the ROM-defined libc strcasecmp to be used by the kernel
+		(for accessing some driver resource, for instance) but the userspace
+		is forbidden to use the same ROM-defined versions. In this case,
+		NuttX's software-defined version of the libc strcasecmp or arch-specific
+		assembly version is built instead.
+
+config LIBC_PREVENT_STRCASECMP_USER
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc strcasecmp from being built and linked
+		in the userspace, including NuttX's software-defined version of the
+		libc strcasecmp or any other architecture-specific version of it. A ROM-defined
+		version of the libc strcasecmp may be linked to the userspace by the linker.
+
+config LIBC_PREVENT_STRCHR
+	bool
+	default n
+	select LIBC_PREVENT_STRCHR_KERNEL
+	select LIBC_PREVENT_STRCHR_USER
+
+config LIBC_PREVENT_STRCHR_KERNEL
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc strchr from being built and linked
+		in the kernel, including NuttX's software-defined version of the libc strchr
+		or any other architecture-specific version of it. The ROM-defined
+		version should be linked instead. This option is particularly useful
+		when it's required that the ROM-defined libc to be used by the kernel
+		(for accessing some driver resource, for instance) but the userspace
+		is forbidden to use the same ROM-defined versions. In this case,
+		NuttX's software-defined version of the libc strchr or arch-specific
+		assembly version is built instead.
+
+config LIBC_PREVENT_STRCHR_USER
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc strchr from being built and linked
+		in the userspace, including NuttX's software-defined version of the
+		libc strchr or any other architecture-specific version of it. A ROM-defined
+		version of the libc strchr may be linked to the userspace by the linker.
+
+config LIBC_PREVENT_STRCHRNUL
+	bool
+	default n
+	select LIBC_PREVENT_STRCHRNUL_KERNEL
+	select LIBC_PREVENT_STRCHRNUL_USER
+
+config LIBC_PREVENT_STRCHRNUL_KERNEL
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc strchrnul from being built and linked
+		in the kernel, including NuttX's software-defined version of the libc strchrnul
+		or any other architecture-specific version of it. The ROM-defined
+		version should be linked instead. This option is particularly useful
+		when it's required that the ROM-defined libc strchrnul to be used by the kernel
+		(for accessing some driver resource, for instance) but the userspace
+		is forbidden to use the same ROM-defined versions. In this case,
+		NuttX's software-defined version of the libc strchrnul or arch-specific
+		assembly version is built instead.
+
+config LIBC_PREVENT_STRCHRNUL_USER
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc strchrnul from being built and linked
+		in the userspace, including NuttX's software-defined version of the
+		libc strchrnul or any other architecture-specific version of it. A ROM-defined
+		version of the libc strchrnul may be linked to the userspace by the linker.
+
+config LIBC_PREVENT_STRCMP
+	bool
+	default n
+	select LIBC_PREVENT_STRCMP_KERNEL
+	select LIBC_PREVENT_STRCMP_USER
+
+config LIBC_PREVENT_STRCMP_KERNEL
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc strcmp from being built and linked
+		in the kernel, including NuttX's software-defined version of the libc strcmp
+		or any other architecture-specific version of it. The ROM-defined
+		version should be linked instead. This option is particularly useful
+		when it's required that the ROM-defined libc strcmp to be used by the kernel
+		(for accessing some driver resource, for instance) but the userspace
+		is forbidden to use the same ROM-defined versions. In this case,
+		NuttX's software-defined version of the libc strcmp or arch-specific
+		assembly version is built instead.
+
+config LIBC_PREVENT_STRCMP_USER
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc strcmp from being built and linked
+		in the userspace, including NuttX's software-defined version of the
+		libc strcmp or any other architecture-specific version of it. A ROM-defined
+		version of the libc strcmp may be linked to the userspace by the linker.
+
+config LIBC_PREVENT_STRCPY
+	bool
+	default n
+	select LIBC_PREVENT_STRCPY_KERNEL
+	select LIBC_PREVENT_STRCPY_USER
+
+config LIBC_PREVENT_STRCPY_KERNEL
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc strcpy from being built and linked
+		in the kernel, including NuttX's software-defined version of the libc strcpy
+		or any other architecture-specific version of it. The ROM-defined
+		version should be linked instead. This option is particularly useful
+		when it's required that the ROM-defined libc strcpy to be used by the kernel
+		(for accessing some driver resource, for instance) but the userspace
+		is forbidden to use the same ROM-defined versions. In this case,
+		NuttX's software-defined version of the libc strcpy or arch-specific
+		assembly version is built instead.
+
+config LIBC_PREVENT_STRCPY_USER
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc strcpy from being built and linked
+		in the userspace, including NuttX's software-defined version of the
+		libc strcpy or any other architecture-specific version of it. A ROM-defined
+		version of the libc strcpy may be linked to the userspace by the linker.
+
+config LIBC_PREVENT_STRLCAT
+	bool
+	default n
+	select LIBC_PREVENT_STRLCAT_KERNEL
+	select LIBC_PREVENT_STRLCAT_USER
+
+config LIBC_PREVENT_STRLCAT_KERNEL
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc strlcat from being built and linked
+		in the kernel, including NuttX's software-defined version of the libc strlcat
+		or any other architecture-specific version of it. The ROM-defined
+		version should be linked instead. This option is particularly useful
+		when it's required that the ROM-defined libc strlcat to be used by the kernel
+		(for accessing some driver resource, for instance) but the userspace
+		is forbidden to use the same ROM-defined versions. In this case,
+		NuttX's software-defined version of the libc strlcat or arch-specific
+		assembly version is built instead.
+
+config LIBC_PREVENT_STRLCAT_USER
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc strlcat from being built and linked
+		in the userspace, including NuttX's software-defined version of the
+		libc strlcat or any other architecture-specific version of it. A ROM-defined
+		version of the libc strlcat may be linked to the userspace by the linker.
+
+config LIBC_PREVENT_STRLEN
+	bool
+	default n
+	select LIBC_PREVENT_STRLEN_KERNEL
+	select LIBC_PREVENT_STRLEN_USER
+
+config LIBC_PREVENT_STRLEN_KERNEL
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc strlen from being built and linked
+		in the kernel, including NuttX's software-defined version of the libc strlen
+		or any other architecture-specific version of it. The ROM-defined
+		version should be linked instead. This option is particularly useful
+		when it's required that the ROM-defined libc strlen to be used by the kernel
+		(for accessing some driver resource, for instance) but the userspace
+		is forbidden to use the same ROM-defined versions. In this case,
+		NuttX's software-defined version of the libc strlen or arch-specific
+		assembly version is built instead.
+
+config LIBC_PREVENT_STRLEN_USER
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc strlen from being built and linked
+		in the userspace, including NuttX's software-defined version of the
+		libc strlen or any other architecture-specific version of it. A ROM-defined
+		version of the libc strlen may be linked to the userspace by the linker.
+
+config LIBC_PREVENT_STRLCPY
+	bool
+	default n
+	select LIBC_PREVENT_STRLCPY_KERNEL
+	select LIBC_PREVENT_STRLCPY_USER
+
+config LIBC_PREVENT_STRLCPY_KERNEL
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc strlcpy from being built and linked
+		in the kernel, including NuttX's software-defined version of the libc strlcpy
+		or any other architecture-specific version of it. The ROM-defined
+		version should be linked instead. This option is particularly useful
+		when it's required that the ROM-defined libc strlcpy to be used by the kernel
+		(for accessing some driver resource, for instance) but the userspace
+		is forbidden to use the same ROM-defined versions. In this case,
+		NuttX's software-defined version of the libc strlcpy or arch-specific
+		assembly version is built instead.
+
+config LIBC_PREVENT_STRLCPY_USER
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc strlcpy from being built and linked
+		in the userspace, including NuttX's software-defined version of the
+		libc strlcpy or any other architecture-specific version of it. A ROM-defined
+		version of the libc strlcpy may be linked to the userspace by the linker.
+
+config LIBC_PREVENT_STRNCASECMP
+	bool
+	default n
+	select LIBC_PREVENT_STRNCASECMP_KERNEL
+	select LIBC_PREVENT_STRNCASECMP_USER
+
+config LIBC_PREVENT_STRNCASECMP_KERNEL
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc strncasecmp from being built and linked
+		in the kernel, including NuttX's software-defined version of the libc strncasecmp
+		or any other architecture-specific version of it. The ROM-defined
+		version should be linked instead. This option is particularly useful
+		when it's required that the ROM-defined libc strncasecmp to be used by the kernel
+		(for accessing some driver resource, for instance) but the userspace
+		is forbidden to use the same ROM-defined versions. In this case,
+		NuttX's software-defined version of the libc strncasecmp or arch-specific
+		assembly version is built instead.
+
+config LIBC_PREVENT_STRNCASECMP_USER
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc strncasecmp from being built and linked
+		in the userspace, including NuttX's software-defined version of the
+		libc strncasecmp or any other architecture-specific version of it. A ROM-defined
+		version of the libc strncasecmp may be linked to the userspace by the linker.
+
+config LIBC_PREVENT_STRNCAT
+	bool
+	default n
+	select LIBC_PREVENT_STRNCAT_KERNEL
+	select LIBC_PREVENT_STRNCAT_USER
+
+config LIBC_PREVENT_STRNCAT_KERNEL
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc strncat from being built and linked
+		in the kernel, including NuttX's software-defined version of the libc strncat
+		or any other architecture-specific version of it. The ROM-defined
+		version should be linked instead. This option is particularly useful
+		when it's required that the ROM-defined libc strncat to be used by the kernel
+		(for accessing some driver resource, for instance) but the userspace
+		is forbidden to use the same ROM-defined versions. In this case,
+		NuttX's software-defined version of the libc strncat or arch-specific
+		assembly version is built instead.
+
+config LIBC_PREVENT_STRNCAT_USER
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc strncat from being built and linked
+		in the userspace, including NuttX's software-defined version of the
+		libc strncat or any other architecture-specific version of it. A ROM-defined
+		version of the libc strncat may be linked to the userspace by the linker.
+
+config LIBC_PREVENT_STRNLEN
+	bool
+	default n
+	select LIBC_PREVENT_STRNLEN_KERNEL
+	select LIBC_PREVENT_STRNLEN_USER
+
+config LIBC_PREVENT_STRNLEN_KERNEL
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc strnlen from being built and linked
+		in the kernel, including NuttX's software-defined version of the libc strnlen
+		or any other architecture-specific version of it. The ROM-defined
+		version should be linked instead. This option is particularly useful
+		when it's required that the ROM-defined libc strnlen to be used by the kernel
+		(for accessing some driver resource, for instance) but the userspace
+		is forbidden to use the same ROM-defined versions. In this case,
+		NuttX's software-defined version of the libc strnlen or arch-specific
+		assembly version is built instead.
+
+config LIBC_PREVENT_STRNLEN_USER
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc strnlen from being built and linked
+		in the userspace, including NuttX's software-defined version of the
+		libc strnlen or any other architecture-specific version of it. A ROM-defined
+		version of the libc strnlen may be linked to the userspace by the linker.
+
+config LIBC_PREVENT_STRNCMP
+	bool
+	default n
+	select LIBC_PREVENT_STRNCMP_KERNEL
+	select LIBC_PREVENT_STRNCMP_USER
+
+config LIBC_PREVENT_STRNCMP_KERNEL
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc strncmp from being built and linked
+		in the kernel, including NuttX's software-defined version of the libc strncmp
 		or any other architecture-specific version of it. The ROM-defined
 		version should be linked instead. This option is particularly useful
 		when it's required that the ROM-defined libc to be used by the kernel
@@ -151,15 +704,72 @@ config LIBC_PREVENT_STRING_KERNEL
 		NuttX's software-defined version of the libc or arch-specific
 		assembly version is built instead.
 
-config LIBC_PREVENT_STRING_USER
+config LIBC_PREVENT_STRNCMP_USER
 	bool
 	default n
 	---help---
-		Prevent any implementation of the libc from being built and linked
+		Prevent any implementation of the libc strncmp from being built and linked
 		in the userspace, including NuttX's software-defined version of the
-		libc or any other architecture-specific version of it. A ROM-defined
-		version of the libc may be linked to the userspace by the linker.
+		libc strncmp or any other architecture-specific version of it. A ROM-defined
+		version of the libc strncmp may be linked to the userspace by the linker.
 
+config LIBC_PREVENT_STRNCPY
+	bool
+	default n
+	select LIBC_PREVENT_STRNCPY_KERNEL
+	select LIBC_PREVENT_STRNCPY_USER
+
+config LIBC_PREVENT_STRNCPY_KERNEL
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc strncpy from being built and linked
+		in the kernel, including NuttX's software-defined version of the libc strncpy
+		or any other architecture-specific version of it. The ROM-defined
+		version should be linked instead. This option is particularly useful
+		when it's required that the ROM-defined libc strncpy to be used by the kernel
+		(for accessing some driver resource, for instance) but the userspace
+		is forbidden to use the same ROM-defined versions. In this case,
+		NuttX's software-defined version of the libc strncpy or arch-specific
+		assembly version is built instead.
+
+config LIBC_PREVENT_STRNCPY_USER
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc strncpy from being built and linked
+		in the userspace, including NuttX's software-defined version of the
+		libc strncpy or any other architecture-specific version of it. A ROM-defined
+		version of the libc strncpy may be linked to the userspace by the linker.
+
+config LIBC_PREVENT_STRRCHR
+	bool
+	default n
+	select LIBC_PREVENT_STRRCHR_KERNEL
+	select LIBC_PREVENT_STRRCHR_USER
+
+config LIBC_PREVENT_STRRCHR_KERNEL
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc strrchr from being built and linked
+		in the kernel, including NuttX's software-defined version of the libc strrchr
+		or any other architecture-specific version of it. The ROM-defined
+		version should be linked instead. This option is particularly useful
+		when it's required that the ROM-defined libc strrchr to be used by the kernel
+		(for accessing some driver resource, for instance) but the userspace
+		is forbidden to use the same ROM-defined versions. In this case,
+		NuttX's software-defined version of the libc strrchr or arch-specific
+		assembly version is built instead.
+
+config LIBC_PREVENT_STRRCHR_USER
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc strrchr from being built and linked
+		in the userspace, including NuttX's software-defined version of the
+		libc strrchr or any other architecture-specific version of it. A ROM-defined
+		version of the libc strrchr may be linked to the userspace by the linker.
 
 # One or more the of above may be selected by architecture specific logic
 

@@ -21,7 +21,7 @@
 ifeq ($(CONFIG_AUDIO_SRC),y)
 
 PACKAGE=libsamplerate
-VERSION=0.1.9
+VERSION=0.2.2
 
 # Download and unpack tarball if no git repo found
 ifeq ($(wildcard libsamplerate/.git),)
@@ -44,6 +44,8 @@ CSRCS += src_zoh.c
 CFLAGS += -DPACKAGE=\"$(PACKAGE)\" -DVERSION=\"$(VERSION)\"
 
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)include$(DELIM)nuttx$(DELIM)audio
+
+CFLAGS += -DCPU_CLIPS_NEGATIVE=0
 
 ifeq ($(CONFIG_SINC_FAST_CONVERTER),y)
 CFLAGS += -DENABLE_SINC_FAST_CONVERTER

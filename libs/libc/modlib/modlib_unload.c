@@ -50,7 +50,7 @@
  *
  ****************************************************************************/
 
-int modlib_unload(struct mod_loadinfo_s *loadinfo)
+int modlib_unload(FAR struct mod_loadinfo_s *loadinfo)
 {
   /* Free all working buffers */
 
@@ -58,18 +58,27 @@ int modlib_unload(struct mod_loadinfo_s *loadinfo)
 
   /* Release memory holding the relocated ELF image */
 
-  if (loadinfo->textalloc != 0)
-    {
-#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
-      up_textheap_free((FAR void *)loadinfo->textalloc);
-#else
-      lib_free((FAR void *)loadinfo->textalloc);
-#endif
-    }
+  /* ET_DYN has a single allocation so we only free textalloc */
 
-  if (loadinfo->datastart != 0)
+  if (loadinfo->ehdr.e_type != ET_DYN)
     {
-      lib_free((FAR void *)loadinfo->datastart);
+      if (loadinfo->textalloc != 0)
+        {
+#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
+           up_textheap_free((FAR void *)loadinfo->textalloc);
+#else
+           lib_free((FAR void *)loadinfo->textalloc);
+#endif
+        }
+
+      if (loadinfo->datastart != 0)
+        {
+          lib_free((FAR void *)loadinfo->datastart);
+        }
+    }
+  else
+    {
+      lib_free((FAR void *)loadinfo->textalloc);
     }
 
   /* Clear out all indications of the allocated address environment */

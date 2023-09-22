@@ -22,6 +22,7 @@ import binascii
 import logging
 import os
 import re
+import shutil
 import socket
 import struct
 import sys
@@ -36,79 +37,9 @@ SHF_EXEC = 0x4
 SHF_WRITE_ALLOC = SHF_WRITE | SHF_ALLOC
 SHF_ALLOC_EXEC = SHF_ALLOC | SHF_EXEC
 
+GDB_SIGNAL_DEFAULT = 7
 
 logger = logging.getLogger()
-
-
-class dump_elf_file:
-    """
-    Class to parse ELF file for memory content in various sections.
-    There are read-only sections (e.g. text and rodata) where
-    the memory content does not need to be dumped via coredump
-    and can be retrieved from the ELF file.
-    """
-
-    def __init__(self, elffile):
-        self.elffile = elffile
-        self.fd = None
-        self.elf = None
-        self.memories = list()
-
-    def open(self):
-        self.fd = open(self.elffile, "rb")
-        self.elf = ELFFile(self.fd)
-
-    def close(self):
-        self.fd.close()
-
-    def parse(self):
-        if self.fd is None:
-            self.open()
-
-        for section in self.elf.iter_sections():
-            # REALLY NEED to match exact type as all other sections
-            # (debug, text, etc.) are descendants where
-            # isinstance() would match.
-            if (
-                type(section) is not elftools.elf.sections.Section
-            ):  # pylint: disable=unidiomatic-typecheck
-                continue
-
-            size = section["sh_size"]
-            flags = section["sh_flags"]
-            start = section["sh_addr"]
-            end = start + size - 1
-
-            store = False
-            desc = "?"
-
-            if section["sh_type"] == "SHT_PROGBITS":
-                if (flags & SHF_ALLOC_EXEC) == SHF_ALLOC_EXEC:
-                    # Text section
-                    store = True
-                    desc = "text"
-                elif (flags & SHF_WRITE_ALLOC) == SHF_WRITE_ALLOC:
-                    # Data section
-                    #
-                    # Running app changes the content so no need
-                    # to store
-                    pass
-                elif (flags & SHF_ALLOC) == SHF_ALLOC:
-                    # Read only data section
-                    store = True
-                    desc = "read-only data"
-
-            if store:
-                memory = {"start": start, "end": end, "data": section.data()}
-                logger.info(
-                    "ELF Section: 0x%x to 0x%x of size %d (%s)"
-                    % (memory["start"], memory["end"], len(memory["data"]), desc)
-                )
-
-                self.memories.append(memory)
-
-        return True
-
 
 reg_table = {
     "arm": {
@@ -143,6 +74,25 @@ reg_table = {
         "SB": 9,
         "SL": 10,
         "FP": 11,
+        "IP": 12,
+        "SP": 13,
+        "LR": 14,
+        "PC": 15,
+        "CPSR": 41,
+    },
+    "arm-t": {
+        "R0": 0,
+        "R1": 1,
+        "R2": 2,
+        "R3": 3,
+        "R4": 4,
+        "R5": 5,
+        "R6": 6,
+        "FP": 7,
+        "R8": 8,
+        "SB": 9,
+        "SL": 10,
+        "R11": 11,
         "IP": 12,
         "SP": 13,
         "LR": 14,
@@ -184,139 +134,263 @@ reg_table = {
         "T6": 31,
         "PC": 32,
     },
-    "xtensa": {
+    # use xtensa-esp32s3-elf-gdb register table
+    "esp32s3": {
         "PC": 0,
-        "SAR": 68,
         "PS": 73,
-        "SCOM": 29,
-        "A0": 21,
-        "A1": 22,
-        "A2": 23,
-        "A3": 24,
-        "A4": 25,
-        "A5": 26,
-        "A6": 27,
-        "A7": 28,
-        "A8": 29,
-        "A9": 30,
-        "A10": 31,
-        "A11": 32,
-        "A12": 33,
-        "A13": 34,
-        "A14": 35,
-        "A15": 36,
+        "A0": 1,
+        "A1": 2,
+        "A2": 3,
+        "A3": 4,
+        "A4": 5,
+        "A5": 6,
+        "A6": 7,
+        "A7": 8,
+        "A8": 9,
+        "A9": 10,
+        "A10": 11,
+        "A11": 12,
+        "A12": 13,
+        "A13": 14,
+        "A14": 15,
+        "A15": 16,
+        "WINDOWBASE": 69,
+        "WINDOWSTART": 70,
+        "CAUSE": 190,
+        "VADDR": 196,
+        "LBEG": 65,
+        "LEND": 66,
+        "LCNT": 67,
+        "SAR": 68,
+        "SCOM": 76,
+    },
+    # use xt-gdb register table
+    "xtensa": {
+        "PC": 32,
+        "PS": 742,
+        "A0": 256,
+        "A1": 257,
+        "A2": 258,
+        "A3": 259,
+        "A4": 260,
+        "A5": 261,
+        "A6": 262,
+        "A7": 263,
+        "A8": 264,
+        "A9": 265,
+        "A10": 266,
+        "A11": 267,
+        "A12": 268,
+        "A13": 269,
+        "A14": 270,
+        "A15": 271,
+        "WINDOWBASE": 584,
+        "WINDOWSTART": 585,
+        "CAUSE": 744,
+        "VADDR": 750,
+        "LBEG": 512,
+        "LEND": 513,
+        "LCNT": 514,
+        "SAR": 515,
+        "SCOM": 524,
+    },
+}
+
+# make sure the a0-a15 can be remapped to the correct register
+reg_fix_value = {
+    "esp32s3": {
+        "WINDOWBASE": 0,
+        "WINDOWSTART": 1,
+        "PS": 0x40000,
+    },
+    "xtensa": {
+        "WINDOWBASE": 0,
+        "WINDOWSTART": 1,
+        "PS": 0x40000,
     },
 }
 
 
-class dump_log_file:
+def str_get_after(s, sub):
+    index = s.find(sub)
+    if index == -1:
+        return None
+    return s[index + len(sub) :]
+
+
+def pack_memory(start, end, data):
+    return {"start": start, "end": end, "data": data}
+
+
+class DumpELFFile:
+    """
+    Class to parse ELF file for memory content in various sections.
+    There are read-only sections (e.g. text and rodata) where
+    the memory content does not need to be dumped via coredump
+    and can be retrieved from the ELF file.
+    """
+
+    def __init__(self, elffile: str):
+        self.elffile = elffile
+        self.__memories = []
+
+    def parse(self):
+        self.__memories = []
+        elf = ELFFile.load_from_path(self.elffile)
+
+        for section in elf.iter_sections():
+            # REALLY NEED to match exact type as all other sections
+            # (debug, text, etc.) are descendants where
+            # isinstance() would match.
+            if (
+                type(section) is not elftools.elf.sections.Section
+            ):  # pylint: disable=unidiomatic-typecheck
+                continue
+
+            size = section["sh_size"]
+            flags = section["sh_flags"]
+            start = section["sh_addr"]
+            end = start + size - 1
+
+            store = False
+            desc = "?"
+
+            if section["sh_type"] == "SHT_PROGBITS":
+                if (flags & SHF_ALLOC_EXEC) == SHF_ALLOC_EXEC:
+                    # Text section
+                    store = True
+                    desc = "text"
+                elif (flags & SHF_WRITE_ALLOC) == SHF_WRITE_ALLOC:
+                    # Data section
+                    #
+                    # Running app changes the content so no need
+                    # to store
+                    pass
+                elif (flags & SHF_ALLOC) == SHF_ALLOC:
+                    # Read only data section
+                    store = True
+                    desc = "read-only data"
+
+            if store:
+                memory = pack_memory(start, end, section.data())
+                logger.debug(
+                    f"ELF Section: {hex(memory['start'])} to {hex(memory['end'])} of size {len(memory['data'])} ({desc})"
+                )
+
+                self.__memories.append(memory)
+
+        elf.close()
+        return True
+
+    def get_memories(self):
+        return self.__memories
+
+
+class DumpLogFile:
     def __init__(self, logfile):
         self.logfile = logfile
-        self.fd = None
-        self.arch = ""
         self.registers = []
-        self.memories = list()
+        self.__memories = list()
+        self.reg_table = dict()
 
-    def open(self):
-        self.fd = open(self.logfile, "r")
+    def _init_register(self):
+        self.registers = [b"x"] * (max(self.reg_table.values()) + 1)
 
-    def close(self):
-        self.fd.closeself()
+    def _parse_register(self, line):
+        line = str_get_after(line, "up_dump_register:")
+        if line is None:
+            return False
+
+        line = line.strip()
+        # find register value
+        find_res = re.findall(r"(?P<REG>\w+): (?P<REGV>[0-9a-fA-F]+)", line)
+
+        for reg_name, reg_val in find_res:
+            if reg_name in self.reg_table:
+                reg_index = self.reg_table[reg_name]
+                self.registers[reg_index] = int(reg_val, 16)
+        return True
+
+    def _parse_fix_register(self, arch):
+        if arch in reg_fix_value:
+            for reg_name, reg_vals in reg_fix_value[arch].items():
+                reg_index = self.reg_table[reg_name]
+                self.registers[reg_index] = reg_vals
+
+    def _parse_stack(self, line, start, data):
+        line = str_get_after(line, "stack_dump:")
+        if line is None:
+            return None
+
+        line = line.strip()
+
+        # find stack-dump
+        match_res = re.match(r"(?P<ADDR_START>0x\w+): (?P<VALS>( ?\w+)+)", line)
+        if match_res is None:
+            return None
+
+        addr_start = int(match_res.groupdict()["ADDR_START"], 16)
+        if start + len(data) != addr_start:
+            # stack is not contiguous
+            if len(data) == 0:
+                start = addr_start
+            else:
+                self.__memories.append(pack_memory(start, start + len(data), data))
+                data = b""
+                start = addr_start
+
+        for val in match_res.groupdict()["VALS"].split():
+            data = data + struct.pack("<I", int(val, 16))
+
+        return start, data
 
     def parse(self, arch):
+        self.reg_table = reg_table[arch]
+        self._init_register()
+
         data = bytes()
         start = 0
-        if self.fd is None:
-            self.open()
-        while 1:
-            line = self.fd.readline()
+
+        if isinstance(self.logfile, list):
+            lines = self.logfile
+        else:
+            with open(self.logfile, "r") as f:
+                lines = f.readlines()
+
+        for line_num, line in enumerate(lines):
             if line == "":
                 break
 
-            tmp = re.search("up_dump_register:", line)
-            if tmp is not None:
-                # find arch
-                if arch is None:
-                    self.arch = tmp.group(1)
-                else:
-                    self.arch = arch
+            try:
+                if self._parse_register(line):
+                    continue
 
-                if self.arch not in reg_table:
-                    logger.error("%s not supported" % (self.arch))
-                # init register list
-                if len(self.registers) == 0:
-                    for x in range(max(reg_table[self.arch].values()) + 1):
-                        self.registers.append(b"x")
+                res = self._parse_stack(line, start, data)
+                if res:
+                    start, data = res
+                    continue
 
-                # find register value
-                line = line[tmp.span()[1] :]
-                line = line.replace("\n", " ")
-                while 1:
-                    tmp = re.search("([^ ]+):", line)
-                    if tmp is None:
-                        break
-                    register = tmp.group(1)
-                    line = line[tmp.span()[1] :]
-                    tmp = re.search("([0-9a-fA-F]+) ", line)
-                    if tmp is None:
-                        break
-                    if register in reg_table[self.arch].keys():
-                        self.registers[reg_table[self.arch][register]] = int(
-                            "0x" + tmp.group().replace(" ", ""), 16
-                        )
-                    line = line[tmp.span()[1] :]
-                continue
+            except Exception as e:
+                logger.error("parse log file error: %s line_number %d" % (e, line_num))
+                sys.exit(1)
 
-            tmp = re.search("stack_dump:", line)
-            if tmp is not None:
-                # find stackdump
-                line = line[tmp.span()[1] :]
-                tmp = re.search("([0-9a-fA-F]+):", line)
-                if tmp is not None:
-                    line_start = int("0x" + tmp.group()[:-1], 16)
+        self._parse_fix_register(arch)
+        if data:
+            self.__memories.append(pack_memory(start, start + len(data), data))
 
-                    if start + len(data) != line_start:
-                        # stack is not contiguous
-                        if len(data) == 0:
-                            start = line_start
-                        else:
-                            memory = {
-                                "start": start,
-                                "end": start + len(data),
-                                "data": data,
-                            }
-                            self.memories.append(memory)
-                            data = b""
-                            start = line_start
-
-                    line = line[tmp.span()[1] :]
-                    line = line.replace("\n", " ")
-
-                    while 1:
-                        # record stack value
-                        tmp = re.search(" ([0-9a-fA-F]+)", line)
-                        if tmp is None:
-                            break
-                        data = data + struct.pack(
-                            "<I", int("0x" + tmp.group().replace(" ", ""), 16)
-                        )
-                        line = line[tmp.span()[1] :]
-
-        if len(data):
-            memory = {"start": start, "end": start + len(data), "data": data}
-            self.memories.append(memory)
+    def get_memories(self):
+        return self.__memories
 
 
-GDB_SIGNAL_DEFAULT = 7
-
-
-class gdb_stub:
-    def __init__(self, logfile, elffile):
+class GDBStub:
+    def __init__(self, logfile: DumpLogFile, elffile: DumpELFFile):
         self.logfile = logfile
         self.elffile = elffile
         self.socket = None
         self.gdb_signal = GDB_SIGNAL_DEFAULT
-        self.mem_regions = self.elffile.memories + self.logfile.memories
+        self.mem_regions = self.elffile.get_memories() + self.logfile.get_memories()
+
+        self.mem_regions.sort(key=lambda x: x["start"])
 
     def get_gdb_packet(self):
         socket = self.socket
@@ -401,11 +475,15 @@ class gdb_stub:
         self.put_gdb_packet(pkt)
 
     def handle_register_single_read_packet(self, pkt):
-        # Mark registers as "<unavailable>".
-        # 'p' packets are usually used for registers
-        # other than the general ones (e.g. eax, ebx)
-        # so we can safely reply "xxxxxxxx" here.
-        self.put_gdb_packet(b"x" * 8)
+        reg_fmt = "<I"
+        logger.debug(f"pkt: {pkt}")
+
+        reg = int("0x" + pkt[1:].decode("utf8"), 16)
+        if reg < len(self.logfile.registers) and self.logfile.registers[reg] != b"x":
+            bval = struct.pack(reg_fmt, self.logfile.registers[reg])
+            self.put_gdb_packet(binascii.hexlify(bval))
+        else:
+            self.put_gdb_packet(b"x" * 8)
 
     def handle_register_group_write_packet(self):
         # the 'G' packet for writing to a group of registers
@@ -423,19 +501,29 @@ class gdb_stub:
         # the 'm' packet for reading memory: m<addr>,<len>
 
         def get_mem_region(addr):
-            for r in self.mem_regions:
-                if r["start"] <= addr <= r["end"]:
-                    return r
+            left = 0
+            right = len(self.mem_regions) - 1
+            while left <= right:
+                mid = (left + right) // 2
+                if (
+                    self.mem_regions[mid]["start"]
+                    <= addr
+                    <= self.mem_regions[mid]["end"]
+                ):
+                    return self.mem_regions[mid]
+                elif addr < self.mem_regions[mid]["start"]:
+                    right = mid - 1
+                else:
+                    left = mid + 1
 
             return None
 
         # extract address and length from packet
         # and convert them into usable integer values
         addr, length = pkt[1:].split(b",")
-        s_addr = int(b"0x" + addr, 16)
-        length = int(b"0x" + length, 16)
+        s_addr = int(addr, 16)
+        length = int(length, 16)
 
-        # FIXME: Need more efficient way of extracting memory content
         remaining = length
         addr = s_addr
         barray = b""
@@ -444,10 +532,6 @@ class gdb_stub:
             if r is None:
                 barray = None
                 break
-
-            if addr > r["end"]:
-                r = get_mem_region(addr)
-                continue
 
             offset = addr - r["start"]
             barray += r["data"][offset : offset + 1]
@@ -470,7 +554,7 @@ class gdb_stub:
     def handle_general_query_packet(self, pkt):
         self.put_gdb_packet(b"")
 
-    def run(self, socket):
+    def run(self, socket: socket.socket):
         self.socket = socket
 
         while True:
@@ -508,27 +592,79 @@ class gdb_stub:
                 self.put_gdb_packet(b"")
 
 
-if __name__ == "__main__":
+def arg_parser():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-e", "--elffile", required=True, help="elffile")
-
     parser.add_argument("-l", "--logfile", required=True, help="logfile")
-
     parser.add_argument(
         "-a",
         "--arch",
-        help="select architecture,if not use this options,\
-                        The architecture will be inferred from the logfile",
-        choices=['arm', 'arm-a', 'riscv', 'xtensa'],
+        help="select architecture,if not use this options",
+        required=True,
+        choices=[arch for arch in reg_table.keys()],
     )
-
     parser.add_argument("-p", "--port", help="gdbport", type=int, default=1234)
-
     parser.add_argument("--debug", action="store_true", default=False)
+    return parser.parse_args()
 
-    args = parser.parse_args()
 
+def config_log(debug):
+    if debug:
+        logger.setLevel(logging.DEBUG)
+    else:
+        logger.setLevel(logging.INFO)
+
+    logging.basicConfig(format="[%(levelname)s][%(name)s] %(message)s")
+
+
+def auto_parse_log_file(logfile):
+    with open(logfile, errors="ignore") as f:
+        dumps = []
+        tmp_dmp = []
+        start = False
+        for line in f.readlines():
+            line = line.strip()
+            if (
+                "up_dump_register" in line
+                or "dump_stack" in line
+                or "stack_dump" in line
+            ):
+                start = True
+            else:
+                if start:
+                    start = False
+                    dumps.append(tmp_dmp)
+                    tmp_dmp = []
+            if start:
+                tmp_dmp.append(line)
+
+        if start:
+            dumps.append(tmp_dmp)
+
+    terminal_width, _ = shutil.get_terminal_size()
+    terminal_width = max(terminal_width - 4, 0)
+
+    def get_one_line(lines):
+        return "    ".join(lines[:2])[:terminal_width]
+
+    if len(dumps) == 0:
+        logger.error(f"Cannot find any dump in {logfile}, exiting...")
+        sys.exit(1)
+
+    if len(dumps) == 1:
+        return dumps[0]
+
+    for i in range(len(dumps)):
+        print(f"{i}: {get_one_line(dumps[i])}")
+
+    index_input = input("Dump number[0]: ").strip()
+    if index_input == "":
+        index_input = 0
+    return dumps[int(index_input)]
+
+
+def main(args):
     if not os.path.isfile(args.elffile):
         logger.error(f"Cannot find file {args.elffile}, exiting...")
         sys.exit(1)
@@ -537,18 +673,16 @@ if __name__ == "__main__":
         logger.error(f"Cannot find file {args.logfile}, exiting...")
         sys.exit(1)
 
-    if args.debug:
-        logger.setLevel(logging.DEBUG)
-    else:
-        logger.setLevel(logging.INFO)
+    config_log(args.debug)
 
-    log = dump_log_file(args.logfile)
+    res = auto_parse_log_file(args.logfile)
+
+    log = DumpLogFile(res)
     log.parse(args.arch)
-    elf = dump_elf_file(args.elffile)
+    elf = DumpELFFile(args.elffile)
     elf.parse()
 
-    gdbstub = gdb_stub(log, elf)
-    logging.basicConfig(format="[%(levelname)s][%(name)s] %(message)s")
+    gdb_stub = GDBStub(log, elf)
 
     gdbserver = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -560,14 +694,21 @@ if __name__ == "__main__":
     gdbserver.listen(1)
 
     logger.info(f"Waiting GDB connection on port {args.port} ...")
+    logger.info("Press Ctrl+C to stop ...")
+    logger.info(f'Hint: gdb {args.elffile} -ex "target remote localhost:{args.port}"')
 
-    conn, remote = gdbserver.accept()
+    while True:
+        try:
+            conn, remote = gdbserver.accept()
 
-    if conn:
-        logger.info(f"Accepted GDB connection from {remote}")
-
-        gdbstub.run(conn)
-
-        conn.close()
+            if conn:
+                logger.info(f"Accepted GDB connection from {remote}")
+                gdb_stub.run(conn)
+        except KeyboardInterrupt:
+            break
 
     gdbserver.close()
+
+
+if __name__ == "__main__":
+    main(arg_parser())

@@ -307,7 +307,7 @@ Select the ``Custom Hello App`` and run the usual build process. If successful
 you can run the newly included ``custom_hello`` app.
 
 --------------------------------------------------------------------------
-3. Include an Additional Custom Cirectory Outside of the Main Source Trees
+3. Include an Additional Custom directory Outside of the Main Source Trees
 --------------------------------------------------------------------------
 
 Thia is similar to the previous approach, but places the ``CustomApps`` directory

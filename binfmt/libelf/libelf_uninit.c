@@ -90,21 +90,27 @@ int elf_uninit(struct elf_loadinfo_s *loadinfo)
  *
  ****************************************************************************/
 
-int elf_freebuffers(struct elf_loadinfo_s *loadinfo)
+int elf_freebuffers(FAR struct elf_loadinfo_s *loadinfo)
 {
   /* Release all working allocations  */
 
+  if (loadinfo->phdr)
+    {
+      kmm_free((FAR void *)loadinfo->phdr);
+      loadinfo->phdr = NULL;
+    }
+
   if (loadinfo->shdr)
     {
-      kmm_free((FAR void *)loadinfo->shdr);
-      loadinfo->shdr      = NULL;
+      kmm_free(loadinfo->shdr);
+      loadinfo->shdr = NULL;
     }
 
   if (loadinfo->iobuffer)
     {
-      kmm_free((FAR void *)loadinfo->iobuffer);
-      loadinfo->iobuffer  = NULL;
-      loadinfo->buflen    = 0;
+      kmm_free(loadinfo->iobuffer);
+      loadinfo->iobuffer = NULL;
+      loadinfo->buflen   = 0;
     }
 
   return OK;

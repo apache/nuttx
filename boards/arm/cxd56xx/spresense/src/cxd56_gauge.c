@@ -46,7 +46,7 @@ static int g_gaugeinitialized = 0;
  *
  ****************************************************************************/
 
-int board_gauge_initialize(const char *devpath, int16_t *gaugemeter)
+int board_gauge_initialize(const char *devpath)
 {
   int ret;
 

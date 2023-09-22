@@ -156,8 +156,8 @@ static int eeed_open(struct inode *inode)
 {
   struct eeed_struct_s *dev;
 
-  DEBUGASSERT(inode && inode->i_private);
-  dev = (struct eeed_struct_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  dev = inode->i_private;
 
   /* Increment the open reference count */
 
@@ -181,8 +181,8 @@ static int eeed_close(struct inode *inode)
 {
   struct eeed_struct_s *dev;
 
-  DEBUGASSERT(inode && inode->i_private);
-  dev = (struct eeed_struct_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  dev = inode->i_private;
 
   /* Increment the open reference count */
 
@@ -206,8 +206,8 @@ static ssize_t eeed_read(struct inode *inode, unsigned char *buffer,
 {
   struct eeed_struct_s *dev;
 
-  DEBUGASSERT(inode && inode->i_private);
-  dev = (struct eeed_struct_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  dev = inode->i_private;
 
   finfo("sector: %" PRIu64 " nsectors: %u sectorsize: %d\n",
         start_sector, nsectors, dev->eeed_sectsize);
@@ -243,8 +243,8 @@ static ssize_t eeed_write(struct inode *inode,
 {
   struct eeed_struct_s *dev;
 
-  DEBUGASSERT(inode && inode->i_private);
-  dev = (struct eeed_struct_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  dev = inode->i_private;
 
   finfo("sector: %" PRIu64 " nsectors: %u sectorsize: %d\n",
         start_sector, nsectors, dev->eeed_sectsize);
@@ -288,10 +288,9 @@ static int eeed_geometry(struct inode *inode, struct geometry *geometry)
 
   finfo("Entry\n");
 
-  DEBUGASSERT(inode);
   if (geometry)
     {
-      dev = (struct eeed_struct_s *)inode->i_private;
+      dev = inode->i_private;
 
       memset(geometry, 0, sizeof(*geometry));
 
@@ -329,10 +328,10 @@ static int eeed_ioctl(struct inode *inode, int cmd, unsigned long arg)
 
   /* Only one ioctl command is supported */
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
   if (cmd == BIOC_XIPBASE && ppv)
     {
-      dev  = (struct eeed_struct_s *)inode->i_private;
+      dev  = inode->i_private;
       *ppv = (void *)dev->eeed_buffer;
 
       finfo("ppv: %p\n", *ppv);
@@ -355,8 +354,8 @@ static int eeed_unlink(struct inode *inode)
 {
   struct eeed_struct_s *dev;
 
-  DEBUGASSERT(inode && inode->i_private);
-  dev = (struct eeed_struct_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  dev = inode->i_private;
 
   /* And free the block driver itself */
 
@@ -393,7 +392,7 @@ int s32k1xx_eeeprom_register(int minor, uint32_t size)
 
   /* Allocate a eeeprom device structure */
 
-  dev = (struct eeed_struct_s *)kmm_zalloc(sizeof(struct eeed_struct_s));
+  dev = kmm_zalloc(sizeof(struct eeed_struct_s));
   if (dev)
     {
       /* Initialize the eeeprom device structure */

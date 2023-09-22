@@ -18,6 +18,9 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_NRF91_NRF91_SPU_H
+#define __ARCH_ARM_SRC_NRF91_NRF91_SPU_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -41,3 +44,5 @@ void nrf91_spu_configure(void);
 
 void board_spu_configure(void);
 #endif
+
+#endif /* __ARCH_ARM_SRC_NRF91_NRF91_SPU_H */

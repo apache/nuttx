@@ -22,7 +22,3 @@ include armv7-a/Make.defs
 
 # qemu-specific C source files
 CHIP_CSRCS  = qemu_boot.c qemu_serial.c qemu_irq.c qemu_timer.c qemu_memorymap.c
-
-ifeq ($(CONFIG_DRIVERS_VIRTIO_NET),y)
-CHIP_CSRCS += qemu_net.c
-endif

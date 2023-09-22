@@ -161,6 +161,7 @@ static bool uart_rpmsg_rxflowcontrol(FAR struct uart_dev_s *dev,
   FAR struct uart_rpmsg_priv_s *priv = dev->priv;
   FAR struct uart_rpmsg_wakeup_s msg;
 
+  nxmutex_lock(&priv->lock);
   if (!upper && upper != priv->last_upper)
     {
       memset(&msg, 0, sizeof(msg));
@@ -173,6 +174,7 @@ static bool uart_rpmsg_rxflowcontrol(FAR struct uart_dev_s *dev,
     }
 
   priv->last_upper = upper;
+  nxmutex_unlock(&priv->lock);
   return false;
 }
 

@@ -37,7 +37,8 @@
  * Name: fread
  ****************************************************************************/
 
-size_t fread(FAR void *ptr, size_t size, size_t n_items, FAR FILE *stream)
+size_t fread_unlocked(FAR void *ptr, size_t size,
+                      size_t n_items, FAR FILE *stream)
 {
   size_t  full_size = n_items * (size_t)size;
   ssize_t bytes_read;
@@ -45,7 +46,7 @@ size_t fread(FAR void *ptr, size_t size, size_t n_items, FAR FILE *stream)
 
   /* Write the data into the stream buffer */
 
-  bytes_read = lib_fread(ptr, full_size, stream);
+  bytes_read = lib_fread_unlocked(ptr, full_size, stream);
   if (bytes_read > 0)
     {
       /* Return the number of full items read */
@@ -55,3 +56,15 @@ size_t fread(FAR void *ptr, size_t size, size_t n_items, FAR FILE *stream)
 
   return items_read;
 }
+
+size_t fread(FAR void *ptr, size_t size, size_t n_items, FAR FILE *stream)
+{
+  size_t ret;
+
+  flockfile(stream);
+  ret = fread_unlocked(ptr, size, n_items, stream);
+  funlockfile(stream);
+
+  return ret;
+}
+

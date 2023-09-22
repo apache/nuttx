@@ -78,6 +78,14 @@ ifeq ($(CONFIG_MM_KASAN_ALL),y)
   ARCHOPTIMIZATION += -fsanitize=kernel-address
 endif
 
+ifeq ($(CONFIG_MM_KASAN_DISABLE_READS_CHECK),y)
+  ARCHOPTIMIZATION += --param asan-instrument-reads=0
+endif
+
+ifeq ($(CONFIG_MM_KASAN_DISABLE_WRITES_CHECK),y)
+  ARCHOPTIMIZATION += --param asan-instrument-writes=0
+endif
+
 ifeq ($(CONFIG_UNWINDER_ARM),y)
   ARCHOPTIMIZATION += -funwind-tables -fasynchronous-unwind-tables
 endif
@@ -157,7 +165,7 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN_CLANG),y)
   CPP     = clang -E -P -x c
   LD      = ld.lld -m armelf
   STRIP   = llvm-strip --strip-unneeded
-  AR      = llvm-ar rcs
+  AR      = llvm-ar rcsP
   NM      = llvm-nm
   OBJCOPY = llvm-objcopy
   OBJDUMP = llvm-objdump
@@ -189,7 +197,7 @@ else ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
   CPP     = armclang -E -P -x c
   LD      = armlink
   STRIP   = llvm-strip --strip-unneeded
-  AR      = armar -rcs
+  AR      = armar -rcsP
   NM      = llvm-nm
   OBJCOPY = llvm-objcopy
   OBJDUMP = llvm-objdump
@@ -230,7 +238,7 @@ else
   CPP     = $(CROSSDEV)gcc -E -P -x c
   LD      = $(CROSSDEV)ld
   STRIP   = $(CROSSDEV)strip --strip-unneeded
-  AR      = $(CROSSDEV)ar rcs
+  AR      = $(CROSSDEV)ar rcsP
   NM      = $(CROSSDEV)nm
   OBJCOPY = $(CROSSDEV)objcopy
   OBJDUMP = $(CROSSDEV)objdump
@@ -238,21 +246,21 @@ else
   ifeq ($(CONFIG_LTO_FULL),y)
     ifeq ($(CONFIG_ARM_TOOLCHAIN_GNU_EABI),y)
       LD := $(CROSSDEV)gcc
-      AR := $(CROSSDEV)gcc-ar rcs
+      AR := $(CROSSDEV)gcc-ar rcsP
       NM := $(CROSSDEV)gcc-nm
       ARCHOPTIMIZATION += -fno-builtin
     endif
   endif
 
-  # Workaround to skip -Warray-bounds check due to bug of GCC-12.2:
+  # Workaround to skip -Warray-bounds check due to bug of GCC-12:
   # Wrong warning array subscript [0] is outside array bounds:
   # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105523
 
   ifeq ($(GCCVER),)
-    export GCCVER := $(shell $(CC) --version | grep gcc | sed -r "s/.* ([0-9]+\.[0-9]+).*/\1/")
+    export GCCVER := $(shell $(CC) --version | grep gcc | sed -r "s/.* ([0-9]+\.[0-9]+).*/\1/" | cut -d'.' -f1)
   endif
 
-  ifeq ($(GCCVER),12.2)
+  ifeq ($(GCCVER),12)
     ARCHOPTIMIZATION += --param=min-pagesize=0
     ifeq ($(CONFIG_ARCH_RAMFUNCS),y)
       LDFLAGS += --no-warn-rwx-segments
@@ -269,6 +277,15 @@ endif
 
 ARCHCFLAGS += -Wstrict-prototypes -Wno-attributes -Wno-unknown-pragmas
 ARCHCXXFLAGS += -nostdinc++ -Wno-attributes -Wno-unknown-pragmas
+
+# When all C++ code is built using GCC 7.1 or a higher version,
+# we can safely disregard warnings of the type "parameter passing for X changed in GCC 7.1."
+# Refer to : https://stackoverflow.com/questions/48149323/what-does-the-gcc-warning-project-parameter-passing-for-x-changed-in-gcc-7-1-m
+
+ifneq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
+  ARCHCFLAGS += -Wno-psabi
+  ARCHCXXFLAGS += -Wno-psabi
+endif
 
 ifneq ($(CONFIG_CXX_STANDARD),)
   ARCHCXXFLAGS += -std=$(CONFIG_CXX_STANDARD)

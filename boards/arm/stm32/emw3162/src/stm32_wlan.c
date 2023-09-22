@@ -31,6 +31,7 @@
 
 #include <arch/board/board.h>
 
+#include "stm32.h"
 #include "stm32_gpio.h"
 #include "stm32_sdio.h"
 

@@ -297,14 +297,13 @@ static int ajoy_open(FAR struct file *filep)
   ajoy_buttonset_t supported;
   irqstate_t flags;
 
-  DEBUGASSERT(filep && filep->f_inode);
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
-  priv = (FAR struct ajoy_upperhalf_s *)inode->i_private;
+  priv = inode->i_private;
 
   /* Allocate a new open structure */
 
-  opriv = (FAR struct ajoy_open_s *)kmm_zalloc(sizeof(struct ajoy_open_s));
+  opriv = kmm_zalloc(sizeof(struct ajoy_open_s));
   if (!opriv)
     {
       ierr("ERROR: Failed to allocate open structure\n");
@@ -352,11 +351,11 @@ static int ajoy_close(FAR struct file *filep)
   FAR struct ajoy_open_s *prev;
   irqstate_t flags;
 
-  DEBUGASSERT(filep && filep->f_priv && filep->f_inode);
+  DEBUGASSERT(filep->f_priv);
   opriv = filep->f_priv;
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
-  priv  = (FAR struct ajoy_upperhalf_s *)inode->i_private;
+  priv  = inode->i_private;
 
   flags = enter_critical_section();
 
@@ -415,11 +414,10 @@ static ssize_t ajoy_read(FAR struct file *filep, FAR char *buffer,
   irqstate_t flags;
   int ret;
 
-  DEBUGASSERT(filep && filep->f_inode);
   opriv = filep->f_priv;
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
-  priv  = (FAR struct ajoy_upperhalf_s *)inode->i_private;
+  priv  = inode->i_private;
 
   /* Make sure that the buffer is sufficiently large to hold at least one
    * complete sample.
@@ -465,11 +463,11 @@ static int ajoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   irqstate_t flags;
   int ret;
 
-  DEBUGASSERT(filep && filep->f_priv && filep->f_inode);
+  DEBUGASSERT(filep->f_priv);
   opriv = filep->f_priv;
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
-  priv  = (FAR struct ajoy_upperhalf_s *)inode->i_private;
+  priv  = inode->i_private;
 
   /* Get exclusive access to the driver structure */
 
@@ -590,7 +588,7 @@ static int ajoy_poll(FAR struct file *filep, FAR struct pollfd *fds,
   int ret = OK;
   int i;
 
-  DEBUGASSERT(filep && filep->f_priv && filep->f_inode);
+  DEBUGASSERT(filep->f_priv);
   opriv = filep->f_priv;
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);

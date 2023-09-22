@@ -60,7 +60,7 @@ static void consume_eol(FILE *stream, bool consume)
 
       do
         {
-          ch = fgetc(stream);
+          ch = fgetc_unlocked(stream);
         }
       while (ch != EOF && ch != '\n');
     }
@@ -93,8 +93,8 @@ static void consume_eol(FILE *stream, bool consume)
  *
  ****************************************************************************/
 
-FAR char *lib_fgets(FAR char *buf, size_t buflen, FILE *stream,
-                    bool keepnl, bool consume)
+FAR char *lib_fgets_unlocked(FAR char *buf, size_t buflen, FILE *stream,
+                             bool keepnl, bool consume)
 {
   size_t nch = 0;
 
@@ -133,7 +133,7 @@ FAR char *lib_fgets(FAR char *buf, size_t buflen, FILE *stream,
     {
       /* Get the next character */
 
-      int ch = fgetc(stream);
+      int ch = fgetc_unlocked(stream);
 
       /* Check for end-of-line.  This is tricky only in that some
        * environments may return CR as end-of-line, others LF, and
@@ -202,4 +202,16 @@ FAR char *lib_fgets(FAR char *buf, size_t buflen, FILE *stream,
             }
         }
     }
+}
+
+FAR char *lib_fgets(FAR char *buf, size_t buflen, FILE *stream,
+                    bool keepnl, bool consume)
+{
+  FAR char *ret;
+
+  flockfile(stream);
+  ret = lib_fgets_unlocked(buf, buflen, stream, keepnl, consume);
+  funlockfile(stream);
+
+  return ret;
 }

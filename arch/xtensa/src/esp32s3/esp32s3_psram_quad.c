@@ -29,6 +29,7 @@
 
 #include "esp32s3_gpio.h"
 #include "esp32s3_psram.h"
+#include "esp32s3_spi_timing.h"
 
 #include "rom/esp32s3_spiflash.h"
 #include "rom/esp32s3_opi_flash.h"
@@ -453,7 +454,7 @@ int psram_enable(int mode, int vaddrmode)
    * PSRAM timing related registers accordingly
    */
 
-  /* FIXME: spi_timing_psram_tuning(); */
+  esp32s3_spi_timing_set_mspi_psram_tuning();
 
   /* Configure SPI0 PSRAM related SPI Phases */
 

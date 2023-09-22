@@ -168,7 +168,7 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
 
   /* Update device buffer length */
 
-  iob_update_pktlen(dev->d_iob, dev->d_len);
+  iob_update_pktlen(dev->d_iob, dev->d_len, false);
 
   /* Select the IPv6 destination address.
    * This varies with the type of message being sent:
@@ -206,8 +206,9 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
     }
 
   mldinfo("destipaddr: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-          destipaddr[0], destipaddr[1], destipaddr[2], destipaddr[3],
-          destipaddr[4], destipaddr[5], destipaddr[6], destipaddr[7]);
+          NTOHS(destipaddr[0]), NTOHS(destipaddr[1]), NTOHS(destipaddr[2]),
+          NTOHS(destipaddr[3]), NTOHS(destipaddr[4]), NTOHS(destipaddr[5]),
+          NTOHS(destipaddr[6]), NTOHS(destipaddr[7]));
 
   ipv6_build_header(IPv6BUF, dev->d_sndlen, NEXT_HOPBYBOT_EH,
                     dev->d_ipv6addr, destipaddr, MLD_TTL, 0);

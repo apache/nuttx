@@ -118,16 +118,16 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev,
 
       if (conn->domain == PF_INET6)
         {
-          FAR struct udp_hdr_s *udp   = UDPIPv6BUF;
-          FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
+          FAR struct udp_hdr_s *udp   = UDPIPv4BUF;
+          FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
           in_addr_t ipv4addr;
 
-          /* Encode the IPv4 address as an IPv-mapped IPv6 address */
+          /* Encode the IPv4 address as an IPv4-mapped IPv6 address */
 
           src_addr6.sin6_family = AF_INET6;
           src_addr6.sin6_port = udp->srcport;
 
-          ipv4addr = net_ip4addr_conv32(ipv6->srcipaddr);
+          ipv4addr = net_ip4addr_conv32(ipv4->srcipaddr);
           ip6_map_ipv4addr(ipv4addr, src_addr6.sin6_addr.s6_addr16);
 
           src_addr_size = sizeof(src_addr6);
@@ -191,10 +191,10 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev,
       goto errout;
     }
 
-  /* Trim l3/l4 offset, src_addr + 4Bytes should be less than header size. */
+  /* Reset new offset to point at start point. */
 
-  DEBUGASSERT(offset >= 0);
-  iob = iob_trimhead(iob, offset);
+  DEBUGASSERT(iob->io_offset + offset >= 0);
+  iob_reserve(iob, iob->io_offset + offset);
 
   /* Concat the iob to readahead */
 

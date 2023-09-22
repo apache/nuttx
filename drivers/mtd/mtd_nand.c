@@ -908,7 +908,7 @@ FAR struct mtd_dev_s *nand_raw_initialize(FAR struct nand_raw_s *raw)
 
   /* Allocate an NAND MTD device structure */
 
-  nand = (FAR struct nand_dev_s *)kmm_zalloc(sizeof(struct nand_dev_s));
+  nand = kmm_zalloc(sizeof(struct nand_dev_s));
   if (!nand)
     {
       ferr("ERROR: Failed to allocate the NAND MTD device structure\n");

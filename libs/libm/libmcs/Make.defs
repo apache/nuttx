@@ -29,6 +29,8 @@ libmcs/libmcs: libmcs-$(LIBMCS_VERSION).zip
 	$(Q) patch -p1 < libmcs/0001-fix-build-error-remove-unused-file-fenv.h.patch
 	$(Q) patch -p1 < libmcs/0002-fix-build-error-do-not-include-config.h.patch
 	$(Q) patch -p1 < libmcs/0003-fix-build-error-INFINITY-error-in-quickjs.c.patch
+	$(Q) patch -p1 < libmcs/0004-Fix-warning-function-declaration-isn-t-a-prototype-W.patch
+	$(Q) patch -p1 < libmcs/0005-libm-libmcs-Fix-clang-build-libmcs-warning.patch
 	$(Q) touch $@
 
 ifeq ($(wildcard libmcs/libmcs/.git),)
@@ -187,6 +189,7 @@ CSRCS = signgam.c \
         tgammaf.c \
         truncf.c
 
+CFLAGS += -DLIBMCS_LONG_IS_32BITS
 ifeq ($(CONFIG_LIBM_LIBMCS_WANT_COMPLEX),y)
 CFLAGS += -DLIBMCS_WANT_COMPLEX
 CSRCS += cabsd.c \

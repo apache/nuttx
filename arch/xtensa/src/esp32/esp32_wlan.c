@@ -40,7 +40,9 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
+
 #if defined(CONFIG_NET_PKT)
 #  include <nuttx/net/pkt.h>
 #endif
@@ -414,8 +416,7 @@ static inline struct wlan_pktbuf *wlan_alloc_buffer(struct wlan_priv_s *priv)
       return NULL;
     }
 
-  pktbuf = (struct wlan_pktbuf *)kmm_malloc(
-            sizeof(struct wlan_pktbuf) + WLAN_BUF_SIZE);
+  pktbuf = kmm_malloc(sizeof(struct wlan_pktbuf) + WLAN_BUF_SIZE);
 #else
   sq_entry_t *entry;
   irqstate_t flags = spin_lock_irqsave(&priv->lock);
@@ -1139,9 +1140,9 @@ static int wlan_ifup(struct net_driver_s *dev)
   struct wlan_priv_s *priv = (struct wlan_priv_s *)dev->d_private;
 
 #ifdef CONFIG_NET_IPv4
-  ninfo("Bringing up: %d.%d.%d.%d\n",
-        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  ninfo("Bringing up: %u.%u.%u.%u\n",
+        ip4_addr1(dev->d_ipaddr), ip4_addr2(dev->d_ipaddr),
+        ip4_addr3(dev->d_ipaddr), ip4_addr4(dev->d_ipaddr));
 #endif
 #ifdef CONFIG_NET_IPv6
   ninfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
@@ -1514,7 +1515,7 @@ static int wlan_ioctl(struct net_driver_s *dev,
             ret = ops->disconnect();
             if (ret < 0)
               {
-                nerr("ERROR: Failed to connect\n");
+                nerr("ERROR: Failed to disconnect\n");
                 break;
               }
           }

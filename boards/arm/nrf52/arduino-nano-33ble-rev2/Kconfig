@@ -5,8 +5,8 @@
 
 if ARCH_BOARD_ARDUINO_NANO_33BLE_REV2
 config ARDUINONANO33BLEREV2_ARDUINO_BOOTLOADER
-    bool "Use Arduino bootloader"
-    default y
-    ---help---
-        Use the Arduino bootloader to load the NuttX binary.
+	bool "Use Arduino bootloader"
+	default y
+	---help---
+		Use the Arduino bootloader to load the NuttX binary.
 endif

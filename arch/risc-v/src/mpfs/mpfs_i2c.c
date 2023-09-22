@@ -43,6 +43,7 @@
 
 #include <arch/board/board.h>
 
+#include "mpfs_gpio.h"
 #include "mpfs_i2c.h"
 #include "riscv_internal.h"
 #include "hardware/mpfs_i2c.h"
@@ -67,6 +68,11 @@
 #define MPFS_I2C_STATUS           (priv->hw_base + MPFS_I2C_STATUS_OFFSET)
 #define MPFS_I2C_DATA             (priv->hw_base + MPFS_I2C_DATA_OFFSET)
 #define MPFS_I2C_ADDR             (priv->hw_base + MPFS_I2C_SLAVE0ADR_OFFSET)
+
+/* Gives TTOA in microseconds, ~4.8% bias, +1 rounds up */
+
+#define I2C_TTOA_US(n, f)           ((((n) << 20) / (f)) + 1)
+#define I2C_TTOA_MARGIN             20
 
 /****************************************************************************
  * Private Types
@@ -143,6 +149,7 @@ struct mpfs_i2c_priv_s
   uint32_t               frequency;   /* Current I2C frequency */
 
   uint8_t                msgid;       /* Current message ID */
+  uint8_t                msgc;        /* Message count */
   ssize_t                bytes;       /* Processed data bytes */
 
   uint8_t                ser_address; /* Own i2c address */
@@ -163,6 +170,7 @@ struct mpfs_i2c_priv_s
 
   bool                   initialized; /* Bus initialization status */
   bool                   fpga;        /* FPGA i2c */
+  bool                   inflight;    /* Transfer ongoing */
 };
 
 #ifndef CONFIG_MPFS_COREI2C
@@ -267,6 +275,7 @@ static struct mpfs_i2c_priv_s
 
 static int mpfs_i2c_setfrequency(struct mpfs_i2c_priv_s *priv,
                                   uint32_t frequency);
+static uint32_t mpfs_i2c_timeout(int msgc, struct i2c_msg_s *msgv);
 
 /****************************************************************************
  * Private Functions
@@ -399,7 +408,8 @@ static void mpfs_i2c_deinit(struct mpfs_i2c_priv_s *priv)
 
 static int mpfs_i2c_sem_waitdone(struct mpfs_i2c_priv_s *priv)
 {
-  return nxsem_tickwait_uninterruptible(&priv->sem_isr, SEC2TICK(1));
+  uint32_t timeout = mpfs_i2c_timeout(priv->msgc, priv->msgv);
+  return nxsem_tickwait_uninterruptible(&priv->sem_isr, USEC2TICK(timeout));
 }
 
 /****************************************************************************
@@ -447,6 +457,8 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
           {
             priv->tx_idx = 0u;
           }
+
+        priv->inflight = true;
         break;
 
       case MPFS_I2C_ST_LOST_ARB:
@@ -479,7 +491,7 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
             clear_irq = 0u;
             modifyreg32(MPFS_I2C_CTRL, 0, MPFS_I2C_CTRL_STA_MASK);
 
-          /* Jump to the next message */
+            /* Jump to the next message */
 
             priv->msgid++;
           }
@@ -498,7 +510,7 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
                 clear_irq = 0u;
                 modifyreg32(MPFS_I2C_CTRL, 0, MPFS_I2C_CTRL_STA_MASK);
 
-               /* Jump to the next message */
+                /* Jump to the next message */
 
                 priv->msgid++;
               }
@@ -566,10 +578,31 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
         break;
 
       case MPFS_I2C_ST_IDLE:
-      case MPFS_I2C_ST_STOP_SENT:
 
         /* No activity, bus idle */
 
+        break;
+
+      case MPFS_I2C_ST_STOP_SENT:
+
+        /* FPGA driver terminates all transactions with STOP sent irq
+         * if there has been no errors, the transfer succeeded.
+         * Due to the IP bug that extra data & STOPs can be sent after
+         * the actual transaction, filter out any extra stops with
+         * priv->inflight flag
+         */
+
+        if (priv->inflight)
+          {
+            if (priv->status == MPFS_I2C_IN_PROGRESS)
+              {
+                priv->status = MPFS_I2C_SUCCESS;
+              }
+
+            nxsem_post(&priv->sem_isr);
+          }
+
+        priv->inflight = false;
         break;
 
       case MPFS_I2C_ST_RESET_ACTIVATED:
@@ -586,31 +619,12 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
         break;
     }
 
-  if (priv->fpga)
-    {
-      /* FPGA driver terminates all transactions with STOP sent irq */
+    if (!priv->fpga && priv->status != MPFS_I2C_IN_PROGRESS)
+      {
+        /* MSS I2C has no STOP sent irq */
 
-      if (status == MPFS_I2C_ST_STOP_SENT)
-        {
-          /* Don't post on a new request, STOPs possible initially */
-
-          if (!((priv->rx_idx == 0 && priv->rx_size > 0) ||
-             (priv->tx_idx == 0 && priv->tx_size > 0)))
-            {
-              nxsem_post(&priv->sem_isr);
-            }
-          else if (priv->status == MPFS_I2C_FAILED)
-            {
-              nxsem_post(&priv->sem_isr);
-            }
-        }
-    }
-  else if (priv->status != MPFS_I2C_IN_PROGRESS)
-    {
-      /* MSS I2C has no STOP SENT irq */
-
-      nxsem_post(&priv->sem_isr);
-    }
+        nxsem_post(&priv->sem_isr);
+      }
 
   if (clear_irq)
     {
@@ -642,7 +656,7 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
 static void mpfs_i2c_sendstart(struct mpfs_i2c_priv_s *priv)
 {
   up_enable_irq(priv->plic_irq);
-  modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_STA_MASK, MPFS_I2C_CTRL_STA_MASK);
+  modifyreg32(MPFS_I2C_CTRL, 0, MPFS_I2C_CTRL_STA_MASK);
 }
 
 static int mpfs_i2c_transfer(struct i2c_master_s *dev,
@@ -661,12 +675,8 @@ static int mpfs_i2c_transfer(struct i2c_master_s *dev,
       return ret;
     }
 
-  if (priv->status != MPFS_I2C_SUCCESS)
-    {
-      priv->status = MPFS_I2C_SUCCESS;
-    }
-
   priv->msgv = msgs;
+  priv->msgc = count;
 
   for (int i = 0; i < count; i++)
     {
@@ -728,6 +738,7 @@ static int mpfs_i2c_transfer(struct i2c_master_s *dev,
       if (mpfs_i2c_sem_waitdone(priv) < 0)
         {
           i2cinfo("Message %" PRIu8 " timed out.\n", priv->msgid);
+          priv->inflight = false;
           ret = -ETIMEDOUT;
           break;
         }
@@ -741,7 +752,6 @@ static int mpfs_i2c_transfer(struct i2c_master_s *dev,
             }
           else
             {
-              priv->status = MPFS_I2C_SUCCESS;
               ret = OK;
             }
         }
@@ -784,6 +794,8 @@ static int mpfs_i2c_reset(struct i2c_master_s *dev)
 
   up_disable_irq(priv->plic_irq);
 
+  priv->inflight = false;
+  priv->status = MPFS_I2C_SUCCESS;
   priv->initialized = false;
 
   ret = mpfs_i2c_init(priv);
@@ -882,6 +894,37 @@ static int mpfs_i2c_setfrequency(struct mpfs_i2c_priv_s *priv,
     }
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: mpfs_i2c_timeout
+ *
+ * Description:
+ *   Calculate the time a full I2C transaction (message vector) will take
+ *   to transmit, used for bus timeout.
+ *
+ * Input Parameters:
+ *   msgc - Message count in message vector
+ *   msgv - Message vector containing the messages to send
+ *
+ * Returned Value:
+ *   I2C transaction timeout in microseconds (with some margin)
+ *
+ ****************************************************************************/
+
+static uint32_t mpfs_i2c_timeout(int msgc, struct i2c_msg_s *msgv)
+{
+  uint32_t usec = 0;
+  int i;
+
+  for (i = 0; i < msgc; i++)
+    {
+      /* start + stop + address is 12 bits, each byte is 9 bits */
+
+      usec += I2C_TTOA_US(12 + msgv[i].length * 9, msgv[i].frequency);
+    }
+
+  return usec + I2C_TTOA_MARGIN;
 }
 
 /****************************************************************************

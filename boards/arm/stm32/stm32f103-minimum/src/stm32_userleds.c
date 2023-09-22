@@ -59,7 +59,7 @@ uint32_t board_userled_initialize(void)
 {
   int i;
 
-  /* Configure LED1-8 GPIOs for output */
+  /* Configure LED GPIOs for output */
 
   for (i = 0; i < BOARD_NLEDS; i++)
     {
@@ -89,7 +89,7 @@ void board_userled_all(uint32_t ledset)
 {
   int i;
 
-  /* Configure LED1-8 GPIOs for output */
+  /* Configure LED GPIOs for output */
 
   for (i = 0; i < BOARD_NLEDS; i++)
     {

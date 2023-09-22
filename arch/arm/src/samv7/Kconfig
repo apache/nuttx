@@ -137,6 +137,7 @@ config ARCH_CHIP_SAME70Q
 	bool
 	default n
 	select ARCH_CHIP_SAME70
+	select SAMV7_QSPI_IS_SPI
 	select SAMV7_HAVE_MCAN1
 	select SAMV7_HAVE_DAC1 if !SAMV7_EMAC0
 	select SAMV7_HAVE_EBI
@@ -154,6 +155,7 @@ config ARCH_CHIP_SAME70N
 	bool
 	default n
 	select ARCH_CHIP_SAME70
+	select SAMV7_QSPI_IS_SPI
 	select SAMV7_HAVE_MCAN1
 	select SAMV7_HAVE_DAC1 if !SAMV7_EMAC0
 	select SAMV7_HAVE_HSMCI0
@@ -187,6 +189,7 @@ config ARCH_CHIP_SAMV71Q
 	bool
 	default n
 	select ARCH_CHIP_SAMV71
+	select SAMV7_QSPI_IS_SPI
 	select SAMV7_HAVE_MCAN1
 	select SAMV7_HAVE_DAC1 if !SAMV7_EMAC0
 	select SAMV7_HAVE_EBI
@@ -204,6 +207,7 @@ config ARCH_CHIP_SAMV71N
 	bool
 	default n
 	select ARCH_CHIP_SAMV71
+	select SAMV7_QSPI_IS_SPI
 	select SAMV7_HAVE_MCAN1
 	select SAMV7_HAVE_DAC1 if !SAMV7_EMAC0
 	select SAMV7_HAVE_HSMCI0
@@ -349,6 +353,10 @@ config SAMV7_HAVE_USBFS
 	default n
 
 config SAMV7_HAVE_USBHS
+	bool
+	default n
+
+config SAMV7_1WIREDRIVER
 	bool
 	default n
 
@@ -1166,35 +1174,125 @@ config SAMV7_TWIHS2
 	default n
 	depends on SAMV7_HAVE_TWIHS2
 
-config SAMV7_UART0
+menuconfig SAMV7_UART0
 	bool "UART 0"
 	default y
+
+if SAMV7_UART0
+
+choice
+	prompt "UART0 Driver Configuration"
+	default SAMV7_UART0_SERIALDRIVER
+	depends on SAMV7_UART0
+
+config SAMV7_UART0_SERIALDRIVER
+	bool "Standard serial driver"
 	select UART0_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
-config SAMV7_UART1
+config SAMV7_UART0_1WIREDRIVER
+	bool "1-Wire driver"
+	select SAMV7_1WIREDRIVER
+
+endchoice # "UART0 Driver Configuration"
+
+endif # SAMV7_UART0
+
+menuconfig SAMV7_UART1
 	bool "UART 1"
 	default n
+
+if SAMV7_UART1
+
+choice
+	prompt "UART1 Driver Configuration"
+	default SAMV7_UART1_SERIALDRIVER
+	depends on SAMV7_UART1
+
+config SAMV7_UART1_SERIALDRIVER
+	bool "Standard serial driver"
 	select UART1_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
-config SAMV7_UART2
+config SAMV7_UART1_1WIREDRIVER
+	bool "1-Wire driver"
+	select SAMV7_1WIREDRIVER
+
+endchoice # "UART1 Driver Configuration"
+
+endif # SAMV7_UART1
+
+menuconfig SAMV7_UART2
 	bool "UART 2"
 	default y
+
+if SAMV7_UART2
+
+choice
+	prompt "UART2 Driver Configuration"
+	default SAMV7_UART2_SERIALDRIVER
+	depends on SAMV7_UART2
+
+config SAMV7_UART2_SERIALDRIVER
+	bool "Standard serial driver"
 	select UART2_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
-config SAMV7_UART3
+config SAMV7_UART2_1WIREDRIVER
+	bool "1-Wire driver"
+	select SAMV7_1WIREDRIVER
+
+endchoice # "UART2 Driver Configuration"
+
+endif # SAMV7_UART2
+
+menuconfig SAMV7_UART3
 	bool "UART 3"
 	default n
+
+if SAMV7_UART3
+
+choice
+	prompt "UART3 Driver Configuration"
+	default SAMV7_UART3_SERIALDRIVER
+	depends on SAMV7_UART3
+
+config SAMV7_UART3_SERIALDRIVER
+	bool "Standard serial driver"
 	select UART3_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
-config SAMV7_UART4
+config SAMV7_UART3_1WIREDRIVER
+	bool "1-Wire driver"
+	select SAMV7_1WIREDRIVER
+
+endchoice # "UART3 Driver Configuration"
+
+endif # SAMV7_UART3
+
+menuconfig SAMV7_UART4
 	bool "UART 4"
 	default y
+
+if SAMV7_UART4
+
+choice
+	prompt "UART4 Driver Configuration"
+	default SAMV7_UART4_SERIALDRIVER
+	depends on SAMV7_UART4
+
+config SAMV7_UART4_SERIALDRIVER
+	bool "Standard serial driver"
 	select UART4_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
+
+config SAMV7_UART4_1WIREDRIVER
+	bool "1-Wire driver"
+	select SAMV7_1WIREDRIVER
+
+endchoice # "UART4 Driver Configuration"
+
+endif # SAMV7_UART4
 
 config SAMV7_USBDEVFS
 	bool "USB Device Full Speed (USBFS)"
@@ -1224,10 +1322,26 @@ menuconfig SAMV7_USART0
 	bool "USART 0"
 	default n
 	depends on SAMV7_HAVE_USART0
+
+if SAMV7_USART0
+
+choice
+	prompt "USART0 Driver Configuration"
+	default SAMV7_USART0_SERIALDRIVER
+	depends on SAMV7_USART0
+
+config SAMV7_USART0_SERIALDRIVER
+	bool "Standard serial driver"
 	select USART0_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
-if SAMV7_USART0
+config SAMV7_USART0_1WIREDRIVER
+	bool "1-Wire driver"
+	select SAMV7_1WIREDRIVER
+
+endchoice # "USART0 Driver Configuration"
+
+if SAMV7_USART0_SERIALDRIVER
 
 config SAMV7_USART0_RS485MODE
 	bool "RS-485 on USART0"
@@ -1238,16 +1352,33 @@ config SAMV7_USART0_RS485MODE
 		logic is required to set the pin to logical 0 before the driver is
 		opened for the first time.
 
-endif
+endif # SAMV7_USART0_SERIALDRIVER
+endif # SAMV7_USART0
 
 menuconfig SAMV7_USART1
 	bool "USART 1"
 	default n
 	depends on SAMV7_HAVE_USART1
+
+if SAMV7_USART1
+
+choice
+	prompt "USART1 Driver Configuration"
+	default SAMV7_USART1_SERIALDRIVER
+	depends on SAMV7_USART1
+
+config SAMV7_USART1_SERIALDRIVER
+	bool "Standard serial driver"
 	select USART1_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
-if SAMV7_USART1
+config SAMV7_USART1_1WIREDRIVER
+	bool "1-Wire driver"
+	select SAMV7_1WIREDRIVER
+
+endchoice # "USART1 Driver Configuration"
+
+if SAMV7_USART1_SERIALDRIVER
 
 config SAMV7_USART1_RS485MODE
 	bool "RS-485 on USART1"
@@ -1258,16 +1389,33 @@ config SAMV7_USART1_RS485MODE
 		logic is required to set the pin to logical 0 before the driver is
 		opened for the first time.
 
-endif
+endif # SAMV7_USART1_SERIALDRIVER
+endif # SAMV7_USART1
 
 menuconfig SAMV7_USART2
 	bool "USART 2"
 	default n
 	depends on SAMV7_HAVE_USART2
+
+if SAMV7_USART2
+
+choice
+	prompt "USART2 Driver Configuration"
+	default SAMV7_USART2_SERIALDRIVER
+	depends on SAMV7_USART2
+
+config SAMV7_USART2_SERIALDRIVER
+	bool "Standard serial driver"
 	select USART2_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
-if SAMV7_USART2
+config SAMV7_USART2_1WIREDRIVER
+	bool "1-Wire driver"
+	select SAMV7_1WIREDRIVER
+
+endchoice # "USART2 Driver Configuration"
+
+if SAMV7_USART2_SERIALDRIVER
 
 config SAMV7_USART2_RS485MODE
 	bool "RS-485 on USART2"
@@ -1278,7 +1426,8 @@ config SAMV7_USART2_RS485MODE
 		logic is required to set the pin to logical 0 before the driver is
 		opened for the first time.
 
-endif
+endif # SAMV7_USART2_SERIALDRIVER
+endif # SAMV7_USART2
 
 config SAMV7_WDT
 	bool "Watchdog Timer (WDT)"
@@ -2485,6 +2634,21 @@ endmenu # DAC device driver configuration
 
 menu "HSMCI device driver options"
 	depends on SAMV7_HSMCI
+
+config SAMV7_HSMCI_SW_CARDDETECT
+	bool "MMC/SD card detect is SW on CD/DAT3"
+	depends on MMCSD_HAVE_CARDDETECT
+	default n
+	---help---
+		Some SD card connectors do not have separate card detection pin. In that
+		case card detection has to be done on CD/DAT3 data line. This means software
+		(i.e. architecture level driver) has to take care of pin configuration switching
+		(pin has to be set as data pin in case of transfer and as interrupt card detection
+		pin when there is no action on data line). SAMv7 HSMCI driver offers this method
+		of SD card detection. Following macros have to be defined in include/board.h:
+
+			GPIO_HSMCI0_CD - detection pin (same as CD/DAT3 but with IRQ)
+			IRQ_HSMCI0_CD  - IRQ number for the pin
 
 config SAMV7_HSMCI_DMA
 	bool "Support DMA data transfers"

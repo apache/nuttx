@@ -27,12 +27,28 @@
 #include <assert.h>
 #include <sys/param.h>
 
-#include <nuttx/userspace.h>
+#ifdef CONFIG_BUILD_PROTECTED
+#  include <nuttx/userspace.h>
+#endif
 
 #include "mpu.h"
+#include "hardware/stm32_memorymap.h"
 #include "stm32_mpuinit.h"
 
-#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_ARM_MPU)
+#ifdef CONFIG_ARM_MPU
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifdef CONFIG_RPTUN
+#  ifdef CONFIG_STM32H7_SHMEM_SRAM3
+#    define STM32_SHMEM_BASE STM32_SRAM3_BASE
+#    define STM32_SHMEM_SIZE STM32H7_SRAM3_SIZE
+#  else
+#    error missing shmem MPU configuration
+#  endif
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -42,18 +58,25 @@
  * Name: stm32_mpuinitialize
  *
  * Description:
- *   Configure the MPU to permit user-space access to only restricted SAM3U
- *   resources.
+ *   Configure the MPU.
+ *
+ *   If PROTECTED build:
+ *     - permit user-space access to only restricted STM32 resources.
+ *
+ *   If RPTUN:
+ *     - configure shared memory as non-cacheable
  *
  ****************************************************************************/
 
 void stm32_mpuinitialize(void)
 {
+#ifdef CONFIG_BUILD_PROTECTED
   uintptr_t datastart = MIN(USERSPACE->us_datastart, USERSPACE->us_bssstart);
   uintptr_t dataend   = MAX(USERSPACE->us_dataend,   USERSPACE->us_bssend);
 
   DEBUGASSERT(USERSPACE->us_textend >= USERSPACE->us_textstart &&
               dataend >= datastart);
+#endif
 
   /* Show MPU information */
 
@@ -63,18 +86,27 @@ void stm32_mpuinitialize(void)
 
   mpu_reset();
 
+#ifdef CONFIG_BUILD_PROTECTED
   /* Configure user flash and SRAM space */
 
   mpu_user_flash(USERSPACE->us_textstart,
                  USERSPACE->us_textend - USERSPACE->us_textstart);
 
   mpu_user_intsram(datastart, dataend - datastart);
+#endif
+
+#ifdef CONFIG_RPTUN
+  /* Configure shared memory as non-cacheable */
+
+  mpu_priv_shmem((uintptr_t)STM32_SHMEM_BASE, STM32_SHMEM_SIZE);
+#endif
 
   /* Then enable the MPU */
 
   mpu_control(true, false, true);
 }
 
+#ifdef CONFIG_BUILD_PROTECTED
 /****************************************************************************
  * Name: stm32_mpu_uheap
  *
@@ -89,5 +121,6 @@ void stm32_mpu_uheap(uintptr_t start, size_t size)
 {
   mpu_user_intsram(start, size);
 }
+#endif
 
-#endif /* CONFIG_BUILD_PROTECTED && CONFIG_ARM_MPU */
+#endif /* CONFIG_ARM_MPU */

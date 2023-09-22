@@ -610,8 +610,8 @@ static int sht3x_unlink(FAR struct inode *inode)
   FAR struct sht3x_dev_s *priv;
   int ret;
 
-  DEBUGASSERT(inode != NULL && inode->i_private != NULL);
-  priv = (FAR struct sht3x_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private != NULL);
+  priv = inode->i_private;
 
   /* Get exclusive access */
 
@@ -671,7 +671,7 @@ int sht3x_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   /* Initialize the device structure */
 
-  priv = (FAR struct sht3x_dev_s *)kmm_zalloc(sizeof(struct sht3x_dev_s));
+  priv = kmm_zalloc(sizeof(struct sht3x_dev_s));
   if (priv == NULL)
     {
       snerr("ERROR: Failed to allocate instance\n");

@@ -1,0 +1,94 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "i.MX8MP Configuration Options"
+
+menu "i.MX8MP Peripheral Selection"
+
+config MX8MP_UART1
+	bool "UART1"
+	default n
+	select UART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config MX8MP_UART2
+	bool "UART2"
+	default n
+	select UART2_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config MX8MP_UART3
+	bool "UART3"
+	default n
+	select UART3_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config MX8MP_UART4
+	bool "UART4"
+	default n
+	select UART4_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+#####################################################################
+#  I2C Configuration (Master)
+#####################################################################
+
+config MX8MP_I2C
+	bool "I2C Master"
+	select I2C
+	---help---
+		Build in support for I2C master mode.
+
+if MX8MP_I2C
+
+	config MX8MP_I2C1
+		bool "I2C1"
+		default n
+		select I2C
+
+	config MX8MP_I2C2
+		bool "I2C2"
+		default n
+		select I2C
+
+	config MX8MP_I2C3
+		bool "I2C3"
+		default n
+		select I2C
+
+	config MX8MP_I2C4
+		bool "I2C4"
+		default n
+		select I2C
+
+	config MX8MP_I2C5
+		bool "I2C5"
+		default n
+		select I2C
+
+	config MX8MP_I2C6
+		bool "I2C6"
+		default n
+		select I2C
+
+	config MX8MP_I2C_DRIVER
+		bool "I2C character driver"
+		default n
+		select I2C_DRIVER
+		---help---
+			Build in support for a character driver at /dev/i2c[N] that may be
+			used to perform I2C bus transfers from applications.  The intent of
+			this driver is to support I2C testing.  It is not suitable for use
+			in any real driver application.
+
+endif # MX8MP_I2C
+endmenu
+
+# These "hidden" settings determine whether a peripheral option is available
+# for the selected MCU
+
+# When there are multiple instances of a device, these "hidden" settings
+# will automatically be selected and will represent the 'OR' of the
+# instances selected.

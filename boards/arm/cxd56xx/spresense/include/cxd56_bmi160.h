@@ -60,6 +60,83 @@ extern "C"
 
 int board_bmi160_initialize(int bus);
 
+#ifdef CONFIG_SENSORS_BMI160_SCU
+/****************************************************************************
+ * Name: bmi160_init
+ *
+ * Description:
+ *   Initialize BMI160 accelerometer/gyro device
+ *
+ * Input Parameters:
+ *   dev     - An instance of the SPI or I2C interface to use to communicate
+ *             with BMI160
+ *   port    - I2C port number
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_BMI160_I2C
+int bmi160_init(struct i2c_master_s *dev, int port);
+#else /* CONFIG_SENSORS_BMI160_SPI */
+int bmi160_init(struct spi_dev_s *dev);
+#endif
+
+/****************************************************************************
+ * Name: bmi160gyro_register
+ *
+ * Description:
+ *   Register the BMI160 gyro character device as 'devpath'
+ *
+ * Input Parameters:
+ *   devpath - The full path to the driver to register. E.g., "/dev/gyro"
+ *   minor   - The number of sequencer
+ *   dev     - An instance of the SPI or I2C interface to use to communicate
+ *             with BMI160
+ *   port    - I2C port number
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_BMI160_I2C
+int bmi160gyro_register(const char *devpath, int minor,
+                        struct i2c_master_s *dev, int port);
+#else /* CONFIG_SENSORS_BMI160_SPI */
+int bmi160gyro_register(const char *devpath, int minor,
+                        struct spi_dev_s *dev);
+#endif
+
+/****************************************************************************
+ * Name: bmi160accel_register
+ *
+ * Description:
+ *   Register the BMI160 accelerometer character device as 'devpath'
+ *
+ * Input Parameters:
+ *   devpath - The full path to the driver to register. E.g., "/dev/accel"
+ *   minor   - The number of sequencer
+ *   dev     - An instance of the SPI or I2C interface to use to communicate
+ *             with BMI160
+ *   port    - I2C port number
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_BMI160_I2C
+int bmi160accel_register(const char *devpath, int minor,
+                         struct i2c_master_s *dev, int port);
+#else /* CONFIG_SENSORS_BMI160_SPI */
+int bmi160accel_register(const char *devpath, int minor,
+                         struct spi_dev_s *dev);
+#endif
+
+#endif /* CONFIG_SENSORS_BMI160_SCU */
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

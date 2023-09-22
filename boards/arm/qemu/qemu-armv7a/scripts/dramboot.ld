@@ -25,7 +25,7 @@ PHDRS
 }
 SECTIONS
 {
-  . = 0x40000000;
+  . = 0x40101000;
   .text : {
         _stext = .;            /* Text section */
        *(.vectors)
@@ -38,7 +38,8 @@ SECTIONS
   . = ALIGN(4096);
   .init_section : {
         _sinit = ABSOLUTE(.);
-        KEEP(*(.init_array .init_array.*))
+        KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
+        KEEP(*(.init_array .ctors))
         _einit = ABSOLUTE(.);
   } :text
   . = ALIGN(4096);

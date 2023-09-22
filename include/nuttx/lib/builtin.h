@@ -36,7 +36,7 @@
 
 struct builtin_s
 {
-  const char *name;         /* Invocation name and as seen under /sbin/ */
+  FAR const char *name;     /* Invocation name and as seen under /sbin/ */
   int         priority;     /* Use: SCHED_PRIORITY_DEFAULT */
   int         stacksize;    /* Desired stack size */
   main_t      main;         /* Entry point: main(int argc, char *argv[]) */
@@ -79,7 +79,7 @@ EXTERN int g_builtin_count;
  * address space.  These globals must be provided the application layer.
  */
 
-EXTERN FAR const struct builtin_s g_builtins[];
+EXTERN const struct builtin_s g_builtins[];
 EXTERN const int g_builtin_count;
 #endif
 

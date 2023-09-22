@@ -679,6 +679,75 @@ source "drivers/serial/Kconfig-lpuart"
 source "drivers/serial/Kconfig-usart"
 source "drivers/serial/Kconfig-sci"
 
+config RAM_UART
+	bool "RAM uart driver"
+	select SERIAL_RXDMA
+	select SERIAL_TXDMA
+	default n
+	---help---
+		It uses the memory block in the kernel as a communication medium,
+		which can communicate between different processes or different CPUs
+
+if RAM_UART
+config RAM_UART_POLLING_INTERVAL
+	int "RAM uart buffer check interval"
+	default USEC_PER_TICK
+	---help---
+		Interval in milliseconds to check for new data on uart ram buffer
+
+config RAM_UART_BUFSIZE
+	int "RAM_UART buffer size"
+	default 1024
+	---help---
+		The size of the RAM_UART buffer in bytes
+
+config RAM_UART0
+	bool "RAM uart driver 0"
+	default n
+	---help---
+		RAM_UART device 0
+
+config RAM_UART0_SLAVE
+	bool "RAM_UART0 is slave"
+	depends on RAM_UART0
+	default n
+	---help---
+		The RAM uart0 is slave
+
+config RAM_UART1
+	bool "RAM uart driver 1"
+	default n
+	---help---
+		RAM uart device 1
+
+config RAM_UART1_SLAVE
+	bool "RAM uart1 is slave"
+	depends on RAM_UART1
+	default n
+	---help---
+		The RAM uart1 is slave
+
+config RAM_UART2
+	bool "RAM uart driver 2"
+	default n
+	---help---
+		RAM uart device 2
+
+config RAM_UART2_SLAVE
+	bool "RAM uart2 is slave"
+	depends on RAM_UART2
+	default n
+	---help---
+		The RAM uart2 is slave
+
+config RAM_UART_BUFFER_SECTION
+	string "RAM uart buffer section name"
+	depends on RAM_UART0 || RAM_UART1 || RAM_UART2
+	---help---
+		The name of the section in the kernel memory block
+
+endif # RAM_UART
+
 menuconfig PSEUDOTERM
 	bool "Pseudo-Terminal (PTY) support"
 	default n
@@ -715,7 +784,7 @@ config PSEUDOTERM_TXBUFSIZE
 endif # PSEUDOTERM
 
 menuconfig UART_BTH4
-	bool "BT H4 uart pseudo device"
+	bool "BT H4 UART Pseudo Device"
 	default n
 	depends on DRIVERS_BLUETOOTH
 	---help---
@@ -727,24 +796,63 @@ menuconfig UART_BTH4
 if UART_BTH4
 
 config UART_BTH4_TXBUFSIZE
-	int "BT H4 uart TX buffer size"
+	int "BT H4 UART TX Buffer Size"
 	default 2048
 	---help---
-		H4 UART TX buffer size.  Default: 2048
+		H4 UART TX Buffer Size.  Default: 2048
 
 config UART_BTH4_RXBUFSIZE
-	int "BT H4 uart RX buffer size"
+	int "BT H4 UART RX Buffer Size"
 	default 8096
 	---help---
-		H4 UART RX buffer size.  Default: 8096
+		H4 UART RX Buffer Size.  Default: 8096
 
 config UART_BTH4_NPOLLWAITERS
-	int "Number of poll threads"
+	int "Number Of Poll Threads"
 	default 2
 	---help---
 		Maximum number of threads than can be waiting for POLL events.
 		Default: 2
 
 endif # UART_BTH4
+
+menuconfig UART_BTH5
+	bool "BT H5 UART Pseudo Device"
+	default n
+	depends on DRIVERS_BLUETOOTH
+	---help---
+		Enable support for Bluetooth H5 UART Pseudo Device(eg. /dev/ttyHCI).
+		This instantiates a serial-like interface over an existing bluetooth
+		controller via HCI interface. Useful for external Bluetooth
+		stacks working this way instead of the socket based interface.
+
+if UART_BTH5
+
+config UART_BTH5_TXBUFSIZE
+	int "BT H5 UART TX Buffer Size"
+	default 2048
+	---help---
+		H5 UART TX Buffer Size.  Default: 2048
+
+config UART_BTH5_TXWIN
+	int "BT H5 Uart TX Window Size"
+	default 4
+	---help---
+		H5 UART TX Window Size.  Default: 4
+
+config UART_BTH5_RXBUFSIZE
+	int "BT H5 Uart RX Buffer Size"
+	default 8096
+	---help---
+		H5 UART RX Buffer Size.  Default: 8096
+
+config UART_BTH5_NPOLLWAITERS
+	int "Number Of Poll Threads"
+	default 2
+	---help---
+		Maximum number of threads than can be waiting for POLL events.
+		Default: 2
+
+endif # UART_BTH5
 
 endif # SERIAL

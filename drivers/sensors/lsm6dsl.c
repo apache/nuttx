@@ -977,11 +977,9 @@ static ssize_t lsm6dsl_read(FAR struct file *filep,
 
   /* Sanity check */
 
-  DEBUGASSERT(filep != NULL);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode != NULL);
-  priv = (FAR struct lsm6dsl_dev_s *)inode->i_private;
+  priv = inode->i_private;
 
   DEBUGASSERT(priv != NULL);
   DEBUGASSERT(priv->datareg == LSM6DSL_OUTX_L_G_SHIFT ||
@@ -1099,11 +1097,9 @@ static int lsm6dsl_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Sanity check */
 
-  DEBUGASSERT(filep != NULL);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode != NULL);
-  priv = (FAR struct lsm6dsl_dev_s *)inode->i_private;
+  priv = inode->i_private;
 
   DEBUGASSERT(priv != NULL);
 
@@ -1184,7 +1180,7 @@ static int lsm6dsl_register(FAR const char *devpath,
 
   /* Initialize the device's structure */
 
-  priv = (FAR struct lsm6dsl_dev_s *)kmm_malloc(sizeof(*priv));
+  priv = kmm_malloc(sizeof(*priv));
   if (priv == NULL)
     {
       snerr("ERROR: Failed to allocate instance\n");

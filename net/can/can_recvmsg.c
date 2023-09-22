@@ -72,6 +72,10 @@ struct can_recvfrom_s
  * Private Functions
  ****************************************************************************/
 
+#ifdef CONFIG_NET_CANPROTO_OPTIONS
+static int can_recv_filter(FAR struct can_conn_s *conn, canid_t id);
+#endif
+
 /****************************************************************************
  * Name: can_add_recvlen
  *
@@ -234,6 +238,31 @@ static inline int can_readahead(struct can_recvfrom_s *pstate)
     {
       DEBUGASSERT(iob->io_pktlen > 0);
 
+#ifdef CONFIG_NET_CANPROTO_OPTIONS
+      /* Check receive filters */
+
+      canid_t can_id;
+      iob_copyout((uint8_t *)&can_id, iob, sizeof(canid_t), 0);
+
+      if (can_recv_filter(conn, can_id) == 0)
+        {
+          FAR struct iob_s *tmp;
+
+          /* Remove the I/O buffer chain from the head of the read-ahead
+           * buffer queue.
+           */
+
+          tmp = iob_remove_queue(&conn->readahead);
+          DEBUGASSERT(tmp == iob);
+          UNUSED(tmp);
+
+          /* And free the I/O buffer chain */
+
+          iob_free_chain(iob);
+          return 0;
+        }
+#endif
+
 #ifdef CONFIG_NET_TIMESTAMP
       if (conn->timestamp && pstate->pr_msglen == sizeof(struct timeval))
         {
@@ -298,16 +327,26 @@ static inline int can_readahead(struct can_recvfrom_s *pstate)
 }
 
 #ifdef CONFIG_NET_CANPROTO_OPTIONS
-static int can_recv_filter(struct can_conn_s *conn, canid_t id)
+static int can_recv_filter(FAR struct can_conn_s *conn, canid_t id)
 {
   uint32_t i;
+
+#ifdef CONFIG_NET_CAN_ERRORS
+  /* error message frame */
+
+  if ((id & CAN_ERR_FLAG) != 0)
+    {
+      return id & conn->err_mask ? 1 : 0;
+    }
+#endif
+
   for (i = 0; i < conn->filter_count; i++)
     {
       if (conn->filters[i].can_id & CAN_INV_FILTER)
         {
           if ((id & conn->filters[i].can_mask) !=
                 ((conn->filters[i].can_id & ~CAN_INV_FILTER) &
-                conn->filters[i].can_mask))
+                 conn->filters[i].can_mask))
             {
               return 1;
             }
@@ -344,7 +383,10 @@ static uint16_t can_recvfrom_eventhandler(FAR struct net_driver_s *dev,
            * when is valid then complete the read action.
            */
 #ifdef CONFIG_NET_CANPROTO_OPTIONS
-          if (can_recv_filter(conn, (canid_t) *dev->d_appdata) == 0)
+          canid_t can_id;
+          memcpy(&can_id, dev->d_appdata, sizeof(canid_t));
+
+          if (can_recv_filter(conn, can_id) == 0)
             {
               flags &= ~CAN_NEWDATA;
               return flags;
@@ -470,14 +512,12 @@ ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   struct can_recvfrom_s state;
   int ret;
 
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
-
   conn = psock->s_conn;
 
   if (psock->s_type != SOCK_RAW)
     {
       nerr("ERROR: Unsupported socket type: %d\n", psock->s_type);
-      ret = -ENOSYS;
+      return -ENOSYS;
     }
 
   net_lock();

@@ -157,7 +157,7 @@ int at25_main(int argc, char *argv[])
   printf("Send Intel HEX file now\n");
   fflush(stdout);
 
-  ret = hex2bin(&rawinstream.public, &memoutstream.public,
+  ret = hex2bin(&rawinstream.common, &memoutstream.common,
                 SAM_ISRAM_VSECTION,
                 SAM_ISRAM_VSECTION + CONFIG_SAMA5D4EK_AT25_PROGSIZE,
                 0);
@@ -175,20 +175,20 @@ int at25_main(int argc, char *argv[])
    * location.
    */
 
-  *(uint32_t *)(SAM_DDRCS_VSECTION + 0x14) = memoutstream.public.nput;
+  *(uint32_t *)(SAM_DDRCS_VSECTION + 0x14) = memoutstream.common.nput;
 
   /* The HEX file load was successful, write the data to FLASH */
 
   printf("Successfully loaded the Intel HEX file into memory...\n");
   printf("  Writing %d bytes to the AT25 Serial FLASH\n",
-         memoutstream.public.nput);
+         memoutstream.common.nput);
 
-  remaining = memoutstream.public.nput;
+  remaining = memoutstream.common.nput;
   src = (uint8_t *)SAM_DDRCS_VSECTION;
 
   do
     {
-      nwritten = write(fd, src, memoutstream.public.nput);
+      nwritten = write(fd, src, memoutstream.common.nput);
       if (nwritten <= 0)
         {
           int errcode = errno;
@@ -214,7 +214,7 @@ int at25_main(int argc, char *argv[])
    */
 
   printf("  Verifying %d bytes in the AT25 Serial FLASH\n",
-         memoutstream.public.nput);
+         memoutstream.common.nput);
 
   /* Open the AT25 device for writing */
 
@@ -226,7 +226,7 @@ int at25_main(int argc, char *argv[])
       return EXIT_FAILURE;
     }
 
-  remaining = memoutstream.public.nput;
+  remaining = memoutstream.common.nput;
   src = (const uint8_t *)SAM_DDRCS_VSECTION;
 
   do
@@ -253,7 +253,7 @@ int at25_main(int argc, char *argv[])
           if (memcmp(g_iobuffer, src, nread) != 0)
             {
               fprintf(stderr, "ERROR: Verify failed at offset %d\n",
-                      memoutstream.public.nput - remaining);
+                      memoutstream.common.nput - remaining);
               close(fd);
               return EXIT_FAILURE;
             }
@@ -265,7 +265,7 @@ int at25_main(int argc, char *argv[])
   while (remaining > 0);
 
   printf("  Successfully verified %d bytes in the AT25 Serial FLASH\n",
-         memoutstream.public.nput);
+         memoutstream.common.nput);
 
   close(fd);
   return EXIT_SUCCESS;

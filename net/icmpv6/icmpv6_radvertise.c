@@ -282,7 +282,7 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
 
   /* Update device buffer length */
 
-  iob_update_pktlen(dev->d_iob, IPv6_HDRLEN + l3size);
+  iob_update_pktlen(dev->d_iob, IPv6_HDRLEN + l3size, false);
 
   /* Calculate the checksum over both the ICMP header and payload */
 

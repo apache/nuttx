@@ -3,6 +3,17 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+config XTENSA_STRING_FUNCTION
+	bool "Enable optimized XTENSA specific string function"
+	default n
+	select XTENSA_MEMCPY
+	select XTENSA_MEMMOVE
+	select XTENSA_MEMSET
+	select XTENSA_STRCMP
+	select XTENSA_STRCPY
+	select XTENSA_STRLEN
+	select XTENSA_STRNCPY
+
 config XTENSA_MEMCPY
 	bool "Enable optimized memcpy() for XTENSA"
 	select LIBC_ARCH_MEMCPY

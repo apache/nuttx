@@ -464,7 +464,7 @@ static int can_close(FAR struct file *filep)
 
   while (dev->cd_xmit.tx_head != dev->cd_xmit.tx_tail)
     {
-       nxsig_usleep(HALF_SECOND_USEC);
+      nxsig_usleep(HALF_SECOND_USEC);
     }
 
   /* And wait for the TX hardware FIFO to drain */
@@ -1009,7 +1009,7 @@ static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
                     bool setup)
 {
   FAR struct inode *inode = (FAR struct inode *)filep->f_inode;
-  FAR struct can_dev_s *dev = (FAR struct can_dev_s *)inode->i_private;
+  FAR struct can_dev_s *dev = inode->i_private;
   FAR struct can_reader_s *reader = NULL;
   pollevent_t eventset;
   int ndx;

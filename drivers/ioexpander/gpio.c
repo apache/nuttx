@@ -115,7 +115,6 @@ static ssize_t gpio_read(FAR struct file *filep, FAR char *buffer,
   FAR struct gpio_dev_s *dev;
   int ret;
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private != NULL);
   dev = inode->i_private;
@@ -174,7 +173,6 @@ static ssize_t gpio_write(FAR struct file *filep, FAR const char *buffer,
   int ret;
   bool val;
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private != NULL);
   dev = inode->i_private;
@@ -278,7 +276,6 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   int i;
   int j = 0;
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private != NULL);
   dev = inode->i_private;

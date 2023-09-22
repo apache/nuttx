@@ -186,7 +186,7 @@ int mempool_init(FAR struct mempool_s *pool, FAR const char *name)
       kasan_poison(base, size);
     }
 
-  spin_initialize(&pool->lock, 0);
+  spin_initialize(&pool->lock, SP_UNLOCKED);
   if (pool->wait && pool->expandsize == 0)
     {
       nxsem_init(&pool->waitsem, 0, 0);
@@ -273,6 +273,10 @@ retry:
         }
     }
 
+#ifdef CONFIG_MM_FILL_ALLOCATIONS
+  memset(blk, 0xaa, pool->blocksize);
+#endif
+
 #if CONFIG_MM_BACKTRACE >= 0
   mempool_add_backtrace(pool, (FAR struct mempool_backtrace_s *)
                               ((FAR char *)blk + pool->blocksize));
@@ -304,9 +308,16 @@ void mempool_free(FAR struct mempool_s *pool, FAR void *blk)
   FAR struct mempool_backtrace_s *buf =
     (FAR struct mempool_backtrace_s *)((FAR char *)blk + pool->blocksize);
 
+  /* Check double free */
+
+  DEBUGASSERT(list_in_list(&buf->node));
   list_delete(&buf->node);
 #else
   pool->nalloc--;
+#endif
+
+#ifdef CONFIG_MM_FILL_ALLOCATIONS
+  memset(blk, 0x55, pool->blocksize);
 #endif
 
   if (pool->interruptsize > blocksize)

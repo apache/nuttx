@@ -118,8 +118,8 @@ static int bch_open(FAR struct file *filep)
   FAR struct bchlib_s *bch;
   int ret = OK;
 
-  DEBUGASSERT(inode && inode->i_private);
-  bch = (FAR struct bchlib_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  bch = inode->i_private;
 
   /* Increment the reference count */
 
@@ -155,8 +155,8 @@ static int bch_close(FAR struct file *filep)
   FAR struct bchlib_s *bch;
   int ret = OK;
 
-  DEBUGASSERT(inode && inode->i_private);
-  bch = (FAR struct bchlib_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  bch = inode->i_private;
 
   /* Get exclusive access */
 
@@ -223,9 +223,9 @@ static off_t bch_seek(FAR struct file *filep, off_t offset, int whence)
   off_t newpos;
   off_t ret;
 
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
 
-  bch = (FAR struct bchlib_s *)inode->i_private;
+  bch = inode->i_private;
   ret = nxmutex_lock(&bch->lock);
   if (ret < 0)
     {
@@ -294,8 +294,8 @@ static ssize_t bch_read(FAR struct file *filep, FAR char *buffer, size_t len)
   FAR struct bchlib_s *bch;
   ssize_t ret;
 
-  DEBUGASSERT(inode && inode->i_private);
-  bch = (FAR struct bchlib_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  bch = inode->i_private;
 
   ret = nxmutex_lock(&bch->lock);
   if (ret < 0)
@@ -324,8 +324,8 @@ static ssize_t bch_write(FAR struct file *filep, FAR const char *buffer,
   FAR struct bchlib_s *bch;
   ssize_t ret = -EACCES;
 
-  DEBUGASSERT(inode && inode->i_private);
-  bch = (FAR struct bchlib_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  bch = inode->i_private;
 
   if (!bch->readonly)
     {
@@ -361,8 +361,8 @@ static int bch_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct bchlib_s *bch;
   int ret = -ENOTTY;
 
-  DEBUGASSERT(inode && inode->i_private);
-  bch = (FAR struct bchlib_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  bch = inode->i_private;
 
   /* Process the call according to the command */
 
@@ -473,8 +473,8 @@ static int bch_unlink(FAR struct inode *inode)
   FAR struct bchlib_s *bch;
   int ret = OK;
 
-  DEBUGASSERT(inode && inode->i_private);
-  bch = (FAR struct bchlib_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  bch = inode->i_private;
 
   /* Get exclusive access to the BCH device */
 

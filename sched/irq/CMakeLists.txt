@@ -18,7 +18,7 @@
 #
 # ##############################################################################
 
-set(SRCS)
+set(SRCS irq_initialize.c irq_attach.c irq_dispatch.c irq_unexpectedisr.c)
 
 if(CONFIG_SMP)
   list(APPEND SRCS irq_spinlock.c)
@@ -38,8 +38,5 @@ endif()
 if(CONFIG_IRQCHAIN)
   list(APPEND SRCS irq_chain.c)
 endif()
-
-list(APPEND SRCS irq_initialize.c irq_attach.c irq_dispatch.c
-     irq_unexpectedisr.c)
 
 target_sources(sched PRIVATE ${SRCS})

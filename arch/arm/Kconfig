@@ -468,7 +468,6 @@ config ARCH_CHIP_STM32F7
 
 config ARCH_CHIP_STM32H7
 	bool "STMicro STM32 H7"
-	select ARCH_CORTEXM7
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_I2CRESET
 	select ARCH_HAVE_PROGMEM
@@ -479,11 +478,8 @@ config ARCH_CHIP_STM32H7
 	select ARCH_HAVE_TICKLESS
 	select ARCH_HAVE_TIMEKEEPING
 	---help---
-		STMicro STM32H7 architectures (ARM Cortex-M7).
-
-		BEWARE: This is a work-in-progress and not yet ready for general
-		usage.  See boards/arm/stm32/nucleo-h743zi/README.txt for the
-		current state of the port.
+		STMicro STM32H7 architectures (ARM Cortex-M7 or
+		dual ARM Cortex-M7 Cortex-M4).
 
 config ARCH_CHIP_STM32L4
 	bool "STMicro STM32 L4"
@@ -602,6 +598,22 @@ config ARCH_CHIP_XMC4
 	---help---
 		Infineon XMC4xxx(ARM Cortex-M4) architectures
 
+config ARCH_CHIP_MX8MP
+	bool "NXP i.MX8MP"
+	select ARCH_CORTEXM7
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_FETCHADD
+	select ARCH_HAVE_RAMFUNCS
+	select ARCH_HAVE_I2CRESET
+	select ARM_HAVE_MPU_UNIFIED
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+	select ARMV7M_HAVE_STACKCHECK
+	---help---
+		NXP i.MX8MP (ARM Cortex-M7) architectures
+
 config ARCH_CHIP_CXD56XX
 	bool "Sony CXD56xx"
 	select ARCH_CORTEXM4
@@ -633,8 +645,34 @@ config ARCH_CHIP_TLSR82
 
 config ARCH_CHIP_QEMU_ARM
 	bool "QEMU virt platform (ARMv7a)"
+	select ARCH_HAVE_PSCI
+	select ARCH_HAVE_POWEROFF
+	select ARCH_HAVE_RESET
 	---help---
 		QEMU virt platform (ARMv7a)
+
+config ARCH_CHIP_GOLDFISH_ARM
+	bool "GOLDFISH virt platform (ARMv7a)"
+	select ARCH_HAVE_PSCI
+	select ARCH_HAVE_POWEROFF
+	select ARCH_HAVE_RESET
+	---help---
+		GOLDFISH virt platform (ARMv7a)
+
+config ARCH_CHIP_AT32
+	bool "Artery AT32 F4"
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_FETCHADD
+	select ARCH_HAVE_I2CRESET
+	select ARCH_HAVE_HEAPCHECK
+	select ARCH_HAVE_PROGMEM
+	select ARCH_HAVE_SPI_BITORDER
+	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_TIMEKEEPING
+	select ARM_HAVE_MPU_UNIFIED
+	select ARMV7M_HAVE_STACKCHECK
+	---help---
+		Artery AT32 architectures (ARM Cortex-M4)
 
 config ARCH_CHIP_ARM_CUSTOM
 	bool "Custom ARM chip"
@@ -732,6 +770,7 @@ config ARCH_ARM1176JZ
 config ARCH_ARMV6M
 	bool
 	default n
+	select ARCH_HAVE_CPUINFO
 
 config ARCH_CORTEXM0
 	bool
@@ -1035,14 +1074,27 @@ config ARCH_CHIP
 	default "str71x"	if ARCH_CHIP_STR71X
 	default "tms570"	if ARCH_CHIP_TMS570
 	default "xmc4"		if ARCH_CHIP_XMC4
+	default "mx8mp"		if ARCH_CHIP_MX8MP
 	default "cxd56xx"	if ARCH_CHIP_CXD56XX
 	default "phy62xx"	if ARCH_CHIP_PHY62XX
 	default "tlsr82"	if ARCH_CHIP_TLSR82
 	default "qemu"		if ARCH_CHIP_QEMU_ARM
+	default "goldfish"	if ARCH_CHIP_GOLDFISH_ARM
+	default "at32"		if ARCH_CHIP_AT32
 
 config ARM_THUMB
 	bool "Thumb Mode"
 	default n
+
+config ARCH_HAVE_PSCI
+	bool "ARM PCSI (Power State Coordination Interface) Support"
+	default n
+	---help---
+		This Power State Coordination Interface (PSCI) defines
+		a standard interface for power management. the PCSI need
+		to implement handling firmware at EL2 or EL3. The option
+		maybe not applicable for arm core without PCSI firmware
+		interface implement
 
 config ARM_HAVE_WFE_SEV
 	bool
@@ -1489,6 +1541,9 @@ endif
 if ARCH_CHIP_XMC4
 source "arch/arm/src/xmc4/Kconfig"
 endif
+if ARCH_CHIP_MX8MP
+source "arch/arm/src/mx8mp/Kconfig"
+endif
 if ARCH_CHIP_PHY62XX
 source "arch/arm/src/phy62xx/Kconfig"
 endif
@@ -1500,5 +1555,11 @@ source "arch/arm/src/tlsr82/Kconfig"
 endif
 if ARCH_CHIP_QEMU_ARM
 source "arch/arm/src/qemu/Kconfig"
+endif
+if ARCH_CHIP_GOLDFISH_ARM
+source "arch/arm/src/goldfish/Kconfig"
+endif
+if ARCH_CHIP_AT32
+source "arch/arm/src/at32/Kconfig"
 endif
 endif # ARCH_ARM

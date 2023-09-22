@@ -44,7 +44,8 @@ set(SRCS
     lib_remove.c
     lib_tempnam.c
     lib_tmpnam.c
-    lib_ultoa_invert.c)
+    lib_ultoa_invert.c
+    lib_putwchar.c)
 
 if(CONFIG_LIBC_FLOATINGPOINT)
   list(APPEND SRCS lib_dtoa_engine.c lib_dtoa_data.c)
@@ -60,7 +61,7 @@ if(CONFIG_FILE_STREAM)
     lib_freopen.c
     lib_fclose.c
     lib_fread.c
-    lib_libfread.c
+    lib_libfread_unlocked.c
     lib_fseek.c
     lib_fseeko.c
     lib_ftell.c
@@ -79,8 +80,8 @@ if(CONFIG_FILE_STREAM)
     lib_fflush.c
     lib_libflushall.c
     lib_libfflush.c
-    lib_rdflush.c
-    lib_wrflush.c
+    lib_rdflush_unlocked.c
+    lib_wrflush_unlocked.c
     lib_putc.c
     lib_fputc.c
     lib_fputs.c
@@ -100,7 +101,10 @@ if(CONFIG_FILE_STREAM)
     lib_setvbuf.c
     lib_libstream.c
     lib_libfilelock.c
-    lib_libgetstreams.c)
+    lib_libgetstreams.c
+    lib_fputwc.c
+    lib_putwc.c
+    lib_fputws.c)
 endif()
 
 target_sources(c PRIVATE ${SRCS})

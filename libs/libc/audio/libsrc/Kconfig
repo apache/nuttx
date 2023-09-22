@@ -11,15 +11,6 @@ config AUDIO_SRC
 
 if AUDIO_SRC
 
-choice
-	prompt "Audio Conversion Quality"
-	default SINC_FAST_CONVERTER
-	---help---
-		Audio Conversion Quality options:
-		    Slowest conversion speed with best quality.
-		    Medium conversion speed with medium qulity
-		    Fastest conversion with lowest quality
-
 config SINC_FAST_CONVERTER
 	bool "Fastest conversion with lowest quality"
 	---help---
@@ -37,7 +28,5 @@ config SINC_BEST_CONVERTER
 	---help---
 		Slowest conversion speed with best quality.
 		Not suitable for most boards due to resource constrains.
-
-endchoice
 
 endif # LIBSRC

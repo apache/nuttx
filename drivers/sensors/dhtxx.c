@@ -545,7 +545,7 @@ int dhtxx_register(FAR const char *devpath,
 
   /* Initialize the Dhtxx device structure */
 
-  priv = (FAR struct dhtxx_dev_s *)kmm_malloc(sizeof(struct dhtxx_dev_s));
+  priv = kmm_malloc(sizeof(struct dhtxx_dev_s));
   if (priv == NULL)
     {
       snerr("ERROR: Failed to allocate instance\n");

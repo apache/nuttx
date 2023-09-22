@@ -1241,7 +1241,7 @@ static int bmi270_init_seq(FAR struct bmi270_dev_s *priv)
   FAR uint8_t *tmp    = NULL;
   uint8_t      regval = 0;
 
-  /* Check if initalization already done */
+  /* Check if initialization already done */
 
   regval = bmi270_getreg8(priv, BMI270_INTERNAL_STAT);
   if ((regval & INTSTAT_MSG_MASK) == INTSTAT_MSG_INITOK)
@@ -1258,9 +1258,11 @@ static int bmi270_init_seq(FAR struct bmi270_dev_s *priv)
 
   bmi270_putreg8(priv, BMI270_INIT_CTRL, 0);
 
+#ifdef CONFIG_SENSORS_BMI270_LOAD_FROM_HEAP
+
   /* Copy configuration to RAM */
 
-  tmp = malloc(sizeof(g_bmi270_config_file));
+  tmp = kmm_malloc(sizeof(g_bmi270_config_file));
   if (tmp == NULL)
     {
       snerr("Failed to allocate memory for configuration file\n");
@@ -1269,11 +1271,23 @@ static int bmi270_init_seq(FAR struct bmi270_dev_s *priv)
 
   memcpy(tmp, g_bmi270_config_file, sizeof(g_bmi270_config_file));
 
+#else
+
+  /* Transfer directly from const data memory */
+
+  tmp = (FAR uint8_t *)&g_bmi270_config_file;
+
+#endif
+
   /* Load configuration - start with byte 0 */
 
   bmi270_putregs(priv, BMI270_INIT_DATA,
                  tmp,
                  sizeof(g_bmi270_config_file));
+
+#ifdef CONFIG_SENSORS_BMI270_LOAD_FROM_HEAP
+  kmm_free(tmp);
+#endif
 
   /* Complete config load INIT_CTRL=0x01 */
 
@@ -1440,7 +1454,7 @@ int bmi270_register(FAR const char *devpath, FAR struct spi_dev_s *dev)
   FAR struct bmi270_dev_s *priv;
   int ret;
 
-  priv = (FAR struct bmi270_dev_s *)kmm_malloc(sizeof(struct bmi270_dev_s));
+  priv = kmm_malloc(sizeof(struct bmi270_dev_s));
   if (!priv)
     {
       snerr("Failed to allocate instance\n");

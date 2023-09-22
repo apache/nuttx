@@ -296,7 +296,7 @@ static void *board_composite0_connect(int port)
   DEBUGASSERT(epin < STM32_NENDPOINTS);
   DEBUGASSERT(epout < STM32_NENDPOINTS);
 
-  return composite_initialize(dev_idx, dev);
+  return composite_initialize(composite_getdevdescs(), dev, dev_idx);
 }
 
 /****************************************************************************

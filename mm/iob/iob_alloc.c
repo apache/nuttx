@@ -38,6 +38,23 @@
  * Private Functions
  ****************************************************************************/
 
+static clock_t iob_allocwait_gettimeout(clock_t start, unsigned int timeout)
+{
+  sclock_t tick;
+
+  tick = clock_systime_ticks() - start;
+  if (tick >= MSEC2TICK(timeout))
+    {
+      tick = 0;
+    }
+  else
+    {
+      tick = MSEC2TICK(timeout) - tick;
+    }
+
+  return tick;
+}
+
 /****************************************************************************
  * Name: iob_alloc_committed
  *
@@ -93,6 +110,7 @@ static FAR struct iob_s *iob_allocwait(bool throttled, unsigned int timeout)
   FAR struct iob_s *iob;
   irqstate_t flags;
   FAR sem_t *sem;
+  clock_t start;
   int ret = OK;
 
 #if CONFIG_IOB_THROTTLE > 0
@@ -115,7 +133,8 @@ static FAR struct iob_s *iob_allocwait(bool throttled, unsigned int timeout)
    * decremented atomically.
    */
 
-  iob = iob_tryalloc(throttled);
+  start = clock_systime_ticks();
+  iob   = iob_tryalloc(throttled);
   while (ret == OK && iob == NULL)
     {
       /* If not successful, then the semaphore count was less than or equal
@@ -130,7 +149,8 @@ static FAR struct iob_s *iob_allocwait(bool throttled, unsigned int timeout)
         }
       else
         {
-          ret = nxsem_tickwait_uninterruptible(sem, MSEC2TICK(timeout));
+          ret = nxsem_tickwait_uninterruptible(sem,
+                                   iob_allocwait_gettimeout(start, timeout));
         }
 
       if (ret >= 0)

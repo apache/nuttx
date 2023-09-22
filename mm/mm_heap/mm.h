@@ -136,18 +136,26 @@
 
 /* What is the size of the allocnode? */
 
-#define SIZEOF_MM_ALLOCNODE sizeof(struct mm_allocnode_s)
+#define MM_SIZEOF_ALLOCNODE sizeof(struct mm_allocnode_s)
 
 /* What is the overhead of the allocnode
  * Remove the space of preceding field since it locates at the end of the
  * previous freenode
  */
 
-#define OVERHEAD_MM_ALLOCNODE (SIZEOF_MM_ALLOCNODE - sizeof(mmsize_t))
+#define MM_ALLOCNODE_OVERHEAD (MM_SIZEOF_ALLOCNODE - sizeof(mmsize_t))
 
 /* Get the node size */
 
-#define SIZEOF_MM_NODE(node) ((node)->size & (~MM_MASK_BIT))
+#define MM_SIZEOF_NODE(node) ((node)->size & (~MM_MASK_BIT))
+
+/* Check if node/prenode is free */
+
+#define MM_NODE_IS_ALLOC(node) (((node)->size & MM_ALLOC_BIT) != 0)
+#define MM_NODE_IS_FREE(node) (((node)->size & MM_ALLOC_BIT) == 0)
+
+#define MM_PREVNODE_IS_ALLOC(node) (((node)->size & MM_PREVFREE_BIT) == 0)
+#define MM_PREVNODE_IS_FREE(node) (((node)->size & MM_PREVFREE_BIT) != 0)
 
 /****************************************************************************
  * Public Types
@@ -196,7 +204,7 @@ struct mm_freenode_s
   FAR struct mm_freenode_s *blink;
 };
 
-static_assert(SIZEOF_MM_ALLOCNODE <= MM_MIN_CHUNK,
+static_assert(MM_SIZEOF_ALLOCNODE <= MM_MIN_CHUNK,
               "Error size for struct mm_allocnode_s\n");
 
 static_assert(MM_ALIGN >= sizeof(uintptr_t) &&

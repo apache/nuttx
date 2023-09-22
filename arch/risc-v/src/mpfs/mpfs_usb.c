@@ -50,6 +50,7 @@
 #include <arch/board/board.h>
 
 #include "hardware/mpfs_usb.h"
+#include "mpfs_gpio.h"
 #include "riscv_internal.h"
 #include "chip.h"
 
@@ -326,7 +327,7 @@ static void mpfs_modifyreg16(uintptr_t addr, uint16_t clearbits,
  ****************************************************************************/
 
 static void mpfs_modifyreg8(uintptr_t addr, uint8_t clearbits,
-                             uint8_t setbits)
+                            uint8_t setbits)
 {
   irqstate_t flags;
   uint8_t    regval;
@@ -1339,7 +1340,7 @@ static int mpfs_ep_configure_internal(struct mpfs_ep_s *privep,
                        TXCSRL_REG_EPN_STALL_SENT_MASK,
                         0);
 
-      mpfs_ep_set_fifo_size(epno, 0, maxpacket);
+      mpfs_ep_set_fifo_size(epno, dirin, maxpacket);
 
       /* Give EP0 64 bytes (8*8) and configure 512 bytes for TX fifo.
        * This is a pointer to internal RAM where the data should be
@@ -1660,7 +1661,7 @@ static struct usbdev_req_s *mpfs_ep_allocreq(struct usbdev_ep_s *ep)
 {
   struct mpfs_req_s *privreq;
 
-  privreq = (struct mpfs_req_s *)kmm_malloc(sizeof(struct mpfs_req_s));
+  privreq = kmm_malloc(sizeof(struct mpfs_req_s));
   if (privreq == NULL)
     {
       usbtrace(TRACE_DEVERROR(MPFS_TRACEERR_ALLOCFAIL), 0);

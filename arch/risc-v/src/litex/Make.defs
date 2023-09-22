@@ -30,6 +30,7 @@ endif
 
 # Specify our C code within this directory to be included
 CHIP_CSRCS  = litex_allocateheap.c litex_clockconfig.c
+CHIP_CSRCS += litex_ctrl.c litex_systemreset.c
 CHIP_CSRCS += litex_irq.c litex_irq_dispatch.c
 CHIP_CSRCS += litex_lowputc.c litex_serial.c
 CHIP_CSRCS += litex_start.c

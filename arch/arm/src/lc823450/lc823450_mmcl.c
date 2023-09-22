@@ -131,8 +131,8 @@ static ssize_t mmcl_read(struct inode *inode, unsigned char *buffer,
 
   finfo("sector: %" PRIuOFF " nsectors: %u\n", start_sector, nsectors);
 
-  DEBUGASSERT(inode && inode->i_private);
-  dev = (struct mmcl_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  dev = inode->i_private;
 
   nread = MTD_BREAD(dev->mtd, start_sector, nsectors, buffer);
   if (nread != nsectors)
@@ -161,8 +161,8 @@ static ssize_t mmcl_write(struct inode *inode,
 
   finfo("sector: %" PRIuOFF " nsectors: %u\n", start_sector, nsectors);
 
-  DEBUGASSERT(inode && inode->i_private);
-  dev = (struct mmcl_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  dev = inode->i_private;
 
   nwrite = MTD_BWRITE(dev->mtd, start_sector, nsectors, buffer);
   if (nwrite != nsectors)
@@ -188,10 +188,9 @@ static int mmcl_geometry(struct inode *inode, struct geometry *geometry)
 
   finfo("Entry\n");
 
-  DEBUGASSERT(inode);
   if (geometry)
     {
-      dev = (struct mmcl_dev_s *)inode->i_private;
+      dev = inode->i_private;
 
       memset(geometry, 0, sizeof(*geometry));
 
@@ -226,8 +225,8 @@ static int mmcl_ioctl(struct inode *inode, int cmd, unsigned long arg)
   int ret;
   finfo("Entry\n");
 
-  DEBUGASSERT(inode && inode->i_private);
-  dev = (struct mmcl_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  dev = inode->i_private;
 
   ret = MTD_IOCTL(dev->mtd, cmd, arg);
   if (ret < 0)
@@ -250,7 +249,7 @@ static struct mmcl_dev_s *mmcl_allocdev(int number,
 
   /* Allocate a MMCL device structure */
 
-  dev = (struct mmcl_dev_s *)kmm_malloc(sizeof(struct mmcl_dev_s));
+  dev = kmm_malloc(sizeof(struct mmcl_dev_s));
   if (dev)
     {
       /* Initialize the MMCL device structure */

@@ -271,7 +271,7 @@ static void usbhost_destroy(FAR void *arg);
 static void usbhost_putbuffer(FAR struct usbhost_state_s *priv,
               uint8_t keycode);
 #ifdef CONFIG_HIDKBD_ENCODED
-static void usbhost_putstream(FAR struct lib_outstream_s *this, int ch);
+static void usbhost_putstream(FAR struct lib_outstream_s *self, int ch);
 #endif
 static inline uint8_t usbhost_mapscancode(uint8_t scancode,
               uint8_t modifier);
@@ -2496,7 +2496,6 @@ static int usbhost_open(FAR struct file *filep)
   int ret;
 
   uinfo("Entry\n");
-  DEBUGASSERT(filep && filep->f_inode);
   inode = filep->f_inode;
   priv  = inode->i_private;
 
@@ -2555,7 +2554,6 @@ static int usbhost_close(FAR struct file *filep)
   int ret;
 
   uinfo("Entry\n");
-  DEBUGASSERT(filep && filep->f_inode);
   inode = filep->f_inode;
   priv  = inode->i_private;
 
@@ -2654,7 +2652,7 @@ static ssize_t usbhost_read(FAR struct file *filep, FAR char *buffer,
   int                         ret;
 
   uinfo("Entry\n");
-  DEBUGASSERT(filep && filep->f_inode && buffer);
+  DEBUGASSERT(buffer);
   inode = filep->f_inode;
   priv  = inode->i_private;
 
@@ -2786,7 +2784,7 @@ static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
   int                         i;
 
   uinfo("Entry\n");
-  DEBUGASSERT(filep && filep->f_inode && fds);
+  DEBUGASSERT(fds);
   inode = filep->f_inode;
   priv  = inode->i_private;
 

@@ -3,6 +3,17 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+config ARMV7R_STRING_FUNCTION
+	bool "Enable optimized ARMv7R specific string function"
+	default n
+	depends on ARCH_TOOLCHAIN_GNU
+	select ARMV7R_MEMCHR
+	select ARMV7R_MEMCPY
+	select ARMV7R_MEMMOVE
+	select ARMV7R_MEMSET
+	select ARMV7R_STRCMP
+	select ARMV7R_STRLEN
+
 config ARMV7R_MEMCHR
 	bool "Enable optimized memchr() for ARMv7-R"
 	default n

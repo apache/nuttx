@@ -34,7 +34,10 @@ computer.
 
        $ make clean; make
        $ ./nuttx
-       login:
+       login: admin
+       password: Administrator
+       User Logged-in!
+       nsh>
 
    From another terminal window, kill the simulator:
 
@@ -121,3 +124,29 @@ This is also useful to script configuration changes that you perform often:
    kconfig-tweak --disable CONFIG_DEBUG_NOOPT
    kconfig-tweak --disable CONFIG_SYSLOG_TIMESTAMP
    make oldconfig
+
+Reference configuration
+--------------------------
+
+Defconfig supports the use of #include statements to reference other configuration files.
+The default header file search path includes:
+   ${current directory}
+   ${boards}/configs/comnon
+   ${boards}/common/configs
+
+.. code-block::
+
+   CONFIG_XXX1=y
+   CONFIG_XXX2=y
+   #include "configs/system.config"
+   #include "configs/net.config"
+
+Merge configuration
+--------------------------
+
+Multiple config fragments can be merged manually using the tools/merge_config.py script.
+
+.. code-block:: console
+
+   $ cd nuttx
+   $ ./tools/merge_config.py -o defconfig .config1 .config2

@@ -83,6 +83,15 @@ ARCHCXXFLAGS += -fno-common -nostdinc++
 ARCHCFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wundef -Wno-attributes -Wno-unknown-pragmas
 ARCHCXXFLAGS += -Wall -Wshadow -Wundef -Wno-attributes -Wno-unknown-pragmas
 
+# When all C++ code is built using GCC 7.1 or a higher version,
+# we can safely disregard warnings of the type "parameter passing for X changed in GCC 7.1."
+# Refer to : https://stackoverflow.com/questions/48149323/what-does-the-gcc-warning-project-parameter-passing-for-x-changed-in-gcc-7-1-m
+
+ifneq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
+  ARCHCFLAGS += -Wno-psabi
+  ARCHCXXFLAGS += -Wno-psabi
+endif
+
 ifneq ($(CONFIG_CXX_STANDARD),)
   ARCHCXXFLAGS += -std=$(CONFIG_CXX_STANDARD)
 endif
@@ -124,12 +133,17 @@ endif
 
 ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
 
-  # Generic GNU RVG toolchain
+  # Generic GNU RVG toolchain, prefer to use riscv-none-elf-gcc from xPack
+  # if CROSSDEV is not defined.
 
-  ifeq ($(CONFIG_RISCV_TOOLCHAIN_GNU_RV32),y)
-    CROSSDEV ?= riscv32-unknown-elf-
+  ifeq ($(shell riscv-none-elf-gcc --version > /dev/null 2>&1; echo $$?), 0)
+    CROSSDEV ?= riscv-none-elf-
   else
-    CROSSDEV ?= riscv64-unknown-elf-
+    ifeq ($(CONFIG_RISCV_TOOLCHAIN_GNU_RV32),y)
+      CROSSDEV ?= riscv32-unknown-elf-
+    else
+      CROSSDEV ?= riscv64-unknown-elf-
+    endif
   endif
 
   # Detect cpu ISA support flags
@@ -169,12 +183,14 @@ ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
     ARCHTYPE = rv64
     ARCHABITYPE = lp64
     LLVM_ARCHTYPE := riscv64
+    # https://www.sifive.com/blog/all-aboard-part-4-risc-v-code-models
+    ARCHCPUFLAGS = -mcmodel=medany
   endif
 
   # Construct arch flags
 
   ARCHCPUEXTFLAGS = i$(ARCHRVISAM)$(ARCHRVISAA)$(ARCHRVISAF)$(ARCHRVISAD)$(ARCHRVISAC)$(ARCHRVISAZ)
-  ARCHCPUFLAGS = -march=$(ARCHTYPE)$(ARCHCPUEXTFLAGS)
+  ARCHCPUFLAGS += -march=$(ARCHTYPE)$(ARCHCPUEXTFLAGS)
 
   # Construct arch abi flags
 
@@ -219,6 +235,14 @@ ifeq ($(CONFIG_MM_KASAN_ALL),y)
   ARCHOPTIMIZATION += -fsanitize=kernel-address
 endif
 
+ifeq ($(CONFIG_MM_KASAN_DISABLE_READS_CHECK),y)
+  ARCHOPTIMIZATION += --param asan-instrument-reads=0
+endif
+
+ifeq ($(CONFIG_MM_KASAN_DISABLE_WRITES_CHECK),y)
+  ARCHOPTIMIZATION += --param asan-instrument-writes=0
+endif
+
 ifeq ($(CONFIG_MM_UBSAN_ALL),y)
   ARCHOPTIMIZATION += $(CONFIG_MM_UBSAN_OPTION)
 endif
@@ -236,7 +260,7 @@ STRIP   = $(CROSSDEV)strip --strip-unneeded
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
 LD      = $(CROSSDEV)ld
-AR      = $(CROSSDEV)ar rcs
+AR      = $(CROSSDEV)ar rcsP
 NM      = $(CROSSDEV)nm
 
 # Link Time Optimization
@@ -245,7 +269,7 @@ ifeq ($(CONFIG_LTO_FULL),y)
   ARCHOPTIMIZATION += -flto
   ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
     LD := $(CROSSDEV)gcc
-    AR := $(CROSSDEV)gcc-ar rcs
+    AR := $(CROSSDEV)gcc-ar rcsP
     NM := $(CROSSDEV)gcc-nm
     ARCHOPTIMIZATION += -fuse-linker-plugin
     ARCHOPTIMIZATION += -fno-builtin

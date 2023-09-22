@@ -115,7 +115,7 @@ int elf_loaddtors(FAR struct elf_loadinfo_s *loadinfo)
   loadinfo->ndtors = dtorsize / sizeof(binfmt_dtor_t);
 
   binfo("dtoridx=%d dtorsize=%d sizeof(binfmt_dtor_t)=%d ndtors=%d\n",
-        dtoridx, dtorsize,  sizeof(binfmt_dtor_t), loadinfo->ndtors);
+        dtoridx, dtorsize, sizeof(binfmt_dtor_t), loadinfo->ndtors);
 
   /* Check if there are any destructors.  It is not an error if there
    * are none.
@@ -139,7 +139,7 @@ int elf_loaddtors(FAR struct elf_loadinfo_s *loadinfo)
         {
           /* Allocate memory to hold a copy of the .dtor section */
 
-          loadinfo->dtoralloc = (binfmt_dtor_t *)kumm_malloc(dtorsize);
+          loadinfo->dtoralloc = kumm_malloc(dtorsize);
           if (!loadinfo->dtoralloc)
             {
               berr("Failed to allocate memory for .dtors\n");
@@ -169,9 +169,8 @@ int elf_loaddtors(FAR struct elf_loadinfo_s *loadinfo)
                   ((FAR void *)(&loadinfo->dtors)[i]);
 
               binfo("dtor %d: "
-                    "%08" PRIxPTR " + %08" PRIxPTR " = %08" PRIxPTR "\n",
-                    i, *ptr, (uintptr_t)loadinfo->textalloc,
-                    (uintptr_t)(*ptr + loadinfo->textalloc));
+                    "%08" PRIxPTR " + %08" PRIxPTR " = %08" PRIxPTR "\n", i,
+                    *ptr, loadinfo->textalloc, (*ptr + loadinfo->textalloc));
 
               *ptr += loadinfo->textalloc;
             }

@@ -1585,7 +1585,7 @@ static ssize_t proc_write(FAR struct file *filep, FAR const char *buffer,
   FAR struct tcb_s *tcb;
   ssize_t ret;
 
-  DEBUGASSERT(filep != NULL && buffer != NULL && buflen > 0);
+  DEBUGASSERT(buffer != NULL && buflen > 0);
 
   procfile = (FAR struct proc_file_s *)filep->f_priv;
   DEBUGASSERT(procfile != NULL);
@@ -1640,7 +1640,7 @@ static int proc_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Allocate a new container to hold the task and node selection */
 
-  newfile = (FAR struct proc_file_s *)kmm_malloc(sizeof(struct proc_file_s));
+  newfile = kmm_malloc(sizeof(struct proc_file_s));
   if (newfile == NULL)
     {
       ferr("ERROR: Failed to allocate file container\n");
@@ -1733,7 +1733,7 @@ static int proc_opendir(FAR const char *relpath,
    * non-zero entries will need be initialized.
    */
 
-  procdir = (FAR struct proc_dir_s *)kmm_zalloc(sizeof(struct proc_dir_s));
+  procdir = kmm_zalloc(sizeof(struct proc_dir_s));
   if (procdir == NULL)
     {
       ferr("ERROR: Failed to allocate the directory structure\n");

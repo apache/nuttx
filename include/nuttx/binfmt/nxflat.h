@@ -113,21 +113,6 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: nxflat_verifyheader
- *
- * Description:
- *   Given the header from a possible NXFLAT executable, verify that it is
- *   an NXFLAT executable.
- *
- * Returned Value:
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- ****************************************************************************/
-
-int nxflat_verifyheader(const struct nxflat_hdr_s *header);
-
-/****************************************************************************
  * Name: nxflat_init
  *
  * Description:

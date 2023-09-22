@@ -128,7 +128,7 @@ static int psci_detect(void)
   uint32_t ver = psci_get_version();
 
   sinfo("Detected PSCI v%d.%d\n",
-       PSCI_VERSION_MAJOR(ver), PSCI_VERSION_MINOR(ver));
+        PSCI_VERSION_MAJOR(ver), PSCI_VERSION_MINOR(ver));
 
   if (PSCI_VERSION_MAJOR(ver) == 0 && PSCI_VERSION_MINOR(ver) < 2)
     {
@@ -188,7 +188,35 @@ int psci_cpu_on(unsigned long cpuid, uintptr_t entry_point)
     }
 
   ret = psci_data.invoke_psci_fn(PSCI_FN_NATIVE(0_2, CPU_ON),
-                      cpuid, (unsigned long)entry_point, 0);
+                                 cpuid, (unsigned long)entry_point, 0);
+
+  return psci_to_dev_err(ret);
+}
+
+int psci_sys_reset(void)
+{
+  int ret;
+
+  if (psci_data.conduit == SMCCC_CONDUIT_NONE)
+    {
+      return -EINVAL;
+    }
+
+  ret = psci_data.invoke_psci_fn(PSCI_0_2_FN_SYSTEM_RESET, 0, 0, 0);
+
+  return psci_to_dev_err(ret);
+}
+
+int psci_sys_poweroff(void)
+{
+  int ret;
+
+  if (psci_data.conduit == SMCCC_CONDUIT_NONE)
+    {
+      return -EINVAL;
+    }
+
+  ret = psci_data.invoke_psci_fn(PSCI_0_2_FN_SYSTEM_OFF, 0, 0, 0);
 
   return psci_to_dev_err(ret);
 }

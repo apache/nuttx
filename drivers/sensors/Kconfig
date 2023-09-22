@@ -56,6 +56,11 @@ config SENSORS_FAKESENSOR
 		2.1234,3.23443,2.23456
 		...
 
+config SENSORS_GOLDFISH_GPS
+	bool "Goldfish GPS Support"
+	depends on SENSORS_GPS
+	default n
+
 config SENSORS_APDS9960
 	bool "Avago APDS-9960 Gesture Sensor support"
 	default n
@@ -90,7 +95,7 @@ config APDS9922_ALS_NPOLLWAITERS
 config APDS9922_PS_NPOLLWAITERS
 	int "APDS-9922 - number of PS poll waiters"
 	default 2
-	depends on SENSORS_APDS9922  
+	depends on SENSORS_APDS9922
 	---help---
 		Sets the number of poll waiters for the proximity sensor
 
@@ -161,6 +166,13 @@ config SENSORS_BMI160
 
 if SENSORS_BMI160
 
+config SENSORS_BMI160_UORB
+	bool "BMI160 UORB Interface"
+	default n
+	---help---
+	Enables Work with the UORB or Character Device interface.
+	If not set, the Character Device is used by default.
+
 choice
 	prompt "BMI160 Interface"
 	default SENSORS_BMI160_SPI
@@ -224,6 +236,14 @@ config SENSORS_BMI270_SPI
 
 endchoice
 
+config SENSORS_BMI270_LOAD_FROM_HEAP
+	bool "BMI270 config loading from heap memory"
+	default n
+	---help---
+		Enable support to load the configuration data from heap memory.
+		Some chips can not do DMA transfer from FLASH and therefore
+		it is necessary to transfer the configuration file to RAM.
+
 endif
 
 config SENSORS_BMP180
@@ -232,6 +252,16 @@ config SENSORS_BMP180
 	select I2C
 	---help---
 		Enable driver support for the Bosch BMP180 barometer sensor.
+
+if SENSORS_BMP180
+
+config SENSORS_BMP180_UORB
+	bool "BMP180 UORB Interface"
+	---help---
+		Enables work with the UORB or Character Device interface.
+		If not set, the Character Device is used by default.
+
+endif #SENSORS_BMP180
 
 config SENSORS_BMP280
 	bool "Bosch BMP280 Barometric Pressure Sensor"
@@ -548,7 +578,7 @@ config LSM303AGR_I2C_FREQUENCY
 	int "LSM303AGR I2C frequency"
 	default 400000
 	range 1 400000
-	depends on SN_LSM303AGR
+	depends on SENSORS_LSM303AGR
 
 config SENSORS_LSM6DSL
 	bool "STMicro LSM6DSL support"
@@ -562,7 +592,7 @@ config LSM6DSL_I2C_FREQUENCY
 	int "LSM6DSL I2C frequency"
 	default 400000
 	range 1 400000
-	depends on SN_LSM6DSL
+	depends on SENSORS_LSM6DSL
 
 config SENSORS_LSM9DS1
 	bool "STMicro LSM9DS1 support"
@@ -582,7 +612,7 @@ config LSM9DS1_I2C_FREQUENCY
 	int "LSM9DS1 I2C frequency"
 	default 400000
 	range 1 400000
-	depends on SN_LSM9DS1
+	depends on SENSORS_LSM9DS1
 
 config SENSORS_LPS25H
 	bool "STMicro LPS25H pressure sensor"

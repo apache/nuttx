@@ -44,6 +44,7 @@
 #include <nuttx/signal.h>
 #include <nuttx/net/mii.h>
 #include <nuttx/net/netconfig.h>
+#include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
 
 #ifdef CONFIG_NET_PKT
@@ -1454,11 +1455,9 @@ static int lpc17_40_ifup(struct net_driver_s *dev)
   uint32_t regval;
   int ret;
 
-  ninfo("Bringing up: %d.%d.%d.%d\n",
-        (int)(dev->d_ipaddr & 0xff),
-        (int)((dev->d_ipaddr >> 8) & 0xff),
-        (int)((dev->d_ipaddr >> 16) & 0xff),
-        (int)(dev->d_ipaddr >> 24));
+  ninfo("Bringing up: %u.%u.%u.%u\n",
+        ip4_addr1(dev->d_ipaddr), ip4_addr2(dev->d_ipaddr),
+        ip4_addr3(dev->d_ipaddr), ip4_addr4(dev->d_ipaddr));
 
   /* Reset the Ethernet controller (again) */
 
@@ -1863,9 +1862,9 @@ static int lpc17_40_addmac(struct net_driver_s *dev, const uint8_t *mac)
 
   /* Enabled multicast address filtering in the RxFilterControl register:
    *
-   *   AcceptUnicastHashEn: When set to ’1’, unicast frames that pass the
+   *   AcceptUnicastHashEn: When set to '1', unicast frames that pass the
    *     imperfect hash filter are accepted.
-   *   AcceptMulticastHashEn When set to ’1’, multicast frames that pass
+   *   AcceptMulticastHashEn When set to '1', multicast frames that pass
    *     the imperfect hash filter are accepted.
    */
 
@@ -1945,9 +1944,9 @@ static int lpc17_40_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 
   if (regval == 0 && lpc17_40_getreg(regaddr2) == 0)
     {
-      /*   AcceptUnicastHashEn: When set to ’1’, unicast frames that pass
+      /*   AcceptUnicastHashEn: When set to '1', unicast frames that pass
        *     the imperfect hash filter are accepted.
-       *   AcceptMulticastHashEn When set to ’1’, multicast frames that
+       *   AcceptMulticastHashEn When set to '1', multicast frames that
        *     pass the imperfect hash filter are accepted.
        */
 

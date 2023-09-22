@@ -689,6 +689,10 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
 
   if (mm_lock(heap) == 0)
     {
+#ifdef CONFIG_MM_FILL_ALLOCATIONS
+      memset(mem, 0x55, mm_malloc_size(heap, mem));
+#endif
+
       kasan_poison(mem, mm_malloc_size(heap, mem));
 
       /* Pass, return to the tlsf pool */
@@ -1064,6 +1068,10 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
       memdump_backtrace(heap, buf);
 #endif
       kasan_unpoison(ret, mm_malloc_size(heap, ret));
+
+#ifdef CONFIG_MM_FILL_ALLOCATIONS
+      memset(ret, 0xaa, mm_malloc_size(heap, ret));
+#endif
     }
 
   return ret;

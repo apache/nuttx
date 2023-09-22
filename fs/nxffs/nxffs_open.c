@@ -994,13 +994,13 @@ int nxffs_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Sanity checks */
 
-  DEBUGASSERT(filep->f_priv == NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv == NULL);
 
   /* Get the mountpoint private data from the NuttX inode reference in the
    * file structure
    */
 
-  volume = (FAR struct nxffs_volume_s *)filep->f_inode->i_private;
+  volume = filep->f_inode->i_private;
   DEBUGASSERT(volume != NULL);
 
   /* Limitation:  A file must be opened for reading or writing, but not both.
@@ -1066,7 +1066,7 @@ int nxffs_dup(FAR const struct file *oldp, FAR struct file *newp)
    * file structure
    */
 
-  volume = (FAR struct nxffs_volume_s *)oldp->f_inode->i_private;
+  volume = oldp->f_inode->i_private;
   DEBUGASSERT(volume != NULL);
 #endif
 
@@ -1116,7 +1116,7 @@ int nxffs_close(FAR struct file *filep)
 
   /* Sanity checks */
 
-  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
 
   /* Recover the open file state from the struct file instance */
 
@@ -1124,7 +1124,7 @@ int nxffs_close(FAR struct file *filep)
 
   /* Recover the volume state from the open file */
 
-  volume = (FAR struct nxffs_volume_s *)filep->f_inode->i_private;
+  volume = filep->f_inode->i_private;
   DEBUGASSERT(volume != NULL);
 
   /* Get exclusive access to the volume.  Note that the volume lock

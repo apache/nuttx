@@ -107,7 +107,7 @@ static void rmt_reset(struct rmt_dev_s *dev)
 
   flags = spin_lock_irqsave(&dev->lock);
 
-  modifyreg32(DPORT_PERIP_RST_EN_REG, DPORT_RMT_RST, 1);
+  modifyreg32(DPORT_PERIP_RST_EN_REG, 0, DPORT_RMT_RST);
   modifyreg32(DPORT_PERIP_RST_EN_REG, DPORT_RMT_RST, 0);
 
   /* Clear any spurious IRQ Flag   */
@@ -191,7 +191,7 @@ static int rmt_setup(struct rmt_dev_s *dev)
  *
  * Description:
  *   Copies chunks of data from the buffer to the RMT device memory
- *   This function can also be called on the first transmition data chunk
+ *   This function can also be called on the first transmission data chunk
  *
  * Input Parameters:
  *   channel - Pointer to the channel to be reloaded
@@ -298,7 +298,7 @@ IRAM_ATTR static int rmt_interrupt(int irq, void *context, void *arg)
         }
       else if (regval & RMT_CHN_TX_END_INT_ST(ch_idx))
         {
-          /* end of transmition */
+          /* end of transmission */
 
           modifyreg32(RMT_INT_ENA_REG,
             RMT_CHN_TX_END_INT_ENA(ch_idx) |
@@ -358,11 +358,8 @@ struct rmt_dev_s *esp32_rmtinitialize(void)
   rmt_reset(rmtdev);
   rmt_setup(rmtdev);
 
-  rmtdev->channels = kmm_zalloc(
-    sizeof(struct rmt_dev_channel_s)*
-    RMT_NUMBER_OF_CHANNELS
-  );
-
+  rmtdev->channels = kmm_zalloc(sizeof(struct rmt_dev_channel_s) *
+                                RMT_NUMBER_OF_CHANNELS);
   if (!rmtdev->channels)
     {
       rmterr("Failed to allocate memory for RMT Channels");

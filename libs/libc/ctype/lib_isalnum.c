@@ -32,3 +32,8 @@ int isalnum(int c)
 {
   return isalpha(c) || isdigit(c);
 }
+
+int isalnum_l(int c, locale_t locale)
+{
+  return isalnum(c);
+}

@@ -219,7 +219,8 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   /* Non-blocking connection ? */
 
-  nonblock_conn = (conn->tcpstateflags == TCP_SYN_SENT &&
+  nonblock_conn = ((conn->tcpstateflags == TCP_ALLOCATED ||
+                    conn->tcpstateflags == TCP_SYN_SENT) &&
                    _SS_ISNONBLOCK(conn->sconn.s_flags));
 
   /* Find a container to hold the poll information */
@@ -343,6 +344,7 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
        * exceptional event.
        */
 
+      _SO_CONN_SETERRNO(conn, ENOTCONN);
       eventset |= POLLERR | POLLHUP;
     }
   else if (_SS_ISCONNECTED(conn->sconn.s_flags) &&

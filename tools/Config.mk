@@ -395,8 +395,8 @@ define INSTALL_LIB
 	$(ECHO_END)
 endef
 
-# ARCHIVE_ADD - Add a list of files to an archive
-# Example: $(call ARCHIVE_ADD, archive-file, "file1 file2 file3 ...")
+# ARCHIVE - Add a list of files to an archive
+# Example: $(call ARCHIVE, archive-file, "file1 file2 file3 ...")
 #
 # Note: The fileN strings may not contain spaces or  characters that may be
 # interpreted strangely by the shell
@@ -411,18 +411,8 @@ endef
 #
 #   CONFIG_WINDOWS_NATIVE - Defined for a Windows native build
 
-define ARCHIVE_ADD
-	$(ECHO_BEGIN)"AR (add): ${shell basename $(1)} "
-	$(Q) $(AR) $1 $2
-	$(ECHO_END)
-endef
-
-# ARCHIVE - Same as above, but ensure the archive is
-# created from scratch
-
 define ARCHIVE
-	$(Q) $(RM) $1
-	$(Q) $(AR) $1  $2
+	$(AR) $1  $2
 endef
 
 # PRELINK - Prelink a list of files
@@ -594,11 +584,12 @@ define CLEAN
 	$(Q) if exist (del /f /q  .*.swp)
 	$(call DELFILE,$(subst /,\,$(OBJS)))
 	$(Q) if exist $(BIN) (del /f /q  $(subst /,\,$(BIN)))
+	$(Q) if exist $(BIN).lock (del /f /q  $(subst /,\,$(BIN).lock))
 	$(Q) if exist $(EXTRA) (del /f /q  $(subst /,\,$(EXTRA)))
 endef
 else
 define CLEAN
-	$(Q) rm -f *$(OBJEXT) *$(LIBEXT) *~ .*.swp $(OBJS) $(BIN) $(EXTRA)
+	$(Q) rm -f *$(OBJEXT) *$(LIBEXT) *~ .*.swp $(OBJS) $(BIN) $(BIN).lock $(EXTRA)
 endef
 endif
 

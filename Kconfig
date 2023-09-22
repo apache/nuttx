@@ -423,7 +423,7 @@ menuconfig DFU_BINARY
 	bool "DFU binary format"
 	select RAW_BINARY
 	---help---
-	Create the dfu binary used with dfu-utils.
+		Create the dfu binary used with dfu-utils.
 
 if DFU_BINARY
 
@@ -601,6 +601,11 @@ config ARCH_CHIP_DEBUG_H
 	---help---
 		The debug.h under include/arch/chip contains architecture dependent debugging primitives
 
+config ARCH_BOARD_DEBUG_H
+	bool "board debug.h"
+	---help---
+		The debug.h under include/arch/board contains board dependent debugging primitives
+
 endchoice # debug.h selection
 
 endmenu # Customize Header Files
@@ -644,14 +649,14 @@ comment "Debug SYSLOG Output Controls"
 
 config DEBUG_ERROR
 	bool "Enable Error Output"
-	default n
+	default y
 	---help---
 		Enables output from [a-z]err() statements.  Errors are significant system
 		exceptions that require immediate attention.
 
 config DEBUG_WARN
 	bool "Enable Warnings Output"
-	default n
+	default y
 	depends on DEBUG_ERROR
 	---help---
 		Enables output from [a-z]warn() statements.  Warnings are considered to
@@ -660,7 +665,7 @@ config DEBUG_WARN
 
 config DEBUG_INFO
 	bool "Enable Informational Debug Output"
-	default n
+	default y
 	depends on DEBUG_WARN
 	---help---
 		Enables verbose "informational" debug output.  If you enable
@@ -1591,6 +1596,44 @@ config DEBUG_PWM_INFO
 
 endif # DEBUG_PWM
 
+config DEBUG_CAPTURE
+	bool "CAPTURE Debug Features"
+	default n
+	depends on CAPTURE
+	---help---
+		Enable CAPTURE debug features.
+
+		Support for this debug option is architecture-specific and may not
+		be available for some MCUs.
+
+if DEBUG_CAPTURE
+
+config DEBUG_CAPTURE_ERROR
+	bool "CAPTURE Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable CAPTURE driver error output to SYSLOG.
+
+		Support for this debug option is architecture-specific and may not
+		be available for some MCUs.
+
+config DEBUG_CAPTURE_WARN
+	bool "CAPTURE Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable CAPTURE driver warning output to SYSLOG.
+
+config DEBUG_CAPTURE_INFO
+	bool "CAPTURE Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable CAPTURE driver informational output to SYSLOG.
+
+endif # DEBUG_CAPTURE
+
 config DEBUG_RC
 	bool "RC Debug Features"
 	default n
@@ -2035,6 +2078,37 @@ config DEBUG_RESET_INFO
 
 endif # DEBUG_RESET
 
+config DEBUG_IPC
+	bool "IPC (Interprocessor communication) Debug Features"
+	default n
+	---help---
+		Enable IPC debug features.
+
+if DEBUG_IPC
+
+config DEBUG_IPC_ERROR
+	bool "IPC Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable IPC error output to SYSLOG.
+
+config DEBUG_IPC_WARN
+	bool "IPC Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable IPC warning output to SYSLOG.
+
+config DEBUG_IPC_INFO
+	bool "IPC Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable IPC informational output to SYSLOG.
+
+endif # DEBUG_IPC
+
 endif # DEBUG_FEATURES
 
 config ARCH_HAVE_STACKCHECK
@@ -2076,7 +2150,7 @@ config STACK_USAGE
 config STACK_USAGE_WARNING
 	int "Detect use of large stack variables"
 	default 0
-	help
+	---help---
 		Set the stack warning threshold, if the stack usage exceeds the
 		threshold, a warning will be generated
 

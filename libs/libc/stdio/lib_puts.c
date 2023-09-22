@@ -54,13 +54,13 @@ int puts(FAR const IPTR char *s)
 
   /* Write the string without its trailing '\0' */
 
-  nwritten = fputs(s, stream);
+  nwritten = fputs_unlocked(s, stream);
   if (nwritten > 0)
     {
       /* Followed by a newline */
 
       char newline = '\n';
-      ret = lib_fwrite(&newline, 1, stream);
+      ret = lib_fwrite_unlocked(&newline, 1, stream);
       if (ret > 0)
         {
           nput = nwritten + 1;
@@ -71,7 +71,7 @@ int puts(FAR const IPTR char *s)
 
           if ((stream->fs_flags & __FS_FLAG_LBF) != 0)
             {
-              ret = lib_fflush(stream, true);
+              ret = lib_fflush_unlocked(stream, true);
               if (ret < 0)
                 {
                   nput = EOF;

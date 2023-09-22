@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/sensors/fakesensor_urob.c
+ * drivers/sensors/fakesensor_uorb.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -316,6 +316,7 @@ static int fakesensor_thread(int argc, char** argv)
       nxsem_wait_uninterruptible(&sensor->wakeup);
 
       /* Open csv file and init file handle */
+
 
       ret = file_open(&sensor->data, sensor->file_path,
                       O_RDONLY | O_CLOEXEC);

@@ -59,6 +59,7 @@ The following list indicates peripherals supported in NuttX:
 ==========  =======
 Peripheral  Support
 ==========  =======
+1Wire       Yes
 ACC         No
 AES         No
 AFEC        Yes
@@ -288,6 +289,12 @@ by ``CONFIG_SAMV7_USARTx_RS485MODE`` option) or can be used with RX DMA support.
 is required to configure idle bus timeout value in ``CONFIG_SAMV7_SERIAL_DMA_TIMEOUT``. This option
 ensures data are read from the DMA buffer even if it is not full yet. TX DMA support is not implemented
 as well as entire DMA support for UART peripheral.
+
+USART/UART can be also used to emulate 1 wire interface. SAMv7 MCUs do not have build in support for
+1 wire therefore external hardware as TX/RX connection or optical isolation might be required. Selecting
+``CONFIG_SAMV7_UARTx_1WIREDRIVER`` enables 1 wire driver and sets USART/UART peripheral to this mode.
+Output pins are configured as if serial mode was selected plus TX is open drain. SAMv7 part of the driver
+is initialized by :c:func:`sam_1wireinitialize` with port number as an argument.
 
 Watchdog Timer (WDT)
 ---------------------

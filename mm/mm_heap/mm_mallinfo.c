@@ -48,17 +48,17 @@ struct mm_mallinfo_handler_s
 static void mallinfo_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
 {
   FAR struct mallinfo *info = arg;
-  size_t nodesize = SIZEOF_MM_NODE(node);
+  size_t nodesize = MM_SIZEOF_NODE(node);
 
   minfo("node=%p size=%zu preceding=%u (%c)\n",
         node, nodesize, (unsigned int)node->preceding,
-        (node->size & MM_ALLOC_BIT) ? 'A' : 'F');
+        MM_NODE_IS_ALLOC(node) ? 'A' : 'F');
 
   /* Check if the node corresponds to an allocated memory chunk */
 
-  if ((node->size & MM_ALLOC_BIT) != 0)
+  if (MM_NODE_IS_ALLOC(node))
     {
-      DEBUGASSERT(nodesize >= SIZEOF_MM_ALLOCNODE);
+      DEBUGASSERT(nodesize >= MM_SIZEOF_ALLOCNODE);
       info->aordblks++;
       info->uordblks += nodesize;
     }
@@ -68,12 +68,12 @@ static void mallinfo_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
 
       DEBUGASSERT(nodesize >= MM_MIN_CHUNK);
       DEBUGASSERT(fnode->blink->flink == fnode);
-      DEBUGASSERT(SIZEOF_MM_NODE(fnode->blink) <= nodesize);
+      DEBUGASSERT(MM_SIZEOF_NODE(fnode->blink) <= nodesize);
       DEBUGASSERT(fnode->flink == NULL ||
                   fnode->flink->blink == fnode);
       DEBUGASSERT(fnode->flink == NULL ||
-                  SIZEOF_MM_NODE(fnode->flink) == 0 ||
-                  SIZEOF_MM_NODE(fnode->flink) >= nodesize);
+                  MM_SIZEOF_NODE(fnode->flink) == 0 ||
+                  MM_SIZEOF_NODE(fnode->flink) >= nodesize);
 
       info->ordblks++;
       info->fordblks += nodesize;
@@ -90,13 +90,13 @@ static void mallinfo_task_handler(FAR struct mm_allocnode_s *node,
   FAR struct mm_mallinfo_handler_s *handler = arg;
   FAR const struct malltask *task = handler->task;
   FAR struct mallinfo_task *info = handler->info;
-  size_t nodesize = SIZEOF_MM_NODE(node);
+  size_t nodesize = MM_SIZEOF_NODE(node);
 
   /* Check if the node corresponds to an allocated memory chunk */
 
-  if ((node->size & MM_ALLOC_BIT) != 0)
+  if (MM_NODE_IS_ALLOC(node))
     {
-      DEBUGASSERT(nodesize >= SIZEOF_MM_ALLOCNODE);
+      DEBUGASSERT(nodesize >= MM_SIZEOF_ALLOCNODE);
 #if CONFIG_MM_BACKTRACE < 0
       if (task->pid == PID_MM_ALLOC)
         {

@@ -31,11 +31,22 @@ list(
   stm32_rcc.c
   stm32_lowputc.c
   stm32_serial.c
-  stm32_uid.c
-)
+  stm32_uid.c)
 
 if(CONFIG_STM32H7_PROGMEM)
   list(APPEND SRCS stm32_flash.c)
+endif()
+
+if(CONFIG_ARCH_STM32H7_DUALCORE)
+  list(APPEND SRCS stm32_dualcore.c)
+endif()
+
+if(CONFIG_STM32H7_HSEM)
+  list(APPEND SRCS stm32_hsem.c)
+endif()
+
+if(CONFIG_RPTUN)
+  list(APPEND SRCS stm32_rptun.c)
 endif()
 
 if(CONFIG_SCHED_TICKLESS)
@@ -48,8 +59,12 @@ if(CONFIG_STM32H7_ONESHOT)
   list(APPEND SRCS stm32_oneshot.c stm32_oneshot_lowerhalf.c)
 endif()
 
+if(CONFIG_ARM_MPU)
+  list(APPEND SRCS stm32_mpuinit.c)
+endif()
+
 if(CONFIG_BUILD_PROTECTED)
-  list(APPEND SRCS stm32_userspace.c stm32_mpuinit.c)
+  list(APPEND SRCS stm32_userspace.c)
 endif()
 
 if(CONFIG_ARMV7M_DTCM)

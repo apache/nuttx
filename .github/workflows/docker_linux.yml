@@ -46,13 +46,13 @@ jobs:
       IMAGE_TAG: ghcr.io/${{ github.repository }}/apache-nuttx-ci-linux
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Log into registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -66,7 +66,7 @@ jobs:
         run: |
           df -h
       - name: Push Linux image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: tools/ci/docker/linux
           platforms: linux/amd64

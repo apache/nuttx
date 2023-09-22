@@ -464,6 +464,11 @@ reload:
 
           DEBUGASSERT(ret == priv->buf_size);
 
+          if (priv->capture_cb == NULL)
+            {
+              return 0;
+            }
+
           clock_systime_timespec(&ts);
           TIMESPEC_TO_TIMEVAL(&tv, &ts);
           priv->capture_cb(0, priv->buf_size, &tv, priv->capture_arg);
@@ -597,8 +602,8 @@ static int goldfish_camera_data_init(FAR struct imgdata_s *data)
   argv[1] = NULL;
 
   ret = kthread_create("goldfish_camera_thread",
-                        CONFIG_GOLDFISH_CAMERA_PRIORITY,
-                        CONFIG_GOLDFISH_CAMERA_STACKSIZE,
+                        SCHED_PRIORITY_DEFAULT,
+                        CONFIG_DEFAULT_TASK_STACKSIZE,
                         goldfish_camera_thread, argv);
   if (ret < 0)
     {
@@ -628,7 +633,7 @@ static int goldfish_camera_data_uninit(FAR struct imgdata_s *data)
 
   priv->streaming = false;
   nxsem_post(&priv->run);
-  nxsched_waitpid(priv->pid, NULL, 0, 0);
+  nxsched_waitpid(priv->pid, NULL, 0);
 
   nxsem_destroy(&priv->run);
   file_close(&priv->file);

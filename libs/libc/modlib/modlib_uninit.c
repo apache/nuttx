@@ -50,7 +50,7 @@
  *
  ****************************************************************************/
 
-int modlib_uninitialize(struct mod_loadinfo_s *loadinfo)
+int modlib_uninitialize(FAR struct mod_loadinfo_s *loadinfo)
 {
   /* Free all working buffers */
 
@@ -61,6 +61,7 @@ int modlib_uninitialize(struct mod_loadinfo_s *loadinfo)
   if (loadinfo->filfd >= 0)
     {
       _NX_CLOSE(loadinfo->filfd);
+      loadinfo->filfd = -1;
     }
 
   return OK;
@@ -78,27 +79,27 @@ int modlib_uninitialize(struct mod_loadinfo_s *loadinfo)
  *
  ****************************************************************************/
 
-int modlib_freebuffers(struct mod_loadinfo_s *loadinfo)
+int modlib_freebuffers(FAR struct mod_loadinfo_s *loadinfo)
 {
   /* Release all working allocations  */
 
   if (loadinfo->shdr != NULL)
     {
-      lib_free((FAR void *)loadinfo->shdr);
-      loadinfo->shdr      = NULL;
+      lib_free(loadinfo->shdr);
+      loadinfo->shdr = NULL;
     }
 
   if (loadinfo->phdr != NULL)
     {
-      lib_free((FAR void *)loadinfo->phdr);
-      loadinfo->phdr      = NULL;
+      lib_free(loadinfo->phdr);
+      loadinfo->phdr = NULL;
     }
 
   if (loadinfo->iobuffer != NULL)
     {
-      lib_free((FAR void *)loadinfo->iobuffer);
-      loadinfo->iobuffer  = NULL;
-      loadinfo->buflen    = 0;
+      lib_free(loadinfo->iobuffer);
+      loadinfo->iobuffer = NULL;
+      loadinfo->buflen   = 0;
     }
 
   return OK;

@@ -41,7 +41,7 @@
 #include <nuttx/wireless/bluetooth/bt_uart.h>
 
 #if defined(CONFIG_UART_BTH4)
-  #include <nuttx/serial/uart_bth4.h>
+#  include <nuttx/serial/uart_bth4.h>
 #endif
 
 #include "esp32_ble_adapter.h"
@@ -50,17 +50,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* BLE packet buffer max number */
-
-#define BLE_BUF_NUM       CONFIG_ESP32_BLE_PKTBUF_NUM
-
 /* BLE packet buffer max size */
 
 #define BLE_BUF_SIZE      1024
-
-/* Low-priority work queue process RX/TX */
-
-#define BLE_WORK          LPWORK
 
 /****************************************************************************
  * Private Types

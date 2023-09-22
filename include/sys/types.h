@@ -242,9 +242,13 @@ typedef uint16_t     sa_family_t;
 
 #ifdef CONFIG_SYSTEM_TIME64
 typedef uint64_t     clock_t;
+typedef int64_t      time_t;         /* Holds time in seconds */
 #else
 typedef uint32_t     clock_t;
+typedef uint32_t     time_t;         /* Holds time in seconds */
 #endif
+typedef int          clockid_t;      /* Identifies one time base source */
+typedef FAR void    *timer_t;        /* Represents one POSIX timer */
 
 /* The type useconds_t shall be an unsigned integer type capable of storing
  * values at least in the range [0, 1000000]. The type suseconds_t shall be

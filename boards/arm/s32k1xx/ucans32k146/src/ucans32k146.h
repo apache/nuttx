@@ -117,5 +117,15 @@ int s32k1xx_i2cdev_initialize(void);
 
 int s32k1xx_spidev_initialize(void);
 
+/****************************************************************************
+ * Name: s32k1xx_se05x_initialize
+ *
+ * Description:
+ *   Initialize SE05x chip and register /dev/se05x
+ *
+ ****************************************************************************/
+
+int s32k1xx_se05x_initialize(void);
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_S32K1XX_UCANS32K146_SRC_UCANS32K146_H */

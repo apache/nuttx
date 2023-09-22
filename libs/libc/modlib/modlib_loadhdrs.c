@@ -85,8 +85,8 @@ int modlib_loadhdrs(FAR struct mod_loadinfo_s *loadinfo)
   loadinfo->shdr = (FAR Elf_Shdr *)lib_malloc(shdrsize);
   if (!loadinfo->shdr)
     {
-      berr("ERROR: Failed to allocate the section header table. Size: %ld\n",
-           (long)shdrsize);
+      berr("ERROR: Failed to allocate the section header table. Size: %zu\n",
+           shdrsize);
       return -ENOMEM;
     }
 
@@ -116,9 +116,8 @@ int modlib_loadhdrs(FAR struct mod_loadinfo_s *loadinfo)
       loadinfo->phdr = (FAR Elf_Phdr *)lib_malloc(phdrsize);
       if (!loadinfo->phdr)
         {
-          lib_free((FAR void *)loadinfo->shdr);
           berr("ERROR: Failed to allocate the program header table."
-               "Size: %ld\n", (long)phdrsize);
+               "Size: %zu\n", phdrsize);
           return -ENOMEM;
         }
 
@@ -129,8 +128,6 @@ int modlib_loadhdrs(FAR struct mod_loadinfo_s *loadinfo)
       if (ret < 0)
         {
           berr("ERROR: Failed to read program header table: %d\n", ret);
-          lib_free((FAR void *)loadinfo->phdr);
-          lib_free((FAR void *)loadinfo->shdr);
         }
     }
   else

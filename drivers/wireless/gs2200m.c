@@ -699,11 +699,10 @@ static ssize_t gs2200m_read(FAR struct file *filep, FAR char *buffer,
   FAR struct gs2200m_dev_s *dev;
   int ret;
 
-  DEBUGASSERT(filep);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
-  dev = (FAR struct gs2200m_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  dev = inode->i_private;
 
   ASSERT(1 == len);
 
@@ -1100,7 +1099,7 @@ static void _parse_pkt_in_s1(FAR struct pkt_ctx_s *pkt_ctx,
   ASSERT(pkt_ctx->ptr > pkt_ctx->head);
   msize = pkt_ctx->ptr - pkt_ctx->head;
 
-  msg = (FAR char *)kmm_calloc(msize + 1, 1);
+  msg = kmm_calloc(msize + 1, 1);
   ASSERT(msg);
 
   memcpy(msg, pkt_ctx->head, msize);
@@ -1374,7 +1373,7 @@ static void _dup_pkt_dat_and_notify(FAR struct gs2200m_dev_s *dev,
 
   /* Allocate a new pkt_dat */
 
-  pkt_dat = (FAR struct pkt_dat_s *)kmm_malloc(sizeof(struct pkt_dat_s));
+  pkt_dat = kmm_malloc(sizeof(struct pkt_dat_s));
   ASSERT(pkt_dat);
 
   /* Copy pkt_dat0 to pkt_dat */
@@ -1383,7 +1382,7 @@ static void _dup_pkt_dat_and_notify(FAR struct gs2200m_dev_s *dev,
 
   /* Allocate bulk data and copy */
 
-  pkt_dat->data = (FAR uint8_t *)kmm_malloc(pkt_dat0->len);
+  pkt_dat->data = kmm_malloc(pkt_dat0->len);
   ASSERT(pkt_dat->data);
   memcpy(pkt_dat->data, pkt_dat0->data, pkt_dat0->len);
 
@@ -1419,7 +1418,7 @@ static enum pkt_type_e gs2200m_recv_pkt(FAR struct gs2200m_dev_s *dev,
   uint16_t len;
   FAR uint8_t *p;
 
-  p = (FAR uint8_t *)kmm_calloc(MAX_PKT_LEN, 1);
+  p = kmm_calloc(MAX_PKT_LEN, 1);
   ASSERT(p);
 
   s = gs2200m_hal_read(dev, p, &len);
@@ -2967,11 +2966,10 @@ static int gs2200m_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct gs2200m_dev_s *dev;
   int ret = -EINVAL;
 
-  DEBUGASSERT(filep);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
-  dev = (FAR struct gs2200m_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  dev = inode->i_private;
 
   /* Lock the device */
 
@@ -3105,11 +3103,11 @@ static int gs2200m_poll(FAR struct file *filep, FAR struct pollfd *fds,
   int ret = OK;
 
   wlinfo("== setup:%d\n", (int)setup);
-  DEBUGASSERT(filep && fds);
+  DEBUGASSERT(fds);
   inode = filep->f_inode;
 
-  DEBUGASSERT(inode && inode->i_private);
-  dev = (FAR struct gs2200m_dev_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  dev = inode->i_private;
 
   ret = nxmutex_lock(&dev->dev_lock);
   if (ret < 0)
@@ -3197,7 +3195,7 @@ repeat:
 
   /* Allocate a new pkt_dat and initialize it */
 
-  pkt_dat = (FAR struct pkt_dat_s *)kmm_malloc(sizeof(struct pkt_dat_s));
+  pkt_dat = kmm_malloc(sizeof(struct pkt_dat_s));
   ASSERT(NULL != pkt_dat);
 
   memset(pkt_dat, 0, sizeof(struct pkt_dat_s));
@@ -3490,7 +3488,7 @@ FAR void *gs2200m_register(FAR const char *devpath,
   int size;
 
   size = sizeof(struct gs2200m_dev_s);
-  dev = (FAR struct gs2200m_dev_s *)kmm_malloc(size);
+  dev = kmm_malloc(size);
   if (!dev)
     {
       wlerr("Failed to allocate instance.\n");

@@ -245,11 +245,11 @@ not applicable. For this to work, you will need to enable PROC filesystem suppor
 which will expose required task information (``CONFIG_FS_PROCFS=y``).
 
 To use this approach, you can load the ``nuttx/tools/gdb/__init__.py`` file. An
-easy way to do this is to  add an extra command:
+easy way to do this is to add an extra command:
 
 .. code-block:: console
 
-  $ gdb nuttx -ex "nuttx/tools/gdb/__init__.py"
+  $ gdb nuttx -ix=tools/gdb/__init__.py
 
 gdb can need to set the current elf support architecture, for example,
 the prefix is arm-ebai-none-.

@@ -1671,14 +1671,6 @@ static int isx019_start_capture(FAR struct imgsensor_s *sensor,
 static int isx019_stop_capture(FAR struct imgsensor_s *sensor,
                                imgsensor_stream_type_t type)
 {
-  FAR isx019_dev_t *priv = (FAR isx019_dev_t *)sensor;
-  uint8_t regval;
-
-  regval = FPGA_DATA_OUTPUT_STOP;
-  nxmutex_lock(&priv->fpga_lock);
-  fpga_i2c_write(priv, FPGA_DATA_OUTPUT, &regval, 1);
-  fpga_activate_setting(priv);
-  nxmutex_unlock(&priv->fpga_lock);
   return OK;
 }
 

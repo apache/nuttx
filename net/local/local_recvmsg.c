@@ -108,7 +108,15 @@ static int psock_fifo_read(FAR struct socket *psock, FAR void *buf,
         }
       else
         {
-          nerr("ERROR: Failed to read packet: %d\n", ret);
+          if (ret == -EAGAIN)
+            {
+              nwarn("WARNING: Failed to read packet: %d\n", ret);
+            }
+          else
+            {
+              nerr("ERROR: Failed to read packet: %d\n", ret);
+            }
+
           return ret;
         }
     }
@@ -501,7 +509,7 @@ ssize_t local_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   FAR void *buf = msg->msg_iov->iov_base;
   size_t len = msg->msg_iov->iov_len;
 
-  DEBUGASSERT(psock && psock->s_conn && buf);
+  DEBUGASSERT(buf);
 
   /* Check for a stream socket */
 

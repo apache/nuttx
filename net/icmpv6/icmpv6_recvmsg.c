@@ -96,7 +96,6 @@ static uint16_t recvfrom_eventhandler(FAR struct net_driver_s *dev,
                                       FAR void *pvpriv, uint16_t flags)
 {
   FAR struct icmpv6_recvfrom_s *pstate = pvpriv;
-  FAR struct socket *psock;
   FAR struct ipv6_hdr_s *ipv6;
 
   ninfo("flags: %04x\n", flags);
@@ -112,15 +111,12 @@ static uint16_t recvfrom_eventhandler(FAR struct net_driver_s *dev,
           goto end_wait;
         }
 
-      psock = pstate->recv_sock;
-      DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
-
       /* Check if we have just received a ICMPv6 message. */
 
       if ((flags & ICMPv6_NEWDATA) != 0)    /* No incoming data */
         {
 #ifdef CONFIG_NET_SOCKOPTS
-          FAR struct icmpv6_conn_s *conn = psock->s_conn;
+          FAR struct icmpv6_conn_s *conn = pstate->recv_sock->s_conn;
 #endif
           unsigned int recvsize;
 
@@ -309,7 +305,7 @@ ssize_t icmpv6_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   /* Some sanity checks */
 
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL && buf != NULL);
+  DEBUGASSERT(buf != NULL);
 
   if (len < ICMPv6_HDRLEN)
     {

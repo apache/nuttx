@@ -44,6 +44,8 @@
 #include "hardware/esp32s3_uart.h"
 #include "hardware/esp32s3_gpio_sigmap.h"
 
+#include "esp32s3_config.h"
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -92,35 +94,40 @@ enum uart_stop_length
 
 struct esp32s3_uart_s
 {
-  uint8_t   periph;         /* UART peripheral ID */
-  int       cpuint;         /* CPU interrupt assigned to this UART */
-  uint8_t   id;             /* UART ID */
-  uint8_t   irq;            /* IRQ associated with this UART */
-  uint8_t   cpu;            /* CPU ID */
-  uint32_t  baud;           /* Configured baud rate */
-  uint8_t   bits;           /* Data length (5 to 8 bits). */
-  uint8_t   parity;         /* 0=no parity, 1=odd parity, 2=even parity */
-  uint8_t   stop_b2;        /* Use 2 stop bits? 0 = no (use 1) 1 = yes (use 2) */
-  uint8_t   int_pri;        /* UART Interrupt Priority */
-  uint8_t   txpin;          /* TX pin */
-  uint8_t   txsig;          /* TX signal */
-  uint8_t   rxpin;          /* RX pin */
-  uint8_t   rxsig;          /* RX signal */
+  uint8_t   periph;            /* UART peripheral ID */
+  uint8_t   id;                /* UART ID */
+  uint8_t   irq;               /* IRQ associated with this UART */
+  uint8_t   cpu;               /* CPU ID */
+  int       cpuint;            /* CPU interrupt assigned to this UART */
+  uint32_t  baud;              /* Configured baud rate */
+  uint8_t   bits;              /* Data length (5 to 8 bits). */
+  uint8_t   parity;            /* 0=no parity, 1=odd parity, 2=even parity */
+  uint8_t   stop_b2;           /* Use 2 stop bits? 0 = no (use 1) 1 = yes (use 2) */
+  uint8_t   int_pri;           /* UART Interrupt Priority */
+  uint8_t   txpin;             /* TX pin */
+  uint8_t   txsig;             /* TX signal */
+  uint8_t   rxpin;             /* RX pin */
+  uint8_t   rxsig;             /* RX signal */
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-  uint8_t  rtspin;          /* RTS pin number */
-  uint8_t  rtssig;          /* RTS signal */
-  bool     iflow;           /* Input flow control (RTS) enabled */
+  uint8_t  rtspin;             /* RTS pin number */
+  uint8_t  rtssig;             /* RTS signal */
+  bool     iflow;              /* Input flow control (RTS) enabled */
 #endif
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
-  uint8_t  ctspin;          /* CTS pin number */
-  uint8_t  ctssig;          /* CTS signal */
-  bool     oflow;           /* Output flow control (CTS) enabled */
+  uint8_t  ctspin;             /* CTS pin number */
+  uint8_t  ctssig;             /* CTS signal */
+  bool     oflow;              /* Output flow control (CTS) enabled */
 #endif
-  spinlock_t lock;          /* Device-specific lock */
+#ifdef HAVE_RS485
+  uint8_t  rs485_dir_gpio;     /* UART RS-485 DIR GPIO pin cfg */
+  bool     rs485_dir_polarity; /* UART RS-485 DIR TXEN polarity */
+#endif
+  spinlock_t lock;             /* Device-specific lock */
 };
 
 extern struct esp32s3_uart_s g_uart0_config;
 extern struct esp32s3_uart_s g_uart1_config;
+extern struct esp32s3_uart_s g_uart2_config;
 
 /****************************************************************************
  * Public Function Prototypes
