@@ -187,16 +187,7 @@ fi
 cd $nuttx || { echo "ERROR: failed to CD to $nuttx"; exit 1; }
 
 function exportandimport {
-  # Do nothing until we finish to build the nuttx
-  if [ ! -f nuttx ]; then
-    return $fail
-  fi
-
-  # If CONFIG_BUILD_KERNEL=y does not exist in .config, do nothing
-  if ! grep CONFIG_BUILD_KERNEL=y .config 1>/dev/null; then
-    return $fail
-  fi
-
+  # Force build using the exported archive
   if ! ${MAKE} export ${JOPTION} 1>/dev/null; then
     fail=1
     return $fail
@@ -214,6 +205,17 @@ function exportandimport {
     fail=1
   fi
   popd
+
+  # Do nothing until we finish to build the nuttx
+  if [ ! -f nuttx ]; then
+    return $fail
+  fi
+
+  # If CONFIG_BUILD_KERNEL=y does not exist in .config, do nothing
+  if ! grep CONFIG_BUILD_KERNEL=y .config 1>/dev/null; then
+    return $fail
+  fi
+
   return $fail
 }
 
@@ -520,12 +522,6 @@ function dotest {
     fi
   else
     boarddir=`echo $config | cut -d':' -f1`
-  fi
-
-  path=$nuttx/boards/*/*/$boarddir/configs/$configdir
-  if [ ! -r $path/defconfig ]; then
-    echo "ERROR: no configuration found at $path"
-    showusage
   fi
 
   unset toolchain
