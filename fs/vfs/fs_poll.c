@@ -264,7 +264,8 @@ void poll_notify(FAR struct pollfd **afds, int nfds, pollevent_t eventset)
               fds->revents &= ~POLLOUT;
             }
 
-          if (fds->revents != 0 && fds->cb != NULL)
+          if ((fds->revents != 0 || (fds->events & POLLALWAYS) != 0) &&
+              fds->cb != NULL)
             {
               finfo("Report events: %08" PRIx32 "\n", fds->revents);
               fds->cb(fds);
