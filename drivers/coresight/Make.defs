@@ -44,6 +44,10 @@ ifeq ($(CONFIG_CORESIGHT_STM),y)
 CSRCS += coresight_stm.c
 endif
 
+ifeq ($(CONFIG_CORESIGHT_TMC),y)
+CSRCS += coresight_tmc_core.c coresight_tmc_etf.c coresight_tmc_etr.c
+endif
+
 ifeq ($(CONFIG_CORESIGHT_TPIU),y)
 CSRCS += coresight_tpiu.c
 endif
