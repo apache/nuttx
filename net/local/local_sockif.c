@@ -49,7 +49,7 @@
 
 static int        local_setup(FAR struct socket *psock);
 static sockcaps_t local_sockcaps(FAR struct socket *psock);
-static void       local_addref(FAR struct socket *psock);
+static void       local_sockaddref(FAR struct socket *psock);
 static int        local_bind(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
 static int        local_getsockname(FAR struct socket *psock,
@@ -80,7 +80,7 @@ const struct sock_intf_s g_local_sockif =
 {
   local_setup,       /* si_setup */
   local_sockcaps,    /* si_sockcaps */
-  local_addref,      /* si_addref */
+  local_sockaddref,  /* si_addref */
   local_bind,        /* si_bind */
   local_getsockname, /* si_getsockname */
   local_getpeername, /* si_getpeername */
@@ -137,8 +137,7 @@ static int local_sockif_alloc(FAR struct socket *psock)
    * count will be incremented only if the socket is dup'ed
    */
 
-  DEBUGASSERT(conn->lc_crefs == 0);
-  conn->lc_crefs = 1;
+  local_addref(conn);
 
   /* Save the pre-allocated connection in the socket structure */
 
@@ -243,7 +242,7 @@ static sockcaps_t local_sockcaps(FAR struct socket *psock)
 }
 
 /****************************************************************************
- * Name: local_addref
+ * Name: local_sockaddref
  *
  * Description:
  *   Increment the reference count on the underlying connection structure.
@@ -257,15 +256,10 @@ static sockcaps_t local_sockcaps(FAR struct socket *psock)
  *
  ****************************************************************************/
 
-static void local_addref(FAR struct socket *psock)
+static void local_sockaddref(FAR struct socket *psock)
 {
-  FAR struct local_conn_s *conn;
-
   DEBUGASSERT(psock->s_domain == PF_LOCAL);
-
-  conn = psock->s_conn;
-  DEBUGASSERT(conn->lc_crefs > 0 && conn->lc_crefs < 255);
-  conn->lc_crefs++;
+  local_addref(psock->s_conn);
 }
 
 /****************************************************************************
@@ -773,23 +767,11 @@ static int local_close(FAR struct socket *psock)
 #endif
       case SOCK_CTRL:
         {
-          FAR struct local_conn_s *conn = psock->s_conn;
-
           /* Is this the last reference to the connection structure (there
            * could be more if the socket was dup'ed).
            */
 
-          if (conn->lc_crefs <= 1)
-            {
-              conn->lc_crefs = 0;
-              local_release(conn);
-            }
-          else
-           {
-             /* No.. Just decrement the reference count */
-
-             conn->lc_crefs--;
-           }
+          local_subref(psock->s_conn);
 
           return OK;
         }
