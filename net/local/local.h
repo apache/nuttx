@@ -224,6 +224,40 @@ FAR struct local_conn_s *local_alloc(void);
 void local_free(FAR struct local_conn_s *conn);
 
 /****************************************************************************
+ * Name: local_addref
+ *
+ * Description:
+ *   Increment the reference count on the underlying connection structure.
+ *
+ * Input Parameters:
+ *   conn - Socket structure of the socket whose reference count will be
+ *           incremented.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void local_addref(FAR struct local_conn_s *conn);
+
+/****************************************************************************
+ * Name: local_subref
+ *
+ * Description:
+ *   Subtract the reference count on the underlying connection structure.
+ *
+ * Input Parameters:
+ *   conn - Socket structure of the socket whose reference count will be
+ *           incremented.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void local_subref(FAR struct local_conn_s *conn);
+
+/****************************************************************************
  * Name: local_nextconn
  *
  * Description:
