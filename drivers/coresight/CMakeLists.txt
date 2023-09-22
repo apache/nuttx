@@ -41,6 +41,11 @@ if(CONFIG_CORESIGHT)
     list(APPEND SRCS coresight_stm.c)
   endif()
 
+  if(CONFIG_CORESIGHT_TMC)
+    list(APPEND SRCS coresight_tmc_core.c coresight_tmc_etf.c
+         coresight_tmc_etr.c)
+  endif()
+
   if(CONFIG_CORESIGHT_TPIU)
     list(APPEND SRCS coresight_tpiu.c)
   endif()
