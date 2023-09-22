@@ -131,6 +131,11 @@
 
 #define BOARD_FWS                  4
 
+/* Serial Peripheral Interface (SPI) */
+
+#define GPIO_SPI0_SPCK GPIO_SPI0_SPCK_1
+#define GPIO_SPI0_CS   (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | GPIO_PORT_PIOC | GPIO_PIN21)
+
 /* LED definitions **********************************************************/
 
 /*  There are three user-controllable LEDs on board the Arduino Due board:

@@ -30,10 +30,12 @@
 #include <nuttx/board.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/leds/userled.h>
+#include <nuttx/spi/spi_transfer.h>
 
 #include "arduino-due.h"
 
 #include <arch/board/board.h>
+#include "sam_spi.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -135,6 +137,23 @@ int sam_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
       return ret;
+    }
+#endif
+
+#ifdef CONFIG_SAM34_SPI0
+  sam_configgpio(GPIO_SPI0_CS);
+
+  struct spi_dev_s *spi;
+  spi = sam_spibus_initialize(0);
+
+  if (!spi)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI port 0\n");
+      return -1;
+    }
+  else
+    {
+      spi_register(spi, 0);
     }
 #endif
 
