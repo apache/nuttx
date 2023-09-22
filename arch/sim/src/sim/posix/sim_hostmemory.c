@@ -119,7 +119,7 @@ void *host_allocshmem(const char *name, size_t size, int master)
     {
       /* Avoid the second slave instance open successfully */
 
-      host_uninterruptible(shm_unlink, name);
+      host_unlinkshmem(name);
     }
 
   ret = host_uninterruptible(ftruncate, fd, size);
@@ -143,6 +143,11 @@ void *host_allocshmem(const char *name, size_t size, int master)
 void host_freeshmem(void *mem)
 {
   host_uninterruptible(munmap, mem, 0);
+}
+
+int host_unlinkshmem(const char *name)
+{
+  return host_uninterruptible(shm_unlink, name);
 }
 
 size_t host_mallocsize(void *mem)
