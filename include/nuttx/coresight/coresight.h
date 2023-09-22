@@ -54,13 +54,16 @@ enum coresight_dev_subtype_link_e
 {
   CORESIGHT_DEV_SUBTYPE_LINK_MERG,         /* Funnel */
   CORESIGHT_DEV_SUBTYPE_LINK_SPLIT,        /* Replocator */
-  CORESIGHT_DEV_SUBTYPE_LINK_FIFO,         /* TMC ETR */
+  CORESIGHT_DEV_SUBTYPE_LINK_FIFO,         /* TMC ETF */
 };
 
 enum coresight_dev_subtype_sink_e
 {
   CORESIGHT_DEV_SUBTYPE_SINK_PORT,         /* TPIU */
   CORESIGHT_DEV_SUBTYPE_SINK_BUFFER,       /* ETB */
+  CORESIGHT_DEV_SUBTYPE_SINK_TMC_BUFFER,   /* TMC ETB */
+  CORESIGHT_DEV_SUBTYPE_SINK_TMC_SYSMEM,   /* TMC ETR */
+  CORESIGHT_DEV_SUBTYPE_SINK_TMC_ETF,      /* TMC ETF */
 };
 
 /* This structure is used to unify different subtype of devices. */
@@ -136,6 +139,11 @@ struct coresight_desc_s
    */
 
   uintptr_t stimulus_port_addr;
+
+  /* Used in TMC-ETR device. */
+
+  uint32_t buffer_size;
+  uint32_t burst_size;
 
   /* Description of outports of current device. */
 
