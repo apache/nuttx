@@ -270,6 +270,9 @@ if [ -z "${appdir}" ]; then
 
     if [ -d "${TOPDIR}/../apps-${CONFIG_VERSION_STRING}" ]; then
       appdir="../apps-${CONFIG_VERSION_STRING}"
+    else
+        echo "ERROR: Could not find the path to the appdir"
+        exit 7
     fi
   fi
 fi
