@@ -225,4 +225,51 @@ void local_free(FAR struct local_conn_s *conn)
   kmm_free(conn);
 }
 
+/****************************************************************************
+ * Name: local_addref
+ *
+ * Description:
+ *   Increment the reference count on the underlying connection structure.
+ *
+ * Input Parameters:
+ *   psock - Socket structure of the socket whose reference count will be
+ *           incremented.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void local_addref(FAR struct local_conn_s *conn)
+{
+  DEBUGASSERT(conn->lc_crefs >= 0 && conn->lc_crefs < 255);
+  conn->lc_crefs++;
+}
+
+/****************************************************************************
+ * Name: local_subref
+ *
+ * Description:
+ *   Subtract the reference count on the underlying connection structure.
+ *
+ * Input Parameters:
+ *   psock - Socket structure of the socket whose reference count will be
+ *           incremented.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void local_subref(FAR struct local_conn_s *conn)
+{
+  DEBUGASSERT(conn->lc_crefs > 0 && conn->lc_crefs < 255);
+
+  conn->lc_crefs--;
+  if (conn->lc_crefs == 0)
+    {
+      local_release(conn);
+    }
+}
+
 #endif /* CONFIG_NET && CONFIG_NET_LOCAL */
