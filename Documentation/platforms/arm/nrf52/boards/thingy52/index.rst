@@ -29,12 +29,26 @@ Battery monitoring                 No
 Serial Console
 ==============
 
+At default serial console is available with Segger RTT driver.
+For access to the RTT console use this commands::
+
+  JLinkGDBServer -if SWD -device stm32h743zi -speed 16000
+  sudo socat -d -d PTY,link=/dev/ttyRTT0,raw,ignoreeof TCP:127.0.0.1:19021,reuseaddr
+  minicom -D /dev/ttyRTT0
+
+An alternative option is to use the P4 connector and connect an external UART converter:
+
 ===== ========== ==========
 Pin   Signal     Notes
 ===== ========== ==========
-P0.02 UART TX    P4 header
-P0.03 UART RX    P4 header
+P0.02 UART0 TX   P4 header
+P0.03 UART0 RX   P4 header
 ===== ========== ==========
+
+For this you need to select the following options in your configuration::
+
+  CONFIG_NRF52_UART0=y
+  CONFIG_UART0_SERIAL_CONSOLE=y
 
 Configurations
 ==============
@@ -49,7 +63,7 @@ Where <subdir> is one of the following:
 nsh
 ----
 
-Basic NuttShell configuration (console enabled in UART0, exposed via P4 header, at 115200 bps).
+Basic NuttShell configuration (console enabled on Segger RTT channel).
 
 Flash & Debug
 =============
