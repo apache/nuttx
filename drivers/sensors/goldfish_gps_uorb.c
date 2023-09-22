@@ -192,8 +192,7 @@ int goldfish_gps_init(int devno, uint32_t batch_number)
       return -ENOMEM;
     }
 
-  ret = goldfish_gps_open_pipe(&gps->pipe, "qemud", "gps",
-                               O_RDWR | O_CLOEXEC);
+  ret = goldfish_gps_open_pipe(&gps->pipe, "qemud", "gps", O_RDWR);
   if (ret < 0)
     {
       kmm_free(gps);

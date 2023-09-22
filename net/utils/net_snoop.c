@@ -361,7 +361,7 @@ int snoop_open(FAR struct snoop_s *snoop, FAR const char *filename,
         }
     }
 
-  ret = file_open(&snoop->filep, filename, O_RDWR | O_CREAT | O_CLOEXEC);
+  ret = file_open(&snoop->filep, filename, O_RDWR | O_CREAT);
   if (ret < 0)
     {
       return ret;

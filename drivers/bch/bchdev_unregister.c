@@ -70,7 +70,7 @@ int bchdev_unregister(FAR const char *chardev)
 
   /* Open the character driver associated with chardev */
 
-  ret = file_open(&filestruct, chardev, O_RDONLY | O_CLOEXEC);
+  ret = file_open(&filestruct, chardev, O_RDONLY);
   if (ret < 0)
     {
       _err("ERROR: Failed to open %s: %d\n", chardev, ret);

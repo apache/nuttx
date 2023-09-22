@@ -204,7 +204,7 @@ static int ptmx_open(FAR struct file *filep)
 
   snprintf(devname, sizeof(devname), "/dev/pty%d", minor);
   memcpy(&temp, filep, sizeof(temp));
-  ret = file_open(filep, devname, O_RDWR | O_CLOEXEC);
+  ret = file_open(filep, devname, O_RDWR);
   DEBUGASSERT(ret >= 0);  /* file_open() should never fail */
 
   /* Close the multiplexor device: /dev/ptmx */
