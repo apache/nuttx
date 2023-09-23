@@ -85,25 +85,25 @@
 
 /* SPI Pins *****************************************************************/
 
-/* SPI0
- *   SPI0_SCK  - P0.29
- *   SPI0_MOSI - P0.28
- *   SPI0_MISO - P0.26
+/* SPI1
+ *   SPI1_SCK  - P0.29
+ *   SPI1_MOSI - P0.28
+ *   SPI1_MISO - P0.26
  */
 
-#define BOARD_SPI0_SCK_PIN  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN(29))
-#define BOARD_SPI0_MOSI_PIN (GPIO_OUTPUT | GPIO_PORT0 | GPIO_PIN(28))
-#define BOARD_SPI0_MISO_PIN (GPIO_INPUT  | GPIO_PORT0 | GPIO_PIN(26))
+#define BOARD_SPI1_SCK_PIN  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN(29))
+#define BOARD_SPI1_MOSI_PIN (GPIO_OUTPUT | GPIO_PORT0 | GPIO_PIN(28))
+#define BOARD_SPI1_MISO_PIN (GPIO_INPUT  | GPIO_PORT0 | GPIO_PIN(26))
 
 /* I2C Pins *****************************************************************/
 
-/* I2C0 (TWI0)
- *    I2C0_SCL - P1.02
- *    I2C0_SDA - P1.03
+/* I2C2 (TWI2)
+ *    I2C2_SCL - P1.03
+ *    I2C2_SDA - P1.02
  */
 
-#define BOARD_I2C0_SCL_PIN (GPIO_OUTPUT | GPIO_PORT1 | GPIO_PIN(2))
-#define BOARD_I2C0_SDA_PIN (GPIO_INPUT  | GPIO_PORT1 | GPIO_PIN(3))
+#define BOARD_I2C2_SCL_PIN (GPIO_OUTPUT | GPIO_PORT1 | GPIO_PIN(3))
+#define BOARD_I2C2_SDA_PIN (GPIO_INPUT  | GPIO_PORT1 | GPIO_PIN(2))
 
 /* ADC Pins *****************************************************************/
 
