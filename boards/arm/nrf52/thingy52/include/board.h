@@ -71,4 +71,10 @@
 #define BOARD_I2C0_SCL_PIN (GPIO_OUTPUT | GPIO_PORT0 | GPIO_PIN(8))
 #define BOARD_I2C0_SDA_PIN (GPIO_INPUT  | GPIO_PORT0 | GPIO_PIN(7))
 
+/* ADC Pins *****************************************************************/
+
+/* ADC CH0 - P0.28 - AIN4 - BATTERY (voltage divider gated by BAT_MON_EN) */
+
+#define NRF52_ADC_CH0_PIN (GPIO_INPUT | GPIO_PORT0 | GPIO_PIN(28))
+
 #endif /* __BOARDS_ARM_NRF52_THINGY52_INCLUDE_BOARD_H */

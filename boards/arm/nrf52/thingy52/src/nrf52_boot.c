@@ -51,6 +51,10 @@
 
 void nrf52_board_initialize(void)
 {
+  /* Enable the VDD rail that supplies the on-board sensors */
+
+  nrf52_gpio_config(GPIO_VDD_PWR_CTRL);
+
   /* Configure on-board LEDs if LED support has been selected. */
 
 #ifdef CONFIG_ARCH_LEDS
