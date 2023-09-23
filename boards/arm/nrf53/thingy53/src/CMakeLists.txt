@@ -40,6 +40,10 @@ if(CONFIG_USBDEV_COMPOSITE)
   list(APPEND SRCS nrf53_composite.c)
 endif()
 
+if(CONFIG_RGBLED)
+  list(APPEND SRCS nrf53_rgbled.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 if(CONFIG_ARCH_BOARD_COMMON)

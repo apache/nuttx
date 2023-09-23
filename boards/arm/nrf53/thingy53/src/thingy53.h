@@ -153,5 +153,15 @@
 
 int nrf53_bringup(void);
 
+/****************************************************************************
+ * Name: nrf53_rgbled_initialize
+ *
+ * Description:
+ *   Configure the RGB LED.
+ *
+ ****************************************************************************/
+
+int nrf53_rgbled_initialize(void);
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_NRF53_THINGY53_SRC_THINGY53_H */
