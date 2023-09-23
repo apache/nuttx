@@ -95,7 +95,7 @@
 
 /* UART Pins ****************************************************************/
 
-/* UART0 is connected to the virtual COM port:
+/* UART0 is connected to the virtual COM0 port:
  *   UART0_RX - P0-28
  *   UART0_TX - P0-29
  */
@@ -103,7 +103,7 @@
 #define BOARD_UART0_RX_PIN  (GPIO_INPUT  | GPIO_PORT0 | GPIO_PIN(28))
 #define BOARD_UART0_TX_PIN  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN(29))
 
-/* UART1 is connected to the virtual COM port:
+/* UART1 is connected to the virtual COM2 port:
  *   UART1_RX - P0-00
  *   UART1_TX - P0-01
  */

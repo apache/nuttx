@@ -1204,6 +1204,12 @@ config ARCH_BOARD_THINGY91_NRF52
 	---help---
 		This option selects the Thingy:91 cellular IoT prototyping platform - nRF52840 chip
 
+config ARCH_BOARD_NRF9160_DK_NRF52
+	bool "Nordic nRF9160 Development Kit (PCA10090) - nRF52840"
+	depends on ARCH_CHIP_NRF52
+	---help---
+		This option selects the nRF9160 Development Kit (PCA10090) - nRF52840 chip
+
 config ARCH_BOARD_NUTINY_NUC120
 	bool "Nuvoton NuTiny NUC120"
 	depends on ARCH_CHIP_NUC120LE3AN
@@ -3109,6 +3115,7 @@ config ARCH_BOARD
 	default "nrf9160-dk"                if ARCH_BOARD_NRF9160_DK
 	default "thingy91"                  if ARCH_BOARD_THINGY91
 	default "thingy91-nrf52"            if ARCH_BOARD_THINGY91_NRF52
+	default "nrf9160-dk-nrf52"          if ARCH_BOARD_NRF9160_DK_NRF52
 	default "ntosd-dm320"               if ARCH_BOARD_NTOSD_DM320
 	default "nucleo-144"                if ARCH_BOARD_NUCLEO_144
 	default "nucleo-f072rb"             if ARCH_BOARD_NUCLEO_F072RB
