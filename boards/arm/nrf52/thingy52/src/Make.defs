@@ -22,12 +22,28 @@
 
 CSRCS = nrf52_boot.c nrf52_bringup.c
 
+ifeq ($(CONFIG_NRF52_I2C0_MASTER),y)
+CSRCS += nrf52_sensors.c
+endif
+
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += nrf52_buttons.c
 endif
 
 ifeq ($(CONFIG_IOEXPANDER_SX1509),y)
 CSRCS += nrf52_sx1509.c
+endif
+
+ifeq ($(CONFIG_ADC),y)
+CSRCS += nrf52_adc.c
+endif
+
+ifeq ($(CONFIG_RGBLED),y)
+ifeq ($(CONFIG_IOEXPANDER_SX1509),y)
+ifeq ($(CONFIG_IOEXPANDER_PWM),y)
+CSRCS += nrf52_rgbled.c
+endif
+endif
 endif
 
 DEPPATH += --dep-path board

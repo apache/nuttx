@@ -10,23 +10,25 @@ is a prototyping platform build around the nRF52832 from Nordic.
 Peripheral Support
 ==================
 
-================================== ======= =============
+================================== ======= ==========================
 Peripheral                         Support NOTES
-================================== ======= =============
+================================== ======= ==========================
 UART                               Yes
 Buttons                            No
-LEDs                               No
+LEDs                               Yes     Lightwell RGB LED (SX1509)
 NFC                                No
 IMU (MPU-9250)                     No
 Low power accelerometer (LIS2DH12) No
-Pressure and temperature (LPS22HB) No
-Humidity and temperature (HTS221)  No
-Color sensor (BH1745NUC)           No
-Gas sensor (CCS811)                No
+Pressure and temperature (LPS22HB) Yes     uORB, ``sensor_baro0``
+Humidity and temperature (HTS221)  Yes     uORB, ``sensor_humi0``,
+                                           ``sensor_ambient_temp0``
+Color sensor (BH1745NUC)           Yes     uORB, ``sensor_rgb0``
+Gas sensor (CCS811)                Yes     uORB, ``sensor_co20``,
+                                           ``sensor_tvoc0``
 Microphone (MP34DB02)              No
 Speaker                            No
-Battery monitoring                 No
-================================== ======= =============
+Battery monitoring                 Yes     SAADC AIN4 (P0.28)
+================================== ======= ==========================
 
 Serial Console
 ==============
@@ -66,6 +68,13 @@ nsh
 ----
 
 Basic NuttShell configuration (console enabled on Segger RTT channel).
+
+thingy_nimble
+-------------
+
+NuttShell configuration with the nimBLE host stack, the SX1509 IO expander
+and LED driver, the buttons and GPIO examples and the on-board uORB sensors
+(HTS221, LPS22HB, BH1745NUC and CCS811) enabled.
 
 Flash & Debug
 =============

@@ -22,12 +22,26 @@
 
 set(SRCS nrf52_boot.c nrf52_bringup.c)
 
+if(CONFIG_NRF52_I2C0_MASTER)
+  list(APPEND SRCS nrf52_sensors.c)
+endif()
+
 if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS nrf52_buttons.c)
 endif()
 
 if(CONFIG_IOEXPANDER_SX1509)
   list(APPEND SRCS nrf52_sx1509.c)
+endif()
+
+if(CONFIG_ADC)
+  list(APPEND SRCS nrf52_adc.c)
+endif()
+
+if(CONFIG_RGBLED
+   AND CONFIG_IOEXPANDER_SX1509
+   AND CONFIG_IOEXPANDER_PWM)
+  list(APPEND SRCS nrf52_rgbled.c)
 endif()
 
 target_sources(board PRIVATE ${SRCS})

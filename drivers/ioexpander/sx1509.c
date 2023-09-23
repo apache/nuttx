@@ -156,7 +156,8 @@ static const struct ioexpander_ops_s g_sx1509_ops =
 #endif
 };
 
-#if defined(CONFIG_SX1509_LED_ENABLE) || defined(CONFIG_IOEXPANDER_PWM)
+#if (defined(CONFIG_SX1509_LED_ENABLE) && defined(CONFIG_USERLED_EFFECTS)) || \
+    defined(CONFIG_IOEXPANDER_PWM)
 /* LED driver registers:
  *   TON, ION, OFF, TRISE, TFALL
  */
