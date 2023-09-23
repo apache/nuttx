@@ -163,5 +163,29 @@ int nrf53_bringup(void);
 
 int nrf53_rgbled_initialize(void);
 
+/****************************************************************************
+ * Name: nrf53_i2c_register
+ *
+ * Description:
+ *   Register one I2C drivers for the I2C tool.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_I2C
+int nrf53_i2c_register(int bus);
+#endif
+
+/****************************************************************************
+ * Name: nrf53_i2ctool
+ *
+ * Description:
+ *   Register I2C drivers for the I2C tool.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SYSTEM_I2CTOOL
+int nrf53_i2ctool(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_NRF53_THINGY53_SRC_THINGY53_H */
