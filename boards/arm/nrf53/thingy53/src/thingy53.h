@@ -57,6 +57,8 @@
 #define GPIO_BUTTON1 (GPIO_INPUT | GPIO_PULLUP | GPIO_PORT1 | GPIO_PIN(14))
 #define GPIO_BUTTON2 (GPIO_INPUT | GPIO_PULLUP | GPIO_PORT1 | GPIO_PIN(13))
 
+/* Supported devices ********************************************************/
+
 /* nRF21540 front end module
  *   RX_EN - P1.11
  *   MODE  - P1.12
@@ -85,7 +87,7 @@
 #define GPIO_ADXL362_INT1 (GPIO_INPUT  | GPIO_PORT0 | GPIO_PIN(19))
 #define GPIO_ADXL362_CS   (GPIO_OUTPUT | GPIO_PORT0 | GPIO_PIN(22))
 
-/* BMI270
+/* BMI270 (I2C address: 0x68)
  *   INT1 - P0.23
  *   CS   - P1.04
  */
@@ -93,13 +95,17 @@
 #define GPIO_BMI270_INT1 (GPIO_INPUT  | GPIO_PORT0 | GPIO_PIN(23))
 #define GPIO_BMI270_CS   (GPIO_OUTPUT | GPIO_PORT1 | GPIO_PIN(4))
 
-/* BMM150
+/* BMM150 (I2C address: 0x10)
  *   INT  - P0.20
  *   DRDY - P0.21
  */
 
 #define GPIO_BMM150_INT  (GPIO_INPUT  | GPIO_PORT0 | GPIO_PIN(20))
 #define GPIO_BMM150_DRDY (GPIO_INPUT  | GPIO_PORT0 | GPIO_PIN(21))
+
+/* BME688 (I2C address: 0x76)
+ *   No additional GPIO
+ */
 
 /* BH1749
  *   INT  - P1.05
