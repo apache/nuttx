@@ -50,7 +50,12 @@ distclean::
 	$(call DELDIR, $(MINMEA_UNPACKNAME))
 	$(call DELDIR, $(TOPDIR)$(DELIM)include$(DELIM)minmea$(DELIM))
 else
-context:: .header
+context::
+	$(Q) mkdir -p $(TOPDIR)$(DELIM)include$(DELIM)minmea$(DELIM)
+	$(Q) cp gpsutils/minmea/minmea.h $(TOPDIR)$(DELIM)include$(DELIM)minmea$(DELIM)
+
+distclean::
+	$(call DELDIR, $(TOPDIR)$(DELIM)include$(DELIM)minmea$(DELIM))
 endif
 
 DEPPATH += --dep-path gpsutils/minmea
