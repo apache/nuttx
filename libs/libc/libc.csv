@@ -28,6 +28,7 @@
 "basename","libgen.h","","FAR char *","FAR char *"
 "bind_textdomain_codeset","libintl.h","defined(CONFIG_LIBC_LOCALE_GETTEXT)","FAR char *","FAR const char *","FAR const char *"
 "bindtextdomain","libintl.h","defined(CONFIG_LIBC_LOCALE_GETTEXT)","FAR char *","FAR const char *","FAR const char *"
+"bsearch","stdlib.h","","FAR void *","FAR const void *","FAR const void *","size_t","size_t","FAR void *"
 "btowc","wchar.h","","wint_t","int"
 "calloc","stdlib.h","","FAR void *","size_t","size_t"
 "cfgetspeed","termios.h","","speed_t","FAR const struct termios *"
