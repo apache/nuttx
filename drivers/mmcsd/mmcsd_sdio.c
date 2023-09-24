@@ -2629,7 +2629,7 @@ static int mmcsd_mmcinitialize(FAR struct mmcsd_state_s *priv)
       return ret;
     }
 
-  mmcsd_decode_cid(priv, cid);
+  mmcsd_decode_cid(priv, priv->cid);
 
   /* Send CMD3, SET_RELATIVE_ADDR.  This command is used to assign a logical
    * address to the card.  For MMC, the host assigns the address. CMD3 causes
