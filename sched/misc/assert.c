@@ -30,8 +30,9 @@
 #include <nuttx/irq.h>
 #include <nuttx/tls.h>
 #include <nuttx/signal.h>
-#include <arch/board/board.h>
-
+#ifdef CONFIG_ARCH_LEDS
+#  include <arch/board/board.h>
+#endif
 #include <nuttx/panic_notifier.h>
 #include <nuttx/reboot_notifier.h>
 #include <nuttx/syslog/syslog.h>
