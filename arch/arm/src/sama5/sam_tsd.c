@@ -621,35 +621,22 @@ static void sam_tsd_bottomhalf(void *arg)
 
           ier &= ~(pending & TSD_ALLREADY);
 
-          /* datasheet suggests that if TSAV != 0 there may not be interrupts
+          /* datasheet says that if TSAV != 0 there may not be interrupts
            * for TSD channels so periodic or continuous triggers are needed
-           *
-           * Testing suggests otherwise, so periodic is used regardless.
+           * unless we're already using periodic triggers (for std adc ops).
            */
-#if 0
+#ifdef SAMA5_TSD_PENDET_TRIG_ALLOWED
           regval  = sam_adc_getreg(priv->adc, SAM_ADC_TSMR);
           regval &= ADC_TSMR_TSAV_MASK;
           if ((regval & ADC_TSMR_TSAV_MASK) != 0)
-#endif
-#ifdef SAMA5_TSD_PENDET_TRIG_ALLOWED
             {
-              regval  = sam_adc_getreg(priv->adc, SAM_ADC_TRGR);
+              regval = sam_adc_getreg(priv->adc, SAM_ADC_TRGR);
 
-              if ((regval & ADC_TRGR_TRGMOD_MASK) == ADC_TRGR_TRGMOD_PEN)
-                {
-                  /* Configure for periodic trigger */
+              /* Configure for periodic trigger */
 
-                  regval &= ~ADC_TRGR_TRGMOD_MASK;
-                  regval |= ADC_TRGR_TRGMOD_PERIOD;
-                  sam_adc_putreg(priv->adc, SAM_ADC_TRGR, regval);
-                }
-              else
-                {
-                  regval  = sam_adc_getreg(priv->adc, SAM_ADC_TRGR);
-                  regval &= ~ADC_TRGR_TRGMOD_MASK;
-                  regval |= ADC_TRGR_TRGMOD_PEN;
-                  sam_adc_putreg(priv->adc, SAM_ADC_TRGR, regval);
-                }
+              regval &= ~ADC_TRGR_TRGMOD_MASK;
+              regval |= ADC_TRGR_TRGMOD_PERIOD;
+              sam_adc_putreg(priv->adc, SAM_ADC_TRGR, regval);
             }
 #endif
 
@@ -748,10 +735,8 @@ static void sam_tsd_bottomhalf(void *arg)
        * resistance (Rxp). Three conversions (Xpos, Z1, Z2) are
        * necessary to determine the value of Rp (Zaxis resistance).
        *
-       *   Rp = Rxp * (X / 1024) * [(Z2 / Z1) - 1]
+       *   Rp = Rxp * (Xpos / 1024) * [(Z2 / Z1) - 1]
        *
-       * Revisited. The ADC is 12 bit not 10 so datasheet is presumed
-       * incorrect. Formula corrected to cope with uint arithmetic.
        */
 
       z2 = (pressr & ADC_PRESSR_Z2_MASK) >> ADC_PRESSR_Z2_SHIFT;
@@ -759,14 +744,10 @@ static void sam_tsd_bottomhalf(void *arg)
 
       if (z1 != 0)
         {
-          p = CONFIG_SAMA_TSD_RXP * xraw * (z2 - z1) / (z1 * 4096);
-        }
-      else
-        {
-          p = 4096;
+          p = CONFIG_SAMA_TSD_RXP * xraw * (z2 - z1) / (z1 * 1024);
         }
 
-      priv->sample.p = MIN(p, 4096);
+      priv->sample.p = UINT16_MAX - MIN(p, UINT16_MAX);
 #endif
 
       /* The X/Y positional data is now valid */
@@ -1610,7 +1591,6 @@ static void sam_tsd_initialize(struct sam_tsd_s *priv)
   regval &= ~ADC_TRGR_TRGMOD_MASK;
   regval |= ADC_TRGR_TRGMOD_PERIOD;
   sam_adc_putreg(priv, SAM_ADC_TRGR, regval);
-
   sam_tsd_trigperiod(priv, CONFIG_SAMA5_ADC_TRIGGER_PERIOD);
 #else
   sam_tsd_trigperiod(priv, 20000); /*  20ms */
