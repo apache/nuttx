@@ -138,8 +138,8 @@ uint32_t *arm_dataabort(uint32_t *regs, uint32_t dfar, uint32_t dfsr)
   return regs;
 
 segfault:
-  _alert("Data abort. PC: %08x DFAR: %08x DFSR: %08x\n",
-        regs[REG_PC], dfar, dfsr);
+  _alert("Data abort. PC: %08" PRIx32 " DFAR: %08" PRIx32 " DFSR: %08"
+         PRIx32 "\n", regs[REG_PC], dfar, dfsr);
   PANIC_WITH_REGS("panic", regs);
   return regs; /* To keep the compiler happy */
 }
@@ -156,8 +156,8 @@ uint32_t *arm_dataabort(uint32_t *regs, uint32_t dfar, uint32_t dfsr)
 
   /* Crash -- possibly showing diagnostic debug information. */
 
-  _alert("Data abort. PC: %08x DFAR: %08x DFSR: %08x\n",
-        regs[REG_PC], dfar, dfsr);
+  _alert("Data abort. PC: %08" PRIx32 " DFAR: %08" PRIx32 " DFSR: %08"
+         PRIx32 "\n", regs[REG_PC], dfar, dfsr);
   PANIC_WITH_REGS("panic", regs);
   return regs; /* To keep the compiler happy */
 }
