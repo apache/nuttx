@@ -56,6 +56,7 @@ include userfs/Make.defs
 include hostfs/Make.defs
 include littlefs/Make.defs
 include rpmsgfs/Make.defs
+include zipfs/Make.defs
 
 endif
 

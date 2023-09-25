@@ -549,6 +549,20 @@ static const char *g_white_content_list[] =
 
   "IRQn_Type",
 
+  /* Ref:
+   * fs/zipfs/zip_vfs.c
+   */
+
+  "unzFile",
+  "uLong",
+  "unzOpen2_64",
+  "unzLocateFile",
+  "unzOpenCurrentFile",
+  "unzClose",
+  "unzReadCurrentFile",
+  "unzGetCurrentFileInfo64",
+  "unzGoToNextFile",
+  "unzGoToFirstFile",
   NULL
 };
 
