@@ -68,9 +68,9 @@ static int tca64_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
              FAR bool *value);
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
 static int tca64_multiwritepin(FAR struct ioexpander_dev_s *dev,
-             FAR uint8_t *pins, FAR bool *values, int count);
+             FAR const uint8_t *pins, FAR bool *values, int count);
 static int tca64_multireadpin(FAR struct ioexpander_dev_s *dev,
-             FAR uint8_t *pins, FAR bool *values, int count);
+             FAR const uint8_t *pins, FAR bool *values, int count);
 #endif
 #ifdef CONFIG_IOEXPANDER_INT_ENABLE
 static FAR void *tca64_attach(FAR struct ioexpander_dev_s *dev,
@@ -163,8 +163,8 @@ static const struct tca64_part_s g_tca64_parts[TCA64_NPARTS] =
  *
  ****************************************************************************/
 
-static FAR const struct tca64_part_s *tca64_getpart(
-                          FAR struct tca64_dev_s *priv)
+static FAR const struct tca64_part_s *
+tca64_getpart(FAR struct tca64_dev_s *priv)
 {
   DEBUGASSERT(priv != NULL && priv->config != NULL &&
               priv->config->part < TCA64_NPARTS);
@@ -366,7 +366,7 @@ static int tca64_putreg(struct tca64_dev_s *priv, uint8_t regaddr,
  ****************************************************************************/
 
 static int tca64_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
-                          int direction)
+                           int direction)
 {
   FAR struct tca64_dev_s *priv = (FAR struct tca64_dev_s *)dev;
   uint8_t regaddr;
@@ -608,7 +608,7 @@ static int tca64_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
  ****************************************************************************/
 
 static int tca64_writepin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
-                         bool value)
+                          bool value)
 {
   FAR struct tca64_dev_s *priv = (FAR struct tca64_dev_s *)dev;
   uint8_t regaddr;
@@ -688,7 +688,7 @@ errout_with_lock:
  ****************************************************************************/
 
 static int tca64_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
-                        FAR bool *value)
+                         FAR bool *value)
 {
   FAR struct tca64_dev_s *priv = (FAR struct tca64_dev_s *)dev;
   uint8_t regaddr;
@@ -760,8 +760,8 @@ errout_with_lock:
 
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
 static int tca64_multiwritepin(FAR struct ioexpander_dev_s *dev,
-                                 FAR uint8_t *pins, FAR bool *values,
-                                 int count)
+                               FAR const uint8_t *pins,
+                               FAR bool *values, int count)
 {
   FAR struct tca64_dev_s *priv = (FAR struct tca64_dev_s *)dev;
   ioe_pinset_t pinset;
@@ -848,8 +848,8 @@ errout_with_lock:
 
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
 static int tca64_multireadpin(FAR struct ioexpander_dev_s *dev,
-                                FAR uint8_t *pins, FAR bool *values,
-                                int count)
+                              FAR const uint8_t *pins,
+                              FAR bool *values, int count)
 {
   FAR struct tca64_dev_s *priv = (FAR struct tca64_dev_s *)dev;
   ioe_pinset_t pinset;
@@ -1344,8 +1344,9 @@ static void tca64_poll_expiry(wdparm_t arg)
  *
  ****************************************************************************/
 
-FAR struct ioexpander_dev_s *tca64_initialize(FAR struct i2c_master_s *i2c,
-                               FAR struct tca64_config_s *config)
+FAR struct ioexpander_dev_s *
+tca64_initialize(FAR struct i2c_master_s *i2c,
+                 FAR struct tca64_config_s *config)
 {
   FAR struct tca64_dev_s *priv;
   int ret;
