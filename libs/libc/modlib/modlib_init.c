@@ -38,24 +38,6 @@
 #include "modlib/modlib.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* CONFIG_DEBUG_FEATURES, CONFIG_DEBUG_INFO, and CONFIG_MODLIB_DUMPBUFFER
- * have to be defined or CONFIG_MODLIB_DUMPBUFFER does nothing.
- */
-
-#if !defined(CONFIG_DEBUG_INFO) || !defined(CONFIG_MODLIB_DUMPBUFFER)
-#  undef CONFIG_MODLIB_DUMPBUFFER
-#endif
-
-#ifdef CONFIG_MODLIB_DUMPBUFFER
-#  define modlib_dumpbuffer(m,b,n) binfodumpbuffer(m,b,n)
-#else
-#  define modlib_dumpbuffer(m,b,n)
-#endif
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
