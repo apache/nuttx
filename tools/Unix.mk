@@ -648,10 +648,10 @@ else
                               rm kwarning; \
                           fi
   MODULE_WARNING        = "warning: the 'modules' option is not supported"
-  PURGE_MODULE_WARNING  = 2>&1 >/dev/null | grep -v ${MODULE_WARNING} | tee kwarning && ${KCONFIG_WARNING}
+  PURGE_MODULE_WARNING  = 2> >(grep -v ${MODULE_WARNING} | tee kwarning) | cat && ${KCONFIG_WARNING}
   KCONFIG_OLDCONFIG     = oldconfig ${PURGE_MODULE_WARNING}
   KCONFIG_OLDDEFCONFIG  = olddefconfig ${PURGE_MODULE_WARNING}
-  KCONFIG_MENUCONFIG    = menuconfig ${PURGE_MODULE_WARNING}
+  KCONFIG_MENUCONFIG    = menuconfig $(subst | cat,,${PURGE_MODULE_WARNING})
   KCONFIG_NCONFIG       = guiconfig ${PURGE_MODULE_WARNING}
   KCONFIG_QCONFIG       = ${KCONFIG_NCONFIG}
   KCONFIG_GCONFIG       = ${KCONFIG_NCONFIG}
