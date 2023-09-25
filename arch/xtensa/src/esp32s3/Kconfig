@@ -1415,6 +1415,12 @@ config ESP32S3_BLE_TASK_PRIORITY
 	int "Controller task priority"
 	default 253
 
+config ESP32S3_BLE_INTERRUPT_SAVE_STATUS
+	int "Number of interrupt save status"
+	default 3
+	---help---
+		Number of interrupt save status variables to keep track. Increase it if any related bug is found.
+
 endmenu # BLE Configuration
 
 menu "Timer/Counter Configuration"
