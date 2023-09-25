@@ -2889,6 +2889,7 @@ static int mmcsd_read_csd(FAR struct mmcsd_state_s *priv)
 }
 #endif
 
+#ifdef CONFIG_MMCSD_IOCSUPPORT
 /****************************************************************************
  * Name: mmcsd_general_cmd_write
  *
@@ -3149,7 +3150,6 @@ static int mmcsd_general_cmd_read(FAR struct mmcsd_state_s *priv,
   return OK;
 }
 
-#ifdef CONFIG_MMCSD_IOCSUPPORT
 /****************************************************************************
  * Name: mmcsd_iocmd
  *
