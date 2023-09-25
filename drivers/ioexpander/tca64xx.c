@@ -68,7 +68,7 @@ static int tca64_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
              FAR bool *value);
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
 static int tca64_multiwritepin(FAR struct ioexpander_dev_s *dev,
-             FAR const uint8_t *pins, FAR bool *values, int count);
+             FAR const uint8_t *pins, FAR const bool *values, int count);
 static int tca64_multireadpin(FAR struct ioexpander_dev_s *dev,
              FAR const uint8_t *pins, FAR bool *values, int count);
 #endif
@@ -761,7 +761,7 @@ errout_with_lock:
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
 static int tca64_multiwritepin(FAR struct ioexpander_dev_s *dev,
                                FAR const uint8_t *pins,
-                               FAR bool *values, int count)
+                               FAR const bool *values, int count)
 {
   FAR struct tca64_dev_s *priv = (FAR struct tca64_dev_s *)dev;
   ioe_pinset_t pinset;

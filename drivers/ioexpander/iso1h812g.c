@@ -81,7 +81,7 @@ static int iso1h812g_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
              FAR bool *value);
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
 static int iso1h812g_multiwritepin(FAR struct ioexpander_dev_s *dev,
-             FAR const uint8_t *pins, FAR bool *values, int count);
+             FAR const uint8_t *pins, FAR const bool *values, int count);
 static int iso1h812g_multireadpin(FAR struct ioexpander_dev_s *dev,
              FAR const uint8_t *pins, FAR bool *values, int count);
 #endif
@@ -336,8 +336,8 @@ static int iso1h812g_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
 static int iso1h812g_multiwritepin(FAR struct ioexpander_dev_s *dev,
-                                   FAR const uint8_t *pins, FAR bool *values,
-                                   int count)
+                                   FAR const uint8_t *pins,
+                                   FAR const bool *values, int count)
 {
   FAR struct iso1h812g_dev_s *priv = (FAR struct iso1h812g_dev_s *)dev;
   int ret;

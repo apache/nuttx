@@ -71,7 +71,7 @@ static int pca9555_readbuf(FAR struct ioexpander_dev_s *dev, uint8_t pin,
              FAR bool *value);
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
 static int pca9555_multiwritepin(FAR struct ioexpander_dev_s *dev,
-             FAR const uint8_t *pins, FAR bool *values, int count);
+             FAR const uint8_t *pins, FAR const bool *values, int count);
 static int pca9555_multireadpin(FAR struct ioexpander_dev_s *dev,
              FAR const uint8_t *pins, FAR bool *values, int count);
 static int pca9555_multireadbuf(FAR struct ioexpander_dev_s *dev,
@@ -554,8 +554,8 @@ static int pca9555_getmultibits(FAR struct pca9555_dev_s *pca, uint8_t addr,
  ****************************************************************************/
 
 static int pca9555_multiwritepin(FAR struct ioexpander_dev_s *dev,
-                                 FAR const uint8_t *pins, FAR bool *values,
-                                 int count)
+                                 FAR const uint8_t *pins,
+                                 FAR const bool *values, int count)
 {
   FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
   uint8_t addr = PCA9555_REG_OUTPUT;

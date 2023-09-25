@@ -80,7 +80,7 @@ static int iso1i813t_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
              FAR bool *value);
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
 static int iso1i813t_multiwritepin(FAR struct ioexpander_dev_s *dev,
-             FAR const uint8_t *pins, FAR bool *values, int count);
+             FAR const uint8_t *pins, FAR const bool *values, int count);
 static int iso1i813t_multireadpin(FAR struct ioexpander_dev_s *dev,
              FAR const uint8_t *pins, FAR bool *values, int count);
 #endif
@@ -349,8 +349,8 @@ static int iso1i813t_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
 static int iso1i813t_multiwritepin(FAR struct ioexpander_dev_s *dev,
-                                   FAR const uint8_t *pins, FAR bool *values,
-                                   int count)
+                                   FAR const uint8_t *pins,
+                                   FAR const bool *values, int count)
 {
   gpiowarn("WARNING: ISO1I813T is only input expander!\n");
 

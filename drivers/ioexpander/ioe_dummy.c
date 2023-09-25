@@ -119,7 +119,7 @@ static int ioe_dummy_readpin(FAR struct ioexpander_dev_s *dev,
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
 static int ioe_dummy_multiwritepin(FAR struct ioexpander_dev_s *dev,
                                    FAR const uint8_t *pins,
-                                   FAR bool *values, int count);
+                                   FAR const bool *values, int count);
 static int ioe_dummy_multireadpin(FAR struct ioexpander_dev_s *dev,
                                   FAR const uint8_t *pins,
                                   FAR bool *values, int count);
@@ -442,7 +442,7 @@ static int ioe_dummy_readpin(FAR struct ioexpander_dev_s *dev,
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
 static int ioe_dummy_multiwritepin(FAR struct ioexpander_dev_s *dev,
                                    FAR const uint8_t *pins,
-                                   FAR bool *values, int count)
+                                   FAR const bool *values, int count)
 {
   FAR struct ioe_dummy_dev_s *priv = (FAR struct ioe_dummy_dev_s *)dev;
   uint8_t pin;
