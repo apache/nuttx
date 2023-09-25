@@ -74,7 +74,7 @@ static int mcp23x08_readbuf(FAR struct ioexpander_dev_s *dev, uint8_t pin,
              FAR bool *value);
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
 static int mcp23x08_multiwritepin(FAR struct ioexpander_dev_s *dev,
-             FAR const uint8_t *pins, FAR bool *values, int count);
+             FAR const uint8_t *pins, FAR const bool *values, int count);
 static int mcp23x08_multireadpin(FAR struct ioexpander_dev_s *dev,
              FAR const uint8_t *pins, FAR bool *values, int count);
 static int mcp23x08_multireadbuf(FAR struct ioexpander_dev_s *dev,
@@ -562,7 +562,7 @@ static int mcp23x08_getmultibits(FAR struct mcp23x08_dev_s *priv,
 
 static int mcp23x08_multiwritepin(FAR struct ioexpander_dev_s *dev,
                                   FAR const uint8_t *pins,
-                                  FAR bool *values, int count)
+                                  FAR const bool *values, int count)
 {
   FAR struct mcp23x08_dev_s *priv = (FAR struct mcp23x08_dev_s *)dev;
   uint8_t addr = MCP23X08_GPIOA;
