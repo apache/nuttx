@@ -121,8 +121,8 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
 
           flags = spin_lock_irqsave(NULL);
 
-          ts.tv_sec  += (uint32_t)g_basetime.tv_sec;
-          ts.tv_nsec += (uint32_t)g_basetime.tv_nsec;
+          ts.tv_sec  += g_basetime.tv_sec;
+          ts.tv_nsec += g_basetime.tv_nsec;
 
           spin_unlock_irqrestore(NULL, flags);
 
