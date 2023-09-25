@@ -109,8 +109,8 @@ uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
     }
   else
     {
-      _alert("Prefetch abort. PC: %08x IFAR: %08x IFSR: %08x\n",
-            regs[REG_PC], ifar, ifsr);
+      _alert("Prefetch abort. PC: %08" PRIx32 " IFAR: %08" PRIx32
+             " IFSR: %08" PRIx32 "\n", regs[REG_PC], ifar, ifsr);
       PANIC_WITH_REGS("panic", regs);
     }
 
@@ -129,8 +129,8 @@ uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
 
   /* Crash -- possibly showing diagnostic debug information. */
 
-  _alert("Prefetch abort. PC: %08x IFAR: %08x IFSR: %08x\n",
-        regs[REG_PC], ifar, ifsr);
+  _alert("Prefetch abort. PC: %08" PRIx32 " IFAR: %08" PRIx32 " IFSR: %08"
+         PRIx32 "\n", regs[REG_PC], ifar, ifsr);
   PANIC_WITH_REGS("panic", regs);
   return regs; /* To keep the compiler happy */
 }
