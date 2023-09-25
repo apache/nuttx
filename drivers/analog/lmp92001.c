@@ -254,11 +254,11 @@ static int lmp92001_gpio_readpin(FAR struct ioexpander_dev_s *dev,
                                  uint8_t pin, FAR bool *value);
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
 static int lmp92001_gpio_multiwritepin(FAR struct ioexpander_dev_s *dev,
-                                       FAR uint8_t *pins, FAR bool *values,
-                                       int count);
+                                       FAR const uint8_t *pins,
+                                       FAR bool *values, int count);
 static int lmp92001_gpio_multireadpin(FAR struct ioexpander_dev_s *dev,
-                                      FAR uint8_t *pins, FAR bool *values,
-                                      int count);
+                                      FAR const uint8_t *pins,
+                                      FAR bool *values, int count);
 #endif
 #ifdef CONFIG_IOEXPANDER_INT_ENABLE
 static FAR void *lmp92001_gpio_attach(FAR struct ioexpander_dev_s *dev,
@@ -1375,8 +1375,8 @@ static int lmp92001_gpio_readpin(FAR struct ioexpander_dev_s *dev,
 
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
 static int lmp92001_gpio_multiwritepin(FAR struct ioexpander_dev_s *dev,
-                                       FAR uint8_t *pins, FAR bool *values,
-                                       int count)
+                                       FAR const uint8_t *pins,
+                                       FAR bool *values, int count)
 {
 }
 
@@ -1398,8 +1398,8 @@ static int lmp92001_gpio_multiwritepin(FAR struct ioexpander_dev_s *dev,
  ****************************************************************************/
 
 static int lmp92001_gpio_multireadpin(FAR struct ioexpander_dev_s *dev,
-                                      FAR uint8_t *pins, FAR bool *values,
-                                      int count)
+                                      FAR const uint8_t *pins,
+                                      FAR bool *values, int count)
 {
 }
 #endif
