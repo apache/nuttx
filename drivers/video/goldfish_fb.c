@@ -306,8 +306,6 @@ int up_fbinitialize(int display)
 err_irq_attach_failed:
   kmm_free(fb->planeinfo.fbmem);
 err_fbmem_alloc_failed:
-  circbuf_uninit(&fb->vsync);
-err_circbuf_alloc_failed:
   kmm_free(fb);
   return ret;
 }
@@ -332,7 +330,6 @@ void up_fbuninitialize(int display)
       FAR struct goldfish_fb_s *fb = g_goldfish_fb;
 
       irq_detach(fb->irq);
-      circbuf_uninit(&fb->vsync);
       kmm_free(fb->planeinfo.fbmem);
       kmm_free(fb);
       g_goldfish_fb = NULL;
