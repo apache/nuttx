@@ -147,6 +147,12 @@ FAR const char *fs_gettype(FAR struct statfs *statbuf)
         break;
 #endif
 
+#ifdef CONFIG_FS_ZIPFS
+      case ZIPFS_MAGIC:
+        fstype = "zipfs";
+        break;
+#endif
+
       default:
         fstype = "Unrecognized";
         break;
