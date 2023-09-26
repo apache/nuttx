@@ -246,7 +246,7 @@ CMODULEFLAGS += -fno-stack-protector
 
 LDMODULEFLAGS = -r -e module_initialize --gc-sections
 LDMODULEFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
-SHMODULEFLAGS = -Bsymbolic -G -Bdynamic
+SHMODULEFLAGS = -shared -Bsymbolic -G -Bdynamic
 
 # NuttX modules are ELF binaries.
 # Non-ELF platforms like macOS need to use a separate ELF toolchain.
