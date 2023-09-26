@@ -318,14 +318,20 @@
 /* DMA configuration flags */
 
 #ifdef CONFIG_SAMA5_ADC_DMA
+#  ifdef ATSAMA5D2
+#    define DMACH_FLAG_PERIPHAHB_AHB DMACH_FLAG_PERIPHAHB_AHB_IF1
+#  else
+#    define DMACH_FLAG_PERIPHAHB_AHB DMACH_FLAG_PERIPHAHB_AHB_IF2
+#  endif
+
 #  define DMA_FLAGS \
-     DMACH_FLAG_FIFOCFG_LARGEST | \
-     DMACH_FLAG_PERIPHPID(SAM_IRQ_ADC) | DMACH_FLAG_PERIPHAHB_AHB_IF2 | \
-     DMACH_FLAG_PERIPHH2SEL | DMACH_FLAG_PERIPHISPERIPH |  \
-     DMACH_FLAG_PERIPHWIDTH_16BITS | DMACH_FLAG_PERIPHCHUNKSIZE_1 | \
-     DMACH_FLAG_MEMPID_MAX | DMACH_FLAG_MEMAHB_AHB_IF0 | \
-     DMACH_FLAG_MEMWIDTH_16BITS | DMACH_FLAG_MEMINCREMENT | \
-     DMACH_FLAG_MEMCHUNKSIZE_1 | DMACH_FLAG_MEMBURST_4)
+      DMACH_FLAG_FIFOCFG_LARGEST   | DMACH_FLAG_PERIPHPID(SAM_IRQ_ADC) | \
+      DMACH_FLAG_PERIPHAHB_AHB     | DMACH_FLAG_PERIPHH2SEL            | \
+      DMACH_FLAG_PERIPHISPERIPH    | DMACH_FLAG_PERIPHWIDTH_16BITS     | \
+      DMACH_FLAG_PERIPHCHUNKSIZE_1 | DMACH_FLAG_MEMPID_MAX             | \
+      DMACH_FLAG_MEMAHB_AHB_IF0    | DMACH_FLAG_MEMWIDTH_16BITS        | \
+      DMACH_FLAG_MEMINCREMENT      | DMACH_FLAG_MEMCHUNKSIZE_1         | \
+      DMACH_FLAG_MEMBURST_4
 #endif
 
 /* Pick an unused channel number */
@@ -1244,10 +1250,6 @@ static int sam_adc_setup(struct adc_dev_s *dev)
 
 static void sam_adc_shutdown(struct adc_dev_s *dev)
 {
-#ifdef CONFIG_SAMA5_ADC_DMA
-  struct sam_adc_s *priv = (struct sam_adc_s *)dev->ad_priv;
-#endif
-
   ainfo("Shutdown\n");
 
   /* Reset the ADC peripheral */
