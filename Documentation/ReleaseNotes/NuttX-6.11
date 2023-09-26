@@ -1,0 +1,37 @@
+NuttX-6.11
+----------
+
+The 78th release of NuttX, Version 6.11, was made on November 12, 2011
+and is available for download from the SourceForge website. Note
+that release consists of two tarballs: nuttx-6.11.tar.gz and
+apps-6.11.tar.gz. Both may be needed (see the top-level nuttx/README.txt
+file for build information).
+
+This release corresponds with SVN release number: r4090
+
+This release is a maintenance release that includes a few new features
+and some important bugfixes. New features include:
+
+* NX Graphics: New interfaces to read from graphics memory
+* Drivers: AT24 FLASH driver will now supports clustering of blocks
+to achieve a larger, more usable block size for NXFFS.
+* STM32: LCD color corrections
+* PIC32: Board configuration for the Microchip PIC32 Ethernet Starter kit
+(not yet verified), new GPIO support library, button and LED support
+for the Sure Electronics PIC32MX board. A lot of progress has been
+made on the PIC32 NuttX port, but it is still not ready for prime time.
+* NXP LPC3152: Board configuration for the Embedded Artists EA3152.
+
+Bugfixes, order roughly on decreasing criticality include:
+
+* NXFFS: Corrected critical bugs in initialization, some full FLASH handling,
+and errors in certain cases where the FLASH is repacked.
+* ARM EABI: Fix stack alignment required for passing floating point values.
+* Build system: Fix build issues when g++ is used as the compiler.
+* NX Graphics: Bitmap error handling, correct RGB color conversion macros,
+Error when the background window is released.
+* STM32: RTC build fixes, LCD color corrections
+* Simulation target: build fixes
+* C Library: fclose() return value.
+
+See the change log for more detailed information.

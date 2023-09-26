@@ -1,0 +1,18 @@
+NuttX-0.3.15
+-----------
+
+This is the 27th release of NuttX. This release includes some new features:
+
+* Adds support for the ROMFS filesystem
+* ROMFS supports mmap() to provide eXecute In Place (XIP) capability
+* NuttShell (NSH) can be configured to use ROMFS to provide a tiny read-only
+filesystem with a startup script in /etc.
+* Completed the basic port of the NXP LPC2148 on the mcu123.com board.
+The basic port includes successful booting, timer interrupts,
+serial console, successfully passing the examples/ostest, and a
+NuttShell (NSH) configuration.
+
+These changes were verified only on the mcu123.com NXP LPC2148
+board. Please report any errors to me.
+
+This tarball contains a complete CVS snapshot from September 20, 2008.

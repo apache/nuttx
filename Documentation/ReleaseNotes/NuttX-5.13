@@ -1,0 +1,40 @@
+NuttX-5.13
+----------
+
+This is the 60th release of NuttX. Headlines for this release
+include:
+
+* AVR32, www.mcuzone.com AVR32DEV1
+
+The port for the www.mcuzone.com AVRDEV1 board based on the
+Atmel AT32UC3B0256 MCU was (almost) fully integrated. The port
+now successfully passes the NuttX OS test (examples/ostest).
+A NuttShell (NSH) configuration is in place (see the NSH User
+Guide at https://nuttx.apache.org/docs/latest/components/nsh/index.html).
+Testing of that NSH configuration, however, has been postponed
+(because it got bumped by the Olimex LPC1766-STK port -- see below)
+
+Current Status: I think I have a hardware problem with my serial
+port setup. There is a good chance that the NSH port is complete
+and functional, but I am not yet able to demonstrate that. At
+present, I get nothing coming in the serial RXD line (probably
+because the pins are configured wrong or I have the MAX232
+connected wrong).
+
+A complete port will include drivers for additional AVR32 UC3
+devices -- like SPI and USB --- and will be available in a
+later release, time permitting.
+
+* LPC1766, Olimex LPC1766-STK
+
+Support for the Olimex-LPC1766 is newly added to NuttX and is
+still undergoing development, test, and integration. Verified
+configurations for the NuttX OS test and for the NuttShell (NSH,
+see the NSH User Guide at
+https://nuttx.apache.org/docs/latest/components/nsh/index.html .
+Additional USB configurations are in the release as well, but
+they have not yet been verified. Goals for NuttX-5.14 include:
+(1) An Ethernet driver, (2) Verified USB support, and (3) SD
+card support.
+
+* Additional changes and bugfixes as detailed in the ChangeLog.

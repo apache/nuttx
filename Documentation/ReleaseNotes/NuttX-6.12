@@ -1,0 +1,28 @@
+NuttX-6.12
+----------
+
+The 79th release of NuttX, Version 6.12, was made on December 6, 2011
+and is available for download from the SourceForge website. Note
+that release consists of two tarballs: nuttx-6.12.tar.gz and
+apps-6.12.tar.gz. Both may be needed (see the top-level nuttx/README.txt
+file for build information).
+
+This release corresponds with SVN release number: r4141
+
+New features in this release include:
+
+* STM32. Basic support added for the STM32 F4 family. Board support
+verified for the STMicro STM3250G-EVAL board.
+* FAT. Enhanced partition handling.
+* SDIO-Based SD Card support. Add support for large (>4Gb) devices
+* Graphics. Added four new small sans serif fonts.
+* Drivers. Fix a banding problem with the R61580 LCD.
+
+Bugfixes, order roughly on decreasing criticality include:
+
+* FAT. Fix errors in how the first entries in the root directory are
+added. Fix errors in FAT date/time handling.
+* Signals. Fix bug in certain sig_timedwait() error handling.
+* Drivers. Fix cloned errors in poll() handling in several drivers.
+* Message Queues. errno was not being set correctly by mq_notify().
+* C Library. wchar_t is a built-in type for C++

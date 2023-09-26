@@ -1,0 +1,52 @@
+NuttX-5.10
+----------
+
+This is the 57th release of NuttX. This release includes a combination
+of some new features as well as several bugfixes. New features
+include:
+
+* TI/Luminary Stellaris LM3S9B96:
+Header file changes contributed by Tiago Maluta.
+* TI/Luminary Stellaris LM3S8962:
+Header file changes and support for the Stellaris LM3S8962
+Ethernet+CAN Evaluation Board contributed by Larry Arnold.
+* On-Demand Paging Support:
+The basic logic for the On-Demand Paging feature is complete,
+implemented for the NXP LPC3131, and partially tested. See
+https://nuttx.apache.org/docs/latest/components/paging.html.
+Some additional test infrastructure will be needed in order to complete
+the verification. See configs/ea3131/README.txt for details.
+* Two Pass Build Support:
+The make system now supports a two pass build where a relocatable,
+partially linked object is created on the first pass and that
+object is linked with the NuttX libraries to produce the final
+executable on the second pass. This two pass build is currently
+only used to support the On-Demand paging feature: The first
+pass link forces critical logic into the locked text region;
+the second pass builds the NuttX executable more-or-less as
+normal.
+* CONFIG_APP_DIR:
+Generalized the way in which applications are built and linked
+with NuttX. The new configuration CONFIG_APP_DIR replaces
+CONFIG_EXAMPLE. CONFIG_EXAMPLE used to identify the sub-directory
+within the NuttX examples/ directory that held the example
+application to be built. That made it awkward to configure to
+build an application that resides outside of the NuttX examples/
+directory. CONFIG_APP_DIR is more general; it can be used to
+refer to any directory containing the application to be built.
+
+For people who have their own configurations and/or Makefiles,
+you will need to make a couple of changes:
+
+- Replace all occurrences of CONFIG_EXAMPLE=foobar with
+CONFIG_APP_DIR=examples/foobar in all of the configuration
+files.
+- Replace any occurrences of examples/$(CONFIG_EXAMPLE) with
+$(CONFIG_APP_DIR)
+- Replace any occurrences of lib$(CONFIG_EXAMPLE)$(LIBEXT)
+with libapp$(LIBEXT) in your Makefiles.
+- Check any other occurrences of CONFIG_EXAMPLE.
+
+* Several bugfixes are included as well as code changes to eliminate
+some warnings. See the ChangeLog for details.
+

@@ -1,0 +1,1101 @@
+NuttX-7.28
+----------
+
+The 128th release of NuttX, Version 7.28, was made on January 19, 2019,
+and is available for download from the Bitbucket.org website. Note
+that release consists of two tarballs: nuttx-7.28.tar.gz and
+apps-7.28.tar.gz. These are available from:
+
+https://bitbucket.org/nuttx/nuttx/downloads
+https://bitbucket.org/nuttx/apps/downloads
+
+Both may be needed (see the top-level nuttx/README.txt file for build
+information).
+
+Additional new features and extended functionality:
+
+* Core OS:
+
+- Critical Section Monitor: Adds data collection logic in support of
+pre-task monitoring critical sections and pre-emption state. From Gregory
+Nutt
+- Critical Section Monitor: Add support for global pre-emption and
+global critical sections to monitor as suggested by Xiang Xaio. From
+Gregory Nutt
+- Interrupt Time: Measurement of interrupt handler duration used to
+be available only in Tickless mode since it used the high resolution
+Tickless timer to measure interrupt time. This change adds
+CONFIG_SCHED_IRQMONITOR_GETTIME which, if enabled, will force the
+interrupt duration calculation to use the same high-resolution,
+platform-specific timer as is used with the Critical Section Monitor.
+This leads to two improvements: (1) You can now measure interrupt
+duration in non-Tickless mode, and (2) in either mode, the interrupt
+duration and the critical section measures will use the same
+high-resolution timer and should, therefore, never be any discrepancy
+due to different clock sources. From Gregory Nutt
+- Context Switching Protection: Add debug assertions before each call
+to up_block_task() to assure that there is no attempt to block an
+IDLE task. From Dave Marples
+- init Task: Allow the init task priority to be configurable. From
+David Sidrane
+- pthreads: Implement pthread_key_delete(). This involves some minor
+changes to the group data structure. From Gregory Nutt
+
+* File Systems/Block and MTD Drivers
+
+- ProcFS: Extended the process ID ProcFS output to show per-thread
+maximum time for pre-emption disabled and maximum time within a
+critical section. From Gregory Nutt
+- NXFFS: Pass unrecognized IOCTL commands to the contained MTD
+driver. From Daniel P. Carvalho
+- LittleFS: Adds an initial port the ARM mbed littlefs to NuttX. This does
+not include FLASH formatting utilities. Depends on CONFIG_MTD_BYTE_WRITE.
+From lihaichen
+- AT25 MTD Driver: Added support for AT25DF081A serial flash chip.
+From Marc Rosen
+- MTD Configdata Device: Extends the MTD configdata device with the
+following features / additions:
+1. Configurable option to use named config items instead of enumerated
+ID/Instance numbers.
+2. Ability to iterate through the existing configdata items in the
+/dev/config device.
+3. Ability to "unset" a configdata item.
+4. Ability to perform "flash_eraseall" on the /dev/config device.
+From Ken Pettit
+
+* Networking/Network Drivers:
+
+- Telnet Driver: Add NAWS and poll interface to telnet for screen size
+negotiation used with termcurses. From Ken Pettit
+
+* Wireless/Wireless Drivers:
+
+- BLE HIC Core: Add second RX work function From Lwazi Dube
+- BLE IOCTL Commands: Add SIOCBTCONNECT and SIOCBTDISCONNECT ioctl
+commands From Lwazi Dube
+- CC2564: Add cc2564 HCI UART driver. From Lwazi Dube
+
+* Graphics/Display Drivers:
+
+- Sitronix ST7032i: Add support to Alphanumeric Sitronix ST7032i
+display From Alan Carvalho de Assis
+- NXP TDA19988: This commit brings in a complete, but untested,
+implementation of a driver for the TI TDA19988 HDMI Encoder. This encoder
+is used on the Beaglebone Black board. Since this driver is untested, it
+requires CONFIG_EXPERIMENTAL in the configuration. From Gregory Nutt
+
+* Crypto:
+
+- crypto/aes.c: This change provides an improved AES cipher API in
+addition to the existing routines. The reasons for this new API are:
+1) better performance, giving the possibility to avoid re-setting-up
+the key for each AES block when the same key is used multiple times.
+This is important for the current single user of AES, which is
+related to storage and FTL. And 2) suitable for simultaneous use of
+multiple AES keys, which will be required by the upcoming crypto
+framework. It retains compatibility with the previous API, so there
+is no need to change anything else right now. From Sebastien Lorquet
+
+* Other Common Device Drivers:
+
+- MMCSD SDIO: The mmcsd_sdio driver makes calls for dcache
+invalidation through the chip specific architecture function
+SDIO_DMARECVSETUP(). I changed the arch/arm/stm32f7 chips to use
+arch_invalidate_dcache_by_addr() instead of arch_invalidate_dcache().
+
+This commit includes additional changes to mmcsd_sdio.c. I
+created SDIO_DMADELYDINVLDT() (DMA delayed invalidate) to
+invalidate store-into mode dcaches after the DMA transfer. I
+have been using SDIO_DMADELYDINVLDT() for several weeks now and
+it has fixed the problems that I previously reported regarding
+non-cache aligned buffer invalidation errors (for my store-through
+dcache). However, it does not permit use of unaligned DMA buffers
+for store-into mode dcaches.
+
+SDIO_DMADELYDINVLDT() is a NoOp unless the chip specific Kconfig
+file selects CONFIG_ARCH_HAVE_SDIO_DELAYED_INVLDT. I have modified
+all the stm32f7 chips to select it. From Bob Feretich
+- SPI Lower Half Interface: Extend the HW features supported by SPI.
+It now supports a deferred DMA trigger hardware configuration. From
+Dave Marples
+- DS28E17 1-Wire Driver: Optimize I2C write followed by read to same
+address. From Juha Niskanen
+- LMP92001: Add support for the TI LMP92001 Multi-channle DAC/ADC
+device. From Abdelatif Guettouche.
+- EEPROM Character Driver: Add support to Microchip AT24CM02 From
+Alan Carvalho de Assis
+- Microchip MCP73871: Add support to Microchip MPC73871 Battery Charger.
+From Alan Carvalho de Assis
+- MCP7941x: Add support for the Microchip MCP741x external RTC. From Ouss4
+- Sensirion SCD30: Driver for Sensirion SCD30 CO2 sensor. From Jussi
+Kivilinna
+- Sensirion SGP30: Driver for Sensirion SCD30 gas sensor. From Jussi
+Kivilinna
+- Sensirion SPS30: Driver for Sensirion SCD30 particulate matter sensor.
+From Jussi Kivilinna
+- USB CDC/ACM Device: When implemented usb cdc on nrf52840, I found
+some issues with cdc driver:
+1. Lost data when receiving buffer is full;
+2. Low-water mask implement issue;
+3. Re-flush cdc buffer when enabling
+4. Serial dma is conflict with cdc , modify the serial.h
+From Levin Li
+
+* MIPS32:
+
+- Configuration System: Allow Penguino for windows for the Windows
+Ubuntu platform as well.
+
+* Maxim Integrated MAX326xx
+
+- MAX32660: Support for the MAX32660 was added (along with partial
+support for other members of the MAX326xx family). The initial port
+includes Clock configuration, timer, GPIO pin configuration, ICC,
+and UART. Additional untested drivers are complete and ready for
+testing: DMA, GPIO interrupts, SPI0 Master, TC, WDT. The following
+drivers are not yet implemented: I2C and I2S.
+
+* Maxim Integrated MAX326xx boards
+
+- MAX32550-EVSYS: Basic support for the Maxim Integrated MAC3X660
+EVSYS is included. A basic NSH configuration is available and is
+fully functional. Includes unverified support for an SPI0-based
+SD card.
+
+* Microchip/Atmel SAMD21/L21 Drivers:
+
+- SAMD21/L21: Adds a complete ADC header file for SAMD21 and a partially
+complete ADC header file for the SAML21. From Alexander Vasiliev
+- SAMD21/L21: Export sam_i2c_master_initialize(int bus) to be used by
+board config. From Alan Carvalho de Assis
+
+* Microchip PIC32MZ Drivers:
+
+- PIC32MZ I2C: Add support for the I2C bus. From Ouss4
+
+* ARMv7-A
+
+- ARMv7-A MMU: Use TLBIMVA vs TLBIMVAAIS to invalidate the Cortex-A8
+cache. From Petro Karashchenko
+
+* ARMv7-M
+
+- Cortex-M7 Cache: This commit adds a new function
+arch_invalidate_dcache_by_addr(). It takes the same parameters as
+arch_invalidate_dcache(), but performs invalidation of only the lines
+in cache that need to be invalidated. This new function could be
+used as a a direct replacement for arch_invalidate_dcache(). From
+Bob Feretich
+- ARMv7-M: In the current implementation we only use very high
+priority interrupts (levels 0, 0x10 and 0x20 in CORTEX-M speak) but
+that means there are loads of lower priority ones that are
+effectively unused. I have *not* changed the semantics of these
+levels but have 'shifted' them to be based around the midpoint of the
+available interrupts (0x80) rather than at the top end....that allows
+for interrupts to be defined above (or, indeed, below) them as needed
+by the application. This should have no functional effect on
+existing code but adds in a clean capability to define higher
+priority interrupts. From Dave Marples
+
+* Broadcom BCM2708:
+
+- BCM2708: Remove all support for the BCM2708/2835. This was added
+only for support of the RaspberryPi Zero board which was previously
+removed. The support was minimal and unverified. The removed files
+can still be found in the Obsoleted directory. From Gregory Nutt
+
+* Broadcom BCM2708 Boards:
+
+- Raspberry Pi Zero: Remove the partial support for the Raspberry Pi
+Zero. This port was started with the best of intentions but was
+never completed. The board support can still be found in the
+Obsoleted repository. From Gregory Nutt
+
+* Nordic NRF52 Boards:
+
+- Improve LED handling #if~#endif in nrf52_autoleds.c and
+nrf52_userleds.c
+Add Adafruit Feather nRF52 board LED support
+Add Adafruit Feather nRF52 board
+Add nrf52-generic
+Replace 'pca10040' with 'generic'
+Copy from nrf52-pca10040 to nrf52-generic
+From Zou Hanya
+
+* NXP i.MX RT Drivers:
+
+- i.MXRT: Add PIT, GPT, and QIMER(TMR) header files From David Sidrane
+- i.MXRT: Add FLEXPWM. From David Sidrane
+- i.MXRT: Add ADC chip header From David Sidrane
+- i.MXRT Build: Include up_systemreset and up_stackcheck.c From David Sidrane
+- i.MXRT GPIO: Add GPIO Support Input daisy selection. From David Sidrane
+- i.MXRT Serial: Support independent input and output flow control. From
+David Sidrane
+- i.MXRT USB: Use single define for USB pin definitions. From David Sidrane
+- IMXRT106X: Add FLEXCAN3 to pinmux header file. From David Sidrane
+
+* NXP Freescale i.MX RT Boards:
+
+- IMXRT1050-EVK: GPIO device driver support added and tested by
+Pavlina Koleva and Ivan Ucherdzhiev. From Pavlina Koleva
+
+* On Semi LPC23450:
+
+- LPC23450: Add support for SPI flash boot. Also, remove unnecessary
+code for the SPI flash boot. From Masayuki Ishikawa
+
+* On Semi LPC23450 Boards:
+
+- LC823450-XGEVK: Add linker script for SPI flash boot. From
+Masayuki Ishikawa
+- LC823450-XGEVK: Enable NFS client for RNDIS configuration. Also, some
+stack size were adjusted to work with NFS From Masayuki Ishikawa
+
+* Simulation
+
+- Critical Section Monitor: Add low level timer support for simulation. From
+Gregory Nutt
+
+* STMicro STM32:
+
+- Configuration: Simplify ARM core selection logic From Mateusz Szafoni
+- Configuration: USB Host is an option. From David Sidrane
+- STM32 L0: Brings in initial support for the STM23 L0. From Mateusz
+Szafoni
+
+* STMicro STM32 Drivers:
+
+- STM32 ADC: Configurable ADC DMA mode (one shot mode, circular
+mode). From Mateusz Szafoni
+- STM32 ADC: Start conversion on startup is now possible if TIM
+triggering selected. This can be useful to start ADC TIM conversion
+for ADC IPv2 when opening ADC device.
+- STM32 DAC: Unified naming for DAC interfaces From Mateusz Szafoni
+- STM32 DMA: Add interfaces to interact with high priority DMA
+interrupts. From Mateusz Szafoni
+- STM32 DMA: Use STM32 DMA IP core version instead of chip family
+names. From Mateusz Szafoni
+- STM32 DMA: Add support for DMA v1 CSELR support. From Mateusz Szafoni
+- STM32 HRTIM: Do not enable timers on startup if option from Kconfig
+selected and add interface to enable/disable timers. From Mateusz
+Szafoni
+- STM32 PWM: Add timer enable/disable and frequency update to
+low-level ops. From Mateusz Szafoni
+- STM32 SPI: Implements the new deferred DMA trigger feature. From
+Dave Marples
+- STM32 F0 Build: Rename the stm32f0 directory to stm32f0l0 to make a
+space for STM32 L0. Rename files, functions and defines, removing
+the f0_ from the names in order to make them MCU agnostic. From
+Gregory Nutt
+- STM32 F0 GPIO: Add support for GPIO EXTI. From Mateusz Sfafoni
+- STM32 F2 FLASH: stm32_flash_writeprotect() supported the same for
+STM32F20XX as STM32F4XXX From Anthony Merlino
+- STM34 F7 DMA: stm32f7 enable separate DMA per SPI configuration
+From Daniel Agar
+- STM32 F7 QEncoder: Ported the QEncoder from F4 to F7. From Eduard
+Niesner
+- STM32 F7 SPI: Port Dave Marples STM32 deferred trigger enhancement
+to the STM32 F7 SPI drivers. From Gregory Nutt
+- STM32 H7 SPI: Port Dave Marples STM32 deferred trigger enhancement
+to the STM32 H7 SPI drivers. From Gregory Nutt
+- STM32 L4 SPI: Port Dave Marples STM32 deferred trigger enhancement
+to the STM32 L4 SPI drivers. From Gregory Nutt
+
+* STMicro STM32 Boards:
+
+- B-L072Z-LRWAN1: Add basic support for b-l072z-lrwan1. Nucleo boards
+use as default ST LINK MCO as clock input from MCU and for this
+HSEBYP must be enabled. From Mateusz Szafoni
+- Nucleo-F103RB: Add board support. From Mateusz Szafoni
+- Nucleo-F103RB: Add ADC and PWM examples. From Mateusz Szafoni
+- Nucleo-F207ZG: Add board support. From Mateusz Szafoni
+- Nucleo-F207ZG: Add ADC and PWM examples. From Mateusz Szafoni
+- Nucleo-F302R8: Add high priority ADC interrupts example to the
+'highpri' configuration. From Mateusz Szafoni
+- Nucleo-F334R8: Add support for ADC injected sequence to the 'highpri'
+configuration, add triggering from TIM1. From Mateusz Szafoni
+- Nucleo-F334R8: Add example for the SPWM generation (custom STM32 PWM
+usage). From Mateusz Szafoni
+- Nucleo-F767ZI: Use on board USB UART as default console. Board is powered
+by USB which can be used as UART link for upload and console. Previously
+it was set to use Arduino shield which developer may not have. From Phil
+Coval
+- Nucleo-F767ZI: Add ethernet config based on nsh configuration plus
+stm32f769i-disco/nsh-ethernet. From Phil Coval
+- Nucleo-L073RZ: Add basic support for nucleo-l073rz. Nucleo boards
+use as default ST LINK MCO as clock input from MCU and for this
+HSEBYP must be enabled. From Mateusz Szafoni
+- Nucleo-L152RE: Add board support. From Mateusz Szafoni
+- STM32F4 Discovery: Add timing support for the critical section
+monitor using the DWT CYCNT register. From Gregory Nutt
+- STM32F4 Discovery: If the Critical Section Monitor, modify the
+ITM_LAR register to assure that the DWT cycle counter is enabled.
+Suggested by Dave Marples. From Gregory Nutt
+- STM32F4 Discovery: Add board support to display ST7032i From Alan
+Carvalho de Assis
+- STM32F4 Discovery: Add loadable application build support in
+Make.defs From Masayuki Ishikawa
+- STM32F4 Discovery: Update RNDIS configuration: (1) Add NFS and adjusted
+stack size for usermain and telnetd client. (2) Add support for loadable
+application and ping. From Masayuki Ishikawa
+- STM32F4 Discovery: Update nsh configuration: (1) Add
+CONFIG_BOARD_INITIALIZE=y, (2) Add CONFIG_EXAMPLES_HELLO=y. From Masayuki
+Ishikawa
+- STM32F429I-DISCO: Add high priority ADC interrupts example to the
+'highpri' configuration. From Mateusz Szafoni
+- configs/nucleo-l073rz: Support for nrf24l01. From Mateusz Sfafoni
+
+* TI CCxx:
+
+- CC13x0 family and CC13x2/CC26x2: Basic, minimal support was added
+for these two chip families. This is a Work-In-Progress: There is
+just enough logic in place to support a simple NSH configuration.
+However, the port is still missing certain, necessary hooks into the
+TI ROM-based 'DriverLib'. As a result, the support is not fully code
+complete and is totally untested. Support for the CC26x2, which is
+nearly identical to the CC13x2 is fragmentary. Stay tuned.
+Hopefully full support will be available in NuttX 7.29.
+
+* TI CCxx Boards:
+
+- LAUNCHL-CC1312R1: Board support is available for the TI
+LAUNCHL-CC1312R1. That board support consists only of an unverified
+NSH configuration. The primary purpose of this port for the time
+being is simply support the core architecture bring-up.
+
+* TI AM335x:
+
+- AM335x: Adds initial support for the TI AM355x family.
+- AM335x: Add minimal wdog logic needed to disable the watchdog timer.
+Otherwise, the board is rebooted after certain time expires while NuttX is
+running. From Petro Karashchenko
+- AM335x: Switch to DMTimer2 for system tick generation. U-Boot does not
+enable DMTimer1ms clocks hence it is not possible to use it until
+implementation in am335x_clockconfig.c is ready. From Petro Karashchenko
+
+* TI AM335x Boards:
+
+- Beaglebone Black: Initial port for BeagleBone Black board support
+(TI AM335x family based on Cortex-A8). Includes a basic functional NSH
+configuration . From Petro Karashchenko
+
+* TI Tiva:
+
+- LM3S9B92: Add support for LM3S9B92. From Lwazi Dube
+
+* TI Tiva Drivers:
+
+- Tiva HCI UART: Port bluetooth HCI uart interface from stm32 to tiva
+From Lwazi Dube
+
+* TI Tiva Boards:
+
+- TM4C1294-Launchpad: Add IRQBUTTONS support to tm4c1294 launchpad.
+From Lwazi Dube
+
+* Tools:
+
+- tools/convert-comments.c: Add a tool to convert C++-style comments
+to C89 C-style comments. From Gregory Nutt
+- tools/detab.c: Add detab.c which will convert all tabs in a file to
+spaces. From Gregory Nutt
+- tools/lowhex.c: Add lowhex.c that will convert hexadecimal constants
+in a file to use lower case representation. From Gregory Nutt
+- tools/mkconfig.c: Add definitions to distinguish between tristate
+'y' and 'm' options. From Gregory Nutt
+- tools/nxstyle.c: Add logic to detect long lines. From Gregory Nutt
+- tools/nxstyle.c: Add -h for help. From Gregory Nutt
+
+* Libraries/Header Files:
+
+- include/nuttx/lcd/edid.h: Add EDID definitions From Gregory Nutt
+- libs/libc/netdb: Make DNS retries configurable From Juha Niskanen
+- libs/libc/netdb: Harden query logic against DNS spoofing. This
+commit implements most of the RFC 5452 guidelines for making DNS more
+resilient. We now verify response matches against what was queried
+and use unpredictable query IDs. It is also checked that response
+come from correct DNS server. Also fixes a buffer overflow when
+querying hostnames longer than CONFIG_NETDB_DNSCLIENT_NAMESIZE. From
+Juha Niskanen
+- libs/libc/netdb: Support multiple IP addresses per hostname From
+Juha Niskanen
+
+* NSH: apps/nshlib:
+
+- apps/nshlib: Add support to use SLCD as NSH Console From Alan Carvalho de
+Assis
+- apps/nshlib: Add support for CROMFS start-up script. From David Sidrane
+- apps/nshlib: Add var expansion in NSH parse. From Daniel Agar
+- apps/nshlib: Display built-in apps using multi-column mode like the NSH
+commands. From Ken Pettit
+- apps/nshlib: In all multi-column help output, calculate an optimal column
+width rather than using a hard-coded width that may or may not be
+appropriate. Also make the number of rows presented dependent upon the
+maximum width of the widest column. From Gregory Nutt
+- apps/nshlib: Adds addroute command options for setting default gateway.
+Like 'addroute default <ipaddr> <interface>'. From Anthony Merlino
+
+* Examples/Tests: apps/examples:
+
+- apps/examples/battery: Add Battery Charger Monitor Example From Alan
+Carvalho de Assis
+
+* System Utilities: apps/system
+
+- apps/system/configdata: Adds an "cfgdata" command which allows
+manipulation of the /dev/config items via the command line. One such use
+for this utility would be to set a "macaddr" configdata item, etc. The
+utility is sort-of like a u-boot env variable edit function:
+
+For instance, to set a "macaddr" when the new CONFIG_MTD_CONFIG_NAMED
+option is selected, you would do:
+
+nsh> cfgdata set macaddr [0xfc 0x01 0x0b 0x45 0xa1 0x12]
+(The brackets denotes an array of bytes)
+nsh> cfgdata set hostname myboard
+
+or using the old ID,INSTANCE numeric method:
+
+nsh> cfgdata set 0,0 [0xfc 0x01 0x0b 0x45 0xa1 0x12]
+(The brackets denotes an array of bytes)
+nsh> cfgdata set 1,0 myboard
+
+You can also display all config items:
+
+nsh> cfgdata print all
+Name Len Data
+macaddr 6 0xFC 0x01 0x0B 0x45 0xA1 0x12
+hostname 8 myboard
+
+From Ken Pettit
+- apps/system/critmon: Add a daemon to monitor critical section usage. From
+Gregory Nutt
+- apps/system/nsh: Set NSH priority if the NSH task was scheduled at a
+different priority than the configured priority. From Gregory Nutt
+- apps/system/nxplayer: Introduce CONFIG_NXPLAYER_MAINTHREAD_STACKSIZE. From
+Masayuki Ishikawa
+- apps/system/termcurses: Addition of termcurses libraries in
+apps/system/termcurses From Ken Pettit
+- apps/system/vi: New feature additions
+1. Vi startup feature to prepend the current working directory to the
+supplied filename if it does not start with '/' absolute path
+specifier. This allows editing files in the current directory
+without needing to fully qualify the filename.
+2. Standard '~' empty screen line characters for proper identification
+of empty '\n' only lines at the end of the file.
+3. Moving into insert or append mode now prints '--INSERT--' in the
+status line and clears it upon exit.
+4. Integration with termcurses to detect special keystrokes and to
+handle terminal type differences. Haven't yet converted all vt100
+print codes to termcurses equivalents.
+5. Support for up, down, left, right arrows, page-up, page-down keys in
+command mode.
+6. Added 'b' command to move cursor 'b'ack to previous word. Honors the
+command repeat value for multiple word moves.
+7. Added 'w' command to move cursor to next 'w'ord. Honors the command
+repeat value for multiple word moves.
+8. Added 'f' and 't' commands to find characters on the current line.
+Honors the command repeat value.
+9. Added the find 'n'ext command to repeat the previous find operation.
+10. Added the 'H', 'M', and 'L' commands to move the cursor to top,
+middle and bottom of the display.
+11. Extended yank/paste to manage a paste buffer with character mode in
+addition to line mode. Character mode allows cut / paste of
+individual characters or groups of characters vs. full lines.
+12. Added support in the 'd'elete and 'y'ank commands for character mode
+deletions such as 'dw', 'dfa', '2yw', etc.
+13. Added support in paste routine for multiple paste using command value
+argument.
+14. Added support for the 'D' and 'C' delete and change to end of line
+commands.
+15. Added support for 's'ubstitute key ('x' followed by insert mode).
+16. Modified yank / paste allocation scheme to avoid repeated alloc and
+free of paste buffer. Uses a minimum allocation size scheme and only
+does free / realloc when paste does not fit. If the paste is smaller
+than the current allocation and the current allocation is larger than
+the threshold, then the buffer is freed and a smaller buffer
+allocated. Otherwise the existing buffer is used.
+17. Support for 'P'aste before current cursor position.
+18. Support for '?' reverse search mode.
+19. Support for 'J'oin next line with current line command.
+20. Printing of current row,col in status line of display.
+21. Command repeat '.' support for commands that modify text.
+22. Support in replace / insert mode for arrow keys, PGUP / PGDN, HOME,
+and END. Using these will cause the command repeat buffer to reset
+such that only the last text addition after a cursor movement is saved.
+23. Added 'X' delete previous command.
+24. Added "gg" go to top of document command sequence.
+25. Added "ZZ" save and quit command (equivalent to :wq).
+26. Implemented '^' goto first non-whitespace on current line, along with
+'+' and '-' goto first non-whitespace on next / previous line.
+27. Added CR / LF goto first non-whitespace on next line in command
+mode. From Ken Pettit ?
+
+* Network Utilities: apps/netutils:
+
+- apps/netutils/webserver: The webserver/httpd app is was broken when script
+support was enabled (CONFIG_NETUTILS_HTTPD_SCRIPT_DISABLE). The root cause
+has been tracked down to the "Content-length" not being available ahead of
+time in this case (length of -1 passed to send_headers() ). On the other
+hand, the server closing the socket does not result in FIN being sent to
+the browser either (FIN not supported by NuttX yet).
+
+Simple solution: Add support for HTTP Chunked Encoding to webserver/httpd.
+The change is simple. It adds a configuration option to enable chunked
+encoding. When enabled, the implementation will auto-detect the cases where
+content length is not available ahead of time, and will automatically
+engage chunked encoding transfers.
+
+Without this patch, the browser/client hangs forever, as it is expecting
+more data. With this patch, the browser displays the content. From Vlado
+Vidovic
+
+* Wireless Utilities: apps/wireless:
+
+- apps/wireless/bluetooth/btsak: Add connect and disconnect commands to
+btsak. From Lwazi Dube
+
+* Graphic Utilities: apps/graphics:
+
+- apps/graphics/pdcurs34: Integration of termcurses into pdcurses, plus
+pdcurses updates for multi-thread support From Ken Pettit
+- apps/graphics/pdcurs34: Adds a configuration option to pdcurses to enable
+line-drawing character (ALTCHARSET) when using the short 16-bit chtype.
+This is done by limiting the characters to 7-bit ASCII values and using the
+8-th bit as the A_ALTCHARSET bit. This allows a significant RAM savings 4K
+- 20K depending on terminal size) while still allowing the nicer
+line-graphic characters for border drawing. From Ken Pettit
+
+* Testing: apps/testing:
+
+- apps/testing/ostest: Add test for pthread-specific data. From Gregory
+Nutt
+
+Bugfixes. Only the most critical bugfixes are listed here (see the
+ChangeLog for the complete list of bugfixes and for additional, more
+detailed bugfix information):
+
+* Core OS:
+
+- Assertions: Identify the running task correctly when dumping task
+state information. It takes time to switch to the target task after
+g_readytorun has been modified. If panic/assert happen during this
+period, the dump will contain the incorrect and confusing information
+due to the difference between the real running task and the return
+value of this_task(). This change resolve this problem by adding
+g_running_task to track the real running task through the context
+switch. From Xiang Xiao
+- Assertions: Correct duplicated logic from commit
+dbf01d12b7321d1b48b68d3b69842a853b049376. Checking for PID == zero
+is not a valid way to test for the IDLE task in all configurations!
+This is only true in the single CPU configuration. In multiple CPU
+configurations, there will be a separate IDLE task for each CPU with
+a different PID and an alternative check must be used. NOTE: The
+logic fixed in some places still lacks sufficient intelligence in SMP
+mode to find the right stack for the CPU IDLE thread and could still
+show the wrong stack. From Gregory Nutt
+- Interrupt Prioritization: Remove all driver-specific logic that may
+set the interrupt priority to anything but the default. There is no
+good reason to change the interrupt priority unless you just want to
+debug a difficult problem. OR if you want to use high priority
+interrupts. In that case the specific interrupt priorities will need
+to be set by board-specific logic. From Gregory Nutt
+- Memory Management: Revert "This patch prevent heap corruption as in
+below case." This solution to the problem noted by EunBong Song
+results in major memory fragmentation and out-of-memory
+conditions on the PX4 platform. On that platform the lower priority
+work queue is very low priority and essentially never runs when the
+system is busy. As a result, the systems gets slowly starved of
+memory until failures and bad behaviors begin to occur. From Gregory Nutt
+- Memory Management: This is a replacement for EunBong Song's reverted
+change. This change adds (1) logic in getpid() to return an error instead
+of the PID if the (apparent) currently executing task is not marked as
+RUNNING. Then (2) mm_trysemaphore() (the root implementation of both
+kmm_trysemaphore() and umm_trysemaphore()) will know that the (apparent)
+running task cannot be the holder of the semaphore. How could the
+non-running task be trying to get the MM semaphore? I think only in the
+exact scenario that Eunbong Song has described. So this new solution
+should provide the same protection as the original change but without the
+bad consequences to memory usage. From Gregory Nutt (with corrections
+from David Sidrane)
+- Memory Management: In implementation of calloc(), verify that the number of
+elements times the size of an element will not overflow type size_t. This
+is required by the SEI CERT C coding style and resolves anonymous Bitbucket
+Issue #139 From Gregory Nutt
+- sigtimedwait(): Remove unnecessary disable of pre-emption. From
+Gregory Nutt
+- _exit(): Update all architecture-specific _exit() implementations
+so that they correctly call the scheduler instrumentation layer for
+the new task that runs when the old one exits. This missing
+instrumentation was confusing the Critical Section Monitor logic with
+uses this instrumentation to track the state of critical sections.
+From Gregory Nutt
+- sched_foreach(): sched_foreach() should not have to hold the
+critical section over the entire traversal. It should be acceptable
+to simply only the critical section while one entry is being
+processed (the caller can always call sched_foreach within a critical
+section is greater stability is needed). From Gregory Nutt
+- task_spawn(): Correct description of input parameters to
+task_spawn_exec(). Noted by: JeongchanKim From Gregory Nutt
+
+* Crypto:
+
+- crtypo/: This change:
+
+Avoids the use of up_aesinitialize() entirely, which resolves
+dependency problems, because this function does not make sure that
+an actual hardware aes implementation was made available: each SoC
+is now responsible to ensure the AES hardware is initialized before
+first use. This applies to lpc43xx, stm32 and sam34.
+
+Remove definitions of the NEVER used aes_init and aes_update
+operations. The new AES API will be more suitable.
+
+From Sebastien Lorquet
+
+* File System/Block and MTD Drivers:
+
+- opendir(): Corrects a problem with opendir() noted by Petteri
+Aimonen in Bitbucket Issue 132: "opendir() fails for FAT filesystem
+with trailing slash in path". I see the following behaviour on NuttX
+7.26, where I have SD card mounted on /flash and a directory called
+"frm" on it:
+
+opendir("/flash") returns (DIR *) 0x1000c580
+opendir("/flash/") returns (DIR *) 0x1000c5d0
+opendir("/flash/frm") returns (DIR *) 0x1000c620
+opendir("/flash/frm/") returns (DIR *) 0x0
+
+From POSIX specs for opendir(): "A pathname ... that ends with one or
+more trailing slashes shall be resolved as if a single dot character
+( '.' ) were appended to the pathname." So for mount points,
+opendir() works correctly, but for FAT32 filesystem it fails to open
+directory if the path has a trailing slash...
+
+NOTE: You would not see this problem if you call opendir() indirectly
+in NSH (like 'ls -R /') because NSH contains logic to remove trailing
+'/' characters from paths. From Gregory Nutt
+- dup()/dup2(): dup() and dup2() were broken some time back.
+fs_dupfd() was return returning OK on success, not the file
+descriptor of the duplicated fd. From David Sidrane
+- ProcFS: Remove the unnecessary critical section From Xiang Xiao
+- CROMFS: Fix hardfault. From David Sidrane
+- SmartFS MTD Driver: Fix smart_write_alloc_sector sector size mapping.
+Was not correctly calculating the encoded sector size for small (256)
+byte or large (>= 4096 byte) sectors. Noted by Daniel P. Carvalho.
+Fix from Ken Pettit
+- AT25 MTD Driver: Fixed missing opening parenthesis. From Marc Rosen
+- MTD Configdata MTD Driver: Check return value mtdconfig_readbytes().
+From Jussi Kivilinna
+- S25FL1 MTD Driver: Minor change for the s25fl1 QSPI FLASH driver which
+fixes additional sectorshift vs. pageshift confusion. From Ken Pettit
+
+* Networking/Network Drivers:
+
+- All network drivers! Change pre-processor logic that selects the
+high priority work queue or gives preferential treatment to the high
+priority work. All network logic must run on the low priority work
+queue! Or suffer the consequences. From Gregory Nutt
+- Socket Clone/Dup: On a failure to start the TCP monitor, the cloned
+socket is closed but is not properly freed, leaving it attached to a
+TCP connection structure with the wrong reference count. From
+Gregory Nutt
+- ARP: Fix whitespace after ARPHRD_IEEE80211 in ARP header file. From
+Daniel Agar
+- 6LoWPAN: Fixes decompression of ipaddr from MAC address. The logic
+used to populate the IP from the radio address should match
+sixlowpan_ipfromsaddr/sixlowpan_ipfromeaddr From Anthony Merlino
+- 6LoWPAN: Fixes logic surrounding the Universal/Local bit. This bit
+represents whether the IID is locally/globally administered. The U/L
+bit is bit 1 of the MSB of the EUI-64. It should only be inverted in
+cases where there is a full EUI-64. In cases where the IID is derived
+from say, a short address, this bit should be forced to 0, indicating
+that it is locally administered. See:
+https://tools.ietf.org/html/rfc4291#section-2.5.1
+https://tools.ietf.org/html/rfc4944#section-6
+https://tools.ietf.org/html/rfc2464#section-4
+From Anthony Merlino
+- 6LoWPAN: IEEE802.15.4 stores and uses addresses in little endian
+order. From Anthony Merlino
+- 6LoWPAN: Address comment regarding avoiding double lookup of address
+context. From Anthony Merlino
+- 6LoWPAN: Record and restore d_buf on entry/exit of sixlowpan_input.
+This avoids an issue where d_buf gets set to NULL by 6LoWPAN, and
+then is used by forwarding logic from another network interface
+before getting set back to the drivers internal buffer. From Anthony
+Merlino
+- 6LoWPAN: sixlowpan_input should always return 0 if the incoming frame was
+consumed. From Anthony Merlino
+- TUN Driver: Fixes a problem reported by Masayuki Ishikwawa: Recently I
+noticed that ARP response packet is corrupted when I tried to run
+bluekitchen with the latest tun.c in TAP mode. If I revert commit
+8193c28e9126c9cb89042e80d6ebab7485a831e4, then it works again. From Xiang
+Xiao
+- Telnet Driver: Add missing logic to set read event flags in poll()
+method. From Ken Pettit
+
+* Wireless/Wireless Drivers:
+
+- BLE: Fix uninitialized variables. From Lwazi Dube
+- BLE GATT header file: Fix struct name. From Lwazi Dube
+- BLE GATT: Remove unnecessary GATT ioctls From Lwazi Dube
+
+* Graphics/Display Drivers:
+
+- ST7032: Fix seek method. Was not taking into account the offset for the
+SEEK_END case. Did not account for negative offsets. On errors, it was
+clobbering the filep->f_pos setting. From Gregory Nutt
+- PCF8574 Backpack: Fix seek method. Had the same problems as noted for
+ST7032 driver. From Gregory Nutt
+
+* Common Drivers:
+
+- Button Upper Half: Fix two bad NULL checks From Juha Niskanen
+- PWM Interface: Remove dependency on CONFIG_PWM for the upper-half
+PWM header. This allows compilation for the lower-level PWM drivers
+even if the upper-half PWM logic is not used. From Mateusz Szafoni
+- Various I2C Drivers: In most I2C drivers, correct upper index value
+in I2C trace dump. Eliminates the extra NONE event from the trace
+dump output. From Ouss4
+- Battery Gauge: Add missing initialization of semaphore. From Alan
+Carvalho de Assis
+- Batter Charger: Add missing initialization of semaphore. From Alan
+Carvalho de Assis
+- MCP73871: Fix Microchip MCP73871 Battery Charger driver to register
+correctly as a battery charger. The first element of a 'struct
+battery_charger_dev_s' should be a pointer to operations structure. From
+Alan Carvalho de Assis
+- MCP794xx: Fix MCP794xx driver to wait for OSCRUN and fix tm_year. From
+Abdelatif Guettouche
+- Numerous files: Fixes usage of CONFIG_BIG_ENDIAN; should be
+CONFIG_ENDIAN_BIG From Anthony Merlino
+
+* ARMv7-A:
+
+- ARMv7-A MMU: Fix end address calculation for mmu_invalidate_region() API
+From Petro Karashchenko
+
+* ARMv7-M:
+
+- ITM: Fix missing space causing macro issues From Alan Carvalho de
+Assis
+- Common Exception Handlers: This commit changes the lazy and non-lazy
+exception handler to remove a couple of cpsid instructions from them
+on ARMv7-m. If my understanding is correct then these interrupt
+manipulations aren't doing anything anyway because prioritization
+stops secondary interrupts arriving and, even if they did work, they
+would have introduced race conditions for the period of time between
+the interrupt arriving and further interrupts being disabled. From
+Dave Marples
+- MPU/Protected Mode Build: Revert "arch/arm/armv7-m: MPU:
+mpu_log2regionceil needs take into account the offset too". Masayuki
+Ishikawa reports that this commit breaks ALL PROTECTED mode builds. It
+violates the basic requirements of the use of the MPU in protected mode.
+Those basic requirements are:
+1. The MPU region must be aligned to the base address of the memory
+region being mapped (it may NEVER extend before the memory region).
+That is, the following MUST always be zero: (base & ((1 << l2size) - 1))
+2. The MPU region must never extend beyond the end of the memory region.
+That is, the following must be true: size >= (1 << l2size)
+From Gregory Nutt
+
+* Microchip PIC32MX Drivers:
+
+- PIC32MX Ethernet: Fix a comparison in a debug assertion. Should be
+<= vs <. Noted by Anonymous in Bitbucket Issue 134. From Gregory Nutt
+
+* Microchip PIC32MZ:
+
+- PIC32MZ chip.h Header: Add a missing " in an error message. From Ouss4
+
+* Microchip PIC32MZ Drivers:
+
+- PIC32MZ Ethernet: Fix a comparison in a debug assertion. Should be
+<= vs <. Noted by Anonymous in Bitbucket Issue 134. From Gregory Nutt
+
+* Microchip/Atmel SAMD21/L21
+
+- SAMD21/L21: Corrects behavior of the I2C_M_NOSTART flag. Also adds
+a release a bus on RXNACK and corrects typo priv->flags to msg->flags
+as priv->flags is never set. From Alexander Vasiliev
+- SAMD21/L21: Fix SAMD2L2 arch to use calibrated oscillator value. Now
+SAMD20 and SAMD21 should work fine without external crystal. Note that
+SAML21 Xplained board has an external crystal and doesn't need this change,
+unless you don't want to use the crystal. From Alexander Vasiliev
+- SAMD21/L21 I2C Master: Adds calculation of a timeout and disables
+interrupts in case of error. From Alexander Vasiliev
+
+* Microchip/Atmel SAMD21/L21 Boards
+
+- SAML21-Xplained: Fix removed MAXCOARSESTEP from saml21-xplained board.
+From Alan Carvalho de Assis
+
+* Microchip/Atmel SAMD51/Ex
+
+- SAMD51/Ex: Alexander Vasiliev's fix to the SAMD21 I2C Master (commit
+b1110ba91c549572e94c24ebed202643233deee3) should probably also be
+applied to the SAMD51 I2C Master which is identical. From Gregory Nutt
+
+* Microchip/Atmel SAMV7
+
+- SAMV7 Serial: Fix case where TTYS0 is not defined. From Ken Pettit
+
+* Maxim Integrated MAX326xx
+
+- MAX326xx: WFI instruction in IDLE loop seems to interfere with
+stability. Commented out for now. Needs to be investigated further.
+From Gregory Nutt
+
+* NXP i.MXRT Drivers:
+
+- i.MXRT FLEXPWM: Correct duplicated definitions From David Sidrane
+- i.MXRT SERIAL: Fix TTYS0 defined definitions of higher numbered ports
+From David Sidrane
+- i.MXRT LPSPI: Removed unused clock, that borked the build. From David
+Sidrane
+- i.MXRT LPI2C: I2C Reset rework From David Sidrane
+
+* On Semi LC823450:
+
+- LC823450: Fix up_allocate_heap() in lc823450_allocateheap2.c. This
+change fixes heap size and also implements up_addregion(). From
+Masayuki Ishikawa
+- LC823450: Fix go_os_start() in lc823450_start.c. I found a bug in
+go_os_start() that it returns immediately because it does not compare
+r1 to zero. This commit fixes this bug. Also, this commit fixes its
+description. From Masayuki Ishikawa
+- Other Architectures: Masayuki Ishikawa's change to go_os_start() was
+also to all MCU-specific start-up functions that support
+go_os_start(). From Gregory Nutt
+
+* On Semi LC823450 Boards:
+
+- LC823450-XEVK: Fix IOB params in rndis/defconfig. These parameters
+work for HTTP audio streaming. From Masayuki Ishikawa
+- LC823450-XGEVK: Change RNDIS MAC address assignment in rndis
+configuration. In previous implementation, mac[0] was assigned to
+0xaa for RNDIS host to avoid MAC address conflicts with RNDIS
+device.. However, I noticed that this assignment causes a random MAC
+address generation on ubuntu16.04 or later which is inconvenient to
+set up network interface. This new assignment scheme fixes this
+issue. From Masayuki Ishikawa
+- LC823450-XGEVK: Fix overlapped memory settings in memory.ld. From
+Masayuki Ishikawa
+
+* STMicro STM32 Drivers:
+
+- STM32: Remove redundant STM32 family definitions from chip.h header
+file. It is already done in arch/arm/src/stm32/Kconfig From Mateusz
+Szafoni
+- STM32 ADC: There is no DMA CFG bit for the basic IPv1 ADC. From
+Mateusz Szafoni
+- STM32 ADC: Refactor adc_reset. It should be easier to maintain this
+code if it's divided into smaller functions From Mateusz Szafoni
+- STM32 F0 Clocking: Fixes the problem in GPIO port clocks. Only port
+A clock was enabled although the comment states otherwise. From Juha
+Paalijärvi
+- STM32 F7 I2C: I2C out of bounds access on priv->msgv. Error in if
+statement. It was checking for msgc > 0. If message count is 1, only
+index 0 is valid on priv->msgv. Therefore random values in memory
+were used to set next_norestart. From David Sidrane
+- STM32 H7 I2C: Applied David Sidrane's I2C fix to the identical logic
+for STM32 H7. From Gregory Nutt
+- STM32 L4 I2C: Applied David Sidrane's I2C fix to the identical logic
+for STM32 L4. From Gregory Nutt
+
+* STMicro STM32 Drivers:
+
+- STM32 ADC: Fix RCC reset logic. From Mateusz Szafoni
+- STM32 ADC: Fix compilation errors for chips with one ADV TIM. From
+Mateusz Szafoni
+- STM32 DMA: Add missing DMA channel configuration.
+- STM32 PWM: STM32 MOE is not being appropriately handled for PWM for
+advanced timers. It is only ever reset and so no PWM train is
+generated. This change addresses this. Noted by Dave Marples. From
+Mateusz Szafoni
+- STM32 PWM: Fix compilation errors if the upper-half PWM logic is not
+enabled. From Mateusz Szafoni
+- STM32 SPI: STM32F446 & STM32F469 correct PC1 SPI assignments From
+David Sidrane
+- STM32 TIM: Fix compilation error if there is no TIM8. From Mateusz
+Szafoni
+- STM32 F0: Fix GPIO EXTI lines assignment for STM32 M0. From Mateuz Szafoni
+- STM32 F3 I2C: Remove the extra NONE event from the trace dump
+output. From Ouss4
+- STM32 F4 I2C: Remove the extra NONE event from the trace dump
+output. From Ouss4
+- STM32 F7 I2C: Use clock_t for ticks instead of uint32_t to hold system
+time. From Jussi Kivilinna
+- STM32 L4 I2C: Use clock_t for ticks instead of uint32_t to hold system
+time. From Jussi Kivilinna
+
+* STMicro STM32 Boards:
+
+- STM32F429I-DISCO: Fix lvgl demo removing STM32_FB_CMAP. From Alan
+Carvalho de Assis
+- STM32VL Discovery: Fix SRAM and FLASH size in the linker script.
+There is STM32F100RB with 8KB RAM and 128KB FLASH on the STM32VL
+Discovery kit. Invalid memory size could cause a hard fault. From
+Matous Pokorny
+- STM32VL Discovery: Fix memory size configuration and documentation.
+There is STM32F100RB instead of STM32F100RC on the STM32 VL Discovery
+kit. From Matous Pokorny
+- Viewtool-STM32F107: Change RNDIS MAC address assignment in rndis
+configuration. In previous implementation, mac[0] was assigned to
+0xaa for RNDIS host to avoid MAC address conflicts with RNDIS
+device.. However, I noticed that this assignment causes a random MAC
+address generation on ubuntu16.04 or later which is inconvenient to
+set up network interface. This new assignment scheme fixes this
+issue. From Masayuki Ishikawa
+
+* TI Tiva:
+
+- Tiva LM/TM4C Start-Up: Remove option CONFIG_TIVA_BOARD_CLOCKCONFIG. It is
+not used and unnecessary. Fix some naming. up_clockconfig() is
+inappropriate. Change tiva_clockconfig() to tiva_clock_reconfigure()
+then we can change up_clockconfig() to tive_clock_configure(). From
+Gregory Nutt
+- Tiva LM/TM4C GPIO Interrupts: Fix tiva gpio interrupts From Lwazi Dube
+- Tiva LM/TM4C: Improve GPIO interrupt support by removing unnecessary,
+hard-coded per-MCU defines and using the existing Kconfig configuration
+options instead. From Lwazi Dube
+
+* TI Tiva Drivers:
+
+- Tiva TM4C Serial: After commit
+51b78034ac8d1fdf598107bf4093f0beccd5b80b, my tiva console does not
+work - enter key produces garbage characters. This commit fixes the
+problem for me. From Lwazi Dube
+
+* C Library/Header Files:
+
+- include/dsp.h: Fix missing semicolon error in dsp.h From MYAPICI
+- include/nuttx/compiler.h: Correct support of C-version-specific features.
+Cannot depend on GCC version because -std=c89 may be used on comomand
+line. Need instead to use __STDC_VERSION__ to determine if a feature is
+supported. Also add conditional support inline, depending on C99. From
+Gregory Nutt
+- libs/libc/stdio: fread() should always set EOF if fewer than the
+requested number of bytes was not read. Per Anthony Merlino. From
+Gregory Nutt
+
+* Build System:
+
+- sched/irq/Make.defs: Fix warning about irq_csection.o appearing
+multiple times in the same rule. From Gregory Nutt
+
+* Tools:
+
+- tools/gencromfs.c: "gencromfs.c:1171:3: warning: ignoring return
+value of 'asprintf'", declared with attribute warn_unused_result
+[-Wunused-result]. From David Sidrane
+- tools/gencromfs.c: Fix build on macOS. From David Sidrane
+
+* NSH Library: apps/nshlib:
+
+- apps/nshlib: Fixes an error in the NSH parser. There was a bug when
+executing an nsh shell script which contains a redirection. When the
+command in the script is executed, it sets the vtbl->np.np_redirect flag
+(as it should), but then doesn't restore it, leaving it set at the end of
+the script execution. Then the vtbl->np.np_redirect flag is set when the
+'sh' command completes, causing a restore from un-initialized variables,
+thus leading to a crash. See the code snippet below for an example test
+case.
+
+Test case:
+
+NuttShell (NSH)
+nsh> mkrd -s 1024 40
+nsh> mkfatfs /dev/ram0
+nsh> mount -t vfat /dev/ram0 /tmp
+nsh> echo "echo 1 > /dev/null" > /tmp/test.sh
+nsh> cat /tmp/test.sh
+echo 1 > /dev/null
+nsh> sh /tmp/test.sh
+...
+
+The nsh prompt doesn't get printed. You can type a couple of commands,
+but then the system will crash because of bad pointers. From Ken Pettit
+- apps/nshlib: Fix buffer overrun when redirected to a file. SAVE_SIZE
+must be the same as sizeof(struct serialsave_s). From Masayuki Ishikawa
+
+* System Utilities: apps/system:
+
+- system/system.c: Fixes build error; There is no result variable, use
+errcode instead. From Anthony Merlino
+- apps/system/vi: Bug fixes:
+1. Deletion of last line in file using 'dd' caused infinite loop
+searching for 'nextline'. Fixed.
+2. Insertion of line above 1st line using 'O' caused line to be
+inserted on 2nd line. Fixed.
+3. Paste buffer from 'dd' was being free'd after the 'p'aste operation,
+preventing multiple paste opportunity. Fixed.
+4. The cursor was not being bound to the line end and was allowed to
+'hover' over the '\n' EOL character. This caused weird (relative to
+standard vi) insertion locations and cursor movement with 'a'ppend
+and 'i'nsert. Fixed.
+5. The 'vi_shrinkpos' position didn't take the end of file pointer into
+account when calculating 'curpos', 'prevpos' variables causing
+weirdness when deleting things near the end of the file. Fixed.
+6. The 'yy'ank command was improperly deleting the text from the
+document instead of simply yanking to the paste buffer. Fixed.
+7. The 'dd'elete line function was not copying the deleted line to the
+paste buffer as part of the delete operation. Fixed.
+8. The bottom line of the screen was sometimes being used for document
+text and other times for command / find entry. Fixed by reserving
+the bottom the bottom line for status / command only.
+9. When scrolling up / down through a file, the cursor position was not
+preserved and moved further and further to the left column based on
+the line lengths of the lines visited. Fixed.
+10. The display was being COMPLETELY redrawn with each keystroke,
+causing the responsiveness to be unbearable. Fixed. Added logic to
+dynamicall indicated which portions of the screen need to be updated
+(full display, current line to end of screen, current line only,
+none).
+11. The individual display line updates were being performed a character
+at a time by calling the vi_putch() function, causing slow
+performance, especially in telnet or USBCDC sessions where there is
+a lot of overhead per packet. Fixed by calling vi_write() instead
+with a block of characters with breaks as needed for TAB exansion.
+12. The forward delete 'x' operation allowed deletion through '\n'
+characters causing lines to be joined. This is different from
+standard vi where 'x' at the end of a line performs a delete
+backward operation. Fixed.
+13. When in 'ex' or find sub-modes (':' or '/' bottom line modes),
+hitting backspace with empty text did not return the operation to
+command mode like it does in standard vi. Fixed.
+14. Performing a 'find' opertation would only search from the current
+cursor position to the end of the file and did not wrap like in
+standard vi. Fixed.
+15. Loading a file that was larger than the initial text allocation
+would force a call to 'vi_extendtext', marking the file as modified
+when in fact it hadn't even been loaded yet. Fixed.
+16. Combined vi_insert_mode and vi_replace_mode into a single function
+to save code space since they are nearly identical routines.
+17. In command mode, backspace was deleting characters which is
+different from standard vi. Backspace in command mode normally
+simply moves the cursor left / to the previous line. Fixed.
+18. Added code to handle boundary conditions when the file is new and
+commands are applied to an empty file.
+19. Fixed vi_shrinktext so it doesn't allocate a zero-length buffer when
+the last character in the file is deleted.
+20. The 'x' command was not copying to the paste buffer. Fixed.
+21. Fixed parsecolon routine to properly deal with ":wq" command sequence.
+From Ken Pettit
+
+* Wireless Utilities: apps/wireless:
+
+- apps/wireless/bluetooth/btsak: 'bt bnep0 info' outputs a reversed addr. It
+should print BDAddr: aa:bb:cc:dd:ee:ff instead of BDAddr:
+ff:ee:dd:cc:bb:aa. From Lwazi
+- apps/wireless/bluetooth/btsak: Fix some errors in btsak. From Lwazi Dube
+- apps/wireless/bluetooth/btsak/btsak_main.c: Fix address parsing. From
+Lwazi Dube
+- apps/wireless/bluetooth/btsak: Remove unnecessary gatt get commands. From
+Lwazi Dube
+- apps/wireless/bluetooth/btsak/btsak_scan.c: Fix reversed address. From
+Lwazi Dube
+- apps/wireless/ieee802154/i8sak: Fixes issues related to re-running
+daemon. Releases lock when releasing daemon. Re-sets daemon_shutdown so
+that a subsequent daemon launch does not immediately return. From Anthony
+Merlino

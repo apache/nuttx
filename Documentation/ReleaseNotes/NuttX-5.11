@@ -1,0 +1,18 @@
+NuttX-5.11
+----------
+
+This is the 58th release of NuttX. This is a bugfix release.
+
+* One very important bug fixes a race condition that can occur
+using semaphores that can be awakened by signals. Under this
+particular race condition, a task could hang waiting for a
+semaphore.
+* Corrections to lm3s8962 port contributed by Larry Arnold. That
+port is purported to work correctly with these changes in place.
+
+Plus less critical bugfixes as detailed in the ChangeLog. New features
+include:
+
+* A new configuration to support the mbed.org LPC1768 board.
+(Contributed by Dave Marples.)
+* A driver for the Atmel AT45DB161D 4Mbit SPI FLASH part

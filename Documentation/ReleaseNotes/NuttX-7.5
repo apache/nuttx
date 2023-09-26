@@ -1,0 +1,404 @@
+NuttX-7.5
+---------
+
+The 105th release of NuttX, Version 7.5, was made on September 28, 2014,
+and is available for download from the SourceForge website. Note
+that release consists of two tarballs: nuttx-7.5.tar.gz and
+apps-7.5.tar.gz. Both may be needed (see the top-level nuttx/README.txt
+file for build information).
+
+Additional new features and extended functionality:
+
+* Core OS:
+
+- Watchdog Timer Allocation: (1) If we run out of pre-allocated
+watchdog times, the logic will now allocate additional timers
+from the heap. A reserve of pre-allocated watchdog timers is
+maintained so that there will always be timers available for
+interrupt handlers. (2) Added support for statically allocated
+watchdog timer
+- Address Environment Support: (2) New OS APIs integrated into all
+platform-specific context switching logic (up_block_task(),
+up_unblock_task(), _exit(), and others).
+- Kernel Build Support: (1) The MPU based "kernel build" renamed to a
+protected build (CONFIG_BUILD_PROTECTED); added support for the a
+new MMU-based "kernel build" (CONFIG_BUILD_KERNEL), (2) The system
+call library can now be built with CONFIG_NUTTX_KERNEL. New
+selection: CONFIG_LIB_SYSCALL.
+- System Startup: Add configuration options to start the system from
+a program on a file system (versus an address in memory).
+- Startup Parameter Passing. There used to be two ways to pass
+parameters to new tasks, depending upon the configuration: Either
+(1) argv[] as created as an array with each string strdup'ed. Or
+(2) argv[] array and strings were created on the stack before the
+new task was started. Now, there is only one way, way (1). Way
+(2) might be slightly more compact, but this is not worth carry the
+complexity of two different ways of doing the same thing.
+- Board Initialization: Add capability to perform initial board
+initialization on a separate worker thread. This is needed because
+there are many cases where initialization logic cannot execute on
+the start-up/IDLE thread. That is because blocking or waiting is
+not permitted on the IDLE thread.
+
+* Memory Management:
+
+- Granule Allocator: (1) Add a new function to reserve un-allocatable
+regions in the granule heap. (2) Add interfaces to support
+un-initializing a granule allocator.
+- Page Allocator: Add a simple physical page allocator based on the
+existing NuttX granule allocator. I am not certain if the granule
+allocator is sufficiently deterministic for long range use, but it
+gets get a page allocator in place for testing very quickly.
+- Remove CONFIG_MM_MULTIHEAP. Non-multiheap operation is no longer
+supported.
+- sbrk(): sbrk() is now supported in the kernel build to permit
+dynamically sized, per-process heaps.
+- Per-Process Heaps: Space at the beginning of the process data space
+is now reserved for user heap management structures. In the kernel
+build mode, these heap structures are shared between the kernel and
+use code in order to allocate user-specific data.
+- User Heap Management: When a privileged thread exits, we have to
+use the kernel allocator to free memory; when an unprivileged thread
+exits, we don't have to do anything... heap memory will be cleaned
+up when the address environment is torn down.
+- Inter-Process Shared Memory Support: (1) Add implementation and
+documentation for shmget(), shmctl(), shmat(), and shmdt(). (2)
+Add system system calls to support the user call gate to the shared
+memory interfaces. (3) Add platform-specific interface definitions
+needed to support the shared memory feature.
+- Virtual Page Allocator: Add support for a per-process virtual page
+allocator. This is a new member of the task_group_s structure. The
+allocator must be initialized when a new user process is started and
+uninitialize when the process group is finally destroyed. It is
+used by shmat() and shmdt() to pick the virtual address onto which
+to map the shared physical memory.
+
+* File Systems/Block Drivers/MTD:
+
+- SMART FS and SMART FS procfs updates from Ken Pettit.
+- The MTD Read-ahead/Write buffer layer appears is now functional.
+
+* Binary Formats:
+
+- Add logic to initialize the per-process user heap when each user
+process is started.
+
+* Graphics:
+
+- Change all occurrences of NxConsole to NxTerm.
+
+* Networking:
+
+- PHY Interrupts: (1) Standardize a PHY interrupt attachment
+interface. (2) Add support for an ioctl that can be used to notify
+an application when there is a change in the network status
+signalled by a PHY interrupt.
+- Improved Send Logic: In the past, the first packet send to a new
+network peer would fail; there would be no entry in the ARP table
+for the peer and so an ARP request could replace that first packet.
+Now as an option if CONFIG_NET_ARP_SEND=y, all send logic will (1)
+check if the peer MAC address is in the ARP table and, if not, (2)
+send ARP requests periodically to get the mapping and (3) wait for
+the ARP response. Then (4) when the ARP response is received then
+the actual send logic will be initiated. Thus there may be a delay
+with the first packet sent to a new peer, but the packet should not
+be lost
+
+* Host Simulation:
+
+- Emulated SPI FLASH driver for the sim target from Ken Pettit.
+
+* Intel x86:
+
+- The default host is now x86_64 and the -m32 option will be
+automatically selected for simulation builds.
+
+* Intel 8051 Family:
+
+- Removed all support for the 8051 family architecture from the NuttX
+source tree. The obsoleted code along with the removal patch can
+now be found at misc/Obsoleted/. This code was removed because (1)
+although some functionality has been demonstrated, I am not aware of
+any really successful ports of NuttX to any 8051, and (2) the 8051,
+with its hardware stack, forces limitations and complications to the
+other architectures and make growth and development of NuttX more
+complex.
+
+* ZiLOG ZNeo Boards:
+
+- configs/16z: Support for this board has been removed from the NuttX
+source tree (but still can be found in the misc/Obsoleted
+directory). This port is not ready for usage but may return to the
+NuttX tree at some point in the future.
+
+* Atmel SAM3/4 Boards:
+
+- SAM4E-EK: Add (1) a fully-functional ILI9341-based LCD driver and
+(2) a fully-functional NxWM configuration.
+
+* ARMv7-A:
+
+- Address Environments: Add support for application address
+environments using the Cortex-A MMU. Implement standardized
+platform-specific interfaces of NuttX address environment
+support.
+- Cache Operations: Implement standardized, platform-specific cache
+operations. These are called from the ELF loader in order to flush
+D-cache and invalidate I-cache after an ELF module has been loaded
+into memory. With this change, ELF modules work correctly on the
+SAMA5/Cortex-A platform.
+- Kernel Build: (1) Add implementations of system call gate. (2) Add
+CRT0 start-up file that can be linked with separately built user
+programs. (3) Add support for delivery of use-mode signals in the
+kernel build. (4) Add logic to initialize the per-process user heap
+when each user process is started. (5) ARMv7-A exception handling
+needs to work a little differently if we support user mode
+processes. This is because R13 and R14 are paged differently
+between user and SVC mode.
+- Shared Memory Support: (1) Add logic necessary to handle remapping
+of shared memory on context switches. (2) Extend virtual/physical
+address conversions to include addresses in shared memory. (3) Add
+implementation of platform-specific shared memory support.
+
+* Atmel SAMA5D Drivers:
+
+- Implement all network ioctls, including the new ioctl to setup PHY
+event notifications.
+- In kernel build with address environment, need logic to map user
+virtual addresses to physical addresses, and vice versa.
+
+* Atmel SAMA5D Boards:
+
+- SAMA5D3 Xplained, SAMA5D3-EK, and SAMA5D4-EK: Convert existing
+board specific PHY interrupt interfaces to use newly defined
+standard interface.
+- SAMA5D4-EK: Add a configuration for testing the kernel build
+configuration. There are configurations to boot either from an SD
+card or from and in-memory ROMFS file system.
+- SAMA5D4-EK: Add documentation/support for Rev E. board.
+
+* STMicro STM32 Drivers:
+
+- Ethernet: Modified to support the change to the network ioctl
+signature changes. Also add support for new ioctl to setup PHY
+event notifications.
+
+* STMicro STM32 Boards:
+
+- STM32F4Discovery with STM32F4DIS-BB: Add a network enabled NSH
+configuration for the STM32F4Discovery board with the STM32F4DIS-BB
+base board installed. Includes support for the microSD card slot on
+the STM32F4DIS-BB base board.
+
+* TI Tiva Drivers:
+
+- Add support for the TI CC3200. From Jim Ewing.
+
+* TI Tiva Boards:
+
+- Add support for the TI CC3200 Launchpad. From Jim Ewing.
+
+* C Library:
+
+- Re-implemented poll() delay using sem_timedwait().
+
+* Configuration/Build System:
+
+- Export Target: In the kernel or protected builds, (1) only the user
+libraries should be exported, (2) do not copy internal header files
+or build scripts if this is a kernel or protected build, and (3)
+needs to bundle up the user C startup file (crt0), not the kernel
+head object for the kernel and protected builds.
+- Add logic that will permit us to build user libraries with different
+CFLAGS than kernel code. This is needed because we need the
+-fno-common option when building ELF code to prevent SHN_COMMON
+relocations.
+
+* Applications:
+
+- NSH: Extend the NSH network initialization logic. There is now an
+option that will create a network monitor thread that will monitor
+the state of the link. When the link goes down, the code will
+attempt to gracefully put the Ethernet driver in a down state; When
+the link comes back, the code will attempt to bring the network back
+up.
+- ELF Example: The ELF test/example has been extended so the
+individual ELF test programs can link against the SYSCALL library
+(if it is available) or against the C library to eliminate or
+minimize the need for symbol tables.
+- Change all occurrences of NxConsole to NxTerm.
+- MTDRWB Example: Add an example to test MTD R/W buffering.
+- OS Test Example: Add a trivial test of sem_timedwait.
+
+* Application Configuration/Build System:
+
+- Import Target: (1) Add logic that will allow building applications
+against a NuttX export package (vs. the nuttx/ source tree). (2)
+Add .config file to export package. (3) Create apps/import. Create
+apps/import/Make.defs that does things like define CFLAGS; ELF build
+requires -fno-common in CFLAGS. Copy some base logic from
+nuttx/tools/Config.mk to apps/import/Make.defs. (4) Add
+apps/import/scripts/gnu-elf.ld GCC linker script for ELF import
+builds.
+- All Makefiles: (1) Add an install target to all makefiles. For
+the import build, the top-level Makefile now does two passes: (1)
+builds libapp.a, then (2) installs the programs into apps/bin. (2)
+Add program installation for CONFIG_BUILD_KERNEL in all Makefiles
+that build a main(). (3) For kernel build, the object file
+containing main cannot go into library because of name collisions.
+The object file must be handled as a special case in every Makefile.
+- All Built-In Programs: With kernel build (CONFIG_BUILD_KERNEL),
+entry point to all tasks is main(), not some xyz_main().
+- NSH: Several commands must be disabled in the kernel build because
+they depend on interfaces that are not available outside of the
+kernel: dd, df, losetup, mkfatfs, mkdr, and ps.
+- apps/tools/: (1) Add mkimport.sh to expload an NuttX import package
+and install in apps/import. (2) Add mkromfsimg.sh script to create
+a BOOT ROMFS filesystem image.
+- ELF and NxFLAT Examples: Do not build test cases that use
+task_create() if there is an address environment.
+
+* Tools:
+
+- refresh.sh: Add a tool to make refreshing configurations easier
+when you want to do a lot of them.
+- mksyscall.c: Build syscalls that do not need header files.
+- mkexport.sh: Add .config file to export package.
+- See above for new apps/tools scripts.
+
+Efforts In Progress. The following are features that are partially
+implemented but present in this release. They are not likely to be
+completed soon.
+
+* Processes. Much of the work in this release is focused on the
+realization of Unix-style user processes in NuttX. There is more to
+be done, however. The full roadmap and status is available at:
+https://cwiki.apache.org/confluence/display/NUTTX/Memory+Configurations
+
+* XMega: There are some fragments in place for an XMega port. That
+port has not really started, however.
+
+* Galileo: Similarly, there are fragments in place for an Intel Galileo
+port. The port not been started in earnest either.
+
+Bugfixes. Only the most critical bugfixes are listed here (see the ChangeLog for the complete list of bugfixes and for additional, more detailed bugfix information):
+
+* Core OS:
+
+- Kernel build fixes: (1) IDLE TCB setup needs to indicate that the
+IDLE thread is a privileged, kernel thread. (2) Don't build
+task_create() or task_spawn() interfaces if there is an address
+environment. (3) posix_spawn() kernel proxy thread should be a
+kernel thread, not a user task.
+- Several pthread interfaces: Add const storage class to phthread
+parameters. From Freddie Chopin.
+- sched/clock: Remove vestiges of g_tickbias; need, instead, to apply
+time bias to g_basetime in order to provide the correct system time.
+- System Calls: (1) Several typos fixed; corrected integration of
+exevc(), execvl(), posix_spawn, and posix_spawnp system calls. (2)
+If we are configured to use a kernel stack while in SYSCALL handling,
+then we need to switch back to the user stack to deliver a signal.
+
+* File Systems/Block Drivers/MTD:
+
+- procfs: Fix some procfs breakage introduced by reorganizing some
+non-reorganizable data structures. From Ken Pettit.
+- AT45: In at45db_bwrite , the buffer is not increased when writing
+more than 1 page. Sourceforge bug #34.
+
+* Binary Formats:
+
+- ELF relocations. Some relocation types do not have a named symbol
+associated with them. The design did not account for that case.
+- ELF Loader: Critical bugfix.. BSS was not being cleared.
+
+* Memory Management:
+
+- Granule allocator initialization uses wrong allocator to setting
+aside kernel memory.
+- Add a flag to group structure: If the group is created by a kernel
+thread, then all resources in the group must be privileged.
+
+* Cryptogrphic Support:
+
+- crypto/cryptodev.c: Path segments reversed in include file path. Noted by Brennan Ashton.
+
+* Common Drivers:
+
+- Common CAN upper-half: In can_txdone, waiters on the semaphore
+should be informed regardless of the return value of can_xmit. First
+it returns -EIO if there are no new packets, and second the
+information of the waiters is about the last transferred packet.
+From Daniel Lazlo Sitzer.
+
+* ARM:
+
+- System Calls: Fix a typo in system call when fetching parameter from
+the stack: regs[REG_PC]+4 is the address, not regs[REG_PC+4].
+
+* STMicro STM32 Drivers:
+
+- STM32 F401 UART: Correct support for USART6 on this chip. From
+Freddie Chopin.
+- STM32 FLASH fixes: use size_t instead of uint16_t, make interface
+more generic. From Freddie Chopin.
+- Fix for UART7 and UART8 on STM32 clock enable from Aton.
+- CAN: At the end of the interrupt handler, the interrupts were being
+disabled, if all packets have been transferred when the interrupt
+handler was invoked. This is problematic, because the interrupt
+handler calls can_txdone of the upper half which can enqueue new
+packets to send. Removed the block altogether, because can_txdone
+calls can_xmit which disables interrupts if there are no new packets
+to send. From Daniel Lazlo Sitzer.
+- Additional STM32 CAN correction suggested by Max Holtzberg.
+
+* STMicro ST32 Boards:
+
+- configs/mikroe-stm32f4: Fix a few compile bugs and minor corrections
+to the mikroe-stm32f4 configuration source. From Ken Pettit.
+
+* ARM9/ARMv7-A:
+
+- System Calls: Fix ARM7/9 and Cortex-A SYSCALLs: For threads in SVC
+mode, the SVC instructions clobbers R14. This must be taken account
+in the inline assembly.
+- Task Setup: All tasks, even user mode tasks, must start in
+supervisor mode until they get past the start-up trampoline.
+- ARMv7-A: Modify up_fullcontextrestore() for CONFIG_BUILD_KERNEL.
+It changed CPSR while in kernel. That will crash if the new CPSR is
+user mode while executing in kernel space. Fixed by adding a
+SYS_context_restore system call. There is an alternative, simpler
+modification to up_fullcontextrestore() that could have been done:
+It might have been possible to use the SPSR instead of the CPRSR and
+then do an exception return from up_fullcontextrestore(). That
+would be more efficient, but I never tried it.
+
+* Atmel SAM3/4 Boards:
+
+- SAM3X/Arduino Due: Fix typo in sam3x_periphclks.h; add SCLK
+definitions to board.h header file. From Fabien Comte.
+- SAM3 RTT: Only SAM4 family has RTTDIS bit in the MR register.
+SourceForge bug #33 from Fabien Comte.
+
+* C Library:
+
+- sscanf(): NuttX libc tried to guess how many characters to parse,
+extracted them into a buffer, then ran strtol() on that buffer.
+That guess was often wrong. A better approach would be to call
+strtol() directly on the input data, using the endptr return value
+to determine how many characters to skip after parsing. From Kosma
+Moczek.
+- Corrected atan2 implementations from Denis Arnst.
+- Change to lib_dtoa() to fix precision error from trailing zeroes.
+From Bob Doiron.
+
+* Applications:
+
+- Fix NSH PS command: If there are no arguments, it could print
+garbage for argument list.
+
+* Configuration/Build System:
+
+- Null Example: Need to include config.h it order know if this is or
+is not a kernel build. This problem still exists in several other
+file that may need to define main().

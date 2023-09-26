@@ -1,0 +1,10 @@
+NuttX-0.3.10
+------------
+
+This is the 22nd release of NuttX. This is an important bug fix
+release. This release incorporates fixes to correct critical list
+handling errors in task shutdown logic: One in timer deletion logic
+(timer_delete.c) and one in stream logic (lib_init.c). This release
+also includes support to ZiLOG EZ80Acclaim microcontroller (EZ80F91
+chip) and configurations for the ZiLOG z8f64200100kit (Z8F6423) and
+ez80f0910200kitg (EZ80F091) development kit.

@@ -1,0 +1,23 @@
+NuttX-0.3.0
+-----------
+
+This is the 12th release of NuttX. This release includes the initial
+integration of a network subsystem and the uIP TCP/IP stack into NuttX
+(see http://www.sics.se/~adam/uip/index.php/Main_Page). Also included
+is a device driver for the Davicom DM90x0 Ethernet controller.
+
+This integration is very preliminary. Only a small portion of the
+network functionality has been integrated and there are a number of
+open issues (see the TODO file). The network subsystem is pre-alpha
+at this point in time. I expect that it will stabilize and mature
+over the next few releases.
+
+The baseline functionality of NuttX continues to mature and remains at
+post-beta (as long as the network is not used).
+
+See the ChangeLog for a complete list of changes.
+
+This release has been verified only on the Neuros OSD (DM320 ARM9)
+platform using the DM90x0 driver.
+
+This tarball contains a complete CVS snapshot from November 6, 2007.

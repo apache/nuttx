@@ -1,0 +1,25 @@
+NuttX-5.6
+---------
+
+This is the 53rd release of NuttX. This release includes one several
+new drivers for existing NuttX ports:
+
+* This port adds support for the RiT displays P14201 4-bpp,
+greyscale OLED. 4-bpp greyscale support was integrated into
+the NX graphics sub-system and verified using the TI/Luminary
+LP3S6965 Ethernet Evaluation Kit.
+
+* The M25Px driver was extended for the M24P1 FLASH part (see NOTE).
+
+* An I2C driver and (basic) SPI driver were added for the NXP
+LPC313x port. The I2C interface definition was extended to
+efficiently handle multiple I2C transfers.
+(Contributed by David Hewson.)
+
+As well as a few, important USB-related bugfixes (See the ChangeLog
+for details).
+
+This release also includes the beginnings of a port for the NXP
+LPC1768 MCU. However, it is too early for that port to be useful
+(stay tuned for a future announce of the availability of the LPC1768
+port).

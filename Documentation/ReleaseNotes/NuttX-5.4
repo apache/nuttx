@@ -1,0 +1,21 @@
+NuttX-5.4
+---------
+
+This is the 51st release of NuttX. This release includes one new,
+important extension to th NX graphics system (See
+https://nuttx.apache.org/docs/latest/components/nxgraphics/index.html).
+
+NX was develop a couple years back on hardware that supported only
+framebuffer devices, that is, video hardware with video memory
+directly converts the memory content to video. However, most MCUs
+that NuttX focuses on do not support such video memory; rather,
+that typically only support LCDs via parallel or serial interfaces.
+
+This release of NuttX extends NX so that now renders directly to
+the LCD device via its serial or parallel interface. No in-memory
+copy of the screen memory need be maintained so this solution should
+also work in MCUs with very limited SRAM.
+
+This initial release of this feature includes the verified NX
+extensions plus a driver for the HX8347, 16-bit parallel LCD. This
+LCD supports 16-bit RGB (5:6:5).

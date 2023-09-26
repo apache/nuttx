@@ -1,0 +1,27 @@
+NuttX-0.3.6
+-----------
+
+This is the 18th release of NuttX. This release contains on a few
+changes. The primary purpose of this release is to synchronize with
+the release of the pascal-0.1.0 add-on package.
+
+This release of NuttX includes the following changes:
+
+* Fixes for use with SDCC compiler
+* Added a simulated z80 target (arch/z80)
+* Fix deadlock errors when using stdio but with no buffering
+* Add support for the add-on Pascal P-Code interpreter (pcode/)
+(see the pascal-0.1.0 package)
+
+This release were verified only on the simulated Z80 and host
+simulation targets. As usual, any feedback about bugs or suggestions
+for improvement would be greatly appreciated.
+
+This tarball contains a complete CVS snapshot from January 6, 2007.
+
+====
+
+There was an error in the initial 0.3.6 release that prevented
+a successful build unless the Pascal add-on was present. The
+tarball was patched to include the fix. Make sure that you download
+the nuttx-0.3.6.1.tar.gz version to avoid this problem.

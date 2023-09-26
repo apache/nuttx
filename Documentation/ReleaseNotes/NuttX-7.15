@@ -1,0 +1,268 @@
+NuttX-7.15
+----------
+
+The 115th release of NuttX, Version 7.15, was made on March 27, 2016,
+and is available for download from the Bitbucket.org website. Note
+that release consists of two tarballs: nuttx-7.15.tar.gz and
+apps-7.15.tar.gz. These are available from:
+
+https://bitbucket.org/patacongo/nuttx/downloads
+https://bitbucket.org/nuttx/apps/downloads
+
+Both may be needed (see the top-level nuttx/README.txt file for build
+information).
+
+Additional new features and extended functionality:
+
+* Core OS:
+
+- Add a state variable that provides the current level of OS
+initialization. This is needed by some logic that may attempt to
+run early in the start-up sequence but cannot run if a sufficient
+level of initialization has not yet occurred.
+- Spinlocks: Add interface definitions for to support spinlocks as
+needed for multi-CPU configurations.
+- SMP support. Support for Symmetric Multi-Processing (SMP) added.
+This affects many internal data structures, spinlock extensions
+and renaming of interrupt enable/disable interfaces, new platform
+interfaces to support CPU initialization and inter-actions, and
+new application interfaces to manage CPU affinity. The changes
+are too extensive to summarize here; see the SMP Wiki page at
+https://cwiki.apache.org/confluence/display/NUTTX/SMP. The
+new platform interfaces are also described in the NuttX porting
+guide: https://nuttx.apache.org/docs/latest/quickstart/organization.html.
+Only partially verified; awaiting hardware for the complete
+verification.
+- TLS: Basic definitions needed to support thread local storage
+(TLS). TLS is not used anywhere yet (and may not be used in the
+near future either).
+- Performance Monitoring: Add a configuration option to buffer
+RTOS instrumentation data in an in-memory buffer.
+- boardctl(): Add boardctl() support that will permit applications
+to control USB devices.
+
+* File Systems/Block Drivers:
+
+- procfs: Add /proc/kmm entry that shows that state of the kernel
+heap. Only useful in PROTECTED and KERNEL build modes where there
+is a kernel heap.
+- procfs: Add support for showing CPU in the taste status if SMP is
+enabled.
+
+* Networking:
+
+- ARP: Add support for IOCTL commands to manage the ARP table.
+- IEEE 802.15.4 and 6LowPAN: There are some radio drivers and a
+directory structure is in place. However, most of this
+development is occurring on a fork and is not yet available in the
+NuttX repositories. Hopefully in NuttX-7.16.
+
+* Common Device Drivers:
+
+- ADS1242: Driver for the 24-Bit Differential Input ADC ADS1242 that
+communicates via SPI with a MCU. Reading the ADC conversion result
+as well as configuring the ADC, setting the input channel, etc. is
+implemented via ioctl calls. However, it does not yet implement
+the standard ADC interface. From Alexander Entinger.
+- U-Blox Modem: Add an upper half driver for the U-Blox Modem. From
+Vladimir Komendantskiy.
+- I2C: Add an I2C, "upper half", character drivers to support raw I2C
+data transfers for test applications.
+- RGB LED: Add a driver to manage a RGB LED via PWM. From Alan
+Carvalho de Assis.
+- Performance Monitoring: Add a character driver that will allow an
+application to read buffered scheduler instrumentation data.
+
+* Simulation Platform:
+
+- SMP: Add multi-CPU support to the simulation to support SMP
+investigation. There are issues with the simulation and it is less
+than perfect but sufficient for some very preliminary testing of
+the core SMP feature.
+
+* ARMv7-A, ARMv7-R, and ARMv7-M:
+
+- ARMv7-A, ARMv7-R, and ARMv7-M: Add test-and-set logic and
+definitions needed to supports spinlocks.
+- ARMv7-A: Added MPCOre Generic Interrupt Controller (GICv2) and
+Global Timer support
+- ARMv7-A: Now includes in MCU-specific hooks needed for SMP support.
+
+* Atmel SAMV7 Drivers:
+
+- HSMSI: HSMCI driver can now be configured to handle unaligned data
+buffers.
+
+* NXP Freescale LPC11xx/17xx/43xx and LPC2378 Drivers:
+
+- I2C: Backported the LPC43XX I2C driver, replacing the LPC11XX,
+LPC17XX, and LPC2378 I2C drivers. This gives us the I2C_TRANSFER
+method in all I2C drivers.
+
+* NXP Freescale LPC17xx Boards:
+
+- Support for the u-blox GSM and GPS module evaluation board with
+NXP LPCExpresso LPC1768. The GSM module is one of LISA-C200,
+LISA-U200 or SARA-G350. The GPS module is one of MAX-M7 or
+MAX-M8. From Vladimir Komendantskiy.
+
+* NXP Freescale i.MX6:
+
+- Basic support is in place for the i.MX6 Quad/Dual MCUs.
+Verification is, however, waiting for the receipt of hardware.
+
+* NXP Freescale i.MX6 Boards:
+
+- Sabre-6Quad: Basic support for the NXP/Freescale Sabre 6Quad
+board is in place but waiting for hardware for verification.
+
+* STMicro STM32:
+
+- STM32F46xx: Support for STM32F46xx from Paul Alexander Patience
+- STM32L4: Add support for the STM32L4 family. From Sebastien
+Lorquet.
+
+* STMicro STM32 Boards:
+
+- STM32F4 Discovery: Add PWM support for the onboard RGB LED. From
+Alan Carvalho de Assis.
+- Nucleo-L476: Add support for the Nucleo-L476 board. From Sebastien
+Lorquet.
+- STM32L476VG Discovery: Add support for the STM32L476VG Discovery
+board. From Dave.
+
+* Tools:
+
+- tools/refresh.sh now has a --silent option so that it can be used in
+batch modes without human input.
+
+* Build System:
+
+- Added a 'make olddefconfig' target that will refresh a .config file
+without interaction.
+
+* Applications: NSH
+
+- 'arp': Add an 'arp' command that will support access to the OS ARP
+table.
+- 'ps': The 'ps' command will show CPU if SMP is enabled.
+
+* Applications: apps/netutils:
+
+- apps/netutils/chat: Chat logic contributed by Vladimir
+Komendantskiy.
+- apps/netutils/netlib: Add utility functions to support accesses to
+the ARP table.
+
+* Applications: apps/examples:
+
+- apps/examples/chat: Chat example contributed by Vladimir
+Komendantskiy.
+- apps/system/ubloxmodem: Example to control the power
+state of the modem in nsh. From Vladimir Komendantskiy.
+- apps/examples/leds: An example to demonstrate use of LED driver.
+- apps/examples/smp: Add a test to verify SMP configurations.
+- apps/examples/rgbled: Example using the RGB LED driver to drive an
+RGB LED via PWM. From Alan Carvalho de Assis.
+- apps/examples/ostest: Add a test of TLS.
+- apps/examples/sched_note: Add a simple example to exercise the
+scheduler instrumentation logic.
+
+Bugfixes. Only the most critical bugfixes are listed here (see the
+ChangeLog for the complete list of bugfixes and for additional, more
+detailed bugfix information):
+
+* Core OS:
+
+- Signals: Move the list of signal actions from the TCB to the group
+structure. Signal handlers are not per thread but, rather, per task
+group. I know, I preferred it the other way too, but this is more
+compliant with POSIX.
+- Semaphores: Add an internal, non-standard interface to reset a
+semaphore count. This is sometimes needed by drivers in order to
+recover from error conditions. Were previously using sem_init()
+which is both inappropriate and incorrect if the semaphore count is
+negative.
+- Low-Priority Work Queue: Fix logic to find an IDLE worker thread;
+the test for busy was backward. From Linfei Chen.
+
+* File System/Block Drivers:
+
+- FAT: Add an option to force all transfers to be performed
+indirectly using the FAT file system's internal sector buffers.
+This is a fix for the case where the user provided buffers are not
+properly aligned for DMA (as with THTTPD).
+- MTD: Increase block size in mtd_geometry_s to 32-bits.
+
+* Common Drivers:
+
+- I2C: Restructured the I2C interface as necessary to eliminate some
+thread-safety issues inherent in the legacy I2C interface design.
+This effects the interface definition, all I2C clients, and all low-
+level I2C drivers. I have used caution, but I still expect a change
+of this magnitude to introduce some errors. Any bug reports of bug
+fixes will be much appreciated.
+- I2C_RESET: Eliminate up_i2creset(). It should not be a global
+function; Now it is an I2C interface method.
+- PCA555: Add logic to make the PCA555 driver thread safe.
+- syslog: If syslog timestamping is enabled, don't try to get the time
+if the timer hardware has not yet been initialized.
+- AT24xx driver: Correct missing address calculation logic. From Frank
+Benkert.
+
+* Networking:
+
+- Networking drivers that support CONFIG_NET_NOINTS: Fix a race
+condition that can cause the TX poll timer to stop running. From
+Manuel Stuhn.
+- Timer Poll: Fix some logic when there are multiple network
+interfaces. In this case, TCP timeout events can really only being
+processed when the poll from the correct device is received.
+
+* Atmel SAMV7 Drivers:
+
+- SAMV7 USB HS device: The USB driver has had some issue that would
+occasionally cause loss of packets. Back last December, a fix was
+put in for this but the fix apparently worsens the problem; now
+causing hangs. The basic problem is that the number of busy banks
+(NBUSYBKS) status is not real time but is delayed. This was fixed;
+now when the DMA completes and NBUSYBKS > 0, the NBUSYBK is
+interrupt is enabled and the operations are deferred until NBUSYBKS
+is truly zero.
+
+* Tools:
+
+- tools/testbuild.sh: .config files were not being updated because
+(a) kconfig-conf was being called in the wrong directory and (b)
+apps/Kconfig had not yet been created. Now uses 'make
+olddefconfig'.
+
+* Applications: apps/system:
+
+- apps/system/i2c: The I2C tool now obeys it OS interfacing: it now
+uses an I2C character driver to access the I2C bus.
+- apps/system/cdcacm, usbmsc, and composite: Use new boardctl()
+instead of calling directly in the OS when possible.
+
+* Applications: apps/netutils:
+
+- apps/netutils/dhcpd: DHCPD no longer calls directly into the OS but
+uses the new network IOCTL commands to modify the ARP table.
+
+* Applications: apps/modbus:
+
+- apps/modbus/nuttx/portserial.c: Was not returning an error on
+failure to open the device driver. From Olololshka kokoko.
+
+* Applications: apps/examples:
+
+- apps/examples/usbserial, composite, usbterm: Use new boardctl()
+instead of calling directly in the OS when possible. There are
+still a few bad OS calls for USB device interfaces that do not yet
+have boardctl() commands.
+
+* Applications: apps/platform:
+
+- Moved C++ initialization logic out of the RTOS and into the
+application space, specifically to apps/platform/board, where it
+belongs.

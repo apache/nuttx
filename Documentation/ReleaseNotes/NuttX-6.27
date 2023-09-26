@@ -1,0 +1,234 @@
+NuttX-6.27
+----------
+
+The 94th release of NuttX, Version 6.27, was made on April 28, 2013,
+and is available for download from the SourceForge website. Note
+that release consists of two tarballs: nuttx-6.27.tar.gz and
+apps-6.27.tar.gz. Both may be needed (see the top-level nuttx/README.txt
+file for build information).
+
+Additional new features and extended functionality:
+
+* OS Initialization:
+
+- Add missing registration of /dev/zero. Registration of /dev/null
+should depend upon conditional compilation. From Ken Pettit.
+
+* Tasking:
+
+- Added a new interface to set aside memory on the task's stack. This
+is used (at least in the kernel build) to hold task arguments.
+- Remove up_assert_code(). One assertion routine is enough.
+
+* Kernel Build:
+
+- Extensive changes were made to support the kernel build mode. In
+this mode, NuttX is built as a monolithic kernel. NuttX is built
+as a separate kernel mode "blob" and the applications are built
+as a separate user mode "blob". The kernel runs in kernel mode and
+the applications run in user mode (with the MPU restricting user
+mode accesses). Access to the kernel from the user blob is only
+via system calls (SVCalls).
+- Kernel build configurations for the Open1788 board and for the
+STM32F4Discovery now execute correctly.
+- Changes were made to task and thread start-up routines, signal
+handling, data structures, ARMv7-M SVCalls, stack management
+interfaces,
+
+* Drivers:
+
+- Driver for the ST7567 LCD Display Module from Univision Technology
+Inc. Contributed by Manikandan.S
+- SPI initialize functions renamed so that multiple SPI blocks can
+be initialized.
+- Extended to support the RAMTRON FM25V01 device. Contributed by
+Lorenz Meier
+- Serial drivers: TIOCSERGSTRUCT ioctls now conditioned on
+CONFIG_SERIAL_TIOCSERGSTRUCT
+
+* ARMv7-M (Cortex-M3/4):
+
+- Added support for modifiable interrupt vectors in RAM
+
+* nuvoTon NUC1xx:
+
+- Added kernel build support
+
+* Freescale Kinetis:
+
+- Add kernel build support
+- Add support for the Kinetis L family of Cortex-M0+ MCUs. Contributed
+by Alan Carvalho de Assis.
+
+* LPC17xx:
+
+- Now holds off sleep mode in the IDLE loop is DMA is in progress
+(because sleep mode will disable CPU SRAM).
+
+* LPC17xx Boards:
+
+- ZKIT-ARM-1769: Now supports the ST7567 LCD display module. Added
+an nxhello configuration for testing (Manikandan.S).
+- ZKIT-ARM-1769: Add support for both CAN1 and CAN2. Contributed by
+M.Kannan
+
+- Open1788: Basic support for the WaveShare Open1788 board is complete
+with working OS test, NSH, and graphics configurations.
+- Open1788: Integrated the LPC178x LCD driver with the WaveShare display.
+Touchscreen support is included, however, there appears to be an
+issue with the Open1788 touchscreen interrupt signal.
+- Open1788: Now supports SDRAM (used to provide the LCD framebuffer).
+- Open 1788: Reversed sense of the IDLE LCD. It is now off when the
+LPC17 is sleeping and on when awake. That is much a better visual
+indication of the dynamic CPU load
+
+* LPC17xx Drivers:
+
+- Added an LCD framebuffer driver for the LPC177x/8x family.
+- Implemented LPC17xx GPDMA support.
+- Integrated the LPC17xx GPDMA support into the SD card driver.
+- SSP driver adapted to work with the LPC178x family.
+- Separate LPC176x and LPC178x GPIO logic; this logic is too different
+to maintain in one file with conditional compilation.
+- Re-design of the GPIO logic for the LPC178x family by Rommel Marcelo.
+
+* LPC43xx:
+
+- Added kernel build support
+
+* STM32:
+
+- Added support for kernel mode build.
+- Added architecture support for the STM32 F427/F437 chips. Contributed
+by Mike Smith
+
+* STM32 Boards:
+
+- Added a configuration to support a kernel mode build of the OS test
+on the STM32F4Discovery
+
+* Stellaris LM3S/LM4F:
+
+- Added kernel build support
+- Added support for the 7 UARTs on the LM4F120
+
+* Stellaris LM4F Boards:
+
+- Added scripts and instructions to simplify use of OpenOCD with ICDI
+(JP Carballo)
+- The basic for the Stellaris LM4F120 Launchpad is complete. This
+includes support for OS test and NSH configurations. Additional
+driver development is needed.
+
+* Build System:
+
+- Directories where the same sources files are used to build different
+objects in the first and second pass kernel builds need to keep those
+objects in separate directories so that they are not constantly
+rebuilt.
+
+* Applications:
+
+- apps/system/ramtest: Add a simple memory test that can be built
+as an NSH command.
+
+* Tools:
+
+- kconfig2html is a new tool which will replace the hand-generated
+documentation of the NuttX configuration variables with auto-
+generated documentation.
+
+Efforts In Progress. The following are features that are partially
+implemented but present in this release. Most are expected to be fully
+available in NuttX 6.28.
+
+* A port to the Freescale Freedom KL25Z is complete but not yet stable
+enough. The KL25Z is a low-cost Cortex-M0+ part with 128KB of FLASH
+and 16KB of SRAM. This is is the effort of Alan Carvalho de Assis.
+
+* Conversion of old configurations to use the kconfig-frontends
+tool is an ongoing effort that will continue for some time.
+At this time, only 32% of the configurations have been converted
+to use the kconfig-frontends tools.
+
+Bugfixes (see the ChangeLog for details). Some of these are very important:
+
+* Tasking:
+
+- Fixed a critical bug: When there is pending C buffered output
+and the system is very busy, the a pthread may be blocked at
+a critical point when trying to exit. Blocking at this critical
+point would cause crashes. All entire task/thread exit logic
+paths were reviewed and failsafe mechanisms were put in place
+to assure that exitting tasks never block after task teardown
+has been started.
+
+* ARMv6-M:
+
+- Fixed parameter passing for all system call inline functions with > 3
+parameters
+- Fixed a major problem: The Cortex-M0 has no BASEPRI register but the
+logic of NuttX-6.26 was using it to manage interrupts. Switch to
+using the PRIMASK instead. This means that hardfaults will (again)
+occur when SVC instructions are executed
+
+* ARMv7-M:
+
+- Corrected Correct MPU sub-region settings for unaligned regions.
+- In exception handling with CONFIG_NUTTX_KERNEL, need to explicitly
+set and clear the privilege bit in the CONTROL
+- Fixed parameter passing for all system call inline functions with > 3
+parameters
+
+* Drivers:
+
+- Support for O_NONBLOCK was not supported in the "upper half"
+serial driver.
+- PL2303 compilation errors
+
+* Stellaris LM3S/4F:
+
+- Corrected typos in alternate function definitions.
+
+* LPC17xx Drivers:
+
+- Added a work-around for an ADC errata. From Chris Taglia
+- Only one ADC pin was configured. Need to configure all that
+are in the ADC0 set. From MKannan
+
+* File Systems:
+
+- The FAT logic was not making a distinction between directory
+non-existence and file non-existence so when it you try to
+create a file in a non-existent directory, it would create a
+file with the name of the missing directory. Reported by Andrew
+Tridgell
+- Several fixes to the FAT file system from Ronen Vainish. These
+fixes mostly involve the logic to extend directory clusters for
+the case of long file names but also include a few important
+general fixes (such as for storing 32 bit FAT values)
+- mkfatfs was writing the boot code to the wrong location. From
+Petteri Aimonen
+
+* Networking:
+
+- Fixed a compilation error when socket options are are disabled.
+Reported by Daniel O'Connor
+
+* C Library:
+
+- Corrected an error in sscanf. If %n occurs in the format statement
+after the input data stream has been fully parsed, the %n format
+specifier will not be handled. Reported by Lorenz Meier
+- strchr(str, '\0') should return a pointer to the end of the string,
+not NULL. From Petteri Aimonen
+
+* Build System:
+
+- Fix naming of NuttX target if EXEEXT is defined.
+
+* Applications:
+
+- OS test: Fix timing error in non-cancelable thread test.
+- NSH: Correct the test of the skip input parameter. Was limiting the
+range to <= count. From Ken Petit.

@@ -1,0 +1,31 @@
+NuttX-0.4.13
+------------
+
+This is the 45th release of NuttX. The release extends the support
+for the STMicro STM32 microcontroller. Minimal support for the
+STM3210E-EVAL development board based around the STM32F103ZET6 MCU
+was released in NuttX-0.4.12. This release adds:
+
+* A simple interface definition to support some FLASH, EEPROM,
+NVRAM, etc. devices.
+* Verified SPI operation using driver for SPI based FLASH parts
+M25P64 and M25P128.
+* Improved Cortex-M3 context switching. This should improve
+context switching performance be 2x in certain cases.
+* Added a USB device-side driver for the STM32. This is an early
+release of a very complex driver; some bugs are expected.
+* The USB driver has been verified against the USB serial device
+class driver. There is at least one known outstanding issue
+(see the full bug description in the TODO list).
+
+This release also corrects some important bugs in the early STM32 release:
+
+* Fixed several errors the prevented operation of NuttX on an
+STM32 development board using USART2 as the serial console.
+* Fixed and optimization-dependent race condition in the clock
+initialization.
+* Fixed a critical bug in the interrupt control logic that could
+cause interrupt operations to failed used for interrupts in a
+certain range.
+
+This tarball contains a complete CVS snapshot from November 4, 2009

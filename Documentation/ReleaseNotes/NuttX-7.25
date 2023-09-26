@@ -1,0 +1,769 @@
+NuttX-7.25
+----------
+
+The 125th release of NuttX, Version 7.25, was made on June 3, 2018,
+and is available for download from the Bitbucket.org website. Note
+that release consists of two tarballs: nuttx-7.25.tar.gz and
+apps-7.25.tar.gz. These are available from:
+
+https://bitbucket.org/nuttx/nuttx/downloads
+https://bitbucket.org/nuttx/apps/downloads
+
+Both may be needed (see the top-level nuttx/README.txt file for build
+information).
+
+Additional new features and extended functionality:
+
+* File Systems/Block and MTD Drivers
+
+- fs/cromfs: Added CROMFS file system. CROMFS is a compressed, in-
+memory, read-only file system based on LZF.
+- fs/vfs: Added support for checking if a descriptor is a socket in
+fstat(). From Pelle Windestam.
+
+* Graphics/Display Drivers:
+
+- drivers/lcd: Remove support for the Nokia6100 LCD. That LCD uses a
+9-bit SPI interface (the 9th bit being the command/data bit that is
+normally a discrete). That communication was never successfully
+integrated. I now believe that it would would require some special
+support from the low-level, MCU SPI driver to manage that 9th bit.
+The deleted code is still available in the Obsoleted repository.
+
+* Networking/Network Drivers:
+
+- net/tcp: Added support for TCP Keepalive, add SO_KEEPALIVE socket
+option. Added socket options needed to manage TCP-keepalive and TCP
+state machine logic to detect if that the remote peer is alive.
+- net/tcp: In tcp_input(), add the logic to detect, decode, and
+respond to TCP Keep-Alive packets.
+- net/tcp: Extended support for sending to non-blocking tcp sockets.
+From Pelle Windestam.
+- net/bluetooth: Added support for AF_BLUETOOTH sockets.
+- drivers/net: Added TAP (network bridge) mode to tun.c. In the
+previous implementation, TAP mode did not handle a packet correctly.
+Also, the driver did not set the link layer type and could not
+assign the interface name. This change fixes such issues and supports
+TAP mode correctly. From Masayuki Ishikawa.
+
+* Wireless/Wireless Drivers:
+
+- wireless/ieee802154: Added basic MAC support for RX-ENABLE.request
+primitive From Anthony Merlino.
+- wireless/ieee802154: Added MAC ackreq flag to TX descriptor for use by
+radio driver. The radio layer is responsible for a full "transaction".
+Because of differences in radio capabilities, the radio must be
+responsible for the handling of acks and retransmissions. This commit
+simply passes the ackreq meta-data flag along to the radio. Also
+Fixes bug where primitive was freed when it shouldn't have been,
+causing double free call. From Anthony Merlino.
+- wireless/bluetooth: Bring in the Bluetooth stack from the Intel/
+Zephyr arduino101_firmware_source-v1.tar package.
+- drivers/bluetooth: Added re-architected version of the Bluetooth
+UART driver from the Intel/Zephyr arduino101_firmware_source-v1.tar
+package.
+- include/nuttx/wireless: Added a setbaud() method to the HCI UART
+lower half interface that can be used to change the default BAUD
+selection.
+- wireless/bluetooth and include/nutt/net: Added support for Bluetooth
+IOCTL commands.
+- drivers/wireless/bluetooth: Added a NULL device to support some very
+low level testing on the Simulator.
+- drivers/wireless/cc3000: Eliminate support for the CC3000 wireless
+part because it doesn't use the USRSOCKET. From Alan Carvalho de
+Assis.
+- drivers/wireless/ieee80211: Added BCM43428 support. From hhuysqt.
+
+* Other Common Device Drivers:
+
+- drivers/1wire: Added 1-wire subsystem and ds28e17 driver From Juha
+Niskanen.
+- drivers/1wire: Added PM hooks and unlink support to sht21 sensor
+(allowing hot-swappable I2C bus from 1-wire converter). Unlike most
+other unlink implementations in NuttX drivers, this one does not
+allow any I2C operations after unlink, making it possible to
+deallocate the I2C bus. From Juha Niskanen.
+- drivers/i2c: Added support for the pca9540bdp i2cmultiplexer. From
+Giorgio Groß.
+- drivers/power: Added pm_unregister From Juha Niskanen.
+- drivers/power: Added generic upper-half motor driver From Mateusz
+Szafoni.
+- drivers/rgbled: Added support for multichannel PWM (multiple PWM
+channels on a single timer) From Anthony Merlino.
+- drivers/sensors: Added support for Sensirion SHT2x humidity sensor.
+From Juha Niskanen.
+- drivers/sensors: Added LSM330 SPI and ADXL372 drivers along with the
+- drivers/sensors: Added support for INA3221 power sensor. This has a
+3 channel bus/shunt voltage pairs. From Anthony Merlino.
+cluster driver infrastructure. From Bob Feratich.
+- drivers/sensors: Added multiple MAX31855 sensors feature support.
+From Tiago Almeida.
+- drivers/wireless/cc1101.c: Driver improvements from from lihaichen.
+- progmem interface: Discern r/w and erase page sizes. Introduce new
+up_progmem_erasesize architecture API to be able to communicate the
+read/write page size independently from erase page size. Implement
+up_progmem_erasesize for all architectures that already support
+progmem, assuming that for those architectures the sizes of both
+read/write and erase pages are identical. From Michael Jung.
+
+* Simulation
+
+- configs/sim: Added a configuration that will support some limited
+testing of the Bluetooth stack.
+
+* ARM:
+
+- ARM: All ARM architectures now support CONFIG_ARCH_IDLE_CUSTOM.
+
+* MIPS:
+
+- MIPS: All MIPS architectures now support CONFIG_ARCH_IDLE_CUSTOM.
+
+* Infineon XMC4xxx Drivers:
+
+- XMC4: Added SPI support for Infineon XMC45xx microcontroller. From
+Alan Carvalho de Assis.
+
+* Infineon XMC4xxx Boards:
+
+- XMC4500-Relax: Added board support for SPI. From Alan Carvalho de
+Assis.
+
+* Nordic NRF52:
+
+- NRF52: Initial support for the NRF52 including UART, Timer, and
+GPIO support. From Janne Rosberg.
+
+* Nordic NRF52 Drivers:
+
+- NRF52: Added watchdog timer drivers. Includes significant
+updates from Levin Li.
+- NRF52: Added nRF52 Flash PROGMEM support From Alan Carvalho de
+Assis.
+
+* Nordic NRF52 Boards:
+
+- configs/nrf52-pca10040: Added support for the NRF52-PCA10040 board
+including LEDs and buttons From Janne Rosberg.
+- configs/nrf52-pca10040: Added support for starting the watchdog
+timer on the nRF52. From Alan Carvalho de Assis.
+- configs/nrf52-pca10040: Added a configuration for testing the
+watchdog timer. From Alan Carvalho de Assis.
+
+* NXP Freescale i.MX RT:
+
+- i.MX RT: Brings in basic support for the i.MX RT 1050 'crossover'
+SoC. Includes timer and UART support. This port was the joint
+effort of Janne Rosberg, Ivan Ucherdzhiev, and myself. I give
+credit to Ivan for the kill because he is the one to held on to
+the end. From Ivan Ucherdzhiev.
+
+* NXP Freescale i.MX RT Drivers:
+
+- i.MX RT: Added power management hooks.
+- i.MX RT: Added eDMA support (unverified).
+- i.MX RT: Added Ethernet driver. From Jake Choy.
+- i.MX RT: Added cache operations to permit the Ethernet driver to
+work with the D-Cache enabled, at least in write-through mode.
+Added support for PHY interrupts and PHY IOCTLs.
+
+* NX FreescaleP i.MX RT Boards:
+
+- IMXRT1050-EVK: Added support for booting from the on board HYPER
+Flash. From Ivan Ucherdzhiev.
+- IMXRT1050-EVK: Added logic to support the board's user LED. From
+Jake Choy.
+- IMXRT1050-EVK: Added procfs auto-mount support in imxrt_bringup.c.
+From Ivan Ucherdzhiev.
+- IMXRT1050-EVK: Added LIBCXX test configuration.
+- IMXRT1050-EVK: Added support for the imxrt1050-evk button. From
+Jake Choy.
+- MXRT1050-EVK: Added support for on-board NOR FLASH boot. From
+Ivan Ucherdzhiev.
+- IMXRT1050-EVK: Disable LED support because pins conflict with PHY.
+Enable device statistics. Enable NSH ifup and ifdown commands.
+Added an NSH configuration for testing Ethernet.
+
+* NXP Freescale Kinetis:
+
+- K28F: Added architecture support for the Kinetis K28F.
+
+* NXP Freescale Kinetis Drivers:
+
+- SDHC: Make Kinetis SDHC pullups work the same as the STM32 SDIO
+pullups.
+
+* NXP Freescale Kinetis Boards:
+
+- Freedom-K28F. Added support for the Kinetis Freedom-K28F board.
+
+* NXP LPC17xx:
+
+- LPC17xx: Added support for ARMv7-M run time stack checking on NXP
+LPC17xx MCUs based on CONFIG_ARMV7M_STACKCHECK. Basically copied
+from STM32. From Michael Jung.
+
+* NXP LPC17xx Drivers:
+
+- LPC17xx: Added a configurable option to allow using a part of
+LPC17xx's internal flash memory as a Memory Technology Device via
+NuttX' mtd_progmem infrastructure. Tested with LPC1769. From
+Michael Jung.
+
+* NXP LPC17xx Boards:
+
+- Olimex-LPC1766STK: Remove support for the Nokia6100 LCD. That
+LCD uses a 9-bit SPI interface (the 9th bit being the command/data
+bit that is normally a discrete). That communication was never
+successfully integrated.
+
+* NXP LPC43xx Boards:
+
+- configs/bambino-200e: Added support for multiple MAX31855 sensors
+to the bambino-200e. From Tiago Almeida.
+
+* OpenRISC
+
+- arch/or1k/src. Added basic architectural support for the OpenRISK
+mor1kx architecture. The initial commit was verified on a Qemu
+simulation but is otherwise untested. From Matt Thompson.
+
+* OpenRISC Board
+
+- configs/or1k. OpenRISK mor1kx Qemu simulation. From Matt Thompson.
+
+* STMicro STM32:
+
+- STM32: Added support for the STM32F401xB and STM32F401xC families.
+
+* STMicro STM32 Drivers:
+
+- STM32 HRTIM: Added HRTIM software capture trigger, added software
+reset trigger, added outputs polarization configuration From
+raiden00pl.
+- STM32 ADC: Added ADC injected channels configuration. From Mateusz
+Szafoni.
+- STM32 HCIUART: Added a Bluetooth HCI UART lower half driver for the
+STM32.
+- STM32 HCIUART: Implement the setbaud() method for the STM32 HCI
+UART interface.
+- STM32 SDIO: Added support for SDIO card to SDIO driver. From
+hhuysqt.
+- STM32 SDIO: Added internal pull-up option for SDIO pins. From Alan
+Carvalho de Assis.
+- STM32 F2/F4 ADC: Added Vbat measurement to ADC driver for
+STM32F20xx and STM32F4xxx. As with the MCU temperature and VREFINT
+measurement, this change requires user to enable the corresponding
+channel first. For Vbat channel the ioctl cmd is
+IO_ENABLE_DISABLE_VBAT_CH, and its arg should be a pointer to bool
+which must be true to enable and false to disable the Vbat channel.
+Moreover, since Vbat input contains a built-in voltage divider, it
+is highly suggested to disable Vbat input channel after measurement
+is done in order to prevent battery drain through the divider. From
+Dmitriy Linikov.
+- STM32, STM32L4 1WIRE: Added one bit read and write to 1-wire
+interface. This is needed for devices that require single bit
+timeslot generation and for 1-Wire search algorithm triplets. From
+Juha Niskanen.
+- STM32 F3 SPI: Enable DMA for SPI on stm32f30xxx MCUs. From Michal
+Lyszczek.
+- STM32 L4 1WIRE: Ported 1wire driver from STM32. From Juha
+Niskanen.
+- STM32 L4 I2C/SPI/1WIRE: Added PM hooks to I2C, SPI and 1-wire From
+Juha Niskanen.
+- STM32 F7 RTC: Added CONFIG_RTC_PERIODIC support. Also makes the RTC
+lowerhalf more like in STM32L4. From Juha Niskanen.
+- STM32 F7 ADC/I2C/SPI: Added PM hooks to ADC, I2C and SPI. From
+Juha Niskanen.
+
+* STMicro STM32 Boards:
+
+- Indium-F7: Removed support for the Indium-F7 board. This was done
+for two reasons: (1) The board support was just clone of the
+Nucleo-144 board support with naming changes. There has been no
+support and no further development for the board support. (2) There
+does not seem to be any available Indium-F7 board available to the
+public anywhere on the Internet. There is not even a reference to
+the board on the rafresearch.com web stie.
+- Nucleo-L452RE: Added buttons example From Juha Niskanen.
+- Nucleo-L476RG: Added support to Nokia LCD PCD8544 on nucleo-l476rg.
+From Alan Carvalho de Assis.
+- Nucleo-L476RG: Added nxdemo configuration to nucleo-l476rg using
+PCD8544. From Alan Carvalho de Assis.
+- Olimex-STM32-P407: Added a zmodem test configuration.
+- Olimex-STM32-P407: Added the module configuration.
+- Photon: Added RGB led support From Anthony Merlino.
+- STM32F103-Minimum: Added support for DFU bootloader From Simon
+Piriou.
+- Spark: Removes Spark board configuration. Still available in the
+Obsoleted repository. If there is no CC3000 support, then there is
+no purpose in supporting the Spark either.
+- STM32F334-Disco: Added buck/boost converter example configuration.
+From Mateusz Szafoni.
+- STM32F4 Discovery: Added support for multiple MAX31855 sensors to the
+STM32F4 Discovery From Tiago Almeida.
+- STM32F4 Discovery: Added support in bring-up logic to initialize the
+HCI UART and register the HCI UART network device.
+- STM32F4 Discovery: Added MAX7219 support to STM32F4Discovery board.
+From Alan Carvalho de Assis.
+- STM32F4 Discovery: Added board configuration for CS43L22 audio
+example. From Alan Carvalho de Assis.
+- STM32F4 Discovery: Added a module configuration for testing the
+kernel module example with the STM32F4Discovery board. From Alan
+Carvalho de Assis.
+- STM32F429I-DISCO: Added a LittlevGL configuration for stm32f429i-
+disco. From seyyah.
+- STM32F746G-DISCO. Added clang support to stm32f746g-disco board.
+From Goran Mekic.
+- STM32L1 Discovery: Added support for the STM32L152RCT6 version of
+the board.
+
+* TI TMS570:
+
+- TMS570: Added support for the TMS570LS3137ZWT. From Ivan Ucherdzhiev.
+
+* TI TMS570 Boards:
+
+- configs/tms570ls31x-usb-kit: Added support for the TI Hercules
+TMS570LS31x USB Kit From Ivan Ucherdzhiev.
+
+* TI Tiva:
+
+- CC3200: Remove all support for the CC3200. This was a port that was
+started but never completed. What good is partial CC3200 support
+with no wireless support?.
+
+* TI Tiva Drivers:
+
+- EEPROM: Implements an EEPROM driver in compliance with MTD driver
+as provided by NUTTX for TM4C1294. The EEPROM driver currently
+supports only two functionalities - read bytes(multiple of 4) and
+write bytes (multiple of 4). From Shirshak Sengupta.
+- FLASH: Implemented Flash CONFIG_MTD_BYTE_WRITE for TM4c1294.
+Implemented the tiva_write function which will write an arbitrary
+number of bytes to flash (in multiple of 4). From Shirshak Sengupta.
+- Serial: Added TERMIOS IOCTL support to the Tiva serial driver.
+From Dmitry Sharihin.
+
+* TI Tiva Boards:
+
+- CC3200-Launchpad: Remove all support for the CC3200-Launchpad.
+This was a port that was started but never completed. What good is
+partial CC3200-Launchpad board support with no wireless support?.
+
+* Libraries/Header Files:
+
+- libs/: Moved all of the libraries under a common directory called
+libs/ (libc, libnx, and libxx). This almost certainly break libcxx
+for now.
+- libs/libc/time: Added an implementation of clock().
+- libs/libc/lzf: Added a modified version of Marc Alexander Lehmann's
+LIBLZF3.6 library From Boris Astardzhiev.
+- libs/libc/unistd: Initial, minimal implementation of sysconf().
+Only sufficient to support the functionality of less standard
+getdtabilesize(). From Michael Jung.
+- libs/libdsp: Added DSP support library. From Mateusz Szafoni.
+- include/sys: Added resource.h.
+- include/nuttx/video: Add overlay support to framebuffer interface
+definition. From Marco Krahl.
+
+* Tools:
+
+- tools/gencromfs.c: Added tools/gencromfs.c, a tool that can be used
+to generate CROMFS file system images.
+- tools/mkromfsimg.sh: Include an option in mkromfsimg.sh to ignore
+FAT/RAMDISK. This permits you to build tiny systems with ROMFS but
+with the rather large FAT FS support. From Alan Carvalho de Assis.
+- tools/nxstyle.c: Added check for blank lines before and after single
+line comments. From Bob Feretich.
+- tools/sethost.sh: Added support for macOS.
+- tools/uncrustify.cfg: An initial cut at an uncrustify C formatting
+script from Gregory Nutt. Updated, corrected, and verified. From
+Bob Feretich.
+
+* Build System:
+
+- Makefile: Added support for nconfig frontend for 'make nconfig'.
+From Michal Lyszczek.
+- configs/: Added definition of strip to many Make.defs files.
+- staging/: Remove fixed lib/ subdirectory and its content. Replace
+with new directory called staging/ that is created dynamically when
+building and removed when 'make clean' is done. This both improves
+the naming and eliminates a garbage directory from the repository.
+- tools/: Move all build-related files (except the top-level Makefile)
+into the tools/ sub-directory. This really cleans up the top-level
+directory.
+
+* NSH: apps/nshlib:
+
+- apps/nshlib: Added the mkfatfs -r option which can be used to
+specify the number of entries in the FAT12/FAT16 root directory.
+From Boris Astardzhiev.
+
+* Examples/Tests: apps/examples:
+
+- apps/examples/adxl372_test and lxm330spi_test: Added ADXL372 and
+LSM330 tests. From Bob Feretich.
+- apps/examples/cc3000: Removed the CC3000 example. From Alan
+Carvalho de Assis.
+- apps/examples/cromfs: Added an example of how to build a CROMFS
+file system image.
+- apps/examples/elf: Extend the ELF program module demo so that you
+can use compressed ELF programs with CROMFS.
+- apps/examples/elf: Use strip command to make ELF binaries MUCH
+smaller. Added an option to strip debug symbols even if the debug
+symbols are enabled in the base code.
+- apps/examples/max31855: Added an example to read multiple max31855
+sensors. From Tiago Almeida.
+- apps/examples/netloop: Update network loopback example so that it
+can be used to test TCP KeepAlive.
+- apps/examples/nxdemo: Added nxdemo application From Alan Carvalho
+de Assis.
+- apps/examples/powerled: Added arch initialization.
+- apps/examples/uavcan: Removed because apps/canutils/libuavcan is no
+longer available.
+
+* System Utilities: apps/system
+
+- apps/system/lzf: Added the test case from Marc Alexander Lehmann's
+LIBLZF3.6 librrary From Boris Astardzhiev.
+- apps/system/embedlog: Support for embedlog data loggin package from
+https://embedlog.kurwinet.pl/ From Michal Lyszczek.
+- apps/system/zmodem: Added an option to enable hardware flow control
+via termios. Allow stack size and priority to be configured.
+- apps/system/zmodem: Call tcflush() before closing the serial port.
+This is necessary because that close operation may hang if hardware
+flow control is enabled. Consider this scenario: After the host
+sz runs on the host, it exits and leaves CTS high. The target rz
+completes, and tries to close the serial port. But if there is
+buffered Tx data, then the close will hang when it tries to drain
+the buffered Tx data since there is no where it can go. tcflush()
+discards the buffered data and permits the close to continue.
+There is additional logic in nuttx/drivers/serial needed to work
+with this.
+
+* CAN Utilities: apps/canutils:
+
+- apps/canutils/libuavcan. Removed! libuavcan has not built for a
+year or so. The basic problem is that as NuttX advances, the old
+frozen version of libuavcan has become absolute because it violates
+the portable POSIX OS interface. No one is maintaining the port so
+there is no alternative but to remove it.
+
+* Network Utilities: apps/netutils:
+
+- apps/netutils/tftpc: Modified the TFTP client functions to use a
+data read/write callback instead of a file. This allows TFTP to
+write to arbitrary destination (in my case, a MTD device - for
+firmware update). Two new functions are introduced for this, named
+tftpget_cb and tftpput_cb. They are just made of most of the
+existing code. The previously existing tftpget/tftpput functions
+are now wrappers on the new ones, with callbacks that read/write
+from files, so my modifications are backwards compatible with
+existing applications, eg the associated nsh commands don't need to
+be changed. From Sebastien Lorquet.
+
+* Wireless Utilities: apps/wireless:
+
+- apps/wireless/bluetooth/btsak: Added a Bluetooth debug tool.
+
+Bugfixes. Only the most critical bugfixes are listed here (see the
+ChangeLog for the complete list of bugfixes and for additional, more
+detailed bugfix information):
+
+* Core OS:
+
+- sched/sched: Fix a deadlock in SMP mode. Two months ago, I
+introduced sched_tasklist_lock() and sched_tasklist_unlock() to
+protect tasklists in SMP mode. This change works well for HTTP
+audio streaming aging test with lc823450-xgevk. However, I found a
+deadlock in the scheduler when I tried similar aging tests with DVFS
+autonomous mode where CPU clock speed changed based on cpu load. In
+this case, call sequences were as follows. To avoid this deadlock,
+I added sched_tasklist_unlock() when calling up_cpu_pause() and
+sched_addreadytorun(). Also, added sched_tasklist_lock() after the
+call. Also added critical sections to lib_filesem.c, mm_sem.c, and
+net_lock.c for SMP for SMP. From Masayuki Ishikawa.
+- sched/sched: Change ordering of round-robin time slice check
+(sched_process_scheduler()) and processing of wdog timers
+(wd_timer()). wd_timer()'s callback function can change current
+running task and, hence, must be done after the time slice check.
+The time slice check will decrement the currently running task's
+time slice allotment. If such a context switch occurs, then the
+newly started task will lost one could of that allotment before it
+even has a chance to run. From EunBong Song.
+
+* File System/Block and MTD Drivers:
+
+- fs/fat: In fs_stat(), when stat'ing the root directory, avoid
+calculating the address of the root directory entry. The
+calculation is bogus (but not harmful) because the root directory
+does not have a directory entry. Noted by Boris Astardzhiev.
+- fs/fat: Avoid calculating the bogus directory entry address for
+the FAT root directory (since it has no directory entry). This
+change should have no effect, other than making the logic clearer.
+From Boris Astardzhiev.
+- fs/mount: Fix wrong size reported by df -h. Reason is that size
+in bytes is calculated always on uint32_t types and cards bigger
+than 4GB will overflow uint32_t type. Solution is to use uint64_t
+where possible. From Michal Lyszczek.
+- fs/smartfs: Fix a hardfault in SmartFS. Problem occurred when
+opening a file with O_CREAT (only) when the file arelready exists
+but has a size of zero. From Michal Lyszczek.
+- fs/vfs: Fix negative errno set in fs_open.c From Michal Lyszczek.
+- drivers/mtd: Fixed a W25 driver w25_cacheflush sector bug. From
+lihaichen.
+- drivers/mtd: mtdconfig_register() returned OK instead of -ENOMEM on
+failed allocation. From Michal Lyszczek.
+
+* Graphics/Display Drivers:
+
+- drivers/lcd/ft80x: ACTIVE host command appears to be formatted
+differently than other host commands; Fix ROM CHIPID. Appears to
+be big-ending, BCD. Fix some compile issues when debug features
+are enabled.
+- drivers/lcd/ft80x: Fix a typo that caused the driver to fail to
+recognize the ft801 chip version. From Gregory Nutt.
+- Review all board implementations of board_lcd_initialize(). The
+NuttX convention is that all internal functions that return errors
+as an 'int' must return a negated errno value on failure and a non-
+negative value on success. Most were right but eight of them had
+cloned logic that returns 1 on success and zero on failure. both
+of which are interpreted as success by the caller since they are
+non-negative.
+
+* Networking/Network Drivers:
+
+- net/tcp: Fixed problem with send() return value when using
+nonblocking I/O over buffered tcp socket From Dmitriy Linikov.
+- net/sixlowpan: Fix a nasty, byte-ordering/endian-ness problem.
+The root cause has been found and corrected. And a half dozen
+or so bandaid fixes were reverted.
+- net/sixlowpan: Preserve big-endian (network order) when
+uncompressing address. From Anthony Merlino.
+- net/sixlowpan: TCP send should have PSH and ACK flags set when
+sending. This matches the standard network (Ethernet) TCP send
+logic. From Anthony Merlino.
+- net/udp: Fix several issues using connected UDP sockets: sendto()
+should not accept an address. Normally send() should be used with
+connect UDP sockets instead. recvfrom() is no longer necessary.
+recvfrom() and poll() should not reset to accept any addresses but
+should, instead, only accept inputs and events from the connected
+remote peer. On of these issues was noted by ???
+<liguiding@pinecone.net>. Changes were made as summarized here:
+http://www.masterraghu.com/subjects/np/introduction/unix_network_programming_v1.3/ch08lev1sec11.html
+From Gregory Nutt.
+- net/udp: Resolve race condition in connection-less UDP sockets with
+read-ahead buffering. In connection-mode UDP sockets, a remote
+address is retained in the UDP connection structure. This
+determines both there send() will send the packets and which packets
+recv() will be accepted. This same mechanism is used for
+connection-less UDP sendto: A temporary remote address is written
+into the connection structure to support the sendto() operation.
+That address persists until the next recvfrom() when it is reset to
+accept any address. When UDP read-ahead buffering is enabled,
+however, that means that the old, invalid remote address can be left
+in the connection structure for some time. This can cause read-
+ahead buffer to fail, dropping UDP packets. Shortening the time
+between when he remote address is reset (i.e., immediately after the
+sendto() completes) is not a solution, that does not eliminate the
+race condition; in only makes it smaller. With this change, a flag
+was added to the connection structure to indicate if the UDP socket
+is in connection mode or if it is connection-less. This change
+effects only UDP receive operations: The remote address in the UDP
+connection is always ignored if the UDP socket is not in connection-
+mode. No for connection-mode sockets, that remote address behaves as
+before. But for connection-less sockets, it is only used by sendto().
+
+* Wireless/Wireless Drivers:
+
+- drivers/wiresless/ieee80211: Correct some initialization problems
+with BCM43362 chip. From hhuysqt.
+- drivers/ieee802154/xbee: Added a timeout to send logic to handle
+case where XBee module fails to respond to a Transmit request with
+a Transmit Status From Anthony Merlino.
+
+* Common Drivers:
+
+- Per OpenGroup.org, syslog -- and, hence, nonstandard vsyslog, and
+debug wrappers -- does not return a value. Rename _vsyslog to
+nx_vsyslog. Use internal nx_vsyslog in the few cases where a
+return value is required.
+- drivers/leds: Fixes RGB LED issues caused by uninitialized memory
+with CONFIG_RGBLED_MULTICHAN. The uninitialized pwm_info_s struct
+caused a rogue channel to be started causing errors in the pwm
+driver From Anthony Merlino.
+- drivers/sensors/lis2dh: Clear INT1 at SNIOC_WRITE_INT1THRESHOLD
+ioctl. From Jussi Kivilinna.
+- drivers/sensors/sht21: Changed I2C_TRANSFER return value so that
+it return on zero on success, not the count of bytes transferred.
+From Juha Niskanen.
+- drivers/serial: Per Matias Edlund: I recently used the tcflush
+function and found that it failed with ENOTTY. The reason is that
+the TCFLSH case in the function uart_ioctl in the file
+drivers/serial/serial.c does not update the ret value." On
+success, the TCFLSH IOCTL logic needs to explicitly set the return
+value (ret) to zero.
+- drivers/serial: Added a timeout to uart_tcdrain(). Even if
+tcflush() is used to discard buffered data, the close() can still
+hang if (a) hardware flow control is enabled, (b) CTS == 1, and
+(c) there is data stuck in the hardware Tx FIFO. tcflush() does
+not currently clear the MCU serial drivers' hardware Tx FIFOs.
+This is a workaround for that.
+- drivers/sensors: Fix APDS9960 work queue BUG found by Kyle Lei.
+From Alan Carvalho de Assis.
+
+* Simulator:
+
+- arch/sim: Various fixes necessary to build the simulator under
+MSYS2.
+
+* ARMv7-R:
+
+- ARMv7-R: Corrected several ARMv7-R issues. From Ivan Ucherdzhiev.
+
+* Infineon XMC4xxx Boards:
+
+- XMC4500-Relax: Call xmc4_spidev_initialize() in xmc4_boot.c. From
+Alan Carvalho de Assis.
+
+* NXP/Freescale LPC17xx Drivers:
+
+- LPC17xx USB: Fix USB device endpoint allocation bookkeeping. From
+Michael Jung.
+- LPC17xx USB: Freeing endpoints should be set the same allocations
+as when endpoint was allocated.
+- LPC17xx USB: Fix loss of RX initiatives. USB bulk endpoints are
+double buffered on LPC17xx MCUs. This means that up to two packets
+might be received on an OUT endpoint that can not be handled
+immediately if the receive request queue is empty. Thus,
+rxpending must be a counter not a boolean flag. From Michael Jung.
+
+* NXP/Freescale Kinetis Drivers:
+
+- Kinetis USG: USB device fixes: Use correct CONFIG OTG control,
+Fix interrupt storm when cable is disconnected. The DM, DP state
+were incorrect because the pulldowns were not enabled. Also the
+pending asynchronous resume interrupt needed to be re-armed after
+the suspend is in effect. This is now done in the isr. From David
+Sidrane.
+- Kinetis Serial: In kinetis_lowputc.c, fix esBRFA calculation
+effecting baudrate. Previous BRFA was not cleared and or-ed into
+new BRFA, hence, buadrate was wrong. Where Baud Rate Fractional
+Divisor (BRFD) UART baud rate = clock / (16 * (SBR + BRFD)). From
+David Sidrane.
+- Kinetis Serial: In kinetis_lowputc.c, fixed parity settings.
+Kinetis UART must be placed in 9 bit mode (M=1) with when 8 bit data
+with parity is required. If left in 8 bit mode (M=0) with parity
+then D7 of the TX/RX register becomes parity bit. Hence what is
+called 9-bit or 8-bit Mode Select is a misnomer. 8 bit mode when
+parity is enabled is really 7 bit with parity. From David Sidrane.
+
+* NXP/Freescale Kinetis Boards:
+
+- configs/teensy-3.x: Remove CONFIG_USBDEV_DUALSPEED from the usbnsh
+configuration. Hardware supports only FS.
+
+* NXP i.MX6 Drivers:
+
+- i.MX6: Bring in a few i.MX6 fixes that were committed to similar
+files for the i.MX RT.
+
+* STMicro STM32:
+
+- STM32 F3: Problem: stm32f30xx hangs waiting for LSE to initialize.
+Reason for hang is that operation of setting LSE_ON does not take
+effect because there is no clock on PWR peripheral. This is
+initialized later in the code From Michal Lyszczek.
+
+* STMicro STM32 Drivers:
+
+- STM32 and STM32 L4 1WIRE: In 1wire driver, do not write useless
+WRITEBIT zero return value to const buffer From Juha Niskanen.
+- STM32 HRTIM: Fixed capture_get function,. From raiden00pl.
+- STM32 F3 ADC: Fixed bug in RCC reset logic that resets ADC1
+configuration when both ADC1 and ADC2 are in use From Mateusz
+Szafoni.
+- STM32 Ethernet: In case of PHY failure, usually because of the
+lack of 25/50 MHz REFCLK input, the Ethernet block would lock up
+in a while loop waiting for readiness, which will never happened.
+This prevented the board from starting at all in the case of a PHY
+failure. This commit adds a retry loop to avoid bricking the board
+if the Ethernet block is unable to start. From Sebastien Lorquet.
+- STM32 F7 SDMMC: Added support for the second SDMMC device. The
+second SDMMC device was already supported but the clock was never
+enabled. This fixes that. From William Douglas.
+- STM32 Serial: Fix UART glitch when lowputc is enabled. From
+Simon Piriou.
+- STM32 USB: Skip recipient check for descriptor related
+requests From Simon Piriou.
+
+* TI Tiva Drivers:
+
+- Tiva ADC: Fix compilation errors on Tiva ADC code when ADC is
+enable. From Vinicius Maciel.
+- Tiva Serial: Allow building of Tiva platform with no serial
+console. From Dmitry Sharihin.
+
+* C Library/Header Files:
+
+- lib/libc/netdb: Fixed boundary conditions in dns_recv_response().
+Fixed typos in include/nuttx/net/dns.h. From Masayuki Ishikawa.
+- libs/libc/modlib: Fixed backward test for an error in
+modlib_verify.c.
+
+* Build System:
+
+- Makefiles: Eliminate the spurious errors reported by 'make
+savedefconfig'.
+- Makefile(s): There is a sort command in the 'make savedefconfig'
+file. I found that sort behaves differently on different platforms
+based on the environment variable LC_ALL. Now, Makefile.unix will
+force LC_ALL=C just for the sort command so that we can all generate
+equivalent defconfig files.
+- Makefile(s): The clean_context target needs to invoke a
+corresponding clean_context target in the apps/Makefile in order to
+remove linkages. From Gregory Nutt.
+- LibTargets.mk, tools/Config.mk: Drop executable bit on installed
+libraries. The rules to install libraries under lib/ were modified
+to use mode 0644 instead of the default 0755. From Andrey Zabolotnyi.
+
+* Examples/Tests: apps/examples:
+
+- apps/examples/ft80x: Fix some size calculations. Added option to
+disable primitive tests. just too boring to have to watch over and
+over again. Fix a typo in backlight fade logic; Fix error in
+formatted display light debug dump output.
+- apps/examples/ft80x: Text is handled by the coprocessor and, hence,
+must use RAM_CMD, not RAM_DL.
+- apps/examples/ft80x: Fix some errors in co-processor demos. Correct
+an error in the spinner demo.
+- apps/examples/nsh and posix_spawn: Must not call exec_setsymtab()
+directly. That is a non-POSIX internal OS interface.
+- apps/examples/ostest: Do not call AIO test without
+CONFIG_EXAMPLES_OSTEST_AIO From Juha Niskanen.
+- apps/examples/smps: Fix typos in Kconfig. All power, voltage,
+current values were strings with no default. I assume they should
+be 'int' with what default?.
+- apps/examples/smps: Fixes in some printf and in Kconfig From
+Mateusz Szafoni.
+- apps/system/zmodem: Fix Makefile.host. It was broken when zmodem.h
+was moved to apps/include/system. Fix an incompatibility with the way
+that CRCs are calculated.
+
+* System Utilities: apps/system:
+
+- apps/system: Applications should use the standard clock() interface,
+not the internal NuttX clock_systimer() interface.
+- apps/system/stackmonitor: Fix comparison between pointer and zero
+character constant. From Juha Niskanen.
+
+* Network Utilities: apps/netutils:
+
+- apps/netutils/netlib: Various fixes needed to get a clean netlib
+build with Bluetooth only.
+
+* Wireless Utilities: apps/wireless:
+
+- apps/wireless: Applications should use the standard clock()
+interface, not the internal NuttX clock_systimer() interface.

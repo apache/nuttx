@@ -1,0 +1,39 @@
+NuttX-5.1
+---------
+
+This is the 48th release of NuttX. This release adds support for
+two new MCU architectures in various states of development:
+
+* AT91SAM3U (http://www.atmel.com/products/at91/sam3landing.asp?family_id=605)
+
+This release adds support for the SAM3U-EK development board with
+the AT91SAM3U4E MCU
+(http://www.atmel.com/dyn/products/product_card_mcu.asp?part_id=4562).
+As with most NuttX architecture releases, the release will be
+rolled out in two parts: A basic port and an extended port.
+
+NuttX-5.1 includes the basic port for the SAM3U-EK board. This
+release passes the NuttX OS test and is proven to have a valid
+OS implementation. It supports the basic boot-up, serial console
+and timer interrupts. A configuration to support the NuttShell
+is also included.
+
+The extended port will also include support for SDIO-based SD
+cards and USB device (and possible LCD support). These extensions
+may or may not happen by the NuttX 5.2 release as my plate is
+kind of full now.
+
+* LPC3131 (http://ics.nxp.com/products/lpc3000/lpc313x.lpc314x.lpc315x/)
+
+This release also adds the complete implementation of the basic
+port for the NXP LPC3131 MCU on the Embedded Artists EA3131 board
+(http://www.embeddedartists.com/products/kits/lpc3131_kit.php).
+That port, unfortunately has stalled due to tools issues. Those
+tool issues have been resolved and I am confident that the verified
+basic port will be available in NuttX-5.2.
+
+The extended release will follow and should include SDIO-based
+SD card support and device USB.
+
+A few additional features and bugfixes of a minor nature were also
+incorporated as detailed in the ChangeLog.

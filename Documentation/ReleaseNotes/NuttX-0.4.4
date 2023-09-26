@@ -1,0 +1,20 @@
+NuttX-0.4.4
+-----------
+
+This is the 36th release of NuttX. This release focuses on bugfixes
+and extending and verifying certain networking features.
+
+* Important bugs were fixed in NSH, UDP checksum calculation, UDP
+bind() behavior for port==0, the eZ80Acclaim! EMAC driver, Z80
+interrupt handling, and in the C libraries.
+
+* Testing was extended to further verify the tiny webserver,
+DHCPD, wget(), and sendmail.
+
+See the Changelog for a detailed description of these changes.
+
+These changes were verified only on the ZiLOG eZ80910200zcog-d board
+using the ZDS-II toolchain in Cygwin-based environment. Please
+report any errors to me.
+
+This tarball contains a complete CVS snapshot from March 29, 2009.

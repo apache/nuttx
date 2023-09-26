@@ -1,0 +1,42 @@
+NuttX-6.6
+---------
+
+The 73rd release of NuttX, Version 6.6, was made on July 11, 2011
+and is available for download from the SourceForge website. The
+6.6 release adds several smaller features but is mostly a bugfix
+release.
+
+Bugfixes include
+
+* Fixed several NX Graphics bugs: Rendering fonts at >8 bits-per-pixel,
+graphics move logic, and display artifacts that appear when a
+window is closed.
+* Corrections to the USB host mass storage class driver
+* STM32 bugfixes: serial driver, GPIO interrupt handling
+* LPC17xx: Changes for a success compilation with no console.
+* Corrections to the Teensy AT90USB SD driver
+* Changes for a clean compilation under the ZDS-II toolchain.
+
+Minor features:
+
+* Add logic to extract printf strings from FLASH (but there are
+still printf issues for that target)
+* Added a configuration for the Sure Electronics PIC32MX board.
+However, higher priority tasks have stopped work on that
+configuration.
+* Added several new configurations for the STMicro STM3210E-EVAL
+board.
+* Added support for the STM3210E-EVAL board: (1) LCD in either
+landscape or portrait mode, and (2) interrupting buttons.
+* Added a configuration option to use different serial ports for
+debug and for the NSH serial console (there are some issues
+with CR-LF expansion and character echo if NSH is not run on
+the console).
+* Standardized the button press and button interrupt interfaces
+so that they are common across all boards.
+* Added a new graphics example that focuses on placing text on
+the background while pop-up windows occur. Text should continue
+to update normally with or without the popup windows present.
+* Added ARM stack checking logic.
+
+See the ChangeLog for a detailed description of these changes.

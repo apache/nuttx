@@ -1,0 +1,30 @@
+NuttX-0.3.4
+-----------
+
+This is the 16th release of NuttX and the 5th release containing
+the integration of a network subsystem and the uIP TCP/IP, UDP, and
+ICMP stacks into NuttX (see http://www.sics.se/~adam/uip/index.php/Main_Page).
+
+This release is primarily a bug-fix release. New features include
+only:
+
+o TELNET front-end to NSH,
+o DHCPC server functionality, and
+o C5471 Ethernet driver.
+
+Numerous network related problems were fixed related to DHCPC, UDP
+input processing, UDP broadcast, send timeouts, and bad compilation when
+uIP is compiled at high levels of optimization.
+
+The level of network reliability is at a strong beta release level. The
+baseline functionality of NuttX continues to mature and remains at
+post-beta or production level.
+
+Parts of this release were verified only on the Neuros OSD (DM320 ARM9)
+platform using the DM90x0 Ethernet driver and other parts on the Spectrum
+Digital C5471 EVM using the C5471 Ethernet driver. Any feedback about bugs
+or suggestions for improving the network reliability/performance would be
+greatly appreciated.
+
+This tarball contains a complete CVS snapshot from December 10, 2007.
+

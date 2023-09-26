@@ -1,0 +1,744 @@
+NuttX-7.24
+----------
+
+The 124th release of NuttX, Version 7.24, was made on March 2, 2018,
+and is available for download from the Bitbucket.org website. Note
+that release consists of two tarballs: nuttx-7.24.tar.gz and
+apps-7.24.tar.gz. These are available from:
+
+https://bitbucket.org/nuttx/nuttx/downloads
+https://bitbucket.org/nuttx/apps/downloads
+
+Both may be needed (see the top-level nuttx/README.txt file for build
+information).
+
+Additional new features and extended functionality:
+
+* Core OS:
+
+- SMP: Introduce spin_lock_irqsave() and spin_unlock_irqrestore().
+These APIs are simplified version of enter_critical_section()
+and leave_critical_section() to protect data (e.g. registers) in
+SMP mode. By using these APIs inside drivers, performance will
+be improved. From Masayuki Ishikawa.
+- System Timer: Replace critical section APIs with spinlock APIs.
+(64bit only). If SMP=n or SMP=y && SPINLOCK_IRQ=n, this works
+in the same way as before. If SMP=y && SPINLOCK_IRQ=y, performance
+will be improved. From Masayuki Ishikawa.
+- POSIX Timers: Replace critical section APIs with spin lock APIs in
+clock_gettime.c. This change will improve performance for SMP
+systems but nothing changes for non-SMP systems. In SMP mode,
+the running TCB is not always at the g_readytorun.head. From
+Masayuki Ishikawa.
+- SMP: Introduce spin_lock_wo_note() and spin_unlock_wo_note(). These
+APIs are used in sched_note.c to protect instrumentation data. The
+difference between these APIs to existing spin_lock() and
+spin_unlock() is that they do not perform instrumentation to avoid
+recursive call when SCHED_INSTRUMENTATION_SPINLOCKS=y. From
+Masayuki Ishikawa.
+- Interrupts: Add a configuration option to show interrupt
+information via a procfs file.
+
+* File Systems/Block and MTD Drivers
+
+- VFS: Add support for truncate() and ftruncate().
+- FAT, SmartFS, UserFS, UnionFS, TmpFS, NFS: Add truncate() support.
+- FAT. Effectively handles the situation when a new file position is
+within the current sector. Accelerates the work of the FS with a
+multitude of operations to write small pieces of data within the
+current sector. From Aleksandr Vyhovanec.
+
+* Graphics/Display Drivers:
+
+- HiletGo OLED: Add configuration support for HiletGo SSD1306 OLED.
+- lcd/ft80x: This commit adds an FTDI/BridgeTek FT80x GUI driver. It
+is untested (I don't even have hardware yet) and, hence, it is
+marked as EXPERIMENTAL).
+
+* Networking/Network Drivers:
+
+- 6LoWPAN: Adds configuration options for specifying preloaded
+address contexts for compression From Anthony Merlino.
+- TCP: Introduce tcp receive window control based on I/O buffer.
+NOTE: The algorithm is still experimental but useful for http
+streaming. From Masayuki Ishikawa.
+- UDP: Add an implementation of UDP write buffering.
+- Routing Tables: Adding ftruncate() support eliminates an issue
+in file-based routing table management system.
+- Telnet: Add support for Telnet character mode From Masayuki
+Ishikawa.
+
+* Other Common Device Drivers:
+
+- drivers/input/ft5x06.c: Add a driver for the FT5x06 capacitive,
+multi-touch, touchscreen controller.
+- drivers/input/ft5x06: Add a polled mode of operation for the FT5x06
+in attempt to work around the fact that the LPCXpresso-LPC54628
+chose a non-interrupt pin for the FT5x06 interrupt. Driver is still
+not yet functional.
+- drivers/power/bq2429x.c: Add trickle charging mode From Juha
+Niskanen.
+- drivers/sensors: Add support to MAX44009 ambient light sensor.
+From Juha Niskanen.
+- drivers/sensors: Added support for LIS3DH accelerometer sensor.
+From Matt Thompson.
+- drivers/eeprom: EEPROM driver for AT24xx compatible EEPROMs.
+From Sebastien Lorquet.
+
+* Simulation
+
+- sim: Add support for a RAM MTD driver and initialization for use
+with SmartFS.
+- sim: Add support for testing NXFFS.
+
+* ARM:
+
+- ARMv7-A, ARMv7-R, ARMv7-M: Add atomic read-add-write and
+read-subtract-write functions.
+
+* Infineon XMC4xxx:
+
+- XMC4xxx: Refactor PLL setup, refactored PLL/CLK config, easier,
+checks for correctness, call go_os_start if STACK_COLORIZED, smarter
+config of EXTCLK output freq. From David Alessio.
+
+* Infineon XMC4xxx Boards:
+
+- Add FPU to xmc4 ostest. Remove +x from makefiles, preserve
+.gdbinit across make clean, add FPU support to ostest on xmc4,
+add FPU test to ostest on xmc4 From David Alessio.
+
+* Microchip/Atmel SAMD/L Drivers:
+
+- SAMD: SAMD External Interrupt Controller (EIC) support From Matt
+Thompson.
+- SAMD/L: Added Analog Comparator basic initialization From Matt
+Thompson.
+- SAMD/L: Added FDPLL clock support. Fixed sequence of OSC32K
+calibration setup. From Matt Thompson.
+- SAMD/L: Added loading factory USB calibration data from NVRAM.
+From Matt Thompson.
+- SAMD/L: Added experimental DMA support to SPI driver. spi_exchange()
+uses a pair of DMA channels for TX and RX. From Matt Thompson.
+
+* Microchip/Atmel SAM3/4 Boards:
+
+- Flip&Click SAM3X: Add board support for the Mikroe Flip&Click
+SAM3X.
+- Flip&Click SAM3X: Adds basic board support for the HiletGo OLED.
+
+* Microchip PIC32MZ
+
+- PIC32MZEF: Add architectural support for the PIC32MZEF family.
+
+* Microchip PIC32MZ Boards
+
+- Flip&Click PIC32MZ: Adds board support for the Mikroe Flip&Click
+PIC32MZ board.
+- Flip&Click PIC32MZ: Add board support for HiletGo OLED.
+- Flip&Click PIC32MZ: Add an nxlines configuration for use in
+testing the custom HiletGo Click board.
+
+* NXP Freescale LPC43xx Drivers:
+
+- LPC43xx: Adapt LPC176x RTC driver for the LPC43xx. From Gintaras
+Drukteinis.
+- LPC43xx: Add Windowed Watchdog Timer (WWDT) driver. Tested on
+LPC4357 but should be compatible for all LPC43xx MCUs.
+From Gintaras Drukteinis.
+- Leverage the LPC54xx SD/MMC back to the LPC43xx (where it came from
+originally).
+
+* NXP Freescale LPC43xx Boards:
+
+- Bambino-200e: Add LPC43 SDMMC board support to Bambino-200E. From
+Alan Carvalho de Assis.
+
+* NXP Freescale LPC54xx:
+
+- LPC546xx: Added basic architectural support for the LPC546xx
+family.
+
+* NXP Freescale LPC54xx Drivers:
+
+- LPC546xx: Basic NSH configuration includes support for UARTs,
+SysTick timer, GPIOs, LEDs, and buttons
+- LPC546xx: Additional drivers include EMC, I2C, Ethernet
+- LPC546xx: Implement GPIO interrupt support.
+- LPC546xx: And unverified SPI driver is included.
+- LPC546xx: Ported LPC1788 LCD driver to use the LPC54xx pin.
+- LPC546xx: Bring in LPC43xx SD/MMC driver from
+https://github.com/Smoothieware/smoothie-nuttx/tree/master/nuttx/arch/arm/src/lpc43xx
+and adapt for use with the LPC43xx
+- LPC546xx: Add DMA driver ported from the LPC43xx GPDMA driver.
+- LPC546xx: Bring in WWDT driver from LPC43.
+- LPC546xx: Add an RTC driver and a RTC character driver lower half.
+- LPC546xx: Add support for a random number generator.
+- LPC546xx: Add an Ethernet driver.
+
+* NXP Freescale LP54xx Boards:
+
+- LCXpresso-LPC54628: Added support for the LPCXpresso-LPC54628
+board. The initial bring-up used a basic NSH port.
+- LCXpresso-LPC54628: On-board SDRAM is also supported
+- LCXpresso-LPC54628: Add support for I2C2 and for the I2C tool to
+the NSH configuration.
+- LCXpresso-LPC54628: Add support for the USER button. Enable the
+apps/examples/button test in the NSH configuration.
+- LCXpresso-LPC54628: Add the fb configuration for testing the LCD.
+- LCXpresso-LPC54628: Add support for the the FT5x06 touchscreen
+controller. Enable the driver as well as the apps/examples
+touchscreen test.
+- LCXpresso-LPC54628: Add an NxWM configuration.
+- LCXpresso-LPC54628: Add logic to bring up SDMMC.
+- LCXpresso-LPC54628: Add logic to register the RTC character driver
+if it is enabled. Enable the RTC and RTC character driver in the
+NSH configuration.
+- LCXpresso-LPC54628: Add a netnsh configuration that was be used to
+test the Ethernet driver.
+- LCXpresso-LPC54628: Add LittlevGL graphics demo configuration.
+
+* On Semiconductor LC823450
+
+- LC823450 SMP improvements: (1) Apply irq_spin APIs to
+modifyregXX, (2) Do not use modifyreg32() to enable Mutex, (3)
+Modify IRQ control for i2s. Apply irq_spin APIs to
+dma/syscontrol/usbdev. From Masayuki Ishikawa.
+- LC823450: LC823450 http streaming improvements: (1) Use spinlock
+APIs in lc823450_gpio.c. (3) Fix a potential race condition in
+up_enable_irq(), (3) Use spinlock APIs instead of critical section
+APIs, (4) Enable HRT_TIMER in lc823450_timerisr.c. (5) Use spinlock
+APIs instead of critical section APIs. (6) Fix race conditions in
+dma/usbdev. From Masayuki Ishikawa.
+- LC823450: Introduce DVFS. This version only supports manual mode
+and Vdd1 is fixed to 1.2V. From Masayuki Ishikawa.
+
+* On Semiconductor LC823450 Drivers
+
+- LC823450: Refactor timer driver. Add MTM timer APIs for DVFS.
+Introduce up_rtc_gettime() for CONFIG_RTC_HIRES. Introduce idle
+time calculation in DVFS. Also, DVFS autonomous mode based on CPU
+idle time is supported. NOTE: voltage control is still disabled.
+From Masayuki Ishikawa.
+
+* On Semiconductor LC823450 Boards
+
+- LC823450-XGEVK: I2S interrupt will be handled on CPU0 with this
+change. Assign CPU1 to lpwork. This change will improve load
+balancing for networking with RNDIS. From Masayuki Ishikawa.
+- LC823450-XGEVK: Enable SPINLOCK_IRQ and NXPLAYER in rndis. From
+Masayuki Ishikawa.
+- LC823450-XGEVK: LC823450 http streaming improvements: (1) In SMP
+mode, H/W interrupts should be handled on CPU0 to avoid deadlocks.
+(2) Call up_enable_irq() to assign CPU0 for IRQ handling. (3)
+Enable HRT_TIMER, LC823450_MTM0_TICK, SPINLOCK_IRQ, (4) Enable
+NET_TCP_RWND_CONTROL, NXPLAYER_HTTP_STREAMING_SUPPORT (rndis only)
+From Masayuki Ishikawa.
+- LC823450-XGEVK: Enable DVFS in lc823450_bringup.c. Enable DVFS
+in audio and rndis. Add Telnet character mode to rndis. From
+Masayuki Ishikawa.
+- LC823450-XGEVK: Explicitly assign I2S IRQ handling to CPU0. From
+Masayuki Ishikawa.
+- LC823450-XGEVK: Enable RTC_HIRES instead of RTC_DATETIME (audio/
+rndis). Disable TCP_WRITE_BUFFERS and change SCHED_LPWORKPRIORITY
+(rndis). Update SMP and DVFS related part. From Masayuki Ishikawa.
+
+* STMicro STM32:
+
+- STM32 F7: Add support for the STM32F72x/73x family. From Bob
+Feretich.
+
+* STMicro STM32 Drivers:
+
+- STM32 HRTIM: Add interface to change outputs SET/RST configuration.
+From Mateusz Szafoni.
+- STM32 HRTIM: Add interface to get timer clock frequency,
+calculation, add compare/capture registers significant bits
+checking. From Mateusz Szafoni.
+- STM32 HRTIM: Add interface to set timer frequency, fix slave timers
+reset configuration, change POWER_INFO to TIMER_INFO From Mateusz
+Szafoni.
+- STM32 HRTIM: Add repetition support and fix enum overflow From
+Mateusz Szafoni.
+- STM32 HRTIM: Add HRTIM push-pull mode configuration. From
+raiden00pl.
+- STM32 FLASH: Add progmem support for STM32L15XX From Juha Niskanen.
+
+* STMicro STM32 Boards:
+
+- configs/photon: Adds BOARD_TIMn_FREQUENCY macros From Anthony
+Merlino.
+- configs/indium-f7: Adds support for the RAF Research Indium-F7
+board. From Bob Feretich.
+- Rename the configs/stm32f0discovery board directory to
+configs/stm32f051-discovery. There are others stm32f0discovery
+boards with different MCUs and different peripherals on the board.
+From Alan Carvalho de Assis.
+- configs/stm32f072b-discovery: Adds support for stm32f072b-disco
+board. This is the board. I added the LEDs of this board and tested
+the compilation. From Alan Carvalho de Assis.
+- configs/stm32f103-minimum: Add AT24 EEPROM support on STM32F103-
+Minimum board From Alan Carvalho de Assis.
+- configs/stm32f103-minimum: Add support to BMP180 on BluePill
+(stm32f103-minimum) board. From Alan Carvalho de Assis.
+- configs/stm32f334-disco: Add buck converter and boost converter
+logic. From Mateusz Szafoni.
+- configs/stm32f103-minimum: Add zerocross support to STM32F103-
+Minimum board From Alan Carvalho de Assis.
+- configs/stm32f103-minimum: Add OLED SSD1306 support to
+STM332F103-Minimum From Alan Carvalho de Assis.
+- configs/stm32f103-minimum: Add board support to MAX6675 Thermocouple
+sensor From Alan Carvalho de Assis.
+- configs/stm32f746g-disco: Add stm32f746g-disco Ethernet configuration.
+Add USART1 support (connected to the USB virtual serial port) From
+Louis Mayencourt.
+- configs/viewtool-stm32f107: Add support for FT80X initialization.
+Add ft80x configuration that will eventually be used for testing the
+ft80x if I ever receive hardware.
+
+* Tools:
+
+- tools/logparser: Add a tool which will help me to convert git logs
+to ChangeLog format.
+
+* NSH: apps/nshlib:
+
+- apps/nshlib: Add support for a truncate command. This will be used
+to test the new ftruncate file system support.
+- apps/nshlib: Add support for Telnet character mode. From Masayuki
+Ishikawa.
+- apps/nshlib: Add support for '-n' option to the echo command. From
+Masayuki Ishikawa.
+- apps/nshlib: Add irqinfo command.
+
+* Examples/Tests: apps/examples:
+
+- apps/examples/userfs: Add truncate() support for userfs.
+- apps/examples/lvgldemo: Add lvgldemo example for LittlevGL.
+- apps/examples/veml6070: Add VEML6070 Application Example. From
+Alan Carvalho de Assis.
+- apps/examples/bmp180: Add BMP180 application example. From Alan
+Carvalho de Assis.
+- apps/examples/ft80x: Add a test of the FT80x based on FTDI
+SampleApp. Includes tests of GPU primitives and graphics co-
+processor commands.
+
+* Network Utilities: apps/netutils:
+
+- apps/netutils/netlib: Add default route in netlib_set_dripv4addr().
+From Masayuki Ishikawa.
+
+* Graphics: apps/graphics:
+
+- apps/graphics/littlevgl: Add littlevgl library. From Alan Carvalho
+de Assis.
+- apps/graphics/ft80x: Add the FTDU FT80x GUI support library.
+Consists of some display list helpers, audio helpers, touch helpers,
+RAM access, register access etc.
+
+* System Utilities (apps/system)
+
+- apps/system/nxplayer: Add support for HTTP streaming in nxplayer.
+From Masayuki Ishikawa.
+- apps/system/setlogmask: Adds 'setlogmask' application that allows
+you to set the syslog priority via a simple command. From Anthony
+Merlino.
+- apps/system/usbmsc: Added Kconfig options to configure write
+protection for each LUN. From Fabio D'Urso.
+- system/stackmonitor: Re-design the stack monitor so that it does not
+make forbidden calls directly into the OS, breaking the portable POSIX
+OS interface. It now properly uses the PROCFS file system to glean
+information about stack usage.
+
+Bugfixes. Only the most critical bugfixes are listed here (see the
+ChangeLog for the complete list of bugfixes and for additional, more
+detailed bugfix information):
+
+* Core OS:
+
+- System Timer: Change the way that the 64-bit time is sampled.
+Previously, we disabled interrupts before sampling the 64-bit
+timer since the uint64_t access is not atomic on most CPUs. However,
+disabling (local) interrupts does not work in the SMP case. In that
+case, the timer interrupt may be running on only one of the CPUs;
+disabling interrupts on a different CPU will provide no protection
+from timer rollover. To work around this, logic was added that
+samples 64-bit timer is sampled twice and if 32-bit rollover was
+detected between samples, then loops until there is no rollover.
+- POSIX Timers: In SMP mode, running TCB is not always at the head of
+the g_readytorun list. This change removes DEBUGASSERT() to avoid
+this condition. From Masayuki Ishikawa.
+- Spinlocks: Add memory barrier operations in spin_unlock(). In ARM
+document regarding memory barriers, SP_DMB() must be issued before
+changing a spinlock state to SP_UNLOCKED. However, we found that
+SP_DSB() is also needed to ensure that spin_unlock() works
+correctly for network streaming aging test. From Masayuki Ishikawa.
+- Sporadic Scheduler: Fix compiler error in Sporadic Scheduler when
+priority inheritance is enabled. Noted by eunb.song@samsung.com
+- Priority Inheritance: Fix some priority inheritance related issues
+noted during review of logic. Also add some REVISIT comments for some issues noted in the design.
+- boardctl: Remove the BOARDIOC_TSCTEST_TEARDOWN and
+BOARDIOC_TSCTEST_SETUP boardctl() commands. Remove all
+implementations of board_tsc_teardown(). Each board now initializes
+the touchscreen controller as a normal part of its board bring-up.
+board_tsc_setup() is gone; the touchscreen controller is now treated
+like any other on-board device.
+- configs: CONFIG_MAX_TASKS must be a power of 2.
+- SMP: Introduce a new global IRQ clearing logic and tasklist
+protection. The previous implementation of clearing global IRQ in
+sched_addreadytorun() and sched_removereadytorun() was done too
+early. As a result, nxsem_post() would have a chance to enter the
+critical section even nxsem_wait() is still not in blocked state.
+This patch moves clearing global IRQ controls from
+sched_addreadytorun() and sched_removereadytorun() to
+sched_resumescheduler() to ensure that nxsem_post() can enter the
+critical section correctly. For this change,
+sched_resumescheduler.c is always necessary for SMP configuration.
+In addition, by this change, task_exit() had to be modified so that
+it calls sched_resumescheduler() because it calls
+sched_removescheduler() inside the function, otherwise it will cause
+a deadlock. However, I encountered another DEBUGASSERT() in
+sched_cpu_select() during HTTP streaming aging test on LC823450-XGEVK.
+Actually sched_cpu_select() accesses the g_assignedtasks which might
+be changed by another CPU. Similarly, other tasklists might be
+modified simultaneously if both CPUs are executing scheduling logic.
+To avoid this, I introduced tasklist protection APIs. With these
+changes, SMP kernel stability has been much improved. From Masayuki
+Ishikawa.
+- SMP: Fix this_task() to be an atomic operation. In the previous
+implementation, this_task() was defined in sched.h by using just a
+macro current_task(this_cpu()). However, I found that this is not
+atomic and actually sometimes switching CPU happened in executing
+the macro when we tested audio steaming plus executing commands via
+Telnet. This change resolves this issue by implementing atomic
+this_task()in sched_thistask.c which is newly introduced. From
+Masayuki Ishikawa.
+- SMP: Implements a global scheduler lock capability as part of SMP
+support. This allows the scheduler to be locked with no knowledge
+or access to the TCB of the currently running task. This is
+necessary because accessing the TCB of the currently running task
+is, itself, a non-atomic operation. This global scheduler lock
+capability was add just to support that atomic access to the TCB.
+- SMP: Extend the last global lock change to work with the
+LC823450-XGEVK which does not support the atomic fetch add but
+does support disabling interprocessor interrupts. Disabling
+interprocessor interrupts will also guarantee that the TCB address
+calculation is atomic.
+- SMP: Fix a infinite recursion problems that a recent changes
+introduced into the i.MX6 SMP implementation. This is not seen
+with the LC823450 because you can disable inter-processor interrupts
+in that architecture; but you cannot in the ARMv7-A/GIC architecture.
+- SMP: Remove SMP related logic in sig_dispatch.c. This change
+prevents from a deadlock in up_schedulesigaction.c where inter-CPU
+signal handling is actually implemented. arch/arm/src/armv7-m: Fix
+signal handling for SMP. In previous implementation, signal handling
+for SMP was incorrect. Thus, for example, if an inter-CPU signal
+happened an incorrect tcb was signaled and caused ASSERT(). This
+change fixes the issues and works for both inter-CPU signal handling
+and signal handling on the same CPU. From Masayuki Ishikawa.
+- Tasking: Add nxtask_create(). Kthread_create() and nxtask_create()
+are internal OS functions and should not modify the errno variable.
+Convert legitimate uses of task_create() to nxtask_create().
+Review handling of returned values from all uses of kthread_create()
+(as well as nxtask_create()).
+- Tasking: Threads started by board bring-up logic should be kernel
+threads, not user tasks.
+- Tasking: Threads started by drivers should be kernel threads, not
+user tasks.
+- Semaphore Usage: Added ECANCELED condition to DEBUGASSERT's
+checking sem_wait result From Dmitriy Linikov.
+
+- errno: Add new internal OS function nxsched_setaffinity() that is
+identical to sched_isetaffinity() except that it does not modify the
+errno value. All usage of sched_setaffinity() within the OS is
+replaced with nxsched_setaffinity().
+- errno: Internal functions sched_reprioritize() and
+sched_setpriority() no longer modify the errno value. Also renamed
+to nxsched_reprioritize() and sched_setpriority().
+- errno: Add new internal OS function nxsched_getscheduler() that is
+identical to sched_getscheduler() except that it does not modify the
+errno value. All usage of sched_getscheduler() within the OS is
+replaced with nxsched_getscheduler().
+- errno: Add new internal OS function nxsched_setparam() that is
+identical to sched_setparam() except that it does not modify the
+errno value. All usage of sched_setparam() within the OS is
+replaced with nxsched_setparam().
+- errno: Add new internal OS function nxsched_getparam() that is
+identical to sched_getparam() except that it does not modify the
+errno value (actually, the previous value erroneously neglected to
+set the errno value to begin with, but this fixes both issues). All
+usage of sched_getparam() within the OS is replaced with
+nxsched_getparam().
+- errno: wd_start() is an internal OS function and should not set the
+errno value. Reviewed and updated every call to wd_start() to
+verify if return value is used and if so if the errno value is
+accessed.
+- errno: Fix several inappropriate accesses to get_errno() that were
+missed in previous changes (some going back to nuttx-7.23). Add new
+nxsched_setscheduler() and nxsched_getaffinity() which are
+equivalent to their counterparts without the nx on front. These
+versions do not modify the errno value. Changed all calls within
+the OS to use these newer versions of the functions.
+- errno: binfmt/, configs/, graphics/, libc/, mm/, net/, sched/: OS
+references to the errno variable should always use the set_errno(),
+get_errno() macros.
+- drivers/, fs/ and libc/: OS references to the errno variable should
+always use the set_errno(), get_errno() macros.
+
+* File System/Block and MTD Drivers:
+
+- FAT: CONFIG_FAT_MAXFNAME may not exceed NAME_MAX (CONFIG_NAME_MAX)
+- NFS: Correctly infer file type. The file type is in struct
+nfs_statinfo_s's ns_type field, not in the ns_mode field. From
+Michael Jung.
+- NFS: Fix buffer corruption. In case multiple read requests to the
+NFS server are required to fill up the user provided buffer,
+nfs_read() might write behind the end of said buffer. This is fixed
+with this change. From Michael Jung.
+- VFS: reopen() should return NULL when oflags is less than 0, not
+equal to 0. Because negative value is returned on failure of
+lib_mode2offlags() which converts the mode string into file open
+mode flag.
+- ProcFS: Fix an error in a common function that manages read data.
+- drivers/mmcsd: Respect SDIO_CAPS_DMABEFOREWRITE on CMD25. From
+Evgeniy Bobkov.
+- AT24xx: Correct page size for AT24C02 part. From Alexander
+Oryshchenko.
+- mtd_config.c: Add still more error handling (to detect bad
+underlying flash implementations). Remove MTD_ERASE that was
+erasing data block instead of erase block. This is a partial
+revert of 4f18b4. Reported-by: Pascal Speck <iktek01@yahoo.com>
+
+* Graphics/Display Drivers:
+
+- drivers/lcd: Fix the default I2C address of SSD1306 OLED display
+(7- vs 8-bit addressing) From Alan Carvalho de Assis.
+- drivers/lcd: lcd_framebuffer.c does not need to include board-
+specific board.h.
+- include/lcd: Eliminate a warning from an SSD1306 header file by
+adding a forward reference to struct i2c_master_s. From Sebastien
+Lorquet.
+
+* Networking/Network Drivers:
+
+- ARP: Fix an error introduced when ICMP and ICMP6 socket support was
+added in NuttX-7.3. A gratuitous ARP (or solicitation) was being
+sent after receive of the ECHO replay (advertisement).
+- ARP: Fix IGMP multicast address computation on NuttX network stack.
+This change fixes the IGMP address computation to allow multicast
+UDP messages. The destination address was created with the incorrect
+bytes of the given IPv4 address. From Louis Mayencourt.
+- ioctl: The existence of the network driver ioctl() method should
+depend on CONFIG_NETDEV_IOCTL rather than CONFIG_NETDEV_PHY_IOCTL.
+The former enables the method, the later enables a subset of
+possible driver IOCTLs.
+- TCP: Write buffering logic should not wait for a free buffer if
+the socket was opened non-blocking.
+- TCP: Fixed bad return value handling in psock_tcp_send(). send()
+expects psock_tcp_send() to return a negated errno value, not -1
+with the errno set (GN: I added same change for tcp_send_buffered.c
+which has the same issue as tcp_send_unbuffered.c) From Pelle
+Windestam.
+- TCP: Fixes hardfault when network goes done and network monitoring
+is in place. From Gianpaolo Ferroni Ariani.
+- TCP: tcp_send_[un]buffered.c: Check routing table in
+psock_send_addrchck(). Previously only ARP table was considered
+when determining if the data will actually be sent. From Juho
+Grundstrom.
+- TCP: Generalize Juho Grundstrom's IPv4 change for IPv6 as well.
+- UDP: Remove some conditional logic that was true if there is only a
+single network device, but not true in the multi-device context.
+- UDP: In sendto(), return EHOSTUNREACH if the network is down.
+
+* Common Drivers:
+
+- drivers/pipes: In poll logic, fix off-by-one error in calculation
+of bytes in the buffer. Buffer calculation in pipe poll setup is
+off-by-one when read index is larger than write index. This causes
+poll() not getting POLLIN when buffer has one byte as calculation
+gives zero bytes in buffer. From Jussi Kivilinna.
+- drivers/audio: Improve stability of the WM8776 driver in SMP mode.
+Apply irq_spin APIs to improve performance. Repeat to process a
+message to avoid deadlock. From Masayuki Ishikawa.
+- drivers/ioexpander: Fixed build of PCF8574 driver when its
+interrupts aren't enabled by config. From Dmitriy Linikov.
+- drivers/syslog: Fixes LOG_UPTO macro to include specified log level.
+From Anthony Merlino.
+- drivers/sensors: Fix HTS221 sensor reset with BOOT bit From Jussi
+Kivilinna.
+- drivers/loop: If we want to open read-only in losetup.c, flags
+should be O_RDONLY not O_RDWR. From Fabio D'Urso.
+- drivers/timers/ds3231.c: Correct some debug statements. From
+Alexander Oryshchenko.
+- drivers/sensors/lis2dh: Use realtime clock if monotonic is not
+available From Juha Niskanen.
+- drivers/i2c and drivers/spi: Fix compile error if
+CONFIG_DISABLE_PSEUDOFS_OPERATIONS, fix bad NULL checks From Juha
+Niskanen.
+
+* ARMv7-A:
+
+- Data Cache: Fix cp15_invalidate_dcache. In cases where more than
+one dcache line was to be invalidated, a missing branch label
+would result in a false branch target into cp15_flush_idcache. Also
+the .size macro was fixed for both cp15_invalidate_dcache. From
+Michael Jung.
+- SMP: Port the signal-related SMP change by Masayuki Ishikawa to the
+ARMv7-A family.
+
+* Extensa:
+
+- SMP: Port the signal-related SMP change by Masayuki Ishikawa to the
+Xtensa family.
+
+* Infineon XMC4xxx Drivers:
+
+- XMC4xxx: Only setup USB clock when USB PLL is enabled From Alan
+Carvalho de Assis.
+- XMC4xxx: Fix USIC_BRG_SCLKCFG definition From Alan Carvalho
+de Assis.
+
+* Microchip PIC32MZ
+
+- MIPS32: In up_idle, the kludge that was conditionally enabled if
+the work queue was enable appears to be needed even when he work
+queue is not enabled on the PIC32MZ.
+- PIC32MZ: Fix some typos in debug instrumentation in pic32mz-gpio.c;
+fix some typos related to UART5 configuration in pic32mz-serial.c.
+
+* Microchip/Atmel SAMD/L:
+
+- SPI: In sam_spibus_initialize(), the pinmux configuration was
+smashing the previous CTRLA register configuration. There are
+also some typos in samd_spi.h From Matt Thompson.
+- SPI: Fixes g_spi2ops and g_spi2dev using incorrect values From Matt
+Thompson.
+- SPI: SPI must be disabled before changing the mode bits in CTRLA
+register From Matt Thompson.
+- DMA: Fix DMA controller support. From Matt Thompson.
+
+* NXP/Freescale LPC17xx Drivers:
+
+- LPC17xx: Disable LPC17 FDR when not used. If a boot loader set the
+fractional divider (FDR) the baud rate in nuttx will be wrong
+(multiplied by this fraction). So if it is not used, it should be
+disabled. From Harald Gutsche.
+
+* NXP/Freescale Kinetis Drivers:
+
+- Kinetis: Correct some Ethernet PHY register bit tests for the
+KSZ8081 PHY. From Stewart.
+
+* On Semiconductor LC823450
+
+- arch/arm/src/LC823450: Add SP_DMB() into lc823450_testset.c.
+In LC823450, ldrex and strex are not supported. So we implemented
+up_testset() with H/W Mutex. However, there was a bug in memory
+access order. This change ensures correct memory access order in
+up_testset() for LC823450. From Masatoshi Tateishi.
+
+* STMicro STM32 Drivers:
+
+- STM32 F3 RCC: A flash wait state configuration. Flash latency must
+be fixed according to sysclk frequency. If this operation is not
+done or done after PLL configuration, the STM32 fail to continue
+boot operation if the frequency if greater than 24MHz according to
+the board variable STM32_SYSCLK_FREQUENCY. Tested on stm32f334-disco
+board. From Gwenhael Goavec-Merou.
+- STM32 RTC: Make STM32 usable with an external RTC.
+- STM32 SPI: Removed unnecessary (and incorrect) speed limitation.
+From Alexander Oryshchenko.
+- STM32 SPI: I have a SPI bus with both Mode 0 and Mode 3 devices
+on it. After performing SPI I/O to a Mode 0 device, switching to a
+Mode 3 device locked up the SPI interface. Only zeroes would be
+read. I traced the reason for the lock-up to arm/arm/src/stm32f7/stm32_spi.c function spi_setmode(). Changing
+the mode causes a spurious SPI clock transmission that confuses the
+stm32f7 SPI input hardware. This problem is solved by (1) changing
+the SPI mode with SPI (and perhaps DMA) disabled, and (2) flushing
+the receive FIFO if the mode change results in garbage in the FIFO.
+From Bob Feretich.
+- STM32 and STM32 F7: Remove confusing, redundant, and misleading
+definitions of STM32_BKP_BASE from the F2, F3, and F4 memory
+maps. Unlike the F1, these parts do not have a separate BKP address
+region. The BKP registers are with the RTCC address regions.
+stm32_bkp.h should only be used for STM32 F1. stm32_rtcc.h should be
+used to access BKP registers on F2, F3, and F4.
+- STM32 and STM32 F7: Architecture-specific code is not permitted to
+modify the errno variable.
+- STM32 F4 I2C: Correct some recent changes to STM32F4 I2C that broke
+poll mode of operation. From Alexander Oryshchenko.
+- STM32 F4 I2C: Corrections to STM32 F4 I2C to restore functionality.
+From Alexander Oryshchenko.
+- STM32 F4 I2C: Corrections to STM32 F4 I2C to fix the NORESTART
+flag. From Alexander Oryshchenko.
+- STM32 F7: Fixes a bug in multi-block SD-card operations on the
+STM32F7 platform. DBLOCKSIZE must be the size of SD-card block, not
+the total amount of transferred bytes. From Evgeniy Bobkov.
+- STM32 F7: Fix undefined variable when using USART1 for other
+purposes than UART (e.g. SPI). From Frank Benkert.
+- STM32 F7: Backport RTC alarm setting changes from STM32L4. Most
+notably this fixes RTC getting stuck issue when both alarms were
+used. Root cause was writing RTC ISR register contents to RTC CR
+register. From Juha Niskanen.
+- STM32 L4 Flash: Change flash programming to use page buffer for
+unaligned writes. From Juha Niskanen.
+
+* STMicro STM32 Boards:
+
+- Nucleo-L432KC: Fix some bogus logic noted by Fanda.
+- configs/nucleo-* and configs/stm32l476vg-disco: Fix more
+stm32_userleds.c bogus logic From Juha Niskanen.
+- Nucleo-L432KC: Fixed nucleo-l432kc broken build when
+CONFIG_USERLED_LOWER defined From Fanda.
+- Nucleo-L432KC: Issue #85: /dev/userleds is not working for
+Nucleo-L432KC fixed From Fanda Vacek.
+- STM32F429I-Disco: Separate SPI4 from MTD init. I was trying to
+attach a non-MTD peripheral to an STM32F429I Discovery Board's SPI4
+port and was hitting compilation problems, since CONFIG_MTD and
+thus 'struct mtd_geometry_s' was not defined. This patch separates
+SPI4 initialization logic from MTD initialization logic. From
+Michael Jung.
+- STM32F103-Minimum: Remove CONFIG_NX_LCDDRIVER dependence from
+stm32_ssd1306.c From Alan Carvalho de Assis.
+
+* C Library/Header Files:
+
+- libc/stdio: In dtoa(), up_interrupt_context() is used in a debug
+assertion. up_interrupt_context() is not available in the user-mode
+phase of the PROTECTED or KERNEL build configurations. In those
+configurations, enabling libc floating point support and debug
+assertions will result in an undefined reference to
+up_interrupt_context().
+- libc/netdb: Fixed parsing of DNS response packets having compressed
+names ending with pointer. There were troubles parsing response
+packets which have compression of QNAME/NAME field when only
+trailing part of the name (not the whole name) is replaced with
+pointer to another part of the packet. This commit fixes parsing of
+such packets. Also I added checks to keep parsing only in bounds of
+the read part of DNS response packet. From Dmitriy Linikov.
+
+* Tools
+
+- tools/*.c: Add #define _GNU_SOURCE to all C files that call
+asprintf() to eliminate a warning.
+- tools/cvsparser.c: Add a check to avoid access past the end
+of a fixed size array
+
+* NSH: apps/nshlib:
+
+- apps/nshlib: Fix compile error when CONFIG_NSH_DISABLESCRIPT is not
+defined. The field np_flags does not exist if scripting is disabled.
+
+* Examples/Tests: apps/examples:
+
+- apps/examples/touchscreen: Eliminate BOARDIOC_TSCTEST_SETUP.
+
+* Network Utilities: apps/netutils:
+
+- apps/netutils/ftpc: Fix some corner-cases that could cause FTP to
+access past the end of valid data.
+
+* Wireless Utilities: apps/wireless:
+
+- apps/wireless/ieee802154/i8shark: Fixes special XBee compensation
+by purposely chopping off the FCS. From Anthony Merlino.

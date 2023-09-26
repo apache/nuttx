@@ -1,0 +1,361 @@
+NuttX-7.16
+----------
+
+The 116th release of NuttX, Version 7.16, was made on June 1, 2016,
+and is available for download from the Bitbucket.org website. Note
+that release consists of two tarballs: nuttx-7.16.tar.gz and
+apps-7.16.tar.gz. These are available from:
+
+https://bitbucket.org/nuttx/nuttx/downloads
+https://bitbucket.org/nuttx/apps/downloads
+
+Both may be needed (see the top-level nuttx/README.txt file for build
+information).
+
+Additional new features and extended functionality:
+
+* Core OS:
+
+- Power Management: Add activity domain to all PM interfaces and
+driver callbacks. If CONFIG_PM_NDOMAINS == 1, then the legacy
+behavior is preserved. If CONFIG_PM_NDOMAINS > 1, then multiple
+PM domains are supported. This will allow separate control for
+certain power management groups. For example, a network can be
+shut down without affect an ongoing UI (and vice versa).
+- board_app_initialize(): board_app_initialize() now accepts an
+argument that may be used to support initialization in different
+configurations.
+
+* File System and Block and MTD Drivers:
+
+- N25Qxxx: Add MTD support for Micron N25Qxxx family of QSPI flash.
+From Dave (ziggurat29).
+- SST26F: Add an MTD driver for SST26F spi/qspi flash devices (SPI
+mode only). From Sebastien Lorquet.
+- File Descriptor Detach: Add logic to detach a file structure from a
+file descriptor. This is for use only within the OS. It permits an
+open file or driver to be used across multiple threads.
+
+* Networking and Network Drivers:
+
+- listen()/accept(): Separate out psock_listen() and psock_accepti()
+for internal, thread independent OS usage (i.e., without a socket
+descriptor).
+- VNC Server: Add support for a VNC server. This logic is code
+complete and functional, but not well tested.
+
+* Graphics and Graphic Drivers:
+
+- Framebuffer driver: Add a display number to each interface in order
+to support multiple display devices.
+- VNC Server: Add support for a VNC server. This logic is code
+complete and functional, but not well tested.
+- LCD Backpack: Add support for PCF8574 LCD Backpack driver. This
+driver supports an interface board that is based on the PCF8574 I/O
+expander and supports the HD44780-based (or compatible) LCD modules.
+There are a myriad of different vendors of such, but they are
+principally the same, save wiring and minor features like jumpers
+for I2C addresses. This driver supports known and unknown variants.
+From Dave (ziggurat29).
+
+* Common Device Drivers:
+
+- RTC: Simplify the RTC interface. The old interface was way too
+complex and was not fully implemented anywhere.
+- BH1750FVI: Add a character driver for Rohm Ambient Light Sensor
+BH1750FVI. From Alan Carvalho de Assis.
+- CAN: Improve CAN error reporting. From Frank Benkert.
+- aes.h: Modifications to the crypto API needed for LPC43xx. From
+Alexander Vasiljev.
+- ADC: Interface no longer uses global adc_receive() call. Added a
+new bind() method to the ADC interface. Now the ADC upper half
+driver will register its receipt-of-data callback. This change
+allows the ADC lower half driver to be used with a differ ADC upper
+half.
+
+* Simulation Platform:
+
+- Linux Host Networking: Enhance networking support for the
+simulation under Linux. Includes updated support for Linux TUN/TAP,
+and the addition of support for Linux bridge devices. From Steve.
+
+* ARMv7-A, ARMv7-R, and ARMv7-M:
+
+- ARMv7-M: Convert more assembly language files for use with the IAR
+toolchain. From Kha Vo.
+- ARMv7-A: Complete re-design of SMP-related logic to initialize each
+CPUn, n > 0, when CONFIG_SMP=y.
+
+* Atmel SAMV7:
+
+- Add a JTAG config and ERASE config to Kconfig to set the
+CCFG_SYSIO SYSIO Pins. From David Sidrane.
+- System Reset: Add the up_systemreset interface to the samv7 arch. The
+approach is slightly different in that: 1) It enables ARCH_HAVE_RESET
+and allows the user to set if, and for how long, to drive External
+nRST signal. It also does not contain a default board_reset, as that
+really should be done in the config's src if CONFIG_BOARDCTL_RESET
+is defined. From David Sidrane.
+
+* Atmel SAMV7 Boards:
+
+- SAMV71-XULT: Add configuration(s) that were be used to verify VNC
+graphics output as well as mouse and keyboard input.
+
+* NXP Freescale i.MX6 Boards:
+
+- Sabre-6Quad: The basic i.MX6 port is complete. This is a minimal
+port at present and probably still has some as-of-yet-undiscovered
+issues.
+- Sabre-6Quad: Basic SMP NSH configuration is now working. But this
+is probably only because the SMP test case does not stress the
+logic. There are know outstanding SMP issues as noted in the
+Sabre-6Quad README.txt file.
+
+* NXP Freescale LPC43xx:
+
+- LPC4337jet100: Add definitions for the LPC4337jet100 chip. From
+Alexander Vasiljev.
+
+* NXP Freescale LPC43xx Drivers:
+
+- AES: Add AES support. From Alexander Vasiljev.
+
+* STMicro STM32:
+
+- STM32 L4: Add configuration options to allow SRAM2 to be used for
+heap, or not at all, and to zero-initialize it on OS start, or not
+at all. From Dave dev@ziggurat29.com.
+- STM32 L4: Add support for HSE and MSI clocks, and auto trim of MSI
+to LSE (needed for USB). From Dave (ziggurat29)
+- STM32 L4: Add support for unique id function to arch; modified board
+to support unique id boardctl. From Dave (ziggurat29)
+
+* STMicro STM32 Drivers:
+
+- STM32 F4 RTC: Add a custom RTC driver with support for alarms. From
+Neil Hancock.
+- STM32 L4 QSPI: Add a QSPI driver with DMA support and (optional
+memory mapped mode support. From Dave ziggurat29).
+- STM32, STM32 L4, and STM32 F7 Serial: Add support for compliant
+SD-style breaks. From David Sidrane.
+- STM32 L4 CAN: Add CAN support for STM32L4. From Sebastien Lorquet.
+- STM32 1-Wire: Add support for a custom 1-wire driver. The serial
+driver already supports a 1-wire interface, but this driver uses the
+same serial logic to implement a lower half driver much like the
+I2C lower half driver. From Aleksandr Vyhovanec.
+- STM32 L4 SPI: Add support for SPI 4 and 5 on stm32f411 chips. From
+Konstantin Berezenko.
+- STM32 ADC: Allow omitting use of channels in a lower part of PWM.
+From Pierre-noel Bouteville.
+- STM32 L4 I2C: Get I2C working for STM32L4. From Dave (ziggurat29).
+
+* STMicro STM32 Boards:
+
+- STM3220G-EVAL: Add support for both the IAR and uVision GCC IDEs.
+From Kha Vo.
+- STM32F429I Discovery: Add support for the uVision GCC IDE. From
+Kha Vo.
+- STM32F4 Discovery: Integrate BH1750FVI driver in the STM32F4 Discovery
+board. From Alan Carvalho de Assis.
+- STM32L476VG Discovery: Add support for QSPI based N25Qxxx flash.
+From Dave (ziggurat29)
+- STM32L476VG Discovery: Add board ioctls for allowing user application
+to cause QSPI memory mapped mode to be engaged and disengaged. Also
+partitioned QSPI flash for file system and other (eventually xip).
+From Dave (ziggurat29)
+- Nucleo-144: Basic port for the Nucleo-144 board with the STM32F746ZG
+MCU. From Kconstantin Berezenko.
+- STM32F103 Minimum: Add support for this minimual STM32F103CBT6 "blue"
+board. From Alan Carvalho de Assis.
+- STM32F411E Discovery: Add basic configuration for stm32f411e-disco
+board with STM32F411VE chip. From Konstantin Berezenko.
+
+* Build/Configuration System:
+
+- Moved NuttX repository to https://bitbucket.org/nuttx/nuttx.
+Eliminated use of sub-modules.
+- Add support for the IAR toolchain for the limited case of the ARMv7-M
+architecture and the STM32 chip. From Aleksandr Vyhovanec.
+- make export: Pass top-level make to the script to allow -j greater
+than 1. From David Sidrane.
+- fs/Kconfig: Allow CONFIG_FS_WRITABLE to be manually selectable. This
+is needed when there are no writable file systems, but write support
+is still needed in BCH or FTL.
+- arch/*/Makefile: Add definitions that can be overrided to use GCC
+instead of LD in the final link. From Paul Alexander Patience .
+
+* Applications: apps/netutils:
+
+- apps/netutils/esp8266: ESP8266 driver application. From Pierre-noel
+Bouteville.
+
+* Applications: apps/examples:
+
+- apps/examples/alarm: Add a simple test of the ALARM iotcl calls of
+the RTC driver.
+- apps/examples/nximage: Add a configuration option to select
+greyscale.
+
+* Platforms: apps/platform:
+
+- apps/platform/nucleo-144: Add platform files for NUCLEO-144
+(NUCLEO-F746ZG). From Mark Olsson.
+- apps/examples/media: You can now override the default device driver
+path by providing an alternal path on the command line. From
+Sébastien Lorquet.
+
+Works-In-Progress:
+
+* IEEE802.14.5/6LowPAN. Hooks and framework for this effort were
+introduced in NuttX-7.15. Work has continued on this effort on
+forks from the main repositories, albeit with many interruptions.
+The completion of this wireless feature will postponed until at
+least NuttX-7.17.
+
+* i.MX6 SMP. Partially functional, but there is more that still
+needs to be done.
+
+Bugfixes. Only the most critical bugfixes are listed here (see the
+ChangeLog for the complete list of bugfixes and for additional, more
+detailed bugfix information):
+
+* Core OS:
+
+- Various places: Search for places where a stray semicolon following
+an if condition cause the if body to be executed unconditionally.
+Fixes in all SAM DMA logic, unionfs, OS signalling logic, and others.
+- enter/leave_critical_section() may attempt to access task lists
+before they have been initialized in the SMP configuration.
+
+* File System/Block Drivers:
+
+- SMART MTD: Return code of smart_scan not checked, can cause success
+result in failure case, leading to 'dev' pointer being invalid. From
+Dave (ziggurat29)
+- mount: Fix a backward debug assertion. Noted by David Sidrane.
+
+* Common Drivers:
+
+- NRF24L01: Fix backward calculation of relative frequency. Noted by
+Henry Zhang.
+- PCA9555 I/O expander: Fix an error in the PCA9555 driver: Under
+certain error conditions, interrupts were not being re-enabled.
+Sebastien Lorquet.
+- ADS1255: Must not do SPI access from interrupt handler. Use the
+worker thread instead. Must also lock the SPI bus before using it.
+- Several SPI-based drivers modified. All drivers that use SPI must
+call SPI_LOCK and SPI_UNLOCK. This is not optional.
+- MS583730: Fix a bug in crc computation for ms583730. Implement
+POSIX read.
+
+* Atmel SAMV7:
+
+- Fix typo in MATRIX register definitions. From Stefan Kolb.
+- SAMV7 Tickless Mode: This is a fix to a problem in the handling of
+the oneshot timer. Due to a wrong assumption concerning the behavior
+directly after the start of the timer/counter the function
+sam_oneshot_cancel calculates the wrong remaining time. The code
+assumes that the counter register is zero directly after the start
+of the timer, but this is not true. To start the time/counter a
+software trigger is invoked, this trigger starts the timer/count and
+sets the counter register to zero, but the reset of the counter
+register is not performed instantly. According to the datasheet:
+"The counter can be reset by a trigger. In this case, the counter
+value passes to zero on the next valid edge of the selected clock."
+Thus the counter is set to zero between 0 and USEC_PER_TICK
+microseconds after the clock was started.
+In my fix I use the freerun count value to determine if at least one
+tick passed since the start of the timer and thus if the value of
+the oneshot counter is correct. I also tried to use the function
+up_timer_gettime to achieve this but, at least if compiled with
+no optimization the problem vanishes without using the value of the
+function, the function call takes too long.
+Another problem treated in the fix is that if the oneshot timer/counter
+is canceled, we only know the remaining time with a precision of
+USEC_PER_TICK microseconds. This means the calculated remaining time
+is between 0 and USEC_PER_TICK microseconds too long. To fix this I
+subtract one tick if the calculated remaining time is greater than
+one tick and otherwise set the remaining time to zero. By doing so
+the measured times are much more precise as without it. From Stefan
+Kolb.
+
+* Atmel SAMA5:
+
+- SAMA5: Stefan Kolb's change to the SAMV7 Oneshot Timer should also
+be applied to the SAMA5 oneshot time since the drivers are identical.
+
+* Atmel SAM3/4:
+
+- SAM3/4: Stefan Kolb's change to the SAMV7 Oneshot Timer should also
+be applied to the SAM3/4 oneshot time since the drivers are identical.
+
+* Atmel SAMV7 Drivers:
+
+- SAMV7 TWIHS (as well as SAM3/4 and SAMA5: Ensure that the TWIHS
+(i2c) hw gets its clock set when the sequence of
+sam_i2cbus_initialize(), sam_i2cbus_uninitialize(), then
+sam_i2cbus_initialize() or twi_reset() is called. I found this a
+while back in the stm32 family, so there may be more arch-es with
+this sort of bug. I suppose any driver that has the notion of "do
+not set the freq if it is already set" could be suspect. From David
+Sidrane.
+- USBHS Device: Remove disabling of whole USB on suspend of USBHS.
+This fix removes the disabling of the whole USB peripheral on
+suspend interrupt. Its enough to freeze the clock instead. When
+disabling the whole peripheral, the next wakeup-interrupt comes up
+with an disabled clocking. The unfreeze clock has no effect, because
+the master clock is disabled. This makes all registers, including
+the IDR unwriteable and the IRQ falls in an endless loop blocking
+the whole system. Furthermore the disabling of the peripheral clock
+prevents hotplugging or reconnecting the USB. From Frank Benkert.
+- MCAN: Fix missing unlock of device in MCAN mcan_txempty(). From
+Frank Benkert.
+
+* STMicro STM32:
+
+- STM32 L4 Clocking: Problem with resetting backup domain clears
+clocking options set up before in *rcc.c use INITS flag to avoid
+magic reg value to detect power up reset state of RTC correct a
+problem clearing interrupt flags (they weren't) which prevented an
+alarm from ever being used more than once per reset cycle. From
+Dave (ziggurat29)
+
+* STMicro STM32 Drivers:
+
+- STM32L4 SPI: That STM32Lr SPI driver is quite different. They now
+handle frames of arbitrary size between 4 and 16 bits. It was broken
+before a new bit has to be set (RX fifo threshold) to handle <= 8-bit
+transactions. If not set, the default is 16-bit packed >=8-bit
+frames and the RXNE bit is never set (it is set when 16-bits are
+received). weird things as always. This also add 8-bit access
+routines to the data register, because a 16-bit access to the data
+register when the frame size is below 9 bits is interpreted as a
+packed dual frame exchange. Sebastien Lorquet.
+- STM32: Correct some bad commits that broke the LTDC display example.
+From Marco Krahl.
+- STM32 F4 RTC: Fix logic in F4 RTCC driver that prevent ALARM
+interrupt. From Neil Hancock.
+- STM32 F1 ADC: Fix STM32 ValueLine ADC IRQ number selection. From
+David Sidrane.
+
+* STMicro STM32 Boards:
+
+- STM32F429I Discovery: Correct some bad commits that broke the LTDC
+display example. From Marco Krahl.
+
+* TI Tiva:
+
+- GPIO Interrupts: Fix a bug of GPIO falling-edge interrupt for tiva.
+From Young.
+
+* C Library:
+
+- math: Add a NAN test on 'x' in asin function of lib_asin.c. Suggested
+by Pierre-noel Bouteville.
+
+* Build/Configuration System:
+
+- Several Makefiles: Add .PHONY definitions to prevent 'clean up to date'
+message weirdness when 'make clean' is done with no .config or
+Make.defs file.

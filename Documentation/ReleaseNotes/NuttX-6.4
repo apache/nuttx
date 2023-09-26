@@ -1,0 +1,32 @@
+NuttX-6.4
+---------
+
+The 71st release of NuttX, Version 6.4, was made on June 5, 2011
+and is available for download from the SourceForge website. The
+6.4 release includes several new features:
+
+* A new, full-featured FTP client. This client may be used as a library
+for automated FTP or via an FTP client shell. The FTP shell
+supports the following commands: cd, chmod, get, help, idle,
+login, ls, quit, mkdir, noop, put, pwd, rename, rhelp, rm,
+rmdir, size, time, and up. A configuration is available for
+the NXP LPC17xx to demonstrate this functionality.
+* A functional C1101 wireless driver (contributed by Uros Platise)
+* A PCI-based E1000 Ethernet driver (contributed by Yu Qiang)
+* New C library functions: inet_addr() (contributed by Yu Qiang),
+strndup(), asprintf()
+* Reduced memory allocation overhead for MCUs with small heaps (<64K).
+* fdopen() now works with socket descriptors allowing standard
+buffered C functions to be used for network communications.
+* The NSH ifconfig command can now be used to set or change the
+IP address (contributed by Yu Qiang)
+
+This release also includes some completed but untested functionality.
+
+* The MicroChip PIC32MX port is now code complete and ready to
+begin testing. Unfortunately, testing will be delayed due to
+tool issues.
+* Support for the NXP LPC315x MCUs.
+
+Additional miscellaneous enhancements and bug fixes to task_delete(),
+recvfrom(), and other changes as noted in the ChangeLog.

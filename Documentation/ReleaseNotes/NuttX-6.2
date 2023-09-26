@@ -1,0 +1,27 @@
+NuttX-6.2
+---------
+
+The 69th release of NuttX, Version 6.2, was made on May 6, 2011 and
+is available for download from the SourceForge website. The 6.2
+release includes several new features:
+
+* NXFFS: The obvious new feature is NXFFS, the NuttX wear-leveling
+FLASH file system. This new file system is intended to be
+small for the MCU usage and has some limitations. No formal
+documentation of NXFFS yet exists. See the fs/nxffs/README.txt
+file for details (see
+http://svn.code.sf.net/p/nuttx/code/trunk/nuttx/fs/nxffs/README.txt?view=log)
+* Support for NXP LPCXpresso LPC1768 board on the Embedded
+Artists base board. The Code Red toolchain is supported under
+either Linux or Windows. Verified configurations include
+dhcpd, nsh, nx, ostest, thttpd, and usbstorage.
+* Support for the Univision UG-9664HSWAG01 OLED with Solomon
+Systech SD1305 LCD controller.
+* A new RAM MTD driver with FLASH simulation capability.
+* A version.h file is now automatically generated so that C code
+can now be version aware.
+
+In addition to these new feature, several important bugfixes are
+included in this release correcting problems with dup2(), LPC17xx
+GPIO interrupts, LPC17xx UART2/3, the FAT file system, build issues,
+and strrch(). See the ChangeLog for more details.

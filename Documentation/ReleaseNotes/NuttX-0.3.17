@@ -1,0 +1,29 @@
+NuttX-0.3.17
+------------
+
+This is the 29th release of NuttX. This release includes the
+additional support for USB in NuttX. The following new features
+were added:
+
+* Added support for SPI-based MMC/SD cards (with an SPI driver
+for the NXP LPC214x).
+* Added USB storage class device side driver (BBB)
+* Added an example that demonstrates the USB storage class by
+exporting the SPI based MMC/SD card on the NXP LPC214x.
+
+This is an early alpha release of these drivers. At present they
+only work with debug features enabled so there are probably some
+race conditions that occur only with debug features disabled.
+(Anyone out there with a USB analyzer? I would love to know what
+is happening.)
+
+Several important bugs were also fixed in the FAT file system, USB
+serial driver and NXP LPC214x USB controller driver. (See the ChangeLog
+for details.)
+
+These changes were verified only on the mcu123.com NXP LPC2148 board
+using a Linux development environment. USB testing was performed
+using both a Linux host and a WinXP host. Please report any errors
+to me.
+
+This tarball contains a complete CVS snapshot from October 28, 2008.

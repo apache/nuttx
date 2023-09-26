@@ -1,0 +1,609 @@
+NuttX-7.30
+----------
+
+The 130th release of NuttX, Version 7.30, was made on May 19, 2019,
+and is available for download from the Bitbucket.org website. Note
+that release consists of two tarballs: nuttx-7.30.tar.gz and
+apps-7.30.tar.gz. These are available from:
+
+https://bitbucket.org/nuttx/nuttx/downloads
+https://bitbucket.org/nuttx/apps/downloads
+
+Both may be needed (see the top-level nuttx/README.txt file for build
+information).
+
+Additional new features and extended functionality:
+
+* Core OS:
+
+- pthreads: Added non-standard pthread_get_stackaddr_np() and
+pthread_get_stacksize_np(). From Joao Matos.
+- boardctl(): Add a command to start the VNC server. From Gregory
+Nutt.
+- Signals: Remove references to CONFIG_DISABLE_SIGNALS in many
+files. Signals can no longer be disabled. From Gregory Nutt.
+
+* Wireless/Wireless Drivers:
+
+- NRF24L01: Add support for "multicast" TX mode - no waiting for ACK
+(needs to be enabled with fcntl SETTXPAYLOADNOACK) From Leif Jakob.
+
+* Graphics/Display Drivers:
+
+- NX Graphics: Add new server->client callback to notify the window
+client of server events. Remove the old 'blocked' callback and just
+make it one case of an 'event' callback. From Gregory Nutt.
+- NX Graphics: Implement new interfaces nx_synch() and nxtk_synch().
+This are used to synchronize the NX server with the window client.
+Currently most of the logic is equivalent to nx_block() and
+nxtk_block(), but with slightly different semantics. They are
+separate now because they are likely to diverge in the future.
+From Gregory Nutt.
+- NX Graphics: Add support for modal windows. From Gregory Nutt.
+- NX Graphics: Implement a software cursor. The cursor behaves
+like a "sprite", always at the top of the display with a
+transparent background. Includes new NX interfaces to show/hide
+the cursor, set the cursor image, and to move the cursor position.
+From Gregory Nutt.
+- NX Graphics: Added support for hiding windows. This features is
+needed by Twm4Nx: When a window is iconified, the icon should
+appear on the background and the window should disappear (i.e., be
+hidden). The windows needs to remain healthy and to be updated in
+all ways, but it cannot affect the display content. Conversely,
+when the icon is clicked, the icon needs to be hidden on the
+background and the window needs to be restored in its current
+state (which may be different than the state of the window at the
+time it was iconified. From Gregory Nutt.
+- NX Graphics: Windows can now be created in the hidden state.
+This can be used to clean up initial window presentation which may
+involve several steps. This makes those steps all invisible until
+nx[tk]_setvisibility() is called to make the windows visible.
+From Gregory Nutt.
+- NX Graphics: Add new NX interfaces to query if a window is hidden
+or not. From Gregory Nutt.
+- NxTerm IOCTLs: Replace specific interfaces between boardctl and
+nxterm with a generalized IOCTL interface. From Gregory Nutt.
+- NxTerm: Add a new IOCTL that can be used to inform NxTerm that
+the size of a window has changed. From Gregory Nutt.
+
+* Other Common Device Drivers:
+
+- CAN Upper Half: Support multiple readers of the same port From
+Valmantas Paliksa.
+- MAX7456: Adds a read-only (for now) /dev/osd0/CM interface for
+obtaining the chip's onboard NVM character map data. Use seek()
+to position the cursor over a desired subset of bytes, or request
+a large read to obtain the entire EEPROM memory contents. Values
+are returned in binary form. Use hexdump, etc. to format them for
+viewing. From Bill Gatliff.
+- Serial Upper Half: The upper half serial driver configuration
+CONFIG_SERIAL_DMA used to enable DMA on both RX and TX streams.
+This was replaced with CONFIG_SERIAL_RXDMA and CONFIG_SERIAKL_TXDMA
+which will permit supporting DMA on only one or both streams.
+From Gregory Nutt.
+- FUSB303: Add FUSB303 driver From Juha Niskanen.
+
+* Microchip PIC32MZ Drivers:
+
+- PIC32MZ GPIO: Adds support for edge detect mode. Slew Rate was
+also added for completeness. From Abdelatif Guettouche.
+
+* Microchip/Atmel SAMv7 Boards
+
+- SAME70-xplained: Add a configuration for test Twm4Nx using VNC.
+From Gregory Nutt.
+
+* Microchip LPCxx Drivers:
+
+- LPC17xx Ethernet: Added support for KSZ8081RNA PHY to LPC17xx
+Ethernet driver. From jjlange.
+- LPC17xx Ethernet: Added support for Ethernet PHY ioctl() on
+LPC17xx. From jjlange.
+
+* NXP i.MX RT:
+
+- .i.MXRT1020: Gets imx1020 family support started. It is pretty
+similar, but subtly different, to 1050/60 (less PLLs, less GPIO
+banks, differently numbered ports etc. etc.).
+
+Moved each of the imxrt family-specific files into its own
+subdirectory to tidy things up a bit, and remove the vast majority
+of ifdefs from the mainline code.
+
+From Dave Marples.
+
+* NXP LPC54xx Drivers
+
+- LPC54xx USB FS Host: Bring in the USB FS OHCI driver from LPC17.
+This is a quick'n'dirty port from LPC17 that I hope finish
+sometime later. Currently, it is missing hardware clocking setup
+and is not even hooked into the build system yet. From Gregory
+Nutt.
+
+* NXP LPC54xx Boards
+
+- LPCXpresso-LPC54628: Add a Twm4Nx configuration. From Gregory Nutt.
+
+* Sony CXD56xx
+
+- CXD56xx: Add initial CXD56xx chip driver sources. From Nobuto
+Kobayashi.
+
+* Sony CXD56xx Spresense Board
+
+- Spresense: Add Spresense board support. This is not the full
+Spresense BSP from Sony, only the barebones logic to present an
+NSH console. From Nobuto Kobayashi.
+
+* STMicro STM32:
+
+- STM32F7 Clocking: Add support for using the HSE in bypass mode,
+configured by board.h From Anthony Merlino.
+- STM32F7 Clocking: Added support for TICKLESS mode. From Valmantas
+Paliksa.
+- STM32H7 Backup Domain: Add backup domain control registers. From
+Jukka Laitinen.
+- STM32H7 Clocking: Set the STM32H7 default HSI pre-divider to 4.
+The I2C driver currently assumes HSI clock to be 16MHz. From Jukka
+Laitinen.
+- STM32H7 Memorymap.: Add the STM32H7 SYSTEM_UID and DEBUGMCU_BASE
+register definitions. From Jukka Laitinen.
+- STM32L071x: Add support for STM32L071x. From Mateusz Szafoni.
+
+* STMicro STM32 Drivers:
+
+- STM32 OTGHS Host: Allow VBUS monitoring for the OTG_HS host
+driver. From Jason Harris.
+- STM32F0/L0 ADC: Initial ADC support for the STM32 M0 From Mateusz
+Szafoni.
+- STM32F0/LO I2C: Port STM32F7 I2C to STM32F0/L0, From Mateusz Szafoni.
+- STM32F1 FLASH: As noted by Matias N, the FLASH base address used
+was incorrect. It was using the address of the FLASH data, not
+the address of the FLASH registers. From Gregory Nutt.
+- STM32F3 I2C: Port STM32F7 I2C to STM32F3. From Mateusz Szafoni.
+- STM32F7 Ethernet.c: Auto-generate Ethernet MAC address from
+device unique ID. From Valmantas Paliksa.
+- STM32F7 FLASH: Add flash block mapping support for progmem. From
+Valmantas Paliksa.
+- STM32F7 FMC: Updated stm32_fmc.h with more FMC definitions. From
+Joao Matos.
+- STM32F7 GPIO: Adds additional pin alternate function for SPI2.
+From Anthony Merlino.
+- STM32F7 PWM: Ported the PWM from F4 to F7. From Eduard Niesner.
+- STM32F7 SDMMC: Support bypassing the input clock divider on the
+SDMMC interface. This enables using the full clock speed provided
+to the SDMMC interface with no dividing. From Anthony Merlino.
+- STM32F7 SPI: Add SPI DMA threshold configuration. From Valmantas
+Paliksa.
+- STM32F7 UID: Add UID access. From Valmantas Paliksa.
+- STM32F7 USB: USB High speed for STM32F7 series From Ramtin Amin.
+- STM32H7 Ethernet: Add stm32h7 Ethernet driver. This is the
+initial push for the Ethernet driver. The driver has been tested
+to be working on a nucleo board. This is still WIP, it doesn't
+for example do MAC filtering on HW level, but just receives all
+Ethernet packets. From Jukka Laitinen.
+- STM32H7 GPIO: Add the GPIO_ETH_RMII_RXD1 pinmap definition for
+STM32H7. From Jukka Laitinen.
+- STM32H7 SDMMC: Add STM32H7 SDMMC driver. It is mostly copied
+from STM32F7, with modified register addresses and bits, and IDMA
+dded. This is still WIP; it only works with IDMA. From Jukka
+Laitinen.
+- STM32H7 Timers: Add timer devices driver for STM32H7. This i
+mostly a forklift from stm32f7 with some h7 specific
+modifications. From Jukka Laitinen.
+- STM32L0 AES: Add support for AES for L0. From Mateusz Szafoni.
+- STM32L0 RND: Add support for RND. From Mateusz Szafoni.
+- STM32L0 HSI48: Add support for HS148 for L0. Move HSI48 enable
+from stm32_usbdev.c to stm32xx_rcc.c From Mateusz Szafoni.
+- STM32L4 USB FS Device: Add USB FS device support. From Juha
+Niskanen.
+- STM32L4 HSI48: Port HSI48 from STM32F0/L0 From Juha Niskanen.
+- STM32L4 CRS: Port CRS from STM32F0/L0 From Juha Niskanen.
+
+* STMicro STM32 Boards:
+
+- B-L072Z-LRWAN1: Add ADC example. From Mateusz Szafoni.
+- B-L072Z-LRWAN1: Add nxlines_oled example (ssd1306). Add support
+for the I2C tool From Mateusz Szafoni.
+- Nucleo-144: Added STM32_RCC_DCKCFGR2_DSISRC definition to board.h.
+From Joao Matos.
+- Nucleo-144: Mount sysfs for ifconfig for f767-netnsh/defconfig.
+Even if ifconfig is working to set IP, it will not work to display
+NICs (without args) From Phil Coval.
+- Nucleo-144: Add basic PWM support to nucleo-144 board. More PWMs
+and multi channels support may be investigated and added later.
+Tested on Nucleo-F767ZI. From Phil Coval.
+- Nucleo-F303ZE: Add nxlines_oled example (ssd1306) From Mateusz
+Szafoni.
+- Nucleo-H743ZI: Enable the FPU. From Jason Harris.
+- Nucleo-H743ZI: Add support for I2C devices: ssd1306, pca9635,
+i2ctools From Mateusz Szafoni.
+- Nucleo-H743ZI: Add default clock configuration for SDMMC for
+Nucleo-H743ZI's board.h. From Jukka Laitinen.
+- Nucleo-H743ZI: Add the input clock frequency definitions in
+board.h for all the drivers. Assumes internal clock source for
+all the timers. From Jukka Laitinen.
+- STM32F4 Discovery: Keep c++ global constructor symbols From
+Masayuki Ishikawa.
+- Nucleo-L073RZ: Add MFRC522 support From Mateusz Szafoni.
+- OmnibusF4: Add boardctl() reset logic. From Bill Gatliff.
+- OmnibusF4: Add board_ioctl() which is needed only if
+CONFIG_BOARDCTL_IOCTL=y is selected; Update NSH configuration
+to enable board IOCTLs and DFU mode reset. From Bill Gatliff.
+- STM32L Discovery: Add support for board_late_initialize(), Move
+common initialization logic out of board_app_initialize() into new
+file stm32_bringup.c From Gregory Nutt.
+- STM32F103-Minimum: Add PROCFS automount support From Alan
+Carvalho de Assis.
+
+* Libraries/Header Files:
+
+- include/alloca.h: Add alloca.h. Included limited implementation
+of alloc() that is only available for GCC versions 3 and above.
+From Joao Matos.
+- include/cxx/cstdlib: Add std::random() From Gregory Nutt.
+
+* apps/ General:
+
+- Many locations: Remove references to CONFIG_DISABLE_SIGNALS.
+Signals can no longer be disabled. From Gregory Nutt.
+
+* Examples/Tests: apps/examples:
+
+- apps/examples/fb: Add some awareness of overlays to
+apps/examples/fb From Matthew Koch.
+- apps/examples/lvgldemo. Update to Littlevgl 5.3. From Matthew
+Koch.
+- apps/examples/pwfb: Extend example to verify software cursors.
+From Gregory Nutt.
+- apps/examples/pwfb: Add options to reduce the number of windows.
+This is helpful during debug to reduce the complexity. From
+Gregory Nutt.
+
+* Network Utilities: apps/netutils:
+
+- apps/netutils/cjson: Support for the current version of cJSON.
+From Mateusz Szafoni.
+- apps/netutils/libcurl4nx: This is an initial commit libcurl4nx.
+It is not complete yet, but I still wish to commit the unfinished
+bits to describe the roadmap, and because it is already usable. It
+will be updated and fixed in the future weeks and months, certainly
+including POST support and later, SSL. From Sebastien Lorquet.
+- apps/netutils/netinit. This commit removes the private network
+initialization logic from NSH and puts in a common location at
+apps/netutils/netinit. Now that netork initialization logic can be
+used by applications that do not include NSH. From Gregory Nutt.
+- apps/netutils/netlib: Add a more flexible version of
+netlib_parsehttpurl(). This one can parse any URL, and is
+extensible so future improvements keep the same API. From Sebastien
+Lorquet.
+
+* System Utilities: apps/system
+
+- apps/system/spi: I needed a small test tool for spi in the style of
+the I2C tool, but I didn't see one so I've hacked one out of the I2C
+tool source. From Dave Marples.
+
+* Graphics: apps/graphics:
+
+- apps/graphics/twm4nx. This release introduces Twm4Nx. Twm4Nx is a
+"port" of TWM, Tab Window Manager (or Tom's Window Manager) version
+1.0.10 to NuttX NX windows server. No, a port is not the right
+word. It is are-design of TWM from the inside out to work with the
+NuttX NX server and NXWidgets. The name Twm4Nx reflects this
+legacy. But Twm4Nx is more a homage to TWM than a port of TWM.
+
+The original TWM was based on X11 which provides a rich set of
+features. TWM provided titlebars, shaped windows, several forms of
+icon management, user-defined macro functions, click-to-type and
+pointer-driven keyboard focus, graphic contexts, and user-specified
+key and pointer button bindings, etc.
+
+Twm4Nx, on the other hand is based on the NuttX NX server which
+provides comparatively minimal support. Additional drawing support
+comes from the NuttX NxWidgets library (which necessitated a
+conversion to C++).
+
+Twm4Nx is greatly stripped down and targeted on small embedded systems
+with minimal resources. For example, no assumption is made about the
+availability of a file system; no .twmrc file is used.
+
+The state of the "port" is available in
+apps/graphics/twm4mx/README.txt. To summarize: The port is fully
+functional but probably only at an alpha release level. The only
+missing critical feature is built-in touchscreen calibration.
+
+- apps/graphics/littlevgl. Update to Littlevgl 5.3. From Matthew
+Koch.
+- apps/graphics/nxglyphs: Put all NxWidgets and NxWM glyphs into a
+common directory where they can eventually be shared. Decouple
+from nxwidgets and nxwm so that they can be used elsewhere.
+Creates include/graphics/nxglyphs.h From Gregory Nutt.
+- apps/graphics/nxglyphs: Add some new cursor bitmap images. From
+Gregory Nutt.
+- apps/graphics/nxglyphs: Add mkcursor.c. Will auto-generate
+cursor image header file from Gimp C output. From Gregory Nutt.
+- apps/graphics/nxglyphs: Add 16x16 cursor images. 30x30 are kind
+of large on small displays. From Gregory Nutt.
+- apps/graphics/nxglyphs: Add a new resize cursor image. From
+Gregory Nutt.
+- apps/graphics/nxwm: Separate NxWidgets and NxWM into separate
+directories. Remove old, common NxWidgets directory. From
+Gregory Nutt.
+- apps/graphics/nxwm: Move the NxWM unit test main() to apps/nxwm.
+It is no longer a unit test, but the main startup entry point for
+NxWM. From Gregory Nutt.
+- apps/graphics/nxwidgets: Update NX window clients so that they
+use the new 'event' callback (vs. the obsoleted 'blocked' callback).
+From Gregory Nutt.
+- apps/graphics/nxwidgets: Add a synchronize method to every window.
+This is a wrapper arounc nx[tk]_sync and permits C++ applications
+to synchronize with the NX server. From Gregory Nutt.
+- apps/graphics/nxwidgets: Add support for modal windows. From
+Gregory Nutt.
+- apps/graphics/nxwidgets: Add cursor control methods to the
+CNxServer class. From Gregory Nutt.
+- apps/graphics/nxwidgets: Add a method to CButtonArray that will
+allow us to dynamically resize the array (at the cost of losing all
+button labels). From Gregory Nutt.
+- apps/graphics/nxwidgets: Fix a possible deadlock condition when
+waiting for window geometry data that will never come. Fixed by
+re-requesting geometry data if we don't already have it. From
+Gregory Nutt.
+- apps/graphics/nxwidgets: Add handshake to
+CWidgetControl::getWindowHandle() to avoid returning a NULL
+handle. From Gregory Nutt.
+- apps/graphics/nxwidgets: CNxTkWindow, CNxWindow, CNxServer: Add
+support to create RAM backed windows. From Gregory Nutt.
+- apps/graphics/nxwidgets: Add methods to all windows to query if a
+window is visible or hidden. From Gregory Nutt.
+
+Bugfixes. Only the most critical bugfixes are listed here (see the
+ChangeLog for the complete list of bugfixes and for additional, more
+detailed bugfix information):
+
+* Core OS:
+
+- Clock Initialization: A recent change broke Tickless mode for all
+architectures. The original change was intended to handle the
+case where up_timer_gettime may not start from zero case. The
+side effect is that this changed to order of initialization of
+clocking, breaking Tickless mode:: After this change the tickless
+timer structures are used before they are initialized in
+clock_inittime(). The commit has been reverted.
+- pthread Stack Attribute: Fixed pthread_attr_get/setstacksize
+param type to size_t. From Joao Matos.
+- Signals: The abnormal termination signal handler was just calling
+exit() conditionally when, for example, Ctrl-C is sent to a task.
+The abnormal termination handler must obey the rules of cancellation
+points: If cancellation is disabled, then the abnormal termination
+logic must wait for cancellation to be re-enabled; If cancellation
+is deferred then the abnormal termination logic may have to wait
+for the victim task to enter or exit a cancellation point. From
+Gregory Nutt.
+- Syscall: Added support for munmap() syscall. From Joao Matos.
+- Syscall: Fix a warning due to inconsistencies in return type in
+syscall.csv. From Gregory Nutt.
+- Syscall: Correct an error syscall.csv. Error occurred when
+creating the munmap() proxy if CONFIG_FS_RAMMAP is not defined.
+From Gregory Nutt.
+
+* File System/Block and MTD Drivers:
+
+- fs/littlefs/lfs.c: Fix lfs_format bug. In superblock disk root-
+block assignment, the second must be root[1]. From YanLin Zhu.
+
+* Networking/Network Drivers:
+
+- getsockname(): Fix addrlen check in socket debug features.
+Getsockname() checked erroneously a pointer against 0, where the
+intention was to dereference the pointer and to check the length.
+This causes also a compilation failure if the code is compiled
+with CONFIG_DEBUG_FEATURES and with -Werror flag set. From Jukka
+Laitinen.
+- Network Locking: net_lock() and net_restorelock() now return a
+value. That values is the standard zero on success; negated errn
+value on failure. This return value is only needed for
+-ECANCELED. That cancellation indication needs to ripple all the
+way back to the highest levels where the cancellation can be acted
+on. This commit only adds the return value; it does not add
+checking for the return values of net_lock() and net_restorelock()
+at higher levels. That is required too. From Gregory Nutt.
+- PHY Notification Driver: Change sprintf to strncpy in phy_notify.
+On some platforms, the sprintf doesn't accept a const char* as a
+format argument. From Jukka Laitinen.
+- 6LoWPAN HC06: Correct an endian-ness problem in HC06 decompression.
+From Ivan Ucherdzhiev.
+
+* Wireless/Wireless Drivers:
+
+- NRF24L01: Don't block in read if file descriptor is O_NONBLOCK.
+From Leif Jakob.
+
+* Graphics/Display Drivers:
+
+- NX Graphics: Fix an error in coordinate system usage. Expected
+rectangle in device coordinate frame, but was passing the
+rectangle in window-relative coordinate frame. From Gregory Nutt.
+- NX Graphics: Fix an oversight in the implementation of per-window
+framebuffers. It is true that redraw callbacks can be suppressed
+for all cases ... EXCEPT ONE: When the window is resized to a
+larger size, then the newly exposed territory must be drawn for
+the first time. From Gregory Nutt.
+- NxTK: Fix an error in handling mouse events for framed windows.
+When drawing, NX may report mouse positions outside of the Window.
+The is only for NX windows, but the outside-the-side positions were
+being discarded by nxtk_events(). From Gregory Nutt.
+- NxTK: Refuse to open a toolbar of height zero or less. From
+Gregory Nutt.
+- Nxglib: Correct bogus logic in nxgl_interesting(). From Gregory
+Nutt.
+- VNC Server: Fix an error in color conversion. From Gregory Nutt.
+
+* Common Drivers:
+
+- APDS9960: Initial state of allocated structure was not being set.
+Noted by Leif Jacob. From Gregory Nutt.
+- MFRC522: In mfrc522_read uid.sak must be different from 0x04 not
+as before from 0x00. SAK == 0x00 is a valid PICC type. Add
+interface to read MIFARE Ultralight data From Mateusz Szafoni.
+- Power: Fix build for battery gauge From Tom Kopriva.
+- Syslog: In syslog buffered mode, avoid IOB alloc lock-up with
+heavy network activity. This change alters the buffered syslog
+logic to use 'iob_tryalloc' instead of blocking 'iob_alloc' to
+avoid syslog printing from getting stuck when all IOBs are
+depleted by network activity. An issue was seen when large
+incoming TCP transfer uses free IOB buffers and processing
+threads try to use syslog which then block at iob_alloc. From
+Jussi Kivilinna.
+- USB CDC/ACM Device: This fixes a problem where the host sent a
+"get descriptor" message of type "standard" with a recipient of
+type "interface". Since the composite driver would only pass
+messages to the child interfaces when a message was not
+"standard", this message was not handled. I changed the condition
+so that the composite driver checks not only if this is a
+"standard" message but if it is also directed to the device.
+Otherwise, the handling is delegated to the children of the
+composite device. From Matias N.
+- USB HID: The usbhid_descriptor_s struct defined in hid.h included
+some optional fields that should not be hard-defined as part of
+that structure. An arbitrary number of optional entries could be
+included in the descriptor, but that is not properly represented.
+No code on NuttX currently depends on the structure definition
+with an optional descriptor so it is safe to remove. From Matias N.
+- USB MSC Device: Correct typo "const const" to "const".
+arch/arm/src/stm32/stm32_i2s.c: In debug assertions, it on a
+sample rate of 0, but based on other code comments this value
+implies disabling the i2s master clock. From Jason Harris.
+- Zerocross Driver: Fix some errors when debug assertions are
+enabled. From Matous Pokorny.
+- User Leds: Fix ledset validity check in ULEDIOC_SETALL ioctl.
+From Jussi Kivilinna.
+
+* Architecture Common:
+
+- All board interfaces (those starting with board_) must be defined
+in board-specific logic. Otherwise, they cannot be customized for
+specialized usage by different boards. The board_reset()
+interface was defined in architecture-specific logic that only
+called up_systemreset(). That is useless! This change removes
+the board_reset() implementation from the architecture-specific
+code and re-implements it in the src/ directory of each board that
+has CONFIG_BOARDCTL_RESET enabled. That is the correct functional
+partitioning. From Gregory Nutt.
+- Start-up: Remove dependency on CONFIG_ARCH_FPU for inclusion of
+nvic.h in all other *_start.c files. From Gregory Nutt.
+- Architecture initialization: up_initialize() needs to know about
+ramlog_consoleinit() From Jason Harris.
+
+* Microchip PIC32MZ Drivers:
+
+- PIC32MZ GPIO: Corrects the gpioirq when mismatch mode is
+selected. From Abdelatif Guettouche.
+
+* ARMv7-A:
+
+- ARMv7-A Build: Fix 'cc1: warning: switch -mcpu=cortex-a7 conflicts
+with -march=armv7-a switch' From Xiang Xiao.
+
+* Nordic NRFxx
+
+- NRF52: Fix compiler error in nrf52832_errdata.c when following
+C89. From Erik Englund.
+
+* STMicro STM32:
+
+- STM32 Configuration: It seems one option in the timer configuration
+was lost at some point. From Matias N.
+- STM32 start-up: Inclusion of nvic.h should not be conditioned on
+CONFIG_ARCH_FPU. From Mateusz Szafoni.
+- STM32H7 Clocking: Fixes for STM32H7 RCC definitions. From Jukka
+Laitinen.
+
+* STMicro STM32 Drivers:
+
+- STM32F0/L USART: A few fixes for USART. From Mateusz Szafoni.
+- STM32F1/F30 FLASH: RCC register access should not be offset by
+FLASH register base. From Matias N.
+- STM32F7 CAN: CAN fixes. From Valmantas Paliksa.
+- STM32F7 I2C: I2C Interrupt storm fix. I2C track bad state. Now
+we track bad state and so the SW reset only when it occurs. From
+David Sidrane.
+- STM32F7 OTG: Fixes some macros related to OTGFS/OTGHS preventing
+OTGHS from working. From Anthony Merlino.
+- STM32F7 OTG Device: Correct hard-coded FIFO size that is wrong
+for OTG FS. From Ramtin Amin.
+- STM32F7 QSPI: Fix QuadSPI interrupts. This commit essentially
+replaces wrongly named configuration variable STM32F7_QSPI_INTERRUPTS
+into CONFIG_STM32F7_QSPI_INTERRUPTS. Also fixes some getreg/
+putreg where register addresses were used instead of register
+offsets From Pierre-Olivier Vauboin.
+- STM32H7 I2C: Fix I2C4 compilation for STM32H7. From Jukka
+Laitinen.
+- STM32H7 UART: Fix compilation for UART7, UART8 and I2C4s. From
+Jukka Laitinen.
+- STM32L4 USB Device: Add missing PWR USBV enable, correct two USB
+register bits From Juha Niskanen.
+
+* STMicro STM32 Boards:
+
+- STM32F103-Minimum: USB reset was not working appropriately since
+the pin connected to D+ was incorrectly defined and the pullup/down
+logic was reversed. From Matias N.
+- Nucleo-l476RG: Fix some errors in GPIO logic when debug assertions
+are enabled. From Matous Pokorny.
+- Nucleo-L476RG: Add missing files of BMP180 example for Nucleo-L476RG.
+From Fabian Justi.
+- STM32F103-Minimum GPIO: Fix some errors when debug assertions are
+enabled. From Matous Pokorny.
+- STM32L4 PWM: Fix register addr, en_bit and resetbit for pwm timers.
+From Fabian Justi.
+- STM32F746G-DISCO: I2C1 config on stm32f746g-disco. Typo in
+stm32f7/stm32_i2c.c From Matthew Koch.
+
+* C Library/Header Files:
+
+- include/limits.h: Remove the duplicate TMP_MAX definitions. The
+standard requires that TMP_MAX defines be in stdio.h. From
+Xiang Xiao.
+- include/sys/select.h: Fix compiler error when
+CONFIG_NSOCKET_DESCRIPTORS is undefined. From Xiang Xiao.
+- include/signal.h: Add commented out definition of the si_addr
+field. From Joao Matos.
+- include/unistd.h: Fixed R_OK/X_OK definitions to match POSIX.
+From Joao Matos.
+
+- libs/libc/locale: Improved error handling in setlocale(). From Joao
+Matos.
+- libs/libc: Fixed return code in uname(). From Joao Matos.
+- libs/libc/stdio: Restore support for printing NULL string as
+"(null)". Legacy printf supported printing "(null)" in place for
+NULL string: printf("null: %s\n", NULL); => null: (null). This
+commit restores this functionality for new printf library. From
+Jussi Kivilinna.
+
+* Examples: apps/examples:
+
+- apps/examples/pca9635/pca9635_main.c: fix compilation error. From
+Mateusz Szafoni.
+
+* Graphics Utilities: apps/graphics:
+
+- Various graphics apps (and apps/examples): If CONFIG_VNCSERVER=y,
+don't call vnc_default_fbinitialize() directly. That is a violation
+of the portable POSIX interface. Instead, call
+boardctl(BOARDIOC_VNC_START);. From Gregory Nutt.
+- apps/graphics/nxwidgets: CWidgetControl::handleLeftClick now
+returns a value to indicate if the click was actually processed or
+not. CWidgetControl::pollMouseEvents: Correct return value. From
+Gregory Nutt.
+- apps/graphics/nxwidgets/: NXWidgets::CNxWidgets: Fix some issues
+with returned values. On setting the widget size or position, it was
+returning false if there was no change in size or position. Many
+places in the code were treating the false return value as an error.
+From Gregory Nutt.
+
+* System Utilities: apps/system:
+
+- apps/system/nxplayer: Fix some logical errors from recent commits.
+They broke the build of the nxplayer as a library vs. a task.

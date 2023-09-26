@@ -1,0 +1,41 @@
+NuttX-0.3.14
+-----------
+
+This is the 26th release of NuttX. This release includes some
+important bugfixes as well as a few new features. Critical bugs
+fixed include:
+
+FAT FS:
+* Fixed several critical bugs with regard to fat reading and
+writing and FAT12 accesses. Basically the FAT FS only worked
+with my tiny test files and test cases. A lot of stronger FAT
+tested is still needed!
+* Fixed another FAT bug in implementation of FAT lseek();
+this prohibited correct random access to large files.
+
+Network:
+* Corrected a critical bug that may prevent recvfrom from receiving
+packets from most remote UDP port numbers.
+* Corrected an error in multi-threaded socket handling in send() and
+sendto(). Outgoing data could overwrite incoming data.
+* Corrected IP checksum calculation in ICMP and UDP message send logic.
+* Corrected an error in send() timeout logic.
+
+New features were also added:
+
+Network:
+* Added support for application access to ICMP protocol stacks
+* Added ping request logic (net/uip).
+* Added basic TFTP client logic (netutils/tftpc).
+
+NuttShell (NSH):
+* New commands: 'test', '[', 'ping', 'mkrd', 'xd', and TFTP 'get' and 'put'
+See the new NuttShell User Guide for additional information.
+
+Other less critical bugs were also fixed and other less important
+features were were added. See the ChangeLog for details.
+
+These changes were verified only on the Neuros OSD (ARM9). Please
+report any errors to me.
+
+This tarball contains a complete CVS snapshot from September 8, 2008.

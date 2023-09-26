@@ -1,0 +1,404 @@
+NuttX-7.9
+---------
+
+The 109th release of NuttX, Version 7.9, was made on April 14, 2015,
+and is available for download from the SourceForge website. Note
+that release consists of two tarballs: nuttx-7.9.tar.gz and
+apps-7.9.tar.gz. Both may be needed (see the top-level nuttx/README.txt
+file for build information).
+
+Additional new features and extended functionality:
+
+* Core OS:
+
+- Assertions: Add support for dumping board-specific information on
+assertions. From David Sidrane.
+- boardctl(): : Add a new non-standard OS interface called boardctl().
+This is similar to a driver IOCTL call. But this is an IOCTL call
+directly on the board logic. This function will eventually replace
+all of the ad hoc OS interfaces that are current used to perform
+application specific initialization and application driver test
+configuration. It essentially formalizes and institutionalizes
+these rogue interface in to at least a single crazy call.
+
+* Graphics:
+
+- Line Joins: Line drawing graphic functions now take an argument that
+will draw a circular "cap" on the ends of lines to support cleaner
+joining of lines segments..
+
+* Common Drivers:
+
+- SPI iInterface: Add an SPIDEV_USER so that there can be board-
+specific definitions of SPI devices.
+- I2C Interface: Add a user provided void * argument to the I2C
+callback method for the I2C slave interface. Suggested by Nate
+Weibley.
+- AT24 EEPROM Driver: Add support for (1) the byte-oriented read()
+method, (2) devices that have extended memory regions, and (3)
+devices that use 8-bit addressing.
+- Freescale MPL115A barometer: Add driver for the Freescale MPL115A
+barometer. From Alan Carvalho de Assis.
+- CS2100-CP: Add a driver for the CS2100-CP Fractional-N Multipler
+chip.
+- RTC IOCTls: Added the definitions of a driver based RTC interfaces
+and RTC upper half driver.
+
+* File Systems/Block Drivers/MTD:
+
+- umount2(): Added to support un-mount flags. umount() is now a macro
+that just calls umount2() with flags = 0.
+- File system interface: Pass the umount2() flags to every unbind()
+implementation. That is where the decision to umount or not and how
+to umount will be made.
+- FAT unbind: Add support for umount2(target, MNT_FORCE) in the FAT
+file system.
+
+* Networking:
+
+- netdev_register(): Improve the network device registration logic.
+When multiple link types are used, modify how each interface number
+is assigned to the device name by incrementing the device number
+individually for each interface link type. From Max Neklyudov.
+- Add TUN network device. Used to support the Netutils PPPD
+implementation. From Max Neklyudov.
+
+* ARMv7-M
+
+- ARM Cortex-M7: Add basic support for the Cortex-M7 architecture.
+- ARMv7 Common Lazy Exception handling. Add common support for lazy
+FPU state saving. MCU-specific lazy FPU saving was already in place.
+This change just makes the code share-able.
+
+* Atmel SAMA5D3/4 Drivers:
+
+- SAMA5 Serial: Backport support for flowcontrol and termios from
+SAM3/4.
+
+* Atmel SAMV7:
+
+- Atmel SAMV7: Add architecture support for the Atmel SAMV7 family
+(Cortex-M7)
+
+* Atmel SAMV7 Boards:
+
+- Atmel SAMV71 Xplained Ultra: Add board support for this SAMV7 board.
+This initialize release includes support for: SDRAM, TWI/I2C, SPI,
+Ethernet, HSMCI, DMA, GPIOs, UARTs, AT24 EEPROM and the maXTouch
+Xplained Pro LCD. Drivers are available for SSC/I2C, the WM8904,
+the maXTouch trouchscreen, and USB device but have not yet been
+fully integrated in this release.
+
+* SiLabs EFM32 Drivers:
+
+- EFM32 USB Device is now functional with the efforts of From Pierre-
+noel Bouteville.
+- EFM32 I2C: Add I2C driver. From Pierre-noel Bouteville.
+
+* STMicro STM32:
+
+- STM32F372/F373: Adds architecture support for this STM32 parts.
+Tested on STM32F373CC. Contributed by Marten Svanfeldt.
+
+* STMicro STM32 Drivers:
+
+- STM32 RTCC: Break out a new internal interface, stm32_rtc_setdatetime().
+This eliminates some un-necessary time conversions. From Freddie Chopin.
+- STM32 RTCC: Add an implementation of the RTC lower half interface
+for the STM32.
+- STM32 RTCC: Extend the RTC interface to support reading subseconds.
+From Jussi Kivilinna.
+- STM32 BBSRAM: Adds the ability to use the STM32F2 and STM32F4 Battery
+Backed SRAM in the file system. With an option to Save Panic context
+to one of the files. From David Sidrane.
+
+* STMicro STM32 Boards:
+
+- Olimexino-STM32: Board support for the Olimexino STM32 board from David
+Sidrane.
+- Viewtool-STM32F107: Add support for an optional, add-on Freescale
+MPL115A baramoter. From Alan Carvalho de Assis.
+
+* TI Tiva:
+
+- TM4C1294: Add support for the TM4C1294. Contributed by Frank Sautter.
+
+* TI Tiva Drivers:
+
+- Tiva ADC: Updated files to allow for ADC and PWM triggering by a
+timer. Refactoring of ADC implementation. From Calvin Maguranis.
+- Tiva Timer: Refactoring by Calvin Maguranis
+
+* TI Tiva Boards:
+
+- TM4C123G-launchpad: Add ADC support. From Calvin Maguranis.
+- TM4C123G-launchpad: Add board button interrupt support. From Calvin
+Maguranis.
+- TM4C1294 Launchpad: Add support for the TM4C1294 Launchpad.
+Contributed by Frank Sautter.
+
+* Microchip PIC32
+
+- PIC32MZ: Add architectural support for the PIC32MZ (MIPS32 M14k).
+Includes contributions from Kristopher Tate.
+
+* Microchip PIC32MZ Boards
+
+- PIC32MZ Starter Kit: Add basic board support for the PIC32MZ.
+Includes contributions from David Sidrane.
+
+* C Library/Header Files:
+
+- gettimeofday(): This function is no longer a core OS interface. It
+is only a wrapper around clock_settime().
+- settimeofday(): Added. gettimeofday has been deprecated in POSIX
+2008. settimeofday() was never part of POSIX, but I decided to add
+it to libc as well just for symmetry.
+- Day-of-Week: Add CONFIG_TIME_EXTENDED to support the last 3 members
+of the tm struct and support for filling them in with the day of the
+week. From David Sidrane.
+- sighold(), sigrelse(), sigignore(), sigset() and sigpause(): New
+signal handling functions.
+- sys/select.h: Extend the fd_set type definition so that it can
+handle more than 32 descriptors (if so configured). From Max
+Neklyudov.
+- netdb.h: Add a mostly-commented-out version of the standard netdb.h
+header file.
+- include/nuttx/board.h: Remove common board function prototypes from
+other files and consolidate them in this new header file.
+
+* Applications:
+
+- OS test: Improved error checking for sem_timedwait() from Juha
+Niskanen.
+- OS test: Add a simple test of sigprocmask, sighold, and sigrelse.
+- PPPD test: Add PPPD test case. Split out from the PPPD daemon by
+Brennan Ashton.
+- Netutils: Add a PPP daemon. From Max Neklyudov.
+- NSH: NSH initialization now calls boardctl(BOARDIOC_INIT) instead
+of nsh_archinitialize(). Remove support for CONFIG_NSH_ARCHMAC.
+It is not used and there are better ways to do that operation.
+- NSH: Allow NSH 'date' command with no hardware RTC. This command
+is useful without an RTC too. Also, this permits testing on the
+simulator which never has an RTC.
+- apps/examples/: Several tests changed (touchscreen adc, pwm,
+graphics). No longer call directly into the OS, but rather
+indirectly via boardctl().
+- Modbus: Includes extensions to support RTU master mode by
+Armink(383016632@qq.com): https://github.com/armink/FreeModbus_Slave-Master-RTT-STM32.
+Ported to NuttX by Darcy Gong.
+- TZ database: All logic to build timezone database needed for
+localtime() support. Does not do much else yet.
+
+Efforts In Progress. The following are features that are partially
+implemented but present in this release. They are not likely to be
+completed soon.
+
+* Processes. Much of the work in this release is focused on the
+realization of Unix-style user processes in NuttX. There is more to
+be done, however. The full roadmap and status is available at:
+https://cwiki.apache.org/confluence/display/NUTTX/Memory+Configurations
+
+* XMega: There are some fragments in place for an XMega port. That
+port has not really started, however.
+
+Bugfixes. Only the most critical bugfixes are listed here (see the
+ChangeLog for the complete list of bugfixes and for additional, more
+detailed bugfix information):
+
+* Core OS:
+
+- atexit(): Fix compile failure due to reference to undefined variable
+in certain configurations. From Juha Niskanen.
+- syscalls: Last changes to message queue prototypes did not make it
+into call gate logic. Some additional errors had crept as well since
+the system calls are seldom used.
+- waitpid(): Do not use uninitialized boolean in waitpid(). From Juha
+Niskanen.
+- Timing functions: Fix some nanosecond comparisons. Comparisons should
+be greater than OR EQUAL TO 1000000000 for maximum value of nanoseconds
+in struct tm. From Juha Niskanen.
+- Time initialization: Fix an error in time initialization when there
+is no RTC and the time is initialized from a fixed configured value.
+The call to clock_calendar2utc() was returning the time in units of
+seconds. The initialization logic, however, was expecting to get
+time in units of days. This problem has been there forever but
+obviously has not significant impact to behavior in systems where
+time is not visible.
+- mq_timedsend(): Should not check for valid time if there is space
+in the message queue. Noted by Freddie Chopin.
+- select() and sem_timedwait(): Fix places where the errno value was
+being overwritten by subsequent actions so that the returned errno
+value was incorrect. From Max Neklyudov.
+- clock_systimer64(): Fix a problem in clock_systimer64 that occurs
+when (1) the 64-bit system time is enabled, and (2) the value of
+CONFIG_USEC_PER_TICK is less than 1 milliseconds (such as when using
+the tickless mode of operation). In that case, the conversion of
+time to 64-bit millisecond value in clock_systmer64() causes some
+bad times to be returned. Time was converted to milliseconds, then
+to configured ticks. Precision was lost in the millisecond
+conversion. The fix is to first convert time to a 64-bit microsecond
+value, then to the configured tick value. Noted by David Sidrane.
+- clock_systimespec(): When an RTC is used clock_systimespec() must
+subtract the basetime from the returned time. It needs to return
+the time since power up, no the current time. Issue noted by Max
+Neklyudov.
+- AIO: correct some backward tests in aio_read() and aio_write():
+Socket descriptors have higher numbers than file descriptors. In
+aio_contain(), Copy u.ptr (void *) when initializing aioc and not
+the case specific u.aioc_filep. From Michal Ulianko.
+
+* File Systems/Block Drivers/MTD:
+
+- procfs: Fix potential NULL pointer dereference of 'node'. From
+Juha Niskanen.
+- FAT: fat_unbind() was accessing 'fs->fs_sem' after freeing the 'fs'
+struct. From Juha Niskanen.
+- mkfatfs: Use DMA memory for mkfatfs when needed. This makes mkfatfs
+use fat_dma_alloc() when CONFIG_FAT_DMAMEMORY is set. This is needed
+to ensure mkfatfs operates with boards that use DMA for microSD.
+From Andrew Tridgell via the PX4/NuttX repository.
+- FAT unmount: Fix a bug in the FAT unbind() logic. There were
+problems with the way certain internal list handling was
+implemented. The end result is that newly opened or cloned file
+structures were never being added to the list of open files. So
+when the unmount() happens, it always looked like there were not
+open files and a crash could ensue.
+- FAT mounting: Fix misthink when CONFIG_ENDIAN_BIG=y. From Lwazi Dube.
+
+* Common Drivers:
+
+- CAN upper half driver: Some lines had to be reordered in the can_open
+function otherwise the open count will only be incremented from 0 to
+1. This caused problems when trying to open the can bus from two
+different tasks. SourceForge Patch #46.
+
+* Crypto:
+
+- crypto: Fix issues when AES support was added for the STM32L1.
+From Juha Niskanen.
+
+* Networking:
+
+- Network initialization: Divide net_intiialize() into net_setup() and
+net_initialize() to solve a chicken-and-egg problem. net_setup()
+must be called before up_initialize() is called so that networking
+data structures are ready to register new network devices.
+net_initialize() now does only timer related operations and is
+called AFTER up_initialize() where the timers are configured.
+Problem noted by Max Neklyudov.
+- netdev_unregister(): Fix a list handling error. From Max Neklyudov.
+- Socket dup: Do not call sockfd_socket() twice. From Juha Niskanen.
+
+* Common Drivers:
+
+- max11802 touchscreen: Fix possible unmatched IRQ restore (not
+normally a problem, but could happen in certain configurations).
+Noted by Juha Niskanen.
+- MMCSD SPI Multi-block transfers: ACMD23 must be preceded with CMD55
+command as any other ACMD commands. Also, after the block reading
+wait loop must be inserted before writing the next block of data to
+the sd card. From Dmitry Nikolaev via Jussi Kivilinna.
+- MMCSD SDIO: Fix some bad logic when file system debug is turned on:
+Arguments to syslog were missing so that garbage was being printed.
+- Common upper-half serial driver: Report correct number of bytes free
+in serial buffer with FIONWRITE. From Sami Pelkonen via Jussi Kivilinna.
+- Pipes/Fifos: Fix zero-lenth writes to pipes/FIFOs. From Jussi Kivilinna.
+- USB device MSC: Add NULL pointer check. From Juha Niskanen.
+- BCH driver: Avoid NULL pointer dereference when bch->refs == 255.
+From Juha Niskanen.
+- Various drivers: The inode unlink method should not be support if
+operations on the root pseudo-filesystem are disabled.
+
+* ARMv7-M
+
+- ARMv7M MPU: Bad syntax in ARMv7-M MPU logic would cause failure to
+write the correct value to the MPU_RASR register. From Juha Niskanen.
+
+* Atmel SAM3/4 Drivers:
+
+- SAM3/4 Serial TERMIOS: A side-effect of changing serial settings
+via TERMIOS (such as tcsetattr) is that serial interrupts were being
+left disabled. This is not a problem if the serial configuration is
+changed when there are no open references to the serial device. In
+that case, serial interrupts are disabled and will not be enabled
+enabled until the serial device is first opened. But it is fatal if
+the serial device is already opened and if there is a task waiting
+to receive data. In that case, the side-effect of disabling
+interrupts is fatal: That task is then left hanging with interrupts
+disabled.
+- SAM3/4 Serial: The IMR register is read-only. This means that
+sam_restoreints() did not actually re-enable UART interrupts
+(Fortunately, that function was not being used up to this point).
+- SAMA5 HSMCI: Fix a bug in SAMA5 HSMCI. The bitfield mask and shift
+values were reversed resulting in a trashed value for the number of
+blocks in the BLOCKR register. This was sufficient to prevent DMA
+writes from working.
+
+* Atmel SAMA5 Drivers:
+
+- SAMA5 Timer/Counter: Fix typos in timer/counter header file. From
+Bob Doiron.
+
+* STMicro STM32 Drivers:
+
+- STM32 PWR and RTC: Changes to support fully write protecting the
+backup domain. N.B. stm32_pwr_enablebkp did not account for the delay
+from enable to the domain being writable. The KISS solution is a
+up_udelay. A more complex solution would be a negated write test
+with restore. From David Sidrane.
+- STM32 SPI: Add missing SPI callback functions to the STM32 SPI
+driver. From Freddie Chopin.
+- STM32 I2C: Add missing NULL check. From Juha Niskanen.
+- STM32 USB device: Fix stale initialization invalidating later NULL
+check. From Juha Niskanen.
+- STM32 UART: Fix RX DMA setup for UART5. From Jussi Kivilinna.
+- STM32 UART: Make input hardware flow-control work with RX DMA. From
+Jussi Kivilinna.
+- STM32 RTC and clock control: The STM32F4Discovery board doesn't
+come with a Low speed external oscillator so the default LSE source
+for the RTC doesn't work. In stm32_rtcc.c the up_rtc_initialize()
+logic doesn't work with the LSI. The check on RTC_MAGIC on the BK0R
+register lead to rtc_setup() call that rightfully enables the LSI
+clock; but the next times, when the rtc is already setup, the
+rtc_resume() call does NOT start the LSI clock! The right place to
+put LSE/LSI initialization is inside stm32_stdclockconfig() in
+stm32fxxxxx_rcc.c. Doing this I checked the possible uses of the
+LSI and the LSE sources: the LSI can be used for RTC and/or the
+IWDG, while the LSE only for the RTC (and to output the MCO1 pin).
+This change is not verified for any other platforms. From Leo
+Aloe3132
+
+* Tiva Drivers:
+
+- Tiva GPIO driver needed small fixes in the configuration routines and
+discovered false-positive bugs in interrupt testing: interrupts are
+now verified to actually be working reliably. From Calvin Maguranis .
+
+* MIPS32:
+
+- mips32/Toolchain.mk: Current Pinguino toolchain uses the prefix p32-
+instead of mips-.
+
+* C Library/Header Files:
+
+- sigaddset() and sigdelset(): Need to set errno if a bad signal
+number is received.
+- sfrtime(): Missing implementation of %C in sfrtime() C (was being
+treated as %y). From Freddie Chopin.
+- pthread.h: Fix PTHREAD_COND_INITIALIZER.
+- ungetc.c: Fix NULL pointer dereference in ungetc() if 'stream' was
+NULL, 'stream->fs_oflags' was evaluated. From Juha Niskanen.
+- Fixes to asinh(), atanh(), and sinh(): The 'basic' expansions all
+exhibited bad cancellation errors near zero (<= 1E-10). This can be
+easily seen e.g. with x = 1E-30, the results are all zero though they
+should be extremely close to x. The cutoff values (1E-5, 1E-9) are
+chosen so that the next term in the Taylor series is negligible (for
+double). Functions could maybe be optimized to use only first term (x)
+and a smaller cutoff, just bigger than where the cancellation occurs
+- localtime(): Inconsistent configuration name: CONFIG_LIBC_TZDIR vs
+CONFIG_LIBC_TZ_TZDIR. Former wins.
+
+* Applications:
+
+- Modbus: Fix some compile problems when TCP is enabled.

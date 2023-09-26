@@ -1,0 +1,83 @@
+NuttX-6.5
+---------
+
+The 72nd release of NuttX, Version 6.5, was made on June 21, 2011
+and is available for download from the SourceForge website. The
+6.5 release is all about support for the Atmel 8-bit AVR family.
+I have been interested in the AVR family for some time but because
+of the severe SRAM constraints and because of the availability of
+many tiny schedulers for the AVR, it has not been "on the radar
+screen." However, I have recently become interested because of
+interest expressed by members of the forum and because of the
+availability of newer, larger capacity AVR parts (that I don't have
+yet).
+
+This release corresponds with SVN release number: r3730
+
+This release includes support for the following AVR boards. As
+with any initial support for new architectures, there are some
+incomplete areas and a few caveats that need to be stated. Here
+they are, ordered from the least to the most complete:
+
+* SoC Robotics Amber Web Server (ATMega128).
+
+This port of NuttX to the Amber Web Server from SoC Robotics
+(http://www.soc-robotics.com/index.htm). Is only partially in
+place. The Amber Web Server is based on an Atmel ATMega128
+(128K FLASH but only 4K of SRAM).
+
+STATUS: Work on this port has stalled due to toolchain issues. It
+is complete, but untested.
+
+* Micropendous 3 AT9USB647
+
+This port of NuttX to the Opendous Micropendous 3 board. The
+Micropendous3 may be populated with an AT90USB646, 647, 1286,
+or 1287. See http://code.google.com/p/opendous/. I have only
+the AT90USB647 version for testing. This version has very
+limited memory resources: 64K of FLASH and 4K of SRAM.
+
+STATUS: The basic port was released in NuttX-6.5. This basic
+port consists only of a "Hello, World!!" example that demonstrates
+initialization of the OS, creation of a simple task, and serial
+console output. The tiny SRAM limits what you can do with the
+AT90USB647 (see issues below).
+
+* PJRC Teensy++ 2.0 AT9USB1286
+
+This is a port of NuttX to the PJRC Teensy++ 2.0 board. This
+board was developed by PJRC (http://pjrc.com/teensy/). The
+Teensy++ 2.0 is based on an Atmel AT90USB1286 MCU with 128K
+of FLASH and 8K of SRAM; a little more room to move than the
+AT90USB647.
+
+STATUS: The basic port was released in NuttX-6.5. This basic
+port consists of a "Hello, World!!" example and also slightly
+simplified NuttShell (NSH) configuration (see the NSH User Guide
+at https://nuttx.apache.org/docs/latest/components/nsh/index.html).
+
+An SPI driver and a USB device driver exist for the AT90USB as
+well as a USB mass storage configuration. However, this
+configuration is not fully debugged as of the NuttX-6.5 release.
+
+AVR-specific issues. The basic AVR port is solid and biggest issue
+for using AVR is its tiny SRAM memory and its Harvard architecture.
+Because of the Harvard architecture, constant data that resides to
+flash is inaccessible using "normal" memory reads and writes (only
+SRAM data can be accessed "normally"). Special AVR instructions
+are available for accessing data in FLASH, but these have not been
+integrated into the normal, general purpose OS.
+
+Most NuttX test applications are console-oriented with lots of
+strings used for printf and debug output. These strings are all
+stored in SRAM now due to these data accessing issues and even the
+smallest console-oriented applications can quickly fill a 4-8K
+memory. So, in order for the AVR port to be useful, one of two
+things would need to be done:
+
+1. Don't use console applications that required lots of strings.
+The basic AVR port is solid and your typical deeply embedded
+application should work fine.
+
+2. Create a special version of printf that knows how to access
+strings that reside in FLASH (or EEPROM).

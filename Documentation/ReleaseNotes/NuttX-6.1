@@ -1,0 +1,50 @@
+NuttX-6.1
+---------
+
+The 68th release of NuttX, Version 6.1, was made on April 10, 2011
+and is available for download from the SourceForge website. The
+6.0 release introduced a detach-able application environment to
+build applications outside of the NuttX source tree. The primary
+purpose of this release is to correct numerous build problems
+introduced by that architectural change:
+
+* In many newer environments, NuttX produced strange Makefile
+errors but built correctly in older environments. A fix provided
+by Rafael Noronha was incorporated and is reported to fix those
+build problems.
+* The apps/ directory build system would not handle Windows-native
+toolchains due to obscure path formatting issues.
+* And other problems as detailed in the Changelog.
+
+Many additional changes were made in the 6.1 release for another
+major architectural change: NuttX will now build as a separately
+linked microkernel. In this build option the RTOS builds as a
+kernel, applications build separately and interface with kernel via
+system calls. Applications run in user mode and kernel logic users
+in kernel-mode. This provides a secure environment for NuttX. This
+feature is fully coded in NuttX-6.1, but has not been tested due
+to higher priority tasks that have arisen.
+
+Related to this change, support for the Cortex-M3 memory protection
+unit (MPU) has been integrated with the NuttX kernel build to provide
+an even higher level of security.
+
+NOTE: This kernel build is an option; the default build configuration
+is still the standard, flat, unsecured RTOS as in previous releases.
+
+Additional new features in this release:
+
+* Support for LPC17xx GPIO interrupts (with much support from
+Decio Renno).
+* Basic timer support for STM32 (Contributed by Uros Platise)
+* A binfs file system. This is a tiny pseudo file system that
+lets named applications to be viewed and accessed in NSH under
+the /bin directory.
+* An I2C-based driver for the LIS331DL MEMS motion sensor.
+(Contributed by Uros Platise.)
+* A configuration for the Embedded Artists LPCXpresso LPC1768 board.
+* The user_initialize() interface has been removed.
+
+And several bugfix associated with SD drivers, opendir(), signed
+8-bit types (int8_t), and USB serial device. See the ChangeLog for
+details.

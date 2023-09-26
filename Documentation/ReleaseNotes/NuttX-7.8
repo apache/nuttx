@@ -1,0 +1,318 @@
+NuttX-7.8
+---------
+
+The 108th release of NuttX, Version 7.8, was made on February 11, 2015,
+and is available for download from the SourceForge website. Note
+that release consists of two tarballs: nuttx-7.8.tar.gz and
+apps-7.8.tar.gz. Both may be needed (see the top-level nuttx/README.txt
+file for build information).
+
+This release is primarily a bugfix release for the NuttX-7.7 version that
+was release just two weeks prior. That release included substantial
+modifications in the NuttX networking to accommodate support for IPv6. This
+release follows close behind NuttX-7.7 in order to correct some the problems
+discovered in that networking code. This release does, however, include a
+small number of new features and bug fixes unrelated to NuttX networking.
+
+Additional new features and extended functionality:
+
+* Core OS:
+
+- Tickless Mode: added limit of maximum delay that can be request
+by the scheduler tickless logic. This is necessary so that the
+tickless logic does not request a delay beyond the capability of the
+underlying hardware. From Macs Neklyudov.
+
+* Common Drivers:
+
+- VFS Unlink: Add an unlink method to both the character and block
+driver interface. This is important because if the driver inode is
+unlinked and there are no open references to the driver, then the
+driver resources will be stranded. On the unlink call, the driver
+has the opportunity (1) check if there an any open references, and
+if not, (2) free the driver resources.
+- Pipes and FIFOs: Implement the unlink method. If the pipe/FIFO is
+unlinked, it will marked the pipe/FIFO as unlinked. If/when all
+open references to the driver are closed, all of the driver
+resources will be freed.
+- Added an option to use the syslog'ing device as the system console.
+This option enables a low-level, write-only console device at
+/dev/console (similar to the low-level UART console device). From
+Pierre-noel Bouteville.
+
+* File Systems/Block Drivers/MTD:
+
+- RAM/ROM disk: Add logic to dispose of the driver and RAM buffer
+when the RAM disk has been unlinked and all open references to the
+RAM disk have been closed. Add new parameters to romdisk() to
+specify what should be done with the RAM/ROM buffer in this case --
+Should it be freed or not? Changed all calls to ramdisk() to use
+these new parameters.
+
+* Networking:
+
+- Add support for local, Unix domain sockets. Support included for
+both SOCK_STREAM and SOCK_DGRAM style local socket.
+- UDP enhancement: Add UDP read-ahead support. In addition to
+eliminating the main reason for lost UDP packets, then change
+enables support for for poll/select on UDP sockets and also non-
+blocking UDP sockets. From Macs Neklyudov.
+- SLIP interface improvements. From Macs Neklyudov.
+- IPv6 Neighbor Solicitation: Added logic to support verification
+that we have the IPv6 address in the Neighbor Table before sending
+any packets. If not, then the Neighbor Solicitation message is
+sent. This feature is important because otherwise the first packet
+sent to a remote peer will fail (it would have been replaced with a
+Neighbor Solicitation).
+- IPv6 Autonomous Auto-Configuration: Added support for sending
+ICMPv6 Router Solicitation and receiving Router advertisement. The
+local IPv6 address, mask, and router address are then auto-configured
+from the response..
+- IPv6 Router Support: Add logic to behave like a router (if so
+configured) only in the sense that NuttX will send the router
+advertisement message in response to any received router solicitation
+messages. Thus, one NuttX node in a network can configure the IPv6
+addresses of all other nodes in the network.
+- Optional IPv6 address filtering added to all Ethernet drivers for
+the all-routers multicast address.
+
+* Atmel AVR:
+
+- Added architecture support for the Atmel AVR ATMega1284P MCU. From
+Jedi Tek'Unum.
+
+* Atmel AVR Boards:
+
+- Added support for the LowPowerLab MoteinoMEGA that is based on the
+Atmel AVR ATMega1284P MCU. From Jedi Tek'Unum.
+
+* Atmel SAMA4:
+
+- Add support for Tickless mode of operation for the SAM4CM platform.
+From Macs Neklyudov.
+
+* Atmel SAMA4 Drivers:
+
+- Ethernet: The SAM4E Ethernet driver can now be configuration to
+perform all network processing on the work queue. This greatly
+reduces the amount of interrupt level processing to service Ethernet
+packets.
+- SAM4E Ethernet: Add support multicast address matching and IPv6.
+
+* Atmel SAMA4 Boards:
+
+- SAM4E-EK: The nsh configuration now configures the Ethernet driver
+for execution on the work thread.
+
+* Atmel SAMA5D Drivers:
+
+- SAMA5D4 Ethernet: The SAMA5D4 Ethernet driver can now be configuration
+to perform all network processing on the work queue. This greatly
+reduces the amount of interrupt level processing to service Ethernet
+packets.
+- SAMA5D3 and SAMA5D4 Ethernet: Add support multicast address matching
+and IPv6.
+
+* Atmel SAMA5D Boards:
+
+- SAMA5D4-EK; Added a configuration to testing IPv6.
+- SAMA5D4-EK: Converted the nsh and ipv6 configurations to configure
+the Ethernet driver to use the work queue (vs. interrupt level
+processing).
+
+* Freescale KL:
+
+- Add architectural support for the K26Z128VLH4 chip. From Derek B. Noonburg.
+
+* Freescale KL Boards:
+
+- Add board support for the Freedom KL26Z board. From Derek B. Noonburg.
+
+* NXP LPC17xx Drivers:
+
+- Ethernet: Add support multicast address matching and IPv6.
+
+* SiLabs EFM32:
+
+- Add configurable option to unconditionally enable LE clocking. Even
+you don't use core clock LE as source for LFA or LFB, to read are
+write any register not clocked by HFPERCLK or HFCORECLK, HFCORECLKLE
+should be enabled. From Pierre-noel Bouteville.
+
+* SiLabs EFM32 Drivers:
+
+- EFM32 RTC: RTC driver using BURTC. From Pierre-Noel Bouteville.
+
+* STMicro STM32 Drivers:
+
+- AES: Add driver for STM32L162XX AES peripheral. From Juha Niskanen.
+- Ethernet: The STM32 Ethernet driver can now be configuration to
+perform all network processing on the work queue. This greatly
+reduces the amount of interrupt level processing to service Ethernet
+packets.
+- Ethernet: Add support multicast address matching and IPv6.
+
+* STMicro STM32 Boards:
+
+- Added an IPv6 configuration for the STM32F4-Discovery board (with the
+STM32-DISCO_BB base board).
+- Converted all STM32F4-Discovery configurations (with base board) to
+configure the Ethernet driver to use the work queue (vs. interrupt
+level processing).
+
+* TI Tiva Drivers:
+
+- Added support for TM4C123G timers. From Calvin Maguranis.
+- Added a Tiva ADC driver. From Calvin Maguranis.
+
+* TI Tiva Boards:
+
+- Added TM4C123G timers on the TM4C123G Launchpad. From Calvin Maguranis.
+- Added Tiva ADC support to the TM4C123G-Launchpad. From Calvin Maguranis.
+
+* C Library/Header Files:
+
+- Math Library: Added support for inverse hyperbolic functions,
+isfinite(), error functions, nan(), copysign(), and trunc()
+functions. From Brennan Ashton.
+
+* Applications:
+
+- apps/examples/ustream: Add a simple test of Unix domain stream
+sockets.
+- apps/examples/udgram: Add a simple test of Unix domain datagram
+sockets.
+- apps/netutils/netlib: Add utilities to convert to/from prefix
+lengths from/to 128-bit network masks.
+- apps/nshlib: Modify the NSH IPv6 ifconfig command to show the more
+standard post-pended prefix value, rather than the full 128-bit
+netmask.
+
+Efforts In Progress. The following are features that are partially
+implemented but present in this release. They are not likely to be
+completed soon.
+
+* Processes. Much of the work in this release is focused on the
+realization of Unix-style user processes in NuttX. There is more to
+be done, however. The full roadmap and status is available at:
+https://cwiki.apache.org/confluence/display/NUTTX/Memory+Configurations
+
+* XMega: There are some fragments in place for an XMega port. That
+port has not really started, however.
+
+Bugfixes. Only the most critical bugfixes are listed here (see the
+ChangeLog for the complete list of bugfixes and for additional, more
+detailed bugfix information):
+
+* Core OS:
+
+- Work Queues: Fix a backward calculation when determining the time
+to the next interesting event. . From Liio Chen via the PX4
+repository.
+- clock_systimespec(): Fixes for compilation errors in certain
+configurations. From Macs Neklyudov.
+
+* Graphics
+
+- Fixed a problem with one of the font files. From Pierre-noel Bouteville.
+
+* Networking:
+
+- IOB Deadlock: There were issues with the TCP write-ahead buffering
+if CONFIG_NET_NOINTS was enabled: There is a possibility of
+deadlocks in certain timing conditions: The network should never
+wait for TCP read-ahead buffering space to be available. It should
+drop the packets immediately if no buffering is available. This was
+fixed by duplicating most of the IOB interfaces: The versions that
+waited are still present (like iob_alloc()), but now there are non-
+waiting versions of the same interfaces (like iob_tryalloc()). The
+TCP read-ahead logic now uses only these non-waiting interfaces.
+- TCP Deadlock: Fix another deadlock when CONFIG_NET_NOINTS is enabled.
+tcp_write_buffer_alloc() calls sem_wait() with network locked. That
+worked if CONFIG_NET_NOINTS was not defined because interrupts are
+automatically restored when the wait happens. But with
+CONFIG_NET_NOINTS=y, the wait blocks with the network locked -- bad
+style and also can lead to a deadlock condition.
+- ARP response waiting: Fixes another CONFIG_NET_NOINTS issue. When
+called sem_timedwait() with the network locked, the network stays
+locked while we wait which is not what we want (without CONFIG_NET_NOINTS,
+interrupts are re-enabled while we wait and all is well).
+- TCP accept(): Fix a major TCP bug introduced with the NuttX-7.7
+IPv6 changes: Some connection logic was reordered; setting the
+socket as 'connected' got moved to BEFORE the point where the check
+was made if the socket was already connected. The resulting behavior
+was odd: Telnet would connect, but then when you exit and reconnect,
+it would fail to connect. But then if try again, it would connect
+okay. So the symptom was connect-fail-connect-fail-...
+- Lots of build problems introduced into multiple NIC support with the
+IPv6 changes of NuttX-7.7. Many places where conditional logic based
+on CONFIG_NETDEV_MULTINIC is confused with CONFIG_NET_MULTILINK.
+Lots of code changed with IPv6 that was never compiled with MULTINIC
+enabled.
+
+* Common Drivers:
+
+- Pipes and FIFOs: Fix a race condition between FIFO buffer operations
+and the opening and closing of FIFOs which necessary when the FIFOs
+are used to support Unix domain, datagram sockets. The default
+policy is the deallocate FIFO buffering when the last client closes
+the pipe. When when used for datagram communications, packets left
+in the FIFO will be lost. Some like UDP read-ahead is needed: The
+buffered data in the FIFO needs to be retained until the reader gets
+a chance to re-open the FIFO. Added an ioctl (PIPEIOC_POLICY) to
+control the buffer policy. Default (0) is the legacy behavior; Unix
+domain datagram logic sets the alternative policy so that the packet
+data persists after the FIFO is closed.
+- RAMTRON: Table of parts is not terminated properly if
+CONFIG_RAMTRON_FRAM_NON_JEDEC is not defined. Noted by David
+Sidrane.
+
+* All Architectures:
+
+- Removed all occurrences of up_maskack_irq() that disables interrupts
+with up_ack_irq() that only acknowledges the interrupts. This is only
+used in interrupt decoding logic. Also remove the logic that
+unconditionally re-enables interrupts with the interrupt exits. This
+interferes with the drivers ability to control the interrupt state.
+This is a necessary, sweeping, global change and unfortunately
+impossible to test.
+
+* ARM
+
+- ARMv7-A and ARMv7-M memcpy(): Optimized ARM assembly language
+memcpy's were not returning a value in R0 they are required to do.
+From David Sidrane.
+- ARMv7-A interrupt handler should not automatically re-enable interrupts
+on interrupt return. That interferes with the driver's ability to
+manage interrupts. Analogous change made to all other architectures
+as well (ARM7, ARM9, HC, SH, x86, z16, z80, etc,. See above.).
+
+* STMicro STM32:
+
+- GPIO Interrupts: Disabling any of EXTI 5-9 interrupts was disabling
+interrupts for all EXTI 5-9. Same issue with EXTI 10-15. From Jussi
+Kivilinna.
+
+* STMicro STM32 Drivers:
+
+- RTCC: Fix for recent changes that caused compilation failrues with
+STM32L15XX configurations. From Jussi Kivilinna.
+- SPI: The source clock for SPI 4,5, and 6 should be PCLK2, not PCLK1
+(for F411, F427, and F429). Per David Sidrane.
+
+* C Library/Header Files:
+
+- execl(): Fix bad logic in counting the number of arguments.
+execl() parameter passing could never have worked. Noted by
+Pierre-noel Bouteville.
+
+* Applications:
+
+- Fix for building with parallel make. Build-server sometimes failed
+'make -j24' with errors in the builtin line or or sometimes silently
+succeeds but generated builds that contain a random subset of
+configured NuttX applications. There are two root causes for this:
+(1) Recipes for building builtin_list.h and builtin_proto.h are
+not linearizable, and (2) Nothing ensures that 'make context' is run
+first for apps/builtin. This change address both issues. From Juha
+Niskanen.

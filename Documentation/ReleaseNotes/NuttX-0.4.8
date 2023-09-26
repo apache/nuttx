@@ -1,0 +1,21 @@
+NuttX-0.4.8
+-----------
+
+This is the 40th release of NuttX. This release adds:
+
+* Support for the Olimex STRP711 board. That board is based on
+the STMicro STR711 MCU (ARM7TDMI). Integration is complete on
+the basic port (boot logic, system time, serial console). Two
+configurations have been verified: (1) The board boots and
+passes the OS test with console output visible on UART0, and
+the NuttShell (NSH) is fully functional with interrupt driven
+serial console. An SPI driver is available but untested (because
+the Olimex card slot appears to accept only MMC cards; I have
+only SD cards). Additional needed: USB and driver, MMC
+integration.
+
+* Support for the CodeSourcery and devkitARM Windows-native GNU
+toolchains. Makefiles have been modified for the LM3S6918,
+LPC2148, and STR711 to support these toolchains under Cygwin.
+
+This tarball contains a complete CVS snapshot from June 13, 2009.

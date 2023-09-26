@@ -1,0 +1,37 @@
+NuttX-5.5
+---------
+
+This is the 52nd release of NuttX. This release includes one new
+port, some new drivers and some important bugfixes:
+
+* NuttX was ported to the Luminary/TI LM3S6965 Ethernet Evaluation
+Kit. At present, that port includes an OS test configuration
+and a NuttShell (NSH) configuration with Telnet support.
+
+MMC/SD and Networking support are provided but not thoroughly
+verified in this release: Current development efforts are focused
+on porting the NuttX window system (NX) to work with the
+Evaluation Kits OLED display.
+
+* A NuttX Ethernet driver for the Microchip ENC28J60 SPI Ethernet
+chip is available in the source tree (but has not yet been fully
+verified because I haven't properly connected it to hardware
+yet).
+
+* The Olimex STR-P711 NuttX port was extended to support the
+ENC28J60 and some new networking configurations were added.
+The ENC28J60 has not been tested on the STR-P711, however,
+because of hardware issues (I don't think the USB powered board
+provides enough power for the ENC28J60 and I don't have the
+right wall wart yet).
+
+Along the way, external interrupt support (XTI) was added to
+the STMicro STR-P711 port and some important bugs were fixed
+in the STR-P711 SPI driver.
+
+* Added (optional) floating point support for printf().
+(Contributed by Yolande Cates.)
+
+* Corrected an important UDP reference counting error. It was
+not a serious error, but it trigger an assertion was IS a serious
+error.

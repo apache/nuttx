@@ -1,0 +1,69 @@
+NuttX-6.9
+---------
+
+The 76th release of NuttX, Version 6.9, was made on September 11, 2011
+and is available for download from the SourceForge website. Note
+that release consists of two tarballs: nuttx-6.9.tar.gz and
+apps-6.9.tar.gz. Both may be needed (see the top-level nuttx/README.txt
+file for build information).
+
+This release includes a few new features and several important bug fixes.
+The new features (some still incomplete) include:
+
+* Analog Support/ NXP LPC17xx: New DAC sub-system including ADC and DAC
+drivers for the LPC17xx. Extensions to the ADS1255 driver.
+(Contributed by Li Zhuoyi (Lzyy))
+
+* Power Management: Added a new NuttX power management sub-system for
+controlling and coordinating reduced power states. At present, only
+verified in a simulation environment.
+
+* I2C Test Tool: A new application was added that can be used to
+verify and debug I2C interfaces from the NuttShell (NSH) command
+line.
+
+* NuttShell (NSH): In addition to the I2C test tool, a date command
+is now supported (if CONFIG_RTC is defined) that can be used to
+read and set the RTC.
+
+* NXP LPC17xx: I2C and DAC driver for the NXP LPC17xx family submitted by Li Zhuoyi
+(Lzyy)
+
+* Kinetis Cortex-M4: Added a SDHC driver for the Kinetis parts.
+Complete debug of the Kinetis SDHC driver was not completed, however,
+do to some higher priority tasks that forced me to stop work.
+
+* Other new drivers: Driver for I2C-based at24cxx EEPROM submitted by
+Li Zhuoyi (Lzyy); Driver for the LM-75 temperature sensor. Support
+for the LM-75 temperature sensor integrated into the SM3210E-EVAL
+development board.
+
+* NuttX Graphics (NX): Added new NX interfaces for drawing circles,
+both circle outlines and filled circles.
+
+* FLASH: Added a function that accepts the path to a block driver and
+then erases the underlying FLASH memory
+
+* Build System: The Make export logic now also tries to track down all
+architecture-specific header files and include these in the NuttX
+export bundle as well. Various changes and modifications so that
+NuttX wil build on FreeBSD using the ASH shell (submitted by Kurt Lidl).
+
+Bugfixes, order roughly on decreasing criticality include:
+
+* STM32 I2C Driver: Add resets, timeout, and other fixes to work
+reliably with the I2C tool. Corrected a major error introduced in
+NuttX 6.8.
+
+* BCH Driver. Several important bugs (noted by Li Zhuoyi (Lzyy))
+were fixed.
+
+* C Library: Fixed errors in gmtime() and gmtime_r() that could lead to
+errors in date calculations.
+
+* Timing: Correct an error in the tv_nsec calculation that happens
+only config CONFIG_RTC is enabled
+
+* Build System: Use of -print-libgcc-file-name to get path to
+libgcc.a might select the wrong libgcc.a if a multilib toolchain
+is used

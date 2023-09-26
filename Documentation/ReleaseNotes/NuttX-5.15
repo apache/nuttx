@@ -1,0 +1,43 @@
+NuttX-5.15
+----------
+
+The 62nd release of NuttX, NuttX-5.15, was made on December 12,
+2010. This release includes several bugfixes as well as feature
+enhancements, primarily for the Olimex LPC1766-STK board.
+
+Important bugfixes included:
+
+* Additional fixes needed with the TCP sequence number problem
+"fixed" in NuttX-5.14.
+* In the send() logic, now checks if the destination IP address
+is in the ARP table before sending the packet; an ARP request
+will go out instead. This improves behavior, for example, on
+the first on the first GET request from a browser
+* All USB class drivers need to call DEV_CONNECT() when they are
+ready to be enumerated. That is, (1) initially when bound to
+the USB driver, and (2) after a USB reset.
+* The SPI_SETBITS macro was calling the SPI setmode method.
+* And several other bug fixes of lower importance (see the
+ChangeLog for details).
+
+And feature enhancements:
+
+* The LPC176x Ethernet driver was using all of AHB SRAM Bank0 for
+Ethernet packet buffers (16K). An option was added to limit
+the amount of SRAM used for packet buffering and to re-use any
+extra Bank0 memory for heap.
+
+* Enabled networking and SD/MMC card support in the Olimex
+LPC1766-STK NuttShell (NSH) configuration.
+
+* The LPC176x USB driver is now fully fully functional.
+* Added an optional cmddata() method to the SPI interface. Some
+devices require an additional out-of-band bit to specify if the
+next word sent to the device is a command or data. The cmddata
+method provides selection of command or data.
+
+* A driver for the Nokia 6100 LCD (with either the Phillips PCF8833
+LCD controller and for the Epson S1D15G10 LCD controller) and
+an NX graphics configuration for the Olimex LPC1766-STK have
+been added. However, neither the LCD driver nor the NX
+configuration have been verified as of the this release.

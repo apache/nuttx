@@ -1,0 +1,21 @@
+NuttX-0.4.6
+-----------
+
+This is the 38th release of NuttX. The release features support
+for the Micromint Eagle-100 development board. This board is based
+around, the Luminary LM3S6918 MCU. This is the first ARM Cortex-M3
+architecture supported by NuttX. This initial, basic port includes
+timer and serial console with configurations to execute the NuttX
+OS test and to run the NuttShell (NSH). Work is still underway on
+this port and current plans are to have I2C, SSI, MMC/SD, and
+Ethernet driver in the 0.4.7 release.
+
+Additional work was done on the MXADS i.MX1 port, however, that
+work has been set aside until I complete work on the Eagle-100 (I
+also need to come up with a 3V power supply).
+
+Other changes in this release include: Extensions to the SPI interface
+definition in order to handle 9-bit interfaces to displays. Several
+bugs were fixed (see the ChangeLog for a complete list of changes).
+
+This tarball contains a complete CVS snapshot from May 19, 2009.

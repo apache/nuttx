@@ -1,0 +1,24 @@
+NuttX-5.7
+---------
+
+This is the 54th release of NuttX. This release adds basic support
+for one new ARM Cortex-M3 architecture:
+
+* Added support for NXP LPC1768 MCU as provided on the Nucleus
+2G board from 2G Engineering (http://www.2g-eng.com).
+* Some initial files for the LPC17xx family were released in NuttX
+5.6, but the first functional release for the NXP LPC1768/Nucleus2G
+occurred with NuttX 5.7.
+* That initial basic release included timer interrupts and a
+serial console and was verified using the NuttX OS test.
+* That release includes a verified NuttShell (NSH) configuration
+(see the https://nuttx.apache.org/docs/latest/components/nsh/index.html).
+* Also included are unverified SPI and USB device drivers.
+
+Further efforts include:
+(1) development of a DMA support library
+(2) SPI-based MMC/SD support
+(3) verification of the USB driver
+
+Watch for announcement of the completed LPC1768 port expected in
+NuttX-5.8.

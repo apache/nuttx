@@ -1,0 +1,289 @@
+NuttX-7.12
+----------
+
+The 112th release of NuttX, Version 7.12, was made on October 1, 2015,
+and is available for download from the Bitbucket.org website. Note
+that release consists of two tarballs: nuttx-7.12.tar.gz and
+apps-7.12.tar.gz. These are available from:
+
+https://bitbucket.org/patacongo/nuttx/downloads
+https://bitbucket.org/nuttx/apps/downloads
+
+Both may be needed (see the top-level nuttx/README.txt file for build
+information).
+
+Additional new features and extended functionality:
+
+* Graphics/Graphic Drivers:
+
+- Added SSD1351 OLED controller support. Contributed by Paul
+Alexander Patience.
+
+* Common Device Drivers:
+
+- MS58xx: Generalize the MS5805 altimeter driver to support other
+family members. From Paul Alexander Patience.
+- CAN driver interface: Add an error indication bit to the CAN
+message report.
+- Developed a new interface for QSPI. Most QSPI hardware (such as the
+SAMV71) used a programmed interface to access the QuadSPI FLASH.
+That programmed interface is no compatible with the simpler NuttX
+SPI data transfer interface.
+- Added a driver for ST25L1*K QuadSPI parts.
+- Renamed the battery driver interface to battery_gauge since it
+really only implements a battery fuel gauge. From Alan Carvalho de
+Assis.
+- Added a new framework to support a batter charger interface. From
+Alan Carvalho de Assis.
+- Added a BQ24250 battery charger driver. From Alan Carvalho de Assis.
+
+* Networking:
+
+- Added support for the local loopback device (dev lo, hostname localhost).
+- Added NetDB support for the local loopback device.
+- Network initialization: Automatically initialize all the TUN and
+loopback devices if they arein the configuration.
+
+* Simulation Platform:
+
+- The simulation now runs under Cygwin64. Modern Cygwin X86_64
+machines follow the Microsoft ABI for parameter passing. The Linux
+System 5 ABI would not work on X86_64-based Cygwin machines. Newer
+Cygwin tool chains do nor pre-pend symbol names with the underscore
+character.
+
+* Atmel SAMA5Dx:
+
+- Added architectural support for the Atmel SAMA5D2 parts. Not fully
+verified in this NuttX release.
+
+* Atmel SAMA5Dx Boards:
+
+- Added support for the Atmel SAMA45D2 Xplained Ultra board. Not
+fully verified in this NuttX release.
+
+* Atmel SAMV7 Drivers:
+
+- SAMV7 USBHS DCD: The device controller driver is (finally)
+functional.
+
+* NXP LPC17xx:
+
+- Implement options to use external SDRAM and or SRAM for the heap.
+From Pavel Pisa.
+
+* NXP LPC43x:
+
+- Added architectural support for the LPC4370. From Lok Tep.
+
+* NXP LPC43xx Drivers:
+
+- Added Ethernet support. From Ilya Averyanov.
+- Added LPC43xx EHCI driver from Ilya Averyanov.
+
+* NXP LPC43xx Drivers:
+
+- Added support for the NXP LPC4370-Link2 development board from Lok
+Tep.
+
+* STMicro STM32:
+
+- Added architectural for STM32F303K6, STM32F303K8, STM32F303C6,
+STM32F303C8, STM32F303RD, and STM32F303RE devices. From Paul
+Alexander Patience.
+
+* STMicro STM32 Drivers:
+
+- Added OTG support for STM32F44x. From David Sidrane.
+
+* STMicro STM32 Boards:
+
+- Added support for the STMicro Nucleo F303ERE board from Paul
+Alexander Patience.
+
+* C Library/Header Files:
+
+- stdlib: Add support for div() to the C library. From OrbitalFox.
+Also added ldiv() and lldiv() which are equivalent to div() with
+long and long long types, respectively, instead of int.
+- Added an implementation of the standard shutdown function.
+
+* Tools:
+
+- tools/mksymtab: declare g_symtab array as const to occupy RO section
+(Flash). From Pavel Pisa.
+
+* Build/Configuration System:
+
+- Simplify configs/ Makefiles by combining common logic into a new
+Board.mk Makefile fragment. From Paul Alexander Patience.
+
+* Applications: apps/system:
+
+- apps/system/symtab: Optional canned symtab inclusion to the build.
+When option CONFIG_SYSTEM_SYMTAB is selected and symbol table file
+libc/symtab/canned_symtab.inc is prepared then application can use
+system provided complete symbol table. The option has substantial
+effect on system image size. Mainly code/text. If loading of
+applications at runtime is not planned do not select this. From
+Pavel Pisa.
+
+* Applications: apps/canutils:
+
+- apps/canutils/uavcan: Add support for libuavcan. From Paul Alexander Patience.
+
+* Applications: apps/examples:
+
+- apps/examples/can: Extend the CAN loopback test by adding more
+command line options.
+- apps/examples/usbserial: Can now be run as an NSH builtin-function.
+Now uses a configurable IO buffer size.
+- apps/examples/nettest: Add option to suppress network initialization.
+This is necessary if the nettest is run from NSH which has already
+initialized the network.
+- apps/examples/nettest: Extend test so that can be performed using
+the local loopback device.
+- apps/examples/netloop: Add a test of the local loopback device.
+- apps/examples/udpblaster: Add a test to stress the network by
+sending UDP packets at a very high rate. .
+- apps/examples/uavcan: libuavcan example from Paul Alexander Patience.
+
+Bugfixes. Only the most critical bugfixes are listed here (see the
+ChangeLog for the complete list of bugfixes and for additional, more
+detailed bugfix information):
+
+* Core OS:
+
+- wd_create(): Correct a counting error in the number of available
+watchdog timers. When the number of free timers is low, the counter
+could be incremented below zero.
+- mq_open(): When message queue is opened, inode_reserve() leaves the
+reference count at zero. mq_open() logic must assure that the
+reference count of the newly created inode is one.
+- work_queue(): Logic that sets the queued indication and the logic
+that does the actual queuing must be atomic.
+
+* Binary Loader:
+
+- Fix a memory leak in the built-in application logic: File was not
+being closed. From Bruno Herrera.
+
+* File System/Block Drivers:
+
+- poll(): If we fail to setup the poll for any file descriptor, for
+any reason, set the POLLERR bit.
+- rwbuffer: Fix some logic errors. From Dmitry Nikolaev via Juha
+Niskanen.
+- ROMFS: One allocation was not being freed if there was a subsequent
+failure to allocation I/O buffers resulting in a memory leak on
+certain error conditions. From Bruno Herrera.
+
+* Networking/Network Drivers:
+
+- Fix a bug in tun interface driver. From Max Neklyudov.
+- recvfrom(): Correct wait for new data when NET_UDP_READAHEAD is
+enabled. Fix size accounting when recvfrom_udpreadahead() sets
+state.rf_recvlen == -1. I have not checked if data are accumulated
+to the right position in the buffer however. From Pavel Pisa.
+- networking: Correct return value from psock_tcp_accept(). From
+SaeHie Park.
+- TCP: Fix a problem in when there are multiple network devices.
+Polls were being sent to all TCP sockets before. This is not good
+because it means that packets may sometimes be sent out on the wrong
+device. That is inefficient because it will cause retransmissions
+and bad performance. But, worse, when one of the devices is not
+Ethernet, it will have a different MSS and, as a result, incorrect
+data transfers can cause crashes. The fix is to lock into a single
+device once the MSS is locked locked down.
+- net/tcp: The logic that binds a specific network device to a
+connection was faulty for the case of multiple network devices. On
+bind(), the local address should be used to associate a device with
+the connection (if the local address is not INADDR_ANY); On connect(),
+the remote address should be used (in case the local address is
+INADDR_ANY). On accept(), it does not matter but the remote address
+is the one guaranteed to be available.
+- net/tcp: Fix unbuffered send compilation error when Ethernet is not
+enabled. From Alan Cavalho de Assis.
+
+* ARMv7-M:
+
+- All ARMV7-M IRQ setup: Always set the NVIC vector table address
+unconditionally. This is needed in cases where the code is running
+with a bootload and when the code is running from RAM. It is also
+needed by the logic of up_ramvec_initialize() which gets the vector
+base address from the NVIC. Suggested by Pavel Pisa.
+- Fix some H/W floating point logic: In the original implementation,
+!defined(CONFIG_ARMV7M_CMNVECTOR) was a sufficient test to determine
+if lazy floating point register saving was being used. But recents
+changes added common lazy register as well so now that test must be
+(!defined(CONFIG_ARMV7M_CMNVECTOR) || defined(CONFIG_ARMV7M_LAZYFPU)).
+- ARMv7-M, all "lazy" interrupt stack logic. Assembly instruction
+that fetches the saved value is incorrect; replace with more
+traditional push and pop. This is an important fix. Noted by
+Stefan Kolb.
+- All ARMV7-M: Force 8-byte stack alignment when calling from assembly
+to C to interrupt handling.
+- up_schedulesigaction(): Fix logic that determines if there is a
+pending signal action before scheduling the next signal action.
+Both the test and the scheduling action need to be atomic. This
+problem was fixed on the ARMv7-M but also ported to other
+architectures that had the same issue.
+
+* NXP LPC43xx:
+
+- LPC43xx: Fix NVIC_SYSH_PRIORITY_STEP define. From Ilya Averyanov.
+- LPC43xx: Fix missing #define in eeprom. From Ilya Averyanov.
+
+* NXP LPC43xx Drivers:
+
+- Fixed the SPI driver. From Ilya Averyanov.
+
+* Atmel SAMA5 Drivers:
+
+- LPC31 and SAMA5D EHCI: Fix qh_ioccheck to move bp to next QH. From
+Ilya Averyanov.
+- LPC31 and SAMA5D EHCI: Performance improvement: Do not disable the
+asynchronous queue when adding a new QH structure. From Ilya
+Averyanov.
+
+* C Library/Header Files:
+
+- gethostbyname(): correct returned address format when DNS is used.
+The hostent.h_addr_list should point to raw in_addr or in6_addr
+as defined in the standard. Original implementation used that for
+numeric addresses but for DNS lookup returned pointer to whole
+sockaddr_in or sockaddr_in6. From Pavel Pisa .
+- asin(): The function did not convert for some input values. asing()
+did not convert for values which do not belong to the domain of the
+function. But aside of that the function also did not converge for
+allowed values. I achieved a conversion of the function by
+reducing the DBL_EPSION and by checking if the input value is in
+the domain of the function. This is a fix for the problem but the
+function should always terminate after a given number of iterations.
+From Stefan Kolb.
+- Change all references from avsprintf to vasprintf. From Sebastien
+Lorquet.
+
+* Applications: apps/nshlib:
+
+- Fix error handling in 'cat' command. On a failure to allocate
+memory, a file was not being closed. From Bruno Herrera.
+- Fix error handling in 'mv' command. On a failure to expand the
+second path, the memory allocated for the expansion of the first
+path was not being freed. From Bruno Herrera.
+
+* Applications: apps/system:
+
+- apps/system/netdb: Failed to build if CONFIG_NET_HOSTFILE was not
+defined because gethostbyaddr() was not available. Noted by
+OrbitalFox.
+
+* Applications: apps/netutils:
+
+- Various Kconfig files in netutils: Fix some changes from from
+NETUTILS_DNSCLIENT to NETDB_DNSCLIENT. From Pavel Pisa.
+
+* Applications: apps/modbus:
+
+- Macros PR_BEGIN_EXTERN_C and PR_END_EXTERN_C were not defined in
+all contexts. Replace with explicit expansion in all cases. From Stefan Kolb.

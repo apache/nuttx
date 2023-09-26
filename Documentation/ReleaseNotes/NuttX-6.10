@@ -1,0 +1,65 @@
+NuttX-6.10
+----------
+
+The 77th release of NuttX, Version 6.10, was made on October 6, 2011
+and is available for download from the SourceForge website. Note
+that release consists of two tarballs: nuttx-6.10.tar.gz and
+apps-6.10.tar.gz. Both may be needed (see the top-level nuttx/README.txt
+file for build information).
+
+This release corresponds with SVN release number: r4028
+
+This release includes a few new features and several important bug fixes.
+The new features (some still incomplete) include:
+
+* CDC ACM serial class device-side driver
+
+* RTC: Now supports hi-res and lo-res hardware RTC. The lo-res RTC
+runs at 1Hz.
+
+* STM32 I2C driver. Now supports faster, polled mode of operation.
+Added an I2C trace capability.
+
+* ADS7843E touchscreen driver. As used on the SAM3U-EK development
+board.
+
+* AT91SAM3U SPI driver. To support the ADS7843E toucscreen
+
+* X11 Support on simulation target. Build errors in the X11 windows
+for the simulated target have been correct. Added support for a
+simulated touchscreen on the X11 window (based on mouse inputs).
+
+* System Timer. Added support for a 64-bit system timer.
+
+* TIFF Support. Added a TIFF library (currently used for storing
+LCD screen shots).
+
+* LCD Support. Added a test to verify that we read and write correct
+to LCD GRAM memory.
+
+* I2C tool. Extended to support to include a verify command and
+repetitions and auto-address increment for most commands.
+
+* USB terminal example. Line oriented serial bridge connects a host
+USB serial terminal to a host UART serial terminal.
+
+* Build System. apps/ Makefile will now include external directories
+in the application build.
+
+Bugfixes, order roughly on decreasing criticality include:
+
+* Message Queues. Correct errors in mq_timedsend() and
+mq_timedreceive().
+
+* FAT. Writes that cross sector boundaries, stray write into the FAT,
+and a FAT long file name issue
+
+* NXFFS. Added a missed error check. Files cannot be opened for
+writing if they are already opened for reading.
+
+* Library: fopen() for append modse was not appending.
+
+* STM32 I2C driver. Correct another conflict between concurrent FSMC
+and I2C1 accesses. Fixed some bad error detection logic.
+
+* STM32 SDHC driver. Interrupts were being left disabled.

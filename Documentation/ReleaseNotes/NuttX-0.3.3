@@ -1,0 +1,31 @@
+NuttX-0.3.3
+-----------
+
+This is the 15th release of NuttX and the 4th release containing
+the integration of a network subsystem and the uIP TCP/IP, UDP, and
+ICMP stacks into NuttX (see http://www.sics.se/~adam/uip/index.php/Main_Page).
+
+Many network-related problems have been fixed and the implementation
+has matured significantly. This release consists of:
+
+o TCP-related bug-fixes for disconnecting sockets
+o Correction of some TCP read-ahead logic
+o TCP performance improvements
+o Misc. additions and cleanup (See the ChangeLog for a complete list of
+changes).
+
+The level of network reliability is at an early beta release level. The
+baseline functionality of NuttX continues to mature and remains at
+post-beta. Open network-related issues include only:
+
+o Some minor unimplemented BSD socket functionality,
+o Thread safety issues: the same socket cannot be used concurrently on
+different threads.
+o Pending design changes necessary to support multiple network interfaces.
+o IPv6 support is incomplete.
+
+This release has been verified only on the Neuros OSD (DM320 ARM9)
+platform using the DM90x0 driver. Any feedback for improving the network
+reliability/performance would be greatly appreciated.
+
+This tarball contains a complete CVS snapshot from November 28, 2007.

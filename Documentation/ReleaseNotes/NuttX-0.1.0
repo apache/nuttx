@@ -1,0 +1,12 @@
+NuttX-0.1.0
+-----------
+
+This is the initial. This initial includes the complete NuttX RTOS
+with support for the Linux user mode simulation and the TI TMS320C5471
+(Arm7) processor. Partial support for the 87C52 is included.
+
+This release has been verified on both the Linux user-mode and C5471
+platforms using the test program under examples/ostest. Test results
+for the C5471 can be found in arch/c5471/doc/test-results.txt.
+
+This tarball contains a complete CVS snapshot from March 9,2007.

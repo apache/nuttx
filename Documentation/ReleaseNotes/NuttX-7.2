@@ -1,0 +1,284 @@
+NuttX-7.2
+---------
+
+The 102nd release of NuttX, Version 7.2, was made on April 29, 2014,
+and is available for download from the SourceForge website. Note
+that release consists of two tarballs: nuttx-7.2.tar.gz and
+apps-7.2.tar.gz. Both may be needed (see the top-level nuttx/README.txt
+file for build information).
+
+Additional new features and extended functionality:
+
+* Core OS:
+
+- Add support for CLOCK_REALTIME. From Macs N.
+
+* Network Utilities:
+
+- Add a very primitive NTP client.
+- DNS resolver: Long needed major clean up for coding style and
+unification of naming conventions (resolv vs dns).
+
+* Common Drivers:
+
+- Add a new MTD driver that can be used to contain another driver and
+force its apparent sector size to be 512 bytes.
+- If DCD can support queuing of stall requests, then the USB MSC stall
+work around delays are not necessary.
+- Redesign threading module used with the USB MSC driver. It was using
+pthreads before and these were changed to a kernel thread. The reason
+for this has to do with task grouping: A pthread is a memory of the
+group of the task that started it. A kernel thread is independent of
+the task that started in (other than knowing it as the parent). This
+allows me to remove so kludge logic to "deparent" the pthread on
+startup.
+- Update the MIO183QT-9A LCD driver to support reading from the LCD.
+From Toby Duckworth.
+- Timer "upper half" driver and l"lower half" interface definition from
+Bob Doiron.
+
+* Atmel SAM4E/4S Board Support:
+
+- All SAM4E configurations updated to run with 120MHz CPU speed and
+with the CMCC enabled.
+- Support for the SAM4S Xplained Pro board from Bob Doiron.
+- Add watchdog driver. From Bob Doiron.
+
+* Atmel SAM4E/4S Drivers:
+
+- Add a USB full speed device driver (UDP) for the SAM4E.
+- Add support in HSMCI and SPI drivers to invalidate cached memory if
+the CMCC is enabled.
+- Add logic to handle SPI word widths > 8
+- Port RTC driver from SAMA5 to SAM3/4. From Bob Doiron.
+- HSMCI: Extensions from Bob Doiron needed to support PDC-based HSMCI
+DMA transfers. Verified on the SAM4S Xplained Pro.
+
+* Atmel SAMA5:
+
+- Add support for the SAMA5D36 chip.
+- Add functions to calculate PLLACK, PCK, and MCK frequencies given
+the main clock frequency.
+- Implemented RAM functions. When booting directly into NOR flash,
+reconfiguring the PLL while executing out of NOR FLASH causes
+crashes. This was fixed by David Sidrane by implementing RAM
+functions. The killer code is copied and executed from ISRAM and
+the crash is avoided.
+
+* Atmel SAMA5 Drivers:
+
+- Add support for the SAMA5D3 DBGU.
+
+* Atmel SAMA5 Board Support:
+
+- Add a board support configuration for the Atmel SAMA5D3 Xplained
+board running out of SDRAM. When booting from SDRAM, start-up logic
+needd to query the PMC registers to determine the MCK, PCK, etc.
+- For all SAMA5 boards, added support for 528MHz clocking.
+
+* TI Tiva/Stellaris:
+
+- Modify the logic to disables the interrupts and sets the default
+interrupt priority so that it uses the ICTR to get the number of
+interrupt lines/registers. This is instead of using some fixed
+number of initializations based a priori knowledge of the number
+of interrupt lines in the MCU.
+
+* STMicro STM32
+
+- Add support for the STM401RE. From Frank Bennett.
+
+* STMicro STM32 Boards:
+
+- STM32F4Discovery: Add support to register keyboard and mouse
+classes if so configured. From Leo.
+- Add support for the Nucleo-F401RE board. From Frank Bennett.
+
+* STMicro STM32 Drivers:
+
+- Add STM32 Ethernet IGMP hashing support. From Manuel Stühn.
+- OTG FS Host: USB host tracing added by Leo.
+
+* Freescale Kinetis
+
+- Modify the logic to disables the interrupts and sets the default
+interrupt priority so that it uses the ICTR to get the number of
+interrupt lines/registers. This is instead of using some fixed
+number of initializations based a priori knowledge of the number
+of interrupt lines in the MCU.
+
+* NXP LPC17xx
+
+- Modify the logic to disables the interrupts and sets the default
+interrupt priority so that it uses the ICTR to get the number of
+interrupt lines/registers. This is instead of using some fixed
+number of initializations based a priori knowledge of the number
+of interrupt lines in the MCU.
+
+* ZiLOG ZNEO Drivers
+
+- Added ZNEO ESPI driver.
+
+* Library:
+
+- Finish incomplete support for ferror(). From Macs N.
+
+* Documentation:
+
+- UsbTrace.html: Add some discussion of the USB monitor.
+
+* Configuration/Build System:
+
+- compiler.h: Add macro UNUSED() that can be used to eliminate
+warnings about variables that are set to values that are not
+used.
+
+* Debugging Support:
+
+- Add a configuration option to enable dumping of the USB trace buffer
+on assertion.
+
+* Applications:
+
+- IGMP Example: Fill out Kconfig file; update makefile so that the
+IGMP example can be used as an NSH built-in application. From Manuel
+Stühn.
+- lcdrw Example: Fill out empty Kconfig file.
+- touchscreen Example: Add a configuration option to indicate if
+architecture-specific initialized is required, yes or no.
+- System usbmsc: Back out the USBMSC daemon... it is no longer needed
+with the recent fix to the USBMSC class driver.
+- NSH: malloc/free IOBUFFER for 'cat' and 'hexdump' commands instead of
+using the stack. From Bob Doiron.
+- cpuhog, serialblaster, and serialrx Examples: Stress test examples
+added by Bob Doiron.
+
+Bugfixes (see the ChangeLog for details). Some of these are very important:
+
+* Core OS:
+
+- errno_get_errno_ptr() and getpid(): Add some checks. If these
+functions are called very early in initialization before the tasking
+structures are initialized, they would not behave properly.
+
+* Networking:
+
+- IGMP-related bug fixes from Manuel Stühn.
+- In netdev_findbyaddr(), skip network devices that are in the "down"
+state. It does not make sense to consider an address match with a
+"down" device. From Brennan Ashton.
+
+* Network Utilities:
+
+- DHCPD: The correct value of the PAD option. Should be zero, not
+one. From Brennan Ashton.
+- Corrections to the NTP client from Manuel Stuehn.
+
+* Common Drivers:
+
+- usbhost.h: Fix some USB HID-related conditional compilation. From Leo.
+- USB HID mouse driver: Don't include NAKs from the device in the error
+count. From Leo.
+
+* TI Tiva/Stellaris:
+
+- Add corrected control logic for TM4C125GXL based on logic from Daniel
+Carvalho with modifications. The LM4F120 also works well with this
+change.
+
+* STMicro STM32 Drivers:
+
+- STM32 F2 SPI: Correct a mapping for SPI MOSI pin. From dlsitzer.
+- OTG FS Host: Fixes related to low-speed devices and interrupt
+endpoints from Leo. Necessary in order to use a USB HID mouse
+device.
+- STM32 SDIO: The dmaflight method must be conditioned on
+CONFIG_SDIO_PREFLIGHT. Noted by Pelle Windestam.
+- Sourceforge Ticket #26. up_prioritize_irq should not be called
+if CONFIG_ARCH_IRQPRIO is not defined.
+
+* Atmel SAM3/4:
+
+- Fix some backward conditional compilation in the start-up logic.
+- Fix initialization of the default interrupt priorities. This is
+a critical bug fix!
+- SAM4S: Fix error in macros that disable peripheral clocking. From
+Bob Doiron.
+
+* Atmel SAMA5:
+
+- Fix double mapping of SDRAM when executing out of SDRAM. In this
+case, the SDRAM was already mapping in arm_head.S.
+- In clock configuration, the BMS bit handling was fixed to match
+what the HW really does. From David Sidrane.
+- TLB Bufferable bit did not do what I thought it was going to do.
+I though I was selecting a write-through cache, but the result was
+that all caching was disabled and NOR FLASH accesses were very slow.
+- Move the un-definitions of __ramfuncs__ from the clock configuration
+.c file to the .h file. Otherwise, the attribute will be applied
+differently for the prototype and the function definition.
+Sourceforge patch 38 from Luciano Neri.
+
+* Atmel SAMA5 Drivers:
+
+- Fix a case in the UDPHS driver where received status was not being
+cleared, causing OUT SETUP commands to fail.
+- TWI data sending fails to increment the number of bytes transferred
+on first byte sent. from David Sidrane.
+- If running from SDRAM, then BOARD_MCK_FREQUENCY is not a constant
+and cannot be used in conditional compilation. All drivers fixed
+EXCEPT for the PWM and Timer/Counter drivers which will need some
+more extensive redesign.
+
+* Atmel SAMA5 Boards:
+
+- SAMA5D3x-EK: The red LED is controlled by PE24 which is also the
+camera/ISI interface reset line. So if the a camera is installed,
+then we must avoid controlling the red LED or we inadvertently
+also reset the camera module. Noted by David Sidrane.
+- Header files reference type xcpt_t in certain configurations and
+so must include nuttx/irq.h. This is Sourceforge bug 25 submitted
+by Luciano Neri.
+
+* NXP LPC17xx Drivers
+
+- arm/src/lpc17xx/Kconfig and lpc17_ethernet.c: The default interrupt
+priority should be default, not the highest priority (2014-4-19).
+
+* ZiLOG ZNEO
+
+- Fix calculation of timer reload and prescaler. The timer frequency
+was way too fast.
+
+* Library:
+
+- strncpy(): Change ordering of test and copy. Logic would have
+failed if n=0; one byte was always copying before testing
+for the end of the copy.
+- Fix a counting error in the return value from sscanf(). Noted by
+kfrolov. Also, sscanf() should return EOF if no values were
+converted.
+- Fix a logic error in ftell(). It was simply using the file offset
+and did not take into account data buffered in memory. From Macs N.
+- sccanf(): Use stroul() vs strol() with %u format otherwise, range
+of values is restricted because of sign bit. From kfrolov.
+
+* Configuration/Build System:
+
+- Fix a build error that occurs when only USB device tracing is enabled.
+
+* NuttShell (NSH):
+
+- Fix NuttShell version number display in the NSH welcome message.
+version.h was not being included.
+
+* Other Applications:
+
+- sysinfo: CONFIG_VERSION_BUILD is a string an needs to be
+printed with %s, not %d. Noted by Librae.
+- nxplayer: Compilation failure in one configuration reported by
+Manuel Stuhn.
+- System sdcard: Remove an STM32 dependency. From Bob Doiron.
+- telnetd Example: Naming is confused. In someplaces 'telnetd',
+and in others 'shell.' All changes to telnetd. Noted by Pelle
+Windestam.

@@ -1,0 +1,22 @@
+NuttX-0.4.3
+-----------
+
+This is the 35th release of NuttX. This release one important new
+OS feature and corrects and extends the eZ80 port:
+
+* Priority Inheritance. The basic NuttX waiting logic was extended
+to support priority inheritance. See the NuttX User Manual for
+further information:
+http://nuttx.apache.org/docs/latest/reference/user/05_counting_semaphore.html.
+
+* ez80Acclaim! Corrected several critical, show-stopping bugs on that
+platform including:
+- Errors in the serial driver interrupts.
+- An error in the eZ80 table.
+* eZ80Acclaim!: Completed integration of the eZ80F91 EMAC driver.
+
+These changes were verified only on the ZiLOG eZ80910200zcog-d board
+and on Cygwin-based simulation platform in various configurations.
+Please report any errors to me.
+
+This tarball contains a complete CVS snapshot from March 13, 2009.
