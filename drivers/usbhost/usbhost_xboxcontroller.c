@@ -913,7 +913,7 @@ static int usbhost_sample(FAR struct usbhost_state_s *priv,
   irqstate_t flags;
   int ret = -EAGAIN;
 
-  /* Interrupts me be disabled when this is called to (1) prevent posting
+  /* Interrupts must be disabled when this is called to (1) prevent posting
    * of semaphores from interrupt handlers, and (2) to prevent sampled data
    * from changing until it has been reported.
    */
@@ -957,7 +957,7 @@ static int usbhost_waitsample(FAR struct usbhost_state_s *priv,
   irqstate_t flags;
   int ret;
 
-  /* Interrupts me be disabled when this is called to (1) prevent posting
+  /* Interrupts must be disabled when this is called to (1) prevent posting
    * of semaphores from interrupt handlers, and (2) to prevent sampled data
    * from changing until it has been reported.
    *

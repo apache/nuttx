@@ -657,7 +657,7 @@ static inline int mxt_waitsample(FAR struct mxt_dev_s *priv)
   irqstate_t flags;
   int ret;
 
-  /* Interrupts me be disabled when this is called to (1) prevent posting
+  /* Interrupts must be disabled when this is called to (1) prevent posting
    * of semaphores from interrupt handlers, and (2) to prevent sampled data
    * from changing until it has been reported.
    */
