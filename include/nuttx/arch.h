@@ -1581,6 +1581,18 @@ void up_secure_irq(int irq, bool secure);
 # define up_secure_irq(i, s)
 #endif
 
+#ifdef CONFIG_SMP_CALL
+/****************************************************************************
+ * Name: up_send_smp_call
+ *
+ * Description:
+ *   Send smp call to target cpu
+ *
+ ****************************************************************************/
+
+void up_send_smp_call(cpu_set_t cpuset);
+#endif
+
 /****************************************************************************
  * Name: up_secure_irq_all
  *

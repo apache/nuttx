@@ -396,6 +396,12 @@ config SMP_DEFAULT_CPUSET
 		Set the Default CPU bits. The way to use the unset CPU is to call the
 		sched_setaffinity function to bind a task to the CPU. bit0 means CPU0.
 
+config SMP_CALL
+	bool "Support SMP function call"
+	default n
+	---help---
+		Enable to support SMP function call.
+
 endif # SMP
 
 choice
