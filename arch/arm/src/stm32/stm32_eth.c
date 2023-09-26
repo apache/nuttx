@@ -3542,6 +3542,7 @@ static int stm32_ethreset(struct stm32_ethmac_s *priv)
 
   /* Wait for software reset to complete. The SR bit is cleared automatically
    * after the reset operation has completed in all core clock domains.
+   * Should take at most a few clock ticks of the 50 MHz domain.
    */
 
   retries = 10;
@@ -3549,7 +3550,7 @@ static int stm32_ethreset(struct stm32_ethmac_s *priv)
          retries > 0)
     {
       retries--;
-      up_mdelay(10);
+      up_udelay(1);
     }
 
   if (retries == 0)
