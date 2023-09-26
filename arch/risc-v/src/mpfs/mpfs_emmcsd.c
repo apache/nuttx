@@ -2280,7 +2280,11 @@ static int mpfs_dmarecvsetup(struct sdio_dev_s *dev,
   mcinfo("Receive: %zu bytes\n", buflen);
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
-  DEBUGASSERT(((uintptr_t)buffer & 3) == 0);
+  if (((uintptr_t)buffer & 3) != 0)
+    {
+      mcerr("Unaligned buffer: %p\n", buffer);
+      return -EFAULT;
+    }
 
   priv->buffer       = (uint32_t *)buffer;
   priv->remaining    = buflen;
@@ -2340,7 +2344,11 @@ static int mpfs_dmasendsetup(struct sdio_dev_s *dev,
   mcinfo("Send: %zu bytes\n", buflen);
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
-  DEBUGASSERT(((uintptr_t)buffer & 3) == 0);
+  if (((uintptr_t)buffer & 3) != 0)
+    {
+      mcerr("Unaligned buffer: %p\n", buffer);
+      return -EFAULT;
+    }
 
   /* DMA send doesn't work in 0x08xxxxxxx address range. Default to IRQ mode
    * in this special case.
