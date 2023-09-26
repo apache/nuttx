@@ -911,6 +911,7 @@ choice
 
 config SCHED_CPULOAD_SYSCLK
 	bool "Use system clock"
+	depends on !SCHED_TICKLESS
 	---help---
 		If this option is enabled, the system clock is used for cpu load
 		measurement by default.
@@ -929,7 +930,6 @@ config SCHED_CPULOAD_SYSCLK
 
 config SCHED_CPULOAD_EXTCLK
 	bool "Use external clock"
-	depends on SCHED_TICKLESS
 	---help---
 		There is a serious issue for the accuracy of measurements if the
 		system clock is used, however.  NuttX threads are often started at
