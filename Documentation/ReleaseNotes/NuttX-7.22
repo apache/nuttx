@@ -1,0 +1,1066 @@
+NuttX-7.22
+----------
+
+The 122nd release of NuttX, Version 7.22, was made on September 9, 2017,
+and is available for download from the Bitbucket.org website. Note
+that release consists of two tarballs: nuttx-7.22.tar.gz and
+apps-7.22.tar.gz. These are available from:
+
+https://bitbucket.org/nuttx/nuttx/downloads
+https://bitbucket.org/nuttx/apps/downloads
+
+Both may be needed (see the top-level nuttx/README.txt file for build
+information).
+
+Additional new features and extended functionality:
+
+* Core OS:
+
+- pthreads: Move functions from sched/pthreads to libc/pthreads. These
+functions just coordinate other OS interface calls but are not a
+fundamental OS interfaces and, hence, do not belong within the OS:
+pthread_yield(), pthread_once(), pthread_cond_init(),
+pthread_cond_destroy(), pthread_barrier_init(),
+pthread_barrier_destroy(), and pthread_barrier_wait().
+- Add power-related debug output.
+
+* File Systems/Block and MTD Drivers
+
+- RAMTRON: Add support for splitting block writes in chunks. Some
+Re-RAMs like MB85AS4MT have a write buffer size limitation. From
+Boris Astardzhiev.
+- MTD: Add driver for Macronix QuadSPI flash memory. From Simon Piriou.
+
+* Graphics/Display Drivers:
+
+- SSD1306 LCD Driver: (1) Separate lcd_dev_s setup to separate object.
+g_oleddev takes 1 KiB because framebuffer and was allocated to .data
+section because of lcd_dev_s function pointer setup. Move lcd_dev_s
+setup out, so that g_oleddev goes to .bss and avoid wasting ROM. (2)
+Fix memory corruption caused by ssd1306_getrun(). ssd1306_getrun was
+writing one extra byte (with value 0) past target buffer when pixlen
+is multiple of 8. When pixlen was not multiple of 8, last byte of
+buffer was fully cleared, instead of modifying only the (pixlen % 8)
+bits of last byte. (3) Add support for board power control.
+ThingseeOne has regulator for controlling display power on/off. Patch
+adds support for board based power control to SSD1306 driver. (4) Add
+DD-12864WO-4A/SSD1309 support to SSD1306 driver. From Jussi Kivilinna.
+
+* Networking/Network Drivers:
+
+- Sockets: Support listening sockets in the getsockname() function.
+From Roland Takacs.
+- IP Forwarding: At the IP level, network may be configured to forward
+IP packets that are not destined for the target through a different
+network device, decrementing the packet TTL.
+- IP forwarding: Add optional support to forward broadcast and
+multicast packets. Add missing ICMP support.
+- ICMPv6: Add 6LoWPAN and IP forwarding support.
+- ICMPv6: Support source link-layer address option in RA. From
+Masayuki Ishikawa.
+- TUN Driver: Add definitions that will permit TUN-only networking.
+- Socket I/F: Created a socket interface used to provide socket support.
+Each address family has an interface that describes how to perform
+socket operations on that address family. Currently only a couple of
+methods are defined in the socket interface call table
+- Remove CONFIG_NET_MULTILINK. This increases code size by a little,
+but greatly reduces the complexity of the network code.
+- Network procfs: Add support for routing tables at proc/net/route.
+- Network procfs: Add support for network procfs statistics for the
+PF_IEEE802154 address family.
+- Network Driver Backlog: Remove driver based backlog support. This
+affects the entire network, but is used by only one driver. The only
+supported RX backlog is now via common read-ahead buffering.
+
+* Wireless Networking/Wireless Drivers:
+
+- IEEE 802.15.4 MAC / MRF24J60 Driver: Extensive updates for
+association/beacon-enabled networks. From Anthony Merlino.
+- IEEE 802.15.4 MAC / MRF24J60 Driver: Hook in setdevmode from newly
+added radio attribute setting. From Anthony Merlino.
+- IEEE 802.15.4 MAC: Supports get request for coordinator address. From
+Anthony Merlino.
+- IEEE 802.15.4 MAC: Notify radio layer of changes in devmode. From
+Anthony Merlino.
+- IEEE 802.15.4: Add special attribute that can be used to perform a
+regdump of the radio. From Anthony Merlino.
+- IEEE 802.15.4 loopback driver: Better simulation addressing: short
+and extended addresses, panid, and IP address conversion.
+- IEEE 802.15.4 Network Driver: Add logic to setup the network mask,
+update the MAC-based IPv6 addressing when the network is brought up.
+The idea is that addressing changes are supposed to occur only while
+the network is down but won't take effect until the network is up
+again.
+- PktRadio: Add an infrastructure to support networking on generic
+(non-IEEE 802.15.4) packet radios.
+- PktRadio Loopback Driver: Add a PktRadio loopback network driver to
+testing testing with 6LoWPAN and PktRadios on the simulator.
+- Spirit Network Driver: The Spirit1 radio (SPSGRF-915) is the first
+generic PktRadio Network driver. Based on STMicros STack packets
+with 8-bit addressing. We need to use the STack packets in order to
+provide the source address and automatic ACKing.
+- Network procfs: Fix so that PktRadio address are shown correctly.
+- Networking: Add support for some packet radio IOCTL commands.
+- 6LoWPAN: Added handling for TCP and ICMPv6 packets.
+- 6LoWPAN: Add configurable support for 6LoWPAN star topology. With
+this change, the endpoints which are the 'points' of the star will
+forward all traffic to the coordinator. The coordinator is assumed to
+be the 'hub' of the star. This function also used IPv6 forwarding.
+- 6LoWPAN: The original, Contiki-based design used only a single buffer
+for reassemblying larger packets. This could be a problem issue for
+hub configurations which really need the capability concurrently
+reassemble multiple incoming streams concurrently. These was also a
+design issue in that the reassembly buffer could be corrupted by
+outgoing packets. The design was extended to support multiple
+reassembly buffers, each associated with the reassembly tag and source
+address. This assures that there can be be no corruption of the
+reassembly once it has started.
+- 6LoWPAN PktRadio: Now radio agnostic. All IEEE 802.15.4 dependencies
+have been removed or isolated so that 6LoWPAN can be used with any
+kind of packet radio. This involved things like: (1) generalizing
+the representation of radio MAC meta-data, (2) changes to handle
+variable-length radio addresses, (3) removal of all explicit IEEE
+802.15.4 types, references, and interfaces, (4) a new radio driver
+interface to return 'capabilities' of the driver.
+- ICMPv6: Update so that ICMPv6 can be used with 6LoWPAN.
+- IPv6 Neighbor: Update table format to support IEEE 802.15.4 MAC
+addresses.
+- PF_IEEE802154 Address Family: Add support for the PF_IEEE802154
+address family socket type. This socket is similar to the PF_PACKET,
+"raw" packet address family except that: (1) it supports only
+SOCK_DRAM, not SOCK_RAW, and (2) works only with IEEE 802.15.4
+MAC-based radios. This address family permits simple access to IEEE
+802.15.4 IOCTLs and frame-level network transfers.
+
+* Other Common Device Drivers:
+
+- Dynamically configurable USB composite devices: We developed a huge
+Changeset over a year ago to make USB Composite configuration
+dynamical and be able to instantiate the CDC/ACM multiple times inside
+this device. We use this feature to switch between one in typical USB MSC + CDC/ACM configuration and up to three CDCACMs dynamically.
+I've changed the interface for some USB-Functions to receive also the
+dynamic configuration. From Frank Benkert.
+- Franks' change remained on a branch until all issues were resolved.
+the current version in Master is complete and ready for use.
+- power: battery_charger: Add ioctl for charging input current. From
+Juha Niskanen.
+- SMPS driver: Add generic upper-half driver for SMPS. From Mateusz
+Szafoni.
+- LED Driver: Add support for inverted LEDS. From Jeff.
+- LED Driver: Add lightness correction for RGB LED driver. From Jeff.
+- LTC4151 Driver: Add driver for LTC4151 current and voltage monitor.
+From Giorgio Groß.
+- Serial TERMIOS: tcdrain() implementation based on a new term ioctl.
+From Sebastien Lorquet.
+- Serial TERMIOS: Add support for TCFLUSH. From Sebastien Lorquet.
+- syslog: Add option to use the CLOCK_MONOTONIC for time stamping. From
+Jussi Kivilinna.
+- HC-SR04 Driver: Add support to HC-SR04 distance sensor. From Alan
+Carvalho de Assis.
+- COMP Driver: Add poll support. From Pekka Ervasti.
+- BQ2429X Driver: Add driver for TI BQ2429X battery charger. From Juha
+Niskanen.
+- ADC Driver: Add poll support. From Juha Niskanen.
+- BCH Driver: Add poll support. From Jussi Kivilinna.
+- RTC Driver: Extend the RTC framework with an alarm read ioctl
+(RTC_RD_ALARM). Through it consumer could get configuration settings
+about previously scheduled hardware alarms (active status, hours,
+minutes, seconds). From Boris Astardzhiev.
+
+* Simulation
+
+- sim/ipforward: Add an IP forwarding configuration using TUN devices
+and apps/examples/tun.
+- Console: Add non blocking read to devconsole driver. From Simon
+Piriou.
+- Networking: Poll for TX frames to speed up driver. From Simon Piriou.
+- pf_ieee802154: Add configuration for testing PF_IEEE802154 address
+family sockets.
+- ARM Simulator: Adds necessary functionality to build Simulator under
+ARM Linux. Tested only on Raspberry3. Currently setjmp/longjmp do not
+save/restore floating point registers. From Nickolay Semyonov.
+
+* MicroChip/Atmel SAML21 Drivers:
+
+- SAML21 I2C driver. Developed for and contributed with permissin from
+Filament company. From Alan Carvalho de Assis.
+- SAMD/L21 USB Driver: Add a USB driver. Developed for Filament Inc.
+by Offcode, LTD. From Janne Rosberg.
+
+* MicroChip/Atmel SAMv7 Boards:
+
+- SAMV71-XULT: Add support for the MRF24J40 radio and create a
+mrf24j40-starhub configuration.
+- SAME70-Xplained: Add MRF24J40 support.
+
+* NXP Freescale Kinetis Drivers:
+
+- Kinetis USB Improvements: usbdev clean up ensuring proper use of HW.
+Rework suspend and resume logic so they perform properly. Made attach
+and detach functions optional. As they do not make sense for a bus
+powered device. From David Sidrane.
+- Kinetis SPI driver: From David Sidrane.
+- Kinetis: I2C driver added I2C3, reference counting and reset.
+Refactored the driver to support reference counting and reset added
+I2C3. From David Sidrane.
+- Kinetis RTC: Implementation of the alarm read function.
+
+* NXP Freescale Kinetis Boards:
+
+- configs/teensy-3.x USB: Define USBOTG-FS Read from FLASH access in
+board config. Allow the board config to define the USBOTG-FS to have
+Read access to FLASH. From David Sidrane.
+- configs/teensy-3.x: Removed call to khci_usbattach. The call is not
+need by the driver if CONFIG_USBDEV_BUSPOWERED=y. On a USB powered device if we are running we are attached. From David Sidrane.
+- freedom-k66f: Use SPI driver. Initialize SPI1 on connector J6. No
+real use, as of yet. From David Sidrane.
+
+* NXP Freescale LPC43xx:
+
+- LPC43xx: Modify up_allocate_(k)heap() to support PROTECTED mode. From
+Alan Carvalho de Assis.
+
+* NXP Freescale LPC4xx Boards:
+
+- configs/Bambino: Add protected mode configuration to Bambino board.
+From Alan Carvalho de Assis.
+
+* On Semiconductor LC823450
+
+- LC823450: Initial support for ON Semiconductor LC823450. From Masayuki
+Ishikawa.
+- LC823450: eMMC/SD and USB support for LC823450. From Masayuki Ishikawa.
+
+* On Semiconductor LC823450 Boards
+
+- LC823450-XGEVK: LC823450-XGEVK board support. From Masayuki
+Ishikawa.
+- LC823450-XGEVK: Add eMMC/SD and USB support. From Masayuki Ishikawa.
+
+* STMicro STM32:
+
+- STM32 L4: Add support for the STM32L475 family.
+- STM32 L4 RCC: Enable ADC clock source. From Juha Niskanen.
+- STM32: Allow clock frequencies > 168 MHz on stm32f427/429. We need
+to enable the power overdrive for this case. This change allows the
+required bits to be set in proper sequence. It also modifies the
+local register access operations to allow more than 16-bit registers.
+From Sebastien Lorquet .
+- STM32 F4: Add support for STM32F433RC. From Alan Carvalho de Assis.
+- STM32 F7: Add new configuration option for enabling flash ART
+Accelerator and flash prefetcher. From Jussi Kivilinna.
+
+* STMicro STM32 Drivers:
+
+- STM32 TIM: Add the set counter function for stm32 timers. From
+Sergey Ustinov.
+- STM32 HRTIM: Update HRTIM definitions. Add HRTIM driver. From
+Mateusz Szafoni.
+- STM32 HRTIM: Add HRTIM character driver. From Mateusz Szafoni.
+- STM32 HRTIM: Fix DAC triggers configuration, Add missing master timer
+logic, enable DAC triggering. From Mateusz Szafoni.
+- STM32 HRTIM: Add DMA configuration. From Mateusz Szafoni.
+- STM32 HRTIM: Add burst mode configuration. From Mateusz Szafoni.
+- STM32 RTC: Port Boris Astardzhiev's RTC change for STM32L4 to STM32.
+- STM32 DAC: Add support for HRTIM triggering. Separate dma buffer
+configuration for channels. From Mateusz Szafoni.
+- STM32 DAC: Conditional logic for timer triggering, fix TSEL
+configuration when HRTIM, DMA request remapping, Add DMA buffers
+initialization logic. From Mateusz Szafoni.
+- STM32 DAC: Support external triggering for DMA transfer. From Mateusz
+Szafoni.
+- STM32 L1 TIM: Add base address for TIM11. From Juha Niskanen.
+- STM32 F4 FLASH: Enable/disable the flash write protection on any
+sector. I have verified it to work on the STM32 F427. From Sebastien
+Lorquet.
+- STM32 F4 Clocking: To use an external oscillator module (not just a
+crystal) with the STM32F4, one needs to enable the HSEBYP bit in the
+RCC_CR register. This change allows an integrator to define
+STM32_RCC_CR_HSEBYP in their board.h file if they want this
+configuration. From Jeff.
+- STM32 F4 USB: I'm working on bringing up USB full-speed support on
+STM32F405. My board does not include a USB power switch, VBus
+sensing, over current detection, or ID pin. This commit add a
+config STM32_OTGFS_VBUS_ CONTROL which lets us selectively disable
+VBus sensing and control. I also sneaked in a change to disable the
+configgpio call for the ID pin, which is only used in OTG mode which
+isn't supported yet. The only pins that need to be initialized should
+be OTGFS_DP and OTGFS_DM. From Jeff.
+- STM32 FLASH: Add CONFIG_STM32_STM32F469 support. From David Sidrane.
+- STM32 COMP: Add default INM configuration and some missing COMP
+1,3,5,7 code. From Mateusz Szafoni.
+- STM32 F33: Add missing SYSCFG CFGR3 definitions. From Mateusz Szafoni.
+- STM32 L4 Serial: Allow configuring Rx DMA buffer size. From Juha
+Niskanen.
+- STM32 L4 COMP: Input minus pin extended selection. From Juha Niskanen.
+- STM32 L4 COMP: Bind to upper half comp driver. From Pekka Ervasti.
+- STM32 L4 DAC: Port from STM32. Add ADC register definitions. From
+Juha Niskanen.
+- STM32 L4 DAC: Add option for routing DAC output to ADC. Actually
+write something to the DAC DMA buffer. From Juha Niskanen.
+- STM32 L4 DAC: Separate DMA buffer configuration for channels. From
+Juha Niskanen.
+- STM32 L4 ADC: Implement peripheral. From Juha Niskanen.
+- STM32 F7: Definitions for I2C4, SDMMC2. Adapted RAM start / size to
+internal SRAM. From Titus von Boxberg.
+- STM32 F7 I2C4: I2C4_SDA can also be on GPIO PB7. From Titus von
+Boxberg.
+- STM32 F7 LTDC: Option for DSI output, inconsistency: the stm32f746
+does not feature a DSI interface. compilable with LTDC_INTERFACE and
+LTDC_USE_DSI. From Titus von Boxberg.
+- STM32 F7 Clocking: Added functions for DSI clock source selection.
+From Titus von Boxberg.
+- STM32 F7 Clocking: Enable APB2 DSI clock. From Titus von Boxberg.
+- STM32 F7 LTDC: No board specific dithering values used; corrected
+dithering init. Corrected LIPOS/LIPCR calculation. Change only
+polarity bits in LTDC_GCR. From Titus von Boxberg.
+- STM32 F7 Reset: Added function for reset. From Titus von Boxberg.
+- STM32 F7 DMA: DMA add dcache alignment check in stm32_dmacapable. In
+the case dcache write-buffed mode is used (not write-through) buffer
+alignment is required for DMA transfers because a)
+arch_invalidate_dcache could lose buffered writes data and b)
+arch_flush_dcache could corrupt adjacent memory if the maddr and the
+mend+1, the next next address are not on ARMV7M_DCACHE_LINESIZE
+boundaries. From David Sidrane.
+- STM32 F7 SDMMC: SDMMC remove widebus limitation on DMA. There is no
+documentation for the STM32F7 that limits DMA on 1 bit vrs 4 bit
+mode. From David Sidrane.
+- STM32 F7 SDMMC: SDMMC add dcache alignment check in
+dma{recv|send}setup. In the case where CONFIG_SDIO_PREFLIGHT is not
+used.
+- STM32 F7 RTC: Port Boris Astardzhiev's RTC change for STM32L4 to
+STM32F7.
+
+* STMicro STM32 Boards:
+
+- STM32F103-Minimum: Add GPIO device driver example. From Alan
+Carvalho de Assis.
+- STM32F103-Minimum: Add small hello example for STM32F103-Minimum
+board. From Alan Carvalho de Assis.
+- STM32F103-Minimum: Add support for SmartFS on Winbond W25 SPI NOR
+Flash. From Alan Carvalho de Assis.
+- STM32F103-Minimum: (1) Enable CONFIG_MTD_PARTITION in Kconfig if flash
+partition is enabled and (2) Update the README.txt file with info
+needed to get SmartFS working. From Alan Carvalho de Assis.
+- Nucleo-F334R8: Add HRTIM initialization. From Mateusz Szafoni.
+- Nucleo-F334R8: UART2 is default serial port (STLINK Virtual Port).
+From Mateusz Szafoni.
+- Clicker2-STM32: Add a configuration that was used with the MRF24J60
+for 6loWPAN testing.
+- Clicker2-STM32: Allow both IEEE 802.15.4 MAC character and network
+devices to be registered.
+- Clicker2-STM32: Add configurations to support the endpoint and hub
+roles in a star topology.
+- Clicker2-STM32: Add support for per-function-call stack checking.
+From Anthony Merlino.
+- Clicker2-STM32: Configure EDBG SPI CS just to make that it is
+disabled.
+- STM32F4 Discovery: Add logic to register the button driver and the
+user led driver if so configured. From Jan Pobrislo.
+- STM32F4-Discovery: Add a configuration for testing libc++. From Alan
+Carvalho de Assis.
+- B-L475E-IOT01A: Add support for the STMicro B-L475E-IOT01A board.
+From Simon Piriou.
+- B-L475E-IOT01A: Add support for the SPSRGF/Spirit1 radio module. Add
+a configuration for testing sprit radio.
+- B-L475E-IOT01A: Add configurations to support a star topology.
+- B-L475E-IOT01A: Add basic support for external Macronix QuadSPI flash
+memory. From Simon Piriou.
+- B-L475E-IOT01A: Enable UDP broadcast test in the spirit-starhub
+configuration.
+- STM32F334-DISCO: Add STM32F334-DISCO basic support. From Mateusz
+Szafoni.
+- STM32F746-Disco: Add ADC3 support. From Ivan Ucherdzhiev.
+- STM32L476-Disco: Add a knsh configuration that may be used to test
+the PROTECTED build mode.
+- STM32F769I-DISCO: Initial port to STM32F769I-DISCO. From Titus von
+Boxberg.
+
+* C Library/Header Files:
+
+- Move TUN ioctl command to include/nuttx/net/ioctl.h so that it will
+always be unique.
+- Math Library: Port gamma() and lgamma() from FreeBSD to NuttX. From
+Alan Carvalho de Assis.
+- C++: Compilation with recent C++ compiler needs an overloaded delete
+operator that includes a size_t size argument. New sized delete
+operators are only for C++14 and above.
+
+* Build/Configuration System:
+
+- Initial clang compile. From Goran Mekic.
+- Add CLANG definitions in Kconfig and Toolchain.defs.
+- drivers/wireless/ieee802154: Moved radios to individual
+sub-directories. From Anthony Merlino.
+- Makefile.unix: Add savedefconfig target. From Gwenhael Goavec-Merou.
+- Add Gwenhael's change to Makefile.win and update README.txt to
+described the new make target.
+- All defconfig files are now in the compressed format created with
+'make savedefconfig.' The original .config file can be reconstituted
+using 'make olddefconfig.'
+- Build System: It is no longer necessary to have a unique Make.defs
+file for each configuration. A board may share a common Make.defs
+file in the scripts directory. Duplicate Make.defs files removed;
+common Make.defs file moved to the scripts/ sub-directory for each
+board.
+- Networking: Move INET socket interface out of net/sockets to its own
+directory net/inet.
+
+* Tools:
+
+- testbuild.sh: Added -x to fail build on errors for continuous
+integration (CI). On CI we want to know ASAP of a failure. From
+David Sidrane.
+- Improve configure.sh behavior: (1) enable to call from top directory.
+(2) enable to designate direct path for config. (3) install .gdbinit
+if the target has. From Hidetaka Takano.
+- Update tools/configure.c to same functionality as configure.sh. Add
+an array of optional file names. Currently, .gdbinit is the only
+optional file but other things like IDE-specific project files might
+need to be copied as well.
+- tools/configure.sh will now copy Eclipse project files if they are
+present in the board directory file.
+- Update configure.sh, configure.bat, configure.c: With compressed
+format, part of the installation requires that we run 'make
+olddefconfig' to restore the uncompressed defconfig format. Also,
+while I was at it, I also added options to select host platform on
+configure command line.
+- tools/refresh.sh: Now runs make savedefconfig before copying the new
+defconfig file in place; Also, added a new option --defaults. Since
+the number of defaults that you now have to answer is so large, the
+option lets you just accept the default values. So it works just like
+--silent but still prompts you for the decision to save or discard the
+new defconfig file.
+- tools/refresh.sh: Update so that it can find the Make.defs file in
+the new location.
+
+* NSH: apps/nshlib:
+
+- NSH Library: Add a Telnetd command. This is needed when network
+initialization is deferred. In that case, telnet daemon cannot be
+started until the network is finally initialized. The telnetd command
+was added just for that case: So that the telnet daemon can be
+started from the NSH command line after the network is configured.
+- NSH Library: Misc changes needed for PktRadio support.
+- NSH Library: Extend ifconfig command so that it can set variable
+length packet radio address.
+- NSH Library: Update addroute and delroute command. The would support either
+IPv4 or IPv6, but not both. Allow expression of the netmask in IPv4 CIDR or
+IPv6 slash notation. This really reduces the pain of using the commands,
+especially for IPv6.
+- NSH Library: Add a route command that will dump the content of routing table.
+
+* Examples/Tests: apps/examples:
+
+- examples/udp: Add configurable network device name; Add option to
+suppress network initialization which is not needed if started by NSH
+or for 6LoWPAN.
+- examples/udp: Fix registration as a built-in program; Change some
+naming to make room for a second target. Current one endpoint is the
+target and one is the host. This will (eventually) allow two targets
+to be both endpoints of the test. Change build so that both server
+and client can be on a target, rather than one on the target one on
+the host PC. Server IP address may not be provided on the command line.
+- examples/udp: Port numbers need to be configurable to work with
+6LoWPAN. Need to bind the client socket to a port number. This was
+not required before so is a apparently a change in the UDP packet
+dispatch logic.
+- examples/udp: Enable testing with the broadcast address.
+- examples/nettest: Support target boards on both ends of the test.
+Separate out network initialization so that it may be used by both a
+target server and a target client. Fix client/server naming
+confusion; Add command line option to select the server address on the
+target. Add support for both endpoints on target boards vs. one on a
+target and one on the host PC.
+- examples/nettest: The send buffer size is now a configuration option.
+- examples/nettest: Loopback option should be available in Kconfig for
+PktRadio.
+- examples/keypadtest: REMOVED and warehoused in the Obsoleted
+repository. This was just a bad clone of apps/examples/hidkbd for a
+keypad driver that was removed years ago. It also uses illegal
+function calls into the OS. So it has no purpose: It is redundant, it
+uses illegal interfaces, and is a test for non-existent code.
+- examples/ipforward: Add an IP forwarding example using only TUN
+devices. Test extended to test forwarding of ICMPv6 multicast messages.
+- Implement powermonitor example for ltc4151 current and voltage
+monitor. From Giorgio Groß.
+- examples/pf_ieee802154: Add for testing PF_IEEE802154 sockets. Add
+PANID to command line options; Cannot bind to address zero... There is
+no counterpart to INADDR_ANY for these radios (not now at least).
+- examples/dac: Add DAC example. From Juha Niskanen.
+
+* Network Utilities: apps/netutils:
+
+- netutils/telnetc: This a port of libtelnet to NuttX.
+- netutils/telnetd and users of telnetd: Add support for IPv6.
+- netutils/thttpd: Remove the netstats demo. This depends on an
+illegal function call and cannot be supported. That example could be
+replaced with logic that uses the procfs network entries as was done
+for NSH which had the same issue. But I am too lazy to implement that.
+- netutils/netlib: Add support for PktRadio IOCTL commands.
+- netutils/netlib: Add a helper to decode short addresses.
+
+* Wireless Utilities: apps/wireless:
+
+- wireless/ieee802154/i8sak: Rewrote i8sak to be test CLI for IEEE
+802.15.4 MAC layer. From Anthony Merlino.
+- wireless/ieee802154/i8sak: Updates to i8sak for
+association/beacon-enabled changes to IEEE 802.15.4. From Anthony
+Merlino.
+- wireless/ieee802154/i8sak: Add option to make it easy to send large
+frame for testing purposes. From Anthony Merlino.
+- wireless/ieee802154/i8sak: Add scan command. From Anthony Merlino.
+- wireless/ieee802154/i8sak: Add coordinfo command allowing you to
+poll various attributes related to the coordinator. From Anthony
+Merlino.
+- wireless/ieee802154/i8sak: Add a option to retry on failures to the
+assoc command (usually meaning tht the coordinator is not yet up).
+- iwireless/ieee802154/8sak: Add reset command to reset the MAC layer.
+Adds option to assoc command -t to specify how long to wait for a
+response from the Coordinator. From Anthony Merlino.
+- ieee802154/i8sak: Adds command to trigger regdump of radio. From
+Anthony Merlino.
+
+* System Utilities (apps/system)
+
+- apps/system/composite: Update to apps/system/composite associated with
+big changes to the composite device logic. From Frank Benkert.
+- apps/system/composite: Remove CDC/ACM and MSC configuration logic.
+This belongs in the OS composite initialization. Add and argument so
+that you can select the USB composite configuration to be attached.
+Restore USB tracing; remove unused field in a structure. Remove
+configuration settings that are no longer used. Fix configuration
+selecting.. was setting the port number, not the configure ID. Also
+add a configuration option to select the default configuration.
+- apps/system/composite: Add a configuration option to the boardctl()
+calls to support multiple composite device configurations dynamically.
+- apps/system/composite: Remove references to USBMSC. There still
+dependencies on CDC/ACM in the serial USB trace output.
+- apps/system/telnet: Add Telnet Chat daemon and client from
+libtelent.
+
+* Platform-Specific Support (apps/platform)
+
+Bugfixes. Only the most critical bugfixes are listed here (see the
+ChangeLog for the complete list of bugfixes and for additional, more
+detailed bugfix information):
+
+* Core OS:
+
+- Fix ELF loader up_checkarch on ARM arch. From Cristian Condurache.
+- pthread_mutex_unlock(): Missing check for the case where
+pthread_mutex_lock() is called when the mutex is not locked. In that
+case, it would increment the underlying semaphore above 1. This is
+the fix for a problem noted by initialkjc@yahoo.com.
+- sig_timedwait(): Pending signal structure used after it has been
+releasd. From anonymous Bitbucket Issue 59.
+- mm_mallinfo: do heap end debug assert check with heap semaphore held.
+From Jussi Kivilinna.
+- sched/: Fix return value in sched_setaffinity(). From Masayuki
+Ishikawa.
+- Work Queues: work_queue() must cancel existing work prior to queuing
+new work, otherwise the work queue list structure can become
+corrupted. Problem noted by Pascal Speck.
+- waitpid(): Corrects two problems when CONFIG_SCHED_HAVE_PARENT +
+CONFIG_SCHED_CHILD_STATUS are enabled: (1) Was erroring out if the
+waited for task had already exited, and (2) was not freeing resources
+when a wait was completed. From Boris Astardzhiev.
+
+* File System/Block and MTD Drivers:
+
+- VFS poll(): Fix timeout calculation. From Jim Paris.
+- VFS poll(): Fix poll for regular files and block devices. Open Group
+documentation says that poll (and select) support regular files and
+that 'Regular files shall always poll TRUE for reading and writing'.
+From Jussi Kivilinna.
+- VFS epoll(): Fix epoll_wait function. From Simon Piriou.
+- Smart FS: Fix wrong freeing of device structure and use-after-free
+issues on error paths. From Jussi Kivilinna.
+- MTD FLASH drivers: The byte write method of several drivers had a
+cloned error: It was not locking the bus while performing byte write
+operations.
+- MTD M2PX: If we READ while a write/erase is pending, the command is
+ignored and the write/erase continues. If we don't catch this situation
+we will return garbage to the user because the flash will not execute
+the command. So READ MUST wait for write completion, and before that,
+the bus must be locked since it's a precondition to calling
+waitwritecomplete(). From Sebastien Lorquet.
+- MTD FLASH drivers: Clone Sebastien Lorquet's m25px change to at25,
+is25xp, ramtron, and sst25xx.
+- MTD W25: Add missing locking and fix SPI_SELECT usage for
+w25_unprotect. From Jussi Kivilinna.
+- MTD W25: Wait for BUSY flag to clear in w25_readid and
+w25_unprotect. W25Q128 datasheet says that all instructions expect
+'Read Status Register' and 'Erase/Program Suspend' are ignored when
+BUSY flag in status register is '1'. Therefore wait for busy flag to
+clear in w25_readid() and w25_unprotect(). From Jussi Kivilinna.
+- Automounter: FS_AUTOMOUNTER should depend on SCHED_LPWORK. From
+Nickolay Semyonov.
+
+* Networking/Network Drivers:
+
+- TCP Listen: Throw error when error happens in the tcp_listen
+function. From Roland Takacs.
+- Network Device Management: Do not search net device when all-zeros
+address is used. From Roland Takacs.
+- Network Device Management: Fix a error in netdev_register(); it was
+not handling device names properly when TUN is the only network device.
+- Network Device Management: Fix netdev_dev_lladdrsize(). In some
+configurations, it could return the wrong size for the address of a
+packet radio.
+- Network Device Management: Fix typo for 802.11 devices in
+netdev_register(). Was being masked before because depended on
+CONFIG_NET_MULTLINK.
+- TUN Driver: Use critical section instead of semaphore in
+tun_ifdown(). From Masayuki Ishikawa.
+- TUN Driver: Do all polling on worker thread. Otherwise, the stack
+gets very deep.
+- TUN Driver: Currently cannot support TAP mode unless Ethenet is
+enabled.
+- netdb: Fixed buffer size used for sending DNS queries should depend
+on the configured DNS name size. From Ritjaina.
+- UDP networking: The TTL (time to live) was not being set in the IPv4
+or IPv6 header unless the UDP socket was bound.
+- UDP Networking: Fix a copy-paste error that could effect networking
+when both IPv4 and IPv6 are enabled.
+- UDP Networking: When upd_input() cannot process a packet, it returns
+ERROR so that network drivers may try calling ipv4_input() later. In
+this case, it must also set d_len to zero. Otherwise, all network
+drivers will assume tht there is also an outgoing packet. This
+results in a gratuitous ARP.
+- TCP Networking: Correct some issues that prevent TCP from working
+correctly when both IPv4 and IPv6 are enabled.
+- TCP Networking: TCP disconnection callbacks are not retained in a
+list. This will support multiple callbacks per lower-level TCP
+connection structure. That is necessary for the cae where a socket is
+dup'ed and shares the same lower-level connection structure. NOTE:
+There still needs to be a call to tcp_start_monitor() when the socket
+is dup'ed.
+- TCP Networking: Start the network monitor for a socket when a TCP
+socket is dup'ed.
+- TCP Networking: If one of the dup'ed socket's is closed, then network
+monitor resources associated with that one socket must be recovered.
+Also, in the event that socket is being used on one thread, but then
+closed on another, any threads waiting for events from the socket
+should be informed of the closure. That latter requirement is not
+implemented because current data structures do not support it.
+- TCP Networking: Fix a race condition. The accept() operation is
+performed with the network locked. However, the network is unlocked
+BEFORE the connected state is set. Therefore, a context switch may
+occur and the socket may no longer be connected when it is marked so.
+Noted by Pascal Speck.
+- Network routing tables: Fix a compilation error when IPv6 and
+routing are enabled.
+- Network procfs: Fix some spacing when both IPv6 and IPv4 are enabled.
+- Network Local Sockets: Fix accept for local stream sockets. From
+Jussi Kivilinna.
+- Network Local Sockets: Fix server lc_waitsem overflow. From Jussi
+Kivilinna.
+- IPv6 Networking: Remove comparisons to the address with all ones
+set. IPv6 does not support broadcast addresses and certainly not in
+that form. Replace with multicast addresses beginning with 0xff02.
+- ICMPv6 Networking: Fix a compilation issue with
+CONFIG_NET_ICMPv6_AUTOCONF=y. From Masayuki Ishikawa.
+- Networking: Fix net_lock returning ERROR when instead of real error
+code on failure. From Jussi Kivilinna.
+- IGMPv2 Networking: Remove special support for interrupt level
+processing (there is none) and fix some timer cancellation logic. In
+many files, correct comments. There is no interrupt level processing
+in the networking layer.
+
+* Wireless/Wireless Drivers:
+
+- IEEE 802.15.4 MAC: Need counting protection on the logic that
+releases the notification resources. Otherwise, notification handlers
+may be operating with a stale pointer.
+- IEEE 802.15.4 MAC: Improves internal timer logic to handle work
+serially. Before, the MAC timer used a watchdog to schedule work with
+the high priority worker queue. However, since everything in the MAC
+is supposed to be serialized through the use of the high priority work
+queue, but the timer uses a watchdog, there are some unintended
+consequences. To simplify, we now use the delayed work feature of the
+work queue. From Anthony Merlino.
+- IEEE 802.15.4 Network Driver: Update RX statistics in network driver.
+- IEEE 802.15.4 MRF24J40 Driver: Minor timing fix. Matches recommended
+value in datasheet. Splits up driver into multiple files to make it
+easier to navigate. Fixes issue with non-beacon enabled mode. From
+Anthony Merlino.
+- IEEE 802.15.4 MRF24J40 Driver: Fix a bug causing radio to cease
+transmitting. From Anthony Merlino.
+- IEEE 802.15.4 MRF24J40 Driver: Fixes issues with sleeping for beacon
+enabled networking. From Anthony Merlino.
+- EEE 802.15.4 MRF24J40 Driver: Fix math error for calculating sleep
+count values. From Anthony Merlino.
+- IEEE 802.15.4: Fix timing issues for beacon enabled coordinators and
+endpoints. From Anthony Merlino.
+- iIEEE 802.15.4: Fix issue with association on beacon-enabled
+networking. From Anthony Merlino.
+- 6LoWPAN: Correct a few addressing issues. Also reserve two bytes at
+the end of the frame for the FCS.
+- 6LoWPAN: Fixes needed when extended addressing is enabled; broke short
+addressing. Loopback driver needs to initialize the MAC meta data;
+Address decompression logic must have the MAC address to handle the
+most common compression cases. Fix a src/dest address confusion and
+other addressing problems.
+- 6LoWPAN: Add missing IPv6 address creation to HC1 decode logic. Fix a
+typo in an index that prevented use with HC1 and extended addresses.
+- 6LoWPAN: TCP logic was not obeying MTU packet size limitations.
+- 6LoWPAN: Major re-architecting of TCP logic to properly handle TCP
+stuff like ACKs and TDP windowing which were not properly covered in
+the initial design.
+- 6LoWPAN: HC06, copy TCP header as though it were data. TCP packet
+reassembly now seems to work OK.
+- 6LoWPAN: Fix duplicate and bad memcpy in loopback driver.
+- 6LoWPAN: Fix a misconception about HC06 16-bit IPv6 address
+compression.
+- 6LoWPAN: TCP send logic was returning a failure in one case when, in
+fact, the send was successful.
+
+* Common Drivers:
+
+- USB MSC: Use struct instead of pointer to the struct as sizeof
+argument in memset in usbmsc.c. Otherwise it leads to error: argument
+to sizeof in memset call is the same pointer type struct usbmsc_lun_s
+* as the destination. From Oleg Evseev.
+- USB MSC: Add missing logic to define endpoints. The composite
+changes broke the the non-composite, USB MSC only case because it omitted the critical setup when USB MSC was not part of the composite.
+- USB CDC/ACM. Fix several known problems resulting from merge of USB
+composite device. That merge now breaks some of the non-composite USB
+devices.
+- Button Driver: Interrupts weren't enabled since nothing updates them
+after btn_poll() marks the file descriptor structure as being polling.
+From Jan Pobrislo.
+- ADC Driver: Fix some data alignment issues in the ADC driver.
+- I2C Drivers: Handle I2C_TRANSFER return value consistently. Some I2C
+peripherals transfers return zero on success, others number of
+completed transfers. Make drivers robust against this. From Juha
+Niskanen.
+- COMP Driver: Fix compilation errors when poll disabled. From Mateusz
+Szafoni.
+
+* Simulation:
+
+- Simulation: Fix mkdir issue in GNU target. From Simon Piriou.
+- Simulation: x86 stack needs to be aligned to 16-byte boundaries.
+- Simulation: Fix building 32-bit simulation on 32-bit X86. From Jussi
+Kivilinna.
+
+* ARM:
+
+- ARM: The older ARM7 and ARM9 configurations were determining CFLAGS
+based on the GCC version 4.x.x or not. That needx to be extended for
+5.x.x and 6.x.x which also behave like 4.x.x.
+
+* ARMv7-M:
+
+- Fixed ARMv7-M Toolchain setting. Cortex-M4 only have Single
+Precision FPU. From Hidetaka Takano.
+- ARMv7-M syscall logic: Clear bit 0 in PC settings. Bit 0 is the
+thumb mode indication and should not be set in the PC. This extra bit
+has not caused problems in the past, but seeing it set in the PC is
+unnerving.
+
+* Espressif ESP32:
+
+- Fix ESP32 gpio enable reg and default UART pin. Modify default UART
+pin for ESP-WROOM-32. Fix gpio enable reg. From Sungki Kim.
+
+* Microchip/Atmel SAMD21 Drivers:
+
+- SAMD21: Fix some SPI-related issues. From Matt Thompson.
+- SAMD21 SPI: I was having issues with the bus freezing up .. slaves
+holding SDL low.. so I rewrote a good portion of the interrupt logic
+based on the application notes from Atmel. One major improvement is
+using the RXNACK flag in the STATUS register, which indicates that no
+device responded to an address packet. Assuming that the chip will
+always give an interrupt status, I believe it's possible to eliminate
+the timer as well. From Matt Thompson.
+- SAMD/L21: Need to preserve errno value across syslog() call.
+- SAMD21: Changes needed to get USB working. From Matt Thompson.
+
+* Microchip/Atmel SAMv7 Drivers:
+
+- SAMv7 TWIHS: TWIHS driver add reference counting. From David Sidrane.
+- SAMv7 CAN: We discovered a problem with the samv7 mcan driver which
+results, under some circumstances, in a very high CPU load. The
+problem occurs, and is easily reproducible, if the device is connected
+to a CAN network with a wrongly configured CAN speed (baud rate). In
+our tests we set the CAN speed of the device to 1000000 and the speed
+of the other CAN nodes to 500000. The device is restarted and sends a
+CANopen "bootup message" to the CAN network. This results in huge
+amount of errors messages on the CAN bus, probably because of the CAN
+feature for acknowledging error messages. The error messages can't be
+read by the device because of the misconfigured CAN speed, instead the
+CAN chip reports lots of errors, which are reported to the application
+which uses the CAN driver (CONFIG_CAN_ERRORS is enabled). The CAN
+errors are reported from the CAN chip via interrupts and thus the
+interrupt load is very high in this scenario. To fix the problem the
+driver now disables each RX error interrupt after it is occurred. The
+RX error interrupts are turned back on if at least one CAN message is
+received successfully. From Stefan Kolb.
+- SAMv7 CAN: I discovered while working on the SAMV7 mcan driver that
+the implementation of the CAN error handling is suboptimal. In the
+current implementation the many errors are implemented as pending
+errors. But those errors are not pending, the errors occurred and are
+gone directly afterwards. This commit changes the described behavior
+and simplifies the handling of CAN errors. From Stefan Kolb.
+
+* Microchip/Atmel SAMv7 Boards:
+
+- SAMv71-XULT: Fix MRF24J40 interrupt GPIO number.
+
+* NXP/Freescale Kinetis:
+
+- Kinetis MPU: Disable MPU when not in protected mode. The hardware
+reset state of the the MPU precludes any bus masters other than DMA
+access to memory. Unfortunately USB and SDHC have their own DMA and
+will not have access to memory in the default reset state. This change
+disabled the MPU if present on system startup. From David Sidrane.
+- Kinetis MPU: Fixed warning for kinetis_mpudisable. Missing header
+file added. From David Sidrane.
+- Kinetis SIM: Ensure isolation of clock dividers for 0 value case.
+This fixes a bug were a SoC does not have a clockdivN register and
+passes a 0 for the init value. This prevents overflow of the 0
+decremented to -1 (0xffffffff) spilling over to other clockdivN
+fields. From David Sidrane.
+
+* NXP/Freescale i.MX6 Drivers:
+
+- i.MX6: Fix a wrong parameter passed when calling irq_attach() in
+imx_serial.c. From Masayuki Ishikawa.
+- Based on Masayuki's change, I review all serial driver vector
+attachment. I Found one additional error and updated all relevant
+drivers to current interrupt parameter passing.
+
+* STMicro STM32:
+
+- STM32 F410 Kconfig: Fix peripherals available on the STM32 F410.
+This also adds a select for STM32_HAVE_DAC1 present on this STM32
+flavor. From Gwenhael Goavec-Merou.
+- STM32 L4 DMA: Correct USART3_RX bad channel definition. From Juha
+Niskanen.
+- STM32 L4 PWR: Correct PWR_SR2 REGLPS and REGLPF bits, add port I
+registers. Also remove duplicate section from Kconfig. From Juha
+Niskanen.
+- STM32 F7: do not enable read-modify-write on DTCM. "AN 4667 - STM32F7
+Series system architecture and performance" recommends to disable
+read-modify-write on DTCM: "If the DTCM-RAM is used as data location
+and the variables used are byte or/and halfword types, since there is
+no ECC management in this RAM on the STM32F7 Series, it is recommended
+to disable the read-modify-write of the DTCM-RAM in the DTCM interface
+(in the DTCMCR register) to increase the performance." From Jussi
+Kivilinna.
+
+* STMicro STM32 Drivers:
+
+- STM32 TIM3/4 are always 16-bits; never 32-bits. Noted by Eetu
+Nevalainen..
+- STM32 ADC: Invalidate dma buffer before use. Missing invalidation
+caused old samples being fetched from cache. From Jussi Kivilinna.
+- STM32, STM32L4, STM32F7 ADC: Fix channel 18 sample time. From Juha
+Niskanen.
+- STM32 DAC: Fix some configuration logic. When STM32_NDAC is greater
+than 1, then second channel is always DAC1OUT2. From Mateusz Szafoni.
+- STM32 DAC: Fix compilation when DMA disabled for channel. From
+Mateusz Szafoni.
+- STM32 F0: Fix some funny shifts in DAC header files. From Juha
+Niskanen.
+- STM32 F1 RTC fixes: (1) Compile issues because of missing RTC_MAGIC
+#defines, (2) missing functionality based on RTC_MAGIC in RTC based on
+stm32_rtcounter.c, (3) IRQ setup from up_rtc_initialize was later
+reset in up_irqinitialize, (4) write access to backup registers
+without enabling access to backup domain, (5) possible races in
+set/cancel alarm. tested with STM32F103C8 only. device now wakes up
+from forced STANDBY mode by alarm. From Leif Jakob.
+- STM32/STM32 L4 PWM: While attempting to output a 70 MHz square wave
+from the timer output of a STM32 clocked at 140 MHz, found that the
+reload calculation was off by one. This correction does allow the
+output up to 70 MHz. I am not sure this affects most users
+generating slow PWM but for frequencies close to the PCLK, the
+difference becomes significant. From JM.
+- STM32 L4 I2C: Set I2C SDA and SCL pins to open drain mode. From Pekka
+Ervasti.
+- STM32 L4 I2C: I2C4 was writing to wrong RCC registers. From Juha
+Niskanen.
+- STM32 L4 DAC: Report transfer as completed in DMA callback. Without
+this even O_NONBLOCK writes block the calling task if DAC was using
+DMA. From Juha Niskanen.
+- STM32 L4 COMP: comparators share RCC enable bit with SYSCFG. From
+Juha Niskanen.
+- STM32 L4 ADC: Correct EXTSEL macros. From Juha Niskanen.
+- STM32 L4 TIM: TIM15,16,17 are always in APB2. From Juha Niskanen.
+- STM32 F7 I2C: Set I2C4 SDA and SCL pins to open drain mode. From Juha
+Niskanen.
+- STM32 F4 RTCC: ISR register and write protection fix. From Eetu
+Nevalainen.
+- STM32 F7 Ethernet: Fix typo in header; Add memory sync barrier
+between writing to DMA TX descriptor and restarting DMA TX. Avoid
+calling work_queue on pollwork if it's already queued, just skip a
+poll cycle instead. Nucleo-144: Fix RMII TXD1 signal, connected to
+PB13 not to PG14. From savinz.
+- STM32 F7: Added missing config option for register value debugging.
+From Titus von Boxberg.
+- STM32 F7: No FSMC, only FMC for STM32F7. From Titus von Boxberg.
+- STM32 F7: HEAP2 depends on CONFIG_ARCH_HAVE_HEAP2, not on particular
+FMC RAM type. From Titus von Boxberg.
+- STM32 F7: STM32_RCC_DCKCFGR2 has nothing to do with PLLI2S; PLLI2S is
+not dependent on LTDC, instead on SAICLK1/2 generated from PLLI2S.
+From Titus von Boxberg.
+- STM32F7: Some STM32F7 builds failed in build testing due to undefined
+STM32_SRAM1_BASE. I think that is because stm32_allocateheap.c was
+not including chip/stm32_memorymap.h.
+- STM32 F7: dcache write-buffed mode is used (not write-through) buffer
+alignment is required for DMA transfers because a)
+arch_invalidate_dcache could lose buffered writes data and b)
+arch_flush_dcache could corrupt adjacent memory if the buffer and the
+bufflen, are not on ARMV7M_DCACHE_LINESIZE boundaries. From David
+Sidrane.
+
+* STMicro STM32 Boards:
+
+- STM32F103-Minumum SPI: SPIDEV_WIRELESS used when this has
+changed to SPIDEV_CONTACTLESS. From Nicolas Estibals.
+- configs/: a few more places where SPIDEV_WIRELELSS should be
+SPIDEV_CONTACTLESS.
+- STM32F103-Minumum: Fix a BUG when reading from output pin. We need
+a different read_ops to read from output pin. This patch fixes the
+issue. From Alan Carvalho de Assis.
+- STM32F103-Minumum: Use separated read_ops for GPIO interrupt pins.
+From Alan Carvalho de Assis.
+- STM32F103-Minumum: Fix compiler error in MCP2415 logic.
+- STM32F746G-DISCO: Fix for compilation of STM32F746G-DISCO. From Ivan
+Ucherdzhiev.
+- STM32F746G-DISCO: Fix for stm32f746g-disco board for button support
+with interrupt. This change is tested with buttons app example and it
+is working with interrupts (signals). I tried the test with polling
+but at this point it doesn't work. From Ivan Ucherdzhiev.
+
+* Build System
+
+- Fix -Werror=implicit-fallthrough on gcc7. From Julien Lecoeur.
+- configs/Board.mk: Remove comment form end of line. In windows native
+build, it appears to be trying to make that an extra parameter to the
+AR command. From Jeff.
+- configs/Board.mk: Remove quotes from CONFIG_ARCH_FAMILY. Causes
+problems with Windows native build. From Jeff.
+- Makefile.win would only create uboot images for ARM. MIPS support
+also needed. From Lwazi Dube.
+
+* C Library/Header Files:
+
+- C++: Fix C++ __guard implementation for ARM. The standard C++ ABI
+that most platforms follow defines __guard to be 64 bits. The existing
+implementation of libxx_cxa_guard.cxx follows this. However, the
+32-bit ARM C++ ABI defines it as 32 bits instead, and changes the
+meaning slightly so only the lowest bit is used. This matters because
+GCC creates guard symbols without regards to what libxx_cxa_guard.cxx
+says. So on ARM, gcc allocates 4 bytes, but __cxa_guard_release
+writes 8 bytes, zeroing out another unlucky variable nearby. Fix it
+by special-casing 32-bit ARM in libxx_cxa_guard. From Jim Paris.
+- C++: In cwchar it uses CONFIG_LIBC_WCHAR to only export the wc/mb
+functions. When a build does not want to use wide or multibyte char
+CONFIG_LIBC_WCHAR is not set. Therefore we should to only export the
+wc/mb functions when defined. Regardless of the stat of
+CONFIG_LIBC_WCHAR the non mb/wc definitions such as mbstate_t,
+wint_t, wctype_t need to be exported. From David Sidrane.
+- C Library: Fix an error in mkstemp() the could result in an infinite
+loop. From Alan Carvalho de Assis.
+- C Library: (1) Fix an error in mkstemp() the could result in an
+infinite loop. (2) Fix for wrong output in some cases. For Example:
+(a) input: "FILEXX", output: "FILE00" and repeats same output for
+further invocations of mkstemp(). But, the output has to be FILE01,
+FILE02, ...., FILEZZ. (b) input: "FILEXXXXXX", output: "FILE100000",
+for next invocation "FILE200000" and so on. But it's good, if the
+output goes like FILE000001, FILE000002, ..., FILE000101, ... From
+Lokesh B V.
+- C Library: gethostbyname_r: Fix check for space in buffer.
+- C Library: inet_ntop() was printing negative values for fields >127.
+- Math Library: Fix wrong output in modf() API. The sign of integral
+part given by the modf() should be same as sign of input. But for
+inputs between 0 and 1, the sign of integral part was not same as
+sign of input. From Lokesh B V.
+- Math Library: Fix wrong output in ceil() API. Ex:for input x = 1.0,
+the output should be 1.0, but the output was 2.0. From Lokesh B V.
+
+* Tools
+
+- tools/testbuild.sh: Fix missing $ before variable name.
+- tools/mkdeps.c: Eliminate a warning. MAX_PATH may already be defined
+in included system files. From Jeff.
+
+* Applications: apps/
+
+- All apps/ Makefiles: Add .PRECIOUS: apps/libapps.a to every
+Makefile. Hopefully this will end awkward problems when you Control-C
+out of a build and libapps.a is deleted.
+- platform/Makefile: More attempts to fix for Windows native build.
+Backslash as a delimiter causes problems in pattern subsitutions.
+
+* NSH: apps/nshlib:
+
+- NSH network initialization: Fix some ieee 802.15.4 initialization
+logic. It should not set the saddr or panid; those cannot be
+hard-coded but must come from the coordinator. Re-factor a function
+that has gotten too big and too complex. Do not set the IP address
+for 6loWPAN. The 6loWPAN stack uses IP address that derive from the
+ieee 802.15.4 addressing and cannot be (safely) configured by the user.
+- NSH Library: Fix copy-paste typo in nsh_usbconsole.c. From Oleg
+Evseev.
+- NSH Library: fix size of 6LoWPAN extended address.
+- NSH Library: Fix build break in nsh_command.c with IPv4/IPv6 dual
+stack. From Masayuki Ishikawa.
+- NSH Library: Correct parsing of ifconfig so that you can specify the
+HW address without specifying the IP address.
+
+* Examples/Tests: apps/examples:
+
+- examples/smart: Fix some compilation errors. Obviously this test has
+not been used in a LONG time.
+- examples/udp: Renaming some files to prevent name collision in
+libapps.a. Fix naming of a configuration setting.
+- examples/nettest: Renaming some files to prevent name collision in
+libapps.a
+- examples/nximage: Remove unused global variable.
+- examples/nsh: Remove APPNAME, PRIORITY, and STACKSIZE settings from
+Makefile to avoid showing nsh in Builtin Apps. From Masayuki Ishikawa.
+
+* Network Utilities: apps/netutils:
+
+- netutils/tftpc: Missing header file causes errors in some
+configurations.
+- netutils/tftpc: TFTPC depends on CONFIG_NET_IPv4.
+- netutils/netlib: Fixes to work when only USRSOCK is enabled.
+- netutils/netlib: Fix netlib_nodaddrconv() so that its return type is
+the same as other address conversion functions.
+- netutils/netlib: If only PF_IEEE802154 socket family is enabled, then
+must use SOCK_DGRAM.
+- netutils/ftpc: Fix some memory leaks. From Boris Astardzhiev.
+- netutils/thttpd: Fix a malformed if condition detected by GCC 6.x.x.
+- netutils/dhcpd: Prevent buffer overflow in dhcpd_addoption. offset
+represents distance from start of option buffer. So this should be
+changed current option pointer minus start of buffer. From EunBong
+Song.
+
+* Wireless Utilities: apps/wireless:
+
+- wireless/ieee802154/i8sak: Need to increment the next_saddr after
+each successful association.
+
+* System Utilities (apps/system)
+
+- correct copy-paste typo in comments in composite_main.c From Oleg
+Evseev.
+- system/dhcpc: The DHCPC renew command did not build correctly due to
+naming problems. Noted by Masayuki Ishikawa.
+- system/dhcpc: Fix warning about renew_main.o appear twice in rule.
+
+* Tools (apps/tools):
+
+- tools/mkkconfig.bat: Use %cd% instead of %~dp0 for usage of APPSDIR
+in this batch file.
+- tools/mkkconfig.bat: Remove quotes in echo. These were begin
+Echo'ed and generating double quots in the output. From Jeff.
+- Windows build fixes: tools/mkkconfig.bat - switch APPSDIR path to
+use forward slashes for kconfig-frontends. interpreters/ficl -
+Reorder some targets that causes GNUwin32 make to behave badly. From
+Jeff.

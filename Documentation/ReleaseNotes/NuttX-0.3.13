@@ -1,0 +1,42 @@
+NuttX-0.3.13
+------------
+
+This is the 25th release of NuttX. This release includes some
+important bugfixes as well as a few new features. Bugs fixed
+include:
+
+* Fixed problems with Cygwin-based console input. NSH now works
+with the Cygwin simulator.
+* sched_get_priority_max/min returned error on SCHED_RR
+* Corrected detection of End-of-File in fgets()
+* Fixed an error in opendir() that could cause an assertion to fail
+inappropriately.
+* Corrected an error in the FAT that caused files opened for writing
+with O_APPEND to fail.
+* Fix error in getopt() when called with argc==1
+* Fix error in stat() when used on the root directory
+* Fixed a critical bug that effects the way that environment variables
+are shared among pthreads.
+* uIP port now supports multi-threaded, concurrent socket access.
+So, for example, one thread can be reading from a socket while
+another is writing to the socket.
+
+New features were also added:
+
+* New OS APIs: chdir() and getcwd()
+* The NuttX shell (NSH) has been extended in many ways.
+- New commands: mkfatfs, mkfifo, sleep, usleep, nice, sh, cd, and pwd
+- New memory inspection commands and heap usage commands
+- New capabilities:
+- Execution of commands in background
+- Execution of simple scripts
+- Redirection of command output
+- Last command status ($?)
+- Now supports if-then[-else]-fi construct
+- Other features as noted in the ChangeLog.
+
+These changes were verified only on the Host simulator under Cygwin
+and under Linux and also on the Neuros OSD (ARM9). Please report
+any errors to me.
+
+This tarball contains a complete CVS snapshot from September 1, 2008.

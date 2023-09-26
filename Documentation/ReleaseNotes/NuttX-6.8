@@ -1,0 +1,27 @@
+NuttX-6.8
+---------
+
+The 75th release of NuttX, Version 6.8, was made on August 19, 2011
+and is available for download from the SourceForge website. Note
+that release consists of two tarballs: nuttx-6.8.tar.gz and
+apps-6.8.tar.gz. Both may be needed (see the top-level nuttx/README.txt
+file for build information). Changes in this release are summarized
+below:
+
+* NuttX has been ported to run on the Freescale Cortex-M4 "Kinetis"
+boards. Two board ports are available for (1) the Kinetis
+KwikStik-K40 and (2) the Kinetis TWR-K60N512 tower.
+* Support for RGMP 0.3. This version of RGMP now runs on the
+OMAP4430 (arm) pandaboard
+* LPC17xx CAN driver extended to support both CAN1 and CAN2
+(submitted by Li Zhuoy (Lzzy))
+* Fixed several critical bugs related to signal handling
+initialization and for signals the wake up tasks that are waiting
+to send or receive message queues.Both are important. (submitted
+by hkwilton).
+* drivers/can.c: Fixed a semaphore overflow problem in the CAN
+driver (reported by Li Zhouy (Lzzy)).
+* Added a new ADC driver infrastructure and TI ADS1255 driver
+both developed and submitted by Li Zhouy (Lzzy)).
+
+See the Changelog for additional changes included in this release.

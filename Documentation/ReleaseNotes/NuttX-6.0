@@ -1,0 +1,46 @@
+NuttX-6.0
+---------
+
+The 67th release of NuttX, Version 6.0, was made on March 21, 2011
+and is available for download from the SourceForge website. The
+version number of this release was bumped from 5.19 to 6.0. A
+change in the major revision number is used to reflect an incompatibility
+with previous versions. In this release, the NuttX core OS
+functionality has been separated from NuttX application-related
+functionality. These are provided as separate tarballs:
+
+* nuttx-6.0.tar.gz, and
+* apps-6.0.tar.gz
+
+The purpose of this separation is both to better organize and
+modularize the NuttX source tree, but also to provide better support
+for incorporation of end-user applications with NuttX.
+
+The incompatibility results from the changes to the board configuration
+logic needed to supported the separable application. The major
+changes to the configuration include:
+
+* CONFIG_APPS_DIR - This should not be set. The default is
+../apps. This should only be set if you have a custom,
+product-specific application directory in some different location.
+
+* appconfig - Each board configuration now requires a new file
+called 'appconfig.' As its name suggests, this file provides
+new configuration information needed by the logic in ../apps.
+
+In addition to this major reorganization in the directory structure,
+this release also includes some important extensions to existing
+features and some important bugfixes. These include:
+
+* The SLIP driver was been well debugged and significantly
+re-designed. Now you can have an Ethernet connection to you
+board even if you have no Ethernet hardware. How cool is that?
+
+* The QEMU i486 port is now functional. It has also been reported
+to work on the Bifferboard (see http://bifferos.bizhat.com/).
+
+* And extensions to the uIP driver interface, and
+
+* Bug fixes to fopen() and STM32 GPIO configuration
+
+Please see the ChangeLog for details.

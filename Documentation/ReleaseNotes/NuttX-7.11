@@ -1,0 +1,383 @@
+NuttX-7.11
+------------------------
+
+The 111th release of NuttX, Version 7.11, was made on August 13 2015,
+and is available for download from the Bitbucket.org website. Note
+that release consists of two tarballs: nuttx-7.11.tar.gz and
+apps-7.11.tar.gz. These are available from:
+
+https://bitbucket.org/patacongo/nuttx/downloads
+https://bitbucket.org/nuttx/apps/downloads
+
+Both may be needed (see the top-level nuttx/README.txt file for build
+information).
+
+Additional new features and extended functionality:
+
+* Core OS:
+
+- clock_gettime(): Use up_timer_gettime for CLOCK_MONOTONIC in
+tickless mode. From Max Neklyudov.
+- waitpid(): Implement WNOHANG for waitpid() only and for the case of
+CONFIG_SCHED_HAVE_PARENT not selected. From Max Neklyudov.
+- SCHED_SPORADIC: Add a sporadic scheduler to NuttX.
+- Extend the processor-specific interface to include information to
+support the Sporadic Scheduler.
+- sem_tickwait(): Added this function for internal use within the OS.
+It is a non-standard but more efficient version of sem_timedwait()
+for use in higher performance device drivers.
+
+* Binary Loader:
+
+* Graphics/Graphic Drivers:
+
+- Graphics: Implement anti-aliasing in order to clean the drawing of
+all edges. Anti-aliasing is supported in the horizontal, raster
+direction only.
+- SSD1306 LCD Driver: Modify the SSD1306 LCD driver to support either
+the SPI or I2C interface. From Alan Carvalho de Assis.
+
+* File Systems/Block Drivers/MTD:
+
+- mount: Add the ability to mount a file system on top of en existing
+node in the pseudo-file system.
+- epoll(): Add a very simple epoll layer just around poll calls. To
+satisfy build app requirements. From Anton D. Kachalov.
+
+* Common Device Drivers:
+
+- IOCTL: Add relay IOCTL definitions. From Max Neklyudov.
+- I/O Expander Framework: Add an I/O expander driver framework. From
+Sebastien Lorquet
+- NXP PCA9555 I/O Explander. Add PCA9555 driver.From Sebastien
+Lorquet
+- BMP180 Barameter: Add support to Bosch BMP180 barometer. From
+Alan Carvalho de Assis.
+- CAN IOCTLs: Add CAN IOCTL command definitions to manage CAN message
+filtering
+- CAN Driver: Add configuration to support DLC to byte conversions
+needed for CAN FD mode.
+- SPI Slave Interface: Add a definition of an SPI slave interface.
+- LM92 Temperature Sensor: Add a driver for the LM92 temperature
+sensor. Contributed by Paul Alexander Patience.
+- AS5048B Rotary Magnetic Sensor: Add support for an AS5048B rotary
+magnetic sensor. From Paul Alexander Patience.
+- Ramtron Driver: Update to include supportf for newer RAMTRON parts.
+From David Sidrane.
+- MB7040 Sonar Driver: Add support for a MB7040 sonar driver. From
+Paul Alexander Patience.
+- ms5805 Altimeter Driver: Add support for an MS5805 altimeter. From
+Paul Alexander Patience.
+
+* Networking:
+
+- DNS Client: Implement the low-level network DNS packet protocol to
+request and receive IPv6 address mappings.
+- NetDB: Add support for a DNS host name resolution cache. This can
+save a lot of DNS name server lookups (but might also have the
+negative consequence of using stale IP address mappings.
+- NetDB: Name resolution logic now supports lookups from a file like
+/etc/hosts.
+- Network Initialization: Add CONFIG_NETDEV_LATEINIT that can be
+used to suppress calls to up_netinitialize() from early in
+initialization.
+- FTMAC100 Ethernet MAC Driver. Add support for Faraday FTMCA100
+Ethernet MAC/ From Anton D. Kachalov.
+- UDP Networking: Add support for send() for connected UDP sockets.
+
+* Crypto:
+
+- Add CFB and MAC AES modes. From Max Neklyudov.
+
+* Simulation Platform:
+
+- Simulation: Implement board_power_off() for the simulation platform.
+This allows for a graceful exit from the simulation.
+
+* MoxaRT:
+
+- MoxaRT SoC: Add support for MoxaRT SoC found in the most Moxa serial
+converters such as NP51x0, NP66xx, UC72xx. From Anton D. Kachalov.
+
+* MoxaRT Boards:
+
+- Moxa NP51x0: Moxa NP51x0 series of 2-port advanced RS-232/422/485
+serial device servers. From Anton D. Kachalov.
+
+* ARMv6-M:
+
+- ARMv6-M Assertions: Port some per-process stack dumping logic from
+ARMv7-M to ARMv6-M. From Alan Carvalho de Assis.
+
+* Atmel SAMD/L Boards:
+
+- SAML21: DMA: Add SAML21 DMA support.
+- SAMD21: Add architecture support for the SAMD21 family.
+- SAMD21-Xplained: Board configuration for the SAMD21 Xplained board.
+
+* Atmel SAM3/4 Drivers:
+
+- SAM4E: Add default loop optimization if EEFC_FMR is available in the
+configuration (i.e., for SAM4S and 4E). From Marco Aurélio da Cruz.
+- crypto/ and SAM4CM: Add CFB and MAC AES modes. From Max Neklyudov.
+- SAM3/4: Add a TWI driver for the SAM4CM. From Max Neklyudov.
+
+* Freescale (NXP) Kinetis:
+
+- Kinetis: Add support for MK20DN--VLH5 and MK20DX---VLH5. Needed
+for backward compatible support for Teensy-3.0.
+
+* Freescale (NXP) Kinetis Boards:
+
+- Teensy 3.x: Add board support for the PJRC Teensy-3.0 and
+Teensy-3.1 boards.
+
+* Atmel SAMV7 Drivers:
+
+- SAMV7: Add an MCAN driver for the SAMV7 platform.
+- SAMV7 SPI Slave Driver: Add the an SPI slave driver.
+
+* STMicro STM32:
+
+- STMicro STM32 F7: Add architecture support for the STMicro STM32
+F7.
+- STM32 F446: Add support for the STMicro STM32 F446. From David
+Sidrane.
+
+* STMicro STM32 Drivers:
+
+- STM32 F7: Add an STM32 F7 Ethernet driver.
+- STM32 F7: Port the STM32 F4 DMA driver.
+- STM32 F4 ADC: Add DMA support to the ADC driver for STM32 F4. From
+Max Kriegler.
+
+* STMicro STM32 Boards:
+
+- STM32F762G-Disco: Add support for the STMicro STM32 F7 Discovery
+board.
+- STM32F4-Disco: Add support to BMP180 driver on the STM32F4 Discovery.
+From Alan Carvalho de Assis.
+
+* C Library/Header Files:
+
+- Add asctime(), asctime_r(), ctime(), and ctime_r().
+- sethostname(): Add support for sethostname().
+- gethostbyname() and gethostbyaddr(): Add support for
+gethostbyname() and gethostbyaddr(). Also support included for the
+non-standard gethostbyname_r() and gethostbyaddr_r(). This moves
+the DNS client logic from apps/ into the NuttX libc implementation.
+
+* Tools:
+
+- testbuild.sh: Add a script that can be used to perform building
+testing for several board configurations.
+
+* Build/Configuration System:
+
+- apps/ Build System: No longer depends on hardcoded lists of
+directories. Instead, it does a wildcard search to find all
+appropriate directories. This means that to install a new
+application, you simply have to copy the directory (or link it) into
+the apps/ directory. If the new directory includes a Makefile and
+Make.defs file, then it will automatically be included in the build.
+- mkkonfig.sh: Add the tool mkkconfig.sh that dynamically builds the
+apps/Kconfig file at configuration time. The hardcoded
+configuration file has been removed and now the top-level Makefile
+executes tools/mkkconfig.sh to auto-generate the top-level Kconfig
+file. A new apps/ make target call preconfig: was added to support
+this operation. Now you do not have to modify the top-level Kconfig
+file to add a new directory into the configuration; the top-level
+subdirectory simply needs to include a Kconfig file and it will
+automatically be included in the configuration. The native Windows
+build is temporarily broken until a new apps/tools/mkconfig.bat
+script is generated.
+- mkkconfig.bat: Add the Windows script corresponding to
+apps/tools/mkkconfig.sh. Needed for a Windows native build.
+
+* Applications: apps/nshlib:
+
+- NSH shutdown command: NSH will now support an (optional) shutdown
+command if the board provides the option CONFIG_BOARDCTL_POWEROFF.
+The command can also be used to reset the system if
+CONFIG_BOARDCTL_RESET=y.
+- NSH uname command: Add support for a uname command.
+- NSH nslookup command: Add an nslookup command.
+
+* Applications: apps/system:
+
+- NetDB: Add a system command to access the network database.
+- readline(): Add support for Unix-style tab complete to readline.
+Contributed by Nghia Ho.
+- readline(): Extended the tab-completion support to also expand NSH
+command names.
+- readline(): Add support for an in-memory command line history that
+can be retrieved using the up and down arrows. Contributed by Nghia
+Ho.
+
+* Applications: apps/netutils:
+
+- DNS client: Moved the DNS client logic into the NuttX C library.
+It is a necessary part for the full implementation of the netdb logic
+and provides more flexibility in that location.
+- Replace calls to the non-standard dns_gethotip() with calls to
+standard gethostbyname().
+- NetLib: Create netlib wrapper functions around dns_getserver() and
+dns_setserver() to isolate application code from changes to those
+interfaces.
+
+* Applications: apps/examples:
+
+- OS test: Extend the OS test to include a test of
+pthread_mutex_trylock() for recursive mutexes. From Juha Niskanen.
+- OS test: Add a test for the sporadic scheduler.
+
+Bugfixes. Only the most critical bugfixes are listed here (see the
+ChangeLog for the complete list of bugfixes and for additional, more
+detailed bugfix information):
+
+* Core OS:
+
+- pthreads: Use -1 instead of 0 as PID for unclaimed mutexes. From
+Juha Niskanen.
+- pthreads: Implement pthread_mutex_trylock() for recursive mutexes.
+From Juha Niskanen.
+- pthread_create(): Group binding needs to be cleared before
+sched_releasetcb(), as otherwise group_leave() will be called and
+group->tg_nmembers decremented or group being released. group_leave()
+should be called only after group_join() is called, not after
+group_bind(). From Jussi Kivilinna.
+- Protected Mode User Memory Allocator: Redesigned how the user space
+heap is accessed from the kernel code in protected mode. It used to
+call memory management functions in user space via function pointers
+in the userspace interface. That is inefficient because the first
+thing that those memory management functions do is to trap back into
+the kernel to get the current PID. Worse, that operation can be
+fatal is certain fragile situations such as when a task is exiting.
+The solution is to remove all of the memory management function
+calls from the interface. Instead, the interface exports the users
+pace heap structure and then kernel size implementations of those
+memory management functions will operate on the userspace heap
+structure. This avoids the unnecessary system calls and, more
+importantly, failures do to freeing memory when a test exits.
+- pthread_create(): Fix an (unlikely) error in fallback value in the
+event of a failure (which should never occur).
+
+* Common Drivers:
+
+- STMPE811 Driver: In stmpe811_instanciate() when
+CONFIG_STMPE811_MULTIPLE is enabled, and the call to
+stmpe811_checkid() fails, then the linked device list is not
+restored to its previous state. From Sebastien Lorquet.
+- CAN driver: Fix an issue in the CAN driver where the rx_sem count
+can grow beyond bounds.
+
+* File System/Block Drivers:
+
+- NFS client: Fix prototype of unbind method. The function prototype
+was not updated for NFS after a recent change to the file system
+interface. From Manuel St??.
+
+* Networking/Network Drivers:
+
+- netconfig.h: Fix some backward compilation that was emitting #error
+in the wrong condition when SLIP was enabled.
+- SLIP Driver: Fix a missed name change when many of network
+interface names changed sometime back but were apparently never
+updated for SLIP.
+- Networking: Allow receipt of empty UDP packets. From Max Neklyudov.
+
+* ARMv6-M:
+
+- ARMv6-M: Fix Cortex-M0 assembly error when the interrupt stack is
+enabled. From Alan Carvalho de Assis.
+
+* Atmel SAMD/L Drivers:
+
+- SAMD20, D21, L21: In the SAML21, SERCOM5 uses a different SLOW clock
+channel (and, hence, also a different SLOW GCLK generator). This
+means that the channel selection cannot be a global definition but
+must be a per SERCOM configuration setting.
+- SAMD/L: Several fixes to register definitions and types. From
+Janne Rosberg.
+
+* Atmel SAM3/4 Drivers:
+
+- SAM3/4 UART: Back out an error introduced with commit
+02c33f66c5a8be774034cd40e4125e9323c7b4d8. Causes an infinite loop in
+up_lowputc(). From Max Neklyudov.
+- SAM4CM: Fix SUPC register definitions. From Max Neklyudov.
+- SAM3/4 WDT: Correct some problems with SAM3/4 watchdog driver.
+Includes some small improvements. From Max Neklyudov.
+
+* Atmel SAMV7 Drivers:
+
+- SAMV7 UART: Also back the bad cloned change o sam_lowputc.c for
+SAMV7 platform.
+
+* NXP LPC43xx Drivers:
+
+- LPC4350: Correct some LPC4350 GPIO pin configurations. From
+Alessandro Temil.
+
+* SiLabs EMF32 Drivers:
+
+- EFM32 SPI: Correct write to incorrect register in EFM32 SPI driver.
+From Pierre-noel Bouteville.
+
+* STMicro STM32 Drivers:
+
+- STM32 F15x: STM322 F15x stm32_stdclockconfig() was calling
+stm32_pw_setvos() which accessed PWR_CR via an inactive APB From
+Juha Niskaneni.
+- STM32 Ethernet: Extend STM32 Ethernet operating frequency to 180MHz.
+From Sebastien Lorquet.
+
+* STMicro STM32 Boards:
+
+- SAMV7 Xplained: In clock configuration, divider was set to 25 to get
+25*12MHz=300MHz CPU clock. The correct multiplier is 24 because the
+calculation if (24+1)*12MHz. So the board was running at 312MHz.
+From Efim Monjak.
+
+* ARMv7-A:
+
+- Cortex-A5 vfork(): Fix a Cortex-A compilation error when system
+calls are enabled in modes other than CONFIG_BUILD_KERNEL.
+
+* Atmel SAMA5 Drivers:
+
+- SAMA5Dx EHCI: Fix some bad conditional compilation that left a
+function undefined if CONFIG_USBHOST_ASYNCH is not selected.
+
+* C Library/Header Files:
+
+- getopt(): Uninitialized variable can cause hardfault from getopt()
+if required argument is missing. From George McWilliams.
+
+* Applications: apps/nshlib:
+
+- NSH/THHPD: Change decoding to handle the increased size of the
+scheduling policy field in the TCB.
+
+* Applications: apps/netutils:
+
+- THTTPD: Fix compilation problems when
+CONFIG_THTTPD_GENERATE_INDICES is defined.
+- THTTPD: Missing gci-src as a dependency path when building with
+BINFS enabled.
+
+* Applications: apps/examples:
+
+- poll() example: Fix a few bit-rot compilation errors.
+- Nx Lines example: If CONFIG_NX_ANTIALIASING=y, then the nxlines
+example now erases a line that is 2 pixels longer and 2 pixels wider
+than the line it drew. That eliminates edges effects due to
+applying the anti-aliasing algorithm twice. A better solution
+would be to make anti-aliasing an option for each graphics call so
+you would rend the line with anti-aliasing ON and clear it with
+anti-aliasing OFF. but I don't have the wherewithal for that change
+today.
+- OS test: Improve synchronization in round robin tests. On very fast
+processors, there are race conditions that make the test fail.
+Need better interlocking to assure that the threads actually do start
+at the same time.

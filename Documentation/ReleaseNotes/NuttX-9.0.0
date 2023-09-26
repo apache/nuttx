@@ -1,0 +1,147 @@
+NuttX-9.0.0
+-----------
+
+This is the first release of NuttX as Apache NuttX (Incubating) and represents our first major milestone as a Podling of the Apache Software Foundation's Incubator. This release is the culmination of nearly 6 months of hard work and includes several new architectures and drivers, and numerous improvements and bug fixes to the core RTOS, drivers, and networking subsystems.
+
+* Major Changes to Core OS
+* Bugfixes
+- nxsem_wait_uninterruptible() now returns if the task is canceled.
+- Fix a bug in pthread_condwait() that was improperly re-initializing the mutex.
+- In sched_setpriority(), fix functions called inside a DEBUGASSERT that were eliminated when assertions are disable
+
+* Compatibility Concerns
+
+- The configuration option CONFIG_CAN_PASS_STRUCT is now removed. Previously, it was used (at the cost of breaking standards support) to support older versions of the SDCC compiler that couldn't pass structs/unions as functions' parameters. A newer version of the compiler has resolved the issue.
+
+* Major Changes to Build System
+- Add a post-build function that allows extending the build with CPU/board-specific logic.
+- Add build tools to simplify ZDS-II tool usage.
+- mkexport.sh: Deal with ARCHSCRIPT containing multiple files.
+- Various nxstyle improvements.
+
+* Architectural Support
+* New architecture support
+- Add support for RISCV-64
+- Add support for x86_64 (tested on QEMU)
+- Add support for ELF64
+- Add a port to the NUCLEO-F429ZI board
+- Add support for the STM32H747I-DISCO board
+- Add Z20X board support and bootloader to upload code from the W25 flash to SRAM
+- Add initial support for Litex with softcore CPU VexRiscV SoC
+- Add support for the Digilent ARTY_A7 board to test the Litex port
+- Added initial support for Sipeed Maix Bit board with Kendryte K210 processor
+- New architectural support: ez80f92
+- Flat address x86_64 port of NuttX
+- Support to run NuttX on ESP32 QEMU
+- Initial support for Sipeed Maix Bit board with Kendryte K210 processor
+- Add initial support for Kendryte K210 processor in SMP mode
+- NXP S32K11x (Cortex-M0+) and S32K14x (Cortext-M4F): Add support for NXP automotive boards.
+- XMC 4700 (Cortex-M4F)
+* Architectures with significant improvements
+- ESP32 loadable modules support
+- i.MX RT: FLEXIO clock config logic.
+- Fix the clock configuration for the i.MX RT family
+- i.MX RT: Add ability to run from OCRAM
+- SAMA5D27 peripheral support - USB Host working
+- z20x: Add W25 bootloader
+- i.MX RT: Add USB Device support
+- STM32, STM32F7, STM32H7 add SPI DMATHRESHOLD
+- Improve the simulator timer
+- 64-bit modules on macOS simulator
+- z20x: Add XTP2046 SPI support; add timer support
+- RX65N RTC Driver added
+- NXP Freedom K28F Board SD-Card support
+- STM32H7: support SDRAM via FMC peripheral
+- LM3S6965-ek: Add PROTECTED build support
+- STM32H7: Added IWDG and WWDG, power management (sleep/stop/standby), WKUP pin configuration
+- SAMV71: Add read UID implementation and move flash functions to RAM
+- i.MX RT: Fix interrupts storm (serial & I2C)
+- Various fixes and cosmetic changes to the CxD56xx architecture
+- Fix SiFive FE310 related code (comments, improve serial irq handling, initial int status)
+- Implement QSPI for STM32H7
+- Improvements for the nRF52 port: I2C, SPI, GPIO support
+- Updates for LPC17xx/40xx serial
+- Adds basic support for Microchip SAM E54 Xplained Pro board
+- Adds an Ethernet driver for the SAME5x family (based on the SAMA5 GMAC driver)
+- Add CDC ECM Ethernet over USB 2.0 High Speed (tested on SAMA5D36-Xplained board)
+- Simulator: Reimplement simulator uart on top of serial driver framework
+- NXP S32K1XX peripheral clock fixes
+- Fix syscall stack alignment on armv7-m
+- Fix flash_erase(page) when page >= 256 for STM32L4 family
+- Add partial support for the NETLINK poll() operation.
+- Add serial DMA support for STM32F7
+- Add AM335x Clock Configuration
+- Add I2C support for AM335x
+- Add configuration to fine tune LPI2C Timeout for iMXRT
+- Add CAN support to AM335x
+- Add I2C support to STM32F0/L0/G0
+- Kinetis LPC SDCard improvements
+- Replace the busy polling with work_queue in the ethernet driver of simulator
+- Fix Xtensa's SMP support to follow same logic from other SMP archs
+- PIC32MZ: SPI transfers can be configured to use DMA.
+- PIC32MZ: Implement cache operations.
+* Driver Support
+* New drivers
+- New driver for the ADS7828 I2C analog to digital converter
+- driver/ioexpander: New driver for PCA9538 I2C I/O expander
+- New driver type for battery monitor ICs.
+- Driver for the BQ769x0 battery monitor IC.
+- Add Support for Quectel EC20 4G LTE Module USB CDC/ACM
+- Add QSPI-based Winbond NOR FLASH driver
+* Drivers with significant improvements
+- Update all the drivers to check return value of nxsem_wait_uninterruptible().
+- MCP9844 shutdown mode support
+- fcntl: add O_CLOEXEC flag, add O_CLOEXEC/FD_CLOEXEC support
+- CDC-ECM Ethernet over USB 2.0 HS
+- smartfs improvements: Handling of duplicate sectors, support fsck to check and repair the smartfs file system, and recover SPI Flash from initial error state.
+- Various fixes for USBDEV driver: Remove unnecessary reset logic, fix descriptor type mismatch when dual speed is enabled, fix invalid/unsupported command processing, and fix string ID calculation.
+- Handle size zero in umm_malloc.c and umm_realloc.c, which causes a system freeze in kernel mode.
+- Fixed compilation issue with poll fds notification.
+- Report POLLHUP and POLLERR in 'revents' regardless the requested 'events' set.
+* Networking
+- Telnet: Fix/Refine CTRL+C to work on telnet
+- TCP: Fix of faulty TCP sequence increments
+- netdb: Fix netdb to query IPv4 and IPv6 addresses regardless the server address type
+- Netlink sockets may be set to non-blocking
+- Improve TUN and SLIP, refine Control+C Handling in Telnet
+- Sockets: Add socket MSG_DONTWAIT support
+- Network Loopback Driver: Add a configuration option to control packet size
+- Network IOCTLs: Add FIONBIO network IOCTL support
+- NFS: Support IPv4 and TCP
+- Sockets: Add IP and TCP socket options needed by iperf3
+- Netlink: Add support for asynchronous Netlink responses
+- TCP: Monitor TCP_POLL/TCP_NEWDATA/TCP_BACKLOG per the request like UDP counterpart
+- TCP: Minor design improvement to TCP delayed ACKs
+- DNS IPv4/IPv6 Dual Host Support: When IPv4/IPv6 Dual Stack is enabled, queries both types of addresses regardless of whether the DNS server is accessed via IPv4 or IPv6. As a result, getaddrinfo() may return a mixed (IPv4/IPv6) address list.
+
+* Applications
+* Improvements
+- Extend netutils and netinit to work with only Netlink sockets enabled
+- Add getprime program to check multi-thread performance
+- Improve zmodem send performance
+- Add simple HTS221, LSM303 and LSM6DSL examples
+- Improve to gs2200m wiki performance
+- Improve telnet server and enable it to listen on both IPv4 and IPv6
+- Improve ntpclient logic
+- Improve wapi to save configuration to file system
+- Improve wapi to skip associate if ssid is invalid
+- Improve cmd_nfsmount to use IPv4 and IPv6
+- Improve ostest for SMP and non-SMP configurations
+- Improve UDP to avoid using standard symbols
+- Improve dhcpd to include configurable timeout and retry count
+* Bugfixes
+- Correct format when printing ARP tablet entries
+- Ensure /bin/ping and ping work at the same time
+- Correct backward conditional logic in dhcpd_leaseexpired()
+- Fix several problems on ftpd
+- Fix dhcpd issue reported on Issue #17
+- Fix sendmail example to run on a local SMTP server
+- Fix buffer overflow on netlib
+- Fix compile errors in loopback mode of the tcpblaster
+- Fix stack corruption in ELF task test
+- Fix errors in NoBlockRecv and BlockRecv tests of usrsocktest
+- Fix ipforward IP Header issue for IPv4
+- Fix wrongly swapped parity options of CU program
+- Fix slcd to avoid using priv->fd before initializing it
+- Fix (tcp, udp)blaster to build on macOS
+- Correct the buffer type of base64 program

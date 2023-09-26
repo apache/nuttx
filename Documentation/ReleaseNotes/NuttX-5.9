@@ -1,0 +1,41 @@
+NuttX-5.9
+---------
+
+This is the 56th release of NuttX. This release is difficult to
+categorize; NuttX-5.9 was really released because there were too
+many changes accumulating in CVS -- a few important, some unfinished
+implementations, and a couple of important bugfixes.
+
+* By far biggest change in this release is the complete implementation
+of on-demand paging support. This feature will allow you to
+execute large programs on a mass storage device (such as SPI
+FLASH) in a small RAM. All of the core on-demand paging logic
+was completed
+(see https://nuttx.apache.org/docs/latest/components/paging.html)
+and support was implemented for the ARM-9 family. A test
+configuration is in place for the NXP LPC3131. It has been
+verified that this new logic does not interfere with normal
+fixed-page ARM9 operation, but otherwise this new on-demand
+paging feature is untested.
+* Add support for the CodeSourcery toolchain to the Olimex-lpc2378
+port and for the Neuros OSD port.
+* The Neuros OSD port has been updated to work with the production
+v1.0 OSD (previously it only worked with the development board).
+* And some miscellaneous feature enhancements as detailed in the
+ChangeLog.
+
+This includes several important bugfixes:
+
+* NXP LPC17xx - Fixed a critical bug in the GPIO configuration
+logic: When attempting to set no pull-up or pull-down (floating),
+it would, instead, select pull-down.
+
+* TI/Luminary LM3Sxxxx - Fixed:
+(1) A logic error in an address table lookup.
+(2) GPIO port encoding the limited support to only 8 GPIO ports.
+
+* Corrected the lease time in the DHCPC implementation: It was
+not in host byte order.
+
+* And several other less important bugs as documented in the
+ChangeLog: Warnings, cornercase compilation problems, etc.

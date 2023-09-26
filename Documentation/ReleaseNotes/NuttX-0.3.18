@@ -1,0 +1,46 @@
+NuttX-0.3.18
+------------
+
+This is the 30th release of NuttX. This release includes two
+partially completed ports, several new features, and a couple of
+important bug fixes. The two partially completed ports are:
+
+* The STMicro STR71x processor and configuration for the Olimex
+STR-P711 board.
+* The Hitachi SH-1 using the SH1_LCEVB1 (SH-1/US7032EVB1) board
+
+Progress on these ports is stalled (as detailed in the ChangeLog).
+
+The new features focus primarily on management of block devices and
+extensions of the NuttShell (NSH). These include:
+
+* A loop device that converts a file into a block device.
+* A block to character (BCH) driver that allow access a block device as
+if it were character device.
+* Added strcasecmp() and strncasecmp() libc functions.
+* Added the 'dd' and 'losetup' commands to NSH. These commands
+(along with mkfatfs and mount), give good management of filesystems
+on the target.
+
+Several bugs were fixed, the most important of which are:
+
+* Fixed a race condition workaround delay in LPC214X SPI logic.
+This was also the cause of some bad MMC/SD performance on that
+platform.
+
+* Fixed a recently introduced FAT file system problem: It would
+mount a (invalid) FAT file system even if the medium is not formatted!
+
+* Corrected two other important errors in the FAT lseek() implementation:
+1 - The sectors-per-cluster value was being reset to "1".
+2 - Important lseek logic was omitted when the seek position was zero.
+
+The FAT filesystem has had many bugs fixed in it and, I think, is
+now maturing and becoming stable.
+
+These changes were verified only on the mcu123.com NXP LPC2148
+board, the Hitachi SH1_LCEVB1 board, and the Linux simulator, all
+using a Linux development environment. Please report any errors
+to me.
+
+This tarball contains a complete CVS snapshot from November 16, 2008.

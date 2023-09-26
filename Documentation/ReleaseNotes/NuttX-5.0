@@ -1,0 +1,57 @@
+NuttX-5.0
+---------
+
+This is 47th release of NuttX and the successor to nuttx-4.14. This
+major revision number has been incremented to indicate that an
+incompatibility with previous nuttx releases has been introduced.
+This version adopts standard fixed width integer names as specified
+by the ANSI C99 standard. The core logic of NuttX is older than
+that standard and did not conform to it.
+
+If you have applications running on NuttX-4.14, those applications
+should continue to build and execute without problem on NuttX-5.0.
+However, if you have device drivers or other OS-internal logic, you
+will probably have to make some minor changes to your code to use
+this version. Below is a summary of those changes:
+
+* If you include sys/types.h to get the non-standard, fixed width
+integer types (uint32, uint16, ubyte, etc.), that is no longer
+necessary.
+* Instead, you will need to include stdint.h where the new fixed
+width integer types are defined (uint32_t, uint16_t, uint8_t, etc).
+* You will have to change all occurrences of the following types:
+
+uint32 -> uint32_t
+uint16 -> uint16_t
+ubyte -> uint8_t
+uint8 -> uint8_t
+sint32 -> int32_t
+sint16 -> int16_t
+sint8 -> int8_t
+
+* In addition, the non-standard type 'boolean' must replaced with
+the standard type 'bool'. The type definition for 'bool' is in
+stdbool.h
+
+This change in typing caused small changes to many, many files. It
+was verified that all configurations in the release still build
+correctly (other than the SDCC-based configurations). Regression
+testing was performed on a few configurations, but it is possible
+that minor build issues still exist. (If you encounter any, please
+let me know and I will help you to fix them.)
+
+In the course of the regression testing, several important bugs
+unrelated to the type changes were found and corrected.
+
+* Fixed an important error in the RX FIFO handling logic of the
+LM3S6918 Ethernet driver.
+* Corrected the handling of TCP sequence numbers in the TCP stack.
+* And other less important bugs as detailed in the ChangeLog.
+
+The primary focus of this release was standards compatibility, but
+a few new features were added including a (1) Flash Translation
+Layer (FTL) that will support filesystems on a FLASH device and (2)
+partial ports for the STM32F107VC and HCS12 C9S12NE64 MCUs. Those
+ports are very incomplete as of this writing.
+
+This tarball contains a complete CVS snapshot from December 21, 2009
