@@ -1,0 +1,20 @@
+NuttX-0.4.10
+------------
+
+This is the 42nd release of NuttX. This released focused on the
+port of Jeff Poskanzer's THTTPD HTTP server (see
+http://acme.com/software/thttpd/). As of the 0.4.10 release, that
+port is still not fully complete and functional. However, numerous
+related bug-fixes and functional additions for THTTPD were added:
+
+* Several new standard C-library functions (fileno, strstr,
+strpbrk, fcntl).
+* Improved and extended timing APIs (mktime, gmtime, gmtime_r,
+gettimeofday, localtime, localtime_r, and strftime)
+* Networking enhancements: recvfrom() and accept() now work with
+non-blocking sockets.
+* NXFLAT extensions (exec)
+* Pattern matching logic.
+* And miscellaneous bug fixes (see the ChangeLog for details).
+
+This tarball contains a complete CVS snapshot from August 8, 2009.

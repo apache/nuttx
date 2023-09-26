@@ -1,0 +1,255 @@
+NuttX-7.14
+----------
+
+The 114th release of NuttX, Version 7.14, was made on January 28, 2016,
+and is available for download from the Bitbucket.org website. Note
+that release consists of two tarballs: nuttx-7.14.tar.gz and
+apps-7.14.tar.gz. These are available from:
+
+https://bitbucket.org/patacongo/nuttx/downloads
+https://bitbucket.org/nuttx/apps/downloads
+
+Both may be needed (see the top-level nuttx/README.txt file for build
+information).
+
+Additional new features and extended functionality:
+
+* Core OS:
+
+- modules: Add support for kernel modules: insmod, rmmod, support
+functions. procfs support for user lsmod functioniality.
+- SIGEV_THREAD: Add support for the SIGEV_THREAD notification method
+in struct sigevent. This initial implementation will only work in
+the FLAT build since it utilizes the work queue for signal
+callbacks. See the top-level TODO file for additional details.
+- 64-Bit Timer: If the 64-bit timer is selected, then use it whenever
+clock_systimer() is called rather then chopping the 64-bit timer
+down to 32-bits. Add a new type, systime_t to represent the 32- or
+64-bit system timer. This eliminates clock_systimer32() and
+clock_systime64(); there is now only clock_systimer().
+
+* Common Device Drivers:
+
+- Telnet Driver: Move the Telnet driver from apps/ to
+nuttx/drivers/net. It is a driver a belongs in the OS. Now works
+like the loop device: A new interface called telnet_initialize()
+registers a telnet session "factory" device at /dev/telnet. Via
+ioctl, the factory device can create instances of the telnet
+character devices at /dev/telnetN to support Telnet sessions.
+- PCA9635PW: Add a driver for the PCA9635PW I2C LED driver IC which
+can be used to control the intensity of up to 16 LEDs. From
+Alexander Entinger.
+- MCP9844: Driver for the MCP9844 I2C digital temperature sensor with
+a selectable resolution. From Alexander Entinger.
+- PN532: Add driver for the NXP PN532 NFC-chip. From Janne Rosberg
+and others at Offcode Ltd.
+- LSM9DS1: Add driver for the STMicro LSM9DS1 chip. The LSM9DS1 is a
+system-in-package featuring a 3D digital linear acceleration sensor,
+a 3D digital angular rate sensor, and a 3D digital magnetic sensor.
+From Paul Alexander Patience.
+- CAN Interface: Add more extensive error reporting capaibility to
+the CAN interface definitions. From Frank Benkert.
+- SPI Interface: Add an optional hwfeatures() method to the SPI
+interface.
+
+* Simulation Platform:
+
+- NSH configuration uses the custom start up scriptwith a read-only
+passwd file. Includes hooks for an MOTD message.
+
+* ARMv7-R
+
+- ARMv7-R: Add basic architecture support for the ARMv7-R processor
+family.
+
+* Atmel AVR:
+
+- Atmega2560: Add support for the Atmega2560. From Dimitry Kloper.
+- debug.h: Add an AVR-specific header file used when the AVR MEMX
+pointer is used. From Dimitri Kloper.
+
+* Atmel AVR Boards:
+
+- Arduino-Mega2560: Add support for the Arduino-Mega2560. From
+Dimitry Koper.
+
+* Atmel SAMV7 Drivers:
+
+- Port the TRNG driver from the SAMA5D3/4 to the SAMV7.
+- Port the WDT driver from the SAMA5D3/4 to the SAMV7.
+- Add an RSWDT driver.
+
+* Atmel SAMV7 Boards:
+
+- SAMV71-XULT: Add configuration for testing OS modules.
+
+* Freescale Kinetis:
+
+- MK60N512VLL100: Add support for the MK60N512VLL100 Kinetis part.
+From Andrew Webster.
+
+* Freescale Kinetis Boards:
+
+- ENET: Numerous updates to the Kinetis ENET driver. That driver is
+now functional. From Andrew Webster.
+
+* NXP LPC43xx Boards:
+
+- WaveShare LPC4337-WS: Support for the WaveShare LPC4337-WS board.
+From Lok Tep.
+
+* STMicro STM32 Drivers:
+
+- Timer Capture: Add timer input capture driver. From Pierre-Noel
+Bouteville.
+
+* STMicro STM32 Boards:
+
+- Olimex STM32 H407: Added a port to the Olimex STM32 H407 board.
+This board features the STMicro STM32F407ZGT6 (144 pins).
+Contributed by Neil Hancock.
+
+* TI TMS550 Boards:
+
+- TI LaunchXL-TMS57004: Add basic board support for TI LaunchXL-
+TMS57004. Still a work in progress.
+
+* C Library/Header Files:
+
+- sys/time.h: Add timeradd(), timersub(), timerclear(), timerisset(),
+and timercmp() as macros. These are non-POSIX interfaces, but
+included in most BSD deriviatives, including Linux. From Manuel St??.
+- AVR support: Introduce support for Atmel toolchain in-flash strings.
+Atmel toolchain AVR compiler provides a transparent in-flash object
+support using __flash and __memx symbols. The former indicates to
+compiler that this is a flash-based object. The later used with
+pointer indicates that the referenced object may reside either in
+flash or in RAM. The compiler automatically makes 32-bit pointer
+with flag indicating whether referenced object is in flash or RAM
+and generates code to access either in run-time. Thus, any function
+hat accepts __memx object can transparently work with RAM and flash
+objects.
+For platforms with a Harvard architecture and a very small RAM like
+AVR this allows to move all constant strings used in trace messages
+to flash in the instruction address space, releasing resources for
+other things. This change introduces IOBJ and IPTR type qualifiers.
+The 'I' indicates that the object may lie in instruction space on a
+Harvard architecture machine. For platforms that do not have __flash
+and __memx or similar symbols IOBJ and IPTR are empty, making the
+types equivalent to, for example, 'const char' and 'const char*'.
+For Atmel compiler these will become 'const __flash char' and
+'const __memx char*'. All printf() functions and syslog() functions
+are changed so that the qualifier is used with the format parameter.
+From Dimitry Kloper.
+- debug.h: Add configuration to support an architecture-specific
+debug.h header file. From Dimitri Kloper.
+- netdb: Add support for the use of a DNS resolver file like
+/etc/resolv.conf.
+- TEA: Add an implementation of the Tiny Encryption Algorithm.
+- math32.h: Add some utilities to support 64-bit arithmetic
+operations for platforms that do not support long long types.
+
+* Tools:
+
+- tools/cnvwindeps.c: Add a tool that will convert paths in
+dependencies generated by a Windows compiler so that they can be
+used with the Cygwin make.
+- tools/mkwindeps.sh: A script that coordinates use of cnvwindeps.exe.
+Dependencies now work on the Cygwin platform when using a Windows
+ative toolchain.
+
+* Applications: NSH
+
+- Module Commands: Add module commands: insmod, rmmod, and lsmod.
+- Time Command: Add a 'time' command that may be used to time the
+execution of other commands.
+- Password Commands: Add useradd, userdel, and passwd commands.
+- MOTD: Now supports a Message of the Day (MOTD) that will be
+presented after the NSH greeting.
+- Session Logins: All sessions may be protected with logins using the
+encrypted password in /etc/passwd.
+- Extended Logins. Added optional platform-specific function to
+perform password verification and optional delay after each failed
+login attempt.
+
+* Applications: apps/fsutils:
+
+- apps/fsutils/passwd: Utility library for accessing a password file
+like /etc/passwd.
+
+* Applications: apps/netutils:
+
+- apps/netutils/telnetd: Now creates Telnet sessions by opening a new
+factory device at /dev/telnet and then using ioctl calls to create
+the session character drivers at /dev/telnetN.
+- apps/netutils/netlib: Add netlib_get_dripv4addr() and
+netlib_get_ipv4netmask(). From Pelle Windestam.
+
+* Applications: apps/examples:
+
+- apps/examples/module: Add a test harness for verifying NuttX kernel
+modules.
+- apps/examples/pca9635: Add a simple test of PCA9635PW PWM LED driver.
+From Alan Carvalho de Assis.
+- apps/examples/ostest: Add a test of POSIX timers using SIGEV_THREAD.
+
+Bugfixes. Only the most critical bugfixes are listed here (see the
+ChangeLog for the complete list of bugfixes and for additional, more
+detailed bugfix information):
+
+* Core OS:
+
+- pthreads: CRITICAL BUGFIX: Logic was wiping out the indication that
+of the type of a pthread. Hence, it could be confused as a task.
+- waitpid: CRITICAL BUGFIX. Add a reference count to prevent waitpid
+from using stale memory released by the waited-for task group.
+- clock_systimespec(): Fix an error in a time conversion.
+
+* File System/Block Drivers:
+
+- poll(): Fix handling of sem_tickwait() return value sem_tickwait()
+does not return an -1+errno, it returns a negated errno value.
+Noted by Freddie Chopin.
+
+* Common Drivers:
+
+- TUN Driver: Fix a compile time error in the TUN driver. From
+Vladimir Komendantskiy.
+- USB Host HID Parser: Wrong size used in memcpy(). From Hang Xu.
+- PCA9555: Fixed a bug in the function pca9555_setbit which occurs if
+someone tries to set one of the pins 8-15. The problem is that
+after the check if the pin is greater than 7 the variable addr is
+incremented and used in the Call I2C_WRITEREAD. But later in the
+call to the I2C_WRITE buf[0] is used as address but this address is
+not incremented as it should be. Note address does mean the address
+to the register in the ioexpander and not the I2C address. From
+Stefan Kolb.
+
+* Networking:
+
+- TCP/IOB: Numerous fixes, mostly relate to TCP and IOB buffering
+and race conditions. These were necessary for for the NuttX
+networking later to be stable in some stress testing. From Andrew
+Webster.
+
+* Atmel SAMV7 Drivers:
+
+- USBHS Device: In USBHS device driver, fix check if zero length
+packet is needed.
+
+* STMicro STM32 Drivers:
+
+- OTG FS Host: Fix some backward arguments to stm32_putreg(). Note
+by Hang Xu.
+
+* Tools:
+
+- tools/mkdeps.c: Extended/fixed support for --winpath option.
+Dependencies now work under Cygwin with a native Windows toolchain.
+
+* Build System:
+
+- apps/platform/Makefile: Use a relative path to the board directory
+link rather than the absolute path. For Cygwin, the absolute would
+would need converted with cygpath. But just using the relative path
+is a simpler solution.

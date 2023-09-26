@@ -1,0 +1,39 @@
+NuttX-12.2.1
+------------
+
+What's New In This Release
+Changes to Core OS
+sched
+* [#9723](https://github.com/apache/nuttx/pull/9723) {BP-9631} sched/pthread: fix race condition on pthread_cond_wait()
+
+libc
+* [#9719](https://github.com/apache/nuttx/pull/9719) {BP-9716} libc: Fix Deadloop in VFS if CONFIG_CANCELLATION_POINTS is enabled
+* [#9730](https://github.com/apache/nuttx/pull/9730) {BP-9611} libc: Minor fix for pwd
+* [#9733](https://github.com/apache/nuttx/pull/9733) {BP-9626} libc/aio: fix aio_error compatible bug
+* [#9729](https://github.com/apache/nuttx/pull/9729) {BP-9664} libc/aio/lio_listio: fix the heap use-after-free bug
+
+Changes to the Build System
+Improvements
+* [#9720](https://github.com/apache/nuttx/pull/9720) {BP-9673} Revert "tools: Fix CONFIG_BASE_DEFCONFIG generation" 
+
+Architectural Support
+Improvements
+* [#9732](https://github.com/apache/nuttx/pull/9732) {BP-9621} arch/arm/cxd56xx/cxd56_dmac, lcd_dev: fix null pointer dereference
+* [#9725](https://github.com/apache/nuttx/pull/9725) {BP-9697} arch/arm/cxd56xx: Fix bug when watchdog restart
+* [#9728](https://github.com/apache/nuttx/pull/9728) {BP-9711} arch/arm/stm32/stm32_rtcounter.c: up_rtc_initialize Possible s…
+* [#9727](https://github.com/apache/nuttx/pull/9727) {BP-9700} arch/armv8-m/arm_secure_irq.c: fix writing to the NVIC_AIRCR register
+* [#9722](https://github.com/apache/nuttx/pull/9722) {BP-9649} arch/arm/stm32f0l0g0: Fix gpio outputs from being configured as interrupts in stm32f0l0g0
+* [#9721](https://github.com/apache/nuttx/pull/9721) {BP-9658} arch/xtensa/esp32s2: Fix UART1 default pins
+
+Driver Support
+Improvements
+* [#9724](https://github.com/apache/nuttx/pull/9724) {BP-9613} drivers/sensors/apds9960.c: Fix resource leak in error handling
+* [#9726](https://github.com/apache/nuttx/pull/9726) {BP-9692} drivers/video/isx01x: Fix system clock to HV mode
+
+Board Support
+Improvements
+* [#9734](https://github.com/apache/nuttx/pull/9734) {BP-9713} boards/arm/cxd56xx/alt1250: Change power on sequence
+
+File System
+Improvements 
+* [#9731](https://github.com/apache/nuttx/pull/9731) {BP-9615} fs/fat: Fix undefined behavior in signed integer overflow check

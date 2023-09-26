@@ -1,0 +1,45 @@
+NuttX-5.14
+----------
+
+The 61st release of NuttX, NuttX-5.14, was made on November 27,
+2010. This release includes multiple, important bugfixes as well
+as a new driver for the NXP LPC1766.
+
+This release corresponds with SVN release number: r3137
+
+Important bugfixes include:
+
+* Cortex-M3 Hard Fault. Fixed a hard fault problem that can occur
+if certain types of interrupts are pending at the time another
+interrupt returns. This problem has only been observed on the
+LPC1766 (returning from a SYSTICK interrupt with a pending
+Ethernet interrupt). However, it is assumed that all Cortex-M3
+ports could have this as a latent bug.
+
+* TCP/IP Sequence Number Bug. Corrected errors some important
+logic in the way that sequence numbers are managed when send()
+sends out packets before a previous packet has been acknowledged.
+Some of that send() logic was incompatible with logic in the
+uIP layer. Errors seen include: (1) The final final packet in
+a sequence of packets might be too large! In the THTTPD example,
+this might leave some garbage at the bottom of the display. Or
+(2) send() might hang with outstanding, unacknowledged data
+(and with no re-transmission requests). This was due to
+differences in sequence number handling in send() and in
+uip_tcpinput.c; uip_tcpinput.c thought (incorrectly) that all
+of the bytes were acknowledged; send.c knew that they were not.
+
+* One-Shot POSIX Timer Bug. Fixed an error in set-up of a one-shot
+POSIX timer. It was using the repetitive timer value (which
+is zero in the one-shot case), always resulting in a 10Ms timer!
+Found and fixed by Wilton Tong.
+
+Additional support has been included for the Olimex-LPC1766. Support
+for that board was added to NuttX 5.13. This release extends that
+support with an Ethernet driver. Verified configurations are now
+available for the NuttX OS test, for the NuttShell (NSH, see
+https://nuttx.apache.org/docs/latest/components/nsh/index.html),
+for the NuttX network test, and for the THTTPD webserver.
+(Additional USB configurations are in the release as well, but those
+have not yet been verified. Goals for NuttX-5.15 (and beyond) include:
+(1) Verified USB support, (2) SD card support, and (3) LCD support.

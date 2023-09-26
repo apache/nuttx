@@ -1,0 +1,601 @@
+NuttX-9.1.0
+-----------
+
+* Major Changes to Core OS:
+* New Features:
+- PR-977 PR-987 PR-998 PR-995 PR-997 PR-1007 Thread Local Storage (TLS)
+is now a required feature and used by all architectures
+There is detailed information on the implementation and how this
+impacts errno specifically in the Wiki article: Userspace errno and
+TLS
+- PR-957 PR-947 PR-963 PR-969 Provide nx_ versions of many functions
+that are used internally to avoid disrupting errno in userspace
+- PR-965 PR-980 PR-984 ioctl is now always in the variadic form.
+Syscalls in KERNEL builds are also more efficient with this as well now.
+Previously the ioctl prototype was normally defined as:
+
+int ioctl(int fd, int cmd, unsigned long arg);
+
+unless the CONFIG_LIBC_IOCTL_VARIADIC was enabled in which case it was
+
+int ioctl(int fd, int cmd, ...); This form is now the form defined by
+opengroup and is also inline with Linux. Prior to this change there
+were issues with making ioctl calls on 64-bit arch since the
+implementation assumed that (void *) would be of size long. There is
+more discussion of this issue in the GitHub issue ticket here:
+
+https://github.com/apache/nuttx/issues/959
+
+- PR-962 PR-964 Add new interface sched_get_stackinfo that simplifies
+interfaces for things like TLS
+There are some security imposed rules for using this interface
+Any thread may query its own stack, A kernel thread may query the
+stack of any other thread Application threads, however, may query
+only the stacks of threads within the same task group, i.e., the
+main thread and any of the child pthreads created with the main
+thread as a parent or grandparent or great-grandparent.
+
+- PR-1104 Internal function fs_fsopen() no longer affects errno -
+- PR-1123 Move task_init() and task_activate() to be internal functions -
+- PR-1140 Add nxtask_uninit() interface
+This function will undo all operations on a TCB performed by
+task_init() and release the TCB by calling kmm_free(). This is
+intended primarily to support error recovery operations after a
+successful call to task_init() such was when a subsequent call to
+task_activate fails.
+- PR-1134 Add typedef for max_align_t
+- PR-1141 Handle custom stack allocations
+sched_releasetcb() will normally free the stack allocated for a task.
+However, a task with a custom, user-managed stack may be created using
+nxtask_init() followed by nxtask_activate(). If such a custom stack is
+used then it must not be freed in this manner or a crash will most
+likely result.
+
+This change adds a flag call TCB_FLAG_CUSTOM_STACK that may be passed
+in the the pre-allocated TCB to nxtask_init(). This flag is not used
+internally anywhere in the OS except that if set, it will prevent
+sched_releasetcb() from attempting to free that custom stack.
+
+* Bug Fixes:
+- Many private architecture interfaces were using 'up_' instead of the
+arch name 'arm_'
+This fix is carried over many PRs such as PR-924. Many files also
+carried this same error in naming convention and were converted as
+well.
+
+- PR-1018 PR-1017 PR-1021 PR-1022 PR-1057 PR-1060 PR-1194 Clean up
+internal APIs that were not using the properly naming conventions -
+- PR-857 Wrong value for it_interval field in timespec returned by
+timer_gettime - PR-902 SMP: On task creation do not clone
+uninitialized descriptors
+In SMP mode, there is a possibility that a pthread executing one CPU
+may create a new task while a pthread on another CPU has allocated
+the socket but not yet initialized it. This commit updates the
+socket clone test to assure that the socket is both allocated and
+initialized before it is cloned.
+- PR-911 Use OS signal functions internally to not reset errno that
+applications are using
+- PR-925 sys/stat.h Change the xtime fields to align with POSIX
+standard. Starting from Issue 7 of the POSIX standard the fields
+st_atime, st_mtime and st_ctime have a type of strcut timespec instead
+of time_t.
+- PR-939 openamp: Update to 2020.04.0 - PR-953 lib_vsprintf: Fix issue
+where stack would become corrupt on x86_64
+This function requires traversing the VA_LIST twice. For some
+architectures like x86 and x86_64 this needs to be cloned first.
+
+* Major Changes to the Build System:
+Parts of the build system have been refactored to reduce duplication and
+simplify Makefile and Make.defs files across many directories. These changes
+are particularly beneficial for boards.
+
+Please note that if you develop your own custom boards, you may need to make
+some modifications to keep your board's build scripts up-to-date with the
+rest of NuttX and avoid a broken or defective build. For details, see
+Compatibility Concerns, Changes to Build System, in these release notes.
+
+* New Features:
+- PR-894 openamp and libmetal can now be downloaded and configured by
+build system - PR-941 Remove 'u' prefix from userspace library in FLAT
+Build so it is the same for all build types - PR-1044 ARM: Remove
+support for old redundant gcc toolchains
+
+This removes support for the Codesourcery, Atollic, DevKitArm,
+Raisonance, and CodeRed toolchains. Not only are these tools old and
+no longer used but they are all equivalent to the standard ARM EABI
+toolchains. Retaining specific support was not meaningful (and they
+are still supported, but now just as generic EABI toolchains).
+- PR-1148 PR-1149 Improve build time especially on non-Linux platforms
+by providing a C version of incdir.sh
+
+* Bug Fixes:
+Many small changes to resolve dependency resolution issues that would
+sometimes appear during parallel builds. Parallel builds should be much
+more reliable now and bugs filed against any issues found.
+
+- PR-1000 Fix broken support of ZDS-II Toolchain with MSYS
+
+* Architectural Support:
+* New Architecture Support:
+- PR-879 ARMv8-M support - PR-1051 STM32G474 support
+
+- Initial architectural support for the STM32G474 family of
+microcontrollers. In terms of peripherals, currently there is basic
+support for the RCC and UART, allowing NuttX to boot to a functional
+NSH prompt on this family. Other peripherals on the SoC are not yet
+supported and/or not tested yet. Contributions to enable other
+peripherals are welcome. This adds support for these variants:
+
+STM32G474C STM32G474M STM32G474R STM32G474Q STM32G474V
+
+* Architectures With Significant Improvements:
+- PR-745 The full line of STM32H7 chips are now defined
+This adds support for these variants:
+
+STM32H743AG STM32H743AI STM32H743BG STM32H743BI STM32H743IG
+STM32H743II STM32H743VG STM32H743VI STM32H743XG STM32H743XI
+STM32H743ZG STM32H753AI STM32H753BI STM32H753VI STM32H753XI
+STM32H753ZI
+
+- PR-811 i486: Fix corruption of esp register on full context restore
+This resolves a long standing issue with running the x86 port under
+QEMU where it would crash shortly after boot.
+
+- PR-837 rx65n: Add crashdump support using standby RAM - PR-862
+STM32L4: Expose LPTIM timers - PR-868 STM32L4: Extend clock options and
+power regulation for based on clock settings
+Interface to select the core regulator voltage according to clock
+frequency range Usage of this interface during clock configuration
+according to chosen clock frequency Option to choose a different
+system clock than the main PLL (there is HSI, MSI, HSE and LSE
+available to use) Option to not enable the main PLL which allows for
+reduced power usage when setting one of the above options as system
+clock, to do this you should define STM32L4_BOARD_NOPLL on your
+board header.
+- PR-960 STM32: Add support for ADC features EXTSEL and JEXTSEL
+- PR-1041 STM32H7: Improve IDMA transfer and cache handling
+This resolves an issue where the sdmmc driver crashes at boot when
+using writeback cache.
+
+This also simplifies the sdmmc driver when the IDMA is in use. There
+is no need to mix IDMA and interrupt based transfers; instead, when
+making unaligned data tranfers, just make IDMA into an internal
+aligned buffer and then copy the data. This method also enables
+multiblock transfers, and transfers from/to data buffers which are not
+aligned on cache boundary.
+- PR-1042 STM32H7: Resolve multiple limitations and bugs with progmem
+especailly for partial memory writes
+- PR-1045 STM32H7: This gives possibility to send arbitrary number of
+bytes from memory to peripheral using DMA also when using write-back
+cache
+It was not possible to DMA to/from AXI sram if
+CONFIG_STM32H7_DMACAPABLE=y When doing TX DMA (e.g. in SPI driver in
+simplex-tx mode), it should not be necessary to align the data
+buffers to the cache line.
+- PR-1103 STM32H7: Resolve clocking and pin configurations bugs that
+could cause SDMMC and ETH to fail in some configurations
+- PR-1104 STM32H7: Use UUID for Ethernet MAC. This is inline with the
+behaviour of STM32F7
+- PR-1110 STM32H7: Use FDCANSEL to determin FDCAN clock source if
+possible - PR-1165 STM32H7: SPI transaction appears to be completed
+before the data has actually been flushed
+TX DMA completes before the data has been actually sent out from the
+SPI fifo. This is expected, but the exchange should actually wait for
+spi tx to finish instead of dma to the fifo to finish. This replaces
+the dma completion event with the SPI TXC event for detecting end of
+transmission.
+
+- PR-1203 PR-1204 STM32H7: Enable support for BDMA and enable it for
+SPI6
+- PR-905 x86_64: Resolve linking issue when building with gcc 7 and 9.
+- PR-904 x86_64: Resolve compiler aliasing warnings and RNG
+pointer cast bug - PR-944 x86_64: Change entrypoint to standard
+location 1M
+- PR-971 x86_64: Fix bug in rng implementation using intrinsics
+- PR-973 x86_64: Fix crash on boot when XSAVE and SSE/AVX is enabled
+- PR-974 x86_64: Add support booting NuttX as a Jailhouse Cell
+- PR-919 sim: Add host mmap and perror to allow use of LIBC_MODLIB
+and BINFMT_LOADABLE
+- PR-1198 sim: Use correct errno sign with hostfs interface
+- PR-932 z16: Updated toolchain to ZDS-II 5.2.2
+- PR-970 K210: Add PLL support
+- PR-988 K210: Resolve occasional lock in early boot caused by waiting
+forserial driver to initialize
+- PR-1205 K210: Add basic GPIOHS support - PR-1112 tiva: Add up_idle
+support - PR-1116 NRF52832: Work around chip eratta for SPI Master 1
+Byte transfer anomaly - PR-1130 imxrt: Resolve WFI issue by setting
+the low power mode to remain in run mode
+- PR-1197 cxd56: Fix locking issue in Spresense audio driver causes by
+using semaphore in DMA buffer handling code
+- PR-1221 Add INTx_C macro defintion
+
+* Driver Support:
+* Bug Fixes:
+- PR-1206 PR-1207 PR-1210 ioctl function should retun ENOTTY when the
+command is not recognized.
+
+* New Driver Support:
+- PR-795 PR-1001 Initial NuttX audio driver supporting the Spresense
+CXD56
+- PR-975 Support for HDC1008 temperature and humidity sensor
+- PR-1201 Support for the CS4344 stereo audio DAC
+- PR-1145 Support for the FTDI FT232R USB to Serial converter
+- PR-1052 gs2200m: Add max payload size to prevent crashing when
+sending large packets
+- PR-1090 gs2200m: Fix possible packet queue count overflow seen during
+streaming - PR-1127 gs2200m: Resolve possible buffer overrun in packet
+parsing - PR-1167 pty: Return correct number of bytes when
+CONFIG_SERIAL_TERMIOS and OPOST|ONLCR are enabled
+
+* Drivers With Significant Improvements:
+- PR-887 PR-888 rptun: Add control for independent control of rx and tx
+buffer size
+- PR-917 gs2200m: Receive performance improvement for TCP/UDP
+- PR-1032 gs2200m: Add SPI-DMA support to spresense
+- PR-1046 gs2200m: Add getsockname() support
+- PR-1094 PR-1163 gs2200m: Add flow control support to prevent memory
+starvation in changing network environments
+- PR-1101 gs2200m: Add WPA2-PSK AP mode support, this is now the default
+instead of WEP
+- PR-1115 SPI slave: Improve interface
+Enable enqueue and receive full buffers of data with single call, to
+avoid call overhead when sending / receiving large amounts of data.
+Enable the slave device to leave received data in the controller
+receive buffers and retrieve it from there by polling
+- PR-1196 Audio: Add support for using ap_buffer_info without
+CONFIG_AUDIO_DRIVER_SPECIFIC_BUFFERS and return ENOTTY if provided ioctl
+is not supported
+- PR-1222 audio/cxd56: Add audio buffering feature.
+
+* Board Support:
+* Significant Improvements:
+
+- PR-1200 The boards_button_initialize and boards_userled_initialize
+functions now return the number of buttons and leds, thus their
+prototypes have changed from:
+void board_button_initialize(void)
+void board_userled_initialize(void)
+
+to
+
+uint32_t board_button_initialize(void)
+uint32_t board_userled_initialize(void).
+
+* New Board Support:
+- PR-1051 ST Micro B-G474E-DPOW1 Discovery Kit
+Initial support for the ST Micro B-G474E-DPOW1 Discovery Kit with
+STM32G474RE MCU. Currently there is basic support for booting NuttX to
+a functional NSH prompt. Other peripherals on the board are not yet
+supported or not tested yet. Contributions to enable other peripherals
+are welcome. The NSH prompt can be accessed from a host computer via a
+Virtual COM Port over the same Micro-USB Type B connection used for
+programming/debugging.
+- PR-1211 STM32F411-Minimum board (a.k.a. BlackPill)
+Initial support for the BlackPill board which is a low cost STM32F411
+board. The current support boots NuttX to a functional NSH prompt.
+
+* Boards With Significant Improvements:
+- PR-949 qemu-intel64: Add nsh configuration for testing QEMU
+virtualization
+- PR-966 qemu-i486: Fix issue where console would not accept input
+because of wrong IRQ number
+- PR-993 stm32h747i-disco: Add support for FMC SDRAM - PR-1029 maix-bit:
+Add knsh configuration for testing Kernel mode under QEMU virtualization
+- PR-1056 stm32h747i-disco: Add support for FAT and SD Card via SDMMC
+- PR-1070 PR-1086 spresense: Add ftpd/ftpc and nxplayer to wifi and rndis
+configurations
+- PR-1084 imxrt1060-evk: Add dns client and renew command to netnsh
+configuration
+- PR-1113 lm3s6965ek: Use proper sysclock for QEMU
+configuration
+- PR-1229 Add support for the inboard joystick
+- PR-1232 Architectural re-organization to the initialization of the
+video stream driver to comply with other NuttX drivers
+
+* File System:
+* Bug Fixes:
+- PR-918 tmpfs: Calling statfs could cause files to be removed
+recursively - PR-1142 NFS: Use of uint64_t causes issues with gaps in
+data since it must be on a 8 byte boundary
+- PR-1143 Report correct stats for proxied block and MTD drivers
+
+* Significant Improvements:
+- PR-793 Allow use of genromfs to geneate ROMFS
+- PR-851 Upgrade littlefs to v2.2.1
+- PR-1154 FATFS: Do not rewrite the root directory if it has not been
+changed.
+- PR-1120 PR-1118 Fill in file size for mtd and block inode
+
+* Networking:
+- PR-807 Netlink: Broadcast link status changes to userspace via
+RTNLGRP_LINK
+- PR-892 Netdb: Multiple DNS Servers
+Adds capability to add multiple nameservers on run-time even when not
+using resolv.conf and reset the list of nameservers back to default
+setting (no nameserver at all or single predefined nameserver in Kconfig).
+This is useful for applications that change their cellular network
+frequently.
+- PR-1015 tcp/conn: Request ARP before 3-way handshake
+
+* Applications:
+* Improvements:
+- PR-185 PR-828 nshlib
+Add the source command. Avoid use of sh where it is not needed since
+it pollutes the parent environment including the working directory and
+variables.
+
+- PR-236 littlevgl: Add additional config mappings to the library
+- PR-264 nxplayer: Add max host and filename for http url
+- PR-260 nshlib: Add wget buffer size control with
+CONFIG_NSH_WGET_BUFF_SIZE
+- PR-243 dhcpd: Add ability for daemon to be cancelled
+- PR-238 Remove use the set_errno this is now properly handled by the
+libc and OS
+- PR-233 hdc1008: Add example application for this driver
+
+* Bug Fixes:
+- PR-282 netlib: Fix pathlen computation for netlib_parseurl and
+netlib_parsehttpurl
+- PR-281 webclient: Check return value of netlib_parseurl correctly
+- PR-278 webclient: Handle http/https redirection correctly
+- PR-277 webclient: Limit the number of http redirects
+- PR-198 webclient: Use getaddrinfo() to get IPv4 address on
+dual stack systems
+- PR-268 ftpd: Fix EPSV mode for IPv4
+- PR-258 nsh: Always try FILE_APPS even if the command is builtin,
+this is a regression introduced in 9.0.0
+- PR-257 gs2200m: Handle packets over 1500 Bytes, previously would
+overflow buffer
+- PR-221 gs2200m: Server sockets were not properly being released by
+the daemon when close was called
+- PR-248 dhcpd: Correct option header check length
+- PR-176 cu: Handle NULL character correctly
+- PR-287 PR-290 examples: Update nxflat and thttpd Makefile's to fix
+a build breakage.
+
+* Compatibility Concerns -- Changes to Build System:
+
+If you are building NuttX for a custom board, you may need to make
+some of the following changes in build-related files for your board:
+
+* Rename EXTRADEFINES to EXTRAFLAGS
+
+In your custom board's scripts/Make.defs file, rename EXTRADEFINES to
+EXTRAFLAGS.
+
+For example, these lines:
+
+```
+CFLAGS = $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES) -pipe
+...
+CXXFLAGS = $(ARCHCXXFLAGS) $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES) -pipe
+...
+CPPFLAGS = $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES)
+```
+
+would change as follows:
+
+```
+CFLAGS = $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+...
+CXXFLAGS = $(ARCHCXXFLAGS) $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+...
+CPPFLAGS = $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
+```
+
+See git commit # 459ad9937377a42785692098ff0d73baaa9551e6 in the main
+NuttX repository.
+
+If you forget to do this, memory allocations on the heap probably won't
+work and your user tasks won't start.
+
+To see why, tools/Config.mk assigns a value to KDEFINE such that the
+preprocessor symbol __KERNEL__ will be defined when certain source
+files are compiled. KDEFINE is passed to nested invocations of 'make'
+as EXTRAFLAGS. If your board's scripts/Make.defs still attempts to use
+EXTRADEFINES, the preprocessor symbol __KERNEL__ will not be defined in
+some of the places that it should be. Suppose you're building a FLAT
+build. In this case, include/nuttx/mm/mm.h will not define
+MM_KERNEL_USRHEAP_INIT like it should, which will cause nx_start.c not
+to call up_allocate_heap() at startup. Therefore, any attempt to
+allocate memory on the heap will fail.
+
+* Rename src/Makefile to src/Make.defs and Modify
+
+This item pertains only to custom boards that are developed in- tree,
+meaning under the NuttX boards/ subdirectory. Out-of-tree boards are
+not affected.
+
+If your custom board directory is in-tree and in a board family that
+uses a 'boards/ARCH/FAMILY/common' directory (such as
+boards/arm/stm32/common, boards/arm/cxd56xx/common, etc), then you'll
+need to make two minor changes to your custom board's src/Makefile:
+
+(1) Rename it from src/Makefile to src/Make.defs, and
+
+(2) Near the end of that file, replace this line, which usually
+appears at the end:
+
+```
+include $(TOPDIR)/boards/Board.mk
+```
+
+with these three lines:
+
+```
+DEPPATH += --dep-path board
+VPATH += :board
+CFLAGS += $(shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board)
+```
+
+See git commit # 6ca46520df38854bf660f9be54957cceede39ded in the main
+NuttX repository.
+
+If you forget to do this, 'make' will report an error, "no rule to make
+libboard.a," and the build will fail.
+
+* Rename WINTOOL to CONFIG_CYGWIN_WINTOOL
+
+In your custom board's scripts/Make.defs file, rename any instances of
+WINTOOL to CONFIG_CYGWIN_WINTOOL.
+
+For example, change this line:
+
+```
+ifeq ($(WINTOOL),y)
+```
+
+to this:
+
+```
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
+```
+
+See git commit # bd656888f26c92e8832f0e76b395a5ece7704530 in the main
+NuttX repository.
+
+* Remove INCDIROPT
+
+In your custom board's src/Make.defs file, remove INCDIROPT from CFLAGS.
+
+For example, change this line:
+
+```
+CFLAGS += $(shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board)
+```
+
+to this:
+
+```
+CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board)
+```
+
+This option, which resolves to -w when CONFIG_CYGWIN_WINTOOL is
+configured, is now appended to INCDIR in tools/Config.mk.
+
+See git commit # 5eae32577e5d5226e5d3027c169eeb369f83f77d in the main
+NuttX repository.
+
+* Remove Unnecessary Variables
+
+In your custom board's scripts/Make.defs file, It is no longer
+necessary to define the following variables unless your build requires
+that you assign special values to them:
+
+- DIRLINK
+- DIRUNLINK
+- MKDEP
+- ASMEXT
+- OBJEXT
+- LIBEXT
+- EXEEXT
+
+These variables have been refactored into tools/Config.mk.
+
+See these git commits in the main NuttX repository:
+9ec9431706fd0eb7c4c4410d84dafff68ff31366 (DIRLINK and DIRUNLINK),
+8b42ee421a41214093c0238e479d73a1099b0e82 (MKDEP), and
+567962bd6263bf8809fb63c739f6ec668c69c416 (ASMEXT, OBJEXT, LIBEXT, EXEEXT)
+
+* Change ${TOPDIR} to $(TOPDIR)
+
+In your custom board's scripts/Make.defs file, it is recommended to
+change ${TOPDIR} to $(TOPDIR) for consistency (change curly braces to
+parenthesis).
+
+See git commit # faf3c0254bb63af89f9eb59beefacb4cba26dd9 in the main
+NuttX repository.
+
+* Remove Workaround For Missing $(TOPDIR)/Make.defs
+
+In src/Make.defs or src/Makefile for your custom board or custom apps,
+the workaround for missing $(TOPDIR)/.config and/or
+$(TOPDIR)/Make.defs is no longer needed. To remove the workaround,
+delete the minus sign in front of include .config. This is now handled
+in the main Makefile and, if those files are missing, will print an
+error message with hint to run tools/configure.sh <target>.
+
+Change this line, located near the top of the file:
+
+```
+-include $(TOPDIR)/Make.defs
+```
+
+to this:
+
+```
+include $(TOPDIR)/Make.defs
+```
+
+See git commit # 1a95cce1a3c3ed8b04d1d86b7bd744352cca45a2 in the main
+NuttX repository, and git commit
+# ead498a7883a654b1d542da94a5fab3ce163361e in the apps repository.
+
+* Simplify ARCHINCLUDES and ARCHXXINCLUDES
+
+In your custom board's scripts/Make.defs, ARCHINCLUDES and
+ARCHXXINCLUDES can be defined without maintaining two different
+versions conditioned upon CONFIG_CYGWIN_WINTOOL (renamed from WINTOOL).
+Replace syntax similar to the following:
+
+```
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
+# Windows-native toolchains
+ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)$(DELIM)include}"
+ARCHXXINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)$(DELIM)include}" -isystem "${shell cygpath -w $(TOPDIR)$(DELIM)include$(DELIM)cxx}"
+else
+# Linux/Cygwin-native toolchain
+ARCHINCLUDES = -I. -isystem $(TOPDIR)$(DELIM)include
+ARCHXXINCLUDES = -I. -isystem $(TOPDIR)$(DELIM)include -isystem $(TOPDIR)$(DELIM)include$(DELIM)cxx
+endif
+```
+
+with syntax similar to:
+
+```
+ARCHINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}
+ARCHXXINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}
+ARCHXXINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include$(DELIM)cxx}
+INCDIR is defined in tools/Config.mk and resolves to a shell script or batch file that constructs the appropriate command line argument string to specify include directories for your compiler.
+```
+
+See git commit # 7e5b0f81e93c7e879ce8434d57e8bf4e2319c1c0 in the main
+NuttX repository.
+
+* Simplify Board Directory Handling With BOARD_DIR
+
+In your custom board's Make.defs or Makefile, when setting up build
+variables containing paths inside your board directory, a new variable
+BOARD_DIR has been introduced that simplifies the syntax:
+
+Replace syntax like this:
+
+```
+$(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)
+```
+
+with this variable:
+
+```
+$(BOARD_DIR)
+```
+
+For example, change this:
+
+```
+ARCHSCRIPT = -T$(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
+```
+
+to this much simpler syntax:
+
+```
+ARCHSCRIPT = -T$(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
+```
+
+You may find the old syntax being used for variables like ARCHSCRIPT,
+LDELFFLAGS, LINKCMDTEMPLATE, SCRIPTDIR, USER_LDSCRIPT, or others.
+
+BOARD_DIR is defined in tools/Config.mk.
+
+See git commit # e83c1400b65c65cbdf59c5abcf2ae368f540faef in the main
+NuttX repository.

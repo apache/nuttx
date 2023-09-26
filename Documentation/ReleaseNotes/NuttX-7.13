@@ -1,0 +1,277 @@
+NuttX-7.13
+----------
+
+The 113th release of NuttX, Version 7.13, was made on December 5, 2015,
+and is available for download from the Bitbucket.org website. Note
+that release consists of two tarballs: nuttx-7.13.tar.gz and
+apps-7.13.tar.gz. These are available from:
+
+https://bitbucket.org/patacongo/nuttx/downloads
+https://bitbucket.org/nuttx/apps/downloads
+
+Both may be needed (see the top-level nuttx/README.txt file for build
+information).
+
+Additional new features and extended functionality:
+
+* Core OS:
+
+- External RTC: Added OS support for external RTC chips.
+- boardctl(): Add a command to the boardctl() interface to obtain a
+board unique ID.
+
+* File Systems:
+
+- TMPFS: Add support for a new TMPFS, RAM file system. The TMPFS
+file system does not require any significant amount of memory
+itself. It will grow dynamically as files are added and shrink back
+when files are deleted. A very low overhead way to retain temporary
+files.
+- VFS: The VFS was extended to support standard file operations on
+block drivers (open, close, read, write, etc.). The open() interface
+accomplishes this by creating a temporary character driver to mediate
+the character oriented accesses to the block driver.
+- HOSTFS: Added a HOSTFS file system for use with the simulator. The
+HOSTFS file system mounts in the simulated NuttX context by provides
+proxied access to the file system on the host PC. This is useful for
+providing file system content and nonvolatile storage of files in the
+simulation environment. From Ken Pettit.
+- MTD/PROCFS: Add an interface to un-register an MTD procfs entry.
+From Ken Pettit.
+- filemtd: A new MTD conversion layer that will convert a regular file
+(or driver file) to an MTD device. This is useful for testing on the
+simulation using the HOSTFS. From Ken Pettit.
+- PROCFS: Extended to include networking entries in the procfs. Device
+status, device statistics, and network statistics are now available
+from the PROCFS.
+- PROCFS: The PROCFS file system can now be configured so that it
+supports runtime registration of PROCFS entries with
+CONFIG_FS_PROCFS_REGISTER=y.
+
+* Graphics/Graphic Drivers:
+
+- ST7565 Driver: Extend to include support for the ERC12864-3. From
+Pierre-noel Bouteville.
+
+* Common Device Drivers:
+
+- User buttons: Added a character driver to support application access
+to board buttons. Supports notification of button activity via
+signals.
+- User LEDs: Added a character driver to support application access
+to on-board LEDs.
+- Zero Cross: Added a Zero Cross device driver support. From Alan
+Carvalho de Assis.
+- MAX6675: Added support to Thermocouple-to-Digital converter MAX6675.
+From Alan Carvalho de Assis.
+- BCH: Block-to-character (BCH) driver should forward ioctl() calls
+to the contained block driver.
+- S25FL1xx: Added a S25FL1xx QuadSPI FLASH driver.
+- On-Chip FLASH: Added an upper half MTD device that can use the
+interfaces defined in included/nuttx/progmem.h to provide a
+standard MTD driver.
+- Serial: Implemented high level DMA infrastructure for serial
+devices. From Max Neklyudov.
+- AT24XX: Add support for multiple AT24xx EEPROM parts, each with
+unique I2C addresses, but otherwise identical.
+- External RTC: Added drivers for external I2C RTC chips: DS3102,
+DS1307, DS3231, DS3232, and NXP PCF85263.
+- W25: Added support for byte write mode to the W25 FLASH driver. From
+Ken Pettit.
+- dev/loop: Added a loop character device. losetup() and loteardown()
+should not be called directory from applications. Rather, these
+functions are now available as IOCTL commands to the loop driver.
+- dev/smart: Added support for a /dev/smart loop device. From Ken
+Pettit.
+
+* Networking:
+
+- Driver Statistics: Most network drivers do not support statistics.
+Those that do only supported them when DEBUG is enabled. Each
+driver collected an architecture specific set of statistics and
+there was no common mechanism to view those statistics. Thus,
+the driver feature was mostly useless. This release standardizes
+the driver statistics and puts the definition in the common network
+device structure defined in netdev.h where they can be accessed by
+network applications. All Ethernet drivers that collect statistics
+have been adapted to use these common statistics.
+
+* Simulation Platform:
+
+- W25 FLASH: Added support for W25 FLASH simulation. From Ken Pettit.
+- HOSTFS: Added support for the HOSTFS file system (see "File Systems",
+above).
+
+* Atmel SAMV7:
+
+- SAME70: Added support for the SAME70 family of chips.
+- Tickless: SAMV7 now supports the tickless mode of operation.
+
+* Atmel SAMV7 Drivers:
+
+- MPU: Added MPU and protected build support.
+- QSPI: Added a QuadSPI FLASH driver. This driver operates in the
+memory-mapped, Serial Memory Mode (SMM).
+- FLASH: Added support to write on-chip FLASH.
+- Timer/Counter: TC driver ported to SAMV7 from the SAMA5. Free-running
+and one-short timer logic also ported.
+- PCK: Brought programmable clock (PCK) logic from SAMA5 into SAMV7.
+- Timer/Counter: Support PCK6 as an optional source for the timer/
+counter clock.
+
+* Atmel SAMV7 Boards:
+
+- SAME70-Xplained: Add NSH and networking configurations for the
+SAME70 Xplained board. Includes verified support for serial console,
+LEDs, buttons, SDRAM, HSMCI SD card, and networking.
+- SAMV7-XULT and SAME70-Xplained: If Tickless mode is selected then
+enable PCK6 as a timer/counter clock source
+
+* STMicro STM32:
+
+- CCM PROCFS: Is no longer a part of the 'base' procfs entries and can
+now only be supported via run time registration with
+CONFIG_FS_PROCFS_REGISTER=y.
+
+* STMicro STM32 Drivers:
+
+- Timers: Add a compatible lower-half timer driver for use with the
+common timer upper-half driver. From Wail Khemir.
+
+* STMicro STM32 Boards:
+
+- STM32F4-Discovery: Add low level support for the Zero Cross driver
+for the STM32F4-Discovery. From Alan Carvalho de Assis.
+- STM32F4-Discovery: Add board config to support for the MAX6675. From
+Alan Carvalho de Assis.
+
+* C Library/Header Files:
+
+- bsearch(): Added the bsearch() function from NetBSD.
+- freopen(): Added support for freopen().
+- strftime(): Added day-of-week support (when available).
+
+* Tools:
+
+- nxstyle: Add crappy style checking tool nxstyle.c. See thee tools/
+README file for more info.
+
+* Applications: NSH
+
+- mksmartfs command: Add configuration option to supported multiple
+rootdirectories. From Ken Pettit.
+- Add support for 'basename' and 'dirname' commands.
+- set command: Like bash, NSH set command now strips off any leading
+or trailing whitespace.
+- mount command: The mount commands now accepts mount options
+(currently needed only for the hostfs file system). From Ken
+Pettit.
+- losetup command: NSH no longer calls losetup() and loteardown
+directly. Now it opens /dev/loop and accomplishes these things
+using ioctl() calls.
+- ifconfig command: If CONFIG_NETDEV_STATISTICS=y, then print the
+network driver statistics in the ifconfig.
+- ifconfig, ifup, and ifdown: These commands now uses /proc/net/<dev>
+to view network device configuration and status and /proc/net/stat
+to show network statistics. A consequence of this is that you
+cannot view this network information if the procfs is not enabled
+and mounted at /proc.
+- losmart command: Added a new NSH losmart command. losmart setups
+up a loop device for the smart MTD driver similar to losetup but
+with different syntax. From Ken Pettit.
+- ps command: The 'ps' command now uses /proc/<pid>/ to obtain task
+status information. A consequence of this is that you cannot use
+the 'ps' command if the procfs is not enabled and mounted at /proc.
+
+* Applications: apps/system:
+
+- apps/system/hexed: Port the hexed command line hexadeciamal editor
+to NuttX. See http://apps.venomdev.net/hexed/.
+
+* Applications: apps/fsutils:
+
+- apps/fsutils/smartfs: Move into apps/fsutils from kernel, now uses
+only open and ioctl. From Ken Pettit.
+
+* Applications: apps/examples:
+
+- apps/examples/fstest: Add a generic file system test. This is
+essentially the same as examples/smart, but has all of the SmartFS
+specific logic ripped out. This was created for testing the new
+TMPFS.
+- apps/examples/zerocross: Add a Zero Cross application example. From
+Alan Carvalho de Assis.
+- apps/examples/media: Add a simple test for access of media via a
+block driver or MTD driver.
+
+Bugfixes. Only the most critical bugfixes are listed here (see the
+ChangeLog for the complete list of bugfixes and for additional, more
+detailed bugfix information):
+
+* Core OS:
+
+- Fixed an error in clock_timespec_subtract(). Found by Lok.
+- pthreads: CRITICAL BUGFIX: Logic was wiping out the indication that
+of the type of a pthread. Hence, it could be confused as a task.
+Found because this was causing a crash when /proc/nnn/cmdline was
+printed.
+
+* File System/Block Drivers:
+
+- SMART MTD: Fix some Smart wear-leveling bugs. Fixed SmartFS wear
+level error that occurs when the logical sector size is too small to
+save all wear level status bytes in a single sector. Logical
+sectors 1 and 2 were simply not being allocated and then the
+read_sector and write_sector routines were failing. From Ken
+Pettit.
+
+* Graphics/Graphic Drivers:
+
+- ILI9432: Fixed errors in orientation. Portrait, RPortrait, and
+Landscript should work correly now. They were displayed mirrored.
+From Marco Krahl.
+
+* Common Drivers:
+
+- CAN: Fix a problem in the CAN upper-half driver that occurs only
+for CAN hardware that support a H/W FIFO of outgoing CAN messages.
+In this case, there can be a hang condition if both the H/W and
+S/W FIFOs are both full. In that case, there may be no event to
+awaken the upper half driver. Add a new (conditional) CAN upper
+half interface called can_txready() that can be used by the lower
+half driver to avoid this hang condition.
+- MS58xx: Fix some issues with initialization and with CRC
+calculation. From Karim Keddam.
+- W25: Fixed W25 FLASH driver page read/write logic. From Ken Pettit.
+
+* Atmel SAMV7 Drivers:
+
+- USART1 pin configuration: Reconfigure System I/O when using USART1.
+From Frank Benkert.
+- MCAN: Added a call to can_txready() to the MCAN driver.
+
+* STMicro STM32 Drivers:
+
+- stm32 F4: Fix some TIM12 pin mappings. From Max Kriegleder.
+
+* STMicro STM32 Boards:
+
+- STM32F429i-Disco: Calculated partition boundaries based on page
+block sizes but mtd_partition() is expecting calculations based on
+erase block size. From Alan Carvalho de Assis.
+
+* C Library/Header Files:
+
+- sys/types.h: When building on a 64-bit machine, the size of size_t
+should be 64-bits. In general, I believe that sizeof(size_t) should
+be the same as sizeof(uinptr_t). mmsize_t should always be 32-bits
+in any event. The last change to stddef has been backed out. With
+these changes, the simulator builds without errors or warnings an a
+64-bit machine.
+
+* Applications: apps/nshlib:
+
+- The I/O buffer, g_iobuffer, should not be a global buffer. That
+will not work in an environment where there are multiple NSH
+sessions. The I/O buffer must, instead, be a part part of the
+session-specific data defined in nsh_console.h.

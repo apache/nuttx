@@ -1,0 +1,518 @@
+NuttX-7.18
+----------
+
+The 118th release of NuttX, Version 7.18, was made on October 8, 2016,
+and is available for download from the Bitbucket.org website. Note
+that release consists of two tarballs: nuttx-7.18.tar.gz and
+apps-7.18.tar.gz. These are available from:
+
+https://bitbucket.org/nuttx/nuttx/downloads
+https://bitbucket.org/nuttx/apps/downloads
+
+Both may be needed (see the top-level nuttx/README.txt file for build
+information).
+
+Additional new features and extended functionality:
+
+* Core OS:
+
+- Add standard adjtime() interface and basic timekeeping support.
+Normally used with an NTP client to keep system time in
+synchronization. From Max Neklyudov.
+- Use the oneshot timer with optional entropy to measure CPU load if
+so configured.
+
+* File System and Block and MTD Drivers:
+
+- Add Fujistu MB85RS256B ramtron support. From Beat Küng.
+- SPI-based MTD driver for Macronix MX25L3233F or MX25L6433F. From
+Aleksandr Vyhovanec.
+
+* Graphics/Display Drivers:
+
+- SH1106 0.96 OLED module support (SSD1306 compatible) + I2C fixes.
+From v01d (phreakuencies).
+
+* Sensor Drivers:
+
+- Add KXTJ9 Accelerometer driver from the Motorola Moto Z MDK.
+- Add MFRC522 RFID ISO14443 and Mifare transceiver driver. From Alan
+Carvalho de Assis.
+- Add driver for the LIS3MDL 3 axis magnetometer. From Alexander
+Entinger.
+- Add driver for the MLX90393 3 axis magnetometer. From Alexander
+Entinger.
+- Add driver for the LIS3DSH 3 axis accelerometer. From Alexander
+Entinger.
+- Add driver for the Bosch BMG160 3 axis gyroscope. From Alexander
+Entinger.
+- Add support for the Sensixs XEN1210 3D-board. This sensor is used
+on NANOSATC-BR2 a Brazilian CUBESAT project. From Alan Carvalho
+de Assis.
+- Add a new ioctl command (set MAXPOS) for Tiva QEI. From Young.
+
+* Other Common Device Drivers:
+
+- I/O Expander: Remove hard-coded PCA9555 fields from ioexpander.h
+definitions. Add support for an attach() method that may be used
+when any subset of pin interrupts occur.
+- I/O Expander Interface: Encode and extend I/O expander options to
+include interrupt configuration.
+- PCA9555 Driver: Replace the signalling logic with a simple callback
+using the new definitions of ioexpander.h. This repartitioning of
+functionality is necessary because (1) the I/O expander driver is
+the lower-lower part of any driver that uses GPIOs (include the GPIO
+driver itself) and should not be interacting directly with the much
+higher level application layer. And (2) in order to be compatible
+with the GPIO driver (and any arbitrary upper half driver), the
+PCA9555 should not directly signal, but should call back into the
+upper half. The upper half driver that interacts directly with the
+application is the appropriate place to be generating signal.
+- Add a skeleton I/O Expander driver (based on the PCA9555 driver).
+- Add PCF8574 I/O Expander driver.
+- GPIO driver: Add IOCTLs to get the pin type and to unregister a
+signal handler.
+- Add a GPIO lower-half driver that can be used to register a GPIO
+character driver for accessing pins on an I/O expander.
+- Add an SPI helper function that encapsulates and manages a sequence
+of SPI transfers.
+- Add an SPI character driver that will permit access to the SPI bus
+for testing purposes.
+- Add oneshot timer lower half interface definition.
+- Add an upper-half, oneshot timer character driver.
+- Add Audio Tone Generator for NuttX. From Alan Carvalho de Assis.
+- Add USB host support for composite devices. This feature is not
+well tested.
+- drivers/ioexpander: Add an (untested) TCA64XX I/O Expander driver
+leveraged from Project Ara.
+
+* Simulation Platform:
+
+- Add a simulated I/O Expander driver.
+- Add simulator-based test support for apps/examples/gpio.
+- Add a configuration useful for testing Mini Basic.
+- Add a simulated oneshot lowerhalf driver.
+
+* Atmel SAM3/4 Drivers:
+
+- SAM4CM: Add option to support oneshot timer without free-running
+timer. Add oneshot lower half driver.
+
+* Atmel SAMA5 Drivers:
+
+- SAMA5D: Add option to support oneshot timer without free-running
+timer. Add oneshot lower half driver.
+
+* Atmel SAMV7 Drivers:
+
+- SAMV71/SAME70: Add option to support oneshot timer without
+free-running timer. Add oneshot lower half driver.
+- Add support for SAMV7 DACC module. From Piotr Mienkowski.
+
+* NXP Freescale Kinetis Drivers:
+
+- Add support for I2C and RTC. From v01d (phreakuencies).
+
+* NXP Freescale Kinetis Boards:
+
+- Add teensy 3.x I2C support. From v01d (phreakuencies).
+
+* STMicro STM32:
+
+- Add IAR-style STM32F1xx vectors. Tested on STM32F103RB and
+STM32F107RC. From Aleksandr Vyhovanec.
+
+* STMicro STM32 Drivers:
+
+- Add timekeeping support for the STM32 tickless mode. From Max
+Neklyudov.
+- Add a oneshot, lower-half driver for STM32.
+- STM32 L4: Add oneshot lower half driver for STM32 L4.
+- STM32 L4: Add support for quadrature encoders on STM32L4. Sebastien
+Lorquet.
+
+* STMicro STM32 Boards:
+
+- stm32f103-minimum: Add board support to MFRC522 driver. From Alan
+Carvalho de Assis.
+- Add oneshot board initialization to stm32f103-minimum. From Alan
+Carvalho de Assis.
+- stm32f103-minimum: Add board configuration to initialize Audio Tone
+Generator. From Alan Carvalho de Assis.
+- stm32bufferfly2: Add support for the Kamami stm32butterfly2
+development board with optional ETH phy. From Michal Lyszczek.
+- stm32f103-minimum: Add board config support to SPI LCD module
+JLX12864G-086. From Alan Carvalho de Assis.
+- stm32l476-mdk: Support basic booting and nsh on Motorola MDK. The
+Motorola MDK is based off of an earlier version of NuttX.
+This only provides a basic NSH shell. From Jim Wylder.
+- STM32 F4 Discovery: Add support for XEN1210 3D-board. From Alan
+Carvalho de Assis.
+- stm32f103-minimum: Add stm32_bringup support and userled example to
+STM32F103 Minimum board. From Alan Carvalho de Assis.
+- Add support for qencoders on various nucleo boards. From Sebastien
+Lorquet.
+- olimex-stm32-e407: Add some networking configurations. From Mateusz
+Szafoni.
+
+* TI Tiva Drivers:
+
+- Add tiva PWM lower-half driver implementation. From Young.
+- Tiva QEI: Add QEI lower-half driver for Tiva series chip. From
+Young.
+
+* C Library/Header Files:
+
+- Separate XorShift128 PRNG from /dev/urandom and make it generally
+available.
+- Add POSIX type sig_atomic_t. From Sebastien Lorquet.
+- Add the difftime() function. The function depends on the toolchain-
+dependent CONFIG_HAVE_DOUBLE so is not available on tiny platforms.
+From Sebastien Lorquet.
+- Add support for remove(). From Sebastien Lorquet.
+- Add system() to stdlib.h. Actual implementation is in
+apps/system/system.
+
+* Build/Configuration System:
+
+- Rename arch/sh to arch/renesas.
+- Remove contactless drivers from drivers/wireless to drivers
+contactless. From Sebastien Lorquet.
+- Move all modem-related IOCTL commands to a common file to assure
+that they will be unique.
+
+* Tools:
+
+- Add sethost.sh. This is a script that you can use to quickly
+change the host platform from Linux to Windows/Cygwin. Might save
+you a lot of headaches.
+
+* Applications: apps/nshlib:
+
+- Add logic to support an NSH-specific system command.
+- Add printf command to NSH, e.g., controlling /dev/userleds from
+command line: nsh> printf \x01 > /dev/userleds. From Alan Carvalho
+de Assis.
+
+* Platforms: apps/system:
+
+- Port tee command from NetBSD.
+- Add a generic system command. Current implementation cannot use
+/bin/sh and spawns the custom NSH system command directly.
+
+* Platforms: apps/platform:
+
+- Add C++ support for STM32L476-MDK.
+
+* Platforms: apps/interpreters:
+
+- Add a port of Mini Basic, version 1.0, written by Malcom McLean and
+released under the Creative Commons Attribution license.
+
+* Applications: apps/examples:
+
+- Add a simple test of the GPIO driver.
+- Add RFID_READUID sample application. From Alan Carvalho de Assis.
+- Add Oneshot timer example.
+- Add a simple test of the system command.
+
+Works-In-Progress:
+
+* IEEE802.14.5/6LowPAN. Hooks and framework for this effort were
+introduced in NuttX-7.15. Work has continued on this effort on
+forks from the main repositories, albeit with many interruptions.
+The completion of this wireless feature will postponed until at
+least NuttX-7.19.
+
+Bugfixes. Only the most critical bugfixes are listed here (see the
+ChangeLog for the complete list of bugfixes and for additional, more
+detailed bugfix information):
+
+* Core OS:
+
+- Explicitly initialize the group tg_exitsem with sem_init(). The
+existing logic worked because the correct initialization value is
+all zero, but it is better to initialize the semaphore explicitly.
+- The TCB nchildren field should not be incremented when pthreads are
+created.
+- Move fields related to parent/child task relationship out of TCB
+into group structure where they belong. Child is a group, not a
+thread.
+- mq_send() was not setting the errno value on certain failures to
+allocate a message.
+- Define 'group' even if HAVE_GROUPID is not set. From Mateusz
+Szafoni.
+- Vector table should have dimension NR_IRQS, not NR_IRQS+1. From
+Sagitta Li.
+- pthreads: When a pthread is started, there is a small bit
+of logic that will run on the thread of execution of the new
+pthread. In the case where the new pthread has a lower
+priority than the parent thread, then this could cause both the
+parent thread and the new pthread to be blocked at the priority of
+the lower priority pthread (assuming that CONFIG_PRIORITY_INHERITANCE
+is not selected). This change temporarily boosts the priority of the
+new pthread to at least the priority of the new pthread to at least
+the priority of the parent thread. When that bit of logic has
+executed on the thread of execution of the new pthread, it will then
+drop to the correct priority (if necessary) before calling into the
+new pthread's entry point.
+
+* File System/Block Drivers/MTD Drivers:
+
+- FAT performance improvement. In large files, seeking to a
+position from the beginning of the file can be very time consuming.
+ftell does lssek(fd, 0, SET_CURR). In that case, that is wasted
+time since we are going to seek to the same position. This fix
+short-circuits fat_seek() in all cases where we attempt to seek to
+current position. Suggested by Nate Weibley.
+- MTD: Fixed cloned typos in several FLASH drivers. From Aleksandr
+Vyhovanec.
+- mount: Corrects a bad assertion noted by Pierre-noel Bouteville.
+Also fixes a reference counting problem in an error condition:
+When the mountpoint inode is found but is not an appropriate
+mountpoint, the reference count on the inode was not being
+decremented.
+
+* Common Drivers:
+
+- Various serial drivers: Fix FIONWRITE and add FIONSPACE. All
+implementations of FIONWRITE were wrong. FIONWRITE should return
+the number of bytes waiting in the outgoing send queue, not the free
+space. Rather, FIONSPACE should return the free space in the send
+queue.
+- Add missing prototype for btn_lower_initialize().
+- Make DAC sample structure packed. From Marc Rechté.
+
+* Networking:
+
+- TCP: tcp_ipvX_bind() not actually using the port selected with
+port==0. Also removes duplicate call to pkt_input(). Issues noted
+by Pascal Speck.
+- drivers/net: NET_TUN=y => NET_MULTIBUFFER=y. From Vladimir
+Komendantskiy.
+- slip driver: Fix calculations using MSEC_PER_TICK. If
+USEC_PER_TICK is less than 1000, then MSEC_PER_TICK will be
+zero. It will be inaccurate in any case.
+
+* Atmel SAM3/4 Drivers:
+
+- SAM3/4 GPIO: Enable peripheral clock for GPIO port when GPIO is
+configured as input. The value of a GPIO input is only sampled when
+the peripheral clock for the port controller the GPIO resides in is
+enabled. Therefore we need to enable the clock even when polling a
+GPIO. From Wolfgang Reissnegger.
+- All SAM Ethernet Drivers: Add support so that the drivers can be
+built with CONFIG_NET_MULTIBUFFER=y.
+- SAM3/4: Fix GPIO pull-up/down code. Enabling the pull-down resistor
+while the pull-up resistor is still enabled is not possible. In this
+case, the write of PIO_PPDER for the relevant I/O line is discarded.
+Likewise, enabling the pull-up resistor while the pull-down resistor
+is still enabled is not possible. In this case, the write of
+PIO_PUER for the relevant I/O line is discarded. From Wolfgang
+Reißnegger.
+
+* Atmel SAMV7 Drivers:
+
+- All SAM Ethernet Drivers: Add support so that the drivers can be
+built with CONFIG_NET_MULTIBUFFER=y.
+- SAM GPIO: Apply Wolfgang's change for SAM3/4 to SAMA5 and SAMV7.
+
+* Atmel SAMA5:
+
+- Add missing oneshot max_delay method.
+- All SAM Ethernet Drivers: Add support so that the drivers can be
+built with CONFIG_NET_MULTIBUFFER=y.
+- SAM GPIO: Apply Wolfgang's change for SAM3/4 to SAMA5 and SAMV7.
+
+* NXP Freescale LPC43xx Drivers:
+
+- LPC43xx serial: Fix typos in LPC43 serial driver. Found by Vytautas
+Lukenskas.
+- LPC43xx Serial: There are some small problems in LPC43xx RS485 mode
+configuration. In particular: (1) UART0,2,3 do not have DTR pins
+(different from UART1), so, Kconfig needs to be adjusted. (2)
+lpc43_uart.c in RS485 mode only configures DIR pin, but doesn't
+enable pin output for UART0,2,3. (3) should be option to reverse DIR
+control pin output polarity. (4) lpc43xx/chip/lpc43_uart.h doesn't
+have USART3 definitions. NOTE: I didn't modified and didn't tested
+USART1, as it has different hardware. From Vytautas Lukenskas.
+From Vytautas Lukenskas.
+
+* SiLabs EFM32 Drivers:
+
+- EFM32 SPI drivers adopted incompatible conventions (See STM32 for
+details of the issue).
+
+* STMicro STM32 Drivers:
+
+- STM32, STM32 L4, and EFM32 SPI drivers adopted incompatible
+conventions somewhere along the line. They set the number of bits
+to negative when calling SPI_SETBITS which had the magical side-
+effect of setting LSB first order of bit transmission. This is not
+only a hokey way to pass control information but is supported by no
+other SPI drivers. This change three things: (1) It adds
+HWFEAT_LSBFIRST as a new H/W feature. (2) It changes the
+implementations of SPI_SETBITS in the STM32 and EFM32 drivers so
+that negated bit numbers are simply errors and it adds the
+SPI_HWFEATURES method that can set the LSB bit order, and
+(3) It changes all calls with negative number of bits from all
+drivers: The number of bits is now always positive and
+SPI_HWFEATURES is called with HWFEAT_LSBFIRST to set the bit order.
+- Add missing SPI2 and SPI3 support for STM32F3F3. Add STM32F37XX DMA
+channel configuration. For STM32F37XX, SYSCFG_EXTICR_PORTE defined
+twice. From Alan Carvalho de Assis.
+- STM32: Make stm32_pwr_enablebkp thread safe. From Max Neklyudov.
+- Fix bad pllmul values for STM32F1XX connectivity line. STM32F1XX
+connectivity line supports only x4, x5, x6, x7, x8, x9 and x6.5
+values. From Michal Lyszczek.
+- STM32F3 SPI: Fix the number of bit setting for the F3. That and
+data packing work differently on the STM32F3 than for other STM32
+parts.
+- STM32 and STM32 L4: Enabling SPI DMA loses other bits in CR2.
+- STM32F3 SPI: Cannot write always 16-bit value to DR register
+because of how the F3 implements data packing.
+- STM32F411 and STM32F446 map i2c2_sda_4 to different alternate
+function numbers. From Konstantin Berezenko.
+- STM32 DMA Fix: Change stm32 adc dma callback to send channel
+number instead of index. From Konstantin Berezenko.
+- STM32 OTGFS device: Fix for lost first word from FIFO
+
+1) Do not overwrite Reserved Bits in GINTSTS (per ref manual)*
+2) Acknowledge all pending int on entry to ISR that are Only rc_w1*
+3) Do not disable RXFVL*
+4) Loop until RXFVL is cleared*
+5) Only clear the NAK on the endpoint on the OTGFS_GRXSTSD_PKTSTS_SETUPDONE to not loose the first WORD of FIFO all the data (Bug Fix)
+
+Changed marked *are just driver clean up and ensure ints are not lost. The bug fix is #5
+
+Test case open putty and observer the Set/Get LineCoding. Without this fix #5 the Get will not match the Set, and in fact the data might be skewed by 4 bytes, that are lost from the FIFO if the OTGFS_DOEPCTL0_CNAK bit is set in the OTGFS_GRXSTSD_PKTSTS_SETUPRECVD as opposed to the OTGFS_GRXSTSD_PKTSTS_SETUPDONE
+
+Set Line Coding DATA1: 4B | 00 c2 01 00 00 00 08 | c8 1B
+Get Line Coding DATA1: 4B | .. .. .. .. 00 00 08 c8 .. 00 00 07 | 7a 72
+
+From David Sidrane.
+- STM32 L4 OTGFS device: Apply stm32 fix to stm32l4. From Sebastien
+Lorquet.
+- STM32 F7: Remove duplicate call to pkt_input from Ethernet driver.
+Issues noted by Pascal Speck.
+- STM32 L4: Add support for USART3-USART5. For STM32L4 parts, the
+higher number USART ports supported varies. Add the HAVE_USARTx
+definitions to the configuration to allow enabling the higher
+numbered USART ports. From Jim Wylder.
+- STM32 USB: Set USB address to avoid a failed assertion. From
+Pierre-noel Bouteville.
+- STM32 L4 and L7 USB: Pierre's assertion-avoidance change should
+also be applied to STM32 F7 and L4.
+- STM32, L4, and F7: Remove GPIO_ETH_RMII_TX_CLK. TX_CLK is not
+present in RMII. Mateusz Szafoni.
+- STM32 Ethernet: Correct typo in conditional logic. From Neil
+Hancock.
+- STM32 L4 USB Device: Fixed L4 USB Driver by avoiding SETUPDONE and
+EPOUT_SETUP. From David Sidrane.
+- STM32 SPI: stm32_modifycr2 should be available on all platforms if
+DMA is enabled.
+- STM32 DMA2D: fix an error in up_dma2dcreatelayer where an invalid
+pointer was returned when a certain underlying function failed.
+From Jens Gräf.
+
+* TI Tiva Drivers:
+
+- Fix two bugs of tiva pwm lower-half driver implementation. From
+Young.
+- Tiva Ethernet: Needs support for CONFIG_NET_MULTIBUFFER=y.
+
+* C Library/Header Files:
+
+- lib_dumpbuffer() now prints a large on-stack buffer first to avoid
+problems when the syslog output is prefixed with time. From
+Pierre-noel Bouteville.
+- libc/math: This fixes the following libc/math issues: (1) asin[f l]()
+use Newton's method to converge on a solution. But Newton's method
+converges very slowly (> 500,000 iterations) for values of x close to
+1.0; and, in the case of asinl(), sometimes fails to converge (loops
+forever). The attached patch uses an trig identity for values of
+x > sqrt(2). The resultant functions converge in no more than 5
+iterations, 6 for asinl(). (2) The NuttX erf[f l]() functions are
+based on Chebyshev fitting to a good guess. The problem there's a
+bug in the implementation that causes the functions to blow up with
+x near -3.0. This patch fixes that problem. It should be noted that
+this method returns the error function erf(x) with fractional error
+less than 1.2E-07 and that's fine for the float version erff(), but
+the same method is used for double and long double version which
+will yield only slightly better precision. This patch doesn't
+address the issue of lower precision for erf() and erfl(). (3) a
+faster version of copysignf() for floats is included. From David S.
+Alessio.
+- strtod() was not returning endptr on error conditions.
+- libc/math: floor(), floorf(), and floorl(): Fix logic error. Was
+not correctly handling negative integral value.
+- isatty() should be prototyped in unstid.h, not termios.h. From
+Sebastien Lorquet.
+- nxglib: Fix handling of near-horizontal lines of width 1 in
+nxgl_splitline(). Missing handling for degenerate condition caused
+width 1 lines such as (0, 0) - (100, 10) to have gaps in the
+drawing. From Petteri Aimonen.
+
+* Build/Configuration System:
+
+- Top-Level Makefiles: Fix a chicken-and-egg problem. In the menuconfig
+target, the context dependency was executed before kconfig-mconf. That
+was necessary because the link at apps/platform/board needed to be set
+up before creating the apps/Kconfig file. Otherwise, the platform
+Kconfig files would not be included. But this introduces the chicken-
+and-egg problem in some configurations. In particular: (1) An NX
+graphics configuration is used that requires auto-generation of
+source files using cpp, (2) the configuration is set for Linux, but
+(3) we are running under Cygwin with (4) a Windows native toolchain.
+In this case, POSIX-style symbolic links are set up but the Windows
+native toolchain cannot follow them. The reason we are running
+'make menuconfig' is to change from Linux to Cygwin, but the target
+fails. During the context phase, NX runs CPP to generate source files
+but that fails because the Windows native toolchain cannot follow
+the links. Checkmate. This was fixed by changing all of the make
+menuconfig (and related) targets. They no longer depend on context
+being run. Instead, they depend only on the dirlinks target. The
+dirlinks target only sets up the directory links but does not try
+to run all of the context setup; the compiler is never invoked; no
+code is autogenerated and things work.
+- CXXFLAGS: Add -fcheck-new whenever -fno-exceptions is used. From
+Beat Küng.
+
+* Tools
+
+- tools/refresh.sh: Recent complexities added to apps/ means that
+configuration needs the correct Make.defs file in place in order to
+configure properly.
+- tools/kconfig2html.c: Update to handle absolute paths when sourcing
+Kconfig files.
+- tools/mkfsdata.pl was still generating the old-style apps/include
+inclusion paths.
+
+* Application Build/Configuration System:
+
+- Add DIRLINK and DIRUNLINK tool definitions to apps/Make.defs.
+
+* apps/nshlib:
+
+- Fix FIFO_SIZE vs PIPE_SIZE.
+- Fix hex representation of IP address in Kconfig. Noted by Michal
+Lyszczek.
+- nsh_syscmds.c: missing semicolon. From Mateusz Szafoni.
+- In system command, don't try to flush output streams if stdio
+buffered I/O is not supported.
+
+* apps/canutils:
+
+- libuavcan: Under certain circumstances, DELIM is not be defined in
+Makefile.
+- Add definition for APPNAME in apps/canutils/canlib. From Sebastien
+Lorquet.
+
+* apps/gpsutils:
+
+- Fix an error minmea. From Aleksandr Vyhovanec.
+
+* apps/examples:
+
+- apps/examples/oneshot: If the requested delay is > max_delay, then
+break the delay up into several pieces.

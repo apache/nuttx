@@ -1,0 +1,39 @@
+NuttX-0.3.19
+------------
+
+This is the 31st release of NuttX. This release includes the
+following new feature:
+
+* Add poll() and select() APIs that may be used to monitor for
+data availability on character devices or TCP/IP sockets.
+* Implemented support TCP/IP connection backlog. This allows
+select() to wake-up on new connections to a listener socket.
+* Added definition of a framebuffer driver and implement framebuffer
+drivers for the simulated platform and the TI DM320 (untested
+as of the initial check-in).
+* Partially developed a graphics framework based on the framebuffer
+drivers, however, this will not be ready for use for a few more
+releases. Currently this includes only a few color conversion
+routines and some rasterizing functions. A tiny windowing system
+is under development but not ready for check-in yet.
+* Added support for fixed precision math.
+* Added support for outgoing multicast packets.
+
+Several bugs were fixed, the most important of which are:
+
+* Fixed an important bug in the TCP/IP buffering logic. When
+TCP/IP read-ahead is enabled and not recv() is in-place when a
+TCP/IP packet is received, the packet is placed into a read-ahead
+buffer. However, the old contents of the read-ahead buffer
+were not being cleared and old data would contaminate the newly
+received buffer.
+
+* Changed the behavior of the serial driver read. It now returns
+data as it is available rather than waiting for the full requested
+read size. This makes functions like fgetc() work much more
+smoothly.
+
+These changes were verified only on the Neuros OSD (ARM9) using a
+Linux development environment. Please report any errors to me.
+
+This tarball contains a complete CVS snapshot from November 26, 2008.
