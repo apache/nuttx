@@ -1,0 +1,18 @@
+NuttX-5.17
+----------
+
+The 64th release of NuttX, Version 5.17, was made on January 19,
+2011 and is available for download from the SourceForge website.
+This release follows close on the heels of the 5.16 release and
+extends the USB host capabilities first introduced in that version.
+
+* The LPC17xx USB host controller driver was extended to (1) add
+support for low-speed devices, (2) handle multiple concurrent
+transfers on different endpoints (still only one TD per endpoint),
+and (3) handle periodic interrupt endpoint types.
+
+* Add a USB host HID keyboard class driver. Now you can connect
+a standard USB keyboard to NuttX and receive keyboard input for
+an application.
+
+And other changes as detailed in the ChangeLog.

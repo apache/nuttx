@@ -1,0 +1,374 @@
+NuttX-7.6
+---------
+
+The 106th release of NuttX, Version 7.6, was made on November 26, 2014,
+and is available for download from the SourceForge website. Note
+that release consists of two tarballs: nuttx-7.6.tar.gz and
+apps-7.6.tar.gz. Both may be needed (see the top-level nuttx/README.txt
+file for build information).
+
+Additional new features and extended functionality:
+
+* Core OS:
+
+- Moved name semaphore and message queue support out of the OS and
+into the VFS. These improves the architecture by unifying the
+management of named resources, removes redundant resource management
+logic, and makes named semaphores and message queues visible in the
+file system. By default, these are visible at /var/lock and
+/var/mqueue.
+- Add SIGPOLL for use as part of the AIO implementation.
+- Remove CONFIG_MAX_TASK_ARGS configuration. There is now no
+predetermined limit on the number of arguments that may be passed
+to a new task on start-up.
+
+* Work queues:
+
+- Add support for priority inheritance on the low priority worker
+queue. That is, if a higher priority thread has scheduled work, the
+priority of the low priority worker thread(s) will be boost to the
+priority of the queuing thread. At work is performed at at least
+thread priority of the scheduling thread. If there are multiple
+worker threads, then all threads get reprioritized. Currently
+only implemented for AIO.
+- Add support for multiple low-priority work queue threads. This
+allows individual worker threads to block indefinitely for I/O as
+necessary without halting the entire work queue.
+
+* VFS/General Drivers:
+
+- Implement create() (as a macro).
+- Add pread() and pwrite(). Also added pread() and pwrite()
+system calls.
+- AIO: Add aio_read(), aio_write(), aio_return(), aio_error(),
+aio_suspend(), aio_canel(), lio_listio(), and aio_fsync(). This
+logic minimizes the creation of new threads by using the new
+features also added to the low priority work queue with this
+release. It uses the new low priority worker thread interface
+to adjust the priority of the worker thread according to the
+priority of the AIO client thread
+- Implement standard syslogmask() to control logging (also removing
+the non-standard syslog_enable()).
+
+* File Systems/Block Drivers/MTD:
+
+- Extend MTD support to the M25P16. From Sébastien Lorquet.
+
+* Drivers:
+
+- BCH (Block-to-Character): Add support for seeking in BCH. From
+Sébastien Lorquet.
+
+* Graphics Support/Graphics-Related Drivers:
+
+- Add support for a generic ILI9341 LCD driver. From Marco Krahl.
+- Add ANSI/VT100 foreground and background color commands.
+- Add driver for ST7565 LCD that works with NHD-C12864KGZ display. From Pierre-noel Bouteville.
+
+* Networking:
+
+- Verify that multiple networks can be supported.
+- Add support for the case where there are multiple networks: One
+being Ethernet and the other not (SLIP, PPP, ...). The primary
+difference from the standpoint of the stack is that (1) ARP may or
+may not be necessary, (2) the size of the link layer header will
+vary, and (3) different MTUs and TCP receive windows may be used
+with each link. Suggested by Brennan Ashton.
+- Extensions to UDP and TCP connection structures for the case of
+multiple networks. In this case, assigned port numbers only have to
+be unique with respect to the IP address. So, for example, you
+could have multiple port 80's, one on each network.
+
+* Host Simulation:
+
+- Removed the old, strange up_stdio.c and implemented a simulated UART
+driver to provide the console input. The new logic starts a
+separate, Linux domain pthread to read the console input in raw mode
+and provides the incoming data to NuttX via standard NuttX domain
+IPCs.
+- Add support for 64-bit longjmp/setjmp in simulator platform. This
+will permit operation of the simulation natively on a 64-bit
+platform.
+
+* ARMv7-M:
+
+- Add ARMv7-M CMSIS ITM header file and library. From Pierre-noel
+Bouteville.
+- Add ARMv7-M CMSIS DWT and TPI header files. From Pierre-noel
+Bouteville.
+- Add ARMv7-M support to use ITM for SYSLOG debug output. Includes
+logic from Pierre-noel Bouteville.
+
+* Atmel SAM3/4 Drivers:
+
+- Add support for SAM3/4 basic serial TERMIOS and flow control.
+There are issues with IFLOW control: PDC or DMAC support is
+required.
+
+* Atmel SAM3/4 Boards:
+
+- SAM4E-EK: Add support for PHY interrupt.
+
+* Atmel SAMA5D Boards:
+
+- SAMA5D3-Xplained: Add a configuration that provides a simple test
+for the EMAC and GMAC on the SAMA5D3 working together.
+- SAMA5D4-EK: Add a configuration that provides a simple test for the
+EMAC0 and EMAC1 on the SAMA5D4 working together.
+
+* Freescale KL:
+
+- Add an I2C header file for the Freescale KL family. From Alan
+Carvalho de Assis.
+
+* NXP LPC32xx:
+
+- Add support for tickless operation using the NXP LPC43xx. From
+Brandon Warhurst.
+
+* SiLabs EFM32:
+
+- Add a basic port for the SiLabs EFM32 family. Includes many files
+contributed by Pierre-noel Bouteville .
+
+* SiLabs EFM32 Boards:
+
+- Add board support for the EFM32 Gecko Starter Kit.
+- Add board support for the Olimex EFM32G8809128 STK. NOTE: I am
+unable to test this configuration due to tool-related issues.
+- Add board support for the SiLbas EFM32GG Giant Gecko Starter kit.
+
+* STMicro STM32:
+
+- Add support for the STM32 F411RE from Serg Podtynnyi.
+- Add support for the STM32F103RG. From Murilo Ponte.
+
+* STMicro STM32 Drivers:
+
+- STM32 F4: Add logic that implement true high speed support for the
+STM32 OTGHS peripheral and concurrent support for both LS and HS
+OTG. New OTGHS drivers provided for both device and host. From
+Brennan Ashton.
+
+* STMicro STM32 Boards:
+
+- STM32 Nucleo-F411RE: Extend this board configuration to also support
+the Nucleo-F411RE. From Serg Podtynnyi.
+- Add support for the STM32F429i Discovery's LCD (SPI based). From
+Marco Krahl.
+- configs/stm32f100rc_generic: Removed this generic board configuration.
+I have decided to stop support of generic board configurations. Generic
+board configurations do not provide support for any specific hardware
+but can be useful only if there are not other examples for the setup
+for a particular architecture. Not the case here.
+
+* C Library:
+
+- Add a mostly bogus wchar.h header file. This file is mostly bogus
+because none of the wide character operations are currently
+supported in the NuttX C library. The file does provide the wchar_t
+types needed by some software, however.
+- Add isatty() function. From Alan Carvalho de Assis.
+- Add mktemp(), mkstemp(), tmpnam() and tempnam().
+
+* Configuration/Build System:
+
+- Add a PRELINK macro to Config.mk. From Kriegleder.
+- compiler.h: Defines inline functions as not instrumented - this is
+relevant for anyone using instrumentation. From Lorenz Meier.
+
+* Applications:
+
+- apps/interpreter/bas: Added in the Michael Haardt's BAS 2.4 adapted
+for use by NuttX by Alan Carvalho de Assis. Includes support for
+VT100 terminals and color commands.
+- Examples: Added bastest/ which holds a special version of Michael
+Haardt's BAS 2.4 test files adapted for use by NuttX on a ROMFS file
+system.
+- Examples: Add a simple UDP relay bridge for testing configurations
+with multiple networks. Includes a host-side test driver for
+testing the bridge.
+- Netutils: Add implementation of timeouts for the netutils webclient.
+From Brennan Ashton
+- NSH: Add support for a custom NSH ROMFS startup image header file
+location. From Martin Lederhilger.
+- OS test: Add a simple test of named semaphores.
+- OS test: Add AIO test case in OS test.
+
+Efforts In Progress. The following are features that are partially
+implemented but present in this release. They are not likely to be
+completed soon.
+
+* Processes. Much of the work in this release is focused on the
+realization of Unix-style user processes in NuttX. There is more to
+be done, however. The full roadmap and status is available at:
+https://cwiki.apache.org/confluence/display/NUTTX/Memory+Configurations
+
+* XMega: There are some fragments in place for an XMega port. That
+port has not really started, however.
+
+* Galileo: Similarly, there are fragments in place for an Intel Galileo
+port. The port not been started in earnest either.
+
+Bugfixes. Only the most critical bugfixes are listed here (see the
+ChangeLog for the complete list of bugfixes and for additional, more
+detailed bugfix information):
+
+I ran cppcheck against the entire code base and correct many latent bugs
+including things as serious as memory leaks, two locations where interrupts
+were be disabled but never re-enabled, and errors in the Tickless mode of
+operation. My thanks to the developers of cppcheck! I am impressed!
+
+* Core OS:
+
+- vfork(): Now that arguments are kept on the stack, the way that
+arguments are passed from parent to child in vfork() must change.
+This bug has always been present, but was not visible with the
+old strdup() way of passing arguments.
+- vfork() problem: If we get to vfork() via system call, then we
+need to clone some system call information so that the return form
+the cloned system call works correctly.
+- Fixes to tickless operation code, especially in alarm mode. From
+Brandon Warhurst.
+- Fix an important bug in the watchdog timer creation logic.
+- Calling mq_timedreceived() with immediate timeout was getting stuck
+and not timing out. Immediate timeout is achieved by setting absolute
+timeout value to past time, for example abstime={ .tv_sec=0,
+.tv_nsec=0 }. However absolute time was converted to relative time
+using unsigned integer arithmetic and resulted large ticks count by
+clock_abstime2ticks, instead of expected negative ticks value.
+Change corrects clock_abstime2ticks() to return negative ticks, if
+absolute time is in the past. From Jussi Kivilinna.
+
+* Memory Management:
+
+- Fix a place in the memory manager where it explicitly assumed that
+the size of a pointer is 4 bytes. That assumption was OK if the
+actual size is smaller but made the heap unstable when used with
+the x86_64 host simulation.
+- Granule Allocator: If the INTR granule allocator mode is enabled,
+there is no semaphore to destroy. From Lorenz Meier.
+
+* Networking:
+
+- Network routing: I don't think that the net_route() function has
+ever worked correctly. The source IP was updated in the match
+struct instead of the route IP. From Brennan Ashton.
+- Move and rename IP header flag definitions. The problem fixed here
+is that there IP header flag definitions were not available when TCP
+was disabled. The IP flags are used in ICMP and IGMP.
+- Network routing: Refuse to perform routing table lookups for the
+Broadcast IP address. From Brennan Ashton.
+- Network routing: Add logic to netdev_findbyaddr() to return the
+correct network device for the case where a broadcast
+address is used. This change caused trivial ripples through other
+files because additional parameters are required for
+netdev_findbyaddr() when CONFIG_NET_MULTINIC.
+
+* File Systems/Block Drivers/MTD:
+
+- NXFFS Dump: Fix problems with redefinitions of fdbg macro. With the
+fix to the syslog prototype, a LOG priority must now be the first
+parameter. Fixed by replacing all occurrences of fdbg with
+syslog(LOG_DEBUG, and eliminating the macro redefinitions. Noted
+by Sebastien Lorquet.
+- poll() was not waking up from signals (for example mq_notify()
+events). From Jussi Kivilinna.
+- poll(): Add proper handling for sem_timedwait errnos. From Jussi
+Kivilinna.
+- include/nuttx/fs/fs.h: Fix typo in conditional compilation. From
+Alan Carvalho de Assis.
+
+* Graphics/Graphic-Related Drivers:
+
+- Remove warnings when CONFIG_NXTK_BORDERWIDTH is set to zero. From
+Pierre-Noel Bouteville.
+
+* Common Drivers:
+
+- Make standard syslog and vsyslog POSIX compliant (also modify
+non-standard syslog functions for compatibility).
+- R/W buffering: Fix typo that can cause compilation error.
+
+* Atmel SAM3/4:
+
+- SAM4S: Add missing SPI0 clock configuration macro for the SAM4S. From spasbyspas.
+
+* Atmel SAM3/4 Drivers:
+
+- SAM4E-EK: Fix an error in a USART1 pin number.
+
+* Atmel SAMA5D3/4 Drivers:
+
+- SAMA5DF4: Fix several typos that will prevented EMAC1 from
+initializing properly.
+
+* NXP LPC43xx:
+
+- Fixes to allow compile of lpc43_gpioint.c. From Brandon Warhurst.
+
+* STMicro STM32:
+
+- Add missing ADC pinmap definitions for the STM32 F103R from Martin
+Lederhilger.
+
+* STMicro STM32 Drivers:
+
+- STM32 EXTI: Correct STM32 RTC EXTI bit definition. From Lazlo.
+- STM32 IWDG, WWDG, DBGMCU: Fix watchdog stop bit usage. From Lazlo.
+- STM32 OTGFS: Correct a typo in the STM32 OTGFS register bit definitions.
+
+* ARM:
+
+- ARM up_internal.h: Add protection from C++ name mangling in the
+ARM up_internal.h. From Lorenz Meier.
+
+* MicroChip PIC32MX:
+
+- PIC32MX7: DEVCFG0 bit 2 must be set. Writing bit 2 as zero can
+brick the CPU on some versions. From Cris Kvist.
+
+* C Library:
+
+- The implementation of access() as vararg macro has the issue that
+any function call with the same name (even in a C++ class) will
+match with it and result in a compile error. Replaced with a small
+function. This resolves the compile issue, and shouldn't have
+negative side effects for users of the function. From Lorenz Meier.
+- The definition of strncpy() is that empty space should be zero-
+filled, the change adds the zero filling (See the POSIX spec here:
+http://pubs.opengroup.org/onlinepubs/7908799/xsh/strncpy.html). From
+Lorenz Meier.
+- limits.h: Remove the definition of INT_FAST32_MIN which is already
+defined in stdint.h (the correct location). From Lorenz Meier.
+
+* Applications:
+
+- apps/: Correct everything under apps to use the corrected syslog
+interfaces. Remove any non-portable uses of syslog.
+- NSH: Fix ls -l output for regular files.
+- NSH: Fix reversed in/out file closing in DD command when an error
+occurs. From Ken Pettit.
+- NSH: Add logic to restart the console wait if an error occurs
+while reading from the console. In USB console startup, the logic
+must be able to open the USB serial and receive 3 newlines.
+However, it the USB driver is disconnected or otherwise fails before
+the 3 newlines are received, the receive loop becomes a killer,
+infinite loop, CPU hog. Noted by spasbyspas.
+- Netutils: Fix memcpy of host address in netlib_gethostaddr(). From
+Brennan Ashton.
+- Netutils: If you make a DNS request before the DNS address it would
+cause an assertion. The state of the IP setting is not something the
+application should be aware of, it should only be concerned with
+whether or not the name was resolved. From Brennan Ashton.
+- Netutils: Fix md5 hashing when digest[$i] islower that 16. From
+Sergey.
+- Stack Monitor: Fix compile problems introduced when the syslog()
+prototype changed; Also update Makefile for kernel build From
+Radoslaw Adamczyk.
+- Examples: Update NxTerm makefile for kernel-build issues. From
+Radoslaw Adamczyk.
+- Examples: Fixes to keypadtest from Pierre-Noel Bouteville.
+- Examples: These examples all set the IP address of eth1 but the
+netmask and gateway of eth0 if DHCP is enabled: discover, tcpecho,
+webserver, xmlrpc. That can't be right.

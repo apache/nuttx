@@ -1,0 +1,35 @@
+NuttX-6.7
+---------
+
+The 74th release of NuttX, Version 6.7, was made on August 2, 2011
+and is available for download from the SourceForge website. Note
+that release consists of two tarballs: nuttx-6.7.tar.gz and
+apps-6.7.tar.gz. Both may be needed (see the top-level nuttx/README.txt
+file for build information). Changes in this release are summarized
+below:
+
+* New OS APIs: Add the standard sem_timedwait() interface.
+* FAT File System: Adds (optional) support for VFAT long file
+names.
+* USB: Now the mass storage device can be connected when needed
+and disconnected when not needed (or re-connected as a different
+kind of device).
+* Touchscreen Support: Defined a new NuttX touchscreen interface.
+Added a driver for the TI TSC2007 touchscreen controller chip.
+* NX Fonts: Add support for multiple fonts; developed a tool to
+convert open source fonts into NuttX format; Converted and
+installed nine new, high quality fontsets.
+* NX Graphics: Add new NX APIs to support drawing of wide lines
+in any orientation. Added new low level routines to set
+individual pixel more efficiently.
+* Build system: Added a export target that will bundle up all
+of the NuttX libraries, header files, and the startup object
+into an exportable tarball.
+* LPC17xx: A CAN driver was contributed by Li Zhuoyi (Lzyy).
+* STM32: New NX-related configurations to exercise text and
+graphic image displays.
+* C Library: Added a fixed precision atan2() math function.
+* Bugfixes: Serial RX overrun error, FAT upper/lower NT 8.3 name
+handling fixed. FAT directory allocation and initialization
+bug. STM32 SDIO DMA race condition bug. eZ80 UART1 serial
+driver errors (Paul Osmialowski)

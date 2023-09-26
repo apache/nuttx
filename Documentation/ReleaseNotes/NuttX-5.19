@@ -1,0 +1,41 @@
+NuttX-5.19
+----------
+
+The 66th release of NuttX, Version 5.19, was made on March 12, 2011
+and is available for download from the SourceForge website. This
+release includes several new features in various states of integration
+and maturity:
+
+* 486SX QEMU port. This port supports the Intel 486SX architecture
+using the QEMU simulator. Initial functionality is in place a
+partially tested. There are still some outstanding issues with
+timer interrupts.
+* Platform specific application support. A new apps/ directory
+appears in this port. This apps/ directory provides a mechanism
+for applications using NuttX to have a highly customized
+initialization process. It supports a set of end-user applications
+than can be executed (1) standalone so you can have a fully
+customized application startup, or (2) on top of NSH. Think
+of it this way: In a buckled-up embedded application, your
+end-user programs will probably have their own dedicated start-up
+logic. But, during development, you might want to have you
+applications available and executable from the NSH command line.
+This apps/ add-on (and NSH hooks) was contributed by Uros to
+accomplish just that.
+* NSH was also extended to support application specific ROMFS
+/etc/init.d/rcS start-up scripts. This feature, as well, as
+all of the above-mentioned apps/ directory support was contributed
+by Uros Platise
+* Additional NSH improvements and bug fixes. See the Changelog
+for details.
+* This release also provides a new SLIP network driver. This
+driver should support point-to-point network communications to
+a host using TCP/IP or UDP. This driver is code complete, but
+not tested in this release.
+* New RAMTRON FRAM driver (contributed by Uros Platise)
+* New generic 16550 UART driver.
+* Cortex-M3 Power improvements: Waits for Interrupt (WFI) in idle
+loop for reduced power consumption (LPC17xx and STM32 only -
+contributed by Uros Platise))
+* New waitpid() system interface.
+* Additional bugfixes: pipes, stdint.h, STM32 SDIO and SPI drivers

@@ -1,0 +1,46 @@
+NuttX-4.14
+----------
+
+This is the 46th release of NuttX. The release extends the support
+for the STMicro STM32 microcontroller. Minimal support for the
+STM3210E-EVAL development board based around the STM32F103ZET6 MCU
+was released in NuttX-0.4.12 and extended in NuttX-0.4.13 to include
+initial USB support. This completes the STM32F103ZET6 and adds:
+
+New Generic RTOS Features:
+
+* Added generic support that can be included in any block driver
+to provide read-ahead buffering and write buffering for improved
+driver performance.
+* Added a generic worker thread that can used to defer processing
+from an interrupt to a task.
+* Defined a generic SD/SDIO interface can can be bound to a MMC/SD
+or SDIO driver to provide SDIO support.
+* Implemented a an SDIO-based MMC/SD driver using this new SDIO
+interface.
+
+New STM32 Features:
+
+* Add support to configure an STM32 input GPIO to generate an
+EXTI interrupt.
+* Added support for buttons on the STM3210E-EVAL board.
+* Implemented an STM32 version of the common the SDIO interface.
+* Added a configuration to exercise the STM32 with the USB mass
+storage device class example.
+
+This release also corrects some important bugs in the early STM32 release:
+
+* Correct error handling in the mount() logic.
+* Fixed several STM32 DMA-related issues. Integrated and debugged
+STM32 DMA functionality that was added in 0.4.12.
+* Fixed several bugs in the STM32 USB device-side driver.
+
+NOTE: This version, 4.14, is equivalent to what would have been
+called 0.4.14 to follow 0.4.13. The zero has been eliminated from
+the front of the version number to avoid confusion about the state
+of development: Some have interpreted the leading zero to mean
+that the code is in some way unstable. That was not the intent.
+Beginning in January 2010, I will switch to the 2010.nn versioning
+as many others have done to avoid such confusion.
+
+This tarball contains a complete CVS snapshot from December 2, 2009

@@ -1,0 +1,21 @@
+NuttX-0.4.0
+-----------
+
+This is the 32nd release of NuttX. This release adds graphics
+support and a tiny windowing subsystem. That new graphics subsystem
+is documented at http://nuttx.sourceforge.net/NXGraphicsSubsystem.html.
+No other substantial changes were made.
+
+These changes were verified only on the NuttX simulation platform
+with X11 windows simulating a device framebuffer. Please report any
+errors to me.
+
+The version number was bumped up to 0.4.0 in part to reflect the
+new graphics subsystem, but also to recognize the NuttX is approaching
+complete functionality. In the 0.3.x versions, network support was
+added, Pascal P-code runtime support was added, FAT and ROMFS
+filesystems were added, MMC/SD and USB device support were added.
+There were also numerous extensions to the NuttShell, NuttX APIs,
+and architecture ports.
+
+This tarball contains a complete CVS snapshot from December 6, 2008.

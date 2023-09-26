@@ -1,0 +1,568 @@
+NuttX-6.32
+----------
+
+The 99th release of NuttX, Version 6.32, was made on December 7, 2013,
+and is available for download from the SourceForge website. Note
+that release consists of two tarballs: nuttx-6.32.tar.gz and
+apps-6.32.tar.gz. Both may be needed (see the top-level nuttx/README.txt
+file for build information).
+
+Additional new features and extended functionality:
+
+* General:
+
+- Extension and standardization of stack debug logic. Now includes
+coloration of the IDLE and interrupt stacks as well as the heap.
+Suggested by David Sidrane.
+
+* Audio Subsystem and Audio Drivers:
+
+- I2S interface definition. Integrates with audio sub-system.
+- VS1053 worker thread stack size is now configurable and assigned a
+name via pthread_setname_np(). From Ken Pettit.
+
+* Networking / Network Drivers
+
+- Updates and adaptations to support for TI CC3000 wireless module
+from David Sidrane. These updates include multi-threading support
+and interface and header file changes to integrate more seamlessly
+with NuttX applications.
+
+* File Systems:
+
+- procfs: Add support for a tiny procfs file system. The initial
+offering is little more that a proof of concept but may be developed
+further in subsequent releases.
+- NXFFS: An initial attempt was made to integrate NXFFS with the NAND
+MTD driver. Changes were made to handle bad blocks. However, I
+later realized that NXFFS cannot handle NAND because the way that
+is re-writes blocks is incompatible with the NAND ECC handling.
+These changes were backed-out so as not to introduce turmoil, but
+can be re-enabled if needed via configuration option.
+- NXFFS: Make the start up scan of the media a configuration option.
+It just takes to long and is not really necessary! Those rare cases
+where the scan was helpful can be fixed using MDIOC_BULKERASE IOCTL
+command.
+
+* General Drivers:
+
+- I2S: A simple character driver was added to support I2S accesses.
+This driver in its current state is intended only to support I2C
+testing and would not be appropriate to used for any real driver
+application.
+
+* MTD Drivers
+
+- Add a container for an MTD device that can be used to provide a
+simple, lightweight interface to configuration data storage that
+resides on some storage media that is wrapped as an MTD device.
+From Ken Pettit.
+- New interface definition for lower half NAND drivers.
+- MTD Nand: Add MTD NAND driver that will support ONFI devices,
+non-ONFI devices (via table lookup), bad block checking, software
+ECC (Hamming), and will interact with the lower-half, hardware-
+specific, NAND driver. Based on BSD-compatible Atmel sample code.
+- MTD geometry structure is now packed so that it can support larger
+erase block sizes needed by NAND without increasing the size of
+the geometry structure.
+- SST25: Add another SST25 SerialFlash driver, sst25xx.c. This one
+differs from sst25.c in that it supports larger SST25 parts: In
+the larger parts support page write instead of byte/word writes
+like the smaller parts. From Ken Pettit.
+
+* USB Drivers
+
+- STM32 F1 USB Device: Add support for decoded USB trace strings.
+From David Sidrane.
+
+* ARM
+
+- Add more ARM9 cache management functions to flush and invalidate
+D-Cache for DMA support.
+
+* Atmel AT91 SAMA5D3x Drivers:
+
+- Many new drivers including CAN, PWM, SSC/I2S
+- PCK: Add support for programmable clock outputs.
+- NAND: Driver with hardware ECC and DMA support
+
+* Atmel AT91 SAMA5D3x Boards:
+
+- SAMA5D3x-EK: Add support for the apps/examples/i2schar test.
+- SAMA5D3x-EK: Provides board-specific memory controller initialize
+for NAND flash.
+- SAMA5D3x-EK: Add support for "auto-mounting" NAND MTD block driver
+or NXFFS file system.
+
+* Atmel AT91 SAM3/4 Boards:
+
+- Basic support for the Atmel SAM4E family. From Mitko.
+
+* STMicro STM32:
+
+- Added support for the STM32F429. From Ken Pettit.
+- Added support for GPIOK and GPIOJ. From Ken Pettit.
+
+* STMicro STM32 Drivers
+
+- STM32 F4 OTG FS/HS Device: OTG FS device and host drivers extended
+so that they can support either the OTG FS peripheral or the OTG HS
+peripheral (in FS mode). This was done as a quick way to get USB
+support on the STM32F429 which has only OTG HS. From Ken Pettit.
+- Added header files and driver framework for the STM32F429 LTDC
+framebuffer driver. From Ken Pettit.
+
+* STMicro STM32 Boards:
+
+- Support for the Spark board was completely by Davide Sidrane. The
+Spark configuration includes integrated CC3000 wireless support, FAT
+file system on the SerialFlash and a composite device that can be
+used both to export the FAT file system and to provide a serial
+interface.
+- The Mikroe-stm32f4 now uses /dev/config for configuration data
+storage. From Ken Pettit.
+- Added support for the STM32F429I-Discovery board from Ken Pettit.
+- Added board support for the ViewTool STM32F103/F107 board with the
+STM32F107VCT6 installed.
+
+* NXP LPC31xx Drivers:
+
+- USB ECHI HCD: Add a driver for the low-/full-/high-speed variant
+of the EHCI host controller.
+
+* NXP LPC31xx Boards:
+
+- Board-specific USB host support for the Embedded Artists EA3131 board.
+(Missing PCA9532 controls).
+- Add support for the Olimex LPC-H3131 board. Including USB host
+support (which does not depend on the PCA8532 interface).
+
+* Kinetis KL Drivers:
+
+- PWM driver for the Freescale Kinetis KL family from Alan Carvalho
+de Assis.
+
+* Kinetis KL Boards
+
+- Freedom-KL25Z: Add PWM support from Alan Carvalho de Assis.
+
+* TI Stellaris LM3S
+
+- Don't initialize .data in start-up logic if not running from FLASH.
+
+* Applications:
+
+- apps/platform: A new home for platform-specific application code.
+- Define a common interface that can be used to manage platform-
+specific configuration data. From Ken Pettit.
+- apps/examples/configdata: A unit test for the MTD configuration
+data driver from Ken Pettit.
+- Aapps/platform/mikroe-stm32f4: dd platform-specific storage of
+configuration data for the Mikroe-stm32f4. From Ken Pettit.
+- apps/examples/cc3000: Fine tuning of memory usage from David Sidrane.
+- apps/system/nxplayer: Play thread stack size is now configurable.
+All NxPlayer threads now have names assigned via pthread_setname_np().
+From Ken Pettit.
+- apps/examples/i2schar: The I2S test based on the I2S character
+driver.
+- apps/examples/hidkbd/hidkbd_main.c: Now calls a function named
+arch_usbhost_initialize() that must be provided by the platform-
+specific code.
+- NSH:
+
+- hexdump: Add skip= and count= options to the hexdump command. From Ken Pettit.
+- Allow USB trace without a USB console. From David Sidrane.
+- Mount command updates from Ken Pettit.
+- Add an option to the mkfatfs command to specify FAT12, FAT16, or FAT32.
+
+* Tools
+
+- tools/mkctags.sh: A script for creating ctags from Ken Pettit.
+
+Efforts In Progress. The following are features that are partially
+implemented but present in this release. They are not likely to be
+completed soon.
+
+* kconfig-fronted Configuration:
+
+- Conversion of old configurations to use the kconfig-frontends
+tool is an ongoing effort that will continue for some time.
+At this time, only 50% of the configurations have been converted
+to use the kconfig-frontends tools.
+
+Bugfixes (see the ChangeLog for details). Some of these are very important:
+
+* File Systems
+
+- FAT: In one error return case, the error return value was not being
+set, making the failure look like success. From David Sidrane.
+- mount: SMART FS must be included in the conditional compilation for
+the set of file systems that require block drivers. From Daniel
+Palmer.
+- SmartFS: Fixed a minor bug with SMART partition number reporting
+that would only be seen if both partition support and multi-root
+directory support are enabled at the same time. From Ken Pettit.
+- Deadlock: The inode semaphore must be re-entrant. Here is the re-
+entrant path that I found: (1) USB host connects to FLASH drive and
+creates /dev/sda, (2) /dev/sda is mounted, (3) FLASH drive is
+removed but /dev/sda is not destroyed because there is still a
+reference on the device because of the mount, (4) umount() is
+called, taking the inode semaphore, now the driver tries to destroy
+the block driver by calling unregister_blockdriver(). But (5)
+unregister_blockdriver() also takes the inode semaphore causing a
+deadlock if the inode semaphore is not re-entrant.
+- FAT: Fix a typo in the FAT16 formatting logic. Was this ever able to
+format a FAT16 volume?
+
+* MTD Drivers
+
+- MTD Partitions: Fix erase block vs page block confusion. From Ken
+Pettit
+- SST25 Serial Flash: Improved write performance by fixing a bug that
+prevented operation in the faster write mode. From David Sidrane.
+
+* USB Drivers:
+
+- USB MSC Device: pthread_join() does not work if called from a
+different task group than the pthread. This is correct behavior,
+but still a problem. The correct solution would be configure the
+USB MSC thread to a task, however, this workaround from David
+Sidrane plugs the hole for now.
+- USB CDC/ACM, USB MSC, and Composite Device Classes: Un-initialization
+logic caused re-use of a stale pointer. Changed to a two pass
+un-initialization for the case of the composite driver: Memory
+resources are not freed until the second un-initialization pass.
+From David Sidrane.
+
+* STMicro STM32 Drivers:
+
+- STM32 F1 USB Device: Fix some errors that cause crashes when the USB
+was disconnected. From David Sidrane.
+- STM32 F1 USB Device: Correct EP0 state handling logic when buffers
+larger than the EP0 packet size are sent. From David Sidrane.
+- STM32 F1 USB Device: The long outstanding bug involving the handling
+of OUT SETUP commands has been fixed in the STM32 F1 USB device
+driver by David Sidrane.
+- Kconfig: Add missing setup of CAN TSEG1 and TSEG2 values. From
+Martin Lederhilger.
+
+* Tools
+
+- tools/mkconfig.c: SMART FS must be included in the conditional
+compilation for the set of writable file systems. Noted by Daniel
+Palmer.
+
+* Applications:
+
+- apps/platform/Makefile: Was not dealing with the bin sub-directory
+correctly.
+- apps/system/composite/composite_main.c: The wrong handle was getting
+nullified. From David Sidrane.
+
+NuttX-6.33
+----------
+
+The 100th release of NuttX, Version 6.33, was made on January 30, 2014,
+and is available for download from the SourceForge website. Note
+that release consists of two tarballs: nuttx-6.33.tar.gz and
+apps-6.33.tar.gz. Both may be needed (see the top-level nuttx/README.txt
+file for build information).
+
+Additional new features and extended functionality:
+
+* Core OS Interfaces
+
+- nanosleep() added. sleep() and usleep() are no longer core OS
+interfaces. These have been moved into the library and re-implemented
+as simple wrappers around nanosleep().
+
+* File Systems
+
+- procfs restructured by Ken Pettit. Added files for MTD status.
+- procfs extended to show uptime and task group status.
+- procfs now shows stack information.
+
+* Networking
+
+- Add support for the SO_LINGER socket option. Extended from logic
+provided by Jason Jiang. Enabled with CONFIG_NET_SOLINGER.
+- TCP write buffering support added. From Jason Jiang.
+- Changes from Max Holtzberg to improve how network status is
+reported. New controls to manage carrier detect.
+
+* Graphics
+
+- Massive reshuffling of files with little or no logic changes. This
+reshuffling was necessary to build graphics applications with the
+kernel builds where the graphics application lie in user space and
+the core graphic server likes in kernel space. Moved much logic out
+of nuttx/graphics to a new user library, libnx.
+
+* Cortex-A5/A8/A9
+
+- Existing Cortex-A5 support updated to include Cortex-A8/9.
+- Add the syscall.h header file needed for the Cortex-A architecture.
+- Start-up logic now supports execution from FLASH with .data and
+.bss in SDRAM. This was not possible prior to this because .bss
+and .data were initialized before SDRAM was configured.
+
+* Allwinner A10:
+
+- Basic support for the Allwinner A10 (Cortex-A8) is in place.
+
+* Allwinner A10 boards
+
+- Support for the pcDuino v1 board has been added. This support
+is not yet very mature and still lacks many drivers. It is a
+good starting point, however, if anyone wants to develop A10
+support.
+
+* Atmel SAMA5D3X
+
+- Start-up logic now supports execution from FLASH with .data and
+.bss in SDRAM. This was not possible prior to this because .bss
+and .data were initialized before SDRAM was configured.
+
+* Atmel SAMA5D3X Boards
+
+- Partial logic in place to support the OV2640 camera. Still needs
+quite a bit of additional logic to be useful.
+
+* ARMv7-M
+
+- Add support for high priority, nested interrupts. This change
+effects not only core ARMv-7M logic, but all ARMv7-M MCU logic:
+LM3S, LM4F, LPC17xx, LPC43xx, SAM3, SAM4, and STM32. See
+https://cwiki.apache.org/confluence/display/NUTTX/High+Performance%2C+Zero+Latency+Interrupts
+
+* STMicro STM32
+
+- Add clocking support for STM32F107 USB OTG FS (which does not yet
+work)
+- Single-wire UART support for the F1 series from Thomas Grubler.
+
+* STMicro STM32 Boards
+
+- The Viewtool board can now be configured to support either the
+STM32F103VCT6 or the STM32F107VCT6.
+- The Viewtool STM32F107VCT6 now supports networking with the
+DP83848C module installed.
+- Add support for Viewtool SSD1289-based LCD on the Viewtool
+STM32F103VCT6 board (untested)
+- Add support for the XPT2046 touchscreen controller on the Viewtool
+LCD module connected to the Viewtool STM32F103 board.
+- Added kernel mode build support for the STM3240G-EVAL board. Added
+a new kernel mode NxWM build configuration
+- C++ static constructor logic from the nuttx/configs/stm3240g-eval/
+directory to the apps/platform/stm3240g-eval/up_cxxinitialize.c
+where is belongs so that it is available in user-space in the kernel
+mode build.
+- Add native Windows build support for the Olimex STM32 P107. From
+Max Holtzberg
+- Support for the STM32VL-Discovery board. Contributed by Alan
+Carvalho de Assis
+- Added a configuration for testing simple configurations on the
+PX4FMU v2.
+
+* ZiLOG ZNEO Boards
+
+- Add an NSH configuration for the Z16F2800100ZCOG ZNEO board.
+- Added support for the Toyaga 16Z ZNEO board. The 16Z board is
+based on the ZiLOG ZNEOZ16F2811AL20EG part. See
+https://github.com/toyaga/16z for further information
+- Developed a patch to work around a compiler error that is revealed
+when building the NSH configuration.
+
+* Architecture-Independent Drivers
+
+- OV2640 Camera Driver.
+- Support for the Sharp Memory LCD from Librae.
+
+* Library
+
+- Pattern matching logic extended to handle set of characters and
+ranges of character values. From Ken Pettit.
+- sleep() and usleep() moved into the C library. These are not
+longer core OS interfaces; they are simple wrappers for the
+nanosleep().
+- Add an implementation of gets_s().
+- Extend fopen() to include support for C11 exclusive open ("x")
+open mode.
+- Add an implementation of stpcpy()
+- strtol(), strtoll, strtoul(), strtoull(), and strtod() from
+libc/string to libc/stdlib where they belong.
+
+* Header Files
+
+- Add rsize_t to include/sys/types.h
+- Add the C11 thread.h header file
+
+* Configuration/Build System
+
+- Top level Makefile now supports qconfig and/or gconfig targets that
+may be used for configuration. These may be used if you build
+kconfig-frontends with support for kconfig-qconf and/or
+kconfig-gconf.
+- Add CONFIG_DEBUG_NOOPT. Now you can independently enable/disable
+debug symbols and optimization
+- File system related header files moved to include/nuttx/fs
+- Video related header files moved to include/nuttx/video
+- Changes for native Windows build: fix creation of a .version file
+if one does not exist. Make sure that the APPDIR environment
+variable is set before configuring. From Max Holtzberg.
+- Board configuration sub-directory can now be specified. The default
+need not be used. This is only useful when CONFIG_ARCH_BOARD_CUSTOM
+is selected and there is no meaningful default sub-directory.
+- Many functions renamed to better conform with the naming standard:
+up_buttoninit() renamed to board_button_initialize(), up_buttons()
+renamed to board_buttons(), up_irqbutton() renamed to
+board_button_irq(), up_ledinit() renamed to board_led_initialize(),
+up_ledon() renamed to board_led_on(), and up_ledoff() renamed to
+board_led_off(). All prototypes removed from board.h header files.
+Now ONLY prototypes in include/nuttx/arch.h.
+
+* Applications
+
+- NSH: Refactor. Separate NSH command handling and command execution
+from NSH line parsing.
+- NSH: Will now support multiple commands on a command line, each
+separated with a semi-colon.
+- NSH: Add support of commands enclosed in back quotes as command
+arguments.
+- NSH: Can now handle arguments that are concatenations of constant
+strings, command return data, application return data, and
+environment variables.
+- NSH: Add true and false commands.
+- NSH: Add support for while-do-done and until-do-done loops. These
+only work when executing a script file because they depend on the
+ability to seek in the file to implement the looping behaviors.
+Can be conditionally compiled out to reduce footprint.
+- NSH: Loosen up if-then-else-fi syntax to allow a command to be on
+the same line as the then or else tokens like:
+"if true; then echo true; else echo false; fi". More like bash.
+- NSH: Add a break command that can be executed with a loop to
+terminate the loop immediately.
+
+- system/inifile: A simple .INI file parser.
+- system/vi: Add support for a tiny, VI work-alike editor. This is
+a minimal full screen editor that works with a terminal emulator
+that using VT100 commands.
+
+Efforts In Progress. The following are features that are partially
+implemented but present in this release. They are not likely to be
+completed soon.
+
+* kconfig-fronted Configuration:
+
+- Conversion of old configurations to use the kconfig-frontends
+tool is an ongoing effort that will continue for some time.
+At this time, only 53% of the configurations have been converted
+to use the kconfig-frontends tools.
+
+Bugfixes (see the ChangeLog for details). Some of these are very important:
+
+* Core OS
+
+- Added missing sem_timedwait() system call.
+
+* Networking
+
+- Prevent tcp_connect callback from being double freed. From Max
+Holtzberg
+- uiplib: Support new definitions and state passing for network
+device status. From Maz Holtzberg.
+
+* File Systems
+
+- FAT: (1) A correction to FAT cluster allocation, and (2) Fix to some
+root directory logic that was conditionally done only for FAT 32.
+Apparently this needs to done for all FAT types. Both from Andrew
+"Tridge" Tridgell via Lorenz Meier.
+
+* Binary Formats
+
+- Fix a small memory leak when attempting to load a program from a file.
+
+* Cortex-A8/9
+
+- Fix some errors in the cache invalidation logic (only seem to matter
+for Cortex-A8).
+- Add more nop's after enabling the MMU. The cortex-a8 seems to need
+these
+
+* Graphics
+
+- Fix a typo that caused a compilation error when
+CONFIG_NXCONSOLE_BPP < 8. From Librae
+
+* ARMv7-M
+
+- Correct alignment of RAM vector table.
+- Interrupt handling: Do not disable and enable the IRQ on each
+entry, (2) this interferes with controlling the IRQ interrupt
+setting from interrupt handlers, and (3) up_disable_irq() does
+not work anyway so that this has never done anything.
+- Fix all implementations of up_disable_irq() for all Cortex-M3 and
+M4 architectures: To enable an interrupt on the Cortex-M3/4 CPU,
+you need to set a bit in the ISER register. To disable the
+interrupt, you need to set a bit in the ICER register. Existing
+logic was trying to disable interrupts by clearing the bit in the
+ISER register. That will not work; writing a '0' to the ISER
+register has no effect. That means that up_disable_irq() was
+doing nothing! It turns out that that is not really important
+because up_disable_irq() is not really used for that purpose. But
+some spurions STM32 ADC interrupts have been reported to me and this
+turned out to be the cause in that case. Thanks to Manuel Stühn for
+the tip.
+
+* STMicro STM32
+
+- Fix configuration and pin definitions that would prevent building
+USB for the connectivity and performance lines.
+- STM32L15xx: Fix a typo in USB pin definitions
+- Fix pin definition names for SPI2 MOSI and MISO. Noted by Brian Webb
+- Various fixes for STM32F103ZE SPI3 pin mapping definitions. From
+Steve Redler IV
+
+* STMicro STM32 Boards
+
+- Olimex STM32-P107: Failed to build if SPI3 for UEXT is not remapped.
+From Max Holtzberg
+
+* x86 Boards
+
+- Add a configuration option to select the -m32 compiler option when
+building for a 32-bit target on a native 64-bit compiler. So far,
+only used for the qemu/i486 configuration.
+- Patch from Matt Campbell to fix 'Error: .size expression for idle_stack
+does not evaluate to a constant".
+
+* Library
+
+- strftime(): Needs null termination on the generated string. From
+Max Holtzberg.
+- Typo in ctype.h macro name: iscntrl(), not iscontrol().
+- If there are no arguments (argc == 1), then getopt() will leave the
+optind variable in an undefined state (2014-1-20).
+- ARMv7-M memcpy(): Assembler changes with the gcc-47 distribution
+from ARM mean that we need to be explicit about branch sizes; one
+or more of the wide branch opcodes results in bad table branching.
+From Mike Smith.
+
+* Configuration/Build System
+
+- Fixes for some tools/ for Windows build issues from Max Holtzberg.
+- Config.mk: 'cypath' must be called if we are using a Windows native
+toolchain with the Cygwin 'make' to convert paths to proper
+Windows paths. From Richard Cochran.
+- ARM Makefile: Dependency directory list is now computed from the
+VPATH. From Richard Cochran.
+- builtin/Makefile: Fixes for native Windows build from Max Holtzberg.
+- Refactor some configuration dependencies: NSH networking features
+should depend on netutil selections; netutil selections, in turn,
+should depend on networking selections.
+
+* Applications
+
+- NSH: Modified the df -h logic to eliminate truncating numbers in
+conversion (like 7900 -> 7M). From Ken Pettit.

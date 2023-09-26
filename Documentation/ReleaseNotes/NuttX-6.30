@@ -1,0 +1,217 @@
+NuttX-6.30
+----------
+
+The 97th release of NuttX, Version 6.30, was made on September 14, 2013,
+and is available for download from the SourceForge website. Note
+that release consists of two tarballs: nuttx-6.30.tar.gz and
+apps-6.30.tar.gz. Both may be needed (see the top-level nuttx/README.txt
+file for build information).
+
+Additional new features and extended functionality:
+
+* Common Drivers:
+
+- Extended TERMIOS support for serial and CDC/ACM drivers. From
+Mike Smith, Andrew Tridgell and Lorenz Meier.
+- Added option to disable serial port reordering. From Lorenz Meier.
+- Several changes to the USB host control interface and extensions to
+common USB host logic to handle host controllers with multiple
+downstream ports in the root hub.
+- USB device tracing: Extended decoding and stringifying of USB trace
+output to include trace output from class drivers.
+- USB host tracing: Added support for USB host tracing similar in
+some ways to USB device tracing: Stringification is an inherent
+part of the trace decoding (not an option). Only available in the
+SAMA5 USB host drivers now.
+
+* Networking / Network Drivers
+
+- Support for the Microchip ENCX24J600 Ethernet driver from Max
+Holtzberg
+- CC3000 Networking. Initial support for the TI CC3000 network
+module on the Freescale Freedom-KL25Z board from Alan Carvalho
+de Assis. This is still a work in progress.
+
+* ARMv7-A, Cortex-A5
+
+- Restructured some MMU-related logic and header files.
+- Hooks added for Cortex-A8, but not yet used.
+
+* STM32 Drivers:
+
+- STM32 SPI: nbits() interface extended to control bit order as well
+as bit width (from Teemu Pirinen)
+
+* STM32 Boards
+
+- Olimex STM32-P107: Incorporate ENCX24J600 networking for the Olimex
+STM32 P107 board.
+- LeafLabs Maple Board: Add board support for the LeafLabs Maple and
+Maple Mini boards. From Librae.
+
+* Atmel AT91 SAMA5D3x
+
+- Added support for the SAMA5 DMAC controllers.
+- DMA-capable drivers for the SAMA5 SPI peripherals.
+- DMA-capable HSCMCI 0/1/2 drivers.
+- Support for PIO interrupts
+- Utilities for intelligent conversions between physical and virtual
+addresses.
+- Added USB host controller drivers for both the OHCI (low- and full-
+speed) peripheral and the ECHI (high-speed) peripheral.
+- Added USB device controller for the SAMA5 UDPHS peripheral (full-
+and high-speed).
+- Added a Two Wire (TWI) driver. This is a variant of I2C.
+
+* Atmel AT91 SAMA5D3x-EK Development Boards
+
+- Now supports onboard SDRAM. Modified heap initialization logic
+to include SDRAM if configured.
+- Integrated a FAT file system on the on-board SPI-based AT25 serial
+FLASH
+- Integrated HSMCI0 and HSMCI1 support for the microSD and full file
+SD card slots. Includes PIO interrupts for card detection events.
+- Integrated USB OHCI and ECHI host and high-speed peripheral support.
+File system on AT25 now exported via Mass Storage Class. Includes
+PIO VBUS controls.
+- Integrated the TWI driver and the I2C tool. Added support for an
+external AT24 serial EEPROM.
+
+* Applications:
+
+- apps/examples/cc3000. Initial support for the TI CC3000 network
+module on the Freescale Freedom-KL25Z board from Alan Carvalho de
+Assis. Includes the test to verify the CC3000.
+- apps/examples/usbmsc: apps/examples/usbstorage renamed usbmsc for
+consistency. Change submitted by CCTSAO.
+- apps/system/usbmonitor: The USB monitor has been extended so that
+it can be used with USB device or host trace data.
+
+Efforts In Progress. The following are features that are partially
+implemented but present in this release. They are not likely to be
+completed soon.
+
+* CC3000 Networking
+
+- CC3000 Networking. Initial support for the TI CC3000 network
+module on the Freescale Freedom-KL25Z board from Alan Carvalho
+de Assis. This is still a work in progress.
+
+* kconfig-fronted Configuration:
+
+- Conversion of old configurations to use the kconfig-frontends
+tool is an ongoing effort that will continue for some time.
+At this time, only 46% of the configurations have been converted
+to use the kconfig-frontends tools.
+
+Bugfixes (see the ChangeLog for details). Some of these are very important:
+
+* File Systems:
+
+- ROMFS: Fix an error where long (>15) file names were read
+incorrectly from a ROMFS file system. From Mike Smith
+- NXFFS: Clean up some compiler warnings.
+
+* Common Drivers
+
+- MMC/SD driver: Correction for a bad return value when multiple
+block SDIO transfers are suppressed. By Andrew Tridgell.
+- USB HID keyboard and mass storage host-side class drivers: Fix some
+compilation errors and warnings when pre-allocated data structures
+are used.
+- USB device-side class drivers: Fix some compilations errors when
+DUALSPEED (i.e., full- and high-sped) support is enabled.
+- CDC/ACM and PL2303: Don't use max packetsize assigned to the endpoint
+when allocating request buffers; The default value of the endpoint
+max packetsize may be incorrect because the endpoint has not yet
+been configured. Really only an issue for high-speed endpoints.
+- USB Host Mast Storage Class: Fixed a problem that was causing some
+devices to fail to initialize: If device is returning fatal transfer
+errors while attempting to initialize, don't bother with the startup
+retries; abort immediately so that the device will be reset and we
+can try again with a better ready device.
+- USB Host Mast Storage Class: Correct a reference counting error:
+When an MSC device transfer fails while waiting for UnitTestReady,
+the reference count on the class was not being decremented. The end
+result is a memory leak as can be seen by the USB device numbers
+incrementing: sda, sdb, sdc, ...
+- USB Device CDC/ACM: Fix backward conditional compilation in the
+CDC/ACM driver with regard to remote wakeup and self-powered
+capabilities. From the PX4 team via Lorenz Meier,
+
+* Networking / Network Drivers
+
+- ARP IP harvesting: Correct backward condition in netmask task.
+From Max Holtzberg.
+- Network connection monitor: Fixes a race condition where a loss of
+connection may not be detected when the connection is lost before it
+has been accepted (from Max Holtzberg).
+- TCP/IP Backlog: Fix a critical bug in the TCP/IP backlog
+initialization: Only the first backlog buffer was getting added to
+the free list. From Max Holtzberg.
+- ENC28J60: Fixes and improvements back-ported from the ENCX24J600
+to the ENC28J60 by Max Holtzberg.
+
+* STM32 Drivers:
+
+- STM32 I2C fixes for the STM32 F3 family from John Wharington.
+- STM32 I2C Correct an error that crept into the STM32 F1 I2C
+driver with some recent changes. From Librae
+- STM32 F4: Added some missing CONFIG_SERIAL_TERMIOS support; Fixed
+some STM32 F4 Timer 8 pin configurations. From CCTSAO.
+- STM32 SDIO: If CONFIG_SDIO_BLOCKSETUP defined, OS would crash. Now
+Generate an error if CONFIG_SDIO_BLOCKSETUP is defined; that
+option is not yet supported by the STM32 SDIO driver. From CCTSAO
+- STM32 I2C Timers: Some CCER bit settings changed. Submitted by
+CCCTSAO.
+- STM32 CAN: Fix access to CAN filter registers. From the PX4 team
+via Lorenz Meier.
+- STM32 Kconfig: Fix STM32 UART7/8 Kconfig names and UART DMA. From
+the PX4 team via Lorenz Meier.
+
+* LPC17xx Drivers
+
+- Fix #endif with missing #if in USB host header file. Reported
+by Andrew Bradford,
+
+* SAM3/4 Boards:
+
+- Corrected DMA-related problems: Bad register definitions, parameters
+reversed in a function call.
+- Correct a race condition in the HSMCI driver when an interrupt
+occurs before the wait for the interrupt begins.
+- Peripheral clock setup: Correct a typo in a register name.
+
+* Atmel AT91 SAMA5D3
+
+- Order of some operations changed in boot-up logic to defer
+enabling of caching of memory regions until SDRAM is initialized.
+- Correct handling of spurious interrupts.
+
+* Freescale KL25Z Drivers
+
+- KL25Z SPI: Correct typo in name of a function. From Alan Carvalho
+de Assis.
+
+* Applications:
+
+- apps/examples/composite: Fix a typo that can cause a configuration
+error. From CCTSAO.
+- apps/examples/pwm: Clean-up some configuration confusion.
+- apps/netutils/dhcpd/dhcpd.c: Fixed calculation of the next lease
+address. From Paolo Messina.
+- apps/examples/usbmsc: Don't try to control USB trace if we are
+an NSH built-in task. In that case our attempts are inadequate
+and only interfere with with other logic that is attempting to
+to do the same thing (in NSH or in the USB monitor).
+- apps/examples/usbmsc: IMPORTANT bug fix: Change how the msconn
+works. Because of recent changes the msconn command was hanging.
+This was because the USB MSC start-up logic creates a pthread;
+Now waitpid() will wait until all members of the task group
+exit. So NSH was hanging in waitpid when msconn started even
+though msconn returned. The USB MSC logic really should not use
+a pthread, but we are stuck with that for now. The work-around
+is the msconn now daemonizes itself so that it so that the pthread
+is created in a different task group.
+- apps/nshlib: Fix NSH listing output for the case of a single file.
+From the PX4 team; provided by Lorenz Meier.
