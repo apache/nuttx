@@ -64,10 +64,12 @@
 
 /* Config SGI8 ~ SGI15 as group0, to signal fiq */
 
-#define IGROUPR_SGI_VAL  0xFFFF00FFU
+#  define IGROUPR_SGI_VAL 0xFFFF00FFU
 #else
-#define IGROUPR_SGI_VAL  0xFFFFFFFFU
+#  define IGROUPR_SGI_VAL 0xFFFFFFFFU
 #endif
+
+#define SMP_FUNC_CALL_IPI GIC_IRQ_SGI3
 
 /***************************************************************************
  * Private Data
@@ -631,6 +633,10 @@ static void gicv3_dist_init(void)
   /* Attach SGI interrupt handlers. This attaches the handler to all CPUs. */
 
   DEBUGVERIFY(irq_attach(GIC_IRQ_SGI2, arm64_pause_handler, NULL));
+#  ifdef CONFIG_SMP_CALL
+  DEBUGVERIFY(irq_attach(SMP_FUNC_CALL_IPI,
+                         nxsched_smp_call_handler, NULL));
+#  endif
 #endif
 }
 
@@ -905,6 +911,9 @@ static void arm64_gic_init(void)
 
 #ifdef CONFIG_SMP
   up_enable_irq(GIC_IRQ_SGI2);
+#  ifdef CONFIG_SMP_CALL
+  up_enable_irq(SMP_FUNC_CALL_IPI);
+#  endif
 #endif
 }
 
@@ -931,5 +940,11 @@ void arm64_gic_secondary_init(void)
 {
   arm64_gic_init();
 }
+#endif
 
+#ifdef CONFIG_SMP_CALL
+void up_send_smp_call(cpu_set_t cpuset)
+{
+  up_trigger_irq(SMP_FUNC_CALL_IPI, cpuset);
+}
 #endif
