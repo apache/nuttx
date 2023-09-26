@@ -1,0 +1,23 @@
+NuttX-0.4.2
+-----------
+
+This is the 34th release of NuttX. This release adds no new OS
+features but does include support for two new architectures:
+
+* ez80Acclaim! Basic support has been integrated and verified
+for the ez80f910200zcog-d board (eZ80F91-based). That basic
+support includes timer interrupts and serial console. Ongoing
+work includes an EMAC driver that should be integrated for the
+next release nuttx-0.4.2. eZ80Acclaim! support has been in the
+code base for some time, but has only just been integrated due
+to toolchain issues.
+
+* Renesas M16C/20. Support for the Renesas SKP16C20 board has
+been included in the NuttX source tree. However, as the
+eZ80Acclaim!, testing and integration of that port is stalled
+due to toolchain issues.
+
+These changes were verified only on the ZiLOG eZ80910200zcog-d
+board. Please report any errors to me.
+
+This tarball contains a complete CVS snapshot from February 28, 2009.

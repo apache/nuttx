@@ -1,0 +1,60 @@
+NuttX-0.3.16
+-----------
+
+This is the 28th release of NuttX. This release includes the first
+support for USB in NuttX. A set of USB APIs were added to support
+USB device controller drivers and bindings to USB device class
+drivers. The form of the interface was inspired by the Linux Gadget APIs.
+
+At present USB device controller drivers are included for:
+* The NXP LPC214x. This driver has been verified and is an early alpha
+stage in quality.
+* TI DM320. Coding for this driver is complete but it is completely
+untested as of this release.
+
+A controller-independent class driver is also included for:
+* USB serial class device driver (emulates the Prolific PL2303
+serial-to-USB adapter). This driver has only been verified with
+the Linux host PL2303 driver.
+
+Other new features include:
+* Add an option to set aside a separate stack for interrupt
+handling (ARM only). This is useful when memory is constrained,
+there are multiple tasks, and the interrupt stack requirement
+is high (as when USB is enabled).
+
+A few bugs were also fixed:
+* Fixed the frequency of system timer interrupts in the NXP LPC214x port
+(off by 20x in nuttx-0.3.15)
+* Fixed serial driver bugs related to (1) open counts and (2) recognizing
+O_NONBLOCK on read.
+* Fixed an error in read(); it was not setting the errno on errors returned
+from the driver.
+
+These changes were verified only on the mcu123.com NXP LPC2148 board
+using with a Linux host. Please report any errors to me.
+
+This tarball contains a complete CVS snapshot from October 10, 2008.
+
+UPDATE
+------
+This release does not build for the ARM target when USB is disabled.
+Here is the fix:
+
+Index: arch/arm/src/common/up_internal.h
+===================================================================
+RCS file: /cvsroot/nuttx/nuttx/arch/arm/src/common/up_internal.h,v
+retrieving revision 1.13
+diff -u -r1.13 up_internal.h
+--- arch/arm/src/common/up_internal.h 6 Oct 2008 16:20:52 -0000 1.13
++++ arch/arm/src/common/up_internal.h 13 Oct 2008 20:48:21 -0000
+@@ -200,7 +200,8 @@
+extern void up_usbinitialize(void);
+extern void up_usbuninitialize(void);
+#else
+-# define up_netinitialize()
++# define up_usbinitialize()
++# define up_usbuninitialize()
+#endif
+
+#endif /* __ASSEMBLY__ */

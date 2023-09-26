@@ -1,0 +1,25 @@
+NuttX-5.12
+----------
+
+This is the 59th release of NuttX. This is a critical bugfix release.
+
+* Fixed an important error in the signal trampoline logic.
+Essentially, interrupts are re-enabled while the signal handler
+executes, but the logic to re-disable the interrupts before
+returning from the signal handler trampoline was missing. Under
+certain circumstances, this can cause stack corruption. This
+was discovered by David Hewson on an ARM9 platform, but since
+the code has been leveraged, the bug has been propagated from
+ARM to Cortex-M3, AVR32, M16C, SH1, ZNEO, eZ80, Z8, and Z80 --
+almost every architecture. The correction has been incorporated
+for all architectures but only verified on a few.
+
+Other notable changes in NuttX-5.12:
+
+* A complete port for the AVR32 (AT32UC3B0256) is incorporated
+in the source tree. Testing of this port is underway now. This
+release was made before verifying this port in order to get the
+important bugfix in place.
+
+* Other miscellaneous bugfix and enhancements as noted in the
+ChangeLog.

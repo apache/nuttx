@@ -1,0 +1,36 @@
+NuttX-5.8
+---------
+
+This is the 55th release of NuttX. This includes several important
+bugfixes:
+
+* Corrects some interrupt vectoring for the TI/Stellarix LM3S
+port
+* Correct initialization logic for NXP LPC17xxx NuttX ports:
+Power was not being provided to the GPIO module!
+* Corrected (but did not verify) implementation of the optional
+interrupt stack feature (all Cortex M3 architectures).
+* Correct a HardFault in the LPC17xx SSP driver.
+
+Additional minor fixes are also included as detailed in the ChangeLog.
+
+Several new features have been fully developed and included in this
+release, but full verification of most of these new features has
+been blocked for a variety of issues:
+
+* Added microSD support for the NuttShell (NSH) configuration in
+the Nucleus2G LPC1768 port. For reasons that have not yet been
+determined, I have not successfully accessed the microSD card
+as of this writing.
+* Two USB configurations were also added for the Nucleus2G board:
+One to support the USB serial device and one for the USB mass
+storage device. Some testing of the USB driver was performed,
+but full verification is stalled for an OTG style USB cable.
+* LEDs now work correctly on the Nucleus2G LPC1768 board.
+* The NuttX/uIP networking subsystem now supports IGMPv2 client.
+IGMP (Internet Group Multicast Protocol) network "appliances"
+to join into multicast groups. Outbound traffic to enter and
+leave multicast groups has been verified, but full verification
+will require a switch capable of multicast. Issues associated
+with the receipt of multicast packets are likely.
+

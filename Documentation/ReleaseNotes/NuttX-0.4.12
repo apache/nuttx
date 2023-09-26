@@ -1,0 +1,23 @@
+NuttX-0.4.12
+------------
+
+This is the 44th release of NuttX. This release adds basic support
+for the STMicro STM32, Cortex-M3 MCU. The specific port is to the
+STMicro STM3210E-EVAL development board based around the STM32F103ZET6
+MCU. Some highlights of this port:
+
+* This basic port includes boot-up logic, interrupt driven serial
+console, and system timer interrupts.
+* Includes a basic STMicro RIDE7 project that can be used to
+perform basic STM32 board bring-up (due to RIDE7 size limitations,
+it cannot be used for the full NuttX bring-up).
+* Working, Tested Configurations: the NuttX OS test and the
+NuttShell (NSH) example.
+
+This basic STM32 port will be extended in the 0.4.13 NuttX release.
+Functionality needed for complete STM32 support includes: USB
+device driver, LCD driver and NX bringup on the development board's
+display and MicroSD support. An SPI driver and a DMA support was
+included in this 0.4.12 release, but is not yet tested.
+
+This tarball contains a complete CVS snapshot from October 17, 2009

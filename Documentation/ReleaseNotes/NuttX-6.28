@@ -1,0 +1,254 @@
+NuttX-6.28
+----------
+
+The 95th release of NuttX, Version 6.28, was made on June 14, 2013,
+and is available for download from the SourceForge website. Note
+that release consists of two tarballs: nuttx-6.28.tar.gz and
+apps-6.28.tar.gz. Both may be needed (see the top-level nuttx/README.txt
+file for build information).
+
+Additional new features and extended functionality:
+
+* File Systems:
+
+- SMART FLASH file system (contributed by Add Ken Pettit).
+
+* MTD (FLASH) Drivers:
+
+- Add support of MTD partitions via a new MTD driver that manages a
+set of MTD devices, each managing a subset of the FLASH region
+managed by the parent MTD driver.
+- Extended the MTD interface to provide an (optional) method to
+perform byte oriented writes if supported by the FLASH part.
+- M25Px driver re-architected to use the byte write capability (when
+possible) and to use 4KB sectors for the erase block size when the
+part supports it (from Ken Pettit).
+
+* LCD Drivers:
+
+- New interface definitions to support audio devices (from Ken Pettit)
+and alphanumeric, segment LCDs.
+
+* Wireless Drivers:
+
+- Added new driver for the wireless nRF24L01+ transceiver (from
+Laurent Latil).
+
+* Calypso:
+
+- Added support for the Pirelli DP-L10 phone (from Craig Comstock via
+Alan Alan Carvalho de Assis)
+
+* STM32:
+
+- Added an option to conditionally disable the "wfi" sleep mode. This
+is needed with certain JTAG debuggers to prevent the debug session
+from being disconnected (from Ken Pettit).
+- Added support for the STM32L (STM32L15X/STM32L16x) family.
+- Added STM32F103C4 and F103C8 chip support (from Laurent Latil).
+- Added a new interface function, stm32_dmacapable() that can be used
+to determine if DMA is possible from the specified memory address
+(from Petteri Aimonen)
+
+* STM32 Drivers:
+
+- If CONFIG_STM32_DMACAPABLE is defined, the STM32 SPI driver now uses
+stm32_dmacapable() to determine if it is possible to perform DMA
+from the specified address. This change is important for the STM32
+F4 which may have SPI data buffers allocated on the stack in CCM
+memory which cannot support the DMA (from Petteri Aimonen).
+
+* STM32 Boards:
+
+- Support added for the MikroElektronika Mikromedia for STM32F4
+development board (from Ken Pettit) with the MIO283QT2 LCD and
+touchscreen. Several graphics configurations are included.
+- The HY-mini STM32v board now uses the common SSD1289 driver
+and supported the card detect interrupt. Several new
+configurations also added and some removed (from Laurent Latil).
+- Support added for the R65105-based LCD that comes with some
+HY-Mini STM32v boards (from Christian Faure).
+- Added basic support for the STM32L-Discovery board. Drivers
+for the on-board segment LCD are included.
+- Added support for the STM32 Tiny development board based on the
+STM32 F103C8T6 MCU. This includes support for the nRF24L01+
+wireless on the board (from Laurent Latil).
+
+* Stellaris LM3S/LM4F:
+
+- Support added for a TI/Stellaris internal FLASH MTD driver (from Max
+Holtzberg).
+
+* Stellaris LM4F Boards:
+
+- The LM3S6965-EK now has configurations for the UDP discovery tool and
+for the TCP echo server (both from Max Holtzberg)
+
+* Atmel ATSAM3/4:
+
+- Reorganized, renamed, and updated directory structure to better
+support additional members of the SAM3/4 family.
+- Added support for both the ATSAM4S and ATSAM4L families. The
+ATSAM4S is similar to the ATSAM3U, but the ATSAM4L is quite a
+different beast, really much more akin to the AVR32s SoCs but
+with a Cortex-M4.
+
+* Atmel ATSAM3/4 Boards:
+
+- Added support for the Atmel SAM4L Xplained Pro development board.
+This board features the ATSAM4LC4C MCU (Cortex-M4 with 256KB FLASH +
+32KB SRAM).
+- Added support for the Atmel SAM4S Xplained development board. This
+board features the ATSAM4S16C MCU (Cortex-M4 with 1MB FLASH + 128KB
+SRAM).
+
+* PIC32MX Boards:
+
+- Added support for the 1602 segment LCD on-board the Sure PIC32MX
+board. This board will now also support a USB NuttX console and
+the USB monitor test program.
+
+* Build System:
+
+- Clean-up of almost all .gitignore files: Made scope of ignore to be
+only the current directory; Ignore .dSYM files in directories where
+.exe's may be built. Also, in Makefiles, clean .dSYM files in
+directories where an .exe may be built.
+- Standardize and consolidated all build-as-an-NSH-application
+configuration settings. Now only CONFIG_NSH_BUILTIN_APPS is
+sufficient to build an application, test, or or example as an NSH
+builtin application.
+- Added support for a generic ARM, ARMv6-M and ARMv7-M Windows EABI
+toolchains.
+
+* Libraries:
+
+- Added encoder/decoder logic to marshal and serialize special segment
+LCD (SLCD) commands intermixed with normal ASCII data. This is the
+similar to the encoding/decoding logic that is used to marshal
+special commands from a keyboard.
+- Add dprintf() and vdprintf() (the latter from Andrew Tridgell).
+- Add an application that may be built as an NSH builtin command that
+will erase FLASH using a flash_eraseall NSH command (from Ken Pettit).
+
+* Applications:
+
+- Added an MTD partition test/examples. Currently used with (1) the a
+simulation configuration to test MTD partitions on a RAM emulation
+of FLASH and (2) with the Mikroe STM32F4 configuration.
+- Added a test/example to verify alphanumeric, segment LCDs.
+- Added a simple single threaded, poll based TCP echo server based
+on W. Richard Stevens UNIX Network Programming Book (from Max
+Holtzberg).
+- Added several tests of the SMART block driver and file system (from
+Ken Pettit).
+- Added a runtime configuration for the UDP discover utility (from
+Max Holtzberg).
+- Added an example application to demo the nRF24L01 driver (from
+Laurent Latil).
+- New and modified NSH commands:
+Added a -h option to the df command to show the volume information
+in human readable form (from Ken Petit).
+Add a new mksmartfs command (from Ken Petit).
+
+Efforts In Progress. The following are features that are partially
+implemented but present in this release. Most are expected to be fully
+available in NuttX 6.28.
+
+* Audio System:
+
+- A complete audio subsystem include CODECs, higher level management,
+interface definitions, and audio drivers was contributed by Ken
+Pettit. This work has not been completely verified as of this
+release and so is categorized as a work-in-progress. At present,
+progress is blocked due to issues interfacing with the VS1053
+audio DAC on the Mikroe STM32F4 board.
+
+* kconfig-fronted Configuration:
+
+- Conversion of old configurations to use the kconfig-frontends
+tool is an ongoing effort that will continue for some time.
+At this time, only 43% of the configurations have been converted
+to use the kconfig-frontends tools.
+
+Bugfixes (see the ChangeLog for details). Some of these are very important:
+
+* Tasking:
+
+- Modify assertion in the priority inheritance logic that is reported
+to cause false alarm assertions.
+
+* Kernel Build:
+
+- Typo in syscall proxying logic corrected by Ken Pettit.
+
+* Networking:
+
+- Poll setup/teardown logic should ignore invalid (i.e., negative)
+file descriptors (from Max Holtzberg).
+- When readahead data is available, the network poll() logic should
+set POLLIN (or POLLRDNORM), not POLLOUT (from Max Holtzberg).
+
+* LCD Drivers:
+
+- Correct power controls in the MIO283QT2 LCD driver.
+
+* USB Device Controller Drivers:
+
+- Change the default IN request buffer size from 64 to 96. This will
+avoid requests of exactly MAXPACKET size and, hence, avoid so many
+NULL packets. Also, fix the OUT request buffers size to exactly the
+max packet size. It really cannot be any other size.
+
+* STM32 Drivers:
+
+- Correct some bad STM32 F1 DMA definitions that crept into the system
+a few months ago a broke STM32 F1 DMA (from Laurent Latil)
+- Fixed an error in NULL packet handling in the STM32 F1 USB device
+controller driver: If the NULL-packet needed flag ever got set,
+then it was not being cleared and infinite NULL packets resulted.
+This only affects the CDC/ACM class and was the cause of the
+failures using the USB CDC/ACM device as a NuttX console. With this
+change the USB works well as an alternative NuttX console device for
+the STM32 F1 family.
+- Correct some bad condition compilation in the RCC logic (CONFIG_
+missing from setting names). This affects some STM32 FLASH pre-
+fetch settings (from Lorenz Meier).
+- Change for hardware flow control support for STM32. The change also
+fixes incorrect operation of USART2 and UART5 in current master
+(from Lorenz Meier and Mike Smith).
+- Fixed a backward conditional in USB OTG FS host controller driver
+that prevented detection of disconnection events (from Scott).
+
+* LPC17xx Drivers:
+
+- I2C interrupt control. Also correction for a single byte read
+timeout error (from M. Kannan).
+
+* Freescale Kinetis:
+
+- Freedom KL25Z pin multiplexing and LED control corrections (from
+Alan Carvalho de Assis)
+
+* PIC32MX:
+
+- Fix NULL packet handling in the PIC32 USB device driver. Without
+this fix the CDC/ACM driver cannot be used reliably with the PIC32
+USB. With this change the USB works well as an alternative NuttX
+console device.
+
+* Graphics:
+
+- Default priorities for NxWidget and NxWM threads should be 100,
+not 50, to be consistent with other default priorities.
+
+* Applications:
+
+- Remove the CONFIG_EXAMPLES_NXTEXT_NOGETRUN option from the NXTEXT
+example. The test logic was bad for the case where this options is
+not selected. Also, completed the empty Kconfig file.
+- C++ name mangling was occurring when this example is built as an NSH
+built-in application causing the entry to be undefined when called
+from C code.
+- Add some missing NSH library configuration values (from Lorenz
+Meier).

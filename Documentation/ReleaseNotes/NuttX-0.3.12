@@ -1,0 +1,21 @@
+NuttX-0.3.12
+------------
+
+This is the 24th release of NuttX. This release includes some minor
+bugfixes as well as a few new features. Bugs fixed include:
+
+* Corrected an error in recursive mutex implementation.
+* task_create() was only dup()ing the first three file descriptors.
+* Fixed driver open reference counting errors in dup(), dup2(), and exit().
+* Fixed error handling logic in fflush().
+
+New features were also added:
+
+* Pipes and pipe() API
+* FIFOs and mkfifo() API
+* mkfatfs() API can be used to format FAT file systems.
+
+These changes were verified only on the Host simulator under Cygwin.
+Please report any errors to me.
+
+This tarball contains a complete CVS snapshot from August 10, 2008.

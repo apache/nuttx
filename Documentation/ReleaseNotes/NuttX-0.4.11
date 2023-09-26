@@ -1,0 +1,27 @@
+NuttX-0.4.11
+------------
+
+This is the 43rd release of NuttX. This release of NuttX incorporates
+the verified port of Jeff Poskanzer's THTTPD HTTP server (see
+http://acme.com/software/thttpd/). Many of the key features of
+THTTPD have been tested on the Micromint Eagle-100 development board
+(Cortex-M3). These tests verify:
+
+* Serving of files from any file system
+* Execution of CGI executable. This release supports execution
+of NXFLAT executables on a ROMFS file system
+(https://nuttx.apache.org/docs/latest/components/nxflat.html)
+
+A standard CGI interface is used: Information is pasted to the CGI
+program via POST commands and via environment variables. CGI socket
+I/O is redirected to stdin and stdout so that the CGI program only
+need to printf() to send its content back to the HTTP client.
+
+Another value to this THTTPD integration effort has been that THTTPD
+has provided a very good test bed for finding NuttX networking bugs.
+Several very critical networking bugs have been fixed with this
+0.4.11 release (see the ChangeLog for details). Networking throughput
+has also been greatly improved. Anyone using NuttX networking
+should consider upgrading to this release.
+
+This tarball contains a complete CVS snapshot from September 16, 2009
