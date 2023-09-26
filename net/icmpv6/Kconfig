@@ -120,6 +120,14 @@ config NET_ICMPv6_ROUTER
 
 if NET_ICMPv6_ROUTER
 
+config NET_ICMPv6_ROUTER_LIFETIME
+	int "Router Advertisement router lifetime in seconds"
+	default 1800
+	---help---
+		Set the router lifetime for advertising as a default router.
+		Set to 0 to only advertise autoconfiguration prefix without
+		advertising as a router.
+
 config NET_ICMPv6_ROUTER_MANUAL
 	bool "Manual router prefix"
 	default n
