@@ -556,11 +556,12 @@ static int tc_waitsample(struct tc_dev_s *priv,
 {
   int ret;
 
-  /* Pre-emption must be disabled when this is called to prevent sampled
-   * data from changing until it has been reported.
+  /* Interrupts must be disabled when this is called to (1) prevent posting
+   * of semaphores from interrupt handlers, and (2) to prevent sampled data
+   * from changing until it has been reported.
    */
 
-  sched_lock();
+  flags = enter_critical_section();
 
   /* Now release the mutex that manages mutually exclusive access to
    * the device structure.  This may cause other tasks to become ready to
@@ -595,13 +596,12 @@ static int tc_waitsample(struct tc_dev_s *priv,
   ret = nxmutex_lock(&priv->devlock);
 
 errout:
-  /* Restore pre-emption.  We might get suspended here but that is okay
-   * because we already have our sample.  Note:  this means that if there
-   * were two threads reading from the touchscreen for some reason, the data
-   * might be read out of order.
+  /* Then re-enable interrupts.  We might get interrupt here and there
+   * could be a new sample.  But no new threads will run because we still
+   * have pre-emption disabled.
    */
 
-  sched_unlock();
+  leave_critical_section(flags);
   return ret;
 }
 
