@@ -28,6 +28,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <sched.h>
 #include <signal.h>
@@ -742,6 +743,12 @@ begin_packed_struct struct tcbinfo_s
 /* This is the callback type used by nxsched_foreach() */
 
 typedef CODE void (*nxsched_foreach_t)(FAR struct tcb_s *tcb, FAR void *arg);
+
+/* This is the callback type used by nxsched_smp_call() */
+
+#ifdef CONFIG_SMP_CALL
+typedef CODE int (*nxsched_smp_call_t)(FAR void *arg);
+#endif
 
 #endif /* __ASSEMBLY__ */
 
@@ -1565,6 +1572,67 @@ pid_t nxsched_getppid(void);
  ****************************************************************************/
 
 size_t nxsched_collect_deadlock(FAR pid_t *pid, size_t count);
+
+#ifdef CONFIG_SMP_CALL
+/****************************************************************************
+ * Name: nxsched_smp_call_handler
+ *
+ * Description:
+ *   SMP function call handler
+ *
+ * Input Parameters:
+ *   irq     - Interrupt id
+ *   context - Regs context before irq
+ *   arg     - Interrupt arg
+ *
+ * Returned Value:
+ *   Result
+ *
+ ****************************************************************************/
+
+int nxsched_smp_call_handler(int irq, FAR void *context,
+                             FAR void *arg);
+
+/****************************************************************************
+ * Name: nxsched_smp_call_single
+ *
+ * Description:
+ *   Call function on single processor
+ *
+ * Input Parameters:
+ *   cpuid - Target cpu id
+ *   func  - Function
+ *   arg   - Function args
+ *   wait  - Wait function callback or not
+ *
+ * Returned Value:
+ *   Result
+ *
+ ****************************************************************************/
+
+int nxsched_smp_call_single(int cpuid, nxsched_smp_call_t func,
+                            FAR void *arg, bool wait);
+
+/****************************************************************************
+ * Name: nxsched_smp_call
+ *
+ * Description:
+ *   Call function on multi processors
+ *
+ * Input Parameters:
+ *   cpuset - Target cpuset
+ *   func   - Function
+ *   arg    - Function args
+ *   wait   - Wait function callback or not
+ *
+ * Returned Value:
+ *   Result
+ *
+ ****************************************************************************/
+
+int nxsched_smp_call(cpu_set_t cpuset, nxsched_smp_call_t func,
+                     FAR void *arg, bool wait);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

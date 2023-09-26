@@ -96,6 +96,10 @@ ifeq ($(CONFIG_SCHED_BACKTRACE),y)
 CSRCS += sched_backtrace.c
 endif
 
+ifeq ($(CONFIG_SMP_CALL),y)
+CSRCS += sched_smp.c
+endif
+
 # Include sched build support
 
 DEPPATH += --dep-path sched

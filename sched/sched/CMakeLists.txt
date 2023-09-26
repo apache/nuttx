@@ -119,4 +119,8 @@ if(CONFIG_SCHED_BACKTRACE)
   list(APPEND SRCS sched_backtrace.c)
 endif()
 
+if(CONFIG_SMP_CALL)
+  list(APPEND SRCS sched_smp.c)
+endif()
+
 target_sources(sched PRIVATE ${SRCS})
