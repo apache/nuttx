@@ -197,7 +197,8 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
   adv->code         = 0;                       /* Message qualifier */
   adv->hoplimit     = 64;                      /* Current hop limit */
   adv->flags        = ICMPv6_RADV_FLAG_M;      /* Managed address flag. */
-  adv->lifetime     = HTONS(1800);             /* Router lifetime */
+  adv->lifetime     =
+     HTONS(CONFIG_NET_ICMPv6_ROUTER_LIFETIME); /* Router lifetime */
   adv->reachable[0] = 0;                       /* Reachable time */
   adv->reachable[1] = 0;
   adv->retrans[0]   = 0;                       /* Retransmission timer */
