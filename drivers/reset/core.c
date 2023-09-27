@@ -251,6 +251,7 @@ reset_control_get_internal(FAR struct reset_controller_dev *rcdev,
                            unsigned int index, bool shared, bool acquired)
 {
   FAR struct reset_control *rstc;
+  int ret;
 
   DEBUGASSERT(nxmutex_is_locked(&g_reset_list_mutex));
 
@@ -288,6 +289,21 @@ reset_control_get_internal(FAR struct reset_controller_dev *rcdev,
       return NULL;
     }
 
+#if defined(CONFIG_RESET_RPMSG)
+
+  /* Only client defines this function */
+
+  if (rcdev->ops->acquire)
+    {
+      ret = rcdev->ops->acquire(rcdev, index, shared, acquired);
+      if (ret < 0)
+        {
+          kmm_free(rstc);
+          return NULL;
+        }
+    }
+#endif
+
   rstc->rcdev = rcdev;
   list_add_after(&rcdev->reset_control_head, &rstc->list);
   rstc->id = index;
@@ -317,6 +333,17 @@ static void reset_control_put_internal(FAR struct reset_control *rstc)
     {
       DEBUGASSERT(nxmutex_is_locked(&g_reset_list_mutex));
       list_delete(&rstc->list);
+
+#if defined(CONFIG_RESET_RPMSG)
+
+      /* Only client defines this function */
+
+      if (rstc->rcdev->ops->release)
+        {
+          rstc->rcdev->ops->release(rstc->rcdev, rstc->id);
+        }
+#endif
+
       kmm_free(rstc);
     }
 }
@@ -378,6 +405,14 @@ reset_controller_get_by_name(FAR const char *name)
   }
 
   nxmutex_unlock(&g_reset_list_mutex);
+
+#if defined(CONFIG_RESET_RPMSG)
+  if (strchr(name, '/'))
+    {
+      return reset_rpmsg_get(name);
+    }
+#endif
+
   return NULL;
 }
 
