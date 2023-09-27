@@ -29,6 +29,7 @@
 #include <nuttx/analog/adc.h>
 #include "chip.h"
 #include "hardware/stm32l4_adc.h"
+#include "stm32l4_dma.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -458,8 +459,6 @@
         (adc)->llops->val_get(adc)
 #define ADC_INJDATA_GET(adc, chan)                   \
         (adc)->llops->inj_get(adc, chan)
-#define ADC_REGBUF_REGISTER(adc, buffer, len)        \
-        (adc)->llops->regbuf_reg(adc, buffer, len)
 #define ADC_REG_STARTCONV(adc, state)                \
         (adc)->llops->reg_startconv(adc, state)
 #define ADC_INJ_STARTCONV(adc, state)                \
@@ -470,6 +469,15 @@
         (adc)->llops->extsel_set(adc, extcfg)
 #define ADC_DUMP_REGS(adc)                           \
         (adc)->llops->dump_regs(adc)
+
+#ifdef ADC_HAVE_DMA
+#  define ADC_REGBUF_REGISTER(adc, buffer, len)      \
+        (adc)->llops->regbuf_reg(adc, buffer, len)
+#  define ADC_DMA_START(adc, cb, buf, len)           \
+        (adc)->llops->dma_start(adc, cb, buf, len)
+#  define ADC_DMA_STOP(adc)                          \
+        (adc)->llops->dma_stop(adc)
+#endif
 
 /* IOCTL Commands ***********************************************************
  *
@@ -524,11 +532,6 @@ struct stm32_adc_ops_s
 
   uint32_t (*val_get)(struct stm32_adc_dev_s *dev);
 
-  /* Register buffer for ADC DMA transfer */
-
-  int (*regbuf_reg)(struct stm32_adc_dev_s *dev, uint16_t *buffer,
-                    uint8_t len);
-
   /* Start/stop regular conversion */
 
   void (*reg_startconv)(struct stm32_adc_dev_s *dev, bool state);
@@ -556,6 +559,22 @@ struct stm32_adc_ops_s
   /* Start/stop injected conversion */
 
   void (*inj_startconv)(struct stm32_adc_dev_s *dev, bool state);
+#endif
+
+#ifdef ADC_HAVE_DMA
+  /* Register buffer for ADC DMA transfer */
+
+  int (*regbuf_reg)(struct stm32_adc_dev_s *dev, uint16_t *buffer,
+                    uint16_t len);
+
+  /* Start DMA */
+
+  void (*dma_start)(struct stm32_adc_dev_s *dev, dma_callback_t callback,
+                    uint16_t *buffer, uint16_t len);
+
+  /* Stop DMA */
+
+  void (*dma_stop)(struct stm32_adc_dev_s *dev);
 #endif
 
   /* Dump ADC regs */
