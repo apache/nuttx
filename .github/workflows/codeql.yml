@@ -1,0 +1,72 @@
+name: "CodeQL"
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }}/${{ matrix.config}})
+    runs-on: 'ubuntu-latest'
+    timeout-minutes: 60
+    permissions:
+      # required for all workflows
+      security-events: write
+
+      # only required for workflows in private repositories
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: c-cpp
+            build-mode: manual
+            config: icicle:nsh
+          - language: c-cpp
+            build-mode: manual
+            config: imx93-evk:nsh
+          - language: python
+            build-mode: none
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Checkout apps
+        uses: actions/checkout@v4
+        with:
+          repository: 'tiiuae/incubator-nuttx-apps.git'
+          path: 'apps'
+          ref: 'master'
+      - name: Install tools
+        run: |
+            mv apps ../apps
+            sudo apt-get install kconfig-frontends
+            mkdir -p ../bin
+            cd ../bin
+            wget https://static.dev.sifive.com/dev-tools/freedom-tools/v2020.12/riscv64-unknown-elf-toolchain-10.2.0-2020.12.8-x86_64-linux-ubuntu14.tar.gz
+            wget https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-aarch64-none-elf.tar.xz
+            tar xvf riscv64-unknown-elf-toolchain-10.2.0-2020.12.8-x86_64-linux-ubuntu14.tar.gz
+            tar xvf arm-gnu-toolchain-13.2.rel1-x86_64-aarch64-none-elf.tar.xz
+
+      # Initializes the CodeQL tools for scanning.
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+
+      - if: matrix.build-mode == 'manual'
+        run: |
+          export PATH=$PATH:$PWD/../bin/riscv64-unknown-elf-toolchain-10.2.0-2020.12.8-x86_64-linux-ubuntu14/bin/
+          export PATH=$PATH:$PWD/../bin/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf/bin
+          ./tools/configure.sh ${{matrix.config}}
+          make
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"
