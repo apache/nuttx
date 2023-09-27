@@ -4584,3 +4584,14 @@ config BOARD_USBDEV_SERIALSTR
 	default n
 	---help---
 		Use board unique serial number to iSerialNumber in the device descriptor.
+
+config BOARD_MEMORY_RANGE
+	string "Board memory range"
+	default ""
+	---help---
+		Memory range of board. format: <start>,<end>,<flags>,....
+		start: start address of memory range
+		end: end address of memory range
+		flags: Readable 0x1, writable 0x2, executable 0x4
+		example:0x1000,0x2000,0x1,0x2000,0x3000,0x3,0x3000,0x4000,0x7
+
