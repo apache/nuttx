@@ -32,6 +32,7 @@
 
 #include <nuttx/sched.h>
 #include <nuttx/streams.h>
+#include <nuttx/memoryregion.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -109,15 +110,6 @@ struct binary_s
   /* Unload module callback */
 
   CODE int (*unload)(FAR struct binary_s *bin);
-};
-
-/* This describes binfmt coredump filed */
-
-struct memory_region_s
-{
-  uintptr_t start;   /* Start address of this region */
-  uintptr_t end;     /* End address of this region */
-  uint32_t  flags;   /* Figure 5-3: Segment Flag Bits: PF_[X|W|R] */
 };
 
 /* This describes one binary format handler */

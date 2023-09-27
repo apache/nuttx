@@ -40,7 +40,8 @@ list(
   lib_getfullpath.c
   lib_openat.c
   lib_mkdirat.c
-  lib_utimensat.c)
+  lib_utimensat.c
+  lib_memoryregion.c)
 
 # Support for platforms that do not have long long types
 
