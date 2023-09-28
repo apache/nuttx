@@ -167,15 +167,15 @@ ARM architecture:
     .. code-block:: console
 
       $ HOST_PLATFORM=x86_64-linux   # use "mac" for macOS.
-      $ # For Windows there is a zip instead (gcc-arm-none-eabi-9-2019-q4-major-win32.zip)
-      $ curl -L -O https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2019q4/gcc-arm-none-eabi-9-2019-q4-major-${HOST_PLATFORM}.tar.bz2
-      $ tar xf gcc-arm-none-eabi-9-2019-q4-major-${HOST_PLATFORM}.tar.bz2
+      $ # For Windows there is a zip instead (gcc-arm-none-eabi-10.3-2021.10-win32.zip)
+      $ curl -L -O https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2019q4/gcc-arm-none-eabi-10.3-2021.10-${HOST_PLATFORM}.tar.bz2
+      $ tar xf gcc-arm-none-eabi-10.3-2021.10-${HOST_PLATFORM}.tar.bz2
 
     Add the toolchain to your `PATH`:
 
     .. code-block:: console
 
-      $ echo "export PATH=/opt/gcc/gcc-arm-none-eabi-9-2019-q4-major/bin:$PATH" >> ~/.bashrc
+      $ echo "export PATH=/opt/gcc/gcc-arm-none-eabi-10.3-2021.10/bin:$PATH" >> ~/.bashrc
 
     You can edit your shell's rc files if you don't use bash.
 
