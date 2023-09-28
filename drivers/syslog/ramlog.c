@@ -90,7 +90,6 @@ static int     ramlog_readnotify(FAR struct ramlog_dev_s *priv);
 #endif
 static void    ramlog_pollnotify(FAR struct ramlog_dev_s *priv,
                                  pollevent_t eventset);
-static int     ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch);
 
 /* Character driver methods */
 
@@ -284,13 +283,23 @@ static void ramlog_initbuf(void)
 #endif
 
 /****************************************************************************
- * Name: ramlog_addchar
+ * Name: ramlog_addbuf
  ****************************************************************************/
 
-static int ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch)
+static ssize_t ramlog_addbuf(FAR struct ramlog_dev_s *priv,
+                             FAR const char *buffer, size_t len)
 {
+  int readers_waken;
   irqstate_t flags;
-  size_t nexthead;
+  int space;
+  int remain;
+  int ret;
+
+  ret = nxmutex_lock(&priv->rl_lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
 #ifdef CONFIG_RAMLOG_SYSLOG
   if (priv == &g_sysdev)
@@ -303,111 +312,46 @@ static int ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch)
 
   flags = enter_critical_section();
 
-#ifdef CONFIG_RAMLOG_CRLF
-  /* Ignore carriage returns */
+  /* Calculate the space in the buffer */
 
-  if (ch == '\r')
-    {
-      leave_critical_section(flags);
-      return OK;
-    }
+  space = (int)priv->rl_head >= (int)priv->rl_tail ?
+          priv->rl_bufsize - (priv->rl_head - priv->rl_tail) - 1:
+          priv->rl_tail - priv->rl_head - 1;
 
-  /* Pre-pend a carriage before a linefeed */
-
-  if (ch == '\n')
-    {
-      ch = '\r';
-    }
-
-again:
-#endif
-
-  /* Calculate the write index AFTER the next byte is written */
-
-  nexthead = priv->rl_head + 1;
-  if (nexthead >= priv->rl_bufsize)
-    {
-      nexthead = 0;
-    }
-
-  /* Would the next write overflow the circular buffer? */
-
-  if (nexthead == priv->rl_tail)
+  if (len > space)
     {
 #ifdef CONFIG_RAMLOG_OVERWRITE
-      /* Yes... Overwrite with the latest log in the circular buffer */
-
-      priv->rl_buffer[priv->rl_tail] = '\0';
-      priv->rl_tail += 1;
-      if (priv->rl_tail >= priv->rl_bufsize)
+      priv->rl_tail = (priv->rl_tail + len - space) % priv->rl_bufsize;
+      if (len >= priv->rl_bufsize)
         {
-          priv->rl_tail = 0;
+          buffer += len - (priv->rl_bufsize - 1);
+          len = priv->rl_bufsize - 1;
         }
 #else
-      /* Yes... Return an indication that nothing was saved in the buffer. */
-
-      leave_critical_section(flags);
-      return -EBUSY;
+      len = space;
 #endif
+    }
+
+  if (priv->rl_head + len > priv->rl_bufsize)
+    {
+      remain = priv->rl_bufsize - priv->rl_head;
+      memcpy(priv->rl_buffer + priv->rl_head, buffer, remain);
+      memcpy(priv->rl_buffer, buffer + remain, len - remain);
+      priv->rl_head = priv->rl_head + len - priv->rl_bufsize;
+    }
+  else
+    {
+      memcpy(priv->rl_buffer + priv->rl_head, buffer, len);
+      priv->rl_head += len;
     }
 
   /* No... copy the byte and re-enable interrupts */
 
-  priv->rl_buffer[priv->rl_head] = ch;
-  priv->rl_head = nexthead;
-
-#ifdef CONFIG_RAMLOG_CRLF
-  if (ch == '\r')
-    {
-      ch = '\n';
-      goto again;
-    }
-#endif
-
   leave_critical_section(flags);
-  return OK;
-}
-
-/****************************************************************************
- * Name: ramlog_addbuf
- ****************************************************************************/
-
-static ssize_t ramlog_addbuf(FAR struct ramlog_dev_s *priv,
-                             FAR const char *buffer, size_t len)
-{
-  int readers_waken;
-  ssize_t nwritten;
-  char ch;
-  int ret;
-
-  ret = nxmutex_lock(&priv->rl_lock);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  for (nwritten = 0; (size_t)nwritten < len; nwritten++)
-    {
-      /* Get the next character to output */
-
-      ch = buffer[nwritten];
-
-      /* Then output the character */
-
-      ret = ramlog_addchar(priv, ch);
-      if (ret < 0)
-        {
-          /* The buffer is full and nothing was saved.  The remaining
-           * data to be written is dropped on the floor.
-           */
-
-          break;
-        }
-    }
 
   /* Was anything written? */
 
-  if (nwritten > 0)
+  if (len > 0)
     {
       readers_waken = 0;
 
@@ -858,12 +802,13 @@ int ramlog_putc(FAR struct syslog_channel_s *channel, int ch)
   FAR struct ramlog_dev_s *priv = &g_sysdev;
   int readers_waken = 0;
   int ret;
+  char tmp = ch;
 
   UNUSED(channel);
 
   /* Add the character to the RAMLOG */
 
-  ret = ramlog_addchar(priv, ch);
+  ret = ramlog_addbuf(priv, &tmp, 1);
   if (ret < 0)
     {
       /* The buffer is full and 'ch' was not saved. */
