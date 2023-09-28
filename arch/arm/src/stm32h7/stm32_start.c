@@ -265,7 +265,7 @@ void __start(void)
 #endif
   showprogress('C');
 
-#if defined(CONFIG_SCHED_IRQMONITOR) || defined(CONFIG_SEGGER_SYSVIEW)
+#ifdef CONFIG_ARCH_PERF_EVENTS
   up_perf_init((void *)STM32_CPUCLK_FREQUENCY);
 #endif
 
