@@ -336,7 +336,7 @@
 #define SCU_ID_MOD_REV_SHIFT        (0)       /* Bits 0-7: Module Revision Number */
 #define SCU_ID_MOD_REV_MASK         (0xff << SCU_ID_MOD_REV_SHIFT)
 #define SCU_ID_MOD_TYPE_SHIFT       (8)       /* Bits 8-15: Module Type */
-#define SCU_ID_MOD_TYPE_MASK        (0xff << SCU_ID_MOD_REV_SHIFT)
+#define SCU_ID_MOD_TYPE_MASK        (0xff << SCU_ID_MOD_TYPE_SHIFT)
 #define SCU_ID_MOD_NUMBER_SHIFT     (16)      /* Bits 16-31: Module Number Value */
 #define SCU_ID_MOD_NUMBER_MASK      (0xffff << SCU_ID_MOD_NUMBER_SHIFT)
 
@@ -345,9 +345,9 @@
 /* Manufactory ID */
 
 #define SCU_IDMANUF_DEPT_SHIFT      (0)       /* Bits 0-4: Department Identification Number */
-#define SCU_IDMANUF_DEPT_MASK       (31 << SCU_IDMANUF_MOD_DEPT_SHIFT)
+#define SCU_IDMANUF_DEPT_MASK       (31 << SCU_IDMANUF_DEPT_SHIFT)
 #define SCU_IDMANUF_MANUF_SHIFT     (5)       /* Bits 5-15: Manufacturer Identification Number */
-#define SCU_IDMANUF_MANUF_MASK      (0x7ff << SCU_IDMANUF_MOD_MANUF_SHIFT)
+#define SCU_IDMANUF_MANUF_MASK      (0x7ff << SCU_IDMANUF_MANUF_SHIFT)
 
 /* Start-up Control */
 
@@ -360,7 +360,7 @@
 
 #define SCU_STCON_SWCON_SHIFT       (8)       /* Bits 8-11: SW Configuration */
 #define SCU_STCON_SWCON_MASK        (15 << SCU_STCON_SWCON_SHIFT)
-#  define SCU_STCON_SWCON_ ROM      (0 << SCU_STCON_SWCON_SHIFT)  /* Normal boot from Boot ROM */
+#  define SCU_STCON_SWCON_ROM       (0 << SCU_STCON_SWCON_SHIFT)  /* Normal boot from Boot ROM */
 #  define SCU_STCON_SWCON_ASCBSL    (1 << SCU_STCON_SWCON_SHIFT)  /* ASC BSL enabled */
 #  define SCU_STCON_SWCON_BMI       (2 << SCU_STCON_SWCON_SHIFT)  /* BMI customized boot enabled */
 #  define SCU_STCON_SWCON_CANBSL    (3 << SCU_STCON_SWCON_SHIFT)  /* CAN BSL enabled */
