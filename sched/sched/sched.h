@@ -417,4 +417,10 @@ void nxsched_suspend_critmon(FAR struct tcb_s *tcb);
 
 bool nxsched_verify_tcb(FAR struct tcb_s *tcb);
 
+#ifdef CONFIG_BUILD_KERNEL
+bool nxsched_is_inittask(FAR struct tcb_s *tcb);
+#else
+#define nxsched_is_inittask(tcb) false
+#endif
+
 #endif /* __SCHED_SCHED_SCHED_H */

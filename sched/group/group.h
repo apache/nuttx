@@ -68,7 +68,7 @@ void group_initialize(FAR struct task_tcb_s *tcb);
 int  group_bind(FAR struct pthread_tcb_s *tcb);
 int  group_join(FAR struct pthread_tcb_s *tcb);
 #endif
-void group_leave(FAR struct tcb_s *tcb);
+int  group_leave(FAR struct tcb_s *tcb);
 void group_drop(FAR struct task_group_s *group);
 #if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
 void group_add_waiter(FAR struct task_group_s *group);

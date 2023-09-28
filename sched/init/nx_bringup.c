@@ -116,6 +116,14 @@ extern const int             CONFIG_INIT_NEXPORTS;
 #endif
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef CONFIG_BUILD_KERNEL
+pid_t g_init_tg_pid = INVALID_PROCESS_ID;
+#endif
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -300,6 +308,14 @@ static inline void nx_start_application(void)
 #endif
   posix_spawnattr_destroy(&attr);
   DEBUGASSERT(ret > 0);
+
+#ifdef CONFIG_BUILD_KERNEL
+  if (ret > 0)
+    {
+      struct tcb_s *init = nxsched_get_tcb(ret);
+      g_init_tg_pid = init->group->tg_pid;
+    }
+#endif
 }
 
 /****************************************************************************

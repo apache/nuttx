@@ -271,7 +271,7 @@ static inline void group_removemember(FAR struct task_group_s *group,
  *   tcb - The TCB of the task that is exiting.
  *
  * Returned Value:
- *   None.
+ *   Remaining amount of members in group; 0 if group is dead.
  *
  * Assumptions:
  *   Called during task deletion in a safe context.  No special precautions
@@ -280,7 +280,7 @@ static inline void group_removemember(FAR struct task_group_s *group,
  ****************************************************************************/
 
 #ifdef HAVE_GROUP_MEMBERS
-void group_leave(FAR struct tcb_s *tcb)
+int group_leave(FAR struct tcb_s *tcb)
 {
   FAR struct task_group_s *group;
 
@@ -291,6 +291,8 @@ void group_leave(FAR struct tcb_s *tcb)
   group = tcb->group;
   if (group)
     {
+      int remaining;
+
       /* Remove the member from group.  This function may be called
        * during certain error handling before the PID has been
        * added to the group.  In this case tcb->pid will be uninitialized
@@ -301,7 +303,8 @@ void group_leave(FAR struct tcb_s *tcb)
 
       /* Have all of the members left the group? */
 
-      if (group->tg_nmembers == 0)
+      remaining = group->tg_nmembers;
+      if (remaining == 0)
         {
           /* Yes.. Release all of the resource held by the task group */
 
@@ -313,12 +316,15 @@ void group_leave(FAR struct tcb_s *tcb)
        */
 
       tcb->group = NULL;
+      return remaining;
     }
+
+  return 0;
 }
 
 #else /* HAVE_GROUP_MEMBERS */
 
-void group_leave(FAR struct tcb_s *tcb)
+int group_leave(FAR struct tcb_s *tcb)
 {
   FAR struct task_group_s *group;
 
@@ -329,6 +335,8 @@ void group_leave(FAR struct tcb_s *tcb)
   group = tcb->group;
   if (group)
     {
+      int remaining;
+
       /* Yes, we have a group.. Is this the last member of the group? */
 
       if (group->tg_nmembers > 1)
@@ -336,6 +344,7 @@ void group_leave(FAR struct tcb_s *tcb)
           /* No.. just decrement the number of members in the group */
 
           group->tg_nmembers--;
+          remaining = group->tg_nmembers;
         }
 
       /* Yes.. that was the last member remaining in the group */
@@ -345,6 +354,7 @@ void group_leave(FAR struct tcb_s *tcb)
           /* Release all of the resource held by the task group */
 
           group_release(group);
+          remaining = 0;
         }
 
       /* In any event, we can detach the group from the TCB so we won't do
@@ -352,7 +362,10 @@ void group_leave(FAR struct tcb_s *tcb)
        */
 
       tcb->group = NULL;
+      return remaining;
     }
+
+  return 0;
 }
 
 #endif /* HAVE_GROUP_MEMBERS */

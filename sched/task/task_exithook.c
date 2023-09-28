@@ -465,7 +465,15 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status)
    * status (no zombies here!)
    */
 
-  group_leave(tcb);
+  if (group_leave(tcb) == 0)
+    {
+      /* Group is dead now, PANIC() if this is the init task */
+
+      if (nxsched_is_inittask(tcb))
+        {
+          PANIC();
+        }
+    }
 
   /* Deallocate anything left in the TCB's queues */
 

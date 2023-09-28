@@ -119,4 +119,8 @@ if(CONFIG_SCHED_BACKTRACE)
   list(APPEND SRCS sched_backtrace.c)
 endif()
 
+if(CONFIG_BUILD_KERNEL)
+  list(APPEND SRCS sched_is_inittask.c)
+endif()
+
 target_sources(sched PRIVATE ${SRCS})

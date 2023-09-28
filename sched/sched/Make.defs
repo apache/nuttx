@@ -96,6 +96,10 @@ ifeq ($(CONFIG_SCHED_BACKTRACE),y)
 CSRCS += sched_backtrace.c
 endif
 
+ifeq ($(CONFIG_BUILD_KERNEL), y)
+CSRCS += sched_is_inittask.c
+endif
+
 # Include sched build support
 
 DEPPATH += --dep-path sched
