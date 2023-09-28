@@ -43,6 +43,13 @@
 #  define HAVE_UART_DEVICE 1
 #endif
 
+/* Is RS-485 used? */
+
+#if defined(CONFIG_ESP32S2_UART0_RS485) || \
+    defined(CONFIG_ESP32S2_UART1_RS485)
+#  define HAVE_RS485 1
+#endif
+
 /* Serial Console ***********************************************************/
 
 /* Is there a serial console?  There should be no more than one defined.  It

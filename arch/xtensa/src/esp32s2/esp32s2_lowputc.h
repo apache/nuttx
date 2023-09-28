@@ -102,6 +102,10 @@ struct esp32s2_uart_s
   uint8_t  ctssig;          /* CTS signal */
   bool     oflow;           /* Output flow control (CTS) enabled */
 #endif
+#ifdef HAVE_RS485
+  uint8_t  rs485_dir_gpio;     /* UART RS-485 DIR GPIO pin cfg */
+  bool     rs485_dir_polarity; /* UART RS-485 DIR TXEN polarity */
+#endif
 };
 
 extern struct esp32s2_uart_s g_uart0_config;
@@ -296,6 +300,21 @@ int esp32s2_lowputc_data_length(const struct esp32s2_uart_s *priv);
  ****************************************************************************/
 
 void esp32s2_lowputc_stop_length(const struct esp32s2_uart_s *priv);
+
+/****************************************************************************
+ * Name: esp32s2_lowputc_set_tx_idle_time
+ *
+ * Description:
+ *   Set the idle time between transfers.
+ *
+ * Parameters:
+ *   priv           - Pointer to the private driver struct.
+ *   time           - Desired time interval between the transfers.
+ *
+ ****************************************************************************/
+
+void esp32s2_lowputc_set_tx_idle_time(const struct esp32s2_uart_s *priv,
+                                      uint32_t time);
 
 /****************************************************************************
  * Name: esp32s2_lowputc_send_byte
