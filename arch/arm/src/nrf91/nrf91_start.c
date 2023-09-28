@@ -235,7 +235,7 @@ void __start(void)
   nrf91_enable_profile(true);
 #endif
 
-#if defined(CONFIG_SCHED_IRQMONITOR) || defined(CONFIG_SEGGER_SYSVIEW)
+#ifdef CONFIG_ARCH_PERF_EVENTS
   up_perf_init((void *)BOARD_SYSTICK_CLOCK);
 #endif
 
