@@ -58,16 +58,19 @@
                                    /* And I don't know now to re-configure it yet */
 
 #ifdef CONFIG_STM32_SYSTICK_HCLKd8
-#  define SYSTICK_RELOAD ((STM32_HCLK_FREQUENCY / 8 / CLK_TCK) - 1)
+#  define SYSTICK_CLOCK  (STM32_HCLK_FREQUENCY / 8)
 #else
-#  define SYSTICK_RELOAD ((STM32_HCLK_FREQUENCY / CLK_TCK) - 1)
+#  define SYSTICK_CLOCK  (STM32_HCLK_FREQUENCY)
 #endif
+
+#define SYSTICK_RELOAD ((SYSTICK_CLOCK / CLK_TCK) - 1)
 
 /* The size of the reload field is 24 bits.  Verify that the reload value
  * will fit in the reload register.
  */
 
-#if SYSTICK_RELOAD > 0x00ffffff
+#define SYSTICK_MAX 0x00ffffff
+#if SYSTICK_RELOAD > SYSTICK_MAX
 #  error SYSTICK_RELOAD exceeds the range of the RELOAD register
 #endif
 
@@ -97,6 +100,69 @@ static int stm32_timerisr(int irq, uint32_t *regs, void *arg)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+#ifdef CONFIG_CLOCK_ADJTIME
+
+/****************************************************************************
+ * Function:  up_adj_timer_period
+ *
+ * Description:
+ *   Adjusts timer period. This call is used when adjusting timer period as
+ *   defined in adjtime() function.
+ *
+ * Input Parameters:
+ *   period_inc_usec  - period adjustment in usec (reset to default value
+ *                      if 0)
+ *
+ ****************************************************************************/
+
+void up_adj_timer_period(long long period_inc_usec)
+{
+  uint32_t period;
+  long long period_inc;
+
+  if (period_inc_usec == 0)
+    {
+      period_inc = 0;
+    }
+  else
+    {
+      period_inc = (SYSTICK_CLOCK / 1000000) * period_inc_usec - 1;
+    }
+
+  period = SYSTICK_RELOAD + period_inc;
+
+  /* Check whether period is at maximum value. */
+
+  if (period > SYSTICK_MAX)
+    {
+      period = SYSTICK_MAX;
+    }
+
+  putreg32(period, NVIC_SYSTICK_RELOAD);
+}
+
+/****************************************************************************
+ * Function:  up_get_timer_period
+ *
+ * Description:
+ *   This function returns the timer period in usec.
+ *
+ * Input Parameters:
+ *   period_usec  - returned timer period in usec
+ *
+ ****************************************************************************/
+
+void up_get_timer_period(long long *period_usec)
+{
+  uint32_t period;
+
+  period = getreg32(NVIC_SYSTICK_RELOAD);
+
+  *period_usec = ((period + 1) / (SYSTICK_CLOCK / 1000000));
+}
+
+#endif
 
 /****************************************************************************
  * Function:  up_timer_initialize
