@@ -155,7 +155,7 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
 
       if (tcb != NULL)
         {
-          up_perf_convert(tcb->run_time, tp);
+          perf_convert(tcb->run_time, tp);
         }
       else
         {
@@ -197,7 +197,7 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
             }
 
           leave_critical_section(flags);
-          up_perf_convert(runtime, tp);
+          perf_convert(runtime, tp);
         }
       else
         {

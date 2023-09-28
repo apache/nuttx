@@ -52,16 +52,16 @@
 #  define CALL_FUNC(func, arg) \
      do \
        { \
-         unsigned long start; \
-         unsigned long elapsed; \
-         start = up_perf_gettime(); \
+         clock_t start; \
+         clock_t elapsed; \
+         start = perf_gettime(); \
          func(arg); \
-         elapsed = up_perf_gettime() - start; \
+         elapsed = perf_gettime() - start; \
          if (elapsed > CONFIG_SCHED_CRITMONITOR_MAXTIME_WDOG) \
            { \
-             CRITMONITOR_PANIC("WDOG %p, %s IRQ, execute too long %lu\n", \
+             CRITMONITOR_PANIC("WDOG %p, %s IRQ, execute too long %ju\n", \
                                func, up_interrupt_context() ? \
-                               "IN" : "NOT", elapsed); \
+                               "IN" : "NOT", (uintmax_t)elapsed); \
            } \
        } \
      while (0)
