@@ -159,15 +159,10 @@ static int irq_callback(int irq, FAR struct irq_info_s *info,
 
   flags = enter_critical_section();
   memcpy(&copy, info, sizeof(struct irq_info_s));
-  now           = clock_systime_ticks();
-  info->start   = now;
-#ifdef CONFIG_HAVE_LONG_LONG
-  info->count   = 0;
-#else
-  info->mscount = 0;
-  info->lscount = 0;
-#endif
-  info->time    = 0;
+  now         = clock_systime_ticks();
+  info->start = now;
+  info->time  = 0;
+  info->count = 0;
   leave_critical_section(flags);
 
   /* Don't bother if count == 0.
@@ -201,7 +196,7 @@ static int irq_callback(int irq, FAR struct irq_info_s *info,
    */
 
   elapsed = now - copy.start;
-  up_perf_convert(copy.time, &delta);
+  perf_convert(copy.time, &delta);
 
 #ifdef CONFIG_HAVE_LONG_LONG
   /* elapsed = <current-time> - <start-time>, units=clock ticks

@@ -60,13 +60,8 @@ struct irq_info_s
   FAR void *arg;     /* The argument provided to the interrupt handler. */
 #ifdef CONFIG_SCHED_IRQMONITOR
   clock_t start;     /* Time interrupt attached */
-#ifdef CONFIG_HAVE_LONG_LONG
-  uint64_t count;    /* Number of interrupts on this IRQ */
-#else
-  uint32_t mscount;  /* Number of interrupts on this IRQ (MS) */
-  uint32_t lscount;  /* Number of interrupts on this IRQ (LS) */
-#endif
-  uint32_t time;     /* Maximum execution time on this IRQ */
+  clock_t time;      /* Maximum execution time on this IRQ */
+  uint32_t count;    /* Number of interrupts on this IRQ */
 #endif
 };
 

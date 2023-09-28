@@ -631,13 +631,13 @@ struct tcb_s
   /* Pre-emption monitor support ********************************************/
 
 #ifdef CONFIG_SCHED_CRITMONITOR
-  unsigned long premp_start;             /* Time when preemption disabled   */
-  unsigned long premp_max;               /* Max time preemption disabled    */
-  unsigned long crit_start;              /* Time critical section entered   */
-  unsigned long crit_max;                /* Max time in critical section    */
-  unsigned long run_start;               /* Time when thread begin run      */
-  unsigned long run_max;                 /* Max time thread run             */
-  unsigned long run_time;                /* Total time thread run           */
+  clock_t premp_start;             /* Time when preemption disabled   */
+  clock_t premp_max;               /* Max time preemption disabled    */
+  clock_t crit_start;              /* Time critical section entered   */
+  clock_t crit_max;                /* Max time in critical section    */
+  clock_t run_start;               /* Time when thread begin run      */
+  clock_t run_max;                 /* Max time thread run             */
+  clock_t run_time;                /* Total time thread run           */
 #endif
 
   /* State save areas *******************************************************/
@@ -762,8 +762,8 @@ extern "C"
 #ifdef CONFIG_SCHED_CRITMONITOR
 /* Maximum time with pre-emption disabled or within critical section. */
 
-EXTERN unsigned long g_premp_max[CONFIG_SMP_NCPUS];
-EXTERN unsigned long g_crit_max[CONFIG_SMP_NCPUS];
+EXTERN clock_t g_premp_max[CONFIG_SMP_NCPUS];
+EXTERN clock_t g_crit_max[CONFIG_SMP_NCPUS];
 #endif /* CONFIG_SCHED_CRITMONITOR */
 
 EXTERN const struct tcbinfo_s g_tcbinfo;
