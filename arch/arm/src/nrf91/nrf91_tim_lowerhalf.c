@@ -46,9 +46,13 @@
 #define NRF91_TIMER_CC  (NRF91_TIM_CC0)
 #define NRF91_TIMER_INT (NRF91_TIM_INT_COMPARE0)
 #define NRF91_TIMER_RES (NRF91_TIM_WIDTH_32B)
-#define NRF91_TIMER_MAX (0xffffffff)
+#define NRF91_TIMER_MAX (4294967295ul)
 #define NRF91_TIMER_PRE (NRF91_TIM_PRE_1000000)
 #define NRF91_TIMER_PER (1000000)
+
+/* Maximum supported timeout */
+
+#define NRF91_TIMER_MAXTIMEOUT (NRF91_TIMER_MAX * 1000000 / NRF91_TIMER_PER)
 
 /****************************************************************************
  * Private Types
@@ -350,7 +354,7 @@ static int nrf91_timer_settimeout(struct timer_lowerhalf_s *lower,
 {
   struct nrf91_timer_lowerhalf_s *priv =
     (struct nrf91_timer_lowerhalf_s *)lower;
-  uint64_t cc  = 0;
+  uint32_t cc  = 0;
   int      ret = OK;
 
   DEBUGASSERT(priv);
@@ -361,13 +365,13 @@ static int nrf91_timer_settimeout(struct timer_lowerhalf_s *lower,
       goto errout;
     }
 
-  if (timeout > NRF91_TIMER_MAX)
+  if (timeout > NRF91_TIMER_MAXTIMEOUT)
     {
       ret = -EINVAL;
       goto errout;
     }
 
-  cc = (timeout / 1000000) * NRF91_TIMER_PER;
+  cc = (timeout * NRF91_TIMER_PER / 1000000);
   NRF91_TIM_SETCC(priv->tim, NRF91_TIMER_CC, cc);
 
 errout:
