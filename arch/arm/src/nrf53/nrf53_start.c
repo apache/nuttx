@@ -247,6 +247,10 @@ void __start(void)
   nrf53_enable_profile(true);
 #endif
 
+#if defined(CONFIG_SCHED_IRQMONITOR) || defined(CONFIG_SEGGER_SYSVIEW)
+  up_perf_init((void *)BOARD_SYSTICK_CLOCK);
+#endif
+
   showprogress('D');
 
 #ifdef USE_EARLYSERIALINIT
