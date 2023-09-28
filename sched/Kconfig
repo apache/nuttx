@@ -217,28 +217,24 @@ config CLOCK_ADJTIME
 
 if CLOCK_ADJTIME
 
-config CLOCK_ADJTIME_SLEWLIMIT
+config CLOCK_ADJTIME_SLEWLIMIT_PPM
 	int "Adjtime slew limit"
-	default 2
-	range 0 100
+	default 20000
+	range 1 1000000
 	---help---
+		Set limit of adjtime() clock slewing as parts per million.
+
 		In real time systems we do not want the time to adjust too quickly.
-		CLOCK_ADJTIME_SLEWLIMIT defines how many seconds can time change
-		during each clock.
+		For example CLOCK_ADJTIME_SLEWLIMIT=1000 will slow or speed the timer
+		tick period by at most 0.1 percent of the nominal value.
 
-		Note that CLOCK_ADJTIME_SLEWLIMIT is divided by 100 in source code,
-		therefore CLOCK_ADJTIME_SLEWLIMIT=2 will result in possible 0.02 second
-		adjustment.
-
-config CLOCK_ADJTIME_PERIOD
+config CLOCK_ADJTIME_PERIOD_MS
 	int "Adjtime period"
-	default 97
-	range 0 100
+	default 970
+	range 1 3600000
 	---help---
-		Define system clock adjustment period. Should be between 0.95 and 0.99.
-
-		Note that CLOCK_ADJTIME_PERIOD is divided by 100 in source code,
-		therefore CLOCK_ADJTIME_PERIOD=97 will result in 0.97.
+		Define system clock adjustment period in milliseconds.
+		The adjustment commanded by adjtime() call is applied over this time period.
 
 endif
 

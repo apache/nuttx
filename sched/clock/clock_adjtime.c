@@ -51,17 +51,6 @@
         is enabled!
 #endif
 
-/* Set slew limit. In real time systems we don't want the time to adjust
- * too quickly. ADJTIME_SLEWLIMIT defines how many seconds can time change
- * during each clock.
- */
-
-#define ADJTIME_SLEWLIMIT      (CONFIG_CLOCK_ADJTIME_SLEWLIMIT * 0.01)
-
-/* Define system clock adjustment period. */
-
-#define ADJTIME_PERIOD         (CONFIG_CLOCK_ADJTIME_PERIOD    * 0.01)
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -158,7 +147,7 @@ int adjtime(FAR const struct timeval *delta, FAR struct timeval *olddelta)
    * of cycles over which we want to do the adjustment.
    */
 
-  count = (USEC_PER_SEC * ADJTIME_PERIOD) / period_usec;
+  count = (USEC_PER_MSEC * CONFIG_CLOCK_ADJTIME_PERIOD_MS) / period_usec;
   incr = adjust_usec / count;
 
   /* Compute maximum possible period increase and check
@@ -166,7 +155,8 @@ int adjtime(FAR const struct timeval *delta, FAR struct timeval *olddelta)
    * one.
    */
 
-  incr_limit = ADJTIME_SLEWLIMIT * period_usec;
+  incr_limit = CONFIG_CLOCK_ADJTIME_SLEWLIMIT_PPM
+               / (USEC_PER_SEC / period_usec);
   if (incr > incr_limit)
     {
       /* It does... limit computed increase and increment count. */
@@ -175,18 +165,26 @@ int adjtime(FAR const struct timeval *delta, FAR struct timeval *olddelta)
       count = adjust_usec / incr;
     }
 
+  /* If requested adjustment is smaller than 1 microsecond per tick,
+   * adjust the count instead.
+   */
+
+  if (adjust_usec == 0)
+    {
+      incr = 0;
+      count = 0;
+    }
+  else if (incr == 0)
+    {
+      incr = 1;
+      count = adjust_usec / incr;
+    }
+
   if (is_negative == 1)
     {
       /* Positive or negative? */
 
       incr = -incr;
-    }
-
-  /* Ignore small differences. */
-
-  if (incr == 0)
-    {
-      count = 0;
     }
 
   leave_critical_section(flags);
