@@ -44,7 +44,6 @@
 
 /* PCF8574xx Helpers */
 
-static int pcf8574_lock(FAR struct pcf8574_dev_s *priv);
 static int pcf8574_read(FAR struct pcf8574_dev_s *priv,
                         FAR uint8_t *portval);
 static int pcf8574_write(struct pcf8574_dev_s *priv, uint8_t portval);
@@ -556,7 +555,7 @@ static int pcf8574_multiwritepin(FAR struct ioexpander_dev_s *dev,
       pin = pins[i];
       DEBUGASSERT(pin < 8);
 
-      gpioinfo("%d. pin=%u value=%u\n", pin, values[i]);
+      gpioinfo("%d. pin=%u value=%u\n", i, pin, values[i]);
 
       if ((priv->inpins & (1 << pin)) != 0)
         {
@@ -672,7 +671,7 @@ static int pcf8574_multireadpin(FAR struct ioexpander_dev_s *dev,
           values[i] = ((regval & (1 << pin)) != 0);
         }
 
-      gpioinfo("%d. pin=%u value=%u\n", pin, values[i]);
+      gpioinfo("%d. pin=%u value=%u\n", i, pin, values[i]);
     }
 
   ret = OK;
@@ -1076,7 +1075,6 @@ FAR struct ioexpander_dev_s *pcf8574_initialize(FAR struct i2c_master_s *i2c,
                               FAR struct pcf8574_config_s *config)
 {
   FAR struct pcf8574_dev_s *priv;
-  int ret;
 
 #ifdef CONFIG_PCF8574_MULTIPLE
   /* Allocate the device state structure */
@@ -1110,9 +1108,8 @@ FAR struct ioexpander_dev_s *pcf8574_initialize(FAR struct i2c_master_s *i2c,
 #ifdef CONFIG_PCF8574_INT_POLL
   /* Set up a timer to poll for missed interrupts */
 
-  ret = wd_start(&priv->wdog, PCF8574_POLLDELAY,
-                 pcf8574_poll_expiry, (wdparm_t)priv);
-  if (ret < 0)
+  if (wd_start(&priv->wdog, PCF8574_POLLDELAY,
+                 pcf8574_poll_expiry, (wdparm_t)priv) < 0)
     {
       gpioerr("ERROR: Failed to start poll timer\n");
     }
