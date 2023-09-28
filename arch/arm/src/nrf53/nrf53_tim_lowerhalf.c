@@ -46,9 +46,13 @@
 #define NRF53_TIMER_CC  (NRF53_TIM_CC0)
 #define NRF53_TIMER_INT (NRF53_TIM_INT_COMPARE0)
 #define NRF53_TIMER_RES (NRF53_TIM_WIDTH_32B)
-#define NRF53_TIMER_MAX (0xffffffff)
+#define NRF53_TIMER_MAX (4294967295ul)
 #define NRF53_TIMER_PRE (NRF53_TIM_PRE_1000000)
 #define NRF53_TIMER_PER (1000000)
+
+/* Maximum supported timeout */
+
+#define NRF53_TIMER_MAXTIMEOUT (NRF53_TIMER_MAX * 1000000 / NRF53_TIMER_PER)
 
 /****************************************************************************
  * Private Types
@@ -350,7 +354,7 @@ static int nrf53_timer_settimeout(struct timer_lowerhalf_s *lower,
 {
   struct nrf53_timer_lowerhalf_s *priv =
     (struct nrf53_timer_lowerhalf_s *)lower;
-  uint64_t cc  = 0;
+  uint32_t cc  = 0;
   int      ret = OK;
 
   DEBUGASSERT(priv);
@@ -361,13 +365,13 @@ static int nrf53_timer_settimeout(struct timer_lowerhalf_s *lower,
       goto errout;
     }
 
-  if (timeout > NRF53_TIMER_MAX)
+  if (timeout > NRF53_TIMER_MAXTIMEOUT)
     {
       ret = -EINVAL;
       goto errout;
     }
 
-  cc = (timeout / 1000000) * NRF53_TIMER_PER;
+  cc = (timeout * NRF53_TIMER_PER / 1000000);
   NRF53_TIM_SETCC(priv->tim, NRF53_TIMER_CC, cc);
 
 errout:
