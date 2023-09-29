@@ -41,6 +41,10 @@
 #  include <nuttx/input/buttons.h>
 #endif
 
+#ifdef CONFIG_TIMER
+#  include "nrf52_timer.h"
+#endif
+
 #ifdef CONFIG_NRF52_PROGMEM
 #  include "nrf52_progmem.h"
 #endif
@@ -50,6 +54,12 @@
 #endif
 
 #include "nrf52832-dk.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define NRF52_TIMER (0)
 
 /****************************************************************************
  * Public Functions
@@ -111,6 +121,18 @@ int nrf52_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#if defined(CONFIG_TIMER) && defined(CONFIG_NRF52_TIMER)
+  /* Configure TIMER driver */
+
+  ret = nrf52_timer_driver_setup("/dev/timer0", NRF52_TIMER);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize timer driver: %d\n",
+             ret);
     }
 #endif
 
