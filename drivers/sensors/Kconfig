@@ -242,7 +242,7 @@ endchoice
 
 config SENSORS_BMI270_LOAD_FROM_HEAP
 	bool "BMI270 config loading from heap memory"
-	default n
+	default ARCH_DMA_NO_FLASH_TRANSFER
 	---help---
 		Enable support to load the configuration data from heap memory.
 		Some chips can not do DMA transfer from FLASH and therefore
