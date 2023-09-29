@@ -355,6 +355,10 @@ config ARCH_DMA
 	bool
 	default n
 
+config ARCH_DMA_NO_FLASH_TRANSFER
+	bool
+	default n
+
 config ARCH_HAVE_IRQPRIO
 	bool
 	default n
