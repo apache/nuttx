@@ -308,7 +308,7 @@ void kmm_unmap(FAR void *kaddr)
     {
       /* Find the entry, it is OK if none found */
 
-      entry = mm_map_find(get_current_mm(), kaddr, 1);
+      entry = mm_map_find(&g_kmm_map, kaddr, 1);
       if (entry)
         {
           npages = MM_NPAGES(entry->length);
