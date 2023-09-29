@@ -58,7 +58,7 @@
 
 /* User address environment end */
 
-#define ARCH_ADDRENV_VEND       (ARCH_ADDRENV_VBASE + ARCH_ADDRENV_MAX_SIZE)
+#define ARCH_ADDRENV_VEND       (ARCH_ADDRENV_VBASE + ARCH_ADDRENV_MAX_SIZE - 1)
 
 /****************************************************************************
  * Public Function Prototypes
