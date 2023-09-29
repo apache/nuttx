@@ -72,7 +72,7 @@ FAR void *kmm_map(FAR void **pages, size_t npages, int prot);
 void kmm_unmap(FAR void *kaddr);
 
 /****************************************************************************
- * Name: kmm_user_map
+ * Name: kmm_map_user
  *
  * Description:
  *   Map a region of user memory (physical pages) for kernel use through
@@ -87,7 +87,7 @@ void kmm_unmap(FAR void *kaddr);
  *
  ****************************************************************************/
 
-FAR void *kmm_user_map(FAR void *uaddr, size_t size);
+FAR void *kmm_map_user(FAR void *uaddr, size_t size);
 
 /****************************************************************************
  * Name: kmm_map_user_page
