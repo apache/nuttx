@@ -84,8 +84,8 @@ supported by the OS.
 nsh
 ----
 
-Basic NuttShell configuration (console enabled in UART0, exposed via J-Link VCOM connection,
-at 115200 bps).
+Basic NuttShell configuration (console enabled in UART0, exposed via J-Link VCOM
+connection, at 115200 bps).
 
 ostest_tickless
 ---------------
@@ -104,3 +104,110 @@ sdc_nimble
 
 Enables Nordic's SoftDevice controller and uses nimBLE for the host-layer.
 The ``nimble`` test application can be used to enable a simple GATT server.
+
+nxscope_rtt
+------------
+
+Configuration demonstrating NxScope stream over Segger RTT interface.
+
+A total of 3 RTT channels are configured:
+
+=========== =================  ============== ================
+RTT channel Function           Up buffer size Down buffer size
+=========== =================  ============== ================
+0           serial console     1024           16
+1           SystemView         2048           0
+2           NxScope interface  2048           128
+=========== =================  ============== ================
+
+See :doc:`/applications/examples/nxscope/index` and
+:doc:`/applications/logging/nxscope/index` for more details.
+
+Device detection with ``nxscli`` client::
+
+    $ nxscli rtt nRF52832_XXAA 2 2048 pdevinfo          
+    Auto-search for RTT block address                                                         
+    JLink interface is SWD
+    connecting to nRF52832_XXAA ...
+    connected, starting RTT...
+    RTT started, 3 up bufs, 3 down bufs.
+    INFO:nxscli:enable (0, <class 'nxscli.plugins.devinfo.PluginDevinfo'>, {})
+    INFO:nxscli:connecting to nxs device...
+    INFO:nxscli:connected!
+    INFO:nxscli:started <nxscli.plugins.devinfo.PluginDevinfo object at 0x7f4a3a4d2270>
+
+    Device Summary
+      Channels:         32
+      Divider support:  yes
+      Ack support:      no
+      Flags:            0x01
+      RX padding:       0
+
+    Stream
+      Connected:        yes
+      Started:          no
+      Overflow count:   0
+      Bitrate:          0.0 B/s
+
+    Channel State
+      Applied enabled:  none
+      Buffered enabled: none
+
+    Channels
+    +----+--------+--------+-----+-------+----+-----+
+    | ID | Name   | Type   | Dim | Valid | En | Div |
+    +====+========+========+=====+=======+====+=====+
+    |  0 | chan0  | UINT8  |   1 | yes   | no |   0 |
+    |  1 | chan1  | INT8   |   1 | yes   | no |   0 |
+    |  2 | chan2  | UINT16 |   1 | yes   | no |   0 |
+    |  3 | chan3  | INT16  |   1 | yes   | no |   0 |
+    |  4 | chan4  | UINT32 |   1 | yes   | no |   0 |
+    |  5 | chan5  | INT32  |   1 | yes   | no |   0 |
+    |  6 | chan6  | UINT64 |   1 | yes   | no |   0 |
+    |  7 | chan7  | INT64  |   1 | yes   | no |   0 |
+    |  8 | chan8  | FLOAT  |   1 | yes   | no |   0 |
+    |  9 | chan9  | DOUBLE |   1 | yes   | no |   0 |
+    | 10 | chan10 | UB8    |   1 | yes   | no |   0 |
+    | 11 | chan11 | B8     |   1 | yes   | no |   0 |
+    | 12 | chan12 | UB16   |   1 | yes   | no |   0 |
+    | 13 | chan13 | B16    |   1 | yes   | no |   0 |
+    | 14 | chan14 | UB32   |   1 | yes   | no |   0 |
+    | 15 | chan15 | B32    |   1 | yes   | no |   0 |
+    | 16 | chan16 | FLOAT  |   3 | yes   | no |   0 |
+    | 17 | chan17 | FLOAT  |   3 | yes   | no |   0 |
+    | 18 | chan18 | NONE   |   0 | yes   | no |   0 |
+    | 19 | -      | UNDEF  |   0 | no    | no |   0 |
+    | 20 | -      | UNDEF  |   0 | no    | no |   0 |
+    | 21 | -      | UNDEF  |   0 | no    | no |   0 |
+    | 22 | -      | UNDEF  |   0 | no    | no |   0 |
+    | 23 | -      | UNDEF  |   0 | no    | no |   0 |
+    | 24 | -      | UNDEF  |   0 | no    | no |   0 |
+    | 25 | -      | UNDEF  |   0 | no    | no |   0 |
+    | 26 | -      | UNDEF  |   0 | no    | no |   0 |
+    | 27 | -      | UNDEF  |   0 | no    | no |   0 |
+    | 28 | -      | UNDEF  |   0 | no    | no |   0 |
+    | 29 | -      | UNDEF  |   0 | no    | no |   0 |
+    | 30 | -      | UNDEF  |   0 | no    | no |   0 |
+    | 31 | -      | UNDEF  |   0 | no    | no |   0 |
+    +----+--------+--------+-----+-------+----+-----+
+
+    closing...
+    INFO:nxscli:disconnecting from nxs device...
+    INFO:nxscli:disconnected!
+
+nxscope_uart
+------------
+
+Configuration demonstrating NxScope stream over USART interface.
+It uses UART0 connected to J-Link VCOM for NxScope, and 2 RTT
+channels for debug purposes are enabled:
+
+=========== =================  ============== ================
+RTT channel Function           Up buffer size Down buffer size
+=========== =================  ============== ================
+0           serial console     1024           16
+1           SystemView         2048           0
+=========== =================  ============== ================
+
+See :doc:`/applications/examples/nxscope/index` and
+:doc:`/applications/logging/nxscope/index` for more details.
