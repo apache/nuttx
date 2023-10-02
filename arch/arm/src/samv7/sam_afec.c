@@ -868,6 +868,7 @@ static int afec_setup(struct adc_dev_s *dev)
 
   if (priv->initialized > 0)
     {
+      priv->initialized++;
       return OK;
     }
 
