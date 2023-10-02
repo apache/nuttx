@@ -183,14 +183,14 @@ int stm32_oneshot_initialize(struct stm32_oneshot_s *oneshot, int chan,
 {
   uint32_t frequency;
 
-  tmrinfo("chan=%d resolution=%d usec, USEC_PER_SEC:%d\n", chan, resolution,
+  tmrinfo("chan=%d resolution=%u usec, USEC_PER_SEC:%ld\n", chan, resolution,
           USEC_PER_SEC);
   DEBUGASSERT(oneshot && resolution > 0);
 
   /* Get the TC frequency the corresponds to the requested resolution */
 
   frequency = USEC_PER_SEC / (uint32_t)resolution;
-  tmrinfo("frequency: %d\n", frequency);
+  tmrinfo("frequency: %" PRIu32 "\n", frequency);
   oneshot->frequency = frequency;
 
   oneshot->tch = stm32_tim_init(chan);
@@ -226,7 +226,7 @@ int stm32_oneshot_max_delay(struct stm32_oneshot_s *oneshot, uint64_t *usec)
 {
   DEBUGASSERT(oneshot != NULL && usec != NULL);
 
-  tmrinfo("frequency: %d, USEC_PER_SEC: %d\n", oneshot->frequency,
+  tmrinfo("frequency: %" PRIu32 ", USEC_PER_SEC: %ld\n", oneshot->frequency,
           USEC_PER_SEC);
   *usec = (uint64_t)(UINT32_MAX / oneshot->frequency) *
           (uint64_t)USEC_PER_SEC;
