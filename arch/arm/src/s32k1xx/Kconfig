@@ -628,14 +628,6 @@ config S32K1XX_EDMA_EDBG
 
 endmenu # eDMA Global Configuration
 
-menu "LPUART Configuration"
-	depends on S32K1XX_LPUART
-
-config S32K1XX_LPUART_INVERT
-	bool "Signal Invert Support"
-	default n
-endmenu
-
 menu "LPSPI Configuration"
 	depends on S32K1XX_LPSPI
 
@@ -821,6 +813,10 @@ endmenu # LPI2C Configuration
 menu "LPUART Configuration"
 comment "LP Uart Driver Configuration"
 
+config S32K1XX_LPUART_INVERT
+	depends on S32K1XX_LPUART
+	bool "Signal Invert Support"
+	default n
 
 config S32K1XX_LPUART_RXDMA_BUFFER_SIZE
 	int "Rx DMA buffer size"
