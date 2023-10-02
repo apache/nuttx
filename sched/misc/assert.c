@@ -555,10 +555,20 @@ void _assert(FAR const char *filename, int linenum,
              FAR const char *msg, FAR void *regs)
 {
   FAR struct tcb_s *rtcb = running_task();
+#if CONFIG_TASK_NAME_SIZE > 0
+  FAR struct tcb_s *ptcb = NULL;
+#endif
   struct panic_notifier_s notifier_data;
   struct utsname name;
   bool fatal = true;
   int flags;
+
+#if CONFIG_TASK_NAME_SIZE > 0
+  if (rtcb->group && !(rtcb->flags & TCB_FLAG_TTYPE_KERNEL))
+    {
+      ptcb = nxsched_get_tcb(rtcb->group->tg_pid);
+    }
+#endif
 
   flags = enter_critical_section();
 
@@ -607,6 +617,7 @@ void _assert(FAR const char *filename, int linenum,
          ": "
 #if CONFIG_TASK_NAME_SIZE > 0
          "%s "
+         "process: %s "
 #endif
          "%p\n",
          msg ? msg : "",
@@ -616,6 +627,7 @@ void _assert(FAR const char *filename, int linenum,
 #endif
 #if CONFIG_TASK_NAME_SIZE > 0
          rtcb->name,
+         ptcb ? ptcb->name : "Kernel",
 #endif
          rtcb->entry.main);
 
