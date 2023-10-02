@@ -357,7 +357,7 @@ static int pwm_timer(struct s32k1xx_pwmtimer_s *priv,
 
   DEBUGASSERT(priv != NULL && info != NULL);
 
-  pwminfo("FTM%d channel: %d frequency: %d duty: %08x\n",
+  pwminfo("FTM%d channel: %d frequency: %" PRId32 " duty: %08" PRIx32 "\n",
           priv->tpmid, priv->channel, info->frequency, info->duty);
 
   DEBUGASSERT(info->frequency > 0 && info->duty > 0 &&
@@ -427,8 +427,8 @@ static int pwm_timer(struct s32k1xx_pwmtimer_s *priv,
 
   cv = b16toi(info->duty * modulo + b16HALF);
 
-  pwminfo("FTM%d PCLK: %d frequency: %d FTMCLK: %d prescaler: %d modulo: %d \
-           c0v: %d\n",
+  pwminfo("FTM%d PCLK: %" PRId32 " frequency: %" PRId32 " FTMCLK: %" PRId32
+          " prescaler: %d modulo: %" PRId32 "c0v: %" PRId32 "\n",
           priv->tpmid, priv->pclk, info->frequency, tpmclk,
           presc_values[prescaler], modulo, cv);
 
@@ -554,7 +554,7 @@ static int pwm_setup(struct pwm_lowerhalf_s *dev)
    * already be enabled in the board-specific s32k1xx_periphclocks.c file.
    */
 
-  pwminfo("FTM%d pincfg: %08x\n", priv->tpmid, priv->pincfg);
+  pwminfo("FTM%d pincfg: %08" PRIx32 "\n", priv->tpmid, priv->pincfg);
   pwm_dumpregs(priv, "Initially");
 
   /* Configure the PWM output pin, but do not start the timer yet */
@@ -585,7 +585,7 @@ static int pwm_shutdown(struct pwm_lowerhalf_s *dev)
   struct s32k1xx_pwmtimer_s *priv = (struct s32k1xx_pwmtimer_s *)dev;
   uint32_t pincfg;
 
-  pwminfo("FTM%d pincfg: %08x\n", priv->tpmid, priv->pincfg);
+  pwminfo("FTM%d pincfg: %08" PRIx32 "\n", priv->tpmid, priv->pincfg);
 
   /* Make sure that the output has been stopped */
 

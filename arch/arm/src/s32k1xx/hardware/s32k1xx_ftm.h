@@ -590,7 +590,7 @@
 
 #define FTM_SC_PWMEN_SHIFT               (16)      /* Bits 16-23: Channel n PWM enable bit */
 #define FTM_SC_PWMEN_MASK                (0xff << FTM_SC_PWMEN_SHIFT)
-#define FTM_SC_PWMEN(n)                  (1 << FTM_SC_PWMEN_SHIFT + (n))
+#define FTM_SC_PWMEN(n)                  (1 << (FTM_SC_PWMEN_SHIFT + (n)))
 #define FTM_SC_FLTPS_SHIFT               (24)      /* Bits 24-27: Filter Prescaler */
 #define FTM_SC_FLTPS_MASK                (0x07 << FTM_SC_FLTPS_SHIFT)
 #  define FTM_SC_FLTPS_DIV1              (0 << FTM_SC_FLTPS_SHIFT)  /* Divide by 1 */
