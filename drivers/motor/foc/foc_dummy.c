@@ -687,13 +687,18 @@ void foc_dummy_update(void)
 
       dev = &g_foc_dev[i];
 
-      /* Get SIM data */
+      /* Update dummy driver state only if device opened */
 
-      sim = FOC_DUMMY_DATA_FROM_DEV_GET(dev);
-
-      if (sim->state == true)
+      if (dev->ocount > 0)
         {
-          foc_dummy_notifier_handler(dev);
+          /* Get SIM data */
+
+          sim = FOC_DUMMY_DATA_FROM_DEV_GET(dev);
+
+          if (sim->state == true)
+            {
+              foc_dummy_notifier_handler(dev);
+            }
         }
     }
 
