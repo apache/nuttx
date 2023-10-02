@@ -2458,6 +2458,7 @@ static int adc_setup(struct adc_dev_s *dev)
 
   if (priv->initialized > 0)
     {
+      priv->initialized += 1;
       return OK;
     }
 
