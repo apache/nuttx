@@ -168,7 +168,7 @@ ARM architecture:
 
       $ HOST_PLATFORM=x86_64-linux   # use "mac" for macOS.
       $ # For Windows there is a zip instead (gcc-arm-none-eabi-10.3-2021.10-win32.zip)
-      $ curl -L -O https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2019q4/gcc-arm-none-eabi-10.3-2021.10-${HOST_PLATFORM}.tar.bz2
+      $ curl -L -O https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-${HOST_PLATFORM}.tar.bz2
       $ tar xf gcc-arm-none-eabi-10.3-2021.10-${HOST_PLATFORM}.tar.bz2
 
     Add the toolchain to your `PATH`:
