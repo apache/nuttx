@@ -45,7 +45,7 @@
 
 void s32k1xx_board_initialize(void)
 {
-#ifdef CONFIG_SEGGER_SYSVIEW
+#ifdef CONFIG_ARCH_PERF_EVENTS
   up_perf_init((void *)S32K148EVB_RUN_SYSCLK_FREQUENCY);
 #endif
 
