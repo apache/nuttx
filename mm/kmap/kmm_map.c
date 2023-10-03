@@ -125,7 +125,7 @@ static FAR void *map_pages(FAR void **pages, size_t npages, int prot)
 
   /* Find a virtual memory area that fits */
 
-  vaddr = gran_alloc(&g_kmm_map_vpages, size);
+  vaddr = gran_alloc(g_kmm_map_vpages, size);
   if (!vaddr)
     {
       return NULL;
