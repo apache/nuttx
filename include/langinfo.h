@@ -33,7 +33,7 @@
  ****************************************************************************/
 
 #define NL_ITEM(cat, index) (((cat) << 16) | (index))
-#define NL_LOCALE_NAME(cat) NL_ITEM((cat)， (0xffff))
+#define NL_LOCALE_NAME(cat) NL_ITEM((cat),  (0xffff))
 
 #define CODESET             NL_ITEM(LC_CTYPE,    0x0e)
 
