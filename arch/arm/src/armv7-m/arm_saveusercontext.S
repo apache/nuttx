@@ -56,7 +56,7 @@
 
 up_saveusercontext:
 
-	/* Save r0~r3, r12，r14, pc */
+	/* Save r0~r3, r12, r14, pc */
 
 	str		r0, [r0, #(4*REG_R0)]
 	str		r1, [r0, #(4*REG_R1)]

@@ -63,7 +63,7 @@ up_saveusercontext:
 	str		r2, [r0, #(4*REG_R2)]
 	str		r3, [r0, #(4*REG_R3)]
 
-	/* Save r12，r14, pc */
+	/* Save r12, r14, pc */
 
 	mov		r1, r12
 	mov		r2, r14
