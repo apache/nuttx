@@ -1565,7 +1565,7 @@ static int task_create_wrapper(void *task_func, const char *name,
 {
   return esp_task_create_pinned_to_core(task_func, name,
                                         stack_depth, param,
-                                        prio, task_handle, UINT32_MAX);
+                                        prio, task_handle, core_id);
 }
 
 /****************************************************************************
