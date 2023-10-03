@@ -193,6 +193,26 @@ static FAR void *map_single_user_page(uintptr_t vaddr)
 }
 
 /****************************************************************************
+ * Name: is_kmap_vaddr
+ *
+ * Description:
+ *   Return true if the virtual address, vaddr, lies in the kmap address
+ *   space.
+ *
+ * Input Parameters:
+ *   vaddr - The kernel virtual address where the mapping begins.
+ *
+ * Returned Value:
+ *   True if vaddr is in the kmap address space; false otherwise.
+ *
+ ****************************************************************************/
+
+static bool is_kmap_vaddr(uintptr_t vaddr)
+{
+  return (vaddr >= CONFIG_ARCH_KMAP_VBASE && vaddr < ARCH_KMAP_VEND);
+}
+
+/****************************************************************************
  * Name: kmm_map_lock
  *
  * Description:
@@ -300,6 +320,15 @@ void kmm_unmap(FAR void *kaddr)
   FAR struct mm_map_entry_s *entry;
   unsigned int               npages;
   int                        ret;
+
+  /* Speed optimization: check that addr is within kmap area */
+
+  if (!is_kmap_vaddr((uintptr_t)kaddr))
+    {
+      /* Nope: get out */
+
+      return;
+    }
 
   /* Lock the mapping list when we fiddle around with it */
 
