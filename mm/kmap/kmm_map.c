@@ -82,7 +82,7 @@ static int get_user_pages(FAR void **pages, size_t npages, uintptr_t vaddr)
 
   for (i = 0; i < npages; i++, vaddr += MM_PGSIZE)
     {
-      page = up_addrenv_find_page(&tcb->addrenv_own->addrenv, vaddr);
+      page = up_addrenv_find_page(&tcb->addrenv_curr->addrenv, vaddr);
       if (!page)
         {
           /* Something went wrong, get out */
@@ -182,7 +182,7 @@ static FAR void *map_single_user_page(uintptr_t vaddr)
 
   /* Find the page associated with this virtual address */
 
-  page = up_addrenv_find_page(&tcb->addrenv_own->addrenv, vaddr);
+  page = up_addrenv_find_page(&tcb->addrenv_curr->addrenv, vaddr);
   if (!page)
     {
       return NULL;
