@@ -262,6 +262,7 @@ static void esp32_intinfo(int cpu, int periphid,
  *   devices.
  *
  * Input Parameters:
+ *   cpu     - CPU core to query for CPU interrupt candidates
  *   intmask - mask of candidate CPU interrupts.  The CPU interrupt will be
  *             be allocated from free interrupts within this set
  *
@@ -271,20 +272,18 @@ static void esp32_intinfo(int cpu, int periphid,
  *
  ****************************************************************************/
 
-static int esp32_getcpuint(uint32_t intmask)
+static int esp32_getcpuint(int cpu, uint32_t intmask)
 {
   uint32_t *freeints;
   uint32_t bitmask;
   uint32_t intset;
   int cpuint;
   int ret = -ENOMEM;
-  int cpu = 0;
 
   /* Check if there are CPU interrupts with the requested properties
    * available.
    */
 
-  cpu = up_cpu_index();
 #ifdef CONFIG_SMP
   if (cpu != 0)
     {
@@ -348,6 +347,7 @@ static int esp32_getcpuint(uint32_t intmask)
  *   Allocate a level CPU interrupt
  *
  * Input Parameters:
+ *   cpu      - CPU core to query for CPU interrupt candidates
  *   priority - Priority of the CPU interrupt (1-5)
  *   type     - Interrupt type (level or edge).
  *
@@ -359,7 +359,7 @@ static int esp32_getcpuint(uint32_t intmask)
  *
  ****************************************************************************/
 
-static int esp32_alloc_cpuint(int priority, int type)
+static int esp32_alloc_cpuint(int cpu, int priority, int type)
 {
   uint32_t mask;
 
@@ -385,7 +385,7 @@ static int esp32_alloc_cpuint(int priority, int type)
       mask = g_priority[ESP32_PRIO_INDEX(priority)] & ESP32_CPUINT_EDGESET;
     }
 
-  return esp32_getcpuint(mask);
+  return esp32_getcpuint(cpu, mask);
 }
 
 /****************************************************************************
@@ -811,7 +811,7 @@ int esp32_setup_irq(int cpu, int periphid, int priority, int type)
    *    3. Map the CPU interrupt to the IRQ to ease searching later.
    */
 
-  cpuint = esp32_alloc_cpuint(priority, type);
+  cpuint = esp32_alloc_cpuint(cpu, priority, type);
   if (cpuint < 0)
     {
       irqerr("Unable to allocate CPU interrupt for priority=%d and type=%d",
