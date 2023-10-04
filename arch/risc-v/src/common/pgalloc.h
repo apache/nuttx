@@ -75,6 +75,10 @@ static inline uintptr_t riscv_pgvaddr(uintptr_t paddr)
     {
       return paddr - CONFIG_ARCH_PGPOOL_PBASE + CONFIG_ARCH_PGPOOL_VBASE;
     }
+  else if (paddr >= CONFIG_RAM_START && paddr < CONFIG_RAM_END)
+    {
+      return paddr - CONFIG_RAM_START + CONFIG_RAM_VSTART;
+    }
 
   return 0;
 }
