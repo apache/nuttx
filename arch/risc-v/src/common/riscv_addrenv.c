@@ -65,6 +65,7 @@
 #include <nuttx/compiler.h>
 #include <nuttx/irq.h>
 #include <nuttx/pgalloc.h>
+#include <nuttx/tls.h>
 
 #include <arch/barriers.h>
 
@@ -420,6 +421,12 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
   /* Allocate 1 extra page for heap, temporary fix for #5811 */
 
   heapsize = heapsize + MM_PGALIGNUP(CONFIG_DEFAULT_TASK_STACKSIZE);
+
+#ifdef CONFIG_TLS_ALIGNED
+  /* Need more stack for TLS alignment */
+
+  heapsize += MM_PGALIGNUP(2 * TLS_MAXSTACK);
+#endif
 
   /* Map the reserved area */
 
