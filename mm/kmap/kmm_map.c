@@ -377,7 +377,7 @@ void kmm_unmap(FAR void *kaddr)
 
 FAR void *kmm_map_user(FAR void *uaddr, size_t size)
 {
-  FAR void *pages;
+  FAR void **pages;
   uintptr_t vaddr;
   uintptr_t offset;
   size_t    npages;
@@ -414,7 +414,7 @@ FAR void *kmm_map_user(FAR void *uaddr, size_t size)
 
   /* No, the area must be mapped into kernel virtual address space */
 
-  pages = kmm_zalloc(npages * sizeof(FAR void *));
+  pages = (FAR void **)kmm_zalloc(npages * sizeof(FAR void *));
   if (!pages)
     {
       return NULL;
@@ -422,7 +422,7 @@ FAR void *kmm_map_user(FAR void *uaddr, size_t size)
 
   /* Fetch the physical pages for the user virtual address range */
 
-  ret = get_user_pages(&pages, npages, vaddr);
+  ret = get_user_pages(pages, npages, vaddr);
   if (ret < 0)
     {
       goto errout_with_pages;
@@ -430,7 +430,7 @@ FAR void *kmm_map_user(FAR void *uaddr, size_t size)
 
   /* Map the physical pages to kernel memory */
 
-  vaddr = (uintptr_t)map_pages(&pages, npages, PROT_READ | PROT_WRITE);
+  vaddr = (uintptr_t)map_pages(pages, npages, PROT_READ | PROT_WRITE);
   if (!vaddr)
     {
       goto errout_with_pages;
@@ -438,6 +438,7 @@ FAR void *kmm_map_user(FAR void *uaddr, size_t size)
 
   /* Ok, we have a virtual memory area, add the offset back */
 
+  kmm_free(pages);
   return (FAR void *)(vaddr + offset);
 
 errout_with_pages:
