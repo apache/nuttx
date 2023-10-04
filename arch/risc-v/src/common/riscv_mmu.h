@@ -59,6 +59,10 @@
 
 #define MMU_IO_FLAGS            (PTE_R | PTE_W | PTE_G)
 
+/* Flags for kernel page tables */
+
+#define MMU_KPGT_FLAGS          (PTE_G)
+
 /* Kernel FLASH and RAM are mapped globally */
 
 #define MMU_KTEXT_FLAGS         (PTE_R | PTE_X | PTE_G)
