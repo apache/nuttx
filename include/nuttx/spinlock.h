@@ -153,6 +153,24 @@ static inline spinlock_t up_testset(FAR volatile spinlock_t *lock)
 #endif
 
 /****************************************************************************
+ * Name: spin_lock_init
+ *
+ * Description:
+ *   Initialize a non-reentrant spinlock object to its initial,
+ *   unlocked state.
+ *
+ * Input Parameters:
+ *   lock  - A reference to the spinlock object to be initialized.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+/* void spin_lock_init(FAR spinlock_t *lock); */
+#define spin_lock_init(l) do { *(l) = SP_UNLOCKED; } while (0)
+
+/****************************************************************************
  * Name: spin_lock
  *
  * Description:
