@@ -405,6 +405,12 @@ config ARCH_HAVE_TEXT_HEAP
 	---help---
 		Special memory region for dynamic code loading
 
+config ARCH_HAVE_DATA_HEAP
+	bool
+	default n
+	---help---
+		Special memory region for dynamic data loading
+
 config ARCH_HAVE_COPY_SECTION
 	bool
 	default n
@@ -625,6 +631,14 @@ config ARCH_USE_TEXT_HEAP
 		for dynamic code loading. For example, ESP32 has separate memory
 		regions for instruction and data and the memory region used for
 		usual malloc doesn't work for instruction.
+
+config ARCH_USE_DATA_HEAP
+	bool "Enable separate data allocation for dynamic data loading"
+	default n
+	depends on ARCH_HAVE_DATA_HEAP
+	---help---
+		This option enables architecture-specific memory allocator
+		for dynamic data loading.
 
 menuconfig ARCH_ADDRENV
 	bool "Address environments"

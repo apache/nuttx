@@ -130,7 +130,11 @@ int rmmod(FAR void *handle)
 #else
           kmm_free((FAR void *)modp->textalloc);
 #endif
+#if defined(CONFIG_ARCH_USE_DATA_HEAP)
+          up_dataheap_free((FAR void *)modp->dataalloc);
+#else
           kmm_free((FAR void *)modp->dataalloc);
+#endif
         }
       else
         {
