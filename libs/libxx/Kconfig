@@ -90,7 +90,8 @@ endif
 
 config CXX_STANDARD
 	string "Language standard"
-	default "gnu++20"
+	default "gnu++20" if LIBCXX
+	default "gnu++17" if !LIBCXX
 	---help---
 		Possible values:
 		gnu++98/c++98, gnu++11/c++11, gnu++14/c++14, gnu++17/c++17 and gnu++20/c++20
