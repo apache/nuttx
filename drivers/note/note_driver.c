@@ -1535,7 +1535,7 @@ void sched_note_vbprintf_ip(uint32_t tag, uintptr_t ip, uint8_t event,
 
   char c;
   int length;
-  bool search_fmt = 0;
+  bool infmt = false;
   int next = 0;
   FAR struct tcb_s *tcb = this_task();
 
@@ -1566,12 +1566,12 @@ void sched_note_vbprintf_ip(uint32_t tag, uintptr_t ip, uint8_t event,
 
           while ((c = *fmt++) != '\0')
             {
-              if (c != '%' && search_fmt == 0)
+              if (c != '%' && !infmt)
                 {
                   continue;
                 }
 
-              search_fmt = 1;
+              infmt = true;
               var = (FAR void *)&note->nbi_data[next];
 
               if (c == 'd' || c == 'i' || c == 'u' ||
@@ -1660,7 +1660,7 @@ void sched_note_vbprintf_ip(uint32_t tag, uintptr_t ip, uint8_t event,
                       next += sizeof(var->i);
                     }
 
-                  search_fmt = 0;
+                  infmt = false;
                 }
 
               if (c == 'e' || c == 'f' || c == 'g' ||
@@ -1703,7 +1703,7 @@ void sched_note_vbprintf_ip(uint32_t tag, uintptr_t ip, uint8_t event,
 #endif
                     }
 
-                  search_fmt = 0;
+                  infmt = false;
                 }
             }
 
