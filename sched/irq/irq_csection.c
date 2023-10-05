@@ -120,7 +120,7 @@ static bool irq_waitlock(int cpu)
    * for the deadlock condition.
    */
 
-  while (spin_trylock_wo_note(&g_cpu_irqlock) == SP_LOCKED)
+  while (!spin_trylock_wo_note(&g_cpu_irqlock))
     {
       /* Is a pause request pending? */
 

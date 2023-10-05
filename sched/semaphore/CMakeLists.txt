@@ -40,4 +40,8 @@ if(CONFIG_SPINLOCK)
   list(APPEND CSRCS spinlock.c)
 endif()
 
+if(CONFIG_TICKET_SPINLOCK)
+  list(APPEND CSRCS spinlock.c)
+endif()
+
 target_sources(sched PRIVATE ${CSRCS})
