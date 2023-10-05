@@ -476,6 +476,13 @@ config ESP32S2_ULP_COPROC_RESERVE_MEM
 	int "Reserved ULP co-processor DRAM"
 	default 0
 
+comment "Additional Heaps"
+
+config ESP32S2_RTC_HEAP
+	bool "Use the RTC memory as a separate heap"
+	select ARCH_HAVE_EXTRA_HEAPS
+	default n
+
 endmenu # Memory Configuration
 
 config ESP32S2_GPIO_IRQ

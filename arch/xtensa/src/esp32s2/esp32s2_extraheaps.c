@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32s2/esp32s2_user.c
+ * arch/xtensa/src/esp32s2/esp32s2_extraheaps.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,36 +23,20 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/arch.h>
-
-#include <arch/loadstore.h>
-#include <arch/xtensa/xtensa_corebits.h>
 
 #include <sys/types.h>
+#include <stdint.h>
+#include <string.h>
 #include <assert.h>
 #include <debug.h>
 
-#include "xtensa.h"
+#include <nuttx/arch.h>
+#include <nuttx/kmalloc.h>
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+#include "hardware/esp32s2_soc.h"
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-#ifdef CONFIG_ARCH_USE_TEXT_HEAP
-#ifdef CONFIG_ENDIAN_BIG
-#error not implemented
-#endif
-#ifndef CONFIG_BUILD_FLAT
-#error permission check not implemented
-#endif
+#ifdef CONFIG_ESP32S2_RTC_HEAP
+#include "esp32s2_rtcheap.h"
 #endif
 
 /****************************************************************************
@@ -60,20 +44,19 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: xtensa_user
+ * Name: up_extraheaps_init
  *
  * Description:
- *   ESP32S2-specific user exception handler.
+ *   Initialize any extra heap.
  *
  ****************************************************************************/
 
-uint32_t *xtensa_user(int exccause, uint32_t *regs)
+void up_extraheaps_init()
 {
-  /* xtensa_user_panic never returns. */
+#ifdef CONFIG_ESP32S2_RTC_HEAP
+  /* Initialize the RTC heap */
 
-  xtensa_user_panic(exccause, regs);
-
-  while (1)
-    {
-    }
+  esp32s2_rtcheap_initialize();
+#endif
 }
+
