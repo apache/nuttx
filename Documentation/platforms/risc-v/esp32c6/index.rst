@@ -26,8 +26,47 @@ core and supports 2.4 GHz Wi-Fi 6, Bluetooth 5 (LE) and the 802.15.4 protocol.
 ESP32-C6 Toolchain
 ==================
 
-A generic RISC-V toolchain can be used to build ESP32-C6 projects.
-SiFive's toolchain can be downloaded from: https://github.com/sifive/freedom-tools/releases
+A generic RISC-V toolchain can be used to build ESP32-C6 projects. It's recommended to use the same
+toolchain used by NuttX CI. Please refer to the Docker
+`container <https://github.com/apache/nuttx/tree/master/tools/ci/docker/linux/Dockerfile>`_ and
+check for the current compiler version being used. For instance:
+
+.. code-block::
+
+   ###############################################################################
+   # Build image for tool required by RISCV builds
+   ###############################################################################
+   FROM nuttx-toolchain-base AS nuttx-toolchain-riscv
+   # Download the latest RISCV GCC toolchain prebuilt by xPack
+   RUN mkdir riscv-none-elf-gcc && \
+   curl -s -L "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v12.3.0-1/xpack-riscv-none-elf-gcc-12.3.0-1-linux-x64.tar.gz" \
+   | tar -C riscv-none-elf-gcc --strip-components 1 -xz
+
+It uses the xPack's prebuilt toolchain based on GCC 12.3.0.
+
+Installing
+----------
+
+First, create a directory to hold the toolchain:
+
+.. code-block:: console
+
+   $ mkdir -p /path/to/your/toolchain/riscv-none-elf-gcc
+
+Download and extract toolchain:
+
+.. code-block:: console
+
+   $ curl -s -L "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v12.3.0-1/xpack-riscv-none-elf-gcc-12.3.0-1-linux-x64.tar.gz" \
+   | tar -C /path/to/your/toolchain/riscv-none-elf-gcc --strip-components 1 -xz
+
+Add the toolchain to your `PATH`:
+
+.. code-block:: console
+
+   $ echo "export PATH=/path/to/your/toolchain/riscv-none-elf-gcc/bin:$PATH" >> ~/.bashrc
+
+You can edit your shell's rc files if you don't use bash.
 
 Second stage bootloader and partition table
 ===========================================
