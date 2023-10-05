@@ -39,6 +39,24 @@
 typedef uint8_t spinlock_t;
 #else
 
+#ifdef CONFIG_TICKET_SPINLOCK
+
+union spinlock_u
+{
+  struct
+  {
+    uint16_t owner;
+    uint16_t next;
+  } tickets;
+  uint32_t value;
+};
+typedef union spinlock_u spinlock_t;
+
+#  define SP_UNLOCKED (union spinlock_u){{0, 0}}
+#  define SP_LOCKED (union spinlock_u){{0, 1}}
+
+#else
+
 /* The architecture specific spinlock.h header file must also provide the
  * following:
  *
@@ -50,6 +68,8 @@ typedef uint8_t spinlock_t;
  */
 
 #include <arch/spinlock.h>
+
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -80,7 +100,8 @@ typedef uint8_t spinlock_t;
 #  define SP_SEV()
 #endif
 
-#if defined(CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS) && !defined(__SP_UNLOCK_FUNCTION)
+#if !defined(__SP_UNLOCK_FUNCTION) && (defined(CONFIG_TICKET_SPINLOCK) || \
+     defined(CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS))
 #  define __SP_UNLOCK_FUNCTION 1
 #endif
 
@@ -199,7 +220,7 @@ void spin_lock_wo_note(FAR volatile spinlock_t *lock);
  *
  ****************************************************************************/
 
-spinlock_t spin_trylock(FAR volatile spinlock_t *lock);
+bool spin_trylock(FAR volatile spinlock_t *lock);
 
 /****************************************************************************
  * Name: spin_trylock_wo_note
@@ -223,7 +244,7 @@ spinlock_t spin_trylock(FAR volatile spinlock_t *lock);
  *
  ****************************************************************************/
 
-spinlock_t spin_trylock_wo_note(FAR volatile spinlock_t *lock);
+bool spin_trylock_wo_note(FAR volatile spinlock_t *lock);
 
 /****************************************************************************
  * Name: spin_unlock
@@ -285,7 +306,11 @@ void spin_unlock_wo_note(FAR volatile spinlock_t *lock);
  ****************************************************************************/
 
 /* bool spin_islocked(FAR spinlock_t lock); */
-#define spin_islocked(l) (*(l) == SP_LOCKED)
+#ifdef CONFIG_TICKET_SPINLOCK
+#  define spin_islocked(l) ((*l).tickets.owner != (*l).tickets.next)
+#else
+#  define spin_islocked(l) (*(l) == SP_LOCKED)
+#endif
 
 /****************************************************************************
  * Name: spin_setbit

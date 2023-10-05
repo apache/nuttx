@@ -33,7 +33,7 @@
 #include <nuttx/sched_note.h>
 #include <sched/sched.h>
 #include <nuttx/cache.h>
-#include <arch/spinlock.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/init.h>
 
 #include "init/init.h"

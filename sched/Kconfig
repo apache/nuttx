@@ -308,6 +308,16 @@ config SPINLOCK
 		CONFIG_ARCH_HAVE_MULTICPU.  This permits the use of spinlocks in
 		other novel architectures.
 
+if SPINLOCK
+
+config TICKET_SPINLOCK
+	bool "Use ticket Spinlocks"
+	default n
+	---help---
+		Use ticket spinlock algorithm.
+
+endif # SPINLOCK
+
 config IRQCHAIN
 	bool "Enable multi handler sharing a IRQ"
 	default n
