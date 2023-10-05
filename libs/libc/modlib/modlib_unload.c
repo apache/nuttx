@@ -65,15 +65,19 @@ int modlib_unload(FAR struct mod_loadinfo_s *loadinfo)
       if (loadinfo->textalloc != 0)
         {
 #if defined(CONFIG_ARCH_USE_TEXT_HEAP)
-           up_textheap_free((FAR void *)loadinfo->textalloc);
+          up_textheap_free((FAR void *)loadinfo->textalloc);
 #else
-           lib_free((FAR void *)loadinfo->textalloc);
+          lib_free((FAR void *)loadinfo->textalloc);
 #endif
         }
 
       if (loadinfo->datastart != 0)
         {
+#if defined(CONFIG_ARCH_USE_DATA_HEAP)
+          up_dataheap_free((FAR void *)loadinfo->datastart);
+#else
           lib_free((FAR void *)loadinfo->datastart);
+#endif
         }
     }
   else

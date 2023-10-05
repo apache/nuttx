@@ -159,8 +159,14 @@ errout_with_addrenv:
 
   if (loadinfo->datasize > 0)
     {
+#  if defined(CONFIG_ARCH_USE_DATA_HEAP)
+      loadinfo->dataalloc = (uintptr_t)
+                            up_dataheap_memalign(loadinfo->dataalign,
+                                                 datasize);
+#  else
       loadinfo->dataalloc = (uintptr_t)
                             kumm_memalign(loadinfo->dataalign, datasize);
+#  endif
       if (!loadinfo->dataalloc)
         {
           return -ENOMEM;
@@ -293,7 +299,11 @@ void elf_addrenv_free(FAR struct elf_loadinfo_s *loadinfo)
 
   if (loadinfo->dataalloc != 0)
     {
+#  if defined(CONFIG_ARCH_USE_DATA_HEAP)
+      up_dataheap_free((FAR void *)loadinfo->dataalloc);
+#  else
       kumm_free((FAR void *)loadinfo->dataalloc);
+#  endif
     }
 #endif
 
