@@ -193,6 +193,27 @@ static FAR void *map_single_user_page(uintptr_t vaddr)
 }
 
 /****************************************************************************
+ * Name: map_single_page
+ *
+ * Description:
+ *   Map (find) a single page from the kernel addressable virtual memory
+ *   pool.
+ *
+ * Input Parameters:
+ *   page - The physical page.
+ *
+ * Returned Value:
+ *   The kernel virtual address for the page, or NULL if page is not kernel
+ *   addressable.
+ *
+ ****************************************************************************/
+
+static FAR void *map_single_page(uintptr_t page)
+{
+  return (FAR void *)up_addrenv_page_vaddr(page);
+}
+
+/****************************************************************************
  * Name: is_kmap_vaddr
  *
  * Description:
@@ -288,6 +309,13 @@ FAR void *kmm_map(FAR void **pages, size_t npages, int prot)
   if (!pages || !npages || npages > CONFIG_ARCH_KMAP_NPAGES)
     {
       return NULL;
+    }
+
+  /* A single page can be addressed directly, if it is a kernel page */
+
+  if (npages == 1)
+    {
+      return map_single_page((uintptr_t)pages[0]);
     }
 
   /* Attempt to map the pages */
