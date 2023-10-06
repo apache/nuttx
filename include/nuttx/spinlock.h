@@ -292,7 +292,7 @@ void spin_unlock(FAR volatile spinlock_t *lock);
 void spin_unlock_wo_note(FAR volatile spinlock_t *lock);
 
 /****************************************************************************
- * Name: spin_islocked
+ * Name: spin_is_locked
  *
  * Description:
  *   Release one count on a non-reentrant spinlock.
@@ -307,9 +307,9 @@ void spin_unlock_wo_note(FAR volatile spinlock_t *lock);
 
 /* bool spin_islocked(FAR spinlock_t lock); */
 #ifdef CONFIG_TICKET_SPINLOCK
-#  define spin_islocked(l) ((*l).tickets.owner != (*l).tickets.next)
+#  define spin_is_locked(l) ((*l).tickets.owner != (*l).tickets.next)
 #else
-#  define spin_islocked(l) (*(l) == SP_LOCKED)
+#  define spin_is_locked(l) (*(l) == SP_LOCKED)
 #endif
 
 /****************************************************************************

@@ -124,7 +124,7 @@ static int sim_cpupause_handler(int irq, void *context, void *arg)
 
 bool up_cpu_pausereq(int cpu)
 {
-  return spin_islocked(&g_cpu_paused[cpu]);
+  return spin_is_locked(&g_cpu_paused[cpu]);
 }
 
 /****************************************************************************
@@ -338,8 +338,8 @@ int up_cpu_pause(int cpu)
    * the CPU is actually paused.
    */
 
-  DEBUGASSERT(!spin_islocked(&g_cpu_wait[cpu]) &&
-              !spin_islocked(&g_cpu_paused[cpu]));
+  DEBUGASSERT(!spin_is_locked(&g_cpu_wait[cpu]) &&
+              !spin_is_locked(&g_cpu_paused[cpu]));
 
   spin_lock(&g_cpu_wait[cpu]);
   spin_lock(&g_cpu_paused[cpu]);
@@ -397,8 +397,8 @@ int up_cpu_resume(int cpu)
    * established thread.
    */
 
-  DEBUGASSERT(spin_islocked(&g_cpu_wait[cpu]) &&
-              !spin_islocked(&g_cpu_paused[cpu]));
+  DEBUGASSERT(spin_is_locked(&g_cpu_wait[cpu]) &&
+              !spin_is_locked(&g_cpu_paused[cpu]));
 
   spin_unlock(&g_cpu_wait[cpu]);
 
