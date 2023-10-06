@@ -44,7 +44,7 @@ void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits)
   irqstate_t flags;
   uint32_t   regval;
 
-  flags   = spin_lock_irqsave();
+  flags   = spin_lock_irqsave(NULL);
   regval  = getreg32(addr);
   regval &= ~clearbits;
   regval |= setbits;
