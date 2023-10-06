@@ -386,6 +386,12 @@ ifeq ($(CONFIG_SENSORS_HDC1008),y)
   CSRCS += hdc1008.c
 endif
 
+# ANALOG MAX31865
+
+ifeq ($(CONFIG_SENSORS_MAX31865),y)
+  CSRCS += max31865.c
+endif
+
 # Include sensor driver build support
 
 DEPPATH += --dep-path sensors
