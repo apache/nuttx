@@ -181,7 +181,7 @@ int sched_lock(void)
            * and g_cpu_lockset should include the bit setting for this CPU.
            */
 
-          DEBUGASSERT(spin_islocked(&g_cpu_schedlock) &&
+          DEBUGASSERT(spin_is_locked(&g_cpu_schedlock) &&
                       (g_cpu_lockset & (1 << this_cpu())) != 0);
         }
 
