@@ -163,7 +163,7 @@ static bool handle_irqreq(int cpu)
 
 bool up_cpu_pausereq(int cpu)
 {
-  return spin_islocked(&g_cpu_paused[cpu]);
+  return spin_is_locked(&g_cpu_paused[cpu]);
 }
 
 /****************************************************************************
@@ -361,7 +361,7 @@ int up_cpu_pause(int cpu)
    * request.
    */
 
-  DEBUGASSERT(!spin_islocked(&g_cpu_paused[cpu]));
+  DEBUGASSERT(!spin_is_locked(&g_cpu_paused[cpu]));
 
   spin_lock(&g_cpu_wait[cpu]);
   spin_lock(&g_cpu_paused[cpu]);
@@ -421,8 +421,8 @@ int up_cpu_resume(int cpu)
    * established thread.
    */
 
-  DEBUGASSERT(spin_islocked(&g_cpu_wait[cpu]) &&
-              !spin_islocked(&g_cpu_paused[cpu]));
+  DEBUGASSERT(spin_is_locked(&g_cpu_wait[cpu]) &&
+              !spin_is_locked(&g_cpu_paused[cpu]));
 
   spin_unlock(&g_cpu_wait[cpu]);
 

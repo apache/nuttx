@@ -304,14 +304,14 @@ int pthread_spin_unlock(pthread_spinlock_t *lock)
   pthread_t me = pthread_self();
 
   DEBUGASSERT(lock != NULL &&
-              spin_islocked(&lock->sp_lock) &&
+              spin_is_locked(&lock->sp_lock) &&
               lock->sp_holder == me);
 
   if (lock == NULL)
     {
       return EINVAL;
     }
-  else if (!spin_islocked(&lock->sp_lock) || lock->sp_holder != me)
+  else if (!spin_is_locked(&lock->sp_lock) || lock->sp_holder != me)
     {
       return EPERM;
     }

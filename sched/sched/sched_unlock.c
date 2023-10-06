@@ -105,7 +105,7 @@ int sched_unlock(void)
            * release our hold on the lock.
            */
 
-          DEBUGASSERT(spin_islocked(&g_cpu_schedlock) &&
+          DEBUGASSERT(spin_is_locked(&g_cpu_schedlock) &&
                       (g_cpu_lockset & (1 << cpu)) != 0);
 
           spin_clrbit(&g_cpu_lockset, cpu, &g_cpu_locksetlock,

@@ -241,7 +241,7 @@ try_again:
           cpu = this_cpu();
           if (g_cpu_nestcount[cpu] > 0)
             {
-              DEBUGASSERT(spin_islocked(&g_cpu_irqlock) &&
+              DEBUGASSERT(spin_is_locked(&g_cpu_irqlock) &&
                           g_cpu_nestcount[cpu] < UINT8_MAX);
               g_cpu_nestcount[cpu]++;
             }
@@ -330,7 +330,7 @@ try_again_in_irq:
                * and (2) this CPU should hold the lock.
                */
 
-              DEBUGASSERT(spin_islocked(&g_cpu_irqlock) &&
+              DEBUGASSERT(spin_is_locked(&g_cpu_irqlock) &&
                           (g_cpu_irqset & (1 << this_cpu())) != 0 &&
                           rtcb->irqcount < INT16_MAX);
               rtcb->irqcount++;
@@ -471,7 +471,7 @@ void leave_critical_section(irqstate_t flags)
             {
               /* Yes.. then just decrement the nesting count */
 
-              DEBUGASSERT(spin_islocked(&g_cpu_irqlock));
+              DEBUGASSERT(spin_is_locked(&g_cpu_irqlock));
               g_cpu_nestcount[cpu]--;
             }
           else
@@ -480,7 +480,7 @@ void leave_critical_section(irqstate_t flags)
                * and release the spinlock (if necessary).
                */
 
-              DEBUGASSERT(spin_islocked(&g_cpu_irqlock) &&
+              DEBUGASSERT(spin_is_locked(&g_cpu_irqlock) &&
                           g_cpu_nestcount[cpu] == 1);
 
               FAR struct tcb_s *rtcb = current_task(cpu);
@@ -518,7 +518,7 @@ void leave_critical_section(irqstate_t flags)
             {
               /* Yes... the spinlock should remain set */
 
-              DEBUGASSERT(spin_islocked(&g_cpu_irqlock));
+              DEBUGASSERT(spin_is_locked(&g_cpu_irqlock));
               rtcb->irqcount--;
             }
           else
@@ -535,7 +535,7 @@ void leave_critical_section(irqstate_t flags)
                * released, then unlock the spinlock.
                */
 
-              DEBUGASSERT(spin_islocked(&g_cpu_irqlock) &&
+              DEBUGASSERT(spin_is_locked(&g_cpu_irqlock) &&
                           (g_cpu_irqset & (1 << cpu)) != 0);
 
               /* Check if releasing the lock held by this CPU will unlock the
