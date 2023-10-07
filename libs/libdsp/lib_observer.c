@@ -170,7 +170,7 @@ void motor_aobserver_smo_init(FAR struct motor_aobserver_smo_f32_s *smo,
  *
  *  and get correction factor (z):
  *
- *    sign = sing(err)
+ *    sign = sign(err)
  *    z = sign*K_SLIDE
  *
  *  Once the digitalized model is compensated, we estimate BEMF (e_s.) by
