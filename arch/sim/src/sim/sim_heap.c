@@ -136,7 +136,7 @@ static void mm_free_delaylist(struct mm_heap_s *heap)
  ****************************************************************************/
 
 struct mm_heap_s *mm_initialize(const char *name,
-                                    void *heap_start, size_t heap_size)
+                                void *heap_start, size_t heap_size)
 {
   struct mm_heap_s *heap;
 
@@ -466,18 +466,7 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
 
 void up_allocate_heap(void **heap_start, size_t *heap_size)
 {
-  /* Note: Some subsystems like modlib and binfmt need to allocate
-   * executable memory.
-   */
-
-  /* We make the entire heap executable here to keep
-   * the sim simpler. If it turns out to be a problem, the
-   * ARCH_HAVE_TEXT_HEAP mechanism can be an alternative.
-   */
-
-  uint8_t *sim_heap = host_allocheap(SIM_HEAP_SIZE);
-
-  *heap_start = sim_heap;
+  *heap_start = host_allocheap(SIM_HEAP_SIZE, false);
   *heap_size  = SIM_HEAP_SIZE;
 }
 

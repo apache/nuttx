@@ -66,7 +66,7 @@ void *up_textheap_memalign(size_t align, size_t size)
    * don't need to do anything here.
    */
 
-  p = host_allocheap(size);
+  p = host_allocheap(size, true);
 
   flags = up_irq_save();
 
