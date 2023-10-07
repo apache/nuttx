@@ -721,6 +721,7 @@ static int virtio_mmio_interrupt(int irq, FAR void *context, FAR void *arg)
   uint32_t isr;
 
   isr = metal_io_read32(&vmdev->cfg_io, VIRTIO_MMIO_INTERRUPT_STATUS);
+  metal_io_write32(&vmdev->cfg_io, VIRTIO_MMIO_INTERRUPT_ACK, isr);
   if (isr & VIRTIO_MMIO_INTERRUPT_VRING)
     {
       for (i = 0; i < vmdev->vdev.vrings_num; i++)
@@ -734,7 +735,6 @@ static int virtio_mmio_interrupt(int irq, FAR void *context, FAR void *arg)
         }
     }
 
-  metal_io_write32(&vmdev->cfg_io, VIRTIO_MMIO_INTERRUPT_ACK, isr);
   return OK;
 }
 
