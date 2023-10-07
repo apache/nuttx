@@ -1660,6 +1660,24 @@ config ESP32S3_SPIFLASH_OP_TASK_STACKSIZE
 		to disable non-IRAM interrupts and wait for the SPI flash operation
 		to be finished.
 
+if ESP32S3_APP_FORMAT_LEGACY
+
+comment "Partition Table configuration"
+
+config ESP32S3_PARTITION_TABLE
+	bool "Create MTD partitions from Partition Table"
+	default n
+	depends on ESP32S3_MTD
+	---help---
+		Decode partition table and initialize partitions as MTD.
+
+config ESP32S3_PARTITION_MOUNTPT
+	string "Partition mount point"
+	default "/dev/esp/partition/"
+	depends on ESP32S3_PARTITION_TABLE
+
+endif # ESP32S3_APP_FORMAT_LEGACY
+
 endif # ESP32S3_SPIFLASH
 
 endmenu # SPI Flash configuration
