@@ -215,10 +215,13 @@ udp_find_raddr_device(FAR struct udp_conn_s *conn,
 #if defined(CONFIG_NET_MLD) && defined(CONFIG_NET_BINDTODEVICE)
           if (IN6_IS_ADDR_MULTICAST(&raddr))
             {
-              if ((conn->sconn.s_boundto == 0) &&
-                  (conn->mreq.imr_ifindex != 0))
+              if (conn->mreq.imr_ifindex != 0)
                 {
                   return netdev_findbyindex(conn->mreq.imr_ifindex);
+                }
+              else if (conn->sconn.s_boundto != 0)
+                {
+                  return netdev_findbyindex(conn->sconn.s_boundto);
                 }
             }
           else
