@@ -133,6 +133,8 @@
 #define ub8divub8(a,b)  (ub8toub16(a)/(ub16_t)(b))          /* Division */
 #define b8divi(a,i)     ((a)/(i))                           /* Simple division by integer */
 #define b8idiv(i,j)     (((i)<<8)/j)                        /* Division of integer, b8 result */
+#define b8abs(b)        ((b < 0) ? (-b) : (b))              /* Get the absolute value */
+#define b8sign(b)       ((b > 0) ? (b8ONE) : (-b8ONE))      /* Get the sign */
 
 /* 32-bit values with 16 bits of precision **********************************/
 
@@ -161,6 +163,8 @@
 #define b16muli(a,i)    ((a)*(i))                /* Simple multiplication by integer */
 #define b16divi(a,i)    ((a)/(i))                /* Simple division by integer*/
 #define b16idiv(i,j)    (((i)<<16)/j)            /* Division of integer, b16 result */
+#define b16abs(b)       ((b < 0) ? (-b) : (b))   /* Get the absolute value */
+#define b16sign(b)      ((b > 0) ? (b16ONE) : (-b16ONE))
 
 #ifdef CONFIG_HAVE_LONG_LONG
 /* Multiplication operators */
@@ -198,6 +202,8 @@
 #define b32trunc(a)     ((a) & 0xffffffff00000000)    /* Truncate to integer */
 #define b32round(a)     (((a)+0x0000000080000000) & 0xffffffff00000000)
 #define b32frac(a)      ((a) & 0x00000000ffffffff)    /* Take fractional part */
+#define b32abs(b)       ((b < 0) ? (-b) : (b))        /* Get the absolute value */
+#define b32sign(b)      ((b > 0) ? (b32ONE) : (-b32ONE))
 #endif
 
 /****************************************************************************
