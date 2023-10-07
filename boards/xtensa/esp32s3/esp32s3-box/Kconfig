@@ -5,6 +5,17 @@
 
 if ARCH_BOARD_ESP32S3_BOX
 
+choice
+	prompt "ESP32-S3-BOX Version"
+	default ESP32_S3_BOX_3
+
+config ESP32_S3_BOX
+	bool "ESP32-S3-BOX(old)"
+
+config ESP32_S3_BOX_3
+	bool "ESP32-S3-BOX-3"
+endchoice
+
 config ESP32S3_STORAGE_MTD_OFFSET
 	hex "Storage MTD base address in SPI Flash"
 	default 0x180000 if !ESP32S3_HAVE_OTA_PARTITION
@@ -57,7 +68,10 @@ config ESP32S3_BOX_LCD
 	select LCD_DEV
 	select LCD_ST7789
 	---help---
-		Enable board LCD support, IC is LCD_ST7789V. 
+		Enable board LCD support, IC is:
+
+			ESP32-S3-BOX:   ST7789V
+			ESP32-S3-BOX-3: ILI9342C
 
 config ESP32S3_BOARD_TOUCHSCREEN
 	bool "Enable Board Touchscreen"
@@ -66,7 +80,10 @@ config ESP32S3_BOARD_TOUCHSCREEN
 	select INPUT
 	select INPUT_TOUCHSCREEN
 	---help---
-		Enable board touchscreen support, IC is TT21100. 
+		Enable board touchscreen support, IC is:
+
+			ESP32-S3-BOX:   TT21100
+			ESP32-S3-BOX-3: GT911
 
 menu "Board Touchscreen Configuration"
 	depends on ESP32S3_BOARD_TOUCHSCREEN
@@ -78,10 +95,12 @@ config ESP32S3_BOARD_TOUCHSCREEN_PATH
 config ESP32S3_BOARD_TOUCHSCREEN_WIDTH
 	int "Touchscreen Width"
 	default 320
+	depends on ESP32_S3_BOX
 
 config ESP32S3_BOARD_TOUCHSCREEN_HEIGHT
 	int "Touchscreen Height"
 	default 240
+	depends on ESP32_S3_BOX
 
 config ESP32S3_BOARD_TOUCHSCREEN_SAMPLE_CACHES
 	int "Touchscreen Sample Cache Number"
@@ -94,10 +113,12 @@ config ESP32S3_BOARD_TOUCHSCREEN_SAMPLE_DELAYS
 config ESP32S3_BOARD_TOUCHSCREEN_X_MIRROR
 	bool "Touchscreen X Mirror"
 	default y
+	depends on ESP32_S3_BOX
 
 config ESP32S3_BOARD_TOUCHSCREEN_Y_MIRROR
 	bool "Touchscreen Y Mirror"
 	default n
+	depends on ESP32_S3_BOX
 
 endmenu # Touchscreen Configuration
 
