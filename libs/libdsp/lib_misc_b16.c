@@ -31,10 +31,6 @@
 #define VECTOR2D_SATURATE_MAG_MIN (1)
 #define FAST_ATAN2_SMALLNUM       (1)
 
-#ifndef ABS
-#  define ABS(a)   ((a) < 0 ? -(a) : (a))
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -327,7 +323,7 @@ b16_t fast_atan2_b16(b16_t y, b16_t x)
 
   /* Get absolute value of y and add some small number to prevent 0/0 */
 
-  abs_y = ABS(y) + FAST_ATAN2_SMALLNUM;
+  abs_y = b16abs(y) + FAST_ATAN2_SMALLNUM;
 
   /* Calculate angle */
 
