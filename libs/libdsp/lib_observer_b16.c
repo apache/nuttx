@@ -165,7 +165,7 @@ void motor_aobserver_smo_init_b16(FAR struct motor_aobserver_smo_b16_s *smo,
  *
  *  and get correction factor (z):
  *
- *    sign = sing(err)
+ *    sign = sign(err)
  *    z = sign*K_SLIDE
  *
  *  Once the digitalized model is compensated, we estimate BEMF (e_s.) by
@@ -323,8 +323,8 @@ void motor_aobserver_smo_b16(FAR struct motor_aobserver_b16_s *o,
 
   /* Slide-mode controller */
 
-  sign->a = (i_err->a > 0 ? b16ONE : -b16ONE);
-  sign->b = (i_err->b > 0 ? b16ONE : -b16ONE);
+  sign->a = b16sign(i_err->a);
+  sign->b = b16sign(i_err->b);
 
   /* Get current error absolute value - just multiply value with its sign */
 
