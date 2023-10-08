@@ -382,7 +382,6 @@ SYSCALL_LOOKUP(munmap,                     2)
   SYSCALL_LOOKUP(arc4random_buf,           2)
 #endif
 
-SYSCALL_LOOKUP(getrandom,                  3)
 SYSCALL_LOOKUP(nanosleep,                  2)
 
 /* I/O event notification facility */
