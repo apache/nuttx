@@ -23,8 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/arch.h>
-#include <nuttx/queue.h>
-#include <nuttx/kmalloc.h>
+#include <nuttx/mm/mm.h>
 
 #include "sim_internal.h"
 
@@ -32,16 +31,7 @@
  * Private Data
  ****************************************************************************/
 
-/* Record memory allocated for text sections by sq_queue_t */
-
-struct textheap_s
-{
-  sq_entry_t entry;
-  void *p;
-  size_t size;
-};
-
-static sq_queue_t g_textheap_list;
+static struct mm_heap_s *g_textheap;
 
 /****************************************************************************
  * Public Functions
@@ -57,40 +47,14 @@ static sq_queue_t g_textheap_list;
 
 void *up_textheap_memalign(size_t align, size_t size)
 {
-  struct textheap_s *node;
-  void *p;
-  irqstate_t flags;
-
-  /* host_allocheap (mmap) returns memory aligned to the page size, which
-   * is always a multiple of the alignment (4/8) for text section. So, we
-   * don't need to do anything here.
-   */
-
-  p = host_allocheap(size, true);
-
-  flags = up_irq_save();
-
-  if (p)
+  if (g_textheap == NULL)
     {
-      node = kmm_malloc(sizeof(*node));
-
-      if (node)
-        {
-          node->p = p;
-          node->size = size;
-
-          sq_addlast(&node->entry, &g_textheap_list);
-        }
-      else
-        {
-          host_freeheap(p);
-          p = NULL;
-        }
+      g_textheap = mm_initialize("textheap",
+                                 host_allocheap(SIM_HEAP_SIZE, true),
+                                 SIM_HEAP_SIZE);
     }
 
-  up_irq_restore(flags);
-
-  return p;
+  return mm_memalign(g_textheap, align, size);
 }
 
 /****************************************************************************
@@ -103,26 +67,10 @@ void *up_textheap_memalign(size_t align, size_t size)
 
 void up_textheap_free(void *p)
 {
-  sq_entry_t *node;
-  struct textheap_s *entry;
-  irqstate_t flags = up_irq_save();
-
-  for (node = sq_peek(&g_textheap_list);
-       node != NULL;
-       node = sq_next(node))
+  if (g_textheap)
     {
-      entry = (struct textheap_s *)node;
-
-      if (entry->p == p)
-        {
-          sq_rem(node, &g_textheap_list);
-          host_freeheap(p);
-          kmm_free(entry);
-          break;
-        }
+      mm_free(g_textheap, p);
     }
-
-  up_irq_restore(flags);
 }
 
 /****************************************************************************
@@ -135,24 +83,5 @@ void up_textheap_free(void *p)
 
 bool up_textheap_heapmember(void *p)
 {
-  bool ret = false;
-  sq_entry_t *node;
-  struct textheap_s *entry;
-  irqstate_t flags = up_irq_save();
-
-  for (node = sq_peek(&g_textheap_list);
-       node != NULL;
-       node = sq_next(node))
-    {
-      entry = (struct textheap_s *)node;
-
-      if (entry->p == p)
-        {
-          ret = true;
-          break;
-        }
-    }
-
-  up_irq_restore(flags);
-  return ret;
+  return g_textheap && mm_heapmember(g_textheap, p);
 }
