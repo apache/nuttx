@@ -44,9 +44,7 @@
  * headers
  */
 
-#define CONFIG_ESP32_SUPPORT_MULTIPLE_PHY_INIT_DATA_BIN     0
-#define CONFIG_MAC_BB_PD                                    0
-
+#define CONFIG_MAC_BB_PD                              (0)
 #define MAC_LEN                                       (6)
 
 /****************************************************************************
@@ -158,6 +156,22 @@ void IRAM_ATTR esp32s3_phy_enable_clock(void);
  ****************************************************************************/
 
 void esp32s3_phy_disable_clock(void);
+
+/****************************************************************************
+ * Name: esp32s3_phy_update_country_info
+ *
+ * Description:
+ *   Update PHY init data according to country code
+ *
+ * Input Parameters:
+ *   country - PHY init data type
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int esp32s3_phy_update_country_info(const char *country);
 
 /****************************************************************************
  * Functions needed by libphy.a

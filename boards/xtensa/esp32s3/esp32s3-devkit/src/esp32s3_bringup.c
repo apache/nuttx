@@ -170,6 +170,14 @@ int esp32s3_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_ESP32S3_SPIFLASH
+  ret = board_spiflash_init();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI Flash\n");
+    }
+#endif
+
 #ifdef CONFIG_ESP32S3_PARTITION_TABLE
   ret = esp32s3_partition_init();
   if (ret < 0)
@@ -316,14 +324,6 @@ int esp32s3_bringup(void)
   if (ret != OK)
     {
       syslog(LOG_ERR, "Failed to register djoystick driver: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_ESP32S3_SPIFLASH
-  ret = board_spiflash_init();
-  if (ret)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize SPI Flash\n");
     }
 #endif
 
