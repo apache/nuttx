@@ -126,6 +126,8 @@ config USBDEV_TRACE_STRINGS
 		extern const struct trace_msg_t g_usb_trace_strings_intdecode[];
 		#endif
 
+endif # USBDEV_TRACE
+
 config USBDEV_TRACE_INITIALIDSET
 	int "Initial enable bits"
 	default 0
@@ -133,8 +135,6 @@ config USBDEV_TRACE_INITIALIDSET
 		This is the set of initial USB features that are enabled at boot
 		time.  See the event ID class bit definitions in
 		include/nuttx/usbdev_trace.h.
-
-endif # USBDEV_TRACE
 
 menuconfig USBDEV_CUSTOM_TXFIFO_SIZE
 	bool "Custom TX Fifo size"
