@@ -95,6 +95,10 @@ else
   endif
 endif
 
+ifeq ($(CONFIG_ARCH_INSTRUMENT_ALL),y)
+  ARCHOPTIMIZATION += -finstrument-functions
+endif
+
 # Add -fno-common because macOS "ld -r" doesn't seem to pick objects
 # for common symbols.
 ARCHCFLAGS += -fno-common

@@ -65,6 +65,10 @@ if(CONFIG_ARMV8M_STACKCHECK)
   list(APPEND PLATFORM_FLAGS -finstrument-functions -ffixed-r10)
 endif()
 
+if(CONFIG_ARCH_INSTRUMENT_ALL AND NOT CONFIG_ARMV8M_STACKCHECK)
+  list(APPEND PLATFORM_FLAGS -finstrument-functions)
+endif()
+
 if(CONFIG_ARMV8M_CMSE)
   list(APPEND PLATFORM_FLAGS -mcmse)
 endif()
