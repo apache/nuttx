@@ -524,7 +524,7 @@ FAR void *mempool_multiple_alloc(FAR struct mempool_multiple_s *mpool,
   end = mpool->pools + mpool->npools;
   do
     {
-      FAR void *blk = mempool_alloc(pool);
+      FAR void *blk = mempool_allocate(pool);
 
       if (blk)
         {
@@ -610,7 +610,7 @@ int mempool_multiple_free(FAR struct mempool_multiple_s *mpool,
   blk = (FAR char *)blk - (((FAR char *)blk -
                            ((FAR char *)dict->addr + mpool->minpoolsize)) %
                            MEMPOOL_REALBLOCKSIZE(dict->pool));
-  mempool_free(dict->pool, blk);
+  mempool_release(dict->pool, blk);
   return 0;
 }
 
@@ -689,7 +689,7 @@ FAR void *mempool_multiple_memalign(FAR struct mempool_multiple_s *mpool,
   end = mpool->pools + mpool->npools;
   do
     {
-      FAR char *blk = mempool_alloc(pool);
+      FAR char *blk = mempool_allocate(pool);
       if (blk != NULL)
         {
           return (FAR void *)ALIGN_UP(blk, alignment);
