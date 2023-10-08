@@ -377,6 +377,11 @@ void regmap_exit(FAR struct regmap_s *map)
       nxmutex_destroy(&map->mutex[0]);
     }
 
+  if (map->bus->exit != NULL)
+    {
+      map->bus->exit(map->bus);
+    }
+
   kmm_free(map->bus);
   kmm_free(map);
 }
