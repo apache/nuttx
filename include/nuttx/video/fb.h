@@ -1057,6 +1057,33 @@ int fb_remove_paninfo(FAR struct fb_vtable_s *vtable, int overlay);
 int fb_paninfo_count(FAR struct fb_vtable_s *vtable, int overlay);
 
 /****************************************************************************
+ * Name: fb_register_device
+ *
+ * Description:
+ *   Register the framebuffer character device at /dev/fbN where N is the
+ *   display number if the devices supports only a single plane.  If the
+ *   hardware supports multiple color planes, then the device will be
+ *   registered at /dev/fbN.M where N is the again display number but M
+ *   is the display plane.
+ *
+ * Input Parameters:
+ *   display - The display number for the case of boards supporting multiple
+ *             displays or for hardware that supports multiple
+ *             layers (each layer is consider a display).  Typically zero.
+ *   plane   - Identifies the color plane on hardware that supports separate
+ *             framebuffer "planes" for each color component.
+ *   vtable  - Pointer to framebuffer's virtual table.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned success; a negated errno value is returned on any
+ *   failure.
+ *
+ ****************************************************************************/
+
+int fb_register_device(int display, int plane,
+                       FAR struct fb_vtable_s *vtable);
+
+/****************************************************************************
  * Name: fb_register
  *
  * Description:
