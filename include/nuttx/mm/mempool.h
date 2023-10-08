@@ -174,7 +174,7 @@ extern "C"
 int mempool_init(FAR struct mempool_s *pool, FAR const char *name);
 
 /****************************************************************************
- * Name: mempool_alloc
+ * Name: mempool_allocate
  *
  * Description:
  *   Allocate an block from a specific memory pool.
@@ -190,10 +190,10 @@ int mempool_init(FAR struct mempool_s *pool, FAR const char *name);
  *
  ****************************************************************************/
 
-FAR void *mempool_alloc(FAR struct mempool_s *pool);
+FAR void *mempool_allocate(FAR struct mempool_s *pool);
 
 /****************************************************************************
- * Name: mempool_free
+ * Name: mempool_release
  *
  * Description:
  *   Release an memory block to the pool.
@@ -203,7 +203,7 @@ FAR void *mempool_alloc(FAR struct mempool_s *pool);
  *   blk  - The pointer of memory block.
  ****************************************************************************/
 
-void mempool_free(FAR struct mempool_s *pool, FAR void *blk);
+void mempool_release(FAR struct mempool_s *pool, FAR void *blk);
 
 /****************************************************************************
  * Name: mempool_info
