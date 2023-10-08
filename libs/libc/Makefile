@@ -49,6 +49,7 @@ include pwd/Make.defs
 include queue/Make.defs
 include regex/Make.defs
 include sched/Make.defs
+include search/Make.defs
 include semaphore/Make.defs
 include signal/Make.defs
 include spawn/Make.defs
