@@ -820,8 +820,6 @@ static void i2c_reset_fsmc(struct esp32s3_i2c_priv_s *priv)
   /* Reset FSM machine */
 
   modifyreg32(I2C_CTR_REG(priv->id), 0, I2C_FSM_RST);
-
-  i2c_clear_bus(priv);
 }
 
 /****************************************************************************
