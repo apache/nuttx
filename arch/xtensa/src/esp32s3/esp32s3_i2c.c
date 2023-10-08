@@ -1125,9 +1125,9 @@ static void i2c_clear_bus(struct esp32s3_i2c_priv_s *priv)
               I2C_SCL_RST_SLV_EN | I2C_SCL_RST_SLV_NUM_M,
               VALUE_TO_FIELD(I2C_SCL_CYC_NUM_DEF, I2C_SCL_RST_SLV_NUM));
 
-  modifyreg32(I2C_CTR_REG(priv->id), 0, I2C_CONF_UPGATE);
-
   modifyreg32(I2C_SCL_SP_CONF_REG(priv->id), 0, I2C_SCL_RST_SLV_EN);
+
+  modifyreg32(I2C_CTR_REG(priv->id), 0, I2C_CONF_UPGATE);
 }
 
 /****************************************************************************
