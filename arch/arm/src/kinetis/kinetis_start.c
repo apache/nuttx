@@ -153,6 +153,10 @@ void __start(void)
     }
 #endif
 
+#ifdef CONFIG_ARMV7M_STACKCHECK
+  arm_stack_check_init();
+#endif
+
   /* Perform clock and Kinetis module initialization (This depends on
    * RAM functions having been copied to RAM).
    */

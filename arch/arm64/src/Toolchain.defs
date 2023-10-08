@@ -84,6 +84,12 @@ ifeq ($(CONFIG_MM_KASAN_ALL),y)
   ARCHOPTIMIZATION += -fsanitize=kernel-address
 endif
 
+# Instrumentation options
+
+ifeq ($(CONFIG_ARCH_INSTRUMENT_ALL),y)
+  ARCHOPTIMIZATION += -finstrument-functions
+endif
+
 ifeq ($(CONFIG_ARCH_FPU),y)
   ARCHCXXFLAGS += -D_LDBL_EQ_DBL
   ARCHCFLAGS   += -D_LDBL_EQ_DBL

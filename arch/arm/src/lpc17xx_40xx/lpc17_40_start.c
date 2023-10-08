@@ -153,6 +153,10 @@ void __start(void)
 
   showprogress('C');
 
+#ifdef CONFIG_ARMV7M_STACKCHECK
+  arm_stack_check_init();
+#endif
+
   /* Perform early serial initialization */
 
 #ifdef USE_EARLYSERIALINIT
