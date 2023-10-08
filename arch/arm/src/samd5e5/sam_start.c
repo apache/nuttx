@@ -167,6 +167,10 @@ void __start(void)
     }
 #endif
 
+#ifdef CONFIG_ARMV7M_STACKCHECK
+  arm_stack_check_init();
+#endif
+
   /* Initialize clocking and the FPU.  Configure the console UART so that
    * we can get debug output as soon as possible.
    */

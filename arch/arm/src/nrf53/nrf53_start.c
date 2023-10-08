@@ -236,6 +236,10 @@ void __start(void)
 
   showprogress('C');
 
+#ifdef CONFIG_ARMV8M_STACKCHECK
+  arm_stack_check_init();
+#endif
+
 #ifdef CONFIG_ARCH_HAVE_FPU
   /* Initialize the FPU (if available) */
 

@@ -90,4 +90,8 @@ if(CONFIG_ARMV7M_STACKCHECK)
   list(APPEND PLATFORM_FLAGS -finstrument-functions -ffixed-r10)
 endif()
 
+if(CONFIG_ARCH_INSTRUMENT_ALL AND NOT CONFIG_ARMV7M_STACKCHECK)
+  list(APPEND PLATFORM_FLAGS -finstrument-functions)
+endif()
+
 add_compile_options(${PLATFORM_FLAGS})

@@ -86,6 +86,12 @@ ifeq ($(CONFIG_MM_KASAN_DISABLE_WRITES_CHECK),y)
   ARCHOPTIMIZATION += --param asan-instrument-writes=0
 endif
 
+# Instrumentation options
+
+ifeq ($(CONFIG_ARCH_INSTRUMENT_ALL),y)
+  ARCHOPTIMIZATION += -finstrument-functions
+endif
+
 ifeq ($(CONFIG_UNWINDER_ARM),y)
   ARCHOPTIMIZATION += -funwind-tables -fasynchronous-unwind-tables
 endif
