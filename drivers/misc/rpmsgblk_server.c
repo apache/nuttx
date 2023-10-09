@@ -31,6 +31,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/rptun/openamp.h>
 
+#include "inode.h"
 #include "rpmsgblk.h"
 
 /****************************************************************************
@@ -119,23 +120,19 @@ static int rpmsgblk_open_handler(FAR struct rpmsg_endpoint *ept,
   FAR struct rpmsgblk_server_s *server = ept->priv;
   FAR struct rpmsgblk_open_s *msg = data;
 
-  if (server->blknode != NULL)
+  if (server->bops->open != NULL)
     {
-      msg->header.result = -EBUSY;
-      goto out;
+      msg->header.result = server->bops->open(server->blknode);
+      if (msg->header.result < 0)
+        {
+          ferr("block device open failed, ret=%d\n", msg->header.result);
+        }
+    }
+  else
+    {
+      msg->header.result = 0;
     }
 
-  msg->header.result = open_blockdriver(&ept->name[RPMSGBLK_NAME_PREFIX_LEN],
-                                        0, &server->blknode);
-  if (msg->header.result < 0)
-    {
-      ferr("block device open failed, ret=%d\n", msg->header.result);
-      goto out;
-    }
-
-  server->bops = server->blknode->u.i_bops;
-
-out:
   return rpmsg_send(ept, msg, sizeof(*msg));
 }
 
@@ -150,17 +147,19 @@ static int rpmsgblk_close_handler(FAR struct rpmsg_endpoint *ept,
   FAR struct rpmsgblk_server_s *server = ept->priv;
   FAR struct rpmsgblk_close_s *msg = data;
 
-  msg->header.result = close_blockdriver(server->blknode);
-  if (msg->header.result < 0)
+  if (server->bops->close != NULL)
     {
-      ferr("block device close failed, ret=%d\n", msg->header.result);
-      goto out;
+      msg->header.result = server->bops->close(server->blknode);
+      if (msg->header.result < 0)
+        {
+          ferr("block device close failed, ret=%d\n", msg->header.result);
+        }
+    }
+  else
+    {
+      msg->header.result = 0;
     }
 
-  server->bops    = NULL;
-  server->blknode = NULL;
-
-out:
   return rpmsg_send(ept, msg, sizeof(*msg));
 }
 
@@ -375,7 +374,18 @@ static void rpmsgblk_ns_bind(FAR struct rpmsg_device *rdev,
       return;
     }
 
+  ret = find_blockdriver(&name[RPMSGBLK_NAME_PREFIX_LEN], 0,
+                         &server->blknode);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to find %s block driver\n",
+           &name[RPMSGBLK_NAME_PREFIX_LEN]);
+      kmm_free(server);
+      return;
+    }
+
   server->ept.priv = server;
+  server->bops = server->blknode->u.i_bops;
 
   ret = rpmsg_create_ept(&server->ept, rdev, name,
                          RPMSG_ADDR_ANY, dest,
@@ -383,6 +393,7 @@ static void rpmsgblk_ns_bind(FAR struct rpmsg_device *rdev,
   if (ret < 0)
     {
       ferr("endpoint create failed, ret=%d\n", ret);
+      inode_release(server->blknode);
       kmm_free(server);
     }
 }
@@ -396,6 +407,7 @@ static void rpmsgblk_ns_unbind(FAR struct rpmsg_endpoint *ept)
   FAR struct rpmsgblk_server_s *server = ept->priv;
 
   rpmsg_destroy_ept(&server->ept);
+  inode_release(server->blknode);
   kmm_free(server);
 }
 

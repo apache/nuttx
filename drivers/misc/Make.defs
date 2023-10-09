@@ -65,6 +65,7 @@ endif
 
 ifeq ($(CONFIG_BLK_RPMSG_SERVER),y)
   CSRCS += rpmsgblk_server.c
+  CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)fs$(DELIM)inode
 endif
 
 # Include build support
