@@ -70,7 +70,9 @@ struct virtio_snd_buffer_s
 struct virtio_snd_dev_s
 {
   struct audio_lowerhalf_s dev;
+  uint32_t cache_buffers;
   uint32_t period_bytes;
+  uint32_t frame_size;
   uint32_t index;
   bool running;
   FAR void *priv;
@@ -333,6 +335,7 @@ static void virtio_snd_pcm_notify_cb(FAR struct virtqueue *vq)
   for (; ; )
     {
       FAR struct virtio_snd_buffer_s *buf;
+      FAR struct virtio_snd_dev_s *sdev;
       buf = virtqueue_get_buffer(vq, NULL, NULL);
       if (buf == NULL)
         {
@@ -346,6 +349,8 @@ static void virtio_snd_pcm_notify_cb(FAR struct virtqueue *vq)
       buf->dev->upper(buf->dev->priv, AUDIO_CALLBACK_DEQUEUE,
                       &buf->apb, OK);
 #endif
+      sdev = (FAR struct virtio_snd_dev_s *)buf->dev;
+      sdev->cache_buffers--;
     }
 }
 
@@ -401,6 +406,7 @@ static int virtio_snd_send_pcm(FAR struct virtio_snd_dev_s *sdev,
     }
 
   virtqueue_kick(vq);
+  sdev->cache_buffers++;
 
   return OK;
 }
@@ -736,6 +742,7 @@ static int virtio_snd_configure(FAR struct audio_lowerhalf_s *dev,
         rate = caps->ac_controls.hw[0] | (caps->ac_controls.b[3] << 16);
         bps = caps->ac_controls.b[2];
         ch = caps->ac_channels;
+        sdev->frame_size = ch * bps / 8;
         sdev->period_bytes =
         virtio_snd_get_period_bytes(rate, ch, bps,
                                     CONFIG_DRIVERS_VIRTIO_SOUND_PERIOD_TIME);
@@ -980,6 +987,7 @@ static int virtio_snd_ioctl(FAR struct audio_lowerhalf_s *dev,
 {
   FAR struct virtio_snd_dev_s *sdev = (FAR struct virtio_snd_dev_s *)dev;
   FAR struct ap_buffer_info_s *bufinfo;
+  FAR long *latency = (FAR long *)arg;
 
   switch (cmd)
     {
@@ -987,6 +995,11 @@ static int virtio_snd_ioctl(FAR struct audio_lowerhalf_s *dev,
         bufinfo = (FAR struct ap_buffer_info_s *)arg;
         bufinfo->nbuffers = CONFIG_DRIVERS_VIRTIO_SND_BUFFER_COUNT;
         bufinfo->buffer_size = sdev->period_bytes;
+        break;
+
+      case AUDIOIOC_GETLATENCY:
+        *latency = sdev->cache_buffers * sdev->period_bytes /
+                   sdev->frame_size;
         break;
 
       default:
