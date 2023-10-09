@@ -66,6 +66,10 @@ static off_t   pseudofile_seek(FAR struct file *filep, off_t offset,
                                int whence);
 static int     pseudofile_mmap(FAR struct file *filep,
                                FAR struct mm_map_entry_s *map);
+static int     pseudofile_munmap(FAR struct task_group_s *group,
+                                 FAR struct mm_map_entry_s *map,
+                                 FAR void *start,
+                                 size_t length);
 static int     pseudofile_truncate(FAR struct file *filep, off_t length);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int     pseudofile_unlink(FAR struct inode *inode);
@@ -309,14 +313,76 @@ static int pseudofile_mmap(FAR struct file *filep,
   FAR struct inode *node = filep->f_inode;
   FAR struct fs_pseudofile_s *pf = node->i_private;
 
-  if (map->offset >= 0 && map->offset < node->i_size &&
-      map->length != 0 && map->offset + map->length <= node->i_size)
+  /* Keep the inode when mmapped, increase refcount */
+
+  int ret = inode_addref(node);
+  if (ret >= 0)
     {
-      map->vaddr = pf->content + map->offset;
-      return OK;
+      if (map->offset >= 0 && map->offset < node->i_size &&
+          map->length != 0 && map->offset + map->length <= node->i_size)
+        {
+          map->vaddr = pf->content + map->offset;
+          map->munmap = pseudofile_munmap;
+          map->priv.p = (FAR void *)node;
+          ret = mm_map_add(get_current_mm(), map);
+        }
+      else
+        {
+          ret = -EINVAL;
+        }
+
+      if (ret < 0)
+        {
+          inode_release(node);
+        }
     }
 
-  return -EINVAL;
+  return ret;
+}
+
+static int pseudofile_munmap(FAR struct task_group_s *group,
+                             FAR struct mm_map_entry_s *map,
+                             FAR void *start,
+                             size_t length)
+{
+  FAR struct inode *inode = (FAR struct inode *)map->priv.p;
+
+  /* If the file has been unlinked previously, delete the contents.
+   * The inode is released after this call, hence checking if i_crefs <= 1.
+   */
+
+  int ret = inode_lock();
+  if (ret >= 0)
+    {
+      if (inode->i_parent == NULL &&
+          inode->i_crefs <= 1)
+        {
+          /* Delete the inode metadata */
+
+          if (inode->i_private)
+            {
+              kmm_free(inode->i_private);
+            }
+
+          inode->i_private = NULL;
+          ret = OK;
+        }
+
+      inode_unlock();
+    }
+
+  /* Unkeep the inode when unmapped, decrease refcount */
+
+  if (ret == OK)
+    {
+      inode_release(inode);
+
+      /* Remove the mapping. */
+
+      ret = mm_map_remove(get_group_mm(group), map);
+    }
+
+  return ret;
 }
 
 static int pseudofile_truncate(FAR struct file *filep, off_t length)
