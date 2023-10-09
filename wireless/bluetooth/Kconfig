@@ -193,6 +193,25 @@ config BLUETOOTH_TXCONN_NMSGS
 	int "Tx connection thread mqueue size"
 	default 16
 
+config BLUETOOTH_TXCMD_PINNED_TO_CORE
+	bool "Pin Tx command thread to specific core"
+	depends on SMP
+	default n
+	---help---
+		This option enables us to set the affinity of the Tx command thread
+		to make it run on a specific core.
+
+if BLUETOOTH_TXCMD_PINNED_TO_CORE
+
+config BLUETOOTH_TXCMD_CORE
+	int "Tx command thread CPU core"
+	default 1
+	range 1 SMP_NCPUS
+	---help---
+		Select the core to pin the Tx command thread.
+
+endif # BLUETOOTH_TXCMD_PINNED_TO_CORE
+
 endmenu # Kernel Thread Configuration
 
 config BLUETOOTH_SMP_SELFTEST
