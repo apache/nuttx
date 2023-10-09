@@ -289,10 +289,13 @@ ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
   endif
 endif
 
+SHCCFLAGS = -fPIC -fPIE -fvisibility=default
+SHLDFLAGS = -shared -Bsymbolic -Bdynamic -G
+
 ifeq ($(CONFIG_SIM_M32),y)
   LDLINKFLAGS += -melf_i386
   LDFLAGS += -m32
   LDMODULEFLAGS += -melf_i386
-  SHMODULEFLAGS += -melf_i386
+  SHLDFLAGS += -melf_i386
   LDELFFLAGS += -melf_i386
 endif
