@@ -104,7 +104,11 @@ do {\
 
 #define ESP_BT_CONTROLLER_CONFIG_MAGIC_VAL  0x20200622
 
-extern void btdm_controller_set_sleep_mode(uint8_t mode);
+#ifdef CONFIG_ESP32_BLE_INTERRUPT_SAVE_STATUS
+#  define NR_IRQSTATE_FLAGS   CONFIG_ESP32_BLE_INTERRUPT_SAVE_STATUS
+#else
+#  define NR_IRQSTATE_FLAGS   3
+#endif
 
 /****************************************************************************
  * Private Types
@@ -305,6 +309,14 @@ struct osi_funcs_s
     uint32_t _magic;
 };
 
+/* List of nested IRQ status flags */
+
+struct irqstate_list_s
+{
+  struct irqstate_list_s *flink;
+  irqstate_t flags;
+};
+
 /****************************************************************************
  * Private Function
  ****************************************************************************/
@@ -503,7 +515,11 @@ static DRAM_ATTR esp_timer_handle_t g_btdm_slp_tmr;
 
 /* BT interrupt private data */
 
-static irqstate_t g_inter_flags;
+static sq_queue_t g_int_flags_free;
+
+static sq_queue_t g_int_flags_used;
+
+static struct irqstate_list_s g_int_flags[NR_IRQSTATE_FLAGS];
 
 /****************************************************************************
  * Public Data
@@ -624,6 +640,8 @@ static btdm_dram_available_region_t btdm_dram_available_region[] =
     SOC_MEM_BT_MISC_END
   },
 };
+
+extern void btdm_controller_set_sleep_mode(uint8_t mode);
 
 /****************************************************************************
  * Private Functions and Public Functions only used by libraries
@@ -1089,7 +1107,15 @@ static int esp_int_adpt_cb(int irq, void *context, void *arg)
 
 static void IRAM_ATTR interrupt_disable(void)
 {
-  g_inter_flags = enter_critical_section();
+  struct irqstate_list_s *irqstate;
+
+  irqstate = (struct irqstate_list_s *)sq_remlast(&g_int_flags_free);
+
+  DEBUGASSERT(irqstate != NULL);
+
+  irqstate->flags = enter_critical_section();
+
+  sq_addlast((sq_entry_t *)irqstate, &g_int_flags_used);
 }
 
 /****************************************************************************
@@ -1109,7 +1135,15 @@ static void IRAM_ATTR interrupt_disable(void)
 
 static void IRAM_ATTR interrupt_restore(void)
 {
-  leave_critical_section(g_inter_flags);
+  struct irqstate_list_s *irqstate;
+
+  irqstate = (struct irqstate_list_s *)sq_remlast(&g_int_flags_used);
+
+  DEBUGASSERT(irqstate != NULL);
+
+  leave_critical_section(irqstate->flags);
+
+  sq_addlast((sq_entry_t *)irqstate, &g_int_flags_free);
 }
 
 /****************************************************************************
@@ -2370,6 +2404,15 @@ int esp32_bt_controller_init(void)
   esp_bt_controller_config_t *cfg = &bt_cfg;
   int err;
   uint32_t btdm_cfg_mask = 0;
+  int i;
+
+  sq_init(&g_int_flags_free);
+  sq_init(&g_int_flags_used);
+
+  for (i = 0; i < NR_IRQSTATE_FLAGS; i++)
+    {
+      sq_addlast((sq_entry_t *)&g_int_flags[i], &g_int_flags_free);
+    }
 
   if (btdm_controller_status != ESP_BT_CONTROLLER_STATUS_IDLE)
     {

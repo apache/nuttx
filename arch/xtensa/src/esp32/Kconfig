@@ -2093,7 +2093,7 @@ choice EXAMPLE_POWER_SAVE_MODE
 
 config EXAMPLE_POWER_SAVE_NONE
 	bool "none"
-	
+
 config EXAMPLE_POWER_SAVE_MIN_MODEM
 	bool "minimum modem"
 
@@ -2129,6 +2129,12 @@ config ESP32_BLE_TASK_STACK_SIZE
 config ESP32_BLE_TASK_PRIORITY
 	int "Controller task priority"
 	default 110
+
+config ESP32_BLE_INTERRUPT_SAVE_STATUS
+	int "Number of interrupt save status"
+	default 3
+	---help---
+		Number of interrupt save status variables to keep track. Increase it if any related bug is found.
 
 config ESP32_BLE_MAX_CONN
 	int "Maximum BLE simultaneous connections"
