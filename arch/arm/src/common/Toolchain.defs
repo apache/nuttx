@@ -409,3 +409,12 @@ include $(TOPDIR)/tools/Rust.defs
 # LDC (LLVM D Compiler) toolchain
 
 include $(TOPDIR)/tools/D.defs
+
+# Shared library build flags
+
+SHCCFLAGS = -fPIC -fPIE -fvisibility=default
+SHLDFLAGS = -shared -Bsymbolic -Bdynamic -G
+
+ifeq ($(CONFIG_SIM_M32),y)
+  SHLDFLAGS += -melf_i386
+endif
