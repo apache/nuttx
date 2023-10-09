@@ -49,6 +49,28 @@ DT_LOCATION = re.compile(r"\(DW_OP_addr: ([0-9a-f]+)\)")
 SRC_FILE_EXT = (".h", ".c", ".hpp", ".cpp", ".hxx", ".cxx", ".c++")
 
 
+class NuttxDictExporter(DictExporter):
+    def export(self, node):
+        """Export tree starting at `node`."""
+        attriter = self.attriter or (lambda attr_values: attr_values)
+        return self.__export(node, self.dictcls, attriter, self.childiter)
+
+    def __export(self, node, dictcls, attriter, childiter, level=1):
+        attr_values = attriter(self._iter_attr_values(node))
+        data = dictcls(attr_values)
+        data["size"] = data.pop("_size")
+
+        maxlevel = self.maxlevel
+        if maxlevel is None or level < maxlevel:
+            children = [
+                self.__export(child, dictcls, attriter, childiter, level=level + 1)
+                for child in childiter(node.children)
+            ]
+            if children:
+                data["children"] = children
+        return data
+
+
 def get_symbol_addr(sym):
     """Get the address of a symbol"""
     return sym["st_value"]
@@ -530,7 +552,7 @@ class TreeNode(NodeMixin):
     def __init__(self, name, identifier, size=0, parent=None, children=None):
         super().__init__()
         self.name = name
-        self.size = size
+        self._size = size
         self.parent = parent
         self.identifier = identifier
         if children:
@@ -538,6 +560,14 @@ class TreeNode(NodeMixin):
 
     def __repr__(self):
         return self.name
+
+    @property
+    def size(self):
+        return self._size
+
+    @size.setter
+    def size(self, value):
+        self._size = value
 
 
 def sum_node_children_size(node):
@@ -756,7 +786,6 @@ def main():
         targets = ["rom", "ram"]
 
     for t in targets:
-
         elf = ELFFile(open(args.kernel, "rb"))
 
         assert elf.has_dwarf_info(), "ELF file has no DWARF information"
@@ -803,7 +832,7 @@ def main():
             if not args.quiet:
                 print_any_tree(root, symsize, args.depth)
 
-            exporter = DictExporter()
+            exporter = NuttxDictExporter()
             data = dict()
             data["symbols"] = exporter.export(root)
             data["total_size"] = symsize
