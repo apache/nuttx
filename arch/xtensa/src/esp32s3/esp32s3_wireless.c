@@ -741,7 +741,7 @@ IRAM_ATTR void esp_post_semcache(struct esp_semcache_s *sc)
 
   sc->count++;
 
-  /* Enable CPU 0 interrupt. This will generate an IRQ as soon as non-IRAM
+  /* Enable CPU 2 interrupt. This will generate an IRQ as soon as non-IRAM
    * are (re)enabled.
    */
 
