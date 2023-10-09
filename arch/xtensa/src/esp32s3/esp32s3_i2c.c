@@ -257,9 +257,9 @@ static int i2c_sem_waitdone(struct esp32s3_i2c_priv_s *priv);
 #ifdef CONFIG_I2C_POLLED
 static int i2c_polling_waitdone(struct esp32s3_i2c_priv_s *priv);
 #endif
-static void i2c_clear_bus(struct esp32s3_i2c_priv_s *priv);
 static void i2c_reset_fsmc(struct esp32s3_i2c_priv_s *priv);
 #ifdef CONFIG_I2C_RESET
+static void i2c_clear_bus(struct esp32s3_i2c_priv_s *priv);
 static int i2c_reset(struct i2c_master_s *dev);
 #endif
 
@@ -1117,6 +1117,7 @@ static int i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_I2C_RESET
 static void i2c_clear_bus(struct esp32s3_i2c_priv_s *priv)
 {
   modifyreg32(I2C_SCL_SP_CONF_REG(priv->id),
@@ -1142,7 +1143,6 @@ static void i2c_clear_bus(struct esp32s3_i2c_priv_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_I2C_RESET
 static int i2c_reset(struct i2c_master_s *dev)
 {
   struct esp32s3_i2c_priv_s *priv = (struct esp32s3_i2c_priv_s *)dev;
