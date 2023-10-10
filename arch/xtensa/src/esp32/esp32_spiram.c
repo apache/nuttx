@@ -84,10 +84,8 @@ unsigned int IRAM_ATTR cache_sram_mmu_set(int cpu_no, int pid,
                                           int psize, int num)
 {
   uint32_t regval;
-  uint32_t statecpu0;
 #ifdef CONFIG_SMP
   int cpu_to_stop = 0;
-  uint32_t statecpu1;
   bool smp_start = OSINIT_OS_READY();
 #endif
   unsigned int i;
@@ -184,10 +182,10 @@ unsigned int IRAM_ATTR cache_sram_mmu_set(int cpu_no, int pid,
       up_cpu_pause(cpu_to_stop);
     }
 
-  spi_disable_cache(1, &statecpu1);
+  spi_disable_cache(1);
 #endif
 
-  spi_disable_cache(0, &statecpu0);
+  spi_disable_cache(0);
 
   /* mmu change */
 
@@ -213,9 +211,9 @@ unsigned int IRAM_ATTR cache_sram_mmu_set(int cpu_no, int pid,
       putreg32(regval, DPORT_APP_CACHE_CTRL1_REG);
     }
 
-  spi_enable_cache(0, statecpu0);
+  spi_enable_cache(0);
 #ifdef CONFIG_SMP
-  spi_enable_cache(1, statecpu1);
+  spi_enable_cache(1);
 
   if (smp_start)
     {

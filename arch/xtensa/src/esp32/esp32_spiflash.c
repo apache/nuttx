@@ -65,8 +65,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Used in spiflash_cachestate_s structure even when SMP is disabled. */
-
 #define SPI_FLASH_WRITE_BUF_SIZE    (32)
 #define SPI_FLASH_READ_BUF_SIZE     (64)
 
@@ -177,17 +175,6 @@ struct spiflash_map_req
   uint32_t  page_cnt;
 };
 
-struct spiflash_cachestate_s
-{
-  int cpu;
-#ifdef CONFIG_SMP
-  int other;
-#endif
-  irqstate_t flags;
-  uint32_t val[CONFIG_SMP_NCPUS];
-  bool sched_suspended[CONFIG_SMP_NCPUS];
-};
-
 #ifdef CONFIG_ESP32_SPI_FLASH_SUPPORT_PSRAM_STACK
 /* SPI flash work operation arguments */
 
@@ -233,9 +220,9 @@ static inline void spi_reset_regbits(struct esp32_spiflash_s *priv,
 /* Misc. helpers */
 
 static inline void IRAM_ATTR
-esp32_spiflash_opstart(struct spiflash_cachestate_s *state);
+esp32_spiflash_opstart(void);
 static inline void IRAM_ATTR
-esp32_spiflash_opdone(struct spiflash_cachestate_s *state);
+esp32_spiflash_opdone(void);
 
 static bool IRAM_ATTR spiflash_pagecached(uint32_t phypage);
 static void IRAM_ATTR spiflash_flushmapped(size_t start, size_t size);
@@ -360,6 +347,7 @@ static struct work_s g_work;
 
 static volatile bool g_flash_op_can_start = false;
 static volatile bool g_flash_op_complete = false;
+static volatile bool g_sched_suspended[CONFIG_SMP_NCPUS];
 #ifdef CONFIG_SMP
 static sem_t g_disable_non_iram_isr_on_core[CONFIG_SMP_NCPUS];
 #endif
@@ -467,31 +455,29 @@ static inline void spi_reset_regbits(struct esp32_spiflash_s *priv,
  *
  ****************************************************************************/
 
-static inline void IRAM_ATTR
-esp32_spiflash_opstart(struct spiflash_cachestate_s *state)
+static void esp32_spiflash_opstart(void)
 {
   struct tcb_s *tcb = this_task();
+  int cpu = up_cpu_index();
   int saved_priority = tcb->sched_priority;
+#ifdef CONFIG_SMP
+  int other_cpu = cpu ? 0 : 1;
+#endif
+
+  DEBUGASSERT(cpu == 0 || cpu == 1);
 
   /* Temporary raise schedule priority */
 
   nxsched_set_priority(tcb, SCHED_PRIORITY_MAX);
 
-  state->cpu = up_cpu_index();
 #ifdef CONFIG_SMP
-  state->other = state->cpu ? 0 : 1;
-#endif
-
-  DEBUGASSERT(state->cpu == 0 || state->cpu == 1);
-
-#ifdef CONFIG_SMP
-  DEBUGASSERT(state->other == 0 || state->other == 1);
-  DEBUGASSERT(state->other != state->cpu);
+  DEBUGASSERT(other_cpu == 0 || other_cpu == 1);
+  DEBUGASSERT(other_cpu != cpu);
   if (OSINIT_OS_READY())
     {
       g_flash_op_can_start = false;
 
-      nxsem_post(&g_disable_non_iram_isr_on_core[state->other]);
+      nxsem_post(&g_disable_non_iram_isr_on_core[other_cpu]);
 
       while (!g_flash_op_can_start)
         {
@@ -502,7 +488,7 @@ esp32_spiflash_opstart(struct spiflash_cachestate_s *state)
     }
 #endif
 
-  state->sched_suspended[state->cpu] = true;
+  g_sched_suspended[cpu] = true;
 
   sched_lock();
 
@@ -510,9 +496,9 @@ esp32_spiflash_opstart(struct spiflash_cachestate_s *state)
 
   esp32_irq_noniram_disable();
 
-  spi_disable_cache(state->cpu, &state->val[state->cpu]);
+  spi_disable_cache(cpu);
 #ifdef CONFIG_SMP
-  spi_disable_cache(state->other, &state->val[state->other]);
+  spi_disable_cache(other_cpu);
 #endif
 }
 
@@ -524,18 +510,23 @@ esp32_spiflash_opstart(struct spiflash_cachestate_s *state)
  *
  ****************************************************************************/
 
-static inline void IRAM_ATTR
-  esp32_spiflash_opdone(struct spiflash_cachestate_s *state)
+static void esp32_spiflash_opdone(void)
 {
-  DEBUGASSERT(state->cpu == 0 || state->cpu == 1);
+  const int cpu = up_cpu_index();
 #ifdef CONFIG_SMP
-  DEBUGASSERT(state->other == 0 || state->other == 1);
-  DEBUGASSERT(state->other != state->cpu);
+  const int other_cpu = cpu ? 0 : 1;
 #endif
 
-  spi_enable_cache(state->cpu, state->val[state->cpu]);
+  DEBUGASSERT(cpu == 0 || cpu == 1);
+
 #ifdef CONFIG_SMP
-  spi_enable_cache(state->other, state->val[state->other]);
+  DEBUGASSERT(other_cpu == 0 || other_cpu == 1);
+  DEBUGASSERT(other_cpu != cpu);
+#endif
+
+  spi_enable_cache(cpu);
+#ifdef CONFIG_SMP
+  spi_enable_cache(other_cpu);
 #endif
 
   /* Signal to spi_flash_op_block_task that flash operation is complete */
@@ -546,10 +537,10 @@ static inline void IRAM_ATTR
 
   sched_unlock();
 
-  state->sched_suspended[state->cpu] = false;
+  g_sched_suspended[cpu] = false;
 
 #ifdef CONFIG_SMP
-  while (state->sched_suspended[state->other])
+  while (g_sched_suspended[other_cpu])
     {
       /* Busy loop and wait for spi_flash_op_block_task to properly finish
        * and resume scheduler
@@ -954,7 +945,6 @@ static int IRAM_ATTR esp32_erasesector(struct esp32_spiflash_s *priv,
                                        uint32_t addr, uint32_t size)
 {
   uint32_t offset;
-  struct spiflash_cachestate_s state;
 
   esp32_set_write_opt(priv);
 
@@ -965,11 +955,11 @@ static int IRAM_ATTR esp32_erasesector(struct esp32_spiflash_s *priv,
 
   for (offset = 0; offset < size; offset += MTD_ERASESIZE(priv))
     {
-      esp32_spiflash_opstart(&state);
+      esp32_spiflash_opstart();
 
       if (esp32_enable_write(priv) != OK)
         {
-          esp32_spiflash_opdone(&state);
+          esp32_spiflash_opdone();
           return -EIO;
         }
 
@@ -982,16 +972,16 @@ static int IRAM_ATTR esp32_erasesector(struct esp32_spiflash_s *priv,
 
       if (esp32_wait_idle(priv) != OK)
         {
-          esp32_spiflash_opdone(&state);
+          esp32_spiflash_opdone();
           return -EIO;
         }
 
-      esp32_spiflash_opdone(&state);
+      esp32_spiflash_opdone();
     }
 
-  esp32_spiflash_opstart(&state);
+  esp32_spiflash_opstart();
   spiflash_flushmapped(addr, size);
-  esp32_spiflash_opdone(&state);
+  esp32_spiflash_opdone();
 
   return 0;
 }
@@ -1094,7 +1084,6 @@ static int IRAM_ATTR esp32_writedata(struct esp32_spiflash_s *priv,
   uint32_t off = 0;
   uint32_t bytes;
   uint32_t tmp_buf[SPI_FLASH_WRITE_WORDS];
-  struct spiflash_cachestate_s state;
 
   esp32_set_write_opt(priv);
 
@@ -1113,9 +1102,9 @@ static int IRAM_ATTR esp32_writedata(struct esp32_spiflash_s *priv,
 
       memcpy(tmp_buf, &buffer[off], bytes);
 
-      esp32_spiflash_opstart(&state);
+      esp32_spiflash_opstart();
       ret = esp32_writeonce(priv, addr, tmp_buf, bytes);
-      esp32_spiflash_opdone(&state);
+      esp32_spiflash_opdone();
 
       if (ret)
         {
@@ -1127,9 +1116,9 @@ static int IRAM_ATTR esp32_writedata(struct esp32_spiflash_s *priv,
       off += bytes;
     }
 
-  esp32_spiflash_opstart(&state);
+  esp32_spiflash_opstart();
   spiflash_flushmapped(addr, size);
-  esp32_spiflash_opdone(&state);
+  esp32_spiflash_opdone();
 
   return OK;
 }
@@ -1162,7 +1151,6 @@ static int IRAM_ATTR esp32_writedata_encrypted(
   int blocks;
   int ret = OK;
   uint32_t tmp_buf[SPI_FLASH_ENCRYPT_WORDS];
-  struct spiflash_cachestate_s state;
 
   if (addr % SPI_FLASH_ENCRYPT_UNIT_SIZE)
     {
@@ -1184,7 +1172,7 @@ static int IRAM_ATTR esp32_writedata_encrypted(
     {
       memcpy(tmp_buf, buffer, SPI_FLASH_ENCRYPT_UNIT_SIZE);
 
-      esp32_spiflash_opstart(&state);
+      esp32_spiflash_opstart();
       esp_rom_spiflash_write_encrypted_enable();
 
       ret = esp_rom_spiflash_prepare_encrypted_data(addr, tmp_buf);
@@ -1203,22 +1191,22 @@ static int IRAM_ATTR esp32_writedata_encrypted(
         }
 
       esp_rom_spiflash_write_encrypted_disable();
-      esp32_spiflash_opdone(&state);
+      esp32_spiflash_opdone();
 
       addr += SPI_FLASH_ENCRYPT_UNIT_SIZE;
       buffer += SPI_FLASH_ENCRYPT_UNIT_SIZE;
       size -= SPI_FLASH_ENCRYPT_UNIT_SIZE;
     }
 
-  esp32_spiflash_opstart(&state);
+  esp32_spiflash_opstart();
   spiflash_flushmapped(addr, size);
-  esp32_spiflash_opdone(&state);
+  esp32_spiflash_opdone();
 
   return 0;
 
 exit:
   esp_rom_spiflash_write_encrypted_disable();
-  esp32_spiflash_opdone(&state);
+  esp32_spiflash_opdone();
 
   return ret;
 }
@@ -1313,15 +1301,14 @@ static int IRAM_ATTR esp32_readdata(struct esp32_spiflash_s *priv,
   uint32_t off = 0;
   uint32_t bytes;
   uint32_t tmp_buf[SPI_FLASH_READ_WORDS];
-  struct spiflash_cachestate_s state;
 
   while (size > 0)
     {
       bytes = MIN(size, SPI_FLASH_READ_BUF_SIZE);
 
-      esp32_spiflash_opstart(&state);
+      esp32_spiflash_opstart();
       ret = esp32_readonce(priv, addr, tmp_buf, bytes);
-      esp32_spiflash_opdone(&state);
+      esp32_spiflash_opdone();
 
       if (ret)
         {
@@ -1365,10 +1352,9 @@ static int IRAM_ATTR esp32_mmap(struct esp32_spiflash_s *priv,
   int start_page;
   int flash_page;
   int page_cnt;
-  struct spiflash_cachestate_s state;
   bool flush = false;
 
-  esp32_spiflash_opstart(&state);
+  esp32_spiflash_opstart();
 
   for (start_page = DROM0_PAGES_START;
        start_page < DROM0_PAGES_END;
@@ -1421,7 +1407,7 @@ static int IRAM_ATTR esp32_mmap(struct esp32_spiflash_s *priv,
 #endif
     }
 
-  esp32_spiflash_opdone(&state);
+  esp32_spiflash_opdone();
 
   return ret;
 }
@@ -1445,9 +1431,8 @@ static void IRAM_ATTR esp32_ummap(struct esp32_spiflash_s *priv,
                                   const struct spiflash_map_req *req)
 {
   int i;
-  struct spiflash_cachestate_s state;
 
-  esp32_spiflash_opstart(&state);
+  esp32_spiflash_opstart();
 
   for (i = req->start_page; i < req->start_page + req->page_cnt; ++i)
     {
@@ -1464,7 +1449,7 @@ static void IRAM_ATTR esp32_ummap(struct esp32_spiflash_s *priv,
 #ifdef CONFIG_SMP
   cache_flush(1);
 #endif
-  esp32_spiflash_opdone(&state);
+  esp32_spiflash_opdone();
 }
 
 /****************************************************************************
@@ -2409,9 +2394,7 @@ static int spi_flash_op_block_task(int argc, char *argv[])
 
       /* Flash operation is complete, re-enable cache */
 
-#if 0
       spi_enable_cache(cpu);
-#endif
 
       /* Restore interrupts that aren't located in IRAM */
 
