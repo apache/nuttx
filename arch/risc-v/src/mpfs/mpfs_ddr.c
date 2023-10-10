@@ -3416,6 +3416,8 @@ static int mpfs_training_verify(void)
   uint32_t lane_sel;
   uint32_t last;
   uint32_t i;
+  uint32_t off_taps;
+  uint32_t width_taps;
 
   while (!(getreg32(MPFS_DDR_CSR_APB_STAT_DFI_TRAINING_COMPLETE) & 0x01) &&
         --retries);
@@ -3503,9 +3505,15 @@ static int mpfs_training_verify(void)
           t_status |= 0x01;
         }
 
-      /* Check that DQ/DQS calculated window is above 5 taps. */
+      /* Check that DQ/DQS calculated window is above 5 taps
+       * and centered with margin
+       */
 
-      if (getreg32(MPFS_CFG_DDR_SGMII_PHY_DQDQS_STATUS2) < DQ_DQS_NUM_TAPS)
+      off_taps = getreg32(MPFS_CFG_DDR_SGMII_PHY_DQDQS_STATUS1);
+      width_taps = getreg32(MPFS_CFG_DDR_SGMII_PHY_DQDQS_STATUS2);
+
+      if (width_taps < DQ_DQS_NUM_TAPS ||
+          width_taps + off_taps <= 16 + DQ_DQS_NUM_TAPS / 2)
         {
           t_status |= 0x01;
         }
