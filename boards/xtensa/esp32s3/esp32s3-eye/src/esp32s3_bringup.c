@@ -70,6 +70,15 @@
 #  include <nuttx/input/buttons.h>
 #endif
 
+#ifdef CONFIG_ESP32S3_SPI
+#  include "esp32s3_spi.h"
+#endif
+
+#ifdef CONFIG_LCD_DEV
+#  include <nuttx/board.h>
+#  include <nuttx/lcd/lcd_dev.h>
+#endif
+
 #include "esp32s3-eye.h"
 
 /****************************************************************************
@@ -206,6 +215,32 @@ int esp32s3_bringup(void)
     {
       syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
     }
+#endif
+
+#ifdef CONFIG_ESP32S3_EYE_LCD
+
+#ifdef CONFIG_VIDEO_FB
+  ret = fb_register(0, 0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize Frame Buffer Driver.\n");
+      return ret;
+    }
+#elif defined(CONFIG_LCD)
+  ret = board_lcd_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize LCD.\n");
+      return ret;
+    }
+
+  ret = lcddev_register(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: lcddev_register() failed: %d\n", ret);
+    }
+#endif
+
 #endif
 
   /* If we got here then perhaps not all initialization was successful, but

@@ -37,6 +37,14 @@ ifeq ($(CONFIG_DEV_GPIO),y)
 CSRCS += esp32s3_gpio.c
 endif
 
+ifeq ($(CONFIG_ESP32S3_SPI),y)
+CSRCS += esp32s3_board_spi.c
+endif
+
+ifeq ($(CONFIG_ESP32S3_EYE_LCD),y)
+CSRCS += esp32s3_board_lcd.c
+endif
+
 DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board
