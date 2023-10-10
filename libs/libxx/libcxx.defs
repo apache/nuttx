@@ -79,7 +79,7 @@ libcxx/src/filesystem/operations.cpp_CXXFLAGS += -Wno-shadow
 #       |                                ^~~~~~
 
 ifeq ($(GCCVER),)
-  export GCCVER = $(shell $(CXX) --version | grep g++ | sed -r 's/.* ([0-9]+\.[0-9]+).*/\1/' | cut -d'.' -f1)
+  export GCCVER = $(shell $(CXX) --version | grep g++ | sed -E 's/.* ([0-9]+\.[0-9]+).*/\1/' | cut -d'.' -f1)
 endif
 
 ifeq ($(GCCVER),12)

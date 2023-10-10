@@ -178,7 +178,7 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN_CLANG),y)
 
   ifneq ($(TOOLCHAIN_CLANG_CONFIG),)
     ifeq ($(CLANGVER),)
-      export CLANGVER := $(shell $(CC) --version | grep "clang version" | sed -r "s/.* ([0-9]+\.[0-9]+).*/\1/")
+      export CLANGVER := $(shell $(CC) --version | grep "clang version" | sed -E "s/.* ([0-9]+\.[0-9]+).*/\1/")
     endif
 
     ifeq ($(CLANGVER),14.0)
@@ -257,7 +257,7 @@ else
   # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105523
 
   ifeq ($(GCCVER),)
-    export GCCVER := $(shell $(CC) --version | grep gcc | sed -r "s/.* ([0-9]+\.[0-9]+).*/\1/" | cut -d'.' -f1)
+    export GCCVER := $(shell $(CC) --version | grep gcc | sed -E "s/.* ([0-9]+\.[0-9]+).*/\1/" | cut -d'.' -f1)
   endif
 
   ifeq ($(GCCVER),12)

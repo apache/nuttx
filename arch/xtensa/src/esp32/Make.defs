@@ -236,7 +236,7 @@ CHIP_CSRCS += esp32_wlan.c esp32_wifi_utils.c esp32_wifi_adapter.c
 EXTRA_LIBS += -lcore -lnet80211 -lpp -lsmartconfig -lespnow -lwpa_supplicant
 
 ifeq ($(GCCVER),)
-  export GCCVER := $(shell $(CC) --version | grep gcc | sed -r 's/.* ([0-9]+\.[0-9]+).*/\1/' | cut -d'.' -f1)
+  export GCCVER := $(shell $(CC) --version | grep gcc | sed -E 's/.* ([0-9]+\.[0-9]+).*/\1/' | cut -d'.' -f1)
 endif
 ifeq ($(GCCVER),12)
   chip/esp32_wifi_adapter.c_CFLAGS += -Wno-maybe-uninitialized
