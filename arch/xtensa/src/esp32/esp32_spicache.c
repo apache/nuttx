@@ -55,14 +55,24 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static uint32_t s_flash_op_cache_state[CONFIG_SMP_NCPUS];
+
+/****************************************************************************
  * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
  * Name: spiflash_disable_cache
  ****************************************************************************/
 
-void IRAM_ATTR spi_disable_cache(int cpu, uint32_t *state)
+void IRAM_ATTR spi_disable_cache(int cpu)
 {
   const uint32_t cache_mask = 0x3f; /* Caches' bits in CTRL1_REG */
   uint32_t regval;
@@ -97,14 +107,14 @@ void IRAM_ATTR spi_disable_cache(int cpu, uint32_t *state)
     }
 
 #endif
-  *state = ret;
+  s_flash_op_cache_state[cpu] = ret;
 }
 
 /****************************************************************************
  * Name: spiflash_enable_cache
  ****************************************************************************/
 
-void IRAM_ATTR spi_enable_cache(int cpu, uint32_t state)
+void IRAM_ATTR spi_enable_cache(int cpu)
 {
   const uint32_t cache_mask = 0x3f;  /* Caches' bits in CTRL1_REG */
   uint32_t regval;
@@ -133,7 +143,7 @@ void IRAM_ATTR spi_enable_cache(int cpu, uint32_t state)
 
   regval  = getreg32(ctrl1reg);
   regval &= ~cache_mask;
-  regval |= state;
+  regval |= s_flash_op_cache_state[cpu];
   putreg32(regval, ctrl1reg);
 }
 

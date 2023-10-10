@@ -56,14 +56,13 @@ extern "C"
  *
  * Input Parameters:
  *   - cpu: ID of CPU to disable cache
- *   - state: pointer to cache reg state that will be returned
  *
  * Returned Value:
- *   None (the return will be over *state)
+ *   None.
  *
  ****************************************************************************/
 
-void IRAM_ATTR spi_disable_cache(int cpu, uint32_t *state);
+void spi_disable_cache(int cpu);
 
 /****************************************************************************
  * Name: spi_enable_cache
@@ -80,7 +79,7 @@ void IRAM_ATTR spi_disable_cache(int cpu, uint32_t *state);
  *
  ****************************************************************************/
 
-void IRAM_ATTR spi_enable_cache(int cpu, uint32_t state);
+void spi_enable_cache(int cpu);
 
 #ifdef __cplusplus
 }

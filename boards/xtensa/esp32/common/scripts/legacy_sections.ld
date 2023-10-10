@@ -78,6 +78,7 @@ SECTIONS
 #endif
     *libarch.a:esp32_cpuindex.*(.literal .text .literal.* .text.*)
     *libarch.a:esp32_irq.*(.literal .text .literal.* .text.*)
+    *libarch.a:esp32_spicache.*(.literal .text .literal.* .text.*)
     *libarch.a:esp32_spiflash.*(.literal .text .literal.* .text.*)
     *libarch.a:xtensa_assert.*(.literal .text .literal.* .text.*)
     *libarch.a:xtensa_cpuint.*(.literal .text .literal.* .text.*)
