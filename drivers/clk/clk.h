@@ -30,6 +30,7 @@
 #include <stdint.h>
 #include <strings.h>
 #include <sys/param.h>
+#include <nuttx/bits.h>
 
 #ifdef CONFIG_CLK
 
@@ -37,7 +38,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define BIT(nr)                     (1ULL << (nr))
 #define MASK(width)                 (BIT(width) - 1)
 #define MULT_ROUND_UP(r, m)         ((r) * (m) + (m) - 1)
 #define DIV_ROUND_UP(n,d)           (((n) + (d) - 1) / (d))

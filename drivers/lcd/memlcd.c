@@ -33,8 +33,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/wqueue.h>
-#include <nuttx/clock.h>
+#include <nuttx/bits.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/memlcd.h>
@@ -245,21 +244,16 @@ static struct memlcd_dev_s g_memlcddev =
  *
  ****************************************************************************/
 
-#define BIT(nr)            (1 << (nr))
-#define BITS_PER_BYTE      8
-#define BIT_MASK(nr)       (1 << ((nr) % BITS_PER_BYTE))
-#define BIT_BYTE(nr)       ((nr) / BITS_PER_BYTE)
-
 static inline void __set_bit(int nr, uint8_t * addr)
 {
-  uint8_t mask = BIT_MASK(nr);
+  uint8_t mask = BIT_BYTE_MASK(nr);
   uint8_t *p = ((uint8_t *) addr) + BIT_BYTE(nr);
   *p |= mask;
 }
 
 static inline void __clear_bit(int nr, uint8_t * addr)
 {
-  uint8_t mask = BIT_MASK(nr);
+  uint8_t mask = BIT_BYTE_MASK(nr);
   uint8_t *p = ((uint8_t *) addr) + BIT_BYTE(nr);
   *p &= ~mask;
 }

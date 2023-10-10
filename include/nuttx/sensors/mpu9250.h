@@ -28,14 +28,11 @@
 #include <nuttx/config.h>
 #include <nuttx/sensors/sensor.h>
 #include <nuttx/sensors/ioctl.h>
+#include <nuttx/bits.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* Sets bit @n */
-
-#define BIT(n)  (1 << (n))
 
 /* Creates a mask of @m bits, i.e. MASK(2) -> 00000011 */
 

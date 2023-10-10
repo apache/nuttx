@@ -74,6 +74,7 @@
 #include <limits.h>
 #include <nuttx/mutex.h>
 
+#include <nuttx/bits.h>
 #include <nuttx/compiler.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/spi/spi.h>
@@ -87,10 +88,6 @@
 /* Enables debug-related interfaces. Leave undefined otherwise. */
 
 #define DEBUG 1
-
-/* Sets bit @n */
-
-#define BIT(n) (1 << (n))
 
 /* Creates a mask of @m bits, i.e. MASK(2) -> 00000011 */
 

@@ -35,6 +35,7 @@
 #endif
 
 #include <sys/param.h>
+#include <nuttx/bits.h>
 
 #include "barriers.h"
 
@@ -42,7 +43,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define BIT(n)          ((1UL) << (n))
 #define BIT64(n)        ((1ULL) << (n))
 
 /* Bit mask with bits 0 through n-1 (inclusive) set,

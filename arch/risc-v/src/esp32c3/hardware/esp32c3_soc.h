@@ -24,6 +24,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <nuttx/bits.h>
 
 #include "esp32c3_attr.h"
 
@@ -253,8 +254,6 @@
 /* Interrupt medium level, used for INT WDT for example */
 
 #define SOC_INTERRUPT_LEVEL_MEDIUM  4
-
-#define BIT(nr)                     (1UL << (nr))
 
 /* Extract the field from the register and shift it to avoid wrong reading */
 
