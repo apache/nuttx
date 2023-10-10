@@ -26,31 +26,32 @@
  ****************************************************************************/
 
 #include <assert.h>
-#include <inttypes.h>
-#include <stdint.h>
+#include <limits.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 #ifndef BITS_PER_BYTE
-# define BITS_PER_BYTE 8
+# define BITS_PER_BYTE CHAR_BIT
 #endif
 
-#if UINTPTR_MAX > UINT32_MAX
-# define BITS_PER_LONG 64
-#else
-# define BITS_PER_LONG 32
+#ifndef BITS_PER_LONG
+# define BITS_PER_LONG (sizeof(unsigned long) * BITS_PER_BYTE)
 #endif
 
 #ifndef BITS_PER_LONG_LONG
-# define BITS_PER_LONG_LONG 64
+# define BITS_PER_LONG_LONG (sizeof(unsigned long long) * BITS_PER_BYTE)
 #endif
 
-#define BIT_MASK(nr)       (UINT32_C(1) << ((nr) % BITS_PER_LONG))
+#define BIT_BYTE_MASK(nr)  (1ul << ((nr) % BITS_PER_BYTE))
+#define BIT_WORD_MASK(nr)  (1ul << ((nr) % BITS_PER_LONG))
+#define BIT_BYTE(nr)       ((nr) / BITS_PER_BYTE)
 #define BIT_WORD(nr)       ((nr) / BITS_PER_LONG)
-#define BIT_ULL_MASK(nr)   (UINT64_C(1) << ((nr) % BITS_PER_LONG_LONG))
+#define BIT_ULL_MASK(nr)   (1ull << ((nr) % BITS_PER_LONG_LONG))
 #define BIT_ULL_WORD(nr)   ((nr) / BITS_PER_LONG_LONG)
+#define BIT(nr)            (1ul << (nr))
+#define BIT_ULL(nr)        (1ull << (nr))
 
 /* Create a contiguous bitmask starting at bit position @l and ending at
  * position @h. For example
@@ -58,14 +59,14 @@
  */
 
 #define __GENMASK(h, l) \
-        (((~UINT32_C(0)) - (UINT32_C(1) << (l)) + 1) & \
-         (~UINT32_C(0) >> (BITS_PER_LONG - 1 - (h))))
+        (((~0ul) - (1ul << (l)) + 1) & \
+         (~0ul >> (BITS_PER_LONG - 1 - (h))))
 #define GENMASK(h, l) \
         (BUILD_BUG_ON_ZERO((l) > (h)) + __GENMASK(h, l))
 
 #define __GENMASK_ULL(h, l) \
-        (((~UINT64_C(0)) - (UINT64_C(1) << (l)) + 1) & \
-         (~UINT64_C(0) >> (BITS_PER_LONG_LONG - 1 - (h))))
+        (((~0ull) - (1ull << (l)) + 1) & \
+         (~0ull >> (BITS_PER_LONG_LONG - 1 - (h))))
 #define GENMASK_ULL(h, l) \
         (BUILD_BUG_ON_ZERO((l) > (h)) + __GENMASK_ULL(h, l))
 

@@ -28,6 +28,7 @@
 #include <nuttx/config.h>
 
 #include "arm_internal.h"
+#include <nuttx/bits.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -47,9 +48,7 @@
 
 /* Common macros definition */
 
-#define BIT(n)                  (1 << (n))
-#define BIT_MASK_LEN(len)       (BIT(len)-1)
-#define BIT_RNG(s, e)           (BIT_MASK_LEN((e) - (s) + 1) << (s))
+#define BIT_RNG(s, e)           (GENMASK(e, s))
 #define BM_SET(x, m)            ((x) |= (m))
 #define BM_CLR(x, m)            ((x) &= ~(m))
 #define BM_IS_SET(x, m)         ((x) & (m))
