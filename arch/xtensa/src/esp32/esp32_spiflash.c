@@ -37,8 +37,11 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/init.h>
+#include <nuttx/kthread.h>
 #include <nuttx/mutex.h>
 #include <nuttx/mtd/mtd.h>
+
+#include "sched/sched.h"
 
 #include "xtensa.h"
 #include "xtensa_attr.h"
@@ -50,11 +53,12 @@
 #include "hardware/esp32_dport.h"
 #include "hardware/efuse_reg.h"
 
+#include "esp32_spicache.h"
 #ifdef CONFIG_ESP32_SPIRAM
 #include "esp32_spiram.h"
 #endif
+#include "esp32_irq.h"
 
-#include "esp32_spicache.h"
 #include "esp32_spiflash.h"
 
 /****************************************************************************
@@ -181,6 +185,7 @@ struct spiflash_cachestate_s
 #endif
   irqstate_t flags;
   uint32_t val[CONFIG_SMP_NCPUS];
+  bool sched_suspended[CONFIG_SMP_NCPUS];
 };
 
 #ifdef CONFIG_ESP32_SPI_FLASH_SUPPORT_PSRAM_STACK
@@ -230,7 +235,7 @@ static inline void spi_reset_regbits(struct esp32_spiflash_s *priv,
 static inline void IRAM_ATTR
 esp32_spiflash_opstart(struct spiflash_cachestate_s *state);
 static inline void IRAM_ATTR
-esp32_spiflash_opdone(const struct spiflash_cachestate_s *state);
+esp32_spiflash_opdone(struct spiflash_cachestate_s *state);
 
 static bool IRAM_ATTR spiflash_pagecached(uint32_t phypage);
 static void IRAM_ATTR spiflash_flushmapped(size_t start, size_t size);
@@ -346,11 +351,17 @@ static struct esp32_spiflash_s g_esp32_spiflash1_encrypt =
   .dummies = g_rom_spiflash_dummy_len_plus
 };
 
-/* Enxusre exculisve access to the driver */
+/* Ensure exclusive access to the driver */
 
 static mutex_t g_lock = NXMUTEX_INITIALIZER;
 #ifdef CONFIG_ESP32_SPI_FLASH_SUPPORT_PSRAM_STACK
 static struct work_s g_work;
+#endif
+
+static volatile bool g_flash_op_can_start = false;
+static volatile bool g_flash_op_complete = false;
+#ifdef CONFIG_SMP
+static sem_t g_disable_non_iram_isr_on_core[CONFIG_SMP_NCPUS];
 #endif
 
 /****************************************************************************
@@ -459,7 +470,12 @@ static inline void spi_reset_regbits(struct esp32_spiflash_s *priv,
 static inline void IRAM_ATTR
 esp32_spiflash_opstart(struct spiflash_cachestate_s *state)
 {
-  state->flags = enter_critical_section();
+  struct tcb_s *tcb = this_task();
+  int saved_priority = tcb->sched_priority;
+
+  /* Temporary raise schedule priority */
+
+  nxsched_set_priority(tcb, SCHED_PRIORITY_MAX);
 
   state->cpu = up_cpu_index();
 #ifdef CONFIG_SMP
@@ -467,11 +483,32 @@ esp32_spiflash_opstart(struct spiflash_cachestate_s *state)
 #endif
 
   DEBUGASSERT(state->cpu == 0 || state->cpu == 1);
+
 #ifdef CONFIG_SMP
   DEBUGASSERT(state->other == 0 || state->other == 1);
   DEBUGASSERT(state->other != state->cpu);
-  up_cpu_pause(state->other);
+  if (OSINIT_OS_READY())
+    {
+      g_flash_op_can_start = false;
+
+      nxsem_post(&g_disable_non_iram_isr_on_core[state->other]);
+
+      while (!g_flash_op_can_start)
+        {
+          /* Busy loop and wait for spi_flash_op_block_task to disable cache
+           * on the other CPU
+           */
+        }
+    }
 #endif
+
+  state->sched_suspended[state->cpu] = true;
+
+  sched_lock();
+
+  nxsched_set_priority(tcb, saved_priority);
+
+  esp32_irq_noniram_disable();
 
   spi_disable_cache(state->cpu, &state->val[state->cpu]);
 #ifdef CONFIG_SMP
@@ -488,7 +525,7 @@ esp32_spiflash_opstart(struct spiflash_cachestate_s *state)
  ****************************************************************************/
 
 static inline void IRAM_ATTR
-  esp32_spiflash_opdone(const struct spiflash_cachestate_s *state)
+  esp32_spiflash_opdone(struct spiflash_cachestate_s *state)
 {
   DEBUGASSERT(state->cpu == 0 || state->cpu == 1);
 #ifdef CONFIG_SMP
@@ -499,10 +536,26 @@ static inline void IRAM_ATTR
   spi_enable_cache(state->cpu, state->val[state->cpu]);
 #ifdef CONFIG_SMP
   spi_enable_cache(state->other, state->val[state->other]);
-  up_cpu_resume(state->other);
 #endif
 
-  leave_critical_section(state->flags);
+  /* Signal to spi_flash_op_block_task that flash operation is complete */
+
+  g_flash_op_complete = true;
+
+  esp32_irq_noniram_enable();
+
+  sched_unlock();
+
+  state->sched_suspended[state->cpu] = false;
+
+#ifdef CONFIG_SMP
+  while (state->sched_suspended[state->other])
+    {
+      /* Busy loop and wait for spi_flash_op_block_task to properly finish
+       * and resume scheduler
+       */
+    }
+#endif
 }
 
 /****************************************************************************
@@ -2300,9 +2353,174 @@ static int esp32_ioctl_encrypt(struct mtd_dev_s *dev, int cmd,
   return ret;
 }
 
+#ifdef CONFIG_SMP
+
+/****************************************************************************
+ * Name: spi_flash_op_block_task
+ *
+ * Description:
+ *   Disable the non-IRAM interrupts on the other core (the one that isn't
+ *   handling the SPI flash operation) and notify that the SPI flash
+ *   operation can start. Wait on a busy loop until it's finished and then
+ *   reenable the non-IRAM interrups.
+ *
+ * Input Parameters:
+ *   argc          - Not used.
+ *   argv          - Not used.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success. A negated errno value is returned to
+ *   indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+static int spi_flash_op_block_task(int argc, char *argv[])
+{
+  struct tcb_s *tcb = this_task();
+  int cpu = up_cpu_index();
+
+  for (; ; )
+    {
+      DEBUGASSERT((1 << cpu) & tcb->affinity);
+      /* Wait for a SPI flash operation to take place and this (the other
+       * core) being asked to disable its non-IRAM interrupts.
+       */
+
+      nxsem_wait(&g_disable_non_iram_isr_on_core[cpu]);
+
+      sched_lock();
+
+      esp32_irq_noniram_disable();
+
+      /* g_flash_op_complete flag is cleared on *this* CPU, otherwise the
+       * other CPU may reset the flag back to false before this task has a
+       * chance to check it (if it's preempted by an ISR taking non-trivial
+       * amount of time).
+       */
+
+      g_flash_op_complete = false;
+      g_flash_op_can_start = true;
+      while (!g_flash_op_complete)
+        {
+          /* Busy loop here and wait for the other CPU to finish the SPI
+           * flash operation.
+           */
+        }
+
+      /* Flash operation is complete, re-enable cache */
+
+#if 0
+      spi_enable_cache(cpu);
+#endif
+
+      /* Restore interrupts that aren't located in IRAM */
+
+      esp32_irq_noniram_enable();
+
+      sched_unlock();
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: spiflash_init_spi_flash_op_block_task
+ *
+ * Description:
+ *   Starts a kernel thread that waits for a semaphore indicating that a SPI
+ *   flash operation is going to take place in the other CPU. It disables
+ *   non-IRAM interrupts, indicates to the other core that the SPI flash
+ *   operation can start and waits for it to be finished in a busy loop.
+ *
+ * Input Parameters:
+ *   cpu - The CPU core that will run the created task to wait on a busy
+ *         loop while the SPI flash operation finishes
+ *
+ * Returned Value:
+ *   0 (OK) on success; A negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int spiflash_init_spi_flash_op_block_task(int cpu)
+{
+  int pid;
+  int ret = OK;
+  char *argv[2];
+  char arg1[32];
+  cpu_set_t cpuset;
+
+  snprintf(arg1, sizeof(arg1), "%p", &cpu);
+  argv[0] = arg1;
+  argv[1] = NULL;
+
+  pid = kthread_create("spiflash_op",
+                       SCHED_PRIORITY_MAX,
+                       CONFIG_ESP32_SPIFLASH_OP_TASK_STACKSIZE,
+                       spi_flash_op_block_task,
+                       argv);
+  if (pid > 0)
+    {
+      if (cpu < CONFIG_SMP_NCPUS)
+        {
+          CPU_ZERO(&cpuset);
+          CPU_SET(cpu, &cpuset);
+          ret = nxsched_set_affinity(pid, sizeof(cpuset), &cpuset);
+          if (ret < 0)
+            {
+              return ret;
+            }
+        }
+    }
+  else
+    {
+      return -EPERM;
+    }
+
+  return ret;
+}
+#endif /* CONFIG_SMP */
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp32_spiflash_init
+ *
+ * Description:
+ *   Initialize ESP32 SPI flash driver.
+ *
+ * Returned Value:
+ *   OK if success or a negative value if fail.
+ *
+ ****************************************************************************/
+
+int esp32_spiflash_init(void)
+{
+  int cpu;
+  int ret = OK;
+
+#ifdef CONFIG_SMP
+  sched_lock();
+
+  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
+    {
+      nxsem_init(&g_disable_non_iram_isr_on_core[cpu], 0, 0);
+
+      ret = spiflash_init_spi_flash_op_block_task(cpu);
+      if (ret != OK)
+        {
+          return ret;
+        }
+    }
+
+  sched_unlock();
+#else
+  UNUSED(cpu);
+#endif
+
+  return ret;
+}
 
 /****************************************************************************
  * Name: esp32_spiflash_alloc_mtdpart

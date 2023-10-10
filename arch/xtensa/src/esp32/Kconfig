@@ -758,6 +758,19 @@ config ESP32_WIFI_BT_COEXIST
 	default n
 	depends on ESP32_WIFI && ESP32_BLE
 
+menu "Interrupt Configuration"
+
+config ESP32_IRAM_ISR_DEBUG
+	bool "Enable debugging of the IRAM-enabled interrupts"
+	default n
+	---help---
+		This option enables keeping track of the IRAM-enabled interrupts by
+		registering its execution when non-IRAM interrupts are disabled. It
+		keeps track of the IRQ executed and register how many times since
+		boot it was executed.
+
+endmenu # Interrupt Configuration
+
 menu "Memory Configuration"
 
 config ESP32_BT_RESERVE_DRAM
@@ -1857,6 +1870,17 @@ config ESP32_PARTITION_MOUNTPT
 	depends on ESP32_PARTITION_TABLE
 
 endif # ESP32_PARTITION_TABLE
+
+config ESP32_SPIFLASH_OP_TASK_STACKSIZE
+	int "The SPI flash operation task stack size"
+	default 768
+	depends on SMP
+	---help---
+		When SMP is enabled, it is needed to create two tasks (one for each
+		core) to be able to run IRAM-enabled interrupts. These tasks ensures
+		that the core that isn't performing the SPI flash operation is able
+		to disable non-IRAM interrupts and wait for the SPI flash operation
+		to be finished.
 
 endif # ESP32_SPIFLASH
 

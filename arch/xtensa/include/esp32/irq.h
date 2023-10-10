@@ -35,6 +35,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* CPU interrupt flags:
+ *   These flags can be used to specify which interrupt qualities the
+ *   code calling esp32_setup_irq needs.
+ */
+
+#define ESP32_CPUINT_FLAG_LEVEL   (1 << 0) /* Level-triggered interrupt */
+#define ESP32_CPUINT_FLAG_EDGE    (1 << 1) /* Edge-triggered interrupt */
+#define ESP32_CPUINT_FLAG_SHARED  (1 << 2) /* Interrupt can be shared between ISRs */
+#define ESP32_CPUINT_FLAG_IRAM    (1 << 3) /* ISR can be called if cache is disabled */
+
 /* Interrupt Matrix
  *
  * The Interrupt Matrix embedded in the ESP32 independently allocates

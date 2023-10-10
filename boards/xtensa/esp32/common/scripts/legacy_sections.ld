@@ -76,18 +76,26 @@ SECTIONS
 #ifdef CONFIG_STACK_CANARIES
     *libc.a:lib_stackchk.*(.literal .text .literal.* .text.*)
 #endif
+    *libarch.a:esp32_cpuindex.*(.literal .text .literal.* .text.*)
+    *libarch.a:esp32_irq.*(.literal .text .literal.* .text.*)
     *libarch.a:esp32_spiflash.*(.literal .text .literal.* .text.*)
+    *libarch.a:xtensa_assert.*(.literal .text .literal.* .text.*)
+    *libarch.a:xtensa_cpuint.*(.literal .text .literal.* .text.*)
     *libarch.a:xtensa_cpupause.*(.literal .text .literal.* .text.*)
-    *libarch.a:xtensa_copystate.*(.literal .text .literal.* .text.*)
-    *libarch.a:xtensa_interruptcontext.*(.literal .text .literal.* .text.*)
+    *libarch.a:xtensa_irqdispatch.*(.literal .text .literal.* .text.*)
+    *libarch.a:xtensa_modifyreg32.*(.literal .text .literal.* .text.*)
     *libarch.a:xtensa_testset.*(.literal .text .literal.* .text.*)
 
-    *libsched.a:sched_suspendscheduler.*(.literal .text .literal.* .text.*)
-    *libsched.a:sched_note.*(.literal .text .literal.* .text.*)
-    *libsched.a:sched_thistask.*(.literal .text .literal.* .text.*)
-    *libsched.a:spinlock.*(.literal .text .literal.* .text.*)
+    *libdrivers.a:syslog_flush.*(.literal .text .literal.* .text.*)
+
+    *libsched.a:assert.*(.literal .text .literal.* .text.*)
     *libsched.a:irq_csection.*(.literal .text .literal.* .text.*)
     *libsched.a:irq_dispatch.*(.literal .text .literal.* .text.*)
+    *libsched.a:irq_spinlock.*(.literal .text .literal.* .text.*)
+    *libsched.a:sched_note.*(.literal .text .literal.* .text.*)
+    *libsched.a:sched_suspendscheduler.*(.literal .text .literal.* .text.*)
+    *libsched.a:sched_thistask.*(.literal .text .literal.* .text.*)
+    *libsched.a:spinlock.*(.literal .text .literal.* .text.*)
 
     *(.wifirxiram .wifirxiram.*)
     *(.wifi0iram  .wifi0iram.*)
