@@ -46,8 +46,8 @@ extern "C"
 
 /* CPU interrupt types. */
 
-#define ESP32_CPUINT_LEVEL   0
-#define ESP32_CPUINT_EDGE    1
+#define ESP32_CPUINT_LEVEL   ESP32_CPUINT_FLAG_LEVEL
+#define ESP32_CPUINT_EDGE    ESP32_CPUINT_FLAG_EDGE
 
 /****************************************************************************
  * Public Functions Prototypes
@@ -75,14 +75,16 @@ int esp32_cpuint_initialize(void);
  *
  * Description:
  *   This function sets up the IRQ. It allocates a CPU interrupt of the given
- *   priority and type and attaches it to the given peripheral.
+ *   priority and associated flags and attaches it to the given peripheral.
  *
  * Input Parameters:
  *   cpu      - The CPU to receive the interrupt 0=PRO CPU 1=APP CPU
  *   periphid - The peripheral number from irq.h to be assigned to
  *              a CPU interrupt.
  *   priority - Interrupt's priority (1 - 5).
- *   type     - Interrupt's type (level or edge).
+ *   flags    - An ORred mask of the ESP32_CPUINT_FLAG_* defines. These
+ *              restrict the choice of interrupts that this routine can
+ *              choose from.
  *
  * Returned Value:
  *   The allocated CPU interrupt on success, a negated errno value on
@@ -90,7 +92,7 @@ int esp32_cpuint_initialize(void);
  *
  ****************************************************************************/
 
-int esp32_setup_irq(int cpu, int periphid, int priority, int type);
+int esp32_setup_irq(int cpu, int periphid, int priority, int flags);
 
 /****************************************************************************
  * Name:  esp32_teardown_irq
@@ -113,6 +115,144 @@ int esp32_setup_irq(int cpu, int periphid, int priority, int type);
  ****************************************************************************/
 
 void esp32_teardown_irq(int cpu, int periphid, int cpuint);
+
+/****************************************************************************
+ * Name:  esp32_getirq
+ *
+ * Description:
+ *   This function returns the IRQ associated with a CPU interrupt
+ *
+ * Input Parameters:
+ *   cpu    - The CPU core of the IRQ being queried
+ *   cpuint - The CPU interrupt associated to the IRQ
+ *
+ * Returned Value:
+ *   The IRQ associated with such CPU interrupt or CPUINT_UNASSIGNED if
+ *   IRQ is not yet assigned to a CPU interrupt.
+ *
+ ****************************************************************************/
+
+int esp32_getirq(int cpu, int cpuint);
+
+/****************************************************************************
+ * Name:  esp32_getcpuint_from_irq
+ *
+ * Description:
+ *   This function returns the CPU interrupt associated with an IRQ
+ *
+ * Input Parameters:
+ *   irq - The IRQ associated with a CPU interrupt
+ *   cpu - Pointer to store the CPU core of the CPU interrupt
+ *
+ * Returned Value:
+ *   The CPU interrupt associated with such IRQ or IRQ_UNMAPPED if
+ *   CPU interrupt is not mapped to an IRQ.
+ *
+ ****************************************************************************/
+
+int esp32_getcpuint_from_irq(int irq, int *cpu);
+
+/****************************************************************************
+ * Name:  esp32_irq_noniram_disable
+ *
+ * Description:
+ *   Disable interrupts that aren't specifically marked as running from IRAM
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Input Parameters:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp32_irq_noniram_disable(void);
+
+/****************************************************************************
+ * Name:  esp32_irq_noniram_enable
+ *
+ * Description:
+ *   Re-enable interrupts disabled by esp32_irq_noniram_disable
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Input Parameters:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp32_irq_noniram_enable(void);
+
+/****************************************************************************
+ * Name:  esp32_irq_noniram_status
+ *
+ * Description:
+ *   Get the current status of non-IRAM interrupts on a specific CPU core
+ *
+ * Input Parameters:
+ *   cpu - The CPU to check the non-IRAM interrupts state
+ *
+ * Returned Value:
+ *   true if non-IRAM interrupts are enabled, false otherwise.
+ *
+ ****************************************************************************/
+
+bool esp32_irq_noniram_status(int cpu);
+
+/****************************************************************************
+ * Name:  esp32_irq_set_iram_isr
+ *
+ * Description:
+ *   Set the ISR associated to an IRQ as a IRAM-enabled ISR.
+ *
+ * Input Parameters:
+ *   irq - The associated IRQ to set
+ *
+ * Returned Value:
+ *   OK on success; A negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int esp32_irq_set_iram_isr(int irq);
+
+/****************************************************************************
+ * Name:  esp32_irq_unset_iram_isr
+ *
+ * Description:
+ *   Set the ISR associated to an IRQ as a non-IRAM ISR.
+ *
+ * Input Parameters:
+ *   irq - The associated IRQ to set
+ *
+ * Returned Value:
+ *   OK on success; A negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int esp32_irq_unset_iram_isr(int irq);
+
+#ifdef CONFIG_ESP32_IRAM_ISR_DEBUG
+
+/****************************************************************************
+ * Name:  esp32_get_iram_interrupt_records
+ *
+ * Description:
+ *   This function copies the vector that keeps track of the IRQs that ran
+ *   when non-IRAM interrupts were disabled.
+ *
+ * Input Parameters:
+ *
+ *   irq_count - A previously allocated pointer to store the counter of the
+ *               interrupts that ran when non-IRAM interrupts were disabled.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp32_get_iram_interrupt_records(uint64_t *irq_count);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -427,7 +427,7 @@ static int init_storage_partition(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32_spiflash_init
+ * Name: board_spiflash_init
  *
  * Description:
  *   Initialize the SPI Flash and register the MTD.
@@ -441,9 +441,15 @@ static int init_storage_partition(void)
  *
  ****************************************************************************/
 
-int esp32_spiflash_init(void)
+int board_spiflash_init(void)
 {
   int ret = OK;
+
+  ret = esp32_spiflash_init();
+  if (ret < 0)
+    {
+      return ret;
+    }
 
 #ifdef CONFIG_ESP32_HAVE_OTA_PARTITION
   ret = init_ota_partitions();
