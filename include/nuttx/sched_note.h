@@ -127,8 +127,10 @@
 
 #define sched_note_string(tag, buf) \
         sched_note_string_ip(tag, SCHED_NOTE_IP, buf)
+#define sched_note_event(tag, event, buf, len) \
+        sched_note_event_ip(tag, SCHED_NOTE_IP, event, buf, len)
 #define sched_note_dump(tag, event, buf, len) \
-        sched_note_dump_ip(tag, SCHED_NOTE_IP, event, buf, len)
+        sched_note_event(tag, SCHED_NOTE_IP, NOTE_DUMP_BINARY, buf, len)
 #define sched_note_vprintf(tag, fmt, va) \
         sched_note_vprintf_ip(tag, SCHED_NOTE_IP, fmt, va)
 #define sched_note_vbprintf(tag, event, fmt, va) \
@@ -137,19 +139,20 @@
         sched_note_printf_ip(tag, SCHED_NOTE_IP, fmt, ##__VA_ARGS__)
 #define sched_note_bprintf(tag, event, fmt, ...) \
         sched_note_bprintf_ip(tag, SCHED_NOTE_IP, event, \
-                                fmt, ##__VA_ARGS__)
-
-#define sched_note_begin(tag) sched_note_string(tag, "B")
-#define sched_note_end(tag) sched_note_string(tag, "E")
-#define sched_note_beginex(tag, str) \
-        sched_note_printf(tag, "B|%d|%s", _SCHED_GETTID(), str)
-#define sched_note_endex(tag, str) \
-        sched_note_printf(tag, "E|%d|%s", _SCHED_GETTID(), str)
-#define sched_note_mark(tag, str) \
-        sched_note_printf(tag, "I|%d|%s", _SCHED_GETTID(), str)
+                              fmt, ##__VA_ARGS__)
 #define sched_note_counter(tag, name, value) \
-        sched_note_printf(tag, "C|%d|%s|%" PRId32, \
-                          _SCHED_GETTID(), name, value)
+        sched_note_counter_ip(tag, SCHED_NOTE_IP, name, value)
+
+#define sched_note_begin(tag) \
+        sched_note_event(tag, NOTE_DUMP_BEGIN, NULL, 0)
+#define sched_note_end(tag) \
+        sched_note_event(tag, NOTE_DUMP_END, NULL, 0)
+#define sched_note_beginex(tag, str) \
+        sched_note_event(tag, NOTE_DUMP_BEGIN, str, strlen(str))
+#define sched_note_endex(tag, str) \
+        sched_note_event(tag, NOTE_DUMP_END, str, strlen(str))
+#define sched_note_mark(tag, str) \
+        sched_note_event(tag, NOTE_DUMP_MARK, str, strlen(str))
 
 /****************************************************************************
  * Public Types
@@ -183,6 +186,11 @@ enum note_type_e
   NOTE_IRQ_LEAVE       = 21,
   NOTE_DUMP_STRING     = 22,
   NOTE_DUMP_BINARY     = 23,
+  NOTE_DUMP_BEGIN      = 24,
+  NOTE_DUMP_END        = 25,
+  NOTE_DUMP_MARK       = 28,
+  NOTE_DUMP_COUNTER    = 29,
+  NOTE_TYPE_LAST
 };
 
 enum note_tag_e
@@ -381,12 +389,17 @@ struct note_binary_s
 {
   struct note_common_s nbi_cmn;      /* Common note parameters */
   uint8_t nbi_ip[sizeof(uintptr_t)]; /* Instruction pointer called from */
-  uint8_t nbi_event;                 /* Event number */
   uint8_t nbi_data[1];               /* Binary data */
 };
 
 #define SIZEOF_NOTE_BINARY(n) (sizeof(struct note_binary_s) + \
                                ((n) - 1) * sizeof(uint8_t))
+
+struct note_counter_s
+{
+  long int value;
+  char name[NAME_MAX];
+};
 
 /* This is the type of the argument passed to the NOTECTL_GETMODE and
  * NOTECTL_SETMODE ioctls
@@ -526,7 +539,7 @@ void sched_note_irqhandler(int irq, FAR void *handler, bool enter);
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
 void sched_note_string_ip(uint32_t tag, uintptr_t ip, FAR const char *buf);
-void sched_note_dump_ip(uint32_t tag, uintptr_t ip, uint8_t event,
+void sched_note_event_ip(uint32_t tag, uintptr_t ip, uint8_t event,
                         FAR const void *buf, size_t len);
 void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                            va_list va) printf_like(3, 0);
@@ -537,13 +550,24 @@ void sched_note_printf_ip(uint32_t tag, uintptr_t ip,
                           FAR const char *fmt, ...) printf_like(3, 4);
 void sched_note_bprintf_ip(uint32_t tag, uintptr_t ip, uint8_t event,
                            FAR const char *fmt, ...) printf_like(4, 5);
+
+static inline void sched_note_counter_ip(uint32_t tag, uintptr_t ip,
+                                         FAR const char *name,
+                                         long int value)
+{
+  struct note_counter_s counter;
+  counter.value = value;
+  strlcpy(counter.name, name, sizeof(counter.name));
+  sched_note_event_ip(tag, ip, NOTE_DUMP_COUNTER, &counter, sizeof(counter));
+}
 #else
 #  define sched_note_string_ip(t,ip,b)
-#  define sched_note_dump_ip(t,ip,e,b,l)
+#  define sched_note_event_ip(t,ip,e,b,l)
 #  define sched_note_vprintf_ip(t,ip,f,v)
 #  define sched_note_vbprintf_ip(t,ip,e,f,v)
 #  define sched_note_printf_ip(t,ip,f,...)
 #  define sched_note_bprintf_ip(t,ip,e,f,...)
+#  define sched_note_counter_ip(t,ip,n,v)
 #endif /* CONFIG_SCHED_INSTRUMENTATION_DUMP */
 
 #if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)

@@ -972,7 +972,44 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
           }
       }
       break;
-
+    case NOTE_DUMP_BEGIN:
+    case NOTE_DUMP_END:
+      {
+        FAR struct note_binary_s *nbi = (FAR struct note_binary_s *)p;
+        char c = note->nc_type == NOTE_DUMP_BEGIN ? 'B' : 'E';
+        int len = note->nc_length - sizeof(struct note_binary_s);
+        ret += noteram_dump_header(s, &nbi->nbi_cmn, ctx);
+        if (len > 0)
+          {
+            ret += lib_sprintf(s, "tracing_mark_write: %c|%d|%.*s\n",
+                               c, pid, len, (FAR const char *)nbi->nbi_data);
+          }
+        else
+          {
+            ret += lib_sprintf(s, "tracing_mark_write: %c|%d|%pS\n",
+                               c, pid, (FAR void *)nbi->nbi_ip);
+          }
+      }
+      break;
+    case NOTE_DUMP_MARK:
+      {
+        int len = note->nc_length - sizeof(struct note_binary_s);
+        FAR struct note_binary_s *nbi = (FAR struct note_binary_s *)p;
+        ret += noteram_dump_header(s, &nbi->nbi_cmn, ctx);
+        ret += lib_sprintf(s, "tracing_mark_write: I|%d|%.*s\n",
+                           pid, len, (FAR const char *)nbi->nbi_data);
+      }
+      break;
+    case NOTE_DUMP_COUNTER:
+      {
+        FAR struct note_binary_s *nbi = (FAR struct note_binary_s *)p;
+        FAR struct note_counter_s *counter;
+        counter = (FAR struct note_counter_s *)nbi->nbi_data;
+        ret += noteram_dump_header(s, &nbi->nbi_cmn, ctx);
+        ret += lib_sprintf(s, "tracing_mark_write: C|%d|%s|%ld\n",
+                           pid, counter->name, counter->value);
+      }
+      break;
     case NOTE_DUMP_BINARY:
       {
         FAR struct note_binary_s *nbi;
@@ -986,8 +1023,8 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
 
         noteram_dump_unflatten(&ip, nbi->nbi_ip, sizeof(ip));
 
-        ret += lib_sprintf(s, "0x%" PRIdPTR ": event=%u count=%u", ip,
-                           nbi->nbi_event, count);
+        ret += lib_sprintf(s, "tracing_mark_write: 0x%" PRIdPTR
+                           ": count=%u", ip, count);
         for (i = 0; i < count; i++)
           {
             ret += lib_sprintf(s, " 0x%x", nbi->nbi_data[i]);
