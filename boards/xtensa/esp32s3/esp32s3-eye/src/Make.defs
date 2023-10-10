@@ -29,6 +29,10 @@ CSRCS += esp32s3_reset.c
 endif
 endif
 
+ifeq ($(CONFIG_ARCH_BUTTONS),y)
+CSRCS += esp32s3_buttons.c
+endif
+
 ifeq ($(CONFIG_DEV_GPIO),y)
 CSRCS += esp32s3_gpio.c
 endif
