@@ -237,7 +237,6 @@ static struct spiflash_guard_funcs g_spi_flash_guard_funcs =
 
 static uint32_t s_flash_op_cache_state[CONFIG_SMP_NCPUS];
 
-static spinlock_t g_flash_op_lock;
 static rmutex_t g_flash_op_mutex;
 static volatile bool g_flash_op_can_start = false;
 static volatile bool g_flash_op_complete = false;
@@ -313,11 +312,11 @@ static void spiflash_start(void)
 
   DEBUGASSERT(cpu == 0 || cpu == 1);
 
+  /* Temporary raise schedule priority */
+
   nxsched_set_priority(tcb, SCHED_PRIORITY_MAX);
 
 #ifdef CONFIG_SMP
-
-  /* Temporary raise schedule priority */
 
   DEBUGASSERT(other_cpu == 0 || other_cpu == 1);
   DEBUGASSERT(other_cpu != cpu);
@@ -360,7 +359,6 @@ static void spiflash_start(void)
 
 static void spiflash_end(void)
 {
-  struct tcb_s *tcb = this_task();
   const int cpu = up_cpu_index();
 #ifdef CONFIG_SMP
   const int other_cpu = cpu ? 0 : 1;
