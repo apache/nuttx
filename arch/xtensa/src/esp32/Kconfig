@@ -720,6 +720,7 @@ config ESP32_BLE
 	bool "BLE"
 	default n
 	select ESP32_WIRELESS
+	select BLUETOOTH_TXCMD_PINNED_TO_CORE if SMP
 	---help---
 		Enable BLE support
 
