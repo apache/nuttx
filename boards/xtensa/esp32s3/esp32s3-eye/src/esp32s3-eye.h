@@ -86,6 +86,18 @@ int esp32s3_gpio_init(void);
 #endif
 
 /****************************************************************************
+ * Name: board_spiflash_init
+ *
+ * Description:
+ *   Initialize the SPIFLASH and register the MTD device.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S3_SPIFLASH
+int board_spiflash_init(void);
+#endif
+
+/****************************************************************************
  * Name: board_i2c_init
  *
  * Description:
