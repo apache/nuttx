@@ -596,3 +596,30 @@ void up_flush_dcache_all(void)
 {
   arm64_dcache_all(CACHE_OP_WB_INVD);
 }
+
+/****************************************************************************
+ * Name: up_coherent_dcache
+ *
+ * Description:
+ *   Ensure that the I and D caches are coherent within specified region
+ *   by cleaning the D cache (i.e., flushing the D cache contents to memory
+ *   and invalidating the I cache. This is typically used when code has been
+ *   written to a memory region, and will be executed.
+ *
+ * Input Parameters:
+ *   addr - virtual start address of region
+ *   len  - Size of the address region in bytes
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void up_coherent_dcache(uintptr_t addr, size_t len)
+{
+  if (len > 0)
+    {
+      arm64_dcache_range(addr, addr + len, CACHE_OP_WB_INVD);
+      up_invalidate_icache_all();
+    }
+}
