@@ -211,6 +211,15 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
   ret = dns_foreach_nameserver(dns_check_nameserver, &dns_addr.addr);
   if (ret < 0)
     {
+      /* If the nameserver is existing, don't need to write it into the
+       * resolv.conf file.
+       */
+
+      if (ret == -EEXIST)
+        {
+          ret = OK;
+        }
+
       goto errout;
     }
 
@@ -334,6 +343,13 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
   ret = dns_foreach_nameserver(dns_check_nameserver, &dns_addr.addr);
   if (ret < 0)
     {
+      /* If the nameserver is existing, we simply return the Ok. */
+
+      if (ret == -EEXIST)
+        {
+          ret = OK;
+        }
+
       dns_unlock();
       return ret;
     }
