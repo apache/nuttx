@@ -1396,8 +1396,8 @@ void sched_note_string_ip(uint32_t tag, uintptr_t ip, FAR const char *buf)
     }
 }
 
-void sched_note_dump_ip(uint32_t tag, uintptr_t ip, uint8_t event,
-                        FAR const void *buf, size_t len)
+void sched_note_event_ip(uint32_t tag, uintptr_t ip, uint8_t event,
+                         FAR const void *buf, size_t len)
 {
   FAR struct note_binary_s *note;
   FAR struct note_driver_s **driver;
@@ -1435,9 +1435,8 @@ void sched_note_dump_ip(uint32_t tag, uintptr_t ip, uint8_t event,
               length = sizeof(data);
             }
 
-          note_common(tcb, &note->nbi_cmn, length, NOTE_DUMP_BINARY);
+          note_common(tcb, &note->nbi_cmn, length, event);
           sched_note_flatten(note->nbi_ip, &ip, sizeof(uintptr_t));
-          note->nbi_event = event;
           memcpy(note->nbi_data, buf,
                  length - sizeof(struct note_binary_s) + 1);
         }
@@ -1712,7 +1711,6 @@ void sched_note_vbprintf_ip(uint32_t tag, uintptr_t ip, uint8_t event,
 
           note_common(tcb, &note->nbi_cmn, length, NOTE_DUMP_BINARY);
           sched_note_flatten(note->nbi_ip, &ip, sizeof(uintptr_t));
-          note->nbi_event = event;
         }
 
       /* Add the note to circular buffer */
