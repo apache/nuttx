@@ -47,8 +47,6 @@
 #endif
 #endif
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -64,100 +62,94 @@
 /* Note filter mode flag definitions */
 
 #define NOTE_FILTER_MODE_FLAG_ENABLE       (1 << 0) /* Enable instrumentation */
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
 #define NOTE_FILTER_MODE_FLAG_SWITCH       (1 << 1) /* Enable syscall instrumentation */
-#endif
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
 #define NOTE_FILTER_MODE_FLAG_SYSCALL      (1 << 2) /* Enable syscall instrumentation */
-#endif
-#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
 #define NOTE_FILTER_MODE_FLAG_IRQ          (1 << 3) /* Enable IRQ instrumentaiton */
-#endif
-#ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
 #define NOTE_FILTER_MODE_FLAG_DUMP         (1 << 4) /* Enable dump instrumentaiton */
-#endif
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
 #define NOTE_FILTER_MODE_FLAG_SYSCALL_ARGS (1 << 5) /* Enable collecting syscall arguments */
-#endif
 
 /* Helper macros for syscall instrumentation filter */
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
-#define NOTE_FILTER_SYSCALLMASK_SET(nr, s) \
-  ((s)->syscall_mask[(nr) / 8] |= (1 << ((nr) % 8)))
-#define NOTE_FILTER_SYSCALLMASK_CLR(nr, s) \
-  ((s)->syscall_mask[(nr) / 8] &= ~(1 << ((nr) % 8)))
-#define NOTE_FILTER_SYSCALLMASK_ISSET(nr, s) \
-  ((s)->syscall_mask[(nr) / 8] & (1 << ((nr) % 8)))
-#define NOTE_FILTER_SYSCALLMASK_ZERO(s) \
-  memset((s), 0, sizeof(struct note_filter_syscall_s))
+#  define NOTE_FILTER_SYSCALLMASK_SET(nr, s) \
+          ((s)->syscall_mask[(nr) / 8] |= (1 << ((nr) % 8)))
+#  define NOTE_FILTER_SYSCALLMASK_CLR(nr, s) \
+          ((s)->syscall_mask[(nr) / 8] &= ~(1 << ((nr) % 8)))
+#  define NOTE_FILTER_SYSCALLMASK_ISSET(nr, s) \
+          ((s)->syscall_mask[(nr) / 8] & (1 << ((nr) % 8)))
+#  define NOTE_FILTER_SYSCALLMASK_ZERO(s) \
+          memset((s), 0, sizeof(struct note_filter_syscall_s))
+#else
+#  define NOTE_FILTER_SYSCALLMASK_SET(nr, s)
+#  define NOTE_FILTER_SYSCALLMASK_CLR(nr, s)
+#  define NOTE_FILTER_SYSCALLMASK_ISSET(nr, s) (0)
+#  define NOTE_FILTER_SYSCALLMASK_ZERO(s)
 #endif
 
 /* Helper macros for IRQ instrumentation filter */
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
-#define NOTE_FILTER_IRQMASK_SET(nr, s) \
-  ((s)->irq_mask[(nr) / 8] |= (1 << ((nr) % 8)))
-#define NOTE_FILTER_IRQMASK_CLR(nr, s) \
-  ((s)->irq_mask[(nr) / 8] &= ~(1 << ((nr) % 8)))
-#define NOTE_FILTER_IRQMASK_ISSET(nr, s) \
-  ((s)->irq_mask[(nr) / 8] & (1 << ((nr) % 8)))
-#define NOTE_FILTER_IRQMASK_ZERO(s) \
-  memset((s), 0, sizeof(struct note_filter_irq_s))
+#  define NOTE_FILTER_IRQMASK_SET(nr, s) \
+          ((s)->irq_mask[(nr) / 8] |= (1 << ((nr) % 8)))
+#  define NOTE_FILTER_IRQMASK_CLR(nr, s) \
+          ((s)->irq_mask[(nr) / 8] &= ~(1 << ((nr) % 8)))
+#  define NOTE_FILTER_IRQMASK_ISSET(nr, s) \
+          ((s)->irq_mask[(nr) / 8] & (1 << ((nr) % 8)))
+#  define NOTE_FILTER_IRQMASK_ZERO(s) \
+          memset((s), 0, sizeof(struct note_filter_irq_s))
+#else
+#  define NOTE_FILTER_IRQMASK_SET(nr, s)
+#  define NOTE_FILTER_IRQMASK_CLR(nr, s)
+#  define NOTE_FILTER_IRQMASK_ISSET(nr, s) (0)
+#  define NOTE_FILTER_IRQMASK_ZERO(s)
 #endif
 
 /* Helper macros for dump instrumentation filter */
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
 #  define NOTE_FILTER_TAGMASK_SET(tag, s) \
-  ((s)->tag_mask[(tag) / 8] |= (1 << ((tag) % 8)))
+          ((s)->tag_mask[(tag) / 8] |= (1 << ((tag) % 8)))
 #  define NOTE_FILTER_TAGMASK_CLR(tag, s) \
-  ((s)->tag_mask[(tag) / 8] &= ~(1 << ((tag) % 8)))
+          ((s)->tag_mask[(tag) / 8] &= ~(1 << ((tag) % 8)))
 #  define NOTE_FILTER_TAGMASK_ISSET(tag, s) \
-  ((s)->tag_mask[(tag) / 8] & (1 << ((tag) % 8)))
+          ((s)->tag_mask[(tag) / 8] & (1 << ((tag) % 8)))
 #  define NOTE_FILTER_TAGMASK_ZERO(s) \
-  memset((s), 0, sizeof(struct note_filter_tag_s));
+          memset((s), 0, sizeof(struct note_filter_tag_s));
+#else
+#  define NOTE_FILTER_TAGMASK_SET(tag, s)
+#  define NOTE_FILTER_TAGMASK_CLR(tag, s)
+#  define NOTE_FILTER_TAGMASK_ISSET(tag, s) (0)
+#  define NOTE_FILTER_TAGMASK_ZERO(s)
 #endif
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
-#  define SCHED_NOTE_IP \
-          ({ __label__ __here; __here: (unsigned long)&&__here; })
-#  define sched_note_string(tag, buf) \
-          sched_note_string_ip(tag, SCHED_NOTE_IP, buf)
-#  define sched_note_dump(tag, event, buf, len) \
-          sched_note_dump_ip(tag, SCHED_NOTE_IP, event, buf, len)
-#  define sched_note_vprintf(tag, fmt, va) \
-          sched_note_vprintf_ip(tag, SCHED_NOTE_IP, fmt, va)
-#  define sched_note_vbprintf(tag, event, fmt, va) \
-          sched_note_vbprintf_ip(tag, SCHED_NOTE_IP, event, fmt, va)
-#  define sched_note_printf(tag, fmt, ...) \
-          sched_note_printf_ip(tag, SCHED_NOTE_IP, fmt, ##__VA_ARGS__)
-#  define sched_note_bprintf(tag, event, fmt, ...) \
-          sched_note_bprintf_ip(tag, SCHED_NOTE_IP, event, \
+#define SCHED_NOTE_IP \
+        ({ __label__ __here; __here: (unsigned long)&&__here; })
+
+#define sched_note_string(tag, buf) \
+        sched_note_string_ip(tag, SCHED_NOTE_IP, buf)
+#define sched_note_dump(tag, event, buf, len) \
+        sched_note_dump_ip(tag, SCHED_NOTE_IP, event, buf, len)
+#define sched_note_vprintf(tag, fmt, va) \
+        sched_note_vprintf_ip(tag, SCHED_NOTE_IP, fmt, va)
+#define sched_note_vbprintf(tag, event, fmt, va) \
+        sched_note_vbprintf_ip(tag, SCHED_NOTE_IP, event, fmt, va)
+#define sched_note_printf(tag, fmt, ...) \
+        sched_note_printf_ip(tag, SCHED_NOTE_IP, fmt, ##__VA_ARGS__)
+#define sched_note_bprintf(tag, event, fmt, ...) \
+        sched_note_bprintf_ip(tag, SCHED_NOTE_IP, event, \
                                 fmt, ##__VA_ARGS__)
-#  define sched_note_beginex(tag, str) \
-          sched_note_printf_ip(tag, SCHED_NOTE_IP, "B|%d|%s", _SCHED_GETTID(), str)
-#  define sched_note_endex(tag, str) \
-          sched_note_printf_ip(tag, SCHED_NOTE_IP, "E|%d|%s", _SCHED_GETTID(), str)
-#  define sched_note_mark(tag, str) \
-          sched_note_printf_ip(tag, SCHED_NOTE_IP, "I|%d|%s", _SCHED_GETTID(), str)
-#  define sched_note_counter(tag, name, value) \
-          sched_note_printf_ip(tag, SCHED_NOTE_IP, "C|%d|%s|%" PRId32, \
-                               _SCHED_GETTID(), name, value)
-#  define sched_note_begin(tag) \
-          sched_note_string_ip(tag, SCHED_NOTE_IP, "B")
-#  define sched_note_end(tag) \
-          sched_note_string_ip(tag, SCHED_NOTE_IP, "E")
-#else
-#  define sched_note_string(tag, buf)
-#  define sched_note_dump(tag, event, buf, len)
-#  define sched_note_vprintf(tag, fmt, va)
-#  define sched_note_vbprintf(tag, event, fmt, va)
-#  define sched_note_printf(tag, fmt, ...)
-#  define sched_note_bprintf(tag, event, fmt, ...)
-#  define sched_note_begin(tag)
-#  define sched_note_end(tag)
-#endif
+
+#define sched_note_begin(tag) sched_note_string(tag, "B")
+#define sched_note_end(tag) sched_note_string(tag, "E")
+#define sched_note_beginex(tag, str) \
+        sched_note_printf(tag, "B|%d|%s", _SCHED_GETTID(), str)
+#define sched_note_endex(tag, str) \
+        sched_note_printf(tag, "E|%d|%s", _SCHED_GETTID(), str)
+#define sched_note_mark(tag, str) \
+        sched_note_printf(tag, "I|%d|%s", _SCHED_GETTID(), str)
+#define sched_note_counter(tag, name, value) \
+        sched_note_printf(tag, "C|%d|%s|%" PRId32, \
+                          _SCHED_GETTID(), name, value)
 
 /****************************************************************************
  * Public Types
@@ -168,56 +160,29 @@
 enum note_type_e
 {
   NOTE_START           = 0,
-  NOTE_STOP            = 1
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
-  ,
+  NOTE_STOP            = 1,
   NOTE_SUSPEND         = 2,
-  NOTE_RESUME          = 3
-#endif
-#ifdef CONFIG_SMP
-  ,
+  NOTE_RESUME          = 3,
   NOTE_CPU_START       = 4,
-  NOTE_CPU_STARTED     = 5
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
-  ,
+  NOTE_CPU_STARTED     = 5,
   NOTE_CPU_PAUSE       = 6,
   NOTE_CPU_PAUSED      = 7,
   NOTE_CPU_RESUME      = 8,
-  NOTE_CPU_RESUMED     = 9
-#endif
-#endif
-#ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
-  ,
+  NOTE_CPU_RESUMED     = 9,
   NOTE_PREEMPT_LOCK    = 10,
-  NOTE_PREEMPT_UNLOCK  = 11
-#endif
-#ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
-  ,
+  NOTE_PREEMPT_UNLOCK  = 11,
   NOTE_CSECTION_ENTER  = 12,
-  NOTE_CSECTION_LEAVE  = 13
-#endif
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
-  ,
+  NOTE_CSECTION_LEAVE  = 13,
   NOTE_SPINLOCK_LOCK   = 14,
   NOTE_SPINLOCK_LOCKED = 15,
   NOTE_SPINLOCK_UNLOCK = 16,
-  NOTE_SPINLOCK_ABORT  = 17
-#endif
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
-  ,
+  NOTE_SPINLOCK_ABORT  = 17,
   NOTE_SYSCALL_ENTER   = 18,
-  NOTE_SYSCALL_LEAVE   = 19
-#endif
-#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
-  ,
+  NOTE_SYSCALL_LEAVE   = 19,
   NOTE_IRQ_ENTER       = 20,
-  NOTE_IRQ_LEAVE       = 21
-#endif
-#ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
-  ,
+  NOTE_IRQ_LEAVE       = 21,
   NOTE_DUMP_STRING     = 22,
-  NOTE_DUMP_BINARY     = 23
-#endif
+  NOTE_DUMP_BINARY     = 23,
 };
 
 enum note_tag_e
@@ -282,7 +247,6 @@ struct note_stop_s
   struct note_common_s nsp_cmn; /* Common note parameters */
 };
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
 /* This is the specific form of the NOTE_SUSPEND note */
 
 struct note_suspend_s
@@ -297,9 +261,6 @@ struct note_resume_s
 {
   struct note_common_s nre_cmn; /* Common note parameters */
 };
-#endif
-
-#ifdef CONFIG_SMP
 
 /* This is the specific form of the NOTE_CPU_START note */
 
@@ -316,7 +277,6 @@ struct note_cpu_started_s
   struct note_common_s ncs_cmn; /* Common note parameters */
 };
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
 /* This is the specific form of the NOTE_CPU_PAUSE note */
 
 struct note_cpu_pause_s
@@ -346,10 +306,7 @@ struct note_cpu_resumed_s
 {
   struct note_common_s ncr_cmn; /* Common note parameters */
 };
-#endif
-#endif
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
 /* This is the specific form of the NOTE_PREEMPT_LOCK/UNLOCK note */
 
 struct note_preempt_s
@@ -357,9 +314,7 @@ struct note_preempt_s
   struct note_common_s npr_cmn; /* Common note parameters */
   uint8_t npr_count[2];         /* Count of nested locks */
 };
-#endif /* CONFIG_SCHED_INSTRUMENTATION_PREEMPTION */
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
 /* This is the specific form of the NOTE_CSECTION_ENTER/LEAVE note */
 
 struct note_csection_s
@@ -369,9 +324,7 @@ struct note_csection_s
   uint8_t ncs_count[2];         /* Count of nested csections */
 #endif
 };
-#endif /* CONFIG_SCHED_INSTRUMENTATION_CSECTION */
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
 /* This is the specific form of the NOTE_SPINLOCK_LOCK/LOCKED/UNLOCK/ABORT
  * note.
  */
@@ -382,9 +335,7 @@ struct note_spinlock_s
   uint8_t nsp_spinlock[sizeof(uintptr_t)];  /* Address of spinlock */
   uint8_t nsp_value;                        /* Value of spinlock */
 };
-#endif /* CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS */
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
 /* This is the specific form of the NOTE_SYSCALL_ENTER/LEAVE notes */
 
 #define MAX_SYSCALL_ARGS  6
@@ -406,9 +357,7 @@ struct note_syscall_leave_s
   uint8_t nsc_nr;                        /* System call number */
   uint8_t nsc_result[sizeof(uintptr_t)]; /* Result of the system call */
 };
-#endif /* CONFIG_SCHED_INSTRUMENTATION_SYSCALL */
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
 /* This is the specific form of the NOTE_IRQ_ENTER/LEAVE notes */
 
 struct note_irqhandler_s
@@ -417,9 +366,7 @@ struct note_irqhandler_s
   uintptr_t nih_handler;        /* IRQ handler address */
   uint8_t nih_irq;              /* IRQ number */
 };
-#endif /* CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER */
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
 struct note_string_s
 {
   struct note_common_s nst_cmn;      /* Common note parameters */
@@ -440,10 +387,6 @@ struct note_binary_s
 
 #define SIZEOF_NOTE_BINARY(n) (sizeof(struct note_binary_s) + \
                                ((n) - 1) * sizeof(uint8_t))
-
-#endif /* CONFIG_SCHED_INSTRUMENTATION_DUMP */
-
-#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
 
 /* This is the type of the argument passed to the NOTECTL_GETMODE and
  * NOTECTL_SETMODE ioctls
@@ -472,21 +415,15 @@ struct note_filter_syscall_s
  * NOTECTL_SETIRQFILTER ioctls
  */
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
 struct note_filter_irq_s
 {
   uint8_t irq_mask[(NR_IRQS + 7) / 8];
 };
-#endif
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
 struct note_filter_tag_s
 {
   uint8_t tag_mask[(NOTE_TAG_MAX + 7) / 8];
 };
-#endif
-
-#endif /* CONFIG_SCHED_INSTRUMENTATION_FILTER */
 
 /****************************************************************************
  * Public Function Prototypes
@@ -517,8 +454,13 @@ extern "C"
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION
 void sched_note_start(FAR struct tcb_s *tcb);
 void sched_note_stop(FAR struct tcb_s *tcb);
+#else
+#  define sched_note_start(t)
+#  define sched_note_stop(t)
+#endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
 void sched_note_suspend(FAR struct tcb_s *tcb);
@@ -528,10 +470,15 @@ void sched_note_resume(FAR struct tcb_s *tcb);
 #  define sched_note_resume(t)
 #endif
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP) && defined(CONFIG_SCHED_INSTRUMENTATION)
 void sched_note_cpu_start(FAR struct tcb_s *tcb, int cpu);
 void sched_note_cpu_started(FAR struct tcb_s *tcb);
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
+#else
+#  define sched_note_cpu_start(t,c)
+#  define sched_note_cpu_started(t)
+#endif
+
+#if defined(CONFIG_SMP) && defined(CONFIG_SCHED_INSTRUMENTATION_SWITCH)
 void sched_note_cpu_pause(FAR struct tcb_s *tcb, int cpu);
 void sched_note_cpu_paused(FAR struct tcb_s *tcb);
 void sched_note_cpu_resume(FAR struct tcb_s *tcb, int cpu);
@@ -541,14 +488,6 @@ void sched_note_cpu_resumed(FAR struct tcb_s *tcb);
 #  define sched_note_cpu_paused(t)
 #  define sched_note_cpu_resume(t,c)
 #  define sched_note_cpu_resumed(t)
-#endif
-#else
-#  define sched_note_cpu_pause(t,c)
-#  define sched_note_cpu_paused(t)
-#  define sched_note_cpu_resume(t,c)
-#  define sched_note_cpu_resumed(t)
-#  define sched_note_cpu_start(t,c)
-#  define sched_note_cpu_started(t)
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
@@ -586,7 +525,6 @@ void sched_note_irqhandler(int irq, FAR void *handler, bool enter);
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
-
 void sched_note_string_ip(uint32_t tag, uintptr_t ip, FAR const char *buf);
 void sched_note_dump_ip(uint32_t tag, uintptr_t ip, uint8_t event,
                         FAR const void *buf, size_t len);
@@ -699,41 +637,4 @@ void sched_note_filter_tag(FAR struct note_filter_tag_s *oldf,
 #if defined(__cplusplus)
 }
 #endif
-
-#else /* CONFIG_SCHED_INSTRUMENTATION */
-
-#  define sched_note_string(tag, buf)
-#  define sched_note_dump(tag, event, buf, len)
-#  define sched_note_vprintf(tag, fmt, va)
-#  define sched_note_vbprintf(tag, event, fmt, va)
-#  define sched_note_printf(tag, fmt, ...)
-#  define sched_note_bprintf(tag, event, fmt, ...)
-#  define sched_note_begin(tag)
-#  define sched_note_end(tag)
-
-#  define sched_note_start(t)
-#  define sched_note_stop(t)
-#  define sched_note_suspend(t)
-#  define sched_note_resume(t)
-#  define sched_note_cpu_start(t,c)
-#  define sched_note_cpu_started(t)
-#  define sched_note_cpu_pause(t,c)
-#  define sched_note_cpu_paused(t)
-#  define sched_note_cpu_resume(t,c)
-#  define sched_note_cpu_resumed(t)
-#  define sched_note_premption(t,l)
-#  define sched_note_csection(t,e)
-#  define sched_note_spinlock(t,s,i)
-#  define sched_note_syscall_enter(n,a,...)
-#  define sched_note_syscall_leave(n,r)
-#  define sched_note_irqhandler(i,h,e)
-#  define sched_note_string_ip(t,ip,b)
-#  define sched_note_dump_ip(t,ip,e,b,l)
-#  define sched_note_vprintf_ip(t,ip,f,v)
-#  define sched_note_vbprintf_ip(t,ip,e,f,v)
-#  define sched_note_printf_ip(t,ip,f,...)
-#  define sched_note_bprintf_ip(t,ip,e,f,...)
-
-#endif /* CONFIG_SCHED_INSTRUMENTATION */
-
 #endif /* __INCLUDE_NUTTX_SCHED_NOTE_H */
