@@ -30,6 +30,17 @@ ifeq ($(CONFIG_MOTOR_UPPER),y)
 CSRCS += motor.c
 endif
 
+# Stepper upper half and lower halfs
+
+ifeq ($(CONFIG_STEPPER_UPPER),y)
+CSRCS += stepper.c
+endif
+
+ifeq ($(CONFIG_STEPPER_A4988),y)
+CSRCS += a4988.c
+endif
+
+
 # Include motor drivers in the build
 
 MOTOR_DEPPATH := --dep-path motor

@@ -830,6 +830,24 @@
 #  define mtrinfo     _none
 #endif
 
+#ifdef CONFIG_DEBUG_STEPPER_ERROR
+#  define stperr      _err
+#else
+#  define stperr      _none
+#endif
+
+#ifdef CONFIG_DEBUG_STEPPER_WARN
+#  define stpwarn     _warn
+#else
+#  define stpwarn     _none
+#endif
+
+#ifdef CONFIG_DEBUG_STEPPER_INFO
+#  define stpinfo     _info
+#else
+#  define stpinfo     _none
+#endif
+
 #ifdef CONFIG_DEBUG_VIDEO_ERROR
 #  define verr        _err
 #else
