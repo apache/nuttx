@@ -185,7 +185,8 @@ static void    mmcsd_mediachange(FAR void *arg);
 static int     mmcsd_widebus(FAR struct mmcsd_state_s *priv);
 #ifdef CONFIG_MMCSD_MMCSUPPORT
 static int     mmcsd_mmcinitialize(FAR struct mmcsd_state_s *priv);
-static int     mmcsd_read_csd(FAR struct mmcsd_state_s *priv);
+static int     mmcsd_read_csd(FAR struct mmcsd_state_s *priv,
+                              FAR uint8_t *data);
 #endif
 static int     mmcsd_sdinitialize(FAR struct mmcsd_state_s *priv);
 static int     mmcsd_cardidentify(FAR struct mmcsd_state_s *priv);
@@ -2755,7 +2756,7 @@ static int mmcsd_mmcinitialize(FAR struct mmcsd_state_s *priv)
   if (IS_BLOCK(priv->type))
     {
       finfo("Card supports eMMC spec 4.0 (or greater). Reading ext_csd.\n");
-      ret = mmcsd_read_csd(priv);
+      ret = mmcsd_read_csd(priv, NULL);
       if (ret != OK)
         {
           ferr("ERROR: Failed to determinate number of blocks: %d\n", ret);
@@ -2790,7 +2791,7 @@ static int mmcsd_mmcinitialize(FAR struct mmcsd_state_s *priv)
  *
  ****************************************************************************/
 
-static int mmcsd_read_csd(FAR struct mmcsd_state_s *priv)
+static int mmcsd_read_csd(FAR struct mmcsd_state_s *priv, FAR uint8_t *data)
 {
   uint8_t buffer[512] aligned_data(16);
   int ret;
@@ -2896,6 +2897,11 @@ static int mmcsd_read_csd(FAR struct mmcsd_state_s *priv)
 
   priv->nblocks = (buffer[215] << 24) | (buffer[214] << 16) |
                   (buffer[213] << 8) | buffer[212];
+
+  if (data != NULL)
+    {
+      memcpy(data, buffer, sizeof(buffer));
+    }
 
   finfo("MMC ext CSD read succsesfully, number of block %" PRId32 "\n",
         priv->nblocks);
@@ -3181,20 +3187,28 @@ static int mmcsd_iocmd(FAR struct mmcsd_state_s *priv,
                        FAR struct mmc_ioc_cmd *ic_ptr)
 {
   uint32_t opcode;
-  int ret;
+  int ret = OK;
 
   DEBUGASSERT(priv != NULL && ic_ptr != NULL);
 
   opcode = ic_ptr->opcode & MMCSD_CMDIDX_MASK;
   switch (opcode)
     {
-    case MMCSD_CMDIDX2:
+    case MMCSD_CMDIDX2: /* Get cid reg data */
       {
         memcpy((FAR void *)(uintptr_t)ic_ptr->data_ptr,
                priv->cid, sizeof(priv->cid));
       }
       break;
-    case MMCSD_CMDIDX56: /* support general commands */
+#ifdef CONFIG_MMCSD_MMCSUPPORT
+    case MMC_CMDIDX8: /* Get extended csd reg data */
+      {
+        ret = mmcsd_read_csd(priv,
+                            (FAR uint8_t *)(uintptr_t)ic_ptr->data_ptr);
+      }
+      break;
+#endif
+    case MMCSD_CMDIDX56: /* General commands */
       {
         if (ic_ptr->write_flag)
           {
@@ -3204,7 +3218,6 @@ static int mmcsd_iocmd(FAR struct mmcsd_state_s *priv,
             if (ret != OK)
               {
                 ferr("mmcsd_iocmd MMCSD_CMDIDX56 write failed.\n");
-                return ret;
               }
           }
         else
@@ -3215,7 +3228,6 @@ static int mmcsd_iocmd(FAR struct mmcsd_state_s *priv,
             if (ret != OK)
               {
                 ferr("mmcsd_iocmd MMCSD_CMDIDX56 read failed.\n");
-                return ret;
               }
           }
       }
@@ -3223,12 +3235,12 @@ static int mmcsd_iocmd(FAR struct mmcsd_state_s *priv,
     default:
       {
         ferr("mmcsd_iocmd opcode unsupported.\n");
-        return -EINVAL;
+        ret = -EINVAL;
       }
       break;
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
