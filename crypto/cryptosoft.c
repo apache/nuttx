@@ -802,6 +802,18 @@ int swcr_newsession(FAR uint32_t *sid, FAR struct cryptoini *cri)
             axf->init((*swd)->sw_ictx);
             (*swd)->sw_axf = axf;
             bcopy((*swd)->sw_ictx, &(*swd)->sw_ctx, axf->ctxsize);
+
+            if (cri->cri_sid != -1)
+              {
+                if (swcr_sessions[cri->cri_sid] == NULL)
+                  {
+                    swcr_freesession(i);
+                    return -EINVAL;
+                  }
+
+                bcopy(&swcr_sessions[cri->cri_sid]->sw_ctx, &(*swd)->sw_ctx,
+                      axf->ctxsize);
+              }
             break;
 
           case CRYPTO_AES_128_GMAC:
