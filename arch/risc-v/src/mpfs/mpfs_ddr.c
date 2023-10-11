@@ -3418,6 +3418,7 @@ static int mpfs_training_verify(void)
   uint32_t i;
   uint32_t off_taps;
   uint32_t width_taps;
+  uint32_t gt_clk_sel;
 
   while (!(getreg32(MPFS_DDR_CSR_APB_STAT_DFI_TRAINING_COMPLETE) & 0x01) &&
         --retries);
@@ -3520,47 +3521,12 @@ static int mpfs_training_verify(void)
 
       /* Extra checks */
 
-      uint32_t temp = 0;
-      uint32_t gt_clk_sel = getreg32(MPFS_CFG_DDR_SGMII_PHY_GT_CLK_SEL) &
-                                     0x03;
+      /* Check the GT_TXDLY result for the selected clock */
 
-      if ((getreg32(MPFS_CFG_DDR_SGMII_PHY_GT_TXDLY) & 0xff) == 0)
-        {
-          temp++;
-          if (gt_clk_sel == 0)
-            {
-              t_status |= 0x01;
-            }
-        }
+      gt_clk_sel = getreg32(MPFS_CFG_DDR_SGMII_PHY_GT_CLK_SEL) & 0x03;
 
-      if (((getreg32(MPFS_CFG_DDR_SGMII_PHY_GT_TXDLY) >> 8) & 0xff) == 0)
-        {
-          temp++;
-          if (gt_clk_sel == 1)
-            {
-              t_status |= 0x01;
-            }
-        }
-
-      if (((getreg32(MPFS_CFG_DDR_SGMII_PHY_GT_TXDLY) >> 16) & 0xff) == 0)
-        {
-          temp++;
-          if (gt_clk_sel == 2)
-            {
-              t_status |= 0x01;
-            }
-        }
-
-      if (((getreg32(MPFS_CFG_DDR_SGMII_PHY_GT_TXDLY) >> 24) & 0xff) == 0)
-        {
-          temp++;
-          if (gt_clk_sel == 3)
-            {
-              t_status |= 0x01;
-            }
-        }
-
-      if (temp > 1)
+      if (((getreg32(MPFS_CFG_DDR_SGMII_PHY_GT_TXDLY) >> (gt_clk_sel * 8)) &
+           0xff) == 0)
         {
           t_status |= 0x01;
         }
