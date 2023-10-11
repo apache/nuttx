@@ -100,8 +100,6 @@
 
 /* Retraining limits */
 
-#define ABNORMAL_RETRAIN_CA_DECREASE_COUNT          2
-#define ABNORMAL_RETRAIN_CA_DLY_DECREASE_COUNT      2
 #define DQ_DQS_NUM_TAPS                             5
 
 /* PLL convenience bits */
@@ -3407,14 +3405,11 @@ static int mpfs_training_addcmd(void)
 
 static int mpfs_training_verify(void)
 {
-  uint32_t low_ca_dly_count;
-  uint32_t decrease_count;
   uint32_t addcmd_status0;
   uint32_t addcmd_status1;
   uint32_t retries = MPFS_DEFAULT_RETRIES;
   uint32_t t_status = 0;
   uint32_t lane_sel;
-  uint32_t last;
   uint32_t i;
   uint32_t off_taps;
   uint32_t width_taps;
@@ -3429,19 +3424,15 @@ static int mpfs_training_verify(void)
       return -ETIMEDOUT;
     }
 
-  for (lane_sel = 0; lane_sel < LIBERO_SETTING_DATA_LANES_USED; lane_sel++)
+  /* Verify cmd address results, rejects if not acceptable */
+
+  addcmd_status0 = getreg32(MPFS_CFG_DDR_SGMII_PHY_ADDCMD_STATUS0);
+  addcmd_status1 = getreg32(MPFS_CFG_DDR_SGMII_PHY_ADDCMD_STATUS1);
+
+  if ((LIBERO_SETTING_TRAINING_SKIP_SETTING & ADDCMD_BIT) != ADDCMD_BIT)
     {
-      mpfs_wait_cycles(10);
-
-      putreg32(lane_sel, MPFS_CFG_DDR_SGMII_PHY_LANE_SELECT);
-      mpfs_wait_cycles(10);
-
-      /* Verify cmd address results, rejects if not acceptable */
-
-      addcmd_status0 = getreg32(MPFS_CFG_DDR_SGMII_PHY_ADDCMD_STATUS0);
-      addcmd_status1 = getreg32(MPFS_CFG_DDR_SGMII_PHY_ADDCMD_STATUS1);
-
-      uint32_t ca_status[8] =
+      unsigned low_ca_dly_count = 0;
+      uint8_t ca_status[8] =
         {
           ((addcmd_status0) & 0xff),
           ((addcmd_status0 >> 8) & 0xff),
@@ -3453,46 +3444,40 @@ static int mpfs_training_verify(void)
           ((addcmd_status1 >> 24) & 0xff)
         };
 
-      low_ca_dly_count = 0;
-      last             = 0;
-      decrease_count   = 0;
+      uint8_t last = ca_status[7];
+
+      /* Retrain if abnormal CA training result detected
+       * Expected result is increasing numbers, starting at index n and
+       * wrapping around. For example:
+       *   [0x35, 0x3b, 0x4, 0x14, 0x1b, 0x21, 0x28, 0x2f].
+       *
+       * Also they need to be separated by at least 5
+       */
 
       for (i = 0; i < 8; i++)
         {
-          if (ca_status[i] < 5)
+          if (ca_status[i] < last + 5)
             {
               low_ca_dly_count++;
-            }
-
-          if (ca_status[i] <= last)
-            {
-              decrease_count++;
             }
 
           last = ca_status[i];
         }
 
-      if (ca_status[0] <= ca_status[7])
+      if (low_ca_dly_count > 1)
         {
-          decrease_count++;
+          /* Retrain via reset */
+
+          return -EIO;
         }
+    }
 
-      if ((LIBERO_SETTING_TRAINING_SKIP_SETTING & ADDCMD_BIT) != ADDCMD_BIT)
-        {
-          /* Retrain if abnormal CA training result detected */
+  for (lane_sel = 0; lane_sel < LIBERO_SETTING_DATA_LANES_USED; lane_sel++)
+    {
+      mpfs_wait_cycles(10);
 
-          if (low_ca_dly_count > ABNORMAL_RETRAIN_CA_DLY_DECREASE_COUNT)
-            {
-              t_status |= 0x01;
-            }
-
-          /* Retrain if abnormal CA training result detected */
-
-          if (decrease_count > ABNORMAL_RETRAIN_CA_DECREASE_COUNT)
-            {
-              t_status |= 0x01;
-            }
-        }
+      putreg32(lane_sel, MPFS_CFG_DDR_SGMII_PHY_LANE_SELECT);
+      mpfs_wait_cycles(10);
 
       /* Check that gate training passed without error  */
 
