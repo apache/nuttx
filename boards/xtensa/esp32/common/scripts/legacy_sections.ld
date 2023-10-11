@@ -80,12 +80,20 @@ SECTIONS
     *libarch.a:esp32_irq.*(.literal .text .literal.* .text.*)
     *libarch.a:esp32_spicache.*(.literal .text .literal.* .text.*)
     *libarch.a:esp32_spiflash.*(.literal .text .literal.* .text.*)
+    *libarch.a:esp32_user.*(.literal .text .literal.* .text.*)
     *libarch.a:xtensa_assert.*(.literal .text .literal.* .text.*)
     *libarch.a:xtensa_cpuint.*(.literal .text .literal.* .text.*)
     *libarch.a:xtensa_cpupause.*(.literal .text .literal.* .text.*)
     *libarch.a:xtensa_irqdispatch.*(.literal .text .literal.* .text.*)
     *libarch.a:xtensa_modifyreg32.*(.literal .text .literal.* .text.*)
+    *libarch.a:xtensa_saveusercontext.*(.literal .text .literal.* .text.*)
     *libarch.a:xtensa_testset.*(.literal .text .literal.* .text.*)
+
+    *libc.a:lib_assert.*(.literal .text .literal.* .text.*)
+    *libc.a:lib_utsname.*(.literal .text .literal.* .text.*)
+#ifdef CONFIG_ESP32_BLE
+    *libc.a:sq_remlast.*(.literal .text .literal.* .text.*)
+#endif
 
     *libdrivers.a:syslog_flush.*(.literal .text .literal.* .text.*)
 
@@ -93,9 +101,13 @@ SECTIONS
     *libsched.a:irq_csection.*(.literal .text .literal.* .text.*)
     *libsched.a:irq_dispatch.*(.literal .text .literal.* .text.*)
     *libsched.a:irq_spinlock.*(.literal .text .literal.* .text.*)
+    *libsched.a:panic_notifier.*(.literal.panic_notifier_call_chain .text.panic_notifier_call_chain)
+    *libsched.a:sched_gettcb.*(.literal .text .literal.* .text.*)
+    *libsched.a:sched_lock.*(.literal .text .literal.* .text.*)
     *libsched.a:sched_note.*(.literal .text .literal.* .text.*)
     *libsched.a:sched_suspendscheduler.*(.literal .text .literal.* .text.*)
     *libsched.a:sched_thistask.*(.literal .text .literal.* .text.*)
+    *libsched.a:sched_unlock.*(.literal .text .literal.* .text.*)
     *libsched.a:spinlock.*(.literal .text .literal.* .text.*)
 
     *(.wifirxiram .wifirxiram.*)
@@ -204,10 +216,12 @@ SECTIONS
     *libc.a:lib_stackchk.*(.rodata  .rodata.*)
 #endif
     *libarch.a:esp32_spiflash.*(.rodata  .rodata.*)
-    *libarch.a:xtensa_cpupause.*(.rodata  .rodata.*)
+    *libarch.a:xtensa_context.*(.rodata  .rodata.*)
     *libarch.a:xtensa_copystate.*(.rodata  .rodata.*)
-    *libarch.a:xtensa_interruptcontext.*(.rodata  .rodata.*)
+    *libarch.a:xtensa_cpupause.*(.rodata  .rodata.*)
     *libarch.a:xtensa_testset.*(.rodata  .rodata.*)
+
+    *libdrivers.a:syslog_channel.*(.rodata  .rodata.*)
 
     *libsched.a:sched_suspendscheduler.*(.rodata  .rodata.*)
     *libsched.a:sched_thistask.*(.rodata  .rodata.*)
