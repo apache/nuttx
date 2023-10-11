@@ -48,12 +48,10 @@
 #  error "NGPIOINT is > 0 and GPIO interrupts aren't enabled"
 #endif
 
-/* Output pins. GPIO3 is the LED, GPIO48 is the LCD backlight.
- * used.
+/* Output pins. GPIO3 is the LED.
  */
 
 #define GPIO_OUT1    3
-#define GPIO_OUT2   48
 
 /* Input pins. GPIO0 is the BOOT button.
  */
@@ -118,8 +116,7 @@ static const struct gpio_operations_s gpout_ops =
 
 static const uint32_t g_gpiooutputs[BOARD_NGPIOOUT] =
 {
-  GPIO_OUT1,
-  GPIO_OUT2
+  GPIO_OUT1
 };
 
 static struct esp32s3gpio_dev_s g_gpout[BOARD_NGPIOOUT];
