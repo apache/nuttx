@@ -92,7 +92,9 @@ void mpfs_jump_to_app(void)
       "ld   t0, g_hart_use_sbi\n"            /* Load sbi usage bitmask */
       "srl  t0, t0, a0\n"                    /* Shift right by this hart */
       "andi t0, t0, 1\n"                     /* Check the 0 bit */
-      "bgtz t0, mpfs_opensbi_prepare_hart\n" /* If bit was 1, jump to sbi */
+      "beqz t0, 1f\n"                        /* If bit was 1, jump to sbi */
+      "tail mpfs_opensbi_prepare_hart\n"
+      "1:\n"
 #endif
       "slli t1, a0, 3\n"                     /* To entrypoint offset */
       "la   t0, g_app_entrypoints\n"         /* Entrypoint table base */
