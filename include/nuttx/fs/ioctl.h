@@ -98,6 +98,7 @@
 #define _MIPIDSIBASE    (0x3900) /* Mipidsi device ioctl commands */
 #define _SEIOCBASE      (0x3a00) /* Secure element ioctl commands */
 #define _SYSLOGBASE     (0x3c00) /* Syslog device ioctl commands */
+#define _STEPIOBASE     (0x3d00) /* Stepper device ioctl commands */
 #define _WLIOCBASE      (0x8b00) /* Wireless modules ioctl network commands */
 
 /* boardctl() commands share the same number space */
@@ -611,6 +612,11 @@
 
 #define _MTRIOCVALID(c)     (_IOC_TYPE(c) == _MTRIOBASE)
 #define _MTRIOC(nr)         _IOC(_MTRIOBASE, nr)
+
+/* Stepper drivers **********************************************************/
+
+#define _STEPIOCVALID(c)    (_IOC_TYPE(c) == _STEPIOBASE)
+#define _STEPIOC(nr)        _IOC(_STEPIOBASE, nr)
 
 /* MATH drivers *************************************************************/
 

@@ -24,3 +24,11 @@ endif()
 if(CONFIG_MOTOR_UPPER)
   target_sources(drivers PRIVATE motor.c)
 endif()
+
+if(CONFIG_STEPPER_UPPER)
+  target_sources(drivers PRIVATE stepper.c)
+endif()
+
+if(CONFIG_STEPPER_A4988)
+  target_sources(drivers PRIVATE a4988.c)
+endif()

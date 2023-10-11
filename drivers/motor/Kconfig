@@ -62,3 +62,23 @@ endif
 source "drivers/motor/foc/Kconfig"
 
 endif # MOTOR
+
+menuconfig STEPPER
+	bool "Stepper control drivers"
+	default n
+
+if STEPPER
+
+config STEPPER_UPPER
+	bool "Stepper Motor Generic upper-half driver"
+	default n
+	---help---
+		Enables building of a stepper generic upper half driver.
+
+config STEPPER_A4988
+	bool "A4988 Stepper Motor Driver"
+	default n
+	---help---
+		Enables A4988 stepper driver.
+
+endif # STEPPER
