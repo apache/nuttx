@@ -111,6 +111,7 @@ static int cryptof_ioctl(FAR struct file *filep,
                          int cmd, unsigned long arg);
 static int cryptof_poll(FAR struct file *filep,
                         struct pollfd *fds, bool setup);
+static int cryptof_open(FAR struct file *filep);
 static int cryptof_close(FAR struct file *filep);
 
 static int cryptoopen(FAR struct file *filep);
@@ -127,7 +128,7 @@ static int cryptoioctl(FAR struct file *filep, int cmd, unsigned long arg);
 
 static const struct file_operations g_cryptofops =
 {
-  NULL,                /* open   */
+  cryptof_open,        /* open   */
   cryptof_close,       /* close  */
   cryptof_read,        /* read   */
   cryptof_write,       /* write  */
@@ -283,6 +284,7 @@ static int cryptof_ioctl(FAR struct file *filep,
         if (thash)
           {
             cria.cri_alg = sop->mac;
+            cria.cri_sid = -1;
             cria.cri_klen = sop->mackeylen * 8;
 
             if (cria.cri_klen)
@@ -364,7 +366,7 @@ bail:
         error = crypto_getfeat((FAR int *)arg);
         break;
       default:
-        error = -EINVAL;
+        error = -ENOTTY;
     }
 
   return error;
@@ -700,6 +702,122 @@ static int cryptof_close(FAR struct file *filep)
     filep->f_priv = NULL;
 
   return 0;
+}
+
+/* Clone csessions into a new fd */
+
+static int cryptof_open(FAR struct file *filep)
+{
+  FAR struct fcrypt *fcr = filep->f_priv;
+  FAR struct fcrypt *fcrd = NULL;
+  FAR struct csession *cse;
+  FAR struct csession *csed;
+  struct cryptoini cria;
+  struct cryptoini crie;
+  uint64_t sid;
+  int ret = 0;
+
+  if (fcr == NULL)
+    {
+      return -EINVAL;
+    }
+
+  /* A 'struct fcrypt' is bound to the fd of the cryptodev,
+   * which stores a list of sessions. Each encryption operation
+   * would create a context and get a session id, which can be
+   * used to find the specific encryption operation. Therefore,
+   * in order to complete the copy operation, it is necessary to
+   * create same session based on the copy fd and obtain the newly
+   * generated session id.
+   */
+
+  fcrd = kmm_zalloc(sizeof(struct fcrypt));
+  if (fcrd == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  TAILQ_INIT(&fcrd->csessions);
+  TAILQ_FOREACH(cse, &fcr->csessions, next)
+    {
+      bzero(&crie, sizeof(crie));
+      bzero(&cria, sizeof(cria));
+      if (cse->txform)
+        {
+          crie.cri_alg = cse->cipher;
+          crie.cri_klen = cse->keylen * 8;
+
+          crie.cri_key = kmm_malloc(cse->keylen);
+          if (crie.cri_key == NULL)
+            {
+              ret = -ENOMEM;
+              goto bail;
+            }
+
+          memcpy(crie.cri_key, cse->key, cse->keylen);
+          if (cse->thash)
+            {
+              crie.cri_next = &cria;
+            }
+        }
+
+      if (cse->thash)
+        {
+          cria.cri_alg = cse->mac;
+          cria.cri_sid = cse->sid;
+          cria.cri_klen = cse->mackeylen * 8;
+
+          if (cria.cri_klen)
+            {
+              cria.cri_key = kmm_malloc(cse->mackeylen);
+              if (cria.cri_key == NULL)
+                {
+                  ret = -ENOMEM;
+                  goto bail;
+                }
+
+              memcpy(cria.cri_key, cse->mackey, cse->mackeylen);
+            }
+        }
+
+      ret = crypto_newsession(&sid, cse->txform ? &crie : &cria,
+                              !cryptodevallowsoft);
+      if (ret < 0)
+        {
+          goto bail;
+        }
+
+      csed = csecreate(fcrd, sid, crie.cri_key, crie.cri_klen,
+                        cria.cri_key, cria.cri_klen,
+                        cse->cipher, cse->mac, cse->txform,
+                        cse->thash);
+      if (csed == NULL)
+        {
+          crypto_freesession(sid);
+          ret = -EINVAL;
+          goto bail;
+        }
+
+      csed->ses = cse->ses;
+    }
+
+  filep->f_priv = fcrd;
+  return 0;
+
+bail:
+  if (crie.cri_key)
+    {
+      explicit_bzero(crie.cri_key, crie.cri_klen / 8);
+      kmm_free(crie.cri_key);
+    }
+
+  if (cria.cri_key)
+    {
+      explicit_bzero(cria.cri_key, cria.cri_klen / 8);
+      kmm_free(cria.cri_key);
+    }
+
+  return ret;
 }
 
 static int cryptoopen(FAR struct file *filep)
