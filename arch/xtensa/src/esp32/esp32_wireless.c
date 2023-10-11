@@ -24,19 +24,24 @@
 
 #include <nuttx/config.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/mqueue.h>
+
 #include <netinet/in.h>
 #include <sys/param.h>
 #include <debug.h>
 #include <assert.h>
 
 #include "xtensa.h"
-#include "hardware/esp32_soc.h"
 #include "hardware/esp32_dport.h"
 #include "hardware/esp32_emac.h"
-#include "esp32_wireless.h"
+#include "hardware/esp32_soc.h"
+#include "esp32_irq.h"
 #include "esp32_partition.h"
+
 #include "esp_phy_init.h"
 #include "phy_init_data.h"
+
+#include "esp32_wireless.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -47,6 +52,28 @@
 #else
 #  define MAC_ADDR_UNIVERSE_BT_OFFSET 1
 #endif
+
+/* Software Interrupt */
+
+#define SWI_IRQ       ESP32_IRQ_CPU_CPU2
+#define SWI_PERIPH    ESP32_PERIPH_CPU_CPU2
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/* Wireless Private Data */
+
+struct esp_wireless_priv_s
+{
+  volatile int ref;               /* Reference count */
+
+  int cpuint;                     /* CPU interrupt assigned to SWI */
+
+  struct list_node sc_list;       /* Semaphore cache list */
+  struct list_node qc_list;       /* Queue cache list */
+  struct list_node qc_freelist;   /* List of free queue cache structures */
+};
 
 /****************************************************************************
  * Private Function Prototypes
@@ -165,6 +192,10 @@ static phy_country_to_bin_type_t g_country_code_map_type_table[] =
 
 #endif
 
+/* Private data of the wireless common interface */
+
+static struct esp_wireless_priv_s g_esp_wireless_priv;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -204,6 +235,68 @@ static inline void phy_digital_regs_load(void)
     {
       phy_dig_reg_backup(false, g_phy_digital_regs_mem);
     }
+}
+
+/****************************************************************************
+ * Name: esp_swi_irq
+ *
+ * Description:
+ *   Wireless software interrupt callback function.
+ *
+ * Parameters:
+ *   cpuint  - CPU interrupt index
+ *   context - Context data from the ISR
+ *   arg     - NULL
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success. A negated errno value is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+static int esp_swi_irq(int irq, void *context, void *arg)
+{
+  int i;
+  int ret;
+  struct esp_semcache_s *sc;
+  struct esp_semcache_s *sc_tmp;
+  struct esp_queuecache_s *qc_entry;
+  struct esp_queuecache_s *qc_tmp;
+  struct esp_wireless_priv_s *priv = &g_esp_wireless_priv;
+
+  modifyreg32(DPORT_CPU_INTR_FROM_CPU_2_REG, DPORT_CPU_INTR_FROM_CPU_2, 0);
+
+  list_for_every_entry_safe(&priv->sc_list, sc, sc_tmp,
+                            struct esp_semcache_s, node)
+    {
+      for (i = 0; i < sc->count; i++)
+        {
+          ret = nxsem_post(sc->sem);
+          if (ret < 0)
+            {
+              wlerr("ERROR: Failed to post sem ret=%d\n", ret);
+            }
+        }
+
+      sc->count = 0;
+      list_delete(&sc->node);
+    }
+
+  list_for_every_entry_safe(&priv->qc_list, qc_entry, qc_tmp,
+                            struct esp_queuecache_s, node)
+    {
+      ret = file_mq_send(qc_entry->mq_ptr, (const char *)qc_entry->buffer,
+                         qc_entry->size, 0);
+      if (ret < 0)
+        {
+          wlerr("ERROR: Failed to send queue ret=%d\n", ret);
+        }
+
+      list_delete(&qc_entry->node);
+      list_add_tail(&priv->qc_freelist, &qc_entry->node);
+    }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -754,7 +847,7 @@ const esp_phy_init_data_t *esp_phy_get_init_data(void)
           kmm_free(init_data_store);
           return NULL;
         }
-#else /* CONFIG_ESP32_PHY_DEFAULT_INIT_IF_INVALID */ 
+#else /* CONFIG_ESP32_PHY_DEFAULT_INIT_IF_INVALID */
       wlerr("ERROR: Failed to validate PHY data partition\n");
       kmm_free(init_data_store);
       return NULL;
@@ -797,7 +890,7 @@ void esp_phy_release_init_data(const esp_phy_init_data_t *init_data)
   kmm_free((uint8_t *)init_data - sizeof(phy_init_magic_pre));
 }
 
-#else /* CONFIG_ESP32_PHY_INIT_DATA_IN_PARTITION */ 
+#else /* CONFIG_ESP32_PHY_INIT_DATA_IN_PARTITION */
 
 /****************************************************************************
  * Name: esp_phy_get_init_data
@@ -1066,4 +1159,241 @@ void esp32_phy_enable(void)
   g_phy_access_ref++;
   leave_critical_section(flags);
   kmm_free(cal_data);
+}
+
+/****************************************************************************
+ * Name: esp_init_semcache
+ *
+ * Description:
+ *   Initialize semaphore cache.
+ *
+ * Parameters:
+ *   sc  - Semaphore cache data pointer
+ *   sem - Semaphore data pointer
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp_init_semcache(struct esp_semcache_s *sc, sem_t *sem)
+{
+  sc->sem   = sem;
+  sc->count = 0;
+  list_initialize(&sc->node);
+}
+
+/****************************************************************************
+ * Name: esp_post_semcache
+ *
+ * Description:
+ *   Store posting semaphore action into semaphore cache.
+ *
+ * Parameters:
+ *   sc  - Semaphore cache data pointer
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+IRAM_ATTR void esp_post_semcache(struct esp_semcache_s *sc)
+{
+  struct esp_wireless_priv_s *priv = &g_esp_wireless_priv;
+
+  if (!sc->count)
+    {
+      list_add_tail(&priv->sc_list, &sc->node);
+    }
+
+  sc->count++;
+
+  /* Enable CPU 2 interrupt. This will generate an IRQ as soon as non-IRAM
+   * are (re)enabled.
+   */
+
+  modifyreg32(DPORT_CPU_INTR_FROM_CPU_2_REG, 0, DPORT_CPU_INTR_FROM_CPU_2);
+}
+
+/****************************************************************************
+ * Name: esp_init_queuecache
+ *
+ * Description:
+ *   Initialize queue cache.
+ *
+ * Parameters:
+ *   qc     - Queue cache data pointer
+ *   mq_ptr - Queue data pointer
+ *   buffer - Queue cache buffer pointer
+ *   len    - Queue cache max length
+ *   size   - Queue cache buffer size
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp_init_queuecache(struct esp_queuecache_s *qc,
+                         struct file *mq_ptr,
+                         uint8_t *buffer,
+                         size_t len,
+                         size_t size)
+{
+  struct esp_wireless_priv_s *priv = &g_esp_wireless_priv;
+  int i;
+
+  for (i = 0; i < len; i++)
+    {
+      qc[i].mq_ptr = mq_ptr;
+      qc[i].size   = size;
+      qc[i].buffer = buffer;
+      list_initialize(&qc[i].node);
+
+      list_add_tail(&priv->qc_freelist, &qc[i].node);
+    }
+}
+
+/****************************************************************************
+ * Name: esp_send_queuecache
+ *
+ * Description:
+ *   Store posting queue action and data into queue cache.
+ *
+ * Parameters:
+ *   qc     - Queue cache data pointer
+ *   buffer - Data buffer
+ *   size   - Buffer size
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+IRAM_ATTR void esp_send_queuecache(void *queue, uint8_t *buffer, int size)
+{
+  struct esp_wireless_priv_s *priv = &g_esp_wireless_priv;
+  struct esp_queuecache_s *msg;
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
+  msg = (struct esp_queuecache_s *)list_remove_head(&priv->qc_freelist);
+  DEBUGASSERT(msg != NULL);
+
+  DEBUGASSERT(msg->size == size);
+  DEBUGASSERT(msg->mq_ptr == queue);
+
+  memcpy(msg->buffer, buffer, size);
+
+  list_add_tail(&priv->qc_list, &msg->node);
+
+  leave_critical_section(flags);
+
+  /* Enable CPU 2 interrupt. This will generate an IRQ as soon as non-IRAM
+   * are (re)enabled.
+   */
+
+  modifyreg32(DPORT_CPU_INTR_FROM_CPU_2_REG, 0, DPORT_CPU_INTR_FROM_CPU_2);
+}
+
+/****************************************************************************
+ * Name: esp_wireless_init
+ *
+ * Description:
+ *   Initialize ESP32 wireless common components for both BT and Wi-Fi.
+ *
+ * Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success. A negated errno value is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int esp_wireless_init(void)
+{
+  int ret;
+  irqstate_t flags;
+  struct esp_wireless_priv_s *priv = &g_esp_wireless_priv;
+
+  flags = enter_critical_section();
+  if (priv->ref != 0)
+    {
+      priv->ref++;
+      leave_critical_section(flags);
+      return OK;
+    }
+
+  priv->cpuint = esp32_setup_irq(0, SWI_PERIPH, 1, ESP32_CPUINT_LEVEL);
+  if (priv->cpuint < 0)
+    {
+      /* Failed to allocate a CPU interrupt of this type. */
+
+      wlerr("ERROR: Failed to attach IRQ ret=%d\n", ret);
+      ret = priv->cpuint;
+      leave_critical_section(flags);
+
+      return ret;
+    }
+
+  ret = irq_attach(SWI_IRQ, esp_swi_irq, NULL);
+  if (ret < 0)
+    {
+      esp32_teardown_irq(0, SWI_PERIPH, priv->cpuint);
+      leave_critical_section(flags);
+      wlerr("ERROR: Failed to attach IRQ ret=%d\n", ret);
+
+      return ret;
+    }
+
+  list_initialize(&priv->sc_list);
+  list_initialize(&priv->qc_list);
+  list_initialize(&priv->qc_freelist);
+
+  up_enable_irq(SWI_IRQ);
+
+  priv->ref++;
+
+  leave_critical_section(flags);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: esp_wireless_deinit
+ *
+ * Description:
+ *   De-initialize ESP32 wireless common components.
+ *
+ * Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success. A negated errno value is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int esp_wireless_deinit(void)
+{
+  irqstate_t flags;
+  struct esp_wireless_priv_s *priv = &g_esp_wireless_priv;
+
+  flags = enter_critical_section();
+
+  if (priv->ref > 0)
+    {
+      priv->ref--;
+      if (priv->ref == 0)
+        {
+          up_disable_irq(SWI_IRQ);
+          irq_detach(SWI_IRQ);
+          esp32_teardown_irq(0, SWI_PERIPH, priv->cpuint);
+        }
+    }
+
+  leave_critical_section(flags);
+
+  return OK;
 }

@@ -81,6 +81,19 @@ void spi_disable_cache(int cpu);
 
 void spi_enable_cache(int cpu);
 
+/****************************************************************************
+ * Name: spi_flash_cache_enabled
+ *
+ * Description:
+ *   Check at runtime if flash cache is enabled on both CPUs.
+ *
+ * Returned Value:
+ *   True if both CPUs have flash cache enabled, false otherwise.
+ *
+ ****************************************************************************/
+
+bool spi_flash_cache_enabled(void);
+
 #ifdef __cplusplus
 }
 #endif
