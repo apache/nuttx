@@ -289,7 +289,7 @@ clear_bss:
 
     // Properly setup RSP to idle stack
     movabs  $g_idle_topstack,    %rbx
-    mov     %rbx,   %rsp
+    mov     (%rbx),   %rsp
 
     /* Initialize and start NuttX */
     call    up_lowsetup                     /* Low-level, pre-OS initialization */
