@@ -1141,7 +1141,7 @@ enum v4l2_ctrl_type
 
 struct v4l2_queryctrl
 {
-  uint16_t   ctrl_class;               /* Control class */
+  uint16_t   ctrl_class;               /* Control class(not used) */
   uint16_t   id;                       /* Control id */
   uint16_t   type;                     /* enum #v4l2_ctrl_type */
   char       name[32];                 /* Name of control */
@@ -1153,7 +1153,7 @@ struct v4l2_queryctrl
 
 struct v4l2_query_ext_ctrl
 {
-  uint16_t   ctrl_class;               /* Control class */
+  uint16_t   ctrl_class;               /* Control class(not used) */
   uint16_t   id;                       /* Control id */
   uint16_t   type;                     /* enum #v4l2_ctrl_type */
   char       name[32];                 /* Name of control */
@@ -1170,7 +1170,7 @@ struct v4l2_query_ext_ctrl
 
 struct v4l2_querymenu
 {
-  uint16_t   ctrl_class;    /* Camera control class */
+  uint16_t   ctrl_class;    /* Camera control class(not used) */
   uint16_t   id;            /* Camera control id    */
   uint32_t   index;         /* Index of menu.       */
   union
