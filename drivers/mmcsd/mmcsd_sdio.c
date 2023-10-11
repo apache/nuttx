@@ -1007,6 +1007,54 @@ static void mmcsd_decode_scr(FAR struct mmcsd_state_s *priv, uint32_t scr[2])
 #endif
 }
 
+#ifdef CONFIG_MMCSD_IOCSUPPORT
+/****************************************************************************
+ * Name: mmcsd_switch
+ *
+ * Description:
+ *   Execute CMD6 to switch the mode of operation of the selected device or
+ * modify the EXT_CSD registers.
+ *
+ ****************************************************************************/
+
+static int mmcsd_switch(FAR struct mmcsd_state_s *priv, uint32_t arg)
+{
+  /* After putting a slave into transfer state, master sends
+   * CMD6(SWITCH) to set the PARTITION_ACCESS bits in the EXT_CSD
+   * register, byte[179].After that, master can use the Multiple Block
+   * read and write commands (CMD23, CMD18 and CMD25) to access the
+   * RPMB partition.
+   * PARTITION_CONFIG[179](see 7.4.69)
+   * Bit[2:0] : PARTITION_ACCESS (before BOOT_PARTITION_ACCESS)
+   * User selects partitions to access:
+   *   0x0 : No access to boot partition (default)
+   *   0x1 : R/W boot partition 1
+   *   0x2 : R/W boot partition 2
+   *   0x3 : R/W Replay Protected Memory Block (RPMB)
+   *   0x4 : Access to General Purpose partition 1
+   *   0x5 : Access to General Purpose partition 2
+   *   0x6 : Access to General Purpose partition 3
+   *   0x7 : Access to General Purpose partition 4
+   *
+   * CMD6 Argument(see 6.10.4)
+   *  [31:26] Set to 0
+   *  [25:24] Access Bits
+   *    00 Command Set
+   *    01 Set Bits
+   *    10 Clear Bits
+   *    11 Write Byte
+   *  [23:16] Index
+   *  [15:8] Value
+   *  [7:3] Set to 0
+   *  [2:0] Cmd Set
+   */
+
+  mmcsd_sendcmdpoll(priv, MMCSD_CMD6, arg);
+  return mmcsd_recv_r1(priv, MMCSD_CMD6);
+}
+
+#endif /* CONFIG_MMCSD_IOCSUPPORT */
+
 /****************************************************************************
  * Name: mmcsd_get_r1
  *
@@ -3198,6 +3246,15 @@ static int mmcsd_iocmd(FAR struct mmcsd_state_s *priv,
       {
         memcpy((FAR void *)(uintptr_t)ic_ptr->data_ptr,
                priv->cid, sizeof(priv->cid));
+      }
+      break;
+    case MMCSD_CMDIDX6: /* Switch commands */
+      {
+        ret = mmcsd_switch(priv, ic_ptr->arg);
+        if (ret != OK)
+          {
+            ferr("ERROR: mmcsd_switch failed: %d\n", ret);
+          }
       }
       break;
 #ifdef CONFIG_MMCSD_MMCSUPPORT
