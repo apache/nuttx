@@ -43,45 +43,45 @@ config MX8MP_I2C
 
 if MX8MP_I2C
 
-	config MX8MP_I2C1
-		bool "I2C1"
-		default n
-		select I2C
+config MX8MP_I2C1
+	bool "I2C1"
+	default n
+	select I2C
 
-	config MX8MP_I2C2
-		bool "I2C2"
-		default n
-		select I2C
+config MX8MP_I2C2
+	bool "I2C2"
+	default n
+	select I2C
 
-	config MX8MP_I2C3
-		bool "I2C3"
-		default n
-		select I2C
+config MX8MP_I2C3
+	bool "I2C3"
+	default n
+	select I2C
 
-	config MX8MP_I2C4
-		bool "I2C4"
-		default n
-		select I2C
+config MX8MP_I2C4
+	bool "I2C4"
+	default n
+	select I2C
 
-	config MX8MP_I2C5
-		bool "I2C5"
-		default n
-		select I2C
+config MX8MP_I2C5
+	bool "I2C5"
+	default n
+	select I2C
 
-	config MX8MP_I2C6
-		bool "I2C6"
-		default n
-		select I2C
+config MX8MP_I2C6
+	bool "I2C6"
+	default n
+	select I2C
 
-	config MX8MP_I2C_DRIVER
-		bool "I2C character driver"
-		default n
-		select I2C_DRIVER
-		---help---
-			Build in support for a character driver at /dev/i2c[N] that may be
-			used to perform I2C bus transfers from applications.  The intent of
-			this driver is to support I2C testing.  It is not suitable for use
-			in any real driver application.
+config MX8MP_I2C_DRIVER
+	bool "I2C character driver"
+	default n
+	select I2C_DRIVER
+	---help---
+		Build in support for a character driver at /dev/i2c[N] that may be
+		used to perform I2C bus transfers from applications.  The intent of
+		this driver is to support I2C testing.  It is not suitable for use
+		in any real driver application.
 
 endif # MX8MP_I2C
 
@@ -97,33 +97,33 @@ config MX8MP_SPI
 
 if MX8MP_SPI
 
-	config MX8MP_SPI1
-		bool "SPI1"
-		default n
-		select SPI
+config MX8MP_SPI1
+	bool "SPI1"
+	default n
+	select SPI
 
-	config MX8MP_SPI2
-		bool "SPI2"
-		default n
-		select SPI
+config MX8MP_SPI2
+	bool "SPI2"
+	default n
+	select SPI
 
-	config MX8MP_SPI3
-		bool "SPI3"
-		default n
-		select SPI
+config MX8MP_SPI3
+	bool "SPI3"
+	default n
+	select SPI
 
-	config MX8MP_SPI_DRIVER
-		bool "SPI character driver"
-		default n
-		select SPI_DRIVER
-		---help---
-			Build in support for a character driver at /dev/spi[N] that may b
-			used to perform SPI bus transfers from applications.  The intent of
-			this driver is to support SPI testing.
+config MX8MP_SPI_DRIVER
+	bool "SPI character driver"
+	default n
+	select SPI_DRIVER
+	---help---
+		Build in support for a character driver at /dev/spi[N] that may b
+		used to perform SPI bus transfers from applications.  The intent of
+		this driver is to support SPI testing.
 
 endif # MX8MP_SPI
 
-endmenu
+endmenu # i.MX8MP Peripheral Selection
 
 # These "hidden" settings determine whether a peripheral option is available
 # for the selected MCU
