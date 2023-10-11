@@ -138,6 +138,7 @@ struct cryptoini
   int cri_alg;       /* Algorithm to use */
   int cri_klen;      /* Key length, in bits */
   int cri_rnd;       /* Algorithm rounds, where relevant */
+  int cri_sid;
   caddr_t cri_key;   /* key to use */
   union
   {
