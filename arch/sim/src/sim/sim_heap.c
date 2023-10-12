@@ -136,13 +136,14 @@ static void mm_free_delaylist(struct mm_heap_s *heap)
  ****************************************************************************/
 
 struct mm_heap_s *mm_initialize(const char *name,
-                                    void *heap_start, size_t heap_size)
+                                void *heap_start, size_t heap_size)
 {
   struct mm_heap_s *heap;
-
+  FAR struct tcb_s *tcb = nxsched_self();
   heap = host_memalign(sizeof(void *), sizeof(*heap));
   DEBUGASSERT(heap);
 
+  tcb->alloc_size += host_mallocsize(heap);
   memset(heap, 0, sizeof(struct mm_heap_s));
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
@@ -227,6 +228,8 @@ void mm_free(struct mm_heap_s *heap, void *mem)
     }
   else
     {
+      FAR struct tcb_s *tcb = nxsched_self();
+      tcb->alloc_size -= host_mallocsize(mem);
       host_free(mem);
     }
 }
@@ -255,10 +258,16 @@ void mm_free(struct mm_heap_s *heap, void *mem)
  ****************************************************************************/
 
 void *mm_realloc(struct mm_heap_s *heap, void *oldmem,
-                    size_t size)
+                 size_t size)
 {
+  FAR struct tcb_s *tcb = nxsched_self();
+  FAR void *mem;
   mm_free_delaylist(heap);
-  return host_realloc(oldmem, size);
+
+  tcb->alloc_size -= host_mallocsize(oldmem);
+  mem = host_realloc(oldmem, size);
+  tcb->alloc_size += host_mallocsize(mem);
+  return mem;
 }
 
 /****************************************************************************
@@ -316,10 +325,15 @@ void *mm_zalloc(struct mm_heap_s *heap, size_t size)
  ****************************************************************************/
 
 void *mm_memalign(struct mm_heap_s *heap, size_t alignment,
-                      size_t size)
+                  size_t size)
 {
+  FAR struct tcb_s *tcb = nxsched_self();
+  FAR void *mem;
+
   mm_free_delaylist(heap);
-  return host_memalign(alignment, size);
+  mem = host_memalign(alignment, size);
+  tcb->alloc_size += host_mallocsize(mem);
+  return mem;
 }
 
 /****************************************************************************

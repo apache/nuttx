@@ -222,6 +222,7 @@ int mempool_init(FAR struct mempool_s *pool, FAR const char *name)
 FAR void *mempool_alloc(FAR struct mempool_s *pool)
 {
   FAR sq_entry_t *blk;
+  FAR struct tcb_s *tcb = nxsched_self();
   irqstate_t flags;
 
 retry:
@@ -285,6 +286,7 @@ retry:
 #endif
   kasan_unpoison(blk, pool->blocksize);
 out_with_lock:
+  tcb->alloc_size += pool->blocksize;
   spin_unlock_irqrestore(&pool->lock, flags);
   return blk;
 }
@@ -304,6 +306,9 @@ void mempool_free(FAR struct mempool_s *pool, FAR void *blk)
 {
   irqstate_t flags = spin_lock_irqsave(&pool->lock);
   size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool);
+  FAR struct tcb_s *tcb = nxsched_self();
+  tcb->alloc_size -= blocksize;
+
 #if CONFIG_MM_BACKTRACE >= 0
   FAR struct mempool_backtrace_s *buf =
     (FAR struct mempool_backtrace_s *)((FAR char *)blk + pool->blocksize);

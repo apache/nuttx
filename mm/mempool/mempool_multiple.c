@@ -156,6 +156,7 @@ mempool_multiple_alloc_chunk(FAR struct mempool_multiple_s *mpool,
                              size_t align, size_t size)
 {
   FAR struct mpool_chunk_s *chunk;
+  FAR struct tcb_s *tcb = nxsched_self();
   FAR char *tmp;
   FAR void *ret;
 
@@ -164,7 +165,9 @@ mempool_multiple_alloc_chunk(FAR struct mempool_multiple_s *mpool,
       ret = mpool->alloc(mpool->arg, align, size);
       if (ret)
         {
-          mpool->alloced += mpool->alloc_size(mpool->arg, ret);
+          size_t alloc_size = mpool->alloc_size(mpool->arg, ret);
+          mpool->alloced += alloc_size;
+          tcb->alloc_size -= alloc_size;
         }
 
       return ret;
@@ -173,6 +176,7 @@ mempool_multiple_alloc_chunk(FAR struct mempool_multiple_s *mpool,
   chunk = (FAR struct mpool_chunk_s *)sq_peek(&mpool->chunk_queue);
   if (chunk == NULL)
     {
+      size_t alloc_size;
 retry:
       tmp = mpool->alloc(mpool->arg, mpool->expandsize,
                          mpool->chunk_size +
@@ -183,7 +187,9 @@ retry:
           return NULL;
         }
 
-      mpool->alloced += mpool->alloc_size(mpool->arg, tmp);
+      alloc_size = mpool->alloc_size(mpool->arg, tmp);
+      mpool->alloced += alloc_size;
+      tcb->alloc_size -= alloc_size;
       chunk = (FAR struct mpool_chunk_s *)(tmp + mpool->chunk_size);
       chunk->end = tmp + mpool->chunk_size;
       chunk->start = tmp;
@@ -209,9 +215,11 @@ mempool_multiple_free_chunk(FAR struct mempool_multiple_s *mpool,
 {
   FAR struct mpool_chunk_s *chunk;
   FAR sq_entry_t *entry;
+  FAR struct tcb_s *tcb = nxsched_self();
 
   if (mpool->chunk_size < mpool->expandsize)
     {
+      tcb->alloc_size += mpool->alloc_size(mpool->arg, ptr);
       mpool->free(mpool->arg, ptr);
       return;
     }
@@ -224,6 +232,7 @@ mempool_multiple_free_chunk(FAR struct mempool_multiple_s *mpool,
         {
           if (--chunk->used == 0)
             {
+              tcb->alloc_size += mpool->alloc_size(mpool->arg, chunk->start);
               sq_rem(&chunk->entry, &mpool->chunk_queue);
               mpool->free(mpool->arg, chunk->start);
             }
@@ -378,6 +387,7 @@ mempool_multiple_init(FAR const char *name,
                       size_t dict_expendsize)
 {
   FAR struct mempool_multiple_s *mpool;
+  FAR struct tcb_s *tcb = nxsched_self();
   FAR struct mempool_s *pools;
   size_t maxpoolszie;
   size_t minpoolsize;
@@ -417,6 +427,7 @@ mempool_multiple_init(FAR const char *name,
   mpool->free = free;
   mpool->arg = arg;
   mpool->alloced = alloc_size(arg, mpool);
+  tcb->alloc_size -= mpool->alloced;
   sq_init(&mpool->chunk_queue);
   pools = mempool_multiple_alloc_chunk(mpool, sizeof(uintptr_t),
                                        npools * sizeof(struct mempool_s));
@@ -528,6 +539,8 @@ FAR void *mempool_multiple_alloc(FAR struct mempool_multiple_s *mpool,
 
       if (blk)
         {
+          FAR struct tcb_s *tcb = nxsched_self();
+          tcb->alloc_size += pool->blocksize;
           return blk;
         }
     }
@@ -692,6 +705,8 @@ FAR void *mempool_multiple_memalign(FAR struct mempool_multiple_s *mpool,
       FAR char *blk = mempool_alloc(pool);
       if (blk != NULL)
         {
+          FAR struct tcb_s *tcb = nxsched_self();
+          tcb->alloc_size += pool->blocksize;
           return (FAR void *)ALIGN_UP(blk, alignment);
         }
     }

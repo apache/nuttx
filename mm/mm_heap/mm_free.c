@@ -72,6 +72,7 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
   FAR struct mm_freenode_s *node;
   FAR struct mm_freenode_s *prev;
   FAR struct mm_freenode_s *next;
+  FAR struct tcb_s *tcb = nxsched_self();
   size_t nodesize;
   size_t prevsize;
 
@@ -114,6 +115,7 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
 
   node = (FAR struct mm_freenode_s *)((FAR char *)mem - MM_SIZEOF_ALLOCNODE);
   nodesize = MM_SIZEOF_NODE(node);
+  tcb->alloc_size -= nodesize;
 
   /* Sanity check against double-frees */
 

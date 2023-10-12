@@ -1068,15 +1068,19 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 
   if (ret)
     {
+      size_t alloc_size = mm_malloc_size(heap, ret);
+      FAR struct tcb_s *tcb = nxsched_self();
+      tcb->alloc_size += alloc_size;
+
 #if CONFIG_MM_BACKTRACE >= 0
-      FAR struct memdump_backtrace_s *buf = ret + mm_malloc_size(heap, ret);
+      FAR struct memdump_backtrace_s *buf = ret + alloc_size;
 
       memdump_backtrace(heap, buf);
 #endif
-      kasan_unpoison(ret, mm_malloc_size(heap, ret));
+      kasan_unpoison(ret, alloc_size);
 
 #ifdef CONFIG_MM_FILL_ALLOCATIONS
-      memset(ret, 0xaa, mm_malloc_size(heap, ret));
+      memset(ret, 0xaa, alloc_size);
 #endif
     }
 
@@ -1126,12 +1130,16 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 
   if (ret)
     {
+      size_t alloc_size = mm_malloc_size(heap, ret);
+      FAR struct tcb_s *tcb = nxsched_self();
+      tcb->alloc_size += alloc_size;
+
 #if CONFIG_MM_BACKTRACE >= 0
-      FAR struct memdump_backtrace_s *buf = ret + mm_malloc_size(heap, ret);
+      FAR struct memdump_backtrace_s *buf = ret + alloc_size;
 
       memdump_backtrace(heap, buf);
 #endif
-      kasan_unpoison(ret, mm_malloc_size(heap, ret));
+      kasan_unpoison(ret, alloc_size);
     }
 
   return ret;
@@ -1164,6 +1172,8 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
                      size_t size)
 {
   FAR void *newmem;
+  FAR struct tcb_s *tcb = nxsched_self();
+  size_t oldsize = 0;
 
   /* If oldmem is NULL, then realloc is equivalent to malloc */
 
@@ -1219,6 +1229,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 
   /* Allocate from the tlsf pool */
 
+  oldsize = mm_malloc_size(heap, oldmem);
   DEBUGVERIFY(mm_lock(heap));
 #if CONFIG_MM_BACKTRACE >= 0
   newmem = tlsf_realloc(heap->mm_tlsf, oldmem, size +
@@ -1228,15 +1239,17 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 #endif
   mm_unlock(heap);
 
-#if CONFIG_MM_BACKTRACE >= 0
   if (newmem)
     {
+      size_t newsize = mm_malloc_size(heap, newmem);
+      tcb->alloc_size += newsize - oldsize;
+#if CONFIG_MM_BACKTRACE >= 0
       FAR struct memdump_backtrace_s *buf =
-        newmem + mm_malloc_size(heap, newmem);
+        newmem + newsize;
 
       memdump_backtrace(heap, buf);
-    }
 #endif
+    }
 
 #endif
 

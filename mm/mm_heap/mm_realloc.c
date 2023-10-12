@@ -68,6 +68,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
   FAR struct mm_allocnode_s *oldnode;
   FAR struct mm_freenode_s  *prev = NULL;
   FAR struct mm_freenode_s  *next;
+  FAR struct tcb_s *tcb = nxsched_self();
   size_t newsize;
   size_t oldsize;
   size_t prevsize = 0;
@@ -143,6 +144,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 
       if (newsize < oldsize)
         {
+          tcb->alloc_size -= oldsize - newsize;
           mm_shrinkchunk(heap, oldnode, newsize);
           kasan_poison((FAR char *)oldnode + MM_SIZEOF_NODE(oldnode) +
                        sizeof(mmsize_t), oldsize - MM_SIZEOF_NODE(oldnode));
@@ -378,6 +380,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
           memcpy(newmem, oldmem, oldsize - MM_ALLOCNODE_OVERHEAD);
         }
 
+      tcb->alloc_size += mm_malloc_size(heap, newmem);
       return newmem;
     }
 

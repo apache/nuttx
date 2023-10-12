@@ -598,6 +598,10 @@ struct tcb_s
                                          /* after the frame has been        */
                                          /* removed from the stack.         */
 
+  /* The allocated memory size of the current thread ************************/
+
+  ssize_t alloc_size;
+
   /* External Module Support ************************************************/
 
 #ifdef CONFIG_PIC

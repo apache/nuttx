@@ -52,6 +52,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
                       size_t size)
 {
   FAR struct mm_allocnode_s *node;
+  FAR struct tcb_s *tcb = nxsched_self();
   uintptr_t rawchunk;
   uintptr_t alignedchunk;
   size_t mask;
@@ -132,6 +133,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
       return NULL;
     }
 
+  tcb->alloc_size -= mm_malloc_size(heap, (FAR void *)rawchunk);
   kasan_poison((FAR void *)rawchunk,
                mm_malloc_size(heap, (FAR void *)rawchunk));
 
@@ -263,6 +265,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 
   MM_ADD_BACKTRACE(heap, node);
 
+  tcb->alloc_size += mm_malloc_size(heap, (FAR void *)alignedchunk);
   kasan_unpoison((FAR void *)alignedchunk,
                  mm_malloc_size(heap, (FAR void *)alignedchunk));
 

@@ -262,6 +262,9 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 
   if (ret)
     {
+      FAR struct tcb_s *tcb = nxsched_self();
+      tcb->alloc_size += alignsize;
+
       MM_ADD_BACKTRACE(heap, node);
       kasan_unpoison(ret, mm_malloc_size(heap, ret));
 #ifdef CONFIG_MM_FILL_ALLOCATIONS
