@@ -28,6 +28,12 @@ SBI_CSRCS += opensbi/opensbi-3rdparty/lib/utils/ipi/aclint_mswi.c
 SBI_CSRCS += opensbi/opensbi-3rdparty/lib/utils/irqchip/plic.c
 SBI_CSRCS += opensbi/opensbi-3rdparty/lib/utils/timer/aclint_mtimer.c
 
+EXCLUDED_FILES  = opensbi/opensbi-3rdparty/lib/sbi/sbi_pmu.c
+EXCLUDED_FILES += opensbi/opensbi-3rdparty/lib/sbi/sbi_ecall_dbcn.c
+
+TMPVAR := $(SBI_CSRCS)
+SBI_CSRCS = $(filter-out $(EXCLUDED_FILES), $(TMPVAR))
+
 SBI_ASRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_expected_trap.S
 SBI_ASRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_hfence.S
 SBI_ASRCS += opensbi/opensbi-3rdparty/lib/sbi/riscv_hardfp.S
@@ -37,10 +43,10 @@ INCLUDES  += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)opensbi$(DELIM)opensbi-3rdpar
 SBI_DIR   := opensbi
 
 OPENSBI_UNPACK  = opensbi-3rdparty
-OPENSBI_COMMIT  = 4998a712b2ab504eff306110879ee05af6050177
+OPENSBI_COMMIT  = fbaaafe808f3da7745760d757c436ef1b293d3ed
 OPENSBI_URL     = https://github.com/riscv-software-src/opensbi/tarball
 OPENSBI_TARBALL = opensbi.tar.gz
-OPENSBI_DIR     = riscv-software-src-opensbi-4998a71
+OPENSBI_DIR     = riscv-software-src-opensbi-fbaaafe
 
 $(OPENSBI_TARBALL):
 	$(call DOWNLOAD,$(OPENSBI_URL),$(OPENSBI_COMMIT),opensbi/$(OPENSBI_TARBALL))
@@ -50,6 +56,7 @@ $(OPENSBI_TARBALL):
 	$(Q) tar xzf opensbi/$(OPENSBI_TARBALL) -C opensbi
 	$(Q) mv opensbi/$(OPENSBI_DIR) opensbi/$(OPENSBI_UNPACK)
 	$(Q) touch opensbi/.opensbi_unpack
+	$(Q) opensbi/$(OPENSBI_UNPACK)/scripts/carray.sh -i opensbi/$(OPENSBI_UNPACK)/lib/sbi/sbi_ecall_exts.carray -l "ecall_base ecall_hsm ecall_ipi ecall_rfence ecall_time ecall_vendor" > opensbi/$(OPENSBI_UNPACK)/lib/sbi/sbi_ecall_exts.c
 
 ifeq ($(wildcard opensbi/$(OPENSBI_UNPACK)/.git),)
 context:: .opensbi_unpack
