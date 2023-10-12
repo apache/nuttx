@@ -505,22 +505,44 @@ config ESP32S2_SPI_UDCS
 	---help---
 		Use user-defined CS.
 
+config ESP32S2_SPI2_SLAVE
+	bool "SPI2 Slave mode"
+	default n
+	depends on SPI_SLAVE && ESP32S2_SPI2
+	select ESP32S2_GPIO_IRQ
+	---help---
+		Configure SPI2 to operate in Slave mode.
+
 config ESP32S2_SPI2_DMA
 	bool "SPI2 use DMA"
 	default y
 	depends on ESP32S2_SPI2
+
+config ESP32S2_SPI3_SLAVE
+	bool "SPI3 Slave mode"
+	default n
+	depends on SPI_SLAVE && ESP32S2_SPI3
+	select ESP32S2_GPIO_IRQ
+	---help---
+		Configure SPI3 to operate in Slave mode.
 
 config ESP32S2_SPI3_DMA
 	bool "SPI3 use DMA"
 	default y
 	depends on ESP32S2_SPI3
 
-config SPI_DMADESC_NUM
-	int "SPI DMA maximum number of descriptors"
-	default 2
+config ESP32S2_SPI_DMA_BUFSIZE
+	int "SPI Master GDMA buffer size"
+	default 2048
+	depends on ESP32S2_SPI2_DMA || ESP32S2_SPI3_DMA
 	---help---
-		Configure the maximum number of out-link/in-link descriptors to
-		be chained for a SPI DMA transfer.
+		This is used to calculate and allocate DMA description buffer,
+		not really allocate TX/RX buffer.
+
+config ESP32S2_SPI_SLAVE_BUFSIZE
+	int "SPI Slave buffer size"
+	default 2048
+	depends on SPI_SLAVE
 
 config ESP32S2_SPI_DMATHRESHOLD
 	int "SPI DMA threshold"
@@ -552,6 +574,17 @@ config ESP32S2_SPI2_MISOPIN
 	default 13
 	range 0 48
 
+config ESP32S2_SPI2_IO2PIN
+	int "SPI2 IO2 Pin"
+	default 14
+	range 0 48
+	depends on ESP32S2_SPI_IO_QIO
+
+config ESP32S2_SPI2_IO3PIN
+	int "SPI2 IO3 Pin"
+	default 9
+	range 0 48
+	depends on ESP32S2_SPI_IO_QIO
 endif # ESP32S2_SPI2
 
 if ESP32S2_SPI3
