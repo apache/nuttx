@@ -91,7 +91,7 @@ static int local_sendctl(FAR struct local_conn_s *conn,
       fds = (int *)CMSG_DATA(cmsg);
       count = (cmsg->cmsg_len - sizeof(struct cmsghdr)) / sizeof(int);
 
-      if (count + peer->lc_cfpcount > LOCAL_NCONTROLFDS)
+      if (count + peer->lc_cfpcount >= LOCAL_NCONTROLFDS)
         {
           ret = -EMFILE;
           goto fail;
