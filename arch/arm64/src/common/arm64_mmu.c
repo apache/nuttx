@@ -336,7 +336,7 @@ static void set_pte_block_desc(uint64_t *pte, uint64_t addr_pa,
       {
         /* Make Normal RW memory as execute never */
 
-        if ((attrs & MT_RW) || (attrs & MT_EXECUTE_NEVER))
+        if (attrs & MT_EXECUTE_NEVER)
           {
             desc |= PTE_BLOCK_DESC_PXN;
           }
