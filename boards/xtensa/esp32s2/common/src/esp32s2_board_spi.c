@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32s2/esp32s2-kaluga-1/src/esp32s2_board_spi.c
+ * boards/xtensa/esp32s2/common/src/esp32s2_board_spi.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -30,10 +30,7 @@
 
 #include <nuttx/spi/spi.h>
 
-#include <arch/board/board.h>
-
 #include "esp32s2_gpio.h"
-#include "esp32s2-kaluga-1.h"
 
 /****************************************************************************
  * Private Functions
@@ -72,7 +69,7 @@ int esp32s2_spi2_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
        *  data bits are data or a command.
        */
 
-      esp32s2_gpiowrite(GPIO_LCD_DC, !cmd);
+      esp32s2_gpiowrite(CONFIG_ESP32S2_SPI2_MISOPIN, !cmd);
 
       return OK;
     }
