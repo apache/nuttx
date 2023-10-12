@@ -251,6 +251,48 @@ static sem_t g_disable_non_iram_isr_on_core[CONFIG_SMP_NCPUS];
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: spiflash_suspend_cache
+ *
+ * Description:
+ *   Suspend CPU cache.
+ *
+ ****************************************************************************/
+
+static void spiflash_suspend_cache(void)
+{
+  int cpu = up_cpu_index();
+#ifdef CONFIG_SMP
+  int other_cpu = cpu ? 0 : 1;
+#endif
+
+  spi_flash_disable_cache(cpu);
+#ifdef CONFIG_SMP
+  spi_flash_disable_cache(other_cpu);
+#endif
+}
+
+/****************************************************************************
+ * Name: spiflash_resume_cache
+ *
+ * Description:
+ *   Resume CPU cache.
+ *
+ ****************************************************************************/
+
+static void spiflash_resume_cache(void)
+{
+  int cpu = up_cpu_index();
+#ifdef CONFIG_SMP
+  int other_cpu = cpu ? 0 : 1;
+#endif
+
+  spi_flash_restore_cache(cpu);
+#ifdef CONFIG_SMP
+  spi_flash_restore_cache(other_cpu);
+#endif
+}
+
+/****************************************************************************
  * Name: spiflash_start
  *
  * Description:
@@ -305,10 +347,7 @@ static void spiflash_start(void)
 
   esp32s3_irq_noniram_disable();
 
-  spi_flash_disable_cache(cpu);
-#ifdef CONFIG_SMP
-  spi_flash_disable_cache(other_cpu);
-#endif
+  spiflash_suspend_cache();
 }
 
 /****************************************************************************
@@ -334,10 +373,7 @@ static void spiflash_end(void)
   DEBUGASSERT(other_cpu != cpu);
 #endif
 
-  spi_flash_restore_cache(cpu);
-#ifdef CONFIG_SMP
-  spi_flash_restore_cache(other_cpu);
-#endif
+  spiflash_resume_cache();
 
   /* Signal to spi_flash_op_block_task that flash operation is complete */
 
@@ -852,6 +888,9 @@ int spi_flash_write(uint32_t dest_addr, const void *buffer, uint32_t size)
   const uint8_t *tx_buf = (const uint8_t *)buffer;
   uint32_t tx_bytes = size;
   uint32_t tx_addr = dest_addr;
+#ifdef CONFIG_ESP32S3_SPIRAM
+  bool buffer_in_psram = esp32s3_ptr_extram(buffer);
+#endif
 
   spiflash_start();
 
@@ -860,7 +899,27 @@ int spi_flash_write(uint32_t dest_addr, const void *buffer, uint32_t size)
       uint32_t spi_buffer[SPI_BUFFER_WORDS];
       uint32_t n = MIN(tx_bytes, SPI_BUFFER_BYTES);
 
+#ifdef CONFIG_ESP32S3_SPIRAM
+
+      /* Re-enable cache, and then copy data from PSRAM to SRAM */
+
+      if (buffer_in_psram)
+        {
+          spiflash_resume_cache();
+        }
+#endif
+
       memcpy(spi_buffer, tx_buf, n);
+
+#ifdef CONFIG_ESP32S3_SPIRAM
+
+      /* Disable cache, and then write data from SRAM to flash */
+
+      if (buffer_in_psram)
+        {
+          spiflash_suspend_cache();
+        }
+#endif
 
       wait_flash_idle();
       enable_flash_write();
@@ -902,6 +961,9 @@ int spi_flash_read(uint32_t src_addr, void *dest, uint32_t size)
   uint8_t *rx_buf = (uint8_t *)dest;
   uint32_t rx_bytes = size;
   uint32_t rx_addr = src_addr;
+#ifdef CONFIG_ESP32S3_SPIRAM
+  bool buffer_in_psram = esp32s3_ptr_extram(dest);
+#endif
 
   spiflash_start();
 
@@ -912,10 +974,30 @@ int spi_flash_read(uint32_t src_addr, void *dest, uint32_t size)
 
       READ_DATA_FROM_FLASH(rx_addr, spi_buffer, n);
 
+#ifdef CONFIG_ESP32S3_SPIRAM
+
+      /* Re-enable cache, and then copy data from SRAM to PSRAM */
+
+      if (buffer_in_psram)
+        {
+          spiflash_resume_cache();
+        }
+#endif
+
       memcpy(rx_buf, spi_buffer, n);
       rx_bytes -= n;
       rx_buf += n;
       rx_addr += n;
+
+#ifdef CONFIG_ESP32S3_SPIRAM
+
+      /* Disable cache, and then read data from flash to SRAM */
+
+      if (buffer_in_psram)
+        {
+          spiflash_suspend_cache();
+        }
+#endif
     }
 
   spiflash_end();
