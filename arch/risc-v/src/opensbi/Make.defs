@@ -28,6 +28,12 @@ SBI_CSRCS += opensbi/opensbi-3rdparty/lib/utils/ipi/aclint_mswi.c
 SBI_CSRCS += opensbi/opensbi-3rdparty/lib/utils/irqchip/plic.c
 SBI_CSRCS += opensbi/opensbi-3rdparty/lib/utils/timer/aclint_mtimer.c
 
+EXCLUDED_FILES  = opensbi/opensbi-3rdparty/lib/sbi/sbi_pmu.c
+EXCLUDED_FILES += opensbi/opensbi-3rdparty/lib/sbi/sbi_ecall_dbcn.c
+
+TMPVAR := $(SBI_CSRCS)
+SBI_CSRCS = $(filter-out $(EXCLUDED_FILES), $(TMPVAR))
+
 SBI_ASRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_expected_trap.S
 SBI_ASRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_hfence.S
 SBI_ASRCS += opensbi/opensbi-3rdparty/lib/sbi/riscv_hardfp.S
@@ -37,10 +43,10 @@ INCLUDES  += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)opensbi$(DELIM)opensbi-3rdpar
 SBI_DIR   := opensbi
 
 OPENSBI_UNPACK  = opensbi-3rdparty
-OPENSBI_COMMIT  = a082fb83f218a647d2009b565e573dac8f179cb9
+OPENSBI_COMMIT  = 273bc20a5d2cda1b30f8d7172d3c22338c758c11
 OPENSBI_URL     = https://github.com/tiiuae/opensbi/tarball
 OPENSBI_TARBALL = opensbi.tar.gz
-OPENSBI_DIR     = tiiuae-opensbi-a082fb8
+OPENSBI_DIR     = tiiuae-opensbi-273bc20
 
 $(OPENSBI_TARBALL):
 	$(call DOWNLOAD,$(OPENSBI_URL),$(OPENSBI_COMMIT),opensbi/$(OPENSBI_TARBALL))
@@ -50,6 +56,7 @@ $(OPENSBI_TARBALL):
 	$(Q) tar xzf opensbi/$(OPENSBI_TARBALL) -C opensbi
 	$(Q) mv opensbi/$(OPENSBI_DIR) opensbi/$(OPENSBI_UNPACK)
 	$(Q) touch opensbi/.opensbi_unpack
+	$(Q) opensbi/$(OPENSBI_UNPACK)/scripts/carray.sh -i opensbi/$(OPENSBI_UNPACK)/lib/sbi/sbi_ecall_exts.carray -l "ecall_base ecall_hsm ecall_ipi ecall_rfence ecall_time ecall_vendor" > opensbi/$(OPENSBI_UNPACK)/lib/sbi/sbi_ecall_exts.c
 
 ifeq ($(wildcard opensbi/$(OPENSBI_UNPACK)/.git),)
 context:: .opensbi_unpack
