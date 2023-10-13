@@ -90,10 +90,10 @@ void host_abort(int status)
 
 int host_backtrace(void** array, int size)
 {
-#ifdef CONFIG_WINDOWS_CYGWIN
-  return 0;
-#else
+#ifdef CONFIG_SIM_GLIBC_PLATFORM
   return host_uninterruptible(backtrace, array, size);
+#else
+  return 0;
 #endif
 }
 

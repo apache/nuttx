@@ -48,6 +48,16 @@ config SIM_M32
 		beyond.  For those versions, you must add SIM_M32=y to the .config file in
 		order to enable building a 32-bit image on a 64-bit platform.
 
+config SIM_GLIBC_PLATFORM
+	bool "glibc platform"
+	default y
+	---help---
+		Configuration option to enable backtrace capability on platforms that
+		have execinfo.h. 
+
+		For platforms that do not have execinfo.h (Cygwin, MSYS2, Alpine and other),
+		you must add SIM_GLIBC_PLATFORM=n to the .config file to enable simulator build.
+
 config SIM_CYGWIN_DECORATED
 	bool "Decorated Cygwin names"
 	default n
