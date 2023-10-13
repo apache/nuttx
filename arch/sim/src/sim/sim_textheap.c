@@ -49,7 +49,8 @@ void *up_textheap_memalign(size_t align, size_t size)
 {
   if (g_textheap == NULL)
     {
-      g_textheap = mm_initialize("textheap", host_allocheap(SIM_HEAP_SIZE),
+      g_textheap = mm_initialize("textheap",
+                                 host_allocheap(SIM_HEAP_SIZE, true),
                                  SIM_HEAP_SIZE);
     }
 
