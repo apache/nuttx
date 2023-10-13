@@ -63,6 +63,7 @@ include sensors/Make.defs
 include serial/Make.defs
 include spi/Make.defs
 include syslog/Make.defs
+include thermal/Make.defs
 include timers/Make.defs
 include usbdev/Make.defs
 include usbhost/Make.defs

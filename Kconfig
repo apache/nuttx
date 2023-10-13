@@ -1936,6 +1936,37 @@ config DEBUG_SPI_INFO
 
 endif # DEBUG_SPI
 
+config DEBUG_THERMAL
+	bool "Thermal Debug Features"
+	default n
+	---help---
+		Enable thermal debug features.
+
+if DEBUG_THERMAL
+
+config DEBUG_THERMAL_ERROR
+	bool "Thermal Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable thermal error output to SYSLOG.
+
+config DEBUG_THERMAL_WARN
+	bool "Thermal Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable thermal warning output to SYSLOG.
+
+config DEBUG_THERMAL_INFO
+	bool "Thermal Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable thermal informational output to SYSLOG.
+
+endif # DEBUG_THERMAL
+
 config DEBUG_TIMER
 	bool "Timer Debug Features"
 	default n

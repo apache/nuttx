@@ -758,6 +758,24 @@
 #  define spiinfo     _none
 #endif
 
+#ifdef CONFIG_DEBUG_THERMAL_ERROR
+#  define therr         _err
+#else
+#  define therr        _none
+#endif
+
+#ifdef CONFIG_DEBUG_THERMAL_WARN
+#  define thwarn       _warn
+#else
+#  define thwarn       _none
+#endif
+
+#ifdef CONFIG_DEBUG_THERMAL_INFO
+#  define thinfo       _info
+#else
+#  define thinfo       _none
+#endif
+
 #ifdef CONFIG_DEBUG_TIMER_ERROR
 #  define tmrerr       _err
 #else
