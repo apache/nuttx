@@ -89,7 +89,7 @@ bool up_cpu_pausereq(int cpu)
  * Description:
  *   Handle a pause request from another CPU.  Normally, this logic is
  *   executed from interrupt handling logic within the architecture-specific
- *   However, it is sometimes necessary necessary to perform the pending
+ *   However, it is sometimes necessary to perform the pending
  *   pause operation in other contexts where the interrupt cannot be taken
  *   in order to avoid deadlocks.
  *
