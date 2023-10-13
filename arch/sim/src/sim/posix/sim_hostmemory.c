@@ -60,18 +60,18 @@ static atomic_int g_uordblks;
  *
  ****************************************************************************/
 
-void *host_allocheap(size_t sz)
+void *host_allocheap(size_t size, bool exec)
 {
   void *p;
 
 #if defined(CONFIG_HOST_MACOS) && defined(CONFIG_HOST_ARM64)
   /* see: https://developer.apple.com/forums/thread/672804 */
 
-  p = host_uninterruptible(mmap, NULL, sz, PROT_READ | PROT_WRITE,
+  p = host_uninterruptible(mmap, NULL, size, PROT_READ | PROT_WRITE,
                            MAP_ANON | MAP_SHARED, -1, 0);
 #else
-  p = host_uninterruptible(mmap, NULL, sz,
-                           PROT_READ | PROT_WRITE | PROT_EXEC,
+  p = host_uninterruptible(mmap, NULL, size, PROT_READ | PROT_WRITE |
+                           (exec ? PROT_EXEC : 0),
                            MAP_ANON | MAP_PRIVATE, -1, 0);
 #endif
 
