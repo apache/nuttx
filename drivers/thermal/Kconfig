@@ -1,0 +1,20 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menuconfig THERMAL
+	bool "Thermal framework"
+	default n
+	---help---
+		Enable thermal framework.
+
+if THERMAL
+
+config THERMAL_DEFAULT_GOVERNOR
+	string "Thermal default governor name"
+	default "step_wise"
+	---help---
+		Default governor name.
+
+endif # THERMAL
