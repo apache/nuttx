@@ -475,7 +475,7 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
    * ARCH_HAVE_TEXT_HEAP mechanism can be an alternative.
    */
 
-  uint8_t *sim_heap = host_allocheap(SIM_HEAP_SIZE);
+  uint8_t *sim_heap = host_allocheap(SIM_HEAP_SIZE, false);
 
   *heap_start = sim_heap;
   *heap_size  = SIM_HEAP_SIZE;

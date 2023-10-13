@@ -216,7 +216,7 @@ int   host_waitpid(pid_t pid);
 
 /* sim_hostmemory.c *********************************************************/
 
-void *host_allocheap(size_t sz);
+void *host_allocheap(size_t sz, bool exec);
 void  host_freeheap(void *mem);
 void *host_allocshmem(const char *name, size_t size, int master);
 void  host_freeshmem(void *mem);
