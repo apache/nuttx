@@ -399,11 +399,9 @@ int arm64_gic_raise_sgi(unsigned int sgi_id, uint16_t target_list)
 
   while ((i = ffs(target_list)))
     {
-      cpu += (i - 1);
-
       target_list >>= i;
 
-      curr_mpidr = arm64_get_mpid(cpu);
+      curr_mpidr = arm64_get_mpid(cpu + (i - 1));
       curr_cluster_id = MPID_TO_CLUSTER_ID(curr_mpidr);
 
       if (pre_cluster_id != UINT64_MAX &&
