@@ -590,11 +590,21 @@ FAR struct regulator_s *regulator_get(FAR const char *id)
     }
 #endif
 
+  if (rdev && rdev->desc->supply_name && rdev->supply == NULL)
+    {
+      rdev->supply = regulator_get(rdev->desc->supply_name);
+      if (rdev->supply == NULL)
+        {
+          pwrerr("get supply %s failed \n", rdev->desc->supply_name);
+          rdev = NULL;
+        }
+    }
+
   regulator_list_unlock(flags);
 
   if (rdev == NULL)
     {
-      pwrerr("regulator %s not found\n", id);
+      pwrerr("regulator %s not found or ready\n", id);
       return NULL;
     }
 
