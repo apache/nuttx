@@ -33,7 +33,8 @@
 #include <nuttx/irq.h>
 
 #ifdef CONFIG_RW_SPINLOCK
-typedef int32_t rwlock_t;
+#include <stdatomic.h>
+typedef atomic_int rwlock_t;
 #define RW_SP_UNLOCKED      0
 #define RW_SP_READ_LOCKED   1
 #define RW_SP_WRITE_LOCKED -1

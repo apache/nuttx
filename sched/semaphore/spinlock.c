@@ -476,7 +476,7 @@ void read_lock(FAR volatile rwlock_t *lock)
 {
   while (true)
     {
-      rwlock_t old = atomic_load(lock);
+      int old = atomic_load(lock);
 
       if (old <= RW_SP_WRITE_LOCKED)
         {
@@ -521,7 +521,7 @@ bool read_trylock(FAR volatile rwlock_t *lock)
 {
   while (true)
     {
-      rwlock_t old = atomic_load(lock);
+      int old = atomic_load(lock);
 
       if (old <= RW_SP_WRITE_LOCKED)
         {
@@ -592,7 +592,7 @@ void read_unlock(FAR volatile rwlock_t *lock)
 
 void write_lock(FAR volatile rwlock_t *lock)
 {
-  rwlock_t zero = RW_SP_UNLOCKED;
+  int zero = RW_SP_UNLOCKED;
 
   while (!atomic_compare_exchange_strong(lock, &zero, RW_SP_WRITE_LOCKED))
     {
@@ -630,7 +630,7 @@ void write_lock(FAR volatile rwlock_t *lock)
 
 bool write_trylock(FAR volatile rwlock_t *lock)
 {
-  rwlock_t zero = RW_SP_UNLOCKED;
+  int zero = RW_SP_UNLOCKED;
 
   if (atomic_compare_exchange_strong(lock, &zero, RW_SP_WRITE_LOCKED))
     {
