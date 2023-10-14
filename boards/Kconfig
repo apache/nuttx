@@ -1589,6 +1589,16 @@ config ARCH_BOARD_NUCLEO_F401RE
 		This is a minimal configuration that supports low-level test of the
 		Nucleo F401RE in the NuttX source tree.
 
+config ARCH_BOARD_STM32F401RC_RS485
+	bool "STM32F401RC-RS485 Board"
+	depends on ARCH_CHIP_STM32F401RC
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This is a minimal configuration that supports low-level test of the
+		STM32F401RC-RS485 in the NuttX source tree.
+
 config ARCH_BOARD_NUCLEO_F410RB
 	bool "STM32F410 Nucleo F410RB"
 	depends on ARCH_CHIP_STM32F410RB
@@ -3127,6 +3137,7 @@ config ARCH_BOARD
 	default "nucleo-f303ze"             if ARCH_BOARD_NUCLEO_F303ZE
 	default "nucleo-f334r8"             if ARCH_BOARD_NUCLEO_F334R8
 	default "nucleo-f4x1re"             if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
+	default "stm32f401rc-rs485"         if ARCH_BOARD_STM32F401RC_RS485
 	default "nucleo-f429zi"             if ARCH_BOARD_NUCLEO_F429ZI
 	default "nucleo-f446re"             if ARCH_BOARD_NUCLEO_F446RE
 	default "nucleo-f410rb"             if ARCH_BOARD_NUCLEO_F410RB
@@ -3839,6 +3850,9 @@ source "boards/arm/stm32/nucleo-f446re/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
 source "boards/arm/stm32/nucleo-f4x1re/Kconfig"
+endif
+if ARCH_BOARD_STM32F401RC_RS485
+source "boards/arm/stm32/stm32f401rc-rs485/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F429ZI
 source "boards/arm/stm32/nucleo-f429zi/Kconfig"
