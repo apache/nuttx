@@ -26,9 +26,43 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
-#include <nuttx/lib/lib.h>
 
 #include "tls.h"
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: task_init_stream
+ *
+ * Description:
+ *   This function is called when a new task is allocated.  It initializes
+ *   the streamlist instance that is stored in the task group.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_FILE_STREAM
+static void task_init_stream(FAR struct streamlist *list)
+{
+  FAR struct file_struct *stream = list->sl_std;
+
+  /* Initialize the list access mutex */
+
+  nxmutex_init(&list->sl_lock);
+  list->sl_head = NULL;
+  list->sl_tail = NULL;
+
+  /* Initialize stdin, stdout and stderr stream */
+
+  stream[0].fs_fd = -1;
+  nxrmutex_init(&stream[0].fs_lock);
+  stream[1].fs_fd = -1;
+  nxrmutex_init(&stream[1].fs_lock);
+  stream[2].fs_fd = -1;
+  nxrmutex_init(&stream[2].fs_lock);
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -72,7 +106,7 @@ int task_init_info(FAR struct task_group_s *group)
 #ifdef CONFIG_FILE_STREAM
   /* Initialize file streams for the task group */
 
-  lib_stream_initialize(group);
+  task_init_stream(&info->ta_streamlist);
 #endif
 
   return OK;
