@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <errno.h>
+#include <fcntl.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
@@ -46,6 +47,7 @@
 static void task_init_stream(FAR struct streamlist *list)
 {
   FAR struct file_struct *stream = list->sl_std;
+  int i;
 
   /* Initialize the list access mutex */
 
@@ -55,12 +57,34 @@ static void task_init_stream(FAR struct streamlist *list)
 
   /* Initialize stdin, stdout and stderr stream */
 
-  stream[0].fs_fd = -1;
-  nxrmutex_init(&stream[0].fs_lock);
-  stream[1].fs_fd = -1;
-  nxrmutex_init(&stream[1].fs_lock);
-  stream[2].fs_fd = -1;
-  nxrmutex_init(&stream[2].fs_lock);
+  for (i = 0; i < 3; i++)
+    {
+      nxrmutex_init(&stream[i].fs_lock);
+
+#if !defined(CONFIG_STDIO_DISABLE_BUFFERING) && CONFIG_STDIO_BUFFER_SIZE > 0
+      /* Set up pointers */
+
+      stream[i].fs_bufstart = stream[i].fs_buffer;
+      stream[i].fs_bufend   = stream[i].fs_bufstart +
+                              CONFIG_STDIO_BUFFER_SIZE;
+      stream[i].fs_bufpos   = stream[i].fs_bufstart;
+      stream[i].fs_bufread  = stream[i].fs_bufstart;
+      stream[i].fs_flags    = __FS_FLAG_UBF; /* Fake setvbuf and fclose */
+#  ifdef CONFIG_STDIO_LINEBUFFER
+      /* Setup buffer flags */
+
+      stream[i].fs_flags   |= __FS_FLAG_LBF; /* Line buffering */
+
+#  endif /* CONFIG_STDIO_LINEBUFFER */
+
+      /* Save the file description and open flags.  Setting the
+       * file descriptor locks this stream.
+       */
+
+      stream[i].fs_fd       = i;
+      stream[i].fs_oflags   = i ? O_WROK : O_RDONLY;
+#endif /* !CONFIG_STDIO_DISABLE_BUFFERING && CONFIG_STDIO_BUFFER_SIZE > 0 */
+    }
 }
 #endif
 

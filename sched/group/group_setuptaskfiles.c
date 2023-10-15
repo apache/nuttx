@@ -83,12 +83,6 @@ int group_setuptaskfiles(FAR struct task_tcb_s *tcb)
     }
 #endif
 
-  /* Allocate file/socket streams for the new TCB */
-
-#ifdef CONFIG_FILE_STREAM
-  ret = group_setupstreams(tcb);
-#endif
-
   sched_trace_end();
   return ret;
 }

@@ -115,11 +115,6 @@ int group_setupidlefiles(FAR struct task_tcb_s *tcb)
 #warning file descriptors 0-2 are not opened
 #endif /* defined(CONFIG_DEV_CONSOLE) || defined(CONFIG_DEV_NULL) */
 
-  /* Allocate file/socket streams for the TCB */
-
-#ifdef CONFIG_FILE_STREAM
-  ret = group_setupstreams(tcb);
-#endif
   sched_trace_end();
   return ret;
 }

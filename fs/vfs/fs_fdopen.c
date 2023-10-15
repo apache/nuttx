@@ -118,14 +118,6 @@ int fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb,
   FAR FILE              *stream;
   int                    ret = OK;
 
-  /* Check input parameters */
-
-  if (fd < 0)
-    {
-      ret = -EBADF;
-      goto errout;
-    }
-
   /* A NULL TCB pointer means to use this threads TCB.  This is a little
    * hack the let's this function be called from user-space (via a syscall)
    * without having access to the TCB.
@@ -138,13 +130,9 @@ int fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb,
 
   DEBUGASSERT(tcb && tcb->group);
 
-  if (fd >= 3)
-    {
-      ret = fs_checkfd(tcb, fd, oflags);
-    }
-
   /* Do we have a good descriptor of some sort? */
 
+  ret = fs_checkfd(tcb, fd, oflags);
   if (ret < 0)
     {
       /* No... return the reported error */
@@ -198,24 +186,22 @@ int fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb,
       stream = &slist->sl_std[fd];
     }
 
-#ifndef CONFIG_STDIO_DISABLE_BUFFERING
-#if CONFIG_STDIO_BUFFER_SIZE > 0
+#if !defined(CONFIG_STDIO_DISABLE_BUFFERING) && CONFIG_STDIO_BUFFER_SIZE > 0
   /* Set up pointers */
 
   stream->fs_bufstart = stream->fs_buffer;
-  stream->fs_bufend   = &stream->fs_bufstart[CONFIG_STDIO_BUFFER_SIZE];
+  stream->fs_bufend   = stream->fs_bufstart + CONFIG_STDIO_BUFFER_SIZE;
   stream->fs_bufpos   = stream->fs_bufstart;
   stream->fs_bufread  = stream->fs_bufstart;
   stream->fs_flags    = __FS_FLAG_UBF; /* Fake setvbuf and fclose */
 
-#ifdef CONFIG_STDIO_LINEBUFFER
+#  ifdef CONFIG_STDIO_LINEBUFFER
   /* Setup buffer flags */
 
   stream->fs_flags   |= __FS_FLAG_LBF; /* Line buffering */
 
-#endif /* CONFIG_STDIO_LINEBUFFER */
-#endif /* CONFIG_STDIO_BUFFER_SIZE > 0 */
-#endif /* CONFIG_STDIO_DISABLE_BUFFERING */
+#  endif /* CONFIG_STDIO_LINEBUFFER */
+#endif /* !CONFIG_STDIO_DISABLE_BUFFERING && CONFIG_STDIO_BUFFER_SIZE > 0 */
 
   /* Save the file description and open flags.  Setting the
    * file descriptor locks this stream.
@@ -224,18 +210,10 @@ int fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb,
   stream->fs_fd       = fd;
   stream->fs_oflags   = oflags;
 
-  if (filep != NULL)
-    {
-      *filep = stream;
-    }
-
+  *filep = stream;
   return OK;
 
 errout:
-  if (filep != NULL)
-    {
-      *filep = NULL;
-    }
-
+  *filep = NULL;
   return ret;
 }
