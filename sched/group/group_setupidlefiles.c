@@ -49,7 +49,7 @@
  *   Configure the idle thread's TCB.
  *
  * Input Parameters:
- *   tcb - tcb of the idle task.
+ *   None.
  *
  * Returned Value:
  *   0 is returned on success; a negated errno value is returned on a
@@ -57,7 +57,7 @@
  *
  ****************************************************************************/
 
-int group_setupidlefiles(FAR struct task_tcb_s *tcb)
+int group_setupidlefiles(void)
 {
   int ret = OK;
 #if defined(CONFIG_DEV_CONSOLE) || defined(CONFIG_DEV_NULL)
@@ -65,7 +65,6 @@ int group_setupidlefiles(FAR struct task_tcb_s *tcb)
 #endif
 
   sched_trace_begin();
-  DEBUGASSERT(tcb->cmn.group != NULL);
 
   /* Open stdin, dup to get stdout and stderr. This should always
    * be the first file opened and, hence, should always get file
@@ -73,11 +72,11 @@ int group_setupidlefiles(FAR struct task_tcb_s *tcb)
    */
 
 #if defined(CONFIG_DEV_CONSOLE) || defined(CONFIG_DEV_NULL)
-#ifdef CONFIG_DEV_CONSOLE
+#  ifdef CONFIG_DEV_CONSOLE
   fd = nx_open("/dev/console", O_RDWR);
-#else
+#  else
   fd = nx_open("/dev/null", O_RDWR);
-#endif
+#  endif
   if (fd == 0)
     {
       /* Successfully opened stdin (fd == 0) */
@@ -112,7 +111,7 @@ int group_setupidlefiles(FAR struct task_tcb_s *tcb)
    * It's a common practice to keep 0-2 always open even if they are
    * /dev/null to avoid that kind of problems. Thus the following warning.
    */
-#warning file descriptors 0-2 are not opened
+#  warning file descriptors 0-2 are not opened
 #endif /* defined(CONFIG_DEV_CONSOLE) || defined(CONFIG_DEV_NULL) */
 
   sched_trace_end();
