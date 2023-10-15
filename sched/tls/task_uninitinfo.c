@@ -24,10 +24,79 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
-#include <nuttx/lib/lib.h>
 #include <nuttx/list.h>
 
 #include "tls.h"
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: task_uninit_stream
+ *
+ * Description:
+ *   This function is called when a TCB is destroyed.  Note that it does not
+ *   close the files by releasing the inode.  That happens separately when
+ *   the file descriptor list is freed.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_FILE_STREAM
+static void task_uninit_stream(FAR struct task_group_s *group)
+{
+  FAR struct streamlist *list;
+  FAR struct file_struct *stream;
+
+  DEBUGASSERT(group && group->tg_info);
+  list = &group->tg_info->ta_streamlist;
+  stream = list->sl_std;
+
+  /* Destroy the mutex and release the filelist */
+
+  nxmutex_destroy(&list->sl_lock);
+
+  /* Destroy stdin, stdout and stderr stream */
+
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
+  nxrmutex_destroy(&stream[0].fs_lock);
+  nxrmutex_destroy(&stream[1].fs_lock);
+  nxrmutex_destroy(&stream[2].fs_lock);
+#endif
+
+  /* Release each stream in the list */
+
+  list->sl_tail = NULL;
+  while (list->sl_head != NULL)
+    {
+      stream = list->sl_head;
+      list->sl_head = stream->fs_next;
+
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
+      /* Destroy the mutex that protects the IO buffer */
+
+      nxrmutex_destroy(&stream->fs_lock);
+#endif
+
+      /* Release the stream */
+
+#ifdef CONFIG_BUILD_KERNEL
+      /* If the exiting group is unprivileged, then it has an address
+       * environment.  Don't bother to release the memory in this case...
+       * There is no point since the memory lies in the user heap which
+       * will be destroyed anyway.  But if this is a privileged group,
+       * when we still have to release the memory using the kernel
+       * allocator.
+       */
+
+      if ((group->tg_flags & GROUP_FLAG_PRIVILEGED) != 0)
+#endif
+        {
+          group_free(group, stream);
+        }
+    }
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -69,7 +138,7 @@ void task_uninit_info(FAR struct task_group_s *group)
 #ifdef CONFIG_FILE_STREAM
   /* Free resource held by the stream list */
 
-  lib_stream_release(group);
+  task_uninit_stream(group);
 #endif /* CONFIG_FILE_STREAM */
 
   nxmutex_destroy(&info->ta_lock);
