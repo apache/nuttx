@@ -612,10 +612,10 @@ void motor_aobserver_nfo(FAR struct motor_aobserver_f32_s *o,
    * as that makes the angle very unstable.
    */
 
-  if (vector2d_mag(nfo->x1, nfo->x2) < (phy->flux_link * 0.5))
+  if (vector2d_mag(nfo->x1, nfo->x2) < (phy->flux_link * 0.5f))
     {
-      nfo->x1 *= 1.1;
-      nfo->x2 *= 1.1;
+      nfo->x1 *= 1.1f;
+      nfo->x2 *= 1.1f;
     }
 
   angle = fast_atan2(nfo->x2 - l_ib, nfo->x1 - l_ia);
