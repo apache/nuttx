@@ -61,8 +61,9 @@ enum stepper_state_e
 {
   STEPPER_STATE_INIT     = 0,     /* Initial state */
   STEPPER_STATE_IDLE     = 1,     /* IDLE state */
-  STEPPER_STATE_RUN      = 2,     /* Run state */
-  STEPPER_STATE_FAULT    = 3      /* Fault state */
+  STEPPER_STATE_READY    = 2,     /* Ready to work */
+  STEPPER_STATE_RUN      = 3,     /* Run state */
+  STEPPER_STATE_FAULT    = 4      /* Fault state */
 };
 
 /* Stepper driver fault type */
@@ -89,13 +90,13 @@ enum stepper_idle_e
   STEPPER_AUTO_IDLE    = 2,  /* Set automaticaly IDLE when stepper not in movement */
 };
 
-/* Stepper driver state */
+/* Stepper driver status */
 
-struct stepper_state_s
+struct stepper_status_s
 {
   uint8_t state;      /* Stepper driver state  */
   uint8_t fault;      /* Stepper driver faults */
-  int32_t position;   /* Feedback from motor - absolute position */
+  int32_t position;   /* Current absolute position */
 };
 
 /* Stepper parameters. */
@@ -103,7 +104,7 @@ struct stepper_state_s
 struct stepper_job_s
 {
   int32_t   steps;     /* Steps to do. Position: CW, Negative: CCW */
-  uint16_t  speed;     /* Stepper speed in step/ms */
+  uint32_t  speed;     /* Stepper speed in step/s */
 };
 
 /* Stepper operations used to call from the upper-half, generic stepper driver
@@ -121,15 +122,14 @@ struct stepper_ops_s
 
   CODE int (*shutdown)(FAR struct stepper_lowerhalf_s *dev);
 
-  /* work */
+  /* Work */
 
   CODE int (*work)(FAR struct stepper_lowerhalf_s *dev,
                    FAR struct stepper_job_s const *param);
 
-  /* Get motor state  */
+  /* Update motor/driver status  */
 
-  CODE int (*state)(FAR struct stepper_lowerhalf_s *dev,
-                    FAR struct stepper_state_s *state);
+  CODE int (*update_status)(FAR struct stepper_lowerhalf_s *dev);
 
   /* Clear fault state */
 
@@ -158,7 +158,7 @@ struct stepper_lowerhalf_s
 {
   FAR const struct stepper_ops_s *ops; /* Arch-specific operations */
   struct stepper_job_s      param;     /* Motor settings */
-  struct stepper_state_s    state;     /* Motor state */
+  struct stepper_status_s   status;    /* Motor status */
   FAR void                  *priv;     /* Private data */
 };
 

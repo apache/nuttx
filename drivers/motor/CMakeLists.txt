@@ -32,3 +32,7 @@ endif()
 if(CONFIG_STEPPER_A4988)
   target_sources(drivers PRIVATE a4988.c)
 endif()
+
+if(CONFIG_STEPPER_DRV8825)
+  target_sources(drivers PRIVATE drv8825.c)
+endif()

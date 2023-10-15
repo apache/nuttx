@@ -33,8 +33,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define STEPIOC_IDLE          _STEPIOC(1)
-#define STEPIOC_CLEAR_FAULT   _STEPIOC(2)
-#define STEPIOC_MICROSTEPPING _STEPIOC(3)
+#define STEPIOC_IDLE            _STEPIOC(1)
+#define STEPIOC_CLEAR_FAULT     _STEPIOC(2)
+#define STEPIOC_MICROSTEPPING   _STEPIOC(3)
+#define STEPIOC_SET_CURRENT_POS _STEPIOC(4)
 
 #endif /* __INCLUDE_NUTTX_MOTOR_STEPPER_IOCTL_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/motor/a4988.c
+ * drivers/motor/drv8825.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,7 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/motor/a4988.h>
+#include <nuttx/motor/drv8825.h>
 
 #include <errno.h>
 #include <debug.h>
@@ -36,72 +36,79 @@
  * Private Types
  ****************************************************************************/
 
-struct a4988_dev_s
+struct drv8825_dev_s
 {
-  FAR struct a4988_ops_s *ops;   /* A4988 ops */
-  uint8_t  auto_idle;            /* If true, go in idle mode between movement */
+  FAR struct drv8825_ops_s *ops;  /* drv8825 ops */
+  uint8_t  auto_idle;             /* If true, go in idle mode between movement */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int a4988_setup(FAR struct stepper_lowerhalf_s *dev);
-static int a4988_shutdown(FAR struct stepper_lowerhalf_s *dev);
-static int a4988_work(FAR struct stepper_lowerhalf_s *dev,
+static int drv8825_setup(FAR struct stepper_lowerhalf_s *dev);
+static int drv8825_shutdown(FAR struct stepper_lowerhalf_s *dev);
+static int drv8825_work(FAR struct stepper_lowerhalf_s *dev,
                       FAR struct stepper_job_s const *param);
-static int a4988_update_status(FAR struct stepper_lowerhalf_s *dev);
-static int a4988_clear(FAR struct stepper_lowerhalf_s *dev, uint8_t fault);
-static int a4988_idle(FAR struct stepper_lowerhalf_s *dev, uint8_t idle);
-static int a4988_microstepping(FAR struct stepper_lowerhalf_s *dev,
+static int drv8825_update_status(FAR struct stepper_lowerhalf_s *dev);
+static int drv8825_clear(FAR struct stepper_lowerhalf_s *dev, uint8_t fault);
+static int drv8825_idle(FAR struct stepper_lowerhalf_s *dev, uint8_t idle);
+static int drv8825_microstepping(FAR struct stepper_lowerhalf_s *dev,
                                uint16_t resolution);
-static int a4988_ioctl(FAR struct stepper_lowerhalf_s *dev, int cmd,
+static int drv8825_ioctl(FAR struct stepper_lowerhalf_s *dev, int cmd,
                        unsigned long arg);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const struct stepper_ops_s g_a4988_ops =
+static const struct stepper_ops_s g_drv8825_ops =
 {
-  a4988_setup,          /* setup */
-  a4988_shutdown,       /* shutdown */
-  a4988_work,           /* work */
-  a4988_update_status,  /* update status */
-  a4988_clear,          /* clear */
-  a4988_idle,           /* idle */
-  a4988_microstepping,  /* microstepping */
-  a4988_ioctl           /* ioctl */
+  drv8825_setup,          /* setup */
+  drv8825_shutdown,       /* shutdown */
+  drv8825_work,           /* work */
+  drv8825_update_status,  /* update status */
+  drv8825_clear,          /* clear */
+  drv8825_idle,           /* idle */
+  drv8825_microstepping,  /* microstepping */
+  drv8825_ioctl           /* ioctl */
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static int a4988_setup(FAR struct stepper_lowerhalf_s *dev)
+static int drv8825_setup(FAR struct stepper_lowerhalf_s *dev)
 {
-  FAR struct a4988_dev_s *priv = (FAR struct a4988_dev_s *)dev->priv;
+  FAR struct drv8825_dev_s *priv = (FAR struct drv8825_dev_s *)dev->priv;
   priv->ops->idle(false);
   priv->ops->enable(true);
 
   return 0;
 }
 
-static int a4988_shutdown(FAR struct stepper_lowerhalf_s *dev)
+static int drv8825_shutdown(FAR struct stepper_lowerhalf_s *dev)
 {
-  FAR struct a4988_dev_s *priv = (FAR struct a4988_dev_s *)dev->priv;
+  FAR struct drv8825_dev_s *priv = (FAR struct drv8825_dev_s *)dev->priv;
   priv->ops->idle(true);
   priv->ops->enable(false);
 
   return 0;
 }
 
-static int a4988_work(FAR struct stepper_lowerhalf_s *dev,
+static int drv8825_work(FAR struct stepper_lowerhalf_s *dev,
                       FAR struct stepper_job_s const *job)
 {
-  FAR struct a4988_dev_s *priv = (FAR struct a4988_dev_s *)dev->priv;
+  FAR struct drv8825_dev_s *priv = (FAR struct drv8825_dev_s *)dev->priv;
   int delay;
   int count;
+
+  if (priv->ops->fault())
+    {
+      /* In fault: do not proceed */
+
+      return -EIO;
+    }
 
   if (job->steps == 0)
     {
@@ -113,10 +120,10 @@ static int a4988_work(FAR struct stepper_lowerhalf_s *dev,
   /* Compute delay between pulse */
 
   delay = USEC_PER_SEC / job->speed;
-  if (delay < 1)
+  if (delay < 2)
     {
-      delay = 1;
-      stpwarn("Delay is clamped to 1 us\n");
+      delay = 2;
+      stpwarn("Delay is clamped to 2 us\n");
     }
 
   stpinfo("Delay is %ld us\n", delay);
@@ -137,14 +144,14 @@ static int a4988_work(FAR struct stepper_lowerhalf_s *dev,
   if (priv->auto_idle)
     {
       priv->ops->idle(false);
-      usleep(USEC_PER_MSEC);
+      usleep(USEC_PER_MSEC * 2);
     }
 
   dev->status.state = STEPPER_STATE_RUN;
   for (int32_t i = 0; i < count; ++i)
     {
       priv->ops->step(true);
-      up_udelay(1);
+      up_udelay(2);
       priv->ops->step(false);
       up_udelay(delay);
     }
@@ -156,30 +163,48 @@ static int a4988_work(FAR struct stepper_lowerhalf_s *dev,
       priv->ops->idle(true);
     }
 
-  /* Update steps done (a4988 cannot detect miss steps) */
+  /* Update steps done (drv8825 cannot detect miss steps) */
 
   dev->status.position += job->steps;
 
   return 0;
 }
 
-static int a4988_update_status(FAR struct stepper_lowerhalf_s *dev)
+static int drv8825_update_status(FAR struct stepper_lowerhalf_s *dev)
 {
-  /* No state to fetch */
+  FAR struct drv8825_dev_s *priv = (FAR struct drv8825_dev_s *)dev->priv;
+
+  if (priv->ops->fault())
+    {
+      /* The same pin is used for overtemp and overcurrent fault.
+       * Since the current implementation is blocking and fetching
+       * is on demand (no interrupt), it is impossible to detect
+       * overcurrent.
+       */
+
+      dev->status.fault = STEPPER_FAULT_OVERTEMP;
+      dev->status.state = STEPPER_STATE_FAULT;
+    }
 
   return 0;
 }
 
-static int a4988_clear(FAR struct stepper_lowerhalf_s *dev, uint8_t fault)
+static int drv8825_clear(FAR struct stepper_lowerhalf_s *dev, uint8_t fault)
 {
   /* No fault to clear ever */
 
+  dev->status.fault &= ~fault;
+  if (dev->status.fault == STEPPER_FAULT_CLEAR)
+    {
+      dev->status.state = STEPPER_STATE_READY;
+    }
+
   return 0;
 }
 
-static int a4988_idle(FAR struct stepper_lowerhalf_s *dev, uint8_t idle)
+static int drv8825_idle(FAR struct stepper_lowerhalf_s *dev, uint8_t idle)
 {
-  FAR struct a4988_dev_s *priv = (FAR struct a4988_dev_s *)dev->priv;
+  FAR struct drv8825_dev_s *priv = (FAR struct drv8825_dev_s *)dev->priv;
 
   if (idle == STEPPER_AUTO_IDLE)
     {
@@ -197,17 +222,17 @@ static int a4988_idle(FAR struct stepper_lowerhalf_s *dev, uint8_t idle)
   else
     {
       priv->ops->idle(false);
-      usleep(USEC_PER_MSEC);
+      usleep(USEC_PER_MSEC * 2);
       dev->status.state = STEPPER_STATE_READY;
     }
 
   return 0;
 }
 
-static int a4988_microstepping(FAR struct stepper_lowerhalf_s *dev,
+static int drv8825_microstepping(FAR struct stepper_lowerhalf_s *dev,
                                uint16_t resolution)
 {
-  FAR struct a4988_dev_s *priv = (FAR struct a4988_dev_s *)dev->priv;
+  FAR struct drv8825_dev_s *priv = (FAR struct drv8825_dev_s *)dev->priv;
 
   switch (resolution)
     {
@@ -237,6 +262,12 @@ static int a4988_microstepping(FAR struct stepper_lowerhalf_s *dev,
 
       case 16:
         {
+          priv->ops->microstepping(false, false, true);
+        }
+        break;
+
+      case 32:
+        {
           priv->ops->microstepping(true, true, true);
         }
         break;
@@ -250,7 +281,7 @@ static int a4988_microstepping(FAR struct stepper_lowerhalf_s *dev,
   return 0;
 }
 
-static int a4988_ioctl(FAR struct stepper_lowerhalf_s *dev, int cmd,
+static int drv8825_ioctl(FAR struct stepper_lowerhalf_s *dev, int cmd,
                        unsigned long arg)
 {
   return -ENOSYS;
@@ -260,9 +291,9 @@ static int a4988_ioctl(FAR struct stepper_lowerhalf_s *dev, int cmd,
  * Public Functions
  ****************************************************************************/
 
-int a4988_register(FAR const char *devpath, FAR struct a4988_ops_s *ops)
+int drv8825_register(FAR const char *devpath, FAR struct drv8825_ops_s *ops)
 {
-  FAR struct a4988_dev_s *priv;
+  FAR struct drv8825_dev_s *priv;
   FAR struct stepper_lowerhalf_s *lower;
   int ret = 0;
 
@@ -270,9 +301,9 @@ int a4988_register(FAR const char *devpath, FAR struct a4988_ops_s *ops)
 
   DEBUGASSERT(ops != NULL);
 
-  /* Initialize the a4988 dev structure */
+  /* Initialize the drv8825 dev structure */
 
-  priv = kmm_malloc(sizeof(struct a4988_dev_s));
+  priv = kmm_malloc(sizeof(struct drv8825_dev_s));
   if (priv == NULL)
     {
       stperr("Failed to allocate instance\n");
@@ -293,7 +324,7 @@ int a4988_register(FAR const char *devpath, FAR struct a4988_ops_s *ops)
   lower->status.fault = STEPPER_FAULT_CLEAR;
   lower->status.state = STEPPER_STATE_READY;
   lower->status.position = 0;
-  lower->ops = &g_a4988_ops;
+  lower->ops = &g_drv8825_ops;
 
   /* Initialize lower layer (only once) */
 
@@ -310,6 +341,6 @@ int a4988_register(FAR const char *devpath, FAR struct a4988_ops_s *ops)
       return ret;
     }
 
-  stpinfo("a4988 registered at %s\n", devpath);
+  stpinfo("drv8825 registered at %s\n", devpath);
   return ret;
 }
