@@ -119,7 +119,7 @@ void group_remove_children(FAR struct task_group_s *group);
 
 /* Group data resource configuration */
 
-int  group_setupidlefiles(FAR struct task_tcb_s *tcb);
+int  group_setupidlefiles(void);
 int  group_setuptaskfiles(FAR struct task_tcb_s *tcb);
 
 #endif /* __SCHED_GROUP_GROUP_H */
