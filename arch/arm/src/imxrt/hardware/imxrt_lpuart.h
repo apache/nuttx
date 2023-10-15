@@ -261,7 +261,7 @@
 #  define LPUART_CTRL_IDLECFG_2        (1 << LPUART_CTRL_IDLECFG_SHIFT) /* 2 idle characters */
 #  define LPUART_CTRL_IDLECFG_4        (2 << LPUART_CTRL_IDLECFG_SHIFT) /* 4 idle characters */
 #  define LPUART_CTRL_IDLECFG_8        (3 << LPUART_CTRL_IDLECFG_SHIFT) /* 8 idle characters */
-#  define LPUART_CTRL_IDLECFG_16       (4 << LPUART_CTRL_IDLECFG_SHIFT) /* 6 idle characters */
+#  define LPUART_CTRL_IDLECFG_16       (4 << LPUART_CTRL_IDLECFG_SHIFT) /* 16 idle characters */
 #  define LPUART_CTRL_IDLECFG_32       (5 << LPUART_CTRL_IDLECFG_SHIFT) /* 32 idle characters */
 #  define LPUART_CTRL_IDLECFG_64       (6 << LPUART_CTRL_IDLECFG_SHIFT) /* 64 idle characters */
 #  define LPUART_CTRL_IDLECFG_128      (7 << LPUART_CTRL_IDLECFG_SHIFT) /* 128 idle characters */

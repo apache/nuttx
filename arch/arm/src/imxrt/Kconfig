@@ -183,7 +183,7 @@ config IMXRT_APP_FORMAT_MCUBOOT
 	select IMXRT_HAVE_OTA_PARTITION
 	depends on EXPERIMENTAL
 	---help---
-		The MCUboot support of loading the firmware images.		
+		The MCUboot support of loading the firmware images.  
 
 comment "MCUboot support depends on CONFIG_EXPERIMENTAL"
 	depends on !EXPERIMENTAL
@@ -497,6 +497,14 @@ config IMXRT_LPUART_SINGLEWIRE
 	---help---
 		Enable single wire UART support.  The option enables support for the
 		TIOCSSINGLEWIRE ioctl in the IMXRT serial driver.
+
+config IMXRT_SERIAL_RXDMA_BUFFER_SIZE
+	int "Size in bytes of circular buffer used with LPUART RX DMA"
+	depends on IMXRT_HAVE_LPUART
+	default 32
+	---help---
+		Value applies to all LPUARTs using DMA. Must be a multiple of
+		ARMV7M_DCACHE_LINESIZE
 
 endmenu # LPUART Configuration
 

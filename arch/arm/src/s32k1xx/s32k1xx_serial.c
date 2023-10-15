@@ -654,11 +654,23 @@ static inline void s32k1xx_serialout(struct s32k1xx_uart_s *priv,
  ****************************************************************************/
 
 #ifdef SERIAL_HAVE_RXDMA
-static int s32k1xx_dma_nextrx(struct s32k1xx_uart_s *priv)
+static unsigned int s32k1xx_dma_nextrx(struct s32k1xx_uart_s *priv)
 {
-  int dmaresidual = s32k1xx_dmach_getcount(priv->rxdma);
+  unsigned int dmaresidual = s32k1xx_dmach_getcount(priv->rxdma);
 
-  return RXDMA_BUFFER_SIZE - dmaresidual;
+  DEBUGASSERT(dmaresidual <= RXDMA_BUFFER_SIZE);
+  if (dmaresidual == 0)
+    {
+      /* We've finished transferring RXDMA_BUFFER_SIZE bytes. The next byte
+       * will be placed at the beginning of the buffer
+       */
+
+      return 0;
+    }
+  else
+    {
+      return RXDMA_BUFFER_SIZE - dmaresidual;
+    }
 }
 #endif
 
@@ -813,7 +825,7 @@ static int s32k1xx_dma_setup(struct uart_dev_s *dev)
       modifyreg32(priv->uartbase + S32K1XX_LPUART_BAUD_OFFSET,
                   0, LPUART_BAUD_RDMAE);
 
-      /* Enable itnerrupt on Idel and errors */
+      /* Enable interrupt on Idle and errors */
 
       modifyreg32(priv->uartbase + S32K1XX_LPUART_CTRL_OFFSET, 0,
                   LPUART_CTRL_PEIE |

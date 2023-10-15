@@ -60,6 +60,19 @@
 
 #ifdef USE_SERIALDRIVER
 
+#if defined(SERIAL_HAVE_TXDMA) && CONFIG_IMXRT_EDMA_NTCD < 2
+#error Each LPUART using TXDMA requires 2 EDMA TCDs for setting up transfers
+#endif
+
+#if defined(SERIAL_HAVE_RXDMA) && CONFIG_IMXRT_EDMA_NTCD < 1
+#error Each LPUART using RXDMA requires 1 EDMA TCD for setting up transfers
+#endif
+
+#if defined(SERIAL_HAVE_TXDMA) && defined(SERIAL_HAVE_RXDMA) && \
+    CONFIG_IMXRT_EDMA_NTCD < 3
+#error TXDMA requires 2 EDMA TCDs for each LPUART and RXDMA requires 1
+#endif 
+
 /* The DMA buffer size when using RX DMA to emulate a FIFO.
  *
  * When streaming data, the generic serial layer will be called every time
@@ -1370,11 +1383,22 @@ static inline void imxrt_serialout(struct imxrt_uart_s *priv,
  ****************************************************************************/
 
 #ifdef SERIAL_HAVE_RXDMA
-static int imxrt_dma_nextrx(struct imxrt_uart_s *priv)
+static unsigned int imxrt_dma_nextrx(struct imxrt_uart_s *priv)
 {
-  int dmaresidual = imxrt_dmach_getcount(priv->rxdma);
+  unsigned int dmaresidual = imxrt_dmach_getcount(priv->rxdma);
+  DEBUGASSERT(dmaresidual <= RXDMA_BUFFER_SIZE);
+  if (dmaresidual == 0)
+    {
+      /* We've finished transferring RXDMA_BUFFER_SIZE bytes. The next byte
+       * will be placed at the beginning of the buffer
+       */
 
-  return RXDMA_BUFFER_SIZE - dmaresidual;
+      return 0;
+    }
+  else
+    {
+      return RXDMA_BUFFER_SIZE - dmaresidual;
+    }
 }
 #endif
 
@@ -1531,12 +1555,13 @@ static int imxrt_dma_setup(struct uart_dev_s *dev)
       modifyreg32(priv->uartbase + IMXRT_LPUART_BAUD_OFFSET,
                   0, LPUART_BAUD_RDMAE);
 
-      /* Enable itnerrupt on Idel and erros */
+      /* Enable interrupt on Idle, overrun, and errors */
 
       modifyreg32(priv->uartbase + IMXRT_LPUART_CTRL_OFFSET, 0,
                   LPUART_CTRL_PEIE       |
                   LPUART_CTRL_FEIE       |
                   LPUART_CTRL_NEIE       |
+                  LPUART_CTRL_ORIE       |
                   LPUART_CTRL_ILIE);
 
       /* Start the DMA channel, and arrange for callbacks at the half and

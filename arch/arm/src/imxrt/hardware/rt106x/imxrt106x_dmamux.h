@@ -34,10 +34,10 @@
 /* Peripheral DMA request channels */
 
 #define IMXRT_DMACHAN_FLEXIO1          0  /* FlexIO1 DMA 0/1, Async DMA 0/1 */
-#define IMXRT_DMACHAN_FLEXIO2          1  /* FlexIO1 DMA 0/1, Async DMA 0/1 */
+#define IMXRT_DMACHAN_FLEXIO2          1  /* FlexIO2 DMA 0/1, Async DMA 0/1 */
 #define IMXRT_DMACHAN_LPUART1_TX       2  /* LPUART1 TX FIFO DMA / Async DMA */
 #define IMXRT_DMACHAN_LPUART1_RX       3  /* LPUART1 RX FIFO DMA / Async DMA */
-#define IMXRT_DMACHAN_LPUART3_TX       4  /* LPUART3 RX FIFO DMA / Async DMA */
+#define IMXRT_DMACHAN_LPUART3_TX       4  /* LPUART3 TX FIFO DMA / Async DMA */
 #define IMXRT_DMACHAN_LPUART3_RX       5  /* LPUART3 RX FIFO DMA / Async DMA */
 #define IMXRT_DMACHAN_LPUART5_TX       6  /* LPUART5 TX FIFO DMA / Async DMA */
 #define IMXRT_DMACHAN_LPUART5_RX       7  /* LPUART5 RX FIFO DMA / Async DMA */

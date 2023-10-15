@@ -1203,7 +1203,7 @@ void imxrt_dmach_stop(DMACH_HANDLE handle)
  * Name: imxrt_dmach_getcount
  *
  * Description:
- *   This function checks the TCD (Task Control Descriptor) status for a
+ *   This function checks the TCD (Transfer Control Descriptor) status for a
  *   specified eDMA channel and returns the the number of major loop counts
  *   that have not finished.
  *
@@ -1286,6 +1286,7 @@ void imxrt_dmasample(DMACH_HANDLE handle, struct imxrt_dmaregs_s *regs)
   uintptr_t regaddr;
   unsigned int chan;
   irqstate_t flags;
+  uintptr_t base;
 
   DEBUGASSERT(dmach != NULL && regs != NULL);
   chan           = dmach->chan;
