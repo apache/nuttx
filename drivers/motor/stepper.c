@@ -168,23 +168,24 @@ static ssize_t stepper_read(FAR struct file *filep, FAR char *buffer,
   FAR struct inode *inode = filep->f_inode;
   FAR struct stepper_upperhalf_s *stepper = inode->i_private;
   FAR struct stepper_lowerhalf_s *lower = stepper->lower;
-  FAR struct stepper_state_s *state;
+  FAR struct stepper_status_s *status;
   int ret;
 
-  if (buflen != sizeof(struct stepper_state_s))
+  if (buflen != sizeof(struct stepper_status_s))
     {
       return -EINVAL;
     }
 
-  state = (FAR struct stepper_state_s *)buffer;
-  ret = lower->ops->state(lower, state);
+  status = (FAR struct stepper_status_s *)buffer;
+  ret = lower->ops->update_status(lower);
   if (ret < 0)
     {
-      stperr("Get stepper state failed: %d\n", ret);
+      stperr("Update stepper state failed: %d\n", ret);
       return ret;
     }
 
-  return sizeof(struct stepper_state_s);
+  *status = lower->status;
+  return sizeof(struct stepper_status_s);
 }
 
 /****************************************************************************
@@ -258,6 +259,15 @@ static int stepper_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           uint16_t resolution = (uint16_t)arg;
 
           ret = lower->ops->microstepping(lower, resolution);
+        }
+        break;
+
+      case STEPIOC_SET_CURRENT_POS:
+        {
+          lower->status.position = (int32_t)arg;
+          ret = 0;
+          stpinfo("STEPIOC_SET_CURRENT_POS: new position is %ld\n",
+                  lower->status.position);
         }
         break;
 

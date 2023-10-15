@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/motor/a4988.h
+ * include/nuttx/motor/drv8825.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_MOTOR_A4988_H
-#define __INCLUDE_NUTTX_MOTOR_A4988_H
+#ifndef __INCLUDE_NUTTX_MOTOR_DRV8825_H
+#define __INCLUDE_NUTTX_MOTOR_DRV8825_H
 
 /****************************************************************************
  * Included Files
@@ -31,13 +31,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_STEPPER_A4988)
+#if defined(CONFIG_STEPPER_DRV8825)
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-struct a4988_ops_s
+struct drv8825_ops_s
 {
   /* Initialize the control, called at register step */
 
@@ -62,6 +62,10 @@ struct a4988_ops_s
   /* Idle control */
 
   CODE void (*idle)(int level);
+
+  /* Fault fetch */
+
+  CODE int (*fault)(void);
 };
 
 /****************************************************************************
@@ -77,10 +81,10 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: a4988_register
+ * Name: drv8825_register
  *
  * Description:
- *  Register the a4988 character device as 'devpath'
+ *  Register the drv8825 character device as 'devpath'
  *
  * Input Parameters:
  *  devpath - The full path to the driver to register. E.g., "/dev/stepper0"
@@ -90,12 +94,12 @@ extern "C"
  *
  ****************************************************************************/
 
-int a4988_register(FAR const char *devpath, FAR struct a4988_ops_s *ops);
+int drv8825_register(FAR const char *devpath, FAR struct drv8825_ops_s *ops);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* CONFIG_STEPPER_A4988 */
-#endif /* __INCLUDE_NUTTX_DRIVERS_MOTOR_A4988_H */
+#endif /* CONFIG_STEPPER_DRV8825 */
+#endif /* __INCLUDE_NUTTX_DRIVERS_MOTOR_DRV8825_H */

@@ -40,6 +40,9 @@ ifeq ($(CONFIG_STEPPER_A4988),y)
 CSRCS += a4988.c
 endif
 
+ifeq ($(CONFIG_STEPPER_DRV8825),y)
+CSRCS += drv8825.c
+endif
 
 # Include motor drivers in the build
 

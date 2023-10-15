@@ -81,4 +81,10 @@ config STEPPER_A4988
 	---help---
 		Enables A4988 stepper driver.
 
+config STEPPER_DRV8825
+	bool "DRV8825 Stepper Motor Driver"
+	default n
+	---help---
+		Enables DRV8825 stepper driver.
+
 endif # STEPPER
