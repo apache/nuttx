@@ -39,12 +39,6 @@ ifeq ($(CONFIG_PSEUDOFS_FILE),y)
 CSRCS += fs_pseudofile.c
 endif
 
-# Stream support
-
-ifeq ($(CONFIG_FILE_STREAM),y)
-CSRCS += fs_fdopen.c
-endif
-
 # Support for eventfd
 
 ifeq ($(CONFIG_EVENT_FD),y)

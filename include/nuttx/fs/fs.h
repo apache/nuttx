@@ -1175,20 +1175,6 @@ int find_mtddriver(FAR const char *pathname, FAR struct inode **ppinode);
 int close_mtddriver(FAR struct inode *pinode);
 
 /****************************************************************************
- * Name: fs_fdopen
- *
- * Description:
- *   This function does the core operations for fopen and fdopen.  It is
- *   used by the OS to clone stdin, stdout, stderr
- *
- ****************************************************************************/
-
-#ifdef CONFIG_FILE_STREAM
-int fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb,
-              FAR struct file_struct **filep);
-#endif
-
-/****************************************************************************
  * Name: lib_flushall
  *
  * Description:
