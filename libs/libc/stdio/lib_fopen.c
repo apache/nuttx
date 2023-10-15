@@ -65,6 +65,7 @@
 
 FAR FILE *fdopen(int fd, FAR const char *mode)
 {
+  FAR struct streamlist *list = lib_get_streams();
   FAR FILE *filep = NULL;
   int oflags;
   int ret;
@@ -72,14 +73,76 @@ FAR FILE *fdopen(int fd, FAR const char *mode)
   /* Map the open mode string to open flags */
 
   oflags = lib_mode2oflags(mode);
-  if (oflags >= 0)
+  if (oflags < 0)
     {
-      ret = fs_fdopen(fd, oflags, NULL, &filep);
+      return NULL;
+    }
+
+  /* Allocate FILE structure */
+
+  if (fd >= 3)
+    {
+      filep = lib_zalloc(sizeof(FILE));
+      if (filep == NULL)
+        {
+          ret = -ENOMEM;
+          goto errout;
+        }
+
+      /* Add FILE structure to the stream list */
+
+      ret = nxmutex_lock(&list->sl_lock);
       if (ret < 0)
         {
-          set_errno(-ret);
+          lib_free(filep);
+          goto errout;
         }
+
+      if (list->sl_tail)
+        {
+          list->sl_tail->fs_next = filep;
+          list->sl_tail = filep;
+        }
+      else
+        {
+          list->sl_head = filep;
+          list->sl_tail = filep;
+        }
+
+      nxmutex_unlock(&list->sl_lock);
+
+      /* Initialize the mutex the manages access to the buffer */
+
+      nxrmutex_init(&filep->fs_lock);
     }
+  else
+    {
+      filep = &list->sl_std[fd];
+    }
+
+#if !defined(CONFIG_STDIO_DISABLE_BUFFERING) && CONFIG_STDIO_BUFFER_SIZE > 0
+  /* Set up pointers */
+
+  filep->fs_bufstart = filep->fs_buffer;
+  filep->fs_bufend   = filep->fs_bufstart + CONFIG_STDIO_BUFFER_SIZE;
+  filep->fs_bufpos   = filep->fs_bufstart;
+  filep->fs_bufread  = filep->fs_bufstart;
+  filep->fs_flags    = __FS_FLAG_UBF; /* Fake setvbuf and fclose */
+
+#  ifdef CONFIG_STDIO_LINEBUFFER
+  /* Setup buffer flags */
+
+  filep->fs_flags   |= __FS_FLAG_LBF; /* Line buffering */
+
+#  endif /* CONFIG_STDIO_LINEBUFFER */
+#endif /* !CONFIG_STDIO_DISABLE_BUFFERING && CONFIG_STDIO_BUFFER_SIZE > 0 */
+
+  /* Save the file description and open flags.  Setting the
+   * file descriptor locks this stream.
+   */
+
+  filep->fs_fd       = fd;
+  filep->fs_oflags   = oflags;
 
 #ifdef CONFIG_FDSAN
   android_fdsan_exchange_owner_tag(fd, 0,
@@ -88,6 +151,10 @@ FAR FILE *fdopen(int fd, FAR const char *mode)
 #endif
 
   return filep;
+
+errout:
+  set_errno(-ret);
+  return NULL;
 }
 
 /****************************************************************************
@@ -99,7 +166,6 @@ FAR FILE *fopen(FAR const char *path, FAR const char *mode)
   FAR FILE *filep = NULL;
   int oflags;
   int fd;
-  int ret;
 
   /* Map the open mode string to open flags */
 
@@ -120,25 +186,16 @@ FAR FILE *fopen(FAR const char *path, FAR const char *mode)
 
   if (fd >= 0)
     {
-      ret = fs_fdopen(fd, oflags, NULL, &filep);
-      if (ret < 0)
+      filep = fdopen(fd, mode);
+      if (filep == NULL)
         {
           /* Don't forget to close the file descriptor if any other
            * failures are reported by fdopen().
            */
 
           close(fd);
-
-          set_errno(-ret);
-          filep = NULL;
         }
     }
-
-#ifdef CONFIG_FDSAN
-  android_fdsan_exchange_owner_tag(fd, 0,
-    android_fdsan_create_owner_tag(ANDROID_FDSAN_OWNER_TYPE_FILE,
-                                       (uintptr_t)filep));
-#endif
 
   return filep;
 }
