@@ -318,6 +318,14 @@ config TICKET_SPINLOCK
 
 endif # SPINLOCK
 
+config RW_SPINLOCK
+	bool "Support read-write Spinlocks"
+	default y
+	---help---
+		Spinlocks are spilit into read and write lock.
+		Reader can take read lock simultaneously and only one writer
+		can take write lock.
+
 config IRQCHAIN
 	bool "Enable multi handler sharing a IRQ"
 	default n
