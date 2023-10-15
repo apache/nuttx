@@ -60,12 +60,6 @@ if(CONFIG_PSEUDOFS_FILE)
   list(APPEND SRCS fs_pseudofile.c)
 endif()
 
-# Stream support
-
-if(CONFIG_FILE_STREAM)
-  list(APPEND SRCS fs_fdopen.c)
-endif()
-
 # Support for eventfd
 
 if(CONFIG_EVENT_FD)
