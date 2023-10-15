@@ -99,7 +99,6 @@ if(CONFIG_FILE_STREAM)
     lib_tmpfile.c
     lib_setbuf.c
     lib_setvbuf.c
-    lib_libstream.c
     lib_libfilelock.c
     lib_libgetstreams.c
     lib_fputwc.c

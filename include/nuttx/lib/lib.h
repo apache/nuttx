@@ -105,13 +105,7 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-/* Functions contained in lib_streams.c *************************************/
-
 #ifdef CONFIG_FILE_STREAM
-struct task_group_s;
-void lib_stream_initialize(FAR struct task_group_s *group);
-void lib_stream_release(FAR struct task_group_s *group);
-
 /* Functions contained in lib_getstreams.c **********************************/
 
 FAR struct streamlist *lib_get_streams(void);
