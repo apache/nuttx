@@ -270,8 +270,8 @@ static void goldfish_events_worker(FAR void *arg)
   putreg32(GOLDFISH_EVENTS_PAGE_ABSDATA,
            events->base + GOLDFISH_EVENTS_SET_PAGE);
 
-  iinfo("goldfish_events_interrupt events(%d,%d,%d).\n",
-        evt.type, evt.code, evt.value);
+  iinfo("goldfish_events_interrupt events(%" PRIu32 ", %" PRIu32 ", \
+        %" PRIu32 ").\n", evt.type, evt.code, evt.value);
 
 #ifdef CONFIG_INPUT_TOUCHSCREEN
   if (goldfish_events_send_touch_event(events, &evt))
