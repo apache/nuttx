@@ -63,7 +63,7 @@
  *
  ****************************************************************************/
 
-bool up_checkarch(FAR const Elf32_Ehdr *ehdr)
+bool up_checkarch(const Elf32_Ehdr *ehdr)
 {
   /* Make sure it's an Sparc executable */
 
@@ -120,7 +120,7 @@ bool up_checkarch(FAR const Elf32_Ehdr *ehdr)
  *
  ****************************************************************************/
 
-int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
+int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym,
                 uintptr_t addr)
 {
   unsigned int relotype;
@@ -140,7 +140,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
   return OK;
 }
 
-int up_relocateadd(FAR const Elf32_Rela *rel, FAR const Elf32_Sym *sym,
+int up_relocateadd(const Elf32_Rela *rel, const Elf32_Sym *sym,
                    uintptr_t addr)
 {
   unsigned int relotype;
@@ -170,76 +170,76 @@ int up_relocateadd(FAR const Elf32_Rela *rel, FAR const Elf32_Sym *sym,
     case R_SPARC_NONE:
       break;
     case R_SPARC_8:
-        (*(FAR uint8_t *)addr) = (uint8_t)value;
+        (*(uint8_t *)addr) = (uint8_t)value;
         break;
 
     case R_SPARC_16:
-        (*(FAR uint16_t *)addr) = (uint16_t)value;
+        (*(uint16_t *)addr) = (uint16_t)value;
         break;
 
     case R_SPARC_32:
-        (*(FAR uint32_t *)addr) = value;
+        (*(uint32_t *)addr) = value;
         break;
 
     case R_SPARC_DISP8:
     case R_SPARC_DISP16:
     case R_SPARC_DISP32:
-        (*(FAR uint32_t *)addr) = value - addr;
+        (*(uint32_t *)addr) = value - addr;
         break;
 
     case R_SPARC_WDISP30:
         value  -= addr;
-        (*(FAR uint32_t *)addr) &= (~0x3fffffff);
-        (*(FAR uint32_t *)addr) |= (value >> 2) & 0x3fffffff;
+        (*(uint32_t *)addr) &= (~0x3fffffff);
+        (*(uint32_t *)addr) |= (value >> 2) & 0x3fffffff;
         break;
 
     case R_SPARC_WDISP22:
         value  -= addr;
-        (*(FAR uint32_t *)addr) &= (~0x3fffff);
-        (*(FAR uint32_t *)addr) |= (value >> 2) & 0x3fffff;
+        (*(uint32_t *)addr) &= (~0x3fffff);
+        (*(uint32_t *)addr) |= (value >> 2) & 0x3fffff;
         break;
 
     case R_SPARC_HI22:
-        (*(FAR uint32_t *)addr) &= (~0x3fffff);
-        (*(FAR uint32_t *)addr) |= (value >> 10) & 0x3fffff;
+        (*(uint32_t *)addr) &= (~0x3fffff);
+        (*(uint32_t *)addr) |= (value >> 10) & 0x3fffff;
         break;
 
     case R_SPARC_22:
-        (*(FAR uint32_t *)addr) &= (~0x3fffff);
-        (*(FAR uint32_t *)addr) |= value & 0x3fffff;
+        (*(uint32_t *)addr) &= (~0x3fffff);
+        (*(uint32_t *)addr) |= value & 0x3fffff;
         break;
 
     case R_SPARC_13:
-        (*(FAR uint32_t *)addr) &= (~0x1ffff);
-        (*(FAR uint32_t *)addr) |= value & 0x1ffff;
+        (*(uint32_t *)addr) &= (~0x1ffff);
+        (*(uint32_t *)addr) |= value & 0x1ffff;
         break;
 
     case R_SPARC_LO10:
-        (*(FAR uint32_t *)addr) &= (~0x3ff);
-        (*(FAR uint32_t *)addr) |= value & 0x3ff;
+        (*(uint32_t *)addr) &= (~0x3ff);
+        (*(uint32_t *)addr) |= value & 0x3ff;
         break;
 
     case R_SPARC_PC10:
         value  -= addr;
-        (*(FAR uint32_t *)addr) &= (~0x3ff);
-        (*(FAR uint32_t *)addr) |= value & 0x3ff;
+        (*(uint32_t *)addr) &= (~0x3ff);
+        (*(uint32_t *)addr) |= value & 0x3ff;
         break;
 
     case R_SPARC_PC22:
         value  -= addr;
-        (*(FAR uint32_t *)addr) &= (~0x3fffff);
-        (*(FAR uint32_t *)addr) |= (value >> 10) & 0x3fffff;
+        (*(uint32_t *)addr) &= (~0x3fffff);
+        (*(uint32_t *)addr) |= (value >> 10) & 0x3fffff;
         break;
 
     case R_SPARC_UA32:
     case R_SPARC_GLOB_DAT:
-        (*(FAR uint32_t *)addr) = value;
+        (*(uint32_t *)addr) = value;
         break;
 
     case R_SPARC_JMP_SLOT:
-        (*(FAR uint32_t *)(addr + 1)) = OPCODE_SETHI_G1 | ((value >> 10) &
+        (*(uint32_t *)(addr + 1)) = OPCODE_SETHI_G1 | ((value >> 10) &
                                         0x3fffff);
-        (*(FAR uint32_t *)(addr + 2)) = OPCODE_JMP_G1 | (value & 0x3ff);
+        (*(uint32_t *)(addr + 2)) = OPCODE_JMP_G1 | (value & 0x3ff);
         break;
 
     default:
