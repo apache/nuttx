@@ -1825,13 +1825,23 @@ static bool up_rxflowcontrol(struct uart_dev_s *dev,
  ****************************************************************************/
 
 #ifdef SERIAL_HAVE_DMA
-static int up_dma_nextrx(struct up_dev_s *priv)
+static unsigned int up_dma_nextrx(struct up_dev_s *priv)
 {
-  size_t dmaresidual;
+  unsigned int dmaresidual = kinetis_dmach_getcount(priv->rxdma);
+  DEBUGASSERT(dmaresidual <= RXDMA_BUFFER_SIZE);
 
-  dmaresidual = kinetis_dmach_getcount(priv->rxdma);
+  if (dmaresidual == 0)
+    {
+      /* We've finished transferring RXDMA_BUFFER_SIZE bytes. The next byte
+       * will be placed at the beginning of the buffer
+       */
 
-  return (RXDMA_BUFFER_SIZE - (int)dmaresidual) % RXDMA_BUFFER_SIZE;
+      return 0;
+    }
+  else
+    {
+      return RXDMA_BUFFER_SIZE - dmaresidual;
+    }
 }
 #endif
 
