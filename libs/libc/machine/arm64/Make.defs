@@ -18,6 +18,10 @@
 #
 ############################################################################
 
+ifeq ($(CONFIG_LIBC_ARCH_ELF_64BIT),y)
+CSRCS += arch_elf.c
+endif
+
 ifeq ($(CONFIG_ARM64_MEMCHR),y)
 ASRCS += arch_memchr.S
 endif
