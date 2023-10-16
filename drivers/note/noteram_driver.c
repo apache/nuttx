@@ -978,6 +978,9 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
         FAR struct note_binary_s *nbi = (FAR struct note_binary_s *)p;
         char c = note->nc_type == NOTE_DUMP_BEGIN ? 'B' : 'E';
         int len = note->nc_length - sizeof(struct note_binary_s);
+        uintptr_t ip;
+
+        noteram_dump_unflatten(&ip, nbi->nbi_ip, sizeof(ip));
         ret += noteram_dump_header(s, &nbi->nbi_cmn, ctx);
         if (len > 0)
           {
@@ -987,7 +990,7 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
         else
           {
             ret += lib_sprintf(s, "tracing_mark_write: %c|%d|%pS\n",
-                               c, pid, (FAR void *)nbi->nbi_ip);
+                               c, pid, (FAR void *)ip);
           }
       }
       break;
@@ -1023,8 +1026,8 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
 
         noteram_dump_unflatten(&ip, nbi->nbi_ip, sizeof(ip));
 
-        ret += lib_sprintf(s, "tracing_mark_write: 0x%" PRIdPTR
-                           ": count=%u", ip, count);
+        ret += lib_sprintf(s, "tracing_mark_write: %pS: count=%u",
+                           (FAR void *)ip, count);
         for (i = 0; i < count; i++)
           {
             ret += lib_sprintf(s, " 0x%x", nbi->nbi_data[i]);

@@ -89,13 +89,12 @@
   ((drv)->ops->irqhandler(drv, irq, handler, enter), true))
 #define note_string(drv, ip, buf)                                            \
   ((drv)->ops->string && ((drv)->ops->string(drv, ip, buf), true))
-#define note_dump(drv, ip, buf, len)                                         \
-  ((drv)->ops->dump && ((drv)->ops->dump(drv, ip, event, buf, len), true))
+#define note_event(drv, ip, event, buf, len)                                 \
+  ((drv)->ops->event && ((drv)->ops->event(drv, ip, event, buf, len), true))
 #define note_vprintf(drv, ip, fmt, va)                                       \
   ((drv)->ops->vprintf && ((drv)->ops->vprintf(drv, ip, fmt, va), true))
-#define note_vbprintf(drv, ip, event, fmt, va)                               \
-  ((drv)->ops->vbprintf &&                                                   \
-  ((drv)->ops->vbprintf(drv, ip, event, fmt, va), true))
+#define note_vbprintf(drv, ip, fmt, va)                                      \
+  ((drv)->ops->vbprintf && ((drv)->ops->vbprintf(drv, ip, fmt, va), true))
 
 /****************************************************************************
  * Private Types
@@ -1413,7 +1412,7 @@ void sched_note_event_ip(uint32_t tag, uintptr_t ip, uint8_t event,
 
   for (driver = g_note_drivers; *driver; driver++)
     {
-      if (note_dump(*driver, ip, buf, len))
+      if (note_event(*driver, ip, event, buf, len))
         {
           continue;
         }
@@ -1501,7 +1500,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip,
     }
 }
 
-void sched_note_vbprintf_ip(uint32_t tag, uintptr_t ip, uint8_t event,
+void sched_note_vbprintf_ip(uint32_t tag, uintptr_t ip,
                             FAR const char *fmt, va_list va)
 {
   FAR struct note_binary_s *note;
@@ -1546,7 +1545,7 @@ void sched_note_vbprintf_ip(uint32_t tag, uintptr_t ip, uint8_t event,
 
   for (driver = g_note_drivers; *driver; driver++)
     {
-      if (note_vbprintf(*driver, ip, event, fmt, va))
+      if (note_vbprintf(*driver, ip, fmt, va))
         {
           continue;
         }
@@ -1728,12 +1727,12 @@ void sched_note_printf_ip(uint32_t tag, uintptr_t ip,
   va_end(va);
 }
 
-void sched_note_bprintf_ip(uint32_t tag, uintptr_t ip, uint8_t event,
+void sched_note_bprintf_ip(uint32_t tag, uintptr_t ip,
                            FAR const char *fmt, ...)
 {
   va_list va;
   va_start(va, fmt);
-  sched_note_vbprintf_ip(tag, ip, event, fmt, va);
+  sched_note_vbprintf_ip(tag, ip, fmt, va);
   va_end(va);
 }
 #endif /* CONFIG_SCHED_INSTRUMENTATION_DUMP */
