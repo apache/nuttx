@@ -2805,10 +2805,10 @@ static void mpfs_buffer_free(struct mpfs_ethmac_s *priv, unsigned int queue)
 #ifndef CONFIG_MPFS_GMAC_PREALLOCATE
   /* Free allocated buffers */
 
-  if (priv->queue[queue].rx_desc_tab != NULL)
+  if (priv->queue[queue].tx_desc_tab != NULL)
     {
-      kmm_free(priv->queue[queue].rx_desc_tab);
-      priv->queue[queue].rx_desc_tab = NULL;
+      kmm_free(priv->queue[queue].tx_desc_tab);
+      priv->queue[queue].tx_desc_tab = NULL;
     }
 
   if (priv->queue[queue].rx_desc_tab != NULL)
@@ -2823,10 +2823,10 @@ static void mpfs_buffer_free(struct mpfs_ethmac_s *priv, unsigned int queue)
       priv->queue[queue].txbuffer = NULL;
     }
 
-  if (priv->queue[queue].txbuffer != NULL)
+  if (priv->queue[queue].rxbuffer != NULL)
     {
-      kmm_free(priv->queue[queue].txbuffer);
-      priv->queue[queue].txbuffer = NULL;
+      kmm_free(priv->queue[queue].rxbuffer);
+      priv->queue[queue].rxbuffer = NULL;
     }
 #endif
 }
