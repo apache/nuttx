@@ -129,17 +129,16 @@
         sched_note_string_ip(tag, SCHED_NOTE_IP, buf)
 #define sched_note_event(tag, event, buf, len) \
         sched_note_event_ip(tag, SCHED_NOTE_IP, event, buf, len)
-#define sched_note_dump(tag, event, buf, len) \
-        sched_note_event(tag, SCHED_NOTE_IP, NOTE_DUMP_BINARY, buf, len)
+#define sched_note_dump(tag, buf, len) \
+        sched_note_event_ip(tag, SCHED_NOTE_IP, NOTE_DUMP_BINARY, buf, len)
 #define sched_note_vprintf(tag, fmt, va) \
         sched_note_vprintf_ip(tag, SCHED_NOTE_IP, fmt, va)
-#define sched_note_vbprintf(tag, event, fmt, va) \
-        sched_note_vbprintf_ip(tag, SCHED_NOTE_IP, event, fmt, va)
+#define sched_note_vbprintf(tag, fmt, va) \
+        sched_note_vbprintf_ip(tag, SCHED_NOTE_IP, fmt, va)
 #define sched_note_printf(tag, fmt, ...) \
         sched_note_printf_ip(tag, SCHED_NOTE_IP, fmt, ##__VA_ARGS__)
-#define sched_note_bprintf(tag, event, fmt, ...) \
-        sched_note_bprintf_ip(tag, SCHED_NOTE_IP, event, \
-                              fmt, ##__VA_ARGS__)
+#define sched_note_bprintf(tag, fmt, ...) \
+        sched_note_bprintf_ip(tag, SCHED_NOTE_IP, fmt, ##__VA_ARGS__)
 #define sched_note_counter(tag, name, value) \
         sched_note_counter_ip(tag, SCHED_NOTE_IP, name, value)
 
@@ -543,13 +542,12 @@ void sched_note_event_ip(uint32_t tag, uintptr_t ip, uint8_t event,
                         FAR const void *buf, size_t len);
 void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                            va_list va) printf_like(3, 0);
-void sched_note_vbprintf_ip(uint32_t tag, uintptr_t ip, uint8_t event,
-                            FAR const char *fmt,
-                            va_list va) printf_like(4, 0);
+void sched_note_vbprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
+                            va_list va) printf_like(3, 0);
 void sched_note_printf_ip(uint32_t tag, uintptr_t ip,
                           FAR const char *fmt, ...) printf_like(3, 4);
-void sched_note_bprintf_ip(uint32_t tag, uintptr_t ip, uint8_t event,
-                           FAR const char *fmt, ...) printf_like(4, 5);
+void sched_note_bprintf_ip(uint32_t tag, uintptr_t ip,
+                           FAR const char *fmt, ...) printf_like(3, 4);
 
 static inline void sched_note_counter_ip(uint32_t tag, uintptr_t ip,
                                          FAR const char *name,
@@ -564,9 +562,9 @@ static inline void sched_note_counter_ip(uint32_t tag, uintptr_t ip,
 #  define sched_note_string_ip(t,ip,b)
 #  define sched_note_event_ip(t,ip,e,b,l)
 #  define sched_note_vprintf_ip(t,ip,f,v)
-#  define sched_note_vbprintf_ip(t,ip,e,f,v)
+#  define sched_note_vbprintf_ip(t,ip,f,v)
 #  define sched_note_printf_ip(t,ip,f,...)
-#  define sched_note_bprintf_ip(t,ip,e,f,...)
+#  define sched_note_bprintf_ip(t,ip,f,...)
 #  define sched_note_counter_ip(t,ip,n,v)
 #endif /* CONFIG_SCHED_INSTRUMENTATION_DUMP */
 
