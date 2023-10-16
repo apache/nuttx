@@ -579,26 +579,26 @@ int tcp_selectport(uint8_t domain,
                    uint16_t portno)
 {
   static uint16_t g_last_tcp_port;
-  ssize_t ret;
 
   /* Generate port base dynamically */
 
   if (g_last_tcp_port == 0)
     {
-      ret = getrandom(&g_last_tcp_port, sizeof(uint16_t), 0);
+#if defined(CONFIG_DEV_URANDOM) || defined(CONFIG_DEV_RANDOM) || \
+    defined(CONFIG_CRYPTO_RANDOM_POOL)
+      ssize_t ret = getrandom(&g_last_tcp_port, sizeof(uint16_t), 0);
       if (ret < 0)
         {
           ret = getrandom(&g_last_tcp_port, sizeof(uint16_t), GRND_RANDOM);
         }
 
       if (ret != sizeof(uint16_t))
+#endif
         {
-          g_last_tcp_port = clock_systime_ticks() % 32000;
+          g_last_tcp_port = (uint16_t)clock_systime_ticks();
         }
-      else
-        {
-          g_last_tcp_port = g_last_tcp_port % 32000;
-        }
+
+      g_last_tcp_port = g_last_tcp_port % 32000;
 
       if (g_last_tcp_port < 4096)
         {

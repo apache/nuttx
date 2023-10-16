@@ -144,15 +144,15 @@ uint32_t tcp_addsequence(FAR uint8_t *seqno, uint16_t len)
 
 void tcp_initsequence(FAR uint8_t *seqno)
 {
-  int ret;
-
   /* If g_tcpsequence is already initialized, just copy it */
 
   if (g_tcpsequence == 0)
     {
       /* Get a random TCP sequence number */
 
-      ret = getrandom(&g_tcpsequence, sizeof(uint32_t), 0);
+#if defined(CONFIG_DEV_URANDOM) || defined(CONFIG_DEV_RANDOM) || \
+    defined(CONFIG_CRYPTO_RANDOM_POOL)
+      int ret = getrandom(&g_tcpsequence, sizeof(uint32_t), 0);
       if (ret < 0)
         {
           ret = getrandom(&g_tcpsequence, sizeof(uint32_t), GRND_RANDOM);
@@ -163,13 +163,12 @@ void tcp_initsequence(FAR uint8_t *seqno)
        */
 
       if (ret != sizeof(uint32_t))
+#endif
         {
-          g_tcpsequence = clock_systime_ticks() % 2000000000;
+          g_tcpsequence = (uint32_t)clock_systime_ticks();
         }
-      else
-        {
-          g_tcpsequence = g_tcpsequence % 2000000000;
-        }
+
+      g_tcpsequence = g_tcpsequence % 2000000000;
 
       /* If the random value is "small" increase it */
 
