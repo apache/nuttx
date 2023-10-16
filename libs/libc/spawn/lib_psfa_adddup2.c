@@ -66,7 +66,6 @@ int posix_spawn_file_actions_adddup2(
                          int fd1, int fd2)
 {
   FAR struct spawn_dup2_file_action_s *entry;
-  int flags;
 
   DEBUGASSERT(file_actions && fd1 >= 0 && fd2 >= 0);
 
@@ -85,23 +84,6 @@ int posix_spawn_file_actions_adddup2(
   entry->action = SPAWN_FILE_ACTION_DUP2;
   entry->fd1    = fd1;
   entry->fd2    = fd2;
-
-  /* NOTE: Workaround to avoid an error when executing dup2 action */
-
-  flags = fcntl(fd1, F_GETFD);
-  if (flags < 0)
-    {
-      lib_free(entry);
-      return flags;
-    }
-
-  flags &= ~FD_CLOEXEC;
-  flags = fcntl(fd1, F_SETFD, flags);
-  if (flags < 0)
-    {
-      lib_free(entry);
-      return flags;
-    }
 
   /* And add it to the file action list */
 
