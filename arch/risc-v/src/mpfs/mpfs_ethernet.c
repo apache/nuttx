@@ -1180,6 +1180,13 @@ static void mpfs_txreset(struct mpfs_ethmac_s *priv)
       priv->queue[qi].txhead = 0;
       priv->queue[qi].txtail = 0;
 
+      if (!txdesc || !txbuffer)
+        {
+          /* The queue index is not set up */
+
+          continue;
+        }
+
       for (ndx = 0; ndx < CONFIG_MPFS_ETHMAC_NTXBUFFERS; ndx++)
         {
           bufaddr = (uintptr_t)&txbuffer[ndx * GMAC_TX_UNITSIZE];
@@ -1254,6 +1261,13 @@ static void mpfs_rxreset(struct mpfs_ethmac_s *priv)
       rxbuffer = priv->queue[qi].rxbuffer;
       rxdesc   = priv->queue[qi].rx_desc_tab;
       priv->queue[qi].rxndx = 0;
+
+      if (!rxdesc || !rxbuffer)
+        {
+          /* The queue index is not set up */
+
+          continue;
+        }
 
       for (ndx = 0; ndx < CONFIG_MPFS_ETHMAC_NRXBUFFERS; ndx++)
         {
