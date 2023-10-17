@@ -45,6 +45,7 @@ extern void mpfs_opensbi_prepare_hart(void);
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define ENTRY_STACK 512
 #define ENTRYPT_CNT sizeof(g_app_entrypoints) / sizeof(g_app_entrypoints[0])
 
 /* Default PMP permissions */
@@ -84,6 +85,11 @@ static uint64_t g_hart_use_sbi =
 #endif
   0;
 
+#ifdef CONFIG_MPFS_BOARD_PMP
+uint8_t g_mpfs_boot_stacks[ENTRY_STACK * ENTRYPT_CNT]
+  aligned_data(STACK_ALIGNMENT);
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -94,11 +100,21 @@ void mpfs_jump_to_app(void)
   __asm__ __volatile__
     (
       "csrr a0, mhartid\n"                   /* Hart ID */
+#ifdef CONFIG_MPFS_BOARD_PMP
+      "li   t1, %0\n"                        /* Size of hart's stack */
+      "mul  t0, a0, t1\n"                    /* Hart stack base */
+      "add  t0, t0, t1\n"                    /* Hart stack top */
+      "la   sp, g_mpfs_boot_stacks\n"        /* Stack area base */
+      "add  sp, sp, t0\n"                    /* Set stack pointer */
+      "call mpfs_board_pmp_setup\n"          /* Run PMP configuration */
+      "csrr a0, mhartid\n"                   /* Restore hartid */
+#else
       "li   t0, -1\n"                        /* Open the whole SoC */
       "csrw pmpaddr0, t0\n"
       "li   t0, %0\n"                        /* Grant RWX permissions */
       "csrw pmpcfg0, t0\n"
       "csrw pmpcfg2, zero\n"
+#endif
 #ifdef CONFIG_MPFS_OPENSBI
       "ld   t0, g_hart_use_sbi\n"            /* Load sbi usage bitmask */
       "srl  t0, t0, a0\n"                    /* Shift right by this hart */
@@ -113,7 +129,11 @@ void mpfs_jump_to_app(void)
       "ld   t0, 0(t0)\n"                     /* Load the address from table */
       "jr   t0\n"                            /* Jump to entrypoint */
       :
+#ifdef CONFIG_MPFS_BOARD_PMP
+      : "i" (ENTRY_STACK)
+#else
       : "i" (PMP_DEFAULT_PERM)
+#endif
       :
     );
 }
