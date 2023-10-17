@@ -33,6 +33,8 @@
 
 #include <sys/types.h>
 
+#include "riscv_internal.h"
+
 /****************************************************************************
  * Extern Function Declarations
  ****************************************************************************/
@@ -44,6 +46,10 @@ extern void mpfs_opensbi_prepare_hart(void);
  ****************************************************************************/
 
 #define ENTRYPT_CNT sizeof(g_app_entrypoints) / sizeof(g_app_entrypoints[0])
+
+/* Default PMP permissions */
+
+#define PMP_DEFAULT_PERM (PMPCFG_A_NAPOT | PMPCFG_R | PMPCFG_W | PMPCFG_X)
 
 /****************************************************************************
  * Private Data
@@ -88,6 +94,11 @@ void mpfs_jump_to_app(void)
   __asm__ __volatile__
     (
       "csrr a0, mhartid\n"                   /* Hart ID */
+      "li   t0, -1\n"                        /* Open the whole SoC */
+      "csrw pmpaddr0, t0\n"
+      "li   t0, %0\n"                        /* Grant RWX permissions */
+      "csrw pmpcfg0, t0\n"
+      "csrw pmpcfg2, zero\n"
 #ifdef CONFIG_MPFS_OPENSBI
       "ld   t0, g_hart_use_sbi\n"            /* Load sbi usage bitmask */
       "srl  t0, t0, a0\n"                    /* Shift right by this hart */
@@ -101,6 +112,9 @@ void mpfs_jump_to_app(void)
       "add  t0, t0, t1\n"                    /* Index in table */
       "ld   t0, 0(t0)\n"                     /* Load the address from table */
       "jr   t0\n"                            /* Jump to entrypoint */
+      :
+      : "i" (PMP_DEFAULT_PERM)
+      :
     );
 }
 
