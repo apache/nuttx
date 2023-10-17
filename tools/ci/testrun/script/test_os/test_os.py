@@ -45,7 +45,7 @@ def test_fs_test(p):
         pytest.skip("unsupported at {}".format(p.board))
     fstest_dir = "{}/{}_fstest".format(p.fs, p.core)
     p.sendCommand("mkdir %s" % fstest_dir)
-    ret = p.sendCommand("fstest -n 10 -m %s" % fstest_dir, "Final memory usage", 2000)
+    ret = p.sendCommand("fstest -n 10 -m %s" % fstest_dir, "FAILED: 0", 2000)
     p.sendCommand("ls %s" % fstest_dir)
     p.sendCommand("rmdir %s" % fstest_dir)
     assert ret == 0
