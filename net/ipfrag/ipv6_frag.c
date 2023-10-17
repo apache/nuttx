@@ -141,8 +141,9 @@ static int32_t ipv6_fragin_getinfo(FAR struct iob_s *iob,
       fraglink->morefrags = fraglink->fragoff & 0x1;
       fraglink->fragoff  &= 0xfff8;
       fraglink->fraglen   = paylen;
-      fraglink->ipid      = NTOHL((*(uint16_t *)(&fraghdr->id[0]) << 16) +
-                                  *(uint16_t *)(&fraghdr->id[2]));
+      fraglink->ipid      = NTOHL(
+        ((uint32_t)(*(FAR uint16_t *)(&fraghdr->id[0])) << 16) +
+         (uint32_t)(*(FAR uint16_t *)(&fraghdr->id[2])));
 
       fraglink->frag      = iob;
 
