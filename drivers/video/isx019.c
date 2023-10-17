@@ -1882,7 +1882,7 @@ static int isx019_get_supported_value(FAR struct imgsensor_s *sensor,
         break;
 
       case IMGSENSOR_ID_AUTO_WHITE_BALANCE:
-        val->type = IMGSENSOR_CTRL_TYPE_INTEGER;
+        val->type = IMGSENSOR_CTRL_TYPE_BOOLEAN;
         SET_RANGE(val->u.range, MIN_AWB, MAX_AWB,
                                 STEP_AWB, def->awb);
         break;
@@ -1900,25 +1900,25 @@ static int isx019_get_supported_value(FAR struct imgsensor_s *sensor,
         break;
 
       case IMGSENSOR_ID_HFLIP_VIDEO:
-        val->type = IMGSENSOR_CTRL_TYPE_INTEGER;
+        val->type = IMGSENSOR_CTRL_TYPE_BOOLEAN;
         SET_RANGE(val->u.range, MIN_HFLIP, MAX_HFLIP,
                                 STEP_HFLIP, def->hflip_video);
         break;
 
       case IMGSENSOR_ID_VFLIP_VIDEO:
-        val->type = IMGSENSOR_CTRL_TYPE_INTEGER;
+        val->type = IMGSENSOR_CTRL_TYPE_BOOLEAN;
         SET_RANGE(val->u.range, MIN_VFLIP, MAX_VFLIP,
                                 STEP_VFLIP, def->vflip_video);
         break;
 
       case IMGSENSOR_ID_HFLIP_STILL:
-        val->type = IMGSENSOR_CTRL_TYPE_INTEGER;
+        val->type = IMGSENSOR_CTRL_TYPE_BOOLEAN;
         SET_RANGE(val->u.range, MIN_HFLIP, MAX_HFLIP,
                                 STEP_HFLIP, def->hflip_still);
         break;
 
       case IMGSENSOR_ID_VFLIP_STILL:
-        val->type = IMGSENSOR_CTRL_TYPE_INTEGER;
+        val->type = IMGSENSOR_CTRL_TYPE_BOOLEAN;
         SET_RANGE(val->u.range, MIN_VFLIP, MAX_VFLIP,
                                 STEP_VFLIP, def->hflip_still);
         break;
