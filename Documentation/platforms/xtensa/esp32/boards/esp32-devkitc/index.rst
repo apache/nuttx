@@ -965,6 +965,89 @@ Find your board IP using ``nsh> ifconfig`` and then from your computer::
 Where x and y are the last two numbers of the IP that your router gave to
 your board.
 
+wifishare
+---------
+
+The ``wifishare`` let your ESP32 board to work as Access Point (WiFi Router)
+and WiFi Station at same time. This way your board will connect to a real
+WiFi Router (from your ISP for example) and will offer WiFi connection to other
+devices and share WiFi connection with them.
+
+After configuring the ``esp32-devkit:wifishare`` you need to define your
+credentials in the menuconfig. You can define your credentials this way::
+
+    $ make menuconfig
+    -> Application Configuration
+        -> Network Utilities
+            -> Network initialization (NETUTILS_NETINIT [=y])
+                -> WAPI Configuration
+
+After compile and flash your board you need to confirm you have two interfaces:
+
+    nsh> ifconfig
+    wlan0   Link encap:Ethernet HWaddr bc:dd:c2:d4:a9:ec at RUNNING mtu 1504
+            inet addr:192.168.0.7 DRaddr:192.168.0.1 Mask:255.255.255.0
+
+    wlan1   Link encap:Ethernet HWaddr bc:dd:c2:d4:a9:ed at DOWN mtu 1504
+            inet addr:0.0.0.0 DRaddr:0.0.0.0 Mask:0.0.0.0
+
+Now you need to configure your wlan1 to become a WiFi Access Point:
+
+    nsh> dhcpd_start wlan1
+    nsh> wapi psk wlan1 mypasswd 3
+    nsh> wapi essid wlan1 nuttxap 1
+
+And you need to make the route to your WiFi Router (i.e. 192.168.0.1) the default route:
+
+    nsh> addroute default 192.168.0.1 wlan0
+    nsh> route
+    SEQ   TARGET          NETMASK         ROUTER
+       1. 0.0.0.0         0.0.0.0         192.168.0.1
+
+Finally we will setup an iptables rule to NAT the wlan0 interface:
+
+    nsh> iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
+
+After connectig a client (i.e. Linux computer) to the `nuttxap` Access Point
+you can confirm it is working this way:
+
+    $ ifconfig
+    lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+            inet 127.0.0.1  netmask 255.0.0.0
+            inet6 ::1  prefixlen 128  scopeid 0x10<host>
+            loop  txqueuelen 1000  (Local Loopback)
+            RX packets 5666  bytes 547514 (547.5 KB)
+            RX errors 0  dropped 0  overruns 0  frame 0
+            TX packets 5666  bytes 547514 (547.5 KB)
+            TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+    
+    wlp0s20f3: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+            inet 10.0.0.4  netmask 255.255.255.0  broadcast 10.0.0.255
+            inet6 xxxx::xxxx:xxx:xxxx:xx  prefixlen 64  scopeid 0x20<link>
+            ether xx:xx:xx:xx:xx:xx  txqueuelen 1000  (Ethernet)
+            RX packets 127217  bytes 146539379 (146.5 MB)
+            RX errors 0  dropped 0  overruns 0  frame 0
+            TX packets 37079  bytes 23604536 (23.6 MB)
+            TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+    
+    $ ping 10.0.0.1
+    PING 10.0.0.1 (10.0.0.1) 56(84) bytes of data.
+    64 bytes from 10.0.0.1: icmp_seq=1 ttl=64 time=3.28 ms
+    64 bytes from 10.0.0.1: icmp_seq=2 ttl=64 time=9.72 ms
+    64 bytes from 10.0.0.1: icmp_seq=3 ttl=64 time=2.63 ms
+    64 bytes from 10.0.0.1: icmp_seq=4 ttl=64 time=18.9 ms
+    64 bytes from 10.0.0.1: icmp_seq=5 ttl=64 time=4.82 ms
+    
+    $ ping 8.8.8.8
+    PING 8.8.8.8 (8.8.8.8) 56(84) bytes of data.
+    64 bytes from 8.8.8.8: icmp_seq=1 ttl=111 time=63.0 ms
+    64 bytes from 8.8.8.8: icmp_seq=2 ttl=111 time=51.4 ms
+    64 bytes from 8.8.8.8: icmp_seq=3 ttl=111 time=55.0 ms
+    64 bytes from 8.8.8.8: icmp_seq=4 ttl=111 time=64.3 ms
+    64 bytes from 8.8.8.8: icmp_seq=5 ttl=111 time=52.8 ms
+
+That is it. You can use this 8.8.8.8 as DNS to resolve names.
+
 Debugging with OpenOCD
 ======================
 
