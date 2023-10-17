@@ -589,7 +589,7 @@ define CLEAN
 endef
 else
 define CLEAN
-	$(Q) rm -f *$(OBJEXT) *$(LIBEXT) *~ .*.swp $(OBJS) $(BIN) $(BIN).lock $(EXTRA)
+	$(Q) rm -f *$(OBJEXT) *$(LIBEXT) *~ .*.swp $(AROBJS) $(OBJS) $(BIN) $(BIN).lock $(EXTRA)
 endef
 endif
 
