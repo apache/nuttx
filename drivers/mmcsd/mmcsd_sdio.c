@@ -214,7 +214,6 @@ static int     mmcsd_cardidentify(FAR struct mmcsd_state_s *priv);
 static int     mmcsd_probe(FAR struct mmcsd_state_s *priv);
 static int     mmcsd_removed(FAR struct mmcsd_state_s *priv);
 static int     mmcsd_hwinitialize(FAR struct mmcsd_state_s *priv);
-static void    mmcsd_hwuninitialize(FAR struct mmcsd_state_s *priv);
 #ifdef CONFIG_MMCSD_IOCSUPPORT
 static int     mmcsd_iocmd(FAR struct mmcsd_state_s *priv,
                            FAR struct mmc_ioc_cmd *ic_ptr);
@@ -1037,7 +1036,7 @@ static void mmcsd_decode_scr(FAR struct mmcsd_state_s *priv, uint32_t scr[2])
  *
  * Description:
  *   Execute CMD6 to switch the mode of operation of the selected device or
- * modify the EXT_CSD registers.
+ *   modify the EXT_CSD registers.
  *
  ****************************************************************************/
 
@@ -3009,7 +3008,7 @@ static int mmcsd_read_extcsd(FAR struct mmcsd_state_s *priv,
       ret = SDIO_DMARECVSETUP(priv->dev, extcsd, 512);
       if (ret != OK)
         {
-          finfo("SDIO_DMARECVSETUP: error %d\n", ret);
+          ferr("SDIO_DMARECVSETUP: error %d\n", ret);
           SDIO_CANCEL(priv->dev);
           return ret;
         }
@@ -3976,6 +3975,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
 
 static int mmcsd_probe(FAR struct mmcsd_state_s *priv)
 {
+  char devname[16];
   int ret;
 
   finfo("type: %d probed: %d\n", priv->type, priv->probed);
@@ -4078,6 +4078,14 @@ static int mmcsd_probe(FAR struct mmcsd_state_s *priv)
           /* When the card is identified, we have probed this card */
 
           priv->probed = true;
+
+          /* Create a MMCSD device name */
+
+          snprintf(devname, sizeof(devname), "/dev/mmcsd%d", priv->minor);
+
+          /* Inode private data is a reference to the MMCSD state structure */
+
+          register_blockdriver(devname, &g_bops, 0666, priv);
         }
 
       /* Regardless of whether or not a card was successfully initialized,
@@ -4119,7 +4127,12 @@ static int mmcsd_probe(FAR struct mmcsd_state_s *priv)
 
 static int mmcsd_removed(FAR struct mmcsd_state_s *priv)
 {
+  char devname[16];
+
   finfo("type: %d present: %d\n", priv->type, SDIO_PRESENT(priv->dev));
+
+  snprintf(devname, sizeof(devname), "/dev/mmcsd%d", priv->minor);
+  unregister_blockdriver(devname);
 
   /* Forget the card geometry, pretend the slot is empty (it might not
    * be), and that the card has never been initialized.
@@ -4209,7 +4222,7 @@ static int mmcsd_hwinitialize(FAR struct mmcsd_state_s *priv)
       ret = mmcsd_probe(priv);
       if (ret != OK)
         {
-          finfo("Slot not empty, but initialization failed: %d\n", ret);
+          ferr("Slot not empty, but initialization failed: %d\n", ret);
 
           /* NOTE: The failure to initialize a card does not mean that
            * initialization has failed! A card could be installed in the slot
@@ -4237,21 +4250,6 @@ static int mmcsd_hwinitialize(FAR struct mmcsd_state_s *priv)
 
   mmcsd_unlock(priv);
   return ret;
-}
-
-/****************************************************************************
- * Name: mmcsd_hwuninitialize
- *
- * Description:
- *   Restore the MMC/SD slot to the uninitialized state.  Called only from
- *   sdio_slotinitialize on a failure to initialize.
- *
- ****************************************************************************/
-
-static void mmcsd_hwuninitialize(FAR struct mmcsd_state_s *priv)
-{
-  mmcsd_removed(priv);
-  SDIO_RESET(priv->dev);
 }
 
 static FAR const char *mmc_get_mode_name(uint8_t mode)
@@ -4324,6 +4322,7 @@ int mmcsd_slotinitialize(int minor, FAR struct sdio_dev_s *dev)
   /* Bind the MMCSD driver to the MMCSD state structure */
 
   priv->dev = dev;
+  priv->minor = minor;
 
   /* Initialize the hardware associated with the slot */
 
@@ -4358,22 +4357,13 @@ int mmcsd_slotinitialize(int minor, FAR struct sdio_dev_s *dev)
         }
     }
 
-  /* Create a MMCSD device name */
-
-  snprintf(devname, sizeof(devname), "/dev/mmcsd%d", minor);
-
-  /* Inode private data is a reference to the MMCSD state structure */
-
-  ret = register_blockdriver(devname, &g_bops, 0, priv);
-  if (ret < 0)
-    {
-      ferr("ERROR: register_blockdriver failed: %d\n", ret);
-      goto errout_with_hwinit;
-    }
-
 #ifdef CONFIG_MMCSD_PROCFS
   mmcsd_initialize_procfs();
 #endif
+
+  /* Create a MMCSD device name */
+
+  snprintf(devname, sizeof(devname), "/dev/mmcsd%d", minor);
 
   finfo("MMC: %s %" PRIu64 "KB %s %s mode\n", devname,
          ((uint64_t)priv->nblocks << priv->blockshift) >> 10,
@@ -4382,8 +4372,6 @@ int mmcsd_slotinitialize(int minor, FAR struct sdio_dev_s *dev)
 
   return OK;
 
-errout_with_hwinit:
-  mmcsd_hwuninitialize(priv);
 errout_with_alloc:
   nxmutex_destroy(&priv->lock);
   kmm_free(priv);
