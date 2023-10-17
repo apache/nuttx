@@ -101,14 +101,14 @@ NuttX configuration system uses `KConfig <https://www.kernel.org/doc/Documentati
     $ make
     $ sudo make install
 
-  .. code-tab:: console MacOS
+  .. code-tab:: console macOS
 
     $ git clone https://bitbucket.org/nuttx/tools.git
     $ cd tools/kconfig-frontends
     $ patch < ../kconfig-macos.diff -p 1
     $ ./configure --enable-mconf --disable-shared --enable-static --disable-gconf --disable-qconf --disable-nconf
     $ make
-    $ make install
+    $ sudo make install
 
 NuttX also supports `kconfiglib <https://github.com/ulfalizer/Kconfiglib>` by default, which is a Kconfig tool implemented in Python 2/3. Compared with kconfig-frontends, kconfiglib provides NuttX with the possibility of multi-platform support(configure NuttX in Winodws native/Visual Studio), and also kconfiglib has a stronger Kconfig syntax check, this will help developers to avoid some Kconfig syntax errors.  Install kconfiglib via following command:
 
@@ -148,6 +148,20 @@ ARM architecture:
 
     $ sudo apt install gcc-arm-none-eabi binutils-arm-none-eabi
 
+  .. tab:: macOS
+
+    For 32 bit ARM targets, such as STM32:
+
+    .. code-block:: console
+      
+      $ brew install --cask gcc-arm-embedded
+
+    For 64 bit ARM targets, such as Allwinner A64:
+
+    .. code-block:: console
+      
+      $ brew install --cask gcc-aarch64-embedded
+
   .. tab:: From arm.com
 
     First, create a directory to hold the toolchain:
@@ -166,9 +180,9 @@ ARM architecture:
 
     .. code-block:: console
 
-      $ HOST_PLATFORM=x86_64-linux   # use "mac" for macOS.
+      $ HOST_PLATFORM=x86_64-linux   # use 'aarch64-linux' for ARM64 Linux, or 'mac' for Intel macOS
       $ # For Windows there is a zip instead (gcc-arm-none-eabi-10.3-2021.10-win32.zip)
-      $ curl -L -O https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-${HOST_PLATFORM}.tar.bz2
+      $ curl -L -O https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-${HOST_PLATFORM}.tar.bz2
       $ tar xf gcc-arm-none-eabi-10.3-2021.10-${HOST_PLATFORM}.tar.bz2
 
     Add the toolchain to your `PATH`:
