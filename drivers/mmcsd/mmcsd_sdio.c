@@ -185,7 +185,7 @@ static void    mmcsd_mediachange(FAR void *arg);
 static int     mmcsd_widebus(FAR struct mmcsd_state_s *priv);
 #ifdef CONFIG_MMCSD_MMCSUPPORT
 static int     mmcsd_mmcinitialize(FAR struct mmcsd_state_s *priv);
-static int     mmcsd_read_csd(FAR struct mmcsd_state_s *priv);
+static int     mmcsd_read_extcsd(FAR struct mmcsd_state_s *priv);
 #endif
 static int     mmcsd_sdinitialize(FAR struct mmcsd_state_s *priv);
 static int     mmcsd_cardidentify(FAR struct mmcsd_state_s *priv);
@@ -2736,7 +2736,7 @@ static int mmcsd_mmcinitialize(FAR struct mmcsd_state_s *priv)
   if (IS_BLOCK(priv->type))
     {
       finfo("Card supports eMMC spec 4.0 (or greater). Reading ext_csd.\n");
-      ret = mmcsd_read_csd(priv);
+      ret = mmcsd_read_extcsd(priv);
       if (ret != OK)
         {
           ferr("ERROR: Failed to determinate number of blocks: %d\n", ret);
@@ -2760,7 +2760,7 @@ static int mmcsd_mmcinitialize(FAR struct mmcsd_state_s *priv)
 }
 
 /****************************************************************************
- * Name: mmcsd_read_csd
+ * Name: mmcsd_read_extcsd
  *
  * Description:
  *   MMC card is detected with block addressing and this function will read
@@ -2771,7 +2771,7 @@ static int mmcsd_mmcinitialize(FAR struct mmcsd_state_s *priv)
  *
  ****************************************************************************/
 
-static int mmcsd_read_csd(FAR struct mmcsd_state_s *priv)
+static int mmcsd_read_extcsd(FAR struct mmcsd_state_s *priv)
 {
   uint8_t buffer[512] aligned_data(16);
   int ret;
