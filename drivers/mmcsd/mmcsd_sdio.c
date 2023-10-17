@@ -206,8 +206,8 @@ static void    mmcsd_mediachange(FAR void *arg);
 static int     mmcsd_widebus(FAR struct mmcsd_state_s *priv);
 #ifdef CONFIG_MMCSD_MMCSUPPORT
 static int     mmcsd_mmcinitialize(FAR struct mmcsd_state_s *priv);
-static int     mmcsd_read_csd(FAR struct mmcsd_state_s *priv,
-                              FAR uint8_t *data);
+static int     mmcsd_read_extcsd(FAR struct mmcsd_state_s *priv,
+                                 FAR uint8_t *extcsd);
 #endif
 static int     mmcsd_sdinitialize(FAR struct mmcsd_state_s *priv);
 static int     mmcsd_cardidentify(FAR struct mmcsd_state_s *priv);
@@ -2771,6 +2771,7 @@ static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
 #ifdef CONFIG_MMCSD_MMCSUPPORT
 static int mmcsd_mmcinitialize(FAR struct mmcsd_state_s *priv)
 {
+  uint8_t extcsd[512] aligned_data(16);
   int ret;
 
   /* At this point, slow, ID mode clocking has been supplied to the card
@@ -2903,7 +2904,7 @@ static int mmcsd_mmcinitialize(FAR struct mmcsd_state_s *priv)
   if (IS_BLOCK(priv->type))
     {
       finfo("Card supports eMMC spec 4.0 (or greater). Reading ext_csd.\n");
-      ret = mmcsd_read_csd(priv, NULL);
+      ret = mmcsd_read_extcsd(priv, extcsd);
       if (ret != OK)
         {
           ferr("ERROR: Failed to determinate number of blocks: %d\n", ret);
@@ -2927,7 +2928,7 @@ static int mmcsd_mmcinitialize(FAR struct mmcsd_state_s *priv)
 }
 
 /****************************************************************************
- * Name: mmcsd_read_csd
+ * Name: mmcsd_read_extcsd
  *
  * Description:
  *   MMC card is detected with block addressing and this function will read
@@ -2938,9 +2939,9 @@ static int mmcsd_mmcinitialize(FAR struct mmcsd_state_s *priv)
  *
  ****************************************************************************/
 
-static int mmcsd_read_csd(FAR struct mmcsd_state_s *priv, FAR uint8_t *data)
+static int mmcsd_read_extcsd(FAR struct mmcsd_state_s *priv,
+                             FAR uint8_t *extcsd)
 {
-  uint8_t buffer[512] aligned_data(16);
   int ret;
 
   DEBUGASSERT(priv != NULL);
@@ -2953,7 +2954,7 @@ static int mmcsd_read_csd(FAR struct mmcsd_state_s *priv, FAR uint8_t *data)
       return -EPERM;
     }
 
-  memset(buffer, 0, sizeof(buffer));
+  memset(extcsd, 0, 512);
 
 #if defined(CONFIG_SDIO_DMA) && defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
 
@@ -2963,7 +2964,7 @@ static int mmcsd_read_csd(FAR struct mmcsd_state_s *priv, FAR uint8_t *data)
 
   if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
     {
-      ret = SDIO_DMAPREFLIGHT(priv->dev, buffer, priv->blocksize);
+      ret = SDIO_DMAPREFLIGHT(priv->dev, extcsd, priv->blocksize);
       if (ret != OK)
         {
           return ret;
@@ -3005,7 +3006,7 @@ static int mmcsd_read_csd(FAR struct mmcsd_state_s *priv, FAR uint8_t *data)
   if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
     {
       finfo("Setting up for DMA transfer.\n");
-      ret = SDIO_DMARECVSETUP(priv->dev, buffer, 512);
+      ret = SDIO_DMARECVSETUP(priv->dev, extcsd, 512);
       if (ret != OK)
         {
           finfo("SDIO_DMARECVSETUP: error %d\n", ret);
@@ -3016,7 +3017,7 @@ static int mmcsd_read_csd(FAR struct mmcsd_state_s *priv, FAR uint8_t *data)
   else
 #endif
     {
-      SDIO_RECVSETUP(priv->dev, buffer, 512);
+      SDIO_RECVSETUP(priv->dev, extcsd, 512);
     }
 
   /* Send CMD8 in data-transfer mode to obtain the
@@ -3042,18 +3043,13 @@ static int mmcsd_read_csd(FAR struct mmcsd_state_s *priv, FAR uint8_t *data)
       return ret;
     }
 
-  priv->nblocks = (buffer[215] << 24) | (buffer[214] << 16) |
-                  (buffer[213] << 8) | buffer[212];
-
-  if (data != NULL)
-    {
-      memcpy(data, buffer, sizeof(buffer));
-    }
+  priv->nblocks = (extcsd[215] << 24) | (extcsd[214] << 16) |
+                  (extcsd[213] << 8) | extcsd[212];
 
   finfo("MMC ext CSD read succsesfully, number of block %" PRId32 "\n",
         priv->nblocks);
 
-  SDIO_GOTEXTCSD(priv->dev, buffer);
+  SDIO_GOTEXTCSD(priv->dev, extcsd);
 
   /* Return value:  One sector read */
 
@@ -3359,8 +3355,8 @@ static int mmcsd_iocmd(FAR struct mmcsd_state_s *priv,
 #ifdef CONFIG_MMCSD_MMCSUPPORT
     case MMC_CMDIDX8: /* Get extended csd reg data */
       {
-        ret = mmcsd_read_csd(priv,
-                            (FAR uint8_t *)(uintptr_t)ic_ptr->data_ptr);
+        ret = mmcsd_read_extcsd(priv,
+                                (FAR uint8_t *)(uintptr_t)ic_ptr->data_ptr);
       }
       break;
 #endif
