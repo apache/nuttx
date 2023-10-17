@@ -39,6 +39,13 @@ def test_getprime(p):
     assert ret == 0
 
 
+def test_fopencookie(p):
+    if p.board in do_not_support:
+        pytest.skip("unsupported at {}".format(p.board))
+    ret = p.sendCommand("fopencookie_test", "fopencokie tests were succesfull.")
+    assert ret == 0
+
+
 @pytest.mark.run(order=-2)
 def test_fs_test(p):
     if p.board in do_not_support:
