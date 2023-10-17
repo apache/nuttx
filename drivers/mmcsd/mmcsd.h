@@ -67,6 +67,7 @@ struct mmcsd_state_s
   FAR struct sdio_dev_s *dev;      /* The SDIO device bound to this instance */
   uint8_t  crefs;                  /* Open references on the driver */
   mutex_t  lock;                   /* Assures mutually exclusive access to the slot */
+  int      minor;                  /* Device number */
 
   /* Status flags */
 
