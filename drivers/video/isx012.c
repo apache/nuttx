@@ -1764,7 +1764,7 @@ static int isx012_get_supported_value(FAR struct imgsensor_s *sensor,
         break;
 
       case IMGSENSOR_ID_CONTRAST:
-        value->type          = IMGSENSOR_CTRL_TYPE_U8FIXEDPOINT_Q7;
+        value->type          = IMGSENSOR_CTRL_TYPE_INTEGER;
         range->minimum       = ISX012_MIN_CONTRAST;
         range->maximum       = ISX012_MAX_CONTRAST;
         range->step          = ISX012_STEP_CONTRAST;
@@ -1808,7 +1808,7 @@ static int isx012_get_supported_value(FAR struct imgsensor_s *sensor,
         break;
 
       case IMGSENSOR_ID_EXPOSURE:
-        value->type          = IMGSENSOR_CTRL_TYPE_INTEGER_TIMES_3;
+        value->type          = IMGSENSOR_CTRL_TYPE_INTEGER;
         range->minimum       = ISX012_MIN_EXPOSURE;
         range->maximum       = ISX012_MAX_EXPOSURE;
         range->step          = ISX012_STEP_EXPOSURE;
@@ -1925,7 +1925,7 @@ static int isx012_get_supported_value(FAR struct imgsensor_s *sensor,
         break;
 
       case IMGSENSOR_ID_WIDE_DYNAMIC_RANGE:
-        value->type          = IMGSENSOR_CTRL_TYPE_BOOLEAN;
+        value->type          = IMGSENSOR_CTRL_TYPE_INTEGER;
         range->minimum       = ISX012_MIN_YGAMMA;
         range->maximum       = ISX012_MAX_YGAMMA;
         range->step          = ISX012_STEP_YGAMMA;
