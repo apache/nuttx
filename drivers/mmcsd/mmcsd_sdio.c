@@ -3260,7 +3260,6 @@ static int mmcsd_multi_iocmd(FAR struct mmcsd_state_s *priv,
 static int mmcsd_sdinitialize(FAR struct mmcsd_state_s *priv)
 {
   uint32_t cid[4];
-  uint32_t csd[4];
   uint32_t scr[2];
   int ret;
 
@@ -3338,7 +3337,7 @@ static int mmcsd_sdinitialize(FAR struct mmcsd_state_s *priv)
       return ret;
     }
 
-  mmcsd_decode_csd(priv, csd);
+  mmcsd_decode_csd(priv, priv->csd);
 
   /* Send CMD7 with the argument == RCA in order to select the card.
    * Since we are supporting only a single card, we just leave the
