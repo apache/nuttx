@@ -131,6 +131,12 @@ SECTIONS
 #ifdef CONFIG_ESP32S3_SPIRAM_MODE_OCT
     *libarch.a:esp32s3_psram_octal.*(.literal .text .literal.* .text.*)
 #endif
+#if defined(CONFIG_STACK_CANARIES) && \
+    (defined(CONFIG_ESP32S3_SPIFLASH) || \
+     defined(CONFIG_ESP32S3_SPIRAM))
+    *libc.a:lib_stackchk.*(.literal .text .literal.* .text.*)
+#endif
+
     *(.wifirxiram .wifirxiram.*)
     *(.wifi0iram  .wifi0iram.*)
     *(.wifiorslpiram .wifiorslpiram.*)
@@ -214,6 +220,11 @@ SECTIONS
 
     *libphy.a:(.rodata  .rodata.*)
     *libarch.a:xtensa_context.*(.rodata  .rodata.*)
+#if defined(CONFIG_STACK_CANARIES) && \
+    (defined(CONFIG_ESP32S3_SPIFLASH) || \
+     defined(CONFIG_ESP32S3_SPIRAM))
+    *libc.a:lib_stackchk.*(.rodata  .rodata.*)
+#endif
 
     _edata = ABSOLUTE(.);
     . = ALIGN(4);
