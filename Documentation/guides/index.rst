@@ -17,6 +17,7 @@ Guides
   pysimcoder.rst
   customboards.rst
   customapps.rst
+  citests.rst
   zerolatencyinterrupts.rst
   nestedinterrupts.rst
   cortexmhardfaults.rst
