@@ -46,6 +46,15 @@ config MPFS_BOOTLOADER
 	---help---
 		This NuttX image is used as a bootloader, which will boot only on one hart, putting the others in WFI
 
+config MPFS_BOARD_PMP
+	bool "Enable board specific PMP configuration"
+	depends on ARCH_USE_MPU && MPFS_BOOTLOADER
+	default n
+	---help---
+		If true, the board must provide "mpfs_board_pmp_setup" for PMP
+		configuration. If false, set ALL memory accessible for every
+		configured HART. Only the bootloader should do this.
+
 config MPFS_OPENSBI
 	bool "Use OpenSBI"
 	depends on MPFS_BOOTLOADER && OPENSBI
