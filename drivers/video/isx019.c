@@ -221,7 +221,6 @@ struct isx019_dev_s
   uint8_t flip_still;
   isx019_rect_t clip_video;
   isx019_rect_t clip_still;
-  int32_t iso;
   double  gamma;
   int32_t jpg_quality;
   imgsensor_colorfx_t colorfx;
@@ -796,6 +795,96 @@ static const int32_t g_isx019_wbmode[] =
 };
 
 #define NR_WBMODE (sizeof(g_isx019_wbmode) / sizeof(int32_t))
+
+static int32_t g_isx019_iso[] =
+{
+  1000,     /* ISO1 */
+  1200,     /* ISO1.2 */
+  1600,     /* ISO1.6 */
+  2000,     /* ISO2 */
+  2500,     /* ISO2.5 */
+  3000,     /* ISO3 */
+  4000,     /* ISO4 */
+  5000,     /* ISO5 */
+  6000,     /* ISO6 */
+  8000,     /* ISO8 */
+  10000,    /* ISO10 */
+  12000,    /* ISO12 */
+  16000,    /* ISO16 */
+  20000,    /* ISO20 */
+  25000,    /* ISO25 */
+  32000,    /* ISO32 */
+  40000,    /* ISO40 */
+  50000,    /* ISO50 */
+  64000,    /* ISO64 */
+  80000,    /* ISO80 */
+  100000,   /* ISO100 */
+  125000,   /* ISO125 */
+  160000,   /* ISO160 */
+  200000,   /* ISO200 */
+  250000,   /* ISO250 */
+  320000,   /* ISO320 */
+  400000,   /* ISO400 */
+  500000,   /* ISO500 */
+  640000,   /* ISO640 */
+  800000,   /* ISO800 */
+  1000000,  /* ISO1000 */
+  1250000,  /* ISO1250 */
+  1600000,  /* ISO1600 */
+  2000000,  /* ISO2000 */
+  2500000,  /* ISO2500 */
+  3200000,  /* ISO3200 */
+  4000000,  /* ISO4000 */
+  5000000,  /* ISO5000 */
+};
+
+#define NR_ISO (sizeof(g_isx019_iso) / sizeof(int32_t))
+
+/* Gain values corresponding to each element of g_isx019_iso table.
+ * This needs to have the same size as g_isx019_iso.
+ */
+
+static const uint8_t g_isx019_gain[] =
+{
+  1,   /* gain for ISO1 */
+  2,   /* gain for ISO1.2 */
+  3,   /* gain for ISO1.6 */
+  4,   /* gain for ISO2 */
+  5,   /* gain for ISO2.5 */
+  6,   /* gain for ISO3 */
+  7,   /* gain for ISO4 */
+  8,   /* gain for ISO5 */
+  9,   /* gain for ISO6 */
+  10,  /* gain for ISO8 */
+  11,  /* gain for ISO10 */
+  12,  /* gain for ISO12 */
+  13,  /* gain for ISO16 */
+  14,  /* gain for ISO20 */
+  15,  /* gain for ISO25 */
+  16,  /* gain for ISO32 */
+  17,  /* gain for ISO40 */
+  18,  /* gain for ISO50 */
+  19,  /* gain for ISO64 */
+  20,  /* gain for ISO80 */
+  21,  /* gain for ISO100 */
+  22,  /* gain for ISO125 */
+  23,  /* gain for ISO160 */
+  24,  /* gain for ISO200 */
+  25,  /* gain for ISO250 */
+  26,  /* gain for ISO320 */
+  27,  /* gain for ISO400 */
+  28,  /* gain for ISO500 */
+  29,  /* gain for ISO640 */
+  30,  /* gain for ISO800 */
+  31,  /* gain for ISO1000 */
+  32,  /* gain for ISO1250 */
+  33,  /* gain for ISO1600 */
+  34,  /* gain for ISO2000 */
+  35,  /* gain for ISO2500 */
+  36,  /* gain for ISO3200 */
+  37,  /* gain for ISO4000 */
+  38,  /* gain for ISO5000 */
+};
 
 /****************************************************************************
  * Private Functions
@@ -1875,9 +1964,11 @@ static int isx019_get_supported_value(FAR struct imgsensor_s *sensor,
         break;
 
       case IMGSENSOR_ID_ISO_SENSITIVITY:
-        val->type = IMGSENSOR_CTRL_TYPE_INTEGER;
-        SET_RANGE(val->u.range, MIN_ISO, MAX_ISO,
-                                STEP_ISO, def->iso);
+        val->type = IMGSENSOR_CTRL_TYPE_INTEGER_MENU;
+        SET_DISCRETE(val->u.discrete,
+                     NR_ISO,
+                     g_isx019_iso,
+                     0);
         break;
 
       case IMGSENSOR_ID_ISO_SENSITIVITY_AUTO:
@@ -2578,18 +2669,21 @@ static int set_3aparameter(FAR isx019_dev_t *priv,
   return OK;
 }
 
-static uint16_t calc_gain(double iso)
+static uint16_t get_gain_from_iso(int32_t iso)
 {
-  double gain;
+  int i;
 
-  gain = 1 + 10 * log(iso) / M_LN10;
+  for (i = 0; i < NR_ISO; i++)
+    {
+      if (g_isx019_iso[i] == iso)
+        {
+          break;
+        }
+    }
 
-  /* In the above formula, the unit of gain is dB.
-   * Because the register has the 0.1dB unit,
-   * return 10 times dB value.
-   */
+  /* Return gain corresponding to specified ISO sensitivity. */
 
-  return (uint16_t)(gain * 10);
+  return (uint16_t)g_isx019_gain[i];
 }
 
 static int set_iso(FAR isx019_dev_t *priv,
@@ -2601,10 +2695,9 @@ static int set_iso(FAR isx019_dev_t *priv,
    * So, calculate gain from ISO sensitivity.
    */
 
-  gain = calc_gain(val.value32 / 1000);
+  gain = get_gain_from_iso(val.value32) * 10;
   isx019_i2c_write(priv, CAT_CATAE, GAIN_PRIMODE, &gain, 2);
 
-  priv->iso = val.value32;
   return OK;
 }
 
@@ -2617,7 +2710,6 @@ static int set_iso_auto(FAR isx019_dev_t *priv,
   if (val.value32 == IMGSENSOR_ISO_SENSITIVITY_AUTO)
     {
       gain = 0;
-      priv->iso = 0;
     }
   else /* IMGSENSOR_ISO_SENSITIVITY_MANUAL */
     {
@@ -2635,8 +2727,6 @@ static int set_iso_auto(FAR isx019_dev_t *priv,
           isx019_i2c_read(priv, CAT_AECOM, GAIN_LEVEL, &buf, 1);
           gain = buf * 3;
         }
-
-      priv->iso = val.value32;
     }
 
   return isx019_i2c_write(priv, CAT_CATAE, GAIN_PRIMODE, &gain, 2);
@@ -3293,56 +3383,46 @@ static int get_3astatus(FAR isx019_dev_t *priv,
   return OK;
 }
 
-static double calc_iso(double gain)
+static int32_t get_iso_from_gain(uint8_t gain)
 {
-  int k;
-  double z;
-  double r;
+  int i;
 
-  /* ISO sensitivity = 10^((gain - 1) / 10)
-   * So, replace z = (gain - 1) / 10 and
-   * calculate 10^z.
-   */
+  /* g_isx019_gain and g_isx019_iso has the common index. */
 
-  /*  Divide z into integer and other parts.
-   *  z =  log10(E) (k * ln2 + r)
-   *  (k : integer, r < 0.5 * ln2)
-   *
-   * Then, 10^z = (2^k) * e^r (r < 0.5 * ln2)
-   */
+  for (i = 0; i < NR_ISO; i++)
+    {
+      if (g_isx019_gain[i] == gain)
+        {
+          break;
+        }
+    }
 
-  z = (gain - 1) / 10;
+  if (i >= NR_ISO)
+    {
+      i = NR_ISO - 1;
+    }
 
-  k = z * M_LN10 / M_LN2;
-  r = z * M_LN10 - k * M_LN2;
-
-  return (1 << k) * exp(r);
+  return g_isx019_iso[i];
 }
 
 static int get_iso(FAR isx019_dev_t *priv,
                    FAR imgsensor_value_t *val)
 {
-  uint8_t buf = 0;
+  uint8_t gain = 0;
 
   if (val == NULL)
     {
       return -EINVAL;
     }
 
-  if (priv->iso == 0)
-    {
-      /* iso = 0 means auto adjustment mode.
-       * In such a case, get gain from auto adjustment value register,
-       * which has the unit 0.3dB, and convert the gain to ISO.
-       */
+  /* The current gain value register has the 0.3dB unit.
+   * So, round the gain to integer, and convert to ISO.
+   */
 
-      isx019_i2c_read(priv, CAT_AECOM, GAIN_LEVEL, &buf, 1);
-      val->value32 = calc_iso((double)buf * 0.3) * USEC_PER_MSEC;
-    }
-  else
-    {
-      val->value32 = priv->iso;
-    }
+  isx019_i2c_read(priv, CAT_AECOM, GAIN_LEVEL, &gain, 1);
+  gain = ((gain * 3) + 5) / 10;
+
+  val->value32 = get_iso_from_gain(gain);
 
   return OK;
 }
