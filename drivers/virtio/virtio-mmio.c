@@ -779,8 +779,8 @@ static int virtio_mmio_init_device(FAR struct virtio_mmio_device_s *vmdev,
   vdev->id.device = metal_io_read32(&vmdev->cfg_io, VIRTIO_MMIO_DEVICE_ID);
   if (vdev->id.device == 0)
     {
-      vrterr("Device Id 0\n");
-      return -EINVAL;
+      vrtinfo("Device Id 0\n");
+      return -ENODEV;
     }
 
   vdev->id.vendor = metal_io_read32(&vmdev->cfg_io, VIRTIO_MMIO_VENDOR_ID);
@@ -842,7 +842,12 @@ int virtio_register_mmio_device(FAR void *regs, int irq)
     }
 
   ret = virtio_mmio_init_device(vmdev, regs, irq);
-  if (ret < 0)
+  if (ret == -ENODEV)
+    {
+      vrtinfo("No virtio mmio device in regs=%p\n", regs);
+      goto err;
+    }
+  else if (ret < 0)
     {
       vrterr("virtio_mmio_device_init failed, ret=%d\n", ret);
       goto err;
