@@ -151,4 +151,46 @@
 #  define wireless_trace_end()
 #endif
 
+#ifdef CONFIG_TRACE_MM
+static inline void trace_mm_malloc(FAR void *mem, size_t size)
+{
+  struct note_alloc_s note;
+  FAR struct tcb_s *tcb = nxsched_self();
+
+  note.mem = mem;
+  note.size = size;
+  note.used = tcb->alloc_size;
+  sched_note_event(NOTE_TAG_MM, NOTE_EVENT_MALLOC, &note,
+                   sizeof(struct note_alloc_s));
+}
+
+static inline void trace_mm_free(FAR void *mem, int size)
+{
+  struct note_alloc_s note;
+  FAR struct tcb_s *tcb = nxsched_self();
+
+  note.mem = mem;
+  note.size = size;
+  note.used = tcb->alloc_size;
+  sched_note_event(NOTE_TAG_MM, NOTE_EVENT_FREE, &note,
+                   sizeof(struct note_alloc_s));
+}
+
+static inline void trace_mm_realloc(FAR void *mem, int size)
+{
+  struct note_alloc_s note;
+  FAR struct tcb_s *tcb = nxsched_self();
+
+  note.mem = mem;
+  note.size = size;
+  note.used = tcb->alloc_size;
+  sched_note_event(NOTE_TAG_MM, NOTE_EVENT_REALLOC, &note,
+                   sizeof(struct note_alloc_s));
+}
+#else
+#  define trace_mm_malloc(m,s)
+#  define trace_mm_free(m,s)
+#  define trace_mm_realloc(m,s)
+#endif /* CONFIG_TRACE_MM */
+
 #endif /* __INCLUDE_NUTTX_TRACE_H */

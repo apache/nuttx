@@ -27,6 +27,7 @@
 #include <stdlib.h>
 
 #include <nuttx/mm/mm.h>
+#include <nuttx/trace.h>
 
 #include "umm_heap/umm_heap.h"
 
@@ -46,5 +47,6 @@
 #undef free /* See mm/README.txt */
 void free(FAR void *mem)
 {
+  trace_mm_free(mem, mm_malloc_size(USR_HEAP, mem));
   mm_free(USR_HEAP, mem);
 }

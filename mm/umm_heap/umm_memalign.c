@@ -28,6 +28,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <nuttx/mm/mm.h>
+#include <nuttx/trace.h>
 
 #include "umm_heap/umm_heap.h"
 
@@ -94,6 +95,7 @@ FAR void *memalign(size_t alignment, size_t size)
       set_errno(ENOMEM);
     }
 
+  trace_mm_malloc(ret, size);
   return ret;
 #endif
 }

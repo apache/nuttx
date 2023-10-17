@@ -31,6 +31,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include <nuttx/spinlock.h>
 #include <nuttx/sched.h>
@@ -1034,7 +1035,28 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
       }
       break;
 #endif
+#ifdef CONFIG_TRACE_MM
+    case NOTE_EVENT_MALLOC:
+    case NOTE_EVENT_FREE:
+    case NOTE_EVENT_REALLOC:
+      {
+        FAR struct note_binary_s *nbi = (FAR struct note_binary_s *)p;
+        FAR struct note_alloc_s *alloc;
+        FAR const char *name[] =
+          {
+            "malloc", "free", "realloc"
+          };
 
+        alloc = (FAR struct note_alloc_s *)nbi->nbi_data;
+        ret += noteram_dump_header(s, &nbi->nbi_cmn, ctx);
+        ret += lib_sprintf(s, "tracing_mark_write: C|%d|Heap Usage|%"
+                           PRIiPTR "|", pid, alloc->used);
+        ret += lib_sprintf(s, "%s: size%" PRIiPTR ", address %p\n",
+                           name[note->nc_type - NOTE_EVENT_MALLOC],
+                           alloc->size, alloc->mem);
+      }
+      break;
+#endif
     default:
       break;
     }

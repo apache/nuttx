@@ -59,6 +59,8 @@
 #  define CONFIG_SCHED_INSTRUMENTATION_CPUSET 0xffff
 #endif
 
+#define NOTE_ALIGN_UP(n) (((n) + 7) & ~7)
+
 /* Note filter mode flag definitions */
 
 #define NOTE_FILTER_MODE_FLAG_ENABLE       (1 << 0) /* Enable instrumentation */
@@ -190,6 +192,12 @@ enum note_type_e
   NOTE_DUMP_END        = 25,
   NOTE_DUMP_MARK       = 28,
   NOTE_DUMP_COUNTER    = 29,
+  NOTE_EVENT_MALLOC    = 30,
+  NOTE_EVENT_FREE      = 31,
+  NOTE_EVENT_REALLOC   = 32,
+
+  /* Always last */
+
   NOTE_TYPE_LAST
 };
 
@@ -214,7 +222,7 @@ enum note_tag_e
   /* Always last */
 
   NOTE_TAG_LAST,
-  NOTE_TAG_MAX = NOTE_TAG_LAST + 16
+  NOTE_TAG_MAX = NOTE_ALIGN_UP(NOTE_TAG_LAST)
 };
 
 /* This structure provides the common header of each note */
@@ -401,6 +409,13 @@ struct note_counter_s
   char name[NAME_MAX];
 };
 
+struct note_alloc_s
+{
+  FAR void *mem;
+  size_t size;
+  ssize_t used;
+};
+
 /* This is the type of the argument passed to the NOTECTL_GETMODE and
  * NOTECTL_SETMODE ioctls
  */
@@ -435,7 +450,7 @@ struct note_filter_irq_s
 
 struct note_filter_tag_s
 {
-  uint8_t tag_mask[(NOTE_TAG_MAX + 7) / 8];
+  uint8_t tag_mask[NOTE_TAG_MAX / 8];
 };
 
 /****************************************************************************

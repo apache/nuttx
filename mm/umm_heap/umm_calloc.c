@@ -27,6 +27,7 @@
 #include <stdlib.h>
 
 #include <nuttx/mm/mm.h>
+#include <nuttx/trace.h>
 
 #include "umm_heap/umm_heap.h"
 
@@ -70,6 +71,8 @@ FAR void *calloc(size_t n, size_t elem_size)
 #else
   /* Use mm_calloc() because it implements the clear */
 
-  return mm_calloc(USR_HEAP, n, elem_size);
+  FAR void *mem = mm_calloc(USR_HEAP, n, elem_size);
+  trace_mm_malloc(mem, n * elem_size);
+  return mem;
 #endif
 }

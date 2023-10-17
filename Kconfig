@@ -2301,6 +2301,10 @@ config TRACE_LIBS
 	bool "Enable tracepoints in libs"
 	default n
 
+config TRACE_MM
+	bool "Enable tracepoints in mm"
+	default n
+
 config TRACE_NET
 	bool "Enable tracepoints in net"
 	default n

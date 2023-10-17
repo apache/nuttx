@@ -156,10 +156,20 @@ static struct note_filter_s g_note_filter =
 {
   {
     CONFIG_SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE
-#ifdef CONFIG_SMP
+#  ifdef CONFIG_SMP
     , (cpu_set_t)CONFIG_SCHED_INSTRUMENTATION_CPUSET
-#endif
+#  endif
+  },
+
+  /* All tags are enabled by default */
+
+#  ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
+  {
+    {
+      [0 ... NOTE_TAG_MAX / 8 - 1] = 0
+    }
   }
+#  endif
 };
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
