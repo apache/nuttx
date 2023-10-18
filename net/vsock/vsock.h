@@ -136,6 +136,10 @@ int vsock_virtio_initialize(void);
 int vsock_vhost_initialize(void);
 #endif
 
+#ifdef CONFIG_NET_VSOCK_LOCAL
+int vsock_local_initialize(void);
+#endif
+
 #ifdef __cplusplus
 }
 #endif

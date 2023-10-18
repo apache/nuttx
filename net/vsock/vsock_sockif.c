@@ -2475,5 +2475,13 @@ int vsock_initialize(void)
     }
 #endif
 
+#ifdef CONFIG_NET_VSOCK_LOCAL
+  ret = vsock_local_initialize();
+  if (ret < 0)
+    {
+      vrterr("ERROR: vsock_local_initialize failed, ret=%d\n", ret);
+    }
+#endif
+
   return ret;
 }

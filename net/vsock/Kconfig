@@ -52,4 +52,10 @@ config NET_VSOCK_VHOST
 	select DRIVERS_VHOST
 	select NET_VSOCK
 
+config NET_VSOCK_LOCAL
+	bool "Virtual Socket Local Transport Layer Support"
+	default n
+	select NET_VSOCK
+	select OPENAMP
+
 endmenu # Virtual Socket networking stack API

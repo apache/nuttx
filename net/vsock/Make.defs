@@ -32,6 +32,10 @@ ifeq ($(CONFIG_NET_VSOCK_VHOST),y)
   SOCK_CSRCS += vsock_vhost.c
 endif
 
+ifeq ($(CONFIG_NET_VSOCK_LOCAL),y)
+  SOCK_CSRCS += vsock_local.c
+endif
+
 # Include Virtio Socket build support
 
 DEPPATH += --dep-path vsock
