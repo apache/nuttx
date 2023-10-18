@@ -241,7 +241,7 @@ config MM_HEAP_MEMPOOL_CHUNK_SIZE
 config MM_HEAP_MEMPOOL_BACKTRACE_SKIP
 	int "The skip depth of backtrace for mempool"
 	default 6
-	depends on MM_HEAP_MEMPOOL_THRESHOLD != 0 && MM_BACKTRACE > 0
+	depends on MM_BACKTRACE > 0
 	---help---
 		This number is the skipped backtrace depth for mempool.
 
