@@ -96,8 +96,8 @@ ssize_t aio_return(FAR struct aiocb *aiocbp)
   DEBUGASSERT(aiocbp);
   if (aiocbp->aio_result < 0)
     {
-      set_errno((int)-aiocbp->aio_result);
-      return (ssize_t)ERROR;
+      set_errno(-aiocbp->aio_result);
+      return ERROR;
     }
 
   ret = aiocbp->aio_result;
