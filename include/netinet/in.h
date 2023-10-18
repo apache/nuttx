@@ -230,19 +230,12 @@
  * for uIP:
  */
 
-#ifdef CONFIG_ENDIAN_BIG
-#  define HTONS(ns) (ns)
-#  define HTONL(nl) (nl)
-#  define HTONQ(nq) (nq)
-#else
-#  define HTONS __swap_uint16
-#  define HTONL __swap_uint32
-#  define HTONQ __swap_uint64
-#endif
-
-#define NTOHS(hs) HTONS(hs)
-#define NTOHL(hl) HTONL(hl)
-#define NTOHQ(hq) HTONQ(hq)
+#define HTONS htobe16
+#define HTONL htobe32
+#define HTONQ htobe64
+#define NTOHS be16toh
+#define NTOHL be32toh
+#define NTOHQ be64toh
 
 /****************************************************************************
  * Public Type Definitions
