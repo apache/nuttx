@@ -337,7 +337,7 @@ iconv_t iconv_open(FAR const char *to, FAR const char *from)
   if ((t = find_charmap(to)) == -1 || (f = find_charmap(from)) == -1 ||
       (g_charmaps[t] >= 0330))
     {
-      errno = EINVAL;
+      set_errno(EINVAL);
       return (iconv_t)-1;
     }
 
@@ -354,7 +354,7 @@ iconv_t iconv_open(FAR const char *to, FAR const char *from)
           scd = lib_malloc(sizeof(*scd));
           if (scd == NULL)
             {
-              errno = ENOMEM;
+              set_errno(ENOMEM);
               return (iconv_t)-1;
             }
 
@@ -1435,7 +1435,7 @@ starved:
   err = EINVAL;
   x = -1;
 end:
-  errno = err;
+  set_errno(err);
   return x;
 }
 

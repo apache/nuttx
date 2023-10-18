@@ -616,10 +616,10 @@ static ssize_t gdb_hex2bin(FAR void *buf, size_t buf_len,
         };
 
       out[pos / 2] = strtoul(ch, NULL, 16); /* Decode high nibble */
-      if (out[pos / 2] == 0 && errno)
+      if (out[pos / 2] == 0 && get_errno())
         {
           GDB_ASSERT();
-          return -errno; /* Buffer contained junk. */
+          return -get_errno(); /* Buffer contained junk. */
         }
     }
 

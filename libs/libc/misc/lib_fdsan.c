@@ -136,7 +136,7 @@ int android_fdsan_close_with_tag(int fd, uint64_t expected_tag)
    * If we were expecting to close with a tag, abort on EBADF.
    **************************************************************************/
 
-  if (expected_tag && ret == -1 && errno == EBADF)
+  if (expected_tag && ret == -1 && get_errno() == EBADF)
     {
       ferr("double-close of file descriptor %d detected\n", fd);
       PANIC();
