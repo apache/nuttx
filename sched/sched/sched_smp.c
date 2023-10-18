@@ -235,6 +235,11 @@ int nxsched_smp_call(cpu_set_t cpuset, nxsched_smp_call_t func,
       CPU_CLR(this_cpu(), &cpuset);
     }
 
+  if (CPU_COUNT(&cpuset) == 0)
+    {
+      goto out;
+    }
+
   /* If waiting is necessary, initialize and wait for the cookie. */
 
   if (wait)
