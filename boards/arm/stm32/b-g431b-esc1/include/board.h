@@ -313,23 +313,56 @@
 
 /* Alternate function pin selections ****************************************/
 
+/* ADC1 */
+
+#define GPIO_ADC1_IN1   GPIO_ADC1_IN1_0   /* PA0 */
+#define GPIO_ADC1_IN2   GPIO_ADC1_IN2_0   /* PA1 */
+#define GPIO_ADC1_IN3   GPIO_ADC1_IN3_0   /* PA2 */
+#define GPIO_ADC1_IN4   GPIO_ADC1_IN4_0   /* PA3 */
+#define GPIO_ADC1_IN5   GPIO_ADC1_IN5_0   /* PB14 */
+#define GPIO_ADC1_IN10  GPIO_ADC1_IN10_0  /* PF0 */
+#define GPIO_ADC1_IN11  GPIO_ADC1_IN11_0  /* PB12 */
+#define GPIO_ADC1_IN12  GPIO_ADC1_IN12_0  /* PB1 */
+#define GPIO_ADC1_IN14  GPIO_ADC1_IN14_0  /* PB11 */
+#define GPIO_ADC1_IN15  GPIO_ADC1_IN15_0  /* PB0 */
+
 /* USART2 (ST LINK Virtual Console and J3 pads) */
 
 #define GPIO_USART2_TX     GPIO_USART2_TX_3 /* PB3 */
 #define GPIO_USART2_RX     GPIO_USART2_RX_3 /* PB4 */
 
-/* Pin Multiplexing Disambiguation ******************************************/
-
 /* TIM1 configuration *******************************************************/
 
-#define GPIO_TIM1_CH1NOUT  GPIO_TIM1_CH1NOUT_4 /* TIM1 CH1N - PC13 - U low */
-#define GPIO_TIM1_CH2NOUT  GPIO_TIM1_CH2NOUT_1 /* TIM1 CH2N - PA12 - V low */
-#define GPIO_TIM1_CH3NOUT  GPIO_TIM1_CH3NOUT_3 /* TIM1 CH3N - PB15 - W low */
+#define GPIO_TIM1_CH1OUT   (GPIO_TIM1_CH1OUT_0 | GPIO_SPEED_50MHz)  /* TIM1 CH1 - PA8  - U high */
+#define GPIO_TIM1_CH2OUT   (GPIO_TIM1_CH2OUT_0 | GPIO_SPEED_50MHz)  /* TIM1 CH2 - PA9  - V high */
+#define GPIO_TIM1_CH3OUT   (GPIO_TIM1_CH3OUT_0 | GPIO_SPEED_50MHz)  /* TIM1 CH3 - PA10 - W high */
+#define GPIO_TIM1_CH1NOUT  (GPIO_TIM1_CH1NOUT_4 | GPIO_SPEED_50MHz) /* TIM1 CH1N - PC13 - U low */
+#define GPIO_TIM1_CH2NOUT  (GPIO_TIM1_CH2NOUT_1 | GPIO_SPEED_50MHz) /* TIM1 CH2N - PA12 - V low */
+#define GPIO_TIM1_CH3NOUT  (GPIO_TIM1_CH3NOUT_3 | GPIO_SPEED_50MHz) /* TIM1 CH3N - PB15 - W low */
 
 /* TIM4 QE configuration ****************************************************/
 
-#define GPIO_TIM4_CH1IN  GPIO_TIM4_CH1IN_2 /* TIM4 CH1 - PB6 */
-#define GPIO_TIM4_CH2IN  GPIO_TIM4_CH2IN_2 /* TIM4 CH2 - PB7 */
+#define GPIO_TIM4_CH1IN  (GPIO_TIM4_CH1IN_2 | GPIO_SPEED_50MHz) /* TIM4 CH1 - PB6 */
+#define GPIO_TIM4_CH2IN  (GPIO_TIM4_CH2IN_2 | GPIO_SPEED_50MHz) /* TIM4 CH2 - PB7 */
+
+/* OPAMP configuration ******************************************************/
+
+#define GPIO_OPAMP1_VINM0  (GPIO_OPAMP1_VINM0_0) /* PA3 */
+#define GPIO_OPAMP1_VINP0  (GPIO_OPAMP1_VINP0_0) /* PA1 */
+#define GPIO_OPAMP1_VOUT   (GPIO_OPAMP1_VOUT_0)  /* PA2 */
+
+#define GPIO_OPAMP2_VINM0  (GPIO_OPAMP2_VINM0_0) /* PA5 */
+#define GPIO_OPAMP2_VINP0  (GPIO_OPAMP2_VINP0_0) /* PA7 */
+#define GPIO_OPAMP2_VOUT   (GPIO_OPAMP2_VOUT_0)  /* PA6 */
+
+#define GPIO_OPAMP3_VINM0  (GPIO_OPAMP3_VINM0_0) /* PB2 */
+#define GPIO_OPAMP3_VINP0  (GPIO_OPAMP3_VINP0_0) /* PB0 */
+#define GPIO_OPAMP3_VOUT   (GPIO_OPAMP3_VOUT_0)  /* PB1 */
+
+/* CAN configuration ********************************************************/
+
+#define GPIO_FDCAN1_RX (GPIO_FDCAN1_RX_1 | GPIO_SPEED_50MHz) /* PA11 */
+#define GPIO_FDCAN1_TX (GPIO_FDCAN1_TX_2 | GPIO_SPEED_50MHz) /* PB9 */
 
 /* DMA channels *************************************************************/
 
@@ -341,10 +374,5 @@
 
 #define DMACHAN_USART2_TX DMAMAP_DMA12_USART2TX_0 /* DMA1 */
 #define DMACHAN_USART2_RX DMAMAP_DMA12_USART2RX_0 /* DMA1 */
-
-/* CAN configuration ********************************************************/
-
-#define GPIO_FDCAN1_RX GPIO_FDCAN1_RX_1 /* PA11 */
-#define GPIO_FDCAN1_TX GPIO_FDCAN1_TX_2 /* PB9 */
 
 #endif /* __BOARDS_ARM_STM32_B_G431B_ESC1_INCLUDE_BOARD_H */
