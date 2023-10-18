@@ -31,5 +31,9 @@ if(CONFIG_NET_VSOCK)
     list(APPEND SRCS vsock_vhost.c)
   endif()
 
+  if(CONFIG_NET_VSOCK_LOCAL)
+    list(APPEND SRCS vsock_local.c)
+  endif()
+
   target_sources(net PRIVATE ${SRCS})
 endif()
