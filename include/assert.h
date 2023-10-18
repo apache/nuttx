@@ -79,20 +79,10 @@
                                            __ASSERT_LINE__, msg, regs)
 
 #define __ASSERT__(f, file, line, _f) \
-  do                                  \
-    {                                 \
-      if (predict_false(!(f)))        \
-        __assert(file, line, _f);     \
-    }                                 \
-  while (0)
+  (predict_false(!(f))) ? __assert(file, line, _f) : ((void)0)
 
 #define __VERIFY__(f, file, line, _f) \
-  do                                  \
-    {                                 \
-      if (predict_false((f) < 0))     \
-        __assert(file, line, _f);     \
-    }                                 \
-  while (0)
+  (predict_false((f) < 0)) ? __assert(file, line, _f) : ((void)0)
 
 #ifdef CONFIG_DEBUG_ASSERTIONS_EXPRESSION
 #  define _ASSERT(f,file,line) __ASSERT__(f, file, line, #f)
@@ -150,7 +140,7 @@
 #    define static_assert _Static_assert
 #  else
 #    define static_assert(cond, msg) \
-       extern int (*__static_assert_function (void)) \
+       extern int (*__static_assert_function(void)) \
        [!!sizeof (struct { int __error_if_negative: (cond) ? 2 : -1; })]
 #  endif
 #endif
