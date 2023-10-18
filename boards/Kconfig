@@ -309,6 +309,12 @@ config ARCH_BOARD_ESP32_WROVERKIT
 			LCD screen
 			MicroSD card slot
 
+config ARCH_BOARD_ESP32_2432S028
+	bool "ESP32-2432S028"
+	depends on ARCH_CHIP_ESP32WROVER
+	---help---
+	ESP32-2432S028 is an ESP32 board with LCD Display, LED RGB and SD Cards.
+	
 config ARCH_BOARD_LILYGO_TBEAM_LORA_GPS
 	bool "LilyGO TBeam V1.1 LoRa/GPS"
 	depends on ARCH_CHIP_ESP32WROOM32
@@ -3040,6 +3046,7 @@ config ARCH_BOARD
 	default "esp32-pico-kit"            if ARCH_BOARD_ESP32_PICO_KIT
 	default "esp32-sparrow-kit"         if ARCH_BOARD_ESP32_SPARROWKIT
 	default "esp32-wrover-kit"          if ARCH_BOARD_ESP32_WROVERKIT
+	default "esp32-2432S028"												if ARCH_BOARD_ESP32_2432S028
 	default "esp32c3-devkit"            if ARCH_BOARD_ESP32C3_DEVKIT
 	default "esp32c3-devkit-rust-1"     if ARCH_BOARD_ESP32C3_DEVKIT_RUST1
 	default "esp32c3-generic"           if ARCH_BOARD_ESP32C3_GENERIC
@@ -4167,6 +4174,9 @@ source "boards/xtensa/esp32/esp32-sparrow-kit/Kconfig"
 endif
 if ARCH_BOARD_ESP32_WROVERKIT
 source "boards/xtensa/esp32/esp32-wrover-kit/Kconfig"
+endif
+if ARCH_BOARD_ESP32_2432S028
+source "boards/xtensa/esp32/esp32-2432S028/Kconfig"
 endif
 if ARCH_BOARD_LILYGO_TBEAM_LORA_GPS
 source "boards/xtensa/esp32/lilygo_tbeam_lora_gps/Kconfig"
