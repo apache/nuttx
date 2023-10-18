@@ -58,7 +58,7 @@ int getentropy(FAR void *buffer, size_t length)
 
   if (length > 256)
     {
-      errno = EIO;
+      set_errno(EIO);
       return -1;
     }
 
@@ -67,7 +67,7 @@ int getentropy(FAR void *buffer, size_t length)
       int ret = getrandom(pos, length, 0);
       if (ret < 0)
         {
-          if (errno == EINTR)
+          if (get_errno() == EINTR)
             {
               continue;
             }

@@ -52,7 +52,7 @@ do                         \
 
 void vwarn(FAR const char *fmt, va_list ap)
 {
-  int error = errno;
+  int error = get_errno();
   struct va_format vaf;
 
 #ifdef va_copy

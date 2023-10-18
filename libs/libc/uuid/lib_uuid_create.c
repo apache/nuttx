@@ -40,7 +40,7 @@ static int uuid_getrandom(FAR void *buf, size_t size, int flags)
       ssize_t ret = getrandom(tmp, size, flags);
       if (ret < 0)
         {
-          if (errno == EINTR)
+          if (get_errno() == EINTR)
             {
               continue;
             }
