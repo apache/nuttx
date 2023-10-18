@@ -7,7 +7,7 @@ do_not_support = ["sabre-6quad", "rv-virt", "rv-virt64", "esp32c3-devkit", "bl60
 
 
 def test_ostest(p):
-    ret = p.sendCommand("ostest", "Exiting with status", 300)
+    ret = p.sendCommand("ostest", "Exiting with status 0", 300)
     assert ret == 0
 
 
