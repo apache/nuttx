@@ -52,7 +52,7 @@
 /* Common byte swapping macros */
 
 #ifdef CONFIG_HAVE_BUILTIN_BSWAP16
-#  define __swap_uint16 __builtin_bswap16
+#  define __swap_uint16(n) ((uint16_t)__builtin_bswap16(n))
 #else
 #  define __swap_uint16(n) \
     (uint16_t)(((((uint16_t)(n)) & 0x00ff) << 8) | \
@@ -60,7 +60,7 @@
 #endif
 
 #ifdef CONFIG_HAVE_BUILTIN_BSWAP32
-#  define __swap_uint32 __builtin_bswap32
+#  define __swap_uint32(n) ((uint32_t)__builtin_bswap32(n))
 #else
 #  define __swap_uint32(n) \
     (uint32_t)(((((uint32_t)(n)) & 0x000000ffUL) << 24) | \
@@ -71,7 +71,7 @@
 
 #ifdef CONFIG_HAVE_LONG_LONG
 #  ifdef CONFIG_HAVE_BUILTIN_BSWAP64
-#    define __swap_uint64 __builtin_bswap64
+#    define __swap_uint64(n) ((uint64_t)__builtin_bswap64(n))
 #  else
 #    define __swap_uint64(n) \
         (uint64_t)(((((uint64_t)(n)) & 0x00000000000000ffULL) << 56) | \
@@ -95,21 +95,21 @@
 
 /* Big-endian byte order macros */
 
-#  define htobe16(n)          (n)
-#  define htole16(n)          __swap_uint16((uint16_t)n)
-#  define be16toh(n)          (n)
-#  define le16toh(n)          __swap_uint16((uint16_t)n)
+#  define htobe16(n)          ((uint16_t)(n))
+#  define htole16(n)          __swap_uint16(n)
+#  define be16toh(n)          ((uint16_t)(n))
+#  define le16toh(n)          __swap_uint16(n)
 
-#  define htobe32(n)          (n)
-#  define htole32(n)          __swap_uint32((uint32_t)n)
-#  define be32toh(n)          (n)
+#  define htobe32(n)          ((uint32_t)(n))
+#  define htole32(n)          __swap_uint32(n)
+#  define be32toh(n)          ((uint32_t)(n))
 #  define le32toh(n)          __swap_uint32(n)
 
 #  ifdef CONFIG_HAVE_LONG_LONG
-#    define htobe64(n)        (n)
-#    define htole64(n)        __swap_uint64((uint64_t)n)
-#    define be64toh(n)        (n)
-#    define le64toh(n)        __swap_uint64((uint64_t)n)
+#    define htobe64(n)        ((uint64_t)(n))
+#    define htole64(n)        __swap_uint64(n)
+#    define be64toh(n)        ((uint64_t)(n))
+#    define le64toh(n)        __swap_uint64(n)
 #  endif
 
 #else
@@ -120,21 +120,21 @@
 
 /* Little-endian byte order macros */
 
-#  define htobe16(n)          __swap_uint16((uint16_t)n)
-#  define htole16(n)          (n)
-#  define be16toh(n)          __swap_uint16((uint16_t)n)
-#  define le16toh(n)          (n)
+#  define htobe16(n)          __swap_uint16(n)
+#  define htole16(n)          ((uint16_t)(n))
+#  define be16toh(n)          __swap_uint16(n)
+#  define le16toh(n)          ((uint16_t)(n))
 
-#  define htobe32(n)          __swap_uint32((uint32_t)n)
-#  define htole32(n)          (n)
-#  define be32toh(n)          __swap_uint32((uint32_t)n)
-#  define le32toh(n)          (n)
+#  define htobe32(n)          __swap_uint32(n)
+#  define htole32(n)          ((uint32_t)(n))
+#  define be32toh(n)          __swap_uint32(n)
+#  define le32toh(n)          ((uint32_t)(n))
 
 #  ifdef CONFIG_HAVE_LONG_LONG
-#    define htobe64(n)        __swap_uint64((uint64_t)n)
-#    define htole64(n)        (n)
-#    define be64toh(n)        __swap_uint64((uint64_t)n)
-#    define le64toh(n)        (n)
+#    define htobe64(n)        __swap_uint64(n)
+#    define htole64(n)        ((uint64_t)(n))
+#    define be64toh(n)        __swap_uint64(n)
+#    define le64toh(n)        ((uint64_t)(n))
 #  endif
 #endif
 
@@ -152,7 +152,7 @@
 #define htolem16(x, v)        (*(FAR uint16_t *)(x) = htole16(v))
 #define betoh32               be32toh
 #define letoh32               le32toh
-#define bemtoh32(x)           htobe32(*(FAR uint32_t *)(x))
+#define bemtoh32(x)           betoh32(*(FAR uint32_t *)(x))
 #define htobem32(x, v)        (*(FAR uint32_t *)(x) = htobe32(v))
 #define lemtoh32(x)           letoh32(*(FAR uint32_t *)(x))
 #define htolem32(x, v)        (*(FAR uint32_t *)(x) = htole32(v))
@@ -160,7 +160,7 @@
 #ifdef CONFIG_HAVE_LONG_LONG
 #  define betoh64             be64toh
 #  define letoh64             le64toh
-#  define bemtoh64(x)         htobe64(*(FAR uint64_t *)(x))
+#  define bemtoh64(x)         betoh64(*(FAR uint64_t *)(x))
 #  define htobem64(x, v)      (*(FAR uint64_t *)(x) = htobe64(v))
 #  define lemtoh64(x)         letoh64(*(FAR uint64_t *)(x))
 #  define htolem64(x, v)      (*(FAR uint64_t *)(x) = htole64(v))
