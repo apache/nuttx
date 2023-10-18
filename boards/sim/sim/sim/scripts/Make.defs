@@ -292,6 +292,12 @@ endif
 SHCCFLAGS = -fPIC -fPIE -fvisibility=default
 SHLDFLAGS = -shared -Bsymbolic -Bdynamic -G
 
+ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
+  ifeq ($(CONFIG_HOST_MACOS),)
+    LDFLAGS += -Wl,-Map=$(TOPDIR)/nuttx.map
+  endif
+endif
+
 ifeq ($(CONFIG_SIM_M32),y)
   LDLINKFLAGS += -melf_i386
   LDFLAGS += -m32
