@@ -50,7 +50,6 @@ SECTION_FUNC(text, arch_cpu_idle)
 #endif
     dsb    sy
     wfi
-    msr    daifclr, #(DAIFCLR_IRQ_BIT)
     ret
 
 GTEXT(arch_cpu_atomic_idle)
