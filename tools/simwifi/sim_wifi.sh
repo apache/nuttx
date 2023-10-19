@@ -33,7 +33,7 @@ HOSTAPD_CONF_FILE="$RUN_DIR/hostapd.conf"
 DNSMASQ_PID="$RUN_DIR/dnsmasq.pid"
 DNSMASQ_CONF="$RUN_DIR/dnsmasq.conf"
 UDHCPC_PID="$RUN_DIR/udhcpc.pid"
-UDHCPC_SCRIPT="$RUN_DIR/udhcpc.script"
+UDHCPC_SCRIPT="/var/udhcpc.script"
 
 LOG_FILE="$RUN_DIR/simwifi.log"
 STATE_FILE="$RUN_DIR/simwifi.state"
@@ -151,6 +151,7 @@ init_env()
 
   cp -fr $CUR_DIR/dnsmasq.conf $DNSMASQ_CONF
   cp -fr $CUR_DIR/udhcpc.script $UDHCPC_SCRIPT
+  chmod +x $UDHCPC_SCRIPT
 }
 
 # Rename the interface name
@@ -337,6 +338,8 @@ del_gw_wlan()
     ip route del $router
     sw_dbg 1 "del the default router on $wlan_if"
   }
+
+  ifconfig $wlan_if 0.0.0.0
 }
 
 stop_sta()
@@ -512,7 +515,7 @@ init()
   echo "mode:$2" >> $DEFCONF_FILE
   [ "$2" = "hwsim" ] &&  modprobe  mac80211_hwsim
 
-  set_state SW_INIT
+  set_state SW_INIT  "" $NUTTX_BR_IF $1
 }
 
 clean()
@@ -523,6 +526,7 @@ clean()
   [ "$cur_mode" = "hwsim" ] &&  modprobe -r mac80211_hwsim
 
   rm -fr $RUN_DIR
+  rm -f $UDHCPC_SCRIPT
 }
 
 usage()
