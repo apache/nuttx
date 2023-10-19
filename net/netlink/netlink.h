@@ -45,7 +45,7 @@
 
 #ifndef CONFIG_NETLINK_ROUTE
 #  define netlink_device_notify(dev)
-#  define netlink_device_notify_ipaddr(dev, type, domain)
+#  define netlink_device_notify_ipaddr(dev, type, domain, addr, preflen)
 #endif
 
 #ifdef CONFIG_NET_NETLINK
@@ -502,7 +502,8 @@ void netlink_device_notify(FAR struct net_driver_s *dev);
  ****************************************************************************/
 
 void netlink_device_notify_ipaddr(FAR struct net_driver_s *dev,
-                                  int type, int domain);
+                                  int type, int domain,
+                                  FAR const void *addr, uint8_t preflen);
 
 /****************************************************************************
  * Name: nla_next
