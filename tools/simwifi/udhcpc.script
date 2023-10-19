@@ -10,6 +10,8 @@ log() {
   logger -t "udhcpc[$PPID]" -p daemon.$1 "$interface: $2"
 }
 
+SIMWIFILOG_FILE=/var/run/simwifi/simwifi.log
+DEFCONF_FILE=/var/run/simwifi/simwifi.conf
 case $1 in
   bound|renew)
 
@@ -18,6 +20,34 @@ case $1 in
   # to also set subnet, broadcast, mtu, ...
   busybox ifconfig $interface ${mtu:+mtu $mtu} \
       $ip netmask $subnet ${broadcast:+broadcast $broadcast}
+
+  # defwan equals to wlanx, should add router and DEF_NS
+
+  defwan=$(cat $DEFCONF_FILE | grep defwan | awk -F':' '{print $2}')
+  [ ".$defwan" = ".wlan0" ] && {
+    # get current ("old") routes (after setting new IP)
+    crouter=$(busybox ip -4 route show dev $interface |
+              busybox awk '$1 == "default" { print $3; }')
+    router="${router%% *}" # linux kernel supports only one (default) route
+    if [ ".$router" != ".$crouter" ]; then
+        # reset just default routes
+        busybox ip -4 route flush exact 0.0.0.0/0 dev $interface
+    fi
+
+    if [ -n "$router" ]; then
+        # special case for /32 subnets: use onlink keyword
+        [ ".$subnet" = .255.255.255.255 ] \
+            && onlink=onlink || onlink=
+        busybox ip -4 route add default via $router dev $interface $onlink
+        log info "udhcpc add router $router on $interfac"
+    fi
+
+    DEF_NS="nameserver 8.8.8.8"
+    RESOLV_CONF_FILE=${RESOLV_CONF:-/etc/resolv.conf}
+    [ -f $RESOLV_CONF_FILE -a -z "$(cat $RESOLV_CONF_FILE | grep 8.8.8.8)" ] && {
+        echo "$DEF_NS" >> "$RESOLV_CONF_FILE"
+    }
+  }
 
   log info "$1: IP=$ip/$subnet router=$router domain=\"$domain\" dns=\"$dns\" lease=$lease"
   ;;
