@@ -83,6 +83,7 @@
 #include "icmpv6/icmpv6.h"
 #include "route/route.h"
 #include "netlink/netlink.h"
+#include "utils/utils.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -858,7 +859,8 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
 
       case SIOCSIFADDR:  /* Set IP address */
         ioctl_set_ipv4addr(&dev->d_ipaddr, &req->ifr_addr);
-        netlink_device_notify_ipaddr(dev, RTM_NEWADDR, AF_INET);
+        netlink_device_notify_ipaddr(dev, RTM_NEWADDR, AF_INET,
+                         &dev->d_ipaddr, net_ipv4_mask2pref(dev->d_netmask));
         break;
 
       case SIOCGIFDSTADDR:  /* Get P-to-P address */
@@ -899,7 +901,8 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
         {
           FAR struct lifreq *lreq = (FAR struct lifreq *)req;
           ioctl_set_ipv6addr(dev->d_ipv6addr, &lreq->lifr_addr);
-          netlink_device_notify_ipaddr(dev, RTM_NEWADDR, AF_INET6);
+          netlink_device_notify_ipaddr(dev, RTM_NEWADDR, AF_INET6,
+                    dev->d_ipv6addr, net_ipv6_mask2pref(dev->d_ipv6netmask));
         }
         break;
 
@@ -1056,12 +1059,14 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
 
       case SIOCDIFADDR:  /* Delete IP address */
 #ifdef CONFIG_NET_IPv4
+        netlink_device_notify_ipaddr(dev, RTM_DELADDR, AF_INET,
+                         &dev->d_ipaddr, net_ipv4_mask2pref(dev->d_netmask));
         dev->d_ipaddr = 0;
-        netlink_device_notify_ipaddr(dev, RTM_DELADDR, AF_INET);
 #endif
 #ifdef CONFIG_NET_IPv6
+        netlink_device_notify_ipaddr(dev, RTM_DELADDR, AF_INET6,
+                    dev->d_ipv6addr, net_ipv6_mask2pref(dev->d_ipv6netmask));
         memset(&dev->d_ipv6addr, 0, sizeof(net_ipv6addr_t));
-        netlink_device_notify_ipaddr(dev, RTM_DELADDR, AF_INET6);
 #endif
         break;
 
