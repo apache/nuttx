@@ -116,6 +116,8 @@
 
 #define MMCSD_CSD_VDDWCURRMAX(csd) ((csd[4] >> 2) & 7)
 
+#define MMCSD_CSD_CSIZE_THRESHOLD   0xfff
+
 /* C_SIZE_MULT 47-49 Device size multiplier */
 
 #define MMCSD_CSD_CSIZEMULT(csd) (((csd[4] & 3) << 1) | (csd[5] >> 15))
@@ -289,6 +291,8 @@
 
 #define MMCSD_CSD_VDDWCURRMAX(csd) ((csd[9] >> 2) & 7)
 #define SD20_CSD_VDDWCURRMAX(csd) (6)
+
+#define MMCSD_CSD_CSIZE_THRESHOLD   0xfff
 
 /* C_SIZE_MULT 47-49 Device size multiplier */
 

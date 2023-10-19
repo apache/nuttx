@@ -54,6 +54,7 @@
 
 #include "mmcsd.h"
 #include "mmcsd_sdio.h"
+#include "mmcsd_csd.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -641,22 +642,35 @@ static void mmcsd_decode_csd(FAR struct mmcsd_state_s *priv, uint32_t csd[4])
            * C_SIZE: 73:64 from Word 2 and 63:62 from Word 3
            */
 
-          /* If the card is MMC and it has Block addressing
-           * then the correct  number of blocks should already be
-           * read from extended CSD register.
+          /* If the card is MMC and it has Block addressing, then C_SIZE
+           * parameter is used to compute the device capacity for devices up
+           * to 2 GB of density only, while SEC_COUNT is used to calculate
+           * densities greater than 2 GB. When the device density is greater
+           * than 2GB, 0xFFF should be set to C_SIZE bitfield (See 7.3.12)
            */
 
-#ifdef CONFIG_DEBUG_FS_INFO
           uint16_t csize        = ((csd[1] & 0x03ff) << 2) |
                                   ((csd[2] >> 30) & 3);
           uint8_t  csizemult    = (csd[2] >> 15) & 7;
-#endif
 
           priv->blockshift      = readbllen;
           priv->blocksize       = (1 << readbllen);
 
+          /* For emmc densities up to 2 GB */
+
+          if (csize != MMCSD_CSD_CSIZE_THRESHOLD)
+            {
+              priv->part.nblocks = ((uint32_t)csize + 1) *
+                                   (1 << (csizemult + 2));
+            }
+
           if (priv->blocksize > 512)
             {
+              if (csize != MMCSD_CSD_CSIZE_THRESHOLD)
+                {
+                  priv->part.nblocks <<= (priv->blockshift - 9);
+                }
+
               priv->blocksize   = 512;
               priv->blockshift  = 9;
             }
