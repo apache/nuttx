@@ -638,6 +638,15 @@ config NDEBUG
 	bool "Define NDEBUG globally"
 	default !DEBUG_ASSERTIONS
 
+config ASSERTIONS_FILENAME
+	bool "Enable library call assert(3) show the file name"
+	default DEBUG_ASSERTIONS_FILENAME || !DEFAULT_SMALL
+	depends on !NDEBUG
+	---help---
+		This option can display the file information of the library call assert(3)
+		function when it is enabled. This option maybe will take up a lot
+		of space from applications.
+
 config DEBUG_ALERT
 	bool
 	default n
