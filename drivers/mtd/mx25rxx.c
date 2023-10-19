@@ -105,6 +105,7 @@
 #else
 #  define MX25R_JEDEC_MEMORY_TYPE          0x28  /* MX25Rx memory type */
 #endif
+#define MX25R_JEDEC_MX25L25673G_CAPACITY 0x19  /* MX25L25673G memory capacity */
 #define MX25R_JEDEC_MX25R6435F_CAPACITY  0x17  /* MX25R6435F memory capacity */
 #define MX25R_JEDEC_MX25R8035F_CAPACITY  0x14  /* MX25R8035F memory capacity */
 
@@ -117,10 +118,19 @@
 #define MX25R6435F_SECTOR_COUNT     (2048)
 #define MX25R6435F_PAGE_SIZE        (256)
 
+/* MX25L25673G (256 MB) memory capacity */
+
+#define MX25L25673G_SECTOR_SIZE      (4*1024)
+#define MX25L25673G_SECTOR_SHIFT     (12)
+#define MX25L25673G_SECTOR_COUNT     (8192)
+#define MX25L25673G_PAGE_SIZE        (256)
+
 #ifdef CONFIG_MX25RXX_PAGE128
-#  define MX25R6435F_PAGE_SHIFT       (7)
+#  define MX25R6435F_PAGE_SHIFT      (7)
+#  define MX25L25673G_PAGE_SHIFT     (7)
 #else
-#  define MX25R6435F_PAGE_SHIFT       (8)
+#  define MX25R6435F_PAGE_SHIFT      (8)
+#  define MX25L25673G_PAGE_SHIFT     (8)
 #endif
 
 /* Status register bit definitions */
@@ -132,7 +142,7 @@
 #define MX25R_SR_QE                 (1 << 6)  /* Bit 6: Quad enable */
 #define MX25R_SR_SRWD               (1 << 7)  /* Bit 7: Status register write protect */
 
-/* Configuration registerregister bit definitions */
+/* Configuration register bit definitions */
 
 #define MX25R_CR_LH                 (1 << 9)  /* Bit 9: Power mode */
 #define MX25R_CR_TB                 (1 << 3)  /* Bit 3: Top/bottom selected */
@@ -853,6 +863,12 @@ int mx25rxx_readid(struct mx25rxx_dev_s *dev)
         dev->sectorshift = MX25R6435F_SECTOR_SHIFT;
         dev->pageshift   = MX25R6435F_PAGE_SHIFT;
         dev->nsectors    = MX25R6435F_SECTOR_COUNT;
+        break;
+
+      case MX25R_JEDEC_MX25L25673G_CAPACITY:
+        dev->sectorshift = MX25L25673G_SECTOR_SHIFT;
+        dev->pageshift   = MX25L25673G_PAGE_SHIFT;
+        dev->nsectors    = MX25L25673G_SECTOR_COUNT;
         break;
 
       default:
