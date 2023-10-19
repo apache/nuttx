@@ -94,7 +94,6 @@ static int usrsock_rpmsg_send_dns_request(FAR void *arg,
 
   dns->head.reqid = USRSOCK_RPMSG_DNS_REQUEST;
   dns->head.xid = 0;
-  dns->head.reserved = 0;
   dns->addrlen = addrlen;
   memcpy(dns + 1, addr, addrlen);
 
