@@ -1,0 +1,29 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menuconfig DRIVERS_WIEGAND
+	bool "Wiegand  Support"
+	default n
+	---help---
+	Drivers for Wiegand Protocol.
+
+if DRIVERS_WIEGAND
+
+choice
+	prompt "Wigand Format"
+	default WIEGAND_FORMAT_26_BIT
+
+config WIEGAND_FORMAT_26_BIT
+	bool "26-bit Wiegand"
+	---help---
+		Enables support for wiegand 26 bit ouput
+
+config WIEGAND_FORMAT_34_BIT
+	bool "34-bit Wiegand format"
+	---help---
+		Enables support for wiegand 34 bit ouput
+
+endchoice
+endif

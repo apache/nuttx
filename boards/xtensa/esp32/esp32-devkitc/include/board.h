@@ -51,6 +51,6 @@
 
 #define BOARD_NGPIOOUT    1 /* Amount of GPIO Output pins */
 #define BOARD_NGPIOIN     1 /* Amount of GPIO Input without Interruption */
-#define BOARD_NGPIOINT    1 /* Amount of GPIO Input w/ Interruption pins */
+#define BOARD_NGPIOINT    2 /* Amount of GPIO Input w/ Interruption pins */
 
 #endif /* __BOARDS_XTENSA_ESP32_ESP32_DEVKITC_INCLUDE_BOARD_H */

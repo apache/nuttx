@@ -105,6 +105,10 @@
 #  include "esp32_lcd_backpack.h"
 #endif
 
+#ifdef CONFIG_DRIVERS_WIEGAND
+#   include "esp32_wiegand.h"
+#endif
+
 #include "esp32-wrover-kit.h"
 
 /****************************************************************************
@@ -382,6 +386,15 @@ int esp32_bringup(void)
     {
       syslog(LOG_ERR,
              "ERROR: Failed to Instantiate the RTC driver: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_DRIVERS_WIEGAND
+  ret = wiegand_initialize(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+            "ERROR: Failed to wiegand_initialize failed : %d\n", ret);
     }
 #endif
 
