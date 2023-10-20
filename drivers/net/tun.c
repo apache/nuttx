@@ -184,7 +184,7 @@ static int tun_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 static int tun_dev_init(FAR struct tun_device_s *priv,
                         FAR struct file *filep,
                         FAR const char *devfmt, bool tun);
-static void tun_dev_uninit(FAR struct tun_device_s *priv);
+static int tun_dev_uninit(FAR struct tun_device_s *priv);
 
 /* File interface */
 
@@ -775,13 +775,21 @@ static void tun_txavail_work(FAR void *arg)
 static int tun_txavail(FAR struct net_driver_s *dev)
 {
   FAR struct tun_device_s *priv = (FAR struct tun_device_s *)dev->d_private;
+  int ret = nxmutex_lock(&priv->lock);
+
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Schedule to perform the TX poll on the worker thread. */
 
-  if (work_available(&priv->work))
+  if (priv->bifup && work_available(&priv->work))
     {
       work_queue(TUNWORK, &priv->work, tun_txavail_work, priv, 0);
     }
+
+  nxmutex_unlock(&priv->lock);
 
   return OK;
 }
@@ -905,11 +913,26 @@ static int tun_dev_init(FAR struct tun_device_s *priv,
  * Name: tun_dev_uninit
  ****************************************************************************/
 
-static void tun_dev_uninit(FAR struct tun_device_s *priv)
+static int tun_dev_uninit(FAR struct tun_device_s *priv)
 {
+  int ret;
+
+  ret = nxmutex_lock(&priv->lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   /* Put the interface in the down state */
 
   tun_ifdown(&priv->dev);
+
+  if (!work_available(&priv->work))
+    {
+      work_cancel_sync(TUNWORK, &priv->work);
+    }
+
+  nxmutex_unlock(&priv->lock);
 
   /* Remove the device from the OS */
 
@@ -918,6 +941,8 @@ static void tun_dev_uninit(FAR struct tun_device_s *priv)
   nxmutex_destroy(&priv->lock);
   nxsem_destroy(&priv->read_wait_sem);
   nxsem_destroy(&priv->write_wait_sem);
+
+  return ret;
 }
 
 /****************************************************************************
@@ -941,8 +966,11 @@ static int tun_close(FAR struct file *filep)
   ret  = nxmutex_lock(&tun->lock);
   if (ret >= 0)
     {
-      tun->free_tuns |= (1 << intf);
-      tun_dev_uninit(priv);
+      ret = tun_dev_uninit(priv);
+      if (ret >= 0)
+        {
+          tun->free_tuns |= (1 << intf);
+        }
 
       nxmutex_unlock(&tun->lock);
     }
