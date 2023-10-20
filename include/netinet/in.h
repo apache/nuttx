@@ -335,6 +335,13 @@ struct in6_pktinfo
   int             ipi6_ifindex;     /* send/recv interface index */
 };
 
+struct in6_ifreq
+{
+  struct in6_addr ifr6_addr;        /* The IPv6 address of the request */
+  uint32_t        ifr6_prefixlen;   /* The IPv6 prefix length */
+  int             ifr6_ifindex;     /* The interface index of the request */
+};
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
