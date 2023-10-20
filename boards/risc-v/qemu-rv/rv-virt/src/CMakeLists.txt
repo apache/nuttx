@@ -1,5 +1,5 @@
 # ##############################################################################
-# libs/libc/machine/risc-v/CMakeLists.txt
+# boards/risc-v/qemu-rv/rv-virt/src/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -17,20 +17,22 @@
 # the License.
 #
 # ##############################################################################
-add_subdirectory(gnu)
 
-if(CONFIG_ARCH_RV64GC)
-  add_subdirectory(rv64)
+set(SRCS qemu_rv_appinit.c)
+
+target_sources(board PRIVATE ${SRCS})
+
+if(CONFIG_ARCH_CHIP_QEMU_RV)
+
+  if(CONFIG_BUILD_KERNEL)
+    if(CONFIG_ARCH_CHIP_QEMU_RV64)
+      set(LDFILE ld-kernel64.script)
+    else()
+      set(LDFILE ld-kernel32.script)
+    endif()
+  else()
+    set(LDFILE ld.script)
+  endif()
 endif()
 
-if(CONFIG_ARCH_RV32IM)
-  add_subdirectory(rv32)
-endif()
-
-set(SRCS)
-
-if(CONFIG_LIBC_ARCH_ELF)
-  list(APPEND SRCS arch_elf.c)
-endif()
-
-target_sources(c PRIVATE ${SRCS})
+set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/${LDFILE}")

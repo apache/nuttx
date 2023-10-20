@@ -1,5 +1,5 @@
 # ##############################################################################
-# libs/libc/machine/risc-v/CMakeLists.txt
+# arch/arm/src/qemu-rv/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -17,20 +17,24 @@
 # the License.
 #
 # ##############################################################################
-add_subdirectory(gnu)
 
-if(CONFIG_ARCH_RV64GC)
-  add_subdirectory(rv64)
+set(SRCS qemu_rv_head.S)
+
+list(
+  APPEND
+  SRCS
+  qemu_rv_start.c
+  qemu_rv_irq_dispatch.c
+  qemu_rv_irq.c
+  qemu_rv_timerisr.c
+  qemu_rv_allocateheap.c)
+
+if(CONFIG_BUILD_KERNEL)
+  list(APPEND SRCS qemu_rv_mm_init.c qemu_rv_exception_m.S)
 endif()
 
-if(CONFIG_ARCH_RV32IM)
-  add_subdirectory(rv32)
+if(CONFIG_MM_PGALLOC)
+  list(APPEND SRCS qemu_rv_pgalloc.c)
 endif()
 
-set(SRCS)
-
-if(CONFIG_LIBC_ARCH_ELF)
-  list(APPEND SRCS arch_elf.c)
-endif()
-
-target_sources(c PRIVATE ${SRCS})
+target_sources(arch PRIVATE ${SRCS})
