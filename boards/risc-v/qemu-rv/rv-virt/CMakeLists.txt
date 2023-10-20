@@ -1,5 +1,5 @@
 # ##############################################################################
-# libs/libc/machine/risc-v/CMakeLists.txt
+# boards/risc-v/qemu-rv/rv-virt/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -17,20 +17,5 @@
 # the License.
 #
 # ##############################################################################
-add_subdirectory(gnu)
 
-if(CONFIG_ARCH_RV64GC)
-  add_subdirectory(rv64)
-endif()
-
-if(CONFIG_ARCH_RV32IM)
-  add_subdirectory(rv32)
-endif()
-
-set(SRCS)
-
-if(CONFIG_LIBC_ARCH_ELF)
-  list(APPEND SRCS arch_elf.c)
-endif()
-
-target_sources(c PRIVATE ${SRCS})
+add_subdirectory(src)
