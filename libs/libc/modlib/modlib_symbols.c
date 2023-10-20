@@ -521,7 +521,8 @@ int modlib_insertsymtab(FAR struct module_s *modp,
 
                   symbol[j].sym_name =
                       strdup((FAR char *)loadinfo->iobuffer);
-                  symbol[j].sym_value = (FAR const void *)sym[i].st_value;
+                  symbol[j].sym_value =
+                      (FAR const void *)(uintptr_t)sym[i].st_value;
                   j++;
                 }
             }
