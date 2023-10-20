@@ -301,7 +301,7 @@ void net_initialize(void);
  *   Calculate the ioctl argument buffer length.
  *
  * Input Parameters:
- *
+ *   domain   The socket domain
  *   cmd      The ioctl command
  *
  * Returned Value:
@@ -309,7 +309,7 @@ void net_initialize(void);
  *
  ****************************************************************************/
 
-ssize_t net_ioctl_arglen(int cmd);
+ssize_t net_ioctl_arglen(uint8_t domain, int cmd);
 
 /****************************************************************************
  * Critical section management.
