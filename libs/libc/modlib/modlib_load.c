@@ -84,7 +84,7 @@ static void modlib_elfsize(FAR struct mod_loadinfo_s *loadinfo)
               if (phdr->p_flags & PF_X)
                 {
                   textsize += phdr->p_memsz;
-                  textaddr = (FAR void *)phdr->p_vaddr;
+                  textaddr = (FAR void *)(uintptr_t)phdr->p_vaddr;
                 }
               else
                 {
