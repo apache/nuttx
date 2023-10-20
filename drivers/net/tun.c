@@ -775,13 +775,20 @@ static void tun_txavail_work(FAR void *arg)
 static int tun_txavail(FAR struct net_driver_s *dev)
 {
   FAR struct tun_device_s *priv = (FAR struct tun_device_s *)dev->d_private;
+  irqstate_t flags;
 
-  /* Schedule to perform the TX poll on the worker thread. */
+  flags = enter_critical_section(); /* No interrupts */
 
-  if (work_available(&priv->work))
+  /* Schedule to perform the TX poll on the worker thread when priv->bifup
+   * is true.
+   */
+
+  if (priv->bifup && work_available(&priv->work))
     {
       work_queue(TUNWORK, &priv->work, tun_txavail_work, priv, 0);
     }
+
+  leave_critical_section(flags);
 
   return OK;
 }
@@ -910,6 +917,8 @@ static void tun_dev_uninit(FAR struct tun_device_s *priv)
   /* Put the interface in the down state */
 
   tun_ifdown(&priv->dev);
+
+  work_cancel_sync(TUNWORK, &priv->work);
 
   /* Remove the device from the OS */
 
