@@ -1,5 +1,5 @@
 # ##############################################################################
-# libs/libc/machine/risc-v/CMakeLists.txt
+# arch/risc-v/src/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -17,20 +17,15 @@
 # the License.
 #
 # ##############################################################################
-add_subdirectory(gnu)
 
-if(CONFIG_ARCH_RV64GC)
-  add_subdirectory(rv64)
+add_subdirectory(common)
+add_subdirectory(${NUTTX_CHIP_ABS_DIR} EXCLUDE_FROM_ALL exclude_chip)
+
+# Include directories (before system ones) as PUBLIC so that it can be exposed
+# to libboard
+target_include_directories(arch BEFORE PUBLIC ${NUTTX_CHIP_ABS_DIR} common)
+
+if(NOT CONFIG_BUILD_FLAT)
+  target_include_directories(arch_interface BEFORE PUBLIC ${NUTTX_CHIP_ABS_DIR}
+                                                          common)
 endif()
-
-if(CONFIG_ARCH_RV32IM)
-  add_subdirectory(rv32)
-endif()
-
-set(SRCS)
-
-if(CONFIG_LIBC_ARCH_ELF)
-  list(APPEND SRCS arch_elf.c)
-endif()
-
-target_sources(c PRIVATE ${SRCS})
