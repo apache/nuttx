@@ -226,7 +226,7 @@ endif()
 
 if(NOT EXISTS "${NUTTX_BOARD_DIR}/CMakeLists.txt"
    AND NOT EXISTS "${NUTTX_BOARD_DIR}/../common/CMakeLists.txt")
-  message(FATAL_ERROR "No CMakeList.txt found at ${NUTTX_BOARD_DIR}")
+  message(FATAL_ERROR "No CMakeLists.txt found at ${NUTTX_BOARD_DIR}")
 endif()
 
 # Custom board ###################################################
