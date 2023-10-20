@@ -1057,7 +1057,7 @@ static int net_rpmsg_drv_ioctl(FAR struct net_driver_s *dev, int cmd,
   ssize_t len;
   int ret;
 
-  len = net_ioctl_arglen(cmd);
+  len = net_ioctl_arglen(PF_RPMSG, cmd);
   if (len >= 0)
     {
       FAR struct net_rpmsg_ioctl_s *msg;
