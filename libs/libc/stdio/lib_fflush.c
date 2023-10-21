@@ -66,7 +66,7 @@ int fflush(FAR FILE *stream)
     }
   else
     {
-      ret = lib_fflush(stream, true);
+      ret = lib_fflush(stream);
     }
 
   /* Check the return value */

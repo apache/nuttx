@@ -45,7 +45,7 @@ int fputc_unlocked(int c, FAR FILE *stream)
 
       if (c == '\n' && (stream->fs_flags & __FS_FLAG_LBF) != 0)
         {
-          ret = lib_fflush_unlocked(stream, true);
+          ret = lib_fflush_unlocked(stream);
           if (ret < 0)
             {
               return EOF;

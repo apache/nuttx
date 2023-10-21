@@ -63,7 +63,7 @@ int lib_flushall(FAR struct streamlist *list)
 
       for (i = 0; i < 3; i++)
         {
-          lib_fflush(&list->sl_std[i], true);
+          lib_fflush(&list->sl_std[i]);
         }
 
       stream = list->sl_head;
@@ -77,7 +77,7 @@ int lib_flushall(FAR struct streamlist *list)
             {
               /* Flush the writable FILE */
 
-              ret = lib_fflush(stream, true);
+              ret = lib_fflush(stream);
               if (ret < 0)
                 {
                   /* An error occurred during the flush AND/OR we were unable
