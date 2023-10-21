@@ -35,7 +35,7 @@
  * It must be done in arch/arm/src/gd32f4/Kconfig !
  */
 
-#if defined(CONFIG_ARCH_CHIP_GD32F450IK)
+#if defined(CONFIG_ARCH_CHIP_GD32F450IK) || defined(CONFIG_ARCH_CHIP_GD32F470IK)
 #  define GD32_NGPIO_PORTS              9   /* GPIOA-I */
 #  define GD32_NCRC                     1   /* CRC calculation unit */
 #  define GD32_NTRNG                    1   /* True random number generator (RNG) */

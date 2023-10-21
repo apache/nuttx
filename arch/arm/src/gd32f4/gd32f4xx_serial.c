@@ -2105,6 +2105,8 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
     {
       ie &= ~(USART_CFG_CTL0_INT_RBNEIE | USART_CFG_CTL0_INT_PERRIE |
               USART_CFG_CTL2_INT_ERRIE);
+      ie |= ((USART_CFG_CTL0_INT << USART_CFG_SHIFT) |
+             (USART_CFG_CTL2_INT << USART_CFG_SHIFT));
     }
 
   /* Then set the new interrupt state */

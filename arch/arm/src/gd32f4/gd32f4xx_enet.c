@@ -3356,7 +3356,7 @@ static inline void gd32_enet_gpio_config(struct gd32_enet_mac_s *priv)
    */
 
   gd32_gpio_config(GPIO_CKOUT0);
-  gd32_rcu_ckout0_config(BOARD_CFG_CKOUT0_SOURCE, BOARD_CFG_CKOUT0_DIV);
+  gd32_rcu_ckout0_config(BOARD_CFG_CKOUT0_SOURCE, BOARD_CFG_CKOUT0_DIVIDER);
 
 #  elif defined(CONFIG_GD32F4_RMII_CKOUT1)
   /* Configure CKOUT1 to drive the PHY.  Board logic must provide
