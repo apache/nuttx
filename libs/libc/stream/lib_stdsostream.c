@@ -112,7 +112,7 @@ static int stdsostream_flush(FAR struct lib_sostream_s *self)
                                         (FAR struct lib_stdsostream_s *)self;
 
   DEBUGASSERT(stream != NULL && stream->handle != NULL);
-  return lib_fflush(stream->handle, true);
+  return lib_fflush(stream->handle);
 }
 #endif
 
