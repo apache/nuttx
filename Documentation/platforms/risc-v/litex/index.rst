@@ -1,6 +1,6 @@
-======================================
+==========================
 Enjoy Digital LiteX FPGA's
-======================================
+==========================
 
 The LiteX framework provides a convenient and efficient infrastructure to create FPGA Cores/SoCs, to explore various digital design architectures and create full FPGA based systems. 
 
@@ -16,7 +16,7 @@ should work with either core, requiring minimal adjustment to the configuration.
 
 
 Toolchain
-==============
+=========
 
 Litex projects can be built with a generic RISC-V GCC toolchain. There are currently two options.
 
