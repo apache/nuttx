@@ -527,19 +527,19 @@ struct file_struct
   cookie_io_functions_t   fs_iofunc;    /* Callbacks to user / system functions */
   FAR void               *fs_cookie;    /* Pointer to file descriptor / cookie struct */
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
-  FAR unsigned char      *fs_bufstart;  /* Pointer to start of buffer */
-  FAR unsigned char      *fs_bufend;    /* Pointer to 1 past end of buffer */
-  FAR unsigned char      *fs_bufpos;    /* Current position in buffer */
-  FAR unsigned char      *fs_bufread;   /* Pointer to 1 past last buffered read char. */
+  FAR char               *fs_bufstart;  /* Pointer to start of buffer */
+  FAR char               *fs_bufend;    /* Pointer to 1 past end of buffer */
+  FAR char               *fs_bufpos;    /* Current position in buffer */
+  FAR char               *fs_bufread;   /* Pointer to 1 past last buffered read char. */
 #  if CONFIG_STDIO_BUFFER_SIZE > 0
-  unsigned char           fs_buffer[CONFIG_STDIO_BUFFER_SIZE];
+  char                    fs_buffer[CONFIG_STDIO_BUFFER_SIZE];
 #  endif
 #endif
   uint16_t                fs_oflags;    /* Open mode flags */
   uint8_t                 fs_flags;     /* Stream flags */
 #if CONFIG_NUNGET_CHARS > 0
   uint8_t                 fs_nungotten; /* The number of characters buffered for ungetc */
-  unsigned char           fs_ungotten[CONFIG_NUNGET_CHARS];
+  char                    fs_ungotten[CONFIG_NUNGET_CHARS];
 #endif
 };
 

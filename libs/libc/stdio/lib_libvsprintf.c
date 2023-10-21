@@ -166,9 +166,9 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
   union
   {
 #if defined (CONFIG_LIBC_LONG_LONG) || (ULONG_MAX > 4294967295UL)
-    unsigned char __buf[22]; /* Size for -1 in octal, without '\0' */
+    char __buf[22]; /* Size for -1 in octal, without '\0' */
 #else
-    unsigned char __buf[11]; /* Size for -1 in octal, without '\0' */
+    char __buf[11]; /* Size for -1 in octal, without '\0' */
 #endif
 #ifdef CONFIG_LIBC_FLOATINGPOINT
     struct dtoa_s __dtoa;
@@ -860,7 +860,7 @@ flt_oper:
                 }
 
               stream_putc(ndigs, stream);
-              c = __ultoa_invert(exp, (FAR char *)buf, 10) - (FAR char *)buf;
+              c = __ultoa_invert(exp, buf, 10) - buf;
 
               if (exp >= 0 && exp <= 9)
                 {
@@ -904,7 +904,7 @@ flt_oper:
 #else
           buf[0] = va_arg(ap, int);
 #endif
-          pnt = (FAR char *)buf;
+          pnt = buf;
           size = 1;
           goto str_lpad;
 
@@ -913,7 +913,7 @@ flt_oper:
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
           if ((flags & FL_ARGNUMBER) != 0)
             {
-              pnt = (FAR char *)arglist[argnumber - 1].value.cp;
+              pnt = arglist[argnumber - 1].value.cp;
             }
           else
             {
@@ -1028,7 +1028,7 @@ str_lpad:
 #if !defined(CONFIG_LIBC_LONG_LONG) && defined(CONFIG_HAVE_LONG_LONG)
               DEBUGASSERT(x >= 0 && x <= ULONG_MAX);
 #endif
-              c = __ultoa_invert(x, (FAR char *)buf, 10) - (FAR char *)buf;
+              c = __ultoa_invert(x, buf, 10) - buf;
             }
         }
       else
@@ -1204,7 +1204,7 @@ str_lpad:
 #if !defined(CONFIG_LIBC_LONG_LONG) && defined(CONFIG_HAVE_LONG_LONG)
               DEBUGASSERT(x <= ULONG_MAX);
 #endif
-              c = __ultoa_invert(x, (FAR char *)buf, base) - (FAR char *)buf;
+              c = __ultoa_invert(x, buf, base) - buf;
             }
 
           flags &= ~FL_NEGATIVE;

@@ -121,7 +121,7 @@ ssize_t getdelim(FAR char **lineptr, size_t *n, int delimiter,
   dest = *lineptr;
   if (dest == NULL)
     {
-      dest = (FAR char *)lib_malloc(bufsize);
+      dest = lib_malloc(bufsize);
       if (dest == NULL)
         {
           ret = ENOMEM;
@@ -156,7 +156,7 @@ ssize_t getdelim(FAR char **lineptr, size_t *n, int delimiter,
            */
 
           bufsize  += BUFSIZE_INCR;
-          newbuffer = (FAR char *)lib_realloc(*lineptr, bufsize);
+          newbuffer = lib_realloc(*lineptr, bufsize);
           if (newbuffer == NULL)
             {
               ret = ENOMEM;
