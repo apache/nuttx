@@ -118,7 +118,7 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
    * interrupts very briefly.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_iob_lock);
 
   /* Which list?  If there is a task waiting for an IOB, then put
    * the IOB on either the free list or on the committed list where
@@ -136,6 +136,8 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
       iob->io_flink   = g_iob_freelist;
       g_iob_freelist  = iob;
     }
+
+  spin_unlock_irqrestore(&g_iob_lock, flags);
 
   /* Signal that an IOB is available.  If there is a thread blocked,
    * waiting for an IOB, this will wake up exactly one thread.  The
@@ -167,8 +169,6 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
       iob_notifier_signal();
     }
 #endif
-
-  leave_critical_section(flags);
 
   /* And return the I/O buffer after the one that was freed */
 

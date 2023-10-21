@@ -73,7 +73,7 @@ static FAR struct iob_s *iob_alloc_committed(void)
    * to protect the committed list:  We disable interrupts very briefly.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_iob_lock);
 
   /* Take the I/O buffer from the head of the committed list */
 
@@ -92,7 +92,7 @@ static FAR struct iob_s *iob_alloc_committed(void)
       iob->io_pktlen = 0;    /* Total length of the packet */
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_iob_lock, flags);
   return iob;
 }
 
@@ -272,7 +272,7 @@ FAR struct iob_s *iob_tryalloc(bool throttled)
    * to protect the free list:  We disable interrupts very briefly.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_iob_lock);
 
 #if CONFIG_IOB_THROTTLE > 0
   /* If there are free I/O buffers for this allocation */
@@ -314,7 +314,7 @@ FAR struct iob_s *iob_tryalloc(bool throttled)
           g_throttle_sem.semcount--;
 #endif
 
-          leave_critical_section(flags);
+          spin_unlock_irqrestore(&g_iob_lock, flags);
 
           /* Put the I/O buffer in a known state */
 
@@ -326,6 +326,6 @@ FAR struct iob_s *iob_tryalloc(bool throttled)
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_iob_lock, flags);
   return NULL;
 }
