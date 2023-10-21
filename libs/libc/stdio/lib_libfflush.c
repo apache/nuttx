@@ -102,7 +102,7 @@ ssize_t lib_fflush_unlocked(FAR FILE *stream, bool bforce)
 
       /* Try to write that amount */
 
-      src = (FAR const char *)stream->fs_bufstart;
+      src = stream->fs_bufstart;
       do
         {
           /* Perform the write */
