@@ -173,12 +173,12 @@ static void add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
 
   /* Delay the deallocation until a more appropriate time. */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(NULL);
 
   tmp->flink = heap->mm_delaylist[up_cpu_index()];
   heap->mm_delaylist[up_cpu_index()] = tmp;
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(NULL, flags);
 #endif
 }
 
@@ -194,12 +194,12 @@ static void free_delaylist(FAR struct mm_heap_s *heap)
 
   /* Move the delay list to local */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(NULL);
 
   tmp = heap->mm_delaylist[up_cpu_index()];
   heap->mm_delaylist[up_cpu_index()] = NULL;
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(NULL, flags);
 
   /* Test if the delayed is empty */
 
