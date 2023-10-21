@@ -102,6 +102,8 @@ sem_t g_throttle_sem = SEM_INITIALIZER(CONFIG_IOB_NBUFFERS -
 sem_t g_qentry_sem = SEM_INITIALIZER(CONFIG_IOB_NCHAINS);
 #endif
 
+spinlock_t g_iob_lock = SP_UNLOCKED;
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/

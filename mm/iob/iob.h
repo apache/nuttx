@@ -30,6 +30,7 @@
 #include <debug.h>
 
 #include <nuttx/mm/iob.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/semaphore.h>
 
 #ifdef CONFIG_MM_IOB
@@ -79,6 +80,8 @@ extern sem_t g_throttle_sem;  /* Counts available I/O buffers when throttled */
 #if CONFIG_IOB_NCHAINS > 0
 extern sem_t g_qentry_sem;    /* Counts free I/O buffer queue containers */
 #endif
+
+extern spinlock_t g_iob_lock;
 
 /****************************************************************************
  * Public Function Prototypes
