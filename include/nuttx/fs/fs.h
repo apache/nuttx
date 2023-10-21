@@ -1231,19 +1231,6 @@ int find_mtddriver(FAR const char *pathname, FAR struct inode **ppinode);
 int close_mtddriver(FAR struct inode *pinode);
 
 /****************************************************************************
- * Name: lib_flushall
- *
- * Description:
- *   Called either (1) by the OS when a task exits, or (2) from fflush()
- *   when a NULL stream argument is provided.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_FILE_STREAM
-int lib_flushall(FAR struct streamlist *list);
-#endif
-
-/****************************************************************************
  * Name: file_read
  *
  * Description:
