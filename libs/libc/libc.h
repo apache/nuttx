@@ -178,13 +178,6 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-/* Defined in lib_dtoa.c */
-
-#ifdef CONFIG_LIBC_FLOATINGPOINT
-FAR char *__dtoa(double d, int mode, int ndigits, FAR int *decpt,
-                 FAR int *sign, FAR char **rve);
-#endif
-
 /* Defined in lib_getfullpath.c */
 
 int lib_getfullpath(int dirfd, FAR const char *path,
