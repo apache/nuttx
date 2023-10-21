@@ -45,12 +45,10 @@ int vsscanf(FAR const char *buf, FAR const IPTR char *fmt, va_list ap)
 
   /* Initialize a memory stream to freadm from the buffer */
 
-  lib_meminstream((FAR struct lib_meminstream_s *)&meminstream, buf,
-                  LIB_BUFLEN_UNKNOWN);
+  lib_meminstream(&meminstream, buf, LIB_BUFLEN_UNKNOWN);
 
   /* Then let lib_vscanf do the real work */
 
-  n = lib_vscanf((FAR struct lib_instream_s *)&meminstream.common, NULL,
-                 fmt, ap);
+  n = lib_vscanf(&meminstream.common, NULL, fmt, ap);
   return n;
 }
