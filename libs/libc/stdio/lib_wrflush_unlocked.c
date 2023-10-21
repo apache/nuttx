@@ -82,7 +82,7 @@ int lib_wrflush_unlocked(FAR FILE *stream)
    * buffered write data was successfully flushed by lib_fflush().
    */
 
-  return lib_fflush_unlocked(stream, true);
+  return lib_fflush_unlocked(stream);
 
 #else
   /* Verify that we were passed a valid (i.e., non-NULL) stream */

@@ -211,8 +211,8 @@ FAR char *lib_fgets_unlocked(FAR char *buf, size_t buflen, FILE *stream,
 
 /* Defined in lib_libfflush.c */
 
-ssize_t lib_fflush(FAR FILE *stream, bool bforce);
-ssize_t lib_fflush_unlocked(FAR FILE *stream, bool bforce);
+ssize_t lib_fflush(FAR FILE *stream);
+ssize_t lib_fflush_unlocked(FAR FILE *stream);
 
 /* Defined in lib_rdflush_unlocked.c */
 

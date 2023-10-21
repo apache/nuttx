@@ -75,7 +75,7 @@ int fclose(FAR FILE *stream)
 
       if ((stream->fs_oflags & O_WROK) != 0)
         {
-          ret = lib_fflush(stream, true);
+          ret = lib_fflush(stream);
           errcode = get_errno();
         }
 

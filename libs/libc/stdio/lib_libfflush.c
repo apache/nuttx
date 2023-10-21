@@ -48,7 +48,6 @@
  *
  * Input Parameters:
  *  stream - the stream to flush
- *  bforce - flush must be complete.
  *
  * Returned Value:
  *  A negated errno value on failure, otherwise the number of bytes remaining
@@ -56,7 +55,7 @@
  *
  ****************************************************************************/
 
-ssize_t lib_fflush_unlocked(FAR FILE *stream, bool bforce)
+ssize_t lib_fflush_unlocked(FAR FILE *stream)
 {
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
   FAR const char *src;
@@ -137,7 +136,7 @@ ssize_t lib_fflush_unlocked(FAR FILE *stream, bool bforce)
           src     += bytes_written;
           nbuffer -= bytes_written;
         }
-      while (bforce && nbuffer > 0);
+      while (nbuffer > 0);
 
       /* Reset the buffer position to the beginning of the buffer */
 
@@ -168,14 +167,14 @@ ssize_t lib_fflush_unlocked(FAR FILE *stream, bool bforce)
 #endif
 }
 
-ssize_t lib_fflush(FAR FILE *stream, bool bforce)
+ssize_t lib_fflush(FAR FILE *stream)
 {
   ssize_t ret;
 
   /* Make sure that we have exclusive access to the stream */
 
   flockfile(stream);
-  ret = lib_fflush_unlocked(stream, bforce);
+  ret = lib_fflush_unlocked(stream);
   funlockfile(stream);
   return ret;
 }
