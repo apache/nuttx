@@ -1,8 +1,8 @@
-====
-AVR8
-====
+=============
+Microchip AVR
+=============
 
-The following AVR8 chips are supported:
+The following AVR chips are supported:
 
 .. toctree::
    :maxdepth: 1
