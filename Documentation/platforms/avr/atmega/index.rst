@@ -1,6 +1,16 @@
-===========
+======
+Atmega
+======
+
+ATMega128
+---------
+
+This port of NuttX to the Amber Web Server from
+`SoC Robotics <http://www.soc-robotics.com/index.htm>`__ is partially
+completed. The Amber Web Server is based on an Microchip ATMega128.
+
 Atmega1284P
-===========
+-----------
 
 The Atmega1284P is a chip from Microchip ("inherited" from Atmel) with the
 following features:
@@ -19,6 +29,14 @@ following features:
   - Watchdog timer
   - Real Time Clock
   - JTAG/OCD Interface
+
+AVR ATMega2560
+--------------
+
+Extension of the AVR architecture to support the
+ATMega2560 and specifi support for the Arduion MEGA2560 board were
+contributed by Dimitry Kloper and first released in NuttX-7.14.
+
 
 Clock Configuration
 ===================
