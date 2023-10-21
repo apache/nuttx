@@ -14,7 +14,6 @@ script, check the command line options and code comments of ``host_sysinfo.py``.
 .. note:: Nxdiag requires Python 3.6 or later. On Linux distributions, the ``distro`` Python module is
           recommended as it provides more accurate information about the host system.
 
-=====
 Usage
 =====
 
