@@ -33,6 +33,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/sched.h>
 #include <nuttx/kthread.h>
+#include <nuttx/fs/fs.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
@@ -101,6 +102,10 @@ int nxthread_create(FAR const char *name, uint8_t ttype, int priority,
       kmm_free(tcb);
       return ret;
     }
+
+  /* Close the file descriptors with O_CLOEXEC before active task */
+
+  files_close_onexec(&tcb->cmn);
 
   /* Get the assigned pid before we start the task */
 
