@@ -50,26 +50,19 @@
  *
  ****************************************************************************/
 
-int file_dup(FAR struct file *filep, int minfd, bool cloexec)
+int file_dup(FAR struct file *filep, int minfd, int flags)
 {
   struct file filep2;
   int fd2;
   int ret;
 
-  /* Let file_dup2() do the real work */
+  /* Let file_dup3() do the real work */
 
   memset(&filep2, 0, sizeof(filep2));
-  ret = file_dup2(filep, &filep2);
+  ret = file_dup3(filep, &filep2, flags);
   if (ret < 0)
     {
       return ret;
-    }
-
-  /* Then allocate a new file descriptor for the inode */
-
-  if (cloexec)
-    {
-      filep2.f_oflags |= O_CLOEXEC;
     }
 
   fd2 = file_allocate(filep2.f_inode, filep2.f_oflags,
