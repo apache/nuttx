@@ -41,31 +41,27 @@
  * Private Functions
  ****************************************************************************/
 
-static inline FAR sq_entry_t *mempool_remove_queue(FAR sq_queue_t *queue)
+static inline FAR sq_entry_t *
+mempool_remove_queue(FAR struct mempool_s *pool, FAR sq_queue_t *queue)
 {
-  if (!sq_empty(queue))
+  FAR sq_entry_t *ret = queue->head;
+
+  if (ret)
     {
-      FAR sq_entry_t *entry = queue->head;
+      queue->head = ret->flink;
+      if (!queue->head)
+        {
+          queue->tail = NULL;
+        }
+      else
+        {
+          pool->check(pool, queue->head);
+        }
 
-      queue->head = entry->flink;
-      return entry;
+      ret->flink = NULL;
     }
-  else
-    {
-      return NULL;
-    }
-}
 
-static inline size_t mempool_queue_lenth(FAR sq_queue_t *queue)
-{
-  FAR sq_entry_t *node;
-  size_t count;
-
-  for (node = queue->head, count = 0;
-       node != NULL;
-       node = node->flink, count++);
-
-  return count;
+  return ret;
 }
 
 static inline void mempool_add_queue(FAR sq_queue_t *queue,
@@ -74,8 +70,21 @@ static inline void mempool_add_queue(FAR sq_queue_t *queue,
 {
   while (nblks-- > 0)
     {
-      sq_addfirst((FAR sq_entry_t *)(base + blocksize * nblks), queue);
+      sq_addlast((FAR sq_entry_t *)(base + blocksize * nblks), queue);
     }
+}
+
+static inline size_t mempool_sq_count(FAR sq_queue_t *queue)
+{
+  FAR sq_entry_t *node;
+  size_t count = 0;
+
+  sq_for_every(queue, node)
+    {
+      count++;
+    }
+
+  return count;
 }
 
 #if CONFIG_MM_BACKTRACE >= 0
@@ -221,12 +230,12 @@ FAR void *mempool_allocate(FAR struct mempool_s *pool)
 
 retry:
   flags = spin_lock_irqsave(&pool->lock);
-  blk = mempool_remove_queue(&pool->queue);
+  blk = mempool_remove_queue(pool, &pool->queue);
   if (blk == NULL)
     {
       if (up_interrupt_context())
         {
-          blk = mempool_remove_queue(&pool->iqueue);
+          blk = mempool_remove_queue(pool, &pool->iqueue);
           if (blk == NULL)
             {
               goto out_with_lock;
@@ -254,7 +263,7 @@ retry:
               mempool_add_queue(&pool->queue, base, nexpand, blocksize);
               sq_addlast((FAR sq_entry_t *)(base + nexpand * blocksize),
                          &pool->equeue);
-              blk = mempool_remove_queue(&pool->queue);
+              blk = mempool_remove_queue(pool, &pool->queue);
             }
           else if (!pool->wait ||
                    nxsem_wait_uninterruptible(&pool->waitsem) < 0)
@@ -320,16 +329,16 @@ void mempool_release(FAR struct mempool_s *pool, FAR void *blk)
       if ((FAR char *)blk >= pool->ibase &&
           (FAR char *)blk < pool->ibase + pool->interruptsize - blocksize)
         {
-          sq_addfirst(blk, &pool->iqueue);
+          sq_addlast(blk, &pool->iqueue);
         }
       else
         {
-          sq_addfirst(blk, &pool->queue);
+          sq_addlast(blk, &pool->queue);
         }
     }
   else
     {
-      sq_addfirst(blk, &pool->queue);
+      sq_addlast(blk, &pool->queue);
     }
 
   kasan_poison(blk, pool->blocksize);
@@ -368,15 +377,14 @@ int mempool_info(FAR struct mempool_s *pool, FAR struct mempoolinfo_s *info)
   DEBUGASSERT(pool != NULL && info != NULL);
 
   flags = spin_lock_irqsave(&pool->lock);
-  info->ordblks = mempool_queue_lenth(&pool->queue);
-  info->iordblks = mempool_queue_lenth(&pool->iqueue);
+  info->ordblks = mempool_sq_count(&pool->queue);
+  info->iordblks = mempool_sq_count(&pool->iqueue);
 #if CONFIG_MM_BACKTRACE >= 0
   info->aordblks = list_length(&pool->alist);
 #else
   info->aordblks = pool->nalloc;
 #endif
-  info->arena =
-    mempool_queue_lenth(&pool->equeue) * sizeof(sq_entry_t) +
+  info->arena = mempool_sq_count(&pool->equeue) * sizeof(sq_entry_t) +
     (info->aordblks + info->ordblks + info->iordblks) * blocksize;
   spin_unlock_irqrestore(&pool->lock, flags);
   info->sizeblks = blocksize;
@@ -412,8 +420,8 @@ mempool_info_task(FAR struct mempool_s *pool,
 
   if (task->pid == PID_MM_FREE)
     {
-      size_t count = mempool_queue_lenth(&pool->queue) +
-                     mempool_queue_lenth(&pool->iqueue);
+      size_t count = mempool_sq_count(&pool->queue) +
+                     mempool_sq_count(&pool->iqueue);
 
       info.aordblks += count;
       info.uordblks += count * blocksize;
@@ -562,7 +570,7 @@ int mempool_deinit(FAR struct mempool_s *pool)
   mempool_procfs_unregister(&pool->procfs);
 #endif
 
-  while ((blk = mempool_remove_queue(&pool->equeue)) != NULL)
+  while ((blk = mempool_remove_queue(pool, &pool->equeue)) != NULL)
     {
       blk = (FAR sq_entry_t *)((FAR char *)blk - count * blocksize);
       pool->free(pool, blk);
