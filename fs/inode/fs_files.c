@@ -136,6 +136,98 @@ static void task_fssync(FAR struct tcb_s *tcb, FAR void *arg)
 }
 
 /****************************************************************************
+ * Name: nx_dup3_from_tcb
+ *
+ * Description:
+ *   nx_dup3_from_tcb() is similar to the standard 'dup3' interface
+ *   except that is not a cancellation point and it does not modify the
+ *   errno variable.
+ *
+ *   nx_dup3_from_tcb() is an internal NuttX interface and should not be
+ *   called from applications.
+ *
+ *   Clone a file descriptor to a specific descriptor number and
+ *   specific flags.
+ *
+ * Returned Value:
+ *   fd2 is returned on success; a negated errno value is return on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+static int nx_dup3_from_tcb(FAR struct tcb_s *tcb, int fd1, int fd2,
+                            int flags)
+{
+  FAR struct filelist *list;
+  FAR struct file *filep;
+  FAR struct file  file;
+  int ret;
+
+  if (fd1 == fd2)
+    {
+      return fd1;
+    }
+
+#ifdef CONFIG_FDCHECK
+  fd1 = fdcheck_restore(fd1);
+  fd2 = fdcheck_restore(fd2);
+#endif
+
+  list = nxsched_get_files_from_tcb(tcb);
+
+  /* Get the file descriptor list.  It should not be NULL in this context. */
+
+  if (fd1 < 0 || fd1 >= CONFIG_NFILE_DESCRIPTORS_PER_BLOCK * list->fl_rows ||
+      fd2 < 0)
+    {
+      return -EBADF;
+    }
+
+  ret = nxmutex_lock(&list->fl_lock);
+  if (ret < 0)
+    {
+      /* Probably canceled */
+
+      return ret;
+    }
+
+  if (fd2 >= CONFIG_NFILE_DESCRIPTORS_PER_BLOCK * list->fl_rows)
+    {
+      ret = files_extend(list, fd2 / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK + 1);
+      if (ret < 0)
+        {
+          nxmutex_unlock(&list->fl_lock);
+          return ret;
+        }
+    }
+
+  filep = &list->fl_files[fd2 / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK]
+                         [fd2 % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK];
+  memcpy(&file, filep, sizeof(struct file));
+  memset(filep, 0,     sizeof(struct file));
+
+  /* Perform the dup3 operation */
+
+  ret = file_dup3(&list->fl_files[fd1 / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK]
+                                 [fd1 % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK],
+                  filep, flags);
+
+#ifdef CONFIG_FDSAN
+  filep->f_tag = file.f_tag;
+#endif
+
+  nxmutex_unlock(&list->fl_lock);
+
+  file_close(&file);
+
+#ifdef CONFIG_FDCHECK
+  return ret < 0 ? ret : fdcheck_protect(fd2);
+#else
+  return ret < 0 ? ret : fd2;
+#endif
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -492,73 +584,7 @@ int fs_getfilep(int fd, FAR struct file **filep)
 
 int nx_dup2_from_tcb(FAR struct tcb_s *tcb, int fd1, int fd2)
 {
-  FAR struct filelist *list;
-  FAR struct file *filep;
-  FAR struct file  file;
-  int ret;
-
-  if (fd1 == fd2)
-    {
-      return fd1;
-    }
-
-#ifdef CONFIG_FDCHECK
-  fd1 = fdcheck_restore(fd1);
-  fd2 = fdcheck_restore(fd2);
-#endif
-
-  list = nxsched_get_files_from_tcb(tcb);
-
-  /* Get the file descriptor list.  It should not be NULL in this context. */
-
-  if (fd1 < 0 || fd1 >= CONFIG_NFILE_DESCRIPTORS_PER_BLOCK * list->fl_rows ||
-      fd2 < 0)
-    {
-      return -EBADF;
-    }
-
-  ret = nxmutex_lock(&list->fl_lock);
-  if (ret < 0)
-    {
-      /* Probably canceled */
-
-      return ret;
-    }
-
-  if (fd2 >= CONFIG_NFILE_DESCRIPTORS_PER_BLOCK * list->fl_rows)
-    {
-      ret = files_extend(list, fd2 / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK + 1);
-      if (ret < 0)
-        {
-          nxmutex_unlock(&list->fl_lock);
-          return ret;
-        }
-    }
-
-  filep = &list->fl_files[fd2 / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK]
-                         [fd2 % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK];
-  memcpy(&file, filep, sizeof(struct file));
-  memset(filep, 0,     sizeof(struct file));
-
-  /* Perform the dup2 operation */
-
-  ret = file_dup2(&list->fl_files[fd1 / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK]
-                                 [fd1 % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK],
-                  filep);
-
-#ifdef CONFIG_FDSAN
-  filep->f_tag = file.f_tag;
-#endif
-
-  nxmutex_unlock(&list->fl_lock);
-
-  file_close(&file);
-
-#ifdef CONFIG_FDCHECK
-  return ret < 0 ? ret : fdcheck_protect(fd2);
-#else
-  return ret < 0 ? ret : fd2;
-#endif
+  return nx_dup3_from_tcb(tcb, fd1, fd2, 0);
 }
 
 /****************************************************************************
@@ -598,6 +624,29 @@ int dup2(int fd1, int fd2)
   int ret;
 
   ret = nx_dup2(fd1, fd2);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: dup3
+ *
+ * Description:
+ *   Clone a file descriptor or socket descriptor to a specific descriptor
+ *   number and specific flags.
+ *
+ ****************************************************************************/
+
+int dup3(int fd1, int fd2, int flags)
+{
+  int ret;
+
+  ret = nx_dup3_from_tcb(nxsched_self(), fd1, fd2, flags);
   if (ret < 0)
     {
       set_errno(-ret);
