@@ -61,6 +61,8 @@ typedef CODE FAR void *(*mempool_alloc_t)(FAR struct mempool_s *pool,
                                           size_t size);
 typedef CODE void (*mempool_free_t)(FAR struct mempool_s *pool,
                                     FAR void *addr);
+typedef CODE void (*mempool_check_t)(FAR struct mempool_s *pool,
+                                     FAR void *addr);
 
 typedef CODE FAR void *(*mempool_multiple_alloc_t)(FAR void *arg,
                                                    size_t alignment,
@@ -100,6 +102,7 @@ struct mempool_s
   FAR void  *priv;          /* This pointer is used to store the user's private data */
   mempool_alloc_t alloc;    /* The alloc function for mempool */
   mempool_free_t  free;     /* The free function for mempool */
+  mempool_check_t check;    /* The check function for mempool */
 
   /* Private data for memory pool */
 
