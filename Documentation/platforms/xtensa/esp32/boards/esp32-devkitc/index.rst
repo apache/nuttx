@@ -982,7 +982,7 @@ credentials in the menuconfig. You can define your credentials this way::
             -> Network initialization (NETUTILS_NETINIT [=y])
                 -> WAPI Configuration
 
-After compile and flash your board you need to confirm you have two interfaces:
+After compile and flash your board you need to confirm you have two interfaces::
 
     nsh> ifconfig
     wlan0   Link encap:Ethernet HWaddr bc:dd:c2:d4:a9:ec at RUNNING mtu 1504
@@ -991,25 +991,25 @@ After compile and flash your board you need to confirm you have two interfaces:
     wlan1   Link encap:Ethernet HWaddr bc:dd:c2:d4:a9:ed at DOWN mtu 1504
             inet addr:0.0.0.0 DRaddr:0.0.0.0 Mask:0.0.0.0
 
-Now you need to configure your wlan1 to become a WiFi Access Point:
+Now you need to configure your wlan1 to become a WiFi Access Point::
 
     nsh> dhcpd_start wlan1
     nsh> wapi psk wlan1 mypasswd 3
     nsh> wapi essid wlan1 nuttxap 1
 
-And you need to make the route to your WiFi Router (i.e. 192.168.0.1) the default route:
+And you need to make the route to your WiFi Router (i.e. 192.168.0.1) the default route::
 
     nsh> addroute default 192.168.0.1 wlan0
     nsh> route
     SEQ   TARGET          NETMASK         ROUTER
        1. 0.0.0.0         0.0.0.0         192.168.0.1
 
-Finally we will setup an iptables rule to NAT the wlan0 interface:
+Finally we will setup an iptables rule to NAT the wlan0 interface::
 
     nsh> iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
 
 After connectig a client (i.e. Linux computer) to the `nuttxap` Access Point
-you can confirm it is working this way:
+you can confirm it is working this way::
 
     $ ifconfig
     lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
