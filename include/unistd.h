@@ -328,6 +328,7 @@ int     daemon(int nochdir, int noclose);
 int     close(int fd);
 int     dup(int fd);
 int     dup2(int fd1, int fd2);
+int     dup3(int fd1, int fd2, int flags);
 int     fsync(int fd);
 off_t   lseek(int fd, off_t offset, int whence);
 ssize_t read(int fd, FAR void *buf, size_t nbytes);
