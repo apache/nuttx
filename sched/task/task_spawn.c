@@ -31,6 +31,7 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/sched.h>
 #include <nuttx/kthread.h>
 #include <nuttx/spawn.h>
@@ -124,6 +125,10 @@ static int nxtask_spawn_create(FAR const char *name, int priority,
           goto errout_with_taskinit;
         }
     }
+
+  /* Close the file descriptors with O_CLOEXEC before active task */
+
+  files_close_onexec(&tcb->cmn);
 
   /* Set the attributes */
 

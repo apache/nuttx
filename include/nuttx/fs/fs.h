@@ -866,6 +866,16 @@ void files_releaselist(FAR struct filelist *list);
 int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist);
 
 /****************************************************************************
+ * Name: files_close_onexec
+ *
+ * Description:
+ *   Close specified task's file descriptors with O_CLOEXEC before exec.
+ *
+ ****************************************************************************/
+
+void files_close_onexec(FAR struct tcb_s *tcb);
+
+/****************************************************************************
  * Name: file_allocate_from_tcb
  *
  * Description:

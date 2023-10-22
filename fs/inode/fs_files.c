@@ -462,8 +462,7 @@ int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist)
 
           filep = &plist->fl_files[i][j];
 
-          if (filep && (filep->f_inode == NULL ||
-                       (filep->f_oflags & O_CLOEXEC) != 0))
+          if (filep && filep->f_inode == NULL)
             {
               continue;
             }
@@ -474,9 +473,10 @@ int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist)
               goto out;
             }
 
-          /* Yes... duplicate it for the child */
+          /* Yes... duplicate it for the child, include O_CLOEXEC flag. */
 
-          ret = file_dup2(filep, &clist->fl_files[i][j]);
+          ret = file_dup3(filep, &clist->fl_files[i][j],
+                          filep->f_oflags & O_CLOEXEC ? O_CLOEXEC : 0);
           if (ret < 0)
             {
               goto out;
@@ -487,6 +487,44 @@ int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist)
 out:
   nxmutex_unlock(&plist->fl_lock);
   return ret;
+}
+
+/****************************************************************************
+ * Name: files_close_onexec
+ *
+ * Description:
+ *   Close specified task's file descriptors with O_CLOEXEC before exec.
+ *
+ ****************************************************************************/
+
+void files_close_onexec(FAR struct tcb_s *tcb)
+{
+  FAR struct filelist *list;
+  int i;
+  int j;
+
+  /* Get the file descriptor list.  It should not be NULL in this context. */
+
+  list = nxsched_get_files_from_tcb(tcb);
+  DEBUGASSERT(list != NULL);
+
+  nxmutex_lock(&list->fl_lock);
+  for (i = 0; i < list->fl_rows; i++)
+    {
+      for (j = 0; j < CONFIG_NFILE_DESCRIPTORS_PER_BLOCK; j++)
+        {
+          FAR struct file *filep;
+
+          filep = &list->fl_files[i][j];
+          if (filep && filep->f_inode != NULL &&
+              (filep->f_oflags & O_CLOEXEC) != 0)
+            {
+              file_close(filep);
+            }
+        }
+    }
+
+  nxmutex_unlock(&list->fl_lock);
 }
 
 /****************************************************************************
