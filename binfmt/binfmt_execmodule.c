@@ -34,6 +34,7 @@
 
 #include <nuttx/addrenv.h>
 #include <nuttx/arch.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/sched.h>
 #include <sched/sched.h>
@@ -374,6 +375,10 @@ int exec_module(FAR struct binary_s *binp,
       tcb->cmn.group->tg_egid = binp->gid;
     }
 #endif
+
+  /* Close the file descriptors with O_CLOEXEC before active task */
+
+  files_close_onexec(&tcb->cmn);
 
   if (!spawn)
     {
