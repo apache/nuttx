@@ -100,6 +100,10 @@
 #  include "esp32_tca9548a.h"
 #endif
 
+#ifdef CONFIG_SENSORS_APDS9960
+#include "esp32_board_apds9960.h"
+#endif
+
 #ifdef CONFIG_SENSORS_BMP180
 #  include "esp32_bmp180.h"
 #endif
@@ -135,6 +139,10 @@
 #ifdef CONFIG_LCD_DEV
 #  include <nuttx/board.h>
 #  include <nuttx/lcd/lcd_dev.h>
+#endif
+
+#ifdef CONFIG_VIDEO_FB
+#  include <nuttx/video/fb.h>
 #endif
 
 #ifdef CONFIG_RTC_DRIVER
@@ -681,6 +689,37 @@ int esp32_bringup(void)
             "ERROR: Failed to wiegand_initialize failed : %d\n", ret);
     }
 
+#endif
+
+#ifdef CONFIG_DRIVERS_WIEGAND
+  ret = wiegand_initialize(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+            "ERROR: Failed to wiegand_initialize failed : %d\n", ret);
+    }
+
+#endif
+
+#ifdef CONFIG_VIDEO_FB
+  /* Initialize and register the framebuffer driver */
+
+  ret = fb_register(0, 0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: fb_register() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_APDS9960
+  /* Register the APDS-9960 gesture sensor */
+
+  ret = board_apds9960_initialize(0, 0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_apds9960_initialize() failed: %d\n",
+             ret);
+    }
 #endif
 
   /* If we got here then perhaps not all initialization was successful, but
