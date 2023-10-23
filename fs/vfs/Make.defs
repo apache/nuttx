@@ -29,6 +29,10 @@ CSRCS += fs_syncfs.c fs_truncate.c
 
 # Certain interfaces are not available if there is no mountpoint support
 
+ifneq ($(CONFIG_FS_LOCK_BUCKET_SIZE),0)
+CSRCS += fs_lock.c
+endif
+
 ifneq ($(CONFIG_PSEUDOFS_SOFTLINKS),0)
 CSRCS += fs_link.c fs_symlink.c fs_readlink.c
 endif

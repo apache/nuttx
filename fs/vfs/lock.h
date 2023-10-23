@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/fs_initialize.c
+ * fs/vfs/lock.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,85 +18,89 @@
  *
  ****************************************************************************/
 
+#ifndef __FS_VFS_LOCK_H
+#define __FS_VFS_LOCK_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <nuttx/reboot_notifier.h>
-#include <nuttx/trace.h>
-
-#include "rpmsgfs/rpmsgfs.h"
-#include "inode/inode.h"
-#include "aio/aio.h"
-#include "vfs/lock.h"
+#include <fcntl.h>
 
 /****************************************************************************
- * Private Functions
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#if CONFIG_FS_LOCK_BUCKET_SIZE == 0
+#  define file_initlk()
+#  define file_closelk(filep)
+#  define file_getlk(filep, flock) ((void)flock, -ENOSYS)
+#  define file_setlk(filep, flock, nonblock) ((void)flock, -ENOSYS)
+#else
+
+/****************************************************************************
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sync_reboot_handler
- ****************************************************************************/
-
-static int sync_reboot_handler(FAR struct notifier_block *nb,
-                               unsigned long action, FAR void *data)
-{
-  if (action == SYS_POWER_OFF || action == SYS_RESTART)
-    {
-      sync();
-    }
-
-  return 0;
-}
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Name: fs_sync_reboot_nb
- ****************************************************************************/
-
-static struct notifier_block g_sync_nb =
-{
-  sync_reboot_handler
-};
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: fs_initialize
+ * Name: file_initlk
  *
  * Description:
- *   This is called from the OS initialization logic to configure the file
- *   system.
+ *   Initializing file locks
  *
  ****************************************************************************/
 
-void fs_initialize(void)
-{
-  fs_trace_begin();
+void file_initlk(void);
 
-  /* Initial inode, file, and VFS data structures */
+/****************************************************************************
+ * Name: file_closelk
+ *
+ * Description:
+ *   Remove all locks associated with the filep when call close is applied.
+ *
+ * Input Parameters:
+ *   filep - The filep that corresponds to the shutdown.
+ *
+ ****************************************************************************/
 
-  inode_initialize();
+void file_closelk(FAR struct file *filep);
 
-  file_initlk();
+/****************************************************************************
+ * Name: file_getlk
+ *
+ * Description:
+ *   Attempts to lock the region (not a real lock), and if there is a
+ *   conflict then returns information about the conflicting locks
+ *
+ * Input Parameters:
+ *   filep - File structure instance
+ *   flock - Lock types to be converted
+ *
+ * Returned Value:
+ *   The resulting 0 on success. A errno value is returned on any failure.
+ *
+ ****************************************************************************/
 
-#ifdef CONFIG_FS_AIO
-  /* Initialize for asynchronous I/O */
+int file_getlk(FAR struct file *filep, FAR struct flock *flock);
 
-  aio_initialize();
+/****************************************************************************
+ * Name: file_setlk
+ *
+ * Description:
+ *   Actual execution of locking and unlocking behaviors
+ *
+ * Input Parameters:
+ *   filep    - File structure instance
+ *   flock    - Lock types to be converted
+ *   nonblock - Waiting for lock
+ *
+ * Returned Value:
+ *   The resulting 0 on success. A errno value is returned on any failure.
+ *
+ ****************************************************************************/
 
-#endif
+int file_setlk(FAR struct file *filep, FAR struct flock *flock,
+               bool nonblock);
 
-#ifdef CONFIG_FS_RPMSGFS_SERVER
-  rpmsgfs_server_init();
-#endif
-
-  register_reboot_notifier(&g_sync_nb);
-  fs_trace_end();
-}
+#endif /* CONFIG_FS_LOCK_BUCKET_SIZE */
+#endif /* __FS_VFS_LOCK_H */

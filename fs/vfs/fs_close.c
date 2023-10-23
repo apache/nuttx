@@ -32,6 +32,7 @@
 #include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
+#include "vfs/lock.h"
 
 /****************************************************************************
  * Public Functions
@@ -65,6 +66,8 @@ int file_close(FAR struct file *filep)
 
   if (inode)
     {
+      file_closelk(filep);
+
       /* Close the file, driver, or mountpoint. */
 
       if (inode->u.i_ops && inode->u.i_ops->close)
