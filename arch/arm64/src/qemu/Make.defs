@@ -26,3 +26,7 @@ CHIP_CSRCS  = qemu_boot.c qemu_serial.c
 ifeq ($(CONFIG_ARCH_EARLY_PRINT),y)
 CHIP_ASRCS  = qemu_lowputc.S
 endif
+
+ifeq ($(CONFIG_ARCH_USE_TEXT_HEAP),y)
+CHIP_CSRCS += qemu_textheap.c
+endif
