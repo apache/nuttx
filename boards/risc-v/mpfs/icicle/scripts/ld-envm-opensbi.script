@@ -36,10 +36,10 @@ SECTIONS
     PROVIDE(__l2lim_end   = ORIGIN(l2lim) + LENGTH(l2lim));
 
     .text.sbi : {
-      */sbi*
-      */riscv_atomic*
-      */riscv_locks*
-      */riscv_asm*
+      sbi*
+      riscv_atomic*
+      riscv_locks*
+      riscv_asm*
     } > ddr
 
     .l2_scratchpad : ALIGN(0x10)
