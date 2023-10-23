@@ -83,5 +83,9 @@ if(CONFIG_NET)
     list(APPEND SRCS phy_notify.c)
   endif()
 
+  if(CONFIG_DRIVERS_WIFI_SIM)
+    list(APPEND SRCS wifi_sim.c)
+  endif()
+
   target_sources(drivers PRIVATE ${SRCS})
 endif()

@@ -93,6 +93,10 @@ endif
 
 endif
 
+ifeq ($(CONFIG_DRIVERS_WIFI_SIM),y)
+  CSRCS += wifi_sim.c
+endif
+
 # Include network build support
 
 DEPPATH += --dep-path net
