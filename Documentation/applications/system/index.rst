@@ -8,6 +8,7 @@ System Libraries and NSH Add-Ons
    :titlesonly:
    
    nxdiag/index.rst
+   i2c/index.rst
 
 - adb - ADB daemon application
 - argtable3 - ARGTABLE3 library
