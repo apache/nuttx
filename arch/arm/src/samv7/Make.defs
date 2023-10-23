@@ -64,6 +64,10 @@ ifeq ($(CONFIG_SAMV7_1WIREDRIVER),y)
 CHIP_CSRCS += sam_1wire.c
 endif
 
+ifeq ($(CONFIG_SAMV7_LIN_SOCKET),y)
+CHIP_CSRCS += sam_lin_sock.c
+endif
+
 ifeq ($(CONFIG_SAMV7_USART_IS_SPI_MASTER),y)
 CHIP_CSRCS += sam_serial_spi.c
 endif
