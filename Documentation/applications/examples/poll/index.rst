@@ -1,5 +1,5 @@
-``poll``
-========
+``poll`` Poll example
+=====================
 
 A test of the ``poll()`` and ``select()`` APIs using FIFOs and, if available,
 ``stdin``, and a TCP/IP socket. In order to use the TCP/IP select test, you must

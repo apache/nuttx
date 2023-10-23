@@ -1,5 +1,5 @@
-``timer_gpio``
-==============
+``timer_gpio`` Timer GPIO example
+=================================
 
 This example uses the timer interrupt to periodically change the state of a
 digital output. The digital output may be a relay, a led or anything else.

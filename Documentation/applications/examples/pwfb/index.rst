@@ -1,5 +1,5 @@
-``pwfb``
-========
+``pwfb`` NX Per-Window Framebuffer Text Example
+===============================================
 
 A graphics example using pre-window frame buffers. The example shows three
 windows containing text moving around, crossing each other from above and from

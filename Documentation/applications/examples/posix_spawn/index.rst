@@ -1,5 +1,5 @@
-``posix_spawn``
-===============
+``posix_spawn`` posix_spawn Unit Test
+=====================================
 
 This is a simple test of the ``posix_spawn()`` API. The example derives from
 ``examples/elf``. As a result, these tests are built using the relocatable ELF

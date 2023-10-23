@@ -1,5 +1,5 @@
-``media``
-=========
+``media`` Media test
+====================
 
 The media test simply writes values onto the media hidden behind a character
 driver and verifies that the media can be successfully written and read. This

@@ -1,4 +1,4 @@
-``sht3x``
-=========
+``sht3x`` SHT3x sensor example
+==============================
 
 TODO

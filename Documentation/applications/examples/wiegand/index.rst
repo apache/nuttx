@@ -1,4 +1,4 @@
-``wiegand``
-===========
+``wiegand`` Wiegand example
+===========================
 
 TODO

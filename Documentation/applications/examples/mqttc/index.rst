@@ -1,5 +1,5 @@
-``mqttc``
-=========
+``mqttc`` MQTT-C Example
+========================
 
 This is a simple MQTT publisher example using MQTT-C
 

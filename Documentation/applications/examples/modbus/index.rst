@@ -1,5 +1,5 @@
-``modbus`` FreeModbus
-=====================
+``modbus`` FreeModbus demo example
+==================================
 
 This is a port of the FreeModbus Linux demo. It derives from the demos/LINUX
 directory of the FreeModBus version ``1.5.0`` (June 6, 2010) that can be

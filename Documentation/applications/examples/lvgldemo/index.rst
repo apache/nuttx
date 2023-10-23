@@ -1,4 +1,4 @@
-``lvgldemo``
-============
+``lvgldemo`` LVGL Demo
+=====================
 
 TODO

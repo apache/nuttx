@@ -1,4 +1,4 @@
-``nng_test``
-============
+``nng_test`` NNG pubsub program
+===============================
 
 TODO
