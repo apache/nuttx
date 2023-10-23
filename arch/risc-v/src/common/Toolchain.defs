@@ -260,7 +260,7 @@ STRIP   = $(CROSSDEV)strip --strip-unneeded
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
 LD      = $(CROSSDEV)ld
-AR      = $(CROSSDEV)ar rcsP
+AR      = $(CROSSDEV)ar rcs
 NM      = $(CROSSDEV)nm
 
 # Link Time Optimization
@@ -269,7 +269,7 @@ ifeq ($(CONFIG_LTO_FULL),y)
   ARCHOPTIMIZATION += -flto
   ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
     LD := $(CROSSDEV)gcc
-    AR := $(CROSSDEV)gcc-ar rcsP
+    AR := $(CROSSDEV)gcc-ar rcs
     NM := $(CROSSDEV)gcc-nm
     ARCHOPTIMIZATION += -fuse-linker-plugin
     ARCHOPTIMIZATION += -fno-builtin
