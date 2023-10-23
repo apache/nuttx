@@ -1,4 +1,4 @@
-``nxscope``
-===========
+``nxscope`` NxScope library example
+===================================
 
 TODO

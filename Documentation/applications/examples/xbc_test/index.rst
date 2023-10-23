@@ -1,4 +1,4 @@
-``xbc_test``
-============
+``xbc_test`` XBox Controller Example
+====================================
 
 TODO

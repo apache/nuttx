@@ -1,5 +1,5 @@
-``pdcurses``
-============
+``pdcurses`` pdcurses demos
+===========================
 
 This directory contains demonstration programs to show and test the capabilities
 of ``pdcurses`` libraries. Some of them predate PDCurses, PCcurses or even

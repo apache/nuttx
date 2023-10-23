@@ -1,4 +1,4 @@
-``nimble``
-==========
+``nimble`` NimBLE example
+=========================
 
 TODO

@@ -1,4 +1,4 @@
-``modbusmaster``
-================
+``modbusmaster`` Modbus Master example
+======================================
 
 TODO

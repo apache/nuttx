@@ -1,5 +1,5 @@
-``nx``
-======
+``nx`` NX graphics example
+==========================
 
 This directory contains a simple test of a subset of the NX APIs defined in
 ``include/nuttx/nx/nx.h``. The following configuration options can be selected:

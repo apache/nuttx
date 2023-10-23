@@ -1,4 +1,4 @@
-``noteprintf``
-==============
+``noteprintf`` "Note printf!" example
+=====================================
 
 TODO

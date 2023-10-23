@@ -1,4 +1,4 @@
-``pppd``
-========
+``pppd`` pppd client example
+============================
 
 TODO

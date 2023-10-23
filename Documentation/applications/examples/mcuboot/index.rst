@@ -1,5 +1,5 @@
-``mcuboot``
-===========
+``mcuboot`` MCUboot examples
+============================
 
 ``swap_test``
 -------------

@@ -1,4 +1,4 @@
-``usrsocktest``
-===============
+``usrsocktest`` USRSOCK test example
+===================================
 
 TODO
