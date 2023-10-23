@@ -360,6 +360,10 @@ config SAMV7_1WIREDRIVER
 	bool
 	default n
 
+config SAMV7_LIN_SOCKET
+	bool
+	default n
+
 config SAMV7_USART_IS_SPI_MASTER
 	bool
 	default n
@@ -1343,6 +1347,11 @@ config SAMV7_USART0_1WIREDRIVER
 	bool "1-Wire driver"
 	select SAMV7_1WIREDRIVER
 
+config SAMV7_USART0_LIN_SOCKET
+	bool "SocketLIN driver"
+	select SAMV7_LIN_SOCKET
+	depends on NET_CAN
+
 config SAMV7_USART0_SPI_MASTER
 	bool "USART0 as SPI Master driver"
 	select SAMV7_USART_IS_SPI_MASTER
@@ -1372,6 +1381,17 @@ config SAMV7_USART0_RS485MODE
 		opened for the first time.
 
 endif # SAMV7_USART0_SERIALDRIVER
+
+if SAMV7_USART0_LIN_SOCKET
+
+config SAMV7_USART0_LIN_BAUD
+	int "BAUD rate"
+	default 19200
+	---help---
+		The configured BAUD of the LIN bus.
+
+endif # SAMV7_USART0_LIN_SOCKET
+
 endif # SAMV7_USART0
 
 menuconfig SAMV7_USART1
@@ -1394,6 +1414,11 @@ config SAMV7_USART1_SERIALDRIVER
 config SAMV7_USART1_1WIREDRIVER
 	bool "1-Wire driver"
 	select SAMV7_1WIREDRIVER
+
+config SAMV7_USART1_LIN_SOCKET
+	bool "SocketLIN driver"
+	select SAMV7_LIN_SOCKET
+	depends on NET_CAN
 
 config SAMV7_USART1_SPI_MASTER
 	bool "USART1 as SPI Master driver"
@@ -1424,6 +1449,17 @@ config SAMV7_USART1_RS485MODE
 		opened for the first time.
 
 endif # SAMV7_USART1_SERIALDRIVER
+
+if SAMV7_USART1_LIN_SOCKET
+
+config SAMV7_USART1_LIN_BAUD
+	int "BAUD rate"
+	default 19200
+	---help---
+		The configured BAUD of the LIN bus.
+
+endif # SAMV7_USART1_LIN_SOCKET
+
 endif # SAMV7_USART1
 
 menuconfig SAMV7_USART2
@@ -1446,6 +1482,11 @@ config SAMV7_USART2_SERIALDRIVER
 config SAMV7_USART2_1WIREDRIVER
 	bool "1-Wire driver"
 	select SAMV7_1WIREDRIVER
+
+config SAMV7_USART2_LIN_SOCKET
+	bool "SocketLIN driver"
+	select SAMV7_LIN_SOCKET
+	depends on NET_CAN
 
 config SAMV7_USART2_SPI_MASTER
 	bool "USART2 as SPI Master driver"
@@ -1476,6 +1517,17 @@ config SAMV7_USART2_RS485MODE
 		opened for the first time.
 
 endif # SAMV7_USART2_SERIALDRIVER
+
+if SAMV7_USART2_LIN_SOCKET
+
+config SAMV7_USART2_LIN_BAUD
+	int "BAUD rate"
+	default 19200
+	---help---
+		The configured BAUD of the LIN bus.
+
+endif # SAMV7_USART2_LIN_SOCKET
+
 endif # SAMV7_USART2
 
 config SAMV7_WDT
