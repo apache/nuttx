@@ -1,5 +1,5 @@
-``pipe``
-========
+``pipe`` Pipe example
+=====================
 
 A test of the ``mkfifo()`` and ``pipe()`` APIs. Requires ``CONFIG_PIPES``
 

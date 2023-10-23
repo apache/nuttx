@@ -1,5 +1,5 @@
-``tiff``
-========
+``tiff`` TIFF file generation example
+=====================================
 
 This is a simple unit test for the TIFF creation library at ``apps/graphic/tiff``.
 It is configured to work in the Linux user-mode simulation and has not been

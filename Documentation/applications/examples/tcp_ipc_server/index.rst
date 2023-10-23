@@ -1,5 +1,5 @@
-``tcp_ipc_server``
-==================
+``tcp_ipc_server`` Server for TCP IPC NuttX
+===========================================
 
 What's this?
 ------------

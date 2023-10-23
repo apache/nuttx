@@ -1,4 +1,4 @@
-``ini_dumper``
-==============
+``ini_dumper`` ini dumper example
+=================================
 
 TODO

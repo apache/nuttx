@@ -1,5 +1,5 @@
-``nxhello``
-===========
+``nxhello`` NX graphics "Hello, World!" example
+===============================================
 
 A very simple graphics example that just says Hello, World! in the center of
 the display.
