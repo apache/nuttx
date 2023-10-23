@@ -37,6 +37,5 @@ more information at the repository.
    wireless/index.rst
 
    nxdiag/index.rst
-   wapi/index.rst
    examples/index.rst
 
