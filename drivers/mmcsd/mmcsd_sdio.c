@@ -1329,7 +1329,7 @@ static int mmcsd_transferready(FAR struct mmcsd_state_s *priv)
       if (ret != OK)
         {
           ferr("ERROR: mmcsd_get_r1 failed: %d\n", ret);
-          goto errorout;
+          return ret;
         }
 
       /* Now check if the card is in the expected transfer state. */
@@ -1359,8 +1359,7 @@ static int mmcsd_transferready(FAR struct mmcsd_state_s *priv)
            */
 
           ferr("ERROR: Unexpected R1 state: %08" PRIx32 "\n", r1);
-          ret = -EINVAL;
-          goto errorout;
+          return -EINVAL;
         }
 
       /* Do not hog the CPU */
@@ -1382,10 +1381,6 @@ static int mmcsd_transferready(FAR struct mmcsd_state_s *priv)
   while (elapsed < TICK_PER_SEC);
 
   return -ETIMEDOUT;
-
-errorout:
-  mmcsd_removed(priv);
-  return ret;
 }
 
 /****************************************************************************
