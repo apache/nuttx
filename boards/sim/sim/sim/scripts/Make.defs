@@ -166,7 +166,7 @@ STRIP = $(CROSSDEV)strip
 AR = $(TOPDIR)/tools/macar-qcs.sh
 else
 STRIP = $(CROSSDEV)strip --strip-unneeded
-AR = $(CROSSDEV)ar rcsP
+AR = $(CROSSDEV)ar rcs
 endif
 NM = $(CROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
