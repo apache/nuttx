@@ -861,6 +861,29 @@ config ESP32S3_SPIRAM_IGNORE_NOTFOUND
 
 endmenu # SPI RAM Configuration
 
+menu "Memory Configuration"
+
+comment "Additional Heaps"
+
+choice ESP32S3_SPIRAM_HEAP
+	prompt "SPI RAM heap function"
+	default ESP32S3_SPIRAM_COMMON_HEAP if BUILD_FLAT
+	default ESP32S3_SPIRAM_USER_HEAP if BUILD_PROTECTED
+	depends on ESP32S3_SPIRAM
+	---help---
+		Select how the SPI RAM will be used as heap.
+
+config ESP32S3_SPIRAM_COMMON_HEAP
+	bool "Additional region to kernel heap"
+
+config ESP32S3_SPIRAM_USER_HEAP
+	bool "Separated userspace heap"
+	select MM_KERNEL_HEAP
+
+endchoice # ESP32S3_SPIRAM_HEAP
+
+endmenu # Memory Configuration
+
 config ESP32S3_GPIO_IRQ
 	bool "GPIO pin interrupts"
 	default n

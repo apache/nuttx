@@ -144,6 +144,14 @@ CHIP_CSRCS += esp32s3_psram_octal.c
 endif
 endif
 
+ifeq ($(CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP),y)
+CHIP_CSRCS += esp32s3_imm.c
+endif
+
+ifeq ($(CONFIG_ARCH_HAVE_EXTRA_HEAPS),y)
+CHIP_CSRCS += esp32s3_extraheaps.c
+endif
+
 ifeq ($(CONFIG_ESP32S3_TOUCH),y)
 CHIP_CSRCS += esp32s3_touch.c
 endif
