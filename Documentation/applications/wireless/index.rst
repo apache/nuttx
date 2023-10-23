@@ -8,9 +8,9 @@ Wireless Libraries and NSH Add-Ons
    :titlesonly:
    
    wapi/index.rst
+   nimble/index.rst
 
 - btsak - Bluetooth Swiss Army Knife (NuttX BLE Host)
-- nimble
 - gs2200m - Telit GS2200M usrsock daemon
 - i8sak - IEEE 802.15.4 Swiss Army Knife
 - i8shark - IEEE 802.15.4 Wireshark adapter
