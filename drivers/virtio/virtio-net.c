@@ -32,6 +32,7 @@
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netdev_lowerhalf.h>
 #include <nuttx/virtio/virtio.h>
+#include <nuttx/net/wifi_sim.h>
 
 #include "virtio-net.h"
 
@@ -96,9 +97,16 @@ begin_packed_struct struct virtio_net_config_s
 
 struct virtio_net_priv_s
 {
+#ifdef CONFIG_DRIVERS_WIFI_SIM
+  /* wifi device information, which includes the netdev lowerhalf */
+
+  struct wifi_sim_lowerhalf_s lower;
+#else
+
   /* This holds the information visible to the NuttX network */
 
   struct netdev_lowerhalf_s lower;     /* The netdev lowerhalf */
+#endif
 
   /* Virtio device information */
 
@@ -147,7 +155,8 @@ static int virtio_net_rmmac(FAR struct netdev_lowerhalf_s *dev,
                             FAR const uint8_t *mac);
 #endif
 #ifdef CONFIG_NETDEV_IOCTL
-static int virtio_net_ioctl(FAR struct netdev_lowerhalf_s *dev);
+static int virtio_net_ioctl(FAR struct netdev_lowerhalf_s *dev,
+                            int cmd, unsigned long arg);
 #endif
 
 static int  virtio_net_probe(FAR struct virtio_device *vdev);
@@ -303,7 +312,16 @@ static int virtio_net_ifup(FAR struct netdev_lowerhalf_s *dev)
   virtqueue_enable_cb(priv->vdev->vrings_info[VIRTIO_NET_RX].vq);
   virtio_net_rxfill(dev);
 
-  return netdev_lower_carrier_on(dev);
+#ifdef CONFIG_DRIVERS_WIFI_SIM
+  if (priv->lower.wifi)
+    {
+      return OK;
+    }
+  else
+#endif
+    {
+      return netdev_lower_carrier_on(dev);
+    }
 }
 
 /****************************************************************************
@@ -322,7 +340,16 @@ static int virtio_net_ifdown(FAR struct netdev_lowerhalf_s *dev)
       virtqueue_disable_cb(priv->vdev->vrings_info[i].vq);
     }
 
-  return netdev_lower_carrier_off(dev);
+#ifdef CONFIG_DRIVERS_WIFI_SIM
+  if (priv->lower.wifi)
+    {
+      return dev->iw_ops->disconnect(dev);
+    }
+  else
+#endif
+    {
+      return netdev_lower_carrier_off(dev);
+    }
 }
 
 /****************************************************************************
@@ -420,7 +447,7 @@ static netpkt_t *virtio_net_recv(FAR struct netdev_lowerhalf_s *dev)
        * TODO: Find a better way to free TX buffer.
        */
 
-      virtio_net_txfree(&priv->lower);
+      virtio_net_txfree((FAR struct netdev_lowerhalf_s *)priv);
 
       vrtinfo("get NULL buffer\n");
       return NULL;
@@ -460,7 +487,8 @@ static int virtio_net_rmmac(FAR struct netdev_lowerhalf_s *dev,
  * Name: virtio_net_ioctl
  ****************************************************************************/
 
-static int virtio_net_ioctl(FAR struct netdev_lowerhalf_s *dev)
+static int virtio_net_ioctl(FAR struct netdev_lowerhalf_s *dev,
+                            int cmd, unsigned long arg)
 {
   return -ENOTTY;
 }
@@ -475,7 +503,7 @@ static void virtio_net_rxready(FAR struct virtqueue *vq)
   FAR struct virtio_net_priv_s *priv = vq->vq_dev->priv;
 
   virtqueue_disable_cb(vq);
-  netdev_lower_rxready(&priv->lower);
+  netdev_lower_rxready((FAR struct netdev_lowerhalf_s *)priv);
 }
 
 /****************************************************************************
@@ -487,7 +515,7 @@ static void virtio_net_txdone(FAR struct virtqueue *vq)
   FAR struct virtio_net_priv_s *priv = vq->vq_dev->priv;
 
   virtqueue_disable_cb(vq);
-  netdev_lower_txdone(&priv->lower);
+  netdev_lower_txdone((FAR struct netdev_lowerhalf_s *)priv);
 }
 
 /****************************************************************************
@@ -542,7 +570,8 @@ static int virtio_net_init(FAR struct virtio_net_priv_s *priv,
 
 static void virtio_net_set_macaddr(FAR struct virtio_net_priv_s *priv)
 {
-  FAR struct net_driver_s *dev = &priv->lower.netdev;
+  FAR struct net_driver_s *dev =
+                   &((FAR struct netdev_lowerhalf_s *)&priv->lower)->netdev;
   FAR struct virtio_device *vdev = priv->vdev;
   FAR uint8_t *mac = dev->d_mac.ether.ether_addr_octet;
 
@@ -602,17 +631,34 @@ static int virtio_net_probe(FAR struct virtio_device *vdev)
 
   /* Initialize the netdev lower half */
 
-  netdev = &priv->lower;
+  netdev = (FAR struct netdev_lowerhalf_s *)priv;
   netdev->quota[NETPKT_RX] = priv->bufnum;
   netdev->quota[NETPKT_TX] = priv->bufnum;
   netdev->ops = &g_virtio_net_ops;
 
+#ifdef CONFIG_DRIVERS_WIFI_SIM
+  ret = wifi_sim_init(&priv->lower);
+  if (ret < 0)
+    {
+      goto err_with_virtqueues;
+    }
+#endif
+
   /* Register the net deivce */
 
-  ret = netdev_lower_register(netdev, NET_LL_ETHERNET);
+  ret = netdev_lower_register(netdev,
+#ifdef CONFIG_DRIVERS_WIFI_SIM
+                              NET_LL_IEEE80211
+#else
+                              NET_LL_ETHERNET
+#endif
+                              );
   if (ret < 0)
     {
       vrterr("netdev_lower_register failed, ret=%d\n", ret);
+#ifdef CONFIG_DRIVERS_WIFI_SIM
+      wifi_sim_remove(&priv->lower);
+#endif
       goto err_with_virtqueues;
     }
 
@@ -636,9 +682,12 @@ static void virtio_net_remove(FAR struct virtio_device *vdev)
 {
   FAR struct virtio_net_priv_s *priv = vdev->priv;
 
-  netdev_lower_unregister(&priv->lower);
+  netdev_lower_unregister((FAR struct netdev_lowerhalf_s *)priv);
   virtio_reset_device(vdev);
   virtio_delete_virtqueues(vdev);
+#ifdef CONFIG_DRIVERS_WIFI_SIM
+  wifi_sim_remove(&priv->lower);
+#endif
   kmm_free(priv);
 }
 

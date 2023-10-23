@@ -657,4 +657,18 @@ config NETDEV_PHY_DEBUG
 
 endif # ARCH_HAVE_PHY
 
+config DRIVERS_WIFI_SIM
+	bool "WiFi SIM support"
+	depends on NETDEV_WIRELESS_IOCTL
+	default n
+
+config WIFI_SIM_CONFDIR
+	string "Virt WiFi configuration directory"
+	default "/etc/wifi"
+	depends on DRIVERS_WIFI_SIM
+	---help---
+		Provides the full path to location in the file system where WiFi-SIM
+		BSS configuration will be accessed.  This is a string and should not
+		include any trailing '/'.
+
 endif # NETDEVICES
