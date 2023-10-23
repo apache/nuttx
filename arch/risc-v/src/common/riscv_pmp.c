@@ -50,11 +50,7 @@
 
 /* Minimum supported block size */
 
-#if !defined CONFIG_ARCH_MPU_MIN_BLOCK_SIZE
 #define MIN_BLOCK_SIZE          (PMP_XLEN / 8)
-#else
-#define MIN_BLOCK_SIZE          CONFIG_ARCH_MPU_MIN_BLOCK_SIZE
-#endif
 
 /* Address and block size alignment mask */
 
@@ -100,51 +96,6 @@ typedef struct pmp_entry_s pmp_entry_t;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: pmp_check_addrmatch_type
- *
- * Description:
- *   Test if an address matching type is supported by the architecture.
- *
- * Input Parameters:
- *   type - The type to test.
- *
- * Returned Value:
- *   true if it is, false otherwise.
- *
- ****************************************************************************/
-
-static bool pmp_check_addrmatch_type(uintptr_t type)
-{
-  /* Parameter is potentially unused */
-
-  UNUSED(type);
-#ifdef CONFIG_ARCH_MPU_HAS_TOR
-  if (type == PMPCFG_A_TOR)
-    {
-      return true;
-    }
-
-#endif
-#ifdef CONFIG_ARCH_MPU_HAS_NO4
-  if (type == PMPCFG_A_NA4)
-    {
-      return true;
-    }
-
-#endif
-#ifdef CONFIG_ARCH_MPU_HAS_NAPOT
-  if (type == PMPCFG_A_NAPOT)
-    {
-      return true;
-    }
-#endif
-
-  /* None of the supported types match */
-
-  return false;
-}
 
 /****************************************************************************
  * Name: pmp_check_region_attrs
@@ -463,13 +414,6 @@ int riscv_config_pmp_region(uintptr_t region, uintptr_t attr,
   uintptr_t addr    = 0;
   uintptr_t cfg     = 0;
   uintptr_t type    = (attr & PMPCFG_A_MASK);
-
-  /* Check that the architecture supports address matching type */
-
-  if (pmp_check_addrmatch_type(type) == false)
-    {
-      return -EINVAL;
-    }
 
   /* Check the region attributes */
 

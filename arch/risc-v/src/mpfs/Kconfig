@@ -797,17 +797,3 @@ config MPFS_CORERMII_ADDRESS
 	int "CoreRMII Phy address"
 	default 1
 	depends on MPFS_HAVE_CORERMII
-
-# Override the default values for MPU / PMP parameters here
-
-config ARCH_MPU_MIN_BLOCK_SIZE
-	default 4096
-
-config ARCH_MPU_HAS_TOR
-	default n
-
-config ARCH_MPU_HAS_NO4
-	default n
-
-config ARCH_MPU_HAS_NAPOT
-	default y
