@@ -35,6 +35,7 @@
 #include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
+#include "lock.h"
 
 /****************************************************************************
  * Private Functions
@@ -195,6 +196,12 @@ static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
          * for the lock type which shall be set to F_UNLCK.
          */
 
+        {
+          FAR struct flock *flock = va_arg(ap, FAR struct flock *);
+          ret = file_getlk(filep, flock);
+        }
+
+        break;
       case F_SETLK:
         /* Set or clear a file segment lock according to the lock
          * description pointed to by the third argument, arg, taken as a
@@ -206,6 +213,12 @@ static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
          * shall return immediately with a return value of -1.
          */
 
+        {
+          FAR struct flock *flock = va_arg(ap, FAR struct flock *);
+          ret = file_setlk(filep, flock, true);
+        }
+
+        break;
       case F_SETLKW:
         /* This command shall be equivalent to F_SETLK except that if a
          * shared or exclusive lock is blocked by other locks, the thread
@@ -216,9 +229,12 @@ static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
          * the lock operation shall not be done.
          */
 
-        ret = -ENOSYS; /* Not implemented */
-        break;
+        {
+          FAR struct flock *flock = va_arg(ap, FAR struct flock *);
+          ret = file_setlk(filep, flock, false);
+        }
 
+        break;
       case F_GETPATH:
         /* Get the path of the file descriptor. The argument must be a buffer
          * of size PATH_MAX or greater.

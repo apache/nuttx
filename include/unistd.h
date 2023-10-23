@@ -289,6 +289,18 @@
 #  define execvpe                        execve
 #endif
 
+/* Commands for lockf()
+ * F_ULOCK - Unlock
+ * F_LOCK  - Blocking Exclusive Lock
+ * F_TLOCK - Attempted Exclusive Locking
+ * F_TEST  - Test Locked Status
+ */
+
+#define F_ULOCK                          0
+#define F_LOCK                           1
+#define F_TLOCK                          2
+#define F_TEST                           3
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -337,6 +349,7 @@ ssize_t pread(int fd, FAR void *buf, size_t nbytes, off_t offset);
 ssize_t pwrite(int fd, FAR const void *buf, size_t nbytes, off_t offset);
 int     ftruncate(int fd, off_t length);
 int     fchown(int fd, uid_t owner, gid_t group);
+int     lockf(int fd, int cmd, off_t len);
 
 /* Check if a file descriptor corresponds to a terminal I/O file */
 
