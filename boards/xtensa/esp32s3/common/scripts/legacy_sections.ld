@@ -124,6 +124,13 @@ SECTIONS
     *libc.a:sq_remfirst.*(.literal.sq_remfirst .text.sq_remfirst)
 #endif
 
+    *libarch.a:esp32s3_spi_timing.*(.literal .text .literal.* .text.*)
+#ifdef CONFIG_ESP32S3_SPIRAM_MODE_QUAD
+    *libarch.a:esp32s3_psram_quad.*(.literal .text .literal.* .text.*)
+#endif
+#ifdef CONFIG_ESP32S3_SPIRAM_MODE_OCT
+    *libarch.a:esp32s3_psram_octal.*(.literal .text .literal.* .text.*)
+#endif
     *(.wifirxiram .wifirxiram.*)
     *(.wifi0iram  .wifi0iram.*)
     *(.wifiorslpiram .wifiorslpiram.*)
