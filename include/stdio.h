@@ -249,6 +249,10 @@ int    vdprintf(int fd, FAR const IPTR char *fmt, va_list ap)
 FAR FILE *fopencookie(FAR void *cookie, FAR const char *mode,
                       cookie_io_functions_t io_funcs);
 
+/* Memory buffer stream */
+
+FAR FILE *fmemopen(FAR void *buf, size_t size, FAR const char *mode);
+
 /* Operations on paths */
 
 FAR FILE *tmpfile(void) fopen_like;
