@@ -61,6 +61,14 @@
 #  define CONFIG_C99_BOOL 1
 #endif
 
+/* ISO C99 supports Designated initializers */
+
+#undef CONFIG_DESIGNATED_INITIALIZERS
+
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+#  define CONFIG_DESIGNATED_INITIALIZERS 1
+#endif
+
 /* ISO C/C++11 atomic types support */
 
 #undef CONFIG_HAVE_ATOMICS
