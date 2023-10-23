@@ -290,7 +290,7 @@ the result by running ``ifconfig`` afterwards.
 
 .. tip:: Boards usually expose a ``wifi`` defconfig which enables Wi-Fi
 
-.. tip:: Please check :doc:`wapi </applications/wapi/index>` documentation for more
+.. tip:: Please check :doc:`wapi </applications/wireless/wapi/index>` documentation for more
    information about its commands and arguments.
 
 .. note:: The ``wapi psk`` command on Station mode sets a security threshold. That
@@ -319,7 +319,7 @@ In this case, you are creating the access point ``nuttxapp`` in your board and t
 connect to it on your smartphone you will be required to type the password ``mypasswd``
 using WPA2.
 
-.. tip:: Please check :doc:`wapi </applications/wapi/index>` documentation for more
+.. tip:: Please check :doc:`wapi </applications/wireless/wapi/index>` documentation for more
    information about its commands and arguments.
 
 The ``dhcpd_start`` is necessary to let your board to associate an IP to your smartphone.
