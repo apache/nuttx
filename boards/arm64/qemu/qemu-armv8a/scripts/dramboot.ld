@@ -62,6 +62,11 @@ SECTIONS
   _etext = .; /* End_1 of .text */
   _sztext = _etext - _stext;
 
+  _sload = .;
+  . += 1048576;
+  _eload = .;
+  _szload = _eload - _sload;
+
   . = ALIGN(4096);
   .rodata : {
         _srodata = .;          /* Read-only data */
