@@ -27,6 +27,7 @@ Testing
 - osperf - System performance profiling
 - ostest - OS test example
 - scanftest - sscanf() test
+- sd_stress - SD card and file system stress test tool
 - sensortest - Sensor driver test
 - setest - Secure Element driver test
 - smart - SMART file system example
