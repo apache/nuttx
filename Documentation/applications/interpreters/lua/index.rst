@@ -15,3 +15,11 @@ toolchain provided math library.
 The following configs are recommended for a full featured Lua interpreter:
 - ``LIBC_FLOATINGPOINT``
 - ``SYSTEM_READLINE``
+
+
+Lua modules:
+
+- cjson
+- lfs
+- luasyslog
+- luv

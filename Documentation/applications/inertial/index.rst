@@ -2,4 +2,10 @@
 Inertial Libraries Support
 ==========================
 
-- madgwick - Madgwick Fusion Algorithm
+.. toctree::
+   :glob:
+   :maxdepth: 1
+   :titlesonly:
+   :caption: Contents
+
+   */index*

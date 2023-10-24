@@ -12,11 +12,3 @@ incorporated into NuttX.
    :caption: Contents
    
    */index*
-
-- duktape - Duktape JavaScript interpreter
-- luajit - LuaJIT interpreter
-- luamodules: cjson, lfs, luasyslog, luv
-- quickjs - QuickJS JavaScript interpreter
-- toywasm - Toywasm Webassembly Runtime
-- wamr - Webassembly Micro Runtime
-- wasm3 - WASM3 Webassembly Runtime
