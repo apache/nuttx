@@ -26,6 +26,8 @@ with little value as usage examples.
 - drivertest - vela cmocka driver test
 - fatutf8 - FAT UTF8 test
 - fdsantest - vela cmocka fdsan test
+- fmemopen - fmemopen() test
+- fopencookie - fopencookie() test
 - getprime - getprime example
 - iozone - IOzone, filesystem benchmark tool
 - irtest - IR driver test
