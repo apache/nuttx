@@ -218,6 +218,7 @@ else
       kconfig-tweak --file $nuttx/.config --enable CONFIG_WINDOWS_MSYS
     else
       echo "  Select CONFIG_WINDOWS_NATIVE=y"
+      kconfig-tweak --file $nuttx/.config --enable CONFIG_EXPERIMENTAL
       kconfig-tweak --file $nuttx/.config --enable CONFIG_WINDOWS_NATIVE
     fi
   fi
