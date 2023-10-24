@@ -33,7 +33,8 @@ Supported examples
 
 .. toctree::
    :glob:
-   :maxdepth: 3
+   :maxdepth: 1
    :titlesonly:
+   :caption: Contents
    
-   */*
+   */index*

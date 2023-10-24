@@ -6,6 +6,7 @@ Wireless Libraries and NSH Add-Ons
    :glob:
    :maxdepth: 1
    :titlesonly:
+   :caption: Contents
    
    */index*
 

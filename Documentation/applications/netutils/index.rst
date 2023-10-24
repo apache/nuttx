@@ -4,10 +4,11 @@ Network Utilities
 
 .. toctree::
    :glob:
-   :maxdepth: 3
+   :maxdepth: 1
    :titlesonly:
+   :caption: Contents
    
-   */*
+   */index*
 
 
 - chat - Chat tool

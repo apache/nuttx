@@ -15,5 +15,6 @@ to Doom in many ways. That game is not part of Apache NuttX.
    :glob:
    :maxdepth: 1
    :titlesonly:
+   :caption: Contents
 
    */index*
