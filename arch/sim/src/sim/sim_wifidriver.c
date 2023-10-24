@@ -643,21 +643,11 @@ static bool get_wpa_state(struct sim_netdev_s *wifidev)
   return false;
 }
 
-static int get_wpa_ssid(struct sim_netdev_s *wifidev, struct iw_point *essid)
+static void get_wpa_ssid(struct sim_netdev_s *wifidev,
+                         struct iw_point *essid)
 {
-  int ret;
-  char rbuf[BUF_LEN];
-
-  ret = get_cmd(wifidev, rbuf, BUF_LEN, "%s",
-                "status | grep ^ssid | awk -F'=' '{print $2}'");
-
-  if (ret > 0 && ret <= essid->length)
-    {
-      strlcpy(essid->pointer, rbuf, ret);
-      essid->length = ret - 1;
-    }
-
-  return ret;
+  essid->length = strlen(wifidev->ssid);
+  strlcpy(essid->pointer, wifidev->ssid, essid->length + 1);
 }
 
 static int get_wpa_freq(struct sim_netdev_s *wifidev)
