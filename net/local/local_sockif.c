@@ -562,19 +562,36 @@ static int local_getsockopt(FAR struct socket *psock, int level, int option,
 {
   DEBUGASSERT(psock->s_domain == PF_LOCAL);
 
-#ifdef CONFIG_NET_LOCAL_SCM
-  if (level == SOL_SOCKET && option == SO_PEERCRED)
+  if (level == SOL_SOCKET)
     {
-      FAR struct local_conn_s *conn = psock->s_conn;
-      if (*value_len != sizeof(struct ucred))
+      switch (option)
         {
-          return -EINVAL;
-        }
+#ifdef CONFIG_NET_LOCAL_SCM
+          case SO_PEERCRED:
+            {
+              FAR struct local_conn_s *conn = psock->s_conn;
+              if (*value_len != sizeof(struct ucred))
+                {
+                  return -EINVAL;
+                }
 
-      memcpy(value, &conn->lc_peer->lc_cred, sizeof(struct ucred));
-      return OK;
-    }
+              memcpy(value, &conn->lc_peer->lc_cred, sizeof(struct ucred));
+              return OK;
+            }
 #endif
+
+          case SO_SNDBUF:
+            {
+              if (*value_len != sizeof(int))
+                {
+                  return -EINVAL;
+                }
+
+              *(FAR int *)value = LOCAL_SEND_LIMIT;
+              return OK;
+            }
+        }
+    }
 
   return -ENOPROTOOPT;
 }
