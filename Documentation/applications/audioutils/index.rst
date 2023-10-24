@@ -9,6 +9,3 @@ Audio Utility libraries
    :caption: Contents
    
    */index*
-
-- fmsynth - FM Synthesizer Library
-- nxaudio - NX Audio Library

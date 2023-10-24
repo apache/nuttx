@@ -18,27 +18,3 @@ with little value as usage examples.
    :caption: Contents
    
    */index*
-
-- atomic - "Test atomic" testing
-- batterydump - Battery dump for test
-- cmocka - libcmocka
-- cpuload - cpuload test
-- crypto - crypto test
-- drivertest - vela cmocka driver test
-- fatutf8 - FAT UTF8 test
-- fdsantest - vela cmocka fdsan test
-- fmemopen - fmemopen() test
-- fopencookie - fopencookie() test
-- getprime - getprime example
-- iozone - IOzone, filesystem benchmark tool
-- irtest - IR driver test
-- ltp - Linux Test Project
-- memtester - utils_memtester
-- monkey - Monkey test
-- nist-sts - NIST Statistical Test Suite
-- osperf - System performance profiling
-- scanftest - sscanf() test
-- sensortest - Sensor driver test
-- setest - Secure Element driver test
-- superpi - SuperPI test
-- uclibcxx_test - uclibcxx test

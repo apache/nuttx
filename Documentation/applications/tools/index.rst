@@ -2,7 +2,7 @@
 Host Side Tools
 ===============
 
-NxWidgets ``bitmap_converter.py``
+``bitmap_converter.py`` NxWidgets
 ---------------------------------
 
 This script converts from any image type supported by Python imaging library to
