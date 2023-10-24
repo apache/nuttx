@@ -430,7 +430,8 @@ static int copy_scan_results(struct sim_scan_result_s *scan_req,
   struct iw_event *iwe;
 
   need_len = IW_EV_LEN(ap_addr) + IW_EV_LEN(qual) +
-             IW_EV_LEN(freq) + IW_EV_LEN(data) + IW_EV_LEN(essid);
+             IW_EV_LEN(freq) + IW_EV_LEN(data) +
+             IW_EV_LEN(essid) + ((MIN(info->ssid_len, 32) + 3) & ~3);
 
   if (scan_req->cur_len + need_len > scan_req->total_len)
     {
