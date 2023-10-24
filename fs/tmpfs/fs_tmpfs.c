@@ -298,6 +298,12 @@ static int tmpfs_realloc_file(FAR struct tmpfs_file_s *tfo,
    */
 
   allocsize = newsize + CONFIG_FS_TMPFS_FILE_ALLOCGUARD;
+  if (allocsize < newsize)
+    {
+      /* There must have been an integer overflow */
+
+      return -ENOMEM;
+    }
 
   /* Realloc the file object */
 
