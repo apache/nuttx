@@ -13,10 +13,11 @@ with little value as usage examples.
 
 .. toctree::
    :glob:
-   :maxdepth: 3
+   :maxdepth: 1
    :titlesonly:
+   :caption: Contents
    
-   */*
+   */index*
 
 - atomic - "Test atomic" testing
 - batterydump - Battery dump for test

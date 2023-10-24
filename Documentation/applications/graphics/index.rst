@@ -4,10 +4,11 @@ Graphics Support
 
 .. toctree::
    :glob:
-   :maxdepth: 3
+   :maxdepth: 1
    :titlesonly:
-   
-   */*
+   :caption: Contents
+
+   */index*
 
 - ft80x - FTDI/BridgeTek FT80x library
 - libjpeg - libjpeg JPEG image encoding

@@ -4,10 +4,11 @@ Cryptography Library Support
 
 .. toctree::
    :glob:
-   :maxdepth: 3
+   :maxdepth: 1
    :titlesonly:
+   :caption: Contents
    
-   wolfssl/index.rst
+   */index*
 
 - controlse - Control Secure Element device
 - libsodium - Libsodium Cryptography Library

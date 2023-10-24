@@ -7,10 +7,11 @@ incorporated into NuttX.
 
 .. toctree::
    :glob:
-   :maxdepth: 3
+   :maxdepth: 1
    :titlesonly:
+   :caption: Contents
    
-   */*
+   */index*
 
 - duktape - Duktape JavaScript interpreter
 - luajit - LuaJIT interpreter

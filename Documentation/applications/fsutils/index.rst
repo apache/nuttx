@@ -4,10 +4,11 @@ File System Utilities
 
 .. toctree::
    :glob:
-   :maxdepth: 3
+   :maxdepth: 1
    :titlesonly:
+   :caption: Contents
    
-   */*
+   */index*
 
 - flash_eraseall - flash_eraseall() function
 - inih - inih ini file parser
