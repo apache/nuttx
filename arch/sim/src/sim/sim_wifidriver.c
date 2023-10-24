@@ -927,6 +927,7 @@ static int wifidriver_set_essid(struct sim_netdev_s *wifidev,
   if (wifidev->mode == IW_MODE_INFRA)
     {
       WPA_SET_NETWORK(wifidev, "ssid \\\"%s\\\"", ssid_buf);
+      WPA_SET_NETWORK(wifidev, "scan_ssid 1");
 
       if (wifidev->psk_flag == 0)
         {
@@ -1011,6 +1012,7 @@ static int wifidriver_set_bssid(struct sim_netdev_s *wifidev,
   if (wifidev->mode == IW_MODE_INFRA)
     {
       WPA_SET_NETWORK(wifidev, "bssid %s", bssid_buf);
+      WPA_SET_NETWORK(wifidev, "scan_ssid 0");
 
       if (wifidev->psk_flag == 0)
         {
