@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32_rtc_driverinit
+ * Name: esp32s3_rtc_driverinit
  *
  * Description:
  *   Bind the configuration timer to a timer lower half instance and register
@@ -49,7 +49,7 @@
  *
  ****************************************************************************/
 
-int esp32_rtc_driverinit(void);
+int esp32s3_rtc_driverinit(void);
 
 #endif /* CONFIG_RTC_DRIVER */
 
