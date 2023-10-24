@@ -1301,7 +1301,7 @@ static ssize_t rpmsg_socket_recvmsg(FAR struct socket *psock,
                       _SO_TIMEOUT(conn->sconn.s_rcvtimeo));
   if (!conn->ept.rdev || conn->unbind)
     {
-      ret = -ECONNRESET;
+      ret = 0;
     }
 
   nxmutex_lock(&conn->recvlock);
