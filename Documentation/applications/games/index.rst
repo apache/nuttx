@@ -12,7 +12,8 @@ It is a raycasting game that Greg Nutt developed from scratch, similar
 to Doom in many ways. That game is not part of Apache NuttX.
 
 .. toctree::
-  :maxdepth: 2
-  :caption: Contents
+   :glob:
+   :maxdepth: 1
+   :titlesonly:
 
-  brichmatch.rst
+   */index*
