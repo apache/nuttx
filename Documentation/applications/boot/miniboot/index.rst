@@ -1,6 +1,6 @@
-========
-miniboot
-========
+===============================
+``miniboot`` Minimal bootloader
+===============================
 
 Minimal bootloader based on NuttX.
 
