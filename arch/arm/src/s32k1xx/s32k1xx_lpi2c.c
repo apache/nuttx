@@ -1452,31 +1452,39 @@ static int s32k1xx_lpi2c_isr_process(struct s32k1xx_lpi2c_priv_s *priv)
                                       LPI2C_MSR_FEF | LPI2C_MSR_EPF)));
     }
 
-  /* Check for endof packet */
+  /* Check for endof packet or Stop */
 
   if ((status & (LPI2C_MSR_EPF | LPI2C_MSR_SDF)) != 0)
     {
+      /* Reset either or both */
+
       s32k1xx_lpi2c_putreg(priv, S32K1XX_LPI2C_MSR_OFFSET, status &
                            (LPI2C_MSR_EPF | LPI2C_MSR_SDF));
 
-#ifndef CONFIG_I2C_POLLED
-      if (priv->intstate == INTSTATE_WAITING)
+      /* Was it both End of packet and Stop */
+
+      if ((status & (LPI2C_MSR_EPF | LPI2C_MSR_SDF)) ==
+          (LPI2C_MSR_EPF | LPI2C_MSR_SDF))
         {
-          /* inform the thread that transfer is complete
-           * and wake it up
-           */
+#ifndef CONFIG_I2C_POLLED
+          if (priv->intstate == INTSTATE_WAITING)
+            {
+              /* inform the thread that transfer is complete
+               * and wake it up
+               */
 
-          priv->intstate = INTSTATE_DONE;
+              priv->intstate = INTSTATE_DONE;
 
-          s32k1xx_lpi2c_modifyreg(priv, S32K1XX_LPI2C_MIER_OFFSET,
-                               LPI2C_MIER_TDIE | LPI2C_MIER_RDIE |
-                               LPI2C_MIER_NDIE | LPI2C_MIER_ALIE |
-                               LPI2C_MIER_SDIE | LPI2C_MIER_EPIE, 0);
-          nxsem_post(&priv->sem_isr);
-        }
+              s32k1xx_lpi2c_modifyreg(priv, S32K1XX_LPI2C_MIER_OFFSET,
+                                      LPI2C_MIER_TDIE | LPI2C_MIER_RDIE |
+                                      LPI2C_MIER_NDIE | LPI2C_MIER_ALIE |
+                                      LPI2C_MIER_SDIE | LPI2C_MIER_EPIE, 0);
+              nxsem_post(&priv->sem_isr);
+            }
 #else
-      priv->intstate = INTSTATE_DONE;
+          priv->intstate = INTSTATE_DONE;
 #endif
+        }
     }
 
   return OK;
