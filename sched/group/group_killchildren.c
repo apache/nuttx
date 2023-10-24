@@ -32,6 +32,7 @@
 #include <sys/types.h>
 
 #include <nuttx/sched.h>
+#include <nuttx/signal.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
@@ -201,9 +202,11 @@ int group_kill_children(FAR struct tcb_s *tcb)
   while (1)
     {
       if (tcb->group->tg_nmembers <= 1)
+        {
           break;
+        }
 
-      usleep(USEC_PER_MSEC);
+      nxsig_usleep(USEC_PER_MSEC);
 
 #  if CONFIG_GROUP_KILL_CHILDREN_TIMEOUT_MS > 0
       if (--ret < 0)
