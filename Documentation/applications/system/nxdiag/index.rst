@@ -1,6 +1,6 @@
-==============================
-NuttX Diagnostic Tool (Nxdiag)
-==============================
+================================
+``nxdiag`` NuttX Diagnostic Tool
+================================
 
 The NuttX Diagnostic Tool (Nxdiag) is a command line tool that can be used to gather information about the NuttX and host systems.
 It also can be used to run a tests to verify that the vendor's tools are properly installed and configured.
@@ -15,7 +15,7 @@ script, check the command line options and code comments of ``host_sysinfo.py``.
           recommended as it provides more accurate information about the host system.
 
 Usage
-=====
+-----
 
 This page shows ``nxdiag`` options. Note that some options are only available if the
 respective configuration options are enabled (see :ref:`cmdtable <nxdiagcmddependencies>`).
