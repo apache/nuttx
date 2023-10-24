@@ -7,7 +7,7 @@ Industrial Applications
    :maxdepth: 3
    :titlesonly:
    
-   abnt_codi/index.rst
+   */*
 
 - foc - Field Oriented Control user-space library
 - scpi - SCPI instrument side parser
