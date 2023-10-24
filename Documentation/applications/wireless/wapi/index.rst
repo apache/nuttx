@@ -1,9 +1,6 @@
-===================
-WAPI (Wireless API)
-===================
-
-WAPI (Wireless API) provides an easy-to-use function set to configure
-wireless network interfaces on a GNU/Linux system, originally.
+============================
+``wapi`` WAPI (Wireless API)
+============================
 
 One can provide use ``wapi`` to connect to Access Points, configure an
 Access Point, set Wi-Fi related configurations and get information about it.
