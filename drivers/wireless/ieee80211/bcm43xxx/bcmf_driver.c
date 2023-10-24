@@ -632,7 +632,7 @@ void bcmf_wl_auth_event_handler(FAR struct bcmf_dev_s *priv,
 
   if (type == WLC_E_PSK_SUP)
     {
-      carrier = (reason == WLC_E_SUP_OTHER) ? 1 : 0;
+      carrier = ((reason == WLC_E_SUP_OTHER) || (reason == 0)) ? 1 : 0;
       if (priv->auth_pending)
         {
           priv->auth_status = reason;
