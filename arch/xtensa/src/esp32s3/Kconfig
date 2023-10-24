@@ -861,6 +861,14 @@ config ESP32S3_SPIRAM_SPEED
 	default 80 if ESP32S3_SPIRAM_SPEED_80M
 	default 40 if ESP32S3_SPIRAM_SPEED_40M
 
+config ESP32S3_SPIRAM_ECC_ENABLE
+	bool "Enable SPI RAM ECC"
+	default n
+	depends on ESP32S3_SPIRAM_MODE_OCT
+	---help---
+		Enable MSPI Error-Correcting Code function when accessing SPIRAM.
+		If enabled, 1/16 of the SPI RAM total size will be reserved for error-correcting code.
+
 config ESP32S3_SPIRAM_BOOT_INIT
 	bool "Initialize SPI RAM during startup"
 	depends on ESP32S3_SPIRAM

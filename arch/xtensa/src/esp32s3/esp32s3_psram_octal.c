@@ -37,6 +37,7 @@
 #include "hardware/esp32s3_iomux.h"
 #include "hardware/esp32s3_gpio.h"
 #include "hardware/esp32s3_gpio_sigmap.h"
+#include "hardware/esp32s3_syscon.h"
 #include "rom/esp32s3_spiflash.h"
 #include "rom/esp32s3_opi_flash.h"
 
@@ -56,7 +57,11 @@
 
 #define OCT_PSRAM_CS_SETUP_TIME         3
 #define OCT_PSRAM_CS_HOLD_TIME          3
+#define OCT_PSRAM_CS_ECC_HOLD_TIME      3
 #define OCT_PSRAM_CS_HOLD_DELAY         2
+
+#define OCT_PSRAM_PAGE_SIZE             2
+#define OCT_PSRAM_ECC_ENABLE_MASK       BIT(8)
 
 /****************************************************************************
  * Private Types
@@ -151,6 +156,7 @@ struct opi_psram_reg
  ****************************************************************************/
 
 extern void cache_resume_dcache(uint32_t val);
+extern void ets_delay_us(uint32_t us);
 
 /****************************************************************************
  * Private Data
@@ -218,6 +224,37 @@ static void IRAM_ATTR set_psram_reg(int spi_num,
                             NULL, 0,
                             BIT(1),
                             false);
+
+#if CONFIG_ESP32S3_SPIRAM_ECC_ENABLE
+  addr = 0x8;
+  data_bit_len = 8;
+  esp_rom_opiflash_exec_cmd(spi_num, mode,
+                            OPI_PSRAM_REG_READ,
+                            cmd_len,
+                            addr,
+                            addr_bit_len,
+                            dummy,
+                            NULL, 0,
+                            &psram_reg.mr8.val,
+                            data_bit_len,
+                            BIT(1),
+                            false);
+
+  psram_reg.mr8.bt = in_reg->mr8.bt;
+  psram_reg.mr8.bl = in_reg->mr8.bl;
+
+  esp_rom_opiflash_exec_cmd(spi_num, mode,
+                            OPI_PSRAM_REG_WRITE,
+                            cmd_len,
+                            addr,
+                            addr_bit_len,
+                            0,
+                            &psram_reg.mr8.val,
+                            16,
+                            NULL, 0,
+                            BIT(1),
+                            false);
+#endif
 }
 
 /****************************************************************************
@@ -303,6 +340,47 @@ static void IRAM_ATTR get_psram_reg(int spi_num,
 }
 
 /****************************************************************************
+ * Name: configure_psram_ecc
+ *
+ * Description:
+ *   Enable error correcting code feature, Can add an input parameter for
+ *   selecting ECC mode if needed.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void IRAM_ATTR configure_psram_ecc(void)
+{
+#if CONFIG_ESP32S3_SPIRAM_ECC_ENABLE
+  /* Clear this bit to use ECC 16to17 mode */
+
+  CLEAR_PERI_REG_MASK(SPI_MEM_SPI_SMEM_AC_REG(0),
+                      SPI_MEM_SPI_SMEM_ECC_16TO18_BYTE_EN_M);
+  SET_PERI_REG_BITS(SYSCON_SPI_MEM_ECC_CTRL_REG,
+                    SYSCON_SRAM_PAGE_SIZE_V,
+                    OCT_PSRAM_PAGE_SIZE,
+                    SYSCON_SRAM_PAGE_SIZE_S);
+  SET_PERI_REG_MASK(SPI_MEM_SPI_SMEM_AC_REG(0),
+                    SPI_MEM_SPI_SMEM_ECC_SKIP_PAGE_CORNER_M);
+
+  /* Enable ECC region 0 (ACE0)
+   * Default: ACE0 range: 0 ~ 256MB
+   * Current Octal PSRAM is 8MB, ACE0 is enough
+   */
+
+  SET_PERI_REG_MASK(SYSCON_SRAM_ACE0_ATTR_REG, OCT_PSRAM_ECC_ENABLE_MASK);
+  minfo("PSRAM ECC is enabled\n");
+#else
+  CLEAR_PERI_REG_MASK(SYSCON_SRAM_ACE0_ATTR_REG, OCT_PSRAM_ECC_ENABLE_MASK);
+#endif
+}
+
+/****************************************************************************
  * Name: print_psram_reg
  *
  * Description:
@@ -383,6 +461,12 @@ static void IRAM_ATTR init_cs_timing(void)
                     SPI_MEM_SPI_SMEM_CS_SETUP_TIME_V,
                     OCT_PSRAM_CS_SETUP_TIME,
                     SPI_MEM_SPI_SMEM_CS_SETUP_TIME_S);
+#if CONFIG_ESP32S3_SPIRAM_ECC_ENABLE
+  SET_PERI_REG_BITS(SPI_MEM_SPI_SMEM_AC_REG(0),
+                    SPI_MEM_SPI_SMEM_ECC_CS_HOLD_TIME_V,
+                    OCT_PSRAM_CS_ECC_HOLD_TIME,
+                    SPI_MEM_SPI_SMEM_ECC_CS_HOLD_TIME_S);
+#endif
 
   /* CS1 high time */
 
@@ -598,8 +682,10 @@ int IRAM_ATTR psram_enable(int mode, int vaddrmode)
   psram_reg.mr0.drive_str = 0;
   set_psram_reg(1, &psram_reg);
   get_psram_reg(1, &psram_reg);
-  print_psram_reg(&psram_reg);
 
+  /* workaround: some chips are unstable without delay */
+
+  ets_delay_us(50000);
   g_psram_size = psram_reg.mr2.density == 0x1 ? PSRAM_SIZE_4MB  :
                  psram_reg.mr2.density == 0X3 ? PSRAM_SIZE_8MB  :
                  psram_reg.mr2.density == 0x5 ? PSRAM_SIZE_16MB :
@@ -610,6 +696,17 @@ int IRAM_ATTR psram_enable(int mode, int vaddrmode)
    */
 
   esp32s3_spi_timing_set_mspi_psram_tuning();
+
+  esp32s3_spi_timing_set_mspi_low_speed(true);
+
+  /* Enable ecc after timing tuning */
+
+  configure_psram_ecc();
+  psram_reg.mr8.bl = 3;
+  psram_reg.mr8.bt = 0;
+  set_psram_reg(1, &psram_reg);
+  get_psram_reg(1, &psram_reg);
+  print_psram_reg(&psram_reg);
 
   /* Back to the high speed mode. Flash/PSRAM clocks are set to the clock
    * that user selected. SPI0/1 registers are all set correctly.
@@ -634,6 +731,11 @@ int IRAM_ATTR psram_enable(int mode, int vaddrmode)
 
 int psram_get_physical_size(uint32_t *out_size_bytes)
 {
+  if (!out_size_bytes)
+    {
+      return -EINVAL;
+    }
+
   *out_size_bytes = g_psram_size;
   return g_psram_size > 0 ? OK : -EINVAL;
 }
@@ -642,6 +744,15 @@ int psram_get_physical_size(uint32_t *out_size_bytes)
 
 int psram_get_available_size(uint32_t *out_size_bytes)
 {
+  if (!out_size_bytes)
+    {
+      return -EINVAL;
+    }
+
+#if CONFIG_ESP32S3_SPIRAM_ECC_ENABLE
+  *out_size_bytes = g_psram_size * 15 / 16;
+#else
   *out_size_bytes = g_psram_size;
+#endif
   return (g_psram_size ? OK : -EINVAL);
 }
