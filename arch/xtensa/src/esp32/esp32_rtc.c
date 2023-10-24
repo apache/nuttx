@@ -1153,7 +1153,7 @@ void esp32_rtc_clk_set(void)
   enum esp32_rtc_fast_freq_e fast_freq = RTC_FAST_FREQ_8M;
   enum esp32_slow_clk_sel_e slow_clk = SLOW_CLK_150K;
 
-#if defined(CONFIG_ESP32_RTC_CLK_SRC_EXT_CRYS)
+#if defined(CONFIG_ESP32_RTC_CLK_SRC_EXT_XTAL)
   slow_clk = SLOW_CLK_32K_XTAL;
 #elif defined(CONFIG_ESP32_RTC_CLK_SRC_EXT_OSC)
   slow_clk = SLOW_CLK_32K_EXT_OSC;
