@@ -39,10 +39,12 @@ def test_getprime(p):
     assert ret == 0
 
 
-def test_fopencookie(p):
+def test_stdio(p):
     if p.board in do_not_support:
         pytest.skip("unsupported at {}".format(p.board))
     ret = p.sendCommand("fopencookie_test", "fopencokie tests were succesfull.")
+    assert ret == 0
+    ret = p.sendCommand("fmemopen_test", "FAILED: 0")
     assert ret == 0
 
 
