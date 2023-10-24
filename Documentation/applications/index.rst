@@ -34,6 +34,7 @@ more information at the repository.
    sdr/index.rst
    system/index.rst
    testing/index.rst
+   tools/index.rst
    wireless/index.rst
 
    examples/index.rst
