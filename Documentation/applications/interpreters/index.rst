@@ -2,13 +2,19 @@
 Interpreters
 ============
 
-- bas - Basic Interpreter 
+This `apps/` directory is set aside to hold interpreters that may be
+incorporated into NuttX.
+
+.. toctree::
+   :glob:
+   :maxdepth: 3
+   :titlesonly:
+   
+   */*
+
 - duktape - Duktape JavaScript interpreter
-- ficl - Ficl Forth interpreter
-- lua - Lua interpreter 
 - luajit - LuaJIT interpreter
 - luamodules: cjson, lfs, luasyslog, luv
-- minibasic - Mini Basic Interpreter
 - quickjs - QuickJS JavaScript interpreter
 - toywasm - Toywasm Webassembly Runtime
 - wamr - Webassembly Micro Runtime
