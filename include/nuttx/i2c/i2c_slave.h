@@ -223,6 +223,33 @@ extern "C"
 #define EXTERN extern
 #endif
 
+#ifdef CONFIG_I2C_SLAVE_DRIVER
+
+/****************************************************************************
+ * Name: i2c_slave_register
+ *
+ * Description:
+ *   Register the I2C Slave character device driver as 'devpath'.
+ *
+ * Input Parameters:
+ *   dev   - An instance of the I2C Slave interface to use to communicate
+ *           with the I2C Slave device
+ *   bus   - The I2C Slave bus number. This will be used as the I2C device
+ *           minor number. The I2C Slave character device will be
+ *           registered as /dev/i2cslvN where N is the minor number
+ *   addr  - I2C Slave address
+ *   nbits - The number of address bits provided (7 or 10)
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int i2c_slave_register(FAR struct i2c_slave_s *dev, int bus, int addr,
+                       int nbit);
+
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
