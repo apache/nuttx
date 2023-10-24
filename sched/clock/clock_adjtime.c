@@ -119,8 +119,6 @@ int adjtime(FAR const struct timeval *delta, FAR struct timeval *olddelta)
   long long incr_limit;
   int is_negative;
 
-  is_negative = 0;
-
   if (!delta)
     {
       set_errno(EINVAL);
@@ -135,6 +133,10 @@ int adjtime(FAR const struct timeval *delta, FAR struct timeval *olddelta)
     {
       adjust_usec = -adjust_usec;
       is_negative = 1;
+    }
+  else
+    {
+      is_negative = 0;
     }
 
   /* Get period in usec. Target hardware has to provide support for

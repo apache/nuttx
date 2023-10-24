@@ -76,11 +76,6 @@ int group_setuptaskfiles(FAR struct task_tcb_s *tcb)
   /* Duplicate the parent task's file descriptors */
 
   ret = files_duplist(&rtcb->group->tg_filelist, &group->tg_filelist);
-  if (ret < 0)
-    {
-      sched_trace_end();
-      return ret;
-    }
 #endif
 
   sched_trace_end();

@@ -59,7 +59,6 @@
 
 int group_setupidlefiles(void)
 {
-  int ret = OK;
 #if defined(CONFIG_DEV_CONSOLE) || defined(CONFIG_DEV_NULL)
   int fd;
 #endif
@@ -115,5 +114,5 @@ int group_setupidlefiles(void)
 #endif /* defined(CONFIG_DEV_CONSOLE) || defined(CONFIG_DEV_NULL) */
 
   sched_trace_end();
-  return ret;
+  return OK;
 }
