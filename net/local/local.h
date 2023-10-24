@@ -49,6 +49,8 @@
 #define LOCAL_NPOLLWAITERS 2
 #define LOCAL_NCONTROLFDS  4
 
+#define LOCAL_SEND_LIMIT   (CONFIG_DEV_FIFO_SIZE - sizeof(uint16_t))
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/

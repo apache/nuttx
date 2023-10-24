@@ -130,7 +130,7 @@ int local_send_packet(FAR struct file *filep, FAR const struct iovec *buf,
           len16 += iov->iov_len;
         }
 
-      if (len16 > CONFIG_DEV_FIFO_SIZE - sizeof(uint16_t))
+      if (len16 > LOCAL_SEND_LIMIT)
         {
           nerr("ERROR: Packet is too big: %d\n", len16);
           return -EMSGSIZE;
