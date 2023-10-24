@@ -113,6 +113,7 @@
 #define _1WIREBASE      (0x4500) /* 1WIRE ioctl commands */
 #define _EEPIOCBASE     (0x4600) /* EEPROM driver ioctl commands */
 #define _PTPBASE        (0x4700) /* PTP ioctl commands */
+#define _PERFBASE       (0x4000) /* Perf ioctl commands */
 #define _WLIOCBASE      (0x8b00) /* Wireless modules ioctl network commands */
 
 /* boardctl() commands share the same number space */
@@ -806,6 +807,13 @@
 
 #define _PTPIOCVALID(c)       (_IOC_TYPE(c)==_PTPBASE)
 #define _PTPIOC(nr)           _IOC(_PTPBASE,nr)
+
+/* Perf driver ioctl definitions ********************************************/
+
+/* see nuttx/include/perf.h */
+
+#define _PERFIOCVALID(c)  (_IOC_TYPE(c)==_PERFBASE)
+#define _PERFIOC(nr)      _IOC(_PERFBASE,nr)
 
 /****************************************************************************
  * Public Type Definitions

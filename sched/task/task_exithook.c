@@ -37,6 +37,10 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/mm/mm.h>
 
+#ifdef CONFIG_SCHED_PERF_EVENTS
+#  include <nuttx/perf.h>
+#endif
+
 #include "sched/sched.h"
 #include "group/group.h"
 #include "signal/signal.h"
@@ -468,5 +472,9 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status)
     {
       umm_memdump(&dump);
     }
+#endif
+
+#ifdef CONFIG_SCHED_PERF_EVENTS
+  perf_event_task_exit(tcb);
 #endif
 }

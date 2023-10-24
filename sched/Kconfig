@@ -2113,3 +2113,10 @@ config HRTIMER_TREE
 endchoice
 
 endif # HRTIMER
+config SCHED_PERF_EVENTS
+	bool "Support Perf Events"
+	select SCHED_RESUMESCHEDULER
+	select SCHED_SUSPENDSCHEDULER
+	default n
+	---help---
+		Enable to support perf events.

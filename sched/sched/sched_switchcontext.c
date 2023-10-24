@@ -27,6 +27,9 @@
 #include "sched/sched.h"
 
 #include <nuttx/sched_note.h>
+#ifdef CONFIG_SCHED_PERF_EVENTS
+#  include <nuttx/perf.h>
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -74,5 +77,9 @@ void nxsched_switch_context(FAR struct tcb_s *from, FAR struct tcb_s *to)
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   sched_note_suspend(from);
   sched_note_resume(to);
+#endif
+
+#ifdef CONFIG_SCHED_PERF_EVENTS
+  perf_event_task_sched_out(tcb);
 #endif
 }

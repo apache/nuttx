@@ -593,6 +593,10 @@ void nx_start(void)
   iob_initialize();
 #endif
 
+#ifdef CONFIG_SCHED_PERF_EVENTS
+  perf_event_init();
+#endif
+
   /* Initialize the logic that determine unique process IDs. */
 
   i = 1 << LOG2_CEIL(CONFIG_PID_INITIAL_COUNT);

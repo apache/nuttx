@@ -50,6 +50,10 @@
 #include <nuttx/tls.h>
 #include <nuttx/spinlock_type.h>
 
+#ifdef CONFIG_SCHED_PERF_EVENTS
+#  include <nuttx/perf.h>
+#endif
+
 #include <arch/arch.h>
 
 /****************************************************************************
@@ -707,6 +711,13 @@ struct tcb_s
   clock_t busywait_total;                /* Total time of busywait          */
   void   *busywait_caller;               /* Caller of busywait              */
   void   *busywait_max_caller;           /* Caller of max busywait          */
+#endif
+
+  /* Perf support ***********************************************************/
+
+#ifdef CONFIG_SCHED_PERF_EVENTS
+  FAR struct perf_event_context_s *perf_event_ctx;
+  mutex_t perf_event_mutex;
 #endif
 
   /* State save areas *******************************************************/
