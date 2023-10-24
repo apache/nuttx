@@ -1,6 +1,6 @@
-==========
-Brickmatch
-==========
+=========================
+``brickmatch`` Brickmatch
+=========================
 
 Brickmatch is a kind puzzle game like a mix between tetris and Candy
 Crush. It is a 6x6 matrix with blocks (cells) with different colors.

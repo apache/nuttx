@@ -2,4 +2,10 @@
 Math Library Support
 ====================
 
-- libtommath - LibTomMath MPI Math Library
+.. toctree::
+   :glob:
+   :maxdepth: 1
+   :titlesonly:
+   :caption: Contents
+   
+   */index*
