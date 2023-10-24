@@ -17,7 +17,7 @@ walls, floor and ceil in direction to the center of the board to make
 the cells of same color to match.
 
 Basic Test
-==========
+----------
 
 The best way to play brickmatch is using an APA102 RGB 16x16 matrix
 and Gesture sensor APDS9960. There are some board examples already
@@ -29,7 +29,7 @@ If you don't have an APA102 matrix you can also play it using an LCD
 display and a digital joystick (DJOYSTICK) or the console input. 
 
 Then you can configure and compile the game to play in your board,
-i.e. for ESP32-Devkitc there is already an example using the APA102:
+i.e. for ESP32-Devkitc there is already an example using the APA102::
 
 
     $ ./tools/configure.sh esp32-devkitc:brickmatch
