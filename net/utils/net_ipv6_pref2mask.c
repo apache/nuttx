@@ -91,7 +91,7 @@ void net_ipv6_pref2mask(uint8_t preflen, net_ipv6addr_t mask)
                *          = 0xfc00
                */
 
-              mask[i] = 0xffff << (16 - (preflen - bit));
+              mask[i] = HTONS(0xffff << (16 - (preflen - bit)));
             }
         }
       else
