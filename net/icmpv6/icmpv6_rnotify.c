@@ -110,7 +110,7 @@ void icmpv6_setaddresses(FAR struct net_driver_s *dev,
 
   /* Copy prefix to the current IPv6 address, applying the mask */
 
-  for (i = 0; i < 7; i++)
+  for (i = 0; i < 8; i++)
     {
       dev->d_ipv6addr[i] = (dev->d_ipv6addr[i] & ~dev->d_ipv6netmask[i]) |
                            (prefix[i] & dev->d_ipv6netmask[i]);
