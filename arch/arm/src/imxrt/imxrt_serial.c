@@ -1373,6 +1373,7 @@ static inline void imxrt_serialout(struct imxrt_uart_s *priv,
 static int imxrt_dma_nextrx(struct imxrt_uart_s *priv)
 {
   int dmaresidual = imxrt_dmach_getcount(priv->rxdma);
+  DEBUGASSERT(dmaresidual <= RXDMA_BUFFER_SIZE);
 
   return RXDMA_BUFFER_SIZE - dmaresidual;
 }
@@ -2345,14 +2346,26 @@ static bool imxrt_rxflowcontrol(struct uart_dev_s *dev,
 #ifdef SERIAL_HAVE_RXDMA
 static int imxrt_dma_receive(struct uart_dev_s *dev, unsigned int *status)
 {
-  struct imxrt_uart_s *priv = (struct imxrt_uart_s *)dev;
-  uint32_t nextrx = imxrt_dma_nextrx(priv);
-  int c = 0;
+  struct imxrt_uart_s *priv   = (struct imxrt_uart_s *)dev;
+  static uint32_t last_nextrx = -1;
+  uint32_t nextrx             = imxrt_dma_nextrx(priv);
+  int c                       = 0;
 
   /* Check if more data is available */
 
   if (nextrx != priv->rxdmanext)
     {
+      /* Now we must ensure the cache is updated if the DMA has
+       * updated again.
+       */
+
+      if (last_nextrx != nextrx)
+        {
+          up_invalidate_dcache((uintptr_t)priv->rxfifo,
+                               (uintptr_t)priv->rxfifo + RXDMA_BUFFER_SIZE);
+          last_nextrx = nextrx;
+        }
+
       /* Now read from the DMA buffer */
 
       c = priv->rxfifo[priv->rxdmanext];
@@ -2720,9 +2733,6 @@ static void imxrt_dma_rxcallback(DMACH_HANDLE handle, void *arg, bool done,
 {
   struct imxrt_uart_s *priv = (struct imxrt_uart_s *)arg;
   uint32_t sr;
-
-  up_invalidate_dcache((uintptr_t)priv->rxfifo,
-                       (uintptr_t)priv->rxfifo + RXDMA_BUFFER_SIZE);
 
   if (priv->rxenable && imxrt_dma_rxavailable(&priv->dev))
     {
