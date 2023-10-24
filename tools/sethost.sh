@@ -79,6 +79,7 @@ done
 #   Cygwin: CYGWIN_NT-10.0-WOW
 #   Linux: Linux
 #   MSYS: MINGW32_NT-6.2
+#   MSYS2: MSYS_NT-6.3-9600
 #   BSD: FreeBSD, OpenBSD, NetBSD, *BSD
 
 if [ -z "$host" ]; then
@@ -95,6 +96,10 @@ if [ -z "$host" ]; then
       wenv=cygwin
       ;;
     MINGW32*)
+      host=windows
+      wenv=msys
+      ;;
+    MSYS*)
       host=windows
       wenv=msys
       ;;
