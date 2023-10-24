@@ -1,6 +1,6 @@
-===================================
-``unity`` - Unity testing framework
-===================================
+=================================
+``unity`` Unity testing framework
+=================================
 
 Unity is a unit testing framework for C developed by ThrowTheSwitch.org:
 

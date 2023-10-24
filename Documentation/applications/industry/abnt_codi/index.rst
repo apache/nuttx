@@ -1,6 +1,6 @@
-=========
-abnt_codi
-=========
+=======================
+``abnt_codi`` ABNT CODI
+=======================
 
 The ABNT CODI is an old energy meter standard used in Brazil.
 

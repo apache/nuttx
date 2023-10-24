@@ -1,6 +1,6 @@
-==============================
-``cxxtest`` - C++ test program
-==============================
+============================
+``cxxtest`` C++ test program
+============================
 
 This is a test of the C++ standard library. At present a port of the uClibc++
 C++ library is available. Due to licensing issues, the uClibc++ C++ library is

@@ -1,6 +1,6 @@
-=======================================
-``arch_libc`` - Arch-specific libc Test
-=======================================
+=====================================
+``arch_libc`` Arch-specific libc Test
+=====================================
 
 This is a test for arch-specific libc function. Arch-specific libc functions are often implemented in
 assembly language, here is the test for these functions. The test focuses on key features in assembly

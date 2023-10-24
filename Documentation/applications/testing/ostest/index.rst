@@ -1,6 +1,6 @@
-====================
-``ostest`` - OS test
-====================
+==================
+``ostest`` OS test
+==================
 
 This is the NuttX _qualification_ suite. It attempts to exercise a broad set of
 OS functionality. Its coverage is not very extensive as of this writing, but it
