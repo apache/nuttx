@@ -1,6 +1,6 @@
-===============
-NxScope Library
-===============
+===========================
+``nxscope`` NxScope Library
+===========================
 
 This library provides real-time data logging functionality for NuttX.
 

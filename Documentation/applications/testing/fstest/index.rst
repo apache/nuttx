@@ -1,6 +1,6 @@
-=====================================
-``fstest`` - Generic file system test
-=====================================
+===================================
+``fstest`` Generic file system test
+===================================
 
 This is a generic file system test that derives from ``testing/nxffs``. It was
 created to test the tmpfs file system, but should work with any file system

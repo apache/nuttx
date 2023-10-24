@@ -1,6 +1,6 @@
-=======================================
-``fopencookie`` - fopencookie test tool
-=======================================
+=====================================
+``fopencookie`` fopencookie test tool
+=====================================
 
 ``CONFIG_TESTING_SMART_TEST=y``
 
