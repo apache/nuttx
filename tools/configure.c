@@ -1441,6 +1441,7 @@ static void set_host(const char *destconfig)
                 printf("  Select Windows native host\n");
                 disable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
                 disable_feature(destconfig, "CONFIG_WINDOWS_MSYS");
+                enable_feature(destconfig, "CONFIG_EXPERIMENTAL");
                 enable_feature(destconfig, "CONFIG_WINDOWS_NATIVE");
                 break;
 
