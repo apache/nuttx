@@ -10,8 +10,10 @@ Network Utilities
    
    */index*
 
-uIP Applications
-----------------
+..
+  comment: wse rubic to prevent the header below from appearing in the toc
+
+.. rubric:: uIP Applications
 
 This directory contains most of the network applications contained under the
 ``uIP-1.0`` apps directory. As the uIP ``apps/README.md`` says, these applications
