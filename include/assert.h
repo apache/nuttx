@@ -76,28 +76,28 @@
 #define PANIC_WITH_REGS(msg, regs) _assert(__ASSERT_FILE__, \
                                            __ASSERT_LINE__, msg, regs)
 
-#define __ASSERT(f, file, line, _f) \
-  do                                \
-    {                               \
-      if (predict_false(!(f)))      \
-        __assert(file, line, _f);   \
-    }                               \
+#define __ASSERT__(f, file, line, _f) \
+  do                                  \
+    {                                 \
+      if (predict_false(!(f)))        \
+        __assert(file, line, _f);     \
+    }                                 \
   while (0)
 
-#define __VERIFY(f, file, line, _f) \
-  do                                \
-    {                               \
-      if (predict_false((f) < 0))   \
-        __assert(file, line, _f);   \
-    }                               \
+#define __VERIFY__(f, file, line, _f) \
+  do                                  \
+    {                                 \
+      if (predict_false((f) < 0))     \
+        __assert(file, line, _f);     \
+    }                                 \
   while (0)
 
 #ifdef CONFIG_DEBUG_ASSERTIONS_EXPRESSION
-#  define _ASSERT(f,file,line) __ASSERT(f, file, line, #f)
-#  define _VERIFY(f,file,line) __VERIFY(f, file, line, #f)
+#  define _ASSERT(f,file,line) __ASSERT__(f, file, line, #f)
+#  define _VERIFY(f,file,line) __VERIFY__(f, file, line, #f)
 #else
-#  define _ASSERT(f,file,line) __ASSERT(f, file, line, NULL)
-#  define _VERIFY(f,file,line) __VERIFY(f, file, line, NULL)
+#  define _ASSERT(f,file,line) __ASSERT__(f, file, line, NULL)
+#  define _VERIFY(f,file,line) __VERIFY__(f, file, line, NULL)
 #endif
 
 #ifdef CONFIG_DEBUG_ASSERTIONS
