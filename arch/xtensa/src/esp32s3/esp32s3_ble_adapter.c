@@ -935,7 +935,7 @@ static void *semphr_create_wrapper(uint32_t max, uint32_t init)
 static void semphr_delete_wrapper(void *semphr)
 {
   struct bt_sem_s *bt_sem = (struct bt_sem_s *)semphr;
-  sem_destroy(&bt_sem->sem);
+  nxsem_destroy(&bt_sem->sem);
   kmm_free(bt_sem);
 }
 
