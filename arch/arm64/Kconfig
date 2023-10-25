@@ -20,7 +20,7 @@ config ARM64_TOOLCHAIN_CLANG
 	bool "LLVM Clang toolchain"
 	select ARCH_TOOLCHAIN_CLANG
 
-endchoice
+endchoice # ARM64 Toolchain Selection
 
 choice
 	prompt "ARM64 chip selection"
@@ -94,7 +94,7 @@ config ARCH_CHIP_ARM64_CUSTOM
 	---help---
 		Select this option if there is no directory for the chip under arch/arm64/src/.
 
-endchoice
+endchoice # ARM64 chip selection
 
 config ARCH_ARMV8A
 	bool
@@ -278,7 +278,7 @@ config ARM64_SEMIHOSTING_HOSTFS_CACHE_COHERENCE
 	---help---
 		Flush & Invalidte cache before & after bkpt instruction.
 
-endif
+endif # ARM64_SEMIHOSTING_HOSTFS
 
 config ARM64_DCACHE_DISABLE
 	bool "Disable DCACHE at __start"

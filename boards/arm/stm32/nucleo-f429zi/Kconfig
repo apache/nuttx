@@ -26,7 +26,7 @@ choice
 		other functions on PC6, PC7
 
 				STM32F4
-			ARDUIONO FUNCTION  GPIO
+			ARDUINO  FUNCTION  GPIO
 			-- ----- --------- ----
 			DO RX    USART6_RX PG9
 			D1 TX    USART6_TX PG14
