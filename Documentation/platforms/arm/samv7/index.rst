@@ -310,11 +310,8 @@ peripheral to memory or memory to memory transfers.
 Supported Boards
 ================
 
-For board documentation please refer to ``board/arm/samv7`` section to separate README files.
+.. toctree::
+   :glob:
+   :maxdepth: 1
 
-..
-   .. toctree::
-      :glob:
-      :maxdepth: 1
-
-      boards/*/*
+   boards/*/*

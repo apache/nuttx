@@ -25,3 +25,12 @@ relevant changes incorporated in NuttX-7.26.
 Refer to the LPCXpresso-LPC54628 board
 `README <https://github.com/apache/nuttx/blob/master/boards/arm/lpc54xx/lpcxpresso-lpc54628/README.txt>`__
 file for more detailed information about this port.
+
+Supported Boards
+================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*

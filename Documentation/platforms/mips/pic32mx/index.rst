@@ -57,3 +57,12 @@ PIC32MX795F512L. There one two board ports using this chip:
    `website <https://code.google.com/archive/p/pinguino32/>`__.
 #. The MIPS SDE toolchain available from the `Mentor
    Graphics <http://www.mentor.com>`__ website.
+
+Supported Boards
+================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*

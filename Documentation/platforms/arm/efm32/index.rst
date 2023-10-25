@@ -91,3 +91,12 @@ Board support is available for the following:
    -  Development of USB support is in started, but never completed.
    -  Reset Management Unit (RMU) was added Pierre-noel Bouteville in
       NuttX-7.7.
+
+Supported Boards
+================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*

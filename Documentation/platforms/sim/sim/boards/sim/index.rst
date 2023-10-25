@@ -1776,3 +1776,10 @@ This is a configuration with sim usbhost support.
 
    Run sim usbhost with root mode, run sim usbdev or plug-in cdcacm usb device.
    Then you can use /dev/ttyACM to transfer data.
+
+
+README.txt
+==========
+
+.. include:: README.txt
+   :literal:

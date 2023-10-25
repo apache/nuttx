@@ -167,3 +167,12 @@ collaborative effort between Rommel Marcelo and myself (with Rommel
 being the leading contributor and I claiming only a support role). You
 can get more information at the Open1788 board from the WaveShare
 website.
+
+Supported Boards
+================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*

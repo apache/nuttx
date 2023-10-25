@@ -15,3 +15,12 @@ This kernel with ostest have been tested with
 
 -  Qemu/KVM on a Xeon 2630v4 machine.
 -  Bochs with broadwell_ult emulation.
+
+Supported Boards
+================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*

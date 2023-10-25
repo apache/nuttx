@@ -21,3 +21,12 @@ have are supported by NuttX:
    ready for "prime time", the pcDuino port is functional and could the
    basis for a more extensive development. There is, at present, no work
    in progress to extend this port, however.
+
+Supported Boards
+================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*

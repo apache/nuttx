@@ -17,3 +17,12 @@ README files for the
 and for
 the\ `z8f64200100kit <https://github.com/apache/nuttx/blob/master/boards/z80/z8/z8f64200100kit/README.txt>`__
 for further information.
+
+Supported Boards
+================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*

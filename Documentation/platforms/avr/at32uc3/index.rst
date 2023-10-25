@@ -31,3 +31,11 @@ NuttX board
 `README <https://github.com/apache/nuttx/blob/master/boards/avr/at32uc3/avr32dev1/README.txt>`__
 file for further information.
 
+Supported Boards
+================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*

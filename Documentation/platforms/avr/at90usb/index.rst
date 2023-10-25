@@ -1,6 +1,6 @@
-===========
-AVR AT90USB
-===========
+=================
+Microchip AT90USB
+=================
 
 AVR AT90USB64x and AT90USB6128x
 -------------------------------
@@ -44,3 +44,12 @@ performed using the NuttX DIY toolchain for Linux or Cygwin is provided
 by the NuttX
 `buildroot <https://bitbucket.org/nuttx/buildroot/downloads/>`__
 package. As a result, that toolchain is recommended.
+
+Supported Boards
+================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*

@@ -25,3 +25,4 @@ case, you can head to the :doc:`reference <../reference/index>`.
    syscall.rst
    tools/index.rst
    arch/index.rst
+   boards.rst
