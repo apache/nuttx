@@ -16,3 +16,4 @@ NuttX is very feature-rich RTOS and is thus composed of various different subsys
    paging.rst
    audio/index.rst
    filesystem/index.rst
+   libs/index.rst
