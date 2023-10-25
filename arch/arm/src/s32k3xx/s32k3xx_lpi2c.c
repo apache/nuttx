@@ -1187,12 +1187,12 @@ static int s32k3xx_lpi2c_isr_process(struct s32k3xx_lpi2c_priv_s *priv)
 #ifdef CONFIG_S32K3XX_LPI2C_DMA
   uint32_t current_status = status;
 
-  /* Condition the status with only the enabled interrupts */
-
-  status &= s32k3xx_lpi2c_getenabledints(priv);
-
   if (priv->rxdma != NULL || priv->txdma != NULL)
     {
+      /* Condition the status with only the enabled interrupts */
+
+      status &= s32k3xx_lpi2c_getenabledints(priv);
+
       /* Is there an Error condition */
 
       if (current_status & LPI2C_MSR_LIMITED_ERROR_MASK)
