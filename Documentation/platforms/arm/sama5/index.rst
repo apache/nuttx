@@ -158,3 +158,13 @@ There is a port in progress on one Microchip SAMA5D4 board:
 native toolchain, or 4) Native Windows. All testing has been performed
 with the CodeSourcery toolchain (GCC version 4.7.3) in the Cygwin
 environment under Windows.
+
+
+Supported Boards
+================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*

@@ -212,3 +212,12 @@ LED_PWM    No
 SHA        No      
 RSA        No      
 ========== ======= =====
+
+Supported Boards
+================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*

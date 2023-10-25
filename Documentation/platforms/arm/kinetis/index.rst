@@ -102,3 +102,12 @@ file for further information.
    I2C device drivers, RTC alarm functionality, and new SPI driver.
 -  **NuttX-7.26**. David Sidrane contributed DMA support to the Kinetis
    K6x family.
+
+Supported Boards
+================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*

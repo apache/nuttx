@@ -104,3 +104,12 @@ LPC4337-WS development board featuring the NXP LPC4337JBD144 MCU.
    leveraged from the LPC17 and contributed by Gintaras Drukteinis.
    Leveraged the LPC54xx SD/MMC to the LPC43xx. There are still
    remaining issues with the SD/MMC driver and it is not yet functional.
+
+Supported Boards
+================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*

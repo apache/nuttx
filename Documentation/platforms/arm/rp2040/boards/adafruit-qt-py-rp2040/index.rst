@@ -123,3 +123,8 @@ usbnsh
 
 Basic NuttShell configuration (console enabled in USB Port, at 115200 bps).
 
+README.txt
+==========
+
+.. include:: README.txt
+   :literal:

@@ -12,3 +12,12 @@ support came support for two boards also contributed by jjlange:
 board may be configured to use either the LPC4088 or the LPC1788.
 
 **Driver Status.**
+
+Supported Boards
+================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*

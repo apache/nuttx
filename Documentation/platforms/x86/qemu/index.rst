@@ -16,3 +16,11 @@ x86 port! Refer to the NuttX
 `README <https://github.com/apache/nuttx/blob/master/boards/x86/qemu/qemu-i486/README.txt>`__
 file for further information.
 
+Supported Boards
+================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*

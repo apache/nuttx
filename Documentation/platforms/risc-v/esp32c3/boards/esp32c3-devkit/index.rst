@@ -538,3 +538,10 @@ at runtime::
     nsh> wapi psk wlan0 mypasswd 3
     nsh> wapi essid wlan0 myssid 1
     nsh> renew wlan0
+
+
+ROMFS.txt
+=========
+
+.. include:: ROMFS.txt
+   :literal:

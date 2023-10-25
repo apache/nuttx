@@ -22,3 +22,12 @@ AM335x are supported by NuttX:
    Refer to the Beaglebone Black board
    `README <https://github.com/apache/nuttx/blob/master/boards/arm/am335x/beaglebone-black/README.txt>`__
    file for further, up-to-date information.
+
+Supported Boards
+================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*

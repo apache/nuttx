@@ -46,3 +46,12 @@ camera support, added audio and board audio control implementation,
 added an audio_tone_generator, added optional initialization of GNSS and
 GEOFENCE at boot if the drivers are enabled, added an lcd examples
 configuration.
+
+Supported Boards
+================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*

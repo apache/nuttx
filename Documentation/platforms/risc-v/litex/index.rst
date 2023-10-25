@@ -68,3 +68,11 @@ Core specific information
 
    cores/*/*
 
+Supported Boards
+================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*
