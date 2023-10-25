@@ -170,7 +170,7 @@ uint32_t g_idlestack[IDLETHREAD_STACKWORDS]
  *
  ****************************************************************************/
 
-static void IRAM_ATTR configure_cpu_caches(void)
+noinstrument_function static void IRAM_ATTR configure_cpu_caches(void)
 {
   int s_instr_flash2spiram_off = 0;
   int s_rodata_flash2spiram_off = 0;
@@ -272,7 +272,7 @@ static void IRAM_ATTR disable_app_cpu(void)
  *
  ****************************************************************************/
 
-void noreturn_function IRAM_ATTR __esp32s3_start(void)
+noinstrument_function void noreturn_function IRAM_ATTR __esp32s3_start(void)
 {
   uint32_t sp;
 
@@ -508,7 +508,7 @@ static int map_rom_segments(void)
  *
  ****************************************************************************/
 
-void IRAM_ATTR __start(void)
+noinstrument_function void IRAM_ATTR __start(void)
 {
 #ifdef CONFIG_ESP32S3_APP_FORMAT_MCUBOOT
   if (map_rom_segments() != 0)

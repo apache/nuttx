@@ -350,7 +350,7 @@ static inline irqstate_t irqstate(void)
 
 /* Disable IRQs and return the previous IRQ state */
 
-static inline irqstate_t up_irq_save(void)
+noinstrument_function static inline irqstate_t up_irq_save(void)
 {
   unsigned int cpsr;
 
@@ -392,7 +392,7 @@ static inline irqstate_t up_irq_enable(void)
 
 /* Restore saved IRQ & FIQ state */
 
-static inline void up_irq_restore(irqstate_t flags)
+noinstrument_function static inline void up_irq_restore(irqstate_t flags)
 {
   __asm__ __volatile__
     (
