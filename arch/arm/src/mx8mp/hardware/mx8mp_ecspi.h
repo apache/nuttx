@@ -89,7 +89,7 @@
 
 #define PERIODREG_CSD_CTL         (16)
 #define PERIODREG_CSRC            (1 << 15)
-#define PERIODREG_SAMPLE_PERIOD	  (0)
+#define PERIODREG_SAMPLE_PERIOD   (0)
 
 #define TESTREG_LBC               (1 << 31)
 #define TESTREG_RXCNT             (8)
