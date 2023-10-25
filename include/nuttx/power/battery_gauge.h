@@ -120,6 +120,10 @@ struct battery_gauge_operations_s
 
   CODE int (*chipid)(FAR struct battery_gauge_dev_s *dev,
                      FAR unsigned int *value);
+
+  /* Do device specific operation */
+
+  CODE int (*operate)(FAR struct battery_gauge_dev_s *dev, FAR int *param);
 };
 
 /* This structure defines the battery driver state structure */

@@ -354,6 +354,16 @@ static int bat_gauge_ioctl(FAR struct file *filep,
         }
         break;
 
+      case BATIOC_OPERATE:
+        {
+          FAR int *ptr = (FAR int *)((uintptr_t)arg);
+          if (ptr)
+            {
+              ret = dev->ops->operate(dev, ptr);
+            }
+        }
+        break;
+
       default:
         _err("ERROR: Unrecognized cmd: %d\n", cmd);
         ret = -ENOTTY;
