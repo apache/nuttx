@@ -633,6 +633,9 @@
 #define MII_PHYID1_KSZ8051           0x0022    /* ID1 value for Micrel KSZ8051 */
 #define MII_PHYID2_KSZ8051           0x1550    /* ID2 value for Micrel KSZ8051 */
 
+#define MII_PHYID1_KSZ8061           0x0022    /* ID1 value for Micrel KSZ8061 */
+#define MII_PHYID2_KSZ8061           0x1573    /* ID2 value for Micrel KSZ8061 */
+
 #define MII_PHYID1_KSZ8081           0x0022    /* ID1 value for Micrel KSZ8081 */
 #define MII_PHYID2_KSZ8081           0x1560    /* ID2 value for Micrel KSZ8081 */
 
@@ -642,7 +645,7 @@
 #define KSZ8081_DRCTRL_PLLOFF        (1 << 4)  /* Bit 4: Turn PLL off in EDPD mode */
                                                /* Bits 0-3: Reserved */
 
-/* KSZ8041/51/81 Register 0x1b: Interrupt control/status */
+/* KSZ8041/51/61/81 Register 0x1b: Interrupt control/status */
 
 #define MII_KSZ80X1_INT_JEN          (1 << 15) /* Jabber interrupt enable */
 #define MII_KSZ80X1_INT_REEN         (1 << 14) /* Receive error interrupt enable */
@@ -661,6 +664,18 @@
 #define MII_KSZ80X1_INT_LD           (1 << 2)  /* Link down fault interrupt */
 #define MII_KSZ80X1_INT_RF           (1 << 1)  /* Remote fault interrupt */
 #define MII_KSZ80X1_INT_LU           (1 << 0)  /* Link up interrupt */
+
+/* KSZ8061 Register 0x1e: PHY Control 1 */
+
+#define MII_KSZ8061_PC2_PE           (1 << 9)  /* Enable pause (flow control) */
+#define MII_KSZ8061_PC2_LS           (1 << 8)  /* Link status */
+#define MII_KSZ8061_PC2_PS           (1 << 7)  /* Polarity status */
+#define MII_KSZ8061_PC2_XS           (1 << 5)  /* MID/MDI-X Status */
+#define MII_KSZ8061_PC2_ED           (1 << 4)  /* Energy detect */
+#define MII_KSZ8061_PC2_PI           (1 << 3)  /* PHY isolate */
+#define MII_KSZ8061_PC2_FD           (1 << 2)  /* Full duplex */
+#define MII_KSZ8061_PC2_100T         (1 << 1)  /* 100base-tx speed */
+#define MII_KSZ8061_PC2_10T          (1 << 0)  /* 10base-t speed */
 
 /* KSZ8041 Register 0x1e: PHY Control 1 -- To be provided */
 
@@ -689,7 +704,7 @@
 #define MII_PHYCTRL2_SEQTEST         (1 << 1)  /* Bit 1:  Enable SQE test */
 #define MII_PHYCTRL2_DISDS           (1 << 0)  /* Bit 1:  Disable data scrambling */
 
-/* KSZ8051/81 Register 0x1e: PHY Control 1 */
+/* KSZ8051/61/81 Register 0x1e: PHY Control 1 */
 
                                                /* Bits 10-15: Reserved */
 #define MII_PHYCTRL1_ENPAUSE         (1 << 9)  /* Bit 9:  Enable pause */
