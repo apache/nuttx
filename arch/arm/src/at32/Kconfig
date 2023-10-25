@@ -1086,7 +1086,7 @@ config AT32_JTAG_NOJNTRST_ENABLE
 config AT32_JTAG_SW_ENABLE
 	bool "Set JTAG-DP disabled and SW-DP enabled"
 
-endchoice
+endchoice # JTAG Configuration
 
 config AT32_DISABLE_IDLE_SLEEP_DURING_DEBUG
 	bool "Disable IDLE Sleep (WFI) in debug mode"
@@ -7131,7 +7131,7 @@ choice
 
 config AT32_MII_MCO1
 	bool "Use MC01 as MII clock"
-	depends on  AT32_AT32F43XX
+	depends on AT32_AT32F43XX
 	---help---
 		Use MCO1 to clock the MII interface.  Default:  Use MC01
 
