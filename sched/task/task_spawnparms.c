@@ -228,29 +228,6 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
 }
 
 /****************************************************************************
- * Name: spawn_proxyattrs
- *
- * Description:
- *   Set attributes of the proxy task before it has started the new child
- *   task.
- *
- * Input Parameters:
- *
- *   attr - The attributes to use
- *
- ****************************************************************************/
-
-void spawn_proxyattrs(FAR const posix_spawnattr_t *attr)
-{
-  /* Check if we need to change the signal mask */
-
-  if (attr != NULL && (attr->flags & POSIX_SPAWN_SETSIGMASK) != 0)
-    {
-      nxsig_procmask(SIG_SETMASK, &attr->sigmask, NULL);
-    }
-}
-
-/****************************************************************************
  * Name: spawn_file_actions
  *
  * Description:
