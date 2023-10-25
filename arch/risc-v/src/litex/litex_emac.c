@@ -110,9 +110,21 @@
 #  define BOARD_PHYID1          MII_PHYID1_DP83848C
 #  define BOARD_PHYID2          MII_PHYID2_DP83848C
 #  define BOARD_PHY_STATUS      MII_DP83848C_STS
+#  define BOARD_PHY_INT_REG     MII_DP83848C_MISR
+#  define BOARD_PHY_SETEN       MII_DP83848C_LINK_INT_EN
 #  define BOARD_PHY_10BASET(s)  (((s) & MII_DP83848C_PHYSTS_SPEED) != 0)
 #  define BOARD_PHY_100BASET(s) (((s) & MII_DP83848C_PHYSTS_SPEED) == 0)
 #  define BOARD_PHY_ISDUPLEX(s) (((s) & MII_DP83848C_PHYSTS_DUPLEX) != 0)
+#elif defined(CONFIG_ETH0_PHY_KSZ8061)
+#  define BOARD_PHY_NAME        "KSZ8061"
+#  define BOARD_PHYID1          MII_PHYID1_KSZ8061
+#  define BOARD_PHYID2          MII_PHYID2_KSZ8061
+#  define BOARD_PHY_STATUS      MII_KSZ8061_PHY_CTRL_1
+#  define BOARD_PHY_INT_REG     MII_KSZ8061_INTR_CTRL_STAT
+#  define BOARD_PHY_SETEN       MII_KSZ80X1_INT_LDEN | MII_KSZ80X1_INT_LUEN
+#  define BOARD_PHY_10BASET(s)  (((s) & MII_KSZ8061_PC2_10T) != 0)
+#  define BOARD_PHY_100BASET(s) (((s) & MII_KSZ8061_PC2_100T) != 0)
+#  define BOARD_PHY_ISDUPLEX(s) (((s) & MII_KSZ8061_PC2_FD) != 0)
 #else
 #  error EMAC PHY unrecognized
 #endif
@@ -1220,7 +1232,7 @@ static int litex_phyfind(struct litex_emac_s *priv, uint8_t phyaddr)
   model = (phyval[1] & 0x03f0) >> 4;
   revision = (phyval[1] & 0x000f);
 
-  ninfo("%s: PHY Found - OUI: 0x%04" PRIx32 "MODEL: %u REV: %u\n",
+  ninfo("%s: PHY Found - OUI: 0x%04" PRIx32 " MODEL: %u REV: %u\n",
         BOARD_PHY_NAME, oui, model, revision);
 
   return OK;
@@ -1246,6 +1258,7 @@ static int litex_phyinit(struct litex_emac_s *priv)
 
   /* Reset PHY */
 
+  ninfo("%s: PHY RESET\n", BOARD_PHY_NAME);
   putreg32(1, LITEX_ETHPHY_CRG_RESET);
   nxsig_usleep(LITEX_PHY_RESETTIMEOUT);
   putreg32(0, LITEX_ETHPHY_CRG_RESET);
