@@ -37,6 +37,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/sched.h>
 #include <sched/sched.h>
+#include <task/spawn.h>
 #include <nuttx/spawn.h>
 #include <nuttx/binfmt/binfmt.h>
 
@@ -203,6 +204,7 @@ int exec_module(FAR struct binary_s *binp,
                 FAR const char *filename, FAR char * const *argv,
                 FAR char * const *envp,
                 FAR const posix_spawn_file_actions_t *actions,
+                FAR const posix_spawnattr_t *attr,
                 bool spawn)
 {
   FAR struct task_tcb_s *tcb;
@@ -326,17 +328,6 @@ int exec_module(FAR struct binary_s *binp,
   binfmt_freeargv(argv);
   binfmt_freeenv(envp);
 
-  /* Perform file actions */
-
-  if (actions != NULL)
-    {
-      ret = spawn_file_actions(&tcb->cmn, actions);
-      if (ret < 0)
-        {
-          goto errout_with_tcbinit;
-        }
-    }
-
 #ifdef CONFIG_PIC
   /* Add the D-Space address as the PIC base address.  By convention, this
    * must be the first allocated address space.
@@ -393,10 +384,6 @@ int exec_module(FAR struct binary_s *binp,
 
   pid = tcb->cmn.pid;
 
-  /* Then activate the task at the provided priority */
-
-  nxtask_activate((FAR struct tcb_s *)tcb);
-
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   /* Restore the address environment of the caller */
 
@@ -407,6 +394,32 @@ int exec_module(FAR struct binary_s *binp,
       goto errout_with_tcbinit;
     }
 #endif
+
+  /* Perform file actions */
+
+  if (actions != NULL)
+    {
+      ret = spawn_file_actions(&tcb->cmn, actions);
+      if (ret < 0)
+        {
+          goto errout_with_tcbinit;
+        }
+    }
+
+  /* Set the attributes */
+
+  if (attr)
+    {
+      ret = spawn_execattrs(pid, attr);
+      if (ret < 0)
+        {
+          goto errout_with_tcbinit;
+        }
+    }
+
+  /* Then activate the task at the provided priority */
+
+  nxtask_activate((FAR struct tcb_s *)tcb);
 
   return pid;
 
