@@ -33,4 +33,5 @@ following section.
   sdio.rst
   usbhost.rst
   usbdev.rst
-
+  rwbuffer.rst
+  regmap.rst
