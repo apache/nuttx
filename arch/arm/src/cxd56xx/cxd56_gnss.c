@@ -2719,7 +2719,7 @@ static int cxd56_gnss_open(struct file *filep)
     {
       /* GNSS requires stable RTC */
 
-      usleep(100 * 1000);
+      nxsig_usleep(100 * 1000);
     }
 
   ret = nxmutex_lock(&priv->devlock);
