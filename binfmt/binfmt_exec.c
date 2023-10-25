@@ -134,7 +134,7 @@ static int exec_internal(FAR const char *filename,
 
   /* Then start the module */
 
-  pid = exec_module(bin, filename, argv, envp, actions, spawn);
+  pid = exec_module(bin, filename, argv, envp, actions, attr, spawn);
   if (pid < 0)
     {
       ret = pid;
