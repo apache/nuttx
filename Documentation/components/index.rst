@@ -15,3 +15,4 @@ NuttX is very feature-rich RTOS and is thus composed of various different subsys
    nxgraphics/index.rst
    nxwidgets.rst
    paging.rst
+   audio/index.rst
