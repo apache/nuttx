@@ -422,6 +422,62 @@ static int mac_addr_a2n(unsigned char *mac_addr, char *arg)
   return OK;
 }
 
+static int utf8_escape(char *outp, int out_size,
+                       const char *inp, size_t in_size)
+{
+  size_t res_size = 0;
+
+  if (!inp || !outp)
+    {
+      return -EINVAL;
+    }
+
+  /* The inp may or may not be NUL terminated, but must be
+   * if 0 size is specified.
+   */
+
+  if (!in_size)
+    {
+      in_size = strlen(inp);
+    }
+
+  while (in_size)
+    {
+      in_size--;
+
+      if (res_size++ >= out_size)
+        {
+          return -EINVAL;
+        }
+
+      switch (*inp)
+        {
+          case '\\':
+          case '\'':
+          case '\"':
+            if (res_size++ >= out_size)
+              {
+                return -EINVAL;
+              }
+
+            *outp++ = '\\';
+
+          default:
+            *outp++ = *inp++;
+            break;
+        }
+    }
+
+  /* NUL terminate if space allows */
+
+  if (res_size < out_size)
+    {
+      *outp = '\0';
+    }
+
+  return 0;
+}
+
 static int copy_scan_results(struct sim_scan_result_s *scan_req,
                                   struct sim_bss_info_s *info)
 {
@@ -909,6 +965,7 @@ static int wifidriver_set_essid(struct sim_netdev_s *wifidev,
                              struct iwreq *pwrq)
 {
   char ssid_buf[SSID_MAX_LEN];
+  char out_ssid[256];
   int ret = 0;
   uint8_t ssid_len = pwrq->u.essid.length;
 
@@ -921,7 +978,14 @@ static int wifidriver_set_essid(struct sim_netdev_s *wifidev,
 
   if (wifidev->mode == IW_MODE_INFRA)
     {
-      WPA_SET_NETWORK(wifidev, "ssid \\\"%s\\\"", ssid_buf);
+      ret = utf8_escape(out_ssid, sizeof(out_ssid), ssid_buf, ssid_len);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      WPA_SET_NETWORK(wifidev, "ssid \"\\\"%s\\\"\"", out_ssid);
+
       WPA_SET_NETWORK(wifidev, "scan_ssid 1");
 
       if (wifidev->psk_flag == 0)
