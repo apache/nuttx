@@ -2814,6 +2814,7 @@ static inline void s32k3xx_serialout(struct s32k3xx_uart_s *priv,
 static int s32k3xx_dma_nextrx(struct s32k3xx_uart_s *priv)
 {
   int dmaresidual = s32k3xx_dmach_getcount(priv->rxdma);
+  DEBUGASSERT(dmaresidual <= RXDMA_BUFFER_SIZE);
 
   return (RXDMA_BUFFER_SIZE - dmaresidual) % RXDMA_BUFFER_SIZE;
 }
@@ -3780,13 +3781,25 @@ static bool s32k3xx_rxflowcontrol(struct uart_dev_s *dev,
 static int s32k3xx_dma_receive(struct uart_dev_s *dev, unsigned int *status)
 {
   struct s32k3xx_uart_s *priv = (struct s32k3xx_uart_s *)dev;
-  uint32_t nextrx = s32k3xx_dma_nextrx(priv);
-  int c = 0;
+  static uint32_t last_nextrx = -1;
+  uint32_t nextrx             = s32k3xx_dma_nextrx(priv);
+  int c                       = 0;
 
   /* Check if more data is available */
 
   if (nextrx != priv->rxdmanext)
     {
+      /* Now we must ensure the cache is updated if the DMA has
+       * updated again.
+       */
+
+      if (last_nextrx != nextrx)
+        {
+          up_invalidate_dcache((uintptr_t)priv->rxfifo,
+                               (uintptr_t)priv->rxfifo + RXDMA_BUFFER_SIZE);
+          last_nextrx = nextrx;
+        }
+
       /* Now read from the DMA buffer */
 
       c = priv->rxfifo[priv->rxdmanext];
@@ -4154,9 +4167,6 @@ static void s32k3xx_dma_rxcallback(DMACH_HANDLE handle, void *arg, bool done,
 {
   struct s32k3xx_uart_s *priv = (struct s32k3xx_uart_s *)arg;
   uint32_t sr;
-
-  up_invalidate_dcache((uintptr_t)priv->rxfifo,
-                       (uintptr_t)priv->rxfifo + RXDMA_BUFFER_SIZE);
 
   if (priv->rxenable && s32k3xx_dma_rxavailable(&priv->dev))
     {
