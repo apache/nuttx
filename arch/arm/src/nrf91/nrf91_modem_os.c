@@ -27,6 +27,7 @@
 #include <arch/irq.h>
 
 #include <nuttx/mutex.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/signal.h>
 
 #include <nuttx/mm/mm.h>
@@ -119,7 +120,7 @@ void nrf_waiting_free(struct nrf91_modem_os_waiting_s *w)
 {
   nxmutex_lock(&g_nrf91_modem_os.waiting_lock);
 
-  sem_destroy(&w->sem);
+  nxsem_destroy(&w->sem);
   w->context = 0;
   w->waiting = false;
 
@@ -176,7 +177,7 @@ void nrf_modem_os_shutdown(void)
       waiting = &g_nrf91_modem_os.waiting[i];
       if (waiting->waiting == true)
         {
-          sem_post(&waiting->sem);
+          nxsem_post(&waiting->sem);
         }
     }
 
@@ -298,7 +299,7 @@ int32_t nrf_modem_os_timedwait(uint32_t context, int32_t *timeout)
     {
       /* Wait for event */
 
-      sem_wait(&waiting->sem);
+      nxsem_wait(&waiting->sem);
       ret = OK;
     }
   else
@@ -308,7 +309,7 @@ int32_t nrf_modem_os_timedwait(uint32_t context, int32_t *timeout)
       abstime.tv_sec  = *timeout / 1000;
       abstime.tv_nsec = (*timeout % 1000) * 1000000;
 
-      sem_timedwait(&waiting->sem, &abstime);
+      nxsem_timedwait(&waiting->sem, &abstime);
     }
 
   /* Free a waiting slot */
@@ -368,7 +369,7 @@ void nrf_modem_os_event_notify(uint32_t context)
         {
           if (waiting->context == context || context == 0)
             {
-              sem_post(&waiting->sem);
+              nxsem_post(&waiting->sem);
             }
         }
     }
@@ -433,7 +434,7 @@ int nrf_modem_os_sem_init(void **sem, unsigned int initial_count,
   UNUSED(limit);
 
   DEBUGASSERT(g_nrf91_modem_os.sem_cntr < NRF_MODEM_OS_NUM_SEM_REQUIRED);
-  ret = sem_init(modemsem, 0, initial_count);
+  ret = nxsem_init(modemsem, 0, initial_count);
   g_nrf91_modem_os.sem_cntr++;
 
   *sem = (void *)modemsem;
@@ -451,7 +452,7 @@ int nrf_modem_os_sem_init(void **sem, unsigned int initial_count,
 
 void nrf_modem_os_sem_give(void *sem)
 {
-  sem_post((sem_t *)sem);
+  nxsem_post((sem_t *)sem);
 }
 
 /****************************************************************************
@@ -469,7 +470,7 @@ int nrf_modem_os_sem_take(void *sem, int timeout)
 
   if (timeout == -1)
     {
-      ret = sem_wait(s);
+      ret = nxsem_wait(s);
     }
   else
     {
@@ -478,7 +479,7 @@ int nrf_modem_os_sem_take(void *sem, int timeout)
       abstime.tv_sec  = timeout / 1000;
       abstime.tv_nsec = (timeout % 1000) * 1000000;
 
-      ret = sem_timedwait(s, &abstime);
+      ret = nxsem_timedwait(s, &abstime);
     }
 
   return ret;
@@ -496,7 +497,7 @@ unsigned int nrf_modem_os_sem_count_get(void *sem)
 {
   int sval = 0;
 
-  sem_getvalue((sem_t *)sem, &sval);
+  nxsem_get_value((sem_t *)sem, &sval);
   return sval;
 }
 

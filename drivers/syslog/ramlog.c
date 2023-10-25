@@ -179,7 +179,7 @@ static int ramlog_readnotify(FAR struct ramlog_dev_s *priv)
     {
       int semcount = 0;
 
-      sem_getvalue(&priv->rl_waitsem, &semcount);
+      nxsem_get_value(&priv->rl_waitsem, &semcount);
       if (semcount >= 0)
         {
           break;

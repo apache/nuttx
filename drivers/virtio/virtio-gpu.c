@@ -25,6 +25,7 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/video/fb.h>
 #include <nuttx/virtio/virtio.h>
 
@@ -145,17 +146,17 @@ static int virtio_gpu_send_cmd(FAR struct virtqueue *vq,
       sem_t sem;
       struct virtio_gpu_cookie_s cookie;
 
-      sem_init(&sem, 0, 0);
+      nxsem_init(&sem, 0, 0);
       cookie.blocking = true;
       cookie.p = &sem;
       ret = virtqueue_add_buffer(vq, buf_list, readable, writable, &cookie);
       if (ret >= 0)
         {
           virtqueue_kick(vq);
-          sem_wait(&sem);
+          nxsem_wait(&sem);
         }
 
-      sem_destroy(&sem);
+      nxsem_destroy(&sem);
     }
   else
     {
@@ -200,7 +201,7 @@ static void virtio_gpu_done(FAR struct virtqueue *vq)
     {
       if (cookie->blocking)
         {
-          sem_post((FAR sem_t *)cookie->p);
+          nxsem_post((FAR sem_t *)cookie->p);
         }
       else
         {
