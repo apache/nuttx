@@ -554,4 +554,11 @@ config 16550_SET_MCR_OUT2
 	---help---
 		Some platforms require OUT2 of MCR being set for interrupt to be triggered
 
+config 16550_DLF_SIZE
+	int "DLF(Divisor Latch Fraction) size of DesignWare APB UART"
+	default 0
+	---help---
+		The bit width of DLF register for DesignWare APB UART.
+		DLF_SIZE=0 means no support. Default: 0
+
 endif # 16550_UART

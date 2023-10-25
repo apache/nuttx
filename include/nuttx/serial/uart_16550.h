@@ -173,20 +173,35 @@
 
 /* Register offsets *********************************************************/
 
-#define UART_RBR_OFFSET        0  /* (DLAB =0) Receiver Buffer Register */
-#define UART_THR_OFFSET        0  /* (DLAB =0) Transmit Holding Register */
-#define UART_DLL_OFFSET        0  /* (DLAB =1) Divisor Latch LSB */
-#define UART_DLM_OFFSET        1  /* (DLAB =1) Divisor Latch MSB */
-#define UART_IER_OFFSET        1  /* (DLAB =0) Interrupt Enable Register */
-#define UART_IIR_OFFSET        2  /* Interrupt ID Register */
-#define UART_FCR_OFFSET        2  /* FIFO Control Register */
-#define UART_LCR_OFFSET        3  /* Line Control Register */
-#define UART_MCR_OFFSET        4  /* Modem Control Register */
-#define UART_LSR_OFFSET        5  /* Line Status Register */
-#define UART_MSR_OFFSET        6  /* Modem Status Register */
-#define UART_SCR_OFFSET        7  /* Scratch Pad Register */
-#define UART_USR_OFFSET        31 /* UART Status Register */
-#define UART_DLF_OFFSET        48 /* Divisor Latch Fraction Register */
+#define UART_RBR_INCR          0  /* (DLAB =0) Receiver Buffer Register */
+#define UART_THR_INCR          0  /* (DLAB =0) Transmit Holding Register */
+#define UART_DLL_INCR          0  /* (DLAB =1) Divisor Latch LSB */
+#define UART_DLM_INCR          1  /* (DLAB =1) Divisor Latch MSB */
+#define UART_IER_INCR          1  /* (DLAB =0) Interrupt Enable Register */
+#define UART_IIR_INCR          2  /* Interrupt ID Register */
+#define UART_FCR_INCR          2  /* FIFO Control Register */
+#define UART_LCR_INCR          3  /* Line Control Register */
+#define UART_MCR_INCR          4  /* Modem Control Register */
+#define UART_LSR_INCR          5  /* Line Status Register */
+#define UART_MSR_INCR          6  /* Modem Status Register */
+#define UART_SCR_INCR          7  /* Scratch Pad Register */
+#define UART_USR_INCR          31 /* UART Status Register */
+#define UART_DLF_INCR          48 /* Divisor Latch Fraction Register */
+
+#define UART_RBR_OFFSET        (CONFIG_16550_REGINCR*UART_RBR_INCR)
+#define UART_THR_OFFSET        (CONFIG_16550_REGINCR*UART_THR_INCR)
+#define UART_DLL_OFFSET        (CONFIG_16550_REGINCR*UART_DLL_INCR)
+#define UART_DLM_OFFSET        (CONFIG_16550_REGINCR*UART_DLM_INCR)
+#define UART_IER_OFFSET        (CONFIG_16550_REGINCR*UART_IER_INCR)
+#define UART_IIR_OFFSET        (CONFIG_16550_REGINCR*UART_IIR_INCR)
+#define UART_FCR_OFFSET        (CONFIG_16550_REGINCR*UART_FCR_INCR)
+#define UART_LCR_OFFSET        (CONFIG_16550_REGINCR*UART_LCR_INCR)
+#define UART_MCR_OFFSET        (CONFIG_16550_REGINCR*UART_MCR_INCR)
+#define UART_LSR_OFFSET        (CONFIG_16550_REGINCR*UART_LSR_INCR)
+#define UART_MSR_OFFSET        (CONFIG_16550_REGINCR*UART_MSR_INCR)
+#define UART_SCR_OFFSET        (CONFIG_16550_REGINCR*UART_SCR_INCR)
+#define UART_USR_OFFSET        (CONFIG_16550_REGINCR*UART_USR_INCR)
+#define UART_DLF_OFFSET        (CONFIG_16550_REGINCR*UART_DLF_INCR)
 
 /* Register bit definitions *************************************************/
 
