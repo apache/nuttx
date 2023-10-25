@@ -221,11 +221,6 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
   sinfo("pid=%p path=%s file_actions=%p attr=%p argv=%p\n",
         pid, path, file_actions, attr, argv);
 
-  if (attr != NULL)
-    {
-      spawn_proxyattrs(attr);
-    }
-
   return nxposix_spawn_exec(pid, path,
                             file_actions != NULL ?
                             *file_actions : NULL, attr, argv, envp);
