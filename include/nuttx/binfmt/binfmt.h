@@ -271,6 +271,7 @@ int exec_module(FAR struct binary_s *binp,
                 FAR const char *filename, FAR char * const *argv,
                 FAR char * const *envp,
                 FAR const posix_spawn_file_actions_t *actions,
+                FAR const posix_spawnattr_t *attr,
                 bool spawn);
 
 /****************************************************************************
