@@ -29,6 +29,7 @@
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 #include <nuttx/wireless/ieee80211/bcmf_gspi.h>
 
 #include "barriers.h"
@@ -164,11 +165,11 @@ static int my_init(gspi_dev_t  *gspi)
   rp2040_gpio_setdir(rp_io->gpio_data, true);
   rp2040_gpio_put(rp_io->gpio_data, false);
 
-  usleep(50000); /* Leave off for at least 50ms. */
+  nxsig_usleep(50000); /* Leave off for at least 50ms. */
 
   rp2040_gpio_put(rp_io->gpio_on, true);     /* power on */
 
-  usleep(50000); /* Wait a bit to let the power come up. */
+  nxsig_usleep(50000); /* Wait a bit to let the power come up. */
 
   /* Don't let anyone else grab a PIO while we are doing so. */
 

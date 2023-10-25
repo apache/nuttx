@@ -29,6 +29,7 @@
 #include <nuttx/nuttx.h>
 #include <nuttx/kthread.h>
 #include <nuttx/rptun/rptun.h>
+#include <nuttx/signal.h>
 
 #include <nuttx/semaphore.h>
 
@@ -245,7 +246,7 @@ nrf53_rptun_get_resource(struct rptun_dev_s *dev)
 
       while (priv->shmem->base == 0)
         {
-          usleep(100);
+          nxsig_usleep(100);
         }
     }
 

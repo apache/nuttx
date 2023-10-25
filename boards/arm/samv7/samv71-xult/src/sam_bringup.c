@@ -32,6 +32,7 @@
 #include <syslog.h>
 #include <errno.h>
 #include <debug.h>
+#include <nuttx/signal.h>
 
 #ifdef CONFIG_USBMONITOR
 #  include <nuttx/usb/usbmonitor.h>
@@ -349,7 +350,7 @@ int sam_bringup(void)
     {
       if (sam_cardinserted(HSMCI0_SLOTNO))
         {
-          usleep(1000 * 1000);
+          nxsig_usleep(1000 * 1000);
 
           /* Mount the volume on HSMCI0 */
 

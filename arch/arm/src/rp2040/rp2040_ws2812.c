@@ -30,6 +30,7 @@
 #include <string.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 #include <nuttx/leds/ws2812.h>
 
 #include <rp2040_pio.h>
@@ -141,7 +142,7 @@ static void update_pixels(struct ws2812_dev_s  *dev_data)
 
   if (time_delta < 50)
     {
-      usleep(50 - time_delta);
+      nxsig_usleep(50 - time_delta);
     }
 
   rp2040_dmastart(dma_handle, dma_complete, dev_data);

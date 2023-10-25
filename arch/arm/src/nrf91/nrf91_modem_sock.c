@@ -38,6 +38,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/net/usrsock.h>
 #include <nuttx/net/ioctl.h>
+#include <nuttx/signal.h>
 
 #include <nuttx/wireless/lte/lte_ioctl.h>
 #include <nuttx/wireless/lte/lte.h>
@@ -682,7 +683,7 @@ static void nrf91_usrsock_poll_work(void *arg)
         {
           while (g_usrsock.sock[pollfd->fd].recvpending == true)
             {
-              usleep(100);
+              nxsig_usleep(100);
             }
         }
 

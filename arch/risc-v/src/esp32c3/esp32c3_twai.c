@@ -37,6 +37,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/can/can.h>
+#include <nuttx/signal.h>
 
 #include "riscv_internal.h"
 
@@ -1217,7 +1218,7 @@ struct can_dev_s *esp32c3_twaiinitialize(int port)
       modifyreg32(SYSTEM_PERIP_RST_EN0_REG, 0, SYSTEM_TWAI_RST_M);
       modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, SYSTEM_TWAI_CLK_EN_M, 0);
 
-      usleep(1);
+      nxsig_usleep(1);
 
       modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, 0, SYSTEM_TWAI_CLK_EN_M);
       modifyreg32(SYSTEM_PERIP_RST_EN0_REG, SYSTEM_TWAI_RST_M, 0);

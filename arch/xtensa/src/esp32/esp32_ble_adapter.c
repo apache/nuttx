@@ -2529,7 +2529,7 @@ int esp32_bt_controller_disable(void)
 
   while (!btdm_power_state_active())
     {
-      usleep(1000); /* wait */
+      nxsig_usleep(1000); /* wait */
     }
 
   btdm_controller_disable();

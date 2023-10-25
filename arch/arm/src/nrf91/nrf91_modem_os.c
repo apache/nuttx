@@ -27,6 +27,7 @@
 #include <arch/irq.h>
 
 #include <nuttx/mutex.h>
+#include <nuttx/signal.h>
 
 #include <nuttx/mm/mm.h>
 
@@ -385,7 +386,7 @@ int nrf_modem_os_sleep(uint32_t timeout)
 {
   /* Timeout in ms */
 
-  usleep(timeout * 1000);
+  nxsig_usleep(timeout * 1000);
   return OK;
 }
 

@@ -37,6 +37,7 @@
 #include <nuttx/drivers/ramdisk.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/nxffs.h>
+#include <nuttx/signal.h>
 
 #include "same70-qmtech.h"
 
@@ -172,7 +173,7 @@ int sam_bringup(void)
     {
       if (sam_cardinserted(HSMCI0_SLOTNO))
         {
-          usleep(1000 * 1000);
+          nxsig_usleep(1000 * 1000);
 
           /* Mount the volume on HSMCI0 */
 
