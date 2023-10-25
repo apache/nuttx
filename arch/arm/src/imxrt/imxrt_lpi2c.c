@@ -1357,12 +1357,12 @@ static int imxrt_lpi2c_isr_process(struct imxrt_lpi2c_priv_s *priv)
 #ifdef CONFIG_IMXRT_LPI2C_DMA
   uint32_t current_status = status;
 
-  /* Condition the status with only the enabled interrupts */
-
-  status &= imxrt_lpi2c_getenabledints(priv);
-
   if (priv->dma != NULL)
     {
+      /* Condition the status with only the enabled interrupts */
+
+      status &= imxrt_lpi2c_getenabledints(priv);
+
       /* Is there an Error condition */
 
       if (current_status & LPI2C_MSR_LIMITED_ERROR_MASK)
