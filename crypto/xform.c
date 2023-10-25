@@ -389,6 +389,15 @@ const struct auth_hash auth_hash_md5 =
   (void (*) (FAR uint8_t *, FAR void *)) md5final
 };
 
+const struct auth_hash auth_hash_ripemd_160 =
+{
+  CRYPTO_RIPEMD160, "RIPEMD160",
+  0, 20, 20, sizeof(RMD160_CTX), HMAC_RIPEMD160_BLOCK_LEN,
+  (void (*) (FAR void *)) rmd160init, NULL, NULL,
+  rmd160update_int,
+  (void (*) (FAR uint8_t *, FAR void *)) rmd160final
+};
+
 const struct auth_hash auth_hash_sha1 =
 {
   CRYPTO_SHA1, "SHA1",

@@ -117,13 +117,14 @@
 #define CRYPTO_CHACHA20_POLY1305 24
 #define CRYPTO_CHACHA20_POLY1305_MAC 25
 #define CRYPTO_MD5              26
-#define CRYPTO_SHA1             27
-#define CRYPTO_SHA2_224         28
-#define CRYPTO_SHA2_256         29
-#define CRYPTO_SHA2_384         30
-#define CRYPTO_SHA2_512         31
-#define CRYPTO_ESN              32 /* Support for Extended Sequence Numbers */
-#define CRYPTO_ALGORITHM_MAX    32 /* Keep updated */
+#define CRYPTO_RIPEMD160        27
+#define CRYPTO_SHA1             28
+#define CRYPTO_SHA2_224         29
+#define CRYPTO_SHA2_256         30
+#define CRYPTO_SHA2_384         31
+#define CRYPTO_SHA2_512         32
+#define CRYPTO_ESN              33 /* Support for Extended Sequence Numbers */
+#define CRYPTO_ALGORITHM_MAX    33 /* Keep updated */
 
 /* Algorithm flags */
 
