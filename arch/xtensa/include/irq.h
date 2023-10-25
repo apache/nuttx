@@ -236,7 +236,7 @@ static inline uint32_t xtensa_getps(void)
 
 /* Set the value of the PS register */
 
-static inline void xtensa_setps(uint32_t ps)
+noinstrument_function static inline void xtensa_setps(uint32_t ps)
 {
   __asm__ __volatile__
   (
@@ -265,7 +265,7 @@ static inline uint32_t up_getsp(void)
 
 /* Restore the value of the PS register */
 
-static inline void up_irq_restore(uint32_t ps)
+noinstrument_function static inline void up_irq_restore(uint32_t ps)
 {
   __asm__ __volatile__
   (
@@ -279,7 +279,7 @@ static inline void up_irq_restore(uint32_t ps)
 
 /* Disable interrupts and return the previous value of the PS register */
 
-static inline uint32_t up_irq_save(void)
+noinstrument_function static inline uint32_t up_irq_save(void)
 {
   uint32_t ps;
 
@@ -313,7 +313,7 @@ static inline void up_irq_enable(void)
 
 /* Disable low- and medium- priority interrupts */
 
-static inline void up_irq_disable(void)
+noinstrument_function static inline void up_irq_disable(void)
 {
 #ifdef __XTENSA_CALL0_ABI__
   xtensa_setps(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM);
@@ -440,7 +440,7 @@ int up_cpu_index(void);
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-static inline bool up_interrupt_context(void)
+noinstrument_function static inline bool up_interrupt_context(void)
 {
 #ifdef CONFIG_SMP
   irqstate_t flags = up_irq_save();

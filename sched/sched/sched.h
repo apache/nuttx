@@ -381,7 +381,7 @@ void nxsched_suspend(FAR struct tcb_s *tcb);
 #endif
 
 #ifdef CONFIG_SMP
-FAR struct tcb_s *this_task(void);
+FAR struct tcb_s *this_task(void) noinstrument_function;
 
 int  nxsched_select_cpu(cpu_set_t affinity);
 int  nxsched_pause_cpu(FAR struct tcb_s *tcb);
