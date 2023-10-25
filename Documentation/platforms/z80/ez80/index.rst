@@ -29,3 +29,12 @@ appropriate configuration to enable support.
 C intrinsics are also required. Some may be found in the Zilog ZDS-II
 distribution, requiring some modification to build with the GNU assembler.
 Additional intrinsics for 64-bit support must be supplied.
+
+Supported Boards
+================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*

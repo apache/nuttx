@@ -28,3 +28,12 @@ board that features the MK26Z128VLH4 Cortex-M0+ MCU, 128KB of FLASH and
 16KB of SRAM. See the
 `Freescale <http://www.freescale.com/webapp/sps/site/prod_summary.jsp?code=FRDM-KL26Z&tid=vanFRDM-KL26Z>`__
 website for further information about this board.
+
+Supported Boards
+================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*

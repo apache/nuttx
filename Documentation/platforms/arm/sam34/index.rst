@@ -141,3 +141,12 @@ devkitARM), or 4) Native Windows. A DIY toolchain for Linux or Cygwin is
 provided by the NuttX
 `buildroot <https://bitbucket.org/nuttx/buildroot/downloads/>`__
 package.
+
+Supported Boards
+================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*

@@ -13,3 +13,12 @@ release:
 
 -  **NuttX-8.2**
 -  **NuttX-9.0** RTC driver for the RX65N was added.
+
+Supported Boards
+================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*

@@ -38,3 +38,12 @@ and USB device. ADC, Watchdog, IPC2, and I2S support was added by
 Masayuki Ishikawa in NuttX-7.23. Bluetooth, SPI, and *PROTECTED* build
 support were added by Masayuki Ishikawa in NuttX-7.26. Support for for
 SPI flash boot was added in NuttX-7.28.
+
+Supported Boards
+================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*

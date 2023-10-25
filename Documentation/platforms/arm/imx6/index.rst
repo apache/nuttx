@@ -20,3 +20,12 @@ The basic port has been completed for the following i.MX6 board:
    with SMP support on this platform as described in the
    `README <https://github.com/apache/nuttx/blob/master/boards/arm/imx6/sabre-6quad/README.txt>`__
    file for the board.
+
+Supported Boards
+================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*

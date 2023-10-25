@@ -59,3 +59,12 @@ information.
 This was a collaborative effort between Kristopher Tate, David Sidrane
 and myself. The basic port is functional and a NuttShell (NSH)
 configuration is available.
+
+Supported Boards
+================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*

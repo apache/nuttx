@@ -10,3 +10,11 @@ EVSYS was included in the NuttX-7.28 release. A basic NSH configuration
 is available and is fully functional. Includes unverified support for an
 SPI0-based SD card.
 
+Supported Boards
+================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*

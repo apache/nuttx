@@ -26,3 +26,12 @@ Microchip SAML21
 The port of NuttX to the Microchip SAML21-Xplained Pro
 development board. This board features the ATSAML21J18A MCU (Cortex-M0+
 with 256KB of FLASH and 32KB of SRAM).
+
+Supported Boards
+================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*
