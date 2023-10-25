@@ -40,6 +40,7 @@
 #include <nuttx/mutex.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/signal.h>
 
 #include "rpmsgfs.h"
 
@@ -260,7 +261,7 @@ static void rpmsgfs_mkpath(FAR struct rpmsgfs_mountpt_s *fs,
           break;
         }
 
-      usleep(RPMSGFS_RETRY_DELAY_MS * USEC_PER_MSEC);
+      nxsig_usleep(RPMSGFS_RETRY_DELAY_MS * USEC_PER_MSEC);
       fs->timeout -= RPMSGFS_RETRY_DELAY_MS;
     }
 }

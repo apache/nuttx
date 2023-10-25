@@ -28,6 +28,8 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/signal.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -137,7 +139,7 @@ static int a4988_work(FAR struct stepper_lowerhalf_s *dev,
   if (priv->auto_idle)
     {
       priv->ops->idle(false);
-      usleep(USEC_PER_MSEC);
+      nxsig_usleep(USEC_PER_MSEC);
     }
 
   dev->status.state = STEPPER_STATE_RUN;
@@ -197,7 +199,7 @@ static int a4988_idle(FAR struct stepper_lowerhalf_s *dev, uint8_t idle)
   else
     {
       priv->ops->idle(false);
-      usleep(USEC_PER_MSEC);
+      nxsig_usleep(USEC_PER_MSEC);
       dev->status.state = STEPPER_STATE_READY;
     }
 

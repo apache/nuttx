@@ -25,6 +25,7 @@
 #include "amebaz_depend.h"
 #include <nuttx/mqueue.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/signal.h>
 #include <nuttx/syslog/syslog.h>
 
 /****************************************************************************
@@ -397,7 +398,7 @@ void rtw_yield_os(void)
 
 void rtw_usleep_os(int us)
 {
-  usleep(us);
+  nxsig_usleep(us);
 }
 
 void rtw_msleep_os(int ms)

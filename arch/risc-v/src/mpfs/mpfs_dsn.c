@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 #include <errno.h>
 #include <unistd.h>
+#include <nuttx/signal.h>
 #include "mpfs_dsn.h"
 #include "riscv_internal.h"
 
@@ -89,7 +90,7 @@ int mpfs_read_dsn(uint8_t *dsn, size_t len)
   while ((getreg32(SERVICES_SR) & SCBCTRL_SERVICESSR_BUSY) && --retries > 0)
     {
       leave_critical_section(flags);
-      usleep(1000);
+      nxsig_usleep(1000);
       flags = enter_critical_section();
     }
 
