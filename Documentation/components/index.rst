@@ -19,3 +19,4 @@ NuttX is very feature-rich RTOS and is thus composed of various different subsys
    libs/index.rst
    net/index.rst
    mm/index.rst
+   syscall.rst
