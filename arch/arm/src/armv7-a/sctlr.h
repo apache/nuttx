@@ -463,6 +463,7 @@ static inline unsigned int cp15_rdid(void)
 
 /* Get the Multiprocessor Affinity Register (MPIDR) */
 
+noinstrument_function
 static inline unsigned int cp15_rdmpidr(void)
 {
   return CP15_GET(MPIDR);

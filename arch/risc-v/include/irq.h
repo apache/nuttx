@@ -680,7 +680,7 @@ int up_cpu_index(void);
  *
  ****************************************************************************/
 
-static inline irqstate_t up_irq_save(void)
+noinstrument_function static inline irqstate_t up_irq_save(void)
 {
   irqstate_t flags;
 
@@ -709,7 +709,7 @@ static inline irqstate_t up_irq_save(void)
  *
  ****************************************************************************/
 
-static inline void up_irq_restore(irqstate_t flags)
+noinstrument_function static inline void up_irq_restore(irqstate_t flags)
 {
   __asm__ __volatile__
     (
@@ -729,7 +729,7 @@ static inline void up_irq_restore(irqstate_t flags)
  *
  ****************************************************************************/
 
-static inline bool up_interrupt_context(void)
+noinstrument_function static inline bool up_interrupt_context(void)
 {
 #ifdef CONFIG_SMP
   irqstate_t flags = up_irq_save();
