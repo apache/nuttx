@@ -1,5 +1,5 @@
 # ##############################################################################
-# libs/libc/builtin/CMakeLists.txt
+# libs/libc/gpsutils/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -18,17 +18,31 @@
 #
 # ##############################################################################
 
-if(CONFIG_BUILTIN)
-  set(SRCS lib_builtin_getname.c lib_builtin_isavail.c lib_builtin_forindex.c)
+nuttx_generate_kconfig(MENUDESC "GPS Utilities")
 
-  if(CONFIG_BUILD_PROTECTED)
-    list(APPEND SRCS lib_builtin_setlist.c)
+if(CONFIG_GPSUTILS_MINMEA_LIB)
+
+  set(MINMEA_DIR ${CMAKE_CURRENT_LIST_DIR}/minmea)
+
+  if(NOT EXISTS ${MINMEA_DIR})
+    set(MINMEA_URL https://github.com/kosma/minmea/archive)
+    set(MINMEA_VERSION db46128e73cee26d6a6eb0482dcba544ee1ea9f5)
+
+    FetchContent_Declare(
+      minmea_fetch
+      URL ${MINMEA_URL}/${MINMEA_VERSION}.zip SOURCE_DIR
+          ${CMAKE_CURRENT_LIST_DIR}/minmea BINARY_DIR
+          ${CMAKE_BINARY_DIR}/libs/libc/gpsutils/minmea
+      DOWNLOAD_NO_PROGRESS true
+      TIMEOUT 30)
+
+    FetchContent_GetProperties(minmea_fetch)
+
+    if(NOT minmea_fetch_POPULATED)
+      FetchContent_Populate(minmea_fetch)
+    endif()
   endif()
 
-  if(CONFIG_SCHED_USER_IDENTITY)
-    list(APPEND SRCS lib_builtin_getuid.c lib_builtin_getgid.c
-         lib_builtin_getmode.c)
-  endif()
+  target_sources(c PRIVATE minmea/minmea.c)
 
-  target_sources(c PRIVATE ${SRCS})
 endif()
