@@ -1,6 +1,6 @@
-=============
-``fs/procfs``
-=============
+======
+PROCFS
+======
 
 This is a tiny procfs file system that allows read-only access to a few
 attributes of a task or thread.  This tiny procfs fs file system can be

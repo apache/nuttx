@@ -6,15 +6,15 @@ This page discusses the NuttX libraries that can be found in ``libs/``
 
 Libraries in NuttX are very special creatures.  They have these properties:
 
-1. They can be shared by both application logic and logic within the OS when
+#. They can be shared by both application logic and logic within the OS when
    using the FLAT build.
 
-2. But in PROTECTED and KERNEL modes, they must be built differently:  The
+#. But in PROTECTED and KERNEL modes, they must be built differently:  The
    copies used by applications and the OS cannot be the same.  Rather,
    separate versions of libraries must be built for the kernel and for
    applications.
 
-3. When used by the OS, some special care must be taken to assure that the
+#. When used by the OS, some special care must be taken to assure that the
    OS logic does not disrupt the user's errno value and that the OS does
    not create inappropriate cancellation points.
 

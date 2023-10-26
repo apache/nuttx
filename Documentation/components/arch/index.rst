@@ -59,21 +59,22 @@ Summary of Files
 ================
 
 ``include/<chip-name>/``
+
   This sub-directory contains chip-specific header files.
 
 ``include/arch.h``
+
   This is a hook for any architecture specific definitions that may be
   needed by the system.  It is included by ``include/nuttx/arch.h``
 
 ``include/types.h``
+
   This provides architecture/toolchain-specific definitions for standard
-  types.  This file should typedef::
+  types.  This file should typedef: ``_int8_t``, ``_uint8_t``, ``_int16_t``,
+  ``_uint16_t``, ``_int32_t``, ``_uint32_t``
 
-    _int8_t, _uint8_t, _int16_t, _uint16_t, _int32_t, _uint32_t
-
-  and if the architecture supports 64-bit integers::
-
-    _int24_t, _uint24_t, _int64_t, _uint64_t
+  and if the architecture supports 64-bit integers: ``_int24_t``, ``_uint24_t``,
+  ``_int64_t``, ``_uint64_t``
 
   NOTE that these type names have a leading underscore character.  This
   file will be included (indirectly) by ``include/stdint.h`` and typedef'ed
@@ -83,6 +84,7 @@ Summary of Files
   definitions provided by their toolchain header files.
 
 ``irqstate_t``
+
   Must be defined to the size required to hold the interrupt
   enable/disable state.
 
@@ -90,17 +92,21 @@ Summary of Files
   available to all files.
 
 ``include/irq.h``
+
   This file needs to define some architecture-specific functions
   (usually inline if the compiler supports inlining) and structures.
   These include:
 
 ``struct xcptcontext``
+
   This structure represents the saved context ofa thread.
 
 ``irqstate_t up_irq_save(void)``
+
   Used to disable all interrupts.
 
 ``void up_irq_restore(irqstate_t flags)``
+
   Used to restore interrupt enables to the same state as before ``up_irq_save``
   was called.
 
@@ -115,9 +121,11 @@ Summary of Files
   by the board.
 
 ``src/<chip-name>/``
+
   This sub-directory contains chip-specific source files.
 
 ``src/Makefile``
+
   This makefile will be executed to build the targets src/libup.a and
   src/up_head.o.  The up_head.o file holds the entry point into the
   system (power-on reset entry point, for example).  It will be used in
