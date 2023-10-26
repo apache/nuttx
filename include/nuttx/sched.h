@@ -625,7 +625,7 @@ struct tcb_s
 
   /* CPU load monitoring support ********************************************/
 
-#ifdef CONFIG_SCHED_CPULOAD
+#ifndef CONFIG_SCHED_CPULOAD_NONE
   uint32_t ticks;                        /* Number of ticks on this thread */
 #endif
 

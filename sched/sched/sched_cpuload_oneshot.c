@@ -44,10 +44,6 @@
 
 /* Configuration ************************************************************/
 
-#if !defined(CONFIG_SCHED_CPULOAD) || !defined(CONFIG_SCHED_CPULOAD_EXTCLK)
-#  error CONFIG_SCHED_CPULOAD and CONFIG_SCHED_CPULOAD_EXTCLK must be defined
-#endif
-
 /* CONFIG_SCHED_CPULOAD_TICKSPERSEC is the frequency of the external clock
  * source.
  */
