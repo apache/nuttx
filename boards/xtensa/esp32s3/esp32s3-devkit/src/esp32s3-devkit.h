@@ -210,5 +210,26 @@ int esp32s3_pwm_setup(void);
 int esp32s3_twai_setup(void);
 #endif
 
+/****************************************************************************
+ * Name: esp32s3_lan9250_initialize
+ *
+ * Description:
+ *   This function is called by platform-specific setup logic to initialize
+ *   the LAN9250 device. This function will register the driver
+ *   as a network device.
+ *
+ * Input Parameters:
+ *   port - The SPI port used for the device
+ *
+ * Returned Value:
+ *   Zero is returned on success. Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_LAN9250
+int esp32s3_lan9250_initialize(int port);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_XTENSA_ESP32S3_ESP32S3_DEVKIT_SRC_ESP32S3_DEVKIT_H */
