@@ -1547,7 +1547,7 @@ Configuration sub-directories
        RAM test enabled with this option:
 
        Application Configuration:
-         CONFIG_SYSTEM_RAMTEST=y
+         CONFIG_TESTING_RAMTEST=y
 
        The RAM test can be executed as follows:
 
