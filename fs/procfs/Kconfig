@@ -45,7 +45,7 @@ config FS_PROCFS_EXCLUDE_CPUINFO
 
 config FS_PROCFS_EXCLUDE_CPULOAD
 	bool "Exclude CPU load"
-	depends on SCHED_CPULOAD
+	depends on !SCHED_CPULOAD_NONE
 	default DEFAULT_SMALL
 
 config FS_PROCFS_EXCLUDE_ENVIRON

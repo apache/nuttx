@@ -54,7 +54,7 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mm/mm.h>
 
-#if defined(CONFIG_SCHED_CPULOAD) || defined(CONFIG_SCHED_CRITMONITOR)
+#if !defined(CONFIG_SCHED_CPULOAD_NONE) || defined(CONFIG_SCHED_CRITMONITOR)
 #  include <nuttx/clock.h>
 #endif
 
@@ -84,7 +84,7 @@ enum proc_node_e
   PROC_LEVEL0 = 0,                    /* The top-level directory */
   PROC_STATUS,                        /* Task/thread status */
   PROC_CMDLINE,                       /* Task command line */
-#ifdef CONFIG_SCHED_CPULOAD
+#ifndef CONFIG_SCHED_CPULOAD_NONE
   PROC_LOADAVG,                       /* Average CPU utilization */
 #endif
 #ifdef CONFIG_SCHED_CRITMONITOR
@@ -171,7 +171,7 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
 static ssize_t proc_cmdline(FAR struct proc_file_s *procfile,
                  FAR struct tcb_s *tcb, FAR char *buffer, size_t buflen,
                  off_t offset);
-#ifdef CONFIG_SCHED_CPULOAD
+#ifndef CONFIG_SCHED_CPULOAD_NONE
 static ssize_t proc_loadavg(FAR struct proc_file_s *procfile,
                  FAR struct tcb_s *tcb, FAR char *buffer, size_t buflen,
                  off_t offset);
@@ -278,7 +278,7 @@ static const struct proc_node_s g_cmdline =
   "cmdline",      "cmdline", (uint8_t)PROC_CMDLINE,      DTYPE_FILE        /* Task command line */
 };
 
-#ifdef CONFIG_SCHED_CPULOAD
+#ifndef CONFIG_SCHED_CPULOAD_NONE
 static const struct proc_node_s g_loadavg =
 {
   "loadavg",       "loadavg", (uint8_t)PROC_LOADAVG,     DTYPE_FILE        /* Average CPU utilization */
@@ -340,7 +340,7 @@ static FAR const struct proc_node_s * const g_nodeinfo[] =
 {
   &g_status,       /* Task/thread status */
   &g_cmdline,      /* Task command line */
-#ifdef CONFIG_SCHED_CPULOAD
+#ifndef CONFIG_SCHED_CPULOAD_NONE
   &g_loadavg,      /* Average CPU utilization */
 #endif
 #ifdef CONFIG_SCHED_CRITMONITOR
@@ -369,7 +369,7 @@ static const struct proc_node_s * const g_level0info[] =
 {
   &g_status,       /* Task/thread status */
   &g_cmdline,      /* Task command line */
-#ifdef CONFIG_SCHED_CPULOAD
+#ifndef CONFIG_SCHED_CPULOAD_NONE
   &g_loadavg,      /* Average CPU utilization */
 #endif
 #ifdef CONFIG_SCHED_CRITMONITOR
@@ -706,7 +706,7 @@ static ssize_t proc_cmdline(FAR struct proc_file_s *procfile,
  * Name: proc_loadavg
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_CPULOAD
+#ifndef CONFIG_SCHED_CPULOAD_NONE
 static ssize_t proc_loadavg(FAR struct proc_file_s *procfile,
                             FAR struct tcb_s *tcb, FAR char *buffer,
                             size_t buflen, off_t offset)
@@ -1521,7 +1521,7 @@ static ssize_t proc_read(FAR struct file *filep, FAR char *buffer,
       ret = proc_cmdline(procfile, tcb, buffer, buflen, filep->f_pos);
       break;
 
-#ifdef CONFIG_SCHED_CPULOAD
+#ifndef CONFIG_SCHED_CPULOAD_NONE
     case PROC_LOADAVG: /* Average CPU utilization */
       ret = proc_loadavg(procfile, tcb, buffer, buflen, filep->f_pos);
       break;
