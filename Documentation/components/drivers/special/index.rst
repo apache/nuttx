@@ -35,3 +35,5 @@ following section.
   usbdev.rst
   rwbuffer.rst
   regmap.rst
+  sensors.rst
+  video.rst
