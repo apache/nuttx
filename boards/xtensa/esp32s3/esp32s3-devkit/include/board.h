@@ -49,4 +49,19 @@
 #define BOARD_NGPIOIN     1 /* Amount of GPIO Input without Interruption */
 #define BOARD_NGPIOINT    1 /* Amount of GPIO Input w/ Interruption pins */
 
+/* LAN9250 SPI and GPIO pins configuration */
+
+#ifdef CONFIG_NET_LAN9250
+
+#  define LAN9250_SPI     2 
+
+/* LAN9250 IRQ pin */
+
+#  define LAN9250_IRQ     38
+
+/* LAN9250 reset pin */
+
+#  define LAN9250_RST     17
+#endif
+
 #endif /* __BOARDS_XTENSA_ESP32S3_ESP32S3_DEVKIT_INCLUDE_BOARD_H */

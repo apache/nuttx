@@ -428,6 +428,69 @@ config NET_W5500_NINTERFACES
 
 endif # W5500
 
+menuconfig NET_LAN9250
+	bool "Microchip LAN9250 support"
+	default n
+	select SPI
+	select ARCH_HAVE_NETDEV_STATISTICS
+	---help---
+		Enable LAN9250 SPI Ethernet driver.
+
+if NET_LAN9250
+
+choice LAN9250_INTERFACE
+	prompt "Select interface"
+	default LAN9250_SPI
+	---help---
+		Select LAN9250 interface: SPI(4-line) or SQI(6-line).
+
+config LAN9250_SPI
+	bool "SPI"
+
+config LAN9250_SQI
+	bool "SQI"
+endchoice
+
+config LAN9250_SPI_EXCLUSIVE
+	bool "SPI Exclusive"
+	default n
+	---help---
+		The SPI is exclusive for LAN9250.
+
+config LAN9250_SPIMODE
+	int "SPI mode"
+	default 0
+	---help---
+		Controls the SPI mode.
+
+config LAN9250_FREQUENCY
+	int "SPI frequency"
+	default 10000000
+	---help---
+		Define to use a different bus frequency.
+
+config LAN9250_HALFDUPPLEX
+	bool "Enable half duplex"
+	default n
+	---help---
+		Default is full duplex.
+
+config LAN9250_DUMPPACKET
+	bool "Dump Packets"
+	default n
+	---help---
+		If selected, the LAN9250 driver will dump the contents of each
+		packet to the console.
+
+config LAN9250_REGDEBUG
+	bool "Register-Level Debug"
+	default n
+	depends on DEBUG_FEATURES && DEBUG_NET
+	---help---
+		Enable very low-level register access debug.
+
+endif # NET_LAN9250
+
 if ARCH_HAVE_PHY
 
 comment "External Ethernet PHY Device Support"
