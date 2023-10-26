@@ -378,7 +378,7 @@ Configuration sub-directories
              CONFIG_SAM34_EXTSRAM0HEAP=n      : Don't add to heap
 
            Application Configuration -> System NSH Add-Ons
-             CONFIG_SYSTEM_RAMTEST=y         : Enable the RAM test built-in
+             CONFIG_TESTING_RAMTEST=y         : Enable the RAM test built-in
 
          In this configuration, the SDRAM is not added to heap and so is
          not excessible to the applications.  So the RAM test can be

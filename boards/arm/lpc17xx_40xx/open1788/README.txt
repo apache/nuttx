@@ -438,7 +438,7 @@ Configuration Directories
        CONFIG_LPC17_40_EMC=y                  : Enable the EMC
        CONFIG_LPC17_40_EXTDRAM=y              : Configure external DRAM
        CONFIG_LPC17_40_EXTDRAMSIZE=67108864   : DRAM size 2x256/8 = 64MB
-       CONFIG_SYSTEM_RAMTEST=y             : Enable the RAM test built-in
+       CONFIG_TESTING_RAMTEST=y             : Enable the RAM test built-in
 
        In this configuration, the SDRAM is not added to heap and so is
        not excessible to the applications.  So the RAM test can be
