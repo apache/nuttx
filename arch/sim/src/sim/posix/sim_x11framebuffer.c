@@ -39,6 +39,29 @@
  * Public Data
  ****************************************************************************/
 
+typedef union
+{
+  struct
+    {
+      uint16_t blue : 5;
+      uint16_t green : 6;
+      uint16_t red : 5;
+    };
+  uint16_t full;
+} x11_color16_t;
+
+typedef union
+{
+  struct
+    {
+      uint8_t blue;
+      uint8_t green;
+      uint8_t red;
+      uint8_t alpha;
+    };
+  uint32_t full;
+} x11_color32_t;
+
 /* Also used in sim_x11eventloop */
 
 Display *g_display;
@@ -58,8 +81,13 @@ static XImage *g_image;
 static char *g_framebuffer;
 static unsigned short g_fbpixelwidth;
 static unsigned short g_fbpixelheight;
+static int g_fbbpp;
+static int g_fblen;
+static int g_fbcount;
 static int g_shmcheckpoint = 0;
 static int b_useshm;
+
+static unsigned char *g_trans_framebuffer;
 
 /****************************************************************************
  * Private Functions
@@ -349,6 +377,27 @@ shmerror:
 }
 
 /****************************************************************************
+ * Name: sim_x11depth16to32
+ ****************************************************************************/
+
+static inline void sim_x11depth16to32(void *d_mem, size_t size,
+                                      const void *s_mem)
+{
+  x11_color32_t *dst = d_mem;
+  const x11_color16_t *src = s_mem;
+
+  for (size /= 4; size; size--)
+    {
+      dst->red = (src->red * 263 + 7) >> 5;
+      dst->green = (src->green * 259 + 3) >> 6;
+      dst->blue = (src->blue * 263 + 7) >> 5;
+      dst->alpha = 0xff;
+      dst++;
+      src++;
+    }
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -373,6 +422,11 @@ int sim_x11initialize(unsigned short width, unsigned short height,
   g_fbpixelwidth  = width;
   g_fbpixelheight = height;
 
+  if (fbcount < 1)
+    {
+      return -EINVAL;
+    }
+
   /* Create the X11 window */
 
   display = sim_x11createframe();
@@ -396,6 +450,11 @@ int sim_x11initialize(unsigned short width, unsigned short height,
       depth = 32;
     }
 
+  if (depth != CONFIG_SIM_FBBPP && depth != 32 && CONFIG_SIM_FBBPP != 16)
+    {
+      return -1;
+    }
+
   *bpp    = depth;
   *stride = (depth * width / 8);
   *fblen  = (*stride * height);
@@ -404,7 +463,32 @@ int sim_x11initialize(unsigned short width, unsigned short height,
 
   sim_x11mapsharedmem(display, windowattributes.depth, *fblen, fbcount);
 
-  *fbmem  = (void *)g_framebuffer;
+  g_fbbpp = depth;
+  g_fblen = *fblen;
+  g_fbcount = fbcount;
+
+  /* Create conversion framebuffer */
+
+  if (depth == 32 && CONFIG_SIM_FBBPP == 16)
+    {
+      *bpp = CONFIG_SIM_FBBPP;
+      *stride = (CONFIG_SIM_FBBPP * width / 8);
+      *fblen = (*stride * height);
+
+      g_trans_framebuffer = malloc((*fblen) * fbcount);
+      if (g_trans_framebuffer == NULL)
+        {
+          syslog(LOG_ERR, "Failed to allocate g_trans_framebuffer\n");
+          return -1;
+        }
+
+      *fbmem = g_trans_framebuffer;
+    }
+  else
+    {
+      *fbmem = g_framebuffer;
+    }
+
   g_display = display;
   return 0;
 }
@@ -454,7 +538,14 @@ int sim_x11setoffset(unsigned int offset)
       return -ENODEV;
     }
 
-  g_image->data = g_framebuffer + offset;
+  if (g_fbbpp == 32 && CONFIG_SIM_FBBPP == 16)
+    {
+      g_image->data = g_framebuffer + (offset << 1);
+    }
+  else
+    {
+      g_image->data = g_framebuffer + offset;
+    }
 
   return 0;
 }
@@ -525,6 +616,13 @@ int sim_x11update(void)
     {
       XPutImage(g_display, g_window, g_gc, g_image, 0, 0, 0, 0,
                 g_fbpixelwidth, g_fbpixelheight);
+    }
+
+  if (g_fbbpp == 32 && CONFIG_SIM_FBBPP == 16)
+    {
+      sim_x11depth16to32(g_framebuffer,
+                         g_fblen * g_fbcount,
+                         g_trans_framebuffer);
     }
 
   XSync(g_display, 0);
