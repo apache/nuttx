@@ -37,8 +37,6 @@
 #include <nuttx/mutex.h>
 #include <nuttx/spi/spi_transfer.h>
 
-#ifdef CONFIG_SPI_DRIVER
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -393,4 +391,3 @@ int spi_register(FAR struct spi_dev_s *spi, int bus)
   return -ENOMEM;
 }
 
-#endif /* CONFIG_SPI_DRIVER */
