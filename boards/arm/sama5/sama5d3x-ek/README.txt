@@ -1780,7 +1780,7 @@ SDRAM Support
   Then enable the RAM test built-in application:
 
     Application Configuration->System NSH Add-Ons->Ram Test
-      CONFIG_SYSTEM_RAMTEST=y
+      CONFIG_TESTING_RAMTEST=y
 
   In this configuration, the SDRAM is not added to heap and so is not
   accessible to the applications.  So the RAM test can be freely executed
