@@ -106,7 +106,10 @@ static ssize_t spi_slave_write(FAR struct file *filep,
                                FAR const char *buffer, size_t buflen);
 static int     spi_slave_poll(FAR struct file *filep, FAR struct pollfd *fds,
                               bool setup);
+
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int     spi_slave_unlink(FAR struct inode *inode);
+#endif
 
 /* SPI Slave driver methods */
 
