@@ -1,6 +1,6 @@
-===========
-sama5d3x-ek
-===========
+============
+sama5d2-xult
+============
 
 This is the  port of NuttX to the Atmel SAMA5D3x-EK development boards
 (where x=1,3,4, or 5).  These boards feature the Atmel SAMA5D3
@@ -16,5 +16,9 @@ for each CPU.  An option 7 inch LCD is also available.  All four boards
 are supported by NuttX with a simple reconfiguration of the processor
 type.
 
-.. include:: README.txt
-   :literal:
+For details look at ``Documentation/platforms/arm/sama5/boards/sama5d2-xult/README.txt``
+
+.. this breaks latexpdf build
+..
+   .. include:: README.txt
+      :literal:
