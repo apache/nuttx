@@ -30,6 +30,51 @@ if(CONFIG_RISCV_TOOLCHAIN_GNU_RV32 OR CONFIG_RISCV_TOOLCHAIN_GNU_RV64)
   endif()
 endif()
 
+# Default toolchain
+find_program(RV_COMPILER riscv-none-elf-gcc)
+if(RV_COMPILER)
+  set(TOOLCHAIN_PREFIX riscv-none-elf)
+else()
+  if(CONFIG_RISCV_TOOLCHAIN_GNU_RV32)
+    set(TOOLCHAIN_PREFIX riscv32-unknown-elf)
+  else()
+    set(TOOLCHAIN_PREFIX riscv64-unknown-elf)
+  endif()
+endif()
+
+set(CMAKE_LIBRARY_ARCHITECTURE ${TOOLCHAIN_PREFIX})
+set(CMAKE_C_COMPILER_TARGET ${TOOLCHAIN_PREFIX})
+set(CMAKE_CXX_COMPILER_TARGET ${TOOLCHAIN_PREFIX})
+
+set(CMAKE_ASM_COMPILER ${CMAKE_C_COMPILER})
+set(CMAKE_C_COMPILER ${TOOLCHAIN_PREFIX}-gcc)
+set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PREFIX}-g++)
+set(CMAKE_STRIP ${TOOLCHAIN_PREFIX}-strip --strip-unneeded)
+set(CMAKE_OBJCOPY ${TOOLCHAIN_PREFIX}-objcopy)
+set(CMAKE_OBJDUMP ${TOOLCHAIN_PREFIX}-objdump)
+set(CMAKE_LINKER ${TOOLCHAIN_PREFIX}-gcc)
+set(CMAKE_LD ${TOOLCHAIN_PREFIX}-ld)
+set(CMAKE_AR ${TOOLCHAIN_PREFIX}-ar)
+set(CMAKE_NM ${TOOLCHAIN_PREFIX}-nm)
+set(CMAKE_RANLIB ${TOOLCHAIN_PREFIX}-gcc-ranlib)
+
+if(CONFIG_LTO_FULL)
+  add_compile_options(-flto)
+  if(${CONFIG_RISCV_TOOLCHAIN} STREQUAL "GNU_RVG")
+    set(CMAKE_LD ${TOOLCHAIN_PREFIX}-gcc)
+    set(CMAKE_AR ${TOOLCHAIN_PREFIX}-gcc-ar)
+    set(CMAKE_NM ${TOOLCHAIN_PREFIX}-gcc-nm)
+    add_compile_options(-fuse-linker-plugin)
+    add_compile_options(-fno-builtin)
+  endif()
+endif()
+
+# override the ARCHIVE command
+
+set(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
+set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
+set(CMAKE_ASM_ARCHIVE_CREATE "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
+
 if(CONFIG_DEBUG_CUSTOMOPT)
   add_compile_options(${CONFIG_DEBUG_OPTLEVEL})
 elseif(CONFIG_DEBUG_FULLOPT)
@@ -130,6 +175,15 @@ endif()
 # Generic GNU RVG toolchain
 if(${CONFIG_RISCV_TOOLCHAIN} STREQUAL GNU_RVG)
 
+  execute_process(COMMAND ${TOOLCHAIN_PREFIX}-gcc --version
+                  OUTPUT_VARIABLE GCC_VERSION_OUTPUT)
+  string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+" GCC_VERSION
+               ${GCC_VERSION_OUTPUT})
+  string(REGEX MATCH "^[0-9]+" GCC_VERSION_MAJOR ${GCC_VERSION})
+  if(GCC_VERSION GREATER_EQUAL 12)
+    set(ARCHRVISAZ "_zicsr_zifencei")
+  endif()
+
   if(CONFIG_ARCH_RV_ISA_M)
     set(ARCHRVISAM m)
   endif()
@@ -165,7 +219,8 @@ if(${CONFIG_RISCV_TOOLCHAIN} STREQUAL GNU_RVG)
   # Construct arch flags
 
   set(ARCHCPUEXTFLAGS
-      i${ARCHRVISAM}${ARCHRVISAA}${ARCHRVISAF}${ARCHRVISAD}${ARCHRVISAC})
+      i${ARCHRVISAM}${ARCHRVISAA}${ARCHRVISAF}${ARCHRVISAD}${ARCHRVISAC}${ARCHRVISAZ}
+  )
   set(ARCHCPUFLAGS -march=${ARCHTYPE}${ARCHCPUEXTFLAGS})
 
   # Construct arch abi flags
@@ -234,48 +289,3 @@ endif()
 if(CONFIG_MM_UBSAN_TRAP_ON_ERROR)
   add_compile_options(-fsanitize-undefined-trap-on-error)
 endif()
-
-# Default toolchain
-find_program(RV_COMPILER riscv-none-elf-gcc)
-if(RV_COMPILER)
-  set(TOOLCHAIN_PREFIX riscv-none-elf)
-else()
-  if(CONFIG_RISCV_TOOLCHAIN_GNU_RV32)
-    set(TOOLCHAIN_PREFIX riscv32-unknown-elf)
-  else()
-    set(TOOLCHAIN_PREFIX riscv64-unknown-elf)
-  endif()
-endif()
-
-set(CMAKE_LIBRARY_ARCHITECTURE ${TOOLCHAIN_PREFIX})
-set(CMAKE_C_COMPILER_TARGET ${TOOLCHAIN_PREFIX})
-set(CMAKE_CXX_COMPILER_TARGET ${TOOLCHAIN_PREFIX})
-
-set(CMAKE_ASM_COMPILER ${CMAKE_C_COMPILER})
-set(CMAKE_C_COMPILER ${TOOLCHAIN_PREFIX}-gcc)
-set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PREFIX}-g++)
-set(CMAKE_STRIP ${TOOLCHAIN_PREFIX}-strip --strip-unneeded)
-set(CMAKE_OBJCOPY ${TOOLCHAIN_PREFIX}-objcopy)
-set(CMAKE_OBJDUMP ${TOOLCHAIN_PREFIX}-objdump)
-set(CMAKE_LINKER ${TOOLCHAIN_PREFIX}-gcc)
-set(CMAKE_LD ${TOOLCHAIN_PREFIX}-ld)
-set(CMAKE_AR ${TOOLCHAIN_PREFIX}-ar)
-set(CMAKE_NM ${TOOLCHAIN_PREFIX}-nm)
-set(CMAKE_RANLIB ${TOOLCHAIN_PREFIX}-gcc-ranlib)
-
-if(CONFIG_LTO_FULL)
-  add_compile_options(-flto)
-  if(${CONFIG_RISCV_TOOLCHAIN} STREQUAL "GNU_RVG")
-    set(CMAKE_LD ${TOOLCHAIN_PREFIX}-gcc)
-    set(CMAKE_AR ${TOOLCHAIN_PREFIX}-gcc-ar)
-    set(CMAKE_NM ${TOOLCHAIN_PREFIX}-gcc-nm)
-    add_compile_options(-fuse-linker-plugin)
-    add_compile_options(-fno-builtin)
-  endif()
-endif()
-
-# override the ARCHIVE command
-
-set(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
-set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
-set(CMAKE_ASM_ARCHIVE_CREATE "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
