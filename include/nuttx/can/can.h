@@ -221,6 +221,31 @@
  *                   is returned with the errno variable set to indicate the
  *                   nature of the error.
  *   Dependencies:   None
+ *
+ * CANIOC_IFLUSH
+ *   Description:    Flush data received but not read
+ *   Argument:       None
+ *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
+ *                   is returned with the errno variable set to indicate the
+ *                   nature of the error.
+ *   Dependencies:   None
+ *
+ * CANIOC_OFLUSH
+ *   Description:    Flush data written but not transmitted
+ *   Argument:       None
+ *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
+ *                   is returned with the errno variable set to indicate the
+ *                   nature of the error.
+ *   Dependencies:   None
+ *
+ * CANIOC_IOFLUSH
+ *   Description:    Flush data received but not read and data written but
+ *                   not transmitted
+ *   Argument:       None
+ *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
+ *                   is returned with the errno variable set to indicate the
+ *                   nature of the error.
+ *   Dependencies:   None
  */
 
 #define CANIOC_RTR                _CANIOC(1)
@@ -235,9 +260,12 @@
 #define CANIOC_BUSOFF_RECOVERY    _CANIOC(10)
 #define CANIOC_SET_NART           _CANIOC(11)
 #define CANIOC_SET_ABOM           _CANIOC(12)
+#define CANIOC_IFLUSH             _CANIOC(13)
+#define CANIOC_OFLUSH             _CANIOC(14)
+#define CANIOC_IOFLUSH            _CANIOC(15)
 
 #define CAN_FIRST                 0x0001         /* First common command */
-#define CAN_NCMDS                 12             /* Ten common commands */
+#define CAN_NCMDS                 15             /* 16 common commands   */
 
 /* User defined ioctl commands are also supported. These will be forwarded
  * by the upper-half CAN driver to the lower-half CAN driver via the

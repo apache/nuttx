@@ -967,9 +967,11 @@ static inline ssize_t can_rtrread(FAR struct file *filep,
 
 static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode     *inode = filep->f_inode;
-  FAR struct can_dev_s *dev   = inode->i_private;
-  int                   ret   = OK;
+  FAR struct inode        *inode  = filep->f_inode;
+  FAR struct can_dev_s    *dev    = inode->i_private;
+  FAR struct can_reader_s *reader = filep->f_priv;
+
+  int                     ret     = OK;
 
   caninfo("cmd: %d arg: %ld\n", cmd, arg);
 
@@ -985,8 +987,71 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
        */
 
       case CANIOC_RTR:
-        ret = can_rtrread(filep,
-                          (FAR struct canioc_rtr_s *)((uintptr_t)arg));
+        {
+          ret = can_rtrread(filep,
+                            (FAR struct canioc_rtr_s *)((uintptr_t)arg));
+        }
+        break;
+
+      /* CANIOC_IFLUSH: Flush data received but not read. No argument.      */
+
+      case CANIOC_IFLUSH:
+        {
+          reader->fifo.rx_head = 0;
+          reader->fifo.rx_tail = 0;
+
+          /* invoke lower half ioctl */
+
+          ret = dev_ioctl(dev, cmd, arg);
+        }
+        break;
+
+      /* CANIOC_OFLUSH: Flush data written but not transmitted. No argument */
+
+      case CANIOC_OFLUSH:
+        {
+          dev->cd_xmit.tx_head  = 0;
+          dev->cd_xmit.tx_queue = 0;
+          dev->cd_xmit.tx_tail  = 0;
+
+          /* invoke lower half ioctl */
+
+          ret = dev_ioctl(dev, cmd, arg);
+        }
+        break;
+
+      /* CANIOC_IOFLUSH: Flush data received but not read and data written
+       *                 but not yet transmitted
+       */
+
+      case CANIOC_IOFLUSH:
+        {
+          dev->cd_xmit.tx_head  = 0;
+          dev->cd_xmit.tx_queue = 0;
+          dev->cd_xmit.tx_tail  = 0;
+          reader->fifo.rx_head = 0;
+          reader->fifo.rx_tail = 0;
+
+          /* invoke lower half ioctl */
+
+          ret = dev_ioctl(dev, cmd, arg);
+        }
+        break;
+
+      /* FIONWRITE: Return the number of CAN messages in the send queue     */
+
+      case FIONWRITE:
+        {
+          *(uint8_t *)arg = dev->cd_xmit.tx_tail;
+        }
+        break;
+
+      /* FIONREAD: Return the number of CAN messages in the receive FIFO    */
+
+      case FIONREAD:
+        {
+          *(uint8_t *)arg = reader->fifo.rx_tail;
+        }
         break;
 
       /* Not a "built-in" ioctl command.. perhaps it is unique to this
@@ -994,7 +1059,9 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
        */
 
       default:
-        ret = dev_ioctl(dev, cmd, arg);
+        {
+          ret = dev_ioctl(dev, cmd, arg);
+        }
         break;
     }
 
