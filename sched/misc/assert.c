@@ -297,7 +297,7 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
   size_t stack_filled = 0;
   size_t stack_used;
 #endif
-#ifdef CONFIG_SCHED_CPULOAD
+#ifndef CONFIG_SCHED_CPULOAD_NONE
   struct cpuload_s cpuload;
   size_t fracpart = 0;
   size_t intpart = 0;
@@ -349,7 +349,7 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
 #ifdef CONFIG_STACK_COLORATION
          "   %7zu   %3zu.%1zu%%%c"
 #endif
-#ifdef CONFIG_SCHED_CPULOAD
+#ifndef CONFIG_SCHED_CPULOAD_NONE
          "   %3zu.%01zu%%"
 #endif
          "   %s%s\n"
@@ -375,7 +375,7 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
          , stack_filled / 10, stack_filled % 10
          , (stack_filled >= 10 * 80 ? '!' : ' ')
 #endif
-#ifdef CONFIG_SCHED_CPULOAD
+#ifndef CONFIG_SCHED_CPULOAD_NONE
          , intpart, fracpart
 #endif
 #if CONFIG_TASK_NAME_SIZE > 0
@@ -431,7 +431,7 @@ static void dump_tasks(void)
 #ifdef CONFIG_STACK_COLORATION
          "      USED   FILLED "
 #endif
-#ifdef CONFIG_SCHED_CPULOAD
+#ifndef CONFIG_SCHED_CPULOAD_NONE
          "      CPU"
 #endif
          "   COMMAND\n");
@@ -450,7 +450,7 @@ static void dump_tasks(void)
 #  ifdef CONFIG_STACK_COLORATION
          "   %7zu   %3zu.%1zu%%%c"
 #  endif
-#  ifdef CONFIG_SCHED_CPULOAD
+#  ifndef CONFIG_SCHED_CPULOAD_NONE
          "     ----"
 #  endif
          "   irq\n"

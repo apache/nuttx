@@ -914,9 +914,9 @@ config SCHED_CRITMONITOR_MAXTIME_PANIC
 		If this option is enabled, a panic will be triggered when
 		IRQ/WQUEUE/PREEMPTION execution time exceeds SCHED_CRITMONITOR_MAXTIME_xxx
 
-config SCHED_CPULOAD
-	bool "Enable CPU load monitoring"
-	default n
+choice
+	prompt "Select CPU load clock source"
+	default SCHED_CPULOAD_NONE
 	---help---
 		If this option is selected, the timer interrupt handler will monitor
 		if the system is IDLE or busy at the time of that the timer interrupt
@@ -932,12 +932,11 @@ config SCHED_CPULOAD
 		possible unless you provide an alternative clock to drive the
 		sampling and select SCHED_CPULOAD_EXTCLK.
 
-if SCHED_CPULOAD
-
-choice
-	prompt "Select CPU load clock source"
-	default SCHED_CPULOAD_EXTCLK if SCHED_TICKLESS
-	default SCHED_CPULOAD_CRITMONITOR if SCHED_CRITMONITOR
+config SCHED_CPULOAD_NONE
+	bool "None CPU load clock source"
+	---help---
+		If this option is enabled, the system will not support CPU load
+		measurement.
 
 config SCHED_CPULOAD_SYSCLK
 	bool "Use system clock"
@@ -955,8 +954,9 @@ config SCHED_CPULOAD_SYSCLK
 		the CPU load attributed to these threads that run synchronously with
 		they system timer may be grossly in error.
 		The CPU load measurements are determined by sampling the active
-		tasks periodically at the occurrence to a timer expiration.  By
-		default, the system clock is used to do that sampling.
+		tasks periodically at the occurrence to a timer expiration.
+		If tickless is enabled, SYSCLK should not be used. Its error will be
+		very large, and using it for analysis will lead to wrong conclusions.
 
 config SCHED_CPULOAD_EXTCLK
 	bool "Use external clock"
@@ -1068,13 +1068,12 @@ endif # SCHED_CPULOAD_EXTCLK
 
 config SCHED_CPULOAD_TIMECONSTANT
 	int "CPU load time constant"
+	depends on !SCHED_CPULOAD_NONE
 	default 2
 	---help---
 		The accumulated CPU count is divided by two when the accumulated
 		tick count exceeds this time constant.  This time constant is in
 		units of seconds.
-
-endif # SCHED_CPULOAD
 
 menuconfig SCHED_INSTRUMENTATION
 	bool "System performance monitor hooks"

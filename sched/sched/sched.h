@@ -235,7 +235,7 @@ extern volatile int g_npidhash;
 
 extern const struct tasklist_s g_tasklisttable[NUM_TASK_STATES];
 
-#ifdef CONFIG_SCHED_CPULOAD
+#ifndef CONFIG_SCHED_CPULOAD_NONE
 /* This is the total number of clock tick counts.  Essentially the
  * 'denominator' for all CPU load calculations.
  */

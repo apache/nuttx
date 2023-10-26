@@ -18,7 +18,7 @@ config SAM4S_XPLAINED_PRO_SCHED_TIMER_DEVPATH
 config SAM4S_XPLAINED_PRO_CPULOAD_TIMER_DEVPATH
 	string "CPU Load Timer Device Path"
 	default "/dev/tc0"
-	depends on TIMER && SCHED_CPULOAD && SCHED_CPULOAD_EXTCLK
+	depends on TIMER && SCHED_CPULOAD_EXTCLK
 
 config SAM34_NAND_BLOCKMOUNT
 	bool "NAND FLASH auto-mount"

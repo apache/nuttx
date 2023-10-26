@@ -106,7 +106,8 @@ static const struct procfs_entry_s g_procfs_entries[] =
   { "cpuinfo",      &g_cpuinfo_operations,  PROCFS_FILE_TYPE   },
 #endif
 
-#if defined(CONFIG_SCHED_CPULOAD) && !defined(CONFIG_FS_PROCFS_EXCLUDE_CPULOAD)
+#if !defined(CONFIG_SCHED_CPULOAD_NONE) && \
+    !defined(CONFIG_FS_PROCFS_EXCLUDE_CPULOAD)
   { "cpuload",      &g_cpuload_operations,  PROCFS_FILE_TYPE   },
 #endif
 
