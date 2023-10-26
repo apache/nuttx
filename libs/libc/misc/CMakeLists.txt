@@ -98,4 +98,12 @@ if(CONFIG_LIBC_ENVPATH)
   list(APPEND SRCS lib_envpath.c)
 endif()
 
+if(CONFIG_FDSAN)
+  list(APPEND SRCS lib_fdsan.c)
+endif()
+
+if(CONFIG_FDCHECK)
+  list(APPEND SRCS lib_fdcheck.c)
+endif()
+
 target_sources(c PRIVATE ${SRCS})
