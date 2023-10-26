@@ -69,6 +69,9 @@ endif()
 # Support for timerfd
 
 if(CONFIG_TIMER_FD)
+  set_source_files_properties(
+    fs_timerfd.c DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/..
+    PROPERTIES INCLUDE_DIRECTORIES ${NUTTX_DIR}/sched)
   list(APPEND SRCS fs_timerfd.c)
 endif()
 
