@@ -42,7 +42,9 @@ information common to all threads in the group.  If ``CONFIG_MM_SHM=y``, then
 this includes data structures for the per-process shared memory virtual
 page allocator.
 
-A memory region is accessed using::
+A memory region is accessed using:
+
+.. code-block:: C
 
     int shmget(key_t key, size_t size, int shmflg);
 
@@ -60,7 +62,7 @@ created, the following things happen:
   identifier.
 
 - The requested size is rounded up to rounded up to full pages, each of
-  size CONFIG_MM_PGSIZE.
+  size ``CONFIG_MM_PGSIZE``.
 
 - A set of physical pages are allocated and the physical address of
   these pages is retained in the internal data set.
@@ -74,12 +76,16 @@ physical memory, i.e., do not allocate the physical memory until the
 memory is required, for example, when a page fault occurs when a
 application tries to allocate the memory.
 
-A shared memory region is destroyed via::
+A shared memory region is destroyed via:
+
+.. code-block:: C
 
     int shmctl(int shmid, int cmd, struct shmid_ds *buf);
 
 In order for a process to make use of the memory region, it must be
-"attached" the process using::
+"attached" the process using:
+
+.. code-block:: C
 
     FAR void *shmat(int shmid, FAR const void *shmaddr, int shmflg);
 
@@ -100,7 +106,9 @@ following steps:
 
 - Return the allocated virtual base address to the caller.
 
-The memory region can be detached from the user process using::
+The memory region can be detached from the user process using:
+
+.. code-block:: C
 
     int shmdt(FAR const void *shmaddr);
 

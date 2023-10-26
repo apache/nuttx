@@ -61,12 +61,12 @@ outside of the WPAN.
 Optimal 6LoWPAN Configuration
 -----------------------------
 
-1. Link local IP addresses::
+#. Link local IP addresses::
 
      128  112  96   80    64   48   32   16
      fe80 0000 0000 0000  xxxx xxxx xxxx xxxx
 
-2. MAC-based IP addresses::
+#. MAC-based IP addresses::
 
      128  112  96   80    64   48   32   16
      ---- ---- ---- ----  ---- ---- ---- ----
@@ -79,17 +79,17 @@ Optimal 6LoWPAN Configuration
 
    For link-local address, AAAA is 0xfe80
 
-3. MAC based link-local addresses::
+#. MAC based link-local addresses::
 
      128  112  96   80    64   48   32   16
      ---- ---- ---- ----  ---- ---- ---- ----
      fe80 0000 0000 0000  0000 00ff fe00 MMMM 2-byte short address IEEE 48-bit MAC
      fe80 0000 0000 0000  NNNN NNNN NNNN NNNN 8-byte extended address IEEE EUI-64
 
-4. To be compressible, port numbers must be in the range 0xf0b0-0xf0bf,
+#. To be compressible, port numbers must be in the range 0xf0b0-0xf0bf,
    hexadecimal.  That is 61616-61631 decimal.
 
-5. IOBs: Must be big enough to hold one IEEE802.15.4 frame (typically 127).
+#. IOBs: Must be big enough to hold one IEEE802.15.4 frame (typically 127).
    There must be enough IOBs to decompose the largest IPv6 packet
    (``CONFIG_NET_6LOWPAN_PKTSIZE``, default 1294, plus per frame overhead).
 
@@ -101,10 +101,10 @@ after the MAC header when the payload is too large to fit in a single IEEE
 802.15.4 frame. The fragment header contains three fields: Datagram size,
 datagram tag and datagram offset.
 
-1. Datagram size describes the total (un-fragmented) payload.
-2. Datagram tag identifies the set of fragments and is used to match
+#. Datagram size describes the total (un-fragmented) payload.
+#. Datagram tag identifies the set of fragments and is used to match
    fragments of the same payload.
-3. Datagram offset identifies the fragment’s offset within the un-
+#. Datagram offset identifies the fragment’s offset within the un-
    fragmented payload (in units of 8 bytes).
 
 The length of the fragment header length is four bytes for the first header

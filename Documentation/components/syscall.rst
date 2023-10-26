@@ -26,70 +26,70 @@ and handle in kernel-mode.
 Header Files
 ------------
 
-include/syscall.h
-~~~~~~~~~~~~~~~~~
+``include/syscall.h``
+~~~~~~~~~~~~~~~~~~~~~
 
 This header file supports general access to SWI facilities.  It is simply
 a wrapper file that includes ``include/sys/syscall.h`` and
 ``include/arch/syscall.h``.
 
-include/sys/syscall.h
-~~~~~~~~~~~~~~~~~~~~~
+``include/sys/syscall.h``
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The SWIs received by the kernel are distinguish by a code that identifies
 how to process the SWI.  This header file defines all such codes understood
 by the NuttX kernel.
 
-include/arch/syscall.h (or arch/<cpu>/include/syscall.h)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+``include/arch/syscall.h`` (or ``arch/<cpu>/include/syscall.h``)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This header file is provided by the platform-specific logic and declares
 (or defines) the mechanism for providing software interrupts on this
 platform.  The following functions must be declared (or defined) in this
 header file:
 
-- ``SWI`` with ``SYS_`` call number and one parameter
+- ``SWI`` with ``SYS_`` call number and one parameter:
 
-.. code-block:: C
+  .. code-block:: C
 
     uintptr_t sys_call0(unsigned int nbr);
 
-- ``SWI`` with ``SYS_`` call number and one parameter
+- ``SWI`` with ``SYS_`` call number and one parameter:
 
-.. code-block:: C
+  .. code-block:: C
 
     uintptr_t sys_call1(unsigned int nbr, uintptr_t parm1);
 
-- ``SWI`` with ``SYS_`` call number and two parameters
+- ``SWI`` with ``SYS_`` call number and two parameters:
 
-.. code-block:: C
+  .. code-block:: C
 
     uintptr_t sys_call2(unsigned int nbr, uintptr_t parm1, uintptr_t parm2);
 
-- ``SWI`` with ``SYS_`` call number and three parameters
+- ``SWI`` with ``SYS_`` call number and three parameters:
 
-.. code-block:: C
+  .. code-block:: C
 
     uintptr_t sys_call3(unsigned int nbr, uintptr_t parm1,
                         uintptr_t parm2, uintptr_t parm3);
 
-- ``SWI`` with ``SYS_`` call number and four parameters
+- ``SWI`` with ``SYS_`` call number and four parameters:
 
-.. code-block:: C
+  .. code-block:: C
 
     uintptr_t sys_call4(unsigned int nbr, uintptr_t parm1, uintptr_t parm2,
                         uintptr_t parm3, uintptr_t parm4);
 
-- ``SWI`` with ``SYS_`` call number and five parameters
+- ``SWI`` with ``SYS_`` call number and five parameters:
 
-.. code-block:: C
+  .. code-block:: C
 
     uintptr_t sys_call5(unsigned int nbr, uintptr_t parm1, uintptr_t parm2,
                         uintptr_t parm3, uintptr_t parm4, uintptr_t parm5);
 
-- ``SWI`` with ``SYS_`` call number and six parameters
+- ``SWI`` with ``SYS_`` call number and six parameters:
 
-.. code-block:: C
+  .. code-block:: C
 
     uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1, uintptr_t parm2,
                         uintptr_t parm3, uintptr_t parm4, uintptr_t parm5,
