@@ -76,6 +76,10 @@ ifeq ($(CONFIG_NET_W5500),y)
   CSRCS += w5500.c
 endif
 
+ifeq ($(CONFIG_NET_LAN9250),y)
+  CSRCS += lan9250.c
+endif
+
 ifeq ($(CONFIG_ARCH_PHY_INTERRUPT),y)
   CSRCS += phy_notify.c
 endif

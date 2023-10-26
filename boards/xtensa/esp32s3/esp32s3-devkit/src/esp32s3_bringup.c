@@ -38,6 +38,7 @@
 #include <errno.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/himem/himem.h>
+#include <arch/board/board.h>
 
 #ifdef CONFIG_ESP32S3_TIMER
 #  include "esp32s3_board_tim.h"
@@ -385,6 +386,14 @@ int esp32s3_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize LCD.\n");
+    }
+#endif
+
+#ifdef CONFIG_NET_LAN9250
+  ret = esp32s3_lan9250_initialize(LAN9250_SPI);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI ethernet LAN9250.\n");
     }
 #endif
 
