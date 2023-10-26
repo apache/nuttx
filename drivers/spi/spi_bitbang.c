@@ -35,8 +35,6 @@
 
 #include <nuttx/mutex.h>
 
-#ifdef CONFIG_SPI_BITBANG
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -559,4 +557,3 @@ void spi_destroy_bitbang(FAR struct spi_dev_s *dev)
   kmm_free(dev);
 }
 
-#endif /* CONFIG_SPI_BITBANG */
