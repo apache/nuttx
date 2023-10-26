@@ -115,6 +115,27 @@ endif
 #          ~~~~~~~~~~^~~~~~~~~~~~
 libcxx/src/condition_variable.cpp_CXXFLAGS += -Wno-sign-compare
 
+# When building with GCC 12.2.0
+# libcxx has a fallback to use __always_inline__ when the (clang) exclude_from_explicit_instantiation isn't available.
+# This causes: `always_inline` function might not be inlinable [-Wattributes] warnings in some modules.
+# For example:
+# libcxx/src/include/to_chars_floating_point.h:988:17: warning: ‘always_inline’ function might not be inlinable [-Wattributes]
+# Should be OK to ignore these
+ifeq ($(GCCVER),12)
+	libcxx/src/charconv.cpp_CXXFLAGS += -Wno-attributes
+endif
+
+# Another warning on gcc 12.2.0
+# libcxx/src/locale.cpp:6604:85: warning: type attributes ignored after type is already defined [-Wattributes]
+# 6604 | template class _LIBCPP_DEPRECATED_IN_CXX20 _LIBCPP_CLASS_TEMPLATE_INSTANTIATION_VIS codecvt_byname<char16_t, char, mbstate_t>;
+#      |                                                                                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# libcxx/src/locale.cpp:6605:85: warning: type attributes ignored after type is already defined [-Wattributes]
+# 6605 | template class _LIBCPP_DEPRECATED_IN_CXX20 _LIBCPP_CLASS_TEMPLATE_INSTANTIATION_VIS codecvt_byname<char32_t, char, mbstate_t>;
+ifeq ($(GCCVER),12)
+	libcxx/src/locale.cpp_CXXFLAGS += -Wno-attributes
+endif
+
+
 CPPSRCS += $(wildcard libcxx/src/*.cpp)
 CPPSRCS += $(wildcard libcxx/src/experimental/*.cpp)
 CPPSRCS += $(wildcard libcxx/src/filesystem/*.cpp)
