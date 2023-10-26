@@ -254,7 +254,9 @@ V71. SD card connector:
 
 Configuration Settings
 ----------------------
-Enabling HSMCI support. The SAMV7-XULT provides a one, full-size SD memory card slots.  The full size SD card slot connects via HSMCI0.  Support for the SD slots can be enabled with the following settings:
+Enabling HSMCI support. The SAMV7-XULT provides a one, full-size SD memory card slots.
+The full size SD card slot connects via HSMCI0.  Support for the SD slots can be
+enabled with the following settings:
 
   System Type->SAMV7 Peripheral Selection
     CONFIG_SAMV7_HSMCI0=y                 : To enable HSMCI0 support

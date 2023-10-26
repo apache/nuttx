@@ -2,5 +2,9 @@
 samv71-xult
 ===========
 
-.. include:: README.txt
-   :literal:
+For details look at ``Documentation/platforms/arm/samv7/boards/samv71-xult/README.txt``
+
+.. this breaks latexpdf build
+.. 
+   .. include:: README.txt
+      :literal:
