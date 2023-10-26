@@ -1,6 +1,6 @@
-============
-``fs/binfs``
-============
+=====
+BINFS
+=====
 
 This is the binfs file system that allows "fake" execution of NSH built-
 in applications via the file system.  The binfs fs file system can be

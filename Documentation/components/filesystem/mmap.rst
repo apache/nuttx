@@ -1,6 +1,6 @@
-===========
-``fs/mmap``
-===========
+=============================
+File mapping emulation (mmap)
+=============================
 
 NuttX operates in a flat open address space and is focused on MCUs that do
 support Memory Management Units (MMUs).  Therefore, NuttX generally does not
