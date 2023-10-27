@@ -37,8 +37,6 @@
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/mutex.h>
 
-#ifdef CONFIG_I2C_DRIVER
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -408,4 +406,3 @@ int i2c_register(FAR struct i2c_master_s *i2c, int bus)
   return -ENOMEM;
 }
 
-#endif /* CONFIG_I2C_DRIVER */
