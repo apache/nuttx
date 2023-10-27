@@ -3,29 +3,29 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-menu "Rpmsg Socket Support"
+menu "RPMSG Socket Support"
 	depends on NET
 
 config NET_RPMSG
-	bool "Rpmsg domain (remote) sockets"
+	bool "RPMSG domain (remote) sockets"
 	depends on RPTUN
 	default n
 	---help---
-		Enable or disable Rpmsg (aka remote) sockets.
+		Enable or disable RPMSG (aka remote) sockets.
 
 if NET_RPMSG
 
 config NET_RPMSG_RXBUF_SIZE
-	int "Rpmsg socket rx buffer size"
+	int "RPMSG socket rx buffer size"
 	default 1024
 	---help---
-		Socket rpmsg rx buffer size, for recv slowly
+		Socket RPMSG rx buffer size, for recv slowly
 
 config NET_RPMSG_NPOLLWAITERS
-	int "Rpmsg socket number of poll waiters"
+	int "RPMSG socket number of poll waiters"
 	default 4
 	---help---
-		Socket rpmsg number of poll waiters
+		Socket RPMSG number of poll waiters
 
 endif # NET_RPMSG
 
