@@ -92,5 +92,5 @@ Example Configurations
   however, because the LPC1766 has insufficient RAM to support the THTTPD
   application in this configuration.
 
-See the README.txt file in each of these board directories for additional
+See the documentation pages for each of these board for additional
 information about these configurations.

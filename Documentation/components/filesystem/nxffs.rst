@@ -2,7 +2,7 @@
 NXFFS
 =====
 
-This README file contains information about the implementation of the NuttX
+This page contains information about the implementation of the NuttX
 wear-leveling FLASH file system, NXFFS.
 
 General NXFFS organization

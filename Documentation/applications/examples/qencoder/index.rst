@@ -14,8 +14,8 @@ specific PWM settings might require additional settings).
   Default: Built as a standalone program.
 
 Additional configuration options will mostly likely be required for the board-
-specific lower-half driver. See the ``README.txt`` file in your board
-configuration directory.
+specific lower-half driver. See the documentation page for your board.
+
 
 Specific configuration options for this example include:
 

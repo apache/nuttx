@@ -240,11 +240,11 @@ Example Code
 
 You can find an example that tests the high priority, nested interrupts in the NuttX source:
 
-* nuttx/boards/arm/stm32/viewtool-stm32f107/README.txt. Description of
+* :doc:`/platforms/arm/stm32f1/boards/viewtool-stm32f107/index` Description of
   the configuration
 
-* nuttx/boards/arm/stm32/viewtool-stm32f107/highpri. Test configuration
+* ``nuttx/boards/arm/stm32/viewtool-stm32f107/highpri`` Test configuration
 
-* nuttx/boards/arm/stm32/viewtool-stm32f107/src/stm32_highpri. Test
+* ``nuttx/boards/arm/stm32/viewtool-stm32f107/src/stm32_highpri`` Test
   driver.
 

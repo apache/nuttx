@@ -14,7 +14,7 @@ valid images.
 
 This application add 3 Builtin Apps to NuttX NSH: version, set_img and confirm.
 After application is build and ``nuttx.bin`` be generated, the binary must be
-signed. Consult your board README file to get instructions how to do it.
+signed. Consult your board documentation page to get instructions how to do it.
 
 How to build and flash
 ......................
@@ -33,7 +33,8 @@ as output file.
 The ``signedv1.bin`` file must be at MCUboot Slot-0 partition and ``signedv2.bin``
 at Slot-1.
 
-More instructions about how to sign and flash can be found at board README file.
+More instructions about how to sign and flash can be found at board documentation
+page.
 
 Running swap image test
 .......................
