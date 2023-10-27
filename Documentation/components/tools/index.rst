@@ -56,7 +56,7 @@ configure.sh configure.bat configure.c, cfgparser.c, and cfgparser.h
 
 configure.sh is a bash script that is used to configure NuttX for a given
 target board in a environment that supports POSIX paths (Linux, Cygwin,
-macOS, or similar).  See boards/README.txt or Documentation/NuttXPortingGuide.html
+macOS, or similar).  See :doc:`/components/boards` or Documentation/NuttXPortingGuide.html
 for a description of how to configure NuttX with this script.
 
 configure.c, cfgparser.c, and cfgparser.h can be used to build a work-alike
@@ -190,7 +190,7 @@ These are C files that are used to build mkconfig program.  The mkconfig
 program is used during the initial NuttX build.
 
 When you configure NuttX, you will copy a configuration file called .config
-in the top level NuttX directory (See boards/README.txt or
+in the top level NuttX directory (See :doc:`/components/boards` or
 Documentation/NuttXPortingGuide.html).  The first time you make NuttX,
 the top-level makefile will build the mkconfig executable from mkconfig.c
 (using Makefile.host).  The top-level Makefile will then execute the mkconfig
@@ -284,7 +284,7 @@ kernel function call (in kernel-mode) on behalf of the proxy function.
 Information about the stubs and proxies is maintained in a comma separated
 value (CSV) file in the syscall/ directory.  The mksyscall program will
 accept this CVS file as input and generate all of the required proxy or
-stub files as output.  See syscall/README.txt for additional information.
+stub files as output.  See :doc:`/components/syscall` for additional information.
 
 mksymtab.c, cvsparser.c, and cvsparser.h
 ----------------------------------------
@@ -805,7 +805,7 @@ mkdeps.c, cnvwindeps.c, mkwindeps.sh, and mknulldeps.sh
 NuttX uses the GCC compiler's capabilities to create Makefile dependencies.
 The program mkdeps is used to run GCC in order to create the dependencies.
 If a NuttX configuration uses the GCC toolchain, its Make.defs file (see
-boards/README.txt) will include a line like::
+:doc:`/components/boards`) will include a line like::
 
     MKDEP = $(TOPDIR)/tools/mkdeps[.exe] (See NOTE below)
 
@@ -846,8 +846,8 @@ General usage:
       Usage: tools/netusb.sh <main-interface> <usb-net-interface> <on|off>
 
 This has been tested on the SAMA5D3-Xplained board; see
-`boards/arm/sama5/sama5d3-xplained/README.txt` for more information on how
-to configure the CDC ECM driver for that board.
+`Documentation/platforms/arm/sama5/boards/sama5d3-xplained/README.txt`
+for more information on how to configure the CDC ECM driver for that board.
 
 refresh.sh
 ----------

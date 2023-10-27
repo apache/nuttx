@@ -487,9 +487,8 @@ configurations for building the simulation:
       The build will also fail to locate the X header files unless you
       install an X11 development package.
 
-   -  Refer to the readme file in sim configuration
-      `README.txt <https://github.com/apache/nuttx/blob/master/boards/sim/sim/sim/README.txt>`__
-      file for additional information.
+   -  Refer to the :doc:`/platforms/sim/sim/boards/sim/index` file for
+      additional information.
 
 **Test Coverage**. At present, ``apps/examples/nx``\ t only exercises a
 subset of NX; the remainder is essentially untested. The following table

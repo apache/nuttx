@@ -3,8 +3,7 @@
 =================================
 
 This directory contains a small program that will mount a ROMFS file system
-containing the BASIC test files extracted from the Bas ``2.4`` release. See
-``examples/bastest/README.md`` for licensing and usage information.
+containing the BASIC test files extracted from the Bas ``2.4`` release.
 
 - ``CONFIG_EXAMPLES_BASTEST_DEVMINOR`` – The minor device number of the ROMFS
   block driver. For example, the ``N`` in ``/dev/ramN``. Used for registering the

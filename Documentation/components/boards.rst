@@ -168,7 +168,7 @@ Configuring NuttX requires only copying::
 
     tools\configure.bat <board>:<config-dir>
 
-  See ``tools/README.txt`` for more information about these scripts.
+  See :doc:`tools/index` for more information about these scripts.
 
   And if your application directory is not in the standard location (``../apps``
   or ``../apps-<version>``), then you should also specify the location of the

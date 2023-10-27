@@ -217,8 +217,8 @@ Sub-Directories:
 
 - ``mm/shm`` - The shared memory logic
 
-The shared memory management logic has its own README file that can be
-found at ``Documentation/components/mm/shm.rst``.
+The shared memory management logic has its own page that can be
+found at :doc:`shm`.
 
 I/O Buffers
 -----------
