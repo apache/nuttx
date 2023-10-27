@@ -9,7 +9,8 @@ required step:
   :maxdepth: 1
 
   install.rst
-  compiling.rst
+  compiling_make.rst
+  compiling_cmake.rst
   running.rst
   configuring.rst
   debugging.rst

@@ -1,16 +1,9 @@
-.. include:: /substitutions.rst
-.. _compiling:
+====================
+Compiling with CMake
+====================
 
-=========
-Compiling
-=========
-
-Now that we've installed Apache NuttX prerequisites and downloaded the source code,
-we are ready to compile the source code into an executable binary file that can
-be run on the embedded board.
-
-Initialize Configuration
-========================
+Initialize Configuration with CMake
+===================================
 
 The first step is to initialize NuttX configuration for a given board, based on
 a pre-existing configuration. To list all supported configurations you can do:
@@ -25,16 +18,14 @@ generally all boards support the ``nsh`` configuration which is a good starting 
 since it enables booting into the interactive command line
 :doc:`/applications/nsh/index`.
 
-To choose a configuration you pass the ``<board name>:<board configuration>`` option
-to ``configure.sh`` and indicate your host platform, such as:
+To choose a configuration you pass the ``<board name>:<board configuration>`` such as:
 
     .. code-block:: console
 
        $ cd nuttx
-       $ ./tools/configure.sh -l stm32f4discovery:nsh
+       $ cmake -B build -DBOARD_CONFIG=stm32f4discovery:nsh -GNinja
 
-The ``-l`` tells use that we're on Linux (macOS and Windows builds are
-possible). Use the ``-h`` argument to see all available options.
+The ``-B build`` tells what is the build direcotry.
 
 You can then customize this configuration by using the menu based
 configuration system with:
@@ -42,22 +33,22 @@ configuration system with:
 .. code-block:: console
 
    $ cd nuttx
-   $ make menuconfig
+   $ cmake --build build -t menuconfig 
 
 Modifying the configuration is covered in :doc:`configuring`.
 
-Build NuttX
-===========
+Build NuttX with CMake
+======================
 
 We can now build NuttX. To do so, you can simply run:
 
   .. code-block:: console
 
      $ cd nuttx
-     $ make
+     $ cmake --build build -t menuconfig 
 
 The build will complete by generating the binary outputs
-inside ``nuttx`` directory. Typically this includes the ``nuttx``
+inside ``build/nuttx`` directory. Typically this includes the ``nuttx``
 ELF file (suitable for debugging using ``gdb``) and a ``nuttx.bin``
 file that can be flashed to the board.
 
@@ -65,11 +56,4 @@ To clean the build, you can do:
 
   .. code-block:: console
 
-     $ make clean
-
-.. tip::
-
-  To increase build speed (or of any other target such as ``clean``), you can
-  pass the ``-jN`` flag to ``make``, where ``N`` is the number of parallel jobs
-  to start (usually, the number of processors on your machine).
-
+     $ cmake --build build -t clean

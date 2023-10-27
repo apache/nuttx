@@ -13,7 +13,7 @@ The Apache NuttX configuration system uses Linux's
 includes various frontends that allow you to modify configuration easily. Usually, the ``menuconfig``
 frontend is used, which is a console based menu system (more info `here <https://en.wikipedia.org/wiki/Menuconfig>`_).
 
-As previously explained in :doc:`compiling`, the first step is to load a premade configuration for
+As previously explained in :doc:`compiling_make`, the first step is to load a premade configuration for
 your board. Then, you can modify this configuration to your liking. In this example, we will show
 how you modify the default configuration of the ``sim`` build, a build of NuttX which runs on your own
 computer.
