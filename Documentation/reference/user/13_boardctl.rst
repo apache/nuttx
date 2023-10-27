@@ -88,7 +88,7 @@ Power Management
    Manage power state transition and query. The supplied argument
    indicates the specific PM operation to perform, which map to
    corresponding internal ``pm_<operation>`` functions
-   (see :doc:`/components/power`).
+   (see :doc:`/components/drivers/special/power/pm/index`).
    
    With this interface you can interact with PM handling arch/board logic
    (typically done in IDLE loop) or you can directly manage state transitions

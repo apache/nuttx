@@ -45,13 +45,23 @@ scalability from the very tiny platform to the moderate platform.
 .. toctree::
   :maxdepth: 1
 
+  aio.rst
   binfs.rst
   cromfs.rst
+  fat.rst
+  hostfs.rst
+  littlefs.rst
   mmap.rst
+  nfs.rst
   nxffs.rst
-  procfs.rst
-  smartfs.rst
-  spiffs.rst
-  unionfs.rst
-  zipfs.rst
   partition.rst
+  procfs.rst
+  romfs.rst
+  rpmsgfs.rst
+  smartfs.rst
+  shmfs.rst
+  spiffs.rst
+  tmpfs.rst
+  unionfs.rst
+  userfs.rst
+  zipfs.rst

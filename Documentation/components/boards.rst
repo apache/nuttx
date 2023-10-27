@@ -1,5 +1,5 @@
 ==============
-Boards support
+Boards Support
 ==============
 
 This page discusses the board support logic for NuttX.
