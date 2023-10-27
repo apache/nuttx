@@ -23,9 +23,9 @@ Files supporting CAN can be found in the following locations:
 -  **"Upper Half" Driver**. The generic, "upper half" CAN driver
    resides at ``drivers/can.c``.
 -  **"Lower Half" Drivers**. Platform-specific CAN drivers reside
-   in ``arch/``\ *<architecture>*\ ``/src/``\ *<hardware>*
-   directory for the specific processor *<architecture>* and for
-   the specific *<chip>* CAN peripheral devices.
+   in ``arch/<architecture>/src/<hardware>``
+   directory for the specific processor ``<architecture>`` and for
+   the specific ``<chip>`` CAN peripheral devices.
 
 **Usage Note**: When reading from the CAN driver multiple messages
 may be returned, depending on (1) the size the returned can

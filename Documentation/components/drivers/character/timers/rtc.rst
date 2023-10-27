@@ -21,6 +21,6 @@ locations:
 -  **"Upper Half" Driver**. The generic, "upper half" RTC driver
    resides at ``drivers/timers/rtc.c``.
 -  **"Lower Half" Drivers**. Platform-specific RTC drivers reside
-   in ``arch/``\ *<architecture>*\ ``/src/``\ *<hardware>*
-   directory for the specific processor *<architecture>* and for
-   the specific *<chip>* RTC peripheral devices.
+   in ``arch/<architecture>/src/<hardware>``
+   directory for the specific processor ``<architecture>`` and for
+   the specific ``<chip>`` RTC peripheral devices.
