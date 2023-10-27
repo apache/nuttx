@@ -146,6 +146,7 @@ static inline uintptr_t up_getsp(void)
  *
  ****************************************************************************/
 
+noinstrument_function
 static inline bool up_interrupt_context(void)
 {
 #ifdef CONFIG_SMP

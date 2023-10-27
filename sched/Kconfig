@@ -1221,6 +1221,19 @@ config SCHED_INSTRUMENTATION_FUNCTION
 endif # SCHED_INSTRUMENTATION
 endmenu # Performance Monitoring
 
+menu "System Auto Instrumentation"
+
+config SCHED_STACK_RECORD
+	int "Maximum stack backtrace to record"
+	default 0
+	---help---
+		Specifies the maximum number of stack backtrace to record in the
+		TCB.  Useful if scheduler instrumentation is selected.  Set to zero
+		to disable.Through instrumentation, record the backtrace at
+		the deepest point in the stack.
+
+endmenu
+
 menu "Files and I/O"
 
 config DEV_CONSOLE
