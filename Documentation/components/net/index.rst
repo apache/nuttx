@@ -6,6 +6,7 @@ Network Support
   :maxdepth: 1
 
   sixlowpan.rst
+  socketcan.rst
 
 ``net`` Directory Structure ::
 
