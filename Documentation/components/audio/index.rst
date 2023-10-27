@@ -1,9 +1,9 @@
 ===============
-Audio subsystem
+Audio Subsystem
 ===============
 
 This page discusses the audio subsystem support for NuttX which is only built if
-CONFIG_AUDIO is defined in the NuttX configuration file.
+``CONFIG_AUDIO`` is defined in the NuttX configuration file.
 
 Files in nuttx/audio
 ====================
