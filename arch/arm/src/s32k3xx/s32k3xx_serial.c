@@ -2815,7 +2815,7 @@ static int s32k3xx_dma_nextrx(struct s32k3xx_uart_s *priv)
 {
   int dmaresidual = s32k3xx_dmach_getcount(priv->rxdma);
 
-  return RXDMA_BUFFER_SIZE - dmaresidual;
+  return (RXDMA_BUFFER_SIZE - dmaresidual) % RXDMA_BUFFER_SIZE;
 }
 #endif
 
