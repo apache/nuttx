@@ -1375,7 +1375,7 @@ static int imxrt_dma_nextrx(struct imxrt_uart_s *priv)
   int dmaresidual = imxrt_dmach_getcount(priv->rxdma);
   DEBUGASSERT(dmaresidual <= RXDMA_BUFFER_SIZE);
 
-  return RXDMA_BUFFER_SIZE - dmaresidual;
+  return (RXDMA_BUFFER_SIZE - dmaresidual) % RXDMA_BUFFER_SIZE;
 }
 #endif
 
