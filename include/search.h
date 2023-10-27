@@ -35,7 +35,8 @@ typedef struct entry
 typedef enum
 {
   FIND,
-  ENTER
+  ENTER,
+  DELETE
 } ACTION;
 
 struct hsearch_data

@@ -191,6 +191,7 @@ void hdestroy_r(FAR struct hsearch_data *htab)
           ie = SLIST_FIRST(&(htab->htable[idx]));
           SLIST_REMOVE_HEAD(&(htab->htable[idx]), link);
           lib_free(ie->ent.key);
+          lib_free(ie->ent.data);
           lib_free(ie);
         }
     }
@@ -239,7 +240,20 @@ int hsearch_r(ENTRY item, ACTION action, FAR ENTRY **retval,
       ie = SLIST_NEXT(ie, link);
     }
 
-  if (ie != NULL)
+  if (action == DELETE)
+    {
+      if (ie != NULL)
+        {
+          SLIST_REMOVE(head, ie, internal_entry, link);
+          lib_free(ie->ent.key);
+          lib_free(ie->ent.data);
+          lib_free(ie);
+          return 1;
+        }
+
+      return 0;
+    }
+  else if (ie != NULL)
     {
       *retval = &ie->ent;
       return 1;
