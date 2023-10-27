@@ -16,9 +16,9 @@ The NuttX analog drivers are split into two parts:
 -  Common analog logic and share-able analog drivers reside in the
    ``drivers/analog/``.
 -  Platform-specific drivers reside in
-   ``arch/``\ *<architecture>*\ ``/src/``\ *<hardware>* directory
-   for the specific processor *<architecture>* and for the
-   specific *<chip>* analog peripheral devices.
+   ``arch/<architecture>//src/<hardware>`` directory
+   for the specific processor ``<architecture>`` and for the
+   specific ``<chip>`` analog peripheral devices.
 
 ADC Drivers
 -----------

@@ -30,9 +30,9 @@ found in the following locations:
    touchscreen drivers reside in the directory ``drivers/input``.
 -  **"Lower Half" Drivers**. Platform-specific touchscreen drivers
    reside in either: (1) The
-   ``arch/``\ *<architecture>*\ ``/src/``\ *<hardware>* directory
+   ``arch/<architecture>/src/<hardware>`` directory
    for the processor architectures that have build in touchscreen
    controllers or (2) the
-   ``boards/``\ *<arch>*\ ``/``\ *<chip>*\ ``/``\ *<board>*\ ``/src/``
+   ``boards/<arch>/<chip>/<board>/src/``
    directory for boards that use an external touchscreen
    controller chip.

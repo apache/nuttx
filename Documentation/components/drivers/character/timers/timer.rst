@@ -13,9 +13,9 @@ locations:
 -  **"Upper Half" Driver**. The generic, "upper half" timer driver
    resides at ``drivers/timers/timer.c``.
 -  **"Lower Half" Drivers**. Platform-specific timer drivers
-   reside in ``arch/``\ *<architecture>*\ ``/src/``\ *<hardware>*
-   directory for the specific processor *<architecture>* and for
-   the specific *<chip>* timer peripheral devices.
+   reside in ``arch/<architecture>/src/<hardware>``
+   directory for the specific processor ``<architecture>`` and for
+   the specific ``<chip>`` timer peripheral devices.
 
 There are two ways to enable Timer Support along with the Timer Example. The
 first is faster and simpler. Just run the following command to use a ready
