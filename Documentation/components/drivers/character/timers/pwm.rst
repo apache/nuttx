@@ -29,6 +29,6 @@ Files supporting PWM can be found in the following locations:
 -  **"Upper Half" Driver**. The generic, "upper half" PWM driver
    resides at ``drivers/timers/pwm.c``.
 -  **"Lower Half" Drivers**. Platform-specific PWM drivers reside
-   in ``arch/``\ *<architecture>*\ ``/src/``\ *<hardware>*
-   directory for the specific processor *<architecture>* and for
-   the specific *<chip>* PWM peripheral devices.
+   in ``arch/<architecture>/src/<hardware>``
+   directory for the specific processor ``<architecture>`` and for
+   the specific ``<chip>`` PWM peripheral devices.

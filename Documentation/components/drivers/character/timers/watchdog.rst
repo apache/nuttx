@@ -24,9 +24,9 @@ following locations:
    timer driver resides at ``drivers/timers/watchdog.c``.
 -  **"Lower Half" Drivers**. Platform-specific watchdog timer
    drivers reside in
-   ``arch/``\ *<architecture>*\ ``/src/``\ *<hardware>* directory
-   for the specific processor *<architecture>* and for the
-   specific *<chip>* watchdog timer peripheral devices.
+   ``arch/<architecture>//src/<hardware>`` directory
+   for the specific processor ``<architecture>`` and for the
+   specific ``<chip>`` watchdog timer peripheral devices.
 
 There are two ways to enable Watchdog Timer Support along with the Watchdog Example.
 The first is faster and simpler. Just run the following command to use a ready config

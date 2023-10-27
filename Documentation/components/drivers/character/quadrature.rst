@@ -24,7 +24,7 @@ following locations:
    Encoder driver resides at ``drivers/sensors/qencoder.c``.
 -  **"Lower Half" Drivers**. Platform-specific Quadrature Encoder
    drivers reside in
-   ``arch/``\ *<architecture>*\ ``/src/``\ *<hardware>* directory
-   for the specific processor *<architecture>* and for the
-   specific *<chip>* Quadrature Encoder peripheral devices.
+   ``arch/<architecture>/src/<hardware>`` directory
+   for the specific processor ``<architecture>`` and for the
+   specific ``<chip>`` Quadrature Encoder peripheral devices.
 

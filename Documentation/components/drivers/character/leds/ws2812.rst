@@ -27,6 +27,6 @@ Files supporting ws2812 can be found in the following locations:
 -  **"Upper Half" Driver**. The generic, "upper half" ws2812 driver
    resides at ``drivers/leds/ws2812.c``.
 -  **"Lower Half" Drivers**. Platform-specific ws2812 drivers reside
-   in ``arch/``\ *<architecture>*\ ``/src/``\ *<hardware>*
-   directory for the specific processor *<architecture>* and for
-   the specific *<chip>* ws2812 peripheral devices.
+   in ``arch/<architecture>/src/<hardware>``
+   directory for the specific processor ``<architecture>`` and for
+   the specific ``<chip>`` ws2812 peripheral devices.
