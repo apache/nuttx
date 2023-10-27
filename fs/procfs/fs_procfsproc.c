@@ -986,6 +986,9 @@ static ssize_t proc_stack(FAR struct proc_file_s *procfile,
   size_t linesize;
   size_t copysize;
   size_t totalsize;
+#if CONFIG_SCHED_STACK_RECORD > 0
+  int i;
+#endif
 
   remaining = buflen;
   totalsize = 0;
@@ -1032,6 +1035,56 @@ static ssize_t proc_stack(FAR struct proc_file_s *procfile,
   totalsize += copysize;
   buffer    += copysize;
   remaining -= copysize;
+
+#if CONFIG_SCHED_STACK_RECORD > 0
+  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%zu\n",
+                              "StackMax: ",
+                              tcb->stack_base_ptr +
+                              tcb->adj_stack_size - tcb->sp_deepest);
+  copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
+                             &offset);
+
+  totalsize += copysize;
+  buffer    += copysize;
+  remaining -= copysize;
+
+  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%-s\n",
+                               "Size", "Backtrace");
+  copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
+                             &offset);
+
+  totalsize += copysize;
+  buffer    += copysize;
+  remaining -= copysize;
+
+  for (i = tcb->level_deepest - 1; i > 0; i--)
+    {
+      linesize = procfs_snprintf(procfile->line, STATUS_LINELEN,
+                                 "%-12zu%-pS\n",
+                                 tcb->stackrecord_sp_deepest[i - 1] -
+                                 tcb->stackrecord_sp_deepest[i],
+                                 tcb->stackrecord_pc_deepest[i]);
+      copysize = procfs_memcpy(procfile->line, linesize, buffer, remaining,
+                               &offset);
+      totalsize += copysize;
+      buffer    += copysize;
+      remaining -= copysize;
+    }
+
+  if (tcb->caller_deepest)
+    {
+      linesize = procfs_snprintf(procfile->line, STATUS_LINELEN,
+                                 "Warning stack record buffer too small\n"
+                                 "Max: %u Overflow: %zu\n",
+                                 CONFIG_SCHED_STACK_RECORD,
+                                 tcb->caller_deepest);
+      copysize = procfs_memcpy(procfile->line, linesize, buffer, remaining,
+                               &offset);
+      totalsize += copysize;
+      buffer    += copysize;
+      remaining -= copysize;
+    }
+#endif
 
 #ifdef CONFIG_STACK_COLORATION
   if (totalsize >= buflen)

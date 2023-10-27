@@ -645,6 +645,17 @@ struct tcb_s
 #if CONFIG_TASK_NAME_SIZE > 0
   char name[CONFIG_TASK_NAME_SIZE + 1];  /* Task name (with NUL terminator  */
 #endif
+
+#if CONFIG_SCHED_STACK_RECORD > 0
+  FAR void *stackrecord_pc[CONFIG_SCHED_STACK_RECORD];
+  FAR void *stackrecord_sp[CONFIG_SCHED_STACK_RECORD];
+  FAR void *stackrecord_pc_deepest[CONFIG_SCHED_STACK_RECORD];
+  FAR void *stackrecord_sp_deepest[CONFIG_SCHED_STACK_RECORD];
+  FAR void *sp_deepest;
+  size_t caller_deepest;
+  size_t level_deepest;
+  size_t level;
+#endif
 };
 
 /* struct task_tcb_s ********************************************************/
