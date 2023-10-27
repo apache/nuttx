@@ -38,7 +38,7 @@
 # -- Project information -----------------------------------------------------
 
 project = "NuttX"
-copyright = "2020, The Apache Software Foundation"
+copyright = "2023, The Apache Software Foundation"
 author = "NuttX community"
 version = release = "latest"
 
