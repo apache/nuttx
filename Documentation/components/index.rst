@@ -26,3 +26,8 @@ case, you can head to the :doc:`reference <../reference/index>`.
    tools/index.rst
    arch/index.rst
    boards.rst
+   cmake.rst
+   openamp.rst
+   video.rst
+   crypto.rst
+   wireless.rst
