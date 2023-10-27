@@ -59,7 +59,7 @@ config NET_RPMSG_DRV
 	depends on RPTUN
 	select ARCH_HAVE_NETDEV_STATISTICS
 	---help---
-		Use the rpmsg as net device, transfer packet between remoteproc.
+		Use the RPMSG as net device, transfer packet between remoteproc.
 
 if NET_RPMSG_DRV
 
@@ -70,10 +70,10 @@ config NET_RPMSG_PRIORITY
 		The priority for net rmpsg task.
 
 config NET_RPMSG_STACKSIZE
-	int "net rpmsg stack size"
+	int "net RPMSG stack size"
 	default DEFAULT_TASK_STACKSIZE
 	---help---
-		The stack size allocated for the net rpmsg task.
+		The stack size allocated for the net RPMSG task.
 
 endif # NET_RPMSG_DRV
 

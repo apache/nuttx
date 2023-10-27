@@ -230,7 +230,7 @@ config SYSLOG_RPMSG
 	depends on SCHED_WORKQUEUE
 	default n
 	---help---
-		Use the rpmsg as a SYSLOG output device, send message to remote proc.
+		Use the RPMSG as a SYSLOG output device, send message to remote proc.
 
 config SYSLOG_STREAM
 	bool "Log to stream"
@@ -275,9 +275,9 @@ endif # RAMLOG_SYSLOG
 if SYSLOG_RPMSG
 
 config SYSLOG_RPMSG_SERVER_NAME
-	string "The name of Syslog Rpmsg Server"
+	string "The name of Syslog RPMSG Server"
 	---help---
-		The proc name of rpmsg server. Client sends message to
+		The proc name of RPMSG server. Client sends message to
 		specified name of remote proc.
 
 config SYSLOG_RPMSG_WORK_DELAY
@@ -285,7 +285,7 @@ config SYSLOG_RPMSG_WORK_DELAY
 	default 100
 
 config SYSLOG_RPMSG_CHARDEV
-	bool "SYSLOG rpmsg character device"
+	bool "SYSLOG RPMSG character device"
 	default SYSLOG_RPMSG_WORK_DELAY != 0
 
 endif # SYSLOG_RPMSG
@@ -295,10 +295,10 @@ config SYSLOG_RPMSG_SERVER
 	default n
 	depends on RPTUN
 	---help---
-		Use rpmsg to receive message from remote proc.
+		Use RPMSG to receive message from remote proc.
 
 config SYSLOG_RPMSG_SERVER_CHARDEV
-	bool "SYSLOG rpmsg server character device"
+	bool "SYSLOG RPMSG server character device"
 	default n
 
 menuconfig SYSLOG_FILE

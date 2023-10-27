@@ -18,11 +18,11 @@ config USENSOR
 		Allow application to register user sensor by /dev/usensor.
 
 config SENSORS_RPMSG
-	bool "Sensor rpmsg Support"
+	bool "Sensor RPMSG Support"
 	default n
 	depends on RPTUN
 	---help---
-		Allow application to read or control remote sensor device by rpmsg.
+		Allow application to read or control remote sensor device by RPMSG.
 
 config SENSORS_GPS
 	bool "GPS Support"
