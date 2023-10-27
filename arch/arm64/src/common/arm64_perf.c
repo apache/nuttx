@@ -29,11 +29,19 @@
 #ifdef CONFIG_ARCH_PERF_EVENTS
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static unsigned long g_cpu_freq = ULONG_MAX;
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 void up_perf_init(void *arg)
 {
+  g_cpu_freq = (unsigned long)(uintptr_t)arg;
+
   pmu_ccntr_ccfiltr_config(PMCCFILTR_EL0_NSH);
   pmu_cntr_control_config(PMCR_EL0_C | PMCR_EL0_E);
   pmu_cntr_trap_control(PMUSERENR_EL0_EN);
@@ -43,7 +51,7 @@ void up_perf_init(void *arg)
 
 unsigned long up_perf_getfreq(void)
 {
-  return read_sysreg(cntfrq_el0);
+  return g_cpu_freq;
 }
 
 unsigned long up_perf_gettime(void)
@@ -54,10 +62,9 @@ unsigned long up_perf_gettime(void)
 void up_perf_convert(unsigned long elapsed, struct timespec *ts)
 {
   unsigned long left;
-  unsigned long cpu_freq = read_sysreg(cntfrq_el0);
 
-  ts->tv_sec  = elapsed / cpu_freq;
-  left        = elapsed - ts->tv_sec * cpu_freq;
-  ts->tv_nsec = NSEC_PER_SEC * left / cpu_freq;
+  ts->tv_sec  = elapsed / g_cpu_freq;
+  left        = elapsed - ts->tv_sec * g_cpu_freq;
+  ts->tv_nsec = NSEC_PER_SEC * left / g_cpu_freq;
 }
 #endif
