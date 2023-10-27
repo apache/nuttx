@@ -3,8 +3,7 @@
 ========================
 
 An example that builds ``netutils/thttpd`` with some simple NXFLAT CGI programs.
-See ``boards/README.txt`` for most THTTPD settings. In addition to those, this
-example accepts:
+In addition to those, this example accepts:
 
 - ``CONFIG_EXAMPLES_THTTPD_NOMAC``    – (May be defined to use software assigned
   MAC)

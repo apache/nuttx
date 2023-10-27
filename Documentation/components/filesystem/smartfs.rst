@@ -2,7 +2,7 @@
 SMARTFS
 =======
 
-This README file contains information about the implementation of the NuttX
+This page contains information about the implementation of the NuttX
 Sector Mapped Allocation for Really Tiny (SMART) FLASH file system, SMARTFS.
 
 Features
@@ -116,7 +116,7 @@ have a smaller erase size available also.  Vendors have different names
 for the smaller erase size; In the NuttX MTD layer it is called
 SUBSECTOR_ERASE.  For FLASH devices that support the smaller erase size,
 this configuration item can be added to the underlying MTD driver, and
-SMART will use it.  As of the writing of this README, only the
+SMART will use it.  As of the writing of this page, only the
 drivers/mtd/m25px.c driver had support for SUBSECTOR_ERASE.
 
 The BYTE_WRITE config option enables use of the underlying MTD driver's

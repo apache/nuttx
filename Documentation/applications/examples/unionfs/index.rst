@@ -25,5 +25,5 @@ Configuration options. Use the defaults if you are unsure of what you are doing:
   number.
 - ``CONFIG_EXAMPLES_UNIONFS_SECTORSIZE`` – ROM disk sector size.
 
-See the ``README.txt`` file at ``nuttx/boards/sim/sim/sim/README.txt`` for a
-walk-through of the output of this text.
+See :doc:`/platforms/sim/sim/boards/sim/index` page for a walk-through of the
+output of this text.

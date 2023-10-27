@@ -42,7 +42,7 @@ doing this:
   before there is any need for time-related services.
 
 Both of these steps are shown together in the following code sample at the
-end of this README file.
+end of this page.
 
 Example Configuration
 =====================
@@ -84,7 +84,8 @@ force rebuilding of the ROMFS filesystem be removing some files::
   make
 
 If you have problems building the simulator on your platform, check out
-nuttx/boards/sim/sim/sim/README.txt.  You might find some help there.
+:doc:`/platforms/sim/sim/boards/sim/index`.
+You might find some help there.
 
 Here is a sample run.  I have not seen any errors in single stepping through
 the logic but neither am I certain that everything is working properly::

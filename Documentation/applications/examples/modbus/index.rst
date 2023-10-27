@@ -15,5 +15,6 @@ http://developer.berlios.de/project/showfiles.php?group_id=6120.
 - ``CONFIG_EXAMPLES_MODBUS_REG_HOLDING_START``, Default ``2000``.
 - ``CONFIG_EXAMPLES_MODBUS_REG_HOLDING_NREGS``, Default ``130``.
 
-The FreeModBus library resides at ``apps/modbus``. See ``apps/modbus/README.txt``
-for additional configuration information.
+The FreeModBus library resides at ``apps/modbus``.
+See :doc:`/applications/industry/modbus/index` for additional configuration
+information.

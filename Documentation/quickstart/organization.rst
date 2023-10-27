@@ -349,10 +349,7 @@ contents of these configuration files.
 Supported Boards
 ----------------
 
-All of the specific boards supported by NuttX are identified in
-the
-`README.txt <https://github.com/apache/nuttx/blob/master/boards/README.txt>`__
-file.
+The list of supported boards can be found in :ref:`Supported Platforms <platforms>`.
 
 Adding a New Board Configuration
 --------------------------------
@@ -494,7 +491,7 @@ user-mode applications and the kernel-mode RTOS.
 This directory holds a collection of tools and scripts to simplify
 configuring, building and maintaining NuttX.
 
-Refer to the README file in the ``tools`` directory for more
+Refer to the :doc:`/components/tools/index` page for more
 information about the individual files. Some of these tools are
 discussed below as well in the discussion of `configuring and
 building <#configandbuild>`__ NuttX.
