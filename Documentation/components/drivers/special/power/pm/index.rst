@@ -85,8 +85,8 @@ All PM interfaces are declared in the file ``include/nuttx/power/pm.h``.
 
   Called by a device driver in
   order to register to receive power management event callbacks.
-  Refer to the :ref:`components/power:Callbacks` section for more
-  details.
+  Refer to the `Callbacks`_
+  section for more details.
 
   :param callbacks:
     An instance of :c:struct:`pm_callback_s`
@@ -100,8 +100,8 @@ All PM interfaces are declared in the file ``include/nuttx/power/pm.h``.
 
   Called by a device driver in
   order to unregister previously registered power management event
-  callbacks. Refer to the :ref:`components/power:Callbacks` section for
-  more details.
+  callbacks. Refer to the `Callbacks`_
+  section for more details.
 
   **Input Parameters:**
 

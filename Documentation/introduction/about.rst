@@ -120,7 +120,7 @@ Key features of NuttX include:
   * Graphics: framebuffer drivers, graphic- and segment-LCD drivers. VNC server.
   * Audio subsystem: CODECs, audio input and output drivers. Command line and graphic media player applications.
   * Cryptographic subsystem.
-  * :doc:`/components/power` sub-system.
+  * :doc:`/components/drivers/special/power/pm/index` sub-system.
   * ModBus support provided by built-in `FreeModBus <https://www.embedded-experts.at/en/freemodbus/>`__ version 1.5.0.
 
 * **C/C++ Libraries**

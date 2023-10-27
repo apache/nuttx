@@ -30,48 +30,57 @@ Drivers in NuttX generally work in two distinct layers:
   * A "lower half" which is typically hardware-specific. This is
     usually implemented at the architecture or board level.
 
-Subdirectories of `nuttx/drivers`
-=================================
+Subdirectories of ``nuttx/drivers``
+===================================
 
-* ``analog/``
+* ``1wire/`` :doc:`character/1wire`
+
+  1wire device drivers.
+
+* ``analog/`` :doc:`character/analog`
 
   This directory holds implementations of analog device drivers.
   This includes drivers for Analog to Digital Conversion (ADC) as
   well as drivers for Digital to Analog Conversion (DAC).
-  See ``include/nuttx/analog/*.h`` for registration information.
 
-* ``audio/`` 
+* ``audio/`` :doc:`special/audio`
 
   Audio device drivers.
 
-  See ``include/nuttx/audio/audio.h`` for interface definitions.
-  See also the audio subsystem at ``nuttx/audio/``.
-
-* ``bch/``
+* ``bch/`` :doc:`character/bch`
 
   Contains logic that may be used to convert a block driver into
   a character driver.  This is the complementary conversion as that
   performed by loop.c.
 
-  See ``include/nuttx/fs/fs.h`` for registration information.
-
-* ``can/``
+* ``can/`` :doc:`character/can`
 
   This is the CAN drivers and logic support.
 
-  See ``include/nuttx/can/can.h`` for usage information.
+* ``clk/``:doc:`special/clk`
 
-* ``contactless/``
+  Clock management (CLK) device drivers.
+
+* ``contactless/`` :doc:`character/contactless`
 
   Contactless devices are related to wireless devices.  They are not
   communication devices with other similar peers, but couplers/interfaces
   to contactless cards and tags.
 
-* ``crypto/``
+* ``crypto/`` :doc:`character/crypto/index`
 
-  Contains crypto drivers and support logic, including the ``/dev/urandom`` device.
+  Contains crypto drivers and support logic, including the
+  ``/dev/urandom`` device.
 
-* ``eeprom/``
+* ``devicetree/`` :doc:`special/devicetree`
+
+  Device Tree support.
+
+* ``dma/`` :doc:`special/dma`
+
+  DMA drivers support.
+
+* ``eeprom/`` :doc:`block/eeprom`
 
   An EEPROM is a form of Memory Technology Device (see ``drivers/mtd``).
   EEPROMs are non-volatile memory like FLASH, but differ in underlying
@@ -86,90 +95,123 @@ Subdirectories of `nuttx/drivers`
   interface but instead use the simple character interface provided by
   the EEPROM drivers.
 
-* ``i2c/``
+* ``efuse/`` :doc:`character/efuse`
+
+  EFUSE drivers support.
+
+* ``i2c/`` :doc:`special/i2c`
 
   I2C drivers and support logic.
 
-  See ``include/nuttx/i2c/i2c_master.h``
-
-* ``i2s/``
+* ``i2s/`` :doc:`character/i2s`
 
   I2S drivers and support logic.
 
-  See ``include/nuttx/audio/i2s.h``
-
-* ``input/``
+* ``input/`` :doc:`character/input/index`
 
   This directory holds implementations of human input device (HID) drivers.
   This includes such things as mouse, touchscreen, joystick,
   keyboard and keypad drivers.
 
-  See ``include/nuttx/input/*.h`` for registration information.
-
   Note that USB HID devices are treated differently.  These can be found under
   ``usbdev/`` or ``usbhost/``.
 
-* ``lcd/``
+* ``ioexpander/`` :doc:`special/ioexpander`
 
-  Drivers for parallel and serial LCD and OLED type devices.  These drivers support
-  interfaces as defined in ``include/nuttx/lcd/lcd.h``
+  IO Expander drivers.
 
-* ``leds/``
+* ``ipcc/`` :doc:`character/ipcc`
+
+  IPCC (Inter Processor Communication Controller) driver.
+
+* ``lcd/`` :doc:`special/lcd`
+
+  Drivers for parallel and serial LCD and OLED type devices.
+
+* ``leds/`` :doc:`character/leds/index`
 
   Various LED-related drivers including discrete as well as PWM- driven LEDs.
 
-* ``loop/``
+* ``loop/`` :doc:`character/loop`
 
   Supports the standard loop device that can be used to export a
   file (or character device) as a block device.
 
   See ``losetup()`` and ``loteardown()`` in ``include/nuttx/fs/fs.h``.
 
-* ``mmcsd/``
+* ``math/`` :doc:`character/math`
+
+  MATH Acceleration drivers.
+
+* ``misc/`` :doc:`character/nullzero` :doc:`special/rwbuffer` :doc:`block/ramdisk`
+
+  Various drivers that don't fit elsewhere.
+
+* ``mmcsd/`` :doc:`special/sdio` :doc:`special/mmcsd`
 
   Support for MMC/SD block drivers.  MMC/SD block drivers based on
   SPI and SDIO/MCI interfaces are supported.
 
-  See include/nuttx/mmcsd.h and include/nuttx/sdio.h for further information.
+* ``modem/`` :doc:`character/modem`
 
-* ``mtd/``
+  Modem Support.
+
+* ``motor/`` :doc:`character/motor/index`
+
+  Motor control drivers.
+
+* ``mtd/`` :doc:`special/mtd`
 
   Memory Technology Device (MTD) drivers.  Some simple drivers for
   memory technologies like FLASH, EEPROM, NVRAM, etc.
-
-
-  See ``include/nuttx/mtd/mtd.h``
 
   (Note: This is a simple memory interface and should not be
   confused with the "real" MTD developed at infradead.org.  This
   logic is unrelated; I just used the name MTD because I am not
   aware of any other common way to refer to this class of devices).
 
-* ``net/``
+* ``net/`` :doc:`special/net/index`
 
   Network interface drivers.
 
-  See also ``include/nuttx/net/net.h``
+* ``notes/`` :doc:`character/note`
 
-* ``pipes/``
+  Note Driver Support.
 
-  FIFO and named pipe drivers.  Standard interfaces are declared in ``include/unistd.h``
+* ``pipes/`` :doc:`special/pipes`
 
-* ``power/``
+  FIFO and named pipe drivers.
+  Standard interfaces are declared in ``include/unistd.h``
 
-  Power management (PM) driver interfaces.  These interfaces are used
-  to manage power usage of a platform by monitoring driver activity
-  and by placing drivers into reduce power usage modes when the
-  drivers are not active.
+* ``power/`` :doc:`special/power/index`
 
-* ``pwm/``
+  Various drivers related to power managament.
 
-  Provides the "upper half" of a pulse width modulation (PWM) driver.
-  The "lower half" of the PWM driver is provided by device-specific logic.
+* ``rc/`` :doc:`character/rc`
 
-  See ``include/nuttx/timers/pwm.h`` for usage information.
+  Remote Control Device Support.
 
-* ``sensors/``
+* ``regmap/`` :doc:`special/regmap`
+
+  Regmap Subsystems Support.
+
+* ``reset/`` :doc:`special/reset`
+
+  Reset Driver Support.
+
+* ``rf/`` :doc:`character/rf`
+
+  RF Device Support.
+
+* ``rptun/`` :doc:`special/rptun`
+
+  Remote Proc Tunnel Driver Support.
+
+* ``segger/`` :doc:`special/segger`
+
+  Segger RTT drivers.
+
+* ``sensors/`` :doc:`special/sensors`
 
   Drivers for various sensors.  A sensor driver differs little from
   other types of drivers other than they are use to provide measurements
@@ -180,57 +222,53 @@ Subdirectories of `nuttx/drivers`
   measure and convert voltage levels.  DACs, however, are retained in
   the ``analog/`` sub-directory.
 
-* ``serial/``
+* ``serial/``:doc:`character/serial`
 
   Front-end character drivers for chip-specific UARTs.
   This provide some TTY-like functionality and are commonly used (but
   not required for) the NuttX system console.
 
-  See also ``include/nuttx/serial/serial.h``
-
-* ``spi/``
+* ``spi/`` :doc:`special/spi`
 
   SPI drivers and support logic.
 
-  See ``include/nuttx/spi/spi.h``
-
-* ``syslog/``
+* ``syslog/`` :doc:`special/syslog`
 
   System logging devices.
 
-  See ``include/syslog.h`` and ``include/nuttx/syslog/syslog.h``
+* ``timers/`` :doc:`character/timers/index`
 
-* ``timers/``
+  Includes support for various timer devices.
 
-  Includes support for various timer devices including:
-
-  - An "upper half" for a generic timer driver.
-    See ``include/nuttx/timers/timer.h`` for more information.
-
-  - An "upper half" for a generic watchdog driver.
-    See ``include/nuttx/timers/watchdog.h`` for more information.
-
-  - RTC drivers
-
-* ``usbdev/``
+* ``usbdev/`` :doc:`special/usbdev`
 
   USB device drivers.
 
-  See also ``include/nuttx/usb/usbdev.h``
-
-* ``usbhost/``
+* ``usbhost/`` :doc:`special/usbhost`
 
   USB host drivers.
 
-  See also ``include/nuttx/usb/usbhost.h``
+* ``usbmisc/`` :doc:`special/usbmisc`
 
-* ``video/``
+  USB Miscellaneous drivers.
+
+* ``usbmonitor/`` :doc:`special/usbmonitor`
+
+  USB Monitor support.
+
+* ``usrsock/`` :doc:`special/usrsock`
+
+  Usrsock Driver Support.
+
+* ``video/`` :doc:`special/video`
 
   Video-related drivers.
 
-  See ``include/nuttx/video/``
+* ``virtio/`` :doc:`special/virtio`
 
-* ``wireless/``
+  Virtio Device Support.
+
+* ``wireless/`` :doc:`special/wireless`
 
   Drivers for various wireless devices.
 

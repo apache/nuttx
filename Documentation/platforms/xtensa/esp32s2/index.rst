@@ -242,7 +242,7 @@ Linker Segments
 ESP32-S2 has 4 generic timers of 64 bits (2 from Group 0 and 2 from Group 1).
 They're accessible as character drivers, the configuration along with a
 guidance on how to run the example and the description of the application level
-interface can be found in the :doc:`timer documentation </components/drivers/character/timer>`.
+interface can be found in the :doc:`timer documentation </components/drivers/character/timers/timer>`.
 
 Watchdog Timers
 ===============
@@ -251,7 +251,7 @@ ESP32-S2 has 3 WDTs. 2 MWDTs from the Timers Module and 1 RWDT from the RTC Modu
 (Currently not supported yet). They're accessible as character drivers,
 The configuration along with a guidance on how to run the example and the description
 of the application level interface can be found in the
-:doc:`watchdog documentation </components/drivers/character/watchdog>`.
+:doc:`watchdog documentation </components/drivers/character/timers/watchdog>`.
 
 I2S
 ===
