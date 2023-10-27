@@ -1,6 +1,6 @@
-==============
-``fs/unionfs``
-==============
+=================
+Union File System
+=================
 
 Overview
 ========
@@ -9,21 +9,21 @@ This directory contains the NuttX Union File System.  The Union file
 system is provides a mechanism to overlay two different, mounted file
 systems so that they appear as one.  In general this works like this:
 
-  1) Mount file system 1 at some location, say /mnt/file1
-  2) Mount file system 2 at some location, say /mnt/file2
-  3) Call mount() to combine and overly /mnt/file1 and mnt/file2
-     as a new mount point, say /mnt/unionfs.
+  1) Mount file system 1 at some location, say ``/mnt/file1``
+  2) Mount file system 2 at some location, say ``/mnt/file2``
+  3) Call ``mount()`` to combine and overly ``/mnt/file1`` and ``mnt/file2``
+     as a new mount point, say ``/mnt/unionfs``.
 
-/mnt/file1 and /mnt/file2 will disappear and be replaced by the single
-mountpoint /mnut/unionfs.  The previous contents under /mnt/file1 and
-/mnt/file2 will appear merged under /mnt/unionfs. Files at the same
+``/mnt/file1`` and ``/mnt/file2`` will disappear and be replaced by the single
+mountpoint ``/mnt/unionfs``.  The previous contents under ``/mnt/file1`` and
+``/mnt/file2`` will appear merged under ``/mnt/unionfs``. Files at the same
 relative path in file system1 will take presence. If another file of the
 same name and same relative location exists 	in file system 2, it will
 not be visible because it will be occluded by the file in file system1.
 
-See include/nutts/unionfs.h for additional information.
+See ``include/nutts/unionfs.h`` for additional information.
 
-The Union File System is enabled by selecting the CONFIG_FS_UNIONFS option
+The Union File System is enabled by selecting the ``CONFIG_FS_UNIONFS`` option
 in the NuttX configuration file.
 
 Disclaimer:  This Union File System was certainly inspired by UnionFS
@@ -63,11 +63,11 @@ combined in by the Union File System.  For example, suppose that:
 
 * File system 1 is a ROMFS file system with prefix == NULL,
 * File system 2 is a BINFS file system with prefix == "cgin-bin", and
-* The union file system is mounted at /mnt/www.
+* The union file system is mounted at ``/mnt/www``.
 
 Then the content in the in the ROMFS file system would appear at
-/mnt/www and the content of the BINFS file system would appear at
-/mnt/www/cgi-gin.
+``/mnt/www`` and the content of the BINFS file system would appear at
+``/mnt/www/cgi-gin``.
 
 Example Configurations
 ======================
