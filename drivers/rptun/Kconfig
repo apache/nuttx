@@ -56,7 +56,7 @@ config RPTUN_PING
 	bool "rptun ping support"
 	default n
 	---help---
-		This is for rptun debugging & profiling, create ping rpmsg
+		This is for rptun debugging & profiling, create ping RPMSG
 		channel, user can use it to get send/recv speed & latency.
 
 endif # RPTUN

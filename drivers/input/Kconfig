@@ -45,7 +45,7 @@ config INPUT_UINPUT
 		Enable support virtual input device driver
 
 config UINPUT_RPMSG
-	bool "Enable uinput rpmsg"
+	bool "Enable uinput RPMSG"
 	depends on INPUT_UINPUT
 	depends on RPTUN
 	default n

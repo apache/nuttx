@@ -17,9 +17,9 @@ config NET_USRSOCK_DEVICE
 		Will export /dev/usrsock device node for usrsock request/response operations
 
 config NET_USRSOCK_RPMSG
-	bool "rpmsg transport"
+	bool "RPMSG transport"
 	---help---
-		Will send usrsock request or receive usrsock response via rpmsg channel directly
+		Will send usrsock request or receive usrsock response via RPMSG channel directly
 
 config NET_USRSOCK_CUSTOM
 	bool "Customerized interface"
@@ -29,7 +29,7 @@ config NET_USRSOCK_CUSTOM
 endchoice
 
 config NET_USRSOCK_RPMSG_CPUNAME
-	string "The cpuname on which the rpmsg server runs"
+	string "The cpuname on which the RPMSG server runs"
 	depends on NET_USRSOCK_RPMSG
 
 endmenu
@@ -41,7 +41,7 @@ config NET_USRSOCK_RPMSG_SERVER
 	default n
 	depends on NET && RPTUN
 	---help---
-		Enable usrsock through rpmsg channel.
+		Enable usrsock through RPMSG channel.
 
 if NET_USRSOCK_RPMSG_SERVER
 
