@@ -15,7 +15,6 @@ case, you can head to the :doc:`reference <../reference/index>`.
    drivers/index.rst
    nxflat.rst
    nxgraphics/index.rst
-   nxwidgets.rst
    paging.rst
    audio/index.rst
    filesystem/index.rst
