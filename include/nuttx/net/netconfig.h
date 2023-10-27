@@ -109,7 +109,7 @@
  * socket for performing driver ioctls.
  */
 
-#define NET_SOCK_TYPE SOCK_CTRL
+#define NET_SOCK_TYPE (SOCK_CTRL | SOCK_CLOEXEC)
 
 #if NET_SOCK_FAMILY == AF_INET
 #  if !defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_TCP) && \
