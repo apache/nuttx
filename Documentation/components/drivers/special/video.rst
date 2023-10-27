@@ -2,6 +2,9 @@
 Video Device Drivers
 ====================
 
+-  ``include/nuttx/video/``. All structures and APIs
+   needed to work with video drivers are provided in this header
+   file.
 
 max7456
 -------

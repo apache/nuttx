@@ -1,3 +1,4 @@
+=============
 OS Components
 =============
 
@@ -10,7 +11,6 @@ case, you can head to the :doc:`reference <../reference/index>`.
    :maxdepth: 2
    :caption: Contents:
    
-   power.rst
    binfmt.rst
    drivers/index.rst
    nxflat.rst
