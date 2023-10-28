@@ -203,3 +203,54 @@ config RPR0521RS_PROXIMITY_INTERRUPT
 
 endif # SENSORS_RPR0521RS_SCU
 endif # SCU_SENSORS
+
+config SENSORS_CXD5610_GNSS
+	bool "Sony CXD5610 GNSS"
+	default n
+	---help---
+		Enable driver for CXD5610 GNSS device.
+
+if SENSORS_CXD5610_GNSS
+
+config SENSORS_CXD5610_GNSS_SNDBUF_SIZE
+	int "CXD5610 GNSS send buffer size"
+	default 64
+
+config SENSORS_CXD5610_GNSS_RCVBUF_SIZE
+	int "CXD5610 GNSS receive buffer size"
+	default 64
+
+config SENSORS_CXD5610_GNSS_NOTIFYBUF_SIZE
+	int "CXD5610 GNSS notify buffer size"
+	default 1536
+
+config SENSORS_CXD5610_GNSS_NPOLLWAITERS
+	int "CXD5610 GNSS max poll waiters"
+	default 4
+
+config SENSORS_CXD5610_GNSS_NSIGNALRECEIVERS
+	int "CXD5610 GNSS max signal receivers"
+	default 4
+
+config SENSORS_CXD5610_GNSS_RX_THREAD_PRIORITY
+	int "CXD5610 GNSS receive thread priority"
+	default 120
+
+config SENSORS_CXD5610_GNSS_RX_THREAD_STACKSIZE
+	int "CXD5610 GNSS receive thread stack size"
+	default 1024
+
+config SENSORS_CXD5610_GNSS_UNALIGNED_ACCESS
+	bool "Unaligned access"
+	default y
+	depends on !ENDIAN_BIG
+	---help---
+		Support unaligned word and half-word access on little endian.
+
+config SENSORS_CXD5610_GNSS_READ_COMPAT
+	bool "Compatible with CXD5602 GNSS"
+	default y
+	---help---
+		Support compatible with CXD5602 GNSS
+
+endif # SENSORS_CXD5610_GNSS
