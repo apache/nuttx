@@ -27,7 +27,7 @@ SERIAL_RX         PD9
 SERIAL_TX         PD8
 ================= ===
 
-Access to the Cortex-M4 core can be acheived using an additional UART port
+Access to the Cortex-M4 core can be achieved using an additional UART port
 or via RPMSG UART by setting ``CONFIG_RPMSG_UART_CONSOLE=y`` in CM4 configuration.
 
 If the RPMSG UART console is enabled, we can connect to it from CM7 using ``cu``::

@@ -8,7 +8,7 @@ Crush. It is a 6x6 matrix with blocks (cells) with different colors.
 Your goal is to move the blocks of the board to unite three or
 more with the same color.
 
-Everytime that three of more blocks with the same color match that block
+Every time that three of more blocks with the same color match that block
 will blink and it will be removed from the board, leaving more space
 for movements.
 

@@ -2,7 +2,7 @@
 ``ymodem`` YMODEM
 =================
 
-This is `ymodem protocal <http://pauillac.inria.fr/~doligez/zmodem/ymodem.txt>`_.
+This is `ymodem protocol <http://pauillac.inria.fr/~doligez/zmodem/ymodem.txt>`_.
 According to it, the sb rb application is realized, which is used to send files and receive files respectively
 
 Usage
@@ -25,8 +25,7 @@ and you need ``sbrb.py`` -k to set the same length as the board. According to my
 when using -k 32, it can reach 93% of the baud rate,
 and is fully compatible with the original ymodem protocol.
 First, you need to add a soft link to sbrb.py, for example ``sudo ln -s /home/<name>/.../<nuttxwork>/apps/system/ymodem/sbrb.py /usr/bin``
-and then sbrb.py can be configured into minicom.``<Ctrl + a> z o`` then chose ``File transfer protocols`` and
-crate two option cmd is 'sbrb.py -k 32'. like this
+and then sbrb.py can be configured into minicom.``<Ctrl + a> z o`` then chose ``File transfer protocols`` and create two option cmd is 'sbrb.py -k 32'. like this
 
 =========== ============= ==== === ======= ======= =====
 Name        Program       Name U/D FullScr IO-Red. Multi

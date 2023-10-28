@@ -8,7 +8,7 @@
 Description
 ~~~~~~~~~~~
 
-MCUboot Swap Image is an application to demostrate firmware upgrade using
+MCUboot Swap Image is an application to demonstrate firmware upgrade using
 internal flash memory. It simulate MCUboot API steps to switch between two
 valid images.
 
@@ -19,7 +19,7 @@ signed. Consult your board documentation page to get instructions how to do it.
 How to build and flash
 ......................
 
-First step is build your board configuraton using ``mcuboot-loader`` as target.
+First step is build your board configuration using ``mcuboot-loader`` as target.
 That create the bootloader itself. The ``nuttx.bin`` must be flash as usual.
 
 After that, clean up environment and set ``mcuboot-swap-test`` as target. The
@@ -73,7 +73,7 @@ step that must be executed if you ran ``imgtool.py`` without optional parameter
   Application Image successfully confirmed!
   nsh>
 
-Third step (let's reboot and see whats happen)::
+Third step (let's reboot and see what's happen)::
 
   nsh> reboot
   *** Booting MCUboot build 7c890f4b075aed73e4c825ccf875b2fb9ebf2ded ***
@@ -92,7 +92,7 @@ Fourth step (let's switch image)::
   Image version 2.0.0.0
   nsh>
 
-Now, we switched from image version 1.0.0 to image 2.0.0. However, we intentionaly
+Now, we switched from image version 1.0.0 to image 2.0.0. However, we intentionally
 will not run ``mcuboot_confirm`` app::
 
   nsh> reboot

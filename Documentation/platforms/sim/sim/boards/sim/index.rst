@@ -1635,7 +1635,7 @@ This is a configuration with sim usbdev support.
 
   Make Raw Gadget:
   Run make in the raw_gadget and dummy_hcd directory. If raw_gadget build
-  fail, you need to check which register interface meets your kenel version,
+  fail, you need to check which register interface meets your kernel version,
   usb_gadget_probe_driver or usb_gadget_register_driver.
 
   Install Raw Gadget:

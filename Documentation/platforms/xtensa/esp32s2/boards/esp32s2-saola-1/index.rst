@@ -80,7 +80,7 @@ to bypass the audio subsystem and write directly to the I2S peripheral.
     -> System Type
         -> ESP32-S2 Peripheral Selection
             -> I2S
-                -> Bit Witdh
+                -> Bit Width
 
 The following configurations use the I2S peripheral::
   * :ref:`platforms/xtensa/esp32s2/boards/esp32s2-saola-1/index:audio`
@@ -169,8 +169,8 @@ disables the NuttShell to get the best possible score.
 cxx
 ---
 
-Development enviroment ready for C++ applications. You can check if the setup
-was successfull by running ``cxxtest``::
+Development environment ready for C++ applications. You can check if the setup
+was successful by running ``cxxtest``::
 
     nsh> cxxtest
     Test ofstream ================================

@@ -105,7 +105,7 @@ Setup RNDIS in your computer
 
    Click on "Apply"
 
-   Disconect and connect the USB cable to force it to get IP.
+   Disconnect and connect the USB cable to force it to get IP.
 
 #. Identify what IP address your board got:
 

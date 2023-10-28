@@ -179,8 +179,8 @@ the ``/dev/crypto`` device file.
 cxx
 ---
 
-Development enviroment ready for C++ applications. You can check if the setup
-was successfull by running ``cxxtest``::
+Development environment ready for C++ applications. You can check if the setup
+was successful by running ``cxxtest``::
 
     nsh> cxxtest
     Test ofstream ================================

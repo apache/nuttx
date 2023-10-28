@@ -3,7 +3,7 @@ nRF52840-dongle
 ===============
 
 The `nRF52840-dongle (PCA10059) <https://www.nordicsemi.com/Products/Development-hardware/nrf52840-dongle>`_
-is a a small, low-cost USB dongle based on nRF52840 fron Nordic.
+is a a small, low-cost USB dongle based on nRF52840 from Nordic.
 
 Serial Console
 ==============
@@ -59,5 +59,5 @@ Basic NuttShell configuration (CDCACM console enabled in USB Port, at 115200 bps
 Flash & Debug
 =============
 
-Both flashing and debuing is possible only with an external debug proble.
+Both flashing and debuing is possible only with an external debug probe.
 
