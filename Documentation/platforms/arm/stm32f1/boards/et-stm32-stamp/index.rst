@@ -10,7 +10,7 @@ ET-STM32 Stamp board from Futurlec (https://www.futurlec.com/ET-STM32_Stamp.shtm
 - I/O Pins Out: 48
 - ADCs: 16 (at 12-bit resolution)
 - DACs: 2 (at 12-bit resolution)
-- Peripherals: RTC, 4 timers, 2 I2Cs, 3 SPI ports, 1 on-board UART (upto 5 channels)
+- Peripherals: RTC, 4 timers, 2 I2Cs, 3 SPI ports, 1 on-board UART (up to 5 channels)
 - Other: Sleep, stop, and standby modes; serial wire debug and JTAG interfaces
 
 Please see link below for board specific details:

@@ -87,9 +87,9 @@ ADC
 ADC driver with the successive approximation analog/digital converter. The lower-half of
 this driver is initialize by calling :c:func:`imxrt_adcinitialize`.
 
-ADC module can use either continous trigger (next conversion is started as soon as the
+ADC module can use either continuous trigger (next conversion is started as soon as the
 previous is finished) or hardware trigger. This option is selected by IMXRT_ADCx_ETC
-(x = 1, 2) config option. If IMXRT_ADCx_ETC = -1 then continous trigger is used. If
+(x = 1, 2) config option. If IMXRT_ADCx_ETC = -1 then continuous trigger is used. If
 corresponding XBAR number is put in IMXRT_ADCx_ETC then that signal is used to trigger
 the ADC conversion (for example PWM signal can be used as a source). For PWM XBAR options
 please refer to PWM chapter of this documentation.

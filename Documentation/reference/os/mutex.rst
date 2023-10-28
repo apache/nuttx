@@ -108,7 +108,7 @@ Api description
     :param mutex: mutex descriptor.
 
     :return:
-      if mutex is locked will return `ture`. if not will reutrn `false`
+      if mutex is locked will return `ture`. if not will return `false`
 
 .. c:function:: void nxmutex_unlock(FAR mutex_t *mutex)
 

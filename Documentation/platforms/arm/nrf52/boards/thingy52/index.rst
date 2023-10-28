@@ -68,4 +68,4 @@ Basic NuttShell configuration (console enabled on Segger RTT channel).
 Flash & Debug
 =============
 
-Both flashing and debuing is possible only with an external debug proble.
+Both flashing and debuing is possible only with an external debug probe.

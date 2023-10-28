@@ -23,5 +23,5 @@ How to write a GDB python script
 Here is an article to introduce, read it to understand the most basic principles of python,
 `Automate Debugging with GDB Python API <https://interrupt.memfault.com/blog/automate-debugging-with-gdb-python-api>`_.
 
-For more documentation on gdb pyhton, please refer to the official documentation of gdb
-`GDB with pyhton <https://interrupt.memfault.com/blog/automate-debugging-with-gdb-python-api>`_.
+For more documentation on gdb python, please refer to the official documentation of gdb
+`GDB with python <https://interrupt.memfault.com/blog/automate-debugging-with-gdb-python-api>`_.

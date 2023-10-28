@@ -83,7 +83,7 @@ NuttShell configuration with support for CDC/ACM with RNDIS composite driver.
 highpri
 -------
 
-This application demonstrates high priorty interrupt feature of the NuttX.
+This application demonstrates high priority interrupt feature of the NuttX.
 
 nsh
 ----

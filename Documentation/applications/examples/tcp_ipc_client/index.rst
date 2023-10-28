@@ -20,7 +20,7 @@ How do I use this?
 
 In order to test tcp_ipc_client & tcp_ipc_server together, there are two ways to proceed:
 
-- Init server manually (command: SERVER &), and after successfull server init, also init client manually (CLIENT 127.0.0.1)
+- Init server manually (command: SERVER &), and after successful server init, also init client manually (CLIENT 127.0.0.1)
 - init server automatically after boot using NuttShell start up scripts (check: https://nuttx.apache.org/docs/latest/applications/nsh/installation.html#nuttshell-start-up-scripts )
 
 Additional info

@@ -64,7 +64,7 @@ notation. In that case, the netmask need not be provided.
 
 ::
 
-  nsh> addroute addroute 11.0.0.0 255.255.255.0 10.0.0.2
+  nsh> addroute 11.0.0.0 255.255.255.0 10.0.0.2
 
 which is equivalent to
 

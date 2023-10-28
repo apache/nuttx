@@ -130,7 +130,7 @@ to bypass the audio subsystem and write directly to the I2S peripheral.
         -> ESP32 Peripheral Selection
             -> I2S
                 -> I2S0/1
-                    -> Bit Witdh
+                    -> Bit Width
 
   And make sure the data stream buffer being written to the I2S peripheral is
   aligned to the next boundary i.e. 16 bits for the 8 and 16-bit-widths and
@@ -307,8 +307,8 @@ disables the NuttShell to get the best possible score.
 cxx
 ---
 
-Development enviroment ready for C++ applications. You can check if the setup
-was successfull by running ``cxxtest``::
+Development environment ready for C++ applications. You can check if the setup
+was successful by running ``cxxtest``::
 
     nsh> cxxtest
     Test ofstream ================================
@@ -375,7 +375,7 @@ After successfully built and flashed, run on the boards's terminal::
 
     i2schar -p /dev/i2schar[0-1]
 
-The corresponding output should show related debug informations.
+The corresponding output should show related debug information.
 
 knsh
 ----

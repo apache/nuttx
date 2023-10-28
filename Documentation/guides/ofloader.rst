@@ -21,7 +21,7 @@ CONFIGURATION
 ```CONFIG_DISABLE_IDLE_LOOP`` is used to disable the idle loop in NuttX.
 ```CONFIG_SYSTEM_OFLOADER``` is used to enable the Open Flash Loader.
 ```CONFIG_SYSTEM_OFLOADER_TABLE``` is used to configure the flash device
-frist parameter is the device name, second parameter is the start address.
+first parameter is the device name, second parameter is the start address.
 
 The reference configuration "stm32f429i-disco:ofloader" is designed
 to be used with the STM32F429I-DISCO board in NuttX,

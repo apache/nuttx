@@ -25,7 +25,7 @@ To choose a configuration you pass the ``<board name>:<board configuration>`` su
        $ cd nuttx
        $ cmake -B build -DBOARD_CONFIG=stm32f4discovery:nsh -GNinja
 
-The ``-B build`` tells what is the build direcotry.
+The ``-B build`` tells what is the build directory.
 
 You can then customize this configuration by using the menu based
 configuration system with:

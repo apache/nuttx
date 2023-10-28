@@ -79,4 +79,4 @@ exposed via J-Link VCOM1, at 115200 bps).
 Flash & Debug
 =============
 
-Both flashing and debuing is possible only with an external debug proble.
+Both flashing and debuing is possible only with an external debug probe.

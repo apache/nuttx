@@ -2,7 +2,7 @@
 NXP S32K3XX
 ===========
 
-The `S32K3XX series <https://www.nxp.com/products/processors-and-microcontrollers/s32-automotive-platform/s32k-general-purpose-mcus/s32k3-microcontrollers-for-general-purpose:S32K3>`_ is a family of automotive-grade general-purpose microcontrollers from NXP Semiconductors. The chips are based around single, dual (lock-step) or tripple Arm Cortex-M7 cores, running at clockspeeds up to 240 MHz.
+The `S32K3XX series <https://www.nxp.com/products/processors-and-microcontrollers/s32-automotive-platform/s32k-general-purpose-mcus/s32k3-microcontrollers-for-general-purpose:S32K3>`_ is a family of automotive-grade general-purpose microcontrollers from NXP Semiconductors. The chips are based around single, dual (lock-step) or triple Arm Cortex-M7 cores, running at clockspeeds up to 240 MHz.
 
 Supported MCUs
 ==============
