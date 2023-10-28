@@ -40,7 +40,7 @@ Buttons and LEDs
 There is a BOOT button which if held down when power is first
 applied or the RESET button is pressed will cause the RP2040 to
 boot into program mode and appear as a storage device to
-a USB connecte .  Saving a .UF2 file to this device will 
+a USB connector.  Saving a .UF2 file to this device will 
 replace the Flash ROM contents on the RP2040.
 
 A RESET button that allows rebooting the board without disconnecting

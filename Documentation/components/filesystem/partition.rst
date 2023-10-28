@@ -14,7 +14,7 @@ TXTABLE - A text based partition table stored in last eraseblock
 #. The 2nd and remaining lines are partition entries(min: one)
    in format: "%s %zx %zx"(means name, size and offset (byte)(in hex)).
 #. Size or offset can be default zero(means zero(for 1st entry) or
-   caculate(for others)), and will be caculated by the parser refs to previous
+   calculated(for others)), and will be calculated by the parser refs to previous
    and next entries.
 #. The last eraseblock will be registered as pseudo partition named "txtable".
    If the last eraseblock included by the last real partition, it will be
@@ -26,7 +26,7 @@ partition table maybe out of sync.
 And it's easier:
 
 1. Text format with simple rules(name + size + offset).
-#. Size or offset can be default(caculated refs to previous
+#. Size or offset can be default(calculated refs to previous
    and next entries).
 #. Support backup table(eg. /etc/txtable.txt in ROMFS)
 
@@ -99,7 +99,7 @@ More than one not set size or offset
 
 * Parsed
 
-  | Size of partition[2,3,4,6] and data are caculated, and gap between
+  | Size of partition[2,3,4,6] and data are calculated, and gap between
     partition7 and data is kept.
 
   ::

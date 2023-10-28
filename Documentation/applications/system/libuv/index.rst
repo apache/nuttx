@@ -4,7 +4,7 @@
 
 Most features of libuv are supported by current port, except SIGPROF relative function (loop_configure).
 
-Nearly full libuv's test suite avaliable on NuttX, but some known case can't run on sim:
+Nearly full libuv's test suite available on NuttX, but some known case can't run on sim:
 
 * ``loop_update_time``
 * ``idle_starvation``

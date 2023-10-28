@@ -140,7 +140,7 @@ though.  Thus, this change::
      return TFM_PLAT_ERR_SUCCESS;
    }
 
-The third chage is required, since current NuttX does not support lazy FPU
+The third change is required, since current NuttX does not support lazy FPU
 register stacking any longer.  Thus, this must be disabled for the TF-M secure
 code as well::
 

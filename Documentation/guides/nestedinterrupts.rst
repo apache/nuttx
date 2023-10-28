@@ -78,7 +78,7 @@ nested interrupt handling. Here is one technical approach to do that:
    atomic in any case.
 
 **NOTE 1**: The ARMv7-M could also be configured to use separate MSP and
-PSP stacks with the interupt processing using the MSP stack and the
+PSP stacks with the interrupt processing using the MSP stack and the
 tasks all using the PSP stacks. This is not compatible with certain
 parts of the existing design and would be more effort, but could result
 in a better solution.
@@ -140,7 +140,7 @@ assume that interrupts are enabled.
    
     /* Current regs non-zero indicates that we are processing an interrupt;
      * regs holds the state of the interrupted logic; current_regs holds the
-     * state of the interrupted user task.  current_regs should, therefor,
+     * state of the interrupted user task.  current_regs should, therefore,
      * only be modified for outermost interrupt handler (when g_nestlevel == 0)
      */
    

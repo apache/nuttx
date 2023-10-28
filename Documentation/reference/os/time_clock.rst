@@ -265,7 +265,7 @@ Tickless Configuration Options
         bool "Simulation"
         select ARCH_HAVE_TICKLESS
         ---help---
-                Linux/Cywgin user-mode simulation.
+                Linux/Cygwin user-mode simulation.
 
    When the simulation platform is selected,
    ``ARCH_HAVE_TICKLESS`` is automatically selected, informing the

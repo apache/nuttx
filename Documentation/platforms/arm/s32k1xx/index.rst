@@ -36,7 +36,7 @@ Peripheral  Support  Comments
 ADC         No
 CMP         No
 eDMA        No
-EEEPROM     Yes      EEPROM emulated by FlexRAM
+EEPROM     Yes      EEPROM emulated by FlexRAM
 ENET        Yes
 FlexCAN     Yes      SocketCAN-compatible
 FlexIO      No
@@ -66,7 +66,7 @@ eDMA
 
 Enhanced Direct Memory Access module. There is a driver that was copied from the i.MX RT port, but this was not tested on S32K1XX.
 
-EEEPROM
+EEPROM
 -------
 
 Emulated EEPROM (implemented by FlexRAM module). A basic block driver is available to read and write data.

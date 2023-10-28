@@ -185,7 +185,7 @@ Subdirectories of ``nuttx/drivers``
 
 * ``power/`` :doc:`special/power/index`
 
-  Various drivers related to power managament.
+  Various drivers related to power management.
 
 * ``rc/`` :doc:`character/rc`
 
