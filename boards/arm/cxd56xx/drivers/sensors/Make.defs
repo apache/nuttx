@@ -62,6 +62,10 @@ ifeq ($(CONFIG_SENSORS_RPR0521RS_SCU),y)
   CSRCS += rpr0521rs_scu.c
 endif
 
+ifeq ($(CONFIG_SENSORS_CXD5610_GNSS),y)
+  CSRCS += cxd5610_gnss.c
+endif
+
 DEPPATH += --dep-path platform$(DELIM)sensors
 VPATH += :platform$(DELIM)sensors
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)platform$(DELIM)sensors
