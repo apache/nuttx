@@ -277,9 +277,9 @@ Skeleton Files
 
 Skeleton files are "empty" frameworks for NuttX drivers.  They are provided to
 give you a good starting point if you want to create a new NuttX driver.
-The following skeleton files are available::
+The following skeleton files are available:
 
-  drivers/lcd/skeleton.c -- Skeleton LCD driver
-  drivers/mtd/skeleton.c -- Skeleton memory technology device drivers
-  drivers/net/skeleton.c -- Skeleton network/Ethernet drivers
-  drivers/usbhost/usbhost_skeleton.c -- Skeleton USB host class driver
+* ``drivers/lcd/skeleton.c`` Skeleton LCD driver
+* ``drivers/mtd/skeleton.c`` Skeleton memory technology device drivers
+* ``drivers/net/skeleton.c`` Skeleton network/Ethernet drivers
+* ``drivers/usbhost/usbhost_skeleton.c`` Skeleton USB host class driver

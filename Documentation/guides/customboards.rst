@@ -17,9 +17,8 @@ Sometimes it is not appropriate, or not wanted, to add a new or custom board to
 the NuttX boards tree itself. If so, the board can be defined out-of-tree in a
 custom directory and still be built easily.
 
-------------------
 Add a Custom Board
-------------------
+==================
 
 The same set of files as provided for in-tree boards is required (i.e. configs,
 Kconfig, scripts, etc.) but these can be placed in a directory of your choice.
@@ -53,7 +52,7 @@ To build the custom board, the syntax is slightly different to in-tree boards an
       Refreshing...
 
 Kconfig Settings
-----------------
+================
 
 Once the board is configured, to ensure subsequent builds run correctly, there
 are two Kconfig settings that need to be set. These are:

@@ -22,4 +22,5 @@ Here's a list of Apache NuttX resources that you might find helpful:
 
 Legacy README
 =============
+
 .. mdinclude:: ../legacy_README.md

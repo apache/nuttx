@@ -1,6 +1,7 @@
 .. include:: /substitutions.rst
 .. _qemugdb:
 
+=====================================
 How to debug NuttX using QEMU and GDB
 =====================================
 
@@ -11,7 +12,7 @@ board or architecture supported by QEMU.
 Start configuring and compiling the lm3s6965-ek board with qemu-flat profile.
 
 Compiling
----------
+=========
 
 #. Configure the lm3s6965-ek
 
@@ -31,7 +32,7 @@ Compiling
        $ make -j
 
 Start QEMU
-----------
+==========
 
 #. You need to start QEMU using the nuttx ELF file just create above:
 
@@ -46,7 +47,7 @@ Start QEMU
        nsh>
 
 Start GDB to connect to QEMU
-----------------------------
+============================
 
    These steps show how to connect GDB to QEMU running NuttX:
 

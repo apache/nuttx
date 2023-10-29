@@ -3,7 +3,7 @@ Open Flash Loader
 =================
 
 Introduce
-=====================================
+=========
 
 Open Flash loader is an implementation in NuttX that bridges the device
 drivers in NuttX with the programming methods of a flash loader in J-Link.

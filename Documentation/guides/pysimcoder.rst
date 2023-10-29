@@ -1,6 +1,7 @@
 .. include:: /substitutions.rst
 .. _pysimcoder:
 
+=================================
 pysimCoder integration with NuttX
 =================================
 
@@ -16,7 +17,7 @@ This documentation describes the steps that are needed to run application genera
 on NuttX and also keeps the track of peripherals that are supported by pysimCoder for NuttX RTOS.
 
 Peripheral Support
-------------------
+==================
 
 The following list shows the peripherals and fuctionalities supported in pysimCoder for NuttX RTOS.
 
@@ -39,7 +40,7 @@ Please note that the actual support for NuttX peripherals can be wider that what
 in case this documentation was not updated when new fuctionalities were added to pysimCoder.
 
 NuttX Configuration
--------------------
+===================
 
 Several configuration options are necessary to be set in order to successfully compile pysimCoder
 with NuttX. The list is the following:
@@ -124,7 +125,7 @@ Please note that PYSUPSICTRL variable has to be set/exported in order to success
 designed with pysimCoder.
 
 Using pysimCoder to design NuttX application
---------------------------------------------
+============================================
 
 After running pysimCoder, separate blocks can be selected from the library menu on the left hand side. The menu contains
 several libraries, NuttX specific blocks can be found in library "NuttX". It is also possible to use blocks from other

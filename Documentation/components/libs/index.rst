@@ -34,7 +34,6 @@ container.
 The only real function of the ``libs/`` directory is to prevent the top-level
 directory from becoming cluttered with individual libraries.
 
-
 .. toctree::
    :maxdepth: 1
    :caption: Contents:
