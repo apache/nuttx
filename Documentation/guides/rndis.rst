@@ -1,6 +1,7 @@
 .. include:: /substitutions.rst
 .. _rndis:
 
+================
 How to use RNDIS
 ================
 
@@ -17,7 +18,7 @@ risk and also be aware that it was tested up to Ubuntu 22.04 LTS and
 couldn't work in future versions.
 
 Compiling
----------
+=========
 
 #. Configure the RNDIS
 
@@ -39,7 +40,7 @@ Compiling
        $ make -j
 
 Flashing
---------
+========
 
 #. Flash the generated nuttx.bin to your board:
 
@@ -65,7 +66,7 @@ Flashing
 
 
 Setup RNDIS in your computer
-----------------------------
+============================
 
    These steps show how to connect your board to your Linux machine.
 

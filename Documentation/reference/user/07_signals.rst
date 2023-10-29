@@ -1,5 +1,6 @@
+=================
 Signal Interfaces
-*****************
+=================
 
 **Tasks and Signals**. NuttX provides signal interfaces for tasks and
 pthreads. Signals are used to alter the flow control of tasks by

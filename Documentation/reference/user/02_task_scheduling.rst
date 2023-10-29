@@ -1,5 +1,6 @@
+==========================
 Task Scheduling Interfaces
-**************************
+==========================
 
 By default, NuttX performs strict priority scheduling: Tasks of higher
 priority have exclusive access to the CPU until they become blocked. At
@@ -29,7 +30,7 @@ compliant interface to the NuttX scheduler:
   - :c:func:`sched_get_rr_interval`
 
 Functions
----------
+=========
 
 .. c:function:: int sched_setparam(pid_t pid, FAR const struct sched_param *param)
 
