@@ -78,6 +78,11 @@ static const uint16_t g_reg_offs[] =
   UINT16_MAX,            /* ES */
   UINT16_MAX,            /* FS */
 };
+#else
+static const uint16_t g_reg_offs[] =
+{
+  [0 ... XCPTCONTEXT_REGS] = UINT16_MAX
+};
 #endif
 
 /****************************************************************************
