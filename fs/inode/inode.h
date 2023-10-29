@@ -329,21 +329,6 @@ int inode_reserve(FAR const char *path,
                   mode_t mode, FAR struct inode **inode);
 
 /****************************************************************************
- * Name: inode_unlink
- *
- * Description:
- *   Given a path, remove a the node from the in-memory, inode tree that the
- *   path refers to.  This is normally done in preparation to removing or
- *   moving an inode.
- *
- * Assumptions/Limitations:
- *   The caller must hold the inode semaphore
- *
- ****************************************************************************/
-
-FAR struct inode *inode_unlink(FAR const char *path);
-
-/****************************************************************************
  * Name: inode_remove
  *
  * Description:
