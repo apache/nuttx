@@ -36,7 +36,7 @@ Peripheral  Support  Comments
 ADC         No
 CMP         No
 eDMA        No
-EEPROM     Yes      EEPROM emulated by FlexRAM
+EEPROM      Yes      EEPROM emulated by FlexRAM
 ENET        Yes
 FlexCAN     Yes      SocketCAN-compatible
 FlexIO      No
