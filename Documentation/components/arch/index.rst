@@ -47,6 +47,7 @@ under ``arch/`` with the following characteristics::
         |   |--<other-chips>/
         |   |-- arch.h
         |   |-- irq.h
+        |   |-- syscall.h
         |   `-- types.h
         `-- src/
             |--<chip-name>/
@@ -119,6 +120,18 @@ Summary of Files
 
   This file must also define NR_IRQS, the total number of IRQs supported
   by the board.
+
+-  ``include/syscall.h``: This file needs to define some
+   architecture specific functions (usually inline if the compiler
+   supports inlining) to support software interrupts or
+   *syscall*\ s that can be used all from user-mode applications
+   into kernel-mode NuttX functions. This file must always be
+   provided to prevent compilation errors. However, it need only
+   contain valid function declarations if the architecture
+   supports the ``CONFIG_BUILD_PROTECTED`` or
+   ``CONFIG_BUILD_KERNEL``\ configurations.
+
+   See :doc:`/components/syscall` for details.
 
 ``src/<chip-name>/``
 
