@@ -362,7 +362,7 @@ by create Windows junctions like this:
 A better version of a command-line only Ubuntu under Windows 10 (beta)
 has recently been made available from Microsoft.
 
-### Installation
+### Installation for Ubuntu Bash under Windows 10
 
 Installation instructions abound on the Internet complete with screen
 shots.  I will attempt to duplicate those instructions in full here.
