@@ -47,12 +47,12 @@ static void free_delaylist(FAR struct mm_heap_s *heap)
 
   /* Move the delay list to local */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&heap->mm_spinlock);
 
   tmp = heap->mm_delaylist[up_cpu_index()];
   heap->mm_delaylist[up_cpu_index()] = NULL;
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&heap->mm_spinlock, flags);
 
   /* Test if the delayed is empty */
 
