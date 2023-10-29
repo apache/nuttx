@@ -1,6 +1,7 @@
 .. include:: /substitutions.rst
 .. _configuring:
 
+===========
 Configuring
 ===========
 
@@ -93,7 +94,7 @@ computer.
    configured in :menuselection:`Application Configuration --> NSH Library --> Message of the Day (MOTD)`.
    
 Fast configuration changes
---------------------------
+==========================
 
 If you know exactly which configuration symbol you want to change, you can use the ``kconfig-tweak`` tool (comes with the ``kconfig-frontends`` package) to quickly change a setting without going into the configuration frontend. This is useful to change settings such as debug options:
 
@@ -126,7 +127,7 @@ This is also useful to script configuration changes that you perform often:
    make oldconfig
 
 Reference configuration
---------------------------
+=======================
 
 Defconfig supports the use of ``#include`` statements to reference other configuration files:
 
@@ -144,7 +145,7 @@ The default header file search path includes:
 * ``${boards}/common/configs``;
 
 Merge configuration
---------------------------
+===================
 
 Multiple config fragments can be merged manually using the tools/merge_config.py script.
 

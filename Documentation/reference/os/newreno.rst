@@ -13,7 +13,6 @@ NewReno congestion control algorithm is used to solve the problem of network con
 Workflow
 ========
 
-
 The NewReno on the tcp sender adjusts the cwnd and ssthresh based on received ack and Retransmitted Timeout (RTO) events.
 
 Using the cwnd, together with snd_wnd, controls the number of bytes sent to the network. Here's how newreno works, as following:

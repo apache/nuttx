@@ -1,5 +1,6 @@
+=================
 Clocks and Timers
-*****************
+=================
 
 - :c:func:`clock_settime`
 - :c:func:`clock_gettime`

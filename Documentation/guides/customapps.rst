@@ -18,9 +18,8 @@ the directory ``CustomApps`` as an example.
   need to run ``make clean`` and possibly even ``make distclean`` before rebuilding to
   ensure it works correctly.
 
------------------------------------------
 1. Replace The Apps/ Directory Completely
------------------------------------------
+=========================================
 
 The CustomApps directory need only to contain the minimum three files:
 
@@ -188,9 +187,8 @@ Then build as you normally would. When you execute the custom_hello app you shou
 
     Hello, Custom World!!
 
----------------------------------------------------------------
 2. Extend the apps/ directory to include a new custom directory
----------------------------------------------------------------
+===============================================================
 
 The collection of apps provided in nuttx-apps can be useful, and this method simply
 extends the directory structure to include your own directory structure.
@@ -306,9 +304,8 @@ followed by ``make menuconfig``. If successful there will be new Kconfig entries
 Select the ``Custom Hello App`` and run the usual build process. If successful
 you can run the newly included ``custom_hello`` app.
 
---------------------------------------------------------------------------
 3. Include an Additional Custom directory Outside of the Main Source Trees
---------------------------------------------------------------------------
+==========================================================================
 
 Thia is similar to the previous approach, but places the ``CustomApps`` directory
 outside of the default trees.
