@@ -177,6 +177,52 @@ Configuring NuttX requires only copying::
     cd tools
     ./configure.sh -a <app-dir> <board>:<config-dir>
 
+
+Adding a New Board Configuration
+================================
+
+Okay, so you have created a new board configuration directory.
+Now, how do you hook this board into the configuration system so
+that you can select with ``make menuconfig``?
+
+You will need modify the file ``boards/Kconfig``. Let's look at
+the STM32F4-Discovery configuration in the ``Kconfig`` file and
+see how we would add a new board directory to the configuration.
+For this configuration let's say that you new board resides in the
+directory ``boards/myarch/mychip/myboard``; It uses an MCU
+selected with ``CONFIG_ARCH_CHIP_MYMCU``; and you want the board
+to be selected with ``CONFIG_ARCH_BOARD_MYBOARD``. Then here is
+how you can clone the STM32F4-Discovery configuration in
+``boards/Kconfig`` to support your new board configuration.
+
+In ``boards/Kconfig`` for the stm32f4-discovery, you will see a
+configuration definition like this:
+
+The above selects the STM32F4-Discovery board. The ``select``
+lines say that the board has both LEDs and buttons and that the
+board can generate interrupts from the button presses. You can
+just copy the above configuration definition to a new location
+(notice that they the configurations are in alphabetical order).
+Then you should edit the configuration to support your board. The
+final configuration definition might look something like:
+
+Later in the ``boards/Kconfig`` file, you will see a long, long
+string configuration with lots of defaults like this:
+
+This logic will assign string value to a configuration variable
+called ``CONFIG_ARCH_BOARD`` that will name the directory where
+the board-specific files reside. In our case, these files reside
+in ``boards/myarch/mychip/myboard`` and we add the following to
+the long list of defaults (again in alphabetical order):
+
+Now the build system knows where to find your board configuration!
+
+And finally, add something like this near the bottom of
+``boards/myarch/mychip/myboard``:
+
+This includes additional, board-specific configuration variable
+definitions in ``boards/myarch/mychip/myboard/Kconfig``.
+
 Building Symbol Tables
 ======================
 
