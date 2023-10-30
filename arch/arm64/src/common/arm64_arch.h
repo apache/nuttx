@@ -393,6 +393,26 @@ static inline void arch_nop(void)
 
 /****************************************************************************
  * Name:
+ *   arm64_current_el()
+ *
+ * Description:
+ *
+ *   Get current execution level
+ *
+ ****************************************************************************/
+
+#define arm64_current_el()                \
+  ({                                      \
+    uint64_t __el;                        \
+    int      __ret;                       \
+    __asm__ volatile ("mrs %0, CurrentEL" \
+                      : "=r" (__el));     \
+    __ret = GET_EL(__el);                 \
+    __ret;                                \
+  })
+
+/****************************************************************************
+ * Name:
  *   read_/write_/zero_ sysreg
  *
  * Description:
