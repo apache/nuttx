@@ -55,28 +55,28 @@ LEDs
 
 The STM32F4-RS485 has 4 software controllable LEDs.
 
-  =====  =====
-  LED    PINS
-  =====  =====
-  LED_1  PC0
-  LED_2  PC1
-  LED_4  PC2
-  LED_5  PC3
-  =====  =====
+=====  =====
+LED    PINS
+=====  =====
+LED_1  PC0
+LED_2  PC1
+LED_4  PC2
+LED_5  PC3
+=====  =====
 
 User Buttons
 ============
 
 The STM32F4-RS485 has 4 user switches.
 
-  ======= =====
-  SWITCH  PINS
-  ======  =====
-  SWIO_1  PB13
-  SWIO_2  PB14
-  SWIO_3  PB15
-  SWIO_4  PC6
-  ======  =====
+======= =====
+SWITCH  PINS
+======= =====
+SWIO_1  PB13
+SWIO_2  PB14
+SWIO_3  PB15
+SWIO_4  PC6
+======= =====
 
 UARTs
 =====
@@ -86,92 +86,96 @@ The STM32F4-RS485 has 1 USART available for user.
 USART2
 ------
 
-  ========== =====
-  UART/USART PINS
-  ========== =====
-  CTS        PA0
-  RTS        PA1
-  TX         PA2  *Warning you make need to reverse RX/TX on
-  RX         PA3   some RS-232 converters
-  CK         PA4
-  ========== =====
+========== =====
+UART/USART PINS
+========== =====
+CTS        PA0
+RTS        PA1
+TX         PA2  *Warning you make need to reverse RX/TX on
+RX         PA3   some RS-232 converters
+CK         PA4
+========== =====
 
 
 SDCARD
-=====
+======
 
 The STM32F4-RS485 has 1 SDCard slot connected as below:
 
-  ========== =====
-  SDIO       PINS
-  ========== =====
-  SDIO_D0    PC8
-  SDIO_D1    PC9
-  SDIO_D2    PC10
-  SDIO_D3    PC11
-  SDIO_DK    PC12
-  ========== =====
-
+========== =====
+SDIO       PINS
+========== =====
+SDIO_D0    PC8
+SDIO_D1    PC9
+SDIO_D2    PC10
+SDIO_D3    PC11
+SDIO_DK    PC12
+========== =====
 
 EEPROM
 ======
 
 The STM32F4-RS485 development board has serial EEPROM HX24LC02B, with 2k bits (256x8) and internally
 organized with 32 pages of 8 bytes each. It is connected through I2C as below:
-  ====== =====
-  I2C    PINS
-  ====== =====
-  SDA    PB7
-  SCL    PB8
-  ====== =====
 
+====== =====
+I2C    PINS
+====== =====
+SDA    PB7
+SCL    PB8
+====== =====
 
 Temperature Sensor
 ==================
 
 The STM32F4-RS485 development board has a temperature sensor TMP75 (TMP75AIDR) connected through I2C as below:
 
-  ====== =====
-  I2C    PINS
-  ====== =====
-  SDA    PB7
-  SCL    PB8
-  ====== =====
-
+====== =====
+I2C    PINS
+====== =====
+SDA    PB7
+SCL    PB8
+====== =====
 
 RS485 Transceiver
-=====
+=================
+
 The STM32F4-RS485 development board has a half-duplex RS-485 transceiver, the BL3085B it is connected
 through USART2 as below:
-  ==========   =====
-  USART2         PINS
-  ==========   =====
-  USART2_RX    RO
-  USART2_RTS   DE, /RE
-  USART2_RX    DI
-  ==========   =====
+
+==========   =====
+USART2       PINS
+==========   =====
+USART2_RX    RO
+USART2_RTS   DE, /RE
+SART2_RX     DI
+==========   =====
 
 A/D Converter
-=====
+=============
+
 The STM32F4-RS485 development board has two Analog to Digital converters with Amplifier Buffer (1COS724SR)
 and connected as below:
-  ======= =====
-  PWM     PINS
-  ======= =====
-  PWM_1   PB6
-  PWM_2   PA6
-  ======= =====
+
+======= =====
+PWM     PINS
+======= =====
+PWM_1   PB6
+PWM_2   PA6
+======= =====
 
 D/C Converter
-=====
+=============
+
 The STM32F4-RS485 development board has two Digital to Analog converters with Amplifier Buffer (1COS724SR)
 and connected as below:
-  ======= =====
-  ADC     PINS
-  ======= =====
-  ADC_1   PA0
-  ADC_2   PA4
-  ======= =====
+
+======= =====
+ADC     PINS
+======= =====
+ADC_1   PA0
+ADC_2   PA4
+======= =====
 
 Configurations
 ==============
@@ -181,7 +185,7 @@ can be selected as follow::
 
     tools/configure.sh stm32f401rc-rs485:<subdir>
 
-  Where <subdir> is one of the following:
+Where <subdir> is one of the following:
 
 
 Configuration Directories
