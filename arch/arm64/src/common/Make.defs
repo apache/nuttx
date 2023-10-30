@@ -119,3 +119,7 @@ endif
 ifeq ($(CONFIG_ARM64_SEMIHOSTING_HOSTFS),y)
   CMN_CSRCS += arm64_hostfs.c
 endif
+
+ifeq ($(CONFIG_ARCH_HAVE_DEBUG),y)
+  CMN_CSRCS += arm64_hwdebug.c
+endif
