@@ -58,6 +58,7 @@ set(SRCS
     lib_strerrorr.c
     lib_explicit_bzero.c
     lib_strsignal.c
+    lib_timingsafe_bcmp.c
     lib_index.c
     lib_rindex.c)
 
