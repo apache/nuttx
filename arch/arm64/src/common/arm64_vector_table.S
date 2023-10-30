@@ -216,25 +216,25 @@ SECTION_SUBSEC_FUNC(exc_vector_table,_vector_table_section,_vector_table)
 
     .align 7
     arm64_enter_exception x0, x1
-    b    arm64_mode32_error
+    b    arm64_mode32_handler
 
     /* Lower EL using AArch32 / IRQ */
 
     .align 7
     arm64_enter_exception x0, x1
-    b    arm64_mode32_error
+    b    arm64_mode32_handler
 
     /* Lower EL using AArch32 / FIQ */
 
     .align 7
     arm64_enter_exception x0, x1
-    b    arm64_mode32_error
+    b    arm64_mode32_handler
 
     /* Lower EL using AArch32 / SError */
 
     .align 7
     arm64_enter_exception x0, x1
-    b    arm64_mode32_error
+    b    arm64_mode32_handler
 
 /* Restore Corruptible Registers and exception context
  * from the task stack.
