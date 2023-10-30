@@ -71,6 +71,7 @@
 #include <crypto/xform.h>
 #include <crypto/gmac.h>
 #include <crypto/chachapoly.h>
+#include <crypto/poly1305.h>
 
 #include "des_locl.h"
 
@@ -117,6 +118,10 @@ void aes_xts_reinit(caddr_t, FAR uint8_t *);
 void aes_gcm_reinit(caddr_t, FAR uint8_t *);
 void aes_ofb_reinit(caddr_t, FAR uint8_t *);
 
+void null_init(FAR void *);
+void poly1305_setkey(FAR void *, FAR const uint8_t *, uint16_t);
+int poly1305update_int(FAR void *, FAR const uint8_t *, size_t);
+int poly1305_final(FAR uint8_t *, FAR void *);
 int md5update_int(FAR void *, FAR const uint8_t *, size_t);
 int sha1update_int(FAR void *, FAR const uint8_t *, size_t);
 int rmd160update_int(FAR void *, FAR const uint8_t *, size_t);
@@ -389,6 +394,15 @@ const struct auth_hash auth_hash_md5 =
   (void (*) (FAR uint8_t *, FAR void *)) md5final
 };
 
+const struct auth_hash auth_hash_poly1305 =
+{
+  CRYPTO_POLY1305, "POLY1305",
+  0, 16, 16, sizeof(poly1305_state), poly1305_block_size,
+  (void (*) (FAR void *)) null_init, poly1305_setkey, NULL,
+  poly1305update_int,
+  (void (*) (FAR uint8_t *, FAR void *)) poly1305_final
+};
+
 const struct auth_hash auth_hash_ripemd_160 =
 {
   CRYPTO_RIPEMD160, "RIPEMD160",
@@ -566,7 +580,9 @@ void aes_ctr_crypt(caddr_t key, FAR uint8_t *data)
   for (i = AESCTR_BLOCKSIZE - 1;
         i >= AESCTR_NONCESIZE + AESCTR_IVSIZE; i--)
     {
-      if (++ctx->ac_block[i])   /* continue on overflow */
+      /* continue on overflow */
+
+      if (++ctx->ac_block[i])
         {
           break;
         }
@@ -797,6 +813,30 @@ void aes_cfb128_decrypt(caddr_t key, FAR uint8_t *data)
 }
 
 /* And now for auth. */
+
+void null_init(FAR void *ctx)
+{
+}
+
+void poly1305_setkey(FAR void *sched, FAR const uint8_t *key, uint16_t len)
+{
+  FAR struct poly1305_state *ctx;
+
+  ctx = (FAR struct poly1305_state *)sched;
+  poly1305_begin(ctx, key);
+}
+
+int poly1305update_int(FAR void *ctx, FAR const uint8_t *buf, size_t len)
+{
+  poly1305_update(ctx, buf, len);
+  return 0;
+}
+
+int poly1305_final(FAR uint8_t *digest, FAR void *ctx)
+{
+  poly1305_finish(ctx, digest);
+  return 0;
+}
 
 int rmd160update_int(FAR void *ctx, FAR const uint8_t *buf, size_t len)
 {
