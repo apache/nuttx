@@ -488,3 +488,16 @@ Configuration                  Description
 ``CONFIG_NSH_FATSECTSIZE``     This is the sector size use with the FAT FS. Default is 512.
 ============================== =======================================================
 
+
+Common Problems
+===============
+
+Problem::
+
+  The function 'readline' is undefined.
+
+Usual Cause:
+
+* The following is missing from your `defconfig` file::
+
+    CONFIG_SYSTEM_READLINE=y

@@ -1,6 +1,6 @@
-******************************
+==============================
 Customizing NSH Initialization
-******************************
+==============================
 
 **Ways to Customize NSH Initialization**. There are three ways to
 customize the NSH start-up behavior. Here they are presented in order of
@@ -28,7 +28,7 @@ increasing difficulty:
      deserves its own paragraph
 
 NuttShell Start up Scripts
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------
 
 First of all you should look at `NSH Start-Up Script <#startupscript>`__
 paragraph. Most everything you need to know can be found there. That
