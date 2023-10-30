@@ -1,6 +1,6 @@
-***************************
+===========================
 NSH "Built-In" Applications
-***************************
+===========================
 
 **Overview.** In addition to these commands that are a part of NSH,
 external programs can also be executed as NSH commands. These external
@@ -27,7 +27,7 @@ Note that no detailed help information beyond the name of the built-in
 application is provided.
 
 Built-In Applications
-~~~~~~~~~~~~~~~~~~~~~
+=====================
 
 **Overview.** The underlying logic that supports the NSH built-in
 applications is called "Built-In Applications". The builtin application
@@ -185,7 +185,7 @@ be mentioned.
      functionality.
 
 Synchronous Built-In Applications
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=================================
 
 By default, built-in commands started from the NSH command line will run
 asynchronously with NSH. If you want to force NSH to execute commands

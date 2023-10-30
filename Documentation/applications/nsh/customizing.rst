@@ -1,6 +1,6 @@
-*************************
+========================*
 Customizing the NuttShell
-*************************
+========================*
 
 **Overview.** The NuttShell (NSH) is a simple shell application that may
 be used with NuttX. It supports a variety of commands and is (very)
@@ -10,7 +10,7 @@ customizing NSH: Adding new commands, changing the initialization
 sequence, etc.
 
 The NSH Library and NSH Initialization
-**************************************
+======================================
 
 **Overview.** NSH is implemented as a library that can be found at
 ``apps/nshlib``. As a library, it can be custom built into any
@@ -23,7 +23,7 @@ as their application ``main()`` function. That initialization performed
 by that example is discussed in the following paragraphs.
 
 NSH Initialization sequence
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------
 
 The NSH start-up sequence is very simple. As an example, the code at
 ``apps/system/nsh/nsh_main.c`` illustrates how to start NSH. It simple
@@ -43,7 +43,7 @@ does the following:
      finished the entire NSH initialization sequence.
 
 ``nsh_initialize()``
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 
 The NSH initialization function, ``nsh_initialize()``, be found in
 ``apps/nshlib/nsh_init.c``. It does only four things:
@@ -118,7 +118,7 @@ The NSH initialization function, ``nsh_initialize()``, be found in
      found in ``apps/nshlib/nsh_romfsimg.h``.
 
 NSH Commands
-************
+============
 
 **Overview.** NSH supports a variety of commands as part of the NSH
 program. All of the NSH commands are listed in the NSH documentation
@@ -133,7 +133,7 @@ commands will be missing from the list of commands presented by
 table `above <#cmddependencies>`__.
 
 Adding New NSH Commands
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 
 New commands can be added to the NSH very easily. You simply need to add
 two things:
