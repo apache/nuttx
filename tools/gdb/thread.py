@@ -24,6 +24,7 @@ import gdb
 import utils
 
 UINT16_MAX = 0xFFFF
+SEM_TYPE_MUTEX = 4
 
 saved_regs = None
 
@@ -143,36 +144,46 @@ class Nxinfothreads(gdb.Command):
 
         if utils.is_target_smp():
             gdb.write(
-                "%-4s %-4s %-21s %-80s %-30s\n"
-                % ("Id", "Cpu", "Thread", "Info", "Frame")
+                "%-4s %-4s %-4s %-21s %-80s %-30s\n"
+                % ("Tid", "Pid", "Cpu", "Thread", "Info", "Frame")
             )
         else:
-            gdb.write("%-4s %-21s %-80s %-30s\n" % ("Id", "Thread", "Info", "Frame"))
+            gdb.write("%-4s %-4s %-21s %-80s %-30s\n" % ("Tid", "Pid", "Thread", "Info", "Frame"))
 
         for i in range(0, npidhash):
             if pidhash[i] == 0:
                 continue
 
+            pid = pidhash[i]["group"]["tg_pid"]
+
             if pidhash[i]["task_state"] == gdb.parse_and_eval("TSTATE_TASK_RUNNING"):
                 id = "*%s" % i
                 pc = int(gdb.parse_and_eval("$pc"))
             else:
-                id = "%s" % i
+                id = " %s" % i
                 pc = get_pc_value(pidhash[i])
 
             thread = "Thread 0x%x" % pidhash[i]
+
+            statename = statenames[pidhash[i]["task_state"]].string()
+
+            if pidhash[i]["task_state"] == gdb.parse_and_eval("TSTATE_WAIT_SEM"):
+                mutex = pidhash[i]["waitobj"].cast(gdb.lookup_type("sem_t").pointer())
+                if mutex["flags"] & SEM_TYPE_MUTEX:
+                    mutex = pidhash[i]["waitobj"].cast(gdb.lookup_type("mutex_t").pointer())
+                    statename = "Waiting,Mutex:%d" % (mutex["holder"])
 
             try:
                 """Maybe tcb not have name member, or name is not utf-8"""
                 info = "(Name: %s, State: %s, Priority: %d, Stack: %d)" % (
                     pidhash[i]["name"].string(),
-                    statenames[pidhash[i]["task_state"]].string(),
+                    statename,
                     pidhash[i]["sched_priority"],
                     pidhash[i]["adj_stack_size"],
                 )
             except gdb.error and UnicodeDecodeError:
                 info = "(Name: Not utf-8, State: %s, Priority: %d, Stack: %d)" % (
-                    statenames[pidhash[i]["task_state"]].string(),
+                    statename,
                     pidhash[i]["sched_priority"],
                     pidhash[i]["adj_stack_size"],
                 )
@@ -192,10 +203,10 @@ class Nxinfothreads(gdb.Command):
             if utils.is_target_smp():
                 cpu = "%d" % pidhash[i]["cpu"]
                 gdb.write(
-                    "%-4s %-4s %-21s %-80s %-30s\n" % (id, cpu, thread, info, frame)
+                    "%-4s %-4s %-4s %-21s %-80s %-30s\n" % (id, pid, cpu, thread, info, frame)
                 )
             else:
-                gdb.write("%-4s %-21s %-80s %-30s\n" % (id, thread, info, frame))
+                gdb.write("%-4s %-4s %-21s %-80s %-30s\n" % (id, pid, thread, info, frame))
 
 
 class Nxthread(gdb.Command):
