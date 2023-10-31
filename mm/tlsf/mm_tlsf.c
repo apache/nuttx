@@ -78,6 +78,14 @@ struct mm_heap_s
 
   size_t mm_heapsize;
 
+  /* This is the heap maximum used memory size */
+
+  size_t mm_maxused;
+
+  /* This is the current used size of the heap */
+
+  size_t mm_curused;
+
   /* This is the first and last of the heap */
 
   FAR void *mm_heapstart[CONFIG_MM_REGIONS];
@@ -698,6 +706,10 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
 
       kasan_poison(mem, mm_malloc_size(heap, mem));
 
+      /* Update heap statistics */
+
+      heap->mm_curused -= mm_malloc_size(heap, mem);
+
       /* Pass, return to the tlsf pool */
 
       tlsf_free(heap->mm_tlsf, mem);
@@ -891,6 +903,7 @@ struct mallinfo mm_mallinfo(FAR struct mm_heap_s *heap)
 
   info.arena    = heap->mm_heapsize;
   info.uordblks = info.arena - info.fordblks;
+  info.usmblks  = heap->mm_maxused;
 
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
   poolinfo = mempool_multiple_mallinfo(heap->mm_mpool);
@@ -1061,6 +1074,12 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
   ret = tlsf_malloc(heap->mm_tlsf, size);
 #endif
 
+  heap->mm_curused += mm_malloc_size(heap, ret);
+  if (heap->mm_curused > heap->mm_maxused)
+    {
+      heap->mm_maxused = heap->mm_curused;
+    }
+
   mm_unlock(heap);
 
   if (ret)
@@ -1119,6 +1138,13 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 #else
   ret = tlsf_memalign(heap->mm_tlsf, alignment, size);
 #endif
+
+  heap->mm_curused += mm_malloc_size(heap, ret);
+  if (heap->mm_curused > heap->mm_maxused)
+    {
+      heap->mm_maxused = heap->mm_curused;
+    }
+
   mm_unlock(heap);
 
   if (ret)
@@ -1217,12 +1243,20 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
   /* Allocate from the tlsf pool */
 
   DEBUGVERIFY(mm_lock(heap));
+  heap->mm_curused -= mm_malloc_size(heap, oldmem);
 #if CONFIG_MM_BACKTRACE >= 0
   newmem = tlsf_realloc(heap->mm_tlsf, oldmem, size +
                         sizeof(struct memdump_backtrace_s));
 #else
   newmem = tlsf_realloc(heap->mm_tlsf, oldmem, size);
 #endif
+
+  heap->mm_curused += mm_malloc_size(heap, newmem ? newmem : oldmem);
+  if (heap->mm_curused > heap->mm_maxused)
+    {
+      heap->mm_maxused = heap->mm_curused;
+    }
+
   mm_unlock(heap);
 
 #if CONFIG_MM_BACKTRACE >= 0

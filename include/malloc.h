@@ -68,6 +68,7 @@ struct mallinfo
                  * chunks handed out by malloc. */
   int fordblks; /* This is the total size of memory occupied
                  * by free (not in use) chunks. */
+  int usmblks;  /* This is the largest amount of space ever allocated */
 };
 
 struct malltask
