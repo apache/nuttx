@@ -756,6 +756,16 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc, bool stop_ns)
   FAR struct metal_list *tmp;
   FAR struct rptun_cb_s *cb;
 
+  if (priv->rproc.state == RPROC_OFFLINE)
+    {
+      return OK;
+    }
+  else if (priv->rproc.state == RPROC_CONFIGURED ||
+           priv->rproc.state == RPROC_READY)
+    {
+      return -EBUSY;
+    }
+
   rdev->support_ns = stop_ns;
 
 #ifdef CONFIG_RPTUN_PING
@@ -805,7 +815,7 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc, bool stop_ns)
 
   remoteproc_shutdown(rproc);
 
-  return 0;
+  return OK;
 }
 
 static int rptun_do_ioctl(FAR struct rptun_priv_s *priv, int cmd,
@@ -818,19 +828,19 @@ static int rptun_do_ioctl(FAR struct rptun_priv_s *priv, int cmd,
       case RPTUNIOC_START:
         if (priv->rproc.state == RPROC_OFFLINE)
           {
-            rptun_dev_start(&priv->rproc);
+            ret = rptun_dev_start(&priv->rproc);
           }
         else
           {
-            rptun_dev_stop(&priv->rproc, false);
-            rptun_dev_start(&priv->rproc);
+            ret = rptun_dev_stop(&priv->rproc, false);
+            if (ret == OK)
+              {
+                ret = rptun_dev_start(&priv->rproc);
+              }
           }
         break;
       case RPTUNIOC_STOP:
-        if (priv->rproc.state != RPROC_OFFLINE)
-          {
-            rptun_dev_stop(&priv->rproc, true);
-          }
+        ret = rptun_dev_stop(&priv->rproc, true);
         break;
       case RPTUNIOC_RESET:
         RPTUN_RESET(priv->dev, arg);
