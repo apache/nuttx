@@ -30,7 +30,9 @@
 #include <sys/param.h>
 #include <sys/types.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/sched.h>
+#include <nuttx/ascii.h>
 #include <nuttx/gdbstub.h>
 
 /****************************************************************************
@@ -57,6 +59,8 @@ struct gdb_state_s
   gdb_monitor_func_t monitor;             /* Monitor will be called when gdb
                                            * receive a monitor command
                                            */
+  int last_stopreason;                    /* Last stop reason */
+  FAR void *last_stopaddr;                /* Last stop address */
   pid_t pid;                              /* Gdb current thread */
   FAR char *pkt_next;                     /* Pointer to next byte in packet */
   char pkt_buf[1024];                     /* Packet buffer */
@@ -107,8 +111,6 @@ static ssize_t gdb_bin2bin(FAR void *buf, size_t buf_len,
 /* Packet creation helpers */
 
 static int gdb_send_ok_packet(FAR struct gdb_state_s *state);
-static int gdb_send_signal_packet(FAR struct gdb_state_s *state,
-                                  unsigned char signal);
 static int gdb_send_error_packet(FAR struct gdb_state_s *state,
                                  unsigned char error);
 
@@ -400,6 +402,12 @@ static int gdb_recv_packet(FAR struct gdb_state_s *state)
 
               break;
             }
+          else if (ret == ASCII_ETX)
+            {
+              state->pkt_buf[0] = ASCII_ETX;
+              state->pkt_len = 1;
+              return 0;
+            }
         }
 
       /* Read until checksum */
@@ -432,6 +440,12 @@ static int gdb_recv_packet(FAR struct gdb_state_s *state)
     }
   while (state->pkt_len == 0); /* Ignore empty packets */
 
+  ret = state->recv(state->priv, buf, 2); /* Receive the checksum */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
 #ifdef CONFIG_LIB_GDBSTUB_DEBUG
     {
       size_t p;
@@ -451,12 +465,6 @@ static int gdb_recv_packet(FAR struct gdb_state_s *state)
       GDB_DEBUG("\n");
     }
 #endif
-
-  ret = state->recv(state->priv, buf, 2); /* Receive the checksum */
-  if (ret < 0)
-    {
-      return ret;
-    }
 
   ret = gdb_hex2bin(&csum, 1, buf, 2);
   if (ret < 0)
@@ -770,39 +778,6 @@ static int gdb_send_ok_packet(FAR struct gdb_state_s *state)
   state->pkt_buf[1] = 'K';
   state->pkt_len = 2;
 
-  return gdb_send_packet(state);
-}
-
-/****************************************************************************
- * Name: gdb_send_signal_packet
- *
- * Description:
- *   Send a signal packet (S AA).
- *
- * Input Parameters:
- *   state   - The pointer to the GDB state structure.
- *   signal  - The signal to send.
- *
- * Returned Value:
- *   Zero on success.
- *   Negative value on error.
- *
- ****************************************************************************/
-
-static int gdb_send_signal_packet(FAR struct gdb_state_s *state,
-                                  unsigned char signal)
-{
-  int ret;
-
-  state->pkt_buf[0] = 'S';
-  ret = gdb_bin2hex(&state->pkt_buf[1], sizeof(state->pkt_buf) - 1,
-                    &signal, 1);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  state->pkt_len = 1 + ret;
   return gdb_send_packet(state);
 }
 
@@ -1176,6 +1151,7 @@ static int gdb_query(FAR struct gdb_state_s *state)
   static const char thread_extra_info[] = "ThreadExtraInfo";
   static const char fthread_info[] = "fThreadInfo";
   static const char sthread_info[] = "sThreadInfo";
+  static const char supported_info[] = "Supported";
   static const char r_cmd[] = "Rcmd";
 
   if (memcmp(&state->pkt_buf[1], fthread_info,
@@ -1193,6 +1169,20 @@ static int gdb_query(FAR struct gdb_state_s *state)
     {
       state->pkt_buf[0] = 'l';
       state->pkt_len = 1;
+      gdb_send_packet(state);
+    }
+  else if (memcmp(&state->pkt_buf[1], supported_info,
+                  sizeof(supported_info) - 1) == 0)
+    {
+#ifdef CONFIG_ARCH_HAVE_DEBUG
+      state->pkt_len = sprintf(state->pkt_buf,
+                               "hwbreak+;PacketSize=%x",
+                               sizeof(state->pkt_buf));
+#else
+      state->pkt_len = sprintf(state->pkt_buf,
+                               "PacketSize=%x",
+                               sizeof(state->pkt_buf));
+#endif
       gdb_send_packet(state);
     }
   else if (memcmp(&state->pkt_buf[1], thread_extra_info,
@@ -1325,7 +1315,7 @@ static int gdb_is_thread_active(FAR struct gdb_state_s *state)
  *   0  if successful.
  *   Negative value on error.
  *
- * Note : Comand Format: Hc<id>
+ * Note : Comand Format: Hg<id>
  *        Rsponse Format: OK
  ****************************************************************************/
 
@@ -1334,6 +1324,11 @@ static int gdb_thread_context(FAR struct gdb_state_s *state)
   FAR struct tcb_s *tcb;
   uintptr_t pid;
   int ret;
+
+  if (state->pkt_buf[1] != 'g')
+    {
+      return -EINVAL;
+    }
 
   state->pkt_next += 2;
   ret = gdb_expect_integer(state, &pid);
@@ -1370,12 +1365,259 @@ static int gdb_thread_context(FAR struct gdb_state_s *state)
  *   0  if successful.
  *   Negative value on error.
  *
+ * Note : Rsponse Format: T AA n1:r1;n2:r2;...
+ *        The program received signal number AA
+ *        n is thread id in current.
+ *        r is stop reason.
+ *
  ****************************************************************************/
 
-static int gdb_send_stop(FAR struct gdb_state_s *state)
+static int gdb_send_stop(FAR struct gdb_state_s *state, int stopreason,
+                         FAR void *stopaddr)
 {
-  return gdb_send_signal_packet(state, 0x00);
+  int ret;
+
+  state->pid = _SCHED_GETTID();
+retry:
+  switch (stopreason)
+    {
+      case GDBSTUB_STOPREASON_WATCHPOINT_RO:
+        ret = sprintf(state->pkt_buf, "T05thread:%x;rwatch:%" PRIxPTR ";",
+                      state->pid + 1, (uintptr_t)stopaddr);
+        break;
+      case GDBSTUB_STOPREASON_WATCHPOINT_WO:
+        ret = sprintf(state->pkt_buf, "T05thread:%x;awatch:%" PRIxPTR ";",
+                      state->pid + 1, (uintptr_t)stopaddr);
+        break;
+      case GDBSTUB_STOPREASON_WATCHPOINT_RW:
+        ret = sprintf(state->pkt_buf, "T05thread:%x;watch:%" PRIxPTR ";",
+                      state->pid + 1, (uintptr_t)stopaddr);
+        break;
+      case GDBSTUB_STOPREASON_BREAKPOINT:
+        ret = sprintf(state->pkt_buf, "T05thread:%x;hwbreak:;",
+                      state->pid + 1);
+        break;
+      case GDBSTUB_STOPREASON_STEPPOINT:
+        if (state->last_stopreason == GDBSTUB_STOPREASON_WATCHPOINT_RW ||
+            state->last_stopreason == GDBSTUB_STOPREASON_WATCHPOINT_WO)
+          {
+            stopreason = state->last_stopreason;
+            stopaddr = state->last_stopaddr;
+            goto retry;
+          }
+
+      case GDBSTUB_STOPREASON_CTRLC:
+      default:
+        ret = sprintf(state->pkt_buf, "T05thread:%d;", state->pid + 1);
+    }
+
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  state->pkt_len = ret;
+  return gdb_send_packet(state);
 }
+
+#ifdef CONFIG_ARCH_HAVE_DEBUG
+
+/****************************************************************************
+ * Name: gdbstub_debugpoint_callback
+ *
+ * Description:
+ *  The debugpoint callback is used by GDB to request.
+ *
+ ****************************************************************************/
+
+static void gdbstub_debugpoint_callback(int type, FAR void *addr,
+                                        size_t size, FAR void *arg)
+{
+  int stopreason;
+
+  switch (type)
+    {
+      case DEBUGPOINT_BREAKPOINT:
+        stopreason = GDBSTUB_STOPREASON_BREAKPOINT;
+        break;
+      case DEBUGPOINT_WATCHPOINT_RO:
+        stopreason = GDBSTUB_STOPREASON_WATCHPOINT_RO;
+        break;
+      case DEBUGPOINT_WATCHPOINT_WO:
+        stopreason = GDBSTUB_STOPREASON_WATCHPOINT_WO;
+        break;
+      case DEBUGPOINT_WATCHPOINT_RW:
+        stopreason = GDBSTUB_STOPREASON_WATCHPOINT_RW;
+        break;
+      case DEBUGPOINT_STEPPOINT:
+        stopreason = GDBSTUB_STOPREASON_STEPPOINT;
+        up_debugpoint_remove(DEBUGPOINT_STEPPOINT, NULL, 0);
+        break;
+      default:
+        return;
+    }
+
+  gdb_process(arg, stopreason, addr);
+}
+
+/****************************************************************************
+ * Name: gdb_debugpoint
+ *
+ * Description:
+ *   The debugpoint packet is used by GDB to request information from
+ *
+ * Input Parameters:
+ *   state  - The pointer to the GDB state structure.
+ *   enable - Enable or disable debugpoint.
+ *
+ * Returned Value:
+ *   0  if successful.
+ *   Negative value on error.
+ *
+ * Note : Comand Format: Z/z type,addr,length
+ *        Rsponse Format: OK
+ *   Z is set breakpoint.
+ *   z is clear breakpoint.
+ *   type: 0 is software breakpoint.
+ *         1 is hardware breakpoint.
+ *         2 is write watchpoint.
+ *         3 is read watchpoint.
+ *         4 is read/write watchpoint.
+ *   length: is the length of watchpoint.
+ *           if is breakpoint, length is instruction type.
+ *
+ ****************************************************************************/
+
+static int gdb_debugpoint(FAR struct gdb_state_s *state, bool enable)
+{
+  uintptr_t type;
+  uintptr_t addr;
+  uintptr_t size;
+  int ret;
+
+  state->pkt_next += 1;
+  ret = gdb_expect_integer(state, &type);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = gdb_expect_seperator(state, ',');
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = gdb_expect_integer(state, &addr);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = gdb_expect_seperator(state, ',');
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = gdb_expect_integer(state, &size);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  switch (type)
+    {
+      case 0: /* just use hardware break */
+      case 1:
+        type = DEBUGPOINT_BREAKPOINT;
+        break;
+      case 2:
+        type = DEBUGPOINT_WATCHPOINT_WO;
+        break;
+      case 3:
+        type = DEBUGPOINT_WATCHPOINT_RO;
+        break;
+      case 4:
+        type = DEBUGPOINT_WATCHPOINT_RW;
+        break;
+      default:
+        return -EPROTONOSUPPORT;
+    }
+
+  if (enable)
+    {
+      ret = up_debugpoint_add(type, (FAR void *)addr, size,
+                              gdbstub_debugpoint_callback, state);
+    }
+  else
+    {
+      ret = up_debugpoint_remove(type, (FAR void *)addr, size);
+    }
+
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  return gdb_send_ok_packet(state);
+}
+
+/****************************************************************************
+ * Name: gdb_step
+ *
+ * Description:
+ *   The handle step packet is used by GDB to request information from
+ *
+ * Input Parameters:
+ *   state  - The pointer to the GDB state structure.
+ *
+ * Returned Value:
+ *   0  if successful.
+ *   Negative value on error.
+ *
+ * Note : Comand Format: s
+ *        Rsponse Format: OK
+ *
+ ****************************************************************************/
+
+static int gdb_step(FAR struct gdb_state_s *state)
+{
+  int ret = up_debugpoint_add(DEBUGPOINT_STEPPOINT, NULL, 0,
+                              gdbstub_debugpoint_callback, state);
+
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  return gdb_send_ok_packet(state);
+}
+
+/****************************************************************************
+ * Name: gdb_continue
+ *
+ * Description:
+ *   The handle continue packet is used by GDB to request information from
+ *
+ * Input Parameters:
+ *   state  - The pointer to the GDB state structure.
+ *
+ * Returned Value:
+ *   0  if successful.
+ *   Negative value on error.
+ *
+ * Note : Comand Format: c
+ *        Rsponse Format: OK
+ *
+ ****************************************************************************/
+
+static int gdb_continue(FAR struct gdb_state_s *state)
+{
+  return gdb_send_ok_packet(state);
+}
+
+#endif
 
 /****************************************************************************
  * Public Data
@@ -1497,9 +1739,15 @@ int gdb_console_message(FAR struct gdb_state_s *state, FAR const char *msg)
  *
  ****************************************************************************/
 
-int gdb_process(FAR struct gdb_state_s *state)
+int gdb_process(FAR struct gdb_state_s *state, int stopreason,
+                FAR void *stopaddr)
 {
   int ret;
+
+  if (stopreason != GDBSTUB_STOPREASON_NONE)
+    {
+      gdb_send_stop(state, stopreason, stopaddr);
+    }
 
   while ((ret = gdb_recv_packet(state)) >= 0)
     {
@@ -1508,7 +1756,7 @@ int gdb_process(FAR struct gdb_state_s *state)
       switch (state->pkt_buf[0])
         {
           case '?': /* gdbserial status */
-            ret = gdb_send_stop(state);
+            ret = gdb_send_stop(state, stopreason, stopaddr);
             break;
           case 'g': /* Read registers */
             ret = gdb_read_registers(state);
@@ -1540,6 +1788,33 @@ int gdb_process(FAR struct gdb_state_s *state)
           case 'k': /* Kill request */
             ret = -ECONNRESET;
             break;
+          case ASCII_ETX: /* Ctrl C */
+            ret = gdb_send_ok_packet(state);
+            break;
+#ifdef CONFIG_ARCH_HAVE_DEBUG
+          case 'Z': /* Insert breakpoint/watchpoint */
+            ret = gdb_debugpoint(state, true);
+            break;
+          case 'z': /* Remove breakpoint/watchpoint */
+            ret = gdb_debugpoint(state, false);
+            break;
+          case 's': /* Single step */
+            ret = gdb_step(state);
+            if (ret < 0)
+              {
+                break;
+              }
+
+            goto out;
+          case 'c': /* Continue */
+            ret = gdb_continue(state);
+            if (ret < 0)
+              {
+                break;
+              }
+
+            goto out;
+#endif
           default:
             ret = -EPROTONOSUPPORT;
       }
@@ -1559,6 +1834,11 @@ int gdb_process(FAR struct gdb_state_s *state)
         }
     }
 
+#ifdef CONFIG_ARCH_HAVE_DEBUG
+out:
+#endif
+  state->last_stopreason = stopreason;
+  state->last_stopaddr = stopaddr;
   return ret;
 }
 
