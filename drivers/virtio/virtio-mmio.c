@@ -196,6 +196,10 @@ static uint32_t virtio_mmio_get_queue_len(FAR struct metal_io_region *io,
                                           int idx);
 static int virtio_mmio_config_virtqueue(FAR struct metal_io_region *io,
                                         FAR struct virtqueue *vq);
+static FAR void *virtio_mmio_alloc_buf(FAR struct virtio_device *vdev,
+                                       size_t size, size_t align);
+static void virtio_mmio_free_buf(FAR struct virtio_device *vdev,
+                                 FAR void *buf);
 static int virtio_mmio_init_device(FAR struct virtio_mmio_device_s *vmdev,
                                    FAR void *regs, int irq);
 
@@ -250,6 +254,12 @@ static const struct virtio_dispatch g_virtio_mmio_dispatch =
   virtio_mmio_write_config,       /* write_config */
   virtio_mmio_reset_device,       /* reset_device */
   virtio_mmio_notify,             /* notify */
+};
+
+static const struct virtio_memory_ops g_virtio_mmio_mmops =
+{
+  virtio_mmio_alloc_buf, /* Alloc */
+  virtio_mmio_free_buf,  /* Free */
 };
 
 /****************************************************************************
@@ -750,6 +760,26 @@ static int virtio_mmio_interrupt(int irq, FAR void *context, FAR void *arg)
 }
 
 /****************************************************************************
+ * Name: virtio_mmio_alloc_buf
+ ****************************************************************************/
+
+static FAR void *virtio_mmio_alloc_buf(FAR struct virtio_device *vdev,
+                                       size_t size, size_t align)
+{
+  return kmm_memalign(align, size);
+}
+
+/****************************************************************************
+ * Name: virtio_mmio_free_buf
+ ****************************************************************************/
+
+static void virtio_mmio_free_buf(FAR struct virtio_device *vdev,
+                                 FAR void *buf)
+{
+  kmm_free(buf);
+}
+
+/****************************************************************************
  * Name: virtio_mmio_init_device
  ****************************************************************************/
 
@@ -778,6 +808,7 @@ static int virtio_mmio_init_device(FAR struct virtio_mmio_device_s *vmdev,
 
   vdev->role = VIRTIO_DEV_DRIVER;
   vdev->func = &g_virtio_mmio_dispatch;
+  vdev->mmops = &g_virtio_mmio_mmops;
 
   magic = metal_io_read32(&vmdev->cfg_io, VIRTIO_MMIO_MAGIC_VALUE);
   if (magic != VIRTIO_MMIO_MAGIC_VALUE_STRING)

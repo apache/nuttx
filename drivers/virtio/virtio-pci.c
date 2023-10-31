@@ -45,6 +45,11 @@
  * Private Function Prototypes
  ****************************************************************************/
 
+static FAR void *virtio_pci_alloc_buf(FAR struct virtio_device *vdev,
+                                      size_t size, size_t align);
+static void virtio_pci_free_buf(FAR struct virtio_device *vdev,
+                                FAR void *buf);
+
 static int virtio_pci_probe(FAR struct pci_device_s *dev);
 static void virtio_pci_remove(FAR struct pci_device_s *dev);
 
@@ -67,6 +72,12 @@ static struct pci_driver_s g_virtio_pci_drv =
   g_virtio_pci_id_table,
   virtio_pci_probe,
   virtio_pci_remove
+};
+
+static const struct virtio_memory_ops g_virtio_pci_mmops =
+{
+  virtio_pci_alloc_buf, /* Alloc */
+  virtio_pci_free_buf,  /* Free */
 };
 
 /****************************************************************************
@@ -136,6 +147,26 @@ static void virtio_pci_wdog(wdparm_t arg)
 #endif
 
 /****************************************************************************
+ * Name: virtio_pci_alloc_buf
+ ****************************************************************************/
+
+static FAR void *virtio_pci_alloc_buf(FAR struct virtio_device *vdev,
+                                      size_t size, size_t align)
+{
+  return kmm_memalign(align, size);
+}
+
+/****************************************************************************
+ * Name: virtio_pci_free_buf
+ ****************************************************************************/
+
+static void virtio_pci_free_buf(FAR struct virtio_device *vdev,
+                                FAR void *buf)
+{
+  return kmm_free(buf);
+}
+
+/****************************************************************************
  * Name: virtio_pci_probe
  ****************************************************************************/
 
@@ -163,6 +194,7 @@ static int virtio_pci_probe(FAR struct pci_device_s *dev)
   dev->priv = vpdev;
   vpdev->dev = dev;
   vdev = &vpdev->vdev;
+  vdev->mmops = &g_virtio_pci_mmops;
 
   /* Virtio device initialize */
 
