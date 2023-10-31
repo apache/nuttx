@@ -1027,6 +1027,13 @@ static void up_send(struct uart_dev_s *dev, int ch)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
 
+#ifdef HAVE_SERIAL_CONSOLE
+  if (dev == &CONSOLE_DEV && !dev->isconsole)
+    {
+      return;
+    }
+#endif
+
   while ((up_serialin(priv, MPFS_UART_LSR_OFFSET)
           & UART_LSR_THRE) == 0);
 
@@ -1198,6 +1205,12 @@ int up_putc(int ch)
 #ifdef HAVE_SERIAL_CONSOLE
   struct up_dev_s *priv = (struct up_dev_s *)CONSOLE_DEV.priv;
   uint32_t ier;
+
+  if (!CONSOLE_DEV.isconsole)
+    {
+      return ch;
+    }
+
   up_disableuartint(priv, &ier);
 #endif
 
