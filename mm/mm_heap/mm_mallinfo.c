@@ -145,6 +145,7 @@ struct mallinfo mm_mallinfo(FAR struct mm_heap_s *heap)
   info.arena = heap->mm_heapsize;
   info.arena += sizeof(struct mm_heap_s);
   info.uordblks += sizeof(struct mm_heap_s);
+  info.usmblks = heap->mm_maxused + sizeof(struct mm_heap_s);
 
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
   poolinfo = mempool_multiple_mallinfo(heap->mm_mpool);

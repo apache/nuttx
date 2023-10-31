@@ -121,6 +121,10 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
 
   node->size &= ~MM_ALLOC_BIT;
 
+  /* Update heap statistics */
+
+  heap->mm_curused -= nodesize;
+
   /* Check if the following node is free and, if so, merge it */
 
   next = (FAR struct mm_freenode_s *)((FAR char *)node + nodesize);

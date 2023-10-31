@@ -225,7 +225,6 @@ size_t host_mallocsize(void *mem);
 void *host_memalign(size_t alignment, size_t size);
 void host_free(void *mem);
 void *host_realloc(void *oldmem, size_t size);
-void host_mallinfo(int *aordblks, int *uordblks);
 int host_unlinkshmem(const char *name);
 
 /* sim_hosttime.c ***********************************************************/

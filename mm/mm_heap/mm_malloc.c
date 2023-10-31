@@ -251,6 +251,14 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
           next->size &= ~MM_PREVFREE_BIT;
         }
 
+      /* Update heap statistics */
+
+      heap->mm_curused += MM_SIZEOF_NODE(node);
+      if (heap->mm_curused > heap->mm_maxused)
+        {
+          heap->mm_maxused = heap->mm_curused;
+        }
+
       /* Handle the case of an exact size match */
 
       node->size |= MM_ALLOC_BIT;
