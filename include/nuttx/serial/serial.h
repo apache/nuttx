@@ -522,6 +522,19 @@ void uart_reset_sem(FAR uart_dev_t *dev);
 int uart_check_special(FAR uart_dev_t *dev, const char *buf, size_t size);
 #endif
 
+/****************************************************************************
+ * Name: uart_gdbstub_register
+ *
+ * Description:
+ *   Use the uart device to register gdbstub.
+ *   gdbstub run with serial interrupt.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SERIAL_GDBSTUB
+int uart_gdbstub_register(FAR uart_dev_t *dev);
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

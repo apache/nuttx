@@ -22,6 +22,10 @@
 
 set(SRCS serial.c serial_io.c)
 
+if(CONFIG_SERIAL_GDBSTUB)
+  list(APPEND SRCS serial_gdbstub.c)
+endif()
+
 if(CONFIG_UART_PL011)
   list(APPEND SRCS serial_pl011.c)
 endif()
