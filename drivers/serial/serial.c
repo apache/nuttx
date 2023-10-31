@@ -1836,6 +1836,13 @@ int uart_register(FAR const char *path, FAR uart_dev_t *dev)
 
   /* Register the serial driver */
 
+#ifdef CONFIG_SERIAL_GDBSTUB
+  if (strcmp(path, CONFIG_SERIAL_GDBSTUB_PATH) == 0)
+    {
+      return uart_gdbstub_register(dev);
+    }
+#endif
+
   sinfo("Registering %s\n", path);
   return register_driver(path, &g_serialops, 0666, dev);
 }

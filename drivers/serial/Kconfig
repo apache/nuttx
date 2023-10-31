@@ -41,6 +41,18 @@ config SERIAL_CONSOLE
 	bool
 	default n
 
+config SERIAL_GDBSTUB
+	bool "GDBSTUB Serial support"
+	depends on ARCH_HAVE_DEBUG
+	default n
+
+config SERIAL_GDBSTUB_PATH
+	string "GDBSTUB Serial path"
+	depends on SERIAL_GDBSTUB
+	default "/dev/ttyS1"
+	---help---
+		The path to the serial device that will be used for GDB stub.
+
 menuconfig UART_PL011
 	bool "PL011 Chip support"
 	default n

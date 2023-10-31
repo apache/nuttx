@@ -28,6 +28,18 @@
 #include <stdlib.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define GDBSTUB_STOPREASON_NONE          0x00
+#define GDBSTUB_STOPREASON_WATCHPOINT_RO 0x01
+#define GDBSTUB_STOPREASON_WATCHPOINT_WO 0x02
+#define GDBSTUB_STOPREASON_WATCHPOINT_RW 0x03
+#define GDBSTUB_STOPREASON_BREAKPOINT    0x04
+#define GDBSTUB_STOPREASON_STEPPOINT     0x05
+#define GDBSTUB_STOPREASON_CTRLC         0x06
+
+/****************************************************************************
  * Type Definitions
  ****************************************************************************/
 
@@ -108,6 +120,7 @@ int gdb_console_message(FAR struct gdb_state_s *state, FAR const char *msg);
  *
  ****************************************************************************/
 
-int gdb_process(FAR struct gdb_state_s *state);
+int gdb_process(FAR struct gdb_state_s *state, int stopreason,
+                FAR void *stopaddr);
 
 #endif /* __INCLUDE_NUTTX_GDBSTUB_H */
