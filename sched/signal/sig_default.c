@@ -37,6 +37,7 @@
 #include <nuttx/sched.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/signal.h>
+#include <nuttx/tls.h>
 
 #include "group/group.h"
 #include "sched/sched.h"
@@ -230,12 +231,17 @@ static void nxsig_abnormal_termination(int signo)
 
   if ((rtcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
     {
+      FAR struct tls_info_s *info = tls_get_info();
+
       /* Exit the final thread of the task group.
        *
        * REVISIT:  This will not work if HAVE_GROUP_MEMBERS is not set.
        */
 
-      pthread_exit(NULL);
+      if ((info->flags & TLS_THREAD_EXIT_PROCESSING) == 0)
+        {
+          pthread_exit(NULL);
+        }
     }
   else
 #endif

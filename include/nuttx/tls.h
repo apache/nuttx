@@ -66,6 +66,8 @@
 #  define TLS_INFO(sp)     ((FAR struct tls_info_s *)((sp) & ~TLS_STACK_MASK))
 #endif
 
+#define TLS_THREAD_EXIT_PROCESSING (1 << 0)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -218,6 +220,7 @@ struct tls_info_s
 
   uint16_t tl_size;                    /* Actual size with alignments */
   int tl_errno;                        /* Per-thread error number */
+  int flags;                           /* Per-thread flags */
 };
 
 /****************************************************************************
