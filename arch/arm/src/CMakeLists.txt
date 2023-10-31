@@ -18,9 +18,9 @@
 #
 # ##############################################################################
 
-add_subdirectory(common)
 add_subdirectory(${ARCH_SUBDIR})
 add_subdirectory(${NUTTX_CHIP_ABS_DIR} EXCLUDE_FROM_ALL exclude_chip)
+add_subdirectory(common)
 
 # Include directories (before system ones) as PUBLIC so that it can be exposed
 # to libboard
