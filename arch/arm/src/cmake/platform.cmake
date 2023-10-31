@@ -100,7 +100,7 @@ if(CONFIG_ARCH_COVERAGE)
   list(APPEND EXTRA_LIB ${extra_library})
 endif()
 
-set_property(GLOBAL APPEND PROPERTY NUTTX_EXTRA_LIBRARIES ${EXTRA_LIB})
+nuttx_add_extra_library(${EXTRA_LIB})
 
 separate_arguments(CMAKE_C_FLAG_ARGS NATIVE_COMMAND ${CMAKE_C_FLAGS})
 set(PREPROCES ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} -E -P -x c)
