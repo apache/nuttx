@@ -650,6 +650,8 @@ static int noteram_dump_header(FAR struct lib_outstream_s *s,
   uint32_t sec = note->nc_systime_sec;
   int ret;
 
+  nsec = note->nc_systime_nsec;
+  sec = note->nc_systime_sec;
   pid = note->nc_pid;
 #ifdef CONFIG_SMP
   int cpu = note->nc_cpu;

@@ -1065,6 +1065,7 @@ void sched_note_premption(FAR struct tcb_s *tcb, bool locked)
       if (!formatted)
         {
           formatted = true;
+          note.npr_count = tcb->lockcount;
           note_common(tcb, &note.npr_cmn, sizeof(struct note_preempt_s),
                       locked ? NOTE_PREEMPT_LOCK : NOTE_PREEMPT_UNLOCK);
           note.npr_count = tcb->lockcount;
@@ -1398,11 +1399,9 @@ void sched_note_string_ip(uint32_t tag, uintptr_t ip, FAR const char *buf)
               length = sizeof(data);
             }
 
+          note->nst_ip = ip;
           note_common(tcb, &note->nst_cmn, length, NOTE_DUMP_STRING);
-          if (buf != NULL)
-            {
-              memcpy(note->nst_data, buf, length - sizeof(struct note_string_s));
-            }
+          memcpy(note->nst_data, buf, length - sizeof(struct note_string_s));
           data[length - 1] = '\0';
           note->nst_ip = ip;
         }
@@ -1452,6 +1451,7 @@ void sched_note_event_ip(uint32_t tag, uintptr_t ip, uint8_t event,
               length = sizeof(data);
             }
 
+          note->nbi_ip = ip;
           note_common(tcb, &note->nbi_cmn, length, event);
           memcpy(note->nbi_data, buf,
                  length - sizeof(struct note_binary_s) + 1);
@@ -1507,8 +1507,8 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip,
               length = sizeof(data);
             }
 
-          note_common(tcb, &note->nst_cmn, length, NOTE_DUMP_STRING);
           note->nst_ip = ip;
+          note_common(tcb, &note->nst_cmn, length, NOTE_DUMP_STRING);
         }
 
       /* Add the note to circular buffer */
@@ -1724,8 +1724,8 @@ void sched_note_vbprintf_ip(uint32_t tag, uintptr_t ip,
             }
 
           length = SIZEOF_NOTE_BINARY(next);
-          note_common(tcb, &note->nbi_cmn, length, NOTE_DUMP_BINARY);
           note->nbi_ip = ip;
+          note_common(tcb, &note->nbi_cmn, length, NOTE_DUMP_BINARY);
         }
 
       /* Add the note to circular buffer */
