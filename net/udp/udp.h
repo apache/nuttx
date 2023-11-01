@@ -310,6 +310,28 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr);
 int udp_connect(FAR struct udp_conn_s *conn,
                 FAR const struct sockaddr *addr);
 
+#if defined(CONFIG_NET_IGMP)
+/****************************************************************************
+ * Name: udp_leavegroup
+ *
+ * Description:
+ *   This function leaves the multicast group to which the conn belongs.
+ *
+ * Input Parameters:
+ *   conn - A reference to UDP connection structure.  A value of NULL will
+ *          disconnect from any previously connected address.
+ *
+ * Assumptions:
+ *   This function is called (indirectly) from user code.  Interrupts may
+ *   be enabled.
+ *
+ ****************************************************************************/
+
+void udp_leavegroup(FAR struct udp_conn_s *conn);
+#else
+#define udp_leavegroup(c)
+#endif
+
 /****************************************************************************
  * Name: udp_close
  *

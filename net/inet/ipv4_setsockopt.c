@@ -126,6 +126,7 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
         }
         break;
 
+#ifdef NET_UDP_HAVE_STACK
       case IP_ADD_MEMBERSHIP:         /* Join a multicast group */
       case IP_DROP_MEMBERSHIP:        /* Leave a multicast group */
         {
@@ -142,6 +143,8 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
             }
           else
             {
+              FAR struct udp_conn_s *conn = psock->s_conn;
+
               /* Use the default network device is imr_interface is
                * INADDRY_ANY.
                */
@@ -166,17 +169,33 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
                 }
               else if (option == IP_ADD_MEMBERSHIP)
                 {
-                  ret = igmp_joingroup(dev, &mrec->imr_multiaddr);
+                  if (conn->mreq.imr_multiaddr.s_addr != 0)
+                    {
+                      ret = -EADDRINUSE;
+                    }
+                  else
+                    {
+                      ret = igmp_joingroup(dev, &mrec->imr_multiaddr);
+                      if (ret == OK)
+                        {
+                          conn->mreq.imr_multiaddr = mrec->imr_multiaddr;
+                          conn->mreq.imr_ifindex   = dev->d_ifindex;
+                        }
+                    }
                 }
               else
                 {
                   ret = igmp_leavegroup(dev, &mrec->imr_multiaddr);
+                  if (ret == OK)
+                    {
+                      conn->mreq.imr_multiaddr.s_addr = 0;
+                      conn->mreq.imr_ifindex          = 0;
+                    }
                 }
             }
         }
         break;
 
-#ifdef NET_UDP_HAVE_STACK
       case IP_MULTICAST_TTL:          /* Set/read the time-to-live value of
                                        * outgoing multicast packets */
 #endif

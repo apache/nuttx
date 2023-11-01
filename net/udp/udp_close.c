@@ -103,6 +103,8 @@ int udp_close(FAR struct socket *psock)
       nerr("ERROR: udp_txdrain() failed: %d\n", ret);
     }
 
+  udp_leavegroup(conn);
+
 #ifdef CONFIG_NET_UDP_WRITE_BUFFERS
   /* Free any semi-permanent write buffer callback in place. */
 
