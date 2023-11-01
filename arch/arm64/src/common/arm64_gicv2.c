@@ -44,7 +44,7 @@
 #include "arm64_internal.h"
 #include "arm64_gic.h"
 
-#if CONFIG_ARM_GIC_VERSION == 2
+#if CONFIG_ARM64_GIC_VERSION == 2
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -1463,4 +1463,4 @@ int arm64_gic_raise_sgi(unsigned int sgi, uint16_t cpuset)
 }
 #endif /* CONFIG_SMP */
 
-#endif /* CONFIG_ARM_GIC_VERSION == 2 */
+#endif /* CONFIG_ARM64_GIC_VERSION == 2 */

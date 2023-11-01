@@ -59,11 +59,11 @@ CMN_CSRCS += arm64_modifyreg8.c arm64_modifyreg16.c arm64_modifyreg32.c
 # Use common heap allocation for now (may need to be customized later)
 CMN_CSRCS += arm64_allocateheap.c
 
-ifeq ($(CONFIG_ARM_GIC_VERSION),3)
+ifeq ($(CONFIG_ARM64_GIC_VERSION),3)
 CMN_CSRCS += arm64_gicv3.c
 endif
 
-ifeq ($(CONFIG_ARM_GIC_VERSION),2)
+ifeq ($(CONFIG_ARM64_GIC_VERSION),2)
 CMN_CSRCS += arm64_gicv2.c
 endif
 
