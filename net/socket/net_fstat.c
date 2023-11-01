@@ -150,14 +150,9 @@ int psock_fstat(FAR struct socket *psock, FAR struct stat *buf)
              {
                /* We need the length of the IP header */
 
-#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-               iplen = (udp_conn->domain == PF_INET) ? IPv4_HDRLEN :
-                                                       IPv6_HDRLEN;
-#elif defined(CONFIG_NET_IPv4)
-               iplen = IPv4_HDRLEN;
-#else
-               iplen = IPv6_HDRLEN;
-#endif
+               iplen = net_ip_domain_select(udp_conn->domain,
+                                            IPv4_HDRLEN, IPv6_HDRLEN);
+
                /* Now we can calculate the MSS */
 
                buf->st_blksize = UDP_MSS(dev, iplen);
