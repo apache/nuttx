@@ -492,6 +492,7 @@ static int bt_bridge_ioctl(FAR struct bt_driver_s *drv, int cmd,
   FAR struct bt_bridge_device_s *device =
     (FAR struct bt_bridge_device_s *)drv;
   FAR struct bt_bridge_s *bridge = device->bridge;
+  FAR struct bt_driver_s *driver = bridge->driver;
   int ret;
 
   switch (cmd)
@@ -534,9 +535,9 @@ static int bt_bridge_ioctl(FAR struct bt_driver_s *drv, int cmd,
 
     default:
       {
-        if (bridge->driver->ioctl)
+        if (driver->ioctl)
           {
-            ret = bridge->driver->ioctl(drv, cmd, arg);
+            ret = driver->ioctl(driver, cmd, arg);
           }
         else
           {
