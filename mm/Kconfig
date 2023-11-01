@@ -198,7 +198,6 @@ config MM_KMAP
 	bool "Support for dynamic kernel virtual mappings"
 	default n
 	depends on MM_PGALLOC && BUILD_KERNEL
-	select ARCH_VMA_MAPPING
 	---help---
 		Build support for dynamically mapping pages from the page pool into
 		kernel virtual memory. This includes pages that are already mapped
