@@ -73,9 +73,6 @@ static int rpmsgblk_geometry_handler(FAR struct rpmsg_endpoint *ept,
 static int rpmsgblk_ioctl_handler(FAR struct rpmsg_endpoint *ept,
                                   FAR void *data, size_t len,
                                   uint32_t src, FAR void *priv);
-static int rpmsgblk_unlink_handler(FAR struct rpmsg_endpoint *ept,
-                                   FAR void *data, size_t len,
-                                   uint32_t src, FAR void *priv);
 
 /* Functions for creating communication with client cpu */
 
@@ -102,7 +99,6 @@ static const rpmsg_ept_cb g_rpmsgblk_handler[] =
   [RPMSGBLK_WRITE]    = rpmsgblk_write_handler,
   [RPMSGBLK_GEOMETRY] = rpmsgblk_geometry_handler,
   [RPMSGBLK_IOCTL]    = rpmsgblk_ioctl_handler,
-  [RPMSGBLK_UNLINK]   = rpmsgblk_unlink_handler,
 };
 
 /****************************************************************************
@@ -321,26 +317,6 @@ static int rpmsgblk_ioctl_handler(FAR struct rpmsg_endpoint *ept,
                                            msg->arglen > 0 ?
                                            (unsigned long)msg->buf :
                                            msg->arg);
-
-  return rpmsg_send(ept, msg, len);
-}
-
-/****************************************************************************
- * Name: rpmsgblk_unlink_handler
- ****************************************************************************/
-
-static int rpmsgblk_unlink_handler(FAR struct rpmsg_endpoint *ept,
-                                   FAR void *data, size_t len,
-                                   uint32_t src, FAR void *priv)
-{
-  FAR struct rpmsgblk_unlink_s *msg = data;
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  FAR struct rpmsgblk_server_s *server = ept->priv;
-
-  msg->header.result = server->bops->unlink(server->blknode);
-#else
-  msg->header.result = -ENXIO;
-#endif
 
   return rpmsg_send(ept, msg, len);
 }
