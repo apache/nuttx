@@ -51,6 +51,12 @@ struct mm_heap_s *g_iheap;
  * Description:
  *   Initialize the internal heap.
  *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void xtensa_imm_initialize(void)
@@ -69,6 +75,12 @@ void xtensa_imm_initialize(void)
  * Description:
  *   Allocate memory from the internal heap.
  *
+ * Input Parameters:
+ *   size - Size (in bytes) of the memory region to be allocated.
+ *
+ * Return Value:
+ *   Adress of the allocated memory space. NULL, if allocation fails.
+ *
  ****************************************************************************/
 
 void *xtensa_imm_malloc(size_t size)
@@ -83,6 +95,13 @@ void *xtensa_imm_malloc(size_t size)
  *   Calculates the size of the allocation and
  *   allocate memory the internal heap.
  *
+ * Input Parameters:
+ *   n         - Size (in types) of the memory region to be allocated.
+ *   elem_size - Size (in bytes) of the type to be allocated.
+ *
+ * Return Value:
+ *   Adress of the allocated memory space. NULL, if allocation fails.
+ *
  ****************************************************************************/
 
 void *xtensa_imm_calloc(size_t n, size_t elem_size)
@@ -95,6 +114,13 @@ void *xtensa_imm_calloc(size_t n, size_t elem_size)
  *
  * Description:
  *   Reallocate memory from the internal heap.
+ *
+ * Input Parameters:
+ *   ptr  - Adress to be reallocate.
+ *   size - Size (in bytes) to be reallocate.
+ *
+ * Return Value:
+ *   Adress of the possibly moved memory space. NULL, if allocation fails.
  *
  ****************************************************************************/
 
@@ -109,6 +135,12 @@ void *xtensa_imm_realloc(void *ptr, size_t size)
  * Description:
  *   Allocate and zero memory from the internal heap.
  *
+ * Input Parameters:
+ *   size - Size (in bytes) of the memory region to be allocated.
+ *
+ * Return Value:
+ *   Adress of the allocated memory space. NULL, if allocation fails.
+ *
  ****************************************************************************/
 
 void *xtensa_imm_zalloc(size_t size)
@@ -121,6 +153,12 @@ void *xtensa_imm_zalloc(size_t size)
  *
  * Description:
  *   Free memory from the internal heap.
+ *
+ * Input Parameters:
+ *   mem - Adress to be freed.
+ *
+ * Returned Value:
+ *   None.
  *
  ****************************************************************************/
 
@@ -140,6 +178,13 @@ void xtensa_imm_free(void *mem)
  *   The alignment argument must be a power of two (not checked).  8-byte
  *   alignment is guaranteed by normal malloc calls.
  *
+ * Input Parameters:
+ *   alignment - Requested alignment.
+ *   size - Size (in bytes) of the memory region to be allocated.
+ *
+ * Return Value:
+ *   Adress of the allocated adress. NULL, if allocation fails.
+ *
  ****************************************************************************/
 
 void *xtensa_imm_memalign(size_t alignment, size_t size)
@@ -153,11 +198,11 @@ void *xtensa_imm_memalign(size_t alignment, size_t size)
  * Description:
  *   Check if an address lies in the internal heap.
  *
- * Parameters:
- *   mem - The address to check
+ * Input Parameters:
+ *   mem - The address to check.
  *
  * Return Value:
- *   true if the address is a member of the internal heap.  false if not
+ *   True if the address is a member of the internal heap. False if not.
  *
  ****************************************************************************/
 
@@ -172,6 +217,12 @@ bool xtensa_imm_heapmember(void *mem)
  * Description:
  *   mallinfo returns a copy of updated current heap information for the
  *   user heap.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Return Value:
+ *   info - Where memory information will be copied.
  *
  ****************************************************************************/
 

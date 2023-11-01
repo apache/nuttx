@@ -72,8 +72,8 @@
  */
 
 #ifdef CONFIG_MM_KERNEL_HEAP
-#define HEAP_REGION1_END      0x3fccfff0
-#define HEAP_REGION2_START    0x3fcd0000
+#  define HEAP_REGION1_END      0x3fccfff0
+#  define HEAP_REGION2_START    0x3fcd0000
 #endif
 
 #ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP

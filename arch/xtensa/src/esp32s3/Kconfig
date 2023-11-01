@@ -875,10 +875,12 @@ choice ESP32S3_SPIRAM_HEAP
 
 config ESP32S3_SPIRAM_COMMON_HEAP
 	bool "Additional region to kernel heap"
+	select XTENSA_USE_SPIRAM_HEAP
 
 config ESP32S3_SPIRAM_USER_HEAP
 	bool "Separated userspace heap"
 	select MM_KERNEL_HEAP
+	select XTENSA_USE_SPIRAM_HEAP
 
 endchoice # ESP32S3_SPIRAM_HEAP
 

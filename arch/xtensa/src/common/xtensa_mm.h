@@ -40,10 +40,18 @@
 #  define UMM_FREE(p)        xtensa_imm_free(p)
 #  define UMM_HEAPMEMEBER(p) xtensa_imm_heapmember(p)
 #else
-#  define UMM_MALLOC(s)      kumm_malloc(s)
-#  define UMM_MEMALIGN(a,s)  kumm_memalign(a,s)
-#  define UMM_FREE(p)        kumm_free(p)
-#  define UMM_HEAPMEMEBER(p) umm_heapmember(p)
-#endif
+#  ifdef CONFIG_XTENSA_USE_SPIRAM_HEAP
+#    define UMM_MALLOC(s)      kmm_malloc(s)
+#    define UMM_MEMALIGN(a,s)  kmm_memalign(a,s)
+#    define UMM_FREE(p)        kmm_free(p)
+#    define UMM_HEAPMEMEBER(p) mm_heapmember(p)
+#  else
+#    define UMM_MALLOC(s)      kumm_malloc(s)
+#    define UMM_MEMALIGN(a,s)  kumm_memalign(a,s)
+#    define UMM_FREE(p)        kumm_free(p)
+#    define UMM_HEAPMEMEBER(p) umm_heapmember(p)
+#  endif /* CONFIG_XTENSA_USE_SPIRAM_HEAP */
+
+#endif  /* CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP */
 
 #endif /* __ARCH_XTENSA_SRC_COMMON_XTENSA_MM_H */
