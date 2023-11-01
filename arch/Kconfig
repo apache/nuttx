@@ -686,7 +686,6 @@ config ARCH_SHM_VBASE
 
 config ARCH_KMAP_VBASE
 	hex "Kernel dynamic virtual mappings base"
-	depends on ARCH_VMA_MAPPING
 	---help---
 		The virtual address of the beginning of the kernel dynamic mapping
 		region.
@@ -743,6 +742,8 @@ config ARCH_SHM_NPAGES
 		maximum number of pages per region, and the configured size of
 		each page.
 
+endif # ARCH_VMA_MAPPING
+
 config ARCH_KMAP_NPAGES
 	int "Max kernel dynamic mapping pages"
 	default 1
@@ -754,8 +755,6 @@ config ARCH_KMAP_NPAGES
 		determined by the product of the maximum number of regions, the
 		maximum number of pages per region, and the configured size of
 		each page.
-
-endif # ARCH_VMA_MAPPING
 
 config ARCH_STACK_DYNAMIC
 	bool "Dynamic user stack"
