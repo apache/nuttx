@@ -42,7 +42,6 @@
 #define RPMSGBLK_WRITE           4
 #define RPMSGBLK_GEOMETRY        5
 #define RPMSGBLK_IOCTL           6
-#define RPMSGBLK_UNLINK          7
 
 /****************************************************************************
  * Public Types
