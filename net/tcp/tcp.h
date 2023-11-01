@@ -896,7 +896,7 @@ uint32_t tcp_addsequence(FAR uint8_t *seqno, uint16_t len);
  *
  ****************************************************************************/
 
-void tcp_initsequence(FAR uint8_t *seqno);
+void tcp_initsequence(FAR struct tcp_conn_s *conn);
 
 /****************************************************************************
  * Name: tcp_nextsequence
