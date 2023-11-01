@@ -276,6 +276,7 @@ struct ifreq
     struct mii_ioctl_data_s    ifru_mii_data;       /* MII request data */
     struct can_ioctl_data_s    ifru_can_data;       /* CAN bitrate request data */
     struct can_ioctl_filter_s  ifru_can_filter;     /* CAN filter request data */
+    FAR void                  *ifru_data;           /* For use by interface */
   } ifr_ifru;
 };
 
@@ -293,6 +294,7 @@ struct ifreq
 #define ifr_mii_reg_num       ifr_ifru.ifru_mii_data.reg_num /* PHY register address */
 #define ifr_mii_val_in        ifr_ifru.ifru_mii_data.val_in  /* PHY input data */
 #define ifr_mii_val_out       ifr_ifru.ifru_mii_data.val_out /* PHY output data */
+#define ifr_data              ifr_ifru.ifru_data             /* for use by interface  */
 
 /* Used only with the SIOCGIFCONF IOCTL command */
 
