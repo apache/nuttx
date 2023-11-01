@@ -421,6 +421,30 @@ extern "C"
    (ipv6addr)->s6_addr16[5] == 0xffff)
 
 /****************************************************************************
+ * Macro: net_ip_domain_select
+ *
+ * Description:
+ *   Select different value by the domain (PF_INET/PF_INET6).
+ *   This domain only needs to exist when both IPv4 and IPv6 are enabled.
+ *
+ * Input Parameters:
+ *   value4 - The value returned when domain is PF_INET.
+ *   value6 - The value returned when domain is PF_INET6.
+ *   domain - The domain field which may only exists when both IPv4 and IPv6
+ *            are enabled.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+#  define net_ip_domain_select(domain, value4, value6) \
+    (((domain) == PF_INET) ? (value4) : (value6))
+#elif defined(CONFIG_NET_IPv4)
+#  define net_ip_domain_select(domain, value4, value6) (value4)
+#else
+#  define net_ip_domain_select(domain, value4, value6) (value6)
+#endif
+
+/****************************************************************************
  * Macro: net_ip_binding_laddr, net_ip_binding_raddr
  *
  * Description:
@@ -428,24 +452,17 @@ extern "C"
  *
  * Input Parameters:
  *   u      - The union of address binding.
- *   domain - The domain of address.
+ *   domain - The domain of address, only needs to exist when both IPv4 and
+ *            IPv6 are enabled.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-#  define net_ip_binding_laddr(u, domain) \
-    (((domain) == PF_INET) ? (FAR void *)(&(u)->ipv4.laddr) : \
-                             (FAR void *)(&(u)->ipv6.laddr))
-#  define net_ip_binding_raddr(u, domain) \
-    (((domain) == PF_INET) ? (FAR void *)(&(u)->ipv4.raddr) : \
-                             (FAR void *)(&(u)->ipv6.raddr))
-#elif defined(CONFIG_NET_IPv4)
-#  define net_ip_binding_laddr(u, domain) ((FAR void *)(&(u)->ipv4.laddr))
-#  define net_ip_binding_raddr(u, domain) ((FAR void *)(&(u)->ipv4.raddr))
-#else
-#  define net_ip_binding_laddr(u, domain) ((FAR void *)(&(u)->ipv6.laddr))
-#  define net_ip_binding_raddr(u, domain) ((FAR void *)(&(u)->ipv6.raddr))
-#endif
+#define net_ip_binding_laddr(u, domain) \
+    net_ip_domain_select(domain, (FAR void *)(&(u)->ipv4.laddr), \
+                                 (FAR void *)(&(u)->ipv6.laddr))
+#define net_ip_binding_raddr(u, domain) \
+    net_ip_domain_select(domain, (FAR void *)(&(u)->ipv4.raddr), \
+                                 (FAR void *)(&(u)->ipv6.raddr))
 
 /****************************************************************************
  * Macro: net_ipv4addr_copy, net_ipv4addr_hdrcopy, net_ipv6addr_copy, and
