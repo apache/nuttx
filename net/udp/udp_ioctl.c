@@ -57,13 +57,7 @@
 
 static void udp_path(FAR struct udp_conn_s *conn, FAR char *buf, size_t len)
 {
-#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-  uint8_t domain = conn->domain;
-#elif defined(CONFIG_NET_IPv4)
-  const uint8_t domain = PF_INET;
-#else
-  const uint8_t domain = PF_INET6;
-#endif
+  uint8_t domain = net_ip_domain_select(conn->domain, PF_INET, PF_INET6);
   char remote[INET6_ADDRSTRLEN];
   char local[INET6_ADDRSTRLEN];
   FAR void *laddr = net_ip_binding_laddr(&conn->u, domain);
