@@ -160,12 +160,12 @@ int igmp_joingroup(struct net_driver_s *dev,
       /* Add the group (MAC) address to the ether drivers MAC filter list */
 
       igmp_addmcastmac(dev, (FAR in_addr_t *)&grpaddr->s_addr);
-      return OK;
     }
 
-  /* Return EEXIST if the address is already a member of the group */
+  DEBUGASSERT(group->njoins < UINT8_MAX);
+  group->njoins++;
 
-  return -EEXIST;
+  return OK;
 }
 
 #endif /* CONFIG_NET_IGMP */

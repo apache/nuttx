@@ -138,6 +138,18 @@ int igmp_leavegroup(struct net_driver_s *dev,
   ninfo("Leaving group: %p\n", group);
   if (group)
     {
+      DEBUGASSERT(group->njoins > 0);
+      group->njoins--;
+
+      /* Take no further actions if there are other members of this group
+       * on this host.
+       */
+
+      if (group->njoins > 0)
+        {
+          return OK;
+        }
+
       /* Cancel the timer and discard any queued Membership Reports.
        * Canceling the timer will prevent any new Membership Reports from
        * being sent; clearing the flags will discard any pending Membership
