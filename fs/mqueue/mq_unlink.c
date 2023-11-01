@@ -65,9 +65,9 @@ static void mq_inode_release(FAR struct inode *inode)
           nxmq_free_msgq(msgq);
           inode->i_private = NULL;
         }
-
-      inode_release(inode);
     }
+
+  inode_release(inode);
 }
 
 /****************************************************************************
