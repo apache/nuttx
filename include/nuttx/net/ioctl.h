@@ -136,6 +136,10 @@
 #define SIOCGIFBR          _SIOC(0x003A)  /* Bridging support */
 #define SIOCSIFBR          _SIOC(0x003B)  /* Set bridging options */
 
+/* ETH Tool calls ***********************************************************/
+
+#define SIOCETHTOOL        _SIOC(0x003D)  /* Ethtool interface */
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
