@@ -143,7 +143,6 @@ static const rpmsg_ept_cb g_rpmsgblk_handler[] =
   [RPMSGBLK_WRITE]    = rpmsgblk_default_handler,
   [RPMSGBLK_GEOMETRY] = rpmsgblk_geometry_handler,
   [RPMSGBLK_IOCTL]    = rpmsgblk_ioctl_handler,
-  [RPMSGBLK_UNLINK]   = rpmsgblk_default_handler,
 };
 
 /****************************************************************************
@@ -663,7 +662,8 @@ static int rpmsgblk_ioctl(FAR struct inode *inode, int cmd,
  * Name: rpmsgblk_unlink
  *
  * Description:
- *   Rpmsg-blk ioctl operation
+ *   Rpmsg-blk unlink operation. Client can not delete the actual block
+ *   device in server's side, so return success directly.
  *
  * Parameters:
  *   inode - the blk device inode
@@ -676,18 +676,7 @@ static int rpmsgblk_ioctl(FAR struct inode *inode, int cmd,
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int rpmsgblk_unlink(FAR struct inode *inode)
 {
-  FAR struct rpmsgblk_s *priv = inode->i_private;
-  struct rpmsgblk_unlink_s msg;
-  int ret;
-
-  ret = rpmsgblk_send_recv(priv, RPMSGBLK_UNLINK, true, &msg.header,
-                           sizeof(msg), NULL);
-  if (ret < 0)
-    {
-      ferr("unlink failed, ret=%d\n", ret);
-    }
-
-  return ret;
+  return OK;
 }
 #endif
 
