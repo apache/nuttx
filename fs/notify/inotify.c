@@ -795,7 +795,7 @@ static void inotify_queue_parent_event(FAR char *path, uint32_t mask,
   FAR char *name;
 
   name = basename(path);
-  if (name == NULL)
+  if (name == NULL || (strcmp(path, "/") == 0))
     {
       return;
     }
