@@ -19,7 +19,7 @@
 # ##############################################################################
 
 if(CONFIG_CORESIGHT)
-  set(SRCS coresight_core.c)
+  set(SRCS coresight_core.c coresight_common.c)
 
   target_sources(drivers PRIVATE ${SRCS})
 endif()

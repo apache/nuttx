@@ -22,7 +22,7 @@
 
 ifeq ($(CONFIG_CORESIGHT),y)
 
-CSRCS += coresight_core.c
+CSRCS += coresight_core.c coresight_common.c
 
 DEPPATH += --dep-path coresight
 VPATH += :coresight
