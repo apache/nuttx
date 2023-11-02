@@ -44,6 +44,47 @@
 #ifdef CONFIG_ARMV7A_HAVE_GICv2
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#if defined(CONFIG_SMP) && CONFIG_SMP_NCPUS > 1
+static volatile bool g_gic_init_done[CONFIG_SMP_NCPUS];
+#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: arm_gic_init_done
+ *
+ * Description:
+ *   Indicates gic init done, and only cpu0 need wait the gic initialize
+ *   done. Because cpu1 ~ (CONFIG_SMP_NCPUS - 1) may not response the
+ *   interrupt request by cpu0 when the gic not initialize done.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SMP) && CONFIG_SMP_NCPUS > 1
+static void arm_gic_init_done(void)
+{
+  int cpu = up_cpu_index();
+  int i;
+
+  g_gic_init_done[cpu] = true;
+  if (cpu == 0)
+    {
+      for (i = 1; i < CONFIG_SMP_NCPUS; i++)
+        {
+          while (!g_gic_init_done[i]);
+        }
+    }
+}
+#else
+#define arm_gic_init_done()
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -326,6 +367,7 @@ void arm_gic_initialize(void)
 
   putreg32(icddcr, GIC_ICDDCR);
   arm_gic_dump("Exit arm_gic_initialize", true, 0);
+  arm_gic_init_done();
 }
 
 /****************************************************************************
