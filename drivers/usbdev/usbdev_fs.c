@@ -1162,7 +1162,7 @@ static void usbdev_fs_classunbind(FAR struct usbdevclass_driver_s *driver,
 
   if (fs->eps != NULL)
     {
-      for (i = 0; i < devinfo->ninterfaces; i++)
+      for (i = 0; i < devinfo->nendpoints; i++)
         {
           snprintf(devname, sizeof(devname), "%s/ep%d",
                    devinfo->name, i + 1);
