@@ -72,15 +72,15 @@ static int rptun_ping_ept_cb(FAR struct rpmsg_endpoint *ept,
     }
   else if (msg->cmd == RPTUN_PING_SEND_CHECK)
     {
-      int data_len;
-      int i;
+      size_t data_len;
+      size_t i;
 
       data_len = msg->len - sizeof(struct rptun_ping_msg_s) + 1;
       for (i = 0; i < data_len; i++)
         {
           if (msg->data[i] != RPTUN_PING_CHECK_DATA)
             {
-              syslog(LOG_ERR, "rptun ping remote receive data error !\n");
+              syslog(LOG_ERR, "rptun ping remote receive data error!\n");
               break;
             }
 
@@ -163,16 +163,20 @@ static void rptun_ping_logout(FAR const char *s, unsigned long value)
 #endif
 }
 
-static void rptun_ping_logout_rate(FAR const uint32_t len, clock_t avg)
+static void rptun_ping_logout_rate(uint64_t len, clock_t avg)
 {
   struct timespec ts;
-  double totalsec;
+  size_t ratebits;
+  size_t rateint;
+  size_t ratedec;
 
   perf_convert(avg, &ts);
 
-  totalsec = (double)ts.tv_sec + (double)ts.tv_nsec / NSEC_PER_SEC;
-  syslog(LOG_INFO, "rate: %.2f Mbits/sec\n",
-        ((double)len * 8.0) / 1048576.0 / totalsec);
+  ratebits = len * 8 * 1000000000 / (ts.tv_sec * NSEC_PER_SEC + ts.tv_nsec);
+  rateint = ratebits / 1000000;
+  ratedec = ratebits - rateint * 1000000;
+
+  syslog(LOG_INFO, "rate: %d.%06d Mbits/sec\n", rateint, ratedec);
 }
 
 /****************************************************************************
