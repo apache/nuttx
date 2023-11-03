@@ -242,8 +242,8 @@ uint8_t net_ipv6_mask2pref(FAR const uint16_t *mask);
  *   specifies the number of MS bits under mask (0-128)
  *
  * Input Parameters:
+ *   mask     - The location to return the netmask.
  *   preflen  - Determines the width of the netmask (in bits).  Range 0-128
- *   mask  - The location to return the netmask.
  *
  * Returned Value:
  *   None
@@ -251,7 +251,7 @@ uint8_t net_ipv6_mask2pref(FAR const uint16_t *mask);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-void net_ipv6_pref2mask(uint8_t preflen, net_ipv6addr_t mask);
+void net_ipv6_pref2mask(net_ipv6addr_t mask, uint8_t preflen);
 #endif
 
 /****************************************************************************
