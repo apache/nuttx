@@ -547,6 +547,7 @@ void files_close_onexec(FAR struct tcb_s *tcb)
 int fs_getfilep(int fd, FAR struct file **filep)
 {
   FAR struct filelist *list;
+  irqstate_t flags;
   int ret;
 
 #ifdef CONFIG_FDCHECK
@@ -574,6 +575,27 @@ int fs_getfilep(int fd, FAR struct file **filep)
       return -EBADF;
     }
 
+  /* Protect this part with a critical section to make sure that we won't
+   * interrupt the mutex lock-unclock sequence below which may lead to the
+   * priority inversion. The case is as follows:
+   *
+   *   We have two threads: low-priority thread A and high-priority thread B,
+   *   both threads share the same task group data.
+   *
+   *   Thread A performs IO on files periodically. Thread B is woken up by a
+   *   high-frequency interrupts, and performs IO on files periodically.
+   *
+   *   There is a chance that thread B wakes up exactly when thread A holds
+   *   the mutex below, and consequently the file access in thread B will be
+   *   delayed due to thread A holding the list->fl_lock mutex and execution
+   *   will be returned to a thread with lower priority.
+   *
+   * The correct solution to this problem is to use the read-write lock,
+   * which is currently not supported by NuttX.
+   */
+
+  flags = enter_critical_section();
+
   /* The descriptor is in a valid range to file descriptor... Get the
    * thread-specific file list.
    */
@@ -583,6 +605,7 @@ int fs_getfilep(int fd, FAR struct file **filep)
   ret = nxmutex_lock(&list->fl_lock);
   if (ret < 0)
     {
+      leave_critical_section(flags);
       return ret;
     }
 
@@ -598,6 +621,7 @@ int fs_getfilep(int fd, FAR struct file **filep)
     }
 
   nxmutex_unlock(&list->fl_lock);
+  leave_critical_section(flags);
   return ret;
 }
 
