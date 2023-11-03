@@ -142,7 +142,7 @@ int netdev_ipv6_add(FAR struct net_driver_s *dev, const net_ipv6addr_t addr,
        *          allows to override the address. But not sure if it's good.
        */
 
-      net_ipv6_pref2mask(preflen, ifaddr->mask);
+      net_ipv6_pref2mask(ifaddr->mask, preflen);
       return OK;
     }
 
@@ -174,7 +174,7 @@ int netdev_ipv6_add(FAR struct net_driver_s *dev, const net_ipv6addr_t addr,
 #endif /* CONFIG_NETDEV_MULTIPLE_IPv6 */
 
   net_ipv6addr_copy(ifaddr->addr, addr);
-  net_ipv6_pref2mask(preflen, ifaddr->mask);
+  net_ipv6_pref2mask(ifaddr->mask, preflen);
 
   return OK;
 }

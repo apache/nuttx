@@ -103,7 +103,7 @@ void icmpv6_setaddresses(FAR struct net_driver_s *dev,
       preflen = 128;
     }
 
-  net_ipv6_pref2mask(preflen, mask);
+  net_ipv6_pref2mask(mask, preflen);
 
   ninfo("preflen=%d netmask=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
         preflen,
