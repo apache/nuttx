@@ -175,7 +175,7 @@ static inline int poll_teardown(FAR struct pollfd *fds, nfds_t nfds,
  * Name: poll_cleanup
  *
  * Description:
- *   Setup the poll operation for each descriptor in the list.
+ *   Cleanup the poll operation.
  *
  ****************************************************************************/
 
