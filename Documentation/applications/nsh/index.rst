@@ -22,3 +22,4 @@ starts a given task instead of the main ``nsh`` application.
   builtin.rst
   installation.rst
   login.rst
+  running_apps.rst
