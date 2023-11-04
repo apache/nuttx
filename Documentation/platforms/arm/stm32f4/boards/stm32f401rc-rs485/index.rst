@@ -86,16 +86,17 @@ The STM32F4-RS485 has 1 USART available for user.
 USART2
 ------
 
-========== =====
+========== =======
 UART/USART PINS
-========== =====
+========== =======
 CTS        PA0
 RTS        PA1
-TX         PA2  *Warning you make need to reverse RX/TX on
-RX         PA3   some RS-232 converters
+TX         PA2 [1]
+RX         PA3
 CK         PA4
-========== =====
+========== =======
 
+[1] Warning you make need to reverse RX/TX on some RS-232 converters
 
 SDCARD
 ======
