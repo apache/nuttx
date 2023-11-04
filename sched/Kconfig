@@ -316,8 +316,6 @@ config TICKET_SPINLOCK
 	---help---
 		Use ticket spinlock algorithm.
 
-endif # SPINLOCK
-
 config RW_SPINLOCK
 	bool "Support read-write Spinlocks"
 	default y
@@ -325,6 +323,8 @@ config RW_SPINLOCK
 		Spinlocks are spilit into read and write lock.
 		Reader can take read lock simultaneously and only one writer
 		can take write lock.
+
+endif # SPINLOCK
 
 config IRQCHAIN
 	bool "Enable multi handler sharing a IRQ"
