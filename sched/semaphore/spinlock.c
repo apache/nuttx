@@ -179,7 +179,7 @@ bool spin_trylock(FAR volatile spinlock_t *lock)
   if (!atomic_compare_exchange_strong(&lock->value, &old.value, new.value))
 #else /* CONFIG_TICKET_SPINLOCK */
   if (up_testset(lock) == SP_LOCKED)
-#endif /* CONFIG_TICKET_SPINLOCK */ 
+#endif /* CONFIG_TICKET_SPINLOCK */
     {
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
       /* Notify that we abort for a spinlock */
@@ -243,7 +243,7 @@ bool spin_trylock_wo_note(FAR volatile spinlock_t *lock)
   if (!atomic_compare_exchange_strong(&lock->value, &old.value, new.value))
 #else /* CONFIG_TICKET_SPINLOCK */
   if (up_testset(lock) == SP_LOCKED)
-#endif /* CONFIG_TICKET_SPINLOCK */ 
+#endif /* CONFIG_TICKET_SPINLOCK */
     {
       SP_DSB();
       return false;
