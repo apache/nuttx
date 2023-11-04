@@ -160,7 +160,7 @@ In order to build with the new custom configuration, you will need the following
 
 :menuselection:`CONFIG_APPS_DIR="../CustomApps"`
 
-:menuselection:`CONFIG_USER_ENTRYPOINT="custom_hello"`
+:menuselection:`CONFIG_INIT_ENTRYPOINT="custom_hello"`
 
 Note that you can only access the ``../CustomApps/Kconfig`` configuration file if ``CONFIG_APPS_DIR`` is set
 to ``../CustomApps`` BEFORE ``make menuconfig`` is executed
