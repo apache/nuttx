@@ -8,3 +8,4 @@ Implementation Details
    
    processes_vs_tasks.rst
    critical_sections.rst
+   interrupt_controls.rst
