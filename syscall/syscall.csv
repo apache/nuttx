@@ -44,7 +44,6 @@
 "getpeername","sys/socket.h","defined(CONFIG_NET)","int","int","FAR struct sockaddr *","FAR socklen_t *"
 "getpid","unistd.h","","pid_t"
 "getppid","unistd.h","defined(CONFIG_SCHED_HAVE_PARENT)","pid_t"
-"getrandom","sys/random.h","","ssize_t","FAR void *","size_t","unsigned int"
 "getsockname","sys/socket.h","defined(CONFIG_NET)","int","int","FAR struct sockaddr *","FAR socklen_t *"
 "getsockopt","sys/socket.h","defined(CONFIG_NET)","int","int","int","int","FAR void *","FAR socklen_t *"
 "gettid","unistd.h","","pid_t"

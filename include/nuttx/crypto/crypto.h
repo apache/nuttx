@@ -70,8 +70,6 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-int up_cryptoinitialize(void);
-
 #if defined(CONFIG_CRYPTO_AES)
 int aes_cypher(FAR void *out, FAR const void *in, size_t size,
                FAR const void *iv, FAR const void *key, size_t keysize,

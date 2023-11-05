@@ -24,6 +24,7 @@
 
 #include <sys/random.h>
 #include <fcntl.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 #include <nuttx/fs/fs.h>
@@ -58,6 +59,7 @@
  *
  ****************************************************************************/
 
+#if defined(CONFIG_DEV_URANDOM) || defined(CONFIG_DEV_RANDOM)
 ssize_t getrandom(FAR void *bytes, size_t nbytes, unsigned int flags)
 {
   int oflags = O_RDONLY;
@@ -99,3 +101,10 @@ ssize_t getrandom(FAR void *bytes, size_t nbytes, unsigned int flags)
 
   return ret;
 }
+#elif defined(CONFIG_CRYPTO_RANDOM_POOL)
+ssize_t getrandom(FAR void *bytes, size_t nbytes, unsigned int flags)
+{
+  arc4random_buf(bytes, nbytes);
+  return nbytes;
+}
+#endif

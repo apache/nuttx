@@ -111,10 +111,12 @@ int crypto_test(void)
 #if defined(CONFIG_CRYPTO_AES)
   if (test_aes())
     {
+      crypterr("ERROR: crypto test failed\n");
       return -1;
     }
 #endif
 
+  cryptinfo("crypto test OK\n");
   return OK;
 }
 

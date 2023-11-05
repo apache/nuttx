@@ -723,22 +723,3 @@ out:
   *featp = feat;
   return 0;
 }
-
-int up_cryptoinitialize(void)
-{
-#ifdef CONFIG_CRYPTO_ALGTEST
-  int ret = crypto_test();
-  if (ret)
-    {
-      crypterr("ERROR: crypto test failed\n");
-    }
-  else
-    {
-      cryptinfo("crypto test OK\n");
-    }
-
-  return ret;
-#else
-  return OK;
-#endif
-}

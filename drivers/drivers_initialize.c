@@ -139,10 +139,8 @@ void drivers_initialize(void)
   ptmx_register();
 #endif
 
-#if defined(CONFIG_CRYPTO)
-  /* Initialize the HW crypto and /dev/crypto */
-
-  up_cryptoinitialize();
+#ifdef CONFIG_CRYPTO_ALGTEST
+  crypto_test();
 #endif
 
 #ifdef CONFIG_CRYPTO_CRYPTODEV
