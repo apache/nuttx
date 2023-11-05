@@ -23,7 +23,7 @@ When we discuss critical sections here we really refer to one of two mechanisms:
 
 The use of either mechanism will always harm real-time performance.
 The effects of critical sections on real-time performance is discussed in
-`Effects of Disabling Interrupts or Pre-Emption on Response Latency <https://cwiki.apache.org/confluence/display/NUTTX/Effects+of+Disabling+Interrupts+or+Pre-Emption+on+Response+Latency>`_ [TODO: move to documentation].
+:doc:`/implementation/preemption_latency`.
 The end result is that a certain amount of **jitter** is added to the real-time response.
 
 Critical sections cannot be avoided within the OS and, as a consequence, a certain
