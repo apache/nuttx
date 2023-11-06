@@ -208,7 +208,7 @@ static void inotify_queue_event(FAR struct inotify_device_s *dev, int wd,
 
   if (dev->event_count > CONFIG_FSNOTIFY_MAX_EVENTS)
     {
-      ferr("Too many events queued\n");
+      finfo("Too many events queued\n");
       return;
     }
 
@@ -891,7 +891,7 @@ static inline void notify_queue_filep_event(FAR struct file *filep,
   ret = file_fcntl(filep, F_GETPATH, path);
   if (ret < 0)
     {
-      ferr("Failed to get path\n");
+      finfo("Failed to get path\n");
       return;
     }
 
