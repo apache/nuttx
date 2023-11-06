@@ -88,7 +88,7 @@ SECTIONS
     *libarch.a:xtensa_testset.*(.literal .text .literal.* .text.*)
 
 #ifdef CONFIG_ESP32S3_BLE
-    *libc.a:bin/sq_remlast.*(.literal .text .literal.* .text.*)
+    *libc.a:sq_remlast.*(.literal .text .literal.* .text.*)
 #endif
 
     *libdrivers.a:syslog_flush.*(.literal .text .literal.* .text.*)
@@ -121,7 +121,7 @@ SECTIONS
     *libsched.a:sched_mergepending.*(.literal.nxsched_merge_pending .text.nxsched_merge_pending)
     *libsched.a:sched_resumescheduler.*(.literal.nxsched_resume_scheduler .text.nxsched_resume_scheduler)
 
-    *libc.a:bin/sq_remfirst.*(.literal.sq_remfirst .text.sq_remfirst)
+    *libc.a:sq_remfirst.*(.literal.sq_remfirst .text.sq_remfirst)
 #endif
 
     *(.wifirxiram .wifirxiram.*)
