@@ -60,7 +60,7 @@ struct inotify_device_s
   int                count;       /* Reference count */
   uint32_t           event_size;  /* Size of the queue (bytes) */
   uint32_t           event_count; /* Number of pending events */
-  FAR struct pollfd *fds[CONFIG_FSNOTIFY_FD_POLLWAITERS];
+  FAR struct pollfd *fds[CONFIG_FS_NOTIFY_FD_POLLWAITERS];
 };
 
 struct inotify_event_s
@@ -130,6 +130,7 @@ static struct inode g_inotify_inode =
 static int g_inotify_event_cookie;
 static int g_inotify_watch_cookie;
 static struct hsearch_data g_inotify_hash;
+static char g_inotify_temp_buffer[2][PATH_MAX];
 static mutex_t g_inotify_hash_lock = NXMUTEX_INITIALIZER;
 
 /****************************************************************************
@@ -206,13 +207,13 @@ static void inotify_queue_event(FAR struct inotify_device_s *dev, int wd,
         }
     }
 
-  if (dev->event_count > CONFIG_FSNOTIFY_MAX_EVENTS)
+  if (dev->event_count > CONFIG_FS_NOTIFY_MAX_EVENTS)
     {
       finfo("Too many events queued\n");
       return;
     }
 
-  if (dev->event_count == CONFIG_FSNOTIFY_MAX_EVENTS)
+  if (dev->event_count == CONFIG_FS_NOTIFY_MAX_EVENTS)
     {
       event = inotify_alloc_event(-1, IN_Q_OVERFLOW, cookie, NULL);
     }
@@ -230,7 +231,7 @@ static void inotify_queue_event(FAR struct inotify_device_s *dev, int wd,
   dev->event_size += sizeof(struct inotify_event) + event->event.len;
   list_add_tail(&dev->events, &event->node);
 
-  poll_notify(dev->fds, CONFIG_FSNOTIFY_FD_POLLWAITERS, POLLIN);
+  poll_notify(dev->fds, CONFIG_FS_NOTIFY_FD_POLLWAITERS, POLLIN);
 
   while (nxsem_get_value(&dev->sem, &semcnt) == 0 && semcnt <= 1)
     {
@@ -363,7 +364,7 @@ static int inotify_poll(FAR struct file *filep, FAR struct pollfd *fds,
       goto out;
     }
 
-  for (i = 0; i < CONFIG_FSNOTIFY_FD_POLLWAITERS; i++)
+  for (i = 0; i < CONFIG_FS_NOTIFY_FD_POLLWAITERS; i++)
     {
       if (dev->fds[i] == 0)
         {
@@ -373,7 +374,7 @@ static int inotify_poll(FAR struct file *filep, FAR struct pollfd *fds,
         }
     }
 
-  if (i >= CONFIG_FSNOTIFY_FD_POLLWAITERS)
+  if (i >= CONFIG_FS_NOTIFY_FD_POLLWAITERS)
     {
       fds->priv = NULL;
       ret = -EBUSY;
@@ -382,7 +383,7 @@ static int inotify_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   if (!list_is_empty(&dev->events))
     {
-      poll_notify(dev->fds, CONFIG_FSNOTIFY_FD_POLLWAITERS, POLLIN);
+      poll_notify(dev->fds, CONFIG_FS_NOTIFY_FD_POLLWAITERS, POLLIN);
     }
 
 out:
@@ -795,7 +796,7 @@ static void inotify_queue_parent_event(FAR char *path, uint32_t mask,
   FAR char *name;
 
   name = basename(path);
-  if (name == NULL || (strcmp(path, "/") == 0))
+  if (name == NULL || name == path)
     {
       return;
     }
@@ -822,13 +823,12 @@ static void notify_queue_path_event(FAR const char *path, uint32_t mask)
   FAR char *abspath;
   uint32_t cookie = 0;
 
-  abspath = lib_realpath(path, NULL, true);
+  abspath = lib_realpath(path, g_inotify_temp_buffer[1], true);
   if (abspath == NULL)
     {
       return;
     }
 
-  nxmutex_lock(&g_inotify_hash_lock);
   if (mask & IN_MOVE)
     {
       if (mask & IN_MOVED_FROM)
@@ -843,8 +843,6 @@ static void notify_queue_path_event(FAR const char *path, uint32_t mask)
   inotify_queue_parent_event(abspath, mask, cookie);
   if (list == NULL)
     {
-      nxmutex_unlock(&g_inotify_hash_lock);
-      lib_free(abspath);
       return;
     }
 
@@ -869,9 +867,6 @@ static void notify_queue_path_event(FAR const char *path, uint32_t mask)
     {
       inotify_queue_watch_list_event(list, mask, cookie, NULL);
     }
-
-  nxmutex_unlock(&g_inotify_hash_lock);
-  lib_free(abspath);
 }
 
 /****************************************************************************
@@ -885,12 +880,13 @@ static void notify_queue_path_event(FAR const char *path, uint32_t mask)
 static inline void notify_queue_filep_event(FAR struct file *filep,
                                             uint32_t mask)
 {
-  char path[PATH_MAX];
   int ret;
 
-  ret = file_fcntl(filep, F_GETPATH, path);
+  nxmutex_lock(&g_inotify_hash_lock);
+  ret = file_fcntl(filep, F_GETPATH, g_inotify_temp_buffer[0]);
   if (ret < 0)
     {
+      nxmutex_unlock(&g_inotify_hash_lock);
       finfo("Failed to get path\n");
       return;
     }
@@ -900,7 +896,8 @@ static inline void notify_queue_filep_event(FAR struct file *filep,
       mask |= IN_ISDIR;
     }
 
-  notify_queue_path_event(path, mask);
+  notify_queue_path_event(g_inotify_temp_buffer[0], mask);
+  nxmutex_unlock(&g_inotify_hash_lock);
 }
 
 /****************************************************************************
@@ -1167,7 +1164,7 @@ void notify_initialize(void)
 {
   int ret;
 
-  ret = hcreate_r(CONFIG_FSNOTIFY_BUCKET_SIZE, &g_inotify_hash);
+  ret = hcreate_r(CONFIG_FS_NOTIFY_BUCKET_SIZE, &g_inotify_hash);
   if (ret != 1)
     {
       ferr("Failed to create hash table\n");
@@ -1196,7 +1193,9 @@ void notify_open(FAR const char *path, int oflags)
       mask |= IN_CREATE;
     }
 
+  nxmutex_lock(&g_inotify_hash_lock);
   notify_queue_path_event(path, mask);
+  nxmutex_unlock(&g_inotify_hash_lock);
 }
 
 /****************************************************************************
@@ -1229,11 +1228,13 @@ void notify_close(FAR struct file *filep)
 
 void notify_close2(FAR struct inode *inode)
 {
-  char path[PATH_MAX];
-  if (inode_getpath(inode, path, PATH_MAX) >= 0)
+  nxmutex_lock(&g_inotify_hash_lock);
+  if (inode_getpath(inode, g_inotify_temp_buffer[0], PATH_MAX) >= 0)
     {
-        notify_queue_path_event(path, IN_CLOSE_WRITE);
+      notify_queue_path_event(g_inotify_temp_buffer[0], IN_CLOSE_WRITE);
     }
+
+  nxmutex_unlock(&g_inotify_hash_lock);
 }
 
 /****************************************************************************
@@ -1285,7 +1286,9 @@ void notify_chstat(FAR struct file *filep)
 
 void notify_unlink(FAR const char *path)
 {
+  nxmutex_lock(&g_inotify_hash_lock);
   notify_queue_path_event(path, IN_DELETE);
+  nxmutex_unlock(&g_inotify_hash_lock);
 }
 
 /****************************************************************************
@@ -1298,7 +1301,9 @@ void notify_unlink(FAR const char *path)
 
 void notify_unmount(FAR const char *path)
 {
+  nxmutex_lock(&g_inotify_hash_lock);
   notify_queue_path_event(path, IN_DELETE | IN_UNMOUNT);
+  nxmutex_unlock(&g_inotify_hash_lock);
 }
 
 /****************************************************************************
@@ -1311,7 +1316,9 @@ void notify_unmount(FAR const char *path)
 
 void notify_mkdir(FAR const char *path)
 {
+  nxmutex_lock(&g_inotify_hash_lock);
   notify_queue_path_event(path, IN_CREATE | IN_ISDIR);
+  nxmutex_unlock(&g_inotify_hash_lock);
 }
 
 /****************************************************************************
@@ -1324,7 +1331,9 @@ void notify_mkdir(FAR const char *path)
 
 void notify_create(FAR const char *path)
 {
+  nxmutex_lock(&g_inotify_hash_lock);
   notify_queue_path_event(path, IN_CREATE);
+  nxmutex_unlock(&g_inotify_hash_lock);
 }
 
 /****************************************************************************
@@ -1351,6 +1360,8 @@ void notify_rename(FAR const char *oldpath, bool oldisdir,
       oldmask |= IN_ISDIR;
     }
 
+  nxmutex_lock(&g_inotify_hash_lock);
   notify_queue_path_event(oldpath, oldmask);
   notify_queue_path_event(newpath, newmask);
+  nxmutex_unlock(&g_inotify_hash_lock);
 }
