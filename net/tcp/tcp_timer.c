@@ -224,7 +224,7 @@ static void tcp_xmit_probe(FAR struct net_driver_s *dev,
 
 void tcp_update_timer(FAR struct tcp_conn_s *conn)
 {
-  int timeout = tcp_get_timeout(conn);
+  sclock_t timeout = tcp_get_timeout(conn);
 
   if (timeout > 0)
     {
