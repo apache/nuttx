@@ -7,6 +7,7 @@ Network Support
 
   sixlowpan.rst
   socketcan.rst
+  netguardsize.rst
 
 ``net`` Directory Structure ::
 
