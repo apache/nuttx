@@ -872,7 +872,7 @@ int arm_smp_sched_handler(int irq, void *context, void *arg);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_IRQ_INFO
+#ifdef CONFIG_ARMV7A_GICv2_DUMP
 void arm_gic_dump(const char *msg, bool all, int irq);
 #else
 #  define arm_gic_dump(msg, all, irq)
