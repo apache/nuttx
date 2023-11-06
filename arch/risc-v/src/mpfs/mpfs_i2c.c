@@ -493,7 +493,10 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
 
             /* Jump to the next message */
 
-            priv->msgid++;
+            if (priv->msgid < (priv->msgc - 1))
+              {
+                priv->msgid++;
+              }
           }
         else
           {
@@ -512,7 +515,10 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
 
                 /* Jump to the next message */
 
-                priv->msgid++;
+                if (priv->msgid < (priv->msgc - 1))
+                  {
+                    priv->msgid++;
+                  }
               }
             else
               {
