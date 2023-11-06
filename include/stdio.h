@@ -254,6 +254,7 @@ FAR FILE *fopencookie(FAR void *cookie, FAR const char *mode,
 /* Memory buffer stream */
 
 FAR FILE *fmemopen(FAR void *buf, size_t size, FAR const char *mode);
+FAR FILE *open_memstream(FAR char **bufp, FAR size_t *sizep);
 
 /* Operations on paths */
 
