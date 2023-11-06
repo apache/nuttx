@@ -302,7 +302,16 @@ int clock_nanosleep(clockid_t clockid, int flags,
        * are equivalent to nxsig_nanosleep().
        */
 
-      ret = nxsig_nanosleep(&reltime, rmtp);
+      if (reltime.tv_sec == 0 && reltime.tv_nsec == 0)
+        {
+          sched_yield();
+          ret = OK;
+        }
+      else
+        {
+          ret = nxsig_nanosleep(&reltime, rmtp);
+        }
+
       leave_critical_section(irqstate);
     }
   else
