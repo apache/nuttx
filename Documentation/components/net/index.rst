@@ -8,6 +8,7 @@ Network Support
   sixlowpan.rst
   socketcan.rst
   netguardsize.rst
+  slip.rst
 
 ``net`` Directory Structure ::
 
