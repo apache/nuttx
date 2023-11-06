@@ -25,3 +25,4 @@ Guides
   gdbwithpython.rst
   ofloader.rst
   testingtcpip.rst
+  automounter.rst
