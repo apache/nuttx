@@ -28,10 +28,6 @@ block comment, the following must appear:
   -  The relative path to the file from the top-level directory.
   -  An optional, one-line description of the file contents.
   -  A blank line
-  -  A copyright notice indented two additional spaces
-  -  A line identifying the author and contact information with the
-     same indentation as the copyright notice.
-  -  A blank line
   -  NuttX standard Apache 2.0 licensing information as provided in
      the `appendix <#appndxa>`__.
 
