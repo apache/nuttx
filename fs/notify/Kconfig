@@ -10,15 +10,15 @@ config FS_NOTIFY
 		The Fsnotify System
 
 if FS_NOTIFY
-config FSNOTIFY_BUCKET_SIZE
+config FS_NOTIFY_BUCKET_SIZE
 	int "Dir hash bucket size"
 	default 64
 
-config FSNOTIFY_MAX_EVENTS
+config FS_NOTIFY_MAX_EVENTS
 	int "Max events in one notify device"
 	default 1024
 
-config FSNOTIFY_FD_POLLWAITERS
+config FS_NOTIFY_FD_POLLWAITERS
 	int "Max pollwaiters in one notify devcie"
 	default 2
 
