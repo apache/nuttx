@@ -9,6 +9,7 @@ Network Support
   socketcan.rst
   netguardsize.rst
   slip.rst
+  wqueuedeadlocks.rst
 
 ``net`` Directory Structure ::
 
