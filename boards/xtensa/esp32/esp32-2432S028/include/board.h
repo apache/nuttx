@@ -43,8 +43,9 @@
 
 #define DISPLAY_SPI       2
 #define DISPLAY_DC        2
-#define DISPLAY_RST       12
+#define DISPLAY_RST       -1 /* Reset pin is connected to on EN pin */
 #define DISPLAY_BCKL      21
+#define DISPLAY_BCKL_LEVEL 1 /* Logic level to turn on the backlight */
 
 /* GPIO pins used by the GPIO Subsystem */
 
