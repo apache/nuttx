@@ -24,6 +24,10 @@ if(CONFIG_MOTOR_FOC)
     list(APPEND SRCS foc_dummy.c)
   endif()
 
+  if(CONFIG_MOTOR_FOC_FOCPWR)
+    list(APPEND SRCS foc_pwr.c)
+  endif()
+
   target_include_directories(drivers PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
   target_sources(drivers PRIVATE ${SRCS})
 endif()

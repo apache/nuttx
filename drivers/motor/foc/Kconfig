@@ -38,4 +38,7 @@ config MOTOR_FOC_DUMMY
 	---help---
 		Build a simulated lower-half FOC device
 
+config MOTOR_FOC_FOCPWR
+	bool
+
 endif #MOTOR_FOC

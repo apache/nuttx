@@ -30,6 +30,8 @@
 #include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 
+#include <nuttx/motor/foc/foc_pwr.h>
+
 #include <stdbool.h>
 
 #include <fixedmath.h>
@@ -45,6 +47,8 @@
 
 #define FOCDUTY_TO_FLOAT(d)     (b16tof(d))
 #define FOCDUTY_TO_FIXED16(d)   (d)
+
+#define FOC_BOARDCFG_GAINLIST_LEN 4
 
 /****************************************************************************
  * Public Types
@@ -133,6 +137,19 @@ struct foc_info_s
   struct foc_info_hw_s hw_cfg; /* Hardware specific informations  */
 };
 
+/* FOC board-specific configuration */
+
+struct foc_set_boardcfg_s
+{
+  int gain;
+};
+
+struct foc_get_boardcfg_s
+{
+  int gain;
+  int gain_list[FOC_BOARDCFG_GAINLIST_LEN];
+};
+
 /* FOC device upper-half */
 
 struct foc_lower_s;
@@ -160,6 +177,10 @@ struct foc_dev_s
   /* FOC device input/output data *******************************************/
 
   struct foc_state_s         state;      /* FOC device state */
+
+  /* (Optional) FOC power-stage driver  *************************************/
+
+  FAR struct focpwr_dev_s    *pwr;        /* FOC power-stage driver */
 };
 
 /****************************************************************************
