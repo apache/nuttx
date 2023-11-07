@@ -462,9 +462,16 @@ static int sim_audio_configure(struct audio_lowerhalf_s *dev,
         priv->sample_rate = caps->ac_controls.hw[0] |
                             (caps->ac_controls.b[3] << 16);
         priv->channels    = caps->ac_channels;
-        priv->bps         = caps->ac_controls.b[2];
-        priv->frame_size  = priv->bps / 8 * priv->channels;
 
+        /* offload mode, bps keep default value */
+
+        priv->bps = 16;
+        if (!priv->offload)
+          {
+            priv->bps = caps->ac_controls.b[2];
+          }
+
+        priv->frame_size  = priv->bps / 8 * priv->channels;
         sim_audio_config_ops(priv, caps->ac_subtype);
 
         info.samplerate = priv->sample_rate;
@@ -716,15 +723,15 @@ static int sim_audio_ioctl(struct audio_lowerhalf_s *dev, int cmd,
           struct ap_buffer_info_s *info =
               (struct ap_buffer_info_s *)arg;
 
-          info->nbuffers    = priv->nbuffers;
-          info->buffer_size = priv->buffer_size;
-
           if (priv->ops->get_samples)
             {
-              info->buffer_size = MAX(info->buffer_size,
+              priv->buffer_size = MAX(priv->buffer_size,
                                       priv->ops->get_samples(priv->codec) *
                                       priv->frame_size);
             }
+
+          info->nbuffers    = priv->nbuffers;
+          info->buffer_size = priv->buffer_size;
         }
         break;
 
