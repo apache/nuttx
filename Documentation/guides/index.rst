@@ -27,3 +27,4 @@ Guides
   testingtcpip.rst
   automounter.rst
   stm32nullpointer.rst
+  stm32ccm.rst
