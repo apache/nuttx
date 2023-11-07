@@ -57,6 +57,11 @@ struct thermal_instance_s
 
 void
 thermal_cooling_device_update (FAR struct thermal_cooling_device_s *cdev);
+#ifdef CONFIG_THERMAL_CDEV_CPUFREQ
+FAR struct thermal_cooling_device_s *thermal_cpufreq_cooling_register(void);
+void thermal_cpufreq_cooling_unregister(
+                                  FAR struct thermal_cooling_device_s *cdev);
+#endif /* CONFIG_THERMAL_CDEV_CPUFREQ */
 
 /* Zone Device */
 

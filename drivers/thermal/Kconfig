@@ -23,4 +23,11 @@ config THERMAL_GOVERNOR_STEP_WISE
 	---help---
 		Enable step wise governor.
 
+config THERMAL_CDEV_CPUFREQ
+	bool "Thermal cpufreq cooling device"
+	default n
+	depends on CPUFREQ
+	---help---
+		Enable thermal cpufreq cooling device.
+
 endif # THERMAL
