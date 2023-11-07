@@ -1422,10 +1422,16 @@ errout:
  *
  ****************************************************************************/
 
-static int stm32_foc_ioctl(struct foc_dev_s *dev, int cmd,
-                           unsigned long arg)
+static int stm32_foc_ioctl(struct foc_dev_s *dev, int cmd, unsigned long arg)
 {
-  return -1;
+  struct stm32_foc_board_s *board = STM32_FOCBOARD_FROM_DEV_GET(dev);
+
+  if (board->ops->ioctl != NULL)
+    {
+      return board->ops->ioctl(dev, cmd, arg);
+    }
+
+  return -ENOTTY;
 }
 
 /****************************************************************************
