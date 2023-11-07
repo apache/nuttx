@@ -926,6 +926,15 @@ int thermal_init(void)
     }
 #endif
 
+#ifdef CONFIG_THERMAL_DUMMY
+  ret = thermal_dummy_init();
+  if (ret < 0)
+    {
+      therr("Dummy driver init failed!\n");
+      return ret;
+    }
+#endif
+
 #ifdef CONFIG_THERMAL_CDEV_CPUFREQ
   if (NULL == thermal_cpufreq_cooling_register())
     {
