@@ -89,4 +89,10 @@ int thermal_zone_procfs_register(FAR struct thermal_zone_device_s *zdev);
 void thermal_zone_procfs_unregister(FAR struct thermal_zone_device_s *zdev);
 #endif
 
+/* Dummy Driver */
+
+#ifdef CONFIG_THERMAL_DUMMY
+int thermal_dummy_init(void);
+#endif
+
 #endif /* __DRIVERS_THERMAL_THERMAL_CORE_H */

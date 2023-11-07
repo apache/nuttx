@@ -36,6 +36,10 @@ ifeq ($(CONFIG_THERMAL_PROCFS),y)
 CSRCS += thermal_procfs.c
 endif
 
+ifeq ($(CONFIG_THERMAL_DUMMY),y)
+CSRCS += thermal_dummy.c
+endif
+
 DEPPATH += --dep-path thermal
 VPATH += thermal
 
