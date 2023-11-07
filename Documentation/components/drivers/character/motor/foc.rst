@@ -28,6 +28,8 @@ Files supporting FOC can be found in the following locations:
    "Lower-half" FOC interface.
 -  ``drivers/motor/foc/foc_dev.c``.
    The generic "upper half" FOC driver.
+-  ``drivers/motor/foc/foc_pwr.c``.
+   The generic power stage for FOC.
 
 The majority of the functionality available to the application
 is implemented in driver ioctl calls. Supported ioctl commands:
@@ -46,3 +48,8 @@ is implemented in driver ioctl calls. Supported ioctl commands:
   arg: ``struct foc_cfg_s`` pointer.
 - ``MTRIOC_GET_INFO`` -  Get the FOC device info,
   arg: ``struct foc_info_s`` pointer.
+
+Additionally, board logic can implement:
+
+- ``MTRIOC_SET_BOARDCFG`` - which returns the board specific FOC configuration
+- ``MTRIOC_GET_BOARDCFG`` - which sets the board-specific FOC configuration
