@@ -26,3 +26,4 @@ Guides
   ofloader.rst
   testingtcpip.rst
   automounter.rst
+  stm32nullpointer.rst
