@@ -10,3 +10,4 @@ Implementation Details
    critical_sections.rst
    interrupt_controls.rst
    preemption_latency.rst
+   bottomhalf_interrupt.rst
