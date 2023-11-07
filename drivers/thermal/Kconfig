@@ -37,4 +37,27 @@ config THERMAL_PROCFS
 	---help---
 		Enable thermal procfs.
 
+config THERMAL_DUMMY
+	bool "Thermal dummy driver"
+	default n
+	---help---
+		Enable thermal dummy driver.
+
+if THERMAL_DUMMY
+
+config THERMAL_DUMMY_POLLING_DELAY
+	int "Polling delay"
+	default 200
+	---help---
+		Polling delay(tick).
+
+config THERMAL_DUMMY_CPUFREQ
+	bool "Dummy cpufreq driver"
+	default n
+	depends on CPUFREQ
+	---help---
+		Enable cpufreq dummy driver.
+
+endif # THERMAL_DUMMY
+
 endif # THERMAL
