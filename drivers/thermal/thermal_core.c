@@ -741,6 +741,10 @@ thermal_zone_device_register(FAR const char *name,
       device_bind(zdev, cdev);
     }
 
+#ifdef CONFIG_THERMAL_PROCFS
+  thermal_zone_procfs_register(zdev);
+#endif
+
   nxmutex_unlock(&g_thermal_lock);
 
   thinfo("Registered zone device %s\n", zdev->name);
@@ -780,6 +784,11 @@ void thermal_zone_device_unregister(FAR struct thermal_zone_device_s *zdev)
     }
 
   list_delete(&zdev->node);
+
+#ifdef CONFIG_THERMAL_PROCFS
+  thermal_zone_procfs_unregister(zdev);
+#endif
+
   zone_set_governor(zdev, NULL);
   kmm_free(zdev);
   nxmutex_unlock(&g_thermal_lock);

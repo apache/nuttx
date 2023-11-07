@@ -82,4 +82,11 @@ int thermal_zone_get_trip_hyst(FAR struct thermal_zone_device_s *zdev,
 
 int thermal_register_step_wise_governor(void);
 
+/* ProcFS */
+
+#ifdef CONFIG_THERMAL_PROCFS
+int thermal_zone_procfs_register(FAR struct thermal_zone_device_s *zdev);
+void thermal_zone_procfs_unregister(FAR struct thermal_zone_device_s *zdev);
+#endif
+
 #endif /* __DRIVERS_THERMAL_THERMAL_CORE_H */
