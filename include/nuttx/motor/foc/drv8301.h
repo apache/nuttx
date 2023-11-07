@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/motor/drv8301.h
+ * include/nuttx/motor/foc/drv8301.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,14 +18,16 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_MOTOR_DRV8301_H
-#define __INCLUDE_NUTTX_MOTOR_DRV8301_H
+#ifndef __INCLUDE_NUTTX_MOTOR_FOC_DRV8301_H
+#define __INCLUDE_NUTTX_MOTOR_FOC_DRV8301_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <nuttx/motor/foc/foc_pwr.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -65,6 +67,7 @@
 #  define DRV8301_CTRL1_GCURR_1p7A      (0x0 << DRV8301_CTRL1_GCURR_SHIFT)
 #  define DRV8301_CTRL1_GCURR_0p7A      (0x1 << DRV8301_CTRL1_GCURR_SHIFT)
 #  define DRV8301_CTRL1_GCURR_0p25A     (0x2 << DRV8301_CTRL1_GCURR_SHIFT)
+#define DRV8301_CTRL1_GCURR(x)          ((x) << DRV8301_CTRL1_GCURR_SHIFT & DRV8301_CTRL1_GCURR_MASK)
 #define DRV8301_CTRL1_GRESET            (1 << 2) /* Gate reset */
 #define DRV8301_CTRL1_PWMMODE           (1 << 3) /* PWM input mode */
 #define DRV8301_CTRL1_OCPMODE_SHIFT     (4)      /* Overcurrent protection mode */
@@ -75,6 +78,8 @@
 #  define DRV8301_CTRL1_OCPMODE_DIS     (0x3 << DRV8301_CTRL1_OCPMODE_SHIFT)
 #define DRV8301_CTRL1_OCADJ_SHIFT       (6)      /* Overcurrent adjustment */
 #define DRV8301_CTRL1_OCADJ_MASK        (0x1f << DRV8301_CTRL1_OCADJ_SHIFT)
+#define DRV8301_CTRL1_OCADJ(x)          ((x) << DRV8301_CTRL1_OCADJ_SHIFT & DRV8301_CTRL1_OCADJ_MASK)
+#define DRV8301_OCADJ_DEFAULT           (16)
 
 /* Control 2 register */
 
@@ -84,7 +89,8 @@
 #  define DRV8301_CTRL2_OCTWMODE_OTONLY (0x1 << DRV8301_CTRL2_OCTWMODE_SHIFT)
 #  define DRV8301_CTRL2_OCTWMODE_OCONLY (0x2 << DRV8301_CTRL2_OCTWMODE_SHIFT)
 #define DRV8301_CTRL2_GAIN_SHIFT        (2)      /* Gain of shunt amplifier */
-#define DRV8301_CTRL2_GAIN_MASK         (0x2 << DRV8301_CTRL2_GAIN_SHIFT)
+#define DRV8301_CTRL2_GAIN_MASK         (0x3 << DRV8301_CTRL2_GAIN_SHIFT)
+#define DRV8301_CTRL2_GAIN(x)           ((x) << DRV8301_CTRL2_GAIN_SHIFT & DRV8301_CTRL2_GAIN_MASK)
 #  define DRV8301_CTRL2_GAIN_10         (0x0 << DRV8301_CTRL2_GAIN_SHIFT)
 #  define DRV8301_CTRL2_GAIN_20         (0x1 << DRV8301_CTRL2_GAIN_SHIFT)
 #  define DRV8301_CTRL2_GAIN_40         (0x2 << DRV8301_CTRL2_GAIN_SHIFT)
@@ -97,8 +103,76 @@
  * Public Types
  ****************************************************************************/
 
+/* Gate current */
+
+enum drv8301_gatecurr_e
+{
+  DRV8301_GATECURR_1p7  = 0,
+  DRV8301_GATECURR_0p7  = 1,
+  DRV8301_GATECURR_0p25 = 2
+};
+
+/* Gain of shunt amplifier */
+
+enum drv8301_gain_e
+{
+  DRV8301_GAIN_10 = 0,
+  DRV8301_GAIN_20 = 1,
+  DRV8301_GAIN_40 = 2,
+  DRV8301_GAIN_80 = 3
+};
+
+/* PWM mode */
+
+enum drv8301_pwmmode_e
+{
+  DRV8301_PWM_6IN = 0,
+  DRV8301_PWM_3IN = 1,
+};
+
+/* DRV8301 board ops */
+
+struct drv8301_ops_s
+{
+  CODE int (*fault_attach)(FAR struct focpwr_dev_s *dev, xcpt_t isr,
+                           FAR void *arg);
+  CODE int (*gate_enable)(FAR struct focpwr_dev_s *dev, bool enable);
+  CODE int (*configure)(FAR struct focpwr_dev_s *dev);
+  CODE void (*fault_handle)(FAR struct focpwr_dev_s *dev);
+};
+
+/* DRV8301 configuration */
+
+struct drv8301_cfg_s
+{
+  /* SPI frequency */
+
+  uint32_t freq;
+
+  /* Control registers settings */
+
+  uint8_t gain:2;                /* Gain of shunt amplifier */
+  uint8_t gate_curr:2;           /* Gate current */
+  uint8_t pwm_mode:1;            /* PWM 3 input mode if set to 1 */
+  uint8_t oc_adj:5;              /* Overcurrent adjustment */
+};
+
+/* DRV8301 board data */
+
+struct drv8301_board_s
+{
+  FAR struct spi_dev_s     *spi;
+  FAR struct drv8301_ops_s *ops;
+  FAR struct drv8301_cfg_s *cfg;
+  int                       devno;
+};
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __INCLUDE_NUTTX_MOTOR_DRV8301_H */
+int drv8301_register(FAR const char *path,
+                     FAR struct foc_dev_s *dev,
+                     FAR struct drv8301_board_s *board);
+
+#endif /* __INCLUDE_NUTTX_MOTOR_FOC_DRV8301_H */

@@ -17,6 +17,7 @@
 # the License.
 #
 # ##############################################################################
+
 if(CONFIG_MOTOR_FOC)
   nuttx_add_subdirectory()
 endif()
