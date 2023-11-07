@@ -30,4 +30,11 @@ config THERMAL_CDEV_CPUFREQ
 	---help---
 		Enable thermal cpufreq cooling device.
 
+config THERMAL_PROCFS
+	bool "Thermal PROCFS support"
+	default n
+	depends on FS_PROCFS
+	---help---
+		Enable thermal procfs.
+
 endif # THERMAL
