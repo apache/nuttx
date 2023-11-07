@@ -566,7 +566,7 @@ static size_t wpa_ssid_decode(uint8_t *buf, size_t maxlen, const char *str)
                     val = hex2byte(pos);
                     if (val < 0)
                       {
-                        val = hex2num(*pos);
+                        val = hex2nibble(*pos);
                         if (val < 0)
                             break;
                         buf[len++] = val;
