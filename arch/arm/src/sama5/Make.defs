@@ -93,6 +93,14 @@ else
 endif
 endif
 
+ifeq ($(CONFIG_SAMA5_QSPI0),y)
+CHIP_CSRCS += sam_qspi.c
+else
+ifeq ($(CONFIG_SAMA5_QSPI1),y)
+CHIP_CSRCS += sam_qspi.c
+endif
+endif
+
 ifeq ($(CONFIG_SAMA5D2_CLASSD), y)
 CHIP_CSRCS += sam_classd.c
 endif
