@@ -149,6 +149,14 @@ config SAMA5_HAVE_PIOE
 	bool
 	default n
 
+config SAMA5_HAVE_QSPI0
+	bool
+	default n
+
+config SAMA5_HAVE_QSPI1
+	bool
+	default n
+
 config SAMA5_HAVE_SAIC
 	bool
 	default n
@@ -250,7 +258,8 @@ config ARCH_CHIP_SAMA5D2
 	select SAMA5_HAVE_FLEXCOM2
 	select SAMA5_HAVE_FLEXCOM3
 	select SAMA5_HAVE_FLEXCOM4
-	select SAMA5_HAVE_QSPI
+	select SAMA5_HAVE_QSPI0
+	select SAMA5_HAVE_QSPI1
 	select SAMA5_HAVE_XDMA
 	select SAMA5_HAVE_SAIC
 	select SAMA5_HAVE_SFC
@@ -650,6 +659,16 @@ config SAMA5_SPI2
 	bool "Serial Peripheral Interface 2 (SPI2)"
 	default n
 	depends on SAMA5_HAVE_SPI2
+
+config SAMA5_QSPI0
+	bool "Quad SPI interface 0 (QSPI0)"
+	default n
+	depends on SAMA5_HAVE_QSPI0
+
+config SAMA5_QSPI1
+	bool "Quad SPI interface 1 (QSPI1)"
+	default n
+	depends on SAMA5_HAVE_QSPI1
 
 config SAMA5_TC0
 	bool "Timer Counter 0 (ch. 0, 1, 2) (TC0)"
@@ -3458,6 +3477,53 @@ config SAMA5_FLEXCOM_SPI_DMADEBUG
 
 endmenu # Flexcom SPI device driver options
 endif # SAMA5_FLEXCOM0_SPI || SAMA5_FLEXCOM1_SPI || SAMA5_FLEXCOM2_SPI || SAMA5_FLEXCOM3_SPI || SAMA5_FLEXCOM4_SPI
+
+menu "QSPI Device Driver Configuration"
+	depends on SAMA5_QSPI0 || SAMA5_QSPI1
+
+config SAMA5_QSPI_DLYBS
+	int "Delay Before QSCK (nsec)"
+	default 0
+
+config SAMA5_QSPI_DLYBCT
+	int "Delay Between Consecutive Transfers (nsec)"
+	default 0
+
+config SAMA5_QSPI_DMA
+	bool "QSPI DMA"
+	default n
+	depends on SAMA5_XDMAC0 || SAMA5_XDMAC1
+	---help---
+		Use XDMA to improve SPI transfer performance.
+
+config SAMA5_QSPI_DMATHRESHOLD
+	int "QSPI DMA threshold"
+	default 4
+	depends on SAMA5_QSPI_DMA
+	---help---
+		When QSPI (X)DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  But we need a threshold value to determine what
+		is small.  That value is provided by SAMA5_QSPI_DMATHRESHOLD.
+
+config SAMA5_QSPI_DMADEBUG
+	bool "QSPI DMA transfer debug"
+	depends on SAMA5_QSPI_DMA && DEBUG_FEATURES && DEBUG_DMA
+	default n
+	---help---
+		Enable special debug instrumentation analyze QSPI DMA data transfers.
+		This logic is as non-invasive as possible:  It samples DMA
+		registers at key points in the data transfer and then dumps all of
+		the registers at the end of the transfer.
+
+config SAMA5_QSPI_REGDEBUG
+	bool "QSPI Register level debug"
+	depends on DEBUG_SPI_INFO
+	default n
+	---help---
+		Output detailed register-level QSPI device debug information.
+		Requires also CONFIG_DEBUG_SPI_INFO.
+
+endmenu # QSPI Device Driver Configuration
 
 if SAMA5_TWI0 || SAMA5_TWI1 || SAMA5_TWI2 || SAMA5_TWI3 || SAMA5_FLEXCOM_TWI
 
