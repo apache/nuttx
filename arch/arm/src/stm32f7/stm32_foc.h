@@ -89,6 +89,10 @@ struct stm32_foc_board_ops_s
 
   int (*shutdown)(struct foc_dev_s *dev);
 
+  /* Board-specific ioctl (optional) */
+
+  int (*ioctl)(struct foc_dev_s *dev, int cmd, unsigned long arg);
+
   /* Board-specific calibration setup */
 
   int (*calibration)(struct foc_dev_s *dev, bool state);
