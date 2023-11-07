@@ -17,7 +17,6 @@ config ARCH_CHIP_GOLDFISH_CORTEXA7
 	select ARCH_HAVE_ADDRENV
 	select ARCH_HAVE_LOWVECTORS
 	select ARCH_HAVE_MULTICPU
-	select ARCH_HAVE_TRUSTZONE
 	select ARCH_NEED_ADDRENV_MAPPING
 	select ARMV7A_HAVE_GICv2
 	select ARMV7A_HAVE_GTM
@@ -26,5 +25,16 @@ config ARCH_CHIP_GOLDFISH_CORTEXA7
 endchoice # Goldfish Chip Selection
 
 endmenu # "Goldfish Virt Chip Selection"
+
+config ARCH_CHIP_GOLDFISH_TRUSTZONE
+	bool "Enable Arm Security Extensions (TrustZone)"
+	select ARCH_HAVE_TRUSTZONE
+	default n
+	---help---
+		Doc: https://qemu-project.gitlab.io/qemu/system/arm/virt.html
+		shows that set secure=on/of can emulating a guest CPU which
+		implements the Arm Security Extensions (TrustZone).
+		The default is off. And this config can enable/disable
+		TrustZone in qemu chip.
 
 endif # ARCH_CHIP_GOLDFISH_ARM
