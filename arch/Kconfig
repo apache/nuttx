@@ -528,6 +528,13 @@ config ARCH_HAVE_CPUINFO
 	bool
 	default n
 
+config ARCH_CPUINFO_FREQ_KHZ
+	int "Default CPU frequency"
+	default 0
+	depends on ARCH_HAVE_CPUINFO
+	---help---
+		Defines the CPU's default maximum frequency. Frequency unit KHZ.
+
 config ARCH_HAVE_TCBINFO
 	bool
 	default n
