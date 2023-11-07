@@ -1,6 +1,5 @@
 /****************************************************************************
- * include/nuttx/motor/motor_ioctl.h
- * NuttX Motor-Related IOCTLs definitions
+ * include/nuttx/motor/foc/foc_pwr.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -19,41 +18,49 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_MOTOR_MOTOR_IOCTL_H
-#define __INCLUDE_NUTTX_MOTOR_MOTOR_IOCTL_H
+#ifndef __INCLUDE_NUTTX_MOTOR_FOC_FOC_PWR_H
+#define __INCLUDE_NUTTX_MOTOR_FOC_FOC_PWR_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/fs/ioctl.h>
+
+#include <nuttx/motor/foc/foc.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Types
  ****************************************************************************/
 
-/* All foc-related IOCTL commands must be defined in this header file
- * in order to assure that every IOCTL command is unique and will not be
- * aliased.
- */
+/* FOC power-stage driver operations */
 
-#define MTRIOC_START          _MTRIOC(1)
-#define MTRIOC_STOP           _MTRIOC(2)
-#define MTRIOC_GET_STATE      _MTRIOC(3)
-#define MTRIOC_CLEAR_FAULT    _MTRIOC(4)
-#define MTRIOC_SET_PARAMS     _MTRIOC(5)
-#define MTRIOC_SET_CONFIG     _MTRIOC(6)
-#define MTRIOC_GET_INFO       _MTRIOC(7)
-#define MTRIOC_SET_MODE       _MTRIOC(8)
-#define MTRIOC_SET_LIMITS     _MTRIOC(9)
-#define MTRIOC_SET_FAULT      _MTRIOC(10)
-#define MTRIOC_GET_FAULT      _MTRIOC(11)
-#define MTRIOC_PWM_OFF        _MTRIOC(12)
-#define MTRIOC_CALIBRATE      _MTRIOC(13)
-#define MTRIOC_SELFTEST       _MTRIOC(14)
-#define MTRIOC_SET_CALIBDATA  _MTRIOC(15)
-#define MTRIOC_SET_BOARDCFG   _MTRIOC(16)
-#define MTRIOC_GET_BOARDCFG   _MTRIOC(17)
+struct focpwr_dev_s;
+struct focpwr_ops_s
+{
+  CODE int (*setup)(FAR struct focpwr_dev_s *dev);
+  CODE int (*shutdown)(FAR struct focpwr_dev_s *dev);
+  CODE int (*calibration)(FAR struct focpwr_dev_s *dev, bool state);
+  CODE int (*ioctl)(FAR struct focpwr_dev_s *dev, int cmd,
+                    unsigned long arg);
+};
 
-#endif /* __INCLUDE_NUTTX_MOTOR_MOTOR_IOCTL_H */
+/* FOC power-stage driver */
+
+struct focpwr_dev_s
+{
+  FAR struct foc_dev_s    *dev;
+  FAR struct focpwr_ops_s *ops;
+  int                      devno;
+};
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+int focpwr_initialize(FAR struct focpwr_dev_s *pwr,
+                      int devno,
+                      FAR struct foc_dev_s *dev,
+                      FAR struct focpwr_ops_s *ops);
+
+#endif /* __INCLUDE_NUTTX_MOTOR_FOC_FOC_PWR_H */
