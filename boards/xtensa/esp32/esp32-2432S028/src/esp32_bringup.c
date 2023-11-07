@@ -71,6 +71,7 @@
 #ifdef CONFIG_LCD_DEV
 #  include <nuttx/board.h>
 #  include <nuttx/lcd/lcd_dev.h>
+#  include "esp32_backlight.h"
 #endif
 
 #include "esp32-2432S028.h"
@@ -333,6 +334,12 @@ int esp32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: board_lcd_initialize() failed: %d\n", ret);
+    }
+
+  ret = esp32_set_backlight(DISPLAY_BCKL_LEVEL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp32_set_backlight() failed: %d\n", ret);
     }
 
   ret = lcddev_register(0);
