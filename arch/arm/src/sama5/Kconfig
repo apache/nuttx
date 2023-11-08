@@ -1092,13 +1092,13 @@ choice
 		TRAILING EDGE: The signal is single-ended.
 			If bit NON_OVERLAP is cleared, the signal is sent to 
 			CLASSD_L0 and CLASSD_R0.
-			
+
 			If bit NON_OVERLAP is set, the signal is sent to
 			CLASSD_L0/L1 and CLASSD_R0/R1.
 		UNIFORM: The signal is differential.
 			If bit NON_OVERLAP is cleared, the signal is sent to 
 			CLASSD_L0/L2 and CLASSD_R0/R2.
-			
+
 			If bit NON_OVERLAP is set, the signal is sent to 
 			CLASSD_L0/L1/L2/L3 and CLASSD_R0/R1/R2/R3.
 
@@ -1109,7 +1109,7 @@ config SAMA5D2_CLASSD_PWM_UNIFORM
 bool "Uniform"
 
 endchoice # Class D PWM Modulation Type
-		
+
 config SAMA5D2_CLASSD_NON_OVERLAP_MODE
 	bool "Non-overlapping Circuit Enable (NON_OVERLAP)"
 	default n

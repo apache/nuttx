@@ -865,7 +865,7 @@ comment "General storage MTD configuration"
 
 config ESP32S2_MTD
 	bool "MTD driver"
-	default y 
+	default y
 	select MTD
 	select MTD_BYTE_WRITE
 	select MTD_PARTITION
