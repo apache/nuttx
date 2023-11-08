@@ -57,6 +57,6 @@ config ESP32S3_EYE_LCD
 	select LCD_DEV
 	select LCD_ST7789
 	---help---
-		Enable board LCD support, IC is LCD_ST7789V. 
+		Enable board LCD support, IC is LCD_ST7789V.
 
 endif # ARCH_BOARD_ESP32S3_EYE

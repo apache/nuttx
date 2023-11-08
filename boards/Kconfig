@@ -1721,7 +1721,7 @@ config ARCH_BOARD_LINUM_STM32H753BI
 	select ARCH_HAVE_BUTTONS
 	---help---
 		The Linum board is based on the STMicro STM32H753BI MCU.
-		
+
 config ARCH_BOARD_NUCLEO_L152RE
 	bool "STM32L152 Nucleo L152RE"
 	depends on ARCH_CHIP_STM32L152RE
@@ -3064,7 +3064,7 @@ config ARCH_BOARD
 	default "esp32-pico-kit"            if ARCH_BOARD_ESP32_PICO_KIT
 	default "esp32-sparrow-kit"         if ARCH_BOARD_ESP32_SPARROWKIT
 	default "esp32-wrover-kit"          if ARCH_BOARD_ESP32_WROVERKIT
-	default "esp32-2432S028"												if ARCH_BOARD_ESP32_2432S028
+	default "esp32-2432S028"            if ARCH_BOARD_ESP32_2432S028
 	default "esp32c3-devkit"            if ARCH_BOARD_ESP32C3_DEVKIT
 	default "esp32c3-devkit-rust-1"     if ARCH_BOARD_ESP32C3_DEVKIT_RUST1
 	default "esp32c3-generic"           if ARCH_BOARD_ESP32C3_GENERIC
@@ -3337,7 +3337,7 @@ config ARCH_BOARD
 	default "xx3823"                    if ARCH_BOARD_XX3823
 	default "s698pm-dkit"               if ARCH_BOARD_S698PM_DKIT
 	default "hpm6750evk2"               if ARCH_BOARD_HPM6750EVK2
-	default "at32f437-mini"  	    	if ARCH_BOARD_AT32F437_MINI
+	default "at32f437-mini"             if ARCH_BOARD_AT32F437_MINI
 
 comment "Common Board Options"
 
@@ -4271,7 +4271,7 @@ config ARCH_BOARD_COMMON
 	bool "Board common logic"
 	default n
 	---help---
-		 Board common logic located in each board/common folder.
+		Board common logic located in each board/common folder.
 
 if ARCH_BOARD_COMMON
 if ARCH_CHIP_ESP32
