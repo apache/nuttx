@@ -287,6 +287,7 @@ static int rpmsgblk_geometry_handler(FAR struct rpmsg_endpoint *ept,
 {
   FAR struct rpmsgblk_server_s *server = ept->priv;
   FAR struct rpmsgblk_geometry_s *msg = data;
+  struct geometry geo;
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   if (server->blknode->i_peer == NULL)
@@ -296,10 +297,16 @@ static int rpmsgblk_geometry_handler(FAR struct rpmsg_endpoint *ept,
     }
 #endif
 
-  DEBUGASSERT(msg->arglen == sizeof(struct geometry));
+  msg->header.result = server->bops->geometry(server->blknode, &geo);
 
-  msg->header.result = server->bops->geometry(
-    server->blknode, (FAR struct geometry *)msg->buf);
+  DEBUGASSERT(strlen(geo.geo_model) <= RPMSGBLK_NAME_MAX);
+
+  msg->available = geo.geo_available;
+  msg->mediachanged = geo.geo_mediachanged;
+  msg->writeenabled = geo.geo_writeenabled;
+  msg->nsectors = geo.geo_nsectors;
+  msg->sectorsize = geo.geo_sectorsize;
+  strlcpy(msg->model, geo.geo_model, sizeof(msg->model));
 
   return rpmsg_send(ept, msg, len);
 }
