@@ -43,9 +43,6 @@
 static int file_vioctl(FAR struct file *filep, int req, va_list ap)
 {
   FAR struct inode *inode;
-#ifdef CONFIG_FDSAN
-  FAR uint64_t *tag;
-#endif
   unsigned long arg;
   int ret = -ENOTTY;
 
@@ -113,15 +110,25 @@ static int file_vioctl(FAR struct file *filep, int req, va_list ap)
         break;
 
 #ifdef CONFIG_FDSAN
-      case FIOC_SETTAG:
-        tag = (FAR uint64_t *)arg;
-        filep->f_tag = *tag;
+      case FIOC_SETTAG_FDSAN:
+        filep->f_tag_fdsan = *(FAR uint64_t *)arg;
         ret = OK;
         break;
 
-      case FIOC_GETTAG:
-        tag = (FAR uint64_t *)arg;
-        *tag = filep->f_tag;
+      case FIOC_GETTAG_FDSAN:
+        *(FAR uint64_t *)arg = filep->f_tag_fdsan;
+        ret = OK;
+        break;
+#endif
+
+#ifdef CONFIG_FDCHECK
+      case FIOC_SETTAG_FDCHECK:
+        filep->f_tag_fdcheck = *(FAR uint8_t *)arg;
+        ret = OK;
+        break;
+
+      case FIOC_GETTAG_FDCHECK:
+        *(FAR uint8_t *)arg = filep->f_tag_fdcheck;
         ret = OK;
         break;
 #endif

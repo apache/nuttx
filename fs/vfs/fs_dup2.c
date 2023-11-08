@@ -163,6 +163,16 @@ int file_dup3(FAR struct file *filep1, FAR struct file *filep2, int flags)
   ret = file_close(filep2);
   DEBUGASSERT(ret == 0);
 
+  /* Copy tag */
+
+#ifdef CONFIG_FDSAN
+  temp.f_tag_fdsan = filep1->f_tag_fdsan;
+#endif
+
+#ifdef CONFIG_FDCHECK
+  temp.f_tag_fdcheck = filep1->f_tag_fdcheck;
+#endif
+
   /* Return the file structure */
 
   memcpy(filep2, &temp, sizeof(temp));
