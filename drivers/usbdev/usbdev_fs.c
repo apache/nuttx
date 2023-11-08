@@ -67,8 +67,10 @@ typedef struct usbdev_fs_waiter_sem_s
 struct usbdev_fs_ep_s
 {
   uint8_t                     crefs;      /* Count of opened instances */
+  bool                        unlinked;   /* Indicates if the driver has been unlinked */
   mutex_t                     lock;       /* Enforces device exclusive access */
   FAR struct usbdev_ep_s     *ep;         /* EP entry */
+  FAR struct usbdev_fs_dev_s *dev;        /* USB device */
   FAR usbdev_fs_waiter_sem_t *sems;       /* List of blocking request */
   struct sq_queue_s           reqq;       /* Available request containers */
   FAR struct usbdev_fs_req_s *reqbuffer;  /* Request buffer */
@@ -496,7 +498,9 @@ static int usbdev_fs_close(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct usbdev_fs_ep_s *fs_ep = inode->i_private;
+  FAR struct usbdev_fs_dev_s *fs = fs_ep->dev;
   int ret;
+  int i;
 
   /* Get exclusive access to the device structures */
 
@@ -512,7 +516,30 @@ static int usbdev_fs_close(FAR struct file *filep)
 
   assert(fs_ep->crefs >= 0);
 
-  nxmutex_unlock(&fs_ep->lock);
+  if (fs_ep->unlinked && fs_ep->crefs == 0)
+    {
+      bool do_free = true;
+
+      nxmutex_destroy(&fs_ep->lock);
+      for (i = 0; i < fs->devinfo.nendpoints; i++)
+        {
+          if (fs->eps[i].crefs > 0)
+            {
+              do_free = false;
+            }
+        }
+
+      if (do_free)
+        {
+          kmm_free(fs->eps);
+          fs->eps = NULL;
+        }
+    }
+  else
+    {
+      nxmutex_unlock(&fs_ep->lock);
+    }
+
   return OK;
 }
 
@@ -975,10 +1002,12 @@ static void usbdev_fs_ep_unbind(FAR const char *devname,
       fs_ep->ep = NULL;
     }
 
-  fs_ep->crefs = 0;
   unregister_driver(devname);
-
-  nxmutex_destroy(&fs_ep->lock);
+  fs_ep->unlinked = true;
+  if (fs_ep->crefs <= 0)
+    {
+      nxmutex_destroy(&fs_ep->lock);
+    }
 }
 
 /****************************************************************************
@@ -1122,6 +1151,7 @@ static int usbdev_fs_classbind(FAR struct usbdevclass_driver_s *driver,
 
   for (i = 0; i < devinfo->nendpoints; i++)
     {
+      fs->eps[i].dev = fs;
       snprintf(devname, sizeof(devname), "%s/ep%d",
                devinfo->name, i + 1);
       ret = usbdev_fs_ep_bind(devname, dev,
@@ -1157,6 +1187,7 @@ static void usbdev_fs_classunbind(FAR struct usbdevclass_driver_s *driver,
     driver, FAR struct usbdev_fs_driver_s, drvr);
   FAR struct usbdev_fs_dev_s *fs = &fs_drvr->dev;
   FAR struct usbdev_devinfo_s *devinfo = &fs->devinfo;
+  bool do_free = true;
   char devname[32];
   uint16_t i;
 
@@ -1169,10 +1200,17 @@ static void usbdev_fs_classunbind(FAR struct usbdevclass_driver_s *driver,
           usbdev_fs_ep_unbind(devname, dev,
                               devinfo->epinfos[i],
                               &fs->eps[i]);
+          if (fs->eps[i].crefs > 0)
+            {
+              do_free = false;
+            }
         }
 
-      kmm_free(fs->eps);
-      fs->eps = NULL;
+      if (do_free)
+        {
+          kmm_free(fs->eps);
+          fs->eps = NULL;
+        }
     }
 
   fs->cdev = NULL;
