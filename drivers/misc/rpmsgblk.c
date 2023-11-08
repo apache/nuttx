@@ -434,9 +434,7 @@ static int rpmsgblk_geometry(FAR struct inode *inode,
                              FAR struct geometry *geometry)
 {
   FAR struct rpmsgblk_s *priv = inode->i_private;
-  struct rpmsgblk_geometry_s *msg;
-  uint32_t space;
-  int msglen;
+  struct rpmsgblk_geometry_s msg;
   int ret;
 
   /* Sanity checks */
@@ -457,25 +455,19 @@ static int rpmsgblk_geometry(FAR struct inode *inode,
       goto out;
     }
 
-  msglen = sizeof(*msg) + sizeof(*geometry) - 1;
-
-  msg = rpmsgblk_get_tx_payload_buffer(priv, &space);
-  if (msg == NULL)
-    {
-      ret = -ENOMEM;
-      goto out;
-    }
-
-  DEBUGASSERT(space > msglen);
-
-  msg->arg    = (uintptr_t)geometry;
-  msg->arglen = sizeof(*geometry);
-  memcpy(msg->buf, geometry, sizeof(*geometry));
-
-  ret = rpmsgblk_send_recv(priv, RPMSGBLK_GEOMETRY, false, &msg->header,
-                           msglen, geometry);
+  ret = rpmsgblk_send_recv(priv, RPMSGBLK_GEOMETRY, true, &msg.header,
+                           sizeof(msg), NULL);
   if (ret >= 0)
     {
+      DEBUGASSERT(msg.nsectors == (blkcnt_t)msg.nsectors);
+      DEBUGASSERT(strlen(msg.model) <= RPMSGBLK_NAME_MAX);
+
+      geometry->geo_available = msg.available;
+      geometry->geo_mediachanged = msg.mediachanged;
+      geometry->geo_writeenabled = msg.writeenabled;
+      geometry->geo_nsectors = msg.nsectors;
+      geometry->geo_sectorsize = msg.sectorsize;
+      strlcpy(geometry->geo_model, msg.model, sizeof(geometry->geo_model));
       memcpy(&priv->geo, geometry, sizeof(priv->geo));
     }
 
@@ -520,8 +512,6 @@ static ssize_t rpmsgblk_ioctl_arglen(int cmd, unsigned long arg)
         return sizeof(struct mtd_smart_procfs_data_s);
       case BIOC_DEBUGCMD:
         return sizeof(struct mtd_smart_debug_data_s);
-      case BIOC_GEOMETRY:
-        return sizeof(struct geometry);
       case BIOC_PARTINFO:
         return sizeof(struct partition_info_s);
       case BIOC_BLKSSZGET:
@@ -585,6 +575,11 @@ static int rpmsgblk_ioctl(FAR struct inode *inode, int cmd,
   /* Sanity checks */
 
   DEBUGASSERT(priv != NULL);
+
+  if (cmd == BIOC_GEOMETRY)
+    {
+      return rpmsgblk_geometry(inode, (FAR struct geometry *)arg);
+    }
 
   /* Call our internal routine to perform the ioctl */
 
@@ -895,12 +890,11 @@ static int rpmsgblk_geometry_handler(FAR struct rpmsg_endpoint *ept,
   FAR struct rpmsgblk_header_s *header = data;
   FAR struct rpmsgblk_cookie_s *cookie =
       (FAR struct rpmsgblk_cookie_s *)(uintptr_t)header->cookie;
-  FAR struct rpmsgblk_geometry_s *rsp = data;
 
   cookie->result = header->result;
-  if (cookie->result >= 0 && rsp->arglen > 0)
+  if (cookie->result >= 0)
     {
-      memcpy(cookie->data, rsp->buf, rsp->arglen);
+      memcpy(cookie->data, data, len);
     }
 
   return rpmsg_post(ept, &cookie->sem);
