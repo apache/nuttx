@@ -1,0 +1,27 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_NUCLEO_H745ZI
+
+choice
+	prompt "Nucleo H745ZI SMPS/LDO configuration"
+	default NUCLEOH745ZI_SMPS
+
+config NUCLEOH745ZI_SMPS
+	bool "Internal SMPS only (default)"
+	select STM32H7_PWR_DIRECT_SMPS_SUPPLY
+
+config NUCLEOH745ZI_LDO
+	bool "Internal LDO only"
+
+config NUCLEOH745ZI_SMPS_LDO
+	bool "Internal SMPS and LDO cascaded (not supported)"
+
+config NUCLEOH745ZI_BYPASS
+	bool "Bypass (not supported)"
+
+endchoice
+
+endif # ARCH_BOARD_NUCLEO_H745ZI

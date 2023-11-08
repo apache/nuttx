@@ -314,7 +314,7 @@ config ARCH_BOARD_ESP32_2432S028
 	depends on ARCH_CHIP_ESP32WROVER
 	---help---
 	ESP32-2432S028 is an ESP32 board with LCD Display, LED RGB and SD Cards.
-	
+
 config ARCH_BOARD_LILYGO_TBEAM_LORA_GPS
 	bool "LilyGO TBeam V1.1 LoRa/GPS"
 	depends on ARCH_CHIP_ESP32WROOM32
@@ -1718,6 +1718,14 @@ config ARCH_BOARD_NUCLEO_H743ZI2
 config ARCH_BOARD_NUCLEO_H745ZI
 	bool "STM32H745 Nucleo H745ZI"
 	depends on ARCH_CHIP_STM32H745ZI
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	---help---
+		STMicro Nucleo H745ZI board based on the STMicro STM32H745ZI MCU.
+
+config ARCH_BOARD_HELIGUYFMU_H747AI
+	bool "Heliguy FMU H747AI"
+	depends on ARCH_CHIP_STM32H747AI
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	---help---

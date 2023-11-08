@@ -78,7 +78,11 @@
 #    include <arch/stm32h7/stm32h7x5xx_cpu2_irq.h>
 #  endif
 #elif defined(CONFIG_STM32H7_STM32H7X7XX)
-#  include <arch/stm32h7/stm32h7x7xx_irq.h>
+#  if CONFIG_ARCH_CHIP_STM32H7_CORTEXM7
+#    include <arch/stm32h7/stm32h7x5xx_irq.h>
+#  else
+#    include <arch/stm32h7/stm32h7x5xx_cpu2_irq.h>
+#  endif
 #else
 #  error "Unsupported STM32 H7 chip"
 #endif
