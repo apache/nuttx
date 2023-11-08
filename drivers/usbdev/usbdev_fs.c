@@ -568,6 +568,14 @@ static ssize_t usbdev_fs_read(FAR struct file *filep, FAR char *buffer,
       return ret;
     }
 
+  /* Check if the usbdev device has been unbind */
+
+  if (fs_ep->unlinked)
+    {
+      nxmutex_unlock(&fs_ep->lock);
+      return -ENOTCONN;
+    }
+
   /* Check for available data */
 
   if (sq_empty(&fs_ep->reqq))
@@ -671,6 +679,14 @@ static ssize_t usbdev_fs_write(FAR struct file *filep,
       return ret;
     }
 
+  /* Check if the usbdev device has been unbind */
+
+  if (fs_ep->unlinked)
+    {
+      nxmutex_unlock(&fs_ep->lock);
+      return -ENOTCONN;
+    }
+
   /* Check for available write request */
 
   if (sq_empty(&fs_ep->reqq))
@@ -772,6 +788,14 @@ static int usbdev_fs_poll(FAR struct file *filep, FAR struct pollfd *fds,
   if (ret < 0)
     {
       return ret;
+    }
+
+  /* Check if the usbdev device has been unbind */
+
+  if (fs_ep->unlinked)
+    {
+      nxmutex_unlock(&fs_ep->lock);
+      return -ENOTCONN;
     }
 
   if (!setup)
@@ -1004,6 +1028,11 @@ static void usbdev_fs_ep_unbind(FAR const char *devname,
 
   unregister_driver(devname);
   fs_ep->unlinked = true;
+
+  /* Notify the usbdev device has been unbind */
+
+  poll_notify(fs_ep->fds, CONFIG_USBDEV_FS_NPOLLWAITERS, POLLHUP | POLLERR);
+
   if (fs_ep->crefs <= 0)
     {
       nxmutex_destroy(&fs_ep->lock);
