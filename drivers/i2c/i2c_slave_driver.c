@@ -509,7 +509,7 @@ int i2c_slave_register(FAR struct i2c_slave_s *dev, int bus, int addr,
     }
 
   ret = I2CS_REGISTERCALLBACK(priv->dev, i2c_slave_callback, priv);
-  if (ret > 0)
+  if (ret >= 0)
     {
       return OK;
     }
