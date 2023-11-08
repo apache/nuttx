@@ -37,14 +37,16 @@
 #include "esp32s3_irq.h"
 #include "esp32s3_rtc_gpio.h"
 #include "esp32s3_wdt.h"
-
-#ifdef CONFIG_ESP32S3_RWDT
-#  error "RWDT not yet supported due to missing RTC driver!"
-#endif
+#include <esp32s3_rtc.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Helpers for converting from Q13.19 fixed-point format to float */
+
+#define N 19
+#define Q_TO_FLOAT(x) ((float)x/(float)(1<<N))
 
 /* Check whether the provided device is a RTC Watchdog Timer */
 
@@ -98,6 +100,7 @@ static int32_t wdt_setisr(struct esp32s3_wdt_dev_s *dev,
 static void wdt_enableint(struct esp32s3_wdt_dev_s *dev);
 static void wdt_disableint(struct esp32s3_wdt_dev_s *dev);
 static void wdt_ackint(struct esp32s3_wdt_dev_s *dev);
+static uint16_t wdt_rtc_clk(struct esp32s3_wdt_dev_s *dev);
 
 /****************************************************************************
  * Private Data
@@ -132,7 +135,7 @@ struct esp32s3_wdt_ops_s esp32s3_rwdt_ops =
   .settimeout    = wdt_settimeout,
   .feed          = wdt_feed,
   .stg_conf      = wdt_config_stage,
-  .rtc_clk       = NULL,
+  .rtc_clk       = wdt_rtc_clk,
   .setisr        = wdt_setisr,
   .enableint     = wdt_enableint,
   .disableint    = wdt_disableint,
@@ -597,6 +600,70 @@ static void wdt_feed(struct esp32s3_wdt_dev_s *dev)
     {
       wdt_putreg(dev, MWDT_FEED_OFFSET, TIMG_WDT_FEED);
     }
+}
+
+/****************************************************************************
+ * Name: wdt_rtc_clk
+ *
+ * Description:
+ *   Check the RTC clock source and return the necessary cycles to complete
+ *   1 ms.
+ *
+ * Parameters:
+ *   dev - Pointer to the driver state structure.
+ *
+ * Returned Values:
+ *   Number of cycles to complete 1 ms.
+ *
+ ****************************************************************************/
+
+static uint16_t wdt_rtc_clk(struct esp32s3_wdt_dev_s *dev)
+{
+  enum esp32s3_rtc_slow_freq_e slow_clk_rtc;
+  uint32_t period_13q19;
+  float period;
+  float cycles_ms;
+  uint16_t cycles_ms_int;
+
+  /* Calibration map: Maps each RTC SLOW_CLK source to the number
+   * used to calibrate this source.
+   */
+
+  static const enum esp32s3_rtc_cal_sel_e cal_map[] =
+  {
+    RTC_CAL_RTC_MUX,
+    RTC_CAL_32K_XTAL,
+    RTC_CAL_8MD256
+  };
+
+  DEBUGASSERT(dev);
+
+  /* Check which clock is sourcing the slow_clk_rtc */
+
+  slow_clk_rtc = esp32s3_rtc_get_slow_clk();
+
+  /* Get the slow_clk_rtc period in us in Q13.19 fixed point format */
+
+  period_13q19 = esp32s3_rtc_clk_cal(cal_map[slow_clk_rtc],
+                                     SLOW_CLK_CAL_CYCLES);
+
+  /* Assert no error happened during the calibration */
+
+  DEBUGASSERT(period_13q19 != 0);
+
+  /* Convert from Q13.19 format to float */
+
+  period = Q_TO_FLOAT(period_13q19);
+
+  /* Get the number of cycles necessary to count 1 ms */
+
+  cycles_ms = 1000.0 / period;
+
+  /* Get the integer number of cycles */
+
+  cycles_ms_int = (uint16_t)cycles_ms;
+
+  return cycles_ms_int;
 }
 
 /****************************************************************************
