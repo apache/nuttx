@@ -189,13 +189,25 @@
                                            */
 
 #ifdef CONFIG_FDSAN
-#define FIOC_SETTAG     _FIOC(0x000e)     /* IN:  FAR uint64_t *
+#define FIOC_SETTAG_FDSAN _FIOC(0x000e)   /* IN:  FAR uint64_t *
                                            * Pointer to file tag
                                            * OUT: None
                                            */
 
-#define FIOC_GETTAG     _FIOC(0x000f)     /* IN:  FAR uint64_t *
+#define FIOC_GETTAG_FDSAN _FIOC(0x000f)   /* IN:  FAR uint64_t *
                                            * Pointer to file tag
+                                           * OUT: None
+                                           */
+#endif
+
+#ifdef CONFIG_FDCHECK
+#define FIOC_SETTAG_FDCHECK _FIOC(0x0010) /* IN:  FAR uint8_t *
+                                           * Pointer to file fdcheck tag
+                                           * OUT: None
+                                           */
+
+#define FIOC_GETTAG_FDCHECK _FIOC(0x0011) /* IN:  FAR uint8_t *
+                                           * Pointer to file fdcheck tag
                                            * OUT: None
                                            */
 #endif

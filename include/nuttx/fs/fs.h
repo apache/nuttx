@@ -468,7 +468,11 @@ struct file
   FAR struct inode *f_inode;    /* Driver or file system interface */
   FAR void         *f_priv;     /* Per file driver private data */
 #ifdef CONFIG_FDSAN
-  uint64_t          f_tag;      /* file owner tag, init to 0 */
+  uint64_t          f_tag_fdsan; /* File owner fdsan tag, init to 0 */
+#endif
+
+#ifdef CONFIG_FDCHECK
+  uint8_t           f_tag_fdcheck; /* File owner fdcheck tag, init to 0 */
 #endif
 };
 

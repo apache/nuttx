@@ -46,21 +46,22 @@ extern "C"
  *
  * Description: Obtain original fd information
  *
- * Val carries the pid and fd information.
+ * Val carries the pid, tag and fd information.
  * The original fd information is stored in low bit of val.
- * The pid information is stored in the high bit of val.
+ * The pid and tag information is stored in the high bit of val.
  * For ease of understanding, let's give an example where
  * the following information is represented in 32-bit binary format
  *
- *  val       00000000 00000000 01010101 10001010
+ *  val       00000000 01010101 00000001 10001010
  *  fd        00000000 00000000 00000000 10001010
  *  pid       00000000 00000000 00000000 01010101
+ *  tag       00000000 00000000 00000000 00000001
  *
- * In this function, we also check if the pid information is correct.
+ * In this function, we also check if the pid and tag information is correct.
  * If there is an error, it will panic.
  *
  * Input Parameters:
- *   val - this val carrying pid and original fd information
+ *   val - this val carrying pid, tag and original fd information
  *
  * Returned Value: none
  *
@@ -71,17 +72,18 @@ int fdcheck_restore(int fd);
 /****************************************************************************
  * Name: fdcheck_protect
  *
- * Description: Obtain the combined value of fd and pid
+ * Description: Obtain the combined value of fd, pid and tag
  *
- * the return value carries the pid and fd information.
+ * the return value carries the pid, tag and fd information.
  * The original fd information is stored in low bit of val.
- * The pid information is stored in high bit of val.
+ * The pid and tag information is stored in high bit of val.
  * For ease of understanding, let's give an example where
  * the following information is represented in 32-bit binary format
  *
  *  fd        00000000 00000000 00000000 10001010
  *  pid       00000000 00000000 00000000 01010101
- *  val       00000000 00000000 01010101 10001010
+ *  tag       00000000 00000000 00000000 00000001
+ *  val       00000000 01010101 00000001 10001010
  *
  * Input Parameters:
  *   fd - original fd
