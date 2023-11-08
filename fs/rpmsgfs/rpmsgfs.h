@@ -115,19 +115,35 @@ begin_packed_struct struct rpmsgfs_ioctl_s
 #define rpmsgfs_sync_s rpmsgfs_close_s
 #define rpmsgfs_dup_s  rpmsgfs_close_s
 
+begin_packed_struct struct rpmsgfs_stat_priv_s
+{
+  uint32_t dev;       /* Device ID of device containing file */
+  uint32_t mode;      /* File type, attributes, and access mode bits */
+  uint32_t rdev;      /* Device ID (if file is character or block special) */
+  uint16_t ino;       /* File serial number */
+  uint16_t nlink;     /* Number of hard links to the file */
+  int64_t  size;      /* Size of file/directory, in bytes */
+  int64_t  atim_sec;  /* Time of last access, seconds */
+  int64_t  atim_nsec; /* Time of last access, nanoseconds */
+  int64_t  mtim_sec;  /* Time of last modification, seconds */
+  int64_t  mtim_nsec; /* Time of last modification, nanoseconds */
+  int64_t  ctim_sec;  /* Time of last status change, seconds */
+  int64_t  ctim_nsec; /* Time of last status change, nanoseconds */
+  uint64_t blocks;    /* Number of blocks allocated */
+  int16_t  uid;       /* User ID of file */
+  int16_t  gid;       /* Group ID of file */
+  int16_t  blksize;   /* Block size used for filesystem I/O */
+  uint16_t reserved;  /* Reserved space */
+} end_packed_struct;
+
 begin_packed_struct struct rpmsgfs_fstat_s
 {
-  struct rpmsgfs_header_s header;
+  struct rpmsgfs_header_s    header;
+  struct rpmsgfs_stat_priv_s buf;
   union
   {
-    struct stat           buf;
-    uint32_t              reserved[16];
-  };
-
-  union
-  {
-    int32_t               fd;
-    char                  pathname[0];
+    int32_t                  fd;
+    char                     pathname[0];
   };
 } end_packed_struct;
 
@@ -158,12 +174,15 @@ begin_packed_struct struct rpmsgfs_readdir_s
 begin_packed_struct struct rpmsgfs_statfs_s
 {
   struct rpmsgfs_header_s header;
-  union
-  {
-    struct statfs         buf;
-    uint32_t              reserved[16];
-  };
-
+  uint32_t                type;     /* Type of filesystem */
+  uint32_t                reserved; /* Reserved space */
+  uint64_t                namelen;  /* Maximum length of filenames */
+  uint64_t                bsize;    /* Optimal block size for transfers */
+  uint64_t                blocks;   /* Total data blocks in the file system of this size */
+  uint64_t                bfree;    /* Free blocks in the file system */
+  uint64_t                bavail;   /* Free blocks avail to non-superuser */
+  uint64_t                files;    /* Total file nodes in the file system */
+  uint64_t                ffree;    /* Free file nodes in the file system */
   char                    pathname[0];
 } end_packed_struct;
 
@@ -183,18 +202,13 @@ begin_packed_struct struct rpmsgfs_mkdir_s
 
 begin_packed_struct struct rpmsgfs_fchstat_s
 {
-  struct rpmsgfs_header_s header;
-  int32_t                 flags;
+  struct rpmsgfs_header_s    header;
+  struct rpmsgfs_stat_priv_s buf;
+  int32_t                    flags;
   union
   {
-    struct stat           buf;
-    uint32_t              reserved[16];
-  };
-
-  union
-  {
-    int32_t               fd;
-    char                  pathname[0];
+    int32_t                  fd;
+    char                     pathname[0];
   };
 } end_packed_struct;
 
