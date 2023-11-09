@@ -525,6 +525,60 @@ static int lcdfb_ioctl(FAR struct fb_vtable_s *vtable,
 }
 
 /****************************************************************************
+ * Name: lcdfb_open
+ ****************************************************************************/
+
+static int lcdfb_open(FAR struct fb_vtable_s *vtable)
+{
+  int ret = OK;
+  FAR struct lcdfb_dev_s *priv;
+  FAR struct lcd_dev_s *lcd;
+
+  DEBUGASSERT(vtable != NULL);
+
+  priv = (FAR struct lcdfb_dev_s *)vtable;
+
+  if (priv != NULL)
+    {
+      lcd = priv->lcd;
+
+      if (lcd->open)
+        {
+          ret = lcd->open(lcd);
+        }
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: lcdfb_close
+ ****************************************************************************/
+
+static int lcdfb_close(FAR struct fb_vtable_s *vtable)
+{
+  int ret = OK;
+  FAR struct lcdfb_dev_s *priv;
+  FAR struct lcd_dev_s *lcd;
+
+  DEBUGASSERT(vtable != NULL);
+
+  priv = (FAR struct lcdfb_dev_s *)vtable;
+
+  if (priv != NULL)
+    {
+      lcd = priv->lcd;
+
+      if (lcd->close)
+        {
+          ret = lcd->close(lcd);
+        }
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -581,6 +635,8 @@ int up_fbinitialize(int display)
   priv->vtable.updatearea   = lcdfb_updateearea,
   priv->vtable.setpower     = lcdfb_setpower,
   priv->vtable.ioctl        = lcdfb_ioctl,
+  priv->vtable.open         = lcdfb_open,
+  priv->vtable.close        = lcdfb_close,
 
 #ifdef CONFIG_LCD_EXTERNINIT
   /* Use external graphics driver initialization */
