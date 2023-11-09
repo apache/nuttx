@@ -47,3 +47,16 @@ FAR char *strdup(FAR const char *s)
 
   return news;
 }
+
+FAR char *nx_strdup(FAR const char *s)
+{
+  size_t size = strlen(s) + 1;
+  FAR char *news = (FAR char *)kmm_malloc(size);
+
+  if (news != NULL)
+    {
+      strlcpy(news, s, size);
+    }
+
+  return news;
+}
