@@ -31,6 +31,38 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: nx_asprintf
+ *
+ * Description:
+ *   This function is similar to sprintf, except that it dynamically
+ *   allocates a string (as with kmm_malloc) to hold the output, instead of
+ *   putting the output in a buffer you allocate in advance.  The ptr
+ *   argument should be the address of a char * object, and a successful
+ *   call to asprintf stores a pointer to the newly allocated string at that
+ *   location.
+ *
+ * Returned Value:
+ *   The returned value is the number of characters allocated for the buffer,
+ *   or less than zero if an error occurred. Usually this means that the
+ *   buffer could not be allocated.
+ *
+ ****************************************************************************/
+
+int nx_asprintf(FAR char **ptr, FAR const IPTR char *fmt, ...)
+{
+  va_list ap;
+  int ret;
+
+  /* Let vasprintf do all of the work */
+
+  va_start(ap, fmt);
+  ret = nx_vasprintf(ptr, fmt, ap);
+  va_end(ap);
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: asprintf
  *
  * Description:
@@ -48,6 +80,7 @@
  *
  ****************************************************************************/
 
+#undef asprintf
 int asprintf(FAR char **ptr, FAR const IPTR char *fmt, ...)
 {
   va_list ap;
