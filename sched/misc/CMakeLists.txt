@@ -28,4 +28,8 @@ if(CONFIG_DUMP_ON_EXIT)
   list(APPEND SRCS dump.c)
 endif()
 
+if(CONFIG_BOARD_COREDUMP_SYSLOG OR CONFIG_BOARD_COREDUMP_BLKDEV)
+  list(APPEND SRCS coredump.c)
+endif()
+
 target_sources(sched PRIVATE ${SRCS})

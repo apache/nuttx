@@ -28,6 +28,10 @@ ifeq ($(CONFIG_DUMP_ON_EXIT),y)
 CSRCS += dump.c
 endif
 
+ifneq ($(CONFIG_BOARD_COREDUMP_SYSLOG)$(CONFIG_BOARD_COREDUMP_BLKDEV),)
+CSRCS += coredump.c
+endif
+
 # Include init build support
 
 DEPPATH += --dep-path misc
