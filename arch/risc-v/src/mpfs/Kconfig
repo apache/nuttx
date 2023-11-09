@@ -427,6 +427,12 @@ config MPFS_COREMMC_IRQNUM
 	range 0 63
 	depends on MPFS_COREMMC
 
+config MPFS_TAMPER
+	bool "Tamper detection"
+	default n
+	---help---
+		Enable tamper detection mechanisms.
+
 config MPFS_IHC_CLIENT
 	bool "IHC slave"
 	depends on RPTUN && !MPFS_BOOTLOADER

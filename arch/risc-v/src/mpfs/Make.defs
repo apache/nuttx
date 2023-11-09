@@ -120,6 +120,10 @@ ifeq ($(CONFIG_MPFS_MPUCFG),y)
 CHIP_CSRCS += mpfs_mpu.c
 endif
 
+ifeq ($(CONFIG_MPFS_TAMPER),y)
+CHIP_CSRCS += mpfs_tamper.c
+endif
+
 ifeq ($(CONFIG_MPFS_CRYPTO),y)
 include mpfs/crypto.defs
 endif
