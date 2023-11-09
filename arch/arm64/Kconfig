@@ -71,6 +71,7 @@ config ARCH_CHIP_GOLDFISH
 	select ARCH_HAVE_POWEROFF
 	select ARCH_HAVE_RESET
 	select ARCH_NEED_ADDRENV_MAPPING
+	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF
 	---help---
 		Android GoldFish platform for NuttX (ARMv8a),
 		based on ARM virt board

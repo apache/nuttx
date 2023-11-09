@@ -231,7 +231,7 @@ static void elf_emit_tcb_note(FAR struct elf_dumpinfo_s *cinfo,
   char name[ROUNDUP(CONFIG_TASK_NAME_SIZE, 8)];
   elf_prstatus_t status;
   elf_prpsinfo_t info;
-  FAR uint32_t *regs;
+  FAR uintptr_t *regs;
   Elf_Nhdr nhdr;
   int i;
 
@@ -267,17 +267,17 @@ static void elf_emit_tcb_note(FAR struct elf_dumpinfo_s *cinfo,
     {
       if (up_interrupt_context())
         {
-          regs = (FAR uint32_t *)CURRENT_REGS;
+          regs = (FAR uintptr_t *)CURRENT_REGS;
         }
       else
         {
           up_saveusercontext(g_running_regs);
-          regs = (FAR uint32_t *)g_running_regs;
+          regs = (FAR uintptr_t *)g_running_regs;
         }
     }
   else
     {
-      regs = tcb->xcp.regs;
+      regs = (uintptr_t *)tcb->xcp.regs;
     }
 
   if (regs != NULL)
