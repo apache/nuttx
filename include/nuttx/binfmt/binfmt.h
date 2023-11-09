@@ -29,6 +29,7 @@
 
 #include <spawn.h>
 #include <sys/types.h>
+#include <sys/utsname.h>
 
 #include <nuttx/sched.h>
 #include <nuttx/streams.h>
@@ -38,7 +39,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define BINFMT_NALLOC 4
+#define BINFMT_NALLOC     4
+#define COREDUMP_MAGIC    0x434f5245
 
 /****************************************************************************
  * Public Types
@@ -136,6 +138,16 @@ struct binfmt_s
   CODE int (*coredump)(FAR struct memory_region_s *regions,
                        FAR struct lib_outstream_s *stream,
                        pid_t pid);
+};
+
+/* Coredump information for block header */
+
+struct coredump_info_s
+{
+  uint32_t       magic;
+  struct utsname name;
+  time_t         time;
+  size_t         size;
 };
 
 /****************************************************************************
