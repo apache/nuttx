@@ -114,6 +114,42 @@ extern "C"
 int vnc_fbinitialize(int display, vnc_kbdout_t kbdout,
                      vnc_mouseout_t mouseout, FAR void *arg);
 
+/****************************************************************************
+ * Name: vnc_fb_register
+ *
+ * Description:
+ *   Register the framebuffer support for the specified display.
+ *
+ * Input Parameters:
+ *   display - The display number for the case of boards supporting multiple
+ *             displays or for hardware that supports multiple
+ *             layers (each layer is consider a display).  Typically zero.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned success; a negated errno value is returned on any
+ *   failure.
+ *
+ ****************************************************************************/
+
+int vnc_fb_register(int display);
+
+/****************************************************************************
+ * Name: vnc_fb_unregister
+ *
+ * Description:
+ *   Unregister the framebuffer support for the specified display.
+ *
+ * Input Parameters:
+ *   display - In the case of hardware with multiple displays, this
+ *     specifies the display.  Normally this is zero.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void vnc_fb_unregister(int display);
+
 #undef EXTERN
 #ifdef __cplusplus
 }

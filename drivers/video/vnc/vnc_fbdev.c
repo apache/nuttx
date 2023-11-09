@@ -582,102 +582,6 @@ static inline int vnc_wait_start(int display)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_fbinitialize
- *
- * Description:
- *   Initialize the framebuffer video hardware associated with the display.
- *
- * Input Parameters:
- *   display - In the case of hardware with multiple displays, this
- *     specifies the display.  Normally this is zero.
- *
- * Returned Value:
- *   Zero is returned on success; a negated errno value is returned on any
- *   failure.
- *
- ****************************************************************************/
-
-int up_fbinitialize(int display)
-{
-  int ret;
-  FAR struct vnc_session_s *session;
-#if defined (CONFIG_VNCSERVER_TOUCH) || defined (CONFIG_VNCSERVER_KBD)
-  char devname[NAME_MAX];
-#endif
-
-  DEBUGASSERT(display >= 0 && display < RFB_MAX_DISPLAYS);
-
-  /* Start the VNC server kernel thread. */
-
-  ret = vnc_start_server(display);
-
-  if (ret < 0)
-    {
-      gerr("ERROR: vnc_start_server() failed: %d\n", ret);
-      return ret;
-    }
-
-  /* Wait for the VNC server to be ready */
-
-  ret = vnc_wait_start(display);
-
-  if (ret < 0)
-    {
-      gerr("ERROR: wait for vnc server start failed: %d\n", ret);
-      return ret;
-    }
-
-  /* Save the input callout function information in the session structure. */
-
-  session           = g_vnc_sessions[display];
-  session->arg      = session;
-
-#ifdef CONFIG_VNCSERVER_TOUCH
-
-  ret = snprintf(devname, sizeof(devname),
-                 CONFIG_VNCSERVER_TOUCH_DEVNAME "%d", display);
-
-  if (ret < 0)
-    {
-      gerr("ERROR: Format vnc touch driver path failed.\n");
-      return ret;
-    }
-
-  ret = vnc_touch_register(devname, session);
-
-  if (ret < 0)
-    {
-      gerr("ERROR: Initial vnc touch driver failed.\n");
-      return ret;
-    }
-
-  session->mouseout = vnc_touch_event;
-#endif
-
-#ifdef CONFIG_VNCSERVER_KBD
-  ret = snprintf(devname, sizeof(devname),
-                 CONFIG_VNCSERVER_KBD_DEVNAME "%d", display);
-  if (ret < 0)
-    {
-      gerr("ERROR: Format vnc keyboard driver path failed.\n");
-      return ret;
-    }
-
-  ret = vnc_kbd_register(devname, session);
-
-  if (ret < 0)
-    {
-      gerr("ERROR: Initial vnc keyboard driver failed.\n");
-      return ret;
-    }
-
-  session->kbdout = vnc_kbd_event;
-#endif
-
-  return ret;
-}
-
-/****************************************************************************
  * Name: vnc_fbinitialize
  *
  * Description:
@@ -767,77 +671,149 @@ int vnc_fbinitialize(int display, vnc_kbdout_t kbdout,
 }
 
 /****************************************************************************
- * Name: up_fbgetvplane
+ * Name: vnc_fb_register
  *
  * Description:
- *   Return a a reference to the framebuffer object for the specified video
- *   plane of the specified plane.  Many OSDs support multiple planes of
- *   video.
+ *   Register the framebuffer support for the specified display.
  *
  * Input Parameters:
- *   display - In the case of hardware with multiple displays, this
- *     specifies the display.  Normally this is zero.
- *   vplane - Identifies the plane being queried.
+ *   display - The display number for the case of boards supporting multiple
+ *             displays or for hardware that supports multiple
+ *             layers (each layer is consider a display).  Typically zero.
  *
  * Returned Value:
- *   A non-NULL pointer to the frame buffer access structure is returned on
- *   success; NULL is returned on any failure.
+ *   Zero (OK) is returned success; a negated errno value is returned on any
+ *   failure.
  *
  ****************************************************************************/
 
-FAR struct fb_vtable_s *up_fbgetvplane(int display, int vplane)
+int vnc_fb_register(int display)
 {
+  FAR struct fb_vtable_s *vtable;
   FAR struct vnc_session_s *session;
   FAR struct vnc_fbinfo_s *fbinfo;
+#if defined(CONFIG_VNCSERVER_TOUCH) || defined(CONFIG_VNCSERVER_KBD)
+  char devname[NAME_MAX];
+#endif
+  int ret;
 
   DEBUGASSERT(display >= 0 && display < RFB_MAX_DISPLAYS);
-  session = g_vnc_sessions[display];
 
-  /* Verify that the session is still valid */
+  /* Start the VNC server kernel thread. */
 
-  if (session == NULL)
+  ret = vnc_start_server(display);
+
+  if (ret < 0)
     {
-      return NULL;
+      gerr("ERROR: vnc_start_server() failed: %d\n", ret);
+      return ret;
     }
 
-  if (vplane == 0)
-    {
-      /* Has the framebuffer information been initialized for this display? */
+  /* Wait for the VNC server to be ready */
 
-      fbinfo = &g_fbinfo[display];
-      if (!fbinfo->initialized)
-        {
-          fbinfo->vtable.getvideoinfo = up_getvideoinfo,
-          fbinfo->vtable.getplaneinfo = up_getplaneinfo,
+  ret = vnc_wait_start(display);
+
+  if (ret < 0)
+    {
+      gerr("ERROR: wait for vnc server start failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Save the input callout function information in the session structure. */
+
+  session           = g_vnc_sessions[display];
+  session->arg      = session;
+
+#ifdef CONFIG_VNCSERVER_TOUCH
+  ret = snprintf(devname, sizeof(devname),
+                 CONFIG_VNCSERVER_TOUCH_DEVNAME "%d", display);
+
+  if (ret < 0)
+    {
+      gerr("ERROR: Format vnc touch driver path failed.\n");
+      return ret;
+    }
+
+  ret = vnc_touch_register(devname, session);
+
+  if (ret < 0)
+    {
+      gerr("ERROR: Initial vnc touch driver failed.\n");
+      return ret;
+    }
+
+  session->mouseout = vnc_touch_event;
+#endif
+
+#ifdef CONFIG_VNCSERVER_KBD
+  ret = snprintf(devname, sizeof(devname),
+                 CONFIG_VNCSERVER_KBD_DEVNAME "%d", display);
+  if (ret < 0)
+    {
+      gerr("ERROR: Format vnc keyboard driver path failed.\n");
+      return ret;
+    }
+
+  ret = vnc_kbd_register(devname, session);
+  if (ret < 0)
+    {
+      gerr("ERROR: Initial vnc keyboard driver failed.\n");
+      goto err_kbd_register_failed;
+    }
+
+  session->kbdout = vnc_kbd_event;
+#endif
+
+  /* Has the framebuffer information been initialized for this display? */
+
+  fbinfo = &g_fbinfo[display];
+  if (!fbinfo->initialized)
+    {
+      fbinfo->vtable.getvideoinfo = up_getvideoinfo,
+      fbinfo->vtable.getplaneinfo = up_getplaneinfo,
 #ifdef CONFIG_FB_CMAP
-          fbinfo->vtable.getcmap      = up_getcmap,
-          fbinfo->vtable.putcmap      = up_putcmap,
+      fbinfo->vtable.getcmap      = up_getcmap,
+      fbinfo->vtable.putcmap      = up_putcmap,
 #endif
 #ifdef CONFIG_FB_HWCURSOR
-          fbinfo->vtable.getcursor    = up_getcursor,
-          fbinfo->vtable.setcursor    = up_setcursor,
+      fbinfo->vtable.getcursor    = up_getcursor,
+      fbinfo->vtable.setcursor    = up_setcursor,
 #endif
 #ifdef CONFIG_FB_SYNC
-          fbinfo->vtable.waitforvsync = up_waitforsync;
+      fbinfo->vtable.waitforvsync = up_waitforsync;
 #endif
-          fbinfo->vtable.updatearea   = up_updateearea,
-          fbinfo->display             = display;
-          fbinfo->initialized         = true;
-        }
+      fbinfo->vtable.updatearea   = up_updateearea,
+      fbinfo->display             = display;
+      fbinfo->initialized         = true;
+    }
 
-      return &fbinfo->vtable;
-    }
-  else
+  vtable = &fbinfo->vtable;
+
+  ret = fb_register_device(display, 0, vtable);
+  if (ret < 0)
     {
-      return NULL;
+      gerr("ERROR: Initial vnc keyboard driver failed.\n");
+      goto err_fb_register_failed;
     }
+
+  return OK;
+
+err_fb_register_failed:
+#ifdef CONFIG_VNCSERVER_KBD
+  vnc_kbd_unregister(session, devname);
+err_kbd_register_failed:
+#endif
+#ifdef CONFIG_VNCSERVER_TOUCH
+  vnc_touch_unregister(session, devname);
+#endif
+  return ret;
 }
 
 /****************************************************************************
- * Name: up_fbuninitialize
+ * Name: vnc_fb_unregister
  *
  * Description:
- *   Uninitialize the framebuffer support for the specified display.
+ *   Unregister the framebuffer support for the specified display.
  *
  * Input Parameters:
  *   display - In the case of hardware with multiple displays, this
@@ -848,10 +824,10 @@ FAR struct fb_vtable_s *up_fbgetvplane(int display, int vplane)
  *
  ****************************************************************************/
 
-void up_fbuninitialize(int display)
+void vnc_fb_unregister(int display)
 {
   FAR struct vnc_session_s *session;
-#if defined(CONFIG_VNCSERVER_TOUCH) || defined (CONFIG_VNCSERVER_KBD)
+#if defined(CONFIG_VNCSERVER_TOUCH) || defined(CONFIG_VNCSERVER_KBD)
   int ret;
   char devname[NAME_MAX];
 #endif
