@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/memoryregion.h>
+#include <nuttx/lib/lib.h>
 #include <stdlib.h>
 #include <errno.h>
 
@@ -52,9 +53,26 @@ ssize_t parse_memory_region(FAR const char *format,
   FAR char *endptr;
   size_t i = 0;
 
-  if (format == NULL || region == NULL || num == 0)
+  if (format == NULL)
     {
       return -EINVAL;
+    }
+
+  if (num == 0 || region == NULL)
+    {
+      num = 0;
+      while (format[i] != '\0')
+        {
+          if (format[i++] == ',')
+            {
+              num++;
+            }
+        }
+    }
+
+  if (region == NULL)
+    {
+      return num / 3 + 1;
     }
 
   while (*format != '\0' && i < num * 3)
@@ -77,4 +95,58 @@ ssize_t parse_memory_region(FAR const char *format,
     }
 
   return i / 3;
+}
+
+/****************************************************************************
+ * Name: alloc_memory_region
+ *
+ * Input Parameters:
+ *   format - The format string to parse. <start>,<end>,<flags>,...
+ *            start - The start address of the memory region
+ *            end   - The end address of the memory region
+ *            flags - Readable 0x1, writable 0x2, executable 0x4
+ *  example: 0x1000,0x2000,0x1,0x2000,0x3000,0x3,0x3000,0x4000,0x7
+ *
+ * Return:
+ *   The parsed memory region list on success; NULL on failure.
+ *   The boundary value of the memory region is zero.
+ *   The return value need free by caller.
+ *
+ ****************************************************************************/
+
+FAR struct memory_region_s *
+alloc_memory_region(FAR const char *format)
+{
+  FAR struct memory_region_s *region;
+  ssize_t num = parse_memory_region(format, NULL, 0);
+
+  if (num < 0)
+    {
+      return NULL;
+    }
+
+  region = lib_zalloc(sizeof(struct memory_region_s) * (num + 1));
+  if (region == NULL)
+    {
+      return NULL;
+    }
+
+  parse_memory_region(format, region, num);
+  return region;
+}
+
+/****************************************************************************
+ * Name: free_memory_region
+ *
+ * Input Parameters:
+ *   region - The memory region list to free.
+ *
+ ****************************************************************************/
+
+void free_memory_region(FAR struct memory_region_s *region)
+{
+  if (region != NULL)
+    {
+      lib_free(region);
+    }
 }

@@ -25,7 +25,6 @@
 #include <nuttx/config.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/binfmt/binfmt.h>
 #include <nuttx/board.h>
 #include <nuttx/irq.h>
 #include <nuttx/tls.h>
@@ -47,6 +46,7 @@
 #include "irq/irq.h"
 #include "sched/sched.h"
 #include "group/group.h"
+#include "misc/coredump.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -75,15 +75,6 @@
  ****************************************************************************/
 
 static uintptr_t g_last_regs[XCPTCONTEXT_REGS] aligned_data(16);
-
-#ifdef CONFIG_BOARD_COREDUMP
-static struct lib_syslogstream_s  g_syslogstream;
-static struct lib_hexdumpstream_s g_hexstream;
-#  ifdef CONFIG_BOARD_COREDUMP_COMPRESSION
-static struct lib_lzfoutstream_s  g_lzfstream;
-#  endif
-#endif
-
 static FAR const char *g_policy[4] =
 {
   "FIFO", "RR", "SPORADIC"
@@ -470,53 +461,6 @@ static void dump_tasks(void)
 }
 
 /****************************************************************************
- * Name: dump_core
- ****************************************************************************/
-
-#ifdef CONFIG_BOARD_COREDUMP
-static void dump_core(pid_t pid)
-{
-  FAR void *stream;
-  int logmask;
-
-  logmask = setlogmask(LOG_ALERT);
-
-  _alert("Start coredump:\n");
-
-  /* Initialize hex output stream */
-
-  lib_syslogstream(&g_syslogstream, LOG_EMERG);
-
-  stream = &g_syslogstream;
-
-  lib_hexdumpstream(&g_hexstream, stream);
-
-  stream = &g_hexstream;
-
-#  ifdef CONFIG_BOARD_COREDUMP_COMPRESSION
-
-  /* Initialize LZF compression stream */
-
-  lib_lzfoutstream(&g_lzfstream, stream);
-  stream = &g_lzfstream;
-
-#  endif
-
-  /* Do core dump */
-
-  core_dump(NULL, stream, pid);
-
-#  ifdef CONFIG_BOARD_COREDUMP_COMPRESSION
-  _alert("Finish coredump (Compression Enabled).\n");
-#  else
-  _alert("Finish coredump.\n");
-#  endif
-
-  setlogmask(logmask);
-}
-#endif
-
-/****************************************************************************
  * Name: dump_deadlock
  ****************************************************************************/
 
@@ -669,16 +613,17 @@ void _assert(FAR const char *filename, int linenum,
 
 #ifdef CONFIG_BOARD_CRASHDUMP
       board_crashdump(up_getsp(), rtcb, filename, linenum, msg, regs);
+#endif
 
-#elif defined(CONFIG_BOARD_COREDUMP)
+#if defined(CONFIG_BOARD_COREDUMP_SYSLOG) || \
+    defined(CONFIG_BOARD_COREDUMP_BLKDEV)
       /* Dump core information */
 
 #  ifdef CONFIG_BOARD_COREDUMP_FULL
-      dump_core(INVALID_PROCESS_ID);
+      coredump_dump(INVALID_PROCESS_ID);
 #  else
-      dump_core(rtcb->pid);
+      coredump_dump(rtcb->pid);
 #  endif
-
 #endif
 
       /* Flush any buffered SYSLOG data */
