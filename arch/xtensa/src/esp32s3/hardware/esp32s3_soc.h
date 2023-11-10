@@ -553,6 +553,26 @@ static inline bool IRAM_ATTR esp32s3_ptr_exec(const void *p)
       || (ip >= SOC_RTC_IRAM_LOW && ip < SOC_RTC_IRAM_HIGH);
 }
 
+/****************************************************************************
+ * Name: esp32s3_ptr_rtc
+ *
+ * Description:
+ *   Check if the buffer comes from the RTC RAM.
+ *
+ * Parameters:
+ *   p - Address of the buffer.
+ *
+ * Return Value:
+ *   True if given buffer comes from RTC RAM. False if not.
+ *
+ ****************************************************************************/
+
+static inline bool IRAM_ATTR esp32s3_ptr_rtc(const void *p)
+{
+  return ((intptr_t)p >= SOC_RTC_DATA_LOW &&
+          (intptr_t)p < SOC_RTC_DATA_HIGH);
+}
+
 #endif /* __ASSEMBLY__ */
 
 #endif /* __ARCH_XTENSA_SRC_ESP32S3_HARDWARE_ESP32S3_SOC_H */

@@ -367,4 +367,15 @@ SECTIONS
     . = ALIGN(4);
     _iram_end = ABSOLUTE(.);
   } >iram0_0_seg
+
+  .rtc.data :
+  {
+    *(.rtc.data)
+    *(.rtc.rodata)
+
+   /* Whatever is left from the RTC memory is used as a special heap. */
+
+    . = ALIGN (4);
+    _srtcheap = ABSOLUTE(.);
+  } > rtc_slow_seg
 }
