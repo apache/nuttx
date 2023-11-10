@@ -180,6 +180,21 @@ void *modlib_findglobal(FAR struct module_s *modp,
 int modlib_loadhdrs(FAR struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
+ * Name: modlib_sectname
+ *
+ * Description:
+ *   Get the symbol name in loadinfo->iobuffer[].
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int modlib_sectname(FAR struct mod_loadinfo_s *loadinfo,
+                    FAR const Elf_Shdr *shdr);
+
+/****************************************************************************
  * Name: modlib_findsection
  *
  * Description:
