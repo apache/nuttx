@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/task/task_setcancelstate.c
+ * libs/libc/sched/task_setcancelstate.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,13 +24,14 @@
 
 #include <nuttx/config.h>
 
-#include <stdlib.h>
-#include <pthread.h>
 #include <sched.h>
+#include <assert.h>
 #include <errno.h>
+#include <pthread.h>
+#include <stdlib.h>
 
-#include "sched/sched.h"
-#include "task/task.h"
+#include <nuttx/cancelpt.h>
+#include <nuttx/tls.h>
 
 /****************************************************************************
  * Public Functions
@@ -61,20 +62,14 @@
 
 int task_setcancelstate(int state, FAR int *oldstate)
 {
-  FAR struct tcb_s *tcb = this_task();
+  FAR struct tls_info_s *tls = tls_get_info();
   int ret = OK;
-
-  /* Suppress context changes for a bit so that the flags are stable. (the
-   * flags should not change in interrupt handling).
-   */
-
-  sched_lock();
 
   /* Return the current state if so requested */
 
   if (oldstate != NULL)
     {
-      if ((tcb->flags & TCB_FLAG_NONCANCELABLE) != 0)
+      if ((tls->tl_cpstate & CANCEL_FLAG_NONCANCELABLE) != 0)
         {
           *oldstate = TASK_CANCEL_DISABLE;
         }
@@ -90,35 +85,29 @@ int task_setcancelstate(int state, FAR int *oldstate)
     {
       /* Clear the non-cancelable flag */
 
-      tcb->flags &= ~TCB_FLAG_NONCANCELABLE;
+      tls->tl_cpstate &= ~CANCEL_FLAG_NONCANCELABLE;
 
       /* Check if a cancellation was pending */
 
-      if ((tcb->flags & TCB_FLAG_CANCEL_PENDING) != 0)
+      if ((tls->tl_cpstate & CANCEL_FLAG_CANCEL_PENDING) != 0)
         {
 #ifdef CONFIG_CANCELLATION_POINTS
           /* If we are using deferred cancellation? */
 
-          if ((tcb->flags & TCB_FLAG_CANCEL_DEFERRED) == 0)
+          if ((tls->tl_cpstate & CANCEL_FLAG_CANCEL_ASYNC) != 0)
 #endif
             {
               /* No.. We are using asynchronous cancellation.  If the
                * cancellation was pending in this case, then just exit.
                */
 
-              tcb->flags &= ~TCB_FLAG_CANCEL_PENDING;
+              tls->tl_cpstate &= ~CANCEL_FLAG_CANCEL_PENDING;
 
 #ifndef CONFIG_DISABLE_PTHREAD
-              if ((tcb->flags & TCB_FLAG_TTYPE_MASK) ==
-                  TCB_FLAG_TTYPE_PTHREAD)
-                {
-                  pthread_exit(PTHREAD_CANCELED);
-                }
-              else
+              pthread_exit(PTHREAD_CANCELED);
+#else
+              exit(EXIT_FAILURE);
 #endif
-                {
-                  _exit(EXIT_FAILURE);
-                }
             }
         }
     }
@@ -126,7 +115,7 @@ int task_setcancelstate(int state, FAR int *oldstate)
     {
       /* Set the non-cancelable state */
 
-      tcb->flags |= TCB_FLAG_NONCANCELABLE;
+      tls->tl_cpstate |= CANCEL_FLAG_NONCANCELABLE;
     }
   else
     {
@@ -134,6 +123,5 @@ int task_setcancelstate(int state, FAR int *oldstate)
       ret = ERROR;
     }
 
-  sched_unlock();
   return ret;
 }

@@ -26,11 +26,11 @@ set(SRCS
     clock_timespec_add.c
     clock_timespec_subtract.c
     clock_getcpuclockid.c
-    clock_getres.c)
-
-if(NOT CONFIG_CANCELLATION_POINTS)
-  list(APPEND SRCS task_setcanceltype.c task_testcancel.c)
-endif()
+    clock_getres.c
+    task_cancelpt.c
+    task_setcancelstate.c
+    task_setcanceltype.c
+    task_testcancel.c)
 
 if(CONFIG_SMP)
   list(APPEND SRCS sched_cpucount.c)

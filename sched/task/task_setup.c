@@ -409,12 +409,6 @@ static int nxthread_setup_scheduler(FAR struct tcb_s *tcb, int priority,
       tcb->flags         |= TCB_FLAG_SCHED_FIFO;
 #endif
 
-#ifdef CONFIG_CANCELLATION_POINTS
-      /* Set the deferred cancellation type */
-
-      tcb->flags         |= TCB_FLAG_CANCEL_DEFERRED;
-#endif
-
       /* Save the task ID of the parent task in the TCB and allocate
        * a child status structure.
        */

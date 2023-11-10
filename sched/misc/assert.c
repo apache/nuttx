@@ -341,7 +341,7 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
 #ifdef CONFIG_SMP
          "  %4d"
 #endif
-         " %3d %-8s %-7s %c%c%c"
+         " %3d %-8s %-7s %c"
          " %-18s"
          " " SIGSET_FMT
          " %p"
@@ -363,8 +363,6 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
                     TCB_FLAG_POLICY_SHIFT]
          , g_ttypenames[(tcb->flags & TCB_FLAG_TTYPE_MASK)
                         >> TCB_FLAG_TTYPE_SHIFT]
-         , tcb->flags & TCB_FLAG_NONCANCELABLE ? 'N' : '-'
-         , tcb->flags & TCB_FLAG_CANCEL_PENDING ? 'P' : '-'
          , tcb->flags & TCB_FLAG_EXIT_PROCESSING ? 'P' : '-'
          , state
          , SIGSET_ELEM(&tcb->sigprocmask)

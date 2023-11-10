@@ -448,12 +448,6 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
 #endif
     }
 
-#ifdef CONFIG_CANCELLATION_POINTS
-  /* Set the deferred cancellation type */
-
-  ptcb->cmn.flags |= TCB_FLAG_CANCEL_DEFERRED;
-#endif
-
   /* Get the assigned pid before we start the task (who knows what
    * could happen to ptcb after this!).
    */
