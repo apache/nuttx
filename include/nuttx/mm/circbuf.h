@@ -202,7 +202,7 @@ size_t circbuf_space(FAR struct circbuf_s *circ);
  * Name: circbuf_peekat
  *
  * Description:
- *   Get data speicified position from the circular buffer without removing
+ *   Get data specified position from the circular buffer without removing
  *
  * Note :
  *   That with only one concurrent reader and one concurrent writer,
