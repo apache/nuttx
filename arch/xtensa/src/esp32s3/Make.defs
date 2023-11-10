@@ -156,6 +156,14 @@ ifeq ($(CONFIG_ARCH_HAVE_EXTRA_HEAPS),y)
 CHIP_CSRCS += esp32s3_extraheaps.c
 endif
 
+ifeq ($(CONFIG_ESP32S3_RTC_HEAP),y)
+CHIP_CSRCS += esp32s3_rtcheap.c
+endif
+
+ifeq ($(CONFIG_ARCH_USE_TEXT_HEAP),y)
+CHIP_CSRCS += esp32s3_textheap.c
+endif
+
 ifeq ($(CONFIG_ESP32S3_TOUCH),y)
 CHIP_CSRCS += esp32s3_touch.c
 endif
