@@ -761,6 +761,18 @@ void up_textheap_free(FAR void *p);
 #endif
 
 /****************************************************************************
+ * Name: up_textheap_heapmember
+ *
+ * Description:
+ *   Test if memory is from text heap.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
+bool up_textheap_heapmember(FAR void *p);
+#endif
+
+/****************************************************************************
  * Name: up_dataheap_memalign
  *
  * Description:
@@ -782,6 +794,18 @@ FAR void *up_dataheap_memalign(size_t align, size_t size);
 
 #if defined(CONFIG_ARCH_USE_DATA_HEAP)
 void up_dataheap_free(FAR void *p);
+#endif
+
+/****************************************************************************
+ * Name: up_dataheap_heapmember
+ *
+ * Description:
+ *   Test if memory is from data heap.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_USE_DATA_HEAP)
+bool up_dataheap_heapmember(FAR void *p);
 #endif
 
 /****************************************************************************
