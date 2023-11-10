@@ -430,17 +430,6 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status)
       return;
     }
 
-#ifdef CONFIG_CANCELLATION_POINTS
-  /* Mark the task as non-cancelable to avoid additional calls to exit()
-   * due to any cancellation point logic that might get kicked off by
-   * actions taken during exit processing.
-   */
-
-  tcb->flags  |= TCB_FLAG_NONCANCELABLE;
-  tcb->flags  &= ~TCB_FLAG_CANCEL_PENDING;
-  tcb->cpcount = 0;
-#endif
-
   /* If the task was terminated by another task, it may be in an unknown
    * state.  Make some feeble effort to recover the state.
    */

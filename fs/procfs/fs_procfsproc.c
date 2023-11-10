@@ -578,9 +578,7 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
   /* Show task flags */
 
   linesize = procfs_snprintf(procfile->line, STATUS_LINELEN,
-                          "%-12s%c%c%c\n", "Flags:",
-                          tcb->flags & TCB_FLAG_NONCANCELABLE ? 'N' : '-',
-                          tcb->flags & TCB_FLAG_CANCEL_PENDING ? 'P' : '-',
+                          "%-12s%c\n", "Flags:",
                           tcb->flags & TCB_FLAG_EXIT_PROCESSING ? 'P' : '-');
 
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,

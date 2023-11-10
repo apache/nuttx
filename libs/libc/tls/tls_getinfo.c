@@ -36,7 +36,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tls_get_info
+ * Name: tls_get_info_pid
  *
  * Description:
  *   Return a reference to the tls_info_s structure.  This is used as part
@@ -44,7 +44,7 @@
  *   where CONFIG_TLS_ALIGNED is *not* defined or __KERNEL__ is defined.
  *
  * Input Parameters:
- *   None
+ *   pid - Thread ID to query, set to 0 to query own
  *
  * Returned Value:
  *   A reference to the thread-specific tls_info_s structure is return on
@@ -52,13 +52,13 @@
  *
  ****************************************************************************/
 
-FAR struct tls_info_s *tls_get_info(void)
+FAR struct tls_info_s *tls_get_info_pid(pid_t pid)
 {
   FAR struct tls_info_s *info = NULL;
   struct stackinfo_s stackinfo;
   int ret;
 
-  ret = nxsched_get_stackinfo(0, &stackinfo);
+  ret = nxsched_get_stackinfo(pid, &stackinfo);
   if (ret >= 0)
     {
       /* The TLS data lies at the lowest address of the stack allocation.
