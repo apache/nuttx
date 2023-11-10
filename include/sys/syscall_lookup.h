@@ -105,13 +105,6 @@ SYSCALL_LOOKUP(sem_wait,                   1)
   SYSCALL_LOOKUP(pgalloc,                  2)
 #endif
 
-SYSCALL_LOOKUP(task_setcancelstate,        2)
-
-#ifdef CONFIG_CANCELLATION_POINTS
-  SYSCALL_LOOKUP(task_setcanceltype,       2)
-  SYSCALL_LOOKUP(task_testcancel,          0)
-#endif
-
 /* The following can be individually enabled */
 
 #ifdef CONFIG_ARCH_HAVE_FORK

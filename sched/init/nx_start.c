@@ -367,9 +367,7 @@ void nx_start(void)
        */
 
 #ifdef CONFIG_SMP
-      g_idletcb[i].cmn.flags = (TCB_FLAG_TTYPE_KERNEL |
-                                TCB_FLAG_NONCANCELABLE |
-                                TCB_FLAG_CPU_LOCKED);
+      g_idletcb[i].cmn.flags = (TCB_FLAG_TTYPE_KERNEL | TCB_FLAG_CPU_LOCKED);
       g_idletcb[i].cmn.cpu   = i;
 
       /* Set the affinity mask to allow the thread to run on all CPUs.  No,
@@ -383,8 +381,7 @@ void nx_start(void)
       g_idletcb[i].cmn.affinity =
         (cpu_set_t)(CONFIG_SMP_DEFAULT_CPUSET & SCHED_ALL_CPUS);
 #else
-      g_idletcb[i].cmn.flags = (TCB_FLAG_TTYPE_KERNEL |
-                                TCB_FLAG_NONCANCELABLE);
+      g_idletcb[i].cmn.flags = TCB_FLAG_TTYPE_KERNEL;
 #endif
 
 #if CONFIG_TASK_NAME_SIZE > 0

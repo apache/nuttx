@@ -1,6 +1,5 @@
 /****************************************************************************
- * include/nuttx/cancelpt.h
- * Definitions related to cancellation points
+ * libs/libc/sched/task_cancelpt.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -19,9 +18,6 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_CANCELPT_H
-#define __INCLUDE_NUTTX_CANCELPT_H
-
 /****************************************************************************
  * Cancellation Points.
  *
@@ -33,20 +29,20 @@
  * clock_nanosleep() msgsnd()                 read()          sigwaitinfo()
  * close()           msync()                  readv()         sleep()
  * connect()         nanosleep()              recv()          system()
- * creat()           open()                   recvfrom()      syncfs()
- * fcntl()           pause()                  recvmsg()       tcdrain()
- * fdatasync()       poll()                   select()        usleep()
- * fsync()           pread()                  sem_timedwait() wait()
- * getmsg()          pselect()                sem_wait()      waitid()
- * getpmsg()         pthread_cond_timedwait() send()          waitpid()
- * lockf()           pthread_cond_wait()      sendmsg()       write()
- * mq_receive()      pthread_join()           sendto()        writev()
+ * creat()           open()                   recvfrom()      tcdrain()
+ * fcntl()           pause()                  recvmsg()       usleep()
+ * fdatasync()       poll()                   select()        wait()
+ * fsync()           pread()                  sem_timedwait() waitid()
+ * getmsg()          pselect()                sem_wait()      waitpid()
+ * getpmsg()         pthread_cond_timedwait() send()          write()
+ * lockf()           pthread_cond_wait()      sendmsg()       writev()
+ * mq_receive()      pthread_join()           sendto()
  * mq_send()         pthread_testcancel()     sigpause()
  * mq_timedreceive() putmsg()                 sigsuspend()
  *
  * Each of the above function must call enter_cancellation_point() on entry
  * in order to establish the cancellation point and
- * leave_cancellation_point() on exit. These functions are described below.
+ * leave_cancellation_point() on exit.  These functions are described below.
  *
  ****************************************************************************/
 
@@ -56,27 +52,20 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
+#include <sched.h>
+#include <assert.h>
+#include <errno.h>
+#include <pthread.h>
+#include <stdlib.h>
+
+#include <nuttx/cancelpt.h>
+#include <nuttx/tls.h>
+
+#ifdef CONFIG_CANCELLATION_POINTS
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Functions
  ****************************************************************************/
-
-#define CANCEL_FLAG_NONCANCELABLE   (1 << 0) /* Pthread is non-cancelable */
-#define CANCEL_FLAG_CANCEL_ASYNC    (1 << 1) /* Async (vs deferred) cancellation type */
-#define CANCEL_FLAG_CANCEL_PENDING  (1 << 2) /* Pthread cancel is pending */
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
 
 /****************************************************************************
  * Name: enter_cancellation_point
@@ -102,11 +91,57 @@ extern "C"
  *
  ****************************************************************************/
 
-#ifdef CONFIG_CANCELLATION_POINTS
-bool enter_cancellation_point(void);
+bool enter_cancellation_point(void)
+{
+  FAR struct tls_info_s *tls = tls_get_info();
+  bool ret = false;
+
+  /* If cancellation is disabled on this thread or if this thread is using
+   * asynchronous cancellation, then do nothing.
+   *
+   * Special case: if the cpcount count is greater than zero, then we are
+   * nested and the above condition was certainly true at the outermost
+   * nesting level.
+   */
+
+  if (((tls->tl_cpstate & CANCEL_FLAG_NONCANCELABLE) == 0 &&
+       (tls->tl_cpstate & CANCEL_FLAG_CANCEL_ASYNC) == 0) ||
+      tls->tl_cpcount > 0)
+    {
+      /* Check if there is a pending cancellation */
+
+      if ((tls->tl_cpstate & CANCEL_FLAG_CANCEL_PENDING) != 0)
+        {
+          /* Yes... return true (if we don't exit here) */
+
+          ret = true;
+
+          /* If there is a pending cancellation and we are at the outermost
+           * nesting level of cancellation function calls, then exit
+           * according to the type of the thread.
+           */
+
+          if (tls->tl_cpcount == 0)
+            {
+#ifndef CONFIG_DISABLE_PTHREAD
+              pthread_exit(PTHREAD_CANCELED);
 #else
-#  define enter_cancellation_point() false
+              exit(EXIT_FAILURE);
 #endif
+            }
+        }
+
+      /* Otherwise, indicate that we are at a cancellation point by
+       * incrementing the nesting level of the cancellation point
+       * functions.
+       */
+
+      DEBUGASSERT(tls->tl_cpcount < INT16_MAX);
+      tls->tl_cpcount++;
+    }
+
+  return ret;
+}
 
 /****************************************************************************
  * Name: leave_cancellation_point
@@ -131,11 +166,51 @@ bool enter_cancellation_point(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_CANCELLATION_POINTS
-void leave_cancellation_point(void);
+void leave_cancellation_point(void)
+{
+  FAR struct tls_info_s *tls = tls_get_info();
+
+  /* If cancellation is disabled on this thread or if this thread is using
+   * asynchronous cancellation, then do nothing.  Here we check only the
+   * nesting level: if the cpcount count is greater than zero, then the
+   * required condition was certainly true at the outermost nesting level.
+   */
+
+  if (tls->tl_cpcount > 0)
+    {
+      /* Decrement the nesting level.  If if would decrement to zero, then
+       * we are at the outermost nesting level and may need to do more.
+       */
+
+      if (tls->tl_cpcount == 1)
+        {
+          /* We are no longer at the cancellation point */
+
+          tls->tl_cpcount = 0;
+
+          /* If there is a pending cancellation then just exit according to
+           * the type of the thread.
+           */
+
+          if ((tls->tl_cpstate & CANCEL_FLAG_CANCEL_PENDING) != 0)
+            {
+#ifndef CONFIG_DISABLE_PTHREAD
+              pthread_exit(PTHREAD_CANCELED);
 #else
-#  define leave_cancellation_point()
+              exit(EXIT_FAILURE);
 #endif
+            }
+        }
+      else
+        {
+          /* We are not at the outermost nesting level.  Just decrment the
+           * nesting level count.
+           */
+
+          tls->tl_cpcount--;
+        }
+    }
+}
 
 /****************************************************************************
  * Name: check_cancellation_point
@@ -156,15 +231,28 @@ void leave_cancellation_point(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_CANCELLATION_POINTS
-bool check_cancellation_point(void);
-#else
-#  define check_cancellation_point() false
-#endif
+bool check_cancellation_point(void)
+{
+  FAR struct tls_info_s *tls = tls_get_info();
+  bool ret = false;
 
-#undef EXTERN
-#ifdef __cplusplus
+  /* If cancellation is disabled on this thread or if this thread is using
+   * asynchronous cancellation, then return false.
+   *
+   * If the cpcount count is greater than zero, then we within a
+   * cancellation and will true if there is a pending cancellation.
+   */
+
+  if (((tls->tl_cpstate & CANCEL_FLAG_NONCANCELABLE) == 0 &&
+       (tls->tl_cpstate & CANCEL_FLAG_CANCEL_ASYNC) == 0) ||
+      tls->tl_cpcount > 0)
+    {
+      /* Check if there is a pending cancellation.  If so, return true. */
+
+      ret = ((tls->tl_cpstate & CANCEL_FLAG_CANCEL_PENDING) != 0);
+    }
+
+  return ret;
 }
-#endif
 
-#endif /* __INCLUDE_NUTTX_CANCELPT_H */
+#endif /* CONFIG_CANCELLATION_POINTS */
