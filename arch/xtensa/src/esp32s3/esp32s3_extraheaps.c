@@ -25,6 +25,10 @@
 #include <nuttx/config.h>
 #include <nuttx/mm/mm.h>
 
+#ifdef CONFIG_ESP32S3_RTC_HEAP
+#  include "esp32s3_rtcheap.h"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -41,6 +45,11 @@ void up_extraheaps_init(void)
 {
 #ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
   xtensa_imm_initialize();
+#endif
+#ifdef CONFIG_ESP32S3_RTC_HEAP
+  /* Initialize the RTC heap */
+
+  esp32s3_rtcheap_initialize();
 #endif
 }
 

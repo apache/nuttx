@@ -79,7 +79,7 @@ void xtensa_imm_initialize(void)
  *   size - Size (in bytes) of the memory region to be allocated.
  *
  * Return Value:
- *   Adress of the allocated memory space. NULL, if allocation fails.
+ *   Address of the allocated memory space. NULL, if allocation fails.
  *
  ****************************************************************************/
 
@@ -100,7 +100,7 @@ void *xtensa_imm_malloc(size_t size)
  *   elem_size - Size (in bytes) of the type to be allocated.
  *
  * Return Value:
- *   Adress of the allocated memory space. NULL, if allocation fails.
+ *   Address of the allocated memory space. NULL, if allocation fails.
  *
  ****************************************************************************/
 
@@ -116,11 +116,11 @@ void *xtensa_imm_calloc(size_t n, size_t elem_size)
  *   Reallocate memory from the internal heap.
  *
  * Input Parameters:
- *   ptr  - Adress to be reallocate.
- *   size - Size (in bytes) to be reallocate.
+ *   ptr  - Address to be reallocated.
+ *   size - Size (in bytes) to be reallocated.
  *
  * Return Value:
- *   Adress of the possibly moved memory space. NULL, if allocation fails.
+ *   Address of the possibly moved memory space. NULL, if allocation fails.
  *
  ****************************************************************************/
 
@@ -139,7 +139,7 @@ void *xtensa_imm_realloc(void *ptr, size_t size)
  *   size - Size (in bytes) of the memory region to be allocated.
  *
  * Return Value:
- *   Adress of the allocated memory space. NULL, if allocation fails.
+ *   Address of the allocated memory space. NULL, if allocation fails.
  *
  ****************************************************************************/
 
@@ -155,7 +155,7 @@ void *xtensa_imm_zalloc(size_t size)
  *   Free memory from the internal heap.
  *
  * Input Parameters:
- *   mem - Adress to be freed.
+ *   mem - Address to be freed.
  *
  * Returned Value:
  *   None.
@@ -180,10 +180,10 @@ void xtensa_imm_free(void *mem)
  *
  * Input Parameters:
  *   alignment - Requested alignment.
- *   size - Size (in bytes) of the memory region to be allocated.
+ *   size      - Size (in bytes) of the memory region to be allocated.
  *
  * Return Value:
- *   Adress of the allocated adress. NULL, if allocation fails.
+ *   Address of the allocated address. NULL, if allocation fails.
  *
  ****************************************************************************/
 

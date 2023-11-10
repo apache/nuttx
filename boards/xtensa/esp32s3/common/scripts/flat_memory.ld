@@ -179,3 +179,6 @@ MEMORY
   REGION_ALIAS("default_code_seg", irom0_0_seg);
 #endif /* CONFIG_ESP32S3_RUN_IRAM */
 
+/* Mark the end of the RTC heap (top of the RTC region) */
+
+_ertcheap = 0x50001fff;

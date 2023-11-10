@@ -906,6 +906,11 @@ config ESP32S3_SPIRAM_USER_HEAP
 
 endchoice # ESP32S3_SPIRAM_HEAP
 
+config ESP32S3_RTC_HEAP
+	bool "Use the RTC memory as a separate heap"
+	select ARCH_HAVE_EXTRA_HEAPS
+	default n
+
 endmenu # Memory Configuration
 
 config ESP32S3_GPIO_IRQ
