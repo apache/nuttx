@@ -2535,9 +2535,12 @@ static void imxrt_dma_txavailable(struct uart_dev_s *dev)
 
   /* Only send when the DMA is idle */
 
-  nxsem_wait(&priv->txdmasem);
+  int rv = nxsem_trywait(&priv->txdmasem);
 
-  uart_xmitchars_dma(dev);
+  if (rv == 0)
+    {
+      uart_xmitchars_dma(dev);
+    }
 }
 #endif
 
