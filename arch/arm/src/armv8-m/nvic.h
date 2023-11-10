@@ -672,9 +672,9 @@
 #define NVIC_SYSHCON_MEMFAULTENA        (1 << 16) /* Bit 16: MemFault enabled */
 #define NVIC_SYSHCON_BUSFAULTENA        (1 << 17) /* Bit 17: BusFault enabled */
 #define NVIC_SYSHCON_USGFAULTENA        (1 << 18) /* Bit 18: UsageFault enabled */
-#define NVIC_SYSHCON_SECUREFAULTENA     (1 << 19) /* Bit 10: SecureFault enabled */
-#define NVIC_SYSHCON_SECUREFAULTPENDED  (1 << 20) /* Bit 10: SecureFault is pended */
-#define NVIC_SYSHCON_HARDFAULTPENDED    (1 << 20) /* Bit 10: HardFault is pended */
+#define NVIC_SYSHCON_SECUREFAULTENA     (1 << 19) /* Bit 19: SecureFault enabled */
+#define NVIC_SYSHCON_SECUREFAULTPENDED  (1 << 20) /* Bit 20: SecureFault is pended */
+#define NVIC_SYSHCON_HARDFAULTPENDED    (1 << 21) /* Bit 21: HardFault is pended */
 
 /* SCB Configurable Fault Status Register Definitions */
 
