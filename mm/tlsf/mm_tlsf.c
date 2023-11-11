@@ -105,7 +105,6 @@ struct mm_heap_s
 
   /* Free delay list, for some situation can't do free immdiately */
 
-  spinlock_t mm_spinlock;
   struct mm_delaynode_s *mm_delaylist[CONFIG_SMP_NCPUS];
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
@@ -178,12 +177,12 @@ static void add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
 
   /* Delay the deallocation until a more appropriate time. */
 
-  flags = spin_lock_irqsave(&heap->mm_spinlock);
+  flags = up_irq_save();
 
   tmp->flink = heap->mm_delaylist[up_cpu_index()];
   heap->mm_delaylist[up_cpu_index()] = tmp;
 
-  spin_unlock_irqrestore(&heap->mm_spinlock, flags);
+  up_irq_restore(flags);
 #endif
 }
 
@@ -199,12 +198,12 @@ static void free_delaylist(FAR struct mm_heap_s *heap)
 
   /* Move the delay list to local */
 
-  flags = spin_lock_irqsave(&heap->mm_spinlock);
+  flags = up_irq_save();
 
   tmp = heap->mm_delaylist[up_cpu_index()];
   heap->mm_delaylist[up_cpu_index()] = NULL;
 
-  spin_unlock_irqrestore(&heap->mm_spinlock, flags);
+  up_irq_restore(flags);
 
   /* Test if the delayed is empty */
 
