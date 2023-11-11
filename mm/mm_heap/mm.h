@@ -258,7 +258,6 @@ struct mm_heap_s
    * immdiately.
    */
 
-  spinlock_t mm_spinlock;
   FAR struct mm_delaynode_s *mm_delaylist[CONFIG_SMP_NCPUS];
 
   /* The is a multiple mempool of the heap */
