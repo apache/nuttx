@@ -24,6 +24,10 @@ CSRCS = stm32_boot.c stm32_bringup.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += stm32_autoleds.c
+else
+  ifeq ($(CONFIG_USERLED),y)
+  CSRCS += stm32_userleds.c
+  endif
 endif
 
 ifeq ($(CONFIG_BOARDCTL),y)

@@ -24,6 +24,10 @@ if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS stm32_autoleds.c)
 endif()
 
+if(CONFIG_USERLED)
+  list(APPEND SRCS stm32_userled.c)
+endif()
+
 if(CONFIG_BOARDCTL)
   list(APPEND SRCS stm32_appinitialize.c)
 endif()
