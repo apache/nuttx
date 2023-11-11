@@ -36,9 +36,8 @@
 
 /* Clocking *****************************************************************/
 
-/* The STM32F401RC-RS485 supports both HSE and LSE crystals (X2 and X3).
- * However, as shipped, the X2 and X3 crystals are not populated.
- * Therefore the Nucleo-F401RE will need to run off the 16MHz HSI clock.
+/* The STM32F401RC-RS485 uses an external 32kHz cristal (X2) to enable HSE
+ * clock.
  *
  *   System Clock source           : PLL (HSI)
  *   SYSCLK(Hz)                    : 84000000     Determined by PLL
@@ -335,22 +334,26 @@ extern "C"
 
 /* LEDs
  *
- * The Nucleo F401RE and F411RE boards provide a single user LED, LD2.  LD2
- * is the green LED connected to Arduino signal D13 corresponding to MCU I/O
- * PA5 (pin 21) or PB13 (pin 34) depending on the STM32 target.
- *
+ * The STM32F401RC-RS485 boards provide 4 blue user LEDs. LD1, LD2, LD3
+ * and LD4 that are connected to MCU I/O pins PC0, PC1, PC2 and PC3.
  *   - When the I/O is HIGH value, the LED is on.
  *   - When the I/O is LOW, the LED is off.
  */
 
 /* LED index values for use with board_userled() */
 
-#define BOARD_LD2         0
-#define BOARD_NLEDS       1
+#define BOARD_LD1         0
+#define BOARD_LD2         1
+#define BOARD_LD3         2
+#define BOARD_LD4         3
+#define BOARD_NLEDS       4
 
 /* LED bits for use with board_userled_all() */
 
-#define BOARD_LD2_BIT     (1 << BOARD_LD2)
+#define BOARD_LED1_BIT    (1 << BOARD_LD1)
+#define BOARD_LED2_BIT    (1 << BOARD_LD2)
+#define BOARD_LED3_BIT    (1 << BOARD_LD3)
+#define BOARD_LED4_BIT    (1 << BOARD_LD4)
 
 /* These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
  * defined.  In that case, the usage by the board port is defined in

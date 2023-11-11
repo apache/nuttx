@@ -27,6 +27,10 @@ ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += stm32_autoleds.c
 endif
 
+ifeq ($(CONFIG_USERLED),y)
+CSRCS += stm32_userleds.c
+endif
+
 ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += stm32_appinit.c
 endif
