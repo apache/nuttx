@@ -35,6 +35,10 @@
 
 #include "linum-stm32h753bi.h"
 
+#ifdef CONFIG_USERLED
+#include <nuttx/leds/userled.h>
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -74,6 +78,16 @@ int stm32_bringup(void)
              "ERROR: Failed to mount the PROC filesystem: %d\n",  ret);
     }
 #endif /* CONFIG_FS_PROCFS */
+
+#ifdef CONFIG_USERLED
+  /* Register the LED driver */
+
+  ret = userled_lower_initialize("/dev/userleds");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
+#endif
 
   return OK;
 }
