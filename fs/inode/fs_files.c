@@ -98,7 +98,7 @@ static int files_extend(FAR struct filelist *list, size_t row)
       return 0;
     }
 
-  if (row * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK > OPEN_MAX)
+  if (files_countlist(list) > OPEN_MAX)
     {
       return -EMFILE;
     }
@@ -214,6 +214,7 @@ static int nx_dup3_from_tcb(FAR struct tcb_s *tcb, int fd1, int fd2,
   FAR struct filelist *list;
   FAR struct file *filep;
   FAR struct file  file;
+  int count;
   int ret;
 
   if (fd1 == fd2)
@@ -228,15 +229,17 @@ static int nx_dup3_from_tcb(FAR struct tcb_s *tcb, int fd1, int fd2,
 
   list = nxsched_get_files_from_tcb(tcb);
 
+  count = files_countlist(list);
+
   /* Get the file descriptor list.  It should not be NULL in this context. */
 
-  if (fd1 < 0 || fd1 >= CONFIG_NFILE_DESCRIPTORS_PER_BLOCK * list->fl_rows ||
+  if (fd1 < 0 || fd1 >= count ||
       fd2 < 0)
     {
       return -EBADF;
     }
 
-  if (fd2 >= CONFIG_NFILE_DESCRIPTORS_PER_BLOCK * list->fl_rows)
+  if (fd2 >= count)
     {
       ret = files_extend(list, fd2 / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK + 1);
       if (ret < 0)
@@ -313,6 +316,28 @@ void files_releaselist(FAR struct filelist *list)
     }
 
   kmm_free(list->fl_files);
+}
+
+/****************************************************************************
+ * Name: files_countlist
+ *
+ * Description:
+ *   Given a file descriptor, return the corresponding instance of struct
+ *   file.
+ *
+ * Input Parameters:
+ *   fd    - The file descriptor
+ *   filep - The location to return the struct file instance
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int files_countlist(FAR struct filelist *list)
+{
+  return list->fl_rows * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK;
 }
 
 /****************************************************************************
@@ -562,7 +587,7 @@ int fs_getfilep(int fd, FAR struct file **filep)
       return -EAGAIN;
     }
 
-  if (fd < 0 || fd >= list->fl_rows * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK)
+  if (fd < 0 || fd >= files_countlist(list))
     {
       return -EBADF;
     }
@@ -714,7 +739,7 @@ int nx_close_from_tcb(FAR struct tcb_s *tcb, int fd)
 
   /* Perform the protected close operation */
 
-  if (fd < 0 || fd >= list->fl_rows * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK)
+  if (fd < 0 || fd >= files_countlist(list))
     {
       return -EBADF;
     }
