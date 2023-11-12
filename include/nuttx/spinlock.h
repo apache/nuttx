@@ -32,12 +32,21 @@
 
 #include <nuttx/irq.h>
 
-#ifdef CONFIG_RW_SPINLOCK
-#include <stdatomic.h>
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+#if defined(CONFIG_RW_SPINLOCK) && !defined(__cplusplus)
+#  include <stdatomic.h>
 typedef atomic_int rwlock_t;
-#define RW_SP_UNLOCKED      0
-#define RW_SP_READ_LOCKED   1
-#define RW_SP_WRITE_LOCKED -1
+#  define RW_SP_UNLOCKED      0
+#  define RW_SP_READ_LOCKED   1
+#  define RW_SP_WRITE_LOCKED -1
 #endif
 
 #ifndef CONFIG_SPINLOCK
@@ -500,7 +509,7 @@ void spin_unlock_irqrestore_wo_note(FAR spinlock_t *lock, irqstate_t flags);
 #  define spin_unlock_irqrestore_wo_note(l, f) up_irq_restore(f)
 #endif
 
-#ifdef CONFIG_RW_SPINLOCK
+#if defined(CONFIG_RW_SPINLOCK) && !defined(__cplusplus)
 
 /****************************************************************************
  * Name: rwlock_init
@@ -808,5 +817,11 @@ void write_unlock_irqrestore(FAR rwlock_t *lock, irqstate_t flags);
 #  define write_unlock_irqrestore(l, f) up_irq_restore(f)
 #endif
 
-#endif /* CONFIG_RW_SPINLOCK */
+#endif /* CONFIG_RW_SPINLOCK && !__cplusplus */
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
 #endif /* __INCLUDE_NUTTX_SPINLOCK_H */
