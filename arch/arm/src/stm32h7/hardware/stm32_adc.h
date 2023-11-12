@@ -243,18 +243,20 @@
 #define ADC_CR_ADSTP                 (1 << 4)  /* Bit 4: ADC stop of regular conversion command */
 #define ADC_CR_JADSTP                (1 << 5)  /* Bit 5: ADC stop of injected conversion command */
                                                /* Bits 6-7: Reserved */
-#if defined(ADC_DEVICE_VERSION_V)
-#  define ADC_CR_BOOST_SHIFT         (8)       /* Bits 8-9: ADC Boost mode control */
-#  define ADC_CR_BOOST_MASK          (3 << ADC_CR_BOOST_SHIFT)
-#    define ADC_CR_BOOST_6p25_MHZ    (0 << ADC_CR_BOOST_SHIFT)
-#    define ADC_CR_BOOST_12p5_MHZ    (1 << ADC_CR_BOOST_SHIFT)
-#    define ADC_CR_BOOST_25_MHZ      (2 << ADC_CR_BOOST_SHIFT)
-#    define ADC_CR_BOOST_50_MHZ      (3 << ADC_CR_BOOST_SHIFT)
-                                               /* Bits 10-15: Reserved */
-#else
-#  define ADC_CR_BOOST               (1 << 8)  /* Bit 8: ADC Boost mode control */
-                                               /* Bits 9-15: Reserved */
-#endif
+
+/* On rev V silicon, the BOOST setting is 2 bits. On Y silicon it's a
+ * single bit.
+ */
+
+#define ADC_CR_BOOST_SHIFT         (8)       /* Bits 8-9: ADC Boost mode control */
+#define ADC_CR_BOOST_MASK          (3 << ADC_CR_BOOST_SHIFT)
+#  define ADC_CR_BOOST_6p25_MHZ    (0 << ADC_CR_BOOST_SHIFT)
+#  define ADC_CR_BOOST_12p5_MHZ    (1 << ADC_CR_BOOST_SHIFT)
+#  define ADC_CR_BOOST_25_MHZ      (2 << ADC_CR_BOOST_SHIFT)
+#  define ADC_CR_BOOST_50_MHZ      (3 << ADC_CR_BOOST_SHIFT)
+#define ADC_CR_BOOST               (1 << 8)  /* Bit 8: ADC Boost mode control */
+                                             /* Bits 10-15: Reserved */
+
 #define ADC_CR_ADCALLIN              (1 << 16) /* Bit 16: ADC Linearity calibration */
                                                /* Bits 17-21: Reserved */
 #define ADC_CR_LINCALRDYW1           (1 << 22) /* Bit 22: ADC Linearity calibration ready Word 1 */
