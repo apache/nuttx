@@ -853,6 +853,19 @@ void files_initlist(FAR struct filelist *list);
 void files_releaselist(FAR struct filelist *list);
 
 /****************************************************************************
+ * Name: files_countlist
+ *
+ * Description:
+ *   Get file count from file list
+ *
+ * Returned Value:
+ *   file count of file list
+ *
+ ****************************************************************************/
+
+int files_countlist(FAR struct filelist *list);
+
+/****************************************************************************
  * Name: files_duplist
  *
  * Description:
