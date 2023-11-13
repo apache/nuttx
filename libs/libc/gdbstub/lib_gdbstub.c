@@ -860,7 +860,7 @@ static void gdb_get_registers(FAR struct gdb_state_s *state)
   int i;
 
   reg = (FAR uint8_t *)tcb->xcp.regs;
-  if (state->pid == _SCHED_GETPID())
+  if (state->pid == _SCHED_GETTID())
     {
       if (up_interrupt_context())
         {
@@ -1148,10 +1148,10 @@ static void gdb_get_thread(FAR struct tcb_s *tcb, FAR void *arg)
 {
   FAR struct gdb_state_s *state = arg;
   int pid = tcb->pid;
-  size_t len;
 
-  len = sprintf(&state->pkt_buf[state->pkt_len], "%x,", pid);
-  state->pkt_len += len;
+  /* Gdb pid start from 1, so add it */
+
+  state->pkt_len += sprintf(&state->pkt_buf[state->pkt_len], "%x,", pid + 1);
 }
 
 /****************************************************************************
@@ -1211,7 +1211,7 @@ static int gdb_query(FAR struct gdb_state_s *state)
           return ret;
         }
 
-      tcb = nxsched_get_tcb(pid);
+      tcb = nxsched_get_tcb(pid - 1);
       if (tcb == NULL)
         {
           return -EINVAL;
@@ -1300,13 +1300,13 @@ static int gdb_is_thread_active(FAR struct gdb_state_s *state)
       return ret;
     }
 
-  tcb = nxsched_get_tcb(pid);
+  tcb = nxsched_get_tcb(pid - 1);
   if (tcb == NULL)
     {
       return -EINVAL;
     }
 
-  state->pid = pid;
+  state->pid = pid - 1;
   gdb_send_ok_packet(state);
   return ret;
 }
@@ -1342,13 +1342,17 @@ static int gdb_thread_context(FAR struct gdb_state_s *state)
       return ret;
     }
 
-  tcb = nxsched_get_tcb(pid);
-  if (tcb == NULL)
+  if (pid != 0)
     {
-      return -EINVAL;
+      tcb = nxsched_get_tcb(pid - 1);
+      if (tcb == NULL)
+        {
+          return -EINVAL;
+        }
+
+      state->pid = pid - 1;
     }
 
-  state->pid = pid;
   gdb_send_ok_packet(state);
   return 0;
 }
