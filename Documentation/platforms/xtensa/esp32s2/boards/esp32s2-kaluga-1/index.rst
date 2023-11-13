@@ -297,6 +297,22 @@ After successfully built and flashed, run on the boards' terminal::
 
     nxlooper> loopback 2 8 44100
 
+rtc
+---
+
+This configuration demonstrates the use of the RTC driver through alarms.
+You can set an alarm, check its progress and receive a notification after it expires::
+
+    nsh> alarm 10
+    alarm_daemon started
+    alarm_daemon: Running
+    Opening /dev/rtc0
+    Alarm 0 set in 10 seconds
+    nsh> alarm -r
+    Opening /dev/rtc0
+    Alarm 0 is active with 10 seconds to expiration
+    nsh> alarm_daemon: alarm 0 received
+
 twai
 ----
 

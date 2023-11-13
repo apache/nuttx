@@ -137,6 +137,12 @@ CHIP_CSRCS += esp32s2_spiram.c
 CHIP_CSRCS += esp32s2_psram.c
 endif
 
+CHIP_CSRCS += esp32s2_rtc.c
+
+ifeq ($(CONFIG_RTC_DRIVER),y)
+CHIP_CSRCS += esp32s2_rtc_lowerhalf.c
+endif
+
 #############################################################################
 # Espressif HAL for 3rd Party Platforms
 #############################################################################
