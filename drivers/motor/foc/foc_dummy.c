@@ -44,8 +44,11 @@
 
 /* Board HW configuration */
 
-#define FOC_DUMMY_HW_PWM_NS      (500)
-#define FOC_DUMMY_HW_PWM_MAX     (0.95f)
+#define FOC_DUMMY_HW_PWM_NS       (500)
+#define FOC_DUMMY_HW_PWM_MAX      (0.95f)
+#define FOC_DUMMY_HW_BEMF_SCALE   (1000)
+#define FOC_DUMMY_HW_IPHASE_SCALE (1000)
+#define FOC_DUMMY_HW_IPHASE_MAX   (40000)
 
 /* Helper macros ************************************************************/
 
@@ -546,8 +549,13 @@ static int foc_dummy_info_get(FAR struct foc_dev_s *dev,
 {
   /* Get HW configuration */
 
-  info->hw_cfg.pwm_dt_ns = FOC_DUMMY_HW_PWM_NS;
-  info->hw_cfg.pwm_max   = ftob16(FOC_DUMMY_HW_PWM_MAX);
+  info->hw_cfg.pwm_dt_ns    = FOC_DUMMY_HW_PWM_NS;
+  info->hw_cfg.pwm_max      = ftob16(FOC_DUMMY_HW_PWM_MAX);
+#ifdef CONFIG_MOTOR_FOC_BEMF_SENSE
+  info->hw_cfg.bemf_scale   = FOC_DUMMY_HW_IPHASE_SCALE;
+#endif
+  info->hw_cfg.iphase_max   = FOC_DUMMY_HW_IPHASE_MAX;
+  info->hw_cfg.iphase_scale = FOC_DUMMY_HW_IPHASE_SCALE;
 
   return OK;
 }

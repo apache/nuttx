@@ -154,7 +154,7 @@ static struct stm32_foc_board_ops_s g_stm32_foc_board_ops =
 static struct stm32_foc_board_data_s g_stm32_foc_board_data =
 {
   .adc_cfg = NULL,     /* board-specific */
-  .pwm_dt  = (PWM_DEADTIME)
+  .pwm_dt  = PWM_DEADTIME
 };
 
 /* Board specific configuration */
@@ -275,6 +275,17 @@ static int board_foc_info_get(struct foc_dev_s *dev,
 
   info->hw_cfg.pwm_dt_ns = PWM_DEADTIME_NS;
   info->hw_cfg.pwm_max   = MAX_DUTY_B16;
+
+  /* ADC BEMF */
+
+#ifdef CONFIG_MOTOR_FOC_BEMF_SENSE
+  info->hw_cfg.bemf_scale = 0;      /* TODO */
+#endif
+
+  /* ADC Current - dynamic current scale not supported */
+
+  info->hw_cfg.iphase_max   = 15000;
+  info->hw_cfg.iphase_scale = -1555;
 
   return OK;
 }
