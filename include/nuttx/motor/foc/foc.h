@@ -102,8 +102,28 @@ struct foc_params_s
 
 struct foc_info_hw_s
 {
+  /* PWM configuration */
+
   uint32_t   pwm_dt_ns;   /* PWM dead-time in nano seconds */
   foc_duty_t pwm_max;     /* Maximum PWM duty cycle */
+
+  /* ADC configuration for phase current sampling
+   *
+   * In most cases it will be:
+   *
+   *   iphase_scale = iphase_ratio * adc_to_volt
+   *   adc_to_volt  = adc_ref_volt / adc_val_max
+   *   for shunt sensors iphase_ratio = 1 / (R_shunt * gain)
+   */
+
+  int32_t    iphase_scale;              /* Current phase scale [x100000] */
+  int32_t    iphase_max;                /* Maximum phase curretn [x1000] */
+
+  /* ADC configuration for BEMF sampling */
+
+#ifdef CONFIG_MOTOR_FOC_BEMF_SENSE
+  int32_t    bemf_scale;                /* BEMF sampling scale [x1000] */
+#endif
 };
 
 /* FOC driver info */
