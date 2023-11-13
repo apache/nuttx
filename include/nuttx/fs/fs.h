@@ -39,6 +39,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/mm/map.h>
+#include <nuttx/spawn.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -877,17 +878,9 @@ int files_countlist(FAR struct filelist *list);
  *
  ****************************************************************************/
 
-int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist);
-
-/****************************************************************************
- * Name: files_close_onexec
- *
- * Description:
- *   Close specified task's file descriptors with O_CLOEXEC before exec.
- *
- ****************************************************************************/
-
-void files_close_onexec(FAR struct tcb_s *tcb);
+int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist,
+                  FAR const posix_spawn_file_actions_t *actions,
+                  bool cloexec);
 
 /****************************************************************************
  * Name: file_allocate_from_tcb

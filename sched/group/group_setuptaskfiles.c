@@ -45,7 +45,9 @@
  *   file descriptors and streams from the parent task.
  *
  * Input Parameters:
- *   tcb - tcb of the new task.
+ *   tcb     - tcb of the new task.
+ *   actions - The spawn file actions
+ *   cloexec - Perform O_CLOEXEC on setup task files
  *
  * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned on
@@ -55,7 +57,9 @@
  *
  ****************************************************************************/
 
-int group_setuptaskfiles(FAR struct task_tcb_s *tcb)
+int group_setuptaskfiles(FAR struct task_tcb_s *tcb,
+                         FAR const posix_spawn_file_actions_t *actions,
+                         bool cloexec)
 {
   FAR struct task_group_s *group = tcb->cmn.group;
   int ret = OK;
@@ -75,7 +79,12 @@ int group_setuptaskfiles(FAR struct task_tcb_s *tcb)
 
   /* Duplicate the parent task's file descriptors */
 
-  ret = files_duplist(&rtcb->group->tg_filelist, &group->tg_filelist);
+  ret = files_duplist(&rtcb->group->tg_filelist,
+                      &group->tg_filelist, actions, cloexec);
+  if (ret >= 0 && actions != NULL)
+    {
+      ret = spawn_file_actions(&tcb->cmn, actions);
+    }
 #endif
 
   sched_trace_end();
