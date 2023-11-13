@@ -74,7 +74,8 @@ struct rpmsgmtd_cookie_s
 
 static int     rpmsgmtd_erase(FAR struct mtd_dev_s *dev, off_t startblock,
                               size_t nblocks);
-static int     rpmsgmtd_get_geometry(FAR struct rpmsgmtd_s *dev);
+static int     rpmsgmtd_get_geometry(FAR struct rpmsgmtd_s *dev,
+                                     FAR struct mtd_geometry_s *geometry);
 static ssize_t rpmsgmtd_bread(FAR struct mtd_dev_s *dev, off_t startblock,
                               size_t nblocks, FAR uint8_t *buffer);
 static ssize_t rpmsgmtd_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
@@ -109,6 +110,9 @@ static int     rpmsgmtd_bread_handler(FAR struct rpmsg_endpoint *ept,
 static int     rpmsgmtd_read_handler(FAR struct rpmsg_endpoint *ept,
                                      FAR void *data, size_t len,
                                      uint32_t src, FAR void *priv);
+static int     rpmsgmtd_geometry_handler(FAR struct rpmsg_endpoint *ept,
+                                         FAR void *data, size_t len,
+                                         uint32_t src, FAR void *priv);
 static int     rpmsgmtd_ioctl_handler(FAR struct rpmsg_endpoint *ept,
                                       FAR void *data, size_t len,
                                       uint32_t src, FAR void *priv);
@@ -132,12 +136,13 @@ static void    rpmsgmtd_ns_bound(struct rpmsg_endpoint *ept);
 
 static const rpmsg_ept_cb g_rpmsgmtd_handler[] =
 {
-  [RPMSGMTD_ERASE]  = rpmsgmtd_default_handler,
-  [RPMSGMTD_BREAD]  = rpmsgmtd_bread_handler,
-  [RPMSGMTD_BWRITE] = rpmsgmtd_default_handler,
-  [RPMSGMTD_READ]   = rpmsgmtd_read_handler,
-  [RPMSGMTD_WRITE]  = rpmsgmtd_default_handler,
-  [RPMSGMTD_IOCTL]  = rpmsgmtd_ioctl_handler,
+  [RPMSGMTD_ERASE]    = rpmsgmtd_default_handler,
+  [RPMSGMTD_BREAD]    = rpmsgmtd_bread_handler,
+  [RPMSGMTD_BWRITE]   = rpmsgmtd_default_handler,
+  [RPMSGMTD_READ]     = rpmsgmtd_read_handler,
+  [RPMSGMTD_WRITE]    = rpmsgmtd_default_handler,
+  [RPMSGMTD_GEOMETRY] = rpmsgmtd_geometry_handler,
+  [RPMSGMTD_IOCTL]    = rpmsgmtd_ioctl_handler,
 };
 
 /****************************************************************************
@@ -191,25 +196,53 @@ static int rpmsgmtd_erase(FAR struct mtd_dev_s *dev, off_t startblock,
  *
  ****************************************************************************/
 
-static int rpmsgmtd_get_geometry(FAR struct rpmsgmtd_s *dev)
+static int rpmsgmtd_get_geometry(FAR struct rpmsgmtd_s *dev,
+                                 FAR struct mtd_geometry_s *geometry)
 {
+  FAR struct rpmsgmtd_s *priv = dev;
+  struct rpmsgmtd_geometry_s msg;
   int ret;
 
-  ret = nxmutex_lock(&dev->geolock);
+  /* Sanity checks */
+
+  DEBUGASSERT(priv != NULL);
+
+  ret = nxmutex_lock(&priv->geolock);
   if (ret < 0)
     {
       return ret;
     }
 
-  if (dev->geo.blocksize == 0)
-    {
-      /* Get the server mtd device geometry */
+  /* Return the perviously got geometry */
 
-      ret = rpmsgmtd_ioctl(&dev->mtd, MTDIOC_GEOMETRY,
-                           (unsigned long)&dev->geo);
+  if (priv->geo.blocksize != 0)
+    {
+      if (geometry != NULL)
+        {
+          memcpy(geometry, &priv->geo, sizeof(*geometry));
+        }
+
+      goto out;
     }
 
-  nxmutex_unlock(&dev->geolock);
+  ret = rpmsgmtd_send_recv(priv, RPMSGMTD_GEOMETRY, true, &msg.header,
+                           sizeof(msg), NULL);
+
+  if (ret >= 0)
+    {
+      priv->geo.blocksize = msg.blocksize;
+      priv->geo.erasesize = msg.erasesize;
+      priv->geo.neraseblocks = msg.neraseblocks;
+      strlcpy(priv->geo.model, msg.model, sizeof(priv->geo.model));
+
+      if (geometry != NULL)
+        {
+          memcpy(geometry, &priv->geo, sizeof(*geometry));
+        }
+    }
+
+out:
+  nxmutex_unlock(&priv->geolock);
   return ret;
 }
 
@@ -250,7 +283,7 @@ static ssize_t rpmsgmtd_bread(FAR struct mtd_dev_s *dev, off_t startblock,
 
   /* Get the server mtd geometry */
 
-  ret = rpmsgmtd_get_geometry(priv);
+  ret = rpmsgmtd_get_geometry(priv, NULL);
   if (ret < 0)
     {
       ferr("Get geometry failed, ret=%d\n", ret);
@@ -314,7 +347,7 @@ static ssize_t rpmsgmtd_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
 
   /* Get the server mtd geometry */
 
-  ret = rpmsgmtd_get_geometry(priv);
+  ret = rpmsgmtd_get_geometry(priv, NULL);
   if (ret < 0)
     {
       ferr("Get geometry failed, ret=%d\n", ret);
@@ -552,8 +585,6 @@ static ssize_t rpmsgmtd_ioctl_arglen(int cmd)
 {
   switch (cmd)
     {
-      case MTDIOC_GEOMETRY:
-        return sizeof(struct mtd_geometry_s);
       case MTDIOC_PROTECT:
       case MTDIOC_UNPROTECT:
         return sizeof(struct mtd_protect_s);
@@ -586,6 +617,11 @@ static int rpmsgmtd_ioctl(FAR struct mtd_dev_s *dev, int cmd,
   uint32_t space;
   ssize_t arglen;
   size_t msglen;
+
+  if (cmd == MTDIOC_GEOMETRY)
+    {
+      return rpmsgmtd_get_geometry(priv, (FAR struct mtd_geometry_s *)arg);
+    }
 
   /* Sanity checks */
 
@@ -851,6 +887,42 @@ static int rpmsgmtd_read_handler(FAR struct rpmsg_endpoint *ept,
       rpmsg_post(ept, &cookie->sem);
     }
 
+  return 0;
+}
+
+/****************************************************************************
+ * Name: rpmsgmtd_geometry_handler
+ *
+ * Description:
+ *   Rpmsg-mtd geometry response handler, this function will be called to
+ *   process the return message of rpmsgmtd_get_geometry().
+ *
+ * Parameters:
+ *   ept  - The rpmsg endpoint
+ *   data - The return message
+ *   len  - The return message length
+ *   src  - unknow
+ *   priv - unknow
+ *
+ * Returned Values:
+ *   Always OK
+ *
+ ****************************************************************************/
+
+static int rpmsgmtd_geometry_handler(FAR struct rpmsg_endpoint *ept,
+                                     FAR void *data, size_t len,
+                                     uint32_t src, FAR void *priv)
+{
+  FAR struct rpmsgmtd_header_s *header = data;
+  FAR struct rpmsgmtd_cookie_s *cookie =
+      (FAR struct rpmsgmtd_cookie_s *)(uintptr_t)header->cookie;
+
+  if (cookie->result >= 0)
+    {
+      memcpy(cookie->data, data, len);
+    }
+
+  rpmsg_post(ept, &cookie->sem);
   return 0;
 }
 
