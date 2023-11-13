@@ -375,8 +375,7 @@ void *mm_realloc(struct mm_heap_s *heap, void *oldmem,
 
   if (size == 0)
     {
-      mm_free(heap, oldmem);
-      return NULL;
+      size = 1;
     }
 
   oldsize = host_mallocsize(oldmem);
