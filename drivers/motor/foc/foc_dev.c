@@ -404,6 +404,7 @@ static int foc_lower_ops_assert(FAR struct foc_lower_ops_s *ops)
   DEBUGASSERT(ops->shutdown);
   DEBUGASSERT(ops->start);
   DEBUGASSERT(ops->pwm_off);
+  DEBUGASSERT(ops->info_get);
   DEBUGASSERT(ops->ioctl);
   DEBUGASSERT(ops->bind);
   DEBUGASSERT(ops->fault_clear);
@@ -753,11 +754,9 @@ errout:
 static int foc_info_get(FAR struct foc_dev_s *dev,
                         FAR struct foc_info_s *info)
 {
-  /* Copy data from device */
+  /* Call lower-half logic */
 
-  memcpy(info, &dev->info, sizeof(struct foc_info_s));
-
-  return OK;
+  return FOC_OPS_INFOGET(dev, info);
 }
 
 /****************************************************************************
