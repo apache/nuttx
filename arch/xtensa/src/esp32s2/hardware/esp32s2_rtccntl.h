@@ -58,9 +58,16 @@
 
 #define RTC_CNTL_SWD_WKEY_VALUE     0x8f1d312a
 
+#define RTC_CNTL_TIME0_REG      RTC_CNTL_TIME_LOW0_REG
+#define RTC_CNTL_TIME1_REG      RTC_CNTL_TIME_HIGH0_REG
+
 #define DPORT_CPUPERIOD_SEL_80          0
 #define DPORT_CPUPERIOD_SEL_160         1
 #define DPORT_CPUPERIOD_SEL_240         2
+
+#define DPORT_SOC_CLK_SEL_XTAL          0
+#define DPORT_SOC_CLK_SEL_PLL           1
+#define DPORT_SOC_CLK_SEL_8M            2
 
 #define RTC_APB_FREQ_REG            RTC_CNTL_STORE5_REG
 

@@ -42,6 +42,7 @@
 #include "esp32s2_start.h"
 #include "esp32s2_lowputc.h"
 #include "esp32s2_wdt.h"
+#include "esp32s2_rtc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -337,6 +338,11 @@ static void noreturn_function IRAM_ATTR __esp32s2_start(void)
    */
 
   esp32s2_wdt_early_deinit();
+
+  /* Initialize RTC parameters */
+
+  esp32s2_rtc_init();
+  esp32s2_rtc_clk_set();
 
   /* Set CPU frequency configured in board.h */
 
