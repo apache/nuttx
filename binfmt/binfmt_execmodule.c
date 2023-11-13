@@ -256,6 +256,12 @@ int exec_module(FAR struct binary_s *binp,
       goto errout_with_args;
     }
 
+  ret = binfmt_copyactions(&actions, actions);
+  if (ret < 0)
+    {
+      goto errout_with_envp;
+    }
+
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   /* If there is no argument vector, the process name must be copied here */
 
@@ -271,7 +277,7 @@ int exec_module(FAR struct binary_s *binp,
   if (ret < 0)
     {
       berr("ERROR: addrenv_select() failed: %d\n", ret);
-      goto errout_with_envp;
+      goto errout_with_actions;
     }
 
   ret = up_addrenv_vheap(addrenv, &vheap);
@@ -310,12 +316,14 @@ int exec_module(FAR struct binary_s *binp,
   if (argv && argv[0])
     {
       ret = nxtask_init(tcb, argv[0], binp->priority, stackaddr,
-                        binp->stacksize, binp->entrypt, &argv[1], envp);
+                        binp->stacksize, binp->entrypt, &argv[1],
+                        envp, actions);
     }
   else
     {
       ret = nxtask_init(tcb, filename, binp->priority, stackaddr,
-                        binp->stacksize, binp->entrypt, argv, envp);
+                        binp->stacksize, binp->entrypt, argv,
+                        envp, actions);
     }
 
   if (ret < 0)
@@ -326,6 +334,7 @@ int exec_module(FAR struct binary_s *binp,
 
   /* The copied argv and envp can now be released */
 
+  binfmt_freeactions(actions);
   binfmt_freeargv(argv);
   binfmt_freeenv(envp);
 
@@ -376,10 +385,6 @@ int exec_module(FAR struct binary_s *binp,
     }
 #endif
 
-  /* Close the file descriptors with O_CLOEXEC before active task */
-
-  files_close_onexec(&tcb->cmn);
-
   if (!spawn)
     {
       exec_swap(this_task(), (FAR struct tcb_s *)tcb);
@@ -399,17 +404,6 @@ int exec_module(FAR struct binary_s *binp,
       goto errout_with_tcbinit;
     }
 #endif
-
-  /* Perform file actions */
-
-  if (actions != NULL)
-    {
-      ret = spawn_file_actions(&tcb->cmn, actions);
-      if (ret < 0)
-        {
-          goto errout_with_tcbinit;
-        }
-    }
 
   /* Set the attributes */
 
@@ -442,8 +436,10 @@ errout_with_tcbinit:
 errout_with_addrenv:
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   addrenv_restore(binp->oldenv);
-errout_with_envp:
+errout_with_actions:
+  binfmt_freeactions(actions);
 #endif
+errout_with_envp:
   binfmt_freeenv(envp);
 errout_with_args:
   binfmt_freeargv(argv);

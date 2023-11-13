@@ -247,7 +247,7 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
  *
  * Input Parameters:
  *
- *   attr - The spawn file actions
+ *   actions - The spawn file actions
  *
  * Returned Value:
  *   0 (OK) on success; A negated errno value is returned on failure.
@@ -295,4 +295,78 @@ int spawn_file_actions(FAR struct tcb_s *tcb,
     }
 
   return ret;
+}
+
+/****************************************************************************
+ * Name: spawn_file_is_duplicateable
+ *
+ * Description:
+ *   Check the input file descriptor is duplicateable from spawn actions
+ *
+ * Input Parameters:
+ *
+ *   actions - The spawn file actions
+ *   fd      - file descriptor
+ *
+ * Returned Value:
+ *   True is returned if file descriptor is duplicate able
+ *
+ ****************************************************************************/
+
+bool
+spawn_file_is_duplicateable(FAR const posix_spawn_file_actions_t *actions,
+                            int fd, bool cloexec)
+{
+  FAR struct spawn_general_file_action_s *entry;
+  FAR struct spawn_close_file_action_s *close;
+  FAR struct spawn_open_file_action_s *open;
+  FAR struct spawn_dup2_file_action_s *dup2;
+
+  /* check each file action */
+
+  for (entry = (FAR struct spawn_general_file_action_s *)actions;
+       entry != NULL;
+       entry = entry->flink)
+    {
+      switch (entry->action)
+        {
+          case SPAWN_FILE_ACTION_CLOSE:
+            close = (FAR struct spawn_close_file_action_s *)entry;
+            if (close->fd == fd)
+              {
+                return false;
+              }
+            break;
+
+          case SPAWN_FILE_ACTION_DUP2:
+            dup2 = (FAR struct spawn_dup2_file_action_s *)entry;
+            if (dup2->fd1 == fd)
+              {
+                return true;
+              }
+            else if (dup2->fd2 == fd)
+              {
+                return false;
+              }
+            break;
+
+          case SPAWN_FILE_ACTION_OPEN:
+            open = (FAR struct spawn_open_file_action_s *)entry;
+            if (open->fd == fd)
+              {
+                return false;
+              }
+            break;
+
+          default:
+            break;
+        }
+    }
+
+  if (cloexec)
+    {
+      return false;
+    }
+
+  return true;
 }

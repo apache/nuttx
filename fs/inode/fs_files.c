@@ -36,6 +36,7 @@
 #include <nuttx/cancelpt.h>
 #include <nuttx/mutex.h>
 #include <nuttx/sched.h>
+#include <nuttx/spawn.h>
 
 #ifdef CONFIG_FDSAN
 #  include <android/fdsan.h>
@@ -462,20 +463,23 @@ int file_allocate(FAR struct inode *inode, int oflags, off_t pos,
  *
  ****************************************************************************/
 
-int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist)
+int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist,
+                  FAR const posix_spawn_file_actions_t *actions,
+                  bool cloexec)
 {
+  bool fcloexec;
   int ret;
+  int fd;
   int i;
   int j;
-
-  DEBUGASSERT(clist);
-  DEBUGASSERT(plist);
 
   for (i = 0; i < plist->fl_rows; i++)
     {
       for (j = 0; j < CONFIG_NFILE_DESCRIPTORS_PER_BLOCK; j++)
         {
           FAR struct file *filep;
+
+          fd = i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK + j;
 #ifdef CONFIG_FDCLONE_STDIO
 
           /* Determine how many file descriptors to clone.  If
@@ -485,7 +489,7 @@ int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist)
            * cloned.  Otherwise all file descriptors will be cloned.
            */
 
-          if (i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK + j >= 3)
+          if (fd >= 3)
             {
               return OK;
             }
@@ -493,6 +497,22 @@ int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist)
 
           filep = files_fget_by_index(plist, i, j);
           if (filep->f_inode == NULL)
+            {
+              continue;
+            }
+
+          fcloexec = (cloexec && (filep->f_oflags & O_CLOEXEC));
+
+          /* Skip file dup if file action is unnecessary to duplicate */
+
+          if (actions != NULL)
+            {
+              if (!spawn_file_is_duplicateable(actions, fd, fcloexec))
+                {
+                  continue;
+                }
+            }
+          else if (fcloexec)
             {
               continue;
             }
@@ -505,8 +525,7 @@ int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist)
 
           /* Yes... duplicate it for the child, include O_CLOEXEC flag. */
 
-          ret = file_dup3(filep, files_fget_by_index(clist, i, j),
-                          filep->f_oflags & O_CLOEXEC ? O_CLOEXEC : 0);
+          ret = file_dup2(filep, files_fget_by_index(clist, i, j));
           if (ret < 0)
             {
               return ret;
@@ -515,41 +534,6 @@ int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist)
     }
 
   return OK;
-}
-
-/****************************************************************************
- * Name: files_close_onexec
- *
- * Description:
- *   Close specified task's file descriptors with O_CLOEXEC before exec.
- *
- ****************************************************************************/
-
-void files_close_onexec(FAR struct tcb_s *tcb)
-{
-  FAR struct filelist *list;
-  int i;
-  int j;
-
-  /* Get the file descriptor list.  It should not be NULL in this context. */
-
-  list = nxsched_get_files_from_tcb(tcb);
-  DEBUGASSERT(list != NULL);
-
-  for (i = 0; i < list->fl_rows; i++)
-    {
-      for (j = 0; j < CONFIG_NFILE_DESCRIPTORS_PER_BLOCK; j++)
-        {
-          FAR struct file *filep;
-
-          filep = files_fget_by_index(list, i, j);
-          if (filep->f_inode != NULL &&
-              (filep->f_oflags & O_CLOEXEC) != 0)
-            {
-              file_close(filep);
-            }
-        }
-    }
 }
 
 /****************************************************************************
