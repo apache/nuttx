@@ -70,6 +70,9 @@ static int rpmsgmtd_read_handler(FAR struct rpmsg_endpoint *ept,
 static int rpmsgmtd_write_handler(FAR struct rpmsg_endpoint *ept,
                                   FAR void *data, size_t len,
                                   uint32_t src, FAR void *priv);
+static int rpmsgmtd_geometry_handler(FAR struct rpmsg_endpoint *ept,
+                                     FAR void *data, size_t len,
+                                     uint32_t src, FAR void *priv);
 static int rpmsgmtd_ioctl_handler(FAR struct rpmsg_endpoint *ept,
                                   FAR void *data, size_t len,
                                   uint32_t src, FAR void *priv);
@@ -93,12 +96,13 @@ static int  rpmsgmtd_ept_cb(FAR struct rpmsg_endpoint *ept,
 
 static const rpmsg_ept_cb g_rpmsgmtd_handler[] =
 {
-  [RPMSGMTD_ERASE]  = rpmsgmtd_erase_handler,
-  [RPMSGMTD_BREAD]  = rpmsgmtd_bread_handler,
-  [RPMSGMTD_BWRITE] = rpmsgmtd_bwrite_handler,
-  [RPMSGMTD_READ]   = rpmsgmtd_read_handler,
-  [RPMSGMTD_WRITE]  = rpmsgmtd_write_handler,
-  [RPMSGMTD_IOCTL]  = rpmsgmtd_ioctl_handler,
+  [RPMSGMTD_ERASE]    = rpmsgmtd_erase_handler,
+  [RPMSGMTD_BREAD]    = rpmsgmtd_bread_handler,
+  [RPMSGMTD_BWRITE]   = rpmsgmtd_bwrite_handler,
+  [RPMSGMTD_READ]     = rpmsgmtd_read_handler,
+  [RPMSGMTD_WRITE]    = rpmsgmtd_write_handler,
+  [RPMSGMTD_GEOMETRY] = rpmsgmtd_geometry_handler,
+  [RPMSGMTD_IOCTL]    = rpmsgmtd_ioctl_handler,
 };
 
 /****************************************************************************
@@ -282,6 +286,39 @@ static int rpmsgmtd_write_handler(FAR struct rpmsg_endpoint *ept,
     }
 
   return 0;
+}
+
+/****************************************************************************
+ * Name: rpmsgmtd_geometry_handler
+ ****************************************************************************/
+
+static int rpmsgmtd_geometry_handler(FAR struct rpmsg_endpoint *ept,
+                                  FAR void *data, size_t len,
+                                  uint32_t src, FAR void *priv)
+{
+  FAR struct rpmsgmtd_server_s *server = ept->priv;
+  FAR struct rpmsgmtd_geometry_s *msg = data;
+  struct mtd_geometry_s geo;
+
+  msg->header.result = MTD_IOCTL(server->dev, MTDIOC_GEOMETRY,
+                                 (unsigned long)&geo);
+
+  if (msg->header.result < 0)
+    {
+      ferr("mtd get geometry result error:  %" PRId32 "\n",
+            msg->header.result);
+      goto send;
+    }
+
+  DEBUGASSERT(strlen(geo.model) <= RPMSGMTD_NAME_MAX);
+
+  msg->blocksize = geo.blocksize;
+  msg->erasesize = geo.erasesize;
+  msg->neraseblocks = geo.neraseblocks;
+  strlcpy(msg->model, geo.model, sizeof(msg->model));
+
+send:
+  return rpmsg_send(ept, msg, len);
 }
 
 /****************************************************************************
