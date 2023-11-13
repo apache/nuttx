@@ -649,7 +649,7 @@ void nx_start(void)
         {
           /* Clone stdout, stderr, stdin from the CPU0 IDLE task. */
 
-          DEBUGVERIFY(group_setuptaskfiles(&g_idletcb[i]));
+          DEBUGVERIFY(group_setuptaskfiles(&g_idletcb[i], NULL, true));
         }
       else
         {

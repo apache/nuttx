@@ -165,6 +165,51 @@ void binfmt_freeargv(FAR char * const *argv);
 #  define binfmt_freeenv(envp)
 #endif
 
+/****************************************************************************
+ * Name: binfmt_copyactions
+ *
+ * Description:
+ *   In the kernel build, the file actions will likely lie in the caller's
+ *   address environment and, hence, be inaccessible when we switch to the
+ *   address environment of the new process address environment.  So we
+ *   do not have any real option other than to copy the callers action list.
+ *
+ * Input Parameters:
+ *   copy     - Pointer of file actions
+ *
+ * Returned Value:
+ *   A non-zero copy is returned on success.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
+int binfmt_copyactions(FAR const posix_spawn_file_actions_t **copy,
+                       FAR const posix_spawn_file_actions_t *actions);
+#else
+#  define binfmt_copyactions(copy, actp) \
+          (*(copy) = (FAR posix_spawn_file_actions_t *)(actp), 0)
+#endif
+
+/****************************************************************************
+ * Name: binfmt_freeactions
+ *
+ * Description:
+ *   Release the copied file action list.
+ *
+ * Input Parameters:
+ *   copy     - Pointer of file actions
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
+void binfmt_freeactions(FAR const posix_spawn_file_actions_t *copy);
+#else
+#  define binfmt_freeactions(copy)
+#endif
+
 #ifdef CONFIG_BUILTIN
 /****************************************************************************
  * Name: builtin_initialize

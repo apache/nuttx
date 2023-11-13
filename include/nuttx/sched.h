@@ -923,7 +923,8 @@ FAR struct filelist *nxsched_get_files(void);
 
 int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
                 FAR void *stack, uint32_t stack_size, main_t entry,
-                FAR char * const argv[], FAR char * const envp[]);
+                FAR char * const argv[], FAR char * const envp[],
+                FAR const posix_spawn_file_actions_t *actions);
 
 /****************************************************************************
  * Name: nxtask_uninit
