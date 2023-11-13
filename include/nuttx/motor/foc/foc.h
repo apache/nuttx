@@ -98,9 +98,9 @@ struct foc_params_s
   foc_duty_t duty[CONFIG_MOTOR_FOC_PHASES]; /* PWM duty cycle for phases */
 };
 
-/* Hardware specific configuration */
+/* Hardware specific informations */
 
-struct foc_hw_config_s
+struct foc_info_hw_s
 {
   uint32_t   pwm_dt_ns;   /* PWM dead-time in nano seconds */
   foc_duty_t pwm_max;     /* Maximum PWM duty cycle */
@@ -110,7 +110,7 @@ struct foc_hw_config_s
 
 struct foc_info_s
 {
-  struct foc_hw_config_s hw_cfg; /* Hardware specific configuration */
+  struct foc_info_hw_s hw_cfg; /* Hardware specific informations  */
 };
 
 /* FOC device upper-half */

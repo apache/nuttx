@@ -48,6 +48,7 @@
 #define FOC_OPS_PWMOFF(d, o)            (d)->lower->ops->pwm_off(d, o)
 #define FOC_OPS_DUTY(d, x)              (d)->lower->ops->pwm_duty_set(d, x)
 #define FOC_OPS_IOCTL(d, c, a)          (d)->lower->ops->ioctl(d, c, a)
+#define FOC_OPS_INFOGET(d, i)           (d)->lower->ops->info_get(d, i)
 #define FOC_OPS_BIND(d, c)              (d)->lower->ops->bind(d, c)
 #define FOC_OPS_FAULT_CLEAR(d)          (d)->lower->ops->fault_clear(d)
 #ifdef CONFIG_MOTOR_FOC_TRACE
@@ -118,6 +119,11 @@ struct foc_lower_ops_s
   /* Lower-half start/stop */
 
   CODE int (*start)(FAR struct foc_dev_s *dev, bool state);
+
+  /* Get all hardware information */
+
+  CODE int (*info_get)(FAR struct foc_dev_s *dev,
+                       FAR struct foc_info_s *info);
 
   /* Lower-half IOCTL */
 

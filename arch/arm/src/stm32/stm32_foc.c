@@ -845,6 +845,8 @@ static int stm32_foc_start(struct foc_dev_s *dev, bool state);
 static int stm32_foc_pwm_duty_set(struct foc_dev_s *dev,
                                   foc_duty_t *duty);
 static int stm32_foc_pwm_off(struct foc_dev_s *dev, bool off);
+static int stm32_foc_info_get(struct foc_dev_s *dev,
+                              struct foc_info_s *info);
 static int stm32_foc_ioctl(struct foc_dev_s *dev, int cmd,
                            unsigned long arg);
 static int stm32_foc_bind(struct foc_dev_s *dev,
@@ -885,8 +887,6 @@ static void stm32_foc_adc_trgo_trg_set(struct foc_dev_s *dev,
 #else
 #  error Invalid FOC ADC trigger
 #endif
-
-static void stm32_foc_hw_config_get(struct foc_dev_s *dev);
 
 /****************************************************************************
  * Private Data
@@ -940,6 +940,7 @@ static struct foc_lower_ops_s g_stm32_foc_ops =
   .start          = stm32_foc_start,
   .pwm_duty_set   = stm32_foc_pwm_duty_set,
   .pwm_off        = stm32_foc_pwm_off,
+  .info_get       = stm32_foc_info_get,
   .ioctl          = stm32_foc_ioctl,
   .bind           = stm32_foc_bind,
   .fault_clear    = stm32_foc_fault_clear,
@@ -1317,12 +1318,14 @@ static void stm32_foc_adc_trgo_trg_set(struct foc_dev_s *dev,
 static int stm32_foc_configure(struct foc_dev_s *dev,
                                struct foc_cfg_s *cfg)
 {
-  struct stm32_foc_priv_s *priv = STM32_FOC_PRIV_FROM_DEV_GET(dev);
-  int                      ret  = OK;
+  struct stm32_foc_priv_s  *priv  = STM32_FOC_PRIV_FROM_DEV_GET(dev);
+  struct stm32_foc_board_s *board = STM32_FOC_BOARD_FROM_DEV_GET(dev);
+  int                       ret   = OK;
 
   DEBUGASSERT(dev);
   DEBUGASSERT(cfg);
   DEBUGASSERT(priv);
+  DEBUGASSERT(board);
   DEBUGASSERT(cfg->pwm_freq > 0);
   DEBUGASSERT(cfg->notifier_freq > 0);
 
@@ -1534,10 +1537,6 @@ static int stm32_foc_setup(struct foc_dev_s *dev)
       mtrerr("irq_attach failed: %d\n", ret);
       goto errout;
     }
-
-  /* Get HW configuration */
-
-  stm32_foc_hw_config_get(dev);
 
 #ifdef CONFIG_MOTOR_FOC_TRACE
   /* Initialize trace interface */
@@ -2136,14 +2135,14 @@ static int stm32_foc_pwm_off(struct foc_dev_s *dev, bool off)
 }
 
 /****************************************************************************
- * Name: stm32_foc_hw_config_get
+ * Name: stm32_foc_info_get
  *
  * Description:
  *   Get HW configuration for FOC device
  *
  ****************************************************************************/
 
-static void stm32_foc_hw_config_get(struct foc_dev_s *dev)
+static int stm32_foc_info_get(struct foc_dev_s *dev, struct foc_info_s *info)
 {
   struct stm32_foc_board_s *board = STM32_FOC_BOARD_FROM_DEV_GET(dev);
 
@@ -2152,8 +2151,7 @@ static void stm32_foc_hw_config_get(struct foc_dev_s *dev)
 
   /* Get data from board configuration */
 
-  dev->info.hw_cfg.pwm_dt_ns = board->data->pwm_dt_ns;
-  dev->info.hw_cfg.pwm_max   = board->data->duty_max;
+  return board->ops->info_get(dev, info);
 }
 
 /****************************************************************************
@@ -2526,6 +2524,7 @@ stm32_foc_initialize(int inst, struct stm32_foc_board_s *board)
   DEBUGASSERT(board->ops->fault_clear);
   DEBUGASSERT(board->ops->pwm_start);
   DEBUGASSERT(board->ops->current_get);
+  DEBUGASSERT(board->ops->info_get);
 #ifdef CONFIG_MOTOR_FOC_TRACE
   DEBUGASSERT(board->ops->trace_init);
   DEBUGASSERT(board->ops->trace);
