@@ -288,8 +288,8 @@ int pwm_shutdown (struct pwm_lowerhalf_s  * dev)
 
   if (priv->pin >= 0)
     {
-      rp2040_gpio_setdir(priv->pin[0], true);
-      rp2040_gpio_put(priv->pin[0],
+      rp2040_gpio_setdir(priv->pin, true);
+      rp2040_gpio_put(priv->pin,
                       ((priv->flags & RP2040_PWM_CSR_A_INV) != 0));
       rp2040_gpio_set_function(priv->pin, RP2040_GPIO_FUNC_SIO);
     }
