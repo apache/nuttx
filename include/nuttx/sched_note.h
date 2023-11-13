@@ -51,6 +51,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define NOTE_ALIGN(a) (((a) + sizeof(uintptr_t) - 1) & \
+                       ~(sizeof(uintptr_t) - 1))
+
 /* Provide defaults for some configuration settings (could be undefined with
  * old configuration files)
  */
