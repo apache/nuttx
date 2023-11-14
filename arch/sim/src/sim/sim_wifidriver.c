@@ -121,7 +121,7 @@ struct sim_bss_info_s
   uint16_t beacon_period;       /* units are Kusec */
   uint16_t capability;          /* Capability information */
   uint8_t ssid_len;
-  uint8_t ssid[32];
+  char ssid[32];
   struct
   {
     uint32_t count;             /* rates in this set */
@@ -483,6 +483,47 @@ static int utf8_escape(char *outp, int out_size,
   return 0;
 }
 
+static int utf8_unescape(char *outp, int out_size,
+                         const char *inp, size_t in_size)
+{
+  size_t res_size = 0;
+
+  if (!inp || !outp)
+    {
+      return -EINVAL;
+    }
+
+  if (!in_size)
+    {
+      in_size = strlen(inp);
+    }
+
+  for (in_size--; in_size >= 0; in_size--, res_size++)
+    {
+      if (res_size >= out_size)
+        {
+          return -EINVAL;
+        }
+
+      if (*inp == '\\')
+        {
+          in_size--;
+          inp++;
+        }
+
+      *outp++ = *inp++;
+    }
+
+  /* NUL terminate if space allows */
+
+  if (res_size < out_size)
+    {
+      *outp = '\0';
+    }
+
+  return res_size;
+}
+
 static int hex2nibble(char c)
 {
   if (c >= '0' && c <= '9')
@@ -523,7 +564,7 @@ static int hex2byte(const char *hex)
   return (a << 4) | b;
 }
 
-static size_t wpa_ssid_decode(uint8_t *buf, size_t maxlen, const char *str)
+static size_t wpa_ssid_decode(char *buf, size_t maxlen, const char *str)
 {
   const char *pos = str;
   size_t len = 0;
@@ -738,14 +779,17 @@ static int get_bss_info(struct sim_bss_info_s *bss_info, char *buf, int len)
           case 4:    /* ssid */
               if (p - s > SSID_MAX_LEN)
                 {
-                  bss_info->ssid_len = wpa_ssid_decode(bss_info->ssid,
-                                                       SSID_MAX_LEN, str);
+                  wpa_ssid_decode(bss_info->ssid, SSID_MAX_LEN, str);
                 }
               else
                 {
                   memcpy(bss_info->ssid, str, p - s);
-                  bss_info->ssid_len = p - s;
                 }
+
+              bss_info->ssid_len =
+                      utf8_unescape(bss_info->ssid, sizeof(bss_info->ssid),
+                                    bss_info->ssid, strlen(bss_info->ssid));
+
               break;
           default:
               break;
