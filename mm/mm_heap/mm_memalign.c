@@ -30,6 +30,7 @@
 
 #include <nuttx/mm/mm.h>
 #include <nuttx/mm/kasan.h>
+#include <nuttx/sched_note.h>
 
 #include "mm_heap/mm.h"
 
@@ -267,7 +268,8 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 
   /* Update heap statistics */
 
-  heap->mm_curused += MM_SIZEOF_NODE(node);
+  size = MM_SIZEOF_NODE(node);
+  heap->mm_curused += size;
   if (heap->mm_curused > heap->mm_maxused)
     {
       heap->mm_maxused = heap->mm_curused;
@@ -277,11 +279,9 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 
   MM_ADD_BACKTRACE(heap, node);
 
-  alignedchunk = (uintptr_t)kasan_unpoison
-                    ((FAR const void *)alignedchunk,
-                    mm_malloc_size(heap,
-                                   (FAR void *)alignedchunk));
-
+  alignedchunk = (uintptr_t)kasan_unpoison((FAR const void *)alignedchunk,
+                                           size - MM_ALLOCNODE_OVERHEAD);
+  sched_note_heap(true, heap, (FAR void *)alignedchunk, size);
   DEBUGASSERT(alignedchunk % alignment == 0);
   return (FAR void *)alignedchunk;
 }

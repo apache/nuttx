@@ -34,6 +34,7 @@
 #include <nuttx/mm/mm.h>
 #include <nuttx/mm/kasan.h>
 #include <nuttx/sched.h>
+#include <nuttx/sched_note.h>
 
 #include "mm_heap/mm.h"
 
@@ -306,7 +307,8 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 
       /* Update heap statistics */
 
-      heap->mm_curused += MM_SIZEOF_NODE(node);
+      nodesize = MM_SIZEOF_NODE(node);
+      heap->mm_curused += nodesize;
       if (heap->mm_curused > heap->mm_maxused)
         {
           heap->mm_maxused = heap->mm_curused;
@@ -324,7 +326,8 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
   if (ret)
     {
       MM_ADD_BACKTRACE(heap, node);
-      ret = kasan_unpoison(ret, mm_malloc_size(heap, ret));
+      ret = kasan_unpoison(ret, nodesize - MM_ALLOCNODE_OVERHEAD);
+      sched_note_heap(true, heap, ret, nodesize);
 #ifdef CONFIG_MM_FILL_ALLOCATIONS
       memset(ret, MM_ALLOC_MAGIC, alignsize - MM_ALLOCNODE_OVERHEAD);
 #endif
