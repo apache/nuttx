@@ -59,11 +59,6 @@ volatile uint32_t g_system_ticks = INITIAL_SYSTEM_TIMER_TICKS;
 struct timespec   g_basetime;
 #endif
 
-#ifdef CONFIG_CLOCK_ADJTIME
-long long g_clk_adj_usec;
-long long g_clk_adj_count;
-#endif
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -228,11 +223,6 @@ void clock_initialize(void)
   /* Initialize the time value to match the RTC */
 
   clock_inittime(NULL);
-#endif
-
-#if defined(CONFIG_CLOCK_ADJTIME)
-  g_clk_adj_count = 0;
-  g_clk_adj_usec = 0;
 #endif
 
 #endif
@@ -421,41 +411,6 @@ skip:
 #endif
 
 /****************************************************************************
- * Name: clock_set_adjust
- *
- * Description:
- *   This function is called from adjtime() defined in clock_adjtime.c if
- *   CONFIG_CLOCK_ADJTIME is enabled. It sets global variables g_clk_adj_usec
- *   and g_clk_adj_count which are used for clock adjustment.
- *
- * Input Parameters:
- *   adj_usec  - period adjustment in usec
- *   adj_count - number of clock ticks over which we apply adj_usec
- *
- ****************************************************************************/
-
-#ifdef CONFIG_CLOCK_ADJTIME
-void clock_set_adjust(long long adj_usec, long long adj_count,
-                      FAR long long *adj_usec_old,
-                      FAR long long *adj_count_old)
-{
-  /* Get old adjust values. */
-
-  *adj_usec_old  = g_clk_adj_usec;
-  *adj_count_old = g_clk_adj_count;
-
-  /* Set new adjust values. */
-
-  g_clk_adj_usec  = adj_usec;
-  g_clk_adj_count = adj_count;
-
-  /* And change timer period. */
-
-  up_adj_timer_period(g_clk_adj_usec);
-}
-#endif
-
-/****************************************************************************
  * Name: clock_timer
  *
  * Description:
@@ -471,25 +426,5 @@ void clock_timer(void)
   /* Increment the per-tick system counter */
 
   g_system_ticks++;
-
-#ifdef CONFIG_CLOCK_ADJTIME
-  /* Do we apply timer adjustment? */
-
-  if (g_clk_adj_count > 0)
-    {
-      /* Yes, decrement the count each tick. */
-
-      g_clk_adj_count--;
-
-      /* Check if clock adjusment is finished. */
-
-      if (g_clk_adj_count == 0)
-        {
-          /* Yes... reset timer period. */
-
-          up_adj_timer_period(0);
-        }
-    }
-#endif
 }
 #endif

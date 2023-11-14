@@ -183,6 +183,16 @@ config RTC_FREQUENCY
 		must be provided.  If RTC_HIRES is not defined, RTC_FREQUENCY is
 		assumed to be one Hz.
 
+config RTC_ADJTIME
+	bool "RTC Adjustment Support"
+	default N
+	depends on RTC_HIRES
+	---help---
+		Enable support for adjtime() to adjust RTC run rate. The following
+		interface must be provided by RTC driver:
+
+			int up_rtc_adjtime(long ppb);
+
 endif # !RTC_DATETIME
 
 config RTC_ALARM
