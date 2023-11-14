@@ -89,6 +89,10 @@ struct note_driver_ops_s
   CODE void (*irqhandler)(FAR struct note_driver_s *drv, int irq,
                           FAR void *handler, bool enter);
 #endif
+#ifdef CONFIG_SCHED_INSTRUMENTATION_HEAP
+  CODE void (*heap)(FAR struct note_driver_s *drv, bool alloc,
+                    FAR void *heap, FAR void *mem, size_t size);
+#endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
   CODE void (*string)(FAR struct note_driver_s *drv, uintptr_t ip,
                       FAR const char *buf);
