@@ -37,6 +37,7 @@
 
 #include <errno.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/himem/himem.h>
 
 #ifdef CONFIG_ESP32S3_TIMER
 #  include "esp32s3_board_tim.h"
@@ -121,6 +122,15 @@ int esp32s3_bringup(void)
     defined(CONFIG_ESP32S3_I2S1)
   bool i2s_enable_tx;
   bool i2s_enable_rx;
+#endif
+
+#if defined(CONFIG_ESP32S3_SPIRAM) && \
+    defined(CONFIG_ESP32S3_SPIRAM_BANKSWITCH_ENABLE)
+  ret = esp_himem_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to init HIMEM: %d\n", ret);
+    }
 #endif
 
 #if defined(CONFIG_ESP32S3_EFUSE)

@@ -33,6 +33,7 @@
 #include <sys/param.h>
 #include <nuttx/config.h>
 #include <nuttx/spinlock.h>
+#include <assert.h>
 
 #include "xtensa.h"
 #include "xtensa_attr.h"
@@ -51,6 +52,18 @@
 #  define PSRAM_SPEED PSRAM_CACHE_S40M
 #else  /* #if CONFIG_ESP32S3_SPIRAM_SPEED_80M */
 #  define PSRAM_SPEED PSRAM_CACHE_S80M
+#endif
+
+#if CONFIG_ESP32S3_SPIRAM_VADDR_OFFSET
+#define SPIRAM_VADDR_OFFSET   CONFIG_ESP32S3_SPIRAM_VADDR_OFFSET
+#else
+#define SPIRAM_VADDR_OFFSET   0
+#endif
+
+#if CONFIG_ESP32S3_SPIRAM_VADDR_MAP_SIZE
+#define SPIRAM_VADDR_MAP_SIZE CONFIG_ESP32S3_SPIRAM_VADDR_MAP_SIZE
+#else
+#define SPIRAM_VADDR_MAP_SIZE 0
 #endif
 
 static bool g_spiram_inited;
@@ -143,6 +156,8 @@ void IRAM_ATTR esp_spiram_init_cache(void)
   uint32_t regval;
   uint32_t psram_size;
   uint32_t mapped_vaddr_size;
+  uint32_t target_mapped_vaddr_start;
+  uint32_t target_mapped_vaddr_end;
 
   int ret = psram_get_available_size(&psram_size);
   if (ret != OK)
@@ -151,9 +166,38 @@ void IRAM_ATTR esp_spiram_init_cache(void)
     }
 
   minfo("PSRAM available size = %d\n", psram_size);
-
   mapped_vaddr_size = mmu_valid_space(&g_mapped_vaddr_start);
-  minfo("Virtual address size = %d\n", mapped_vaddr_size);
+
+  if ((SPIRAM_VADDR_OFFSET + SPIRAM_VADDR_MAP_SIZE) > 0)
+    {
+      ASSERT(SPIRAM_VADDR_OFFSET % MMU_PAGE_SIZE == 0);
+      ASSERT(SPIRAM_VADDR_MAP_SIZE % MMU_PAGE_SIZE == 0);
+      target_mapped_vaddr_start = DRAM0_CACHE_ADDRESS_LOW +
+                                  SPIRAM_VADDR_OFFSET;
+      target_mapped_vaddr_end = target_mapped_vaddr_start +
+                                SPIRAM_VADDR_MAP_SIZE;
+      if (target_mapped_vaddr_start < g_mapped_vaddr_start)
+        {
+          mwarn("Invalid target vaddr = 0x%x, change vaddr to: 0x%x\n",
+                target_mapped_vaddr_start, g_mapped_vaddr_start);
+          target_mapped_vaddr_start = g_mapped_vaddr_start;
+        }
+
+      if (target_mapped_vaddr_end >
+         (g_mapped_vaddr_start + mapped_vaddr_size))
+        {
+          mwarn("Invalid vaddr map size: 0x%x, change vaddr end: 0x%x\n",
+                SPIRAM_VADDR_MAP_SIZE,
+                g_mapped_vaddr_start + mapped_vaddr_size);
+          target_mapped_vaddr_end = g_mapped_vaddr_start + mapped_vaddr_size;
+        }
+
+      ASSERT(target_mapped_vaddr_end > target_mapped_vaddr_start);
+      ASSERT(target_mapped_vaddr_end <= DRAM0_CACHE_ADDRESS_HIGH);
+      mapped_vaddr_size = target_mapped_vaddr_end -
+                          target_mapped_vaddr_start;
+      g_mapped_vaddr_start = target_mapped_vaddr_start;
+    }
 
   if (mapped_vaddr_size < psram_size)
     {
@@ -167,6 +211,10 @@ void IRAM_ATTR esp_spiram_init_cache(void)
     {
       g_mapped_size = psram_size;
     }
+
+  minfo("Virtual address size = 0x%x, start: 0x%x, end: 0x%x\n",
+         mapped_vaddr_size, g_mapped_vaddr_start,
+         g_mapped_vaddr_start + g_mapped_size);
 
   /* Suspend DRAM Case during configuration */
 
@@ -336,7 +384,7 @@ int IRAM_ATTR g_rodata_flash2spiram_offset(void)
 }
 #endif
 
-int esp_spiram_init(void)
+int IRAM_ATTR esp_spiram_init(void)
 {
   int r;
   uint32_t psram_physical_size = 0;
