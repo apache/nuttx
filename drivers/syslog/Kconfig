@@ -48,12 +48,6 @@ config RAMLOG_NONBLOCKING
 		Reading from the RAMLOG will never block if the RAMLOG is empty.  If the RAMLOG
 		is empty, then zero is returned (usually interpreted as end-of-file).
 
-config RAMLOG_NPOLLWAITERS
-	int "RAMLOG number of poll waiters"
-	default 4
-	---help---
-		The maximum number of threads that may be waiting on the poll method.
-
 config RAMLOG_POLLTHRESHOLD
 	int "The threshold value of circular buffer to notify poll waiters"
 	default 1
