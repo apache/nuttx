@@ -41,6 +41,7 @@
 #include "hardware/esp32s3_rom_layout.h"
 #ifdef CONFIG_ESP32S3_SPIRAM
 #  include "esp32s3_spiram.h"
+#  include "esp32s3_himem.h"
 #endif
 
 /****************************************************************************
@@ -101,7 +102,8 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
 #  elif defined(CONFIG_BUILD_FLAT)
 #    ifdef MM_USER_HEAP_EXTRAM
   ubase = (uintptr_t)esp_spiram_allocable_vaddr_start();
-  utop  = (uintptr_t)esp_spiram_allocable_vaddr_end();
+  utop  = (uintptr_t)(esp_spiram_allocable_vaddr_end() -
+                      esp_himem_reserved_area_size());
 #    elif defined(MM_USER_HEAP_IRAM)
   ubase = (uintptr_t)_sheap + XTENSA_IMEM_REGION_SIZE;
   utop  = (uintptr_t)HEAP_REGION1_END;
@@ -220,7 +222,8 @@ void xtensa_add_region(void)
 
 #if defined(CONFIG_ESP32S3_SPIRAM_COMMON_HEAP) && !defined(MM_USER_HEAP_EXTRAM)
   start = (void *)esp_spiram_allocable_vaddr_start();
-  end = (void *)esp_spiram_allocable_vaddr_end();
+  end = (void *)(esp_spiram_allocable_vaddr_end() -
+                 esp_himem_reserved_area_size());
   size  = (size_t)(end - start);
 #endif
 

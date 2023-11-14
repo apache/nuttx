@@ -919,6 +919,53 @@ config ESP32S3_RTC_HEAP
 	select ARCH_HAVE_EXTRA_HEAPS
 	default n
 
+config ESP32S3_SPIRAM_MAP
+	bool "Remap the size and offset of SPIRAM virtual address"
+	depends on ESP32S3_SPIRAM
+	default n
+
+config ESP32S3_SPIRAM_VADDR_OFFSET
+	hex "Map virtual address offset"
+	default 0x30000
+	depends on ESP32S3_SPIRAM_MAP
+	range 0 0x1FF0000
+
+config ESP32S3_SPIRAM_VADDR_MAP_SIZE
+	hex "Map virtual address size"
+	default 0x400000
+	depends on ESP32S3_SPIRAM_MAP
+	range 0x10000 0x2000000
+
+config ESP32S3_SPIRAM_BANKSWITCH_ENABLE
+	bool "Enable bank switching for external RAM"
+	default n
+	depends on ESP32S3_SPIRAM_MAP
+	---help---
+		The MMU table of ESP32-S3 is up to 512, and the page size of each MMU
+		is 64KB. The MMU table can be used for mapping instructions and data.
+		External RAM mapped into data space in 64 KB blocks no larger than 32MB.
+		The hardware does support larger memories, but these have to be
+		bank-switched in and out of this address space. Enabling this allows
+		you to reserve some MMU pages for this, which allows the use of the
+		esp32s3_himem api to manage these
+		banks.
+
+config SPIRAM_BANKSWITCH_RESERVE
+	int "Amount of 64K pages to reserve for bank switching"
+	depends on ESP32S3_SPIRAM_BANKSWITCH_ENABLE
+	default 4
+	range 1 256
+	---help---
+		Select the amount of banks reserved for bank switching. Note
+		that the amount of RAM allocatable with malloc will decrease
+		by 64KB for each page reserved here.
+		Note that the amount of banks reserved is smaller than the number
+		of 64KB blocks of configured external RAM mapped to the data space.
+		Note that this reservation is only actually done if your
+		program actually uses the himem API. Without any himem
+		calls, the reservation is not done and the original amount
+		of memory will be available.
+
 endmenu # Memory Configuration
 
 config ESP32S3_GPIO_IRQ
