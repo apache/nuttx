@@ -345,27 +345,6 @@ static int rpmsgblk_ioctl_handler(FAR struct rpmsg_endpoint *ept,
         }
         break;
 
-      case MMC_IOC_MULTI_CMD:
-        {
-          FAR struct mmc_ioc_multi_cmd *mioc =
-            (FAR struct mmc_ioc_multi_cmd *)(uintptr_t)msg->buf;
-          uint64_t num = mioc->num_of_cmds;
-          size_t off   = sizeof(struct mmc_ioc_multi_cmd) +
-                         num * sizeof(struct mmc_ioc_cmd);
-          uint64_t i;
-
-          for (i = 0; i < num; i++)
-            {
-              if (mioc->cmds[i].data_ptr)
-                {
-                  mioc->cmds[i].data_ptr = (uint64_t)(uintptr_t)
-                                           ((FAR uint8_t *)mioc + off);
-                  off += mioc->cmds[i].blksz * mioc->cmds[i].blocks;
-                }
-            }
-        }
-        break;
-
       default:
         break;
     }
