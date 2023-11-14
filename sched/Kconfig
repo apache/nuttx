@@ -1284,6 +1284,14 @@ config SCHED_INSTRUMENTATION_IRQHANDLER
 
 			void sched_note_irqhandler(int irq, FAR void *handler, bool enter);
 
+config SCHED_INSTRUMENTATION_HEAP
+	bool "Heap monitor hooks"
+	default n
+	---help---
+		Enables additional hooks for heap allocation.
+
+			void sched_note_heap(bool alloc, FAR void* heap, FAR void *mem, size_t size)
+
 config SCHED_INSTRUMENTATION_DUMP
 	bool "Use note dump for instrumentation"
 	default n

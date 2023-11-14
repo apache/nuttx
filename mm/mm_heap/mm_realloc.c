@@ -34,6 +34,7 @@
 
 #include <nuttx/mm/mm.h>
 #include <nuttx/mm/kasan.h>
+#include <nuttx/sched_note.h>
 
 #include "mm_heap/mm.h"
 
@@ -382,10 +383,13 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
           heap->mm_maxused = heap->mm_curused;
         }
 
+      sched_note_heap(false, heap, oldmem, oldsize);
+      sched_note_heap(true, heap, newmem, newsize);
       mm_unlock(heap);
       MM_ADD_BACKTRACE(heap, (FAR char *)newmem - MM_SIZEOF_ALLOCNODE);
 
-      newmem = kasan_unpoison(newmem, mm_malloc_size(heap, newmem));
+      newmem = kasan_unpoison(newmem, MM_SIZEOF_NODE(oldnode) -
+                              MM_ALLOCNODE_OVERHEAD);
       if (kasan_reset_tag(newmem) != kasan_reset_tag(oldmem))
         {
           /* Now we have to move the user contents 'down' in memory.  memcpy
