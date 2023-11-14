@@ -23,11 +23,16 @@
  ****************************************************************************/
 
 #include <nuttx/kmalloc.h>
+#ifdef CONFIG_PM
+#include <nuttx/power/pm.h>
+#endif
 
+#include <assert.h>
 #include <debug.h>
 #include <stdio.h>
 #include <sys/boardctl.h>
 
+#include "sched/sched.h"
 #include "thermal_core.h"
 
 /****************************************************************************
@@ -53,6 +58,11 @@ static void device_bind        (FAR struct thermal_zone_device_s *zdev,
 static void device_unbind      (FAR struct thermal_zone_device_s *zdev,
                                 FAR struct thermal_cooling_device_s *cdev);
 
+#ifdef CONFIG_PM
+static void thermal_pm_notify(FAR struct pm_callback_s *cb, int domain,
+                              enum pm_state_e pmstate);
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -69,6 +79,13 @@ g_zone_dev_list = LIST_INITIAL_VALUE(g_zone_dev_list);
 static mutex_t g_thermal_lock = NXMUTEX_INITIALIZER;
 
 static FAR struct thermal_governor_s *g_def_governor = NULL;
+
+#ifdef CONFIG_PM
+struct pm_callback_s g_thermal_pm_cb =
+{
+  .notify  = thermal_pm_notify,
+};
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -263,6 +280,56 @@ find_governor_by_name(FAR const char *name)
 
   return NULL;
 }
+
+#ifdef CONFIG_PM
+static void thermal_pm_notify(FAR struct pm_callback_s *cb, int domain,
+                              enum pm_state_e pmstate)
+{
+  FAR struct thermal_zone_device_s *zdev;
+
+  switch (pmstate)
+    {
+      case PM_SLEEP:
+        {
+          nxmutex_lock(&g_thermal_lock);
+
+          list_for_every_entry(&g_zone_dev_list, zdev,
+                               struct thermal_zone_device_s, node)
+            {
+              work_cancel(LPWORK, &zdev->monitor);
+            }
+
+          nxmutex_unlock(&g_thermal_lock);
+        }
+        break;
+      case PM_RESTORE:
+      case PM_NORMAL:
+      case PM_IDLE:
+      case PM_STANDBY:
+        {
+          nxmutex_lock(&g_thermal_lock);
+
+          list_for_every_entry(&g_zone_dev_list, zdev,
+                               struct thermal_zone_device_s, node)
+            {
+              if (zdev->enabled && work_available(&zdev->monitor))
+                {
+                  work_queue(LPWORK, &zdev->monitor,
+                             (worker_t)thermal_zone_device_update, zdev,
+                             zdev->params->polling_delay);
+                }
+            }
+
+          nxmutex_unlock(&g_thermal_lock);
+        }
+        break;
+      default:
+        break;
+    }
+
+  return;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -740,6 +807,8 @@ void thermal_zone_device_update(FAR struct thermal_zone_device_s *zdev)
   int temp;
   int ret;
 
+  DEBUGASSERT(!is_idle_task(this_task()));
+
   nxmutex_lock(&g_thermal_lock);
 
   /* Update termerature */
@@ -852,6 +921,15 @@ int thermal_init(void)
   if (NULL == thermal_cpufreq_cooling_register())
     {
       return -ENOTSUP;
+    }
+#endif
+
+#ifdef CONFIG_PM
+  ret = pm_register(&g_thermal_pm_cb);
+  if (ret < 0)
+    {
+      therr("Register suspend notifier failed!\n");
+      return ret;
     }
 #endif
 
