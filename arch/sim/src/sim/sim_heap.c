@@ -33,6 +33,7 @@
 #include <nuttx/atomic.h>
 #include <nuttx/fs/procfs.h>
 #include <nuttx/mm/mm.h>
+#include <nuttx/sched_note.h>
 
 #include "sim_internal.h"
 
@@ -185,6 +186,7 @@ static void mm_delayfree(struct mm_heap_s *heap, void *mem, bool delay)
       int size = host_mallocsize(mem);
       atomic_fetch_sub(&heap->aordblks, 1);
       atomic_fetch_sub(&heap->uordblks, size);
+      sched_note_heap(false, heap, mem, size);
       host_free(mem);
     }
 }
@@ -364,6 +366,7 @@ void *mm_realloc(struct mm_heap_s *heap, void *oldmem,
   int uordblks;
   int usmblks;
   int newsize;
+  int oldsize;
 
   free_delaylist(heap, false);
 
@@ -373,13 +376,23 @@ void *mm_realloc(struct mm_heap_s *heap, void *oldmem,
       return NULL;
     }
 
-  atomic_fetch_sub(&heap->uordblks, host_mallocsize(oldmem));
+  oldsize = host_mallocsize(oldmem);
+  atomic_fetch_sub(&heap->uordblks, oldsize);
   mem = host_realloc(oldmem, size);
 
   atomic_fetch_add(&heap->aordblks, oldmem == NULL && mem != NULL);
   newsize = host_mallocsize(mem ? mem : oldmem);
   atomic_fetch_add(&heap->uordblks, newsize);
   usmblks = atomic_load(&heap->usmblks);
+  if (mem != NULL)
+    {
+      if (oldmem != NULL)
+        {
+          sched_note_heap(false, heap, oldmem, oldsize);
+        }
+
+      sched_note_heap(true, heap, mem, newsize);
+    }
 
   do
     {
@@ -470,6 +483,7 @@ void *mm_memalign(struct mm_heap_s *heap, size_t alignment, size_t size)
     }
 
   size = host_mallocsize(mem);
+  sched_note_heap(true, heap, mem, size);
   atomic_fetch_add(&heap->aordblks, 1);
   atomic_fetch_add(&heap->uordblks, size);
   usmblks = atomic_load(&heap->usmblks);
