@@ -138,6 +138,7 @@ endif
 
 ifeq ($(CONFIG_ESP32S3_SPIRAM),y)
 CHIP_CSRCS += esp32s3_spiram.c
+CHIP_CSRCS += esp32s3_himem.c
 
 ifeq ($(CONFIG_ESP32S3_SPIRAM_MODE_QUAD),y)
 CHIP_CSRCS += esp32s3_psram_quad.c
