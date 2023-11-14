@@ -500,10 +500,6 @@ static void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem,
 
       kasan_poison(mem, size);
 
-      /* Update heap statistics */
-
-      heap->mm_curused -= size;
-
       /* Pass, return to the tlsf pool */
 
       if (delay)
@@ -512,6 +508,9 @@ static void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem,
         }
       else
         {
+          /* Update heap statistics */
+
+          heap->mm_curused -= mm_malloc_size(heap, mem);
           sched_note_heap(false, heap, mem, size);
           tlsf_free(heap->mm_tlsf, mem);
         }
