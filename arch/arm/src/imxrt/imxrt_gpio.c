@@ -255,7 +255,7 @@ static inline bool imxrt_gpio_getinput(int port, int pin)
 
 static inline int imxrt_gpio_select(int port, int pin)
 {
-#if IMXRT_GPIO_NPORTS > 5
+#if IMXRT_GPIO_NPORTS > 5 && defined(CONFIG_IMXRT_IOMUX_VER1)
   uint32_t gpr = port;
   uint32_t setbits = 1 << pin;
   uint32_t clearbits = 1 << pin;
