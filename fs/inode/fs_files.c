@@ -151,8 +151,11 @@ static int files_extend(FAR struct filelist *list, size_t row)
       return OK;
     }
 
-  memcpy(files, list->fl_files,
-         list->fl_rows * sizeof(FAR struct file *));
+  if (list->fl_files != NULL)
+    {
+      memcpy(files, list->fl_files,
+             list->fl_rows * sizeof(FAR struct file *));
+    }
 
   tmp = list->fl_files;
   list->fl_files = files;
@@ -160,7 +163,10 @@ static int files_extend(FAR struct filelist *list, size_t row)
 
   spin_unlock_irqrestore(&list->fl_lock, flags);
 
-  kmm_free(tmp);
+  if (tmp != NULL)
+    {
+      kmm_free(tmp);
+    }
 
   return OK;
 }
