@@ -184,7 +184,6 @@ struct usb_raw_fifo_s
 
 struct usb_raw_ep_entry_s
 {
-  bool                  halted;
   uint16_t              addr;
   uint16_t              raw_epaddr;
   uint16_t              raw_epid;
@@ -441,28 +440,6 @@ static int host_raw_ep0stall(int fd)
   return rv;
 }
 
-static int host_raw_epsethalt(int fd, int ep)
-{
-  int rv = ioctl(fd, USB_RAW_IOCTL_EP_SET_HALT, ep);
-  if (rv < 0)
-    {
-      ERROR("ioctl(USB_RAW_IOCTL_EP_SET_HALT) fail");
-    }
-
-  return rv;
-}
-
-static int host_raw_epclearhalt(int fd, int ep)
-{
-  int rv = ioctl(fd, USB_RAW_IOCTL_EP_CLEAR_HALT, ep);
-  if (rv < 0)
-    {
-      ERROR("ioctl(USB_RAW_IOCTL_EP_CLEAR_HALT) fail");
-    }
-
-  return rv;
-}
-
 static void
 host_raw_setctrlreq(struct host_usb_ctrlreq_s *host_req,
                     const struct usb_ctrlrequest *raw_req)
@@ -653,12 +630,6 @@ static void *host_raw_ephandle(void *arg)
         {
           int len;
 
-          if (entry->halted)
-            {
-              host_raw_epclearhalt(dev->fd, entry->raw_epid);
-              entry->halted = false;
-            }
-
           io->inner.ep = entry->raw_epid;
           io->inner.flags = 0;
           io->inner.length = USB_RAW_EP_MAX_LEN;
@@ -671,12 +642,6 @@ static void *host_raw_ephandle(void *arg)
         }
       else
         {
-          if (!entry->halted)
-            {
-              host_raw_epsethalt(dev->fd, entry->raw_epid);
-              entry->halted = true;
-            }
-
           usleep(10);
         }
     }
@@ -785,7 +750,6 @@ int host_usbdev_epconfig(uint8_t epno,
   entry->addr = epdesc->addr;
   entry->raw_epaddr = raw_epdesc.bEndpointAddress;
   entry->raw_epid = ret;
-  entry->halted = false;
 
   if (USB_RAW_EP_DIR(epdesc->addr) == USB_DIR_OUT)
     {
