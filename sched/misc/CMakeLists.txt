@@ -24,4 +24,8 @@ if(CONFIG_ARCH_DEADLOCKDUMP)
   list(APPEND SRCS deadlock.c)
 endif()
 
+if(CONFIG_DUMP_ON_EXIT)
+  list(APPEND SRCS dump.c)
+endif()
+
 target_sources(sched PRIVATE ${SRCS})
