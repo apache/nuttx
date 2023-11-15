@@ -137,9 +137,9 @@ static struct sam_dmach_s g_dmach[SAMD2L2_NDMACHAN];
  */
 
 static struct dma_desc_s g_base_desc[SAMD2L2_NDMACHAN]
-  locate_data(".lpram"), aligned(16);
+  locate_data(".lpram") aligned_data(16);
 static struct dma_desc_s g_writeback_desc[SAMD2L2_NDMACHAN]
-  locate_data(".lpram"), aligned(16);
+  locate_data(".lpram") aligned_data(16);
 
 #if CONFIG_SAMD2L2_DMAC_NDESC > 0
 /* Additional DMA descriptors for (optional) multi-block transfer support.
@@ -147,7 +147,7 @@ static struct dma_desc_s g_writeback_desc[SAMD2L2_NDMACHAN]
  */
 
 static struct dma_desc_s g_dma_desc[CONFIG_SAMD2L2_DMAC_NDESC]
-  locate_data(".lpram"), aligned(16);
+  locate_data(".lpram") aligned_data(16);
 #endif
 
 /****************************************************************************
@@ -178,7 +178,7 @@ static void sam_dmaterminate(struct sam_dmach_s *dmach, int result)
 
   /* Disable all channel interrupts */
 
-  putreg8(1 << dmach->dc_chan, SAM_DMAC_CHINTENCLR);
+  putreg8(DMAC_INT_ALL, SAM_DMAC_CHINTENCLR);
   leave_critical_section(flags);
 
   /* Free the DMA descriptor list */
@@ -833,7 +833,7 @@ DMA_HANDLE sam_dmachannel(uint32_t chflags)
 
           /* Disable all channel interrupts */
 
-          putreg8(1 << chndx, SAM_DMAC_CHINTENCLR);
+          putreg8(DMAC_INT_ALL, SAM_DMAC_CHINTENCLR);
           leave_critical_section(flags);
           break;
         }
