@@ -986,7 +986,7 @@ int fat_putcluster(struct fat_mountpt_s *fs, uint32_t clusterno,
                   /* Save the LS four bits of the next cluster */
 
                   value = (fs->fs_buffer[fatindex] & 0x0f) |
-                           nextcluster << 4;
+                           (uint8_t)nextcluster << 4;
                 }
               else
                 {
