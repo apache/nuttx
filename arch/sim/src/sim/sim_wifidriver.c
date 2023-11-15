@@ -453,7 +453,12 @@ static int utf8_escape(char *outp, int out_size,
       switch (*inp)
         {
           case '\\':
-          case '\'':
+            if (*(inp + 1) == '\'')
+              {
+                inp++;
+                break;
+              }
+
           case '\"':
             if (res_size++ >= out_size)
               {
