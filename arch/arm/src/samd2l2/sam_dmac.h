@@ -31,8 +31,6 @@
 
 #include "chip.h"
 
-#include "hardware/sam_dmac.h"
-
 #ifdef CONFIG_SAMD2L2_DMAC
 
 #if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
