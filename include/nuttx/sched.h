@@ -1573,6 +1573,22 @@ pid_t nxsched_getppid(void);
 
 size_t nxsched_collect_deadlock(FAR pid_t *pid, size_t count);
 
+/****************************************************************************
+ * Name: nxsched_dumponexit
+ *
+ * Description:
+ *   Dump the state of all tasks whenever on task exits.  This is debug
+ *   instrumentation that was added to check file-related reference counting
+ *   but could be useful again sometime in the future.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DUMP_ON_EXIT
+void nxsched_dumponexit(void);
+#else
+#  define nxsched_dumponexit()
+#endif /* CONFIG_DUMP_ON_EXIT */
+
 #ifdef CONFIG_SMP_CALL
 /****************************************************************************
  * Name: nxsched_smp_call_handler
