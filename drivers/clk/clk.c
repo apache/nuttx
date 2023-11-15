@@ -45,7 +45,7 @@
  * Private Datas
  ****************************************************************************/
 
-static mutex_t g_clk_list_lock = NXMUTEX_INITIALIZER;
+static rmutex_t g_clk_list_lock = NXRMUTEX_INITIALIZER;
 
 static struct list_node g_clk_root_list
                             = LIST_INITIAL_VALUE(g_clk_root_list);
@@ -322,7 +322,7 @@ static irqstate_t clk_list_lock(void)
 {
   if (!up_interrupt_context() && !sched_idletask())
     {
-      nxmutex_lock(&g_clk_list_lock);
+      nxrmutex_lock(&g_clk_list_lock);
     }
 
   return enter_critical_section();
@@ -334,7 +334,7 @@ static void clk_list_unlock(irqstate_t flags)
 
   if (!up_interrupt_context() && !sched_idletask())
     {
-      nxmutex_unlock(&g_clk_list_lock);
+      nxrmutex_unlock(&g_clk_list_lock);
     }
 }
 
