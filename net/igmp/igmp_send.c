@@ -116,6 +116,10 @@ void igmp_send(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group,
       return;
     }
 
+  /* Select IPv4 */
+
+  IFF_SET_IPv4(dev->d_flags);
+
   /* The IGMP header immediately follows the IP header */
 
   iphdrlen          = IPv4_HDRLEN + RASIZE;
