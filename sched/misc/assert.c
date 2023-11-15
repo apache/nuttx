@@ -581,6 +581,10 @@ void _assert(FAR const char *filename, int linenum,
       up_saveusercontext(g_last_regs);
       regs = g_last_regs;
     }
+  else
+    {
+      memcpy(g_last_regs, regs, sizeof(g_last_regs));
+    }
 
 #if CONFIG_BOARD_RESET_ON_ASSERT < 2
   if (!up_interrupt_context() &&
