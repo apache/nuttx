@@ -336,9 +336,7 @@ void arm_gic_initialize(void)
 #  endif
 #endif
 
-#ifndef CONFIG_ARCH_TRUSTZONE_SECURE
   iccicr |= GIC_ICCICRS_ACKTCTL;
-#endif
 
 #ifdef CONFIG_ARCH_TRUSTZONE_NONSECURE
   /* Enable the Group 1 interrupts and disable Group 1 bypass. */
