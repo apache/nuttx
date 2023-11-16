@@ -742,4 +742,31 @@ config NRF91_MODEM_AT
 	bool "Modem AT interface support"
 	default y
 
+config NRF91_MODEM_LTEM
+	bool "Modem LTE-M mode support"
+	default y
+
+config NRF91_MODEM_NBIOT
+	bool "Modem NB-IoT mode support"
+	default n
+
+config NRF91_MODEM_GNSS
+	bool "Modem GNSS support"
+	depends on SENSORS_GPS
+	default y
+
+config NRF91_MODEM_PREFERENCE
+	int "Modem mode preference"
+	default 0
+	range 0 4
+	---help---
+		0 - No preference. Initial system selection is based on history data and USIM
+		1 - LTE-M preferred
+		2 - NB-IoT preferred
+		3 - Network selection priorities override system priority, but LTE-M is prefered
+		4 - Network selection priorities override system priority, but NB-IoT is prefered
+
+		For details look at "nRF9160 AT Commands Command Reference Guid" from Nordic,
+		section "5.27 System mode"
+
 endif # NRF91_MODEM
