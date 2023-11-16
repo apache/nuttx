@@ -25,11 +25,11 @@ ifeq ($(CONFIG_SENSORS),y)
 CSRCS += sensor.c
 
 ifeq ($(CONFIG_USENSOR),y)
-CSRCS += usensor.c
+  CSRCS += usensor.c
 endif
 
 ifeq ($(CONFIG_SENSORS_RPMSG),y)
-CSRCS += sensor_rpmsg.c
+  CSRCS += sensor_rpmsg.c
 endif
 
 ifeq ($(CONFIG_SENSORS_GPS),y)
