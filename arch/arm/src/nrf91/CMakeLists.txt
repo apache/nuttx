@@ -126,6 +126,10 @@ if(CONFIG_NRF91_MODEM)
     list(APPEND SRCS nrf91_modem_at.c)
   endif()
 
+  if(CONFIG_NRF91_MODEM_GNSS)
+    list(APPEND SRCS nrf91_modem_gnss.c)
+  endif()
+
   set(NRFXLIB_DIR "${NUTTX_CHIP_ABS_DIR}/sdk-nrfxlib")
 
   if(CONFIG_ARCH_FPU)

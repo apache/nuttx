@@ -32,7 +32,7 @@
 #include <semaphore.h>
 #include <string.h>
 
-#include "nrf_modem_at.h"
+#include "nrf91_modem_at.h"
 
 /****************************************************************************
  * Pre-processor Definitions
