@@ -34,6 +34,10 @@ if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS nrf91_buttons.c)
 endif()
 
+if(CONFIG_NRF91_MODEM)
+  list(APPEND SRCS nrf91_modem.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 if(CONFIG_ARCH_BOARD_COMMON)
