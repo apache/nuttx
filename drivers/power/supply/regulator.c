@@ -1043,6 +1043,11 @@ regulator_register(FAR const struct regulator_desc_s *regulator_desc,
   list_initialize(&rdev->consumer_list);
   list_initialize(&rdev->list);
 
+  if (rdev->desc->bypass_on)
+    {
+      goto bypass;
+    }
+
   if (rdev->desc->boot_on || rdev->desc->always_on)
     {
       ret = _regulator_do_enable(rdev);
@@ -1060,6 +1065,7 @@ regulator_register(FAR const struct regulator_desc_s *regulator_desc,
       _regulator_do_disable(rdev);
     }
 
+bypass:
   if (rdev->desc->apply_uv)
     {
       _regulator_do_set_voltage(rdev, rdev->desc->min_uv,
