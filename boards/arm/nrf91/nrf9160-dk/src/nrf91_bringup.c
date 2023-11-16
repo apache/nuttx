@@ -46,6 +46,10 @@
 #  include "nrf91_modem_at.h"
 #endif
 
+#ifdef CONFIG_NRF91_MODEM_GNSS
+#  include "nrf91_modem_gnss.h"
+#endif
+
 #ifdef CONFIG_NRF91_PROGMEM
 #  include "nrf91_progmem.h"
 #endif
