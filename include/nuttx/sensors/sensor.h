@@ -435,6 +435,10 @@
 
 #define SENSOR_BODY_COORDINATE_P7                   7
 
+/* GPS satellite info slots */
+
+#define SENSOR_GPS_SAT_INFO_MAX                     4
+
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
@@ -705,7 +709,7 @@ struct sensor_gps_satellite
 
     uint32_t snr;
   }
-  info[4];
+  info[SENSOR_GPS_SAT_INFO_MAX];
 };
 
 struct sensor_wake_gesture  /* Type: Wake gesture */
