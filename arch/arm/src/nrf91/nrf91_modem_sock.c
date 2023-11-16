@@ -1193,12 +1193,13 @@ int usrsock_request(struct iovec *iov, unsigned int iovcnt)
                                              g_usrsock.in, ret);
       if (ret < 0)
         {
-          nerr("Usrsock request %d failed: %d\n", common->reqid, ret);
+          nerr("Usrsock request %" PRId32 " failed: %d\n",
+               common->reqid, ret);
         }
     }
   else
     {
-      nerr("Invalid request id: %d\n", common->reqid);
+      nerr("Invalid request id: %" PRId32 "\n", common->reqid);
     }
 
   return ret;
