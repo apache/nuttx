@@ -759,9 +759,9 @@ static int virtio_mmio_init_device(FAR struct virtio_mmio_device_s *vmdev,
   vmdev->shm_phy = (metal_phys_addr_t)0;
   vmdev->cfg_phy = (metal_phys_addr_t)regs;
   metal_io_init(&vmdev->shm_io, NULL, &vmdev->shm_phy,
-                SIZE_MAX, UINT_MAX, 0, NULL);
+                SIZE_MAX, UINT_MAX, 0, metal_io_get_ops());
   metal_io_init(&vmdev->cfg_io, regs, &vmdev->cfg_phy,
-                SIZE_MAX, UINT_MAX, 0, NULL);
+                SIZE_MAX, UINT_MAX, 0, metal_io_get_ops());
 
   /* Init the virtio device */
 
