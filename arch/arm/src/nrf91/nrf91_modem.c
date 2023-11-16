@@ -32,6 +32,7 @@
 #include "chip.h"
 
 #include "nrf_modem.h"
+#include "nrf_modem_at.h"
 
 #include "nrf91_modem.h"
 
@@ -45,6 +46,18 @@
 
 #ifndef CONFIG_NRF91_LFCLK_XTAL
 #  error NRF91 modem requires using LFXO as the LFCLK source
+#endif
+
+#ifndef CONFIG_NRF91_MODEM_LTEM
+#  define CONFIG_NRF91_MODEM_LTEM 0
+#endif
+
+#ifndef CONFIG_NRF91_MODEM_NBIOT
+#  define CONFIG_NRF91_MODEM_NBIOT 0
+#endif
+
+#ifndef CONFIG_NRF91_MODEM_GNSS
+#  define CONFIG_NRF91_MODEM_GNSS 0
 #endif
 
 /****************************************************************************
@@ -103,6 +116,30 @@ static void nrf91_modem_fault_handler(struct nrf_modem_fault_info *info)
 }
 
 /****************************************************************************
+ * Name: nrf91_modem_config
+ ****************************************************************************/
+
+static int nrf91_modem_config(void)
+{
+  int ret;
+
+  /* Configure modem system mode */
+
+  ret = nrf_modem_at_printf("AT%%XSYSTEMMODE=%d,%d,%d,%d",
+                            CONFIG_NRF91_MODEM_LTEM,
+                            CONFIG_NRF91_MODEM_NBIOT,
+                            CONFIG_NRF91_MODEM_GNSS,
+                            CONFIG_NRF91_MODEM_PREFERENCE);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+errout:
+  return ret;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -120,6 +157,15 @@ int nrf91_modem_initialize(void)
   if (ret < 0)
     {
       nerr("nrf_modem_init failed %d\n", ret);
+      goto errout;
+    }
+
+  /* Initial modem configuration */
+
+  ret = nrf91_modem_config();
+  if (ret < 0)
+    {
+      nerr("nrf91_modem_config failed %d\n", ret);
       goto errout;
     }
 
