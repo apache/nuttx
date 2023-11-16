@@ -1,0 +1,57 @@
+From af3de6cd042c89ae2e8d07d503e0a07129e1296c Mon Sep 17 00:00:00 2001
+From: Bowen Wang <wangbowen6@xiaomi.com>
+Date: Thu, 16 Nov 2023 14:52:48 +0800
+Subject: [PATCH] libmetal/nuttx/io.c: align access when read/write size = 1,
+ 2, 4, 8
+
+Signed-off-by: Bowen Wang <wangbowen6@xiaomi.com>
+---
+ lib/system/nuttx/io.c | 25 +++++++++++++++++++++++--
+ 1 file changed, 23 insertions(+), 2 deletions(-)
+
+diff --git a/lib/system/nuttx/io.c libmetal/lib/system/nuttx/io.c
+index 4fa4727..3ce9cbe 100644
+--- a/lib/system/nuttx/io.c
++++ libmetal/lib/system/nuttx/io.c
+@@ -37,7 +37,17 @@ static int metal_io_block_read_(struct metal_io_region *io,
+ 	void *va = metal_io_virt(io, offset);
+ 
+ 	metal_cache_invalidate(va, len);
+-	memcpy(dst, va, len);
++	if (len == 1)
++		*(uint8_t *)dst = *(uint8_t *)va;
++	else if (len == 2)
++		*(uint16_t *)dst = *(uint16_t *)va;
++	else if (len == 4)
++		*(uint32_t *)dst = *(uint32_t *)va;
++	else if (len == 8) {
++		*(uint32_t *)dst = *(uint32_t *)va;
++		*(uint32_t *)(dst + 4) = *(uint32_t *)(va + 4);
++	} else
++		memcpy(dst, va, len);
+ 
+ 	return len;
+ }
+@@ -50,7 +60,18 @@ static int metal_io_block_write_(struct metal_io_region *io,
+ {
+ 	void *va = metal_io_virt(io, offset);
+ 
+-	memcpy(va, src, len);
++	if (len == 1)
++		*(uint8_t *)va = *(uint8_t *)src;
++	else if (len == 2)
++		*(uint16_t *)va = *(uint16_t *)src;
++	else if (len == 4)
++		*(uint32_t *)va = *(uint32_t *)src;
++	else if (len == 8) {
++		*(uint32_t *)va = *(uint32_t *)src;
++		*(uint32_t *)(va + 4) = *(uint32_t *)(src + 4);
++	} else
++		memcpy(va, src, len);
++
+ 	metal_cache_flush(va, len);
+ 
+ 	return len;
+-- 
+2.34.1
+

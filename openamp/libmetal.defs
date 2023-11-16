@@ -78,6 +78,7 @@ libmetal.zip:
 	$(Q) unzip -o libmetal.zip
 	$(Q) mv libmetal-$(VERSION) libmetal
 	$(Q) patch -p0 < 0001-libmetal-add-metal_list_for_each_safe-support.patch
+	$(Q) patch -p0 < 0002-libmetal-nuttx-io.c-align-access-when-read-write-siz.patch
 
 .libmetal_headers: libmetal.zip
 else
