@@ -31,7 +31,6 @@
 #include <nuttx/init.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/cancelpt.h>
 
 #include "sched/sched.h"
 #include "semaphore/semaphore.h"
@@ -250,68 +249,4 @@ int nxsem_wait_uninterruptible(FAR sem_t *sem)
   while (ret == -EINTR);
 
   return ret;
-}
-
-/****************************************************************************
- * Name: sem_wait
- *
- * Description:
- *   This function attempts to lock the semaphore referenced by 'sem'.  If
- *   the semaphore value is (<=) zero, then the calling task will not return
- *   until it successfully acquires the lock.
- *
- * Input Parameters:
- *   sem - Semaphore descriptor.
- *
- * Returned Value:
- *   This function is a standard, POSIX application interface.  It returns
- *   zero (OK) if successful.  Otherwise, -1 (ERROR) is returned and
- *   the errno value is set appropriately.  Possible errno values include:
- *
- *   - EINVAL:  Invalid attempt to get the semaphore
- *   - EINTR:   The wait was interrupted by the receipt of a signal.
- *
- ****************************************************************************/
-
-int sem_wait(FAR sem_t *sem)
-{
-  int errcode;
-  int ret;
-
-  if (sem == NULL)
-    {
-      set_errno(EINVAL);
-      return ERROR;
-    }
-
-  /* sem_wait() is a cancellation point */
-
-  if (enter_cancellation_point())
-    {
-#ifdef CONFIG_CANCELLATION_POINTS
-      /* If there is a pending cancellation, then do not perform
-       * the wait.  Exit now with ECANCELED.
-       */
-
-      errcode = ECANCELED;
-      goto errout_with_cancelpt;
-#endif
-    }
-
-  /* Let nxsem_wait() do the real work */
-
-  ret = nxsem_wait(sem);
-  if (ret < 0)
-    {
-      errcode = -ret;
-      goto errout_with_cancelpt;
-    }
-
-  leave_cancellation_point();
-  return OK;
-
-errout_with_cancelpt:
-  set_errno(errcode);
-  leave_cancellation_point();
-  return ERROR;
 }
