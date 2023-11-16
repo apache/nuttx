@@ -18,10 +18,16 @@
 #
 # ##############################################################################
 
-set(SRCS sem_init.c sem_getprotocol.c sem_getvalue.c)
-
-if(NOT CONFIG_PRIORITY_INHERITANCE)
-  list(APPEND SRCS sem_setprotocol.c)
-endif()
+set(SRCS
+    sem_init.c
+    sem_setprotocol.c
+    sem_getprotocol.c
+    sem_getvalue.c
+    sem_destroy.c
+    sem_wait.c
+    sem_trywait.c
+    sem_timedwait.c
+    sem_clockwait.c
+    sem_post.c)
 
 target_sources(c PRIVATE ${SRCS})

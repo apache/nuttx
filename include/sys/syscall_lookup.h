@@ -75,17 +75,15 @@ SYSCALL_LOOKUP(sethostname,                2)
 
 /* Semaphores */
 
+SYSCALL_LOOKUP(nxsem_destroy,              1)
+SYSCALL_LOOKUP(nxsem_post,                 1)
+SYSCALL_LOOKUP(nxsem_clockwait,            3)
+SYSCALL_LOOKUP(nxsem_timedwait,            2)
+SYSCALL_LOOKUP(nxsem_trywait,              1)
 SYSCALL_LOOKUP(nxsem_wait,                 1)
 
-SYSCALL_LOOKUP(sem_destroy,                1)
-SYSCALL_LOOKUP(sem_post,                   1)
-SYSCALL_LOOKUP(sem_clockwait,              3)
-SYSCALL_LOOKUP(sem_timedwait,              2)
-SYSCALL_LOOKUP(sem_trywait,                1)
-SYSCALL_LOOKUP(sem_wait,                   1)
-
 #ifdef CONFIG_PRIORITY_INHERITANCE
-  SYSCALL_LOOKUP(sem_setprotocol,          2)
+  SYSCALL_LOOKUP(nxsem_set_protocol,       2)
 #endif
 
 /* Named semaphores */
