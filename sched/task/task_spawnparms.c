@@ -58,14 +58,15 @@
  *
  ****************************************************************************/
 
-static inline int nxspawn_close(FAR struct tcb_s *tcb,
-                                FAR struct spawn_close_file_action_s *action)
+static inline void
+nxspawn_close(FAR struct tcb_s *tcb,
+              FAR struct spawn_close_file_action_s *action)
 {
   /* The return value from nx_close() is ignored */
 
   sinfo("Closing fd=%d\n", action->fd);
 
-  return nx_close_from_tcb(tcb, action->fd);
+  nx_close_from_tcb(tcb, action->fd);
 }
 
 static inline int nxspawn_dup2(FAR struct tcb_s *tcb,
@@ -268,7 +269,13 @@ int spawn_file_actions(FAR struct tcb_s *tcb,
       switch (entry->action)
         {
           case SPAWN_FILE_ACTION_CLOSE:
-            ret = nxspawn_close(tcb, (FAR void *)entry);
+
+            /* Ignore return value of nxspawn_close(),
+             * Closing an invalid file descriptor will
+             * not cause the action fail.
+             */
+
+            nxspawn_close(tcb, (FAR void *)entry);
             break;
 
           case SPAWN_FILE_ACTION_DUP2:
