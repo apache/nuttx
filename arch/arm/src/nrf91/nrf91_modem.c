@@ -120,7 +120,27 @@ int nrf91_modem_initialize(void)
   if (ret < 0)
     {
       nerr("nrf_modem_init failed %d\n", ret);
+      goto errout;
     }
 
+  /* Initial modem configuration */
+
+  ret = nrf91_modem_config();
+  if (ret < 0)
+    {
+      nerr("nrf91_modem_config failed %d\n", ret);
+      goto errout;
+    }
+
+  /* Board-specific modem configuration */
+
+  ret = nrf91_modem_board_init();
+  if (ret < 0)
+    {
+      nerr("nrf91_modem_board_init failed %d\n", ret);
+      goto errout;
+    }
+
+errout:
   return ret;
 }
