@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/nrf91/nrf91_modem_at.h
+ * arch/arm/src/nrf91/nrf91_modem_gnss.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_NRF91_NRF91_MODEM_AT_H
-#define __ARCH_ARM_SRC_NRF91_NRF91_MODEM_AT_H
+#ifndef __ARCH_ARM_SRC_NRF91_NRF91_MODEM_GNSS_H
+#define __ARCH_ARM_SRC_NRF91_NRF91_MODEM_GNSS_H
 
 /****************************************************************************
  * Included Files
@@ -27,37 +27,14 @@
 
 #include <nuttx/config.h>
 
-#include "nrf_modem_at.h"
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* Modem functional mode */
-
-enum nrf91_modem_func_e
-{
-  NRF91_MODEM_FUNC_DISABLED        = 0,
-  NRF91_MODEM_FUNC_FULL            = 1,
-  NRF91_MODEM_FUNC_RXONLY          = 2,
-  NRF91_MODEM_FUNC_FLIGHT          = 4,
-  NRF91_MODEM_FUNC_DEACTIVATE_LTE  = 20,
-  NRF91_MODEM_FUNC_ACTIVATE_LTE    = 21,
-  NRF91_MODEM_FUNC_DEACTIVATE_GNSS = 30,
-  NRF91_MODEM_FUNC_ACTIVATE_GNSS   = 31,
-  NRF91_MODEM_FUNC_DEACTIVATE_UICC = 40,
-  NRF91_MODEM_FUNC_ACTIVATE_UICC   = 41,
-  NRF91_MODEM_FUNC_FLIGHT_UICC     = 44
-};
-
 /****************************************************************************
  * Public Functions Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nrf91_at_register
+ * Name: nrf91_gnss_register
  ****************************************************************************/
 
-int nrf91_at_register(const char *path);
+int nrf91_gnss_register(int devno, uint32_t batch_number);
 
-#endif /* __ARCH_ARM_SRC_NRF91_NRF91_MODEM_AT_H */
+#endif /* __ARCH_ARM_SRC_NRF91_NRF91_MODEM_GNSS_H */

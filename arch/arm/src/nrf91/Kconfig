@@ -769,4 +769,16 @@ config NRF91_MODEM_PREFERENCE
 		For details look at "nRF9160 AT Commands Command Reference Guid" from Nordic,
 		section "5.27 System mode"
 
+if NRF91_MODEM_GNSS
+
+config NRF91_MODEM_GNSS_BOOST_PRIO
+	bool "Modem GNSS support for priority boost"
+	default y
+	---help---
+		Enables GNSS priority boos over LTE idle mode.
+		For details look at nrf_modem_gnss_prio_mode_enable() documentation
+		in sdk-nrfxlib/nrf_modem/include/nrf_modem_gnss.h
+
+endif # NRF91_MODEM_GNSS
+
 endif # NRF91_MODEM

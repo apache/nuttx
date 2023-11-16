@@ -110,6 +110,10 @@ ifeq ($(CONFIG_NRF91_MODEM_AT),y)
 CHIP_CSRCS += nrf91_modem_at.c
 endif
 
+ifeq ($(CONFIG_NRF91_MODEM_GNSS),y)
+CHIP_CSRCS += nrf91_modem_gnss.c
+endif
+
 NRFXLIB_DIR = $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)sdk-nrfxlib
 
 INCLUDES += \
