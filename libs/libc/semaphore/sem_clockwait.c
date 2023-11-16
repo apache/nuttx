@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/semaphore/sem_timedwait.c
+ * libs/libc/semaphore/sem_clockwait.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,8 +22,12 @@
  * Included Files
  ****************************************************************************/
 
-#include <assert.h>
+#include <nuttx/config.h>
 
+#include <time.h>
+#include <errno.h>
+
+#include <nuttx/cancelpt.h>
 #include <nuttx/semaphore.h>
 
 /****************************************************************************
@@ -31,7 +35,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxsem_timedwait
+ * Name: sem_clockwait
  *
  * Description:
  *   This function will lock the semaphore referenced by sem as in the
@@ -46,21 +50,14 @@
  *   absolute time specified by abstime has already been passed at the
  *   time of the call.
  *
- *   This is an internal OS interface.  It is functionally equivalent to
- *   sem_wait except that:
- *
- *   - It is not a cancellation point, and
- *   - It does not modify the errno value.
- *
  * Input Parameters:
  *   sem     - Semaphore object
+ *   clockid - The timing source to use in the conversion
  *   abstime - The absolute time to wait until a timeout is declared.
  *
  * Returned Value:
- *   This is an internal OS interface and should not be used by applications.
- *   It follows the NuttX internal error return policy:  Zero (OK) is
- *   returned on success.  A negated errno value is returned on failure.
- *   That may be one of:
+ *   Zero (OK) is returned on success.  On failure, -1 (ERROR) is returned
+ *   and the errno is set appropriately:
  *
  *   EINVAL    The sem argument does not refer to a valid semaphore.  Or the
  *             thread would have blocked, and the abstime parameter specified
@@ -70,39 +67,38 @@
  *             expired.
  *   EDEADLK   A deadlock condition was detected.
  *   EINTR     A signal interrupted this function.
- *
- ****************************************************************************/
-
-int nxsem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime)
-{
-  return nxsem_clockwait(sem, CLOCK_REALTIME, abstime);
-}
-
-/****************************************************************************
- * Name: nxsem_timedwait_uninterruptible
- *
- * Description:
- *   This function is wrapped version of nxsem_timedwait(), which is
- *   uninterruptible and convenient for use.
- *
- * Input Parameters:
- *   sem     - Semaphore object
- *   abstime - The absolute time to wait until a timeout is declared.
- *
- * Returned Value:
- *   EINVAL    The sem argument does not refer to a valid semaphore.  Or the
- *             thread would have blocked, and the abstime parameter specified
- *             a nanoseconds field value less than zero or greater than or
- *             equal to 1000 million.
- *   ETIMEDOUT The semaphore could not be locked before the specified timeout
- *             expired.
- *   EDEADLK   A deadlock condition was detected.
  *   ECANCELED May be returned if the thread is canceled while waiting.
  *
  ****************************************************************************/
 
-int nxsem_timedwait_uninterruptible(FAR sem_t *sem,
-                                    FAR const struct timespec *abstime)
+int sem_clockwait(FAR sem_t *sem, clockid_t clockid,
+                  FAR const struct timespec *abstime)
 {
-  return nxsem_clockwait_uninterruptible(sem, CLOCK_REALTIME, abstime);
+  int ret;
+
+  /* Verify the input parameters and, in case of an error, set
+   * errno appropriately.
+   */
+
+  if (sem == NULL || abstime == NULL)
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
+
+  /* sem_timedwait() is a cancellation point */
+
+  enter_cancellation_point();
+
+  /* Let nxsem_timedout() do the work */
+
+  ret = nxsem_clockwait(sem, clockid, abstime);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
+    }
+
+  leave_cancellation_point();
+  return ret;
 }
