@@ -49,7 +49,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sem_open
+ * Name: nxsem_open
  *
  * Description:
  *   This function establishes a connection between named semaphores and a
@@ -81,42 +81,22 @@
  *        SEM_VALUE_MAX.
  *
  * Returned Value:
- *   A pointer to sem_t or SEM_FAILED if unsuccessful.
+ *   A pointer to sem_t or negated errno if unsuccessful.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-FAR sem_t *sem_open(FAR const char *name, int oflags, ...)
+FAR sem_t *nxsem_open(FAR const char *name, int oflags, ...)
 {
   FAR struct inode *inode;
   FAR struct nsem_inode_s *nsem;
-  FAR sem_t *sem = (FAR sem_t *)ERROR;
+  FAR sem_t *sem;
   struct inode_search_s desc;
   char fullpath[MAX_SEMPATH];
   mode_t mode;
   unsigned value;
-  int errcode;
   int ret;
-
-  /* Make sure that a non-NULL name is supplied */
-
-  DEBUGASSERT(name != NULL);
-
-  if (name[0] == '/')
-    {
-      if (strlen(name) >= PATH_MAX)
-        {
-          set_errno(ENAMETOOLONG);
-          return SEM_FAILED;
-        }
-
-      if (strlen(strrchr(name, '/') + 1) >= NAME_MAX)
-        {
-          set_errno(ENAMETOOLONG);
-          return SEM_FAILED;
-        }
-    }
 
   /* Get the full path to the semaphore */
 
@@ -141,7 +121,7 @@ FAR sem_t *sem_open(FAR const char *name, int oflags, ...)
 
       if (!INODE_IS_NAMEDSEM(inode))
         {
-          errcode = ENXIO;
+          ret = -ENXIO;
           goto errout_with_inode;
         }
 
@@ -151,7 +131,7 @@ FAR sem_t *sem_open(FAR const char *name, int oflags, ...)
 
       if ((oflags & (O_CREAT | O_EXCL)) == (O_CREAT | O_EXCL))
         {
-          errcode = EEXIST;
+          ret = -EEXIST;
           goto errout_with_inode;
         }
 
@@ -171,7 +151,7 @@ FAR sem_t *sem_open(FAR const char *name, int oflags, ...)
         {
           /* The semaphore does not exist and O_CREAT is not set */
 
-          errcode = ENOENT;
+          ret = -ENOENT;
           goto errout_with_lock;
         }
 
@@ -189,7 +169,7 @@ FAR sem_t *sem_open(FAR const char *name, int oflags, ...)
 
       if (value > SEM_VALUE_MAX)
         {
-          errcode = EINVAL;
+          ret = -EINVAL;
           goto errout_with_lock;
         }
 
@@ -200,7 +180,6 @@ FAR sem_t *sem_open(FAR const char *name, int oflags, ...)
       ret = inode_lock();
       if (ret < 0)
         {
-          errcode = -ret;
           goto errout_with_lock;
         }
 
@@ -209,7 +188,6 @@ FAR sem_t *sem_open(FAR const char *name, int oflags, ...)
 
       if (ret < 0)
         {
-          errcode = -ret;
           goto errout_with_lock;
         }
 
@@ -220,7 +198,7 @@ FAR sem_t *sem_open(FAR const char *name, int oflags, ...)
       nsem = group_malloc(NULL, sizeof(struct nsem_inode_s));
       if (!nsem)
         {
-          errcode = ENOMEM;
+          ret = -ENOMEM;
           goto errout_with_inode;
         }
 
@@ -251,8 +229,7 @@ errout_with_inode:
 
 errout_with_lock:
   RELEASE_SEARCH(&desc);
-  set_errno(errcode);
-  return SEM_FAILED;
+  return (FAR sem_t *)(intptr_t)ret;
 }
 
 #endif /* CONFIG_FS_NAMED_SEMAPHORES */
