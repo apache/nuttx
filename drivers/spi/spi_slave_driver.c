@@ -644,9 +644,8 @@ static void spi_slave_cmddata(FAR struct spi_slave_dev_s *dev, bool data)
 static size_t spi_slave_getdata(FAR struct spi_slave_dev_s *dev,
                                 FAR const void **data)
 {
-  FAR struct spi_slave_driver_s *priv = (FAR struct spi_slave_driver_s *)dev;
-
 #ifdef CONFIG_SPI_SLAVE_DRIVER_COLORIZE_TX_BUFFER
+  FAR struct spi_slave_driver_s *priv = (FAR struct spi_slave_driver_s *)dev;
   *data = priv->tx_buffer;
   return BYTES2WORDS(CONFIG_SPI_SLAVE_DRIVER_COLORIZE_NUM_BYTES);
 #else
