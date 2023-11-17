@@ -1406,7 +1406,7 @@ FAR struct gdb_state_s *gdb_state_init(gdb_send_func_t send,
                                        gdb_monitor_func_t monitor,
                                        FAR void *priv)
 {
-  size_t size = g_tcbinfo.basic_num * sizeof(uintptr_t);
+  size_t size = g_tcbinfo.regs_num * sizeof(uintptr_t);
   FAR struct gdb_state_s *state = lib_zalloc(sizeof(*state) + size);
 
   if (state == NULL)

@@ -52,19 +52,20 @@ static const uint16_t g_reg_offs[] =
   TCB_REG_OFF(REG_R15),
   TCB_REG_OFF(REG_XPSR),
 
+#if 0
   UINT16_MAX,                         /* msp */
   TCB_REG_OFF(REG_R13),
-#ifdef CONFIG_ARMV7M_USEBASEPRI
+#  ifdef CONFIG_ARMV7M_USEBASEPRI
   UINT16_MAX,                         /* primask */
   TCB_REG_OFF(REG_BASEPRI),
-#else
+#  else
   TCB_REG_OFF(REG_PRIMASK),
   UINT16_MAX,                         /* basepri */
-#endif
+#  endif
   UINT16_MAX,                         /* faultmask */
   UINT16_MAX,                         /* control */
 
-#ifdef CONFIG_ARCH_FPU
+#  ifdef CONFIG_ARCH_FPU
   TCB_REG_OFF(REG_S0),
   TCB_REG_OFF(REG_S1),
   TCB_REG_OFF(REG_S2),
@@ -98,6 +99,7 @@ static const uint16_t g_reg_offs[] =
   TCB_REG_OFF(REG_S30),
   TCB_REG_OFF(REG_S31),
   TCB_REG_OFF(REG_FPSCR),
+#  endif
 #endif
 };
 
@@ -114,8 +116,7 @@ const struct tcbinfo_s g_tcbinfo used_data =
   .stack_off      = TCB_STACK_OFF,
   .stack_size_off = TCB_STACK_SIZE_OFF,
   .regs_off       = TCB_REGS_OFF,
-  .basic_num      = 17,
-  .total_num      = nitems(g_reg_offs),
+  .regs_num       = nitems(g_reg_offs),
   {
     .p = g_reg_offs,
   },

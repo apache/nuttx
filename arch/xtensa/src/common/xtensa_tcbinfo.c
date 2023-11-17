@@ -67,8 +67,7 @@ const struct tcbinfo_s g_tcbinfo used_data =
   .stack_off      = TCB_STACK_OFF,
   .stack_size_off = TCB_STACK_SIZE_OFF,
   .regs_off       = TCB_REGS_OFF,
-  .basic_num      = COMMON_CTX_REGS,
-  .total_num      = nitems(g_reg_offs),
+  .regs_num       = COMMON_CTX_REGS,
   {
     .p = g_reg_offs,
   },
