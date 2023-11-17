@@ -430,6 +430,98 @@ int nxsem_post(FAR sem_t *sem);
 int nxsem_get_value(FAR sem_t *sem, FAR int *sval);
 
 /****************************************************************************
+ * Name: nxsem_open
+ *
+ * Description:
+ *   This function establishes a connection between named semaphores and a
+ *   task.  Following a call to sem_open() with the semaphore name, the task
+ *   may reference the semaphore associated with name using the address
+ *   returned by this call.  The semaphore may be used in subsequent calls
+ *   to sem_wait(), sem_trywait(), and sem_post().  The semaphore remains
+ *   usable until the semaphore is closed by a successful call to
+ *   sem_close().
+ *
+ *   If a task makes multiple calls to sem_open() with the same name, then
+ *   the same semaphore address is returned (provided there have been no
+ *   calls to sem_unlink()).
+ *
+ * Input Parameters:
+ *   name  - Semaphore name
+ *   oflags - Semaphore creation options.  This may either or both of the
+ *     following bit settings.
+ *     oflags = 0:  Connect to the semaphore only if it already exists.
+ *     oflags = O_CREAT:  Connect to the semaphore if it exists, otherwise
+ *        create the semaphore.
+ *     oflags = O_CREAT|O_EXCL:  Create a new semaphore
+ *        unless one of this name already exists.
+ *   Optional parameters.  When the O_CREAT flag is specified, two optional
+ *     parameters are expected:
+ *     1. mode_t mode, and
+ *     2. unsigned int value.  This initial value of the semaphore. Valid
+ *        initial values of the semaphore must be less than or equal to
+ *        SEM_VALUE_MAX.
+ *
+ * Returned Value:
+ *   A pointer to sem_t or negated errno if unsuccessful.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+FAR sem_t *nxsem_open(FAR const char *name, int oflags, ...);
+
+/****************************************************************************
+ * Name:  nxsem_close
+ *
+ * Description:
+ *   This function is called to indicate that the calling task is finished
+ *   with the specified named semaphore, 'sem'.  The sem_close() deallocates
+ *   any system resources allocated by the system for this named semaphore.
+ *
+ *   If the semaphore has not been removed with a call to sem_unlink(), then
+ *   sem_close() has no effect on the named semaphore.  However, when the
+ *   named semaphore has been fully unlinked, the semaphore will vanish when
+ *   the last task closes it.
+ *
+ * Input Parameters:
+ *  sem - semaphore descriptor
+ *
+ * Returned Value:
+ *  0 (OK), or negated errno if unsuccessful.
+ *
+ * Assumptions:
+ *   - Care must be taken to avoid risking the deletion of a semaphore that
+ *     another calling task has already locked.
+ *   - sem_close must not be called for an un-named semaphore
+ *
+ ****************************************************************************/
+
+int nxsem_close(FAR sem_t *sem);
+
+/****************************************************************************
+ * Name: nxsem_unlink
+ *
+ * Description:
+ *   This function removes the semaphore named by the input parameter 'name.'
+ *   If the semaphore named by 'name' is currently referenced by other task,
+ *   the sem_unlink() will have no effect on the state of the semaphore.  If
+ *   one or more processes have the semaphore open when sem_unlink() is
+ *   called, destruction of the semaphore will be postponed until all
+ *   references to the semaphore have been destroyed by calls of sem_close().
+ *
+ * Input Parameters:
+ *   name - Semaphore name
+ *
+ * Returned Value:
+ *  0 (OK), or negated errno if unsuccessful.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+int nxsem_unlink(FAR const char *name);
+
+/****************************************************************************
  * Name: nxsem_reset
  *
  * Description:

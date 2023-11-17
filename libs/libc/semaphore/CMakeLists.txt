@@ -30,4 +30,8 @@ set(SRCS
     sem_clockwait.c
     sem_post.c)
 
+if(CONFIG_FS_NAMED_SEMAPHORES)
+  list(APPEND SRCS sem_open.c sem_close.c sem_unlink.c)
+endif()
+
 target_sources(c PRIVATE ${SRCS})

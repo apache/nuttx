@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sem_unlink
+ * Name: nxsem_unlink
  *
  * Description:
  *   This function removes the semaphore named by the input parameter 'name.'
@@ -55,18 +55,17 @@
  *   name - Semaphore name
  *
  * Returned Value:
- *  0 (OK), or -1 (ERROR) if unsuccessful.
+ *  0 (OK), or negated errno if unsuccessful.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int sem_unlink(FAR const char *name)
+int nxsem_unlink(FAR const char *name)
 {
   FAR struct inode *inode;
   struct inode_search_s desc;
   char fullpath[MAX_SEMPATH];
-  int errcode;
   int ret;
 
   /* Get the full path to the semaphore */
@@ -83,7 +82,6 @@ int sem_unlink(FAR const char *name)
     {
       /* There is no inode that includes in this path */
 
-      errcode = -ret;
       goto errout_with_search;
     }
 
@@ -95,7 +93,7 @@ int sem_unlink(FAR const char *name)
 
   if (!INODE_IS_NAMEDSEM(inode))
     {
-      errcode = ENOENT;
+      ret = -ENOENT;
       goto errout_with_inode;
     }
 
@@ -106,13 +104,12 @@ int sem_unlink(FAR const char *name)
   ret = inode_lock();
   if (ret < 0)
     {
-      errcode = -ret;
       goto errout_with_inode;
     }
 
   if (inode->i_child != NULL)
     {
-      errcode = ENOTEMPTY;
+      ret = -ENOTEMPTY;
       goto errout_with_lock;
     }
 
@@ -139,7 +136,7 @@ int sem_unlink(FAR const char *name)
    */
 
   inode_unlock();
-  ret = sem_close(&inode->u.i_nsem->ns_sem);
+  ret = nxsem_close(&inode->u.i_nsem->ns_sem);
   RELEASE_SEARCH(&desc);
   return ret;
 
@@ -151,6 +148,5 @@ errout_with_inode:
 
 errout_with_search:
   RELEASE_SEARCH(&desc);
-  set_errno(errcode);
-  return ERROR;
+  return ret;
 }
