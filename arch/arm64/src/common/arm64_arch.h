@@ -263,7 +263,7 @@
  *  to these memory regions.
  */
 
-#define CONFIG_MAX_XLAT_TABLES      7
+#define CONFIG_MAX_XLAT_TABLES      10
 
 /* Virtual address space size
  * Allows choosing one of multiple possible virtual address
