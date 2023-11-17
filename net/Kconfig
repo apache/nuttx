@@ -23,6 +23,10 @@ config ARCH_HAVE_NETDEV_STATISTICS
 	bool
 	default n
 
+config ARCH_HAVE_NETDEV_TIMESTAMP
+	bool
+	default n
+
 config NET_WRITE_BUFFERS
 	bool
 	default n
