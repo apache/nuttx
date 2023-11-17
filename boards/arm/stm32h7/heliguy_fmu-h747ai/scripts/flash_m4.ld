@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32h7/nucleo-h745zi/scripts/flash_m4.ld
+ * boards/arm/stm32h7/heliguy_fmu-h747ai/scripts/flash_m4.ld
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

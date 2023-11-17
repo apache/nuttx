@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32h7/nucleo-h745zi/include/board.h
+ * boards/arm/stm32h7/heliguy_fmu-h747ai/include/board.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32H7_NUCLEO_H745ZI_INCLUDE_BOARD_H
-#define __BOARDS_ARM_STM32H7_NUCLEO_H745ZI_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32H7_HELIGUYFMU_H747AI_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32H7_HELIGUYFMU_H747AI_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -409,4 +409,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_STM32H7_NUCLEO_H745ZI_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_STM32H7_HELIGUYFMU_H747AI_INCLUDE_BOARD_H */
