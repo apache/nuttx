@@ -715,8 +715,7 @@ begin_packed_struct struct tcbinfo_s
   uint16_t stack_off;                    /* Offset of tcb.stack_alloc_ptr   */
   uint16_t stack_size_off;               /* Offset of tcb.adj_stack_size    */
   uint16_t regs_off;                     /* Offset of tcb.regs              */
-  uint16_t basic_num;                    /* Num of genernal regs            */
-  uint16_t total_num;                    /* Num of regs in tcbinfo.reg_offs */
+  uint16_t regs_num;                     /* Num of general regs             */
 
   /* Offset pointer of xcp.regs, order in GDB org.gnu.gdb.xxx feature.
    * Please refer:

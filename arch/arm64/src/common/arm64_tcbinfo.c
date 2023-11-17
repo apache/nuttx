@@ -82,8 +82,7 @@ const struct tcbinfo_s g_tcbinfo =
   .stack_off      = TCB_STACK_OFF,
   .stack_size_off = TCB_STACK_SIZE_OFF,
   .regs_off       = TCB_REGS_OFF,
-  .basic_num      = nitems(g_reg_offs),
-  .total_num      = nitems(g_reg_offs),
+  .regs_num       = nitems(g_reg_offs),
   {
     .p = g_reg_offs,
   },
