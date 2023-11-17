@@ -11,13 +11,14 @@ A single test run.
 
 The following runtime options are available::
 
-  sdbench: [-b] [-r] [-d] [-k] [-s] [-u] [-v]
+  sdbench: [-b] [-r] [-d] [-k] [-s] [-a] [-v]
     -b   Block size per write (1-65536), default 512
     -r   Number of runs (1-10000), default 5
     -d   Max duration of a test (ms) (1-60000), default 2000
     -k   Keep test file when finished, default false
     -s   Call fsync after each block, false calls fsync
          only at the end of each run, default false
+    -a   Test performance on aligned data, default false
     -v   Verify data and block number, default true
 
 An example of a completed test::
