@@ -10899,12 +10899,45 @@ config STM32_PHYSR_100FD
 		This must be provided if STM32_AUTONEG is defined.  This is the value
 		under the bit mask that represents the 100Mbps, full duplex setting.
 
+config STM32_ETH_ENHANCEDDESC
+	bool "Enable enhanced RX/TX descriptors"
+	default n
+	---help---
+		Enables double-length DMA descriptors that have space for packet
+		timestamps and checksum offloading.
+
 config STM32_ETH_PTP
 	bool "Precision Time Protocol (PTP)"
 	default n
 	---help---
-		Precision Time Protocol (PTP).  Not supported but some hooks are indicated
-		with this condition.
+		Enables Precision Time Protocol (PTP) hardware timer.
+
+config STM32_ETH_PTP_GPIO
+	bool "PTP pulse-per-second output signal"
+	depends on STM32_ETH_PTP
+	default n
+	---help---
+		Enables pulse-per-second output on GPIO pin.
+
+config STM32_ETH_PTP_RTC_HIRES
+	bool "Use PTP timer as system high-resolution RTC"
+	depends on STM32_ETH_PTP
+	default n
+	---help---
+		Uses the Ethernet peripheral PTP timer as the CONFIG_RTC_HIRES source.
+		This provides high resolution timestamps to clock_gettime().
+		Note that PTP timer is disabled when Ethernet interface is down or
+		being reset. During this time g_rtc_enabled is set to false and system
+		uses the lower resolution system tick counter.
+
+config STM32_ETH_TIMESTAMP_RX
+	bool "Hardware timestamping of received packets"
+	depends on STM32_ETH_PTP && NET_TIMESTAMP && STM32_ETH_ENHANCEDDESC
+	select ARCH_HAVE_NETDEV_TIMESTAMP
+	default n
+	---help---
+		Timestamp all received Ethernet packets.
+		Timestamp is available to application through SO_TIMESTAMP socket option.
 
 config STM32_RMII
 	bool
