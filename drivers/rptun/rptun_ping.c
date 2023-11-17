@@ -176,7 +176,7 @@ static void rptun_ping_logout_rate(uint64_t len, clock_t avg)
   rateint = ratebits / 1000000;
   ratedec = ratebits - rateint * 1000000;
 
-  syslog(LOG_INFO, "rate: %d.%06d Mbits/sec\n", rateint, ratedec);
+  syslog(LOG_INFO, "rate: %zu.%06zu Mbits/sec\n", rateint, ratedec);
 }
 
 /****************************************************************************
