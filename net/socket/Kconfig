@@ -74,9 +74,10 @@ config NET_SOLINGER
 config NET_TIMESTAMP
 	bool "SO_TIMESTAMP socket option"
 	default n
-	depends on NET_CAN
+	depends on NET_CAN || NET_ETHERNET
 	---help---
-		Enable or disable support for the SO_TIMESTAMP socket option. Currently only tested & implemented in SocketCAN but should work on all sockets
+		Enable or disable support for the SO_TIMESTAMP socket option.
+		Supported on SocketCAN and Ethernet/UDP.
 
 config NET_BINDTODEVICE
 	bool "SO_BINDTODEVICE socket option Bind-to-device support"
