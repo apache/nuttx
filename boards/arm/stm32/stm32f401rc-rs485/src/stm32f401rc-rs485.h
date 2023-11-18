@@ -67,17 +67,25 @@
    GPIO_SPEED_50MHz)
 
 /* Buttons
- *
- * B1 USER: the user button is connected to the I/O PC13 (pin 2) of the STM32
- * microcontroller.
+ * The STm32F401RC-RS485 has 4 user buttons.
+ * - SW3 is connected to the GPIO PB13.
+ * - SW4 is connected to the GPIO PB14.
+ * - SW5 is connected to the GPIO PB15.
+ * - SW6 is connected to the GPIO PC6.
  */
 
-#define MIN_IRQBUTTON   BUTTON_USER
-#define MAX_IRQBUTTON   BUTTON_USER
-#define NUM_IRQBUTTONS  1
+#define MIN_IRQBUTTON   BUTTON_SW3
+#define MAX_IRQBUTTON   BUTTON_SW6
+#define NUM_IRQBUTTONS  4
 
-#define GPIO_BTN_USER \
-  (GPIO_INPUT |GPIO_FLOAT |GPIO_EXTI | GPIO_PORTC | GPIO_PIN13)
+#define GPIO_BTN_SW3 \
+  (GPIO_INPUT |GPIO_FLOAT |GPIO_EXTI | GPIO_PORTB | GPIO_PIN13)
+#define GPIO_BTN_SW4 \
+  (GPIO_INPUT |GPIO_FLOAT |GPIO_EXTI | GPIO_PORTB | GPIO_PIN14)
+#define GPIO_BTN_SW5 \
+  (GPIO_INPUT |GPIO_FLOAT |GPIO_EXTI | GPIO_PORTB | GPIO_PIN15)
+#define GPIO_BTN_SW6 \
+  (GPIO_INPUT |GPIO_FLOAT |GPIO_EXTI | GPIO_PORTC | GPIO_PIN6)
 
 /* The shield uses the following pins:
  *
