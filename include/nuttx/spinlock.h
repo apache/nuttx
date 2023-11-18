@@ -54,9 +54,7 @@ typedef atomic_int rwlock_t;
 #  define SP_LOCKED   1  /* The Locked state */
 
 typedef uint8_t spinlock_t;
-#else
-
-#ifdef CONFIG_TICKET_SPINLOCK
+#elif defined(CONFIG_TICKET_SPINLOCK)
 
 union spinlock_u
 {
@@ -86,7 +84,7 @@ typedef union spinlock_u spinlock_t;
 
 #include <arch/spinlock.h>
 
-#endif
+#endif /* CONFIG_SPINLOCK */
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -392,8 +390,6 @@ void spin_clrbit(FAR volatile cpu_set_t *set, unsigned int cpu,
                  FAR volatile spinlock_t *setlock,
                  FAR volatile spinlock_t *orlock);
 #endif
-
-#endif /* CONFIG_SPINLOCK */
 
 /****************************************************************************
  * Name: spin_initialize
