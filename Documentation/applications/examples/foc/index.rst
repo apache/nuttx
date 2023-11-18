@@ -57,7 +57,6 @@ f_PWM  f_notifier  ccb   Kp       Ki
 20kHz  10kHz       1000  0.0087   0.0025
 ====== =========== ===== ======== ======
 
-
 * Linix 45ZWN24-40 (PMSM motor dedicated for NXP FRDM-MC-LVMTR kit)
 
 ====== =========== ===== ======== ======
@@ -73,7 +72,6 @@ f_PWM  f_notifier  ccb   Kp       Ki
 ====== =========== ===== ======== ======
 20kHz  10kHz       200   0.036    0.022
 ====== =========== ===== ======== ======
-
 
 * iPower GBM2804H-100T (gimbal motor provided with the ST P-NUCLEO-IHM03 kit)
 
