@@ -42,7 +42,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/mutex.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
@@ -96,7 +96,6 @@ struct ramlog_dev_s
 
   FAR struct ramlog_header_s *rl_header;
 
-  mutex_t                    rl_lock;    /* Enforces mutually exclusive access */
   uint32_t                   rl_bufsize; /* Size of the Circular RAM buffer */
   struct list_node           rl_list;    /* The head of ramlog_user_s list */
 };
@@ -163,7 +162,6 @@ static uint32_t g_sysbuffer[CONFIG_RAMLOG_BUFSIZE / 4];
 static struct ramlog_dev_s g_sysdev =
 {
   (FAR struct ramlog_header_s *)g_sysbuffer,            /* rl_buffer */
-  NXMUTEX_INITIALIZER,                                  /* rl_lock */
   sizeof(g_sysbuffer) - sizeof(struct ramlog_header_s), /* rl_bufsize */
   LIST_INITIAL_VALUE(g_sysdev.rl_list)                  /* rl_list */
 };
@@ -193,11 +191,9 @@ static uint32_t ramlog_bufferused(FAR struct ramlog_dev_s *priv,
 static void ramlog_readnotify(FAR struct ramlog_dev_s *priv)
 {
   FAR struct ramlog_user_s *upriv;
-  irqstate_t flags;
 
   /* Notify all waiting readers that they can read from the FIFO */
 
-  flags = enter_critical_section();
   list_for_every_entry(&priv->rl_list, upriv, struct ramlog_user_s, rl_node)
     {
       for (; ; )
@@ -213,8 +209,6 @@ static void ramlog_readnotify(FAR struct ramlog_dev_s *priv)
           nxsem_post(&upriv->rl_waitsem);
         }
     }
-
-    leave_critical_section(flags);
 }
 #endif
 
@@ -225,11 +219,9 @@ static void ramlog_readnotify(FAR struct ramlog_dev_s *priv)
 static void ramlog_pollnotify(FAR struct ramlog_dev_s *priv)
 {
   FAR struct ramlog_user_s *upriv;
-  irqstate_t flags;
 
   /* This function may be called from an interrupt handler */
 
-  flags = enter_critical_section();
   list_for_every_entry(&priv->rl_list, upriv, struct ramlog_user_s, rl_node)
     {
       if (ramlog_bufferused(priv, upriv) >= upriv->rl_threashold)
@@ -241,8 +233,6 @@ static void ramlog_pollnotify(FAR struct ramlog_dev_s *priv)
           poll_notify(&upriv->rl_fds, 1, POLLIN);
         }
     }
-
-  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -252,11 +242,6 @@ static void ramlog_pollnotify(FAR struct ramlog_dev_s *priv)
 static void ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch)
 {
   FAR struct ramlog_header_s *header = priv->rl_header;
-  irqstate_t flags;
-
-  /* Disable interrupts (in case we are NOT called from interrupt handler) */
-
-  flags = enter_critical_section();
 
 #ifdef CONFIG_RAMLOG_SYSLOG
   if (priv == &g_sysdev && header->rl_magic != RAMLOG_MAGIC_NUMBER)
@@ -271,7 +256,6 @@ static void ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch)
 
   if (ch == '\r')
     {
-      leave_critical_section(flags);
       return;
     }
 
@@ -294,8 +278,6 @@ again:
       goto again;
     }
 #endif
-
-  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -305,15 +287,13 @@ again:
 static ssize_t ramlog_addbuf(FAR struct ramlog_dev_s *priv,
                              FAR const char *buffer, size_t len)
 {
+  irqstate_t flags;
   size_t nwritten;
   char ch;
-  int ret;
 
-  ret = nxmutex_lock(&priv->rl_lock);
-  if (ret < 0)
-    {
-      return ret;
-    }
+  /* Disable interrupts (in case we are NOT called from interrupt handler) */
+
+  flags = enter_critical_section();
 
   for (nwritten = 0; nwritten < len; nwritten++)
     {
@@ -345,7 +325,7 @@ static ssize_t ramlog_addbuf(FAR struct ramlog_dev_s *priv,
    * probably retry, causing same error condition again.
    */
 
-  nxmutex_unlock(&priv->rl_lock);
+  leave_critical_section(flags);
   return len;
 }
 
@@ -360,10 +340,10 @@ static ssize_t ramlog_file_read(FAR struct file *filep, FAR char *buffer,
   FAR struct ramlog_dev_s *priv = inode->i_private;
   FAR struct ramlog_header_s *header = priv->rl_header;
   FAR struct ramlog_user_s *upriv = filep->f_priv;
+  irqstate_t flags;
   uint32_t tail;
   ssize_t nread;
   char ch;
-  int ret;
 
   /* If the circular buffer is empty, then wait for something to be written
    * to it.  This function may NOT be called from an interrupt handler.
@@ -373,11 +353,7 @@ static ssize_t ramlog_file_read(FAR struct file *filep, FAR char *buffer,
 
   /* Get exclusive access to the rl_tail index */
 
-  ret = nxmutex_lock(&priv->rl_lock);
-  if (ret < 0)
-    {
-      return ret;
-    }
+  flags = enter_critical_section();
 
   /* Determine whether the read pointer is overwritten */
 
@@ -403,6 +379,8 @@ static ssize_t ramlog_file_read(FAR struct file *filep, FAR char *buffer,
 
           break;
 #else
+          int ret;
+
           /* Did we read anything? */
 
           if (nread > 0)
@@ -422,14 +400,6 @@ static ssize_t ramlog_file_read(FAR struct file *filep, FAR char *buffer,
               break;
             }
 
-          /* Otherwise, wait for something to be written to the circular
-           * buffer. Increment the number of waiters so that the
-           * ramlog_file_write() will note that it needs to post the
-           * semaphore to wake us up.
-           */
-
-          nxmutex_unlock(&priv->rl_lock);
-
           /* We may now be pre-empted!  But that should be okay because we
            * have already incremented nwaiters.  Pre-emptions is disabled
            * but will be re-enabled while we are waiting.
@@ -439,20 +409,9 @@ static ssize_t ramlog_file_read(FAR struct file *filep, FAR char *buffer,
 
           /* Did we successfully get the rl_waitsem? */
 
-          if (ret >= 0)
-            {
-              /* Yes... then retake the mutual exclusion mutex */
-
-              ret = nxmutex_lock(&priv->rl_lock);
-            }
-
-          /* Was the mutex wait successful? Did we successful re-take the
-           * mutual exclusion mutex?
-           */
-
           if (ret < 0)
             {
-              /* No.. One of the two nxsem_wait's failed. */
+              /* No.. nxsem_wait's failed. */
 
               /* Return the error. We did handle the case where we read
                * anything already before waiting.
@@ -485,9 +444,7 @@ static ssize_t ramlog_file_read(FAR struct file *filep, FAR char *buffer,
         }
     }
 
-  /* Relinquish the mutual exclusion mutex */
-
-  nxmutex_unlock(&priv->rl_lock);
+  leave_critical_section(flags);
 
   /* Return the number of characters actually read */
 
@@ -517,13 +474,10 @@ static int ramlog_file_ioctl(FAR struct file *filep, int cmd,
   FAR struct inode *inode = filep->f_inode;
   FAR struct ramlog_dev_s *priv = inode->i_private;
   FAR struct ramlog_user_s *upriv = filep->f_priv;
-  int ret;
+  irqstate_t flags;
+  int ret = 0;
 
-  ret = nxmutex_lock(&priv->rl_lock);
-  if (ret < 0)
-    {
-      return ret;
-    }
+  flags = spin_lock_irqsave(NULL);
 
   switch (cmd)
     {
@@ -538,7 +492,7 @@ static int ramlog_file_ioctl(FAR struct file *filep, int cmd,
         break;
     }
 
-  nxmutex_unlock(&priv->rl_lock);
+  spin_unlock_irqrestore(NULL, flags);
   return ret;
 }
 
@@ -554,15 +508,10 @@ static int ramlog_file_poll(FAR struct file *filep, FAR struct pollfd *fds,
   FAR struct ramlog_user_s *upriv = filep->f_priv;
   pollevent_t eventset = POLLOUT;
   irqstate_t flags;
-  int ret;
 
   /* Get exclusive access to the poll structures */
 
-  ret = nxmutex_lock(&priv->rl_lock);
-  if (ret < 0)
-    {
-      return ret;
-    }
+  flags = enter_critical_section();
 
   /* Are we setting up the poll?  Or tearing it down? */
 
@@ -580,16 +529,12 @@ static int ramlog_file_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       /* Should immediately notify on any of the requested events? */
 
-      flags = enter_critical_section();
-
       /* Check if the receive buffer is not empty. */
 
       if (ramlog_bufferused(priv, upriv) >= upriv->rl_threashold)
         {
           eventset |= POLLIN;
         }
-
-      leave_critical_section(flags);
 
       poll_notify(&fds, 1, eventset);
     }
@@ -605,8 +550,8 @@ static int ramlog_file_poll(FAR struct file *filep, FAR struct pollfd *fds,
       fds->priv = NULL;
     }
 
-  nxmutex_unlock(&priv->rl_lock);
-  return ret;
+  leave_critical_section(flags);
+  return 0;
 }
 
 /****************************************************************************
@@ -619,7 +564,7 @@ static int ramlog_file_open(FAR struct file *filep)
   FAR struct ramlog_dev_s *priv = inode->i_private;
   FAR struct ramlog_header_s *header = priv->rl_header;
   FAR struct ramlog_user_s *upriv;
-  int ret;
+  irqstate_t flags;
 
   /* Get exclusive access to the rl_tail index */
 
@@ -634,23 +579,14 @@ static int ramlog_file_open(FAR struct file *filep)
   nxsem_init(&upriv->rl_waitsem, 0, 0);
 #endif
 
-  ret = nxmutex_lock(&priv->rl_lock);
-  if (ret < 0)
-    {
-#ifndef CONFIG_RAMLOG_NONBLOCKING
-      nxsem_destroy(&upriv->rl_waitsem);
-#endif
-      kmm_free(upriv);
-      return ret;
-    }
-
+  flags = spin_lock_irqsave(NULL);
   list_add_tail(&priv->rl_list, &upriv->rl_node);
-
   upriv->rl_tail = header->rl_head > priv->rl_bufsize ?
                    header->rl_head - priv->rl_bufsize : 0;
+  spin_unlock_irqrestore(NULL, flags);
+
   filep->f_priv = upriv;
-  nxmutex_unlock(&priv->rl_lock);
-  return ret;
+  return 0;
 }
 
 /****************************************************************************
@@ -659,27 +595,20 @@ static int ramlog_file_open(FAR struct file *filep)
 
 static int ramlog_file_close(FAR struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct ramlog_dev_s *priv = inode->i_private;
   FAR struct ramlog_user_s *upriv = filep->f_priv;
-  int ret;
+  irqstate_t flags;
 
   /* Get exclusive access to the rl_tail index */
 
-  ret = nxmutex_lock(&priv->rl_lock);
-  if (ret < 0)
-    {
-      return ret;
-    }
+  flags = spin_lock_irqsave(NULL);
+  list_delete(&upriv->rl_node);
+  spin_unlock_irqrestore(NULL, flags);
 
 #ifndef CONFIG_RAMLOG_NONBLOCKING
   nxsem_destroy(&upriv->rl_waitsem);
 #endif
-
-  list_delete(&upriv->rl_node);
   kmm_free(upriv);
-  nxmutex_unlock(&priv->rl_lock);
-  return ret;
+  return 0;
 }
 
 /****************************************************************************
@@ -710,7 +639,6 @@ int ramlog_register(FAR const char *devpath, FAR char *buffer, size_t buflen)
     {
       /* Initialize the non-zero values in the RAM logging device structure */
 
-      nxmutex_init(&priv->rl_lock);
       list_initialize(&priv->rl_list);
       priv->rl_bufsize = buflen - sizeof(struct ramlog_header_s);
       priv->rl_header = (FAR struct ramlog_header_s *)buffer;
@@ -720,7 +648,6 @@ int ramlog_register(FAR const char *devpath, FAR char *buffer, size_t buflen)
       ret = register_driver(devpath, &g_ramlogfops, 0666, priv);
       if (ret < 0)
         {
-          nxmutex_destroy(&priv->rl_lock);
           kmm_free(priv);
         }
     }
@@ -758,11 +685,13 @@ void ramlog_syslog_register(void)
 int ramlog_putc(FAR struct syslog_channel_s *channel, int ch)
 {
   FAR struct ramlog_dev_s *priv = &g_sysdev;
+  irqstate_t flags;
 
   UNUSED(channel);
 
   /* Add the character to the RAMLOG */
 
+  flags = enter_critical_section();
   ramlog_addchar(priv, ch);
 
 #ifndef CONFIG_RAMLOG_NONBLOCKING
@@ -774,6 +703,7 @@ int ramlog_putc(FAR struct syslog_channel_s *channel, int ch)
   /* Notify all poll/select waiters that they can read from the FIFO */
 
   ramlog_pollnotify(priv);
+  leave_critical_section(flags);
 
   /* Return the character added on success */
 
