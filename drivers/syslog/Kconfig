@@ -54,13 +54,6 @@ config RAMLOG_NPOLLWAITERS
 	---help---
 		The maximum number of threads that may be waiting on the poll method.
 
-config RAMLOG_OVERWRITE
-	bool "RAMLOG overwrite circular buffer"
-	default n
-	---help---
-		Enable overwrite of circular buffer. If RAMLOG buffer overflows,
-		overwrite it from the top of buffer and always keep the latest log.
-
 config RAMLOG_POLLTHRESHOLD
 	int "The threshold value of circular buffer to notify poll waiters"
 	default 1
