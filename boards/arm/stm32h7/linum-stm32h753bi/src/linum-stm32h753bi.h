@@ -49,6 +49,13 @@
 #define GPIO_LED_GREEN   GPIO_LD2
 #define GPIO_LED_BLUE    GPIO_LD3
 
+/* Check if we can support the RTC driver */
+
+#define HAVE_RTC_DRIVER 1
+#if !defined(CONFIG_RTC) || !defined(CONFIG_RTC_DRIVER)
+#  undef HAVE_RTC_DRIVER
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
