@@ -41,9 +41,8 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#if defined(CONFIG_RW_SPINLOCK) && !defined(__cplusplus)
-#  include <stdatomic.h>
-typedef atomic_int rwlock_t;
+#if defined(CONFIG_RW_SPINLOCK)
+typedef int rwlock_t;
 #  define RW_SP_UNLOCKED      0
 #  define RW_SP_READ_LOCKED   1
 #  define RW_SP_WRITE_LOCKED -1
@@ -60,10 +59,10 @@ union spinlock_u
 {
   struct
   {
-    uint16_t owner;
-    uint16_t next;
+    unsigned short owner;
+    unsigned short next;
   } tickets;
-  uint32_t value;
+  unsigned int value;
 };
 typedef union spinlock_u spinlock_t;
 
@@ -505,7 +504,7 @@ void spin_unlock_irqrestore_wo_note(FAR spinlock_t *lock, irqstate_t flags);
 #  define spin_unlock_irqrestore_wo_note(l, f) up_irq_restore(f)
 #endif
 
-#if defined(CONFIG_RW_SPINLOCK) && !defined(__cplusplus)
+#if defined(CONFIG_RW_SPINLOCK)
 
 /****************************************************************************
  * Name: rwlock_init
@@ -813,7 +812,7 @@ void write_unlock_irqrestore(FAR rwlock_t *lock, irqstate_t flags);
 #  define write_unlock_irqrestore(l, f) up_irq_restore(f)
 #endif
 
-#endif /* CONFIG_RW_SPINLOCK && !__cplusplus */
+#endif /* CONFIG_RW_SPINLOCK */
 
 #undef EXTERN
 #if defined(__cplusplus)
