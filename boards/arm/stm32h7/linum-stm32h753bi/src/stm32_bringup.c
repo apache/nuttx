@@ -39,6 +39,11 @@
 #include <nuttx/leds/userled.h>
 #endif
 
+#ifdef HAVE_RTC_DRIVER
+#  include <nuttx/timers/rtc.h>
+#  include "stm32_rtc.h"
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -68,6 +73,10 @@ int stm32_bringup(void)
 
   UNUSED(ret);
 
+#ifdef HAVE_RTC_DRIVER
+  struct rtc_lowerhalf_s *lower;
+#endif
+
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 
@@ -86,6 +95,32 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef HAVE_RTC_DRIVER
+  /* Instantiate the STM32 lower-half RTC driver */
+
+  lower = stm32_rtc_lowerhalf();
+  if (!lower)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to instantiate the RTC lower-half driver\n");
+      return -ENOMEM;
+    }
+  else
+    {
+      /* Bind the lower half driver and register the combined RTC driver
+       * as /dev/rtc0
+       */
+
+      ret = rtc_initialize(0, lower);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR,
+                 "ERROR: Failed to bind/register the RTC driver: %d\n", ret);
+          return ret;
+        }
     }
 #endif
 
