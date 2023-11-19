@@ -66,42 +66,50 @@ static int        inet_setup(FAR struct socket *psock);
 static sockcaps_t inet_sockcaps(FAR struct socket *psock);
 static void       inet_addref(FAR struct socket *psock);
 static int        inet_bind(FAR struct socket *psock,
-                    FAR const struct sockaddr *addr, socklen_t addrlen);
+                            FAR const struct sockaddr *addr,
+                            socklen_t addrlen);
 static int        inet_getsockname(FAR struct socket *psock,
-                    FAR struct sockaddr *addr, FAR socklen_t *addrlen);
+                                   FAR struct sockaddr *addr,
+                                   FAR socklen_t *addrlen);
 static int        inet_getpeername(FAR struct socket *psock,
-                    FAR struct sockaddr *addr, FAR socklen_t *addrlen);
+                                   FAR struct sockaddr *addr,
+                                   FAR socklen_t *addrlen);
 static int        inet_listen(FAR struct socket *psock, int backlog);
 static int        inet_connect(FAR struct socket *psock,
-                    FAR const struct sockaddr *addr, socklen_t addrlen);
+                               FAR const struct sockaddr *addr,
+                               socklen_t addrlen);
 static int        inet_accept(FAR struct socket *psock,
-                    FAR struct sockaddr *addr, FAR socklen_t *addrlen,
-                    FAR struct socket *newsock, int flags);
+                              FAR struct sockaddr *addr,
+                              FAR socklen_t *addrlen,
+                              FAR struct socket *newsock, int flags);
 static int        inet_poll(FAR struct socket *psock,
-                    FAR struct pollfd *fds, bool setup);
+                            FAR struct pollfd *fds, bool setup);
 static ssize_t    inet_send(FAR struct socket *psock, FAR const void *buf,
-                    size_t len, int flags);
+                            size_t len, int flags);
 static ssize_t    inet_sendto(FAR struct socket *psock, FAR const void *buf,
-                    size_t len, int flags, FAR const struct sockaddr *to,
-                    socklen_t tolen);
+                              size_t len, int flags,
+                              FAR const struct sockaddr *to,
+                              socklen_t tolen);
 static ssize_t    inet_sendmsg(FAR struct socket *psock,
-                    FAR struct msghdr *msg, int flags);
+                               FAR struct msghdr *msg, int flags);
 static ssize_t    inet_recvmsg(FAR struct socket *psock,
-                    FAR struct msghdr *msg, int flags);
+                               FAR struct msghdr *msg, int flags);
 static int        inet_ioctl(FAR struct socket *psock,
-                    int cmd, unsigned long arg);
+                             int cmd, unsigned long arg);
 static int        inet_socketpair(FAR struct socket *psocks[2]);
 static int        inet_shutdown(FAR struct socket *psock, int how);
 #ifdef CONFIG_NET_SOCKOPTS
 static int        inet_getsockopt(FAR struct socket *psock, int level,
-                    int option, FAR void *value, FAR socklen_t *value_len);
+                                  int option, FAR void *value,
+                                  FAR socklen_t *value_len);
 static int        inet_setsockopt(FAR struct socket *psock, int level,
-                    int option, FAR const void *value, socklen_t value_len);
+                                  int option, FAR const void *value,
+                                  socklen_t value_len);
 #endif
 #ifdef CONFIG_NET_SENDFILE
 static ssize_t    inet_sendfile(FAR struct socket *psock,
-                    FAR struct file *infile, FAR off_t *offset,
-                    size_t count);
+                                FAR struct file *infile, FAR off_t *offset,
+                                size_t count);
 #endif
 
 /****************************************************************************

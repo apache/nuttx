@@ -1199,7 +1199,7 @@ static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
             }
         }
 
-      poll_notify(dev->cd_fds, CONFIG_CAN_NPOLLWAITERS, eventset);
+      poll_notify(&fds, 1, eventset);
     }
   else if (fds->priv != NULL)
     {

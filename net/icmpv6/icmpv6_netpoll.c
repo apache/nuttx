@@ -189,7 +189,7 @@ int icmpv6_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
    */
 
   cb->flags = NETDEV_DOWN;
-  cb->priv  = (FAR void *)info;
+  cb->priv  = info;
   cb->event = icmpv6_poll_eventhandler;
 
   if ((fds->events & POLLIN) != 0)
@@ -201,7 +201,7 @@ int icmpv6_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
    * for use during poll teardown as well.
    */
 
-  fds->priv = (FAR void *)info;
+  fds->priv = info;
 
   /* Check for read data availability now */
 

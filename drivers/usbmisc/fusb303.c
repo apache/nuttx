@@ -893,7 +893,7 @@ static int fusb303_poll(FAR struct file *filep, FAR struct pollfd *fds,
       flags = enter_critical_section();
       if (priv->int_pending)
         {
-          poll_notify(priv->fds, CONFIG_FUSB303_NPOLLWAITERS, POLLIN);
+          poll_notify(&fds, 1, POLLIN);
         }
 
       leave_critical_section(flags);

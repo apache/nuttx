@@ -490,7 +490,7 @@ static int spi_slave_poll(FAR struct file *filep, FAR struct pollfd *fds,
           eventset |= POLLOUT;
         }
 
-      poll_notify(&priv->fds, 1, eventset);
+      poll_notify(&fds, 1, eventset);
     }
   else if (fds->priv != NULL)
     {

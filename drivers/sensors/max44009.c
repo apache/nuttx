@@ -828,7 +828,8 @@ static int max44009_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (priv->int_pending)
         {
-          max44009_notify(priv);
+          poll_notify(&fds, 1, POLLIN);
+          priv->int_pending = false;
         }
     }
   else if (fds->priv)

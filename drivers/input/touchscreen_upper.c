@@ -308,12 +308,12 @@ static int touch_poll(FAR struct file *filep, struct pollfd *fds, bool setup)
           eventset |= POLLIN;
         }
 
-      poll_notify(&openpriv->fds, 1, eventset);
+      poll_notify(&fds, 1, eventset);
     }
   else if (fds->priv)
     {
       openpriv->fds = NULL;
-      fds->priv   = NULL;
+      fds->priv     = NULL;
     }
 
 errout:

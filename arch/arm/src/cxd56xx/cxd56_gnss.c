@@ -3097,7 +3097,7 @@ static int cxd56_gnss_poll(struct file *filep, struct pollfd *fds,
 
       if (priv->has_event)
         {
-          cxd56_gnss_pollnotify(priv);
+          poll_notify(&fds, 1, POLLIN);
         }
     }
   else if (fds->priv)
@@ -3108,9 +3108,9 @@ static int cxd56_gnss_poll(struct file *filep, struct pollfd *fds,
 
       /* Remove all memory of the poll setup */
 
-      *slot                = NULL;
-      fds->priv            = NULL;
-      priv->has_event      = false;
+      *slot           = NULL;
+      fds->priv       = NULL;
+      priv->has_event = false;
     }
 
 errout:
