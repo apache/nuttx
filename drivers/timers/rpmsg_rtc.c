@@ -472,10 +472,22 @@ static int rpmsg_rtc_server_settime(FAR struct rtc_lowerhalf_s *lower,
   ret = server->lower->ops->settime(server->lower, rtctime);
   if (ret >= 0)
     {
-      nxmutex_lock(&server->lock);
       msg.sec  = timegm((FAR struct tm *)rtctime);
       msg.nsec = rtctime->tm_nsec;
       msg.header.command = RPMSG_RTC_SYNC;
+
+      if (ret == 0)
+        {
+          struct timespec tp;
+
+          tp.tv_sec  = msg.sec;
+          tp.tv_nsec = msg.nsec;
+          clock_synchronize(&tp);
+
+          ret = 1; /* Request the upper half skip clock synchronize */
+        }
+
+      nxmutex_lock(&server->lock);
       list_for_every(&server->list, node)
         {
           client = (FAR struct rpmsg_rtc_client_s *)node;
@@ -649,16 +661,6 @@ static int rpmsg_rtc_server_ept_cb(FAR struct rpmsg_endpoint *ept,
         rtctime.tm_nsec = msg->nsec;
 
         header->result = rpmsg_rtc_server_settime(priv, &rtctime);
-        if (header->result >= 0)
-          {
-            struct timespec tp;
-
-            tp.tv_sec  = msg->sec;
-            tp.tv_nsec = msg->nsec;
-
-            clock_synchronize(&tp);
-          }
-
         return rpmsg_send(ept, msg, sizeof(*msg));
       }
 
