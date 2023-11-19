@@ -705,7 +705,7 @@ static int fusb301_poll(FAR struct file *filep,
       flags = enter_critical_section();
       if (priv->int_pending)
         {
-          poll_notify(priv->fds, CONFIG_FUSB301_NPOLLWAITERS, POLLIN);
+          poll_notify(&fds, 1, POLLIN);
         }
 
       leave_critical_section(flags);

@@ -86,9 +86,9 @@ static const struct comp_callback_s g_comp_callback =
 static int comp_poll(FAR struct file *filep, FAR struct pollfd *fds,
                      bool setup)
 {
-  FAR struct inode      *inode    = filep->f_inode;
-  FAR struct comp_dev_s *dev      = inode->i_private;
-  int                    ret      = OK;
+  FAR struct inode      *inode = filep->f_inode;
+  FAR struct comp_dev_s *dev   = inode->i_private;
+  int                    ret   = OK;
   int                    i;
 
   DEBUGASSERT(dev && fds);
@@ -123,8 +123,8 @@ static int comp_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (i >= CONFIG_DEV_COMP_NPOLLWAITERS)
         {
-          fds->priv   = NULL;
-          ret         = -EBUSY;
+          fds->priv = NULL;
+          ret       = -EBUSY;
           goto errout;
         }
     }
@@ -137,15 +137,15 @@ static int comp_poll(FAR struct file *filep, FAR struct pollfd *fds,
 #ifdef CONFIG_DEBUG_FEATURES
       if (!slot)
         {
-          ret              = -EIO;
+          ret = -EIO;
           goto errout;
         }
 #endif
 
       /* Remove all memory of the poll setup */
 
-      *slot                = NULL;
-      fds->priv            = NULL;
+      *slot     = NULL;
+      fds->priv = NULL;
     }
 
 errout:

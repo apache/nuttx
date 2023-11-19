@@ -218,7 +218,8 @@ out:
  * Name: mouse_poll
  ****************************************************************************/
 
-static int mouse_poll(FAR struct file *filep, struct pollfd *fds, bool setup)
+static int mouse_poll(FAR struct file *filep,
+                      FAR struct pollfd *fds, bool setup)
 {
   FAR struct mouse_openpriv_s *openpriv = filep->f_priv;
   pollevent_t eventset = 0;
@@ -248,7 +249,7 @@ static int mouse_poll(FAR struct file *filep, struct pollfd *fds, bool setup)
           eventset |= POLLIN;
         }
 
-      poll_notify(&openpriv->fds, 1, eventset);
+      poll_notify(&fds, 1, eventset);
     }
   else if (fds->priv)
     {

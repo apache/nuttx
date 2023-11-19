@@ -640,8 +640,8 @@ static int spq10kbd_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (i >= CONFIG_SPQ10KBD_NPOLLWAITERS)
         {
-          fds->priv    = NULL;
-          ret          = -EBUSY;
+          fds->priv = NULL;
+          ret       = -EBUSY;
           goto errout;
         }
 
@@ -651,7 +651,7 @@ static int spq10kbd_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (priv->headndx != priv->tailndx)
         {
-          poll_notify(priv->fds, CONFIG_SPQ10KBD_NPOLLWAITERS, POLLIN);
+          poll_notify(&fds, 1, POLLIN);
         }
     }
   else
@@ -663,8 +663,8 @@ static int spq10kbd_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       /* Remove all memory of the poll setup */
 
-      *slot                = NULL;
-      fds->priv            = NULL;
+      *slot     = NULL;
+      fds->priv = NULL;
     }
 
 errout:

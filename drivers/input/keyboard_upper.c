@@ -276,7 +276,7 @@ static int keyboard_poll(FAR struct file *filep,
 
       if (!circbuf_is_empty(&opriv->circ))
         {
-          poll_notify(&opriv->fds, 1, POLLIN);
+          poll_notify(&fds, 1, POLLIN);
         }
     }
   else

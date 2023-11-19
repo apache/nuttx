@@ -165,9 +165,9 @@ static uint16_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
         {
           /* Stop further callbacks */
 
-          info->cb->flags   = 0;
-          info->cb->priv    = NULL;
-          info->cb->event   = NULL;
+          info->cb->flags = 0;
+          info->cb->priv  = NULL;
+          info->cb->event = NULL;
         }
     }
 
@@ -256,17 +256,16 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
    * callback processing.
    */
 
-  cb->flags    = TCP_DISCONN_EVENTS;
-  cb->priv     = (FAR void *)info;
-  cb->event    = tcp_poll_eventhandler;
+  cb->flags = TCP_DISCONN_EVENTS;
+  cb->priv  = info;
+  cb->event = tcp_poll_eventhandler;
 
   if ((fds->events & POLLOUT) != 0)
     {
-      cb->flags |= TCP_POLL
+      cb->flags |= TCP_POLL;
 #if defined(CONFIG_NET_TCP_WRITE_BUFFERS)
-                   | TCP_ACKDATA
+      cb->flags |= TCP_ACKDATA;
 #endif
-                   ;
 
       /* Monitor the connected event */
 
@@ -285,7 +284,7 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
    * for use during poll teardown as well.
    */
 
-  fds->priv    = (FAR void *)info;
+  fds->priv = info;
 
   /* Check for read data or backlogged connection availability now */
 

@@ -325,7 +325,7 @@ static int cxd5610_gnss_post_interrupt(void);
 
 #if CONFIG_SENSORS_CXD5610_GNSS_NSIGNALRECEIVERS != 0
 static void cxd5610_gnss_signalhandler(struct cxd5610_gnss_dev_s *priv,
-                                uint8_t sigtype);
+                                       uint8_t sigtype);
 #endif
 
 #if CONFIG_SENSORS_CXD5610_GNSS_NPOLLWAITERS != 0
@@ -2037,7 +2037,7 @@ static int cxd5610_gnss_poll(struct file *filep, struct pollfd *fds,
 
       if (priv->has_event)
         {
-          cxd5610_gnss_pollnotify(priv);
+          poll_notify(&fds, 1, POLLIN);
         }
     }
   else if (fds->priv)
@@ -2048,9 +2048,9 @@ static int cxd5610_gnss_poll(struct file *filep, struct pollfd *fds,
 
       /* Remove all memory of the poll setup */
 
-      *slot                = NULL;
-      fds->priv            = NULL;
-      priv->has_event      = false;
+      *slot           = NULL;
+      fds->priv       = NULL;
+      priv->has_event = false;
     }
 
 errout:

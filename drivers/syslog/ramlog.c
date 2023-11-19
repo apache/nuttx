@@ -204,16 +204,12 @@ static void ramlog_pollnotify(FAR struct ramlog_dev_s *priv,
                               pollevent_t eventset)
 {
   irqstate_t flags;
-  int i;
 
   /* This function may be called from an interrupt handler */
 
-  for (i = 0; i < CONFIG_RAMLOG_NPOLLWAITERS; i++)
-    {
-      flags = enter_critical_section();
-      poll_notify(&priv->rl_fds[i], 1, eventset);
-      leave_critical_section(flags);
-    }
+  flags = enter_critical_section();
+  poll_notify(priv->rl_fds, CONFIG_RAMLOG_NPOLLWAITERS, eventset);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -709,8 +705,8 @@ static int ramlog_file_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (i >= CONFIG_RAMLOG_NPOLLWAITERS)
         {
-          fds->priv    = NULL;
-          ret          = -EBUSY;
+          fds->priv = NULL;
+          ret       = -EBUSY;
           goto errout;
         }
 
@@ -741,7 +737,7 @@ static int ramlog_file_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       leave_critical_section(flags);
 
-      ramlog_pollnotify(priv, eventset);
+      poll_notify(&fds, 1, eventset);
     }
   else if (fds->priv)
     {

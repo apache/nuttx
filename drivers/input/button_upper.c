@@ -710,8 +710,8 @@ static int btn_poll(FAR struct file *filep, FAR struct pollfd *fds,
       if (i >= CONFIG_INPUT_BUTTONS_NPOLLWAITERS)
         {
           ierr("ERROR: Too many poll waiters\n");
-          fds->priv    = NULL;
-          ret          = -EBUSY;
+          fds->priv = NULL;
+          ret       = -EBUSY;
           goto errout;
         }
     }

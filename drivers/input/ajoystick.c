@@ -630,8 +630,8 @@ static int ajoy_poll(FAR struct file *filep, FAR struct pollfd *fds,
       if (i >= CONFIG_INPUT_AJOYSTICK_NPOLLWAITERS)
         {
           ierr("ERROR: Too man poll waiters\n");
-          fds->priv    = NULL;
-          ret          = -EBUSY;
+          fds->priv = NULL;
+          ret       = -EBUSY;
           goto errout;
         }
     }

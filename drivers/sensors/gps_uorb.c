@@ -386,7 +386,7 @@ static int gps_poll(FAR struct file *filep, FAR struct pollfd *fds,
       fds->priv = filep;
       if (upper->buffer.head > user->pos)
         {
-          poll_notify(&user->fds, 1, POLLIN);
+          poll_notify(&fds, 1, POLLIN);
         }
     }
   else if (user->fds)

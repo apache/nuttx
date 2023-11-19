@@ -1220,7 +1220,7 @@ static int sx127x_poll(FAR struct file *filep, FAR struct pollfd *fds,
         {
           /* Data available for input */
 
-          poll_notify(&dev->pfd, 1, POLLIN);
+          poll_notify(&fds, 1, POLLIN);
         }
 
       nxmutex_unlock(&dev->rx_buffer_lock);

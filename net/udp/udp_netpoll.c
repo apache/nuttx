@@ -186,9 +186,9 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
    * callback processing.
    */
 
-  cb->flags    = NETDEV_DOWN;
-  cb->priv     = (FAR void *)info;
-  cb->event    = udp_poll_eventhandler;
+  cb->flags = NETDEV_DOWN;
+  cb->priv  = info;
+  cb->event = udp_poll_eventhandler;
 
   if ((fds->events & POLLOUT) != 0)
     {
@@ -204,7 +204,7 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
    * for use during poll teardown as well.
    */
 
-  fds->priv = (FAR void *)info;
+  fds->priv = info;
 
   /* Check for read data availability now */
 

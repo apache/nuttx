@@ -246,11 +246,6 @@ static void tun_pollnotify(FAR struct tun_device_s *priv,
       nxsem_post(&priv->write_wait_sem);
     }
 
-  if (fds == NULL)
-    {
-      return;
-    }
-
   poll_notify(&fds, 1, eventset);
 }
 
@@ -1186,7 +1181,7 @@ static int tun_poll(FAR struct file *filep,
           eventset |= POLLIN;
         }
 
-      tun_pollnotify(priv, eventset);
+      poll_notify(&fds, 1, eventset);
     }
   else
     {
