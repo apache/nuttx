@@ -396,7 +396,7 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         if (ops->settime)
           {
             ret = ops->settime(upper->lower, rtctime);
-            if (ret >= 0)
+            if (ret == 0)
               {
                 /* If the RTC time was set successfully, then update the
                  * current system time to match.
