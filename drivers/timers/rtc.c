@@ -335,7 +335,7 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct inode *inode;
   FAR struct rtc_upperhalf_s *upper;
   FAR const struct rtc_ops_s *ops;
-  int ret = -ENOSYS;
+  int ret;
 
   /* Get the reference to our internal state structure from the inode
    * structure.
@@ -359,7 +359,9 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
    * RTC implementation.
    */
 
+  ret = -ENOSYS;
   ops = upper->lower->ops;
+
   switch (cmd)
     {
     /* RTC_RD_TIME returns the current RTC time.
@@ -474,16 +476,16 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
              * alarm expires.
              */
 
-            upperinfo->active   = true;
-            upperinfo->pid      = pid;
-            upperinfo->event    = alarminfo->event;
+            upperinfo->active = true;
+            upperinfo->pid    = pid;
+            upperinfo->event  = alarminfo->event;
 
             /* Format the alarm info needed by the lower half driver */
 
-            lowerinfo.id        = alarmid;
-            lowerinfo.cb        = rtc_alarm_callback;
-            lowerinfo.priv      = (FAR void *)upper;
-            lowerinfo.time      = alarminfo->time;
+            lowerinfo.id   = alarmid;
+            lowerinfo.cb   = rtc_alarm_callback;
+            lowerinfo.priv = (FAR void *)upper;
+            lowerinfo.time = alarminfo->time;
 
             /* Then set the alarm */
 
@@ -545,16 +547,16 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
              * alarm expires.
              */
 
-            upperinfo->active   = true;
-            upperinfo->pid      = pid;
-            upperinfo->event    = alarminfo->event;
+            upperinfo->active = true;
+            upperinfo->pid    = pid;
+            upperinfo->event  = alarminfo->event;
 
             /* Format the alarm info needed by the lower half driver */
 
-            lowerinfo.id        = alarmid;
-            lowerinfo.cb        = rtc_alarm_callback;
-            lowerinfo.priv      = (FAR void *)upper;
-            lowerinfo.reltime   = alarminfo->reltime;
+            lowerinfo.id      = alarmid;
+            lowerinfo.cb      = rtc_alarm_callback;
+            lowerinfo.priv    = (FAR void *)upper;
+            lowerinfo.reltime = alarminfo->reltime;
 
             /* Then set the alarm */
 
@@ -679,16 +681,16 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
              * alarm expires.
              */
 
-            upperinfo->active   = true;
-            upperinfo->pid      = pid;
-            upperinfo->event    = alarminfo->event;
+            upperinfo->active = true;
+            upperinfo->pid    = pid;
+            upperinfo->event  = alarminfo->event;
 
             /* Format the alarm info needed by the lower half driver. */
 
-            lowerinfo.id        = id;
-            lowerinfo.cb        = rtc_periodic_callback;
-            lowerinfo.priv      = (FAR void *)upper;
-            lowerinfo.period    = alarminfo->period;
+            lowerinfo.id     = id;
+            lowerinfo.cb     = rtc_periodic_callback;
+            lowerinfo.priv   = (FAR void *)upper;
+            lowerinfo.period = alarminfo->period;
 
             /* Then set the periodic wakeup. */
 
@@ -734,7 +736,6 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
     default:
       {
-        ret = -ENOTTY;
 #ifdef CONFIG_RTC_IOCTL
         if (ops->ioctl)
           {
