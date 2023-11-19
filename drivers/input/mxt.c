@@ -212,18 +212,18 @@ struct mxt_dev_s
 /* MXT register access */
 
 static int  mxt_getreg(FAR struct mxt_dev_s *priv, uint16_t regaddr,
-              FAR uint8_t *buffer, size_t buflen);
+                       FAR uint8_t *buffer, size_t buflen);
 static int  mxt_putreg(FAR struct mxt_dev_s *priv, uint16_t regaddr,
-              FAR const uint8_t *buffer, size_t buflen);
+                       FAR const uint8_t *buffer, size_t buflen);
 
 /* MXT object/message access */
 
 static FAR struct mxt_object_s *mxt_object(FAR struct mxt_dev_s *priv,
-              uint8_t type);
+                                           uint8_t type);
 static int mxt_getmessage(FAR struct mxt_dev_s *priv,
-              FAR struct mxt_msg_s *msg);
+                          FAR struct mxt_msg_s *msg);
 static int mxt_putobject(FAR struct mxt_dev_s *priv, uint8_t type,
-              uint8_t offset, uint8_t value);
+                         uint8_t offset, uint8_t value);
 #if 0 /* Not used */
 static int mxt_getobject(FAR struct mxt_dev_s *priv, uint8_t type,
               uint8_t offset, FAR uint8_t *value);
@@ -236,27 +236,27 @@ static void mxt_notify(FAR struct mxt_dev_s *priv);
 
 /* Touch event waiting */
 
-static inline int  mxt_checksample(FAR struct mxt_dev_s *priv);
-static inline int  mxt_waitsample(FAR struct mxt_dev_s *priv);
+static inline int mxt_checksample(FAR struct mxt_dev_s *priv);
+static inline int mxt_waitsample(FAR struct mxt_dev_s *priv);
 
 /* Interrupt handling/position sampling */
 
 #ifdef CONFIG_MXT_BUTTONS
 static void mxt_button_event(FAR struct mxt_dev_s *priv,
-              FAR struct mxt_msg_s *msg);
+                             FAR struct mxt_msg_s *msg);
 #endif
 static void mxt_touch_event(FAR struct mxt_dev_s *priv,
-              FAR struct mxt_msg_s *msg, int ndx);
+                            FAR struct mxt_msg_s *msg, int ndx);
 static void mxt_worker(FAR void *arg);
 static int  mxt_interrupt(FAR const struct mxt_lower_s *lower,
-              FAR void *context);
+                          FAR void *context);
 
 /* Character driver methods */
 
 static int  mxt_open(FAR struct file *filep);
 static int  mxt_close(FAR struct file *filep);
 static ssize_t mxt_read(FAR struct file *filep, FAR char *buffer,
-              size_t len);
+                        size_t len);
 static int  mxt_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 static int  mxt_poll(FAR struct file *filep, struct pollfd *fds, bool setup);
 
@@ -1511,10 +1511,10 @@ static int mxt_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 static int mxt_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup)
 {
-  FAR struct inode         *inode;
+  FAR struct inode     *inode;
   FAR struct mxt_dev_s *priv;
-  int                       ret;
-  int                       i;
+  int                   ret;
+  int                   i;
 
   iinfo("setup: %d\n", (int)setup);
   DEBUGASSERT(fds);
@@ -1564,8 +1564,8 @@ static int mxt_poll(FAR struct file *filep, FAR struct pollfd *fds,
       if (i >= CONFIG_MXT_NPOLLWAITERS)
         {
           ierr("ERROR: No available slot found: %d\n", i);
-          fds->priv    = NULL;
-          ret          = -EBUSY;
+          fds->priv = NULL;
+          ret       = -EBUSY;
           goto errout;
         }
 
@@ -1573,7 +1573,7 @@ static int mxt_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (priv->event)
         {
-          mxt_notify(priv);
+          poll_notify(&fds, 1, POLLIN);
         }
     }
   else if (fds->priv)
@@ -1585,8 +1585,8 @@ static int mxt_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       /* Remove all memory of the poll setup */
 
-      *slot                = NULL;
-      fds->priv            = NULL;
+      *slot     = NULL;
+      fds->priv = NULL;
     }
 
 errout:

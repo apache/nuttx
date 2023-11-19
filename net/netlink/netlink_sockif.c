@@ -51,15 +51,18 @@ static int  netlink_setup(FAR struct socket *psock);
 static sockcaps_t netlink_sockcaps(FAR struct socket *psock);
 static void netlink_addref(FAR struct socket *psock);
 static int  netlink_bind(FAR struct socket *psock,
-              FAR const struct sockaddr *addr, socklen_t addrlen);
+                        FAR const struct sockaddr *addr, socklen_t addrlen);
 static int  netlink_getsockname(FAR struct socket *psock,
-              FAR struct sockaddr *addr, FAR socklen_t *addrlen);
+                                FAR struct sockaddr *addr,
+                                FAR socklen_t *addrlen);
 static int  netlink_getpeername(FAR struct socket *psock,
-              FAR struct sockaddr *addr, FAR socklen_t *addrlen);
+                                FAR struct sockaddr *addr,
+                                FAR socklen_t *addrlen);
 static int  netlink_connect(FAR struct socket *psock,
-              FAR const struct sockaddr *addr, socklen_t addrlen);
+                            FAR const struct sockaddr *addr,
+                            socklen_t addrlen);
 static int  netlink_poll(FAR struct socket *psock, FAR struct pollfd *fds,
-              bool setup);
+                         bool setup);
 static ssize_t netlink_sendmsg(FAR struct socket *psock,
                                FAR struct msghdr *msg, int flags);
 static ssize_t netlink_recvmsg(FAR struct socket *psock,

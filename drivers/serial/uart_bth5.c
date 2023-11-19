@@ -1209,7 +1209,7 @@ uart_bth5_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
       nxmutex_unlock(&dev->recvlock);
       eventset |= POLLOUT;
 
-      uart_bth5_pollnotify(dev, eventset);
+      poll_notify(&fds, 1, eventset);
     }
   else if (fds->priv != NULL)
     {

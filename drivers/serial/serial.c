@@ -1617,8 +1617,8 @@ static int uart_poll(FAR struct file *filep,
             {
               /* Bind the poll structure and this slot */
 
-              dev->fds[i]  = fds;
-              fds->priv    = &dev->fds[i];
+              dev->fds[i] = fds;
+              fds->priv   = &dev->fds[i];
               break;
             }
         }
@@ -1678,7 +1678,7 @@ static int uart_poll(FAR struct file *filep,
         }
 #endif
 
-      poll_notify(dev->fds, CONFIG_SERIAL_NPOLLWAITERS, eventset);
+      poll_notify(&fds, 1, eventset);
     }
   else if (fds->priv != NULL)
     {

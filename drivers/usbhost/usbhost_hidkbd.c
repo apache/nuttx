@@ -263,21 +263,22 @@ static inline void usbhost_freeclass(FAR struct usbhost_state_s *usbclass);
 static int  usbhost_allocdevno(FAR struct usbhost_state_s *priv);
 static void usbhost_freedevno(FAR struct usbhost_state_s *priv);
 static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv,
-              FAR char *devname);
+                                     FAR char *devname);
 
 /* Keyboard polling thread */
 
 static void usbhost_destroy(FAR void *arg);
 static void usbhost_putbuffer(FAR struct usbhost_state_s *priv,
-              uint8_t keycode);
+                              uint8_t keycode);
 #ifdef CONFIG_HIDKBD_ENCODED
 static void usbhost_putstream(FAR struct lib_outstream_s *self, int ch);
 #endif
 static inline uint8_t usbhost_mapscancode(uint8_t scancode,
-              uint8_t modifier);
+                                          uint8_t modifier);
 #ifdef CONFIG_HIDKBD_ENCODED
 static inline void usbhost_encodescancode(FAR struct usbhost_state_s *priv,
-              uint8_t scancode, uint8_t modifier);
+                                          uint8_t scancode,
+                                          uint8_t modifier);
 #endif
 static int  usbhost_kbdpoll(int argc, char *argv[]);
 
@@ -298,7 +299,8 @@ static inline void usbhost_toggle_capslock(void);
 /* Helpers for usbhost_connect() */
 
 static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
-              FAR const uint8_t *configdesc, int desclen);
+                                  FAR const uint8_t *configdesc,
+                                  int desclen);
 static inline int usbhost_devinit(FAR struct usbhost_state_s *priv);
 
 /* (Little Endian) Data helpers */
@@ -318,9 +320,9 @@ static int usbhost_crfree(FAR struct usbhost_state_s *priv);
 
 /* struct usbhost_registry_s methods */
 
-static FAR struct usbhost_class_s *usbhost_create(
-              FAR struct usbhost_hubport_s *hport,
-              FAR const struct usbhost_id_s *id);
+static FAR struct usbhost_class_s *
+usbhost_create(FAR struct usbhost_hubport_s *hport,
+               FAR const struct usbhost_id_s *id);
 
 /* struct usbhost_class_s methods */
 
@@ -333,11 +335,11 @@ static int  usbhost_disconnected(FAR struct usbhost_class_s *usbclass);
 static int  usbhost_open(FAR struct file *filep);
 static int  usbhost_close(FAR struct file *filep);
 static ssize_t usbhost_read(FAR struct file *filep,
-              FAR char *buffer, size_t len);
+                            FAR char *buffer, size_t len);
 static ssize_t usbhost_write(FAR struct file *filep,
-              FAR const char *buffer, size_t len);
+                             FAR const char *buffer, size_t len);
 static int  usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
-              bool setup);
+                         bool setup);
 
 /****************************************************************************
  * Private Data
@@ -2832,8 +2834,8 @@ static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (i >= CONFIG_HIDKBD_NPOLLWAITERS)
         {
-          fds->priv    = NULL;
-          ret          = -EBUSY;
+          fds->priv = NULL;
+          ret       = -EBUSY;
           goto errout;
         }
 
@@ -2843,7 +2845,7 @@ static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (priv->headndx != priv->tailndx)
         {
-          poll_notify(priv->fds, CONFIG_HIDKBD_NPOLLWAITERS, POLLIN);
+          poll_notify(&fds, 1, POLLIN);
         }
     }
   else
@@ -2855,8 +2857,8 @@ static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       /* Remove all memory of the poll setup */
 
-      *slot                = NULL;
-      fds->priv            = NULL;
+      *slot     = NULL;
+      fds->priv = NULL;
     }
 
 errout:

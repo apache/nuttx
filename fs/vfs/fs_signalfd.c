@@ -271,7 +271,7 @@ static int signalfd_file_poll(FAR struct file *filep,
   sigandset(&mask, &mask, &dev->sigmask);
   if (!sigisemptyset(&mask))
     {
-      poll_notify(dev->fds, CONFIG_SIGNAL_FD_NPOLLWAITERS, POLLIN);
+      poll_notify(&fds, 1, POLLIN);
     }
 
 out:

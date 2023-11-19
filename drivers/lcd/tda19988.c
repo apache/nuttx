@@ -126,25 +126,26 @@ static int     tda19988_connected(FAR struct tda1988_dev_s *priv);
 /* HDMI Module Helpers */
 
 static int     tda19988_fetch_edid_block(FAR struct tda1988_dev_s *priv,
-                 FAR uint8_t *buf, int block);
+                                         FAR uint8_t *buf, int block);
 static int     tda19988_fetch_edid(struct tda1988_dev_s *priv);
 static ssize_t tda19988_read_internal(FAR struct tda1988_dev_s *priv,
-                 off_t offset, FAR uint8_t *buffer, size_t buflen);
+                                      off_t offset, FAR uint8_t *buffer,
+                                      size_t buflen);
 
 /* Character driver methods */
 
 static int     tda19988_open(FAR struct file *filep);
 static int     tda19988_close(FAR struct file *filep);
 static ssize_t tda19988_read(FAR struct file *filep, FAR char *buffer,
-                 size_t buflen);
+                             size_t buflen);
 static ssize_t tda19988_write(FAR struct file *filep, FAR const char *buffer,
-                 size_t buflen);
+                              size_t buflen);
 static off_t   tda19988_seek(FAR struct file *filep, off_t offset,
-                 int whence);
+                             int whence);
 static int     tda19988_ioctl(FAR struct file *filep, int cmd,
-                 unsigned long arg);
+                              unsigned long arg);
 static int     tda19988_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                 bool setup);
+                             bool setup);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int     tda19988_unlink(FAR struct inode *inode);
 #endif

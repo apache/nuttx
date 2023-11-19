@@ -134,7 +134,7 @@ static int nxmq_file_poll(FAR struct file *filep,
           eventset |= POLLIN;
         }
 
-      nxmq_pollnotify(msgq, eventset);
+      poll_notify(&fds, 1, eventset);
     }
   else if (fds->priv != NULL)
     {

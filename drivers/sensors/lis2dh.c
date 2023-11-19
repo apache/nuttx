@@ -108,38 +108,40 @@ static int            lis2dh_open(FAR struct file *filep);
 static int            lis2dh_close(FAR struct file *filep);
 static ssize_t        lis2dh_read(FAR struct file *, FAR char *, size_t);
 static ssize_t        lis2dh_write(FAR struct file *filep,
-                        FAR const char *buffer, size_t buflen);
+                                   FAR const char *buffer, size_t buflen);
 static int            lis2dh_ioctl(FAR struct file *filep, int cmd,
-                        unsigned long arg);
+                                   unsigned long arg);
 static int            lis2dh_access(FAR struct lis2dh_dev_s *dev,
-                        uint8_t subaddr, FAR uint8_t *buf, int length);
+                                    uint8_t subaddr, FAR uint8_t *buf,
+                                    int length);
 static int            lis2dh_get_reading(FAR struct lis2dh_dev_s *dev,
-                        FAR struct lis2dh_vector_s *res, bool force_read);
+                                         FAR struct lis2dh_vector_s *res,
+                                         bool force_read);
 static int            lis2dh_powerdown(FAR struct lis2dh_dev_s *dev);
 static int            lis2dh_reboot(FAR struct lis2dh_dev_s *dev);
 static int            lis2dh_poll(FAR struct file *filep,
-                        FAR struct pollfd *fds, bool setup);
+                                  FAR struct pollfd *fds, bool setup);
 static int            lis2dh_int_handler(int irq, FAR void *context,
-                        FAR void *arg);
+                                         FAR void *arg);
 static int            lis2dh_setup(FAR struct lis2dh_dev_s *dev,
-                        FAR struct lis2dh_setup *new_setup);
+                                   FAR struct lis2dh_setup *new_setup);
 static inline int16_t lis2dh_raw_to_mg(uint8_t raw_hibyte,
-                        uint8_t raw_lobyte, int scale);
+                                       uint8_t raw_lobyte, int scale);
 static int            lis2dh_read_temp(FAR struct lis2dh_dev_s *dev,
-                        FAR int16_t *temper);
+                                       FAR int16_t *temper);
 static int            lis2dh_clear_interrupts(FAR struct lis2dh_dev_s *priv,
-                        uint8_t interrupts);
+                                              uint8_t interrupts);
 static unsigned int   lis2dh_get_fifo_readings(FAR struct lis2dh_dev_s *priv,
-                        FAR struct lis2dh_result *res,
-                        unsigned int readcount,
-                        FAR int *perr);
+                                               FAR struct lis2dh_result *res,
+                                               unsigned int readcount,
+                                               FAR int *perr);
 #ifdef CONFIG_LIS2DH_DRIVER_SELFTEST
 static int            lis2dh_handle_selftest(FAR struct lis2dh_dev_s *priv);
 static int16_t        lis2dh_raw_convert_to_12bit(uint8_t raw_hibyte,
-                        uint8_t raw_lobyte);
+                                                  uint8_t raw_lobyte);
 static FAR const struct lis2dh_vector_s *
                        lis2dh_get_raw_readings(FAR struct lis2dh_dev_s *dev,
-                        FAR int *err);
+                                               FAR int *err);
 #endif
 
 /****************************************************************************
@@ -713,7 +715,7 @@ static int lis2dh_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (priv->int_pending)
         {
-          poll_notify(priv->fds, CONFIG_LIS2DH_NPOLLWAITERS, POLLIN);
+          poll_notify(&fds, 1, POLLIN);
         }
     }
   else if (fds->priv)
