@@ -40,7 +40,7 @@
 
 static void pm_auto_updatestate_cb(FAR void *arg)
 {
-  int domain = (uintptr_t)arg;
+  int domain = (intptr_t)arg;
   enum pm_state_e newstate;
   irqstate_t flags;
 
@@ -81,12 +81,13 @@ void pm_auto_updatestate(int domain)
       if (up_interrupt_context())
         {
           work_queue(HPWORK, &pdom->update_work,
-                     pm_auto_updatestate_cb, (FAR void *)domain, 0);
+                     pm_auto_updatestate_cb,
+                     (FAR void *)(intptr_t)domain, 0);
         }
       else
 #endif
         {
-          pm_auto_updatestate_cb((FAR void *)domain);
+          pm_auto_updatestate_cb((FAR void *)(intptr_t)domain);
         }
     }
 }
