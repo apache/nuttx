@@ -144,8 +144,6 @@
         sched_note_printf_ip(tag, SCHED_NOTE_IP, fmt, ##__VA_ARGS__)
 #define sched_note_bprintf(tag, fmt, ...) \
         sched_note_bprintf_ip(tag, SCHED_NOTE_IP, fmt, ##__VA_ARGS__)
-#define sched_note_counter(tag, name, value) \
-        sched_note_counter_ip(tag, SCHED_NOTE_IP, name, value)
 
 #define sched_note_begin(tag) \
         sched_note_event(tag, NOTE_DUMP_BEGIN, NULL, 0)
@@ -157,6 +155,17 @@
         sched_note_event(tag, NOTE_DUMP_END, str, strlen(str))
 #define sched_note_mark(tag, str) \
         sched_note_event(tag, NOTE_DUMP_MARK, str, strlen(str))
+
+#define sched_note_counter(tag, name_, value_) \
+        do \
+          { \
+            struct note_counter_s counter; \
+            counter.value = value_; \
+            strlcpy(counter.name, name_, NAME_MAX); \
+            sched_note_event(tag, NOTE_DUMP_COUNTER, \
+                             &counter, sizeof(counter)); \
+          } \
+        while (0)
 
 /****************************************************************************
  * Public Types
@@ -576,16 +585,6 @@ void sched_note_printf_ip(uint32_t tag, uintptr_t ip,
                           FAR const char *fmt, ...) printf_like(3, 4);
 void sched_note_bprintf_ip(uint32_t tag, uintptr_t ip,
                            FAR const char *fmt, ...) printf_like(3, 4);
-
-static inline void sched_note_counter_ip(uint32_t tag, uintptr_t ip,
-                                         FAR const char *name,
-                                         long int value)
-{
-  struct note_counter_s counter;
-  counter.value = value;
-  strlcpy(counter.name, name, sizeof(counter.name));
-  sched_note_event_ip(tag, ip, NOTE_DUMP_COUNTER, &counter, sizeof(counter));
-}
 #else
 #  define sched_note_string_ip(t,ip,b)
 #  define sched_note_event_ip(t,ip,e,b,l)
@@ -593,7 +592,6 @@ static inline void sched_note_counter_ip(uint32_t tag, uintptr_t ip,
 #  define sched_note_vbprintf_ip(t,ip,f,v)
 #  define sched_note_printf_ip(t,ip,f,...)
 #  define sched_note_bprintf_ip(t,ip,f,...)
-#  define sched_note_counter_ip(t,ip,n,v)
 #endif /* CONFIG_SCHED_INSTRUMENTATION_DUMP */
 
 #if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
