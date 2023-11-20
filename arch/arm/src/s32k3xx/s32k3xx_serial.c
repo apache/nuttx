@@ -1342,6 +1342,10 @@ struct s32k3xx_uart_s
   DMACH_HANDLE       rxdma;         /* currently-open receive DMA stream */
   bool               rxenable;      /* DMA-based reception en/disable */
   uint32_t           rxdmanext;     /* Next byte in the DMA buffer to be read */
+#ifdef CONFIG_ARMV7M_DCACHE
+  uint32_t           rxdmaavail;    /* Number of bytes available without need to
+                                     * to invalidate the data cache */
+#endif
   char *const        rxfifo;        /* Receive DMA buffer */
 #endif
 };
@@ -2965,6 +2969,9 @@ static int s32k3xx_dma_setup(struct uart_dev_s *dev)
        */
 
       priv->rxdmanext = 0;
+#ifdef CONFIG_ARMV7M_DCACHE
+      priv->rxdmaavail = 0;
+#endif
 
       /* Enable receive Rx DMA for the UART */
 
@@ -3781,7 +3788,6 @@ static bool s32k3xx_rxflowcontrol(struct uart_dev_s *dev,
 static int s32k3xx_dma_receive(struct uart_dev_s *dev, unsigned int *status)
 {
   struct s32k3xx_uart_s *priv = (struct s32k3xx_uart_s *)dev;
-  static uint32_t last_nextrx = -1;
   uint32_t nextrx             = s32k3xx_dma_nextrx(priv);
   int c                       = 0;
 
@@ -3789,16 +3795,48 @@ static int s32k3xx_dma_receive(struct uart_dev_s *dev, unsigned int *status)
 
   if (nextrx != priv->rxdmanext)
     {
-      /* Now we must ensure the cache is updated if the DMA has
-       * updated again.
+#ifdef CONFIG_ARMV7M_DCACHE
+      /* If the data cache is enabled, then we will also need to manage
+       * cache coherency.  Are any bytes available in the currently coherent
+       * region of the data cache?
        */
 
-      if (last_nextrx != nextrx)
+      if (priv->rxdmaavail == 0)
         {
-          up_invalidate_dcache((uintptr_t)priv->rxfifo,
-                               (uintptr_t)priv->rxfifo + RXDMA_BUFFER_SIZE);
-          last_nextrx = nextrx;
+          uint32_t rxdmaavail;
+          uintptr_t addr;
+
+          /* No.. then we will have to invalidate additional space in the Rx
+           * DMA buffer.
+           */
+
+          if (nextrx > priv->rxdmanext)
+            {
+              /* Number of available bytes */
+
+              rxdmaavail = nextrx - priv->rxdmanext;
+            }
+          else
+            {
+              /* Number of available bytes up to the end of RXDMA buffer */
+
+              rxdmaavail = RXDMA_BUFFER_SIZE - priv->rxdmanext;
+            }
+
+          /* Invalidate the DMA buffer range */
+
+          addr = (uintptr_t)&priv->rxfifo[priv->rxdmanext];
+          up_invalidate_dcache(addr, addr + rxdmaavail);
+
+          /* We don't need to invalidate the data cache for the next
+           * rxdmaavail number of next bytes.
+           */
+
+          priv->rxdmaavail = rxdmaavail;
         }
+
+      priv->rxdmaavail--;
+#endif
 
       /* Now read from the DMA buffer */
 
@@ -3864,6 +3902,9 @@ static void s32k3xx_dma_reenable(struct s32k3xx_uart_s *priv)
    */
 
   priv->rxdmanext = 0;
+#ifdef CONFIG_ARMV7M_DCACHE
+  priv->rxdmaavail = 0;
+#endif
 
   /* Start the DMA channel, and arrange for callbacks at the half and
    * full points in the FIFO.  This ensures that we have half a FIFO
