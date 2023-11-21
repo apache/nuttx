@@ -1009,6 +1009,19 @@ FAR struct fb_vtable_s *up_fbgetvplane(int display, int vplane);
 void up_fbuninitialize(int display);
 
 /****************************************************************************
+ * Name: fb_notify_vsync
+ * Description:
+ *   notify that the vsync comes.
+ *
+ * Input Parameters:
+ *   vtable  - Pointer to framebuffer's virtual table.
+ *   overlay - Overlay index.
+ *
+ ****************************************************************************/
+
+void fb_notify_vsync(FAR struct fb_vtable_s *vtable, int overlay);
+
+/****************************************************************************
  * Name: fb_peek_paninfo
  * Description:
  *   Peek a frame from pan info queue of the specified overlay.

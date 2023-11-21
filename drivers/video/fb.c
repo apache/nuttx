@@ -1223,17 +1223,14 @@ static int fb_get_planeinfo(FAR struct fb_chardev_s *fb,
 }
 
 /****************************************************************************
- * Name: fb_do_pollnotify
+ * Name: fb_notify_paninfo
  ****************************************************************************/
 
-static void fb_do_pollnotify(wdparm_t arg)
+static void fb_notify_paninfo(FAR struct fb_paninfo_s *paninfo,
+                              pollevent_t events, int overlay)
 {
-  FAR struct fb_paninfo_s *paninfo = (FAR struct fb_paninfo_s *)arg;
   FAR struct fb_priv_s * priv;
   irqstate_t flags;
-  int overlay;
-
-  overlay = paninfo - paninfo->dev->paninfo - 1;
 
   flags = enter_critical_section();
   for (priv = paninfo->dev->head; priv; priv = priv->flink)
@@ -1245,10 +1242,24 @@ static void fb_do_pollnotify(wdparm_t arg)
 
       /* Notify framebuffer is writable. */
 
-      poll_notify(priv->fds, CONFIG_VIDEO_FB_NPOLLWAITERS, POLLOUT);
+      poll_notify(priv->fds, CONFIG_VIDEO_FB_NPOLLWAITERS, events);
     }
 
   leave_critical_section(flags);
+}
+
+/****************************************************************************
+ * Name: fb_do_pollnotify
+ ****************************************************************************/
+
+static void fb_do_pollnotify(wdparm_t arg)
+{
+  FAR struct fb_paninfo_s *paninfo = (FAR struct fb_paninfo_s *)arg;
+  int overlay;
+
+  overlay = paninfo - paninfo->dev->paninfo - 1;
+
+  fb_notify_paninfo(paninfo, POLLOUT, overlay);
 }
 
 #ifdef CONFIG_FB_SYNC
@@ -1354,6 +1365,30 @@ static void fb_pollnotify(FAR struct fb_chardev_s *fb, int overlay)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: fb_notify_vsync
+ * Description:
+ *   notify that the vsync comes.
+ *
+ * Input Parameters:
+ *   vtable  - Pointer to framebuffer's virtual table.
+ *   overlay - Overlay index.
+ *
+ ****************************************************************************/
+
+void fb_notify_vsync(FAR struct fb_vtable_s *vtable, int overlay)
+{
+  FAR struct fb_chardev_s *fb;
+  FAR struct fb_paninfo_s *paninfo;
+
+  fb = vtable->priv;
+  if (fb != NULL)
+    {
+      paninfo = &fb->paninfo[overlay + 1];
+      fb_notify_paninfo(paninfo, POLLPRI, overlay);
+    }
+}
 
 /****************************************************************************
  * Name: fb_peek_paninfo
