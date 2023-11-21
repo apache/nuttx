@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/tls/tls_getinfo.c
+ * sched/sched/sched_get_tls.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,51 +24,32 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <assert.h>
-
-#include <nuttx/tls.h>
-
-#if !defined(up_tls_info) && (defined(__KERNEL__) || !defined(CONFIG_TLS_ALIGNED))
+#include "nuttx/sched.h"
+#include "sched/sched.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tls_get_info
+ * Name: nxsched_get_tls
  *
  * Description:
- *   Return a reference to the tls_info_s structure.  This is used as part
- *   of the internal implementation of tls_get/set_elem() and ONLY for the
- *   where CONFIG_TLS_ALIGNED is *not* defined or __KERNEL__ is defined.
+ *   Get TLS of any task / tcb with no security checks.
  *
  * Input Parameters:
- *   None.
+ *   tcb - The tcb to query.
  *
  * Returned Value:
- *   A reference to the thread-specific tls_info_s structure is return on
- *   success.  NULL would be returned in the event of any failure.
+ *   Pointer to the TLS structure.
  *
  ****************************************************************************/
 
-FAR struct tls_info_s *tls_get_info(void)
+FAR struct tls_info_s *nxsched_get_tls(FAR struct tcb_s *tcb)
 {
-  FAR struct tls_info_s *info = NULL;
-  struct stackinfo_s stackinfo;
-  int ret;
+  /* The TLS data lies at the lowest address of the stack allocation.
+   * This is true for both push-up and push-down stacks.
+   */
 
-  ret = nxsched_get_stackinfo(0, &stackinfo);
-  if (ret >= 0)
-    {
-      /* The TLS data lies at the lowest address of the stack allocation.
-       * This is true for both push-up and push-down stacks.
-       */
-
-      info = (FAR struct tls_info_s *)stackinfo.stack_alloc_ptr;
-    }
-
-  return info;
+  return (FAR struct tls_info_s *)tcb->stack_alloc_ptr;
 }
-
-#endif /* !defined(up_tls_info) && (defined(__KERNEL__) || !defined(CONFIG_TLS_ALIGNED)) */
