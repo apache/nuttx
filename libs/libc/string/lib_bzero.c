@@ -36,5 +36,21 @@
 
 void bzero(FAR void *s, size_t n)
 {
+#ifdef CONFIG_HOST_MACOS
+
+  /* When macos compiles bzero, it thinks it is equivalent to
+   * meset(s, 0, n), so recursion occurs.
+   */
+
+  FAR char *dst = s;
+  size_t i;
+
+  for (i = 0; i < n; i++)
+    {
+      dst[i] = 0;
+    }
+
+#else
   memset(s, 0, n);
+#endif
 }
