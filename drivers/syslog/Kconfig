@@ -11,6 +11,10 @@ config ARCH_SYSLOG
 	bool
 	default n
 
+config SYSLOG_DEFAULT_MASK
+	hex "syslog mask default value"
+	default 0xff
+
 comment "SYSLOG options"
 
 config SYSLOG_MAX_CHANNELS
