@@ -33,24 +33,32 @@ config DEV_RPMSG_SERVER
 	depends on RPTUN
 
 choice
-	prompt "Select optee dev implementation"
+	prompt "Select OP-TEE dev implementation"
 	default DEV_OPTEE_NONE
+	---help---
+		There are two implementations of optee server,
+		one is soft tee server which does not distinguish
+		between secure and non-secure states and uses socket communication,
+		and the other is teeos which runs in the secure state of
+		the cpu and uses rpmsg cross-core communication.
 
 config DEV_OPTEE_LOCAL
 	bool "OPTEE Local Socket Support"
 	depends on NET_LOCAL
+	depends on ALLOW_BSD_COMPONENTS
 
 config DEV_OPTEE_RPMSG
-	bool "OPTEE RPMSG Socket Support"
+	bool "OP-TEE RPMSG Socket Support"
 	depends on NET_RPMSG
+	depends on ALLOW_BSD_COMPONENTS
 
 config DEV_OPTEE_NONE
-	bool "Disable optee driver"
+	bool "Disable OP-TEE driver"
 
 endchoice
 
 config OPTEE_REMOTE_CPU_NAME
-	string "The cpuname on which the optee server runs"
+	string "The cpuname on which the OP-TEE server runs"
 	default "tee"
 	depends on DEV_OPTEE_RPMSG
 
