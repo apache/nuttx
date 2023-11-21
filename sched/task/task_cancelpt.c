@@ -88,7 +88,7 @@
 
 bool nxnotify_cancellation(FAR struct tcb_s *tcb)
 {
-  FAR struct tls_info_s *tls = tls_get_info_pid(tcb->pid);
+  FAR struct tls_info_s *tls = nxsched_get_tls(tcb);
   irqstate_t flags;
   bool ret = false;
 

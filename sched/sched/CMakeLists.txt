@@ -43,6 +43,7 @@ set(SRCS
     sched_idletask.c
     sched_self.c
     sched_get_stackinfo.c
+    sched_get_tls.c
     sched_sysinfo.c
     sched_reprioritizertr.c
     sched_get_stateinfo.c)
