@@ -412,6 +412,20 @@ void imxrt_dmach_stop(DMACH_HANDLE handle);
 unsigned int imxrt_dmach_getcount(DMACH_HANDLE handle);
 
 /****************************************************************************
+ * Name: imxrt_dmach_idle
+ *
+ * Description:
+ *   This function checks if the dma is idle
+ *
+ * Returned Value:
+ *   0  - if idle
+ *   !0 - not
+ *
+ ****************************************************************************/
+
+unsigned int imxrt_dmach_idle(DMACH_HANDLE handle);
+
+/****************************************************************************
  * Name: imxrt_dmasample
  *
  * Description:
