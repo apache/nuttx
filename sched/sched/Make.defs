@@ -27,7 +27,7 @@ CSRCS += sched_setparam.c sched_setpriority.c sched_getparam.c
 CSRCS += sched_setscheduler.c sched_getscheduler.c
 CSRCS += sched_yield.c sched_rrgetinterval.c sched_foreach.c
 CSRCS += sched_lock.c sched_unlock.c sched_lockcount.c
-CSRCS += sched_idletask.c sched_self.c sched_get_stackinfo.c
+CSRCS += sched_idletask.c sched_self.c sched_get_stackinfo.c sched_get_tls.c
 CSRCS += sched_sysinfo.c sched_reprioritizertr.c sched_get_stateinfo.c
 
 ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)

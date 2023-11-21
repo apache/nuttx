@@ -316,27 +316,8 @@ uintptr_t task_tls_get_value(int tlsindex);
 #elif defined(CONFIG_TLS_ALIGNED) && !defined(__KERNEL__)
 #  define tls_get_info() TLS_INFO(up_getsp())
 #else
-#  define tls_get_info() tls_get_info_pid(0)
+FAR struct tls_info_s *tls_get_info(void);
 #endif
-
-/****************************************************************************
- * Name: tls_get_info_pid
- *
- * Description:
- *   Return a reference to the tls_info_s structure.  This is used as part
- *   of the internal implementation of tls_get/set_elem() and ONLY for the
- *   where CONFIG_TLS_ALIGNED is *not* defined or __KERNEL__ is defined.
- *
- * Input Parameters:
- *   pid - Thread ID to query, set to 0 to query own
- *
- * Returned Value:
- *   A reference to the thread-specific tls_info_s structure is return on
- *   success.  NULL would be returned in the event of any failure.
- *
- ****************************************************************************/
-
-FAR struct tls_info_s *tls_get_info_pid(pid_t pid);
 
 /****************************************************************************
  * Name: tls_destruct
