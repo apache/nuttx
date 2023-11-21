@@ -73,8 +73,7 @@ static uint32_t g_connected_harts_c;
  * Description:
  *   This is a copy of modifyreg32() without spinlock.  That function is a
  *   real danger here as it is likely located in eNVM, thus being a real
- *   bottleneck.  All functions called from this file should be located in
- *   the zero device.
+ *   bottleneck.
  *
  * Input Parameters:
  *   addr       - Address to perform the operation
@@ -219,8 +218,6 @@ static uint32_t mpfs_ihc_sbi_context_to_remote_hart_id(ihc_channel_t channel)
       hart_idx++;
     }
 
-  DEBUGASSERT(hart != UNDEFINED_HART_ID);
-
   return hart;
 }
 
@@ -244,8 +241,6 @@ static uint32_t mpfs_ihc_sbi_context_to_local_hart_id(ihc_channel_t channel)
   uint32_t hart_idx         = 0;
   uint32_t harts_in_context = LIBERO_SETTING_CONTEXT_A_HART_EN;
   uint32_t hart_next        = 0;
-
-  DEBUGASSERT(channel > IHC_CHANNEL_TO_HART4);
 
   hart_idx = 0;
   while (hart_idx < MPFS_NUM_HARTS)
@@ -272,7 +267,6 @@ static uint32_t mpfs_ihc_sbi_context_to_local_hart_id(ihc_channel_t channel)
       hart_idx++;
     }
 
-  DEBUGASSERT(hart < MPFS_NUM_HARTS);
   return hart;
 }
 
@@ -304,8 +298,7 @@ static void mpfs_ihc_sbi_message_present_handler(uint32_t *message,
                                                  bool is_mp)
 {
   struct ihc_sbi_rx_msg_s *msg;
-  uintptr_t message_ihc     = (uintptr_t)MPFS_IHC_MSG_IN(mhartid, rhartid);
-  uint32_t message_size_ihc = getreg32(MPFS_IHC_MSG_SIZE(mhartid, rhartid));
+  uintptr_t message_ihc = (uintptr_t)MPFS_IHC_MSG_IN(mhartid, rhartid);
 
   msg = (struct ihc_sbi_rx_msg_s *)message;
 
@@ -325,8 +318,6 @@ static void mpfs_ihc_sbi_message_present_handler(uint32_t *message,
       msg->irq_type = ACK_IRQ | MP_IRQ;
       msg->ihc_msg = *(struct mpfs_ihc_msg_s *)message_ihc;
     }
-
-    DEBUGASSERT(sizeof(msg->ihc_msg) >= message_size_ihc);
 }
 
 /****************************************************************************
@@ -351,17 +342,23 @@ static void mpfs_ihc_sbi_message_present_handler(uint32_t *message,
 static void mpfs_ihc_sbi_rx_message(uint32_t rhartid, uint32_t mhartid,
                                     bool is_ack, bool is_mp, uint32_t *msg)
 {
+  /* Msg must be always present */
+
+  if (msg == NULL)
+    {
+      return;
+    }
+
   if (is_ack && !is_mp)
     {
       if (mhartid == CONTEXTB_HARTID)
         {
-          DEBUGPANIC();
+          return;
         }
       else
         {
           /* This path is meant for the OpenSBI vendor extension only */
 
-          DEBUGASSERT(msg != NULL);
           mpfs_ihc_sbi_message_present_handler(msg, mhartid, rhartid,
                                                is_ack, is_mp);
 
@@ -376,13 +373,12 @@ static void mpfs_ihc_sbi_rx_message(uint32_t rhartid, uint32_t mhartid,
 
       if (mhartid == CONTEXTB_HARTID)
         {
-          DEBUGPANIC();
+          return;
         }
       else
         {
           /* This path is meant for the OpenSBI vendor extension only */
 
-          DEBUGASSERT(msg != NULL);
           mpfs_ihc_sbi_message_present_handler(msg, mhartid, rhartid,
                                                is_ack, is_mp);
         }
@@ -395,7 +391,6 @@ static void mpfs_ihc_sbi_rx_message(uint32_t rhartid, uint32_t mhartid,
     }
   else if (is_ack && is_mp)
     {
-      DEBUGASSERT(msg != NULL);
       mpfs_ihc_sbi_message_present_handler(msg, mhartid, rhartid,
                                            is_ack, is_mp);
 
@@ -432,7 +427,8 @@ void mpfs_ihc_sbi_message_present_indirect_isr(ihc_channel_t channel,
   uint32_t origin_hart = mpfs_ihc_sbi_parse_incoming_hartid(mhartid,
                                                             &is_ack,
                                                             &is_mp);
-  if (origin_hart != UNDEFINED_HART_ID)
+
+  if ((origin_hart != UNDEFINED_HART_ID) && (mhartid < MPFS_NUM_HARTS))
     {
       /* Process incoming packet */
 
@@ -460,8 +456,6 @@ void mpfs_ihc_sbi_message_present_indirect_isr(ihc_channel_t channel,
 static void mpfs_ihc_sbi_local_context_init(uint32_t hart_to_configure)
 {
   uint32_t rhartid = 0;
-
-  DEBUGASSERT(hart_to_configure < MPFS_NUM_HARTS);
 
   while (rhartid < MPFS_NUM_HARTS)
     {
@@ -552,7 +546,18 @@ static int mpfs_ihc_sbi_tx_message(ihc_channel_t channel, uint32_t *message)
   uint32_t ctrl_reg;
   uint32_t retries      = 10000;
 
-  DEBUGASSERT(message_size <= IHC_MAX_MESSAGE_SIZE);
+  if (message_size > IHC_MAX_MESSAGE_SIZE)
+    {
+      return -EINVAL;
+    }
+  else if (rhartid == UNDEFINED_HART_ID)
+    {
+      return -EINVAL;
+    }
+  else if (mhartid >= MPFS_NUM_HARTS)
+    {
+      return -EINVAL;
+    }
 
   /* Check if the system is busy.  All we can try is wait. */
 
@@ -644,7 +649,19 @@ int mpfs_ihc_sbi_ecall_handler(unsigned long funcid, uint32_t remote_channel,
         /* mhartid = Linux hart id, rhartid = NuttX hart id */
 
         mhartid = mpfs_ihc_sbi_context_to_local_hart_id(remote_channel);
+
+        if (mhartid >= MPFS_NUM_HARTS)
+          {
+            return -EINVAL;
+          }
+
         rhartid = mpfs_ihc_sbi_context_to_remote_hart_id(remote_channel);
+
+        if (rhartid == UNDEFINED_HART_ID)
+          {
+            return -EINVAL;
+          }
+
         if (remote_channel == IHC_CHANNEL_TO_CONTEXTB)
           {
             mpfs_ihc_sbi_local_context_init(mhartid);
