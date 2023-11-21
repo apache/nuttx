@@ -3280,7 +3280,7 @@ static int video_poll(FAR struct file *filep, struct pollfd *fds, bool setup)
           fds->priv     = &type_inf->fds;
           if (!video_framebuff_is_empty(&type_inf->bufinf))
             {
-              poll_notify(&type_inf->fds, 1, POLLIN);
+              poll_notify(&fds, 1, POLLIN);
             }
         }
       else

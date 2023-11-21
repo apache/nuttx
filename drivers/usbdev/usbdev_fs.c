@@ -856,7 +856,7 @@ static int usbdev_fs_poll(FAR struct file *filep, FAR struct pollfd *fds,
         }
     }
 
-  poll_notify(fs_ep->fds, CONFIG_USBDEV_FS_NPOLLWAITERS, eventset);
+  poll_notify(&fds, 1, eventset);
 
 exit_leave_critical:
   leave_critical_section(flags);

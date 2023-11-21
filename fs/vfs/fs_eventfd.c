@@ -78,7 +78,7 @@ static ssize_t eventfd_do_write(FAR struct file *filep,
                                 FAR const char *buffer, size_t len);
 #ifdef CONFIG_EVENT_FD_POLL
 static int eventfd_do_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                       bool setup);
+                           bool setup);
 #endif
 
 static int eventfd_blocking_io(FAR struct eventfd_priv_s *dev,
@@ -489,7 +489,7 @@ static int eventfd_do_poll(FAR struct file *filep, FAR struct pollfd *fds,
       eventset |= POLLIN;
     }
 
-  poll_notify(dev->fds, CONFIG_EVENT_FD_NPOLLWAITERS, eventset);
+  poll_notify(&fds, 1, eventset);
 
 out:
   nxmutex_unlock(&dev->lock);

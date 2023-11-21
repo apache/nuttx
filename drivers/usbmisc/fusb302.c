@@ -456,6 +456,7 @@ void           enableccmeas(FAR struct fusb302_dev_s *priv,
 void           set_switches(FAR struct fusb302_dev_s *priv,
                             uint8_t toggsval);
 static int     set_int_mask(struct fusb302_dev_s *priv);
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/

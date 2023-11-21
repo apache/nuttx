@@ -26,6 +26,14 @@ ifeq ($(CONFIG_MOTOR_FOC_DUMMY),y)
 CSRCS += foc_dummy.c
 endif
 
+ifeq ($(CONFIG_MOTOR_FOC_FOCPWR),y)
+CSRCS += foc_pwr.c
+endif
+
+ifeq ($(CONFIG_MOTOR_FOC_DRV8301),y)
+CSRCS += drv8301.c
+endif
+
 # Include FOC driver build support
 
 DEPPATH += --dep-path motor$(DELIM)foc

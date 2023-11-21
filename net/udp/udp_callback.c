@@ -28,6 +28,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <debug.h>
+#include <sys/time.h>
 
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
@@ -153,10 +154,25 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev,
 #endif /* CONFIG_NET_IPv4 */
 
   /* Copy the meta info into the I/O buffer chain, just before data.
-   * Layout: |datalen|ifindex|src_addr_size|src_addr|data|
+   * Layout: |datalen|ifindex|src_addr_size|src_addr|[timestamp]|data|
    */
 
   offset = (dev->d_appdata - iob->io_data) - iob->io_offset;
+
+#ifdef CONFIG_NET_TIMESTAMP
+  /* Store timestamp while packet is being queued.
+   * This is done unconditionally to avoid race condition when SO_TIMESTAMP
+   * gets enabled after packet is received but before it is read.
+   */
+
+  offset -= sizeof(struct timespec);
+  ret = iob_trycopyin(iob, (FAR const uint8_t *)&dev->d_rxtime,
+                      sizeof(struct timespec), offset, true);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+#endif
 
   offset -= src_addr_size;
   ret = iob_trycopyin(iob, src_addr, src_addr_size, offset, true);

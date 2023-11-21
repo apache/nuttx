@@ -51,25 +51,31 @@ static int        local_setup(FAR struct socket *psock);
 static sockcaps_t local_sockcaps(FAR struct socket *psock);
 static void       local_sockaddref(FAR struct socket *psock);
 static int        local_bind(FAR struct socket *psock,
-                    FAR const struct sockaddr *addr, socklen_t addrlen);
+                             FAR const struct sockaddr *addr,
+                             socklen_t addrlen);
 static int        local_getsockname(FAR struct socket *psock,
-                    FAR struct sockaddr *addr, FAR socklen_t *addrlen);
+                                    FAR struct sockaddr *addr,
+                                    FAR socklen_t *addrlen);
 static int        local_getpeername(FAR struct socket *psock,
-                    FAR struct sockaddr *addr, FAR socklen_t *addrlen);
+                                    FAR struct sockaddr *addr,
+                                    FAR socklen_t *addrlen);
 static int        local_connect(FAR struct socket *psock,
-                    FAR const struct sockaddr *addr, socklen_t addrlen);
+                                FAR const struct sockaddr *addr,
+                                socklen_t addrlen);
 static int        local_poll(FAR struct socket *psock,
-                    FAR struct pollfd *fds, bool setup);
+                             FAR struct pollfd *fds, bool setup);
 static int        local_close(FAR struct socket *psock);
 static int        local_ioctl(FAR struct socket *psock,
-                    int cmd, unsigned long arg);
+                              int cmd, unsigned long arg);
 static int        local_socketpair(FAR struct socket *psocks[2]);
 static int        local_shutdown(FAR struct socket *psock, int how);
 #ifdef CONFIG_NET_SOCKOPTS
 static int        local_getsockopt(FAR struct socket *psock, int level,
-                    int option, FAR void *value, FAR socklen_t *value_len);
+                                   int option, FAR void *value,
+                                   FAR socklen_t *value_len);
 static int        local_setsockopt(FAR struct socket *psock, int level,
-                    int option, FAR const void *value, socklen_t value_len);
+                                   int option, FAR const void *value,
+                                   socklen_t value_len);
 #endif
 
 /****************************************************************************

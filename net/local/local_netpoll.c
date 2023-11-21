@@ -87,7 +87,7 @@ static int local_event_pollsetup(FAR struct local_conn_s *conn,
           eventset |= POLLIN;
         }
 
-      local_event_pollnotify(conn, eventset);
+      poll_notify(&fds, 1, eventset);
     }
   else
     {

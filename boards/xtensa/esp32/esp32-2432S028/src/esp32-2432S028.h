@@ -37,6 +37,19 @@
 
 #define BUTTON_BOOT  0
 
+/* LED
+ *
+ * This is the external RGB LED.
+ */
+
+#define GPIO_LED_RED             17
+#define GPIO_LED_GREEN           4
+#define GPIO_LED_BLUE            16
+
+/* PCNT Quadrature Encoder IDs */
+
+#define PCNT_QE0_ID           0
+
 /* TIMERS */
 
 #define TIMER0 0

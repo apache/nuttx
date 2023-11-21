@@ -572,8 +572,8 @@ static int cdcwdm_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (i >= CONFIG_USBHOST_CDCMBIM_NPOLLWAITERS)
         {
-          fds->priv    = NULL;
-          ret          = -EBUSY;
+          fds->priv = NULL;
+          ret       = -EBUSY;
           goto errout;
         }
 
@@ -583,8 +583,7 @@ static int cdcwdm_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (priv->comm_rxlen > 0)
         {
-          poll_notify(priv->fds, CONFIG_USBHOST_CDCMBIM_NPOLLWAITERS,
-                      POLLIN);
+          poll_notify(&fds, 1, POLLIN);
         }
     }
   else

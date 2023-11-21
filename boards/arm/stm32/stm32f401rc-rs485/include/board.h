@@ -387,16 +387,20 @@ extern "C"
 #define LED_PANIC        1
 
 /* Buttons
- *
- *   B1 USER:
- *   the user button is connected to the I/O PC13 (pin 2) of the STM32
- *   microcontroller.
+ *   The STM32F401RC-RS485 has 4 user buttons: SW3, SW4, SW5 and
+ *   SW6. They are connected to PB13, PB14, PB15 and PC6 respectively.
  */
 
-#define BUTTON_USER        0
-#define NUM_BUTTONS        1
+#define BUTTON_SW3         0
+#define BUTTON_SW4         1
+#define BUTTON_SW5         2
+#define BUTTON_SW6         3
+#define NUM_BUTTONS        4
 
-#define BUTTON_USER_BIT    (1 << BUTTON_USER)
+#define BUTTON_SW3_BIT     (1 << BUTTON_SW3)
+#define BUTTON_SW4_BIT     (1 << BUTTON_SW4)
+#define BUTTON_SW5_BIT     (1 << BUTTON_SW5)
+#define BUTTON_SW6_BIT     (1 << BUTTON_SW6)
 
 #define GPIO_TIM2_CH1IN (GPIO_TIM2_CH1IN_1 | GPIO_PULLUP)
 #define GPIO_TIM2_CH2IN (GPIO_TIM2_CH2IN_1 | GPIO_PULLUP)

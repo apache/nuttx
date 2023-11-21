@@ -109,15 +109,15 @@ struct stm32_bbsram_s
 static int     stm32_bbsram_open(struct file *filep);
 static int     stm32_bbsram_close(struct file *filep);
 static off_t   stm32_bbsram_seek(struct file *filep, off_t offset,
-                 int whence);
+                                 int whence);
 static ssize_t stm32_bbsram_read(struct file *filep, char *buffer,
-                 size_t len);
+                                 size_t len);
 static ssize_t stm32_bbsram_write(struct file *filep,
-                 const char *buffer, size_t len);
+                                  const char *buffer, size_t len);
 static int stm32_bbsram_ioctl(struct file *filep, int cmd,
-                 unsigned long arg);
+                              unsigned long arg);
 static int     stm32_bbsram_poll(struct file *filep,
-                 struct pollfd *fds, bool setup);
+                                 struct pollfd *fds, bool setup);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int     stm32_bbsram_unlink(struct inode *inode);
 #endif

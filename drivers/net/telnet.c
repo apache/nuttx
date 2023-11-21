@@ -159,13 +159,13 @@ static void    telnet_sendopt(FAR struct telnet_dev_s *priv, uint8_t option,
 static int     telnet_open(FAR struct file *filep);
 static int     telnet_close(FAR struct file *filep);
 static ssize_t telnet_read(FAR struct file *filep, FAR char *buffer,
-                 size_t len);
+                           size_t len);
 static ssize_t telnet_write(FAR struct file *filep, FAR const char *buffer,
-                 size_t len);
+                            size_t len);
 static int     telnet_ioctl(FAR struct file *filep, int cmd,
-                 unsigned long arg);
+                            unsigned long arg);
 static int     telnet_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                 bool setup);
+                           bool setup);
 
 /* Telnet session creation */
 
