@@ -630,7 +630,7 @@ static int netdev_wifr_ioctl(FAR struct socket *psock, int cmd,
       dev = netdev_findbyname(req->ifr_name);
       if (cmd == SIOCGIWNAME)
         {
-          if (dev == NULL)
+          if (dev == NULL || dev->d_lltype != NET_LL_IEEE80211)
             {
               ret = -ENODEV;
             }
