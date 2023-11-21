@@ -426,6 +426,7 @@ void sim_x11loop(void)
   if (now - last >= MSEC2TICK(16))
     {
       last = now;
+      fb_notify_vsync(&g_fbobject, FB_NO_OVERLAY);
       if (fb_paninfo_count(&g_fbobject, FB_NO_OVERLAY) > 1)
         {
           fb_remove_paninfo(&g_fbobject, FB_NO_OVERLAY);
@@ -463,7 +464,8 @@ int up_fbinitialize(int display)
 
 #ifdef CONFIG_SIM_X11FB
   g_planeinfo.xres_virtual = CONFIG_SIM_FBWIDTH;
-  g_planeinfo.yres_virtual = CONFIG_SIM_FBHEIGHT * CONFIG_SIM_FRAMEBUFFER_COUNT;
+  g_planeinfo.yres_virtual = CONFIG_SIM_FBHEIGHT *
+                             CONFIG_SIM_FRAMEBUFFER_COUNT;
   ret = sim_x11initialize(CONFIG_SIM_FBWIDTH, CONFIG_SIM_FBHEIGHT,
                           &g_planeinfo.fbmem, &g_planeinfo.fblen,
                           &g_planeinfo.bpp, &g_planeinfo.stride,
