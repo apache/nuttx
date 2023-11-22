@@ -507,6 +507,9 @@ int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist,
 
           if (actions != NULL)
             {
+#ifdef CONFIG_FDCHECK
+              fd = fdcheck_protect(fd);
+#endif
               if (!spawn_file_is_duplicateable(actions, fd, fcloexec))
                 {
                   continue;
