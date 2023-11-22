@@ -631,13 +631,14 @@ static int start_capture(FAR video_mng_t *vmng,
   convert_to_imgsensorfmt(&fmt[VIDEO_FMT_SUB], &sf[IMGSENSOR_FMT_SUB]);
   convert_to_imgsensorinterval(interval, &si);
 
+  IMGDATA_SET_BUF(vmng->imgdata,
+     nr_fmt, df, (FAR uint8_t *)bufaddr, bufsize);
+  IMGDATA_START_CAPTURE(vmng->imgdata,
+     nr_fmt, df, &di, video_complete_capture, vmng);
   IMGSENSOR_START_CAPTURE(vmng->imgsensor,
      type == V4L2_BUF_TYPE_VIDEO_CAPTURE ?
      IMGSENSOR_STREAM_TYPE_VIDEO : IMGSENSOR_STREAM_TYPE_STILL,
      nr_fmt, sf, &si);
-  IMGDATA_START_CAPTURE(vmng->imgdata,
-     nr_fmt, df, &di, video_complete_capture, vmng);
-  IMGDATA_SET_BUF(vmng->imgdata, (FAR uint8_t *)bufaddr, bufsize);
   return OK;
 }
 
@@ -3311,6 +3312,8 @@ static int video_complete_capture(uint8_t err_code, uint32_t datasize,
   FAR vbuf_container_t *container = NULL;
   enum v4l2_buf_type buf_type;
   irqstate_t           flags;
+  imgdata_format_t df[MAX_VIDEO_FMT];
+  video_format_t c_fmt[MAX_VIDEO_FMT];
 
   flags = enter_critical_section();
 
@@ -3385,7 +3388,18 @@ static int video_complete_capture(uint8_t err_code, uint32_t datasize,
         }
       else
         {
+          get_clipped_format(type_inf->nr_fmt,
+                             type_inf->fmt,
+                             &type_inf->clip,
+                             c_fmt);
+
+          convert_to_imgdatafmt(&c_fmt[VIDEO_FMT_MAIN],
+                                &df[IMGDATA_FMT_MAIN]);
+          convert_to_imgdatafmt(&c_fmt[VIDEO_FMT_SUB], &df[IMGDATA_FMT_SUB]);
+
           IMGDATA_SET_BUF(vmng->imgdata,
+            type_inf->nr_fmt,
+            df,
             (FAR uint8_t *)container->buf.m.userptr,
             container->buf.length);
           container->buf.sequence = type_inf->seqnum++;
