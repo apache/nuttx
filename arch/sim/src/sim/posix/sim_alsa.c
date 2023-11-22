@@ -309,6 +309,7 @@ static int sim_audio_getcaps(struct audio_lowerhalf_s *dev, int type,
                              struct audio_caps_s *caps)
 {
   struct sim_audio_s *priv = (struct sim_audio_s *)dev;
+  uint16_t *ptr;
   long val;
 
   caps->ac_format.hw  = 0;
@@ -369,14 +370,16 @@ static int sim_audio_getcaps(struct audio_lowerhalf_s *dev, int type,
 
               /* Report the Sample rates we support */
 
-              caps->ac_controls.b[0] = AUDIO_SAMP_RATE_8K |
-                                       AUDIO_SAMP_RATE_11K |
-                                       AUDIO_SAMP_RATE_16K |
-                                       AUDIO_SAMP_RATE_22K |
-                                       AUDIO_SAMP_RATE_24K |
-                                       AUDIO_SAMP_RATE_32K |
-                                       AUDIO_SAMP_RATE_44K |
-                                       AUDIO_SAMP_RATE_48K;
+              ptr  = (uint16_t *)caps->ac_controls.b;
+              *ptr = AUDIO_SAMP_RATE_8K |
+                     AUDIO_SAMP_RATE_11K |
+                     AUDIO_SAMP_RATE_12K |
+                     AUDIO_SAMP_RATE_16K |
+                     AUDIO_SAMP_RATE_22K |
+                     AUDIO_SAMP_RATE_24K |
+                     AUDIO_SAMP_RATE_32K |
+                     AUDIO_SAMP_RATE_44K |
+                     AUDIO_SAMP_RATE_48K;
               break;
 
             default:
