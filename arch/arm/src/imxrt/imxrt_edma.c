@@ -438,6 +438,8 @@ static void imxrt_dmaterminate(struct imxrt_dmach_s *dmach, int result)
   uintptr_t regaddr;
   uint8_t regval8;
   uint8_t chan;
+  edma_callback_t callback;
+  void *arg;
 
   /* Disable channel ERROR interrupts */
 
@@ -479,14 +481,17 @@ static void imxrt_dmaterminate(struct imxrt_dmach_s *dmach, int result)
 
   /* Perform the DMA complete callback */
 
-  if (dmach->callback)
-    {
-      dmach->callback((DMACH_HANDLE)dmach, dmach->arg, true, result);
-    }
+  callback = dmach->callback;
+  arg      = dmach->arg;
 
   dmach->callback = NULL;
   dmach->arg      = NULL;
   dmach->state    = IMXRT_DMA_IDLE;
+
+  if (callback)
+    {
+      callback((DMACH_HANDLE)dmach, arg, true, result);
+    }
 }
 
 /****************************************************************************
