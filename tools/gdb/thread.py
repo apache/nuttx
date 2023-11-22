@@ -276,7 +276,10 @@ class Nxthread(gdb.Command):
 
         else:
             if arg[0].isnumeric() and pidhash[int(arg[0])] != 0:
-                gdb.execute("nxsetregs g_pidhash[%s]->xcp.regs" % arg[0])
+                if pidhash[int(arg[0])]["task_state"] == gdb.parse_and_eval("TSTATE_TASK_RUNNING"):
+                    restore_regs()
+                else:
+                    gdb.execute("nxsetregs g_pidhash[%s]->xcp.regs" % arg[0])
             else:
                 gdb.write("Invalid thread id %s\n" % arg[0])
 
@@ -289,12 +292,23 @@ class Nxcontinue(gdb.Command):
         restore_regs()
         gdb.execute("continue")
 
+class Nxstep(gdb.Command):
+    def __init__(self):
+        super(Nxstep, self).__init__("nxstep", gdb.COMMAND_USER)
+
+    def invoke(self, args, from_tty):
+        restore_regs()
+        gdb.execute("step")
 
 # We can't use a user command to rename continue it will recursion
+
 gdb.execute("define c\n nxcontinue \n end\n")
+gdb.execute("define s\n nxstep \n end\n")
 gdb.write("\nif use thread command, please don't use 'continue', use 'c' instead !!!\n")
+gdb.write("if use thread command, please don't use 'step', use 's' instead !!!\n")
 
 Nxsetregs()
 Nxinfothreads()
 Nxthread()
 Nxcontinue()
+Nxstep()
