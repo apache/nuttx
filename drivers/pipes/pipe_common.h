@@ -126,6 +126,7 @@ struct pipe_dev_s
   uint8_t          d_nwriters;    /* Number of reference counts for write access */
   uint8_t          d_nreaders;    /* Number of reference counts for read access */
   uint8_t          d_flags;       /* See PIPE_FLAG_* definitions */
+  int16_t          d_crefs;       /* References to dev */
   struct circbuf_s d_buffer;      /* Buffer allocated when device opened */
 
   /* The following is a list if poll structures of threads waiting for
