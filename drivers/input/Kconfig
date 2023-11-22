@@ -25,6 +25,13 @@ config INPUT_GOLDFISH_NBUFFER
 	depends on INPUT_GOLDFISH_EVENTS
 	default 8
 
+config INPUT_FF
+	bool "Support Force Feedback device"
+	default n
+	---help---
+		Enable support for force feedback devices.
+		The doc link: https://www.kernel.org/doc/html/v4.19/input/ff.html.
+
 config INPUT_MOUSE
 	bool
 	default n
