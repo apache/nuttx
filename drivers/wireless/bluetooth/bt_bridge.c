@@ -117,7 +117,7 @@ static const uint8_t g_bt_filter_ble_evt_table[] =
  ****************************************************************************/
 
 static bool bt_filter_set(FAR uint16_t *array, int size, uint16_t old,
-                          uint16_t new, uint16_t mask)
+                          uint16_t new)
 {
   int i;
 
@@ -125,7 +125,7 @@ static bool bt_filter_set(FAR uint16_t *array, int size, uint16_t old,
     {
       if (array[i] == old)
         {
-          array[i] = new & mask;
+          array[i] = new;
           return true;
         }
     }
@@ -136,7 +136,7 @@ static bool bt_filter_set(FAR uint16_t *array, int size, uint16_t old,
 static bool bt_filter_set_handle(FAR uint16_t *handle, int size,
                                  uint16_t old, uint16_t new)
 {
-  return bt_filter_set(handle, size, old, new, 0xfff);
+  return bt_filter_set(handle, size, old, new);
 }
 
 static bool bt_filter_alloc_handle(FAR struct bt_filter_s *filter,
@@ -163,7 +163,7 @@ static bool bt_filter_has_handle(FAR struct bt_filter_s *filter,
 static bool bt_filter_set_opcode(FAR uint16_t *opcode, int size,
                                  uint16_t old, uint16_t new)
 {
-  return bt_filter_set(opcode, size, old, new, 0xffff);
+  return bt_filter_set(opcode, size, old, new);
 }
 
 static bool bt_filter_alloc_opcode(FAR struct bt_filter_s *filter,
@@ -335,7 +335,11 @@ static bool bt_filter_can_recv(FAR struct bt_filter_s *filter,
     {
       FAR struct bt_hci_acl_hdr_s *acl = (FAR void *)&buffer[0];
 
-      return bt_filter_has_handle(filter, acl->handle);
+      /* When in HCI ACL Data packets,  connection handle is
+       * the first 3 octets of the packet
+       */
+
+      return bt_filter_has_handle(filter, acl->handle & 0x0fff);
     }
 
   return true;
