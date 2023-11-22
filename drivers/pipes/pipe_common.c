@@ -94,12 +94,11 @@ FAR struct pipe_dev_s *pipecommon_allocdev(size_t bufsize)
 
   /* Allocate a private structure to manage the pipe */
 
-  dev = kmm_malloc(sizeof(struct pipe_dev_s));
+  dev = kmm_zalloc(sizeof(struct pipe_dev_s));
   if (dev)
     {
       /* Initialize the private structure */
 
-      memset(dev, 0, sizeof(struct pipe_dev_s));
       nxmutex_init(&dev->d_bflock);
       nxsem_init(&dev->d_rdsem, 0, 0);
       nxsem_init(&dev->d_wrsem, 0, 0);
@@ -150,7 +149,7 @@ int pipecommon_open(FAR struct file *filep)
    * is first opened.
    */
 
-  if (inode->i_crefs == 1 && !circbuf_is_init(&dev->d_buffer))
+  if (dev->d_crefs == 0)
     {
       ret = circbuf_init(&dev->d_buffer, NULL, dev->d_bufsize);
       if (ret < 0)
@@ -159,6 +158,8 @@ int pipecommon_open(FAR struct file *filep)
           return ret;
         }
     }
+
+  dev->d_crefs++;
 
   /* If opened for writing, increment the count of writers on the pipe
    * instance.
@@ -304,7 +305,7 @@ int pipecommon_close(FAR struct file *filep)
   FAR struct pipe_dev_s *dev   = inode->i_private;
   int                    ret;
 
-  DEBUGASSERT(dev && filep->f_inode->i_crefs > 0);
+  DEBUGASSERT(dev && dev->d_crefs > 0);
 
   /* Make sure that we have exclusive access to the device structure.
    * NOTE: close() is supposed to return EINTR if interrupted, however
@@ -325,7 +326,8 @@ int pipecommon_close(FAR struct file *filep)
 
   /* Check if the decremented inode reference count would go to zero */
 
-  if (inode->i_crefs > 1)
+  dev->d_crefs--;
+  if (dev->d_crefs > 0)
     {
       /* More references.. If opened for writing, decrement the count of
        * writers on the pipe instance.
@@ -886,26 +888,28 @@ int pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 int pipecommon_unlink(FAR struct inode *inode)
 {
   FAR struct pipe_dev_s *dev;
+  int ret;
 
   DEBUGASSERT(inode->i_private);
   dev = inode->i_private;
 
+  ret = nxmutex_lock(&dev->d_bflock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  if (dev->d_crefs <= 0)
+    {
+      circbuf_uninit(&dev->d_buffer);
+      pipecommon_freedev(dev);
+      return OK;
+    }
+
   /* Mark the pipe unlinked */
 
   PIPE_UNLINK(dev->d_flags);
-
-  /* Are the any open references to the driver? */
-
-  if (inode->i_crefs == 1)
-    {
-      /* No.. free the buffer (if there is one) */
-
-      circbuf_uninit(&dev->d_buffer);
-
-      /* And free the device structure. */
-
-      pipecommon_freedev(dev);
-    }
+  nxmutex_unlock(&dev->d_bflock);
 
   return OK;
 }
