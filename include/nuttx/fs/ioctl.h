@@ -100,6 +100,7 @@
 #define _SYSLOGBASE     (0x3c00) /* Syslog device ioctl commands */
 #define _STEPIOBASE     (0x3d00) /* Stepper device ioctl commands */
 #define _FPGACFGBASE    (0x3e00) /* FPGA configuration ioctl commands */
+#define _FFIOCBASE      (0x3f00) /* Force feedback ioctl commands */
 #define _PCIBASE        (0x4100) /* Pci ioctl commands */
 #define _WLIOCBASE      (0x8b00) /* Wireless modules ioctl network commands */
 
@@ -723,6 +724,13 @@
 
 #define _PCIIOCVALID(c)   (_IOC_TYPE(c)==_PCIBASE)
 #define _PCIIOC(nr)       _IOC(_PCIBASE,nr)
+
+/* Force Feedback driver command definitions ********************************/
+
+/* see nuttx/include/input/ff.h */
+
+#define _FFIOCVALID(c) (_IOC_TYPE(c)==_FFIOCBASE)
+#define _FFIOC(nr)     _IOC(_FFIOCBASE,nr)
 
 /****************************************************************************
  * Public Type Definitions
