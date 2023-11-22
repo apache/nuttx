@@ -53,8 +53,8 @@
   ((d)->ops->init ? (d)->ops->init(d) : -ENOTTY)
 #define IMGDATA_UNINIT(d) \
   ((d)->ops->uninit ? (d)->ops->uninit(d) : -ENOTTY)
-#define IMGDATA_SET_BUF(d, a, s) \
-  ((d)->ops->set_buf ? (d)->ops->set_buf(d, a, s) : NULL)
+#define IMGDATA_SET_BUF(d, n, f, a, s) \
+  ((d)->ops->set_buf ? (d)->ops->set_buf(d, n, f, a, s) : NULL)
 #define IMGDATA_VALIDATE_FRAME_SETTING(d, n, f, i) \
   ((d)->ops->validate_frame_setting ? \
    (d)->ops->validate_frame_setting(d, n, f, i) : -ENOTTY)
@@ -96,6 +96,8 @@ struct imgdata_ops_s
   CODE int (*uninit)(FAR struct imgdata_s *data);
 
   CODE int (*set_buf)(FAR struct imgdata_s *data,
+                      uint8_t nr_datafmts,
+                      FAR imgdata_format_t *datafmts,
                       uint8_t *addr, uint32_t size);
 
   CODE int (*validate_frame_setting)(FAR struct imgdata_s *data,

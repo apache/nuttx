@@ -223,6 +223,8 @@ static int cxd56_cisif_stop_capture(struct imgdata_s *data);
 static int cxd56_cisif_validate_buf(struct imgdata_s *data,
                                     uint8_t *addr, uint32_t size);
 static int cxd56_cisif_set_buf(struct imgdata_s *data,
+                               uint8_t nr_datafmt,
+                               imgdata_format_t *datafmt,
                                uint8_t *addr, uint32_t size);
 
 static const intc_func_table g_intcomp_func[] =
@@ -977,6 +979,8 @@ static int cxd56_cisif_validate_buf(struct imgdata_s *data,
 }
 
 static int cxd56_cisif_set_buf(struct imgdata_s *data,
+                               uint8_t nr_datafmts,
+                               FAR imgdata_format_t *datafmts,
                                uint8_t *addr, uint32_t size)
 {
   int      ret;
