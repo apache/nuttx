@@ -20,6 +20,7 @@
 
 LIBMCS_VERSION=1.2.0
 
+ifeq ($(wildcard libmcs/libmcs/.git),)
 libmcs-$(LIBMCS_VERSION).zip:
 	$(call DOWNLOAD,https://gitlab.com/gtd-gmbh/libmcs/-/archive/$(LIBMCS_VERSION),libmcs-$(LIBMCS_VERSION).zip,libmcs.zip)
 
@@ -32,17 +33,19 @@ libmcs/libmcs: libmcs-$(LIBMCS_VERSION).zip
 	$(Q) patch -p1 < libmcs/0004-Fix-warning-function-declaration-isn-t-a-prototype-W.patch
 	$(Q) patch -p1 < libmcs/0005-libm-libmcs-Fix-clang-build-libmcs-warning.patch
 	$(Q) touch $@
+endif
 
-ifeq ($(wildcard libmcs/libmcs/.git),)
 distclean::
+	$(Q) $(DIRUNLINK) $(TOPDIR)/include/libmcs
+ifeq ($(wildcard libmcs/libmcs/.git),)
 	$(call DELFILE, libmcs.zip)
 	$(call DELDIR, libmcs/libmcs)
-
-context:: libmcs/libmcs
-else
-distclean::
-context::
 endif
+
+$(TOPDIR)/include/libmcs: libmcs/libmcs
+	$(Q) $(DIRLINK) $(CURDIR)/libmcs/libmcs/libm/include $@
+
+context:: $(TOPDIR)/include/libmcs
 
 VPATH += :libmcs/libmcs/libm/common
 VPATH += :libmcs/libmcs/libm/complexd
