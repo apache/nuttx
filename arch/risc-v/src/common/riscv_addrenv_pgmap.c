@@ -40,6 +40,14 @@
 #ifdef CONFIG_BUILD_KERNEL
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_MM_KMAP
+static struct arch_addrenv_s g_kernel_addrenv;
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -142,6 +150,51 @@ bool up_addrenv_user_vaddr(uintptr_t vaddr)
 #ifdef CONFIG_MM_KMAP
 
 /****************************************************************************
+ * Name: up_addrenv_kmap_init
+ *
+ * Description:
+ *   Initialize the architecture specific part of the kernel mapping
+ *   interface.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on failure.
+ *
+ ****************************************************************************/
+
+int up_addrenv_kmap_init(void)
+{
+  struct arch_addrenv_s *addrenv;
+  uintptr_t              next;
+  uintptr_t              vaddr;
+  int                    i;
+
+  /* Populate the static page tables one by one */
+
+  addrenv = &g_kernel_addrenv;
+  next    =  g_kernel_pgt_pbase;
+  vaddr   =  CONFIG_ARCH_KMAP_VBASE;
+
+  for (i = 0; i < (ARCH_SPGTS - 1); i++)
+    {
+      /* Connect the static page tables */
+
+      uintptr_t lnvaddr = riscv_pgvaddr(next);
+      addrenv->spgtables[i] = next;
+      next = mmu_pte_to_paddr(mmu_ln_getentry(i + 1, lnvaddr, vaddr));
+    }
+
+  /* Set the page directory root */
+
+  addrenv->satp = mmu_satp_reg(g_kernel_pgt_pbase, 0);
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: up_addrenv_kmap_pages
  *
  * Description:
@@ -164,13 +217,11 @@ bool up_addrenv_user_vaddr(uintptr_t vaddr)
 int up_addrenv_kmap_pages(void **pages, unsigned int npages, uintptr_t vaddr,
                           int prot)
 {
-  struct tcb_s          *tcb     = nxsched_self();
-  struct arch_addrenv_s *addrenv = &tcb->addrenv_own->addrenv;
+  struct arch_addrenv_s *addrenv = &g_kernel_addrenv;
   int mask                       = 0;
 
   /* Sanity checks */
 
-  DEBUGASSERT(tcb && tcb->addrenv_own);
   DEBUGASSERT(pages != NULL && npages > 0);
   DEBUGASSERT(vaddr >= CONFIG_ARCH_KMAP_VBASE && vaddr < ARCH_KMAP_VEND);
   DEBUGASSERT(MM_ISALIGNED(vaddr));
@@ -220,12 +271,10 @@ int up_addrenv_kmap_pages(void **pages, unsigned int npages, uintptr_t vaddr,
 
 int up_addrenv_kunmap_pages(uintptr_t vaddr, unsigned int npages)
 {
-  struct tcb_s          *tcb     = nxsched_self();
-  struct arch_addrenv_s *addrenv = &tcb->addrenv_own->addrenv;
+  struct arch_addrenv_s *addrenv = &g_kernel_addrenv;
 
   /* Sanity checks */
 
-  DEBUGASSERT(tcb && tcb->addrenv_own);
   DEBUGASSERT(npages > 0);
   DEBUGASSERT(vaddr >= CONFIG_ARCH_KMAP_VBASE && vaddr < ARCH_KMAP_VEND);
   DEBUGASSERT(MM_ISALIGNED(vaddr));
