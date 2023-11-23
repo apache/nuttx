@@ -289,7 +289,7 @@ int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify, unsigned int timeout)
  *
  ****************************************************************************/
 
-void icmpv6_rnotify(FAR struct net_driver_s *dev)
+void icmpv6_rnotify(FAR struct net_driver_s *dev, int result)
 {
   FAR struct icmpv6_rnotify_s *curr;
 
@@ -309,7 +309,7 @@ void icmpv6_rnotify(FAR struct net_driver_s *dev)
         {
           /* And signal the waiting, returning success */
 
-          curr->rn_result = OK;
+          curr->rn_result = result;
           nxsem_post(&curr->rn_sem);
           break;
         }

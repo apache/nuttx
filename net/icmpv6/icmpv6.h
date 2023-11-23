@@ -536,9 +536,9 @@ int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify, unsigned int timeout);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6_AUTOCONF
-void icmpv6_rnotify(FAR struct net_driver_s *dev);
+void icmpv6_rnotify(FAR struct net_driver_s *dev, int result);
 #else
-#  define icmpv6_rnotify(d) (0)
+#  define icmpv6_rnotify(d,r) (0)
 #endif
 
 /****************************************************************************
