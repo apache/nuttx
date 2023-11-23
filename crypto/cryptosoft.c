@@ -97,7 +97,7 @@ int swcr_encdec(FAR struct cryptop *crp, FAR struct cryptodesc *crd,
         {
           /* Get IV off buf */
 
-          bcopy(crd->crd_iv, buf + crd->crd_inject, ivlen);
+          bcopy(buf + crd->crd_inject, crd->crd_iv, ivlen);
         }
     }
 
@@ -1164,7 +1164,7 @@ int swcr_kprocess(struct cryptkop *krp)
 
   switch (krp->krp_op)
     {
-      case CRK_RSA_PCKS15_VERIFY:
+      case CRK_RSA_PKCS15_VERIFY:
         if ((krp->krp_status = swcr_rsa_verify(krp)) != 0)
           {
             goto done;
@@ -1235,6 +1235,6 @@ void swcr_init(void)
   crypto_register(swcr_id, algs, swcr_newsession,
                   swcr_freesession, swcr_process);
 
-  kalgs[CRK_RSA_PCKS15_VERIFY] = CRYPTO_ALG_FLAG_SUPPORTED;
+  kalgs[CRK_RSA_PKCS15_VERIFY] = CRYPTO_ALG_FLAG_SUPPORTED;
   crypto_kregister(swcr_id, kalgs, swcr_kprocess);
 }

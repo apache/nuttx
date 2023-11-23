@@ -592,7 +592,7 @@ int cryptodev_key(FAR struct crypt_kop *kop)
         if (in == 3 && out == 1)
           break;
         return -EINVAL;
-      case CRK_RSA_PCKS15_VERIFY:
+      case CRK_RSA_PKCS15_VERIFY:
         if (in == 5 && out == 0)
           break;
         return -EINVAL;
