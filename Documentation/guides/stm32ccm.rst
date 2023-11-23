@@ -40,7 +40,7 @@ NOTE: These interfaces are, technically, not prototyped since they are really
 provided via C pre-processor macros.
 
 NOTE: In order to use the CCM memory allocator functions, you must first call
-``ccm_initialize()`` somwhere in your early boot-up logic.
+``ccm_initialize()`` somewhere in your early boot-up logic.
 
 With these interfaces you have a (nearly) standard way to manage memory from a
 heap that consists of the the CCM SRAM. And, since the CCM memory is no longer

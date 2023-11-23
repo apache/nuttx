@@ -425,7 +425,7 @@ Toolchains
 
   Even then, there are more warnings from the linker and some undefined symbols
   for non-NuttX code that resides in the unused Microchip libraries.  You will
-  have to solve at least this undefined symbol problem if you want to used thei
+  have to solve at least this undefined symbol problem if you want to use their
   XC32 toolchain.
 
   Windows Native Toolchains

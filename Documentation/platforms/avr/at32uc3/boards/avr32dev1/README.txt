@@ -127,7 +127,7 @@ Atmel Toolchain:
   sources,and pre-built binaries are available from the Atmel website.
 
     CONFIG_AVR32_AVRTOOLSW=y  # Use the windows version
-    CONFIG_AVR32_AVRTOOLSL=y  # Ue the Linux version
+    CONFIG_AVR32_AVRTOOLSL=y  # Use the Linux version
 
   NOTE: The NuttX builtroot cannot be used to build the AVR32 toolchain.
   This is because the Atmel patches that add support for the AVR32 are not
