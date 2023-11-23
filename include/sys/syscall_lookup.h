@@ -183,7 +183,9 @@ SYSCALL_LOOKUP(clock_settime,              2)
 
 /* System logging */
 
+#ifdef CONFIG_SYSLOG
 SYSCALL_LOOKUP(nx_vsyslog,                 3)
+#endif
 
 /* The following are defined if either file or socket descriptor are
  * enabled.
