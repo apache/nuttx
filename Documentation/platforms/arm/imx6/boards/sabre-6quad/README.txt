@@ -401,7 +401,7 @@ of 1MB or so.
    - Remove all of the non-existent partitions created by the 'dd' copy.
    - Make a single FAT16 partition at the end of the SD card.
 
-   You will also need to format the partion for FAT.
+   You will also need to format the partition for FAT.
 
 4. You can put nuttx.bin here and then boot very simply with:
 
@@ -423,7 +423,7 @@ If you can prepare tftp server, this approach would be easy
      MX6Q SABRESD U-Boot > setenv serverip 192.168.10.16
      MX6Q SABRESD U-Boot > setenv image nuttx.bin
      MX6Q SABRESD U-Boot > tftp ${loadaddr} ${image}
-     PHY indentify @ 0x1 = 0x004dd074
+     PHY identify @ 0x1 = 0x004dd074
      FEC: Link is Up 796d
      Using FEC0 device
      TFTP from server 192.168.10.16; our IP address is 192.168.10.103

@@ -1673,7 +1673,7 @@ file1: CONFIG_USBHOST_ISOC_DISABLE=y
       CONFIG_USBMONITOR_PRIORITY=50    : USB monitor daemon priority
       CONFIG_USBMONITOR_INTERVAL=1     : Dump trace data every second
 
-  NOTE: If USB debug output is also enabled, both outpus will appear on the
+  NOTE: If USB debug output is also enabled, both outputs will appear on the
   serial console.  However, the debug output will be asynchronous with the
   trace output and, hence, difficult to interpret.
 

@@ -123,7 +123,7 @@ Olimex LPC1766-STK development board
   The LPC1766-STK has a Nokia 6100 132x132 LCD and either a Phillips PCF8833
   or an Epson S1D15G10 LCD controller.  The NuttX configuration may have to
   be adjusted depending on which controller is used with the LCD.  The
-  "LPC1766-STK development board Users Manual" states tha the board features
+  "LPC1766-STK development board Users Manual" states that the board features
   a "LCD NOKIA 6610 128x128 x12bit color TFT with Epson LCD controller."
   But, referring to a different Olimex board, "Nokia 6100 LCD Display
   Driver," Revision 1, James P. Lynch ("Nokia 6100 LCD Display Driver.pdf")

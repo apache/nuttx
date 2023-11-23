@@ -25,7 +25,7 @@ The board features:
 - Crystal for RTC 32.768KHz
 - 1 UART serial for debug
 - 1 Led RGB
-- 1 Buzzer without internal oscilator
+- 1 Buzzer without internal oscillator
 - 1 Mono audio up to 3W
 - 1 Ethernet 10/100
 - 1 MicroSD connector supporting 1 or 4-bit bus
@@ -300,7 +300,7 @@ The LINUM-STM32H753BI has a external SDRAM with 16Mbits connected to FMC periphe
 
 LCD
 =======
-The LINUM-STM32H753BI use the LTDC to suport one LCD with RGB connection.
+The LINUM-STM32H753BI use the LTDC to support one LCD with RGB connection.
 
   =========== =====
   LTDC        PINS
@@ -354,7 +354,7 @@ The LINUM-STM32H753BI has one I2S output.
 
 BUZZER
 =======
-The LINUM-STM32H753BI has a buzzer without internal oscilator
+The LINUM-STM32H753BI has a buzzer without internal oscillator
 
   ======= =====
   GPIO    PINS

@@ -100,7 +100,7 @@ of a ``send()`` or ``sendto()`` transfer, then the operation will block until IO
 available if ``O_NONBLOCK`` is not selected. This delay can can be a substantial amount
 of time.
 
-Second, if ``O_NONBLOCK`` is selected, the send will, of course, return immediatly,
+Second, if ``O_NONBLOCK`` is selected, the send will, of course, return immediately,
 failing with errno set ``EAGAIN`` if we cannot allocate the first IOB for the transfer.
 
 The third behavior occurs if the we run out of IOBs in the middle of the transfer.

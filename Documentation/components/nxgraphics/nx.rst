@@ -29,7 +29,7 @@ features:
 * **Device Interface** NX supports any graphics device either of two
   device interfaces:
 
-  #. Any device with random accesss video memory using the NuttX framebuffer
+  #. Any device with random access video memory using the NuttX framebuffer
      driver interface (see include/nuttx/video/fb.h).
   #. Any LCD-like device than can accept raster line runs through a parallel
      or serial interface (see include/nuttx/lcd/lcd.h). By default, NX is

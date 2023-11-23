@@ -127,7 +127,7 @@ pretty good description of how mouse/touchscreen input works.
 
 The mouse/touchscreen input is a little simpler, however: The main simplication
 is that the additional complexities of the NxConsole and its special input device
-do not apply. Mouse/touchscreen inut as always steered to widgets when the
+do not apply. Mouse/touchscreen input as always steered to widgets when the
 callback is received in ``CCallback::newMouseEvent`` by an unconditional call to
 ``CWidgetControl::newMouseEvent``. There is a "fork in the road" at the
 corresponding point in the logic of ``CCallback::newKeyboardEvent``

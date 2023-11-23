@@ -1322,7 +1322,7 @@ Configuration sub-directories
 
   can
 
-    An nsh configuration (see below) with added support fo MCAN driver.
+    An nsh configuration (see below) with added support for MCAN driver.
     The purpose of the configuration is mainly to track whether changes
     to SAMv7 MCAN driver do not cause build errors and warnings.
 
