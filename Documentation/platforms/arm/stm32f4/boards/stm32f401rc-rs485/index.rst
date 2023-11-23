@@ -16,7 +16,7 @@ STM32F401RCT6 microcontroller.
 
 STM32F401RCT6 microcontroller features:
  - Arm 32-bit Cortex®-M4 CPU with FPU
- - 128 Kbytes of Flash memory
+ - 256 Kbytes of Flash memory
  - 64 Kbytes of SRAM
  - Serial wire debug (SWD) & JTAG interfaces
  - Up to 81 I/O ports with interrupt capability
