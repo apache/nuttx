@@ -539,10 +539,18 @@ errout_with_halfduplex:
 ssize_t local_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
                       int flags)
 {
+  FAR struct local_conn_s *conn = psock->s_conn;
   FAR socklen_t *fromlen = &msg->msg_namelen;
   FAR struct sockaddr *from = msg->msg_name;
   FAR void *buf = msg->msg_iov->iov_base;
   size_t len = msg->msg_iov->iov_len;
+
+  /* Check shutdown state */
+
+  if (conn->lc_infile.f_inode == NULL)
+    {
+      return 0;
+    }
 
   DEBUGASSERT(buf);
 
