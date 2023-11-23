@@ -701,7 +701,8 @@ static bool is_bufsize_sufficient(FAR video_mng_t *vmng, uint32_t bufsize)
   return true;
 }
 
-static void initialize_frame_setting(FAR uint8_t *nr_fmt,
+static void initialize_frame_setting(FAR struct imgsensor_s *imgsensor,
+                                     FAR uint8_t *nr_fmt,
                                      FAR video_format_t *fmt,
                                      FAR struct v4l2_fract *interval)
 {
@@ -710,20 +711,70 @@ static void initialize_frame_setting(FAR uint8_t *nr_fmt,
   /* Initial setting : QVGA YUV4:2:2 15FPS */
 
   *nr_fmt = 1;
-  fmt[VIDEO_FMT_MAIN].width       = VIDEO_HSIZE_QVGA;
-  fmt[VIDEO_FMT_MAIN].height      = VIDEO_VSIZE_QVGA;
-  fmt[VIDEO_FMT_MAIN].pixelformat = V4L2_PIX_FMT_UYVY;
-  interval->denominator = 15;
-  interval->numerator   = 1;
+  if (imgsensor && imgsensor->frmsizes)
+    {
+      if (imgsensor->frmsizes[0].type == V4L2_FRMSIZE_TYPE_DISCRETE)
+        {
+          fmt[VIDEO_FMT_MAIN].width =
+            imgsensor->frmsizes[0].discrete.width;
+          fmt[VIDEO_FMT_MAIN].height =
+            imgsensor->frmsizes[0].discrete.height;
+        }
+      else
+        {
+          fmt[VIDEO_FMT_MAIN].width =
+            imgsensor->frmsizes[0].stepwise.min_width;
+          fmt[VIDEO_FMT_MAIN].height =
+            imgsensor->frmsizes[0].stepwise.min_height;
+        }
+    }
+  else
+    {
+      fmt[VIDEO_FMT_MAIN].width  = VIDEO_HSIZE_QVGA;
+      fmt[VIDEO_FMT_MAIN].height = VIDEO_VSIZE_QVGA;
+    }
+
+  if (imgsensor && imgsensor->fmtdescs)
+    {
+      fmt[VIDEO_FMT_MAIN].pixelformat = imgsensor->fmtdescs[0].pixelformat;
+    }
+  else
+    {
+      fmt[VIDEO_FMT_MAIN].pixelformat = V4L2_PIX_FMT_UYVY;
+    }
+
+  if (imgsensor && imgsensor->frmintervals)
+    {
+      if (imgsensor->frmintervals[0].type == V4L2_FRMIVAL_TYPE_DISCRETE)
+        {
+          interval->denominator =
+            imgsensor->frmintervals[0].discrete.denominator;
+          interval->numerator =
+            imgsensor->frmintervals[0].discrete.numerator;
+        }
+      else
+        {
+          interval->denominator =
+            imgsensor->frmintervals[0].stepwise.min.denominator;
+          interval->numerator =
+            imgsensor->frmintervals[0].stepwise.min.numerator;
+        }
+    }
+  else
+    {
+      interval->denominator = 15;
+      interval->numerator   = 1;
+    }
 }
 
-static void initialize_streamresources(FAR video_type_inf_t *type_inf)
+static void initialize_streamresources(FAR video_type_inf_t *type_inf,
+                                       FAR struct imgsensor_s *imgsensor)
 {
   memset(type_inf, 0, sizeof(video_type_inf_t));
   type_inf->remaining_capnum = VIDEO_REMAINING_CAPNUM_INFINITY;
   nxmutex_init(&type_inf->lock_state);
   nxsem_init(&type_inf->wait_capture.dqbuf_wait_flg, 0, 0);
-  initialize_frame_setting(&type_inf->nr_fmt,
+  initialize_frame_setting(imgsensor, &type_inf->nr_fmt,
                            type_inf->fmt,
                            &type_inf->frame_interval);
   video_framebuff_init(&type_inf->bufinf);
@@ -950,8 +1001,8 @@ static void initialize_scenes_parameter(FAR video_mng_t *vmng)
 
 static void initialize_resources(FAR video_mng_t *vmng)
 {
-  initialize_streamresources(&vmng->video_inf);
-  initialize_streamresources(&vmng->still_inf);
+  initialize_streamresources(&vmng->video_inf, vmng->imgsensor);
+  initialize_streamresources(&vmng->still_inf, vmng->imgsensor);
   initialize_scenes_parameter(vmng);
 }
 
@@ -3072,6 +3123,103 @@ static int video_s_ext_ctrls_scene(FAR struct video_mng_s *vmng,
   return ret;
 }
 
+static int video_enum_fmt(FAR video_mng_t *vmng, struct v4l2_fmtdesc *f)
+{
+  if (vmng->imgsensor && vmng->imgsensor->fmtdescs)
+    {
+      if (f->index > vmng->imgsensor->fmtdescs_num)
+        {
+          return -EINVAL;
+        }
+      else
+        {
+          f->pixelformat = vmng->imgsensor->fmtdescs[f->index].pixelformat;
+          strlcpy(f->description,
+                  vmng->imgsensor->fmtdescs[f->index].description,
+                  sizeof(f->description));
+        }
+    }
+  else
+    {
+      if (f->index > 0)
+          return -EINVAL;
+
+      f->pixelformat = V4L2_PIX_FMT_UYVY;
+    }
+
+  return 0;
+}
+
+static int video_enum_frmsize(FAR video_mng_t *vmng,
+                              struct v4l2_frmsizeenum *f)
+{
+  if (vmng->imgsensor && vmng->imgsensor->frmsizes)
+    {
+      if (f->index > vmng->imgsensor->frmsizes_num)
+        {
+          return -EINVAL;
+        }
+      else
+        {
+          f->type = vmng->imgsensor->frmsizes[f->index].type;
+          if (f->type == V4L2_FRMSIZE_TYPE_DISCRETE)
+            {
+              f->discrete = vmng->imgsensor->frmsizes[f->index].discrete;
+            }
+          else
+            {
+              f->stepwise = vmng->imgsensor->frmsizes[f->index].stepwise;
+            }
+        }
+    }
+  else
+    {
+      if (f->index > 0)
+          return -EINVAL;
+
+      f->type = V4L2_FRMIVAL_TYPE_DISCRETE;
+      f->discrete.width = VIDEO_HSIZE_QVGA;
+      f->discrete.height = VIDEO_VSIZE_QVGA;
+    }
+
+  return 0;
+}
+
+static int video_enum_frminterval(FAR video_mng_t *vmng,
+                                  struct v4l2_frmivalenum *f)
+{
+  if (vmng->imgsensor && vmng->imgsensor->frmintervals)
+    {
+      if (f->index > vmng->imgsensor->frmintervals_num)
+        {
+          return -EINVAL;
+        }
+      else
+        {
+          f->type = vmng->imgsensor->frmintervals[f->index].type;
+          if (f->type == V4L2_FRMIVAL_TYPE_DISCRETE)
+            {
+              f->discrete = vmng->imgsensor->frmintervals[f->index].discrete;
+            }
+          else
+            {
+              f->stepwise = vmng->imgsensor->frmintervals[f->index].stepwise;
+            }
+        }
+    }
+  else
+    {
+      if (f->index > 0)
+          return -EINVAL;
+
+      f->type = V4L2_FRMIVAL_TYPE_DISCRETE;
+      f->discrete.denominator = 15;
+      f->discrete.numerator = 1;
+    }
+
+  return 0;
+}
+
 /****************************************************************************
  * Name: video_ioctl
  *
@@ -3225,6 +3373,21 @@ static int video_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case V4SIOC_S_EXT_CTRLS_SCENE:
         ret = video_s_ext_ctrls_scene(priv,
                 (FAR struct v4s_ext_controls_scene *)arg);
+        break;
+
+      case VIDIOC_ENUM_FMT:
+        ret = video_enum_fmt(priv,
+                (FAR struct v4l2_fmtdesc *)arg);
+        break;
+
+      case VIDIOC_ENUM_FRAMEINTERVALS:
+        ret = video_enum_frminterval(priv,
+                (FAR struct v4l2_frmivalenum *)arg);
+        break;
+
+      case VIDIOC_ENUM_FRAMESIZES:
+        ret = video_enum_frmsize(priv,
+                (FAR struct v4l2_frmsizeenum *)arg);
         break;
 
       default:

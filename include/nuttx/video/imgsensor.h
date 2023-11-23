@@ -393,6 +393,12 @@ struct imgsensor_ops_s
 struct imgsensor_s
 {
   FAR const struct imgsensor_ops_s *ops;
+  size_t fmtdescs_num;
+  FAR const struct v4l2_fmtdesc *fmtdescs;
+  size_t frmsizes_num;
+  FAR const struct v4l2_frmsizeenum *frmsizes;
+  size_t frmintervals_num;
+  FAR const struct v4l2_frmivalenum *frmintervals;
 };
 
 #ifdef __cplusplus
