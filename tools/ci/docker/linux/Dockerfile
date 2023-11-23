@@ -35,7 +35,11 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   git \
   gperf \
   libncurses5-dev \
-  make
+  make \
+  ninja-build \
+  nodejs \
+  npm \
+  unzip
 
 RUN mkdir /tools
 WORKDIR /tools
@@ -62,6 +66,18 @@ RUN mkdir -p $CARGO_HOME \
   && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
   && $CARGO_HOME/bin/rustup target add thumbv6m-none-eabi \
   && $CARGO_HOME/bin/rustup target add thumbv7m-none-eabi
+
+ENV ZAP_INSTALL_PATH=/tools/zap_release
+RUN mkdir $ZAP_INSTALL_PATH -p \
+  && cd $ZAP_INSTALL_PATH \
+  && curl -s -O -L https://github.com/project-chip/zap/releases/download/v2023.10.09-nightly/zap-linux-x64.zip \
+  && unzip zap-linux-x64.zip
+
+ENV ZAP_DEVELOPMENT_PATH=/tools/zap
+RUN cd /tools \
+  && curl -s -O -L https://github.com/project-chip/zap/archive/refs/tags/v2023.10.09-nightly.zip \
+  && unzip v2023.10.09-nightly.zip && mv zap-2023.10.09-nightly zap \
+  && cd zap && npm install cross-spawn folder-hash
 
 CMD [ "/bin/bash" ]
 
@@ -253,6 +269,7 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   clang-tidy \
   gcc-avr \
   gcc-multilib \
+  generate-ninja \
   genromfs \
   gettext \
   git \
@@ -311,6 +328,9 @@ RUN pip3 install pytest==6.2.5
 RUN pip3 install pytest-json==0.4.0
 RUN pip3 install pytest-ordering==0.6
 RUN pip3 install pytest-repeat==0.9.1
+# Install lark and stringcase for matter build
+RUN pip3 install lark
+RUN pip3 install stringcase
 
 # Used to generate symbol table files
 
@@ -376,6 +396,12 @@ COPY --from=nuttx-toolchain-esp32 /tools/blobs/* /tools/blobs/esp-bins/
 COPY --from=nuttx-toolchain-wasm /tools/wasi-sdk/ wasi-sdk/
 ENV WASI_SDK_PATH="/tools/wasi-sdk"
 ENV PATH="/tools/wamr:$PATH"
+
+# ZAP tool and nodejs packet
+COPY --from=nuttx-tools /tools/zap/ /tools/zap/
+COPY --from=nuttx-tools /tools/zap_release/ /tools/zap_release/
+ENV ZAP_INSTALL_PATH=/tools/zap_release
+ENV ZAP_DEVELOPMENT_PATH=/tools/zap
 
 # Configure ccache
 RUN mkdir -p /tools/ccache/bin && \
