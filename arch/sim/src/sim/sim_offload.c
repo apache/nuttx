@@ -454,6 +454,7 @@ void *sim_audio_lame_init(struct audio_info_s *info)
     {
       lame_set_num_channels(codec->gfp, info->channels);
       lame_set_mode(codec->gfp, info->channels > 1 ? STEREO : MONO);
+      lame_set_in_samplerate(codec->gfp, (int)info->samplerate);
     }
 
   ret = lame_init_params(codec->gfp);
@@ -507,8 +508,17 @@ static int sim_audio_lame_encode(void *handle,
   chs = lame_get_num_channels(codec->gfp);
   samples = insize / (sizeof(short int) * chs);
 
-  ret = lame_encode_buffer_interleaved(codec->gfp, (short int *)in, samples,
-                                       codec->out, codec->max);
+  if (chs > 1)
+    {
+      ret = lame_encode_buffer_interleaved(codec->gfp, (short int *)in,
+                                          samples, codec->out, codec->max);
+    }
+  else
+    {
+      ret = lame_encode_buffer(codec->gfp, (short int *)in, NULL, samples,
+                              codec->out, codec->max);
+    }
+
   if (ret < 0)
     {
       return ret;
