@@ -54,19 +54,38 @@
 #ifdef CONFIG_RAMLOG
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define RAMLOG_MAGIC_NUMBER 0x12345678
+#define RAMLOG_HEADER_LEN   12
+
+/****************************************************************************
  * Private Types
  ****************************************************************************/
 
+struct ramlog_header_s
+{
+  uint32_t          rl_magic;    /* The rl_magic number for ramlog buffer init */
+  volatile uint32_t rl_head;     /* The head index (where data is added) */
+  volatile uint32_t rl_tail;     /* The tail index (where data is removed) */
+  char              rl_buffer[]; /* Circular RAM buffer */
+};
+
 struct ramlog_dev_s
 {
-  volatile size_t   rl_head;     /* The head index (where data is added) */
-  volatile size_t   rl_tail;     /* The tail index (where data is removed) */
+  /* The following is the header of the RAM buffer,
+   * Store the RAM BUFFER init rl_magic number,
+   * and read/write pointers
+   */
+
+  FAR struct ramlog_header_s *rl_header;
+
   mutex_t           rl_lock;     /* Enforces mutually exclusive access */
 #ifndef CONFIG_RAMLOG_NONBLOCKING
   sem_t             rl_waitsem;  /* Used to wait for data */
 #endif
-  size_t            rl_bufsize;  /* Size of the RAM buffer */
-  FAR char         *rl_buffer;   /* Circular RAM buffer */
+  uint32_t          rl_bufsize;  /* Size of the Circular RAM buffer */
 
   /* The following is a list if poll structures of threads waiting for
    * driver events. The 'struct pollfd' reference for each open is also
@@ -136,14 +155,12 @@ static char g_sysbuffer[CONFIG_RAMLOG_BUFSIZE];
 
 static struct ramlog_dev_s g_sysdev =
 {
-  CONFIG_RAMLOG_BUFSIZE,         /* rl_head */
-  CONFIG_RAMLOG_BUFSIZE,         /* rl_tail */
-  NXMUTEX_INITIALIZER,           /* rl_lock */
+  (FAR struct ramlog_header_s *)g_sysbuffer, /* rl_buffer */
+  NXMUTEX_INITIALIZER,                       /* rl_lock */
 #  ifndef CONFIG_RAMLOG_NONBLOCKING
-  SEM_INITIALIZER(0),           /* rl_waitsem */
+  SEM_INITIALIZER(0),                        /* rl_waitsem */
 #  endif
-  CONFIG_RAMLOG_BUFSIZE,         /* rl_bufsize */
-  g_sysbuffer                    /* rl_buffer */
+  CONFIG_RAMLOG_BUFSIZE - RAMLOG_HEADER_LEN  /* rl_bufsize */
 };
 #endif
 
@@ -157,8 +174,10 @@ static struct ramlog_dev_s g_sysdev =
 
 static size_t ramlog_bufferused(FAR struct ramlog_dev_s *priv)
 {
-  return (priv->rl_bufsize + priv->rl_head - priv->rl_tail) %
-         priv->rl_bufsize;
+  FAR struct ramlog_header_s *header = priv->rl_header;
+
+  return (priv->rl_bufsize + header->rl_head - header->rl_tail) %
+          priv->rl_bufsize;
 }
 
 /****************************************************************************
@@ -219,60 +238,12 @@ static void ramlog_pollnotify(FAR struct ramlog_dev_s *priv,
 static void ramlog_initbuf(void)
 {
   FAR struct ramlog_dev_s *priv = &g_sysdev;
-#ifdef CONFIG_BOARDCTL_RESET_CAUSE
-  struct boardioc_reset_cause_s cause;
-  int ret;
-#endif
-  bool is_empty = true;
-  char prev;
-  char cur;
-  size_t i;
+  FAR struct ramlog_header_s *header = priv->rl_header;
 
-  if (priv->rl_head != CONFIG_RAMLOG_BUFSIZE ||
-      priv->rl_tail != CONFIG_RAMLOG_BUFSIZE)
+  if (header->rl_magic != RAMLOG_MAGIC_NUMBER)
     {
-      return;
-    }
-
-#ifdef CONFIG_BOARDCTL_RESET_CAUSE
-  memset(&cause, 0, sizeof(cause));
-  ret = boardctl(BOARDIOC_RESET_CAUSE, (uintptr_t)&cause);
-  if (ret >= 0 && cause.cause == BOARDIOC_RESETCAUSE_SYS_CHIPPOR)
-    {
-      memset(priv->rl_buffer, 0, priv->rl_bufsize);
-      priv->rl_head = priv->rl_tail = 0;
-      return;
-    }
-#endif
-
-  prev = priv->rl_buffer[priv->rl_bufsize - 1];
-
-  for (i = 0; i < priv->rl_bufsize; i++)
-    {
-      cur = priv->rl_buffer[i];
-
-      if (!isprint(cur) && !isspace(cur) && cur != '\0')
-        {
-          memset(priv->rl_buffer, 0, priv->rl_bufsize);
-          is_empty = true;
-          break;
-        }
-      else if (prev && !cur)
-        {
-          priv->rl_head = i;
-          is_empty = false;
-        }
-      else if (!prev && cur)
-        {
-          priv->rl_tail = i;
-        }
-
-      prev = cur;
-    }
-
-  if (is_empty)
-    {
-      priv->rl_head = priv->rl_tail = 0;
+      memset(header, 0, CONFIG_RAMLOG_BUFSIZE);
+      header->rl_magic = RAMLOG_MAGIC_NUMBER;
     }
 }
 #endif
@@ -283,6 +254,7 @@ static void ramlog_initbuf(void)
 
 static void ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch)
 {
+  FAR struct ramlog_header_s *header;
   irqstate_t flags;
   size_t nexthead;
 
@@ -318,7 +290,8 @@ again:
 
   /* Calculate the write index AFTER the next byte is written */
 
-  nexthead = priv->rl_head + 1;
+  header = priv->rl_header;
+  nexthead = header->rl_head + 1;
   if (nexthead >= priv->rl_bufsize)
     {
       nexthead = 0;
@@ -326,22 +299,22 @@ again:
 
   /* Would the next write overflow the circular buffer? */
 
-  if (nexthead == priv->rl_tail)
+  if (nexthead == header->rl_tail)
     {
       /* Yes... Overwrite with the latest log in the circular buffer */
 
-      priv->rl_buffer[priv->rl_tail] = '\0';
-      priv->rl_tail += 1;
-      if (priv->rl_tail >= priv->rl_bufsize)
+      header->rl_buffer[header->rl_tail] = '\0';
+      header->rl_tail += 1;
+      if (header->rl_tail >= priv->rl_bufsize)
         {
-          priv->rl_tail = 0;
+          header->rl_tail = 0;
         }
     }
 
   /* No... copy the byte and re-enable interrupts */
 
-  priv->rl_buffer[priv->rl_head] = ch;
-  priv->rl_head = nexthead;
+  header->rl_buffer[header->rl_head] = ch;
+  header->rl_head = nexthead;
 
 #ifdef CONFIG_RAMLOG_CRLF
   if (ch == '\r')
@@ -419,6 +392,7 @@ static ssize_t ramlog_file_read(FAR struct file *filep, FAR char *buffer,
                                 size_t len)
 {
   FAR struct inode *inode = filep->f_inode;
+  FAR struct ramlog_header_s *header;
   FAR struct ramlog_dev_s *priv;
   ssize_t nread;
   char ch;
@@ -445,11 +419,13 @@ static ssize_t ramlog_file_read(FAR struct file *filep, FAR char *buffer,
 
   /* Loop until something is read */
 
+  header = priv->rl_header;
+
   for (nread = 0; (size_t)nread < len; )
     {
       /* Get the next byte from the buffer */
 
-      if (priv->rl_head == priv->rl_tail)
+      if (header->rl_head == header->rl_tail)
         {
           /* The circular buffer is empty. */
 
@@ -523,14 +499,14 @@ static ssize_t ramlog_file_read(FAR struct file *filep, FAR char *buffer,
            * tail index.
            */
 
-          ch = priv->rl_buffer[priv->rl_tail];
-          priv->rl_buffer[priv->rl_tail] = '\0';
+          ch = header->rl_buffer[header->rl_tail];
+          header->rl_buffer[header->rl_tail] = '\0';
 
           /* Increment the tail index. */
 
-          if (++priv->rl_tail >= priv->rl_bufsize)
+          if (++header->rl_tail >= priv->rl_bufsize)
             {
-              priv->rl_tail = 0;
+              header->rl_tail = 0;
             }
 
           /* Add the character to the user buffer. */
@@ -716,7 +692,7 @@ int ramlog_register(FAR const char *devpath, FAR char *buffer, size_t buflen)
 
   /* Sanity checking */
 
-  DEBUGASSERT(devpath && buffer && buflen > 1);
+  DEBUGASSERT(devpath && buffer && buflen > (RAMLOG_HEADER_LEN + 1));
 
   /* Allocate a RAM logging device structure */
 
@@ -730,8 +706,8 @@ int ramlog_register(FAR const char *devpath, FAR char *buffer, size_t buflen)
       nxsem_init(&priv->rl_waitsem, 0, 0);
 #endif
 
-      priv->rl_bufsize = buflen;
-      priv->rl_buffer  = buffer;
+      priv->rl_bufsize = buflen - RAMLOG_HEADER_LEN;
+      priv->rl_header = (FAR struct ramlog_header_s *)buffer;
 
       /* Register the character driver */
 
