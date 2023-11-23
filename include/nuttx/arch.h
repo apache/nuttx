@@ -1378,6 +1378,26 @@ bool up_addrenv_user_vaddr(uintptr_t vaddr);
 #endif
 
 /****************************************************************************
+ * Name: up_addrenv_kmap_init
+ *
+ * Description:
+ *   Initialize the architecture specific part of the kernel mapping
+ *   interface.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_MM_KMAP)
+int up_addrenv_kmap_init(void);
+#endif
+
+/****************************************************************************
  * Name: up_addrenv_kmap_pages
  *
  * Description:

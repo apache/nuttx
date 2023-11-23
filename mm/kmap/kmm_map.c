@@ -279,10 +279,16 @@ static void kmm_map_unlock(void)
 
 void kmm_map_initialize(void)
 {
+  /* Initialize the architecture specific part */
+
+  DEBUGVERIFY(up_addrenv_kmap_init());
+
+  /* Then, the local vmap */
+
   g_kmm_map_vpages = gran_initialize((FAR void *)CONFIG_ARCH_KMAP_VBASE,
                                      CONFIG_ARCH_KMAP_NPAGES << MM_PGSHIFT,
                                      MM_PGSHIFT, MM_PGSHIFT);
-  DEBUGVERIFY(g_kmm_map_vpages);
+  DEBUGASSERT(g_kmm_map_vpages != NULL);
   mm_map_initialize(&g_kmm_map, true);
 }
 
