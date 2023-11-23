@@ -5,16 +5,48 @@
 
 menu "System Logging"
 
-# Selected if the architecture has its own, built-in SYSLOGging enabled
+# Selected if the architecture has its own, built-in SYSLOG enabled
+
+choice
+	prompt "System logging"
+	default SYSLOG
+
+config SYSLOG
+	bool "Enable system logging"
+	---help---
+		Enables the SYSLOG interface.
 
 config ARCH_SYSLOG
-	bool
+	bool "Architecture-specific SYSLOG support"
+	---help---
+		Architecture-specific SYSLOG support
+
+config SYSLOG_TO_SCHED_NOTE
+	bool "SYSLOG redirected to sched_note"
+	depends on SCHED_INSTRUMENTATION_DUMP
+	---help---
+		If this option is enabled, syslog will be redirected to sched_note,
+		It uses the sched_note_printf macro to replace syslog
+endchoice
+
+config SYSLOG_CHARDEV
+	bool "SYSLOG character device"
 	default n
+	---help---
+		Enables support for a simple character driver at /dev/log whose
+		write() method will transfer data to the SYSLOG device.  This can be
+		useful if, for example, you want to redirect the output of a program
+		to the SYSLOG.
+
+		NOTE that unlike other syslog output, this data is unformatted raw
+		byte output with no time-stamping or any other SYSLOG features
+		supported.
 
 config SYSLOG_DEFAULT_MASK
 	hex "syslog mask default value"
 	default 0xff
 
+if SYSLOG
 comment "SYSLOG options"
 
 config SYSLOG_MAX_CHANNELS
@@ -361,19 +393,6 @@ config CONSOLE_SYSLOG
 		example, if the only console is a Telnet console.  Then in that case,
 		console output from non-Telnet threads will go to the syslog output.
 
-config SYSLOG_CHARDEV
-	bool "SYSLOG character device"
-	default n
-	---help---
-		Enables support for a simple character driver at /dev/log whose
-		write() method will transfer data to the SYSLOG device.  This can be
-		useful if, for example, you want to redirect the output of a program
-		to the SYSLOG.
-
-		NOTE that unlike other syslog output, this data is unformatted raw
-		byte output with no time-stamping or any other SYSLOG features
-		supported.
-
 config SYSLOG_IOCTL
 	bool "SYSLOG IOCTL support"
 	default n
@@ -388,4 +407,5 @@ config SYSLOG_REGISTER
 	---help---
 		This option will support register the syslog channel dynamically.
 
+endif # SYSLOG
 endmenu # System logging
