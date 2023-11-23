@@ -43,7 +43,7 @@ OS Interfaces
 -------------
 
 Before we talk about SMP Critical Sections let's first review the internal OS
-interfaces avaiable and what they do in the single CPU case:
+interfaces available and what they do in the single CPU case:
 
 * ``up_irq_save()`` (and its companion, ``up_irq_restore()``). These simple
   interfaces just enable and disable interrupts globally. This is the simplest
@@ -272,7 +272,7 @@ This file cat be read from NSH like:
    nsh> cat /proc/1/critmon
    0.000009610,0.000001165
 
-The form of the output from the ``/proc/critmon`` file is simlar::
+The form of the output from the ``/proc/critmon`` file is similar::
 
   X,X.XXXXXXXXX,X.XXXXXXXXX
 
@@ -295,7 +295,7 @@ file was read.
 ``apps/system/critmon``
 -----------------------
 
-Also available is a application daemon at ``apps/sysem/critmon``. This daemon
+Also available is a application daemon at ``apps/system/critmon``. This daemon
 periodically reads the ProcFS files described above and dumps the output to
 stdout. This daemon is enabled with:
 

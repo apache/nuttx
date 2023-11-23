@@ -127,8 +127,8 @@ on these requests a application specific fuzz test can be generated.
    # Record requests to the target at 192.168.2.135 on port 80
    ~/SPIKE/src/requests$ ../webmitm -t 192.168.2.135 -p 80
 
-Now use your web applicaiton through localhost to record some requests. Then you
-can generate your application specific fuzz test from the recorded requests.
+Now use your web application through localhost to record some requests. Then you
+can generate your application-specific fuzz test from the recorded requests.
 
 .. code-block:: bash
 

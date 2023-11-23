@@ -23,7 +23,7 @@ Refer to https://open-isa.org for further information about this board.
 Currently NuttX is ported to RV32M1 RI5CY only. RI5CY is RV32IMC RISC-V CPU
 with PULP extensions features:
   - Post-Incrementing load and stores,
-  - Multiply-Accumulate extenstions,
+  - Multiply-Accumulate extensions,
   - ALU extensions,
   - Hardware Loops.
 
@@ -78,7 +78,7 @@ Default LPUART Configuration
 
 LPUART0 is enabled in most configurations (see */defconfig). RX and TX are
 configured on pins PC7 and PC8, respectively (see include/board.h). These
-two above pins are connected to onboard Debug Adpater which provides a USB-
+two above pins are connected to onboard Debug Adapter which provides a USB-
 TTL serial channel.
 
 Buttons
@@ -164,9 +164,9 @@ Program
 To program RV32M1, openocd from OPEN ISA and an external jtag adapter are pre-
 requisite. There are 2 tested jtag adapters: Segger Jlink EDU mini and SiPEED
 USB Jtag Adapter. The Segger Jlink EDU mini can connect J55 header on RV32M1-VEGA
-board directly while SiPEED USB Jtag Adpater has to co-operate with an Adapter
+board directly while SiPEED USB Jtag Adapter has to co-operate with an Adapter
 board to setup wires connection.
-Compared to Segger Jlink EDU Mini Adapter, SiPEED USB Jtag Adpater is cheaper but
+Compared to Segger Jlink EDU Mini Adapter, SiPEED USB Jtag Adapter is cheaper but
 not inferior.
 
 With SiPEED USB Jtag Adapter, some patches must be applied to rv32m1_ri5cy.cfg:

@@ -12,7 +12,7 @@ NuttX Build Types
 
 NuttX can be built in several different ways:
 
-* **Kernel Build** The kernal build, selected with ``CONFIG_BUILD_KERNEL``, uses
+* **Kernel Build** The kernel build, selected with ``CONFIG_BUILD_KERNEL``, uses
   the MCU's Memory Management Unit (MMU) to implement processes very similar to
   Linux processes. There is no interesting discussion here; NuttX behaves very
   much like Linux.
