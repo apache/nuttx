@@ -48,7 +48,7 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/syslog/ramlog.h>
 #include <nuttx/compiler.h>
-
+#include <nuttx/list.h>
 #include <nuttx/irq.h>
 
 #ifdef CONFIG_RAMLOG
@@ -58,7 +58,6 @@
  ****************************************************************************/
 
 #define RAMLOG_MAGIC_NUMBER 0x12345678
-#define RAMLOG_HEADER_LEN   12
 
 /****************************************************************************
  * Private Types
@@ -67,9 +66,25 @@
 struct ramlog_header_s
 {
   uint32_t          rl_magic;    /* The rl_magic number for ramlog buffer init */
-  volatile uint32_t rl_head;     /* The head index (where data is added) */
-  volatile uint32_t rl_tail;     /* The tail index (where data is removed) */
+  volatile uint32_t rl_head;     /* The head index (where data is added,natural growth) */
   char              rl_buffer[]; /* Circular RAM buffer */
+};
+
+struct ramlog_user_s
+{
+  struct list_node  rl_node;       /* The list_node of reader */
+  volatile uint32_t rl_tail;       /* The tail index (where data is removed) */
+  uint32_t          rl_threashold; /* The threashold of the reader to read log */
+#ifndef CONFIG_RAMLOG_NONBLOCKING
+  sem_t             rl_waitsem;    /* Used to wait for data */
+#endif
+
+  /* The following the poll structures of threads waiting for driver events.
+   * The 'struct pollfd' reference for each open is also  retained in the
+   * f_priv field of the 'struct file'.
+   */
+
+  FAR struct pollfd *rl_fds;
 };
 
 struct ramlog_dev_s
@@ -81,18 +96,9 @@ struct ramlog_dev_s
 
   FAR struct ramlog_header_s *rl_header;
 
-  mutex_t           rl_lock;     /* Enforces mutually exclusive access */
-#ifndef CONFIG_RAMLOG_NONBLOCKING
-  sem_t             rl_waitsem;  /* Used to wait for data */
-#endif
-  uint32_t          rl_bufsize;  /* Size of the Circular RAM buffer */
-
-  /* The following is a list if poll structures of threads waiting for
-   * driver events. The 'struct pollfd' reference for each open is also
-   * retained in the f_priv field of the 'struct file'.
-   */
-
-  FAR struct pollfd *rl_fds[CONFIG_RAMLOG_NPOLLWAITERS];
+  mutex_t                    rl_lock;    /* Enforces mutually exclusive access */
+  uint32_t                   rl_bufsize; /* Size of the Circular RAM buffer */
+  struct list_node           rl_list;    /* The head of ramlog_user_s list */
 };
 
 /****************************************************************************
@@ -104,12 +110,13 @@ struct ramlog_dev_s
 #ifndef CONFIG_RAMLOG_NONBLOCKING
 static void    ramlog_readnotify(FAR struct ramlog_dev_s *priv);
 #endif
-static void    ramlog_pollnotify(FAR struct ramlog_dev_s *priv,
-                                 pollevent_t eventset);
+static void    ramlog_pollnotify(FAR struct ramlog_dev_s *priv);
 static void    ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch);
 
 /* Character driver methods */
 
+static int     ramlog_file_open(FAR struct file *filep);
+static int     ramlog_file_close(FAR struct file *filep);
 static ssize_t ramlog_file_read(FAR struct file *filep, FAR char *buffer,
                                 size_t buflen);
 static ssize_t ramlog_file_write(FAR struct file *filep,
@@ -125,8 +132,8 @@ static int     ramlog_file_poll(FAR struct file *filep,
 
 static const struct file_operations g_ramlogfops =
 {
-  NULL,              /* open */
-  NULL,              /* close */
+  ramlog_file_open,  /* open */
+  ramlog_file_close, /* close */
   ramlog_file_read,  /* read */
   ramlog_file_write, /* write */
   NULL,              /* seek */
@@ -142,10 +149,10 @@ static const struct file_operations g_ramlogfops =
 
 #ifdef CONFIG_RAMLOG_SYSLOG
 #  ifdef RAMLOG_BUFFER_SECTION
-static char g_sysbuffer[CONFIG_RAMLOG_BUFSIZE]
+static uint32_t g_sysbuffer[CONFIG_RAMLOG_BUFSIZE / 4]
                        locate_data(RAMLOG_BUFFER_SECTION);
 #  else
-static char g_sysbuffer[CONFIG_RAMLOG_BUFSIZE];
+static uint32_t g_sysbuffer[CONFIG_RAMLOG_BUFSIZE / 4];
 #  endif
 
 /* This is the device structure for the console or syslogging function.  It
@@ -155,13 +162,12 @@ static char g_sysbuffer[CONFIG_RAMLOG_BUFSIZE];
 
 static struct ramlog_dev_s g_sysdev =
 {
-  (FAR struct ramlog_header_s *)g_sysbuffer, /* rl_buffer */
-  NXMUTEX_INITIALIZER,                       /* rl_lock */
-#  ifndef CONFIG_RAMLOG_NONBLOCKING
-  SEM_INITIALIZER(0),                        /* rl_waitsem */
-#  endif
-  CONFIG_RAMLOG_BUFSIZE - RAMLOG_HEADER_LEN  /* rl_bufsize */
+  (FAR struct ramlog_header_s *)g_sysbuffer,            /* rl_buffer */
+  NXMUTEX_INITIALIZER,                                  /* rl_lock */
+  sizeof(g_sysbuffer) - sizeof(struct ramlog_header_s), /* rl_bufsize */
+  LIST_INITIAL_VALUE(g_sysdev.rl_list)                  /* rl_list */
 };
+
 #endif
 
 /****************************************************************************
@@ -172,12 +178,11 @@ static struct ramlog_dev_s g_sysdev =
  * Name: ramlog_bufferused
  ****************************************************************************/
 
-static size_t ramlog_bufferused(FAR struct ramlog_dev_s *priv)
+static uint32_t ramlog_bufferused(FAR struct ramlog_dev_s *priv,
+                                  FAR struct ramlog_user_s *upriv)
 {
-  FAR struct ramlog_header_s *header = priv->rl_header;
-
-  return (priv->rl_bufsize + header->rl_head - header->rl_tail) %
-          priv->rl_bufsize;
+  uint32_t used = priv->rl_header->rl_head - upriv->rl_tail;
+  return used > priv->rl_bufsize ? priv->rl_bufsize : used;
 }
 
 /****************************************************************************
@@ -187,26 +192,29 @@ static size_t ramlog_bufferused(FAR struct ramlog_dev_s *priv)
 #ifndef CONFIG_RAMLOG_NONBLOCKING
 static void ramlog_readnotify(FAR struct ramlog_dev_s *priv)
 {
+  FAR struct ramlog_user_s *upriv;
   irqstate_t flags;
 
   /* Notify all waiting readers that they can read from the FIFO */
 
   flags = enter_critical_section();
-
-  for (; ; )
+  list_for_every_entry(&priv->rl_list, upriv, struct ramlog_user_s, rl_node)
     {
-      int semcount = 0;
-
-      nxsem_get_value(&priv->rl_waitsem, &semcount);
-      if (semcount >= 0)
+      for (; ; )
         {
-          break;
-        }
+          int semcount = 0;
 
-      nxsem_post(&priv->rl_waitsem);
+          nxsem_get_value(&upriv->rl_waitsem, &semcount);
+          if (semcount >= 0)
+            {
+              break;
+            }
+
+          nxsem_post(&upriv->rl_waitsem);
+        }
     }
 
-  leave_critical_section(flags);
+    leave_critical_section(flags);
 }
 #endif
 
@@ -214,39 +222,28 @@ static void ramlog_readnotify(FAR struct ramlog_dev_s *priv)
  * Name: ramlog_pollnotify
  ****************************************************************************/
 
-static void ramlog_pollnotify(FAR struct ramlog_dev_s *priv,
-                              pollevent_t eventset)
+static void ramlog_pollnotify(FAR struct ramlog_dev_s *priv)
 {
+  FAR struct ramlog_user_s *upriv;
   irqstate_t flags;
 
   /* This function may be called from an interrupt handler */
 
   flags = enter_critical_section();
-  poll_notify(priv->rl_fds, CONFIG_RAMLOG_NPOLLWAITERS, eventset);
+  list_for_every_entry(&priv->rl_list, upriv, struct ramlog_user_s, rl_node)
+    {
+      if (ramlog_bufferused(priv, upriv) >= upriv->rl_threashold)
+        {
+          /* Notify all poll/select waiters that they can read from
+           * the FIFO
+           */
+
+          poll_notify(&upriv->rl_fds, 1, POLLIN);
+        }
+    }
+
   leave_critical_section(flags);
 }
-
-/****************************************************************************
- * Name: ramlog_initbuf
- *
- * Description:
- *  Initialize g_sysdev based on the current system ramlog buffer.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_RAMLOG_SYSLOG
-static void ramlog_initbuf(void)
-{
-  FAR struct ramlog_dev_s *priv = &g_sysdev;
-  FAR struct ramlog_header_s *header = priv->rl_header;
-
-  if (header->rl_magic != RAMLOG_MAGIC_NUMBER)
-    {
-      memset(header, 0, CONFIG_RAMLOG_BUFSIZE);
-      header->rl_magic = RAMLOG_MAGIC_NUMBER;
-    }
-}
-#endif
 
 /****************************************************************************
  * Name: ramlog_addchar
@@ -254,20 +251,20 @@ static void ramlog_initbuf(void)
 
 static void ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch)
 {
-  FAR struct ramlog_header_s *header;
+  FAR struct ramlog_header_s *header = priv->rl_header;
   irqstate_t flags;
-  size_t nexthead;
-
-#ifdef CONFIG_RAMLOG_SYSLOG
-  if (priv == &g_sysdev)
-    {
-      ramlog_initbuf();
-    }
-#endif
 
   /* Disable interrupts (in case we are NOT called from interrupt handler) */
 
   flags = enter_critical_section();
+
+#ifdef CONFIG_RAMLOG_SYSLOG
+  if (priv == &g_sysdev && header->rl_magic != RAMLOG_MAGIC_NUMBER)
+    {
+      memset(header, 0, sizeof(g_sysbuffer));
+      header->rl_magic = RAMLOG_MAGIC_NUMBER;
+    }
+#endif
 
 #ifdef CONFIG_RAMLOG_CRLF
   /* Ignore carriage returns */
@@ -288,33 +285,7 @@ static void ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch)
 again:
 #endif
 
-  /* Calculate the write index AFTER the next byte is written */
-
-  header = priv->rl_header;
-  nexthead = header->rl_head + 1;
-  if (nexthead >= priv->rl_bufsize)
-    {
-      nexthead = 0;
-    }
-
-  /* Would the next write overflow the circular buffer? */
-
-  if (nexthead == header->rl_tail)
-    {
-      /* Yes... Overwrite with the latest log in the circular buffer */
-
-      header->rl_buffer[header->rl_tail] = '\0';
-      header->rl_tail += 1;
-      if (header->rl_tail >= priv->rl_bufsize)
-        {
-          header->rl_tail = 0;
-        }
-    }
-
-  /* No... copy the byte and re-enable interrupts */
-
-  header->rl_buffer[header->rl_head] = ch;
-  header->rl_head = nexthead;
+  header->rl_buffer[header->rl_head++ % priv->rl_bufsize] = ch;
 
 #ifdef CONFIG_RAMLOG_CRLF
   if (ch == '\r')
@@ -364,15 +335,9 @@ static ssize_t ramlog_addbuf(FAR struct ramlog_dev_s *priv,
 
       ramlog_readnotify(priv);
 #endif
+      /* Notify all poll/select waiters that they can read from the FIFO */
 
-      if (ramlog_bufferused(priv) >= CONFIG_RAMLOG_POLLTHRESHOLD)
-        {
-          /* Notify all poll/select waiters that they can read from the
-           * FIFO.
-           */
-
-          ramlog_pollnotify(priv, POLLIN);
-        }
+      ramlog_pollnotify(priv);
     }
 
   /* We always have to return the number of bytes requested and NOT the
@@ -392,16 +357,13 @@ static ssize_t ramlog_file_read(FAR struct file *filep, FAR char *buffer,
                                 size_t len)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR struct ramlog_header_s *header;
-  FAR struct ramlog_dev_s *priv;
+  FAR struct ramlog_dev_s *priv = inode->i_private;
+  FAR struct ramlog_header_s *header = priv->rl_header;
+  FAR struct ramlog_user_s *upriv = filep->f_priv;
+  uint32_t tail;
   ssize_t nread;
   char ch;
   int ret;
-
-  /* Some sanity checking */
-
-  DEBUGASSERT(inode->i_private);
-  priv = inode->i_private;
 
   /* If the circular buffer is empty, then wait for something to be written
    * to it.  This function may NOT be called from an interrupt handler.
@@ -417,15 +379,22 @@ static ssize_t ramlog_file_read(FAR struct file *filep, FAR char *buffer,
       return ret;
     }
 
-  /* Loop until something is read */
+  /* Determine whether the read pointer is overwritten */
 
-  header = priv->rl_header;
+  if (header->rl_head - upriv->rl_tail > priv->rl_bufsize)
+    {
+      upriv->rl_tail = header->rl_head - priv->rl_bufsize;
+    }
+
+  tail = upriv->rl_tail % priv->rl_bufsize;
+
+  /* Loop until something is read */
 
   for (nread = 0; (size_t)nread < len; )
     {
       /* Get the next byte from the buffer */
 
-      if (header->rl_head == header->rl_tail)
+      if (header->rl_head == upriv->rl_tail)
         {
           /* The circular buffer is empty. */
 
@@ -466,7 +435,7 @@ static ssize_t ramlog_file_read(FAR struct file *filep, FAR char *buffer,
            * but will be re-enabled while we are waiting.
            */
 
-          ret = nxsem_wait(&priv->rl_waitsem);
+          ret = nxsem_wait(&upriv->rl_waitsem);
 
           /* Did we successfully get the rl_waitsem? */
 
@@ -499,14 +468,14 @@ static ssize_t ramlog_file_read(FAR struct file *filep, FAR char *buffer,
            * tail index.
            */
 
-          ch = header->rl_buffer[header->rl_tail];
-          header->rl_buffer[header->rl_tail] = '\0';
+          ch = header->rl_buffer[tail];
 
           /* Increment the tail index. */
 
-          if (++header->rl_tail >= priv->rl_bufsize)
+          upriv->rl_tail++;
+          if (++tail >= priv->rl_bufsize)
             {
-              header->rl_tail = 0;
+              tail = 0;
             }
 
           /* Add the character to the user buffer. */
@@ -533,12 +502,7 @@ static ssize_t ramlog_file_write(FAR struct file *filep,
                                  FAR const char *buffer, size_t len)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR struct ramlog_dev_s *priv;
-
-  /* Some sanity checking */
-
-  DEBUGASSERT(inode->i_private);
-  priv = inode->i_private;
+  FAR struct ramlog_dev_s *priv = inode->i_private;
 
   return ramlog_addbuf(priv, buffer, len);
 }
@@ -551,11 +515,9 @@ static int ramlog_file_ioctl(FAR struct file *filep, int cmd,
                              unsigned long arg)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR struct ramlog_dev_s *priv;
+  FAR struct ramlog_dev_s *priv = inode->i_private;
+  FAR struct ramlog_user_s *upriv = filep->f_priv;
   int ret;
-
-  DEBUGASSERT(inode->i_private);
-  priv = inode->i_private;
 
   ret = nxmutex_lock(&priv->rl_lock);
   if (ret < 0)
@@ -566,7 +528,10 @@ static int ramlog_file_ioctl(FAR struct file *filep, int cmd,
   switch (cmd)
     {
       case FIONREAD:
-        *(FAR int *)((uintptr_t)arg) = ramlog_bufferused(priv);
+        *(FAR int *)((uintptr_t)arg) = ramlog_bufferused(priv, upriv);
+        break;
+      case PIPEIOC_POLLINTHRD:
+        upriv->rl_threashold = (uint32_t)arg;
         break;
       default:
         ret = -ENOTTY;
@@ -585,16 +550,11 @@ static int ramlog_file_poll(FAR struct file *filep, FAR struct pollfd *fds,
                             bool setup)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR struct ramlog_dev_s *priv;
+  FAR struct ramlog_dev_s *priv = inode->i_private;
+  FAR struct ramlog_user_s *upriv = filep->f_priv;
   pollevent_t eventset = POLLOUT;
   irqstate_t flags;
   int ret;
-  int i;
-
-  /* Some sanity checking */
-
-  DEBUGASSERT(inode->i_private);
-  priv = inode->i_private;
 
   /* Get exclusive access to the poll structures */
 
@@ -612,25 +572,10 @@ static int ramlog_file_poll(FAR struct file *filep, FAR struct pollfd *fds,
        * slot for the poll structure reference.
        */
 
-      for (i = 0; i < CONFIG_RAMLOG_NPOLLWAITERS; i++)
+      if (!upriv->rl_fds)
         {
-          /* Find an available slot */
-
-          if (!priv->rl_fds[i])
-            {
-              /* Bind the poll structure and this slot */
-
-              priv->rl_fds[i] = fds;
-              fds->priv       = &priv->rl_fds[i];
-              break;
-            }
-        }
-
-      if (i >= CONFIG_RAMLOG_NPOLLWAITERS)
-        {
-          fds->priv = NULL;
-          ret       = -EBUSY;
-          goto errout;
+          upriv->rl_fds = fds;
+          fds->priv     = &upriv->rl_fds;
         }
 
       /* Should immediately notify on any of the requested events? */
@@ -639,7 +584,7 @@ static int ramlog_file_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       /* Check if the receive buffer is not empty. */
 
-      if (ramlog_bufferused(priv) >= CONFIG_RAMLOG_POLLTHRESHOLD)
+      if (ramlog_bufferused(priv, upriv) >= upriv->rl_threashold)
         {
           eventset |= POLLIN;
         }
@@ -654,21 +599,85 @@ static int ramlog_file_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       struct pollfd **slot = (struct pollfd **)fds->priv;
 
-#ifdef CONFIG_DEBUG_FEATURES
-      if (!slot)
-        {
-          ret = -EIO;
-          goto errout;
-        }
-#endif
-
       /* Remove all memory of the poll setup */
 
       *slot     = NULL;
       fds->priv = NULL;
     }
 
-errout:
+  nxmutex_unlock(&priv->rl_lock);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: ramlog_file_open
+ ****************************************************************************/
+
+static int ramlog_file_open(FAR struct file *filep)
+{
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct ramlog_dev_s *priv = inode->i_private;
+  FAR struct ramlog_header_s *header = priv->rl_header;
+  FAR struct ramlog_user_s *upriv;
+  int ret;
+
+  /* Get exclusive access to the rl_tail index */
+
+  upriv = kmm_zalloc(sizeof(FAR struct ramlog_user_s));
+  if (upriv == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  upriv->rl_threashold = CONFIG_RAMLOG_POLLTHRESHOLD;
+#ifndef CONFIG_RAMLOG_NONBLOCKING
+  nxsem_init(&upriv->rl_waitsem, 0, 0);
+#endif
+
+  ret = nxmutex_lock(&priv->rl_lock);
+  if (ret < 0)
+    {
+#ifndef CONFIG_RAMLOG_NONBLOCKING
+      nxsem_destroy(&upriv->rl_waitsem);
+#endif
+      kmm_free(upriv);
+      return ret;
+    }
+
+  list_add_tail(&priv->rl_list, &upriv->rl_node);
+
+  upriv->rl_tail = header->rl_head > priv->rl_bufsize ?
+                   header->rl_head - priv->rl_bufsize : 0;
+  filep->f_priv = upriv;
+  nxmutex_unlock(&priv->rl_lock);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: ramlog_file_close
+ ****************************************************************************/
+
+static int ramlog_file_close(FAR struct file *filep)
+{
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct ramlog_dev_s *priv = inode->i_private;
+  FAR struct ramlog_user_s *upriv = filep->f_priv;
+  int ret;
+
+  /* Get exclusive access to the rl_tail index */
+
+  ret = nxmutex_lock(&priv->rl_lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+#ifndef CONFIG_RAMLOG_NONBLOCKING
+  nxsem_destroy(&upriv->rl_waitsem);
+#endif
+
+  list_delete(&upriv->rl_node);
+  kmm_free(upriv);
   nxmutex_unlock(&priv->rl_lock);
   return ret;
 }
@@ -692,7 +701,7 @@ int ramlog_register(FAR const char *devpath, FAR char *buffer, size_t buflen)
 
   /* Sanity checking */
 
-  DEBUGASSERT(devpath && buffer && buflen > (RAMLOG_HEADER_LEN + 1));
+  DEBUGASSERT(devpath && buffer && buflen > sizeof(struct ramlog_header_s));
 
   /* Allocate a RAM logging device structure */
 
@@ -702,11 +711,8 @@ int ramlog_register(FAR const char *devpath, FAR char *buffer, size_t buflen)
       /* Initialize the non-zero values in the RAM logging device structure */
 
       nxmutex_init(&priv->rl_lock);
-#ifndef CONFIG_RAMLOG_NONBLOCKING
-      nxsem_init(&priv->rl_waitsem, 0, 0);
-#endif
-
-      priv->rl_bufsize = buflen - RAMLOG_HEADER_LEN;
+      list_initialize(&priv->rl_list);
+      priv->rl_bufsize = buflen - sizeof(struct ramlog_header_s);
       priv->rl_header = (FAR struct ramlog_header_s *)buffer;
 
       /* Register the character driver */
@@ -715,9 +721,6 @@ int ramlog_register(FAR const char *devpath, FAR char *buffer, size_t buflen)
       if (ret < 0)
         {
           nxmutex_destroy(&priv->rl_lock);
-#ifndef CONFIG_RAMLOG_NONBLOCKING
-          nxsem_destroy(&priv->rl_waitsem);
-#endif
           kmm_free(priv);
         }
     }
@@ -768,12 +771,9 @@ int ramlog_putc(FAR struct syslog_channel_s *channel, int ch)
   ramlog_readnotify(priv);
 #endif
 
-  if (ramlog_bufferused(priv) >= CONFIG_RAMLOG_POLLTHRESHOLD)
-    {
-      /* Notify all poll/select waiters that they can read from the FIFO */
+  /* Notify all poll/select waiters that they can read from the FIFO */
 
-      ramlog_pollnotify(priv, POLLIN);
-    }
+  ramlog_pollnotify(priv);
 
   /* Return the character added on success */
 
