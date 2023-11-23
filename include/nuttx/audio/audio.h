@@ -434,10 +434,10 @@ struct audio_caps_desc_s
 
 struct audio_info_s
 {
-  uint8_t samplerate;   /* Sample Rate of the audio data */
-  uint8_t channels;     /* Number of channels (1, 2, 5, 7) */
-  uint8_t format;       /* Audio data format */
-  uint8_t subformat;    /* Audio subformat
+  uint32_t samplerate;   /* Sample Rate of the audio data */
+  uint8_t  channels;     /* Number of channels (1, 2, 5, 7) */
+  uint8_t  format;       /* Audio data format */
+  uint8_t  subformat;    /* Audio subformat
                          * (maybe should be combined with format?
                          */
 };
