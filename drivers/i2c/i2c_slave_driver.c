@@ -103,6 +103,14 @@ struct i2c_slave_driver_s
 
   int16_t crefs;
 
+  /* I2C Slave address */
+
+  int addr;
+
+  /* The number of address bits provided (7 or 10) */
+
+  int nbits;
+
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   bool unlinked; /* Indicates if the driver has been unlinked */
 #endif
@@ -150,6 +158,7 @@ static const struct file_operations g_i2cslavefops =
 static int i2c_slave_open(FAR struct file *filep)
 {
   FAR struct i2c_slave_driver_s *priv;
+  int ret;
 
   DEBUGASSERT(filep->f_inode->i_private != NULL);
 
@@ -161,13 +170,36 @@ static int i2c_slave_open(FAR struct file *filep)
 
   nxmutex_lock(&priv->lock);
 
+  /* I2c slave initialize */
+
+  if (priv->dev->ops->setup != NULL && priv->crefs == 0)
+    {
+      ret = I2CS_SETUP(priv->dev);
+      if (ret < 0)
+        {
+          goto out;
+        }
+    }
+
+  /* Set i2c slave address */
+
+  ret = I2CS_SETOWNADDRESS(priv->dev, priv->addr, priv->nbits);
+  if (ret < 0)
+    {
+      if (priv->dev->ops->shutdown != NULL)
+        {
+          ret = I2CS_SHUTDOWN(priv->dev);
+        }
+    }
+
   /* Increment the count of open references on the driver */
 
   priv->crefs++;
   DEBUGASSERT(priv->crefs > 0);
 
+out:
   nxmutex_unlock(&priv->lock);
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -188,6 +220,7 @@ static int i2c_slave_open(FAR struct file *filep)
 static int i2c_slave_close(FAR struct file *filep)
 {
   FAR struct i2c_slave_driver_s *priv;
+  int ret = OK;
 
   DEBUGASSERT(filep->f_inode->i_private != NULL);
 
@@ -198,6 +231,17 @@ static int i2c_slave_close(FAR struct file *filep)
   /* Get exclusive access to the I2C slave driver state structure */
 
   nxmutex_lock(&priv->lock);
+
+  /* I2c slave uninitialize */
+
+  if (priv->dev->ops->shutdown != NULL && priv->crefs == 1)
+    {
+      ret = I2CS_SHUTDOWN(priv->dev);
+      if (ret < 0)
+        {
+          goto out;
+        }
+    }
 
   /* Decrement the count of open references on the driver */
 
@@ -213,8 +257,9 @@ static int i2c_slave_close(FAR struct file *filep)
     }
 #endif
 
+out:
   nxmutex_unlock(&priv->lock);
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -494,12 +539,8 @@ int i2c_slave_register(FAR struct i2c_slave_s *dev, int bus, int addr,
   nxsem_init(&priv->wait, 0, 0);
   nxmutex_init(&priv->lock);
   priv->dev = dev;
-
-  ret = I2CS_SETOWNADDRESS(priv->dev, addr, nbits);
-  if (ret < 0)
-    {
-      goto out;
-    }
+  priv->addr = addr;
+  priv->nbits = nbits;
 
   ret = I2CS_READ(priv->dev, priv->read_buffer,
                   CONFIG_I2C_SLAVE_READBUFSIZE);
