@@ -30,6 +30,7 @@ else
   NEWLIB_TARBALL=$(NEWLIB_BASENAME)-$(NEWLIB_VERSION).tar.gz
 endif
 
+ifeq ($(wildcard newlib/newlib/.git),)
 $(NEWLIB_BASENAME)-$(NEWLIB_VERSION).tar.gz:
 	$(call DOWNLOAD,$(NEWLIB_URL_BASE),$(NEWLIB_TARBALL),$(NEWLIB_BASENAME)-$(NEWLIB_VERSION).tar.gz)
 
@@ -39,17 +40,19 @@ newlib/newlib: $(NEWLIB_BASENAME)-$(NEWLIB_VERSION).tar.gz
 	$(Q) patch -p0 < newlib/0001-newlib-libm-fix-__RCSID-build-error.patch
 	$(Q) patch -p0 < newlib/0002-newlib-libm-remove-include-reent.h.patch
 	$(Q) touch $@
+endif
 
-ifeq ($(wildcard newlib/newlib/.git),)
 distclean::
+	$(Q) $(DIRUNLINK) $(TOPDIR)/include/newlib
+ifeq ($(wildcard newlib/newlib/.git),)
 	$(call DELFILE, $(NEWLIB_BASENAME)-$(NEWLIB_VERSION).tar.gz)
 	$(call DELDIR, newlib/newlib)
-
-context:: newlib/newlib
-else
-distclean::
-context::
 endif
+
+$(TOPDIR)/include/newlib: newlib/newlib
+	$(Q) $(DIRLINK) $(CURDIR)/newlib/include $@
+
+context:: $(TOPDIR)/include/newlib
 
 CSRCS += $(wildcard newlib/newlib/newlib/libm/common/*.c)
 CSRCS += $(wildcard newlib/newlib/newlib/libm/complex/*.c)

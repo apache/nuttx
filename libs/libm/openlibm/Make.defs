@@ -21,6 +21,7 @@
 
 OPENLIBM_VERSION=0.8.1
 
+ifeq ($(wildcard openlibm/openlibm/.git),)
 openlibm-$(OPENLIBM_VERSION).zip:
 	$(call DOWNLOAD,https://github.com/JuliaMath/openlibm/archive/refs/tags,v$(OPENLIBM_VERSION).zip,openlibm.zip)
 
@@ -29,16 +30,19 @@ openlibm/openlibm: openlibm-$(OPENLIBM_VERSION).zip
 	$(Q) mv openlibm-$(OPENLIBM_VERSION) openlibm/openlibm
 	$(Q) patch -p0 < openlibm/0001-fix-build-float_t-error-float_t-has-not-been-declare.patch
 	$(Q) patch -p0 < openlibm/0002-add-math.h-and-complex.h-to-openlibm.patch
+endif
 
-ifeq ($(wildcard openlibm/openlibm/.git),)
 distclean::
+	$(Q) $(DIRUNLINK) $(TOPDIR)/include/openlibm
+ifeq ($(wildcard openlibm/openlibm/.git),)
 	$(call DELFILE, openlibm.zip)
 	$(call DELDIR, openlibm/openlibm)
-context:: openlibm/openlibm
-else
-distclean::
-context::
 endif
+
+$(TOPDIR)/include/openlibm: openlibm/openlibm
+	$(Q) $(DIRLINK) $(CURDIR)/openlibm/openlibm/include $@
+
+context:: $(TOPDIR)/include/openlibm
 
 # OS-specific stuff
 # Get ARCH, it is used to read source code file list form $(ARCH)/Make.files
