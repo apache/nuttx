@@ -24,6 +24,10 @@ ifeq ($(CONFIG_THERMAL),y)
 
 CSRCS += thermal_core.c
 
+ifeq ($(CONFIG_THERMAL_GOVERNOR_STEP_WISE),y)
+CSRCS += thermal_step_wise.c
+endif
+
 DEPPATH += --dep-path thermal
 VPATH += thermal
 
