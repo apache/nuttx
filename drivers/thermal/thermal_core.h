@@ -73,4 +73,8 @@ int thermal_zone_get_trip_hyst(FAR struct thermal_zone_device_s *zdev,
                                int trip,
                                FAR int *hyst);
 
+/* Governor */
+
+int thermal_register_step_wise_governor(void);
+
 #endif /* __DRIVERS_THERMAL_THERMAL_CORE_H */

@@ -17,4 +17,10 @@ config THERMAL_DEFAULT_GOVERNOR
 	---help---
 		Default governor name.
 
+config THERMAL_GOVERNOR_STEP_WISE
+	bool "Enable step wise governor"
+	default y
+	---help---
+		Enable step wise governor.
+
 endif # THERMAL
