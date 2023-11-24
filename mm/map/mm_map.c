@@ -84,7 +84,7 @@ void mm_map_unlock(void)
  * Name: mm_map_initialize
  *
  * Description:
- *   Allocates a task group specific mm_map stucture. Called when the group
+ *   Allocates a task group specific mm_map structure. Called when the group
  *   is initialized
  *
  ****************************************************************************/
@@ -119,7 +119,7 @@ void mm_map_initialize(FAR struct mm_map_s *mm, bool kernel)
  * Name: mm_map_destroy
  *
  * Description:
- *   De-allocates a task group specific mm_map stucture and the mm_map_mutex
+ *   De-allocates a task group specific mm_map structure and the mm_map_mutex
  *
  ****************************************************************************/
 

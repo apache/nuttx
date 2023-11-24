@@ -293,7 +293,7 @@ out_with_lock:
  * Name: mempool_free
  *
  * Description:
- *   Release an memory block to the pool.
+ *   Release a memory block to the pool.
  *
  * Input Parameters:
  *   pool - Address of the memory pool to be used.

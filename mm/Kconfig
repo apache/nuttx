@@ -220,11 +220,11 @@ config MM_HEAP_MEMPOOL_EXPAND_SIZE
 		pool with insufficient memory in the multi-level memory pool.
 
 config MM_HEAP_MEMPOOL_DICTIONARY_EXPAND_SIZE
-	int "The expand size for multiple mempool's dictonary"
+	int "The expand size for multiple mempool's dictionary"
 	default MM_HEAP_MEMPOOL_EXPAND_SIZE
 	depends on MM_HEAP_MEMPOOL_THRESHOLD != 0
 	---help---
-		This size describes the multiple mempool dictonary expend.
+		This size describes the multiple mempool dictionary expand.
 
 config MM_HEAP_MEMPOOL_CHUNK_SIZE
 	int "The multiples pool chunk size"

@@ -209,7 +209,7 @@ static_assert(MM_SIZEOF_ALLOCNODE <= MM_MIN_CHUNK,
 
 static_assert(MM_ALIGN >= sizeof(uintptr_t) &&
               (MM_ALIGN & MM_GRAN_MASK) == 0,
-              "Error memory aligment\n");
+              "Error memory alignment\n");
 
 struct mm_delaynode_s
 {
