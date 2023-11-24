@@ -237,11 +237,17 @@ psock_stream_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   /* Verify that this is a connected peer socket */
 
-  if (conn->lc_state != LOCAL_STATE_CONNECTED ||
-      conn->lc_infile.f_inode == NULL)
+  if (conn->lc_state != LOCAL_STATE_CONNECTED)
     {
       nerr("ERROR: not connected\n");
       return -ENOTCONN;
+    }
+
+  /* Check shutdown state */
+
+  if (conn->lc_infile.f_inode == NULL)
+    {
+      return 0;
     }
 
   /* If it is non-blocking mode, the data in fifo is 0 and
