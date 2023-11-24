@@ -21,9 +21,7 @@ Libraries in NuttX are very special creatures.  They have these properties:
    For example, ``sem_wait()`` is both a cancellation point and modifies the
    errno value.  So within the FLAT build and without kernel version for
    the PROTECTED and KERNEL builds, the special internal OS interface
-   ``nxsem_wait()`` must be used.  Within libraries, the macro ``_SEM_WAIT()``
-   (as defined in ``include/nuttx/semaphore.h``) is used instead.  The
-   definition of this macro accounts for the different usage environments.
+   ``nxsem_wait()`` must be used.
 
 NOTE:  The libraries under ``libs/`` build differently from other NuttX
 components:  There are no build-related files in the ``libs/`` directory; it

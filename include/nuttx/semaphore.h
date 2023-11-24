@@ -57,51 +57,6 @@
      {(c), (f), SEM_WAITLIST_INITIALIZER}
 #endif /* CONFIG_PRIORITY_INHERITANCE */
 
-/* Most internal nxsem_* interfaces are not available in the user space in
- * PROTECTED and KERNEL builds.  In that context, the application semaphore
- * interfaces must be used.  The differences between the two sets of
- * interfaces are:  (1) the nxsem_* interfaces do not cause cancellation
- * points and (2) they do not modify the errno variable.
- *
- * This is only important when compiling libraries (libc or libnx) that are
- * used both by the OS (libkc.a and libknx.a) or by the applications
- * (libc.a and libnx.a).  In that case, the correct interface must be
- * used for the build context.
- *
- * REVISIT:  In the flat build, the same functions must be used both by
- * the OS and by applications.  We have to use the normal user functions
- * in this case or we will fail to set the errno or fail to create the
- * cancellation point.
- */
-
-#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
-#  define _SEM_INIT(s,p,c)      nxsem_init(s,p,c)
-#  define _SEM_DESTROY(s)       nxsem_destroy(s)
-#  define _SEM_WAIT(s)          nxsem_wait(s)
-#  define _SEM_TRYWAIT(s)       nxsem_trywait(s)
-#  define _SEM_TIMEDWAIT(s,t)   nxsem_timedwait(s,t)
-#  define _SEM_CLOCKWAIT(s,c,t) nxsem_clockwait(s,c,t)
-#  define _SEM_POST(s)          nxsem_post(s)
-#  define _SEM_GETVALUE(s,v)    nxsem_get_value(s,v)
-#  define _SEM_GETPROTOCOL(s,p) nxsem_get_protocol(s,p)
-#  define _SEM_SETPROTOCOL(s,p) nxsem_set_protocol(s,p)
-#  define _SEM_ERRNO(r)         (-(r))
-#  define _SEM_ERRVAL(r)        (r)
-#else
-#  define _SEM_INIT(s,p,c)      sem_init(s,p,c)
-#  define _SEM_DESTROY(s)       sem_destroy(s)
-#  define _SEM_WAIT(s)          sem_wait(s)
-#  define _SEM_TRYWAIT(s)       sem_trywait(s)
-#  define _SEM_TIMEDWAIT(s,t)   sem_timedwait(s,t)
-#  define _SEM_CLOCKWAIT(s,c,t) sem_clockwait(s,c,t)
-#  define _SEM_GETVALUE(s,v)    sem_getvalue(s,v)
-#  define _SEM_POST(s)          sem_post(s)
-#  define _SEM_GETPROTOCOL(s,p) sem_getprotocol(s,p)
-#  define _SEM_SETPROTOCOL(s,p) sem_setprotocol(s,p)
-#  define _SEM_ERRNO(r)         errno
-#  define _SEM_ERRVAL(r)        (-errno)
-#endif
-
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
