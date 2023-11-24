@@ -128,20 +128,12 @@
 #define SCHED_NOTE_IP \
         ({ __label__ __here; __here: (unsigned long)&&__here; })
 
-#define sched_note_string(tag, buf) \
-        sched_note_string_ip(tag, SCHED_NOTE_IP, buf)
 #define sched_note_event(tag, event, buf, len) \
         sched_note_event_ip(tag, SCHED_NOTE_IP, event, buf, len)
-#define sched_note_dump(tag, buf, len) \
-        sched_note_event_ip(tag, SCHED_NOTE_IP, NOTE_DUMP_BINARY, buf, len)
 #define sched_note_vprintf(tag, fmt, va) \
         sched_note_vprintf_ip(tag, SCHED_NOTE_IP, fmt, va)
-#define sched_note_vbprintf(tag, fmt, va) \
-        sched_note_vbprintf_ip(tag, SCHED_NOTE_IP, fmt, va)
 #define sched_note_printf(tag, fmt, ...) \
         sched_note_printf_ip(tag, SCHED_NOTE_IP, fmt, ##__VA_ARGS__)
-#define sched_note_bprintf(tag, fmt, ...) \
-        sched_note_bprintf_ip(tag, SCHED_NOTE_IP, fmt, ##__VA_ARGS__)
 
 #define sched_note_begin(tag) \
         sched_note_event(tag, NOTE_DUMP_BEGIN, NULL, 0)
@@ -203,8 +195,8 @@ enum note_type_e
   NOTE_HEAP_REMOVE,
   NOTE_HEAP_ALLOC,
   NOTE_HEAP_FREE,
-  NOTE_DUMP_STRING,
-  NOTE_DUMP_BINARY,
+  NOTE_DUMP_PRINTF,
+
   NOTE_DUMP_BEGIN,
   NOTE_DUMP_END,
   NOTE_DUMP_MARK,
@@ -413,25 +405,26 @@ struct note_heap_s
   size_t used;
 };
 
-struct note_string_s
+struct note_printf_s
 {
-  struct note_common_s nst_cmn;      /* Common note parameters */
-  uintptr_t nst_ip;                  /* Instruction pointer called from */
-  char    nst_data[1];               /* String data terminated by '\0' */
+  struct note_common_s npt_cmn; /* Common note parameters */
+  uintptr_t npt_ip;             /* Instruction pointer called from */
+  FAR const char *npt_fmt;      /* Printf format string */
+  char npt_data[1];             /* Print arguments */
 };
 
-#define SIZEOF_NOTE_STRING(n) (sizeof(struct note_string_s) + \
-                               (n) * sizeof(char))
+#define SIZEOF_NOTE_PRINTF(n) (sizeof(struct note_printf_s) + \
+                              ((n) - 1) * sizeof(uint8_t))
 
-struct note_binary_s
+struct note_event_s
 {
-  struct note_common_s nbi_cmn;      /* Common note parameters */
-  uintptr_t nbi_ip;                  /* Instruction pointer called from */
-  uint8_t nbi_data[1];               /* Binary data */
+  struct note_common_s nev_cmn;      /* Common note parameters */
+  uintptr_t nev_ip;                  /* Instruction pointer called from */
+  uint8_t nev_data[1];               /* Event data */
 };
 
-#define SIZEOF_NOTE_BINARY(n) (sizeof(struct note_binary_s) + \
-                               ((n) - 1) * sizeof(uint8_t))
+#define SIZEOF_NOTE_EVENT(n) (sizeof(struct note_event_s) + \
+                             ((n)) * sizeof(uint8_t))
 
 struct note_counter_s
 {
@@ -589,24 +582,16 @@ void sched_note_heap(uint8_t event, FAR void *heap, FAR void *mem,
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
-void sched_note_string_ip(uint32_t tag, uintptr_t ip, FAR const char *buf);
 void sched_note_event_ip(uint32_t tag, uintptr_t ip, uint8_t event,
-                        FAR const void *buf, size_t len);
+                         FAR const void *buf, size_t len);
 void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                            va_list va) printf_like(3, 0);
-void sched_note_vbprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
-                            va_list va) printf_like(3, 0);
 void sched_note_printf_ip(uint32_t tag, uintptr_t ip,
                           FAR const char *fmt, ...) printf_like(3, 4);
-void sched_note_bprintf_ip(uint32_t tag, uintptr_t ip,
-                           FAR const char *fmt, ...) printf_like(3, 4);
 #else
-#  define sched_note_string_ip(t,ip,b)
 #  define sched_note_event_ip(t,ip,e,b,l)
 #  define sched_note_vprintf_ip(t,ip,f,v)
-#  define sched_note_vbprintf_ip(t,ip,f,v)
 #  define sched_note_printf_ip(t,ip,f,...)
-#  define sched_note_bprintf_ip(t,ip,f,...)
 #endif /* CONFIG_SCHED_INSTRUMENTATION_DUMP */
 
 #if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)

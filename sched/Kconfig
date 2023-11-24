@@ -1306,12 +1306,9 @@ config SCHED_INSTRUMENTATION_DUMP
 	---help---
 		Use note dump for instrumentation.
 
-			void sched_note_string(FAR const char *buf);
-			void sched_note_dump(uint32_t module, uint8_t event, FAR const void *buf, size_t len);
-			void sched_note_vprintf(FAR const char *fmt, va_list va);
-			void sched_note_vbprintf(uint32_t module, uint8_t event, FAR const char *fmt, va_list va);
-			void sched_note_printf(FAR const char *fmt, ...) printf_like(1, 2);
-			void sched_note_bprintf(uint32_t module, uint8_t event, FAR const char *fmt, ...);
+			void sched_note_event_ip(uint32_t tag, uintptr_t ip, uint8_t event, FAR const void *buf, size_t len);
+			void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt, va_list va) printf_like(3, 0);
+			void sched_note_printf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt, ...) printf_like(3, 4);
 
 config SCHED_INSTRUMENTATION_FUNCTION
 	bool "Enable function auto-tracing"
