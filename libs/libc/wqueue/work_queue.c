@@ -96,7 +96,7 @@ static int work_qqueue(FAR struct usr_wqueue_s *wqueue,
       /* Add the watchdog to the head == tail of the queue. */
 
       dq_addfirst(&work->u.s.dq, &wqueue->q);
-      _SEM_POST(&wqueue->wake);
+      nxsem_post(&wqueue->wake);
     }
 
   /* There are other active watchdogs in the timer queue */
@@ -127,10 +127,10 @@ static int work_qqueue(FAR struct usr_wqueue_s *wqueue,
           /* Insert the watchdog at the head of the list */
 
           dq_addfirst(&work->u.s.dq, &wqueue->q);
-          _SEM_GETVALUE(&wqueue->wake, &semcount);
+          nxsem_get_value(&wqueue->wake, &semcount);
           if (semcount < 1)
             {
-              _SEM_POST(&wqueue->wake);
+              nxsem_post(&wqueue->wake);
             }
         }
       else
