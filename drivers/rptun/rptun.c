@@ -68,12 +68,8 @@ struct rptun_priv_s
   rmutex_t                     lock;
   struct metal_list            node;
   sem_t                        semtx;
-#ifdef CONFIG_RPTUN_WORKQUEUE
-  struct work_s                work;
-#else
   sem_t                        semrx;
   pid_t                        tid;
-#endif
 #ifdef CONFIG_RPTUN_PM
   bool                         stay;
 #endif
@@ -239,25 +235,6 @@ static void rptun_worker(FAR void *arg)
   remoteproc_get_notification(&priv->rproc, RPTUN_NOTIFY_ALL);
 }
 
-#ifdef CONFIG_RPTUN_WORKQUEUE
-static void rptun_wakeup_rx(FAR struct rptun_priv_s *priv)
-{
-  work_queue(HPWORK, &priv->work, rptun_worker, priv, 0);
-}
-
-static void rptun_in_recursive(int tid, FAR void *arg)
-{
-  *((FAR bool *)arg) = (nxsched_gettid() == tid);
-}
-
-static bool rptun_is_recursive(FAR struct rptun_priv_s *priv)
-{
-  bool in = false;
-  work_foreach(HPWORK, rptun_in_recursive, &in);
-  return in;
-}
-
-#else
 static int rptun_thread(int argc, FAR char *argv[])
 {
   FAR struct rptun_priv_s *priv;
@@ -294,7 +271,6 @@ static bool rptun_is_recursive(FAR struct rptun_priv_s *priv)
 {
   return nxsched_gettid() == priv->tid;
 }
-#endif
 
 static void rptun_wakeup_tx(FAR struct rptun_priv_s *priv)
 {
@@ -1200,10 +1176,8 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
   struct metal_init_params params = METAL_INIT_DEFAULTS;
   FAR struct rptun_priv_s *priv;
   static bool onceinit;
-#ifndef CONFIG_RPTUN_WORKQUEUE
   FAR char *argv[3];
   char arg1[19];
-#endif
   char name[32];
   int ret;
 
@@ -1239,13 +1213,6 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
     }
 
   nxsem_init(&priv->semtx, 0, 0);
-
-#ifdef CONFIG_RPTUN_WORKQUEUE
-  if (RPTUN_IS_AUTOSTART(dev))
-    {
-      work_queue(HPWORK, &priv->work, rptun_start_worker, priv, 0);
-    }
-#else
   nxsem_init(&priv->semrx, 0, 0);
   snprintf(arg1, sizeof(arg1), "0x%" PRIxPTR, (uintptr_t)priv);
   argv[0] = (void *)RPTUN_GET_CPUNAME(dev);
@@ -1261,7 +1228,6 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
       nxsem_destroy(&priv->semrx);
       goto err_driver;
     }
-#endif
 
   /* Add priv to list */
 
