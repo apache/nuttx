@@ -309,7 +309,7 @@ void uart_recvchars(FAR uart_dev_t *dev)
 
   if (signo != 0)
     {
-      nxsig_kill(dev->pid, signo);
+      nxsig_tgkill(-1, dev->pid, signo);
     }
 #endif
 }
