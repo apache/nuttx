@@ -226,10 +226,10 @@ int rptun_ping(FAR struct rpmsg_endpoint *ept,
   return 0;
 }
 
-int rptun_ping_init(FAR struct rpmsg_virtio_device *rvdev,
+int rptun_ping_init(FAR struct rpmsg_device *rdev,
                     FAR struct rpmsg_endpoint *ept)
 {
-  return rpmsg_create_ept(ept, &rvdev->rdev, RPTUN_PING_EPT_NAME,
+  return rpmsg_create_ept(ept, rdev, RPTUN_PING_EPT_NAME,
                           RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
                           rptun_ping_ept_cb, NULL);
 }
