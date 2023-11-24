@@ -106,6 +106,7 @@ class Nxsetregs(gdb.Command):
             if i >= tcbinfo["regs_num"]:
                 return
 
+            gdb.execute("select-frame 0")
             if tcbinfo["reg_off"]["p"][i] != UINT16_MAX:
                 value = gdb.Value(regs + tcbinfo["reg_off"]["p"][i]).cast(
                     gdb.lookup_type("uintptr_t").pointer()
