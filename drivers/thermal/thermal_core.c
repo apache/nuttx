@@ -839,5 +839,14 @@ int thermal_init(void)
 {
   int ret = OK;
 
+#ifdef CONFIG_THERMAL_GOVERNOR_STEP_WISE
+  ret = thermal_register_step_wise_governor();
+  if (ret < 0)
+    {
+      therr("Register step wise governor failed!\n");
+      return ret;
+    }
+#endif
+
   return ret;
 }
