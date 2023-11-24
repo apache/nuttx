@@ -416,6 +416,36 @@ int nxsig_queue(int pid, int signo, union sigval value);
 int nxsig_kill(pid_t pid, int signo);
 
 /****************************************************************************
+ * Name: nxsig_tgkill
+ *
+ * Description:
+ *   The tgkill() system call can be used to send any signal to a thread.
+ *   See kill() for further information as this is just a simple wrapper
+ *   around the kill() function.
+ *
+ * Input Parameters:
+ *   gid   - The id of the task to receive the signal.
+ *   tid   - The id of the thread to receive the signal. Only positive,
+ *           non-zero values of 'tid' are supported.
+ *   signo - The signal number to send.  If 'signo' is zero, no signal is
+ *           sent, but all error checking is performed.
+ *
+ * Returned Value:
+ *    On success the signal was send and zero is returned. On error -1 is
+ *    returned, and errno is set one of the following error numbers:
+ *
+ *    EINVAL An invalid signal was specified.
+ *    EPERM  The thread does not have permission to send the
+ *           signal to the target thread.
+ *    ESRCH  No thread could be found corresponding to that
+ *           specified by the given thread ID
+ *    ENOSYS Do not support sending signals to process groups.
+ *
+ ****************************************************************************/
+
+int nxsig_tgkill(pid_t pid, pid_t tid, int signo);
+
+/****************************************************************************
  * Name: nxsig_waitinfo
  *
  * Description:
