@@ -711,6 +711,151 @@ static int noteram_dump_sched_switch(FAR struct lib_outstream_s *s,
 #endif
 
 /****************************************************************************
+ * Name: noteram_dump_printf
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
+static int noteram_dump_printf(FAR struct lib_outstream_s *s,
+                               FAR struct note_printf_s *note)
+{
+  begin_packed_struct union
+    {
+      int i;
+      long l;
+#ifdef CONFIG_HAVE_LONG_LONG
+      long long ll;
+#endif
+      intmax_t im;
+      size_t sz;
+      ptrdiff_t pd;
+      uintptr_t p;
+#ifdef CONFIG_HAVE_DOUBLE
+      double d;
+#  ifdef CONFIG_HAVE_LONG_DOUBLE
+      long double ld;
+#  endif
+#endif
+    }
+
+  end_packed_struct *var;
+  FAR const char *p = note->npt_fmt;
+  FAR char *data = note->npt_data;
+  char fmtstr[64];
+  bool infmt = false;
+  size_t offset = 0;
+  size_t ret = 0;
+  size_t len = 0;
+  char c;
+
+  while ((c = *p++) != '\0')
+    {
+      if (c != '%' && !infmt)
+        {
+          lib_stream_putc(s, c);
+          ret++;
+          continue;
+        }
+
+      if (!infmt)
+        {
+          len = 0;
+          infmt = true;
+          memset(fmtstr, 0, sizeof(fmtstr));
+        }
+
+      var = (FAR void *)(note->npt_data + offset);
+      fmtstr[len++] = c;
+
+      if (c == 'c' || c == 'd' || c == 'i' || c == 'u' ||
+          c == 'o' || c == 'x' || c == 'X')
+        {
+          if (*(p - 2) == 'j')
+            {
+              offset += sizeof(var->im);
+              ret += lib_sprintf(s, fmtstr, var->im);
+            }
+#ifdef CONFIG_HAVE_LONG_LONG
+          else if (*(p - 2) == 'l' && *(p - 3) == 'l')
+            {
+              offset += sizeof(var->ll);
+              ret += lib_sprintf(s, fmtstr, var->ll);
+            }
+#endif
+          else if (*(p - 2) == 'l')
+            {
+              offset += sizeof(var->l);
+              ret += lib_sprintf(s, fmtstr, var->l);
+            }
+          else if (*(p - 2) == 'z')
+            {
+              offset += sizeof(var->sz);
+              ret += lib_sprintf(s, fmtstr, var->sz);
+            }
+          else if (*(p - 2) == 't')
+            {
+              offset += sizeof(var->pd);
+              ret += lib_sprintf(s, fmtstr, var->pd);
+            }
+          else
+            {
+              offset += sizeof(var->i);
+              ret += lib_sprintf(s, fmtstr, var->i);
+            }
+
+          infmt = false;
+        }
+      else if (c == 'e' || c == 'f' || c == 'g' || c == 'a' ||
+              c == 'A' || c == 'E' || c == 'F' || c == 'G')
+        {
+#ifdef CONFIG_HAVE_DOUBLE
+#  ifdef CONFIG_HAVE_LONG_DOUBLE
+          if (*(p - 2) == 'L')
+            {
+              offset += sizeof(var->ld);
+              ret += lib_sprintf(s, fmtstr, var->ld);
+            }
+          else
+#  endif
+            {
+              offset += sizeof(var->d);
+              ret += lib_sprintf(s, fmtstr, var->d);
+            }
+
+          infmt = false;
+        }
+#endif
+      else if (c == '*')
+        {
+          itoa(var->i, fmtstr + len - 1, 10);
+          len = strlen(fmtstr);
+          offset += sizeof(var->i);
+        }
+      else if (c == 's')
+        {
+          FAR const char *value = data + offset;
+          offset += strlen(value) + 1;
+          ret += lib_sprintf(s, fmtstr, value);
+          infmt = false;
+        }
+      else if (c == 'p')
+        {
+          offset += sizeof(var->p);
+          ret += lib_sprintf(s, fmtstr, var->p);
+          infmt = false;
+        }
+    }
+
+  if (*(p - 2) != '\n')
+    {
+      lib_stream_putc(s, '\n');
+      ret++;
+    }
+
+  return ret;
+}
+#endif
+
+/****************************************************************************
  * Name: noteram_dump_one
  ****************************************************************************/
 
@@ -954,42 +1099,30 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
-    case NOTE_DUMP_STRING:
+    case NOTE_DUMP_PRINTF:
       {
-        FAR struct note_string_s *nst;
-        uintptr_t ip;
+        FAR struct note_printf_s *npt;
 
-        nst = (FAR struct note_string_s *)p;
-        ret += noteram_dump_header(s, note, ctx);
-        ip = nst->nst_ip;
-
-        if (nst->nst_data[1] == '\0' &&
-            (nst->nst_data[0] == 'B' || nst->nst_data[0] == 'E'))
-          {
-            ret += lib_sprintf(s, "tracing_mark_write: %c|%d|%pS\n",
-                               nst->nst_data[0], pid, (FAR void *)ip);
-          }
-        else
-          {
-            ret += lib_sprintf(s, "tracing_mark_write: %s\n",
-                               nst->nst_data);
-          }
+        npt = (FAR struct note_printf_s *)p;
+        ret += noteram_dump_header(s, &npt->npt_cmn, ctx);
+        ret += lib_sprintf(s, "tracing_mark_write: ");
+        ret += noteram_dump_printf(s, npt);
       }
       break;
     case NOTE_DUMP_BEGIN:
     case NOTE_DUMP_END:
       {
-        FAR struct note_binary_s *nbi = (FAR struct note_binary_s *)p;
+        FAR struct note_event_s *nbi = (FAR struct note_event_s *)p;
         char c = note->nc_type == NOTE_DUMP_BEGIN ? 'B' : 'E';
         int len = note->nc_length - SIZEOF_NOTE_EVENT(0);
         uintptr_t ip;
 
-        ip = nbi->nbi_ip;
-        ret += noteram_dump_header(s, &nbi->nbi_cmn, ctx);
+        ip = nbi->nev_ip;
+        ret += noteram_dump_header(s, &nbi->nev_cmn, ctx);
         if (len > 0)
           {
             ret += lib_sprintf(s, "tracing_mark_write: %c|%d|%.*s\n",
-                               c, pid, len, (FAR const char *)nbi->nbi_data);
+                               c, pid, len, (FAR const char *)nbi->nev_data);
           }
         else
           {
@@ -1000,43 +1133,21 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
       break;
     case NOTE_DUMP_MARK:
       {
-        int len = note->nc_length - sizeof(struct note_binary_s);
-        FAR struct note_binary_s *nbi = (FAR struct note_binary_s *)p;
-        ret += noteram_dump_header(s, &nbi->nbi_cmn, ctx);
+        int len = note->nc_length - sizeof(struct note_event_s);
+        FAR struct note_event_s *nbi = (FAR struct note_event_s *)p;
+        ret += noteram_dump_header(s, &nbi->nev_cmn, ctx);
         ret += lib_sprintf(s, "tracing_mark_write: I|%d|%.*s\n",
-                           pid, len, (FAR const char *)nbi->nbi_data);
+                           pid, len, (FAR const char *)nbi->nev_data);
       }
       break;
     case NOTE_DUMP_COUNTER:
       {
-        FAR struct note_binary_s *nbi = (FAR struct note_binary_s *)p;
+        FAR struct note_event_s *nbi = (FAR struct note_event_s *)p;
         FAR struct note_counter_s *counter;
-        counter = (FAR struct note_counter_s *)nbi->nbi_data;
-        ret += noteram_dump_header(s, &nbi->nbi_cmn, ctx);
+        counter = (FAR struct note_counter_s *)nbi->nev_data;
+        ret += noteram_dump_header(s, &nbi->nev_cmn, ctx);
         ret += lib_sprintf(s, "tracing_mark_write: C|%d|%s|%ld\n",
                            pid, counter->name, counter->value);
-      }
-      break;
-    case NOTE_DUMP_BINARY:
-      {
-        FAR struct note_binary_s *nbi;
-        uint8_t count;
-        uintptr_t ip;
-        int i;
-
-        nbi = (FAR struct note_binary_s *)p;
-        ret += noteram_dump_header(s, note, ctx);
-        count = note->nc_length - sizeof(struct note_binary_s) + 1;
-        ip = nbi->nbi_ip;
-
-        ret += lib_sprintf(s, "tracing_mark_write: %pS: count=%u",
-                           (FAR void *)ip, count);
-        for (i = 0; i < count; i++)
-          {
-            ret += lib_sprintf(s, " 0x%x", nbi->nbi_data[i]);
-          }
-
-        ret += lib_sprintf(s, "\n");
       }
       break;
 #endif
