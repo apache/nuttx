@@ -186,11 +186,17 @@ static ssize_t local_send(FAR struct socket *psock,
            * opened the outgoing FIFO for write-only access.
            */
 
-          if (peer->lc_state != LOCAL_STATE_CONNECTED ||
-              peer->lc_outfile.f_inode == NULL)
+          if (peer->lc_state != LOCAL_STATE_CONNECTED)
             {
               nerr("ERROR: not connected\n");
               return -ENOTCONN;
+            }
+
+          /* Check shutdown state */
+
+          if (peer->lc_outfile.f_inode == NULL)
+            {
+              return -EPIPE;
             }
 
           /* Send the packet */
