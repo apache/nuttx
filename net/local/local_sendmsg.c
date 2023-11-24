@@ -431,20 +431,13 @@ errout_with_lock:
 ssize_t local_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
                       int flags)
 {
-  FAR struct local_conn_s *conn = psock->s_conn;
   FAR const struct sockaddr *to = msg->msg_name;
   FAR const struct iovec *buf = msg->msg_iov;
   socklen_t tolen = msg->msg_namelen;
   size_t len = msg->msg_iovlen;
 
-  /* Check shutdown state */
-
-  if (conn->lc_outfile.f_inode == NULL)
-    {
-      return -EPIPE;
-    }
-
 #ifdef CONFIG_NET_LOCAL_SCM
+  FAR struct local_conn_s *conn = psock->s_conn;
   int count = 0;
 
   if (msg->msg_control &&
