@@ -148,19 +148,20 @@ class Nxinfothreads(gdb.Command):
                 % ("Tid", "Pid", "Cpu", "Thread", "Info", "Frame")
             )
         else:
-            gdb.write("%-4s %-4s %-21s %-80s %-30s\n" % ("Tid", "Pid", "Thread", "Info", "Frame"))
+            gdb.write("%-5s %-4s %-4s %-21s %-80s %-30s\n" % ("Index", "Tid", "Pid", "Thread", "Info", "Frame"))
 
         for i in range(0, npidhash):
             if pidhash[i] == 0:
                 continue
 
             pid = pidhash[i]["group"]["tg_pid"]
+            tid = pidhash[i]["pid"]
 
             if pidhash[i]["task_state"] == gdb.parse_and_eval("TSTATE_TASK_RUNNING"):
-                id = "*%s" % i
+                index = "*%s" % i
                 pc = int(gdb.parse_and_eval("$pc"))
             else:
-                id = " %s" % i
+                index = " %s" % i
                 pc = get_pc_value(pidhash[i])
 
             thread = "Thread 0x%x" % pidhash[i]
@@ -203,10 +204,10 @@ class Nxinfothreads(gdb.Command):
             if utils.is_target_smp():
                 cpu = "%d" % pidhash[i]["cpu"]
                 gdb.write(
-                    "%-4s %-4s %-4s %-21s %-80s %-30s\n" % (id, pid, cpu, thread, info, frame)
+                    "%-5s %-4s %-4s %-4s %-21s %-80s %-30s\n" % (index, tid, pid, cpu, thread, info, frame)
                 )
             else:
-                gdb.write("%-4s %-4s %-21s %-80s %-30s\n" % (id, pid, thread, info, frame))
+                gdb.write("%-5s %-4s %-4s %-21s %-80s %-30s\n" % (index, tid, pid, thread, info, frame))
 
 
 class Nxthread(gdb.Command):
