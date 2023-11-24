@@ -40,7 +40,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tgkill
+ * Name: nxsig_tgkill
  *
  * Description:
  *   The tgkill() system call can be used to send any signal to a thread.
@@ -67,9 +67,8 @@
  *
  ****************************************************************************/
 
-int tgkill(pid_t pid, pid_t tid, int signo)
+int nxsig_tgkill(pid_t pid, pid_t tid, int signo)
 {
-#ifdef HAVE_GROUP_MEMBERS
   /* If group members are supported then tgkill() differs from kill().
    * kill(), in this case, must follow the POSIX rules for delivery of
    * signals in the group environment.  Otherwise, kill(), like tgkill()
@@ -125,14 +124,47 @@ int tgkill(pid_t pid, pid_t tid, int signo)
   return OK;
 
 errout:
-  set_errno(-ret);
-  return ERROR;
+  return ret;
+}
 
-#else
-  /* If group members are not supported then tgkill is basically the
-   * same as kill() other than the sign of the returned value.
-   */
+/****************************************************************************
+ * Name: tgkill
+ *
+ * Description:
+ *   The tgkill() system call can be used to send any signal to a thread.
+ *   See kill() for further information as this is just a simple wrapper
+ *   around the kill() function.
+ *
+ * Input Parameters:
+ *   gid   - The id of the task to receive the signal.
+ *   tid   - The id of the thread to receive the signal. Only positive,
+ *           non-zero values of 'tid' are supported.
+ *   signo - The signal number to send.  If 'signo' is zero, no signal is
+ *           sent, but all error checking is performed.
+ *
+ * Returned Value:
+ *    On success the signal was send and zero is returned. On error -1 is
+ *    returned, and errno is set one of the following error numbers:
+ *
+ *    EINVAL An invalid signal was specified.
+ *    EPERM  The thread does not have permission to send the
+ *           signal to the target thread.
+ *    ESRCH  No thread could be found corresponding to that
+ *           specified by the given thread ID
+ *    ENOSYS Do not support sending signals to process groups.
+ *
+ ****************************************************************************/
 
-  return kill(tid, signo);
-#endif
+int tgkill(pid_t pid, pid_t tid, int signo)
+{
+  int ret;
+
+  ret = nxsig_tgkill(pid, tid, signo);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
+    }
+
+  return ret;
 }
