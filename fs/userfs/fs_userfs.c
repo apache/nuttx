@@ -162,6 +162,7 @@ const struct mountpt_operations g_userfs_operations =
   userfs_ioctl,      /* ioctl */
   NULL,              /* mmap */
   userfs_truncate,   /* truncate */
+  NULL,              /* poll */
 
   userfs_sync,       /* sync */
   userfs_dup,        /* dup */

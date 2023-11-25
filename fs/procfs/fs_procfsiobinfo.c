@@ -98,6 +98,7 @@ const struct procfs_operations g_iobinfo_operations =
   iobinfo_close,  /* close */
   iobinfo_read,   /* read */
   NULL,           /* write */
+  NULL,           /* poll */
   iobinfo_dup,    /* dup */
   NULL,           /* opendir */
   NULL,           /* closedir */

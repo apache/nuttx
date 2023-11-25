@@ -98,6 +98,7 @@ const struct procfs_operations g_tcbinfo_operations =
   tcbinfo_close,      /* close */
   tcbinfo_read,       /* read */
   NULL,               /* write */
+  NULL,               /* poll */
 
   tcbinfo_dup,        /* dup */
 

@@ -250,6 +250,7 @@ const struct procfs_operations g_proc_operations =
   proc_close,         /* close */
   proc_read,          /* read */
   proc_write,         /* write */
+  NULL,               /* poll */
 
   proc_dup,           /* dup */
 

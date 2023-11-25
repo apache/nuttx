@@ -131,6 +131,7 @@ const struct procfs_operations g_pm_operations =
   pm_close,      /* close */
   pm_read,       /* read */
   NULL,          /* write */
+  NULL,          /* poll */
 
   pm_dup,        /* dup */
 

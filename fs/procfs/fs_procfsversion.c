@@ -101,6 +101,7 @@ const struct procfs_operations g_version_operations =
   version_close,      /* close */
   version_read,       /* read */
   NULL,               /* write */
+  NULL,               /* poll */
 
   version_dup,        /* dup */
 

@@ -202,6 +202,7 @@ const struct mountpt_operations g_nfs_operations =
   NULL,                         /* ioctl */
   NULL,                         /* mmap */
   nfs_truncate,                 /* truncate */
+  NULL,                         /* poll */
 
   nfs_sync,                     /* sync */
   nfs_dup,                      /* dup */
