@@ -36,15 +36,23 @@
 
 /* Configuration ************************************************************/
 
-#define HAVE_MMCSD 1
+#define HAVE_SDIO  1
 #if !defined(CONFIG_STM32_SDIO) || !defined(CONFIG_MMCSD) || \
     !defined(CONFIG_MMCSD_SDIO)
-#  undef HAVE_MMCSD
+#  undef HAVE_SDIO
 #endif
 
-/* LED.  User LD2: the green LED is a user LED connected to Arduino signal
- * D13 corresponding to MCU I/O PA5 (pin 21) or PB13 (pin 34) depending on
- * the STM32 target.
+#define SDIO_MINOR  0  /* Any minor number, default 0 */
+#define SDIO_SLOTNO 0  /* Only one slot */
+
+#define GPIO_SDIO_NCD    (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|\
+                          GPIO_PORTA|GPIO_PIN8)
+
+/* The STM32F401RC-RS485 has 4 blue LEDs connected as below:
+ * - LED_1 is connected to the GPIO PC0.
+ * - LED_2 is connected to the GPIO PC1.
+ * - LED_3 is connected to the GPIO PC2.
+ * - LED_4 is connected to the GPIO PC3.
  *
  * - When the I/O is HIGH value, the LED is on.
  * - When the I/O is LOW, the LED is off.
@@ -67,7 +75,7 @@
    GPIO_SPEED_50MHz)
 
 /* Buttons
- * The STm32F401RC-RS485 has 4 user buttons.
+ * The STM32F401RC-RS485 has 4 user buttons.
  * - SW3 is connected to the GPIO PB13.
  * - SW4 is connected to the GPIO PB14.
  * - SW5 is connected to the GPIO PB15.
@@ -324,6 +332,18 @@ int board_ajoy_initialize(void);
 
 #ifdef CONFIG_CAN_MCP2515
 int stm32_mcp2515initialize(const char *devpath);
+#endif
+
+/****************************************************************************
+ * Name: stm32_sdio_initialize
+ *
+ * Description:
+ *   Initialize SDIO-based MMC/SD card support
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_STM32_SDIO)
+int stm32_sdio_initialize(void);
 #endif
 
 #endif /* __BOARDS_ARM_STM32_STM32F401RC_RS485_SRC_STM32F401RC_RS485_H */
