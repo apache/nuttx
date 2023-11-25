@@ -9,10 +9,13 @@ Assumes the following:
 Compiling
 ---------
 
-Build using:
+Configure and build using:
 
     cmake -B build/h747ai_cm7_rptun -DBOARD_CONFIG=h747ai:nsh_cm7_rptun -GNinja
     cmake -B build/h747ai_cm4_rptun -DBOARD_CONFIG=h747ai:nsh_cm4_rptun -GNinja
+
+    cmake --build build/h747ai_cm7_rptun
+    cmake --build build/h747ai_cm4_rptun
 
 Testing
 -------
