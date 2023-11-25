@@ -99,6 +99,7 @@ const struct procfs_operations g_critmon_operations =
   critmon_close,      /* close */
   critmon_read,       /* read */
   NULL,               /* write */
+  NULL,               /* poll */
 
   critmon_dup,        /* dup */
 

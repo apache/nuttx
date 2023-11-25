@@ -143,7 +143,7 @@ const struct procfs_operations g_mount_operations =
   mount_close,         /* close */
   mount_read,          /* read */
   NULL,                /* write */
-
+  NULL,                /* poll */
   mount_dup,           /* dup */
 
   NULL,                /* opendir */

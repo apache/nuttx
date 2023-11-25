@@ -134,6 +134,7 @@ const struct mountpt_operations g_zipfs_operations =
   NULL,                /* ioctl */
   NULL,                /* mmap */
   NULL,                /* truncate */
+  NULL,                /* poll */
 
   NULL,                /* sync */
   zipfs_dup,           /* dup */

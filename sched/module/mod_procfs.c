@@ -106,6 +106,7 @@ const struct procfs_operations g_module_operations =
   modprocfs_close,      /* close */
   modprocfs_read,       /* read */
   NULL,                 /* write */
+  NULL,                 /* poll */
   modprocfs_dup,        /* dup */
 
   NULL,                 /* opendir */

@@ -127,6 +127,7 @@ const struct mountpt_operations g_fat_operations =
   fat_ioctl,         /* ioctl */
   NULL,              /* mmap */
   fat_truncate,      /* truncate */
+  NULL,              /* poll */
   fat_sync,          /* sync */
   fat_dup,           /* dup */
   fat_fstat,         /* fstat */

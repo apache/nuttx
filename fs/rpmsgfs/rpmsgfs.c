@@ -163,6 +163,7 @@ const struct mountpt_operations g_rpmsgfs_operations =
   rpmsgfs_ioctl,         /* ioctl */
   NULL,                  /* mmap */
   rpmsgfs_truncate,      /* truncate */
+  NULL,                  /* poll */
 
   rpmsgfs_sync,          /* sync */
   rpmsgfs_dup,           /* dup */

@@ -123,6 +123,7 @@ const struct procfs_operations g_meminfo_operations =
   meminfo_close,  /* close */
   meminfo_read,   /* read */
   NULL,           /* write */
+  NULL,           /* poll */
   meminfo_dup,    /* dup */
   NULL,           /* opendir */
   NULL,           /* closedir */
@@ -138,6 +139,7 @@ const struct procfs_operations g_memdump_operations =
   meminfo_close,  /* close */
   memdump_read,   /* read */
   memdump_write,  /* write */
+  NULL,           /* poll */
   meminfo_dup,    /* dup */
   NULL,           /* opendir */
   NULL,           /* closedir */

@@ -155,6 +155,7 @@ const struct procfs_operations g_part_operations =
   part_procfs_close,      /* close */
   part_procfs_read,       /* read */
   NULL,                   /* write */
+  NULL,                   /* poll */
 
   part_procfs_dup,        /* dup */
 

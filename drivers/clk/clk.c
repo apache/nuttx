@@ -114,6 +114,7 @@ const struct procfs_operations g_clk_operations =
   clk_procfs_close,      /* close */
   clk_procfs_read,       /* read */
   NULL,                  /* write */
+  NULL,                  /* poll */
 
   clk_procfs_dup,        /* dup */
 
