@@ -103,7 +103,7 @@ The LINUM-STM32H753BI board has two on-board RS-232 transceiver connected to USA
 The LINUM-STM32H753BI board has two on-board RS-485 transceiver connected to USART4 and USART6.
 
   ====== =====
-  UART4 PINS
+  UART4  PINS
   ====== =====
   TXD    PB9
   RXD    PB8
@@ -238,7 +238,7 @@ The touchscreen sensor used is the GT928.
   ======== =====
   TS_RESET PI7
   TS_ISR   PH9
-  ========  =====
+  ======== =====
 
 I2C4
 =======
@@ -339,6 +339,7 @@ The LINUM-STM32H753BI use the LTDC to support one LCD with RGB connection.
   PWM           PINS
   ============= =====
   PWM_BACKLIGHT PH6
+  ============= =====
 
 I2S
 =======
