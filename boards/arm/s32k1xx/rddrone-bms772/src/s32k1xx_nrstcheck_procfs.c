@@ -94,6 +94,7 @@ const struct procfs_operations s32k1xx_nrstcheck_procfs_ops =
   s32k1xx_nrstcheck_procfs_close, /* close */
   s32k1xx_nrstcheck_procfs_read,  /* read */
   NULL,                           /* write */
+  NULL,                           /* poll */
   s32k1xx_nrstcheck_procfs_dup,   /* dup */
   NULL,                           /* opendir */
   NULL,                           /* closedir */

@@ -60,6 +60,7 @@ const struct mountpt_operations g_nxffs_operations =
 #else
   NULL,              /* truncate */
 #endif
+  NULL,              /* poll */
 
   NULL,              /* sync -- No buffered data */
   nxffs_dup,         /* dup */

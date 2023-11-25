@@ -215,6 +215,7 @@ const struct mountpt_operations g_unionfs_operations =
   unionfs_ioctl,       /* ioctl */
   NULL,                /* mmap */
   unionfs_truncate,    /* truncate */
+  NULL,                /* pool */
 
   unionfs_sync,        /* sync */
   unionfs_dup,         /* dup */

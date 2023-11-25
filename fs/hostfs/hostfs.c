@@ -144,6 +144,7 @@ const struct mountpt_operations g_hostfs_operations =
   hostfs_ioctl,         /* ioctl */
   NULL,                 /* mmap */
   hostfs_ftruncate,     /* ftruncate */
+  NULL,                 /* poll */
 
   hostfs_sync,          /* sync */
   hostfs_dup,           /* dup */

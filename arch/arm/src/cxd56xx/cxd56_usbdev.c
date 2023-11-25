@@ -618,6 +618,7 @@ const struct procfs_operations cxd56_usbdev_operations =
   cxd56_usbdev_close, /* close */
   cxd56_usbdev_read,  /* read */
   NULL,               /* write */
+  NULL,               /* poll */
   cxd56_usbdev_dup,   /* dup */
 
   NULL,               /* opendir */

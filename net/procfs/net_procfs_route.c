@@ -181,6 +181,7 @@ const struct procfs_operations g_netroute_operations =
   route_close,         /* close */
   route_read,          /* read */
   NULL,                /* write */
+  NULL,                /* poll */
 
   route_dup,           /* dup */
 
