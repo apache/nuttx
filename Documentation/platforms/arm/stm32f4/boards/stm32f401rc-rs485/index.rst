@@ -98,8 +98,8 @@ CK         PA4
 
 [1] Warning you make need to reverse RX/TX on some RS-232 converters
 
-SDCARD
-======
+SDCard support
+==============
 
 The STM32F4-RS485 has 1 SDCard slot connected as below:
 
@@ -197,3 +197,16 @@ nsh
 
 Configures the NuttShell (nsh) located at apps/examples/nsh. This
 configuration enables a serial console on UART2.
+
+sdcard
+------
+
+Configures the NuttShell (nsh) and enables SD card support.
+The stm32f401rc-rs485 has an onboard microSD slot that should
+be automatically registered as the block device /dev/mmcsd0 when
+an SD card is present.  The SD card can then be mounted by the
+NSH commands::
+
+       nsh> mount -t procfs /proc
+       nsh> mount -t vfat /dev/mmcsd0 /mnt
+
