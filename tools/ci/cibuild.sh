@@ -46,15 +46,15 @@ function arm-clang-toolchain {
     local flavor
     case ${os} in
       Linux)
-        flavor=linux
+        flavor=Linux
         ;;
     esac
     cd "${tools}"
-    curl -O -L -s https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-14.0.0/LLVMEmbeddedToolchainForArm-14.0.0-${flavor}.tar.gz
-    tar zxf LLVMEmbeddedToolchainForArm-14.0.0-${flavor}.tar.gz
-    mv LLVMEmbeddedToolchainForArm-14.0.0 clang-arm-none-eabi
+    curl -O -L -s https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-17.0.1/LLVMEmbeddedToolchainForArm-17.0.1-${flavor}-x86_64.tar.xz
+    xz -d LLVMEmbeddedToolchainForArm-17.0.1-${flavor}.tar.xz
+    mv LLVMEmbeddedToolchainForArm-17.0.1 clang-arm-none-eabi
     cp /usr/bin/clang-extdef-mapping-10 clang-arm-none-eabi/bin/clang-extdef-mapping
-    rm LLVMEmbeddedToolchainForArm-14.0.0-${flavor}.tar.gz
+    rm LLVMEmbeddedToolchainForArm-17.0.1-${flavor}.tar.xz
   fi
 
   command clang --version
