@@ -38,7 +38,7 @@
 #include <nuttx/arch.h>
 
 #include <nuttx/wqueue.h>
-#include <nuttx/can.h>
+#include <nuttx/lin.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/can.h>
 #include <netpacket/can.h>
@@ -85,9 +85,8 @@
 
 #define UART_INT_LINERR     (UART_INT_LINBE | UART_INT_LINISFE | \
                              UART_INT_LINIPE | UART_INT_LINCE | \
-                             UART_INT_LINSNRE)
-
-#define LIN_ID_MASK         0x0000003f
+                             UART_INT_LINSNRE | UART_INT_LINSTE | \
+                             UART_INT_LINHTE)
 
 /* BAUD definitions
  *
@@ -113,11 +112,12 @@
 
 struct sam_lin_s
 {
-  uint8_t  port;     /* LIN port number (1 or 2) */
   uint32_t base;     /* Base address of the USART registers */
-  uint8_t  irq;      /* IRQ associated with this USART */
   uint32_t baud;     /* Configured baud */
   uint32_t sr;       /* Saved status bits */
+  uint8_t  port;     /* LIN port number (1 or 2) */
+  uint8_t  irq;      /* IRQ associated with this USART */
+  bool     master;   /* LIN master vs slave node */
 
   bool                bifup;  /* true:ifup false:ifdown */
   struct net_driver_s dev;    /* Interface understood by the network */
@@ -130,12 +130,18 @@ struct sam_lin_s
   struct can_frame *txdesc;
   struct can_frame *rxdesc;
 
-  volatile uint8_t idx;     /* Data index */
+  uint8_t lin_data_buf[CAN_MAX_DLEN];
+  bool    lin_rx;
+  uint8_t lin_dlc;
+  uint8_t *lin_data;
+  volatile uint8_t idx;     /* lin_data[] index */
 
   /* TX/RX pool */
 
   uint8_t tx_pool[sizeof(struct can_frame)*POOL_SIZE];
   uint8_t rx_pool[sizeof(struct can_frame)*POOL_SIZE];
+
+  struct can_frame tx_cache[LIN_ID_MAX + 1];
 };
 
 /****************************************************************************
@@ -200,6 +206,7 @@ static struct sam_lin_s g_lin0priv =
   .base          = SAM_USART0_BASE,
   .irq           = SAM_IRQ_USART0,
   .baud          = CONFIG_SAMV7_USART0_LIN_BAUD,
+  .master        = true,
   .dev           =
     {
       .d_ifname  = "lin%d",
@@ -222,6 +229,7 @@ static struct sam_lin_s g_lin1priv =
   .base          = SAM_USART1_BASE,
   .irq           = SAM_IRQ_USART1,
   .baud          = CONFIG_SAMV7_USART1_LIN_BAUD,
+  .master        = false,
   .dev           =
     {
       .d_ifname  = "lin%d",
@@ -244,6 +252,7 @@ static struct sam_lin_s g_lin2priv =
   .base          = SAM_USART2_BASE,
   .irq           = SAM_IRQ_USART2,
   .baud          = CONFIG_SAMV7_USART2_LIN_BAUD,
+  .master        = true,
   .dev           =
     {
       .d_ifname  = "lin%d",
@@ -408,6 +417,14 @@ static int sam_lin_ifup(struct net_driver_s *dev)
 
   priv->dev.d_buf = (uint8_t *)priv->txdesc;
 
+  if (!priv->master)
+    {
+      /* Enabled interrupts for LIN slave so we can wait for LIN ID */
+
+      sam_lin_putreg(priv, SAM_UART_IER_OFFSET,
+                     UART_INT_LINID | UART_INT_LINERR);
+    }
+
   return OK;
 }
 
@@ -439,6 +456,18 @@ static int sam_lin_ifdown(struct net_driver_s *dev)
 
   sam_lin_reset(priv);
 
+  if (!priv->master)
+    {
+      int i;
+
+      /* Discard all cached data */
+
+      for (i = 0; i < LIN_ID_MASK + 1; i++)
+        {
+          priv->tx_cache[i].can_id = 0;
+        }
+    }
+
   return OK;
 }
 
@@ -452,14 +481,25 @@ static int sam_lin_ifdown(struct net_driver_s *dev)
 
 static bool sam_lin_txready(struct sam_lin_s *priv)
 {
-  uint32_t regval;
+  if (priv->master)
+    {
+      uint32_t regval;
 
-  /* Return true no interrupts are enabled */
+      /* Return true no interrupts are enabled */
 
-  regval = sam_lin_getreg(priv, SAM_UART_IMR_OFFSET);
-  ninfo("LIN%" PRIu8 " IMR: %08" PRIx32 "\n", priv->port, regval);
+      regval = sam_lin_getreg(priv, SAM_UART_IMR_OFFSET);
+      ninfo("LIN%" PRIu8 " IMR: %08" PRIx32 "\n", priv->port, regval);
 
-  return regval == 0;
+      return regval == 0;
+    }
+  else
+    {
+      /* Slave is always ready for transmission since all
+       * TX data are cached
+       */
+
+      return true;
+    }
 }
 
 /****************************************************************************
@@ -486,7 +526,7 @@ static int sam_lin_transmit(struct sam_lin_s *priv)
 {
   struct can_frame *frame = (struct can_frame *)priv->dev.d_buf;
   uint32_t          regval;
-  uint8_t           lin_dlc;
+  uint8_t           lin_id;
 
   ninfo("LIN%" PRIu8 " ID: %" PRIu32 " DLC: %" PRIu8 "\n",
         priv->port, (uint32_t)frame->can_id, frame->can_dlc);
@@ -497,69 +537,96 @@ static int sam_lin_transmit(struct sam_lin_s *priv)
       return -EBUSY;
     }
 
-  lin_dlc = frame->can_dlc;
-
-  if (lin_dlc > CAN_MAX_DLEN)
+  if (frame->can_dlc > CAN_MAX_DLEN)
     {
       return -EINVAL;
     }
 
-  if (lin_dlc == 0)
+  lin_id = frame->can_id & LIN_ID_MASK;
+
+  if (priv->master)
     {
-      regval = UART_LINMR_DLM;
-      switch (((frame->can_id & LIN_ID_MASK) >> 4) & 0x03)
+      priv->lin_dlc = frame->can_dlc;
+
+      if (priv->lin_dlc == 0)
         {
-          case 3:
-            lin_dlc = 8;
-            break;
-          case 2:
-            lin_dlc = 4;
-            break;
-          default:
-            lin_dlc = 2;
-            break;
+          regval = UART_LINMR_DLM;
+          switch ((lin_id >> 4) & 0x03)
+            {
+              case 3:
+                priv->lin_dlc = 8;
+                break;
+              case 2:
+                priv->lin_dlc = 4;
+                break;
+              default:
+                priv->lin_dlc = 2;
+                break;
+            }
         }
+      else
+        {
+          regval = UART_LINMR_DLC(priv->lin_dlc - 1);
+        }
+
+      /* Select classical vs enhanced checksum */
+
+      if ((frame->can_id & LIN_CHECKSUM_EXTENDED) == 0)
+        {
+          regval |= UART_LINMR_CHKTYP;
+        }
+
+      /* RTR flag means that we want to read data */
+
+      priv->lin_rx = (frame->can_id & CAN_RTR_FLAG) != 0;
+      priv->idx = 0;
+
+      if (priv->lin_rx)
+        {
+          /* Setup RX information and prepare to receive the data */
+
+          priv->rxdesc->can_id = lin_id;
+          priv->rxdesc->can_dlc = priv->lin_dlc;
+
+          priv->lin_data = priv->rxdesc->data;
+          regval |= UART_LINMR_NACT_SUBSCRIBE;
+        }
+      else
+        {
+          memcpy(priv->lin_data_buf, frame->data, priv->lin_dlc);
+          priv->lin_data = priv->lin_data_buf;
+        }
+
+      /* Abort previous transaction. Just in case */
+#if 0
+      sam_lin_putreg(priv, SAM_UART_CR_OFFSET,
+                     UART_CR_LINABT | UART_CR_RSTSTA);
+#endif
+      /* Write LIN Mode Register value */
+
+      sam_lin_putreg(priv, SAM_UART_LINMR_OFFSET, regval);
+
+#if 1
+      /* Wait until transmitter is empty */
+
+      while ((sam_lin_getreg(priv, SAM_UART_SR_OFFSET) & UART_INT_TXEMPTY) == 0);
+#endif
+
+      /* Write LIN Identifier Register value */
+
+      sam_lin_putreg(priv, SAM_UART_LINIR_OFFSET, lin_id);
+
+      /* Enable LIN Identifier Sent interrupt */
+
+      sam_lin_putreg(priv, SAM_UART_IER_OFFSET,
+                     UART_INT_LINID | UART_INT_LINERR);
     }
   else
     {
-      regval = UART_LINMR_DLC(lin_dlc - 1);
+      /* Save data for further transmission */
+
+      memcpy(&priv->tx_cache[lin_id], frame, sizeof(struct can_frame));
     }
-
-  /* RTR flag means that we want to read data */
-
-  if ((frame->can_id & CAN_RTR_FLAG) != 0)
-    {
-      /* Setup RX information and prepare to receive the data */
-
-      priv->rxdesc->can_id = frame->can_id & LIN_ID_MASK;
-      priv->rxdesc->can_dlc = lin_dlc;
-      regval |= UART_LINMR_NACT_SUBSCRIBE;
-    }
-
-  /* Use Extended ID field as identifier to select classical vs
-   * enhanced checksum */
-
-  if ((frame->can_id & CAN_EFF_FLAG) == 0)
-    {
-      regval |= UART_LINMR_CHKTYP;
-    }
-
-  /* Abort previous transaction. Just in case */
-
-  sam_lin_putreg(priv, SAM_UART_CR_OFFSET, UART_CR_LINABT | UART_CR_RSTSTA);
-
-  /* Write LIN Mode Register value */
-
-  sam_lin_putreg(priv, SAM_UART_LINMR_OFFSET, regval);
-
-  /* Write LIN Identifier Register value */
-
-  sam_lin_putreg(priv, SAM_UART_LINIR_OFFSET,
-                 frame->can_id & UART_LINIR_MASK);
-
-  /* Enable LIN Identifier Sent interrupt */
-
-  sam_lin_putreg(priv, SAM_UART_IER_OFFSET, UART_INT_LINID | UART_INT_LINERR);
 
   return OK;
 }
@@ -720,7 +787,9 @@ static int sam_lin_txavail(struct net_driver_s *dev)
 static int sam_lin_netdev_ioctl(struct net_driver_s *dev, int cmd,
                                 unsigned long arg)
 {
+#if 0
   struct sam_lin_s *priv = (struct sam_lin_s *)dev->d_private;
+#endif
   int               ret  = OK;
 
   switch (cmd)
@@ -739,7 +808,6 @@ static int sam_lin_netdev_ioctl(struct net_driver_s *dev, int cmd,
 static int sam_interrupt(int irq, void *context, FAR void *arg)
 {
   struct sam_lin_s *priv = (struct sam_lin_s *)arg;
-  struct can_frame *frame = (struct can_frame *)priv->txdesc;
   uint32_t pending;
   uint32_t imr;
   int passes;
@@ -776,10 +844,9 @@ static int sam_interrupt(int irq, void *context, FAR void *arg)
 
           /* Store byte to RX buffer */
 
-          if (priv->idx < priv->rxdesc->can_dlc)
+          if (priv->idx < priv->lin_dlc)
             {
-              priv->rxdesc->data[priv->idx] = byte;
-              priv->idx++;
+              priv->lin_data[priv->idx++] = byte;
             }
           else
             {
@@ -799,11 +866,10 @@ static int sam_interrupt(int irq, void *context, FAR void *arg)
         {
           /* Transmit data register empty ... process outgoing bytes */
 
-          if (priv->idx < priv->txdesc->can_dlc)
+          if (priv->idx < priv->lin_dlc)
             {
               sam_lin_putreg(priv, SAM_UART_THR_OFFSET,
-                             priv->txdesc->data[priv->idx]);
-              priv->idx++;
+                             priv->lin_data[priv->idx++]);
             }
           else
             {
@@ -823,24 +889,115 @@ static int sam_interrupt(int irq, void *context, FAR void *arg)
 
           sam_lin_putreg(priv, SAM_UART_IDR_OFFSET, UART_INT_LINID);
 
-          /* Check LIN RX or TX */
-
-          if ((frame->can_id & CAN_RTR_FLAG) != 0)
+          if (priv->master)
             {
-              /* Enable RX ready interrupt */
+              /* Check LIN RX or TX */
 
-              sam_lin_putreg(priv, SAM_UART_IER_OFFSET, UART_INT_RXRDY);
+              if (priv->lin_rx)
+                {
+                  /* Enable RX ready interrupt */
+
+                  sam_lin_putreg(priv, SAM_UART_IER_OFFSET, UART_INT_RXRDY);
+                }
+              else
+                {
+                  /* Enable TX ready interrupt */
+
+                  sam_lin_putreg(priv, SAM_UART_IER_OFFSET, UART_INT_TXRDY);
+                }
+
+              /* Enable LIN Transfer Completed interrupt */
+
+              sam_lin_putreg(priv, SAM_UART_IER_OFFSET, UART_INT_LINTC);
             }
           else
             {
-              /* Enable TX ready interrupt */
+              uint32_t regval = sam_lin_getreg(priv, SAM_UART_LINIR_OFFSET);
+              uint8_t lin_id = regval & LIN_ID_MASK;
+              struct can_frame *frame = &priv->tx_cache[lin_id];
 
-              sam_lin_putreg(priv, SAM_UART_IER_OFFSET, UART_INT_TXRDY);
+              if ((frame->can_id & LIN_CACHE_RESPONSE) != 0)
+                {
+                  if ((frame->can_id & LIN_SINGLE_RESPONSE) != 0)
+                    {
+                      frame->can_id &= ~LIN_CACHE_RESPONSE;
+                    }
+
+                  priv->lin_dlc = frame->can_dlc;
+
+                  if (priv->lin_dlc == 0)
+                    {
+                      regval = UART_LINMR_DLM;
+                      switch ((lin_id >> 4) & 0x03)
+                        {
+                          case 3:
+                            priv->lin_dlc = 8;
+                            break;
+                          case 2:
+                            priv->lin_dlc = 4;
+                            break;
+                          default:
+                            priv->lin_dlc = 2;
+                            break;
+                        }
+                    }
+                  else
+                    {
+                      regval = UART_LINMR_DLC(priv->lin_dlc - 1);
+                    }
+
+                  /* Select classical vs enhanced checksum */
+
+                  if ((frame->can_id & LIN_CHECKSUM_EXTENDED) == 0)
+                    {
+                      regval |= UART_LINMR_CHKTYP;
+                    }
+
+                  /* RTR flag means that we want to read data */
+
+                  priv->lin_rx = (frame->can_id & CAN_RTR_FLAG) != 0;
+                  priv->idx = 0;
+
+                  if (priv->lin_rx)
+                    {
+                      /* Setup RX information and prepare to receive the data */
+
+                      priv->rxdesc->can_id = lin_id;
+                      priv->rxdesc->can_dlc = priv->lin_dlc;
+
+                      priv->lin_data = priv->rxdesc->data;
+                      regval |= UART_LINMR_NACT_SUBSCRIBE;
+
+                      /* Enable RX ready interrupt */
+
+                      sam_lin_putreg(priv, SAM_UART_IER_OFFSET,
+                                     UART_INT_RXRDY);
+                    }
+                  else
+                    {
+                      priv->lin_data = frame->data;
+
+                      /* Enable TX ready interrupt */
+
+                      sam_lin_putreg(priv, SAM_UART_IER_OFFSET,
+                                     UART_INT_TXRDY);
+                    }
+                }
+              else
+                {
+                  priv->lin_data = NULL;
+
+                  regval = UART_LINMR_NACT_IGNORE;
+                }
+
+              /* Write LIN Mode Register value */
+
+              sam_lin_putreg(priv, SAM_UART_LINMR_OFFSET, regval);
+
+              /* Enable LIN Transfer Completed interrupt */
+
+              sam_lin_putreg(priv, SAM_UART_IER_OFFSET, UART_INT_LINTC);
             }
-
-          /* Enable LIN Transfer Completed interrupt */
-
-          sam_lin_putreg(priv, SAM_UART_IER_OFFSET, UART_INT_LINTC);
 
           handled = true;
         }
@@ -855,30 +1012,50 @@ static int sam_interrupt(int irq, void *context, FAR void *arg)
 
           if ((pending & UART_INT_LINTC) != 0)
             {
-              /* LIN transaction complete. Start RX/TX interrupt worker */
-
-              if ((frame->can_id & CAN_RTR_FLAG) != 0)
+              if (priv->lin_data != NULL)
                 {
-                  work_queue(LINWORK, &priv->irqwork,
-                             sam_lin_rxinterrupt_work, priv, 0);
+                  /* LIN transaction complete. Start RX/TX interrupt worker */
+
+                  if (priv->lin_rx)
+                    {
+                      work_queue(LINWORK, &priv->irqwork,
+                                 sam_lin_rxinterrupt_work, priv, 0);
+                    }
+                  else
+                    {
+                      work_queue(LINWORK, &priv->irqwork,
+                                 sam_lin_txdone_work, priv, 0);
+                    }
                 }
               else
                 {
-                  work_queue(LINWORK, &priv->irqwork,
-                             sam_lin_txdone_work, priv, 0);
+                  DEBUGASSERT(!priv->master);
+
+                  /* Enable LIN Transfer Completed interrupt */
+
+                  sam_lin_putreg(priv, SAM_UART_IER_OFFSET, UART_INT_LINID | UART_INT_LINERR);
                 }
             }
-#ifdef CONFIG_NET_CAN_ERRORS
           else
             {
+#ifdef CONFIG_NET_CAN_ERRORS
               work_queue(LINWORK, &priv->irqwork,
                          sam_lin_errinterrupt_work, priv, 0);
-            }
+#else
+              if (!priv->master)
+                {
+                  /* Enable LIN Transfer Completed interrupt */
+
+                  sam_lin_putreg(priv, SAM_UART_IER_OFFSET, UART_INT_LINID | UART_INT_LINERR);
+                }
 #endif
+            }
 
           /* Reset transaction status bit */
 
           sam_lin_putreg(priv, SAM_UART_CR_OFFSET, UART_CR_RSTSTA);
+
+          handled = true;
         }
     }
 
@@ -916,6 +1093,15 @@ static void sam_lin_rxinterrupt_work(void *arg)
    */
 
   priv->dev.d_buf = (uint8_t *)priv->txdesc;
+
+  /* Enabled LIN ID interrupt for slave mode */
+
+  if (!priv->master)
+    {
+      /* Enable LIN Transfer Completed interrupt */
+
+      sam_lin_putreg(priv, SAM_UART_IER_OFFSET, UART_INT_LINID | UART_INT_LINERR);
+    }
 }
 
 /****************************************************************************
@@ -935,6 +1121,15 @@ static void sam_lin_txdone_work(void *arg)
   net_lock();
   devif_poll(&priv->dev, sam_lin_txpoll);
   net_unlock();
+
+  /* Enabled LIN ID interrupt for slave mode */
+
+  if (!priv->master)
+    {
+      /* Enable LIN Transfer Completed interrupt */
+
+      sam_lin_putreg(priv, SAM_UART_IER_OFFSET, UART_INT_LINID | UART_INT_LINERR);
+    }
 }
 
 /****************************************************************************
@@ -1057,6 +1252,15 @@ static void sam_lin_errinterrupt_work(void *arg)
       priv->dev.d_buf = (uint8_t *)priv->txdesc;
       net_unlock();
     }
+
+  /* Enabled LIN ID interrupt for slave mode */
+
+  if (!priv->master)
+    {
+      /* Enable LIN Transfer Completed interrupt */
+
+      sam_lin_putreg(priv, SAM_UART_IER_OFFSET, UART_INT_LINID | UART_INT_LINERR);
+    }
 }
 #endif
 
@@ -1083,8 +1287,22 @@ static int sam_lin_setup(struct sam_lin_s *priv)
 
   sam_lin_putreg(priv, SAM_UART_IDR_OFFSET, 0xffffffff);
 
-  regval = UART_MR_MODE_LINMSTR | UART_MR_CHRL_8BITS | UART_MR_PAR_NONE |
-           UART_MR_NBSTOP_1;
+  /* Enable receiver & transmitter */
+
+  sam_lin_putreg(priv, SAM_UART_CR_OFFSET, UART_CR_RXEN | UART_CR_TXEN);
+
+  /* Setup USART LIN node configuration */
+
+  if (priv->master)
+    {
+      regval = UART_MR_MODE_LINMSTR | UART_MR_CHRL_8BITS | UART_MR_PAR_NONE |
+               UART_MR_NBSTOP_1;
+    }
+  else
+    {
+      regval = UART_MR_MODE_LINSLV | UART_MR_CHRL_8BITS | UART_MR_PAR_NONE |
+               UART_MR_NBSTOP_1;
+    }
 
   /* Configure the console baud:
    *
@@ -1131,10 +1349,6 @@ static int sam_lin_setup(struct sam_lin_s *priv)
   regval = UART_BRGR_CD(intpart) | UART_BRGR_FP(fracpart);
   sam_lin_putreg(priv, SAM_UART_BRGR_OFFSET, regval);
 
-  /* Enable receiver & transmitter */
-
-  sam_lin_putreg(priv, SAM_UART_CR_OFFSET, UART_CR_RXEN | UART_CR_TXEN);
-
   /* Attach and enable the IRQ */
 
   ret = irq_attach(priv->irq, sam_interrupt, priv);
@@ -1147,7 +1361,7 @@ static int sam_lin_setup(struct sam_lin_s *priv)
       up_enable_irq(priv->irq);
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
