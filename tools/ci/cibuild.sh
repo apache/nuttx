@@ -337,10 +337,10 @@ function riscv-gcc-toolchain {
         ;;
     esac
     cd "${tools}"
-    wget --quiet https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v12.3.0-2/xpack-riscv-none-elf-gcc-12.3.0-2-${flavor}.tar.gz
-    tar zxf xpack-riscv-none-elf-gcc-12.3.0-2-${flavor}.tar.gz
-    mv xpack-riscv-none-elf-gcc-12.3.0-2 riscv-none-elf-gcc
-    rm xpack-riscv-none-elf-gcc-12.3.0-2-${flavor}.tar.gz
+    wget --quiet https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v13.2.0-2/xpack-riscv-none-elf-gcc-13.2.0-2-${flavor}.tar.gz
+    tar zxf xpack-riscv-none-elf-gcc-13.2.0-2-${flavor}.tar.gz
+    mv xpack-riscv-none-elf-gcc-13.2.0-2 riscv-none-elf-gcc
+    rm xpack-riscv-none-elf-gcc-13.2.0-2-${flavor}.tar.gz
   fi
 
   command riscv-none-elf-gcc --version
