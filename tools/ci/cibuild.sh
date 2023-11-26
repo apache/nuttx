@@ -91,18 +91,18 @@ function arm64-gcc-toolchain {
     local flavor
     case ${os} in
       Darwin)
-        flavor=darwin-x86_64
+        flavor=-darwin
         ;;
       Linux)
-        flavor=x86_64
+        flavor=
         ;;
     esac
     cd "${tools}"
-    wget --quiet https://developer.arm.com/-/media/Files/downloads/gnu/11.2-2022.02/binrel/gcc-arm-11.2-2022.02-${flavor}-aarch64-none-elf.tar.xz
-    xz -d gcc-arm-11.2-2022.02-${flavor}-aarch64-none-elf.tar.xz
-    tar xf gcc-arm-11.2-2022.02-${flavor}-aarch64-none-elf.tar
-    mv gcc-arm-11.2-2022.02-${flavor}-aarch64-none-elf gcc-aarch64-none-elf
-    rm gcc-arm-11.2-2022.02-${flavor}-aarch64-none-elf.tar
+    wget --quiet https://developer.arm.com/-/media/Files/downloads/gnu/12.3.rel1/binrel/arm-gnu-toolchain-12.3.rel1${flavor}-x86_64-aarch64-none-elf.tar.xz
+    xz -d arm-gnu-toolchain-12.3.rel1${flavor}-x86_64-aarch64-none-elf.tar.xz
+    tar xf arm-gnu-toolchain-12.3.rel1${flavor}-x86_64-aarch64-none-elf.tar
+    mv arm-gnu-toolchain-12.3.rel1${flavor}-x86_64-aarch64-none-elf gcc-aarch64-none-elf
+    rm arm-gnu-toolchain-12.3.rel1${flavor}-x86_64-aarch64-none-elf.tar
   fi
 
   command aarch64-none-elf-gcc --version
