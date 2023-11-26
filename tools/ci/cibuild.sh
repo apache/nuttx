@@ -74,11 +74,11 @@ function arm-gcc-toolchain {
         ;;
     esac
     cd "${tools}"
-    wget --quiet https://developer.arm.com/-/media/Files/downloads/gnu/12.3.rel1/binrel/arm-gnu-toolchain-12.3.rel1${flavor}-x86_64-arm-none-eabi.tar.xz
-    xz -d arm-gnu-toolchain-12.3.rel1${flavor}-x86_64-arm-none-eabi.tar.xz
-    tar xf arm-gnu-toolchain-12.3.rel1${flavor}-x86_64-arm-none-eabi.tar
-    mv arm-gnu-toolchain-12.3.rel1${flavor}-x86_64-arm-none-eabi gcc-arm-none-eabi
-    rm arm-gnu-toolchain-12.3.rel1${flavor}-x86_64-arm-none-eabi.tar
+    wget --quiet https://developer.arm.com/-/media/Files/downloads/gnu/13.2.Rel1/binrel/arm-gnu-toolchain-13.2.Rel1${flavor}-x86_64-arm-none-eabi.tar.xz
+    xz -d arm-gnu-toolchain-13.2.Rel1${flavor}-x86_64-arm-none-eabi.tar.xz
+    tar xf arm-gnu-toolchain-13.2.Rel1${flavor}-x86_64-arm-none-eabi.tar
+    mv arm-gnu-toolchain-13.2.Rel1${flavor}-x86_64-arm-none-eabi gcc-arm-none-eabi
+    rm arm-gnu-toolchain-13.2.Rel1${flavor}-x86_64-arm-none-eabi.tar
   fi
 
   command arm-none-eabi-gcc --version
@@ -98,11 +98,11 @@ function arm64-gcc-toolchain {
         ;;
     esac
     cd "${tools}"
-    wget --quiet https://developer.arm.com/-/media/Files/downloads/gnu/12.3.rel1/binrel/arm-gnu-toolchain-12.3.rel1${flavor}-x86_64-aarch64-none-elf.tar.xz
-    xz -d arm-gnu-toolchain-12.3.rel1${flavor}-x86_64-aarch64-none-elf.tar.xz
-    tar xf arm-gnu-toolchain-12.3.rel1${flavor}-x86_64-aarch64-none-elf.tar
-    mv arm-gnu-toolchain-12.3.rel1${flavor}-x86_64-aarch64-none-elf gcc-aarch64-none-elf
-    rm arm-gnu-toolchain-12.3.rel1${flavor}-x86_64-aarch64-none-elf.tar
+    wget --quiet https://developer.arm.com/-/media/Files/downloads/gnu/13.2.Rel1/binrel/arm-gnu-toolchain-13.2.Rel1${flavor}-x86_64-aarch64-none-elf.tar.xz
+    xz -d arm-gnu-toolchain-13.2.Rel1${flavor}-x86_64-aarch64-none-elf.tar.xz
+    tar xf arm-gnu-toolchain-13.2.Rel1${flavor}-x86_64-aarch64-none-elf.tar
+    mv arm-gnu-toolchain-13.2.Rel1${flavor}-x86_64-aarch64-none-elf gcc-aarch64-none-elf
+    rm arm-gnu-toolchain-13.2.Rel1${flavor}-x86_64-aarch64-none-elf.tar
   fi
 
   command aarch64-none-elf-gcc --version
