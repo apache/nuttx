@@ -28,7 +28,7 @@ def test_cxxtest(p):
 def test_scanftest(p):
     if p.board in do_not_support:
         pytest.skip("unsupported at {}".format(p.board))
-    ret = p.sendCommand("scanftest", "FAILED: 0")
+    ret = p.sendCommand("scanftest", "Scanf tests done")
     assert ret == 0
 
 

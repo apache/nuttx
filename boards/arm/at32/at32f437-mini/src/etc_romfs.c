@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/at32/at32f437-mini/include/nsh_romfsimg.h
+ * boards/arm/at32/at32f437-mini/src/etc_romfs.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +16,10 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
  ****************************************************************************/
 
 unsigned char romfs_img[] =
@@ -109,3 +113,7 @@ unsigned char romfs_img[] =
 };
 
 unsigned int romfs_img_len = 1024;
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/

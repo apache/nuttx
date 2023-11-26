@@ -52,11 +52,9 @@ else
 endif
 endif
 
-ifeq ($(CONFIG_NSH_ROMFSETC),y)
-ifneq ($(CONFIG_NSH_CUSTOMROMFS),y)
+ifeq ($(CONFIG_ETC_ROMFS),y)
   RCSRCS = etc/init.d/rc.sysinit etc/init.d/rcS
   RCRAWS = etc/group etc/passwd
-endif
 endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)

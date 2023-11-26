@@ -48,4 +48,9 @@
 #define container_of(ptr, type, member) \
   ((type *)((uintptr_t)(ptr) - offsetof(type, member)))
 
+/* Stringify the arguments */
+
+#define STRINGIFY_(x) #x
+#define STRINGIFY(x)  STRINGIFY_(x)
+
 #endif /* __INCLUDE_NUTTX_NUTTX_H */

@@ -67,4 +67,8 @@ ifeq ($(CONFIG_SMBUS_SBD),y)
 CSRCS += s32k1xx_smbus_sbd.c
 endif
 
+ifeq ($(CONFIG_ETC_ROMFS),y)
+CSRCS += etc_romfs.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

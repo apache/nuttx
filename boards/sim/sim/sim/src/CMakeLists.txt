@@ -64,7 +64,7 @@ target_sources(board PRIVATE ${SRCS})
 
 set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/gnu-elf.ld")
 
-if(CONFIG_NSH_ROMFSETC AND CONFIG_NSH_ARCHROMFS)
+if(CONFIG_ETC_ROMFS)
   nuttx_add_romfs(
     NAME
     etc

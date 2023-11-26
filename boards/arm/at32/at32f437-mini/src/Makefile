@@ -80,4 +80,8 @@ ifeq ($(CONFIG_MTD_AT24XX),y)
 	CSRCS += at32_at24.c
 endif
 
+ifeq ($(CONFIG_ETC_ROMFS),y)
+	CSRCS += etc_romfs.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

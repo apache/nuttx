@@ -1,5 +1,5 @@
-/****************************************************************************
- * boards/arm/stm32/mikroe-stm32f4/include/nsh_romfsimg.h
+/***************************************************************************
+ * boards/arm/stm32l4/stm32l476vg-disco/src/etc_romfs.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,7 +16,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************/
+ ***************************************************************************/
+
+/***************************************************************************
+ * Public Data
+ ***************************************************************************/
 
 unsigned char romfs_img[] =
 {
@@ -108,3 +112,7 @@ unsigned char romfs_img[] =
   0x00, 0x00, 0x00, 0x00
 };
 unsigned int romfs_img_len = 1024;
+
+/***************************************************************************
+ * Public Functions
+ ***************************************************************************/
