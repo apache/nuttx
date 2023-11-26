@@ -66,6 +66,10 @@ ifeq ($(CONFIG_AUDIO_VS1053),y)
 CSRCS += stm32_vs1053.c
 endif
 
+ifeq ($(CONFIG_ETC_ROMFS),y)
+CSRCS += etc_romfs.c
+endif
+
 DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board

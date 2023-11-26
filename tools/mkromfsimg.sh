@@ -28,7 +28,7 @@ rcsysinittemplate=$rcsysinitfile.template
 rcsfile=rcS
 rcstemplate=$rcsfile.template
 romfsimg=romfs.img
-headerfile=nsh_romfsimg.h
+headerfile=etc_romfs.c
 
 # Get the input parameters
 
@@ -79,25 +79,25 @@ if [ ! -r $topdir/.config ]; then
   exit 1
 fi
 
-romfsetc=`grep CONFIG_NSH_ROMFSETC= $topdir/.config | cut -d'=' -f2`
+romfsetc=`grep CONFIG_ETC_ROMFS= $topdir/.config | cut -d'=' -f2`
 disablempt=`grep CONFIG_DISABLE_MOUNTPOINT= $topdir/.config | cut -d'=' -f2`
 disablescript=`grep CONFIG_NSH_DISABLESCRIPT= $topdir/.config | cut -d'=' -f2`
 devconsole=`grep CONFIG_DEV_CONSOLE= $topdir/.config | cut -d'=' -f2`
 romfs=`grep CONFIG_FS_ROMFS= $topdir/.config | cut -d'=' -f2`
-romfsmpt=`grep CONFIG_NSH_ROMFSMOUNTPT= $topdir/.config | cut -d'=' -f2`
+romfsmpt=`grep CONFIG_ETC_ROMFSMOUNTPT= $topdir/.config | cut -d'=' -f2`
 initscript=`grep CONFIG_NSH_INITSCRIPT= $topdir/.config | cut -d'=' -f2`
 sysinitscript=`grep CONFIG_NSH_SYSINITSCRIPT= $topdir/.config | cut -d'=' -f2`
-romfsdevno=`grep CONFIG_NSH_ROMFSDEVNO= $topdir/.config | cut -d'=' -f2`
-romfssectsize=`grep CONFIG_NSH_ROMFSSECTSIZE= $topdir/.config | cut -d'=' -f2`
+romfsdevno=`grep CONFIG_ETC_ROMFSDEVNO= $topdir/.config | cut -d'=' -f2`
+romfssectsize=`grep CONFIG_ETC_ROMFSSECTSIZE= $topdir/.config | cut -d'=' -f2`
 
 # If we disabled FAT FS requirement, we don't need to check it
 
 if [ "$usefat" = true ]; then
   fatfs=`grep CONFIG_FS_FAT= $topdir/.config | cut -d'=' -f2`
-  fatdevno=`grep CONFIG_NSH_FATDEVNO= $topdir/.config | cut -d'=' -f2`
-  fatsectsize=`grep CONFIG_NSH_FATSECTSIZE= $topdir/.config | cut -d'=' -f2`
-  fatnsectors=`grep CONFIG_NSH_FATNSECTORS= $topdir/.config | cut -d'=' -f2`
-  fatmpt=`grep CONFIG_NSH_FATMOUNTPT= $topdir/.config | cut -d'=' -f2`
+  fatdevno=`grep CONFIG_ETC_FATDEVNO= $topdir/.config | cut -d'=' -f2`
+  fatsectsize=`grep CONFIG_ETC_FATSECTSIZE= $topdir/.config | cut -d'=' -f2`
+  fatnsectors=`grep CONFIG_ETC_FATNSECTORS= $topdir/.config | cut -d'=' -f2`
+  fatmpt=`grep CONFIG_ETC_FATMOUNTPT= $topdir/.config | cut -d'=' -f2`
 fi
 
 # The following settings are required for general ROMFS support
@@ -184,7 +184,7 @@ fi
 # /., /./*, /.., or /../*
 
 if [ ${romfsmpt:0:1} != "\"" ]; then
-  echo "CONFIG_NSH_ROMFSMOUNTPT must be a string"
+  echo "CONFIG_ETC_ROMFSMOUNTPT must be a string"
   echo "Change it so that it is enclosed in quotes."
   exit 1
 fi
@@ -192,7 +192,7 @@ fi
 uromfsmpt=`echo $romfsmpt | sed -e "s/\"//g"`
 
 if [ ${uromfsmpt:0:1} != "/" ]; then
-  echo "CONFIG_NSH_ROMFSMOUNTPT must be an absolute path in the target FS"
+  echo "CONFIG_ETC_ROMFSMOUNTPT must be an absolute path in the target FS"
   echo "Change it so that it begins with the character '/'.  Eg. /etc"
   exit 1
 fi
@@ -204,7 +204,7 @@ done
 
 if [ -z "$tmpdir" -o "X$tmpdir" = "Xdev" -o "X$tmpdir" = "." -o \
      ${tmpdir:0:2} = "./" -o "X$tmpdir" = ".." -o ${tmpdir:0:3} = "../" ]; then
-  echo "Invalid CONFIG_NSH_ROMFSMOUNTPT selection."
+  echo "Invalid CONFIG_ETC_ROMFSMOUNTPT selection."
   exit 1
 fi
 

@@ -3,9 +3,9 @@
 
 genromfs -f romfs.img -d ../romfs -v -V "romfs"
 
-xxd -i romfs.img nsh_romfsimg.h
+xxd -i romfs.img etc_romfs.c
 
-cp nsh_romfsimg.h ../include
+cp etc_romfs.c ../src
 
-rm romfs.img nsh_romfsimg.h
+rm romfs.img etc_romfs.c
 

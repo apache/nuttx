@@ -528,6 +528,86 @@ config INIT_MOUNT_DATA
 endif # INIT_MOUNT
 endif # INIT_FILE
 
+menuconfig ETC_ROMFS
+	bool "Auto-mount etc baked-in ROMFS image"
+	default n
+	depends on !DISABLE_MOUNTPOINT && FS_ROMFS
+	---help---
+		Mount a ROMFS filesystem at /etc and provide a system init
+		script at /etc/init.d/rc.sysinit and a startup script
+		at /etc/init.d/rcS.  The default system init script will mount
+		a FAT FS RAMDISK at /tmp but the logic is easily extensible.
+
+if ETC_ROMFS
+
+config ETC_CROMFS
+	bool "Support CROMFS (compressed) start-up script"
+	default n
+	depends on FS_CROMFS
+	---help---
+		Mount a CROMFS filesystem at /etc and provide a compressed system
+		init script at /etc/init.d/rc.sysinit and a startup script
+		at /etc/init.d/rcS.
+
+config ETC_ROMFSMOUNTPT
+	string "Mountpoint of the etc romfs image"
+	default "/etc"
+
+config ETC_ROMFSDEVNO
+	int "ROMFS block device minor number"
+	default 0
+	---help---
+		This is the minor number of the ROMFS block device.  The default is
+		'0' corresponding to /dev/ram0.
+
+config ETC_ROMFSSECTSIZE
+	int "ROMFS sector size"
+	default 64
+	---help---
+		This is the sector size to use with the ROMFS volume.  Since the
+		default volume is very small, this defaults to 64 but should be
+		increased if the ROMFS volume were to be become large.  Any value
+		selected must be a power of 2.
+
+config ETC_FATDEVNO
+	int "FAT block device minor number"
+	default 1
+	depends on FS_FAT
+	---help---
+		When the default rcS file used when ETC_ROMFS is selected, it
+		will mount a FAT FS under /tmp. This is the minor number of the FAT
+		FS block device.  The default is '1' corresponding to /dev/ram1.
+
+config ETC_FATSECTSIZE
+	int "FAT sector size"
+	default 512
+	depends on FS_FAT
+	---help---
+		When the default rcS file used when ETC_ROMFS is selected, it
+		will mount a FAT FS under /tmp. This is the sector size use with the
+		FAT FS. Default is 512.
+
+config ETC_FATNSECTORS
+	int "FAT number of sectors"
+	default 1024
+	depends on FS_FAT
+	---help---
+		When the default rcS file used when ETC_ROMFS is selected, it
+		will mount a FAT FS under /tmp. This is the number of sectors to use
+		with the FAT FS.  Default is 1024.  The amount of memory used by the
+		FAT FS will be ETC_FATSECTSIZE * ETC_FATNSECTORS bytes.
+
+config ETC_FATMOUNTPT
+	string "FAT mount point"
+	default "/tmp"
+	depends on FS_FAT
+	---help---
+		When the default rcS file used when ETC_ROMFS is selected, it
+		will mount a FAT FS under /tmp. This is the location where the FAT
+		FS will be mounted.  Default is "/tmp".
+
+endif # ETC_ROMFS
+
 config RR_INTERVAL
 	int "Round robin timeslice (MSEC)"
 	default 0

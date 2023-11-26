@@ -42,11 +42,9 @@ ifeq ($(CONFIG_BOARDCTL_UNIQUEID),y)
   CSRCS += esp32c3_uid.c
 endif
 
-ifeq ($(CONFIG_NSH_ROMFSETC),y)
-ifneq ($(CONFIG_NSH_CUSTOMROMFS),y)
+ifeq ($(CONFIG_ETC_ROMFS),y)
   RCSRCS = etc/init.d/rc.sysinit etc/init.d/rcS
   RCRAWS = etc/group etc/passwd
-endif
 endif
 
 DEPPATH += --dep-path board

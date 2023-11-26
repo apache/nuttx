@@ -23,10 +23,8 @@ include $(TOPDIR)/Make.defs
 CSRCS = nanopi_m4_boardinit.c
 CSRCS += nanopi_m4_appinit.c
 
-ifeq ($(CONFIG_NSH_ROMFSETC),y)
-ifneq ($(CONFIG_NSH_CUSTOMROMFS),y)
+ifeq ($(CONFIG_ETC_ROMFS),y)
   RCSRCS = etc/init.d/rc.sysinit etc/init.d/rcS
-endif
 endif
 
 include $(TOPDIR)/boards/Board.mk
