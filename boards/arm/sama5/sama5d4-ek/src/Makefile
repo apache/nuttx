@@ -126,4 +126,8 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += sam_buttons.c
 endif
 
+ifeq ($(CONFIG_ETC_ROMFS),y)
+CSRCS += etc_romfs.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/s32k1xx/rddrone-bms772/include/nsh_romfsimg.h
+ * boards/arm/s32k1xx/rddrone-bms772/src/etc_romfs.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -20,9 +20,6 @@
 
 /* Copyright 2022 NXP */
 
-#ifndef __BOARDS_ARM_S32K1XX_RDDRONE_BMS772_INCLUDE_NSH_ROMFSIMG_H
-#define __BOARDS_ARM_S32K1XX_RDDRONE_BMS772_INCLUDE_NSH_ROMFSIMG_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -40,7 +37,7 @@
  * memory usage after board initialization has finished.
  */
 
-const unsigned char aligned_data(4) romfs_img[] =
+const unsigned char romfs_img[] =
 {
   0x2d, 0x72, 0x6f, 0x6d, 0x31, 0x66, 0x73, 0x2d, 0x00, 0x00, 0x01, 0xb0,
   0x98, 0xcd, 0xf3, 0x32, 0x4e, 0x53, 0x48, 0x49, 0x6e, 0x69, 0x74, 0x56,
@@ -135,7 +132,7 @@ const unsigned int romfs_img_len = 1024;
 
 /* Init script does not call the free command to show available memory */
 
-const unsigned char aligned_data(4) romfs_img[] =
+const unsigned char romfs_img[] =
 {
   0x2d, 0x72, 0x6f, 0x6d, 0x31, 0x66, 0x73, 0x2d, 0x00, 0x00, 0x01, 0xb0,
   0x4e, 0x7a, 0x78, 0x04, 0x4e, 0x53, 0x48, 0x49, 0x6e, 0x69, 0x74, 0x56,
@@ -227,4 +224,7 @@ const unsigned char aligned_data(4) romfs_img[] =
 const unsigned int romfs_img_len = 1024;
 
 #endif /* CONFIG_DEBUG_FEATURES */
-#endif /* __BOARDS_ARM_S32K1XX_RDDRONE_BMS772_INCLUDE_NSH_ROMFSIMG_H */
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/

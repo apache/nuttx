@@ -29,4 +29,8 @@ CSRCS += appinit.c
 
 CSRCS += reset.c
 
+ifeq ($(CONFIG_ETC_ROMFS),y)
+CSRCS += etc_romfs.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

@@ -1,5 +1,5 @@
 /***************************************************************************
- * boards/arm/sama5/sama5d4-ek/include/nsh_romfsimg.h
+ * boards/arm/sama5/sama5d4-ek/src/etc_romfs.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,7 +18,12 @@
  *
  ***************************************************************************/
 
-unsigned char romfs_img[] = {
+/***************************************************************************
+ * Public Data
+ ***************************************************************************/
+
+unsigned char romfs_img[] =
+{
   0x2d, 0x72, 0x6f, 0x6d, 0x31, 0x66, 0x73, 0x2d, 0x00, 0x00, 0x02, 0x00,
   0xe7, 0x04, 0x63, 0xbd, 0x4e, 0x53, 0x48, 0x49, 0x6e, 0x69, 0x74, 0x56,
   0x6f, 0x6c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x49,
@@ -107,3 +112,7 @@ unsigned char romfs_img[] = {
   0x00, 0x00, 0x00, 0x00
 };
 unsigned int romfs_img_len = 1024;
+
+/***************************************************************************
+ * Public Functions
+ ***************************************************************************/
