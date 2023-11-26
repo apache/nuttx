@@ -46,6 +46,8 @@ def test_stdio(p):
     assert ret == 0
     ret = p.sendCommand("fmemopen_test", "FAILED: 0")
     assert ret == 0
+    ret = p.sendCommand("open_memstream_test", "FAILED: 0")
+    assert ret == 0
 
 
 @pytest.mark.run(order=-2)
