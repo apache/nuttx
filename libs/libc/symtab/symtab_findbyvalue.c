@@ -92,7 +92,7 @@ symtab_findbyvalue(FAR const struct symtab_s *symtab,
         }
       else if (symtab[mid].sym_value < value)
         {
-          if (symtab[mid + 1].sym_value >= value)
+          if (symtab[mid + 1].sym_value > value)
             {
               break;
             }

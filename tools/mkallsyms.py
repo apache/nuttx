@@ -110,7 +110,7 @@ class SymbolTables(object):
                     func_name = re.sub(r"\(.*$", "", symbol_name)
                 except cxxfilt.InvalidName:
                     symbol_name = symbol.name
-                self.symbol_list.append((symbol["st_value"] & ~0x01, func_name))
+                self.symbol_list.append((symbol["st_value"], func_name))
         if orderbyname:
             self.symbol_list = sorted(self.symbol_list, key=lambda item: item[1])
         else:
