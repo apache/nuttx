@@ -120,6 +120,18 @@ static const struct imgdata_ops_s g_sim_camera_data_ops =
   .stop_capture           = sim_camera_data_stop_capture,
 };
 
+static const struct v4l2_frmsizeenum g_frmsizes[] =
+{
+  {
+    .type = V4L2_FRMSIZE_TYPE_DISCRETE,
+    .discrete =
+    {
+      .width = 640,
+      .height = 480,
+    }
+  }
+};
+
 static sim_camera_priv_t g_sim_camera_priv =
 {
   .data =
@@ -128,7 +140,9 @@ static sim_camera_priv_t g_sim_camera_priv =
   },
   .sensor =
   {
-    &g_sim_camera_ops
+    .ops = &g_sim_camera_ops,
+    .frmsizes_num = 1,
+    .frmsizes = g_frmsizes,
   }
 };
 
