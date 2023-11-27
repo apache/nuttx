@@ -28,6 +28,7 @@
 *.ddc
 *.dds
 *.su
+*.pyc
 *~
 .depend
 /.config
