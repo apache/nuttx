@@ -31,9 +31,12 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 # import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
 
+import sys
+
+# Add the '_extensions' directory to sys.path, to enable finding Sphinx
+# extensions within.
+sys.path.insert(0, "_extensions")
 
 # -- Project information -----------------------------------------------------
 
@@ -55,6 +58,7 @@ extensions = [
     "sphinx.ext.todo",
     "sphinx_tabs.tabs",
     "sphinx_copybutton",
+    "warnings_filter",
 ]
 
 source_suffix = [".rst", ".md"]
@@ -124,3 +128,7 @@ linkcheck_ignore = [
 latex_engine = "lualatex"
 
 copybutton_exclude = ".linenos, .gp, .go"
+
+# -- Options for warnings_filter ------------------------------------------
+
+warnings_filter_config = "known-warnings.txt"
