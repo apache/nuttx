@@ -394,3 +394,8 @@ To test it, just run the following::
     nsh> wdog -i /dev/watchdogx
 
 Where x is the watchdog instance.
+
+To test the XTWDT(/dev/watchdog3) an interrupt handler needs to be
+implemented because XTWDT does not have system reset feature. To implement
+an interrupt handler `WDIOC_CAPTURE` command can be used. When interrupt
+rises, XTAL32K clock can be restored with `WDIOC_RSTCLK` command.

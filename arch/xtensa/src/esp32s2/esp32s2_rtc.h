@@ -96,7 +96,8 @@ enum esp32s2_rtc_slow_freq_e
 {
   RTC_SLOW_FREQ_RTC = 0,      /* Internal 150 kHz RC oscillator */
   RTC_SLOW_FREQ_32K_XTAL = 1, /* External 32 kHz XTAL */
-  RTC_SLOW_FREQ_8MD256 = 2,   /* Internal 8 MHz RC oscillator, divided by 256 */
+  RTC_SLOW_FREQ_8MD256 = 2,   /* Internal 8 MHz RC oscillator, divided
+                               * by 256 */
 };
 
 /* RTC FAST_CLK frequency values */
@@ -241,7 +242,7 @@ enum esp32s2_rtc_slow_freq_e esp32s2_rtc_get_slow_clk(void);
  *
  * Input Parameters:
  *   cal_clk        - clock to be measured
- *   slowclk_cycles - number of slow clock cycles to average
+ *   slowclk_cycles - number of slow clock cycles what is to be averaged
  *
  * Returned Value:
  *   Average slow clock period in microseconds, Q13.19 fixed point format
