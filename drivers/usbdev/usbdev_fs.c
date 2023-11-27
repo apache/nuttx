@@ -263,15 +263,7 @@ static void usbdev_fs_rdcomplete(FAR struct usbdev_ep_s *ep,
 
       usbtrace(TRACE_CLASSRDCOMPLETE, sq_count(&fs_ep->reqq));
 
-      /* Restart request due to either no reader or
-       * empty frame received.
-       */
-
-      if (fs_ep->crefs == 0)
-        {
-          uwarn("drop frame\n");
-          goto restart_req;
-        }
+      /* Restart request due to empty frame received */
 
       if (req->xfrd <= 0)
         {
