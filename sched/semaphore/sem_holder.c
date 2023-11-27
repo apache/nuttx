@@ -601,7 +601,7 @@ void nxsem_destroyholder(FAR sem_t *sem)
 #else
   /* There may be an issue if there are multiple holders of the semaphore. */
 
-  DEBUGASSERT(sem->holder.htcb == NULL);
+  DEBUGASSERT(sem->holder.htcb == NULL || sem->holder.htcb == this_task());
 
 #endif
 
