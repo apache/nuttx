@@ -59,6 +59,15 @@
 #define I3C_MATCH_PART                  0x4
 #define I3C_MATCH_EXTRA_INFO            0x8
 
+/* Bit definitions for the flags field in struct i3c_priv_xfer
+ *
+ * I3C_MASTER_READ macro indicates a read data from slave to master
+ * I3C_MASTER_WRITE macro indicates a write data from slave to master
+ */
+
+#define I3C_MASTER_READ                 0x01
+#define I3C_MASTER_WRITE                0x00
+
 /* These macros should be used to i3c_device_id entries. */
 
 #define I3C_MATCH_MANUF_AND_PART (I3C_MATCH_MANUF | I3C_MATCH_PART)
@@ -142,7 +151,8 @@ enum i3c_hdr_mode
 };
 
 /* struct i3c_priv_xfer - I3C SDR private transfer
- * @rnw: encodes the transfer direction. true for a read, false for a write
+ * @flags: encodes the transfer direction. bit 0 indicates read or write,
+ *      set 1 for read, set 0 for write
  * @len: transfer length in bytes of the transfer
  * @data: input/output buffer
  * @data.in: input buffer. Must point to a DMA-able buffer
@@ -152,7 +162,7 @@ enum i3c_hdr_mode
 
 struct i3c_priv_xfer
 {
-  unsigned char rnw;
+  uint16_t flags;
   uint16_t len;
   union
   {
