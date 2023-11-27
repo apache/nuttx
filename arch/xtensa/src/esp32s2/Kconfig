@@ -420,6 +420,28 @@ config ESP32S2_RWDT
 		to have the RTC module reset, please, use the Timers' Module WDTs.
 		They will only reset Main System.
 
+config ESP32S2_XTWDT
+	bool "XTAL32K Watchdog Timer"
+	depends on ESP32S2_RTC_CLK_EXT_OSC || ESP32S2_RTC_CLK_EXT_XTAL
+	default n
+	select ESP32S2_WDT
+	select ESP32S2_RTCIO_IRQ
+	---help---
+		Includes XTWDT. This watchdog timer monitors the status of the
+		external 32 kHz crystal oscillator (XTAL32K). When XTAL32K_CLK works
+		as the clock source of RTC_SLOW_CLK and it stops oscillating, the
+		XTAL32K watchdog timer first switches to BACKUP32K_CLK derived from
+		RC_SLOW_CLK (if ESP32S2_XTWDT_BACKUP_CLK_ENABLE) and, then, generates
+		an interrupt that could be captured by WDIOC_CAPTURE.
+
+config ESP32S2_XTWDT_BACKUP_CLK_ENABLE
+	bool "Automatically switch to BACKUP32K_CLK when timer expires"
+	depends on ESP32S2_XTWDT
+	default y
+	---help---
+		Enable this to automatically switch to BACKUP32K_CLK as the source of
+		RTC_SLOW_CLK when the watchdog timer expires.
+
 config ESP32S2_RTC
 	bool "Real Time Clock (RTC)"
 	default y
