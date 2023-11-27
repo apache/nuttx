@@ -37,6 +37,7 @@
 
 #include "xtensa.h"
 #include "esp32s2_wdt.h"
+#include "esp32s2_rtc.h"
 #include "esp32s2_wdt_lowerhalf.h"
 #include "hardware/esp32s2_soc.h"
 
@@ -68,6 +69,24 @@
 
 #define RWDT_FULL_STAGE           (UINT32_MAX)
 
+/* XTWDT clock period in nanoseconds */
+
+#define XTWDT_CLK_PERIOD_NS        (30)
+
+/* Maximum number of cycles supported for a XTWDT stage timeout */
+
+#define XTWDT_FULL_STAGE          (UINT8_MAX)
+
+/* Number of cycles for RTC_SLOW_CLK calibration */
+
+#define XT_WDT_CLK_CAL_CYCLES     (500)
+
+/* Maximum number of divisor components
+ * according to the frequency of RC_SLOW_CLK
+ */
+
+#define XT_WDT_DIV_COMP_N_MAX     8
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -75,7 +94,8 @@
 enum wdt_peripheral_e
 {
   RTC,
-  TIMER
+  TIMER,
+  XTAL32K,
 };
 
 /* This structure provides the private representation of the "lower-half"
@@ -114,6 +134,12 @@ static int    wdt_lh_settimeout(struct watchdog_lowerhalf_s *lower,
                                 uint32_t timeout);
 static xcpt_t wdt_lh_capture(struct watchdog_lowerhalf_s *lower,
                              xcpt_t handler);
+static int wdt_lh_ioctl(struct watchdog_lowerhalf_s *lower, int cmd,
+                        unsigned long arg);
+#ifdef CONFIG_ESP32S2_XTWDT_BACKUP_CLK_ENABLE
+static uint32_t wdt_lh_xt_calculate(uint32_t rtc_clk_frequency_khz);
+static uint32_t wdt_lh_clk_freq_cal(uint32_t rtc_clk_period_us);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -129,7 +155,7 @@ static const struct watchdog_ops_s g_esp32s2_wdg_ops =
   .getstatus  = wdt_lh_getstatus,
   .settimeout = wdt_lh_settimeout,
   .capture    = wdt_lh_capture,
-  .ioctl      = NULL
+  .ioctl      = wdt_lh_ioctl,
 };
 
 #ifdef CONFIG_ESP32S2_MWDT0
@@ -156,6 +182,15 @@ static struct esp32s2_wdt_lowerhalf_s g_esp32s2_mwdt1_lowerhalf =
 static struct esp32s2_wdt_lowerhalf_s g_esp32s2_rwdt_lowerhalf =
 {
   .ops = &g_esp32s2_wdg_ops
+};
+#endif
+
+#ifdef CONFIG_ESP32S2_XTWDT
+/* XTWDT lower-half */
+
+static struct esp32s2_wdt_lowerhalf_s g_esp32s2_xtwdt_lowerhalf =
+{
+  .ops = &g_esp32s2_wdg_ops,
 };
 #endif
 
@@ -216,7 +251,7 @@ static int wdt_lh_start(struct watchdog_lowerhalf_s *lower)
               ESP32S2_WDT_STG_CONF(priv->wdt, ESP32S2_WDT_STAGE0,
                                    ESP32S2_WDT_STAGE_ACTION_RESET_SYSTEM);
             }
-          else
+          else if (priv->peripheral == RTC)
             {
               ESP32S2_WDT_STG_CONF(priv->wdt, ESP32S2_WDT_STAGE0,
                                    ESP32S2_WDT_STAGE_ACTION_RESET_RTC);
@@ -433,6 +468,8 @@ static int wdt_lh_settimeout(struct watchdog_lowerhalf_s *lower,
     (struct esp32s2_wdt_lowerhalf_s *)lower;
   uint16_t rtc_cycles = 0;
   uint32_t rtc_ms_max = 0;
+  uint16_t xtal32k_cycles = 0;
+  uint32_t xtal32k_ms_max = 0;
 
   wdinfo("Entry: timeout=%" PRIu32 "\n", timeout);
   DEBUGASSERT(priv);
@@ -466,7 +503,7 @@ static int wdt_lh_settimeout(struct watchdog_lowerhalf_s *lower,
 
   /* Watchdog from RTC Module */
 
-  else
+  else if (priv->peripheral == RTC)
     {
       rtc_cycles = ESP32S2_RWDT_CLK(priv->wdt);
       rtc_ms_max = (RWDT_FULL_STAGE / (uint32_t)rtc_cycles);
@@ -482,6 +519,28 @@ static int wdt_lh_settimeout(struct watchdog_lowerhalf_s *lower,
       else
         {
           timeout = timeout * rtc_cycles;
+          ESP32S2_WDT_STO(priv->wdt, timeout, ESP32S2_WDT_STAGE0);
+        }
+    }
+
+    /* Watchdog from XTAL32K Module */
+
+  else
+    {
+      xtal32k_cycles =  XTWDT_CLK_PERIOD_NS;
+      xtal32k_ms_max = (XTWDT_FULL_STAGE * NSEC_PER_USEC / xtal32k_cycles);
+
+      /* Is this timeout a valid value for RTC WDT? */
+
+      if (timeout == 0 || timeout > xtal32k_ms_max)
+        {
+          wderr("Cannot represent timeout=%" PRIu32 " > %" PRIu32 "\n",
+                timeout, rtc_ms_max);
+          return -ERANGE;
+        }
+      else
+        {
+          timeout = timeout * xtal32k_cycles;
           ESP32S2_WDT_STO(priv->wdt, timeout, ESP32S2_WDT_STAGE0);
         }
     }
@@ -588,7 +647,7 @@ static xcpt_t wdt_lh_capture(struct watchdog_lowerhalf_s *lower,
           ESP32S2_WDT_STG_CONF(priv->wdt, ESP32S2_WDT_STAGE0,
                                ESP32S2_WDT_STAGE_ACTION_RESET_SYSTEM);
         }
-      else
+      else if (priv->peripheral == RTC)
         {
           ESP32S2_WDT_STG_CONF(priv->wdt, ESP32S2_WDT_STAGE0,
                                ESP32S2_WDT_STAGE_ACTION_RESET_RTC);
@@ -598,6 +657,47 @@ static xcpt_t wdt_lh_capture(struct watchdog_lowerhalf_s *lower,
   leave_critical_section(flags);
   ESP32S2_WDT_LOCK(priv->wdt);
   return oldhandler;
+}
+
+/****************************************************************************
+ * Name: wdt_lh_ioctl
+ *
+ * Description:
+ *   Any ioctl commands that are not recognized by the "upper-half" driver
+ *   are forwarded to the lower half driver through this method.
+ *
+ * Input Parameters:
+ *   lower      - A pointer the publicly visible representation of the
+ *                "lower-half" driver state structure.
+ *   cmd        - Command number to process.
+ *   arg        - Argument that sent to the command.
+ *
+ * Returned Value:
+ *   OK if success or a negative value if fail.
+ *
+ ****************************************************************************/
+
+static int wdt_lh_ioctl(struct watchdog_lowerhalf_s *lower, int cmd,
+                        unsigned long arg)
+{
+  struct esp32s2_wdt_lowerhalf_s *priv =
+    (struct esp32s2_wdt_lowerhalf_s *)lower;
+
+  wdinfo("ioctl Call: cmd=0x%x arg=0x%lx", cmd, arg);
+
+  /* Process the IOCTL command */
+
+  switch (cmd)
+    {
+    case WDIOC_RSTCLK:
+      ESP32S2_XTWDT_RST_CLK(priv->wdt);
+      break;
+
+    default:
+      return -ENOTTY;
+    }
+
+  return OK;
 }
 
 /* Interrupt handling *******************************************************/
@@ -621,6 +721,81 @@ static int wdt_handler(int irq, void *context, void *arg)
 
   return OK;
 }
+
+/****************************************************************************
+ * Name: wdt_lh_xt_calculate
+ *
+ * Description:
+ *   Calculate the actual frequency of RC_SLOW_CLK to calibrate the backup
+ *   RTC_SLOW_CLK. This is necessary to compensate for clock deviations.
+ *
+ * Input Parameters:
+ *   rtc_clk_frequency_khz - Frequency of RTC SLOW CLK in khz
+ *
+ * Returned Values:
+ *   The divisor of BACKUP32K_CLK used to calibrate the RTC_SLOW_CLK
+ *   according to the actual frequency of the RC_SLOW_CLK.
+ *
+ ****************************************************************************/
+#ifdef CONFIG_ESP32S2_XTWDT_BACKUP_CLK_ENABLE
+static uint32_t wdt_lh_xt_calculate(uint32_t rtc_clk_frequency_khz)
+{
+    uint32_t xtal32k_clk_factor = 0;
+    uint8_t divisor_comps[XT_WDT_DIV_COMP_N_MAX];
+
+    uint8_t M = ((rtc_clk_frequency_khz / 32) / 2);
+    uint32_t S = ((4 * rtc_clk_frequency_khz) / 32);
+
+    memset(divisor_comps, M, XT_WDT_DIV_COMP_N_MAX);
+
+    /* Calculate how far we are away from satisfying S = SUM(x_n) */
+
+    uint8_t off = S - XT_WDT_DIV_COMP_N_MAX * M;
+
+    /* Offset should never be this big */
+
+    ASSERT(off <= XT_WDT_DIV_COMP_N_MAX);
+
+    for (int i = 0; i < XT_WDT_DIV_COMP_N_MAX; i++)
+      {
+        if (off)
+          {
+            divisor_comps[i]++;
+            off--;
+          }
+
+        /* Sum up all divisors */
+
+        xtal32k_clk_factor |=  (divisor_comps[i] << 4 * i);
+      }
+
+    return xtal32k_clk_factor;
+}
+
+/****************************************************************************
+ * Name: wdt_lh_clk_freq_cal
+ *
+ * Description:
+ *   Calculate the clock frequency from period in microseconds.
+ *
+ * Input Parameters:
+ *   rtc_clk_period_us - Average slow clock period in microseconds.
+ *
+ * Returned Values:
+ *   Frequency of the clock in Hz.
+ *
+ ****************************************************************************/
+
+static uint32_t wdt_lh_clk_freq_cal(uint32_t rtc_clk_period_us)
+{
+  if (rtc_clk_period_us == 0)
+    {
+      return 0;
+    }
+
+  return 1000000ULL * (1 << RTC_CLK_CAL_FRACT) / rtc_clk_period_us;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -680,6 +855,15 @@ int esp32s2_wdt_initialize(const char *devpath, enum esp32s2_wdt_inst_e wdt)
         }
 #endif
 
+#ifdef CONFIG_ESP32S2_XTWDT
+      case ESP32S2_WDT_XTWDT:
+        {
+          lower = &g_esp32s2_xtwdt_lowerhalf;
+          lower->peripheral = XTAL32K;
+          break;
+        }
+#endif
+
       default:
         {
           ret = -ENODEV;
@@ -711,6 +895,26 @@ int esp32s2_wdt_initialize(const char *devpath, enum esp32s2_wdt_inst_e wdt)
     {
       ESP32S2_MWDT_PRE(lower->wdt, MWDT_CLK_PRESCALER_VALUE);
     }
+
+  /* Configure auto backup clock when XTAL32K fails */
+
+#ifdef CONFIG_ESP32S2_XTWDT_BACKUP_CLK_ENABLE
+  if (lower->peripheral == XTAL32K)
+    {
+      /* Estimate frequency of internal RTC oscillator */
+
+      uint32_t rtc_clk_period_us =
+        esp32s2_rtc_clk_cal(RTC_CAL_INTERNAL_OSC, XT_WDT_CLK_CAL_CYCLES);
+
+      uint32_t rtc_clk_frequency_khz = wdt_lh_clk_freq_cal(rtc_clk_period_us)
+        / 1000;
+
+      uint32_t xtal32k_clk_factor =
+        wdt_lh_xt_calculate(rtc_clk_frequency_khz);
+
+      ESP32S2_XTWDT_PRE(lower->wdt, xtal32k_clk_factor);
+    }
+#endif
 
   ESP32S2_WDT_LOCK(lower->wdt);
 

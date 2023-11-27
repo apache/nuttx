@@ -34,6 +34,7 @@
 /* Offset relative to each watchdog timer instance memory base */
 
 #define RWDT_CONFIG0_OFFSET         0x0094
+#define XTWDT_CONFIG0_OFFSET        0x0060
 
 /* RWDT */
 
@@ -45,6 +46,12 @@
 #define RWDT_WP_REG                 0x00ac
 #define RWDT_INT_ENA_REG_OFFSET     0x0040
 #define RWDT_INT_CLR_REG_OFFSET     0x004c
+
+/* XTWDT */
+
+#define XTWDT_TIMEOUT_OFFSET        0x00f4
+#define XTWDT_CLK_PRESCALE_OFFSET   0x00f0
+#define XTWDT_INT_ENA_REG_OFFSET    0x0040
 
 /* The value that needs to be written to RTC_CNTL_WDT_WKEY to
  * write-enable the wdt registers

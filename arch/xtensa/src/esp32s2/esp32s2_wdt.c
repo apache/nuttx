@@ -32,27 +32,43 @@
 #include "xtensa.h"
 #include "esp32s2_irq.h"
 #include "esp32s2_rtc_gpio.h"
+#include "esp32s2_rtc.h"
 #include "esp32s2_wdt.h"
 #include "hardware/esp32s2_efuse.h"
 #include "hardware/esp32s2_rtccntl.h"
 #include "hardware/esp32s2_tim.h"
 
-#ifdef CONFIG_ESP32S2_RWDT
-#  error "RWDT not yet supported due to missing RTC driver!"
-#endif
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Helpers for converting from Q13.19 fixed-point format to float */
+
+#define N 19
+#define Q_TO_FLOAT(x) ((float)x/(float)(1<<N))
+
 /* Check whether the provided device is a RTC Watchdog Timer */
 
-#define IS_RWDT(dev)    (((struct esp32s2_wdt_priv_s *)(dev))->base == \
-                         RTC_CNTL_OPTIONS0_REG)
+#define IS_RWDT(dev)    (((struct esp32s2_wdt_priv_s *)dev)->type == RTC)
+
+/* Check whether the provided device is a Main Watchdog Timer */
+
+#define IS_MWDT(dev)    (((struct esp32s2_wdt_priv_s *)dev)->type == TIMER)
+
+/* Check whether the provided device is a XTAL32K Watchdog Timer */
+
+#define IS_XTWDT(dev)    (((struct esp32s2_wdt_priv_s *)dev)->type == XTAL32K)
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
+enum wdt_peripheral_e
+{
+  RTC,
+  TIMER,
+  XTAL32K,
+};
 
 struct esp32s2_wdt_priv_s
 {
@@ -62,7 +78,14 @@ struct esp32s2_wdt_priv_s
   uint8_t                   irq;     /* Interrupt ID */
   int32_t                   cpuint;  /* CPU interrupt assigned to this WDT */
   bool                      inuse;   /* Flag indicating if this WDT is in use */
+  enum wdt_peripheral_e     type;    /* Type of the WDT Peripheral */
 };
+
+/****************************************************************************
+ * External Functions
+ ****************************************************************************/
+
+extern void esp_rom_delay_us(uint32_t us);
 
 /****************************************************************************
  * Private Function Prototypes
@@ -96,6 +119,8 @@ static int32_t wdt_setisr(struct esp32s2_wdt_dev_s *dev,
 static void wdt_enableint(struct esp32s2_wdt_dev_s *dev);
 static void wdt_disableint(struct esp32s2_wdt_dev_s *dev);
 static void wdt_ackint(struct esp32s2_wdt_dev_s *dev);
+static uint16_t wdt_rtc_clk(struct esp32s2_wdt_dev_s *dev);
+static void wdt_rstclk(struct esp32s2_wdt_dev_s *dev);
 
 /****************************************************************************
  * Private Data
@@ -103,7 +128,7 @@ static void wdt_ackint(struct esp32s2_wdt_dev_s *dev);
 
 /* ESP32-S2 WDT ops */
 
-struct esp32s2_wdt_ops_s esp32s2_mwdt_ops =
+struct esp32s2_wdt_ops_s esp32s2_wdt_ops =
 {
   .start         = wdt_start,
   .stop          = wdt_stop,
@@ -113,63 +138,63 @@ struct esp32s2_wdt_ops_s esp32s2_mwdt_ops =
   .settimeout    = wdt_settimeout,
   .feed          = wdt_feed,
   .stg_conf      = wdt_config_stage,
-  .rtc_clk       = NULL,
+  .rtc_clk       = wdt_rtc_clk,
   .setisr        = wdt_setisr,
   .enableint     = wdt_enableint,
   .disableint    = wdt_disableint,
   .ackint        = wdt_ackint,
-};
-
-struct esp32s2_wdt_ops_s esp32s2_rwdt_ops =
-{
-  .start         = wdt_start,
-  .stop          = wdt_stop,
-  .enablewp      = wdt_enablewp,
-  .disablewp     = wdt_disablewp,
-  .pre           = NULL,
-  .settimeout    = wdt_settimeout,
-  .feed          = wdt_feed,
-  .stg_conf      = wdt_config_stage,
-  .rtc_clk       = NULL,
-  .setisr        = wdt_setisr,
-  .enableint     = wdt_enableint,
-  .disableint    = wdt_disableint,
-  .ackint        = wdt_ackint,
+  .rstclk        = wdt_rstclk,
 };
 
 #ifdef CONFIG_ESP32S2_MWDT0
 struct esp32s2_wdt_priv_s g_esp32s2_mwdt0_priv =
 {
-  .ops    = &esp32s2_mwdt_ops,
+  .ops    = &esp32s2_wdt_ops,
   .base   = TIMG_T0CONFIG_REG(0),
   .periph = ESP32S2_PERIPH_TG_WDT_LEVEL,
   .irq    = ESP32S2_IRQ_TG_WDT_LEVEL,
   .cpuint = -ENOMEM,
   .inuse  = false,
+  .type   = TIMER,
 };
 #endif
 
 #ifdef CONFIG_ESP32S2_MWDT1
 struct esp32s2_wdt_priv_s g_esp32s2_mwdt1_priv =
 {
-  .ops    = &esp32s2_mwdt_ops,
+  .ops    = &esp32s2_wdt_ops,
   .base   = TIMG_T0CONFIG_REG(1),
   .periph = ESP32S2_PERIPH_TG1_WDT_LEVEL,
   .irq    = ESP32S2_IRQ_TG1_WDT_LEVEL,
   .cpuint = -ENOMEM,
   .inuse  = false,
+  .type   = TIMER,
 };
 #endif
 
 #ifdef CONFIG_ESP32S2_RWDT
 struct esp32s2_wdt_priv_s g_esp32s2_rwdt_priv =
 {
-  .ops    = &esp32s2_rwdt_ops,
+  .ops    = &esp32s2_wdt_ops,
   .base   = RTC_CNTL_OPTIONS0_REG,
   .periph = ESP32S2_PERIPH_RTC_CORE,
   .irq    = ESP32S2_IRQ_RTC_WDT,
   .cpuint = -ENOMEM,
   .inuse  = false,
+  .type   = RTC,
+};
+#endif
+
+#ifdef CONFIG_ESP32S2_XTWDT
+struct esp32s2_wdt_priv_s g_esp32s2_xtwdt_priv =
+{
+  .ops    = &esp32s2_wdt_ops,
+  .base   = RTC_CNTL_OPTIONS0_REG,
+  .periph = ESP32S2_PERIPH_RTC_CORE,
+  .irq    = ESP32S2_IRQ_RTC_XTAL32K_DEAD,
+  .cpuint = -ENOMEM,
+  .inuse  = false,
+  .type   = XTAL32K,
 };
 #endif
 
@@ -262,9 +287,17 @@ static void wdt_start(struct esp32s2_wdt_dev_s *dev)
     {
       wdt_modifyreg32(dev, RWDT_CONFIG0_OFFSET, 0, RTC_CNTL_WDT_EN);
     }
-  else
+  else if (IS_MWDT(dev))
     {
       wdt_modifyreg32(dev, MWDT_CONFIG0_OFFSET, 0, TIMG_WDT_EN);
+    }
+  else
+    {
+      wdt_modifyreg32(dev, XTWDT_CONFIG0_OFFSET, 0, RTC_CNTL_XTAL32K_WDT_EN);
+#ifdef CONFIG_ESP32S2_XTWDT_BACKUP_CLK_ENABLE
+      wdt_modifyreg32(dev, XTWDT_CONFIG0_OFFSET,
+                      0, RTC_CNTL_XTAL32K_AUTO_BACKUP);
+#endif
     }
 }
 
@@ -303,7 +336,7 @@ static int32_t wdt_config_stage(struct esp32s2_wdt_dev_s *dev,
             wdt_modifyreg32(dev, RWDT_CONFIG0_OFFSET, RTC_CNTL_WDT_STG0_M,
                             mask);
           }
-        else
+        else if (IS_MWDT(dev))
           {
             mask = (uint32_t)cfg << TIMG_WDT_STG0_S;
             wdt_modifyreg32(dev, MWDT_CONFIG0_OFFSET, TIMG_WDT_STG0_M, mask);
@@ -319,7 +352,7 @@ static int32_t wdt_config_stage(struct esp32s2_wdt_dev_s *dev,
             wdt_modifyreg32(dev, RWDT_CONFIG0_OFFSET, RTC_CNTL_WDT_STG1_M,
                             mask);
           }
-        else
+        else if (IS_MWDT(dev))
           {
             mask = (uint32_t)cfg << TIMG_WDT_STG1_S;
             wdt_modifyreg32(dev, MWDT_CONFIG0_OFFSET, TIMG_WDT_STG1_M, mask);
@@ -335,7 +368,7 @@ static int32_t wdt_config_stage(struct esp32s2_wdt_dev_s *dev,
             wdt_modifyreg32(dev, RWDT_CONFIG0_OFFSET, RTC_CNTL_WDT_STG2_M,
                             mask);
           }
-        else
+        else if (IS_MWDT(dev))
           {
             mask = (uint32_t)cfg << TIMG_WDT_STG2_S;
             wdt_modifyreg32(dev, MWDT_CONFIG0_OFFSET, TIMG_WDT_STG2_M, mask);
@@ -351,7 +384,7 @@ static int32_t wdt_config_stage(struct esp32s2_wdt_dev_s *dev,
             wdt_modifyreg32(dev, RWDT_CONFIG0_OFFSET, RTC_CNTL_WDT_STG3_M,
                             mask);
           }
-        else
+        else if (IS_MWDT(dev))
           {
             mask = (uint32_t)cfg << TIMG_WDT_STG3_S;
             wdt_modifyreg32(dev, MWDT_CONFIG0_OFFSET, TIMG_WDT_STG3_M, mask);
@@ -388,9 +421,13 @@ static void wdt_stop(struct esp32s2_wdt_dev_s *dev)
     {
       wdt_modifyreg32(dev, RWDT_CONFIG0_OFFSET, RTC_CNTL_WDT_EN, 0);
     }
-  else
+  else if (IS_MWDT(dev))
     {
       wdt_modifyreg32(dev, MWDT_CONFIG0_OFFSET, TIMG_WDT_EN, 0);
+    }
+  else
+    {
+      wdt_modifyreg32(dev, XTWDT_CONFIG0_OFFSET, RTC_CNTL_XTAL32K_WDT_EN, 0);
     }
 }
 
@@ -417,7 +454,7 @@ static void wdt_enablewp(struct esp32s2_wdt_dev_s *dev)
     {
       wdt_putreg(dev, RWDT_WP_REG, 0);
     }
-  else
+  else if (IS_MWDT(dev))
     {
       wdt_putreg(dev, MWDT_WP_REG, 0);
     }
@@ -446,7 +483,7 @@ static void wdt_disablewp(struct esp32s2_wdt_dev_s *dev)
     {
       wdt_putreg(dev, RWDT_WP_REG, RTC_CNTL_WDT_WKEY_VALUE);
     }
-  else
+  else if (IS_MWDT(dev))
     {
       wdt_putreg(dev, MWDT_WP_REG, TIMG_WDT_WKEY_VALUE);
     }
@@ -469,12 +506,23 @@ static void wdt_disablewp(struct esp32s2_wdt_dev_s *dev)
 
 static void wdt_pre(struct esp32s2_wdt_dev_s *dev, uint16_t pre)
 {
-  uint32_t mask = (uint32_t)pre << TIMG_WDT_CLK_PRESCALER_S;
-
+  uint32_t mask = 0;
   DEBUGASSERT(dev != NULL);
 
-  wdt_modifyreg32(dev, MWDT_CLK_PRESCALE_OFFSET, TIMG_WDT_CLK_PRESCALER_M,
-                  mask);
+  if (IS_MWDT(dev))
+    {
+      mask = (uint32_t)pre << TIMG_WDT_CLK_PRESCALER_S;
+      wdt_modifyreg32(dev, MWDT_CLK_PRESCALE_OFFSET,
+                      TIMG_WDT_CLK_PRESCALER_M, mask);
+    }
+#ifdef CONFIG_ESP32S2_XTWDT_BACKUP_CLK_ENABLE
+  else if (IS_XTWDT(dev))
+    {
+      mask = (uint32_t)pre;
+      wdt_modifyreg32(dev, XTWDT_CLK_PRESCALE_OFFSET,
+                      RTC_CNTL_XTAL32K_CLK_FACTOR_M, mask);
+    }
+#endif
 }
 
 /****************************************************************************
@@ -499,6 +547,14 @@ static int32_t wdt_settimeout(struct esp32s2_wdt_dev_s *dev, uint32_t value,
 {
   DEBUGASSERT(dev != NULL);
 
+  if (IS_XTWDT(dev))
+    {
+      value = value << RTC_CNTL_XTAL32K_WDT_TIMEOUT_S;
+      wdt_modifyreg32(dev, XTWDT_TIMEOUT_OFFSET,
+                      RTC_CNTL_XTAL32K_WDT_TIMEOUT_M, value);
+      return OK;
+    }
+
   switch (stage)
   {
     case ESP32S2_WDT_STAGE0:
@@ -515,7 +571,7 @@ static int32_t wdt_settimeout(struct esp32s2_wdt_dev_s *dev, uint32_t value,
             value = value >> (delay + 1);
             wdt_putreg(dev, RWDT_STAGE0_TIMEOUT_OFFSET, value);
           }
-        else
+        else if (IS_MWDT(dev))
           {
             wdt_putreg(dev, MWDT_STAGE0_TIMEOUT_OFFSET, value);
           }
@@ -528,7 +584,7 @@ static int32_t wdt_settimeout(struct esp32s2_wdt_dev_s *dev, uint32_t value,
           {
             wdt_putreg(dev, RWDT_STAGE1_TIMEOUT_OFFSET, value);
           }
-        else
+        else if (IS_MWDT(dev))
           {
             wdt_putreg(dev, MWDT_STAGE1_TIMEOUT_OFFSET, value);
           }
@@ -541,7 +597,7 @@ static int32_t wdt_settimeout(struct esp32s2_wdt_dev_s *dev, uint32_t value,
           {
             wdt_putreg(dev, RWDT_STAGE2_TIMEOUT_OFFSET, value);
           }
-        else
+        else if (IS_MWDT(dev))
           {
             wdt_putreg(dev, MWDT_STAGE2_TIMEOUT_OFFSET, value);
           }
@@ -554,7 +610,7 @@ static int32_t wdt_settimeout(struct esp32s2_wdt_dev_s *dev, uint32_t value,
           {
             wdt_putreg(dev, RWDT_STAGE3_TIMEOUT_OFFSET, value);
           }
-        else
+        else if (IS_MWDT(dev))
           {
             wdt_putreg(dev, MWDT_STAGE3_TIMEOUT_OFFSET, value);
           }
@@ -591,10 +647,74 @@ static void wdt_feed(struct esp32s2_wdt_dev_s *dev)
     {
       wdt_modifyreg32(dev, RWDT_FEED_OFFSET, 0, RTC_CNTL_WDT_FEED);
     }
-  else
+  else if (IS_MWDT(dev))
     {
       wdt_putreg(dev, MWDT_FEED_OFFSET, TIMG_WDT_FEED);
     }
+}
+
+/****************************************************************************
+ * Name: wdt_rtc_clk
+ *
+ * Description:
+ *   Check the RTC clock source and return the necessary cycles to complete
+ *   1 ms.
+ *
+ * Parameters:
+ *   dev - Pointer to the driver state structure.
+ *
+ * Returned Values:
+ *   Number of cycles to complete 1 ms.
+ *
+ ****************************************************************************/
+
+static uint16_t wdt_rtc_clk(struct esp32s2_wdt_dev_s *dev)
+{
+  enum esp32s2_rtc_slow_freq_e slow_clk_rtc;
+  uint32_t period_13q19;
+  float period;
+  float cycles_ms;
+  uint16_t cycles_ms_int;
+
+  /* Calibration map: Maps each RTC SLOW_CLK source to the number
+   * used to calibrate this source.
+   */
+
+  static const enum esp32s2_rtc_cal_sel_e cal_map[] =
+  {
+    RTC_CAL_RTC_MUX,
+    RTC_CAL_32K_XTAL,
+    RTC_CAL_8MD256
+  };
+
+  DEBUGASSERT(dev);
+
+  /* Check which clock is sourcing the slow_clk_rtc */
+
+  slow_clk_rtc = esp32s2_rtc_get_slow_clk();
+
+  /* Get the slow_clk_rtc period in us in Q13.19 fixed point format */
+
+  period_13q19 = esp32s2_rtc_clk_cal(cal_map[slow_clk_rtc],
+                                     SLOW_CLK_CAL_CYCLES);
+
+  /* Assert no error happened during the calibration */
+
+  DEBUGASSERT(period_13q19 != 0);
+
+  /* Convert from Q13.19 format to float */
+
+  period = Q_TO_FLOAT(period_13q19);
+
+  /* Get the number of cycles necessary to count 1 ms */
+
+  cycles_ms = 1000.0 / period;
+
+  /* Get the integer number of cycles */
+
+  cycles_ms_int = (uint16_t)cycles_ms;
+
+  return cycles_ms_int;
 }
 
 /****************************************************************************
@@ -635,8 +755,9 @@ static int32_t wdt_setisr(struct esp32s2_wdt_dev_s *dev, xcpt_t handler,
 
       if (wdt->cpuint >= 0)
         {
-#ifdef CONFIG_ESP32S2_RWDT
-          if (wdt->irq == ESP32S2_IRQ_RTC_WDT)
+#if defined(CONFIG_ESP32S2_RWDT) || defined(CONFIG_ESP32S2_XTWDT)
+          if (wdt->irq == ESP32S2_IRQ_RTC_WDT ||
+              wdt->irq == ESP32S2_IRQ_RTC_XTAL32K_DEAD)
             {
               esp32s2_rtcioirqdisable(wdt->irq);
               irq_detach(wdt->irq);
@@ -663,8 +784,9 @@ static int32_t wdt_setisr(struct esp32s2_wdt_dev_s *dev, xcpt_t handler,
     {
       /* Set up to receive peripheral interrupts on the current CPU */
 
-#ifdef CONFIG_ESP32S2_RWDT
-      if (wdt->irq == ESP32S2_IRQ_RTC_WDT)
+#if defined(CONFIG_ESP32S2_RWDT) || defined(CONFIG_ESP32S2_XTWDT)
+      if (wdt->irq == ESP32S2_IRQ_RTC_WDT ||
+          wdt->irq == ESP32S2_IRQ_RTC_XTAL32K_DEAD)
         {
           ret = irq_attach(wdt->irq, handler, arg);
 
@@ -728,9 +850,14 @@ static void wdt_enableint(struct esp32s2_wdt_dev_s *dev)
     {
       wdt_modifyreg32(dev, RWDT_INT_ENA_REG_OFFSET, 0, RTC_CNTL_WDT_INT_ENA);
     }
-  else
+  else if (IS_MWDT(dev))
     {
       wdt_modifyreg32(dev, MWDT_INT_ENA_REG_OFFSET, 0, TIMG_WDT_INT_ENA);
+    }
+  else
+    {
+      wdt_modifyreg32(dev, XTWDT_INT_ENA_REG_OFFSET, 0,
+                      RTC_CNTL_XTAL32K_DEAD_INT_ENA);
     }
 }
 
@@ -753,9 +880,14 @@ static void wdt_disableint(struct esp32s2_wdt_dev_s *dev)
     {
       wdt_modifyreg32(dev, RWDT_INT_ENA_REG_OFFSET, RTC_CNTL_WDT_INT_ENA, 0);
     }
-  else
+  else if (IS_MWDT(dev))
     {
       wdt_modifyreg32(dev, MWDT_INT_ENA_REG_OFFSET, TIMG_WDT_INT_ENA, 0);
+    }
+  else
+    {
+      wdt_modifyreg32(dev, XTWDT_INT_ENA_REG_OFFSET,
+                      RTC_CNTL_XTAL32K_DEAD_INT_ENA, 0);
     }
 }
 
@@ -778,9 +910,48 @@ static void wdt_ackint(struct esp32s2_wdt_dev_s *dev)
     {
       wdt_putreg(dev, RWDT_INT_CLR_REG_OFFSET, RTC_CNTL_WDT_INT_CLR);
     }
-  else
+  else if (IS_MWDT(dev))
     {
       wdt_putreg(dev, MWDT_INT_CLR_REG_OFFSET, TIMG_WDT_INT_CLR);
+    }
+  else
+    {
+      wdt_putreg(dev, MWDT_INT_CLR_REG_OFFSET,
+                 RTC_CNTL_XTAL32K_DEAD_INT_CLR);
+    }
+}
+
+/****************************************************************************
+ * Name: wdt_rstclk
+ *
+ * Description:
+ *   Restores the xtal32k clock.
+ *
+ * Parameters:
+ *   dev           - Pointer to the driver state structure.
+ *
+ ****************************************************************************/
+
+static void wdt_rstclk(struct esp32s2_wdt_dev_s *dev)
+{
+  DEBUGASSERT(dev != NULL);
+
+  struct esp32s2_wdt_priv_s *wdt = (struct esp32s2_wdt_priv_s *)dev;
+
+  if (IS_XTWDT(dev))
+    {
+      wdt->ops->stop(dev);
+
+      wdt_modifyreg32(dev, XTWDT_CONFIG0_OFFSET, RTC_CNTL_XPD_XTAL_32K, 0);
+      wdt_modifyreg32(dev, XTWDT_CONFIG0_OFFSET, 0, RTC_CNTL_XPD_XTAL_32K);
+
+      /* Needs some time after switching to 32khz XTAL
+       * before turning on WDT again
+       */
+
+      esp_rom_delay_us(300);
+
+      wdt->ops->start(dev);
     }
 }
 
@@ -831,6 +1002,15 @@ struct esp32s2_wdt_dev_s *esp32s2_wdt_init(enum esp32s2_wdt_inst_e wdt_id)
       case ESP32S2_WDT_RWDT:
         {
           wdt = &g_esp32s2_rwdt_priv;
+          break;
+        }
+
+#endif
+
+#ifdef CONFIG_ESP32S2_XTWDT
+      case ESP32S2_WDT_XTWDT:
+        {
+          wdt = &g_esp32s2_xtwdt_priv;
           break;
         }
 
@@ -928,10 +1108,18 @@ bool esp32s2_wdt_is_running(struct esp32s2_wdt_dev_s *dev)
           return true;
         }
     }
-  else
+  else if (IS_MWDT(dev))
     {
       status = wdt_getreg(dev, MWDT_CONFIG0_OFFSET);
       if ((status & TIMG_WDT_EN) == TIMG_WDT_EN)
+        {
+          return true;
+        }
+    }
+  else
+    {
+      status = wdt_getreg(dev, XTWDT_CONFIG0_OFFSET);
+      if ((status & RTC_CNTL_XTAL32K_WDT_EN) == RTC_CNTL_XTAL32K_WDT_EN)
         {
           return true;
         }
