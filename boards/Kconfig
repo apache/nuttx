@@ -1850,6 +1850,13 @@ config ARCH_BOARD_ADAFRUIT_FEATHER_RP2040
 		This is a port to the Adafruit Feather RP2040 board.
 		Support is derived from Raspberry Pi Pico support.
 
+config ARCH_BOARD_SEEED_XIAO_RP2040
+	bool "Seeed Studio XIAO RP2040 board"
+	depends on ARCH_CHIP_RP2040
+	---help---
+		This is a port to the Seeed Studio XIAO RP2040 board.
+		Support is derived from Raspberry Pi Pico support.
+
 config ARCH_BOARD_ADAFRUIT_KB2040
 	bool "Adafruit KB2040 board"
 	depends on ARCH_CHIP_RP2040
@@ -3223,6 +3230,7 @@ config ARCH_BOARD
 	default "raspberrypi-pico-w"        if ARCH_BOARD_RASPBERRYPI_PICO_W
 	default "pimoroni-tiny2040"         if ARCH_BOARD_PIMORONI_TINY2040
 	default "adafruit-feather-rp2040"   if ARCH_BOARD_ADAFRUIT_FEATHER_RP2040
+	default "seeed-xiao-rp2040"         if ARCH_BOARD_SEEED_XIAO_RP2040
 	default "adafruit-kb2040"           if ARCH_BOARD_ADAFRUIT_KB2040
 	default "adafruit-qt-py-rp2040"     if ARCH_BOARD_ADAFRUIT_QT_PY_RP2040
 	default "waveshare-rp2040-lcd-1.28" if ARCH_BOARD_WAVESHARE_RP2040_LCD_1_28
@@ -3627,6 +3635,9 @@ source "boards/arm/rp2040/pimoroni-tiny2040/Kconfig"
 endif
 if ARCH_BOARD_ADAFRUIT_FEATHER_RP2040
 source "boards/arm/rp2040/adafruit-feather-rp2040/Kconfig"
+endif
+if ARCH_BOARD_SEEED_XIAO_RP2040
+source "boards/arm/rp2040/seeed-xiao-rp2040/Kconfig"
 endif
 if ARCH_BOARD_ADAFRUIT_KB2040
 source "boards/arm/rp2040/adafruit-kb2040/Kconfig"
