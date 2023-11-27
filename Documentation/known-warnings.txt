@@ -1,0 +1,6 @@
+# Each line should contain the regular expression of a known Sphinx warning
+# that should be filtered out
+
+# Function and (enum or struct) name
+.*Duplicate C declaration.*\n.*'\.\. c:.*:: net_driver_s'.*
+.*Duplicate C declaration.*\n.*'\.\. c:.*:: sigaction'.*
