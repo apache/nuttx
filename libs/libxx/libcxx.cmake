@@ -24,22 +24,7 @@ if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/libcxx)
 
   # cmake-format: off
   set(LIBCXX_PATCH_COMMAND
-      patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-      ${CMAKE_CURRENT_LIST_DIR}/0001-Remove-the-locale-fallback-for-NuttX.patch
-      && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-      ${CMAKE_CURRENT_LIST_DIR}/0001-libc-avoid-the-waring-__EXCEPTIONS-is-not-defined-ev.patch
-      && patch -p1 -d ${CMAKE_CURRENT_LIST_DIR} <
-      ${CMAKE_CURRENT_LIST_DIR}/0001-libcxx-Rename-PS-macro-to-avoid-clashing-with-Xtensa.patch
-  )
-
-  if(CONFIG_LIBC_ARCH_ATOMIC)
-    list(
-      APPEND
-      LIBCXX_PATCH_COMMAND
-      && patch -p1 -d ${CMAKE_CURRENT_LIST_DIR} <
-      ${CMAKE_CURRENT_LIST_DIR}/0002-Omit-atomic_-un-signed_lock_free-if-unsupported.patch
-    )
-  endif()
+  patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx < ${CMAKE_CURRENT_LIST_DIR}/0001_fix_stdatomic_h_miss_typedef.patch)
   # cmake-format: on
   FetchContent_Declare(
     libcxx
@@ -68,12 +53,30 @@ if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/libcxx)
     FetchContent_Populate(libcxx)
   endif()
 
+  execute_process(
+    COMMAND
+      sh -c
+      "ln -s ${CMAKE_CURRENT_LIST_DIR}/libcxx/include ${NUTTX_DIR}/include/libcxx"
+    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
+  execute_process(
+    COMMAND
+      sh -c
+      "cp ${CMAKE_CURRENT_LIST_DIR}/__config_site ${NUTTX_DIR}/include/libcxx/__config_site"
+    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 endif()
+
+find_program(GN_EXECUTABLEXX gn REQUIRED)
+message("GN_EXECUTABLEXX ${GN_EXECUTABLEXX}")
 
 set_property(
   TARGET nuttx
   APPEND
   PROPERTY NUTTX_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_LIST_DIR}/libcxx/include)
+
+set_property(
+  TARGET nuttx
+  APPEND
+  PROPERTY NUTTX_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_LIST_DIR}/libcxx/src)
 
 add_compile_definitions(_LIBCPP_BUILDING_LIBRARY)
 if(CONFIG_LIBSUPCXX)
