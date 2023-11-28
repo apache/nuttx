@@ -675,7 +675,7 @@ static int sim_uartram_register(const char *devname, bool slave)
   struct uart_rambuf_s *shmem;
 
   strlcpy(name, strrchr(devname, '/') + 1, NAME_MAX);
-  shmem = host_allocshmem(name, sizeof(struct uart_rambuf_s) * 2, !slave);
+  shmem = host_allocshmem(name, sizeof(struct uart_rambuf_s) * 2);
   DEBUGASSERT(shmem);
 
   memset(shmem, 0, sizeof(struct uart_rambuf_s) * 2);

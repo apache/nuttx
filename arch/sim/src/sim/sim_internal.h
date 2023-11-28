@@ -224,7 +224,7 @@ int   host_waitpid(pid_t pid);
 
 void *host_allocheap(size_t size, bool exec);
 void  host_freeheap(void *mem);
-void *host_allocshmem(const char *name, size_t size, int master);
+void *host_allocshmem(const char *name, size_t size);
 void  host_freeshmem(void *mem);
 
 size_t host_mallocsize(void *mem);
