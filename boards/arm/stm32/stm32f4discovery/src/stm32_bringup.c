@@ -76,7 +76,7 @@
 #include "stm32_bmp180.h"
 #endif
 
-#ifdef CONFIG_SENSORS_MS5611
+#ifdef CONFIG_SENSORS_MS56XX
 #include "stm32_ms5611.h"
 #endif
 
@@ -217,7 +217,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_SENSORS_MS5611
+#ifdef CONFIG_SENSORS_MS56XX
   /* Initialize the MS5611 pressure sensor. */
 
   ret = board_ms5611_initialize(0, 1);
