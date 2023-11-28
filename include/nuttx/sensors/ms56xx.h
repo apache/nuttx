@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/sensors/ms5611.h
+ * include/nuttx/sensors/ms56xx.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_SENSORS_MS5611_H
-#define __INCLUDE_NUTTX_SENSORS_MS5611_H
+#ifndef __INCLUDE_NUTTX_SENSORS_MS56XX_H
+#define __INCLUDE_NUTTX_SENSORS_MS56XX_H
 
 /****************************************************************************
  * Included Files
@@ -28,7 +28,7 @@
 #include <nuttx/config.h>
 #include <nuttx/sensors/ioctl.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_MS5611)
+#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_MS56XX)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -39,20 +39,26 @@
  *
  * CONFIG_I2C
  *   Enables support for I2C drivers
- * CONFIG_SENSORS_MS5611
- *   Enables support for the MS5611 driver
+ * CONFIG_SENSORS_MS56XX
+ *   Enables support for the MS56XX driver
  */
 
 /* I2C Address **************************************************************/
 
-#define MS5611_ADDR0       0x77
-#define MS5611_ADDR1       0x76
+#define MS56XX_ADDR0       0x77
+#define MS56XX_ADDR1       0x76
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-struct ms5611_measure_s
+enum ms56xx_model_e
+{
+  MS56XX_MODEL_MS5607 = 0,
+  MS56XX_MODEL_MS5611 = 1,
+};
+
+struct ms56xx_measure_s
 {
   int32_t temperature;  /* in Degree   x100    */
   int32_t pressure;     /* in mBar     x10     */
@@ -73,27 +79,29 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: ms5611_register
+ * Name: ms56xx_register
  *
  * Description:
- *   Register the MS5611 character device as 'devpath'.
+ *   Register the MS56XX character device as 'devpath'.
  *
  * Input Parameters:
  *   i2c     - An I2C driver instance.
  *   devno   - Number of device (i.e. baro0, baro1, ...)
- *   addr    - The I2C address of the MS5611.
+ *   addr    - The I2C address of the MS56XX.
+ *   model   - The MS56XX model.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int ms5611_register(FAR struct i2c_master_s *i2c, int devno, uint8_t addr);
+int ms56xx_register(FAR struct i2c_master_s *i2c, int devno, uint8_t addr,
+                    enum ms56xx_model_e model);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* CONFIG_I2C && CONFIG_SENSORS_MS5611 */
-#endif /* __INCLUDE_NUTTX_SENSORS_MS5611_H */
+#endif /* CONFIG_I2C && CONFIG_SENSORS_MS56XX */
+#endif /* __INCLUDE_NUTTX_SENSORS_MS56XX_H */

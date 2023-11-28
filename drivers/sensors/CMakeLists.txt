@@ -188,8 +188,8 @@ if(CONFIG_SENSORS)
       list(APPEND SRCS mlx90614.c)
     endif()
 
-    if(CONFIG_SENSORS_MS5611)
-      list(APPEND SRCS ms5611_uorb.c)
+    if(CONFIG_SENSORS_MS56XX)
+      list(APPEND SRCS ms56xx_uorb.c)
     endif()
 
     if(CONFIG_SENSORS_MS58XX)

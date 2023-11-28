@@ -737,45 +737,45 @@ config MCP9844_I2C_FREQUENCY
 	range 1 400000
 	depends on SENSORS_MCP9844
 
-config SENSORS_MS5611
-	bool "MS5611 Barometric Pressure Sensor support"
+config SENSORS_MS56XX
+	bool "MS56XX Barometric Pressure Sensor support"
 	default n
 	---help---
 		Enable driver support for MEAS MS5511 barometer.
 
-if SENSORS_MS5611
+if SENSORS_MS56XX
 
 choice
-	prompt "MS5611 Interface"
-	default MS5611_I2C
+	prompt "MS56XX Interface"
+	default MS56XX_I2C
 
-config MS5611_I2C
-	bool "MS5611 I2C Interface"
+config MS56XX_I2C
+	bool "MS56XX I2C Interface"
 	select I2C
 	---help---
 		Enables support for the I2C interface
 
-config MS5611_SPI
-	bool "MS5611 SPI Interface"
+config MS56XX_SPI
+	bool "MS56XX SPI Interface"
 	select SPI
 	---help---
 		Enables support for the SPI interface.
 
 endchoice
 
-config MS5611_THREAD_STACKSIZE
+config MS56XX_THREAD_STACKSIZE
 	int "Worker thread stack size"
 	default 1024
 	---help---
 		The stack size for the worker thread
 
-config MS5611_I2C_FREQUENCY
-	int "MS5611 I2C frequency"
+config MS56XX_I2C_FREQUENCY
+	int "MS56XX I2C frequency"
 	default 400000
 	range 1 400000
-	depends on MS5611_I2C
+	depends on MS56XX_I2C
 
-endif # SENSORS_MS5611
+endif # SENSORS_MS56XX
 
 config SENSORS_MS58XX
 	bool "MEAS MS58XX Altimeter support"
