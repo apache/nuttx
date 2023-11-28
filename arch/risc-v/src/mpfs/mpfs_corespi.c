@@ -543,9 +543,9 @@ static uint32_t mpfs_spi_setfrequency(struct spi_dev_s *dev,
 
   priv->frequency = frequency;
 
-  /* Formula is SPICLK = PCLK/(2*(CFG_CLK + 1)) */
+  /* Formula is SPICLK = PCLK/(2*(CFG_CLK + 1)) (result is rounded up) */
 
-  divider = ((MPFS_FPGA_PERIPHERAL_CLK / frequency) >> 1) - 1;
+  divider = (MPFS_FPGA_PERIPHERAL_CLK / frequency) >> 1;
   priv->actual = MPFS_FPGA_PERIPHERAL_CLK / ((divider + 1) << 1);
 
   DEBUGASSERT(divider < 256u);
