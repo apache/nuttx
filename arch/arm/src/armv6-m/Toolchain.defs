@@ -30,7 +30,7 @@ LLVM_CPUTYPE  := cortex-m0
 # Clang Configuration files
 
 ifeq ($(CONFIG_ARM_TOOLCHAIN_CLANG),y)
-  TOOLCHAIN_CLANG_CONFIG = --config armv6m_soft_nofp
+  TOOLCHAIN_CLANG_CONFIG = armv6m_soft_nofp
 else ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
   LDFLAGS += --cpu=Cortex-M0
 endif

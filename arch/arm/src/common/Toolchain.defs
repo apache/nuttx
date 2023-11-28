@@ -185,7 +185,14 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN_CLANG),y)
       TOOLCHAIN_CLANG_CONFIG := $(TOOLCHAIN_CLANG_CONFIG)_nosys
     endif
 
-    ARCHCPUFLAGS += $(TOOLCHAIN_CLANG_CONFIG).cfg
+    ifeq ($(CLANGVER),17.0)
+      TOOLCHAIN_CLANG_OPTION = -target
+      ARCHCPUFLAGS += --target=arm-none-eabi
+    else
+      TOOLCHAIN_CLANG_OPTION = --config
+    endif
+
+    ARCHCPUFLAGS := $(TOOLCHAIN_CLANG_OPTION) $(TOOLCHAIN_CLANG_CONFIG).cfg $(ARCHCPUFLAGS)
   endif
 
 # ARM Compiler Clang toolchain
