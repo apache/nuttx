@@ -147,6 +147,9 @@ endif
 ifeq ($(CONFIG_DRIVERS_WIEGAND),y)
   CSRCS += esp32_wiegand.c
 endif
+#ifeq ($(CONFIG_DAC),y)
+  CSRCS += esp32_board_dac.c
+#endif
 
 DEPPATH += --dep-path src
 VPATH += :src

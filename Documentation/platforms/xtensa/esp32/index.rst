@@ -95,6 +95,7 @@ AES          Yes
 Bluetooth    Yes
 CAN/TWAI     Yes
 DMA          Yes
+DAC          Yes    One-shot
 eFuse        Yes
 Ethernet     Yes
 GPIO         Yes

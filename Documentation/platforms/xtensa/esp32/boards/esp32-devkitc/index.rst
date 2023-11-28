@@ -329,6 +329,33 @@ was successful by running ``cxxtest``::
     Invalid file! /invalid
     File /proc/version exists!
 
+dac
+---
+This configuration enables DAC and registers a `DAC example application <https://github.com/apache/nuttx-apps/tree/master/examples/dac>`_.
+
+.. note:: The DAC module is hard-wired to pins 25 (channel 0) and 26
+  (channel 1). The default device name is ``/dev/dac0`` and can be changed in
+  the config menu.
+
+.. note:: The DAC channels in `IDF <https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/dac.html>`_ are numbered ``channel 1`` (pin 25) and ``channel 2`` (pin 26).
+
+.. note:: Max value 255 should be close to VRef (3.3V) but it probably will not.
+  You can more realistically expect to get voltage around 3.09V.
+
+With this example you can use (not only) the following commands:
+
+For a multimeter, you can use the command:
+
+``dac -d 5000 -s 32 test``
+
+For oscilloscope or anything else with tracing:
+
+``dac -d 0 -s 4 test``
+
+For more info about the example capabilities invoke help message by typing
+
+``dac -h``
+
 efuse
 -----
 
