@@ -132,6 +132,8 @@
 #define MPFS_MIN_EP_FIFO_SIZE 8
 #define MPFS_USB_REG_MAX      0x2000
 
+#define LINKDEAD_THRESHOLD    20
+
 /* Request queue operations *************************************************/
 
 #define mpfs_rqempty(q)      ((q)->head == NULL)
@@ -228,6 +230,7 @@ static void   mpfs_epset_reset(struct mpfs_usbdev_s *priv, uint16_t epset);
 
 static struct mpfs_usbdev_s g_usbd;
 static uint8_t g_clkrefs;
+static bool    g_linkdead;
 
 static const struct usbdev_epops_s g_epops =
 {
@@ -771,11 +774,26 @@ static int mpfs_req_wrsetup(struct mpfs_usbdev_s *priv,
 
   if (nbytes > packetsize)
     {
-      ret = mpfs_write_tx_fifo(buf, packetsize, epno);
-      if (ret != OK)
+      if (privep->linkdead < LINKDEAD_THRESHOLD)
         {
-          privep->epstate = USB_EPSTATE_IDLE;
-          return ret;
+          ret = mpfs_write_tx_fifo(buf, packetsize, epno);
+          if (ret != OK)
+            {
+              privep->linkdead++;
+              privep->epstate = USB_EPSTATE_IDLE;
+              return ret;
+            }
+          else
+            {
+              privep->linkdead = 0;
+            }
+        }
+      else
+        {
+          /* We're in trouble, remote has likely closed */
+
+          g_linkdead = true;
+          return -EIO;
         }
 
       if (epno == EP0)
@@ -796,11 +814,26 @@ static int mpfs_req_wrsetup(struct mpfs_usbdev_s *priv,
     }
   else
     {
-      ret = mpfs_write_tx_fifo(buf, nbytes, epno);
-      if (ret != OK)
+      if (privep->linkdead < LINKDEAD_THRESHOLD)
         {
-          privep->epstate = USB_EPSTATE_IDLE;
-          return ret;
+          ret = mpfs_write_tx_fifo(buf, nbytes, epno);
+          if (ret != OK)
+            {
+              privep->linkdead++;
+              privep->epstate = USB_EPSTATE_IDLE;
+              return ret;
+            }
+          else
+            {
+              privep->linkdead = 0;
+            }
+        }
+      else
+        {
+          /* We're in trouble, remote has likely closed */
+
+          g_linkdead = true;
+          return -EIO;
         }
     }
 
@@ -2443,6 +2476,8 @@ static void mpfs_reset(struct mpfs_usbdev_s *priv)
 
       mpfs_req_cancel(privep, -ESHUTDOWN);
 
+      privep->linkdead  = 0;
+
       /* Reset endpoint status */
 
       privep->stalled   = false;
@@ -3455,11 +3490,28 @@ static int mpfs_usb_interrupt(int irq, void *context, void *arg)
     {
       for (i = 0; i < MPFS_USB_NENDPOINTS; i++)
         {
+          /* Check if dead connections are back in business */
+
+          if (g_linkdead)
+            {
+              /* This releases all, which is a problem if only some
+               * endpoints are closed on the remote; whereas some
+               * are functioning; for example ACM and mass storage;
+               * now the functioning one likely marks the closed ones
+               * as no longer dead.
+               */
+
+              struct mpfs_ep_s *privep = &priv->eplist[i];
+              privep->linkdead = 0;
+            }
+
           if ((pending_rx_ep & (1 << i)) != 0)
             {
               mpfs_ep_rx_interrupt(priv, i);
             }
         }
+
+      g_linkdead = false;
     }
 
   if ((isr & SUSPEND_IRQ_MASK) != 0)

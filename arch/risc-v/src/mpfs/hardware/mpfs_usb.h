@@ -427,6 +427,7 @@ struct mpfs_ep_s
   struct mpfs_rqhead_s  reqq;         /* Read/write request queue */
   struct mpfs_rqhead_s  pendq;        /* Write requests pending stall sent */
   struct usbdev_epdesc_s *descb[2];   /* Pointers to this endpoint descriptors */
+  uint32_t              linkdead;     /* Remote end has closed the connection */
   volatile uint8_t      epstate;      /* State of the endpoint (see enum mpfs_epstate_e) */
   uint8_t               stalled:1;    /* true: Endpoint is stalled */
   uint8_t               pending:1;    /* true: IN Endpoint stall is pending */
