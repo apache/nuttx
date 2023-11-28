@@ -28,7 +28,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/sensors/ms5611.h>
+#include <nuttx/sensors/ms56xx.h>
 #include <nuttx/i2c/i2c_master.h>
 
 #include "stm32_i2c.h"
@@ -69,7 +69,7 @@ int board_ms5611_initialize(int devno, int busno)
 
       snprintf(devpath, sizeof(devpath), "/dev/press%d", devno);
 
-      ret = ms5611_register(i2c, devno, MS5611_ADDR0);
+      ret = ms56xx_register(i2c, devno, MS56XX_ADDR0, MS56XX_MODEL_MS5611);
       if (ret < 0)
         {
           snerr("ERROR: Error registering MS5611 in I2C%d\n", busno);

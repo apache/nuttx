@@ -116,7 +116,7 @@
 #  include "esp32_sht3x.h"
 #endif
 
-#ifdef CONFIG_SENSORS_MS5611
+#ifdef CONFIG_SENSORS_MS56XX
 #  include "esp32_ms5611.h"
 #endif
 
@@ -594,7 +594,7 @@ int esp32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_SENSORS_MS5611
+#ifdef CONFIG_SENSORS_MS56XX
   /* Try to register MS5611 device in I2C0 as device 0: I2C addr 0x77 */
 
   ret = board_ms5611_initialize(0, 0);
