@@ -2355,6 +2355,35 @@ config ESP32_RTC_CLK_SRC_INT_8MD256
 endchoice
 endmenu # "RTC Configuration"
 
+menu "DAC Configuration"
+	depends on ANALOG && DAC
+
+config ESP32_DAC_DEVPATH
+	string "DAC device path"
+	default "/dev/dac0"
+
+choice ESP32_DAC_MODE
+	prompt "DAC mode of operation"
+	default ESP32_DAC_MODE_ONE_SHOT
+	---help---
+		One-shot mode requires to write every single value with a write call while
+		retaining the last value on output.
+
+		Following modes are not implemented yet.
+		Timer mode utilizes timer IRQs to call handler which can manage the write.
+		DMA is using a ring buffer accessed directly by the driver.
+		Cosine Wave Generator can output preset wave without the need to generate
+		the data and write in memory.
+
+config ESP32_DAC_MODE_ONE_SHOT
+	bool "One-shot mode"
+	---help---
+		One-shot mode requires to write every single value with a write call while
+		retaining the last value on output.
+
+endchoice # "DAC mode of operation"
+endmenu # "DAC Configuration"
+
 menu "LEDC Configuration"
 	depends on ESP32_LEDC
 
