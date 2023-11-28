@@ -764,6 +764,15 @@ config MS56XX_SPI
 
 endchoice # MS5611 Interface
 
+config MS56XX_SECOND_ORDER_COMPENSATE
+	bool "MS56XX second order compensation support"
+	default n
+	---help---
+		Enables second order compensation.
+		In order to obtain best accuracy over temperature range,
+		particularly in low temperature, it is recommended to
+		compensate the non-linearity over the temperature.
+
 config MS56XX_THREAD_STACKSIZE
 	int "Worker thread stack size"
 	default 1024
