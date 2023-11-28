@@ -1244,7 +1244,7 @@ static void noteram_dump(FAR struct noteram_driver_s *drv)
 {
   struct noteram_dump_context_s ctx;
   struct lib_syslograwstream_s stream;
-  uint8_t note[64];
+  uint8_t note[256];
 
   lib_syslograwstream_open(&stream);
   lib_sprintf(&stream.common, "# tracer:nop\n#\n");
