@@ -24,22 +24,28 @@ if(CONFIG_ARMV7M_MEMCPY)
   list(APPEND SRCS gnu/arch_memcpy.S)
 endif()
 
+if(CONFIG_ARMV7M_MEMSET)
+  list(APPEND SRCS arch_memset.S)
+endif()
+
+if(CONFIG_ARMV7M_MEMMOVE)
+  list(APPEND SRCS arch_memmove.S)
+endif()
+
+if(CONFIG_ARMV7M_STRCMP)
+  list(APPEND SRCS arch_strcmp.S)
+endif()
+
+if(CONFIG_ARMV7M_STRCPY)
+  list(APPEND SRCS arch_strcpy.S)
+endif()
+
+if(CONFIG_ARMV7M_STRLEN)
+  list(APPEND SRCS arch_strlen.S)
+endif()
+
 if(CONFIG_LIBC_ARCH_ELF)
   list(APPEND SRCS arch_elf.c)
-endif()
-
-if(CONFIG_MACHINE_OPTS_ARMV7M)
-  if(CONFIG_LIBM_ARCH_FABSF)
-    list(APPEND SRCS arch_fabsf.c)
-  endif()
-
-  if(CONFIG_LIBM_ARCH_SQRTF)
-    list(APPEND SRCS arch_sqrtf.c)
-  endif()
-endif()
-
-if(CONFIG_ARCH_SETJMP_H)
-  list(APPEND SRCS gnu/arch_setjmp.S)
 endif()
 
 target_sources(c PRIVATE ${SRCS})
