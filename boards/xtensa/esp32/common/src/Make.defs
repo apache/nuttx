@@ -144,6 +144,10 @@ ifeq ($(CONFIG_ESP32_RMT),y)
   CSRCS += esp32_rmt.c
 endif
 
+#ifeq ($(CONFIG_DAC),y)
+  CSRCS += esp32_board_dac.c
+#endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src
