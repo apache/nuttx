@@ -728,7 +728,8 @@ static int noteram_dump_printf(FAR struct lib_outstream_s *s,
       intmax_t im;
       size_t sz;
       ptrdiff_t pd;
-      uintptr_t p;
+      FAR void *p;
+      FAR const char *s;
 #ifdef CONFIG_HAVE_DOUBLE
       double d;
 #  ifdef CONFIG_HAVE_LONG_DOUBLE
@@ -738,117 +739,169 @@ static int noteram_dump_printf(FAR struct lib_outstream_s *s,
     }
 
   end_packed_struct *var;
-  FAR const char *p = note->npt_fmt;
-  FAR char *data = note->npt_data;
-  char fmtstr[64];
-  bool infmt = false;
   size_t offset = 0;
   size_t ret = 0;
   size_t len = 0;
-  char c;
 
-  while ((c = *p++) != '\0')
+  if (note->npt_type == 0)
     {
-      if (c != '%' && !infmt)
-        {
-          lib_stream_putc(s, c);
-          ret++;
-          continue;
-        }
+      FAR const char *p = note->npt_fmt;
+      bool infmt = false;
+      char fmtstr[64];
+      char c;
 
-      if (!infmt)
+      while ((c = *p++) != '\0')
         {
-          len = 0;
-          infmt = true;
-          memset(fmtstr, 0, sizeof(fmtstr));
-        }
-
-      var = (FAR void *)(note->npt_data + offset);
-      fmtstr[len++] = c;
-
-      if (c == 'c' || c == 'd' || c == 'i' || c == 'u' ||
-          c == 'o' || c == 'x' || c == 'X')
-        {
-          if (*(p - 2) == 'j')
+          if (c != '%' && !infmt)
             {
-              offset += sizeof(var->im);
-              ret += lib_sprintf(s, fmtstr, var->im);
+              lib_stream_putc(s, c);
+              ret++;
+              continue;
             }
+
+          if (!infmt)
+            {
+              len = 0;
+              infmt = true;
+              memset(fmtstr, 0, sizeof(fmtstr));
+            }
+
+          var = (FAR void *)(note->npt_data + offset);
+          fmtstr[len++] = c;
+
+          if (c == 'c' || c == 'd' || c == 'i' || c == 'u' ||
+              c == 'o' || c == 'x' || c == 'X')
+            {
+              if (*(p - 2) == 'j')
+                {
+                  offset += sizeof(var->im);
+                  ret += lib_sprintf(s, fmtstr, var->im);
+                }
 #ifdef CONFIG_HAVE_LONG_LONG
-          else if (*(p - 2) == 'l' && *(p - 3) == 'l')
-            {
-              offset += sizeof(var->ll);
-              ret += lib_sprintf(s, fmtstr, var->ll);
-            }
+              else if (*(p - 2) == 'l' && *(p - 3) == 'l')
+                {
+                  offset += sizeof(var->ll);
+                  ret += lib_sprintf(s, fmtstr, var->ll);
+                }
 #endif
-          else if (*(p - 2) == 'l')
-            {
-              offset += sizeof(var->l);
-              ret += lib_sprintf(s, fmtstr, var->l);
-            }
-          else if (*(p - 2) == 'z')
-            {
-              offset += sizeof(var->sz);
-              ret += lib_sprintf(s, fmtstr, var->sz);
-            }
-          else if (*(p - 2) == 't')
-            {
-              offset += sizeof(var->pd);
-              ret += lib_sprintf(s, fmtstr, var->pd);
-            }
-          else
-            {
-              offset += sizeof(var->i);
-              ret += lib_sprintf(s, fmtstr, var->i);
-            }
+              else if (*(p - 2) == 'l')
+                {
+                  offset += sizeof(var->l);
+                  ret += lib_sprintf(s, fmtstr, var->l);
+                }
+              else if (*(p - 2) == 'z')
+                {
+                  offset += sizeof(var->sz);
+                  ret += lib_sprintf(s, fmtstr, var->sz);
+                }
+              else if (*(p - 2) == 't')
+                {
+                  offset += sizeof(var->pd);
+                  ret += lib_sprintf(s, fmtstr, var->pd);
+                }
+              else
+                {
+                  offset += sizeof(var->i);
+                  ret += lib_sprintf(s, fmtstr, var->i);
+                }
 
-          infmt = false;
-        }
-      else if (c == 'e' || c == 'f' || c == 'g' || c == 'a' ||
-              c == 'A' || c == 'E' || c == 'F' || c == 'G')
-        {
+              infmt = false;
+            }
+          else if (c == 'e' || c == 'f' || c == 'g' || c == 'a' ||
+                  c == 'A' || c == 'E' || c == 'F' || c == 'G')
+            {
 #ifdef CONFIG_HAVE_DOUBLE
 #  ifdef CONFIG_HAVE_LONG_DOUBLE
-          if (*(p - 2) == 'L')
-            {
-              offset += sizeof(var->ld);
-              ret += lib_sprintf(s, fmtstr, var->ld);
-            }
-          else
+              if (*(p - 2) == 'L')
+                {
+                  offset += sizeof(var->ld);
+                  ret += lib_sprintf(s, fmtstr, var->ld);
+                }
+              else
 #  endif
-            {
-              offset += sizeof(var->d);
-              ret += lib_sprintf(s, fmtstr, var->d);
-            }
+                {
+                  offset += sizeof(var->d);
+                  ret += lib_sprintf(s, fmtstr, var->d);
+                }
 
-          infmt = false;
-        }
+              infmt = false;
+            }
 #endif
-      else if (c == '*')
-        {
-          itoa(var->i, fmtstr + len - 1, 10);
-          len = strlen(fmtstr);
-          offset += sizeof(var->i);
+          else if (c == '*')
+            {
+              itoa(var->i, fmtstr + len - 1, 10);
+              len = strlen(fmtstr);
+              offset += sizeof(var->i);
+            }
+          else if (c == 's')
+            {
+              const char *str = note->npt_data + offset;
+              offset += strlen(str) + 1;
+              ret += lib_sprintf(s, fmtstr, str);
+              infmt = false;
+            }
+          else if (c == 'p')
+            {
+              offset += sizeof(var->p);
+              ret += lib_sprintf(s, fmtstr, var->p);
+              infmt = false;
+            }
         }
-      else if (c == 's')
+
+      if (*(p - 2) != '\n')
         {
-          FAR const char *value = data + offset;
-          offset += strlen(value) + 1;
-          ret += lib_sprintf(s, fmtstr, value);
-          infmt = false;
-        }
-      else if (c == 'p')
-        {
-          offset += sizeof(var->p);
-          ret += lib_sprintf(s, fmtstr, var->p);
-          infmt = false;
+          lib_stream_putc(s, '\n');
+          ret++;
         }
     }
-
-  if (*(p - 2) != '\n')
+  else
     {
-      lib_stream_putc(s, '\n');
-      ret++;
+      size_t count = NOTE_PRINTF_GET_COUNT(note->npt_type);
+      size_t i;
+
+      len = strlen(note->npt_fmt);
+      if (note->npt_fmt[len - 1] == '\n')
+        {
+          len--;
+        }
+
+      ret += lib_sprintf(s, "%p", note->npt_fmt);
+      for (i = 0; i < count; i++)
+        {
+          int type = NOTE_PRINTF_GET_TYPE(note->npt_type, i);
+          var = (FAR void *)(note->npt_data + offset);
+
+          switch (type)
+            {
+              case NOTE_PRINTF_UINT32:
+                {
+                  offset += sizeof(var->i);
+                  ret += lib_sprintf(s, " %u", var->i);
+                }
+                break;
+              case NOTE_PRINTF_UINT64:
+                {
+                  offset += sizeof(var->ll);
+                  ret += lib_sprintf(s, " %llu", var->ll);
+                }
+                break;
+              case NOTE_PRINTF_STRING:
+                {
+                  const char *str = note->npt_data + offset;
+                  offset += strlen(str) + 1;
+                  ret += lib_sprintf(s, " %s", str);
+                }
+                break;
+              case NOTE_PRINTF_DOUBLE:
+                {
+                  offset += sizeof(var->d);
+                  ret += lib_sprintf(s, " %f", var->d);
+                }
+            }
+        }
+
+        lib_stream_putc(s, '\n');
+        ret++;
     }
 
   return ret;
