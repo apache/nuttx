@@ -223,7 +223,7 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
    */
 
   me = this_cpu();
-  if ((nxsched_islocked_global() || irq_cpu_locked(me)) &&
+  if ((nxsched_islocked_global()) &&
       task_state != TSTATE_TASK_ASSIGNED)
     {
       /* Add the new ready-to-run task to the g_pendingtasks task list for

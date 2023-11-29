@@ -137,7 +137,7 @@ int sched_unlock(void)
            * BEFORE it clears IRQ lock.
            */
 
-          if (!nxsched_islocked_global() && !irq_cpu_locked(cpu) &&
+          if (!nxsched_islocked_global() &&
               list_pendingtasks()->head != NULL)
             {
               if (nxsched_merge_pending())

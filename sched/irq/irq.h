@@ -151,33 +151,6 @@ void irq_initialize(void);
 int irq_unexpected_isr(int irq, FAR void *context, FAR void *arg);
 
 /****************************************************************************
- * Name:  irq_cpu_locked
- *
- * Description:
- *   Test if the IRQ lock set OR if this CPU holds the IRQ lock
- *   There is an interaction with pre-emption controls and IRQ locking:
- *   Even if the pre-emption is enabled, tasks will be forced to pend if
- *   the IRQ lock is also set UNLESS the CPU starting the task is the
- *   holder of the IRQ lock.
- *
- * Input Parameters:
- *   rtcb - Points to the blocked TCB that is ready-to-run
- *
- * Returned Value:
- *   true  - IRQs are locked by a different CPU.
- *   false - IRQs are unlocked OR if they are locked BUT this CPU
- *           is the holder of the lock.
- *
- *   Warning: This values are volatile at only valid at the instance that
- *   the CPU set was queried.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SMP
-bool irq_cpu_locked(int cpu);
-#endif
-
-/****************************************************************************
  * Name: irq_foreach
  *
  * Description:
