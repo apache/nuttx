@@ -7,14 +7,14 @@ if ARCH_BOARD_H747AI
 
 choice
 	prompt "Nucleo H747AI SMPS/LDO configuration"
-	default H747AI_SMPS
+	default H747AI_LDO
 
 config H747AI_SMPS
-	bool "Internal SMPS only (default)"
+	bool "Internal SMPS only"
 	select STM32H7_PWR_DIRECT_SMPS_SUPPLY
 
 config H747AI_LDO
-	bool "Internal LDO only"
+	bool "Internal LDO only (default)"
 
 config H747AI_SMPS_LDO
 	bool "Internal SMPS and LDO cascaded (not supported)"
