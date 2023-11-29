@@ -652,6 +652,10 @@ libs/libc/machine/arm/armv8-m/gnu/arch_memcpy.S
 
 libs/libc/machine/arm/armv7-m/gnu/arch_strcmp.S
 libs/libc/machine/arm/armv8-m/gnu/arch_strcmp.S
+libs/libc/machine/arm/armv7-m/gnu/acle-compat.h
+libs/libc/machine/arm/armv8-m/gnu/acle-compat.h
+libs/libc/machine/arm/armv7-r/gnu/acle-compat.h
+libs/libc/machine/arm/armv7-a/gnu/acle-compat.h
 ================================================
 
  Copyright (c) 2012-2014 ARM Ltd
