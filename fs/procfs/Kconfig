@@ -154,5 +154,9 @@ config FS_PROCFS_EXCLUDE_VERSION
 	bool "Exclude version"
 	default DEFAULT_SMALL
 
+config FS_PROCFS_INCLUDE_PRESSURE
+	bool "Include memory pressure notification"
+	default n
+
 endmenu # Exclude individual procfs entries
 endif # FS_PROCFS
