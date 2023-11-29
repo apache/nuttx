@@ -26,6 +26,10 @@ CSRCS += fs_procfscritmon.c fs_procfsfdt.c fs_procfsiobinfo.c
 CSRCS += fs_procfsmeminfo.c fs_procfsproc.c fs_procfstcbinfo.c
 CSRCS += fs_procfsuptime.c fs_procfsutil.c fs_procfsversion.c
 
+ifeq ($(CONFIG_FS_PROCFS_INCLUDE_PRESSURE),y)
+CSRCS += fs_procfspressure.c
+endif
+
 # Include procfs build support
 
 DEPPATH += --dep-path procfs

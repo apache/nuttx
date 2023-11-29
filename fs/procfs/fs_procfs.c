@@ -68,6 +68,7 @@ extern const struct procfs_operations g_proc_operations;
 extern const struct procfs_operations g_tcbinfo_operations;
 extern const struct procfs_operations g_uptime_operations;
 extern const struct procfs_operations g_version_operations;
+extern const struct procfs_operations g_pressure_operations;
 
 /* This is not good.  These are implemented in other sub-systems.  Having to
  * deal with them here is not a good coupling. What is really needed is a
@@ -174,6 +175,11 @@ static const struct procfs_entry_s g_procfs_entries[] =
 #if defined(CONFIG_PM) && defined(CONFIG_PM_PROCFS)
   { "pm",           &g_pm_operations,       PROCFS_DIR_TYPE    },
   { "pm/**",        &g_pm_operations,       PROCFS_UNKOWN_TYPE },
+#endif
+
+#ifdef CONFIG_FS_PROCFS_INCLUDE_PRESSURE
+  { "pressure",     &g_pressure_operations, PROCFS_DIR_TYPE    },
+  { "pressure/**",  &g_pressure_operations, PROCFS_FILE_TYPE   },
 #endif
 
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_PROCESS
