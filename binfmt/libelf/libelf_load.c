@@ -64,6 +64,69 @@
  * Private Functions
  ****************************************************************************/
 
+#if defined(CONFIG_ARCH_USE_SEPARATED_SECTION) && !defined(CONFIG_ARCH_ADDRENV)
+static int elf_section_alloc(FAR struct elf_loadinfo_s *loadinfo,
+                             FAR Elf_Shdr *shdr, uint8_t idx)
+{
+  if (loadinfo->ehdr.e_type != ET_REL)
+    {
+      return -EINVAL;
+    }
+
+  if (loadinfo->sectalloc == NULL)
+    {
+      /* Allocate memory info for all sections */
+
+      loadinfo->sectalloc = kmm_zalloc(sizeof(uintptr_t) *
+                                       loadinfo->ehdr.e_shnum);
+      if (loadinfo->sectalloc == NULL)
+        {
+          return -ENOMEM;
+        }
+    }
+
+  elf_sectname(loadinfo, shdr);
+  if ((shdr->sh_flags & SHF_WRITE) != 0)
+    {
+#  ifdef CONFIG_ARCH_USE_DATA_HEAP
+      loadinfo->sectalloc[idx] = (uintptr_t)
+                                 up_dataheap_memalign(
+                                   (FAR const char *)loadinfo->iobuffer,
+                                                     shdr->sh_addralign,
+                                                     shdr->sh_size);
+#  else
+      loadinfo->sectalloc[idx] = (uintptr_t)kumm_memalign(shdr->sh_addralign,
+                                                          shdr->sh_size);
+#  endif
+
+      if (loadinfo->dataalloc == 0)
+        {
+          loadinfo->dataalloc = loadinfo->sectalloc[idx];
+        }
+    }
+  else
+    {
+#  ifdef CONFIG_ARCH_USE_TEXT_HEAP
+      loadinfo->sectalloc[idx] = (uintptr_t)
+                                 up_textheap_memalign(
+                                   (FAR const char *)loadinfo->iobuffer,
+                                                     shdr->sh_addralign,
+                                                     shdr->sh_size);
+#  else
+      loadinfo->sectalloc[idx] = (uintptr_t)kumm_memalign(shdr->sh_addralign,
+                                                          shdr->sh_size);
+#  endif
+
+      if (loadinfo->textalloc == 0)
+        {
+          loadinfo->textalloc = loadinfo->sectalloc[idx];
+        }
+    }
+
+  return OK;
+}
+#endif
+
 /****************************************************************************
  * Name: elf_elfsize
  *
@@ -104,6 +167,13 @@ static void elf_elfsize(FAR struct elf_loadinfo_s *loadinfo)
 #endif
               )
             {
+#if defined(CONFIG_ARCH_USE_SEPARATED_SECTION) && !defined(CONFIG_ARCH_ADDRENV)
+              if (elf_section_alloc(loadinfo, shdr, i) >= 0)
+                {
+                  continue;
+                }
+#endif
+
               datasize = _ALIGN_UP(datasize, shdr->sh_addralign);
               datasize += ELF_ALIGNUP(shdr->sh_size);
               if (loadinfo->dataalign < shdr->sh_addralign)
@@ -113,6 +183,13 @@ static void elf_elfsize(FAR struct elf_loadinfo_s *loadinfo)
             }
           else
             {
+#if defined(CONFIG_ARCH_USE_SEPARATED_SECTION) && !defined(CONFIG_ARCH_ADDRENV)
+              if (elf_section_alloc(loadinfo, shdr, i) >= 0)
+                {
+                  continue;
+                }
+#endif
+
               textsize = _ALIGN_UP(textsize, shdr->sh_addralign);
               textsize += ELF_ALIGNUP(shdr->sh_size);
               if (loadinfo->textalign < shdr->sh_addralign)
@@ -181,7 +258,7 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
 {
   FAR uint8_t *text = (FAR uint8_t *)loadinfo->textalloc;
   FAR uint8_t *data = (FAR uint8_t *)loadinfo->dataalloc;
-  FAR uint8_t **pptr;
+  FAR uint8_t **pptr = NULL;
   int ret;
   int i;
 
@@ -192,6 +269,23 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
   for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
     {
       FAR Elf_Shdr *shdr = &loadinfo->shdr[i];
+
+      /* SHF_ALLOC indicates that the section requires memory during
+       * execution.
+       */
+
+      if ((shdr->sh_flags & SHF_ALLOC) == 0)
+        {
+          continue;
+        }
+
+#ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
+      if (loadinfo->ehdr.e_type == ET_REL)
+        {
+          pptr = (FAR uint8_t **)&loadinfo->sectalloc[i];
+        }
+      else
+#endif
 
       /* SHF_WRITE indicates that the section address space is write-
        * able
@@ -262,7 +356,9 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
           continue;
         }
 
+#ifndef CONFIG_ARCH_USE_SEPARATED_SECTION
       *pptr = (FAR uint8_t *)_ALIGN_UP((uintptr_t)*pptr, shdr->sh_addralign);
+#endif
 
       /* SHT_NOBITS indicates that there is no data in the file for the
        * section.
@@ -296,9 +392,16 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
 
       shdr->sh_addr = (uintptr_t)*pptr;
 
+#ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
+      if (loadinfo->ehdr.e_type != ET_REL)
+        {
+          *pptr += ELF_ALIGNUP(shdr->sh_size);
+        }
+#else
       /* Setup the memory pointer for the next time through the loop */
 
       *pptr += ELF_ALIGNUP(shdr->sh_size);
+#endif
     }
 
   return OK;

@@ -146,13 +146,15 @@ errout_with_addrenv:
 
   /* Allocate memory to hold the ELF image */
 
-#  if defined(CONFIG_ARCH_USE_TEXT_HEAP)
+#  ifndef CONFIG_ARCH_USE_SEPARATED_SECTION
+#    if defined(CONFIG_ARCH_USE_TEXT_HEAP)
   loadinfo->textalloc = (uintptr_t)
-                        up_textheap_memalign(loadinfo->textalign, textsize);
-#  else
+                        up_textheap_memalign(loadinfo->textalign,
+                                             textsize);
+#    else
   loadinfo->textalloc = (uintptr_t)
                         kumm_memalign(loadinfo->textalign, textsize);
-#  endif
+#    endif
 
   if (!loadinfo->textalloc)
     {
@@ -161,19 +163,20 @@ errout_with_addrenv:
 
   if (loadinfo->datasize > 0)
     {
-#  if defined(CONFIG_ARCH_USE_DATA_HEAP)
+#    ifdef CONFIG_ARCH_USE_DATA_HEAP
       loadinfo->dataalloc = (uintptr_t)
                             up_dataheap_memalign(loadinfo->dataalign,
                                                  datasize);
-#  else
+#    else
       loadinfo->dataalloc = (uintptr_t)
                             kumm_memalign(loadinfo->dataalign, datasize);
-#  endif
+#    endif
       if (!loadinfo->dataalloc)
         {
           return -ENOMEM;
         }
     }
+#  endif
 
   return OK;
 #endif
@@ -290,23 +293,56 @@ void elf_addrenv_free(FAR struct elf_loadinfo_s *loadinfo)
   addrenv_drop(loadinfo->addrenv, false);
 #else
 
+#  ifndef CONFIG_ARCH_USE_SEPARATED_SECTION
   if (loadinfo->textalloc != 0)
     {
-#  if defined(CONFIG_ARCH_USE_TEXT_HEAP)
+#    if defined(CONFIG_ARCH_USE_TEXT_HEAP)
       up_textheap_free((FAR void *)loadinfo->textalloc);
-#  else
+#    else
       kumm_free((FAR void *)loadinfo->textalloc);
-#  endif
+#    endif
     }
 
   if (loadinfo->dataalloc != 0)
     {
-#  if defined(CONFIG_ARCH_USE_DATA_HEAP)
+#    if defined(CONFIG_ARCH_USE_DATA_HEAP)
       up_dataheap_free((FAR void *)loadinfo->dataalloc);
-#  else
+#    else
       kumm_free((FAR void *)loadinfo->dataalloc);
-#  endif
+#    endif
     }
+#  else
+  int i;
+
+  for (i = 0; loadinfo->ehdr.e_type == ET_REL && i < loadinfo->ehdr.e_shnum;
+       i++)
+    {
+      if (loadinfo->sectalloc[i] == 0)
+        {
+          continue;
+        }
+
+      if ((loadinfo->shdr[i].sh_flags & SHF_WRITE) != 0)
+        {
+#    if defined(CONFIG_ARCH_USE_DATA_HEAP)
+          up_dataheap_free((FAR void *)loadinfo->sectalloc[i]);
+#    else
+          kumm_free((FAR void *)loadinfo->sectalloc[i]);
+#    endif
+        }
+      else
+        {
+#    if defined(CONFIG_ARCH_USE_TEXT_HEAP)
+          up_textheap_free((FAR void *)loadinfo->sectalloc[i]);
+#    else
+          kumm_free((FAR void *)loadinfo->sectalloc[i]);
+#    endif
+        }
+    }
+
+    kmm_free(loadinfo->sectalloc);
+    loadinfo->sectalloc = 0;
+#  endif
 #endif
 
   /* Clear out all indications of the allocated address environment */
