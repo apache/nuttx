@@ -22,6 +22,14 @@
 
 #ifdef LIBC_BUILD_STRCPY
 
+#ifndef __ARM_FEATURE_BTI_DEFAULT
+#  define __ARM_FEATURE_BTI_DEFAULT 0
+#endif
+
+#ifndef __ARM_FEATURE_PAC_DEFAULT
+#  define __ARM_FEATURE_PAC_DEFAULT 0
+#endif
+
 /* This strcpy borrowed some ideas from arch_strcmp.S(). */
 
 /* Parameters and result. */
@@ -63,6 +71,13 @@
     .type   strcpy, %function
 
 strcpy:
+#if __ARM_FEATURE_PAC_DEFAULT
+#  if __ARM_FEATURE_BTI_DEFAULT
+    pacbti  ip, lr, sp
+#  else
+    pac     ip, lr, sp
+#  endif /* __ARM_FEATURE_BTI_DEFAULT */
+#endif /* __ARM_FEATURE_PAC_DEFAULT */
     push    {result, tmp1, tmp2, tmp3, src_offset}
     eor     tmp1, dst, src
     tst     tmp1, #3
@@ -209,6 +224,9 @@ strcpy:
     mov     tmp3, #0
     strb    tmp3, [dst]
     pop     {result, tmp1, tmp2, tmp3, src_offset}
+#if __ARM_FEATURE_PAC_DEFAULT
+    aut     ip, lr, sp
+#endif /* __ARM_FEATURE_PAC_DEFAULT */
     bx      lr
 
 #if 0
