@@ -40,6 +40,7 @@ config ARM_TOOLCHAIN_GNU_OABI
 
 config ARM_TOOLCHAIN_CLANG
 	bool "LLVM Clang toolchain"
+	depends on !LIBM_TOOLCHAIN
 	select ARCH_TOOLCHAIN_CLANG
 
 config ARM_TOOLCHAIN_ARMCLANG
