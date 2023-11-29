@@ -533,6 +533,12 @@ static int usbdev_fs_close(FAR struct file *filep)
         {
           kmm_free(fs->eps);
           fs->eps = NULL;
+          if (!fs->registered)
+            {
+              FAR struct usbdev_fs_driver_s *alloc = container_of(
+                           fs, FAR struct usbdev_fs_driver_s, dev);
+              kmm_free(alloc);
+            }
         }
     }
   else
@@ -1411,6 +1417,17 @@ void usbdev_fs_classuninitialize(FAR struct usbdevclass_driver_s *classdev)
     }
   else
     {
+      FAR struct usbdev_fs_dev_s *fs = &alloc->dev;
+      int i;
+
+      for (i = 0; i < fs->devinfo.nendpoints; i++)
+        {
+          if (fs->eps != NULL && fs->eps[i].crefs > 0)
+            {
+              return;
+            }
+        }
+
       kmm_free(alloc);
     }
 }
