@@ -346,11 +346,18 @@
 
 /* USART3 (Nucleo Virtual Console) */
 
-#define GPIO_USART3_RX     GPIO_USART3_RX_3  /* PD9 */
-#define GPIO_USART3_TX     GPIO_USART3_TX_3  /* PD8 */
+#define GPIO_UART8_RX GPIO_UART8_RX_1
+#define GPIO_UART8_TX GPIO_UART8_TX_1
 
-#define DMAMAP_USART3_RX DMAMAP_DMA12_USART3RX_0
-#define DMAMAP_USART3_TX DMAMAP_DMA12_USART3TX_1
+/* I2C1 pins */
+
+#define GPIO_I2C1_SCL     (GPIO_I2C1_SCL_2 | GPIO_SPEED_50MHz) /* PB8 - D5 */
+#define GPIO_I2C1_SDA     (GPIO_I2C1_SDA_1 | GPIO_SPEED_50MHz) /* PB7 - C5 */
+
+/* I2C2 pins */
+
+#define GPIO_I2C2_SCL     (GPIO_I2C2_SCL_2 | GPIO_SPEED_50MHz) /* PF1 - F5 */
+#define GPIO_I2C2_SDA     (GPIO_I2C2_SDA_2 | GPIO_SPEED_50MHz) /* PF0 - F4 */
 
 /****************************************************************************
  * Public Data
