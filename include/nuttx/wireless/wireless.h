@@ -138,7 +138,8 @@
 
 /* WPA2 : PMKSA cache management */
 
-#define SIOCSIWPMKSA        _WLIOC(0x0036)  /* PMKSA cache operation */
+#define SIOCSIWPMKSA        _WLIOC(0x0036)  /* set PMKSA cache */
+#define SIOCGIWPMKSA        _WLIOC(0x0037)  /* get PMKSA cache */
 
 /* -------------------- DEV PRIVATE IOCTL LIST -------------------- */
 
