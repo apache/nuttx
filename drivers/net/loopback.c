@@ -357,7 +357,7 @@ int localhost_initialize(void)
 
   /* Put the network in the UP state */
 
-  priv->lo_dev.d_flags = IFF_UP;
+  IFF_SET_UP(priv->lo_dev.d_flags);
   return lo_ifup(&priv->lo_dev);
 }
 
