@@ -1898,7 +1898,6 @@ static void stm32_receive(struct stm32_ethmac_s *priv)
 static void stm32_freeframe(struct stm32_ethmac_s *priv)
 {
   struct eth_txdesc_s *txdesc;
-  int i;
 
   ninfo("txhead: %p txtail: %p inflight: %d\n",
         priv->txhead, priv->txtail, priv->inflight);
@@ -1915,7 +1914,7 @@ static void stm32_freeframe(struct stm32_ethmac_s *priv)
       up_invalidate_dcache((uintptr_t)txdesc,
                            (uintptr_t)txdesc + sizeof(struct eth_txdesc_s));
 
-      for (i = 0; (txdesc->tdes0 & ETH_TDES0_OWN) == 0; i++)
+      while ((txdesc->tdes0 & ETH_TDES0_OWN) == 0)
         {
           /* There should be a buffer assigned to all in-flight
            * TX descriptors.
