@@ -57,7 +57,7 @@ list(
   sim_registerdump.c
   sim_saveusercontext.c
   sim_tcbinfo.c
-  sim_textheap.c
+  sim_sectionheap.c
   sim_checkhostfstypes.c)
 
 if(CONFIG_HOST_X86_64)

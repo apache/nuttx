@@ -671,6 +671,14 @@ config ARCH_USE_DATA_HEAP
 		This option enables architecture-specific memory allocator
 		for dynamic data loading.
 
+config ARCH_USE_SEPARATED_SECTION
+	bool "Enable separate section allocation for dynamic loading"
+	default n
+	depends on ARCH_USE_TEXT_HEAP || ARCH_USE_DATA_HEAP
+	---help---
+		This option enables loading different sections into different
+		memory areas, allowing for different speeds.
+
 menuconfig ARCH_ADDRENV
 	bool "Address environments"
 	default n

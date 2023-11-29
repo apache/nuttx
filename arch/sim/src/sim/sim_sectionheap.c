@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/sim_textheap.c
+ * arch/sim/src/sim/sim_sectionheap.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -32,6 +32,7 @@
  ****************************************************************************/
 
 static struct mm_heap_s *g_textheap;
+static struct mm_heap_s *g_dataheap;
 
 /****************************************************************************
  * Public Functions
@@ -45,7 +46,11 @@ static struct mm_heap_s *g_textheap;
  *
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
+void *up_textheap_memalign(const char *sectname, size_t align, size_t size)
+#else
 void *up_textheap_memalign(size_t align, size_t size)
+#endif
 {
   if (g_textheap == NULL)
     {
@@ -84,4 +89,57 @@ void up_textheap_free(void *p)
 bool up_textheap_heapmember(void *p)
 {
   return g_textheap != NULL && mm_heapmember(g_textheap, p);
+}
+
+/****************************************************************************
+ * Name: up_dataheap_memalign
+ *
+ * Description:
+ *   Allocate memory for data sections with the specified alignment.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
+void *up_dataheap_memalign(const char *sectname, size_t align, size_t size)
+#else
+void *up_dataheap_memalign(size_t align, size_t size)
+#endif
+{
+  if (g_dataheap == NULL)
+    {
+      g_dataheap = mm_initialize("dataheap",
+                                 host_allocheap(SIM_HEAP_SIZE, true),
+                                 SIM_HEAP_SIZE);
+    }
+
+  return mm_memalign(g_dataheap, align, size);
+}
+
+/****************************************************************************
+ * Name: up_dataheap_free
+ *
+ * Description:
+ *   Free memory allocated for data sections.
+ *
+ ****************************************************************************/
+
+void up_dataheap_free(void *p)
+{
+  if (g_dataheap != NULL)
+    {
+      mm_free(g_dataheap, p);
+    }
+}
+
+/****************************************************************************
+ * Name: up_dataheap_heapmember
+ *
+ * Description:
+ *   Test if memory is from data heap.
+ *
+ ****************************************************************************/
+
+bool up_dataheap_heapmember(void *p)
+{
+  return g_dataheap != NULL && mm_heapmember(g_dataheap, p);
 }
