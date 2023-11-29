@@ -1487,39 +1487,14 @@ void sched_note_event_ip(uint32_t tag, uintptr_t ip, uint8_t event,
     }
 }
 
-void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip,
-                           FAR const char *fmt, va_list va)
+void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
+                           uint32_t type, va_list va)
 {
   FAR struct note_printf_s *note;
   FAR struct note_driver_s **driver;
   bool formatted = false;
   uint8_t data[255];
-  begin_packed_struct union
-    {
-      int i;
-      long l;
-#ifdef CONFIG_HAVE_LONG_LONG
-      long long ll;
-#endif
-      intmax_t im;
-      size_t sz;
-      ptrdiff_t ptr;
-      FAR void *p;
-#ifdef CONFIG_HAVE_DOUBLE
-      double d;
-#  ifdef CONFIG_HAVE_LONG_DOUBLE
-      long double ld;
-#  endif
-#endif
-    }
-
-  end_packed_struct *var;
-
-  char c;
-  size_t length;
-  size_t next = 0;
-  bool infmt = false;
-  FAR const char *p = fmt;
+  size_t length = 0;
   FAR struct tcb_s *tcb = this_task();
 
   if (!note_isenabled_dump(tag))
@@ -1543,146 +1518,236 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip,
 
       if (!formatted)
         {
+          begin_packed_struct union
+            {
+              int i;
+              long l;
+#ifdef CONFIG_HAVE_LONG_LONG
+              long long ll;
+#endif
+              intmax_t im;
+              size_t sz;
+              ptrdiff_t ptr;
+              FAR void *p;
+              FAR const char *s;
+#ifdef CONFIG_HAVE_DOUBLE
+              double d;
+#  ifdef CONFIG_HAVE_LONG_DOUBLE
+              long double ld;
+#  endif
+#endif
+            }
+
+          end_packed_struct *var;
+          size_t next = 0;
           formatted = true;
           note = (FAR struct note_printf_s *)data;
           length = sizeof(data) - SIZEOF_NOTE_PRINTF(0);
 
-          while ((c = *p++) != '\0')
+          if (type)
             {
-              if (c != '%' && !infmt)
+              size_t count = NOTE_PRINTF_GET_COUNT(type);
+              size_t i;
+
+              for (i = 0; i < count; i++)
                 {
-                  continue;
+                  var = (FAR void *)&note->npt_data[next];
+                  switch (NOTE_PRINTF_GET_TYPE(type, i))
+                    {
+                      case NOTE_PRINTF_UINT32:
+                        {
+                          var->i = va_arg(va, int);
+                          if (next + sizeof(var->i) > length)
+                            {
+                              break;
+                            }
+
+                          next += sizeof(var->i);
+                        }
+                      break;
+                      case NOTE_PRINTF_UINT64:
+                        {
+                          if (next + sizeof(var->ll) > length)
+                            {
+                              break;
+                            }
+
+                          var->ll = va_arg(va, long long);
+                          next += sizeof(var->ll);
+                        }
+                      break;
+                      case NOTE_PRINTF_STRING:
+                        {
+                          size_t len;
+                          var->s = va_arg(va, FAR const char *);
+                          len = strlen(var->s) + 1;
+                          if (next + len > length)
+                            {
+                              len = length - next;
+                            }
+
+                          strlcpy(note->npt_data + next, var->s, len);
+                          next += len;
+                        }
+                      break;
+                      case NOTE_PRINTF_DOUBLE:
+                        {
+                          var->d = va_arg(va, double);
+                          if (next + sizeof(var->d) > length)
+                            {
+                              break;
+                            }
+
+                          next += sizeof(var->d);
+                        }
+                      break;
+                    }
                 }
+            }
+          else
+            {
+              FAR const char *p = fmt;
+              bool infmt = false;
+              char c;
 
-              infmt = true;
-              var = (FAR void *)&note->npt_data[next];
-
-              if (c == 'c' || c == 'd' || c == 'i' || c == 'u' ||
-                  c == 'o' || c == 'x' || c == 'X')
+              while ((c = *p++) != '\0')
                 {
-                  if (*(p - 2) == 'j')
+                  if (c != '%' && !infmt)
                     {
-                      if (next + sizeof(var->im) > length)
-                        {
-                          break;
-                        }
-
-                      var->im = va_arg(va, intmax_t);
-                      next += sizeof(var->im);
+                      continue;
                     }
+
+                  infmt = true;
+                  var = (FAR void *)&note->npt_data[next];
+
+                  if (c == 'c' || c == 'd' || c == 'i' || c == 'u' ||
+                      c == 'o' || c == 'x' || c == 'X')
+                    {
+                      if (*(p - 2) == 'j')
+                        {
+                          if (next + sizeof(var->im) > length)
+                            {
+                              break;
+                            }
+
+                          var->im = va_arg(va, intmax_t);
+                          next += sizeof(var->im);
+                        }
 #ifdef CONFIG_HAVE_LONG_LONG
-                  else if (*(p - 2) == 'l' && *(p - 3) == 'l')
-                    {
-                      if (next + sizeof(var->ll) > length)
+                      else if (*(p - 2) == 'l' && *(p - 3) == 'l')
                         {
-                          break;
-                        }
+                          if (next + sizeof(var->ll) > length)
+                            {
+                              break;
+                            }
 
-                      var->ll = va_arg(va, long long);
-                      next += sizeof(var->ll);
-                    }
+                          var->ll = va_arg(va, long long);
+                          next += sizeof(var->ll);
+                        }
 #endif
-                  else if (*(p - 2) == 'l')
-                    {
-                      if (next + sizeof(var->l) > length)
+                      else if (*(p - 2) == 'l')
                         {
-                          break;
+                          if (next + sizeof(var->l) > length)
+                            {
+                              break;
+                            }
+
+                          var->l = va_arg(va, long);
+                          next += sizeof(var->l);
+                        }
+                      else if (*(p - 2) == 'z')
+                        {
+                          if (next + sizeof(var->sz) > length)
+                            {
+                              break;
+                            }
+
+                          var->sz = va_arg(va, size_t);
+                          next += sizeof(var->sz);
+                        }
+                      else if (*(p - 2) == 't')
+                        {
+                          if (next + sizeof(var->ptr) > length)
+                            {
+                              break;
+                            }
+
+                          var->ptr = va_arg(va, ptrdiff_t);
+                          next += sizeof(var->ptr);
+                        }
+                      else
+                        {
+                          if (next + sizeof(var->i) > length)
+                            {
+                              break;
+                            }
+
+                          var->i = va_arg(va, int);
+                          next += sizeof(var->i);
                         }
 
-                      var->l = va_arg(va, long);
-                      next += sizeof(var->l);
+                      infmt = false;
                     }
-                  else if (*(p - 2) == 'z')
+                  else if (c == 'e' || c == 'f' || c == 'g' || c == 'a' ||
+                           c == 'A' || c == 'E' || c == 'F' || c == 'G')
                     {
-                      if (next + sizeof(var->sz) > length)
+#ifdef CONFIG_HAVE_DOUBLE
+#  ifdef CONFIG_HAVE_LONG_DOUBLE
+                      if (*(p - 2) == 'L')
                         {
-                          break;
-                        }
+                          if (next + sizeof(var->ld) > length)
+                            {
+                              break;
+                            }
 
-                      var->sz = va_arg(va, size_t);
-                      next += sizeof(var->sz);
+                          var->ld = va_arg(va, long double);
+                          next += sizeof(var->ld);
+                        }
+                      else
+#  endif
+                        {
+                          if (next + sizeof(var->d) > length)
+                            {
+                              break;
+                            }
+
+                          var->d = va_arg(va, double);
+                          next += sizeof(var->d);
+                        }
+#endif
+
+                      infmt = false;
                     }
-                  else if (*(p - 2) == 't')
+                  else if (c == '*')
                     {
-                      if (next + sizeof(var->ptr) > length)
-                        {
-                          break;
-                        }
-
-                      var->ptr = va_arg(va, ptrdiff_t);
-                      next += sizeof(var->ptr);
-                    }
-                  else
-                    {
-                      if (next + sizeof(var->i) > length)
-                        {
-                          break;
-                        }
-
                       var->i = va_arg(va, int);
                       next += sizeof(var->i);
                     }
-
-                  infmt = false;
-                }
-              else if (c == 'e' || c == 'f' || c == 'g' || c == 'a' ||
-                       c == 'A' || c == 'E' || c == 'F' || c == 'G')
-                {
-#ifdef CONFIG_HAVE_DOUBLE
-#  ifdef CONFIG_HAVE_LONG_DOUBLE
-                  if (*(p - 2) == 'L')
+                  else if (c == 's')
                     {
-                      if (next + sizeof(var->ld) > length)
+                      size_t len;
+                      var->s = va_arg(va, FAR char *);
+                      len = strlen(var->s) + 1;
+                      if (next + len > length)
+                        {
+                          len = length - next;
+                        }
+
+                      strlcpy(note->npt_data + next, var->s, len);
+                      next += len;
+                      infmt = false;
+                    }
+                  else if (c == 'p')
+                    {
+                      if (next + sizeof(var->p) > length)
                         {
                           break;
                         }
 
-                      var->ld = va_arg(va, long double);
-                      next += sizeof(var->ld);
+                      var->p = va_arg(va, FAR void *);
+                      next += sizeof(var->p);
+                      infmt = false;
                     }
-                  else
-#  endif
-                    {
-                      if (next + sizeof(var->d) > length)
-                        {
-                          break;
-                        }
-
-                      var->d = va_arg(va, double);
-                      next += sizeof(var->d);
-                    }
-#endif
-
-                  infmt = false;
-                }
-              else if (c == '*')
-                {
-                  var->i = va_arg(va, int);
-                  next += sizeof(var->i);
-                }
-              else if (c == 's')
-                {
-                  FAR char *str = (FAR char *)va_arg(va, FAR char *);
-                  size_t len = strlen(str) + 1;
-                  if (next + len > length)
-                    {
-                      len = length - next;
-                    }
-
-                  strlcpy(&note->npt_data[next], str, len);
-                  next += len;
-                  infmt = false;
-                }
-              else if (c == 'p')
-                {
-                  if (next + sizeof(var->p) > length)
-                    {
-                      break;
-                    }
-
-                  var->p = va_arg(va, FAR void *);
-                  next += sizeof(var->p);
-                  infmt = false;
                 }
             }
 
@@ -1690,6 +1755,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip,
           note_common(tcb, &note->npt_cmn, length, NOTE_DUMP_PRINTF);
           note->npt_ip = ip;
           note->npt_fmt = fmt;
+          note->npt_type = type;
         }
 
       /* Add the note to circular buffer */
@@ -1698,12 +1764,12 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip,
     }
 }
 
-void sched_note_printf_ip(uint32_t tag, uintptr_t ip,
-                          FAR const char *fmt, ...)
+void sched_note_printf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
+                          uint32_t type, ...)
 {
   va_list va;
-  va_start(va, fmt);
-  sched_note_vprintf_ip(tag, ip, fmt, va);
+  va_start(va, type);
+  sched_note_vprintf_ip(tag, ip, fmt, type, va);
   va_end(va);
 }
 

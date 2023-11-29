@@ -34,6 +34,7 @@
 #include <stdbool.h>
 #include <stdarg.h>
 
+#include <nuttx/macro.h>
 #include <nuttx/sched.h>
 #include <nuttx/spinlock.h>
 
@@ -127,15 +128,83 @@
 #  define NOTE_FILTER_TAGMASK_ZERO(s)
 #endif
 
+/* Printf argument type */
+
+#define NOTE_PRINTF_UINT32 0
+#define NOTE_PRINTF_UINT64 1
+#define NOTE_PRINTF_DOUBLE 2
+#define NOTE_PRINTF_STRING 3
+
+/* Get/set printf tag. each parameter occupies 2 bits. The highest
+ * four bits are used to represent the number of parameters, So up to
+ * 14 variable arguments can be passed.
+ */
+
+#define NOTE_PRINTF_GET_TYPE(tag, index) (((tag) >> (index) * 2) & 0x03)
+#define NOTE_PRINTF_GET_COUNT(tag)       (((tag) >> 28) & 0x0f)
+
+/* Check if a variable is 32-bit or 64-bit */
+
+#define NOTE_PRINTF_INT_TYPE(arg) (sizeof((arg) + 0) <= sizeof(uint32_t) ? \
+                                   NOTE_PRINTF_UINT32 : NOTE_PRINTF_UINT64)
+
+/* Use object_size to mark strings of known size */
+
+#define NOTE_PRINTF_OBJECT_SIZE(arg) object_size((FAR void *)(uintptr_t)(arg), 2)
+
+/* Use _Generic to determine the type of the parameter */
+
+#define NOTE_PRINTF_ARG_TYPE(__arg__) \
+        _Generic((__arg__) + 0, \
+                 float : NOTE_PRINTF_DOUBLE, \
+                 double: NOTE_PRINTF_DOUBLE, \
+                 char *: ({NOTE_PRINTF_OBJECT_SIZE(__arg__) > 0 ? \
+                         NOTE_PRINTF_STRING : \
+                         NOTE_PRINTF_INT_TYPE(__arg__);}), \
+                 const char *: ({NOTE_PRINTF_OBJECT_SIZE(__arg__) > 0 ? \
+                               NOTE_PRINTF_STRING : \
+                               NOTE_PRINTF_INT_TYPE(__arg__);}), \
+                 default: NOTE_PRINTF_INT_TYPE(__arg__))
+
+/* Set the type of each parameter */
+
+#define NOTE_PRINTF_TYPE(arg, index) + ((NOTE_PRINTF_ARG_TYPE(arg) << (index) * 2))
+#define NOTE_PRINTF_TYPES(...)       FOREACH_ARG(NOTE_PRINTF_TYPE, ##__VA_ARGS__)
+
+/* Using macro expansion to calculate the expression of tag, tag will
+ * be a constant at compile time, which will reduce the number of
+ * size in the code.
+ */
+
+#define NOTE_PRINTF_TAG(...) \
+        ((GET_ARG_COUNT(__VA_ARGS__) << 28) + NOTE_PRINTF_TYPES(__VA_ARGS__))
+
 #define SCHED_NOTE_IP \
         ({ __label__ __here; __here: (unsigned long)&&__here; })
 
 #define sched_note_event(tag, event, buf, len) \
         sched_note_event_ip(tag, SCHED_NOTE_IP, event, buf, len)
 #define sched_note_vprintf(tag, fmt, va) \
-        sched_note_vprintf_ip(tag, SCHED_NOTE_IP, fmt, va)
-#define sched_note_printf(tag, fmt, ...) \
-        sched_note_printf_ip(tag, SCHED_NOTE_IP, fmt, ##__VA_ARGS__)
+        sched_note_vprintf_ip(tag, SCHED_NOTE_IP, fmt, 0, va)
+
+#ifdef CONFIG_DRIVERS_NOTE_STRIP_FORMAT
+#  define sched_note_printf(tag, fmt, ...) \
+          do \
+            { \
+              static const locate_data(".printf_format") \
+              char __fmt__[] = fmt; \
+              uint32_t __type__ = NOTE_PRINTF_TAG(__VA_ARGS__); \
+              static_assert(GET_ARG_COUNT(__VA_ARGS__) <= 14, \
+                            "The number of sched_note_nprintf " \
+                            "parameters needs to be less than 14"); \
+              sched_note_printf_ip(tag, SCHED_NOTE_IP, __fmt__, \
+                                   __type__, ##__VA_ARGS__); \
+            } \
+          while (0)
+#else
+#  define sched_note_printf(tag, fmt, ...) \
+          sched_note_printf_ip(tag, SCHED_NOTE_IP, fmt, 0, ##__VA_ARGS__)
+#endif
 
 #define sched_note_begin(tag) \
         sched_note_event(tag, NOTE_DUMP_BEGIN, NULL, 0)
@@ -412,6 +481,7 @@ struct note_printf_s
   struct note_common_s npt_cmn; /* Common note parameters */
   uintptr_t npt_ip;             /* Instruction pointer called from */
   FAR const char *npt_fmt;      /* Printf format string */
+  uint32_t npt_type;            /* Printf parameter type */
   char npt_data[1];             /* Print arguments */
 };
 
@@ -587,13 +657,13 @@ void sched_note_heap(uint8_t event, FAR void *heap, FAR void *mem,
 void sched_note_event_ip(uint32_t tag, uintptr_t ip, uint8_t event,
                          FAR const void *buf, size_t len);
 void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
-                           va_list va) printf_like(3, 0);
-void sched_note_printf_ip(uint32_t tag, uintptr_t ip,
-                          FAR const char *fmt, ...) printf_like(3, 4);
+                           uint32_t type, va_list va) printf_like(3, 0);
+void sched_note_printf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
+                          uint32_t type, ...) printf_like(3, 5);
 #else
 #  define sched_note_event_ip(t,ip,e,b,l)
-#  define sched_note_vprintf_ip(t,ip,f,v)
-#  define sched_note_printf_ip(t,ip,f,...)
+#  define sched_note_vprintf_ip(t,ip,f,p,v)
+#  define sched_note_printf_ip(t,ip,f,p,...)
 #endif /* CONFIG_SCHED_INSTRUMENTATION_DUMP */
 
 #if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
