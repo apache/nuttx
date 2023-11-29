@@ -47,9 +47,12 @@
 
 static const uint32_t g_ledcfg[BOARD_NLEDS] =
 {
-  GPIO_LED_GREEN,
-  GPIO_LED_BLUE,
-  GPIO_LED_RED,
+  GPIO_LED1_GREEN,
+  GPIO_LED1_BLUE,
+  GPIO_LED1_RED,
+  GPIO_LED2_GREEN,
+  GPIO_LED2_BLUE,
+  GPIO_LED2_RED,
 };
 
 /****************************************************************************

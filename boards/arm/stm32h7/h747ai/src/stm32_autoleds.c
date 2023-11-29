@@ -49,9 +49,9 @@
 
 static const uint32_t g_ledmap[BOARD_NLEDS] =
 {
-  GPIO_LED_GREEN,
-  GPIO_LED_BLUE,
-  GPIO_LED_RED,
+  GPIO_LED1_GREEN,
+  GPIO_LED1_BLUE,
+  GPIO_LED1_RED,
 };
 
 static bool g_initialized;
@@ -132,7 +132,7 @@ void board_autoled_on(int led)
 
     case LED_IDLE : /* IDLE */
       phy_set_led(BOARD_LED_RED, true);
-    break;
+      break;
     }
 }
 
@@ -166,7 +166,7 @@ void board_autoled_off(int led)
 
     case LED_IDLE : /* IDLE */
       phy_set_led(BOARD_LED_RED, false);
-    break;
+      break;
     }
 }
 

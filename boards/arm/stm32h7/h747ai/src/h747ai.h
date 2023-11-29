@@ -117,16 +117,25 @@
  * following definitions assume the default Solder Bridges are installed.
  */
 
-#define GPIO_LD1       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
+#define GPIO_LD1       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
+                        GPIO_OUTPUT_CLEAR | GPIO_PORTA | GPIO_PIN4)
+#define GPIO_LD2       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
+                        GPIO_OUTPUT_CLEAR | GPIO_PORTA | GPIO_PIN3)
+#define GPIO_LD3       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
                         GPIO_OUTPUT_CLEAR | GPIO_PORTB | GPIO_PIN0)
-#define GPIO_LD2       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
-                        GPIO_OUTPUT_CLEAR | GPIO_PORTB | GPIO_PIN7)
-#define GPIO_LD3       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
-                        GPIO_OUTPUT_CLEAR | GPIO_PORTB | GPIO_PIN14)
+#define GPIO_LD4       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
+                        GPIO_OUTPUT_CLEAR | GPIO_PORTE | GPIO_PIN9)
+#define GPIO_LD5       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
+                        GPIO_OUTPUT_CLEAR | GPIO_PORTF | GPIO_PIN14)
+#define GPIO_LD6       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
+                        GPIO_OUTPUT_CLEAR | GPIO_PORTE | GPIO_PIN11)
 
-#define GPIO_LED_GREEN GPIO_LD1
-#define GPIO_LED_BLUE  GPIO_LD2
-#define GPIO_LED_RED   GPIO_LD3
+#define GPIO_LED1_GREEN GPIO_LD1
+#define GPIO_LED1_BLUE  GPIO_LD2
+#define GPIO_LED1_RED   GPIO_LD3
+#define GPIO_LED2_GREEN GPIO_LD4
+#define GPIO_LED2_BLUE  GPIO_LD5
+#define GPIO_LED2_RED   GPIO_LD6
 
 #define LED_DRIVER_PATH "/dev/userleds"
 
