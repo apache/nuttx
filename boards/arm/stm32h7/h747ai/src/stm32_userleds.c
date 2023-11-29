@@ -86,8 +86,8 @@ uint32_t board_userled_initialize(void)
  *
  * Description:
  *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
- *  LEDs.  If CONFIG_ARCH_LEDS is not defined, then the board_userled() is
- *  available to control the LED from user application logic.
+ *   LEDs.  If CONFIG_ARCH_LEDS is not defined, then the board_userled() is
+ *   available to control the LED from user application logic.
  *
  ****************************************************************************/
 
@@ -104,9 +104,9 @@ void board_userled(int led, bool ledon)
  *
  * Description:
  *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
- *  LEDs.  If CONFIG_ARCH_LEDS is not defined, then the board_userled_all()
- *  is available to control the LED from user application logic. NOTE: since
- *  there is only a single LED on-board, this is function is not very useful.
+ *   LEDs. If CONFIG_ARCH_LEDS is not defined, then the board_userled_all() is
+ *   available to control the LED from user application logic. NOTE: since
+ *   there is only a single LED on-board, this is function is not very useful.
  *
  ****************************************************************************/
 
@@ -121,5 +121,29 @@ void board_userled_all(uint32_t ledset)
       stm32_gpiowrite(g_ledcfg[i], (ledset & (1 << i)) != 0);
     }
 }
+
+#ifdef CONFIG_USERLED_LOWER_READSTATE
+/****************************************************************************
+ * Name: board_userled_getall
+ *
+ * Description:
+ *   Get the state of all LEDs.
+ *
+ ****************************************************************************/
+
+void board_userled_getall(uint32_t *ledset)
+{
+  /* Clear the LED bits */
+
+  *ledset = 0;
+
+  /* Get LED state. An output of '1' illuminates the LED. */
+
+  for (int i = 0; i < nitems(g_ledcfg); i++)
+    {
+      *ledset |= ((stm32_gpioread(g_ledcfg[i]) & 1) << i);
+    }
+}
+#endif /* CONFIG_USERLED_LOWER_READSTATE */
 
 #endif /* !CONFIG_ARCH_LEDS */
