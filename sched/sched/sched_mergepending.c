@@ -190,7 +190,6 @@ bool nxsched_merge_pending(void)
   FAR struct tcb_s *tcb;
   bool ret = false;
   int cpu;
-  int me;
 
   /* Remove and process every TCB in the g_pendingtasks list.
    *
@@ -198,8 +197,7 @@ bool nxsched_merge_pending(void)
    * some CPU other than this one is in a critical section.
    */
 
-  me = this_cpu();
-  if (!nxsched_islocked_global() && !irq_cpu_locked(me))
+  if (!nxsched_islocked_global())
     {
       /* Find the CPU that is executing the lowest priority task */
 
@@ -237,7 +235,7 @@ bool nxsched_merge_pending(void)
            * Check if that happened.
            */
 
-          if (nxsched_islocked_global() || irq_cpu_locked(me))
+          if (nxsched_islocked_global())
             {
               /* Yes.. then we may have incorrectly placed some TCBs in the
                * g_readytorun list (unlikely, but possible).  We will have to
