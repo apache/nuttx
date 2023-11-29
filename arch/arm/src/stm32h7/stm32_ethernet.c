@@ -2011,7 +2011,6 @@ static void stm32_freeframe(struct stm32_ethmac_s *priv)
 {
   struct eth_desc_s *txdesc;
   uint32_t des3_tmp;
-  int i;
 
   ninfo("txhead: %p txtail: %p inflight: %d\n",
         priv->txhead, priv->txtail, priv->inflight);
@@ -2028,7 +2027,7 @@ static void stm32_freeframe(struct stm32_ethmac_s *priv)
       up_invalidate_dcache((uintptr_t)txdesc,
                            (uintptr_t)txdesc + sizeof(struct eth_desc_s));
 
-      for (i = 0; (txdesc->des3 & ETH_TDES3_RD_OWN) == 0; i++)
+      while ((txdesc->des3 & ETH_TDES3_RD_OWN) == 0)
         {
           /* There should be a buffer assigned to all in-flight
            * TX descriptors.
