@@ -87,6 +87,11 @@ config DRIVERS_NOTERAM_CRASH_DUMP
 
 endif # DRIVERS_NOTERAM
 
+config DRIVERS_NOTE_STRIP_FORMAT
+	bool "Strip sched_note_printf format string"
+	---help---
+		Strip sched_note_printf format string.
+
 config DRIVERS_NOTELOG
 	bool "Note syslog driver"
 	---help---
