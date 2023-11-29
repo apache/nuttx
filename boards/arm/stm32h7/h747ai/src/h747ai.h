@@ -111,10 +111,6 @@
 #endif
 
 /* LED
- *
- * The Nucleo-144 board has numerous LEDs but only three, LD1 a Green LED,
- * LD2 a Blue LED and LD3 a Red LED, that can be controlled by software. The
- * following definitions assume the default Solder Bridges are installed.
  */
 
 #define GPIO_LD1       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
@@ -138,19 +134,6 @@
 #define GPIO_LED2_RED   GPIO_LD6
 
 #define LED_DRIVER_PATH "/dev/userleds"
-
-/* BUTTONS
- *
- * The Blue pushbutton B1, labeled "User", is connected to GPIO PC13.
- * A high value will be sensed when the button is depressed.
- * Note:
- *    1) That the EXTI is included in the definition to enable an interrupt
- *       on this IO.
- *    2) The following definitions assume the default Solder Bridges are
- *       installed.
- */
-
-#define GPIO_BTN_USER  (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTC | GPIO_PIN13)
 
 /* USB OTG FS
  *
