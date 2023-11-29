@@ -59,11 +59,26 @@
 
 #ifdef LIBC_BUILD_MEMSET
 
+#ifndef __ARM_FEATURE_BTI_DEFAULT
+#  define __ARM_FEATURE_BTI_DEFAULT 0
+#endif
+
+#ifndef __ARM_FEATURE_PAC_DEFAULT
+#  define __ARM_FEATURE_PAC_DEFAULT 0
+#endif
+
 	.thumb
 	.syntax unified
 	.global memset
 	.type	memset, %function
 memset:
+#if __ARM_FEATURE_PAC_DEFAULT
+#  if __ARM_FEATURE_BTI_DEFAULT
+	pacbti	ip, lr, sp
+#  else
+	pac	ip, lr, sp
+#  endif /* __ARM_FEATURE_BTI_DEFAULT */
+#endif /* __ARM_FEATURE_PAC_DEFAULT */
 #ifdef __ARM_FEATURE_MVE
 	vdup.8	q0, r1
 	mov	r3, lr
@@ -73,6 +88,9 @@ memset:
 	vstrb.8	q0, [r1], #16
 	letp	lr, 1b
 2:
+#if __ARM_FEATURE_PAC_DEFAULT
+	aut	ip, lr, sp
+#endif /* __ARM_FEATURE_PAC_DEFAULT */
 	bx	r3
 #else
 	stmfd	sp!, {r0, r4-r7, lr}
@@ -140,7 +158,13 @@ memset:
 	strhmi	r1, [r0], #2
 	movs	r2, r2, lsl #2
 	strbcs	r1, [r0]
+#  if __ARM_FEATURE_PAC_DEFAULT
+	ldmfd	sp!, {r0, r4-r7, lr}
+	aut	ip, lr, sp
+	bx	lr
+#  else
 	ldmfd	sp!, {r0, r4-r7, pc}
+#  endif /* __ARM_FEATURE_PAC_DEFAULT */
 #endif
 	.size memset, . - memset
 
