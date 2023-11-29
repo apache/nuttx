@@ -31,8 +31,6 @@
 #include <stdint.h>
 #include <nuttx/mtd/mtd.h>
 
-#include "xtensa_attr.h"
-
 #ifndef __ASSEMBLY__
 
 #undef EXTERN
@@ -129,6 +127,61 @@ struct mtd_dev_s *esp32_spiflash_encrypt_get_mtd(void);
  ****************************************************************************/
 
 bool esp32_flash_encryption_enabled(void);
+
+#ifdef CONFIG_ESP32_SPI_FLASH_MMAP
+
+/****************************************************************************
+ * Name: esp32_spiflash_mmu_init
+ *
+ * Description:
+ *   Initialize MMU for accessing SPI flash by I-Bus.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp32_spiflash_mmu_init(void);
+
+/****************************************************************************
+ * Name: esp32_flash_mmap
+ *
+ * Description:
+ *   Map SPI flash physical space to I-Bus address.
+ *
+ * Input Parameters:
+ *   flash_addr - SPI flash physical space start address
+ *   flash_size - SPI flash physical space size
+ *   mapped_ptr - Mapped I-Bus address
+ *
+ * Returned Value:
+ *   0 if success or a negative value if failed.
+ *
+ ****************************************************************************/
+
+int esp32_flash_mmap(uint32_t flash_addr, uint32_t flash_size,
+                     uint32_t *mapped_ptr);
+
+/****************************************************************************
+ * Name: esp32_flash_unmap
+ *
+ * Description:
+ *   Free mapped I-Bus space.
+ *
+ * Input Parameters:
+ *   mapped_ptr  - Mapped I-Bus space start address
+ *   mapped_size - Mapped I-Bus space size
+ *
+ * Returned Value:
+ *   0 if success or a negative value if failed.
+ *
+ ****************************************************************************/
+
+int esp32_flash_unmap(uint32_t mapped_ptr, uint32_t mapped_size);
+#endif
 
 #ifdef __cplusplus
 }

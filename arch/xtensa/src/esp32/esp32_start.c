@@ -39,6 +39,7 @@
 #include "esp32_start.h"
 #include "esp32_spiram.h"
 #include "esp32_wdt.h"
+#include "esp32_spiflash.h"
 #ifdef CONFIG_BUILD_PROTECTED
 #  include "esp32_userspace.h"
 #endif
@@ -164,6 +165,10 @@ static noreturn_function void __esp32_start(void)
   /* Make page 0 access raise an exception */
 
   esp32_region_protection();
+
+#ifdef CONFIG_ESP32_SPI_FLASH_MMAP
+  esp32_spiflash_mmu_init();
+#endif
 
 #if defined(CONFIG_ESP32_PID) && defined(CONFIG_BUILD_PROTECTED)
   /* We have 2 VECBASE Addresses: one in CPU and one in DPORT peripheral.

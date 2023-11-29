@@ -1863,6 +1863,18 @@ config ESP32_SPI_FLASH_SUPPORT_PSRAM_STACK
 		can do SPI Flash read/write/erase/map/unmap.
 		Otherwise, it may cause exception.
 
+config ESP32_SPI_FLASH_MMAP
+	bool "Support mapping flash space to instruction bus space"
+	default n
+	---help---
+		Enable the mapping of flash memory space to the
+		instruction bus space. The following instruction
+		bus space will be available for use if it is not
+		currently occupied by firmware:
+
+			IRAM0: 0x400d,0000 ~ 0x403f,ffff
+			IRAM1: 0x4040,0000 ~ 0x407f,ffff
+
 if ESP32_APP_FORMAT_LEGACY
 
 comment "Partition Table Configuration"

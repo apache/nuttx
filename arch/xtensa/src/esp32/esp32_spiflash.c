@@ -79,6 +79,19 @@
 
 #define SPI_FLASH_ENCRYPT_MIN_SIZE  (16)
 
+#define IBUS1_PAGE_BASE             IROM0_PAGES_START
+#define IBUS1_PAGE_ADRR             SOC_IROM_MASK_LOW
+#define IBUS1_PAGE_START            (IBUS1_PAGE_BASE + 13)
+#define IBUS1_PAGE_END              (IBUS1_PAGE_BASE + 64)
+
+#define IBUS2_PAGE_START            (IBUS1_PAGE_END)
+#define IBUS2_PAGE_END              (IBUS2_PAGE_START + 64)
+
+#define IBUS3_PAGE_START            (IBUS2_PAGE_END)
+#define IBUS3_PAGE_END              (IBUS3_PAGE_START + 64)
+
+#define IBUS2_INVALID_MMU_VAL       0
+
 #define MTD2PRIV(_dev)              ((struct esp32_spiflash_s *)_dev)
 #define MTD_SIZE(_priv)             ((_priv)->chip->chip_size)
 #define MTD_BLKSIZE(_priv)          ((_priv)->chip->page_size)
@@ -446,6 +459,83 @@ static inline void spi_reset_regbits(struct esp32_spiflash_s *priv,
 
   putreg32(tmp & (~bits), priv->config->reg_base + offset);
 }
+
+#ifdef CONFIG_ESP32_SPI_FLASH_MMAP
+
+/****************************************************************************
+ * Name: mmu_is_unused
+ *
+ * Description:
+ *   Check if MMU is unused.
+ *
+ * Input Parameters:
+ *   id - MMU ID
+ *
+ * Returned Value:
+ *   True if the MMU unit is unused or false.
+ *
+ ****************************************************************************/
+
+static bool IRAM_ATTR mmu_is_unused(uint32_t id)
+{
+  if (id < IBUS2_PAGE_START)
+    {
+      if (PRO_MMU_TABLE[id] == INVALID_MMU_VAL
+#ifdef CONFIG_SMP
+          && APP_MMU_TABLE[id] == INVALID_MMU_VAL
+#endif
+         )
+        {
+          return true;
+        }
+    }
+  else if (id < IBUS2_PAGE_END)
+    {
+      if (PRO_MMU_TABLE[id] == IBUS2_INVALID_MMU_VAL
+#ifdef CONFIG_SMP
+          && APP_MMU_TABLE[id] == IBUS2_INVALID_MMU_VAL
+#endif
+         )
+        {
+          return true;
+        }
+    }
+
+  return false;
+}
+
+/****************************************************************************
+ * Name: mmu_set_unused
+ *
+ * Description:
+ *   Set MMU to be unused.
+ *
+ * Input Parameters:
+ *   id - MMU ID
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void IRAM_ATTR mmu_set_unused(uint32_t id)
+{
+  if (id < IBUS2_PAGE_START)
+    {
+      PRO_MMU_TABLE[id] = INVALID_MMU_VAL;
+#ifdef CONFIG_SMP
+      APP_MMU_TABLE[id] = INVALID_MMU_VAL;
+#endif
+    }
+  else if (id < IBUS2_PAGE_END)
+    {
+      PRO_MMU_TABLE[id] = IBUS2_INVALID_MMU_VAL;
+#ifdef CONFIG_SMP
+      APP_MMU_TABLE[id] = IBUS2_INVALID_MMU_VAL;
+#endif
+    }
+}
+#endif
 
 /****************************************************************************
  * Name: esp32_spiflash_opstart
@@ -2659,5 +2749,203 @@ bool esp32_flash_encryption_enabled(void)
 
   return enabled;
 }
+
+#ifdef CONFIG_ESP32_SPI_FLASH_MMAP
+
+/****************************************************************************
+ * Name: esp32_spiflash_mmu_init
+ *
+ * Description:
+ *   Initialize MMU for accessing SPI flash by I-Bus.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp32_spiflash_mmu_init(void)
+{
+  int i;
+  uint32_t regval;
+
+  /* Initialize I-Bus 2 section, initial value can't be invalid */
+
+  for (i = IBUS2_PAGE_START; i < IBUS2_PAGE_END; i++)
+    {
+      PRO_MMU_TABLE[i] = IBUS2_INVALID_MMU_VAL;
+#ifdef CONFIG_SMP
+      APP_MMU_TABLE[i] = IBUS2_INVALID_MMU_VAL;
+#endif
+    }
+
+  /* Enable multiply I-Bus region when cache is enable */
+
+  regval  = getreg32(DPORT_PRO_CACHE_CTRL_REG);
+  regval &= ~DPORT_PRO_SINGLE_IRAM_ENA_M;
+  putreg32(regval, DPORT_PRO_CACHE_CTRL_REG);
+#ifdef CONFIG_SMP
+  regval  = getreg32(DPORT_APP_CACHE_CTRL_REG);
+  regval &= ~DPORT_APP_SINGLE_IRAM_ENA_M;
+  putreg32(regval, DPORT_APP_CACHE_CTRL_REG);
+#endif
+
+  /* Enable I-Bus 2 when cache is enable */
+
+  regval  = getreg32(DPORT_PRO_CACHE_CTRL1_REG);
+  regval &= ~DPORT_PRO_CACHE_MASK_IRAM1_M;
+  putreg32(regval, DPORT_PRO_CACHE_CTRL1_REG);
+#ifdef CONFIG_SMP
+  regval  = getreg32(DPORT_APP_CACHE_CTRL1_REG);
+  regval &= ~DPORT_APP_CACHE_MASK_IRAM1_M;
+  putreg32(regval, DPORT_APP_CACHE_CTRL1_REG);
+#endif
+}
+
+/****************************************************************************
+ * Name: esp32_flash_mmap
+ *
+ * Description:
+ *   Map SPI flash physical space to I-Bus address.
+ *
+ * Input Parameters:
+ *   flash_addr - SPI flash physical space start address
+ *   flash_size - SPI flash physical space size
+ *   mapped_ptr - Mapped I-Bus address
+ *
+ * Returned Value:
+ *   0 if success or a negative value if failed.
+ *
+ ****************************************************************************/
+
+int IRAM_ATTR esp32_flash_mmap(uint32_t flash_addr,
+                               uint32_t flash_size,
+                               uint32_t *mapped_ptr)
+{
+  uint32_t i;
+  uint32_t regval;
+  uint32_t mmu_start;
+  uint32_t mmu_units = MMU_BYTES2PAGES(flash_size);
+  uint32_t flash_page = MMU_ADDR2PAGE(flash_addr);
+
+  esp32_spiflash_opstart();
+
+  for (mmu_start = IBUS1_PAGE_START;
+       mmu_start < IBUS2_PAGE_END - mmu_units;
+       mmu_start++)
+    {
+      if (mmu_is_unused(mmu_start))
+        {
+          for (i = 0; i < mmu_units; i++)
+            {
+              if (!mmu_is_unused(mmu_start + i))
+                {
+                  mmu_start += i;
+                  break;
+                }
+            }
+
+          if (i >= mmu_units)
+            {
+              break;
+            }
+        }
+    }
+
+  if (mmu_start >= IBUS2_PAGE_END - mmu_units)
+    {
+      esp32_spiflash_opdone();
+      return -ENOSPC;
+    }
+
+  for (i = 0; i < mmu_units; i++)
+    {
+      PRO_MMU_TABLE[mmu_start + i] = flash_page + i;
+#ifdef CONFIG_SMP
+      APP_MMU_TABLE[mmu_start + i] = flash_page + i;
+#endif
+    }
+
+#ifdef CONFIG_ESP32_SPIRAM
+  esp_spiram_writeback_cache();
+#endif
+
+  cache_flush(0);
+#ifdef CONFIG_SMP
+  cache_flush(1);
+#endif
+
+  esp32_spiflash_opdone();
+
+  *mapped_ptr = IBUS1_PAGE_ADRR +
+               (mmu_start - IBUS1_PAGE_BASE) * SPI_FLASH_MMU_PAGE_SIZE;
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: esp32_flash_unmap
+ *
+ * Description:
+ *   Free mapped I-Bus space.
+ *
+ * Input Parameters:
+ *   mapped_ptr  - Mapped I-Bus space start address
+ *   mapped_size - Mapped I-Bus space size
+ *
+ * Returned Value:
+ *   0 if success or a negative value if failed.
+ *
+ ****************************************************************************/
+
+int IRAM_ATTR esp32_flash_unmap(uint32_t mapped_ptr,
+                                uint32_t mapped_size)
+{
+  uint32_t mmu_start;
+  uint32_t mmu_units;
+  uint32_t i;
+
+  if ((mapped_ptr < SOC_IROM_LOW) ||
+      (mapped_ptr >= IRAM1_CACHE_ADDRESS_HIGH))
+    {
+      return -EINVAL;
+    }
+
+  mmu_start = (mapped_ptr - IBUS1_PAGE_ADRR) / SPI_FLASH_MMU_PAGE_SIZE +
+              IBUS1_PAGE_BASE;
+  mmu_units = MMU_ADDR2PAGE(mapped_size);
+
+  esp32_spiflash_opstart();
+
+  for (i = mmu_start; i < mmu_start + mmu_units; i++)
+    {
+      if (mmu_is_unused(i))
+        {
+          esp32_spiflash_opdone();
+          return -EINVAL;
+        }
+    }
+
+  for (i = mmu_start; i < mmu_start + mmu_units; i++)
+    {
+      mmu_set_unused(i);
+    }
+
+#ifdef CONFIG_ESP32_SPIRAM
+  esp_spiram_writeback_cache();
+#endif
+
+  cache_flush(0);
+#ifdef CONFIG_SMP
+  cache_flush(1);
+#endif
+
+  esp32_spiflash_opdone();
+
+  return 0;
+}
+#endif
 
 #endif /* CONFIG_ESP32_SPIFLASH */
