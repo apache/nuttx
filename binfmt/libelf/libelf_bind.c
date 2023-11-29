@@ -674,8 +674,28 @@ int elf_bind(FAR struct elf_loadinfo_s *loadinfo,
    * contents to memory and invalidating the I cache).
    */
 
-  up_coherent_dcache(loadinfo->textalloc, loadinfo->textsize);
-  up_coherent_dcache(loadinfo->dataalloc, loadinfo->datasize);
+  if (loadinfo->textsize > 0)
+    {
+      up_coherent_dcache(loadinfo->textalloc, loadinfo->textsize);
+    }
+
+  if (loadinfo->datasize > 0)
+    {
+      up_coherent_dcache(loadinfo->dataalloc, loadinfo->datasize);
+    }
+
+#  ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
+  for (i = 0; loadinfo->ehdr.e_type == ET_REL && i < loadinfo->ehdr.e_shnum;
+       i++)
+    {
+      if (loadinfo->sectalloc[i] == 0)
+        {
+          continue;
+        }
+
+      up_coherent_dcache(loadinfo->sectalloc[i], loadinfo->shdr[i].sh_size);
+    }
+#  endif
 
 #endif
 

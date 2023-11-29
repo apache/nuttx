@@ -89,6 +89,14 @@ static void dldump_loadinfo(FAR struct mod_loadinfo_s *loadinfo)
         {
           FAR Elf_Shdr *shdr = &loadinfo->shdr[i];
           binfo("Sections %d:\n", i);
+#    ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
+          if (loadinfo->ehdr.e_type == ET_REL)
+            {
+              binfo("  sh_alloc:     %08jx\n",
+                    (uintmax_t)loadinfo->sectalloc[i]);
+            }
+#    endif
+
           binfo("  sh_name:      %08x\n", shdr->sh_name);
           binfo("  sh_type:      %08x\n", shdr->sh_type);
           binfo("  sh_flags:     %08x\n", shdr->sh_flags);

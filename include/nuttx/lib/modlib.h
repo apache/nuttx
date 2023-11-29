@@ -191,6 +191,10 @@ struct mod_loadinfo_s
    * after the module has been loaded.
    */
 
+#ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
+  uintptr_t    *sectalloc;   /* All sections memory allocated when ELF file was loaded */
+#endif
+
   uintptr_t     textalloc;   /* .text memory allocated when module was loaded */
   uintptr_t     datastart;   /* Start of.bss/.data memory in .text allocation */
   size_t        textsize;    /* Size of the module .text memory allocation */

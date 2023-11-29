@@ -81,7 +81,7 @@ CSRCS  = sim_initialize.c sim_idle.c sim_doirq.c sim_initialstate.c
 CSRCS += sim_createstack.c sim_usestack.c sim_releasestack.c sim_stackframe.c
 CSRCS += sim_exit.c sim_schedulesigaction.c sim_switchcontext.c sim_heap.c
 CSRCS += sim_uart.c sim_copyfullstate.c sim_sigdeliver.c sim_tcbinfo.c sim_cpuinfo.c
-CSRCS += sim_registerdump.c sim_saveusercontext.c sim_textheap.c
+CSRCS += sim_registerdump.c sim_saveusercontext.c sim_sectionheap.c
 CSRCS += sim_checkhostfstypes.c
 
 ifeq ($(CONFIG_SCHED_BACKTRACE),y)
