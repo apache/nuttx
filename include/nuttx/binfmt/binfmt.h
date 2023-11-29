@@ -69,6 +69,10 @@ struct binary_s
 
   main_t entrypt;                      /* Entry point into a program module */
   FAR void *mapped;                    /* Memory-mapped, address space */
+#ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
+  FAR void **sectalloc;                /* All sections memory allocated */
+  uint16_t nsect;                      /* Number of sections */
+#endif
   FAR void *alloc[BINFMT_NALLOC];      /* Allocated address spaces */
 
 #ifdef CONFIG_BINFMT_CONSTRUCTORS
