@@ -30,6 +30,10 @@ if(CONFIG_BOARDCTL)
   list(APPEND SRCS stm32_appinitialize.c)
 endif()
 
+if(CONFIG_STM32H7_CUSTOM_CLOCKCONFIG)
+  list(APPEND SRCS stm32_clockconfig.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 if(CONFIG_ARCH_CHIP_STM32H7_CORTEXM7)
