@@ -63,6 +63,19 @@
  * Private Types
  ****************************************************************************/
 
+#ifdef CONFIG_ESP32S3_SPI_FLASH_SUPPORT_PSRAM_STACK
+/* SPI flash work operation code */
+
+enum spiflash_op_code_e
+{
+  SPIFLASH_OP_CODE_WRITE = 0,
+  SPIFLASH_OP_CODE_READ,
+  SPIFLASH_OP_CODE_ERASE,
+  SPIFLASH_OP_CODE_ENCRYPT_READ,
+  SPIFLASH_OP_CODE_ENCRYPT_WRITE
+};
+#endif
+
 /* ESP32-S3 SPI Flash device private data  */
 
 struct esp32s3_mtd_dev_s
@@ -73,6 +86,26 @@ struct esp32s3_mtd_dev_s
 
   const struct spiflash_legacy_data_s **data;
 };
+
+#ifdef CONFIG_ESP32S3_SPI_FLASH_SUPPORT_PSRAM_STACK
+/* SPI flash work operation arguments */
+
+struct spiflash_work_arg
+{
+  enum spiflash_op_code_e op_code;
+
+  struct
+  {
+    uint32_t addr;
+    uint8_t *buffer;
+    uint32_t size;
+  } op_arg;
+
+  volatile int ret;
+
+  sem_t sem;
+};
+#endif
 
 /****************************************************************************
  * Private Functions Prototypes
@@ -104,6 +137,15 @@ static ssize_t esp32s3_bwrite_encrypt(struct mtd_dev_s *dev,
                                       const uint8_t *buffer);
 static int esp32s3_ioctl(struct mtd_dev_s *dev, int cmd,
                          unsigned long arg);
+
+#ifdef CONFIG_ESP32S3_SPI_FLASH_SUPPORT_PSRAM_STACK
+static inline bool IRAM_ATTR stack_is_psram(void);
+static void esp32s3_spiflash_work(void *arg);
+static int esp32s3_async_op(enum spiflash_op_code_e opcode,
+                            uint32_t addr,
+                            const uint8_t *buffer,
+                            uint32_t size);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -149,9 +191,140 @@ static const struct esp32s3_mtd_dev_s g_esp32s3_spiflash_encrypt =
 
 static mutex_t g_lock = NXMUTEX_INITIALIZER;
 
+#ifdef CONFIG_ESP32S3_SPI_FLASH_SUPPORT_PSRAM_STACK
+static struct work_s g_work;
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: stack_is_psram
+ *
+ * Description:
+ *   Check if current task's stack space is in PSRAM.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   true if it is in PSRAM or false if not.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S3_SPI_FLASH_SUPPORT_PSRAM_STACK
+static inline bool IRAM_ATTR stack_is_psram(void)
+{
+  void *sp = (void *)up_getsp();
+
+  return esp32s3_ptr_extram(sp);
+}
+#endif
+
+/****************************************************************************
+ * Name: esp32s3_spiflash_work
+ *
+ * Description:
+ *   Do SPI Flash operation, cache result and send semaphore to wake up
+ *   blocked task.
+ *
+ * Input Parameters:
+ *   arg - Reference to SPI flash work arguments structure (cast to void*)
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S3_SPI_FLASH_SUPPORT_PSRAM_STACK
+static void esp32s3_spiflash_work(void *arg)
+{
+  struct spiflash_work_arg *work_arg = (struct spiflash_work_arg *)arg;
+
+  if (work_arg->op_code == SPIFLASH_OP_CODE_WRITE)
+    {
+      work_arg->ret = spi_flash_write(work_arg->op_arg.addr,
+                                      work_arg->op_arg.buffer,
+                                      work_arg->op_arg.size);
+    }
+  else if (work_arg->op_code == SPIFLASH_OP_CODE_READ)
+    {
+      work_arg->ret = spi_flash_read(work_arg->op_arg.addr,
+                                     work_arg->op_arg.buffer,
+                                     work_arg->op_arg.size);
+    }
+  else if (work_arg->op_code == SPIFLASH_OP_CODE_ERASE)
+    {
+      work_arg->ret = spi_flash_erase_range(work_arg->op_arg.addr,
+                                            work_arg->op_arg.size);
+    }
+  else if (work_arg->op_code == SPIFLASH_OP_CODE_ENCRYPT_READ)
+    {
+      work_arg->ret = spi_flash_read_encrypted(work_arg->op_arg.addr,
+                                               work_arg->op_arg.buffer,
+                                               work_arg->op_arg.size);
+    }
+  else if (work_arg->op_code == SPIFLASH_OP_CODE_ENCRYPT_WRITE)
+    {
+      work_arg->ret = spi_flash_write_encrypted(work_arg->op_arg.addr,
+                                                work_arg->op_arg.buffer,
+                                                work_arg->op_arg.size);
+    }
+  else
+    {
+      ferr("ERROR: op_code=%d is not supported\n", work_arg->op_code);
+    }
+
+  nxsem_post(&work_arg->sem);
+}
+
+/****************************************************************************
+ * Name: esp32s3_async_op
+ *
+ * Description:
+ *   Send operation code and arguments to workqueue so that workqueue do SPI
+ *   Flash operation actually.
+ *
+ * Input Parameters:
+ *   opcode - SPI flash work operation code
+ *   addr   - target address
+ *   buffer - data buffer pointer
+ *   size   - data number
+ *
+ * Returned Value:
+ *   0 if success or a negative value if fail.
+ *
+ ****************************************************************************/
+
+static int esp32s3_async_op(enum spiflash_op_code_e opcode,
+                            uint32_t addr,
+                            const uint8_t *buffer,
+                            uint32_t size)
+{
+  int ret;
+  struct spiflash_work_arg work_arg =
+  {
+    .op_code = opcode,
+    .op_arg =
+    {
+      .addr = addr,
+      .buffer = (uint8_t *)buffer,
+      .size = size,
+    },
+    .sem = NXSEM_INITIALIZER(0, 0)
+  };
+
+  ret = work_queue(LPWORK, &g_work, esp32s3_spiflash_work, &work_arg, 0);
+  if (ret == 0)
+    {
+      nxsem_wait(&work_arg.sem);
+      ret = work_arg.ret;
+    }
+
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Name: esp32s3_erase
@@ -194,9 +367,18 @@ static int esp32s3_erase(struct mtd_dev_s *dev, off_t startblock,
       return ret;
     }
 
-  ret = spi_flash_erase_range(offset, nbytes);
-  nxmutex_unlock(&g_lock);
+#ifdef CONFIG_ESP32S3_SPI_FLASH_SUPPORT_PSRAM_STACK
+  if (stack_is_psram())
+    {
+      ret = esp32s3_async_op(SPIFLASH_OP_CODE_ERASE, offset, NULL, nbytes);
+    }
+  else
+#endif
+    {
+      ret = spi_flash_erase_range(offset, nbytes);
+    }
 
+  nxmutex_unlock(&g_lock);
   if (ret == OK)
     {
       ret = nblocks;
@@ -252,9 +434,19 @@ static ssize_t esp32s3_read(struct mtd_dev_s *dev, off_t offset,
       return ret;
     }
 
-  ret = spi_flash_read(offset, buffer, nbytes);
-  nxmutex_unlock(&g_lock);
+#ifdef CONFIG_ESP32S3_SPI_FLASH_SUPPORT_PSRAM_STACK
+  if (stack_is_psram())
+    {
+      ret = esp32s3_async_op(SPIFLASH_OP_CODE_READ, offset,
+                             buffer, nbytes);
+    }
+  else
+#endif
+    {
+      ret = spi_flash_read(offset, buffer, nbytes);
+    }
 
+  nxmutex_unlock(&g_lock);
   if (ret == OK)
     {
       ret = nbytes;
@@ -294,20 +486,10 @@ static ssize_t esp32s3_bread(struct mtd_dev_s *dev, off_t startblock,
 #ifdef CONFIG_ESP32S3_STORAGE_MTD_DEBUG
   finfo("%s(%p, 0x%x, %d, %p)\n", __func__, dev, startblock, nblocks,
         buffer);
-
-  finfo("spi_flash_read(0x%x, %p, %d)\n", addr, buffer, size);
 #endif
 
-  ret = nxmutex_lock(&g_lock);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  ret = spi_flash_read(addr, buffer, size);
-  nxmutex_unlock(&g_lock);
-
-  if (ret == OK)
+  ret = esp32s3_read(dev, addr, size, buffer);
+  if (ret == size)
     {
       ret = nblocks;
     }
@@ -347,8 +529,7 @@ static ssize_t esp32s3_read_decrypt(struct mtd_dev_s *dev,
 #ifdef CONFIG_ESP32S3_STORAGE_MTD_DEBUG
   finfo("%s(%p, 0x%x, %d, %p)\n", __func__, dev, offset, nbytes, buffer);
 
-  finfo("spi_flash_read_encrypted(0x%x, %p, %d)\n", offset, buffer,
-        nbytes);
+  finfo("spi_flash_read_encrypted(0x%x, %p, %d)\n", offset, buffer, nbytes);
 #endif
 
   /* Acquire the mutex. */
@@ -359,9 +540,19 @@ static ssize_t esp32s3_read_decrypt(struct mtd_dev_s *dev,
       return ret;
     }
 
-  ret = spi_flash_read_encrypted(offset, buffer, nbytes);
-  nxmutex_unlock(&g_lock);
+#ifdef CONFIG_ESP32S3_SPI_FLASH_SUPPORT_PSRAM_STACK
+  if (stack_is_psram())
+    {
+      ret = esp32s3_async_op(SPIFLASH_OP_CODE_ENCRYPT_READ, offset,
+                             buffer, nbytes);
+    }
+  else
+#endif
+    {
+      ret = spi_flash_read_encrypted(offset, buffer, nbytes);
+    }
 
+  nxmutex_unlock(&g_lock);
   if (ret == OK)
     {
       ret = nbytes;
@@ -403,20 +594,10 @@ static ssize_t esp32s3_bread_decrypt(struct mtd_dev_s *dev,
 #ifdef CONFIG_ESP32S3_STORAGE_MTD_DEBUG
   finfo("%s(%p, 0x%x, %d, %p)\n", __func__, dev, startblock, nblocks,
         buffer);
-
-  finfo("spi_flash_read_encrypted(0x%x, %p, %d)\n", addr, buffer, size);
 #endif
 
-  ret = nxmutex_lock(&g_lock);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  ret = spi_flash_read_encrypted(addr, buffer, size);
-  nxmutex_unlock(&g_lock);
-
-  if (ret == OK)
+  ret = esp32s3_read_decrypt(dev, addr, size, buffer);
+  if (ret == size)
     {
       ret = nblocks;
     }
@@ -471,9 +652,19 @@ static ssize_t esp32s3_write(struct mtd_dev_s *dev, off_t offset,
       return ret;
     }
 
-  ret = spi_flash_write(offset, buffer, nbytes);
-  nxmutex_unlock(&g_lock);
+#ifdef CONFIG_ESP32S3_SPI_FLASH_SUPPORT_PSRAM_STACK
+  if (stack_is_psram())
+    {
+      ret = esp32s3_async_op(SPIFLASH_OP_CODE_WRITE, offset,
+                             buffer, nbytes);
+    }
+  else
+#endif
+    {
+      ret = spi_flash_write(offset, buffer, nbytes);
+    }
 
+  nxmutex_unlock(&g_lock);
   if (ret == OK)
     {
       ret = nbytes;
@@ -525,9 +716,19 @@ static ssize_t esp32s3_bwrite_encrypt(struct mtd_dev_s *dev,
       return ret;
     }
 
-  ret = spi_flash_write_encrypted(addr, buffer, size);
-  nxmutex_unlock(&g_lock);
+#ifdef CONFIG_ESP32S3_SPI_FLASH_SUPPORT_PSRAM_STACK
+  if (stack_is_psram())
+    {
+      ret = esp32s3_async_op(SPIFLASH_OP_CODE_ENCRYPT_WRITE, addr,
+                             buffer, size);
+    }
+  else
+#endif
+    {
+      ret = spi_flash_write_encrypted(addr, buffer, size);
+    }
 
+  nxmutex_unlock(&g_lock);
   if (ret == OK)
     {
       ret = nblocks;
@@ -567,20 +768,10 @@ static ssize_t esp32s3_bwrite(struct mtd_dev_s *dev, off_t startblock,
 #ifdef CONFIG_ESP32S3_STORAGE_MTD_DEBUG
   finfo("%s(%p, 0x%x, %d, %p)\n", __func__, dev, startblock,
         nblocks, buffer);
-
-  finfo("spi_flash_write(0x%x, %p, %d)\n", addr, buffer, size);
 #endif
 
-  ret = nxmutex_lock(&g_lock);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  ret = spi_flash_write(addr, buffer, size);
-  nxmutex_unlock(&g_lock);
-
-  if (ret == OK)
+  ret = esp32s3_write(dev, addr, size, buffer);
+  if (ret == size)
     {
       ret = nblocks;
     }
