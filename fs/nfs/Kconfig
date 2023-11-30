@@ -11,7 +11,7 @@ config NFS
 	---help---
 		Enable network file system (NFS) client file system
 
-#if NFS
+if NFS
 
 config NFS_DONT_BIND_TCP_SOCKET
 	bool
@@ -31,4 +31,4 @@ config NFS_STATISTICS
 		obtain these statistics, however.  So they would only be of value
 		if you add debug instrumentation or use a debugger.
 
-#endif
+endif
