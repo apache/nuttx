@@ -258,13 +258,6 @@ config XTENSA_INTBACKTRACE
 	---help---
 		Add necessary logic to be able to have a full backtrace from an interrupt context.
 
-config XTENSA_USE_SPIRAM_HEAP
-	bool "Enable SPI RAM heap"
-	default n
-	---help---
-		If enabled, SPIRAM can be selected as the heap, of course, the premise is that 
-		the device needs to support SPIRAM.
-
 config XTENSA_IMEM_USE_SEPARATE_HEAP
 	bool "Use a separate heap for internal memory"
 	select ARCH_HAVE_EXTRA_HEAPS
