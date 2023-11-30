@@ -324,7 +324,7 @@ int bthci_register(void)
   ret = uart_bth4_register("/dev/ttyHCI0", &hci_dev->drv);
   #elif defined(CONFIG_NET_BLUETOOTH)
   ret = bt_netdev_register(&hci_dev->drv);
-  #elif defined(BL602_BLE_CONTROLLER)
+  #elif defined(CONFIG_BL602_BLE_CONTROLLER)
     #error "Must select CONFIG_UART_BTH4 or CONFIG_NET_BLUETOOTH"
   #endif
   if (ret < 0)
