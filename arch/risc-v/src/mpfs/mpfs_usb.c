@@ -3477,7 +3477,7 @@ static int mpfs_usb_interrupt(int irq, void *context, void *arg)
 
   if (pending_tx_ep != 0)
     {
-      for (i = 1; i < MPFS_USB_NENDPOINTS; i++)
+      for (i = 1; i < (MPFS_USB_NENDPOINTS / 2 + 1); i++)
         {
           if ((pending_tx_ep & (1 << i)) != 0)
             {
@@ -3488,20 +3488,27 @@ static int mpfs_usb_interrupt(int irq, void *context, void *arg)
 
   if (pending_rx_ep != 0)
     {
-      for (i = 0; i < MPFS_USB_NENDPOINTS; i++)
+      for (i = 1; i < (MPFS_USB_NENDPOINTS / 2 + 1); i++)
         {
           /* Check if dead connections are back in business */
 
           if (g_linkdead)
             {
-              /* This releases all, which is a problem if only some
-               * endpoints are closed on the remote; whereas some
-               * are functioning; for example ACM and mass storage;
-               * now the functioning one likely marks the closed ones
-               * as no longer dead.
+              /* This releases all tx counterparts with linkdead flag
+               * set, which is a problem if only some endpoints are
+               * closed on the remote; whereas some are functioning;
+               * for example ACM and mass storage; now the functioning
+               * one likely marks the closed ones as no longer dead.
+               * Please note that tx counterparts have MPFS_EPIN_START
+               * offset on top of the rx eps.
+               *
+               * For clarity, the eplist[] is as follows:
+               * eplist: 0:   ep0,
+               *         1-4: ep1rx, ep2rx, ep3rx, ep4rx,
+               *         5-8: ep1tx, ep2tx, ep3tx, ep4tx
                */
 
-              struct mpfs_ep_s *privep = &priv->eplist[i];
+              struct mpfs_ep_s *privep = &priv->eplist[i + MPFS_EPIN_START];
               privep->linkdead = 0;
             }
 
