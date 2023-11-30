@@ -31,8 +31,7 @@
 #include <time.h>
 #include <nuttx/signal.h>
 
-#include "rptun.h"
-
+#include "rptun_ping.h"
 /****************************************************************************
  * Pre-processor definitions
  ****************************************************************************/
