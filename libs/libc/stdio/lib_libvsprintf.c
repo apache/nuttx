@@ -616,7 +616,7 @@ flt_oper:
           exp = _dtoa.exp;
 
           sign = 0;
-          if ((_dtoa.flags & DTOA_MINUS) && !(_dtoa.flags & DTOA_NAN))
+          if (_dtoa.flags & DTOA_MINUS)
             {
               sign = '-';
             }
