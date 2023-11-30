@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/rptun/rptun.h
+ * include/nuttx/rptun/rptun_ping.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,23 +18,30 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_RPTUN_RPTUN_H
-#define __DRIVERS_RPTUN_RPTUN_H
+#ifndef __INCLUDE_NUTTX_RPTUN_RPTUN_PING_H
+#define __INCLUDE_NUTTX_RPTUN_RPTUN_PING_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/rptun/rptun.h>
-#include <openamp/open_amp.h>
+#include <nuttx/config.h>
 
-#include "rptun_ping.h"
+#ifdef CONFIG_RPTUN_PING
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-int rptun_buffer_nused(FAR struct rpmsg_virtio_device *rvdev, bool rx);
-void rptun_dump(FAR struct rpmsg_virtio_device *rvdev);
+/* used for ioctl RPTUNIOC_PING */
 
-#endif /* __DRIVERS_RPTUN_RPTUN_H */
+struct rptun_ping_s
+{
+  int  times;
+  int  len;
+  int  ack;
+  int  sleep; /* unit: ms */
+};
+
+#endif /* CONFIG_RPTUN_PING */
+#endif /* __INCLUDE_NUTTX_RPTUN_RPTUN_PING_H */

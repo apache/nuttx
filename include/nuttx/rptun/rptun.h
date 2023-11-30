@@ -30,6 +30,7 @@
 #ifdef CONFIG_RPTUN
 
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/rptun/rptun_ping.h>
 #include <openamp/open_amp.h>
 
 /****************************************************************************
@@ -340,16 +341,6 @@ struct rptun_ops_s
 struct rptun_dev_s
 {
   FAR const struct rptun_ops_s *ops;
-};
-
-/* used for ioctl RPTUNIOC_PING */
-
-struct rptun_ping_s
-{
-  int  times;
-  int  len;
-  int  ack;
-  int  sleep; /* unit: ms */
 };
 
 /****************************************************************************
