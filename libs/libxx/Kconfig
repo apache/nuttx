@@ -84,7 +84,7 @@ config LIBCXXABI_VERSION
 	string "Select libcxxabi version"
 	depends on LIBCXXABI
 	default LIBCXX_VERSION if LIBCXX
-	default "15.0.7" if !LIBCXX
+	default "17.0.6" if !LIBCXX
 
 endif
 
@@ -117,6 +117,6 @@ endif
 config LIBCXX_VERSION
 	string "Select libcxx version"
 	depends on LIBCXX
-	default "15.0.7"
+	default "17.0.6"
 
 endif
