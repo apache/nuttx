@@ -31,67 +31,67 @@ Debugging
 
 Debug using:
 
-		{
-			"name": "Debug CM7 - ST-Link",
-			"cwd": "${workspaceFolder}",
-			"type": "cortex-debug",
-			"executable": "${workspaceFolder}/build/h747ai_cm7_rptun/nuttx",
-			"loadFiles": [
-				"${workspaceFolder}/build/h747ai_cm7_rptun/nuttx",
-				"${workspaceFolder}/build/h747ai_cm4_rptun/nuttx"
-			],
-			"request": "launch",
-			"servertype": "stlink",
-			"gdbPath": "/usr/bin/gdb-multiarch",
-			"device": "STM32H747AI",
-			"interface": "swd",
-			"runToEntryPoint": "main",
-			"svdFile": "${workspaceFolder}/STM32H747_CM7.svd",
-			"v1": false,
-			"showDevDebugOutput": "both",
-			"serverArgs": [
-				"-l",
-				"1",
-				"-m",
-				"0",
-				"-k",
-				"-t",
-				"-s"
-			]
-		},
-		{
-			"name": "Debug CM7+CM4 - ST-Link",
-			"cwd": "${workspaceFolder}",
-			"type": "cortex-debug",
-			"executable": "${workspaceFolder}/build/h747ai_cm7_rptun/nuttx",
-			"loadFiles": [
-				"${workspaceFolder}/build/h747ai_cm7_rptun/nuttx",
-				"${workspaceFolder}/build/h747ai_cm4_rptun/nuttx"
-			],
-			"request": "launch",
-			"servertype": "stlink",
-			"gdbPath": "/usr/bin/gdb-multiarch",
-			"device": "STM32H747AI",
-			"interface": "swd",
-			"serialNumber": "",
-			"svdFile": "${workspaceFolder}/STM32H747_CM7.svd",
-			"v1": false,
-			"showDevDebugOutput": "both",
-			"serverArgs": [
-				"-l",
-				"1",
-				"-m",
-				"0",
-				"-k",
-				"-t",
-				"-s"
-			],
-			"chainedConfigurations": {
-				"enabled": true,
-				"waitOnEvent": "postInit",
-				"detached": true,
-				"delayMs": 5000,
-				"lifecycleManagedByParent": true,
+	{
+		"name": "Debug CM7 - ST-Link",
+		"cwd": "${workspaceFolder}",
+		"type": "cortex-debug",
+		"executable": "${workspaceFolder}/build/h747ai_cm7_rptun/nuttx",
+		"loadFiles": [
+			"${workspaceFolder}/build/h747ai_cm7_rptun/nuttx",
+			"${workspaceFolder}/build/h747ai_cm4_rptun/nuttx"
+		],
+		"request": "launch",
+		"servertype": "stlink",
+		"gdbPath": "/usr/bin/gdb-multiarch",
+		"device": "STM32H747AI",
+		"interface": "swd",
+		"runToEntryPoint": "main",
+		"svdFile": "${workspaceFolder}/STM32H747_CM7.svd",
+		"v1": false,
+		"showDevDebugOutput": "both",
+		"serverArgs": [
+			"-l",
+			"1",
+			"-m",
+			"0",
+			"-k",
+			"-t",
+			"-s"
+		]
+	},
+	{
+		"name": "Debug CM7+CM4 - ST-Link",
+		"cwd": "${workspaceFolder}",
+		"type": "cortex-debug",
+		"executable": "${workspaceFolder}/build/h747ai_cm7_rptun/nuttx",
+		"loadFiles": [
+			"${workspaceFolder}/build/h747ai_cm7_rptun/nuttx",
+			"${workspaceFolder}/build/h747ai_cm4_rptun/nuttx"
+		],
+		"request": "launch",
+		"servertype": "stlink",
+		"gdbPath": "/usr/bin/gdb-multiarch",
+		"device": "STM32H747AI",
+		"interface": "swd",
+		"serialNumber": "",
+		"svdFile": "${workspaceFolder}/STM32H747_CM7.svd",
+		"v1": false,
+		"showDevDebugOutput": "both",
+		"serverArgs": [
+			"-l",
+			"1",
+			"-m",
+			"0",
+			"-k",
+			"-t",
+			"-s"
+		],
+		"chainedConfigurations": {
+			"enabled": true,
+			"waitOnEvent": "postInit",
+			"detached": true,
+			"delayMs": 5000,
+			"lifecycleManagedByParent": true,
 				"launches": [
 					{
 						"name": "Attach CM4 - ST-Link",
