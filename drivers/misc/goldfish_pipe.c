@@ -717,7 +717,7 @@ static int goldfish_pipe_interrupt(int irq, void *dev_id, void *arg)
   spin_unlock_irqrestore(&dev->lock, flags);
 
   work_queue(HPWORK, &dev->work, goldfish_interrupt_task,
-             dev, MSEC2TICK(20));
+             dev, 0);
 
   return OK;
 }
