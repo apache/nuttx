@@ -92,36 +92,36 @@ Debug using:
 			"detached": true,
 			"delayMs": 5000,
 			"lifecycleManagedByParent": true,
-				"launches": [
-					{
-						"name": "Attach CM4 - ST-Link",
-						"folder": "${workspaceFolder}"
-					}
-				]
-			}
-		},
-		{
-			"name": "Attach CM4 - ST-Link",
-			"cwd": "${workspaceFolder}",
-			"type": "cortex-debug",
-			"executable": "${workspaceFolder}/build/h747ai_cm4_rptun/nuttx",
-			"request": "attach",
-			"servertype": "stlink",
-			"gdbPath": "/usr/bin/gdb-multiarch",
-			"device": "STM32H747AI",
-			"interface": "swd",
-			"serialNumber": "",
-			"svdFile": "${workspaceFolder}/STM32H747_CM4.svd",
-			"v1": false,
-			"showDevDebugOutput": "both",
-			"serverArgs": [
-				"-l",
-				"1",
-				"-m",
-				"3",
-				"-t",
-				"-s"
+			"launches": [
+				{
+					"name": "Attach CM4 - ST-Link",
+					"folder": "${workspaceFolder}"
+				}
 			]
 		}
+	},
+	{
+		"name": "Attach CM4 - ST-Link",
+		"cwd": "${workspaceFolder}",
+		"type": "cortex-debug",
+		"executable": "${workspaceFolder}/build/h747ai_cm4_rptun/nuttx",
+		"request": "attach",
+		"servertype": "stlink",
+		"gdbPath": "/usr/bin/gdb-multiarch",
+		"device": "STM32H747AI",
+		"interface": "swd",
+		"serialNumber": "",
+		"svdFile": "${workspaceFolder}/STM32H747_CM4.svd",
+		"v1": false,
+		"showDevDebugOutput": "both",
+		"serverArgs": [
+			"-l",
+			"1",
+			"-m",
+			"3",
+			"-t",
+			"-s"
+		]
+	}
 
 Note that the M7 is core 0 (`-m 0`) and the M4 is core 3 (`-m 3`).
