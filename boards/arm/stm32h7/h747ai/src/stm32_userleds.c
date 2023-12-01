@@ -136,13 +136,15 @@ void board_userled_all(uint32_t ledset)
 
 void board_userled_getall(uint32_t *ledset)
 {
+  int i;
+
   /* Clear the LED bits */
 
   *ledset = 0;
 
   /* Get LED state. An output of '1' illuminates the LED. */
 
-  for (int i = 0; i < nitems(g_ledcfg); i++)
+  for (i = 0; i < nitems(g_ledcfg); i++)
     {
       *ledset |= ((stm32_gpioread(g_ledcfg[i]) & 1) << i);
     }
