@@ -1698,7 +1698,7 @@ static void up_set_format(struct uart_dev_s *dev)
    *              = 2 * usartdiv8
    */
 
-  /* Use oversamply by 8 only if the divisor is small.  But what is small? */
+  /* Use oversampling by 8 only if the divisor is small.  But what is small? */
 
   if (usartdiv8 > 100)
     {

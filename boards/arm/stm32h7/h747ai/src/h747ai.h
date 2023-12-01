@@ -146,7 +146,7 @@
                            GPIO_OPENDRAIN|GPIO_PORTA|GPIO_PIN9)
 
 # define GPIO_OTGFS_PWRON  (GPIO_OUTPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|  \
-                           GPIO_PUSHPULL|GPIO_PORTG|GPIO_PIN6)
+                            GPIO_PUSHPULL|GPIO_PORTG|GPIO_PIN6)
 
 #ifdef CONFIG_USBHOST
 #  define GPIO_OTGFS_OVER (GPIO_INPUT|GPIO_EXTI|GPIO_FLOAT| \
@@ -173,6 +173,10 @@
 /* PWM */
 
 #define H747AI_PWMTIMER 1
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Function Prototypes

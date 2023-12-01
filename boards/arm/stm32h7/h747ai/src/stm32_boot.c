@@ -61,12 +61,6 @@ void stm32_boardinitialize(void)
 
   stm32_usbinitialize();
 #endif
-
-#ifdef CONFIG_STM32H7_SPI
-  /* Configure SPI chip selects */
-
-  stm32_spidev_initialize();
-#endif
 }
 
 /****************************************************************************

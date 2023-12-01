@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include <syslog.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <arch/board/board.h>
 
@@ -43,13 +44,15 @@
 #  include <nuttx/leds/userled.h>
 #endif
 
-#include "h747ai.h"
-
 #if defined(CONFIG_I2C)
-#include "stm32_i2c.h"
-struct i2c_master_s *i2c1_m;
-struct i2c_master_s *i2c2_m;
-#endif /* CONFIG_I2C */
+#  include "stm32_i2c.h"
+#endif
+
+#if defined(CONFIG_SPI)
+#  include "stm32_spi.h"
+#endif
+
+#include "h747ai.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -61,14 +64,18 @@ struct i2c_master_s *i2c2_m;
 #define DEVNO_THREE  3
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-#ifdef CONFIG_RPMSG_UART
 /****************************************************************************
  * Name: rpmsg_serialinit
  ****************************************************************************/
 
+#ifdef CONFIG_RPMSG_UART
 void rpmsg_serialinit(void)
 {
 #ifdef CONFIG_ARCH_CHIP_STM32H7_CORTEXM7
@@ -103,6 +110,37 @@ void rpmsg_serialinit(void)
 int stm32_bringup(void)
 {
   int ret = OK;
+#ifdef CONFIG_STM32H7_I2C1
+  struct i2c_master_s *i2c1;
+#endif
+#ifdef CONFIG_STM32H7_I2C2
+  struct i2c_master_s *i2c2;
+#endif
+#ifdef CONFIG_STM32H7_I2C3
+  struct i2c_master_s *i2c3;
+#endif
+#ifdef CONFIG_STM32H7_I2C4
+  struct i2c_master_s *i2c4;
+#endif
+
+#ifdef CONFIG_STM32H7_SPI1
+  struct spi_dev_s *spi1;
+#endif
+#ifdef CONFIG_STM32H7_SPI2
+  struct spi_dev_s *spi2;
+#endif
+#ifdef CONFIG_STM32H7_SPI3
+  struct spi_dev_s *spi3;
+#endif
+#ifdef CONFIG_STM32H7_SPI4
+  struct spi_dev_s *spi4;
+#endif
+#ifdef CONFIG_STM32H7_SPI5
+  struct spi_dev_s *spi5;
+#endif
+#ifdef CONFIG_STM32H7_SPI6
+  struct spi_dev_s *spi6;
+#endif
 
   UNUSED(ret);
 
@@ -146,39 +184,131 @@ int stm32_bringup(void)
     }
 #endif
 
-#if defined(CONFIG_I2C)
-  i2c1_m = stm32_i2cbus_initialize(1);
-  if (i2c1_m == NULL)
+#ifdef CONFIG_STM32H7_I2C1
+  i2c1 = stm32_i2cbus_initialize(1);
+  if (i2c1 == NULL)
     {
-      syslog(LOG_ERR, "ERROR: Failed to init i2c controller\n");
+      syslog(LOG_ERR, "ERROR: Failed to init i2c controller 1\n");
     }
   else
     {
-      ret = i2c_register(i2c1_m, DEVNO_ZERO);
+      ret = i2c_register(i2c1, DEVNO_ZERO);
       if (ret < 0)
         {
-          syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n", 
+          syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n",
                 DEVNO_ZERO, ret);
-          stm32_i2cbus_uninitialize(i2c1_m);
+          stm32_i2cbus_uninitialize(i2c1);
         }
     }
-  
-  i2c2_m = stm32_i2cbus_initialize(2);
-  if (i2c2_m == NULL)
+#endif
+
+#ifdef CONFIG_STM32H7_I2C2
+  i2c2 = stm32_i2cbus_initialize(2);
+  if (i2c2 == NULL)
     {
-      syslog(LOG_ERR, "ERROR: Failed to init i2c controller\n");
+      syslog(LOG_ERR, "ERROR: Failed to init i2c controller 2\n");
     }
   else
     {
-      ret = i2c_register(i2c2_m, DEVNO_ONE);
+      ret = i2c_register(i2c2, DEVNO_ONE);
       if (ret < 0)
         {
-          syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n", 
+          syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n",
                 DEVNO_ONE, ret);
-          stm32_i2cbus_uninitialize(i2c2_m);
+          stm32_i2cbus_uninitialize(i2c2);
         }
     }
-#endif /* CONFIG_I2C */
+#endif
+
+#ifdef CONFIG_STM32H7_I2C3
+  i2c3 = stm32_i2cbus_initialize(3);
+  if (i2c3 == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to init i2c controller 3\n");
+    }
+  else
+    {
+      ret = i2c_register(i2c3, DEVNO_TWO);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n",
+                DEVNO_TWO, ret);
+          stm32_i2cbus_uninitialize(i2c3);
+        }
+    }
+#endif
+
+#ifdef CONFIG_STM32H7_I2C4
+  i2c4 = stm32_i2cbus_initialize(4);
+  if (i2c4 == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to init i2c controller 4\n");
+    }
+  else
+    {
+      ret = i2c_register(i2c4, DEVNO_THREE);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n",
+                DEVNO_THREE, ret);
+          stm32_i2cbus_uninitialize(i2c4);
+        }
+    }
+#endif
+
+#ifdef CONFIG_STM32H7_SPI1
+  /* Initialize the SPI1 bus */
+
+  spi1 = NULL;//stm32_spibus_initialize(1);
+  if (spi1 == NULL)
+    {
+      spierr("ERROR: Initialize SPI1: \n");
+    }
+  else
+    {
+#ifdef CONFIG_SPI_DRIVER
+      /* Register the SPI1 character driver */
+
+      ret = spi_register(spi1, 1);
+      if (ret < 0)
+        {
+          spierr("ERROR: Failed to register SPI1 device: %d\n", ret);
+        }
+#endif
+    }
+#endif
 
   return OK;
 }
+
+/****************************************************************************
+ * Name: board_early_initialize
+ *
+ * Description:
+ *   If CONFIG_BOARD_EARLY_INITIALIZE is selected, then an additional
+ *   initialization call will be performed in the boot-up sequence to a
+ *   function called board_early_initialize().  board_early_initialize() will
+ *   be called immediately after up_initialize() and well before
+ *   board_early_initialize() is called and the initial application is
+ *   started.  The context in which board_early_initialize() executes is
+ *   suitable for early initialization of most, simple device drivers and is a
+ *   logical, board-specific extension of up_initialize().
+ *
+ *   board_early_initialize() runs on the startup, initialization thread. Some
+ *   initialization operations cannot be performed on the start-up,
+ *   initialization thread.  That is because the initialization thread cannot
+ *   wait for event.  Waiting may be required, for example, to mount a file
+ *   system or or initialize a device such as an SD card. For this reason,
+ *   such driver initialize must be deferred to board_late_initialize().
+
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARD_EARLY_INITIALIZE
+void board_early_initialize(void)
+{
+  int ret = OK;
+
+  UNUSED(ret);
+
+}
+#endif
