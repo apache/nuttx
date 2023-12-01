@@ -142,7 +142,7 @@ void board_userled_getall(uint32_t *ledset)
 
   *ledset = 0;
 
-  /* Get LED state. An output of '1' illuminates the LED. */
+  /* Get LED states. An output of '1' illuminates the LEDs. */
 
   for (i = 0; i < nitems(g_ledcfg); i++)
     {
