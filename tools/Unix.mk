@@ -283,7 +283,9 @@ include/arch:
 
 LINK_INCLUDE_DIR=$(BOARD_DIR)/include
 ifeq ($(wildcard $(LINK_INCLUDE_DIR)),)
-	LINK_INCLUDE_DIR = $(BOARD_COMMON_DIR)/include
+	ifneq ($(strip $(BOARD_COMMON_DIR)),)
+		LINK_INCLUDE_DIR = $(BOARD_COMMON_DIR)/include
+	endif
 endif
 
 include/arch/board: | include/arch
