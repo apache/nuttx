@@ -60,6 +60,34 @@ Debug using:
 		]
 	},
 	{
+		"name": "Debug CM4 - ST-Link",
+		"cwd": "${workspaceFolder}",
+		"type": "cortex-debug",
+		"executable": "${workspaceFolder}/build/h747ai_cm4_rptun/nuttx",
+		"loadFiles": [
+			"${workspaceFolder}/build/h747ai_cm7_rptun/nuttx",
+			"${workspaceFolder}/build/h747ai_cm4_rptun/nuttx"
+		],
+		"request": "launch",
+		"servertype": "stlink",
+		"gdbPath": "/usr/bin/gdb-multiarch",
+		"device": "STM32H747AI",
+		"interface": "swd",
+		"runToEntryPoint": "main",
+		"svdFile": "${workspaceFolder}/STM32H747_CM4.svd",
+		"v1": false,
+		"showDevDebugOutput": "both",
+		"serverArgs": [
+			"-l",
+			"1",
+			"-m",
+			"3",
+			"-k",
+			"-t",
+			"-s"
+		]
+	},
+	{
 		"name": "Debug CM7+CM4 - ST-Link",
 		"cwd": "${workspaceFolder}",
 		"type": "cortex-debug",
