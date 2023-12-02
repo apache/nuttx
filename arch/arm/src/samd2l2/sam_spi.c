@@ -1429,13 +1429,13 @@ static void spi_dma_setup(struct sam_spidev_s *priv)
 {
   /* Allocate a pair of DMA channels */
 
-  priv->dma_rx = sam_dmachannel(DMACH_FLAG_BEATSIZE_BYTE |
-                                DMACH_FLAG_MEM_INCREMENT |
-                                DMACH_FLAG_PERIPH_RXTRIG(priv->dma_rx_trig));
-
   priv->dma_tx = sam_dmachannel(DMACH_FLAG_BEATSIZE_BYTE |
                                 DMACH_FLAG_MEM_INCREMENT |
                                 DMACH_FLAG_PERIPH_TXTRIG(priv->dma_tx_trig));
+
+  priv->dma_rx = sam_dmachannel(DMACH_FLAG_BEATSIZE_BYTE |
+                                DMACH_FLAG_MEM_INCREMENT |
+                                DMACH_FLAG_PERIPH_RXTRIG(priv->dma_rx_trig));
 }
 #endif
 
