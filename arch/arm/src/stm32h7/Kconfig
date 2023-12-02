@@ -233,6 +233,7 @@ config ARCH_CHIP_STM32H747AI
 	select STM32H7_IO_CONFIG_A
 	select STM32H7_HAVE_FDCAN1
 	select STM32H7_HAVE_FDCAN2
+	select STM32H7_HAVE_SMPS
 	---help---
 		Dual core STM32 H7 Cortex M7+M4, 2048 Kb FLASH, 1024K Kb SRAM,
 		without cryptographic accelerator, UFBGA169
