@@ -204,6 +204,12 @@ static void nrf91_setbaud(uintptr_t base, const struct uart_config_s *config)
           break;
         }
 
+      case 1000000:
+        {
+          br = UART_BAUDRATE_1000000;
+          break;
+        }
+
       default:
         {
           DEBUGPANIC();
