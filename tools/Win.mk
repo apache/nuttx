@@ -264,10 +264,18 @@ include\arch:
 	$(Q) $(DIRLINK) $(TOPDIR)\$(ARCH_DIR)\include $@
 
 # Link the boards\<arch>\<chip>\<board>\include directory to include\arch\board
+# If the above path does not exist, then we try to link to common
+
+LINK_INCLUDE_DIR=$(BOARD_DIR)/include
+ifeq ($(wildcard $(LINK_INCLUDE_DIR)),)
+	ifneq ($(strip $(BOARD_COMMON_DIR)),)
+		LINK_INCLUDE_DIR = $(BOARD_COMMON_DIR)/include
+	endif
+endif
 
 include\arch\board: | include\arch
 	@echo "LN: $@ to $(BOARD_DIR)\include"
-	$(Q) $(DIRLINK) $(BOARD_DIR)\include $@
+	$(Q) $(DIRLINK) $(LINK_INCLUDE_DIR) $@
 
 # Link the boards\<arch>\<chip>\common dir to arch\<arch-name>\src\board
 # Link the boards\<arch>\<chip>\<board>\src dir to arch\<arch-name>\src\board\board
