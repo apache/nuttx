@@ -57,7 +57,7 @@ int fw_pm_wakeupcpu(int cpuid);
 #define CPU_ID (CXD56_CPU_BASE + 0x40)
 
 /****************************************************************************
- * Private Type
+ * Private Types
  ****************************************************************************/
 
 typedef int farapicallback(void *data);

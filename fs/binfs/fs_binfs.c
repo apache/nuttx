@@ -45,7 +45,7 @@
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_BINFS)
 
 /****************************************************************************
- * Private Type
+ * Private Types
  ****************************************************************************/
 
 struct binfs_dir_s
