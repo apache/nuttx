@@ -376,7 +376,7 @@
 
 #define GPIO_SPI1_SCK     (GPIO_SPI1_SCK_3)  /* PG11 - E7 */
 #define GPIO_SPI1_MISO    (GPIO_SPI1_MISO_3) /* PG9 - C7 */
-#define GPIO_SPI1_MOSI    (GPIO_SPI1_MOSI_2) /* PD5 - A8 */
+#define GPIO_SPI1_MOSI    (GPIO_SPI1_MOSI_3) /* PD7 - A8 */
 
 /****************************************************************************
  * Public Data
