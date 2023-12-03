@@ -352,18 +352,15 @@
 
 /* Alternate function pin selections ****************************************/
 
-/* USART1 (Arduino Serial Shield) */
+/* UART5 pins */
 
-#define GPIO_UART5_RX GPIO_UART5_RX_2
-#define GPIO_UART5_TX GPIO_UART5_TX_2
+#define GPIO_UART5_RX GPIO_UART5_RX_2 /* PB5 */
+#define GPIO_UART5_TX GPIO_UART5_TX_2 /* PB6 */
 
-#define DMAMAP_UART5_RX DMAMAP_DMA12_USARTRX_0
-#define DMAMAP_UART5_TX DMAMAP_DMA12_USARTTX_1
+/* UART8 pins */
 
-/* USART3 (Nucleo Virtual Console) */
-
-#define GPIO_UART8_RX GPIO_UART8_RX_1
-#define GPIO_UART8_TX GPIO_UART8_TX_1
+#define GPIO_UART8_RX GPIO_UART8_RX_1 /* PE0 */
+#define GPIO_UART8_TX GPIO_UART8_TX_1 /* PE1 */
 
 /* I2C1 pins */
 
@@ -377,7 +374,7 @@
 
 /* SPI1 pins */
 
-#define GPIO_SPI1_SCK     (GPIO_SPI1_SCK_3) /* PG11 - E7 */
+#define GPIO_SPI1_SCK     (GPIO_SPI1_SCK_3)  /* PG11 - E7 */
 #define GPIO_SPI1_MISO    (GPIO_SPI1_MISO_3) /* PG9 - C7 */
 #define GPIO_SPI1_MOSI    (GPIO_SPI1_MOSI_2) /* PD5 - A8 */
 
