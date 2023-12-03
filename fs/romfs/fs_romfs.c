@@ -44,7 +44,7 @@
 #include "fs_romfs.h"
 
 /****************************************************************************
- * Private Type
+ * Private Types
  ****************************************************************************/
 
 /* This structure represents one entry node in the romfs file system */
