@@ -81,7 +81,7 @@
  *
  *   PLLP1   = {2, 4, 6, 8, ..., 128}
  *   PLLP2,3 = {2, 3, 4, ..., 128}
- *   CPUCLK <= 400 MHz
+ *   CPUCLK <= 480 MHz
  */
 
 #define STM32_BOARD_USEHSE
