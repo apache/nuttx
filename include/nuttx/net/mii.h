@@ -53,6 +53,7 @@
 #define MII_PSECONTROL               0x0b      /* PSE control register */
 #define MII_PSESTATUS                0x0c      /* PSE status register */
 #define MII_MMDCONTROL               0x0d      /* MMD access control register */
+#define MII_MMDADDRDATA              0x0e      /* MMD access address data register */
 #define MII_ESTATUS                  0x0f      /* Extended status register */
 
 /* Extended Registers: Registers 16-31 may be used for vendor specific

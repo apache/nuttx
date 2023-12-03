@@ -3751,6 +3751,37 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
       goto errout;
     }
 
+  if (priv->phytype == SAMV7_PHY_KSZ8061)
+    {
+      ret = sam_phywrite(priv, priv->phyaddr, MII_MMDCONTROL, 0x0001);
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to write MMDCONTROL\n");
+          goto errout;
+        }
+
+      ret = sam_phywrite(priv, priv->phyaddr, MII_MMDADDRDATA, 0x0002);
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to write MMDADDRDATA\n");
+          goto errout;
+        }
+
+      ret = sam_phywrite(priv, priv->phyaddr, MII_MMDCONTROL, 0x4001);
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to write MMDCONTROL\n");
+          goto errout;
+        }
+
+      ret = sam_phywrite(priv, priv->phyaddr, MII_MMDADDRDATA, 0xb61a);
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to write MMDADDRDATA\n");
+          goto errout;
+        }
+    }
+
   /* Restart Auto_negotiation */
 
   mcr |=  MII_MCR_ANRESTART;
