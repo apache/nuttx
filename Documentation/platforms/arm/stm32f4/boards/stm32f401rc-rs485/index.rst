@@ -126,6 +126,31 @@ SDA    PB7
 SCL    PB8
 ====== =====
 
+Users can enable EERPOM support on STM32F4-RS485 by following below configuration:
+
+- Configure basic nsh::
+
+       ./tools/configure.sh -l stm32f401rc-rs485:nsh
+
+- Enable the following configs::
+
+       CONFIG_DEV_ZERO=y
+       CONFIG_EEPROM=y
+       CONFIG_FS_PROCFS=y
+       CONFIG_I2C=y
+       CONFIG_I2C_EE_24XX=y
+       CONFIG_STM32_I2C1=y
+
+- Build and flash the STM32F4-RS485.
+- Use dd command to write and read data from EEPROM as below::
+
+       nsh> dd if=/dev/zero of=/dev/eeprom
+       nsh: dd: write failed: 1
+       nsh> dd if=/dev/console of=/dev/eeprom bs=1 count=4
+       (type "Hello")
+       nsh> dd if=/dev/eeprom of=/dev/console bs=4 count=1
+       Hellonsh>
+
 Temperature Sensor
 ==================
 

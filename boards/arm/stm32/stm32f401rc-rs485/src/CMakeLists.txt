@@ -40,6 +40,10 @@ if(CONFIG_STM32_SDIO)
   list(APPEND SRCS stm32_sdio.c)
 endif()
 
+if(CONFIG_STM32_CONFIG_I2C_EE_24XXEEPROM)
+  list(APPEND SRCS stm32_at24.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 if(CONFIG_ARCH_CHIP_STM32F401RC)
