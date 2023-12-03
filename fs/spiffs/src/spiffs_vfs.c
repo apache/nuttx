@@ -74,7 +74,7 @@
 #define spiffs_unlock_volume(fs)     (nxrmutex_unlock(&fs->lock))
 
 /****************************************************************************
- * Private Type
+ * Private Types
  ****************************************************************************/
 
 struct spiffs_dir_s
