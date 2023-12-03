@@ -346,4 +346,24 @@ int stm32_mcp2515initialize(const char *devpath);
 int stm32_sdio_initialize(void);
 #endif
 
+/****************************************************************************
+ * Name: stm32_i2cbus_initialize
+ *
+ * Description:
+ *   Initialize one I2C bus
+ *
+ ****************************************************************************/
+
+struct i2c_master_s *stm32_i2cbus_initialize(int port);
+
+/****************************************************************************
+ * Name: stm32_at24_init
+ *
+ * Description:
+ *   Initialize and register the EEPROM for 24XX  driver.
+ *
+ ****************************************************************************/
+
+int stm32_at24_init(char *path);
+
 #endif /* __BOARDS_ARM_STM32_STM32F401RC_RS485_SRC_STM32F401RC_RS485_H */
