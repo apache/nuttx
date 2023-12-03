@@ -123,7 +123,6 @@
 #define STM32_PLLCFG_PLL2CFG (RCC_PLLCFGR_PLL1VCOSEL_MEDIUM | \
                               RCC_PLLCFGR_PLL1RGE_8_16_MHZ | \
                               RCC_PLLCFGR_DIVP2EN | \
-                              RCC_PLLCFGR_DIVP2EN | \
                               RCC_PLLCFGR_DIVQ2EN | \
                               RCC_PLLCFGR_DIVR2EN | \
                               RCC_PLLCFGR_PLL2FRACEN)
