@@ -200,11 +200,9 @@ int stm32_bringup(void)
           stm32_i2cbus_uninitialize(i2c1);
         }
     }
-#endif
 
-#ifdef CONFIG_STM32H7_I2C2
-  i2c2 = stm32_i2cbus_initialize(2);
-  if (i2c2 == NULL)
+  i2c2_m = stm32_i2cbus_initialize(2);
+  if (i2c2_m == NULL)
     {
       syslog(LOG_ERR, "ERROR: Failed to init i2c controller 2\n");
     }
@@ -213,6 +211,7 @@ int stm32_bringup(void)
       ret = i2c_register(i2c2, DEVNO_ONE);
       if (ret < 0)
         {
+          syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n",
           syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n",
                 DEVNO_ONE, ret);
           stm32_i2cbus_uninitialize(i2c2);
