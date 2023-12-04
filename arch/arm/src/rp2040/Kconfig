@@ -247,7 +247,7 @@ config RP2040_I2C1_SLAVE_10BIT
 	---help---
 		Set to enable 10-bit mode addressing.
 
-	endif # RP2040_I2C1_SLAVE
+endif # RP2040_I2C1_SLAVE
 
 endif # RP2040_I2C_SLAVE
 

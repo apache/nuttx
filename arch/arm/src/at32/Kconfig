@@ -217,7 +217,6 @@ menu "AT32 Peripheral Support"
 # These "hidden" settings determine whether a peripheral option is available
 # for the selected MCU
 
-
 config AT32_HAVE_OVERDRIVE
 	bool
 	default n
@@ -649,7 +648,7 @@ config AT32_DAC1CH2
 	bool "DAC1CH2"
 	default n
 
-endif #AT32_DAC1
+endif # AT32_DAC1
 
 config AT32_DAC2
 	bool "DAC2"
@@ -663,7 +662,7 @@ config AT32_DAC2CH1
 	bool "DAC2CH1"
 	default n
 
-endif #AT32_DAC2
+endif # AT32_DAC2
 
 config AT32_DAC3
 	bool "DAC3"
@@ -681,7 +680,7 @@ config AT32_DAC3CH2
 	bool "DAC3CH2 Internal"
 	default n
 
-endif #AT32_DAC3
+endif # AT32_DAC3
 
 config AT32_DAC4
 	bool "DAC4"
@@ -699,7 +698,7 @@ config AT32_DAC4CH2
 	bool "DAC4CH2 Internal"
 	default n
 
-endif #AT32_DAC4
+endif # AT32_DAC4
 
 config AT32_DCMI
 	bool "DCMI"
