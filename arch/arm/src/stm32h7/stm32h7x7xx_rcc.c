@@ -773,6 +773,15 @@ void stm32_stdclockconfig(void)
                 STM32_PLLCFG_PLL1R);
       putreg32(regval, STM32_RCC_PLL1DIVR);
 
+#ifdef STM32_PLLCFG_PLL1FRACN
+      /* Configure PLL1 fractional divider */
+
+      regval = getreg32(STM32_RCC_PLL1FRACR);
+      regval &= ~RCC_PLL1FRACR_FRACN1_MASK;
+      regval |= STM32_PLLCFG_PLL1FRACN;
+      putreg32(regval, STM32_RCC_PLL1FRACR);
+#endif
+
       /* Configure PLL2 dividers */
 
       regval = (STM32_PLLCFG_PLL2N |
@@ -781,6 +790,15 @@ void stm32_stdclockconfig(void)
                 STM32_PLLCFG_PLL2R);
       putreg32(regval, STM32_RCC_PLL2DIVR);
 
+#ifdef STM32_PLLCFG_PLL2FRACN
+      /* Configure PLL2 fractional divider */
+
+      regval = getreg32(STM32_RCC_PLL2FRACR);
+      regval &= ~RCC_PLL2FRACR_FRACN2_MASK;
+      regval |= STM32_PLLCFG_PLL2FRACN;
+      putreg32(regval, STM32_RCC_PLL2FRACR);
+#endif
+
       /* Configure PLL3 dividers */
 
       regval = (STM32_PLLCFG_PLL3N |
@@ -788,6 +806,15 @@ void stm32_stdclockconfig(void)
                 STM32_PLLCFG_PLL3Q |
                 STM32_PLLCFG_PLL3R);
       putreg32(regval, STM32_RCC_PLL3DIVR);
+
+#ifdef STM32_PLLCFG_PLL3FRACN
+      /* Configure PLL3 fractional divider */
+
+      regval = getreg32(STM32_RCC_PLL3FRACR);
+      regval &= ~RCC_PLL3FRACR_FRACN3_MASK;
+      regval |= STM32_PLLCFG_PLL3FRACN;
+      putreg32(regval, STM32_RCC_PLL3FRACR);
+#endif
 
       /* Configure PLLs */
 
