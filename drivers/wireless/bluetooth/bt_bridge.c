@@ -133,6 +133,21 @@ static bool bt_filter_set(FAR uint16_t *array, int size, uint16_t old,
   return false;
 }
 
+static bool bt_filter_ogf_is_valid(uint8_t ogf)
+{
+  switch (ogf)
+    {
+    case BT_OGF_BASEBAND:
+    case BT_OGF_LINK_CTRL:
+    case BT_OGF_INFO:
+    case BT_OGF_LE:
+    case BT_OGF_VS_RTK:
+      return true;
+    default:
+      return false;
+    }
+}
+
 static bool bt_filter_set_handle(FAR uint16_t *handle, int size,
                                  uint16_t old, uint16_t new)
 {
@@ -292,8 +307,7 @@ static bool bt_filter_can_recv(FAR struct bt_filter_s *filter,
             evt = (FAR void *)&buffer[2];
             ogf = evt->opcode >> 10;
 
-            if (BT_OGF_BASEBAND == ogf || BT_OGF_LINK_CTRL == ogf
-                || BT_OGF_INFO == ogf || BT_OGF_LE == ogf)
+            if (bt_filter_ogf_is_valid(ogf))
               {
                 return bt_filter_free_opcode(filter, evt->opcode);
               }
@@ -314,8 +328,7 @@ static bool bt_filter_can_recv(FAR struct bt_filter_s *filter,
             stat = (FAR void *)&buffer[2];
             ogf = stat->opcode >> 10;
 
-            if (BT_OGF_BASEBAND == ogf || BT_OGF_LINK_CTRL == ogf
-                || BT_OGF_INFO == ogf || BT_OGF_LE == ogf)
+            if (bt_filter_ogf_is_valid(ogf))
               {
                 return bt_filter_free_opcode(filter, stat->opcode);
               }
@@ -372,8 +385,7 @@ static bool bt_filter_can_send(FAR struct bt_filter_s *filter,
           break;
         }
 
-      if (BT_OGF_BASEBAND == ogf || BT_OGF_LINK_CTRL == ogf
-          || BT_OGF_INFO == ogf || BT_OGF_LE == ogf)
+      if (bt_filter_ogf_is_valid(ogf))
         {
           if (!bt_filter_alloc_opcode(filter, opcode))
             {
