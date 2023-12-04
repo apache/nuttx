@@ -598,6 +598,13 @@ static int net_rpmsg_drv_ept_cb(FAR struct rpmsg_endpoint *ept, void *data,
   FAR struct net_rpmsg_header_s *header = data;
   uint32_t command = header->command;
 
+#ifdef CONFIG_MPFS_IHC_CLIENT
+  if (command != NET_RPMSG_TRANSFER)
+    {
+      return -EINVAL;
+    }
+#endif
+
   if (command < sizeof(g_net_rpmsg_drv_handler) /
                 sizeof(g_net_rpmsg_drv_handler[0]))
     {
