@@ -102,6 +102,11 @@ sim_rptun_get_resource(struct rptun_dev_s *dev)
   priv->shmem = host_allocshmem(priv->shmemname,
                                 sizeof(*priv->shmem));
 
+  if (!priv->shmem)
+    {
+      return NULL;
+    }
+
   if (priv->master)
     {
       struct rptun_rsc_s *rsc = &priv->shmem->rsc;
