@@ -126,6 +126,8 @@ static void goldfish_fb_vsync_irq(FAR struct goldfish_fb_s *fb)
     }
 #endif
 
+  fb_notify_vsync(&fb->vtable, FB_NO_OVERLAY);
+
   if (fb_peek_paninfo(&fb->vtable, &info, FB_NO_OVERLAY) == OK)
     {
       uintptr_t buf = (uintptr_t)(fb->planeinfo.fbmem +
