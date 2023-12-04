@@ -353,10 +353,10 @@ static int sim_audio_mad_decode(void *handle,
   struct sim_mad_s *codec = (struct sim_mad_s *)handle;
   const mad_fixed_t *right_ch;
   const mad_fixed_t *left_ch;
+  uint32_t header;
   int nchannels;
   int nsamples;
   uint8_t *ptr;
-  int header;
   int i = 0;
   int size;
   int ret;
@@ -366,7 +366,10 @@ static int sim_audio_mad_decode(void *handle,
       return -ENODATA;
     }
 
-  header = in[0] << 24 | in[1] << 16 | in[2] << 8 | in[3];
+  header = ((uint32_t)in[0] << 24) |
+           ((uint32_t)in[1] << 16) |
+           ((uint32_t)in[2] << 8) |
+           ((uint32_t)in[3]);
   size = sim_mad_check(header);
   if (size < 0)
     {
