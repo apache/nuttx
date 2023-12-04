@@ -1193,7 +1193,6 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
   size_t copysize;
   size_t totalsize;
   int count;
-  int ret;
   int i;
 
   DEBUGASSERT(group != NULL);
@@ -1226,8 +1225,11 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
 
   for (i = 0; i < count; i++)
     {
-      ret = fs_getfilep(i, &filep);
-      if (ret != OK || filep == NULL)
+      filep = files_fget(&group->tg_filelist, i);
+
+      /* Is there an inode associated with the file descriptor? */
+
+      if (filep->f_inode == NULL)
         {
           continue;
         }
