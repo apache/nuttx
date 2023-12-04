@@ -28,6 +28,7 @@ FROM builder-base AS nuttx-tools
 
 RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -qq \
   bison \
+  clang \
   cmake \
   flex \
   g++ \
@@ -66,6 +67,11 @@ RUN mkdir -p $CARGO_HOME \
   && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
   && $CARGO_HOME/bin/rustup target add thumbv6m-none-eabi \
   && $CARGO_HOME/bin/rustup target add thumbv7m-none-eabi
+
+RUN mkdir /tools/gn -p \
+  && cd /tools/gn \
+  && git clone https://gn.googlesource.com/gn gn \
+  && cd gn && ./build/gen.py && cd out && ninja
 
 ENV ZAP_INSTALL_PATH=/tools/zap_release
 RUN mkdir $ZAP_INSTALL_PATH -p \
@@ -269,7 +275,6 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   clang-tidy \
   gcc-avr \
   gcc-multilib \
-  generate-ninja \
   genromfs \
   gettext \
   git \
@@ -396,6 +401,10 @@ COPY --from=nuttx-toolchain-esp32 /tools/blobs/* /tools/blobs/esp-bins/
 COPY --from=nuttx-toolchain-wasm /tools/wasi-sdk/ wasi-sdk/
 ENV WASI_SDK_PATH="/tools/wasi-sdk"
 ENV PATH="/tools/wamr:$PATH"
+
+# gn tool
+COPY --from=nuttx-tools /tools/gn/ /tools/gn/
+ENV PATH="/tools/gn/gn/out:$PATH"
 
 # ZAP tool and nodejs packet
 COPY --from=nuttx-tools /tools/zap/ /tools/zap/
