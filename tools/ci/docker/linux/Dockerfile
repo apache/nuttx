@@ -295,6 +295,7 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   linux-headers-generic \
   linux-libc-dev:i386 \
   ninja-build \
+  npm \
   qemu-system-arm \
   qemu-system-misc \
   python3 \
@@ -333,9 +334,13 @@ RUN pip3 install pytest==6.2.5
 RUN pip3 install pytest-json==0.4.0
 RUN pip3 install pytest-ordering==0.6
 RUN pip3 install pytest-repeat==0.9.1
-# Install lark and stringcase for matter build
+# Install lark stringcase and jinja2 for matter build
 RUN pip3 install lark
 RUN pip3 install stringcase
+RUN pip3 install jinja2
+
+# Upgrade nodejs to the latest version
+RUN npm install -g n && n stable && hash -r
 
 # Used to generate symbol table files
 
