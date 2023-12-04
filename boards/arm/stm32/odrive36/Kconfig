@@ -6,8 +6,8 @@
 if ARCH_BOARD_ODRIVE36
 
 choice
-       prompt "ODrive voltage version"
-       default ODRIVE_HW_VOLTAGE_56
+	prompt "ODrive voltage version"
+	default ODRIVE_HW_VOLTAGE_56
 
 config ODRIVE_HW_VOLTAGE_56
 	bool "ODrive 56V version"
