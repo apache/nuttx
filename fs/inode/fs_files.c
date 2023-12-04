@@ -72,16 +72,6 @@ static FAR struct file *files_fget_by_index(FAR struct filelist *list,
 }
 
 /****************************************************************************
- * Name: files_fget
- ****************************************************************************/
-
-static FAR struct file *files_fget(FAR struct filelist *list, int fd)
-{
-  return files_fget_by_index(list, fd / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK,
-                             fd % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK);
-}
-
-/****************************************************************************
  * Name: files_extend
  ****************************************************************************/
 
@@ -345,6 +335,27 @@ void files_releaselist(FAR struct filelist *list)
 int files_countlist(FAR struct filelist *list)
 {
   return list->fl_rows * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK;
+}
+
+/****************************************************************************
+ * Name: files_fget
+ *
+ * Description:
+ *   Get the instance of struct file from file list by file descriptor.
+ *
+ * Input Parameters:
+ *   list - The list of files for a task.
+ *   fd   - A valid descriptor between 0 and files_countlist(list).
+ *
+ * Returned Value:
+ *   Pointer to file structure of list[fd].
+ *
+ ****************************************************************************/
+
+FAR struct file *files_fget(FAR struct filelist *list, int fd)
+{
+  return files_fget_by_index(list, fd / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK,
+                             fd % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK);
 }
 
 /****************************************************************************

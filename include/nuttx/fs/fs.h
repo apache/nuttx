@@ -883,6 +883,23 @@ int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist,
                   bool cloexec);
 
 /****************************************************************************
+ * Name: files_fget
+ *
+ * Description:
+ *   Get the instance of struct file from file list by file descriptor.
+ *
+ * Input Parameters:
+ *   list - The list of files for a task.
+ *   fd   - A valid descriptor between 0 and files_countlist(list).
+ *
+ * Returned Value:
+ *   Pointer to file structure of list[fd].
+ *
+ ****************************************************************************/
+
+FAR struct file *files_fget(FAR struct filelist *list, int fd);
+
+/****************************************************************************
  * Name: file_allocate_from_tcb
  *
  * Description:
