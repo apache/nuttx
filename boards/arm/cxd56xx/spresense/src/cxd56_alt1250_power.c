@@ -39,19 +39,6 @@
 #include "cxd56_pinconfig.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define RESET_INTERVAL_TIMEOUT MSEC2TICK(1)
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static struct wdog_s g_reset_wd;
-static sem_t g_wd_wait;
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -113,52 +100,5 @@ int board_alt1250_powerkeep(bool enable)
       return board_set_reset_gpo(POWER_LTE);
     }
 }
-
-/****************************************************************************
- * Name: board_alt1250_timeout
- *
- * Description:
- *   Watchdog timer for timeout of reset interval.
- *
- ****************************************************************************/
-
-static void board_alt1250_timeout(wdparm_t arg)
-{
-  sem_t *wd_wait = (sem_t *)arg;
-
-  nxsem_post(wd_wait);
-}
-
-/****************************************************************************
- * Name: board_alt1250_reset
- *
- * Description:
- *   Reset the Altair modem device on the board.
- *
- ****************************************************************************/
-
-void board_alt1250_reset(void)
-{
-  memset(&g_reset_wd, 0, sizeof(struct wdog_s));
-  nxsem_init(&g_wd_wait, 0, 0);
-
-  /* Reset Altair modem device */
-
-  board_alt1250_poweroff();
-
-  /* ALT1250_SHUTDOWN should be low in the range 101usec to 100msec */
-
-  wd_start(&g_reset_wd, RESET_INTERVAL_TIMEOUT,
-           board_alt1250_timeout, (wdparm_t)&g_wd_wait);
-
-  /* Wait for the watchdog timer to expire */
-
-  nxsem_wait_uninterruptible(&g_wd_wait);
-
-  board_alt1250_poweron();
-
-  nxsem_destroy(&g_wd_wait);
-}
-
 #endif
 
