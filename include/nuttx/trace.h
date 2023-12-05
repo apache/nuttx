@@ -103,6 +103,14 @@
 #  define graphics_trace_end()
 #endif
 
+#ifdef CONFIG_TRACE_INPUT
+#  define input_trace_begin() trace_begin(NOTE_TAG_INPUT)
+#  define input_trace_end() trace_end(NOTE_TAG_INPUT)
+#else
+#  define input_trace_begin()
+#  define input_trace_end()
+#endif
+
 #ifdef CONFIG_TRACE_LIBS
 #  define libs_trace_begin() trace_begin(NOTE_TAG_LIBS)
 #  define libs_trace_end() trace_end(NOTE_TAG_LIBS)
