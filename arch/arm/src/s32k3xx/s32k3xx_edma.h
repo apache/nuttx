@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/s32k3xx/s32k3xx_edma.h
  *
- *   Copyright (C) 2019, 2021 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019, 2021, 2023 Gregory Nutt. All rights reserved.
  *   Copyright 2022 NXP
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david.sidrane@nscdg.com>
@@ -430,6 +430,20 @@ void s32k3xx_dmach_stop(DMACH_HANDLE handle);
  ****************************************************************************/
 
 unsigned int s32k3xx_dmach_getcount(DMACH_HANDLE *handle);
+
+/****************************************************************************
+ * Name: s32k3xx_dmach_idle
+ *
+ * Description:
+ *   This function checks if the dma is idle
+ *
+ * Returned Value:
+ *   0  - if idle
+ *   !0 - not
+ *
+ ****************************************************************************/
+
+unsigned int s32k3xx_dmach_idle(DMACH_HANDLE handle);
 
 /****************************************************************************
  * Name: s32k3xx_dmasample

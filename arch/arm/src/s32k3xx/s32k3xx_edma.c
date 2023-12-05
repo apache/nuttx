@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/s32k3xx/s32k3xx_edma.c
  *
- *   Copyright (C) 2019, 2021 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019, 2021, 2023 Gregory Nutt. All rights reserved.
  *   Copyright 2022 NXP
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david.sidrane@nscdg.com>
@@ -708,6 +708,8 @@ static void s32k3xx_dmaterminate(struct s32k3xx_dmach_s *dmach, int result)
   struct s32k3xx_edmatcd_s *next;
 #endif
   uint8_t chan;
+  edma_callback_t callback;
+  void *arg;
 
   chan            = dmach->chan;
 
@@ -749,14 +751,17 @@ static void s32k3xx_dmaterminate(struct s32k3xx_dmach_s *dmach, int result)
 
   /* Perform the DMA complete callback */
 
-  if (dmach->callback)
-    {
-      dmach->callback((DMACH_HANDLE)dmach, dmach->arg, true, result);
-    }
+  callback = dmach->callback;
+  arg      = dmach->arg;
 
   dmach->callback = NULL;
   dmach->arg      = NULL;
   dmach->state    = S32K3XX_DMA_IDLE;
+
+  if (callback)
+    {
+      callback((DMACH_HANDLE)dmach, arg, true, result);
+    }
 }
 
 /****************************************************************************
@@ -1493,6 +1498,24 @@ unsigned int s32k3xx_dmach_getcount(DMACH_HANDLE *handle)
     }
 
   return remaining;
+}
+
+/****************************************************************************
+ * Name: s32k3xx_dmach_idle
+ *
+ * Description:
+ *   This function checks if the dma is idle
+ *
+ * Returned Value:
+ *   0  - if idle
+ *   !0 - not
+ *
+ ****************************************************************************/
+
+unsigned int s32k3xx_dmach_idle(DMACH_HANDLE handle)
+{
+  struct s32k3xx_dmach_s *dmach = (struct s32k3xx_dmach_s *)handle;
+  return dmach->state == S32K3XX_DMA_IDLE ? 0 : -1;
 }
 
 /****************************************************************************
