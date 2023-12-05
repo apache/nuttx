@@ -89,7 +89,14 @@
 
 #define STM32_PLLCFG_PLLSRC      RCC_PLLCKSELR_PLLSRC_HSE
 
-#define STM32_PWR_VOS_SCALE      PWR_D3CR_VOS_SCALE_3
+/* VOS Scale
+ *
+ * Choose VOS scaling to suit the electrical environment.  NuttX defaults to VOS
+ * scale 1 for higher speeds.  Override the default in order to limit the
+ * internal voltage regulator's ramp up.  Try increase the scale (lower the
+ * voltage) if the board finds VOSRDY not ready on power-up.
+ */
+#define STM32_PWR_VOS_SCALE      PWR_D3CR_VOS_SCALE_2
 
 #if STM32_PWR_VOS_SCALE == PWR_D3CR_VOS_SCALE_2
 #  include "board_vos_scale_2.h"
