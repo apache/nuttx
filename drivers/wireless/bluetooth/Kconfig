@@ -85,4 +85,24 @@ config BLUETOOTH_RPMSG
 	depends on EXPERIMENTAL && RPTUN
 	default n
 
+config BLUETOOTH_SLIP
+	bool "Bluetooth SLIP support"
+	default n
+
+if BLUETOOTH_SLIP
+
+config BLUETOOTH_SLIP_TXBUFSIZE
+	int "BT H5 UART TX Buffer Size"
+	default 2048
+	---help---
+		H5 UART TX Buffer Size.  Default: 2048
+
+config BLUETOOTH_SLIP_TXWIN
+	int "BT H5 Uart TX Window Size"
+	default 4
+	---help---
+		H5 UART TX Window Size.  Default: 4
+
+endif # BLUETOOTH_SLIP
+
 endif # DRIVERS_BLUETOOTH
