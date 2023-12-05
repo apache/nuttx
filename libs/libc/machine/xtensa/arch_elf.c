@@ -126,7 +126,8 @@ bool up_checkarch(const Elf32_Ehdr *ehdr)
  *
  ****************************************************************************/
 
-int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
+int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr,
+                void *arch_data)
 {
   unsigned int relotype;
 
@@ -159,7 +160,7 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
 }
 
 int up_relocateadd(const Elf32_Rela *rel, const Elf32_Sym *sym,
-                   uintptr_t addr)
+                   uintptr_t addr, void *arch_data)
 {
   unsigned int relotype;
   unsigned char *p;

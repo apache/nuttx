@@ -44,6 +44,15 @@
 #define I_PLT   1    /* ... for PLTs */
 #define N_RELS  2    /* Number of relxxx[] indexes */
 
+#ifdef ARCH_ELFDATA
+#  define ARCH_ELFDATA_DEF  arch_elfdata_t arch_data; \
+                            memset(&arch_data, 0, sizeof(arch_elfdata_t))
+#  define ARCH_ELFDATA_PARM &arch_data
+#else
+#  define ARCH_ELFDATA_DEF
+#  define ARCH_ELFDATA_PARM NULL
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -180,6 +189,10 @@ static int modlib_relocate(FAR struct module_s *modp,
   int               ret = OK;
   int               i;
   int               j;
+
+  /* Define potential architecture specific elf data container */
+
+  ARCH_ELFDATA_DEF;
 
   rels = lib_malloc(CONFIG_MODLIB_RELOCATION_BUFFERCOUNT * sizeof(Elf_Rel));
   if (!rels)
@@ -331,7 +344,7 @@ static int modlib_relocate(FAR struct module_s *modp,
 
       /* Now perform the architecture-specific relocation */
 
-      ret = up_relocate(rel, sym, addr);
+      ret = up_relocate(rel, sym, addr, ARCH_ELFDATA_PARM);
       if (ret < 0)
         {
           berr("ERROR: Section %d reloc %d: Relocation failed: %d\n",
@@ -367,6 +380,10 @@ static int modlib_relocateadd(FAR struct module_s *modp,
   int               ret = OK;
   int               i;
   int               j;
+
+  /* Define potential architecture specific elf data container */
+
+  ARCH_ELFDATA_DEF;
 
   relas = lib_malloc(CONFIG_MODLIB_RELOCATION_BUFFERCOUNT *
                      sizeof(Elf_Rela));
@@ -519,7 +536,7 @@ static int modlib_relocateadd(FAR struct module_s *modp,
 
       /* Now perform the architecture-specific relocation */
 
-      ret = up_relocateadd(rela, sym, addr);
+      ret = up_relocateadd(rela, sym, addr, ARCH_ELFDATA_PARM);
       if (ret < 0)
         {
           berr("ERROR: Section %d reloc %d: Relocation failed: %d\n",
@@ -567,6 +584,10 @@ static int modlib_relocatedyn(FAR struct module_s *modp,
   int           i;
   int           idx_rel;
   int           idx_sym;
+
+  /* Define potential architecture specific elf data container */
+
+  ARCH_ELFDATA_DEF;
 
   dyn = lib_malloc(shdr->sh_size);
   ret = modlib_read(loadinfo, (FAR uint8_t *)dyn, shdr->sh_size,
@@ -778,7 +799,7 @@ static int modlib_relocatedyn(FAR struct module_s *modp,
                                     loadinfo->datasec + loadinfo->datastart;
                 }
 
-              ret = up_relocate(rel, &dynsym, addr);
+              ret = up_relocate(rel, &dynsym, addr, ARCH_ELFDATA_PARM);
             }
 
           if (ret < 0)

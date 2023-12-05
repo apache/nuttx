@@ -465,14 +465,15 @@ bool up_checkarch(const Elf64_Ehdr *ehdr)
  *
  ****************************************************************************/
 
-int up_relocate(const Elf64_Rel *rel, const Elf64_Sym *sym, uintptr_t addr)
+int up_relocate(const Elf64_Rel *rel, const Elf64_Sym *sym, uintptr_t addr,
+                void *arch_data)
 {
   berr("ERROR: REL relocation not supported\n");
   return -ENOSYS;
 }
 
 int up_relocateadd(const Elf64_Rela *rel, const Elf64_Sym *sym,
-                   uintptr_t addr)
+                   uintptr_t addr, void *arch_data)
 {
   bool overflow_check = true;
   uint64_t val;

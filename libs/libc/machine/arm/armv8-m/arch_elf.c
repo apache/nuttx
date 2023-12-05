@@ -110,7 +110,8 @@ bool up_checkarch(const Elf32_Ehdr *ehdr)
  *
  ****************************************************************************/
 
-int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
+int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr,
+                void *arch_data)
 {
   int32_t offset;
   uint32_t upper_insn;
@@ -513,7 +514,7 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
 }
 
 int up_relocateadd(const Elf32_Rela *rel, const Elf32_Sym *sym,
-                   uintptr_t addr)
+                   uintptr_t addr, void *arch_data)
 {
   berr("ERROR: RELA relocation not supported\n");
   return -ENOSYS;
