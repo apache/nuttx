@@ -390,6 +390,10 @@ static void parse_args(int argc, char **argv)
 
   g_altpath = strdup(".");
 
+  /* Ensure dep target obj path has a default value */
+
+  g_objpath = strdup(".");
+
   /* Accumulate CFLAGS up to "--" */
 
   for (argidx = 1; argidx < argc; argidx++)
@@ -765,7 +769,19 @@ static void do_dependency(const char *file)
           exit(EXIT_FAILURE);
         }
 
-      objname = basename(dupname);
+      /* Check g_altpath. If only the CURRENT path is included,
+       * the obj target use its own full path.
+       */
+
+      if (strcmp(g_altpath, ".") == 0)
+        {
+          objname = dupname;
+        }
+      else
+        {
+          objname = basename(dupname);
+        }
+
       dotptr  = strrchr(objname, '.');
       if (dotptr)
         {
