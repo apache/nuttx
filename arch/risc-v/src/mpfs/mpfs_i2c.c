@@ -437,8 +437,6 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
   volatile uint32_t status;
   uint8_t clear_irq = 1u;
 
-  DEBUGASSERT(msg != NULL);
-
   status = getreg32(MPFS_I2C_STATUS);
 
   switch (status)
@@ -479,7 +477,16 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
       case MPFS_I2C_ST_TX_DATA_ACK:
         if (priv->tx_idx < priv->tx_size)
           {
-            DEBUGASSERT(priv->tx_buffer != NULL);
+            if (priv->tx_buffer == NULL)
+              {
+                i2cerr("ERROR: tx_buffer is NULL!\n");
+
+                /* Clear the serial interrupt flag and exit */
+
+                modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_SI_MASK, 0);
+                return 0;
+              }
+
             putreg32(priv->tx_buffer[priv->tx_idx], MPFS_I2C_DATA);
             priv->tx_idx++;
           }
@@ -557,10 +564,18 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
         break;
 
       case MPFS_I2C_ST_RX_DATA_ACK:
+        if (priv->rx_buffer == NULL)
+          {
+            i2cerr("ERROR: rx_buffer is NULL!\n");
+
+            /* Clear the serial interrupt flag and exit */
+
+            modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_SI_MASK, 0);
+            return 0;
+          }
 
         /* Data byte received, ACK returned */
 
-        DEBUGASSERT(priv->rx_buffer != NULL);
         priv->rx_buffer[priv->rx_idx] = (uint8_t)getreg32(MPFS_I2C_DATA);
         priv->rx_idx++;
 
@@ -572,10 +587,29 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
 
       case MPFS_I2C_ST_RX_DATA_NACK:
 
+        /* Some sanity checks */
+
+        if (priv->rx_buffer == NULL)
+          {
+            i2cerr("ERROR: rx_buffer is NULL!\n");
+
+            /* Clear the serial interrupt flag and exit */
+
+            modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_SI_MASK, 0);
+            return 0;
+          }
+        else if (priv->rx_idx >= priv->rx_size)
+          {
+            i2cerr("ERROR: rx_idx is out of bounds!\n");
+
+            /* Clear the serial interrupt flag and exit */
+
+            modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_SI_MASK, 0);
+            return 0;
+          }
+
         /* Data byte received, NACK returned */
 
-        DEBUGASSERT(priv->rx_buffer != NULL);
-        DEBUGASSERT(priv->rx_idx < priv->rx_size);
         priv->rx_buffer[priv->rx_idx] = (uint8_t)getreg32(MPFS_I2C_DATA);
         priv->rx_idx++;
 
@@ -673,7 +707,11 @@ static int mpfs_i2c_transfer(struct i2c_master_s *dev,
   int ret = OK;
 
   i2cinfo("Starting transfer request of %d message(s):\n", count);
-  DEBUGASSERT(count > 0);
+
+  if (count <= 0)
+    {
+      return -EINVAL;
+    }
 
   ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
@@ -715,9 +753,17 @@ static int mpfs_i2c_transfer(struct i2c_master_s *dev,
 
           if (msgs[i].flags & I2C_M_NOSTOP)
             {
-              /* Support only write + read combinations */
+              /* Support only write + read combinations.  No write + write,
+               * nor read + write without stop condition between supported
+               * yet.
+               */
 
-              DEBUGASSERT(!(msgs[i].flags & I2C_M_READ));
+              if (msgs[i].flags & I2C_M_READ)
+                {
+                  i2cerr("No read before write supported!\n");
+                  nxmutex_unlock(&priv->lock);
+                  return -EINVAL;
+                }
 
               /* Combine write + read transaction into one */
 
@@ -764,6 +810,10 @@ static int mpfs_i2c_transfer(struct i2c_master_s *dev,
 
         i2cinfo("Message %" PRIu8 " transfer complete.\n", priv->msgid);
     }
+
+  /* Irq was enabled at mpfs_i2c_sendstart()  */
+
+  up_disable_irq(priv->plic_irq);
 
   nxmutex_unlock(&priv->lock);
   return ret;
