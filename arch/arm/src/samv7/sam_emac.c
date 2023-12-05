@@ -3751,6 +3751,7 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
       goto errout;
     }
 
+#if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
   if (priv->phytype == SAMV7_PHY_KSZ8061)
     {
       ret = sam_phywrite(priv, priv->phyaddr, MII_MMDCONTROL, 0x0001);
@@ -3781,6 +3782,7 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
           goto errout;
         }
     }
+#endif
 
   /* Restart Auto_negotiation */
 
