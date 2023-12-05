@@ -1332,7 +1332,6 @@ struct s32k3xx_uart_s
 #ifdef SERIAL_HAVE_TXDMA
   const unsigned int dma_txreqsrc;  /* DMAMUX source of TX DMA request */
   DMACH_HANDLE       txdma;         /* currently-open transmit DMA stream */
-  sem_t              txdmasem;      /* Indicate TX DMA completion */
 #endif
 
   /* RX DMA state */
@@ -2909,8 +2908,6 @@ static int s32k3xx_dma_setup(struct uart_dev_s *dev)
             {
               return -EBUSY;
             }
-
-          nxsem_init(&priv->txdmasem, 0, 1);
         }
 
       /* Enable Tx DMA for the UART */
@@ -3112,7 +3109,6 @@ static void s32k3xx_dma_shutdown(struct uart_dev_s *dev)
 
       s32k3xx_dmach_free(priv->txdma);
       priv->txdma = NULL;
-      nxsem_destroy(&priv->txdmasem);
     }
 #endif
 }
@@ -3948,9 +3944,9 @@ static void s32k3xx_dma_txcallback(DMACH_HANDLE handle, void *arg, bool done,
 
   uart_xmitchars_done(&priv->dev);
 
-  /* Release waiter */
+  /* Send more data if available */
 
-  nxsem_post(&priv->txdmasem);
+  s32k3xx_dma_txavailable(&priv->dev);
 }
 #endif
 
@@ -3969,9 +3965,7 @@ static void s32k3xx_dma_txavailable(struct uart_dev_s *dev)
 
   /* Only send when the DMA is idle */
 
-  int rv = nxsem_trywait(&priv->txdmasem);
-
-  if (rv == OK)
+  if (s32k3xx_dmach_idle(priv->txdma) == 0)
     {
       uart_xmitchars_dma(dev);
     }
