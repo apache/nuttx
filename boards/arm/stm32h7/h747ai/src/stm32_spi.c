@@ -35,8 +35,8 @@
 
 #include "arm_internal.h"
 #include "chip.h"
-#include "stm32_gpio.h"
 #include "stm32_spi.h"
+#include "stm32_gpio.h"
 
 #include "h747ai.h"
 
@@ -76,6 +76,8 @@ void stm32_spi1select(struct spi_dev_s *dev, uint32_t devid,
 {
   spiinfo("devid: %d CS: %s\n",
          (int)devid, selected ? "assert" : "de-assert");
+
+  stm32_gpiowrite(GPIO_SPI1_NSS, !selected);
 }
 
 uint8_t stm32_spi1status(struct spi_dev_s *dev, uint32_t devid)

@@ -50,6 +50,11 @@
 
 #if defined(CONFIG_SPI)
 #  include "stm32_spi.h"
+#  include "stm32_gpio.h"
+#  if defined(CONFIG_SPI_DRIVER)
+#    include <nuttx/spi/spi.h>
+#    include <nuttx/spi/spi_transfer.h>
+#  endif
 #endif
 
 #include "h747ai.h"
@@ -256,9 +261,13 @@ int stm32_bringup(void)
 #endif
 
 #ifdef CONFIG_STM32H7_SPI1
+  /* Set up SPI1 NSS */
+
+  stm32_configgpio(GPIO_SPI1_NSS);
+
   /* Initialize the SPI1 bus */
 
-  spi1 = NULL;//stm32_spibus_initialize(1);
+  spi1 = stm32_spibus_initialize(1);
   if (spi1 == NULL)
     {
       spierr("ERROR: Initialize SPI1: \n");

@@ -124,6 +124,8 @@
  * Note: look at Table 54 in ST Manual
  */
 
+/* USART234578 clock source - PCLK */
+
 #define STM32_RCC_D2CCIP2R_USART234578SRC RCC_D2CCIP2R_USART234578SEL_PCLK
 
 /* I2C123 clock source - HSI */
@@ -275,9 +277,11 @@
 
 /* SPI1 pins */
 
-#define GPIO_SPI1_SCK     (GPIO_SPI1_SCK_3)  /* PG11 - E7 */
-#define GPIO_SPI1_MISO    (GPIO_SPI1_MISO_3) /* PG9 - C7 */
-#define GPIO_SPI1_MOSI    (GPIO_SPI1_MOSI_3) /* PD7 - A8 */
+#define GPIO_SPI1_NSS     (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_OUTPUT_SET| \
+                           GPIO_PORTG | GPIO_PIN10)           /* PG10 - D7 */
+#define GPIO_SPI1_SCK     (GPIO_SPI1_SCK_3)                   /* PG11 - E7 */
+#define GPIO_SPI1_MISO    (GPIO_SPI1_MISO_3)                  /* PG9 - C7 */
+#define GPIO_SPI1_MOSI    (GPIO_SPI1_MOSI_3)                  /* PD7 - A8 */
 
 /****************************************************************************
  * Public Data
