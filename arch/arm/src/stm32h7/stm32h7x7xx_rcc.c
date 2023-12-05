@@ -774,7 +774,11 @@ void stm32_stdclockconfig(void)
       putreg32(regval, STM32_RCC_PLL1DIVR);
 
 #ifdef STM32_PLLCFG_PLL1FRACN
-      /* Configure PLL1 fractional divider */
+      /* Configure PLL1 fractional divider. Assumes that the fractional latch is
+       * initially disabled. Also assumes that the STM32_PLLCFG_PLL1/2/3CFG
+       * includes the corresponding RCC_PLLCFGR_PLL1/2/3FRACEN to enable the
+       * latch.
+       */
 
       regval = getreg32(STM32_RCC_PLL1FRACR);
       regval &= ~RCC_PLL1FRACR_FRACN1_MASK;
