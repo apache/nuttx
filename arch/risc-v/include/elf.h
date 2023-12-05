@@ -83,4 +83,25 @@
 #define R_RISCV_SET32         56
 #define R_RISCV_32_PCREL      57
 
+#define ARCH_ELFDATA          1
+#define ARCH_ELF_RELCNT       8
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+struct arch_elfdata_s
+{
+  struct hi20_rels_s
+  {
+    uintptr_t hi20_rel;
+    uintptr_t hi20_offset;
+  }
+  hi20_rels[ARCH_ELF_RELCNT];
+};
+typedef struct arch_elfdata_s arch_elfdata_t;
+
+#endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISCV_INCLUDE_ELF_H */
