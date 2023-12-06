@@ -168,6 +168,10 @@ class Nxinfothreads(gdb.Command):
             thread = "Thread 0x%x" % pidhash[i]
 
             statename = statenames[pidhash[i]["task_state"]].string()
+            if statename == "Running":
+                statename = "\x1b[32;1m%s\x1b[m" % statename
+            else:
+                statename = "\x1b[33;1m%s\x1b[m" % statename
 
             if pidhash[i]["task_state"] == gdb.parse_and_eval("TSTATE_WAIT_SEM"):
                 mutex = pidhash[i]["waitobj"].cast(gdb.lookup_type("sem_t").pointer())
@@ -177,7 +181,7 @@ class Nxinfothreads(gdb.Command):
 
             try:
                 """Maybe tcb not have name member, or name is not utf-8"""
-                info = "(Name: %s, State: %s, Priority: %d, Stack: %d)" % (
+                info = "(Name: \x1b[31;1m%s\x1b[m, State: %s, Priority: %d, Stack: %d)" % (
                     pidhash[i]["name"].string(),
                     statename,
                     pidhash[i]["sched_priority"],
@@ -193,7 +197,7 @@ class Nxinfothreads(gdb.Command):
             line = gdb.find_pc_line(pc)
             if line.symtab:
                 func = gdb.execute("info symbol %d " % pc, to_string=True)
-                frame = "0x%x %s at %s:%d" % (
+                frame = "\x1b[34;1m0x%x\x1b[\t\x1b[33;1m%s\x1b[m at %s:%d" % (
                     pc,
                     func.split()[0] + "()",
                     line.symtab,
@@ -306,8 +310,8 @@ class Nxstep(gdb.Command):
 
 gdb.execute("define c\n nxcontinue \n end\n")
 gdb.execute("define s\n nxstep \n end\n")
-gdb.write("\nif use thread command, please don't use 'continue', use 'c' instead !!!\n")
-gdb.write("if use thread command, please don't use 'step', use 's' instead !!!\n")
+gdb.write("\n\x1b[31;1m if use thread command, please don't use 'continue', use 'c' instead !!!\x1b[m\n")
+gdb.write("\x1b[31;1m if use thread command, please don't use 'step', use 's' instead !!!\x1b[m\n")
 
 Nxsetregs()
 Nxinfothreads()
