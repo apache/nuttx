@@ -460,6 +460,54 @@ To test it, just run the following::
 
 Where x in the timer instance.
 
+toywasm
+-------
+
+This config is an example to use toywasm.
+
+This example uses littlefs on the SPI flash to store wasm modules.
+
+Note: This example assumes a board with 32MB flash. To use a smaller one,
+tweak the --img-size option and CONFIG_ESP32S3_STORAGE_MTD_SIZE.
+
+Note: To use flash larger than 4MB, you need to install a custom bootloader.
+https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-guides/bootloader.html#spi-flash-configuration
+
+1. Create a littlefs image which contains wasm modules.
+
+   https://github.com/jrast/littlefs-python/blob/master/examples/mkfsimg.py
+   is used in the following example::
+
+      % python3 mkfsimg.py \
+        --img-filename ..../littlefs.bin \
+        --img-size 31981568 \
+        --block-size 4096 \
+        --prog-size 256 \
+        --read-size 256 \
+        --name-max 32 \
+        --disk-version 2.0 \
+        ..../wasm_module_dir
+
+2. Build a NuttX binary as usual with this config.
+
+3. Write the NuttX binary and the filesystem image to the board::
+
+      % esptool.py \
+        -c esp32s3 \
+        -p /dev/tty.SLAB_USBtoUART \
+        -b 921600 \
+        write_flash \
+        -fs detect \
+        -fm dio \
+        -ff 40m \
+        0x10000 nuttx.bin \
+        0x180000 ..../littlefs.bin
+
+4. Mount the filesystem and run a wasm module on it::
+
+      nsh> mount -t littlefs /dev/esp32s3flash /mnt
+      nsh> toywasm --print-stats --wasi /mnt/....
+
 twai
 ----
 
