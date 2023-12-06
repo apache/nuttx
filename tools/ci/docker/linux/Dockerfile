@@ -273,9 +273,9 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   ccache \
   clang \
   clang-tidy \
-  g++-multilib \
+  g++-12-multilib \
   gcc-avr \
-  gcc-multilib \
+  gcc-12-multilib \
   genromfs \
   gettext \
   git \
@@ -307,6 +307,14 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   wget \
   xxd \
   && rm -rf /var/lib/apt/lists/*
+
+# Set GCC-12 as Default compiler
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 20 && \
+  update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 20 && \
+  update-alternatives --install /usr/bin/cc cc /usr/bin/gcc 30 && \
+  update-alternatives --set cc /usr/bin/gcc && \
+  update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++ 30 && \
+  update-alternatives --set c++ /usr/bin/g++
 
 # Configure out base setup for adding python packages
 ENV PIP_DISABLE_PIP_VERSION_CHECK=true
