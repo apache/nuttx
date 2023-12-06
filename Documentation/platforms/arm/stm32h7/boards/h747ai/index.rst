@@ -1,6 +1,6 @@
-==============
-Generic H747AI
-==============
+=================
+Standalone H747AI
+=================
 
 Assumes the following:
 
