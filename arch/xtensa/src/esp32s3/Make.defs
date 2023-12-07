@@ -191,7 +191,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = 2fbc8a025275d68833cdfef490377048538de57a
+	ESP_HAL_3RDPARTY_VERSION = 22804823777dbbb7f43925b7729b3a32331aa7cd
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL
@@ -211,6 +211,24 @@ CFLAGS += -Wno-undef -Wno-unused-variable
 # Files that require the HAL recipe
 
 include chip/Bootloader.mk
+
+CHIP_SERIES = $(patsubst "%",%,$(CONFIG_ESPRESSIF_CHIP_SERIES))
+
+include chip/hal.mk
+
+include common/espressif/Make.defs
+
+context:: chip/$(ESP_HAL_3RDPARTY_REPO)
+ifeq ($(CONFIG_ESP32S3_WIRELESS),y)
+	$(Q) echo "Espressif HAL for 3rd Party Platforms: initializing submodules..."
+	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule --quiet update --init --depth=1 components/mbedtls/mbedtls components/esp_phy/lib components/esp_wifi/lib components/bt/controller/lib_esp32c3_family components/esp_coex/lib
+	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO)/components/mbedtls/mbedtls reset --quiet --hard
+	$(Q) echo "Applying patches..."
+	$(Q) cd chip/$(ESP_HAL_3RDPARTY_REPO)/components/mbedtls/mbedtls && git apply ../../../nuttx/patches/components/mbedtls/mbedtls/*.patch
+endif
+
+distclean::
+	$(call DELDIR, chip/$(ESP_HAL_3RDPARTY_REPO))
 
 ifeq ($(CONFIG_ESP32S3_WIRELESS),y)
 include chip/Wireless.mk

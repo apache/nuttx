@@ -35,6 +35,10 @@ config ARCH_CHIP_ESP32S3MINI1
 
 endchoice # ESP32-S3 Chip Selection
 
+config ESPRESSIF_CHIP_SERIES
+	string
+	default "esp32s3"
+
 choice ESP32S3_DEFAULT_CPU_FREQ
 	prompt "CPU frequency"
 	default ESP32S3_DEFAULT_CPU_FREQ_240
@@ -263,6 +267,8 @@ config ESP32S3_RUN_IRAM
 		images that can fit entirely in IRAM.
 
 menu "ESP32-S3 Peripheral Selection"
+
+source "arch/xtensa/src/common/espressif/Kconfig"
 
 config ESP32S3_UART
 	bool
