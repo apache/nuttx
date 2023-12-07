@@ -232,7 +232,7 @@ static void djoy_enable(const struct djoy_lowerhalf_s *lower,
 
               if (falling != 0 && rising != 0)
                 {
-                  esp32s3_gpioirqenable(irq, GPIO_INTR_ANYEDGE);
+                  esp32s3_gpioirqenable(irq, CHANGE);
                 }
               else if (falling != 0)
                 {
@@ -240,7 +240,7 @@ static void djoy_enable(const struct djoy_lowerhalf_s *lower,
                 }
               else
                 {
-                  esp32s3_gpioirqenable(irq, GPIO_INTR_POSEDGE);
+                  esp32s3_gpioirqenable(irq, RISING);
                 }
             }
         }

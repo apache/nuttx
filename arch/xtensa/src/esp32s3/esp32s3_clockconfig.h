@@ -29,6 +29,8 @@
 
 #include <stdint.h>
 
+#include "esp_private/esp_clk.h"
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -84,37 +86,5 @@ void esp32s3_set_cpu_freq(int cpu_freq_mhz);
  ****************************************************************************/
 
 void esp32s3_clockconfig(void);
-
-/****************************************************************************
- * Name:  esp_clk_cpu_freq
- *
- * Description:
- *   Get the current CPU frequency.
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   CPU frequency in Hz.
- *
- ****************************************************************************/
-
-int esp_clk_cpu_freq(void);
-
-/****************************************************************************
- * Name:  esp_clk_apb_freq
- *
- * Description:
- *   Return current APB clock frequency.
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   APB clock frequency in Hz.
- *
- ****************************************************************************/
-
-int esp_clk_apb_freq(void);
 
 #endif /* __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_CLOCKCONFIG_H */
