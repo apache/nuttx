@@ -328,12 +328,12 @@ static void up_setuartint(struct up_dev_s *priv)
    * in ie.
    */
 
-  flags    = enter_critical_section();
+  flags    = spin_lock_irqsave(NULL);
   regval   = up_serialin(priv, KL_UART_C2_OFFSET);
   regval  &= ~UART_C2_ALLINTS;
   regval  |= priv->ie;
   up_serialout(priv, KL_UART_C2_OFFSET, regval);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************
@@ -348,10 +348,10 @@ static void up_restoreuartint(struct up_dev_s *priv, uint8_t ie)
    * in ie.
    */
 
-  flags    = enter_critical_section();
+  flags    = spin_lock_irqsave(NULL);
   priv->ie = ie & UART_C2_ALLINTS;
   up_setuartint(priv);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************
@@ -362,14 +362,14 @@ static void up_disableuartint(struct up_dev_s *priv, uint8_t *ie)
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(NULL);
   if (ie)
     {
       *ie = priv->ie;
     }
 
   up_restoreuartint(priv, 0);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************

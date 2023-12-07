@@ -922,14 +922,14 @@ static void lpc54_fifoint_disableall(struct lpc54_dev_s *priv,
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(NULL);
   if (intset)
     {
       *intset = lpc54_serialin(priv, LPC54_USART_FIFOINTENCLR_OFFSET);
     }
 
   lpc54_serialout(priv, LPC54_USART_FIFOINTENCLR_OFFSET, USART_FIFOINT_ALL);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************

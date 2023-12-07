@@ -965,7 +965,7 @@ static int a64_uart_init(uint32_t gating, uint32_t rst, pio_pinset_t tx,
   irqstate_t flags;
   int ret = OK;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(NULL);
 
   /* Enable clocking to UART */
 
@@ -991,7 +991,7 @@ static int a64_uart_init(uint32_t gating, uint32_t rst, pio_pinset_t tx,
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(NULL, flags);
   return ret;
 };
 
