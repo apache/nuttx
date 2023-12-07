@@ -27,7 +27,7 @@ ifeq ($(CONFIG_VIDEO_FB),y)
 endif
 
 ifeq ($(CONFIG_VIDEO_STREAM),y)
-  CSRCS += video.c video_framebuff.c
+  CSRCS += v4l2_core.c video_framebuff.c v4l2_cap.c
 endif
 
 # These video drivers depend on I2C support
