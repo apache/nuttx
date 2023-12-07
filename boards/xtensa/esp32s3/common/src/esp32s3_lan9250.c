@@ -129,7 +129,7 @@ static void lan9250_enable(const struct lan9250_lower_s *lower)
 
   /* Configure the interrupt for rising and falling edges */
 
-  esp32s3_gpioirqenable(irq, GPIO_INTR_LOW_LEVEL);
+  esp32s3_gpioirqenable(irq, ONLOW);
   ninfo("Enable the interrupt\n");
 }
 

@@ -294,6 +294,11 @@ static int32_t esp_nvs_erase_key(uint32_t handle, const char *key);
 static int32_t esp_get_random(uint8_t *buf, size_t len);
 static int32_t esp_get_time(void *t);
 static uint32_t esp_clk_slowclk_cal_get_wrapper(void);
+static void esp_log_writev_wrapper(uint32_t level, const char *tag,
+                                   const char *format, va_list args);
+static void esp_log_write_wrapper(uint32_t level,
+                                  const char *tag,
+                                  const char *format, ...);
 static void *esp_malloc_internal(size_t size);
 static void *esp_realloc_internal(void *ptr, size_t size);
 static void *esp_calloc_internal(size_t n, size_t size);
@@ -515,8 +520,8 @@ wifi_osi_funcs_t g_wifi_osi_funcs =
   ._get_time = esp_get_time,
   ._random = esp_random_ulong,
   ._slowclk_cal_get = esp_clk_slowclk_cal_get_wrapper,
-  ._log_write = esp_log_write,
-  ._log_writev = esp_log_writev,
+  ._log_write = esp_log_write_wrapper,
+  ._log_writev = esp_log_writev_wrapper,
   ._log_timestamp = esp_log_timestamp,
   ._malloc_internal =  esp_malloc_internal,
   ._realloc_internal = esp_realloc_internal,
@@ -3245,7 +3250,7 @@ static uint32_t esp_clk_slowclk_cal_get_wrapper(void)
 }
 
 /****************************************************************************
- * Name: esp_log_writev
+ * Name: esp_log_writev_wrapper
  *
  * Description:
  *   Output log with by format string and its arguments
@@ -3261,34 +3266,29 @@ static uint32_t esp_clk_slowclk_cal_get_wrapper(void)
  *
  ****************************************************************************/
 
-void esp_log_writev(uint32_t level, const char *tag,
-                           const char *format, va_list args)
+static void esp_log_writev_wrapper(uint32_t level, const char *tag,
+                                   const char *format, va_list args)
 {
-  switch (level)
+  esp_log_level_t max_level;
+
+#if defined (CONFIG_DEBUG_WIRELESS_INFO)
+  max_level = ESP_LOG_VERBOSE;
+#elif defined (CONFIG_DEBUG_WIRELESS_WARN)
+  max_level = ESP_LOG_WARN;
+#elif defined (CONFIG_DEBUG_WIRELESS_ERROR)
+  max_level = ESP_LOG_ERROR;
+#else
+  max_level = ESP_LOG_NONE;
+#endif
+
+  if (level <= max_level)
     {
-#ifdef CONFIG_DEBUG_WIRELESS_ERROR
-      case ESP_LOG_ERROR:
-        vsyslog(LOG_ERR, format, args);
-        break;
-#endif
-#ifdef CONFIG_DEBUG_WIRELESS_WARN
-      case ESP_LOG_WARN:
-        vsyslog(LOG_WARNING, format, args);
-        break;
-#endif
-#ifdef CONFIG_DEBUG_WIRELESS_INFO
-      case ESP_LOG_INFO:
-        vsyslog(LOG_INFO, format, args);
-        break;
-      default:
-        vsyslog(LOG_DEBUG, format, args);
-        break;
-#endif
+      esp_log_writev(level, tag, format, args);
     }
 }
 
 /****************************************************************************
- * Name: esp_log_write
+ * Name: esp_log_write_wrapper
  *
  * Description:
  *   Output log with by format string and its arguments
@@ -3303,33 +3303,29 @@ void esp_log_writev(uint32_t level, const char *tag,
  *
  ****************************************************************************/
 
-void esp_log_write(uint32_t level,
-                   const char *tag,
-                   const char *format, ...)
+static void esp_log_write_wrapper(uint32_t level,
+                                  const char *tag,
+                                  const char *format, ...)
 {
-  va_list list;
-  va_start(list, format);
-  esp_log_writev(level, tag, format, list);
-  va_end(list);
-}
+  esp_log_level_t max_level;
 
-/****************************************************************************
- * Name: esp_log_timestamp
- *
- * Description:
- *   Get system time by millim second
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   System time
- *
- ****************************************************************************/
+#if defined (CONFIG_DEBUG_WIRELESS_INFO)
+  max_level = ESP_LOG_VERBOSE;
+#elif defined (CONFIG_DEBUG_WIRELESS_WARN)
+  max_level = ESP_LOG_WARN;
+#elif defined (CONFIG_DEBUG_WIRELESS_ERROR)
+  max_level = ESP_LOG_ERROR;
+#else
+  max_level = ESP_LOG_NONE;
+#endif
 
-uint32_t esp_log_timestamp(void)
-{
-  return (uint32_t)(esp_timer_get_time() / 1000);
+  if (level <= max_level)
+    {
+      va_list list;
+      va_start(list, format);
+      esp_log_writev(level, tag, format, list);
+      va_end(list);
+    }
 }
 
 /****************************************************************************
