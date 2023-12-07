@@ -47,7 +47,7 @@
 #include <nuttx/serial/uart_rpmsg.h>
 #include <nuttx/timers/oneshot.h>
 #include <nuttx/video/fb.h>
-#include <nuttx/video/video.h>
+#include <nuttx/video/v4l2_cap.h>
 #include <nuttx/timers/oneshot.h>
 #include <nuttx/wireless/pktradio.h>
 #include <nuttx/wireless/bluetooth/bt_null.h>
@@ -300,10 +300,10 @@ int sim_bringup(void)
 
   sim_camera_initialize();
 
-  ret = video_initialize(CONFIG_SIM_CAMERA_DEV_PATH);
+  ret = capture_initialize(CONFIG_SIM_CAMERA_DEV_PATH);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: video_initialize() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: capture_initialize() failed: %d\n", ret);
     }
 
 #endif

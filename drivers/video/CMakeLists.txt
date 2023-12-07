@@ -29,7 +29,7 @@ if(CONFIG_DRIVERS_VIDEO)
   endif()
 
   if(CONFIG_VIDEO_STREAM)
-    list(APPEND SRCS video.c video_framebuff.c)
+    list(APPEND SRCS v4l2_core.c video_framebuff.c v4l2_cap.c)
   endif()
 
   # These video drivers depend on I2C support
