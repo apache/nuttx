@@ -356,6 +356,14 @@ noinstrument_function void noreturn_function IRAM_ATTR __esp32s3_start(void)
   esp32s3_spi_timing_set_pin_drive_strength();
 #endif
 
+  /* The PLL provided by bootloader is not stable enough, do calibration
+   * again here so that we can use better clock for the timing tuning.
+   */
+
+#ifdef CONFIG_ESP32S3_SYSTEM_BBPLL_RECALIB
+  esp32s3_rtc_recalib_bbpll();
+#endif
+
   esp32s3_spi_timing_set_mspi_flash_tuning();
 #if defined(CONFIG_ESP32S3_SPIRAM_BOOT_INIT)
   if (esp_spiram_init() != OK)
