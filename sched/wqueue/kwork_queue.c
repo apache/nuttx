@@ -46,11 +46,11 @@
   do \
     { \
       int sem_count; \
-      dq_addlast((FAR dq_entry_t *)(work), &(wqueue).q); \
-      nxsem_get_value(&(wqueue).sem, &sem_count); \
+      dq_addlast((FAR dq_entry_t *)(work), &(wqueue)->q); \
+      nxsem_get_value(&(wqueue)->sem, &sem_count); \
       if (sem_count < 0) /* There are threads waiting for sem. */ \
         { \
-          nxsem_post(&(wqueue).sem); \
+          nxsem_post(&(wqueue)->sem); \
         } \
     } \
   while (0)
@@ -67,7 +67,7 @@
 static void hp_work_timer_expiry(wdparm_t arg)
 {
   irqstate_t flags = enter_critical_section();
-  queue_work(g_hpwork, arg);
+  queue_work(&g_hpwork, arg);
   leave_critical_section(flags);
 }
 #endif
@@ -80,10 +80,30 @@ static void hp_work_timer_expiry(wdparm_t arg)
 static void lp_work_timer_expiry(wdparm_t arg)
 {
   irqstate_t flags = enter_critical_section();
-  queue_work(g_lpwork, arg);
+  queue_work(&g_lpwork, arg);
   leave_critical_section(flags);
 }
 #endif
+
+static bool work_is_canceling(FAR struct kworker_s *kworkers, int nthreads,
+                              FAR struct work_s *work)
+{
+  int semcount;
+
+  for (int wndx = 0; wndx < nthreads; wndx++)
+    {
+      if (kworkers[wndx].work == work)
+        {
+          nxsem_get_value(&kworkers[wndx].wait, &semcount);
+          if (semcount < 0)
+            {
+              return true;
+            }
+        }
+    }
+
+  return false;
+}
 
 /****************************************************************************
  * Public Functions
@@ -122,7 +142,10 @@ static void lp_work_timer_expiry(wdparm_t arg)
 int work_queue(int qid, FAR struct work_s *work, worker_t worker,
                FAR void *arg, clock_t delay)
 {
+  FAR struct kwork_wqueue_s * wqueue;
+  wdentry_t expiry;
   irqstate_t flags;
+  int nthreads;
   int ret = OK;
 
   /* Interrupts are disabled so that this logic can be called from with
@@ -138,6 +161,34 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
       work_cancel(qid, work);
     }
 
+#ifdef CONFIG_SCHED_HPWORK
+  if (qid == HPWORK)
+    {
+      wqueue = (FAR struct kwork_wqueue_s *)&g_hpwork;
+      expiry = hp_work_timer_expiry;
+      nthreads = CONFIG_SCHED_HPNTHREADS;
+    }
+  else
+#endif
+#ifdef CONFIG_SCHED_LPWORK
+  if (qid == LPWORK)
+    {
+      wqueue = (FAR struct kwork_wqueue_s *)&g_lpwork;
+      expiry = lp_work_timer_expiry;
+      nthreads = CONFIG_SCHED_LPNTHREADS;
+    }
+  else
+#endif
+    {
+      ret = -EINVAL;
+      goto out;
+    }
+
+  if (work_is_canceling(wqueue->worker, nthreads, work))
+    {
+      goto out;
+    }
+
   /* Initialize the work structure. */
 
   work->worker = worker;           /* Work callback. non-NULL means queued */
@@ -145,46 +196,18 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
 
   /* Queue the new work */
 
-#ifdef CONFIG_SCHED_HPWORK
-  if (qid == HPWORK)
+  if (!delay)
     {
-      /* Queue high priority work */
-
-      if (!delay)
-        {
-          queue_work(g_hpwork, work);
-        }
-      else
-        {
-          wd_start(&work->u.timer, delay, hp_work_timer_expiry,
-                   (wdparm_t)work);
-        }
+      queue_work(wqueue, work);
     }
   else
-#endif
-#ifdef CONFIG_SCHED_LPWORK
-  if (qid == LPWORK)
     {
-      /* Queue low priority work */
-
-      if (!delay)
-        {
-          queue_work(g_lpwork, work);
-        }
-      else
-        {
-          wd_start(&work->u.timer, delay, lp_work_timer_expiry,
-                   (wdparm_t)work);
-        }
-    }
-  else
-#endif
-    {
-      ret = -EINVAL;
+      wd_start(&work->u.timer, delay, expiry,
+               (wdparm_t)work);
     }
 
+out:
   leave_critical_section(flags);
-
   return ret;
 }
 
