@@ -44,6 +44,26 @@
 
 #define BUTTON_BOOT  0
 
+/* RMT gpio */
+
+#define RMT_RXCHANNEL       4
+#define RMT_TXCHANNEL       0
+
+#ifdef CONFIG_RMT_LOOP_TEST_MODE
+#  define RMT_INPUT_PIN       0
+#  define RMT_OUTPUT_PIN      0
+#else
+#  define RMT_INPUT_PIN       2
+
+/* The on-board RGB LED pin differs depending on the board version */
+
+#  ifdef CONFIG_ESP32S3_DEVKITC_1_V10
+#    define RMT_OUTPUT_PIN      48
+#  else
+#    define RMT_OUTPUT_PIN      38
+#  endif
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
