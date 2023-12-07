@@ -4,7 +4,7 @@ Standalone H747AI
 
 Assumes the following:
 
-    * 48 MHz crystal oscillator for HSE
+* 48 MHz crystal oscillator for HSE
 
 Compiling
 ---------
@@ -30,6 +30,8 @@ Debugging
 ---------
 
 Debug using:
+
+.. code-block:: json
 
 	{
 		"name": "Debug CM7 - ST-Link",
