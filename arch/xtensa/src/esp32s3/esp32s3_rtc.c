@@ -403,6 +403,10 @@ volatile bool g_rtc_enabled = false;
 
 extern void ets_update_cpu_frequency(uint32_t ticks_per_us);
 
+/* Pauses execution for us microseconds */
+
+extern void esp_rom_delay_us(uint32_t us);
+
 /****************************************************************************
  * Name: esp32s3_rtc_sleep_pu
  *
@@ -1442,8 +1446,21 @@ static void IRAM_ATTR esp32s3_rtc_bbpll_configure(
   REGI2C_WRITE_MASK(I2C_BBPLL, I2C_BBPLL_OC_DR3, dr3);
   REGI2C_WRITE(I2C_BBPLL, I2C_BBPLL_OC_DCUR, i2c_bbpll_dcur);
   REGI2C_WRITE_MASK(I2C_BBPLL, I2C_BBPLL_OC_VCO_DBIAS, dbias);
-  REGI2C_WRITE_MASK(I2C_BBPLL, I2C_BBPLL_OC_DHREF_SEL, 2);
-  REGI2C_WRITE_MASK(I2C_BBPLL, I2C_BBPLL_OC_DLREF_SEL, 1);
+
+  /* Wait calibration done */
+
+  while (!(getreg32(I2C_MST_ANA_CONF0_REG) & I2C_MST_BBPLL_CAL_DONE));
+
+  /* Delay 10us after calibration done to fix bbpll calibration may
+   * stop early.
+   */
+
+  esp_rom_delay_us(10);
+
+  /* BBPLL calibration stop */
+
+  modifyreg32(I2C_MST_ANA_CONF0_REG, I2C_MST_BBPLL_STOP_FORCE_LOW,
+              I2C_MST_BBPLL_STOP_FORCE_HIGH);
 }
 
 /****************************************************************************
@@ -2352,10 +2369,30 @@ uint64_t esp32s3_rtc_get_time_us(void)
 }
 
 /****************************************************************************
+ * Name: esp32s3_rtc_bbpll_enable
+ *
+ * Description:
+ *   Power up BBPLL circuit.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void IRAM_ATTR esp32s3_rtc_bbpll_enable(void)
+{
+  modifyreg32(RTC_CNTL_RTC_OPTIONS0_REG, RTC_CNTL_BB_I2C_FORCE_PD |
+              RTC_CNTL_BBPLL_FORCE_PD | RTC_CNTL_BBPLL_I2C_FORCE_PD, 0);
+}
+
+/****************************************************************************
  * Name: esp32_rtc_bbpll_disable
  *
  * Description:
- *   disable BBPLL.
+ *   Power down BBPLL circuit.
  *
  * Input Parameters:
  *   None
@@ -2410,6 +2447,34 @@ uint64_t IRAM_ATTR esp32s3_rtc_get_boot_time(void)
   return ((uint64_t)getreg32(RTC_BOOT_TIME_LOW_REG))
         + (((uint64_t)getreg32(RTC_BOOT_TIME_HIGH_REG)) << 32);
 }
+
+/****************************************************************************
+ * Name: esp32s3_rtc_recalib_bbpll
+ *
+ * Description:
+ *   Re-calibration BBPLL, workaround for bootloader not calibration well
+ *   issue.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S3_SYSTEM_BBPLL_RECALIB
+void IRAM_ATTR esp32s3_rtc_recalib_bbpll(void)
+{
+  struct esp32s3_cpu_freq_config_s freq_config;
+  esp32s3_rtc_clk_cpu_freq_get_config(&freq_config);
+  esp32s3_rtc_cpu_freq_set_xtal();
+  esp32s3_rtc_bbpll_disable();
+  esp32s3_rtc_bbpll_enable();
+  esp32s3_rtc_bbpll_configure(esp32s3_rtc_clk_xtal_freq_get(), 480);
+  esp32s3_rtc_clk_cpu_freq_set_config(&freq_config);
+}
+#endif
 
 /****************************************************************************
  * Name: up_rtc_time
