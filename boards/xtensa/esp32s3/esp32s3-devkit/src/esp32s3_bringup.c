@@ -96,6 +96,10 @@
 #  include "esp32s3_partition.h"
 #endif
 
+#ifdef CONFIG_ESP_RMT
+#  include "esp32s3_board_rmt.h"
+#endif
+
 #include "esp32s3-devkit.h"
 
 /****************************************************************************
@@ -203,6 +207,20 @@ int esp32s3_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize RT timer: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESP_RMT
+  ret = board_rmt_txinitialize(RMT_TXCHANNEL, RMT_OUTPUT_PIN);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_rmt_txinitialize() failed: %d\n", ret);
+    }
+
+  ret = board_rmt_rxinitialize(RMT_RXCHANNEL, RMT_INPUT_PIN);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_rmt_txinitialize() failed: %d\n", ret);
     }
 #endif
 

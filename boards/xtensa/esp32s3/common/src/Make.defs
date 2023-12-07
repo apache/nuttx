@@ -60,6 +60,10 @@ ifeq ($(CONFIG_NET_LAN9250),y)
   CSRCS += esp32s3_lan9250.c
 endif
 
+ifeq ($(CONFIG_ESP_RMT),y)
+  CSRCS += esp32s3_board_rmt.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src
