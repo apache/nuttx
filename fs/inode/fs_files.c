@@ -379,64 +379,54 @@ int file_allocate_from_tcb(FAR struct tcb_s *tcb, FAR struct inode *inode,
                            int oflags, off_t pos, FAR void *priv, int minfd,
                            bool addref)
 {
+  int i = minfd / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK;
+  int j = minfd % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK;
   FAR struct filelist *list;
   FAR struct file *filep;
+  irqstate_t flags;
   int ret;
-  int i;
-  int j;
 
   /* Get the file descriptor list.  It should not be NULL in this context. */
 
   list = nxsched_get_files_from_tcb(tcb);
 
-  /* Calculate minfd whether is in list->fl_files.
-   * if not, allocate a new filechunk.
-   */
-
-  i = minfd / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK;
-  if (i >= list->fl_rows)
-    {
-      ret = files_extend(list, i + 1);
-      if (ret < 0)
-        {
-          return ret;
-        }
-    }
-
   /* Find free file */
 
-  j = minfd % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK;
-  do
+  flags = spin_lock_irqsave(&list->fl_lock);
+
+  for (; ; i++, j = 0)
     {
+      if (i >= list->fl_rows)
+        {
+          spin_unlock_irqrestore(&list->fl_lock, flags);
+
+          ret = files_extend(list, i + 1);
+          if (ret < 0)
+            {
+              return ret;
+            }
+
+          flags = spin_lock_irqsave(&list->fl_lock);
+        }
+
       do
         {
-          filep = files_fget_by_index(list, i, j);
+          filep = &list->fl_files[i][j];
           if (filep->f_inode == NULL)
             {
+              filep->f_oflags = oflags;
+              filep->f_pos    = pos;
+              filep->f_inode  = inode;
+              filep->f_priv   = priv;
+
               goto found;
             }
         }
       while (++j < CONFIG_NFILE_DESCRIPTORS_PER_BLOCK);
-
-      j = 0;
-    }
-  while (++i < list->fl_rows);
-
-  /* The space of file array isn't enough, allocate a new filechunk */
-
-  ret = files_extend(list, i + 1);
-  if (ret < 0)
-    {
-      return ret;
     }
 
-  filep = files_fget_by_index(list, i, 0);
 found:
-
-  filep->f_oflags = oflags;
-  filep->f_pos    = pos;
-  filep->f_inode  = inode;
-  filep->f_priv   = priv;
+  spin_unlock_irqrestore(&list->fl_lock, flags);
 
   if (addref)
     {
