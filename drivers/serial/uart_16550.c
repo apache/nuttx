@@ -1694,8 +1694,12 @@ static bool u16550_txempty(struct uart_dev_s *dev)
 #ifdef HAVE_16550_CONSOLE
 static void u16550_putc(FAR struct u16550_s *priv, int ch)
 {
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(NULL);
   while ((u16550_serialin(priv, UART_LSR_OFFSET) & UART_LSR_THRE) == 0);
   u16550_serialout(priv, UART_THR_OFFSET, (uart_datawidth_t)ch);
+  spin_unlock_irqrestore(NULL, flags);
 }
 #endif
 
@@ -1768,13 +1772,6 @@ void u16550_serialinit(void)
 int up_putc(int ch)
 {
   FAR struct u16550_s *priv = (FAR struct u16550_s *)CONSOLE_DEV.priv;
-  irqstate_t flags;
-
-  /* All interrupts must be disabled to prevent re-entrancy and to prevent
-   * interrupts from firing in the serial driver code.
-   */
-
-  flags = enter_critical_section();
 
   /* Check for LF */
 
@@ -1786,7 +1783,6 @@ int up_putc(int ch)
     }
 
   u16550_putc(priv, ch);
-  leave_critical_section(flags);
 
   return ch;
 }

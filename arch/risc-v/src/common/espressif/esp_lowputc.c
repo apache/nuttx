@@ -207,7 +207,7 @@ void esp_lowputc_disable_all_uart_int(const struct esp_uart_s *priv,
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(NULL);
 
   if (current_status != NULL)
     {
@@ -224,7 +224,7 @@ void esp_lowputc_disable_all_uart_int(const struct esp_uart_s *priv,
 
   uart_hal_clr_intsts_mask(priv->hal, UINT32_MAX);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************

@@ -213,7 +213,7 @@ static uart_dev_t g_uart1port;
 static uint8_t z16f_disableuartirq(struct uart_dev_s *dev)
 {
   struct z16f_uart_s *priv  = (struct z16f_uart_s *)dev->priv;
-  irqstate_t          flags = enter_critical_section();
+  irqstate_t          flags = spin_lock_irqsave(NULL);
   uint8_t             state = priv->rxenabled ? STATE_RXENABLED :
                                                 STATE_DISABLED |
                               priv->txenabled ? STATE_TXENABLED :
@@ -222,7 +222,7 @@ static uint8_t z16f_disableuartirq(struct uart_dev_s *dev)
   z16f_txint(dev, false);
   z16f_rxint(dev, false);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(NULL, flags);
   return state;
 }
 
@@ -232,12 +232,12 @@ static uint8_t z16f_disableuartirq(struct uart_dev_s *dev)
 
 static void z16f_restoreuartirq(struct uart_dev_s *dev, uint8_t state)
 {
-  irqstate_t flags = enter_critical_section();
+  irqstate_t flags = spin_lock_irqsave(NULL);
 
   z16f_txint(dev, (state & STATE_TXENABLED) ? true : false);
   z16f_rxint(dev, (state & STATE_RXENABLED) ? true : false);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************

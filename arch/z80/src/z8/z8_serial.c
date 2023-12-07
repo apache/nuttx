@@ -253,7 +253,7 @@ static inline uint8_t z8_getuart(FAR struct z8_uart_s *priv, uint8_t offset)
 static uint8_t z8_disableuartirq(FAR struct uart_dev_s *dev)
 {
   struct z8_uart_s *priv    = (struct z8_uart_s *)dev->priv;
-  irqstate_t          flags = enter_critical_section();
+  irqstate_t          flags = spin_lock_irqsave(NULL);
   uint8_t             state = priv->rxenabled ?
                               STATE_RXENABLED : STATE_DISABLED | \
                               priv->txenabled ?
@@ -262,7 +262,7 @@ static uint8_t z8_disableuartirq(FAR struct uart_dev_s *dev)
   z8_txint(dev, false);
   z8_rxint(dev, false);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(NULL, flags);
   return state;
 }
 
@@ -272,12 +272,12 @@ static uint8_t z8_disableuartirq(FAR struct uart_dev_s *dev)
 
 static void z8_restoreuartirq(FAR struct uart_dev_s *dev, uint8_t state)
 {
-  irqstate_t flags = enter_critical_section();
+  irqstate_t flags = spin_lock_irqsave(NULL);
 
   z8_txint(dev, (state & STATE_TXENABLED) ? true : false);
   z8_rxint(dev, (state & STATE_RXENABLED) ? true : false);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************

@@ -50,6 +50,7 @@
 #include <errno.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/arch.h>
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
@@ -200,18 +201,18 @@ void arm_lowputc(char ch)
        * atomic.
        */
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(NULL);
       if ((getreg32(TMS570_CONSOLE_BASE + TMS570_SCI_FLR_OFFSET) &
         SCI_FLR_TXRDY) != 0)
         {
           /* Send the character */
 
           putreg32((uint32_t)ch, TMS570_CONSOLE_BASE + TMS570_SCI_TD_OFFSET);
-          leave_critical_section(flags);
+          spin_unlock_irqrestore(NULL, flags);
           return;
         }
 
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(NULL, flags);
     }
 #endif
 }
