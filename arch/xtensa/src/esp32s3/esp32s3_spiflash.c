@@ -118,7 +118,7 @@
 
 /* SPI flash operation */
 
-#  ifdef CONFIG_ESP32S3S_SPI_FLASH_USE_32BIT_ADDRESS
+#  ifdef CONFIG_ESP32S3_SPI_FLASH_USE_32BIT_ADDRESS
 #    define ADDR_BITS(addr)         (((addr) & 0xff000000) ? 32 : 24)
 #    define READ_CMD(addr)          (ADDR_BITS(addr) == 32 ? FLASH_CMD_FSTRD4B : \
                                                              FLASH_CMD_FSTRD)

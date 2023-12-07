@@ -233,7 +233,7 @@ config ESP32S3_FLASH_16M
 config ESP32S3_FLASH_32M
 	bool
 	default n
-	select ESP32S3S_SPI_FLASH_USE_32BIT_ADDRESS
+	select ESP32S3_SPI_FLASH_USE_32BIT_ADDRESS
 
 config ESP32S3_ESPTOOLPY_NO_STUB
 	bool "Disable download stub"
@@ -1753,7 +1753,7 @@ config ESP32S3_SPI_FLASH_DONT_USE_ROM_CODE
 		Use source code for SPI flash driver instead of functions
 		in ROM.
 
-config ESP32S3S_SPI_FLASH_USE_32BIT_ADDRESS
+config ESP32S3_SPI_FLASH_USE_32BIT_ADDRESS
 	bool "SPI flash uses 32-bit address"
 	default n
 	select ESP32S3_SPI_FLASH_DONT_USE_ROM_CODE
