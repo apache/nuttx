@@ -68,16 +68,19 @@
  * VCOH otherwise.
  *
  * PLL_VCOx = (STM32_HSE_FREQUENCY / PLLM) * PLLN
+ *
  * Subject to:
  *
  *     1 <= PLLM <= 63
  *     4 <= PLLN <= 512
+ *
  *   150 MHz <= PLL_VCOL <= 420MHz
  *   192 MHz <= PLL_VCOH <= 836MHz
  *
  * SYSCLK  = PLL_VCO / PLLP
  * CPUCLK  = SYSCLK / D1CPRE
- * Subject to
+ *
+ * Subject to:
  *
  *   PLLP1   = {2, 4, 6, 8, ..., 128}
  *   PLLP2,3 = {2, 3, 4, ..., 128}
@@ -91,10 +94,11 @@
 
 /* VOS Scale
  *
- * Choose VOS scaling to suit the electrical environment.  NuttX defaults to VOS
- * scale 1 for higher speeds.  Override the default in order to limit the
- * internal voltage regulator's ramp-up.  Try increasing the scale (lower the
- * voltage) if the board finds VOSRDY not ready at power-up.
+ * Choose VOS scaling to suit the electrical environment.  NuttX
+ * defaults to VOS scale 1 for higher speeds.  Override the default in
+ * order to limit the internal voltage regulator's ramp-up.  Try
+ * increasing the scale (lower the voltage) if the board finds VOSRDY
+ * not ready at power-up.
  */
 #define STM32_PWR_VOS_SCALE      PWR_D3CR_VOS_SCALE_2
 
@@ -126,10 +130,7 @@
 #define STM32_APB2_TIM16_CLKIN  (2*STM32_PCLK2_FREQUENCY)
 #define STM32_APB2_TIM17_CLKIN  (2*STM32_PCLK2_FREQUENCY)
 
-/* Kernel Clock Configuration
- *
- * Note: look at Table 54 in ST Manual
- */
+/* Kernel Clock Configuration ***********************************************/
 
 /* USART234578 clock source - PCLK */
 
@@ -147,7 +148,7 @@
 
 #define STM32_RCC_D2CCIP1R_SPI123SRC RCC_D2CCIP1R_SPI123SEL_PLL1
 
-/* SPI45 clock source - APB (PCLK2?) */
+/* SPI45 clock source - APB (PCLK2) */
 
 #define STM32_RCC_D2CCIP1R_SPI45SRC  RCC_D2CCIP1R_SPI45SEL_APB
 
@@ -218,12 +219,12 @@
 #define BOARD_LED6        5
 #define BOARD_NLEDS       6
 
-#define BOARD_LED1_GREEN   BOARD_LED1
-#define BOARD_LED1_BLUE    BOARD_LED2
-#define BOARD_LED1_RED     BOARD_LED3
-#define BOARD_LED2_GREEN   BOARD_LED4
-#define BOARD_LED2_BLUE    BOARD_LED5
-#define BOARD_LED2_RED     BOARD_LED6
+#define BOARD_LED1_GREEN  BOARD_LED1
+#define BOARD_LED1_BLUE   BOARD_LED2
+#define BOARD_LED1_RED    BOARD_LED3
+#define BOARD_LED2_GREEN  BOARD_LED4
+#define BOARD_LED2_BLUE   BOARD_LED5
+#define BOARD_LED2_RED    BOARD_LED6
 
 /* LED bits for use with board_userled_all() */
 

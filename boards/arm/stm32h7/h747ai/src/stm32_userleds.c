@@ -116,7 +116,7 @@ void board_userled_all(uint32_t ledset)
 {
   int i;
 
-  /* Configure LED1-3 GPIOs for output */
+  /* Configure LED1-6 GPIOs for output */
 
   for (i = 0; i < nitems(g_ledcfg); i++)
     {
