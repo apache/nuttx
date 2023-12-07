@@ -417,8 +417,8 @@ ENV WASI_SDK_PATH="/tools/wasi-sdk"
 ENV PATH="/tools/wamr:$PATH"
 
 # gn tool
-COPY --from=nuttx-tools /tools/gn/ /tools/gn/
-ENV PATH="/tools/gn/gn/out:$PATH"
+COPY --from=nuttx-tools /tools/gn/ /tools/gn/out/
+ENV PATH="/tools/gn:$PATH"
 
 # ZAP tool and nodejs packet
 COPY --from=nuttx-tools /tools/zap/ /tools/zap/
