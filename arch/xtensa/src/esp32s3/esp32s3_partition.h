@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32S3S3_ESP32S3S3_PARTITION_H
-#define __ARCH_XTENSA_SRC_ESP32S3S3_ESP32S3S3_PARTITION_H
+#ifndef __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_PARTITION_H
+#define __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_PARTITION_H
 
 /****************************************************************************
  * Included Files
@@ -109,4 +109,4 @@ int esp32s3_partition_write(const char *label, size_t offset, void *buf,
 #undef EXTERN
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_XTENSA_SRC_ESP32S3S3_ESP32S3S3_PARTITION_H */
+#endif /* __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_PARTITION_H */
