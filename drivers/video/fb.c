@@ -1223,14 +1223,17 @@ static int fb_get_planeinfo(FAR struct fb_chardev_s *fb,
 }
 
 /****************************************************************************
- * Name: fb_notify_paninfo
+ * Name: fb_do_pollnotify
  ****************************************************************************/
 
-static void fb_notify_paninfo(FAR struct fb_paninfo_s *paninfo,
-                              pollevent_t events, int overlay)
+static void fb_do_pollnotify(wdparm_t arg)
 {
+  FAR struct fb_paninfo_s *paninfo = (FAR struct fb_paninfo_s *)arg;
   FAR struct fb_priv_s * priv;
   irqstate_t flags;
+  int overlay;
+
+  overlay = paninfo - paninfo->dev->paninfo - 1;
 
   flags = enter_critical_section();
   for (priv = paninfo->dev->head; priv; priv = priv->flink)
@@ -1242,24 +1245,10 @@ static void fb_notify_paninfo(FAR struct fb_paninfo_s *paninfo,
 
       /* Notify framebuffer is writable. */
 
-      poll_notify(priv->fds, CONFIG_VIDEO_FB_NPOLLWAITERS, events);
+      poll_notify(priv->fds, CONFIG_VIDEO_FB_NPOLLWAITERS, POLLOUT);
     }
 
   leave_critical_section(flags);
-}
-
-/****************************************************************************
- * Name: fb_do_pollnotify
- ****************************************************************************/
-
-static void fb_do_pollnotify(wdparm_t arg)
-{
-  FAR struct fb_paninfo_s *paninfo = (FAR struct fb_paninfo_s *)arg;
-  int overlay;
-
-  overlay = paninfo - paninfo->dev->paninfo - 1;
-
-  fb_notify_paninfo(paninfo, POLLOUT, overlay);
 }
 
 #ifdef CONFIG_FB_SYNC
@@ -1373,20 +1362,27 @@ static void fb_pollnotify(FAR struct fb_chardev_s *fb, int overlay)
  *
  * Input Parameters:
  *   vtable  - Pointer to framebuffer's virtual table.
- *   overlay - Overlay index.
  *
  ****************************************************************************/
 
-void fb_notify_vsync(FAR struct fb_vtable_s *vtable, int overlay)
+void fb_notify_vsync(FAR struct fb_vtable_s *vtable)
 {
   FAR struct fb_chardev_s *fb;
-  FAR struct fb_paninfo_s *paninfo;
+  FAR struct fb_priv_s * priv;
+  irqstate_t flags;
 
   fb = vtable->priv;
   if (fb != NULL)
     {
-      paninfo = &fb->paninfo[overlay + 1];
-      fb_notify_paninfo(paninfo, POLLPRI, overlay);
+      flags = enter_critical_section();
+      for (priv = fb->head; priv; priv = priv->flink)
+        {
+          /* Notify that the vsync comes. */
+
+          poll_notify(priv->fds, CONFIG_VIDEO_FB_NPOLLWAITERS, POLLPRI);
+        }
+
+      leave_critical_section(flags);
     }
 }
 

@@ -426,7 +426,7 @@ void sim_x11loop(void)
   if (now - last >= MSEC2TICK(16))
     {
       last = now;
-      fb_notify_vsync(&g_fbobject, FB_NO_OVERLAY);
+      fb_notify_vsync(&g_fbobject);
       if (fb_paninfo_count(&g_fbobject, FB_NO_OVERLAY) > 1)
         {
           fb_remove_paninfo(&g_fbobject, FB_NO_OVERLAY);
