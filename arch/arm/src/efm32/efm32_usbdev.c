@@ -3673,6 +3673,7 @@ static int efm32_usbinterrupt(int irq, void *context, void *arg)
           usbtrace(TRACE_INTDECODE(EFM32_TRACEINTID_SOF),
                   (uint16_t)regval);
           efm32_putreg(USB_GINTSTS_SOF, EFM32_USB_GINTSTS);
+          usbdev_sof_irq(&priv->usbdev, efm32_getframe(&priv->usbdev));
         }
 #endif
 
