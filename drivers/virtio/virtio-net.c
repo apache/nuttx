@@ -313,15 +313,13 @@ static int virtio_net_ifup(FAR struct netdev_lowerhalf_s *dev)
   virtio_net_rxfill(dev);
 
 #ifdef CONFIG_DRIVERS_WIFI_SIM
-  if (priv->lower.wifi)
-    {
-      return OK;
-    }
-  else
+  if (priv->lower.wifi == NULL)
 #endif
     {
-      return netdev_lower_carrier_on(dev);
+      netdev_lower_carrier_on(dev);
     }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -348,7 +346,8 @@ static int virtio_net_ifdown(FAR struct netdev_lowerhalf_s *dev)
   else
 #endif
     {
-      return netdev_lower_carrier_off(dev);
+      netdev_lower_carrier_off(dev);
+      return OK;
     }
 }
 
