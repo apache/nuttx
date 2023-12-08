@@ -1015,11 +1015,10 @@ void up_fbuninitialize(int display);
  *
  * Input Parameters:
  *   vtable  - Pointer to framebuffer's virtual table.
- *   overlay - Overlay index.
  *
  ****************************************************************************/
 
-void fb_notify_vsync(FAR struct fb_vtable_s *vtable, int overlay);
+void fb_notify_vsync(FAR struct fb_vtable_s *vtable);
 
 /****************************************************************************
  * Name: fb_peek_paninfo
