@@ -1462,27 +1462,18 @@ static void wlan_softap_tx_done(uint8_t *data, uint16_t *len, bool status)
 #ifdef ESP32C3_WLAN_HAS_STA
 int esp32c3_wlan_sta_set_linkstatus(bool linkstatus)
 {
-  int ret = -EINVAL;
   struct wlan_priv_s *priv = &g_wlan_priv[ESP32C3_WLAN_STA_DEVNO];
 
-  if (priv != NULL)
+  if (linkstatus == true)
     {
-      if (linkstatus == true)
-        {
-          ret = netdev_carrier_on(&priv->dev);
-        }
-      else
-        {
-          ret = netdev_carrier_off(&priv->dev);
-        }
-
-      if (ret < 0)
-        {
-          nerr("ERROR: Failed to notify the networking layer\n");
-        }
+      netdev_carrier_on(&priv->dev);
+    }
+  else
+    {
+      netdev_carrier_off(&priv->dev);
     }
 
-  return ret;
+  return OK;
 }
 
 /****************************************************************************

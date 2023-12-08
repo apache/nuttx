@@ -1538,7 +1538,7 @@ static int wifidriver_connect(struct netdev_lowerhalf_s *dev)
   ret = wifidriver_start_connect((struct sim_netdev_s *)dev);
   if (ret >= 0)
     {
-      ret = netdev_lower_carrier_on(dev);
+      netdev_lower_carrier_on(dev);
     }
 
   return ret;
@@ -1551,7 +1551,7 @@ static int wifidriver_disconnect(struct netdev_lowerhalf_s *dev)
   ret = wifidriver_start_disconnect((struct sim_netdev_s *)dev);
   if (ret >= 0)
     {
-      ret = netdev_lower_carrier_off(dev);
+      netdev_lower_carrier_off(dev);
     }
 
   return ret;
