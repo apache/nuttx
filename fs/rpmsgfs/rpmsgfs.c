@@ -1223,6 +1223,7 @@ static int rpmsgfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
     }
 
   ret = rpmsgfs_client_statfs(fs->handle, fs->fs_root, buf);
+  buf->f_type = RPMSGFS_MAGIC;
 
   nxmutex_unlock(&fs->fs_lock);
   return ret;
