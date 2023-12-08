@@ -3724,6 +3724,7 @@ static int esp32s3_usbinterrupt(int irq, void *context, void *arg)
         {
           usbtrace(TRACE_INTDECODE(ESP32S3_TRACEINTID_SOF),
                    (uint16_t)regval);
+          usbdev_sof_irq(&priv->usbdev, esp32s3_getframe(&priv->usbdev));
         }
 #endif
 
