@@ -1788,19 +1788,18 @@ static void wlan_softap_tx_done(uint8_t *data, uint16_t *len, bool status)
 #ifdef ESP32_WLAN_HAS_STA
 int esp32_wlan_sta_set_linkstatus(bool linkstatus)
 {
-  int ret = -EINVAL;
   struct wlan_priv_s *priv = &g_wlan_priv[ESP32_WLAN_STA_DEVNO];
 
   if (linkstatus)
     {
-      ret = netdev_carrier_on(&priv->dev);
+      netdev_carrier_on(&priv->dev);
     }
   else
     {
-      ret = netdev_carrier_off(&priv->dev);
+      netdev_carrier_off(&priv->dev);
     }
 
-  return ret;
+  return OK;
 }
 
 /****************************************************************************

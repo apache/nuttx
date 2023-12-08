@@ -1715,7 +1715,7 @@ static int wifidriver_connect(FAR struct netdev_lowerhalf_s *dev)
   ret = wifidriver_start_connect(LOWERDEV2WIFIDEV(dev));
   if (ret >= 0)
     {
-      ret = netdev_lower_carrier_on(dev);
+      netdev_lower_carrier_on(dev);
     }
 
   return ret;

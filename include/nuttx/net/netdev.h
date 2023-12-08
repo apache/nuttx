@@ -736,8 +736,8 @@ int netdev_ifdown(FAR struct net_driver_s *dev);
  *
  ****************************************************************************/
 
-int netdev_carrier_on(FAR struct net_driver_s *dev);
-int netdev_carrier_off(FAR struct net_driver_s *dev);
+void netdev_carrier_on(FAR struct net_driver_s *dev);
+void netdev_carrier_off(FAR struct net_driver_s *dev);
 
 /****************************************************************************
  * Name: chksum
