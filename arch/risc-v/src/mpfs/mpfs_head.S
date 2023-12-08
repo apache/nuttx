@@ -166,7 +166,7 @@ __start:
   csrw mip, zero
 
   /* Jump to application */
-  j mpfs_jump_to_app
+  tail mpfs_jump_to_app
 
 .continue_boot:
 
@@ -187,7 +187,7 @@ __start:
 
   /* Jump to __mpfs_start with mhartid in a0 */
 
-  jal  __mpfs_start
+  tail __mpfs_start
 
   /* We shouldn't return from __mpfs_start
    * in case of return, loop forever. nop's added so can be seen in debugger
