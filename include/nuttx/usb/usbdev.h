@@ -480,6 +480,19 @@ FAR void *usbdev_dma_alloc(size_t size);
 void usbdev_dma_free(FAR void *memory);
 #endif
 
+/****************************************************************************
+ * Name: up_usbdev_sof_irq
+ *
+ * Description:
+ *   If CONFIG_USBDEV_SOFINTERRUPT is enabled, board logic must provide
+ *   this function. It gets called in interrupt mode by USB device code
+ *   every time start-of-frame USB packet is received from host.
+ *
+ ****************************************************************************/
+#ifdef CONFIG_USBDEV_SOFINTERRUPT
+void usbdev_sof_irq(FAR struct usbdev_s *dev, uint16_t frameno);
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
