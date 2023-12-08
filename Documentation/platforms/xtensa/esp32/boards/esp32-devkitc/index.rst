@@ -858,6 +858,8 @@ This example uses littlefs on ESP32's SPI flash to store wasm modules.
         --block-size 4096 \
         --prog-size 256 \
         --read-size 256 \
+        --name-max 32 \
+        --disk-version 2.0 \
         ..../wasm_binary_directory
 
 2. Write the NuttX image and the filesystem to ESP32::
