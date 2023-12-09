@@ -83,7 +83,7 @@ config CXD56_PMIC_INT
 	---help---
 		Enable PMIC interrupt.
 
-endif
+endif # CXD56_PMIC
 
 config CXD56_CPUFIFO
 	bool
@@ -125,7 +125,8 @@ config CXD56_FARAPI_VERSION_FAILED_PANIC
 	default n
 	---help---
 		If the version mismatch is detected, do PANIC() to stop the system.
-endif
+
+endif # CXD56_FARAPI_VERSION_CHECK
 
 config CXD56_FARAPI_DEBUG
 	bool "Debug Far API"
@@ -290,7 +291,8 @@ config CXD56_CHARGER_TEMP_PRECISE
 		Get temperature precisely. If this option is enabled, driver calculate precisely
 		from register value to degrees Celsius.
 		This option requires libm.
-endif
+
+endif # CXD56_CHARGER
 
 comment "NuttX style Audio Driver Support"
 
@@ -390,7 +392,7 @@ config CXD56_UART0_FLOWCONTROL
 	---help---
 		Enable CXD56 UART0 RTS flow control
 
-endif
+endif # CXD56_UART0
 
 config CXD56_UART1
 	bool "UART1"
@@ -538,7 +540,8 @@ config CXD56_SPI5_PINMAP_SDIO
 	bool "SPI5 pin assign to SDIO"
 	---help---
 		SPI5 assigns to the shared pins with SDIO.
-endchoice
+
+endchoice # SPI5 pin configuration
 
 config CXD56_DMAC_SPI5_TX
 	bool "DMAC support for SPI5 TX"
@@ -1113,7 +1116,8 @@ config CXD56_SCU_XOSC_DIV
 	int "SCU XOSC predivider"
 	default 2
 	range 1 4
-endif
+
+endif # CXD56_SCU_XOSC
 
 choice
 	prompt "SCU32K clock source"
@@ -1124,7 +1128,8 @@ config CXD56_SCU32K_RCRTC
 
 config CXD56_SCU32K_RTC
 	bool "RTC"
-endchoice
+
+endchoice # SCU32K clock source
 
 config CXD56_SCU_DEBUG
 	bool "SCU Debug"
@@ -1151,6 +1156,7 @@ config CXD56_UDMAC
 	select ARCH_DMA
 	---help---
 		Use DMAC for reading sensing data from SCU FIFO.
+
 endif # CXD56_SCU
 
 config CXD56_CISIF
@@ -1380,7 +1386,8 @@ config CXD56_GNSS_1PPS_PIN_HIF_IRQ_OUT
 	bool "Use PIN_HIF_IRQ_OUT"
 	---help---
 		GNSS 1PPS output from PIN_HIF_IRQ_OUT pin.
-endchoice
+
+endchoice # GNSS 1PPS output
 
 config CXD56_GNSS_DEBUG_FEATURE
 	bool "GNSS debug feature"
@@ -1398,13 +1405,14 @@ config CXD56_GNSS_DEBUG_INFO
 
 endif # CXD56_GNSS_DEBUG_FEATURE
 
-endmenu
+endmenu # GNSS settings
+
 config CXD56_GEOFENCE
 	bool "Geofence Support"
 	default y
 	depends on CXD56_GNSS
 
-endif
+endif # CXD56_GNSS
 
 config CXD56_TESTSET
 	bool "Use custom testset for spinlock"
@@ -1419,7 +1427,7 @@ config CXD56_TESTSET_WITH_HWSEM
 	bool "Use custom testset based on hardware semaphore"
 	default !CXD56_USE_SYSBUS
 
-endif
+endif # CXD56_TESTSET
 
 config CXD56_USE_SYSBUS
 	bool "Use the system bus for the data section"
@@ -1427,4 +1435,5 @@ config CXD56_USE_SYSBUS
 	select ARCH_USE_TEXT_HEAP if ELF
 	---help---
 		To make ldrex/strex work correctly, this option must be enabled
+
 endmenu
