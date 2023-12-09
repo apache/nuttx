@@ -60,7 +60,7 @@ static const size_t g_pgt_sizes[] =
  ****************************************************************************/
 
 void mmu_ln_setentry(uint32_t ptlevel, uintptr_t lnvaddr, uintptr_t paddr,
-                     uintptr_t vaddr, uint32_t mmuflags)
+                     uintptr_t vaddr, uint64_t mmuflags)
 {
   uintptr_t *lntable = (uintptr_t *)lnvaddr;
   uint32_t   index;
@@ -136,7 +136,7 @@ void mmu_ln_restore(uint32_t ptlevel, uintptr_t lnvaddr, uintptr_t vaddr,
 }
 
 void mmu_ln_map_region(uint32_t ptlevel, uintptr_t lnvaddr, uintptr_t paddr,
-                       uintptr_t vaddr, size_t size, uint32_t mmuflags)
+                       uintptr_t vaddr, size_t size, uint64_t mmuflags)
 {
   uintptr_t end_paddr = paddr + size;
   size_t    page_size = g_pgt_sizes[ptlevel - 1];
