@@ -19,38 +19,35 @@ STM32H753BI microcontroller. The board has 2 expansion connectors used by the LC
 touchscreen and another for access to other peripherals of microcontroller.
 
 The board features:
-- 8 to 52V power supply
-- SWD Pins for use as STLink (Pin header) and TC2030-IDC 6-Pin Tag-Connect Plug-of-Nails™ Connector
-- Crystal for HS 25MHz
-- Crystal for RTC 32.768KHz
-- 1 UART serial for debug
-- 1 Led RGB
-- 1 Buzzer without internal oscillator
-- 1 Mono audio up to 3W
-- 1 Ethernet 10/100
-- 1 MicroSD connector supporting 1 or 4-bit bus
-- 1 USB 2.0 Host/Device
-- 1 EEPROM memory with 512K bits
-- 1 External SRAM memory with 8MB
-- 1 NOR memory with 16MB
-- 2 On-board RS232 Transceiver with RTS/CTS
-- 2 On-board RS485 Transceiver
-- 2 On-board CAN-FD Transceiver
+  - 8 to 52V power supply
+  - SWD Pins for use as STLink (Pin header) and TC2030-IDC 6-Pin Tag-Connect Plug-of-Nails™ Connector
+  - Crystal for HS 25MHz
+  - Crystal for RTC 32.768KHz
+  - 1 UART serial for debug
+  - 1 Led RGB
+  - 1 Buzzer without internal oscillator
+  - 1 Mono audio up to 3W
+  - 1 Ethernet 10/100
+  - 1 MicroSD connector supporting 1 or 4-bit bus
+  - 1 USB 2.0 Host/Device
+  - 1 EEPROM memory with 512K bits
+  - 1 External SRAM memory with 8MB
+  - 1 NOR memory with 16MB
+  - 2 On-board RS232 Transceiver with RTS/CTS
+  - 2 On-board RS485 Transceiver
+  - 2 On-board CAN-FD Transceiver
 
 Expansion connector 1 features:
-- 1 Display RBG 888 
-- 1 Capacitive Touchscreen sensor
+  - 1 Display RBG 888 
+  - 1 Capacitive Touchscreen sensor
 
 Expansion connector 2 features.
-- 1 SPI
-- 1 I2C
-- 1 One Wire
-- 2 DACs
-- 6 PWM Channels
-- 10 ADCs
-
-Board documentation:
-https://github.com/witte-technology/...
+  - 1 SPI
+  - 1 I2C
+  - 1 One Wire
+  - 2 DACs
+  - 6 PWM Channels
+  - 10 ADCs
 
 LEDs
 ====
@@ -381,3 +378,18 @@ nsh
 
 Configures the NuttShell (nsh) located at apps/examples/nsh. This
 configuration enables a serial console on UART1.
+
+modbus_slave
+------------
+
+Configures the ModBus RTU Slave located at apps/examples/modbus. This
+configuration enables a RS485 on USART6.
+
+After configuring the desired pins on menuconfig and wiring the RS485 converter, you
+can enable the ModBus to respond to queries::
+
+    nsh> modbus -e
+
+In your pc you will be able to read the ModBus registers using an application like ``mbpoll``::
+
+    $ mbpoll -a 10 -b 38400 -t 3 -r 1000 -c 4 /dev/ttyUSB1 -R
