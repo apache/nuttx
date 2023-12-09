@@ -355,7 +355,7 @@ config NRF52_LFCLK_RC
 config NRF52_LFCLK_SYNTH
 	bool "Synthesized from HFCLK"
 
-endchoice
+endchoice # LFCLK source
 
 endif # NRF52_USE_LFCLK
 
@@ -397,7 +397,7 @@ config NRF52_SYSTIMER_RTC
 	---help---
 		Use RTC timer in tickless mode.
 
-endchoice
+endchoice # System Timer Source
 
 if NRF52_SYSTIMER_RTC
 
@@ -409,7 +409,7 @@ config NRF52_SYSTIMER_RTC_INSTANCE
 	---help---
 		Which RTC instance to use to drive the system timer
 
-endif
+endif # NRF52_SYSTIMER_RTC
 
 endmenu # System Timer
 
@@ -636,7 +636,7 @@ config NRF52_SAADC_TIMER_CC
 	default 0
 	range 80 2047
 
-endif #NRF52_SAADC_TIMER
+endif # NRF52_SAADC_TIMER
 
 config NRF52_SAADC_OVERSAMPLE
 	int "SAADC oversample"

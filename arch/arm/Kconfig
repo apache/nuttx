@@ -1347,7 +1347,7 @@ config ARM_SEMIHOSTING_HOSTFS_CACHE_COHERENCE
 	---help---
 		Flush & Invalidte cache before & after bkpt instruction.
 
-endif
+endif # ARM_SEMIHOSTING_HOSTFS
 
 if SCHED_BACKTRACE
 
