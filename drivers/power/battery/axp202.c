@@ -390,8 +390,7 @@ static int axp202_current(FAR struct battery_charger_dev_s *dev, int value)
       return ret;
     }
 
-  /**
-   * Charge current setting
+  /* Charge current setting
    * Icharge= [300+(Bit3-0)*100] mA
    */
 

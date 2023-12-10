@@ -1693,8 +1693,7 @@ static int seq_scuirqhandler(int irq, void *context, void *arg)
         }
     }
 
-  /**
-   * Detect all FIFO underrun errors
+  /* Detect all FIFO underrun errors
    * This error may not happened because check reading bytes at seq_read().
    * Thus, it is a program error when ERR1 detected.
    */
@@ -1888,8 +1887,7 @@ static int seq_fifoinit(struct seq_s *seq, int fifoid, uint16_t fsize)
       return -ENOMEM;
     }
 
-  /**
-   * FIFO IDs (* is unavailable)
+  /* FIFO IDs (* is unavailable)
    *  D = Decimation FIFO
    *  N = Normal FIFO
    *
@@ -3165,8 +3163,7 @@ int seq_ioctl(struct seq_s *seq, int fifoid, int cmd, unsigned long arg)
         }
         break;
 
-      /**
-       * Enable/disable sign conversion feature
+      /* Enable/disable sign conversion feature
        * Arg: unsigned long, 0 = off, other = on
        */
 
@@ -3176,8 +3173,7 @@ int seq_ioctl(struct seq_s *seq, int fifoid, int cmd, unsigned long arg)
         }
         break;
 
-      /**
-       * Enable offset/gain adjustment preprocessing.
+      /* Enable offset/gain adjustment preprocessing.
        * Arg: Pointer of adjust_xyz_t
        * If arg is null, just enable offset/gain (use current setting value).
        */
@@ -3201,8 +3197,7 @@ int seq_ioctl(struct seq_s *seq, int fifoid, int cmd, unsigned long arg)
         }
         break;
 
-      /**
-       * Disable offset/gain adjustment preprocessing.
+      /* Disable offset/gain adjustment preprocessing.
        * Arg: None
        */
 
@@ -3212,8 +3207,7 @@ int seq_ioctl(struct seq_s *seq, int fifoid, int cmd, unsigned long arg)
         }
         break;
 
-      /**
-       * Set IIR filter position and coefficiencies.
+      /* Set IIR filter position and coefficiencies.
        * Arg: Pointer of struct math_filter_s
        */
 
@@ -3239,8 +3233,7 @@ int seq_ioctl(struct seq_s *seq, int fifoid, int cmd, unsigned long arg)
         }
         break;
 
-      /**
-       * Set event notifier
+      /* Set event notifier
        * Arg: Pointer of struct scuev_notify_s
        */
 
@@ -3266,8 +3259,7 @@ int seq_ioctl(struct seq_s *seq, int fifoid, int cmd, unsigned long arg)
         }
         break;
 
-      /**
-       * Set number of elements per sample for mathfunc
+      /* Set number of elements per sample for mathfunc
        * Arg: uint8_t
        */
 
@@ -3277,8 +3269,7 @@ int seq_ioctl(struct seq_s *seq, int fifoid, int cmd, unsigned long arg)
         }
         break;
 
-      /**
-       * Set decimation parameters
+      /* Set decimation parameters
        * Arg: Pointer of struct decimation_s
        */
 
@@ -3295,8 +3286,7 @@ int seq_ioctl(struct seq_s *seq, int fifoid, int cmd, unsigned long arg)
               break;
             }
 
-          /**
-           * Now only save decimation parameters because decimation parameter
+          /* Now only save decimation parameters because decimation parameter
            * cannot be set while sequencer running.
            */
 
@@ -3306,8 +3296,7 @@ int seq_ioctl(struct seq_s *seq, int fifoid, int cmd, unsigned long arg)
         }
         break;
 
-      /**
-       * Set FIFO watermark
+      /* Set FIFO watermark
        * Arg: Pointer of struct scufifo_wm_s
        */
 
@@ -3418,15 +3407,13 @@ void scu_initialize(void)
 
   scufifo_initialize();
 
-  /**
-   * If SCU clock has been already enabled, keep SCU running without loading
+  /* If SCU clock has been already enabled, keep SCU running without loading
    * and reset of SCU firmware.
    */
 
   if (false == cxd56_scuseq_clock_is_enabled())
     {
-      /**
-       * Enable SCU clock. This process must do before loading firmware
+      /* Enable SCU clock. This process must do before loading firmware
        * because SCU instruction RAM is not accessible.
        */
 

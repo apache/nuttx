@@ -19,11 +19,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- *    @file     log.h
- *    @brief    Contains all functions support for uart driver
- *    @version  0.0
- *    @date     31. Jan. 2018
- *    @author   eagle.han
+ * log.h
+ * Contains all functions support for uart driver
+ * 0.0
+ * 31. Jan. 2018
+ * eagle.han
  ****************************************************************************/
 
 #ifndef ENABLE_LOG_ROM

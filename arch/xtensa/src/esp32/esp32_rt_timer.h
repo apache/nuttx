@@ -42,9 +42,7 @@
  * Public Types
  ****************************************************************************/
 
-/**
- * RT timer state
- */
+/* RT timer state */
 
 enum rt_timer_state_e
 {
@@ -54,9 +52,7 @@ enum rt_timer_state_e
   RT_TIMER_DELETE           /* Timer is to be delete */
 };
 
-/**
- * RT timer data structure
- */
+/* RT timer data structure */
 
 struct rt_timer_s
 {
@@ -69,9 +65,7 @@ struct rt_timer_s
   struct list_node list;        /* Working list */
 };
 
-/**
- * RT timer creation arguments data structure
- */
+/* RT timer creation arguments data structure */
 
 struct rt_timer_args_s
 {

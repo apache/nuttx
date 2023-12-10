@@ -84,8 +84,7 @@
 #  define LAN9250_SPI_ENABLE_SQI    LAN9250_SPI_CMD_ENABLE_SQI
 #endif
 
-/**
- * LAN9250 interrupt trigger source:
+/* LAN9250 interrupt trigger source:
  *
  *   - PHY for checking link up or down
  *   - TX data FIFO available
@@ -923,8 +922,7 @@ static inline void lan9250_send_buffer(FAR struct lan9250_driver_s *priv,
 
   lan9250_buffer_dump(LAN9250_TXDFR, buffer, buflen);
 
-  /**
-   * LAN9250 SPI write command A fields:
+  /* LAN9250 SPI write command A fields:
    *
    *   - TX packet length 4 bytes align
    *   - First frame
@@ -935,8 +933,7 @@ static inline void lan9250_send_buffer(FAR struct lan9250_driver_s *priv,
            SPI_CMD_WRITE_A_LS  | buflen;
   lan9250_set_reg(priv, LAN9250_TXDFR, regval);
 
-  /**
-   * LAN9250 SPI write command B fields:
+  /* LAN9250 SPI write command B fields:
    *
    *   - Packet TAG
    */
@@ -1059,8 +1056,7 @@ static inline void lan9250_sw_reset(FAR struct lan9250_driver_s *priv)
   lan9250_wait_ready(priv, LAN9250_BOTR, BOTR_MASK,
                      BOTR_VAL, LAN9250_RESET_TIMEOUT);
 
-  /**
-   * Send a command to reset:
+  /* Send a command to reset:
    *
    *   - Digital controller
    *   - HMAC
@@ -1104,8 +1100,7 @@ static void lan9250_set_txavailabe(FAR struct lan9250_driver_s *priv,
 
   if (enable)
     {
-      /**
-       * Configure FIFO level interrupt:
+      /* Configure FIFO level interrupt:
        *
        *   - TX data available level: Ethernet maximum packet size, transform
        *     this value to be block number with 64-byte align
@@ -1124,8 +1119,7 @@ static void lan9250_set_txavailabe(FAR struct lan9250_driver_s *priv,
     }
   else
     {
-      /**
-       * Configure FIFO level interrupt:
+      /* Configure FIFO level interrupt:
        *
        *   - TX data available level: 255, so that no interrupt triggers
        *   - TX status level: 255, use maximum value so that this will not be
@@ -1184,8 +1178,7 @@ static int lan9250_reset(FAR struct lan9250_driver_s *priv)
 
   ninfo("Rev ID: %08x\n", regval & CIARR_CREV_M);
 
-  /**
-   * Configure TX FIFO size mode to be 8:
+  /* Configure TX FIFO size mode to be 8:
    *
    *   - TX data FIFO size:   7680
    *   - RX data FIFO size:   7680
@@ -1196,8 +1189,7 @@ static int lan9250_reset(FAR struct lan9250_driver_s *priv)
   regval = HWCFGR_MBO | (8 << HWCFGR_TXFS_S);
   lan9250_set_reg(priv, LAN9250_HWCFGR,  regval);
 
-  /**
-   * Configure MAC automatic flow control:
+  /* Configure MAC automatic flow control:
    *
    *   - Automatic flow control high level: 110
    *   - Automatic flow control low level: 55
@@ -1211,8 +1203,7 @@ static int lan9250_reset(FAR struct lan9250_driver_s *priv)
            HMAFCCFGR_FCOAF;
   lan9250_set_reg(priv, LAN9250_HMAFCCFGR, regval);
 
-  /**
-   * Configure host MAC flow control:
+  /* Configure host MAC flow control:
    *
    *   - Pause time: 15
    *   - Flow control
@@ -1221,8 +1212,7 @@ static int lan9250_reset(FAR struct lan9250_driver_s *priv)
   regval = (0xf << HMACFCR_PT_S) | HMACFCR_FLE;
   lan9250_set_macreg(priv, LAN9250_HMACFCR, regval);
 
-  /**
-   * Configure interrupt:
+  /* Configure interrupt:
    *
    *   - Interrupt De-assertion interval: 10
    *   - Interrupt output to pin
@@ -1234,8 +1224,7 @@ static int lan9250_reset(FAR struct lan9250_driver_s *priv)
            ICFGR_IRQE | ICFGR_IRQBT;
   lan9250_set_reg(priv, LAN9250_ICFGR, regval);
 
-  /**
-   * Configure interrupt trigger source, please refer to macro
+  /* Configure interrupt trigger source, please refer to macro
    * LAN9250_INT_SOURCE.
    */
 
@@ -1245,8 +1234,7 @@ static int lan9250_reset(FAR struct lan9250_driver_s *priv)
 
   lan9250_set_txavailabe(priv, false);
 
-  /**
-   * Configure RX:
+  /* Configure RX:
    *
    *   - RX DMA counter: Ethernet maximum packet size
    *   - RX data offset: 4, so that need read dummy before reading data
@@ -1255,8 +1243,7 @@ static int lan9250_reset(FAR struct lan9250_driver_s *priv)
   regval = (LAN9250_PKTBUF_SIZE << RXCFGR_RXDMAC_S) | (4 << RXCFGR_RXDO_S);
   lan9250_set_reg(priv, LAN9250_RXCFGR, regval);
 
-  /**
-   * Configure remote power management:
+  /* Configure remote power management:
    *
    *   - Auto wakeup
    *   - Disable 1588 clock
@@ -1274,8 +1261,7 @@ static int lan9250_reset(FAR struct lan9250_driver_s *priv)
            PMCR_WOLS | PMCR_PMEP     | PMCR_PMEE;
   lan9250_set_reg(priv, LAN9250_PMCR, regval);
 
-  /**
-   * Configure PHY basic control:
+  /* Configure PHY basic control:
    *
    *   - Auto-Negotiation for speed(10 or 100Mbsp) and direction
    *     (half or full duplex)
@@ -1283,8 +1269,7 @@ static int lan9250_reset(FAR struct lan9250_driver_s *priv)
 
   lan9250_set_phyreg(priv, LAN9250_PHYBCR, PHYBCR_ANE);
 
-  /**
-   * Configure PHY auto-negotiation advertisement capability:
+  /* Configure PHY auto-negotiation advertisement capability:
    *
    *   - Asymmetric pause
    *   - Symmetric pause
@@ -1302,8 +1287,7 @@ static int lan9250_reset(FAR struct lan9250_driver_s *priv)
 #endif
   lan9250_set_phyreg(priv, LAN9250_PHYANAR, regval);
 
-  /**
-   * Configure PHY special mode:
+  /* Configure PHY special mode:
    *
    *   - PHY mode = 111b, enable all capable and auto-nagotiation
    *   - PHY address = 1, default value is fixed to 1 by manufacturer
@@ -1312,8 +1296,7 @@ static int lan9250_reset(FAR struct lan9250_driver_s *priv)
   regval = PHYSMR_PM_M | 1;
   lan9250_set_phyreg(priv, LAN9250_PHYSMR, regval);
 
-  /**
-   * Configure PHY special control or status indication:
+  /* Configure PHY special control or status indication:
    *
    *   - Port auto-MDIX determined by bits 14 and 13
    *   - Auto-MDIX
@@ -1323,8 +1306,7 @@ static int lan9250_reset(FAR struct lan9250_driver_s *priv)
   regval = PHYSCOSIR_AMDIXC | PHYSCOSIR_AMDIXE | PHYSCOSIR_SQETD;
   lan9250_set_phyreg(priv, LAN9250_PHYSCOSIR, regval);
 
-  /**
-   * Configure PHY interrupt source:
+  /* Configure PHY interrupt source:
    *
    *   - Link up
    *   - Link down
@@ -1333,8 +1315,7 @@ static int lan9250_reset(FAR struct lan9250_driver_s *priv)
   regval = PHYIER_LU | PHYIER_LD;
   lan9250_set_phyreg(priv, LAN9250_PHYIER, regval);
 
-  /**
-   * Configure special control or status:
+  /* Configure special control or status:
    *
    *   - Fixed to write 0000010b to reserved filed
    */
@@ -1345,8 +1326,7 @@ static int lan9250_reset(FAR struct lan9250_driver_s *priv)
 
   lan9250_set_reg(priv, LAN9250_ISR, UINT32_MAX);
 
-  /**
-   * Configure HMAC control:
+  /* Configure HMAC control:
    *
    *   - Automaticaly strip the pad field on incoming packets
    *   - TX enable
@@ -1458,8 +1438,7 @@ static int lan9250_transmit(FAR struct lan9250_driver_s *priv)
 
           lan9250_set_txavailabe(priv, true);
 
-          /**
-           * Enable the TX timeout watchdog (perhaps restarting the timer)
+          /* Enable the TX timeout watchdog (perhaps restarting the timer)
            * when free data space is not enough.
            */
 
@@ -1763,16 +1742,14 @@ static void lan9250_rxdone_isr(FAR struct lan9250_driver_s *priv)
 
       if (pktlen)
         {
-          /**
-           * Copy the data from the receive buffer to priv->dev.d_buf.
+          /* Copy the data from the receive buffer to priv->dev.d_buf.
            * ERDPT should be correctly positioned from the last call to
            * end_rdbuffer (above).
            */
 
           lan9250_recv_buffer(priv, priv->dev.d_buf, pktlen);
 
-          /**
-           * Save the packet length (without the 4 byte CRC)
+          /* Save the packet length (without the 4 byte CRC)
            * in priv->dev.d_len.
            */
 
@@ -1815,8 +1792,7 @@ static void lan9250_int_worker(FAR void *arg)
   net_lock();
   lan9250_lock_spi(priv);
 
-  /**
-   * There is no infinite loop check... if there are always pending
+  /* There is no infinite loop check... if there are always pending
    * interrupts, we are just broken.
    */
 
@@ -2002,8 +1978,7 @@ static void lan9250_int_worker(FAR void *arg)
   lan9250_unlock_spi(priv);
   net_unlock();
 
-  /**
-   * Enable ISR_GPIO interrupts after unlocking net so that application
+  /* Enable ISR_GPIO interrupts after unlocking net so that application
    * could have chance to process Ethernet packet and free iob.
    */
 
@@ -2285,8 +2260,7 @@ static int lan9250_txavail(FAR struct net_driver_s *dev)
         (FAR struct lan9250_driver_s *)dev->d_private;
   irqstate_t flags;
 
-  /**
-   * Lock the SPI bus so that we have exclusive access for but SPI and
+  /* Lock the SPI bus so that we have exclusive access for but SPI and
    * LAN9250 SPI private data.
    */
 
@@ -2294,8 +2268,7 @@ static int lan9250_txavail(FAR struct net_driver_s *dev)
 
   flags = enter_critical_section();
 
-  /**
-   * Since SPI is locked, so interrupt work must not really process when
+  /* Since SPI is locked, so interrupt work must not really process when
    * CPU run here, so:
    *
    *   - priv->tx_available = true, TX data FIFO is available and its related

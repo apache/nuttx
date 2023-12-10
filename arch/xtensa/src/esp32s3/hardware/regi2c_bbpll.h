@@ -21,9 +21,8 @@
 #ifndef __ARCH_XTENSA_SRC_ESP32S3_HARDWARE_REGI2C_BBPLL_H
 #define __ARCH_XTENSA_SRC_ESP32S3_HARDWARE_REGI2C_BBPLL_H
 
-/**
- * @file regi2c_bbpll.h
- * @brief Register definitions for digital PLL (BBPLL)
+/* regi2c_bbpll.h
+ * Register definitions for digital PLL (BBPLL)
  *
  * This file lists register fields of BBPLL, located on an internal
  * configuration bus. These definitions are used via macros defined

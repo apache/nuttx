@@ -1440,8 +1440,7 @@ void IRAM_ATTR esp32s3_spi_timing_set_mspi_high_speed(bool spi1)
 
 void IRAM_ATTR esp32s3_spi_timing_set_mspi_low_speed(bool spi1)
 {
-  /**
-   * Here we are going to set the SPI1 frequency to be 20MHz,
+  /* Here we are going to set the SPI1 frequency to be 20MHz,
    * so we need to set SPI1 din_num and din_mode regs.
    *
    * Because SPI0 and SPI1 share the din_num and din_mode regs,

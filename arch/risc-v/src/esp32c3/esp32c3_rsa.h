@@ -73,9 +73,7 @@ extern "C"
  * Public Types
  ****************************************************************************/
 
-/**
- * \brief   - The RSA context structure.
- */
+/* The RSA context structure. */
 
 struct esp32c3_rsa_context_s
 {

@@ -27,7 +27,7 @@
 
 #include <nuttx/config.h>
 
-/* Number of bytes in @p x kibibytes/mebibytes/gibibytes */
+/* Number of bytes in x kibibytes/mebibytes/gibibytes */
 
 #define KB(x)           ((x) << 10)
 #define MB(x)           (KB(x) << 10)

@@ -1107,8 +1107,7 @@ static int32_t esp_queue_send_generic(void *queue, void *item,
 
   if (ticks == OSI_FUNCS_TIME_BLOCKING || ticks == 0)
     {
-      /**
-       * BLE interrupt function will call this adapter function to send
+      /* BLE interrupt function will call this adapter function to send
        * message to message queue, so here we should call kernel API
        * instead of application API
        */

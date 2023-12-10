@@ -411,8 +411,7 @@ static int rt_timer_isr(int irq, void *context, void *arg)
 
   if (!list_is_empty(&priv->runlist))
     {
-      /**
-       * When stop/delete timer, in the same time the hardware timer
+      /* When stop/delete timer, in the same time the hardware timer
        * interrupt triggers, function "stop/delete" remove the timer
        * from running list, so the 1st timer is not which triggers.
        */
