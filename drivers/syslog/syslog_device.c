@@ -313,13 +313,6 @@ static int syslog_dev_outputready(FAR struct syslog_dev_s *syslog_dev)
           return -EAGAIN; /* Can't access the SYSLOG now... maybe next time? */
         }
 
-      /* NOTE that the scheduler is locked.  That is because we do not have
-       * fully initialized mutex capability until the SYSLOG device is
-       * successfully initialized.
-       */
-
-      sched_lock();
-
       /* Case (6) */
 
       if (syslog_dev->sl_state == SYSLOG_FAILURE)
@@ -352,12 +345,10 @@ static int syslog_dev_outputready(FAR struct syslog_dev_s *syslog_dev)
                                 (int)syslog_dev->sl_mode);
           if (ret < 0)
             {
-              sched_unlock();
               return ret;
             }
         }
 
-      sched_unlock();
       DEBUGASSERT(syslog_dev->sl_state == SYSLOG_OPENED);
     }
 
@@ -758,7 +749,6 @@ void syslog_dev_uninitialize(FAR struct syslog_channel_s *channel)
 
   /* Attempt to flush any buffered data. */
 
-  sched_lock();
   syslog_dev_flush(channel);
 
   /* Close the detached file instance, and destroy the mutex. These are
@@ -787,5 +777,4 @@ void syslog_dev_uninitialize(FAR struct syslog_channel_s *channel)
   /* Free the channel structure */
 
   kmm_free(syslog_dev);
-  sched_unlock();
 }

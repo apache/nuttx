@@ -91,13 +91,6 @@ int bchdev_unregister(FAR const char *chardev)
       return ret;
     }
 
-  /* Lock out context switches.  If there are no other references
-   * and no context switches, then we can assume that we can safely
-   * teardown the driver.
-   */
-
-  sched_lock();
-
   /* Check if the internal structure is non-busy (we hold one reference). */
 
   if (bch->refs > 1)
@@ -117,8 +110,6 @@ int bchdev_unregister(FAR const char *chardev)
       goto errout_with_lock;
     }
 
-  sched_unlock();
-
   /* Release the internal structure */
 
   bch->refs = 0;
@@ -126,6 +117,5 @@ int bchdev_unregister(FAR const char *chardev)
 
 errout_with_lock:
   bch->refs--;
-  sched_unlock();
   return ret;
 }
