@@ -60,7 +60,7 @@ static uint8_t slcd_nibble(uint8_t binary)
     }
   else
     {
-      return 'a' + binary;
+      return 'a' + binary - 10;
     }
 }
 
