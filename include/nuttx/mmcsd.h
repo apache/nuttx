@@ -111,9 +111,9 @@ struct mmc_ioc_cmd
 };
 
 /* struct mmc_ioc_multi_cmd - multi command information
- * @num_of_cmds: Number of commands to send. Must be equal to or less than
+ * num_of_cmds: Number of commands to send. Must be equal to or less than
  * MMC_IOC_MAX_CMDS.
- * @cmds: Array of commands with length equal to 'num_of_cmds'
+ * cmds: Array of commands with length equal to 'num_of_cmds'
  */
 
 struct mmc_ioc_multi_cmd

@@ -5594,8 +5594,7 @@ void xtensa_usbinitialize(void)
   esp32s3_configgpio(USB_IOMUX_DM, DRIVE_3);
   esp32s3_configgpio(USB_IOMUX_DP, DRIVE_3);
 
-  /**
-   * USB_OTG_IDDIG_IN_IDX:     connected connector is mini-B side
+  /* USB_OTG_IDDIG_IN_IDX:     connected connector is mini-B side
    * USB_SRP_BVALID_IN_IDX:    HIGH to force USB device mode
    * USB_OTG_VBUSVALID_IN_IDX: receiving a valid Vbus from device
    * USB_OTG_AVALID_IN_IDX:    HIGH to force USB host mode

@@ -887,8 +887,7 @@ static void wlan_rxpoll(void *arg)
         }
 
 #ifdef WLAN_RX_THRESHOLD
-      /**
-       * If received total bytes is larger than receive threshold,
+      /* If received total bytes is larger than receive threshold,
        * then do "unlock" to try to active applicantion to receive
        * data from low-level buffer of IP stack.
        */

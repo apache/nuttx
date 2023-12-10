@@ -3177,8 +3177,8 @@ typedef enum
 #define WLC_DOT11_SC_STATUS_OFFSET (512)
 
 /* Enumerated list of event status codes
- * @note : WLC_SUP values overlap other values, so it is necessary
- *         to check the event type
+ * Note : WLC_SUP values overlap other values, so it is necessary
+ *        to check the event type
  */
 
 typedef enum
@@ -3255,8 +3255,8 @@ typedef enum
 #define WLC_E_DOT11_RC_REASON_OFFSET (768)
 
 /* Enumerated list of event reason codes
- * @note : Several values overlap other values, so it is necessary
- *         to check the event type
+ * Note : Several values overlap other values, so it is necessary
+ *        to check the event type
  */
 
 typedef enum

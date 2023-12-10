@@ -21,11 +21,7 @@
 #ifndef __ARCH_ARM64_SRC_COMMON_ARM64_FATAL_H
 #define __ARCH_ARM64_SRC_COMMON_ARM64_FATAL_H
 
-/**
- * @defgroup fatal_apis Fatal error APIs
- * @ingroup kernel_apis
- * @{
- */
+/* Fatal error APIs */
 
 #define K_ERR_CPU_EXCEPTION     (0)
 #define K_ERR_CPU_MODE32        (1)

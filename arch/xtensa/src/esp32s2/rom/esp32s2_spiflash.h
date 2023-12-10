@@ -143,8 +143,7 @@ typedef struct
     uint16_t data;
 } esp_rom_spiflash_common_cmd_t;
 
-/**
- * Structure holding SPI flash access critical sections management functions.
+/* Structure holding SPI flash access critical sections management functions.
  *
  * Flash API uses two types of functions for flash access management:
  * 1) Functions which prepare/restore flash cache and interrupts before
@@ -175,7 +174,7 @@ typedef struct
  * use OS primitives or even does not need them (multithreaded access is
  * not possible).
  *
- * @note Structure and corresponding guard functions should not reside
+ * Note: Structure and corresponding guard functions should not reside
  *       in flash. For example structure can be placed in DRAM and functions
  *       in IRAM sections.
  */

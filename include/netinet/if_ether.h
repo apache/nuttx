@@ -38,8 +38,7 @@
 #define ETH_P_IP  ETHERTYPE_IP
 #define ETH_P_ARP ETHERTYPE_ARP
 
-/**
- * Ethernet Address Resolution Protocol.
+/* Ethernet Address Resolution Protocol.
  *
  * See RFC 826 for protocol description.  Structure below is adapted
  * to resolving internet addresses.  Field names used correspond to

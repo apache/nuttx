@@ -50,12 +50,11 @@
 
 #ifdef CONFIG_NET_NETLINK
 
-/**
- * nla_for_each_attr - iterate over a stream of attributes
- * @pos: loop counter, set to current attribute
- * @head: head of attribute stream
- * @len: length of attribute stream
- * @rem: initialized to len, holds bytes currently remaining in stream
+/* nla_for_each_attr - iterate over a stream of attributes
+ * pos: loop counter, set to current attribute
+ * head: head of attribute stream
+ * len: length of attribute stream
+ * rem: initialized to len, holds bytes currently remaining in stream
  */
 
 #define nla_for_each_attr(pos, head, len, rem)  \
@@ -82,31 +81,27 @@
     }                                                  \
   while (0)
 
-/**
- * nla_data - head of payload
- * @nla: netlink attribute
+/* nla_data - head of payload
+ * nla: netlink attribute
  */
 
 #define nla_data(nla) ((FAR void *)((FAR char *)(nla) + NLA_HDRLEN))
 
-/**
- * nla_len - length of payload
- * @nla: netlink attribute
+/* nla_len - length of payload
+ * nla: netlink attribute
  */
 
 #define nla_len(nla) ((nla)->nla_len - NLA_HDRLEN)
 
-/**
- * nla_type - attribute type
- * @nla: netlink attribute
+/* nla_type - attribute type
+ * nla: netlink attribute
  */
 
 #define nla_type(nla) ((nla)->nla_type & NLA_TYPE_MASK)
 
-/**
- * nla_ok - check if the netlink attribute fits into the remaining bytes
- * @nla: netlink attribute
- * @remaining: number of bytes remaining in attribute stream
+/* nla_ok - check if the netlink attribute fits into the remaining bytes
+ * nla: netlink attribute
+ * remaining: number of bytes remaining in attribute stream
  */
 
 #define nla_ok(nla, remaining)        \
@@ -114,59 +109,52 @@
   (nla)->nla_len >= sizeof(*(nla)) && \
   (nla)->nla_len <= (remaining))
 
-/**
- * nlmsg_msg_size - length of netlink message not including padding
- * @payload: length of message payload
+/* nlmsg_msg_size - length of netlink message not including padding
+ * payload: length of message payload
  */
 
 #define nlmsg_msg_size(payload) (NLMSG_HDRLEN + (payload))
 
-/**
- * nlmsg_len - length of message payload
- * @nlh: netlink message header
+/* nlmsg_len - length of message payload
+ * nlh: netlink message header
  */
 
 #define nlmsg_len(nlh) ((nlh)->nlmsg_len - NLMSG_HDRLEN)
 
-/**
- * nlmsg_attrlen - length of attributes data
- * @nlh: netlink message header
- * @hdrlen: length of family specific header
+/* nlmsg_attrlen - length of attributes data
+ * nlh: netlink message header
+ * hdrlen: length of family specific header
  */
 
 #define nlmsg_attrlen(nlh, hdrlen) (nlmsg_len(nlh) - NLMSG_ALIGN(hdrlen))
 
-/**
- * nlmsg_data - head of message payload
- * @nlh: netlink message header
+/* nlmsg_data - head of message payload
+ * nlh: netlink message header
  */
 
 #define nlmsg_data(nlh) ((FAR void *)((FAR char *)(nlh) + NLMSG_HDRLEN))
 
-/**
- * nla_get_in_addr - return payload of IPv4 address attribute
- * @nla: IPv4 address netlink attribute
+/* nla_get_in_addr - return payload of IPv4 address attribute
+ * nla: IPv4 address netlink attribute
  */
 
 #define nla_get_in_addr(nla) (*(FAR uint32_t *)nla_data(nla))
 
-/**
- * nlmsg_attrdata - head of attributes data
- * @nlh: netlink message header
- * @hdrlen: length of family specific header
+/* nlmsg_attrdata - head of attributes data
+ * nlh: netlink message header
+ * hdrlen: length of family specific header
  */
 
 #define nlmsg_attrdata(nlh, hdrlen) \
   ((FAR struct nlattr *)((FAR char *)nlmsg_data(nlh) + NLMSG_ALIGN(hdrlen)))
 
-/**
- * nlmsg_parse - parse attributes of a netlink message
- * @nlh: netlink message header
- * @hdrlen: length of family specific header
- * @tb: destination array with maxtype+1 elements
- * @maxtype: maximum attribute type to be expected
- * @policy: validation policy
- * @extack: extended ACK report struct
+/* nlmsg_parse - parse attributes of a netlink message
+ * nlh: netlink message header
+ * hdrlen: length of family specific header
+ * tb: destination array with maxtype+1 elements
+ * maxtype: maximum attribute type to be expected
+ * policy: validation policy
+ * extack: extended ACK report struct
  *
  * See nla_parse()
  */
@@ -210,9 +198,7 @@ struct netlink_conn_s
   sq_queue_t resplist;               /* Singly linked list of responses */
 };
 
-/**
- * Standard attribute types to specify validation policy
- */
+/* Standard attribute types to specify validation policy */
 
 enum
 {
@@ -236,13 +222,12 @@ enum
   NLA_TYPE_MAX = NLA_BITFIELD32,
 };
 
-/**
- * struct netlink_ext_ack - netlink extended ACK report struct
- * @_msg: message string to report - don't access directly, use
- *  %nl_set_err_msg_attr
- * @bad_attr: attribute with error
- * @cookie: cookie data to return to userspace (for success)
- * @cookie_len: actual cookie data length
+/* struct netlink_ext_ack - netlink extended ACK report struct
+ * _msg: message string to report - don't access directly, use
+ *  nl_set_err_msg_attr
+ * bad_attr: attribute with error
+ * cookie: cookie data to return to userspace (for success)
+ * cookie_len: actual cookie data length
  */
 
 struct netlink_ext_ack
@@ -253,10 +238,9 @@ struct netlink_ext_ack
   uint8_t cookie_len;
 };
 
-/**
- * struct nla_policy - attribute validation policy
- * @type: Type of attribute or NLA_UNSPEC
- * @len: Type specific length of payload
+/* struct nla_policy - attribute validation policy
+ * type: Type of attribute or NLA_UNSPEC
+ * len: Type specific length of payload
  *
  * Policies are defined as arrays of this struct, the array must be
  * accessible by attribute type up to the highest identifier to be expected.

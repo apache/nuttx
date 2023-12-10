@@ -138,53 +138,46 @@ typedef struct
 
 /* spi user mode command config */
 
-/**
- * @brief Config the spi user command
- * @param spi_num spi port
- * @param pcmd pointer to accept the spi command struct
+/* Config the spi user command
+ * spi_num spi port
+ * pcmd pointer to accept the spi command struct
  */
 
 void esp_rom_spi_cmd_config(int spi_num, esp_rom_spi_cmd_t *pcmd);
 
-/**
- * @brief Start a spi user command sequence
- * @param spi_num spi port
- * @param rx_buf buffer pointer to receive data
- * @param rx_len receive data length in byte
- * @param cs_en_mask decide which cs to use, 0 for cs0, 1 for cs1
- * @param is_write_erase to indicate whether this is a write or erase
+/* Start a spi user command sequence
+ * spi_num spi port
+ * rx_buf buffer pointer to receive data
+ * rx_len receive data length in byte
+ * cs_en_mask decide which cs to use, 0 for cs0, 1 for cs1
+ * is_write_erase to indicate whether this is a write or erase
  * operation, since the CPU would check permission
  */
 
 void esp_rom_spi_cmd_start(int spi_num, uint8_t *rx_buf, uint16_t rx_len,
                            uint8_t cs_en_mask, bool is_write_erase);
 
-/**
- * @brief Config opi flash pads according to efuse settings.
- */
+/* Config opi flash pads according to efuse settings. */
 
 void esp_rom_opiflash_pin_config(void);
 
-/**
- * @brief Set SPI operation mode
- * @param spi_num spi port
- * @param mode Flash Read Mode
+/* Set SPI operation mode
+ * spi_num spi port
+ * mode Flash Read Mode
  */
 
 void esp_rom_spi_set_op_mode(int spi_num, esp_rom_spiflash_read_mode_t mode);
 
-/**
- * @brief Set data swap mode in DTR(DDR) mode
- * @param spi_num spi port
- * @param wr_swap to decide whether to swap fifo data in dtr write operation
- * @param rd_swap to decide whether to swap fifo data in dtr read operation
+/* Set data swap mode in DTR(DDR) mode
+ * spi_num spi port
+ * wr_swap to decide whether to swap fifo data in dtr write operation
+ * rd_swap to decide whether to swap fifo data in dtr read operation
  */
 
 void esp_rom_spi_set_dtr_swap_mode(int spi, bool wr_swap, bool rd_swap);
 
-/**
- * @brief to send reset command in spi/opi-str/opi-dtr mode(for MX25UM25645G)
- * @param spi_num spi port
+/* To send reset command in spi/opi-str/opi-dtr mode(for MX25UM25645G)
+ * spi_num spi port
  */
 
 void esp_rom_opiflash_mode_reset(int spi_num);
@@ -193,21 +186,20 @@ void esp_rom_opiflash_mode_reset(int spi_num);
 
 /* MX25UM25645G opi flash interface */
 
-/**
- * @brief To execute a flash operation command
- * @param spi_num spi port
- * @param mode Flash Read Mode
- * @param cmd data to send in command field
- * @param cmd_bit_len bit length of command field
- * @param addr data to send in address field
- * @param addr_bit_len bit length of address field
- * @param dummy_bits bit length of dummy field
- * @param mosi_data data buffer to be sent in mosi field
- * @param mosi_bit_len bit length of data buffer to be sent in mosi field
- * @param miso_data data buffer to accept data in miso field
- * @param miso_bit_len bit length of data buffer to accept data in miso field
- * @param cs_mark decide which cs pin to use. 0: cs0, 1: cs1
- * @param is_write_erase_operation to indicate whether this a write or erase
+/* To execute a flash operation command
+ * spi_num spi port
+ * mode Flash Read Mode
+ * cmd data to send in command field
+ * cmd_bit_len bit length of command field
+ * addr data to send in address field
+ * addr_bit_len bit length of address field
+ * dummy_bits bit length of dummy field
+ * mosi_data data buffer to be sent in mosi field
+ * mosi_bit_len bit length of data buffer to be sent in mosi field
+ * miso_data data buffer to accept data in miso field
+ * miso_bit_len bit length of data buffer to accept data in miso field
+ * cs_mark decide which cs pin to use. 0: cs0, 1: cs1
+ * is_write_erase_operation to indicate whether this a write or erase
  * flash operation
  */
 
@@ -220,98 +212,89 @@ void esp_rom_opiflash_exec_cmd(int spi_num, esp_rom_spiflash_read_mode_t mode,
                                uint32_t cs_mask,
                                bool is_write_erase_operation);
 
-/**
- * @brief send reset command to opi flash
- * @param spi_num spi port
- * @param mode Flash Operation Mode
+/* end reset command to opi flash
+ * spi_num spi port
+ * mode Flash Operation Mode
  */
 
 void esp_rom_opiflash_soft_reset(int spi_num,
                                  esp_rom_spiflash_read_mode_t mode);
 
-/**
- * @brief to read opi flash ID
- * @note command format would be defined in initialization
- * @param[out] out_id buffer to accept id
- * @return flash operation result
+/* To read opi flash ID
+ * Note command format would be defined in initialization
+ *   out_id buffer to accept id
+ * Return flash operation result
  */
 
 uint32_t esp_rom_opiflash_read_id(int spi_num,
                                   esp_rom_spiflash_read_mode_t mode);
 
-/**
- * @brief to read opi flash status register(for MX25UM25645G)
- * @param spi_num spi port
- * @param mode Flash Operation Mode
- * @return opi flash status value
+/* To read opi flash status register(for MX25UM25645G)
+ * spi_num spi port
+ * mode Flash Operation Mode
+ * Return opi flash status value
  */
 
 uint8_t esp_rom_opiflash_rdsr(int spi_num, esp_rom_spiflash_read_mode_t mode);
 
-/**
- * @brief wait opi flash status register to be idle
- * @param spi_num spi port
- * @param mode Flash Operation Mode
+/* Wait opi flash status register to be idle
+ * spi_num spi port
+ * mode Flash Operation Mode
  */
 
 void esp_rom_opiflash_wait_idle(int spi_num,
                                 esp_rom_spiflash_read_mode_t mode);
 
-/**
- * @brief to read the config register2(for MX25UM25645G)
- * @param spi_num spi port
- * @param mode Flash Operation Mode
- * @param addr the address of configure register
- * @return value of config register2
+/* To read the config register2(for MX25UM25645G)
+ * spi_num spi port
+ * mode Flash Operation Mode
+ * addr the address of configure register
+ * Return value of config register2
  */
 
 uint8_t esp_rom_opiflash_rdcr2(int spi_num,
                                esp_rom_spiflash_read_mode_t mode,
                                uint32_t addr);
 
-/**
- * @brief to write the config register2(for MX25UM25645G)
- * @param spi_num spi port
- * @param mode Flash Operation Mode
- * @param addr the address of config register
- * @param val the value to write
+/* To write the config register2(for MX25UM25645G)
+ * spi_num spi port
+ * mode Flash Operation Mode
+ * addr the address of config register
+ * val the value to write
  */
 
 void esp_rom_opiflash_wrcr2(int spi_num, esp_rom_spiflash_read_mode_t mode,
                             uint32_t addr, uint8_t val);
 
-/**
- * @brief to erase flash sector(for MX25UM25645G)
- * @param spi_num spi port
- * @param address the sector address to be erased
- * @param mode Flash operation mode
- * @return flash operation result
+/* To erase flash sector(for MX25UM25645G)
+ * spi_num spi port
+ * address the sector address to be erased
+ * mode Flash operation mode
+ * Return flash operation result
  */
 
 esp_rom_spiflash_result_t
 esp_rom_opiflash_erase_sector(int spi_num, uint32_t address,
                               esp_rom_spiflash_read_mode_t mode);
 
-/**
- * @brief to erase flash block(for MX25UM25645G)
- * @param spi_num spi port
- * @param address the block address to be erased
- * @param mode Flash operation mode
- * @return flash operation result
+/* To erase flash block(for MX25UM25645G)
+ * spi_num spi port
+ * address the block address to be erased
+ * mode Flash operation mode
+ * Return flash operation result
  */
 
 esp_rom_spiflash_result_t
 esp_rom_opiflash_erase_block_64k(int spi_num, uint32_t address,
                                  esp_rom_spiflash_read_mode_t mode);
 
-/**
- * @brief to erase a flash area define by start address and length
+/* To erase a flash area define by start address and length
  * (for MX25UM25645G)
- * @param spi_num spi port
- * @param start_addr the start address to be erased
- * @param area_len the erea length to be erased
- * @param mode flash operation mode
- * @return flash operation result
+ * spi_num spi port
+ * start_addr the start address to be erased
+ * area_len the erea length to be erased
+ * mode flash operation mode
+ * Return flash operation result
  */
 
 esp_rom_spiflash_result_t
@@ -319,28 +302,26 @@ esp_rom_opiflash_erase_area(int spi_num, uint32_t start_addr,
                             uint32_t area_len,
                             esp_rom_spiflash_read_mode_t mode);
 
-/**
- * @brief to read data from opi flash(for MX25UM25645G)
- * @param spi_num spi port
- * @param mode flash operation mode
- * @param flash_addr flash address to read data from
- * @param data_addr data buffer to accept the data
- * @param len data length to be read
- * @return flash operation result
+/* T read data from opi flash(for MX25UM25645G)
+ * spi_num spi port
+ * mode flash operation mode
+ * flash_addr flash address to read data from
+ * data_addr data buffer to accept the data
+ * len data length to be read
+ * Return flash operation result
  */
 
 esp_rom_spiflash_result_t
 esp_rom_opiflash_read(int spi_num, esp_rom_spiflash_read_mode_t mode,
                       uint32_t flash_addr, uint8_t *data_addr, int len);
 
-/**
- * @brief to write data to opi flash(for MX25UM25645G)
- * @param spi_num spi port
- * @param mode flash operation mode
- * @param flash_addr flash address to write data to
- * @param data_addr data buffer to write to flash
- * @param len data length to write
- * @return flash operation result
+/* To write data to opi flash(for MX25UM25645G)
+ * spi_num spi port
+ * mode flash operation mode
+ * flash_addr flash address to write data to
+ * data_addr data buffer to write to flash
+ * len data length to write
+ * Return flash operation result
  */
 
 esp_rom_spiflash_result_t
@@ -348,11 +329,10 @@ esp_rom_opiflash_write(int spi_num, esp_rom_spiflash_read_mode_t mode,
                        uint32_t flash_addr, uint8_t *data_addr,
                        uint32_t len);
 
-/**
- * @brief to set opi flash operation mode(for MX25UM25645G)
- * @param spi_num spi port
- * @param cur_mode current operation mode
- * @param target the target operation mode to be set
+/* To set opi flash operation mode(for MX25UM25645G)
+ * spi_num spi port
+ * cur_mode current operation mode
+ * target the target operation mode to be set
  */
 
 void esp_rom_opiflash_set_mode(int spi_num,

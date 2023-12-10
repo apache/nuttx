@@ -49,4 +49,4 @@
 void nrf53_earlyserialinit(void);
 #endif
 
-#endif /* __ARCH_ARM_SRC_NRF53_NRF53@_SERIAL_H */
+#endif /* __ARCH_ARM_SRC_NRF53_NRF53_SERIAL_H */

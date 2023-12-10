@@ -44,170 +44,170 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/** @def BBT_UUID_GAP
- *  @brief Generic Access
+/* BBT_UUID_GAP
+ *  Generic Access
  */
 
 #define BT_UUID_GAP                           0x1800
 
-/** @def BBT_UUID_GATT
- *  @brief Generic Attribute
+/* BBT_UUID_GATT
+ *  Generic Attribute
  */
 
 #define BT_UUID_GATT                          0x1801
 
-/** @def BBT_UUID_CTS
- *  @brief Current Time Service
+/* BBT_UUID_CTS
+ *  Current Time Service
  */
 
 #define BT_UUID_CTS                           0x1805
 
-/** @def BBT_UUID_DIS
- *  @brief Device Information Service
+/* BBT_UUID_DIS
+ *  Device Information Service
  */
 
 #define BT_UUID_DIS                           0x180a
 
-/** @def BBT_UUID_HRS
- *  @brief Heart Rate Service
+/* BBT_UUID_HRS
+ *  Heart Rate Service
  */
 
 #define BT_UUID_HRS                           0x180d
 
-/** @def BBT_UUID_BAS
- *  @brief Battery Service
+/* BBT_UUID_BAS
+ *  Battery Service
  */
 
 #define BT_UUID_BAS                           0x180f
 
-/** @def BT_UUID_GATT_PRIMARY
- *  @brief GATT Primary Service
+/* BT_UUID_GATT_PRIMARY
+ *  GATT Primary Service
  */
 
 #define BT_UUID_GATT_PRIMARY                  0x2800
 
-/** @def BT_UUID_GATT_SECONDARY
- *  @brief GATT Secondary Service
+/* BT_UUID_GATT_SECONDARY
+ *  GATT Secondary Service
  */
 
 #define BT_UUID_GATT_SECONDARY                0x2801
 
-/** @def BT_UUID_GATT_INCLUDE
- *  @brief GATT Include Service
+/* BT_UUID_GATT_INCLUDE
+ *  GATT Include Service
  */
 
 #define BT_UUID_GATT_INCLUDE                  0x2802
 
-/** @def BT_UUID_GATT_CHRC
- *  @brief GATT Characteristic
+/* BT_UUID_GATT_CHRC
+ *  GATT Characteristic
  */
 
 #define BT_UUID_GATT_CHRC                     0x2803
 
-/** @def BT_UUID_GATT_CEP
- *  @brief GATT Characteristic Extended Properties
+/* BT_UUID_GATT_CEP
+ *  GATT Characteristic Extended Properties
  */
 
 #define BT_UUID_GATT_CEP                      0x2900
 
-/** @def BT_UUID_GATT_CUD
- *  @brief GATT Characteristic User Description
+/* BT_UUID_GATT_CUD
+ *  GATT Characteristic User Description
  */
 
 #define BT_UUID_GATT_CUD                      0x2901
 
-/** @def BT_UUID_GATT_CCC
- *  @brief GATT Client Characteristic Configuration
+/* BT_UUID_GATT_CCC
+ *  GATT Client Characteristic Configuration
  */
 
 #define BT_UUID_GATT_CCC                      0x2902
 
-/** @def BT_UUID_GAP_DEVICE_NAME
- *  @brief GAP Characteristic Device Name
+/* BT_UUID_GAP_DEVICE_NAME
+ *  GAP Characteristic Device Name
  */
 
 #define BT_UUID_GAP_DEVICE_NAME               0x2a00
 
-/** @def BT_UUID_GAP_APPEARANCE
- *  @brief GAP Characteristic Appearance
+/* BT_UUID_GAP_APPEARANCE
+ *  GAP Characteristic Appearance
  */
 
 #define BT_UUID_GAP_APPEARANCE                0x2a01
 
-/** @def BT_UUID_BAS_BATTERY_LEVEL
- *  @brief BAS Characteristic Battery Level
+/* BT_UUID_BAS_BATTERY_LEVEL
+ *  BAS Characteristic Battery Level
  */
 
 #define BT_UUID_BAS_BATTERY_LEVEL             0x2a19
 
-/** @def BT_UUID_DIS_SYSTEM_ID
- *  @brief DIS Characteristic System ID
+/* BT_UUID_DIS_SYSTEM_ID
+ *  DIS Characteristic System ID
  */
 
 #define BT_UUID_DIS_SYSTEM_ID                 0x2a23
 
-/** @def BT_UUID_DIS_MODEL_NUMBER_STRING
- *  @brief DIS Characteristic Model Number String
+/* BT_UUID_DIS_MODEL_NUMBER_STRING
+ *  DIS Characteristic Model Number String
  */
 
 #define BT_UUID_DIS_MODEL_NUMBER_STRING       0x2a24
 
-/** @def BT_UUID_DIS_SERIAL_NUMBER_STRING
- *  @brief DIS Characteristic Serial Number String
+/* BT_UUID_DIS_SERIAL_NUMBER_STRING
+ *  DIS Characteristic Serial Number String
  */
 
 #define BT_UUID_DIS_SERIAL_NUMBER_STRING      0x2a25
 
-/** @def BT_UUID_DIS_FIRMWARE_REVISION_STRING
- *  @brief DIS Characteristic Firmware Revision String
+/* BT_UUID_DIS_FIRMWARE_REVISION_STRING
+ *  DIS Characteristic Firmware Revision String
  */
 
 #define BT_UUID_DIS_FIRMWARE_REVISION_STRING  0x2a26
 
-/** @def BT_UUID_DIS_HARDWARE_REVISION_STRING
- *  @brief DIS Characteristic Hardware Revision String
+/* BT_UUID_DIS_HARDWARE_REVISION_STRING
+ *  DIS Characteristic Hardware Revision String
  */
 
 #define BT_UUID_DIS_HARDWARE_REVISION_STRING  0x2a27
 
-/** @def BT_UUID_DIS_SOFTWARE_REVISION_STRING
- *  @brief DIS Characteristic Software Revision String
+/* BT_UUID_DIS_SOFTWARE_REVISION_STRING
+ *  DIS Characteristic Software Revision String
  */
 
 #define BT_UUID_DIS_SOFTWARE_REVISION_STRING  0x2a28
 
-/** @def BT_UUID_DIS_MANUFACTURER_NAME_STRING
- *  @brief DIS Characteristic Manufacturer Name String
+/* BT_UUID_DIS_MANUFACTURER_NAME_STRING
+ *  DIS Characteristic Manufacturer Name String
  */
 
 #define BT_UUID_DIS_MANUFACTURER_NAME_STRING  0x2a29
 
-/** @def BT_UUID_DIS_PNP_ID
- *  @brief DIS Characteristic PnP ID
+/* BT_UUID_DIS_PNP_ID
+ *  DIS Characteristic PnP ID
  */
 
 #define BT_UUID_DIS_PNP_ID                    0x2a50
 
-/** @def BT_UUID_CTS_CURRENT_TIME
- *  @brief CTS Characteristic Current Time
+/* BT_UUID_CTS_CURRENT_TIME
+ *  CTS Characteristic Current Time
  */
 
 #define BT_UUID_CTS_CURRENT_TIME              0x2a2b
 
-/** @def BT_UUID_HR_MEASUREMENT
- *  @brief HRS Characteristic Measurement Interval
+/* BT_UUID_HR_MEASUREMENT
+ *  HRS Characteristic Measurement Interval
  */
 
 #define BT_UUID_HRS_MEASUREMENT               0x2a37
 
-/** @def BT_UUID_HRS_BODY_SENSOR
- *  @brief HRS Characteristic Body Sensor Location
+/* BT_UUID_HRS_BODY_SENSOR
+ *  HRS Characteristic Body Sensor Location
  */
 
 #define BT_UUID_HRS_BODY_SENSOR               0x2a38
 
-/** @def BT_UUID_HR_CONTROL_POINT
- *  @brief HRS Characteristic Control Point
+/* BT_UUID_HR_CONTROL_POINT
+ *  HRS Characteristic Control Point
  */
 
 #define BT_UUID_HRS_CONTROL_POINT             0x2a39

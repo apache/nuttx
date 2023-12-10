@@ -23,11 +23,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- *   @file     uart.h
- *   @brief    Contains all functions support for uart driver
- *   @version  0.0
- *   @date     19. Oct. 2017
- *   @author   qing.han
+ * uart.h
+ * Contains all functions support for uart driver
+ * 0.0
+ * 19. Oct. 2017
+ * qing.han
  ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_PHY62XX_UART_H

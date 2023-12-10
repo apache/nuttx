@@ -43,8 +43,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/**
- * This file describes the API provided by a TEE driver to user space.
+/* This file describes the API provided by a TEE driver to user space.
  *
  * Each TEE driver defines a TEE specific protocol which is used for the
  * data passed back and forth using TEE_IOC_CMD.
@@ -64,28 +63,23 @@
 
 #define TEE_MEMREF_NULL         ((uint64_t)-1) /* NULL MemRef Buffer */
 
-/**
- * TEE Implementation ID
- */
+/* TEE Implementation ID */
 
 #define TEE_IMPL_ID_OPTEE       1
 #define TEE_IMPL_ID_AMDTEE      2
 
-/**
- * OP-TEE specific capabilities
- */
+/* OP-TEE specific capabilities */
 
 #define TEE_OPTEE_CAP_TZ        (1 << 0)
 
-/**
- * struct tee_ioctl_version_data - TEE version
- * @impl_id:    [out] TEE implementation id
- * @impl_caps:  [out] Implementation specific capabilities
- * @gen_caps:   [out] Generic capabilities, defined by TEE_GEN_CAPS_* above
+/* struct tee_ioctl_version_data - TEE version
+ * impl_id:    [out] TEE implementation id
+ * impl_caps:  [out] Implementation specific capabilities
+ * gen_caps:   [out] Generic capabilities, defined by TEE_GEN_CAPS_* above
  *
- * Identifies the TEE implementation, @impl_id is one of TEE_IMPL_ID_* above.
- * @impl_caps is implementation specific, for example TEE_OPTEE_CAP_*
- * is valid when @impl_id == TEE_IMPL_ID_OPTEE.
+ * Identifies the TEE implementation, impl_id is one of TEE_IMPL_ID_* above.
+ * impl_caps is implementation specific, for example TEE_OPTEE_CAP_*
+ * is valid when impl_id == TEE_IMPL_ID_OPTEE.
  */
 
 struct tee_ioctl_version_data
@@ -95,19 +89,17 @@ struct tee_ioctl_version_data
   uint32_t gen_caps;
 };
 
-/**
- * TEE_IOC_VERSION - query version of TEE
+/* TEE_IOC_VERSION - query version of TEE
  *
  * Takes a tee_ioctl_version_data struct and returns with the TEE version
  * data filled in.
  */
 #define TEE_IOC_VERSION  _IOC(TEE_IOC_MAGIC << 8, TEE_IOC_BASE + 0)
 
-/**
- * struct tee_ioctl_shm_alloc_data - Shared memory allocate argument
- * @size:       [in/out] Size of shared memory to allocate
- * @flags:      [in/out] Flags to/from allocation.
- * @id:         [out] Identifier of the shared memory
+/* struct tee_ioctl_shm_alloc_data - Shared memory allocate argument
+ * size:       [in/out] Size of shared memory to allocate
+ * flags:      [in/out] Flags to/from allocation.
+ * id:         [out] Identifier of the shared memory
  *
  * The flags field should currently be zero as input. Updated by the call
  * with actual flags as defined by TEE_IOCTL_SHM_* above.
@@ -121,8 +113,7 @@ struct tee_ioctl_shm_alloc_data
   int32_t id;
 };
 
-/**
- * TEE_IOC_SHM_ALLOC - allocate shared memory
+/* TEE_IOC_SHM_ALLOC - allocate shared memory
  *
  * Allocates shared memory between the user space process and secure OS.
  *
@@ -135,12 +126,11 @@ struct tee_ioctl_shm_alloc_data
 
 #define TEE_IOC_SHM_ALLOC _IOC(TEE_IOC_MAGIC << 8, TEE_IOC_BASE + 1)
 
-/**
- * struct tee_ioctl_shm_register_fd_data - Shared memory registering argument
- * @fd:         [in] file descriptor identifying the shared memory
- * @size:       [out] Size of shared memory to allocate
- * @flags:      [in] Flags to/from allocation.
- * @id:         [out] Identifier of the shared memory
+/* struct tee_ioctl_shm_register_fd_data - Shared memory registering argument
+ * fd:         [in] file descriptor identifying the shared memory
+ * size:       [out] Size of shared memory to allocate
+ * flags:      [in] Flags to/from allocation.
+ * id:         [out] Identifier of the shared memory
  *
  * The flags field should currently be zero as input. Updated by the call
  * with actual flags as defined by TEE_IOCTL_SHM_* above.
@@ -155,22 +145,17 @@ struct tee_ioctl_shm_register_fd_data
   int32_t id;
 };
 
-/**
- * Attributes for struct tee_ioctl_param, selects field in the union
- */
+/* Attributes for struct tee_ioctl_param, selects field in the union */
 
 #define TEE_IOCTL_PARAM_ATTR_TYPE_NONE          0       /* parameter not used */
 
-/**
- * These defines value parameters (struct tee_ioctl_param_value)
- */
+/* These defines value parameters (struct tee_ioctl_param_value) */
 
 #define TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_INPUT   1
 #define TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_OUTPUT  2
 #define TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_INOUT   3       /* input and output */
 
-/**
- * These defines shared memory reference parameters (struct
+/* These defines shared memory reference parameters (struct
  * tee_ioctl_param_memref)
  */
 
@@ -178,9 +163,7 @@ struct tee_ioctl_shm_register_fd_data
 #define TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_OUTPUT 6
 #define TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_INOUT  7       /* input and output */
 
-/**
- * Mask for the type part of the attribute, leaves room for more types
- */
+/* Mask for the type part of the attribute, leaves room for more types */
 
 #define TEE_IOCTL_PARAM_ATTR_TYPE_MASK          0xff
 
@@ -192,8 +175,7 @@ struct tee_ioctl_shm_register_fd_data
 #define TEE_IOCTL_PARAM_ATTR_MASK \
         (TEE_IOCTL_PARAM_ATTR_TYPE_MASK | TEE_IOCTL_PARAM_ATTR_META)
 
-/**
- * Matches TEEC_LOGIN_* in GP TEE Client API
+/* Matches TEEC_LOGIN_* in GP TEE Client API
  * Are only defined for GP compliant TEEs
  */
 
@@ -204,8 +186,7 @@ struct tee_ioctl_shm_register_fd_data
 #define TEE_IOCTL_LOGIN_USER_APPLICATION        5
 #define TEE_IOCTL_LOGIN_GROUP_APPLICATION       6
 
-/**
- * Disallow user-space to use GP implementation specific login
+/* Disallow user-space to use GP implementation specific login
  * method range (0x80000000 - 0xBFFFFFFF). This range is rather
  * being reserved for REE kernel clients or TEE implementation.
  */
@@ -217,24 +198,23 @@ struct tee_ioctl_shm_register_fd_data
 
 #define TEE_IOCTL_LOGIN_REE_KERNEL              0x80000000
 
-/**
- * struct tee_ioctl_param - parameter
- * @attr: attributes
- * @a: if a memref, offset into the shared memory object, else a value
+/* struct tee_ioctl_param - parameter
+ * attr: attributes
+ * a: if a memref, offset into the shared memory object, else a value
  * parameter
- * @b: if a memref, size of the buffer, else a value parameter
- * @c: if a memref, shared memory identifier, else a value parameter
+ * b: if a memref, size of the buffer, else a value parameter
+ * c: if a memref, shared memory identifier, else a value parameter
  *
- * @attr & TEE_PARAM_ATTR_TYPE_MASK indicates if memref or value is used in
+ * attr & TEE_PARAM_ATTR_TYPE_MASK indicates if memref or value is used in
  * the union. TEE_PARAM_ATTR_TYPE_VALUE_* indicates value and
  * TEE_PARAM_ATTR_TYPE_MEMREF_* indicates memref. TEE_PARAM_ATTR_TYPE_NONE
  * indicates that none of the members are used.
  *
  * Shared memory is allocated with TEE_IOC_SHM_ALLOC which returns an
  * identifier representing the shared memory object. A memref can reference
- * a part of a shared memory by specifying an offset (@a) and size (@b) of
+ * a part of a shared memory by specifying an offset (a) and size (b) of
  * the object. To supply the entire shared memory object set the offset
- * (@a) to 0 and size (@b) to the previously returned size of the object.
+ * (a) to 0 and size (b) to the previously returned size of the object.
  */
 
 struct tee_ioctl_param
@@ -247,16 +227,15 @@ struct tee_ioctl_param
 
 #define TEE_IOCTL_UUID_LEN  16
 
-/**
- * struct tee_ioctl_open_session_arg - Open session argument
- * @uuid:       [in] UUID of the Trusted Application
- * @clnt_uuid:  [in] UUID of client
- * @clnt_login: [in] Login class of client, TEE_IOCTL_LOGIN_* above
- * @cancel_id:  [in] Cancellation id, a unique value to identify this request
- * @session:    [out] Session id
- * @ret:        [out] return value
- * @ret_origin  [out] origin of the return value
- * @num_params  [in] number of parameters following this struct
+/* struct tee_ioctl_open_session_arg - Open session argument
+ * uuid:       [in] UUID of the Trusted Application
+ * clnt_uuid:  [in] UUID of client
+ * clnt_login: [in] Login class of client, TEE_IOCTL_LOGIN_* above
+ * cancel_id:  [in] Cancellation id, a unique value to identify this request
+ * session:    [out] Session id
+ * ret:        [out] return value
+ * ret_origin  [out] origin of the return value
+ * num_params  [in] number of parameters following this struct
  */
 
 struct tee_ioctl_open_session_arg
@@ -275,8 +254,7 @@ struct tee_ioctl_open_session_arg
   struct tee_ioctl_param params[];
 };
 
-/**
- * TEE_IOC_OPEN_SESSION - opens a session to a Trusted Application
+/* TEE_IOC_OPEN_SESSION - opens a session to a Trusted Application
  *
  * Takes a struct tee_ioctl_buf_data which contains a struct
  * tee_ioctl_open_session_arg followed by any array of struct
@@ -285,15 +263,14 @@ struct tee_ioctl_open_session_arg
 
 #define TEE_IOC_OPEN_SESSION _IOC(TEE_IOC_MAGIC << 8, TEE_IOC_BASE + 2)
 
-/**
- * struct tee_ioctl_invoke_func_arg - Invokes a function in a Trusted
+/* struct tee_ioctl_invoke_func_arg - Invokes a function in a Trusted
  * Application
- * @func:       [in] Trusted Application function, specific to the TA
- * @session:    [in] Session id
- * @cancel_id:  [in] Cancellation id, a unique value to identify this request
- * @ret:        [out] return value
- * @ret_origin  [out] origin of the return value
- * @num_params  [in] number of parameters following this struct
+ * func:       [in] Trusted Application function, specific to the TA
+ * session:    [in] Session id
+ * cancel_id:  [in] Cancellation id, a unique value to identify this request
+ * ret:        [out] return value
+ * ret_origin  [out] origin of the return value
+ * num_params  [in] number of parameters following this struct
  */
 
 struct tee_ioctl_invoke_arg
@@ -310,8 +287,7 @@ struct tee_ioctl_invoke_arg
   struct tee_ioctl_param params[];
 };
 
-/**
- * TEE_IOC_INVOKE - Invokes a function in a Trusted Application
+/* TEE_IOC_INVOKE - Invokes a function in a Trusted Application
  *
  * Takes a struct tee_ioctl_buf_data which contains a struct
  * tee_invoke_func_arg followed by any array of struct tee_param
@@ -319,10 +295,9 @@ struct tee_ioctl_invoke_arg
 
 #define TEE_IOC_INVOKE  _IOC(TEE_IOC_MAGIC << 8, TEE_IOC_BASE + 3)
 
-/**
- * struct tee_ioctl_cancel_arg - Cancels an open session or invoke ioctl
- * @cancel_id:  [in] Cancellation id, a unique value to identify this request
- * @session:    [in] Session id, if the session is opened, else set to 0
+/* struct tee_ioctl_cancel_arg - Cancels an open session or invoke ioctl
+ * cancel_id:  [in] Cancellation id, a unique value to identify this request
+ * session:    [in] Session id, if the session is opened, else set to 0
  */
 
 struct tee_ioctl_cancel_arg
@@ -331,14 +306,12 @@ struct tee_ioctl_cancel_arg
   uint32_t session;
 };
 
-/**
- * TEE_IOC_CANCEL - Cancels an open session or invoke
- */
+/* TEE_IOC_CANCEL - Cancels an open session or invoke */
 
 #define TEE_IOC_CANCEL  _IOC(TEE_IOC_MAGIC << 4, TEE_IOC_BASE + 0)
-/**
- * struct tee_ioctl_close_session_arg - Closes an open session
- * @session: [in] Session id
+
+/* struct tee_ioctl_close_session_arg - Closes an open session
+ * session: [in] Session id
  */
 
 struct tee_ioctl_close_session_arg
@@ -346,20 +319,17 @@ struct tee_ioctl_close_session_arg
   uint32_t session;
 };
 
-/**
- * TEE_IOC_CLOSE_SESSION - Closes a session
- */
+/* TEE_IOC_CLOSE_SESSION - Closes a session */
 
 #define TEE_IOC_CLOSE_SESSION _IOC(TEE_IOC_MAGIC << 8, TEE_IOC_BASE + 5)
 
-/**
- * struct tee_iocl_supp_recv_arg - Receive a request for a supplicant
+/* struct tee_iocl_supp_recv_arg - Receive a request for a supplicant
  * function
- * @func:       [in] supplicant function
- * @num_params  [in/out] number of parameters following this struct
+ * func:       [in] supplicant function
+ * num_params  [in/out] number of parameters following this struct
  *
- * @num_params is the number of params that tee-supplicant has room to
- * receive when input, @num_params is the number of actual params
+ * num_params is the number of params that tee-supplicant has room to
+ * receive when input, num_params is the number of actual params
  * tee-supplicant receives when output.
  */
 
@@ -373,8 +343,7 @@ struct tee_iocl_supp_recv_arg
   struct tee_ioctl_param params[];
 };
 
-/**
- * TEE_IOC_SUPPL_RECV - Receive a request for a supplicant function
+/* TEE_IOC_SUPPL_RECV - Receive a request for a supplicant function
  *
  * Takes a struct tee_ioctl_buf_data which contains a struct
  * tee_iocl_supp_recv_arg followed by any array of struct tee_param
@@ -382,10 +351,9 @@ struct tee_iocl_supp_recv_arg
 
 #define TEE_IOC_SUPPL_RECV _IOC(TEE_IOC_MAGIC << 8, TEE_IOC_BASE + 6)
 
-/**
- * struct tee_iocl_supp_send_arg - Send a response to a received request
- * @ret:        [out] return value
- * @num_params  [in] number of parameters following this struct
+/* struct tee_iocl_supp_send_arg - Send a response to a received request
+ * ret:        [out] return value
+ * num_params  [in] number of parameters following this struct
  */
 
 struct tee_iocl_supp_send_arg
@@ -398,8 +366,7 @@ struct tee_iocl_supp_send_arg
   struct tee_ioctl_param params[];
 };
 
-/**
- * TEE_IOC_SUPPL_SEND - Receive a request for a supplicant function
+/* TEE_IOC_SUPPL_SEND - Receive a request for a supplicant function
  *
  * Takes a struct tee_ioctl_buf_data which contains a struct
  * tee_iocl_supp_send_arg followed by any array of struct tee_param
@@ -407,12 +374,11 @@ struct tee_iocl_supp_send_arg
 
 #define TEE_IOC_SUPPL_SEND _IOC(TEE_IOC_MAGIC << 8, TEE_IOC_BASE + 7)
 
-/**
- * struct tee_ioctl_shm_register_data - Shared memory register argument
- * @addr:      [in] Start address of shared memory to register
- * @length:    [in/out] Length of shared memory to register
- * @flags:     [in/out] Flags to/from registration.
- * @id:        [out] Identifier of the shared memory
+/* struct tee_ioctl_shm_register_data - Shared memory register argument
+ * addr:      [in] Start address of shared memory to register
+ * length:    [in/out] Length of shared memory to register
+ * flags:     [in/out] Flags to/from registration.
+ * id:        [out] Identifier of the shared memory
  *
  * The flags field should currently be zero as input. Updated by the call
  * with actual flags as defined by TEE_IOCTL_SHM_* above.
@@ -427,8 +393,7 @@ struct tee_ioctl_shm_register_data
   int32_t id;
 };
 
-/**
- * TEE_IOC_SHM_REGISTER_FD - register a shared memory from a file descriptor
+/* TEE_IOC_SHM_REGISTER_FD - register a shared memory from a file descriptor
  *
  * Returns a file descriptor on success or < 0 on failure
  *
@@ -438,10 +403,9 @@ struct tee_ioctl_shm_register_data
 
 #define TEE_IOC_SHM_REGISTER_FD _IOC(TEE_IOC_MAGIC << 8, TEE_IOC_BASE + 8)
 
-/**
- * struct tee_ioctl_buf_data - Variable sized buffer
- * @buf_ptr:    [in] A __user pointer to a buffer
- * @buf_len:    [in] Length of the buffer above
+/* struct tee_ioctl_buf_data - Variable sized buffer
+ * buf_ptr:    [in] A __user pointer to a buffer
+ * buf_len:    [in] Length of the buffer above
  *
  * Used as argument for TEE_IOC_OPEN_SESSION, TEE_IOC_INVOKE,
  * TEE_IOC_SUPPL_RECV, and TEE_IOC_SUPPL_SEND below.
@@ -453,8 +417,7 @@ struct tee_ioctl_buf_data
   uint64_t buf_len;
 };
 
-/**
- * TEE_IOC_SHM_REGISTER - Register shared memory argument
+/* TEE_IOC_SHM_REGISTER - Register shared memory argument
  *
  * Registers shared memory between the user space process and secure OS.
  *
@@ -464,8 +427,8 @@ struct tee_ioctl_buf_data
  */
 
 #define TEE_IOC_SHM_REGISTER   _IOC(TEE_IOC_MAGIC << 8, TEE_IOC_BASE + 9)
-/**
- * Five syscalls are used when communicating with the TEE driver.
+
+/* Five syscalls are used when communicating with the TEE driver.
  * open(): opens the device associated with the driver
  * ioctl(): as described above operating on the file descriptor from open()
  * close(): two cases

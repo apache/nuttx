@@ -29,8 +29,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/**
- * Peripheral' fixed mapped pins by IOMUX, these GPIO pins can have better
+/* Peripheral' fixed mapped pins by IOMUX, these GPIO pins can have better
  * speed performance.
  */
 

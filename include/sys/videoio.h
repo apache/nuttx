@@ -918,9 +918,9 @@ struct v4l2_pix_format
 typedef struct v4l2_pix_format v4l2_pix_format_t;
 
 /* struct v4l2_plane_pix_format - additional, per-plane format definition
- * @sizeimage: maximum size in bytes required for data, for which
+ * sizeimage: maximum size in bytes required for data, for which
  * this plane will be used
- * @bytesperline: distance in bytes between the leftmost pixels in two
+ * bytesperline: distance in bytes between the leftmost pixels in two
  * adjacent lines
  */
 
@@ -932,17 +932,17 @@ struct v4l2_plane_pix_format
 };
 
 /* struct v4l2_pix_format_mplane - multiplanar format definition
- * @width: image width in pixels
- * @height: image height in pixels
- * @pixelformat: little endian four character code (fourcc)
- * @field: enum v4l2_field; field order (for interlaced video)
- * @colorspace: enum v4l2_colorspace; supplemental to pixelformat
- * @plane_fmt: per-plane information
- * @num_planes: number of planes for this format
- * @flags: format flags (V4L2_PIX_FMT_FLAG_*)
- * @ycbcr_enc: enum v4l2_ycbcr_encoding, Y'CbCr encoding
- * @quantization: enum v4l2_quantization, colorspace quantization
- * @xfer_func: enum v4l2_xfer_func, colorspace transfer function
+ * width: image width in pixels
+ * height: image height in pixels
+ * pixelformat: little endian four character code (fourcc)
+ * field: enum v4l2_field; field order (for interlaced video)
+ * colorspace: enum v4l2_colorspace; supplemental to pixelformat
+ * plane_fmt: per-plane information
+ * num_planes: number of planes for this format
+ * flags: format flags (V4L2_PIX_FMT_FLAG_*)
+ * ycbcr_enc: enum v4l2_ycbcr_encoding, Y'CbCr encoding
+ * quantization: enum v4l2_quantization, colorspace quantization
+ * xfer_func: enum v4l2_xfer_func, colorspace transfer function
  */
 
 struct v4l2_pix_format_mplane
@@ -1073,10 +1073,10 @@ struct v4l2_event_src_change
 #define V4L2_EVENT_MD_FL_HAVE_FRAME_SEQ     (1 << 0)
 
 /* struct v4l2_event_motion_det - motion detection event
- * @flags:             if V4L2_EVENT_MD_FL_HAVE_FRAME_SEQ is set, then the
- *                     frame_sequence field is valid.
- * @frame_sequence:    the frame sequence number associated with this event.
- * @region_mask:       which regions detected motion.
+ * flags:             if V4L2_EVENT_MD_FL_HAVE_FRAME_SEQ is set, then the
+ *                    frame_sequence field is valid.
+ * frame_sequence:    the frame sequence number associated with this event.
+ * region_mask:       which regions detected motion.
  */
 
 struct v4l2_event_motion_det

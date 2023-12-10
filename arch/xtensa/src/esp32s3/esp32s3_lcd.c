@@ -773,8 +773,7 @@ static void esp32s3_lcd_config(void)
   regval |= LCD_CAM_LCD_VSYNC_INT_ENA_M;
   esp32s3_lcd_putreg(LCD_CAM_LC_DMA_INT_ENA_REG, regval);
 
-  /**
-   * Set LCD screem parameters:
+  /* Set LCD screem parameters:
    *    1. RGB mode, ouput VSYNC/HSYNC/DE signal
    *    2. VT height
    *    3. VA height
@@ -805,8 +804,7 @@ static void esp32s3_lcd_config(void)
            LCD_CAM_LCD_VSYNC_IDLE_POL_M;
   esp32s3_lcd_putreg(LCD_CAM_LCD_CTRL2_REG, regval);
 
-  /**
-   * Configure output mode:
+  /* Configure output mode:
    *    1. always output
    *    2. 16-bit word
    *    3. LCD mode

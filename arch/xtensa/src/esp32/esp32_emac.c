@@ -606,8 +606,7 @@ static int emac_config(void)
       return -ETIMEDOUT;
     }
 
-  /**
-   * Enable transmission options:
+  /* Enable transmission options:
    *
    *   - 100M
    *   - Full duplex
@@ -620,8 +619,7 @@ static int emac_config(void)
 
   emac_set_reg(EMAC_FFR_OFFSET, EMAC_PMF_E);
 
-  /**
-   * Enable flow control options:
+  /* Enable flow control options:
    *
    *   - PT-28 Time slot
    *   - RX flow control
@@ -634,8 +632,7 @@ static int emac_config(void)
            (EMAC_PAUSE_TIME << EMAC_CFPT_S);
   emac_set_reg(EMAC_FCR_OFFSET, regval);
 
-  /**
-   * Enable DMA options:
+  /* Enable DMA options:
    *
    *   - Drop error frame
    *   - Send frame when filled into FiFO
@@ -645,8 +642,7 @@ static int emac_config(void)
   regval = EMAC_FSF_E | EMAC_FTF_E | EMAC_OSF_E;
   emac_set_reg(EMAC_DMA_OMR_OFFSET, regval);
 
-  /**
-   * Enable DMA bus options:
+  /* Enable DMA bus options:
    *
    *   - Mixed burst mode
    *   - Address align beast

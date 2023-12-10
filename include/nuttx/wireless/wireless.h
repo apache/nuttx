@@ -461,8 +461,8 @@ struct iw_freq
 
 struct iw_quality
 {
-  uint8_t   qual;           /* link quality (%retries, SNR,
-                             * %missed beacons or better...) */
+  uint8_t   qual;           /* link quality (retries, SNR,
+                             * missed beacons or better...) */
   uint8_t   level;          /* signal level (dBm) */
   uint8_t   noise;          /* noise level (dBm) */
   uint8_t   updated;        /* Flags to know if updated */

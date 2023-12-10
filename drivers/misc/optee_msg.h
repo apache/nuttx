@@ -16,8 +16,7 @@
 #include <sys/types.h>
 #include <nuttx/bits.h>
 
-/**
- * This file defines the OP-TEE message protocol (ABI) used to communicate
+/* This file defines the OP-TEE message protocol (ABI) used to communicate
  * with an instance of OP-TEE running in secure world.
  *
  * This file is divided into two sections.
@@ -45,16 +44,14 @@
 
 #define OPTEE_MSG_ATTR_TYPE_MASK                GENMASK(7, 0)
 
-/**
- * Meta parameter to be absorbed by the Secure OS and not passed
+/* Meta parameter to be absorbed by the Secure OS and not passed
  * to the Trusted Application.
- *
  * Currently only used with OPTEE_MSG_CMD_OPEN_SESSION.
  */
+
 #define OPTEE_MSG_ATTR_META                     BIT(8)
 
-/**
- * Pointer to a list of pages used to register user-defined SHM buffer.
+/* Pointer to a list of pages used to register user-defined SHM buffer.
  * Used with OPTEE_MSG_ATTR_TYPE_TMEM_*.
  * buf_ptr should point to the beginning of the buffer. Buffer will contain
  * list of page addresses. OP-TEE core can reconstruct contiguous buffer from
@@ -81,22 +78,22 @@
  * architectures. If REE uses larger pages, it should divide them to 4KB
  * ones.
  */
+
 #define OPTEE_MSG_ATTR_NONCONTIG                BIT(9)
 
-/**
- * Memory attributes for caching passed with temp memrefs. The actual value
+/* Memory attributes for caching passed with temp memrefs. The actual value
  * used is defined outside the message protocol with the exception of
  * OPTEE_MSG_ATTR_CACHE_PREDEFINED which means the attributes already
  * defined for the memory range should be used. If optee_smc.h is used as
  * bearer of this protocol OPTEE_SMC_SHM_* is used for values.
  */
+
 #define OPTEE_MSG_ATTR_CACHE_SHIFT              16
 #define OPTEE_MSG_ATTR_CACHE_MASK               GENMASK(2, 0)
 #define OPTEE_MSG_ATTR_CACHE_PREDEFINED         0
 
-/**
- * Same values as TEE_LOGIN_* from TEE Internal API
- */
+/* Same values as TEE_LOGIN_* from TEE Internal API */
+
 #define OPTEE_MSG_LOGIN_PUBLIC                  0x00000000
 #define OPTEE_MSG_LOGIN_USER                    0x00000001
 #define OPTEE_MSG_LOGIN_GROUP                   0x00000002
@@ -104,19 +101,17 @@
 #define OPTEE_MSG_LOGIN_APPLICATION_USER        0x00000005
 #define OPTEE_MSG_LOGIN_APPLICATION_GROUP       0x00000006
 
-/**
- * Page size used in non-contiguous buffer entries
- */
+/* Page size used in non-contiguous buffer entries */
+
 #define OPTEE_MSG_NONCONTIG_PAGE_SIZE           4096
 
 #define OPTEE_MSG_FMEM_INVALID_GLOBAL_ID        0xffffffffffffffff
 
-/**
- * struct optee_msg_param_tmem - temporary memory reference parameter
- * @buf_ptr:    Address of the buffer
- * @size:       Size of the buffer
- * @shm_ref:    Temporary shared memory reference, pointer to a struct
- *              tee_shm
+/* struct optee_msg_param_tmem - temporary memory reference parameter
+ * buf_ptr:    Address of the buffer
+ * size:       Size of the buffer
+ * shm_ref:    Temporary shared memory reference, pointer to a struct
+ *             tee_shm
  *
  * Secure and normal world communicates pointers as physical address
  * instead of the virtual address. This is because secure and normal world
@@ -133,11 +128,10 @@ struct optee_msg_param_tmem
   uint64_t shm_ref;
 };
 
-/**
- * struct optee_msg_param_rmem - registered memory reference parameter
- * @offs:       Offset into shared memory reference
- * @size:       Size of the buffer
- * @shm_ref:    Shared memory reference, pointer to a struct tee_shm
+/* struct optee_msg_param_rmem - registered memory reference parameter
+ * offs:       Offset into shared memory reference
+ * size:       Size of the buffer
+ * shm_ref:    Shared memory reference, pointer to a struct tee_shm
  */
 
 struct optee_msg_param_rmem
@@ -147,14 +141,13 @@ struct optee_msg_param_rmem
   uint64_t shm_ref;
 };
 
-/**
- * struct optee_msg_param_fmem - ffa memory reference parameter
- * @offs_lower:    Lower bits of offset into shared memory reference
- * @offs_upper:    Upper bits of offset into shared memory reference
- * @internal_offs: Internal offset into the first page of shared memory
- *                 reference
- * @size:          Size of the buffer
- * @global_id:     Global identifier of Shared memory
+/* struct optee_msg_param_fmem - ffa memory reference parameter
+ * offs_lower:    Lower bits of offset into shared memory reference
+ * offs_upper:    Upper bits of offset into shared memory reference
+ * internal_offs: Internal offset into the first page of shared memory
+ *                reference
+ * size:          Size of the buffer
+ * global_id:     Global identifier of Shared memory
  */
 
 struct optee_msg_param_fmem
@@ -166,8 +159,7 @@ struct optee_msg_param_fmem
   uint64_t global_id;
 };
 
-/**
- * struct optee_msg_param_value - opaque value parameter
+/* struct optee_msg_param_value - opaque value parameter
  *
  * Value parameters are passed unchecked between normal and secure world.
  */
@@ -179,20 +171,19 @@ struct optee_msg_param_value
   uint64_t c;
 };
 
-/**
- * struct optee_msg_param - parameter used together with struct optee_msg_arg
- * @attr:       attributes
- * @tmem:       parameter by temporary memory reference
- * @rmem:       parameter by registered memory reference
- * @fmem:       parameter by ffa registered memory reference
- * @value:      parameter by opaque value
- * @octets:     parameter by octet string
+/* struct optee_msg_param - parameter used together with struct optee_msg_arg
+ * attr:       attributes
+ * tmem:       parameter by temporary memory reference
+ * rmem:       parameter by registered memory reference
+ * fmem:       parameter by ffa registered memory reference
+ * value:      parameter by opaque value
+ * octets:     parameter by octet string
  *
- * @attr & OPTEE_MSG_ATTR_TYPE_MASK indicates if tmem, rmem or value is used
+ * attr & OPTEE_MSG_ATTR_TYPE_MASK indicates if tmem, rmem or value is used
  * in the union. OPTEE_MSG_ATTR_TYPE_VALUE_* indicates value or octets,
- * OPTEE_MSG_ATTR_TYPE_TMEM_* indicates @tmem and
+ * OPTEE_MSG_ATTR_TYPE_TMEM_* indicates tmem and
  * OPTEE_MSG_ATTR_TYPE_RMEM_* or the alias PTEE_MSG_ATTR_TYPE_FMEM_*
- * indicates @rmem or @fmem depending on the conduit.
+ * indicates rmem or fmem depending on the conduit.
  * OPTEE_MSG_ATTR_TYPE_NONE indicates that none of the members are used.
  */
 
@@ -209,19 +200,18 @@ struct optee_msg_param
   } u;
 };
 
-/**
- * struct optee_msg_arg - call argument
- * @cmd: Command, one of OPTEE_MSG_CMD_* or OPTEE_MSG_RPC_CMD_*
- * @func: Trusted Application function, specific to the Trusted Application,
- *           used if cmd == OPTEE_MSG_CMD_INVOKE_COMMAND
- * @session: In parameter for all OPTEE_MSG_CMD_* except
- *           OPTEE_MSG_CMD_OPEN_SESSION where it's an output parameter
- *           instead
- * @cancel_id: Cancellation id, a unique value to identify this request
- * @ret: return value
- * @ret_origin: origin of the return value
- * @num_params: number of parameters supplied to the OS Command
- * @params: the parameters supplied to the OS Command
+/* struct optee_msg_arg - call argument
+ * cmd: Command, one of OPTEE_MSG_CMD_* or OPTEE_MSG_RPC_CMD_*
+ * func: Trusted Application function, specific to the Trusted Application,
+ *       used if cmd == OPTEE_MSG_CMD_INVOKE_COMMAND
+ * session: In parameter for all OPTEE_MSG_CMD_* except
+ *          OPTEE_MSG_CMD_OPEN_SESSION where it's an output parameter
+ *          instead
+ * cancel_id: Cancellation id, a unique value to identify this request
+ * ret: return value
+ * ret_origin: origin of the return value
+ * num_params: number of parameters supplied to the OS Command
+ * params: the parameters supplied to the OS Command
  *
  * All normal calls to Trusted OS uses this struct. If cmd requires further
  * information than what these fields hold it can be passed as a parameter
@@ -245,14 +235,14 @@ struct optee_msg_arg
   struct optee_msg_param params[];
 };
 
-/**
- * OPTEE_MSG_GET_ARG_SIZE - return size of struct optee_msg_arg
+/* OPTEE_MSG_GET_ARG_SIZE - return size of struct optee_msg_arg
  *
- * @num_params: Number of parameters embedded in the struct optee_msg_arg
+ * num_params: Number of parameters embedded in the struct optee_msg_arg
  *
  * Returns the size of the struct optee_msg_arg together with the number
  * of embedded parameters.
  */
+
 #define OPTEE_MSG_GET_ARG_SIZE(num_params) \
         (sizeof(struct optee_msg_arg) + \
          sizeof(struct optee_msg_param) * (num_params))
@@ -261,30 +251,29 @@ struct optee_msg_arg
  * Part 2 - requests from normal world
  ****************************************************************************/
 
-/**
- * Return the following UID if using API specified in this file without
+/* Return the following UID if using API specified in this file without
  * further extensions:
  * 384fb3e0-e7f8-11e3-af63-0002a5d5c51b.
  * Represented in 4 32-bit words in OPTEE_MSG_UID_0, OPTEE_MSG_UID_1,
  * OPTEE_MSG_UID_2, OPTEE_MSG_UID_3.
  */
+
 #define OPTEE_MSG_UID_0                 0x384fb3e0
 #define OPTEE_MSG_UID_1                 0xe7f811e3
 #define OPTEE_MSG_UID_2                 0xaf630002
 #define OPTEE_MSG_UID_3                 0xa5d5c51b
 #define OPTEE_MSG_FUNCID_CALLS_UID      0xFF01
 
-/**
- * Returns 2.0 if using API specified in this file without further
+/* Returns 2.0 if using API specified in this file without further
  * extensions. Represented in 2 32-bit words in OPTEE_MSG_REVISION_MAJOR
  * and OPTEE_MSG_REVISION_MINOR
  */
+
 #define OPTEE_MSG_REVISION_MAJOR        2
 #define OPTEE_MSG_REVISION_MINOR        0
 #define OPTEE_MSG_FUNCID_CALLS_REVISION 0xFF03
 
-/**
- * Get UUID of Trusted OS.
+/* Get UUID of Trusted OS.
  *
  * Used by non-secure world to figure out which Trusted OS is installed.
  * Note that returned UUID is the UUID of the Trusted OS, not of the API.
@@ -292,14 +281,14 @@ struct optee_msg_arg
  * Returns UUID in 4 32-bit words in the same way as
  * OPTEE_MSG_FUNCID_CALLS_UID described above.
  */
+
 #define OPTEE_MSG_OS_OPTEE_UUID_0       0x486178e0
 #define OPTEE_MSG_OS_OPTEE_UUID_1       0xe7f811e3
 #define OPTEE_MSG_OS_OPTEE_UUID_2       0xbc5e0002
 #define OPTEE_MSG_OS_OPTEE_UUID_3       0xa5d5c51b
 #define OPTEE_MSG_FUNCID_GET_OS_UUID    0x0000
 
-/**
- * Get revision of Trusted OS.
+/* Get revision of Trusted OS.
  *
  * Used by non-secure world to figure out which version of the Trusted OS
  * is installed. Note that the returned revision is the revision of the
@@ -308,10 +297,10 @@ struct optee_msg_arg
  * Returns revision in 2 32-bit words in the same way as
  * OPTEE_MSG_CALLS_REVISION described above.
  */
+
 #define OPTEE_MSG_FUNCID_GET_OS_REVISION 0x0001
 
-/**
- * Do a secure call with struct optee_msg_arg as argument
+/* Do a secure call with struct optee_msg_arg as argument
  * The OPTEE_MSG_CMD_* below defines what goes in struct optee_msg_arg::cmd
  *
  * OPTEE_MSG_CMD_OPEN_SESSION opens a session to a Trusted Application.
@@ -352,6 +341,7 @@ struct optee_msg_arg
  * normal world unable to process asynchronous notifications. Typically
  * used when the driver is shut down.
  */
+
 #define OPTEE_MSG_CMD_OPEN_SESSION      0
 #define OPTEE_MSG_CMD_INVOKE_COMMAND    1
 #define OPTEE_MSG_CMD_CLOSE_SESSION     2

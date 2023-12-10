@@ -38,17 +38,17 @@
 struct reset_controller_dev;
 
 /* struct reset_control - a reset control
- * @rcdev: A pointer to the reset controller device
+ * rcdev: A pointer to the reset controller device
  *  this reset control belongs to
- * @list: List entry for the rcdev's reset controller list
- * @id: ID of the reset controller in the reset
+ * list: List entry for the rcdev's reset controller list
+ * id: ID of the reset controller in the reset
  *  controller device
- * @refcnt: Number of gets of this reset_control
- * @acquired: Only one reset_control may be acquired for a given rcdev and
+ * refcnt: Number of gets of this reset_control
+ * acquired: Only one reset_control may be acquired for a given rcdev and
  *  id.
- * @shared: Is this a shared (1), or an exclusive (0) reset_control?
- * @deassert_cnt: Number of times this reset line has been deasserted
- * @triggered_count: Number of times this reset line has been reset.
+ * shared: Is this a shared (1), or an exclusive (0) reset_control?
+ * deassert_cnt: Number of times this reset line has been deasserted
+ * triggered_count: Number of times this reset line has been reset.
  *  Currently only used for shared resets, which means that the value will
  *  be either 0 or 1.
  */

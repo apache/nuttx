@@ -542,9 +542,7 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
   priv->cs             = cs;
   priv->rb             = GPIO_SMC_RB;
 
-  /* Initialize the NAND hardware for this CS */
-
-  /**
+  /* Initialize the NAND hardware for this CS
    * Note: The initialization is shown for the reference purpose only, and
    * for other MCUs, refer to the Package and Pinout chapter of the
    * respective data sheet.

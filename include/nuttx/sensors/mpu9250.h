@@ -34,15 +34,15 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Creates a mask of @m bits, i.e. MASK(2) -> 00000011 */
+/* Creates a mask of m bits, i.e. MASK(2) -> 00000011 */
 
 #define MASK(m) (BIT(m) - 1)
 
-/* Masks and shifts @v into bit field @m */
+/* Masks and shifts v into bit field m */
 
 #define TO_BITFIELD(m,v) (((v) & MASK(m ##_WIDTH)) << (m ##_SHIFT))
 
-/* Un-masks and un-shifts bit field @m from @v */
+/* Un-masks and un-shifts bit field m from v */
 
 #define FROM_BITFIELD(m,v) (((v) >> (m ##_SHIFT)) & MASK(m ##_WIDTH))
 
