@@ -256,47 +256,31 @@ extern "C"
 
 /* Alternate function pin selections ****************************************/
 
-/* USART1:
- *   RXD: PA10  CN9 pin 3, CN10 pin 33
- *        PB7   CN7 pin 21
- *   TXD: PA9   CN5 pin 1, CN10 pin 21
- *        PB6   CN5 pin 3, CN10 pin 17
+/* USART2:
+ *   RXD: PA3   CN4 pin 20
+ *   TXD: PA2   CN4 pin 18
  */
 
-#if 1
-#  define GPIO_USART1_RX GPIO_USART1_RX_1    /* PA10 */
-#  define GPIO_USART1_TX GPIO_USART1_TX_1    /* PA9  */
-#else
-#  define GPIO_USART1_RX GPIO_USART1_RX_2    /* PB7 */
-#  define GPIO_USART1_TX GPIO_USART1_TX_2    /* PB6  */
+#ifdef CONFIG_USART2_RS485
+  /* Lets use for RS485 */
+
+#  define GPIO_USART2_TX        GPIO_USART2_TX_1 /* PA2 */
+#  define GPIO_USART2_RX        GPIO_USART2_RX_1 /* PA3 */
+
+  /* RS485 DIR pin: PA1 */
+
+#  define GPIO_USART2_RS485_DIR (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz |\
+                                 GPIO_OUTPUT_CLEAR | GPIO_PORTA | GPIO_PIN1)
+
 #endif
 
-/* USART2:
- *   RXD: PA3   CN9 pin 1 (See SB13, 14, 62, 63). CN10 pin 37
- *        PD6
- *   TXD: PA2   CN9 pin 2(See SB13, 14, 62, 63). CN10 pin 35
- *        PD5
- */
-
-#define GPIO_USART2_RX   GPIO_USART2_RX_1    /* PA3 */
-#define GPIO_USART2_TX   GPIO_USART2_TX_1    /* PA2 */
-#define GPIO_USART2_RTS  GPIO_USART2_RTS_2
-#define GPIO_USART2_CTS  GPIO_USART2_CTS_2
-
 /* USART6:
- *  RXD: PC7    CN5 pin2, CN10 pin 19
- *       PA12   CN10, pin 12
- *  TXD: PC6    CN10, pin 4
- *       PA11   CN10, pin 14
+ *  RXD: PC7    CN2 pin 15
+ *  TXD: PC6    CN2 pin 17
  */
 
 #define GPIO_USART6_RX   GPIO_USART6_RX_1    /* PC7 */
 #define GPIO_USART6_TX   GPIO_USART6_TX_1    /* PC6 */
-
-/* UART RX DMA configurations */
-
-#define DMAMAP_USART1_RX DMAMAP_USART1_RX_2
-#define DMAMAP_USART6_RX DMAMAP_USART6_RX_2
 
 /* I2C
  *
@@ -379,20 +363,18 @@ extern "C"
 #define LED_PANIC        1
 
 /* Buttons
- *   The STM32F401RC-RS485 has 4 user buttons: SW3, SW4, SW5 and
- *   SW6. They are connected to PB13, PB14, PB15 and PC6 respectively.
+ *   The STM32F401RC-RS485 has 3 user buttons: SW3, SW4, and SW5.
+ *   They are connected to PB13, PB14, and PB15 respectively.
  */
 
 #define BUTTON_SW3         0
 #define BUTTON_SW4         1
 #define BUTTON_SW5         2
-#define BUTTON_SW6         3
-#define NUM_BUTTONS        4
+#define NUM_BUTTONS        3
 
 #define BUTTON_SW3_BIT     (1 << BUTTON_SW3)
 #define BUTTON_SW4_BIT     (1 << BUTTON_SW4)
 #define BUTTON_SW5_BIT     (1 << BUTTON_SW5)
-#define BUTTON_SW6_BIT     (1 << BUTTON_SW6)
 
 #define GPIO_TIM2_CH1IN (GPIO_TIM2_CH1IN_1 | GPIO_PULLUP)
 #define GPIO_TIM2_CH2IN (GPIO_TIM2_CH2IN_1 | GPIO_PULLUP)
