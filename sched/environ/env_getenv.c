@@ -63,7 +63,10 @@ FAR char *getenv(FAR const char *name)
   FAR struct tcb_s *rtcb;
   FAR struct task_group_s *group;
   FAR char *pvalue = NULL;
+  irqstate_t flags;
   ssize_t ret = OK;
+
+  flags = enter_critical_section();
 
   /* Verify that a string was passed */
 
@@ -75,7 +78,6 @@ FAR char *getenv(FAR const char *name)
 
   /* Get a reference to the thread-private environ in the TCB. */
 
-  sched_lock();
   rtcb  = this_task();
   group = rtcb->group;
 
@@ -83,7 +85,7 @@ FAR char *getenv(FAR const char *name)
 
   if (group == NULL || (ret = env_findvar(group, name)) < 0)
     {
-      goto errout_with_lock;
+      goto errout;
     }
 
   /* It does!  Get the value sub-string from the name=value string */
@@ -94,18 +96,17 @@ FAR char *getenv(FAR const char *name)
       /* The name=value string has no '='  This is a bug! */
 
       ret = -EINVAL;
-      goto errout_with_lock;
+      goto errout;
     }
 
   /* Adjust the pointer so that it points to the value right after the '=' */
 
   pvalue++;
-  sched_unlock();
+  leave_critical_section(flags);
   return pvalue;
 
-errout_with_lock:
-  sched_unlock();
 errout:
+  leave_critical_section(flags);
   set_errno(-ret);
   return NULL;
 }
