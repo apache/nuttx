@@ -34,57 +34,51 @@ extern "C"
 {
 #endif
 
-/* @brief Initialize spiram interface/hardware. Normally called from
+/* Initialize spiram interface/hardware. Normally called from
  * cpu_start.c.
  *
- * @return ESP_OK on success
+ * Return ESP_OK on success
  */
 
 int esp_spiram_init(void);
 
-/**
- * @brief Configure Cache/MMU for access to external SPI RAM.
+/* Configure Cache/MMU for access to external SPI RAM.
  *
  * Normally this function is called from cpu_start, if
  * CONFIG_SPIRAM_BOOT_INIT option is enabled. Applications which need to
  * enable SPI RAM at run time can disable CONFIG_SPIRAM_BOOT_INIT, and
  * call this function later.
  *
- * @attention this function must be called with flash cache disabled.
+ * Attention: this function must be called with flash cache disabled.
  */
 
 void esp_spiram_init_cache(void);
 
-/**
- * @brief Memory test for SPI RAM. Should be called after SPI RAM is
+/* Memory test for SPI RAM. Should be called after SPI RAM is
  * initialized and (in case of a dual-core system) the app CPU is online.
  * This test overwrites the memory with crap, so do not call after e.g. the
  * heap allocator has stored important stuff in SPI RAM.
  *
- * @return true on success, false on failed memory test
+ * Return true on success, false on failed memory test
  */
 
 bool esp_spiram_test(void);
 
-/**
- * @brief Add the initialized SPI RAM to the heap allocator.
- */
+/* Add the initialized SPI RAM to the heap allocator. */
 
 int esp_spiram_add_to_heapalloc(void);
 
-/**
- * @brief Get the available physical size of the attached SPI RAM chip
+/* Get the available physical size of the attached SPI RAM chip
  *
- * @note If ECC is enabled, the available physical size would be smaller
+ * Note If ECC is enabled, the available physical size would be smaller
  * than the physical size. See `CONFIG_SPIRAM_ECC_ENABLE`
  *
- * @return Size in bytes, or 0 if no external RAM chip support compiled in.
+ * Return size in bytes, or 0 if no external RAM chip support compiled in.
  */
 
 size_t esp_spiram_get_size(void);
 
-/**
- * @brief Force a writeback of the data in the SPI RAM cache. This is to be
+/* Force a writeback of the data in the SPI RAM cache. This is to be
  * called whenever cache is disabled, because disabling cache on the ESP32
  * discards the data in the SPI RAM cache.
  *
@@ -93,46 +87,42 @@ size_t esp_spiram_get_size(void);
 
 void esp_spiram_writeback_cache(void);
 
-/**
- * @brief If SPI RAM(PSRAM) has been initialized
+/* If SPI RAM(PSRAM) has been initialized
  *
- * @return
+ * Return
  *          - true SPI RAM has been initialized successfully
  *          - false SPI RAM hasn't been initialized or initialized failed
  */
 
 bool esp_spiram_is_initialized(void);
 
-/**
- * @brief get psram CS IO
+/* get psram CS IO
  *
  * This interface should be called after PSRAM is enabled, otherwise it will
  * return an invalid value -1/0xff.
  *
- * @return psram CS IO or -1/0xff if psram not enabled
+ * Return psram CS IO or -1/0xff if psram not enabled
  */
 
 uint8_t esp_spiram_get_cs_io(void);
 
-/**
- * @brief Reserve a pool of internal memory for specific DMA/internal
+/* Reserve a pool of internal memory for specific DMA/internal
  * allocations
  *
- * @param size Size of reserved pool in bytes
+ * size Size of reserved pool in bytes
  *
- * @return
+ * Return
  *          - ESP_OK on success
  *          - ESP_ERR_NO_MEM when no memory available for pool
  */
 
 int esp_spiram_reserve_dma_pool(size_t size);
 
-/**
- * @brief If SPI RAM(PSRAM) has been initialized
+/* If SPI RAM(PSRAM) has been initialized
  *
- * @return
- *          - true SPI RAM has been initialized successfully
- *          - false SPI RAM hasn't been initialized or initialized failed
+ * Return
+ *   - true SPI RAM has been initialized successfully
+ *   - false SPI RAM hasn't been initialized or initialized failed
  */
 
 bool esp_spiram_is_initialized(void);
@@ -142,26 +132,23 @@ bool esp_spiram_is_initialized(void);
 extern int _instruction_reserved_start;
 extern int _instruction_reserved_end;
 
-/**
- * @brief Get the start page number of the instruction in SPI flash
+/* Get the start page number of the instruction in SPI flash
  *
- * @return start page number
+ * Return start page number
  */
 
 uint32_t instruction_flash_start_page_get(void);
 
-/**
- * @brief Get the end page number of the instruction in SPI flash
+/* Get the end page number of the instruction in SPI flash
  *
- * @return end page number
+ * Return end page number
  */
 
 uint32_t instruction_flash_end_page_get(void);
 
-/**
- * @brief Get the offset of instruction from SPI flash to SPI RAM
+/* Get the offset of instruction from SPI flash to SPI RAM
  *
- * @return instruction offset
+ * Return instruction offset
  */
 
 int instruction_flash2spiram_offset(void);
@@ -173,26 +160,23 @@ int instruction_flash2spiram_offset(void);
 extern uint8_t _rodata_reserved_start[];
 extern uint8_t _rodata_reserved_end[];
 
-/**
- * @brief Get the start page number of the rodata in SPI flash
+/* Get the start page number of the rodata in SPI flash
  *
- * @return start page number
+ * Return start page number
  */
 
 uint32_t rodata_flash_start_page_get(void);
 
-/**
- * @brief Get the end page number of the rodata in SPI flash
+/* Get the end page number of the rodata in SPI flash
  *
- * @return end page number
+ * Return end page number
  */
 
 uint32_t rodata_flash_end_page_get(void);
 
-/**
- * @brief Get the offset number of rodata from SPI flash to SPI RAM
+/* Get the offset number of rodata from SPI flash to SPI RAM
  *
- * @return rodata offset
+ * Return rodata offset
  */
 
 int rodata_flash2spiram_offset(void);

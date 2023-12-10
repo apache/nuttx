@@ -81,17 +81,15 @@ enum ota_img_ctrl_e
 
 enum ota_img_state_e
 {
-  /**
-   *  Monitor the first boot. In bootloader of esp-idf this state is changed
-   *  to ESP_OTA_IMG_PENDING_VERIFY if this bootloader enable app rollback.
+  /* Monitor the first boot. In bootloader of esp-idf this state is changed
+   * to ESP_OTA_IMG_PENDING_VERIFY if this bootloader enable app rollback.
    *
-   *  So this driver doesn't use this state currently.
+   * So this driver doesn't use this state currently.
    */
 
   OTA_IMG_NEW             = 0x0,
 
-  /**
-   * First boot for this app was. If while the second boot this state is then
+  /* First boot for this app was. If while the second boot this state is then
    * it will be changed to ABORTED if this bootloader enable app rollback.
    *
    * So this driver doesn't use this state currently.
@@ -107,8 +105,7 @@ enum ota_img_state_e
 
   OTA_IMG_INVALID         = 0x3,
 
-  /**
-   * App could not confirm the workable or non-workable. In bootloader
+  /* App could not confirm the workable or non-workable. In bootloader
    * IMG_PENDING_VERIFY state will be changed to IMG_ABORTED. This app will
    * not selected to boot at all if this bootloader enable app rollback.
    *
@@ -117,8 +114,7 @@ enum ota_img_state_e
 
   OTA_IMG_ABORTED         = 0x4,
 
-  /**
-   * Undefined. App can boot and work without limits in esp-idf.
+  /* Undefined. App can boot and work without limits in esp-idf.
    *
    * This state is not used.
    */

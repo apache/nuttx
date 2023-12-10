@@ -476,7 +476,7 @@ struct xcptcontext
  ****************************************************************************/
 
 /* Macro to set the PSR.
- * This macro sets the PSR register to the value in @a _psr.
+ * This macro sets the PSR register to the value in _psr.
  */
 #define sparc_set_psr( _psr ) \
   do { \
@@ -487,7 +487,7 @@ struct xcptcontext
   } while ( 0 )
 
 /* Macro to obtain the PSR.
- * This macro returns the current contents of the PSR register in @a _psr.
+ * This macro returns the current contents of the PSR register in _psr.
  */
 #define sparc_get_psr( _psr ) \
   do { \
@@ -503,7 +503,7 @@ struct xcptcontext
   } while ( 0 )
 
 /* Macro to obtain the TBR.
- * This macro returns the current contents of the TBR register in @a _tbr.
+ * This macro returns the current contents of the TBR register in _tbr.
  */
 #define sparc_get_tbr( _tbr ) \
   do { \
@@ -512,7 +512,7 @@ struct xcptcontext
   } while ( 0 )
 
 /* Macro to set the TBR.
- * This macro sets the TBR register to the value in @a _tbr.
+ * This macro sets the TBR register to the value in _tbr.
  */
 #define sparc_set_tbr( _tbr ) \
   do { \
@@ -520,7 +520,7 @@ struct xcptcontext
   } while ( 0 )
 
 /* Macro to obtain the WIM.
- * This macro returns the current contents of the WIM field in @a _wim.
+ * This macro returns the current contents of the WIM field in _wim.
  */
 #define sparc_get_wim( _wim ) \
   do { \
@@ -528,7 +528,7 @@ struct xcptcontext
   } while ( 0 )
 
 /* Macro to set the WIM.
- * This macro sets the WIM field to the value in @a _wim.
+ * This macro sets the WIM field to the value in _wim.
  */
 #define sparc_set_wim( _wim ) \
   do { \
@@ -539,7 +539,7 @@ struct xcptcontext
   } while ( 0 )
 
 /* Macro to obtain the Y register.
- * This macro returns the current contents of the Y register in @a _y.
+ * This macro returns the current contents of the Y register in _y.
  */
 #define sparc_get_y( _y ) \
   do { \
@@ -547,7 +547,7 @@ struct xcptcontext
   } while ( 0 )
 
 /* Macro to set the Y register.
- * This macro sets the Y register to the value in @a _y.
+ * This macro sets the Y register to the value in _y.
  */
 #define sparc_set_y( _y ) \
   do { \
@@ -565,7 +565,7 @@ struct xcptcontext
 
 /* SPARC disable processor interrupts.
  * This method is invoked to disable all maskable interrupts.
- * @return This method returns the entire PSR contents.
+ * This method returns the entire PSR contents.
  */
 
 static inline uint32_t sparc_disable_interrupts(void)
@@ -577,7 +577,7 @@ static inline uint32_t sparc_disable_interrupts(void)
 
 /* SPARC enable processor interrupts.
  * This method is invoked to enable all maskable interrupts.
- * @param[in] psr is the PSR returned by @ref sparc_disable_interrupts.
+ * psr is the PSR returned by sparc_disable_interrupts.
  */
 
 static inline void sparc_enable_interrupts(uint32_t psr)
@@ -595,7 +595,7 @@ static inline void sparc_enable_interrupts(uint32_t psr)
 
 /* SPARC flash processor interrupts.
  * This method is invoked to temporarily enable all maskable interrupts.
- * @param[in] _psr is the PSR returned by @ref sparc_disable_interrupts.
+ * _psr is the PSR returned by sparc_disable_interrupts.
  */
 
 #define sparc_flash_interrupts( _psr ) \
@@ -606,7 +606,7 @@ static inline void sparc_enable_interrupts(uint32_t psr)
 
 /* SPARC obtain interrupt level.
  * This method is invoked to obtain the current interrupt disable level.
- * @param[in] _level is the PSR returned by @ref sparc_disable_interrupts.
+ * _level is the PSR returned by sparc_disable_interrupts.
  */
 
 #define sparc_get_interrupt_level( _level ) \

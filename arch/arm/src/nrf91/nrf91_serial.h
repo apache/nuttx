@@ -49,4 +49,4 @@
 void nrf91_earlyserialinit(void);
 #endif
 
-#endif /* __ARCH_ARM_SRC_NRF91_NRF91@_SERIAL_H */
+#endif /* __ARCH_ARM_SRC_NRF91_NRF91_SERIAL_H */

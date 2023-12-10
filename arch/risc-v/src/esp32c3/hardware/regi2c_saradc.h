@@ -25,8 +25,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/**
- * Register definitions for analog to calibrate initial code for getting a
+/* Register definitions for analog to calibrate initial code for getting a
  * more precise voltage of SAR ADC.
  */
 

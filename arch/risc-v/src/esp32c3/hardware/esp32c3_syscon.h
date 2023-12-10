@@ -216,8 +216,7 @@
 #define SYSTEM_WIFI_CLK_EN_V 0x00FB9FCF
 #define SYSTEM_WIFI_CLK_EN_S 0
 
-/**
- * Mask for all Wifi clock bits - 0, 1, 2, 3, 6, 7, 8, 9, 10, 15, 19, 20, 21
+/* Mask for all Wifi clock bits - 0, 1, 2, 3, 6, 7, 8, 9, 10, 15, 19, 20, 21
  * Bit15 not included here because of the bit now can't be cleared
  */
 
@@ -233,8 +232,7 @@
 #define SYSTEM_WIFI_CLK_BT_EN_V 0x0
 #define SYSTEM_WIFI_CLK_BT_EN_S 0
 
-/**
- * Mask for clock bits used by both WIFI and Bluetooth,
+/* Mask for clock bits used by both WIFI and Bluetooth,
  * bit 0, 3, 6, 7, 8, 9
  */
 

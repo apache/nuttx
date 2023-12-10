@@ -131,8 +131,7 @@ int board_nandflash_config(int cs)
 
   /* Configure the SMC cycle timing */
 
-  /**
-   * Select 0. Chip Select 0 has been programmed with:
+  /* Select 0. Chip Select 0 has been programmed with:
    * NRD_HOLD = 4; READ_MODE = 1 (NRD controlled)
    * NWE_SETUP = 3; WRITE_MODE = 1 (NWE controlled)
    * TDF_CYCLES = 6; TDF_MODE = 1 (optimization enabled).
@@ -143,9 +142,7 @@ int board_nandflash_config(int cs)
 
   /* Configure the SMC mode */
 
-  /**
-   *
-   * READ_MODE:
+  /* READ_MODE:
    *    0: The read operation is controlled by the NCS signal.
    *    1: The read operation is controlled by the NRD signal.
    *

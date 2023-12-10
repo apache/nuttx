@@ -783,7 +783,7 @@ int spirit_radio_convert_datarate(FAR struct spirit_library_s *spirit,
  *   Returns the mantissa and exponent for a given bandwidth.  Even if it is
  *   possible to pass as parameter any value in the below mentioned range, the
  *   API will search the closer value according to a fixed table of channel
- *   bandwidth values (@ref s_vectnBandwidth), as defined in the datasheet,
+ *   bandwidth values (s_vectnBandwidth), as defined in the datasheet,
  *   returning the corresponding mantissa and exponent value.
  *
  * Input Parameters:
@@ -1167,7 +1167,7 @@ int spirit_radio_set_palevel_dbm(FAR struct spirit_library_s *spirit,
  *   Returns a specific PA_LEVEL register, returning a value in dBm.
  *
  *   NOTE:
- *   This function makes use of the @ref spirit_radio_convert_reg2power fcn to
+ *   This function makes use of the spirit_radio_convert_reg2power fcn to
  *   interpolate the power value.
  *
  * Input Parameters:

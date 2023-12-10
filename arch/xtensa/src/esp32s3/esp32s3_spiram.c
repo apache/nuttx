@@ -451,11 +451,10 @@ void IRAM_ATTR esp_spiram_writeback_cache(void)
   cache_writeback_all();
 }
 
-/**
- * @brief If SPI RAM(PSRAM) has been initialized
+/* If SPI RAM(PSRAM) has been initialized
  *
- * @return true SPI RAM has been initialized successfully
- * @return false SPI RAM hasn't been initialized or initialized failed
+ * Return true SPI RAM has been initialized successfully
+ * Return false SPI RAM hasn't been initialized or initialized failed
  */
 
 bool esp_spiram_is_initialized(void)
@@ -468,10 +467,9 @@ uint8_t esp_spiram_get_cs_io(void)
   return psram_get_cs_io();
 }
 
-/**
- * @brief Get allocable virtual start address
+/* Get allocable virtual start address
  *
- * @return Allocable virtual start address
+ * Return Allocable virtual start address
  */
 
 uint32_t esp_spiram_allocable_vaddr_start(void)
@@ -479,10 +477,9 @@ uint32_t esp_spiram_allocable_vaddr_start(void)
   return g_allocable_vaddr_start;
 }
 
-/**
- * @brief Get allocable virtual end address
+/* Get allocable virtual end address
  *
- * @return Allocable virtual end address
+ * Return Allocable virtual end address
  */
 
 uint32_t esp_spiram_allocable_vaddr_end(void)

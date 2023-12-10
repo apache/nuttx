@@ -19,12 +19,10 @@
  ****************************************************************************/
 
 /****************************************************************************
- *    @file global_config.h
+ * global_config.h
  *
- *    @brief This file contains the definitions of index of
-
- *           global configuration which
- *           will be configured in APP project.
+ *   This file contains the definitions of index of
+ *   global configuration which will be configured in APP project.
  *
  *    $Rev:  $
  *

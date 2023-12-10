@@ -31,8 +31,7 @@
  *
  ****************************************************************************/
 
-/**
- * nsh_romfsetc.h
+/* nsh_romfsetc.h
  *
  * This file is a stub for 'make export' purposes; the actual ROMFS
  * must be supplied by the library client.

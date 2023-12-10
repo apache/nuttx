@@ -35,9 +35,7 @@
  * Public Types
  ****************************************************************************/
 
-/**
- * @brief Clock nodes
- */
+/* Clock nodes */
 
 typedef enum
 {
@@ -120,9 +118,7 @@ typedef enum
   clock_node_end,
 } clock_node_t;
 
-/**
- * @brief General clock sources
- */
+/* General clock sources */
 
 typedef enum
 {
