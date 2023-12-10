@@ -75,16 +75,15 @@
    GPIO_SPEED_50MHz)
 
 /* Buttons
- * The STM32F401RC-RS485 has 4 user buttons.
+ * The STM32F401RC-RS485 has 3 user buttons.
  * - SW3 is connected to the GPIO PB13.
  * - SW4 is connected to the GPIO PB14.
  * - SW5 is connected to the GPIO PB15.
- * - SW6 is connected to the GPIO PC6.
  */
 
 #define MIN_IRQBUTTON   BUTTON_SW3
-#define MAX_IRQBUTTON   BUTTON_SW6
-#define NUM_IRQBUTTONS  4
+#define MAX_IRQBUTTON   BUTTON_SW5
+#define NUM_IRQBUTTONS  3
 
 #define GPIO_BTN_SW3 \
   (GPIO_INPUT |GPIO_FLOAT |GPIO_EXTI | GPIO_PORTB | GPIO_PIN13)
@@ -92,29 +91,6 @@
   (GPIO_INPUT |GPIO_FLOAT |GPIO_EXTI | GPIO_PORTB | GPIO_PIN14)
 #define GPIO_BTN_SW5 \
   (GPIO_INPUT |GPIO_FLOAT |GPIO_EXTI | GPIO_PORTB | GPIO_PIN15)
-#define GPIO_BTN_SW6 \
-  (GPIO_INPUT |GPIO_FLOAT |GPIO_EXTI | GPIO_PORTC | GPIO_PIN6)
-
-/* The shield uses the following pins:
- *
- *   +5V
- *   GND
- *  SERIAL_TX=PA_2    USER_BUTTON=PC_13
- *  SERIAL_RX=PA_3            LD2=PA_5
- *
- * Analog                         Digital
- *  A0=PA_0    USART2RX D0=PA_3              D8 =PA_9
- *  A1=PA_1    USART2TX D1=PA_2              D9 =PC_7
- *  A2=PA_4             D2=PA_10     WIFI_CS=D10=PB_6 SPI_CS
- *  A3=PB_0    WIFI_INT=D3=PB_3              D11=PA_7 SPI_MOSI
- *  A4=PC_1       SD_CS=D4=PB_5              D12=PA_6 SPI_MISO
- *  A5=PC_0     WIFI_EN=D5=PB_4          LD2=D13=PA_5 SPI_SCK
- *                 LED2=D6=PB_10    I2C1_SDA=D14=PB_9 WIFI Probe
- *                      D7=PA_8     I2C1_SCL=D15=PB_8 WIFI Probe
- *
- *  mostly from: https://mbed.org/platforms/ST-Nucleo-F401RE/
- *
- */
 
 /* SPI1 off */
 
