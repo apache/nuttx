@@ -434,6 +434,7 @@ static int stm32_setrelative(struct rtc_lowerhalf_s *lower,
   struct tm time;
   time_t seconds;
   int ret = -EINVAL;
+  irqstate_t flags;
 
   DEBUGASSERT(lower != NULL && alarminfo != NULL);
   DEBUGASSERT(alarminfo->id == RTC_ALARMA || alarminfo->id == RTC_ALARMB);
@@ -445,7 +446,7 @@ static int stm32_setrelative(struct rtc_lowerhalf_s *lower,
        * about being suspended and working on an old time.
        */
 
-      sched_lock();
+      flags = enter_critical_section();
 
       /* Get the current time in broken out format */
 
@@ -475,7 +476,7 @@ static int stm32_setrelative(struct rtc_lowerhalf_s *lower,
           ret = stm32_setalarm(lower, &setalarm);
         }
 
-      sched_unlock();
+      leave_critical_section(flags);
     }
 
   return ret;
@@ -559,6 +560,7 @@ static int stm32_rdalarm(struct rtc_lowerhalf_s *lower,
 {
   struct alm_rdalarm_s lowerinfo;
   int ret = -EINVAL;
+  irqstate_t flags;
 
   DEBUGASSERT(lower != NULL && alarminfo != NULL && alarminfo->time != NULL);
   DEBUGASSERT(alarminfo->id == RTC_ALARMA || alarminfo->id == RTC_ALARMB);
@@ -569,14 +571,14 @@ static int stm32_rdalarm(struct rtc_lowerhalf_s *lower,
        * about being suspended and working on an old time.
        */
 
-      sched_lock();
+      flags = enter_critical_section();
 
       lowerinfo.ar_id = alarminfo->id;
       lowerinfo.ar_time = alarminfo->time;
 
       ret = stm32_rtc_rdalarm(&lowerinfo);
 
-      sched_unlock();
+      leave_critical_section(flags);
     }
 
   return ret;
