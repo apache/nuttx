@@ -160,10 +160,6 @@ static void lio_sighandler(int signo, siginfo_t *info, void *ucontext)
   DEBUGASSERT(sighand && sighand->list);
   aiocbp->aio_priv = NULL;
 
-  /* Prevent any asynchronous I/O completions while the signal handler runs */
-
-  sched_lock();
-
   /* Check if all of the pending I/O has completed */
 
   ret = lio_checkio(sighand->list, sighand->nent);
@@ -188,8 +184,6 @@ static void lio_sighandler(int signo, siginfo_t *info, void *ucontext)
 
       lib_free(sighand);
     }
-
-  sched_unlock();
 }
 
 /****************************************************************************
