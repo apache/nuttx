@@ -142,8 +142,6 @@ int s698pm_dkit_watchdog_initialize(void)
 
 #if defined(CONFIG_S698PM_DKIT_WDG_THREAD)
 
-  sched_lock();
-
   /* Spawn wdog daemon thread */
 
   int taskid = kthread_create(CONFIG_S698PM_DKIT_WDG_THREAD_NAME,
@@ -153,8 +151,6 @@ int s698pm_dkit_watchdog_initialize(void)
 
   DEBUGASSERT(taskid > 0);
   UNUSED(taskid);
-
-  sched_unlock();
 
 #endif /* CONFIG_S698PM_DKIT_WDG_THREAD */
 
