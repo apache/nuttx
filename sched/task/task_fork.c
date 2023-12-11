@@ -320,19 +320,10 @@ pid_t nxtask_start_fork(FAR struct task_tcb_s *child)
 
   pid = child->cmn.pid;
 
-  /* Eliminate a race condition by disabling pre-emption.  The child task
-   * can be instantiated, but cannot run until we call waitpid().  This
-   * assures us that we cannot miss the death-of-child signal (only
-   * needed in the SMP case).
-   */
-
-  sched_lock();
-
   /* Activate the task */
 
   nxtask_activate((FAR struct tcb_s *)child);
 
-  sched_unlock();
   return pid;
 }
 
