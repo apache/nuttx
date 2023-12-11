@@ -430,6 +430,7 @@ static int max326_setrelative(struct rtc_lowerhalf_s *lower,
 #endif
   struct timespec ts;
   int ret = -EINVAL;
+  irqstate_t flags;
 
   DEBUGASSERT(lower != NULL && alarminfo != NULL && alarminfo->id == 0);
   priv = (struct max326_lowerhalf_s *)lower;
@@ -440,7 +441,7 @@ static int max326_setrelative(struct rtc_lowerhalf_s *lower,
        * about being suspended and working on an old time.
        */
 
-      sched_lock();
+      flags = enter_critical_section();
 
       /* Get the current time in seconds */
 
@@ -450,7 +451,7 @@ static int max326_setrelative(struct rtc_lowerhalf_s *lower,
       ret = up_rtc_getdatetime(&time);
       if (ret < 0)
         {
-          sched_unlock();
+          leave_critical_section(flags);
           return ret;
         }
 
@@ -463,7 +464,7 @@ static int max326_setrelative(struct rtc_lowerhalf_s *lower,
       ret = up_rtc_gettime(&ts);
       if (ret < 0)
         {
-          sched_unlock();
+          leave_critical_section(flags);
           return ret;
         }
 #else
@@ -494,7 +495,7 @@ static int max326_setrelative(struct rtc_lowerhalf_s *lower,
           cbinfo->priv = NULL;
         }
 
-      sched_unlock();
+      leave_critical_section(flags);
     }
 
   return ret;
