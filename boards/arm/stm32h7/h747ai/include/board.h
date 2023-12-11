@@ -27,6 +27,21 @@
 
 #include <nuttx/config.h>
 
+/* VOS Scale
+ *
+ * Choose VOS scaling to suit the electrical environment.  NuttX defaults to
+ * VOS scale 1 for higher speeds.  Override the default in order to limit the
+ * internal voltage regulator's ramp-up.  Try increasing the scale (lower the
+ * voltage) if the board finds VOSRDY not ready at power-up.
+ */
+#define STM32_PWR_VOS_SCALE      PWR_D3CR_VOS_SCALE_2
+
+#if STM32_PWR_VOS_SCALE == PWR_D3CR_VOS_SCALE_2
+#  include "board_vos_scale_2.h"
+#elif STM32_PWR_VOS_SCALE == PWR_D3CR_VOS_SCALE_3
+#  include "board_vos_scale_3.h"
+#endif
+
 #ifndef __ASSEMBLY__
 # include <stdint.h>
 #endif
@@ -91,22 +106,6 @@
 #define STM32_HSEBYP_ENABLE
 
 #define STM32_PLLCFG_PLLSRC      RCC_PLLCKSELR_PLLSRC_HSE
-
-/* VOS Scale
- *
- * Choose VOS scaling to suit the electrical environment.  NuttX
- * defaults to VOS scale 1 for higher speeds.  Override the default in
- * order to limit the internal voltage regulator's ramp-up.  Try
- * increasing the scale (lower the voltage) if the board finds VOSRDY
- * not ready at power-up.
- */
-#define STM32_PWR_VOS_SCALE      PWR_D3CR_VOS_SCALE_2
-
-#if STM32_PWR_VOS_SCALE == PWR_D3CR_VOS_SCALE_2
-#  include "board_vos_scale_2.h"
-#elif STM32_PWR_VOS_SCALE == PWR_D3CR_VOS_SCALE_3
-#  include "board_vos_scale_3.h"
-#endif
 
 /* Timer clock frequencies */
 
