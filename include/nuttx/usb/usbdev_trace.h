@@ -187,6 +187,7 @@
 #define USBSER_TRACECLASSAPI_TXREADY                 0x000b
 #define USBSER_TRACECLASSAPI_TXEMPTY                 0x000c
 #define USBSER_TRACECLASSAPI_FLOWCONTROL             0x000d
+#define USBSER_TRACECLASSAPI_RELEASE                 0x000e
 
 /* Values of the class error ID used by the USB serial driver */
 

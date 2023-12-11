@@ -222,6 +222,7 @@ static bool    cdcuart_rxflowcontrol(FAR struct uart_dev_s *dev,
 #endif
 static void    cdcuart_txint(FAR struct uart_dev_s *dev, bool enable);
 static bool    cdcuart_txempty(FAR struct uart_dev_s *dev);
+static int     cdcuart_release(FAR struct uart_dev_s *dev);
 
 /****************************************************************************
  * Private Data
@@ -272,7 +273,8 @@ static const struct uart_ops_s g_uartops =
   NULL,                  /* send */
   cdcuart_txint,         /* txinit */
   NULL,                  /* txready */
-  cdcuart_txempty        /* txempty */
+  cdcuart_txempty,       /* txempty */
+  cdcuart_release        /* release */
 };
 
 /****************************************************************************
@@ -2798,6 +2800,28 @@ static bool cdcuart_txempty(FAR struct uart_dev_s *dev)
    */
 
   return priv->nwrq >= CONFIG_CDCACM_NWRREQS;
+}
+
+/****************************************************************************
+ * Name: cdcuart_release
+ *
+ * Description:
+ *   This is called to release some resource about the device when device
+ *   was close and unregistered.
+ *
+ ****************************************************************************/
+
+static int cdcuart_release(FAR struct uart_dev_s *dev)
+{
+  FAR struct cdcacm_dev_s *priv = (FAR struct cdcacm_dev_s *)dev->priv;
+
+  usbtrace(CDCACM_CLASSAPI_RELEASE, 0);
+
+  /* And free the memory resources. */
+
+  wd_cancel(&priv->rxfailsafe);
+  kmm_free(priv);
+  return OK;
 }
 
 /****************************************************************************

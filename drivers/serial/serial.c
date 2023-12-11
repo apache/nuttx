@@ -112,6 +112,9 @@ static int     uart_ioctl(FAR struct file *filep,
                           int cmd, unsigned long arg);
 static int     uart_poll(FAR struct file *filep,
                          FAR struct pollfd *fds, bool setup);
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+static int     uart_unlink(FAR struct inode *inode);
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -129,15 +132,18 @@ int CONFIG_TTY_LAUNCH_ENTRYPOINT(int argc, char *argv[]);
 
 static const struct file_operations g_serialops =
 {
-  uart_open,  /* open */
-  uart_close, /* close */
-  uart_read,  /* read */
-  uart_write, /* write */
-  NULL,       /* seek */
-  uart_ioctl, /* ioctl */
-  NULL,       /* mmap */
-  NULL,       /* truncate */
-  uart_poll   /* poll */
+  uart_open,    /* open */
+  uart_close,   /* close */
+  uart_read,    /* read */
+  uart_write,   /* write */
+  NULL,         /* seek */
+  uart_ioctl,   /* ioctl */
+  NULL,         /* mmap */
+  NULL,         /* truncate */
+  uart_poll     /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , uart_unlink /* unlink */
+#endif
 };
 
 #ifdef CONFIG_TTY_LAUNCH
@@ -725,6 +731,20 @@ static int uart_close(FAR struct file *filep)
    */
 
   uart_reset_sem(dev);
+
+  if (dev->unlinked)
+    {
+      nxmutex_unlock(&dev->closelock);
+      nxmutex_destroy(&dev->xmit.lock);
+      nxmutex_destroy(&dev->recv.lock);
+      nxmutex_destroy(&dev->closelock);
+      nxmutex_destroy(&dev->polllock);
+      nxsem_destroy(&dev->xmitsem);
+      nxsem_destroy(&dev->recvsem);
+      uart_release(dev);
+      return OK;
+    }
+
   nxmutex_unlock(&dev->closelock);
   return OK;
 }
@@ -1702,6 +1722,46 @@ errout:
   nxmutex_unlock(&dev->polllock);
   return ret;
 }
+
+/****************************************************************************
+ * Name: uart_unlink
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+static int uart_unlink(FAR struct inode *inode)
+{
+  FAR uart_dev_t *dev;
+  int ret;
+
+  DEBUGASSERT(inode->i_private != NULL);
+
+  dev = inode->i_private;
+  ret = nxmutex_lock(&dev->closelock);
+  if (ret < 0)
+    {
+      /* A signal received while waiting for the last close operation. */
+
+      return ret;
+    }
+
+  if (dev->open_count <= 0)
+    {
+      nxmutex_unlock(&dev->closelock);
+      nxmutex_destroy(&dev->xmit.lock);
+      nxmutex_destroy(&dev->recv.lock);
+      nxmutex_destroy(&dev->closelock);
+      nxmutex_destroy(&dev->polllock);
+      nxsem_destroy(&dev->xmitsem);
+      nxsem_destroy(&dev->recvsem);
+      uart_release(dev);
+      return OK;
+    }
+
+  dev->unlinked = true;
+  nxmutex_unlock(&dev->closelock);
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Name: uart_nxsched_foreach_cb
