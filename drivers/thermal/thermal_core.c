@@ -27,7 +27,6 @@
 #include <nuttx/power/pm.h>
 #endif
 
-#include <assert.h>
 #include <debug.h>
 #include <stdio.h>
 #include <sys/boardctl.h>
@@ -291,15 +290,11 @@ static void thermal_pm_notify(FAR struct pm_callback_s *cb, int domain,
     {
       case PM_SLEEP:
         {
-          nxmutex_lock(&g_thermal_lock);
-
           list_for_every_entry(&g_zone_dev_list, zdev,
                                struct thermal_zone_device_s, node)
             {
               work_cancel(LPWORK, &zdev->monitor);
             }
-
-          nxmutex_unlock(&g_thermal_lock);
         }
         break;
       case PM_RESTORE:
@@ -307,8 +302,6 @@ static void thermal_pm_notify(FAR struct pm_callback_s *cb, int domain,
       case PM_IDLE:
       case PM_STANDBY:
         {
-          nxmutex_lock(&g_thermal_lock);
-
           list_for_every_entry(&g_zone_dev_list, zdev,
                                struct thermal_zone_device_s, node)
             {
@@ -319,8 +312,6 @@ static void thermal_pm_notify(FAR struct pm_callback_s *cb, int domain,
                              zdev->params->polling_delay);
                 }
             }
-
-          nxmutex_unlock(&g_thermal_lock);
         }
         break;
       default:
@@ -815,8 +806,6 @@ void thermal_zone_device_update(FAR struct thermal_zone_device_s *zdev)
   int trip;
   int temp;
   int ret;
-
-  DEBUGASSERT(!is_idle_task(this_task()));
 
   nxmutex_lock(&g_thermal_lock);
 
