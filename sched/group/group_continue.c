@@ -108,15 +108,12 @@ static int group_continue_handler(pid_t pid, FAR void *arg)
 
 int group_continue(FAR struct tcb_s *tcb)
 {
+  irqstate_t flags;
   int ret;
 
-  /* Lock the scheduler so that there this thread will not lose priority
-   * until all of its children are suspended.
-   */
-
-  sched_lock();
+  flags = enter_critical_section();
   ret = group_foreachchild(tcb->group, group_continue_handler, NULL);
-  sched_unlock();
+  leave_critical_section(flags);
   return ret;
 }
 
