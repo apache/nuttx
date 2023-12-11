@@ -49,18 +49,18 @@
  *
  * Description:
  *   The external functions, stm32_spi1/2/3/4/5/6select and
- *   stm32_spi1/2/3/4/5/6status must be provided by board-specific logic.  They
- *   are implementations of the select and status methods of the SPI interface
- *   defined by struct spi_ops_s (see include/nuttx/spi/spi.h).  All other
- *   methods (including stm32_spibus_initialize()) are provided by common
- *   STM32 logic. To use this common SPI logic on your board:
+ *   stm32_spi1/2/3/4/5/6status must be provided by board-specific logic.
+ *   They are implementations of the select and status methods of the SPI
+ *   interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All
+ *   other methods (including stm32_spibus_initialize()) are provided by
+ *   common STM32 logic. To use this common SPI logic on your board:
  *
  *   1. Provide logic in stm32_boardinitialize() to configure SPI chip select
  *      pins.
  *   2. Provide stm32_spi1/2/3/4/5/6select() and stm32_spi1/2/3/4/5/6status()
  *      functions in your board-specific logic.  These functions will perform
- *      chip selection and status operations using GPIOs in the way your board
- *      is configured.
+ *      chip selection and status operations using GPIOs in the way your
+ *      board is configured.
  *   3. Add a calls to stm32_spibus_initialize() in your low level
  *      application initialization logic
  *   4. The handle returned by stm32_spibus_initialize() may then be used to
