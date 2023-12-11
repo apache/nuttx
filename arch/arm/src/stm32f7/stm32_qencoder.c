@@ -31,6 +31,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/sensors/qencoder.h>
 
 #include <arch/board/board.h>
@@ -1022,6 +1023,7 @@ static int stm32_position(struct qe_lowerhalf_s *lower, int32_t *pos)
 {
   struct stm32_lowerhalf_s *priv = (struct stm32_lowerhalf_s *)lower;
 #ifdef HAVE_16BIT_TIMERS
+  irqstate_t flags;
   int32_t position;
   int32_t verify;
   uint32_t count;
@@ -1030,19 +1032,15 @@ static int stm32_position(struct qe_lowerhalf_s *lower, int32_t *pos)
 
   /* Loop until we are certain that no interrupt occurred between samples */
 
+  flags = spin_lock_irqsave(NULL);
   do
     {
-      /* Don't let another task preempt us until we get the measurement.
-       * The timer interrupt may still be processed.
-       */
-
-      sched_lock();
       position = priv->position;
       count    = stm32_getreg32(priv, STM32_GTIM_CNT_OFFSET);
       verify   = priv->position;
-      sched_unlock();
     }
   while (position != verify);
+  spin_unlock_irqrestore(NULL, flags);
 
   /* Return the position measurement */
 

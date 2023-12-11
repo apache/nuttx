@@ -301,7 +301,6 @@ void pic32mx_dumpgpio(uint32_t pinset, const char *msg)
 
       /* The following requires exclusive access to the GPIO registers */
 
-      sched_lock();
       gpioinfo("IOPORT%c pinset: %04x base: %08x -- %s\n",
                'A' + port, pinset, base, msg);
       gpioinfo("   TRIS: %08x   PORT: %08x    LAT: %08x    ODC: %08x\n",
@@ -313,7 +312,6 @@ void pic32mx_dumpgpio(uint32_t pinset, const char *msg)
                getreg32(PIC32MX_IOPORT_CNCON),
                getreg32(PIC32MX_IOPORT_CNEN),
                getreg32(PIC32MX_IOPORT_CNPUE));
-      sched_unlock();
     }
 }
 #endif
