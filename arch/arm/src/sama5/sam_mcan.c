@@ -3035,7 +3035,6 @@ static int mcan_send(struct can_dev_s *dev, struct can_msg_s *msg)
    * the MCAN device was opened O_NONBLOCK.
    */
 
-  sched_lock();
   mcan_buffer_reserve(priv);
 
   /* Get exclusive access to the MCAN peripheral */
@@ -3044,11 +3043,8 @@ static int mcan_send(struct can_dev_s *dev, struct can_msg_s *msg)
   if (ret < 0)
     {
       mcan_buffer_release(priv);
-      sched_unlock();
       return ret;
     }
-
-  sched_unlock();
 
   /* Get our reserved Tx FIFO/queue put index */
 
