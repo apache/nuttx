@@ -262,15 +262,6 @@ else()
   file(TOUCH ${CMAKE_BINARY_DIR}/drivers/platform/Kconfig)
 endif()
 
-# board common directory
-
-if(CONFIG_ARCH_BOARD_COMMON)
-  file(
-    GLOB NUTTX_COMMON_DIR
-    LIST_DIRECTORIES true
-    "${NUTTX_DIR}/boards/${CONFIG_ARCH}/${CONFIG_ARCH_CHIP}/common")
-endif()
-
 # Custom chip ###################################################
 
 if(CONFIG_ARCH_CHIP_CUSTOM)
@@ -387,6 +378,15 @@ include(ExternalProject)
 include(FetchContent)
 
 set(FETCHCONTENT_QUIET OFF)
+
+# Board common directory #####################################################
+
+if(CONFIG_ARCH_BOARD_COMMON)
+  file(
+    GLOB NUTTX_COMMON_DIR
+    LIST_DIRECTORIES true
+    "${NUTTX_DIR}/boards/${CONFIG_ARCH}/${CONFIG_ARCH_CHIP}/common")
+endif()
 
 # Setup toolchain ############################################################
 
