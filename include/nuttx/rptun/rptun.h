@@ -31,7 +31,8 @@
 
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/rptun/rptun_ping.h>
-#include <openamp/open_amp.h>
+#include <openamp/remoteproc.h>
+#include <openamp/rpmsg_virtio.h>
 
 /****************************************************************************
  * Pre-processor Definitions

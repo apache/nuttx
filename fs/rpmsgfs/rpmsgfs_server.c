@@ -35,6 +35,7 @@
 #include <nuttx/mutex.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/rptun/openamp.h>
+#include <openamp/rpmsg_virtio.h>
 
 #include "rpmsgfs.h"
 
