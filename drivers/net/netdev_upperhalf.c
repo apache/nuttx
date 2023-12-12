@@ -270,7 +270,16 @@ static int netdev_upper_txpoll(FAR struct net_driver_s *dev)
 #endif
 
   pkt = netpkt_get(dev, NETPKT_TX);
-  ret = lower->ops->transmit(lower, pkt);
+
+  if (netpkt_getdatalen(lower, pkt) > NETDEV_PKTSIZE(dev))
+    {
+      nerr("ERROR: Packet too long to send!\n");
+      ret = -EMSGSIZE;
+    }
+  else
+    {
+      ret = lower->ops->transmit(lower, pkt);
+    }
 
   if (ret != OK)
     {
