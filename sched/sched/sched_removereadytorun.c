@@ -233,15 +233,13 @@ bool nxsched_remove_readytorun(FAR struct tcb_s *rtcb, bool merge)
         {
           /* Yes... make sure that scheduling logic knows about this */
 
-          spin_setbit(&g_cpu_lockset, cpu, &g_cpu_locksetlock,
-                      &g_cpu_schedlock);
+          g_cpu_lockset |= (1 << cpu);
         }
       else
         {
           /* No.. we may need to perform release our hold on the lock. */
 
-          spin_clrbit(&g_cpu_lockset, cpu, &g_cpu_locksetlock,
-                      &g_cpu_schedlock);
+          g_cpu_lockset &= ~(1 << cpu);
         }
 
       /* NOTE: If the task runs on another CPU(cpu), adjusting global IRQ

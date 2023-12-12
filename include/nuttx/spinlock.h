@@ -345,52 +345,6 @@ void spin_unlock_wo_note(FAR volatile spinlock_t *lock);
 #endif
 
 /****************************************************************************
- * Name: spin_setbit
- *
- * Description:
- *   Makes setting a CPU bit in a bitset an atomic action
- *
- * Input Parameters:
- *   set     - A reference to the bitset to set the CPU bit in
- *   cpu     - The bit number to be set
- *   setlock - A reference to the lock protecting the set
- *   orlock  - Will be set to SP_LOCKED while holding setlock
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SPINLOCK
-void spin_setbit(FAR volatile cpu_set_t *set, unsigned int cpu,
-                 FAR volatile spinlock_t *setlock,
-                 FAR volatile spinlock_t *orlock);
-#endif
-
-/****************************************************************************
- * Name: spin_clrbit
- *
- * Description:
- *   Makes clearing a CPU bit in a bitset an atomic action
- *
- * Input Parameters:
- *   set     - A reference to the bitset to set the CPU bit in
- *   cpu     - The bit number to be set
- *   setlock - A reference to the lock protecting the set
- *   orlock  - Will be set to SP_UNLOCKED if all bits become cleared in set
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SPINLOCK
-void spin_clrbit(FAR volatile cpu_set_t *set, unsigned int cpu,
-                 FAR volatile spinlock_t *setlock,
-                 FAR volatile spinlock_t *orlock);
-#endif
-
-/****************************************************************************
  * Name: spin_initialize
  *
  * Description:

@@ -205,7 +205,6 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
    * situation.
    */
 
-  me = this_cpu();
   if ((nxsched_islocked_global()) &&
       task_state != TSTATE_TASK_ASSIGNED)
     {
@@ -238,6 +237,7 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
        * will need to stop that CPU.
        */
 
+      me = this_cpu();
       if (cpu != me)
         {
           DEBUGVERIFY(up_cpu_pause(cpu));
@@ -277,13 +277,11 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
 
           if (btcb->lockcount > 0)
             {
-              spin_setbit(&g_cpu_lockset, cpu, &g_cpu_locksetlock,
-                          &g_cpu_schedlock);
+              g_cpu_lockset |= (1 << cpu);
             }
           else
             {
-              spin_clrbit(&g_cpu_lockset, cpu, &g_cpu_locksetlock,
-                          &g_cpu_schedlock);
+              g_cpu_lockset &= ~(1 << cpu);
             }
 
           /* NOTE: If the task runs on another CPU(cpu), adjusting global IRQ

@@ -277,50 +277,8 @@ extern volatile clock_t g_cpuload_total;
  */
 
 #ifdef CONFIG_SMP
-/* In the multiple CPU, SMP case, disabling context switches will not give a
- * task exclusive access to the (multiple) CPU resources (at least without
- * stopping the other CPUs): Even though pre-emption is disabled, other
- * threads will still be executing on the other CPUS.
- *
- * There are additional rules for this multi-CPU case:
- *
- * 1. There is a global lock count 'g_cpu_lockset' that includes a bit for
- *    each CPU: If the bit is '1', then the corresponding CPU has the
- *    scheduler locked; if '0', then the CPU does not have the scheduler
- *    locked.
- * 2. Scheduling logic would set the bit associated with the cpu in
- *    'g_cpu_lockset' when the TCB at the head of the g_assignedtasks[cpu]
- *    list transitions has 'lockcount' > 0. This might happen when
- *    sched_lock() is called, or after a context switch that changes the
- *    TCB at the head of the g_assignedtasks[cpu] list.
- * 3. Similarly, the cpu bit in the global 'g_cpu_lockset' would be cleared
- *    when the TCB at the head of the g_assignedtasks[cpu] list has
- *    'lockcount' == 0. This might happen when sched_unlock() is called, or
- *    after a context switch that changes the TCB at the head of the
- *    g_assignedtasks[cpu] list.
- * 4. Modification of the global 'g_cpu_lockset' must be protected by a
- *    spinlock, 'g_cpu_schedlock'. That spinlock would be taken when
- *    sched_lock() is called, and released when sched_unlock() is called.
- *    This assures that the scheduler does enforce the critical section.
- *    NOTE: Because of this spinlock, there should never be more than one
- *    bit set in 'g_cpu_lockset'; attempts to set additional bits should
- *    be cause the CPU to block on the spinlock.  However, additional bits
- *    could get set in 'g_cpu_lockset' due to the context switches on the
- *    various CPUs.
- * 5. Each the time the head of a g_assignedtasks[] list changes and the
- *    scheduler modifies 'g_cpu_lockset', it must also set 'g_cpu_schedlock'
- *    depending on the new state of 'g_cpu_lockset'.
- * 5. Logic that currently uses the currently running tasks lockcount
- *    instead uses the global 'g_cpu_schedlock'. A value of SP_UNLOCKED
- *    means that no CPU has pre-emption disabled; SP_LOCKED means that at
- *    least one CPU has pre-emption disabled.
- */
-
-extern volatile spinlock_t g_cpu_schedlock;
-
 /* Used to keep track of which CPU(s) hold the IRQ lock. */
 
-extern volatile spinlock_t g_cpu_locksetlock;
 extern volatile cpu_set_t g_cpu_lockset;
 
 /* Used to lock tasklist to prevent from concurrent access */
@@ -400,7 +358,7 @@ FAR struct tcb_s *this_task(void) noinstrument_function;
 int  nxsched_select_cpu(cpu_set_t affinity);
 int  nxsched_pause_cpu(FAR struct tcb_s *tcb);
 
-#  define nxsched_islocked_global() spin_is_locked(&g_cpu_schedlock)
+#  define nxsched_islocked_global() (g_cpu_lockset != 0)
 #  define nxsched_islocked_tcb(tcb) nxsched_islocked_global()
 
 #else
