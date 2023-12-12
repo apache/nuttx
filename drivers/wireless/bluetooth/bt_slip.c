@@ -436,9 +436,9 @@ static int bt_slip_send_packet(FAR struct sliphci_s *priv, uint8_t type,
 
   *pend++ = SLIP_DELIMITER;
 
-  wlinfo("tx t:%d l:%d s:%d a:%d\n", BT_SLIP_GET_PKT_TYPE(header),
-         BT_SLIP_GET_LEN(header), BT_SLIP_GET_SEQ(header),
-         BT_SLIP_GET_ACK(header));
+  wlinfo("tx t:%d l:%d s:%d a:%d checksum:0x%04x \n",
+         BT_SLIP_GET_PKT_TYPE(header), BT_SLIP_GET_LEN(header),
+         BT_SLIP_GET_SEQ(header), BT_SLIP_GET_ACK(header), checksum);
 
   return priv->drv->send(priv->drv, type, packet, pend - packet);
 }
