@@ -61,4 +61,8 @@ ifeq ($(CONFIG_MTD_AT24XX), y)
 CSRCS += gd32f4xx_at24.c
 endif
 
+ifeq ($(CONFIG_BOARDCTL_RESET), y)
+CSRCS += gd32f4xx_reset.c
+endif
+
 include $(TOPDIR)/boards/Board.mk
