@@ -33,8 +33,7 @@
 # Skip WebAssembly Micro Runtime
 -Darwin,sim:wamr
 
-# macOS matter compilation is not currently supported
--Darwin,sim:matter
+-sim:matter
 
 # Boards build by CMake
 CMake,sim:alsa
@@ -54,4 +53,3 @@ CMake,sim:nettest
 CMake,sim:note
 CMake,sim:nsh
 CMake,sim:nxffs
-CMake,sim:matter
