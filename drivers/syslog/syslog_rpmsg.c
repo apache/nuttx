@@ -29,6 +29,7 @@
 #include <errno.h>
 #include <string.h>
 #include <sys/boardctl.h>
+#include <syslog.h>
 
 #ifdef CONFIG_ARCH_LOWPUTC
 #include <nuttx/arch.h>
