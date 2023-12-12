@@ -115,6 +115,12 @@ static int setup_smartfs(int smartn, struct mtd_dev_s *mtd,
       if (ret < 0)
         {
           ferr("ERROR: Failed to mount the FS volume: %d\n", ret);
+          if (ret == -ENODEV)
+            {
+              fwarn("Smartfs seems unformatted. "
+                    "Did you run 'mksmartfs /dev/smart%d'?\n", smartn);
+            }
+
           return ret;
         }
     }
