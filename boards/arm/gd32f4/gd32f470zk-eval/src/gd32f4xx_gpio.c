@@ -48,6 +48,7 @@
 struct gd32gpio_dev_s
 {
   struct gpio_dev_s gpio;
+  uint32_t pinconfig;
   uint8_t id;
 };
 
@@ -163,12 +164,102 @@ static struct gd32gpint_dev_s g_gpint[BOARD_NGPIOINT];
 static int gpio_setpintype(struct gpio_dev_s *dev,
                            enum gpio_pintype_e gpio_pintype)
 {
+  int ret = OK;
+  uint32_t pinconfig;
+  const struct gpio_operations_s *gpio_ops;
   struct gd32gpint_dev_s *gd32gpint = (struct gd32gpint_dev_s *)dev;
 
-  UNUSED(gd32gpint);
-  UNUSED(gpio_pintype);
+  DEBUGASSERT(gd32gpint != NULL);
+  gpioinfo("Setpintype...\n");
 
-  gpioinfo("setpintype is not supported. \n");
+  /* Check if the new pintype is actually different from the old pintype */
+
+  if (gd32gpint->gd32gpio.gpio.gp_pintype == gpio_pintype)
+    {
+      /* Pintype has not changed. We're done already. */
+
+      return ret;
+    }
+
+  if (gd32gpint->gd32gpio.gpio.gp_pintype >= GPIO_NPINTYPES)
+    {
+      gpioerr("pintype error\n");
+      return -1;
+    }
+
+  pinconfig = (gd32gpint->gd32gpio.pinconfig &
+              (GPIO_CFG_PIN_MASK | GPIO_CFG_PORT_MASK));
+
+  switch (gpio_pintype)
+    {
+    case GPIO_INPUT_PIN:
+      gd32_gpio_config(GPIO_CFG_MODE_INPUT | GPIO_CFG_PUPD_NONE |
+                       pinconfig);
+      gpio_ops = &gpin_ops;
+      break;
+    case GPIO_INPUT_PIN_PULLUP:
+      gd32_gpio_config(GPIO_CFG_MODE_INPUT | GPIO_CFG_PUPD_PULLUP |
+                       pinconfig);
+      gpio_ops = &gpin_ops;
+      break;
+    case GPIO_INPUT_PIN_PULLDOWN:
+      gd32_gpio_config(GPIO_CFG_MODE_INPUT | GPIO_CFG_PUPD_PULLDOWN |
+                       pinconfig);
+      gpio_ops = &gpin_ops;
+      break;
+    case GPIO_OUTPUT_PIN:
+      gd32_gpio_config(GPIO_CFG_MODE_OUTPUT | GPIO_CFG_PP |
+                      GPIO_CFG_SPEED_50MHZ | pinconfig);
+      gpio_ops = &gpout_ops;
+      break;
+    case GPIO_OUTPUT_PIN_OPENDRAIN:
+      gd32_gpio_config(GPIO_CFG_MODE_OUTPUT | GPIO_CFG_OD |
+                      GPIO_CFG_SPEED_50MHZ | pinconfig);
+      gpio_ops = &gpout_ops;
+      break;
+    case GPIO_INTERRUPT_PIN:
+    case GPIO_INTERRUPT_RISING_PIN:
+    case GPIO_INTERRUPT_FALLING_PIN:
+    case GPIO_INTERRUPT_BOTH_PIN:
+      gd32_gpio_config(GPIO_CFG_MODE_INPUT | GPIO_PUPD_NONE |
+                       pinconfig);
+      gpio_ops = &gpint_ops;
+      break;
+    default:
+
+          /* Not support! */
+
+          return -EINVAL;
+      break;
+    }
+
+  /* If the pin previously had an interrupt pintype... */
+
+  if ((gd32gpint->gd32gpio.gpio.gp_pintype >= GPIO_INTERRUPT_PIN) &&
+      (gd32gpint->gd32gpio.gpio.gp_pintype < GPIO_NPINTYPES))
+    {
+      /* ...disable the interrupt... */
+
+      ret = gpint_enable(dev, false);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      /* ...and detach the old callback. */
+
+      ret = gpint_attach(dev, NULL);
+      if (ret < 0)
+        {
+          return ret;
+        }
+    }
+
+  /* Change the pintype and set of operations */
+
+  gd32gpint->gd32gpio.gpio.gp_pintype = gpio_pintype;
+  gd32gpint->gd32gpio.gpio.gp_ops = gpio_ops;
+  gd32gpint->gd32gpio.pinconfig = pinconfig;
 
   return 0;
 }
@@ -179,10 +270,10 @@ static int gpin_read(struct gpio_dev_s *dev, bool *value)
   struct gd32gpio_dev_s *gd32gpio = (struct gd32gpio_dev_s *)dev;
 
   DEBUGASSERT(gd32gpio != NULL && value != NULL);
-  DEBUGASSERT(gd32gpio->id < BOARD_NGPIOIN);
   gpioinfo("Reading...\n");
 
-  *value = gd32_gpio_read(g_gpioinputs[gd32gpio->id]);
+  *value = gd32_gpio_read(gd32gpio->pinconfig);
+
   return OK;
 }
 #endif
@@ -193,10 +284,10 @@ static int gpout_read(struct gpio_dev_s *dev, bool *value)
   struct gd32gpio_dev_s *gd32gpio = (struct gd32gpio_dev_s *)dev;
 
   DEBUGASSERT(gd32gpio != NULL && value != NULL);
-  DEBUGASSERT(gd32gpio->id < BOARD_NGPIOOUT);
   gpioinfo("Reading...\n");
 
-  *value = gd32_gpio_read(g_gpiooutputs[gd32gpio->id]);
+  *value = gd32_gpio_read(gd32gpio->pinconfig);
+
   return OK;
 }
 
@@ -205,10 +296,10 @@ static int gpout_write(struct gpio_dev_s *dev, bool value)
   struct gd32gpio_dev_s *gd32gpio = (struct gd32gpio_dev_s *)dev;
 
   DEBUGASSERT(gd32gpio != NULL);
-  DEBUGASSERT(gd32gpio->id < BOARD_NGPIOOUT);
   gpioinfo("Writing %d\n", (int)value);
 
-  gd32_gpio_write(g_gpiooutputs[gd32gpio->id], value);
+  gd32_gpio_write(gd32gpio->pinconfig, value);
+
   return OK;
 }
 #endif
@@ -234,7 +325,8 @@ static int gpint_read(struct gpio_dev_s *dev, bool *value)
   DEBUGASSERT(gd32gpint->gd32gpio.id < BOARD_NGPIOINT);
   gpioinfo("Reading int pin...\n");
 
-  *value = gd32_gpio_read(g_gpiointinputs[gd32gpint->gd32gpio.id]);
+  *value = gd32_gpio_read(gd32gpint->gd32gpio.pinconfig);
+
   return OK;
 }
 
@@ -342,6 +434,7 @@ int gd32_gpio_initialize(void)
 
       g_gpin[i].gpio.gp_pintype = GPIO_INPUT_PIN;
       g_gpin[i].gpio.gp_ops     = &gpin_ops;
+      g_gpin[i].pinconfig       = g_gpioinputs[i];
       g_gpin[i].id              = i;
 
       gpio_pin_register(&g_gpin[i].gpio, pincount);
@@ -361,6 +454,7 @@ int gd32_gpio_initialize(void)
 
       g_gpout[i].gpio.gp_pintype = GPIO_OUTPUT_PIN;
       g_gpout[i].gpio.gp_ops     = &gpout_ops;
+      g_gpout[i].pinconfig       = g_gpiooutputs[i];
       g_gpout[i].id              = i;
 
       gpio_pin_register(&g_gpout[i].gpio, pincount);
@@ -381,6 +475,7 @@ int gd32_gpio_initialize(void)
 
       g_gpint[i].gd32gpio.gpio.gp_pintype = GPIO_INTERRUPT_PIN;
       g_gpint[i].gd32gpio.gpio.gp_ops     = &gpint_ops;
+      g_gpint[i].gd32gpio.pinconfig       = g_gpiointinputs[i];
       g_gpint[i].gd32gpio.id              = i;
       (void)gpio_pin_register(&g_gpint[i].gd32gpio.gpio, pincount);
 
