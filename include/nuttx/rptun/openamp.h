@@ -27,55 +27,6 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_RPTUN
+#include <nuttx/rpmsg/rpmsg.h>
 
-#include <openamp/open_amp.h>
-#include <openamp/remoteproc_loader.h>
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-typedef void (*rpmsg_dev_cb_t)(FAR struct rpmsg_device *rdev,
-                               FAR void *priv);
-typedef bool (*rpmsg_match_cb_t)(FAR struct rpmsg_device *rdev,
-                                 FAR void *priv, FAR const char *name,
-                                 uint32_t dest);
-typedef void (*rpmsg_bind_cb_t)(FAR struct rpmsg_device *rdev,
-                                FAR void *priv, FAR const char *name,
-                                uint32_t dest);
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-int rpmsg_wait(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem);
-int rpmsg_post(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem);
-
-const char *rpmsg_get_cpuname(FAR struct rpmsg_device *rdev);
-
-int rpmsg_register_callback(FAR void *priv,
-                            rpmsg_dev_cb_t device_created,
-                            rpmsg_dev_cb_t device_destroy,
-                            rpmsg_match_cb_t ns_match,
-                            rpmsg_bind_cb_t ns_bind);
-void rpmsg_unregister_callback(FAR void *priv,
-                               rpmsg_dev_cb_t device_created,
-                               rpmsg_dev_cb_t device_destroy,
-                               rpmsg_match_cb_t ns_match,
-                               rpmsg_bind_cb_t ns_bind);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* CONFIG_RPTUN */
 #endif /* __INCLUDE_NUTTX_RPTUN_OPENAMP_H */

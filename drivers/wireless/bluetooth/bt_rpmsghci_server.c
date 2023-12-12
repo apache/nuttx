@@ -28,6 +28,7 @@
 #include <debug.h>
 #include <stdlib.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/rptun/openamp.h>
 #include <nuttx/wireless/bluetooth/bt_rpmsghci.h>
 

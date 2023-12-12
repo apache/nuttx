@@ -26,7 +26,7 @@
  ****************************************************************************/
 
 #include <nuttx/rptun/rptun.h>
-#include <openamp/open_amp.h>
+#include <nuttx/rpmsg/rpmsg.h>
 
 #include "rptun_ping.h"
 

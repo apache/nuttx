@@ -6,7 +6,7 @@
 menuconfig RPTUN
 	bool "Remote Proc Tunnel Driver Support"
 	default n
-	select OPENAMP
+	select RPMSG
 	---help---
 		RPTUN driver is used for multi-cores' communication.
 
