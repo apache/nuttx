@@ -134,7 +134,7 @@
  */
 
 #define GD32_PLL_PLLPSC            RCU_PLL_PLLPSC(25)
-#define GD32_PLL_PLLN              RCU_PLL_PLLN(336)
+#define GD32_PLL_PLLN              RCU_PLL_PLLN(480)
 #define GD32_PLL_PLLP              RCU_PLL_PLLP(2)
 #define GD32_PLL_PLLQ              RCU_PLL_PLLQ(7)
 
