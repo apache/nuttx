@@ -210,6 +210,26 @@ config ARCH_CHIP_JH7110
 	---help---
 		StarFive JH7110 SoC.
 
+config ARCH_CHIP_BL808
+	bool "Bouffalo Lab BL808"
+	select ARCH_RV64
+	select ARCH_RV_ISA_M
+	select ARCH_RV_ISA_A
+	select ARCH_RV_ISA_C
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
+	select ARCH_HAVE_MULTICPU
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_MMU
+	select ARCH_MMU_TYPE_SV39
+	select ARCH_HAVE_ADDRENV
+	select ARCH_NEED_ADDRENV_MAPPING
+	select ARCH_HAVE_S_MODE
+	select ONESHOT
+	select ALARM_ARCH
+	---help---
+		Bouffalo Lab BL808 SoC.
+
 config ARCH_CHIP_RISCV_CUSTOM
 	bool "Custom RISC-V chip"
 	select ARCH_CHIP_CUSTOM
@@ -260,6 +280,7 @@ config ARCH_CHIP
 	default "qemu-rv"	if ARCH_CHIP_QEMU_RV
 	default "hpm6750"	if ARCH_CHIP_HPM6750
 	default "jh7110"	if ARCH_CHIP_JH7110
+	default "bl808"		if ARCH_CHIP_BL808
 
 config ARCH_RISCV_INTXCPT_EXTENSIONS
 	bool "RISC-V Integer Context Extensions"
@@ -424,5 +445,8 @@ source "arch/risc-v/src/hpm6750/Kconfig"
 endif
 if ARCH_CHIP_JH7110
 source "arch/risc-v/src/jh7110/Kconfig"
+endif
+if ARCH_CHIP_BL808
+source "arch/risc-v/src/bl808/Kconfig"
 endif
 endif
