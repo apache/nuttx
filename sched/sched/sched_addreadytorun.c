@@ -165,6 +165,7 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
     {
       /* Yes.. that is the CPU we must use */
 
+      task_state = TSTATE_TASK_ASSIGNED;
       cpu = btcb->cpu;
     }
   else
@@ -173,6 +174,7 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
        * (possibly its IDLE task).
        */
 
+      task_state = TSTATE_TASK_READYTORUN;
       cpu = nxsched_select_cpu(btcb->affinity);
     }
 
@@ -189,24 +191,6 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
   if (rtcb->sched_priority < btcb->sched_priority)
     {
       task_state = TSTATE_TASK_RUNNING;
-    }
-
-  /* If it will not be running, but is locked to a CPU, then it will be in
-   * the assigned state.
-   */
-
-  else if ((btcb->flags & TCB_FLAG_CPU_LOCKED) != 0)
-    {
-      task_state = TSTATE_TASK_ASSIGNED;
-      cpu        = btcb->cpu;
-    }
-
-  /* Otherwise, it will be ready-to-run, but not not yet running */
-
-  else
-    {
-      task_state = TSTATE_TASK_READYTORUN;
-      cpu        = 0;  /* CPU does not matter */
     }
 
   /* If the selected state is TSTATE_TASK_RUNNING, then we would like to
