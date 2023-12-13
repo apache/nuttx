@@ -543,11 +543,13 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
          * ICMPv6 checksum before we return the packet.
          */
 
+        FAR const uint16_t *srcaddr;
+
         icmpv6->type = ICMPv6_ECHO_REPLY;
 
+        srcaddr = netdev_ipv6_srcaddr(dev, ipv6->destipaddr);
         net_ipv6addr_copy(ipv6->destipaddr, ipv6->srcipaddr);
-        net_ipv6addr_copy(ipv6->srcipaddr,
-                          netdev_ipv6_srcaddr(dev, ipv6->srcipaddr));
+        net_ipv6addr_copy(ipv6->srcipaddr, srcaddr);
 
         icmpv6->chksum = 0;
         icmpv6->chksum = ~icmpv6_chksum(dev, iplen);
