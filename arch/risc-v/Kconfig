@@ -230,6 +230,27 @@ config ARCH_CHIP_BL808
 	---help---
 		Bouffalo Lab BL808 SoC.
 
+config ARCH_CHIP_K230
+	bool "Kendryte K230"
+	select ARCH_RV64
+	select ARCH_RV_ISA_M
+	select ARCH_RV_ISA_A
+	select ARCH_RV_ISA_C
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
+	select ARCH_HAVE_MISALIGN_EXCEPTION
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_MMU
+	select ARCH_MMU_TYPE_SV39
+	select ARCH_HAVE_ADDRENV
+	select ARCH_NEED_ADDRENV_MAPPING
+	select ARCH_HAVE_S_MODE
+	select ONESHOT
+	select ALARM_ARCH
+	---help---
+		Kendryte K230 SoC (RV64GCV and RV64GCVX C908 cores).
+
+
 config ARCH_CHIP_RISCV_CUSTOM
 	bool "Custom RISC-V chip"
 	select ARCH_CHIP_CUSTOM
@@ -260,6 +281,14 @@ config ARCH_RV_ISA_C
 	bool
 	default n
 
+config ARCH_RV_MMIO_BITS
+	int
+	# special cases
+	default 32		if ARCH_CHIP_K230
+	# general fallbacks
+	default 32 		if ARCH_RV32
+	default 64		if ARCH_RV64
+
 config ARCH_FAMILY
 	string
 	default "rv32"		if ARCH_RV32
@@ -281,6 +310,7 @@ config ARCH_CHIP
 	default "hpm6750"	if ARCH_CHIP_HPM6750
 	default "jh7110"	if ARCH_CHIP_JH7110
 	default "bl808"		if ARCH_CHIP_BL808
+	default "k230"		if ARCH_CHIP_K230
 
 config ARCH_RISCV_INTXCPT_EXTENSIONS
 	bool "RISC-V Integer Context Extensions"
@@ -448,5 +478,8 @@ source "arch/risc-v/src/jh7110/Kconfig"
 endif
 if ARCH_CHIP_BL808
 source "arch/risc-v/src/bl808/Kconfig"
+endif
+if ARCH_CHIP_K230
+source "arch/risc-v/src/k230/Kconfig"
 endif
 endif
