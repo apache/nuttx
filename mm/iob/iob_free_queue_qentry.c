@@ -53,7 +53,7 @@ void iob_free_queue_qentry(FAR struct iob_s *iob,
   FAR struct iob_qentry_s *prev = NULL;
   FAR struct iob_qentry_s *qentry;
 
-  irqstate_t flags = spin_lock_irqsave(&g_iob_lock);
+  irqstate_t flags = enter_critical_section();
   for (qentry = iobq->qh_head; qentry != NULL;
        prev = qentry, qentry = qentry->qe_flink)
     {
@@ -75,8 +75,6 @@ void iob_free_queue_qentry(FAR struct iob_s *iob,
               iobq->qh_tail = prev;
             }
 
-          spin_unlock_irqrestore(&g_iob_lock, flags);
-
           /* Remove the queue container */
 
           iob_free_qentry(qentry);
@@ -85,11 +83,11 @@ void iob_free_queue_qentry(FAR struct iob_s *iob,
 
           iob_free_chain(iob);
 
-          return;
+          break;
         }
     }
 
-  spin_unlock_irqrestore(&g_iob_lock, flags);
+  leave_critical_section(flags);
 }
 
 #endif /* CONFIG_IOB_NCHAINS > 0 */

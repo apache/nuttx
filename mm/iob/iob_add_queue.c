@@ -63,7 +63,7 @@ static int iob_add_queue_internal(FAR struct iob_s *iob,
 
   qentry->qe_flink = NULL;
 
-  irqstate_t flags = spin_lock_irqsave(&g_iob_lock);
+  irqstate_t flags = enter_critical_section();
   if (!iobq->qh_head)
     {
       iobq->qh_head = qentry;
@@ -76,7 +76,7 @@ static int iob_add_queue_internal(FAR struct iob_s *iob,
       iobq->qh_tail = qentry;
     }
 
-  spin_unlock_irqrestore(&g_iob_lock, flags);
+  leave_critical_section(flags);
 
   return 0;
 }
