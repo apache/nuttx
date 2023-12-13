@@ -784,7 +784,7 @@ const esp_phy_init_data_t *esp_phy_get_init_data(void)
           kmm_free(init_data_store);
           return NULL;
         }
-#else /* CONFIG_ESP32S3_PHY_DEFAULT_INIT_IF_INVALID */ 
+#else /* CONFIG_ESP32S3_PHY_DEFAULT_INIT_IF_INVALID */
       wlerr("ERROR: Failed to validate PHY data partition\n");
       kmm_free(init_data_store);
       return NULL;
@@ -828,7 +828,7 @@ void esp_phy_release_init_data(const esp_phy_init_data_t *init_data)
   kmm_free((uint8_t *)init_data - sizeof(phy_init_magic_pre));
 }
 
-#else /* CONFIG_ESP32S3_PHY_INIT_DATA_IN_PARTITION */ 
+#else /* CONFIG_ESP32S3_PHY_INIT_DATA_IN_PARTITION */
 
 /****************************************************************************
  * Name: esp_phy_get_init_data

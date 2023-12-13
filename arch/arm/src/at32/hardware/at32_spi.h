@@ -128,16 +128,16 @@
 
 #define SPI_CTRL1_MDIV_SHIFT        (3) /* Master clock frequency division */
 #define SPI_CTRL1_MDIV_MASK         (7 << SPI_CTRL1_MDIV_SHIFT)
-#  define SPI_CTRL1_MDIV_2          (0 << SPI_CTRL1_MDIV_SHIFT) /* Div 2 */       
-#  define SPI_CTRL1_MDIV_4          (1 << SPI_CTRL1_MDIV_SHIFT) /* Div 4 */  
-#  define SPI_CTRL1_MDIV_8          (2 << SPI_CTRL1_MDIV_SHIFT) /* Div 8 */  
-#  define SPI_CTRL1_MDIV_16         (3 << SPI_CTRL1_MDIV_SHIFT) /* Div 16 */  
-#  define SPI_CTRL1_MDIV_32         (4 << SPI_CTRL1_MDIV_SHIFT) /* Div 32 */  
-#  define SPI_CTRL1_MDIV_64         (5 << SPI_CTRL1_MDIV_SHIFT) /* Div 64 */  
-#  define SPI_CTRL1_MDIV_128        (6 << SPI_CTRL1_MDIV_SHIFT) /* Div 128 */  
-#  define SPI_CTRL1_MDIV_256        (7 << SPI_CTRL1_MDIV_SHIFT) /* Div 256 */  
-#  define SPI_CTRL1_MDIV_512        (8 << SPI_CTRL1_MDIV_SHIFT) /* Div 512 */  
-#  define SPI_CTRL1_MDIV_1024       (9 << SPI_CTRL1_MDIV_SHIFT) /* Div 1024 */  
+#  define SPI_CTRL1_MDIV_2          (0 << SPI_CTRL1_MDIV_SHIFT) /* Div 2 */
+#  define SPI_CTRL1_MDIV_4          (1 << SPI_CTRL1_MDIV_SHIFT) /* Div 4 */
+#  define SPI_CTRL1_MDIV_8          (2 << SPI_CTRL1_MDIV_SHIFT) /* Div 8 */
+#  define SPI_CTRL1_MDIV_16         (3 << SPI_CTRL1_MDIV_SHIFT) /* Div 16 */
+#  define SPI_CTRL1_MDIV_32         (4 << SPI_CTRL1_MDIV_SHIFT) /* Div 32 */
+#  define SPI_CTRL1_MDIV_64         (5 << SPI_CTRL1_MDIV_SHIFT) /* Div 64 */
+#  define SPI_CTRL1_MDIV_128        (6 << SPI_CTRL1_MDIV_SHIFT) /* Div 128 */
+#  define SPI_CTRL1_MDIV_256        (7 << SPI_CTRL1_MDIV_SHIFT) /* Div 256 */
+#  define SPI_CTRL1_MDIV_512        (8 << SPI_CTRL1_MDIV_SHIFT) /* Div 512 */
+#  define SPI_CTRL1_MDIV_1024       (9 << SPI_CTRL1_MDIV_SHIFT) /* Div 1024 */
 
 #define SPI_CTRL1_SPIEN             (1 << 6)  /* SPI enable */
 #define SPI_CTRL1_LTF               (1 << 7)  /* LSB transmit first */
