@@ -487,6 +487,9 @@ static int ramlog_file_ioctl(FAR struct file *filep, int cmd,
       case PIPEIOC_POLLINTHRD:
         upriv->rl_threashold = (uint32_t)arg;
         break;
+      case BIOC_FLUSH:
+        priv->rl_header->rl_head = 0;
+        break;
       default:
         ret = -ENOTTY;
         break;
