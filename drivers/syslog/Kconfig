@@ -61,6 +61,18 @@ config RAMLOG_OVERWRITE
 		Enable overwrite of circular buffer. If RAMLOG buffer overflows,
 		overwrite it from the top of buffer and always keep the latest log.
 
+config RAMLOG_KEEPLOG
+	bool "RAMLOG keeps messages after they have been read"
+	default n
+	depends on RAMLOG_OVERWRITE
+	---help---
+		By default reading /dev/kmsg clears messages from the log buffer.
+		If this option is enabled, log is never cleared and gets overwritten
+		when the buffer is full. First read after open always reads the oldest
+		log messages in buffer. Further reads continue from previous position.
+		If the whole buffer is overwritten between reads, the next read operation
+		may skip some of the log contents.
+
 config RAMLOG_POLLTHRESHOLD
 	int "The threshold value of circular buffer to notify poll waiters"
 	default 1

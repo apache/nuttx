@@ -91,6 +91,7 @@ static int     ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch);
 
 /* Character driver methods */
 
+static int     ramlog_file_open(FAR struct file *filep);
 static ssize_t ramlog_file_read(FAR struct file *filep, FAR char *buffer,
                                 size_t buflen);
 static ssize_t ramlog_file_write(FAR struct file *filep,
@@ -106,7 +107,7 @@ static int     ramlog_file_poll(FAR struct file *filep,
 
 static const struct file_operations g_ramlogfops =
 {
-  NULL,              /* open */
+  ramlog_file_open,  /* open */
   NULL,              /* close */
   ramlog_file_read,  /* read */
   ramlog_file_write, /* write */
@@ -446,6 +447,16 @@ static ssize_t ramlog_addbuf(FAR struct ramlog_dev_s *priv,
 }
 
 /****************************************************************************
+ * Name: ramlog_file_open
+ ****************************************************************************/
+
+static int ramlog_file_open(FAR struct file *filep)
+{
+  filep->f_priv = NULL;
+  return OK;
+}
+
+/****************************************************************************
  * Name: ramlog_read
  ****************************************************************************/
 
@@ -455,6 +466,7 @@ static ssize_t ramlog_file_read(FAR struct file *filep, FAR char *buffer,
   FAR struct inode *inode = filep->f_inode;
   FAR struct ramlog_dev_s *priv;
   ssize_t nread;
+  size_t tail_pos;
   char ch;
   int ret;
 
@@ -477,13 +489,25 @@ static ssize_t ramlog_file_read(FAR struct file *filep, FAR char *buffer,
       return ret;
     }
 
+  tail_pos = priv->rl_tail;
+
+#ifdef CONFIG_RAMLOG_KEEPLOG
+  /* Continue from previous read position? */
+
+  if (filep->f_priv)
+    {
+      tail_pos = (char *)filep->f_priv - priv->rl_buffer;
+    }
+
+#endif
+
   /* Loop until something is read */
 
   for (nread = 0; (size_t)nread < len; )
     {
       /* Get the next byte from the buffer */
 
-      if (priv->rl_head == priv->rl_tail)
+      if (priv->rl_head == tail_pos)
         {
           /* The circular buffer is empty. */
 
@@ -564,15 +588,22 @@ static ssize_t ramlog_file_read(FAR struct file *filep, FAR char *buffer,
            * tail index.
            */
 
-          ch = priv->rl_buffer[priv->rl_tail];
-          priv->rl_buffer[priv->rl_tail] = '\0';
+          ch = priv->rl_buffer[tail_pos];
+
+#ifndef CONFIG_RAMLOG_KEEPLOG
+          priv->rl_buffer[tail_pos] = '\0';
+#endif
 
           /* Increment the tail index. */
 
-          if (++priv->rl_tail >= priv->rl_bufsize)
+          if (++tail_pos >= priv->rl_bufsize)
             {
-              priv->rl_tail = 0;
+              tail_pos = 0;
             }
+
+#ifndef CONFIG_RAMLOG_KEEPLOG
+          priv->rl_tail = tail_pos;
+#endif
 
           /* Add the character to the user buffer. */
 
@@ -580,6 +611,10 @@ static ssize_t ramlog_file_read(FAR struct file *filep, FAR char *buffer,
           nread++;
         }
     }
+
+#ifdef CONFIG_RAMLOG_KEEPLOG
+  filep->f_priv = &priv->rl_buffer[tail_pos];
+#endif
 
   /* Relinquish the mutual exclusion mutex */
 
