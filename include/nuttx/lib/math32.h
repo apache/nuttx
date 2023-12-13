@@ -249,6 +249,38 @@ void umul64(FAR const struct uint64_s *factor1,
             FAR const struct uint64_s *factor2,
             FAR struct uint64_s *product);
 
+/****************************************************************************
+ * Name: log2ceil
+ *
+ * Description:
+ *   Calculate the up-rounded power-of-two for input.
+ *
+ * Input Parameters:
+ *   x - Argument to calculate the power-of-two from.
+ *
+ * Returned Value:
+ *   Power-of-two for argument, rounded up.
+ *
+ ****************************************************************************/
+
+uintptr_t log2ceil(uintptr_t x);
+
+/****************************************************************************
+ * Name: log2floor
+ *
+ * Description:
+ *   Calculate the down-rounded (truncated) power-of-two for input.
+ *
+ * Input Parameters:
+ *   x - Argument to calculate the power-of-two from.
+ *
+ * Returned Value:
+ *   Power-of-two for argument, rounded (truncated) down.
+ *
+ ****************************************************************************/
+
+uintptr_t log2floor(uintptr_t x);
+
 #undef EXTERN
 #ifdef __cplusplus
 }
