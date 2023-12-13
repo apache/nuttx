@@ -220,11 +220,19 @@ int netdev_ipv6_del(FAR struct net_driver_s *dev, const net_ipv6addr_t addr,
  * Name: netdev_ipv6_srcaddr/srcifaddr
  *
  * Description:
- *   Get the source IPv6 address (RFC6724).
+ *   Get the source IPv6 address (RFC6724) to use for transmitted packets.
+ *   If we are responding to a received packet, use the destination address
+ *   from that packet. If we are initiating communication, pick a local
+ *   address that best matches the destination address.
+ *
+ * Input parameters:
+ *   dev - Network device that packet is being transmitted from
+ *   dst - Address to compare against when choosing local address.
  *
  * Returned Value:
- *   A pointer to the IPv6 address is returned on success.  It will never be
- *   NULL, but can be an address containing g_ipv6_unspecaddr.
+ *   A pointer to a net_ipv6addr_t contained in net_driver_s is returned on
+ *   success.  It will never be NULL, but can be an address containing
+ *   g_ipv6_unspecaddr.
  *
  * Assumptions:
  *   The caller has locked the network.
