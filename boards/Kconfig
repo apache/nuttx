@@ -1947,6 +1947,13 @@ config ARCH_BOARD_JH7110_STAR64
 		This options selects support for NuttX on PINE64 Star64 based
 		on StarFive JH7110 SoC.
 
+config ARCH_BOARD_BL808_OX64
+	bool "PINE64 Ox64"
+	depends on ARCH_CHIP_BL808
+	---help---
+		This options selects support for NuttX on PINE64 Ox64 based
+		on Bouffalo Lab BL808 SoC.
+
 config ARCH_BOARD_S32K118EVB
 	bool "NXP S32K118EVB"
 	depends on ARCH_CHIP_S32K118
@@ -3260,6 +3267,7 @@ config ARCH_BOARD
 	default "rv32m1-vega"               if ARCH_BOARD_RV32M1_VEGA
 	default "rv-virt"                   if ARCH_BOARD_QEMU_RV_VIRT
 	default "star64"                    if ARCH_BOARD_JH7110_STAR64
+	default "ox64"                      if ARCH_BOARD_BL808_OX64
 	default "sabre-6quad"               if ARCH_BOARD_SABRE_6QUAD
 	default "qemu-armv7a"               if ARCH_BOARD_QEMU_ARMV7A
 	default "qemu-armv8a"               if ARCH_BOARD_QEMU_ARMV8A
@@ -4150,6 +4158,9 @@ source "boards/risc-v/qemu-rv/rv-virt/Kconfig"
 endif
 if ARCH_BOARD_JH7110_STAR64
 source "boards/risc-v/jh7110/star64/Kconfig"
+endif
+if ARCH_BOARD_BL808_OX64
+source "boards/risc-v/bl808/ox64/Kconfig"
 endif
 if ARCH_BOARD_ESP32C3_DEVKIT
 source "boards/risc-v/esp32c3/esp32c3-devkit/Kconfig"
