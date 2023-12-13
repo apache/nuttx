@@ -82,6 +82,10 @@ list(
   lib_err.c
   lib_instrument.c)
 
+# Add generic integer math functions
+
+list(APPEND SRCS lib_log2ceil.c lib_log2floor.c)
+
 # Keyboard driver encoder/decoder
 
 if(CONFIG_LIBC_KBDCODEC)

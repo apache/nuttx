@@ -42,6 +42,10 @@ CSRCS += lib_crc64.c lib_crc32.c lib_crc16.c lib_crc16ccitt.c lib_crc8.c
 CSRCS += lib_crc8ccitt.c lib_crc8table.c lib_glob.c lib_execinfo.c
 CSRCS += lib_ftok.c lib_err.c lib_instrument.c
 
+# Add generic integer math functions
+
+CSRCS += lib_log2ceil.c lib_log2floor.c
+
 # Keyboard driver encoder/decoder
 
 ifeq ($(CONFIG_LIBC_KBDCODEC),y)
