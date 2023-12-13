@@ -66,6 +66,7 @@ open-amp.zip:
 	$(Q) patch -p0 < 0017-virtio-follow-virtio-1.2-spec-add-more-virtio-status.patch
 	$(Q) patch -p0 < 0018-virtio-decoupling-the-transport-layer-and-virtio-dev.patch
 	$(Q) patch -p0 < 0019-virtio.h-add-version-in-device-id-table.patch
+	$(Q) patch -p0 < 0020-virtio-Add-the-virtio_negotiate_features-interface.patch
 
 
 
