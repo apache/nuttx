@@ -1133,6 +1133,25 @@ int fs_getfilep(int fd, FAR struct file **filep);
 int file_close(FAR struct file *filep);
 
 /****************************************************************************
+ * Name: file_close_without_clear
+ *
+ * Description:
+ *   Close a file that was previously opened with file_open(), but without
+ *   clear filep.
+ *
+ * Input Parameters:
+ *   filep - A pointer to a user provided memory location containing the
+ *           open file data returned by file_open().
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned on
+ *   any failure to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+int file_close_without_clear(FAR struct file *filep);
+
+/****************************************************************************
  * Name: nx_close_from_tcb
  *
  * Description:
