@@ -61,6 +61,15 @@ if UART_PL011
 source "drivers/serial/Kconfig-pl011"
 endif
 
+menuconfig CMSDK_UART
+	bool "CMSDK UART Chip support"
+	select ARCH_HAVE_SERIAL_TERMIOS
+	default n
+
+if CMSDK_UART
+source "drivers/serial/Kconfig-cmsdk"
+endif # CMSDK_UART
+
 menuconfig 16550_UART
 	bool "16550 UART Chip support"
 	select ARCH_HAVE_SERIAL_TERMIOS
