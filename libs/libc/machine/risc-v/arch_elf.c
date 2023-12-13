@@ -36,7 +36,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define OPCODE_SW       0x23
+#define OPCODE_AUIPC    0x17
 #define OPCODE_LUI      0x37
 
 #define RVI_OPCODE_MASK 0x7F
@@ -257,6 +257,39 @@ static uintptr_t _find_hi20(void *arch_data, uintptr_t hi20_rel)
 }
 
 /****************************************************************************
+ * Name: _valid_hi20_imm
+ *
+ * Description:
+ *   Check that any XX_HI20 relocation has a valid upper 20-bit immediate.
+ *   Note that this test is not necessary for RV32 targets, the problem is
+ *   related to RV64 sign extension.
+ *
+ * Input Parameters:
+ *   imm_hi - The upper immediate value.
+ *
+ * Returned Value:
+ *   true if imm_hi is valid; false otherwise
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_LIBC_ARCH_ELF_64BIT
+static inline bool _valid_hi20_imm(long imm_hi)
+{
+  /* 32-bit sign extend imm_hi and compare with the original value */
+
+  long hi   = imm_hi & ((1 << 20) - 1);        /* 32-bit signed value */
+  long sign = -((imm_hi >> 19) & 1);           /* 32-bit sign value */
+  hi        = ((hi << 12) | sign << 32) >> 12; /* 32-bit sign extend */
+
+  /* If the values do not match, the immediate is invalid */
+
+  return imm_hi == hi;
+}
+#else
+#  define _valid_hi20_imm(imm_hi) 1
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -445,6 +478,7 @@ int up_relocateadd(const Elf_Rela *rel, const Elf_Sym *sym,
 
       case R_RISCV_PCREL_HI20:
         {
+          uint32_t insn;
           long imm_hi;
           long imm_lo;
 
@@ -456,7 +490,18 @@ int up_relocateadd(const Elf_Rela *rel, const Elf_Sym *sym,
 
           offset = (long)sym->st_value + (long)rel->r_addend - (long)addr;
 
+          insn = _get_val((uint16_t *)addr);
+          ASSERT(OPCODE_AUIPC == (insn & RVI_OPCODE_MASK));
+
           _calc_imm(offset, &imm_hi, &imm_lo);
+
+          if (!_valid_hi20_imm(imm_hi))
+            {
+              berr("ERROR: %s at %08" PRIxPTR " bad:%08lx\n",
+                   _get_rname(relotype), addr, imm_hi << 12);
+
+              return -EINVAL;
+            }
 
           /* Adjust auipc (add upper immediate to pc) : 20bit */
 
@@ -483,6 +528,14 @@ int up_relocateadd(const Elf_Rela *rel, const Elf_Sym *sym,
           offset = (long)sym->st_value + (long)rel->r_addend - (long)addr;
 
           _calc_imm(offset, &imm_hi, &imm_lo);
+
+          if (!_valid_hi20_imm(imm_hi))
+            {
+              berr("ERROR: %s at %08" PRIxPTR " bad:%08lx\n",
+                   _get_rname(relotype), addr, imm_hi << 12);
+
+              return -EINVAL;
+            }
 
           /* Adjust auipc (add upper immediate to pc) : 20bit */
 
@@ -558,6 +611,15 @@ int up_relocateadd(const Elf_Rela *rel, const Elf_Sym *sym,
           long imm_hi;
           long imm_lo;
           _calc_imm(offset, &imm_hi, &imm_lo);
+
+          if (!_valid_hi20_imm(imm_hi))
+            {
+              berr("ERROR: %s at %08" PRIxPTR " bad:%08lx\n",
+                   _get_rname(relotype), addr, imm_hi << 12);
+
+              return -EINVAL;
+            }
+
           insn = (insn & 0x00000fff) | (imm_hi << 12);
 
           _set_val((uint16_t *)addr, insn);
