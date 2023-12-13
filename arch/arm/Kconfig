@@ -649,6 +649,11 @@ config ARCH_CHIP_TLSR82
 	---help---
 		Telink tlsr82xx architectures (Customed armv6m)
 
+config ARCH_CHIP_MPS
+	bool "MPS ARM Series"
+	---help---
+		MPS platform (MPS2 MPS3)
+
 config ARCH_CHIP_QEMU_ARM
 	bool "QEMU virt platform (ARMv7a)"
 	select ARCH_HAVE_PSCI
@@ -1095,6 +1100,7 @@ config ARCH_CHIP
 	default "phy62xx"	if ARCH_CHIP_PHY62XX
 	default "tlsr82"	if ARCH_CHIP_TLSR82
 	default "qemu"		if ARCH_CHIP_QEMU_ARM
+	default "mps"		if ARCH_CHIP_MPS
 	default "goldfish"	if ARCH_CHIP_GOLDFISH_ARM
 	default "at32"		if ARCH_CHIP_AT32
 
@@ -1571,6 +1577,9 @@ source "arch/arm/src/tlsr82/Kconfig"
 endif
 if ARCH_CHIP_QEMU_ARM
 source "arch/arm/src/qemu/Kconfig"
+endif
+if ARCH_CHIP_MPS
+source "arch/arm/src/mps/Kconfig"
 endif
 if ARCH_CHIP_GOLDFISH_ARM
 source "arch/arm/src/goldfish/Kconfig"
