@@ -8,6 +8,7 @@ menu "ICMPv6 Networking Support"
 config NET_ICMPv6
 	bool "Enable ICMPv6 networking"
 	default n
+	select NET_MCASTGROUP
 	depends on NET
 	---help---
 		Enable minimal ICMPv6 support. Includes built-in support
