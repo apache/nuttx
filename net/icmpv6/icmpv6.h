@@ -166,6 +166,26 @@ EXTERN const struct sock_intf_s g_icmpv6_sockif;
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: icmpv6_devinit
+ *
+ * Description:
+ *   Called when a new network device is registered to configure that device
+ *   for ICMPv6 support.
+ *
+ * Input Parameters:
+ *   dev   - The device driver structure to configure.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+void icmpv6_devinit(FAR struct net_driver_s *dev);
+
+/****************************************************************************
  * Name: icmpv6_input
  *
  * Description:

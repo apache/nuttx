@@ -31,6 +31,7 @@
 #include <nuttx/net/netdev.h>
 
 #include "inet/inet.h"
+#include "netdev/netdev.h"
 #include "utils/utils.h"
 
 /****************************************************************************
@@ -49,6 +50,41 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: netdev_ipv6_mcastmac
+ *
+ * Description:
+ *   Given an IPv6 address (in network order), create a IPv6 multicast MAC
+ *   address for ICMPv6 Neighbor Solicitation message.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_ICMPv6
+static void netdev_ipv6_mcastmac(const net_ipv6addr_t addr, FAR uint8_t *mac)
+{
+  FAR const uint8_t *ipaddr8 = (FAR const uint8_t *)addr;
+
+  /* For ICMPv6, we need to add the IPv6 multicast address
+   *
+   * For IPv6 multicast addresses, the Ethernet MAC is derived by
+   * the four low-order octets OR'ed with the MAC 33:33:00:00:00:00,
+   * so for example the IPv6 address FF02:DEAD:BEEF::1:3 would map
+   * to the Ethernet MAC address 33:33:00:01:00:03.
+   *
+   * NOTES:  This appears correct for the ICMPv6 Router Solicitation
+   * Message, but the ICMPv6 Neighbor Solicitation message seems to
+   * use 33:33:ff:01:00:03.
+   */
+
+  mac[0] = 0x33;
+  mac[1] = 0x33;
+  mac[2] = 0xff;
+  mac[3] = ipaddr8[13];  /* Bits: 104-111 */
+  mac[4] = ipaddr8[14];  /* Bits: 112-119 */
+  mac[5] = ipaddr8[15];  /* Bits: 120-127 */
+}
+#endif
 
 /****************************************************************************
  * Name: netdev_ipv6_get_scope
@@ -176,6 +212,8 @@ int netdev_ipv6_add(FAR struct net_driver_s *dev, const net_ipv6addr_t addr,
   net_ipv6addr_copy(ifaddr->addr, addr);
   net_ipv6_pref2mask(ifaddr->mask, preflen);
 
+  netdev_ipv6_addmcastmac(dev, addr);
+
   return OK;
 }
 
@@ -213,8 +251,104 @@ int netdev_ipv6_del(FAR struct net_driver_s *dev, const net_ipv6addr_t addr,
   net_ipv6addr_copy(ifaddr->addr, g_ipv6_unspecaddr);
   net_ipv6addr_copy(ifaddr->mask, g_ipv6_unspecaddr);
 
+  netdev_ipv6_removemcastmac(dev, addr);
+
   return OK;
 }
+
+/****************************************************************************
+ * Name: netdev_ipv6_addmcastmac/removemcastmac
+ *
+ * Description:
+ *   Add / Remove an MAC address corresponds to the IPv6 address to / from
+ *   the device's MAC filter table.
+ *
+ * Input Parameters:
+ *   dev  - The device driver structure to be modified
+ *   addr - The IPv6 address whose related MAC will be added or removed
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   The caller has locked the network.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_ICMPv6
+void netdev_ipv6_addmcastmac(FAR struct net_driver_s *dev,
+                             const net_ipv6addr_t addr)
+{
+  uint8_t mcastmac[ETHER_ADDR_LEN];
+
+  if (net_ipv6addr_cmp(addr, g_ipv6_unspecaddr))
+    {
+      return;
+    }
+
+  if (dev->d_addmac != NULL)
+    {
+      netdev_ipv6_mcastmac(addr, mcastmac);
+      ninfo("Add IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
+            mcastmac[0], mcastmac[1], mcastmac[2],
+            mcastmac[3], mcastmac[4], mcastmac[5]);
+      dev->d_addmac(dev, mcastmac);
+    }
+}
+
+void netdev_ipv6_removemcastmac(FAR struct net_driver_s *dev,
+                                const net_ipv6addr_t addr)
+{
+  uint8_t mcastmac[ETHER_ADDR_LEN];
+#ifdef CONFIG_NETDEV_MULTIPLE_IPv6
+  int i;
+#endif
+
+  if (net_ipv6addr_cmp(addr, g_ipv6_unspecaddr))
+    {
+      return;
+    }
+
+  if (dev->d_rmmac != NULL)
+    {
+      netdev_ipv6_mcastmac(addr, mcastmac);
+
+#ifdef CONFIG_NETDEV_MULTIPLE_IPv6
+      /* Avoid removing mac needed by other addresses. */
+
+      for (i = 0; i < CONFIG_NETDEV_MAX_IPv6_ADDR; i++)
+        {
+          FAR struct netdev_ifaddr6_s *current = &dev->d_ipv6[i];
+          uint8_t currentmac[ETHER_ADDR_LEN];
+
+          /* Skip empty address and target address */
+
+          if (net_ipv6addr_cmp(current->addr, g_ipv6_unspecaddr) ||
+              net_ipv6addr_cmp(current->addr, addr))
+            {
+              continue;
+            }
+
+          /* Generate multicast MAC for this address. */
+
+          netdev_ipv6_mcastmac(current->addr, currentmac);
+
+          /* We don't remove the MAC if any other IPv6 address needs it. */
+
+          if (memcmp(currentmac, mcastmac, ETHER_ADDR_LEN) == 0)
+            {
+              return;
+            }
+        }
+#endif /* CONFIG_NETDEV_MULTIPLE_IPv6 */
+
+      ninfo("Remove IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
+            mcastmac[0], mcastmac[1], mcastmac[2],
+            mcastmac[3], mcastmac[4], mcastmac[5]);
+      dev->d_rmmac(dev, mcastmac);
+    }
+}
+#endif
 
 /****************************************************************************
  * Name: netdev_ipv6_srcaddr/srcifaddr

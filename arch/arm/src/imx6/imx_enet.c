@@ -1657,7 +1657,7 @@ static int imx_addmac(struct net_driver_s *dev, const uint8_t *mac)
 
   temp  = imx_enet_getreg32(priv, registeraddress);
   temp |= 1 << hashindex;
-  imx_rt_enet_putreg32(priv, temp, registeraddress);
+  imx_enet_putreg32(priv, temp, registeraddress);
 
   return OK;
 }

@@ -371,9 +371,6 @@ static void sam_txreset(struct sam_gmac_s *priv);
 static void sam_rxreset(struct sam_gmac_s *priv);
 static void sam_gmac_reset(struct sam_gmac_s *priv);
 static void sam_macaddress(struct sam_gmac_s *priv);
-#ifdef CONFIG_NET_ICMPv6
-static void sam_ipv6multicast(struct sam_gmac_s *priv);
-#endif
 static int  sam_gmac_configure(struct sam_gmac_s *priv);
 
 /****************************************************************************
@@ -1734,12 +1731,6 @@ static int sam_ifup(struct net_driver_s *dev)
   /* Set the MAC address (should have been configured while we were down) */
 
   sam_macaddress(priv);
-
-#ifdef CONFIG_NET_ICMPv6
-  /* Set up IPv6 multicast address filtering */
-
-  sam_ipv6multicast(priv);
-#endif
 
   /* Initialize for PHY access */
 
@@ -3452,79 +3443,6 @@ static void sam_macaddress(struct sam_gmac_s *priv)
            (uint32_t)dev->d_mac.ether.ether_addr_octet[5] << 8;
   sam_putreg(priv, SAM_GMAC_SAT1, regval);
 }
-
-/****************************************************************************
- * Function: sam_ipv6multicast
- *
- * Description:
- *   Configure the IPv6 multicast MAC address.
- *
- * Input Parameters:
- *   priv - A reference to the private driver state structure
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_ICMPv6
-static void sam_ipv6multicast(struct sam_gmac_s *priv)
-{
-  struct net_driver_s *dev;
-  uint16_t tmp16;
-  uint8_t mac[6];
-
-  /* For ICMPv6, we need to add the IPv6 multicast address
-   *
-   * For IPv6 multicast addresses, the Ethernet MAC is derived by
-   * the four low-order octets OR'ed with the MAC 33:33:00:00:00:00,
-   * so for example the IPv6 address FF02:DEAD:BEEF::1:3 would map
-   * to the Ethernet MAC address 33:33:00:01:00:03.
-   *
-   * NOTES:  This appears correct for the ICMPv6 Router Solicitation
-   * Message, but the ICMPv6 Neighbor Solicitation message seems to
-   * use 33:33:ff:01:00:03.
-   */
-
-  mac[0] = 0x33;
-  mac[1] = 0x33;
-
-  dev    = &priv->dev;
-  tmp16  = dev->d_ipv6addr[6];
-  mac[2] = 0xff;
-  mac[3] = tmp16 >> 8;
-
-  tmp16  = dev->d_ipv6addr[7];
-  mac[4] = tmp16 & 0xff;
-  mac[5] = tmp16 >> 8;
-
-  ninfo("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
-        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-
-  sam_addmac(dev, mac);
-
-#ifdef CONFIG_NET_ICMPv6_AUTOCONF
-  /* Add the IPv6 all link-local nodes Ethernet address.  This is the
-   * address that we expect to receive ICMPv6 Router Advertisement
-   * packets.
-   */
-
-  sam_addmac(dev, g_ipv6_ethallnodes.ether_addr_octet);
-
-#endif /* CONFIG_NET_ICMPv6_AUTOCONF */
-#ifdef CONFIG_NET_ICMPv6_ROUTER
-  /* Add the IPv6 all link-local routers Ethernet address.  This is the
-   * address that we expect to receive ICMPv6 Router Solicitation
-   * packets.
-   */
-
-  sam_addmac(dev, g_ipv6_ethallrouters.ether_addr_octet);
-
-#endif /* CONFIG_NET_ICMPv6_ROUTER */
-}
-#endif /* CONFIG_NET_ICMPv6 */
 
 /****************************************************************************
  * Function: sam_gmac_configure

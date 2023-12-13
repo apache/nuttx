@@ -387,9 +387,6 @@ static void mpfs_rxreset(struct mpfs_ethmac_s *priv);
 static int  mpfs_macenable(struct mpfs_ethmac_s *priv);
 static int  mpfs_ethconfig(struct mpfs_ethmac_s *priv);
 static void mpfs_ethreset(struct mpfs_ethmac_s *priv);
-#ifdef CONFIG_NET_ICMPv6
-static void mpfs_ipv6multicast(struct sam_gmac_s *priv);
-#endif
 
 static void mpfs_interrupt_work(void *arg);
 
@@ -1525,12 +1522,6 @@ static int mpfs_ifup(struct net_driver_s *dev)
   /* Set the MAC address */
 
   mpfs_macaddress(priv);
-
-#ifdef CONFIG_NET_ICMPv6
-  /* Set up IPv6 multicast address filtering */
-
-  mpfs_ipv6multicast(priv);
-#endif
 
   /* Initialize for PHY access */
 

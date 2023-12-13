@@ -913,7 +913,11 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
         {
           FAR struct lifreq *lreq = (FAR struct lifreq *)req;
           idx = MIN(idx, CONFIG_NETDEV_MAX_IPv6_ADDR - 1);
+
+          netdev_ipv6_removemcastmac(dev, dev->d_ipv6[idx].addr);
           ioctl_set_ipv6addr(dev->d_ipv6[idx].addr, &lreq->lifr_addr);
+          netdev_ipv6_addmcastmac(dev, dev->d_ipv6[idx].addr);
+
           netlink_device_notify_ipaddr(dev, RTM_NEWADDR, AF_INET6,
            dev->d_ipv6[idx].addr, net_ipv6_mask2pref(dev->d_ipv6[idx].mask));
         }

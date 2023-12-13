@@ -495,6 +495,35 @@ void netdown_notifier_teardown(int key);
 void netdown_notifier_signal(FAR struct net_driver_s *dev);
 #endif
 
+/****************************************************************************
+ * Name: netdev_ipv6_addmcastmac/removemcastmac
+ *
+ * Description:
+ *   Add / Remove an MAC address corresponds to the IPv6 address to / from
+ *   the device's MAC filter table.
+ *
+ * Input Parameters:
+ *   dev  - The device driver structure to be modified
+ *   addr - The IPv6 address whose related MAC will be added or removed
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   The caller has locked the network.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_ICMPv6
+void netdev_ipv6_addmcastmac(FAR struct net_driver_s *dev,
+                             const net_ipv6addr_t addr);
+void netdev_ipv6_removemcastmac(FAR struct net_driver_s *dev,
+                                const net_ipv6addr_t addr);
+#else
+#  define netdev_ipv6_addmcastmac(dev,addr)
+#  define netdev_ipv6_removemcastmac(dev,addr)
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }
