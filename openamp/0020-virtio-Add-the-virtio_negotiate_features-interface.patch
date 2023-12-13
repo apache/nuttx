@@ -1,0 +1,41 @@
+From 49e9be3fee1c3f56e1891959965420550bbafa92 Mon Sep 17 00:00:00 2001
+From: liqinhui <liqinhui@xiaomi.com>
+Date: Mon, 4 Dec 2023 19:35:59 +0800
+Subject: [PATCH] virtio: Add the virtio_negotiate_features interface.
+
+Add the interface for the VIRTIO_NET_F_MAC feature.
+
+Change-Id: I51fcb0e5388a908ebf43912b793c061c9488e226
+Signed-off-by: liqinhui <liqinhui@xiaomi.com>
+---
+ lib/include/openamp/virtio.h | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/lib/include/openamp/virtio.h open-amp/lib/include/openamp/virtio.h
+index 6ef1746..e32dc16 100644
+--- a/lib/include/openamp/virtio.h
++++ open-amp/lib/include/openamp/virtio.h
+@@ -299,6 +299,20 @@ static inline void virtio_set_features(struct virtio_device *vdev,
+ 	return vdev->func->set_features(vdev, features);
+ }
+ 
++/**
++ * @brief Negotiate features between virtio device and driver.
++ *
++ * @param dev		Pointer to device structure.
++ * @param features	Supported features.
++ *
++ * @return The final features after negotiate.
++ */
++static inline uint32_t virtio_negotiate_features(struct virtio_device *vdev,
++                                                 uint32_t features)
++{
++	return vdev->func->negotiate_features(vdev, features);
++}
++
+ /**
+  * @brief Reset virtio device.
+  *
+-- 
+2.34.1
+
