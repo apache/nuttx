@@ -80,7 +80,6 @@ struct usbdev_fs_ep_s
 struct usbdev_fs_dev_s
 {
   FAR struct composite_dev_s *cdev;
-  bool                        registered;
   uint8_t                     config;
   struct usbdev_devinfo_s     devinfo;
   FAR struct usbdev_fs_ep_s  *eps;
@@ -531,14 +530,12 @@ static int usbdev_fs_close(FAR struct file *filep)
 
       if (do_free)
         {
+          FAR struct usbdev_fs_driver_s *alloc = container_of(
+                       fs, FAR struct usbdev_fs_driver_s, dev);
+
           kmm_free(fs->eps);
           fs->eps = NULL;
-          if (!fs->registered)
-            {
-              FAR struct usbdev_fs_driver_s *alloc = container_of(
-                           fs, FAR struct usbdev_fs_driver_s, dev);
-              kmm_free(alloc);
-            }
+          kmm_free(alloc);
         }
     }
   else
@@ -1394,7 +1391,6 @@ int usbdev_fs_classobject(int minor,
   alloc->drvr.ops = &g_usbdev_fs_classops;
 
   *classdev = &alloc->drvr;
-  alloc->dev.registered = true;
   return OK;
 }
 
@@ -1410,26 +1406,18 @@ void usbdev_fs_classuninitialize(FAR struct usbdevclass_driver_s *classdev)
 {
   FAR struct usbdev_fs_driver_s *alloc = container_of(
     classdev, FAR struct usbdev_fs_driver_s, drvr);
+  FAR struct usbdev_fs_dev_s *fs = &alloc->dev;
+  int i;
 
-  if (alloc->dev.registered)
+  for (i = 0; i < fs->devinfo.nendpoints; i++)
     {
-      alloc->dev.registered = false;
-    }
-  else
-    {
-      FAR struct usbdev_fs_dev_s *fs = &alloc->dev;
-      int i;
-
-      for (i = 0; i < fs->devinfo.nendpoints; i++)
+      if (fs->eps != NULL && fs->eps[i].crefs > 0)
         {
-          if (fs->eps != NULL && fs->eps[i].crefs > 0)
-            {
-              return;
-            }
+          return;
         }
-
-      kmm_free(alloc);
     }
+
+  kmm_free(alloc);
 }
 
 /****************************************************************************

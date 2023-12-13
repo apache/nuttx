@@ -3058,45 +3058,18 @@ int cdcacm_initialize(int minor, FAR void **handle)
  *   standalone USB driver:
  *
  *     classdev - The class object returned by cdcacm_classobject()
- *     handle - The opaque handle representing the class object returned by
- *       a previous call to cdcacm_initialize().
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-#ifdef CONFIG_CDCACM_COMPOSITE
 void cdcacm_uninitialize(FAR struct usbdevclass_driver_s *classdev)
-#else
-void cdcacm_uninitialize(FAR void *handle)
-#endif
 {
-#ifdef CONFIG_CDCACM_COMPOSITE
   FAR struct cdcacm_driver_s *drvr = (FAR struct cdcacm_driver_s *)classdev;
-#else
-  FAR struct cdcacm_driver_s *drvr = (FAR struct cdcacm_driver_s *)handle;
-#endif
   FAR struct cdcacm_dev_s    *priv = drvr->dev;
   char devname[CDCACM_DEVNAME_SIZE];
   int ret;
-
-#ifdef CONFIG_CDCACM_COMPOSITE
-  /* Check for pass 2 uninitialization.  We did most of the work on the
-   * first pass uninitialization.
-   */
-
-  if (priv->minor == (uint8_t)-1)
-    {
-      /* In this second and final pass, all that remains to be done is to
-       * free the memory resources.
-       */
-
-      wd_cancel(&priv->rxfailsafe);
-      kmm_free(priv);
-      return;
-    }
-#endif
 
   /* Un-register the CDC/ACM TTY device */
 
@@ -3108,35 +3081,17 @@ void cdcacm_uninitialize(FAR void *handle)
                (uint16_t)-ret);
     }
 
-  /* Unregister the driver (unless we are a part of a composite device).  The
-   * device unregister logic will (1) return all of the requests to us then
-   * (2) all the unbind method.
-   *
-   * The same thing will happen in the composite case except that: (1) the
-   * composite driver will call usbdev_unregister() which will (2) return the
-   * requests for all members of the composite, and (3) call the unbind
-   * method in the composite device which will (4) call the unbind method
-   * for this device.
-   */
-
 #ifndef CONFIG_CDCACM_COMPOSITE
   usbdev_unregister(&drvr->drvr);
+#endif
 
   /* And free the memory resources. */
 
-  wd_cancel(&priv->rxfailsafe);
-  kmm_free(priv);
-
-#else
-  /* For the case of the composite driver, there is a two pass
-   * uninitialization sequence.  We cannot yet free the driver structure.
-   * We will do that on the second pass.  We mark the fact that we have
-   * already uninitialized by setting the minor number to -1.  If/when we
-   * are called again, then we will free the memory resources.
-   */
-
-  priv->minor = (uint8_t)-1;
-#endif
+  if (priv->serdev.open_count <= 0)
+    {
+      wd_cancel(&priv->rxfailsafe);
+      kmm_free(priv);
+    }
 }
 
 /****************************************************************************

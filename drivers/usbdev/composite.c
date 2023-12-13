@@ -1115,24 +1115,15 @@ void composite_uninitialize(FAR void *handle)
 
   DEBUGASSERT(alloc != NULL);
 
-  /* First phase uninitialization each of the member classes */
-
   priv = &alloc->dev;
-
-  for (i = 0; i < priv->ndevices; i++)
-    {
-      priv->device[i].compdesc.uninitialize(priv->device[i].dev);
-    }
 
   /* Then unregister and destroy the composite class */
 
   usbdev_unregister(&alloc->drvr.drvr);
 
-  /* Free any resources used by the composite driver */
-
-  /* None */
-
-  /* Second phase uninitialization:  Clean up all memory resources */
+  /* Uninitialization each of the member classes and clean up
+   * all memory resources
+   */
 
   for (i = 0; i < priv->ndevices; i++)
     {
