@@ -1947,6 +1947,12 @@ config ARCH_BOARD_JH7110_STAR64
 		This options selects support for NuttX on PINE64 Star64 based
 		on StarFive JH7110 SoC.
 
+config ARCH_BOARD_K230_CANMV
+	bool "CanMV K230"
+	depends on ARCH_CHIP_K230
+	---help---
+		This selects NuttX on CanMV-K230 board with Kendryte K230 SoC.
+
 config ARCH_BOARD_BL808_OX64
 	bool "PINE64 Ox64"
 	depends on ARCH_CHIP_BL808
@@ -3267,6 +3273,7 @@ config ARCH_BOARD
 	default "rv32m1-vega"               if ARCH_BOARD_RV32M1_VEGA
 	default "rv-virt"                   if ARCH_BOARD_QEMU_RV_VIRT
 	default "star64"                    if ARCH_BOARD_JH7110_STAR64
+	default "canmv230"                  if ARCH_BOARD_K230_CANMV
 	default "ox64"                      if ARCH_BOARD_BL808_OX64
 	default "sabre-6quad"               if ARCH_BOARD_SABRE_6QUAD
 	default "qemu-armv7a"               if ARCH_BOARD_QEMU_ARMV7A
@@ -4158,6 +4165,9 @@ source "boards/risc-v/qemu-rv/rv-virt/Kconfig"
 endif
 if ARCH_BOARD_JH7110_STAR64
 source "boards/risc-v/jh7110/star64/Kconfig"
+endif
+if ARCH_BOARD_K230_CANMV
+source "boards/risc-v/k230/canmv230/Kconfig"
 endif
 if ARCH_BOARD_BL808_OX64
 source "boards/risc-v/bl808/ox64/Kconfig"
