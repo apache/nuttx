@@ -22,7 +22,7 @@ if(CONFIG_NET_ICMPv6 AND NOT CONFIG_NET_ICMPv6_NO_STACK)
   # ICMPv6 source files
 
   set(SRCS icmpv6_input.c icmpv6_solicit.c icmpv6_advertise.c
-           icmpv6_linkipaddr.c icmpv6_reply.c)
+           icmpv6_linkipaddr.c icmpv6_reply.c icmpv6_initialize.c)
 
   if(CONFIG_NET_ICMPv6_SOCKET)
     list(

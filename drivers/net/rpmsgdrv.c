@@ -131,9 +131,6 @@ static int  net_rpmsg_drv_addmac(FAR struct net_driver_s *dev,
 static int  net_rpmsg_drv_rmmac(FAR struct net_driver_s *dev,
               FAR const uint8_t *mac);
 #endif
-#ifdef CONFIG_NET_ICMPv6
-static void net_rpmsg_drv_ipv6multicast(FAR struct net_driver_s *dev);
-#endif
 #endif
 #ifdef CONFIG_NETDEV_IOCTL
 static int  net_rpmsg_drv_ioctl(FAR struct net_driver_s *dev, int cmd,
@@ -715,12 +712,6 @@ static int net_rpmsg_drv_ifup(FAR struct net_driver_s *dev)
   net_ipv6addr_copy(dev->d_ipv6netmask, msg.ipv6netmask);
 #endif
 
-#ifdef CONFIG_NET_ICMPv6
-  /* Set up IPv6 multicast address filtering */
-
-  net_rpmsg_drv_ipv6multicast(dev);
-#endif
-
   net_unlock();
 
 #ifdef CONFIG_NETDB_DNSCLIENT
@@ -959,77 +950,6 @@ static int net_rpmsg_drv_rmmac(FAR struct net_driver_s *dev,
   return net_rpmsg_drv_send_recv(dev, &msg, NET_RPMSG_RMMCAST, sizeof(msg));
 }
 #endif
-
-/****************************************************************************
- * Name: net_rpmsg_drv_ipv6multicast
- *
- * Description:
- *   Configure the IPv6 multicast MAC address.
- *
- * Parameters:
- *   dev  - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_ICMPv6
-static void net_rpmsg_drv_ipv6multicast(FAR struct net_driver_s *dev)
-{
-  if (dev->d_lltype == NET_LL_ETHERNET || dev->d_lltype == NET_LL_IEEE80211)
-    {
-      uint16_t tmp16;
-      uint8_t mac[6];
-
-      /* For ICMPv6, we need to add the IPv6 multicast address
-       *
-       * For IPv6 multicast addresses, the Ethernet MAC is derived by
-       * the four low-order octets OR'ed with the MAC 33:33:00:00:00:00,
-       * so for example the IPv6 address FF02:DEAD:BEEF::1:3 would map
-       * to the Ethernet MAC address 33:33:00:01:00:03.
-       *
-       * NOTES:  This appears correct for the ICMPv6 Router Solicitation
-       * Message, but the ICMPv6 Neighbor Solicitation message seems to
-       * use 33:33:ff:01:00:03.
-       */
-
-      mac[0] = 0x33;
-      mac[1] = 0x33;
-
-      tmp16  = dev->d_ipv6addr[6];
-      mac[2] = 0xff;
-      mac[3] = tmp16 >> 8;
-
-      tmp16  = dev->d_ipv6addr[7];
-      mac[4] = tmp16 & 0xff;
-      mac[5] = tmp16 >> 8;
-
-      ninfo("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
-            mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-
-      net_rpmsg_drv_addmac(dev, mac);
-
-#if defined(CONFIG_NET_ETHERNET) && defined(CONFIG_NET_ICMPv6_AUTOCONF)
-      /* Add the IPv6 all link-local nodes Ethernet address.  This is the
-       * address that we expect to receive ICMPv6 Router Advertisement
-       * packets.
-       */
-
-      net_rpmsg_drv_addmac(dev, g_ipv6_ethallnodes.ether_addr_octet);
-#endif /* CONFIG_NET_ETHERNET && CONFIG_NET_ICMPv6_AUTOCONF */
-
-#if defined(CONFIG_NET_ETHERNET) && defined(CONFIG_NET_ICMPv6_ROUTER)
-      /* Add the IPv6 all link-local routers Ethernet address.  This is the
-       * address that we expect to receive ICMPv6 Router Solicitation
-       * packets.
-       */
-
-      net_rpmsg_drv_addmac(dev, g_ipv6_ethallrouters.ether_addr_octet);
-#endif /* CONFIG_NET_ETHERNET && CONFIG_NET_ICMPv6_ROUTER */
-    }
-}
-#endif /* CONFIG_NET_ICMPv6 */
 
 /****************************************************************************
  * Name: net_rpmsg_drv_ioctl
