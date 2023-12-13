@@ -102,7 +102,7 @@
 #define CRM_PLL_CFG_PLL_NS_MASK         (0x1FF << CRM_PLL_CFG_PLL_NS_SHIFT) 
 #  define CRM_PLL_CFG_PLL_NS(n)         ((n) << CRM_PLL_CFG_PLL_NS_SHIFT) /* n = 31..500 */
 
-#define CRM_PLL_CFG_PLL_FR_SHIFT        (16) /* PLL post-division */   
+#define CRM_PLL_CFG_PLL_FR_SHIFT        (16) /* PLL post-division */
 #define CRM_PLL_CFG_PLL_FR_MASK         (7 << CRM_PLL_CFG_PLL_FR_SHIFT)
 #  define CRM_PLL_CFG_PLL_FR_1          (0 << CRM_PLL_CFG_PLL_FR_SHIFT) /* div 1 */
 #  define CRM_PLL_CFG_PLL_FR_2          (1 << CRM_PLL_CFG_PLL_FR_SHIFT) /* div 2 */

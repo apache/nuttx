@@ -86,7 +86,7 @@
 #if defined(CONFIG_ARCH_CHIP_AT32F435RC)  /* LQFP 64 10x10x1.4 256Kb FLASH 384Kb SRAM */
 #  define AT32_NFSMC                    0   /* No FSMC */
 #  define AT32_NATIM                    3   /* 3 advanced timers TIM1 and 8 */
-#  define AT32_NGTIM                    2   /* 32-bit general timers TIM2 and 5 with DMA */                                        
+#  define AT32_NGTIM                    2   /* 32-bit general timers TIM2 and 5 with DMA */
 #  define AT32_NGTIMNDMA                8   /* 16-bit general timers TIM9-14 without DMA */
 #  define AT32_NBTIM                    2   /* 2 basic timers, TIM6-7 */
 #  define AT32_NDMA                     2   /* DMA1-2 */
@@ -434,7 +434,7 @@
 #elif defined(CONFIG_ARCH_CHIP_AT32F437VM)  /* LQFP-100 14x14x1.4 4032Kb FLASH 384Kb SRAM */
 #  define AT32_NFSMC                    1   /* FSMC */
 #  define AT32_NATIM                    3   /* Two advanced timers TIM1 and 8 */
-#  define AT32_NGTIM                    2   /* 32-bit general timers TIM2 and 5 with DMA */ 
+#  define AT32_NGTIM                    2   /* 32-bit general timers TIM2 and 5 with DMA */
 #  define AT32_NGTIMNDMA                8   /* 16-bit general timers TIM9-14 without DMA */
 #  define AT32_NBTIM                    2   /* Two basic timers, TIM6-7 */
 #  define AT32_NDMA                     2   /* DMA1-2 */
