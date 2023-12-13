@@ -149,7 +149,7 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
           dev->d_len        = dev->d_sndlen + UDP_HDRLEN;
 
           ipv6_build_header(IPv6BUF, dev->d_len, IP_PROTO_UDP,
-                            netdev_ipv6_srcaddr(dev, conn->u.ipv6.raddr),
+                            netdev_ipv6_srcaddr(dev, conn->u.ipv6.laddr),
                             conn->u.ipv6.raddr,
                             conn->sconn.ttl, conn->sconn.s_tclass);
 
