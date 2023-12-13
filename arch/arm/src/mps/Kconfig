@@ -1,0 +1,26 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_MPS
+
+menu "MPS Chip Selection"
+
+choice
+	prompt "ARM MPS Configuration"
+	default ARCH_CHIP_MPS3_AN547
+
+config ARCH_CHIP_MPS3_AN547
+	bool "MPS3 AN547 Processor Cortexm55"
+	select ARCH_CORTEXM55
+
+config ARCH_CHIP_MPS3_AN524
+	bool "MPS3 AN524 Processor Cortexm33"
+	select ARCH_CORTEXM33
+
+endchoice
+
+endmenu
+
+endif

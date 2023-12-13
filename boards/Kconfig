@@ -2075,6 +2075,14 @@ config ARCH_BOARD_MR_CANHUBK3
 		This options selects support for NuttX on the NXP MR-CANHUBK3 board
 		featuring the S32K344 Cortex-M7.
 
+config ARCH_BOARD_MPS3_AN547
+	bool "Arm MPS3 AN547"
+	depends on ARCH_CHIP_MPS3_AN547
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This options selects support for NuttX on the MPS3 AN547
+		board featuring the Cortex-M55.
+
 config ARCH_BOARD_SABRE_6QUAD
 	bool "NXP/Freescale i.MX6 Sabre-6Quad board"
 	depends on ARCH_CHIP_IMX6_6QUAD
@@ -3342,6 +3350,7 @@ config ARCH_BOARD
 	default "s32k148evb"                if ARCH_BOARD_S32K148EVB
 	default "s32k344evb"                if ARCH_BOARD_S32K344EVB
 	default "mr-canhubk3"               if ARCH_BOARD_MR_CANHUBK3
+	default "mps3-an547"                if ARCH_BOARD_MPS3_AN547
 	default "rv32m1-vega"               if ARCH_BOARD_RV32M1_VEGA
 	default "rv-virt"                   if ARCH_BOARD_QEMU_RV_VIRT
 	default "star64"                    if ARCH_BOARD_JH7110_STAR64
@@ -3554,6 +3563,9 @@ source "boards/arm/imx6/sabre-6quad/Kconfig"
 endif
 if ARCH_BOARD_TC397
 source "boards/tricore/tc3xx/tc397/Kconfig"
+endif
+if ARCH_BOARD_MPS3_AN547
+source "boards/arm/mps/mps3-an547/Kconfig"
 endif
 if ARCH_BOARD_QEMU_ARMV7A
 source "boards/arm/qemu/qemu-armv7a/Kconfig"
