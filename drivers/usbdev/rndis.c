@@ -160,8 +160,6 @@ struct rndis_dev_s
   struct work_s rxwork;                  /* Worker for dispatching RX packets */
   struct work_s pollwork;                /* TX poll worker */
 
-  bool registered;                       /* Has netdev_register() been called */
-
   uint8_t config;                        /* USB Configuration number */
   FAR struct rndis_req_s *net_req;       /* Pointer to request whose buffer is assigned to network */
   FAR struct rndis_req_s *rx_req;        /* Pointer request container that holds RX buffer */
@@ -2312,12 +2310,6 @@ static void usbclass_unbind(FAR struct usbdevclass_driver_s *driver,
           usbdev_freereq(priv->epbulkout, priv->rdreq);
         }
 
-      if (priv->registered)
-        {
-          netdev_unregister(&priv->netdev);
-          priv->registered = false;
-        }
-
       /* Free write requests that are not in use (which should be all
        * of them
        */
@@ -2872,34 +2864,18 @@ static int usbclass_classobject(int minor,
   if (ret)
     {
       uerr("Failed to register net device");
-      return ret;
     }
 
-  drvr->dev->registered = true;
-
-  return OK;
+  return ret;
 }
 
 static void usbclass_uninitialize(FAR struct usbdevclass_driver_s *classdev)
 {
   FAR struct rndis_driver_s *drvr = (FAR struct rndis_driver_s *)classdev;
   FAR struct rndis_alloc_s *alloc = (FAR struct rndis_alloc_s *)drvr->dev;
-  if (!alloc->dev.registered)
-    {
-#ifdef CONFIG_RNDIS_COMPOSITE
-      kmm_free(alloc);
-#endif
-      return;
-    }
-  if (drvr->dev->registered)
-    {
-      netdev_unregister(&drvr->dev->netdev);
-      drvr->dev->registered = false;
-#ifndef CONFIG_RNDIS_COMPOSITE
-      kmm_free(alloc);
-#endif
-      return;
-    }
+
+  netdev_unregister(&drvr->dev->netdev);
+  kmm_free(alloc);
 }
 
 /****************************************************************************

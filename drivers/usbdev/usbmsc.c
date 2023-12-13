@@ -1745,7 +1745,7 @@ int usbmsc_classobject(FAR void *handle,
 
 void usbmsc_uninitialize(FAR void *handle)
 {
-  FAR struct usbmsc_alloc_s *alloc = (FAR struct usbmsc_alloc_s *)handle;
+  FAR struct usbmsc_alloc_s *alloc = handle;
   FAR struct usbmsc_dev_s *priv;
   irqstate_t flags;
   int ret;
@@ -1760,22 +1760,6 @@ void usbmsc_uninitialize(FAR void *handle)
 #endif
 
   priv = &alloc->dev;
-
-#ifdef CONFIG_USBMSC_COMPOSITE
-  /* Check for pass 2 uninitialization.  We did most of the work on the
-   * first pass uninitialization.
-   */
-
-  if (priv->thpid == 0)
-    {
-      /* In this second and final pass, all that remains to be done is to
-       * free the memory resources.
-       */
-
-      kmm_free(priv);
-      return;
-    }
-#endif
 
   /* If the thread hasn't already exitted, tell it to exit now */
 
@@ -1855,16 +1839,7 @@ void usbmsc_uninitialize(FAR void *handle)
   nxsem_destroy(&priv->thsynch);
   nxmutex_destroy(&priv->thlock);
   nxsem_destroy(&priv->thwaitsem);
-
-#ifndef CONFIG_USBMSC_COMPOSITE
-  /* For the case of the composite driver, there is a two pass
-   * uninitialization sequence.  We cannot yet free the driver structure.
-   * We will do that on the second pass (and we will know that it is the
-   * second pass because of priv->thpid == 0)
-   */
-
   kmm_free(priv);
-#endif
 }
 
 /****************************************************************************
