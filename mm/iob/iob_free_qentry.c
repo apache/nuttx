@@ -60,7 +60,7 @@ FAR struct iob_qentry_s *iob_free_qentry(FAR struct iob_qentry_s *iobq)
    * interrupts very briefly.
    */
 
-  flags = spin_lock_irqsave(&g_iob_lock);
+  flags = enter_critical_section();
 
   /* Which list?  If there is a task waiting for an IOB chain, then put
    * the IOB chain on either the free list or on the committed list where
@@ -79,8 +79,6 @@ FAR struct iob_qentry_s *iob_free_qentry(FAR struct iob_qentry_s *iobq)
       g_iob_freeqlist  = iobq;
     }
 
-  spin_unlock_irqrestore(&g_iob_lock, flags);
-
   /* Signal that an I/O buffer chain container is available.  If there
    * is a thread waiting for an I/O buffer chain container, this will
    * wake up exactly one thread.  The semaphore count will correctly
@@ -89,6 +87,7 @@ FAR struct iob_qentry_s *iob_free_qentry(FAR struct iob_qentry_s *iobq)
    */
 
   nxsem_post(&g_qentry_sem);
+  leave_critical_section(flags);
 
   /* And return the I/O buffer chain container after the one that was freed */
 

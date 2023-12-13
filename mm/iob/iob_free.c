@@ -135,7 +135,7 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
    * interrupts very briefly.
    */
 
-  flags = spin_lock_irqsave(&g_iob_lock);
+  flags = enter_critical_section();
 
   /* Which list?  If there is a task waiting for an IOB, then put
    * the IOB on either the free list or on the committed list where
@@ -168,7 +168,7 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
       g_iob_freelist  = iob;
     }
 
-  spin_unlock_irqrestore(&g_iob_lock, flags);
+  leave_critical_section(flags);
 
   /* Signal that an IOB is available. This is done with schedule locked
    * to make sure that both g_iob_sem and g_throttle_sem are incremented
@@ -184,7 +184,7 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
   DEBUGASSERT(g_iob_sem.semcount <= CONFIG_IOB_NBUFFERS);
 
 #if CONFIG_IOB_THROTTLE > 0
-  flags = spin_lock_irqsave(&g_iob_lock);
+  flags = enter_critical_section();
 
   if (g_iob_sem.semcount > CONFIG_IOB_THROTTLE)
     {
@@ -205,7 +205,7 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
           g_iob_sem.semcount--;
         }
 
-      spin_unlock_irqrestore(&g_iob_lock, flags);
+      leave_critical_section(flags);
 
       nxsem_post(&g_throttle_sem);
       DEBUGASSERT(g_throttle_sem.semcount <=
@@ -213,7 +213,7 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
     }
   else
     {
-      spin_unlock_irqrestore(&g_iob_lock, flags);
+      leave_critical_section(flags);
     }
 #endif
 
