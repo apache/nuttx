@@ -268,5 +268,5 @@ void imxrt_i2c_setup(void);
 void imxrt_autoled_initialize(void);
 #endif
 
-#endif  /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_TEENSY_4X_SRC_TEENSY_4_H */
+#endif /* __ASSEMBLY__ */
+#endif /* __BOARDS_ARM_TEENSY_4X_SRC_TEENSY_4_H */

@@ -329,7 +329,7 @@ int imxrt_flexspi_nor_initialize(void);
 
 #ifdef HAVE_PROGMEM_CHARDEV
 int imxrt_progmem_init(void);
-#endif  /* HAVE_PROGMEM_CHARDEV */
+#endif /* HAVE_PROGMEM_CHARDEV */
 #endif
 
 #endif /* __ASSEMBLY__ */

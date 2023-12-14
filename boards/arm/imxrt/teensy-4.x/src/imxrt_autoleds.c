@@ -161,4 +161,4 @@ void board_autoled_off(int led)
   imxrt_gpio_write(GPIO_LED, false);    /* Low illuminates */
 }
 
-#endif                                 /* CONFIG_ARCH_LEDS */
+#endif /* CONFIG_ARCH_LEDS */

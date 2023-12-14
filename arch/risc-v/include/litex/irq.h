@@ -29,7 +29,7 @@
 #include CONFIG_LITEX_CUSTOM_IRQ_DEFINITIONS_PATH
 #else
 
-#include  <arch/mode.h>
+#include <arch/mode.h>
 
 /****************************************************************************
  * Pre-processor Definitions

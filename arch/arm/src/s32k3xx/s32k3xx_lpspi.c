@@ -1827,7 +1827,7 @@ static void s32k3xx_lpspi_exchange(struct spi_dev_s *dev,
     }
 }
 
-#endif  /* CONFIG_S32K3XX_SPI_DMA */
+#endif /* CONFIG_S32K3XX_SPI_DMA */
 
 /****************************************************************************
  * Name: s32k3xx_lpspi_sndblock

@@ -1149,10 +1149,10 @@ static int at32can_txavail(struct net_driver_s *dev)
 static int at32can_netdev_ioctl(struct net_driver_s *dev, int cmd,
                                  unsigned long arg)
 {
-#if 0  
+#if 0
   struct at32_can_s *priv = (struct at32_can_s *)dev->d_private;
-#endif  
-  int                 ret  = OK;
+#endif
+  int ret  = OK;
 
   switch (cmd)
     {

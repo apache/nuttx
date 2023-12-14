@@ -1584,7 +1584,7 @@ static void imxrt_lpspi_exchange(struct spi_dev_s *dev,
     }
 }
 
-#endif  /* CONFIG_IMXRT_SPI_DMA */
+#endif /* CONFIG_IMXRT_SPI_DMA */
 
 /****************************************************************************
  * Name: imxrt_lpspi_sndblock

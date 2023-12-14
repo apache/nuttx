@@ -352,13 +352,13 @@ static int     cxd56_start(struct audio_lowerhalf_s *lower,
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
 static int     cxd56_stop(struct audio_lowerhalf_s *lower,
                           void *session);
-#endif  /* CONFIG_AUDIO_EXCLUDE_STOP */
+#endif /* CONFIG_AUDIO_EXCLUDE_STOP */
 #ifndef CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME
 static int     cxd56_pause(struct audio_lowerhalf_s *lower,
                            void *session);
 static int     cxd56_resume(struct audio_lowerhalf_s *lower,
                             void *session);
-#endif  /* CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME */
+#endif /* CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME */
 static int     cxd56_reserve(struct audio_lowerhalf_s *lower,
                              void **session);
 static int     cxd56_release(struct audio_lowerhalf_s *lower,
@@ -370,11 +370,11 @@ static int     cxd56_configure(struct audio_lowerhalf_s *lower,
 static int     cxd56_start(struct audio_lowerhalf_s *lower);
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
 static int     cxd56_stop(struct audio_lowerhalf_s *lower);
-#endif  /* CONFIG_AUDIO_EXCLUDE_STOP */
+#endif /* CONFIG_AUDIO_EXCLUDE_STOP */
 #ifndef CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME
 static int     cxd56_pause(struct audio_lowerhalf_s *lower);
 static int     cxd56_resume(struct audio_lowerhalf_s *lower);
-#endif  /* CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME */
+#endif /* CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME */
 static int     cxd56_reserve(struct audio_lowerhalf_s *lower);
 static int     cxd56_release(struct audio_lowerhalf_s *lower);
 #endif /* CONFIG_AUDIO_MULTI_SESSION */
