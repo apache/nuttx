@@ -22,10 +22,6 @@ if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/libcxx)
 
   set(LIBCXX_VERSION ${CONFIG_LIBCXX_VERSION})
 
-  # cmake-format: off
-  set(LIBCXX_PATCH_COMMAND
-  patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx < ${CMAKE_CURRENT_LIST_DIR}/0001_fix_stdatomic_h_miss_typedef.patch)
-  # cmake-format: on
   FetchContent_Declare(
     libcxx
     DOWNLOAD_NAME "libcxx-${LIBCXX_VERSION}.src.tar.xz"
@@ -43,7 +39,11 @@ if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/libcxx)
         ""
         TEST_COMMAND
         ""
-    PATCH_COMMAND ${LIBCXX_PATCH_COMMAND}
+    PATCH_COMMAND
+      patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
+      ${CMAKE_CURRENT_LIST_DIR}/0001_fix_stdatomic_h_miss_typedef.patch && patch
+      -p3 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
+      ${CMAKE_CURRENT_LIST_DIR}/mbstate_t.patch
     DOWNLOAD_NO_PROGRESS true
     TIMEOUT 30)
 
@@ -91,15 +91,47 @@ file(GLOB SRCSTMP ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/experimental/*.cpp)
 list(APPEND SRCS ${SRCSTMP})
 file(GLOB SRCSTMP ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/filesystem/*.cpp)
 list(APPEND SRCS ${SRCSTMP})
+file(GLOB SRCSTMP ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/ryu/*.cpp)
+list(APPEND SRCS ${SRCSTMP})
+
+if(NOT DEFINED GCCVER)
+  execute_process(COMMAND ${CMAKE_CXX_COMPILER} --version
+                  OUTPUT_VARIABLE GCC_VERSION_OUTPUT)
+  string(REGEX MATCH "\\+\\+.* ([0-9]+)\\.[0-9]+" GCC_VERSION_REGEX
+               "${GCC_VERSION_OUTPUT}")
+  set(GCCVER ${CMAKE_MATCH_1})
+endif()
+
+if(GCCVER EQUAL 12)
+  set_source_files_properties(libcxx/src/filesystem/operations.cpp
+                              PROPERTIES COMPILE_FLAGS -Wno-maybe-uninitialized)
+  set_source_files_properties(libcxx/src/locale.cpp
+                              PROPERTIES COMPILE_FLAGS -Wno-maybe-uninitialized)
+  set_source_files_properties(
+    libcxx/src/string.cpp PROPERTIES COMPILE_FLAGS -Wno-alloc-size-larger-than)
+  set_source_files_properties(libcxx/src/charconv.cpp
+                              PROPERTIES COMPILE_FLAGS -Wno-attributes)
+  set_source_files_properties(libcxx/src/locale.cpp PROPERTIES COMPILE_FLAGS
+                                                               -Wno-attributes)
+endif()
+
+if(GCCVER GREATER_EQUAL 12)
+  set_source_files_properties(
+    libcxx/src/string.cpp PROPERTIES COMPILE_FLAGS -Wno-deprecated-declarations)
+  set_source_files_properties(libcxx/src/filesystem/path.cpp
+                              PROPERTIES COMPILE_FLAGS -Wno-shadow)
+  set_source_files_properties(libcxx/src/ryu/d2s.cpp
+                              PROPERTIES COMPILE_FLAGS -Wno-maybe-uninitialized)
+endif()
 
 set_source_files_properties(libcxx/src/barrier.cpp PROPERTIES COMPILE_FLAGS
                                                               -Wno-shadow)
 set_source_files_properties(libcxx/src/locale.cpp PROPERTIES COMPILE_FLAGS
                                                              -Wno-shadow)
-set_source_files_properties(libcxx/src/filesystem/directory_iterator.cpp
-                            PROPERTIES COMPILE_FLAGS -Wno-shadow)
 set_source_files_properties(libcxx/src/filesystem/operations.cpp
                             PROPERTIES COMPILE_FLAGS -Wno-shadow)
+set_source_files_properties(libcxx/src/condition_variable.cpp
+                            PROPERTIES COMPILE_FLAGS -Wno-sign-compare)
 
 nuttx_add_system_library(libcxx)
 target_sources(libcxx PRIVATE ${SRCS})
