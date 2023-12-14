@@ -1147,4 +1147,22 @@ int i3c_master_do_daa(FAR struct i3c_master_controller *master);
 int i3c_master_set_info(FAR struct i3c_master_controller *master,
                         FAR const struct i3c_device_info *info);
 
+/****************************************************************************
+ * Name: i3c_master_send_ccc_cmd_locked
+ *
+ * Description:
+ *   Set master ccc command to i3c device of i3c bus
+ *
+ * Input Parameters:
+ *   master -  Master used to send ccc frames on the bus
+ *   cmd    -  Command data to send on the bus
+ *
+ * Returned Value:
+ *   0 in case of success, an negative error code otherwise.
+ ****************************************************************************/
+
+int i3c_master_send_ccc_cmd_locked(
+              FAR struct i3c_master_controller *master,
+              FAR struct i3c_ccc_cmd *cmd);
+
 #endif /* __INCLUDE_NUTTX_I3C_MASTER_H */

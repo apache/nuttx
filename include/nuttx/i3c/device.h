@@ -90,6 +90,7 @@
  ****************************************************************************/
 
 struct i3c_device;
+struct i3c_ccc_cmd;
 
 struct i3c_device_id
 {
@@ -416,5 +417,22 @@ void i3c_master_detach_i2c_dev(FAR struct i3c_master_controller *master,
 FAR const struct i3c_device *i3c_master_find_i3c_dev(
                               FAR struct i3c_master_controller *master,
                               FAR const struct i3c_device_id *id);
+
+/****************************************************************************
+ * Name: i3c_device_send_ccc_cmd
+ *
+ * Description:
+ *   This function is used to send a common ccc command.
+ *
+ * Input Parameters:
+ *   dev - An I3C device descriptor will be used for
+ *   cmd - The buf of ccc commands to transfer, only one frame at a time
+ *
+ * Returned Value:
+ *   0 or positive if Success, nagative otherwise.
+ ****************************************************************************/
+
+int i3c_device_send_ccc_cmd(FAR const struct i3c_device *dev,
+                            FAR struct i3c_ccc_cmd *cmd);
 
 #endif /* __INCLUDE_NUTTX_I3C_DEV_H */

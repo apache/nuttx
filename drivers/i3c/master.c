@@ -351,57 +351,6 @@ static void i3c_ccc_cmd_init(FAR struct i3c_ccc_cmd *cmd, bool rnw,
   cmd->err = I3C_ERROR_UNKNOWN;
 }
 
-/****************************************************************************
- * Name: i3c_master_send_ccc_cmd_locked
- ****************************************************************************/
-
-static int i3c_master_send_ccc_cmd_locked(
-              FAR struct i3c_master_controller *master,
-              FAR struct i3c_ccc_cmd *cmd)
-{
-  int ret;
-
-  if (!cmd || !master)
-    {
-      return -EINVAL;
-    }
-
-  if (master->init_done &&
-      nxmutex_is_locked(&master->bus.lock))
-    {
-      return -EINVAL;
-    }
-
-  if (!master->ops->send_ccc_cmd)
-    {
-      return -ENOTSUP;
-    }
-
-  if ((cmd->id & I3C_CCC_DIRECT) && (!cmd->dests || !cmd->ndests))
-    {
-      return -EINVAL;
-    }
-
-  if (master->ops->supports_ccc_cmd &&
-      !master->ops->supports_ccc_cmd(master, cmd))
-    {
-      return -ENOTSUP;
-    }
-
-  ret = master->ops->send_ccc_cmd(master, cmd);
-  if (ret)
-    {
-      if (cmd->err != I3C_ERROR_UNKNOWN)
-        {
-          return cmd->err;
-        }
-
-      return ret;
-    }
-
-  return 0;
-}
-
 static FAR struct i3c_dev_desc *
 i3c_master_alloc_i3c_dev(FAR struct i3c_master_controller *master,
                          FAR const struct i3c_device_info *info)
@@ -1304,6 +1253,57 @@ static void i3c_unregister_driver(FAR struct i3c_master_controller *master)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: i3c_master_send_ccc_cmd_locked
+ ****************************************************************************/
+
+int i3c_master_send_ccc_cmd_locked(
+              FAR struct i3c_master_controller *master,
+              FAR struct i3c_ccc_cmd *cmd)
+{
+  int ret;
+
+  if (!cmd || !master)
+    {
+      return -EINVAL;
+    }
+
+  if (master->init_done &&
+      nxmutex_is_locked(&master->bus.lock))
+    {
+      return -EINVAL;
+    }
+
+  if (!master->ops->send_ccc_cmd)
+    {
+      return -ENOTSUP;
+    }
+
+  if ((cmd->id & I3C_CCC_DIRECT) && (!cmd->dests || !cmd->ndests))
+    {
+      return -EINVAL;
+    }
+
+  if (master->ops->supports_ccc_cmd &&
+      !master->ops->supports_ccc_cmd(master, cmd))
+    {
+      return -ENOTSUP;
+    }
+
+  ret = master->ops->send_ccc_cmd(master, cmd);
+  if (ret)
+    {
+      if (cmd->err != I3C_ERROR_UNKNOWN)
+        {
+          return cmd->err;
+        }
+
+      return ret;
+    }
+
+  return 0;
+}
 
 /****************************************************************************
  * Name: i3c_bus_normaluse_lock

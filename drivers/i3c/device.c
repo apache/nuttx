@@ -245,6 +245,46 @@ void i3c_device_free_ibi(FAR const struct i3c_device *dev)
 }
 
 /****************************************************************************
+ * Name: i3c_device_send_ccc_cmd
+ *
+ * Description:
+ *   This function is used to send a common ccc command.
+ *
+ * Input Parameters:
+ *   dev  - An I3C device descriptor will be used for
+ *   cmd  - The buf of ccc commands to transfer, only one frame at a time
+ *
+ * Returned Value:
+ *   0 or positive if Success, nagative otherwise.
+ ****************************************************************************/
+
+int i3c_device_send_ccc_cmd(FAR const struct i3c_device *dev,
+                            FAR struct i3c_ccc_cmd *cmd)
+{
+  int ret;
+  FAR struct i3c_master_controller *master;
+
+  if (dev == NULL || cmd == NULL)
+    {
+      return -EINVAL;
+    }
+
+  master = i3c_dev_get_master(dev->desc);
+
+  i3c_bus_normaluse_lock(dev->bus);
+
+  ret = i3c_master_send_ccc_cmd_locked(master, cmd);
+  if (ret < 0)
+    {
+      ret = cmd->err;
+    }
+
+  i3c_bus_normaluse_unlock(dev->bus);
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: i3c_master_find_i3c_dev
  *
  * Description:
