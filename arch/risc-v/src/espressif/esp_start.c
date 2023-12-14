@@ -40,10 +40,24 @@
 #include "esp_cpu.h"
 #include "esp_private/brownout.h"
 #include "hal/wdt_hal.h"
+#include "hal/mmu_hal.h"
+#include "hal/mmu_types.h"
+#include "hal/cache_types.h"
+#include "hal/cache_ll.h"
+#include "hal/cache_hal.h"
 #include "soc/ext_mem_defs.h"
 #include "soc/extmem_reg.h"
 #include "soc/mmu.h"
 #include "soc/reg_base.h"
+#include "rom/cache.h"
+
+#ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
+#include "bootloader_init.h"
+#include "bootloader_flash_priv.h"
+#include "esp_rom_uart.h"
+#include "esp_rom_sys.h"
+#include "esp_app_format.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -55,24 +69,46 @@
 #  define showprogress(c)
 #endif
 
+#if defined(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT) || \
+    defined (CONFIG_ESPRESSIF_SIMPLE_BOOT)
 #ifdef CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT
 #  define PRIMARY_SLOT_OFFSET   CONFIG_ESPRESSIF_OTA_PRIMARY_SLOT_OFFSET
+#  define MMU_FLASH_MASK        (~(MMU_BLOCK_SIZE - 1))
+#else
+/* Force offset to the beginning of the whole image
+ */
+
+#  define PRIMARY_SLOT_OFFSET   0
+#endif
 #  define HDR_ATTR              __attribute__((section(".entry_addr"))) \
                                   __attribute__((used))
 #  define FLASH_MMU_TABLE       ((volatile uint32_t*) DR_REG_MMU_TABLE)
 #  define FLASH_MMU_TABLE_SIZE  (ICACHE_MMU_SIZE/sizeof(uint32_t))
 #  define MMU_BLOCK_SIZE        0x00010000  /* 64 KB */
-#  define MMU_FLASH_MASK        (~(MMU_BLOCK_SIZE - 1))
 #  define CACHE_REG             EXTMEM_ICACHE_CTRL1_REG
 #  define CACHE_MASK            (EXTMEM_ICACHE_SHUT_IBUS_M | \
                                  EXTMEM_ICACHE_SHUT_DBUS_M)
+
+#  define CHECKSUM_ALIGN        16
+#  define IS_PADD(addr) (addr == 0)
+#  define IS_DRAM(addr) (addr >= SOC_DRAM_LOW && addr < SOC_DRAM_HIGH)
+#  define IS_IRAM(addr) (addr >= SOC_IRAM_LOW && addr < SOC_IRAM_HIGH)
+#  define IS_IROM(addr) (addr >= SOC_IROM_LOW && addr < SOC_IROM_HIGH)
+#  define IS_DROM(addr) (addr >= SOC_DROM_LOW && addr < SOC_DROM_HIGH)
+#  define IS_SRAM(addr) (IS_IRAM(addr) || IS_DRAM(addr))
+#  define IS_MMAP(addr) (IS_IROM(addr) || IS_DROM(addr))
+#  define IS_NONE(addr) (!IS_IROM(addr) && !IS_DROM(addr) \
+                      && !IS_IRAM(addr) && !IS_DRAM(addr) && !IS_PADD(addr))
+
+#  define IS_MAPPING(addr) IS_IROM(addr) || IS_DROM(addr)
 #endif
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-#ifdef CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT
+#if defined(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT) || \
+    defined (CONFIG_ESPRESSIF_SIMPLE_BOOT)
 extern uint8_t _image_irom_vma[];
 extern uint8_t _image_irom_lma[];
 extern uint8_t _image_irom_size[];
@@ -86,33 +122,17 @@ extern uint8_t _image_drom_size[];
  * ROM Function Prototypes
  ****************************************************************************/
 
-#ifdef CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT
+#if defined(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT) || \
+    defined (CONFIG_ESPRESSIF_SIMPLE_BOOT)
 extern int ets_printf(const char *fmt, ...) printf_like(1, 2);
-extern uint32_t cache_suspend_icache(void);
-extern void cache_resume_icache(uint32_t val);
-extern void cache_invalidate_icache_all(void);
-
-#ifdef CONFIG_ESPRESSIF_ESP32C3
-extern int cache_dbus_mmu_set(uint32_t ext_ram, uint32_t vaddr,
-                              uint32_t paddr, uint32_t psize, uint32_t num,
-                              uint32_t fixed);
-extern int cache_ibus_mmu_set(uint32_t ext_ram, uint32_t vaddr,
-                              uint32_t paddr, uint32_t psize, uint32_t num,
-                              uint32_t fixed);
-#elif defined(CONFIG_ESPRESSIF_ESP32C6)
-extern bool ets_efuse_cache_encryption_enabled(void);
-extern int cache_mspi_mmu_set(uint32_t sensitive, uint32_t ext_ram,
-                              uint32_t vaddr, uint32_t paddr, uint32_t psize,
-                              uint32_t num, uint32_t fixed);
-#endif
-
 #endif
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-#ifdef CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT
+#if defined(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT) || \
+    defined (CONFIG_ESPRESSIF_SIMPLE_BOOT)
 IRAM_ATTR noreturn_function void __start(void);
 #endif
 
@@ -120,7 +140,8 @@ IRAM_ATTR noreturn_function void __start(void);
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT
+#if defined(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT) || \
+    defined (CONFIG_ESPRESSIF_SIMPLE_BOOT)
 HDR_ATTR static void (*_entry_point)(void) = __start;
 #endif
 
@@ -153,7 +174,8 @@ uintptr_t g_idle_topstack = ESP_IDLESTACK_TOP;
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT
+#if defined(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT) || \
+    defined (CONFIG_ESPRESSIF_SIMPLE_BOOT)
 static inline uint32_t calc_mmu_pages(uint32_t size, uint32_t vaddr)
 {
   return (size + (vaddr - (vaddr & MMU_FLASH_MASK)) + MMU_BLOCK_SIZE - 1) /
@@ -175,55 +197,151 @@ static inline uint32_t calc_mmu_pages(uint32_t size, uint32_t vaddr)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT
-static int map_rom_segments(void)
+#if defined(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT) || \
+    defined(CONFIG_ESPRESSIF_SIMPLE_BOOT)
+static int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
+                            uint32_t app_drom_size, uint32_t app_irom_start,
+                            uint32_t app_irom_vaddr, uint32_t app_irom_size)
 {
   uint32_t rc = 0;
-  uint32_t regval;
-  uint32_t drom_lma_aligned;
-  uint32_t drom_vma_aligned;
-  uint32_t drom_page_count;
-  uint32_t irom_lma_aligned;
-  uint32_t irom_vma_aligned;
-  uint32_t irom_page_count;
+  uint32_t actual_mapped_len = 0;
+  uint32_t app_irom_start_aligned = app_irom_start & MMU_FLASH_MASK;
+  uint32_t app_irom_vaddr_aligned = app_irom_vaddr & MMU_FLASH_MASK;
+  uint32_t app_drom_start_aligned = app_drom_start & MMU_FLASH_MASK;
+  uint32_t app_drom_vaddr_aligned = app_drom_vaddr & MMU_FLASH_MASK;
+#ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
+  esp_image_header_t image_header; /* Header for entire image */
+  esp_image_segment_header_t WORD_ALIGNED_ATTR segment_hdr;
+  bool padding_checksum = false;
+  unsigned int segments = 0;
+  unsigned int ram_segments = 0;
+  size_t offset = CONFIG_BOOTLOADER_OFFSET_IN_FLASH;
+#endif
 
-  size_t partition_offset = PRIMARY_SLOT_OFFSET;
-  uint32_t app_irom_lma = partition_offset + (uint32_t)_image_irom_lma;
-  uint32_t app_irom_size = (uint32_t)_image_irom_size;
-  uint32_t app_irom_vma = (uint32_t)_image_irom_vma;
-  uint32_t app_drom_lma = partition_offset + (uint32_t)_image_drom_lma;
-  uint32_t app_drom_size = (uint32_t)_image_drom_size;
-  uint32_t app_drom_vma = (uint32_t)_image_drom_vma;
+  ets_printf("\nIROM lma: 0x%lx  vma: 0x%lx  size: 0x%lx\n",
+             (uint32_t)_image_irom_lma,
+             (uint32_t)_image_irom_vma,
+             (uint32_t)_image_irom_size);
+  ets_printf("DROM lma: 0x%lx  vma: 0x%lx  size: 0x%lx\n",
+             (uint32_t)_image_drom_lma,
+             (uint32_t)_image_drom_vma,
+             (uint32_t)_image_drom_size);
 
-  uint32_t autoload = cache_suspend_icache();
-  cache_invalidate_icache_all();
+#ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
 
-  /* Clear the MMU entries that are already set up, so the new app only has
-   * the mappings it creates.
-   */
+  /* Read image header */
 
-  for (size_t i = 0; i < FLASH_MMU_TABLE_SIZE; i++)
+  if (bootloader_flash_read(offset, &image_header,
+                            sizeof(esp_image_header_t),
+                            true) != ESP_OK)
     {
-      FLASH_MMU_TABLE[i] = MMU_INVALID;
+      ets_printf("Failed to load image header!\n");
+      abort();
     }
 
-  drom_lma_aligned = app_drom_lma & MMU_FLASH_MASK;
-  drom_vma_aligned = app_drom_vma & MMU_FLASH_MASK;
-  drom_page_count = calc_mmu_pages(app_drom_size, app_drom_vma);
-  rc  = cache_dbus_mmu_set(MMU_ACCESS_FLASH, drom_vma_aligned,
-                           drom_lma_aligned, 64, (int)drom_page_count, 0);
+  offset += sizeof(esp_image_header_t);
 
-  irom_lma_aligned = app_irom_lma & MMU_FLASH_MASK;
-  irom_vma_aligned = app_irom_vma & MMU_FLASH_MASK;
-  irom_page_count = calc_mmu_pages(app_irom_size, app_irom_vma);
-  rc |= cache_ibus_mmu_set(MMU_ACCESS_FLASH, irom_vma_aligned,
-                           irom_lma_aligned, 64, (int)irom_page_count, 0);
+  /* Iterate for segment information parsing */
 
-  regval  = getreg32(CACHE_REG);
-  regval &= ~(CACHE_MASK);
-  putreg32(regval, CACHE_REG);
+  while (segments++ < 16)
+    {
+      /* Read segment header */
 
-  cache_resume_icache(autoload);
+      if (bootloader_flash_read(offset, &segment_hdr,
+                                sizeof(esp_image_segment_header_t),
+                                true) != ESP_OK)
+        {
+          ets_printf("failed to read segment header at %x\n", offset);
+          abort();
+        }
+
+      if (IS_NONE(segment_hdr.load_addr))
+        {
+          /* Total segment count = (segments - 1) */
+
+          break;
+        }
+
+      ets_printf("%s: lma 0x%08x vma 0x%08lx len 0x%-6lx (%lu)\n",
+                 IS_NONE(segment_hdr.load_addr) ? "???" :
+                   IS_MMAP(segment_hdr.load_addr) ?
+                     IS_IROM(segment_hdr.load_addr) ? "imap" : "dmap" :
+                       IS_PADD(segment_hdr.load_addr) ? "padd" :
+                         IS_DRAM(segment_hdr.load_addr) ? "dram" : "iram",
+                 offset + sizeof(esp_image_segment_header_t),
+                 segment_hdr.load_addr, segment_hdr.data_len,
+                 segment_hdr.data_len);
+
+      /* Fix drom and irom produced be the linker, as this
+       * is later invalidated by the elf2image command.
+       */
+
+      if (IS_DROM(segment_hdr.load_addr))
+        {
+          app_drom_start = offset + sizeof(esp_image_segment_header_t);
+          app_drom_start_aligned = app_drom_start & MMU_FLASH_MASK;
+        }
+
+      if (IS_IROM(segment_hdr.load_addr))
+        {
+          app_irom_start = offset + sizeof(esp_image_segment_header_t);
+          app_irom_start_aligned = app_irom_start & MMU_FLASH_MASK;
+        }
+
+      if (IS_SRAM(segment_hdr.load_addr))
+        {
+          ram_segments++;
+        }
+
+      offset += sizeof(esp_image_segment_header_t) + segment_hdr.data_len;
+      if (ram_segments == image_header.segment_count && !padding_checksum)
+        {
+          offset += (CHECKSUM_ALIGN - 1) - (offset % CHECKSUM_ALIGN) + 1;
+          padding_checksum = true;
+        }
+    }
+
+  if (segments == 0 || segments == 16)
+    {
+      ets_printf("Error parsing segments\n");
+    }
+
+  ets_printf("total segments stored %d\n", segments - 1);
+#endif
+
+  cache_hal_disable(CACHE_TYPE_ALL);
+
+  /* Clear the MMU entries that are already set up,
+   * so the new app only has the mappings it creates.
+   */
+
+  mmu_hal_unmap_all();
+
+  mmu_hal_map_region(0, MMU_TARGET_FLASH0,
+                     app_drom_vaddr_aligned, app_drom_start_aligned,
+                     app_drom_size, &actual_mapped_len);
+
+  mmu_hal_map_region(0, MMU_TARGET_FLASH0,
+                     app_irom_vaddr_aligned, app_irom_start_aligned,
+                     app_irom_size, &actual_mapped_len);
+
+  /* ------------------Enable corresponding buses--------------------- */
+
+  cache_bus_mask_t bus_mask = cache_ll_l1_get_bus(0, app_drom_vaddr_aligned,
+                                                  app_drom_size);
+  cache_ll_l1_enable_bus(0, bus_mask);
+  bus_mask = cache_ll_l1_get_bus(0, app_irom_vaddr_aligned, app_irom_size);
+  cache_ll_l1_enable_bus(0, bus_mask);
+#if CONFIG_ESPRESSIF_NUM_CPUS > 1
+  bus_mask = cache_ll_l1_get_bus(1, app_drom_vaddr_aligned, app_drom_size);
+  cache_ll_l1_enable_bus(1, bus_mask);
+  bus_mask = cache_ll_l1_get_bus(1, app_irom_vaddr_aligned, app_irom_size);
+  cache_ll_l1_enable_bus(1, bus_mask);
+#endif
+
+  /* ------------------Enable Cache----------------------------------- */
+
+  cache_hal_enable(CACHE_TYPE_ALL);
 
   return (int)rc;
 }
@@ -239,13 +357,30 @@ static int map_rom_segments(void)
 
 void __esp_start(void)
 {
-#ifdef CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT
-  if (map_rom_segments() != 0)
+#ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
+  if (bootloader_init() != 0)
+    {
+      ets_printf("Hardware init failed, aborting\n");
+      while (true);
+    }
+#endif
+
+#if defined(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT) || \
+    defined(CONFIG_ESPRESSIF_SIMPLE_BOOT)
+  size_t partition_offset = PRIMARY_SLOT_OFFSET;
+  uint32_t app_irom_start = partition_offset + (uint32_t)_image_irom_lma;
+  uint32_t app_irom_size  = (uint32_t)_image_irom_size;
+  uint32_t app_irom_vaddr = (uint32_t)_image_irom_vma;
+  uint32_t app_drom_start = partition_offset + (uint32_t)_image_drom_lma;
+  uint32_t app_drom_size  = (uint32_t)_image_drom_size;
+  uint32_t app_drom_vaddr = (uint32_t)_image_drom_vma;
+
+  if (map_rom_segments(app_drom_start, app_drom_vaddr, app_drom_size,
+                       app_irom_start, app_irom_vaddr, app_irom_size) != 0)
     {
       ets_printf("Failed to setup XIP, aborting\n");
       while (true);
     }
-
 #endif
 
 #ifdef CONFIG_ESPRESSIF_REGION_PROTECTION

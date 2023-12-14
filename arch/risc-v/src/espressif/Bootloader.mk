@@ -86,6 +86,10 @@ else
 	} >> $(BOOTLOADER_CONFIG)
 endif
 
+ifeq ($(CONFIG_ESPRESSIF_SIMPLE_BOOT),y)
+bootloader:
+	$(Q) echo "Using direct bootloader to boot NuttX."
+else
 ifeq ($(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT),y)
 
 BOOTLOADER_BIN = $(TOPDIR)/mcuboot-$(CHIP_SERIES).bin
@@ -122,4 +126,5 @@ clean_bootloader:
 	$(call DELFILE,$(TOPDIR)/bootloader-$(CHIP_SERIES).bin)
 	$(call DELFILE,$(TOPDIR)/partition-table-$(CHIP_SERIES).bin)
 
+endif
 endif
