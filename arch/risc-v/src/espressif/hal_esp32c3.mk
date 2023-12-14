@@ -50,6 +50,15 @@ INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)/chip/$(ESP_HAL_3RDPARTY_REPO)/compone
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)/chip/$(ESP_HAL_3RDPARTY_REPO)/components/soc/include
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)/chip/$(ESP_HAL_3RDPARTY_REPO)/components/soc/$(CHIP_SERIES)/include
 
+ifeq ($(CONFIG_ESPRESSIF_SIMPLE_BOOT),y)
+  INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)/chip/$(ESP_HAL_3RDPARTY_REPO)/components/bootloader_support/include
+  INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)/chip/$(ESP_HAL_3RDPARTY_REPO)/components/bootloader_support/private_include
+  INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)/chip/$(ESP_HAL_3RDPARTY_REPO)/components/bootloader_support/bootloader_flash/include
+  INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)/chip/$(ESP_HAL_3RDPARTY_REPO)/components/spi_flash/include
+  INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)/chip/$(ESP_HAL_3RDPARTY_REPO)/components/spi_flash/include/spi_flash
+  INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)/chip/$(ESP_HAL_3RDPARTY_REPO)/components/esp_app_format/include
+endif
+
 # Linker scripts
 
 ARCHSCRIPT += $(ARCH_SRCDIR)/chip/$(ESP_HAL_3RDPARTY_REPO)/components/esp_rom/$(CHIP_SERIES)/ld/$(CHIP_SERIES).rom.ld
@@ -76,6 +85,7 @@ CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/esp_hw_support/port/esp_c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/esp_hw_support/port/$(CHIP_SERIES)/esp_clk_tree.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/esp_hw_support/port/$(CHIP_SERIES)/cpu_region_protect.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/esp_hw_support/port/$(CHIP_SERIES)/rtc_clk.c
+CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/esp_hw_support/port/$(CHIP_SERIES)/rtc_clk_init.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/esp_hw_support/port/$(CHIP_SERIES)/rtc_init.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/esp_hw_support/port/$(CHIP_SERIES)/rtc_sleep.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/esp_hw_support/port/$(CHIP_SERIES)/rtc_time.c
@@ -92,6 +102,9 @@ CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/ledc_hal_iram.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/systimer_hal.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/timer_hal.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/timer_hal_iram.c
+CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/cache_hal.c
+CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/mpu_hal.c
+CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/mmu_hal.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/uart_hal.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/uart_hal_iram.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/wdt_hal_iram.c
@@ -102,3 +115,33 @@ CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/log/log_noos.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/riscv/interrupt.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/soc/$(CHIP_SERIES)/gpio_periph.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/soc/$(CHIP_SERIES)/ledc_periph.c
+
+ifeq ($(CONFIG_ESPRESSIF_SIMPLE_BOOT),y)
+  CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/nuttx/src/bootloader_banner_wrap.c
+  CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/bootloader_support/src/bootloader_console.c
+  CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/bootloader_support/src/bootloader_console_loader.c
+  CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/bootloader_support/src/${CHIP_SERIES}/bootloader_${CHIP_SERIES}.c
+  CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/bootloader_support/src/bootloader_init.c
+  CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/bootloader_support/src/bootloader_common.c
+  CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/bootloader_support/src/bootloader_common_loader.c
+  CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/bootloader_support/bootloader_flash/src/bootloader_flash.c
+  CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/bootloader_support/bootloader_flash/src/bootloader_flash_config_${CHIP_SERIES}.c
+  CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/bootloader_support/src/bootloader_clock_init.c
+  CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/bootloader_support/src/bootloader_clock_loader.c
+  CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/bootloader_support/src/bootloader_efuse.c
+  CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/bootloader_support/src/bootloader_mem.c
+  CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/bootloader_support/src/bootloader_random.c
+  CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/bootloader_support/src/bootloader_random_${CHIP_SERIES}.c
+  CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/bootloader_support/src/esp_image_format.c
+  CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/bootloader_support/src/${CHIP_SERIES}/bootloader_soc.c
+  CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/bootloader_support/src/${CHIP_SERIES}/bootloader_sha.c
+  CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/bootloader_support/src/flash_encrypt.c
+  CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/soc/${CHIP_SERIES}/uart_periph.c
+  CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/esp_rom/patches/esp_rom_uart.c
+  CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/esp_rom/patches/esp_rom_sys.c
+  CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/esp_rom/patches/esp_rom_spiflash.c
+  CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/efuse/src/esp_efuse_fields.c
+  CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/efuse/src/efuse_controller/keys/with_key_purposes/esp_efuse_api_key.c
+
+  LDFLAGS += --wrap=bootloader_print_banner
+endif
