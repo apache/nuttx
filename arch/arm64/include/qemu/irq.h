@@ -29,6 +29,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define NR_IRQS                 220  /* Total number of interrupts */
+#define NR_IRQS            220  /* Total number of interrupts */
+#define MPID_TO_CORE(mpid) (((mpid) >> MPIDR_AFF0_SHIFT) & MPIDR_AFFLVL_MASK)
 
 #endif /* __ARCH_ARM64_INCLUDE_QEMU_IRQ_H */
