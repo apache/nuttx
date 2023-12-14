@@ -553,16 +553,9 @@ static void virtio_mmio_write_config(FAR struct virtio_device *vdev,
   uint16_t u16data;
   uint8_t u8data;
 
-  if (vdev->id.version == VIRTIO_MMIO_VERSION_1 || length > 8)
+  if (vdev->id.version == VIRTIO_MMIO_VERSION_1)
     {
-      FAR char *s = src;
-      int i;
-      for (i = 0; i < length; i++)
-        {
-          metal_io_write8(&vmdev->cfg_io, write_offset + i, s[i]);
-        }
-
-      return;
+      goto byte_write;
     }
 
   switch (length)
@@ -587,7 +580,15 @@ static void virtio_mmio_write_config(FAR struct virtio_device *vdev,
                          u32data);
         break;
       default:
-        DEBUGASSERT(0);
+byte_write:
+        {
+          FAR char *s = src;
+          int i;
+          for (i = 0; i < length; i++)
+            {
+              metal_io_write8(&vmdev->cfg_io, write_offset + i, s[i]);
+            }
+        }
     }
 }
 
@@ -606,16 +607,9 @@ static void virtio_mmio_read_config(FAR struct virtio_device *vdev,
   uint16_t u16data;
   uint8_t u8data;
 
-  if (vdev->id.version == VIRTIO_MMIO_VERSION_1 || length > 8)
+  if (vdev->id.version == VIRTIO_MMIO_VERSION_1)
     {
-      FAR char *d = dst;
-      int i;
-      for (i = 0; i < length; i++)
-        {
-          d[i] = metal_io_read8(&vmdev->cfg_io, read_offset + i);
-        }
-
-      return;
+      goto byte_read;
     }
 
   switch (length)
@@ -640,7 +634,15 @@ static void virtio_mmio_read_config(FAR struct virtio_device *vdev,
         memcpy(dst + sizeof(u32data), &u32data, sizeof(u32data));
         break;
       default:
-        DEBUGASSERT(0);
+byte_read:
+        {
+          FAR char *d = dst;
+          int i;
+          for (i = 0; i < length; i++)
+            {
+              d[i] = metal_io_read8(&vmdev->cfg_io, read_offset + i);
+            }
+        }
     }
 }
 
