@@ -136,7 +136,7 @@
 #define IMXRT_IRQ_SRC          (IMXRT_IRQ_EXTINT + 98)  /* SRC interrupt */
 #define IMXRT_IRQ_RESERVED99   (IMXRT_IRQ_EXTINT + 99)  /* Reserved */
 #define IMXRT_IRQ_GPT1         (IMXRT_IRQ_EXTINT + 100) /* GPT1 interrupt */
-#define IMXRT_IRQ_GPT2         (IMXRT_IRQ_EXTINT + 101) /*  GPT2 interrupt */
+#define IMXRT_IRQ_GPT2         (IMXRT_IRQ_EXTINT + 101) /* GPT2 interrupt */
 #define IMXRT_IRQ_FLEXPWM1_0   (IMXRT_IRQ_EXTINT + 102) /* FLEXPWM1 capture/compare/reload 0 interrupt */
 #define IMXRT_IRQ_FLEXPWM1_1   (IMXRT_IRQ_EXTINT + 103) /* FLEXPWM1 capture/compare/reload 1 interrupt */
 #define IMXRT_IRQ_FLEXPWM1_2   (IMXRT_IRQ_EXTINT + 104) /* FLEXPWM1 capture/compare/reload 2 interrupt */

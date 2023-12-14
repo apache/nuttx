@@ -1258,7 +1258,7 @@ static int wlan_ioctl(struct net_driver_s *dev,
 
   return ret;
 }
-#endif  /* CONFIG_NETDEV_IOCTL */
+#endif /* CONFIG_NETDEV_IOCTL */
 
 /****************************************************************************
  * Name: esp32s3_net_initialize
@@ -1595,4 +1595,4 @@ int esp32s3_wlan_softap_initialize(void)
 }
 #endif /* ESP32S3_WLAN_HAS_SOFTAP */
 
-#endif  /* CONFIG_ESP32S3_WIFI */
+#endif /* CONFIG_ESP32S3_WIFI */

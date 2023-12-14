@@ -463,4 +463,4 @@
 #define LEBR_PWMHFEN            (1 << 18) /* Bit 17: PWMH Falling Edge Enable */
 #define LEBR_PWMHREN            (1 << 19) /* Bit 18: PWMH Rising Edge Enable */
 
-#endif  /* CONFIG_SAMV7_PWM */
+#endif /* CONFIG_SAMV7_PWM */

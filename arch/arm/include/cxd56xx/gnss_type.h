@@ -223,7 +223,7 @@ extern "C"
 
 /* GNSS positionig data elements */
 
-/*  Day (UTC) */
+/* Day (UTC) */
 
 struct cxd56_gnss_date_s
 {

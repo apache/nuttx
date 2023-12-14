@@ -93,7 +93,7 @@
 #define KINETIS_IRQ_CAN1ERR  (KINETIS_IRQ_FIRST + 39)  /* 39: CAN1 Error */
 #define KINETIS_IRQ_CAN1TW   (KINETIS_IRQ_FIRST + 40)  /* 40: CAN1 Transmit Warning */
 #define KINETIS_IRQ_CAN1RW   (KINETIS_IRQ_FIRST + 41)  /* 41: CAN1 Receive Warning */
-#define KINETIS_IRQ_CAN1WU   (KINETIS_IRQ_FIRST + 42)  /*  42: CAN1 Wake UP */
+#define KINETIS_IRQ_CAN1WU   (KINETIS_IRQ_FIRST + 42)  /* 42: CAN1 Wake UP */
 #define KINETIS_IRQ_RESVD43  (KINETIS_IRQ_FIRST + 43)  /* 43: Reserved */
 #define KINETIS_IRQ_RESVD44  (KINETIS_IRQ_FIRST + 44)  /* 44: Reserved */
 #define KINETIS_IRQ_UART0S   (KINETIS_IRQ_FIRST + 45)  /* 45: UART0 status */

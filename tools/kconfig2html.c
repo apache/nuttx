@@ -196,7 +196,8 @@ static int g_menu_number;
 static int g_choice_number;
 static int g_toggle_number;
 
-static const char g_delimiters[] = " ,";
+static const char g_delimiters[] =
+" ,";
 
 static struct reserved_s g_reserved[] =
 {
@@ -225,7 +226,7 @@ static struct reserved_s g_reserved[] =
   {TOKEN_SOURCE,     "source"},
   {TOKEN_IF,         "if"},
   {TOKEN_ENDIF,      "endif"},
-  {TOKEN_NOTRESERVED, NULL}   /* Terminates list */
+  {TOKEN_NOTRESERVED, NULL}
 };
 
 /****************************************************************************
@@ -898,7 +899,7 @@ static char *get_token(void)
 
   if (*pbegin == '"')
     {
-      /*  Search for the trailing quotation mark */
+      /* Search for the trailing quotation mark */
 
       pend = findchar(pbegin + 1, '"');
 
@@ -1869,7 +1870,8 @@ static inline char *process_config(FILE *stream, const char *varname,
 
   if (config.c_select.s_nvar > 0)
     {
-      outfunc("  <li><i>Selects</i>: <a href=\"#CONFIG_%s\"><code>CONFIG_%s</code></a>",
+      outfunc("  <li><i>Selects</i>: <a href=\"#CONFIG_%s\">"
+              "<code>CONFIG_%s</code></a>",
               config.c_select.s_varname[0], config.c_select.s_varname[0]);
 
       for (i = 1; i < config.c_select.s_nvar; i++)
@@ -2168,14 +2170,16 @@ static inline char *process_menu(FILE *stream, const char *kconfigdir,
   paranum = get_paranum();
   if (menu.m_name)
     {
-      output("<li><a name=\"menu_%d_toc\"><a href=\"#menu_%d\">%s Menu: %s</a></a></li>\n",
+      output("<li><a name=\"menu_%d_toc\">"
+             "<a href=\"#menu_%d\">%s Menu: %s</a></a></li>\n",
              g_menu_number, g_menu_number, paranum, menu.m_name);
       body("\n<h1><a name=\"menu_%d\">%s Menu: %s</a></h1>\n",
            g_menu_number, paranum, menu.m_name);
     }
   else
     {
-      output("<li><a name=\"menu_%d_toc\"><a href=\"#menu_%d\">%s Menu</a></a></li>\n",
+      output("<li><a name=\"menu_%d_toc\">"
+             "<a href=\"#menu_%d\">%s Menu</a></a></li>\n",
              g_menu_number, g_menu_number, paranum);
       body("\n<h1><a name=\"menu_%d\">%s Menu</a></h1>\n",
              g_menu_number, paranum);
@@ -2186,10 +2190,13 @@ static inline char *process_menu(FILE *stream, const char *kconfigdir,
    */
 
 #ifdef USE_JQUERY
-  output("<a id=\"link_%d\" href=\"#menu_%d_toc\" onclick=\"toggle('toggle_%d', 'link_%d')\">Expand</a>\n",
+  output("<a id=\"link_%d\" "
+         "href=\"#menu_%d_toc\" onclick=\"toggle('toggle_%d', 'link_%d')\">"
+         "Expand</a>\n",
          g_menu_number, g_toggle_number, g_toggle_number);
 #else
-  output("<a href=\"#menu_%d_toc\" onclick=\"toggle('toggle_%d', this)\">Expand</a>\n",
+  output("<a href=\"#menu_%d_toc\" onclick=\"toggle('toggle_%d', this)\">"
+         "Expand</a>\n",
          g_menu_number, g_toggle_number);
 #endif
   output("<ul id=\"toggle_%d\"  style=\"display:none\">\n",
@@ -2293,17 +2300,20 @@ static char *parse_kconfigfile(FILE *stream, const char *kconfigdir,
 
                               *appsdir = '\0';
                               asprintf(&dirpath, "%s/%s%s%s",
-                                       g_kconfigroot, subdir, g_appsdir, tmp);
+                                       g_kconfigroot, subdir,
+                                       g_appsdir, tmp);
                             }
                           else
                             {
-                              asprintf(&dirpath, "%s/%s", g_kconfigroot, subdir);
+                              asprintf(&dirpath, "%s/%s",
+                                       g_kconfigroot, subdir);
                             }
                         }
 
                       configname = strdup(configname);
 
-                      debug("parse_kconfigfile: Recursing for TOKEN_SOURCE\n");
+                      debug("parse_kconfigfile: "
+                            "Recursing for TOKEN_SOURCE\n");
                       debug("  source:      %s\n", source);
                       debug("  subdir:      %s\n", subdir);
                       debug("  dirpath:     %s\n", dirpath);
@@ -2317,8 +2327,8 @@ static char *parse_kconfigfile(FILE *stream, const char *kconfigdir,
                       free(configname);
                     }
 
-                  /* Set the token string to NULL to indicate that we need to read
-                   * the next line
+                  /* Set the token string to NULL to indicate that
+                   * we need to read the next line
                    */
 
                   token = NULL;
@@ -2371,8 +2381,8 @@ static char *parse_kconfigfile(FILE *stream, const char *kconfigdir,
               case TOKEN_ENDMENU:
                 {
                   /* Reduce table of contents indentation level.  NOTE that
-                   * this also terminates the toggle block that began with the
-                   * matching <ul>
+                   * this also terminates the toggle block that
+                   * began with the matching <ul>
                    */
 
                   output("</ul>\n");
@@ -2588,14 +2598,16 @@ int main(int argc, char **argv, char **envp)
   output("<table width =\"100%%\">\n");
   output("<tr align=\"center\" bgcolor=\"#e4e4e4\">\n");
   output("<td>\n");
-  output("<h1><big><font color=\"#3c34ec\"><i>NuttX Configuration Variables</i></font></big></h1>\n");
+  output("<h1><big><font color=\"#3c34ec\">"
+         "<i>NuttX Configuration Variables</i></font></big></h1>\n");
   output("<p>Last Updated: %s</p>\n", g_scratch);
   output("</td>\n");
   output("</tr>\n");
   output("</table>\n");
 
 #ifdef USE_JQUERY
-  output("<script src=\"http://code.jquery.com/jquery-1.9.1.js\"></script>\n");
+  output("<script src=\"http://code.jquery.com/jquery-1.9.1.js\">"
+         "</script>\n");
   output("<script type=\"text/javascript\">\n");
   output("function toggle(list_id, link_id) {\n");
   output("  var list = $('#' + list_id);\n");
@@ -2661,24 +2673,39 @@ int main(int argc, char **argv, char **envp)
   body("<p>\n");
   body("  <b>Overview</b>.\n");
   body("  The NuttX RTOS is highly configurable.\n");
-  body("  The NuttX configuration files are maintained using the <a href=\"https://bitbucket.org/nuttx/tools/src/master/kconfig-frontends\">kconfig-frontends</a> tool.\n");
-  body("  That configuration tool uses <code>Kconfig</code> files that can be found through the NuttX source tree.\n");
-  body("  Each <code>Kconfig</code> files contains declarations of configuration variables.\n");
-  body("  Each configuration variable provides one configuration option for the NuttX RTOS.\n");
+  body("  The NuttX configuration files are maintained using the "
+       "kconfig-frontends</a> tool.\n");
+  body("  That configuration tool uses <code>Kconfig</code> "
+       "files that can be found through the NuttX source tree.\n");
+  body("  Each <code>Kconfig</code> files contains "
+       "declarations of configuration variables.\n");
+  body("  Each configuration variable provides one configuration "
+       "option for the NuttX RTOS.\n");
   body("  This configurable options are described in this document.\n");
   body("</p>\n");
   body("<p>\n");
   body("  <b>Main Menu</b>.\n");
-  body("  The normal way to start the NuttX configuration is to enter this command line from the NuttX build directory: <code>make menuconfig</code>.\n");
-  body("  Note that NuttX must first be configured <i>before</i> this command so that the configuration file (<code>.config</code>) is present in the top-level build directory.\n");
-  body("  The main menu is the name give to the opening menu display after this command is executed.\n");
+  body("  The normal way to start the NuttX configuration is to enter "
+       "this command line from the NuttX build directory: "
+       "<code>make menuconfig</code>.\n");
+  body("  Note that NuttX must first be configured <i>before</i> "
+       "this command so that the configuration file (<code>.config</code>) "
+       "is present in the top-level build directory.\n");
+  body("  The main menu is the name give to the opening menu display "
+       "after this command is executed.\n");
   body("</p>\n");
   body("<p>\n");
   body("  <b>Maintenance Note</b>.\n");
-  body("  This documentation was auto-generated using the <a href=\"https://bitbucket.org/nuttx/nuttx/src/master/tools/kconfig2html.c\">kconfig2html</a> tool\n");
-  body("  That tool analyzes the NuttX <code>Kconfig</code> files and generates this HTML document.\n");
+  body("  This documentation was auto-generated using the "
+       "kconfig2html tool\n");
+  body("  That tool analyzes the NuttX <code>Kconfig</code> "
+       "files and generates this HTML document.\n");
   body("  This HTML document file should not be edited manually.\n");
-  body("  In order to make changes to this document, you should instead modify the <code>Kconfig</code> file(s) that were used to generated this document and then execute the <code>kconfig2html</code> again to regenerate the HTML document file.\n");
+  body("  In order to make changes to this document, "
+       "you should instead modify the <code>Kconfig</code> file(s) "
+       "that were used to generated this document and then execute the "
+       "<code>kconfig2html</code> again "
+       "to regenerate the HTML document file.\n");
   body("</p>\n");
 
   /* Process the Kconfig files through recursive descent */
@@ -2687,7 +2714,8 @@ int main(int argc, char **argv, char **envp)
 
   /* Terminate the table of contents */
 
-  output("<li><a href=\"#appendixa\">Appendix A: Hidden Configuration Variables</a></li>\n");
+  output("<li><a href=\"#appendixa\">"
+         "Appendix A: Hidden Configuration Variables</a></li>\n");
   output("</ul>\n");
 
   /* Close the HMTL body file and copy it to the output file */
@@ -2700,17 +2728,28 @@ int main(int argc, char **argv, char **envp)
   output("<table width =\"100%%\">\n");
   output("  <tr bgcolor=\"#e4e4e4\">\n");
   output("  <td>\n");
-  output("    <a name=\"appendixa\"><h1>Appendix A: Hidden Configuration Variables</h1></a>\n");
+  output("    <a name=\"appendixa\">"
+         "<h1>Appendix A: Hidden Configuration Variables</h1></a>\n");
   output("  </td>\n");
   output("  </tr>\n");
   output("</table>\n");
 
   output("<p>\n");
-  output("  This appendix holds internal configurations variables that are not visible to the user.\n");
-  output("  These settings are presented out-of-context because they cannot be directly controlled by the user.\n");
-  output("  Many of these settings are selected automatically and indirectly when other, visible configuration variables are selected.\n");
-  output("  One purpose of these hidden configuration variables is to control menuing in the kconfig-frontends configuration tool.\n");
-  output("  Many configuration variables with a form like <code>CONFIG_ARCH_HAVE_</code><i>feature</i>, for example, are used only to indicate that the selected architecture supports <i>feature</i> and so addition selection associated with <i>feature</i> will become accessible to the user.\n");
+  output("  This appendix holds internal configurations variables that "
+         "are not visible to the user.\n");
+  output("  These settings are presented out-of-context because "
+         "they cannot be directly controlled by the user.\n");
+  output("  Many of these settings are selected automatically and "
+         "indirectly when other, visible configuration variables "
+         "are selected.\n");
+  output("  One purpose of these hidden configuration variables "
+         "is to control menuing in the kconfig-frontends "
+         "configuration tool.\n");
+  output("  Many configuration variables with a form like "
+         "<code>CONFIG_ARCH_HAVE_</code><i>feature</i>, for example, "
+         "are used only to indicate that the selected architecture supports "
+         "<i>feature</i> and so addition selection associated with "
+         "<i>feature</i> will become accessible to the user.\n");
   output("</p>\n");
   output("<ul>\n");
 

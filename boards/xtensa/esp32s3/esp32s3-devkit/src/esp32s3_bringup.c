@@ -316,7 +316,7 @@ int esp32s3_bringup(void)
              CONFIG_ESP32S3_I2S1, ret);
     }
 
-#endif  /* CONFIG_ESP32S3_I2S1 */
+#endif /* CONFIG_ESP32S3_I2S1 */
 
 #endif /* CONFIG_ESP32S3_I2S */
 

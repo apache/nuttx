@@ -101,9 +101,9 @@ static const struct gpio_operations_s gpint_ops =
 #if (BOARD_NGPIOIN > 0)
 static const uint32_t g_gpioinputs[BOARD_NGPIOIN] =
     {
-#if 0      
+#if 0
       GPIO_IN1,
-#endif        
+#endif
 };
 
 static struct at32gpio_dev_s g_gpin[BOARD_NGPIOIN];
