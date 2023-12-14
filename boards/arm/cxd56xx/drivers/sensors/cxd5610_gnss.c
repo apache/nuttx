@@ -46,11 +46,11 @@
 
 #ifndef MIN
 #  define MIN(a,b)      (((a) < (b)) ? (a) : (b))
-#endif  /* MIN */
+#endif /* MIN */
 
 #ifndef MAX
 #  define MAX(a,b)      (((a) > (b)) ? (a) : (b))
-#endif  /* MAX */
+#endif /* MAX */
 
 /* Configurations */
 

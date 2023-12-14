@@ -120,7 +120,7 @@ void stm32_clockconfig(void)
   stm32_stdclockconfig();
 
 #  endif
-#endif  /* !CONFIG_STM32H7_BYPASS_CLOCKCONFIG */
+#endif /* !CONFIG_STM32H7_BYPASS_CLOCKCONFIG */
 
   /* Enable peripheral clocking */
 

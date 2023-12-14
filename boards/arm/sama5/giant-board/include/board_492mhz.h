@@ -204,4 +204,4 @@ extern "C"
 #endif
 
 #endif /* !__ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_SAMA5_GIANT_BOARD_INCLUDE_BOARD_492MHZ_H */
+#endif /* __BOARDS_ARM_SAMA5_GIANT_BOARD_INCLUDE_BOARD_492MHZ_H */

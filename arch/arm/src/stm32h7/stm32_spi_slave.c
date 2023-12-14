@@ -121,7 +121,7 @@
 #  if SPI123_KERNEL_CLOCK_FREQ > 200000000
 #    error Not supported SPI123 frequency
 #  endif
-#endif  /* SPI123 */
+#endif /* SPI123 */
 
 #if defined(CONFIG_STM32H7_SPI4_SLAVE) || defined(CONFIG_STM32H7_SPI5_SLAVE)
 #  if STM32_RCC_D2CCIP1R_SPI45SRC == RCC_D2CCIP1R_SPI45SEL_APB
@@ -132,7 +132,7 @@
 #  if SPI45_KERNEL_CLOCK_FREQ > 100000000
 #    error Not supported SPI45 frequency
 #  endif
-#endif  /* SPI45 */
+#endif /* SPI45 */
 
 #if defined(CONFIG_STM32H7_SPI6_SLAVE)
 #  if STM32_RCC_D3CCIPR_SPI6SRC == RCC_D3CCIPR_SPI6SEL_PCLK4
@@ -143,7 +143,7 @@
 #  if SPI6_KERNEL_CLOCK_FREQ > 100000000
 #    error Not supported SPI6 frequency
 #  endif
-#endif  /* SPI6 */
+#endif /* SPI6 */
 
 #if defined (CONFIG_STM32H7_SPI_SLAVE_QSIZE)
 #  if CONFIG_STM32H7_SPI_SLAVE_QSIZE > 65535

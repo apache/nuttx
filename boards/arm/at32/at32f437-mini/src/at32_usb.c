@@ -141,7 +141,7 @@ void at32_usbinitialize(void)
   at32_configgpio(GPIO_OTGFS_VBUS);
   at32_configgpio(GPIO_OTGFS_PWRON);
   at32_configgpio(GPIO_OTGFS_OVER);
-#endif  
+#endif
 
 #endif
 }
@@ -294,7 +294,7 @@ void at32_usbhost_vbusdrive(int iface, bool enable)
 
       at32_gpiowrite(GPIO_OTGFS_PWRON, true);
     }
-#endif    
+#endif
 }
 #endif
 
@@ -320,7 +320,7 @@ int at32_setup_overcurrent(xcpt_t handler, void *arg)
 {
 #ifdef CONFIG_AT32_OTGFS_VBUS_CONTROL  
   return at32_gpiosetevent(GPIO_OTGFS_OVER, true, true, true, handler, arg);
-#endif  
+#endif
 
   return 0;
 }

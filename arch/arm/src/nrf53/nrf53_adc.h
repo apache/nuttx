@@ -159,4 +159,4 @@ struct adc_dev_s *nrf53_adcinitialize(
     const struct nrf53_adc_channel_s *chan,
     int channels);
 
-#endif  /* __ARCH_ARM_SRC_NRF53_NRF53_ADC_H */
+#endif /* __ARCH_ARM_SRC_NRF53_NRF53_ADC_H */

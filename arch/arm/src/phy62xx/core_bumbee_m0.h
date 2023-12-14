@@ -102,4 +102,4 @@ extern "C"
 }
 #endif
 
-#endif  /* PHY_BUMBEE_M0 */
+#endif /* PHY_BUMBEE_M0 */

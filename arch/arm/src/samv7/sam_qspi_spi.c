@@ -741,7 +741,7 @@ static void qspi_spi_recvblock(struct spi_dev_s *dev, void *buffer,
 
   qspi_spi_exchange(dev, NULL, buffer, nwords);
 }
-#endif  /* CONFIG_SPI_EXCHANGE */
+#endif /* CONFIG_SPI_EXCHANGE */
 
 /****************************************************************************
  * Public Functions

@@ -282,7 +282,7 @@ struct cxd56_dev_s
   uint32_t                samplerate;       /* Sample rate */
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
   int16_t                 volume;           /* Output volume {0..63} */
-#endif  /* CONFIG_AUDIO_EXCLUDE_VOLUME */
+#endif /* CONFIG_AUDIO_EXCLUDE_VOLUME */
   uint8_t                 channels;         /* Number of channels (1..8) */
 
   uint16_t                mic_gain;         /* Mic gain */

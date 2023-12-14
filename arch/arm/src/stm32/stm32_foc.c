@@ -161,7 +161,7 @@
 #  if CONFIG_STM32_TIM1_MODE != 2
 #    error TIM1 must be configured in center-aligned mode 1
 #  endif
-#endif  /* CONFIG_STM32_FOC_FOC0 */
+#endif /* CONFIG_STM32_FOC_FOC0 */
 
 /* FOC1 always use TIMER8 for PWM */
 
@@ -901,7 +901,7 @@ static struct stm32_foc_adccmn_s g_stm32_foc_adccmn123 =
   .cntr = 0,
   .lock = NXMUTEX_INITIALIZER,
 };
-#  endif  /* CONFIG_STM32_HAVE_IP_ADC_V1 */
+#  endif /* CONFIG_STM32_HAVE_IP_ADC_V1 */
 
 #  ifdef CONFIG_STM32_HAVE_IP_ADC_V2
 #    if defined(CONFIG_STM32_HAVE_ADC1) || defined(CONFIG_STM32_HAVE_ADC2)
@@ -2457,7 +2457,7 @@ struct adc_dev_s *stm32_foc_adc_init(struct stm32_foc_adc_s *adc_cfg)
     {
       adc_chan[i] = adc_cfg->chan[i - 1];
     }
-#endif  /* CONFIG_STM32_FOC_G4_ADCCHAN0_WORKAROUND */
+#endif /* CONFIG_STM32_FOC_G4_ADCCHAN0_WORKAROUND */
 
   /* Get the ADC interface */
 

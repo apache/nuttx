@@ -109,4 +109,4 @@ int stm32_dac_setup(void)
   return OK;
 }
 
-#endif  /* CONFIG_DAC */
+#endif /* CONFIG_DAC */

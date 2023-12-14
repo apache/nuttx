@@ -40,4 +40,4 @@
 #define NVIC_SYSH_PRIORITY_MAX     0x00 /* Zero is maximum priority */
 #define NVIC_SYSH_PRIORITY_STEP    0x20 /* Three bits of interrupt pri used */
 
-#endif  /* __ARCH_ARM_INCLUDE_EFM32_CHIP_H */
+#endif /* __ARCH_ARM_INCLUDE_EFM32_CHIP_H */

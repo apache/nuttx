@@ -1924,7 +1924,7 @@ int main(int argc, char **argv, char **envp)
                    strncmp(&line[indent], "goto ", 5) == 0 ||
                    strncmp(&line[indent], "if ", 3) == 0 ||
                    strncmp(&line[indent], "return ", 7) == 0 ||
-    #if 0 /*  Doesn't follow pattern */
+    #if 0 /* Doesn't follow pattern */
                    strncmp(&line[indent], "switch ", 7) == 0 ||
     #endif
                    strncmp(&line[indent], "while ", 6) == 0)

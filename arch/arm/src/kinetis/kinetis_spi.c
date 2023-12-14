@@ -1275,7 +1275,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                 0);
 }
 
-#endif  /* CONFIG_KINETIS_SPI_DMA */
+#endif /* CONFIG_KINETIS_SPI_DMA */
 /****************************************************************************
  * Name: spi_sndblock
  *

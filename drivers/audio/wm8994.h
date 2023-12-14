@@ -1610,9 +1610,9 @@ struct wm8994_dev_s
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
 #ifndef CONFIG_AUDIO_EXCLUDE_BALANCE
   uint16_t                balance;          /* Current balance level (b16) */
-#endif  /* CONFIG_AUDIO_EXCLUDE_BALANCE */
+#endif /* CONFIG_AUDIO_EXCLUDE_BALANCE */
   uint8_t                 volume;           /* Current volume level {0..63} */
-#endif  /* CONFIG_AUDIO_EXCLUDE_VOLUME */
+#endif /* CONFIG_AUDIO_EXCLUDE_VOLUME */
   uint8_t                 nchannels;        /* Number of channels (1 or 2) */
   uint8_t                 bpsamp;           /* Bits per sample (8 or 16) */
   volatile uint8_t        inflight;         /* Number of audio buffers in-flight */
