@@ -73,6 +73,9 @@ MEMORY
   metadata (RX) :        org = CONFIG_ESPRESSIF_APP_MCUBOOT_HEADER_SIZE, len = 0x20
   ROM (RX) :             org = ORIGIN(metadata) + LENGTH(metadata),
                          len = FLASH_SIZE - ORIGIN(ROM)
+#elif defined (CONFIG_ESPRESSIF_SIMPLE_BOOT)
+  ROM (RX) :             org = ORIGIN(ROM),
+                         len = FLASH_SIZE - ORIGIN(ROM)
 #endif
 
   /* Below values assume the flash cache is on, and have the blocks this

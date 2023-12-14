@@ -15,7 +15,7 @@ config ESPRESSIF_ESP32C3
 	select ARCH_RV_ISA_M
 	select ARCH_RV_ISA_C
 	select ARCH_VECNOTIRQ
-	select ARCH_HAVE_BOOTLOADER
+	select ARCH_HAVE_BOOTLOADER if !ESPRESSIF_SIMPLE_BOOT
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_RESET
 	select ARCH_HAVE_RNG
@@ -121,6 +121,10 @@ config ESPRESSIF_FLASH_DETECT
 	---help---
 		Auto detect flash size when flashing.
 
+config ESPRESSIF_NUM_CPUS
+	int
+	default 1 if ESPRESSIF_ESP32C3 || ESPRESSIF_ESP32C6 || ESPRESSIF_ESP32H2
+
 choice ESPRESSIF_CPU_FREQ
 	prompt "CPU frequency"
 	default ESPRESSIF_CPU_FREQ_160 if ESPRESSIF_ESP32C3 || ESPRESSIF_ESP32C6
@@ -213,13 +217,31 @@ config ESPRESSIF_SOC_RTC_MEM_SUPPORTED
 
 menu "Bootloader and Image Configuration"
 
+choice
+	prompt "Bootloader type"
+	default ESPRESSIF_SIMPLE_BOOT
+	depends on ESPRESSIF_ESP32C3
+	---help---
+		Bootloader type
+
 config ESPRESSIF_BOOTLOADER_MCUBOOT
 	bool "Enable Native MCUboot"
 	select ESPRESSIF_HAVE_OTA_PARTITION
 	depends on ESPRESSIF_ESP32C3
-	default n
 	---help---
 		Enables the Espressif port of MCUboot bootloader.
+
+config ESPRESSIF_SIMPLE_BOOT
+	bool "Enable Simple Boot mode"
+	depends on ESPRESSIF_ESP32C3
+	---help---
+		Enables the Simple Boot, a method of booting that doesn't depend on a
+		2nd stage bootloader. Please note that some of the ESP-IDF bootloader
+		features are not available using direct boot, such as partition tables
+		and OTA. However, most of these features are implemented in NuttX and
+		MCUboot.
+
+endchoice
 
 config ESPRESSIF_MCUBOOT_VERSION
 	string "MCUboot version"
@@ -259,7 +281,7 @@ config ESPRESSIF_APP_MCUBOOT_HEADER_SIZE
 config ESPRESSIF_PARTITION_TABLE_OFFSET
 	hex "Partition Table offset"
 	default 0x8000
-	depends on !ESPRESSIF_BOOTLOADER_MCUBOOT
+	depends on !ESPRESSIF_BOOTLOADER_MCUBOOT && !ESPRESSIF_SIMPLE_BOOT
 
 config ESPRESSIF_HAVE_OTA_PARTITION
 	bool

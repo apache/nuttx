@@ -35,6 +35,8 @@ ARCHSCRIPT += $(call FINDSCRIPT,$(CHIP_SERIES)_flat_memory.ld)
 
 ifeq ($(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT),y)
   ARCHSCRIPT += $(call FINDSCRIPT,$(CHIP_SERIES)_mcuboot_sections.ld)
+else ifeq ($(CONFIG_ESPRESSIF_SIMPLE_BOOT),y)
+  ARCHSCRIPT += $(call FINDSCRIPT,$(CHIP_SERIES)_simple_boot_sections.ld)
 else
   ARCHSCRIPT += $(call FINDSCRIPT,$(CHIP_SERIES)_legacy_sections.ld)
 endif
