@@ -110,7 +110,6 @@ struct ramlog_dev_s
 static void    ramlog_readnotify(FAR struct ramlog_dev_s *priv);
 #endif
 static void    ramlog_pollnotify(FAR struct ramlog_dev_s *priv);
-static void    ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch);
 
 /* Character driver methods */
 
@@ -236,48 +235,36 @@ static void ramlog_pollnotify(FAR struct ramlog_dev_s *priv)
 }
 
 /****************************************************************************
- * Name: ramlog_addchar
+ * Name: ramlog_copybuf
  ****************************************************************************/
 
-static void ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch)
+static void ramlog_copybuf(FAR struct ramlog_dev_s *priv,
+                          FAR const char *buffer, size_t len)
 {
   FAR struct ramlog_header_s *header = priv->rl_header;
+  FAR char *buf = header->rl_buffer;
+  uint32_t offset;
+  uint32_t tail;
 
-#ifdef CONFIG_RAMLOG_SYSLOG
-  if (priv == &g_sysdev && header->rl_magic != RAMLOG_MAGIC_NUMBER)
-    {
-      memset(header, 0, sizeof(g_sysbuffer));
-      header->rl_magic = RAMLOG_MAGIC_NUMBER;
-    }
-#endif
-
-#ifdef CONFIG_RAMLOG_CRLF
-  /* Ignore carriage returns */
-
-  if (ch == '\r')
+  if (len <= 0)
     {
       return;
     }
 
-  /* Pre-pend a carriage before a linefeed */
+  offset = header->rl_head % priv->rl_bufsize;
+  tail = priv->rl_bufsize - offset;
 
-  if (ch == '\n')
+  if (len > tail)
     {
-      ch = '\r';
+      memcpy(&buf[offset], buffer, tail);
+      memcpy(buf, buffer + tail, len - tail);
+    }
+  else
+    {
+      memcpy(&buf[offset], buffer, len);
     }
 
-again:
-#endif
-
-  header->rl_buffer[header->rl_head++ % priv->rl_bufsize] = ch;
-
-#ifdef CONFIG_RAMLOG_CRLF
-  if (ch == '\r')
-    {
-      ch = '\n';
-      goto again;
-    }
-#endif
+  header->rl_head += len;
 }
 
 /****************************************************************************
@@ -287,28 +274,68 @@ again:
 static ssize_t ramlog_addbuf(FAR struct ramlog_dev_s *priv,
                              FAR const char *buffer, size_t len)
 {
+#if defined(CONFIG_RAMLOG_SYSLOG) || defined(CONFIG_RAMLOG_CRLF)
+  FAR struct ramlog_header_s *header = priv->rl_header;
+#endif
+  size_t buflen = len;
   irqstate_t flags;
-  size_t nwritten;
-  char ch;
+#ifdef CONFIG_RAMLOG_CRLF
+  FAR const char *end;
+  FAR const char *pos;
+  FAR char *buf;
+#endif
 
   /* Disable interrupts (in case we are NOT called from interrupt handler) */
 
   flags = enter_critical_section();
 
-  for (nwritten = 0; nwritten < len; nwritten++)
+#ifdef CONFIG_RAMLOG_SYSLOG
+  if (header->rl_magic != RAMLOG_MAGIC_NUMBER && priv == &g_sysdev)
     {
-      /* Get the next character to output */
-
-      ch = buffer[nwritten];
-
-      /* Then output the character */
-
-      ramlog_addchar(priv, ch);
+      memset(header, 0, sizeof(g_sysbuffer));
+      header->rl_magic = RAMLOG_MAGIC_NUMBER;
     }
+#endif
+
+  if (buflen > priv->rl_bufsize)
+    {
+      buffer += buflen - priv->rl_bufsize;
+      buflen = priv->rl_bufsize;
+    }
+
+#ifdef CONFIG_RAMLOG_CRLF
+  buf = header->rl_buffer;
+  end = buffer + buflen;
+  pos = buffer;
+
+  do
+    {
+      /* Ignore carriage returns */
+
+      if (*pos == '\r' || *pos == '\n')
+        {
+          ramlog_copybuf(priv, buffer, pos - buffer);
+          buffer = pos + 1;
+        }
+
+      /* Pre-pend a carriage before a linefeed */
+
+      if (*pos == '\n')
+        {
+          buf[header->rl_head++ % priv->rl_bufsize] = '\r';
+          buf[header->rl_head++ % priv->rl_bufsize] = '\n';
+        }
+    }
+  while (++pos != end);
+
+  ramlog_copybuf(priv, buffer, pos - buffer);
+#else
+  ramlog_copybuf(priv, buffer, buflen);
+#endif
 
   /* Was anything written? */
 
-  if (nwritten > 0)
+  if (len > 0)
     {
 #ifndef CONFIG_RAMLOG_NONBLOCKING
       /* Are there threads waiting for read data? */
@@ -341,9 +368,10 @@ static ssize_t ramlog_file_read(FAR struct file *filep, FAR char *buffer,
   FAR struct ramlog_header_s *header = priv->rl_header;
   FAR struct ramlog_user_s *upriv = filep->f_priv;
   irqstate_t flags;
-  uint32_t tail;
+  uint32_t ncopy;
   ssize_t nread;
-  char ch;
+  uint32_t tail;
+  uint32_t pos;
 
   /* If the circular buffer is empty, then wait for something to be written
    * to it.  This function may NOT be called from an interrupt handler.
@@ -354,15 +382,6 @@ static ssize_t ramlog_file_read(FAR struct file *filep, FAR char *buffer,
   /* Get exclusive access to the rl_tail index */
 
   flags = enter_critical_section();
-
-  /* Determine whether the read pointer is overwritten */
-
-  if (header->rl_head - upriv->rl_tail > priv->rl_bufsize)
-    {
-      upriv->rl_tail = header->rl_head - priv->rl_bufsize;
-    }
-
-  tail = upriv->rl_tail % priv->rl_bufsize;
 
   /* Loop until something is read */
 
@@ -423,24 +442,38 @@ static ssize_t ramlog_file_read(FAR struct file *filep, FAR char *buffer,
         }
       else
         {
+          /* Determine whether the read pointer is overwritten */
+
+          if (header->rl_head - upriv->rl_tail > priv->rl_bufsize)
+            {
+              upriv->rl_tail = header->rl_head - priv->rl_bufsize;
+            }
+
           /* The circular buffer is not empty, get the next byte from the
            * tail index.
            */
 
-          ch = header->rl_buffer[tail];
+          pos = upriv->rl_tail % priv->rl_bufsize;
+          ncopy = header->rl_head - upriv->rl_tail;
+          tail = priv->rl_bufsize - pos;
 
-          /* Increment the tail index. */
-
-          upriv->rl_tail++;
-          if (++tail >= priv->rl_bufsize)
+          if (ncopy > len - nread)
             {
-              tail = 0;
+              ncopy = len - nread;
             }
 
-          /* Add the character to the user buffer. */
+          if (ncopy > tail)
+            {
+              memcpy(&buffer[nread], &header->rl_buffer[pos], tail);
+              memcpy(&buffer[nread + tail], header->rl_buffer, ncopy - tail);
+            }
+          else
+            {
+              memcpy(&buffer[nread], &header->rl_buffer[pos], ncopy);
+            }
 
-          buffer[nread] = ch;
-          nread++;
+          upriv->rl_tail += ncopy;
+          nread += ncopy;
         }
     }
 
@@ -687,26 +720,13 @@ void ramlog_syslog_register(void)
 #ifdef CONFIG_RAMLOG_SYSLOG
 int ramlog_putc(FAR struct syslog_channel_s *channel, int ch)
 {
-  FAR struct ramlog_dev_s *priv = &g_sysdev;
-  irqstate_t flags;
+  char cch = ch;
 
   UNUSED(channel);
 
   /* Add the character to the RAMLOG */
 
-  flags = enter_critical_section();
-  ramlog_addchar(priv, ch);
-
-#ifndef CONFIG_RAMLOG_NONBLOCKING
-  /* Are there threads waiting for read data? */
-
-  ramlog_readnotify(priv);
-#endif
-
-  /* Notify all poll/select waiters that they can read from the FIFO */
-
-  ramlog_pollnotify(priv);
-  leave_critical_section(flags);
+  ramlog_addbuf(&g_sysdev, &cch, 1);
 
   /* Return the character added on success */
 
@@ -716,9 +736,7 @@ int ramlog_putc(FAR struct syslog_channel_s *channel, int ch)
 ssize_t ramlog_write(FAR struct syslog_channel_s *channel,
                      FAR const char *buffer, size_t buflen)
 {
-  FAR struct ramlog_dev_s *priv = &g_sysdev;
-
-  return ramlog_addbuf(priv, buffer, buflen);
+  return ramlog_addbuf(&g_sysdev, buffer, buflen);
 }
 #endif
 
