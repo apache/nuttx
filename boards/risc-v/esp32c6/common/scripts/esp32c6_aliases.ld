@@ -18,6 +18,9 @@
  *
  ****************************************************************************/
 
+cache_resume_icache = Cache_Resume_ICache;
+cache_suspend_icache = Cache_Suspend_ICache;
+
 #ifdef CONFIG_ESPRESSIF_BLE
 
 /* Lower-case aliases for BLE library symbols not compliant to nxstyle */

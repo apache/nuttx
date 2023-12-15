@@ -43,6 +43,12 @@ config ESPRESSIF_FLASH_2M
 config ESPRESSIF_FLASH_4M
 	bool "4 MB"
 
+config ESPRESSIF_FLASH_8M
+	bool "8 MB"
+
+config ESPRESSIF_FLASH_16M
+	bool "16 MB"
+
 endchoice # ESPRESSIF_FLASH
 
 config ESPRESSIF_FLASH_DETECT
@@ -281,6 +287,10 @@ config ESPRESSIF_LEDC
 	select PWM
 	select ARCH_HAVE_PWM_MULTICHAN
 
+config ESPRESSIF_SPIFLASH
+	bool "SPI Flash"
+	default n
+
 config ESPRESSIF_HR_TIMER
 	bool
 	default RTC_DRIVER
@@ -408,6 +418,35 @@ config ESPRESSIF_FLASH_MODE_QOUT
 
 endchoice # ESPRESSIF_FLASH_MODE
 
+if ESPRESSIF_SPIFLASH
+comment "General storage MTD configuration"
+
+config ESPRESSIF_MTD
+	bool "MTD driver"
+	default y
+	select MTD
+	select MTD_BYTE_WRITE
+	select MTD_PARTITION
+	---help---
+		Initialize an MTD driver for the SPI Flash, which will
+		add an entry at /dev for application access from userspace.
+
+config ESPRESSIF_SPIFLASH_MTD_BLKSIZE
+	int "Storage MTD block size"
+	default 64
+	depends on ESPRESSIF_MTD
+	---help---
+		Block size for MTD driver in kB. This size must be divisible by 2
+
+config ESPRESSIF_STORAGE_MTD_DEBUG
+	bool "Storage MTD Debug"
+	default n
+	depends on ESPRESSIF_MTD && DEBUG_FS_INFO
+	---help---
+		If this option is enabled, Storage MTD driver read and write functions
+		will output input parameters and return values (if applicable).
+endif # ESPRESSIF_SPIFLASH
+
 choice ESPRESSIF_FLASH_FREQ
 	prompt "SPI Flash frequency"
 	default ESPRESSIF_FLASH_FREQ_80M if ESPRESSIF_ESP32C3 || ESPRESSIF_ESP32C6
@@ -436,6 +475,29 @@ config ESPRESSIF_FLASH_FREQ_20M
 	depends on ESPRESSIF_ESP32C3 || ESPRESSIF_ESP32C6
 
 endchoice # ESPRESSIF_FLASH_FREQ
+
+config ESPRESSIF_SPI_FLASH_USE_32BIT_ADDRESS
+	bool "SPI flash uses 32-bit address"
+	default n
+	---help---
+		SPI flash driver in ROM only support 24-bit address access,
+		if select the option, it will force to use source code instead
+		of functions in ROM, so that SPI flash driver can access full
+		32-bit address.
+
+config ESPRESSIF_STORAGE_MTD_OFFSET
+	hex "Storage MTD base address in SPI Flash"
+	default 0x180000
+	depends on ESPRESSIF_MTD
+	---help---
+		MTD base address in SPI Flash.
+
+config ESPRESSIF_STORAGE_MTD_SIZE
+	hex "Storage MTD size in SPI Flash"
+	default 0x100000
+	depends on ESPRESSIF_MTD
+	---help---
+		MTD size in SPI Flash.
 
 endmenu # SPI Flash Configuration
 

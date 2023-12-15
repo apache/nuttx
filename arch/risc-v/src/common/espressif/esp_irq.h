@@ -142,6 +142,38 @@ int esp_setup_irq(int source, irq_priority_t priority, irq_trigger_t type);
 
 void esp_teardown_irq(int source, int cpuint);
 
+/****************************************************************************
+ * Name: esp_intr_noniram_disable
+ *
+ * Description:
+ *   Disable interrupts that aren't specifically marked as running from IRAM.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp_intr_noniram_disable(void);
+
+/****************************************************************************
+ * Name: esp_intr_noniram_enable
+ *
+ * Description:
+ *   Enable interrupts that aren't specifically marked as running from IRAM.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp_intr_noniram_enable(void);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
