@@ -3627,17 +3627,6 @@ int mpfs_ethinitialize(int intf)
 
   mpfs_read_dsn(&priv->dev.d_mac.ether.ether_addr_octet[1], 5);
 
-  /* MPU hack for ETH DMA if not enabled by bootloader */
-
-#ifdef CONFIG_MPFS_MPU_DMA_ENABLE
-#  ifdef CONFIG_MPFS_ETHMAC_0
-  putreg64(0x1f00000fffffffff, MPFS_PMPCFG_ETH0_0);
-#  endif
-#  ifdef CONFIG_MPFS_ETHMAC_1
-  putreg64(0x1f00000fffffffff, MPFS_PMPCFG_ETH1_0);
-#  endif
-#endif
-
   /* Allocate buffers */
 
   ret = mpfs_buffer_initialize(priv, 0);
