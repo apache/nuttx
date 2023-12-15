@@ -38,7 +38,7 @@ $(ETCSRC): $(addprefix $(BOARD_DIR)$(DELIM)src$(DELIM),$(RCRAWS)) $(RCOBJS)
 	$(Q) genromfs -f romfs.img -d $(ETCDIR)$(DELIM)$(CONFIG_NSH_ROMFSMOUNTPT) -V "NSHInitVol"
 	$(Q) echo "#include <nuttx/compiler.h>" > $@
 	$(Q) xxd -i romfs.img | sed -e "s/^unsigned char/const unsigned char aligned_data(4)/g" >> $@
-	$(Q) rm romfs.img
+	$(Q) rm -rf romfs.img $(ETCDIR)$(DELIM)
 endif
 
 ifneq ($(ZDSVERSION),)
@@ -87,6 +87,7 @@ $(CXXOBJS) $(LINKOBJS): %$(OBJEXT): %.cxx
 
 libboard$(LIBEXT): $(OBJS) $(CXXOBJS)
 	$(call ARCHIVE, $@, $(OBJS) $(CXXOBJS))
+	$(Q) rm -f $(ETCSRC)
 
 .depend: Makefile $(SRCS) $(CXXSRCS) $(RCSRCS) $(TOPDIR)$(DELIM).config
 ifneq ($(ZDSVERSION),)
