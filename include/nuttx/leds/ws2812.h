@@ -52,6 +52,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Although the LED might be RGB-only, the LED data is packed in a 32-bit
+ * long variable and, then, this is the default size of a LED pixel.
+ */
+
+#define WS2812_RW_PIXEL_SIZE  4
+
 #ifdef __cplusplus
 #define EXTERN extern "C"
 extern "C"

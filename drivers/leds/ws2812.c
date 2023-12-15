@@ -55,15 +55,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef WS2812_HAS_WHITE
-#  define WS2812_RW_PIXEL_SIZE  4
-#else 
-#  define WS2812_RW_PIXEL_SIZE  3
-#endif
-
-#ifdef CONFIG_WS2812_NON_SPI_DRIVER
-
-#else /* CONFIG_WS2812_NON_SPI_DRIVER */
+#ifndef CONFIG_WS2812_NON_SPI_DRIVER
 
 /* In order to meet the signaling timing requirements, the waveforms required
  * to represent a 0/1 symbol are created by specific SPI bytes defined here.
