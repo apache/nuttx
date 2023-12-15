@@ -93,6 +93,33 @@
 #  define OUTPUT_FUNCTION_5 (OUTPUT_FUNCTION | FUNCTION_5)
 #  define OUTPUT_FUNCTION_6 (OUTPUT_FUNCTION | FUNCTION_6)
 
+/* Interrupt type used with esp32s2_gpioirqenable() */
+
+#define DISABLED          0x00
+#define RISING            0x01
+#define FALLING           0x02
+#define CHANGE            0x03
+#define ONLOW             0x04
+#define ONHIGH            0x05
+
+/* Check whether it is a valid GPIO number */
+
+#define GPIO_IS_VALID_GPIO(gpio_num)   ((gpio_num >= 0) && \
+                                        (((1ULL << (gpio_num)) & \
+                                         SOC_GPIO_VALID_GPIO_MASK) != 0))
+
+/* Check whether it can be a valid GPIO number of output mode */
+
+#define GPIO_IS_VALID_OUTPUT_GPIO(gpio_num) \
+  ((gpio_num >= 0) && \
+      (((1ULL << (gpio_num)) & SOC_GPIO_VALID_OUTPUT_GPIO_MASK) != 0))
+
+/* Check whether it can be a valid digital I/O pad */
+
+#define GPIO_IS_VALID_DIGITAL_IO_PAD(gpio_num) \
+  ((gpio_num >= 0) && \
+    (((1ULL << (gpio_num)) & SOC_GPIO_VALID_DIGITAL_IO_PAD_MASK) != 0))
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -102,16 +129,7 @@
 /* Must be big enough to hold the above encodings */
 
 typedef uint16_t gpio_pinattr_t;
-
-typedef enum gpio_intrtype_e
-{
-  GPIO_INTR_DISABLE    = 0,     /* Disable GPIO interrupt       */
-  GPIO_INTR_POSEDGE    = 1,     /* Rising edge                  */
-  GPIO_INTR_NEGEDGE    = 2,     /* Falling edge                 */
-  GPIO_INTR_ANYEDGE    = 3,     /* Both rising and falling edge */
-  GPIO_INTR_LOW_LEVEL  = 4,     /* Input low level trigger      */
-  GPIO_INTR_HIGH_LEVEL = 5      /* Input high level trigger     */
-} gpio_intrtype_t;
+typedef uint8_t gpio_intrtype_t;
 
 /****************************************************************************
  * Public Data

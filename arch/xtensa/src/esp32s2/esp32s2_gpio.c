@@ -34,6 +34,9 @@
 #include <nuttx/irq.h>
 
 #include "xtensa.h"
+
+#include "soc/soc_caps.h"
+
 #include "esp32s2_gpio.h"
 #include "esp32s2_irq.h"
 #include "hardware/esp32s2_gpio.h"
