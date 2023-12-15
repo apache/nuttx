@@ -925,13 +925,13 @@ static void initialize_frame_setting(FAR struct imgsensor_s *imgsensor,
 }
 
 static void initialize_streamresources(FAR capture_type_inf_t *type_inf,
-                                       FAR struct imgsensor_s *imgsensor)
+                                       FAR capture_mng_t *cmng)
 {
   memset(type_inf, 0, sizeof(capture_type_inf_t));
   type_inf->remaining_capnum = REMAINING_CAPNUM_INFINITY;
   nxmutex_init(&type_inf->lock_state);
   nxsem_init(&type_inf->wait_capture.dqbuf_wait_flg, 0, 0);
-  initialize_frame_setting(imgsensor, &type_inf->nr_fmt,
+  initialize_frame_setting(cmng->imgsensor, &type_inf->nr_fmt,
                            type_inf->fmt,
                            &type_inf->frame_interval);
   video_framebuff_init(&type_inf->bufinf);
@@ -1161,19 +1161,28 @@ static void initialize_scenes_parameter(FAR capture_mng_t *cmng)
 
 static void initialize_resources(FAR capture_mng_t *cmng)
 {
-  initialize_streamresources(&cmng->capture_inf, cmng->imgsensor);
-  initialize_streamresources(&cmng->still_inf, cmng->imgsensor);
+  initialize_streamresources(&cmng->capture_inf, cmng);
+  initialize_streamresources(&cmng->still_inf, cmng);
   initialize_scenes_parameter(cmng);
 }
 
-static void cleanup_streamresources(FAR capture_type_inf_t *type_inf)
+static void cleanup_streamresources(FAR capture_type_inf_t *type_inf,
+                                    FAR capture_mng_t *cmng)
 {
   video_framebuff_uninit(&type_inf->bufinf);
   nxsem_destroy(&type_inf->wait_capture.dqbuf_wait_flg);
   nxmutex_destroy(&type_inf->lock_state);
   if (type_inf->bufheap != NULL)
     {
-      kumm_free(type_inf->bufheap);
+      if (cmng->imgdata->mem_ops && cmng->imgdata->mem_ops->mem_free)
+        {
+          cmng->imgdata->mem_ops->mem_free(type_inf->bufheap);
+        }
+      else
+        {
+          kumm_free(type_inf->bufheap);
+        }
+
       type_inf->bufheap = NULL;
     }
 }
@@ -1222,8 +1231,8 @@ static void cleanup_resources(FAR capture_mng_t *cmng)
 
   /* Clean up resource */
 
-  cleanup_streamresources(&cmng->capture_inf);
-  cleanup_streamresources(&cmng->still_inf);
+  cleanup_streamresources(&cmng->capture_inf, cmng);
+  cleanup_streamresources(&cmng->still_inf, cmng);
   cleanup_scenes_parameter(cmng);
 }
 
@@ -2111,6 +2120,8 @@ static int capture_reqbufs(FAR struct v4l2_s *v4l2,
 {
   FAR capture_mng_t *cmng = (FAR capture_mng_t *)v4l2;
   FAR capture_type_inf_t *type_inf;
+  const imgdata_mem_ops_t *mem_ops = cmng->imgdata->mem_ops;
+
   irqstate_t flags;
   int ret = OK;
 
@@ -2147,11 +2158,27 @@ static int capture_reqbufs(FAR struct v4l2_s *v4l2,
         {
           if (type_inf->bufheap != NULL)
             {
-              kumm_free(type_inf->bufheap);
+              if (mem_ops && mem_ops->mem_free)
+                {
+                    mem_ops->mem_free(type_inf->bufheap);
+                }
+              else
+                {
+                  kumm_free(type_inf->bufheap);
+                }
             }
 
-          type_inf->bufheap = kumm_memalign(32,
-            reqbufs->count * get_bufsize(&type_inf->fmt[CAPTURE_FMT_MAIN]));
+          if (mem_ops && mem_ops->mem_malloc)
+            {
+              type_inf->bufheap = mem_ops->mem_malloc(32, reqbufs->count *
+                get_bufsize(&type_inf->fmt[CAPTURE_FMT_MAIN]));
+            }
+          else
+            {
+              type_inf->bufheap = kumm_memalign(32, reqbufs->count *
+                get_bufsize(&type_inf->fmt[CAPTURE_FMT_MAIN]));
+            }
+
           if (type_inf->bufheap == NULL)
             {
               ret = -ENOMEM;
