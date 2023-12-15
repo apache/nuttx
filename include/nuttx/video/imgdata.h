@@ -83,6 +83,14 @@ typedef struct imgdata_interval_s
   uint32_t denominator;
 } imgdata_interval_t;
 
+/* Structure for memory operations */
+
+typedef struct imgdata_mem_ops_s
+{
+  CODE void *(*mem_malloc)(uint32_t align_size, uint32_t size);
+  CODE void (*mem_free)(void *data);
+} imgdata_mem_ops_t;
+
 typedef int (*imgdata_capture_t)(uint8_t result, uint32_t size,
                                  FAR const struct timeval *ts,
                                  FAR void *arg);
@@ -121,6 +129,7 @@ struct imgdata_ops_s
 struct imgdata_s
 {
   FAR const struct imgdata_ops_s *ops;
+  FAR const struct imgdata_mem_ops_s *mem_ops;
 };
 
 #ifdef __cplusplus
