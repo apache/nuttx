@@ -21,6 +21,10 @@ config ARCH_CHIP_ESP32S2WROVER
 
 endchoice # ESP32-S2 Chip Selection
 
+config ESPRESSIF_CHIP_SERIES
+	string
+	default "esp32s2"
+
 choice ESP32S2_DEFAULT_CPU_FREQ
 	prompt "CPU Frequency"
 	default ESP32S2_DEFAULT_CPU_FREQ_240
@@ -190,6 +194,8 @@ config ESP32S2_RUN_IRAM
 		images that can fit entirely in IRAM.
 
 menu "ESP32-S2 Peripheral Selection"
+
+source "arch/xtensa/src/common/espressif/Kconfig"
 
 config ESP32S2_UART
 	bool
