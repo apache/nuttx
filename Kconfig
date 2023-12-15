@@ -1729,7 +1729,7 @@ endif # DEBUG_REGMAP
 config DEBUG_RMT
 	bool "RMT Debug Features"
 	default n
-	depends on ESP32_RMT
+	depends on RMT
 	---help---
 		Enable RMT debug features.
 

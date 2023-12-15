@@ -1,0 +1,7 @@
+config ESP_RMT
+	bool "Remote Control Module (RMT)"
+	default n
+	depends on RMT
+	---help---
+		Remote Control Module is currently used to control WS2812
+		RGB LED normally used on LED strips.
