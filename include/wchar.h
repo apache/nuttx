@@ -142,7 +142,8 @@ extern "C"
 wint_t            btowc(int);
 int               fwprintf(FILE *, FAR const wchar_t *, ...);
 int               fwscanf(FILE *, FAR const wchar_t *, ...);
-wint_t            fgetwc(FILE *);
+wint_t            fgetwc(FAR FILE *);
+wint_t            fgetwc_unlocked(FAR FILE *f);
 FAR wchar_t      *fgetws(wchar_t *, int, FILE *);
 wint_t            fputwc(wchar_t, FILE *);
 wint_t            fputwc_unlocked(wchar_t, FAR FILE *);

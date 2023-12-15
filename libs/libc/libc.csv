@@ -64,6 +64,8 @@
 "fgetc","stdio.h","defined(CONFIG_FILE_STREAM)","int","FAR FILE *"
 "fgetpos","stdio.h","defined(CONFIG_FILE_STREAM)","int","FAR FILE *","FAR fpos_t *"
 "fgets","stdio.h","defined(CONFIG_FILE_STREAM)","FAR char *","FAR char *","int","FAR FILE *"
+"fgetwc","wchar.h","defined(CONFIG_FILE_STREAM)","wint_t","FAR FILE *"
+"fgetwc_unlocked","wchar.h","defined(CONFIG_FILE_STREAM)","wint_t","FAR FILE *"
 "fileno","stdio.h","","int","FAR FILE *"
 "flockfile","stdio.h","!defined(CONFIG_FILE_STREAM)","void","FAR FILE *"
 "fnmatch","fnmatch.h","","int","FAR const char *","FAR const char *","int"
