@@ -174,7 +174,15 @@ static ssize_t thermal_procfs_write(FAR struct file *filep,
 {
   FAR struct thermal_procfs_s *p = filep->f_priv;
 
-  thermal_zone_enable(p->zdev, atoi(buffer) ? true : false);
+  if (!strncmp(buffer, "1", 1))
+    {
+      thermal_zone_enable(p->zdev, true);
+    }
+  else if (!strncmp(buffer, "0", 1))
+    {
+      thermal_zone_enable(p->zdev, false);
+    }
+
   return buflen;
 }
 
