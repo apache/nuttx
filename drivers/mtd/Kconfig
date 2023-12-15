@@ -195,6 +195,13 @@ config MTD_CONFIG_FAIL_SAFE
 		This replaces the drivers/mtd/mtd_config, which
 		is resilient to power loss.
 
+config MTD_WRITE_ALIGN_SIZE
+	int "align size [1,2,4,8,16] for per write operation"
+	default 1
+	depends on MTD_CONFIG_FAIL_SAFE
+	---help---
+		align size will be one of 1,2,4,8,16
+
 endif # MTD_CONFIG
 
 comment "MTD Device Drivers"
