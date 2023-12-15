@@ -102,6 +102,24 @@
 #define ONLOW_WE          0x0c
 #define ONHIGH_WE         0x0d
 
+/* Check whether it is a valid GPIO number */
+
+#define GPIO_IS_VALID_GPIO(gpio_num)   ((gpio_num >= 0) && \
+                                        (((1ULL << (gpio_num)) & \
+                                         SOC_GPIO_VALID_GPIO_MASK) != 0))
+
+/* Check whether it can be a valid GPIO number of output mode */
+
+#define GPIO_IS_VALID_OUTPUT_GPIO(gpio_num) \
+  ((gpio_num >= 0) && \
+      (((1ULL << (gpio_num)) & SOC_GPIO_VALID_OUTPUT_GPIO_MASK) != 0))
+
+/* Check whether it can be a valid digital I/O pad */
+
+#define GPIO_IS_VALID_DIGITAL_IO_PAD(gpio_num) \
+  ((gpio_num >= 0) && \
+    (((1ULL << (gpio_num)) & SOC_GPIO_VALID_DIGITAL_IO_PAD_MASK) != 0))
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
