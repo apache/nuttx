@@ -1718,7 +1718,7 @@ static void *mpfs_ep_allocbuffer(struct usbdev_ep_s *ep, uint16_t nbytes)
 {
   /* There is not special buffer allocation requirement */
 
-  return kumm_malloc(nbytes);
+  return kmm_malloc(nbytes);
 }
 #endif
 
@@ -1745,7 +1745,7 @@ static void mpfs_ep_freebuffer(struct usbdev_ep_s *ep, void *buf)
 {
   /* There is not special buffer allocation requirement */
 
-  kumm_free(buf);
+  kmm_free(buf);
 }
 #endif
 
