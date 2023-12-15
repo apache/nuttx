@@ -58,6 +58,9 @@
 #include "mpfs_dsn.h"
 #include "mpfs_i2c.h"
 
+#include "hardware/mpfs_ethernet.h"
+#include "hardware/mpfs_mpucfg.h"
+
 #if defined(CONFIG_MPFS_ETH0_PHY_KSZ9477) ||\
     defined(CONFIG_MPFS_ETH1_PHY_KSZ9477)
 #  if !defined(CONFIG_MPFS_MAC_SGMII)
@@ -77,15 +80,6 @@
 #endif
 
 #if defined(CONFIG_NET) && defined(CONFIG_MPFS_ETHMAC)
-
-#define MPFS_PMPCFG_ETH0_0   (MPFS_MPUCFG_BASE + 0x400)
-#define MPFS_PMPCFG_ETH0_1   (MPFS_MPUCFG_BASE + 0x408)
-#define MPFS_PMPCFG_ETH0_2   (MPFS_MPUCFG_BASE + 0x410)
-#define MPFS_PMPCFG_ETH0_3   (MPFS_MPUCFG_BASE + 0x418)
-#define MPFS_PMPCFG_ETH1_0   (MPFS_MPUCFG_BASE + 0x500)
-#define MPFS_PMPCFG_ETH1_1   (MPFS_MPUCFG_BASE + 0x508)
-#define MPFS_PMPCFG_ETH1_2   (MPFS_MPUCFG_BASE + 0x510)
-#define MPFS_PMPCFG_ETH1_3   (MPFS_MPUCFG_BASE + 0x518)
 
 #if defined(CONFIG_MPFS_ETHMAC_0) && defined(CONFIG_MPFS_ETHMAC_1)
 #  warning "Using 2 MACs is not yet supported."

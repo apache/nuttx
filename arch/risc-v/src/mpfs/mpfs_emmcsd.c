@@ -48,6 +48,7 @@
 #include "mpfs_emmcsd.h"
 #include "riscv_internal.h"
 #include "hardware/mpfs_emmcsd.h"
+#include "hardware/mpfs_mpucfg.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -82,11 +83,6 @@
                                        MPFS_SYSREG_SOFT_RESET_CR_OFFSET)
 #define MPFS_SYSREG_SUBBLK_CLOCK_CR   (MPFS_SYSREG_BASE + \
                                        MPFS_SYSREG_SUBBLK_CLOCK_CR_OFFSET)
-
-#define MPFS_PMPCFG_MMC_0             (MPFS_MPUCFG_BASE + 0x700)
-#define MPFS_PMPCFG_MMC_1             (MPFS_MPUCFG_BASE + 0x708)
-#define MPFS_PMPCFG_MMC_2             (MPFS_MPUCFG_BASE + 0x710)
-#define MPFS_PMPCFG_MMC_3             (MPFS_MPUCFG_BASE + 0x718)
 
 #define MPFS_MMC_CLOCK_400KHZ              400u
 #define MPFS_MMC_CLOCK_12_5MHZ             12500u
@@ -233,6 +229,7 @@
                                    MPFS_EMMCSD_SRS14_TC_IE)
 
 /* SD-Card IOMUX */
+
 #define LIBERO_SETTING_IOMUX1_CR_SD                     0x00000000UL
 #ifdef CONFIG_MPFS_EMMCSD_MUX_GPIO
 #define LIBERO_SETTING_IOMUX2_CR_SD   0X00BB0000UL
