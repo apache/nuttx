@@ -109,6 +109,7 @@
 "gets","stdio.h","defined(CONFIG_FILE_STREAM)","FAR char *","FAR char *"
 "gettext","libintl.h","defined(CONFIG_LIBC_LOCALE_GETTEXT)","FAR char *","FAR const char *"
 "gettimeofday","sys/time.h","","int","FAR struct timeval *","FAR struct timezone *"
+"getwc","wchar.h","defined(CONFIG_FILE_STREAM)","wint_t","FAR FILE *"
 "gmtime","time.h","","FAR struct tm *","FAR const time_t *"
 "gmtime_r","time.h","","FAR struct tm *","FAR const time_t *","FAR struct tm *"
 "htonl","arpa/inet.h","","uint32_t","uint32_t"

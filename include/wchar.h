@@ -150,7 +150,7 @@ wint_t            fputwc_unlocked(wchar_t, FAR FILE *);
 int               fputws(FAR const wchar_t *, FILE *);
 int               fputws_unlocked(FAR const wchar_t *, FAR FILE *);
 int               fwide(FILE *, int);
-wint_t            getwc(FILE *);
+wint_t            getwc(FAR FILE *);
 wint_t            getwchar(void);
 int               mbsinit(FAR const mbstate_t *);
 size_t            mbrlen(FAR const char *, size_t, FAR mbstate_t *);
