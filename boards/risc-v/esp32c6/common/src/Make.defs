@@ -28,6 +28,10 @@ ifeq ($(CONFIG_ESP_RMT),y)
   CSRCS += esp_board_rmt.c
 endif
 
+ifeq ($(CONFIG_ESPRESSIF_SPIFLASH),y)
+  CSRCS += esp_board_spiflash.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src

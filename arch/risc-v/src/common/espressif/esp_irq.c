@@ -115,6 +115,19 @@ static volatile uint8_t g_irq_map[NR_IRQS];
 
 static uint32_t g_cpuint_freelist = ESP_CPUINT_PERIPHSET;
 
+/* This bitmask has an 1 if the int should be disabled
+ * when the flash is disabled.
+ */
+
+static uint32_t non_iram_int_mask[CONFIG_ESPRESSIF_NUM_CPUS];
+
+/* This bitmask has 1 in it if the int was disabled
+ * using esp_intr_noniram_disable.
+ */
+
+static uint32_t non_iram_int_disabled[CONFIG_ESPRESSIF_NUM_CPUS];
+static bool non_iram_int_disabled_flag[CONFIG_ESPRESSIF_NUM_CPUS];
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -280,6 +293,15 @@ static void esp_cpuint_initialize(void)
 
 void up_irqinitialize(void)
 {
+  /* All CPU ints are non-IRAM interrupts at the beginning and should be
+   * disabled during a SPI flash operation
+   */
+
+  for (int i = 0; i < CONFIG_SMP_NCPUS; i++)
+    {
+      non_iram_int_mask[i] = UINT32_MAX;
+    }
+
   /* Indicate that no interrupt sources are assigned to CPU interrupts */
 
   for (int i = 0; i < NR_IRQS; i++)
@@ -583,4 +605,78 @@ irqstate_t up_irq_enable(void)
 
   flags = READ_AND_SET_CSR(mstatus, MSTATUS_MIE);
   return flags;
+}
+
+/****************************************************************************
+ * Name: esp_intr_noniram_disable
+ *
+ * Description:
+ *   Disable interrupts that aren't specifically marked as running from IRAM.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void IRAM_ATTR esp_intr_noniram_disable(void)
+{
+  uint32_t oldint;
+  irqstate_t irqstate;
+  uint32_t cpu;
+  uint32_t non_iram_ints;
+
+  irqstate = enter_critical_section();
+  cpu = esp_cpu_get_core_id();
+  non_iram_ints = non_iram_int_mask[cpu];
+
+  if (non_iram_int_disabled_flag[cpu])
+    {
+      abort();
+    }
+
+  non_iram_int_disabled_flag[cpu] = true;
+  oldint = esp_cpu_intr_get_enabled_mask();
+  esp_cpu_intr_disable(non_iram_ints);
+
+  /* Save disabled ints */
+
+  non_iram_int_disabled[cpu] = oldint & non_iram_ints;
+  leave_critical_section(irqstate);
+}
+
+/****************************************************************************
+ * Name: esp_intr_noniram_enable
+ *
+ * Description:
+ *   Enable interrupts that aren't specifically marked as running from IRAM.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void IRAM_ATTR esp_intr_noniram_enable(void)
+{
+  irqstate_t irqstate;
+  uint32_t cpu;
+  int non_iram_ints;
+
+  irqstate = enter_critical_section();
+  cpu = esp_cpu_get_core_id();
+  non_iram_ints = non_iram_int_disabled[cpu];
+
+  if (!non_iram_int_disabled_flag[cpu])
+    {
+      abort();
+    }
+
+  non_iram_int_disabled_flag[cpu] = false;
+  esp_cpu_intr_enable(non_iram_ints);
+  leave_critical_section(irqstate);
 }
