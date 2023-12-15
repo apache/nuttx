@@ -27,8 +27,6 @@
 
 #include <nuttx/config.h>
 
-#include "hardware/mpfs_ethernet.h"
-
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
