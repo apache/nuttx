@@ -35,6 +35,8 @@
 
 #include "xtensa.h"
 
+#include "soc/soc_caps.h"
+
 #include "hardware/esp32_iomux.h"
 #include "hardware/esp32_gpio.h"
 

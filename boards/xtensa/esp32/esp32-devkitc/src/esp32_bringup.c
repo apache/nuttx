@@ -165,6 +165,10 @@
 #  include "esp32_board_dac.h"
 #endif
 
+#ifdef CONFIG_ESP_RMT
+#  include "esp32_board_rmt.h"
+#endif
+
 #include "esp32-devkitc.h"
 
 /****************************************************************************
@@ -653,6 +657,20 @@ int esp32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_ESP_RMT
+  ret = board_rmt_txinitialize(RMT_TXCHANNEL, RMT_OUTPUT_PIN);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_rmt_txinitialize() failed: %d\n", ret);
+    }
+
+  ret = board_rmt_rxinitialize(RMT_RXCHANNEL, RMT_INPUT_PIN);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_rmt_txinitialize() failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_RTC_DRIVER
   /* Instantiate the ESP32 RTC driver */
 
@@ -676,7 +694,7 @@ int esp32_bringup(void)
 #endif
 
 #ifdef CONFIG_WS2812
-#  ifndef CONFIG_WS2812_NON_SPI_DRIVER 
+#  ifndef CONFIG_WS2812_NON_SPI_DRIVER
   ret = board_ws2812_initialize(0, ESP32_SPI3, CONFIG_WS2812_LED_COUNT);
   if (ret < 0)
     {

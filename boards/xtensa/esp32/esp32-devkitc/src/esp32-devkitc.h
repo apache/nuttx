@@ -68,8 +68,16 @@
 
 /* RMT gpio */
 
-#define RMT_OUTPUT_PIN 4
-#define RMT_CHANNEL    0
+#define RMT_RXCHANNEL       1
+#define RMT_TXCHANNEL       0
+
+#ifdef CONFIG_RMT_LOOP_TEST_MODE
+#  define RMT_INPUT_PIN     0
+#  define RMT_OUTPUT_PIN    0
+#else
+#  define RMT_INPUT_PIN     2
+#  define RMT_OUTPUT_PIN    4
+#endif
 
 /****************************************************************************
  * Public Types

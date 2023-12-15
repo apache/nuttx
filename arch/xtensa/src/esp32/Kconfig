@@ -213,6 +213,8 @@ config ESP32_EXCEPTION_ENABLE_CACHE
 
 menu "ESP32 Peripheral Selection"
 
+source "arch/xtensa/src/common/espressif/Kconfig"
+
 config ESP32_UART
 	bool
 	default n

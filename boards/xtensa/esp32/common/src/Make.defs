@@ -140,8 +140,8 @@ ifeq ($(CONFIG_RGBLED),y)
   CSRCS += esp32_rgbled.c
 endif
 
-ifeq ($(CONFIG_ESP32_RMT),y)
-  CSRCS += esp32_rmt.c
+ifeq ($(CONFIG_ESP_RMT),y)
+  CSRCS += esp32_board_rmt.c
 endif
 
 #ifeq ($(CONFIG_DAC),y)
