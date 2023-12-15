@@ -1022,6 +1022,22 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
               sndlen = remaining_snd_wnd;
             }
 
+          /* Normally CONFIG_IOB_THROTTLE should ensure that we have enough
+           * iob space available for copying the data to a packet buffer.
+           * If it doesn't, a deadlock could happen where the iobs are used
+           * by queued TX data and cannot be released because a full-sized
+           * packet gets refused by devif_iob_send(). Detect this situation
+           * and send tiny TCP packets until we manage to free up some space.
+           * We do not want to exhaust all of the remaining iobs by sending
+           * the maximum size packet that would fit.
+           */
+
+          if (sndlen > iob_navail(false) * CONFIG_IOB_BUFSIZE)
+            {
+              nwarn("Running low on iobs, limiting packet size\n");
+              sndlen = CONFIG_IOB_BUFSIZE;
+            }
+
           ninfo("SEND: wrb=%p seq=%" PRIu32 " pktlen=%u sent=%u sndlen=%zu "
                 "mss=%u snd_wnd=%u seq=%" PRIu32
                 " remaining_snd_wnd=%" PRIu32 "\n",
