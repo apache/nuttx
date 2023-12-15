@@ -33,4 +33,15 @@ config RMT_DEFAULT_RX_BUFFER_SIZE
 		The RMT RX default buffer size. This is the expected buffer size
 		that should be returned on a `read()` operation.
 
+config RMT_LOOP_TEST_MODE
+	bool "RMT character driver loopback test mode (for testing only)"
+	depends on EXPERIMENTAL
+	default n
+	---help---
+		This enables a lower-half driver-specific loopback test
+		mode that attaches the transmitter to the receiver, being
+		able to test the RMT peripheral without any external
+		connection. This feature depends on lower-half driver
+		implementation.
+
 endif # RMT
