@@ -332,6 +332,8 @@
 "ub16sqr","fixedmath.h","!defined(CONFIG_HAVE_LONG_LONG)","ub16_t","ub16_t"
 "uname","sys/utsname.h","","int","FAR struct utsname *"
 "ungetc","stdio.h","defined(CONFIG_FILE_STREAM)","int","int","FAR FILE *"
+"ungetwc","wchar.h","defined(CONFIG_FILE_STREAM)","wint_t","wint_t","FAR FILE *"
+"ungetwc_unlocked","wchar.h","defined(CONFIG_FILE_STREAM)","wint_t","wint_t","FAR FILE *"
 "usleep","unistd.h","","int","useconds_t"
 "vasprintf","stdio.h","","int","FAR char **","FAR const IPTR char *","va_list"
 "versionsort","dirent.h","","int","FAR const struct dirent **","FAR const struct dirent **"
