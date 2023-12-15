@@ -150,6 +150,22 @@ int spi_flash_read_encrypted(uint32_t addr, void *buffer, uint32_t size);
 
 int esp32s3_spiflash_init(void);
 
+/****************************************************************************
+ * Name: esp32s3_flash_encryption_enabled
+ *
+ * Description:
+ *   Check if ESP32-S3 enables SPI Flash encryption.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   True: SPI Flash encryption is enable, False if not.
+ *
+ ****************************************************************************/
+
+bool esp32s3_flash_encryption_enabled(void);
+
 #ifdef __cplusplus
 }
 #endif
