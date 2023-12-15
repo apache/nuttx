@@ -80,6 +80,13 @@ ifeq ($(CONFIG_ESP_RMT),y)
   endif
 endif
 
+ifeq ($(CONFIG_ESPRESSIF_SPIFLASH),y)
+  CHIP_CSRCS += esp_spiflash.c
+  ifeq ($(CONFIG_ESPRESSIF_MTD),y)
+    CHIP_CSRCS += esp_spiflash_mtd.c
+  endif
+endif
+
 #############################################################################
 # Espressif HAL for 3rd Party Platforms
 #############################################################################
@@ -88,7 +95,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = b6a943764f5e5a12d12edd8a6d71bdecc505428c
+	ESP_HAL_3RDPARTY_VERSION = 7951b5b282384ec43858a28ddfabbef7b6b326cb
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL

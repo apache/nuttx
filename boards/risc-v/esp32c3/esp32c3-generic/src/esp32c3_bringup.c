@@ -35,6 +35,7 @@
 #include <nuttx/fs/fs.h>
 
 #include "esp_board_ledc.h"
+#include "esp_board_spiflash.h"
 
 #ifdef CONFIG_WATCHDOG
 #  include "espressif/esp_wdt.h"
@@ -141,6 +142,14 @@ int esp_bringup(void)
       _err("Failed to initialize Timer 1: %d\n", ret);
     }
 #endif
+#endif
+
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
+  ret = board_spiflash_init();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI Flash\n");
+    }
 #endif
 
 #ifdef CONFIG_ONESHOT

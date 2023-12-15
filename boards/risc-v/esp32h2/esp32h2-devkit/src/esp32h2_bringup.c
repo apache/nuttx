@@ -35,6 +35,7 @@
 #include <nuttx/fs/fs.h>
 
 #include "esp_board_ledc.h"
+#include "esp_board_spiflash.h"
 
 #ifdef CONFIG_WATCHDOG
 #  include "espressif/esp_wdt.h"
@@ -172,6 +173,14 @@ int esp_bringup(void)
   if (ret < 0)
     {
       _err("Failed to initialize the RTC driver: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
+  ret = board_spiflash_init();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI Flash\n");
     }
 #endif
 
