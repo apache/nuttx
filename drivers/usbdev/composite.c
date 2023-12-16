@@ -298,8 +298,6 @@ static int16_t composite_mkcfgdesc(FAR struct usbdevclass_driver_s *driver,
   memcpy(buf, priv->descs->cfgdesc, sizeof(struct usb_cfgdesc_s));
 
   cfgdesc = (FAR struct usb_cfgdesc_s *)buf;
-  cfgdesc->totallen[0] = LSBYTE(priv->cfgdescsize);
-  cfgdesc->totallen[1] = MSBYTE(priv->cfgdescsize);
   cfgdesc->ninterfaces = priv->ninterfaces;
 
   /* Increment the size and buf to point right behind the information
@@ -328,6 +326,9 @@ static int16_t composite_mkcfgdesc(FAR struct usbdevclass_driver_s *driver,
       buf += len;
 #endif
     }
+
+  cfgdesc->totallen[0] = LSBYTE(total);
+  cfgdesc->totallen[1] = MSBYTE(total);
 
   return total;
 }
@@ -1016,6 +1017,7 @@ FAR void *composite_initialize(FAR const struct usbdev_devdescs_s *devdescs,
                                FAR struct composite_devdesc_s *pdevices,
                                uint8_t ndevices)
 {
+  FAR const struct usbdev_strdesc_s *strdesc;
   FAR struct composite_alloc_s *alloc;
   FAR struct composite_dev_s *priv;
   FAR struct composite_driver_s *drvr;
@@ -1071,6 +1073,26 @@ FAR void *composite_initialize(FAR const struct usbdev_devdescs_s *devdescs,
 
       priv->cfgdescsize += devobj->compdesc.cfgdescsize;
       priv->ninterfaces += devobj->compdesc.devinfo.ninterfaces;
+    }
+
+  /* Update cfgdescsize based on the longest string descriptor */
+
+#ifdef CONFIG_BOARD_USBDEV_SERIALSTR
+  ret = sizeof(struct usb_strdesc_s) + strlen(board_usbdev_serialstr()) * 2;
+  if (priv->cfgdescsize < ret)
+    {
+      priv->cfgdescsize = ret;
+    }
+#endif
+
+  strdesc = devdescs->strdescs->strdesc;
+  for (i = 0; strdesc[i].string != NULL; i++)
+    {
+      ret = sizeof(struct usb_strdesc_s) + strlen(strdesc[i].string) * 2;
+      if (priv->cfgdescsize < ret)
+        {
+          priv->cfgdescsize = ret;
+        }
     }
 
   priv->ndevices = ndevices;
