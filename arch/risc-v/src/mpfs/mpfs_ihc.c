@@ -80,7 +80,6 @@
 /* rptun initialization names */
 
 #define MPFS_RPTUN_CPU_NAME      "mpfs-ihc"
-#define MPFS_RPTUN_SHMEM_NAME    "mpfs-shmem"
 
 /* Vring configuration parameters */
 
@@ -131,7 +130,6 @@ struct mpfs_rptun_dev_s
   struct mpfs_rptun_shmem_s *shmem;
   struct simple_addrenv_s    addrenv[VRINGS];
   char                       cpuname[RPMSG_NAME_SIZE + 1];
-  char                       shmemname[RPMSG_NAME_SIZE + 1];
 };
 
 struct mpfs_queue_table_s
@@ -1085,7 +1083,6 @@ static int mpfs_rptun_register_callback(struct rptun_dev_s *dev,
  *   Initializes the rptun device.
  *
  * Input Parameters:
- *   shmemname  - Shared mempory name
  *   cpuname    - Local CPU name
  *
  * Returned Value:
@@ -1093,7 +1090,7 @@ static int mpfs_rptun_register_callback(struct rptun_dev_s *dev,
  *
  ****************************************************************************/
 
-static int mpfs_rptun_init(const char *shmemname, const char *cpuname)
+static int mpfs_rptun_init(const char *cpuname)
 {
   struct mpfs_rptun_dev_s *dev;
   int ret;
@@ -1112,7 +1109,6 @@ static int mpfs_rptun_init(const char *shmemname, const char *cpuname)
 
   dev->rptun.ops = &g_mpfs_rptun_ops;
   strlcpy(dev->cpuname, cpuname, sizeof(dev->cpuname));
-  strlcpy(dev->shmemname, shmemname, sizeof(dev->shmemname));
   list_add_tail(&g_dev_list, &dev->node);
 
   ret = rptun_initialize(&dev->rptun);
@@ -1377,7 +1373,7 @@ int mpfs_ihc_init(void)
       g_shmem.rsc.rpmsg_vdev.status |= VIRTIO_CONFIG_STATUS_DRIVER_OK;
     }
 
-  ret = mpfs_rptun_init(MPFS_RPTUN_SHMEM_NAME, MPFS_RPTUN_CPU_NAME);
+  ret = mpfs_rptun_init(MPFS_RPTUN_CPU_NAME);
   if (ret < 0)
     {
       ihcerr("ERROR: Not able to init RPTUN\n");

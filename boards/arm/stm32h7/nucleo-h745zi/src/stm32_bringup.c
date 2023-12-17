@@ -104,9 +104,9 @@ int stm32_bringup(void)
 
 #ifdef CONFIG_RPTUN
 #  ifdef CONFIG_ARCH_CHIP_STM32H7_CORTEXM7
-  stm32_rptun_init("cm4-cm7-shmem", "cm4");
+  stm32_rptun_init("cm4");
 #  else
-  stm32_rptun_init("cm4-cm7-shmem", "cm7");
+  stm32_rptun_init("cm7");
 #  endif
 #endif
 
