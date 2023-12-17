@@ -353,6 +353,7 @@ enum boardioc_usbdev_identifier_e
   BOARDIOC_USBDEV_NONE = 0        /* Not valid */
 #ifdef CONFIG_USBADB
   , BOARDIOC_USBDEV_ADB           /* ADB */
+  , BOARDIOC_USBDEV_FASTBOOT = BOARDIOC_USBDEV_ADB
 #endif
 #ifdef CONFIG_CDCACM
   , BOARDIOC_USBDEV_CDCACM        /* CDC/ACM */
