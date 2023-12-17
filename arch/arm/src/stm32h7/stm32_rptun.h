@@ -50,7 +50,7 @@ extern "C"
  * Name: stm32_rptun_init
  ****************************************************************************/
 
-int stm32_rptun_init(const char *shmemname, const char *cpuname);
+int stm32_rptun_init(const char *cpuname);
 
 #undef EXTERN
 #if defined(__cplusplus)

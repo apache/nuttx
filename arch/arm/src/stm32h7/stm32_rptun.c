@@ -99,7 +99,6 @@ struct stm32_rptun_dev_s
   bool                        master;
   struct stm32_rptun_shmem_s *shmem;
   char                        cpuname[RPMSG_NAME_SIZE + 1];
-  char                        shmemname[RPMSG_NAME_SIZE + 1];
 };
 
 /****************************************************************************
@@ -452,7 +451,7 @@ static int stm32_rptun_thread(int argc, char *argv[])
  * Public Functions
  ****************************************************************************/
 
-int stm32_rptun_init(const char *shmemname, const char *cpuname)
+int stm32_rptun_init(const char *cpuname)
 {
   struct stm32_rptun_dev_s *dev = &g_rptun_dev;
   int                       ret = OK;
@@ -482,7 +481,6 @@ int stm32_rptun_init(const char *shmemname, const char *cpuname)
 
   dev->rptun.ops = &g_stm32_rptun_ops;
   strncpy(dev->cpuname, cpuname, RPMSG_NAME_SIZE);
-  strncpy(dev->shmemname, shmemname, RPMSG_NAME_SIZE);
 
   ret = rptun_initialize(&dev->rptun);
   if (ret < 0)
