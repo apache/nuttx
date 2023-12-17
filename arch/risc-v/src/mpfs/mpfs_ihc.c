@@ -113,8 +113,6 @@
 struct mpfs_rptun_shmem_s
 {
   volatile uintptr_t         base;
-  volatile unsigned int      seqs;
-  volatile unsigned int      seqm;
   struct rptun_rsc_s         rsc;
   bool                       master_up;
 };
@@ -126,7 +124,6 @@ struct mpfs_rptun_dev_s
   rptun_callback_t           callback;
   void                      *arg;
   bool                       master;
-  unsigned int               seq;
   struct mpfs_rptun_shmem_s *shmem;
   struct simple_addrenv_s    addrenv[VRINGS];
   char                       cpuname[RPMSG_NAME_SIZE + 1];
@@ -868,8 +865,6 @@ mpfs_rptun_get_resource(struct rptun_dev_s *dev)
       rsc = &priv->shmem->rsc;
 
       g_shmem.base = VRING_SHMEM;
-      g_shmem.seqm = 0;
-      g_shmem.seqs = 0;
 
       rsc->rsc_tbl_hdr.ver          = 1;
       rsc->rsc_tbl_hdr.num          = 1;
