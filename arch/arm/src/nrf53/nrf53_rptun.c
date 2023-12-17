@@ -93,7 +93,6 @@ struct nrf53_rptun_dev_s
   bool                        master;
   struct nrf53_rptun_shmem_s *shmem;
   char                        cpuname[RPMSG_NAME_SIZE + 1];
-  char                        shmemname[RPMSG_NAME_SIZE + 1];
 };
 
 /****************************************************************************
@@ -456,7 +455,7 @@ static int nrf53_rptun_thread(int argc, char *argv[])
  * Public Functions
  ****************************************************************************/
 
-int nrf53_rptun_init(const char *shmemname, const char *cpuname)
+int nrf53_rptun_init(const char *cpuname)
 {
   struct nrf53_rptun_dev_s *dev = &g_rptun_dev;
   int                       ret = OK;
@@ -488,7 +487,6 @@ int nrf53_rptun_init(const char *shmemname, const char *cpuname)
 
   dev->rptun.ops = &g_nrf53_rptun_ops;
   strncpy(dev->cpuname, cpuname, RPMSG_NAME_SIZE);
-  strncpy(dev->shmemname, shmemname, RPMSG_NAME_SIZE);
 
   ret = rptun_initialize(&dev->rptun);
   if (ret < 0)

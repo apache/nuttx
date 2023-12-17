@@ -50,7 +50,7 @@ extern "C"
  * Name: nrf53_rptun_init
  ****************************************************************************/
 
-int nrf53_rptun_init(const char *shmemname, const char *cpuname);
+int nrf53_rptun_init(const char *cpuname);
 
 #undef EXTERN
 #if defined(__cplusplus)
