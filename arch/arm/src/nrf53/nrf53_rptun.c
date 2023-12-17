@@ -101,9 +101,6 @@ struct nrf53_rptun_dev_s
  ****************************************************************************/
 
 static const char *nrf53_rptun_get_cpuname(struct rptun_dev_s *dev);
-static const char *nrf53_rptun_get_firmware(struct rptun_dev_s *dev);
-static const struct rptun_addrenv_s *
-nrf53_rptun_get_addrenv(struct rptun_dev_s *dev);
 static struct rptun_rsc_s *
 nrf53_rptun_get_resource(struct rptun_dev_s *dev);
 static bool nrf53_rptun_is_autostart(struct rptun_dev_s *dev);
@@ -127,8 +124,6 @@ static void nrf53_rptun_panic(struct rptun_dev_s *dev);
 static const struct rptun_ops_s g_nrf53_rptun_ops =
 {
   .get_cpuname       = nrf53_rptun_get_cpuname,
-  .get_firmware      = nrf53_rptun_get_firmware,
-  .get_addrenv       = nrf53_rptun_get_addrenv,
   .get_resource      = nrf53_rptun_get_resource,
   .is_autostart      = nrf53_rptun_is_autostart,
   .is_master         = nrf53_rptun_is_master,
@@ -165,25 +160,6 @@ static const char *nrf53_rptun_get_cpuname(struct rptun_dev_s *dev)
                                  struct nrf53_rptun_dev_s, rptun);
 
   return priv->cpuname;
-}
-
-/****************************************************************************
- * Name: nrf53_rptun_get_firmware
- ****************************************************************************/
-
-static const char *nrf53_rptun_get_firmware(struct rptun_dev_s *dev)
-{
-  return NULL;
-}
-
-/****************************************************************************
- * Name: nrf53_rptun_get_addrenv
- ****************************************************************************/
-
-static const struct rptun_addrenv_s *
-nrf53_rptun_get_addrenv(struct rptun_dev_s *dev)
-{
-  return NULL;
 }
 
 /****************************************************************************

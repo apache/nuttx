@@ -165,7 +165,7 @@
  *   OK unless an error occurs.  Then a negated errno value is returned
  *
  ****************************************************************************/
-#define RPTUN_CONFIG(d, p) ((d)->ops->config ?\
+#define RPTUN_CONFIG(d, p) ((d)->ops->config ? \
                             (d)->ops->config(d, p) : 0)
 
 /****************************************************************************
