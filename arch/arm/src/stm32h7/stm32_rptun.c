@@ -107,9 +107,6 @@ struct stm32_rptun_dev_s
  ****************************************************************************/
 
 static const char *stm32_rptun_get_cpuname(struct rptun_dev_s *dev);
-static const char *stm32_rptun_get_firmware(struct rptun_dev_s *dev);
-static const struct rptun_addrenv_s *
-stm32_rptun_get_addrenv(struct rptun_dev_s *dev);
 static struct rptun_rsc_s *
 stm32_rptun_get_resource(struct rptun_dev_s *dev);
 static bool stm32_rptun_is_autostart(struct rptun_dev_s *dev);
@@ -133,8 +130,6 @@ static void stm32_rptun_panic(struct rptun_dev_s *dev);
 static const struct rptun_ops_s g_stm32_rptun_ops =
 {
   .get_cpuname       = stm32_rptun_get_cpuname,
-  .get_firmware      = stm32_rptun_get_firmware,
-  .get_addrenv       = stm32_rptun_get_addrenv,
   .get_resource      = stm32_rptun_get_resource,
   .is_autostart      = stm32_rptun_is_autostart,
   .is_master         = stm32_rptun_is_master,
@@ -171,25 +166,6 @@ static const char *stm32_rptun_get_cpuname(struct rptun_dev_s *dev)
                                  struct stm32_rptun_dev_s, rptun);
 
   return priv->cpuname;
-}
-
-/****************************************************************************
- * Name: stm32_rptun_get_firmware
- ****************************************************************************/
-
-static const char *stm32_rptun_get_firmware(struct rptun_dev_s *dev)
-{
-  return NULL;
-}
-
-/****************************************************************************
- * Name: stm32_rptun_get_addrenv
- ****************************************************************************/
-
-static const struct rptun_addrenv_s *
-stm32_rptun_get_addrenv(struct rptun_dev_s *dev)
-{
-  return NULL;
 }
 
 /****************************************************************************

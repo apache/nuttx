@@ -150,9 +150,6 @@ struct mpfs_ihc_work_arg_s
  ****************************************************************************/
 
 static const char *mpfs_rptun_get_cpuname(struct rptun_dev_s *dev);
-static const char *mpfs_rptun_get_firmware(struct rptun_dev_s *dev);
-static const struct rptun_addrenv_s
-*mpfs_rptun_get_addrenv(struct rptun_dev_s *dev);
 static struct rptun_rsc_s *mpfs_rptun_get_resource(struct rptun_dev_s *dev);
 static bool mpfs_rptun_is_autostart(struct rptun_dev_s *dev);
 static bool mpfs_rptun_is_master(struct rptun_dev_s *dev);
@@ -226,8 +223,6 @@ const uint32_t ihcia_remote_hart_ints[MPFS_NUM_HARTS] =
 static const struct rptun_ops_s g_mpfs_rptun_ops =
 {
   .get_cpuname       = mpfs_rptun_get_cpuname,
-  .get_firmware      = mpfs_rptun_get_firmware,
-  .get_addrenv       = mpfs_rptun_get_addrenv,
   .get_resource      = mpfs_rptun_get_resource,
   .is_autostart      = mpfs_rptun_is_autostart,
   .is_master         = mpfs_rptun_is_master,
@@ -837,45 +832,6 @@ static const char *mpfs_rptun_get_cpuname(struct rptun_dev_s *dev)
                                                struct mpfs_rptun_dev_s,
                                                rptun);
   return priv->cpuname;
-}
-
-/****************************************************************************
- * Name: mpfs_rptun_get_firmware
- *
- * Description:
- *   Gets the mpfs rptun firmware.
- *
- * Input Parameters:
- *   dev   - Rptun device.
- *
- * Returned Value:
- *   Always null, no associated firmware present
- *
- ****************************************************************************/
-
-static const char *mpfs_rptun_get_firmware(struct rptun_dev_s *dev)
-{
-  return NULL;
-}
-
-/****************************************************************************
- * Name: mpfs_rptun_get_addrenv
- *
- * Description:
- *   Gets the mpfs rptun addrenv.
- *
- * Input Parameters:
- *   dev   - Rptun device.
- *
- * Returned Value:
- *   Always null, no associated addrenv present.
- *
- ****************************************************************************/
-
-static const struct rptun_addrenv_s *
-mpfs_rptun_get_addrenv(struct rptun_dev_s *dev)
-{
-  return NULL;
 }
 
 /****************************************************************************
