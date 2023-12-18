@@ -169,8 +169,8 @@ static const rpmsg_ept_cb g_rpmsgfs_handler[] =
  * Private Functions
  ****************************************************************************/
 
-static int rpmsgfs_attach_file(FAR struct rpmsgfs_server_s *priv,
-                               FAR struct file *filep)
+static int rpmsgfs_alloc_file(FAR struct rpmsgfs_server_s *priv,
+                              FAR struct file **filep)
 {
   FAR struct file **tmp;
   int ret;
@@ -185,9 +185,7 @@ static int rpmsgfs_attach_file(FAR struct rpmsgfs_server_s *priv,
         {
           if (priv->files[i][j].f_inode == NULL)
             {
-              memcpy(&priv->files[i][j], filep, sizeof(*filep));
-              ret = i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK + j;
-              goto out;
+              goto found;
             }
         }
     }
@@ -213,32 +211,16 @@ static int rpmsgfs_attach_file(FAR struct rpmsgfs_server_s *priv,
   priv->files = tmp;
   priv->file_rows++;
 
-  memcpy(&priv->files[i][0], filep, sizeof(*filep));
-  ret = i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK;
+  j = 0;
+
+found:
+  priv->files[i][j].f_inode = (FAR struct inode *)-1;
+  *filep = &priv->files[i][j];
+  ret = i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK + j;
 
 out:
   nxmutex_unlock(&priv->lock);
   return ret;
-}
-
-static int rpmsgfs_detach_file(FAR struct rpmsgfs_server_s *priv,
-                               int fd, FAR struct file *filep)
-{
-  struct file *tfilep;
-
-  if (fd < 0 || fd >= priv->file_rows * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK)
-    {
-      return -EBADF;
-    }
-
-  nxmutex_lock(&priv->lock);
-  tfilep = &priv->files[fd / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK]
-                       [fd % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK];
-  memcpy(filep, tfilep, sizeof(*filep));
-  memset(tfilep, 0, sizeof(*tfilep));
-  nxmutex_unlock(&priv->lock);
-
-  return 0;
 }
 
 static FAR struct file *rpmsgfs_get_file(
@@ -334,20 +316,24 @@ static int rpmsgfs_open_handler(FAR struct rpmsg_endpoint *ept,
                                 uint32_t src, FAR void *priv)
 {
   FAR struct rpmsgfs_open_s *msg = data;
-  struct file file;
+  FAR struct file *filep;
   int ret;
+  int fd;
 
-  ret = file_open(&file, msg->pathname, msg->flags, msg->mode);
-  if (ret >= 0)
+  ret = fd = rpmsgfs_alloc_file(priv, &filep);
+  if (ret < 0)
     {
-      ret = rpmsgfs_attach_file(priv, &file);
-      if (ret < 0)
-        {
-          file_close(&file);
-        }
+      goto out;
     }
 
-  msg->header.result = ret;
+  ret = file_open(filep, msg->pathname, msg->flags, msg->mode);
+  if (ret < 0)
+    {
+      filep->f_inode = NULL;
+    }
+
+out:
+  msg->header.result = ret < 0 ? ret : fd;
   return rpmsg_send(ept, msg, sizeof(*msg));
 }
 
@@ -356,13 +342,13 @@ static int rpmsgfs_close_handler(FAR struct rpmsg_endpoint *ept,
                                  uint32_t src, FAR void *priv)
 {
   FAR struct rpmsgfs_close_s *msg = data;
-  struct file file;
-  int ret;
+  FAR struct file *filep;
+  int ret = -ENOENT;
 
-  ret = rpmsgfs_detach_file(priv, msg->fd, &file);
-  if (ret >= 0)
+  filep = rpmsgfs_get_file(priv, msg->fd);
+  if (filep)
     {
-      ret = file_close(&file);
+      ret = file_close(filep);
     }
 
   msg->header.result = ret;
@@ -511,25 +497,23 @@ static int rpmsgfs_dup_handler(FAR struct rpmsg_endpoint *ept,
                                uint32_t src, FAR void *priv)
 {
   FAR struct rpmsgfs_dup_s *msg = data;
+  FAR struct file *newfilep = NULL;
   FAR struct file *filep;
-  struct file newfile;
-  int ret = -ENOENT;
+  int ret;
+  int fd;
 
   filep = rpmsgfs_get_file(priv, msg->fd);
-  if (filep != NULL)
+  ret = fd = rpmsgfs_alloc_file(priv, &newfilep);
+  if (filep != NULL && ret >= 0)
     {
-      ret = file_dup2(filep, &newfile);
-      if (ret >= 0)
+      ret = file_dup2(filep, newfilep);
+      if (ret < 0)
         {
-          ret = rpmsgfs_attach_file(priv, &newfile);
-          if (ret < 0)
-            {
-              file_close(&newfile);
-            }
+          file_close(newfilep);
         }
     }
 
-  msg->header.result = ret;
+  msg->header.result = ret < 0 ? ret : fd;
   return rpmsg_send(ept, msg, sizeof(*msg));
 }
 
