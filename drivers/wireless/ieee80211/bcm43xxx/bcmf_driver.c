@@ -1143,7 +1143,6 @@ int bcmf_wl_get_interface(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr)
 
 FAR struct bcmf_dev_s *bcmf_allocate_device(void)
 {
-  int ret;
   FAR struct bcmf_dev_s *priv;
 
   /* Allocate a bcmf device structure */
@@ -1160,25 +1159,20 @@ FAR struct bcmf_dev_s *bcmf_allocate_device(void)
 
   /* Init control frames mutex and timeout signal */
 
-  if ((ret = nxsem_init(&priv->control_mutex, 0, 1)) != OK)
-    {
-      goto exit_free_priv;
-    }
+  nxsem_init(&priv->control_mutex, 0, 1);
+  nxsem_init(&priv->control_timeout, 0, 0);
 
-  if ((ret = nxsem_init(&priv->control_timeout, 0, 0)) != OK)
-    {
-      goto exit_free_priv;
-    }
+  /* Init ioctl mutex */
+
+#ifdef CONFIG_NETDEV_IOCTL
+  nxmutex_init(&priv->ioctl_mutex);
+#endif
 
   /* Init scan timeout timer */
 
   priv->scan_status = BCMF_SCAN_DISABLED;
 
   return priv;
-
-exit_free_priv:
-  kmm_free(priv);
-  return NULL;
 }
 
 /****************************************************************************

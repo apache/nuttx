@@ -936,6 +936,11 @@ static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
       return -EPERM;
     }
 
+  if ((ret = nxmutex_lock(&priv->ioctl_mutex)) < 0)
+    {
+      return ret;
+    }
+
 #ifdef CONFIG_IEEE80211_BROADCOM_LOWPOWER
   bcmf_lowpower_poll(priv);
 #endif
@@ -1071,6 +1076,8 @@ static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
         ret = -ENOTTY;  /* Special return value for this case */
         break;
     }
+
+  nxmutex_unlock(&priv->ioctl_mutex);
 
   return ret;
 }
