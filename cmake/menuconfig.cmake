@@ -98,6 +98,8 @@ add_custom_target(
   COMMAND echo "\\#" >> ${CMAKE_BINARY_DIR}/warning.tmp
   COMMAND cat ${CMAKE_BINARY_DIR}/warning.tmp
           ${CMAKE_BINARY_DIR}/sortedconfig.tmp > ${CMAKE_BINARY_DIR}/defconfig
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/defconfig
+          ${NUTTX_DEFCONFIG}
   COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_BINARY_DIR}/warning.tmp
   COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_BINARY_DIR}/defconfig.tmp
   COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_BINARY_DIR}/sortedconfig.tmp
