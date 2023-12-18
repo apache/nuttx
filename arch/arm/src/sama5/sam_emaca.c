@@ -1627,7 +1627,7 @@ static int sam_emac_interrupt(int irq, void *context, void *arg)
    *   a one to this bit.
    */
 
-  tsr = sam_getreg(priv, SAM_EMAC_TSR_OFFSET);
+  tsr = sam_getreg(priv, SAM_EMAC_TSR);
   if ((tsr & EMAC_TSR_COMP) != 0)
     {
       /* If a TX transfer just completed, then cancel the TX timeout so
