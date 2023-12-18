@@ -1893,7 +1893,7 @@ static int lpc43_usbinterrupt(int irq, void *context, void *arg)
     {
       usbtrace(TRACE_INTDECODE(LPC43_TRACEINTID_FRAME), 0);
 
-      priv->sof = (int)lpc43_getreg(LPC43_USBDEV_FRINDEX_OFFSET);
+      priv->sof = lpc43_getreg(LPC43_USBDEV_FRINDEX);
     }
 #endif
 
@@ -2602,7 +2602,7 @@ static int lpc43_getframe(struct usbdev_s *dev)
 
   /* FIXME: this actually returns the micro frame number! */
 
-  return (int)lpc43_getreg(LPC43_USBDEV_FRINDEX_OFFSET);
+  return (int)lpc43_getreg(LPC43_USBDEV_FRINDEX);
 #endif
 }
 
