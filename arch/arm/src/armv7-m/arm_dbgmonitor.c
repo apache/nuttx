@@ -633,6 +633,13 @@ int up_debugpoint_remove(int type, void *addr, size_t size)
 
 int arm_enable_dbgmonitor(void)
 {
+  if (getreg32(NVIC_DHCSR) & NVIC_DHCSR_C_DEBUGEN)
+    {
+      /* If already on debug mode(jtag/swo), just return */
+
+      return OK;
+    }
+
   arm_fpb_init();
   arm_dwt_init();
   modifyreg32(NVIC_DEMCR, 0, NVIC_DEMCR_MONEN | NVIC_DEMCR_TRCENA);
