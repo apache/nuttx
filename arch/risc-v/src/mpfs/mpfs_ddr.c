@@ -717,6 +717,8 @@ static int mpfs_ddr_pll_lock_scb(void)
 #define INIT_SETTING_SEG1_6    0x00000000
 #define INIT_SETTING_SEG1_7    0x00000000
 
+#define SEG_LOCKED             (1 << 31)
+
 /****************************************************************************
  * Name: mpfs_setup_ddr_segments
  *
@@ -756,10 +758,17 @@ void mpfs_setup_ddr_segments(enum seg_setup_e option)
     }
   else
     {
+      /* This is the final configuration that cannot be changed after being
+       * locked.
+       */
+
       /* Segment 0 */
 
       val_l = LIBERO_SETTING_SEG0_0 & 0x7fff;
       val_h = LIBERO_SETTING_SEG0_1 & 0x7fff;
+
+      val_l |= SEG_LOCKED;
+      val_h |= SEG_LOCKED;
 
       putreg64((((uint64_t)val_h) << 32) | val_l, MPFS_MPUCFG_SEG0_REG0);
 
@@ -768,10 +777,16 @@ void mpfs_setup_ddr_segments(enum seg_setup_e option)
       val_l = LIBERO_SETTING_SEG1_2 & 0x7fff;
       val_h = LIBERO_SETTING_SEG1_3 & 0x7fff;
 
+      val_l |= SEG_LOCKED;
+      val_h |= SEG_LOCKED;
+
       putreg64((((uint64_t)val_h) << 32) | val_l, MPFS_MPUCFG_SEG1_REG1);
 
       val_l = LIBERO_SETTING_SEG1_4 & 0x7fff;
       val_h = LIBERO_SETTING_SEG1_5 & 0x7fff;
+
+      val_l |= SEG_LOCKED;
+      val_h |= SEG_LOCKED;
 
       putreg64((((uint64_t)val_h) << 32) | val_l, MPFS_MPUCFG_SEG1_REG2);
     }
@@ -779,7 +794,7 @@ void mpfs_setup_ddr_segments(enum seg_setup_e option)
   /* Disable ddr blocker: cleared at reset. When written to '1' disables
    * the blocker function allowing the L2 cache controller to access the
    * DDRC. Once written to '1' the register cannot be written to 0, only
-   * an devie reset will clear the register.
+   * an device reset will clear the register.
    */
 
   putreg64((((uint64_t)0x01) << 32) , MPFS_MPUCFG_SEG0_REG3);
