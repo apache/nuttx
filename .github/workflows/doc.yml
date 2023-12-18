@@ -44,7 +44,7 @@ jobs:
           pip3 install pipenv
           pipenv install
           pipenv run make html latexpdf
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: sphinx-docs
           path: |
