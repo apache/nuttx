@@ -384,7 +384,7 @@ static int am335x_set_refclk(uint32_t frequency)
 
   /* Bypass mode */
 
-  putreg32(AM335X_CM_WKUP_CLKMODE_DPLL_DISP, 0x4);
+  putreg32(0x4, AM335X_CM_WKUP_CLKMODE_DPLL_DISP);
 
   /* Make sure it's in bypass mode */
 
@@ -427,7 +427,7 @@ static int am335x_set_refclk(uint32_t frequency)
 
   /* Locked mode */
 
-  putreg32(AM335X_CM_WKUP_CLKMODE_DPLL_DISP, 0x7);
+  putreg32(0x7, AM335X_CM_WKUP_CLKMODE_DPLL_DISP);
 
   timeout = 10000;
   while ((getreg32(AM335X_CM_WKUP_IDLEST_DPLL_DISP) & (1 << 0)) == 0 &&
@@ -777,23 +777,22 @@ int am335x_lcd_initialize(const struct am335x_panel_info_s *panel)
 
   putreg32(AM335X_LCD_RASTER_CTRL, regval);
 
-  putreg32(AM335X_LCD_CLKC_ENABLE,
-           LCD_CLKC_ENABLE_CORE | LCD_CLKC_ENABLE_LIDD |
-           LCD_CLKC_ENABLE_DMA);
+  putreg32(LCD_CLKC_ENABLE_CORE | LCD_CLKC_ENABLE_LIDD |
+           LCD_CLKC_ENABLE_DMA, AM335X_LCD_CLKC_ENABLE);
 
-  putreg32(AM335X_LCD_CLKC_RESET, LCD_CLKC_RESET_MAIN);
+  putreg32(LCD_CLKC_RESET_MAIN, AM335X_LCD_CLKC_RESET);
   up_udelay(100);
-  putreg32(AM335X_LCD_CLKC_RESET, 0);
+  putreg32(0, AM335X_LCD_CLKC_RESET);
 
   regval  = LCD_IRQ_DONE | LCD_IRQ_RR_DONE | LCD_IRQ_SYNC | LCD_IRQ_ACB |
            LCD_IRQ_PL | LCD_IRQ_FUF | LCD_IRQ_EOF0 | LCD_IRQ_EOF1;
-  putreg32(AM335X_LCD_IRQ_EN_SET, regval);
+  putreg32(regval, AM335X_LCD_IRQ_EN_SET);
 
   regval  = getreg32(AM335X_LCD_RASTER_CTRL);
   regval |= LCD_RASTER_CTRL_LCD_EN;
   putreg32(AM335X_LCD_RASTER_CTRL, regval);
 
-  putreg32(AM335X_LCD_SYSC, LCD_SYSC_IDLE_SMART | LCD_SYSC_STANDBY_SMART);
+  putreg32(LCD_SYSC_IDLE_SMART | LCD_SYSC_STANDBY_SMART, AM335X_LCD_SYSC);
 
 #ifdef CONFIG_AM335X_LCDC_BACKLIGHT
   /* Turn on the back light
