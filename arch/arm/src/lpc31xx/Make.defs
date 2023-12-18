@@ -20,6 +20,8 @@
 
 include arm/Make.defs
 
+CFLAGS += -Wno-array-bounds
+
 CGU_CSRCS  = lpc31_bcrndx.c lpc31_clkdomain.c lpc31_clkexten.c
 CGU_CSRCS += lpc31_clkfreq.c lpc31_clkinit.c lpc31_defclk.c
 CGU_CSRCS += lpc31_esrndx.c lpc31_fdcndx.c lpc31_fdivinit.c

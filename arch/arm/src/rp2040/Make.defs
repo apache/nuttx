@@ -20,6 +20,8 @@
 
 include armv6-m/Make.defs
 
+CFLAGS += -Wno-array-bounds
+
 CHIP_CSRCS += rp2040_idle.c
 CHIP_CSRCS += rp2040_irq.c
 CHIP_CSRCS += rp2040_uart.c
