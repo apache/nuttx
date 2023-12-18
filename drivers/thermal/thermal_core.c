@@ -678,11 +678,21 @@ thermal_zone_device_register(FAR const char *name,
   FAR struct thermal_governor_s *gov;
   FAR struct thermal_zone_device_s *pos;
   FAR struct thermal_zone_device_s *zdev;
+  int i;
 
   if (!ops || !ops->get_temp)
     {
       therr("Invalid zone operations!\n");
       return NULL;
+    }
+
+  for (i = 0; i < params->num_trips; i++)
+    {
+      if (params->trips[i].type >= THERMAL_TRIP_TYPE_MAX)
+        {
+          therr("Invalid trip type (%d)!\n", params->trips[i].type);
+          return NULL;
+        }
     }
 
   nxmutex_lock(&g_thermal_lock);

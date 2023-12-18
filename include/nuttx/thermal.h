@@ -69,10 +69,10 @@ enum thermal_trend_e
 
 enum thermal_trip_type_e
 {
-  THERMAL_COLD,
   THERMAL_NORMAL,
   THERMAL_HOT,
   THERMAL_CRITICAL,
+  THERMAL_TRIP_TYPE_MAX,
 };
 
 struct thermal_governor_s
