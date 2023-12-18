@@ -20,6 +20,8 @@
 
 include arm/Make.defs
 
+CFLAGS += -Wno-array-bounds
+
 CHIP_ASRCS  = dm320_lowputc.S dm320_restart.S
 
 CHIP_CSRCS  = dm320_allocateheap.c dm320_boot.c dm320_decodeirq.c
