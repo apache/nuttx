@@ -139,7 +139,7 @@ static inline void up_setlevel2coarseentry(uint32_t ctabvaddr,
                                            uint32_t vaddr,
                                            uint32_t mmuflags)
 {
-  uint32_t *ctable  = (uint32_t *)ctabvaddr;
+  uint32_t *ctable = (uint32_t *)ctabvaddr;
   uint32_t  index;
 
   /* The coarse table divides a 1Mb address space up into 256 entries, each
@@ -246,7 +246,7 @@ static void up_vectormapping(void)
 
   while (vector_paddr < end_paddr)
     {
-      up_setlevel2coarseentry(PGTABLE_L2_COARSE_VBASE,  vector_paddr,
+      up_setlevel2coarseentry(PGTABLE_L2_COARSE_VBASE, vector_paddr,
                               vector_vaddr, MMU_L2_VECTORFLAGS);
       vector_paddr += 4096;
       vector_vaddr += 4096;

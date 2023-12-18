@@ -181,7 +181,7 @@ static void sam_vectormapping(void)
 
   while (vector_paddr < end_paddr)
     {
-      mmu_l2_setentry(VECTOR_L2_VBASE,  vector_paddr, vector_vaddr,
+      mmu_l2_setentry(VECTOR_L2_VBASE, vector_paddr, vector_vaddr,
                       MMU_L2_VECTORFLAGS);
       vector_paddr += 4096;
       vector_vaddr += 4096;

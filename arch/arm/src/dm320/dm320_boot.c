@@ -102,7 +102,7 @@ static inline void
 up_setlevel2coarseentry(uint32_t ctabvaddr, uint32_t paddr,
                         uint32_t vaddr, uint32_t mmuflags)
 {
-  uint32_t *ctable  = (uint32_t *)ctabvaddr;
+  uint32_t *ctable = (uint32_t *)ctabvaddr;
   uint32_t  index;
 
   /* The coarse table divides a 1Mb address space up into 256 entries, each
