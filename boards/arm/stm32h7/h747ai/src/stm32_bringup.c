@@ -299,11 +299,11 @@ int stm32_bringup(void)
  *   be called immediately after up_initialize() and well before
  *   board_early_initialize() is called and the initial application is
  *   started.  The context in which board_early_initialize() executes is
- *   suitable for early initialization of most, simple device drivers and is a
- *   logical, board-specific extension of up_initialize().
+ *   suitable for early initialization of most, simple device drivers and is
+ *   a logical, board-specific extension of up_initialize().
  *
- *   board_early_initialize() runs on the startup, initialization thread. Some
- *   initialization operations cannot be performed on the start-up,
+ *   board_early_initialize() runs on the startup, initialization thread.
+ *   Some initialization operations cannot be performed on the start-up,
  *   initialization thread.  That is because the initialization thread cannot
  *   wait for event.  Waiting may be required, for example, to mount a file
  *   system or or initialize a device such as an SD card. For this reason,
@@ -317,6 +317,5 @@ void board_early_initialize(void)
   int ret = OK;
 
   UNUSED(ret);
-
 }
 #endif
