@@ -86,6 +86,10 @@ ifeq ($(CONFIG_MTD_AT24XX),y)
 CSRCS += at24xx.c
 endif
 
+ifeq ($(CONFIG_MTD_AT25EE),y)
+CSRCS += at25ee.c
+endif
+
 ifeq ($(CONFIG_MTD_AT45DB),y)
 CSRCS += at45db.c
 endif
