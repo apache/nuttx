@@ -84,22 +84,21 @@ static unsigned int get_target_state(FAR struct thermal_instance_s *instance,
                                      bool throttle)
 {
   FAR struct thermal_cooling_device_s *cdev = instance->cdev;
-  unsigned int next_state = THERMAL_NO_TARGET;
   unsigned int cur_state = instance->target;
 
   if (!cdev->ops || !cdev->ops->get_state)
     {
-      return next_state;
+      return THERMAL_NO_TARGET;
     }
 
   if (cur_state == THERMAL_NO_TARGET)
     {
       if (throttle)
         {
-          next_state = validate_state(instance, throttle, cur_state, 1);
+          return validate_state(instance, throttle, cur_state, 1);
         }
 
-      return next_state;
+      return THERMAL_NO_TARGET;
     }
 
   /* Update Cooling State */
@@ -109,25 +108,37 @@ static unsigned int get_target_state(FAR struct thermal_instance_s *instance,
       case THERMAL_TREND_RAISING:
         if (throttle)
           {
-            next_state = validate_state(instance, throttle, cur_state, 1);
+            return validate_state(instance, throttle, cur_state, 1);
           }
         break;
 
       case THERMAL_TREND_DROPPING:
         if (!throttle)
           {
-            next_state = validate_state(instance, throttle, cur_state, -1);
+            return validate_state(instance, throttle, cur_state, -1);
           }
         break;
 
       case THERMAL_TREND_STABLE:
+        if (throttle)
+          {
+            enum thermal_trip_type_e type;
+            int ret;
+
+            ret = thermal_zone_get_trip_type(instance->zdev, instance->trip,
+                                             &type);
+            if (ret >= 0 && type == THERMAL_HOT)
+              {
+                return validate_state(instance, throttle, cur_state, 1);
+              }
+          }
         break;
 
       default:
         break;
     }
 
-  return next_state;
+  return THERMAL_NO_TARGET;
 }
 
 /* step_wise */
