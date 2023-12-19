@@ -599,11 +599,9 @@ set(nuttx_libs ${nuttx_kernel_libs} ${nuttx_system_libs} ${nuttx_apps_libs})
 
 if(NOT CONFIG_ARCH_SIM)
 
-  # TODO: nostart/nodefault not applicable to nuttx toolchain
   target_link_libraries(
-    nuttx
-    PRIVATE ${NUTTX_EXTRA_FLAGS} -Wl,--script=${ldscript} -Wl,--start-group
-            ${nuttx_libs} ${nuttx_extra_libs} -Wl,--end-group)
+    nuttx PRIVATE --script=${ldscript} --start-group ${nuttx_libs}
+                  ${nuttx_extra_libs} --end-group)
 
   # generate binary outputs in different formats (.bin, .hex, etc)
   nuttx_generate_outputs(nuttx)
@@ -720,22 +718,21 @@ if(NOT CONFIG_BUILD_FLAT)
   get_property(nuttx_system_libs GLOBAL PROPERTY NUTTX_SYSTEM_LIBRARIES)
 
   get_property(user_ldscript GLOBAL PROPERTY LD_SCRIPT_USER)
-  list(TRANSFORM user_ldscript PREPEND "-Wl,--script=")
+  list(TRANSFORM user_ldscript PREPEND "--script=")
 
   target_link_options(
     nuttx_user PRIVATE -nostartfiles -nodefaultlibs
-    -Wl,--entry=${CONFIG_USER_ENTRYPOINT}
-    -Wl,--undefined=${CONFIG_USER_ENTRYPOINT})
+    --entry=${CONFIG_USER_ENTRYPOINT} --undefined=${CONFIG_USER_ENTRYPOINT})
 
   target_link_libraries(
     nuttx_user
     PRIVATE ${user_ldscript}
             userspace
-            $<$<NOT:$<BOOL:${APPLE}>>:-Wl,--start-group>
+            $<$<NOT:$<BOOL:${APPLE}>>:--start-group>
             ${nuttx_system_libs}
             gcc
             $<$<BOOL:${CONFIG_HAVE_CXX}>:supc++>
-            $<$<NOT:$<BOOL:${APPLE}>>:-Wl,--end-group>)
+            $<$<NOT:$<BOOL:${APPLE}>>:--end-group>)
 
   add_custom_command(
     OUTPUT User.map

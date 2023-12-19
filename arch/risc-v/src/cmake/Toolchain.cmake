@@ -52,7 +52,7 @@ set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PREFIX}-g++)
 set(CMAKE_STRIP ${TOOLCHAIN_PREFIX}-strip --strip-unneeded)
 set(CMAKE_OBJCOPY ${TOOLCHAIN_PREFIX}-objcopy)
 set(CMAKE_OBJDUMP ${TOOLCHAIN_PREFIX}-objdump)
-set(CMAKE_LINKER ${TOOLCHAIN_PREFIX}-gcc)
+set(CMAKE_LINKER ${TOOLCHAIN_PREFIX}-ld)
 set(CMAKE_LD ${TOOLCHAIN_PREFIX}-ld)
 set(CMAKE_AR ${TOOLCHAIN_PREFIX}-ar)
 set(CMAKE_NM ${TOOLCHAIN_PREFIX}-nm)
@@ -74,6 +74,17 @@ endif()
 set(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
 set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
 set(CMAKE_ASM_ARCHIVE_CREATE "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
+
+# override LINK command use `ld` linker
+
+set(CMAKE_C_LINK_EXECUTABLE
+    "<CMAKE_LINKER> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
+
+set(CMAKE_CXX_LINK_EXECUTABLE
+    "<CMAKE_LINKER> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
+
+set(CMAKE_ASM_LINK_EXECUTABLE
+    "<CMAKE_LINKER> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
 
 if(CONFIG_DEBUG_CUSTOMOPT)
   add_compile_options(${CONFIG_DEBUG_OPTLEVEL})
@@ -134,22 +145,23 @@ if(NOT ${CONFIG_CXX_RTTI})
 endif()
 
 if(CONFIG_ARCH_RV32)
-  add_link_options(-Wl,-melf32lriscv)
+  add_link_options(-melf32lriscv)
 elseif(CONFIG_ARCH_RV64)
   add_compile_options(-mcmodel=medany)
-  add_link_options(-Wl,-melf64lriscv)
+  add_link_options(-melf64lriscv)
 endif()
 
 if(CONFIG_DEBUG_OPT_UNUSED_SECTIONS)
-  add_link_options(-Wl,--gc-sections)
+  add_link_options(--gc-sections)
   add_compile_options(-ffunction-sections -fdata-sections)
 endif()
 
-add_link_options(-Wl,-nostdlib)
-add_link_options(-Wl,--entry=__start)
+add_link_options(-nostdlib)
+add_link_options(--entry=__start)
+add_link_options(--no-warn-rwx-segments)
 
 if(CONFIG_DEBUG_LINK_MAP)
-  add_link_options(-Wl,--cref -Wl,-Map=nuttx.map)
+  add_link_options(--cref -Map=nuttx.map)
 endif()
 
 if(CONFIG_DEBUG_SYMBOLS)

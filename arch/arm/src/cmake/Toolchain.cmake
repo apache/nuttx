@@ -93,9 +93,20 @@ set(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
 set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
 set(CMAKE_ASM_ARCHIVE_CREATE "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
 
+# override LINK command use `ld` linker
+
+set(CMAKE_C_LINK_EXECUTABLE
+    "<CMAKE_LINKER> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
+
+set(CMAKE_CXX_LINK_EXECUTABLE
+    "<CMAKE_LINKER> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
+
+set(CMAKE_ASM_LINK_EXECUTABLE
+    "<CMAKE_LINKER> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
+
 # Architecture flags
 
-add_link_options(-Wl,--entry=__start)
+add_link_options(--entry=__start)
 add_link_options(-nostdlib)
 add_compile_options(-fno-common)
 add_compile_options(-Wall -Wshadow -Wundef)
@@ -151,7 +162,7 @@ endif()
 # Optimization of unused sections
 
 if(CONFIG_DEBUG_OPT_UNUSED_SECTIONS)
-  add_link_options(-Wl,--gc-sections)
+  add_link_options(--gc-sections)
   add_compile_options(-ffunction-sections -fdata-sections)
 endif()
 
@@ -174,7 +185,7 @@ endif()
 # Debug link map
 
 if(CONFIG_DEBUG_LINK_MAP)
-  add_link_options(-Wl,--cref -Wl,-Map=nuttx.map)
+  add_link_options(--cref -Map=nuttx.map)
 endif()
 
 if(CONFIG_DEBUG_SYMBOLS)
@@ -206,10 +217,4 @@ if(NOT EXISTS_FLAGS)
   set(CMAKE_CXX_FLAGS
       "${CMAKE_CXX_FLAGS} ${ARCHCXXFLAGS}"
       CACHE STRING "" FORCE)
-endif()
-
-if(CONFIG_ARCH_TOOLCHAIN_CLANG)
-  set(CMAKE_EXE_LINKER_FLAGS_INIT "-c")
-else()
-  set(CMAKE_EXE_LINKER_FLAGS_INIT "--specs=nosys.specs")
 endif()
