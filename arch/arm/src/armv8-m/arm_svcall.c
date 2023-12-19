@@ -34,6 +34,7 @@
 #include <nuttx/sched.h>
 #include <nuttx/userspace.h>
 
+#include "sched/sched.h"
 #include "signal/signal.h"
 #include "exc_return.h"
 #include "arm_internal.h"
@@ -482,6 +483,11 @@ int arm_svcall(int irq, void *context, void *arg)
     }
 #  endif
 #endif
+
+  if (regs != CURRENT_REGS)
+    {
+      restore_critical_section();
+    }
 
   return OK;
 }
