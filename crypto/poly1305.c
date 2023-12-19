@@ -236,9 +236,9 @@ void poly1305_update(FAR poly1305_state *st,
 
   if (bytes)
     {
-      for (i = 0; i < bytes; i++)
+      for (i = 0; i < bytes && i < poly1305_block_size; i++)
         {
-          st->buffer[st->leftover + i] = m[i];
+          st->buffer[i] = m[i];
         }
 
       st->leftover += bytes;
