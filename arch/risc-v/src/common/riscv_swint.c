@@ -40,6 +40,7 @@
 #  include <syscall.h>
 #endif
 
+#include "sched/sched.h"
 #include "signal/signal.h"
 #include "riscv_internal.h"
 #include "addrenv.h"
@@ -497,6 +498,11 @@ int riscv_swint(int irq, void *context, void *arg)
       svcinfo("SWInt Return: %" PRIxPTR "\n", regs[REG_A0]);
     }
 #endif
+
+  if (regs != CURRENT_REGS)
+    {
+      restore_critical_section();
+    }
 
   return OK;
 }
