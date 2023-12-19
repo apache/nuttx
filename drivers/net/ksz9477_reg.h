@@ -67,6 +67,14 @@
 #define KSZ9477_PORT_ADDRESS(p)            KSZ9477_PORT_REG(p, 0x200)
 #define KSZ9477_PORT_DATA(p)               KSZ9477_PORT_REG(p, 0x204)
 
+/* Switch queue management registers */
+
+#define KSZ9477_Q_MGMT_CONTROL0            0x0390
+#define KSZ9477_Q_MGMT_PORT_VLAN_ENABLE    (1 << 1)
+
+#define KSZ9477_Q_MGMT_PORT_CONTROL0(p)    KSZ9477_PORT_REG(p, 0xA00)
+#define KSZ9477_Q_MGMT_PORT_CONTROL1(p)    KSZ9477_PORT_REG(p, 0xA04)
+
 #define KSZ9477_SGMII_PORT_ADDRESS         KSZ9477_PORT_ADDRESS(7)
 #define KSZ9477_SGMII_PORT_DATA            KSZ9477_PORT_DATA(7)
 

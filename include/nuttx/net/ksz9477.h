@@ -91,6 +91,62 @@ int ksz9477_i2c_init(struct i2c_master_s *i2c_bus,
 #  error Only I2c interface currently supported
 #endif
 
+/****************************************************************************
+ * Name: ksz9477_enable_port_vlan
+ *
+ * Description:
+ *   Enables static port-based VLAN, which can be configured in the switch
+ *   queue management's port control registers
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK or negative error number
+ *
+ ****************************************************************************/
+
+int ksz9477_enable_port_vlan(void);
+
+/****************************************************************************
+ * Name: ksz9477_disable_port_vlan
+ *
+ * Description:
+ *   Disables the static port-based VLAN
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK or negative error number
+ *
+ ****************************************************************************/
+
+int ksz9477_disable_port_vlan(void);
+
+/****************************************************************************
+ * Name: ksz9477_configure_port_vlan
+ *
+ * Description:
+ *   Configures the static port-based VLAN for a single port
+ *   The change will become effective next time when the switch is
+ *   initialized.
+ *
+ * Input Parameters:
+ *   port: The port being configured (1-7)
+ *   disable: Bitmask of ports where frames may not be forwarded to.
+ *            Bit 0 is for port 1, bit 1 for port 2 etc.
+ *   enable: Bitmask of ports where frames may be forwarded to.
+ *            Bit 0 is for port 1, bit 1 for port 2 etc.
+ *
+ * Returned Value:
+ *   OK or negative error number
+ *
+ ****************************************************************************/
+
+int ksz9477_configure_port_vlan(ksz9477_port_t port, uint8_t disable,
+                                uint8_t enable);
+
 #if defined(__cplusplus)
 }
 #endif
