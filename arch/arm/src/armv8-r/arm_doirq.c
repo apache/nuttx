@@ -64,7 +64,6 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
 
   if (regs != CURRENT_REGS)
     {
-      restore_critical_section();
       regs = (uint32_t *)CURRENT_REGS;
     }
 

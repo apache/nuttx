@@ -118,13 +118,6 @@ uint32_t *sparc_doirq(int irq, uint32_t *regs)
   regs = (uint32_t *)((uint32_t)CURRENT_REGS -
                                 CPU_MINIMUM_STACK_FRAME_SIZE);
 
-  /* Restore the cpu lock */
-
-  if (regs != CURRENT_REGS)
-    {
-      restore_critical_section();
-    }
-
   /* Set CURRENT_REGS to NULL to indicate that we are no longer in an
    * interrupt handler.
    */
