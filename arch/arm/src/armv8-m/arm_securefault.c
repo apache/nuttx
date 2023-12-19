@@ -66,12 +66,13 @@ int arm_securefault(int irq, void *context, void *arg)
 
   sfalert("PANIC!!! Secure Fault:\n");
   sfalert("\tIRQ: %d regs: %p\n", irq, context);
-  sfalert("\tBASEPRI: %08x PRIMASK: %08x IPSR: %08"
+  sfalert("\tBASEPRI: %08" PRIx8 " PRIMASK: %08" PRIx8 " IPSR: %08"
           PRIx32 " CONTROL: %08" PRIx32 "\n",
           getbasepri(), getprimask(), getipsr(), getcontrol());
-  sfalert("\tCFSR: %08x HFSR: %08x DFSR: %08x\n", getreg32(NVIC_CFAULTS),
-          getreg32(NVIC_HFAULTS), getreg32(NVIC_DFAULTS));
-  sfalert("\tBFAR: %08x AFSR: %08x SFAR: %08x\n",
+  sfalert("\tCFSR: %08" PRIx32 " HFSR: %08" PRIx32 " DFSR: %08" PRIx32 "\n",
+          getreg32(NVIC_CFAULTS), getreg32(NVIC_HFAULTS),
+          getreg32(NVIC_DFAULTS));
+  sfalert("\tBFAR: %08" PRIx32 " AFSR: %08" PRIx32 " SFAR: %08" PRIx32 "\n",
           getreg32(NVIC_BFAULT_ADDR), getreg32(NVIC_AFAULTS),
           getreg32(SAU_SFAR));
 
