@@ -240,11 +240,6 @@ psock_stream_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   if (conn->lc_state != LOCAL_STATE_CONNECTED ||
       conn->lc_infile.f_inode == NULL)
     {
-      if (conn->lc_state == LOCAL_STATE_CONNECTING)
-        {
-          return -EAGAIN;
-        }
-
       nerr("ERROR: not connected\n");
       return -ENOTCONN;
     }
