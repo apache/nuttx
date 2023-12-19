@@ -66,39 +66,11 @@ int local_release(FAR struct local_conn_s *conn)
 
   DEBUGASSERT(conn->lc_state != LOCAL_STATE_ACCEPT);
 
-  if (conn->lc_state == LOCAL_STATE_CONNECTING)
-    {
-      FAR struct local_conn_s *server = NULL;
-      FAR struct local_conn_s *client;
-      FAR dq_entry_t *waiter = NULL;
-
-      while ((server = local_nextconn(server)) && waiter == NULL)
-        {
-          if (server->lc_state == LOCAL_STATE_LISTENING)
-            {
-              for (waiter = dq_peek(&server->u.server.lc_waiters);
-                   waiter;
-                   waiter = dq_next(&client->u.client.lc_waiter))
-                {
-                  if (&conn->u.client.lc_waiter == waiter)
-                    {
-                      dq_rem(waiter, &server->u.server.lc_waiters);
-                      server->u.server.lc_pending--;
-                      break;
-                    }
-
-                  client = container_of(waiter, struct local_conn_s,
-                                        u.client.lc_waiter);
-                }
-            }
-        }
-    }
-
   /* Is the socket is listening socket (SOCK_STREAM server) */
 
-  else if (conn->lc_state == LOCAL_STATE_LISTENING)
+  if (conn->lc_state == LOCAL_STATE_LISTENING)
     {
-      FAR struct local_conn_s *client;
+      FAR struct local_conn_s *accept;
       FAR dq_entry_t *waiter;
 
       DEBUGASSERT(conn->lc_proto == SOCK_STREAM);
@@ -107,13 +79,11 @@ int local_release(FAR struct local_conn_s *conn)
 
       for (waiter = dq_peek(&conn->u.server.lc_waiters);
            waiter;
-           waiter = dq_next(&client->u.client.lc_waiter))
+           waiter = dq_next(&accept->u.accept.lc_waiter))
         {
-          client = container_of(waiter, struct local_conn_s,
-                                u.client.lc_waiter);
-          client->u.client.lc_result = -ENOTCONN;
-          nxsem_post(&client->lc_waitsem);
-          local_event_pollnotify(client, POLLOUT);
+          accept = container_of(waiter, struct local_conn_s,
+                                u.accept.lc_waiter);
+          local_subref(accept);
         }
 
       conn->u.server.lc_pending = 0;
