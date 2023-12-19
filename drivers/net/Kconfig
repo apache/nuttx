@@ -392,6 +392,18 @@ menuconfig NET_W5500
 		References:
 		W5500 Datasheet, Version 1.0.9, 2013 WIZnet Co., Ltd.
 
+if NET_W5500
+
+config NET_W5500_NINTERFACES
+	int "Number of physical W5500 devices"
+	default 1
+	range 1 1
+	---help---
+		Specifies the number of physical WIZnet W5500
+		devices that will be supported.
+
+endif # W5500
+
 config NET_KSZ9477
 	bool "Management interface for ksz9477 ethernet switch"
 	default n
@@ -416,17 +428,49 @@ config NET_KSZ9477_SPI
 
 endchoice
 
-if NET_W5500
-
-config NET_W5500_NINTERFACES
-	int "Number of physical W5500 devices"
-	default 1
-	range 1 1
+config NET_KSZ9477_PORT_VLAN
+	bool "Use simple port-based VLAN configuration by default"
+	depends on NET_KSZ9477
+	default n
 	---help---
-		Specifies the number of physical WIZnet W5500
-		devices that will be supported.
+		Set connections between switch ports by default at switch init.
+		For each port, set a bit mask indicating to which ports it is allowed
+		to forward packets. Bit 0 is for PHY1 port, bit 1 for PHY2 port etc.
 
-endif # W5500
+config NET_KSZ9477_PORT_VLAN_PHY1
+	hex "Bitmask for PHY1 port connections"
+	depends on NET_KSZ9477_PORT_VLAN
+	default 0x1f
+
+config NET_KSZ9477_PORT_VLAN_PHY2
+	hex "Bitmask for PHY2 port connections"
+	depends on NET_KSZ9477_PORT_VLAN
+	default 0x1f
+
+config NET_KSZ9477_PORT_VLAN_PHY3
+	hex "Bitmask for PHY3 port connections"
+	depends on NET_KSZ9477_PORT_VLAN
+	default 0x1f
+
+config NET_KSZ9477_PORT_VLAN_PHY4
+	hex "Bitmask for PHY4 port connections"
+	depends on NET_KSZ9477_PORT_VLAN
+	default 0x1f
+
+config NET_KSZ9477_PORT_VLAN_PHY5
+	hex "Bitmask for PHY4 port connections"
+	depends on NET_KSZ9477_PORT_VLAN
+	default 0x1f
+
+config NET_KSZ9477_PORT_VLAN_RMII
+	hex "Bitmask for RMII port connections"
+	depends on NET_KSZ9477_PORT_VLAN
+	default 0x1f
+
+config NET_KSZ9477_PORT_VLAN_SGMII
+	hex "Bitmask for SGMII port connections"
+	depends on NET_KSZ9477_PORT_VLAN
+	default 0x1f
 
 menuconfig NET_LAN9250
 	bool "Microchip LAN9250 support"
