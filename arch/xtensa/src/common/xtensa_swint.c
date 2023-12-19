@@ -32,6 +32,7 @@
 #include <nuttx/arch.h>
 #include <sys/syscall.h>
 
+#include "sched/sched.h"
 #include "chip.h"
 #include "signal/signal.h"
 #include "xtensa.h"
@@ -438,6 +439,11 @@ int xtensa_swint(int irq, void *context, void *arg)
       svcinfo("SYSCALL Return: %" PRIu32 "\n", cmd);
     }
 #endif
+
+  if (regs != CURRENT_REGS)
+    {
+      restore_critical_section();
+    }
 
   return OK;
 }
