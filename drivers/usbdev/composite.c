@@ -38,7 +38,7 @@
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbdev_trace.h>
 
-#ifdef CONFIG_BOARD_USBDEV_SERIALSTR
+#if defined(CONFIG_BOARD_USBDEV_SERIALSTR) || defined(CONFIG_BOARD_USBDEV_PIDVID)
 #  include <nuttx/board.h>
 #endif
 
