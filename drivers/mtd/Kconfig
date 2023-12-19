@@ -33,7 +33,8 @@ config MTD_PARTITION
 		is described in:
 
 			include/nuttx/mtd/mtd.h
-			FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd, off_t offset, off_t nblocks);
+			FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd,
+			off_t offset, off_t nblocks);
 
 		Each call to mtd_partition() will create a new MTD driver instance
 		managing the sub-region of flash beginning at 'offset' (in blocks)
@@ -115,7 +116,8 @@ config MTD_READAHEAD
 	select DRVR_INVALIDATE
 	select DRVR_READBYTES
 	---help---
-		Build the mtd_rwbuffer layer and enable support for read-ahead buffering.
+		Build the mtd_rwbuffer layer and enable support for read-ahead
+		buffering.
 
 if MTD_READAHEAD
 
@@ -350,7 +352,7 @@ config NULLMTD_BLOCKSIZE
 	default 512
 
 config NULLMTD_ERASESIZE
-	int "MTD null detault erase block size"
+	int "MTD null default erase block size"
 	default 4096
 
 config NULLMTD_ERASESTATE
@@ -382,10 +384,10 @@ config AT24XX_SIZE
 	int "AT24xx size (Kbit)"
 	default 64
 	---help---
-		This is the XX in the AT24Cxx part number.  For example, if you have a
-		AT 24C512, then the correct value is 512.  This value is also the capacity
-		of the part in kilobits.  For example, the 24C512 supports 512 Kbits or
-		512 /8 = 64 KiB.
+		This is the XX in the AT24Cxx part number.  For example, if you have
+		an AT24C64, then the correct value is 64.
+		This value is also the capacity of the part in kilobits.
+		For example, the 64 supports 64 Kbits or 64/8 = 8 KiB.
 
 config AT24XX_ADDR
 	hex "AT24XX I2C address"
@@ -403,8 +405,8 @@ config AT24XX_EXTENDED
 	bool "Extended memory"
 	default n
 	---help---
-		If the device supports extended memory, then this operation may be set
-		to enabled the MTDIOC_EXTENDED ioctl() operation.  When the
+		If the device supports extended memory, then this operation may be
+		set to enable the MTDIOC_EXTENDED ioctl() operation.  When the
 		extended operation is selected, calls to the driver read method will
 		return data from the extended memory region.
 
@@ -422,11 +424,106 @@ config AT24XX_FREQUENCY
 	int "AT24xx I2C bus frequency"
 	default 100000
 	---help---
-		Set the I2C frequency to use when accessing the AT24CXX EEPROM. This value
-		must represent a valid I2C speed (normally less than 400.000) or the driver
-		might fail.
+		Set the I2C frequency to use when accessing the AT24CXX EEPROM. 
+		This value must represent a valid I2C speed (normally less than
+		400.000) or the driver might fail.
 
 endif # MTD_AT24XX
+
+config MTD_AT25EE
+	bool "SPI-based AT25xx EEPROM"
+	default n
+	select SPI
+	select MTD_BYTE_WRITE
+	---help---
+		Build support for SPI-based AT25xx type EEPROMs. MTD on EEPROM can
+		perform poorly, so it is possible only usable if the EEPROM has a 
+		clock speed 10MHz or higher. EEPROMs that use the same commands as
+		the 25AA160 should work OK.
+
+if MTD_AT25EE
+
+choice
+	prompt "Block Size"
+	default USE_NATIVE_AT25EE_BLOCK_SIZE
+	---help---
+		For applications where a file system is used on the AT25 EEPROM,
+		the tiny page sizes will result in very inefficient EEPROM usage.
+		In such cases, it is better if blocks are comprised of "clusters" of
+		pages so that the file system block size is, say, 128, 256 or
+		512 bytes.
+
+		In any event, the block size *must* be an even multiple of the 
+		number of pages and, often, needs to be a factor 2.
+
+		This is up to the user to check!
+
+config USE_NATIVE_AT25EE_BLOCK_SIZE
+	bool "Use EEPROM's native block size"
+
+config MANUALLY_SET_AT25EE_BLOCK_SIZE
+	bool "Manually set block size"
+
+endchoice # Block Size
+
+if MANUALLY_SET_AT25EE_BLOCK_SIZE
+
+config MANUAL_AT25EE_BLOCK_SIZE
+	int "Manually-set EEPROM block size"
+	default 512
+
+endif # MANUALLY_SET_BLOCK_SIZE
+
+config AT25EE_ENABLE_BLOCK_ERASE
+	bool "Enabled block erase"
+	default n
+	---help---
+		EEPROM does not need to be erased before write. However, in some
+		applications (e.g if an erase verify is wanted, or if a particular
+		file system requires this) block erase (i.e. writing each byte to
+		0xff) can be enabled here.
+
+config AT25EE_SPIMODE
+	int "AT25EE SPI Mode"
+	default 0
+
+config AT25EE_SPIFREQUENCY
+	int "AT25EE SPI Frequency"
+	default 10000000
+
+config AT25EE_START_DELAY
+	int "AT25EE startdelay"
+	---help---
+		The delay between CS active and first CLK. In ns.
+	depends on SPI_DELAY_CONTROL
+	range 0 1000000
+	default 5000
+
+config AT25EE_STOP_DELAY
+	int "AT25EE stopdelay"
+	---help---
+		The delay between last CLK and CS inactive. In ns.
+	depends on SPI_DELAY_CONTROL
+	range 0 1000000
+	default 5000
+
+config AT25EE_CS_DELAY
+	int "AT25EE csdelay"
+	---help---
+		The delay between CS inactive and CS active again. In ns.
+	depends on SPI_DELAY_CONTROL
+	range 0 1000000
+	default 5000
+
+config AT25EE_IFDELAY
+	int "AT25EE ifdelay"
+	---help---
+		The delay between frames. In ns.
+	depends on SPI_DELAY_CONTROL
+	range 0 1000000
+	default 5000
+
+endif # MTD_AT25EE
 
 config MTD_AT25
 	bool "SPI-based AT25 FLASH"
@@ -502,18 +599,20 @@ config M25P_MANUFACTURER
 	hex "M25P manufacturers ID"
 	default 0x20
 	---help---
-		Various manufacturers may have produced the parts.  0x20 is the manufacturer ID
-		for the STMicro MP25x serial FLASH.  If, for example, you are using the a Macronix
-		International MX25 serial FLASH, the correct manufacturer ID would be 0xc2.
+		Various manufacturers may have produced the parts.
+		0x20 is the manufacturer ID for the STMicro MP25x serial FLASH.
+		If, for example, you are using the a Macronix International MX25
+		serial FLASH, the correct manufacturer ID would be 0xc2.
 
 config M25P_MEMORY_TYPE
 	hex "M25P memory type ID"
 	default 0x20
 	---help---
-		The memory type for M25 "P" series is 0x20, but the driver also supports "F" series
-		devices, such as the EON EN25F80 part which adds a 4K sector erase capability.  The
-		memory type for "F" series parts from EON is 0x31.  The 4K sector erase size will
-		automatically be enabled when filesystems that can use it are enabled, such as SMART.
+		The memory type for M25 "P" series is 0x20, but the driver also
+		supports "F" series devices, such as the EON EN25F80 part which adds
+		a 4K sector erase capability.  The memory type for "F" series parts
+		from EON is 0x31.  The 4K sector erase size will automatically be
+		enabled when filesystems that can use it are enabled, such as SMART.
 
 config MT25Q_MEMORY_TYPE
 	hex "MT25Q memory type ID"
@@ -527,7 +626,8 @@ config M25P_SUBSECTOR_ERASE
 	---help---
 		Some devices (such as the EON EN25F80) support a smaller erase block
 		size (4K vs 64K).  This option enables support for sub-sector erase.
-		The SMART file system can take advantage of this option if it is enabled.
+		The SMART file system can take advantage of this option if it is
+		enabled.
 
 endif # MTD_M25P
 
@@ -558,7 +658,8 @@ config MX25L_SUBSECTOR_ERASE
 	---help---
 		Some devices (such as the EON EN25F80) support a smaller erase block
 		size (4K vs 64K).  This option enables support for sub-sector erase.
-		The SMART file system can take advantage of this option if it is enabled.
+		The SMART file system can take advantage of this option if it is
+		enabled.
 
 config MX25L_DEBUG
 	bool "Enable driver debug features"
@@ -672,7 +773,8 @@ config MTD_W25QXXXJV
 	bool "QuadSPI-based Winbond W25QXXXJV family FLASH"
 	default n
 	---help---
-		Support the W25Q016JV, W25Q032JV, W25Q064JV, W25Q128JV, W25Q256JV, W25Q512JV, W25Q01JV
+		Support the W25Q016JV, W25Q032JV, W25Q064JV, W25Q128JV, W25Q256JV,
+		W25Q512JV, W25Q01JV
 
 if MTD_W25QXXXJV
 
@@ -744,13 +846,14 @@ config MTD_SMART
 	bool "Sector Mapped Allocation for Really Tiny (SMART) Flash support"
 	default n
 	---help---
-		The MP25x series of Flash devices are typically very small and have a very large
-		erase block size.  This causes issues with the standard Flash Translation Layer
-		block driver since it tries to allocate a RAM block the size of a flash erase
-		block, which is typically 64K.  This block driver uses a different approach
-		to sacrifice performance for RAM memory footprint by saving data in sectors
-		(typically 2K - 4K based on memory size) and relocating sectors as needed when
-		an erase block needs to be erased.
+		The MP25x series of Flash devices are typically very small and have a
+		very large erase block size.  This causes issues with the standard
+		Flash Translation Layer	block driver since it tries to allocate a RAM
+		block the size of a flash erase	block, which is typically 64K.
+		This block driver uses a different approach	to sacrifice performance
+		for RAM memory footprint by saving data in sectors (typically 2K - 4K
+		based on memory size) and relocating sectors as needed when	an erase
+		block needs to be erased.
 
 if MTD_SMART
 
@@ -766,9 +869,9 @@ config MTD_SMART_SECTOR_SIZE
 	int "SMART Device sector size"
 	default 1024
 	---help---
-		Sets the size of a single allocation on the SMART device.  Larger sector sizes
-		reduce overhead per sector, but cause more wasted space with a lot of smaller
-		files.
+		Sets the size of a single allocation on the SMART device.
+		Larger sector sizes reduce overhead per sector, but cause more wasted
+		space with a lot of smaller files.
 
 config MTD_SMART_WRITEBUFFER
 	bool "Enable SMART write buffering"
@@ -785,10 +888,11 @@ config MTD_SMART_WEAR_LEVEL
 	depends on MTD_SMART
 	default y
 	---help---
-		Adds extra logic and RAM to guarantee equal wear leveling of the FLASH
-		device by recording and monitoring erase block operations and selecting
-		sector allocations to ensure all erase blocks are worn evenly.  This will
-		evenly wear both dynamic and static data on the device.
+		Adds extra logic and RAM to guarantee equal wear leveling of the
+		FLASH device by recording and monitoring erase block operations and
+		selecting sector allocations to ensure all erase blocks are worn
+		evenly.  This will evenly wear both dynamic and static data on the
+		device.
 
 if MTD_SMART_WEAR_LEVEL && !SMART_CRC_16
 
@@ -796,11 +900,11 @@ config MTD_SMART_CONVERT_WEAR_FORMAT
 	bool "Convert existing non wear leveling FLASH to wear leveling"
 	default n
 	---help---
-		Adds a little extra code which detects an existing SMART format on a device
-		that was created prior to the wear leveling implementation.  This conversion
-		only works if either no CRC is being used or if CRC-8 is being used as other
-		CRC versions use a different header format and require a mksmartfs on the
-		device even if an existing format is there.
+		Adds a little extra code which detects an existing SMART format on a
+		device that was created prior to the wear leveling implementation.
+		This conversion only works if either no CRC is being used or if CRC-8
+		is being used as other CRC versions use a different header format and
+		require a mksmartfs on the device even if an existing format is there
 
 endif # MTD_SMART_WEAR_LEVEL && !SMART_CRC_16
 
@@ -809,17 +913,19 @@ config MTD_SMART_ENABLE_CRC
 	depends on MTD_SMART
 	default n
 	---help---
-		Enables logic to compute and validate a CRC for logical sectors.  The
-		CRC is calculated for all bytes in the logical sector.  The CRC size is
-		selectable (8-bit, 16-bit, 32-bit).  For added protection, larger CRCs should
-		be used with larger (2K - 4K) sector sizes.  Enabling CRC protection will
-		cause increased sector relocation and increased erase block erasures since
-		directory and wear-level status updates can no longer be performed in-place
-		and mandate re-writing the information to a new sector.
+		Enables logic to compute and validate a CRC for logical sectors.
+		The CRC is calculated for all bytes in the logical sector.
+		The CRC size is selectable (8-bit, 16-bit, 32-bit). For added
+		protection, larger CRCs should be used with larger (2K - 4K) sector
+		sizes.  Enabling CRC protection will cause increased sector
+		relocation and increased erase block erasures since directory and
+		wear-level status updates can no longer be performed in-place and
+		mandate re-writing the information to a new sector.
 
-		An 8-bit CRC protection scheme can be added to an existing non-CRC formatted
-		SMART volume without needing to reformat the drive.  As sectors are re-written
-		or relocated, they will be converted to CRC protected sectors.
+		An 8-bit CRC protection scheme can be added to an existing non-CRC
+		formatted SMART volume without needing to reformat the drive. As
+		sectors are re-written or relocated, they will be converted to CRC
+		protected sectors.
 
 choice
 	prompt "CRC level selection"
@@ -827,9 +933,9 @@ choice
 	default SMART_CRC_8
 	---help---
 		Select the level of CRC protection implemented in the SMART MTD layer.
-		Smaller CRC selection uses less overhead per logical sectors, but also has
-		a higher probability of not detecting multiple bit errors.  Devices with
-		larger logical sector sizes should use a larger CRC.
+		Smaller CRC selection uses less overhead per logical sectors, but
+		also has a higher probability of not detecting multiple bit errors.
+		Devices with larger logical sector sizes should use a larger CRC.
 
 config SMART_CRC_8
 	bool "CRC-8"
@@ -858,52 +964,54 @@ config MTD_SMART_MINIMIZE_RAM
 	depends on MTD_SMART
 	default 0
 	---help---
-		Reduces RAM usage in the SMART MTD layer by replacing the 1-for-1 logical to
-		physical sector map with a smaller cache-based structure.  This can save a
-		considerable amount of RAM on devices with a large sector count, but at the
-		expense of increased read/write times when a cache miss occurs.  If the
-		requested logical sector has not been cached, then the device will need to be
-		scanned to located it on the physical medium.
+		Reduces RAM usage in the SMART MTD layer by replacing the 1-for-1
+		logical to physical sector map with a smaller cache-based structure.
+		This can save a considerable amount of RAM on devices with a large
+		sector count, but at the expense of increased read/write times when a
+		cache miss occurs.  If the requested logical sector has not been
+		cached, then the device will need to be scanned to located it on the
+		physical medium.
 
 config MTD_SMART_SECTOR_CACHE_SIZE
 	int "Number of entries in the SMART logical sector cache"
 	depends on MTD_SMART_MINIMIZE_RAM
 	default 512
 	---help---
-		Sets the size of the cache used for logical to physical sector mapping.  A
-		larger number allows larger files to be "seek"ed randomly without encountering
-		cache misses.  Any files larger than CACH_SIZE * SECTOR_SIZE that are sought
-		start to end will cause the cache to flush forcing manual scanning of the
-		MTD device to find the logical to physical mappings.
+		Sets the size of the cache used for logical to physical sector
+		mapping.  A	larger number allows larger files to be "seek"ed randomly
+		without encountering cache misses. Any files larger than
+		CACHE_SIZE * SECTOR_SIZE that are sought start to end will cause the
+		cache to flush forcing manual scanning of the MTD device to find the
+		logical to physical mappings.
 
 config MTD_SMART_SECTOR_PACK_COUNTS
 	bool "Pack free and release counts when possible"
 	depends on MTD_SMART_MINIMIZE_RAM
 	default y
 	---help---
-		For volumes with 16 sectors per erase block or less, this option causes the
-		free sector and released sector counts used for allocation and garbage
-		collection to be packed such that two values are stored per byte.  For
-		volumes with 16 sectors per erase block, the 4 LSBs are packed and all of
-		the high-order bits are packed separately (8 per byte).  This squeezes even
-		more RAM out.
+		For volumes with 16 sectors per erase block or less, this option
+		causes the free sector and released sector counts used for allocation
+		and garbage collection to be packed such that two values are stored
+		per byte.  For volumes with 16 sectors per erase block, the 4 LSBs
+		are packed and all of the high-order bits are packed separately
+		(8 per byte).  This squeezes even more RAM out.
 
 config MTD_SMART_SECTOR_ERASE_DEBUG
 	bool "Track Erase Block erasure counts"
 	depends on MTD_SMART
 	default n
 	---help---
-		Allocates an Erase Block erase count array and keeps track of the number
-		of erases per erase block.  This data is then presented on the procfs
-		interface.
+		Allocates an Erase Block erase count array and keeps track of the
+		number of erases per erase block.  This data is then presented on the
+		procfs interface.
 
 config MTD_SMART_ALLOC_DEBUG
 	bool "RAM Allocation Debug"
 	depends on MTD_SMART
 	default n
 	---help---
-		Records all SMART MTD layer allocations for debug purposes and makes them
-		accessible from the ProcFS interface if it is enabled.
+		Records all SMART MTD layer allocations for debug purposes and makes
+		them accessible from the ProcFS interface if it is enabled.
 
 endif # MTD_SMART
 
@@ -938,8 +1046,8 @@ config RAMTRON_EMULATE_SECTOR_SHIFT
 		For purpose of the VFAT file system, we emulate them.
 
 		Specify sector shift value to determine emulated sector size.
-		The relationship between sector shift value and emulated sector size is
-		described in the equation:
+		The relationship between sector shift value and emulated sector size
+		is described in the equation:
 		RAMTRON_EMULATE_SECTOR_SIZE = (1 << RAMTRON_EMULATE_SECTOR_SHIFT)
 
 		sector shift value	: sector size in bytes
@@ -1007,11 +1115,12 @@ config SST25_SLOWWRITE
 	bool
 	default n
 	---help---
-		There used to be a bug in the current code when using the higher speed AAI
-		write sequence. The nature of the bug is that the WRDI instruction is not
-		working. At the end of the AAI sequence, the status register continues to
-		report that the SST25 is write enabled (WEL bit) and in AAI mode (AAI
-		bit).  This has been fixed by David Sidrane!
+		There used to be a bug in the current code when using the higher
+		speed AAI write sequence. The nature of the bug is that the WRDI
+		instruction is not working. At the end of the AAI sequence, the
+		status register continues to report that the SST25 is write enabled
+		(WEL bit) and in AAI mode (AAI bit).
+		This has been fixed by David Sidrane!
 
 config SST25_SLOWREAD
 	bool
@@ -1026,8 +1135,8 @@ config MTD_SST25XX
 	---help---
 		With the 64 MBit and larger parts, SST changed the write mechanism to
 		support page write instead of byte/word write like the smaller parts.
-		As a result, the SST25 driver is not compatible with the larger density
-		parts, and the SST25XX driver must be used instead.
+		As a result, the SST25 driver is not compatible with the larger
+		density	parts, and the SST25XX driver must be used instead.
 
 if MTD_SST25XX
 
@@ -1043,15 +1152,16 @@ config SST25XX_MANUFACTURER
 	hex "Manufacturers ID"
 	default 0xBF
 	---help---
-		Various manufacturers may have produced the parts.  0xBF is the manufacturer ID
-		for the parts manufactured by SST.
+		Various manufacturers may have produced the parts.  0xBF is the
+		manufacturer ID	for the parts manufactured by SST.
 
 config SST25XX_MEMORY_TYPE
 	hex "Memory type ID"
 	default 0x25
 	---help---
-		The memory type for SST25VF065 series is 0x25, but this can be modified if needed
-		to support compatible devices from different manufacturers.
+		The memory type for SST25VF065 series is 0x25, but this can be
+		modified if needed to support compatible devices from different
+		manufacturers.
 
 endif # MTD_SST25XX
 
@@ -1060,7 +1170,8 @@ config MTD_SST26
 	default n
 	select SPI
 	---help---
-		These part are also different from SST25 and SST25XX, they support both SPI and QSPI.
+		These part are also different from SST25 and SST25XX, they support
+		both SPI and QSPI.
 
 if MTD_SST26
 
@@ -1076,15 +1187,16 @@ config SST26_MANUFACTURER
 	hex "Manufacturers ID"
 	default 0xBF
 	---help---
-		Various manufacturers may have produced the parts.  0xBF is the manufacturer ID
-		for the parts manufactured by SST.
+		Various manufacturers may have produced the parts.  0xBF is the
+		manufacturer ID	for the parts manufactured by SST.
 
 config SST26_MEMORY_TYPE
 	hex "Memory type ID"
 	default 0x26
 	---help---
-		The memory type for SST26VF0xx series is 0x26, but this can be modified if needed
-		to support compatible devices from different manufacturers.
+		The memory type for SST26VF0xx series is 0x26, but this can be
+		modified if needed to support compatible devices from different
+		manufacturers.
 
 config SST26_DEBUG
 	bool "Debug output from the SST26 driver"
