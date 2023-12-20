@@ -553,7 +553,7 @@ static uint32_t ms56xx_compensate_press(FAR struct ms56xx_dev_s *priv,
             off2 = (61 * delta) >> 4;
             sens2 = 2 * delta;
 
-            if (temp < 1500)
+            if (temp < -1500)
               {
                 /* Very low temperature */
 
@@ -579,7 +579,7 @@ static uint32_t ms56xx_compensate_press(FAR struct ms56xx_dev_s *priv,
             off2 = (5 * delta) >> 1;
             sens2 = (5 * delta) >> 2;
 
-            if (temp < 1500)
+            if (temp < -1500)
               {
                 /* Very low temperature */
 
