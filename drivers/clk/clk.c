@@ -727,6 +727,11 @@ static void clk_init_parent(FAR struct clk_s *clk)
       return;
     }
 
+  for (index = 0; index < clk->num_parents; index++)
+    {
+      clk->parents[index] = clk_get(clk->parent_names[index]);
+    }
+
   if (!clk->ops->get_parent)
     {
       return;
@@ -1205,7 +1210,12 @@ FAR struct clk_s *clk_get_parent_by_index(FAR struct clk_s *clk,
       return NULL;
     }
 
-  return clk_get(clk->parent_names[index]);
+  if (clk->parents[index] == NULL)
+    {
+      clk->parents[index] = clk_get(clk->parent_names[index]);
+    }
+
+  return clk->parents[index];
 }
 
 FAR struct clk_s *clk_get_parent(FAR struct clk_s *clk)
@@ -1308,6 +1318,15 @@ FAR struct clk_s *clk_register(FAR const char *name,
         }
     }
 
+  if (num_parents > 0)
+    {
+      clk->parents = kmm_zalloc(sizeof(struct clk_s *) * num_parents);
+      if (clk->parents == NULL)
+        {
+          goto out;
+        }
+    }
+
   list_initialize(&clk->node);
   list_initialize(&clk->children);
 
@@ -1318,7 +1337,13 @@ FAR struct clk_s *clk_register(FAR const char *name,
       return clk;
     }
 
+out:
   clk_list_unlock(irqflags);
+  if (clk->parents)
+    {
+      kmm_free(clk->parents);
+    }
+
   kmm_free(clk);
   return NULL;
 }
