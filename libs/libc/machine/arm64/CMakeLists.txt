@@ -1,5 +1,5 @@
 # ##############################################################################
-# libs/libc/fdt/CMakeLists.txt
+# libs/libc/machine/arm64/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -17,37 +17,12 @@
 # the License.
 #
 # ##############################################################################
-if(CONFIG_LIBC_FDT)
+add_subdirectory(gnu)
 
-  set(FDT_DIR ${CMAKE_CURRENT_LIST_DIR}/dtc)
-  if(NOT EXISTS ${FDT_DIR})
-    set(VERSION ${CONFIG_LIBC_FDT_DTC_VERSION})
+set(SRCS)
 
-    FetchContent_Declare(
-      dtc
-      URL https://github.com/dgibson/dtc/archive/v${VERSION}.zip SOURCE_DIR
-          ${CMAKE_CURRENT_LIST_DIR}/dtc BINARY_DIR
-          ${CMAKE_BINARY_DIR}/libs/libc/fdt/dtc)
-    FetchContent_GetProperties(dtc)
-    if(NOT dtc_POPULATED)
-      FetchContent_Populate(dtc)
-    endif()
-  endif()
-
-  set(SRCS
-      fdt.c
-      fdt_ro.c
-      fdt_wip.c
-      fdt_sw.c
-      fdt_rw.c
-      fdt_strerror.c
-      fdt_empty_tree.c
-      fdt_addresses.c
-      fdt_overlay.c
-      fdt_check.c)
-  list(TRANSFORM SRCS PREPEND ${FDT_DIR}/libfdt/)
-
-  target_sources(c PRIVATE ${SRCS})
-
-  target_include_directories(c PRIVATE ${FDT_DIR}/libfdt)
+if(CONFIG_LIBC_ARCH_ELF_64BIT)
+  list(APPEND SRCS arch_elf.c)
 endif()
+
+target_sources(c PRIVATE ${SRCS})
