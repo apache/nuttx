@@ -114,7 +114,7 @@ static int ms56xx_read24(FAR struct ms56xx_dev_s *priv,
                          FAR uint8_t *regval);
 
 static int32_t ms56xx_compensate_temp(FAR struct ms56xx_dev_s *priv,
-                                      uint32_t temp, int32_t *deltat);
+                                      uint32_t temp_raw, int32_t *deltat);
 static uint32_t ms56xx_compensate_press(FAR struct ms56xx_dev_s *priv,
                                         uint32_t press, uint32_t dt,
                                         int32_t *temp);
@@ -257,7 +257,8 @@ static inline void baro_measure_read(FAR struct ms56xx_dev_s *priv,
                                      FAR struct sensor_baro *baro)
 {
   uint32_t press;
-  uint32_t temp;
+  uint32_t temp_raw;
+  int32_t temp;
   int32_t deltat;
   int ret;
   uint8_t buffer[3];
@@ -340,9 +341,9 @@ static inline void baro_measure_read(FAR struct ms56xx_dev_s *priv,
       return;
     }
 
-  temp = (uint32_t) buffer[0] << 16 |
-         (uint32_t) buffer[1] << 8 |
-         (uint32_t) buffer[2];
+  temp_raw = (uint32_t) buffer[0] << 16 |
+             (uint32_t) buffer[1] << 8 |
+             (uint32_t) buffer[2];
 
   /* Release the mutex */
 
@@ -350,7 +351,7 @@ static inline void baro_measure_read(FAR struct ms56xx_dev_s *priv,
 
   /* Compensate the temp/press with calibration data */
 
-  temp = ms56xx_compensate_temp(priv, temp, &deltat);
+  temp = ms56xx_compensate_temp(priv, temp_raw, &deltat);
   press = ms56xx_compensate_press(priv, press, deltat, &temp);
 
   baro->timestamp = ms56xx_curtime();
@@ -491,14 +492,15 @@ static int ms56xx_initialize(FAR struct ms56xx_dev_s *priv)
  ****************************************************************************/
 
 static int32_t ms56xx_compensate_temp(FAR struct ms56xx_dev_s *priv,
-                                      uint32_t temp, int32_t *deltat)
+                                      uint32_t temp_raw, int32_t *deltat)
 {
   struct ms56xx_calib_s *c = &priv->calib;
   int32_t dt;
+  int32_t temp;
 
   /* dt = d1 - c5 * 256 */
 
-  dt = temp - ((int32_t) c->c5 << 8);
+  dt = temp_raw - ((int32_t) c->c5 << 8);
 
   /* temp = 2000 + (dt * c6) / 8388608 */
 
