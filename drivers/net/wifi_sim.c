@@ -474,7 +474,7 @@ static int read_bss_config(FAR char *buf, size_t len, FAR char *path)
   struct file filep;
   int ret;
 
-  ret = file_open(&filep, path, O_RDWR);
+  ret = file_open(&filep, path, O_RDONLY);
   if (ret < 0)
     {
       nerr("open error");
