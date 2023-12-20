@@ -164,6 +164,16 @@ int file_dup3(FAR struct file *filep1, FAR struct file *filep2, int flags)
         }
     }
 
+  /* Copy tag */
+
+#ifdef CONFIG_FDSAN
+  filep2->f_tag_fdsan = filep1->f_tag_fdsan;
+#endif
+
+#ifdef CONFIG_FDCHECK
+  filep2->f_tag_fdcheck = filep1->f_tag_fdcheck;
+#endif
+
   return OK;
 }
 
