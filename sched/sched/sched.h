@@ -291,6 +291,16 @@ extern volatile clock_t g_cpuload_total;
 
 extern volatile cpu_set_t g_cpu_lockset;
 
+/* This is the spinlock that enforces critical sections when interrupts are
+ * disabled.
+ */
+
+extern volatile spinlock_t g_cpu_irqlock;
+
+/* Used to keep track of which CPU(s) hold the IRQ lock. */
+
+extern volatile cpu_set_t g_cpu_irqset;
+
 /* Used to lock tasklist to prevent from concurrent access */
 
 extern volatile spinlock_t g_cpu_tasklistlock;
