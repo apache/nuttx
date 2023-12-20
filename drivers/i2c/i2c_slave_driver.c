@@ -91,6 +91,10 @@ struct i2c_slave_driver_s
 
   sem_t wait;
 
+  /* I2C Slave write flag */
+
+  bool writeable;
+
   /* Mutual exclusion */
 
   mutex_t lock;
@@ -359,6 +363,11 @@ static ssize_t i2c_slave_write(FAR struct file *filep,
   write_bytes = MIN(buflen, CONFIG_I2C_SLAVE_WRITEBUFSIZE);
   memcpy(priv->write_buffer, buffer, write_bytes);
   ret = I2CS_WRITE(priv->dev, priv->write_buffer, write_bytes);
+  if (ret >= 0)
+    {
+      priv->writeable = false;
+    }
+
   nxmutex_unlock(&priv->lock);
   return ret < 0 ? ret : write_bytes;
 }
@@ -371,7 +380,7 @@ static int i2c_slave_poll(FAR struct file *filep, FAR struct pollfd *fds,
                           bool setup)
 {
   FAR struct i2c_slave_driver_s *priv;
-  int ret;
+  int ret = OK;
 
   DEBUGASSERT(filep->f_inode->i_private != NULL);
 
@@ -400,6 +409,11 @@ static int i2c_slave_poll(FAR struct file *filep, FAR struct pollfd *fds,
       if (priv->read_length > 0)
         {
           eventset |= POLLIN;
+        }
+
+      if (priv->writeable)
+        {
+          eventset |= POLLOUT;
         }
 
       poll_notify(&priv->fds, 1, eventset);
@@ -464,26 +478,36 @@ static int i2c_slave_unlink(FAR struct inode *inode)
 }
 #endif
 
-static int i2c_slave_callback(FAR void *arg, size_t length)
+static int i2c_slave_callback(FAR void *arg, i2c_slave_complete_t status,
+                              size_t length)
 {
   FAR struct i2c_slave_driver_s *priv = arg;
+  pollevent_t events;
   int semcount;
 
   /* Get exclusive access to the I2C Slave driver state structure */
 
   nxmutex_lock(&priv->lock);
 
-  priv->read_index = 0;
-  priv->read_length = length;
-
-  while (nxsem_get_value(&priv->wait, &semcount) >= 0 && semcount <= 1)
+  if (status == I2CS_RX_COMPLETE)
     {
-      nxsem_post(&priv->wait);
+      events = POLLIN;
+      priv->read_index = 0;
+      priv->read_length = length;
+
+      while (nxsem_get_value(&priv->wait, &semcount) >= 0 && semcount <= 1)
+        {
+          nxsem_post(&priv->wait);
+        }
+    }
+  else
+    {
+      events = POLLOUT;
+      priv->writeable = true;
     }
 
   nxmutex_unlock(&priv->lock);
-
-  poll_notify(&priv->fds, 1, POLLIN);
+  poll_notify(&priv->fds, 1, events);
   return OK;
 }
 
@@ -541,6 +565,7 @@ int i2c_slave_register(FAR struct i2c_slave_s *dev, int bus, int addr,
   priv->dev = dev;
   priv->addr = addr;
   priv->nbits = nbits;
+  priv->writeable = true;
 
   ret = I2CS_READ(priv->dev, priv->read_buffer,
                   CONFIG_I2C_SLAVE_READBUFSIZE);

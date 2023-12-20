@@ -206,9 +206,16 @@
  * Public Types
  ****************************************************************************/
 
+typedef enum i2c_slave_complete_e
+{
+  I2CS_RX_COMPLETE = 0,
+  I2CS_TX_COMPLETE
+} i2c_slave_complete_t;
+
 /* The callback function */
 
-typedef int (i2c_slave_callback_t)(void *arg, size_t rx_len);
+typedef int (i2c_slave_callback_t)(FAR void *arg, i2c_slave_complete_t state,
+                                   size_t len);
 
 /* The I2C vtable */
 
