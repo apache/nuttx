@@ -34,6 +34,7 @@
 #include "esp32_clockconfig.h"
 #include "esp32_rt_timer.h"
 
+#include "hardware/esp32_apb_ctrl.h"
 #include "hardware/esp32_rtccntl.h"
 #include "hardware/esp32_rtc_io.h"
 #include "hardware/esp32_dport.h"
