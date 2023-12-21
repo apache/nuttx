@@ -1354,9 +1354,14 @@ static int isx019_init(FAR struct imgsensor_s *sensor)
   fpga_init(priv);
   initialize_wbmode(priv);
   initialize_jpg_quality(priv);
-  store_default_value(priv);
+
+  /* Because store_default_value() needs the clock ratio,
+   * clock_ratio has to be calculated first.
+   */
+
   clk = board_isx019_get_master_clock();
   priv->clock_ratio = (float)clk / ISX019_STANDARD_MASTER_CLOCK;
+  store_default_value(priv);
 
   return OK;
 }
