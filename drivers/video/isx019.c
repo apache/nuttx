@@ -99,13 +99,26 @@
 
 /* For set_value() and get_value() I/F */
 
-#define SET_REGINFO(a, c, o, s) do \
+#define SET_REGINFO(a, c, o, t, s) do \
                                   {                      \
                                     (a)->category = (c); \
                                     (a)->offset   = (o); \
+                                    (a)->type     = (t); \
                                     (a)->size     = (s); \
                                   }                      \
                                 while (0);
+
+/* Register type, which represents the number of bits and
+ * whether it is signed or unsigned.
+ */
+
+#define ISX019_REGTYPE_INT8   (0)
+#define ISX019_REGTYPE_UINT8  (1)
+#define ISX019_REGTYPE_INT16  (2)
+
+#define SET_REGINFO_INT8(a, c, o) SET_REGINFO(a, c, o, ISX019_REGTYPE_INT8, 1)
+#define SET_REGINFO_UINT8(a, c, o) SET_REGINFO(a, c, o, ISX019_REGTYPE_UINT8, 1)
+#define SET_REGINFO_INT16(a, c, o) SET_REGINFO(a, c, o, ISX019_REGTYPE_INT16, 2)
 
 #define VALIDATE_RANGE(v, min, max, step) (((v) >= (min)) && \
                                            ((v) <= (max)) && \
@@ -239,6 +252,7 @@ struct isx019_reginfo_s
 {
   uint16_t category;
   uint16_t offset;
+  uint8_t  type;
   uint8_t  size;
 };
 
@@ -2040,12 +2054,12 @@ static int32_t not_convert(int32_t val)
 
 static int32_t convert_brightness_is2reg(int32_t val)
 {
-  return (val << 2);
+  return (val * 4);
 }
 
 static int32_t convert_brightness_reg2is(int32_t val)
 {
-  return (val >> 2);
+  return (val / 4);
 }
 
 static int32_t convert_hue_is2reg(int32_t val)
@@ -2119,38 +2133,38 @@ static convert_t get_reginfo(uint32_t id, bool is_set,
   switch (id)
     {
       case IMGSENSOR_ID_BRIGHTNESS:
-        SET_REGINFO(reg, CAT_PICTTUNE, UIBRIGHTNESS, 2);
+        SET_REGINFO_INT16(reg, CAT_PICTTUNE, UIBRIGHTNESS);
         cvrt = is_set ? convert_brightness_is2reg
                       : convert_brightness_reg2is;
         break;
 
       case IMGSENSOR_ID_CONTRAST:
-        SET_REGINFO(reg, CAT_PICTTUNE, UICONTRAST, 1);
+        SET_REGINFO_UINT8(reg, CAT_PICTTUNE, UICONTRAST);
         cvrt = not_convert;
         break;
 
       case IMGSENSOR_ID_SATURATION:
-        SET_REGINFO(reg, CAT_PICTTUNE, UISATURATION, 1);
+        SET_REGINFO_UINT8(reg, CAT_PICTTUNE, UISATURATION);
         cvrt = not_convert;
         break;
 
       case IMGSENSOR_ID_HUE:
-        SET_REGINFO(reg, CAT_PICTTUNE, UIHUE, 1);
+        SET_REGINFO_INT8(reg, CAT_PICTTUNE, UIHUE);
         cvrt = is_set ? convert_hue_is2reg : convert_hue_reg2is;
         break;
 
       case IMGSENSOR_ID_EXPOSURE:
-        SET_REGINFO(reg, CAT_AEDGRM, EVSEL, 1);
+        SET_REGINFO_INT8(reg, CAT_AEDGRM, EVSEL);
         cvrt = not_convert;
         break;
 
       case IMGSENSOR_ID_SHARPNESS:
-        SET_REGINFO(reg, CAT_PICTTUNE, UISHARPNESS, 1);
+        SET_REGINFO_UINT8(reg, CAT_PICTTUNE, UISHARPNESS);
         cvrt = not_convert;
         break;
 
       case IMGSENSOR_ID_WIDE_DYNAMIC_RANGE:
-        SET_REGINFO(reg, CAT_AEWD, AEWDMODE, 1);
+        SET_REGINFO_UINT8(reg, CAT_AEWD, AEWDMODE);
         cvrt = is_set ? convert_hdr_is2reg : convert_hdr_reg2is;
         break;
 
@@ -3568,16 +3582,37 @@ static int isx019_get_value(FAR struct imgsensor_s *sensor,
   isx019_reginfo_t reg;
   convert_t cvrt;
   getvalue_t get;
-  int32_t val32;
+  union
+  {
+    int32_t i32;
+    int16_t i16;
+    int8_t  i8;
+  } regval;
 
   DEBUGASSERT(val);
 
   cvrt = get_reginfo(id, false, &reg);
   if (cvrt)
     {
+      memset(&regval, 0, sizeof(regval));
       ret = isx019_i2c_read(priv,
-              reg.category, reg.offset, &val32, reg.size);
-      val->value32 = cvrt(val32);
+              reg.category, reg.offset, &regval.i32, reg.size);
+
+      switch (reg.type)
+        {
+          case ISX019_REGTYPE_INT8:
+            regval.i32 = (int32_t)regval.i8;
+            break;
+
+          case ISX019_REGTYPE_INT16:
+            regval.i32 = (int32_t)regval.i16;
+            break;
+
+          default:
+            break;
+        }
+
+      val->value32 = cvrt(regval.i32);
     }
   else
     {
