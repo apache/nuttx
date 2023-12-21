@@ -44,7 +44,7 @@
 
 #include "rom/esp32_efuse.h"
 #include "rom/esp32_spiflash.h"
-#include "hardware/efuse_reg.h"
+#include "hardware/esp32_efuse.h"
 
 #ifdef CONFIG_ESP32_SPIRAM
 
