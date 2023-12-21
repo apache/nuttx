@@ -38,6 +38,7 @@
 #include <nuttx/note/note_driver.h>
 #include <nuttx/note/noteram_driver.h>
 #include <nuttx/note/notelog_driver.h>
+#include <nuttx/note/notestream_driver.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/sched_note.h>
 #include <nuttx/instrument.h>
@@ -191,7 +192,10 @@ FAR static struct note_driver_s *
   (FAR struct note_driver_s *)&g_noteram_driver,
 #endif
 #ifdef CONFIG_DRIVERS_NOTELOG
-  &g_notelog_driver,
+  (FAR struct note_driver_s *)&g_notelog_driver,
+#endif
+#ifdef CONFIG_DRIVERS_NOTELOWEROUT
+  (FAR struct note_driver_s *)&g_notestream_lowerout,
 #endif
 #ifdef CONFIG_DRIVERS_NOTERPMSG
   (FAR struct note_driver_s *)&g_noterpmsg_driver,

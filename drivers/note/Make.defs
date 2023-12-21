@@ -25,6 +25,10 @@ ifeq ($(CONFIG_DRIVERS_NOTE),y)
   CSRCS += note_initialize.c
 endif
 
+ifneq ($(CONFIG_DRIVERS_NOTEFILE)$(CONFIG_DRIVERS_NOTELOWEROUT),)
+  CSRCS += notestream_driver.c
+endif
+
 ifeq ($(CONFIG_DRIVERS_NOTERAM),y)
   CSRCS += noteram_driver.c
 endif
