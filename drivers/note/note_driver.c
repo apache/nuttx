@@ -1504,7 +1504,10 @@ void sched_note_event_ip(uint32_t tag, uintptr_t ip, uint8_t event,
 
           note_common(tcb, &note->nev_cmn, length, event);
           note->nev_ip = ip;
-          memcpy(note->nev_data, buf, length - SIZEOF_NOTE_EVENT(0));
+          if (buf != NULL)
+            {
+              memcpy(note->nev_data, buf, length - SIZEOF_NOTE_EVENT(0));
+            }
         }
 
       /* Add the note to circular buffer */
