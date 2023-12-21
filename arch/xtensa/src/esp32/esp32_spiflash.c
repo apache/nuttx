@@ -51,7 +51,7 @@
 #include "hardware/esp32_soc.h"
 #include "hardware/esp32_spi.h"
 #include "hardware/esp32_dport.h"
-#include "hardware/efuse_reg.h"
+#include "hardware/esp32_efuse.h"
 
 #include "esp32_spicache.h"
 #ifdef CONFIG_ESP32_SPIRAM
