@@ -309,6 +309,8 @@ extern "C"
 #  define EXTERN extern
 #endif
 
+extern struct lib_outstream_s g_lowoutstream;
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
