@@ -502,25 +502,22 @@ static int IRAM_ATTR esp32_get_vddsdio_config(
 
   efuse_reg = getreg32(EFUSE_BLK0_RDATA4_REG);
 
-  if (efuse_reg & EFUSE_RD_SDIO_FORCE)
+  if (efuse_reg & EFUSE_RD_XPD_SDIO_FORCE)
     {
       /* Get configuration from EFUSE */
 
       result->force = 0;
       result->enable = (efuse_reg & EFUSE_RD_XPD_SDIO_REG_M)
                                   >> EFUSE_RD_XPD_SDIO_REG_S;
-      result->tieh = (efuse_reg & EFUSE_RD_SDIO_TIEH_M)
-                                >> EFUSE_RD_SDIO_TIEH_S;
+      result->tieh = (efuse_reg & EFUSE_RD_XPD_SDIO_TIEH_M)
+                                >> EFUSE_RD_XPD_SDIO_TIEH_S;
 
       if (REG_GET_FIELD(EFUSE_BLK0_RDATA3_REG,
               EFUSE_RD_BLK3_PART_RESERVE) == 0)
         {
-          result->drefh = (efuse_reg & EFUSE_RD_SDIO_DREFH_M)
-                                     >> EFUSE_RD_SDIO_DREFH_S;
-          result->drefm = (efuse_reg & EFUSE_RD_SDIO_DREFM_M)
-                                     >> EFUSE_RD_SDIO_DREFM_S;
-          result->drefl = (efuse_reg & EFUSE_RD_SDIO_DREFL_M)
-                                     >> EFUSE_RD_SDIO_DREFL_S;
+          result->drefh = (efuse_reg >> 8) & 0x3;
+          result->drefm = (efuse_reg >> 10) & 0x3;
+          result->drefl = (efuse_reg >> 12) & 0x3;
         }
 
       return OK;

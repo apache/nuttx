@@ -32,6 +32,7 @@
 #include "xtensa.h"
 #include "esp32_efuse.h"
 #include "esp32_clockconfig.h"
+#include "hardware/esp32_apb_ctrl.h"
 #include "hardware/esp32_efuse.h"
 
 /****************************************************************************
