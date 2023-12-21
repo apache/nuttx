@@ -34,8 +34,6 @@
 #include "imxrt_config.h"
 #include "hardware/imxrt_flexio.h"
 
-#ifdef CONFIG_IMXRT_FLEXIO
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -239,6 +237,8 @@ enum flexio_shifter_buffer_type_e
   FLEXIO_SHIFTER_BUFFER_HALF_WORD_SWAPPED   = 0x5u, /* Shifter Buffer N Half Word Swapped Register. */
   FLEXIO_SHIFTER_BUFFER_NIBBLE_SWAPPED      = 0x6u, /* Shifter Buffer N Nibble Swapped Register. */
 };
+
+#ifdef CONFIG_IMXRT_FLEXIO
 
 struct flexio_timer_config_s
 {
