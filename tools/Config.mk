@@ -38,12 +38,14 @@ endif
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   export SHELL=cmd
-else ifeq ($(V),)
+else
   BASHCMD := $(shell command -v bash 2> /dev/null)
   ifneq ($(BASHCMD),)
     export SHELL=$(BASHCMD)
-    export ECHO_BEGIN=@echo -ne "\033[1K\r"
-    export ECHO_END=$(ECHO_BEGIN)
+    ifeq ($(V),)
+      export ECHO_BEGIN=@echo -ne "\033[1K\r"
+      export ECHO_END=$(ECHO_BEGIN)
+    endif
   endif
 endif
 
