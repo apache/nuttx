@@ -31,6 +31,26 @@
  * Public Function Prototypes
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: pci_ivshmem_register
+ *
+ * Description:
+ *   Register common pci ivshmem driver
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PCI_IVSHMEM
+int pci_ivshmem_register(void);
+#endif
+
+/****************************************************************************
+ * Name: pci_register_uio_ivshmem_driver
+ *
+ * Description:
+ *   Register uio ivshmem device pci driver
+ *
+ ****************************************************************************/
+
 #ifdef CONFIG_PCI_UIO_IVSHMEM
 int pci_register_uio_ivshmem_driver(void);
 #endif
