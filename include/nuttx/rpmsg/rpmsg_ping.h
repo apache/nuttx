@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/rptun/rptun_ping.h
+ * include/nuttx/rpmsg/rpmsg_ping.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,27 +18,30 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_RPTUN_RPTUN_PING_H
-#define __DRIVERS_RPTUN_RPTUN_PING_H
+#ifndef __INCLUDE_NUTTX_RPMSG_RPMSG_PING_H
+#define __INCLUDE_NUTTX_RPMSG_RPMSG_PING_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/rptun/rptun_ping.h>
-#include <openamp/open_amp.h>
+#include <nuttx/config.h>
 
-#ifdef CONFIG_RPTUN_PING
+#ifdef CONFIG_RPMSG_PING
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-int rptun_ping_init(FAR struct rpmsg_device *rvdev,
-                    FAR struct rpmsg_endpoint *ept);
-void rptun_ping_deinit(FAR struct rpmsg_endpoint *ept);
-int rptun_ping(FAR struct rpmsg_endpoint *ept,
-               FAR const struct rptun_ping_s *ping);
+/* used for ioctl RPTUNIOC_PING */
 
-#endif /* CONFIG_RPTUN_PING */
-#endif /* __DRIVERS_RPTUN_RPTUN_PING_H */
+struct rpmsg_ping_s
+{
+  int  times;
+  int  len;
+  int  ack;
+  int  sleep; /* unit: ms */
+};
+
+#endif /* CONFIG_RPMSG_PING */
+#endif /* __INCLUDE_NUTTX_RPMSG_RPMSG_PING_H */

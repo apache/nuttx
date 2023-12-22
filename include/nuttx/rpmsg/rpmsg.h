@@ -29,7 +29,20 @@
 
 #ifdef CONFIG_RPMSG
 
+#include <nuttx/fs/ioctl.h>
+#include <nuttx/rpmsg/rpmsg_ping.h>
 #include <openamp/rpmsg.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define RPMSGIOC_START              _RPMSGIOC(1)
+#define RPMSGIOC_STOP               _RPMSGIOC(2)
+#define RPMSGIOC_RESET              _RPMSGIOC(3)
+#define RPMSGIOC_PANIC              _RPMSGIOC(4)
+#define RPMSGIOC_DUMP               _RPMSGIOC(5)
+#define RPMSGIOC_PING               _RPMSGIOC(6)
 
 /****************************************************************************
  * Public Types
@@ -41,6 +54,9 @@ struct rpmsg_s
   rmutex_t                     lock;
   struct metal_list            node;
   FAR const struct rpmsg_ops_s *ops;
+#ifdef CONFIG_RPMSG_PING
+  struct rpmsg_endpoint        ping;
+#endif
   struct rpmsg_device          rdev[0];
 };
 
