@@ -71,9 +71,6 @@ struct rptun_priv_s
 #ifdef CONFIG_RPTUN_PM
   bool                         stay;
 #endif
-#ifdef CONFIG_RPTUN_PING
-  struct rpmsg_endpoint        ping;
-#endif
 };
 
 struct rptun_store_s
@@ -461,7 +458,7 @@ static int rptun_ioctl(FAR struct rpmsg_s *rpmsg, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-      case RPTUNIOC_START:
+      case RPMSGIOC_START:
         if (priv->rproc.state == RPROC_OFFLINE)
           {
             ret = rptun_dev_start(&priv->rproc);
@@ -475,26 +472,21 @@ static int rptun_ioctl(FAR struct rpmsg_s *rpmsg, int cmd, unsigned long arg)
               }
           }
         break;
-      case RPTUNIOC_STOP:
+      case RPMSGIOC_STOP:
         ret = rptun_dev_stop(&priv->rproc, true);
         break;
-      case RPTUNIOC_RESET:
+      case RPMSGIOC_RESET:
         RPTUN_RESET(priv->dev, arg);
         break;
-      case RPTUNIOC_PANIC:
+      case RPMSGIOC_PANIC:
         RPTUN_PANIC(priv->dev);
         break;
-      case RPTUNIOC_DUMP:
+      case RPMSGIOC_DUMP:
         rptun_dump(&priv->rvdev);
 #ifdef CONFIG_RPTUN_PM
         metal_log(METAL_LOG_EMERGENCY, "rptun headrx %d\n", priv->headrx);
 #endif
         break;
-#ifdef CONFIG_RPTUN_PING
-      case RPTUNIOC_PING:
-        rptun_ping(&priv->ping, (FAR const struct rptun_ping_s *)arg);
-        break;
-#endif
       default:
         ret = -ENOTTY;
         break;
@@ -696,9 +688,6 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
 
   virtqueue_enable_cb(priv->rvdev.svq);
 
-#ifdef CONFIG_RPTUN_PING
-  rptun_ping_init(&priv->rvdev.rdev, &priv->ping);
-#endif
   return 0;
 }
 
@@ -718,10 +707,6 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc, bool stop_ns)
     }
 
   rdev->support_ns = stop_ns;
-
-#ifdef CONFIG_RPTUN_PING
-  rptun_ping_deinit(&priv->ping);
-#endif
 
   /* Unregister callback from mbox */
 
@@ -932,22 +917,22 @@ err_mem:
 
 int rptun_boot(FAR const char *cpuname)
 {
-  return rpmsg_ioctl(cpuname, RPTUNIOC_START, 0);
+  return rpmsg_ioctl(cpuname, RPMSGIOC_START, 0);
 }
 
 int rptun_poweroff(FAR const char *cpuname)
 {
-  return rpmsg_ioctl(cpuname, RPTUNIOC_STOP, 0);
+  return rpmsg_ioctl(cpuname, RPMSGIOC_STOP, 0);
 }
 
 int rptun_reset(FAR const char *cpuname, int value)
 {
-  return rpmsg_ioctl(cpuname, RPTUNIOC_RESET, value);
+  return rpmsg_ioctl(cpuname, RPMSGIOC_RESET, value);
 }
 
 int rptun_panic(FAR const char *cpuname)
 {
-  return rpmsg_ioctl(cpuname, RPTUNIOC_PANIC, 0);
+  return rpmsg_ioctl(cpuname, RPMSGIOC_PANIC, 0);
 }
 
 int rptun_buffer_nused(FAR struct rpmsg_virtio_device *rvdev, bool rx)
@@ -967,5 +952,5 @@ int rptun_buffer_nused(FAR struct rpmsg_virtio_device *rvdev, bool rx)
 
 void rptun_dump_all(void)
 {
-  rpmsg_ioctl(NULL, RPTUNIOC_DUMP, 0);
+  rpmsg_ioctl(NULL, RPMSGIOC_DUMP, 0);
 }

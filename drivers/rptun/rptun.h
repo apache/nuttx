@@ -26,9 +26,6 @@
  ****************************************************************************/
 
 #include <nuttx/rptun/rptun.h>
-#include <nuttx/rpmsg/rpmsg.h>
-
-#include "rptun_ping.h"
 
 /****************************************************************************
  * Public Function Prototypes
