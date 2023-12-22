@@ -451,7 +451,7 @@ void mmu_ln_map_region(uint32_t ptlevel, uintptr_t lnvaddr, uintptr_t paddr,
                        uintptr_t vaddr, size_t size, uint64_t mmuflags);
 
 /****************************************************************************
- * Name: mmu_ln_map_region
+ * Name: mmu_get_region_size
  *
  * Description:
  *   Get (giga/mega) page size for level n.
