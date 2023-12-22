@@ -24,6 +24,10 @@ ifeq ($(CONFIG_RPMSG),y)
 
 CSRCS += rpmsg.c
 
+ifeq ($(CONFIG_RPMSG_PING),y)
+CSRCS += rpmsg_ping.c
+endif
+
 DEPPATH += --dep-path rpmsg
 VPATH += :rpmsg
 

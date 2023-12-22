@@ -24,10 +24,6 @@ ifeq ($(CONFIG_RPTUN),y)
 
 CSRCS += rptun.c rptun_dump.c
 
-ifeq ($(CONFIG_RPTUN_PING),y)
-CSRCS += rptun_ping.c
-endif
-
 DEPPATH += --dep-path rptun
 VPATH += :rptun
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)rptun

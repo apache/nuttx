@@ -7,3 +7,14 @@ config RPMSG
 	bool
 	default n
 	select OPENAMP
+
+if RPMSG
+
+config RPMSG_PING
+	bool "rpmsg ping support"
+	default n
+	---help---
+		This is for debugging & profiling, create ping rpmsg
+		channel, user can use it to get send/recv speed & latency.
+
+endif # RPMSG

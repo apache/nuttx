@@ -10,13 +10,6 @@ menuconfig RPTUN
 	---help---
 		RPTUN driver is used for multi-cores' communication.
 
-config RPTUN_PING
-	bool "rptun ping support"
-	default n
-	---help---
-		This is for debugging & profiling, create ping rpmsg
-		channel, user can use it to get send/recv speed & latency.
-
 if RPTUN
 
 config RPTUN_PRIORITY
