@@ -31,6 +31,12 @@ config PCI_QEMU_EDU
 	---help---
 		Driver for QEMU EDU test device
 
+config PCI_IVSHMEM
+	bool "PCI ivshmem driver"
+	default n
+	---help---
+		Enable Inter-VM share memory device driver.
+
 config PCI_UIO_IVSHMEM
 	bool "Enable uio ivshmem driver support"
 	default n

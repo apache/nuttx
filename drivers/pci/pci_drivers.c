@@ -47,6 +47,14 @@ int pci_register_drivers(void)
 {
   int ret;
 
+#ifdef CONFIG_PCI_IVSHMEM
+  ret = pci_ivshmem_register();
+  if (ret < 0)
+    {
+      pcierr("pci_ivshemem_register failed ret=%d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_PCI_UIO_IVSHMEM
   ret = pci_register_uio_ivshmem_driver();
   if (ret < 0)
