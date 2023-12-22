@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <debug.h>
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
@@ -35,6 +36,7 @@
 #include "xtensa_attr.h"
 
 #include "esp32_clockconfig.h"
+#include "esp32_efuse.h"
 #include "esp32_region.h"
 #include "esp32_start.h"
 #include "esp32_spiram.h"
@@ -91,8 +93,9 @@ extern uint8_t _image_drom_size[];
  * ROM Function Prototypes
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32_APP_FORMAT_MCUBOOT
 extern int ets_printf(const char *fmt, ...) printf_like(1, 2);
+
+#ifdef CONFIG_ESP32_APP_FORMAT_MCUBOOT
 extern void cache_read_enable(int cpu);
 extern void cache_read_disable(int cpu);
 extern void cache_flush(int cpu);
@@ -143,6 +146,7 @@ static noreturn_function void __esp32_start(void)
 {
   uint32_t sp;
   uint32_t regval unused_data;
+  uint32_t chip_rev;
 
   /* Make sure that normal interrupts are disabled.  This is really only an
    * issue when we are started in un-usual ways (such as from IRAM).  In this
@@ -221,6 +225,26 @@ static noreturn_function void __esp32_start(void)
 #endif
 
   showprogress('A');
+
+  chip_rev = esp_efuse_hal_chip_revision();
+
+  _info("ESP32 chip revision is v%d.%01d\n", chip_rev / 100, chip_rev % 100);
+
+  if (chip_rev < 300)
+    {
+#ifndef ESP32_IGNORE_CHIP_REVISION_CHECK
+      ets_printf("ERROR: NuttX supports ESP32 chip revision >= v3.0"
+                 " (chip revision is v%d.%01d)\n",
+                 chip_rev / 100, chip_rev % 100);
+      PANIC();
+#endif
+      ets_printf("WARNING: NuttX supports ESP32 chip revision >= v3.0"
+                 " (chip is v%d.%01d).\n"
+                 "Ignoring this error and continuing because "
+                 "`ESP32_IGNORE_CHIP_REVISION_CHECK` is set...\n"
+                 "THIS MAY NOT WORK! DON'T USE THIS CHIP IN PRODUCTION!\n",
+                 chip_rev / 100, chip_rev % 100);
+    }
 
 #if defined(CONFIG_ESP32_SPIRAM_BOOT_INIT)
   if (esp_spiram_init() != OK)
