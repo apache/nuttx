@@ -572,10 +572,6 @@ static int rt_timer_thread(int argc, char *argv[])
               kmm_free(timer);
             }
 
-          /* Enter critical section for next scanning list */
-
-          flags = spin_lock_irqsave(&priv->lock);
-
           if (raw_state == RT_TIMER_TIMEOUT)
             {
               /* Check if the timer is in "repeat" mode */
@@ -585,6 +581,10 @@ static int rt_timer_thread(int argc, char *argv[])
                   start_rt_timer(timer, timer->timeout, true);
                 }
             }
+
+          /* Enter critical section for next scanning list */
+
+          flags = spin_lock_irqsave(&priv->lock);
         }
 
       spin_unlock_irqrestore(&priv->lock, flags);
