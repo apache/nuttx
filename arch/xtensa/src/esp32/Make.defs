@@ -111,8 +111,8 @@ CHIP_CSRCS += esp32_himem.c
 CHIP_CSRCS += esp32_himem_chardev.c
 endif
 
-ifeq ($(CONFIG_ESP32_EFUSE),y)
 CHIP_CSRCS += esp32_efuse.c
+ifeq ($(CONFIG_ESP32_EFUSE),y)
 CHIP_CSRCS += esp32_efuse_table.c
 CHIP_CSRCS += esp32_efuse_lowerhalf.c
 endif
