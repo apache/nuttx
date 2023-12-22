@@ -234,6 +234,8 @@ static int arm_timer_interrupt(int irq, void *context, void *arg)
   oneshot_callback_t callback;
   void *cbarg;
 
+  arm_timer_set_ctrl(arm_timer_get_ctrl() | ARM_TIMER_CTRL_INT_MASK);
+
   DEBUGASSERT(lower != NULL);
 
   arm_timer_set_ctrl(arm_timer_get_ctrl() | ARM_TIMER_CTRL_INT_MASK);
