@@ -281,7 +281,7 @@ static int dummy_cpufreq_target_index(FAR struct cpufreq_policy *driver,
   FAR struct dummy_cpufreq_driver_s **dummy =
                                 (FAR struct dummy_cpufreq_driver_s **)driver;
 
-  DEBUGASSERT(index >= 0 && index < (*dummy)->table_len);
+  DEBUGASSERT(index < (*dummy)->table_len);
 
   (*dummy)->current = (*dummy)->table[index].frequency;
   return 0;
