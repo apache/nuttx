@@ -239,21 +239,16 @@ static void note_common(FAR struct tcb_s *tcb,
 
   note->nc_length = length;
   note->nc_type   = type;
+  note->nc_cpu    = this_cpu();
 
   if (tcb == NULL)
     {
       note->nc_priority = CONFIG_INIT_PRIORITY;
-#ifdef CONFIG_SMP
-      note->nc_cpu = 0;
-#endif
       note->nc_pid = 0;
     }
   else
     {
       note->nc_priority = tcb->sched_priority;
-#ifdef CONFIG_SMP
-      note->nc_cpu      = tcb->cpu;
-#endif
       note->nc_pid = tcb->pid;
     }
 

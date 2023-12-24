@@ -318,9 +318,7 @@ struct note_common_s
   uint8_t nc_length;           /* Length of the note */
   uint8_t nc_type;             /* See enum note_type_e */
   uint8_t nc_priority;         /* Thread/task priority */
-#ifdef CONFIG_SMP
   uint8_t nc_cpu;              /* CPU thread/task running on */
-#endif
   pid_t nc_pid;                /* ID of the thread/task */
 
   /* Time when note was buffered (sec) */
