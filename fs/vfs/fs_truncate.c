@@ -174,11 +174,10 @@ int ftruncate(int fd, off_t length)
       goto errout;
     }
 
-  DEBUGASSERT(filep != NULL);
-
   /* Perform the truncate operation */
 
   ret = file_truncate(filep, length);
+  fs_putfilep(filep);
   if (ret >= 0)
     {
       return 0;

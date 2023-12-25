@@ -218,7 +218,9 @@ int poll_fdsetup(int fd, FAR struct pollfd *fds, bool setup)
 
   /* Let file_poll() do the rest */
 
-  return file_poll(filep, fds, setup);
+  ret = file_poll(filep, fds, setup);
+  fs_putfilep(filep);
+  return ret;
 }
 
 /****************************************************************************

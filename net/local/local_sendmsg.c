@@ -120,11 +120,13 @@ static int local_sendctl(FAR struct local_conn_s *conn,
           filep2 = kmm_zalloc(sizeof(*filep2));
           if (!filep2)
             {
+              fs_putfilep(filep);
               ret = -ENOMEM;
               goto fail;
             }
 
           ret = file_dup2(filep, filep2);
+          fs_putfilep(filep);
           if (ret < 0)
             {
               kmm_free(filep2);

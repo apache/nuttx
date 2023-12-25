@@ -145,7 +145,9 @@ ssize_t nx_read(int fd, FAR void *buf, size_t nbytes)
 
   /* Then let file_read do all of the work. */
 
-  return file_read(filep, buf, nbytes);
+  ret = file_read(filep, buf, nbytes);
+  fs_putfilep(filep);
+  return ret;
 }
 
 /****************************************************************************

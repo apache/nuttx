@@ -131,11 +131,11 @@ off_t nx_seek(int fd, off_t offset, int whence)
       return ret;
     }
 
-  DEBUGASSERT(filep != NULL);
-
   /* Then let file_seek do the real work */
 
-  return file_seek(filep, offset, whence);
+  ret = file_seek(filep, offset, whence);
+  fs_putfilep(filep);
+  return ret;
 }
 
 /****************************************************************************
