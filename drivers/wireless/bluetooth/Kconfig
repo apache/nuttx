@@ -51,6 +51,12 @@ config BLUETOOTH_UART_DUMP
 	---help---
 		Dump the full content of all outgoing and incoming messages.
 
+config BLUETOOTH_UART_RXBUFSIZE
+	int "Bluetooth UART RX Buffer size"
+	default 2048
+	---help---
+		Bluetooth UART RX Buffer size.  Default: 2048
+
 endif # BLUETOOTH_UART
 
 config BLUETOOTH_BRIDGE
