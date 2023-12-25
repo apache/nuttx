@@ -102,7 +102,7 @@ static ssize_t btuart_read(FAR struct btuart_upperhalf_s *upper,
 static void btuart_rxwork(FAR void *arg)
 {
   FAR struct btuart_upperhalf_s *upper;
-  uint8_t data[BLUETOOTH_MAX_FRAMELEN];
+  uint8_t data[CONFIG_BLUETOOTH_UART_RXBUFSIZE];
   enum bt_buf_type_e type;
   unsigned int hdrlen;
   unsigned int pktlen;
