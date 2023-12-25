@@ -145,11 +145,9 @@ int load_cc2564_firmware(FAR const struct btuart_lowerhalf_s *lower)
 }
 
 /****************************************************************************
- * Name: btuart_register
+ * Name: btuart_create
  *
- * Description:
- *   Create the UART-based Bluetooth device and register it with the
- *   Bluetooth stack.
+ *   Create the UART-based bluetooth device.
  *
  * Input Parameters:
  *   lower - an instance of the lower half driver interface
@@ -160,7 +158,8 @@ int load_cc2564_firmware(FAR const struct btuart_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-int btuart_register(FAR const struct btuart_lowerhalf_s *lower)
+int btuart_create(FAR const struct btuart_lowerhalf_s *lower,
+                  FAR struct bt_driver_s **driver)
 {
   FAR struct btuart_upperhalf_s *upper;
   int ret;
@@ -203,14 +202,6 @@ int btuart_register(FAR const struct btuart_lowerhalf_s *lower)
       return -EINVAL;
     }
 
-  /* And register the driver with the network and the Bluetooth stack. */
-
-  ret = bt_netdev_register(&upper->dev);
-  if (ret < 0)
-    {
-      wlerr("ERROR: bt_netdev_register failed: %d\n", ret);
-      kmm_free(upper);
-    }
-
+  *driver = &upper->dev;
   return ret;
 }
