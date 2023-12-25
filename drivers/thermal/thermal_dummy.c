@@ -55,7 +55,7 @@ struct dummy_cpufreq_driver_s
   struct cpufreq_driver driver;
   const struct cpufreq_frequency_table *table;
   size_t table_len;
-  int current;
+  struct cpufreq_frequency_table current;
 };
 
 /****************************************************************************
@@ -268,31 +268,32 @@ static int dummy_zdev_set_trips(FAR struct thermal_zone_device_s *zdev,
 
 #ifdef CONFIG_THERMAL_DUMMY_CPUFREQ
 static FAR const struct cpufreq_frequency_table *dummy_cpufreq_get_table(
-                            FAR struct cpufreq_policy *driver)
+                                           FAR struct cpufreq_policy *policy)
 {
-  FAR struct dummy_cpufreq_driver_s **dummy =
-                                (FAR struct dummy_cpufreq_driver_s **)driver;
-  return (*dummy)->table;
+  FAR struct dummy_cpufreq_driver_s *driver =
+                         (FAR struct dummy_cpufreq_driver_s *)policy->driver;
+
+  return driver->table;
 }
 
-static int dummy_cpufreq_target_index(FAR struct cpufreq_policy *driver,
+static int dummy_cpufreq_target_index(FAR struct cpufreq_policy *policy,
                                       unsigned int index)
 {
-  FAR struct dummy_cpufreq_driver_s **dummy =
-                                (FAR struct dummy_cpufreq_driver_s **)driver;
+  FAR struct dummy_cpufreq_driver_s *driver =
+                         (FAR struct dummy_cpufreq_driver_s *)policy->driver;
 
-  DEBUGASSERT(index < (*dummy)->table_len);
+  DEBUGASSERT(index < driver->table_len);
 
-  (*dummy)->current = (*dummy)->table[index].frequency;
+  driver->current.frequency = driver->table[index].frequency;
   return 0;
 }
 
-static int dummy_cpufreq_get_frequency(FAR struct cpufreq_policy *driver)
+static int dummy_cpufreq_get_frequency(FAR struct cpufreq_policy *policy)
 {
-  FAR struct dummy_cpufreq_driver_s **dummy =
-                                (FAR struct dummy_cpufreq_driver_s **)driver;
+  FAR struct dummy_cpufreq_driver_s *driver =
+                         (FAR struct dummy_cpufreq_driver_s *)policy->driver;
 
-  return (*dummy)->current;
+  return driver->current.frequency;
 }
 
 static int dummy_cpufreq_suspend(FAR struct cpufreq_policy *driver)
