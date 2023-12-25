@@ -115,12 +115,12 @@ int mq_notify(mqd_t mqdes, FAR const struct sigevent *notification)
 
   /* Was a valid message queue descriptor provided? */
 
-  if (!inode || !inode->i_private)
+  if (!inode->i_private)
     {
       /* No.. return EBADF */
 
       errval = EBADF;
-      goto errout_without_lock;
+      goto errout_with_filep;
     }
 
   /* Get a pointer to the message queue */
@@ -184,10 +184,14 @@ int mq_notify(mqd_t mqdes, FAR const struct sigevent *notification)
     }
 
   leave_critical_section(flags);
+  fs_putfilep(filep);
   return OK;
 
 errout:
   leave_critical_section(flags);
+
+errout_with_filep:
+  fs_putfilep(filep);
 
 errout_without_lock:
   set_errno(errval);

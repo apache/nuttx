@@ -63,7 +63,7 @@
  ****************************************************************************/
 
 static FAR struct file *files_fget_by_index(FAR struct filelist *list,
-                                            int l1, int l2)
+                                            int l1, int l2, FAR bool *new)
 {
   FAR struct file *filep;
   irqstate_t flags;
@@ -71,9 +71,25 @@ static FAR struct file *files_fget_by_index(FAR struct filelist *list,
   flags = spin_lock_irqsave(NULL);
 
   filep = &list->fl_files[l1][l2];
+  if (filep->f_inode != NULL)
+    {
+      filep->f_refs++;
+    }
+  else if (new == NULL)
+    {
+      filep = NULL;
+    }
+  else if (filep->f_refs)
+    {
+      filep->f_refs++;
+    }
+  else
+    {
+      filep->f_refs = 2;
+      *new = true;
+    }
 
   spin_unlock_irqrestore(NULL, flags);
-
   return filep;
 }
 
@@ -180,10 +196,11 @@ static void task_fssync(FAR struct tcb_s *tcb, FAR void *arg)
         {
           FAR struct file *filep;
 
-          filep = files_fget_by_index(list, i, j);
-          if (filep->f_inode != NULL)
+          filep = files_fget_by_index(list, i, j, NULL);
+          if (filep != NULL)
             {
               file_fsync(filep);
+              fs_putfilep(filep);
             }
         }
     }
@@ -215,6 +232,7 @@ static int nx_dup3_from_tcb(FAR struct tcb_s *tcb, int fd1, int fd2,
                             int flags)
 {
   FAR struct filelist *list;
+  FAR struct file *filep1;
   FAR struct file *filep;
 #ifdef CONFIG_FDCHECK
   uint8_t f_tag_fdcheck;
@@ -222,6 +240,7 @@ static int nx_dup3_from_tcb(FAR struct tcb_s *tcb, int fd1, int fd2,
 #ifdef CONFIG_FDSAN
   uint64_t f_tag_fdsan;
 #endif
+  bool new = false;
   int count;
   int ret;
 
@@ -254,11 +273,16 @@ static int nx_dup3_from_tcb(FAR struct tcb_s *tcb, int fd1, int fd2,
         }
     }
 
-  filep = files_fget(list, fd2);
-  if (filep == NULL)
+  filep1 = files_fget(list, fd1);
+  if (filep1 == NULL)
     {
       return -EBADF;
     }
+
+  filep = files_fget_by_index(list,
+                              fd2 / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK,
+                              fd2 % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK,
+                              &new);
 
 #ifdef CONFIG_FDSAN
   f_tag_fdsan = filep->f_tag_fdsan;
@@ -270,9 +294,16 @@ static int nx_dup3_from_tcb(FAR struct tcb_s *tcb, int fd1, int fd2,
 
   /* Perform the dup3 operation */
 
-  ret = file_dup3(files_fget(list, fd1), filep, flags);
+  ret = file_dup3(filep1, filep, flags);
+  fs_putfilep(filep1);
+  fs_putfilep(filep);
   if (ret < 0)
     {
+      if (new)
+        {
+          fs_putfilep(filep);
+        }
+
       return ret;
     }
 
@@ -482,7 +513,7 @@ int files_countlist(FAR struct filelist *list)
 FAR struct file *files_fget(FAR struct filelist *list, int fd)
 {
   return files_fget_by_index(list, fd / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK,
-                             fd % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK);
+                             fd % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK, NULL);
 }
 
 /****************************************************************************
@@ -541,6 +572,7 @@ int file_allocate_from_tcb(FAR struct tcb_s *tcb, FAR struct inode *inode,
               filep->f_pos    = pos;
               filep->f_inode  = inode;
               filep->f_priv   = priv;
+              filep->f_refs   = 1;
 
               goto found;
             }
@@ -607,7 +639,9 @@ int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist,
     {
       for (j = 0; j < CONFIG_NFILE_DESCRIPTORS_PER_BLOCK; j++)
         {
+          FAR struct file *filep2;
           FAR struct file *filep;
+          bool new = false;
 
           fd = i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK + j;
 #ifdef CONFIG_FDCLONE_STDIO
@@ -625,8 +659,8 @@ int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist,
             }
 #endif
 
-          filep = files_fget_by_index(plist, i, j);
-          if (filep->f_inode == NULL)
+          filep = files_fget_by_index(plist, i, j, NULL);
+          if (filep == NULL)
             {
               continue;
             }
@@ -642,25 +676,36 @@ int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist,
 #endif
               if (!spawn_file_is_duplicateable(actions, fd, fcloexec))
                 {
+                  fs_putfilep(filep);
                   continue;
                 }
             }
           else if (fcloexec)
             {
+              fs_putfilep(filep);
               continue;
             }
 
           ret = files_extend(clist, i + 1);
           if (ret < 0)
             {
+              fs_putfilep(filep);
               return ret;
             }
 
           /* Yes... duplicate it for the child, include O_CLOEXEC flag. */
 
-          ret = file_dup2(filep, files_fget_by_index(clist, i, j));
+          filep2 = files_fget_by_index(clist, i, j, &new);
+          ret = file_dup2(filep, filep2);
+          fs_putfilep(filep2);
+          fs_putfilep(filep);
           if (ret < 0)
             {
+              if (new)
+                {
+                  fs_putfilep(filep2);
+                }
+
               return ret;
             }
         }
@@ -721,15 +766,53 @@ int fs_getfilep(int fd, FAR struct file **filep)
 
   *filep = files_fget(list, fd);
 
-  /* if f_inode is NULL, fd was closed */
+  /* if *filep is NULL, fd was closed */
 
-  if ((*filep)->f_inode == NULL)
+  if (*filep == NULL)
     {
-      *filep = NULL;
       return -EBADF;
     }
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: fs_putfilep
+ *
+ * Description:
+ *   Handles reference counts for files, less than or equal to 0 and close
+ *   the file
+ *
+ * Input Parameters:
+ *   filep  - The caller provided location in which to return the 'struct
+ *            file' instance.
+ ****************************************************************************/
+
+int fs_putfilep(FAR struct file *filep)
+{
+  irqstate_t flags;
+  int ret = 0;
+  int refs;
+
+  DEBUGASSERT(filep);
+  flags = spin_lock_irqsave(NULL);
+
+  refs = --filep->f_refs;
+
+  spin_unlock_irqrestore(NULL, flags);
+
+  /* If refs is zero, the close() had called, closing it now. */
+
+  if (refs == 0)
+    {
+      ret = file_close(filep);
+      if (ret < 0)
+        {
+          ferr("ERROR: fs putfilep file_close() failed: %d\n", ret);
+        }
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -870,12 +953,20 @@ int nx_close_from_tcb(FAR struct tcb_s *tcb, int fd)
 
   /* If the file was properly opened, there should be an inode assigned */
 
-  if (filep->f_inode == NULL)
+  if (filep == NULL)
     {
       return -EBADF;
     }
 
-  return file_close(filep);
+  /* files_fget will increase the reference count, there call fs_putfilep
+   * reduce reference count.
+   */
+
+  fs_putfilep(filep);
+
+  /* Undo the last reference count from file_allocate_from_tcb */
+
+  return fs_putfilep(filep);
 }
 
 /****************************************************************************

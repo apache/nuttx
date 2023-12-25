@@ -350,13 +350,12 @@ int fcntl(int fd, int cmd, ...)
   ret = fs_getfilep(fd, &filep);
   if (ret >= 0)
     {
-      DEBUGASSERT(filep != NULL);
-
       /* Let file_vfcntl() do the real work.  The errno is not set on
        * failures.
        */
 
       ret = file_vfcntl(filep, cmd, ap);
+      fs_putfilep(filep);
     }
 
   if (ret < 0)

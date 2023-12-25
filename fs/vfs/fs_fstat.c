@@ -236,7 +236,8 @@ int nx_fstat(int fd, FAR struct stat *buf)
     {
       /* Perform the fstat operation */
 
-      return file_fstat(filep, buf);
+      ret = file_fstat(filep, buf);
+      fs_putfilep(filep);
     }
 
   return ret;

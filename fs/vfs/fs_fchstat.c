@@ -60,6 +60,7 @@ static int fchstat(int fd, FAR struct stat *buf, int flags)
   /* Perform the fchstat operation */
 
   ret = file_fchstat(filep, buf, flags);
+  fs_putfilep(filep);
   if (ret >= 0)
     {
       /* Successfully fchstat'ed the file */

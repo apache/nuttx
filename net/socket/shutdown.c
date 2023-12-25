@@ -29,6 +29,7 @@
 #include <errno.h>
 #include <sys/socket.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
 
 #include "socket/socket.h"
@@ -128,17 +129,19 @@ int psock_shutdown(FAR struct socket *psock, int how)
 int shutdown(int sockfd, int how)
 {
   FAR struct socket *psock;
+  FAR struct file *filep;
   int ret;
 
   /* Get the underlying socket structure */
 
-  ret = sockfd_socket(sockfd, &psock);
+  ret = sockfd_socket(sockfd, &filep, &psock);
 
   /* Then let psock_shutdown() do all of the work */
 
   if (ret == OK)
     {
       ret = psock_shutdown(psock, how);
+      fs_putfilep(filep);
     }
 
   if (ret < 0)

@@ -437,7 +437,9 @@ int nxmq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen,
       return ret;
     }
 
-  return file_mq_timedsend_internal(filep, msg, msglen, prio, abstime, 0);
+  ret = file_mq_timedsend_internal(filep, msg, msglen, prio, abstime, 0);
+  fs_putfilep(filep);
+  return ret;
 }
 
 /****************************************************************************
