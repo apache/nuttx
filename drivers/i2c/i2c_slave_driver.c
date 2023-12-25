@@ -101,7 +101,7 @@ struct i2c_slave_driver_s
 
   /* The poll waiter */
 
-  FAR struct pollfd *fds;
+  FAR struct pollfd *fds[CONFIG_I2C_SLAVE_NPOLLWAITERS];
 
   /* Number of open references */
 
@@ -381,6 +381,7 @@ static int i2c_slave_poll(FAR struct file *filep, FAR struct pollfd *fds,
 {
   FAR struct i2c_slave_driver_s *priv;
   int ret = OK;
+  int i;
 
   DEBUGASSERT(filep->f_inode->i_private != NULL);
 
@@ -395,12 +396,17 @@ static int i2c_slave_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       pollevent_t eventset = 0;
 
-      if (priv->fds == NULL)
+      for (i = 0; i < CONFIG_I2C_SLAVE_NPOLLWAITERS; i++)
         {
-          priv->fds = fds;
-          fds->priv = &priv->fds;
+          if (!priv->fds[i])
+            {
+              priv->fds[i] = fds;
+              fds->priv    = &priv->fds[i];
+              break;
+            }
         }
-      else
+
+      if (i == CONFIG_I2C_SLAVE_NPOLLWAITERS)
         {
           ret = -EBUSY;
           goto out;
@@ -416,11 +422,12 @@ static int i2c_slave_poll(FAR struct file *filep, FAR struct pollfd *fds,
           eventset |= POLLOUT;
         }
 
-      poll_notify(&priv->fds, 1, eventset);
+      poll_notify(priv->fds, CONFIG_I2C_SLAVE_NPOLLWAITERS, eventset);
     }
   else if (fds->priv != NULL)
     {
-      priv->fds = NULL;
+      struct pollfd **slot = fds->priv;
+      *slot     = NULL;
       fds->priv = NULL;
     }
 
@@ -507,7 +514,7 @@ static int i2c_slave_callback(FAR void *arg, i2c_slave_complete_t status,
     }
 
   nxmutex_unlock(&priv->lock);
-  poll_notify(&priv->fds, 1, events);
+  poll_notify(priv->fds, CONFIG_I2C_SLAVE_NPOLLWAITERS, events);
   return OK;
 }
 

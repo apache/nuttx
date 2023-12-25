@@ -46,6 +46,13 @@ config I2C_SLAVE_WRITEBUFSIZE
 	---help---
 		I2C Slave write buffer size
 
+config I2C_SLAVE_NPOLLWAITERS
+	int "Number of i2c slave poll waiters"
+	default 1
+	depends on I2C_SLAVE_DRIVER
+	---help---
+		Number of waiters to i2c slave poll
+
 endmenu # I2C Slave Support
 
 config I2C_POLLED
