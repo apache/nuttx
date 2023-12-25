@@ -108,8 +108,13 @@
 /* These must match the definitions in include/sys/types.h */
 
 typedef int16_t      nuttx_blksize_t;
+#ifdef CONFIG_SMALL_MEMORY
 typedef int16_t      nuttx_gid_t;
 typedef int16_t      nuttx_uid_t;
+#else
+typedef unsigned int nuttx_gid_t;
+typedef unsigned int nuttx_uid_t;
+#endif
 typedef uint32_t     nuttx_dev_t;
 typedef uint16_t     nuttx_ino_t;
 typedef uint16_t     nuttx_nlink_t;
