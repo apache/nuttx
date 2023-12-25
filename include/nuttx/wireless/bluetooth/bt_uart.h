@@ -149,11 +149,27 @@ struct btuart_lowerhalf_s
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: btuart_create
+ *
+ *   Create the UART-based Bluetooth device.
+ *
+ * Input Parameters:
+ *   lower - an instance of the lower half driver interface
+ *
+ * Returned Value:
+ *   Zero is returned on success; a negated errno value is returned on any
+ *   failure.
+ *
+ ****************************************************************************/
+
+int btuart_create(FAR const struct btuart_lowerhalf_s *lower,
+                  FAR struct bt_driver_s **driver);
+
+/****************************************************************************
  * Name: btuart_register
  *
  * Description:
- *   Create the generic UART-based Bluetooth device and register it with the
- *   Bluetooth stack.
+ *   Register the generic UART-based bluetooth driver.
  *
  * Input Parameters:
  *   lower - an instance of the lower half driver interface

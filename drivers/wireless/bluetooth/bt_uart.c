@@ -326,3 +326,39 @@ int btuart_ioctl(FAR struct bt_driver_s *dev,
       return -ENOTTY;
     }
 }
+
+/****************************************************************************
+ * Name: btuart_register
+ *
+ * Description:
+ *   Register the UART-based bluetooth driver.
+ *
+ * Input Parameters:
+ *   lower - an instance of the lower half driver interface
+ *
+ * Returned Value:
+ *   Zero is returned on success; a negated errno value is returned on any
+ *   failure.
+ *
+ ****************************************************************************/
+
+int btuart_register(FAR const struct btuart_lowerhalf_s *lower)
+{
+  FAR struct bt_driver_s *driver;
+  int ret;
+
+  ret = btuart_create(lower, &driver);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = bt_netdev_register(driver);
+  if (ret < 0)
+    {
+      wlerr("ERROR: bt_netdev_register failed: %d\n", ret);
+      kmm_free(driver);
+    }
+
+  return ret;
+}
