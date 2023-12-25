@@ -792,6 +792,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
       else
         {
           memcpy(&wrb->wb_dest, to, tolen);
+          udp_connect(conn, to);
         }
 
       /* Skip l2/l3/l4 offset before copy */
