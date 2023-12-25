@@ -25,8 +25,7 @@ set(SRCS arm_vectortab.S)
 
 # Common assembly language files
 
-list(APPEND SRCS arm_cpuhead.S arm_vectoraddrexcptn.S arm_vectors.S
-     arm_saveusercontext.S)
+list(APPEND SRCS arm_cpuhead.S arm_vectors.S arm_saveusercontext.S)
 
 # Common C source files
 
