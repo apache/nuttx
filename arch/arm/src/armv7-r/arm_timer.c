@@ -129,6 +129,18 @@ static inline void arm_timer_set_tval(uint32_t tval)
   ARM_ISB();
 }
 
+static inline uint64_t arm_timer_get_cval(void)
+{
+  ARM_ISB();
+  return CP15_GET64(CNTP_CVAL);
+}
+
+static inline void arm_timer_set_cval(uint64_t cval)
+{
+  CP15_SET64(CNTP_CVAL, cval);
+  ARM_ISB();
+}
+
 static inline uint64_t nsec_from_count(uint64_t count, uint32_t freq)
 {
   return (uint64_t)count * NSEC_PER_SEC / freq;
@@ -165,7 +177,7 @@ static int arm_timer_start(struct oneshot_lowerhalf_s *lower_,
   struct arm_timer_lowerhalf_s *lower =
     (struct arm_timer_lowerhalf_s *)lower_;
   irqstate_t flags;
-  uint32_t count;
+  uint64_t count;
   uint32_t ctrl;
 
   flags = up_irq_save();
@@ -175,7 +187,7 @@ static int arm_timer_start(struct oneshot_lowerhalf_s *lower_,
 
   count = sec_to_count(ts->tv_sec, lower->freq) +
           nsec_to_count(ts->tv_nsec, lower->freq);
-  arm_timer_set_tval(count);
+  arm_timer_set_cval(arm_timer_get_count() + count);
 
   ctrl = arm_timer_get_ctrl();
   ctrl &= ~ARM_TIMER_CTRL_INT_MASK;
@@ -229,6 +241,8 @@ static int arm_timer_interrupt(int irq, void *context, void *arg)
   void *cbarg;
 
   DEBUGASSERT(lower != NULL);
+
+  arm_timer_set_ctrl(arm_timer_get_ctrl() | ARM_TIMER_CTRL_INT_MASK);
 
   if (lower->callback != NULL)
     {
