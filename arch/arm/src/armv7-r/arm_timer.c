@@ -150,7 +150,7 @@ static int arm_timer_maxdelay(struct oneshot_lowerhalf_s *lower_,
   struct arm_timer_lowerhalf_s *lower =
     (struct arm_timer_lowerhalf_s *)lower_;
 
-  uint64_t maxnsec = nsec_from_count(UINT32_MAX, lower->freq);
+  uint64_t maxnsec = nsec_from_count(UINT64_MAX, lower->freq);
 
   ts->tv_sec  = maxnsec / NSEC_PER_SEC;
   ts->tv_nsec = maxnsec % NSEC_PER_SEC;
