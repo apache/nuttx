@@ -678,36 +678,7 @@ static inline unsigned int arm_gic_nlines(void)
  *
  ****************************************************************************/
 
-static inline void arm_cpu_sgi(int sgi, unsigned int cpuset)
-{
-  uint32_t regval;
-
-#ifdef CONFIG_SMP
-  regval = GIC_ICDSGIR_INTID(sgi) | GIC_ICDSGIR_CPUTARGET(cpuset) |
-           GIC_ICDSGIR_TGTFILTER_LIST;
-#else
-  regval = GIC_ICDSGIR_INTID(sgi) | GIC_ICDSGIR_CPUTARGET(0) |
-           GIC_ICDSGIR_TGTFILTER_THIS;
-#endif
-
-#if defined(CONFIG_ARCH_TRUSTZONE_SECURE)
-  if (sgi >= GIC_IRQ_SGI0 && sgi <= GIC_IRQ_SGI7)
-#endif
-    {
-      /* Set NSATT be 1: forward the SGI specified in the SGIINTID field to a
-       * specified CPU interfaces only if the SGI is configured as Group 1 on
-       * that interface.
-       * For non-secure context, the configuration of GIC_ICDSGIR_NSATT_GRP1
-       * is not mandatory in the GICv2 specification, but for SMP scenarios,
-       * this value needs to be configured, otherwise issues may occur in the
-       * SMP scenario.
-       */
-
-      regval |= GIC_ICDSGIR_NSATT_GRP1;
-    }
-
-  putreg32(regval, GIC_ICDSGIR);
-}
+void arm_cpu_sgi(int sgi, unsigned int cpuset);
 
 /****************************************************************************
  * Public Function Prototypes
