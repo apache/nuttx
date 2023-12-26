@@ -895,5 +895,5 @@ void mempool_multiple_deinit(FAR struct mempool_multiple_s *mpool)
   mempool_multiple_free_chunk(mpool, mpool->dict);
   mempool_multiple_free_chunk(mpool, mpool->pools);
   nxrmutex_destroy(&mpool->lock);
-  mpool->free(mpool, mpool);
+  mpool->free(mpool->arg, mpool);
 }
