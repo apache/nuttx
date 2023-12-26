@@ -153,7 +153,6 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
 {
   FAR struct tcb_s *rtcb;
   FAR dq_queue_t *tasklist;
-  bool switched;
   bool doswitch;
   int task_state;
   int cpu;
@@ -249,14 +248,14 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
        */
 
       tasklist = list_assignedtasks(cpu);
-      switched = nxsched_add_prioritized(btcb, tasklist);
+      doswitch = nxsched_add_prioritized(btcb, tasklist);
 
       /* If the selected task list was the g_assignedtasks[] list and if the
        * new tasks is the highest priority (RUNNING) task, then a context
        * switch will occur.
        */
 
-      if (switched)
+      if (doswitch)
         {
           FAR struct tcb_s *next;
 
@@ -332,8 +331,6 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
 
               nxsched_add_prioritized(next, tasklist);
             }
-
-          doswitch = true;
         }
       else
         {
