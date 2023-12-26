@@ -44,33 +44,40 @@
  * handled by Secure Monitor code running in EL3.
  */
 
-    .text
-    .syntax unified
+	.text
+	.syntax	unified
 
-    .global arm_smccc_smc
-    .type   arm_smccc_smc, function
+	.global	arm_smccc_smc
+	.type	arm_smccc_smc, function
+
 arm_smccc_smc:
-    mov     r12, sp
-    push    {r4-r7}
-    ldm     r12, {r4-r7}
-    smc     #0
-    pop     {r4-r7}
-    ldr     r12, [sp, #(4 * 4)]
-    stm     r12, {r0-r3}
-    bx      lr
+	mov		r12, sp
+	push		{r4-r7}
+	ldm		r12, {r4-r7}
+	smc		#0
+	pop		{r4-r7}
+	ldr		r12, [sp, #(4 * 4)]
+	stm		r12, {r0-r3}
+	bx 		lr
 
-/* The HVC instruction is used to generate a synchronous exception that is
- * handled by a hypervisor running in EL2.
- */
+	.size	arm_smccc_smc, . - arm_smccc_smc
 
-    .global arm_smccc_hvc
-    .type   arm_smccc_hvc, function
+	/* The HVC instruction is used to generate a synchronous exception that is
+	 * handled by a hypervisor running in EL2.
+	 */
+
+	.global	arm_smccc_hvc
+	.type	arm_smccc_hvc, function
+
 arm_smccc_hvc:
-    mov     r12, sp
-    push    {r4-r7}
-    ldm     r12, {r4-r7}
-    hvc     #0
-    pop     {r4-r7}
-    ldr     r12, [sp, #(4 * 4)]
-    stm     r12, {r0-r3}
-    bx      lr
+	mov		r12, sp
+	push		{r4-r7}
+	ldm		r12, {r4-r7}
+	hvc		#0
+	pop		{r4-r7}
+	ldr		r12, [sp, #(4 * 4)]
+	stm		r12, {r0-r3}
+	bx		lr
+
+	.size	arm_smccc_hvc, . - arm_smccc_hvc
+	.end
