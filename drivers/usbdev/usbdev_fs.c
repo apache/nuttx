@@ -851,7 +851,7 @@ static int usbdev_fs_poll(FAR struct file *filep, FAR struct pollfd *fds,
         }
     }
 
-  poll_notify(&fds, 1, eventset);
+  poll_notify(fs_ep->fds, CONFIG_USBDEV_FS_NPOLLWAITERS, eventset);
 
 exit_leave_critical:
   leave_critical_section(flags);
@@ -878,12 +878,12 @@ static void usbdev_fs_connect(FAR struct usbdev_fs_dev_s *fs, int connect)
 
   if (connect)
     {
-      /* Notify poll/select with POLLIN */
+      /* Notify poll/select with POLLPRI */
 
       for (cnt = 0; cnt < devinfo->nendpoints; cnt++)
         {
           fs_ep = &fs->eps[cnt];
-          poll_notify(fs_ep->fds, CONFIG_USBDEV_FS_NPOLLWAITERS, POLLIN);
+          poll_notify(fs_ep->fds, CONFIG_USBDEV_FS_NPOLLWAITERS, POLLPRI);
         }
     }
   else
