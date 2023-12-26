@@ -108,35 +108,41 @@
 /* These must match the definitions in include/sys/types.h */
 
 typedef int16_t      nuttx_blksize_t;
-#ifdef CONFIG_SMALL_MEMORY
+#  ifdef CONFIG_SMALL_MEMORY
 typedef int16_t      nuttx_gid_t;
 typedef int16_t      nuttx_uid_t;
-#else
+typedef uint16_t     nuttx_size_t;
+typedef int16_t      nuttx_ssize_t;
+#  else /* CONFIG_SMALL_MEMORY */
 typedef unsigned int nuttx_gid_t;
 typedef unsigned int nuttx_uid_t;
-#endif
+typedef uintptr_t    nuttx_size_t;
+typedef intptr_t     nuttx_ssize_t;
+#  endif /* CONFIG_SMALL_MEMORY */
 typedef uint32_t     nuttx_dev_t;
 typedef uint16_t     nuttx_ino_t;
 typedef uint16_t     nuttx_nlink_t;
-#ifdef CONFIG_FS_LARGEFILE
+#  ifdef CONFIG_FS_LARGEFILE
 typedef int64_t      nuttx_off_t;
 typedef uint64_t     nuttx_blkcnt_t;
-#else
+#  else
 typedef int32_t      nuttx_off_t;
 typedef uint32_t     nuttx_blkcnt_t;
-#endif
+#  endif
 typedef unsigned int nuttx_mode_t;
-typedef uintptr_t    nuttx_size_t;
-typedef intptr_t     nuttx_ssize_t;
 
 /* These must match the definition in include/time.h */
 
+#  ifdef CONFIG_SYSTEM_TIME64
+typedef int64_t      nuttx_time_t;
+#  else
 typedef uint32_t     nuttx_time_t;
+#  endif
 
 struct nuttx_timespec
 {
-    nuttx_time_t tv_sec;
-    long tv_nsec;
+  nuttx_time_t tv_sec;
+  long tv_nsec;
 };
 
 /* These must exactly match the definition from include/dirent.h: */
