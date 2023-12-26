@@ -83,14 +83,6 @@ typedef struct imgdata_interval_s
   uint32_t denominator;
 } imgdata_interval_t;
 
-/* Structure for memory operations */
-
-typedef struct imgdata_mem_ops_s
-{
-  CODE void *(*mem_malloc)(uint32_t align_size, uint32_t size);
-  CODE void (*mem_free)(void *data);
-} imgdata_mem_ops_t;
-
 typedef int (*imgdata_capture_t)(uint8_t result, uint32_t size,
                                  FAR const struct timeval *ts,
                                  FAR void *arg);
@@ -119,6 +111,14 @@ struct imgdata_ops_s
                             FAR imgdata_capture_t callback,
                             FAR void *arg);
   CODE int (*stop_capture)(FAR struct imgdata_s *data);
+
+  /* This is a pair of user define frame memory allocation interface.
+   * If both are NULL, just using system memory operations.
+   */
+
+  CODE void *(*alloc)(FAR struct imgdata_s *data,
+                           uint32_t align_size, uint32_t size);
+  CODE void (*free)(FAR struct imgdata_s *data, void *addr);
 };
 
 /* Image data private data.  This structure only defines the initial fields
@@ -129,7 +129,6 @@ struct imgdata_ops_s
 struct imgdata_s
 {
   FAR const struct imgdata_ops_s *ops;
-  FAR const struct imgdata_mem_ops_s *mem_ops;
 };
 
 #ifdef __cplusplus

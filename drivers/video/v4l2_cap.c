@@ -1174,9 +1174,9 @@ static void cleanup_streamresources(FAR capture_type_inf_t *type_inf,
   nxmutex_destroy(&type_inf->lock_state);
   if (type_inf->bufheap != NULL)
     {
-      if (cmng->imgdata->mem_ops && cmng->imgdata->mem_ops->mem_free)
+      if (cmng->imgdata->ops->free)
         {
-          cmng->imgdata->mem_ops->mem_free(type_inf->bufheap);
+          cmng->imgdata->ops->free(cmng->imgdata, type_inf->bufheap);
         }
       else
         {
@@ -2120,7 +2120,7 @@ static int capture_reqbufs(FAR struct v4l2_s *v4l2,
 {
   FAR capture_mng_t *cmng = (FAR capture_mng_t *)v4l2;
   FAR capture_type_inf_t *type_inf;
-  const imgdata_mem_ops_t *mem_ops = cmng->imgdata->mem_ops;
+  struct imgdata_s *imgdata = cmng->imgdata;
 
   irqstate_t flags;
   int ret = OK;
@@ -2158,9 +2158,9 @@ static int capture_reqbufs(FAR struct v4l2_s *v4l2,
         {
           if (type_inf->bufheap != NULL)
             {
-              if (mem_ops && mem_ops->mem_free)
+              if (imgdata->ops->free)
                 {
-                    mem_ops->mem_free(type_inf->bufheap);
+                    imgdata->ops->free(imgdata, type_inf->bufheap);
                 }
               else
                 {
@@ -2168,9 +2168,10 @@ static int capture_reqbufs(FAR struct v4l2_s *v4l2,
                 }
             }
 
-          if (mem_ops && mem_ops->mem_malloc)
+          if (imgdata->ops->alloc)
             {
-              type_inf->bufheap = mem_ops->mem_malloc(32, reqbufs->count *
+              type_inf->bufheap = imgdata->ops->alloc(imgdata, 32,
+                reqbufs->count *
                 get_bufsize(&type_inf->fmt[CAPTURE_FMT_MAIN]));
             }
           else
