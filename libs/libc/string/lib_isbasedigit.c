@@ -80,7 +80,7 @@ bool lib_isbasedigit(int ch, int base, int *value)
         }
     }
 
-  if (value)
+  if (ret && value)
     {
       *value = tmp;
     }
