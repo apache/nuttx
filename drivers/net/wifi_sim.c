@@ -1029,7 +1029,7 @@ static int wifidriver_get_sensitivity(FAR struct wifi_sim_s *wifidev,
               pwrq->u.sens.value = -wifidev->connected_ap->RSSI;
             }
 
-          ninfo("get rssi is %d\n", pwrq->u.sens.value);
+          ninfo("get rssi is %" PRId32 "\n", pwrq->u.sens.value);
         }
         break;
 
