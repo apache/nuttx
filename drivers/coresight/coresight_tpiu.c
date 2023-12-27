@@ -93,15 +93,6 @@ static const struct coresight_ops_s g_tpiu_ops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tpiu_hw_enable
- ****************************************************************************/
-
-static int tpiu_hw_enable(FAR struct coresight_tpiu_dev_s *tpiudev)
-{
-  return coresight_claim_device(tpiudev->csdev.addr);
-}
-
-/****************************************************************************
  * Name: tpiu_hw_disable
  ****************************************************************************/
 
@@ -128,7 +119,6 @@ static void tpiu_hw_disable(FAR struct coresight_tpiu_dev_s *tpiudev)
     }
 
   coresight_lock(tpiudev->csdev.addr);
-  coresight_disclaim_device(tpiudev->csdev.addr);
 }
 
 /****************************************************************************
@@ -137,21 +127,7 @@ static void tpiu_hw_disable(FAR struct coresight_tpiu_dev_s *tpiudev)
 
 static int tpiu_enable(FAR struct coresight_dev_s *csdev)
 {
-  FAR struct coresight_tpiu_dev_s *tpiudev =
-    (FAR struct coresight_tpiu_dev_s *)csdev;
-  int ret = 0;
-
-  if (tpiudev->refcnt++ == 0)
-    {
-      ret = tpiu_hw_enable(tpiudev);
-      if (ret < 0)
-        {
-          tpiudev->refcnt--;
-          cserr("tpiu %s enabled failed\n", csdev->name);
-        }
-    }
-
-  return ret;
+  return coresight_claim_device(csdev->addr);
 }
 
 /****************************************************************************
@@ -163,11 +139,8 @@ static void tpiu_disable(FAR struct coresight_dev_s *csdev)
   FAR struct coresight_tpiu_dev_s *tpiudev =
     (FAR struct coresight_tpiu_dev_s *)csdev;
 
-  if (--tpiudev->refcnt == 0)
-    {
-      tpiu_hw_disable(tpiudev);
-      csinfo("tpiu %s disabled\n", csdev->name);
-    }
+  tpiu_hw_disable(tpiudev);
+  coresight_disclaim_device(tpiudev->csdev.addr);
 }
 
 /****************************************************************************

@@ -157,24 +157,14 @@ static void stm_hw_disable(FAR struct coresight_stm_dev_s *stmdev)
     }
 
   coresight_lock(stmdev->csdev.addr);
-  coresight_disclaim_device(stmdev->csdev.addr);
 }
 
 /****************************************************************************
  * Name: stm_hw_enable
  ****************************************************************************/
 
-static int stm_hw_enable(FAR struct coresight_stm_dev_s *stmdev)
+static void stm_hw_enable(FAR struct coresight_stm_dev_s *stmdev)
 {
-  int ret;
-
-  ret = coresight_claim_device(stmdev->csdev.addr);
-  if (ret < 0)
-    {
-      cserr("stm %s claim failed\n", stmdev->csdev.name);
-      return ret;
-    }
-
   coresight_unlock(stmdev->csdev.addr);
   if (stmdev->stmheer != 0)
     {
@@ -196,7 +186,6 @@ static int stm_hw_enable(FAR struct coresight_stm_dev_s *stmdev)
                   stmdev->csdev.addr + STM_TCSR);
 
   coresight_lock(stmdev->csdev.addr);
-  return ret;
 }
 
 /****************************************************************************
@@ -208,11 +197,8 @@ static void stm_disable(FAR struct coresight_dev_s *csdev)
   FAR struct coresight_stm_dev_s *stmdev =
     (FAR struct coresight_stm_dev_s *)csdev;
 
-  if (--stmdev->refcnt == 0)
-    {
-      stm_hw_disable(stmdev);
-      csinfo("%s disabled\n", csdev->name);
-    }
+  stm_hw_disable(stmdev);
+  coresight_disclaim_device(stmdev->csdev.addr);
 }
 
 /****************************************************************************
@@ -223,18 +209,15 @@ static int stm_enable(FAR struct coresight_dev_s *csdev)
 {
   FAR struct coresight_stm_dev_s *stmdev =
     (FAR struct coresight_stm_dev_s *)csdev;
-  int ret = 0;
+  int ret;
 
-  if (stmdev->refcnt++ == 0)
+  ret = coresight_claim_device(stmdev->csdev.addr);
+  if (ret < 0)
     {
-      ret = stm_hw_enable(stmdev);
-      if (ret < 0)
-        {
-          stmdev->refcnt--;
-          cserr("%s enabled failed\n", csdev->name);
-        }
+      return ret;
     }
 
+  stm_hw_enable(stmdev);
   return ret;
 }
 

@@ -272,21 +272,15 @@ static int etb_enable(FAR struct coresight_dev_s *csdev)
 {
   FAR struct coresight_etb_dev_s *etbdev =
     (FAR struct coresight_etb_dev_s *)csdev;
-  int ret = 0;
+  int ret;
 
-  if (etbdev->refcnt++ == 0)
+  ret = coresight_claim_device(etbdev->csdev.addr);
+  if (ret < 0)
     {
-      ret = coresight_claim_device(etbdev->csdev.addr);
-      if (ret < 0)
-        {
-          etbdev->refcnt--;
-          cserr("%s enable failed\n", csdev->name);
-          return ret;
-        }
-
-      etb_hw_enable(etbdev);
+      return ret;
     }
 
+  etb_hw_enable(etbdev);
   return ret;
 }
 
@@ -299,12 +293,8 @@ static void etb_disable(FAR struct coresight_dev_s *csdev)
   FAR struct coresight_etb_dev_s *etbdev =
     (FAR struct coresight_etb_dev_s *)csdev;
 
-  if (--etbdev->refcnt == 0)
-    {
-      etb_hw_disable(etbdev);
-      coresight_disclaim_device(etbdev->csdev.addr);
-      csinfo("%s disabled\n", csdev->name);
-    }
+  etb_hw_disable(etbdev);
+  coresight_disclaim_device(etbdev->csdev.addr);
 }
 
 /****************************************************************************
@@ -342,13 +332,13 @@ static int etb_open(FAR struct file *filep)
           irqstate_t flags;
 
           flags = enter_critical_section();
-          if (etbdev->refcnt > 0)
+          if (etbdev->csdev.refcnt > 0)
             {
               etb_hw_disable(etbdev);
             }
 
           etb_hw_read(etbdev);
-          if (etbdev->refcnt > 0)
+          if (etbdev->csdev.refcnt > 0)
             {
               etb_hw_enable(etbdev);
             }

@@ -68,7 +68,6 @@ struct coresight_tmc_dev_s
   uint32_t caps;                        /* Capalilities current etr device has. */
   enum tmc_etr_mode_e mode;             /* ETR buffer mode. */
   uint32_t offset;                      /* Data offset in ETR buffer. */
-  uint8_t refcnt;                       /* TMC coresight device's enable count */
   uint8_t opencnt;                      /* TMC device's open count. */
 };
 

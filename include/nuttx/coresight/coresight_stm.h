@@ -63,7 +63,6 @@ enum stp_packet_flags_e
 struct coresight_stm_dev_s
 {
   struct coresight_dev_s csdev;
-  uint8_t refcnt;
   int traceid;                       /* Trace id. */
 
   /* Used in STM device: start address of extend stimulus port, this memory
