@@ -93,7 +93,7 @@ config NET_TCP_MAX_CONNS
 
 config NET_TCP_NPOLLWAITERS
 	int "Number of TCP poll waiters"
-	default 1
+	default 2
 
 config NET_TCP_RTO
 	int "RTO of TCP/IP connections"
