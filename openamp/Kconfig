@@ -4,7 +4,7 @@
 #
 
 config OPENAMP
-	bool "Open Asymmetric Multi Processing support"
+	bool
 	default n
 	---help---
 		Enable or disable Open Asymmetric Multi Processing features
