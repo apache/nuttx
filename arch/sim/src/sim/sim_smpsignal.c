@@ -246,7 +246,7 @@ int up_cpu_paused_restore(void)
 
   /* Restore the cpu lock */
 
-  restore_critical_section();
+  restore_critical_section(tcb, this_cpu());
 
   /* Then switch contexts.  Any necessary address environment changes
    * will be made when the interrupt returns.

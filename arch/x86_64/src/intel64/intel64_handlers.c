@@ -62,6 +62,9 @@
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
 static uint64_t *common_handler(int irq, uint64_t *regs)
 {
+  struct tcb_s *tcb;
+  int cpu;
+
   /* Current regs non-zero indicates that we are processing an interrupt;
    * g_current_regs is also used to manage interrupt level context switches.
    *
@@ -99,11 +102,13 @@ static uint64_t *common_handler(int irq, uint64_t *regs)
        * crashes.
        */
 
-      g_running_tasks[this_cpu()] = this_task();
+      cpu = this_cpu();
+      tcb = current_task(cpu);
+      g_running_tasks[cpu] = tcb;
 
       /* Restore the cpu lock */
 
-      restore_critical_section();
+      restore_critical_section(tcb, cpu);
     }
 
   /* If a context switch occurred while processing the interrupt then
