@@ -34,7 +34,6 @@
 struct coresight_tpiu_dev_s
 {
   struct coresight_dev_s csdev;
-  uint8_t refcnt;
 };
 
 /****************************************************************************

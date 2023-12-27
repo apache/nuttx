@@ -436,7 +436,7 @@ static bool etm_arch_supported(uint8_t arch)
  *
  ****************************************************************************/
 
-void etm_set_default(struct etm_config_s *config)
+static void etm_set_default(struct etm_config_s *config)
 {
   int i;
 
@@ -470,18 +470,11 @@ void etm_set_default(struct etm_config_s *config)
  * Name: etm_hw_enable
  ****************************************************************************/
 
-static int etm_hw_enable(FAR struct coresight_etm_dev_s *etmdev)
+static void etm_hw_enable(FAR struct coresight_etm_dev_s *etmdev)
 {
   FAR struct etm_config_s *config = &etmdev->cfg;
   uint32_t etmcr;
-  int ret;
   int i;
-
-  ret = coresight_claim_device(etmdev->csdev.addr);
-  if (ret < 0)
-    {
-      return ret;
-    }
 
   coresight_unlock(etmdev->csdev.addr);
   etm_os_unlock(etmdev);
@@ -549,8 +542,6 @@ static int etm_hw_enable(FAR struct coresight_etm_dev_s *etmdev)
 
   etm_clr_program(etmdev);
   coresight_lock(etmdev->csdev.addr);
-
-  return ret;
 }
 
 /****************************************************************************
@@ -575,8 +566,6 @@ static void etm_hw_disable(FAR struct coresight_etm_dev_s *etmdev)
 
   etm_set_pwrdwn(etmdev);
   coresight_lock(etmdev->csdev.addr);
-
-  coresight_disclaim_device(etmdev->csdev.addr);
 }
 
 /****************************************************************************
@@ -587,18 +576,15 @@ static int etm_enable(FAR struct coresight_dev_s *csdev)
 {
   FAR struct coresight_etm_dev_s *etmdev =
     (FAR struct coresight_etm_dev_s *)csdev;
-  int ret = 0;
+  int ret;
 
-  if (etmdev->refcnt++ == 0)
+  ret = coresight_claim_device(etmdev->csdev.addr);
+  if (ret < 0)
     {
-      ret = etm_hw_enable(etmdev);
-      if (ret < 0)
-        {
-          etmdev->refcnt--;
-          cserr("%s enabled\n", csdev->name);
-        }
+      return ret;
     }
 
+  etm_hw_enable(etmdev);
   return ret;
 }
 
@@ -611,11 +597,8 @@ static void etm_disable(FAR struct coresight_dev_s *csdev)
   FAR struct coresight_etm_dev_s *etmdev =
     (FAR struct coresight_etm_dev_s *)csdev;
 
-  if (--etmdev->refcnt == 0)
-    {
-      etm_hw_disable(etmdev);
-      csinfo("etm %s disabled\n", csdev->name);
-    }
+  etm_hw_disable(etmdev);
+  coresight_disclaim_device(etmdev->csdev.addr);
 }
 
 /****************************************************************************
@@ -692,7 +675,6 @@ etm_register(FAR const struct coresight_desc_s *desc)
 
   etmdev->cpu = desc->cpu;
   etmdev->csdev.addr = desc->addr;
-
   etm_init_arch_data(etmdev);
 
   if (!etm_arch_supported(etmdev->arch))
