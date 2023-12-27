@@ -77,7 +77,7 @@ void up_exit(int status)
 
   /* Restore the cpu lock */
 
-  restore_critical_section();
+  restore_critical_section(tcb, this_cpu());
 
   /* Then switch contexts */
 

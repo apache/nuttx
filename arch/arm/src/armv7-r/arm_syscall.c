@@ -156,7 +156,9 @@ static void dispatch_syscall(void)
 
 uint32_t *arm_syscall(uint32_t *regs)
 {
+  struct tcb_s *tcb;
   uint32_t cmd;
+  int cpu;
 #ifdef CONFIG_BUILD_PROTECTED
   uint32_t cpsr;
 #endif
@@ -567,9 +569,13 @@ uint32_t *arm_syscall(uint32_t *regs)
        * assertion logic for reporting crashes.
        */
 
-      g_running_tasks[this_cpu()] = this_task();
+      cpu = this_cpu();
+      tcb = current_task(cpu);
+      g_running_tasks[cpu] = tcb;
 
-      restore_critical_section();
+      /* Restore the cpu lock */
+
+      restore_critical_section(tcb, cpu);
       regs = (uint32_t *)CURRENT_REGS;
     }
 

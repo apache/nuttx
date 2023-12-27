@@ -111,7 +111,7 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 
       /* Restore the cpu lock */
 
-      restore_critical_section();
+      restore_critical_section(tcb, this_cpu());
 
       /* Record the new "running" task.  g_running_tasks[] is only used by
        * assertion logic for reporting crashes.
