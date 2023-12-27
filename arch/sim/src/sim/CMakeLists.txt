@@ -187,7 +187,8 @@ elseif(CONFIG_SIM_NETDEV_VPNKIT)
   list(APPEND SRCS sim_netdriver.c)
   list(APPEND HOST_DEFINITIONS
        CONFIG_SIM_NETDEV_VPNKIT_PATH=\"${CONFIG_SIM_NETDEV_VPNKIT_PATH}\")
-  list(APPEND HOSTSRCS sim_vpnkit.c vpnkit/protocol.c vpnkit/negotiate.c)
+  list(APPEND HOSTSRCS sim_vpnkit.c vpnkit/sim_protocol.c
+       vpnkit/sim_negotiate.c)
 endif()
 
 if(CONFIG_SIM_NETUSRSOCK)
