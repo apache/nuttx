@@ -75,7 +75,6 @@ struct coresight_etm_dev_s
 {
   struct coresight_dev_s csdev;
   struct etm_config_s cfg;
-  uint8_t refcnt;
   int cpu;                       /* The cpu this component is affined to */
   int port_size;                 /* Out port size */
   int traceid;                   /* Trace id */

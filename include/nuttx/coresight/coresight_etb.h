@@ -39,7 +39,6 @@ struct coresight_etb_dev_s
   uint32_t buffer_depth;             /* ETB buffer depth. */
   FAR uint32_t *bufptr;              /* Buffer that ETB content sends to. */
   mutex_t lock;                      /* Mutex for driver's open/close. */
-  uint8_t refcnt;                    /* ETB coresight device's enable count. */
   uint8_t opencnt;                   /* ETB device's open count. */
 };
 

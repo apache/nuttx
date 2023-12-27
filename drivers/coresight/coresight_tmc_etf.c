@@ -277,25 +277,19 @@ static int tmc_etf_sink_enable(FAR struct coresight_dev_s *csdev)
 {
   FAR struct coresight_tmc_dev_s *tmcdev =
     (FAR struct coresight_tmc_dev_s *)csdev;
-  int ret = 0;
+  int ret;
 
-  if (tmcdev->refcnt++ == 0)
+  ret = coresight_claim_device(tmcdev->csdev.addr);
+  if (ret < 0)
     {
-      ret = coresight_claim_device(tmcdev->csdev.addr);
-      if (ret < 0)
-        {
-          tmcdev->refcnt--;
-          cserr("%s claimed failed\n", csdev->name);
-          return ret;
-        }
+      cserr("%s claimed failed\n", csdev->name);
+      return ret;
+    }
 
-      ret = tmc_etf_sink_hw_enable(tmcdev);
-      if (ret < 0)
-        {
-          tmcdev->refcnt--;
-          coresight_disclaim_device(tmcdev->csdev.addr);
-          cserr("%s enable failed\n", csdev->name);
-        }
+  ret = tmc_etf_sink_hw_enable(tmcdev);
+  if (ret < 0)
+    {
+      coresight_disclaim_device(tmcdev->csdev.addr);
     }
 
   return ret;
@@ -310,12 +304,8 @@ static void tmc_etf_sink_disable(FAR struct coresight_dev_s *csdev)
   FAR struct coresight_tmc_dev_s *tmcdev =
     (FAR struct coresight_tmc_dev_s *)csdev;
 
-  if (--tmcdev->refcnt == 0)
-    {
-      tmc_etf_hw_disable(tmcdev);
-      coresight_disclaim_device(tmcdev->csdev.addr);
-      csinfo("%s disabled\n", csdev->name);
-    }
+  tmc_etf_hw_disable(tmcdev);
+  coresight_disclaim_device(tmcdev->csdev.addr);
 }
 
 /****************************************************************************
@@ -327,25 +317,19 @@ static int tmc_etf_link_enable(FAR struct coresight_dev_s *csdev,
 {
   FAR struct coresight_tmc_dev_s *tmcdev =
     (FAR struct coresight_tmc_dev_s *)csdev;
-  int ret = 0;
+  int ret;
 
-  if (tmcdev->refcnt++ == 0)
+  ret = coresight_claim_device(tmcdev->csdev.addr);
+  if (ret < 0)
     {
-      ret = coresight_claim_device(tmcdev->csdev.addr);
-      if (ret < 0)
-        {
-          tmcdev->refcnt--;
-          cserr("%s claimed failed\n", csdev->name);
-          return ret;
-        }
+      cserr("%s claimed failed\n", csdev->name);
+      return ret;
+    }
 
-      ret = tmc_etf_link_hw_enable(tmcdev);
-      if (ret < 0)
-        {
-          tmcdev->refcnt--;
-          coresight_disclaim_device(tmcdev->csdev.addr);
-          cserr("%s enable failed\n", csdev->name);
-        }
+  ret = tmc_etf_link_hw_enable(tmcdev);
+  if (ret < 0)
+    {
+      coresight_disclaim_device(tmcdev->csdev.addr);
     }
 
   return ret;
@@ -361,12 +345,8 @@ static void tmc_etf_link_disable(FAR struct coresight_dev_s *csdev,
   FAR struct coresight_tmc_dev_s *tmcdev =
     (FAR struct coresight_tmc_dev_s *)csdev;
 
-  if (--tmcdev->refcnt == 0)
-    {
-      tmc_etf_hw_disable(tmcdev);
-      coresight_disclaim_device(tmcdev->csdev.addr);
-      csinfo("%s disabled\n", csdev->name);
-    }
+  tmc_etf_hw_disable(tmcdev);
+  coresight_disclaim_device(tmcdev->csdev.addr);
 }
 
 /****************************************************************************
@@ -402,7 +382,7 @@ static int tmc_etf_open(FAR struct file *filep)
           irqstate_t flags;
 
           flags = enter_critical_section();
-          if (tmcdev->refcnt > 0)
+          if (tmcdev->csdev.refcnt > 0)
             {
               tmc_etf_hw_disable_and_read(tmcdev);
               tmc_etf_sink_hw_enable(tmcdev);

@@ -56,20 +56,151 @@ static struct list_node g_csdev_list = LIST_INITIAL_VALUE(g_csdev_list);
  * Private Functions
  ****************************************************************************/
 
+#ifdef CONFIG_PM
+
+/****************************************************************************
+ * Name: coresight_notify_pm
+ ****************************************************************************/
+
+static void coresight_notify_pm(struct pm_callback_s *cb, int domain,
+                                enum pm_state_e pmstate)
+{
+  FAR struct coresight_dev_s *csdev =
+    container_of(cb, struct coresight_dev_s, pmcb);
+  enum pm_state_e oldstate;
+
+  if (csdev->refcnt == 0 || domain != PM_IDLE_DOMAIN)
+    {
+      return;
+    }
+
+  oldstate = pm_querystate(PM_IDLE_DOMAIN);
+  switch (oldstate)
+    {
+      case PM_NORMAL:
+      case PM_IDLE:
+      case PM_STANDBY:
+        if (pmstate == PM_SLEEP)
+          {
+            clk_disable(csdev->clk);
+          }
+        break;
+
+      case PM_SLEEP:
+        if (pmstate == PM_NORMAL || pmstate == PM_IDLE ||
+            pmstate == PM_STANDBY)
+          {
+            if (clk_enable(csdev->clk) <= 0)
+              {
+                cserr("clk enable failed when pm state change\n");
+              }
+          }
+        break;
+
+      default:
+        break;
+    }
+}
+
+#endif
+
+#ifdef CONFIG_CLK
+
+/****************************************************************************
+ * Name: coresight_enable_clk
+ ****************************************************************************/
+
+static int coresight_enable_clk(FAR struct coresight_dev_s *csdev)
+{
+  int ret;
+
+  if (csdev->clk == NULL)
+    {
+      return 0;
+    }
+
+  ret = clk_enable(csdev->clk);
+  if (ret < 0)
+    {
+      cserr("%s clk enable failed\n", csdev->name);
+      return ret;
+    }
+
+#ifdef CONFIG_PM
+  if (csdev->pmcb.notify == NULL)
+    {
+      csdev->pmcb.notify = coresight_notify_pm;
+    }
+
+  ret = pm_register(&csdev->pmcb);
+  if (ret < 0)
+    {
+      clk_disable(csdev->clk);
+      cserr("%s register pm failed\n", csdev->name);
+      return ret;
+    }
+#endif
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: coresight_disable_clk
+ ****************************************************************************/
+
+static void coresight_disable_clk(FAR struct coresight_dev_s *csdev)
+{
+  if (csdev->clk == NULL)
+    {
+      return;
+    }
+
+#ifdef CONFIG_PM
+  pm_unregister(&csdev->pmcb);
+#endif
+  clk_disable(csdev->clk);
+}
+
+#else
+#  define coresight_enable_clk(csdev) (0)
+#  define coresight_disable_clk(csdev)
+#endif
+
 /****************************************************************************
  * Name: coresight_enable_sink
  ****************************************************************************/
 
 static int coresight_enable_sink(FAR struct coresight_dev_s *csdev)
 {
-  if (csdev->ops->sink_ops->enable != NULL)
-    {
-      return csdev->ops->sink_ops->enable(csdev);
-    }
-  else
+  int ret;
+
+  if (csdev->ops->sink_ops->enable == NULL)
     {
       return -EINVAL;
     }
+
+  if (csdev->refcnt++ != 0)
+    {
+      return 0;
+    }
+
+  ret = coresight_enable_clk(csdev);
+  if (ret < 0)
+    {
+      csdev->refcnt--;
+      return ret;
+    }
+
+  ret = csdev->ops->sink_ops->enable(csdev);
+  if (ret >= 0)
+    {
+      return ret;
+    }
+
+  csdev->refcnt--;
+  coresight_disable_clk(csdev);
+  cserr("%s enable failed\n", csdev->name);
+  return ret;
 }
 
 /****************************************************************************
@@ -78,10 +209,18 @@ static int coresight_enable_sink(FAR struct coresight_dev_s *csdev)
 
 static void coresight_disable_sink(FAR struct coresight_dev_s *csdev)
 {
-  if (csdev->ops->sink_ops->disable != NULL)
+  if (csdev->ops->sink_ops->disable == NULL)
     {
-      csdev->ops->sink_ops->disable(csdev);
+      return;
     }
+
+  if (--csdev->refcnt != 0)
+    {
+      return;
+    }
+
+  csdev->ops->sink_ops->disable(csdev);
+  coresight_disable_clk(csdev);
 }
 
 /****************************************************************************
@@ -138,6 +277,7 @@ static int coresight_enable_link(FAR struct coresight_dev_s *csdev,
 {
   int inport = 0;
   int outport = 0;
+  int ret;
 
   if (csdev->ops->link_ops->enable == NULL)
     {
@@ -162,7 +302,28 @@ static int coresight_enable_link(FAR struct coresight_dev_s *csdev,
         }
     }
 
-  return csdev->ops->link_ops->enable(csdev, inport, outport);
+  if (csdev->refcnt++ == 0)
+    {
+      ret = coresight_enable_clk(csdev);
+      if (ret < 0)
+        {
+          csdev->refcnt--;
+          return ret;
+        }
+    }
+
+  ret = csdev->ops->link_ops->enable(csdev, inport, outport);
+  if (ret < 0)
+    {
+      if (--csdev->refcnt == 0)
+        {
+          coresight_disable_clk(csdev);
+        }
+
+      return ret;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -173,11 +334,21 @@ static void coresight_disable_link(FAR struct coresight_dev_s *csdev,
                                    FAR struct coresight_dev_s *prev,
                                    FAR struct coresight_dev_s *next)
 {
-  if (csdev->ops->sink_ops->disable != NULL)
+  int inport;
+  int outport;
+
+  if (csdev->ops->sink_ops->disable == NULL)
     {
-      int inport = coresight_find_link_inport(csdev, prev);
-      int outport = coresight_find_link_outport(csdev, next);
-      csdev->ops->link_ops->disable(csdev, inport, outport);
+      return;
+    }
+
+  inport = coresight_find_link_inport(csdev, prev);
+  outport = coresight_find_link_outport(csdev, next);
+  csdev->ops->link_ops->disable(csdev, inport, outport);
+
+  if (--csdev->refcnt == 0)
+    {
+      coresight_disable_clk(csdev);
     }
 }
 
@@ -187,14 +358,35 @@ static void coresight_disable_link(FAR struct coresight_dev_s *csdev,
 
 static int coresight_enable_source(FAR struct coresight_dev_s *csdev)
 {
-  if (csdev->ops->source_ops->enable != NULL)
-    {
-      return csdev->ops->source_ops->enable(csdev);
-    }
-  else
+  int ret;
+
+  if (csdev->ops->source_ops->enable == NULL)
     {
       return -EINVAL;
     }
+
+  if (csdev->refcnt++ != 0)
+    {
+      return 0;
+    }
+
+  ret = coresight_enable_clk(csdev);
+  if (ret < 0)
+    {
+      csdev->refcnt--;
+      return ret;
+    }
+
+  ret = csdev->ops->source_ops->enable(csdev);
+  if (ret >= 0)
+    {
+      return ret;
+    }
+
+  csdev->refcnt--;
+  coresight_disable_clk(csdev);
+  cserr("%s enable failed\n", csdev->name);
+  return ret;
 }
 
 /****************************************************************************
@@ -203,10 +395,18 @@ static int coresight_enable_source(FAR struct coresight_dev_s *csdev)
 
 static void coresight_disable_source(FAR struct coresight_dev_s *csdev)
 {
-  if (csdev->ops->source_ops->disable != NULL)
+  if (csdev->ops->source_ops->disable == NULL)
     {
-      csdev->ops->source_ops->disable(csdev);
+      return;
     }
+
+  if (--csdev->refcnt != 0)
+    {
+      return;
+    }
+
+  csdev->ops->source_ops->disable(csdev);
+  coresight_disable_clk(csdev);
 }
 
 /****************************************************************************
@@ -494,6 +694,18 @@ int coresight_register(FAR struct coresight_dev_s *csdev,
   csdev->outport_num = desc->outport_num;
   list_initialize(&csdev->path);
 
+#ifdef CONFIG_CLK
+  if (desc->clkname != NULL)
+    {
+      csdev->clk = clk_get(desc->clkname);
+      if (csdev->clk == NULL)
+        {
+          cserr("get device clk failed\n");
+          return -ENODEV;
+        }
+    }
+#endif
+
   if (csdev->outport_num > 0)
     {
       csdev->outconns =
@@ -684,4 +896,3 @@ void coresight_disable(FAR struct coresight_dev_s *srcdev)
 
   leave_critical_section(flags);
 }
-

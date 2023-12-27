@@ -26,7 +26,9 @@
  ****************************************************************************/
 
 #include <stdint.h>
+#include <nuttx/clk/clk.h>
 #include <nuttx/list.h>
+#include <nuttx/power/pm.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -121,6 +123,9 @@ struct coresight_portdesc_s
 struct coresight_desc_s
 {
   FAR const char *name;
+#ifdef CONFIG_CLK
+  FAR const char *clkname;
+#endif
   uintptr_t addr;
   enum coresight_dev_type_e type;
   union coresight_dev_subtype_u subtype;
@@ -168,6 +173,16 @@ struct coresight_connect_s
 struct coresight_dev_s
 {
   FAR const char *name;
+#ifdef CONFIG_CLK
+  FAR struct clk_s *clk;
+#endif
+#ifdef CONFIG_PM
+  struct pm_callback_s pmcb;
+#endif
+
+  /* Coresight device's enable count. */
+
+  uint8_t refcnt;
 
   /* Memory-mapped base address of current coresight device. */
 
