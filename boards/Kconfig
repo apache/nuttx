@@ -4218,9 +4218,6 @@ endif
 if ARCH_BOARD_ESP32S3_BOX
 source "boards/xtensa/esp32s3/esp32s3-box/Kconfig"
 endif
-if ARCH_BOARD_ESP32C6_DEVKIT
-source "boards/risc-v/esp32c6/esp32c6-devkit/Kconfig"
-endif
 if ARCH_BOARD_ESP32C6_GENERIC
 source "boards/risc-v/espressif/esp32c6-generic/Kconfig"
 endif
