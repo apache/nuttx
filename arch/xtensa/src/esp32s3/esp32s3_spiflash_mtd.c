@@ -39,9 +39,11 @@
 #include <nuttx/mtd/mtd.h>
 
 #include "hardware/esp32s3_soc.h"
+#include "hardware/esp32s3_cache_memory.h"
 
 #include "xtensa_attr.h"
 #include "esp32s3_spiflash.h"
+#include "esp32s3_spiram.h"
 
 #include "rom/esp32s3_spiflash.h"
 #include "esp32s3_spiflash_mtd.h"
@@ -71,6 +73,7 @@ enum spiflash_op_code_e
   SPIFLASH_OP_CODE_WRITE = 0,
   SPIFLASH_OP_CODE_READ,
   SPIFLASH_OP_CODE_ERASE,
+  SPIFLASH_OP_CODE_SET_BANK,
   SPIFLASH_OP_CODE_ENCRYPT_READ,
   SPIFLASH_OP_CODE_ENCRYPT_WRITE
 };
@@ -99,6 +102,7 @@ struct spiflash_work_arg
     uint32_t addr;
     uint8_t *buffer;
     uint32_t size;
+    uint32_t paddr;
   } op_arg;
 
   volatile int ret;
@@ -144,7 +148,8 @@ static void esp32s3_spiflash_work(void *arg);
 static int esp32s3_async_op(enum spiflash_op_code_e opcode,
                             uint32_t addr,
                             const uint8_t *buffer,
-                            uint32_t size);
+                            uint32_t size,
+                            uint32_t paddr);
 #endif
 
 /****************************************************************************
@@ -259,6 +264,12 @@ static void esp32s3_spiflash_work(void *arg)
       work_arg->ret = spi_flash_erase_range(work_arg->op_arg.addr,
                                             work_arg->op_arg.size);
     }
+  else if (work_arg->op_code == SPIFLASH_OP_CODE_SET_BANK)
+    {
+      work_arg->ret = cache_dbus_mmu_map(work_arg->op_arg.addr,
+                                         work_arg->op_arg.paddr,
+                                         work_arg->op_arg.size);
+    }
   else if (work_arg->op_code == SPIFLASH_OP_CODE_ENCRYPT_READ)
     {
       work_arg->ret = spi_flash_read_encrypted(work_arg->op_arg.addr,
@@ -300,7 +311,8 @@ static void esp32s3_spiflash_work(void *arg)
 static int esp32s3_async_op(enum spiflash_op_code_e opcode,
                             uint32_t addr,
                             const uint8_t *buffer,
-                            uint32_t size)
+                            uint32_t size,
+                            uint32_t paddr)
 {
   int ret;
   struct spiflash_work_arg work_arg =
@@ -311,6 +323,7 @@ static int esp32s3_async_op(enum spiflash_op_code_e opcode,
       .addr = addr,
       .buffer = (uint8_t *)buffer,
       .size = size,
+      .paddr = paddr,
     },
     .sem = NXSEM_INITIALIZER(0, 0)
   };
@@ -370,7 +383,8 @@ static int esp32s3_erase(struct mtd_dev_s *dev, off_t startblock,
 #ifdef CONFIG_ESP32S3_SPI_FLASH_SUPPORT_PSRAM_STACK
   if (stack_is_psram())
     {
-      ret = esp32s3_async_op(SPIFLASH_OP_CODE_ERASE, offset, NULL, nbytes);
+      ret = esp32s3_async_op(SPIFLASH_OP_CODE_ERASE, offset, NULL,
+                             nbytes, 0);
     }
   else
 #endif
@@ -438,7 +452,7 @@ static ssize_t esp32s3_read(struct mtd_dev_s *dev, off_t offset,
   if (stack_is_psram())
     {
       ret = esp32s3_async_op(SPIFLASH_OP_CODE_READ, offset,
-                             buffer, nbytes);
+                             buffer, nbytes, 0);
     }
   else
 #endif
@@ -544,7 +558,7 @@ static ssize_t esp32s3_read_decrypt(struct mtd_dev_s *dev,
   if (stack_is_psram())
     {
       ret = esp32s3_async_op(SPIFLASH_OP_CODE_ENCRYPT_READ, offset,
-                             buffer, nbytes);
+                             buffer, nbytes, 0);
     }
   else
 #endif
@@ -656,7 +670,7 @@ static ssize_t esp32s3_write(struct mtd_dev_s *dev, off_t offset,
   if (stack_is_psram())
     {
       ret = esp32s3_async_op(SPIFLASH_OP_CODE_WRITE, offset,
-                             buffer, nbytes);
+                             buffer, nbytes, 0);
     }
   else
 #endif
@@ -720,7 +734,7 @@ static ssize_t esp32s3_bwrite_encrypt(struct mtd_dev_s *dev,
   if (stack_is_psram())
     {
       ret = esp32s3_async_op(SPIFLASH_OP_CODE_ENCRYPT_WRITE, addr,
-                             buffer, size);
+                             buffer, size, 0);
     }
   else
 #endif
@@ -862,6 +876,43 @@ static int esp32s3_ioctl(struct mtd_dev_s *dev, int cmd,
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp32s3_set_bank
+ *
+ * Description:
+ *   Set Ext-SRAM-Cache mmu mapping.
+ *
+ * Input Parameters:
+ *   virt_bank - Beginning of the virtual bank
+ *   phys_bank - Beginning of the physical bank
+ *   ct        - Number of banks
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32s3_set_bank(int virt_bank, int phys_bank, int ct)
+{
+  int ret;
+  uint32_t vaddr = SOC_EXTRAM_DATA_LOW + MMU_PAGE_SIZE * virt_bank;
+  uint32_t paddr = phys_bank * MMU_PAGE_SIZE;
+#ifdef CONFIG_ESP32S3_SPI_FLASH_SUPPORT_PSRAM_STACK
+  if (stack_is_psram())
+    {
+      ret = esp32s3_async_op(SPIFLASH_OP_CODE_SET_BANK, vaddr, NULL, ct,
+                             paddr);
+    }
+  else
+#endif
+    {
+      ret = cache_dbus_mmu_map(vaddr, paddr, ct);
+    }
+
+  DEBUGASSERT(ret == 0);
+  UNUSED(ret);
+}
 
 /****************************************************************************
  * Name: esp32s3_spiflash_alloc_mtdpart
