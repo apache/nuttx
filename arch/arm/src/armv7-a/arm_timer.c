@@ -87,12 +87,6 @@ static const struct oneshot_operations_s g_arm_timer_ops =
  * Private Functions
  ****************************************************************************/
 
-static inline uint32_t arm_timer_get_freq(void)
-{
-  ARM_ISB();
-  return CP15_GET(CNTFRQ);
-}
-
 static inline void arm_timer_set_freq(uint32_t freq)
 {
   CP15_SET(CNTFRQ, freq);
@@ -262,6 +256,12 @@ static int arm_timer_interrupt(int irq, void *context, void *arg)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+uint32_t arm_timer_get_freq(void)
+{
+  ARM_ISB();
+  return CP15_GET(CNTFRQ);
+}
 
 struct oneshot_lowerhalf_s *arm_timer_initialize(unsigned int freq)
 {
