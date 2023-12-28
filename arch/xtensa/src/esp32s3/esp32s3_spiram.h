@@ -34,6 +34,24 @@ extern "C"
 {
 #endif
 
+/****************************************************************************
+ * Name: cache_dbus_mmu_map
+ *
+ * Description:
+ *   Set Ext-SRAM-Cache mmu mapping.
+ *
+ * Input Parameters:
+ *   vaddr - Virtual address in CPU address space
+ *   paddr - Physical address in Ext-SRAM
+ *   num   - Pages to be set
+ *
+ * Returned Value:
+ *   0 if success or a negative value if fail.
+ *
+ ****************************************************************************/
+
+int cache_dbus_mmu_map(int vaddr, int paddr, int num);
+
 /* Initialize spiram interface/hardware. Normally called from
  * cpu_start.c.
  *

@@ -47,6 +47,24 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: esp32s3_set_bank
+ *
+ * Description:
+ *   Set Ext-SRAM-Cache mmu mapping.
+ *
+ * Input Parameters:
+ *   virt_bank - Beginning of the virtual bank
+ *   phys_bank - Beginning of the physical bank
+ *   ct        - Number of banks
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32s3_set_bank(int virt_bank, int phys_bank, int ct);
+
+/****************************************************************************
  * Name: esp32s3_spiflash_mtd
  *
  * Description:
