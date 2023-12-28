@@ -852,6 +852,14 @@ static int wifidriver_start_connect(FAR struct wifi_sim_s *wifidev)
               memset(&wrqu, 0, sizeof(wrqu));
               memcpy(wrqu.ap_addr.sa_data, bss_info->bssid, ETH_ALEN);
               wifi_send_event(wifidev, SIOCGIWAP, &wrqu);
+
+              /* If connect the AP with the bssid, copy the essid from bss */
+
+              if (wifidev->ssid_flag == 2)
+                {
+                  memcpy(wifidev->ssid, bss_info->ssid,
+                         strlen(bss_info->ssid));
+                }
             }
           else
             {
@@ -1750,10 +1758,6 @@ static int wifidriver_bssid(FAR struct netdev_lowerhalf_s *dev,
   if (set)
     {
       ret = wifidriver_set_bssid(wifidev, iwr);
-      if (ret >= 0)
-        {
-           ret = wifidriver_start_connect(wifidev);
-        }
     }
   else
     {
