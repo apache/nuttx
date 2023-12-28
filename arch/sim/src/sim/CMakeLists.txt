@@ -229,9 +229,10 @@ list(APPEND HOST_DEFINITIONS CONFIG_NAME_MAX=${CONFIG_NAME_MAX})
 
 configure_file(${NUTTX_DIR}/include/nuttx/fs/hostfs.h
                ${CMAKE_CURRENT_BINARY_DIR}/hostfs.h COPYONLY)
+configure_file(${CMAKE_BINARY_DIR}/include/nuttx/config.h
+               ${CMAKE_CURRENT_BINARY_DIR}/config.h COPYONLY)
 target_include_directories(nuttx PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-target_include_directories(nuttx PRIVATE ${CMAKE_BINARY_DIR}/include/nuttx)
 target_include_directories(nuttx PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 
 target_include_directories(sim_head PUBLIC ${NUTTX_DIR}/sched)
