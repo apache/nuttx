@@ -24,12 +24,6 @@ ifeq ($(V),)
   MAKE := $(MAKE) -s --no-print-directory
 endif
 
-# Build any necessary tools needed early in the build.
-# incdir - Is needed immediately by all Make.defs file.
-
-DUMMY  := ${shell $(MAKE) -C tools -f Makefile.host incdir \
-          INCDIR="$(TOPDIR)/tools/incdir.sh"}
-
 include $(TOPDIR)/Make.defs
 
 # GIT directory present
@@ -221,6 +215,13 @@ ifeq ($(CONFIG_ARCH_SETJMP_H),y)
 include/setjmp.h: include/nuttx/lib/setjmp.h
 	$(Q) cp -f include/nuttx/lib/setjmp.h include/setjmp.h
 endif
+
+# Targets used to generate compiler-specific include paths
+# Build this tools needed early in the build
+# so we define it as a dependency of `context` target
+
+tools/incdir$(HOSTEXEEXT):
+	$(Q) $(MAKE) -C tools -f Makefile.host incdir INCDIR="$(TOPDIR)/tools/incdir.sh"
 
 # Targets used to build include/nuttx/version.h.  Creation of version.h is
 # part of the overall NuttX configuration sequence. Notice that the
@@ -440,7 +441,7 @@ endif
 
 CONTEXTDIRS_DEPS = $(patsubst %,%/.context,$(CONTEXTDIRS))
 
-context: include/nuttx/config.h include/nuttx/version.h .dirlinks $(CONTEXTDIRS_DEPS) | staging
+context: tools/incdir$(HOSTEXEEXT) include/nuttx/config.h include/nuttx/version.h .dirlinks $(CONTEXTDIRS_DEPS) | staging
 
 staging:
 	$(Q) mkdir -p $@

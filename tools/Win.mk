@@ -22,12 +22,6 @@ export SHELL=cmd
 
 export TOPDIR := ${shell echo %CD%}
 
-# Build any necessary tools needed early in the build.
-# incdir - Is needed immediately by all Make.defs file.
-
-DUMMY  := ${shell $(MAKE) -C tools -f Makefile.host incdir \
-          INCDIR="$(TOPDIR)\tools\incdir.bat"}
-
 include $(TOPDIR)\Make.defs
 -include $(TOPDIR)\.version
 
@@ -209,6 +203,13 @@ include\setjmp.h: include\nuttx\lib\setjmp.h
 else
 include\setjmp.h:
 endif
+
+# Targets used to generate compiler-specific include paths
+# Build this tools needed early in the build
+# so we define it as a dependency of `context` target
+
+tools\incdir$(HOSTEXEEXT):
+	$(Q) $(MAKE) -C tools -f Makefile.host incdir INCDIR="$(TOPDIR)\tools\incdir.bat"
 
 # Targets used to build include\nuttx\version.h.  Creation of version.h is
 # part of the overall NuttX configuration sequence. Notice that the
@@ -424,7 +425,7 @@ endif
 
 CONTEXTDIRS_DEPS = $(patsubst %,%\.context,$(CONTEXTDIRS))
 
-context: include\nuttx\config.h include\nuttx\version.h $(CONTEXTDIRS_DEPS) .dirlinks | staging
+context: tools\incdir$(HOSTEXEEXT) include\nuttx\config.h include\nuttx\version.h $(CONTEXTDIRS_DEPS) .dirlinks | staging
 
 ifeq ($(NEED_MATH_H),y)
 context: include\math.h
