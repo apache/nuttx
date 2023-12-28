@@ -33,6 +33,7 @@
 #include <sys/param.h>
 #include <nuttx/config.h>
 #include <nuttx/spinlock.h>
+#include <nuttx/init.h>
 #include <assert.h>
 
 #include "xtensa.h"
@@ -65,6 +66,22 @@
 #else
 #define SPIRAM_VADDR_MAP_SIZE 0
 #endif
+
+/* Max MMU available paddr page num.
+ * `MMU_MAX_PADDR_PAGE_NUM * MMU_PAGE_SIZE` means the max paddr
+ * address supported by the MMU.  e.g.: 16384 * 64KB, means MMU can
+ * support 1GB paddr at most
+ */
+
+#define MMU_MAX_PADDR_PAGE_NUM    16384
+
+/* This is the mask used for mapping. e.g.: 0x4200_0000 & MMU_VADDR_MASK */
+
+#define MMU_VADDR_MASK  0x1FFFFFF
+
+/* MMU entry num */
+
+#define MMU_ENTRY_NUM   512
 
 static bool g_spiram_inited;
 
@@ -109,6 +126,7 @@ extern void cache_resume_dcache(uint32_t val);
 extern int cache_dbus_mmu_set(uint32_t ext_ram, uint32_t vaddr,
                               uint32_t paddr, uint32_t psize,
                               uint32_t num, uint32_t fixed);
+extern int cache_invalidate_addr(uint32_t addr, uint32_t size);
 
 /****************************************************************************
  * Private Functions
@@ -143,8 +161,187 @@ static inline uint32_t mmu_valid_space(uint32_t *start_address)
 }
 
 /****************************************************************************
+ * Name: mmu_check_valid_paddr_region
+ *
+ * Description:
+ *   Check if the paddr region is valid.
+ *
+ * Input Parameters:
+ *   paddr_start - start of the physical address
+ *   len         - length, in bytes
+ *
+ * Returned Value:
+ *   True for valid.
+ *
+ ****************************************************************************/
+
+static inline bool mmu_check_valid_paddr_region(uint32_t paddr_start,
+                                                uint32_t len)
+{
+  return (paddr_start < (MMU_PAGE_SIZE * MMU_MAX_PADDR_PAGE_NUM)) &&
+         (len < (MMU_PAGE_SIZE * MMU_MAX_PADDR_PAGE_NUM)) &&
+         ((paddr_start + len - 1) <
+          (MMU_PAGE_SIZE * MMU_MAX_PADDR_PAGE_NUM));
+}
+
+/****************************************************************************
+ * Name: mmu_check_valid_ext_vaddr_region
+ *
+ * Description:
+ *   Check if the external memory vaddr region is valid.
+ *
+ * Input Parameters:
+ *   vaddr_start - start of the virtual address
+ *   len         - length, in bytes
+ *
+ * Returned Value:
+ *   True for valid.
+ *
+ ****************************************************************************/
+
+static inline bool mmu_check_valid_ext_vaddr_region(uint32_t vaddr_start,
+                                                    uint32_t len)
+{
+  uint32_t vaddr_end = vaddr_start + len - 1;
+  bool valid = false;
+  valid |= (ADDRESS_IN_IRAM0_CACHE(vaddr_start) &&
+            ADDRESS_IN_IRAM0_CACHE(vaddr_end)) |
+           (ADDRESS_IN_DRAM0_CACHE(vaddr_start) &&
+            ADDRESS_IN_DRAM0_CACHE(vaddr_end));
+  return valid;
+}
+
+/****************************************************************************
+ * Name: esp_mmu_map_region
+ *
+ * Description:
+ *   To map a virtual address block to a physical memory block.
+ *
+ * Input Parameters:
+ *   vaddr    - Virtual address in CPU address space
+ *   paddr    - Physical address in Ext-SRAM
+ *   len      - Length to be mapped, in bytes
+ *   mem_type - MMU target physical memory
+ *
+ * Returned Value:
+ *   Actual mapped length.
+ *
+ ****************************************************************************/
+
+static int IRAM_ATTR esp_mmu_map_region(uint32_t vaddr, uint32_t paddr,
+                                        uint32_t len, uint32_t mem_type)
+{
+  DEBUGASSERT(vaddr % MMU_PAGE_SIZE == 0);
+  DEBUGASSERT(paddr % MMU_PAGE_SIZE == 0);
+  DEBUGASSERT(mmu_check_valid_paddr_region(paddr, len));
+  DEBUGASSERT(mmu_check_valid_ext_vaddr_region(vaddr, len));
+
+  uint32_t mmu_val;
+  uint32_t entry_id;
+  uint32_t page_num = (len + MMU_PAGE_SIZE - 1) / MMU_PAGE_SIZE;
+  uint32_t ret = page_num * MMU_PAGE_SIZE;
+  mmu_val = paddr >> 16;
+  bool write_back = false;
+
+  while (page_num)
+    {
+      entry_id = (vaddr & MMU_VADDR_MASK) >> 16;
+      DEBUGASSERT(entry_id < MMU_ENTRY_NUM);
+      if (write_back == false &&  FLASH_MMU_TABLE[entry_id] != MMU_INVALID)
+        {
+          esp_spiram_writeback_cache();
+          write_back = true;
+        }
+
+      FLASH_MMU_TABLE[entry_id] = mmu_val | mem_type;
+      vaddr += MMU_PAGE_SIZE;
+      mmu_val++;
+      page_num--;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: cache_dbus_mmu_map
+ *
+ * Description:
+ *   Set Ext-SRAM-Cache mmu mapping.
+ *
+ * Input Parameters:
+ *   vaddr - Virtual address in CPU address space
+ *   paddr - Physical address in Ext-SRAM
+ *   num   - Pages to be set
+ *
+ * Returned Value:
+ *   0 if success or a negative value if fail.
+ *
+ ****************************************************************************/
+
+int IRAM_ATTR cache_dbus_mmu_map(int vaddr, int paddr, int num)
+{
+  uint32_t regval;
+  irqstate_t flags;
+  uint32_t actual_mapped_len;
+  uint32_t cache_state[CONFIG_SMP_NCPUS];
+  int cpu = up_cpu_index();
+#ifdef CONFIG_SMP
+  bool smp_start = OSINIT_OS_READY();
+  int other_cpu = cpu ? 0 : 1;
+#endif
+
+  /* The MMU registers are implemented in such a way that lookups from the
+   * cache subsystem may collide with CPU access to the MMU registers. We use
+   * cache_suspend_dcache to make sure the cache is disabled.
+   */
+
+  flags = enter_critical_section();
+
+#ifdef CONFIG_SMP
+  /* The other CPU might be accessing the cache at the same time, just by
+   * using variables in external RAM.
+   */
+
+  if (smp_start)
+    {
+      up_cpu_pause(other_cpu);
+    }
+
+  cache_state[other_cpu] = cache_suspend_dcache();
+#endif
+  cache_state[cpu] = cache_suspend_dcache();
+
+  esp_mmu_map_region(vaddr, paddr, num * MMU_PAGE_SIZE, MMU_ACCESS_SPIRAM);
+
+  regval = getreg32(EXTMEM_DCACHE_CTRL1_REG);
+  regval &= ~EXTMEM_DCACHE_SHUT_CORE0_BUS;
+  putreg32(regval, EXTMEM_DCACHE_CTRL1_REG);
+
+#if defined(CONFIG_SMP)
+  regval = getreg32(EXTMEM_DCACHE_CTRL1_REG);
+  regval &= ~EXTMEM_DCACHE_SHUT_CORE1_BUS;
+  putreg32(regval, EXTMEM_DCACHE_CTRL1_REG);
+#endif
+
+  cache_invalidate_addr(vaddr, num * MMU_PAGE_SIZE);
+
+  cache_resume_dcache(cache_state[cpu]);
+
+#ifdef CONFIG_SMP
+  cache_resume_dcache(cache_state[other_cpu]);
+  if (smp_start)
+    {
+      up_cpu_resume(other_cpu);
+    }
+#endif
+
+  leave_critical_section(flags);
+  return 0;
+}
 
 /* Initially map all psram physical address to virtual address.
  * If psram physical size is larger than virtual address range, then only

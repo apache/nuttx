@@ -32,6 +32,7 @@
 #include "xtensa.h"
 #include "esp32s3_spiram.h"
 #include "esp32s3_himem.h"
+#include "esp32s3_spiflash_mtd.h"
 #include "hardware/esp32s3_soc.h"
 #include "hardware/esp32s3_cache_memory.h"
 #include "hardware/esp32s3_extmem.h"
@@ -82,7 +83,6 @@
 #  define SPIRAM_BANKSWITCH_RESERVE 0
 #endif
 
-#define MMU_PAGE_SIZE                   0x10000
 #define MMU_PAGE_TO_BYTES(page_num)     ((page_num) * MMU_PAGE_SIZE)
 #define BYTES_TO_MMU_PAGE(bytes)        ((bytes) / MMU_PAGE_SIZE)
 
@@ -129,7 +129,6 @@ extern int cache_dbus_mmu_set(uint32_t ext_ram, uint32_t vaddr,
 
 static inline bool ramblock_idx_valid(int ramblock_idx);
 static inline bool rangeblock_idx_valid(int rangeblock_idx);
-static void set_bank(int virt_bank, int phys_bank, int ct);
 static uint32_t esp_himem_get_range_start(void);
 static uint32_t esp_himem_get_range_block(void);
 static uint32_t esp_himem_get_phy_block(void);
@@ -207,47 +206,6 @@ static inline bool ramblock_idx_valid(int ramblock_idx)
 static inline bool rangeblock_idx_valid(int rangeblock_idx)
 {
   return (rangeblock_idx >= 0 && rangeblock_idx < g_rangeblockcnt);
-}
-
-/****************************************************************************
- * Name: set_bank
- *
- * Description:
- *   Set DCache mmu mapping.
- *
- * Input Parameters:
- *   virt_bank - Beginning of the virtual bank
- *   phys_bank - Beginning of the physical bank
- *   ct        - Number of banks
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-static void set_bank(int virt_bank, int phys_bank, int ct)
-{
-  uint32_t regval;
-
-  /* Suspend DRAM Case during configuration */
-
-  cache_suspend_dcache();
-  ASSERT(cache_dbus_mmu_set(MMU_ACCESS_SPIRAM,
-                            SOC_EXTRAM_DATA_LOW +
-                            MMU_PAGE_TO_BYTES(virt_bank),
-                            MMU_PAGE_TO_BYTES(phys_bank), 64, ct, 0) == 0);
-
-  regval = getreg32(EXTMEM_DCACHE_CTRL1_REG);
-  regval &= ~EXTMEM_DCACHE_SHUT_CORE0_BUS;
-  putreg32(regval, EXTMEM_DCACHE_CTRL1_REG);
-
-#if defined(CONFIG_SMP)
-  regval = getreg32(EXTMEM_DCACHE_CTRL1_REG);
-  regval &= ~EXTMEM_DCACHE_SHUT_CORE1_BUS;
-  putreg32(regval, EXTMEM_DCACHE_CTRL1_REG);
-#endif
-
-  cache_resume_dcache(0);
 }
 
 /****************************************************************************
@@ -974,7 +932,7 @@ int esp_himem_map(esp_himem_handle_t handle,
     {
       virt_bank = himem_mmu_start + range->block_start + i + range_block;
       phys_bank = himem_phy_start + handle->block[i + ram_block];
-      set_bank(virt_bank, phys_bank, 1);
+      esp32s3_set_bank(virt_bank, phys_bank, 1);
     }
 
   /* Set out pointer */
