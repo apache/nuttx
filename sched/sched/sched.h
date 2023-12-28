@@ -410,6 +410,7 @@ void nxsched_process_cpuload_ticks(clock_t ticks);
 #ifdef CONFIG_SCHED_CRITMONITOR
 void nxsched_resume_critmon(FAR struct tcb_s *tcb);
 void nxsched_suspend_critmon(FAR struct tcb_s *tcb);
+void nxsched_update_critmon(FAR struct tcb_s *tcb);
 #endif
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
