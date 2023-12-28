@@ -44,9 +44,6 @@ struct rpmsg_s
   struct rpmsg_device          rdev[0];
 };
 
-typedef CODE int (*rpmsg_foreach_t)(FAR struct rpmsg_s *rpmsg,
-                                    FAR void *arg);
-
 /**
  * struct rpmsg_ops_s - Rpmsg device operations
  * wait: wait sem.
@@ -60,19 +57,20 @@ struct rpmsg_ops_s
 {
   CODE int (*wait)(FAR struct rpmsg_s *rpmsg, FAR sem_t *sem);
   CODE int (*post)(FAR struct rpmsg_s *rpmsg, FAR sem_t *sem);
+  CODE int (*ioctl)(FAR struct rpmsg_s *rpmsg, int cmd, unsigned long arg);
   CODE FAR const char *(*get_cpuname)(FAR struct rpmsg_s *rpmsg);
   CODE int (*get_tx_buffer_size)(FAR struct rpmsg_s *rpmsg);
   CODE int (*get_rx_buffer_size)(FAR struct rpmsg_s *rpmsg);
 };
 
 CODE typedef void (*rpmsg_dev_cb_t)(FAR struct rpmsg_device *rdev,
-                               FAR void *priv);
+                                    FAR void *priv);
 CODE typedef bool (*rpmsg_match_cb_t)(FAR struct rpmsg_device *rdev,
-                                 FAR void *priv, FAR const char *name,
-                                 uint32_t dest);
+                                      FAR void *priv, FAR const char *name,
+                                      uint32_t dest);
 CODE typedef void (*rpmsg_bind_cb_t)(FAR struct rpmsg_device *rdev,
-                                FAR void *priv, FAR const char *name,
-                                uint32_t dest);
+                                     FAR void *priv, FAR const char *name,
+                                     uint32_t dest);
 
 /****************************************************************************
  * Public Function Prototypes
@@ -110,10 +108,10 @@ void rpmsg_ns_unbind(FAR struct rpmsg_device *rdev,
                      FAR const char *name, uint32_t dest);
 void rpmsg_device_created(FAR struct rpmsg_s *rpmsg);
 void rpmsg_device_destory(FAR struct rpmsg_s *rpmsg);
-void rpmsg_register(FAR struct rpmsg_s *rpmsg,
-                    FAR const struct rpmsg_ops_s *ops);
-void rpmsg_unregister(FAR struct rpmsg_s *rpmsg);
-int  rpmsg_foreach(rpmsg_foreach_t callback, FAR void *arg);
+int rpmsg_register(FAR const char *path, FAR struct rpmsg_s *rpmsg,
+                   FAR const struct rpmsg_ops_s *ops);
+void rpmsg_unregister(FAR const char *path, FAR struct rpmsg_s *rpmsg);
+int rpmsg_ioctl(FAR const char *cpuname, int cmd, unsigned long arg);
 
 #ifdef __cplusplus
 }
