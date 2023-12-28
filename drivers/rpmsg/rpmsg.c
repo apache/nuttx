@@ -51,6 +51,13 @@ struct rpmsg_cb_s
 };
 
 /****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static int rpmsg_dev_ioctl(FAR struct file *filep, int cmd,
+                           unsigned long arg);
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -58,6 +65,16 @@ static METAL_DECLARE_LIST(g_rpmsg_cb);
 static METAL_DECLARE_LIST(g_rpmsg);
 
 static rmutex_t g_rpmsg_lock = NXRMUTEX_INITIALIZER;
+
+static const struct file_operations g_rpmsg_dev_ops =
+{
+  NULL,             /* open */
+  NULL,             /* close */
+  NULL,             /* read */
+  NULL,             /* write */
+  NULL,             /* seek */
+  rpmsg_dev_ioctl,  /* ioctl */
+};
 
 /****************************************************************************
  * Private Functions
@@ -72,6 +89,14 @@ rpmsg_get_by_rdev(FAR struct rpmsg_device *rdev)
     }
 
   return metal_container_of(rdev, struct rpmsg_s, rdev);
+}
+
+static int rpmsg_dev_ioctl(FAR struct file *filep, int cmd,
+                           unsigned long arg)
+{
+  FAR struct rpmsg_s *rpmsg = filep->f_inode->i_private;
+
+  return rpmsg->ops->ioctl(rpmsg, cmd, arg);
 }
 
 /****************************************************************************
@@ -337,29 +362,6 @@ void rpmsg_ns_unbind(FAR struct rpmsg_device *rdev,
   nxrmutex_unlock(&rpmsg->lock);
 }
 
-int rpmsg_foreach(rpmsg_foreach_t callback, FAR void *arg)
-{
-  FAR struct metal_list *node;
-  FAR struct rpmsg_s *rpmsg;
-  int ret = OK;
-
-  nxrmutex_lock(&g_rpmsg_lock);
-
-  metal_list_for_each(&g_rpmsg, node)
-    {
-      rpmsg = metal_container_of(node, struct rpmsg_s, node);
-      ret = callback(rpmsg, arg);
-      if (ret < 0)
-        {
-          break;
-        }
-    }
-
-  nxrmutex_unlock(&g_rpmsg_lock);
-
-  return ret;
-}
-
 void rpmsg_device_created(FAR struct rpmsg_s *rpmsg)
 {
   FAR struct rpmsg_cb_s *cb;
@@ -414,9 +416,17 @@ void rpmsg_device_destory(FAR struct rpmsg_s *rpmsg)
   nxrmutex_unlock(&g_rpmsg_lock);
 }
 
-void rpmsg_register(FAR struct rpmsg_s *rpmsg,
-                    FAR const struct rpmsg_ops_s *ops)
+int rpmsg_register(FAR const char *path, FAR struct rpmsg_s *rpmsg,
+                   FAR const struct rpmsg_ops_s *ops)
 {
+  int ret;
+
+  ret = register_driver(path, &g_rpmsg_dev_ops, 0222, rpmsg);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   metal_list_init(&rpmsg->bind);
   nxrmutex_init(&rpmsg->lock);
   rpmsg->ops = ops;
@@ -426,13 +436,44 @@ void rpmsg_register(FAR struct rpmsg_s *rpmsg,
   nxrmutex_lock(&g_rpmsg_lock);
   metal_list_add_tail(&g_rpmsg, &rpmsg->node);
   nxrmutex_unlock(&g_rpmsg_lock);
+
+  return ret;
 }
 
-void rpmsg_unregister(FAR struct rpmsg_s *rpmsg)
+void rpmsg_unregister(FAR const char *path, FAR struct rpmsg_s *rpmsg)
 {
   nxrmutex_lock(&g_rpmsg_lock);
   metal_list_del(&rpmsg->node);
   nxrmutex_unlock(&g_rpmsg_lock);
 
   nxrmutex_destroy(&rpmsg->lock);
+
+  unregister_driver(path);
+}
+
+int rpmsg_ioctl(FAR const char *cpuname, int cmd, unsigned long arg)
+{
+  FAR struct metal_list *node;
+  int ret = OK;
+
+  nxrmutex_lock(&g_rpmsg_lock);
+
+  metal_list_for_each(&g_rpmsg, node)
+    {
+      FAR struct rpmsg_s *rpmsg;
+
+      rpmsg = metal_container_of(node, struct rpmsg_s, node);
+
+      if (!cpuname || !strcmp(rpmsg_get_cpuname(rpmsg->rdev), cpuname))
+        {
+          ret = rpmsg->ops->ioctl(rpmsg, cmd, arg);
+          if (ret < 0)
+            {
+              break;
+            }
+        }
+    }
+
+  nxrmutex_unlock(&g_rpmsg_lock);
+  return ret;
 }
