@@ -899,7 +899,6 @@ error:
 
 static int wifidriver_start_disconnect(FAR struct wifi_sim_s *wifidev)
 {
-  int ret;
   union iwreq_data wrqu;
 
   switch (wifidev->mode)
@@ -912,11 +911,12 @@ static int wifidriver_start_disconnect(FAR struct wifi_sim_s *wifidev)
 
               free(wifidev->connected_ap);
 
-              netdev_lower_carrier_off(wifidev->lower);
               memset(&wrqu, 0, sizeof(wrqu));
               wrqu.ap_addr.sa_family = ARPHRD_ETHER;
               wifi_send_event(wifidev, SIOCGIWAP, &wrqu);
             }
+
+          netdev_lower_carrier_off(wifidev->lower);
 
           if (wifidev->psk_flag == 0)
             {
@@ -925,17 +925,15 @@ static int wifidriver_start_disconnect(FAR struct wifi_sim_s *wifidev)
             }
 
           wifidev->state = WLAN_STA_STATE_INIT;
-          ret            = OK;
         }
         break;
 
       case IW_MODE_MASTER:
       default:
-        ret = -ENOSYS;
         break;
     }
 
-  return ret;
+  return OK;
 }
 
 static int wifidriver_get_mode(FAR struct wifi_sim_s *wifidev,
