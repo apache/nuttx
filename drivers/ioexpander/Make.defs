@@ -78,6 +78,10 @@ ifeq ($(CONFIG_IOEXPANDER_PCF8575),y)
   CSRCS += pcf8575.c
 endif
 
+ifeq ($(CONFIG_IOEXPANDER_PL061),y)
+  CSRCS += pl061.c
+endif
+
 ifeq ($(CONFIG_IOEXPANDER_MCP23X08),y)
   CSRCS += mcp23x08.c
 endif

@@ -383,6 +383,23 @@ config PCA9557_RETRY
 
 endif # IOEXPANDER_PCA9557
 
+config IOEXPANDER_PL061
+	bool "PL061 IO expander"
+	default n
+	---help---
+		Enable support for the PL061 IO Expander
+
+if IOEXPANDER_PL061
+
+config PL061_INT_ENABLE
+	bool "Enable PL061 Interrupt Support"
+	default n
+	select IOEXPANDER_INT_ENABLE
+	---help---
+		Enable driver interrupt functionality
+
+endif # IOEXPANDER_PL061
+
 config IOEXPANDER_TCA64XX
 	bool "TCA64XX I2C IO expander"
 	default n
