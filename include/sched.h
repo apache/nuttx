@@ -113,7 +113,7 @@
 
 /* int CPU_EQUAL(FAR const cpu_set_t *set1, FAR const cpu_set_t *set2); */
 
-#  define CPU_EQUAL(s1,s2) (*(s2) == *(s2))
+#  define CPU_EQUAL(s1,s2) (*(s1) == *(s2))
 
 /* REVISIT: Variably sized CPU sets are not supported */
 
