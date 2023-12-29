@@ -1407,6 +1407,20 @@ config ESP32S3_WIFI_STATION_SOFTAP
 
 endchoice # ESP32S3 Wi-Fi mode
 
+config ESP_WIFI_ENABLE_SAE_PK
+	bool "Enable SAE-PK"
+	default y
+	---help---
+		Select this option to enable SAE-PK
+
+config ESP_WIFI_ENABLE_WPA3_OWE_STA
+	bool "Enable OWE STA"
+	default y
+	---help---
+		Select this option to allow the device to establish OWE connection with eligible AP's.
+		PMF (Protected Management Frames) is a prerequisite feature for a WPA3 connection, it needs to be
+		explicitly configured before attempting connection. Please refer to the Wi-Fi Driver API Guide for details.
+
 config ESP32S3_WIFI_STATIC_RXBUF_NUM
 	int "Wi-Fi static RX buffer number"
 	default 10

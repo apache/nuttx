@@ -87,6 +87,20 @@ CHIP_CSRCS += platform.c
 CHIP_CSRCS += sha1.c
 CHIP_CSRCS += sha256.c
 CHIP_CSRCS += sha512.c
+CHIP_CSRCS += pk.c
+CHIP_CSRCS += pk_wrap.c
+CHIP_CSRCS += pkparse.c
+CHIP_CSRCS += ecdsa.c
+CHIP_CSRCS += asn1parse.c
+CHIP_CSRCS += asn1write.c
+CHIP_CSRCS += rsa.c
+CHIP_CSRCS += md5.c
+CHIP_CSRCS += oid.c
+CHIP_CSRCS += pem.c
+CHIP_CSRCS += hmac_drbg.c
+CHIP_CSRCS += hash_info.c
+CHIP_CSRCS += rsa_alt_helpers.c
+CHIP_CSRCS += ecdh.c
 
 VPATH += chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)mbedtls$(DELIM)port
 
@@ -113,6 +127,16 @@ CFLAGS += $(DEFINE_PREFIX)ESP_SUPPLICANT
 CFLAGS += $(DEFINE_PREFIX)ESPRESSIF_USE
 CFLAGS += $(DEFINE_PREFIX)IEEE8021X_EAPOL
 CFLAGS += $(DEFINE_PREFIX)USE_WPA2_TASK
+CFLAGS += $(DEFINE_PREFIX)CONFIG_SHA256
+CFLAGS += $(DEFINE_PREFIX)CONFIG_SAE
+
+ifeq ($(CONFIG_ESP_WIFI_ENABLE_SAE_PK),y)
+CFLAGS += $(DEFINE_PREFIX)CONFIG_SAE_PK
+endif
+
+ifeq ($(CONFIG_ESP_WIFI_ENABLE_WPA3_OWE_STA),y)
+CFLAGS += $(DEFINE_PREFIX)CONFIG_OWE_STA
+endif
 
 ifeq ($(CONFIG_ESP_WIFI_GCMP_SUPPORT),y)
 CFLAGS += $(DEFINE_PREFIX)CONFIG_GCMP
@@ -131,6 +155,7 @@ INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)$(WIFI_WPA_SUPPLICANT)$(DELIM)
 
 CHIP_CSRCS += ap_config.c
 CHIP_CSRCS += ieee802_11.c
+CHIP_CSRCS += comeback_token.c
 CHIP_CSRCS += pmksa_cache_auth.c
 CHIP_CSRCS += sta_info.c
 CHIP_CSRCS += wpa_auth_ie.c
@@ -143,6 +168,10 @@ INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)$(WIFI_WPA_SUPPLICANT)$(DELIM)
 CHIP_CSRCS += dragonfly.c
 CHIP_CSRCS += sae.c
 CHIP_CSRCS += wpa_common.c
+CHIP_CSRCS += sae_pk.c
+CHIP_CSRCS += bss.c
+CHIP_CSRCS += scan.c
+CHIP_CSRCS += ieee802_11_common.c
 
 VPATH += $(WIFI_WPA_SUPPLICANT)$(DELIM)src$(DELIM)crypto
 
@@ -213,6 +242,8 @@ CHIP_CSRCS += esp_wpa_main.c
 CHIP_CSRCS += esp_wpa2.c
 CHIP_CSRCS += esp_wpa3.c
 CHIP_CSRCS += esp_wpas_glue.c
+CHIP_CSRCS += esp_owe.c
+CHIP_CSRCS += esp_scan.c
 
 VPATH += $(WIFI_WPA_SUPPLICANT)$(DELIM)esp_supplicant$(DELIM)src$(DELIM)crypto
 
@@ -223,5 +254,6 @@ CHIP_CSRCS += crypto_mbedtls-ec.c
 CHIP_CSRCS += crypto_mbedtls-rsa.c
 CHIP_CSRCS += crypto_mbedtls.c
 CHIP_CSRCS += tls_mbedtls.c
+CHIP_CSRCS += aes-siv.c
 
 endif
