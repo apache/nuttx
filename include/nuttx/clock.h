@@ -277,8 +277,8 @@
 #ifndef CONFIG_SCHED_CPULOAD_NONE
 struct cpuload_s
 {
-  volatile uint32_t total;   /* Total number of clock ticks */
-  volatile uint32_t active;  /* Number of ticks while this thread was active */
+  volatile clock_t total;   /* Total number of clock ticks */
+  volatile clock_t active;  /* Number of ticks while this thread was active */
 };
 #endif
 
