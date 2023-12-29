@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <debug.h>
 #include <nuttx/init.h>
 #include <nuttx/arch.h>
 #include <nuttx/serial/uart_16550.h>
@@ -55,20 +56,10 @@
 #endif
 
 /****************************************************************************
- * Extern Function Declarations
- ****************************************************************************/
-
-#ifdef CONFIG_BUILD_KERNEL
-extern void __trap_vec(void);
-extern void __trap_vec_m(void);
-extern void up_mtimer_initialize(void);
-#endif
-
-/****************************************************************************
  * Name: k230_clear_bss
  ****************************************************************************/
 
-void k230_clear_bss(void)
+static void k230_clear_bss(void)
 {
   uint32_t *dest;
 
@@ -100,12 +91,23 @@ uintptr_t g_idle_topstack = K230_IDLESTACK_TOP;
  * Name: k230_start
  ****************************************************************************/
 
-#ifdef CONFIG_BUILD_KERNEL
-void k230_start_s(int mhartid, const char *dtb)
-#else
 void k230_start(int mhartid, const char *dtb)
-#endif
 {
+  if (0 == mhartid)
+    {
+      k230_clear_bss();
+
+#ifdef CONFIG_BUILD_KERNEL
+      /* Initialize the per CPU areas */
+
+      riscv_percpu_add_hart(mhartid);
+#endif
+    }
+
+  /* Disable MMU */
+
+  WRITE_CSR(satp, 0x0);
+
   /* Configure FPU */
 
   riscv_fpuconfig();
@@ -114,10 +116,6 @@ void k230_start(int mhartid, const char *dtb)
     {
       goto cpux;
     }
-
-#ifndef CONFIG_BUILD_KERNEL
-  k230_clear_bss();
-#endif
 
 #ifdef CONFIG_DEVICE_TREE
   fdt_register(dtb);
@@ -156,77 +154,6 @@ cpux:
       asm("WFI");
     }
 }
-
-#ifdef CONFIG_BUILD_KERNEL
-
-/****************************************************************************
- * Name: k230_start
- ****************************************************************************/
-
-void k230_start(int mhartid, const char *dtb)
-{
-  /* NOTE: still in M-mode */
-
-  if (0 == mhartid)
-    {
-      k230_clear_bss();
-
-      /* Initialize the per CPU areas */
-
-      riscv_percpu_add_hart(mhartid);
-    }
-
-  /* Disable MMU and enable PMP */
-
-  WRITE_CSR(satp, 0x0);
-  WRITE_CSR(pmpaddr0, 0x3fffffffffffffull);
-  WRITE_CSR(pmpcfg0, 0xf);
-
-  /* Set exception and interrupt delegation for S-mode */
-
-  WRITE_CSR(medeleg, 0xffff);
-  WRITE_CSR(mideleg, 0xffff);
-
-  /* Allow to write satp from S-mode */
-
-  CLEAR_CSR(mstatus, MSTATUS_TVM);
-
-  /* Set mstatus to S-mode and enable SUM */
-
-  CLEAR_CSR(mstatus, ~MSTATUS_MPP_MASK);
-  SET_CSR(mstatus, MSTATUS_MPPS | SSTATUS_SUM);
-
-  /* Set the trap vector for S-mode */
-
-  WRITE_CSR(stvec, (uintptr_t)__trap_vec);
-
-  /* Set the trap vector for M-mode */
-
-  WRITE_CSR(mtvec, (uintptr_t)__trap_vec_m);
-
-  if (0 == mhartid)
-    {
-      /* Only the primary CPU needs to initialize mtimer
-       * before entering to S-mode
-       */
-
-      up_mtimer_initialize();
-    }
-
-  /* Set mepc to the entry */
-
-  WRITE_CSR(mepc, (uintptr_t)k230_start_s);
-
-  /* Set a0 to mhartid and a1 to dtb explicitly and enter to S-mode */
-
-  asm volatile (
-      "mv a0, %0 \n"
-      "mv a1, %1 \n"
-      "mret \n"
-      :: "r" (mhartid), "r" (dtb)
-  );
-}
-#endif
 
 void riscv_earlyserialinit(void)
 {

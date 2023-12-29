@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/k230/hardware/k230_clint.h
+ * boards/risc-v/k230/canmv230/src/romfs_stub.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,30 +18,21 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_K230_HARDWARE_K230_CLINT_H
-#define __ARCH_RISCV_SRC_K230_HARDWARE_K230_CLINT_H
-
 /****************************************************************************
- * Pre-processor Definitions
+ * Included Files
  ****************************************************************************/
 
-#define K230_CLINT_MSIP      (K230_CLINT_BASE + 0x0000)
-#define K230_CLINT_MTIMECMP  (K230_CLINT_BASE + 0x4000)
-#define K230_CLINT_SSIP      (K230_CLINT_BASE + 0xC000)
-#define K230_CLINT_STIMECMP  (K230_CLINT_BASE + 0xD000)
-#define K230_CLINT_MTIME     (K230_CLINT_BASE + 0xBFF8)
-#define K230_CLINT_STIME     (K230_CLINT_BASE + 0xBFF8)
+#include <nuttx/compiler.h>
+weak_data const unsigned char aligned_data(4) romfs_img[] =
+{
+  0x00
+};
+weak_data unsigned int romfs_img_len = 1;
 
-#define K230_CLINT_FREQ      (27000000)
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
-#ifdef CONFIG_ARCH_USE_S_MODE
-#  define K230_IPI           K230_CLINT_SSIP
-#  define K230_TIME          K230_CLINT_STIME
-#  define K230_TIMECMP       K230_CLINT_STIMECMP
-#else
-#  define K230_IPI           K230_CLINT_MSIP
-#  define K230_TIME          K230_CLINT_MTIME
-#  define K230_TIMECMP       K230_CLINT_MTIMECMP
-#endif
-
-#endif /* __ARCH_RISCV_SRC_K230_HARDWARE_K230_CLINT_H */
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
