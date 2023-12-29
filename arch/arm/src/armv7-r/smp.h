@@ -84,6 +84,8 @@ extern uint32_t g_cpu3_idlestack[SMP_STACK_WORDS];
  *
  ****************************************************************************/
 
+void __start(void);
+
 #if CONFIG_SMP_NCPUS > 1
 void __cpu1_start(void);
 #endif
