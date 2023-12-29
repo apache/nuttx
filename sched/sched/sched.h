@@ -240,7 +240,7 @@ extern const struct tasklist_s g_tasklisttable[NUM_TASK_STATES];
  * 'denominator' for all CPU load calculations.
  */
 
-extern volatile uint32_t g_cpuload_total;
+extern volatile clock_t g_cpuload_total;
 #endif
 
 /* Declared in sched_lock.c *************************************************/
@@ -399,8 +399,8 @@ int  nxsched_pause_cpu(FAR struct tcb_s *tcb);
 
 #if defined(CONFIG_SCHED_CPULOAD_SYSCLK) || \
     defined (CONFIG_SCHED_CPULOAD_CRITMONITOR)
-void nxsched_process_taskload_ticks(FAR struct tcb_s *tcb, uint32_t ticks);
-void nxsched_process_cpuload_ticks(uint32_t ticks);
+void nxsched_process_taskload_ticks(FAR struct tcb_s *tcb, clock_t ticks);
+void nxsched_process_cpuload_ticks(clock_t ticks);
 #define nxsched_process_cpuload() nxsched_process_cpuload_ticks(1)
 #endif
 
