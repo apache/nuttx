@@ -159,9 +159,12 @@ int net_delroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask);
  *   router on a local network that can forward to the external network.
  *
  * Input Parameters:
- *   target - An IPv4 address on a remote network to use in the lookup.
- *   router - The address of router on a local network that can forward our
- *     packets to the target.
+ *   target    - An IPv4 address on a remote network to use in the lookup.
+ *   router    - The address of router on a local network that can forward
+ *               our packets to the target.
+ *   prefixlen - The prefix length of previously matched routes (maybe on
+ *               device), will only match prefix longer than prefixlen.
+ *               Range: -1(match all) ~ 32(match none)
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
@@ -169,7 +172,8 @@ int net_delroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
-int net_ipv4_router(in_addr_t target, FAR in_addr_t *router);
+int net_ipv4_router(in_addr_t target, FAR in_addr_t *router,
+                    int8_t prefixlen);
 #endif
 
 /****************************************************************************
@@ -180,9 +184,12 @@ int net_ipv4_router(in_addr_t target, FAR in_addr_t *router);
  *   router on a local network that can forward to the external network.
  *
  * Input Parameters:
- *   target - An IPv6 address on a remote network to use in the lookup.
- *   router - The address of router on a local network that can forward our
- *     packets to the target.
+ *   target    - An IPv6 address on a remote network to use in the lookup.
+ *   router    - The address of router on a local network that can forward
+ *               our packets to the target.
+ *   prefixlen - The prefix length of previously matched routes (maybe on
+ *               device), will only match prefix longer than prefixlen.
+ *               Range: -1(match all) ~ 128(match none)
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
@@ -190,7 +197,8 @@ int net_ipv4_router(in_addr_t target, FAR in_addr_t *router);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-int net_ipv6_router(const net_ipv6addr_t target, net_ipv6addr_t router);
+int net_ipv6_router(const net_ipv6addr_t target, net_ipv6addr_t router,
+                    int16_t prefixlen);
 #endif
 
 /****************************************************************************
