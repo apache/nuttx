@@ -31,8 +31,16 @@
 
 /* Map RISC-V exception code to NuttX IRQ */
 
+#ifndef CONFIG_BUILD_KERNEL
+#define K230_IRQ_TIMER  (RISCV_IRQ_MTIMER)
 #define K230_IRQ_UART0  (RISCV_IRQ_MEXT + 16)
+#else
+#define K230_IRQ_TIMER  (RISCV_IRQ_STIMER)
+#define K230_IRQ_UART0  (RISCV_IRQ_SEXT + 16)
+#endif
 
-#define NR_IRQS (K230_IRQ_UART0 + 1)
+/* NR_IRQS is needed by NuttX */
+
+#define NR_IRQS         (K230_IRQ_UART0 + 1)
 
 #endif /* __ARCH_RISCV_INCLUDE_K230_IRQ_H */

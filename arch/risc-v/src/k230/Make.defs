@@ -30,7 +30,6 @@ CHIP_CSRCS += k230_timerisr.c k230_allocateheap.c
 
 ifeq ($(CONFIG_BUILD_KERNEL),y)
 CHIP_CSRCS += k230_mm_init.c
-CMN_ASRCS  += k230_exception_m.S
 endif
 
 ifeq ($(CONFIG_MM_PGALLOC),y)

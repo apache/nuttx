@@ -31,23 +31,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* DDR start address */
-
-#define K230_DDR_BASE   (0x8000000)
-#define K230_DDR_SIZE   (0x8000000)
-
 /* Kernel code memory (RX) */
 
 #define KFLASH_START    (uintptr_t)__kflash_start
 #define KFLASH_SIZE     (uintptr_t)__kflash_size
-#define KSRAM_START     (uintptr_t)__ksram_start
-#define KSRAM_SIZE      (uintptr_t)__ksram_size
-#define KSRAM_END       (uintptr_t)__ksram_end
 
 /* Kernel RAM (RW) */
 
-#define PGPOOL_START    (uintptr_t)__pgheap_start
-#define PGPOOL_SIZE     (uintptr_t)__pgheap_size
+#define KSRAM_START     (uintptr_t)__ksram_start
+#define KSRAM_SIZE      (uintptr_t)__ksram_size
+#define KSRAM_END       (uintptr_t)__ksram_end
 
 /* Page pool (RWX) */
 
