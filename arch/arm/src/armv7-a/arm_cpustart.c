@@ -121,7 +121,7 @@ int arm_start_handler(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-int up_cpu_start(int cpu)
+int weak_function up_cpu_start(int cpu)
 {
   sinfo("Starting CPU%d\n", cpu);
 
