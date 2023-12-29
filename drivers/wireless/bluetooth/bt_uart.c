@@ -196,15 +196,10 @@ static void btuart_rxcallback(FAR const struct btuart_lowerhalf_s *lower,
   DEBUGASSERT(lower != NULL && arg != NULL);
   upper = (FAR struct btuart_upperhalf_s *)arg;
 
-  if (!upper->busy)
+  int ret = work_queue(HPWORK, &upper->work, btuart_rxwork, arg, 0);
+  if (ret < 0)
     {
-      upper->busy = true;
-      int ret = work_queue(HPWORK, &upper->work, btuart_rxwork, arg, 0);
-      if (ret < 0)
-        {
-          upper->busy = false;
-          wlerr("ERROR: work_queue failed: %d\n", ret);
-        }
+      wlerr("ERROR: work_queue failed: %d\n", ret);
     }
 }
 
