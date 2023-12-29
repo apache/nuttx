@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/k230/canmv230/src/k230_appinit.c
+ * boards/risc-v/k230/canmv230/src/canmv_init.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <syslog.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/board.h>
 #include <nuttx/drivers/ramdisk.h>
@@ -35,9 +36,18 @@
 #include <sys/boardctl.h>
 #include <arch/board/board_memorymap.h>
 
+#ifdef CONFIG_BUILD_KERNEL
+#include "romfs.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#ifdef CONFIG_BUILD_KERNEL
+#define SECTORSIZE    512
+#define NSECTORS(b)   (((b) + SECTORSIZE - 1) / SECTORSIZE)
+#endif /* CONFIG_BUILD_KERNEL */
 
 /****************************************************************************
  * Private Functions
@@ -111,6 +121,25 @@ int board_app_initialize(uintptr_t arg)
 void board_late_initialize(void)
 {
   /* Perform board-specific initialization */
+
+#ifdef CONFIG_BUILD_KERNEL
+  /* Create ROM disk for mount in nx_start_application */
+
+  if (NSECTORS(romfs_img_len) > 5)
+    {
+      int ret = OK;
+      ret = romdisk_register(0, romfs_img, NSECTORS(romfs_img_len),
+        SECTORSIZE);
+      if (ret < 0)
+        {
+          serr("ERROR: Failed to register romfs: %d\n", -ret);
+        }
+    }
+  else
+    {
+      swarn("ROMFS too small: %d\n", NSECTORS(romfs_img_len));
+    }
+#endif /* CONFIG_BUILD_KERNEL */
 
 #ifdef CONFIG_NSH_ARCHINIT
 

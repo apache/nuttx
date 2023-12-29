@@ -1,5 +1,5 @@
 ############################################################################
-# boards/risc-v/k230/canmv-k230/src/Makefile
+# boards/risc-v/k230/canmv230/src/Makefile
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -22,6 +22,10 @@ include $(TOPDIR)/Make.defs
 
 RCSRCS = etc/init.d/rc.sysinit etc/init.d/rcS
 
-CSRCS = k230_appinit.c
+CSRCS = canmv_init.c 
+
+ifeq ($(CONFIG_BUILD_KERNEL),y)
+CSRCS += $(wildcard romfs_*.c)
+endif
 
 include $(TOPDIR)/boards/Board.mk
