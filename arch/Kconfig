@@ -696,6 +696,7 @@ config ARCH_SHM_VBASE
 
 config ARCH_KMAP_VBASE
 	hex "Kernel dynamic virtual mappings base"
+	depends on MM_KMAP
 	---help---
 		The virtual address of the beginning of the kernel dynamic mapping
 		region.
