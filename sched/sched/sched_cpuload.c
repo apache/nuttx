@@ -76,7 +76,7 @@
  * each would have a load of 25% of the total.
  */
 
-volatile uint32_t g_cpuload_total;
+volatile clock_t g_cpuload_total;
 
 /****************************************************************************
  * Public Functions
@@ -97,7 +97,7 @@ volatile uint32_t g_cpuload_total;
  *
  ****************************************************************************/
 
-void nxsched_process_taskload_ticks(FAR struct tcb_s *tcb, uint32_t ticks)
+void nxsched_process_taskload_ticks(FAR struct tcb_s *tcb, clock_t ticks)
 {
   tcb->ticks += ticks;
   g_cpuload_total += ticks;
@@ -147,7 +147,7 @@ void nxsched_process_taskload_ticks(FAR struct tcb_s *tcb, uint32_t ticks)
  *
  ****************************************************************************/
 
-void nxsched_process_cpuload_ticks(uint32_t ticks)
+void nxsched_process_cpuload_ticks(clock_t ticks)
 {
   int i;
 
