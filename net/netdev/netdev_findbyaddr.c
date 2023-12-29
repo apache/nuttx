@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
@@ -34,11 +35,218 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/ip.h>
 
+#include "arp/arp.h"
+#include "neighbor/neighbor.h"
 #include "utils/utils.h"
 #include "devif/devif.h"
 #include "inet/inet.h"
 #include "route/route.h"
 #include "netdev/netdev.h"
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: netdev_prefixlen_findby_lipv4addr
+ *
+ * Description:
+ *   Find a previously registered network device by matching a local address
+ *   with the subnet served by the device.  Only "up" devices are considered
+ *   (since a "down" device has no meaningful address).
+ *
+ * Input Parameters:
+ *   lipaddr - Local, IPv4 address assigned to the network device.  Or any
+ *             IPv4 address on the sub-net served by the network device.
+ *   prefixlen - The length of matching prefix. Range: -1(no match) ~ 32
+ *
+ * Returned Value:
+ *   Pointer to driver on success; null on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv4
+static FAR struct net_driver_s *
+netdev_prefixlen_findby_lipv4addr(in_addr_t lipaddr, FAR int8_t *prefixlen)
+{
+  FAR struct net_driver_s *dev;
+  FAR struct net_driver_s *bestdev  = NULL;
+  int8_t                   bestpref = -1;
+#ifdef CONFIG_ROUTE_LONGEST_MATCH
+  int8_t len;
+#endif
+
+  /* Examine each registered network device */
+
+  net_lock();
+  for (dev = g_netdevices; dev; dev = dev->flink)
+    {
+      /* Is the interface in the "up" state? */
+
+      if ((dev->d_flags & IFF_UP) != 0 &&
+          !net_ipv4addr_cmp(dev->d_ipaddr, INADDR_ANY))
+        {
+#ifndef CONFIG_ROUTE_LONGEST_MATCH
+          /* Yes.. check for an address match (under the netmask) */
+
+          if (net_ipv4addr_maskcmp(dev->d_ipaddr, lipaddr,
+                                   dev->d_netmask))
+            {
+              /* Its a match */
+
+              bestdev  = dev;
+              bestpref = 32; /* Regard as best (exact) match */
+              break;
+            }
+#else
+          /* Longest prefix flow: First, check for an exact address match */
+
+          if (net_ipv4addr_cmp(dev->d_ipaddr, lipaddr))
+            {
+              /* It's an exact match */
+
+              bestdev  = dev;
+              bestpref = 32;
+              break;
+            }
+
+          /* Then, check for an address match (under the netmask) */
+
+          if (net_ipv4addr_maskcmp(dev->d_ipaddr, lipaddr,
+                                   dev->d_netmask))
+            {
+              len = (int8_t)net_ipv4_mask2pref(dev->d_netmask);
+
+              /* Regard current device as better if:
+               * 1. It has longer prefix length
+               * 2. It has the same prefix length but it has target address
+               *    in the ARP cache (We don't have other information
+               *    for the precedence of networks)
+               */
+
+              if (len > bestpref
+#ifdef CONFIG_NET_ARP
+                  || (len == bestpref && arp_find(lipaddr, NULL, dev) == OK)
+#endif
+                  )
+                {
+                  bestdev  = dev;
+                  bestpref = len;
+                }
+            }
+#endif /* CONFIG_ROUTE_LONGEST_MATCH */
+        }
+    }
+
+  net_unlock();
+  *prefixlen = bestpref;
+  return bestdev;
+}
+#endif /* CONFIG_NET_IPv4 */
+
+/****************************************************************************
+ * Name: netdev_prefixlen_findby_lipv6addr
+ *
+ * Description:
+ *   Find a previously registered network device by matching a local address
+ *   with the subnet served by the device.  Only "up" devices are considered
+ *   (since a "down" device has no meaningful address).
+ *
+ * Input Parameters:
+ *   lipaddr - Local, IPv6 address assigned to the network device.  Or any
+ *             IPv6 address on the sub-net served by the network device.
+ *   prefixlen - The length of matching prefix. Range: -1(no match) ~ 128
+ *
+ * Returned Value:
+ *   Pointer to driver on success; null on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+static FAR struct net_driver_s *
+netdev_prefixlen_findby_lipv6addr(const net_ipv6addr_t lipaddr,
+                                  FAR int16_t *prefixlen)
+{
+  FAR struct net_driver_s *dev;
+  FAR struct net_driver_s *bestdev  = NULL;
+  int16_t                  bestpref = -1;
+#ifdef CONFIG_ROUTE_LONGEST_MATCH
+  FAR struct netdev_ifaddr6_s *ifaddr6;
+  FAR struct neighbor_entry_s *ne;
+  FAR struct net_driver_s     *hint;
+  int16_t len;
+#endif
+
+  net_lock();
+
+#ifdef CONFIG_ROUTE_LONGEST_MATCH
+  /* Find a hint from neighbor table in case same prefix length exists on
+   * multiple devices.
+   */
+
+  ne   = neighbor_findentry(lipaddr);
+  hint = ne ? ne->ne_dev : NULL;
+#endif
+
+  /* Examine each registered network device */
+
+  for (dev = g_netdevices; dev; dev = dev->flink)
+    {
+      /* Is the interface in the "up" state? */
+
+      if ((dev->d_flags & IFF_UP) != 0 && NETDEV_HAS_V6ADDR(dev))
+        {
+#ifndef CONFIG_ROUTE_LONGEST_MATCH
+          /* Yes.. check for an address match (under the netmask) */
+
+          if (NETDEV_V6ADDR_ONLINK(dev, lipaddr))
+            {
+              /* Its a match */
+
+              bestdev  = dev;
+              bestpref = 128; /* Regard as best (exact) match */
+              break;
+            }
+#else
+          /* Longest prefix flow: First, check for an exact address match */
+
+          if (NETDEV_IS_MY_V6ADDR(dev, lipaddr))
+            {
+              /* It's an exact match */
+
+              bestdev  = dev;
+              bestpref = 128;
+              break;
+            }
+
+          /* Then, check for an address match (under the netmask) */
+
+          if ((ifaddr6 = netdev_ipv6_lookup(dev, lipaddr, true)) != NULL)
+            {
+              len = (int16_t)net_ipv6_mask2pref(ifaddr6->mask);
+
+              /* Regard current device as better if:
+               * 1. It has longer prefix length
+               * 2. It has the same prefix length but it has target address
+               *    in the neighbor cache (We don't have other information
+               *    for the precedence of networks)
+               */
+
+              if (len > bestpref || (len == bestpref && hint == dev))
+                {
+                  bestdev  = dev;
+                  bestpref = len;
+                }
+            }
+#endif /* CONFIG_ROUTE_LONGEST_MATCH */
+        }
+    }
+
+  net_unlock();
+  *prefixlen = bestpref;
+  return bestdev;
+}
+#endif /* CONFIG_NET_IPv6 */
 
 /****************************************************************************
  * Public Functions
@@ -64,35 +272,8 @@
 #ifdef CONFIG_NET_IPv4
 FAR struct net_driver_s *netdev_findby_lipv4addr(in_addr_t lipaddr)
 {
-  FAR struct net_driver_s *dev;
-
-  /* Examine each registered network device */
-
-  net_lock();
-  for (dev = g_netdevices; dev; dev = dev->flink)
-    {
-      /* Is the interface in the "up" state? */
-
-      if ((dev->d_flags & IFF_UP) != 0 &&
-          !net_ipv4addr_cmp(dev->d_ipaddr, INADDR_ANY))
-        {
-          /* Yes.. check for an address match (under the netmask) */
-
-          if (net_ipv4addr_maskcmp(dev->d_ipaddr, lipaddr,
-                                   dev->d_netmask))
-            {
-              /* Its a match */
-
-              net_unlock();
-              return dev;
-            }
-        }
-    }
-
-  /* No device with the matching address found */
-
-  net_unlock();
-  return NULL;
+  int8_t prefixlen;
+  return netdev_prefixlen_findby_lipv4addr(lipaddr, &prefixlen);
 }
 #endif /* CONFIG_NET_IPv4 */
 
@@ -117,33 +298,8 @@ FAR struct net_driver_s *netdev_findby_lipv4addr(in_addr_t lipaddr)
 FAR struct net_driver_s *netdev_findby_lipv6addr(
                                       const net_ipv6addr_t lipaddr)
 {
-  FAR struct net_driver_s *dev;
-
-  /* Examine each registered network device */
-
-  net_lock();
-  for (dev = g_netdevices; dev; dev = dev->flink)
-    {
-      /* Is the interface in the "up" state? */
-
-      if ((dev->d_flags & IFF_UP) != 0 && NETDEV_HAS_V6ADDR(dev))
-        {
-          /* Yes.. check for an address match (under the netmask) */
-
-          if (NETDEV_V6ADDR_ONLINK(dev, lipaddr))
-            {
-              /* Its a match */
-
-              net_unlock();
-              return dev;
-            }
-        }
-    }
-
-  /* No device with the matching address found */
-
-  net_unlock();
-  return NULL;
+  int16_t prefixlen;
+  return netdev_prefixlen_findby_lipv6addr(lipaddr, &prefixlen);
 }
 #endif /* CONFIG_NET_IPv6 */
 
@@ -168,7 +324,8 @@ FAR struct net_driver_s *netdev_findby_lipv6addr(
 FAR struct net_driver_s *netdev_findby_ripv4addr(in_addr_t lipaddr,
                                                  in_addr_t ripaddr)
 {
-  struct net_driver_s *dev;
+  FAR struct net_driver_s *dev;
+  int8_t prefixlen;
 #ifdef CONFIG_NET_ROUTE
   in_addr_t router;
   int ret;
@@ -198,22 +355,20 @@ FAR struct net_driver_s *netdev_findby_ripv4addr(in_addr_t lipaddr,
         }
     }
 
-  /* Check if the address maps to a locally available network */
+  /* Check if the address maps to a locally available network
+   * Note: If longest prefix match is not enabled, prefixlen will be 32 if
+   *       matched and it will disable further routing lookup.
+   */
 
-  dev = netdev_findby_lipv4addr(ripaddr);
-  if (dev)
-    {
-      return dev;
-    }
-
-  /* No.. The address lies on an external network */
+  dev = netdev_prefixlen_findby_lipv4addr(ripaddr, &prefixlen);
 
 #ifdef CONFIG_NET_ROUTE
   /* If we have a routing table, then perhaps we can find the local
-   * address of a router that can forward packets to the external network.
+   * address of a router that can forward packets to the external network
+   * with longer prefix.
    */
 
-  ret = net_ipv4_router(ripaddr, &router);
+  ret = net_ipv4_router(ripaddr, &router, prefixlen);
   if (ret >= 0)
     {
       /* Success... try to find the network device associated with the local
@@ -221,12 +376,15 @@ FAR struct net_driver_s *netdev_findby_ripv4addr(in_addr_t lipaddr,
        */
 
       dev = netdev_findby_lipv4addr(router);
-      if (dev)
-        {
-          return dev;
-        }
     }
 #endif /* CONFIG_NET_ROUTE */
+
+  /* Return the device we found. */
+
+  if (dev)
+    {
+      return dev;
+    }
 
   /* The above lookup will fail if the packet is being sent out of our
    * out subnet to a router and there is no routing information. Let's
@@ -259,7 +417,8 @@ FAR struct net_driver_s *netdev_findby_ripv6addr(
                                  const net_ipv6addr_t lipaddr,
                                  const net_ipv6addr_t ripaddr)
 {
-  struct net_driver_s *dev;
+  FAR struct net_driver_s *dev;
+  int16_t prefixlen;
 #ifdef CONFIG_NET_ROUTE
   net_ipv6addr_t router;
   int ret;
@@ -291,22 +450,20 @@ FAR struct net_driver_s *netdev_findby_ripv6addr(
         }
     }
 
-  /* Check if the address maps to a locally available network */
+  /* Check if the address maps to a locally available network
+   * Note: If longest prefix match is not enabled, prefixlen will be 128 if
+   *       matched and it will disable further routing lookup.
+   */
 
-  dev = netdev_findby_lipv6addr(ripaddr);
-  if (dev)
-    {
-      return dev;
-    }
-
-  /* No.. The address lies on an external network */
+  dev = netdev_prefixlen_findby_lipv6addr(ripaddr, &prefixlen);
 
 #ifdef CONFIG_NET_ROUTE
   /* If we have a routing table, then perhaps we can find the local
-   * address of a router that can forward packets to the external network.
+   * address of a router that can forward packets to the external network
+   * with longer prefix.
    */
 
-  ret = net_ipv6_router(ripaddr, router);
+  ret = net_ipv6_router(ripaddr, router, prefixlen);
   if (ret >= 0)
     {
       /* Success... try to find the network device associated with the local
@@ -314,12 +471,15 @@ FAR struct net_driver_s *netdev_findby_ripv6addr(
        */
 
       dev = netdev_findby_lipv6addr(router);
-      if (dev)
-        {
-          return dev;
-        }
     }
 #endif /* CONFIG_NET_ROUTE */
+
+  /* Return the device we found. */
+
+  if (dev)
+    {
+      return dev;
+    }
 
   /* The above lookup will fail if the packet is being sent out of our
    * out subnet to a router and there is no routing information. Let's

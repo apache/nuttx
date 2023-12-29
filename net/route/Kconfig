@@ -137,5 +137,12 @@ config ROUTE_MAX_IPv6_CACHEROUTES
 		This determines the maximum number of routes that can be cached in
 		memory.
 
+config ROUTE_LONGEST_MATCH
+	bool "Enable longest prefix match support"
+	default y
+	---help---
+		Enable support for longest prefix match routing.
+		("Longest Match" in RFC 1812, Section 5.2.4.3, Page 75)
+
 endif # NET_ROUTE
-endmenu # ARP Configuration
+endmenu # Routing Table Configuration
