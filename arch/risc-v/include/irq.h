@@ -124,7 +124,7 @@
 #define REG_X3_NDX          3
 #define REG_X4_NDX          4
 
-/* $5-$7 = t0-t3: Temporary registers */
+/* $5-$7 = t0-t2: Temporary registers */
 
 #define REG_X5_NDX          5
 #define REG_X6_NDX          6
@@ -134,7 +134,7 @@
 
 #define REG_X8_NDX          8
 
-/* $89 s1 Saved register */
+/* $9 s1 Saved register */
 
 #define REG_X9_NDX          9
 
