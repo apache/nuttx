@@ -694,6 +694,18 @@ int lib_sprintf(FAR struct lib_outstream_s *stream,
                 FAR const IPTR char *fmt, ...) printf_like(2, 3);
 
 /****************************************************************************
+ * Name: lib_bsprintf
+ *
+ * Description:
+ *  Implementation of sprintf formatted output buffer data. Structure data
+ *  types must be one-byte aligned.
+ *
+ ****************************************************************************/
+
+int lib_bsprintf(FAR struct lib_outstream_s *s, FAR const IPTR char *fmt,
+                 FAR const void *buf);
+
+/****************************************************************************
  * Name: lib_sprintf_internal
  *
  * Description:
