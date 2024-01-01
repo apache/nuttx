@@ -15,20 +15,20 @@ The K230 U-Boot runs in machine mode, thus it can run flat or kernel NuttX build
 Preparations
 ============
 
-Take the prebuilt CanMV-k230 boot image from `here <https://gitee.com/yf1972/filexfers/tree/canmv230-tools-for-nuttx-v1.2>` as the v1.2 K230 SDK doesn't provide RiscV standard PTE format support needed by NuttX. This package also contains extract of OpenSBI from K230 SDK v1.2 release, which is needed to wrap kernel build NuttX binary.
+Take the prebuilt CanMV-k230 boot image from `here <https://gitee.com/yf1972/filexfers/tree/canmv230-tools-for-nuttx-v1.2>`_ as the default K230 SDK doesn't support RiscV standard PTE format at least till v1.2. This package also contains an extract of the OpenSBI from K230 SDK v1.2 release, which is needed to wrap Nuttx kernel build binary.
 
 Make sure that before trying NuttX:
 
-- The board can boot K230 SDK image normally.
+- The board can boot with prebuilt CanMV-k230 image.
 - Device console access available (e.g. `minicom -D /dev/ttyACM0`).
 - U-Boot connectivity to TFTP service available.
 
-For NuttX tests, the microSD card is only used to enter U-Boot console, NuttX isn't using any persistent storage on the target now.
+For below NuttX tests, the microSD card is only used to enter the U-Boot console environment, as NuttX isn't using any storage yet.
 
 Toolchains
 ==========
 
-Before building NuttX, download the **RISC-V Toolchain riscv64-unknown-elf** from `XPack <https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack>`_ or use the stock "gcc-riscv64-unknown-elf" on Ubuntu.
+Before building NuttX, download the **RISC-V Toolchain riscv64-unknown-elf** from `XPack <https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack>`_ or get the stock "gcc-riscv64-unknown-elf" via `apt` on Ubuntu.
 
 
 Building
@@ -36,26 +36,26 @@ Building
 
 To build NuttX for CanMV, :doc:`install the prerequisites </quickstart/install>` and :doc:`clone the git repositories </quickstart/install>` for ``nuttx`` and ``apps``.
 
-Configure the NuttX project and build the project:
+Configure and build FLAT mode NuttX:
 
 .. code:: console
 
    $ cd nuttx
-   $ tools/configure.sh canmv230:nsh
+   $ make distclean && tools/configure.sh canmv230:nsh
    $ make -j4
 
-This should have `nuttx.bin` generated, it can be used without OpenSBI wrapping on the board.
+This should have `nuttx.bin` generated, it can be loaded by U-Boot on the board.
 
-The kernel build requires two build passes: first pass to build kernel and apps, second pass to build the kernel with a ROMFS image that includes some built apps.
+The NuttX KERNEL build requires two build passes: first pass to build kernel w/ dummy ROMFS and apps, second pass to build the kernel with real ROMFS image containing apps built in first pass.
 
 .. code:: console
 
    $ cd nuttx
-   $ tools/configure.sh canmv230:knsh
-   $ make -j4  # first pass for apps build preparations
-   $ (make export; cd ../apps; tools/mkimport.sh -z -x ../nuttx/nuttx-export-*.gz; make import)
-   $ (cd ../apps/; tools/mkromfsimg.sh ../nuttx/boards/risc-v/k230/canmv230/src/romfs_boot.c)
-   $ make -j4  # second pass to pick up ROMFS
+   $ make distclean && tools/configure.sh canmv230:knsh
+   $ make -j4    # first pass to build kernel
+   $ (make export; cd ../apps; tools/mkimport.sh -z -x ../nuttx/nuttx-export-*.gz; make import)  # build the apps
+   $ (cd ../apps/; tools/mkromfsimg.sh ../nuttx/boards/risc-v/k230/canmv230/src/romfs_boot.c) # update the ROMFS image
+   $ make -j4    # build again to pick up the ROMFS
 
 The built `nuttx.bin` can be then wrapped with K230 OpenSBI like below:
 
@@ -63,14 +63,14 @@ The built `nuttx.bin` can be then wrapped with K230 OpenSBI like below:
 
    $ cd $HOME
    $ tar xvf canmv230-opensbi-dtb.tar.xz
-   $ export OSBI=$HOME/opensbi 
+   $ export OSBI=$HOME/opensbi
    $ cd /tmp/aaa    # use a temporary work folder
    $ make -C $OSBI O=$(pwd) PLATFORM=generic\
           CROSS_COMPILE=riscv64-unknown-elf- FW_PIC=n K230_LIITLE_CORE=1\
           FW_FDT_PATH=$OSBI/k230.dtb FW_PAYLOAD_PATH=nuttx.bin -j4
    $ cp platform/generic/firmware/fw_payload.bin tftp-server-path/nuttx.bin
 
-Note to use actual paths of SBI source tree, device dtb, TFTP folder etc when using above commands.
+Please use actual paths on your host for `nuttx.bin` and TFTP folder when running above commands.
 
 Booting
 =======
@@ -89,5 +89,5 @@ Then the `nsh> ` console should appear, type `help` to see available commands.
 Issues
 ======
 
- - The `ostest` app only works with flat build.
+ - The `ostest` app has non-zero exit code in Kernel build.
 
