@@ -5,6 +5,12 @@
 
 if DRIVERS_BLUETOOTH
 
+config BLUETOOTH_DEVICE_ID
+	int "Bluetooth Device ID, eg: /dev/ttyBT0"
+	default 0
+	---help---
+		Bluetooth Device ID.
+
 config BLUETOOTH_UART
 	bool "Bluetooth UART driver"
 	default n

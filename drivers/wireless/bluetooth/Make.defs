@@ -24,6 +24,8 @@ ifeq ($(CONFIG_DRIVERS_BLUETOOTH),y)
 
 # Include Bluetooth drivers into the build
 
+CSRCS += bt_driver.c
+
 ifeq ($(CONFIG_BLUETOOTH_UART),y)
 CSRCS += bt_uart.c
 ifeq ($(CONFIG_BLUETOOTH_UART_GENERIC),y)

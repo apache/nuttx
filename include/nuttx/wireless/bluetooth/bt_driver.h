@@ -49,6 +49,9 @@
 #define bt_netdev_receive(btdev, type, data, len) \
         (btdev)->receive(btdev, type, data, len)
 
+#define bt_driver_register(btdev) \
+        bt_driver_register_with_id(btdev, CONFIG_BLUETOOTH_DEVICE_ID)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -135,5 +138,23 @@ int bt_netdev_register(FAR struct bt_driver_s *btdev);
  ****************************************************************************/
 
 int bt_netdev_unregister(FAR struct bt_driver_s *btdev);
+
+/****************************************************************************
+ * Name: bt_driver_register_with_id
+ *
+ * Description:
+ *   Register bluetooth driver.
+ *
+ * Input Parameters:
+ *   driver - an instance of the bt_driver_s interface
+ *   id     - bluetooth device id
+ *
+ * Returned Value:
+ *   Zero is returned on success; a negated errno value is returned on any
+ *   failure.
+ *
+ ****************************************************************************/
+
+int bt_driver_register_with_id(FAR struct bt_driver_s *driver, int id);
 
 #endif /* __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_DRIVER_H */
