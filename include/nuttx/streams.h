@@ -746,6 +746,19 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 int lib_vscanf(FAR struct lib_instream_s *stream, FAR int *lastc,
                FAR const IPTR char *src, va_list ap) scanf_like(3, 0);
 
+/****************************************************************************
+ * Name: lib_bscanf
+ *
+ * Description:
+ *  Convert data into a structure according to standard formatting protocols.
+ *  For string arrays, please use "%{length}s" or "%{length}c" to specify
+ *  the length.
+ *
+ ****************************************************************************/
+
+int lib_bscanf(FAR struct lib_instream_s *stream, FAR int *lastc,
+               FAR const IPTR char *fmt, FAR void *data);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
