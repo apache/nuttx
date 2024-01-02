@@ -131,9 +131,11 @@ static metal_phys_addr_t rptun_pa_to_da(FAR struct rptun_dev_s *dev,
 static metal_phys_addr_t rptun_da_to_pa(FAR struct rptun_dev_s *dev,
                                         metal_phys_addr_t da);
 
-static FAR const char *rptun_get_cpuname(FAR struct rpmsg_s *rpmsg);
 static int rptun_wait(FAR struct rpmsg_s *rpmsg, FAR sem_t *sem);
 static int rptun_post(FAR struct rpmsg_s *rpmsg, FAR sem_t *sem);
+static FAR const char *rptun_get_cpuname(FAR struct rpmsg_s *rpmsg);
+static int rptun_get_tx_buffer_size(FAR struct rpmsg_s *rpmsg);
+static int rptun_get_rx_buffer_size(FAR struct rpmsg_s *rpmsg);
 
 /****************************************************************************
  * Private Data
@@ -173,9 +175,11 @@ static const struct image_store_ops g_rptun_store_ops =
 
 static const struct rpmsg_ops_s g_rptun_rpmsg_ops =
 {
-  rptun_get_cpuname,
   rptun_wait,
   rptun_post,
+  rptun_get_cpuname,
+  rptun_get_tx_buffer_size,
+  rptun_get_rx_buffer_size,
 };
 
 /****************************************************************************
@@ -424,13 +428,6 @@ static int rptun_notify_wait(FAR struct remoteproc *rproc, uint32_t id)
   return 0;
 }
 
-static FAR const char *rptun_get_cpuname(FAR struct rpmsg_s *rpmsg)
-{
-  FAR struct rptun_priv_s *priv = (FAR struct rptun_priv_s *)rpmsg;
-
-  return RPTUN_GET_CPUNAME(priv->dev);
-}
-
 static int rptun_wait(FAR struct rpmsg_s *rpmsg, FAR sem_t *sem)
 {
   FAR struct rptun_priv_s *priv = (FAR struct rptun_priv_s *)rpmsg;
@@ -471,6 +468,23 @@ static int rptun_post(FAR struct rpmsg_s *rpmsg, FAR sem_t *sem)
     }
 
   return ret;
+}
+
+static FAR const char *rptun_get_cpuname(FAR struct rpmsg_s *rpmsg)
+{
+  FAR struct rptun_priv_s *priv = (FAR struct rptun_priv_s *)rpmsg;
+
+  return RPTUN_GET_CPUNAME(priv->dev);
+}
+
+static int rptun_get_tx_buffer_size(FAR struct rpmsg_s *rpmsg)
+{
+  return rpmsg_virtio_get_buffer_size(rpmsg->rdev);
+}
+
+static int rptun_get_rx_buffer_size(FAR struct rpmsg_s *rpmsg)
+{
+  return rpmsg_virtio_get_rx_buffer_size(rpmsg->rdev);
 }
 
 static int rptun_dev_start(FAR struct remoteproc *rproc)
