@@ -762,7 +762,7 @@ static int get_bss_from_file(FAR char **rbuf)
   FAR char *p;
 
   *rbuf = malloc(size * sizeof(char));
-  if (rbuf == NULL)
+  if (*rbuf == NULL)
     {
       nerr("malloc failed!\n");
       return -ENOMEM;
@@ -777,7 +777,8 @@ redo:
       if (p == NULL)
         {
           nerr("read bss faied in realloc!\n");
-          free(rbuf);
+          free(*rbuf);
+          *rbuf = NULL;
           return -ENOMEM;
         }
 
@@ -790,7 +791,7 @@ redo:
       return ret;
     }
 
-  rbuf[ret] = '\0';
+  (*rbuf)[ret] = '\0';
 
   return ret;
 }
@@ -871,7 +872,11 @@ static int wifidriver_start_connect(FAR struct wifi_sim_s *wifidev)
             }
 
 error:
-          free(bss_buf);
+          if (bss_buf)
+            {
+              free(bss_buf);
+            }
+
           if (ret != OK)
             {
               wifidev->state = WLAN_STA_STATE_INIT;
