@@ -786,14 +786,24 @@ static int gic_validate_dist_version(void)
   if (reg == (0x2 << GIC_ICCIDR_ARCHNO_SHIFT))
     {
       sinfo("GICv2 detected\n");
-    }
-  else
-    {
-      sinfo("GICv2 not detected\n");
-      return -ENODEV;
+      return 0;
     }
 
-  return 0;
+  /* Read the Peripheral ID2 Register (ICPIDR2) */
+
+  reg = getreg32(GIC_ICDPIDR(GIC_ICPIDR2)) & GICD_PIDR2_ARCH_MASK;
+
+  /* GIC Version should be 2 */
+
+  if (reg == GICD_PIDR2_ARCH_GICV2)
+    {
+      sinfo("GICv2 detected\n");
+      return 0;
+    }
+
+  sinfo("GICv2 not detected\n");
+
+  return -ENODEV;
 }
 
 /****************************************************************************
