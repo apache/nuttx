@@ -126,6 +126,30 @@ FAR const char *rpmsg_get_cpuname(FAR struct rpmsg_device *rdev)
   return rpmsg->ops->get_cpuname(rpmsg);
 }
 
+int rpmsg_get_tx_buffer_size(FAR struct rpmsg_device *rdev)
+{
+  FAR struct rpmsg_s *rpmsg = rpmsg_get_by_rdev(rdev);
+
+  if (!rpmsg)
+    {
+      return -EINVAL;
+    }
+
+  return rpmsg->ops->get_tx_buffer_size(rpmsg);
+}
+
+int rpmsg_get_rx_buffer_size(FAR struct rpmsg_device *rdev)
+{
+  FAR struct rpmsg_s *rpmsg = rpmsg_get_by_rdev(rdev);
+
+  if (!rpmsg)
+    {
+      return -EINVAL;
+    }
+
+  return rpmsg->ops->get_rx_buffer_size(rpmsg);
+}
+
 int rpmsg_register_callback(FAR void *priv,
                             rpmsg_dev_cb_t device_created,
                             rpmsg_dev_cb_t device_destroy,
