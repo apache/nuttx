@@ -78,13 +78,14 @@ setjmp:
 #ifdef CONFIG_ARCH_ARMV6M
 	stmia		r0!, {r4-r7}			/* Save R4 ~ R7 */
 
-	mov		r2, r8
-	mov		r3, r9
-	mov		r4, r10
-	mov		r5, r11
-	mov		r6, ip
-	mov		r7, lr
-	stmia		r0!, {r2-r7}			/* Save R8 ~ R11, IP, LR */
+	mov		r1, r8
+	mov		r2, r9
+	mov		r3, r10
+	stmia		r0!, {r1-r3}			/* Save R8 ~ R10 */
+	mov		r1, r11
+	mov		r2, ip
+	mov		r3, lr
+	stmia		r0!, {r1-r3}			/* Save R11, IP, LR */
 #else
 	stmia		r0!, {r4-r11, ip, lr}
 #endif
@@ -142,15 +143,13 @@ longjmp:
 #ifdef CONFIG_ARCH_ARMV6M
 	ldmia		r0!, {r4-r7}			/* Restore R4 ~ R7 */
 
-	ldmia		r0!, {r2-r3}			/* Restore R8, R9 */
-	mov		r8, r2
-	mov		r9, r3
+	ldmia		r0!, {r1-r3}			/* Restore R8 ~ R10 */
+	mov		r8, r1
+	mov		r9, r2
+	mov		r10, r3
 
-	ldmia		r0!, {r2-r3}			/* Restore R10, R11 */
-	mov		r10, r2
-	mov		r11, r3
-
-	ldmia		r0!, {r2-r3}			/* Restore IP, LR */
+	ldmia		r0!, {r1-r3}			/* Restore R11, IP, LR */
+	mov		r11, r1
 	mov		ip, r2
 	mov		lr, r3
 #else
