@@ -1,11 +1,11 @@
-# lib_libbsprintf
-  This function is mainly used to output the contents of the input structure. Most standards follow the standards of printf and scanf.
+# lib_bsprintf
+  This function is mainly used to output the contents of the input structure. Supports standard formats for printf and scanf.
   For detailed parameters, see:
   1. https://en.cppreference.com/w/c/io/fprintf
   2. https://en.cppreference.com/w/c/io/fscanf
 
 - **special**:
-  1. Float use %hf, and double for all others.
+  1. Float use %hf, "%f" or "%lf" is double, "%Lf" is long double.
   2. The char array is specified with %.xs. for example: "char t[30]" is specified with "%.30s", char a [20] - " %.20s "
   3. "%u" is unsigned int.
   4. "%d" is int.
@@ -93,3 +93,63 @@
     lib_stream_flush(&outstream.common);
   #endif
    ~~~
+
+# lib_bscanf
+  This function adds a formatted standard scanf string to the structure(lib_bscanf).
+  1. https://zh.cppreference.com/w/c/io/fscanf
+
+- **special**:
+  1. Please use %lf for double precision, "%hf" or "%f" for float, long double ("%Lf") is not supported.
+  2. Please use %hhd or %hhu for a single char or unsigned char.
+  3. Use %hd or %hu for short int or unsigned short int.
+  4. When using %s or %c, please specify the length of the char array, such as %32s, %32c.
+  5. %s will check the string for spaces. When there are spaces in the string, it will be truncated. If you want to use string with spaces, please use %{length}c, but make sure that the length of the string can fill the array, otherwise an error will occur.
+  6. %[] collection and %n are not supported.
+
+- **demo**
+  1. **struct**:
+  Same as above
+  1. **format string**:
+  ~~~
+  #define TOSTR(str)   #str
+  #define TONNAME(name) TOSTR(name)
+
+  #define v_uint8_t    97
+  #define v_uint16_t   19299
+  #define v_uint32_t   22155
+
+  ......
+
+  #define v_l_double   -9299.9299929912122464755474
+
+  char bflag[] = "%hhu%hu%u%hhd%hd%d%f%lf%32s%llu%lld%hhd%hhu%hd%hu%d%u%ld%lu%lld%llu%zu%ld";
+
+  char binput[] = TONNAME(v_uint8_t) \
+                 " " TONNAME(v_uint16_t) \
+                 " " TONNAME(v_uint32_t) \
+                 " " TONNAME(v_int8_t) \
+                 " " TONNAME(v_int16_t) \
+                 " " TONNAME(v_int32_t) \
+                 " " TONNAME(v_float) \
+                 " " TONNAME(v_double) \
+                 " " TONNAME(v_char_arr) \
+                 " " TONNAME(v_uint64_t) \
+                 " " TONNAME(v_int64_t) \
+                 " " TONNAME(v_char) \
+                 " " TONNAME(v_u_char) \
+                 " " TONNAME(v_s_int) \
+                 " " TONNAME(v_u_s_int) \
+                 " " TONNAME(v_int) \
+                 " " TONNAME(v_u_int) \
+                 " " TONNAME(v_long) \
+                 " " TONNAME(v_u_long) \
+                 " " TONNAME(v_l_l) \
+                 " " TONNAME(v_u_l_l) \
+                 " " TONNAME(v_size_t) \
+                 " " TONNAME(v_l_double);
+  ~~~
+  3. **use**:
+  ~~~
+  struct test vg;
+  ret = lib_bscanf(binput, bflag, &vg);
+  ~~~
