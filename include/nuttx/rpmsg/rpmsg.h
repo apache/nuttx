@@ -49,16 +49,20 @@ typedef CODE int (*rpmsg_foreach_t)(FAR struct rpmsg_s *rpmsg,
 
 /**
  * struct rpmsg_ops_s - Rpmsg device operations
- * get_cpuname: get cpu name.
  * wait: wait sem.
  * post: post sem.
+ * get_cpuname: get cpu name.
+ * get_tx_buffer_size: get tx buffer size.
+ * get_rx_buffer_size: get rx buffer size.
  */
 
 struct rpmsg_ops_s
 {
-  CODE FAR const char *(*get_cpuname)(FAR struct rpmsg_s *rpmsg);
   CODE int (*wait)(FAR struct rpmsg_s *rpmsg, FAR sem_t *sem);
   CODE int (*post)(FAR struct rpmsg_s *rpmsg, FAR sem_t *sem);
+  CODE FAR const char *(*get_cpuname)(FAR struct rpmsg_s *rpmsg);
+  CODE int (*get_tx_buffer_size)(FAR struct rpmsg_s *rpmsg);
+  CODE int (*get_rx_buffer_size)(FAR struct rpmsg_s *rpmsg);
 };
 
 CODE typedef void (*rpmsg_dev_cb_t)(FAR struct rpmsg_device *rdev,
@@ -86,6 +90,9 @@ int rpmsg_wait(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem);
 int rpmsg_post(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem);
 
 FAR const char *rpmsg_get_cpuname(FAR struct rpmsg_device *rdev);
+
+int rpmsg_get_tx_buffer_size(FAR struct rpmsg_device *rdev);
+int rpmsg_get_rx_buffer_size(FAR struct rpmsg_device *rdev);
 
 int rpmsg_register_callback(FAR void *priv,
                             rpmsg_dev_cb_t device_created,
