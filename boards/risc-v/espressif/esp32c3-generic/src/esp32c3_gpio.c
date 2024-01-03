@@ -41,7 +41,7 @@
 
 /* Arch */
 
-#include "esp_gpio.h"
+#include "espressif/esp_gpio.h"
 
 /* Board */
 

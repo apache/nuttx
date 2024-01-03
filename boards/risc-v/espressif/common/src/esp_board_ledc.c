@@ -33,7 +33,7 @@
 
 #include <arch/board/board.h>
 
-#include "esp_ledc.h"
+#include "espressif/esp_ledc.h"
 
 #include "esp_board_ledc.h"
 
