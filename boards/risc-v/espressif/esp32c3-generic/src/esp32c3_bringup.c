@@ -37,23 +37,23 @@
 #include "esp_board_ledc.h"
 
 #ifdef CONFIG_WATCHDOG
-#  include "esp_wdt.h"
+#  include "espressif/esp_wdt.h"
 #endif
 
 #ifdef CONFIG_TIMER
-#  include "esp_timer.h"
+#  include "espressif/esp_timer.h"
 #endif
 
 #ifdef CONFIG_ONESHOT
-#  include "esp_oneshot.h"
+#  include "espressif/esp_oneshot.h"
 #endif
 
 #ifdef CONFIG_RTC_DRIVER
-#  include "esp_rtc.h"
+#  include "espressif/esp_rtc.h"
 #endif
 
 #ifdef CONFIG_DEV_GPIO
-#  include "esp_gpio.h"
+#  include "espressif/esp_gpio.h"
 #endif
 
 #ifdef CONFIG_INPUT_BUTTONS

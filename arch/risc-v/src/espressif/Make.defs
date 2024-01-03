@@ -19,61 +19,7 @@
 ############################################################################
 
 include common/Make.defs
-
-# The start-up, "head", file. May be either a .S or a .c file.
-
-HEAD_ASRC   = esp_head.S
-
-# Skip common RISC-V vector table in favor of Espressif's custom vector
-# table.
-
-CMN_ASRCS  := $(filter-out riscv_vectors.S,$(CMN_ASRCS))
-CHIP_ASRCS  = esp_vectors.S
-
-# Required Espressif chip's files (arch/risc-v/src/espressif)
-
-CHIP_CSRCS  = esp_allocateheap.c esp_start.c esp_idle.c
-CHIP_CSRCS += esp_irq.c esp_gpio.c esp_libc_stubs.c
-CHIP_CSRCS += esp_lowputc.c esp_serial.c
-CHIP_CSRCS += esp_systemreset.c
-
-ifeq ($(CONFIG_SCHED_TICKLESS),y)
-  CHIP_CSRCS += esp_tickless.c
-else
-  CHIP_CSRCS += esp_timerisr.c
-endif
-
-ifeq ($(CONFIG_WATCHDOG),y)
-  CHIP_CSRCS += esp_wdt.c
-endif
-
-ifneq ($(CONFIG_DEV_RANDOM)$(CONFIG_DEV_URANDOM_ARCH),)
-  CHIP_CSRCS += esp_random.c
-endif
-
-ifeq ($(CONFIG_TIMER),y)
-  CHIP_CSRCS += esp_timer.c
-endif
-
-ifeq ($(CONFIG_ONESHOT),y)
-  CHIP_CSRCS += esp_oneshot.c
-endif
-
-ifeq ($(CONFIG_RTC),y)
-  CHIP_CSRCS += esp_rtc.c
-endif
-
-ifeq ($(CONFIG_ESPRESSIF_HR_TIMER),y)
-  CHIP_CSRCS += esp_hr_timer.c
-endif
-
-ifeq ($(CONFIG_ESPRESSIF_LEDC),y)
-  CHIP_CSRCS += esp_ledc.c
-endif
-
-ifeq ($(CONFIG_ESPRESSIF_USBSERIAL),y)
-  CHIP_CSRCS += esp_usbserial.c
-endif
+include common/espressif/Make.defs
 
 #############################################################################
 # Espressif HAL for 3rd Party Platforms
@@ -114,5 +60,3 @@ distclean::
 	$(call DELFILE,../include/chip/gpio_sig_map.h)
 	$(call DELFILE,../include/chip/irq.h)
 	$(call DELDIR,chip/$(ESP_HAL_3RDPARTY_REPO))
-
-include chip/Bootloader.mk

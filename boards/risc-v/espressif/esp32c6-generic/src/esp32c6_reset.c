@@ -31,7 +31,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 
-#include "esp_systemreset.h"
+#include "espressif/esp_systemreset.h"
 
 #ifdef CONFIG_BOARDCTL_RESET
 

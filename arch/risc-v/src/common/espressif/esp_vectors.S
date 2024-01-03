@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/espressif/esp32h2-generic/src/esp32h2_reset.c
+ * arch/risc-v/src/common/espressif/esp_vectors.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,58 +24,35 @@
 
 #include <nuttx/config.h>
 
-#include <assert.h>
-#include <debug.h>
-#include <stdlib.h>
+#include <arch/espressif/irq.h>
+#include <arch/irq.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/board.h>
-
-#include "espressif/esp_systemreset.h"
-
-#ifdef CONFIG_BOARDCTL_RESET
+#include "chip.h"
 
 /****************************************************************************
- * Public Functions
+ * Public Symbols
  ****************************************************************************/
+
+  .global  _vector_table
 
 /****************************************************************************
- * Name: board_reset
- *
- * Description:
- *   Reset board.  Support for this function is required by board-level
- *   logic if CONFIG_BOARDCTL_RESET is selected.
- *
- * Input Parameters:
- *   status - Status information provided with the reset event.  This
- *            meaning of this status information is board-specific.  If not
- *            used by a board, the value zero may be provided in calls to
- *            board_reset().
- *
- * Returned Value:
- *   If this function returns, then it was not possible to power-off the
- *   board due to some constraints.  The return value in this case is a
- *   board-specific reason for the failure to shutdown.
- *
+ * Section: .exception_vectors.text
  ****************************************************************************/
 
-int board_reset(int status)
-{
-  syslog(LOG_INFO, "reboot status=%d\n", status);
+  .section .exception_vectors.text
 
-  switch (status)
-    {
-      case EXIT_SUCCESS:
-        up_shutdown_handler();
-        break;
-      case CONFIG_BOARD_ASSERT_RESET_VALUE:
-      default:
-        break;
-    }
+/****************************************************************************
+ * Name: _vector_table
+ ****************************************************************************/
 
-  up_systemreset();
+  .balign   0x100
+  .type     _vector_table, @function
 
-  return 0;
-}
+_vector_table:
+  .option push
+  .option norvc
 
-#endif /* CONFIG_BOARDCTL_RESET */
+  .rept (32)
+  j    exception_common
+  .endr
+
