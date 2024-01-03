@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/espressif/esp32h2-generic/src/esp32h2_reset.c
+ * arch/risc-v/src/common/espressif/esp_idle.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,58 +24,51 @@
 
 #include <nuttx/config.h>
 
-#include <assert.h>
-#include <debug.h>
-#include <stdlib.h>
-
+#include <arch/board/board.h>
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 
-#include "espressif/esp_systemreset.h"
-
-#ifdef CONFIG_BOARDCTL_RESET
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_reset
+ * Name: up_idle
  *
  * Description:
- *   Reset board.  Support for this function is required by board-level
- *   logic if CONFIG_BOARDCTL_RESET is selected.
+ *   up_idle() is the logic that will be executed when their is no other
+ *   ready-to-run task. This is processor idle time and will continue until
+ *   some interrupt occurs to cause a context switch from the idle task.
+ *
+ *   Processing in this state may be processor-specific. e.g., this is where
+ *   power management operations might be performed.
  *
  * Input Parameters:
- *   status - Status information provided with the reset event.  This
- *            meaning of this status information is board-specific.  If not
- *            used by a board, the value zero may be provided in calls to
- *            board_reset().
+ *   None.
  *
  * Returned Value:
- *   If this function returns, then it was not possible to power-off the
- *   board due to some constraints.  The return value in this case is a
- *   board-specific reason for the failure to shutdown.
+ *   None.
  *
  ****************************************************************************/
 
-int board_reset(int status)
+void up_idle(void)
 {
-  syslog(LOG_INFO, "reboot status=%d\n", status);
+#if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_TIMER_INTS)
+  /* If the system is idle and there are no timer interrupts, then process
+   * "fake" timer interrupts. Hopefully, something will wake up.
+   */
 
-  switch (status)
-    {
-      case EXIT_SUCCESS:
-        up_shutdown_handler();
-        break;
-      case CONFIG_BOARD_ASSERT_RESET_VALUE:
-      default:
-        break;
-    }
+  nxsched_process_timer();
+#else
+  /* This would be an appropriate place to put some MCU-specific logic to
+   * sleep in a reduced power mode until an interrupt occurs to save power
+   */
 
-  up_systemreset();
+  asm("WFI");
 
-  return 0;
+#endif
 }
-
-#endif /* CONFIG_BOARDCTL_RESET */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/espressif/esp32h2-generic/src/esp32h2_reset.c
+ * arch/risc-v/src/common/espressif/esp_oneshot.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,64 +18,34 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_ONESHOT_H
+#define __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_ONESHOT_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <assert.h>
-#include <debug.h>
-#include <stdlib.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/board.h>
-
-#include "espressif/esp_systemreset.h"
-
-#ifdef CONFIG_BOARDCTL_RESET
-
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_reset
+ * Name: esp_oneshot_initialize
  *
  * Description:
- *   Reset board.  Support for this function is required by board-level
- *   logic if CONFIG_BOARDCTL_RESET is selected.
+ *   Initialize a oneshot timer device.
  *
  * Input Parameters:
- *   status - Status information provided with the reset event.  This
- *            meaning of this status information is board-specific.  If not
- *            used by a board, the value zero may be provided in calls to
- *            board_reset().
+ *   None.
  *
- * Returned Value:
- *   If this function returns, then it was not possible to power-off the
- *   board due to some constraints.  The return value in this case is a
- *   board-specific reason for the failure to shutdown.
+ * Returned Values:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
  *
  ****************************************************************************/
 
-int board_reset(int status)
-{
-  syslog(LOG_INFO, "reboot status=%d\n", status);
+int esp_oneshot_initialize(void);
 
-  switch (status)
-    {
-      case EXIT_SUCCESS:
-        up_shutdown_handler();
-        break;
-      case CONFIG_BOARD_ASSERT_RESET_VALUE:
-      default:
-        break;
-    }
-
-  up_systemreset();
-
-  return 0;
-}
-
-#endif /* CONFIG_BOARDCTL_RESET */
+#endif /* __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_ONESHOT_H */

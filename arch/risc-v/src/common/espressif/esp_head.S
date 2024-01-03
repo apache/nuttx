@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/espressif/esp32h2-generic/src/esp32h2_reset.c
+ * arch/risc-v/src/common/espressif/esp_head.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,58 +24,55 @@
 
 #include <nuttx/config.h>
 
-#include <assert.h>
-#include <debug.h>
-#include <stdlib.h>
+#include <arch/irq.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/board.h>
-
-#include "espressif/esp_systemreset.h"
-
-#ifdef CONFIG_BOARDCTL_RESET
+#include "chip.h"
 
 /****************************************************************************
- * Public Functions
+ * Public Symbols
  ****************************************************************************/
+
+  .global  __start
 
 /****************************************************************************
- * Name: board_reset
- *
- * Description:
- *   Reset board.  Support for this function is required by board-level
- *   logic if CONFIG_BOARDCTL_RESET is selected.
- *
- * Input Parameters:
- *   status - Status information provided with the reset event.  This
- *            meaning of this status information is board-specific.  If not
- *            used by a board, the value zero may be provided in calls to
- *            board_reset().
- *
- * Returned Value:
- *   If this function returns, then it was not possible to power-off the
- *   board due to some constraints.  The return value in this case is a
- *   board-specific reason for the failure to shutdown.
- *
+ * Section: .text
  ****************************************************************************/
 
-int board_reset(int status)
-{
-  syslog(LOG_INFO, "reboot status=%d\n", status);
+  .section .text
 
-  switch (status)
-    {
-      case EXIT_SUCCESS:
-        up_shutdown_handler();
-        break;
-      case CONFIG_BOARD_ASSERT_RESET_VALUE:
-      default:
-        break;
-    }
+/****************************************************************************
+ * Name: __start
+ ****************************************************************************/
 
-  up_systemreset();
+__start:
+  .option push
+  .option norelax
 
-  return 0;
-}
+  /* Set stack pointer to the idle thread stack */
 
-#endif /* CONFIG_BOARDCTL_RESET */
+  lui  sp, %hi(ESP_IDLESTACK_TOP)
+  addi sp, sp, %lo(ESP_IDLESTACK_TOP)
+
+  /* Set gp pointer */
+
+  la   gp, __global_pointer$
+
+  /* Disable all interrupts (i.e. timer, external) in mstatus */
+
+  csrw mstatus, zero
+
+  .option pop
+
+  /* Initialize the Machine Trap-Vector */
+
+  lui  t0, %hi(_vector_table)
+  addi t0, t0, %lo(_vector_table)
+  csrw  mtvec, t0
+
+  /* Jump to __esp_start */
+
+  jal  x1, __esp_start
+
+  /* We shouldn't return from __esp_start */
+
+  ret
