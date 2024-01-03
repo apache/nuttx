@@ -200,6 +200,8 @@
 #  error "Need at least one RX buffer"
 #endif
 
+#define nitems(_a)    (sizeof(_a) / sizeof(0[(_a)]))
+
 /* From ref manual TDSR/RDSR description
  * For optimal performance the pointer should be 512-bit aligned, that is,
  * evenly divisible by 64.
