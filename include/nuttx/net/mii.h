@@ -21,11 +21,14 @@
 #ifndef __INCLUDE_NUTTX_NET_MII_H
 #define __INCLUDE_NUTTX_NET_MII_H
 
+#ifndef __ASSEMBLY__
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdint.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -62,12 +65,14 @@
 
 /* AR8031: */
 
+#define MII_AR8031_NAME             "AR8031"
 #define MII_AR8031_PSSR              0x11      /* Phy-Specific Status Register */
 
 /* National Semiconductor DP83840: 0x07-0x11, 0x14, 0x1a, 0x1d-0x1f
  * reserved
  */
 
+#define MII_DP83840_NAME             "DP83840"
 #define MII_DP83840_COUNTER          0x12      /* Disconnect counter */
 #define MII_DP83840_FCSCOUNTER       0x13      /* False carrier sense counter */
 #define MII_DP83840_NWAYTEST         0x14      /* N-way auto-neg test reg */
@@ -80,6 +85,7 @@
 
 /* Am79c874: 0x08-0x0f, 0x14, 0x16, 0x19-0x1f reserved */
 
+#define MII_AM79C874_NAME            "AM79C874"
 #define MII_AM79C874_NPADVERTISE     0x07      /* Auto-negotiation next page advertisement */
 #define MII_AM79C874_MISCFEATURES    0x10      /* Miscellaneous features reg */
 #define MII_AM79C874_INTCS           0x11      /* Interrupt control/status */
@@ -91,6 +97,7 @@
 
 /* Luminary LM3S6918 built-in PHY: 0x07-0x0f, 0x14-0x16, 0x19-0x1f reserved */
 
+#define MII_LM3S6918_NAME            "LM3S6918"
 #define MII_LM_VSPECIFIC             0x10      /* Vendor-Specific */
 #define MII_LM_INTCS                 0x11      /* Interrupt control/status */
 #define MII_LM_DIAGNOSTIC            0x12      /* Diagnostic */
@@ -100,12 +107,14 @@
 
 /* Micrel KS8721: 0x15, 0x1b, and 0x1f */
 
+#define MII_KS8721_NAME              "KS8721"
 #define MII_KS8721_RXERCOUNTER       0x15      /* RXER counter */
 #define MII_KS8721_INTCS             0x1b      /* Interrupt control/status register */
 #define MII_KS8721_10BTCR            0x1f      /* 10BASE-TX PHY control register */
 
 /* Micrel KSZ8041:  0x15, 0x1b, 0x1e-0x1f */
 
+#define MII_KSZ8041_NAME             "KSZ8041"
 #define MII_KSZ8041_RXERR            0x15      /* RXERR Counter */
 #define MII_KSZ8041_INT              0x1b      /* Interrupt Control/Status */
 #define MII_KSZ8041_PHYCTRL1         0x1e      /* PHY Control 1 */
@@ -113,6 +122,7 @@
 
 /* Micrel KSZ8051:  0x11, 0x15-0x18, 0x1b, 0x1d-0x1f */
 
+#define MII_KSZ8051_NAME             "KSZ8051"
 #define MII_KSZ8051_AFEC1            0x11      /* AFE Control 1 */
 #define MII_KSZ8051_RXERR            0x15      /* RXERR Counter */
 #define MII_KSZ8051_OMSO             0x16      /* Operation Mode Strap Override */
@@ -124,6 +134,8 @@
 #define MII_KSZ8051_PHYCTRL2         0x1f      /* PHY Control 2 */
 
 /* Micrel KSZ8061:  0x10-0x18, 0x1b, 0x1c-0x1f */
+
+#define MII_KSZ8061_NAME               "KSZ8061"
 #define MII_KSZ8061_DIG_CTRL           0x10   /* Digital Control */
 #define MII_KSZ8061_AFE_CTRL_0         0x11   /* AFE Control 0 */
 #define MII_KSZ8061_AFE_CTRL_1         0x12   /* AFE Control 1 */
@@ -141,6 +153,7 @@
 
 /* Micrel KSZ8081:  0x10-0x11, 0x15-0x18, 0x1b, 0x1d-0x1f */
 
+#define MII_KSZ8081_NAME             "KSZ8081"
 #define MII_KSZ8081_DRCTRL           0x10      /* Digital Reserve Control */
 #define MII_KSZ8081_AFEC1            0x11      /* AFE Control 1 */
 #define MII_KSZ8081_RXERR            0x15      /* RXERR Counter */
@@ -156,6 +169,7 @@
  * 0x8-0x15, 0x13, 0x1c reserved
  */
 
+#define MII_DP83848C_NAME            "DP83848C"
 #define MII_DP83848C_STS             0x10      /* RO PHY Status Register */
 #define MII_DP83848C_MICR            0x11      /* RW MII Interrupt Control Register */
 #define MII_DP83848C_MISR            0x12      /* RO MII Interrupt Status Register */
@@ -171,6 +185,7 @@
 
 /* Texas Instruments DP83825I PHY Extended Registers. */
 
+#define MII_DP83825I_NAME            "DP83825I"
 #define MII_DP83825I_PHYSTS          0x10      /* RO PHY Status Register */
 #define MII_DP83825I_PHYSCR          0x11      /* RW PHY Specific Control Register */
 #define MII_DP83825I_MISR1           0x12      /* RO MII Interrupt Status Register 1 */
@@ -189,6 +204,7 @@
 
 /* SMSC LAN8720 PHY Extended Registers */
 
+#define MII_LAN8720_NAME             "LAN8720"
 #define MII_LAN8720_REV              0x10      /* Silicon Revision Register */
 #define MII_LAN8720_MCSR             0x11      /* Mode Control/Status Register */
 #define MII_LAN8720_MODES            0x12      /* Special modes */
@@ -201,6 +217,8 @@
 
 /* SMSC LAN8740/LAN8742A PHY Extended Registers */
 
+#define MII_LAN8740_NAME             "LAN8740"
+#define MII_LAN8742A_NAME            "LAN8742A"
 #define MII_LAN8740_CONFIG           0x10      /* EDPD NDL/Crossover Timer/EEE Configuration */
 #define MII_LAN8740_MCSR             0x11      /* Mode Control/Status Register */
 #define MII_LAN8740_MODES            0x12      /* Special modes */
@@ -215,6 +233,7 @@
 
 /* Motorcomm YT8512C/YT8512H Extended Registers */
 
+#define MII_YT8512_NAME             "YT8512"
 #define MII_YT8512_PHYSFC            0x10      /* PHY Function conrtol Register */
 #define MII_YT8512_PHYSTS            0x11      /* PHY Status Register */
 #define MII_YT8512_IMR               0x12      /* Interrupt Mask Register */
@@ -728,12 +747,15 @@
 
 /* TJA110X MII ID1/2 register bits */
 
+#define MII_TJA1100_NAME                  "TJA1100"
 #define MII_PHYID1_TJA1100                0x0180  /* ID1 value for NXP TJA1100 */
 #define MII_PHYID2_TJA1100                0xdc40  /* ID2 value for NXP TJA1100 */
 
+#define MII_TJA1101_NAME                  "TJA1101"
 #define MII_PHYID1_TJA1101                0x0180  /* ID1 value for NXP TJA1101 */
 #define MII_PHYID2_TJA1101                0xdd00  /* ID2 value for NXP TJA1101 */
 
+#define MII_TJA1103_NAME                  "TJA1103"
 #define MII_PHYID1_TJA1103                0x01b   /* ID1 value for NXP TJA1103 */
 #define MII_PHYID2_TJA1103                0xB013  /* ID2 value for NXP TJA1103 */
 
@@ -915,6 +937,22 @@
  * Type Definitions
  ****************************************************************************/
 
+struct phy_desc_s
+{
+  char      name[16];       /* The name of the PHY */
+  uint16_t  id1;            /* The MII_PHYID1 registers value */
+  uint16_t  id2;            /* The MII_PHYID2 registers value */
+  uint16_t  status;         /* The Phys status register or 0xffff */
+  uint16_t  address_lo;     /* The lowest address to check for the PHY */
+  uint16_t  address_high;   /* The highest address to check for the PHY or
+                             * 0xffff uses only the address_lo (one address)
+                             */
+  uint16_t  mbps10;         /* The bit mask for 10MBP if status is not 0xffff */
+  uint16_t  mbps100;        /* The bit mask for 100MBP if status is not 0xffff */
+  uint16_t  duplex;         /* The bit mask for DUPLEX if status is not 0xffff */
+  uint16_t  clause;         /* The PHY clause supported. 22 or 45 */
+};
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -932,4 +970,5 @@ extern "C"
 }
 #endif
 
+#endif /* __ASSEMBLY__ */
 #endif /* __INCLUDE_NUTTX_NET_MII_H */
