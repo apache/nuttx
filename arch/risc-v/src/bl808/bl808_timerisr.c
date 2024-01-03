@@ -29,62 +29,16 @@
 #include <time.h>
 #include <debug.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/clock.h>
-#include <nuttx/init.h>
-#include <nuttx/spinlock.h>
 #include <nuttx/timers/arch_alarm.h>
-#include <arch/board/board.h>
 
 #include "riscv_internal.h"
 #include "riscv_mtimer.h"
-#include "riscv_percpu.h"
-#include "hardware/bl808_memorymap.h"
 
 /****************************************************************************
- * Private Data
+ * Pre-processor Definitions
  ****************************************************************************/
 
-static uint32_t g_stimer_pending = false;
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: bl808_ssoft_interrupt
- *
- * Description:
- *   This function is S-mode software interrupt handler to proceed
- *   the OS timer
- *
- ****************************************************************************/
-
-static int bl808_ssoft_interrupt(int irq, void *context, void *arg)
-{
-  /* Cleaer Supervisor Software Interrupt */
-
-  CLEAR_CSR(sip, SIP_SSIP);
-
-  if (g_stimer_pending)
-    {
-      g_stimer_pending = false;
-
-      /* Proceed the OS timer */
-
-      nxsched_process_timer();
-    }
-#ifdef CONFIG_SMP
-  else
-    {
-      /* We assume IPI has been issued */
-
-      riscv_pause_handler(irq, context, arg);
-    }
-#endif
-
-  return 0;
-}
+#define MTIMER_FREQ 1000000
 
 /****************************************************************************
  * Public Functions
@@ -101,6 +55,15 @@ static int bl808_ssoft_interrupt(int irq, void *context, void *arg)
 
 void up_timer_initialize(void)
 {
-  irq_attach(RISCV_IRQ_SSOFT, bl808_ssoft_interrupt, NULL);
-  up_enable_irq(RISCV_IRQ_SSOFT);
+  struct oneshot_lowerhalf_s *lower;
+
+  /* Initialize the OpenSBI Timer. mtime and mtimecmp are unused for
+   * OpenSBI.
+   */
+
+  lower = riscv_mtimer_initialize(0, 0, RISCV_IRQ_STIMER, MTIMER_FREQ);
+
+  DEBUGASSERT(lower != NULL);
+
+  up_alarm_set_lowerhalf(lower);
 }
