@@ -747,7 +747,7 @@ static int verify_password(FAR struct wifi_sim_s *sta,
     {
       ret = OK;
     }
-  else if (!memcmp(sta->password, bss->password, strlen(sta->password)))
+  else if (!strncmp(sta->password, bss->password, sizeof(sta->password)))
     {
       ret = OK;
     }
