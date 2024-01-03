@@ -327,7 +327,6 @@ int nxthread_create(FAR const char *name, uint8_t ttype, int priority,
 bool nxsched_add_readytorun(FAR struct tcb_s *rtrtcb);
 bool nxsched_remove_readytorun(FAR struct tcb_s *rtrtcb);
 void nxsched_remove_self(FAR struct tcb_s *rtrtcb);
-bool nxsched_add_prioritized(FAR struct tcb_s *tcb, DSEG dq_queue_t *list);
 void nxsched_merge_prioritized(FAR dq_queue_t *list1, FAR dq_queue_t *list2,
                                uint8_t task_state);
 bool nxsched_merge_pending(void);
@@ -400,7 +399,6 @@ static inline_function FAR struct tcb_s *this_task(void)
   return tcb;
 }
 
-int  nxsched_select_cpu(cpu_set_t affinity);
 void nxsched_process_delivered(int cpu);
 #else
 #  define nxsched_select_cpu(a)     (0)
@@ -444,4 +442,132 @@ struct tls_info_s; /* Forward declare */
 FAR struct tls_info_s *nxsched_get_tls(FAR struct tcb_s *tcb);
 FAR char **nxsched_get_stackargs(FAR struct tcb_s *tcb);
 
+/****************************************************************************
+ * Inline functions
+ ****************************************************************************/
+
+static inline_function bool nxsched_add_prioritized(FAR struct tcb_s *tcb,
+                                                    DSEG dq_queue_t *list)
+{
+  FAR struct tcb_s *next;
+  FAR struct tcb_s *prev;
+  uint8_t sched_priority = tcb->sched_priority;
+  bool ret = false;
+
+  /* Lets do a sanity check before we get started. */
+
+  DEBUGASSERT(sched_priority >= SCHED_PRIORITY_MIN);
+
+  /* Search the list to find the location to insert the new Tcb.
+   * Each is list is maintained in descending sched_priority order.
+   */
+
+  for (next = (FAR struct tcb_s *)list->head;
+       (next && sched_priority <= next->sched_priority);
+       next = next->flink);
+
+  /* Add the tcb to the spot found in the list.  Check if the tcb
+   * goes at the end of the list. NOTE:  This could only happen if list
+   * is the g_pendingtasks list!
+   */
+
+  if (next == NULL)
+    {
+      /* The tcb goes at the end of the list. */
+
+      prev = (FAR struct tcb_s *)list->tail;
+      if (prev == NULL)
+        {
+          /* Special case:  The list is empty */
+
+          tcb->flink = NULL;
+          tcb->blink = NULL;
+          list->head = (FAR dq_entry_t *)tcb;
+          list->tail = (FAR dq_entry_t *)tcb;
+          ret = true;
+        }
+      else
+        {
+          /* The tcb goes at the end of a non-empty list */
+
+          tcb->flink = NULL;
+          tcb->blink = prev;
+          prev->flink = tcb;
+          list->tail = (FAR dq_entry_t *)tcb;
+        }
+    }
+  else
+    {
+      /* The tcb goes just before next */
+
+      prev = next->blink;
+      if (prev == NULL)
+        {
+          /* Special case:  Insert at the head of the list */
+
+          tcb->flink  = next;
+          tcb->blink  = NULL;
+          next->blink = tcb;
+          list->head  = (FAR dq_entry_t *)tcb;
+          ret = true;
+        }
+      else
+        {
+          /* Insert in the middle of the list */
+
+          tcb->flink = next;
+          tcb->blink = prev;
+          prev->flink = tcb;
+          next->blink = tcb;
+        }
+    }
+
+  return ret;
+}
+
+#  ifdef CONFIG_SMP
+static inline_function int nxsched_select_cpu(cpu_set_t affinity)
+{
+  uint8_t minprio;
+  int cpu;
+  int i;
+
+  minprio = SCHED_PRIORITY_MAX;
+  cpu     = 0xff;
+
+  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
+    {
+      /* Is the thread permitted to run on this CPU? */
+
+      if ((affinity & (1 << i)) != 0)
+        {
+          FAR struct tcb_s *rtcb = (FAR struct tcb_s *)
+                                   g_assignedtasks[i].head;
+
+          /* If this CPU is executing its IDLE task, then use it.  The
+           * IDLE task is always the last task in the assigned task list.
+           */
+
+          if (is_idle_task(rtcb))
+            {
+              /* The IDLE task should always be assigned to this CPU and have
+               * a priority of zero.
+               */
+
+              DEBUGASSERT(rtcb->sched_priority == 0);
+              return i;
+            }
+          else if (rtcb->sched_priority <= minprio)
+            {
+              DEBUGASSERT(rtcb->sched_priority > 0);
+              minprio = rtcb->sched_priority;
+              cpu = i;
+            }
+        }
+    }
+
+  DEBUGASSERT(cpu != 0xff);
+  return cpu;
+}
+#  endif
 #endif /* __SCHED_SCHED_SCHED_H */
