@@ -549,6 +549,13 @@ choice
 config ETH0_PHY_NONE
 	bool "No PHY support"
 
+config ETH0_PHY_MULTI
+	bool "Multiple PHYs are supported"
+	---help---
+		The Board will provide a list of PHYs to probe for.
+		The first one found on the bpard will be used.
+		This setting is not supported by all Ethernet drivers.
+
 config ETH0_PHY_AM79C874
 	bool "AMD Am79C874 PHY"
 
