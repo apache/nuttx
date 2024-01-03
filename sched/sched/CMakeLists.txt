@@ -24,7 +24,6 @@ set(SRCS
     sched_profil.c
     sched_addreadytorun.c
     sched_removereadytorun.c
-    sched_addprioritized.c
     sched_mergeprioritized.c
     sched_mergepending.c
     sched_addblocked.c
@@ -57,7 +56,7 @@ if(CONFIG_PRIORITY_INHERITANCE)
 endif()
 
 if(CONFIG_SMP)
-  list(APPEND SRCS sched_cpuselect.c sched_getaffinity.c sched_setaffinity.c
+  list(APPEND SRCS sched_getaffinity.c sched_setaffinity.c
        sched_process_delivered.c)
 endif()
 
