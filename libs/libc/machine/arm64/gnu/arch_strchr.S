@@ -84,7 +84,7 @@
 \f:
 	.endm
 
-def_fn strchr
+def_fn ARCH_LIBCFUN(strchr)
 	/* Magic constant 0x40100401 to allow us to identify which lane
 	   matches the requested byte.  Magic constant 0x80200802 used
 	   similarly for NUL termination.  */
@@ -162,6 +162,6 @@ def_fn strchr
 	csel	result, result, xzr, eq
 	ret
 
-	.size	strchr, . - strchr
+	.size	ARCH_LIBCFUN(strchr), . - ARCH_LIBCFUN(strchr)
 
 #endif

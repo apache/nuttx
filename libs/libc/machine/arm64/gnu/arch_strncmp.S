@@ -83,7 +83,7 @@
 	.rep 7
 	nop	/* Pad so that the loop below fits a cache line.  */
 	.endr
-def_fn strncmp
+def_fn ARCH_LIBCFUN(strncmp)
 	cbz	limit, .Lret0
 	eor	tmp1, src1, src2
 	mov	zeroones, #REP8_01
@@ -295,6 +295,6 @@ def_fn strncmp
 .Lret0:
 	mov	result, #0
 	ret
-	.size strncmp, . - strncmp
+	.size ARCH_LIBCFUN(strncmp), . - ARCH_LIBCFUN(strncmp)
 
 #endif

@@ -41,9 +41,9 @@
   .begin schedule
   .align  4
   .literal_position
-  .global strcpy
-  .type strcpy, @function
-strcpy:
+  .global ARCH_LIBCFUN(strcpy)
+  .type ARCH_LIBCFUN(strcpy), @function
+ARCH_LIBCFUN(strcpy):
   ENTRY(16)
   /* a2 = dst, a3 = src */
 
@@ -245,6 +245,6 @@ strcpy:
 #endif /* 0 */
   .end schedule
 
-  .size strcpy, . - strcpy
+  .size ARCH_LIBCFUN(strcpy), . - ARCH_LIBCFUN(strcpy)
 
 #endif

@@ -41,7 +41,7 @@
 
 	.text
 
-memcpy:
+ARCH_LIBCFUN(memcpy):
 	move		t6, a0  /* Preserve return value */
 
 	/* Defer to byte-oriented copy for small sizes */

@@ -113,7 +113,7 @@
 	   whether the first fetch, which may be misaligned, crosses a page
 	   boundary.  */
 
-def_fn strlen p2align=6
+def_fn ARCH_LIBCFUN(strlen) p2align=6
 	and	tmp1, srcin, MIN_PAGE_SIZE - 1
 	mov	zeroones, REP8_01
 	cmp	tmp1, MIN_PAGE_SIZE - 16
@@ -243,6 +243,6 @@ L(page_cross):
 	csel	data2, data2, tmp2, eq
 	b	L(page_cross_entry)
 
-	.size	strlen, . - strlen
+	.size	ARCH_LIBCFUN(strlen), . - ARCH_LIBCFUN(strlen)
 
 #endif

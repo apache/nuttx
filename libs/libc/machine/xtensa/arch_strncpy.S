@@ -73,9 +73,9 @@ __strncpy_aux:
   RET(16)
 
   .align  4
-  .global strncpy
-  .type strncpy, @function
-strncpy:
+  .global ARCH_LIBCFUN(strncpy)
+  .type ARCH_LIBCFUN(strncpy), @function
+ARCH_LIBCFUN(strncpy):
   ENTRY(16)
   /* a2 = dst, a3 = src */
 
@@ -266,6 +266,6 @@ strncpy:
 3:  RET(16)
 .end schedule
 
-  .size strncpy, . - strncpy
+  .size ARCH_LIBCFUN(strncpy), . - ARCH_LIBCFUN(strncpy)
 
 #endif
