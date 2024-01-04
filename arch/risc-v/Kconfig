@@ -304,20 +304,20 @@ config ARCH_FAMILY
 
 config ARCH_CHIP
 	string
-	default "fe310"		if ARCH_CHIP_FE310
-	default "k210"		if ARCH_CHIP_K210
-	default "litex"		if ARCH_CHIP_LITEX
-	default "bl602"		if ARCH_CHIP_BL602
-	default "esp32c3"	if ARCH_CHIP_ESP32C3
-	default "espressif"	if ARCH_CHIP_ESPRESSIF
-	default "c906"		if ARCH_CHIP_C906
-	default "mpfs"		if ARCH_CHIP_MPFS
-	default "rv32m1"	if ARCH_CHIP_RV32M1
-	default "qemu-rv"	if ARCH_CHIP_QEMU_RV
-	default "hpm6750"	if ARCH_CHIP_HPM6750
-	default "jh7110"	if ARCH_CHIP_JH7110
-	default "bl808"		if ARCH_CHIP_BL808
-	default "k230"		if ARCH_CHIP_K230
+	default "fe310"				if ARCH_CHIP_FE310
+	default "k210"				if ARCH_CHIP_K210
+	default "litex"				if ARCH_CHIP_LITEX
+	default "bl602"				if ARCH_CHIP_BL602
+	default "esp32c3-legacy"	if ARCH_CHIP_ESP32C3
+	default "espressif"			if ARCH_CHIP_ESPRESSIF
+	default "c906"				if ARCH_CHIP_C906
+	default "mpfs"				if ARCH_CHIP_MPFS
+	default "rv32m1"			if ARCH_CHIP_RV32M1
+	default "qemu-rv"			if ARCH_CHIP_QEMU_RV
+	default "hpm6750"			if ARCH_CHIP_HPM6750
+	default "jh7110"			if ARCH_CHIP_JH7110
+	default "bl808"				if ARCH_CHIP_BL808
+	default "k230"				if ARCH_CHIP_K230
 
 config ARCH_RISCV_INTXCPT_EXTENSIONS
 	bool "RISC-V Integer Context Extensions"
@@ -458,7 +458,7 @@ if ARCH_CHIP_BL602
 source "arch/risc-v/src/bl602/Kconfig"
 endif
 if ARCH_CHIP_ESP32C3
-source "arch/risc-v/src/esp32c3/Kconfig"
+source "arch/risc-v/src/esp32c3-legacy/Kconfig"
 endif
 if ARCH_CHIP_ESPRESSIF
 source "arch/risc-v/src/espressif/Kconfig"
