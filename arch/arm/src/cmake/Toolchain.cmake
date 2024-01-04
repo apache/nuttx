@@ -184,11 +184,11 @@ endif()
 set(ARCHCFLAGS "-Wstrict-prototypes")
 set(ARCHCXXFLAGS "-nostdinc++")
 
-if(CONFIG_CXX_EXCEPTION)
+if(NOT CONFIG_CXX_EXCEPTION)
   string(APPEND ARCHCXXFLAGS " -fno-exceptions -fcheck-new")
 endif()
 
-if(CONFIG_CXX_RTTI)
+if(NOT CONFIG_CXX_RTTI)
   string(APPEND ARCHCXXFLAGS " -fno-rtti")
 endif()
 
