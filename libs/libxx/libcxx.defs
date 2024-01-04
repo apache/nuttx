@@ -139,8 +139,10 @@ endif
 # warning on gcc >= 12.3.Rel1
 # libcxx/src/string.cpp:58:33: warning: 'template<class _CharT> struct std::__1::char_traits' is deprecated: char_traits<T> for T not equal to char, wchar_t, char8_t, char16_t or char32_t is non-standard and is provided for a temporary period. It will be removed in LLVM 18, so please migrate off of it. [-Wdeprecated-declarations]
 #    58 | template string operator+<char, char_traits<char>, allocator<char>>(char const*, string const&);
+ifneq ($(GCCVER),)
 ifeq ($(shell expr $(GCCVER) \>= 12), 1)
 	libcxx/src/string.cpp_CXXFLAGS += -Wno-deprecated-declarations
+endif
 endif
 
 # warning on gcc >= 12.3.Rel1
@@ -166,16 +168,20 @@ endif
 # libcxx/src/filesystem/path_parser.h:55:15: note: shadowed declaration is here
 #    55 |   ParserState State;
 #       |               ^~~~~
+ifneq ($(GCCVER),)
 ifeq ($(shell expr $(GCCVER) \>= 12), 1)
 	libcxx/src/filesystem/path.cpp_CXXFLAGS += -Wno-shadow
+endif
 endif
 
 # warning on gcc >= 12.3.Rel1
 # libcxx/src/ryu/d2s.cpp:490:31: warning: '_Trailing_zero_bits' may be used uninitialized [-Wmaybe-uninitialized]
 #   490 |           _Trailing_zero_bits += 32;
 #       |           ~~~~~~~~~~~~~~~~~~~~^~~~~
+ifneq ($(GCCVER),)
 ifeq ($(shell expr $(GCCVER) \>= 12), 1)
 	libcxx/src/ryu/d2s.cpp_CXXFLAGS += -Wno-maybe-uninitialized
+endif
 endif
 
 
