@@ -43,9 +43,9 @@
 
 	.thumb
 	.syntax unified
-	.global memmove
-	.type	memmove, %function
-memmove:
+	.global ARCH_LIBCFUN(memmove)
+	.type	ARCH_LIBCFUN(memmove), %function
+ARCH_LIBCFUN(memmove):
 #if __ARM_FEATURE_PAC_DEFAULT
 #  if __ARM_FEATURE_BTI_DEFAULT
 	pacbti	ip, lr, sp
@@ -88,6 +88,6 @@ memmove:
 	aut	ip, lr, sp
 #endif /* __ARM_FEATURE_PAC_DEFAULT */
 	bx	lr
-	.size memmove, . - memmove
+	.size ARCH_LIBCFUN(memmove), . - ARCH_LIBCFUN(memmove)
 
 #endif

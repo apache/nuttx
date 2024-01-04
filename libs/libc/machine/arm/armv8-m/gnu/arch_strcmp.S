@@ -88,7 +88,7 @@
 
 	.thumb
 	.syntax unified
-def_fn strcmp
+def_fn ARCH_LIBCFUN(strcmp)
 	.cfi_sections .debug_frame
 	.cfi_startproc
 #if __ARM_FEATURE_PAC_DEFAULT
@@ -439,6 +439,6 @@ def_fn strcmp
 #endif /* __ARM_FEATURE_PAC_DEFAULT */
 	bx	lr
 	.cfi_endproc
-	.size strcmp, . - strcmp
+	.size ARCH_LIBCFUN(strcmp), . - ARCH_LIBCFUN(strcmp)
 
 #endif
