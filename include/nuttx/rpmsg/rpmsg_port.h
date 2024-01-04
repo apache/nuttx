@@ -121,7 +121,6 @@ rpmsg_port_spi_initialize(FAR const struct rpmsg_port_config_s *cfg,
                           FAR const struct rpmsg_port_spi_config_s *spicfg,
                           FAR struct spi_dev_s *spi,
                           FAR struct ioexpander_dev_s *ioe);
-
 #endif
 
 #ifdef CONFIG_RPMSG_PORT_SPI_SLAVE
@@ -150,6 +149,26 @@ rpmsg_port_spi_slave_initialize(FAR const struct rpmsg_port_config_s *cfg,
   FAR const struct rpmsg_port_spi_config_s *spicfg,
   FAR struct spi_slave_ctrlr_s *spictrlr, FAR struct ioexpander_dev_s *ioe);
 
+#endif
+
+#ifdef CONFIG_RPMSG_PORT_UART
+
+/****************************************************************************
+ * Name: rpmsg_port_uart_initialize
+ *
+ * Description:
+ *   Initialze a rpmsg_port_uart device to communicate between two chips.
+ *
+ * Input Parameters:
+ *   cfg      - Configuration of buffers needed for communication.
+ *   uartpath - Uart device path.
+ *   localcpu - Local cpu name
+ *
+ ****************************************************************************/
+
+int rpmsg_port_uart_initialize(FAR const struct rpmsg_port_config_s *cfg,
+                               FAR const char *uartpath,
+                               FAR const char *localcpu);
 #endif
 
 #ifdef __cplusplus
