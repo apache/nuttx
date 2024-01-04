@@ -39,9 +39,7 @@ if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/libcxxabi)
         ""
         TEST_COMMAND
         ""
-    PATCH_COMMAND
-      patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-      ${CMAKE_CURRENT_LIST_DIR}/0001-libc-abi-avoid-the-waring-__EXCEPTIONS-is-not-define.patch
+    PATCH_COMMAND ""
     DOWNLOAD_NO_PROGRESS true
     TIMEOUT 30)
 
