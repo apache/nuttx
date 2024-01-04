@@ -1,0 +1,256 @@
+############################################################################
+# arch/risc-v/src/esp32c3-legacy/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+include common/Make.defs
+
+# Specify our HEAD assembly file.  This will be linked as
+# the first object file, so it will appear at address 0
+
+HEAD_ASRC = esp32c3_head.S
+
+CHIP_ASRCS = esp32c3_vectors.S
+
+# Specify our general Assembly files
+
+CMN_ASRCS := $(filter-out riscv_vectors.S,$(CMN_ASRCS))
+
+# Specify our C code within this directory to be included
+
+CHIP_CSRCS  = esp32c3_allocateheap.c esp32c3_start.c esp32c3_wdt.c esp32c3_idle.c
+CHIP_CSRCS += esp32c3_irq.c esp32c3_libc_stubs.c
+CHIP_CSRCS += esp32c3_clockconfig.c esp32c3_gpio.c esp32c3_rtc_gpio.c
+CHIP_CSRCS += esp32c3_lowputc.c esp32c3_serial.c
+CHIP_CSRCS += esp32c3_systemreset.c esp32c3_resetcause.c
+CHIP_CSRCS += esp32c3_uid.c esp32c3_perf.c
+
+ifeq ($(CONFIG_ESP32C3_REGION_PROTECTION),y)
+CHIP_CSRCS += esp32c3_region.c
+endif
+
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+CHIP_CSRCS += esp32c3_userspace.c
+endif
+
+ifeq ($(CONFIG_SCHED_TICKLESS),y)
+CHIP_CSRCS += esp32c3_tickless.c
+else
+CHIP_CSRCS += esp32c3_timerisr.c
+endif
+
+ifeq ($(CONFIG_ESP32C3_USBSERIAL),y)
+CHIP_CSRCS += esp32c3_usbserial.c
+endif
+
+ifeq ($(CONFIG_ESP32C3_RNG),y)
+CHIP_CSRCS += esp32c3_rng.c
+endif
+
+ifeq ($(CONFIG_ESP32C3_I2C),y)
+CHIP_CSRCS += esp32c3_i2c.c
+endif
+
+ifeq ($(CONFIG_ESP32C3_TWAI),y)
+CHIP_CSRCS += esp32c3_twai.c
+endif
+
+ifeq ($(CONFIG_ESP32C3_SPI),y)
+CHIP_CSRCS += esp32c3_spi.c
+  ifeq ($(CONFIG_SPI_SLAVE),y)
+    CHIP_CSRCS += esp32c3_spi_slave.c
+  endif
+endif
+
+ifeq ($(CONFIG_ESP32C3_SPIFLASH),y)
+CHIP_CSRCS += esp32c3_spiflash.c
+  ifeq ($(CONFIG_ESP32C3_MTD),y)
+    CHIP_CSRCS += esp32c3_spiflash_mtd.c
+  endif
+endif
+
+ifeq ($(CONFIG_ESP32C3_PARTITION_TABLE),y)
+CHIP_CSRCS += esp32c3_partition.c
+endif
+
+ifeq ($(CONFIG_WATCHDOG),y)
+CHIP_CSRCS += esp32c3_wdt_lowerhalf.c
+endif
+
+ifeq ($(CONFIG_ESP32C3_TIMER),y)
+CHIP_CSRCS += esp32c3_tim.c
+ifeq ($(CONFIG_TIMER),y)
+CHIP_CSRCS += esp32c3_tim_lowerhalf.c
+endif
+endif
+
+ifeq ($(CONFIG_ESP32C3_ONESHOT),y)
+CHIP_CSRCS += esp32c3_oneshot.c
+ifeq ($(CONFIG_ONESHOT),y)
+CHIP_CSRCS += esp32c3_oneshot_lowerhalf.c
+endif
+endif
+
+ifeq ($(CONFIG_ESP32C3_RT_TIMER),y)
+CHIP_CSRCS += esp32c3_rt_timer.c
+endif
+
+ifeq ($(CONFIG_ESP32C3_BIGNUM_ACCELERATOR),y)
+CHIP_CSRCS += esp32c3_bignum.c
+endif
+
+ifeq ($(CONFIG_ESP32C3_RSA_ACCELERATOR),y)
+CHIP_CSRCS += esp32c3_rsa.c
+endif
+
+ifeq ($(CONFIG_ESP32C3_SHA_ACCELERATOR),y)
+CHIP_CSRCS += esp32c3_sha.c
+endif
+
+ifeq ($(CONFIG_ESP32C3_FREERUN),y)
+CHIP_CSRCS += esp32c3_freerun.c
+endif
+
+ifeq ($(CONFIG_ESP32C3_DMA),y)
+CHIP_CSRCS += esp32c3_dma.c
+endif
+
+ifeq ($(CONFIG_PM),y)
+ifneq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)
+CHIP_CSRCS += esp32c3_pminitialize.c
+endif
+CHIP_CSRCS += esp32c3_pm.c
+endif
+
+CHIP_CSRCS += esp32c3_rtc.c
+
+ifeq ($(CONFIG_ESP32C3_LEDC),y)
+CHIP_CSRCS += esp32c3_ledc.c
+endif
+
+ifeq ($(CONFIG_ESP32C3_ADC),y)
+CHIP_CSRCS += esp32c3_adc.c
+endif
+
+ifeq ($(CONFIG_CRYPTO_CRYPTODEV_HARDWARE),y)
+CHIP_CSRCS += esp32c3_crypto.c
+endif
+
+ifeq ($(CONFIG_ESP32C3_AES_ACCELERATOR),y)
+CHIP_CSRCS += esp32c3_aes.c
+endif
+
+ifeq ($(CONFIG_ESP32C3_EFUSE),y)
+CHIP_CSRCS += esp32c3_efuse.c
+CHIP_CSRCS += esp32c3_efuse_table.c
+CHIP_CSRCS += esp32c3_efuse_lowerhalf.c
+endif
+
+ifeq ($(CONFIG_ARCH_HAVE_EXTRA_HEAPS),y)
+CHIP_CSRCS += esp32c3_extraheaps.c
+endif
+
+ifeq ($(CONFIG_ARCH_USE_TEXT_HEAP),y)
+CHIP_CSRCS += esp32c3_textheap.c
+endif
+
+ifeq ($(CONFIG_RTC_DRIVER),y)
+CHIP_CSRCS += esp32c3_rtc_lowerhalf.c
+endif
+
+ifeq ($(CONFIG_ESP32C3_RTC_HEAP),y)
+CHIP_CSRCS += esp32c3_rtcheap.c
+endif
+
+ifeq ($(CONFIG_ESP32C3_BROWNOUT_DET),y)
+CHIP_CSRCS += esp32c3_brownout.c
+endif
+
+ifeq ($(CONFIG_ESP32C3_WIRELESS),y)
+WIRELESS_DRV_UNPACK = esp-wireless-drivers-3rdparty
+WIRELESS_DRV_ID     = 45701c0
+WIRELESS_DRV_ZIP    = $(WIRELESS_DRV_ID).zip
+WIRELESS_DRV_URL    = https://github.com/espressif/esp-wireless-drivers-3rdparty/archive
+
+$(WIRELESS_DRV_ZIP):
+	$(call DOWNLOAD,$(WIRELESS_DRV_URL),$(WIRELESS_DRV_ZIP),chip/$(WIRELESS_DRV_ZIP))
+
+chip/$(WIRELESS_DRV_UNPACK): $(WIRELESS_DRV_ZIP)
+	$(Q) echo "Unpacking: ESP Wireless Drivers"
+	$(Q) unzip -oqq chip/$(WIRELESS_DRV_ZIP) -d chip/
+	$(Q) mv chip/$(WIRELESS_DRV_UNPACK)-$(WIRELESS_DRV_ID)* chip/$(WIRELESS_DRV_UNPACK)
+	$(Q) touch chip/$(WIRELESS_DRV_UNPACK)
+
+ifeq ($(wildcard chip/$(WIRELESS_DRV_UNPACK)/.git),)
+context:: chip/$(WIRELESS_DRV_UNPACK)
+
+distclean::
+	$(call DELFILE, chip/$(WIRELESS_DRV_ZIP))
+	$(call DELDIR, chip/$(WIRELESS_DRV_UNPACK))
+endif
+
+INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)esp-wireless-drivers-3rdparty$(DELIM)include
+INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)esp-wireless-drivers-3rdparty$(DELIM)include$(DELIM)esp32c3
+
+EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)esp-wireless-drivers-3rdparty$(DELIM)libs$(DELIM)esp32c3
+EXTRA_LIBS += -lphy
+
+# Wireless interfaces.
+
+CHIP_CSRCS += esp32c3_wireless.c
+endif
+
+ifeq ($(CONFIG_ESP32C3_WIFI),y)
+CHIP_CSRCS += esp32c3_wlan.c esp32c3_wifi_utils.c esp32c3_wifi_adapter.c
+EXTRA_LIBS += -lcore -lnet80211 -lpp -lsmartconfig -lcoexist -lespnow -lwpa_supplicant -lwapi -lmesh
+endif
+
+ifeq ($(CONFIG_ESP32C3_BLE),y)
+CHIP_CSRCS += esp32c3_ble_adapter.c esp32c3_ble.c
+EXTRA_LIBS +=  -lbtbb -lbtdm_app
+endif
+
+#############################################################################
+# Espressif HAL for 3rd Party Platforms
+#############################################################################
+
+# Fetch source files and add them to build
+
+ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
+ifndef ESP_HAL_3RDPARTY_VERSION
+	ESP_HAL_3RDPARTY_VERSION = 45c33111b441363e1267158186a60f42525228ca
+endif
+
+ifndef ESP_HAL_3RDPARTY_URL
+	ESP_HAL_3RDPARTY_URL	= https://github.com/espressif/esp-hal-3rdparty.git
+endif
+
+chip/$(ESP_HAL_3RDPARTY_REPO):
+	$(Q) echo "Cloning Espressif HAL for 3rd Party Platforms"
+	$(Q) git clone --quiet $(ESP_HAL_3RDPARTY_URL) chip/$(ESP_HAL_3RDPARTY_REPO)
+	$(Q) echo "Espressif HAL for 3rd Party Platforms: ${ESP_HAL_3RDPARTY_VERSION}"
+	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) checkout --quiet $(ESP_HAL_3RDPARTY_VERSION)
+
+# Silent preprocessor warnings
+
+CFLAGS += -Wno-undef -Wno-unused-variable
+
+include chip/Bootloader.mk
+
+distclean::
+	$(call DELDIR,chip/$(ESP_HAL_3RDPARTY_REPO))
