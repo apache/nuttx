@@ -395,6 +395,127 @@ static inline int romfs_searchdir(FAR struct romfs_mountpt_s *rm,
   return -ENOENT;
 }
 
+#ifdef CONFIG_FS_ROMFS_WRITEABLE
+/****************************************************************************
+ * Name: romfs_alloc_sparenode
+ *
+ * Description:
+ *   Allocate the spare node
+ *
+ ****************************************************************************/
+
+static FAR struct romfs_sparenode_s *
+romfs_alloc_sparenode(uint32_t start, uint32_t end)
+{
+  FAR struct romfs_sparenode_s *node;
+  node = kmm_malloc(sizeof(struct romfs_sparenode_s));
+  if (node == NULL)
+    {
+      ferr("romfs_alloc_sparenode: no memory\n");
+      return NULL;
+    }
+
+  node->start = start;
+  node->end = end;
+  return node;
+}
+
+/****************************************************************************
+ * Name: romfs_init_sparelist
+ *
+ * Description:
+ *   Init the sparelist
+ *
+ ****************************************************************************/
+
+static int romfs_init_sparelist(FAR struct romfs_mountpt_s *rm, bool rw)
+{
+  FAR struct romfs_sparenode_s *node;
+
+  list_initialize(&rm->rm_sparelist);
+  if (!rw)
+    {
+      return 0;
+    }
+
+  node = romfs_alloc_sparenode(0, rm->rm_hwsectorsize *
+                               rm->rm_hwnsectors);
+  if (node == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  list_add_head(&rm->rm_sparelist, &node->node);
+  rm->rm_volsize = 0;
+  return 0;
+}
+
+/****************************************************************************
+ * Name: romfs_alloc_spareregion
+ *
+ * Description:
+ *   Allocate the spare region
+ *
+ ****************************************************************************/
+
+static int romfs_alloc_spareregion(FAR struct list_node *list,
+                                   uint32_t start, uint32_t end)
+{
+  FAR struct romfs_sparenode_s *node;
+
+  list_for_every_entry(list, node, struct romfs_sparenode_s, node)
+    {
+      /* Find the node that start ~ end
+       * is in node->start ~ node->end
+       */
+
+      if (start == node->start && end == node->end)
+        {
+          /* Delete the node */
+
+          list_delete(&node->node);
+          kmm_free(node);
+          return 0;
+        }
+      else if (start == node->start)
+        {
+          /* Update the node */
+
+          node->start = end;
+          return 0;
+        }
+      else if (end == node->end)
+        {
+          /* Update the node */
+
+          node->end = start;
+          return 0;
+        }
+      else if (start > node->start && end < node->end)
+        {
+          /* Split the node */
+
+          FAR struct romfs_sparenode_s *new;
+          new = romfs_alloc_sparenode(end, node->end);
+          if (new == NULL)
+            {
+              return -ENOMEM;
+            }
+
+          node->end = start;
+          list_add_after(&node->node, &new->node);
+          return 0;
+        }
+    }
+
+  /* Not found */
+
+  ferr("No space for start %" PRIu32 ", end %" PRIu32 "\n", start,
+        end);
+  return -ENOENT;
+}
+#endif
+
 /****************************************************************************
  * Name: romfs_cachenode
  *
@@ -431,6 +552,26 @@ static int romfs_cachenode(FAR struct romfs_mountpt_s *rm,
   nodeinfo->rn_next       = next;
   nodeinfo->rn_namesize   = nsize;
   strlcpy(nodeinfo->rn_name, name, nsize + 1);
+
+#ifdef CONFIG_FS_ROMFS_WRITEABLE
+  if (!list_is_empty(&rm->rm_sparelist))
+    {
+      uint32_t totalsize = ROMFS_ALIGNUP(ROMFS_FHDR_NAME + nsize + 1);
+      if (offset == origoffset)
+        {
+          totalsize += size;
+        }
+
+      rm->rm_volsize += totalsize;
+      ret = romfs_alloc_spareregion(&rm->rm_sparelist, offset,
+                                    offset + totalsize);
+      if (ret < 0)
+        {
+          return ret;
+        }
+    }
+#endif
+
   if (!IS_DIRECTORY(next) || (strcmp(name, ".") == 0) ||
       (strcmp(name, "..") == 0))
     {
@@ -687,6 +828,27 @@ int romfs_hwconfigure(FAR struct romfs_mountpt_s *rm)
 }
 
 /****************************************************************************
+ * Name: romfs_free_sparelist
+ *
+ * Description:
+ *   Free the sparelist
+ *
+ ****************************************************************************/
+#ifdef CONFIG_FS_ROMFS_WRITEABLE
+void romfs_free_sparelist(FAR struct list_node *list)
+{
+  FAR struct romfs_sparenode_s *node;
+  FAR struct romfs_sparenode_s *tmp;
+
+  list_for_every_entry_safe(list, node, tmp, struct romfs_sparenode_s, node)
+    {
+      list_delete(&node->node);
+      kmm_free(node);
+    }
+}
+#endif
+
+/****************************************************************************
  * Name: romfs_fsconfigure
  *
  * Description:
@@ -697,20 +859,20 @@ int romfs_hwconfigure(FAR struct romfs_mountpt_s *rm)
  *
  ****************************************************************************/
 
-int romfs_fsconfigure(FAR struct romfs_mountpt_s *rm)
+int romfs_fsconfigure(FAR struct romfs_mountpt_s *rm, FAR const void *data)
 {
   FAR const char *name;
-  int16_t         ndx;
+  int             ret;
   uint32_t        rootoffset;
 
   /* Then get information about the ROMFS filesystem on the devices managed
    * by this block driver. Read sector zero which contains the volume header.
    */
 
-  ndx = romfs_devcacheread(rm, 0);
-  if (ndx < 0)
+  ret = romfs_devcacheread(rm, 0);
+  if (ret < 0)
     {
-      return ndx;
+      return ret;
     }
 
   /* Verify the magic number at that identifies this as a ROMFS filesystem */
@@ -722,19 +884,30 @@ int romfs_fsconfigure(FAR struct romfs_mountpt_s *rm)
 
   /* Then extract the values we need from the header and return success */
 
-  rm->rm_volsize    = romfs_devread32(rm, ROMFS_VHDR_SIZE);
+  rm->rm_volsize = romfs_devread32(rm, ROMFS_VHDR_SIZE);
 
   /* The root directory entry begins right after the header */
 
-  name              = (FAR const char *)&rm->rm_buffer[ROMFS_VHDR_VOLNAME];
-  rootoffset        = ROMFS_ALIGNUP(ROMFS_VHDR_VOLNAME + strlen(name) + 1);
-#ifdef CONFIG_FS_ROMFS_CACHE_NODE
-  ndx               = romfs_cachenode(rm, 0, rootoffset, RFNEXT_DIRECTORY,
-                                      0, "", &rm->rm_root);
-  if (ndx < 0)
+  name = (FAR const char *)&rm->rm_buffer[ROMFS_VHDR_VOLNAME];
+  rootoffset = ROMFS_ALIGNUP(ROMFS_VHDR_VOLNAME + strlen(name) + 1);
+#ifdef CONFIG_FS_ROMFS_WRITEABLE
+  ret = romfs_init_sparelist(rm, data && strstr(data, "rw"));
+  if (ret < 0)
     {
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_FS_ROMFS_CACHE_NODE
+  ret = romfs_cachenode(rm, 0, rootoffset, RFNEXT_DIRECTORY,
+                        0, "", &rm->rm_root);
+  if (ret < 0)
+    {
+#  ifdef CONFIG_FS_ROMFS_WRITEABLE
+      romfs_free_sparelist(&rm->rm_sparelist);
+#  endif
       romfs_freenode(rm->rm_root);
-      return ndx;
+      return ret;
     }
 #else
   rm->rm_rootoffset = rootoffset;
@@ -742,7 +915,7 @@ int romfs_fsconfigure(FAR struct romfs_mountpt_s *rm)
 
   /* and return success */
 
-  rm->rm_mounted    = true;
+  rm->rm_mounted = true;
   return OK;
 }
 

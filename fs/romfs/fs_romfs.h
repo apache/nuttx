@@ -26,6 +26,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/list.h>
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -116,6 +117,20 @@
  * Public Types
  ****************************************************************************/
 
+#ifdef CONFIG_FS_ROMFS_WRITEABLE
+/* This structure represents the spare list.  An instance of this
+ * structure is retained as file header and file data size on each mountpoint
+ * that is mounted with a romfs filesystem.
+ */
+
+struct romfs_sparenode_s
+{
+  struct list_node node;
+  uint32_t start;
+  uint32_t end;
+};
+#endif
+
 /* This structure represents the overall mountpoint state.  An instance of
  * this structure is retained as inode private data on each mountpoint that
  * is mounted with a romfs filesystem.
@@ -139,6 +154,9 @@ struct romfs_mountpt_s
   uint32_t rm_cachesector;        /* Current sector in the rm_buffer */
   FAR uint8_t *rm_xipbase;        /* Base address of directly accessible media */
   FAR uint8_t *rm_buffer;         /* Device sector buffer, allocated if rm_xipbase==0 */
+#ifdef CONFIG_FS_ROMFS_WRITEABLE
+  struct list_node rm_sparelist;  /* The list of spare space */
+#endif
 };
 
 /* This structure represents on open file under the mountpoint.  An instance
@@ -194,7 +212,7 @@ int  romfs_hwread(FAR struct romfs_mountpt_s *rm, FAR uint8_t *buffer,
 int  romfs_filecacheread(FAR struct romfs_mountpt_s *rm,
                          FAR struct romfs_file_s *rf, uint32_t sector);
 int  romfs_hwconfigure(FAR struct romfs_mountpt_s *rm);
-int  romfs_fsconfigure(FAR struct romfs_mountpt_s *rm);
+int  romfs_fsconfigure(FAR struct romfs_mountpt_s *rm, FAR const void *data);
 int  romfs_fileconfigure(FAR struct romfs_mountpt_s *rm,
                          FAR struct romfs_file_s *rf);
 int  romfs_checkmount(FAR struct romfs_mountpt_s *rm);
@@ -211,6 +229,9 @@ int  romfs_datastart(FAR struct romfs_mountpt_s *rm,
                      FAR uint32_t *start);
 #ifdef CONFIG_FS_ROMFS_CACHE_NODE
 void romfs_freenode(FAR struct romfs_nodeinfo_s *node);
+#endif
+#ifdef CONFIG_FS_ROMFS_WRITEABLE
+void romfs_free_sparelist(FAR struct list_node *list);
 #endif
 
 #undef EXTERN
