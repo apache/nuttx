@@ -688,16 +688,28 @@ else()
     list(APPEND nuttx_libs_paths $<TARGET_FILE:${lib}>)
   endforeach()
 
-  add_custom_command(
-    OUTPUT nuttx.rel
-    COMMAND
-      ${CMAKE_C_COMPILER} ARGS -r $<$<BOOL:${CONFIG_SIM_M32}>:-m32>
-      $<TARGET_OBJECTS:sim_head> $<$<NOT:$<BOOL:${APPLE}>>:-Wl,--start-group>
-      ${nuttx_libs_paths} ${nuttx_extra_libs}
-      $<$<NOT:$<BOOL:${APPLE}>>:-Wl,--end-group> -o nuttx.rel
-    COMMAND ${CMAKE_OBJCOPY} --redefine-syms=nuttx-names.dat nuttx.rel
-    DEPENDS ${nuttx_libs} ${nuttx_extra_libs} sim_head
-    COMMAND_EXPAND_LISTS)
+  if(APPLE)
+    add_custom_command(
+      OUTPUT nuttx.rel
+      COMMAND
+        ${CMAKE_C_COMPILER} ARGS -r $<$<BOOL:${CONFIG_SIM_M32}>:-m32>
+        $<TARGET_OBJECTS:sim_head> $<$<NOT:$<BOOL:${APPLE}>>:-Wl,--start-group>
+        ${nuttx_libs_paths} ${nuttx_extra_libs}
+        $<$<NOT:$<BOOL:${APPLE}>>:-Wl,--end-group> -o nuttx.rel
+      DEPENDS ${nuttx_libs} ${nuttx_extra_libs} sim_head
+      COMMAND_EXPAND_LISTS)
+  else()
+    add_custom_command(
+      OUTPUT nuttx.rel
+      COMMAND
+        ${CMAKE_C_COMPILER} ARGS -r $<$<BOOL:${CONFIG_SIM_M32}>:-m32>
+        $<TARGET_OBJECTS:sim_head> $<$<NOT:$<BOOL:${APPLE}>>:-Wl,--start-group>
+        ${nuttx_libs_paths} ${nuttx_extra_libs}
+        $<$<NOT:$<BOOL:${APPLE}>>:-Wl,--end-group> -o nuttx.rel
+      COMMAND ${CMAKE_OBJCOPY} --redefine-syms=nuttx-names.dat nuttx.rel
+      DEPENDS ${nuttx_libs} ${nuttx_extra_libs} sim_head
+      COMMAND_EXPAND_LISTS)
+  endif()
   add_custom_target(nuttx-rel DEPENDS nuttx.rel
                                       $<$<NOT:$<BOOL:${APPLE}>>:nuttx.ld>)
 
