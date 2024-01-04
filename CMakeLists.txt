@@ -436,6 +436,7 @@ if(CONFIG_ARCH_SIM)
     TARGET nuttx
     PROPERTY NUTTX_KERNEL_COMPILE_OPTIONS)
   target_compile_options(sim_head PRIVATE ${options})
+  target_compile_options(sim_head PRIVATE -fvisibility=default)
 
   # We need the relocatable object to be first in the list of libraries to be
   # linked against final nuttx binary
