@@ -41,9 +41,9 @@
   .begin schedule
   .align  4
   .literal_position
-  .global strlen
-  .type strlen, @function
-strlen:
+  .global ARCH_LIBCFUN(strlen)
+  .type ARCH_LIBCFUN(strlen), @function
+ARCH_LIBCFUN(strlen):
   ENTRY(16)
   /* a2 = s */
 
@@ -125,6 +125,6 @@ strlen:
 
   .end schedule
 
-  .size strlen, . - strlen
+  .size ARCH_LIBCFUN(strlen), . - ARCH_LIBCFUN(strlen)
 
 #endif

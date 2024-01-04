@@ -94,7 +94,7 @@
 \f:
         .endm
 
-def_fn memcmp p2align=6
+def_fn ARCH_LIBCFUN(memcmp) p2align=6
 	subs	limit, limit, 8
 	b.lo	L(less8)
 
@@ -197,6 +197,6 @@ L(byte_loop):
 	sub	result, data1w, data2w
 	ret
 
-	.size	memcmp, . - memcmp
+	.size	ARCH_LIBCFUN(memcmp), . - ARCH_LIBCFUN(memcmp)
 
 #endif
