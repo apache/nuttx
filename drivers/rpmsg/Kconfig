@@ -72,6 +72,41 @@ config RPMSG_PORT_SPI_RX_THRESHOLD
 
 endif # RPMSG_PORT_SPI
 
+config RPMSG_PORT_UART
+	bool "Rpmsg Uart Port Driver Support"
+	default n
+	select RPMSG_PORT
+	---help---
+		Rpmsg Uart Port driver used for cross chip communication.
+
+if RPMSG_PORT_UART
+
+config RPMSG_PORT_UART_RX_THREAD_PRIORITY
+	int "Rpmsg UART Port RX Thread Priority"
+	default 224
+
+config RPMSG_PORT_UART_RX_THREAD_STACKSIZE
+	int "Rpmsg UART Port RX Stack Size"
+	default DEFAULT_TASK_STACKSIZE
+
+config RPMSG_PORT_UART_TX_THREAD_PRIORITY
+	int "Rpmsg UART Port TX Thread Priority"
+	default 224
+
+config RPMSG_PORT_UART_TX_THREAD_STACKSIZE
+	int "Rpmsg UART Port TX Stack Size"
+	default DEFAULT_TASK_STACKSIZE
+
+config RPMSG_PORT_UART_CRC
+	bool "Rpmsg UART Port CRC Enable"
+	default n
+
+config RPMSG_PORT_UART_DEBUG
+	bool "Rpmsg UART DEBUG Enable"
+	default n
+
+endif # RPMSG_PORT_UART
+
 config RPMSG_VIRTIO
 	bool "rpmsg virtio transport support"
 	default n
