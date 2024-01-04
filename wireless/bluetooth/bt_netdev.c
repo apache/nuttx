@@ -1262,10 +1262,10 @@ int bt_netdev_register(FAR struct bt_driver_s *btdev)
    * supported.
    */
 
-  ret = bt_driver_register(btdev);
+  ret = bt_driver_set(btdev);
   if (ret < 0)
     {
-      nerr("ERROR: bt_driver_register() failed: %d\n", ret);
+      nerr("ERROR: bt_driver_set() failed: %d\n", ret);
       goto errout;
     }
 
@@ -1316,7 +1316,7 @@ int bt_netdev_register(FAR struct bt_driver_s *btdev)
 errout:
 
   btnet_ifdown(netdev);
-  bt_driver_unregister(btdev);
+  bt_driver_unset(btdev);
 
   /* Free memory and return the error */
 
@@ -1367,7 +1367,7 @@ int bt_netdev_unregister(FAR struct bt_driver_s *btdev)
 
   bt_deinitialize();
 
-  bt_driver_unregister(btdev);
+  bt_driver_unset(btdev);
 
   kmm_free(btdev->bt_net);
   btdev->bt_net = NULL;
