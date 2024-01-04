@@ -58,6 +58,7 @@
 
     .syntax unified
     .text
+    .section .text.strcpy
     .align  2
     .global strcpy
     .thumb

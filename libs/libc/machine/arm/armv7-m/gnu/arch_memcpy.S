@@ -94,6 +94,7 @@
 
 	.syntax unified
 	.text
+	.section .text.memcpy
 	.align	2
 	.global	memcpy
 	.thumb
