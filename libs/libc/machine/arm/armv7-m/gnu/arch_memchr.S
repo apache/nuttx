@@ -136,6 +136,7 @@
  */
 
 	.text
+	.section .text.memchr
 	.thumb_func
 	.align 4
 	.p2align 4,,15
