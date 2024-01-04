@@ -405,16 +405,16 @@ static inline int romfs_searchdir(FAR struct romfs_mountpt_s *rm,
 
 #ifdef CONFIG_FS_ROMFS_CACHE_NODE
 static int romfs_cachenode(FAR struct romfs_mountpt_s *rm,
-                           uint32_t offset, uint32_t next,
-                           uint32_t size, FAR const char *name,
+                           uint32_t origoffset, uint32_t offset,
+                           uint32_t next, uint32_t size,
+                           FAR const char *name,
                            FAR struct romfs_nodeinfo_s **pnodeinfo)
 {
   FAR struct romfs_nodeinfo_s **child;
   FAR struct romfs_nodeinfo_s *nodeinfo;
   char childname[NAME_MAX + 1];
-  uint32_t linkoffset;
-  uint32_t info;
   uint8_t num = 0;
+  uint32_t info;
   size_t nsize;
   int ret;
 
@@ -427,71 +427,69 @@ static int romfs_cachenode(FAR struct romfs_mountpt_s *rm,
 
   *pnodeinfo              = nodeinfo;
   nodeinfo->rn_offset     = offset;
+  nodeinfo->rn_origoffset = origoffset;
   nodeinfo->rn_next       = next;
   nodeinfo->rn_namesize   = nsize;
   strlcpy(nodeinfo->rn_name, name, nsize + 1);
-  if (!IS_DIRECTORY(next))
+  if (!IS_DIRECTORY(next) || (strcmp(name, ".") == 0) ||
+      (strcmp(name, "..") == 0))
     {
       nodeinfo->rn_size = size;
       return 0;
     }
 
+  origoffset = offset;
   child = nodeinfo->rn_child;
   do
     {
-      /* Parse the directory entry at this offset (which may be re-directed
-       * to some other entry if HARLINKED).
-       */
+      /* Fetch the directory entry at this offset */
 
-      ret = romfs_parsedirentry(rm, offset, &linkoffset, &next, &info,
+      ret = romfs_parsedirentry(rm, origoffset, &offset, &next, &info,
                                 &size);
       if (ret < 0)
         {
           return ret;
         }
 
-      ret = romfs_parsefilename(rm, offset, childname);
+      ret = romfs_parsefilename(rm, origoffset, childname);
       if (ret < 0)
         {
           return ret;
         }
 
-      if (strcmp(childname, ".") != 0 && strcmp(childname, "..") != 0)
+      if (child == NULL || nodeinfo->rn_count == num - 1)
         {
-          if (child == NULL || nodeinfo->rn_count == num - 1)
+          FAR void *tmp;
+
+          tmp = fs_heap_realloc(nodeinfo->rn_child,
+                (num + NODEINFO_NINCR) * sizeof(*nodeinfo->rn_child));
+          if (tmp == NULL)
             {
-              FAR void *tmp;
-
-              tmp = fs_heap_realloc(nodeinfo->rn_child,
-                    (num + NODEINFO_NINCR) * sizeof(*nodeinfo->rn_child));
-              if (tmp == NULL)
-                {
-                  return -ENOMEM;
-                }
-
-              nodeinfo->rn_child = tmp;
-              memset(nodeinfo->rn_child + num, 0, NODEINFO_NINCR *
-                     sizeof(*nodeinfo->rn_child));
-              num += NODEINFO_NINCR;
+              return -ENOMEM;
             }
 
-          child = &nodeinfo->rn_child[nodeinfo->rn_count++];
-          if (IS_DIRECTORY(next))
-            {
-              linkoffset = info;
-            }
+          nodeinfo->rn_child = tmp;
+          memset(nodeinfo->rn_child + num, 0, NODEINFO_NINCR *
+                  sizeof(*nodeinfo->rn_child));
+          num += NODEINFO_NINCR;
+        }
 
-          ret = romfs_cachenode(rm, linkoffset, next, size,
-                                childname, child);
-          if (ret < 0)
-            {
-              nodeinfo->rn_count--;
-              return ret;
-            }
+      child = &nodeinfo->rn_child[nodeinfo->rn_count++];
+      if (IS_DIRECTORY(next))
+        {
+          offset = info;
+        }
+
+      ret = romfs_cachenode(rm, origoffset, offset, next, size,
+                            childname, child);
+      if (ret < 0)
+        {
+          nodeinfo->rn_count--;
+          return ret;
         }
 
       next &= RFNEXT_OFFSETMASK;
-      offset = next;
+      origoffset = next;
     }
   while (next != 0);
 
@@ -703,6 +701,7 @@ int romfs_fsconfigure(FAR struct romfs_mountpt_s *rm)
 {
   FAR const char *name;
   int16_t         ndx;
+  uint32_t        rootoffset;
 
   /* Then get information about the ROMFS filesystem on the devices managed
    * by this block driver. Read sector zero which contains the volume header.
@@ -728,17 +727,17 @@ int romfs_fsconfigure(FAR struct romfs_mountpt_s *rm)
   /* The root directory entry begins right after the header */
 
   name              = (FAR const char *)&rm->rm_buffer[ROMFS_VHDR_VOLNAME];
+  rootoffset        = ROMFS_ALIGNUP(ROMFS_VHDR_VOLNAME + strlen(name) + 1);
 #ifdef CONFIG_FS_ROMFS_CACHE_NODE
-  ndx               = romfs_cachenode(rm, ROMFS_ALIGNUP(ROMFS_VHDR_VOLNAME +
-                                                        strlen(name) + 1),
-                                      RFNEXT_DIRECTORY, 0, "", &rm->rm_root);
+  ndx               = romfs_cachenode(rm, 0, rootoffset, RFNEXT_DIRECTORY,
+                                      0, "", &rm->rm_root);
   if (ndx < 0)
     {
       romfs_freenode(rm->rm_root);
       return ndx;
     }
 #else
-  rm->rm_rootoffset = ROMFS_ALIGNUP(ROMFS_VHDR_VOLNAME + strlen(name) + 1);
+  rm->rm_rootoffset = rootoffset;
 #endif
 
   /* and return success */
