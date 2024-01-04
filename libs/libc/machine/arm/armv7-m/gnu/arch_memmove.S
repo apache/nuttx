@@ -35,6 +35,8 @@
 
 	.thumb
 	.syntax unified
+	.text
+	.section .text.memmove
 	.global memmove
 	.type	memmove, %function
 memmove:

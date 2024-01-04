@@ -70,6 +70,7 @@
 
 	.macro def_fn f p2align=0
 	.text
+	.section .text.strlen
 	.p2align \p2align
 	.global \f
 	.type \f, %function
