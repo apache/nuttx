@@ -99,4 +99,7 @@ foreach(src ${SRCS})
   list(APPEND TARGET_SRCS ${src})
 endforeach()
 
+# RTTI is required for building the libcxxabi library
+target_compile_options(libcxxabi PRIVATE -frtti)
+
 target_sources(libcxxabi PRIVATE ${TARGET_SRCS})
