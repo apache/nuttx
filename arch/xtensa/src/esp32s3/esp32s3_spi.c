@@ -430,8 +430,8 @@ static struct esp32s3_spi_priv_s esp32s3_spi3_priv =
  *   Set the bits of the SPI register.
  *
  * Input Parameters:
- *   addr   - Address of the register of interest
- *   bits   - Bits to be set
+ *   addr - Address of the register of interest
+ *   bits - Bits to be set
  *
  * Returned Value:
  *   None.
@@ -452,8 +452,8 @@ static inline void esp32s3_spi_set_regbits(uint32_t addr, uint32_t bits)
  *   Clear the bits of the SPI register.
  *
  * Input Parameters:
- *   addr   - Address of the register of interest
- *   bits   - Bits to be cleared
+ *   addr - Address of the register of interest
+ *   bits - Bits to be cleared
  *
  * Returned Value:
  *   None.
@@ -511,8 +511,8 @@ static inline bool esp32s3_spi_iomux(struct esp32s3_spi_priv_s *priv)
  *   Lock or unlock the SPI device.
  *
  * Input Parameters:
- *   dev    - Device-specific state data
- *   lock   - true: Lock SPI bus, false: unlock SPI bus
+ *   dev  - Device-specific state data
+ *   lock - true: Lock SPI bus, false: unlock SPI bus
  *
  * Returned Value:
  *   The result of lock or unlock the SPI device.
@@ -1277,7 +1277,7 @@ static void esp32s3_spi_recvblock(struct spi_dev_s *dev,
  *   Trigger a previously configured DMA transfer.
  *
  * Input Parameters:
- *   dev      - Device-specific state data
+ *   dev - Device-specific state data
  *
  * Returned Value:
  *   OK       - Trigger was fired
@@ -1293,6 +1293,8 @@ static int esp32s3_spi_trigger(struct spi_dev_s *dev)
 }
 #endif
 
+#ifdef CONFIG_ESP32S3_SPI_DMA
+
 /****************************************************************************
  * Name: esp32s3_spi_dma_init
  *
@@ -1300,14 +1302,13 @@ static int esp32s3_spi_trigger(struct spi_dev_s *dev)
  *   Initialize ESP32-S3 SPI connection to GDMA engine.
  *
  * Input Parameters:
- *   dev      - Device-specific state data
+ *   dev - Device-specific state data
  *
  * Returned Value:
  *   None.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32S3_SPI_DMA
 void esp32s3_spi_dma_init(struct spi_dev_s *dev)
 {
   struct esp32s3_spi_priv_s *priv = (struct esp32s3_spi_priv_s *)dev;
@@ -1340,6 +1341,37 @@ void esp32s3_spi_dma_init(struct spi_dev_s *dev)
   putreg32((SPI_SLV_RX_SEG_TRANS_CLR_EN_M | SPI_SLV_TX_SEG_TRANS_CLR_EN_M),
            SPI_DMA_CONF_REG(priv->config->id));
 }
+
+/****************************************************************************
+ * Name: esp32s3_spi_dma_deinit
+ *
+ * Description:
+ *   Deinitialize ESP32-S3 SPI GDMA engine.
+ *
+ * Input Parameters:
+ *   dev - Device-specific state data
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32s3_spi_dma_deinit(struct spi_dev_s *dev)
+{
+  struct esp32s3_spi_priv_s *priv = (struct esp32s3_spi_priv_s *)dev;
+
+  /* Release a DMA channel from peripheral */
+
+  esp32s3_dma_release(priv->dma_channel);
+
+  /* Deinitialize DMA controller */
+
+  esp32s3_dma_deinit();
+
+  /* Disable DMA clock for the SPI peripheral */
+
+  modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, priv->config->dma_clk_bit, 0);
+}
 #endif
 
 /****************************************************************************
@@ -1349,7 +1381,7 @@ void esp32s3_spi_dma_init(struct spi_dev_s *dev)
  *   Initialize ESP32-S3 SPI hardware interface.
  *
  * Input Parameters:
- *   dev      - Device-specific state data
+ *   dev - Device-specific state data
  *
  * Returned Value:
  *   None.
@@ -1442,7 +1474,7 @@ static void esp32s3_spi_init(struct spi_dev_s *dev)
  *   Deinitialize ESP32-S3 SPI hardware interface.
  *
  * Input Parameters:
- *   dev      - Device-specific state data
+ *   dev - Device-specific state data
  *
  * Returned Value:
  *   None.
@@ -1454,7 +1486,7 @@ static void esp32s3_spi_deinit(struct spi_dev_s *dev)
   struct esp32s3_spi_priv_s *priv = (struct esp32s3_spi_priv_s *)dev;
 
 #ifdef CONFIG_ESP32S3_SPI_DMA
-  modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, priv->config->dma_clk_bit, 0);
+  esp32s3_spi_dma_deinit(dev);
 #endif
 
   modifyreg32(SYSTEM_PERIP_RST_EN0_REG, 0, priv->config->clk_bit);
@@ -1504,7 +1536,7 @@ static int esp32s3_spi_interrupt(int irq, void *context, void *arg)
  *   Initialize the selected SPI bus.
  *
  * Input Parameters:
- *   port     - Port number (for hardware that has multiple SPI interfaces)
+ *   port - Port number (for hardware that has multiple SPI interfaces)
  *
  * Returned Value:
  *   Valid SPI device structure reference on success; NULL on failure.
@@ -1603,7 +1635,7 @@ struct spi_dev_s *esp32s3_spibus_initialize(int port)
  *   Uninitialize an SPI bus.
  *
  * Input Parameters:
- *   dev      - Device-specific state data
+ *   dev - Device-specific state data
  *
  * Returned Value:
  *   Zero (OK) is returned on success. Otherwise -1 (ERROR).
