@@ -692,7 +692,7 @@ else()
     add_custom_command(
       OUTPUT nuttx.rel
       COMMAND
-        ${CMAKE_C_COMPILER} ARGS -r $<$<BOOL:${CONFIG_SIM_M32}>:-m32>
+        ${CMAKE_LINKER} ARGS -r $<$<BOOL:${CONFIG_SIM_M32}>:-m32>
         $<TARGET_OBJECTS:sim_head> $<$<NOT:$<BOOL:${APPLE}>>:-Wl,--start-group>
         ${nuttx_libs_paths} ${nuttx_extra_libs}
         $<$<NOT:$<BOOL:${APPLE}>>:-Wl,--end-group> -o nuttx.rel
