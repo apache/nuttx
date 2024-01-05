@@ -125,19 +125,15 @@ void board_late_initialize(void)
 #ifdef CONFIG_BUILD_KERNEL
   /* Create ROM disk for mount in nx_start_application */
 
-  if (NSECTORS(romfs_img_len) > 5)
+  if (NSECTORS(romfs_img_len) > 1)
     {
       int ret = OK;
       ret = romdisk_register(0, romfs_img, NSECTORS(romfs_img_len),
         SECTORSIZE);
       if (ret < 0)
         {
-          serr("ERROR: Failed to register romfs: %d\n", -ret);
+          ferr("ERROR: Failed to register romfs: %d\n", -ret);
         }
-    }
-  else
-    {
-      swarn("ROMFS too small: %d\n", NSECTORS(romfs_img_len));
     }
 #endif /* CONFIG_BUILD_KERNEL */
 

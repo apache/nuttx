@@ -27,7 +27,7 @@ weak_data const unsigned char aligned_data(4) romfs_img[] =
 {
   0x00
 };
-weak_data unsigned int romfs_img_len = 1;
+weak_data const unsigned int romfs_img_len = 1;
 
 /****************************************************************************
  * Private Functions

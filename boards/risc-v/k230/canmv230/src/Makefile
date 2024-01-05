@@ -25,7 +25,17 @@ RCSRCS = etc/init.d/rc.sysinit etc/init.d/rcS
 CSRCS = canmv_init.c 
 
 ifeq ($(CONFIG_BUILD_KERNEL),y)
-CSRCS += $(wildcard romfs_*.c)
+CSRCS += $(if $(wildcard romfs_boot.c), romfs_boot.c, romfs_stub.c)
 endif
 
 include $(TOPDIR)/boards/Board.mk
+
+# don't use single-colon targets as they may coflict with those included ones.
+# use double-colon targets to avoid collisions below.
+
+ifeq ($(CONFIG_BUILD_KERNEL),y)
+.PHONY: clean
+clean::
+	$(call DELFILE, romfs_boot.c)
+endif
+
