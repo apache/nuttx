@@ -48,3 +48,18 @@ CXXELFFLAGS = $(CXXFLAGS)
 LDELFFLAGS = --oformat elf64-littleriscv
 LDELFFLAGS += -r -e main
 LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/binfmt/libelf/gnu-elf.ld)
+
+# POSTBUILD management
+
+ifeq ($(CONFIG_BUILD_KERNEL),y)
+ifeq ($(wildcard $(BOARD_DIR)$(DELIM)src$(DELIM)romfs_boot.c),)
+define POSTBUILD
+  $(Q) echo "Please replace stub ROMFS w/ real one."
+  $(Q) rm $(BOARD_DIR)$(DELIM)src$(DELIM)libboard.a
+endef
+else
+define POSTBUILD
+  $(Q) echo "wrap nuttx.bin w/ SBI to run on target."
+endef
+endif
+endif
