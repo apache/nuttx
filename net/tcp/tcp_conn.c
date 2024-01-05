@@ -1319,7 +1319,7 @@ int tcp_bind(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
 int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
 {
   int port;
-  int ret;
+  int ret = OK;
 
   /* The connection is expected to be in the TCP_ALLOCATED state.. i.e.,
    * allocated via up_tcpalloc(), but not yet put into the active connections
@@ -1468,7 +1468,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
 
 #if defined(CONFIG_NET_ARP_SEND) || defined(CONFIG_NET_ICMPv6_NEIGHBOR)
 #ifdef CONFIG_NET_ARP_SEND
-#ifdef CONFIG_NET_ICMPv6_NEIGHBOR
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
   if (conn->domain == PF_INET)
 #endif
     {
@@ -1479,8 +1479,8 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
 #endif /* CONFIG_NET_ARP_SEND */
 
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
-#ifdef CONFIG_NET_ARP_SEND
-  else
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+  if (conn->domain == PF_INET6)
 #endif
     {
       /* Make sure that the IP address mapping is in the Neighbor Table */
