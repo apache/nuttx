@@ -792,11 +792,6 @@ config NRF53_SDC_DLE
 	bool "Support Data Length Extension (DLE)"
 	default y
 
-config NRF53_BLE_TTY_NAME
-	string "BLE TTY device name"
-	default "/dev/ttyHCI0"
-	depends on UART_BTH4
-
 config NRF53_SDC_FICR_STATIC_ADDR
 	bool "Configure factory generated static random address"
 	default n

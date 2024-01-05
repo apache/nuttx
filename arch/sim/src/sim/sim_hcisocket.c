@@ -40,8 +40,6 @@
 #include <nuttx/net/bluetooth.h>
 #include <nuttx/wireless/bluetooth/bt_driver.h>
 #include <nuttx/wireless/bluetooth/bt_uart.h>
-#include <nuttx/wireless/bluetooth/bt_bridge.h>
-#include <nuttx/serial/uart_bth4.h>
 
 #include "sim_internal.h"
 #include "sim_hosthcisocket.h"
@@ -256,27 +254,6 @@ static void bthcisock_free(struct bthcisock_s *dev)
   kmm_free(dev);
 }
 
-static int bthcisock_driver_register(struct bt_driver_s *drv, int id,
-                                     bool bt)
-{
-#ifdef CONFIG_UART_BTH4
-  char name[32];
-
-  if (bt)
-    {
-      snprintf(name, sizeof(name), "/dev/ttyBT%d", id);
-    }
-  else
-    {
-      snprintf(name, sizeof(name), "/dev/ttyBLE%d", id);
-    }
-
-  return uart_bth4_register(name, drv);
-#else
-  return bt_netdev_register(drv);
-#endif
-}
-
 /****************************************************************************
  * Name: sim_bthcisock_work
  *
@@ -320,10 +297,6 @@ static void sim_bthcisock_work(void *arg)
 int sim_bthcisock_register(int dev_id)
 {
   struct bthcisock_s *dev;
-#if defined(CONFIG_BLUETOOTH_BRIDGE)
-  struct bt_driver_s *btdrv;
-  struct bt_driver_s *bledrv;
-#endif
   int ret;
 
   dev = bthcisock_alloc(dev_id);
@@ -332,35 +305,17 @@ int sim_bthcisock_register(int dev_id)
       return -ENOMEM;
     }
 
-#if defined(CONFIG_BLUETOOTH_BRIDGE)
-  ret = bt_bridge_register(&dev->drv, &btdrv, &bledrv);
+#ifdef CONFIG_DRIVERS_BLUETOOTH
+  ret = bt_driver_register_with_id(&dev->drv, dev_id);
   if (ret < 0)
     {
-      goto end;
-    }
-
-  ret = bthcisock_driver_register(btdrv, dev_id, true);
-  if (ret < 0)
-    {
-      goto end;
-    }
-
-  ret = bthcisock_driver_register(bledrv, dev_id, false);
-  if (ret < 0)
-    {
-      goto end;
-    }
-
-end:
-#else
-  ret = bthcisock_driver_register(&dev->drv, dev_id, true);
-#endif
-
-  if (ret < 0)
-    {
+      wlerr("bt_driver_register error: %d\n", ret);
       bthcisock_free(dev);
       return ret;
     }
+#else
+# error "Please select CONFIG_DRIVERS_BLUETOOTH"
+#endif
 
   return work_queue(HPWORK, &dev->worker, sim_bthcisock_work, dev, 0);
 }

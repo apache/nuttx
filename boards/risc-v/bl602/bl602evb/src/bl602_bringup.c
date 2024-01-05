@@ -59,9 +59,6 @@
 #include <nuttx/wireless/bluetooth/bt_driver.h>
 #include <nuttx/wireless/bluetooth/bt_uart.h>
 #include <nuttx/circbuf.h>
-#if defined(CONFIG_UART_BTH4)
-#include <nuttx/serial/uart_bth4.h>
-#endif
 #endif /* CONFIG_BL602_BLE_CONTROLLER */
 
 #ifdef CONFIG_FS_ROMFS
@@ -320,18 +317,14 @@ int bthci_register(void)
       return -ENOMEM;
     }
 
-  #if defined(CONFIG_UART_BTH4)
-  ret = uart_bth4_register("/dev/ttyHCI0", &hci_dev->drv);
-  #elif defined(CONFIG_NET_BLUETOOTH)
-  ret = bt_netdev_register(&hci_dev->drv);
-  #elif defined(CONFIG_BL602_BLE_CONTROLLER)
-    #error "Must select CONFIG_UART_BTH4 or CONFIG_NET_BLUETOOTH"
-  #endif
+#  ifdef CONFIG_DRIVERS_BLUETOOTH
+  ret = bt_driver_register(&hci_dev->drv);
   if (ret < 0)
     {
-      printf("register faile[%d] errno %d\n", ret, errno);
+      printf("bt_driver_register failed[%d] errno %d\n", ret, errno);
       kmm_free(hci_dev);
     }
+#  endif
 
   return ret;
 }
