@@ -2175,11 +2175,6 @@ config ESP32_BLE_PKTBUF_NUM
 	int "BLE netcard packet buffer number per netcard"
 	default 16
 
-config ESP32_BLE_TTY_NAME
-	string "BLE TTY device name"
-	default "/dev/ttyHCI0"
-	depends on UART_BTH4
-
 config ESP32_BLE_TASK_STACK_SIZE
 	int "Controller task stack size"
 	default 4096

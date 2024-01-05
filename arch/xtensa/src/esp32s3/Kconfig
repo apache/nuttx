@@ -1682,11 +1682,6 @@ endif # ESP32S3_OPENETH
 menu "BLE Configuration"
 	depends on ESP32S3_BLE
 
-config ESP32S3_BLE_TTY_NAME
-	string "BLE TTY device name"
-	default "/dev/ttyHCI0"
-	depends on UART_BTH4
-
 config ESP32S3_BLE_TASK_STACK_SIZE
 	int "Controller task stack size"
 	default 4096
