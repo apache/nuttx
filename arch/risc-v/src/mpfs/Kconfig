@@ -791,6 +791,12 @@ config MPFS_ETHMAC_REGDEBUG
 
 endmenu
 
+config MPFS_MPUCFG
+	bool "Enable MPUCFG driver"
+	default n
+	---help---
+		Enable driver to set MPUCFG entries.
+
 config MPFS_HAVE_CORERMII
 	bool "CoreRMII FPGA IP block configured"
 	default n
