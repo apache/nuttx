@@ -69,7 +69,7 @@ extern "C"
  *   Initialize the selected SPI bus.
  *
  * Input Parameters:
- *   port     - Port number (for hardware that has multiple SPI interfaces)
+ *   port - Port number (for hardware that has multiple SPI interfaces)
  *
  * Returned Value:
  *   Valid SPI device structure reference on success; NULL on failure
@@ -134,7 +134,7 @@ int esp32s3_spi3_cmddata(struct spi_dev_s *dev,
  *   Uninitialize an SPI bus.
  *
  * Input Parameters:
- *   dev      - Device-specific state data
+ *   dev - Device-specific state data
  *
  * Returned Value:
  *   Zero (OK) is returned on success.  Otherwise -1 (ERROR).
