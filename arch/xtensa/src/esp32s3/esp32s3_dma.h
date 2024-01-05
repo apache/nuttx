@@ -146,6 +146,22 @@ int32_t esp32s3_dma_request(enum esp32s3_dma_periph_e periph,
                             bool burst_en);
 
 /****************************************************************************
+ * Name: esp32s3_dma_release
+ *
+ * Description:
+ *   Release DMA channel from peripheral.
+ *
+ * Input Parameters:
+ *   chan - Peripheral for which the DMA channel request was made
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32s3_dma_release(int chan);
+
+/****************************************************************************
  * Name: esp32s3_dma_setup
  *
  * Description:
@@ -271,6 +287,22 @@ void esp32s3_dma_set_ext_memblk(int chan, bool tx,
  ****************************************************************************/
 
 void esp32s3_dma_init(void);
+
+/****************************************************************************
+ * Name: esp32s3_dma_deinit
+ *
+ * Description:
+ *   Deinitialize DMA driver.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32s3_dma_deinit(void);
 
 #ifdef __cplusplus
 }
