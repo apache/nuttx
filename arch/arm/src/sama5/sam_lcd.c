@@ -2282,6 +2282,9 @@ static void sam_lcd_enable(void)
 #ifdef BOARD_LCDC_PIXCLK_INV
   regval |= LCDC_LCDCFG0_CLKPOL;
 #endif
+#ifdef BOARD_LCDC_PWMCLK
+  regval |= LCDC_LCDCFG0_CLKPWMSEL;
+#endif
 #ifdef BOARD_LCDC_MCK_MUL2
   regval |= LCDC_LCDCFG0_CLKSEL;
 #endif
