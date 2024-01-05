@@ -89,6 +89,22 @@ static mutex_t g_protect_lock = NXMUTEX_INITIALIZER;
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: file_lock_get_path
+ ****************************************************************************/
+
+static int file_lock_get_path(FAR struct file *filep, FAR char *path)
+{
+  /* We only apply file lock on mount points (f_inode won't be NULL). */
+
+  if (!INODE_IS_MOUNTPT(filep->f_inode))
+    {
+      return -EBADF;
+    }
+
+  return file_fcntl(filep, F_GETPATH, path);
+}
+
+/****************************************************************************
  * Name: file_lock_normalize
  ****************************************************************************/
 
@@ -534,7 +550,7 @@ int file_getlk(FAR struct file *filep, FAR struct flock *flock)
 
   /* We need to get the unique identifier (Path) via filep */
 
-  ret = file_fcntl(filep, F_GETPATH, path);
+  ret = file_lock_get_path(filep, path);
   if (ret < 0)
     {
       return ret;
@@ -613,7 +629,7 @@ int file_setlk(FAR struct file *filep, FAR struct flock *flock,
 
   /* We need to get the unique identifier (Path) via filep */
 
-  ret = file_fcntl(filep, F_GETPATH, path);
+  ret = file_lock_get_path(filep, path);
   if (ret < 0)
     {
       return ret;
@@ -716,7 +732,7 @@ void file_closelk(FAR struct file *filep)
   bool deleted = false;
   int ret;
 
-  ret = file_fcntl(filep, F_GETPATH, path);
+  ret = file_lock_get_path(filep, path);
   if (ret < 0)
     {
       /* It isn't an error if fs doesn't support F_GETPATH, so we just end
