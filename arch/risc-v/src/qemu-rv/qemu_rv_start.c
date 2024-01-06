@@ -191,10 +191,10 @@ void qemu_rv_start(int mhartid, const char *dtb)
 
   CLEAR_CSR(mstatus, MSTATUS_TVM);
 
-  /* Set mstatus to S-mode and enable SUM */
+  /* Set mstatus to S-mode */
 
-  CLEAR_CSR(mstatus, ~MSTATUS_MPP_MASK);
-  SET_CSR(mstatus, MSTATUS_MPPS | SSTATUS_SUM);
+  CLEAR_CSR(mstatus, MSTATUS_MPP_MASK);
+  SET_CSR(mstatus, MSTATUS_MPPS);
 
   /* Set the trap vector for S-mode */
 
