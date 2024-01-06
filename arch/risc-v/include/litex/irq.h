@@ -46,7 +46,7 @@
 
 /* The last hardware IRQ number */
 
-#define LITEX_LAST_IRQ          (LITEX_IRQ_GPIO_BASE + LITEX_IRQ_GPIO_LENGTH)
+#define LITEX_IRQ_LAST        (LITEX_IRQ_GPIO_BASE + LITEX_IRQ_GPIO_LENGTH)
 
 /* Second level GPIO interrupts.  GPIO interrupts are decoded and dispatched
  * as a second level of decoding:  The first level dispatches to the GPIO
