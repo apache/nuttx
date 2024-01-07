@@ -160,14 +160,12 @@ struct romfs_file_s
 
 struct romfs_nodeinfo_s
 {
-#ifdef CONFIG_FS_ROMFS_CACHE_NODE
-  FAR struct romfs_nodeinfo_s **rn_child;  /* The node array for link to lower level */
-  uint16_t rn_count;                       /* The count of node in rn_child level */
-#endif
   uint32_t rn_offset;                      /* Offset of real file header */
   uint32_t rn_next;                        /* Offset of the next file header+flags */
   uint32_t rn_size;                        /* Size (if file) */
 #ifdef CONFIG_FS_ROMFS_CACHE_NODE
+  FAR struct romfs_nodeinfo_s **rn_child;  /* The node array for link to lower level */
+  uint16_t rn_count;                       /* The count of node in rn_child level */
   uint8_t  rn_namesize;                    /* The length of name of the entry */
   char     rn_name[1];                     /* The name to the entry */
 #endif
