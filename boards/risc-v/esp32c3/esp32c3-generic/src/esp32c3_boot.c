@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/common/espressif/esp_vectors.S
+ * boards/risc-v/esp32c3/esp32c3-generic/src/esp32c3_boot.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,34 +24,66 @@
 
 #include <nuttx/config.h>
 
-#include <arch/irq.h>
-
-#include "chip.h"
+#include "riscv_internal.h"
 
 /****************************************************************************
- * Public Symbols
+ * Pre-processor Definitions
  ****************************************************************************/
-
-  .global  _vector_table
 
 /****************************************************************************
- * Section: .exception_vectors.text
+ * Private Functions
  ****************************************************************************/
-
-  .section .exception_vectors.text
 
 /****************************************************************************
- * Name: _vector_table
+ * Public Functions
  ****************************************************************************/
 
-  .balign   0x100
-  .type     _vector_table, @function
+/****************************************************************************
+ * Name: esp_board_initialize
+ *
+ * Description:
+ *   All Espressif boards must provide the following entry point.
+ *   This entry point is called early in the initialization -- after all
+ *   memory has been configured and mapped but before any devices have been
+ *   initialized.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
 
-_vector_table:
-  .option push
-  .option norvc
+void esp_board_initialize(void)
+{
+}
 
-  .rept (32)
-  j    exception_common
-  .endr
+/****************************************************************************
+ * Name: board_late_initialize
+ *
+ * Description:
+ *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
+ *   initialization call will be performed in the boot-up sequence to a
+ *   function called board_late_initialize().  board_late_initialize() will
+ *   be called immediately after up_initialize() is called and just before
+ *   the initial application is started.  This additional initialization
+ *   phase may be used, for example, to initialize board-specific device
+ *   drivers.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
 
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+void board_late_initialize(void)
+{
+  /* Perform board-specific initialization */
+
+  esp_bringup();
+}
+#endif

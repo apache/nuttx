@@ -487,7 +487,7 @@ config ARCH_BOARD_ESP32S3_MEADOW
 		The ESP32-S3-Meadow is a small-sized board produced by WildernessLabs
 		featuring the ESP32-S3 CPU with 32MiB Octal SPI PSRAM and 64 MiB flash.
 
-config ARCH_BOARD_ESP32C6_GENERIC
+config ARCH_BOARD_ESP32C6_DEVKIT
 	bool "Espressif ESP32-C6 Generic DevKit"
 	depends on ESPRESSIF_ESP32C6
 	select ARCH_HAVE_BUTTONS
@@ -495,7 +495,7 @@ config ARCH_BOARD_ESP32C6_GENERIC
 	---help---
 		The ESP32-C6 DevKit features the ESP32-C6 CPU with a RISC-V core.
 
-config ARCH_BOARD_ESP32H2_GENERIC
+config ARCH_BOARD_ESP32H2_DEVKIT
 	bool "Espressif ESP32-H2 Generic DevKit"
 	depends on ESPRESSIF_ESP32H2
 	select ARCH_HAVE_BUTTONS
@@ -509,15 +509,6 @@ config ARCH_BOARD_ET_STM32_STAMP
 	---help---
 		The ET-STM32 Stamp features the STM32F103RET6 (Cortex M3) microcontroller.
 		For board details, see: https://www.futurlec.com/ET-STM32_Stamp.shtml
-
-config ARCH_BOARD_ESP32C6_DEVKIT
-	bool "Espressif ESP32-C6 DevKit"
-	depends on ARCH_CHIP_ESP32C6MINI1 || ARCH_CHIP_ESP32C6WROOM1
-	---help---
-		The ESP32-C6 DevKit features the ESP32-C6 CPU with a RISC-V core.
-		It comes in two flavors, the ESP32-C6-DevKitM-1 and the ESP32-C6-DevKitC-02.
-		The ESP32-C6-DevKitM-1 version contains the ESP32-C6-MINI-1 module and the
-		ESP32-C6-DevKitC-02 version the ESP32-C6-WROOM-1.
 
 config ARCH_BOARD_EZ80F910200KITG
 	bool "ZiLOG ez80f910200kitg development kit"
@@ -3124,8 +3115,7 @@ config ARCH_BOARD
 	default "esp32s3-lcd-ev"            if ARCH_BOARD_ESP32S3_LCD_EV
 	default "esp32s3-box"               if ARCH_BOARD_ESP32S3_BOX
 	default "esp32c6-devkit"            if ARCH_BOARD_ESP32C6_DEVKIT
-	default "esp32c6-generic"           if ARCH_BOARD_ESP32C6_GENERIC
-	default "esp32h2-generic"           if ARCH_BOARD_ESP32H2_GENERIC
+	default "esp32h2-devkit"           	if ARCH_BOARD_ESP32H2_DEVKIT
 	default "et-stm32-stamp"            if ARCH_BOARD_ET_STM32_STAMP
 	default "tlsr8278adk80d"            if ARCH_BOARD_TLSR8278ADK80D
 	default "ez80f910200kitg"           if ARCH_BOARD_EZ80F910200KITG
@@ -4192,7 +4182,7 @@ if ARCH_BOARD_ESP32C3_DEVKIT_RUST1
 source "boards/risc-v/esp32c3-legacy/esp32c3-devkit-rust-1/Kconfig"
 endif
 if ARCH_BOARD_ESP32C3_GENERIC
-source "boards/risc-v/espressif/esp32c3-generic/Kconfig"
+source "boards/risc-v/esp32c3/esp32c3-generic/Kconfig"
 endif
 if ARCH_BOARD_ESP32S2_KALUGA_1
 source "boards/xtensa/esp32s2/esp32s2-kaluga-1/Kconfig"
@@ -4218,11 +4208,11 @@ endif
 if ARCH_BOARD_ESP32S3_BOX
 source "boards/xtensa/esp32s3/esp32s3-box/Kconfig"
 endif
-if ARCH_BOARD_ESP32C6_GENERIC
-source "boards/risc-v/espressif/esp32c6-generic/Kconfig"
-endif
-if ARCH_BOARD_ESP32H2_GENERIC
-source "boards/risc-v/espressif/esp32h2-generic/Kconfig"
+#if ARCH_BOARD_ESP32C6_DEVKIT
+#source "boards/risc-v/esp32c6/esp32c6-devkit/Kconfig"
+#endif
+if ARCH_BOARD_ESP32H2_DEVKIT
+source "boards/risc-v/esp32h2/esp32h2-devkit/Kconfig"
 endif
 if ARCH_BOARD_SIM
 source "boards/sim/sim/sim/Kconfig"
@@ -4354,8 +4344,14 @@ endif
 if ARCH_CHIP_ESP32C3
 source "boards/risc-v/esp32c3-legacy/common/Kconfig"
 endif
-if ARCH_CHIP_ESPRESSIF
-source "boards/risc-v/espressif/common/Kconfig"
+if ARCH_CHIP_ESP32C3_GENERIC
+source "boards/risc-v/esp32c3/common/Kconfig"
+endif
+if ARCH_CHIP_ESP32C6
+source "boards/risc-v/esp32c6/common/Kconfig"
+endif
+if ARCH_CHIP_ESP32H2
+source "boards/risc-v/esp32h2/common/Kconfig"
 endif
 if ARCH_CHIP_SAMV7
 source "boards/arm/samv7/common/Kconfig"
