@@ -82,7 +82,7 @@ ln -s "${src}" "${dest}" || \
 
 # Verify that the link was created
 
-if [ -e ${dest} ] && [ -h ${desg} ]; then
+if [ -e ${dest} ] && [ -h ${dest} ]; then
   # The file exists and is a symlink (i.e. the symlink isn't broken)
 
   exit 0
