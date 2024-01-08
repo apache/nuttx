@@ -33,12 +33,12 @@
 #include "riscv_internal.h"
 #include "chip.h"
 
-#ifdef CONFIG_BUILD_KERNEL
-#  include "k230_mm_init.h"
+#ifdef CONFIG_BUILD_PROTECTED
+#  include "k230_userspace.h"
 #endif
 
-#ifdef CONFIG_DEVICE_TREE
-#  include <nuttx/fdt.h>
+#ifdef CONFIG_BUILD_KERNEL
+#  include "k230_mm_init.h"
 #endif
 
 /****************************************************************************
@@ -73,6 +73,31 @@ static void k230_clear_bss(void)
     }
 }
 
+#ifndef CONFIG_BUILD_KERNEL
+/****************************************************************************
+ * Name: k230_copy_initialized
+ ****************************************************************************/
+
+static void k230_copy_initialized(void)
+{
+  const uint32_t *src;
+  uint32_t *dest;
+
+  /* Move the initialized data section from his temporary holding spot in
+   * FLASH into the correct place in SRAM.  The correct place in SRAM is
+   * give by _sdata and _edata.  The temporary location is in FLASH at the
+   * end of all of the other read-only data (.text, .rodata) at _eronly.
+   */
+
+  for (src = (const uint32_t *)_eronly,
+       dest = (uint32_t *)_sdata; dest < (uint32_t *)_edata;
+      )
+    {
+      *dest++ = *src++;
+    }
+}
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -98,9 +123,9 @@ void k230_start(int mhartid, const char *dtb)
       k230_clear_bss();
 
 #ifdef CONFIG_BUILD_KERNEL
-      /* Initialize the per CPU areas */
-
       riscv_percpu_add_hart(mhartid);
+#else
+      k230_copy_initialized();
 #endif
     }
 
@@ -117,10 +142,6 @@ void k230_start(int mhartid, const char *dtb)
       goto cpux;
     }
 
-#ifdef CONFIG_DEVICE_TREE
-  fdt_register(dtb);
-#endif
-
   showprogress('A');
 
 #ifdef USE_EARLYSERIALINIT
@@ -131,9 +152,11 @@ void k230_start(int mhartid, const char *dtb)
 
   /* Do board initialization */
 
-#ifdef CONFIG_BUILD_KERNEL
-  /* Setup page tables for kernel and enable MMU */
+#ifdef CONFIG_BUILD_PROTECTED
+  k230_userspace();
+#endif
 
+#ifdef CONFIG_BUILD_KERNEL
   k230_mm_init();
 #endif
 
