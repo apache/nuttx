@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/common/espressif/esp_vectors.S
+ * boards/risc-v/esp32c3/esp32c3-generic/src/esp32c3_reset.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,34 +24,58 @@
 
 #include <nuttx/config.h>
 
-#include <arch/irq.h>
+#include <assert.h>
+#include <debug.h>
+#include <stdlib.h>
 
-#include "chip.h"
+#include <nuttx/arch.h>
+#include <nuttx/board.h>
 
-/****************************************************************************
- * Public Symbols
- ****************************************************************************/
+#include "espressif/esp_systemreset.h"
 
-  .global  _vector_table
-
-/****************************************************************************
- * Section: .exception_vectors.text
- ****************************************************************************/
-
-  .section .exception_vectors.text
+#ifdef CONFIG_BOARDCTL_RESET
 
 /****************************************************************************
- * Name: _vector_table
+ * Public Functions
  ****************************************************************************/
 
-  .balign   0x100
-  .type     _vector_table, @function
+/****************************************************************************
+ * Name: board_reset
+ *
+ * Description:
+ *   Reset board.  Support for this function is required by board-level
+ *   logic if CONFIG_BOARDCTL_RESET is selected.
+ *
+ * Input Parameters:
+ *   status - Status information provided with the reset event.  This
+ *            meaning of this status information is board-specific.  If not
+ *            used by a board, the value zero may be provided in calls to
+ *            board_reset().
+ *
+ * Returned Value:
+ *   If this function returns, then it was not possible to power-off the
+ *   board due to some constraints.  The return value in this case is a
+ *   board-specific reason for the failure to shutdown.
+ *
+ ****************************************************************************/
 
-_vector_table:
-  .option push
-  .option norvc
+int board_reset(int status)
+{
+  syslog(LOG_INFO, "reboot status=%d\n", status);
 
-  .rept (32)
-  j    exception_common
-  .endr
+  switch (status)
+    {
+      case EXIT_SUCCESS:
+        up_shutdown_handler();
+        break;
+      case CONFIG_BOARD_ASSERT_RESET_VALUE:
+      default:
+        break;
+    }
 
+  up_systemreset();
+
+  return 0;
+}
+
+#endif /* CONFIG_BOARDCTL_RESET */

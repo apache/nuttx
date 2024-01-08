@@ -1,0 +1,10 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_ESP32H2
+
+source "arch/risc-v/src/common/espressif/Kconfig"
+
+endif # ARCH_CHIP_ESP32H2

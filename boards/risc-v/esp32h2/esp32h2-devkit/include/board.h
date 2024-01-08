@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/common/espressif/esp_vectors.S
+ * boards/risc-v/esp32h2/esp32h2-devkit/include/board.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,40 +18,23 @@
  *
  ****************************************************************************/
 
-/****************************************************************************
- * Included Files
- ****************************************************************************/
-
-#include <nuttx/config.h>
-
-#include <arch/irq.h>
-
-#include "chip.h"
+#ifndef __BOARDS_RISCV_ESP32H2_ESP32H2_DEVKIT_INCLUDE_BOARD_H
+#define __BOARDS_RISCV_ESP32H2_ESP32H2_DEVKIT_INCLUDE_BOARD_H
 
 /****************************************************************************
- * Public Symbols
+ * Pre-processor Definitions
  ****************************************************************************/
 
-  .global  _vector_table
+/* GPIO pins used by the GPIO Subsystem */
 
-/****************************************************************************
- * Section: .exception_vectors.text
- ****************************************************************************/
+#define BOARD_NGPIOOUT    2 /* Amount of GPIO Output pins */
+#define BOARD_NGPIOINT    1 /* Amount of GPIO Input w/ Interruption pins */
 
-  .section .exception_vectors.text
+/* ESP32H2-Generic GPIOs ****************************************************/
 
-/****************************************************************************
- * Name: _vector_table
- ****************************************************************************/
+/* BOOT Button */
 
-  .balign   0x100
-  .type     _vector_table, @function
+#define BUTTON_BOOT  9
 
-_vector_table:
-  .option push
-  .option norvc
-
-  .rept (32)
-  j    exception_common
-  .endr
+#endif /* __BOARDS_RISCV_ESP32H2_ESP32H2_DEVKIT_INCLUDE_BOARD_H */
 
