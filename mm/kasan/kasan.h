@@ -35,6 +35,7 @@
 #  define kasan_poison(addr, size)
 #  define kasan_unpoison(addr, size)
 #  define kasan_register(addr, size)
+#  define kasan_init_early()
 #endif
 
 /****************************************************************************
@@ -104,6 +105,24 @@ void kasan_unpoison(FAR const void *addr, size_t size);
  ****************************************************************************/
 
 void kasan_register(FAR void *addr, FAR size_t *size);
+
+/****************************************************************************
+ * Name: kasan_init_early
+ *
+ * Description:
+ *   Initialize the kasan early, setup g_region_init variable.
+ *   This used for some platfroms clear bss late, and error use kasan before
+ *   called kasan_register().
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void kasan_init_early(void);
 
 #endif /* CONFIG_MM_KASAN */
 

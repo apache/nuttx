@@ -324,6 +324,11 @@ void kasan_register(FAR void *addr, FAR size_t *size)
   *size -= KASAN_REGION_SIZE(*size);
 }
 
+void kasan_init_early(void)
+{
+  g_region_init = 0;
+}
+
 /* Exported functions called from the compiler generated code */
 
 void __sanitizer_annotate_contiguous_container(FAR const void *beg,
