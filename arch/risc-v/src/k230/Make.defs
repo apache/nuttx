@@ -35,3 +35,7 @@ endif
 ifeq ($(CONFIG_MM_PGALLOC),y)
 CHIP_CSRCS += k230_pgalloc.c
 endif
+
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+CHIP_CSRCS += k230_userspace.c
+endif
