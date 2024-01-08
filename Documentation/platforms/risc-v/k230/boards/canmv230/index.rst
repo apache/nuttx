@@ -36,7 +36,10 @@ Building
 
 To build NuttX for CanMV, :doc:`install the prerequisites </quickstart/install>` and :doc:`clone the git repositories </quickstart/install>` for ``nuttx`` and ``apps``.
 
-Configure and build FLAT mode NuttX:
+FLAT Build
+----------
+
+FLAT build is straightforward:
 
 .. code:: console
 
@@ -44,9 +47,33 @@ Configure and build FLAT mode NuttX:
    $ make distclean && tools/configure.sh canmv230:nsh
    $ make -j4
 
-This should have `nuttx.bin` generated, it can be loaded by U-Boot on the board.
+The generated `nuttx.bin` can then be tried on the target.
 
-The NuttX KERNEL build requires two build passes: first pass to build kernel w/ dummy ROMFS and apps, second pass to build the kernel with real ROMFS image containing apps built in first pass.
+PROTECTED Build
+---------------
+
+PROTECTED build can be done like below:
+
+.. code:: console
+
+   $ cd nuttx
+   $ make distclean && tools/configure.sh canmv230:pnsh
+   $ make -j4
+
+There will be `nuttx.bin` and `nuttx_user.bin` generated. We need pad `nuttx.bin` to so that to fill memory gap till user space flash start then combine it with `nuttx_user.bin` to form the final binary for run on the target. Say the gap between uflash and kflash is 256KB in `scripts/ld-protected.script`, we can pad-combine them like below:
+
+.. code:: console
+
+   $ dd if=/dev/zero of=/tmp/padded bs=1024 count=256
+   $ dd if=nuttx.bin of=/tmp/padded conv=notrunc
+   $ cat /tmp/padded nuttx_user.bin > /tftp-folder/nuttx.bin
+
+The combined `nuttx.bin` in TFTP service folder can then be tried on target.
+
+KERNEL Build
+------------
+
+KERNEL build requires two build passes: first pass to build kernel w/ dummy ROMFS, then we build the apps and update ROMFS, second pass to build the kernel with real ROMFS image containing the apps.
 
 .. code:: console
 
@@ -72,7 +99,8 @@ The built `nuttx.bin` can be then wrapped with K230 OpenSBI like below:
 
 Please use actual paths on your host for `nuttx.bin` and TFTP folder when running above commands.
 
-Booting
+
+Running
 =======
 
 Within U-boot console, load `nuttx.bin` from TFTP service and run it:
@@ -90,4 +118,3 @@ Issues
 ======
 
  - The `ostest` app has non-zero exit code in Kernel build.
-
