@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/common/espressif/esp_vectors.S
+ * boards/risc-v/esp32c6/common/include/esp_board_ledc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,40 +18,57 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARDS_RISCV_ESP32C6_COMMON_INCLUDE_ESP_BOARD_LEDC_H
+#define __BOARDS_RISCV_ESP32C6_COMMON_INCLUDE_ESP_BOARD_LEDC_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <arch/irq.h>
-
-#include "chip.h"
-
 /****************************************************************************
- * Public Symbols
+ * Pre-processor Definitions
  ****************************************************************************/
 
-  .global  _vector_table
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
- * Section: .exception_vectors.text
+ * Public Function Prototypes
  ****************************************************************************/
-
-  .section .exception_vectors.text
 
 /****************************************************************************
- * Name: _vector_table
+ * Name: board_ledc_setup
+ *
+ * Description:
+ *   Initialize LEDC PWM and register the PWM device.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
  ****************************************************************************/
 
-  .balign   0x100
-  .type     _vector_table, @function
+#ifdef CONFIG_ESPRESSIF_LEDC
+int board_ledc_setup(void);
+#endif
 
-_vector_table:
-  .option push
-  .option norvc
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
 
-  .rept (32)
-  j    exception_common
-  .endr
-
+#endif /* __ASSEMBLY__ */
+#endif /* __BOARDS_RISCV_ESP32C6_COMMON_INCLUDE_ESP_BOARD_LEDC_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/common/espressif/esp_vectors.S
+ * arch/risc-v/include/esp32h2/chip.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,40 +18,15 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_RISCV_INCLUDE_ESP32H2_CHIP_H
+#define __ARCH_RISCV_INCLUDE_ESP32H2_CHIP_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <arch/irq.h>
-
-#include "chip.h"
-
 /****************************************************************************
- * Public Symbols
+ * Pre-processor Definitions
  ****************************************************************************/
 
-  .global  _vector_table
-
-/****************************************************************************
- * Section: .exception_vectors.text
- ****************************************************************************/
-
-  .section .exception_vectors.text
-
-/****************************************************************************
- * Name: _vector_table
- ****************************************************************************/
-
-  .balign   0x100
-  .type     _vector_table, @function
-
-_vector_table:
-  .option push
-  .option norvc
-
-  .rept (32)
-  j    exception_common
-  .endr
-
+#endif /* __ARCH_RISCV_INCLUDE_ESP32H2_CHIP_H */

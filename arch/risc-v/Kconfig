@@ -90,10 +90,93 @@ config ARCH_CHIP_ESP32C3
 	---help---
 		Espressif ESP32-C3 (RV32IMC).
 
-config ARCH_CHIP_ESPRESSIF
-	bool "Espressif ESP32 family"
+config ARCH_CHIP_ESP32C3_GENERIC
+	bool "ESP32-C3"
+	select ARCH_RV32
+	select ARCH_RV_ISA_M
+	select ARCH_RV_ISA_C
+	select ARCH_VECNOTIRQ
+	select ARCH_HAVE_BOOTLOADER if !ESPRESSIF_SIMPLE_BOOT
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_RESET
+	select ARCH_HAVE_RNG
+	select ARCH_HAVE_TICKLESS
+	select LIBC_ARCH_ATOMIC
+	select LIBC_ARCH_MEMCPY
+	select LIBC_ARCH_MEMCHR
+	select LIBC_ARCH_MEMCMP
+	select LIBC_ARCH_MEMMOVE
+	select LIBC_ARCH_MEMSET
+	select LIBC_ARCH_STRCHR
+	select LIBC_ARCH_STRCMP
+	select LIBC_ARCH_STRCPY
+	select LIBC_ARCH_STRLCPY
+	select LIBC_ARCH_STRNCPY
+	select LIBC_ARCH_STRLEN
+	select LIBC_ARCH_STRNLEN
+	select ESPRESSIF_SOC_RTC_MEM_SUPPORTED
+	select ARCH_CHIP_ESPRESSIF
 	---help---
-		Family of RISC-V based microcontrollers from Espressif Systems.
+		ESP32-C3 chip with a single RISC-V IMC core, no embedded Flash memory
+
+config ARCH_CHIP_ESP32C6
+	bool "ESP32-C6"
+	select ARCH_RV32
+	select ARCH_RV_ISA_M
+	select ARCH_RV_ISA_A
+	select ARCH_RV_ISA_C
+	select ARCH_VECNOTIRQ
+	select ARCH_HAVE_BOOTLOADER
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_RESET
+	select ARCH_HAVE_RNG
+	select ARCH_HAVE_TICKLESS
+	select LIBC_ARCH_MEMCPY
+	select LIBC_ARCH_MEMCHR
+	select LIBC_ARCH_MEMCMP
+	select LIBC_ARCH_MEMMOVE
+	select LIBC_ARCH_MEMSET
+	select LIBC_ARCH_STRCHR
+	select LIBC_ARCH_STRCMP
+	select LIBC_ARCH_STRCPY
+	select LIBC_ARCH_STRLCPY
+	select LIBC_ARCH_STRNCPY
+	select LIBC_ARCH_STRLEN
+	select LIBC_ARCH_STRNLEN
+	select ESPRESSIF_SOC_RTC_MEM_SUPPORTED
+	select ARCH_CHIP_ESPRESSIF
+	---help---
+		Espressif ESP32-C6 (RV32IMAC).
+
+config ARCH_CHIP_ESP32H2
+	bool "ESP32-H2"
+	select ARCH_RV32
+	select ARCH_RV_ISA_M
+	select ARCH_RV_ISA_C
+	select ARCH_VECNOTIRQ
+	select ARCH_HAVE_BOOTLOADER
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_RESET
+	select ARCH_HAVE_RNG
+	select ARCH_HAVE_TICKLESS
+	select LIBC_ARCH_ATOMIC
+	select LIBC_ARCH_MEMCPY
+	select LIBC_ARCH_MEMCHR
+	select LIBC_ARCH_MEMCMP
+	select LIBC_ARCH_MEMMOVE
+	select LIBC_ARCH_MEMSET
+	select LIBC_ARCH_STRCHR
+	select LIBC_ARCH_STRCMP
+	select LIBC_ARCH_STRCPY
+	select LIBC_ARCH_STRLCPY
+	select LIBC_ARCH_STRNCPY
+	select LIBC_ARCH_STRLEN
+	select LIBC_ARCH_STRNLEN
+	select ESPRESSIF_ESPTOOLPY_NO_STUB
+	select ESPRESSIF_SOC_RTC_MEM_SUPPORTED
+	select ARCH_CHIP_ESPRESSIF
+	---help---
+		Espressif ESP32-H2 (RV32IMC).
 
 config ARCH_CHIP_C906
 	bool "THEAD C906"
@@ -304,20 +387,22 @@ config ARCH_FAMILY
 
 config ARCH_CHIP
 	string
-	default "fe310"				if ARCH_CHIP_FE310
-	default "k210"				if ARCH_CHIP_K210
-	default "litex"				if ARCH_CHIP_LITEX
-	default "bl602"				if ARCH_CHIP_BL602
-	default "esp32c3-legacy"	if ARCH_CHIP_ESP32C3
-	default "espressif"			if ARCH_CHIP_ESPRESSIF
-	default "c906"				if ARCH_CHIP_C906
-	default "mpfs"				if ARCH_CHIP_MPFS
-	default "rv32m1"			if ARCH_CHIP_RV32M1
-	default "qemu-rv"			if ARCH_CHIP_QEMU_RV
-	default "hpm6750"			if ARCH_CHIP_HPM6750
-	default "jh7110"			if ARCH_CHIP_JH7110
-	default "bl808"				if ARCH_CHIP_BL808
-	default "k230"				if ARCH_CHIP_K230
+	default "fe310"					if ARCH_CHIP_FE310
+	default "k210"					if ARCH_CHIP_K210
+	default "litex"					if ARCH_CHIP_LITEX
+	default "bl602"					if ARCH_CHIP_BL602
+	default "esp32c3-legacy"			if ARCH_CHIP_ESP32C3
+	default "esp32c3"				if ARCH_CHIP_ESP32C3_GENERIC
+	default "esp32c6"				if ARCH_CHIP_ESP32C6
+	default "esp32h2"				if ARCH_CHIP_ESP32H2
+	default "c906"					if ARCH_CHIP_C906
+	default "mpfs"					if ARCH_CHIP_MPFS
+	default "rv32m1"				if ARCH_CHIP_RV32M1
+	default "qemu-rv"				if ARCH_CHIP_QEMU_RV
+	default "hpm6750"				if ARCH_CHIP_HPM6750
+	default "jh7110"				if ARCH_CHIP_JH7110
+	default "bl808"					if ARCH_CHIP_BL808
+	default "k230"					if ARCH_CHIP_K230
 
 config ARCH_RISCV_INTXCPT_EXTENSIONS
 	bool "RISC-V Integer Context Extensions"
@@ -460,8 +545,14 @@ endif
 if ARCH_CHIP_ESP32C3
 source "arch/risc-v/src/esp32c3-legacy/Kconfig"
 endif
-if ARCH_CHIP_ESPRESSIF
-source "arch/risc-v/src/espressif/Kconfig"
+if ARCH_CHIP_ESP32C3_GENERIC
+source "arch/risc-v/src/esp32c3/Kconfig"
+endif
+if ARCH_CHIP_ESP32C6
+source "arch/risc-v/src/esp32c6/Kconfig"
+endif
+if ARCH_CHIP_ESP32H2
+source "arch/risc-v/src/esp32h2/Kconfig"
 endif
 if ARCH_CHIP_C906
 source "arch/risc-v/src/c906/Kconfig"
