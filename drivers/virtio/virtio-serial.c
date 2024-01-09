@@ -524,6 +524,52 @@ static void virtio_serial_uninit(FAR struct virtio_serial_priv_s *priv)
 }
 
 /****************************************************************************
+ * Name: virtio_serial_uart_register
+ ****************************************************************************/
+
+static int virtio_serial_uart_register(FAR struct virtio_serial_priv_s *priv)
+{
+  FAR const char *name = CONFIG_DRIVERS_VIRTIO_SERIAL_NAME;
+  bool found = false;
+  int start = 0;
+  int ret;
+  int i;
+  int j;
+
+  for (i = 0, j = 0; name[start] != '\0'; i++)
+    {
+      if (name[i] == ';' || name[i] == '\0')
+        {
+          if (j++ == g_virtio_serial_idx)
+            {
+              found = true;
+              break;
+            }
+
+          start = i + 1;
+        }
+    }
+
+  if (found)
+    {
+      snprintf(priv->name, NAME_MAX, "/dev/%.*s", i - start, &name[start]);
+    }
+  else
+    {
+      snprintf(priv->name, NAME_MAX, "/dev/ttyV%d", g_virtio_serial_idx);
+    }
+
+  ret = uart_register(priv->name, &priv->udev);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  g_virtio_serial_idx++;
+  return ret;
+}
+
+/****************************************************************************
  * Name: virtio_serial_probe
  ****************************************************************************/
 
@@ -550,15 +596,13 @@ static int virtio_serial_probe(FAR struct virtio_device *vdev)
 
   /* Uart driver register */
 
-  snprintf(priv->name, NAME_MAX, "/dev/ttyV%d", g_virtio_serial_idx);
-  ret = uart_register(priv->name, &priv->udev);
+  ret = virtio_serial_uart_register(priv);
   if (ret < 0)
     {
       vrterr("uart_register failed, ret=%d\n", ret);
       goto err_with_init;
     }
 
-  g_virtio_serial_idx++;
   return ret;
 
 err_with_init:
