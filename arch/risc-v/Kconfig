@@ -245,6 +245,7 @@ config ARCH_CHIP_K230
 	select ARCH_HAVE_ADDRENV
 	select ARCH_NEED_ADDRENV_MAPPING
 	select ARCH_HAVE_S_MODE
+	select ARCH_HAVE_ELF_EXECUTABLE
 	select ONESHOT
 	select ALARM_ARCH
 	---help---
