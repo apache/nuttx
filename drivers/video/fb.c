@@ -206,7 +206,10 @@ static int fb_add_paninfo(FAR struct fb_chardev_s *fb,
   /* Write planeinfo information to the queue. */
 
   ret = circbuf_write(panbuf, info, sizeof(union fb_paninfo_u));
-  DEBUGASSERT(ret == sizeof(union fb_paninfo_u));
+  if (ret != sizeof(union fb_paninfo_u))
+    {
+      gwarn("WARNING: circbuf_write(panbuf) failed\n");
+    }
 
   /* Re-enable interrupts */
 
