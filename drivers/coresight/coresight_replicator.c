@@ -25,6 +25,7 @@
 #include <errno.h>
 #include <debug.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/irq.h>
 
 #include <nuttx/coresight/coresight_replicator.h>
 
@@ -274,6 +275,24 @@ replicator_register(FAR const struct coresight_desc_s *desc)
 
 void replicator_unregister(FAR struct coresight_replicator_dev_s *repdev)
 {
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+  if (repdev->csdev.refcnt > 0)
+    {
+      int i;
+
+      for (i = 0; i < repdev->csdev.outport_num; i++)
+        {
+          if (repdev->port_refcnt[i] > 0)
+            {
+              replicator_hw_disable(repdev, i);
+            }
+        }
+    }
+
+  leave_critical_section(flags);
   coresight_unregister(&repdev->csdev);
+
   kmm_free(repdev);
 }

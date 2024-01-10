@@ -25,6 +25,7 @@
 #include <errno.h>
 #include <debug.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/irq.h>
 
 #include <nuttx/coresight/coresight_funnel.h>
 
@@ -223,6 +224,7 @@ funnel_register(FAR const struct coresight_desc_s *desc)
       return NULL;
     }
 
+  fundev->port_num = desc->inport_num;
   csdev = &fundev->csdev;
   csdev->ops = &g_funnel_ops;
   ret = coresight_register(csdev, desc);
@@ -249,6 +251,24 @@ funnel_register(FAR const struct coresight_desc_s *desc)
 
 void funnel_unregister(FAR struct coresight_funnel_dev_s *fundev)
 {
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+  if (fundev->csdev.refcnt > 0)
+    {
+      int i;
+
+      for (i = 0; i < fundev->port_num; i++)
+        {
+          if (fundev->port_refcnt[i] > 0)
+            {
+              funnel_hw_disable(fundev, i);
+            }
+        }
+    }
+
+  leave_critical_section(flags);
   coresight_unregister(&fundev->csdev);
+
   kmm_free(fundev);
 }
