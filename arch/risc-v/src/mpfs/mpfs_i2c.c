@@ -358,10 +358,9 @@ static int mpfs_i2c_init(struct mpfs_i2c_priv_s *priv)
 
       putreg32(priv->ser_address, MPFS_I2C_ADDR);
 
-      /* Enable i2c bus */
+      /* Enable i2c bus, clear all other bits */
 
-      modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_ENS1_MASK,
-                  MPFS_I2C_CTRL_ENS1_MASK);
+      putreg32(MPFS_I2C_CTRL_ENS1_MASK, MPFS_I2C_CTRL);
 
       priv->initialized = true;
     }
@@ -385,8 +384,7 @@ static void mpfs_i2c_deinit(struct mpfs_i2c_priv_s *priv)
   up_disable_irq(priv->plic_irq);
   irq_detach(priv->plic_irq);
 
-  modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_ENS1_MASK,
-              ~MPFS_I2C_CTRL_ENS1_MASK);
+  putreg32(0, MPFS_I2C_CTRL);
 
   priv->initialized = false;
 }
