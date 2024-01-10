@@ -644,6 +644,16 @@ static ssize_t usbdev_fs_read(FAR struct file *filep, FAR char *buffer,
 
           PANIC();
         }
+
+      /* The container buffer length is less than the maximum length.
+       * It is an independent packet of requests and needs to be
+       * returned directly.
+       */
+
+      if (reqlen < fs_ep->ep->maxpacket)
+        {
+          break;
+        }
     }
 
   nxmutex_unlock(&fs_ep->lock);
