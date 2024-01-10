@@ -136,12 +136,20 @@ static int nxtask_restart(pid_t pid)
    */
 
 #ifdef CONFIG_SMP
-  tasklist = TLIST_HEAD(&tcb->cmn, tcb->cmn.cpu);
+  if ((FAR struct tcb_s *)tcb == g_delivertasks[tcb->cmn.cpu])
+    {
+      g_delivertasks[tcb->cmn.cpu] = NULL;
+    }
+  else
+    {
+      tasklist = TLIST_HEAD(&tcb->cmn, tcb->cmn.cpu);
+      dq_rem((FAR dq_entry_t *)tcb, tasklist);
+    }
 #else
   tasklist = TLIST_HEAD(&tcb->cmn);
+  dq_rem((FAR dq_entry_t *)tcb, tasklist);
 #endif
 
-  dq_rem((FAR dq_entry_t *)tcb, tasklist);
   tcb->cmn.task_state = TSTATE_TASK_INVALID;
 
   /* Deallocate anything left in the TCB's signal queues */

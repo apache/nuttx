@@ -227,6 +227,7 @@ int up_cpu_paused_restore(void)
 
 int riscv_pause_handler(int irq, void *c, void *arg)
 {
+  struct tcb_s *tcb;
   int cpu = this_cpu();
 
   nxsched_smp_call_handler(irq, c, arg);
@@ -257,6 +258,40 @@ int riscv_pause_handler(int irq, void *c, void *arg)
 
       leave_critical_section(flags);
     }
+
+  tcb = current_task(cpu);
+  riscv_savecontext(tcb);
+  nxsched_process_delivered(cpu);
+  tcb = current_task(cpu);
+  riscv_restorecontext(tcb);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: up_cpu_pause_async
+ *
+ * Description:
+ *   pause task execution on the CPU
+ *   check whether there are tasks delivered to specified cpu
+ *   and try to run them.
+ *
+ * Input Parameters:
+ *   cpu - The index of the CPU to be paused.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ * Assumptions:
+ *   Called from within a critical section;
+ *
+ ****************************************************************************/
+
+inline_function int up_cpu_pause_async(int cpu)
+{
+  /* Execute Pause IRQ to CPU(cpu) */
+
+  riscv_ipi_send(cpu);
 
   return OK;
 }
