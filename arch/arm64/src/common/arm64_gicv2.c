@@ -1479,14 +1479,13 @@ void arm64_gic_secondary_init(void)
  *   cpuset - The set of CPUs to receive the SGI
  *
  * Returned Value:
- *   OK is always returned at present.
+ *   None
  *
  ****************************************************************************/
 
-int arm64_gic_raise_sgi(unsigned int sgi, uint16_t cpuset)
+void arm64_gic_raise_sgi(unsigned int sgi, uint16_t cpuset)
 {
   arm_cpu_sgi(sgi, cpuset);
-  return 0;
 }
 
 #  ifdef CONFIG_SMP

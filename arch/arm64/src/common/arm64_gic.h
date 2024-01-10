@@ -317,7 +317,7 @@ int arm64_gic_irq_trigger(unsigned int intid, uint32_t flags);
 
 uint64_t * arm64_decodeirq(uint64_t *regs);
 
-int arm64_gic_raise_sgi(unsigned int sgi_id, uint16_t target_list);
+void arm64_gic_raise_sgi(unsigned int sgi_id, uint16_t target_list);
 
 int arm64_gicv_irq_trigger(int irq, bool edge);
 #ifdef CONFIG_ARM64_GICV2M

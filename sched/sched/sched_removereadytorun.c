@@ -324,6 +324,19 @@ bool nxsched_remove_readytorun(FAR struct tcb_s *tcb, bool merge)
   else
     {
       FAR dq_queue_t *tasklist;
+      int i;
+
+      /* if tcb == g_delivertasks[i] we set NULL to g_delivertasks[i] */
+
+      for (i = 0; i < CONFIG_SMP_NCPUS; i++)
+        {
+          if (tcb == g_delivertasks[i])
+            {
+              g_delivertasks[i] = NULL;
+              tcb->task_state = TSTATE_TASK_INVALID;
+              goto finish;
+            }
+        }
 
       tasklist = TLIST_HEAD(tcb, tcb->cpu);
 
@@ -341,6 +354,7 @@ bool nxsched_remove_readytorun(FAR struct tcb_s *tcb, bool merge)
       tcb->task_state = TSTATE_TASK_INVALID;
     }
 
+finish:
   if (list_pendingtasks()->head && merge)
     {
       doswitch |= nxsched_merge_pending();

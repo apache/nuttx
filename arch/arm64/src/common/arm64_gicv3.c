@@ -408,7 +408,7 @@ static int arm64_gic_send_sgi(unsigned int sgi_id, uint64_t target_aff,
   return 0;
 }
 
-int arm64_gic_raise_sgi(unsigned int sgi_id, uint16_t target_list)
+void arm64_gic_raise_sgi(unsigned int sgi_id, uint16_t target_list)
 {
   uint64_t pre_cluster_id = UINT64_MAX;
   uint64_t curr_cluster_id;
@@ -437,8 +437,6 @@ int arm64_gic_raise_sgi(unsigned int sgi_id, uint16_t target_list)
     }
 
   arm64_gic_send_sgi(sgi_id, pre_cluster_id, tlist);
-
-  return 0;
 }
 
 /* Wake up GIC redistributor.

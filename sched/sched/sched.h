@@ -190,6 +190,14 @@ extern dq_queue_t g_readytorun;
 extern dq_queue_t g_assignedtasks[CONFIG_SMP_NCPUS];
 #endif
 
+/* g_delivertasks is used to record the tcb that needs to be passed to
+ * another cpu for scheduling. When it is null, it means that there
+ * is no tcb that needs to be processed. When it is not null,
+ * it indicates that there is a tcb that needs to be processed.
+ */
+
+extern FAR struct tcb_s *g_delivertasks[CONFIG_SMP_NCPUS];
+
 /* g_running_tasks[] holds a references to the running task for each cpu.
  * It is valid only when up_interrupt_context() returns true.
  */
@@ -397,6 +405,7 @@ static inline_function FAR struct tcb_s *this_task(void)
 
 int  nxsched_select_cpu(cpu_set_t affinity);
 int  nxsched_pause_cpu(FAR struct tcb_s *tcb);
+void nxsched_process_delivered(int cpu);
 
 #  define nxsched_islocked_global() (g_cpu_lockset != 0)
 #  define nxsched_islocked_tcb(tcb) nxsched_islocked_global()
