@@ -5125,6 +5125,7 @@ int esp_wifi_sta_essid(struct iwreq *iwr, bool set)
     {
       memset(wifi_cfg.sta.ssid, 0x0, SSID_MAX_LEN);
       memcpy(wifi_cfg.sta.ssid, pdata, len);
+      memset(wifi_cfg.sta.sae_h2e_identifier, 0x0, SAE_H2E_IDENTIFIER_LEN);
       wifi_cfg.sta.sae_pwe_h2e = WPA3_SAE_PWE_BOTH;
 
       if (g_sta_connected)
