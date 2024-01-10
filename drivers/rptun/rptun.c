@@ -35,14 +35,14 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/mutex.h>
-#include <nuttx/semaphore.h>
 #include <nuttx/power/pm.h>
+#include <nuttx/rptun/rptun.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/wqueue.h>
 #include <metal/utilities.h>
 #include <openamp/remoteproc_loader.h>
 #include <openamp/remoteproc_virtio.h>
-
-#include "rptun.h"
+#include <rpmsg/rpmsg_internal.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -167,6 +167,32 @@ static const struct rpmsg_ops_s g_rptun_rpmsg_ops =
  * Private Functions
  ****************************************************************************/
 
+static int rptun_buffer_nused(FAR struct rpmsg_virtio_device *rvdev, bool rx)
+{
+  FAR struct virtqueue *vq = rx ? rvdev->rvq : rvdev->svq;
+  uint16_t nused = vq->vq_ring.avail->idx - vq->vq_ring.used->idx;
+
+  if ((rpmsg_virtio_get_role(rvdev) == RPMSG_HOST) ^ rx)
+    {
+      return nused;
+    }
+  else
+    {
+      return vq->vq_nentries - nused;
+    }
+}
+
+static void rptun_wakeup_tx(FAR struct rptun_priv_s *priv)
+{
+  int semcount;
+
+  nxsem_get_value(&priv->semtx, &semcount);
+  while (semcount++ < 1)
+    {
+      nxsem_post(&priv->semtx);
+    }
+}
+
 #ifdef CONFIG_RPTUN_PM
 static inline void rptun_pm_action(FAR struct rptun_priv_s *priv,
                                    bool stay)
@@ -246,17 +272,6 @@ static void rptun_wakeup_rx(FAR struct rptun_priv_s *priv)
 static bool rptun_is_recursive(FAR struct rptun_priv_s *priv)
 {
   return nxsched_gettid() == priv->tid;
-}
-
-static void rptun_wakeup_tx(FAR struct rptun_priv_s *priv)
-{
-  int semcount;
-
-  nxsem_get_value(&priv->semtx, &semcount);
-  while (semcount++ < 1)
-    {
-      nxsem_post(&priv->semtx);
-    }
 }
 
 static int rptun_callback(FAR void *arg, uint32_t vqid)
@@ -407,6 +422,104 @@ static int rptun_notify_wait(FAR struct remoteproc *rproc, uint32_t id)
   rptun_worker(priv);
 
   return 0;
+}
+
+static void rptun_dump_buffer(FAR struct rpmsg_virtio_device *rvdev,
+                              bool rx)
+{
+  FAR struct virtqueue *vq = rx ? rvdev->rvq : rvdev->svq;
+  FAR void *addr;
+  int desc_idx;
+  int num;
+  int i;
+
+  num = rptun_buffer_nused(rvdev, rx);
+  metal_log(METAL_LOG_EMERGENCY,
+            "    %s buffer, total %d, pending %d\n",
+            rx ? "RX" : "TX", vq->vq_nentries, num);
+
+  for (i = 0; i < num; i++)
+    {
+      if ((rpmsg_virtio_get_role(rvdev) == RPMSG_HOST) ^ rx)
+        {
+          desc_idx = (vq->vq_ring.used->idx + i) & (vq->vq_nentries - 1);
+          desc_idx = vq->vq_ring.avail->ring[desc_idx];
+        }
+      else
+        {
+          desc_idx = (vq->vq_ring.avail->idx + i) & (vq->vq_nentries - 1);
+          desc_idx = vq->vq_ring.used->ring[desc_idx].id;
+        }
+
+      addr = metal_io_phys_to_virt(vq->shm_io,
+                                   vq->vq_ring.desc[desc_idx].addr);
+      if (addr)
+        {
+          FAR struct rpmsg_hdr *hdr = addr;
+          FAR struct rpmsg_endpoint *ept;
+
+          ept = rpmsg_get_ept_from_addr(&rvdev->rdev,
+                                        rx ? hdr->dst : hdr->src);
+          if (ept)
+            {
+              metal_log(METAL_LOG_EMERGENCY,
+                        "      %s buffer %p hold by %s\n",
+                        rx ? "RX" : "TX", hdr, ept->name);
+            }
+        }
+    }
+}
+
+static void rptun_dump(FAR struct rpmsg_virtio_device *rvdev)
+{
+  FAR struct rpmsg_device *rdev = &rvdev->rdev;
+  FAR struct rpmsg_endpoint *ept;
+  FAR struct metal_list *node;
+  bool needlock = true;
+
+  if (!rvdev->vdev)
+    {
+      return;
+    }
+
+  if (up_interrupt_context() || sched_idletask() ||
+      nxmutex_is_hold(&rdev->lock))
+    {
+      needlock = false;
+    }
+
+  if (needlock)
+    {
+      metal_mutex_acquire(&rdev->lock);
+    }
+
+  metal_log(METAL_LOG_EMERGENCY,
+            "Dump rpmsg info between cpu (master: %s)%s <==> %s:\n",
+            rpmsg_virtio_get_role(rvdev) == RPMSG_HOST ? "yes" : "no",
+            CONFIG_RPMSG_LOCAL_CPUNAME, rpmsg_get_cpuname(rdev));
+
+  metal_log(METAL_LOG_EMERGENCY, "rpmsg vq RX:\n");
+  virtqueue_dump(rvdev->rvq);
+  metal_log(METAL_LOG_EMERGENCY, "rpmsg vq TX:\n");
+  virtqueue_dump(rvdev->svq);
+
+  metal_log(METAL_LOG_EMERGENCY, "  rpmsg ept list:\n");
+
+  metal_list_for_each(&rdev->endpoints, node)
+    {
+      ept = metal_container_of(node, struct rpmsg_endpoint, node);
+      metal_log(METAL_LOG_EMERGENCY, "    ept %s\n", ept->name);
+    }
+
+  metal_log(METAL_LOG_EMERGENCY, "  rpmsg buffer list:\n");
+
+  rptun_dump_buffer(rvdev, true);
+  rptun_dump_buffer(rvdev, false);
+
+  if (needlock)
+    {
+      metal_mutex_release(&rdev->lock);
+    }
 }
 
 static int rptun_wait(FAR struct rpmsg_s *rpmsg, FAR sem_t *sem)
@@ -933,21 +1046,6 @@ int rptun_reset(FAR const char *cpuname, int value)
 int rptun_panic(FAR const char *cpuname)
 {
   return rpmsg_ioctl(cpuname, RPMSGIOC_PANIC, 0);
-}
-
-int rptun_buffer_nused(FAR struct rpmsg_virtio_device *rvdev, bool rx)
-{
-  FAR struct virtqueue *vq = rx ? rvdev->rvq : rvdev->svq;
-  uint16_t nused = vq->vq_ring.avail->idx - vq->vq_ring.used->idx;
-
-  if ((rpmsg_virtio_get_role(rvdev) == RPMSG_HOST) ^ rx)
-    {
-      return nused;
-    }
-  else
-    {
-      return vq->vq_nentries - nused;
-    }
 }
 
 void rptun_dump_all(void)
