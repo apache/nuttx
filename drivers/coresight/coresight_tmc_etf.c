@@ -319,6 +319,11 @@ static int tmc_etf_link_enable(FAR struct coresight_dev_s *csdev,
     (FAR struct coresight_tmc_dev_s *)csdev;
   int ret;
 
+  if (csdev->refcnt != 1)
+    {
+      return 0;
+    }
+
   ret = coresight_claim_device(tmcdev->csdev.addr);
   if (ret < 0)
     {
@@ -344,6 +349,11 @@ static void tmc_etf_link_disable(FAR struct coresight_dev_s *csdev,
 {
   FAR struct coresight_tmc_dev_s *tmcdev =
     (FAR struct coresight_tmc_dev_s *)csdev;
+
+  if (csdev->refcnt != 1)
+    {
+      return;
+    }
 
   tmc_etf_hw_disable(tmcdev);
   coresight_disclaim_device(tmcdev->csdev.addr);
@@ -544,6 +554,19 @@ void tmc_etf_unregister(FAR struct coresight_tmc_dev_s * tmcdev)
 
       snprintf(pathname, sizeof(pathname), "/dev/%s", tmcdev->csdev.name);
       unregister_driver(pathname);
+    }
+  else if (tmcdev->csdev.refcnt > 0)
+    {
+      irqstate_t flags;
+
+      /* Link device should disable hw here, and sink device will disable
+       * hw in coresight_core.c
+       */
+
+      flags = enter_critical_section();
+      tmc_etf_hw_disable(tmcdev);
+      coresight_disclaim_device(tmcdev->csdev.addr);
+      leave_critical_section(flags);
     }
 
   coresight_unregister(&tmcdev->csdev);
