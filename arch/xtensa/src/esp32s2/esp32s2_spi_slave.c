@@ -1203,7 +1203,7 @@ static void spislave_initialize(struct spi_slave_ctrlr_s *ctrlr)
   spislave_dma_init(priv);
 #endif
 
-  esp32s2_gpioirqenable(ESP32S2_PIN2IRQ(config->cs_pin), GPIO_INTR_POSEDGE);
+  esp32s2_gpioirqenable(ESP32S2_PIN2IRQ(config->cs_pin), RISING);
 
   /* Force a transaction done interrupt.
    * This interrupt won't fire yet because we initialized the SPI interrupt
