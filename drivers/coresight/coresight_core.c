@@ -791,6 +791,36 @@ void coresight_unregister(FAR struct coresight_dev_s *csdev)
         }
     }
 
+  if (csdev->refcnt > 0)
+    {
+      switch (csdev->type)
+        {
+          case CORESIGHT_DEV_TYPE_SINK:
+            if (csdev->ops->sink_ops->disable != NULL)
+              {
+                csdev->ops->sink_ops->disable(csdev);
+              }
+            break;
+
+          case CORESIGHT_DEV_TYPE_SOURCE:
+            if (csdev->ops->source_ops->disable != NULL)
+              {
+                csdev->ops->source_ops->disable(csdev);
+              }
+            break;
+
+          /* Link devices may have multiple inport or outport, it can
+           * not be distinguished here which one of them has been enabled.
+           * so disable inport/outports in its own unregister function.
+           */
+
+          default:
+            break;
+        }
+
+      coresight_disable_clk(csdev);
+    }
+
   list_delete(&csdev->node);
   leave_critical_section(flags);
 
