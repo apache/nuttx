@@ -721,6 +721,10 @@ static int mpfs_i2c_transfer(struct i2c_master_s *dev,
 {
   struct mpfs_i2c_priv_s *priv = (struct mpfs_i2c_priv_s *)dev;
   int ret = OK;
+#ifdef CONFIG_DEBUG_I2C_ERROR
+  int sval;
+  uint32_t status;
+#endif
 
   i2cinfo("Starting transfer request of %d message(s):\n", count);
 
@@ -734,6 +738,24 @@ static int mpfs_i2c_transfer(struct i2c_master_s *dev,
     {
       return ret;
     }
+
+#ifdef CONFIG_DEBUG_I2C_ERROR
+  /* We should never start at transfer with semaphore already signalled */
+
+  sem_getvalue(&priv->sem_isr, &sval);
+  if (sval != 0)
+    {
+      i2cerr("Already signalled at start? %d\n", sval);
+    }
+
+  /* We should always be idle before transfer */
+
+  status = getreg32(MPFS_I2C_STATUS);
+  if (status != MPFS_I2C_ST_IDLE)
+    {
+      i2cerr("I2C bus not idle before transfer! Status: 0x%x\n", status);
+    }
+#endif
 
   priv->msgv = msgs;
   priv->msgc = count;
@@ -826,6 +848,16 @@ static int mpfs_i2c_transfer(struct i2c_master_s *dev,
 
         i2cinfo("Message %" PRIu8 " transfer complete.\n", priv->msgid);
     }
+
+#ifdef CONFIG_DEBUG_I2C_ERROR
+  /* We should always be idle after the transfers */
+
+  status = getreg32(MPFS_I2C_STATUS);
+  if (status != MPFS_I2C_ST_IDLE)
+    {
+      i2cerr("I2C bus not idle after transfer! Status: 0x%x\n", status);
+    }
+#endif
 
   /* Irq was enabled at mpfs_i2c_sendstart()  */
 
