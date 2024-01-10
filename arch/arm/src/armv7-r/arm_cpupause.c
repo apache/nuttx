@@ -256,6 +256,34 @@ int arm_pause_handler(int irq, void *context, void *arg)
       leave_critical_section(flags);
     }
 
+  nxsched_process_delivered(cpu);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: up_cpu_pause_async
+ *
+ * Description:
+ *   pause task execution on the CPU
+ *   check whether there are tasks delivered to specified cpu
+ *   and try to run them.
+ *
+ * Input Parameters:
+ *   cpu - The index of the CPU to be paused.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ * Assumptions:
+ *   Called from within a critical section;
+ *
+ ****************************************************************************/
+
+inline_function int up_cpu_pause_async(int cpu)
+{
+  arm_cpu_sgi(GIC_SMP_CPUPAUSE, (1 << cpu));
+
   return OK;
 }
 
@@ -303,9 +331,7 @@ int up_cpu_pause(int cpu)
   spin_lock(&g_cpu_wait[cpu]);
   spin_lock(&g_cpu_paused[cpu]);
 
-  /* Execute SGI2 */
-
-  arm_cpu_sgi(GIC_SMP_CPUPAUSE, (1 << cpu));
+  up_cpu_pause_async(cpu);
 
   /* Wait for the other CPU to unlock g_cpu_paused meaning that
    * it is fully paused and ready for up_cpu_resume();
