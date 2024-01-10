@@ -259,6 +259,36 @@ int arm64_pause_handler(int irq, void *context, void *arg)
       leave_critical_section(flags);
     }
 
+  nxsched_process_delivered(cpu);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: up_cpu_pause_async
+ *
+ * Description:
+ *   pause task execution on the CPU
+ *   check whether there are tasks delivered to specified cpu
+ *   and try to run them.
+ *
+ * Input Parameters:
+ *   cpu - The index of the CPU to be paused.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ * Assumptions:
+ *   Called from within a critical section;
+ *
+ ****************************************************************************/
+
+inline_function int up_cpu_pause_async(int cpu)
+{
+  /* Execute SGI2 */
+
+  arm64_gic_raise_sgi(GIC_SMP_CPUPAUSE, (1 << cpu));
+
   return OK;
 }
 
@@ -284,8 +314,6 @@ int arm64_pause_handler(int irq, void *context, void *arg)
 
 int up_cpu_pause(int cpu)
 {
-  int ret;
-
   DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS && cpu != this_cpu());
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
@@ -308,23 +336,13 @@ int up_cpu_pause(int cpu)
   spin_lock(&g_cpu_wait[cpu]);
   spin_lock(&g_cpu_paused[cpu]);
 
-  /* Execute SGI2 */
+  up_cpu_pause_async(cpu);
 
-  ret = arm64_gic_raise_sgi(GIC_SMP_CPUPAUSE, (1 << cpu));
-  if (ret < 0)
-    {
-      /* What happened?  Unlock the g_cpu_wait spinlock */
+  /* Wait for the other CPU to unlock g_cpu_paused meaning that
+   * it is fully paused and ready for up_cpu_resume();
+   */
 
-      spin_unlock(&g_cpu_wait[cpu]);
-    }
-  else
-    {
-      /* Wait for the other CPU to unlock g_cpu_paused meaning that
-       * it is fully paused and ready for up_cpu_resume();
-       */
-
-      spin_lock(&g_cpu_paused[cpu]);
-    }
+  spin_lock(&g_cpu_paused[cpu]);
 
   spin_unlock(&g_cpu_paused[cpu]);
 
@@ -333,7 +351,7 @@ int up_cpu_pause(int cpu)
    * called.  g_cpu_paused will be unlocked in any case.
    */
 
-  return ret;
+  return OK;
 }
 
 /****************************************************************************

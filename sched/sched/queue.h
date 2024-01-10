@@ -63,4 +63,14 @@
     } \
   while (0)
 
+#define dq_insert_mid(pre, mid, next) \
+  do \
+    { \
+      mid->flink = next; \
+      mid->blink = prev; \
+      pre->flink = mid; \
+      next->blink = mid; \
+    } \
+  while (0)
+
 #endif /* __INCLUDE_NUTTX_QUEUE_H_ */
