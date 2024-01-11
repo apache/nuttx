@@ -236,7 +236,7 @@
 "putwc_unlocked","wchar.h","defined(CONFIG_FILE_STREAM)","wint_t","wchar_t","FAR FILE *"
 "putwchar","wchar.h","","wint_t","wchar_t"
 "pwritev","sys/uio.h","","ssize_t","int","FAR const struct iovec *","int","off_t"
-"qsort","stdlib.h","","void","FAR void *","size_t","size_t","int(*)(FAR const void *","FAR const void *)"
+"qsort","stdlib.h","","void","FAR void *","size_t","size_t","int(*)(FAR const void *,FAR const void *)"
 "raise","signal.h","","int","int"
 "rand","stdlib.h","","int"
 "readdir","dirent.h","","FAR struct dirent *","FAR DIR *"
