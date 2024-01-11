@@ -332,6 +332,16 @@ int sam_usbhost_initialize(void)
     }
 #endif
 
+#ifdef CONFIG_USBHOST_HIDMOUSE
+  /* Initialize the HID mouse class */
+
+  ret = usbhost_mouse_init();
+  if (ret != OK)
+    {
+      uerr("ERROR: Failed to register the HID mouse class\n");
+    }
+#endif
+
   /* Then get an instance of the USB host interface. */
 
 #ifdef CONFIG_SAMA5_OHCI
