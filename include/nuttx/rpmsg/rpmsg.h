@@ -37,12 +37,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define RPMSGIOC_START              _RPMSGIOC(1)
-#define RPMSGIOC_STOP               _RPMSGIOC(2)
-#define RPMSGIOC_RESET              _RPMSGIOC(3)
-#define RPMSGIOC_PANIC              _RPMSGIOC(4)
-#define RPMSGIOC_DUMP               _RPMSGIOC(5)
-#define RPMSGIOC_PING               _RPMSGIOC(6)
+#define RPMSGIOC_PANIC              _RPMSGIOC(1)
+#define RPMSGIOC_DUMP               _RPMSGIOC(2)
+#define RPMSGIOC_PING               _RPMSGIOC(3)
+#define RPMSGIOC_START              _RPMSGIOC(4)
+#define RPMSGIOC_STOP               _RPMSGIOC(5)
+#define RPMSGIOC_RESET              _RPMSGIOC(6)
 
 /****************************************************************************
  * Public Types
@@ -74,6 +74,8 @@ struct rpmsg_ops_s
   CODE int (*wait)(FAR struct rpmsg_s *rpmsg, FAR sem_t *sem);
   CODE int (*post)(FAR struct rpmsg_s *rpmsg, FAR sem_t *sem);
   CODE int (*ioctl)(FAR struct rpmsg_s *rpmsg, int cmd, unsigned long arg);
+  CODE void (*panic)(FAR struct rpmsg_s *rpmsg);
+  CODE void (*dump)(FAR struct rpmsg_s *rpmsg);
   CODE FAR const char *(*get_cpuname)(FAR struct rpmsg_s *rpmsg);
   CODE int (*get_tx_buffer_size)(FAR struct rpmsg_s *rpmsg);
   CODE int (*get_rx_buffer_size)(FAR struct rpmsg_s *rpmsg);
@@ -128,6 +130,9 @@ int rpmsg_register(FAR const char *path, FAR struct rpmsg_s *rpmsg,
                    FAR const struct rpmsg_ops_s *ops);
 void rpmsg_unregister(FAR const char *path, FAR struct rpmsg_s *rpmsg);
 int rpmsg_ioctl(FAR const char *cpuname, int cmd, unsigned long arg);
+
+int rpmsg_panic(FAR const char *cpuname);
+void rpmsg_dump_all(void);
 
 #ifdef __cplusplus
 }
