@@ -727,7 +727,7 @@ static int gic_validate_dist_version(void)
   spis  = MIN(GICD_TYPER_SPIS(typer), 1020U) - 32;
   espis = GICD_TYPER_ESPIS(typer);
 
-  sinfo("GICD_TYPER = 0x%x\n", typer);
+  sinfo("GICD_TYPER = 0x%" PRIu32 "\n", typer);
   sinfo("%d SPIs implemented\n", spis);
   sinfo("%d Extended SPIs implemented\n", espis);
 
