@@ -3613,7 +3613,7 @@ static void mpfs_usb_iomux(void)
 
 #ifdef CONFIG_USBDEV_DMA
   /* DMA operations need to open the USB PMP registers for proper
-   * operation. If not configured, apply default settings.
+   * operation.
    */
 
   uint64_t pmpcfg_usb_x;
@@ -3622,28 +3622,24 @@ static void mpfs_usb_iomux(void)
   if ((pmpcfg_usb_x & 0x1ffffff000000000llu) != 0x1f00000000000000llu)
     {
       uerr("Please check the MPFS_PMPCFG_USB_0 register.\n");
-      putreg64(0x1f00000fffffffffllu, MPFS_PMPCFG_USB_0);
     }
 
   pmpcfg_usb_x = getreg64(MPFS_PMPCFG_USB_1);
   if ((pmpcfg_usb_x & 0x1ffffff000000000llu) != 0x1f00000000000000llu)
     {
       uerr("Please check the MPFS_PMPCFG_USB_1 register.\n");
-      putreg64(0x1f00000fffffffffllu, MPFS_PMPCFG_USB_1);
     }
 
   pmpcfg_usb_x = getreg64(MPFS_PMPCFG_USB_2);
   if ((pmpcfg_usb_x & 0x1ffffff000000000llu) != 0x1f00000000000000llu)
     {
       uerr("Please check the MPFS_PMPCFG_USB_2 register.\n");
-      putreg64(0x1f00000fffffffffllu, MPFS_PMPCFG_USB_2);
     }
 
   pmpcfg_usb_x = getreg64(MPFS_PMPCFG_USB_3);
   if ((pmpcfg_usb_x & 0x1ffffff000000000llu) != 0x1f00000000000000llu)
     {
       uerr("Please check the MPFS_PMPCFG_USB_3 register.\n");
-      putreg64(0x1f00000fffffffffllu, MPFS_PMPCFG_USB_3);
     }
 #endif
 }
