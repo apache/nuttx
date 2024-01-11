@@ -61,9 +61,9 @@
 
 /* Encode the MPUCFG register value */
 
-#define MPFS_MPUCFG_ENCODE(mode, napot)                        \
- (((mode << MPFS_MPUCFG_MODE_SHIFT) & MPFS_MPUCFG_MODE_MASK) | \
-  ((napot << MPFS_MPUCFG_PMP_SHIFT) & MPFS_MPUCFG_PMP_MASK))
+#define MPFS_MPUCFG_ENCODE(mode, napot)                          \
+ ((((mode) << MPFS_MPUCFG_MODE_SHIFT) & MPFS_MPUCFG_MODE_MASK) | \
+  (((napot) << MPFS_MPUCFG_PMP_SHIFT) & MPFS_MPUCFG_PMP_MASK))
 
 /* Decode the MPUCFG register value */
 
@@ -91,7 +91,7 @@
  *   size - Size out.
  *
  * Returned Value:
- *   Base address
+ *   Base address.
  *
  ****************************************************************************/
 
@@ -136,7 +136,7 @@ static void napot_decode(uintptr_t val, uintptr_t *base, uintptr_t *size)
  *   size must align with each other.
  *
  * Returned Value:
- *   0 on success; negated error on failure
+ *   0 on success; negated error on failure.
  *
  ****************************************************************************/
 
@@ -184,7 +184,7 @@ int mpfs_mpu_set(uintptr_t reg, uintptr_t perm, uintptr_t base,
 
   /* Calculate mode (RWX), only NAPOT encoding is supported */
 
-  mode = (perm & PMPCFG_RWX_MASK) | PMPCFG_A_NAPOT;
+  mode = (perm & (PMPCFG_RWX_MASK | PMPCFG_L)) | PMPCFG_A_NAPOT;
 
   /* Do the NAPOT encoding */
 
@@ -210,7 +210,7 @@ int mpfs_mpu_set(uintptr_t reg, uintptr_t perm, uintptr_t base,
  *   size - The length of the region.
  *
  * Returned Value:
- *   true if access OK; false if not
+ *   true if access OK; false if not.
  *
  ****************************************************************************/
 
@@ -240,4 +240,44 @@ bool mpfs_mpu_access_ok(uintptr_t reg, uintptr_t perm, uintptr_t base,
   /* Then check if the area fits */
 
   return (base >= reg_base && (base + size) <= (reg_base + reg_size));
+}
+
+/****************************************************************************
+ * Name: mpfs_mpu_lock
+ *
+ * Description:
+ *   Lock an MPUCFG register from further modifications.
+ *
+ * Input Parameters:
+ *   reg  - The MPUCFG register to lock.
+ *
+ * Returned Value:
+ *   0 on success; negated error on failure.
+ *
+ ****************************************************************************/
+
+int mpfs_mpu_lock(uintptr_t reg)
+{
+  uintptr_t mode;
+  uintptr_t napot;
+
+  /* Sanity check the register */
+
+  if (reg < MPFS_MPUCFG_BASE || reg >= MPFS_MPUCFG_END)
+    {
+      return -EINVAL;
+    }
+
+  MPFS_MPUCFG_DECODE(reg, &mode, &napot);
+
+  /* If the entry is already locked, everything is fine */
+
+  if ((mode & PMPCFG_L) == 0)
+    {
+      /* Set the lock bit and write the value back */
+
+      putreg64(MPFS_MPUCFG_ENCODE(mode | PMPCFG_L, napot), reg);
+    }
+
+  return OK;
 }
