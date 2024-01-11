@@ -49,7 +49,7 @@
  *   size must align with each other.
  *
  * Returned Value:
- *   0 on success; negated error on failure
+ *   0 on success; negated error on failure.
  *
  ****************************************************************************/
 
@@ -69,11 +69,27 @@ int mpfs_mpu_set(uintptr_t reg, uintptr_t perm, uintptr_t base,
  *   size - The length of the region.
  *
  * Returned Value:
- *   true if access OK; false if not
+ *   true if access OK; false if not.
  *
  ****************************************************************************/
 
 bool mpfs_mpu_access_ok(uintptr_t reg, uintptr_t perm, uintptr_t base,
                         uintptr_t size);
+
+/****************************************************************************
+ * Name: mpfs_mpu_lock
+ *
+ * Description:
+ *   Lock an MPUCFG register from further modifications.
+ *
+ * Input Parameters:
+ *   reg  - The MPUCFG register to lock.
+ *
+ * Returned Value:
+ *   0 on success; negated error on failure.
+ *
+ ****************************************************************************/
+
+int mpfs_mpu_lock(uintptr_t reg);
 
 #endif /* __ARCH_RISC_V_SRC_MPFS_MPFS_MPU_H */
