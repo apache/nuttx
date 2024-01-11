@@ -132,12 +132,12 @@
 	.type	__start, #function
 
 __start:
-#if defined(CONFIG_SMP) && CONFIG_SMP_NCPUS > 1
 	/* Get cpuindex, cpu0 continue boot, others wait event from cpu0 */
 
 	mrc		CP15_MPIDR(r0)
 	and		r0, r0, #0x3
 	cmp		r0, #0
+#if defined(CONFIG_SMP) && CONFIG_SMP_NCPUS > 1
 	beq		__cpu0_start
 	wfe
 	cmp		r0, #1
@@ -155,8 +155,20 @@ __start:
 	beq		__cpu4_start
 #  endif
 
-__cpu0_start:
+#else
+	beq		__cpu0_start
+
+__cpux_wfi:
+
+  /* Clear all pending data access */
+
+	dsb		sy
+	wfi
+	b		__cpux_wfi
+
 #endif
+
+__cpu0_start:
 
 	/* Make sure that IRQs and FIQs are disabled */
 
