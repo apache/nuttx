@@ -653,6 +653,29 @@ err:
 }
 
 /****************************************************************************
+ * Name: coresight_find_dev
+ ****************************************************************************/
+
+static FAR struct coresight_dev_s *coresight_find_dev(FAR const char *name)
+{
+  FAR struct coresight_dev_s *tempdev;
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+  list_for_every_entry(&g_csdev_list, tempdev, struct coresight_dev_s, node)
+    {
+      if (strcmp(tempdev->name, name) == 0)
+        {
+          leave_critical_section(flags);
+          return tempdev;
+        }
+    }
+
+  leave_critical_section(flags);
+  return NULL;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -677,6 +700,12 @@ int coresight_register(FAR struct coresight_dev_s *csdev,
   FAR struct coresight_dev_s *tempdev;
   irqstate_t flags;
   int i;
+
+  if (coresight_find_dev(desc->name) != NULL)
+    {
+      cserr("device has been registered!\n");
+      return -EEXIST;
+    }
 
   csdev->name = desc->name;
   csdev->addr = desc->addr;
