@@ -55,5 +55,7 @@ else
   LDELFFLAGS = --oformat elf64-littleriscv
 endif
 
-LDELFFLAGS += -r -e main
-LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/binfmt/libelf/gnu-elf.ld)
+ifeq ($(CONFIG_BINFMT_ELF_RELOCATABLE),y)
+LDELFFLAGS += -r
+endif
+
