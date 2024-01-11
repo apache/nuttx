@@ -195,7 +195,7 @@ static bool is_sem_waited(FAR sem_t *sem);
 static int save_scene_param(FAR capture_mng_t *cmng,
                             enum v4l2_scene_mode mode,
                             uint32_t id,
-                            struct v4l2_ext_control *control);
+                            FAR struct v4l2_ext_control *control);
 static int complete_capture(uint8_t err_code, uint32_t datasize,
                             FAR const struct timeval *ts,
                             FAR void *arg);
@@ -1452,7 +1452,7 @@ static int reflect_scene_parameter(FAR capture_mng_t *cmng,
 static int read_scene_param(FAR struct capture_mng_s *cmng,
                             enum v4l2_scene_mode mode,
                             uint32_t id,
-                            struct v4l2_ext_control *control)
+                            FAR struct v4l2_ext_control *control)
 {
   imgsensor_supported_value_t value;
   capture_scene_params_t *sp;
@@ -3609,7 +3609,7 @@ static int capture_mmap(FAR struct file *filep,
 }
 
 static int capture_poll(FAR struct file *filep,
-                        struct pollfd *fds, bool setup)
+                        FAR struct pollfd *fds, bool setup)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR capture_mng_t *cmng = inode->i_private;
