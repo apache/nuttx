@@ -145,8 +145,8 @@ class Nxinfothreads(gdb.Command):
 
         if utils.is_target_smp():
             gdb.write(
-                "%-4s %-4s %-4s %-21s %-80s %-30s\n"
-                % ("Tid", "Pid", "Cpu", "Thread", "Info", "Frame")
+                "%-5s %-4s %-4s %-4s %-21s %-80s %-30s\n"
+                % ("Index", "Tid", "Pid", "Cpu", "Thread", "Info", "Frame")
             )
         else:
             gdb.write("%-5s %-4s %-4s %-21s %-80s %-30s\n" % ("Index", "Tid", "Pid", "Thread", "Info", "Frame"))
