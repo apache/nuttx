@@ -268,11 +268,7 @@ typedef int32_t      suseconds_t;
 
 /* This is the smallest integer type that will hold a bitset of all CPUs */
 
-#if (CONFIG_SMP_NCPUS <= 8)
-typedef volatile uint8_t cpu_set_t;
-#elif (CONFIG_SMP_NCPUS <= 16)
-typedef volatile uint16_t cpu_set_t;
-#elif (CONFIG_SMP_NCPUS <= 32)
+#if (CONFIG_SMP_NCPUS <= 32)
 typedef volatile uint32_t cpu_set_t;
 #else
 #  error SMP: Extensions needed to support this number of CPUs
