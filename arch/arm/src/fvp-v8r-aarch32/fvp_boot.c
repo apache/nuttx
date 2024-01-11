@@ -30,6 +30,8 @@
 
 #include <arch/chip/chip.h>
 
+#include "arm_internal.h"
+
 #include "barriers.h"
 #include "cp15.h"
 #include "arm_gic.h"
