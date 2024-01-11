@@ -37,6 +37,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define _RPTUNIOCVALID(c)           _RPMSGIOCVALID(c)
+#define _RPTUNIOC(nr)               _RPMSGIOC(nr)
+
+#define RPTUNIOC_START              _RPTUNIOC(100)
+#define RPTUNIOC_STOP               _RPTUNIOC(101)
+#define RPTUNIOC_RESET              _RPTUNIOC(102)
+
 #define RPTUN_NOTIFY_ALL            (UINT32_MAX - 0)
 
 /* Access macros ************************************************************/

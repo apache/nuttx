@@ -81,7 +81,7 @@
 #define _FBIOCBASE      (0x2800) /* Frame buffer character driver ioctl commands */
 #define _NXTERMBASE     (0x2900) /* NxTerm character driver ioctl commands */
 #define _RFIOCBASE      (0x2a00) /* RF devices ioctl commands */
-#define _RPMSGBASE      (0x2b00) /* Remote processor tunnel ioctl commands */
+#define _RPMSGBASE      (0x2b00) /* Remote processor message ioctl commands */
 #define _NOTECTLBASE    (0x2c00) /* Note filter control ioctl commands*/
 #define _NOTERAMBASE    (0x2d00) /* Noteram device ioctl commands*/
 #define _RCIOCBASE      (0x2e00) /* Remote Control device ioctl commands */
