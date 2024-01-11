@@ -140,9 +140,6 @@ extern const struct mountpt_operations g_mnemofs_operations;
 
 static const struct fsmap_t g_mdfsmap[] =
 {
-#ifdef CONFIG_FS_ROMFS
-    { "romfs", &g_romfs_operations },
-#endif
 #ifdef CONFIG_FS_SPIFFS
     { "spiffs", &g_spiffs_operations },
 #endif
@@ -334,11 +331,28 @@ int nx_mount(FAR const char *source, FAR const char *target,
 #endif /* MDFS_SUPPORT */
       if (mops == NULL)
         {
-          ferr("ERROR: Failed to find MTD based file system %s\n",
-               filesystemtype);
+#ifdef BDFS_SUPPORT
+          mops = mount_findfs(g_bdfsmap, filesystemtype);
+#endif /* BDFS_SUPPORT */
+          if (mops == NULL)
+            {
+              ferr("ERROR: Failed to find MTD based file system %s\n",
+                   filesystemtype);
 
-          ret = -ENODEV;
-          goto errout_with_inode;
+              ret = -ENODEV;
+              goto errout_with_inode;
+            }
+#ifdef CONFIG_MTD
+          else
+            {
+              inode_release(drvr_inode);
+              ret = mtd_proxy(source, mountflags, &drvr_inode);
+              if (ret < 0)
+                {
+                  goto errout_with_inode;
+                }
+            }
+#endif
         }
     }
   else
