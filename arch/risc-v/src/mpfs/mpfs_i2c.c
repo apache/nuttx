@@ -126,6 +126,8 @@ static const uint32_t mpfs_i2c_freqs_fpga[MPFS_I2C_NUMBER_OF_DIVIDERS] =
   MPFS_FPGA_BCLK / 8
 };
 
+static int mpfs_i2c_irq(int cpuint, void *context, void *arg);
+
 static int mpfs_i2c_transfer(struct i2c_master_s *dev,
                              struct i2c_msg_s *msgs,
                              int count);
@@ -301,8 +303,22 @@ static uint32_t mpfs_i2c_timeout(int msgc, struct i2c_msg_s *msgv);
 
 static int mpfs_i2c_init(struct mpfs_i2c_priv_s *priv)
 {
+  int ret = OK;
+
   if (!priv->initialized)
     {
+      /* Clear any pending serial interrupt flag */
+
+      modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_SI_MASK, 0);
+
+      /* Attach interrupt */
+
+      ret = irq_attach(priv->plic_irq, mpfs_i2c_irq, priv);
+      if (ret != OK)
+        {
+          return ret;
+        }
+
       if (priv->fpga)
         {
           /* FIC3 is used by many, don't reset it here, or many
@@ -838,26 +854,15 @@ static int mpfs_i2c_reset(struct i2c_master_s *dev)
 {
   struct mpfs_i2c_priv_s *priv = (struct mpfs_i2c_priv_s *)dev;
   int ret;
-  irqstate_t flags;
 
-  DEBUGASSERT(priv != NULL);
+  nxmutex_lock(&priv->lock);
 
-  flags = enter_critical_section();
-
-  /* Disabling I2C interrupts.
-   * NOTE: up_enable_irq() will be called at mpfs_i2c_sendstart()
-   */
-
-  up_disable_irq(priv->plic_irq);
-
-  priv->inflight = false;
-  priv->status = MPFS_I2C_SUCCESS;
-  priv->initialized = false;
+  mpfs_i2c_deinit(priv);
 
   ret = mpfs_i2c_init(priv);
   if (ret != OK)
     {
-      leave_critical_section(flags);
+      nxmutex_unlock(&priv->lock);
       return ret;
     }
 
@@ -865,8 +870,10 @@ static int mpfs_i2c_reset(struct i2c_master_s *dev)
   priv->tx_idx  = 0;
   priv->rx_size = 0;
   priv->rx_idx  = 0;
+  priv->inflight = false;
+  priv->status = MPFS_I2C_SUCCESS;
 
-  leave_critical_section(flags);
+  nxmutex_unlock(&priv->lock);
 
   return OK;
 }
@@ -1059,14 +1066,6 @@ struct i2c_master_s *mpfs_i2cbus_initialize(int port)
   priv->status = MPFS_I2C_SUCCESS;
   priv->fpga = true;
 #endif
-
-  ret = irq_attach(priv->plic_irq, mpfs_i2c_irq, priv);
-  if (ret != OK)
-    {
-      priv->refs--;
-      nxmutex_unlock(&priv->lock);
-      return NULL;
-    }
 
   ret = mpfs_i2c_init(priv);
   if (ret != OK)
