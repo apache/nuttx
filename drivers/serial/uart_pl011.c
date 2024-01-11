@@ -1,5 +1,5 @@
 /***************************************************************************
- * drivers/serial/serial_pl011.c
+ * drivers/serial/uart_pl011.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
