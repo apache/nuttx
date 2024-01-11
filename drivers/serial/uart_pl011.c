@@ -209,7 +209,7 @@ struct pl011_regs
 
 struct pl011_config
 {
-  volatile struct pl011_regs *uart;
+  FAR volatile struct pl011_regs *uart;
   uint32_t sys_clk_freq;
 };
 
@@ -228,18 +228,19 @@ struct pl011_uart_port_s
   unsigned int irq_num;
 };
 
-static int pl011_setup(struct uart_dev_s *dev);
-static void pl011_shutdown(struct uart_dev_s *dev);
-static int pl011_attach(struct uart_dev_s *dev);
-static void pl011_detach(struct uart_dev_s *dev);
-static int pl011_ioctl(struct file *filep, int cmd, unsigned long arg);
-static int pl011_receive(struct uart_dev_s *dev, unsigned int *status);
-static void pl011_rxint(struct uart_dev_s *dev, bool enable);
-static bool pl011_rxavailable(struct uart_dev_s *dev);
-static void pl011_send(struct uart_dev_s *dev, int ch);
-static void pl011_txint(struct uart_dev_s *dev, bool enable);
-static bool pl011_txready(struct uart_dev_s *dev);
-static bool pl011_txempty(struct uart_dev_s *dev);
+static int pl011_setup(FAR struct uart_dev_s *dev);
+static void pl011_shutdown(FAR struct uart_dev_s *dev);
+static int pl011_attach(FAR struct uart_dev_s *dev);
+static void pl011_detach(FAR struct uart_dev_s *dev);
+static int pl011_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int pl011_receive(FAR struct uart_dev_s *dev,
+                         FAR unsigned int *status);
+static void pl011_rxint(FAR struct uart_dev_s *dev, bool enable);
+static bool pl011_rxavailable(FAR struct uart_dev_s *dev);
+static void pl011_send(FAR struct uart_dev_s *dev, int ch);
+static void pl011_txint(FAR struct uart_dev_s *dev, bool enable);
+static bool pl011_txready(FAR struct uart_dev_s *dev);
+static bool pl011_txempty(FAR struct uart_dev_s *dev);
 
 /***************************************************************************
  * Private Data
@@ -299,7 +300,7 @@ static struct pl011_uart_port_s g_uart0priv =
 
   .config =
     {
-      .uart         = (volatile struct pl011_regs *)CONFIG_UART0_BASE,
+      .uart         = (FAR volatile struct pl011_regs *)CONFIG_UART0_BASE,
       .sys_clk_freq = 24000000,
     },
 
@@ -342,7 +343,7 @@ static struct pl011_uart_port_s g_uart1priv =
 
   .config =
     {
-      .uart         = (volatile struct pl011_regs *)CONFIG_UART1_BASE,
+      .uart         = (FAR volatile struct pl011_regs *)CONFIG_UART1_BASE,
       .sys_clk_freq = 24000000,
     },
 
@@ -385,7 +386,7 @@ static struct pl011_uart_port_s g_uart2priv =
 
   .config =
     {
-      .uart         = (volatile struct pl011_regs *)CONFIG_UART2_BASE,
+      .uart         = (FAR volatile struct pl011_regs *)CONFIG_UART2_BASE,
       .sys_clk_freq = 24000000,
     },
 
@@ -428,7 +429,7 @@ static struct pl011_uart_port_s g_uart3priv =
 
   .config =
     {
-      .uart         = (volatile struct pl011_regs *)CONFIG_UART3_BASE,
+      .uart         = (FAR volatile struct pl011_regs *)CONFIG_UART3_BASE,
       .sys_clk_freq = 24000000,
     },
 
@@ -487,38 +488,38 @@ static struct uart_dev_s g_uart3port =
  * Private Functions
  ***************************************************************************/
 
-static void pl011_enable(const struct pl011_uart_port_s *sport)
+static void pl011_enable(FAR const struct pl011_uart_port_s *sport)
 {
-  const struct pl011_config *config = &sport->config;
+  FAR const struct pl011_config *config = &sport->config;
 
   config->uart->cr |= PL011_CR_UARTEN;
 }
 
-static void pl011_disable(const struct pl011_uart_port_s *sport)
+static void pl011_disable(FAR const struct pl011_uart_port_s *sport)
 {
-  const struct pl011_config *config = &sport->config;
+  FAR const struct pl011_config *config = &sport->config;
 
   config->uart->cr &= ~PL011_CR_UARTEN;
 }
 
-static void pl011_enable_fifo(const struct pl011_uart_port_s *sport)
+static void pl011_enable_fifo(FAR const struct pl011_uart_port_s *sport)
 {
-  const struct pl011_config *config = &sport->config;
+  FAR const struct pl011_config *config = &sport->config;
 
   config->uart->lcr_h |= PL011_LCRH_FEN;
 }
 
-static void pl011_disable_fifo(const struct pl011_uart_port_s *sport)
+static void pl011_disable_fifo(FAR const struct pl011_uart_port_s *sport)
 {
-  const struct pl011_config *config = &sport->config;
+  FAR const struct pl011_config *config = &sport->config;
 
   config->uart->lcr_h &= ~PL011_LCRH_FEN;
 }
 
-static int pl011_set_baudrate(const struct pl011_uart_port_s *sport,
+static int pl011_set_baudrate(FAR const struct pl011_uart_port_s *sport,
                               uint32_t clk, uint32_t baudrate)
 {
-  const struct pl011_config *config = &sport->config;
+  FAR const struct pl011_config *config = &sport->config;
 
   /* Avoiding float calculations, bauddiv is left shifted by 6 */
 
@@ -549,47 +550,47 @@ static int pl011_set_baudrate(const struct pl011_uart_port_s *sport,
   return 0;
 }
 
-static void pl011_irq_tx_enable(const struct pl011_uart_port_s *sport)
+static void pl011_irq_tx_enable(FAR const struct pl011_uart_port_s *sport)
 {
-  const struct pl011_config *config = &sport->config;
+  FAR const struct pl011_config *config = &sport->config;
 
   config->uart->imsc |= PL011_IMSC_TXIM;
 }
 
-static void pl011_irq_tx_disable(const struct pl011_uart_port_s *sport)
+static void pl011_irq_tx_disable(FAR const struct pl011_uart_port_s *sport)
 {
-  const struct pl011_config *config = &sport->config;
+  FAR const struct pl011_config *config = &sport->config;
 
   config->uart->imsc &= ~PL011_IMSC_TXIM;
 }
 
-static void pl011_irq_rx_enable(const struct pl011_uart_port_s *sport)
+static void pl011_irq_rx_enable(FAR const struct pl011_uart_port_s *sport)
 {
-  const struct pl011_config *config = &sport->config;
+  FAR const struct pl011_config *config = &sport->config;
 
   config->uart->imsc |= PL011_IMSC_RXIM | PL011_IMSC_RTIM;
 }
 
-static void pl011_irq_rx_disable(const struct pl011_uart_port_s *sport)
+static void pl011_irq_rx_disable(FAR const struct pl011_uart_port_s *sport)
 {
-  const struct pl011_config *config = &sport->config;
+  FAR const struct pl011_config *config = &sport->config;
 
   config->uart->imsc &= ~(PL011_IMSC_RXIM | PL011_IMSC_RTIM);
 }
 
-static int pl011_irq_tx_complete(const struct pl011_uart_port_s *sport)
+static int pl011_irq_tx_complete(FAR const struct pl011_uart_port_s *sport)
 {
-  const struct pl011_config *config = &sport->config;
+  FAR const struct pl011_config *config = &sport->config;
 
   /* check for TX FIFO empty */
 
   return config->uart->fr & PL011_FR_TXFE;
 }
 
-static int pl011_irq_rx_ready(const struct pl011_uart_port_s *sport)
+static int pl011_irq_rx_ready(FAR const struct pl011_uart_port_s *sport)
 {
-  const struct pl011_config *config = &sport->config;
-  const struct pl011_data   *data   = &sport->data;
+  FAR const struct pl011_config *config = &sport->config;
+  FAR const struct pl011_data   *data   = &sport->data;
 
   if (!data->sbsa && !(config->uart->cr & PL011_CR_RXE))
     {
@@ -608,11 +609,11 @@ static int pl011_irq_rx_ready(const struct pl011_uart_port_s *sport)
  *
  ***************************************************************************/
 
-static bool pl011_txready(struct uart_dev_s *dev)
+static bool pl011_txready(FAR struct uart_dev_s *dev)
 {
-  struct pl011_uart_port_s  *sport  = dev->priv;
-  const struct pl011_config *config = &sport->config;
-  struct pl011_data         *data   = &sport->data;
+  FAR struct pl011_uart_port_s  *sport  = dev->priv;
+  FAR const struct pl011_config *config = &sport->config;
+  FAR struct pl011_data         *data   = &sport->data;
 
   if (!data->sbsa && !(config->uart->cr & PL011_CR_TXE))
     {
@@ -631,9 +632,9 @@ static bool pl011_txready(struct uart_dev_s *dev)
  *
  ***************************************************************************/
 
-static bool pl011_txempty(struct uart_dev_s *dev)
+static bool pl011_txempty(FAR struct uart_dev_s *dev)
 {
-  struct pl011_uart_port_s *sport = dev->priv;
+  FAR struct pl011_uart_port_s *sport = dev->priv;
 
   return pl011_irq_tx_complete(sport);
 }
@@ -646,10 +647,10 @@ static bool pl011_txempty(struct uart_dev_s *dev)
  *
  ***************************************************************************/
 
-static void pl011_send(struct uart_dev_s *dev, int ch)
+static void pl011_send(FAR struct uart_dev_s *dev, int ch)
 {
-  struct pl011_uart_port_s  *sport  = dev->priv;
-  const struct pl011_config *config = &sport->config;
+  FAR struct pl011_uart_port_s  *sport  = dev->priv;
+  FAR const struct pl011_config *config = &sport->config;
 
   config->uart->dr = ch;
 }
@@ -662,11 +663,11 @@ static void pl011_send(struct uart_dev_s *dev, int ch)
  *
  ***************************************************************************/
 
-static bool pl011_rxavailable(struct uart_dev_s *dev)
+static bool pl011_rxavailable(FAR struct uart_dev_s *dev)
 {
-  struct pl011_uart_port_s  *sport  = dev->priv;
-  const struct pl011_config *config = &sport->config;
-  struct pl011_data         *data   = &sport->data;
+  FAR struct pl011_uart_port_s  *sport  = dev->priv;
+  FAR const struct pl011_config *config = &sport->config;
+  FAR struct pl011_data         *data   = &sport->data;
 
   if (!data->sbsa &&
       (!(config->uart->cr & PL011_CR_UARTEN) ||
@@ -686,9 +687,9 @@ static bool pl011_rxavailable(struct uart_dev_s *dev)
  *
  ***************************************************************************/
 
-static void pl011_rxint(struct uart_dev_s *dev, bool enable)
+static void pl011_rxint(FAR struct uart_dev_s *dev, bool enable)
 {
-  struct pl011_uart_port_s *sport = dev->priv;
+  FAR struct pl011_uart_port_s *sport = dev->priv;
 
   if (enable)
     {
@@ -708,9 +709,9 @@ static void pl011_rxint(struct uart_dev_s *dev, bool enable)
  *
  ***************************************************************************/
 
-static void pl011_txint(struct uart_dev_s *dev, bool enable)
+static void pl011_txint(FAR struct uart_dev_s *dev, bool enable)
 {
-  struct pl011_uart_port_s *sport = dev->priv;
+  FAR struct pl011_uart_port_s *sport = dev->priv;
   irqstate_t flags;
 
   flags = enter_critical_section();
@@ -743,10 +744,11 @@ static void pl011_txint(struct uart_dev_s *dev, bool enable)
  *
  ***************************************************************************/
 
-static int pl011_receive(struct uart_dev_s *dev, unsigned int *status)
+static int pl011_receive(FAR struct uart_dev_s *dev,
+                         FAR unsigned int *status)
 {
-  struct pl011_uart_port_s  *sport  = dev->priv;
-  const struct pl011_config *config = &sport->config;
+  FAR struct pl011_uart_port_s  *sport  = dev->priv;
+  FAR const struct pl011_config *config = &sport->config;
   unsigned int              rx;
 
   rx = config->uart->dr;
@@ -765,7 +767,7 @@ static int pl011_receive(struct uart_dev_s *dev, unsigned int *status)
  *
  ***************************************************************************/
 
-static int pl011_ioctl(struct file *filep, int cmd, unsigned long arg)
+static int pl011_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   int ret = OK;
   UNUSED(filep);
@@ -795,10 +797,10 @@ static int pl011_ioctl(struct file *filep, int cmd, unsigned long arg)
  *
  ***************************************************************************/
 
-static int pl011_irq_handler(int irq, void *context, void *arg)
+static int pl011_irq_handler(int irq, FAR void *context, FAR void *arg)
 {
-  struct uart_dev_s         *dev = arg;
-  struct pl011_uart_port_s  *sport;
+  FAR struct uart_dev_s        *dev = arg;
+  FAR struct pl011_uart_port_s *sport;
   UNUSED(irq);
   UNUSED(context);
 
@@ -828,9 +830,9 @@ static int pl011_irq_handler(int irq, void *context, void *arg)
  *
  ***************************************************************************/
 
-static void pl011_detach(struct uart_dev_s *dev)
+static void pl011_detach(FAR struct uart_dev_s *dev)
 {
-  struct pl011_uart_port_s *sport = dev->priv;
+  FAR struct pl011_uart_port_s *sport = dev->priv;
 
   up_disable_irq(sport->irq_num);
   irq_detach(sport->irq_num);
@@ -853,10 +855,10 @@ static void pl011_detach(struct uart_dev_s *dev)
  *
  ***************************************************************************/
 
-static int pl011_attach(struct uart_dev_s *dev)
+static int pl011_attach(FAR struct uart_dev_s *dev)
 {
-  struct pl011_uart_port_s  *sport;
-  struct pl011_data         *data;
+  FAR struct pl011_uart_port_s  *sport;
+  FAR struct pl011_data         *data;
   int                       ret;
 
   sport = dev->priv;
@@ -890,20 +892,20 @@ static int pl011_attach(struct uart_dev_s *dev)
  *
  ***************************************************************************/
 
-static void pl011_shutdown(struct uart_dev_s *dev)
+static void pl011_shutdown(FAR struct uart_dev_s *dev)
 {
   UNUSED(dev);
   sinfo("%s: call unexpected\n", __func__);
 }
 
-static int pl011_setup(struct uart_dev_s *dev)
+static int pl011_setup(FAR struct uart_dev_s *dev)
 {
-  struct pl011_uart_port_s  *sport  = dev->priv;
-  const struct pl011_config *config = &sport->config;
-  struct pl011_data         *data   = &sport->data;
-  int                       ret;
-  uint32_t                  lcrh;
-  irqstate_t                i_flags;
+  FAR struct pl011_uart_port_s  *sport  = dev->priv;
+  FAR const struct pl011_config *config = &sport->config;
+  FAR struct pl011_data         *data   = &sport->data;
+  int                            ret;
+  uint32_t                       lcrh;
+  irqstate_t                     i_flags;
 
   i_flags = up_irq_save();
 
@@ -1020,7 +1022,7 @@ void pl011_serialinit(void)
 #ifdef HAVE_PL011_CONSOLE
 int up_putc(int ch)
 {
-  struct uart_dev_s *dev = &CONSOLE_DEV;
+  FAR struct uart_dev_s *dev = &CONSOLE_DEV;
 
   /* Check for LF */
 
