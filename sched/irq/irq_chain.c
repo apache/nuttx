@@ -218,7 +218,7 @@ int irqchain_detach(int irq, xcpt_t isr, FAR void *arg)
       ndx = irq;
 #endif
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(NULL);
 
       if (g_irqvector[ndx].handler == irqchain_dispatch)
         {
@@ -264,7 +264,7 @@ int irqchain_detach(int irq, xcpt_t isr, FAR void *arg)
           ret = irq_detach(irq);
         }
 
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(NULL, flags);
     }
 
   return ret;
