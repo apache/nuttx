@@ -37,7 +37,8 @@
 #include "arm_gic.h"
 #include "chip.h"
 #include "fvp_boot.h"
-#include "serial_pl011.h"
+
+#include <nuttx/serial/uart_pl011.h>
 
 /****************************************************************************
  * Private Data
