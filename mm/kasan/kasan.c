@@ -104,16 +104,10 @@ extern const unsigned char g_globals_region[];
  * Private Functions
  ****************************************************************************/
 
-static FAR uintptr_t *kasan_mem_to_shadow(FAR const void *ptr, size_t size,
-                                          unsigned int *bit)
+static inline FAR uintptr_t *kasan_find_mem(uintptr_t addr, size_t size,
+                                            unsigned int *bit)
 {
   FAR struct kasan_region_s *region;
-  uintptr_t addr = (uintptr_t)ptr;
-
-  if (g_region_init != KASAN_INIT_VALUE)
-    {
-      return NULL;
-    }
 
   for (region = g_region; region != NULL; region = region->next)
     {
@@ -144,6 +138,41 @@ static FAR uintptr_t *kasan_mem_to_shadow(FAR const void *ptr, size_t size,
 #endif
 
   return NULL;
+}
+
+static FAR uintptr_t *kasan_mem_to_shadow(FAR const void *ptr, size_t size,
+                                          unsigned int *bit)
+{
+  uintptr_t addr = (uintptr_t)ptr;
+  FAR uintptr_t *ret;
+  size_t mul;
+  size_t mod;
+  size_t i;
+
+  if (g_region_init != KASAN_INIT_VALUE)
+    {
+      return NULL;
+    }
+
+  if (size > KASAN_SHADOW_SCALE)
+    {
+      mul = size / KASAN_SHADOW_SCALE;
+      for (i = 0; i < mul; i++)
+        {
+          ret = kasan_find_mem(addr + i * KASAN_SHADOW_SCALE,
+                               KASAN_SHADOW_SCALE, bit);
+          if (ret)
+            {
+              return ret;
+            }
+        }
+
+      mod = size % KASAN_SHADOW_SCALE;
+      addr += mul * KASAN_SHADOW_SCALE;
+      size = mod;
+    }
+
+  return kasan_find_mem(addr, size, bit);
 }
 
 static void kasan_show_memory(FAR const uint8_t *addr, size_t size,
