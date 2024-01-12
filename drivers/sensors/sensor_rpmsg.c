@@ -1303,7 +1303,11 @@ static void sensor_rpmsg_ns_unbind_cb(FAR struct rpmsg_endpoint *ept)
   nxrmutex_unlock(&g_dev_lock);
 
   nxrmutex_lock(&g_ept_lock);
-  list_delete(&sre->node);
+  if (list_in_list(&sre->node))
+    {
+      list_delete(&sre->node);
+    }
+
   nxrmutex_unlock(&g_ept_lock);
 
   nxrmutex_destroy(&sre->lock);
