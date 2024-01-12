@@ -37,7 +37,6 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/ioctl.h>
-#include <nuttx/mtd/mtd.h>
 
 #include "fs_romfs.h"
 
@@ -538,16 +537,8 @@ int romfs_hwread(FAR struct romfs_mountpt_s *rm, FAR uint8_t *buffer,
       FAR struct inode *inode = rm->rm_blkdriver;
       ssize_t nsectorsread = -ENODEV;
 
-      if (INODE_IS_MTD(inode))
-        {
-          nsectorsread =
-            MTD_BREAD(inode->u.i_mtd, sector, nsectors, buffer);
-        }
-      else if (inode->u.i_bops->read)
-        {
-          nsectorsread =
-            inode->u.i_bops->read(inode, buffer, sector, nsectors);
-        }
+      nsectorsread =
+        inode->u.i_bops->read(inode, buffer, sector, nsectors);
 
       if (nsectorsread == (ssize_t)nsectors)
         {
@@ -639,6 +630,7 @@ int romfs_filecacheread(FAR struct romfs_mountpt_s *rm,
 int romfs_hwconfigure(FAR struct romfs_mountpt_s *rm)
 {
   FAR struct inode *inode = rm->rm_blkdriver;
+  struct geometry geo;
   int ret;
 
   /* Get the underlying device geometry */
@@ -650,72 +642,40 @@ int romfs_hwconfigure(FAR struct romfs_mountpt_s *rm)
     }
 #endif
 
-  if (INODE_IS_MTD(inode))
+  ret = inode->u.i_bops->geometry(inode, &geo);
+  if (ret != OK)
     {
-      struct mtd_geometry_s mgeo;
-
-      ret = MTD_IOCTL(inode->u.i_mtd, MTDIOC_GEOMETRY,
-                      (unsigned long)&mgeo);
-      if (ret != OK)
-        {
-          return ret;
-        }
-
-      /* Save that information in the mount structure */
-
-      rm->rm_hwsectorsize = mgeo.blocksize;
-      rm->rm_hwnsectors   = mgeo.neraseblocks *
-                            (mgeo.erasesize / mgeo.blocksize);
+      return ret;
     }
-  else
+
+  if (!geo.geo_available)
     {
-      struct geometry geo;
-
-      ret = inode->u.i_bops->geometry(inode, &geo);
-      if (ret != OK)
-        {
-          return ret;
-        }
-
-      if (!geo.geo_available)
-        {
-          return -EBUSY;
-        }
-
-      /* Save that information in the mount structure */
-
-      rm->rm_hwsectorsize = geo.geo_sectorsize;
-      rm->rm_hwnsectors   = geo.geo_nsectors;
+      return -EBUSY;
     }
+
+  /* Save that information in the mount structure */
+
+  rm->rm_hwsectorsize = geo.geo_sectorsize;
+  rm->rm_hwnsectors   = geo.geo_nsectors;
 
   /* Determine if block driver supports the XIP mode of operation */
 
   rm->rm_cachesector = (uint32_t)-1;
 
-  if (INODE_IS_MTD(inode))
-    {
-      ret = MTD_IOCTL(inode->u.i_mtd, BIOC_XIPBASE,
-                      (unsigned long)&rm->rm_xipbase);
-    }
-  else if (inode->u.i_bops->ioctl != NULL)
+  if (inode->u.i_bops->ioctl)
     {
       ret = inode->u.i_bops->ioctl(inode, BIOC_XIPBASE,
                                    (unsigned long)&rm->rm_xipbase);
-    }
-  else
-    {
-      ret = -ENOTSUP;
-    }
+      if (ret == OK && rm->rm_xipbase)
+        {
+          /* Yes.. Then we will directly access the media (vs.
+           * copying into an allocated sector buffer.
+           */
 
-  if (ret == OK && rm->rm_xipbase)
-    {
-      /* Yes.. Then we will directly access the media (vs.
-       * copying into an allocated sector buffer.
-       */
-
-      rm->rm_buffer      = rm->rm_xipbase;
-      rm->rm_cachesector = 0;
-      return OK;
+          rm->rm_buffer      = rm->rm_xipbase;
+          rm->rm_cachesector = 0;
+          return OK;
+        }
     }
 
   /* Allocate the device cache buffer for normal sector accesses */
@@ -868,13 +828,7 @@ int romfs_checkmount(FAR struct romfs_mountpt_s *rm)
        */
 
       inode = rm->rm_blkdriver;
-      if (INODE_IS_MTD(inode))
-        {
-          /* It is impossible to remove MTD device */
-
-          return OK;
-        }
-      else if (inode->u.i_bops->geometry)
+      if (inode->u.i_bops->geometry)
         {
           ret = inode->u.i_bops->geometry(inode, &geo);
           if (ret == OK && geo.geo_available && !geo.geo_mediachanged)
