@@ -312,6 +312,8 @@ enum cdcacm_event_e
 
 typedef CODE void (*cdcacm_callback_t)(enum cdcacm_event_e event);
 
+struct usbdevclass_driver_s;
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -336,7 +338,6 @@ typedef CODE void (*cdcacm_callback_t)(enum cdcacm_event_e event);
 
 #if defined(CONFIG_USBDEV_COMPOSITE) && defined(CONFIG_CDCACM_COMPOSITE)
 struct usbdev_devinfo_s;
-struct usbdevclass_driver_s;
 int cdcacm_classobject(int minor, FAR struct usbdev_devinfo_s *devinfo,
                        FAR struct usbdevclass_driver_s **classdev);
 #endif

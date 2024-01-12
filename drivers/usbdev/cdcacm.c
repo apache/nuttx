@@ -3071,6 +3071,10 @@ void cdcacm_uninitialize(FAR struct usbdevclass_driver_s *classdev)
   char devname[CDCACM_DEVNAME_SIZE];
   int ret;
 
+#ifndef CONFIG_CDCACM_COMPOSITE
+  usbdev_unregister(&drvr->drvr);
+#endif
+
   /* Un-register the CDC/ACM TTY device */
 
   snprintf(devname, CDCACM_DEVNAME_SIZE, CDCACM_DEVNAME_FORMAT, priv->minor);
@@ -3079,18 +3083,6 @@ void cdcacm_uninitialize(FAR struct usbdevclass_driver_s *classdev)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_UARTUNREGISTER),
                (uint16_t)-ret);
-    }
-
-#ifndef CONFIG_CDCACM_COMPOSITE
-  usbdev_unregister(&drvr->drvr);
-#endif
-
-  /* And free the memory resources. */
-
-  if (priv->serdev.open_count <= 0)
-    {
-      wd_cancel(&priv->rxfailsafe);
-      kmm_free(priv);
     }
 }
 
