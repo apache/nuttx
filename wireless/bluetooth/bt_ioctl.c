@@ -58,6 +58,7 @@ struct btnet_scanstate_s
   volatile bool bs_scanning;        /* True:  Scanning in progress */
   volatile uint8_t bs_head;         /* Head of circular list (for removal) */
   uint8_t bs_tail;                  /* Tail of circular list (for addition) */
+  uint32_t msgcount;                /* Number of warnings printed */
 
   struct bt_scanresponse_s bs_rsp[CONFIG_BLUETOOTH_MAXSCANRESULT];
 };
@@ -185,7 +186,12 @@ static void btnet_scan_callback(FAR const bt_addr_le_t *addr,
   head = g_scanstate.bs_head;
   if (nexttail == head)
     {
-      wlerr("ERROR: Too many scan results\n");
+      /* Print only one error message for each SIOCBTSCANSTART call */
+
+      if (g_scanstate.msgcount++ == 0)
+        {
+          wlerr("ERROR: Too many scan results\n");
+        }
 
       if (++head >= CONFIG_BLUETOOTH_MAXSCANRESULT)
         {
@@ -624,6 +630,7 @@ int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
               g_scanstate.bs_scanning = true;
               g_scanstate.bs_head     = 0;
               g_scanstate.bs_tail     = 0;
+              g_scanstate.msgcount    = 0;
 
               ret = bt_start_scanning(btreq->btr_dupenable,
                                       btnet_scan_callback);
