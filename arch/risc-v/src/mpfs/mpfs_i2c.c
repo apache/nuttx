@@ -304,12 +304,57 @@ static uint32_t mpfs_i2c_timeout(int msgc, struct i2c_msg_s *msgv);
 static int mpfs_i2c_init(struct mpfs_i2c_priv_s *priv)
 {
   int ret = OK;
+  uint32_t ctrl;
+  uint32_t status;
 
   if (!priv->initialized)
     {
-      /* Clear any pending serial interrupt flag */
+      /* In case of warm boot, or after reset, check that the IP block is
+       * not already active and try to recover from any pending data
+       * transfer if it is.
+       */
 
-      modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_SI_MASK, 0);
+      ctrl = getreg32(MPFS_I2C_CTRL);
+      if (ctrl != 0)
+        {
+          /* Check if the IP is enabled */
+
+          status = getreg32(MPFS_I2C_STATUS);
+          if (ctrl & MPFS_I2C_CTRL_ENS1_MASK)
+            {
+              if (status == MPFS_I2C_ST_RX_DATA_ACK)
+                {
+                  /* In case the machine was in the middle of data RX, try to
+                   * receive one byte and nack it
+                   */
+
+                  modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_AA_MASK, 0);
+                  modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_SI_MASK, 0);
+                  usleep(100);
+                  status = getreg32(MPFS_I2C_STATUS);
+                }
+
+              if (status != MPFS_I2C_ST_IDLE)
+                {
+                  /* If the bus is not idle, send STOP */
+
+                  modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_SI_MASK, 0);
+                  modifyreg32(MPFS_I2C_CTRL, 0, MPFS_I2C_CTRL_STO_MASK);
+                  usleep(100);
+                  modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_SI_MASK, 0);
+                  status = getreg32(MPFS_I2C_STATUS);
+                }
+            }
+
+          if (status != MPFS_I2C_ST_IDLE)
+            {
+              i2cerr("Bus not idle before init\n");
+            }
+
+          /* Disable IP and continue initialization */
+
+          putreg32(0, MPFS_I2C_CTRL);
+        }
 
       /* Attach interrupt */
 
