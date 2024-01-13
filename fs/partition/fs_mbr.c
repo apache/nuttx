@@ -36,7 +36,7 @@
  ****************************************************************************/
 
 #define MBR_SIZE                   512
-#define MBR_LBA_TO_BLOCK(lba, blk) ((le32toh(lba) * 512 + (blk) - 1) / (blk))
+#define MBR_LBA_TO_BLOCK(lba, blk) (((blkcnt_t)le32toh(lba) * 512 + (blk) - 1) / (blk))
 
 /****************************************************************************
  * Private Types
