@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <sched.h>
+#include <debug.h>
 
 #include "sched/sched.h"
 
@@ -87,6 +88,13 @@ int nxtask_exit(void)
 #else
   dtcb = this_task();
 #endif
+
+#if CONFIG_TASK_NAME_SIZE > 0
+  sinfo("%s pid=%d,TCB=%p\n", dtcb->name,
+#else
+  sinfo("pid=%d,TCB=%p\n",
+#endif  
+        dtcb->pid, dtcb);
 
   /* Update scheduler parameters */
 
