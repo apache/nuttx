@@ -107,6 +107,10 @@ void sbi_start(void)
   WRITE_CSR(mcounteren, UINT32_C(~0));
   WRITE_CSR(scounteren, UINT32_C(~0));
 
+  /* Do device specific initialization as needed */
+
+  sbi_late_initialize();
+
   /* Set program counter to __start_s */
 
   WRITE_CSR(mepc, __start_s);

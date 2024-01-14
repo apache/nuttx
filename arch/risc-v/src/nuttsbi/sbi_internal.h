@@ -140,5 +140,17 @@ uint64_t sbi_get_mtime(void);
 
 void sbi_set_mtimecmp(uint64_t value);
 
+/****************************************************************************
+ * Name: sbi_late_initialize
+ *
+ * Description:
+ *   Conduct any device specific initialization before entering S-mode from
+ *   NUTTSBI as some chips need such preparations. This function still runs
+ *   in M-mode.
+ *
+ ****************************************************************************/
+
+weak_function void sbi_late_initialize(void);
+
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISC_V_SRC_NUTTSBI_SBI_INTERNAL_H */
