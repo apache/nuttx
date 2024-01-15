@@ -440,6 +440,11 @@ config ARCH_HAVE_DPFPU
 	default n
 	select ARCH_HAVE_FPU
 
+config ARCH_HAVE_QPFPU
+	bool
+	default n
+	select ARCH_HAVE_DPFPU
+
 config ARCH_HAVE_LAZYFPU
 	bool
 	default n
@@ -575,6 +580,14 @@ config ARCH_DPFPU
 	depends on ARCH_FPU && ARCH_HAVE_DPFPU
 	---help---
 		Enable toolchain support for double precision (64-bit) floating
+		point if both the toolchain and the hardware support it.
+
+config ARCH_QPFPU
+	bool "Quad-Precision FPU support"
+	default y
+	depends on ARCH_FPU && ARCH_HAVE_DPFPU && ARCH_HAVE_QPFPU
+	---help---
+		Enable toolchain support for quadruple precision (128 bits or 16 bytes) floating
 		point if both the toolchain and the hardware support it.
 
 config ARCH_LAZYFPU
