@@ -148,29 +148,35 @@ ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
 
   # Detect cpu ISA support flags
 
+  ARCHCPUEXTFLAGS = i
+
   ifeq ($(CONFIG_ARCH_RV_ISA_M),y)
-    ARCHRVISAM = m
+    ARCHCPUEXTFLAGS := $(ARCHCPUEXTFLAGS)m
   endif
 
   ifeq ($(CONFIG_ARCH_RV_ISA_A),y)
-    ARCHRVISAA = a
-  endif
-
-  ifeq ($(CONFIG_ARCH_RV_ISA_C),y)
-    ARCHRVISAC = c
+    ARCHCPUEXTFLAGS := $(ARCHCPUEXTFLAGS)a
   endif
 
   ifeq ($(CONFIG_ARCH_FPU),y)
-    ARCHRVISAF = f
+    ARCHCPUEXTFLAGS := $(ARCHCPUEXTFLAGS)f
   endif
 
   ifeq ($(CONFIG_ARCH_DPFPU),y)
-    ARCHRVISAD = d
+    ARCHCPUEXTFLAGS := $(ARCHCPUEXTFLAGS)d
+  endif
+
+  ifeq ($(CONFIG_ARCH_QPFPU),y)
+    ARCHCPUEXTFLAGS := $(ARCHCPUEXTFLAGS)q
+  endif
+
+  ifeq ($(CONFIG_ARCH_RV_ISA_C),y)
+    ARCHCPUEXTFLAGS := $(ARCHCPUEXTFLAGS)c
   endif
 
   GCC_VERSION = ${shell $(CROSSDEV)gcc --version | grep gcc | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | tail -n 1 | cut -d"." -f1 }
   ifeq ($(shell expr $(GCC_VERSION) \>= 12), 1)
-    ARCHRVISAZ = _zicsr_zifencei
+    ARCHCPUEXTFLAGS := $(ARCHCPUEXTFLAGS)_zicsr_zifencei
   endif
 
   # Detect abi type
@@ -189,7 +195,6 @@ ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
 
   # Construct arch flags
 
-  ARCHCPUEXTFLAGS = i$(ARCHRVISAM)$(ARCHRVISAA)$(ARCHRVISAF)$(ARCHRVISAD)$(ARCHRVISAC)$(ARCHRVISAZ)
   ARCHCPUFLAGS += -march=$(ARCHTYPE)$(ARCHCPUEXTFLAGS)
 
   # Construct arch abi flags
