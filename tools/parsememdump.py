@@ -150,7 +150,7 @@ if __name__ == "__main__":
         log.output("\n")
         if args.elffile != "":
             addr2line_file = os.popen(
-                "%saddr2line -Cfe %s %s" % (args.prefix, args.elffile[0], memstr), "r"
+                "%saddr2line -Cfe %s %s" % (args.prefix[0], args.elffile[0], memstr), "r"
             )
             while 1:
                 add2line_str = addr2line_file.readline()
