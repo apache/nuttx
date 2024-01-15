@@ -777,7 +777,7 @@ static int bt_slip_receive(FAR struct bt_driver_s *drv,
   FAR uint8_t *packet;
   FAR uint8_t *cursor;
   FAR uint8_t *header;
-  uint8_t byte;
+  uint8_t byte = 0;
   uint16_t checksum;
   size_t remaining;
   uint8_t state;
