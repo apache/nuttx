@@ -2538,8 +2538,8 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
           finfo("available: true mediachanged: %s writeenabled: %s\n",
                  geometry->geo_mediachanged ? "true" : "false",
                  geometry->geo_writeenabled ? "true" : "false");
-          finfo("nsectors: %lu sectorsize: %" PRIi16 "\n",
-                 (unsigned long)geometry->geo_nsectors,
+          finfo("nsectors: %" PRIuOFF " sectorsize: %" PRIi16 "\n",
+                 geometry->geo_nsectors,
                  geometry->geo_sectorsize);
 
           priv->mediachanged = false;
@@ -2905,7 +2905,7 @@ static void mmcsd_decode_extcsd(FAR struct mmcsd_state_s *priv,
 
   priv->part[0].nblocks = (extcsd[215] << 24) | (extcsd[214] << 16) |
                           (extcsd[213] << 8) | extcsd[212];
-  finfo("MMC ext CSD read succsesfully, number of block %" PRId32 "\n",
+  finfo("MMC ext CSD read succsesfully, number of block %" PRIuOFF "\n",
                                                 priv->part[0].nblocks);
 
   if (extcsd[MMCSD_EXTCSD_PARTITION_SUPPORT] & MMCSD_PART_SUPPORT_PART_EN)
@@ -4310,7 +4310,7 @@ static int mmcsd_probe(FAR struct mmcsd_state_s *priv)
             {
               /* Yes...  */
 
-              finfo("Capacity: %" PRIu32 " Kbytes\n",
+              finfo("Capacity: %" PRIuOFF " Kbytes\n",
                     MMCSD_CAPACITY(priv->part[0].nblocks,
                                    priv->blockshift));
               priv->mediachanged = true;

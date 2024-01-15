@@ -65,7 +65,7 @@
 struct mmcsd_part_s
 {
   FAR struct mmcsd_state_s *priv;
-  uint32_t nblocks; /* Number of blocks */
+  blkcnt_t nblocks; /* Number of blocks */
 };
 
 /* This structure is contains the unique state of the MMC/SD block driver */
