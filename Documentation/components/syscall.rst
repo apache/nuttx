@@ -202,8 +202,8 @@ mksyscall
 ---------
 
 mksyscall is C program that is used used during the initial NuttX build
-by the logic in the top-level ``syscall/``! directory. Information about the
+by the logic in the top-level ``syscall/`` directory. Information about the
 stubs and proxies is maintained in a comma separated value (CSV) file
-in the ``syscall/`` directory.  The mksyscall program will accept this CVS
+in the ``syscall/`` directory.  The mksyscall program will accept this CSV
 file as input and generate all of the required proxy or stub files as
 output.  See ``Documentation/components/tools/`` for additional information.

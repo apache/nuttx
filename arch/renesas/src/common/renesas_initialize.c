@@ -33,7 +33,7 @@
  ****************************************************************************/
 
 /* This holds a references to the current interrupt level register storage
- * structure.  If is non-NULL only during interrupt processing.
+ * structure.  It is non-NULL only during interrupt processing.
  */
 
 /* Actually a pointer to the beginning of a uint8_t array */
