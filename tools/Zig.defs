@@ -39,4 +39,6 @@ endif
 
 # Convert cortex-xxx/sifive-exx to cortex_xxx/sifive_exx
 
+ifneq ($(LLVM_CPUTYPE),)
 ZIGFLAGS += -mcpu $(subst -,_,$(LLVM_CPUTYPE))
+endif
