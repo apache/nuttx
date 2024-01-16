@@ -141,7 +141,6 @@ config ARCH_CHIP_MPFS
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_DPFPU
 	select ARCH_HAVE_MPU
-	select ARCH_HAVE_MMU
 	select ARCH_MMU_TYPE_SV39
 	select ARCH_HAVE_ADDRENV
 	select ARCH_NEED_ADDRENV_MAPPING
@@ -168,7 +167,6 @@ config ARCH_CHIP_QEMU_RV
 	select ARCH_HAVE_DPFPU
 	select ARCH_HAVE_MULTICPU
 	select ARCH_HAVE_MPU
-	select ARCH_HAVE_MMU
 	select ARCH_MMU_TYPE_SV39 if ARCH_CHIP_QEMU_RV64
 	select ARCH_MMU_TYPE_SV32 if ARCH_CHIP_QEMU_RV32
 	select ARCH_HAVE_ADDRENV
@@ -201,7 +199,6 @@ config ARCH_CHIP_JH7110
 	select ARCH_HAVE_DPFPU
 	select ARCH_HAVE_MULTICPU
 	select ARCH_HAVE_MPU
-	select ARCH_HAVE_MMU
 	select ARCH_MMU_TYPE_SV39
 	select ARCH_HAVE_ADDRENV
 	select ARCH_NEED_ADDRENV_MAPPING
@@ -221,7 +218,6 @@ config ARCH_CHIP_BL808
 	select ARCH_HAVE_DPFPU
 	select ARCH_HAVE_MULTICPU
 	select ARCH_HAVE_MPU
-	select ARCH_HAVE_MMU
 	select ARCH_MMU_TYPE_SV39
 	select ARCH_HAVE_ADDRENV
 	select ARCH_NEED_ADDRENV_MAPPING
@@ -241,7 +237,6 @@ config ARCH_CHIP_K230
 	select ARCH_HAVE_DPFPU
 	select ARCH_HAVE_MISALIGN_EXCEPTION
 	select ARCH_HAVE_MPU
-	select ARCH_HAVE_MMU
 	select ARCH_MMU_TYPE_SV39
 	select ARCH_HAVE_ADDRENV
 	select ARCH_NEED_ADDRENV_MAPPING
@@ -282,6 +277,40 @@ config ARCH_RV_ISA_A
 config ARCH_RV_ISA_C
 	bool
 	default n
+
+config ARCH_RV_ISA_V
+	bool
+	default n
+	depends on ARCH_FPU
+
+config ARCH_RV_ISA_ZICSR_ZIFENCEI
+	bool
+	default y
+	---help---
+		https://sourceware.org/git/?p=binutils-gdb.git;a=commit;h=aed44286efa8ae8717a77d94b51ac3614e2ca6dc
+		https://gcc.gnu.org/git/?p=gcc.git;a=commit;h=98416dbb0a62579d4a7a4a76bab51b5b52fec2cd
+		GCC-12.1.0 bumped the default ISA spec to the newer 20191213 version,
+		which moves some instructions from the I extension to the Zicsr and
+		Zifencei extensions. This requires explicitly specifying Zicsr and
+		Zifencei when GCC >= 12.1.0. To make life easier, and avoid forcing
+		toolchains that default to a newer ISA spec to version 2.2. For
+		clang < 17 or GCC < 11.3.0, for which this is not possible or need
+		special treatment.
+
+config ARCH_RV_ISA_VENDOR_EXTENSIONS
+	string "Vendor Custom RISC-V Instruction Set Architecture Extensions"
+	default ""
+	---help---
+		This option allows the platform to enable some vendor-customized ISA extensions,
+		E.g OpenHW, SiFive, T-Head.
+
+		SiFive Intelligence Extensions:
+		    SiFive Vector Coprocessor Interface(VCIX): xsfvcp
+		    SiFive FP32-to-int8 Ranged Clip Instructions: Xsfvfnrclipxfqf
+		    SiFive Matrix Multiply Accumulate Instructions: Xsfvfwmaccqqq
+		    SiFive Int8 Matrix Multiplication Instructions: XSFvqmaccqoq
+		Command Line:
+		    xsfvcp0p1_xsfvfnrclipxfqf0p1_xsfvfwmaccqqq0p1_xsfvqmaccqoq0p1
 
 config ARCH_RV_MMIO_BITS
 	int
@@ -333,10 +362,12 @@ endif
 config ARCH_MMU_TYPE_SV39
 	bool
 	default n
+	select ARCH_HAVE_MMU
 
 config ARCH_MMU_TYPE_SV32
 	bool
 	default n
+	select ARCH_HAVE_MMU
 
 config ARCH_HAVE_S_MODE
 	bool
@@ -424,7 +455,6 @@ config LITEX_CORE_VEXRISCV
 config LITEX_CORE_VEXRISCV_SMP
 	bool "vexriscv_smp core"
 	select ARCH_HAVE_MPU
-	select ARCH_HAVE_MMU
 	select ARCH_RV_ISA_C
 	select ARCH_MMU_TYPE_SV32
 	select ARCH_HAVE_ADDRENV
