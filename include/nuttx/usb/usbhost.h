@@ -1013,7 +1013,7 @@ const struct usbhost_registry_s *
  *
  * Description:
  *   Initialize the USB hub class.  This function should be called
- *   be platform-specific code in order to initialize and register support
+ *   by platform-specific code in order to initialize and register support
  *   for the USB host storage class.
  *
  * Input Parameters:
@@ -1034,7 +1034,7 @@ int usbhost_hub_initialize(void);
  *
  * Description:
  *   Initialize the USB host storage class.  This function should be called
- *   be platform-specific code in order to initialize and register support
+ *   by platform-specific code in order to initialize and register support
  *   for the USB host storage class.
  *
  * Input Parameters:
@@ -1126,7 +1126,7 @@ void usbhost_msc_notifier_signal(uint8_t event, char sdchar);
  *
  * Description:
  *   Initialize the USB host CDC/ACM class.  This function should be called
- *   be platform-specific code in order to initialize and register support
+ *   by platform-specific code in order to initialize and register support
  *   for the USB host CDC/ACM class.
  *
  * Input Parameters:
@@ -1147,7 +1147,7 @@ int usbhost_cdcacm_initialize(void);
  *
  * Description:
  *   Initialize the USB FT232R driver.  This function should be called
- *   be platform-specific code in order to initialize and register support
+ *   by platform-specific code in order to initialize and register support
  *   for the FT232R.
  *
  * Input Parameters:
@@ -1168,7 +1168,7 @@ int usbhost_ft232r_initialize(void);
  *
  * Description:
  *   Initialize the USB storage HID keyboard class driver.  This function
- *   should be called be platform-specific code in order to initialize and
+ *   should be called by platform-specific code in order to initialize and
  *   register support for the USB host HID keyboard class device.
  *
  * Input Parameters:
@@ -1189,7 +1189,7 @@ int usbhost_kbdinit(void);
  *
  * Description:
  *   Initialize the USB storage HID mouse class driver.  This function
- *   should be called be platform-specific code in order to initialize and
+ *   should be called by platform-specific code in order to initialize and
  *   register support for the USB host HID mouse class device.
  *
  * Input Parameters:
@@ -1210,7 +1210,7 @@ int usbhost_mouse_init(void);
  *
  * Description:
  *   Initialize the USB XBox controller driver.  This function
- *   should be called be platform-specific code in order to initialize and
+ *   should be called by platform-specific code in order to initialize and
  *   register support for the USB XBox controller.
  *
  * Input Parameters:
@@ -1226,11 +1226,32 @@ int usbhost_xboxcontroller_init(void);
 #endif
 
 /****************************************************************************
+ * Name: usbhost_bthci_initialize
+ *
+ * Description:
+ *   Initialize the USB Bluetooth HCI class driver.  This function should be
+ *   called by platform-specific code in order to initialize and register
+ *   support for the USB host class device.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   On success this function will return zero (OK);  A negated errno value
+ *   will be returned on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_USBHOST_BTHCI
+int usbhost_bthci_initialize(void);
+#endif
+
+/****************************************************************************
  * Name: usbhost_wlaninit
  *
  * Description:
  *   Initialize the USB WLAN class driver.  This function should be called
- *   be platform-specific code in order to initialize and register support
+ *   by platform-specific code in order to initialize and register support
  *   for the USB host class device.
  *
  * Input Parameters:
