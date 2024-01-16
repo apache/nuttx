@@ -100,6 +100,11 @@
 #  include "esp32s3_board_rmt.h"
 #endif
 
+#ifdef CONFIG_ESP32S3_SPI
+#include "esp32s3_spi.h"
+#include "esp32s3_board_spidev.h"
+#endif
+
 #include "esp32s3-devkit.h"
 
 /****************************************************************************
@@ -136,6 +141,24 @@ int esp32s3_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: Failed to init HIMEM: %d\n", ret);
     }
+#endif
+
+#ifdef CONFIG_ESP32S3_SPI
+  #ifdef CONFIG_ESP32S3_SPI2
+  ret = board_spidev_initialize(2);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to init spidev 2: %d\n", ret);
+    }
+  #endif
+
+  #ifdef CONFIG_ESP32S3_SPI3
+  ret = board_spidev_initialize(3);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to init spidev 3: %d\n", ret);
+    }
+  #endif
 #endif
 
 #if defined(CONFIG_ESP32S3_EFUSE)
