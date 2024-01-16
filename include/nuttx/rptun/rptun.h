@@ -359,8 +359,6 @@ int rptun_initialize(FAR struct rptun_dev_s *dev);
 int rptun_boot(FAR const char *cpuname);
 int rptun_poweroff(FAR const char *cpuname);
 int rptun_reset(FAR const char *cpuname, int value);
-int rptun_panic(FAR const char *cpuname);
-void rptun_dump_all(void);
 
 #ifdef __cplusplus
 }

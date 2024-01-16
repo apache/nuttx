@@ -1053,13 +1053,3 @@ int rptun_reset(FAR const char *cpuname, int value)
 {
   return rpmsg_ioctl(cpuname, RPTUNIOC_RESET, value);
 }
-
-int rptun_panic(FAR const char *cpuname)
-{
-  return rpmsg_ioctl(cpuname, RPMSGIOC_PANIC, 0);
-}
-
-void rptun_dump_all(void)
-{
-  rpmsg_ioctl(NULL, RPMSGIOC_DUMP, 0);
-}
