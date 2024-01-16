@@ -50,6 +50,18 @@ void up_irqinitialize(void)
 
   up_irq_save();
 
+  /* Complete possibly claimed IRQs in PLIC (for current hart) in case
+   * of warm reboot, e.g. after a crash in the middle of IRQ handler.
+   * This has no effect on non-claimed or disabled interrupts.
+   */
+
+  uintptr_t claim_address = mpfs_plic_get_claimbase();
+
+  for (int irq = MPFS_IRQ_EXT_START; irq < NR_IRQS; irq++)
+    {
+      putreg32(irq - MPFS_IRQ_EXT_START, claim_address);
+    }
+
   /* Disable all global interrupts for current hart */
 
   uintptr_t iebase = mpfs_plic_get_iebase();
@@ -61,12 +73,6 @@ void up_irqinitialize(void)
   putreg32(0x0, iebase + 16);
   putreg32(0x0, iebase + 20);
 
-  /* Clear pendings in PLIC (for current hart) */
-
-  uintptr_t claim_address = mpfs_plic_get_claimbase();
-  uint32_t val = getreg32(claim_address);
-  putreg32(val, claim_address);
-
   /* Colorize the interrupt stack for debug purposes */
 
 #if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 15
@@ -76,9 +82,7 @@ void up_irqinitialize(void)
 
   /* Set priority for all global interrupts to 1 (lowest) */
 
-  int id;
-
-  for (id = 1; id <= NR_IRQS; id++)
+  for (int id = 1; id <= NR_IRQS; id++)
     {
       putreg32(1, (uintptr_t)(MPFS_PLIC_PRIORITY + (4 * id)));
     }
