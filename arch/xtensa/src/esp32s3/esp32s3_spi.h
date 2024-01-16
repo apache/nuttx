@@ -63,16 +63,6 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_spidev_initialize
- *
- * Description:
- *   Initialize and register SPI driver for the specified SPI port.
- *
- ****************************************************************************/
-
-int board_spidev_initialize(int port);
-
-/****************************************************************************
  * Name: esp32s3_spibus_initialize
  *
  * Description:

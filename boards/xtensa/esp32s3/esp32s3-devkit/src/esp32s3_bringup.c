@@ -102,6 +102,7 @@
 
 #ifdef CONFIG_ESP32S3_SPI
 #include "esp32s3_spi.h"
+#include "esp32s3_board_spidev.h"
 #endif
 
 #include "esp32s3-devkit.h"
