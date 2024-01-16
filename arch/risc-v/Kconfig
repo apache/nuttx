@@ -297,6 +297,21 @@ config ARCH_RV_ISA_ZICSR_ZIFENCEI
 		clang < 17 or GCC < 11.3.0, for which this is not possible or need
 		special treatment.
 
+config ARCH_RV_ISA_VENDOR_EXTENSIONS
+	string "Vendor Custom RISC-V Instruction Set Architecture Extensions"
+	default ""
+	---help---
+		This option allows the platform to enable some vendor-customized ISA extensions,
+		E.g OpenHW, SiFive, T-Head.
+
+		SiFive Intelligence Extensions:
+		    SiFive Vector Coprocessor Interface(VCIX): xsfvcp
+		    SiFive FP32-to-int8 Ranged Clip Instructions: Xsfvfnrclipxfqf
+		    SiFive Matrix Multiply Accumulate Instructions: Xsfvfwmaccqqq
+		    SiFive Int8 Matrix Multiplication Instructions: XSFvqmaccqoq
+		Command Line:
+		    xsfvcp0p1_xsfvfnrclipxfqf0p1_xsfvfwmaccqqq0p1_xsfvqmaccqoq0p1
+
 config ARCH_RV_MMIO_BITS
 	int
 	# special cases
