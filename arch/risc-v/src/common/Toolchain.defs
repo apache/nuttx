@@ -146,7 +146,14 @@ ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
     endif
   endif
 
-  # Detect cpu ISA support flags
+  # Detect cpu ISA support flags:
+  #
+  # Naming Convention
+  # RISC-V defines an exact order that must be used to define the RISC-V ISA subset:
+  #
+  # RV [32, 64, 128] I, M, A, F, D, G, Q, L, C, B, J, T, P, V, N
+  #
+  # For example, RV32IMAFDQC is legal, whereas RV32IMAFDCQ is not.
 
   ARCHCPUEXTFLAGS = i
 
@@ -172,6 +179,10 @@ ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
 
   ifeq ($(CONFIG_ARCH_RV_ISA_C),y)
     ARCHCPUEXTFLAGS := $(ARCHCPUEXTFLAGS)c
+  endif
+
+  ifeq ($(CONFIG_ARCH_RV_ISA_V),y)
+    ARCHCPUEXTFLAGS := $(ARCHCPUEXTFLAGS)v
   endif
 
   GCC_VERSION = ${shell $(CROSSDEV)gcc --version | grep gcc | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | tail -n 1 | cut -d"." -f1 }
