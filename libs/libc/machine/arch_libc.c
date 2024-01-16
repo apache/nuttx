@@ -268,12 +268,14 @@ int strncmp(FAR const char *s1, FAR const char *s2, size_t n)
 #ifdef CONFIG_LIBC_ARCH_STRNLEN
 size_t strnlen(FAR const char *s, size_t maxlen)
 {
+  size_t ret = arch_strnlen(s, maxlen);
 #  ifdef CONFIG_MM_KASAN
 #    ifndef CONFIG_MM_KASAN_DISABLE_READS_CHECK
-  __asan_loadN((FAR void *)s, maxlen + 1);
+  __asan_loadN((FAR void *)s, ret);
 #    endif
 #  endif
-  return arch_strnlen(s, maxlen);
+
+  return ret;
 }
 #endif
 
