@@ -283,6 +283,11 @@ config ARCH_RV_ISA_C
 	bool
 	default n
 
+config ARCH_RV_ISA_V
+	bool
+	default n
+	depends on ARCH_FPU
+
 config ARCH_RV_MMIO_BITS
 	int
 	# special cases
