@@ -288,6 +288,20 @@ config ARCH_RV_ISA_V
 	default n
 	depends on ARCH_FPU
 
+config ARCH_RV_ISA_ZICSR_ZIFENCEI
+	bool
+	default y
+	---help---
+		https://sourceware.org/git/?p=binutils-gdb.git;a=commit;h=aed44286efa8ae8717a77d94b51ac3614e2ca6dc
+		https://gcc.gnu.org/git/?p=gcc.git;a=commit;h=98416dbb0a62579d4a7a4a76bab51b5b52fec2cd
+		GCC-12.1.0 bumped the default ISA spec to the newer 20191213 version,
+		which moves some instructions from the I extension to the Zicsr and
+		Zifencei extensions. This requires explicitly specifying Zicsr and
+		Zifencei when GCC >= 12.1.0. To make life easier, and avoid forcing
+		toolchains that default to a newer ISA spec to version 2.2. For
+		clang < 17 or GCC < 11.3.0, for which this is not possible or need
+		special treatment.
+
 config ARCH_RV_MMIO_BITS
 	int
 	# special cases
