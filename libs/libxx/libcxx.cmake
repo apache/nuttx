@@ -80,7 +80,7 @@ if(CONFIG_LIBSUPCXX)
   add_compile_definitions(__GLIBCXX__)
 endif()
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(SRCS)
