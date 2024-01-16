@@ -302,6 +302,16 @@ int sam_usbhost_initialize(void)
     }
 #endif
 
+#ifdef CONFIG_USBHOST_BTHCI
+  /* Register USB Bluetooth support */
+
+  ret = usbhost_bthci_initialize();
+  if (ret != OK)
+    {
+      uerr("ERROR: Failed to register the bt controller: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_USBHOST_MSC
   /* Register theUSB host Mass Storage Class */
 
