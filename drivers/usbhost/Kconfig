@@ -721,4 +721,13 @@ config USBHOST_FT232R_LATENCY
 
 endif # USBHOST_FT232R
 
+config USBHOST_BTHCI
+	bool "Bluetooth HCI Driver"
+	default n
+	depends on WIRELESS_BLUETOOTH && USBHOST_HAVE_ASYNCH && !USBHOST_BULK_DISABLE && !USBHOST_INT_DISABLE
+	select USBHOST_ASYNCH
+	select SERIAL_REMOVABLE
+	---help---
+		Select this option to build in support for USB Bluetooth HCI devices.
+
 endif # USBHOST
