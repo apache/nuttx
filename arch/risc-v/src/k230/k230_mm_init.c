@@ -40,15 +40,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* T-Head C908 MMU flags for I/O Memory, just in case standard Risc-V
- * PTE format is not working.
- */
-
-#define MMU_THEAD_SHAREABLE    (1ul << 60)
-#define MMU_THEAD_STRONG_ORDER (1ul << 63)
-#define MMU_THEAD_IO_FLAGS     (MMU_IO_FLAGS | MMU_THEAD_SHAREABLE | \
-                                MMU_THEAD_STRONG_ORDER)
-
 /* Map the whole I/O & PLIC memory with vaddr = paddr mappings */
 
 #define MMU_IO_BASE     (0x80000000)      /* KPU-Cache */
@@ -61,18 +52,27 @@
 #error "No valid MMU type defined"
 #endif
 
-/* Physical and virtual addresses to page tables (vaddr = paddr mapping) */
+/* Physical and virtual addresses to page tables (vaddr = paddr mapping)
+ * Note NUTTSBI kernel can live in small flash+ram regions thus needs L3
+ * entries
+ */
 
 #define PGT_L1_PBASE    (uintptr_t)&m_l1_pgtable
 #define PGT_L2_PBDDR    (uintptr_t)&m_l2_pgt_ddr
 #define PGT_L2_PBINT    (uintptr_t)&m_l2_pgt_int
+#ifdef CONFIG_NUTTSBI
+#define PGT_L3_PBDDR    (uintptr_t)&m_l3_pgt_ddr
+#endif
 #define PGT_L1_VBASE    PGT_L1_PBASE
 #define PGT_L2_VBDDR    PGT_L2_PBDDR
 #define PGT_L2_VBINT    PGT_L2_PBINT
+#ifdef CONFIG_NUTTSBI
+#define PGT_L3_VBDDR    PGT_L3_PBDDR
+#endif
 
 #define PGT_L1_SIZE     (512)  /* Enough to map 512 GiB */
 #define PGT_L2_SIZE     (512)  /* Enough to map 1 GiB */
-#define PGT_L3_SIZE     (1024) /* Enough to map 4 MiB (2MiB x 2) */
+#define PGT_L3_SIZE     (512)  /* Enough to map 2 MiB */
 
 /****************************************************************************
  * Private Types
@@ -87,6 +87,9 @@
 static size_t         m_l1_pgtable[PGT_L1_SIZE] locate_data(".pgtables");
 static size_t         m_l2_pgt_ddr[PGT_L2_SIZE] locate_data(".pgtables");
 static size_t         m_l2_pgt_int[PGT_L2_SIZE] locate_data(".pgtables");
+#ifdef CONFIG_NUTTSBI
+static size_t         m_l3_pgt_ddr[PGT_L3_SIZE] locate_data(".pgtables");
+#endif
 
 /* Kernel mappings (L1 base) required by riscv_addrenv */
 
@@ -155,13 +158,23 @@ void k230_kernel_mappings(void)
 
   /* Map kernel text and data using L2 pages  */
 
-  minfo("map L2 kernel text(%ldMB)\n", KFLASH_SIZE >> 20);
+  minfo("map kernel text(%ldMB)\n", KFLASH_SIZE >> 20);
   mmu_ln_map_region(2, PGT_L2_VBDDR, KFLASH_START, KFLASH_START,
                    KFLASH_SIZE, MMU_KTEXT_FLAGS);
+#ifdef CONFIG_NUTTSBI
+  mmu_ln_map_region(3, PGT_L3_VBDDR, KFLASH_START, KFLASH_START,
+                  KFLASH_SIZE, MMU_KTEXT_FLAGS);
+  mmu_ln_setentry(2, PGT_L2_VBDDR, PGT_L3_PBDDR, KFLASH_START, 0);
+#endif
 
-  minfo("map L2 kernel data(%ldMB)\n", KSRAM_SIZE >> 20);
+  minfo("map kernel data(%ldMB)\n", KSRAM_SIZE >> 20);
   mmu_ln_map_region(2, PGT_L2_VBDDR, KSRAM_START, KSRAM_START,
                    KSRAM_SIZE, MMU_KDATA_FLAGS);
+#ifdef CONFIG_NUTTSBI
+  mmu_ln_map_region(3, PGT_L3_VBDDR, KSRAM_START, KSRAM_START,
+                  KSRAM_SIZE, MMU_KDATA_FLAGS);
+  mmu_ln_setentry(2, PGT_L2_VBDDR, PGT_L3_PBDDR, KSRAM_START, 0);
+#endif
 
   /* Map the page pool */
 
@@ -184,6 +197,9 @@ void k230_kernel_mappings(void)
   dump_pgtable(m_l1_pgtable, PGT_L1_SIZE, "L1");
   dump_pgtable(m_l2_pgt_ddr, PGT_L2_SIZE, "L2_DDR");
   dump_pgtable(m_l2_pgt_int, PGT_L2_SIZE, "L2_INT");
+#ifdef CONFIG_NUTTSBI
+  dump_pgtable(m_l3_pgt_ddr, PGT_L3_SIZE, "L3_DDR");
+#endif
 }
 
 /****************************************************************************

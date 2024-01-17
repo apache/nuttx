@@ -24,7 +24,11 @@ include $(TOPDIR)/arch/risc-v/src/common/Toolchain.defs
 
 ifeq ($(CONFIG_ARCH_CHIP_K230),y)
 ifeq ($(CONFIG_BUILD_KERNEL),y)
+ifeq ($(CONFIG_NUTTSBI),y)
+  LDSCRIPT = ld-nuttsbi.script
+else
   LDSCRIPT = ld-kernel.script
+endif
 else ifeq ($(CONFIG_BUILD_PROTECTED),y)
   LDSCRIPT = ld-protected.script
 else
@@ -54,17 +58,21 @@ endif
 
 # POSTBUILD management
 
-# KERNEL build needs real ROMFS and SBI wrapping
+# KERNEL builds need real ROMFS and even OpenSBI wrapping
 
 ifeq ($(CONFIG_BUILD_KERNEL),y)
 ifeq ($(wildcard $(BOARD_DIR)$(DELIM)src$(DELIM)romfs_boot.c),)
 define POSTBUILD
-  $(Q) echo "Please replace stub ROMFS w/ real one."
+  $(Q) echo "Please replace stub ROMFS with real one."
   $(Q) rm $(BOARD_DIR)$(DELIM)src$(DELIM)libboard.a
+endef
+else ifneq ($(CONFIG_NUTTSBI),y)
+define POSTBUILD
+  $(Q) echo "Please wrap nuttx.bin with OpenSBI to run on target."
 endef
 else
 define POSTBUILD
-  $(Q) echo "wrap nuttx.bin w/ SBI to run on target."
+  $(Q) echo "Please try nuttx.bin on target."
 endef
 endif
 endif
