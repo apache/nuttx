@@ -41,9 +41,20 @@
   /* Exported Symbols */
 
   .section .text
+
+#ifdef CONFIG_NUTTSBI
+
+  .global __start_s
+
+__start_s:
+
+#else
+
   .global __start
 
 __start:
+
+#endif
 
   /* Preserve a1 by not using it here as it contains DTB */
 

@@ -46,4 +46,8 @@
 #  define K230_PLIC_CLAIM     (K230_PLIC_BASE + 0x200004)
 #endif
 
+/* use in M-mode to enable PLIC delegation to S-mode */
+
+#define K230_PLIC_CTRL        (K230_PLIC_BASE + 0x01ffffc)
+
 #endif /* __ARCH_RISCV_SRC_K230_HARDWARE_K230_PLIC_H */
