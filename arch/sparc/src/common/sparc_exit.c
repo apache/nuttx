@@ -62,8 +62,6 @@ void up_exit(int status)
 
   (void)enter_critical_section();
 
-  sinfo("TCB=%p exiting\n", tcb);
-
   nxsched_dumponexit();
 
   /* Update scheduler parameters */
