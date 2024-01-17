@@ -20,9 +20,7 @@
 
 include common/Make.defs
 
-# Specify our HEAD assembly file.  This will be linked as
-# the first object file, so it will appear at address 0
-HEAD_ASRC = k230_head.S
+CHIP_ASRCS += k230_head.S
 
 # Specify our C code within this directory to be included
 CHIP_CSRCS  = k230_start.c k230_irq_dispatch.c k230_irq.c

@@ -41,6 +41,19 @@
  * Public Functions
  ****************************************************************************/
 
+#ifdef CONFIG_NUTTSBI
+/****************************************************************************
+ * Name: sbi_late_initialize  runs in M-mode
+ ****************************************************************************/
+
+void sbi_late_initialize(void)
+{
+  /* delegate K230 plic enable to S-mode */
+
+  *((volatile uint32_t *)K230_PLIC_CTRL) = 1;
+}
+#endif
+
 /****************************************************************************
  * Name: up_irqinitialize
  ****************************************************************************/
@@ -72,7 +85,7 @@ void up_irqinitialize(void)
       putreg32(1, (uintptr_t)(K230_PLIC_PRIORITY + 4 * id));
     }
 
-  sinfo("prioritized %d plic irqs\n", NR_IRQS);
+  sinfo("prioritized %d irqs\n", NR_IRQS);
 
   /* Set irq threshold to 0 (permits all global interrupts) */
 
@@ -197,7 +210,7 @@ irqstate_t up_irq_enable(void)
   /* Read and enable global interrupts (M/SIE) in m/sstatus */
 
   oldstat = READ_AND_SET_CSR(CSR_STATUS, STATUS_IE);
-  sinfo("ie=%lx sts=%lx xcs=%d\n", READ_CSR(CSR_IE), STATUS_LOW,
+  sinfo("ie=%lx sts=%lx ctx=%d\n", READ_CSR(CSR_IE), STATUS_LOW,
         XCPTCONTEXT_SIZE);
 
   return oldstat;
