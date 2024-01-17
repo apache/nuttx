@@ -97,7 +97,7 @@ struct usbhost_state_s
   char                    devchar;      /* Character identifying the /dev/bthci[n] device */
   volatile bool           disconnected; /* TRUE: Device has been disconnected */
   uint8_t                 ifno;         /* Interface number */
-  sem_t                   exclsem;      /* Used to maintain mutual exclusive access */
+  mutex_t                 lock;         /* Used to maintain mutual exclusive access */
   struct work_s           work;         /* For interacting with the worker thread */
   FAR uint8_t            *tbuffer;      /* The allocated transfer buffer */
   size_t                  tbuflen;      /* Size of the allocated transfer buffer */
@@ -148,7 +148,7 @@ static inline void usbhost_putle16(uint8_t *dest, uint16_t val);
 /* Transfer descriptor memory management */
 
 static inline int usbhost_talloc(FAR struct usbhost_state_s *priv);
-static inline int usbhost_tfree(FAR struct usbhost_state_s *priv);
+static inline void usbhost_tfree(FAR struct usbhost_state_s *priv);
 
 /* struct usbhost_registry_s methods */
 
@@ -194,7 +194,7 @@ static int usbhost_bthci_ioctl(FAR struct bt_driver_s *dev,
  * used to associate the USB class driver to a connected USB device.
  */
 
-static struct usbhost_id_s g_id[] =
+static const struct usbhost_id_s g_id[] =
 {
   {
     USB_CLASS_WIRELESS_CONTROLLER,  /* base     */
@@ -387,14 +387,9 @@ static void usbhost_destroy(FAR void *arg)
 
   usbhost_tfree(priv);
 
-  /* Free the function address assigned to this device */
-
-  usbhost_devaddr_destroy(hport, hport->funcaddr);
-  hport->funcaddr = 0;
-
   /* Destroy the semaphores */
 
-  nxsem_destroy(&priv->exclsem);
+  nxmutex_destroy(&priv->lock);
 
   /* Disconnect the USB host device */
 
@@ -826,14 +821,14 @@ static ssize_t usbhost_cmd_tx(FAR struct usbhost_state_s *priv,
 {
   int ret;
 
-  nxsem_wait_uninterruptible(&priv->exclsem);
+  nxmutex_lock(&priv->lock);
 
   ret = usbhost_ctrl_cmd(priv,
                          USB_REQ_DIR_OUT | USB_REQ_TYPE_CLASS |
                          USB_REQ_RECIPIENT_DEVICE,
                          0, 0, 0, (uint8_t *)buffer, buflen);
 
-  nxsem_post(&priv->exclsem);
+  nxmutex_unlock(&priv->lock);
 
   return ret;
 }
@@ -943,7 +938,7 @@ static ssize_t usbhost_acl_tx(FAR struct usbhost_state_s *priv,
   hport = priv->usbclass.hport;
   DEBUGASSERT(hport);
 
-  nxsem_wait_uninterruptible(&priv->exclsem);
+  nxmutex_lock(&priv->lock);
 
   nwritten = DRVR_TRANSFER(hport->drvr, priv->bulkout,
                                (uint8_t *)buffer, buflen);
@@ -957,7 +952,7 @@ static ssize_t usbhost_acl_tx(FAR struct usbhost_state_s *priv,
       nwritten = OK;
     }
 
-  nxsem_post(&priv->exclsem);
+  nxmutex_unlock(&priv->lock);
 
   return nwritten;
 }
@@ -1118,17 +1113,9 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
 
   if (ret >= 0)
     {
-      ret = nxsem_wait_uninterruptible(&priv->exclsem);
-      if (ret < 0)
-        {
-          return ret;
-        }
-
       /* Ready for normal operation */
 
       uinfo("Successfully initialized\n");
-
-      nxsem_post(&priv->exclsem);
     }
 
   return ret;
@@ -1220,19 +1207,20 @@ static inline int usbhost_talloc(FAR struct usbhost_state_s *priv)
     {
       uerr("ERROR: DRVR_ALLOC of ctrlreq failed: %d\n", ret);
 
-      if (priv->evbuffer)
-        {
-          DRVR_FREE(hport->drvr, priv->evbuffer);
-          priv->evbuffer = NULL;
-          priv->evbuflen = 0;
-        }
-
+      usbhost_tfree(priv);
       return ret;
     }
 
   DEBUGASSERT(maxlen >= sizeof(struct usb_ctrlreq_s));
 
-  return DRVR_ALLOC(hport->drvr, &priv->tbuffer, &priv->tbuflen);
+  ret = DRVR_ALLOC(hport->drvr, &priv->tbuffer, &priv->tbuflen);
+  if (ret < 0)
+    {
+      uerr("ERROR: DRVR_ALLOC of buffer failed: %d\n", ret);
+      usbhost_tfree(priv);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -1250,10 +1238,9 @@ static inline int usbhost_talloc(FAR struct usbhost_state_s *priv)
  *
  ****************************************************************************/
 
-static inline int usbhost_tfree(FAR struct usbhost_state_s *priv)
+static inline void usbhost_tfree(FAR struct usbhost_state_s *priv)
 {
   FAR struct usbhost_hubport_s *hport;
-  int result = OK;
 
   DEBUGASSERT(priv != NULL && priv->usbclass.hport != NULL);
   hport = priv->usbclass.hport;
@@ -1273,12 +1260,10 @@ static inline int usbhost_tfree(FAR struct usbhost_state_s *priv)
 
   if (priv->tbuffer)
     {
-      result        = DRVR_FREE(hport->drvr, priv->tbuffer);
+      DRVR_FREE(hport->drvr, priv->tbuffer);
       priv->tbuffer = NULL;
       priv->tbuflen = 0;
     }
-
-  return result;
 }
 
 /****************************************************************************
@@ -1312,54 +1297,52 @@ static inline int usbhost_tfree(FAR struct usbhost_state_s *priv)
  ****************************************************************************/
 
 static FAR struct usbhost_class_s *
-  usbhost_create(FAR struct usbhost_hubport_s *hport,
-                 FAR const struct usbhost_id_s *id)
+usbhost_create(FAR struct usbhost_hubport_s *hport,
+               FAR const struct usbhost_id_s *id)
 {
   FAR struct usbhost_state_s *priv;
 
   /* Allocate a USB host class instance */
 
   priv = usbhost_allocclass();
-  if (priv)
+  if (priv == NULL)
     {
-      /* Initialize the allocated storage class instance */
+      return NULL;
+    }
 
-      memset(priv, 0, sizeof(struct usbhost_state_s));
+  /* Initialize the allocated storage class instance */
 
-      /* Assign a device number to this class instance */
+  memset(priv, 0, sizeof(struct usbhost_state_s));
 
-      if (usbhost_allocdevno(priv) == OK)
-        {
-          /* Initialize class method function pointers */
+  /* Assign a device number to this class instance */
 
-          priv->usbclass.hport        = hport;
-          priv->usbclass.connect      = usbhci_connect;
-          priv->usbclass.disconnected = usbhost_disconnected;
+  if (usbhost_allocdevno(priv) == OK)
+    {
+      /* Initialize class method function pointers */
 
-          priv->btdev.head_reserve    = 0;
-          priv->btdev.open            = usbhost_bthci_open;
-          priv->btdev.send            = usbhost_bthci_send;
-          priv->btdev.close           = usbhost_bthci_close;
-          priv->btdev.ioctl           = usbhost_bthci_ioctl;
+      priv->usbclass.hport        = hport;
+      priv->usbclass.connect      = usbhci_connect;
+      priv->usbclass.disconnected = usbhost_disconnected;
 
-          /* Initialize semaphores
-           * (this works okay in the interrupt context)
-           */
+      priv->btdev.open            = usbhost_bthci_open;
+      priv->btdev.send            = usbhost_bthci_send;
+      priv->btdev.close           = usbhost_bthci_close;
+      priv->btdev.ioctl           = usbhost_bthci_ioctl;
 
-          nxsem_init(&priv->exclsem, 0, 1);
+      /* Initialize semaphores
+       * (this works okay in the interrupt context)
+       */
 
-          /* Return the instance of the USB class driver */
+      nxmutex_init(&priv->lock);
 
-          return &priv->usbclass;
-        }
+      /* Return the instance of the USB class driver */
+
+      return &priv->usbclass;
     }
 
   /* An error occurred. Free the allocation and return NULL on all failures */
 
-  if (priv)
-    {
-      usbhost_freeclass(priv);
-    }
+  usbhost_freeclass(priv);
 
   return NULL;
 }
