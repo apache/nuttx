@@ -346,14 +346,14 @@ static const struct esp32s3_spi_config_s esp32s3_spi3_config =
   .dma_clk_bit  = SYSTEM_SPI3_DMA_CLK_EN,
   .dma_rst_bit  = SYSTEM_SPI3_DMA_RST,
 #endif
-  .cs_insig     = FSPICS0_IN_IDX,
-  .cs_outsig    = FSPICS0_OUT_IDX,
-  .mosi_insig   = FSPID_IN_IDX,
-  .mosi_outsig  = FSPID_OUT_IDX,
-  .miso_insig   = FSPIQ_IN_IDX,
-  .miso_outsig  = FSPIQ_OUT_IDX,
-  .clk_insig    = FSPICLK_IN_IDX,
-  .clk_outsig   = FSPICLK_OUT_IDX
+  .cs_insig     = SPI3_CS0_IN_IDX,
+  .cs_outsig    = SPI3_CS0_OUT_IDX,
+  .mosi_insig   = SPI3_D_IN_IDX,
+  .mosi_outsig  = SPI3_D_OUT_IDX,
+  .miso_insig   = SPI3_Q_IN_IDX,
+  .miso_outsig  = SPI3_Q_OUT_IDX,
+  .clk_insig    = SPI3_CLK_IN_IDX,
+  .clk_outsig   = SPI3_CLK_OUT_IDX
 };
 
 static const struct spi_ops_s esp32s3_spi3_ops =
