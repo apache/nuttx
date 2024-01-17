@@ -30,6 +30,7 @@
 #include <string.h>
 #include <debug.h>
 #include <errno.h>
+#include <nuttx/config.h>
 
 #include "esp32s3_clockconfig.h"
 #include "esp32s3_gpio.h"
@@ -104,15 +105,27 @@
 
 /* LEDC clock resource */
 
-#define LEDC_CLK_RES              (1)         /* APB clock */
+#define LEDC_CLK_RES_APB          (1)         /* APB clock */
+#define LEDC_CLK_RES_RC_FAST      (2)         /* RC_FAST clock */
+#define LEDC_CLK_RES_XTAL         (3)         /* XTAL clock */
+
+/* LEDC clock source frequency */
+
+#define LEDC_CLK_APB_FREQ         (80 * MHZ)      /* APB clock frequency */
+#define LEDC_CLK_RC_FAST_FREQ     (17.5 * MHZ)    /* RC_FAST clock frequency */
+#define LEDC_CLK_XTAL_FREQ        (40 * MHZ)      /* XTAL clock frequency */
 
 /* LEDC timer max reload */
 
 #define LEDC_RELOAD_MAX           (16384)    /* 2^14 */
 
+/* LEDC timer max reload bit length */
+
+#define LEDC_RELOAD_MAX_BIT_LEN   (14)
+
 /* LEDC timer max clock divider parameter */
 
-#define LEDC_CLKDIV_MAX           (262144)    /* 2^18 */
+#define LEDC_CLKDIV_MAX           (1024)    /* 2^10 */
 
 /* LEDC timer registers mapping */
 
@@ -283,9 +296,9 @@ static struct esp32s3_ledc_s g_pwm3dev =
 };
 #endif /* CONFIG_ESP32S3_LEDC_TIM3 */
 
-/* Clock reference count */
+/* Clock source */
 
-static uint32_t g_clk_ref;
+static uint32_t clk_src = 0;
 
 /****************************************************************************
  * Private functions
@@ -311,18 +324,20 @@ static void ledc_enable_clk(void)
 
   flags = enter_critical_section();
 
-  if (g_clk_ref == 0)
+  if (clk_src == 0)
     {
       setbits(SYSTEM_LEDC_CLK_EN, SYSTEM_PERIP_CLK_EN0_REG);
       resetbits(SYSTEM_LEDC_RST, SYSTEM_PERIP_RST_EN0_REG);
 
-      putreg32(LEDC_CLK_RES, LEDC_CONF_REG);
-      putreg32(LEDC_CLK_EN, LEDC_CONF_REG);
+      putreg32(LEDC_CLK_RES_APB, LEDC_CONF_REG);
+      setbits(LEDC_CLK_EN, LEDC_CONF_REG);
+
+      /* We set default clock is APB. */
+
+      clk_src = LEDC_CLK_RES_APB;
 
       pwminfo("Enable ledc clock\n");
     }
-
-  g_clk_ref++;
 
   leave_critical_section(flags);
 }
@@ -347,14 +362,13 @@ static void ledc_disable_clk(void)
 
   flags = enter_critical_section();
 
-  g_clk_ref--;
-
-  if (g_clk_ref == 0)
+  if (clk_src != 0)
     {
       pwminfo("Disable ledc clock\n");
 
       setbits(SYSTEM_LEDC_RST, SYSTEM_PERIP_RST_EN0_REG);
       resetbits(SYSTEM_LEDC_CLK_EN, SYSTEM_PERIP_CLK_EN0_REG);
+      clk_src = 0;
     }
 
   leave_critical_section(flags);
@@ -379,9 +393,41 @@ static void setup_timer(struct esp32s3_ledc_s *priv)
   irqstate_t flags;
   uint32_t regval;
   uint32_t reload;
-  uint32_t prescaler;
-  uint32_t shift = 1;
-  uint64_t pwmclk = esp_clk_apb_freq();
+  float prescaler;
+  uint32_t integral_prescaler;
+  uint32_t fractional_prescaler;
+  uint8_t shift;
+  uint64_t pwmclk = LEDC_CLK_APB_FREQ;
+
+  /* Determine the using clock source and set pwmclk */
+
+  switch (clk_src)
+  {
+  case LEDC_CLK_RES_APB:
+
+    /* use APB clock */
+
+    pwmclk = LEDC_CLK_APB_FREQ;
+    break;
+
+  case LEDC_CLK_RES_RC_FAST:
+
+    /* use RC_FAST clock */
+
+    pwmclk = LEDC_CLK_RC_FAST_FREQ;
+    break;
+
+  case LEDC_CLK_RES_XTAL:
+
+    /* use XTAL clock */
+
+    pwmclk = LEDC_CLK_XTAL_FREQ;
+    break;
+
+  default:
+    pwmerr("Invalid clock source or no clock has been inited !");
+    break;
+  }
 
   /* Reset timer */
 
@@ -400,8 +446,8 @@ static void setup_timer(struct esp32s3_ledc_s *priv)
    * In ESP32S3, there are 3 clock resources for PWM:
    *
    *   1. APB clock (80 MHz)
-   *   2. RTC clock (8 MHz)
-   *   3. XTAL_CLK
+   *   2. RC_FAST_CLK (17.5 MHz)
+   *   3. XTAL_CLK (40 MHZ)
    *
    * We mostly use APB clock generally.
    *
@@ -410,11 +456,11 @@ static void setup_timer(struct esp32s3_ledc_s *priv)
    * That is the solution that should give us the most accuracy in the timer
    * control.  Subject to:
    *
-   *   2 <= presc  <= 2^18(262144)
+   *   2 <= presc  <= 2^14(16384)
    *   1 <= clkdiv <= 2^10
    *
-   * clkdiv has 8-bit decimal precision, so
-   * clkdiv = pwmclk * 256 / 16384 / frequency would be optimal.
+   * clkdiv has 10-bit integral precision and 8-bit fractional precision, so
+   * clkdiv = pwmclk / 16384 / frequency would be optimal.
    *
    * Example:
    *
@@ -431,34 +477,42 @@ static void setup_timer(struct esp32s3_ledc_s *priv)
    *  shift     = 14
    */
 
-  reload = (pwmclk * 256 / priv->frequency + LEDC_CLKDIV_MAX) /
-           LEDC_CLKDIV_MAX;
-  if (reload == 0)
-    {
-      reload = 1;
-    }
-  else if (reload > LEDC_RELOAD_MAX)
-    {
-      reload = LEDC_RELOAD_MAX;
-    }
+  /* Search the maximum value of timer reload value */
 
-  for (int c = 2; c <= LEDC_RELOAD_MAX; c *= 2)
-    {
-      if (c * 2 > reload)
+  for (reload = LEDC_RELOAD_MAX , shift = LEDC_RELOAD_MAX_BIT_LEN;
+       reload > 1;
+       reload = (reload >> 1), shift -= 1)
+      {
+        if (reload * priv->frequency <= pwmclk)
         {
-          reload = c;
           break;
         }
+  }
 
-      shift++;
-    }
+  /* Caculate the prescaler */
 
-  prescaler = pwmclk * 256 / reload / priv->frequency;
+  prescaler = (float)pwmclk / priv->frequency / reload;
+
+  /* Get the integral part */
+
+  integral_prescaler = (uint32_t) prescaler;
+
+  /* Get the fractional part. To write to the registers, value need to be
+  * multiply by 256
+  */
+
+  fractional_prescaler = (uint32_t)((prescaler - integral_prescaler) * 256);
+
+  /* Prevent prescaler goto 0. In esp32 series, prescaler == 1 means
+  * clock signal goes pass-through
+  */
+
+  if (integral_prescaler == 0) integral_prescaler = 1;
 
   pwminfo("PWM timer%" PRIu8 " frequency=%0.4f reload=%" PRIu32 " shift=%"
           PRIu32 " prescaler=%0.4f\n",
-          priv->num, (float)pwmclk / reload / ((float)prescaler / 256),
-          reload, shift, (float)prescaler / 256);
+          priv->num, (float)pwmclk / reload / ((float)prescaler),
+          reload, shift, (float)prescaler);
 
   /* Store reload for channel duty */
 
@@ -469,12 +523,9 @@ static void setup_timer(struct esp32s3_ledc_s *priv)
   /* Set timer clock divide and reload */
 
   regval = (shift << LEDC_TIMER0_DUTY_RES_S) |
-           (prescaler << LEDC_CLK_DIV_TIMER0_S);
+           (fractional_prescaler << LEDC_CLK_DIV_TIMER0_S) |
+           (integral_prescaler << LEDC_CLK_DIV_TIMER0_S << 8);
   SET_TIMER_REG(priv, LEDC_TIMER0_CONF_REG, regval);
-
-  /* Setup to timer to use APB clock (80MHz) */
-
-  SET_TIMER_BITS(priv, LEDC_TIMER0_CONF_REG, LEDC_TICK_SEL_TIMER0);
 
   /* Update clock divide and reload to hardware */
 
@@ -522,6 +573,10 @@ static void setup_channel(struct esp32s3_ledc_s *priv, int cn)
 
   SET_CHAN_REG(chan, LEDC_CH0_CONF0_REG, 0);
   SET_CHAN_REG(chan, LEDC_CH0_CONF1_REG, 0);
+
+  /* Select the clock source */
+
+  SET_CHAN_REG(chan, LEDC_CH0_CONF0_REG, priv->num);
 
   /* Set pulse phase 0 */
 
