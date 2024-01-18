@@ -30,6 +30,28 @@
 #include <nuttx/config.h>
 #include <stdlib.h>
 
+#include <nuttx/lib/lib.h>
+
+//***************************************************************************
+// Pre-processor Definitions
+//***************************************************************************
+
+#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
+#undef malloc
+#undef free
+#undef realloc
+#undef memalign
+#undef zalloc
+#undef calloc
+
+#define malloc   kmm_malloc
+#define free     kmm_free
+#define realloc  kmm_realloc
+#define memalign kmm_memalign
+#define zalloc   kmm_zalloc
+#define calloc   kmm_calloc
+#endif
+
 //***************************************************************************
 // Namespace
 //***************************************************************************
