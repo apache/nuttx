@@ -1435,6 +1435,22 @@ static void mpfs_spi_init(struct spi_dev_s *dev)
   mpfs_spi_set_master_mode(priv, 1);
   mpfs_spi_enable(priv, 1);
 
+  /* Disable all interrupt sources */
+
+  modifyreg32(MPFS_SPI_CONTROL, MPFS_SPI_INTTXTURUN |
+                                MPFS_SPI_INTRXOVRFLOW |
+                                MPFS_SPI_INTTXDONE,
+                                0);
+
+  /* Clear all interrupt sources */
+
+  putreg32(MPFS_SPI_TXCHUNDRUN |
+           MPFS_SPI_RXCHOVRFLW |
+           MPFS_SPI_DATA_RX |
+           MPFS_SPI_TXDONE, MPFS_SPI_INT_CLEAR);
+
+  /* Then enable the interrupt */
+
   up_enable_irq(priv->plic_irq);
 }
 
