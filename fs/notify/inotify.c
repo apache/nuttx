@@ -870,6 +870,28 @@ static void notify_queue_path_event(FAR const char *path, uint32_t mask)
 }
 
 /****************************************************************************
+ * Name: notify_get_path
+ *
+ * Description:
+ *   Get the path from the file pointer.
+ *
+ ****************************************************************************/
+
+static int notify_get_path(FAR struct file *filep, FAR char *path)
+{
+  /* We only apply file lock on mount points (f_inode won't be NULL). */
+
+  if (!INODE_IS_MOUNTPT(filep->f_inode) &&
+      !INODE_IS_PSEUDODIR(filep->f_inode) &&
+      !INODE_IS_DRIVER(filep->f_inode))
+    {
+      return -EBADF;
+    }
+
+  return file_fcntl(filep, F_GETPATH, path);
+}
+
+/****************************************************************************
  * Name: notify_queue_filep_event
  *
  * Description:
@@ -883,11 +905,10 @@ static inline void notify_queue_filep_event(FAR struct file *filep,
   int ret;
 
   nxmutex_lock(&g_inotify_hash_lock);
-  ret = file_fcntl(filep, F_GETPATH, g_inotify_temp_buffer[0]);
+  ret = notify_get_path(filep, g_inotify_temp_buffer[0]);
   if (ret < 0)
     {
       nxmutex_unlock(&g_inotify_hash_lock);
-      finfo("Failed to get path\n");
       return;
     }
 
