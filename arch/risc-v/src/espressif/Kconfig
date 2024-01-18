@@ -217,31 +217,17 @@ config ESPRESSIF_SOC_RTC_MEM_SUPPORTED
 
 menu "Bootloader and Image Configuration"
 
-choice
-	prompt "Bootloader type"
-	default ESPRESSIF_SIMPLE_BOOT
-	depends on ESPRESSIF_ESP32C3
-	---help---
-		Bootloader type
+config ESPRESSIF_SIMPLE_BOOT
+	bool
+	depends on !ESPRESSIF_BOOTLOADER_MCUBOOT
+	default y if ESPRESSIF_ESP32C3
 
 config ESPRESSIF_BOOTLOADER_MCUBOOT
-	bool "Enable Native MCUboot"
+	bool "Enable MCUboot-bootable format"
 	select ESPRESSIF_HAVE_OTA_PARTITION
 	depends on ESPRESSIF_ESP32C3
 	---help---
-		Enables the Espressif port of MCUboot bootloader.
-
-config ESPRESSIF_SIMPLE_BOOT
-	bool "Enable Simple Boot mode"
-	depends on ESPRESSIF_ESP32C3
-	---help---
-		Enables the Simple Boot, a method of booting that doesn't depend on a
-		2nd stage bootloader. Please note that some of the ESP-IDF bootloader
-		features are not available using direct boot, such as partition tables
-		and OTA. However, most of these features are implemented in NuttX and
-		MCUboot.
-
-endchoice
+		Enables the Espressif port of MCUboot to be used as 2nd stage bootloader.
 
 config ESPRESSIF_MCUBOOT_VERSION
 	string "MCUboot version"
