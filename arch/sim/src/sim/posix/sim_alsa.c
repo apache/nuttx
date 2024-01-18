@@ -633,6 +633,7 @@ static int sim_audio_flush(struct audio_lowerhalf_s *dev)
       struct ap_buffer_s *apb;
 
       apb = (struct ap_buffer_s *)dq_remfirst(&priv->pendq);
+      apb->flags &= ~AUDIO_APB_FINAL;
 #ifdef CONFIG_AUDIO_MULTI_SESSION
       priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_DEQUEUE, apb, OK, NULL);
 #else
