@@ -36,6 +36,11 @@
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
+#include "chip.h"
+
+#ifdef CONFIG_ARCH_HAVE_MMU
+#include "mmu.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
