@@ -24,6 +24,7 @@
 
 #include <string.h>
 #include <errno.h>
+#include <syslog.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
@@ -232,6 +233,7 @@ void video_framebuff_capture_done(video_framebuff_t *fbuf)
       fbuf->vbuf_next = fbuf->vbuf_next->next;
       if (fbuf->vbuf_next == fbuf->vbuf_top)  /* RING mode case. */
         {
+          syslog(LOG_WARNING, "video buffer is overflow.\n");
           fbuf->vbuf_top  = fbuf->vbuf_top->next;
           fbuf->vbuf_tail = fbuf->vbuf_tail->next;
         }
