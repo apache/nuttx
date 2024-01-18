@@ -2152,6 +2152,7 @@ static int video_query_ext_ctrl(FAR struct video_mng_s *vmng,
 
   attr->flags      = 0;
   attr->elem_size  = 0;
+  attr->elems      = 1;
   attr->nr_of_dims = 0;
   memset(attr->dims, 0, sizeof(attr->dims));
 
