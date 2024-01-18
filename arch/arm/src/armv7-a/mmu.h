@@ -645,7 +645,10 @@
  * require up to 16Kb of memory.
  */
 
-#define PGTABLE_SIZE       0x00004000
+#ifndef PGTABLE_SIZE
+#  define PGTABLE_SIZE       0x00004000
+#endif
+
 #ifdef CONFIG_ARCH_ADDRENV
 #  define ALL_PGTABLE_SIZE (PGTABLE_SIZE * CONFIG_SMP_NCPUS)
 #else
