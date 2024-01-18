@@ -184,24 +184,52 @@ if(${CONFIG_RISCV_TOOLCHAIN} STREQUAL GNU_RVG)
     set(ARCHRVISAZ "_zicsr_zifencei")
   endif()
 
+  set(ARCHCPUEXTFLAGS i)
+
   if(CONFIG_ARCH_RV_ISA_M)
-    set(ARCHRVISAM m)
+    set(ARCHCPUEXTFLAGS ${ARCHCPUEXTFLAGS}m)
   endif()
 
   if(CONFIG_ARCH_RV_ISA_A)
-    set(ARCHRVISAA a)
-  endif()
-
-  if(CONFIG_ARCH_RV_ISA_C)
-    set(ARCHRVISAC c)
+    set(ARCHCPUEXTFLAGS ${ARCHCPUEXTFLAGS}a)
   endif()
 
   if(CONFIG_ARCH_FPU)
-    set(ARCHRVISAF f)
+    set(ARCHCPUEXTFLAGS ${ARCHCPUEXTFLAGS}f)
   endif()
 
   if(CONFIG_ARCH_DPFPU)
-    set(ARCHRVISAD d)
+    set(ARCHCPUEXTFLAGS ${ARCHCPUEXTFLAGS}d)
+  endif()
+
+  if(CONFIG_ARCH_QPFPU)
+    set(ARCHCPUEXTFLAGS ${ARCHCPUEXTFLAGS}q)
+  endif()
+
+  if(CONFIG_ARCH_RV_ISA_C)
+    set(ARCHCPUEXTFLAGS ${ARCHCPUEXTFLAGS}c)
+  endif()
+
+  if(CONFIG_ARCH_RV_ISA_V)
+    set(ARCHCPUEXTFLAGS ${ARCHCPUEXTFLAGS}v)
+  endif()
+
+  if(CONFIG_ARCH_RV_ISA_ZICSR_ZIFENCEI)
+    if(NOT DEFINED GCCVER)
+      execute_process(COMMAND ${CMAKE_CXX_COMPILER} --version
+                      OUTPUT_VARIABLE GCC_VERSION_OUTPUT)
+      string(REGEX MATCH "\\+\\+.* ([0-9]+)\\.[0-9]+" GCC_VERSION_REGEX
+                   "${GCC_VERSION_OUTPUT}")
+      set(GCCVER ${CMAKE_MATCH_1})
+    endif()
+    if(GCCVER GREATER_EQUAL 12)
+      set(ARCHCPUEXTFLAGS ${ARCHCPUEXTFLAGS}_zicsr_zifencei)
+    endif()
+  endif()
+
+  if(CONFIG_ARCH_RV_ISA_VENDOR_EXTENSIONS)
+    set(ARCHCPUEXTFLAGS
+        ${ARCHCPUEXTFLAGS}_${CONFIG_ARCH_RV_ISA_VENDOR_EXTENSIONS})
   endif()
 
   # Detect abi type
@@ -218,9 +246,6 @@ if(${CONFIG_RISCV_TOOLCHAIN} STREQUAL GNU_RVG)
 
   # Construct arch flags
 
-  set(ARCHCPUEXTFLAGS
-      i${ARCHRVISAM}${ARCHRVISAA}${ARCHRVISAF}${ARCHRVISAD}${ARCHRVISAC}${ARCHRVISAZ}
-  )
   set(ARCHCPUFLAGS -march=${ARCHTYPE}${ARCHCPUEXTFLAGS})
 
   # Construct arch abi flags
