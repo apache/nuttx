@@ -145,7 +145,7 @@ if(CONFIG_DEBUG_OPT_UNUSED_SECTIONS)
   add_compile_options(-ffunction-sections -fdata-sections)
 endif()
 
-add_link_options(-Wl,-nostdlib)
+add_link_options(-nostdlib)
 add_link_options(-Wl,--entry=__start)
 
 if(CONFIG_DEBUG_LINK_MAP)
