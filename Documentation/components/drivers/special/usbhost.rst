@@ -2,36 +2,36 @@
 USB Host-Side Drivers
 =====================
 
--  ``include/nuttx/usb/usbhost.h``. All structures and APIs
-   needed to work with USB host-side drivers are provided in this
-   header file.
+-  **USB host controller driver** abstracts the host controller
+   device in the target chip. Each USB host controller driver
+   must implement an instance of ``struct usbhost_driver_s`` and
+   ``struct usbhost_connection_s`` defined in
+   ``include/nuttx/usb/usbhost.h``.
 
--  ``struct usbhost_driver_s`` and
-   ``struct usbhost_connection_s``. Each USB host controller
-   driver must implement an instance of
-   ``struct usbhost_driver_s`` and
-   ``struct usbhost_connection_s``: ``struct usbhost_driver_s``
-   provides the interface between the USB host driver and the USB
-   class driver; ``struct usbhost_connection_s`` provides the
-   interface between the USB host driver and platform-specific
-   connection management and device enumeration logic. These
-   structures are defined in ``include/nuttx/usb/usbhost.h``.
+   -  ``struct usbhost_driver_s`` provides the interface between 
+      the USB host driver and the USB host class driver.
+
+   -  ``struct usbhost_connection_s`` provides the interface between
+      the USB host driver and platform-specific connection management
+      and device enumeration logic.
+
 
    **Examples**: ``arch/arm/src/lpc17xx_40xx/lpc17_40_usbhost.c``,
    ``arch/arm/src/stm32/stm32_otgfshost.c``,
    ``arch/arm/src/sama5/sam_ohci.c``, and
    ``arch/arm/src/sama5/sam_ehci.c``.
 
--  ``struct usbhost_class_s``. Each USB host class driver must
-   implement an instance of ``struct usbhost_class_s``. This
-   structure is also defined in ``include/nuttx/usb/usbhost.h``.
+-  **USB host class driver** abstracts USB peripherals conected to
+   the USB host controller. Each USB host class driver must implement
+   an instance of ``struct usbhost_class_s`` defined also in
+   ``include/nuttx/usb/usbhost.h``.
 
    **Examples**: ``drivers/usbhost/usbhost_storage.c``
 
 -  **USB Host Class Driver Registry**. The NuttX USB host
    infrastructure includes a *registry*. During its
    initialization, each USB host class driver must call the
-   interface, ``usbhost_registerclass()`` in order add its
+   interface, ``usbhost_registerclass()`` in order to add its
    interface to the registry. Later, when a USB device is
    connected, the USB host controller will look up the USB host
    class driver that is needed to support the connected device in
@@ -84,7 +84,7 @@ USB Host-Side Drivers
       **Examples**: The function ``usbhost_msc_initialize()`` in
       the file ``drivers/usbhost/usbhost_storage.c``
 
-   #. Each application must include a *waiter* thread thread that
+   #. Each application must include a *waiter* thread that
       (1) calls the USB host controller driver's ``wait()`` to
       detect the connection of a device, and then (2) call the USB
       host controller driver's ``enumerate`` method to bind the
