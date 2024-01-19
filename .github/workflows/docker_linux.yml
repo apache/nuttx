@@ -27,6 +27,8 @@ on:
       - 'tools/ci/docker/linux/**'
       - '.github/workflows/docker_linux.yml'
 
+  workflow_dispatch:
+
 env:
   IMAGE_NAME: apache-nuttx-ci-linux
 
