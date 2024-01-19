@@ -994,6 +994,7 @@ comment "Partition Table configuration"
 config ESP32C3_PARTITION_TABLE
 	bool "Create MTD partitions from Partition Table"
 	default n
+	select ESP32C3_BOOTLOADER_BUILD_FROM_SOURCE
 	---help---
 		Decode partition table and initialize partitions as MTD.
 
@@ -1032,42 +1033,28 @@ config ESP32C3_HAVE_OTA_PARTITION
 	bool
 	default n
 
-menu "Application Image Configuration"
-
-choice
-	prompt "Application Image Format"
-	default ESP32C3_APP_FORMAT_LEGACY
-	---help---
-		Depending on the chosen 2nd stage bootloader, the application may
-		be required to be perform a specific startup routine. Furthermore,
-		the image binary must be formatted according to the definition from
-		the 2nd stage bootloader.
+menu "Bootloader and Image Configuration"
 
 config ESP32C3_APP_FORMAT_LEGACY
-	bool "Legacy format"
+	bool
+	default y if !ESP32C3_APP_FORMAT_MCUBOOT
+	depends on !ESP32C3_APP_FORMAT_MCUBOOT
 	---help---
 		This is the legacy application image format, as supported by the ESP-IDF
 		2nd stage bootloader.
 
 config ESP32C3_APP_FORMAT_MCUBOOT
-	bool "MCUboot-bootable format"
+	bool "Enable MCUboot-bootable format"
 	depends on !MCUBOOT_BOOTLOADER
 	select ESP32C3_HAVE_OTA_PARTITION
+	select ESP32C3_BOOTLOADER_BUILD_FROM_SOURCE
 	---help---
-		The Espressif port of MCUboot supports the loading of unsegmented firmware
-		images.
-
-endchoice # Application Image Format
-
-choice
-	prompt "Source for bootloader binaries"
-	default ESP32C3_BOOTLOADER_DOWNLOAD_PREBUILT
-	---help---
-		Select the action to be taken by the build system for the
-		"make bootloader" target.
+		Enables the Espressif port of MCUboot to be used as 2nd stage bootloader.
 
 config ESP32C3_BOOTLOADER_DOWNLOAD_PREBUILT
-	bool "Download prebuilt binaries"
+	bool
+	default y if !ESP32C3_BOOTLOADER_BUILD_FROM_SOURCE
+	depends on !ESP32C3_BOOTLOADER_BUILD_FROM_SOURCE
 	---help---
 		The build system will download the prebuilt binaries from
 		https://github.com/espressif/esp-nuttx-bootloader according to the chosen
@@ -1080,8 +1067,6 @@ config ESP32C3_BOOTLOADER_BUILD_FROM_SOURCE
 		the https://github.com/espressif/esp-nuttx-bootloader repository and build a
 		custom bootloader according to the chosen Application Image Format
 		(ESP32C3_APP_FORMAT_LEGACY or ESP32C3_APP_FORMAT_MCUBOOT) and partition information.
-
-endchoice
 
 choice
 	prompt "Target slot for image flashing"
@@ -1113,10 +1098,36 @@ config ESP32C3_APP_MCUBOOT_HEADER_SIZE
 	default 32
 	depends on ESP32C3_APP_FORMAT_MCUBOOT
 
-config ESP32C3_PARTITION_TABLE_OFFSET
-	hex "Partition Table offset"
+config ESP32C3_PARTITION_TABLE_OFFSET_DEFAULT
+	hex
 	default 0x8000
 	depends on ESP32C3_APP_FORMAT_LEGACY
+
+config ESP32C3_CUSTOM_PARTITION_TABLE_OFFSET
+	bool "Customize partition table offset"
+	default n
+	depends on ESP32C3_APP_FORMAT_LEGACY
+	select ESP32C3_BOOTLOADER_BUILD_FROM_SOURCE
+	---help---
+		Enable to select the offset of the partition table in the flash.
+
+if ESP32C3_CUSTOM_PARTITION_TABLE_OFFSET
+
+config ESP32C3_PARTITION_TABLE_OFFSET
+	hex "Partition Table offset"
+	default ESP32C3_PARTITION_TABLE_OFFSET_DEFAULT
+	depends on ESP32C3_APP_FORMAT_LEGACY
+
+endif # ESP32C3_CUSTOM_PARTITION_TABLE_OFFSET
+
+if !ESP32C3_CUSTOM_PARTITION_TABLE_OFFSET
+
+config ESP32C3_PARTITION_TABLE_OFFSET
+	hex
+	default ESP32C3_PARTITION_TABLE_OFFSET_DEFAULT
+	depends on ESP32C3_APP_FORMAT_LEGACY
+
+endif # !ESP32C3_CUSTOM_PARTITION_TABLE_OFFSET
 
 if BUILD_PROTECTED
 
