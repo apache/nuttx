@@ -79,7 +79,7 @@ int nxsem_init(FAR sem_t *sem, int pshared, unsigned int value)
   sem->flags = 0;
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-#  if defined(CONFIG_SEM_PREALLOCHOLDERS) && CONFIG_SEM_PREALLOCHOLDERS > 0
+#  if CONFIG_SEM_PREALLOCHOLDERS > 0
   sem->hhead = NULL;
 #  else
   INITIALIZE_SEMHOLDER(&sem->holder);
