@@ -348,8 +348,8 @@ static int cdcecm_txpoll(FAR struct net_driver_s *dev)
  *
  * Description:
  *   After a packet has been received and dispatched to the network, it
- *   may return return with an outgoing packet.  This function checks for
- *   that case and performs the transmission if necessary.
+ *   may return with an outgoing packet.  This function checks for that
+ *   case and performs the transmission if necessary.
  *
  * Input Parameters:
  *   priv - Reference to the driver state structure
@@ -401,7 +401,7 @@ static void cdcecm_receive(FAR struct cdcecm_driver_s *self)
    * configuration.
    */
 
-  /* Copy the data data from the hardware to self->dev.d_buf.  Set
+  /* Copy the data from the hardware to self->dev.d_buf.  Set
    * amount of data in self->dev.d_len
    */
 
