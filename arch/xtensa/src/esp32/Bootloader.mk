@@ -192,15 +192,7 @@ else ifeq ($(CONFIG_ESP32_BOOTLOADER_DOWNLOAD_PREBUILT),y)
 BOOTLOADER_VERSION = latest
 BOOTLOADER_URL     = https://github.com/espressif/esp-nuttx-bootloader/releases/download/$(BOOTLOADER_VERSION)
 
-ifeq ($(CONFIG_ESP32_APP_FORMAT_MCUBOOT),y)
-
-bootloader:
-	$(call DOWNLOAD,$(BOOTLOADER_URL),mcuboot-esp32.bin,$(TOPDIR)/mcuboot-esp32.bin)
-
-clean_bootloader:
-	$(call DELFILE,$(TOPDIR)/mcuboot-esp32.bin)
-
-else ifeq ($(CONFIG_ESP32_APP_FORMAT_LEGACY),y)
+ifeq ($(CONFIG_ESP32_APP_FORMAT_LEGACY),y)
 
 bootloader:
 	$(call DOWNLOAD,$(BOOTLOADER_URL),bootloader-esp32.bin,$(TOPDIR)/bootloader-esp32.bin)
