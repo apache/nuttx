@@ -109,12 +109,12 @@ ifeq ($(CONFIG_ESP32C3_APP_FORMAT_MCUBOOT),y)
 BOOTLOADER_BIN        = $(TOPDIR)/mcuboot-esp32c3.bin
 BOOTLOADER_SIGNED_BIN = $(TOPDIR)/mcuboot-esp32c3.signed.bin
 
-$(BOOTLOADER_BIN): $(BOOTLOADER_CONFIG)
+$(BOOTLOADER_BIN): $(BOOTLOADER_SRCDIR) $(BOOTLOADER_CONFIG)
 	$(Q) echo "Building Bootloader"
 	$(Q) $(BOOTLOADER_SRCDIR)/build_mcuboot.sh -c esp32c3 -s -f $(BOOTLOADER_CONFIG)
 	$(call COPYFILE, $(BOOTLOADER_SRCDIR)/$(BOOTLOADER_OUTDIR)/mcuboot-esp32c3.bin, $(TOPDIR))
 
-bootloader: $(BOOTLOADER_CONFIG) $(BOOTLOADER_SRCDIR) $(BOOTLOADER_BIN)
+bootloader: $(BOOTLOADER_CONFIG) $(BOOTLOADER_BIN)
 ifeq ($(CONFIG_ESP32C3_SECURE_BOOT),y)
 	$(eval KEYDIR := $(TOPDIR)/$(ESPSEC_KEYDIR))
 	$(eval BOOTLOADER_SIGN_KEY := $(abspath $(KEYDIR)/$(subst ",,$(CONFIG_ESP32C3_SECURE_BOOT_BOOTLOADER_SIGNING_KEY))))
@@ -165,15 +165,7 @@ else ifeq ($(CONFIG_ESP32C3_BOOTLOADER_DOWNLOAD_PREBUILT),y)
 BOOTLOADER_VERSION = latest
 BOOTLOADER_URL     = https://github.com/espressif/esp-nuttx-bootloader/releases/download/$(BOOTLOADER_VERSION)
 
-ifeq ($(CONFIG_ESP32C3_APP_FORMAT_MCUBOOT),y)
-
-bootloader:
-	$(call DOWNLOAD,$(BOOTLOADER_URL),mcuboot-esp32c3.bin,$(TOPDIR)/mcuboot-esp32c3.bin)
-
-clean_bootloader:
-	$(call DELFILE,$(TOPDIR)/mcuboot-esp32c3.bin)
-
-else ifeq ($(CONFIG_ESP32C3_APP_FORMAT_LEGACY),y)
+ifeq ($(CONFIG_ESP32C3_APP_FORMAT_LEGACY),y)
 
 bootloader:
 	$(call DOWNLOAD,$(BOOTLOADER_URL),bootloader-esp32c3.bin,$(TOPDIR)/bootloader-esp32c3.bin)
