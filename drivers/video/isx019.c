@@ -810,7 +810,7 @@ static const int32_t g_isx019_wbmode[] =
 
 #define NR_WBMODE (sizeof(g_isx019_wbmode) / sizeof(int32_t))
 
-static int32_t g_isx019_iso[] =
+static const int32_t g_isx019_iso[] =
 {
   1000,     /* ISO1 */
   1200,     /* ISO1.2 */
@@ -899,6 +899,32 @@ static const uint8_t g_isx019_gain[] =
   37,  /* gain for ISO4000 */
   38,  /* gain for ISO5000 */
 };
+
+static const int32_t g_isx019_iso_auto[] =
+{
+  IMGSENSOR_ISO_SENSITIVITY_MANUAL,
+  IMGSENSOR_ISO_SENSITIVITY_AUTO,
+};
+
+#define NR_ISO_AUTO (sizeof(g_isx019_iso_auto) / sizeof(int32_t))
+
+static const int32_t g_isx019_metering[] =
+{
+  IMGSENSOR_EXPOSURE_METERING_AVERAGE,
+  IMGSENSOR_EXPOSURE_METERING_CENTER_WEIGHTED,
+  IMGSENSOR_EXPOSURE_METERING_SPOT,
+  IMGSENSOR_EXPOSURE_METERING_MATRIX,
+};
+
+#define NR_METERING (sizeof(g_isx019_metering) / sizeof(int32_t))
+
+static const int32_t g_isx019_ae[] =
+{
+  IMGSENSOR_EXPOSURE_AUTO,
+  IMGSENSOR_EXPOSURE_MANUAL,
+};
+
+#define NR_AE (sizeof(g_isx019_ae) / sizeof(int32_t))
 
 /****************************************************************************
  * Private Functions
@@ -1957,9 +1983,11 @@ static int isx019_get_supported_value(FAR struct imgsensor_s *sensor,
         break;
 
       case IMGSENSOR_ID_EXPOSURE_AUTO:
-        val->type = IMGSENSOR_CTRL_TYPE_INTEGER;
-        SET_RANGE(val->u.range, MIN_AE, MAX_AE,
-                                STEP_AE, def->ae);
+        val->type = IMGSENSOR_CTRL_TYPE_INTEGER_MENU;
+        SET_DISCRETE(val->u.discrete,
+                     NR_AE,
+                     g_isx019_ae,
+                     IMGSENSOR_EXPOSURE_AUTO);
         break;
 
       case IMGSENSOR_ID_EXPOSURE_ABSOLUTE:
@@ -1991,15 +2019,19 @@ static int isx019_get_supported_value(FAR struct imgsensor_s *sensor,
         break;
 
       case IMGSENSOR_ID_ISO_SENSITIVITY_AUTO:
-        val->type = IMGSENSOR_CTRL_TYPE_INTEGER;
-        SET_RANGE(val->u.range, MIN_AUTOISO, MAX_AUTOISO,
-                                STEP_AUTOISO, def->iso_auto);
+        val->type = IMGSENSOR_CTRL_TYPE_INTEGER_MENU;
+        SET_DISCRETE(val->u.discrete,
+                     NR_ISO_AUTO,
+                     g_isx019_iso_auto,
+                     IMGSENSOR_ISO_SENSITIVITY_AUTO);
         break;
 
       case IMGSENSOR_ID_EXPOSURE_METERING:
-        val->type = IMGSENSOR_CTRL_TYPE_INTEGER;
-        SET_RANGE(val->u.range, MIN_METER, MAX_METER,
-                                STEP_METER, def->meter);
+        val->type = IMGSENSOR_CTRL_TYPE_INTEGER_MENU;
+        SET_DISCRETE(val->u.discrete,
+                     NR_METERING,
+                     g_isx019_metering,
+                     IMGSENSOR_EXPOSURE_METERING_AVERAGE);
         break;
 
       case IMGSENSOR_ID_SPOT_POSITION:
