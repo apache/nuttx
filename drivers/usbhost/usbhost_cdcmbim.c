@@ -256,6 +256,7 @@ static void usbhost_notification_work(FAR void *arg);
 static void usbhost_notification_callback(FAR void *arg, ssize_t nbytes);
 static void usbhost_rxdata_work(FAR void *arg);
 static void usbhost_bulkin_work(FAR void *arg);
+static void usbhost_bulkin_callback(FAR void *arg, ssize_t nbytes);
 
 static void usbhost_destroy(FAR void *arg);
 
