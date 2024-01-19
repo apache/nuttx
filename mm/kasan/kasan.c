@@ -109,6 +109,11 @@ static inline FAR uintptr_t *kasan_find_mem(uintptr_t addr, size_t size,
 {
   FAR struct kasan_region_s *region;
 
+  if (size == 0)
+    {
+      return NULL;
+    }
+
   for (region = g_region; region != NULL; region = region->next)
     {
       if (addr >= region->begin && addr < region->end)
@@ -168,11 +173,6 @@ static FAR uintptr_t *kasan_mem_to_shadow(FAR const void *ptr, size_t size,
         }
 
       mod = size % KASAN_SHADOW_SCALE;
-      if (mod == 0)
-        {
-          return NULL;
-        }
-
       addr += mul * KASAN_SHADOW_SCALE;
       size = mod;
     }
