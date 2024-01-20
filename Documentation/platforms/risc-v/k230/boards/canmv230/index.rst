@@ -2,15 +2,13 @@
 CanMV K230
 =============
 
-The `Kendryte K230 <https://www.canaan.io/product/k230>`_ SoC contains two indepedent T-Head C908 based RV64GC CPU cores. The CPU1 even has RVV1.0 vector extension and operates at higher speed. The SoC contains accelerators for depth image processing, audio processing and neural network inferencing etc.
-
 The `CanMV K230 <https://developer.canaan-creative.com/k230/dev/zh/CanMV_K230_%E6%95%99%E7%A8%8B.html>`_ is a raspberry-pi sized single board computer with 512MB DRAM and a microSD card slot for booting. It comes with serial console, Ethernet, HDMI and USB/OTG ports. Unfortuunately it doesn't support JTAG alike debugging interfaces.
 
 The `K230 SDK <https://github.com/kendryte/k230_sdk>`_ contains source code, libraries and user guides for booting up an AMP enviroment with Linux on CPU0 and RT-Thread on CPU1. 
 
 K230 boots from CPU0 and loads U-Boot into DRAM first, then U-Boot kicks off OpenSBI wrapped Linux/RTT OS images on respective CPU cores accordingly.
 
-The K230 U-Boot runs in machine mode, thus it can run flat or kernel NuttX builds. The kernel build shall run with or without SBI layer.
+The K230 U-Boot runs in machine mode, thus it supports flat, protected or kernel `build modes <https://nuttx.apache.org/docs/latest/implementation/processes_vs_tasks.html>`_. The kernel build mode further allows use of OpenSBI or not.
 
 Preparations
 ============
@@ -34,7 +32,8 @@ Before building NuttX, download the **RISC-V Toolchain riscv64-unknown-elf** fro
 Building
 ========
 
-To build NuttX for CanMV, :doc:`install the prerequisites </quickstart/install>` and :doc:`clone the git repositories </quickstart/install>` for ``nuttx`` and ``apps``.
+
+To build NuttX for CanMV-k230, :doc:`install the prerequisites </quickstart/install>` and :doc:`clone the git repositories </quickstart/install>` for ``nuttx`` and ``apps``.
 
 FLAT Build
 ----------
@@ -73,27 +72,59 @@ The combined `nuttx.bin` in TFTP service folder can then be tried on target.
 KERNEL Build
 ------------
 
-KERNEL build requires two build passes: first pass to build kernel w/ dummy ROMFS, then we build the apps and update ROMFS, second pass to build the kernel with real ROMFS image containing the apps.
+KERNEL build requires two build passes:
+
+- First pass to build kernel w/ dummy ROMFS, then we build the apps and update ROMFS,
+- Second pass to build the kernel with real ROMFS image containing the apps.
+
+There are two configurations for KERNEL build mode:
+
+- The ``canmv230/knsh`` is for use within standard SBI environment.
+- The ``canmv230/nsbi`` uses a built-in minimal SBI environment.
+
+The ``canmv230/nsbi`` has smaller footprint and is simpler to use, the ``canmv230/knsh`` is for cases requiring stanard SBI environment.
+
+Take the following steps to build the kernel mode export package:
+
+.. code:: console
+
+   $ # first pass to build kernel exports
+   $ cd nuttx
+   $ make distclean && tools/configure.sh canmv230:knsh
+   $ make -j4
+   $ make export # build nuttx-export-*.gz package
+
+With export package, we can move ahead to build the apps:
+
+.. code:: console
+
+   $ cd apps
+   $ # import the nuttx-export-*.gz package from kernel
+   $ tools/mkimport.sh -z -x ../nuttx/nuttx-export-*.gz
+   $ make import)  # build the apps
+   $ # generate ROMFS image for contents in apps/bin folder
+   $ tools/mkromfsimg.sh ../nuttx/arch/risc-v/src/board/romfs_boot.c
+
+Once ROMFS for apps is ready, build the kernel again:
 
 .. code:: console
 
    $ cd nuttx
-   $ make distclean && tools/configure.sh canmv230:knsh
-   $ make -j4    # first pass to build kernel
-   $ (make export; cd ../apps; tools/mkimport.sh -z -x ../nuttx/nuttx-export-*.gz; make import)  # build the apps
-   $ (cd ../apps/; tools/mkromfsimg.sh ../nuttx/boards/risc-v/k230/canmv230/src/romfs_boot.c) # update the ROMFS image
-   $ make -j4    # build again to pick up the ROMFS
+   $ make -j4    # build kernel again with real ROMFS
 
-The built `nuttx.bin` can be then wrapped with K230 OpenSBI like below:
+The ``nuttx.bin`` is the artifact of kernel build. For ``canmv230/nsbi`` case, simply copy it to the TFTP folder and try on the target.
+
+For ``canmv230/knsh`` case, take following steps to wrap the artifact with the  OpenSBI extract from the K230 SDK downloaded above:
 
 .. code:: console
 
    $ cd $HOME
+   $ # unpack the OpenSBI extract from K230 SDK
    $ tar xvf canmv230-opensbi-dtb.tar.xz
    $ export OSBI=$HOME/opensbi
    $ cd /tmp/aaa    # use a temporary work folder
-   $ make -C $OSBI O=$(pwd) PLATFORM=generic\
-          CROSS_COMPILE=riscv64-unknown-elf- FW_PIC=n K230_LIITLE_CORE=1\
+   $ make -C $OSBI O=$(pwd) PLATFORM=generic \
+          CROSS_COMPILE=riscv64-unknown-elf- FW_PIC=n K230_LIITLE_CORE=1 \
           FW_FDT_PATH=$OSBI/k230.dtb FW_PAYLOAD_PATH=nuttx.bin -j4
    $ cp platform/generic/firmware/fw_payload.bin tftp-server-path/nuttx.bin
 
@@ -103,7 +134,7 @@ Please use actual paths on your host for `nuttx.bin` and TFTP folder when runnin
 Running
 =======
 
-Within U-boot console, load `nuttx.bin` from TFTP service and run it:
+Within U-boot console, load ``nuttx.bin`` from TFTP and run it as shown below:
 
 .. code:: console
 
@@ -112,9 +143,10 @@ Within U-boot console, load `nuttx.bin` from TFTP service and run it:
    k230# tftp 8000000 nuttx.bin
    k230# go 8000000
 
-Then the `nsh> ` console should appear, type `help` to see available commands.
+Then the ``nsh`` console should appear, type ``help`` to see available commands.
 
 Issues
 ======
 
- - The `ostest` app has non-zero exit code in Kernel build.
+- The ``ostest`` app has non-zero exit code in Kernel mode.
+
