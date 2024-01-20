@@ -1,5 +1,5 @@
 /****************************************************************************
- * nuttx/drivers/pcie/pcie_root.c
+ * drivers/pcie/pcie_root.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -39,12 +39,25 @@
  * Public Data
  ****************************************************************************/
 
-struct pcie_dev_type_s *pci_device_types[] =
+FAR struct pcie_dev_type_s *g_pci_device_types[] =
 {
 #ifdef CONFIG_VIRT_QEMU_PCI_TEST
   &pcie_type_qemu_pci_test,
 #endif /* CONFIG_VIRT_QEMU_PCI_TEST */
   NULL,
+};
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+static struct pcie_dev_type_s g_tmp_type =
+{
+  PCI_ID_ANY,                   /* vendor */
+  PCI_ID_ANY,                   /* device */
+  PCI_ID_ANY,                   /* class_rev */
+  "Unknown",                    /* name */
+  NULL,                         /* probe */
 };
 
 /****************************************************************************
@@ -70,29 +83,27 @@ struct pcie_dev_type_s *pci_device_types[] =
 int pci_enumerate(FAR struct pcie_bus_s *bus,
                   FAR struct pcie_dev_type_s **types)
 {
-  unsigned int bdf;
-  uint16_t vid;
-  uint16_t id;
-  uint16_t rev;
   struct pcie_dev_s tmp_dev;
-  struct pcie_dev_type_s tmp_type =
-    {
-      .name = "Unknown",
-      .vendor = PCI_ID_ANY,
-      .device = PCI_ID_ANY,
-      .class_rev = PCI_ID_ANY,
-      .probe = NULL,
-    };
+  unsigned int      bdf;
+  uint16_t          vid;
+  uint16_t          id;
+  uint16_t          rev;
+  int               i;
 
   if (!bus)
+    {
       return -EINVAL;
+    }
+
   if (!types)
+    {
       return -EINVAL;
+    }
 
   for (bdf = 0; bdf < CONFIG_PCIE_MAX_BDF; bdf++)
     {
       tmp_dev.bus = bus;
-      tmp_dev.type = &tmp_type;
+      tmp_dev.type = &g_tmp_type;
       tmp_dev.bdf = bdf;
 
       bus->ops->pci_cfg_read(&tmp_dev, PCI_CFG_VENDOR_ID, &vid, 2);
@@ -100,13 +111,15 @@ int pci_enumerate(FAR struct pcie_bus_s *bus,
       bus->ops->pci_cfg_read(&tmp_dev, PCI_CFG_REVERSION, &rev, 2);
 
       if (vid == PCI_ID_ANY)
-        continue;
+        {
+          continue;
+        }
 
       pciinfo("[%02x:%02x.%x] Found %04x:%04x, class/reversion %08x\n",
               bdf >> 8, (bdf >> 3) & 0x1f, bdf & 0x3,
               vid, id, rev);
 
-      for (int i = 0; types[i] != NULL; i++)
+      for (i = 0; types[i] != NULL; i++)
         {
           if (types[i]->vendor == PCI_ID_ANY ||
               types[i]->vendor == vid)
@@ -130,6 +143,7 @@ int pci_enumerate(FAR struct pcie_bus_s *bus,
                                   device probe function\n",
                                   bdf >> 8, (bdf >> 3) & 0x1f, bdf & 0x3);
                         }
+
                       break;
                     }
                 }
@@ -160,7 +174,7 @@ int pci_enumerate(FAR struct pcie_bus_s *bus,
 
 int pcie_initialize(FAR struct pcie_bus_s *bus)
 {
-  return pci_enumerate(bus, pci_device_types);
+  return pci_enumerate(bus, g_pci_device_types);
 }
 
 /****************************************************************************
@@ -214,25 +228,31 @@ int pci_enable_device(FAR struct pcie_dev_s *dev)
 
 int pci_find_cap(FAR struct pcie_dev_s *dev, uint16_t cap)
 {
-  uint8_t pos = PCI_CFG_CAP_PTR - 1;
+  uint8_t  pos = PCI_CFG_CAP_PTR - 1;
   uint16_t status;
-  uint8_t rcap;
+  uint8_t  rcap;
 
   dev->bus->ops->pci_cfg_read(dev, PCI_CFG_STATUS, &status, 2);
 
   if (!(status & PCI_STS_CAPS))
+    {
       return -EINVAL;
+    }
 
   while (1)
     {
       dev->bus->ops->pci_cfg_read(dev, pos + 1, &pos, 1);
       if (pos == 0)
+        {
           return -EINVAL;
+        }
 
       dev->bus->ops->pci_cfg_read(dev, pos, &rcap, 1);
 
       if (rcap == cap)
+        {
           return pos;
+        }
     }
 }
 
@@ -252,11 +272,12 @@ int pci_find_cap(FAR struct pcie_dev_s *dev, uint16_t cap)
  *
  ****************************************************************************/
 
-int pci_get_bar(FAR struct pcie_dev_s *dev, uint32_t bar,
-                uint32_t *ret)
+int pci_get_bar(FAR struct pcie_dev_s *dev, uint32_t bar, FAR uint32_t *ret)
 {
   if (bar > 5)
+    {
       return -EINVAL;
+    }
 
   dev->bus->ops->pci_cfg_read(dev, PCI_CFG_BAR + bar * 4, ret, 4);
 
@@ -280,13 +301,15 @@ int pci_get_bar(FAR struct pcie_dev_s *dev, uint32_t bar,
  ****************************************************************************/
 
 int pci_get_bar64(FAR struct pcie_dev_s *dev, uint32_t bar,
-                  uint64_t *ret)
+                  FAR uint64_t *ret)
 {
-  if (bar > 4 || ((bar % 2) != 0))
-      return -EINVAL;
-
   uint32_t barmem1;
   uint32_t barmem2;
+
+  if (bar > 4 || ((bar % 2) != 0))
+    {
+      return -EINVAL;
+    }
 
   dev->bus->ops->pci_cfg_read(dev, PCI_CFG_BAR + bar * 4, &barmem1, 4);
   dev->bus->ops->pci_cfg_read(dev, PCI_CFG_BAR + bar * 4 + 4, &barmem2, 4);
@@ -312,11 +335,12 @@ int pci_get_bar64(FAR struct pcie_dev_s *dev, uint32_t bar,
  *
  ****************************************************************************/
 
-int pci_set_bar(FAR struct pcie_dev_s *dev, uint32_t bar,
-                uint32_t val)
+int pci_set_bar(FAR struct pcie_dev_s *dev, uint32_t bar, uint32_t val)
 {
   if (bar > 5)
+    {
       return -EINVAL;
+    }
 
   dev->bus->ops->pci_cfg_write(dev, PCI_CFG_BAR + bar * 4, &val, 4);
 
@@ -339,14 +363,15 @@ int pci_set_bar(FAR struct pcie_dev_s *dev, uint32_t bar,
  *
  ****************************************************************************/
 
-int pci_set_bar64(FAR struct pcie_dev_s *dev, uint32_t bar,
-                  uint64_t val)
+int pci_set_bar64(FAR struct pcie_dev_s *dev, uint32_t bar, uint64_t val)
 {
-  if (bar > 4 || ((bar % 2) != 0))
-      return -EINVAL;
-
   uint32_t barmem1 = (uint32_t)val;
   uint32_t barmem2 = (uint32_t)(val >> 32);
+
+  if (bar > 4 || ((bar % 2) != 0))
+    {
+      return -EINVAL;
+    }
 
   dev->bus->ops->pci_cfg_write(dev, PCI_CFG_BAR + bar * 4, &barmem1, 4);
   dev->bus->ops->pci_cfg_write(dev, PCI_CFG_BAR + bar * 4 + 4, &barmem2, 4);
@@ -372,27 +397,35 @@ int pci_set_bar64(FAR struct pcie_dev_s *dev, uint32_t bar,
  ****************************************************************************/
 
 int pci_map_bar(FAR struct pcie_dev_s *dev, uint32_t bar,
-                unsigned long length, uint32_t *ret)
+                unsigned long length, FAR uint32_t *ret)
 {
-  if (bar > 5)
-      return -EINVAL;
-
   uint32_t barmem;
+
+  if (bar > 5)
+    {
+      return -EINVAL;
+    }
 
   dev->bus->ops->pci_cfg_read(dev, PCI_CFG_BAR + bar * 4, &barmem, 4);
 
   if (((bar % 2) == 0 &&
       (barmem & PCI_BAR_64BIT) == PCI_BAR_64BIT) ||
       (barmem & PCI_BAR_IO)    == PCI_BAR_IO)
+    {
       return -EINVAL;
+    }
 
   if (!dev->bus->ops->pci_map_bar)
+    {
       return -EINVAL;
+    }
 
   dev->bus->ops->pci_map_bar(dev, barmem, length);
 
   if (ret)
-    *ret = barmem;
+    {
+      *ret = barmem;
+    }
 
   return OK;
 }
@@ -415,32 +448,40 @@ int pci_map_bar(FAR struct pcie_dev_s *dev, uint32_t bar,
  ****************************************************************************/
 
 int pci_map_bar64(FAR struct pcie_dev_s *dev, uint32_t bar,
-                  unsigned long length, uint64_t *ret)
+                  unsigned long length, FAR uint64_t *ret)
 {
-  if (bar > 4 || ((bar % 2) != 0))
-      return -EINVAL;
-
   uint32_t barmem1;
   uint32_t barmem2;
   uint64_t barmem;
+
+  if (bar > 4 || ((bar % 2) != 0))
+    {
+      return -EINVAL;
+    }
 
   dev->bus->ops->pci_cfg_read(dev, PCI_CFG_BAR + bar * 4, &barmem1, 4);
 
   if ((barmem1 & PCI_BAR_64BIT) != PCI_BAR_64BIT ||
       (barmem1 & PCI_BAR_IO)    == PCI_BAR_IO)
+    {
       return -EINVAL;
+    }
 
   dev->bus->ops->pci_cfg_read(dev, PCI_CFG_BAR + bar * 4 + 4, &barmem2, 4);
 
   barmem = ((uint64_t)barmem2 << 32) | barmem1;
 
   if (!dev->bus->ops->pci_map_bar64)
+    {
       return -EINVAL;
+    }
 
   dev->bus->ops->pci_map_bar64(dev, barmem, length);
 
   if (ret)
-    *ret = barmem;
+    {
+      *ret = barmem;
+    }
 
   return OK;
 }
