@@ -42,6 +42,8 @@ config ARCH_CHIP_NRF52840
 	select NRF52_HAVE_USBDEV
 	select NRF52_HAVE_PWM3
 	select NRF52_HAVE_CRYPTOCELL
+	select NRF52_HAVE_IEEE802154
+	select NRF52_HAVE_BLELR
 
 endchoice # NRF52 Chip Selection
 
@@ -131,6 +133,14 @@ config NRF52_HAVE_PWM3
 	default n
 
 config NRF52_HAVE_CRYPTOCELL
+	bool
+	default n
+
+config NRF52_HAVE_BLELE
+	bool
+	default n
+
+config NRF52_HAVE_IEEE802154
 	bool
 	default n
 
@@ -610,6 +620,18 @@ endif # !NRF52_PWM_MULTICHAN
 endif # NRF52_PWM
 
 endmenu # PWM configuration
+
+menu "RADIO Configuration"
+
+if NRF52_RADIO
+
+config NRF52_RADIO_CUSTOM
+	bool "RADIO uses custom IRQ handlers"
+	default n
+
+endif #NRF52_RADIO
+
+endmenu # "RADIO Configuration"
 
 menu "SAADC Configuration"
 
