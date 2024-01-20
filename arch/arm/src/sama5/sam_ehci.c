@@ -2719,7 +2719,7 @@ static int sam_qh_cancel(struct sam_qh_s *qh, uint32_t **bp, void *arg)
 
   /* Check if this is the QH that we are looking for */
 
-  if (qh->epinfo == epinfo)
+  if (qh->epinfo != epinfo)
     {
       /* No... keep looking */
 
@@ -4441,7 +4441,7 @@ static int sam_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
            * head.
            */
 
-          if (qh && qh != &g_asynchead)
+          if (qh && qh == &g_asynchead)
             {
               /* Claim that we successfully cancelled the transfer */
 
