@@ -46,19 +46,40 @@
 
 struct pci_test_dev_hdr_s
 {
-    volatile uint8_t test;       /* write-only, starts a given test number */
-    volatile uint8_t width_type; /* read-only, type and width of access for a given test.
-                                  * 1,2,4 for byte,word or long write.
-                                  * any other value if test not supported on this BAR */
-    volatile uint8_t pad0[2];
-    volatile uint32_t offset;    /* read-only, offset in this BAR for a given test */
-    volatile uint32_t data;      /* read-only, data to use for a given test */
-    volatile uint32_t count;     /* for debugging. number of writes detected. */
-    volatile uint8_t name[];     /* for debugging. 0-terminated ASCII string. */
+  volatile uint8_t  test;       /* write-only, starts a given test number */
+  volatile uint8_t  width_type; /* read-only, type and width of access for a given test.
+                                 * 1,2,4 for byte,word or long write.
+                                 * any other value if test not supported on this BAR */
+  volatile uint8_t  pad0[2];
+  volatile uint32_t offset;     /* read-only, offset in this BAR for a given test */
+  volatile uint32_t data;       /* read-only, data to use for a given test */
+  volatile uint32_t count;      /* for debugging. number of writes detected. */
+  volatile uint8_t  name[];     /* for debugging. 0-terminated ASCII string. */
 };
 
 /*****************************************************************************
- * Public Functions
+ * Private Function Prototypes
+ *****************************************************************************/
+
+static int qemu_pci_test_probe(FAR struct pcie_bus_s *bus,
+                               FAR struct pcie_dev_type_s *type,
+                               uint16_t bdf);
+
+/*****************************************************************************
+ * Public Data
+ *****************************************************************************/
+
+struct pcie_dev_type_s g_pcie_type_qemu_pci_test =
+{
+  0x1b36,                 /* vendor */
+  0x0005,                 /* device */
+  PCI_ID_ANY,             /* class_rev */
+  "Qemu PCI test device", /* name */
+  qemu_pci_test_probe     /* probe */
+};
+
+/*****************************************************************************
+ * Private Functions
  *****************************************************************************/
 
 /*****************************************************************************
@@ -66,22 +87,28 @@ struct pci_test_dev_hdr_s
  *
  * Description:
  *   Initialize device
+ *
  *****************************************************************************/
 
-int qemu_pci_test_probe(FAR struct pcie_bus_s *bus,
-                        FAR struct pcie_dev_type_s *type, uint16_t bdf)
+static int qemu_pci_test_probe(FAR struct pcie_bus_s *bus,
+                               FAR struct pcie_dev_type_s *type,
+                               uint16_t bdf)
 {
-  uint32_t bar[2];
-  struct pcie_dev_s dev =
-    {
-      .bus = bus,
-      .type = type,
-      .bdf = bdf,
-    };
+  FAR struct pci_test_dev_hdr_s *ptr;
+  struct pcie_dev_s              dev;
+  uint32_t                       bar[2];
+  int                            ii;
+  int                            i;
+
+  /* Get dev */
+
+  dev.bus = bus;
+  dev.type = type;
+  dev.bdf = bdf;
 
   pci_enable_device(&dev);
 
-  for (int ii = 0; ii < 2; ii++)
+  for (ii = 0; ii < 2; ii++)
     {
       pci_get_bar(&dev, ii, bar + ii);
 
@@ -91,10 +118,9 @@ int qemu_pci_test_probe(FAR struct pcie_bus_s *bus,
 
           pci_map_bar(&dev, ii, 0x1000, NULL);
 
-          struct pci_test_dev_hdr_s *ptr =
-            (struct pci_test_dev_hdr_s *)(uintptr_t)bar[ii];
+          ptr = (struct pci_test_dev_hdr_s *)(uintptr_t)bar[ii];
 
-          int i = 0;
+          i = 0;
           while (1)
             {
               ptr->test = i;
@@ -115,16 +141,3 @@ int qemu_pci_test_probe(FAR struct pcie_bus_s *bus,
 
   return OK;
 }
-
-/*****************************************************************************
- * Public Data
- *****************************************************************************/
-
-struct pcie_dev_type_s pcie_type_qemu_pci_test =
-{
-    .vendor = 0x1b36,
-    .device = 0x0005,
-    .class_rev = PCI_ID_ANY,
-    .name = "Qemu PCI test device",
-    .probe = qemu_pci_test_probe
-};

@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/serial/uart_mcs99xx.h
+ * include/nuttx/virt/qemu_pci.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -42,7 +42,7 @@ extern "C"
 #endif
 
 #ifdef CONFIG_VIRT_QEMU_PCI_TEST
-extern struct pcie_dev_type_s pcie_type_qemu_pci_test;
+extern struct pcie_dev_type_s g_pcie_type_qemu_pci_test;
 #endif /* CONFIG_VIRT_QEMU_PCI_TEST */
 
 #undef EXTERN
