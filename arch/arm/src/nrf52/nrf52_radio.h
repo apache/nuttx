@@ -40,6 +40,29 @@
 
 #define NRF52_RADIO_LOGICAL_ADDRESS_MAX (8)
 
+/* Ops */
+
+#define NRF52_RADIO_RESET(lower)         lower->ops->reset(lower)
+#define NRF52_RADIO_PUTREG(lower, o, v)  lower->ops->putreg(lower, o, v)
+#define NRF52_RADIO_GETREG(lower, o)     lower->ops->getreg(lower, o)
+#define NRF52_RADIO_INTEN(lower, i)      lower->ops->inten(lower, i)
+#define NRF52_RADIO_INTCLR(lower, i)     lower->ops->intclr(lower, i)
+#define NRF52_RADIO_SHRTSET(lower, s)    lower->ops->shorts(lower, s)
+#define NRF52_RADIO_PWRSET(lower, pwr)   lower->ops->power(lower, pwr)
+#define NRF52_RADIO_MODESET(lower, m)    lower->ops->mode_set(lower, m)
+#define NRF52_RADIO_FREQSET(lower, f)    lower->ops->freq_set(lower, f)
+#define NRF52_RADIO_RSSIGET(lower, r)    lower->ops->rssi_get(lower, r)
+#define NRF52_RADIO_TXPWRSET(lower, p)   lower->ops->txpower_set(lower, p)
+#define NRF52_RADIO_TIFSSET(lower, p)    lower->ops->tifs_set(lower, t)
+#define NRF52_RADIO_PKTCFG(lower, cfg)   lower->ops->pkt_cfg(lower, cfg)
+#define NRF52_RADIO_CRCCFG(lower, cfg)   lower->ops->crc_cfg(lower, cfg)
+#define NRF52_RADIO_WHITESET(lower, cfg) lower->ops->white_set(lower, c)
+#define NRF52_RADIO_ADDRSET(lower, i, a) lower->ops->addr_set(lower, i, a)
+#define NRF52_RADIO_DUMPREGS(lower)      lower->ops->dumpregs(lower)
+#define NRF52_RADIO_SFDSET(lower, sfd)   lower->ops->sfd_set(lower, sfd)
+#define NRF52_RADIO_EDCNTSET(lower, ec)  lower->ops->edcnt_set(lower, ec)
+#define NRF52_RADIO_CCACFG(lower, cca)   lower->ops->cca_cfg(lower, cca)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -50,20 +73,18 @@ enum nrf52_radio_mode_e
 {
   NRF52_RADIO_MODE_NRF1MBIT     = 0,
   NRF52_RADIO_MODE_NRF2MBIT     = 1,
-  NRF52_RADIO_MODE_BLE1MBIT     = 2,
-  NRF52_RADIO_MODE_BLE2MBIT     = 3,
-  NRF52_RADIO_MODE_BLELR125KBIT = 4,
-  NRF52_RADIO_MODE_BLELR500KBIT = 5,
-  NRF52_RADIO_MODE_IEEE802154   = 6
-};
+  NRF52_RADIO_MODE_NRF250KBIT   = 2,
+  NRF52_RADIO_MODE_BLE1MBIT     = 3,
+  NRF52_RADIO_MODE_BLE2MBIT     = 4,
+#ifdef CONFIG_NRF52_HAVE_BLELR
+  NRF52_RADIO_MODE_BLELR125KBIT = 5,
+  NRF52_RADIO_MODE_BLELR500KBIT = 6,
+#endif
+  NRF52_RADIO_MODE_LAST,
 
-/* Radio state */
-
-enum nrf52_radio_state_e
-{
-  NRF52_RADIO_STATE_DISABLED = 0,
-  NRF52_RADIO_STATE_TX       = 1,
-  NRF52_RADIO_STATE_RX       = 2,
+#ifdef CONFIG_NRF52_HAVE_IEEE802154
+  NRF52_RADIO_MODE_IEEE802154   = 15
+#endif
 };
 
 /* Preamble configuration */
@@ -95,7 +116,18 @@ enum nrf52_radio_crc_skipaddr_e
   NRF52_RADIO_CRC_SKIPADDR_IEEE802154 = 2,
 };
 
-/* On air packet layout:
+/* CCA mode of operation */
+
+enum nrf52_radio_cca_mode_e
+{
+  NRF52_RADIO_CCA_ED             = 0,
+  NRF52_RADIO_CCA_CARRIER        = 1,
+  NRF52_RADIO_CCA_CARRIER_AND_ED = 2,
+  NRF52_RADIO_CCA_CARRIER_OR_ED  = 2,
+  NRF52_RADIO_CCA_EDTEST1        = 4,
+};
+
+/* On air packet layout (no IEEE802154 mode):
  *
  * +---------------------------------------+
  * | FIRST                                 |
@@ -104,7 +136,6 @@ enum nrf52_radio_crc_skipaddr_e
  * | LSB      | LSB  | LSB    |    |       |
  * |          | ADDRESS       |    |       |
  * +----------+---------------+----+-------+
- *
  *
  * +----------------------------+
  * | Stored on RAM              |
@@ -121,6 +152,20 @@ enum nrf52_radio_crc_skipaddr_e
  * | MSB   |       |
  * |       |       |
  * +-------+-------+
+ *
+ * For IEEE802154 mode packet layout is different:
+ *
+ * +--------------------------------------------------------------------+
+ * |         PHY protocol data unit (PPDU)                              |
+ * +--------------------+-----+---------+-------------------------------+
+ * | Preamble sequence  | SFD | Lenght  | PHY payload                   |
+ * |--------------------+-----+---------+-------------------------------+
+ * | 5 octets synchronization | 1 octet | Maximum 127 octets (PSDU)     |
+ * | header (SHR)             | (PHR)   +-------------------------------+
+ * |                          |         | MAC protocol data unit (MPDU) |
+ * +--------------------------+---------+-------------------------------+
+ *                            |  Stored on RAM                          |
+ *                            +-----------------------------------------+
  *
  */
 
@@ -166,11 +211,49 @@ struct nrf52_radio_addr_s
   uint8_t a4;                   /* BASE[3] */
 };
 
+#ifdef CONFIG_NRF52_HAVE_IEEE802154
+
+/* IEEE 802.15.4 clear channel assessment control */
+
+struct nrf52_radio_cca_s
+{
+  uint8_t mode;                 /* CCA mode of operation */
+  uint8_t edthres;              /* CCA energy busy threshold */
+  uint8_t corrthres;            /* CCA correlator busy threshold */
+  uint8_t corrcnt;              /* Limit for occurances above CCACORRTHRES */
+};
+#endif
+
 /* NRF52 radio operations */
 
 struct nrf52_radio_dev_s;
 struct nrf52_radio_ops_s
 {
+  /* Reset radio */
+
+  void (*reset)(struct nrf52_radio_dev_s *dev);
+
+  /* Put register value */
+
+  void (*putreg)(struct nrf52_radio_dev_s *dev, uint32_t offset,
+                 uint32_t value);
+
+  /* Get register value */
+
+  uint32_t (*getreg)(struct nrf52_radio_dev_s *dev, uint32_t offset);
+
+  /* Enable interrupts */
+
+  void (*inten)(struct nrf52_radio_dev_s *dev, uint32_t irq);
+
+  /* Disable interrupts */
+
+  void (*intclr)(struct nrf52_radio_dev_s *dev, uint32_t irq);
+
+  /* Configure shorts */
+
+  void (*shorts)(struct nrf52_radio_dev_s *dev, uint32_t irq);
+
   /* Turn-on/turn-off radio power */
 
   int (*power)(struct nrf52_radio_dev_s *dev, bool state);
@@ -185,7 +268,7 @@ struct nrf52_radio_ops_s
 
   /* Get RSSI sample */
 
-  int (*rssi_get)(struct nrf52_radio_dev_s *dev, int *rssi);
+  int (*rssi_get)(struct nrf52_radio_dev_s *dev, int8_t *rssi);
 
   /* Set TX power */
 
@@ -214,19 +297,24 @@ struct nrf52_radio_ops_s
   int (*addr_set)(struct nrf52_radio_dev_s *dev, uint8_t i,
                   struct nrf52_radio_addr_s *addr);
 
-  /* Read packet */
-
-  int (*read)(struct nrf52_radio_dev_s *dev,
-              uint8_t *buf, int len);
-
-  /* Write packet */
-
-  int (*write)(struct nrf52_radio_dev_s *dev,
-               uint8_t *buf, int len);
-
   /* Dump radio registers */
 
   void (*dumpregs)(struct nrf52_radio_dev_s *dev);
+
+#ifdef CONFIG_NRF52_HAVE_IEEE802154
+  /* IEEE 802.15.4 start of frame delimiter */
+
+  void (*sfd_set)(struct nrf52_radio_dev_s *dev, uint8_t sfd);
+
+  /* IEEE 802.15.4 energy detect level */
+
+  void (*edcnt_set)(struct nrf52_radio_dev_s *dev, uint32_t edcnt);
+
+  /* IEEE 802.15.4 clear channel assessment control */
+
+  void (*cca_cfg)(struct nrf52_radio_dev_s *dev,
+                  struct nrf52_radio_cca_s *cca);
+#endif
 };
 
 /* NRF52 radio board specific data */
@@ -247,18 +335,10 @@ struct nrf52_radio_dev_s
   uint32_t                    base;      /* Radio base */
   uint32_t                    irq;       /* Radio IRQ number */
   uint8_t                     mode;      /* Radio mode */
-  uint8_t                     state;     /* Radio state */
   struct nrf52_radio_pktcfg_s pktcfg;    /* Current packet */
-  uint16_t                    rxbuf_len; /* RX buffer length */
-  uint16_t                    txbuf_len; /* TX buffer length */
-  uint8_t                     *rxbuf;    /* RX buffer */
-  uint8_t                     *txbuf;    /* TX buffer */
   mutex_t                     lock;      /* Mutual exclusion mutex */
-  sem_t                       sem_isr;   /* Interrupt wait semaphore */
   uint16_t                    tifs;      /* Interframe spacing time */
   uint8_t                     txpower;   /* TX power */
-  uint8_t                     txaddr;    /* TX address */
-  uint8_t                     rxaddr;    /* RX addresses */
   struct nrf52_radio_addr_s   addr[NRF52_RADIO_LOGICAL_ADDRESS_MAX];
 };
 
