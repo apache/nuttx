@@ -49,7 +49,7 @@ with NuttX. The list is the following:
 ``CONFIG_ARCH_RAMVECTORS=y``         ``CONFIG_NSH_FILE_APPS=y``
 ``CONFIG_BOARDCTL_APP_SYMTAB=y``     ``CONFIG_NSH_LINELEN=64``
 ``CONFIG_BOARDCTL_OS_SYMTAB=y``      ``CONFIG_NSH_READLINE=y``
-``CONFIG_BUILTIN=y``                 ``CONFIG_NSH_ROMFSETC=y``
+``CONFIG_BUILTIN=y``                 ``CONFIG_ETC_ROMFS=y``
 ``CONFIG_ELF=y``                     ``CONFIG_PSEUDOTERM=y``
 ``CONFIG_FS_BINFS=y``                ``CONFIG_PTHREAD_CLEANUP_STACKSIZE=1``
 ``CONFIG_FS_PROCFS=y``               ``CONFIG_PTHREAD_MUTEX_TYPES=y``

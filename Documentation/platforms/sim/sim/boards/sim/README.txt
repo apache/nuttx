@@ -5,7 +5,7 @@ README
   --------
   This directory contains logic to support a custom ROMFS system-init script
   and start-up script.  These scripts are used by by the NSH when it starts
-  provided that CONFIG_NSH_ARCHROMFS=y.  These scripts provide a ROMFS volume
+  provided that CONFIG_ETC_ROMFS=y.  These scripts provide a ROMFS volume
   that will be mounted at /etc and will look like this at run-time:
 
     NuttShell (NSH) NuttX-7.31
