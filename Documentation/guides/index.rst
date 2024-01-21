@@ -30,3 +30,4 @@ Guides
   stm32nullpointer.rst
   stm32ccm.rst
   stackrecord.rst
+  etcromfs.rst
