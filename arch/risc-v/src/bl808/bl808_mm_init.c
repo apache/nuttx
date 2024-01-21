@@ -74,8 +74,8 @@
 #define SLAB_COUNT       (sizeof(m_l3_pgtable) / RV_MMU_PAGE_SIZE)
 
 #define KMM_PAGE_SIZE    RV_MMU_L3_PAGE_SIZE
-#define KMM_PBASE        PGT_L3_PBASE   
-#define KMM_PBASE_IDX    3   
+#define KMM_PBASE        PGT_L3_PBASE
+#define KMM_PBASE_IDX    3
 #define KMM_SPBASE       PGT_L2_PBASE
 #define KMM_SPBASE_IDX   2
 
@@ -171,7 +171,7 @@ static uintptr_t slab_alloc(void)
  ****************************************************************************/
 
 static void map_region(uintptr_t paddr, uintptr_t vaddr, size_t size,
-                       uint32_t mmuflags)
+                       uint64_t mmuflags)
 {
   uintptr_t endaddr;
   uintptr_t pbase;
@@ -235,8 +235,7 @@ void bl808_kernel_mappings(void)
 
   /* Begin mapping memory to MMU; note that at this point the MMU is not yet
    * active, so the page table virtual addresses are actually physical
-   * addresses and so forth. M-mode does not perform translations anyhow, so
-   * this mapping is quite simple to do
+   * addresses and so forth.
    */
 
   /* Map I/O region, use enough large page tables for the IO region. */
@@ -291,8 +290,34 @@ void bl808_mm_init(void)
 
   bl808_kernel_mappings();
 
-  /* Enable MMU (note: system is still in M-mode) */
+  /* Enable MMU */
 
   binfo("mmu_enable: satp=%" PRIuPTR "\n", g_kernel_pgt_pbase);
   mmu_enable(g_kernel_pgt_pbase, 0);
+}
+
+/****************************************************************************
+ * Name: mmu_flush_cache
+ *
+ * Description:
+ *   Flush the MMU Cache for T-Head C906.  Called by mmu_write_satp() after
+ *   updating the MMU SATP Register, when swapping MMU Page Tables.
+ *   This operation executes RISC-V Instructions that are specific to
+ *   T-Head C906.
+ *
+ ****************************************************************************/
+
+void weak_function mmu_flush_cache(void)
+{
+  __asm__ __volatile__
+    (
+
+      /* DCACHE.IALL: Invalidate all Page Table Entries in the D-Cache */
+
+      ".long 0x0020000b\n"
+
+      /* SYNC.S: Ensure that all Cache Operations are completed */
+
+      ".long 0x0190000b\n"
+    );
 }
