@@ -737,188 +737,49 @@ static int noteram_dump_sched_switch(FAR struct lib_outstream_s *s,
 static int noteram_dump_printf(FAR struct lib_outstream_s *s,
                                FAR struct note_printf_s *note)
 {
-  begin_packed_struct union
-    {
-      int i;
-      long l;
-#ifdef CONFIG_HAVE_LONG_LONG
-      long long ll;
-#endif
-      intmax_t im;
-      size_t sz;
-      ptrdiff_t pd;
-      FAR void *p;
-      FAR const char *s;
-#ifdef CONFIG_HAVE_DOUBLE
-      double d;
-#  ifdef CONFIG_HAVE_LONG_DOUBLE
-      long double ld;
-#  endif
-#endif
-    }
-
-  end_packed_struct *var;
-  size_t offset = 0;
   size_t ret = 0;
-  size_t len = 0;
 
   if (note->npt_type == 0)
     {
-      FAR const char *p = note->npt_fmt;
-      bool infmt = false;
-      char fmtstr[64];
-      char c;
-
-      while ((c = *p++) != '\0')
-        {
-          if (c != '%' && !infmt)
-            {
-              lib_stream_putc(s, c);
-              ret++;
-              continue;
-            }
-
-          if (!infmt)
-            {
-              len = 0;
-              infmt = true;
-              memset(fmtstr, 0, sizeof(fmtstr));
-            }
-
-          var = (FAR void *)(note->npt_data + offset);
-          fmtstr[len++] = c;
-
-          if (c == 'c' || c == 'd' || c == 'i' || c == 'u' ||
-              c == 'o' || c == 'x' || c == 'X')
-            {
-              if (*(p - 2) == 'j')
-                {
-                  offset += sizeof(var->im);
-                  ret += lib_sprintf(s, fmtstr, var->im);
-                }
-#ifdef CONFIG_HAVE_LONG_LONG
-              else if (*(p - 2) == 'l' && *(p - 3) == 'l')
-                {
-                  offset += sizeof(var->ll);
-                  ret += lib_sprintf(s, fmtstr, var->ll);
-                }
-#endif
-              else if (*(p - 2) == 'l')
-                {
-                  offset += sizeof(var->l);
-                  ret += lib_sprintf(s, fmtstr, var->l);
-                }
-              else if (*(p - 2) == 'z')
-                {
-                  offset += sizeof(var->sz);
-                  ret += lib_sprintf(s, fmtstr, var->sz);
-                }
-              else if (*(p - 2) == 't')
-                {
-                  offset += sizeof(var->pd);
-                  ret += lib_sprintf(s, fmtstr, var->pd);
-                }
-              else
-                {
-                  offset += sizeof(var->i);
-                  ret += lib_sprintf(s, fmtstr, var->i);
-                }
-
-              infmt = false;
-            }
-          else if (c == 'e' || c == 'f' || c == 'g' || c == 'a' ||
-                  c == 'A' || c == 'E' || c == 'F' || c == 'G')
-            {
-#ifdef CONFIG_HAVE_DOUBLE
-#  ifdef CONFIG_HAVE_LONG_DOUBLE
-              if (*(p - 2) == 'L')
-                {
-                  offset += sizeof(var->ld);
-                  ret += lib_sprintf(s, fmtstr, var->ld);
-                }
-              else
-#  endif
-                {
-                  offset += sizeof(var->d);
-                  ret += lib_sprintf(s, fmtstr, var->d);
-                }
-
-              infmt = false;
-            }
-#endif
-          else if (c == '*')
-            {
-              itoa(var->i, fmtstr + len - 1, 10);
-              len = strlen(fmtstr);
-              offset += sizeof(var->i);
-            }
-          else if (c == 's')
-            {
-              const char *str = note->npt_data + offset;
-              offset += strlen(str) + 1;
-              ret += lib_sprintf(s, fmtstr, str);
-              infmt = false;
-            }
-          else if (c == 'p')
-            {
-              offset += sizeof(var->p);
-              ret += lib_sprintf(s, fmtstr, var->p);
-              infmt = false;
-            }
-        }
-
-      if (*(p - 2) != '\n')
-        {
-          lib_stream_putc(s, '\n');
-          ret++;
-        }
+      ret = lib_bsprintf(s, note->npt_fmt, note->npt_data);
     }
   else
     {
       size_t count = NOTE_PRINTF_GET_COUNT(note->npt_type);
+      char fmt[128];
       size_t i;
 
-      len = strlen(note->npt_fmt);
-      if (note->npt_fmt[len - 1] == '\n')
-        {
-          len--;
-        }
-
+      fmt[0] = '\0';
       ret += lib_sprintf(s, "%p", note->npt_fmt);
       for (i = 0; i < count; i++)
         {
           int type = NOTE_PRINTF_GET_TYPE(note->npt_type, i);
-          var = (FAR void *)(note->npt_data + offset);
 
           switch (type)
             {
               case NOTE_PRINTF_UINT32:
                 {
-                  offset += sizeof(var->i);
-                  ret += lib_sprintf(s, " %u", var->i);
+                  strcat(fmt, " %u");
                 }
                 break;
               case NOTE_PRINTF_UINT64:
                 {
-                  offset += sizeof(var->ll);
-                  ret += lib_sprintf(s, " %llu", var->ll);
+                  strcat(fmt, " %llu");
                 }
                 break;
               case NOTE_PRINTF_STRING:
                 {
-                  const char *str = note->npt_data + offset;
-                  offset += strlen(str) + 1;
-                  ret += lib_sprintf(s, " %s", str);
+                  strcat(fmt, " %s");
                 }
                 break;
               case NOTE_PRINTF_DOUBLE:
                 {
-                  offset += sizeof(var->d);
-                  ret += lib_sprintf(s, " %f", var->d);
+                  strcat(fmt, " %f");
                 }
             }
         }
 
+        ret += lib_bsprintf(s, fmt, note->npt_data);
         lib_stream_putc(s, '\n');
         ret++;
     }
