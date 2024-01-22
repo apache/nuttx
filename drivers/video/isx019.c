@@ -1396,6 +1396,10 @@ static int isx019_init(FAR struct imgsensor_s *sensor)
   initialize_wbmode(priv);
   initialize_jpg_quality(priv);
 
+  /* Set initial gamma value for getting current value API. */
+
+  priv->gamma = 1000;
+
   /* Because store_default_value() needs the clock ratio,
    * clock_ratio has to be calculated first.
    */
