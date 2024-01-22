@@ -284,14 +284,28 @@ The peripheral implements four timer counter modules, each supporting three inde
 Universal Synchronous Asynchronous Receiver Transceiver (USART)
 ---------------------------------------------------------------
 
-The MCU supports both UART and USART controllers. USART can be also used in RS-485 mode (enabled
-by ``CONFIG_SAMV7_USARTx_RS485MODE`` option) or can be used with RX DMA support. For this purpose it
-is required to configure idle bus timeout value in ``CONFIG_SAMV7_SERIAL_DMA_TIMEOUT``. This option
-ensures data are read from the DMA buffer even if it is not full yet. TX DMA support is not implemented
-as well as entire DMA support for UART peripheral.
+The MCU supports both UART and USART controllers. USART peripheral can be used with RX DMA support.
+For this purpose it is required to configure idle bus timeout value in ``CONFIG_SAMV7_SERIAL_DMA_TIMEOUT``.
+This option ensures data are read from the DMA buffer even if it is not full yet. TX DMA support is not
+implemented as well as entire DMA support for UART peripheral.
+
+There are several modes in which USART peripheral can operate (ISO7816, IrDA, RS485, SPI, LIN and LON).
+Currently RS485 and SPI master are supported by NuttX.
+
+RS-485 mode is enabled by ``CONFIG_SAMV7_USARTx_RS485MODE`` option (``CONFIG_SAMV7_USART2_SERIALDRIVER``
+has to be true). In this case RTS pin is set to logical 1 before the serial driver is opened and board
+specific logic is required to set it to logical zero. This has to be done in board initialization. Once
+the driver is opened for the first time, architecture layer takes care of correct settings of RTS pin.
+There is no additional requirement for driver initialization, the process is the same as with serial mode.
+
+SPI master (host) mode is enabled by ``CONFIG_SAMV7_USARTx_SPI_MASTER`` option. In this mode USART emulates
+SPI peripheral with one slave (client) device (more slaves are not supported by the peripheral). The interface
+with the driver is the same as with other SPI drivers but BSP layer does not have to support chip selection.
+Command/data transfers are also not supported by the peripheral. Driver for SPI master mode is initialized
+by :c:func:`sam_serial_spi_initialize` with port number as an argument.
 
 USART/UART can be also used to emulate 1 wire interface. SAMv7 MCUs do not have build in support for
-1 wire therefore external hardware as TX/RX connection or optical isolation might be required. Selecting
+1 wire, therefore external hardware as TX/RX connection or optical isolation might be required. Selecting
 ``CONFIG_SAMV7_UARTx_1WIREDRIVER`` enables 1 wire driver and sets USART/UART peripheral to this mode.
 Output pins are configured as if serial mode was selected plus TX is open drain. SAMv7 part of the driver
 is initialized by :c:func:`sam_1wireinitialize` with port number as an argument.
