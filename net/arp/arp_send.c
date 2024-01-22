@@ -31,6 +31,7 @@
 #include <netinet/in.h>
 #include <net/if.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/ip.h>
@@ -50,7 +51,8 @@
  * Name: arp_send_terminate
  ****************************************************************************/
 
-static void arp_send_terminate(FAR struct arp_send_s *state, int result)
+static void arp_send_terminate(FAR struct net_driver_s *dev,
+                               FAR struct arp_send_s *state, int result)
 {
   /* Don't allow any further call backs. */
 
@@ -63,6 +65,14 @@ static void arp_send_terminate(FAR struct arp_send_s *state, int result)
   /* Wake up the waiting thread */
 
   nxsem_post(&state->snd_sem);
+
+  if (state->finish_cb != NULL)
+    {
+      nxsem_destroy(&state->snd_sem);
+      arp_callback_free(dev, state->snd_cb);
+      state->finish_cb(dev, result);
+      kmm_free(state);
+    }
 }
 
 /****************************************************************************
@@ -93,7 +103,7 @@ static uint16_t arp_send_eventhandler(FAR struct net_driver_s *dev,
       if ((flags & NETDEV_DOWN) != 0)
         {
           nerr("ERROR: Interface is down\n");
-          arp_send_terminate(state, -ENETUNREACH);
+          arp_send_terminate(dev, state, -ENETUNREACH);
           return flags;
         }
 
@@ -130,7 +140,7 @@ static uint16_t arp_send_eventhandler(FAR struct net_driver_s *dev,
 
       /* Don't allow any further call backs. */
 
-      arp_send_terminate(state, OK);
+      arp_send_terminate(dev, state, OK);
     }
 
   return flags;
@@ -319,6 +329,7 @@ int arp_send(in_addr_t ipaddr)
       state.snd_cb->flags = (ARP_POLL | NETDEV_DOWN);
       state.snd_cb->priv  = (FAR void *)&state;
       state.snd_cb->event = arp_send_eventhandler;
+      state.finish_cb     = NULL;
 
       /* Notify the device driver that new TX data is available. */
 
@@ -379,6 +390,84 @@ timeout:
 
   nxsem_destroy(&state.snd_sem);
   arp_callback_free(dev, state.snd_cb);
+errout_with_lock:
+  net_unlock();
+errout:
+  return ret;
+}
+
+/****************************************************************************
+ * Name: arp_send_async
+ *
+ * Description:
+ *   The arp_send_async() call may be to send an ARP request asyncly to
+ *   resolve an IPv4 address.
+ *
+ * Input Parameters:
+ *   ipaddr   The IP address to be queried.
+ *   cb       The callback when ARP send is finished, should not be NULL.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success the arp been sent to the driver.
+ *   On error a negated errno value is returned:
+ *
+ *     -ETIMEDOUT:    The number or retry counts has been exceed.
+ *     -EHOSTUNREACH: Could not find a route to the host
+ *
+ * Assumptions:
+ *   This function is called from the normal tasking context.
+ *
+ ****************************************************************************/
+
+int arp_send_async(in_addr_t ipaddr, arp_send_finish_cb_t cb)
+{
+  FAR struct net_driver_s *dev;
+  FAR struct arp_send_s *state = kmm_zalloc(sizeof(struct arp_send_s));
+  int ret = 0;
+
+  if (!state)
+    {
+      nerr("ERROR: %s \n", ENOMEM_STR);
+      ret = -ENOMEM;
+      goto errout;
+    }
+
+  dev = netdev_findby_ripv4addr(INADDR_ANY, ipaddr);
+  if (!dev)
+    {
+      nerr("ERROR: Unreachable: %08lx\n", (unsigned long)ipaddr);
+      ret = -EHOSTUNREACH;
+      goto errout;
+    }
+
+  net_lock();
+  state->snd_cb = arp_callback_alloc(dev);
+  if (!state->snd_cb)
+    {
+      nerr("ERROR: Failed to allocate a callback\n");
+      ret = -ENOMEM;
+      goto errout_with_lock;
+    }
+
+  nxsem_init(&state->snd_sem, 0, 0); /* Doesn't really fail */
+  state->snd_ipaddr = ipaddr;        /* IP address to query */
+
+  /* Remember the routing device name */
+
+  strlcpy((FAR char *)state->snd_ifname,
+          (FAR const char *)dev->d_ifname, IFNAMSIZ);
+
+  /* Arm/re-arm the callback */
+
+  state->snd_cb->flags = (ARP_POLL | NETDEV_DOWN);
+  state->snd_cb->priv  = (FAR void *)state;
+  state->snd_cb->event = arp_send_eventhandler;
+  state->finish_cb     = cb;
+
+  /* Notify the device driver that new TX data is available. */
+
+  netdev_txnotify_dev(dev);
+
 errout_with_lock:
   net_unlock();
 errout:

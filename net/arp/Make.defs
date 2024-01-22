@@ -35,6 +35,10 @@ ifeq ($(CONFIG_NET_ARP_DUMP),y)
 NET_CSRCS += arp_dump.c
 endif
 
+ifeq ($(CONFIG_NET_ARP_ACD),y)
+NET_CSRCS += arp_acd.c
+endif
+
 # Include arp build support
 
 DEPPATH += --dep-path arp
