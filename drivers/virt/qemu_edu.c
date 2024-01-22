@@ -60,6 +60,12 @@
 #define EDU_CONTROL_BAR_ID      0
 #define EDU_CONTROL_BAR_OFFSET  PCI_HEADER_NORM_BAR0
 
+/* One 4096 bytes long buffer at offset 0x40000 is available in the
+ * EDU device
+ */
+
+#define QEMU_EDU_DMABUF_OFFSET 0x40000
+
 /*****************************************************************************
  * Private Types
  *****************************************************************************/
@@ -67,8 +73,8 @@
 struct qemu_edu_priv_s
 {
   uintptr_t base_addr;
-  sem_t isr_done;
-  uint32_t test_result;
+  sem_t     isr_done;
+  uint32_t  test_result;
 };
 
 /*****************************************************************************
@@ -89,9 +95,22 @@ static void qemu_edu_test_intx(FAR struct pci_dev_s *dev,
 
 static int qemu_edu_interrupt(int irq, void *context, FAR void *arg);
 
+static int qemu_edu_probe(FAR struct pci_bus_s *bus,
+                          FAR const struct pci_dev_type_s *type,
+                          uint16_t bdf);
+
 /*****************************************************************************
- * Private Data
+ * Public Data
  *****************************************************************************/
+
+const struct pci_dev_type_s g_pci_type_qemu_edu =
+{
+  .vendor    = 0x1234,
+  .device    = 0x11e8,
+  .class_rev = PCI_ID_ANY,
+  .name      = "Qemu PCI EDU device",
+  .probe     = qemu_edu_probe
+};
 
 /*****************************************************************************
  * Private Functions
@@ -206,10 +225,10 @@ static void qemu_edu_test_poll(FAR struct pci_dev_s *dev, uintptr_t base_addr)
  *****************************************************************************/
 
 static void qemu_edu_test_intx(FAR struct pci_dev_s *dev,
-                               struct qemu_edu_priv_s *drv_priv)
+                               FAR struct qemu_edu_priv_s *drv_priv)
 {
   uintptr_t base_addr = drv_priv->base_addr;
-  uint32_t test_value;
+  uint32_t  test_value;
 
   pciinfo("Identification: 0x%08xu\n",
           qemu_edu_read_reg32(base_addr + EDU_REG_ID));
@@ -253,16 +272,16 @@ static void qemu_edu_test_intx(FAR struct pci_dev_s *dev,
  *****************************************************************************/
 
 static void qemu_edu_test_dma(FAR struct pci_dev_s *dev,
-                               struct qemu_edu_priv_s *drv_priv)
+                              FAR struct qemu_edu_priv_s *drv_priv)
 {
-  uintptr_t base_addr = drv_priv->base_addr;
-  void *test_block;
-  size_t block_size = 2048;
-  int i;
-  uint32_t psrand;
-  uint32_t tx_checksum;
-  uint32_t rx_checksum;
-  uint32_t dev_addr = 0x40000;
+  uintptr_t  base_addr  = drv_priv->base_addr;
+  FAR void  *test_block;
+  size_t     block_size = 2048;
+  int        i;
+  uint32_t   psrand;
+  uint32_t   tx_checksum;
+  uint32_t   rx_checksum;
+  uint32_t   dev_addr   = QEMU_EDU_DMABUF_OFFSET;
 
   pciinfo("Identification: 0x%08xu\n",
           qemu_edu_read_reg32(base_addr + EDU_REG_ID));
@@ -322,27 +341,44 @@ static void qemu_edu_test_dma(FAR struct pci_dev_s *dev,
  *
  *****************************************************************************/
 
-static int qemu_edu_interrupt(int irq, void *context, FAR void *arg)
+static int qemu_edu_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  struct qemu_edu_priv_s *drv_priv = (struct qemu_edu_priv_s *)arg;
-  uintptr_t base_addr = drv_priv->base_addr;
+  FAR struct qemu_edu_priv_s *drv_priv = (struct qemu_edu_priv_s *)arg;
+  uintptr_t                   base_addr;
+  uint32_t                    status;
 
-  uint32_t status = qemu_edu_read_reg32(base_addr + EDU_REG_INT_STATUS);
+  base_addr = drv_priv->base_addr;
+  status = qemu_edu_read_reg32(base_addr + EDU_REG_INT_STATUS);
 
   qemu_edu_write_reg32(base_addr + EDU_REG_INT_ACK, ~0U);
   switch (status)
     {
-    case 0x1:    /* Factorial triggered */
-      drv_priv->test_result = qemu_edu_read_reg32(base_addr + EDU_REG_FAC);
-      pciinfo("Computed factorial: %d\n",
-              drv_priv->test_result);
-      break;
-    case 0x100:  /* DMA triggered */
-      pciinfo("DMA transfer complete\n");
-      break;
-    default:     /* Generic write */
-      drv_priv->test_result = status;
-      pciinfo("Received value: 0x%08x\n", status);
+      /* Factorial triggered */
+
+      case 0x1:
+        {
+          drv_priv->test_result
+              = qemu_edu_read_reg32(base_addr + EDU_REG_FAC);
+          pciinfo("Computed factorial: %d\n", drv_priv->test_result);
+          break;
+        }
+
+      /* DMA triggered */
+
+      case 0x100:
+        {
+          pciinfo("DMA transfer complete\n");
+          break;
+        }
+
+      /* Generic write */
+
+      default:
+        {
+          drv_priv->test_result = status;
+          pciinfo("Received value: 0x%08x\n", status);
+          break;
+        }
     }
 
   sem_post(&drv_priv->isr_done);
@@ -350,30 +386,28 @@ static int qemu_edu_interrupt(int irq, void *context, FAR void *arg)
 }
 
 /*****************************************************************************
- * Public Functions
- *****************************************************************************/
-
-/*****************************************************************************
  * Name: qemu_edu_probe
  *
  * Description:
  *   Initialize device
+ *
  *****************************************************************************/
 
-int qemu_edu_probe(FAR struct pci_bus_s *bus,
-                   FAR struct pci_dev_type_s *type, uint16_t bdf)
+static int qemu_edu_probe(FAR struct pci_bus_s *bus,
+                          FAR const struct pci_dev_type_s *type,
+                          uint16_t bdf)
 {
-  uint32_t bar;
-  uintptr_t bar_addr;
-  struct pci_dev_s dev =
-    {
-      .bus = bus,
-      .type = type,
-      .bdf = bdf,
-    };
-
-  uint8_t irq;
   struct qemu_edu_priv_s drv_priv;
+  struct pci_dev_s       dev;
+  uint32_t               bar;
+  uintptr_t              bar_addr;
+  uint8_t                irq;
+
+  /* Get dev */
+
+  dev.bus = bus;
+  dev.type = type;
+  dev.bdf = bdf;
 
   pci_enable_bus_master(&dev);
   pciinfo("Enabled bus mastering\n");
@@ -434,16 +468,3 @@ int qemu_edu_probe(FAR struct pci_bus_s *bus,
 
   return OK;
 }
-
-/*****************************************************************************
- * Public Data
- *****************************************************************************/
-
-struct pci_dev_type_s pci_type_qemu_edu =
-{
-    .vendor = 0x1234,
-    .device = 0x11e8,
-    .class_rev = PCI_ID_ANY,
-    .name = "Qemu PCI EDU device",
-    .probe = qemu_edu_probe
-};
