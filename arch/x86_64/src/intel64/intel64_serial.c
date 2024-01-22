@@ -82,6 +82,11 @@ void uart_putreg(uart_addrwidth_t base, unsigned int offset,
  *
  ****************************************************************************/
 
+void up_lowputc(char ch)
+{
+  fb_putc(ch);
+}
+
 int up_putc(int ch)
 {
   /* Check for LF */
@@ -90,18 +95,15 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      x86_64_lowputc('\r');
+      up_lowputc('\r');
     }
 
-  x86_64_lowputc(ch);
+  up_lowputc(ch);
   return ch;
 }
-
-void up_lowputc(char ch)
-{
-  fb_putc(ch);
-}
 #endif /* USE_SERIALDRIVER */
+
+#ifdef USE_EARLYSERIALINIT
 
 void x86_64_earlyserialinit(void)
 {
@@ -112,3 +114,4 @@ void x86_64_serialinit(void)
 {
   u16550_serialinit();
 }
+#endif

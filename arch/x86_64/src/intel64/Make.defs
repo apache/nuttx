@@ -38,7 +38,7 @@ CHIP_CSRCS += intel64_serial.c intel64_rng.c intel64_check_capability.c
 
 # Configuration-dependent intel64 files
 
-ifeq ($(CONFIG_ARCH_MULTIBOOT2),y)
+ifeq ($(CONFIG_MULTBOOT2_FB_TERM),y)
 CHIP_CSRCS += intel64_mbfb.c
 endif
 

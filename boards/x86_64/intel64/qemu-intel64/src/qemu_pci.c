@@ -29,8 +29,7 @@
 
 #include <nuttx/pci/pci.h>
 
-#include "up_arch.h"
-#include "up_internal.h"
+#include "x86_64_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
