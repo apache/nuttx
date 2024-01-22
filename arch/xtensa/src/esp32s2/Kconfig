@@ -1220,42 +1220,28 @@ config ESP32S2_HAVE_OTA_PARTITION
 	bool
 	default n
 
-menu "Application Image Configuration"
-
-choice
-	prompt "Application Image Format"
-	default ESP32S2_APP_FORMAT_LEGACY
-	---help---
-		Depending on the chosen 2nd stage bootloader, the application may
-		be required to be perform a specific startup routine. Furthermore,
-		the image binary must be formatted according to the definition from
-		the 2nd stage bootloader.
+menu "Bootloader and Image Configuration"
 
 config ESP32S2_APP_FORMAT_LEGACY
-	bool "Legacy format"
+	bool
+	default y if !ESP32S2_APP_FORMAT_MCUBOOT
+	depends on !ESP32S2_APP_FORMAT_MCUBOOT
 	---help---
 		This is the legacy application image format, as supported by the ESP-IDF
 		2nd stage bootloader.
 
 config ESP32S2_APP_FORMAT_MCUBOOT
-	bool "MCUboot-bootable format"
+	bool "Enable MCUboot-bootable format"
 	depends on !MCUBOOT_BOOTLOADER
 	select ESP32S2_HAVE_OTA_PARTITION
+	select ESP32S2_BOOTLOADER_BUILD_FROM_SOURCE
 	---help---
-		The Espressif port of MCUboot supports the loading of unsegmented firmware
-		images.
-
-endchoice # Application Image Format
-
-choice
-	prompt "Source for bootloader binaries"
-	default ESP32S2_BOOTLOADER_DOWNLOAD_PREBUILT
-	---help---
-		Select the action to be taken by the build system for the
-		"make bootloader" target.
+		Enables the Espressif port of MCUboot to be used as 2nd stage bootloader.
 
 config ESP32S2_BOOTLOADER_DOWNLOAD_PREBUILT
-	bool "Download prebuilt binaries"
+	bool
+	default y if !ESP32S2_BOOTLOADER_BUILD_FROM_SOURCE
+	depends on !ESP32S2_BOOTLOADER_BUILD_FROM_SOURCE
 	---help---
 		The build system will download the prebuilt binaries from
 		https://github.com/espressif/esp-nuttx-bootloader according to the chosen
@@ -1268,8 +1254,6 @@ config ESP32S2_BOOTLOADER_BUILD_FROM_SOURCE
 		the https://github.com/espressif/esp-nuttx-bootloader repository and build a
 		custom bootloader according to the chosen Application Image Format
 		(ESP32S2_APP_FORMAT_LEGACY or ESP32S2_APP_FORMAT_MCUBOOT) and partition information.
-
-endchoice
 
 choice
 	prompt "Target slot for image flashing"
@@ -1306,13 +1290,39 @@ config ESP32S2_APP_MCUBOOT_HEADER_SIZE
 	default 32
 	depends on ESP32S2_APP_FORMAT_MCUBOOT
 
-config ESP32S2_PARTITION_TABLE_OFFSET
-	hex "Partition Table offset"
+config ESP32S2_PARTITION_TABLE_OFFSET_DEFAULT
+	hex
 	default 0x8000
 	depends on ESP32S2_APP_FORMAT_LEGACY
 
+config ESP32S2_CUSTOM_PARTITION_TABLE_OFFSET
+	bool "Customize partition table offset"
+	default n
+	depends on ESP32S2_APP_FORMAT_LEGACY
+	select ESP32S2_BOOTLOADER_BUILD_FROM_SOURCE
+	---help---
+		Enable to select the offset of the partition table in the flash.
+
+if ESP32S2_CUSTOM_PARTITION_TABLE_OFFSET
+
+config ESP32S2_PARTITION_TABLE_OFFSET
+	hex "Partition Table offset"
+	default ESP32S2_PARTITION_TABLE_OFFSET_DEFAULT
+	depends on ESP32S2_APP_FORMAT_LEGACY
+
+endif # ESP32S2_CUSTOM_PARTITION_TABLE_OFFSET
+
+if !ESP32S2_CUSTOM_PARTITION_TABLE_OFFSET
+
+config ESP32S2_PARTITION_TABLE_OFFSET
+	hex
+	default ESP32S2_PARTITION_TABLE_OFFSET_DEFAULT
+	depends on ESP32S2_APP_FORMAT_LEGACY
+
+endif # !ESP32S2_CUSTOM_PARTITION_TABLE_OFFSET
+
 source "arch/xtensa/src/esp32s2/Kconfig.security"
 
-endmenu # Application Image Configuration
+endmenu # Bootloader and Image Configuration
 
 endif # ARCH_CHIP_ESP32S2
