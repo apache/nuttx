@@ -64,7 +64,7 @@ extern "C"
 
 /* DMA channel number */
 
-#define ESP32S3_DMA_CHAN_MAX          (3)
+#define ESP32S3_DMA_CHAN_MAX          (5)
 
 /* DMA RX MAX priority */
 
