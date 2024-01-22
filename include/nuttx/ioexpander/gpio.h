@@ -162,7 +162,9 @@ struct gpio_dev_s
 
   /* Writable storage used by the upper half driver */
 
+#if CONFIG_DEV_GPIO_NSIGNALS > 0
   struct gpio_signal_s gp_signals[CONFIG_DEV_GPIO_NSIGNALS];
+#endif
 
   /* Read-only pointer to GPIO device operations (also provided by the
    * lower half driver).
@@ -170,7 +172,9 @@ struct gpio_dev_s
 
   FAR const struct gpio_operations_s *gp_ops;
 
-  FAR struct pollfd *fds[CONFIG_DEV_GPIO_NSIGNALS];
+#if CONFIG_DEV_GPIO_NPOLLWAITERS > 0
+  FAR struct pollfd *fds[CONFIG_DEV_GPIO_NPOLLWAITERS];
+#endif
 
   /* Device specific, lower-half information may follow. */
 };
