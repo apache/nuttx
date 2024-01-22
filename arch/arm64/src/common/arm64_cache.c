@@ -77,6 +77,11 @@
     __asm__ volatile ("dc " op ", %0" : : "r" (val) : "memory"); \
   })
 
+#define ic_ops(op, val)                                          \
+  ({                                                             \
+    __asm__ volatile ("ic " op ", %0" : : "r" (val) : "memory"); \
+  })
+
 /* IC IALLUIS, Instruction Cache Invalidate All to PoU, Inner Shareable
  * Purpose
  * Invalidate all instruction caches in the Inner Shareable domain of
@@ -104,6 +109,34 @@ static size_t g_dcache_line_size;
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
+static inline uint32_t arm64_cache_get_info(uint32_t *sets, uint32_t *ways)
+{
+  uint32_t ccsidr = read_sysreg(ccsidr_el1);
+
+  if (sets)
+    {
+      *sets = ((ccsidr >> CCSIDR_EL1_SETS_SHIFT) & CCSIDR_EL1_SETS_MASK) + 1;
+    }
+
+  if (ways)
+    {
+      *ways = ((ccsidr >> CCSIDR_EL1_WAYS_SHIFT) & CCSIDR_EL1_WAYS_MASK) + 1;
+    }
+
+  return (1 << ((ccsidr & CCSIDR_EL1_LN_SZ_MASK) + 2)) * 4;
+}
+
+static inline size_t arm64_get_cache_size(void)
+{
+  uint32_t sets;
+  uint32_t ways;
+  uint32_t line;
+
+  line = arm64_cache_get_info(&sets, &ways);
+
+  return sets * ways * line;
+}
 
 /* operation for data cache by virtual address to PoC */
 
@@ -301,7 +334,33 @@ static inline int arm64_dcache_all(int op)
 
 size_t up_get_icache_linesize(void)
 {
-  return 64;
+  return arm64_cache_get_info(NULL, NULL);
+}
+
+/****************************************************************************
+ * Name: up_get_icache_size
+ *
+ * Description:
+ *   Get icache size
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Cache size
+ *
+ ****************************************************************************/
+
+size_t up_get_icache_size(void)
+{
+  static uint32_t csize;
+
+  if (csize == 0)
+    {
+      csize = arm64_get_cache_size();
+    }
+
+  return csize;
 }
 
 /****************************************************************************
@@ -322,6 +381,41 @@ size_t up_get_icache_linesize(void)
 void up_invalidate_icache_all(void)
 {
   __ic_ialluis();
+}
+
+/****************************************************************************
+ * Name: up_invalidate_icache
+ *
+ * Description:
+ *   Validate the specified range instruction cache as PoU,
+ *   and flush the branch target cache
+ *
+ * Input Parameters:
+ *   start - virtual start address of region
+ *   end   - virtual end address of region + 1
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void up_invalidate_icache(uintptr_t start, uintptr_t end)
+{
+  size_t line_size = up_get_icache_linesize();
+
+  /* Align address to line size */
+
+  start = LINE_ALIGN_DOWN(start, line_size);
+
+  ARM64_DSB();
+
+  while (start < end)
+    {
+      ic_ops("ivau", start);
+      start += line_size;
+    }
+
+  ARM64_ISB();
 }
 
 /****************************************************************************
@@ -446,6 +540,32 @@ size_t up_get_dcache_linesize(void)
   g_dcache_line_size = 4 << dminline;
 
   return g_dcache_line_size;
+}
+
+/****************************************************************************
+ * Name: up_get_dcache_size
+ *
+ * Description:
+ *   Get dcache size
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Cache size
+ *
+ ****************************************************************************/
+
+size_t up_get_dcache_size(void)
+{
+  static uint32_t csize;
+
+  if (csize == 0)
+    {
+      csize = arm64_get_cache_size();
+    }
+
+  return csize;
 }
 
 /****************************************************************************
