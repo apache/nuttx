@@ -137,6 +137,7 @@ struct esp32s3_spi_config_s
 #ifdef CONFIG_ESP32S3_SPI_DMA
   uint32_t dma_clk_bit;       /* DMA clock enable bit */
   uint32_t dma_rst_bit;       /* DMA reset bit */
+  uint8_t dma_periph;         /* DMA peripheral */
 #endif
   uint32_t cs_insig;          /* SPI CS input signal index */
   uint32_t cs_outsig;         /* SPI CS output signal index */
@@ -251,6 +252,7 @@ static const struct esp32s3_spi_config_s esp32s3_spi2_config =
 #ifdef CONFIG_ESP32S3_SPI_DMA
   .dma_clk_bit  = SYSTEM_SPI2_DMA_CLK_EN,
   .dma_rst_bit  = SYSTEM_SPI2_DMA_RST,
+  .dma_periph   = ESP32S3_DMA_PERIPH_SPI2,
 #endif
   .cs_insig     = FSPICS0_IN_IDX,
   .cs_outsig    = FSPICS0_OUT_IDX,
@@ -345,6 +347,7 @@ static const struct esp32s3_spi_config_s esp32s3_spi3_config =
 #ifdef CONFIG_ESP32S3_SPI_DMA
   .dma_clk_bit  = SYSTEM_SPI3_DMA_CLK_EN,
   .dma_rst_bit  = SYSTEM_SPI3_DMA_RST,
+  .dma_periph   = ESP32S3_DMA_PERIPH_SPI3,
 #endif
   .cs_insig     = SPI3_CS0_IN_IDX,
   .cs_outsig    = SPI3_CS0_OUT_IDX,
@@ -1352,17 +1355,8 @@ void esp32s3_spi_dma_init(struct spi_dev_s *dev)
 
   /* Request a GDMA channel for SPI peripheral */
 
-  if (priv->config->id == 2)
-    {
-      priv->dma_channel = esp32s3_dma_request(ESP32S3_DMA_PERIPH_SPI2, 1, 1,
-                                              true);
-    }
-  else if (priv->config->id == 3)
-    {
-      priv->dma_channel = esp32s3_dma_request(ESP32S3_DMA_PERIPH_SPI3, 1, 1,
-                                              true);
-    }
-
+  priv->dma_channel = esp32s3_dma_request(priv->config->dma_periph, 1, 1,
+                                          true);
   if (priv->dma_channel < 0)
     {
       spierr("Failed to allocate GDMA channel\n");
