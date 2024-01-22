@@ -62,6 +62,15 @@ uint32_t mb_info_struct __attribute__((section(".loader.bss")));
  * Private Functions
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_MULTIBOOT2
+/****************************************************************************
+ * Name: x86_64_mb2_config
+ *
+ * Description:
+ *   Parse multiboot2 info.
+ *
+ ****************************************************************************/
+
 static void x86_64_mb2_config(void)
 {
   struct multiboot_tag *tag;
@@ -82,18 +91,21 @@ static void x86_64_mb2_config(void)
               break;
             }
 
+#ifdef CONFIG_MULTBOOT2_FB_TERM
           case MULTIBOOT_TAG_TYPE_FRAMEBUFFER:
             {
               x86_64_mb2_fbinitialize(
                 (struct multiboot_tag_framebuffer *)tag);
               break;
             }
+#endif
 
           default:
             break;
         }
     }
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -133,9 +145,11 @@ void up_lowsetup(void)
 
   x86_64_check_and_enable_capability();
 
+#ifdef CONFIG_ARCH_MULTIBOOT2
   /* Handle multiboot2 info */
 
   x86_64_mb2_config();
+#endif
 
   /* Revoke the lower memory */
 

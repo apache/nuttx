@@ -27,6 +27,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 
+#include <debug.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
