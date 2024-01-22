@@ -119,6 +119,7 @@ memcpy:
 #  else
 	pac	ip, lr, sp
 #  endif /* __ARM_FEATURE_BTI_DEFAULT */
+	push	{ip}
 #endif /* __ARM_FEATURE_PAC_DEFAULT */
 #ifdef __ARM_FEATURE_MVE
 	mov	r3, lr
@@ -130,6 +131,7 @@ memcpy:
 	letp	lr, 1b
 2:
 #if __ARM_FEATURE_PAC_DEFAULT
+	pop	{ip}
 	aut	ip, lr, sp
 #endif /* __ARM_FEATURE_PAC_DEFAULT */
 	bx	r3
@@ -243,6 +245,7 @@ memcpy:
 	pop	{r0}
 #endif
 #if __ARM_FEATURE_PAC_DEFAULT
+	pop	{ip}
 	aut	ip, lr, sp
 #endif /* __ARM_FEATURE_PAC_DEFAULT */
 	bx	lr
@@ -387,6 +390,7 @@ memcpy:
 	pop	{r0}
 #endif
 #if __ARM_FEATURE_PAC_DEFAULT
+	pop	{ip}
 	aut	ip, lr, sp
 #endif /* __ARM_FEATURE_PAC_DEFAULT */
 	bx	lr
