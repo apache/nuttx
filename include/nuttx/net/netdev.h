@@ -320,6 +320,9 @@ struct net_driver_s
   in_addr_t      d_ipaddr;      /* Host IPv4 address assigned to the network interface */
   in_addr_t      d_draddr;      /* Default router IP address */
   in_addr_t      d_netmask;     /* Network subnet mask */
+#ifdef CONFIG_NET_ARP_ACD
+  struct arp_acd_s d_acd;       /* ipv4 acd entry */
+#endif /* CONFIG_NET_ARP_ACD */
 #endif
 
 #ifdef CONFIG_NET_IPv6

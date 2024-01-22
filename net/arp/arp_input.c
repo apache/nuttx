@@ -98,6 +98,11 @@ static int arp_in(FAR struct net_driver_s *dev)
   dev->d_len = 0;
 
   ipaddr = net_ip4addr_conv32(arp->ah_dipaddr);
+
+#ifdef CONFIG_NET_ARP_ACD
+  arp_acd_update(dev);
+#endif /* CONFIG_NET_ARP_ACD */
+
   switch (arp->ah_opcode)
     {
       case HTONS(ARP_REQUEST):
