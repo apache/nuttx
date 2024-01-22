@@ -144,6 +144,16 @@ struct v4l2_ops_s
                                FAR struct v4l2_frmivalenum *f);
   CODE int (*enum_frmsize)(FAR struct v4l2_s *ctx,
                            FAR struct v4l2_frmsizeenum *f);
+  CODE int (*cropcap)(FAR struct v4l2_s *ctx,
+                      FAR struct v4l2_cropcap *cropcap);
+  CODE int (*dqevent)(FAR struct v4l2_s *ctx,
+                      FAR struct v4l2_event *event);
+  CODE int (*subscribe_event)(FAR struct v4l2_s *ctx,
+                              FAR struct v4l2_event_subscription *sub);
+  CODE int (*decoder_cmd)(FAR struct v4l2_s *ctx,
+                          FAR struct v4l2_decoder_cmd *cmd);
+  CODE int (*encoder_cmd)(FAR struct v4l2_s *ctx,
+                          FAR struct v4l2_encoder_cmd *cmd);
 };
 
 /****************************************************************************

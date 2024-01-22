@@ -518,6 +518,8 @@ enum v4l2_buf_type
    || (type) == V4L2_BUF_TYPE_SDR_OUTPUT           \
    || (type) == V4L2_BUF_TYPE_META_OUTPUT)
 
+#define V4L2_TYPE_IS_CAPTURE(type) (!V4L2_TYPE_IS_OUTPUT(type))
+
 /* Memory I/O method. Currently, support only V4L2_MEMORY_USERPTR. */
 
 enum v4l2_memory
