@@ -50,6 +50,7 @@
 
 #ifdef CONFIG_ESP32S3_SPI_DMA
 #include "esp32s3_dma.h"
+#include "hardware/esp32s3_dma.h"
 #endif
 
 #include "xtensa.h"
@@ -204,12 +205,11 @@ static void esp32s3_spi_dma_exchange(struct esp32s3_spi_priv_s *priv,
                                      const void *txbuffer,
                                      void *rxbuffer,
                                      uint32_t nwords);
-#else
+#endif
 static void esp32s3_spi_poll_exchange(struct esp32s3_spi_priv_s *priv,
                                       const void *txbuffer,
                                       void *rxbuffer,
                                       size_t nwords);
-#endif
 #ifndef CONFIG_SPI_EXCHANGE
 static void esp32s3_spi_sndblock(struct spi_dev_s *dev,
                                  const void *txbuffer,
@@ -894,10 +894,11 @@ static void esp32s3_spi_dma_exchange(struct esp32s3_spi_priv_s *priv,
     {
       /* Reset SPI DMA TX FIFO */
 
-      esp32s3_spi_set_regbits(SPI_DMA_CONF_REG(priv->config->id),
-                              SPI_DMA_RESET_MASK);
-      esp32s3_spi_clr_regbits(SPI_DMA_CONF_REG(priv->config->id),
-                              SPI_DMA_RESET_MASK);
+      SET_GDMA_CH_BITS(DMA_OUT_CONF0_CH0_REG, priv->dma_channel,
+                       DMA_OUT_RST_CH0);
+
+      CLR_GDMA_CH_BITS(DMA_OUT_CONF0_CH0_REG, priv->dma_channel,
+                       DMA_OUT_RST_CH0);
 
       /* Enable SPI DMA TX */
 
@@ -917,6 +918,14 @@ static void esp32s3_spi_dma_exchange(struct esp32s3_spi_priv_s *priv,
 
       if (rp != NULL)
         {
+          /* Reset SPI DMA RX FIFO */
+
+          SET_GDMA_CH_BITS(DMA_IN_CONF0_CH0_REG, priv->dma_channel,
+                           DMA_IN_RST_CH0);
+
+          CLR_GDMA_CH_BITS(DMA_IN_CONF0_CH0_REG, priv->dma_channel,
+                           DMA_IN_RST_CH0);
+
           /* Enable SPI DMA RX */
 
           esp32s3_spi_set_regbits(SPI_DMA_CONF_REG(priv->config->id),
@@ -979,6 +988,14 @@ static void esp32s3_spi_dma_exchange(struct esp32s3_spi_priv_s *priv,
 static uint32_t esp32s3_spi_poll_send(struct esp32s3_spi_priv_s *priv,
                                       uint32_t wd)
 {
+#ifdef CONFIG_ESP32S3_SPI_DMA
+  esp32s3_spi_clr_regbits(SPI_DMA_CONF_REG(priv->config->id),
+                          SPI_DMA_TX_ENA_M);
+
+  esp32s3_spi_clr_regbits(SPI_DMA_CONF_REG(priv->config->id),
+                          SPI_DMA_RX_ENA_M);
+#endif
+
   uint32_t val;
 
   putreg32((priv->nbits - 1), SPI_MS_DLEN_REG(priv->config->id));
@@ -1059,6 +1076,14 @@ static void esp32s3_spi_poll_exchange(struct esp32s3_spi_priv_s *priv,
                                       void *rxbuffer,
                                       size_t nwords)
 {
+#ifdef CONFIG_ESP32S3_SPI_DMA
+  esp32s3_spi_clr_regbits(SPI_DMA_CONF_REG(priv->config->id),
+                          SPI_DMA_TX_ENA_M);
+
+  esp32s3_spi_clr_regbits(SPI_DMA_CONF_REG(priv->config->id),
+                          SPI_DMA_RX_ENA_M);
+#endif
+
   const uint32_t total_bytes = nwords * (priv->nbits / 8);
   uintptr_t bytes_remaining = total_bytes;
   const uint8_t *tp = (const uint8_t *)txbuffer;
@@ -1198,7 +1223,7 @@ static void esp32s3_spi_exchange(struct spi_dev_s *dev,
 #ifdef CONFIG_ESP32S3_SPI_DMA
   size_t thld = CONFIG_ESP32S3_SPI_DMATHRESHOLD;
 
-  if (nwords > thld)
+  if ((nwords * priv->nbits) / 8 > thld)
     {
       esp32s3_spi_dma_exchange(priv, txbuffer, rxbuffer, nwords);
     }
@@ -1326,8 +1351,17 @@ void esp32s3_spi_dma_init(struct spi_dev_s *dev)
 
   /* Request a GDMA channel for SPI peripheral */
 
-  priv->dma_channel = esp32s3_dma_request(ESP32S3_DMA_PERIPH_SPI2, 1, 1,
-                                          true);
+  if (priv->config->id == 2)
+    {
+      priv->dma_channel = esp32s3_dma_request(ESP32S3_DMA_PERIPH_SPI2, 1, 1,
+                                              true);
+    }
+  else if (priv->config->id == 3)
+    {
+      priv->dma_channel = esp32s3_dma_request(ESP32S3_DMA_PERIPH_SPI3, 1, 1,
+                                              true);
+    }
+
   if (priv->dma_channel < 0)
     {
       spierr("Failed to allocate GDMA channel\n");
