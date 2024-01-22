@@ -2020,7 +2020,7 @@ static int isx019_get_supported_value(FAR struct imgsensor_s *sensor,
         SET_DISCRETE(val->u.discrete,
                      NR_ISO,
                      g_isx019_iso,
-                     0);
+                     def->iso);
         break;
 
       case IMGSENSOR_ID_ISO_SENSITIVITY_AUTO:
