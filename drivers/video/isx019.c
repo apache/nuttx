@@ -236,6 +236,7 @@ struct isx019_dev_s
   isx019_rect_t clip_still;
   double  gamma;
   int32_t jpg_quality;
+  int32_t hue;
   imgsensor_colorfx_t colorfx;
 };
 
@@ -1403,6 +1404,10 @@ static int isx019_init(FAR struct imgsensor_s *sensor)
   priv->clock_ratio = (float)clk / ISX019_STANDARD_MASTER_CLOCK;
   store_default_value(priv);
 
+  /* Store initial HUE value for getting current value API. */
+
+  priv->hue = priv->default_value.hue;
+
   return OK;
 }
 
@@ -2094,16 +2099,6 @@ static int32_t convert_brightness_reg2is(int32_t val)
   return (val / 4);
 }
 
-static int32_t convert_hue_is2reg(int32_t val)
-{
-  return (val * 90) / 128;
-}
-
-static int32_t convert_hue_reg2is(int32_t val)
-{
-  return (val * 128) / 90;
-}
-
 static int32_t convert_hdr_is2reg(int32_t val)
 {
   int32_t ret = AEWDMODE_AUTO;
@@ -2180,11 +2175,6 @@ static convert_t get_reginfo(uint32_t id, bool is_set,
         cvrt = not_convert;
         break;
 
-      case IMGSENSOR_ID_HUE:
-        SET_REGINFO_INT8(reg, CAT_PICTTUNE, UIHUE);
-        cvrt = is_set ? convert_hue_is2reg : convert_hue_reg2is;
-        break;
-
       case IMGSENSOR_ID_EXPOSURE:
         SET_REGINFO_INT8(reg, CAT_AEDGRM, EVSEL);
         cvrt = not_convert;
@@ -2205,6 +2195,23 @@ static convert_t get_reginfo(uint32_t id, bool is_set,
     }
 
   return cvrt;
+}
+
+static int set_hue(FAR isx019_dev_t *priv,
+                   imgsensor_value_t val)
+{
+  int ret;
+  int val32 = val.value32 * 90 / 128;
+
+  ret = isx019_i2c_write(priv, CAT_PICTTUNE, UIHUE, &val32, 1);
+  if (ret == OK)
+    {
+      /* Store value before conversion for get_hue(). */
+
+      priv->hue = val.value32;
+    }
+
+  return ret;
 }
 
 static void set_flip(FAR uint8_t *flip, uint8_t direction, int32_t val)
@@ -3034,6 +3041,10 @@ static setvalue_t set_value_func(uint32_t id)
 
   switch (id)
     {
+      case IMGSENSOR_ID_HUE:
+        func = set_hue;
+        break;
+
       case IMGSENSOR_ID_GAMMA:
         func = set_gamma;
         break;
@@ -3115,6 +3126,21 @@ static setvalue_t set_value_func(uint32_t id)
     }
 
   return func;
+}
+
+static int get_hue(FAR isx019_dev_t *priv,
+                   FAR imgsensor_value_t *val)
+{
+  if (val == NULL)
+    {
+      return -EINVAL;
+    }
+
+  /* Return stored value without reading register. */
+
+  val->value32 = priv->hue;
+
+  return OK;
 }
 
 static int32_t get_flip(FAR uint8_t *flip, uint8_t direction)
@@ -3526,6 +3552,10 @@ static getvalue_t get_value_func(uint32_t id)
 
   switch (id)
     {
+      case IMGSENSOR_ID_HUE:
+        func = get_hue;
+        break;
+
       case IMGSENSOR_ID_GAMMA:
         func = get_gamma;
         break;
