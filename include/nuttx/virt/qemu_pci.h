@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/serial/uart_mcs99xx.h
+ * include/nuttx/virt/qemu_pci.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_VIRT_QEMU_PCI_TEST_H
-#define __INCLUDE_NUTTX_VIRT_QEMU_PCI_TEST_H
+#ifndef __INCLUDE_NUTTX_VIRT_QEMU_PCI_H
+#define __INCLUDE_NUTTX_VIRT_QEMU_PCI_H
 
 /****************************************************************************
  * Included Files
@@ -42,16 +42,16 @@ extern "C"
 #endif
 
 #ifdef CONFIG_VIRT_QEMU_PCI_TEST
-extern struct pci_dev_type_s pci_type_qemu_pci_test;
-#endif /* CONFIG_VIRT_QEMU_PCI_TEST */
+extern const struct pci_dev_type_s g_pci_type_qemu_pci_test;
+#endif
 
 #ifdef CONFIG_VIRT_QEMU_EDU
-extern struct pci_dev_type_s pci_type_qemu_edu;
-#endif /* CONFIG_VIRT_QEMU_EDU */
+extern const struct pci_dev_type_s g_pci_type_qemu_edu;
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_VIRT_QEMU_PCI_TEST_H */
+#endif /* __INCLUDE_NUTTX_VIRT_QEMU_PCI_H */
