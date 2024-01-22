@@ -71,6 +71,7 @@ config ARCH_MULTIBOOT2
 		system to enable certain features like the low level framebuffer.
 
 if ARCH_MULTIBOOT2
+
 config MULTBOOT2_FB_TERM
 	bool "Multiboot2 framebuffer terminal"
 	default n

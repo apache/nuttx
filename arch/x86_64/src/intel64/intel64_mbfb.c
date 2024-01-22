@@ -34,7 +34,7 @@
 #include <nuttx/nx/nxfonts.h>
 #endif
 
-#include "up_internal.h"
+#include "x86_64_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
