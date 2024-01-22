@@ -58,6 +58,7 @@
 #include <netinet/in.h>
 
 #include <nuttx/net/netconfig.h>
+#include <nuttx/wqueue.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -244,6 +245,41 @@ struct ipv6_stats_s
 };
 #endif /* CONFIG_NET_IPv6 */
 #endif /* CONFIG_NET_STATISTICS */
+
+#ifdef CONFIG_NET_ARP_ACD
+#define ARP_ACD_TMR_INTERVAL      100    /* milliseconds */
+#define ARP_ACD_TICKS_PER_SECOND (1000 / ARP_ACD_TMR_INTERVAL)
+
+/* RFC 5227 Constants */
+
+#define ANNOUNCE_NUM            2   /*          (number of announcement packets)       */
+#define ANNOUNCE_INTERVAL       2   /* seconds  (time between announcement packets)    */
+#define ANNOUNCE_WAIT           2   /* seconds  (delay before announcing)              */
+#define DEFEND_INTERVAL         10  /* seconds  (min. wait between defensive ARPs)     */
+
+/* arp acd entry states */
+
+enum arp_acd_state_e
+{
+  ARP_ACD_STATE_INIT       = 0,
+  ARP_ACD_STATE_ANNOUNCING = 1,
+  ARP_ACD_STATE_FINISH     = 2
+};
+
+#define ARP_ACD_ADDRESS_NO_CONFLICT 0
+#define ARP_ACD_ADDRESS_CONFLICT    1
+
+struct arp_acd_s
+{
+  enum arp_acd_state_e state;     /* current arp_acd_s status */
+  int sendnum;                    /* sent number of probes or announces, dependent on state */
+  bool conflict_flag;             /* arp address conflict flag */
+  bool need_announce;             /* need to send arp announce packet */
+  uint32_t ttw;                   /* ticks to wait */
+  clock_t lastconflict;           /* last conflict timestamp */
+  struct work_s work;             /* For deferred timeout operations */
+};
+#endif /* CONFIG_NET_ARP_ACD */
 
 /****************************************************************************
  * Public Data

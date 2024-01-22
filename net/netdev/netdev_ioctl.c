@@ -982,6 +982,11 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
             /* Yes.. bring the interface up */
 
             ret = netdev_ifup(dev);
+#ifdef CONFIG_NET_ARP_ACD
+            /* having address then start acd */
+
+            arp_acd_setup(dev);
+#endif /* CONFIG_NET_ARP_ACD */
           }
 
         /* Is this a request to take the interface down? */
@@ -1080,9 +1085,19 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
 #ifdef CONFIG_NET_IPv4
         if (psock->s_domain != PF_INET6)
           {
+            if (net_ipv4addr_cmp(dev->d_ipaddr,
+                ((FAR struct sockaddr_in *)&req->ifr_addr)->sin_addr.s_addr))
+              {
+                break;
+              }
+
             ioctl_set_ipv4addr(&dev->d_ipaddr, &req->ifr_addr);
             netlink_device_notify_ipaddr(dev, RTM_NEWADDR, AF_INET,
                          &dev->d_ipaddr, net_ipv4_mask2pref(dev->d_netmask));
+
+#ifdef CONFIG_NET_ARP_ACD
+            arp_acd_set_addr(dev);
+#endif /* CONFIG_NET_ARP_ACD */
           }
 #endif
 

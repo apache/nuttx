@@ -293,6 +293,13 @@ static int netprocfs_inet4addresses(FAR struct netprocfs_file_s *netfile)
   len += snprintf(&netfile->line[len], NET_LINELEN - len,
                   "\tinet addr:%s ", inet_ntoa_r(addr, inetaddr,
                                                  sizeof(inetaddr)));
+#ifdef CONFIG_NET_ARP_ACD
+  if (dev->d_acd.conflict_flag == ARP_ACD_ADDRESS_CONFLICT)
+    {
+      len += snprintf(&netfile->line[len], NET_LINELEN - len,
+                      "(conflict!) ");
+    }
+#endif
 
   /* Show the IPv4 default router address */
 
