@@ -271,21 +271,21 @@ if(${CONFIG_RISCV_TOOLCHAIN} STREQUAL GNU_RVG)
   # These models can't cover all implementation of RISCV, but it's enough for
   # most cases.
 
-  set(PLATFORM_FLAGS)
+  set(LLVM_CPUFLAGS)
 
   if(CONFIG_ARCH_RV32)
     if(${ARCHCPUEXTFLAGS} STREQUAL imc)
-      list(APPEND PLATFORM_FLAGS -mcpu=sifive-e20)
+      list(APPEND LLVM_CPUFLAGS -mcpu=sifive-e20)
     elseif(${ARCHCPUEXTFLAGS} STREQUAL imac)
-      list(APPEND PLATFORM_FLAGS -mcpu=sifive-e31)
+      list(APPEND LLVM_CPUFLAGS -mcpu=sifive-e31)
     elseif(${ARCHCPUEXTFLAGS} STREQUAL imafc)
-      list(APPEND PLATFORM_FLAGS -mcpu=sifive-e76)
+      list(APPEND LLVM_CPUFLAGS -mcpu=sifive-e76)
     endif()
   else()
     if(${ARCHCPUEXTFLAGS} STREQUAL imac)
-      list(APPEND PLATFORM_FLAGS -mcpu=sifive-s51)
+      list(APPEND LLVM_CPUFLAGS -mcpu=sifive-s51)
     elseif(${ARCHCPUEXTFLAGS} STREQUAL imafdc)
-      list(APPEND PLATFORM_FLAGS -mcpu=sifive-u54)
+      list(APPEND LLVM_CPUFLAGS -mcpu=sifive-u54)
     endif()
   endif()
 
