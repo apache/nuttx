@@ -43,35 +43,35 @@
  * Private Functions Definitions
  ****************************************************************************/
 
-static void qemu_pci_cfg_write(FAR struct pci_dev_s *dev, int reg,
-                              uint32_t val, int width);
+static void qemu_pci_cfg_write(struct pci_dev_s *dev, int reg,
+                               uint32_t val, int width);
 
-static uint32_t qemu_pci_cfg_read(FAR struct pci_dev_s *dev, int reg,
+static uint32_t qemu_pci_cfg_read(struct pci_dev_s *dev, int reg,
                                   int width);
 
 static int qemu_pci_map_bar(uint64_t addr, uint64_t len);
 
-static uint32_t qemu_pci_io_read(FAR const volatile void *addr, int width);
+static uint32_t qemu_pci_io_read(const volatile void *addr, int width);
 
-static void qemu_pci_io_write(FAR const volatile void *addr, uint32_t val,
+static void qemu_pci_io_write(const volatile void *addr, uint32_t val,
                               int width);
 
 /****************************************************************************
- * Public Data
+ * Private Data
  ****************************************************************************/
 
-struct pci_bus_ops_s qemu_pci_bus_ops =
+static const struct pci_bus_ops_s g_qemu_pci_bus_ops =
 {
-    .pci_cfg_write     =   qemu_pci_cfg_write,
-    .pci_cfg_read      =   qemu_pci_cfg_read,
-    .pci_map_bar       =   qemu_pci_map_bar,
-    .pci_io_read       =   qemu_pci_io_read,
-    .pci_io_write      =   qemu_pci_io_write,
+  .pci_cfg_write = qemu_pci_cfg_write,
+  .pci_cfg_read  = qemu_pci_cfg_read,
+  .pci_map_bar   = qemu_pci_map_bar,
+  .pci_io_read   = qemu_pci_io_read,
+  .pci_io_write  = qemu_pci_io_write,
 };
 
-struct pci_bus_s qemu_pci_bus =
+static struct pci_bus_s g_qemu_pci_bus =
 {
-    .ops = &qemu_pci_bus_ops,
+  .ops = &g_qemu_pci_bus_ops,
 };
 
 /****************************************************************************
@@ -86,19 +86,20 @@ struct pci_bus_s qemu_pci_bus =
  *  specified by dev
  *
  * Input Parameters:
- *   bdf    - Device private data
- *   reg - A pointer to the read-only buffer of data to be written
- *   size   - The number of bytes to send from the buffer
+ *   bdf  - Device private data
+ *   reg  - A pointer to the read-only buffer of data to be written
+ *   size - The number of bytes to send from the buffer
  *
  * Returned Value:
  *   0: success, <0: A negated errno
  *
  ****************************************************************************/
 
-static void qemu_pci_cfg_write(FAR struct pci_dev_s *dev, int reg,
+static void qemu_pci_cfg_write(struct pci_dev_s *dev, int reg,
                                uint32_t val, int width)
 {
   uint8_t offset_mask = (4 - width);
+
   outl(PCI_CFG_EN | (dev->bdf << 8) | reg, PCI_CFG_ADDR);
   switch (width)
     {
@@ -133,11 +134,12 @@ static void qemu_pci_cfg_write(FAR struct pci_dev_s *dev, int reg,
  *
  ****************************************************************************/
 
-static uint32_t qemu_pci_cfg_read(FAR struct pci_dev_s *dev, int reg,
+static uint32_t qemu_pci_cfg_read(struct pci_dev_s *dev, int reg,
                                   int width)
 {
   uint32_t ret;
-  uint8_t offset_mask = 4 - width;
+  uint8_t  offset_mask = 4 - width;
+
   outl(PCI_CFG_EN | (dev->bdf << 8) | reg, PCI_CFG_ADDR);
 
   switch (width)
@@ -159,9 +161,10 @@ static uint32_t qemu_pci_cfg_read(FAR struct pci_dev_s *dev, int reg,
   return 0;
 }
 
-static uint32_t qemu_pci_io_read(FAR const volatile void *addr, int width)
+static uint32_t qemu_pci_io_read(const volatile void *addr, int width)
 {
   uint16_t portaddr = (uint16_t)(intptr_t)addr;
+
   switch (width)
   {
     case 1:
@@ -178,20 +181,21 @@ static uint32_t qemu_pci_io_read(FAR const volatile void *addr, int width)
   return 0;
 }
 
-static void qemu_pci_io_write(FAR const volatile void *addr, uint32_t val,
+static void qemu_pci_io_write(const volatile void *addr, uint32_t val,
                               int width)
 {
   uint16_t portaddr = (uint16_t)(intptr_t)addr;
+
   switch (width)
   {
     case 1:
       outb((uint8_t)val, portaddr);
       return;
     case 2:
-      outw((uint8_t)val, portaddr);
+      outw((uint16_t)val, portaddr);
       return;
     case 4:
-      outl((uint8_t)val, portaddr);
+      outl((uint32_t)val, portaddr);
       return;
     default:
       pcierr("Invalid write width %d\n", width);
@@ -221,5 +225,5 @@ static int qemu_pci_map_bar(uint64_t addr, uint64_t len)
 void qemu_pci_init(void)
 {
   pciinfo("Initializing PCI Bus\n");
-  pci_initialize(&qemu_pci_bus);
+  pci_initialize(&g_qemu_pci_bus);
 }

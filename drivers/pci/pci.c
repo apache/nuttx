@@ -1,5 +1,5 @@
 /****************************************************************************
- * nuttx/drivers/pci/pci.c
+ * drivers/pci/pci.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -51,7 +51,7 @@
 
 static void pci_probe_device(FAR struct pci_bus_s *root_bus,
                              uint8_t bus_idx, uint8_t slot_idx, uint8_t func,
-                             FAR struct pci_dev_type_s **types);
+                             FAR const struct pci_dev_type_s **types);
 
 static uint8_t pci_check_pci_bridge(FAR struct pci_bus_s *root_bus,
                                     uint8_t bus_idx, uint8_t slot_idx,
@@ -59,11 +59,11 @@ static uint8_t pci_check_pci_bridge(FAR struct pci_bus_s *root_bus,
 
 static void pci_scan_device(FAR struct pci_bus_s *root_bus,
                             uint8_t bus_idx, uint8_t slot_idx,
-                            FAR struct pci_dev_type_s **types);
+                            FAR const struct pci_dev_type_s **types);
 
 static void pci_scan_bus(FAR struct pci_bus_s *root_bus,
                          uint8_t bus_idx,
-                         FAR struct pci_dev_type_s **types);
+                         FAR const struct pci_dev_type_s **types);
 
 static void pci_set_cmd_bit(FAR struct pci_dev_s *dev, uint16_t bitmask);
 
@@ -73,14 +73,14 @@ static void pci_clear_cmd_bit(FAR struct pci_dev_s *dev, uint16_t bitmask);
  * Public Data
  ****************************************************************************/
 
-struct pci_dev_type_s *pci_device_types[] =
+const struct pci_dev_type_s *g_pci_device_types[] =
 {
 #ifdef CONFIG_VIRT_QEMU_PCI_TEST
-  &pci_type_qemu_pci_test,
-#endif /* CONFIG_VIRT_QEMU_PCI_TEST */
+  &g_pci_type_qemu_pci_test,
+#endif
 #ifdef CONFIG_VIRT_QEMU_EDU
-  &pci_type_qemu_edu,
-#endif /* CONFIG_VIRT_QEMU_EDU */
+  &g_pci_type_qemu_edu,
+#endif
   NULL,
 };
 
@@ -105,12 +105,13 @@ struct pci_dev_type_s *pci_device_types[] =
 
 static void pci_probe_device(FAR struct pci_bus_s *root_bus,
                              uint8_t bus_idx, uint8_t slot_idx, uint8_t func,
-                             FAR struct pci_dev_type_s **types)
+                             FAR const struct pci_dev_type_s **types)
 {
   struct pci_dev_s tmp_dev;
-  uint16_t vid;
-  uint16_t id;
-  uint32_t class_rev;
+  uint32_t         class_rev;
+  uint16_t         vid;
+  uint16_t         id;
+  int              i;
 
   tmp_dev.bus = root_bus;
   tmp_dev.bdf = PCI_BDF(bus_idx, slot_idx, func);
@@ -124,7 +125,7 @@ static void pci_probe_device(FAR struct pci_bus_s *root_bus,
 
   pci_dev_dump(&tmp_dev);
 
-  for (int i = 0; types[i] != NULL; i++)
+  for (i = 0; types[i] != NULL; i++)
     {
       if (types[i]->vendor == PCI_ID_ANY ||
           types[i]->vendor == vid)
@@ -144,10 +145,11 @@ static void pci_probe_device(FAR struct pci_bus_s *root_bus,
                     }
                   else
                     {
-                      pcierr("[%02x:%02x.%x] Error: Invalid \
-                              device probe function\n",
-                              bus_idx, slot_idx, func);
+                      pcierr("[%02x:%02x.%x] Error: Invalid"
+                             "device probe function\n",
+                             bus_idx, slot_idx, func);
                     }
+
                   break;
                 }
             }
@@ -175,9 +177,9 @@ static uint8_t pci_check_pci_bridge(FAR struct pci_bus_s *root_bus,
                                     uint8_t dev_func)
 {
   struct pci_dev_s tmp_dev;
-  uint8_t base_class;
-  uint8_t sub_class;
-  uint8_t secondary_bus;
+  uint8_t          base_class;
+  uint8_t          sub_class;
+  uint8_t          secondary_bus;
 
   tmp_dev.bus = root_bus;
   tmp_dev.bdf = PCI_BDF(bus_idx, slot_idx, dev_func);
@@ -187,18 +189,19 @@ static uint8_t pci_check_pci_bridge(FAR struct pci_bus_s *root_bus,
   base_class = root_bus->ops->pci_cfg_read(&tmp_dev, PCI_CONFIG_CLASS, 1);
   sub_class = root_bus->ops->pci_cfg_read(&tmp_dev, PCI_CONFIG_SUBCLASS, 1);
 
-  if ((base_class == PCI_CLASS_BASE_BRG_DEV) && \
-     (sub_class == PCI_CLASS_SUB_PCI_BRG))
+  if ((base_class == PCI_CLASS_BASE_BRG_DEV) &&
+      (sub_class == PCI_CLASS_SUB_PCI_BRG))
     {
-      /* This is a bridge device we need to determin the bus idx and
+      /* This is a bridge device we need to determine the bus idx and
        * enumerate it just like we do the root.
        */
 
       pciinfo("[%02x:%02x.%x] Found Bridge\n",
-        bus_idx, slot_idx, dev_func);
+              bus_idx, slot_idx, dev_func);
 
       secondary_bus = root_bus->ops->pci_cfg_read(
         &tmp_dev, PCI_CONFIG_SEC_BUS, 1);
+
       return secondary_bus;
     }
 
@@ -222,25 +225,21 @@ static uint8_t pci_check_pci_bridge(FAR struct pci_bus_s *root_bus,
 
 static void pci_scan_device(FAR struct pci_bus_s *root_bus,
                             uint8_t bus_idx, uint8_t slot_idx,
-                            FAR struct pci_dev_type_s **types)
+                            FAR const struct pci_dev_type_s **types)
 {
   struct pci_dev_s tmp_dev;
-  uint8_t dev_func = 0;
-  uint16_t vid;
-  uint8_t sec_bus;
-  uint8_t multi_function;
+  uint8_t          multi_function;
+  uint8_t          dev_func = 0;
+  uint16_t         vid;
+  uint8_t          sec_bus;
 
   tmp_dev.bus = root_bus;
   tmp_dev.bdf = PCI_BDF(bus_idx, slot_idx, dev_func);
   vid = root_bus->ops->pci_cfg_read(&tmp_dev, PCI_CONFIG_VENDOR, 2);
   if (vid == 0xffff)
+    {
       return;
-
-  /* Check if this is a PCI-PCI bridge device */
-
-  sec_bus = pci_check_pci_bridge(root_bus, bus_idx, slot_idx, dev_func);
-  if (sec_bus)
-    pci_scan_bus(root_bus, sec_bus, types);
+    }
 
   multi_function = root_bus->ops->pci_cfg_read(
     &tmp_dev, PCI_CONFIG_HEADER_TYPE, 1) & PCI_HEADER_MASK_MULTI;
@@ -258,10 +257,12 @@ static void pci_scan_device(FAR struct pci_bus_s *root_bus,
         {
           tmp_dev.bdf = PCI_BDF(bus_idx, slot_idx, dev_func);
           vid = root_bus->ops->pci_cfg_read(&tmp_dev, PCI_CONFIG_VENDOR, 2);
+
           if (vid != 0xffff)
             {
               sec_bus = pci_check_pci_bridge(
                 root_bus, bus_idx, slot_idx, dev_func);
+
               if (sec_bus)
                 {
                   pci_scan_bus(root_bus, sec_bus, types);
@@ -274,7 +275,17 @@ static void pci_scan_device(FAR struct pci_bus_s *root_bus,
     }
   else
     {
-      pci_probe_device(root_bus, bus_idx, slot_idx, dev_func, types);
+      /* Check if this is a PCI-PCI bridge device with MF=0 */
+
+      sec_bus = pci_check_pci_bridge(root_bus, bus_idx, slot_idx, dev_func);
+      if (sec_bus)
+        {
+          pci_scan_bus(root_bus, sec_bus, types);
+        }
+      else
+        {
+          pci_probe_device(root_bus, bus_idx, slot_idx, dev_func, types);
+        }
     }
 }
 
@@ -294,7 +305,7 @@ static void pci_scan_device(FAR struct pci_bus_s *root_bus,
 
 static void pci_scan_bus(FAR struct pci_bus_s *root_bus,
                          uint8_t bus_idx,
-                         FAR struct pci_dev_type_s **types)
+                         FAR const struct pci_dev_type_s **types)
 {
   uint8_t slot_idx;
 
@@ -302,8 +313,6 @@ static void pci_scan_bus(FAR struct pci_bus_s *root_bus,
     {
       pci_scan_device(root_bus, bus_idx, slot_idx, types);
     }
-
-  return;
 }
 
 /****************************************************************************
@@ -320,11 +329,11 @@ static void pci_scan_bus(FAR struct pci_bus_s *root_bus,
 
 static void pci_set_cmd_bit(FAR struct pci_dev_s *dev, uint16_t bitmask)
 {
-  uint16_t	cmd;
+  uint16_t cmd;
 
   cmd = dev->bus->ops->pci_cfg_read(dev, PCI_CONFIG_COMMAND, 2);
   dev->bus->ops->pci_cfg_write(dev, PCI_CONFIG_COMMAND,
-    (cmd | bitmask), 2);
+                               (cmd | bitmask), 2);
 }
 
 /****************************************************************************
@@ -341,11 +350,11 @@ static void pci_set_cmd_bit(FAR struct pci_dev_s *dev, uint16_t bitmask)
 
 static void pci_clear_cmd_bit(FAR struct pci_dev_s *dev, uint16_t bitmask)
 {
-  uint16_t	cmd;
+  uint16_t cmd;
 
   cmd = dev->bus->ops->pci_cfg_read(dev, PCI_CONFIG_COMMAND, 2);
   dev->bus->ops->pci_cfg_write(dev, PCI_CONFIG_COMMAND,
-    (cmd & ~bitmask), 2);
+                               (cmd & ~bitmask), 2);
 }
 
 /****************************************************************************
@@ -369,12 +378,17 @@ static void pci_clear_cmd_bit(FAR struct pci_dev_s *dev, uint16_t bitmask)
  ****************************************************************************/
 
 int pci_enumerate(FAR struct pci_bus_s *bus,
-                  FAR struct pci_dev_type_s **types)
+                  FAR const struct pci_dev_type_s **types)
 {
   if (!bus)
+    {
       return -EINVAL;
+    }
+
   if (!types)
+    {
       return -EINVAL;
+    }
 
   pci_scan_bus(bus, 0, types);
   return OK;
@@ -400,7 +414,7 @@ int pci_enumerate(FAR struct pci_bus_s *bus,
 
 int pci_initialize(FAR struct pci_bus_s *bus)
 {
-  return pci_enumerate(bus, pci_device_types);
+  return pci_enumerate(bus, g_pci_device_types);
 }
 
 /****************************************************************************
@@ -425,12 +439,17 @@ int pci_enable_io(FAR struct pci_dev_s *dev, int res)
 {
   switch (res)
     {
-    case PCI_SYS_RES_IOPORT:
-      pci_set_cmd_bit(dev, PCI_CMD_IO_SPACE);
-      return OK;
-    case PCI_SYS_RES_MEM:
-      pci_set_cmd_bit(dev, PCI_CMD_MEM_SPACE);
-      return OK;
+      case PCI_SYS_RES_IOPORT:
+        {
+          pci_set_cmd_bit(dev, PCI_CMD_IO_SPACE);
+          return OK;
+        }
+
+      case PCI_SYS_RES_MEM:
+        {
+          pci_set_cmd_bit(dev, PCI_CMD_MEM_SPACE);
+          return OK;
+        }
     }
 
   return -EINVAL;
@@ -458,12 +477,17 @@ int pci_disable_io(FAR struct pci_dev_s *dev, int res)
 {
   switch (res)
     {
-    case PCI_SYS_RES_IOPORT:
-      pci_clear_cmd_bit(dev, PCI_CMD_IO_SPACE);
-      return OK;
-    case PCI_SYS_RES_MEM:
-      pci_clear_cmd_bit(dev, PCI_CMD_MEM_SPACE);
-      return OK;
+      case PCI_SYS_RES_IOPORT:
+        {
+          pci_clear_cmd_bit(dev, PCI_CMD_IO_SPACE);
+          return OK;
+        }
+
+      case PCI_SYS_RES_MEM:
+        {
+          pci_clear_cmd_bit(dev, PCI_CMD_MEM_SPACE);
+          return OK;
+        }
     }
 
   return -EINVAL;
@@ -530,7 +554,7 @@ int pci_disable_bus_master(FAR struct pci_dev_s *dev)
 int pci_bar_valid(FAR struct pci_dev_s *dev, uint8_t bar_id)
 {
   uint32_t bar = dev->bus->ops->pci_cfg_read(dev,
-      PCI_HEADER_NORM_BAR0 + (bar_id * 4), 4);
+                    PCI_HEADER_NORM_BAR0 + (bar_id * 4), 4);
 
   if (bar == PCI_BAR_INVALID)
     {
@@ -559,12 +583,14 @@ int pci_bar_valid(FAR struct pci_dev_s *dev, uint8_t bar_id)
 bool pci_bar_is_64(FAR struct pci_dev_s *dev, uint8_t bar_id)
 {
   uint32_t bar = dev->bus->ops->pci_cfg_read(dev,
-      PCI_HEADER_NORM_BAR0 + (bar_id * 4), 4);
+                    PCI_HEADER_NORM_BAR0 + (bar_id * 4), 4);
 
   /* Check that it is memory and not io port */
 
   if ((bar & PCI_BAR_LAYOUT_MASK) != PCI_BAR_LAYOUT_MEM)
+    {
       return false;
+    }
 
   if (((bar & PCI_BAR_TYPE_MASK) >> PCI_BAR_TYPE_OFFSET) == PCI_BAR_TYPE_64)
     {
@@ -591,12 +617,13 @@ bool pci_bar_is_64(FAR struct pci_dev_s *dev, uint8_t bar_id)
 
 uint64_t pci_bar_size(FAR struct pci_dev_s *dev, uint8_t bar_id)
 {
-  uint32_t bar;
-  uint32_t size;
-  uint64_t full_size;
-  uint8_t bar_offset = PCI_HEADER_NORM_BAR0 + (bar_id * 4);
-  const struct pci_bus_ops_s *dev_ops = dev->bus->ops;
+  FAR const struct pci_bus_ops_s *dev_ops = dev->bus->ops;
+  uint32_t                        bar;
+  uint32_t                        size;
+  uint64_t                        full_size;
+  uint8_t                         bar_offset;
 
+  bar_offset = PCI_HEADER_NORM_BAR0 + (bar_id * 4);
   bar = dev_ops->pci_cfg_read(dev, bar_offset, 4);
 
   /* Write all 1 to the BAR.  We are looking for which bits will change */
@@ -660,10 +687,11 @@ uint64_t pci_bar_size(FAR struct pci_dev_s *dev, uint8_t bar_id)
 
 uint64_t pci_bar_addr(FAR struct pci_dev_s *dev, uint8_t bar_id)
 {
-  uint64_t addr;
-  uint8_t bar_offset = PCI_HEADER_NORM_BAR0 + (bar_id * 4);
-  const struct pci_bus_ops_s *dev_ops = dev->bus->ops;
+  FAR const struct pci_bus_ops_s *dev_ops = dev->bus->ops;
+  uint64_t                        addr;
+  uint8_t                         bar_offset;
 
+  bar_offset = PCI_HEADER_NORM_BAR0 + (bar_id * 4);
   addr = dev_ops->pci_cfg_read(dev, bar_offset, 4);
 
   if ((addr & PCI_BAR_LAYOUT_MASK) == PCI_BAR_LAYOUT_MEM)
@@ -699,25 +727,31 @@ uint64_t pci_bar_addr(FAR struct pci_dev_s *dev, uint8_t bar_id)
 
 void pci_dev_dump(FAR struct pci_dev_s *dev)
 {
-  uint8_t bar_id;
-  uint8_t bar_mem_type = 0;
-  uint32_t bar;
-  uint64_t bar_size;
-  uint64_t bar_addr;
+  FAR const struct pci_bus_ops_s *dev_ops      = dev->bus->ops;
+  uint8_t                         bar_mem_type = 0;
+  uint8_t                         bar_id;
+  uint32_t                        bar;
+  uint64_t                        bar_size;
+  uint64_t                        bar_addr;
+  uint8_t                         cap_id;
+  uint8_t                         cap_offset;
+  uint32_t                        bdf;
+  uint16_t                        vid;
+  uint16_t                        pid;
+  uint8_t                         header;
+  uint8_t                         progif;
+  uint8_t                         subclass;
+  uint8_t                         class;
+  uint8_t                         int_pin;
+  uint8_t                         int_line;
 
-  uint8_t cap_id;
-  uint8_t cap_offset;
-
-  const struct pci_bus_ops_s *dev_ops = dev->bus->ops;
-  uint32_t bdf = dev->bdf;
-  uint16_t vid = dev_ops->pci_cfg_read(dev, PCI_CONFIG_VENDOR, 2);
-  uint16_t pid = dev_ops->pci_cfg_read(dev, PCI_CONFIG_DEVICE, 2);
-  uint8_t header = dev_ops->pci_cfg_read(dev, PCI_CONFIG_HEADER_TYPE, 1);
-  uint8_t progif = dev_ops->pci_cfg_read(dev, PCI_CONFIG_PROG_IF, 1);
-  uint8_t subclass = dev_ops->pci_cfg_read(dev, PCI_CONFIG_SUBCLASS, 1);
-  uint8_t class = dev_ops->pci_cfg_read(dev, PCI_CONFIG_CLASS, 1);
-  uint8_t int_pin;
-  uint8_t int_line;
+  bdf      = dev->bdf;
+  vid      = dev_ops->pci_cfg_read(dev, PCI_CONFIG_VENDOR, 2);
+  pid      = dev_ops->pci_cfg_read(dev, PCI_CONFIG_DEVICE, 2);
+  header   = dev_ops->pci_cfg_read(dev, PCI_CONFIG_HEADER_TYPE, 1);
+  progif   = dev_ops->pci_cfg_read(dev, PCI_CONFIG_PROG_IF, 1);
+  subclass = dev_ops->pci_cfg_read(dev, PCI_CONFIG_SUBCLASS, 1);
+  class    = dev_ops->pci_cfg_read(dev, PCI_CONFIG_CLASS, 1);
 
   pciinfo("[%02x:%02x.%x] %04x:%04x\n",
           bdf >> 8, (bdf & 0xff) >> 3, bdf & 0x7, vid, pid);
@@ -740,7 +774,9 @@ void pci_dev_dump(FAR struct pci_dev_s *dev)
     }
 
   if ((header & PCI_HEADER_TYPE_MASK) != PCI_HEADER_NORMAL)
+    {
       return;
+    }
 
   int_pin = dev_ops->pci_cfg_read(dev, PCI_HEADER_NORM_INT_PIN, 1);
   int_line = dev_ops->pci_cfg_read(dev, PCI_HEADER_NORM_INT_LINE, 1);
@@ -749,7 +785,9 @@ void pci_dev_dump(FAR struct pci_dev_s *dev)
   for (bar_id = 0; bar_id < PCI_BAR_CNT; bar_id++)
     {
       if (pci_bar_valid(dev, bar_id) != OK)
-        continue;
+        {
+          continue;
+        }
 
       bar = dev_ops->pci_cfg_read(dev,
         PCI_HEADER_NORM_BAR0 + (bar_id * 4), 4);
@@ -787,6 +825,8 @@ void pci_dev_dump(FAR struct pci_dev_s *dev)
       /* Skip next bar if this one was 64bit */
 
       if (bar_mem_type == 64)
+        {
           bar_id++;
+        }
     }
 }

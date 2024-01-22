@@ -40,17 +40,17 @@
 
 /* PCI config common registers */
 
-#define	PCI_CONFIG_VENDOR	          0x00
-#define	PCI_CONFIG_DEVICE	          0x02
-#define	PCI_CONFIG_COMMAND	        0x04
-#define	PCI_CONFIG_REV_ID	          0x08
+#define	PCI_CONFIG_VENDOR           0x00
+#define	PCI_CONFIG_DEVICE           0x02
+#define	PCI_CONFIG_COMMAND          0x04
+#define	PCI_CONFIG_REV_ID           0x08
 #define	PCI_CONFIG_PROG_IF          0x09
-#define	PCI_CONFIG_SUBCLASS	        0x0A
-#define	PCI_CONFIG_CLASS	          0x0B
-#define	PCI_CONFIG_CACHE_LINE_SIZE	0x0C
-#define	PCI_CONFIG_LATENCY_TIMER	  0x0D
-#define	PCI_CONFIG_HEADER_TYPE	    0x0E
-#define	PCI_CONFIG_BIST	            0x0F
+#define	PCI_CONFIG_SUBCLASS         0x0A
+#define	PCI_CONFIG_CLASS            0x0B
+#define	PCI_CONFIG_CACHE_LINE_SIZE  0x0C
+#define	PCI_CONFIG_LATENCY_TIMER    0x0D
+#define	PCI_CONFIG_HEADER_TYPE      0x0E
+#define	PCI_CONFIG_BIST             0x0F
 
 /* PCI config header types */
 
@@ -109,7 +109,7 @@
 
 /* Reserved 0x14-0x3F */
 
-#define PCI_CLASS_BASE_CO_PROC           0x40   
+#define PCI_CLASS_BASE_CO_PROC           0x40
 
 /* Reserved 0x41-0xFE */
 
@@ -216,18 +216,32 @@ struct pci_dev_s;
 
 struct pci_bus_ops_s
 {
-    CODE void (*pci_cfg_write)(FAR struct pci_dev_s *dev, int reg,
-                               uint32_t val, int width);
+  /* Write 8, 16, 32, 64 bits data to PCI-E configuration space of device
+   * specified by dev.
+   */
 
-    CODE uint32_t (*pci_cfg_read)(FAR struct pci_dev_s *dev, int reg,
-                                  int width);
+  CODE void (*pci_cfg_write)(FAR struct pci_dev_s *dev, int reg,
+                             uint32_t val, int width);
 
-    CODE int (*pci_map_bar)(uint64_t addr, uint64_t len);
+  /* Read 8, 16, 32, 64 bits data to PCI-E configuration space of device
+   * specified by dev.
+   */
 
-    CODE uint32_t (*pci_io_read)(FAR const volatile void *addr, int width);
+  CODE uint32_t (*pci_cfg_read)(FAR struct pci_dev_s *dev, int reg,
+                                int width);
 
-    CODE void (*pci_io_write)(FAR const volatile void *addr, uint32_t val,
-                              int width);
+  /* Map address in a 32 bits bar in the memory address space */
+
+  CODE int (*pci_map_bar)(uint64_t addr, uint64_t len);
+
+  /* Read from IO port */
+
+  CODE uint32_t (*pci_io_read)(FAR const volatile void *addr, int width);
+
+  /* Write to IO port */
+
+  CODE void (*pci_io_write)(FAR const volatile void *addr, uint32_t val,
+                            int width);
 };
 
 /* PCI bus private data. */
@@ -249,16 +263,16 @@ struct pci_dev_type_s
   /* Call back function when a device is probed */
 
   CODE int (*probe)(FAR struct pci_bus_s *bus,
-                    FAR struct pci_dev_type_s *type, uint16_t bdf);
+                    FAR const struct pci_dev_type_s *type, uint16_t bdf);
 };
 
 /* PCI device private data. */
 
 struct pci_dev_s
 {
-    FAR struct pci_bus_s       *bus;
-    FAR struct pci_dev_type_s  *type;
-    uint32_t                    bdf;
+  FAR struct pci_bus_s            *bus;
+  FAR const struct pci_dev_type_s *type;
+  uint32_t                         bdf;
 };
 
 /****************************************************************************

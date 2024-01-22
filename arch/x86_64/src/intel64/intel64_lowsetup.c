@@ -78,11 +78,14 @@ static void x86_64_mb2_config(void)
   /* Check that we were actually booted by a mulitboot2 bootloader */
 
   if (mb_magic != MULTIBOOT2_BOOTLOADER_MAGIC)
-    return;
+    {
+      return;
+    }
 
   for (tag = (struct multiboot_tag *)(uintptr_t)(mb_info_struct + 8);
-    tag->type != MULTIBOOT_TAG_TYPE_END;
-    tag = (struct multiboot_tag *)((uint8_t *)tag + ((tag->size + 7) & ~7)))
+       tag->type != MULTIBOOT_TAG_TYPE_END;
+       tag = (struct multiboot_tag *)((uint8_t *)tag +
+                                      ((tag->size + 7) & ~7)))
     {
       switch (tag->type)
         {
