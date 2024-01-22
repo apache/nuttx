@@ -98,6 +98,19 @@
 
 #define MMCSD_CAPACITY(b, s)    ((s) >= 10 ? (b) << ((s) - 10) : (b) >> (10 - (s)))
 
+#define MMCSD_USLEEP(usec) \
+  do \
+  { \
+    if (up_interrupt_context()) \
+      { \
+        up_udelay(usec); \
+      } \
+    else \
+      { \
+        nxsig_usleep(usec); \
+      } \
+  } while (0)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -336,12 +349,12 @@ static inline int mmcsd_sendcmd4(FAR struct mmcsd_state_s *priv)
        */
 
       mmcsd_sendcmdpoll(priv, MMCSD_CMD4, CONFIG_MMCSD_DSR << 16);
-      nxsig_usleep(MMCSD_DSR_DELAY);
+      MMCSD_USLEEP(MMCSD_DSR_DELAY);
 
       /* Send it again to have more confidence */
 
       mmcsd_sendcmdpoll(priv, MMCSD_CMD4, CONFIG_MMCSD_DSR << 16);
-      nxsig_usleep(MMCSD_DSR_DELAY);
+      MMCSD_USLEEP(MMCSD_DSR_DELAY);
     }
   else
     {
@@ -1305,7 +1318,7 @@ static int mmcsd_transferready(FAR struct mmcsd_state_s *priv)
 
       sched_yield();
 #else
-      nxsig_usleep(1000);
+      MMCSD_USLEEP(1000);
 #endif
 
       /* We are still in the programming state. Calculate the elapsed
@@ -2595,7 +2608,7 @@ static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
       SDIO_WIDEBUS(priv->dev, false);
       priv->widebus = false;
       SDIO_CLOCK(priv->dev, CLOCK_SDIO_DISABLED);
-      nxsig_usleep(MMCSD_CLK_DELAY);
+      MMCSD_USLEEP(MMCSD_CLK_DELAY);
 
       return OK;
     }
@@ -2656,7 +2669,7 @@ static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
     }
 #endif /* #ifdef CONFIG_MMCSD_MMCSUPPORT */
 
-  nxsig_usleep(MMCSD_CLK_DELAY);
+  MMCSD_USLEEP(MMCSD_CLK_DELAY);
   return OK;
 }
 
@@ -3450,7 +3463,7 @@ static int mmcsd_sdinitialize(FAR struct mmcsd_state_s *priv)
   /* Select high speed SD clocking (which may depend on the DSR setting) */
 
   SDIO_CLOCK(priv->dev, CLOCK_SD_TRANSFER_1BIT);
-  nxsig_usleep(MMCSD_CLK_DELAY);
+  MMCSD_USLEEP(MMCSD_CLK_DELAY);
 
   /* If the hardware only supports 4-bit transfer mode then we forced to
    * attempt to setup the card in this mode before checking the SCR register.
@@ -3547,7 +3560,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
    */
 
   mmcsd_sendcmdpoll(priv, MMCSD_CMD0, 0xf0f0f0f0);
-  nxsig_usleep(MMCSD_IDLE_DELAY);
+  MMCSD_USLEEP(MMCSD_IDLE_DELAY);
 
   /* After power up at least 74 clock cycles are required prior to starting
    * bus communication
@@ -3558,7 +3571,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
   /* Then send CMD0 just once is standard procedure */
 
   mmcsd_sendcmdpoll(priv, MMCSD_CMD0, 0);
-  nxsig_usleep(MMCSD_IDLE_DELAY);
+  MMCSD_USLEEP(MMCSD_IDLE_DELAY);
 
 #ifdef CONFIG_MMCSD_MMCSUPPORT
   /* Send CMD1 which is supported only by MMC.  if there is valid response
@@ -3580,7 +3593,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
        */
 
       mmcsd_sendcmdpoll(priv, MMCSD_CMD0, 0);
-      nxsig_usleep(MMCSD_IDLE_DELAY);
+      MMCSD_USLEEP(MMCSD_IDLE_DELAY);
     }
   else
     {
