@@ -29,6 +29,7 @@
 
 #include "mpu.h"
 #include "arm_internal.h"
+#include "barriers.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -201,6 +202,9 @@ static void mpu_reset_internal()
     }
 
   putreg32(0, MPU_CTRL);
+
+  ARM_DSB();
+  ARM_ISB();
 }
 #endif
 
@@ -356,6 +360,11 @@ void mpu_control(bool enable, bool hfnmiena, bool privdefena)
     }
 
   putreg32(regval, MPU_CTRL);
+
+  /* Ensure MPU setting take effects */
+
+  ARM_DSB();
+  ARM_ISB();
 }
 
 /****************************************************************************
@@ -413,6 +422,11 @@ void mpu_configure_region(uintptr_t base, size_t size,
            ((uint32_t)subregions << MPU_RASR_SRD_SHIFT) | /* Sub-regions    */
            flags;
   putreg32(regval, MPU_RASR);
+
+  /* Ensure MPU setting take effects */
+
+  ARM_DSB();
+  ARM_ISB();
 }
 
 /****************************************************************************
