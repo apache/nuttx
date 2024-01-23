@@ -98,7 +98,7 @@ rptun_get_mem(FAR struct remoteproc *rproc,
               metal_phys_addr_t da,
               FAR void *va, size_t size,
               FAR struct remoteproc_mem *buf);
-static int rptun_notify_wait(FAR struct remoteproc *rproc, uint32_t id);
+static int rptun_notify_wait(FAR struct rpmsg_device *rdev, uint32_t id);
 
 static int rptun_dev_start(FAR struct remoteproc *rproc);
 static int rptun_dev_stop(FAR struct remoteproc *rproc, bool stop_ns);
@@ -142,7 +142,6 @@ static const struct remoteproc_ops g_rptun_ops =
   .stop        = rptun_stop,
   .notify      = rptun_notify,
   .get_mem     = rptun_get_mem,
-  .notify_wait = rptun_notify_wait,
 };
 
 #ifdef CONFIG_RPTUN_LOADER
@@ -411,9 +410,10 @@ rptun_get_mem(FAR struct remoteproc *rproc,
   return buf;
 }
 
-static int rptun_notify_wait(FAR struct remoteproc *rproc, uint32_t id)
+static int rptun_notify_wait(FAR struct rpmsg_device *rdev, uint32_t id)
 {
-  FAR struct rptun_priv_s *priv = rproc->priv;
+  FAR struct rptun_priv_s *priv = (FAR struct rptun_priv_s *)
+    metal_container_of(rdev, struct rpmsg_s, rdev);
 
   if (!rptun_is_recursive(priv))
     {
@@ -787,6 +787,7 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
     }
 
   priv->rvdev.rdev.ns_unbind_cb = rpmsg_ns_unbind;
+  priv->rvdev.notify_wait_cb    = rptun_notify_wait;
 
   /* Remote proc start */
 
