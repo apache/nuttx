@@ -249,7 +249,6 @@ static const struct virtio_dispatch g_virtio_mmio_dispatch =
   virtio_mmio_write_config,       /* write_config */
   virtio_mmio_reset_device,       /* reset_device */
   virtio_mmio_notify,             /* notify */
-  NULL,                           /* notify_wait */
 };
 
 /****************************************************************************
