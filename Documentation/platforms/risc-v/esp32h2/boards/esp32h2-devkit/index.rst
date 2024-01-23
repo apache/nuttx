@@ -1,38 +1,37 @@
 ==================
-ESP32-C6-DevKitC-1
+ESP32-H2-DevKitM-1
 ==================
 
-ESP32-C6-DevKitC-1 is an entry-level development board based on ESP32-C6-WROOM-1(U),
-a general-purpose module with a 8 MB SPI flash. This board integrates complete Wi-Fi,
-Bluetooth LE, Zigbee, and Thread functions. You can find the board schematic
-`here <https://espressif-docs.readthedocs-hosted.com/projects/esp-dev-kits/en/latest/_static/esp32-c6-devkitc-1/schematics/esp32-c6-devkitc-1-schematics_v1.2.pdf>`_.
+ESP32-H2-DevKitM-1 is an entry-level development board based on Bluetooth® Low Energy and
+IEEE 802.15.4 combo module ESP32-H2-MINI-1 or ESP32-H2-MINI-1U. You can find the board schematic
+`here <https://espressif-docs.readthedocs-hosted.com/projects/esp-dev-kits/en/latest/_static/esp32-h2-devkitm-1/esp32-h2-devkitm-1_v1.2_schematics_20230306.pdf>`_.
 
-Most of the I/O pins are broken out to the pin headers on both sides for easy interfacing.
-Developers can either connect peripherals with jumper wires or mount ESP32-C6-DevKitC-1 on
-a breadboard.
+Most of the I/O pins on the ESP32-H2-MINI-1/1U module are broken out to the pin headers on 
+both sides of this board for easy interfacing. Developers can either connect peripherals with
+jumper wires or mount ESP32-H2-DevKitM-1 on a breadboard.
 
-.. figure:: esp32-c6-devkitc-1-isometric_v1.2.png
-    :alt: ESP32-C6-DevKitC-1 Board Layout
+.. figure:: esp32-h2-devkitm-1-isometric.png
+    :alt: ESP32-H2-DevKitM-1 Board Layout
     :figclass: align-center
 
-    ESP32-C6-DevKitC-1 Board Layout
+    ESP32-H2-DevKitM-1 Board Layout
 
-The block diagram below presents main components of the ESP32-C6-DevKitC-1.
+The block diagram below presents main components of the ESP32-H2-DevKitM-1.
 
-.. figure:: esp32-c6-devkitc-1-v1.2-block-diagram.png
-    :alt: ESP32-C6-DevKitC-1 Electrical Block Diagram
+.. figure:: ESP32-H2-DevKitM-1-v1.0-block-diagram.png
+    :alt: ESP32-H2-DevKitM-1 Electrical Block Diagram
     :figclass: align-center
 
-    ESP32-C6-DevKitC-1 Electrical Block Diagram
+    ESP32-H2-DevKitM-1 Electrical Block Diagram
 
 Hardware Components
 -------------------
 
-.. figure:: esp32-c6-devkitc-1-v1.2-annotated-photo.png
-    :alt: ESP32-C6-DevKitC-1 Hardware Components
+.. figure:: esp32-h2-devkitm-1-v1.2-annotated-photo.png
+    :alt: ESP32-H2-DevKitM-1 Hardware Components
     :figclass: align-center
 
-    ESP32-C6-DevKitC-1 Hardware Components
+    ESP32-H2-DevKitM-1 Hardware Components
 
 Buttons and LEDs
 ================
@@ -56,8 +55,8 @@ Another WS2812 LED is connected to GPIO8 and is available for software.
 Current Measurement
 ===================
 
-The J5 headers on the ESP32-C6-DevKitC-1 can be used for measuring the current
-drawn by the ESP32-C6-WROOM-1(U) module:
+The J5 headers on ESP32-H2-DevKitM-1 can be used for measuring the current
+drawn by the ESP32-H2-MINI-1/1U module:
 
     - Remove the jumper: Power supply between the module and peripherals on the
       board is cut off. To measure the module's current, connect the board with an
@@ -71,18 +70,18 @@ drawn by the ESP32-C6-WROOM-1(U) module:
 Pin Mapping
 ===========
 
-.. figure:: esp32-c6-devkitc-1-pin-layout.png
-    :alt: ESP32-C6-DevKitC pin layout
+.. figure:: esp32-h2-devkitm-1-pin-layout.png
+    :alt: ESP32-H2-DevKitM-1 pin layout
     :figclass: align-center
 
-    ESP32-C6-DevKitC-1 Pin Layout
+    ESP32-H2-DevKitM-1 Pin Layout
 
 Configurations
 ==============
 
 All of the configurations presented below can be tested by running the following commands::
 
-    $ ./tools/configure.sh esp32c6-devkit:<config_name>
+    $ ./tools/configure.sh esp32h2-devkit:<config_name>
     $ make flash ESPTOOL_PORT=/dev/ttyUSB0 -j
 
 Where <config_name> is the name of board configuration you want to use, i.e.: nsh, buttons, wifi...
@@ -177,10 +176,10 @@ Where x in the timer instance.
 usbconsole
 ----------
 
-This configuration tests the built-in USB-to-serial converter found in ESP32-C6.
+This configuration tests the built-in USB-to-serial converter found in ESP32-H2.
 ``esptool`` can be used to check the version of the chip and if this feature is
 supported.  Running ``esptool.py -p <port> chip_id`` should have ``Chip is
-ESP32-C6`` in its output.
+ESP32-H2`` in its output.
 When connecting the board a new device should appear, a ``/dev/ttyACMX`` on Linux
 or a ``/dev/cu.usbmodemXXX`` om macOS.
 This can be used to flash and monitor the device with the usual commands::
