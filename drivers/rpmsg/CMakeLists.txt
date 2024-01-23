@@ -33,6 +33,10 @@ if(CONFIG_RPMSG)
                                PRIVATE ${NUTTX_DIR}/openamp/open-amp/lib)
   endif()
 
+  if(CONFIG_RPMSG_PORT_SPI)
+    list(APPEND SRCS rpmsg_port_spi.c)
+  endif()
+
   if(CONFIG_RPMSG_VIRTIO)
     list(APPEND SRCS rpmsg_virtio.c)
   endif()

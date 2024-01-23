@@ -28,6 +28,9 @@
 #include <nuttx/config.h>
 #include <stdint.h>
 
+#include <nuttx/ioexpander/ioexpander.h>
+#include <nuttx/spi/spi.h>
+
 #ifdef CONFIG_RPMSG_PORT
 
 /****************************************************************************
@@ -49,6 +52,80 @@ struct rpmsg_port_config_s
   FAR void       *txbuf;
   FAR void       *rxbuf;
 };
+
+#ifdef CONFIG_RPMSG_PORT_SPI
+
+/* There are two gpios used for communication between two chips. At the SPI
+ * master side, mreq is an output gpio pin which is used to notify the
+ * slave side there is a data packet to be sent. it actually transfers the
+ * data only when it receives an interrupt from sreq pin. and at the SPI
+ * slave side, it prepares the data to be sent, and activates the sreq to
+ * the master side, master will initiate a transfer immediately when it
+ * receives an interrupt from sreq pin to receive the data.
+ *
+ * If IOEXPANDER_OPTION_INVERT option of pin is set to be 0, then it will
+ * be triggered an interrupt at the rising edge. or it will be triggered
+ * at the falling edge.
+ */
+
+struct rpmsg_port_spi_config_s
+{
+  /* GPIO configurations of pins used for communication between two chips. */
+
+  uint8_t         mreq_pin;
+  uint8_t         sreq_pin;
+  int             mreq_invert;
+  int             sreq_invert; /* Pin options described in ioexpander.h */
+
+  enum spi_mode_e mode;
+  uint32_t        devid;       /* Device ID of enum spi_devtype_e */
+  uint32_t        freq;        /* SPI frequency (Hz) */
+};
+
+#endif
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+#ifdef CONFIG_RPMSG_PORT_SPI
+
+/****************************************************************************
+ * Name: rpmsg_port_spi_initialize
+ *
+ * Description:
+ *   Initialize a rpmsg_port_spi device to communicate between two chips.
+ *
+ * Input Parameters:
+ *   cfg     - Configuration of buffers needed for communication.
+ *   spicfg  - SPI device's configuration.
+ *   spi     - SPI device used for transfer data between two chips.
+ *   ioe     - ioexpander used to config gpios.
+ *
+ * Returned Value:
+ *   Zero on success or an negative value on failure.
+ *
+ ****************************************************************************/
+
+int
+rpmsg_port_spi_initialize(FAR const struct rpmsg_port_config_s *cfg,
+                          FAR const struct rpmsg_port_spi_config_s *spicfg,
+                          FAR struct spi_dev_s *spi,
+                          FAR struct ioexpander_dev_s *ioe);
+
+#endif
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* CONFIG_RPMSG_PORT */
 #endif /* __INCLUDE_NUTTX_RPMSG_RPMSG_PORT_H */
