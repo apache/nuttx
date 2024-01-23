@@ -27,6 +27,34 @@ config RPMSG_PORT
 	---help---
 		Rpmsg port transport layer used for cross chip communication.
 
+config RPMSG_PORT_SPI
+	bool "Rpmsg SPI Port Driver Support"
+	default n
+	select RPMSG_PORT
+	---help---
+		Rpmsg SPI Port driver used for cross chip communication.
+
+if RPMSG_PORT_SPI
+
+config RPMSG_PORT_SPI_THREAD_PRIORITY
+	int "Rpmsg SPI Port Thread Priority"
+	default 224
+
+config RPMSG_PORT_SPI_THREAD_STACKSIZE
+	int "Rpmsg SPI Port Stack Size"
+	default DEFAULT_TASK_STACKSIZE
+
+config RPMSG_PORT_SPI_CRC
+	bool "Rpmsg SPI Port Use CRC Check"
+	default n
+
+config RPMSG_PORT_SPI_RX_THRESHOLD
+	int "Rpmsg SPI Port Rx Buffer Threshold"
+	default 50
+	range 0 100
+
+endif # RPMSG_PORT_SPI
+
 endif # RPMSG
 
 config RPMSG_VIRTIO
