@@ -1,6 +1,9 @@
-==================
-Espressif ESP32-C3
-==================
+.. note::
+   A new approach is being adopted for this chip and this implementation will be deprecated when the same support level is achieved.
+
+===========================
+Espressif ESP32-C3 (Legacy)
+===========================
 
 The ESP32-C3 is an ultra-low-power and highly integrated SoC with a RISC-V
 core and supports 2.4 GHz Wi-Fi and Bluetooth Low Energy.
