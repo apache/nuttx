@@ -1,10 +1,8 @@
-.. note::
-   A new approach is being adopted for this chip and this implementation will be deprecated when the same support level is achieved.
-   For the new approach please check :ref:`here<esp32c3>`.
+.. _esp32c3:
 
-===========================
-Espressif ESP32-C3 (Legacy)
-===========================
+==================
+Espressif ESP32-C3
+==================
 
 The ESP32-C3 is an ultra-low-power and highly integrated SoC with a RISC-V
 core and supports 2.4 GHz Wi-Fi and Bluetooth Low Energy.
@@ -147,26 +145,26 @@ The following list indicates the state of peripherals' support in NuttX:
 =========== ======= =====
 Peripheral  Support NOTES
 =========== ======= =====
-ADC          Yes
-AES          Yes
-Bluetooth    Yes
+ADC          No
+AES          No
+Bluetooth    No
 CDC Console  Yes    Rev.3
-DMA          Yes
-eFuse        Yes
+DMA          No
+eFuse        No
 GPIO         Yes
-I2C          Yes
+I2C          No
 LED_PWM      Yes
-RNG          Yes
-RSA          Yes
+RNG          No
+RSA          No
 RTC          Yes
-SHA          Yes
-SPI          Yes
-SPIFLASH     Yes
+SHA          No
+SPI          No
+SPIFLASH     No
 Timers       Yes
-Touch        Yes
+Touch        No
 UART         Yes
 Watchdog     Yes
-Wifi         Yes
+Wifi         No
 =========== ======= =====
 
 Secure Boot and Flash Encryption
