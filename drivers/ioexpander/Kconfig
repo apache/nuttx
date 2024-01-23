@@ -56,6 +56,24 @@ config IOEXPANDER_DUMMY_INT_POLLDELAY
 
 endif # IOEXPANDER_DUMMY
 
+config IOEXPANDER_ICJX
+	bool "iC-JX SPI IO expander"
+	default n
+	depends on SPI
+	---help---
+		Enable support for the iC-JX expander from iC-Haus GmbH manufacturer.
+		SPI peripheral is used for the communication.
+
+if IOEXPANDER_ICJX
+
+config iC-JX_MULTIPLE
+	bool "Multiple iC-JX Devices"
+	default n
+	---help---
+		Can be defined to support multiple iC-JX devices on board.
+
+endif # IOEXPANDER_ICJX
+
 config IOEXPANDER_ISO1H812G
 	bool "ISO1H812G SPI IO expander"
 	default n
