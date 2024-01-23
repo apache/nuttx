@@ -194,7 +194,7 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   /* Only SOCK_RAW is supported */
 
-  if (psock->s_type == SOCK_RAW)
+  if (psock->s_type != SOCK_RAW)
     {
       /* EDESTADDRREQ.  Signifies that the socket is not connection-mode and
        * no peer address is set.
