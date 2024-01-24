@@ -115,7 +115,7 @@ typedef uint8_t pipe_ndx_t;   /*  8-bit index */
 
 struct pipe_dev_s
 {
-  mutex_t          d_bflock;      /* Used to serialize access to d_buffer and indices */
+  rmutex_t         d_bflock;      /* Used to serialize access to d_buffer and indices */
   sem_t            d_rdsem;       /* Empty buffer - Reader waits for data write AND
                                    * block O_RDONLY open until there is at least one writer */
   sem_t            d_wrsem;       /* Full buffer - Writer waits for data read AND
