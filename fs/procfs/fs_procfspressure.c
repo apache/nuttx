@@ -159,19 +159,25 @@ static ssize_t pressure_read(FAR struct file *filep, FAR char *buffer,
 {
   char buf[128];
   uint32_t flags;
+  size_t remain;
+  off_t offset;
   ssize_t ret;
 
-  flags = spin_lock_irqsave(&g_pressure_lock);
-  ret = procfs_snprintf(buf, sizeof(buf), "remaining %zu\n",
-                        g_remaining);
+  flags  = spin_lock_irqsave(&g_pressure_lock);
+  remain = g_remaining;
   spin_unlock_irqrestore(&g_pressure_lock, flags);
+
+  ret = procfs_snprintf(buf, sizeof(buf), "remaining %zu\n", remain);
 
   if (ret > buflen)
     {
       return -ENOMEM;
     }
 
-  memcpy(buffer, buf, ret);
+  offset = filep->f_pos;
+  ret    = procfs_memcpy(buf, ret, buffer, buflen, &offset);
+
+  filep->f_pos += ret;
   return ret;
 }
 
@@ -216,9 +222,9 @@ static ssize_t pressure_write(FAR struct file *filep, FAR const char *buffer,
 
   /* We should trigger the first event immediately */
 
-  priv->lasttick = CLOCK_MAX;
+  priv->lasttick  = CLOCK_MAX;
   priv->threshold = threshold;
-  priv->interval = interval;
+  priv->interval  = interval;
   spin_unlock_irqrestore(&g_pressure_lock, flags);
   return buflen;
 }
@@ -365,7 +371,7 @@ static int pressure_rewinddir(FAR struct fs_dirent_s *dir)
   FAR struct procfs_dir_priv_s *level;
 
   DEBUGASSERT(dir);
-  level = (FAR struct procfs_dir_priv_s *)dir;
+  level        = (FAR struct procfs_dir_priv_s *)dir;
   level->index = 0;
   return OK;
 }
@@ -411,7 +417,7 @@ void mm_notify_pressure(size_t remaining)
   FAR dq_entry_t *tmp;
   uint32_t flags;
 
-  flags = spin_lock_irqsave(&g_pressure_lock);
+  flags       = spin_lock_irqsave(&g_pressure_lock);
   g_remaining = remaining;
   dq_for_every_safe(&g_pressure_memory_queue, entry, tmp)
     {
