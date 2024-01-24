@@ -451,6 +451,7 @@ static const char *g_white_content_list[] =
   "AsyncBoth",
   "CurrentTime",
   "XUnmapWindow",
+  "XFree",
 
   /* Ref:
    * nuttx/arch/sim/src/sim_hostdecoder.*
