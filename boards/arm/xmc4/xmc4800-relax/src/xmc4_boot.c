@@ -29,6 +29,8 @@
 
 #include "xmc4800-relax.h"
 
+#include "xmc4_ecat.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -54,6 +56,10 @@ void xmc4_board_initialize(void)
 
 #ifdef CONFIG_XMC4_USCI_SPI
   xmc4_spidev_initialize();
+#endif
+
+#ifdef CONFIG_ECAT
+  xmc4_ecat_initialize();
 #endif
 }
 
