@@ -137,6 +137,7 @@ exception_common:
 	mrs		r1, msp					/* R1=The main stack pointer (MSP) */
 	sub		r2, r1, #SW_XCPT_SIZE			/* Reserve the stack space */
 	msr		msp, r2
+	isb		sy
 2:
 	mov		r2, r1					/* R2=Copy of the main/process stack pointer */
 	add		r2, #HW_XCPT_SIZE			/* R2=MSP/PSP before the interrupt was taken */
