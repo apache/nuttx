@@ -470,6 +470,7 @@ int up_fbinitialize(int display)
                           &g_planeinfo.fbmem, &g_planeinfo.fblen,
                           &g_planeinfo.bpp, &g_planeinfo.stride,
                           CONFIG_SIM_FRAMEBUFFER_COUNT);
+  g_planeinfo.fblen *= CONFIG_SIM_FRAMEBUFFER_COUNT;
 #endif
 
   return ret;

@@ -83,11 +83,11 @@ static unsigned short g_fbpixelwidth;
 static unsigned short g_fbpixelheight;
 static int g_fbbpp;
 static int g_fblen;
-static int g_fbcount;
 static int g_shmcheckpoint = 0;
 static int b_useshm;
 
 static unsigned char *g_trans_framebuffer;
+static unsigned int g_offset;
 
 /****************************************************************************
  * Private Functions
@@ -465,7 +465,6 @@ int sim_x11initialize(unsigned short width, unsigned short height,
 
   g_fbbpp = depth;
   g_fblen = *fblen;
-  g_fbcount = fbcount;
 
   /* Create conversion framebuffer */
 
@@ -541,6 +540,7 @@ int sim_x11setoffset(unsigned int offset)
   if (g_fbbpp == 32 && CONFIG_SIM_FBBPP == 16)
     {
       g_image->data = g_framebuffer + (offset << 1);
+      g_offset = offset;
     }
   else
     {
@@ -620,9 +620,9 @@ int sim_x11update(void)
 
   if (g_fbbpp == 32 && CONFIG_SIM_FBBPP == 16)
     {
-      sim_x11depth16to32(g_framebuffer,
-                         g_fblen * g_fbcount,
-                         g_trans_framebuffer);
+      sim_x11depth16to32(g_image->data,
+                         g_fblen,
+                         g_trans_framebuffer + g_offset);
     }
 
   XSync(g_display, 0);
