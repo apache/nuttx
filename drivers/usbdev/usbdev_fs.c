@@ -37,6 +37,7 @@
 #include <nuttx/usb/usbdev_trace.h>
 #include <nuttx/usb/composite.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/wqueue.h>
 
 #include "composite.h"
 #include "usbdev_fs.h"
@@ -81,6 +82,7 @@ struct usbdev_fs_dev_s
 {
   FAR struct composite_dev_s *cdev;
   uint8_t                     config;
+  struct work_s               work;
   struct usbdev_devinfo_s     devinfo;
   FAR struct usbdev_fs_ep_s  *eps;
   bool                        uninitialized;
@@ -929,8 +931,7 @@ static void usbdev_fs_connect(FAR struct usbdev_fs_dev_s *fs, int connect)
  *
  ****************************************************************************/
 
-static int usbdev_fs_ep_bind(FAR const char *devname,
-                             FAR struct usbdev_s *dev, uint8_t epno,
+static int usbdev_fs_ep_bind(FAR struct usbdev_s *dev, uint8_t epno,
                              FAR const struct usbdev_epinfo_s *epinfo,
                              FAR struct usbdev_fs_ep_s *fs_ep)
 {
@@ -994,8 +995,7 @@ static int usbdev_fs_ep_bind(FAR const char *devname,
     }
 
   fs_ep->crefs = 0;
-
-  return register_driver(devname, &g_usbdev_fs_fops, 0666, fs_ep);
+  return 0;
 }
 
 /****************************************************************************
@@ -1095,6 +1095,43 @@ static void usbdev_fs_classresetconfig(FAR struct usbdev_fs_dev_s *fs)
 }
 
 /****************************************************************************
+ * Name: usbdev_fs_register_driver
+ *
+ * Description:
+ *   Register the driver after successful set configuration.
+ *
+ ****************************************************************************/
+
+static void usbdev_fs_register_driver(FAR void *arg)
+{
+  FAR struct usbdev_fs_dev_s *fs = arg;
+  FAR struct usbdev_devinfo_s *devinfo = &fs->devinfo;
+  int i;
+
+  for (i = 0; i < devinfo->nendpoints; i++)
+    {
+      char devname[32];
+      int ret;
+
+      snprintf(devname, sizeof(devname), "%s/ep%d",
+               devinfo->name, i + 1);
+      ret = register_driver(devname, &g_usbdev_fs_fops, 0666, &fs->eps[i]);
+      if (ret < 0)
+        {
+          uerr("Failed to register driver:%s, ret:%d\n", devname, ret);
+          while (i--)
+            {
+              snprintf(devname, sizeof(devname), "%s/ep%d",
+                       devinfo->name, i + 1);
+              unregister_driver(devname);
+            }
+
+          break;
+        }
+    }
+}
+
+/****************************************************************************
  * Name: usbdev_fs_classsetconfig
  *
  * Description:
@@ -1158,6 +1195,7 @@ static int usbdev_fs_classsetconfig(FAR struct usbdev_fs_dev_s *fs,
     }
 
   fs->config = config;
+  work_queue(HPWORK, &fs->work, usbdev_fs_register_driver, fs, 0);
 
   /* We are successfully configured. Char device is now active */
 
@@ -1184,7 +1222,6 @@ static int usbdev_fs_classbind(FAR struct usbdevclass_driver_s *driver,
     driver, FAR struct usbdev_fs_driver_s, drvr);
   FAR struct usbdev_fs_dev_s *fs = &fs_drvr->dev;
   FAR struct usbdev_devinfo_s *devinfo = &fs->devinfo;
-  char devname[32];
   uint16_t i;
   int ret;
 
@@ -1204,9 +1241,7 @@ static int usbdev_fs_classbind(FAR struct usbdevclass_driver_s *driver,
   for (i = 0; i < devinfo->nendpoints; i++)
     {
       fs->eps[i].dev = fs;
-      snprintf(devname, sizeof(devname), "%s/ep%d",
-               devinfo->name, i + 1);
-      ret = usbdev_fs_ep_bind(devname, dev,
+      ret = usbdev_fs_ep_bind(dev,
                               devinfo->epno[i],
                               devinfo->epinfos[i],
                               &fs->eps[i]);
