@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/kmalloc.h>
 
 #include <sys/types.h>
 #include <stdbool.h>
@@ -112,7 +113,7 @@ int bchlib_flushsector(FAR struct bchlib_s *bch, bool discard)
    * media.
    */
 
-  if (bch->dirty)
+  if (bch->dirty && bch->buffer != NULL)
     {
       inode = bch->inode;
 
@@ -167,6 +168,20 @@ int bchlib_readsector(FAR struct bchlib_s *bch, size_t sector)
 {
   FAR struct inode *inode;
   ssize_t ret = OK;
+
+  if (bch->buffer == NULL)
+    {
+#if CONFIG_BCH_BUFFER_ALIGNMENT != 0
+      bch->buffer = kmm_memalign(CONFIG_BCH_BUFFER_ALIGNMENT, bch->sectsize);
+#else
+      bch->buffer = kmm_malloc(bch->sectsize);
+#endif
+      if (bch->buffer == NULL)
+        {
+          ferr("Failed to allocate sector buffer\n");
+          return -ENOMEM;
+        }
+    }
 
   if (bch->sector != sector)
     {
