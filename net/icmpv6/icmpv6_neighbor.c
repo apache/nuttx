@@ -216,6 +216,17 @@ int icmpv6_neighbor(FAR struct net_driver_s *dev,
       goto errout;
     }
 
+  /* Neighbor support is only built if the Ethernet link layer is supported.
+   * Continue and send the Solicitation only if this device uses the
+   * Ethernet link layer protocol.
+   */
+
+  if (dev->d_lltype != NET_LL_ETHERNET &&
+      dev->d_lltype != NET_LL_IEEE80211)
+    {
+      return OK;
+    }
+
   /* Check if the destination address is on the local network. */
 
   if (NETDEV_V6ADDR_ONLINK(dev, ipaddr) || net_is_addr_linklocal(ipaddr))
