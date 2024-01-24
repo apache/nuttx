@@ -66,6 +66,10 @@ FAR void *malloc(size_t size)
     {
       set_errno(ENOMEM);
     }
+  else
+    {
+      mm_notify_pressure(mm_heapfree(USR_HEAP));
+    }
 
   return ret;
 #endif

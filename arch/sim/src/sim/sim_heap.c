@@ -611,6 +611,18 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
   *heap_size  = 0;
 }
 
+/****************************************************************************
+ * Name: mm_heapfree
+ *
+ * Description:
+ *   Return the total free size (in bytes) in the heap
+ *
+ ****************************************************************************/
+
+size_t mm_heapfree(struct mm_heap_s *heap)
+{
+  return SIZE_MAX;
+}
 #else /* CONFIG_MM_CUSTOMIZE_MANAGER */
 
 void up_allocate_heap(void **heap_start, size_t *heap_size)
