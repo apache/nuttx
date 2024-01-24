@@ -68,7 +68,7 @@
 
 struct sam_dac_s
 {
-  uint8_t   initialized : 1;       /* True, the DAC block has been initialized */
+  uint8_t   users;                 /* Number of channels using peripheral */
 #ifdef CONFIG_SAMV7_DAC_TRIGGER
   TC_HANDLE tc;                    /* Timer handle */
 #endif
@@ -78,7 +78,7 @@ struct sam_dac_s
 
 struct sam_chan_s
 {
-  uint8_t   inuse  : 1;            /* True, the driver is in use and not available */
+  bool      inuse;                 /* True, the driver is in use and not available */
   uint8_t   intf;                  /* DAC zero-based interface number (0 or 1) */
   uint32_t  dro;                   /* Conversion Data Register */
 #ifdef CONFIG_SAMV7_DAC_TRIGGER
@@ -134,7 +134,7 @@ static struct sam_chan_s g_dac1priv =
   .intf       = 0,
   .dro        = SAM_DACC_CDR0,
 #ifdef CONFIG_SAMV7_DAC_TRIGGER
-  .reg_dacc_trigr_clear = DACC_TRIGR_TRGSEL0_MASK,
+  .reg_dacc_trigr_clear = DACC_TRIGR_TRGSEL0_MASK | DACC_TRIGR_TRGEN0_EN,
   .reg_dacc_trigr_set   = DACC_TRIGR_TRGSEL0(
                             CONFIG_SAMV7_DAC_TRIGGER_SELECT) |
                             DACC_TRIGR_TRGEN0,
@@ -154,7 +154,7 @@ static struct sam_chan_s g_dac2priv =
   .intf       = 1,
   .dro        = SAM_DACC_CDR1,
 #ifdef CONFIG_SAMV7_DAC_TRIGGER
-  .reg_dacc_trigr_clear = DACC_TRIGR_TRGSEL1_MASK,
+  .reg_dacc_trigr_clear = DACC_TRIGR_TRGSEL1_MASK | DACC_TRIGR_TRGEN1_EN,
   .reg_dacc_trigr_set   = DACC_TRIGR_TRGSEL1(
                             CONFIG_SAMV7_DAC_TRIGGER_SELECT) |
                             DACC_TRIGR_TRGEN1,
@@ -226,15 +226,46 @@ static int dac_interrupt(int irq, void *context, void *arg)
 
 static void dac_reset(struct dac_dev_s *dev)
 {
+  struct sam_chan_s *chan = dev->ad_priv;
+#ifdef CONFIG_SAMV7_DAC_TRIGGER
+  uint32_t regval;
+#endif
   irqstate_t flags;
 
   /* Reset only the selected DAC channel; the other DAC channel must remain
-   * functional.
+   * functional. The controller however does not have an option to reset
+   * single channel, therefore we have to do this manually by writing zeroes
+   * to all important registers.
    */
 
-  flags   = enter_critical_section();
+  /* This should be called only before dac_setup(), therefore the channel
+   * should not be in use. Skip reset if it is.
+   */
 
-#warning "Missing logic"
+  if (chan->inuse)
+    {
+      /* Yes.. then return EBUSY */
+
+      return;
+    }
+
+  flags = enter_critical_section();
+
+  /* Disable channel */
+
+  putreg32(1u << chan->intf, SAM_DACC_CHDR);
+
+  /* Disable interrupts */
+
+  dac_txint(dev, false);
+
+#ifdef CONFIG_SAMV7_DAC_TRIGGER
+  /* Reset trigger mode */
+
+  regval = getreg32(SAM_DACC_TRIGR);
+  regval &= ~chan->reg_dacc_trigr_clear;
+  putreg32(regval, SAM_DACC_TRIGR);
+#endif
 
   leave_critical_section(flags);
 }
@@ -257,7 +288,40 @@ static void dac_reset(struct dac_dev_s *dev)
 
 static int dac_setup(struct dac_dev_s *dev)
 {
-#warning "Missing logic"
+  struct sam_chan_s *chan = dev->ad_priv;
+  int ret;
+
+  /* Initialize the DAC peripheral module */
+
+  ret = dac_module_init();
+  if (ret < 0)
+    {
+      aerr("ERROR: Failed to initialize the DAC peripheral module: %d\n",
+           ret);
+      return ret;
+    }
+
+  /* Add channel user. We can do this because the upper layer checks
+   * whether the device is opened for the first time and calls dac_setup
+   * only if this is true. Therefore there can not be a situation where
+   * the application would open DAC1 two times and dac_setup would be called
+   * two times. We however have to check number of users (DAC0 and DAC1)
+   * to know whether we want to disable the entire peripheral during
+   * shutdown.
+   */
+
+  g_dacmodule.users++;
+
+  /* Configure the selected DAC channel */
+
+  ret = dac_channel_init(chan);
+  if (ret < 0)
+    {
+      aerr("ERROR: Failed to initialize DAC channel %d: %d\n",
+           chan->intf, ret);
+      return ret;
+    }
+
   return OK;
 }
 
@@ -277,7 +341,43 @@ static int dac_setup(struct dac_dev_s *dev)
 
 static void dac_shutdown(struct dac_dev_s *dev)
 {
-#warning "Missing logic"
+  struct sam_chan_s *chan = dev->ad_priv;
+
+  /* We can use dac_reset() to disable the channel. */
+
+  chan->inuse = false;
+  dac_reset(dev);
+
+  /* Decrement number of peripheral users. */
+
+  g_dacmodule.users--;
+
+  if (g_dacmodule.users == 0)
+    {
+      /* This means there are no more channels using the peripheral. We
+       * can disable entire peripheral and free timer.
+       */
+
+      /* Reset peripheral. This will simulate HW reset and clean all
+       * registers.
+       */
+
+      putreg32(DACC_CR_SWRST, SAM_DACC_CR);
+
+      /* Disable interrupt */
+
+      up_disable_irq(SAM_IRQ_DACC);
+
+      /* Detach interrupt */
+
+      irq_detach(SAM_IRQ_DACC);
+
+#ifdef CONFIG_SAMV7_DAC_TRIGGER
+      /* Free timer */
+
+      dac_timer_free(&g_dacmodule);
+#endif
+    }
 }
 
 /****************************************************************************
@@ -327,7 +427,7 @@ static int dac_send(struct dac_dev_s *dev, struct dac_msg_s *msg)
 
   /* Interrupt based transfer */
 
-  putreg16(msg->am_data >> 16, chan->dro);
+  putreg32(msg->am_data & DACC_CDR_DATA0_MASK, chan->dro);
 
   return OK;
 }
@@ -483,11 +583,11 @@ static int dac_channel_init(struct sam_chan_s *chan)
 
   /* Enable DAC Channel */
 
-  putreg32(1 << chan->intf, SAM_DACC_CHER);
+  putreg32(1u << chan->intf, SAM_DACC_CHER);
 
   /* Mark the DAC channel "in-use" */
 
-  chan->inuse = 1;
+  chan->inuse = true;
   return OK;
 }
 
@@ -509,9 +609,9 @@ static int dac_module_init(void)
   uint32_t regval;
   int ret;
 
-  /* Has the DAC block already been initialized? */
+  /* Has the DAC block already been users? */
 
-  if (g_dacmodule.initialized)
+  if (g_dacmodule.users > 0)
     {
       /* Yes.. then return success  We only have to do this once */
 
@@ -571,9 +671,6 @@ static int dac_module_init(void)
   ainfo("Enable the DAC interrupt: irq=%d\n", SAM_IRQ_DACC);
   up_enable_irq(SAM_IRQ_DACC);
 
-  /* Mark the DAC module as initialized */
-
-  g_dacmodule.initialized = 1;
   return OK;
 }
 
@@ -598,8 +695,6 @@ static int dac_module_init(void)
 struct dac_dev_s *sam_dac_initialize(int intf)
 {
   struct dac_dev_s *dev;
-  struct sam_chan_s *chan;
-  int ret;
 
 #ifdef CONFIG_SAMV7_DAC0
   if (intf == 0)
@@ -619,26 +714,6 @@ struct dac_dev_s *sam_dac_initialize(int intf)
 #endif
     {
       aerr("ERROR: No such DAC interface: %d\n", intf);
-      return NULL;
-    }
-
-  /* Initialize the DAC peripheral module */
-
-  ret = dac_module_init();
-  if (ret < 0)
-    {
-      aerr("ERROR: Failed to initialize the DAC peripheral module: %d\n",
-            ret);
-      return NULL;
-    }
-
-  /* Configure the selected DAC channel */
-
-  chan = dev->ad_priv;
-  ret  = dac_channel_init(chan);
-  if (ret < 0)
-    {
-      aerr("ERROR: Failed to initialize DAC channel %d: %d\n", intf, ret);
       return NULL;
     }
 
