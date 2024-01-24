@@ -228,9 +228,9 @@
  * fUSBPLLVCO <= 520 MHz
  */
 
-#undef  BOARD_ENABLE_USBPLL
-#define BOARD_USB_PDIV            2
-#define BOARD_USB_NDIV            64
+#define  BOARD_ENABLE_USBPLL
+#define BOARD_USB_PDIV            3
+#define BOARD_USB_NDIV            100
 
 /* FLASH wait states */
 
@@ -322,6 +322,47 @@
 #define GPIO_SPI4_MOSI    (GPIO_U2C0_DOUT0_2 | GPIO_PADA2_STRONGMEDIUM)
 #define GPIO_SPI4_MISO    (GPIO_U2C0_DX0C)
 #define GPIO_SPI4_SCLK    (GPIO_U2C0_SCLKOUT_1 | GPIO_PADA2_STRONGMEDIUM)
+
+/* ECAT0 configuration */
+
+#define ECAT_CLK_25          GPIO_ECAT_CLK_25_1
+#define ECAT_LED_ERR         GPIO_ECAT_LED_ERR
+#define ECAT_LED_RUN         GPIO_ECAT_LED_RUN
+#define ECAT_MCLK            GPIO_ECAT_MCLK
+#define ECAT_MDO             GPIO_ECAT_MDO
+#define ECAT_PHY_RESET       GPIO_ECAT_PHY_RESET
+
+#define ECAT_P0_LED_LINK_ACT GPIO_ECAT_P0_LED_LINK_ACT_1
+#define ECAT_P0_LINK_STATUS  GPIO_ECAT_P0_LINK_STATUS
+#define ECAT_P0_RXD0         GPIO_ECAT_P0_RXD0_1
+#define ECAT_P0_RXD1         GPIO_ECAT_P0_RXD1_1
+#define ECAT_P0_RXD2         GPIO_ECAT_P0_RXD2_1
+#define ECAT_P0_RXD3         GPIO_ECAT_P0_RXD3_1
+#define ECAT_P0_RX_CLK       GPIO_ECAT_P0_RX_CLK_1
+#define ECAT_P0_RX_DV        GPIO_ECAT_P0_RX_DV_1
+#define ECAT_P0_RX_ERR       GPIO_ECAT_P0_RX_ERR
+#define ECAT_P0_TX_CLK       GPIO_ECAT_P0_TX_CLK_1
+#define ECAT_P0_TXD0         GPIO_ECAT_P0_TXD0_1
+#define ECAT_P0_TXD1         GPIO_ECAT_P0_TXD1_1
+#define ECAT_P0_TXD2         GPIO_ECAT_P0_TXD2_1
+#define ECAT_P0_TXD3         GPIO_ECAT_P0_TXD3_1
+#define ECAT_P0_TX_EN        GPIO_ECAT_P0_TX_EN_1
+
+#define ECAT_P1_LED_LINK_ACT GPIO_ECAT_P1_LED_LINK_ACT
+#define ECAT_P1_LINK_STATUS  GPIO_ECAT_P1_LINK_STATUS_1
+#define ECAT_P1_RXD0         GPIO_ECAT_P1_RXD0
+#define ECAT_P1_RXD1         GPIO_ECAT_P1_RXD1
+#define ECAT_P1_RXD2         GPIO_ECAT_P1_RXD2
+#define ECAT_P1_RXD3         GPIO_ECAT_P1_RXD3
+#define ECAT_P1_RX_CLK       GPIO_ECAT_P1_RX_CLK
+#define ECAT_P1_RX_DV        GPIO_ECAT_P1_RX_DV
+#define ECAT_P1_RX_ERR       GPIO_ECAT_P1_RX_ERR
+#define ECAT_P1_TX_CLK       GPIO_ECAT_P1_TX_CLK
+#define ECAT_P1_TXD0         GPIO_ECAT_P1_TXD0
+#define ECAT_P1_TXD1         GPIO_ECAT_P1_TXD1
+#define ECAT_P1_TXD2         GPIO_ECAT_P1_TXD2
+#define ECAT_P1_TXD3         GPIO_ECAT_P1_TXD3
+#define ECAT_P1_TX_EN        GPIO_ECAT_P1_TX_EN
 
 /****************************************************************************
  * Public Data
