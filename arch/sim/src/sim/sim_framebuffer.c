@@ -243,7 +243,21 @@ static int sim_getplaneinfo(struct fb_vtable_s *vtable, int planeno,
   ginfo("vtable=%p planeno=%d pinfo=%p\n", vtable, planeno, pinfo);
   if (vtable && planeno == 0 && pinfo)
     {
+#if CONFIG_SIM_FB_INTERVAL_LINE > 0
+      int display = pinfo->display;
+#endif
       memcpy(pinfo, &g_planeinfo, sizeof(struct fb_planeinfo_s));
+
+#if CONFIG_SIM_FB_INTERVAL_LINE > 0
+      if (display - g_planeinfo.display > 0)
+        {
+          pinfo->display = display;
+          pinfo->fbmem = g_planeinfo.fbmem + g_planeinfo.stride *
+             (CONFIG_SIM_FB_INTERVAL_LINE + CONFIG_SIM_FBHEIGHT) *
+             (display - g_planeinfo.display);
+        }
+#endif
+
       return OK;
     }
 
@@ -469,8 +483,8 @@ int up_fbinitialize(int display)
   ret = sim_x11initialize(CONFIG_SIM_FBWIDTH, CONFIG_SIM_FBHEIGHT,
                           &g_planeinfo.fbmem, &g_planeinfo.fblen,
                           &g_planeinfo.bpp, &g_planeinfo.stride,
-                          CONFIG_SIM_FRAMEBUFFER_COUNT);
-  g_planeinfo.fblen *= CONFIG_SIM_FRAMEBUFFER_COUNT;
+                          CONFIG_SIM_FRAMEBUFFER_COUNT,
+                          CONFIG_SIM_FB_INTERVAL_LINE);
 #endif
 
   return ret;

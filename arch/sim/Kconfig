@@ -440,6 +440,16 @@ config SIM_FRAMEBUFFER_COUNT
 		Framebuffer count.
 		Simulated frambuffer count.  Default: 2
 
+config SIM_FB_INTERVAL_LINE
+	int "The line between non-consecutive framebuffers"
+	depends on SIM_FRAMEBUFFER && SIM_FRAMEBUFFER_COUNT > 1
+	default 0
+	---help---
+		When SIM_FB_INTERVAL_LINE = 0, the framebuffers are consecutive.
+		When SIM_FB_INTERVAL_LINE > 0, the first buffer is not consecutive with
+		the second buffer, and the interval between discontinuous buffers is
+		SIM_FB_INTERVAL_LINE * stride.  Default: 0
+
 endmenu
 
 choice

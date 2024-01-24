@@ -76,6 +76,12 @@
 #  endif
 #endif
 
+/* Use the consecutive framebuffers */
+
+#ifndef CONFIG_SIM_FB_INTERVAL_LINE
+#  define CONFIG_SIM_FB_INTERVAL_LINE 0
+#endif
+
 /* Use a stack alignment of 16 bytes.  If necessary frame_size must be
  * rounded up to the next boundary
  */
@@ -286,7 +292,7 @@ void sim_registerblockdevice(void);
 #ifdef CONFIG_SIM_X11FB
 int sim_x11initialize(unsigned short width, unsigned short height,
                       void **fbmem, size_t *fblen, unsigned char *bpp,
-                      unsigned short *stride, int fbcount);
+                      unsigned short *stride, int fbcount, int interval);
 int sim_x11update(void);
 int sim_x11openwindow(void);
 int sim_x11closewindow(void);
