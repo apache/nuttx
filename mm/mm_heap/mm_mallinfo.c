@@ -187,3 +187,16 @@ struct mallinfo_task mm_mallinfo_task(FAR struct mm_heap_s *heap,
 
   return info;
 }
+
+/****************************************************************************
+ * Name: mm_heapfree
+ *
+ * Description:
+ *   Return the total free size (in bytes) in the heap
+ *
+ ****************************************************************************/
+
+size_t mm_heapfree(FAR struct mm_heap_s *heap)
+{
+  return heap->mm_heapsize - heap->mm_curused;
+}
