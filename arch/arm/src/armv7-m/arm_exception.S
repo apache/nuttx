@@ -138,6 +138,7 @@ exception_common:
 	mrs		r1, msp					/* R1=The main stack pointer (MSP) */
 	sub		r2, r1, #SW_XCPT_SIZE			/* Reserved stack space */
 	msr		msp, r2
+	isb		sy
 
 2:
 	mov		r2, r1					/* R2=Copy of the main/process stack pointer */
