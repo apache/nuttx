@@ -1229,6 +1229,7 @@ endif # CDCECM
 config USBDEV_FS
 	bool
 	default n
+	select SCHED_HPWORK
 	---help---
 		Enables USBDEV FS support, userspace can use fs to control USB device.
 
