@@ -642,7 +642,7 @@ void sched_note_start(FAR struct tcb_s *tcb)
   bool formatted = false;
 
 #if CONFIG_TASK_NAME_SIZE > 0
-  int namelen;
+  int namelen = 0;
 #endif
 
   for (driver = g_note_drivers; *driver; driver++)
@@ -671,7 +671,10 @@ void sched_note_start(FAR struct tcb_s *tcb)
            */
 
 #if CONFIG_TASK_NAME_SIZE > 0
-          namelen = strlen(tcb->name);
+          if (tcb->name[0] != '\0')
+            {
+              namelen = strlen(tcb->name);
+            }
 
           DEBUGASSERT(namelen <= CONFIG_TASK_NAME_SIZE);
           strlcpy(note.nsa_name, tcb->name, sizeof(note.nsa_name));
