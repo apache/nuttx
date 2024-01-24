@@ -483,7 +483,7 @@ void xmc4_clock_configure(void)
 
   regval = getreg32(XMC4_SCU_USBPLLCON);
   regval &= ~(SCU_USBPLLCON_VCOPWD | SCU_USBPLLCON_PLLPWD);
-  getreg32(regval, XMC4_SCU_USBPLLCON);
+  putreg32(regval, XMC4_SCU_USBPLLCON);
 
   /* USB PLL uses as clock input the OSC_HP */
 

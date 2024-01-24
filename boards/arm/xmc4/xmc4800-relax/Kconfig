@@ -2,3 +2,12 @@
 # For a description of the syntax of this configuration file,
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
+
+if ARCH_BOARD_XMC4800RELAX
+
+config ECAT
+    bool "Enable EtherCAT interface"
+    default y
+    ---help---
+            Enable start up of the EtherCAT interface and configure ports.
+endif
