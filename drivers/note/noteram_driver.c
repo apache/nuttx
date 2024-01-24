@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <inttypes.h>
+#include <poll.h>
 
 #include <nuttx/spinlock.h>
 #include <nuttx/sched.h>
@@ -83,6 +84,7 @@ struct noteram_driver_s
   volatile unsigned int ni_tail;
   volatile unsigned int ni_read;
   spinlock_t lock;
+  FAR struct pollfd *pfd;
 };
 
 /* The structure to hold the context data of trace dump */
@@ -113,6 +115,8 @@ static int noteram_close(FAR struct file *filep);
 static ssize_t noteram_read(FAR struct file *filep,
                             FAR char *buffer, size_t buflen);
 static int noteram_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int noteram_poll(FAR struct file *filep, FAR struct pollfd *fds,
+                        bool setup);
 static void noteram_add(FAR struct note_driver_s *drv,
                         FAR const void *note, size_t len);
 static void
@@ -132,6 +136,9 @@ static const struct file_operations g_noteram_fops =
   NULL,          /* write */
   NULL,          /* seek */
   noteram_ioctl, /* ioctl */
+  NULL,          /* mmap */
+  NULL,          /* truncate */
+  noteram_poll,  /* poll */
 };
 
 static
@@ -596,6 +603,72 @@ static int noteram_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 }
 
 /****************************************************************************
+ * Name: noteram_poll
+ ****************************************************************************/
+
+static int noteram_poll(FAR struct file *filep, FAR struct pollfd *fds,
+                        bool setup)
+{
+  int ret = 0;
+  FAR struct inode *inode;
+  FAR struct noteram_driver_s *drv;
+  irqstate_t flags;
+
+  DEBUGASSERT(filep != NULL && fds != NULL);
+  inode = filep->f_inode;
+
+  DEBUGASSERT(inode != NULL && inode->i_private != NULL);
+  drv = inode->i_private;
+
+  flags = spin_lock_irqsave_wo_note(&drv->lock);
+
+  /* Ignore waits that do not include POLLIN */
+
+  if ((fds->events & POLLIN) == 0)
+    {
+      ret = -EDEADLK;
+      goto errout;
+    }
+
+  /* Are we setting up the poll?  Or tearing it down? */
+
+  if (setup)
+    {
+      /* Check if we can accept this poll.
+       * For now, only one thread can poll the device at any time
+       * (shorter / simpler code)
+       */
+
+      if (drv->pfd)
+        {
+          ret = -EBUSY;
+          goto errout;
+        }
+
+      drv->pfd = fds;
+
+      /* Is there unread data in noteram? then trigger POLLIN now -
+       * don't wait for RX.
+       */
+
+      if (noteram_unread_length(drv) > 0)
+        {
+          spin_unlock_irqrestore_wo_note(&drv->lock, flags);
+          poll_notify(&drv->pfd, 1, POLLIN);
+          return ret;
+        }
+    }
+  else /* Tear it down */
+    {
+      drv->pfd = NULL;
+    }
+
+errout:
+  spin_unlock_irqrestore_wo_note(&drv->lock, flags);
+  return ret;
+}
+
+/****************************************************************************
  * Name: noteram_add
  *
  * Description:
@@ -663,6 +736,7 @@ static void noteram_add(FAR struct note_driver_s *driver,
   memcpy(drv->ni_buffer, buf + space, notelen - space);
   drv->ni_head = noteram_next(drv, head, NOTE_ALIGN(notelen));
   spin_unlock_irqrestore_wo_note(&drv->lock, flags);
+  poll_notify(&drv->pfd, 1, POLLIN);
 }
 
 /****************************************************************************
@@ -1298,6 +1372,7 @@ noteram_initialize(FAR const char *devpath, size_t bufsize, bool overwrite)
   drv->ni_head = 0;
   drv->ni_tail = 0;
   drv->ni_read = 0;
+  drv->pfd = NULL;
 
   ret = note_driver_register(&drv->driver);
   if (ret < 0)
