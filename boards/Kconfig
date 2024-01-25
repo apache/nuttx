@@ -2868,6 +2868,15 @@ config ARCH_BOARD_XMC4700RELAX
 	---help---
 		Infineon XMC4700 Relax
 
+config ARCH_BOARD_XMC4800RELAX
+	bool "Infineon XMC4800 Relax"
+	depends on ARCH_CHIP_XMC4800
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		Infineon XMC4800 Relax
+
 config ARCH_BOARD_VERDIN_MX8MP
 	bool "Toradex Verdin i.MX8MP"
 	depends on ARCH_CHIP_MX8MP
@@ -3364,6 +3373,7 @@ config ARCH_BOARD
 	default "viewtool-stm32f107"        if ARCH_BOARD_VIEWTOOL_STM32F107
 	default "xmc4500-relax"             if ARCH_BOARD_XMC4500RELAX
 	default "xmc4700-relax"             if ARCH_BOARD_XMC4700RELAX
+	default "xmc4800-relax"             if ARCH_BOARD_XMC4800RELAX
 	default "verdin-mx8mp"              if ARCH_BOARD_VERDIN_MX8MP
 	default "z16f2800100zcog"           if ARCH_BOARD_Z16F2800100ZCOG
 	default "z20x"                      if ARCH_BOARD_Z20X
@@ -4069,6 +4079,9 @@ source "boards/arm/xmc4/xmc4500-relax/Kconfig"
 endif
 if ARCH_BOARD_XMC4700RELAX
 source "boards/arm/xmc4/xmc4700-relax/Kconfig"
+endif
+if ARCH_BOARD_XMC4800RELAX
+source "boards/arm/xmc4/xmc4800-relax/Kconfig"
 endif
 if ARCH_BOARD_VERDIN_MX8MP
 source "boards/arm/mx8mp/verdin-mx8mp/Kconfig"
