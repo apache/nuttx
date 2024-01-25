@@ -28,7 +28,7 @@
 #include <errno.h>
 #include <nuttx/mmcsd.h>
 
-#include "mpfs_emmcsd.h"
+#include "mpfs_sdio.h"
 #include "board_config.h"
 
 /****************************************************************************

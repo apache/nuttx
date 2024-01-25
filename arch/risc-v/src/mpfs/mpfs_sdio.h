@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/mpfs/mpfs_emmcsd.h
+ * arch/risc-v/src/mpfs/mpfs_sdio.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,19 +18,18 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_MPFS_MPFS_EMMCSD_H
-#define __ARCH_RISCV_SRC_MPFS_MPFS_EMMCSD_H
+#ifndef __ARCH_RISCV_SRC_MPFS_MPFS_SDIO_H
+#define __ARCH_RISCV_SRC_MPFS_MPFS_SDIO_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 #include <stdbool.h>
+#include <sys/types.h>
 
 #include "chip.h"
-#include "hardware/mpfs_emmcsd.h"
 
 /****************************************************************************
  * Public Function Prototypes
@@ -48,7 +47,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: mpfs_emmcsd_sdio_initialize
+ * Name: sdio_initialize
  *
  * Description:
  *   Initialize SDIO for operation.
@@ -63,10 +62,10 @@ extern "C"
  ****************************************************************************/
 
 struct sdio_dev_s; /* See include/nuttx/sdio.h */
-struct sdio_dev_s *mpfs_emmcsd_sdio_initialize(int slotno);
+struct sdio_dev_s *sdio_initialize(int slotno);
 
 /****************************************************************************
- * Name: mpfs_emmcsd_sdio_mediachange
+ * Name: sdio_mediachange
  *
  * Description:
  *   Called by board-specific logic -- possibly from an interrupt handler --
@@ -84,10 +83,10 @@ struct sdio_dev_s *mpfs_emmcsd_sdio_initialize(int slotno);
  *
  ****************************************************************************/
 
-void mpfs_emmcsd_sdio_mediachange(struct sdio_dev_s *dev, bool cardinslot);
+void sdio_mediachange(struct sdio_dev_s *dev, bool cardinslot);
 
 /****************************************************************************
- * Name: mpfs_emmcsd_sdio_wrprotect
+ * Name: sdio_wrprotect
  *
  * Description:
  *   Called by board-specific logic to report if the card in the slot is
@@ -102,7 +101,7 @@ void mpfs_emmcsd_sdio_mediachange(struct sdio_dev_s *dev, bool cardinslot);
  *
  ****************************************************************************/
 
-void mpfs_emmcsd_sdio_wrprotect(struct sdio_dev_s *dev, bool wrprotect);
+void sdio_wrprotect(struct sdio_dev_s *dev, bool wrprotect);
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -110,4 +109,4 @@ void mpfs_emmcsd_sdio_wrprotect(struct sdio_dev_s *dev, bool wrprotect);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_RISCV_SRC_MPFS_MPFS_EMMCSD_H */
+#endif /* __ARCH_RISCV_SRC_MPFS_MPFS_SDIO_H */
