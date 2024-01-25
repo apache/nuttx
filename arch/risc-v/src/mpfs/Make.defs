@@ -58,6 +58,10 @@ ifeq ($(CONFIG_I2C),y)
 CHIP_CSRCS += mpfs_i2c.c
 endif
 
+ifneq ($(filter y,$(CONFIG_MPFS_EMMCSD) $(CONFIG_MPFS_COREMMC)),)
+CHIP_CSRCS += mpfs_sdio.c
+endif
+
 ifeq ($(CONFIG_MPFS_EMMCSD),y)
 CHIP_CSRCS += mpfs_emmcsd.c
 endif
