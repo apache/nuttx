@@ -388,8 +388,7 @@
  *
  * 4) When the first word from the master is shifted in, the SPI
  *    controller driver will call the device's receive() method to
- *    provide the master with the command word that was just shifted
- *    in.
+ *    provide the master command word that was just shifted in.
  *
  *    For the case of bi-directional data transfer or of a transfer of
  *    data from the SPI device to the master, the SPI device driver
