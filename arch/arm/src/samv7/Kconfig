@@ -1873,7 +1873,7 @@ config SAMV7_SPI_REGDEBUG
 endmenu # SPI device driver options
 
 menu "QSPI Device Driver Configuration"
-	depends on SAMV7_QSPI && !SAMV7_QSPI_IS_SPI
+	depends on SAMV7_QSPI && !SAMV7_QSPI_SPI_MODE
 
 config SAMV7_QSPI_DLYBS
 	int "Delay Before QSCK (nsec)"
