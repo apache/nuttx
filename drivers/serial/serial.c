@@ -1060,6 +1060,10 @@ static ssize_t uart_read(FAR struct file *filep,
                     {
                       ret = nxsem_wait(&dev->recvsem);
                     }
+
+#ifdef CONFIG_SERIAL_TERMIOS
+                  dev->minrecv = dev->minread;
+#endif
                 }
 
               leave_critical_section(flags);
@@ -1579,6 +1583,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_SERIAL_TERMIOS
               dev->timeout = termiosp->c_cc[VTIME];
               dev->minread = termiosp->c_cc[VMIN];
+              dev->minrecv = dev->minread;
 #endif
               ret = 0;
             }
