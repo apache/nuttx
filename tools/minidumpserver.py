@@ -779,7 +779,15 @@ def main(args):
     # close before we can bind to the port again
     gdbserver.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-    gdbserver.bind(("", args.port))
+    try:
+        gdbserver.bind(("", args.port))
+    except OSError:
+        gdbserver.bind(("", 0))
+        logger.info(
+            f"Port {args.port} is already in use, using port {gdbserver.getsockname()[1]} instead."
+        )
+        args.port = gdbserver.getsockname()[1]
+
     gdbserver.listen(1)
 
     gdb_exec = "gdb" if not args.gdb else args.gdb
