@@ -92,7 +92,7 @@ int sched_unlock(void)
         {
           /* Note that we no longer have pre-emption disabled. */
 
-#ifdef CONFIG_SCHED_CRITMONITOR
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
           nxsched_critmon_preemption(rtcb, false);
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
@@ -249,7 +249,7 @@ int sched_unlock(void)
         {
           /* Note that we no longer have pre-emption disabled. */
 
-#ifdef CONFIG_SCHED_CRITMONITOR
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
           nxsched_critmon_preemption(rtcb, false);
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION

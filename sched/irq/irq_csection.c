@@ -382,7 +382,7 @@ try_again_in_irq:
 
           /* Note that we have entered the critical section */
 
-#ifdef CONFIG_SCHED_CRITMONITOR
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
           nxsched_critmon_csection(rtcb, true);
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
@@ -422,7 +422,7 @@ irqstate_t enter_critical_section(void)
         {
           /* Note that we have entered the critical section */
 
-#ifdef CONFIG_SCHED_CRITMONITOR
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
           nxsched_critmon_csection(rtcb, true);
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
@@ -523,7 +523,7 @@ void leave_critical_section(irqstate_t flags)
         {
           /* No.. Note that we have left the critical section */
 
-#ifdef CONFIG_SCHED_CRITMONITOR
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
           nxsched_critmon_csection(rtcb, false);
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
@@ -577,7 +577,7 @@ void leave_critical_section(irqstate_t flags)
         {
           /* Note that we have left the critical section */
 
-#ifdef CONFIG_SCHED_CRITMONITOR
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
           nxsched_critmon_csection(rtcb, false);
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
