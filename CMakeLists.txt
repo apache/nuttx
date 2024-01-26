@@ -366,6 +366,10 @@ endif()
 
 # this exposes all Kconfig vars to CMake
 
+include(menuconfig)
+include(nuttx_sethost)
+nuttx_sethost()
+
 nuttx_export_kconfig(${CMAKE_BINARY_DIR}/.config)
 
 include(nuttx_generate_headers)
@@ -377,7 +381,6 @@ include(nuttx_add_symtab)
 include(nuttx_add_module)
 include(nuttx_add_dependencies)
 include(nuttx_export_header)
-include(menuconfig)
 
 include(ExternalProject)
 include(FetchContent)
