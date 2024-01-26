@@ -29,6 +29,23 @@
 #include "libc.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define ALIGNED(x) \
+  (((long)(x) & (sizeof(long) - 1)) == 0)
+
+/* Macros for detecting endchar */
+
+#if LONG_MAX == 2147483647
+#  define DETECTNULL(x) (((x) - 0x01010101) & ~(x) & 0x80808080)
+#elif LONG_MAX == 9223372036854775807
+/* Nonzero if x (a long int) contains a NULL byte. */
+
+#  define DETECTNULL(x) (((x) - 0x0101010101010101) & ~(x) & 0x8080808080808080)
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -38,13 +55,33 @@ FAR char *strcat(FAR char *dest, FAR const char *src)
 {
   FAR char *ret = dest;
 
-  dest += strlen(dest);
-  while (*src != '\0')
+  /* Skip over the data in dest as quickly as possible. */
+
+  if (ALIGNED(dest))
     {
-      *dest++ = *src++;
+      FAR unsigned long *aligned_s1 = (FAR unsigned long *)dest;
+      while (!DETECTNULL(*aligned_s1))
+        {
+          aligned_s1++;
+        }
+
+      dest = (FAR char *)aligned_s1;
     }
 
-  *dest = '\0';
+  while (*dest)
+    {
+      dest++;
+    }
+
+  /* dest now points to the its trailing null character, we can
+   * just use strcpy to do the work for us now.
+   * ?!? We might want to just include strcpy here.
+   * Also, this will cause many more unaligned string copies because
+   * dest is much less likely to be aligned.  I don't know if its worth
+   * tweaking strcpy to handle this better.
+   */
+
+  strcpy(dest, src);
 
   return ret;
 }

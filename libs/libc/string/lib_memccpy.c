@@ -27,6 +27,33 @@
 #include <string.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Nonzero if either x or y is not aligned on a "long" boundary. */
+
+#define UNALIGNED(x, y) \
+  (((long)(x) & (sizeof(long) - 1)) | ((long)(y) & (sizeof(long) - 1)))
+
+/* How many bytes are copied each iteration of the word copy loop. */
+
+#define LITTLEBLOCKSIZE (sizeof(long))
+
+/* Threshhold for punting to the byte copier. */
+
+#define TOO_SMALL(len) ((len) < LITTLEBLOCKSIZE)
+
+/* Macros for detecting endchar */
+
+#if LONG_MAX == 2147483647
+#  define DETECTNULL(x) (((x) - 0x01010101) & ~(x) & 0x80808080)
+#elif LONG_MAX == 9223372036854775807
+/* Nonzero if x (a long int) contains a NULL byte. */
+
+#  define DETECTNULL(x) (((x) - 0x0101010101010101) & ~(x) & 0x8080808080808080)
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -49,28 +76,67 @@
 #undef memccpy /* See mm/README.txt */
 FAR void *memccpy(FAR void *s1, FAR const void *s2, int c, size_t n)
 {
+  FAR void *ptr = NULL;
   FAR unsigned char *pout = (FAR unsigned char *)s1;
-  FAR unsigned char *pin  = (FAR unsigned char *)s2;
+  FAR const unsigned char *pin = (FAR const unsigned char *)s2;
+  FAR long *paligned_out;
+  FAR const long *paligned_in;
+  unsigned char endchar = c & 0xff;
 
-  /* Copy at most n bytes */
+  /* If the size is small, or either pin or pout is unaligned,
+   * then punt into the byte copy loop.  This should be rare.
+   */
 
-  while (n-- > 0)
+  if (!TOO_SMALL(n) && !UNALIGNED(pin, pout))
     {
-      /* Copy one byte */
+      unsigned int i;
+      unsigned long mask = 0;
 
-      *pout = *pin++;
+      paligned_out = (FAR long *)pout;
+      paligned_in = (FAR long *)pin;
 
-      /* Did we just copy the terminating byte c? */
+      /* The fast code reads the ASCII one word at a time and only
+       * performs the bytewise search on word-sized segments if they
+       * contain the search character, which is detected by XORing
+       * the word-sized segment with a word-sized block of the search
+       * character and then detecting for the presence of NULL in the
+       * result.
+       */
 
-      if (*pout++ == (unsigned char)c)
+      for (i = 0; i < LITTLEBLOCKSIZE; i++)
         {
-          /* Yes return a pointer to the byte after the copy of c into s1 */
+          mask = (mask << 8) + endchar;
+        }
 
-          return (FAR void *)pout;
+      /* Copy one long word at a time if possible.  */
+
+      while (n >= LITTLEBLOCKSIZE)
+        {
+          unsigned long buffer = (unsigned long)(*paligned_in);
+          buffer ^= mask;
+          if (DETECTNULL(buffer))
+            {
+              break; /* endchar is found, go byte by byte from here */
+            }
+
+          *paligned_out++ = *paligned_in++;
+          n -= LITTLEBLOCKSIZE;
+        }
+
+      /* Pick up any residual with a byte copier.  */
+
+      pout = (FAR unsigned char *)paligned_out;
+      pin = (FAR unsigned char *)paligned_in;
+    }
+
+  while (n--)
+    {
+      if ((*pout++ = *pin++) == endchar)
+        {
+          ptr = pout;
+          break;
         }
     }
 
-  /* C was not found in the first n bytes of s2 */
-
-  return NULL;
+  return ptr;
 }
