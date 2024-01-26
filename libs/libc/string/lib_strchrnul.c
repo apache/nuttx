@@ -52,6 +52,11 @@
 #undef strchrnul /* See mm/README.txt */
 FAR char *strchrnul(FAR const char *s, int c)
 {
+#ifdef CONFIG_LIBC_STRING_OPTIMIZE
+  FAR char *s1 = strchr(s, c);
+
+  return s1 ? s1 : (FAR char *)s + strlen(s);
+#else
   if (s)
     {
       while (*s != '\0' && *s != c)
@@ -61,5 +66,6 @@ FAR char *strchrnul(FAR const char *s, int c)
     }
 
   return (FAR char *)s;
+#endif
 }
 #endif

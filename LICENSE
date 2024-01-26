@@ -8664,3 +8664,34 @@ drivers/i3c/internals.h
  Author: Boris Brezillon <boris.brezillon@bootlin.com>
 
  SPDX-License-Identifier: Apache-2.0
+
+libs/libc/string/lib_memccpy.c
+libs/libc/string/lib_memchr.c
+libs/libc/string/lib_memcmp.c
+libs/libc/string/lib_memcpy.c
+libs/libc/string/lib_memrchr.c
+libs/libc/string/lib_stpcpy.c
+libs/libc/string/lib_stpncpy.c
+libs/libc/string/lib_strcat.c
+libs/libc/string/lib_strchr.c
+libs/libc/string/lib_strchrnul.c
+libs/libc/string/lib_strcmp.c
+libs/libc/string/lib_strcpy.c
+libs/libc/string/lib_strlen.c
+libs/libc/string/lib_strncmp.c
+libs/libc/string/lib_strncpy.c
+libs/libc/string/lib_strrchr.c
+======================
+
+Copyright (c) 1994-2009  Red Hat, Inc. All rights reserved.
+
+This copyrighted material is made available to anyone wishing to use,
+modify, copy, or redistribute it subject to the terms and conditions
+of the BSD License.   This program is distributed in the hope that
+it will be useful, but WITHOUT ANY WARRANTY expressed or implied,
+including the implied warranties of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE.  A copy of this license is available at
+http://www.opensource.org/licenses. Any Red Hat trademarks that are
+incorporated in the source code or documentation are not subject to
+the BSD License and may only be used or replicated with the express
+permission of Red Hat, Inc.
