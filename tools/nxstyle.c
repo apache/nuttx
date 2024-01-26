@@ -1860,6 +1860,7 @@ int main(int argc, char **argv, char **envp)
               if (pnest == 0)
                 {
                   int tmppnest;
+                  bool tmpbstring;
 
                   /* Note, we have not yet parsed each character on the line so
                    * a comma have have been be preceded by '(' on the same line.
@@ -1867,11 +1868,11 @@ int main(int argc, char **argv, char **envp)
                    * case.
                    */
 
-                  for (i = indent, tmppnest = 0;
+                  for (i = indent, tmppnest = 0, tmpbstring = false;
                        line[i] != '\n' && line[i] != '\0';
                        i++)
                     {
-                      if (tmppnest == 0 && line[i] == ',')
+                      if (tmppnest == 0 && !tmpbstring && line[i] == ',')
                         {
                            ERROR("Multiple data definitions", lineno, i + 1);
                           break;
@@ -1890,6 +1891,10 @@ int main(int argc, char **argv, char **envp)
                             }
 
                           tmppnest--;
+                        }
+                      else if (line[i] == '"')
+                        {
+                          tmpbstring = !tmpbstring;
                         }
                       else if (line[i] == ';')
                         {
