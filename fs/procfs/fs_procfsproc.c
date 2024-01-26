@@ -775,6 +775,7 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
 
   /* Convert the for maximum time pre-emption disabled */
 
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
   if (tcb->premp_max > 0)
     {
       perf_convert(tcb->premp_max, &maxtime);
@@ -805,9 +806,11 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
     {
       return totalsize;
     }
+#endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPT >= 0 */
 
   /* Convert and generate output for maximum time in a critical section */
 
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
   if (tcb->crit_max > 0)
     {
       perf_convert(tcb->crit_max, &maxtime);
@@ -838,9 +841,10 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
     {
       return totalsize;
     }
+#endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 */
 
   /* Convert and generate output for maximum time thread running */
-
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
   if (tcb->run_max > 0)
     {
       perf_convert(tcb->run_max, &maxtime);
@@ -870,6 +874,8 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
                            &offset);
 
   totalsize += copysize;
+#endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0 */
+
   return totalsize;
 }
 #endif

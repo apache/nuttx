@@ -47,7 +47,7 @@
  * Private Functions
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_CRITMONITOR
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
 static clock_t clock_process_runtime(FAR struct tcb_s *tcb)
 {
 # ifdef HAVE_GROUP_MEMBERS
@@ -118,7 +118,7 @@ void nxclock_gettime(clockid_t clock_id, FAR struct timespec *tp)
     }
   else
     {
-#ifdef CONFIG_SCHED_CRITMONITOR
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
       clockid_t clock_type = clock_id & CLOCK_MASK;
       pid_t pid = clock_id >> CLOCK_SHIFT;
       FAR struct tcb_s *tcb;

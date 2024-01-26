@@ -654,14 +654,20 @@ struct tcb_s
 
   /* Pre-emption monitor support ********************************************/
 
-#ifdef CONFIG_SCHED_CRITMONITOR
-  clock_t premp_start;                   /* Time when preemption disabled   */
-  clock_t premp_max;                     /* Max time preemption disabled    */
-  clock_t crit_start;                    /* Time critical section entered   */
-  clock_t crit_max;                      /* Max time in critical section    */
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
   clock_t run_start;                     /* Time when thread begin run      */
   clock_t run_max;                       /* Max time thread run             */
   clock_t run_time;                      /* Total time thread run           */
+#endif
+
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
+  clock_t premp_start;                   /* Time when preemption disabled   */
+  clock_t premp_max;                     /* Max time preemption disabled    */
+#endif
+
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
+  clock_t crit_start;                    /* Time critical section entered   */
+  clock_t crit_max;                      /* Max time in critical section    */
 #endif
 
   /* State save areas *******************************************************/
@@ -799,12 +805,15 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#ifdef CONFIG_SCHED_CRITMONITOR
 /* Maximum time with pre-emption disabled or within critical section. */
 
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
 EXTERN clock_t g_premp_max[CONFIG_SMP_NCPUS];
+#endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION  >= 0 */
+
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
 EXTERN clock_t g_crit_max[CONFIG_SMP_NCPUS];
-#endif /* CONFIG_SCHED_CRITMONITOR */
+#endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 */
 
 EXTERN const struct tcbinfo_s g_tcbinfo;
 
