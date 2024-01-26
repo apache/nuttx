@@ -119,6 +119,8 @@ static ssize_t file_bytewrite(FAR struct mtd_dev_s *dev, off_t offset,
 #endif
 static int filemtd_ioctl(FAR struct mtd_dev_s *dev, int cmd,
                          unsigned long arg);
+static int filemtd_isbad(FAR struct mtd_dev_s *dev, off_t block);
+static int filemtd_markbad(FAR struct mtd_dev_s *dev, off_t block);
 
 #ifdef CONFIG_MTD_LOOP
 static ssize_t mtd_loop_read(FAR struct file *filep, FAR char *buffer,
@@ -148,6 +150,28 @@ static const struct file_operations g_fops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: filemtd_isbad
+ ****************************************************************************/
+
+static int filemtd_isbad(FAR struct mtd_dev_s *dev, off_t block)
+{
+  /* We always think it's all GOODBLOCK */
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: filemtd_markbad
+ ****************************************************************************/
+
+static int filemtd_markbad(FAR struct mtd_dev_s *dev, off_t block)
+{
+  /* Provides a dummy interface */
+
+  return 0;
+}
 
 /****************************************************************************
  * Name: filemtd_write
@@ -800,17 +824,19 @@ FAR struct mtd_dev_s *filemtd_initialize(FAR const char *path, size_t offset,
    * nullified by kmm_zalloc).
    */
 
-  priv->mtd.erase  = filemtd_erase;
-  priv->mtd.bread  = filemtd_bread;
-  priv->mtd.bwrite = filemtd_bwrite;
-  priv->mtd.read   = filemtd_byteread;
+  priv->mtd.erase   = filemtd_erase;
+  priv->mtd.bread   = filemtd_bread;
+  priv->mtd.bwrite  = filemtd_bwrite;
+  priv->mtd.read    = filemtd_byteread;
 #ifdef CONFIG_MTD_BYTE_WRITE
-  priv->mtd.write  = file_bytewrite;
+  priv->mtd.write   = file_bytewrite;
 #endif
-  priv->mtd.ioctl  = filemtd_ioctl;
-  priv->mtd.name   = "filemtd";
-  priv->offset     = offset;
-  priv->nblocks    = nblocks;
+  priv->mtd.ioctl   = filemtd_ioctl;
+  priv->mtd.isbad   = filemtd_isbad;
+  priv->mtd.markbad = filemtd_markbad;
+  priv->mtd.name    = "filemtd";
+  priv->offset      = offset;
+  priv->nblocks     = nblocks;
 
   return &priv->mtd;
 }
