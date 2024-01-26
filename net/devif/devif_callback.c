@@ -578,6 +578,18 @@ uint16_t devif_dev_event(FAR struct net_driver_s *dev, uint16_t flags)
            */
 
           flags = cb->event(dev, cb->priv, flags);
+          cb->free_flags &= ~DEVIF_CB_DONT_FREE;
+
+          /* update the next callback to prevent previously recorded the
+           * next callback from being deleted
+           */
+
+          next = cb->nxtdev;
+          if ((cb->free_flags & DEVIF_CB_PEND_FREE) != 0)
+            {
+              cb->free_flags &= ~DEVIF_CB_PEND_FREE;
+              devif_dev_callback_free(dev, cb);
+            }
         }
     }
 
