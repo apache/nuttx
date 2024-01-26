@@ -940,20 +940,11 @@ static int fpga_i2c_write(FAR isx019_dev_t *priv, uint8_t addr,
 
   DEBUGASSERT(size <= FPGA_I2C_REGSIZE_MAX);
 
-  config.frequency = ISX019_I2C_FREQUENCY;
-  config.address   = ISX019_I2C_SLVADDR;
-  config.addrlen   = ISX019_I2C_SLVADDR_LEN;
-
-  nxmutex_lock(&priv->i2c_lock);
-
-  /* ISX019 requires that send read command to ISX019 before FPGA access. */
-
-  send_read_cmd(priv, &config, CAT_VERSION, ROM_VERSION, 1);
-
   config.frequency = FPGA_I2C_FREQUENCY;
   config.address   = FPGA_I2C_SLVADDR;
   config.addrlen   = FPGA_I2C_SLVADDR_LEN;
 
+  nxmutex_lock(&priv->i2c_lock);
   buf[FPGA_I2C_OFFSET_ADDR] = addr;
   memcpy(&buf[FPGA_I2C_OFFSET_WRITEDATA], data, size);
   ret = i2c_write(priv->i2c,
@@ -973,20 +964,11 @@ static int fpga_i2c_read(FAR isx019_dev_t *priv, uint8_t addr,
 
   DEBUGASSERT(size <= FPGA_I2C_REGSIZE_MAX);
 
-  config.frequency = ISX019_I2C_FREQUENCY;
-  config.address   = ISX019_I2C_SLVADDR;
-  config.addrlen   = ISX019_I2C_SLVADDR_LEN;
-
-  nxmutex_lock(&priv->i2c_lock);
-
-  /* ISX019 requires that send read command to ISX019 before FPGA access. */
-
-  send_read_cmd(priv, &config, CAT_VERSION, ROM_VERSION, 1);
-
   config.frequency = FPGA_I2C_FREQUENCY;
   config.address   = FPGA_I2C_SLVADDR;
   config.addrlen   = FPGA_I2C_SLVADDR_LEN;
 
+  nxmutex_lock(&priv->i2c_lock);
   ret = i2c_write(priv->i2c,
                   &config,
                   &addr,
