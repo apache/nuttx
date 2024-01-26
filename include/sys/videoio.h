@@ -989,6 +989,16 @@ struct v4l2_captureparm
   uint32_t           readbuffers;   /*  # of buffers for read */
 };
 
+struct v4l2_outputparm
+{
+  uint32_t          capability;      /*  Supported modes */
+  uint32_t          outputmode;      /*  Current mode */
+  struct v4l2_fract timeperframe;    /*  Time per frame in seconds */
+  uint32_t          extendedmode;    /*  Driver-specific extensions */
+  uint32_t          writebuffers;    /*  # of buffers for write */
+  uint32_t          reserved[4];
+};
+
 struct v4l2_cropcap
 {
   uint32_t                type; /* enum v4l2_buf_type */
@@ -1015,7 +1025,9 @@ struct v4l2_streamparm
   union
   {
     struct v4l2_captureparm capture;
+    struct v4l2_outputparm  output;
   } parm;
+  uint8_t  raw_data[200];            /* user-defined */
 };
 
 /* E V E N T S */
