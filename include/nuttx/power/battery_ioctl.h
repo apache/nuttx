@@ -116,6 +116,7 @@ enum battery_health_e
 
 enum battery_protocol_e
 {
+  BATTERY_PROTOCOL_DEFAULT = 0,         /* Battery charge protocol of adapter is DEFAULT */
   BATTERY_PROTOCOL_QC3P0 = 1 << 0,      /* Battery charge protocol of adapter is QC 3.0 */
   BATTERY_PROTOCOL_TX_XIAOMI = 1 << 1,  /* Battery charge protocol of TX is xiaomi standard */
 };
