@@ -166,7 +166,12 @@ endif()
 
 if(CONFIG_SIM_X11FB)
   list(APPEND HOSTSRCS sim_x11framebuffer.c)
-  list(APPEND STDLIBS X11 Xext)
+
+  find_package(X11 REQUIRED)
+  if(X11_FOUND)
+    target_include_directories(nuttx PRIVATE ${X11_INCLUDE_DIR})
+    target_link_libraries(nuttx PRIVATE ${X11_LIBRARIES})
+  endif()
 
   if(CONFIG_SIM_TOUCHSCREEN)
     list(APPEND SRCS sim_touchscreen.c)
