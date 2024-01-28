@@ -306,6 +306,10 @@
 #define MSTATUS_MPIE        (0x1 << 7)  /* Machine Previous Interrupt Enable */
 #define MSTATUS_SPPU        (0x0 << 8)  /* Supervisor Previous Privilege (u-mode) */
 #define MSTATUS_SPPS        (0x1 << 8)  /* Supervisor Previous Privilege (s-mode) */
+#define MSTATUS_VS          (0x3 << 9)  /* Machine Vector-extension Status */
+#define MSTATUS_VS_INIT     (0x1 << 9)
+#define MSTATUS_VS_CLEAN    (0x2 << 9)
+#define MSTATUS_VS_DIRTY    (0x3 << 9)
 #define MSTATUS_MPPU        (0x0 << 11) /* Machine Previous Privilege (u-mode) */
 #define MSTATUS_MPPS        (0x1 << 11) /* Machine Previous Privilege (s-mode) */
 #define MSTATUS_MPPM        (0x3 << 11) /* Machine Previous Privilege (m-mode) */
@@ -314,6 +318,10 @@
 #define MSTATUS_FS_INIT     (0x1 << 13)
 #define MSTATUS_FS_CLEAN    (0x2 << 13)
 #define MSTATUS_FS_DIRTY    (0x3 << 13)
+#define MSTATUS_XS          (0x3 << 15) /* Machine additional-extension Status */
+#define MSTATUS_XS_INIT     (0x1 << 15)
+#define MSTATUS_XS_CLEAN    (0x2 << 15)
+#define MSTATUS_XS_DIRTY    (0x3 << 15)
 #define MSTATUS_MPRV        (0x1 << 17) /* Modify Privilege */
 #define MSTATUS_SUM         (0x1 << 18) /* S mode access to U mode memory */
 #define MSTATUS_MXR         (0x1 << 19) /* Make executable / readable */
@@ -351,10 +359,18 @@
 #define SSTATUS_SPIE        MSTATUS_SPIE
 #define SSTATUS_SPPU        MSTATUS_SPPU
 #define SSTATUS_SPPS        MSTATUS_SPPS
+#define SSTATUS_VS          MSTATUS_VS
+#define SSTATUS_VS_INIT     MSTATUS_VS_INIT
+#define SSTATUS_VS_CLEAN    MSTATUS_VS_CLEAN
+#define SSTATUS_VS_DIRTY    MSTATUS_VS_DIRTY
 #define SSTATUS_FS          MSTATUS_FS
 #define SSTATUS_FS_INIT     MSTATUS_FS_INIT
 #define SSTATUS_FS_CLEAN    MSTATUS_FS_CLEAN
 #define SSTATUS_FS_DIRTY    MSTATUS_FS_DIRTY
+#define SSTATUS_XS          MSTATUS_XS
+#define SSTATUS_XS_INIT     MSTATUS_XS_INIT
+#define SSTATUS_XS_CLEAN    MSTATUS_XS_CLEAN
+#define SSTATUS_XS_DIRTY    MSTATUS_XS_DIRTY
 #define SSTATUS_SUM         MSTATUS_SUM
 #define SSTATUS_MXR         MSTATUS_MXR
 
