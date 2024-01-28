@@ -657,7 +657,7 @@ static int nrf91_tim_checkint(struct nrf91_tim_dev_s *dev, uint8_t s)
 
       case NRF91_TIM_INT_COMPARE1:
         {
-          ret = nrf91_tim_getreg(dev, NRF91_TIM_EVENTS_COMPARE_OFFSET(0));
+          ret = nrf91_tim_getreg(dev, NRF91_TIM_EVENTS_COMPARE_OFFSET(1));
           break;
         }
 
