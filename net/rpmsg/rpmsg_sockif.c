@@ -146,7 +146,7 @@ static int        rpmsg_socket_bind(FAR struct socket *psock,
 static int        rpmsg_socket_getsockname(FAR struct socket *psock,
                                            FAR struct sockaddr *addr,
                                            FAR socklen_t *addrlen);
-static int        rpmsg_socket_getconnname(FAR struct socket *psock,
+static int        rpmsg_socket_getpeername(FAR struct socket *psock,
                                            FAR struct sockaddr *addr,
                                            FAR socklen_t *addrlen);
 static int        rpmsg_socket_listen(FAR struct socket *psock, int backlog);
@@ -184,7 +184,7 @@ const struct sock_intf_s g_rpmsg_sockif =
   rpmsg_socket_addref,      /* si_addref */
   rpmsg_socket_bind,        /* si_bind */
   rpmsg_socket_getsockname, /* si_getsockname */
-  rpmsg_socket_getconnname, /* si_getconnname */
+  rpmsg_socket_getpeername, /* si_getpeername */
   rpmsg_socket_listen,      /* si_listen */
   rpmsg_socket_connect,     /* si_connect */
   rpmsg_socket_accept,      /* si_accept */
@@ -679,7 +679,7 @@ static int rpmsg_socket_getsockname(FAR struct socket *psock,
   return ret;
 }
 
-static int rpmsg_socket_getconnname(FAR struct socket *psock,
+static int rpmsg_socket_getpeername(FAR struct socket *psock,
                                     FAR struct sockaddr *addr,
                                     FAR socklen_t *addrlen)
 {
