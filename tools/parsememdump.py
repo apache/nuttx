@@ -83,7 +83,7 @@ def compare_dump_line(dump_line_list, str):
 
     find = 0
     for tmp in dump_line_list:
-        if tmp.mem is t.mem:
+        if tmp.mem == t.mem:
             find = 1
             tmp.cnt += 1
             break
