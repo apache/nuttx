@@ -30,9 +30,11 @@
 #include <arch/k230/chip.h>
 
 #include "k230_memorymap.h"
+#include "k230_hart.h"
 
 #include "hardware/k230_memorymap.h"
 #include "hardware/k230_plic.h"
+#include "hardware/k230_clint.h"
 
 #include "riscv_internal.h"
 #include "riscv_percpu.h"

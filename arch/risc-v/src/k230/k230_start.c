@@ -129,6 +129,10 @@ void k230_start(int mhartid, const char *dtb)
 #endif
     }
 
+#ifndef CONFIG_BUILD_KERNEL
+    k230_hart_init();
+#endif
+
   /* Disable MMU */
 
   WRITE_CSR(satp, 0x0);

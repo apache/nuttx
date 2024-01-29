@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/k230/hardware/k230_memorymap.h
+ * arch/risc-v/src/k230/k230_hart.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,28 +18,23 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_K230_HARDWARE_K230_MEMORYMAP_H
-#define __ARCH_RISCV_SRC_K230_HARDWARE_K230_MEMORYMAP_H
+#ifndef __ARCH_RISCV_SRC_K230_K230_HART_H
+#define __ARCH_RISCV_SRC_K230_K230_HART_H
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Included Files
  ****************************************************************************/
 
-/* PLIC/CLINT Base Address **************************************************/
+/****************************************************************************
+ * Public functions
+ ****************************************************************************/
 
-#define K230_PLIC_BASE    0xF00000000
-#define K230_CLINT_BASE   (K230_PLIC_BASE + 0x04000000)
+#ifndef __ASSEMBLY__
+#if !defined(CONFIG_BUILD_KERNEL) || defined(CONFIG_NUTTSBI)
 
-/* T-Head c908 specific CSR */
+int  hart_has_vec_ext(void);         /* checks for vector extension */
+void k230_hart_init(void);           /* M-mode initialization */
 
-#define CSR_MCOR         0x7c2
-#define CSR_MHCR         0x7c1
-#define CSR_MCCR2        0x7c3
-#define CSR_MHINT        0x7c5
-#define CSR_MXSTATUS     0x7c0
-#define CSR_MRMR         0x7c6
-#define CSR_MRVBR        0x7c7
-#define CSR_MSMPR        0x7f3
-#define CSR_PLIC_BASE    0xfc1
-
-#endif /* __ARCH_RISCV_SRC_K230_HARDWARE_K230_MEMORYMAP_H */
+#endif /* !defined(CONFIG_BUILD_KERNEL) || defined(CONFIG_NUTTSBI) */
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_RISCV_SRC_K230_K230_HART_H */
