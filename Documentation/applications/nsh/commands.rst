@@ -1757,6 +1757,27 @@ and the group-wide environment variables. For example::
 
   nsh>
 
+.. _cmduptime:
+
+``uptime`` Show how long the system has been running
+====================================================
+
+**Command Syntax**:
+
+  uptime [-sph]
+
+**Synopsis**. Display of the following information: the current time,
+how long the system has been running, and the load averages for the past 1, 5,
+and 15 minutes.
+
+**Options**
+
+======  ================================
+``-p`` 	show uptime in pretty format
+``-s`` 	system up since
+``-h`` 	display this help and exit
+======  ================================
+
 .. _cmdurldecode:
 
 ``urldecode`` URL Decode
