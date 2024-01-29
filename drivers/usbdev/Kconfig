@@ -1742,6 +1742,12 @@ config USBDEV_FS_NPOLLWAITERS
 	---help---
 		Maximum number of threads that can be waiting on poll().
 
+config USBDEV_FS_NEP0REQS
+	int "Number of ep0 requests that can be in flight"
+	default 4
+	---help---
+		The number of ep0 requests that can be in flight
+
 endif #USBDEV_FS
 
 menuconfig USBMTP
