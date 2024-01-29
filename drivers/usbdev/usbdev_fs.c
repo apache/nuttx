@@ -1009,6 +1009,8 @@ static void usbdev_fs_ep_unbind(FAR const char *devname,
 
   /* Release request buffer */
 
+  nxmutex_lock(&fs_ep->lock);
+
   if (fs_ep->reqbuffer)
     {
       for (i = 0; i < epinfo->reqnum; i++)
@@ -1045,7 +1047,12 @@ static void usbdev_fs_ep_unbind(FAR const char *devname,
 
   if (fs_ep->crefs <= 0)
     {
+      nxmutex_unlock(&fs_ep->lock);
       nxmutex_destroy(&fs_ep->lock);
+    }
+  else
+    {
+      nxmutex_unlock(&fs_ep->lock);
     }
 }
 
