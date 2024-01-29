@@ -231,9 +231,10 @@ indication only if the files differ.
 
 **Command Syntax**::
 
-  date [-s "MMM DD HH:MM:SS YYYY"]
+  date [-s "MMM DD HH:MM:SS YYYY"] [-u] [+%format]
 
-**Synopsis**. Show or set the current date and time.
+**Synopsis**. Show or set the current date and time or UTC with ``-u`` option,
+and support format output with ``+%format``.
 
 To show the current system time and date, type in the ``date`` command.
 The output displays the day of the week, day of the month, month, year,
