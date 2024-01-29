@@ -503,6 +503,34 @@ examples:
 The ``export`` command is not supported by NSH unless both
 ``CONFIG_NSH_VARS=y`` and ``CONFIG_DISABLE_ENVIRON``\ is not set.
 
+.. _cmdexpr:
+
+``expr`` Evaluate expressions
+=============================
+
+**Command Syntax**::
+
+  expr <operand1> <operator> <operand2>
+
+**Synopsis**. It is a mini version for the expr command, which implements the
+features of addition, subtraction, multiplication, division and mod.
+
+**Examples**:
+
+  nsh> expr 5 - 2
+  3
+  nsh> set hello 10
+  nsh> expr $hello - 2
+  8
+  nsh> expr 8 a 9
+  Unknown operator
+  nsh> expr 20 / 5
+  4
+  nsh> expr 10 % 4
+  2
+  nsh> expr 100 + 0
+  100
+
 .. _cmdfree:
 
 ``free`` Show Memory Manager Status
