@@ -210,19 +210,15 @@ void kasan_unpoison(FAR const void *addr, size_t size)
 void kasan_register(FAR void *addr, FAR size_t *size)
 {
   FAR struct kasan_region_s *region;
-  int flags;
 
   region = (FAR struct kasan_region_s *)
     ((FAR char *)addr + *size - KASAN_REGION_SIZE(*size));
 
   region->begin = (uintptr_t)addr;
   region->end   = region->begin + *size;
-
-  flags = spin_lock_irqsave(&g_lock);
   region->next  = g_region;
   g_region      = region;
   g_region_init = KASAN_INIT_VALUE;
-  spin_unlock_irqrestore(&g_lock, flags);
 
   kasan_poison(addr, *size);
   *size -= KASAN_REGION_SIZE(*size);
