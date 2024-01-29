@@ -77,10 +77,9 @@ struct arm64_fpu_procfs_file_s
  * Private Data
  ***************************************************************************/
 
-static struct fpu_reg g_idle_thread_fpu[CONFIG_SMP_NCPUS];
-static struct arm64_cpu_fpu_context g_cpu_fpu_ctx[CONFIG_SMP_NCPUS];
-
 #ifdef CONFIG_FS_PROCFS_REGISTER
+
+static struct arm64_cpu_fpu_context g_cpu_fpu_ctx[CONFIG_SMP_NCPUS];
 
 /* procfs methods */
 
@@ -259,141 +258,6 @@ static int arm64_fpu_procfs_stat(const char *relpath, struct stat *buf)
   buf->st_blksize = 0;
   buf->st_blocks  = 0;
   return OK;
-}
-#endif
-
-/***************************************************************************
- * Public Functions
- ***************************************************************************/
-
-void arm64_init_fpu(struct tcb_s *tcb)
-{
-  if (tcb->pid < CONFIG_SMP_NCPUS)
-    {
-#ifdef CONFIG_SMP
-      int cpu = tcb->cpu;
-#else
-      int cpu = 0;
-#endif
-      memset(&g_cpu_fpu_ctx[cpu], 0,
-             sizeof(struct arm64_cpu_fpu_context));
-      g_cpu_fpu_ctx[cpu].idle_thread = tcb;
-
-      tcb->xcp.fpu_regs = (uint64_t *)&g_idle_thread_fpu[cpu];
-    }
-
-  memset(tcb->xcp.fpu_regs, 0, sizeof(struct fpu_reg));
-}
-
-void arm64_destory_fpu(struct tcb_s *tcb)
-{
-  struct tcb_s *owner;
-
-  /* save current fpu owner's context */
-
-  owner = g_cpu_fpu_ctx[this_cpu()].fpu_owner;
-
-  if (owner == tcb)
-    {
-      g_cpu_fpu_ctx[this_cpu()].fpu_owner = NULL;
-    }
-}
-
-/***************************************************************************
- * Name: arm64_fpu_enter_exception
- *
- * Description:
- *   called at every time get into a exception
- *
- ***************************************************************************/
-
-void arm64_fpu_enter_exception(void)
-{
-}
-
-void arm64_fpu_exit_exception(void)
-{
-}
-
-void arm64_fpu_trap(struct regs_context *regs)
-{
-  struct tcb_s *owner;
-
-  UNUSED(regs);
-
-  /* disable fpu trap access */
-
-  arm64_fpu_access_trap_disable();
-
-  /* save current fpu owner's context */
-
-  owner = g_cpu_fpu_ctx[this_cpu()].fpu_owner;
-
-  if (owner != NULL)
-    {
-      arm64_fpu_save((struct fpu_reg *)owner->xcp.fpu_regs);
-      ARM64_DSB();
-      g_cpu_fpu_ctx[this_cpu()].save_count++;
-      g_cpu_fpu_ctx[this_cpu()].fpu_owner = NULL;
-    }
-
-  if (arch_get_exception_depth() > 1)
-    {
-      /* if get_exception_depth > 1
-       * it means FPU access exception occurred in exception context
-       * switch FPU owner to idle thread
-       */
-
-      owner = g_cpu_fpu_ctx[this_cpu()].idle_thread;
-    }
-  else
-    {
-      owner = running_task();
-    }
-
-  /* restore our context */
-
-  arm64_fpu_restore((struct fpu_reg *)owner->xcp.fpu_regs);
-  g_cpu_fpu_ctx[this_cpu()].restore_count++;
-
-  /* become new owner */
-
-  g_cpu_fpu_ctx[this_cpu()].fpu_owner = owner;
-}
-
-void arm64_fpu_context_restore(void)
-{
-  struct tcb_s *new_tcb = running_task();
-
-  arm64_fpu_access_trap_disable();
-
-  /* FPU trap has happened at this task */
-
-  if (new_tcb == g_cpu_fpu_ctx[this_cpu()].fpu_owner)
-    {
-      arm64_fpu_access_trap_disable();
-    }
-  else
-    {
-      arm64_fpu_access_trap_enable();
-    }
-
-  g_cpu_fpu_ctx[this_cpu()].switch_count++;
-}
-
-#ifdef CONFIG_SMP
-void arm64_fpu_context_save(void)
-{
-  struct tcb_s *tcb = running_task();
-
-  if (tcb == g_cpu_fpu_ctx[this_cpu()].fpu_owner)
-    {
-      arm64_fpu_access_trap_disable();
-      arm64_fpu_save((struct fpu_reg *)tcb->xcp.fpu_regs);
-      ARM64_DSB();
-      g_cpu_fpu_ctx[this_cpu()].save_count++;
-      g_cpu_fpu_ctx[this_cpu()].fpu_owner = NULL;
-    }
 }
 #endif
 
