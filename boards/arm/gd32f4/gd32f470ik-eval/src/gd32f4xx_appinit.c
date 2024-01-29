@@ -24,24 +24,14 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <debug.h>
+#include <stdbool.h>
+#include <stdio.h>
 #include <syslog.h>
+#include <errno.h>
 
-#include <nuttx/mtd/mtd.h>
-#include <nuttx/fs/fs.h>
-#include <nuttx/fs/nxffs.h>
-#include <nuttx/leds/userled.h>
-#include <nuttx/fs/nxffs.h>
+#include <nuttx/board.h>
 
-#ifdef CONFIG_INPUT_BUTTONS
-#  include <nuttx/input/buttons.h>
-#endif
-
-#ifdef CONFIG_GD32F4_ROMFS
-#include "gd32f4xx_romfs.h"
-#endif
-
+#include "gd32f4xx.h"
 #include "gd32f470i_eval.h"
 
 /****************************************************************************
@@ -75,192 +65,7 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-  int ret;
-  static bool initialized = false;
+  /* Perform board initialization here */
 
-  /* Have we already initialized? */
-
-  if (!initialized)
-    {
-#ifdef CONFIG_FS_PROCFS
-      /* Mount the procfs file system */
-
-      ret = nx_mount(NULL, GD32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
-      if (ret < 0)
-        {
-          syslog(LOG_ERR, "ERROR: Failed to mount procfs at %s: %d\n",
-                GD32_PROCFS_MOUNTPOINT, ret);
-        }
-#endif
-
-#ifdef CONFIG_GD32F4_ROMFS
-      /* Mount the romfs partition */
-
-      ret = gd32_romfs_initialize();
-      if (ret < 0)
-        {
-          syslog(LOG_ERR, "ERROR: Failed to mount romfs at %s: %d\n",
-                CONFIG_GD32F4_ROMFS_MOUNTPOINT, ret);
-        }
-#endif
-
-#ifndef CONFIG_DISABLE_MOUNTPOINT
-
-#  ifdef CONFIG_GD32F4_PROGMEM
-
-      /* Create an instance of the GD32F4 FLASH program memory
-       * device driver
-       */
-
-      struct mtd_dev_s *mtd = progmem_initialize();
-      if (!mtd)
-        {
-          syslog(LOG_ERR, "ERROR: progmem_initialize failed\n");
-        }
-
-#    if defined(CONFIG_FS_NXFFS)
-      /* Initialize to provide NXFFS on the MTD interface */
-
-      ret = nxffs_initialize(mtd);
-      if (ret < 0)
-        {
-          syslog(LOG_ERR, "ERROR: NXFFS initialization failed: %d\n",
-                  ret);
-        }
-
-      /* Mount the file system */
-
-      ret = nx_mount(NULL, CONFIG_GD32F4_NXFFS_MOUNTPT, "nxffs", 0, NULL);
-      if (ret < 0)
-        {
-          syslog(LOG_ERR, "ERROR: Failed to mount the NXFFS volume: %d\n",
-                  ret);
-        }
-#      elif defined(CONFIG_FS_LITTLEFS)
-      /* Initialize to provide LittleFS on the MTD interface */
-
-      ret = register_mtddriver("/dev/fmc", mtd, 0755, NULL);
-      if (ret < 0)
-        {
-          syslog(LOG_ERR, "ERROR: Failed to register MTD: %d\n", ret);
-          return ret;
-        }
-
-      /* Mount the file system at /mnt/fmc */
-
-      ret = nx_mount("/dev/fmc", "/mnt/fmc", "littlefs", 0, NULL);
-      if (ret < 0)
-        {
-          ret = nx_mount("/dev/fmc", "/mnt/fmc", "littlefs", 0,
-                         "forceformat");
-          if (ret < 0)
-            {
-              ferr("ERROR: Failed to mount the FS volume: %d\n", ret);
-              return ret;
-            }
-        }
-
-      syslog(LOG_INFO, "INFO: LittleFS volume /mnt/fmc mount " \
-            "on chip flash success: %d\n", ret);
-#    endif
-#  endif
-
-#  ifdef HAVE_GD25
-
-      ret = gd32_gd25_automount(0);
-      if (ret < 0)
-        {
-          syslog(LOG_ERR, "ERROR: Failed to mount the LittleFS \
-                 volume on spi flash: %d\n", ret);
-        }
-
-#  endif
-
-#  ifdef HAVE_AT24
-
-     ret = gd32_at24_wr_test(AT24_MINOR);
-      if (ret < 0)
-        {
-          syslog(LOG_ERR, "ERROR: I2C EEPROM write and read test fail: \
-                 %d\n", ret);
-        }
-
-#  endif
-
-#endif /* CONFIG_FS_NXFFS */
-
-#ifdef CONFIG_DEV_GPIO
-      /* Register the GPIO driver */
-
-      ret = gd32_gpio_initialize();
-      if (ret < 0)
-        {
-          syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
-          return ret;
-        }
-#endif
-
-#ifdef CONFIG_INPUT_BUTTONS
-#ifdef CONFIG_INPUT_BUTTONS_LOWER
-  /* Register the BUTTON driver */
-
-      ret = btn_lower_initialize("/dev/buttons");
-      if (ret != OK)
-        {
-          syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
-          return ret;
-        }
-#else
-  /* Enable BUTTON support for some other purpose */
-
-  board_button_initialize();
-#endif /* CONFIG_INPUT_BUTTONS_LOWER */
-#endif /* CONFIG_INPUT_BUTTONS */
-
-#if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
-      /* Register the LED driver */
-
-      ret = userled_lower_initialize(LED_DRIVER_PATH);
-      if (ret < 0)
-        {
-          syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n",
-                 ret);
-        }
-#endif
-
-  /* Configure SDIO chip selects */
-
-#ifdef CONFIG_ARCH_HAVE_SDIO
-      ret = gd32_sdio_initialize();
-      if (ret != OK)
-        {
-          syslog(LOG_ERR, "ERROR: gd32_sdio_initialize() failed: %d\n", ret);
-          return ret;
-        }
-
-  /* Mount the file system at /mnt/sd */
-
-      ret = nx_mount("/dev/mmcsd0", "/mnt/sd", "vfat", 0, NULL);
-      if (ret < 0)
-        {
-          ret = nx_mount("/dev/mmcsd0", "/mnt/sd", "vfat", 0,
-            "forceformat");
-          if (ret < 0)
-            {
-              ferr("ERROR: Failed to mount the SD card: %d\n", ret);
-              return ret;
-            }
-        }
-
-    syslog(LOG_INFO, "INFO: FAT volume /mnt/sd mount " \
-        "sd card success: %d\n", ret);
-#endif
-
-      /* Now we are initialized */
-
-      initialized = true;
-    }
-
-  UNUSED(ret);
-  return OK;
+  return gd32_bringup();
 }
