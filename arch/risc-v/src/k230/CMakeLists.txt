@@ -26,6 +26,7 @@ list(
   k230_start.c
   k230_irq_dispatch.c
   k230_irq.c
+  k230_hart.c
   k230_timerisr.c
   k230_allocateheap.c)
 

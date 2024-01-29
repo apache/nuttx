@@ -24,7 +24,7 @@ CHIP_ASRCS += k230_head.S
 
 # Specify our C code within this directory to be included
 CHIP_CSRCS  = k230_start.c k230_irq_dispatch.c k230_irq.c
-CHIP_CSRCS += k230_timerisr.c k230_allocateheap.c
+CHIP_CSRCS += k230_timerisr.c k230_allocateheap.c k230_hart.c
 
 ifeq ($(CONFIG_BUILD_KERNEL),y)
 CHIP_CSRCS += k230_mm_init.c
