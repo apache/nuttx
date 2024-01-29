@@ -876,7 +876,7 @@ implementation is simplified for use with NuttX in these ways:
 
 **Command Syntax**::
 
-  ls [-lRs] <dir-path>
+  ls [-lRsh] <dir-path>
 
 **Synopsis**. Show the contents of the directory at
 ``<dir-path>``. NOTE: ``<dir-path>`` must refer to a directory and
@@ -888,6 +888,7 @@ no other file system object.
 ``-R`` 	Show the contents of specified directory and all of its sub-directories.
 ``-s`` 	Show the size of the files along with the filenames in the listing
 ``-l`` 	Show size and mode information along with the filenames in the listing.
+``-h`` 	Show size and mode information along with the filenames in the listing with humanable.
 ======  ================================
 
 .. _cmdlsmod:
@@ -1898,4 +1899,3 @@ Example::
   nsh>
 
 ``ping6`` differs from ``ping`` in that it uses IPv6 addressing.
-
