@@ -38,10 +38,6 @@
 #include "irq/irq.h"
 #include "arm64_fatal.h"
 
-#ifdef CONFIG_ARCH_FPU
-#include "arm64_fpu.h"
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -156,11 +152,6 @@ retry:
 
   rtcb->xcp.sigdeliver = NULL;  /* Allows next handler to be scheduled */
   rtcb->xcp.regs = rtcb->xcp.saved_reg;
-
-#ifdef CONFIG_ARCH_FPU
-  arm64_destory_fpu(rtcb);
-  rtcb->xcp.fpu_regs = rtcb->xcp.saved_fpu_regs;
-#endif
 
   /* Then restore the correct state for this thread of execution. */
 
