@@ -96,7 +96,7 @@ ipv4_nat_outbound_internal(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static inline uint16_t ipv4_nat_l4_hdrlen(uint8_t proto)
+static inline uint8_t ipv4_nat_l4_hdrlen(uint8_t proto)
 {
   switch (proto)
     {
@@ -113,7 +113,7 @@ static inline uint16_t ipv4_nat_l4_hdrlen(uint8_t proto)
         return ICMP_HDRLEN;
 #endif
       default:
-        DEBUGASSERT(false);
+        nwarn("WARNING: Unsupported protocol %u inside ICMP\n", proto);
     }
 
   return 0;
@@ -336,13 +336,24 @@ ipv4_nat_inbound_icmp(FAR struct ipv4_hdr_s *ipv4,
 
             FAR struct ipv4_hdr_s *inner =
                 (FAR struct ipv4_hdr_s *)(icmp + 1);
-            FAR void *inner_l4 = L4_HDR(inner);
-            int16_t inner_l4len = ((ipv4->len[0] << 8) + ipv4->len[1]) -
-                                  ((intptr_t)inner_l4 - (intptr_t)ipv4);
-            uint16_t inner_l4hdrbak[L4_MAXHDRLEN / 2];
-            uint16_t inner_l4hdrlen;
+            FAR void *inner_l4;
+            uint16_t outer_l3len = (ipv4->len[0] << 8) + ipv4->len[1];
+            int16_t  inner_l4len;
+            int16_t  inner_l4hdrlen;
+            uint16_t inner_l4hdrbak[L4_MAXHDRLEN];
 
-            if (inner_l4len < 8)
+            /* Make sure we have a full inner IPv4 header. */
+
+            if (outer_l3len < (uintptr_t)(inner + 1) - (uintptr_t)ipv4)
+              {
+                return NULL;
+              }
+
+            inner_l4 = L4_HDR(inner);
+            inner_l4len = (intptr_t)ipv4 + outer_l3len - (intptr_t)inner_l4;
+            inner_l4hdrlen = ipv4_nat_l4_hdrlen(inner->proto);
+            inner_l4hdrlen = MIN(inner_l4len, inner_l4hdrlen);
+            if (inner_l4hdrlen < 8)
               {
                 /* RFC792: The original L4 data should be at least 64 bits. */
 
@@ -351,8 +362,6 @@ ipv4_nat_inbound_icmp(FAR struct ipv4_hdr_s *ipv4,
 
             /* Try backup origin L4 header for later checksum update. */
 
-            inner_l4hdrlen = MIN(inner_l4len,
-                                 ipv4_nat_l4_hdrlen(inner->proto));
             DEBUGASSERT((intptr_t)inner_l4 - (intptr_t)ipv4 + inner_l4hdrlen
                         <= CONFIG_IOB_BUFSIZE);
             memcpy(inner_l4hdrbak, inner_l4, inner_l4hdrlen);
@@ -558,13 +567,24 @@ ipv4_nat_outbound_icmp(FAR struct net_driver_s *dev,
 
             FAR struct ipv4_hdr_s *inner =
                 (FAR struct ipv4_hdr_s *)(icmp + 1);
-            FAR void *inner_l4 = L4_HDR(inner);
-            int16_t inner_l4len = ((ipv4->len[0] << 8) + ipv4->len[1]) -
-                                  ((intptr_t)inner_l4 - (intptr_t)ipv4);
-            uint16_t inner_l4hdrbak[L4_MAXHDRLEN / 2];
-            uint16_t inner_l4hdrlen;
+            FAR void *inner_l4;
+            uint16_t outer_l3len = (ipv4->len[0] << 8) + ipv4->len[1];
+            int16_t  inner_l4len;
+            int16_t  inner_l4hdrlen;
+            uint16_t inner_l4hdrbak[L4_MAXHDRLEN];
 
-            if (inner_l4len < 8)
+            /* Make sure we have a full inner IPv4 header. */
+
+            if (outer_l3len < (uintptr_t)(inner + 1) - (uintptr_t)ipv4)
+              {
+                return NULL;
+              }
+
+            inner_l4 = L4_HDR(inner);
+            inner_l4len = (intptr_t)ipv4 + outer_l3len - (intptr_t)inner_l4;
+            inner_l4hdrlen = ipv4_nat_l4_hdrlen(inner->proto);
+            inner_l4hdrlen = MIN(inner_l4len, inner_l4hdrlen);
+            if (inner_l4hdrlen < 8)
               {
                 /* RFC792: The original L4 data should be at least 64 bits. */
 
@@ -573,8 +593,6 @@ ipv4_nat_outbound_icmp(FAR struct net_driver_s *dev,
 
             /* Try backup origin L4 header for later checksum update. */
 
-            inner_l4hdrlen = MIN(inner_l4len,
-                                 ipv4_nat_l4_hdrlen(inner->proto));
             DEBUGASSERT((intptr_t)inner_l4 - (intptr_t)ipv4 + inner_l4hdrlen
                         <= CONFIG_IOB_BUFSIZE);
             memcpy(inner_l4hdrbak, inner_l4, inner_l4hdrlen);
