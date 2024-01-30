@@ -676,18 +676,20 @@ config ARCH_CHIP_MPS
 
 config ARCH_CHIP_QEMU_ARM
 	bool "QEMU virt platform (ARMv7a)"
-	select ARCH_HAVE_PSCI
 	select ARCH_HAVE_POWEROFF
 	select ARCH_HAVE_RESET
 	select ARCH_IDLE_CUSTOM
+	select ARM_HAVE_PSCI
+	select ARM_HAVE_NEON
 	---help---
 		QEMU virt platform (ARMv7a)
 
 config ARCH_CHIP_GOLDFISH_ARM
 	bool "GOLDFISH virt platform (ARMv7a)"
-	select ARCH_HAVE_PSCI
 	select ARCH_HAVE_POWEROFF
 	select ARCH_HAVE_RESET
+	select ARM_HAVE_PSCI
+	select ARM_HAVE_NEON
 	---help---
 		GOLDFISH virt platform (ARMv7a)
 
@@ -1139,8 +1141,8 @@ config ARM_THUMB
 	bool "Thumb Mode"
 	default n
 
-config ARCH_HAVE_PSCI
-	bool "ARM PCSI (Power State Coordination Interface) Support"
+config ARM_HAVE_PSCI
+	bool "ARM PSCI (Power State Coordination Interface) Support"
 	default n
 	---help---
 		This Power State Coordination Interface (PSCI) defines
@@ -1187,6 +1189,13 @@ config ARM_HAVE_PACBTI
 	default n
 	---help---
 		Decide whether support PACBTI(Pointer Authentication and Branch Target Identification) Extension
+
+config ARM_PSCI
+	bool "Enabled PSCI"
+	depends on ARM_HAVE_PSCI
+	default n
+	---help---
+		See ARM_HAVE_PSCI for details
 
 config ARM_FPU_ABI_SOFT
 	bool "Soft Float ABI"
