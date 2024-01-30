@@ -40,5 +40,13 @@ if(CONFIG_DRIVERS_NOTESNAP)
   list(APPEND SRCS notesnap_driver.c)
 endif()
 
+if(CONFIG_DRIVERS_NOTERPMSG_SERVER)
+  list(APPEND SRCS noterpmsg_server.c)
+endif()
+
+if(CONFIG_DRIVERS_NOTERPMSG)
+  list(APPEND SRCS noterpmsg_driver.c)
+endif()
+
 target_sources(drivers PRIVATE ${SRCS})
 target_include_directories(drivers PRIVATE ${NUTTX_DIR}/sched)

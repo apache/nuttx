@@ -41,5 +41,13 @@ ifeq ($(CONFIG_DRIVERS_NOTESNAP),y)
   CSRCS += notesnap_driver.c
 endif
 
+ifeq ($(CONFIG_DRIVERS_NOTERPMSG_SERVER),y)
+  CSRCS += noterpmsg_server.c
+endif
+
+ifeq ($(CONFIG_DRIVERS_NOTERPMSG),y)
+  CSRCS += noterpmsg_driver.c
+endif
+
 DEPPATH += --dep-path note
 VPATH += :note

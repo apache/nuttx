@@ -106,4 +106,40 @@ config DRIVERS_NOTESNAP_NBUFFERS
 		Number of last scheduling information buffers.
 endif
 
+config DRIVERS_NOTERPMSG_SERVER
+	bool "Enable RPMSG server for NOTE"
+	default n
+	depends on RPTUN
+	---help---
+		Use rpmsg to receive message from remote proc.
+
+config DRIVERS_NOTERPMSG
+	bool "Note to RPMSG"
+	depends on RPTUN
+	depends on SCHED_WORKQUEUE
+	default n
+	---help---
+		Use the rpmsg as a Note output device, send message to remote proc.
+
+if DRIVERS_NOTERPMSG
+
+config DRIVERS_NOTERPMSG_BUFSIZE
+	int "Note RPMSG client buffer size"
+	default 1024
+	---help---
+		The size of the client buffer (in bytes)
+
+config DRIVERS_NOTERPMSG_SERVER_NAME
+	string "The name of Note Rpmsg Server"
+	default "ap"
+	---help---
+		The proc name of rpmsg server. Client sends message to
+		specified name of remote proc.
+
+config DRIVERS_NOTERPMSG_WORK_DELAY
+	int "NOTE RPMSG work delay(ms)"
+	default 100
+
+endif
+
 endif # DRIVERS_NOTE
