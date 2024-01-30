@@ -60,7 +60,7 @@ void arm_boot(void)
 
   arm_fpuconfig();
 
-#ifdef CONFIG_ARCH_HAVE_PSCI
+#ifdef CONFIG_ARM_PSCI
   arm_psci_init("smc");
 #endif
 
@@ -77,7 +77,7 @@ void arm_boot(void)
 #endif
 }
 
-#if defined(CONFIG_ARCH_HAVE_PSCI) && defined(CONFIG_SMP)
+#if defined(CONFIG_ARM_PSCI) && defined(CONFIG_SMP)
 int up_cpu_start(int cpu)
 {
 #ifdef CONFIG_SCHED_INSTRUMENTATION

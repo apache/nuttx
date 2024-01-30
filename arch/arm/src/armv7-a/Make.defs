@@ -98,7 +98,7 @@ ifeq ($(CONFIG_SMP),y)
   CMN_CSRCS += arm_scu.c
 endif
 
-ifeq ($(CONFIG_ARCH_HAVE_PSCI),y)
+ifeq ($(CONFIG_ARM_PSCI),y)
   CMN_ASRCS += arm_smccc.S
   CMN_CSRCS += arm_cpu_psci.c
 endif
