@@ -35,7 +35,6 @@
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/nxffs.h>
-#include <nuttx/fs/rpmsgfs.h>
 #include <nuttx/spi/spi_transfer.h>
 #include <nuttx/rc/dummy.h>
 
@@ -192,17 +191,6 @@ int gd32_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
     }
-#endif
-
-#ifdef CONFIG_FS_PROCFS
-      /* Mount the procfs file system */
-
-      ret = nx_mount(NULL, GD32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
-      if (ret < 0)
-        {
-          syslog(LOG_ERR, "ERROR: Failed to mount procfs at %s: %d\n",
-                GD32_PROCFS_MOUNTPOINT, ret);
-        }
 #endif
 
 #ifdef CONFIG_GD32F4_ROMFS
