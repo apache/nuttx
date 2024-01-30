@@ -23,10 +23,9 @@
  ****************************************************************************/
 
 #include <nuttx/binfmt/binfmt.h>
+#include <nuttx/coredump.h>
 #include <syslog.h>
 #include <debug.h>
-
-#include "misc/coredump.h"
 
 /****************************************************************************
  * Private Data
@@ -166,6 +165,22 @@ static void coredump_dump_blkdev(pid_t pid)
 #endif
 
 /****************************************************************************
+ * Name: coredump_set_memory_region
+ *
+ * Description:
+ *   Set do coredump memory region.
+ *
+ ****************************************************************************/
+
+int coredump_set_memory_region(FAR struct memory_region_s *region)
+{
+  /* Not free g_regions, because allow call this fun when crash */
+
+  g_regions = region;
+  return 0;
+}
+
+/****************************************************************************
  * Name: coredump_initialize
  *
  * Description:
@@ -180,7 +195,8 @@ int coredump_initialize(void)
 
   if (CONFIG_BOARD_MEMORY_RANGE[0] != '\0')
     {
-      g_regions = alloc_memory_region(CONFIG_BOARD_MEMORY_RANGE);
+      coredump_set_memory_region(
+         alloc_memory_region(CONFIG_BOARD_MEMORY_RANGE));
       if (g_regions == NULL)
         {
           _alert("Coredump memory region alloc fail\n");

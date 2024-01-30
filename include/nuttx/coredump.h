@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/misc/coredump.h
+ * include/nuttx/coredump.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,18 +18,29 @@
  *
  ****************************************************************************/
 
-#ifndef __SCHED_MISC_COREDUMP_H
-#define __SCHED_MISC_COREDUMP_H
+#ifndef __INCLUDE_NUTTX_COREDUMP_H
+#define __INCLUDE_NUTTX_COREDUMP_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/memoryregion.h>
 #include <unistd.h>
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: coredump_set_memory_region
+ *
+ * Description:
+ *   Set do coredump memory region.
+ *
+ ****************************************************************************/
+
+int coredump_set_memory_region(FAR struct memory_region_s *region);
 
 /****************************************************************************
  * Name: coredump_initialize
@@ -55,4 +66,4 @@ int coredump_initialize(void);
 
 void coredump_dump(pid_t pid);
 
-#endif /* __SCHED_MISC_COREDUMP_H */
+#endif /* __INCLUDE_NUTTX_COREDUMP_H */
