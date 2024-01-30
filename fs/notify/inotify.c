@@ -870,16 +870,16 @@ static void notify_queue_path_event(FAR const char *path, uint32_t mask)
 }
 
 /****************************************************************************
- * Name: notify_get_path
+ * Name: notify_check_inode
  *
  * Description:
- *   Get the path from the file pointer.
+ *   Check if the inode is a mount point.
  *
  ****************************************************************************/
 
-static int notify_get_path(FAR struct file *filep, FAR char *path)
+static int notify_check_inode(FAR struct file *filep)
 {
-  /* We only apply file lock on mount points (f_inode won't be NULL). */
+  /* We only apply notify on mount points (f_inode won't be NULL). */
 
   if (!INODE_IS_MOUNTPT(filep->f_inode) &&
       !INODE_IS_PSEUDODIR(filep->f_inode) &&
@@ -888,7 +888,7 @@ static int notify_get_path(FAR struct file *filep, FAR char *path)
       return -EBADF;
     }
 
-  return file_fcntl(filep, F_GETPATH, path);
+  return OK;
 }
 
 /****************************************************************************
@@ -904,8 +904,14 @@ static inline void notify_queue_filep_event(FAR struct file *filep,
 {
   int ret;
 
+  ret = notify_check_inode(filep);
+  if (ret < 0)
+    {
+      return;
+    }
+
   nxmutex_lock(&g_inotify_hash_lock);
-  ret = notify_get_path(filep, g_inotify_temp_buffer[0]);
+  ret = file_fcntl(filep, F_GETPATH, g_inotify_temp_buffer[0]);
   if (ret < 0)
     {
       nxmutex_unlock(&g_inotify_hash_lock);
