@@ -123,7 +123,7 @@ void arm64_chip_boot(void)
   imx9_lowsetup();
 #endif
 
-#if defined(CONFIG_SMP) || defined(CONFIG_ARCH_HAVE_PSCI)
+#if defined(CONFIG_ARM64_PSCI)
   arm64_psci_init("smc");
 #endif
 

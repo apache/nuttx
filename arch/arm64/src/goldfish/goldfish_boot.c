@@ -182,7 +182,7 @@ void arm64_chip_boot(void)
   fdt_register((const char *)0x40000000);
 #endif
 
-#ifdef CONFIG_ARCH_HAVE_PSCI
+#ifdef CONFIG_ARM64_PSCI
   arm64_psci_init("smc");
 #endif
 

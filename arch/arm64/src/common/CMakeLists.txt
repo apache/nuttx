@@ -63,7 +63,7 @@ if(CONFIG_ARCH_HAVE_MPU)
   list(APPEND SRCS arm64_mpu.c)
 endif()
 
-if(CONFIG_ARCH_HAVE_PSCI)
+if(CONFIG_ARM64_PSCI)
   list(APPEND SRCS arm64_cpu_psci.c arm64_systemreset.c)
 endif()
 

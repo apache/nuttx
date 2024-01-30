@@ -194,7 +194,7 @@ void arm64_chip_boot(void)
 
   arm64_mpu_init(true);
 
-#if defined(CONFIG_SMP) && defined(CONFIG_ARCH_HAVE_PCSI)
+#if defined(CONFIG_ARM64_PSCI)
   arm64_psci_init("smc");
 #endif
 

@@ -175,9 +175,9 @@ void arm64_chip_boot(void)
   fdt_register((const char *)0x40000000);
 #endif
 
-#if defined(CONFIG_ARCH_CHIP_QEMU_WITH_HV)
+#if defined(CONFIG_ARCH_CHIP_QEMU_WITH_HV) && defined(CONFIG_ARM64_PSCI)
   arm64_psci_init("hvc");
-#elif defined(CONFIG_ARCH_HAVE_PSCI)
+#elif defined(CONFIG_ARM64_PSCI)
   arm64_psci_init("smc");
 #endif
 

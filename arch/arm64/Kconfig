@@ -31,9 +31,9 @@ config ARCH_CHIP_A64
 	select ARCH_CORTEX_A53
 	select ARCH_HAVE_ADDRENV
 	select ARCH_HAVE_RESET
-	select ARCH_HAVE_PSCI
 	select ARCH_HAVE_IRQTRIGGER
 	select ARCH_NEED_ADDRENV_MAPPING
+	select ARM64_HAVE_PSCI
 	---help---
 		Allwinner A64 SoC
 
@@ -42,8 +42,8 @@ config ARCH_CHIP_RK3399
 	select ARCH_CORTEX_A53
 	select ARCH_HAVE_ADDRENV
 	select ARCH_HAVE_RESET
-	select ARCH_HAVE_PSCI
 	select ARCH_NEED_ADDRENV_MAPPING
+	select ARM64_HAVE_PSCI
 	---help---
 		Rockchip RK3399 SoC
 
@@ -51,11 +51,11 @@ config ARCH_CHIP_QEMU
 	bool "QEMU virt platform (ARMv8a)"
 	select ARCH_HAVE_ADDRENV
 	select ARCH_HAVE_IRQTRIGGER
-	select ARCH_HAVE_PSCI
 	select ARCH_NEED_ADDRENV_MAPPING
 	select ARCH_HAVE_POWEROFF
 	select ARCH_HAVE_RESET
 	select ARCH_HAVE_TEXT_HEAP
+	select ARM64_HAVE_PSCI
 	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF
 	---help---
 		QEMU virt platform (ARMv8a)
@@ -63,7 +63,6 @@ config ARCH_CHIP_QEMU
 config ARCH_CHIP_GOLDFISH
 	bool "goldfish platform (ARMv8a)"
 	select ARCH_CORTEX_A53
-	select ARCH_HAVE_PSCI
 	select ARCH_HAVE_MULTICPU
 	select ARMV8A_HAVE_GICv2
 	select ARCH_HAVE_ADDRENV
@@ -71,6 +70,7 @@ config ARCH_CHIP_GOLDFISH
 	select ARCH_HAVE_POWEROFF
 	select ARCH_HAVE_RESET
 	select ARCH_NEED_ADDRENV_MAPPING
+	select ARM64_HAVE_PSCI
 	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF
 	---help---
 		Android GoldFish platform for NuttX (ARMv8a),
@@ -117,16 +117,6 @@ config ARCH_ARMV8R
 	bool
 	default n
 	select ARCH_SINGLE_SECURITY_STATE
-
-config ARCH_HAVE_PSCI
-	bool "ARM PCSI (Power State Coordination Interface) Support"
-	default n
-	---help---
-		This Power State Coordination Interface (PSCI) defines
-		a standard interface for power management. the PCSI need
-		to implement handling firmware at EL2 or EL3. The option
-		maybe not applicable for arm core without PCSI firmware
-		interface implement
 
 config ARCH_SINGLE_SECURITY_STATE
 	bool "ARM Single Security State Support"
@@ -260,6 +250,23 @@ config ARCH_CHIP
 	default "fvp-v8r"   if ARCH_CHIP_FVP_ARMV8R
 	default "imx8"      if ARCH_CHIP_IMX8
 	default "imx9"      if ARCH_CHIP_IMX9
+
+config ARM64_HAVE_PSCI
+	bool "ARM PCSI (Power State Coordination Interface) Support"
+	default n
+	---help---
+		This Power State Coordination Interface (PSCI) defines
+		a standard interface for power management. the PCSI need
+		to implement handling firmware at EL2 or EL3. The option
+		maybe not applicable for arm core without PCSI firmware
+		interface implement
+
+config ARM64_PSCI
+	bool "Enabled PSCI"
+	depends on ARM64_HAVE_PSCI
+	default y
+	---help---
+		See ARM64_HAVE_PSCI for details
 
 config ARM64_HAVE_NEON
 	bool
