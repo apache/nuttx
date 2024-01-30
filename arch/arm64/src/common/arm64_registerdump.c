@@ -50,7 +50,11 @@
 uintptr_t up_getusrsp(void *regs)
 {
   struct regs_context *ptr = regs;
-  return ptr->regs[REG_X13];
+#ifndef CONFIG_BUILD_KERNEL
+  return ptr->sp_elx;
+#else
+  return ptr->sp_el0;
+#endif
 }
 
 /****************************************************************************
