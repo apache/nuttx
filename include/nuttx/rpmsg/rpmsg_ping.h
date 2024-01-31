@@ -33,7 +33,7 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-/* used for ioctl RPTUNIOC_PING */
+/* used for ioctl RPMSGIOC_PING */
 
 struct rpmsg_ping_s
 {
