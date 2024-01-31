@@ -282,6 +282,21 @@ void local_subref(FAR struct local_conn_s *conn);
 FAR struct local_conn_s *local_nextconn(FAR struct local_conn_s *conn);
 
 /****************************************************************************
+ * Name: local_findconn
+ *
+ * Description:
+ *   Traverse the connections list to find the server
+ *
+ * Assumptions:
+ *   This function must be called with the network locked.
+ *
+ ****************************************************************************/
+
+FAR struct local_conn_s *
+local_findconn(FAR const struct local_conn_s *conn,
+               FAR const struct sockaddr_un *unaddr);
+
+/****************************************************************************
  * Name: local_peerconn
  *
  * Description:

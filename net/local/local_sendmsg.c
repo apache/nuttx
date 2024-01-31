@@ -262,7 +262,7 @@ static ssize_t local_sendto(FAR struct socket *psock,
 {
 #ifdef CONFIG_NET_LOCAL_DGRAM
   FAR struct local_conn_s *conn = psock->s_conn;
-  FAR struct sockaddr_un *unaddr = (FAR struct sockaddr_un *)to;
+  FAR const struct sockaddr_un *unaddr = (FAR const struct sockaddr_un *)to;
   ssize_t ret;
 
   /* Verify that a valid address has been provided */
@@ -294,6 +294,12 @@ static ssize_t local_sendto(FAR struct socket *psock,
 
       nerr("ERROR: Connected state\n");
       return -EISCONN;
+    }
+
+  if (local_findconn(conn, unaddr) == NULL)
+    {
+      nerr("ERROR: No such file or directory\n");
+      return -ENOENT;
     }
 
   /* The outgoing FIFO should not be open */
