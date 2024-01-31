@@ -84,15 +84,13 @@ off_t file_seek(FAR struct file *filep, off_t offset, int whence)
             /* FALLTHROUGH */
 
           case SEEK_SET:
-            if (offset >= 0)
-              {
-                filep->f_pos = offset; /* Might be beyond the end-of-file */
-                break;
-              }
-            else
+            if (offset < 0)
               {
                 return -EINVAL;
               }
+
+            filep->f_pos = offset; /* Might be beyond the end-of-file */
+
             break;
 
           case SEEK_END:

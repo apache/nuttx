@@ -147,7 +147,7 @@ int iswctype(wint_t c, wctype_t desc)
       return iswxdigit(c);
 
     default:
-      return 0;                 /* eliminate warning */
+      break;                 /* eliminate warning */
     }
 
   /* Otherwise unknown */
