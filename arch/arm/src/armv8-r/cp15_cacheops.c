@@ -259,18 +259,60 @@ void cp15_flush_dcache_all(void)
   cp15_dcache_op(CP15_CACHE_CLEANINVALIDATE);
 }
 
-uint32_t cp15_cache_size(void)
+uint32_t cp15_icache_size(void)
 {
-  uint32_t sets;
-  uint32_t ways;
-  uint32_t line;
+  static uint32_t csize;
 
-  line = cp15_cache_get_info(&sets, &ways);
+  if (csize == 0)
+    {
+      uint32_t sets;
+      uint32_t ways;
+      uint32_t line;
 
-  return sets * ways * line;
+      line = cp15_cache_get_info(&sets, &ways, true);
+      csize = sets * ways * line;
+    }
+
+  return csize;
 }
 
-uint32_t cp15_cache_linesize(void)
+uint32_t cp15_dcache_size(void)
 {
-  return cp15_cache_get_info(NULL, NULL);
+  static uint32_t csize;
+
+  if (csize == 0)
+    {
+      uint32_t sets;
+      uint32_t ways;
+      uint32_t line;
+
+      line = cp15_cache_get_info(&sets, &ways, false);
+      csize = sets * ways * line;
+    }
+
+  return csize;
+}
+
+uint32_t cp15_icache_linesize(void)
+{
+  static uint32_t clsize;
+
+  if (clsize == 0)
+    {
+      clsize = cp15_cache_get_info(NULL, NULL, true);
+    }
+
+  return clsize;
+}
+
+uint32_t cp15_dcache_linesize(void)
+{
+  static uint32_t clsize;
+
+  if (clsize == 0)
+    {
+      clsize = cp15_cache_get_info(NULL, NULL, false);
+    }
+
+  return clsize;
 }
