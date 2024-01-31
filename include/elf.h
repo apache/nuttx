@@ -233,6 +233,12 @@
 #define PF_X               1          /* Execute */
 #define PF_W               2          /* Write */
 #define PF_R               4          /* Read */
+#define PF_MASKOS          0x0ff00000 /* All bits included in the PF_MASKOS
+                                       * mask are reserved for operating system-specific
+                                       * semantics.
+                                       */
+#define PF_REGISTER        0x00100000 /* Register, need pointer aligned access */
+
 #define PF_MASKPROC        0xf0000000 /* Unspecified */
 
 /* Figure 5-10: Dynamic Array Tags, d_tag */
