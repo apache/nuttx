@@ -874,10 +874,8 @@ static ssize_t uart_read(FAR struct file *filep,
                 {
                   /* Skipping character count down */
 
-                  if (dev->escape-- > 0)
-                    {
-                      continue;
-                    }
+                  dev->escape--;
+                  continue;
                 }
 
               /* Echo if the character is not a control byte */

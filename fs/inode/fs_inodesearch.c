@@ -69,11 +69,6 @@ static int _inode_compare(FAR const char *fname, FAR struct inode *node)
 {
   FAR char *nname = node->i_name;
 
-  if (!nname)
-    {
-      return 1;
-    }
-
   if (!fname)
     {
       return -1;
