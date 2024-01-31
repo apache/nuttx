@@ -278,7 +278,7 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve)
     }
   else
 #endif
-#if defined(CONFIG_FS_SHM)
+#if defined(CONFIG_FS_SHMFS)
   /* Check for shared memory */
 
   if (INODE_IS_SHM(inode))

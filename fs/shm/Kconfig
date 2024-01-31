@@ -19,4 +19,4 @@ config FS_SHMFS_VFS_PATH
 		The path to where shared memory objects will exist in the VFS
 		namespace.
 
-endif # FS_SHM
+endif # FS_SHMFS
