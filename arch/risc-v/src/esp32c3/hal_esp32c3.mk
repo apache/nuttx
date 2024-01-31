@@ -105,6 +105,7 @@ CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/timer_hal_iram.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/cache_hal.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/mpu_hal.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/mmu_hal.c
+CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/rmt_hal.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/uart_hal.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/uart_hal_iram.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/wdt_hal_iram.c
@@ -115,6 +116,7 @@ CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/log/log_noos.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/riscv/interrupt.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/soc/$(CHIP_SERIES)/gpio_periph.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/soc/$(CHIP_SERIES)/ledc_periph.c
+CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/soc/$(CHIP_SERIES)/rmt_periph.c
 
 ifeq ($(CONFIG_ESPRESSIF_SIMPLE_BOOT),y)
   CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/nuttx/src/bootloader_banner_wrap.c

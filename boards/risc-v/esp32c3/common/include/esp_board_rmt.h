@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32h2/esp32h2-devkit/src/esp32h2-devkit.h
+ * boards/risc-v/esp32c3/common/include/esp_board_rmt.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RISCV_ESP32H2_ESP32H2_DEVKIT_SRC_ESP32H2_DEVKIT_H
-#define __BOARDS_RISCV_ESP32H2_ESP32H2_DEVKIT_SRC_ESP32H2_DEVKIT_H
+#ifndef __BOARDS_RISC_V_ESP32C3_COMMON_INCLUDE_ESP_BOARD_RMT_H
+#define __BOARDS_RISC_V_ESP32C3_COMMON_INCLUDE_ESP_BOARD_RMT_H
 
 /****************************************************************************
  * Included Files
@@ -31,70 +31,67 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* RMT gpio */
-
-#define RMT_RXCHANNEL       2
-#define RMT_TXCHANNEL       0
-
-#ifdef CONFIG_RMT_LOOP_TEST_MODE
-#  define RMT_INPUT_PIN     0
-#  define RMT_OUTPUT_PIN    0
-#else
-#  define RMT_INPUT_PIN     2
-#  define RMT_OUTPUT_PIN    8
-#endif
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+#ifndef __ASSEMBLY__
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
+#ifdef CONFIG_ESP_RMT
+
 /****************************************************************************
- * Name: esp_bringup
+ * Name: board_rmt_rxinitialize
  *
  * Description:
- *   Perform architecture-specific initialization.
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_BOARDCTL=y :
- *     Called from the NSH library via board_app_initialize().
+ *   Initialize the RMT peripheral and register a RX device.
  *
  * Input Parameters:
- *   None.
+ *   ch  - the RMT's channel that will be used
+ *   pin - The pin used for the RX channel
  *
  * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned on
- *   any failure.
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int esp_bringup(void);
+int board_rmt_rxinitialize(int ch, int pin);
 
 /****************************************************************************
- * Name: esp_gpio_init
+ * Name: board_rmt_txinitialize
  *
  * Description:
- *   Configure the GPIO driver.
+ *   Initialize the RMT peripheral and register a TX device.
+ *
+ * Input Parameters:
+ *   ch  - the RMT's channel that will be used
+ *   pin - The pin used for the TX channel
  *
  * Returned Value:
- *   Zero (OK).
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEV_GPIO
-int esp_gpio_init(void);
+int board_rmt_txinitialize(int ch, int pin);
+
+#endif /* CONFIG_ESP_RMT */
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_RISCV_ESP32H2_ESP32H2_DEVKIT_SRC_ESP32H2_DEVKIT_H */
+#endif /* __BOARDS_RISC_V_ESP32C3_COMMON_INCLUDE_ESP_BOARD_RMT_H */

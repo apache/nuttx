@@ -298,6 +298,16 @@ config ESPRESSIF_BROWNOUT_DET
 		than a specific value. If this happens, it will reset the chip in
 		order to prevent unintended behaviour.
 
+config ESP_RMT
+	bool "Remote Control Module (RMT)"
+	default n
+	depends on RMT
+	---help---
+		The RMT (Remote Control Transceiver) peripheral was designed to act as
+		an infrared transceiver. However, due to the flexibility of its data
+		format, RMT can be extended to a versatile and general-purpose
+		transceiver, transmitting or receiving many other types of signals.
+
 endmenu # Peripheral Support
 
 menu "UART Configuration"
