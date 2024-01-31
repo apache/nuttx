@@ -210,8 +210,7 @@ static ssize_t local_send(FAR struct socket *psock,
               return ret;
             }
 
-          ret = local_send_packet(&conn->lc_outfile, buf, len,
-                                  psock->s_type == SOCK_DGRAM);
+          ret = local_send_packet(&conn->lc_outfile, buf, len);
           nxmutex_unlock(&conn->lc_sendlock);
         }
         break;
@@ -325,7 +324,7 @@ static ssize_t local_sendto(FAR struct socket *psock,
   if (ret < 0)
     {
       nerr("ERROR: Failed to create FIFO for %s: %zd\n",
-           conn->lc_path, ret);
+           unaddr->sun_path, ret);
       return ret;
     }
 
@@ -352,9 +351,17 @@ static ssize_t local_sendto(FAR struct socket *psock,
       goto errout_with_sender;
     }
 
+  /* Send the preamble */
+
+  ret = local_send_preamble(conn, &conn->lc_outfile, buf, len);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to send the preamble: %zd\n", ret);
+    }
+
   /* Send the packet */
 
-  ret = local_send_packet(&conn->lc_outfile, buf, len, true);
+  ret = local_send_packet(&conn->lc_outfile, buf, len);
   if (ret < 0)
     {
       nerr("ERROR: Failed to send the packet: %zd\n", ret);
