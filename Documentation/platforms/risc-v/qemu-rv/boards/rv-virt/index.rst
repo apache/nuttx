@@ -277,3 +277,50 @@ smp64
 
 Similar to the `nsh`_ configuration, but with SMP support
 This configuration is used for 64-bit RISC-V
+
+RISC-V GDB Debugging
+====================
+
+First of all, make sure to select ``CONFIG_DEBUG_SYMBOLS=y`` in `menuconfig`.
+
+After building the kernel (and the applications, in kernel mode), use the toolchain's GDB
+to debug RISC-V applications. For instance, if you are using the xPack's prebuilt toolchain,
+you can use the following command to start GDB::
+
+    $ riscv-none-elf-gdb-py3 -ix tools/gdb/__init__.py --tui nuttx
+
+To use QEMU for debugging, one should add the parameters ``-s -S`` to the QEMU command line.
+
+For instance::
+
+    $ qemu-system-riscv32 -semihosting -M virt,aclint=on -cpu rv32 -smp 8 -bios none -kernel nuttx -nographic -s -S
+
+Then, in GDB, use the following command to connect to QEMU::
+
+    $ target extended-remote localhost:1234
+
+Debugging Applications in Kernel Mode
+-------------------------------------
+
+In kernel mode, only the kernel symbols are loaded by default.
+
+If needed, one should also load the application symbols using the following command::
+
+    $ add-symbol-file <file> <address>
+
+``address`` refers to the ``.text`` section of the application and can be retrieved from the ELF file using the following command::
+
+    $ readelf -WS <file> | grep .text
+
+For instance, to check the ``.text`` section address of the ``hello`` application, use the following command::
+
+    $ readelf -WS ../apps/bin/hello | grep .text
+    [ 1] .text             PROGBITS        c0000000 001000 0009e0 00  AX  0   0  2
+
+Then, look for the ``.text`` section address and use the ``c0000000`` as the address to load the symbols.
+
+For instance, if you want to load the ``hello`` application, you can use the following command in GDB::
+
+    $ add-symbol-file ../apps/bin/hello 0xc0000000
+
+Then, you can set breakpoints, step through the code, and inspect the memory and registers of the applications too.
