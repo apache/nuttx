@@ -59,3 +59,21 @@ ifeq ($(CONFIG_BINFMT_ELF_RELOCATABLE),y)
 LDELFFLAGS += -r
 endif
 
+# POSTBUILD management
+
+# KERNEL builds need real ROMFS
+
+ifeq ($(CONFIG_BUILD_KERNEL),y)
+ifeq ($(CONFIG_RISCV_SEMIHOSTING_HOSTFS),)
+ifeq ($(wildcard $(BOARD_DIR)$(DELIM)src$(DELIM)romfs_boot.c),)
+define POSTBUILD
+  $(Q) echo "Please replace stub ROMFS with real one."
+  $(Q) rm $(BOARD_DIR)$(DELIM)src$(DELIM)libboard.a
+endef
+else
+define POSTBUILD
+  $(Q) echo "Please try nuttx.bin on target."
+endef
+endif
+endif
+endif
