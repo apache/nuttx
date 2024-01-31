@@ -28,11 +28,15 @@
 #include <stdio.h>
 #include <syslog.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/board.h>
+#include <nuttx/drivers/ramdisk.h>
 #include <nuttx/virtio/virtio-mmio.h>
 
 #include <sys/mount.h>
+
+#include "romfs.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -46,6 +50,9 @@
 #  define QEMU_VIRTIO_MMIO_IRQ   28
 #endif
 #define QEMU_VIRTIO_MMIO_NUM     8
+
+#define SECTORSIZE   512
+#define NSECTORS(b)  (((b) + SECTORSIZE - 1) / SECTORSIZE)
 
 /****************************************************************************
  * Private Functions
@@ -123,5 +130,50 @@ int board_app_initialize(uintptr_t arg)
 #endif
 
   return OK;
+#endif
+}
+
+/****************************************************************************
+ * Name: board_late_initialize
+ *
+ * Description:
+ *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
+ *   initialization call will be performed in the boot-up sequence to a
+ *   function called board_late_initialize().  board_late_initialize() will
+ *   be called after up_initialize() and board_early_initialize() and just
+ *   before the initial application is started.  This additional
+ *   initialization phase may be used, for example, to initialize board-
+ *   specific device drivers for which board_early_initialize() is not
+ *   suitable.
+ *
+ *   Waiting for events, use of I2C, SPI, etc are permissible in the context
+ *   of board_late_initialize().  That is because board_late_initialize()
+ *   will run on a temporary, internal kernel thread.
+ *
+ ****************************************************************************/
+
+void board_late_initialize(void)
+{
+  /* Perform board-specific initialization */
+
+#if defined(CONFIG_BUILD_KERNEL) && !defined(CONFIG_RISCV_SEMIHOSTING_HOSTFS)
+  /* Create ROM disk for mount in nx_start_application */
+
+  if (NSECTORS(romfs_img_len) > 1)
+    {
+      int ret = OK;
+      ret = romdisk_register(0, romfs_img, NSECTORS(romfs_img_len),
+        SECTORSIZE);
+      if (ret < 0)
+        {
+          ferr("ERROR: Failed to register romfs: %d\n", -ret);
+        }
+    }
+#endif /* CONFIG_BUILD_KERNEL && !CONFIG_RISCV_SEMIHOSTING_HOSTFS */
+
+#ifdef CONFIG_NSH_ARCHINIT
+
+  mount(NULL, "/proc", "procfs", 0, NULL);
+
 #endif
 }
