@@ -153,7 +153,6 @@ static int getopt_long_option(FAR struct getopt_s *go,
 
                   default:
                     goto errout;
-                    break;
                 }
             }
           else
@@ -213,7 +212,6 @@ static int getopt_long_option(FAR struct getopt_s *go,
 
                   default:
                     goto errout;
-                    break;
                 }
             }
 

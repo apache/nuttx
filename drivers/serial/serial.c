@@ -181,7 +181,7 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
 
           dev->xmit.buffer[dev->xmit.head] = ch;
           dev->xmit.head = nexthead;
-          return OK;
+          break;
         }
 
       /* The TX buffer is full.  Should be block, waiting for the hardware

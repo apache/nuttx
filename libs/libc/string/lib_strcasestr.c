@@ -92,7 +92,7 @@ FAR char *strcasestr(FAR const char *str, FAR const char *substr)
            * substring.
            */
 
-          return NULL;
+          break;
         }
 
       /* Check if this is the beginning of a matching substring
