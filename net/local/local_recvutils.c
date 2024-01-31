@@ -122,34 +122,6 @@ errout:
 }
 
 /****************************************************************************
- * Name: local_sync
- *
- * Description:
- *   Read a sync bytes until the start of the packet is found.
- *
- * Input Parameters:
- *   filep - File structure of write-only FIFO.
- *
- * Returned Value:
- *   The non-zero size of the following packet is returned on success; a
- *   negated errno value is returned on any failure.
- *
- ****************************************************************************/
-
-int local_sync(FAR struct file *filep)
-{
-  size_t readlen;
-  uint16_t pktlen;
-  int ret;
-
-  /* Read the packet length */
-
-  readlen = sizeof(uint16_t);
-  ret     = local_fifo_read(filep, (FAR uint8_t *)&pktlen, &readlen, false);
-  return ret < 0 ? ret : pktlen;
-}
-
-/****************************************************************************
  * Name: local_getaddr
  *
  * Description:

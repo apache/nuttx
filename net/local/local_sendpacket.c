@@ -94,6 +94,66 @@ static int local_fifo_write(FAR struct file *filep, FAR const uint8_t *buf,
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: local_send_preamble
+ *
+ * Description:
+ *   Send a packet on the write-only FIFO.
+ *
+ * Input Parameters:
+ * conn      A reference to local connection structure
+ * filep     File structure of write-only FIFO.
+ * buf       Data to send
+ * len       Length of data to send
+ *
+ * Returned Value:
+ *   Packet length is returned on success; a negated errno value is returned
+ *   on any failure.
+ *
+ ****************************************************************************/
+
+int local_send_preamble(FAR struct local_conn_s *conn,
+                        FAR struct file *filep,
+                        FAR const struct iovec *buf,
+                        size_t len)
+{
+  FAR const struct iovec *end = buf + len;
+  FAR const struct iovec *iov;
+  int ret;
+  uint16_t len16 = strlen(conn->lc_path);
+
+  ret = local_fifo_write(&conn->lc_outfile, (FAR const uint8_t *)&len16,
+                         sizeof(uint16_t));
+  if (ret != sizeof(uint16_t))
+    {
+      nerr("ERROR: local send path length failed ret: %d\n", ret);
+      return ret;
+    }
+
+  /* Send the packet length */
+
+  for (len16 = 0, iov = buf; iov != end; iov++)
+    {
+      len16 += iov->iov_len;
+    }
+
+  if (len16 > LOCAL_SEND_LIMIT)
+    {
+      nerr("ERROR: Packet is too big: %d\n", len16);
+      return -EMSGSIZE;
+    }
+
+  ret = local_fifo_write(filep, (FAR const uint8_t *)&len16,
+                        sizeof(uint16_t));
+  if (ret != sizeof(uint16_t))
+    {
+      return ret;
+    }
+
+  return local_fifo_write(&conn->lc_outfile, (uint8_t *)conn->lc_path,
+                          strlen(conn->lc_path));
+}
+
+/****************************************************************************
  * Name: local_send_packet
  *
  * Description:
@@ -103,7 +163,6 @@ static int local_fifo_write(FAR struct file *filep, FAR const uint8_t *buf,
  *   filep    File structure of write-only FIFO.
  *   buf      Data to send
  *   len      Length of data to send
- *   preamble Flag to indicate the preamble sync header assembly
  *
  * Returned Value:
  *   Packet length is returned on success; a negated errno value is returned
@@ -112,41 +171,19 @@ static int local_fifo_write(FAR struct file *filep, FAR const uint8_t *buf,
  ****************************************************************************/
 
 int local_send_packet(FAR struct file *filep, FAR const struct iovec *buf,
-                      size_t len, bool preamble)
+                      size_t len)
 {
   FAR const struct iovec *end = buf + len;
   FAR const struct iovec *iov;
   int ret = -EINVAL;
   uint16_t len16;
 
-  if (preamble)
-    {
-      /* Send the packet length */
-
-      for (len16 = 0, iov = buf; iov != end; iov++)
-        {
-          len16 += iov->iov_len;
-        }
-
-      if (len16 > LOCAL_SEND_LIMIT)
-        {
-          nerr("ERROR: Packet is too big: %d\n", len16);
-          return -EMSGSIZE;
-        }
-
-      ret = local_fifo_write(filep, (FAR const uint8_t *)&len16,
-                             sizeof(uint16_t));
-      if (ret != sizeof(uint16_t))
-        {
-          return ret;
-        }
-    }
-
   for (len16 = 0, iov = buf; iov != end; iov++)
     {
       ret = local_fifo_write(filep, iov->iov_base, iov->iov_len);
       if (ret < 0)
         {
+          nerr("ERROR: local send packet failed ret: %d\n", ret);
           break;
         }
 
