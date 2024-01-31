@@ -154,6 +154,29 @@ In `nsh`, applications can be run from the `/system/bin` directory::
 
     nsh> /system/bin/hello
 
+knsh32_romfs
+------------
+
+Similar to the `knsh32`_ configuration, but uses ROMFS instead of `hostfs`.
+A ROMFS image is generated and linked to the kernel. This requires re-running ``make``::
+
+    $ make V=1 -j$(nproc)
+    $ make export V=1 -j$(nproc)
+    $ pushd ../apps
+    $ ./tools/mkimport.sh -z -x ../nuttx/nuttx-export-*.tar.gz
+    $ make import V=1 -j$(nproc)
+    $ ./tools/mkromfsimg.sh ../nuttx/arch/risc-v/src/board/romfs_boot.c
+    $ popd
+    $ make V=1 -j$(nproc)
+
+To run it, use the following command::
+
+    $ qemu-system-riscv32 -M virt,aclint=on -cpu rv32 -smp 8 -bios none -kernel nuttx -nographic
+
+In `nsh`, applications can be run from the `/system/bin` directory::
+
+    nsh> /system/bin/hello
+
 knsh64
 ------
 
@@ -310,12 +333,15 @@ If needed, one should also load the application symbols using the following comm
 
 ``address`` refers to the ``.text`` section of the application and can be retrieved from the ELF file using the following command::
 
-    $ readelf -WS <file> | grep .text
+    $ riscv-none-elf-readelf -WS <file> | grep .text
 
 For instance, to check the ``.text`` section address of the ``hello`` application, use the following command::
 
-    $ readelf -WS ../apps/bin/hello | grep .text
+    $ riscv-none-elf-readelf -WS ../apps/bin/hello | grep .text
     [ 1] .text             PROGBITS        c0000000 001000 0009e0 00  AX  0   0  2
+
+.. note:: Pay attention that ``riscv-none-elf-readelf`` refers to your toolchain's readelf utility. Adjust accordingly if you are
+    using a different toolchain.
 
 Then, look for the ``.text`` section address and use the ``c0000000`` as the address to load the symbols.
 
