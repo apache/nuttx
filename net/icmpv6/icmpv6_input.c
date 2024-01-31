@@ -455,6 +455,14 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
                                                    prefixopt);
                       }
 
+                    /* Set the router address for the stateful process. */
+
+                    if ((adv->flags & ICMPv6_RADV_FLAG_M))
+                      {
+                        net_ipv6addr_copy(dev->d_ipv6draddr,
+                                          ipv6->srcipaddr);
+                      }
+
                       /* Notify any waiting threads */
 
                       icmpv6_rnotify(dev, (adv->flags & ICMPv6_RADV_FLAG_M) ?
