@@ -31,6 +31,19 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* RMT gpio */
+
+#define RMT_RXCHANNEL       2
+#define RMT_TXCHANNEL       0
+
+#ifdef CONFIG_RMT_LOOP_TEST_MODE
+#  define RMT_INPUT_PIN     0
+#  define RMT_OUTPUT_PIN    0
+#else
+#  define RMT_INPUT_PIN     2
+#  define RMT_OUTPUT_PIN    8
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

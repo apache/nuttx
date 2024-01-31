@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32h2/esp32h2-devkit/src/esp32h2-devkit.h
+ * arch/risc-v/src/common/espressif/esp_rmt.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,31 +18,32 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RISCV_ESP32H2_ESP32H2_DEVKIT_SRC_ESP32H2_DEVKIT_H
-#define __BOARDS_RISCV_ESP32H2_ESP32H2_DEVKIT_SRC_ESP32H2_DEVKIT_H
+#ifndef __ARCH_RISC_V_SRC_COMMON_ESPRESSIF_ESP_RMT_H
+#define __ARCH_RISC_V_SRC_COMMON_ESPRESSIF_ESP_RMT_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <semaphore.h>
+#include <nuttx/spinlock.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* RMT gpio */
+#define RMT_MEM_ITEM_NUM SOC_RMT_MEM_WORDS_PER_CHANNEL
 
-#define RMT_RXCHANNEL       2
-#define RMT_TXCHANNEL       0
+#define RMT_DEFAULT_CLK_DIV 1
 
-#ifdef CONFIG_RMT_LOOP_TEST_MODE
-#  define RMT_INPUT_PIN     0
-#  define RMT_OUTPUT_PIN    0
-#else
-#  define RMT_INPUT_PIN     2
-#  define RMT_OUTPUT_PIN    8
-#endif
+/* Channel can work during APB clock scaling */
+
+#define RMT_CHANNEL_FLAGS_AWARE_DFS (1 << 0)
+
+/* Invert RMT signal */
+
+#define RMT_CHANNEL_FLAGS_INVERT_SIG (1 << 1)
 
 /****************************************************************************
  * Public Types
@@ -53,48 +54,56 @@
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: esp_bringup
- *
- * Description:
- *   Perform architecture-specific initialization.
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_BOARDCTL=y :
- *     Called from the NSH library via board_app_initialize().
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned on
- *   any failure.
- *
- ****************************************************************************/
-
-int esp_bringup(void);
-
-/****************************************************************************
- * Name: esp_gpio_init
- *
- * Description:
- *   Configure the GPIO driver.
- *
- * Returned Value:
- *   Zero (OK).
- *
- ****************************************************************************/
-
-#ifdef CONFIG_DEV_GPIO
-int esp_gpio_init(void);
+#ifdef __cplusplus
+extern "C"
+{
 #endif
 
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
+
+#if defined(CONFIG_ESP_RMT)
+
+/****************************************************************************
+ * Name: esp_rmt_tx_init
+ *
+ * Description:
+ *   Initialize the selected RMT device in TX mode
+ *
+ * Input Parameters:
+ *   ch   - the RMT's channel that will be used
+ *   pin  - The pin used for the TX channel
+ *
+ * Returned Value:
+ *   Valid RMT device structure reference on success; NULL, otherwise.
+ *
+ ****************************************************************************/
+
+struct rmt_dev_s *esp_rmt_tx_init(int ch, int pin);
+
+/****************************************************************************
+ * Name: esp_rmt_rx_init
+ *
+ * Description:
+ *   Initialize the selected RMT device in RC mode
+ *
+ * Input Parameters:
+ *   ch   - the RMT's channel that will be used
+ *   pin  - The pin used for the RX channel
+ *
+ * Returned Value:
+ *   Valid RMT device structure reference on success; NULL, otherwise.
+ *
+ ****************************************************************************/
+
+struct rmt_dev_s *esp_rmt_rx_init(int ch, int pin);
+
+#endif
+
+#ifdef __cplusplus
+}
+#endif
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_RISCV_ESP32H2_ESP32H2_DEVKIT_SRC_ESP32H2_DEVKIT_H */
+
+#endif /* __ARCH_RISC_V_SRC_COMMON_ESPRESSIF_ESP_RMT_H */

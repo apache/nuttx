@@ -60,6 +60,10 @@
 #  include <nuttx/input/buttons.h>
 #endif
 
+#ifdef CONFIG_ESP_RMT
+#  include "esp_board_rmt.h"
+#endif
+
 #include "esp32c6-devkit.h"
 
 /****************************************************************************
@@ -144,6 +148,20 @@ int esp_bringup(void)
   if (ret < 0)
     {
       _err("Failed to initialize Oneshot Timer: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESP_RMT
+  ret = board_rmt_txinitialize(RMT_TXCHANNEL, RMT_OUTPUT_PIN);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_rmt_txinitialize() failed: %d\n", ret);
+    }
+
+  ret = board_rmt_rxinitialize(RMT_RXCHANNEL, RMT_INPUT_PIN);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_rmt_txinitialize() failed: %d\n", ret);
     }
 #endif
 
