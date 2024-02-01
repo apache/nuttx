@@ -238,7 +238,12 @@ static int shmfs_truncate(FAR struct file *filep, off_t length)
           filep->f_inode->i_private = shmfs_alloc_object(length);
           if (!filep->f_inode->i_private)
             {
+              filep->f_inode->i_size = 0;
               ret = -EFAULT;
+            }
+          else
+            {
+              filep->f_inode->i_size = length;
             }
         }
       else if (object->length != length)
