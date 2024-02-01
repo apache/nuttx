@@ -717,6 +717,7 @@
 struct pipe_peek_s
 {
   FAR void *buf;
+  size_t offset;
   size_t size;
 };
 
