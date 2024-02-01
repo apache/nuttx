@@ -86,6 +86,9 @@
 void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
 {
   FAR struct udp_hdr_s *udp;
+#ifdef CONFIG_NET_IPv6
+  FAR const uint16_t *laddr;
+#endif
 #ifdef CONFIG_NET_IPv4
   in_addr_t raddr;
 #endif
@@ -148,9 +151,16 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
 
           dev->d_len        = dev->d_sndlen + UDP_HDRLEN;
 
+          /* We use the laddr if the conn is bounded to an address, otherwise
+           * find a suitable source address corresponding to the raddr
+           */
+
+          laddr = !net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_unspecaddr) ?
+                    conn->u.ipv6.laddr :
+                    netdev_ipv6_srcaddr(dev, conn->u.ipv6.raddr);
+
           ipv6_build_header(IPv6BUF, dev->d_len, IP_PROTO_UDP,
-                            netdev_ipv6_srcaddr(dev, conn->u.ipv6.laddr),
-                            conn->u.ipv6.raddr,
+                            laddr, conn->u.ipv6.raddr,
                             conn->sconn.ttl, conn->sconn.s_tclass);
 
           /* The total length to send is the size of the application data
