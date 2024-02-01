@@ -852,6 +852,10 @@ static void wdt_enableint(struct esp32s2_wdt_dev_s *dev)
     }
   else if (IS_MWDT(dev))
     {
+      /* Level Interrupt */
+
+      wdt_modifyreg32(dev, MWDT_CONFIG0_OFFSET, 0, TIMG_WDT_LEVEL_INT_EN);
+
       wdt_modifyreg32(dev, MWDT_INT_ENA_REG_OFFSET, 0, TIMG_WDT_INT_ENA);
     }
   else
@@ -882,6 +886,10 @@ static void wdt_disableint(struct esp32s2_wdt_dev_s *dev)
     }
   else if (IS_MWDT(dev))
     {
+      /* Level Interrupt */
+
+      wdt_modifyreg32(dev, MWDT_CONFIG0_OFFSET, TIMG_WDT_LEVEL_INT_EN, 0);
+
       wdt_modifyreg32(dev, MWDT_INT_ENA_REG_OFFSET, TIMG_WDT_INT_ENA, 0);
     }
   else

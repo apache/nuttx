@@ -45,7 +45,7 @@
 #define MWDT_FEED_OFFSET                0x0060
 #define MWDT_WP_REG                     0x0064
 #define MWDT_INT_ENA_REG_OFFSET         0x0098
-#define MWDT_INT_CLR_REG_OFFSET         0x00a0
+#define MWDT_INT_CLR_REG_OFFSET         0x00a4
 
 /* The value that needs to be written to TIMG_WDT_WKEY to
  * write-enable the WDT registers.
