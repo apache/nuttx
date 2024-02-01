@@ -147,6 +147,26 @@ bool up_addrenv_user_vaddr(uintptr_t vaddr)
   return riscv_uservaddr(vaddr);
 }
 
+/****************************************************************************
+ * Name: up_addrenv_page_wipe
+ *
+ * Description:
+ *   Wipe a page of physical memory, first mapping it into kernel virtual
+ *   memory.
+ *
+ * Input Parameters:
+ *   page - The page physical address.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void up_addrenv_page_wipe(uintptr_t page)
+{
+  riscv_pgwipe(page);
+}
+
 #ifdef CONFIG_MM_KMAP
 
 /****************************************************************************
