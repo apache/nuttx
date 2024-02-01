@@ -626,6 +626,8 @@ static ssize_t rpmsgdev_ioctl_arglen(int cmd)
       case TUNSETIFF:
       case TUNGETIFF:
         return sizeof(struct ifreq);
+      case FIOC_FILEPATH:
+        return PATH_MAX;
       default:
         return -ENOTTY;
     }
