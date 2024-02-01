@@ -442,22 +442,18 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
                     FAR struct icmpv6_prefixinfo_s *prefixopt =
                                       (FAR struct icmpv6_prefixinfo_s *)opt;
 
-                    /* if "M" flag isn't set, and the "A" flag is set.
-                     * Set the new network addresses.
-                     */
+                   /* Is the "A" flag set? */
 
-                    if ((adv->flags & ICMPv6_RADV_FLAG_M) == 0 &&
-                        (prefixopt->flags & ICMPv6_PRFX_FLAG_A) != 0)
+                    if ((prefixopt->flags & ICMPv6_PRFX_FLAG_A) != 0)
                       {
-                         icmpv6_setaddresses(dev, ipv6->srcipaddr,
+                        /* Yes.. Set the new network addresses. */
+
+                        icmpv6_setaddresses(dev, ipv6->srcipaddr,
                                     prefixopt->prefix, prefixopt->preflen);
                         netlink_ipv6_prefix_notify(dev, RTM_NEWPREFIX,
                                                    prefixopt);
                       }
-
-                    /* Set the router address for the stateful process. */
-
-                    if ((adv->flags & ICMPv6_RADV_FLAG_M))
+                    else if ((adv->flags & ICMPv6_RADV_FLAG_M) != 0)
                       {
                         net_ipv6addr_copy(dev->d_ipv6draddr,
                                           ipv6->srcipaddr);
