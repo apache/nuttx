@@ -40,6 +40,7 @@
 #include <libgen.h>
 
 #include "inode/inode.h"
+#include "sched/sched.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -879,11 +880,14 @@ static void notify_queue_path_event(FAR const char *path, uint32_t mask)
 
 static int notify_check_inode(FAR struct file *filep)
 {
+  FAR struct tcb_s *tcb = this_task();
+
   /* We only apply notify on mount points (f_inode won't be NULL). */
 
-  if (!INODE_IS_MOUNTPT(filep->f_inode) &&
+  if ((tcb->flags & TCB_FLAG_SIGNAL_ACTION) ||
+      (!INODE_IS_MOUNTPT(filep->f_inode) &&
       !INODE_IS_PSEUDODIR(filep->f_inode) &&
-      !INODE_IS_DRIVER(filep->f_inode))
+      !INODE_IS_DRIVER(filep->f_inode)))
     {
       return -EBADF;
     }
