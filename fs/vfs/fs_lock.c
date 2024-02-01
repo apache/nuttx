@@ -36,6 +36,7 @@
 #include <nuttx/list.h>
 
 #include "lock.h"
+#include "sched/sched.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -94,9 +95,12 @@ static mutex_t g_protect_lock = NXMUTEX_INITIALIZER;
 
 static int file_lock_get_path(FAR struct file *filep, FAR char *path)
 {
+  FAR struct tcb_s *tcb = this_task();
+
   /* We only apply file lock on mount points (f_inode won't be NULL). */
 
-  if (!INODE_IS_MOUNTPT(filep->f_inode))
+  if (!INODE_IS_MOUNTPT(filep->f_inode) ||
+      tcb->flags & TCB_FLAG_SIGNAL_ACTION)
     {
       return -EBADF;
     }
