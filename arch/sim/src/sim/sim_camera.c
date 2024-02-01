@@ -233,7 +233,7 @@ static int sim_camera_data_init(struct imgdata_s *data)
 {
   sim_camera_priv_t *priv = (sim_camera_priv_t *)data;
 
-  priv->vdev = host_video_init(CONFIG_HOST_VIDEO_DEV_PATH);
+  priv->vdev = host_video_init(CONFIG_HOST_CAMERA_DEV_PATH);
   if (priv->vdev == NULL)
     {
       return -ENODEV;

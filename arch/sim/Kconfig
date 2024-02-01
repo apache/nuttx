@@ -338,14 +338,14 @@ config SIM_OFFLOAD_BUFFER_NUMBYTES
 		value.
 
 config SIM_CAMERA
-	bool "Simulated video support"
+	bool "Simulated camera support"
 	depends on VIDEO
 	default y
 
 if SIM_CAMERA
 
 choice
-	prompt "Simulated video device type"
+	prompt "Simulated camera device type"
 	default SIM_CAMERA_V4L2
 
 config SIM_CAMERA_V4L2
@@ -354,8 +354,8 @@ config SIM_CAMERA_V4L2
 
 endchoice
 
-config HOST_VIDEO_DEV_PATH
-	string "Host video device path"
+config HOST_CAMERA_DEV_PATH
+	string "Host camera device path"
 	default "/dev/video0"
 
 config SIM_CAMERA_DEV_PATH
