@@ -110,6 +110,10 @@ int board_app_initialize(uintptr_t arg)
 
   mount(NULL, "/proc", "procfs", 0, NULL);
 
+#ifdef CONFIG_FS_TMPFS
+  mount(NULL, "/tmp", "tmpfs", 0, NULL);
+#endif
+
 #endif
 
 #ifdef CONFIG_DRIVERS_VIRTIO_MMIO
