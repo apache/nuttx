@@ -751,7 +751,6 @@ static inline void audio_complete(FAR struct audio_upperhalf_s *upper,
 
   /* Send a dequeue message to the user if a message queue is registered */
 
-  upper->started = false;
   if (upper->usermq != NULL)
     {
       msg.msg_id = AUDIO_MSG_COMPLETE;
