@@ -32,6 +32,10 @@ ifeq ($(CONFIG_NRF53_PROGMEM),y)
   CSRCS += nrf53_progmem.c
 endif
 
+ifeq ($(CONFIG_BOARDCTL_RESET),y)
+  CSRCS += nrf53_reset.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src
