@@ -107,9 +107,11 @@ void sbi_start(void)
   WRITE_CSR(mcounteren, UINT32_C(~0));
   WRITE_CSR(scounteren, UINT32_C(~0));
 
+#ifdef CONFIG_NUTTSBI_LATE_INIT
   /* Do device specific initialization as needed */
 
   sbi_late_initialize();
+#endif
 
   /* Set program counter to __start_s */
 
