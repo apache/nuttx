@@ -32,6 +32,10 @@ if(CONFIG_ARCH_BOARD_COMMON)
     list(APPEND SRCS nrf53_progmem.c)
   endif()
 
+  if(CONFIG_BOARDCTL_RESET)
+    list(APPEND SRCS nrf53_reset.c)
+  endif()
+
   target_sources(board PRIVATE ${SRCS})
 
 endif()
