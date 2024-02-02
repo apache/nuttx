@@ -140,6 +140,7 @@ uint64_t sbi_get_mtime(void);
 
 void sbi_set_mtimecmp(uint64_t value);
 
+#ifdef CONFIG_NUTTSBI_LATE_INIT
 /****************************************************************************
  * Name: sbi_late_initialize
  *
@@ -150,7 +151,8 @@ void sbi_set_mtimecmp(uint64_t value);
  *
  ****************************************************************************/
 
-weak_function void sbi_late_initialize(void);
+void sbi_late_initialize(void);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISC_V_SRC_NUTTSBI_SBI_INTERNAL_H */

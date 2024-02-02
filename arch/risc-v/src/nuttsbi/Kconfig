@@ -27,4 +27,8 @@ config NUTTSBI_MTIMECMP_BASE
 	---help---
 		Sets the address of mtimecmp memory mapped register
 
+config NUTTSBI_LATE_INIT
+	bool "Target has sbi_late_init() implementation"
+	default n
+
 endif
