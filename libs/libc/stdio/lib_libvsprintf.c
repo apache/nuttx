@@ -1117,6 +1117,14 @@ str_lpad:
               c = fmt_char(fmt);
               switch (c)
                 {
+                  case 'B':
+                    {
+                      FAR struct va_format *vaf = (FAR void *)(uintptr_t)x;
+
+                      lib_bsprintf(stream, vaf->fmt, vaf->va);
+                      continue;
+                    }
+
                   case 'V':
                     {
                       FAR struct va_format *vaf = (FAR void *)(uintptr_t)x;
