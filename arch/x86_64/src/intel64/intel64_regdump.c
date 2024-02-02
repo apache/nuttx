@@ -90,7 +90,7 @@ void backtrace(uint64_t rbp)
 
   for (i = 0; i < 16; i++)
     {
-      if ((rbp < 0x200000) || (rbp > 0xffffffff))
+      if ((rbp < 0x200000) || (rbp > 0xfffffffff))
         {
           break;
         }
