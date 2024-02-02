@@ -56,7 +56,7 @@ FAR struct tcb_s *nxsched_get_tcb(pid_t pid)
   irqstate_t flags;
   int hash_ndx;
 
-  flags = spin_lock_irqsave_wo_note(NULL);
+  flags = enter_critical_section();
 
   /* Verify whether g_pidhash hash table has already been allocated and
    * whether the PID is within range.
@@ -84,7 +84,7 @@ FAR struct tcb_s *nxsched_get_tcb(pid_t pid)
         }
     }
 
-  spin_unlock_irqrestore_wo_note(NULL, flags);
+  leave_critical_section(flags);
 
   /* Return the TCB. */
 
