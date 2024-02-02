@@ -74,7 +74,7 @@
 #define BBSRAM_USED            ((4*BBSRAM_HEADER_SIZE)+ \
                                 (BBSRAM_SIZE_FN0+BBSRAM_SIZE_FN1+ \
                                  BBSRAM_SIZE_FN2))
-#define BBSRAM_REAMINING       (STM32F4_BBSRAM_SIZE-BBSRAM_USED)
+#define BBSRAM_REAMINING       (STM32_BBSRAM_SIZE-BBSRAM_USED)
 #if CONFIG_ARCH_INTERRUPTSTACK <= 3
 #  define BBSRAM_NUMBER_STACKS 1
 #else
@@ -136,7 +136,7 @@ typedef struct
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
   _stack_t interrupt;
 #endif
-} stack_t;
+} stacks_t;
 
 /* Not Used for reference only */
 
@@ -237,7 +237,7 @@ typedef struct
   int           lineno;                 /* __LINE__ to up_assert */
   pid_t         pid;                    /* Process ID */
   uint32_t      regs[XCPTCONTEXT_REGS]; /* Interrupt register save area */
-  stack_t       stacks;                 /* Stack info */
+  stacks_t      stacks;                 /* Stack info */
 #if CONFIG_TASK_NAME_SIZE > 0
   char          name[CONFIG_TASK_NAME_SIZE + 1]; /* Task name (with NULL
                                                   * terminator) */
@@ -265,7 +265,7 @@ typedef struct
  * Private Data
  ****************************************************************************/
 
-static uint8_t g_sdata[STM32F4_BBSRAM_SIZE];
+static uint8_t g_sdata[STM32_BBSRAM_SIZE];
 
 /****************************************************************************
  * Private Functions
@@ -288,7 +288,7 @@ static int hardfault_get_desc(struct bbsramd_s *desc)
     }
   else
     {
-      ret = file_ioctl(&filestruct, STM32F4_BBSRAM_GETDESC_IOCTL,
+      ret = file_ioctl(&filestruct, STM32_BBSRAM_GETDESC_IOCTL,
                        (unsigned long)((uintptr_t)desc));
       file_close(&filestruct);
 
