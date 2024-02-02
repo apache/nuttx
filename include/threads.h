@@ -203,7 +203,7 @@ static inline int mtx_init(FAR mtx_t *mutex, int type)
  * int mtx_timedlock(FAR mtx_t *mutex, FAR const struct timespec *tp);
  */
 
-#define mtx_timedlock(mutex,tp) pthread_mutex_timedwait(mutex,tp)
+#define mtx_timedlock(mutex,tp) pthread_mutex_timedlock(mutex,tp)
 
 /* mtx_trylock: locks a mutex or returns without blocking if already locked
  *
