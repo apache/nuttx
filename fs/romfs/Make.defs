@@ -23,6 +23,10 @@ ifeq ($(CONFIG_FS_ROMFS),y)
 
 CSRCS += fs_romfs.c fs_romfsutil.c
 
+ifeq ($(CONFIG_TRACE_ROMFS_FS),y)
+romfs/fs_romfs.c_CFLAGS += -finstrument-functions
+endif
+
 # Include ROMFS build support
 
 DEPPATH += --dep-path romfs

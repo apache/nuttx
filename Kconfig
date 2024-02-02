@@ -2423,6 +2423,24 @@ config TRACE_FS
 	bool "Enable tracepoints in fs"
 	default n
 
+if TRACE_FS
+menu "Trace Fs Support"
+
+config TRACE_LITTLEFS_FS
+	bool "Enable tracepoints in littlefs"
+	default n
+
+config TRACE_ROMFS_FS
+	bool "Enable tracepoints in romfs"
+	default n
+
+config TRACE_RPMSGFS_FS
+	bool "Enable tracepoints in rpmsgfs"
+	default n
+
+endmenu # Trace Fs Support
+endif
+
 config TRACE_GRAPHICS
 	bool "Enable tracepoints in graphics"
 	default n

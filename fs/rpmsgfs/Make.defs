@@ -25,6 +25,9 @@ VPATH += :rpmsgfs
 
 ifeq ($(CONFIG_FS_RPMSGFS),y)
 CSRCS += rpmsgfs.c rpmsgfs_client.c
+ifeq ($(CONFIG_TRACE_RPMSGFS_FS),y)
+rpmsgfs/rpmsgfs.c_CFLAGS += -finstrument-functions
+endif
 endif
 
 ifeq ($(CONFIG_FS_RPMSGFS_SERVER),y)
