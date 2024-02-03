@@ -23,6 +23,7 @@ USB
 PIO            RP2040 Programmable I/O
 IRQs        
 DMA         
+Clock Output
 ws2812         Smart pixels (e.g. Neopixel)
 Flash ROM Boot
 SRAM Boot      If Pico SDK is available a nuttx.uf2 file will be created
