@@ -81,6 +81,30 @@ static inline bool has_glitchless_mux(int clk_index)
          clk_index == RP2040_CLOCKS_NDX_REF;
 }
 
+#if defined(CONFIG_RP2040_CLK_GPOUT_ENABLE)
+static bool rp2040_clock_configure_gpout(int clk_index,
+                                        uint32_t src,
+                                        uint32_t div_int,
+                                        uint32_t div_frac)
+{
+  if (clk_index > RP2040_CLOCKS_NDX_GPOUT3 ||
+      clk_index < RP2040_CLOCKS_NDX_GPOUT0 ||
+      (src >> RP2040_CLOCKS_CLK_GPOUT0_CTRL_AUXSRC_SHIFT) > 0xa)
+    {
+      return false;
+    }
+
+  putreg32((div_int << RP2040_CLOCKS_CLK_GPOUT0_DIV_INT_SHIFT) |
+            (div_frac & RP2040_CLOCKS_CLK_GPOUT0_DIV_FRAC_MASK),
+           (RP2040_CLOCKS_CLK_NDX_DIV(clk_index)));
+  putreg32((src << RP2040_CLOCKS_CLK_GPOUT0_CTRL_AUXSRC_SHIFT) |
+            RP2040_CLOCKS_CLK_GPOUT0_CTRL_ENABLE,
+           (RP2040_CLOCKS_CLK_NDX_CTRL(clk_index)));
+
+  return true;
+}
+#endif
+
 bool rp2040_clock_configure(int clk_index,
                             uint32_t src, uint32_t auxsrc,
                             uint32_t src_freq, uint32_t freq)
@@ -274,6 +298,91 @@ void clocks_init(void)
                          RP2040_CLOCKS_CLK_PERI_CTRL_AUXSRC_CLK_SYS,
                          BOARD_SYS_FREQ,
                          BOARD_PERI_FREQ);
+
+#if defined(CONFIG_RP2040_CLK_GPOUT_ENABLE)
+  uint32_t src;
+
+  #if defined(CONFIG_RP2040_CLK_GPOUT0)
+    #if defined(CONFIG_RP2040_CLK_GPOUT0_SRC_REF)
+      src = RP2040_CLOCKS_CLK_GPOUT0_CTRL_AUXSRC_CLK_REF;
+    #elif defined(CONFIG_RP2040_CLK_GPOUT0_SRC_SYS)
+      src = RP2040_CLOCKS_CLK_GPOUT0_CTRL_AUXSRC_CLK_SYS;
+    #elif defined(CONFIG_RP2040_CLK_GPOUT0_SRC_USB)
+      src = RP2040_CLOCKS_CLK_GPOUT0_CTRL_AUXSRC_CLK_USB;
+    #elif defined(CONFIG_RP2040_CLK_GPOUT0_SRC_ADC)
+      src = RP2040_CLOCKS_CLK_GPOUT0_CTRL_AUXSRC_CLK_ADC;
+    #elif defined(CONFIG_RP2040_CLK_GPOUT0_SRC_RTC)
+      src = RP2040_CLOCKS_CLK_GPOUT0_CTRL_AUXSRC_CLK_RTC;
+    #else
+      src = 0;
+    #endif
+    rp2040_clock_configure_gpout(RP2040_CLOCKS_NDX_GPOUT0,
+                                 src,
+                                 CONFIG_RP2040_CLK_GPOUT0_DIVINT,
+                                 CONFIG_RP2040_CLK_GPOUT0_DIVFRAC);
+  #endif
+
+  #if defined(CONFIG_RP2040_CLK_GPOUT1)
+    #if defined(CONFIG_RP2040_CLK_GPOUT1_SRC_REF)
+      src = RP2040_CLOCKS_CLK_GPOUT1_CTRL_AUXSRC_CLK_REF;
+    #elif defined(CONFIG_RP2040_CLK_GPOUT1_SRC_SYS)
+      src = RP2040_CLOCKS_CLK_GPOUT1_CTRL_AUXSRC_CLK_SYS;
+    #elif defined(CONFIG_RP2040_CLK_GPOUT1_SRC_USB)
+      src = RP2040_CLOCKS_CLK_GPOUT1_CTRL_AUXSRC_CLK_USB;
+    #elif defined(CONFIG_RP2040_CLK_GPOUT1_SRC_ADC)
+      src = RP2040_CLOCKS_CLK_GPOUT1_CTRL_AUXSRC_CLK_ADC;
+    #elif defined(CONFIG_RP2040_CLK_GPOUT1_SRC_RTC)
+      src = RP2040_CLOCKS_CLK_GPOUT1_CTRL_AUXSRC_CLK_RTC;
+    #else
+      src = 0;
+    #endif
+    rp2040_clock_configure_gpout(RP2040_CLOCKS_NDX_GPOUT1,
+                                 src,
+                                 CONFIG_RP2040_CLK_GPOUT1_DIVINT,
+                                 CONFIG_RP2040_CLK_GPOUT1_DIVFRAC);
+  #endif
+
+  #if defined(CONFIG_RP2040_CLK_GPOUT2)
+    #if defined(CONFIG_RP2040_CLK_GPOUT2_SRC_REF)
+      src = RP2040_CLOCKS_CLK_GPOUT2_CTRL_AUXSRC_CLK_REF;
+    #elif defined(CONFIG_RP2040_CLK_GPOUT2_SRC_SYS)
+      src = RP2040_CLOCKS_CLK_GPOUT2_CTRL_AUXSRC_CLK_SYS;
+    #elif defined(CONFIG_RP2040_CLK_GPOUT2_SRC_USB)
+      src = RP2040_CLOCKS_CLK_GPOUT2_CTRL_AUXSRC_CLK_USB;
+    #elif defined(CONFIG_RP2040_CLK_GPOUT2_SRC_ADC)
+      src = RP2040_CLOCKS_CLK_GPOUT2_CTRL_AUXSRC_CLK_ADC;
+    #elif defined(CONFIG_RP2040_CLK_GPOUT2_SRC_RTC)
+      src = RP2040_CLOCKS_CLK_GPOUT2_CTRL_AUXSRC_CLK_RTC;
+    #else
+      src = 0;
+    #endif
+    rp2040_clock_configure_gpout(RP2040_CLOCKS_NDX_GPOUT2,
+                                 src,
+                                 CONFIG_RP2040_CLK_GPOUT2_DIVINT,
+                                 CONFIG_RP2040_CLK_GPOUT2_DIVFRAC);
+  #endif
+
+  #if defined(CONFIG_RP2040_CLK_GPOUT3)
+    #if defined(CONFIG_RP2040_CLK_GPOUT3_SRC_REF)
+      src = RP2040_CLOCKS_CLK_GPOUT3_CTRL_AUXSRC_CLK_REF;
+    #elif defined(CONFIG_RP2040_CLK_GPOUT3_SRC_SYS)
+      src = RP2040_CLOCKS_CLK_GPOUT3_CTRL_AUXSRC_CLK_SYS;
+    #elif defined(CONFIG_RP2040_CLK_GPOUT3_SRC_USB)
+      src = RP2040_CLOCKS_CLK_GPOUT3_CTRL_AUXSRC_CLK_USB;
+    #elif defined(CONFIG_RP2040_CLK_GPOUT3_SRC_ADC)
+      src = RP2040_CLOCKS_CLK_GPOUT3_CTRL_AUXSRC_CLK_ADC;
+    #elif defined(CONFIG_RP2040_CLK_GPOUT3_SRC_RTC)
+      src = RP2040_CLOCKS_CLK_GPOUT3_CTRL_AUXSRC_CLK_RTC;
+    #else
+      src = 0;
+    #endif
+    rp2040_clock_configure_gpout(RP2040_CLOCKS_NDX_GPOUT3,
+                                 src,
+                                 CONFIG_RP2040_CLK_GPOUT3_DIVINT,
+                                 CONFIG_RP2040_CLK_GPOUT3_DIVFRAC);
+  #endif
+
+#endif
 }
 
 /****************************************************************************

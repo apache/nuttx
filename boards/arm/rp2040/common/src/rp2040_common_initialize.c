@@ -94,6 +94,23 @@ void rp2040_common_earlyinitialize(void)
                            RP2040_GPIO_FUNC_UART);      /* RTS */
 #endif
 #endif
+
+#if defined(CONFIG_RP2040_CLK_GPOUT0)
+  rp2040_gpio_set_function(RP2040_GPIO_PIN_CLK_GPOUT0,
+                           RP2040_GPIO_FUNC_CLOCKS);
+#endif
+#if defined(CONFIG_RP2040_CLK_GPOUT1)
+  rp2040_gpio_set_function(RP2040_GPIO_PIN_CLK_GPOUT1,
+                           RP2040_GPIO_FUNC_CLOCKS);
+#endif
+#if defined(CONFIG_RP2040_CLK_GPOUT2)
+  rp2040_gpio_set_function(RP2040_GPIO_PIN_CLK_GPOUT2,
+                           RP2040_GPIO_FUNC_CLOCKS);
+#endif
+#if defined(CONFIG_RP2040_CLK_GPOUT3)
+  rp2040_gpio_set_function(RP2040_GPIO_PIN_CLK_GPOUT3,
+                           RP2040_GPIO_FUNC_CLOCKS);
+#endif
 }
 
 /****************************************************************************

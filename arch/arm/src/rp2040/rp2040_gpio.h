@@ -55,12 +55,19 @@
 #define RP2040_GPIO_FUNC_USB        RP2040_IO_BANK0_GPIO_CTRL_FUNCSEL_USB
 #define RP2040_GPIO_FUNC_NULL       RP2040_IO_BANK0_GPIO_CTRL_FUNCSEL_NULL
 
+/* GPIO function pins *******************************************************/
+
+#define RP2040_GPIO_PIN_CLK_GPOUT0  (21)
+#define RP2040_GPIO_PIN_CLK_GPOUT1  (23)
+#define RP2040_GPIO_PIN_CLK_GPOUT2  (24)
+#define RP2040_GPIO_PIN_CLK_GPOUT3  (25)
+
 /* GPIO interrupt modes *****************************************************/
 
-#define RP2040_GPIO_INTR_LEVEL_LOW    0
-#define RP2040_GPIO_INTR_LEVEL_HIGH   1
-#define RP2040_GPIO_INTR_EDGE_LOW     2
-#define RP2040_GPIO_INTR_EDGE_HIGH    3
+#define RP2040_GPIO_INTR_LEVEL_LOW  0
+#define RP2040_GPIO_INTR_LEVEL_HIGH 1
+#define RP2040_GPIO_INTR_EDGE_LOW   2
+#define RP2040_GPIO_INTR_EDGE_HIGH  3
 
 /****************************************************************************
  * Public Types
