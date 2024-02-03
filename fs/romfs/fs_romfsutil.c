@@ -536,9 +536,7 @@ int romfs_hwread(FAR struct romfs_mountpt_s *rm, FAR uint8_t *buffer,
       /* In non-XIP mode, we have to read the data from the device */
 
       FAR struct inode *inode = rm->rm_blkdriver;
-      ssize_t nsectorsread = -ENODEV;
-
-      nsectorsread =
+      ssize_t nsectorsread =
         inode->u.i_bops->read(inode, buffer, sector, nsectors);
 
       if (nsectorsread == (ssize_t)nsectors)

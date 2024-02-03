@@ -1090,12 +1090,11 @@ static int romfs_bind(FAR struct inode *blkdriver, FAR const void *data,
       return -ENODEV;
     }
 
-  if (INODE_IS_BLOCK(blkdriver) &&
-      blkdriver->u.i_bops->open != NULL &&
-      blkdriver->u.i_bops->open(blkdriver) != OK)
+  if (blkdriver->u.i_bops->open != NULL &&
+      (ret = blkdriver->u.i_bops->open(blkdriver)) != OK)
     {
       ferr("ERROR: No open method\n");
-      return -ENODEV;
+      return ret;
     }
 
   /* Create an instance of the mountpt state structure */
@@ -1104,7 +1103,8 @@ static int romfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   if (!rm)
     {
       ferr("ERROR: Failed to allocate mountpoint structure\n");
-      return -ENOMEM;
+      ret = -ENOMEM;
+      goto errout;
     }
 
   /* Initialize the allocated mountpt state structure.  The filesystem is
@@ -1121,7 +1121,7 @@ static int romfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   if (ret < 0)
     {
       ferr("ERROR: romfs_hwconfigure failed: %d\n", ret);
-      goto errout;
+      goto errout_with_mount;
     }
 
   /* Then complete the mount by getting the ROMFS configuratrion from
@@ -1146,9 +1146,16 @@ errout_with_buffer:
       fs_heap_free(rm->rm_buffer);
     }
 
-errout:
+errout_with_mount:
   nxrmutex_destroy(&rm->rm_lock);
   fs_heap_free(rm);
+
+errout:
+  if (blkdriver->u.i_bops->close != NULL)
+    {
+      blkdriver->u.i_bops->close(blkdriver);
+    }
+
   return ret;
 }
 
@@ -1193,7 +1200,7 @@ static int romfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
        * no open file references.
        */
 
-      ret = (flags != 0) ? -ENOSYS : -EBUSY;
+      ret = flags ? -ENOSYS : -EBUSY;
     }
   else
     {
@@ -1224,7 +1231,7 @@ static int romfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
 
       /* Release the mountpoint private data */
 
-      if (!rm->rm_xipbase && rm->rm_buffer)
+      if (!rm->rm_xipbase)
         {
           fs_heap_free(rm->rm_buffer);
         }
