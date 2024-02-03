@@ -206,8 +206,8 @@ static const char *g_white_prefix[] =
   "ub32",    /* Ref:  include/fixedmath.h */
   "lua_",    /* Ref:  apps/interpreters/lua/lua-5.x.x/src/lua.h */
   "luaL_",   /* Ref:  apps/interpreters/lua/lua-5.x.x/src/lauxlib.h */
+  "V4L2_",   /* Ref:  include/sys/video_controls.h */
   "Ifx",     /* Ref:  arch/tricore/src */
-
   NULL
 };
 
