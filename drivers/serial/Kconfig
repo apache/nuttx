@@ -86,7 +86,7 @@ config MCU_SERIAL
 config RPMSG_UART
 	bool "UART RPMSG support"
 	default n
-	depends on RPTUN
+	depends on RPMSG
 	select ARCH_HAVE_SERIAL_TERMIOS
 	select SERIAL_RXDMA
 	select SERIAL_TXDMA

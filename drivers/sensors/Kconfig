@@ -20,7 +20,7 @@ config USENSOR
 config SENSORS_RPMSG
 	bool "Sensor RPMSG Support"
 	default n
-	depends on RPTUN
+	depends on RPMSG
 	---help---
 		Allow application to read or control remote sensor device by RPMSG.
 
