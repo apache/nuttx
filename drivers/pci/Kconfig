@@ -8,4 +8,14 @@ menuconfig PCI
 	default n
 	---help---
 		Enables support for the PCI bus.
-		Backend bust be provided by per-arch or per-board implementation.
+		Backend must be provided by per-arch or per-board implementation.
+
+if PCI
+
+config PCI_ASSIGN_ALL_BUSES
+	bool "Assign resource to all buses"
+	default !ARCH_X86 && !ARCH_X86_64
+	---help---
+		Assign resources to all buses. This is required for some
+		platforms that have multiple PCI buses.
+endif
