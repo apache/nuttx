@@ -10,6 +10,10 @@ config RPMSG
 
 if RPMSG
 
+config RPMSG_LOCAL_CPUNAME
+	string "Rpmsg Local Cpuname"
+	default LIBC_HOSTNAME
+
 config RPMSG_PING
 	bool "rpmsg ping support"
 	default n

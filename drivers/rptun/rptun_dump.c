@@ -115,7 +115,7 @@ void rptun_dump(FAR struct rpmsg_virtio_device *rvdev)
   metal_log(METAL_LOG_EMERGENCY,
             "Dump rpmsg info between cpu (master: %s)%s <==> %s:\n",
             rpmsg_virtio_get_role(rvdev) == RPMSG_HOST ? "yes" : "no",
-            CONFIG_RPTUN_LOCAL_CPUNAME, rpmsg_get_cpuname(rdev));
+            CONFIG_RPMSG_LOCAL_CPUNAME, rpmsg_get_cpuname(rdev));
 
   metal_log(METAL_LOG_EMERGENCY, "rpmsg vq RX:\n");
   virtqueue_dump(rvdev->rvq);
