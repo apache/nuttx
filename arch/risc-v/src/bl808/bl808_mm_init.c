@@ -307,8 +307,9 @@ void bl808_mm_init(void)
  *
  ****************************************************************************/
 
-void weak_function mmu_flush_cache(void)
+void weak_function mmu_flush_cache(uintptr_t reg)
 {
+  UNUSED(reg);
   __asm__ __volatile__
     (
 
