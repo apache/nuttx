@@ -24,10 +24,6 @@ config RPTUN_LOADER
 	bool "rptun loader support"
 	default n
 
-config RPTUN_LOCAL_CPUNAME
-	string "rptun local cpuname"
-	default LIBC_HOSTNAME
-
 config RPTUN_PM
 	bool "rptun power management"
 	depends on PM

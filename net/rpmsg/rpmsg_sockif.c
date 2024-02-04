@@ -673,7 +673,7 @@ static int rpmsg_socket_getsockname(FAR struct socket *psock,
   if (ret >= 0)
     {
       strlcpy(((struct sockaddr_rpmsg *)addr)->rp_cpu,
-              CONFIG_RPTUN_LOCAL_CPUNAME, RPMSG_SOCKET_CPU_SIZE);
+              CONFIG_RPMSG_LOCAL_CPUNAME, RPMSG_SOCKET_CPU_SIZE);
     }
 
   return ret;
@@ -1374,14 +1374,14 @@ static void rpmsg_socket_path(FAR struct rpmsg_socket_conn_s *conn,
     {
       snprintf(buf, len,
                "rpmsg:[%s:[%s%s]<->%s]",
-               CONFIG_RPTUN_LOCAL_CPUNAME, conn->rpaddr.rp_name,
+               CONFIG_RPMSG_LOCAL_CPUNAME, conn->rpaddr.rp_name,
                conn->nameid, conn->rpaddr.rp_cpu);
     }
   else /* Client */
     {
       snprintf(buf, len,
                "rpmsg:[%s<->%s:[%s%s]]",
-               CONFIG_RPTUN_LOCAL_CPUNAME, conn->rpaddr.rp_cpu,
+               CONFIG_RPMSG_LOCAL_CPUNAME, conn->rpaddr.rp_cpu,
                conn->rpaddr.rp_name, conn->nameid);
     }
 }
