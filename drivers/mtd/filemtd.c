@@ -279,19 +279,12 @@ static int filemtd_erase(FAR struct mtd_dev_s *dev, off_t startblock,
       nblocks = priv->nblocks - startblock;
     }
 
-  /* Convert the erase block to a logical block and the number of blocks
-   * in logical block numbers
-   */
-
-  startblock *= (priv->erasesize / priv->blocksize);
-  nblocks    *= (priv->erasesize / priv->blocksize);
-
   /* Get the offset corresponding to the first block and the size
    * corresponding to the number of blocks.
    */
 
-  offset = startblock * priv->blocksize;
-  nbytes = nblocks * priv->blocksize;
+  offset = startblock * priv->erasesize;
+  nbytes = nblocks * priv->erasesize;
 
   /* Then erase the data in the file */
 
@@ -303,7 +296,7 @@ static int filemtd_erase(FAR struct mtd_dev_s *dev, off_t startblock,
       nbytes -= MIN(nbytes, sizeof(buffer));
     }
 
-  return OK;
+  return nblocks;
 }
 
 /****************************************************************************
