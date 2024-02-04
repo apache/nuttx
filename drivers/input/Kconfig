@@ -47,7 +47,7 @@ config INPUT_UINPUT
 config UINPUT_RPMSG
 	bool "Enable uinput RPMSG"
 	depends on INPUT_UINPUT
-	depends on RPTUN
+	depends on RPMSG
 	default n
 	---help---
 		Enable support uinput cross core communication

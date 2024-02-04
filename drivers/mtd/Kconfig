@@ -276,12 +276,12 @@ endif # MTD_NAND
 config RPMSGMTD
 	bool "MTD RPMSG Client Enable"
 	default n
-	depends on RPTUN
+	depends on RPMSG
 
 config RPMSGMTD_SERVER
 	bool "MTD RPMSG Server Enable"
 	default n
-	depends on RPTUN
+	depends on RPMSG
 
 config RAMMTD
 	bool "RAM-based MTD driver"

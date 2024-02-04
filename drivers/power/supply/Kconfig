@@ -68,7 +68,7 @@ config REGULATOR_GPIO
 
 config REGULATOR_RPMSG
 	bool "Regulator RPMSG driver support"
-	depends on RPTUN
+	depends on RPMSG
 	default n
 	---help---
 		The RPMSG regulator driver implements the common regulator APIs, inside which
