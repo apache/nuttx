@@ -82,6 +82,7 @@ static const char g_noname[] = "<noname>";
 static int nxtask_assign_pid(FAR struct tcb_s *tcb)
 {
   FAR struct tcb_s **pidhash;
+  irqstate_t flags;
   pid_t next_pid;
   int   hash_ndx;
   void *temp;
@@ -92,15 +93,15 @@ static int nxtask_assign_pid(FAR struct tcb_s *tcb)
    * We cannot allow another task to be started.
    */
 
+  /* We'll try every allowable pid */
+
+retry:
+
   /* Protect the following operation with a critical section
    * because g_pidhash is accessed from an interrupt context
    */
 
-  irqstate_t flags = enter_critical_section();
-
-  /* We'll try every allowable pid */
-
-retry:
+  flags = enter_critical_section();
 
   /* Get the next process ID candidate */
 
@@ -140,11 +141,28 @@ retry:
    * expand space.
    */
 
+  temp = g_pidhash;
+
+  /* Calling malloc in a critical section may cause thread switching.
+   * Here we check whether other threads have applied successfully,
+   * and if successful, return directly
+   */
+
+  leave_critical_section(flags);
   pidhash = kmm_zalloc(g_npidhash * 2 * sizeof(*pidhash));
   if (pidhash == NULL)
     {
-      leave_critical_section(flags);
       return -ENOMEM;
+    }
+
+  /* Handle conner case: context siwtch happened when kmm_malloc */
+
+  flags = enter_critical_section();
+  if (temp != g_pidhash)
+    {
+      leave_critical_section(flags);
+      kmm_free(pidhash);
+      goto retry;
     }
 
   g_npidhash *= 2;
@@ -155,6 +173,16 @@ retry:
 
   for (i = 0; i < g_npidhash / 2; i++)
     {
+      if (g_pidhash[i] == NULL)
+        {
+          /* If the pid is not used, skip it.
+           * This may be triggered when a context switch occurs
+           * during zalloc and a thread is destroyed.
+           */
+
+          continue;
+        }
+
       hash_ndx = PIDHASH(g_pidhash[i]->pid);
       DEBUGASSERT(pidhash[hash_ndx] == NULL);
       pidhash[hash_ndx] = g_pidhash[i];
@@ -162,8 +190,8 @@ retry:
 
   /* Release resource for original g_pidhash, using new g_pidhash */
 
-  temp = g_pidhash;
   g_pidhash = pidhash;
+  leave_critical_section(flags);
   kmm_free(temp);
 
   /* Let's try every allowable pid again */
