@@ -158,7 +158,7 @@ extern uintptr_t g_kernel_pgt_pbase;
  * Public Function Prototypes
  ****************************************************************************/
 
-void weak_function mmu_flush_cache(void);
+void weak_function mmu_flush_cache(uintptr_t);
 
 /****************************************************************************
  * Inline Functions
@@ -216,7 +216,7 @@ static inline void mmu_write_satp(uintptr_t reg)
 
   if (mmu_flush_cache != NULL)
     {
-      mmu_flush_cache();
+      mmu_flush_cache(reg);
     }
 }
 
