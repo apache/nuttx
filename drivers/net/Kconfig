@@ -56,7 +56,7 @@ comment "General Ethernet MAC Driver Options"
 
 config NET_RPMSG_DRV
 	bool "RPMSG net driver"
-	depends on RPTUN
+	depends on RPMSG
 	select ARCH_HAVE_NETDEV_STATISTICS
 	---help---
 		Use the RPMSG as net device, transfer packet between remoteproc.
