@@ -21,6 +21,7 @@
 MEMORY
 {
     ram (rwx)  : ORIGIN = 0x0d000000, LENGTH = 1536K
+    gnssram (rwx) : ORIGIN = 0x09000000, LENGTH = 640K
 }
 
 OUTPUT_ARCH(arm)
@@ -29,6 +30,48 @@ EXTERN(_vectors)       /* Force the vectors to be included in the output */
 EXTERN(__stack)        /* Force the __stack to be included in the output */
 SECTIONS
 {
+    /* GNSS memory */
+
+    .gnssram.text : {
+        _sgnsstext = ABSOLUTE(.);
+
+        /* Possible to locate text of any object file.
+         * *libxxx.a:*.o(.text .text.*)
+         * *libxxx.a:*.o(.rodata .rodata.*)
+         */
+
+    } > gnssram
+
+    .gnssram.data . : ALIGN(4) {
+        /* Possible to locate data of any object file.
+         * *libxxx.a:*.o(.data .data.*)
+         */
+
+    } > gnssram
+
+    .gnssram.bss . (NOLOAD) : {
+        . = ALIGN(4);
+        _gnssramsbss = ABSOLUTE(.);
+
+        /* Possible to locate bss of any object file.
+         * *libxxx.a:*.o(.bss .bss.*)
+         * *libxxx.a:*.o(COMMON)
+         */
+
+    } > gnssram
+
+    . = ALIGN(4);
+    _gnssramebss = ABSOLUTE(.);
+
+    /* Whatever is left from the GNSS memory is used as a special heap. */
+
+    _sgnssheap = ABSOLUTE(.);
+    _egnssheap = ORIGIN(gnssram) + LENGTH(gnssram);
+
+    ASSERT(_sgnssheap < _egnssheap, "Error: Out of memory")
+
+    /* Application memory */
+
     .text : {
         _stext = ABSOLUTE(.);
         *(.vectors)
