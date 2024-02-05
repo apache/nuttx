@@ -6333,6 +6333,7 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
+libs/libc/string/lib_memmem.c
 libs/libc/string/lib_strstr.c
 ===============================
 The MIT License (MIT)
