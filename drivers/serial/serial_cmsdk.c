@@ -497,8 +497,8 @@ static int uart_cmsdk_tx_interrupt(int irq, FAR void *context, FAR void *arg)
 static int uart_cmsdk_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct uart_dev_s *dev = filep->f_inode->i_private;
-  FAR struct uart_cmsdk_s *priv = dev->priv;
-  int ret;
+  FAR struct uart_cmsdk_s *priv = (FAR struct uart_cmsdk_s *)dev->priv;
+  int ret = OK;
 
   switch (cmd)
     {
@@ -514,7 +514,6 @@ static int uart_cmsdk_ioctl(struct file *filep, int cmd, unsigned long arg)
 
         cfsetispeed(termiosp, priv->baud);
         termiosp->c_cflag = CS8;
-        break;
       }
       break;
 
