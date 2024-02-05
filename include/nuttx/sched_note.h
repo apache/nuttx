@@ -595,6 +595,12 @@ extern "C"
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+void sched_note_add(FAR const void *note, size_t notelen);
+#else
+#  define sched_note_add(n,l)
+#endif
+
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
 void sched_note_start(FAR struct tcb_s *tcb);
 void sched_note_stop(FAR struct tcb_s *tcb);
