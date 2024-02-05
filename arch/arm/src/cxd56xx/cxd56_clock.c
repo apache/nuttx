@@ -69,6 +69,8 @@
 #define PDID_SCU         0
 #define PDID_APP_DSP     9
 #define PDID_APP_SUB    10
+#define PDID_GNSS_ITP   12
+#define PDID_GNSS       13
 #define PDID_APP_AUD    14
 
 /* For enable_apwd, disable_apwd (analog domain) */
@@ -2600,6 +2602,41 @@ int cxd56_hostseq_clock_disable(void)
 
   clock_unlock(&g_clocklock);
   return ret;
+}
+
+int cxd56_gnssram_clock_enable(void)
+{
+  uint32_t stat;
+
+  stat = getreg32(CXD56_TOPREG_PWD_STAT);
+  if ((stat & (1u << PDID_GNSS)) && (stat & (1u << PDID_GNSS_ITP)))
+    {
+      /* Already power on */
+
+      return OK;
+    }
+
+  /* Enable all of GNSS RAM memory power. */
+
+  putreg32(0xff00ffff, CXD56_TOPREG_GNSS_RAMMODE_SEL);
+  enable_pwd(PDID_GNSS_ITP);
+  enable_pwd(PDID_GNSS);
+  putreg32(0x143, CXD56_TOPREG_GNSDSP_CKEN);
+  busy_wait(10);
+  putreg32(0x103, CXD56_TOPREG_GNSDSP_CKEN);
+  putreg32(0x10000, CXD56_TOPREG_SWRESET_GNSDSP);
+  putreg32(0x153, CXD56_TOPREG_GNSDSP_CKEN);
+  return OK;
+}
+
+int cxd56_gnssram_clock_disable(void)
+{
+  putreg32(0x0, CXD56_TOPREG_GNSDSP_CKEN);
+  putreg32(0x0, CXD56_TOPREG_SWRESET_GNSDSP);
+  putreg32(0xff000000, CXD56_TOPREG_GNSS_RAMMODE_SEL);
+  disable_pwd(PDID_GNSS);
+  disable_pwd(PDID_GNSS_ITP);
+  return OK;
 }
 
 int up_pmramctrl(int cmd, uintptr_t addr, size_t size)
