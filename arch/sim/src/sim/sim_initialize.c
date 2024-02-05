@@ -310,6 +310,10 @@ void up_initialize(void)
   sim_decoder_initialize();
 #endif
 
+#ifdef CONFIG_SIM_VIDEO_ENCODER
+  sim_encoder_initialize();
+#endif
+
   kthread_create("loop_task", CONFIG_SIM_LOOPTASK_PRIORITY,
                  CONFIG_DEFAULT_TASK_STACKSIZE,
                  sim_loop_task, NULL);

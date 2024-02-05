@@ -343,6 +343,16 @@ config SIM_VIDEO_DECODER_DEV_PATH
 	depends on SIM_VIDEO_DECODER
 	default "/dev/video1"
 
+config SIM_VIDEO_ENCODER
+	bool "Video encoder support on sim"
+	depends on VIDEO
+	default n
+
+config SIM_VIDEO_ENCODER_DEV_PATH
+	string "Video encoder device path"
+	depends on SIM_VIDEO_ENCODER
+	default "/dev/video2"
+
 endmenu
 
 menu "Simulated Graphics/Input"

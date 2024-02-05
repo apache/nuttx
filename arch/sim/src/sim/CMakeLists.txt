@@ -161,6 +161,12 @@ if(CONFIG_SIM_VIDEO_DECODER)
   list(APPEND STDLIBS openh264)
 endif()
 
+if(CONFIG_SIM_VIDEO_ENCODER)
+  list(APPEND HOSTSRCS sim_hostencoder.c)
+  list(APPEND SRCS sim_encoder.c)
+  list(APPEND STDLIBS x264)
+endif()
+
 if(CONFIG_SPINLOCK)
   list(APPEND HOSTSRCS sim_testset.c)
 endif()
