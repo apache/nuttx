@@ -276,13 +276,15 @@ static int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
        * is later invalidated by the elf2image command.
        */
 
-      if (IS_DROM(segment_hdr.load_addr))
+      if (IS_DROM(segment_hdr.load_addr) &&
+          segment_hdr.load_addr == (uint32_t)_image_drom_vma)
         {
           app_drom_start = offset + sizeof(esp_image_segment_header_t);
           app_drom_start_aligned = app_drom_start & MMU_FLASH_MASK;
         }
 
-      if (IS_IROM(segment_hdr.load_addr))
+      if (IS_IROM(segment_hdr.load_addr) &&
+          segment_hdr.load_addr == (uint32_t)_image_irom_vma)
         {
           app_irom_start = offset + sizeof(esp_image_segment_header_t);
           app_irom_start_aligned = app_irom_start & MMU_FLASH_MASK;
