@@ -649,11 +649,11 @@ static int noteram_dump_header(FAR struct lib_outstream_s *s,
                                FAR struct note_common_s *note,
                                FAR struct noteram_dump_context_s *ctx)
 {
+  struct timespec ts;
   pid_t pid;
-  long nsec = note->nc_systime_nsec;
-  time_t sec = note->nc_systime_sec;
   int ret;
 
+  perf_convert(note->nc_systime, &ts);
   pid = note->nc_pid;
 #ifdef CONFIG_SMP
   int cpu = note->nc_cpu;
@@ -663,7 +663,7 @@ static int noteram_dump_header(FAR struct lib_outstream_s *s,
 
   ret = lib_sprintf(s, "%8s-%-3u [%d] %3" PRIu64 ".%09lu: ",
                     get_taskname(pid), get_pid(pid), cpu,
-                    (uint64_t)sec, nsec);
+                    (uint64_t)ts.tv_sec, ts.tv_nsec);
 
   return ret;
 }
