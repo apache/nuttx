@@ -56,7 +56,7 @@
  * Public Functions
  ****************************************************************************/
 
-void arm_doirq(int irq, uint32_t *regs)
+uint32_t *arm_doirq(int irq, uint32_t *regs)
 {
   board_autoled_on(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
@@ -105,6 +105,8 @@ void arm_doirq(int irq, uint32_t *regs)
        */
 
       g_running_tasks[this_cpu()] = this_task();
+
+      regs = (uint32_t *)CURRENT_REGS;
     }
 
   /* Set CURRENT_REGS to NULL to indicate that we are no longer in an
@@ -114,4 +116,5 @@ void arm_doirq(int irq, uint32_t *regs)
   CURRENT_REGS = NULL;
 #endif
   board_autoled_off(LED_INIRQ);
+  return regs;
 }

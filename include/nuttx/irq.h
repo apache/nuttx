@@ -184,7 +184,7 @@ int irqchain_detach(int irq, xcpt_t isr, FAR void *arg);
  ****************************************************************************/
 
 #ifdef CONFIG_IRQCOUNT
-irqstate_t enter_critical_section(void);
+irqstate_t enter_critical_section(void) noinstrument_function;
 #else
 #  define enter_critical_section() up_irq_save()
 #endif
@@ -214,7 +214,7 @@ irqstate_t enter_critical_section(void);
  ****************************************************************************/
 
 #ifdef CONFIG_IRQCOUNT
-void leave_critical_section(irqstate_t flags);
+void leave_critical_section(irqstate_t flags) noinstrument_function;
 #else
 #  define leave_critical_section(f) up_irq_restore(f)
 #endif

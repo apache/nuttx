@@ -38,6 +38,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/net/usrsock.h>
 #include <nuttx/net/ioctl.h>
+#include <nuttx/signal.h>
 
 #include <nuttx/wireless/lte/lte_ioctl.h>
 #include <nuttx/wireless/lte/lte.h>
@@ -682,7 +683,7 @@ static void nrf91_usrsock_poll_work(void *arg)
         {
           while (g_usrsock.sock[pollfd->fd].recvpending == true)
             {
-              usleep(100);
+              nxsig_usleep(100);
             }
         }
 
@@ -1192,12 +1193,13 @@ int usrsock_request(struct iovec *iov, unsigned int iovcnt)
                                              g_usrsock.in, ret);
       if (ret < 0)
         {
-          nerr("Usrsock request %d failed: %d\n", common->reqid, ret);
+          nerr("Usrsock request %" PRId32 " failed: %d\n",
+               common->reqid, ret);
         }
     }
   else
     {
-      nerr("Invalid request id: %d\n", common->reqid);
+      nerr("Invalid request id: %" PRId32 "\n", common->reqid);
     }
 
   return ret;

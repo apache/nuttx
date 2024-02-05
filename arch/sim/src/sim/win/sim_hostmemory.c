@@ -36,9 +36,9 @@
  *
  ****************************************************************************/
 
-void *host_allocheap(size_t sz)
+void *host_allocheap(size_t size, bool exec)
 {
-  return _aligned_malloc(sz, 8);
+  return _aligned_malloc(size, 8);
 }
 
 /****************************************************************************
@@ -95,8 +95,4 @@ void host_free(void *mem)
 void *host_realloc(void *oldmem, size_t size)
 {
   return _aligned_realloc(oldmem, size, 8);
-}
-
-void host_mallinfo(int *aordblks, int *uordblks)
-{
 }

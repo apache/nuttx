@@ -738,4 +738,30 @@ int local_open_sender(FAR struct local_conn_s *conn, FAR const char *path,
 }
 #endif /* CONFIG_NET_LOCAL_DGRAM */
 
+/****************************************************************************
+ * Name: local_set_nonblocking
+ *
+ * Description:
+ *   Set the local conntion to nonblocking mode
+ *
+ ****************************************************************************/
+
+int local_set_nonblocking(FAR struct local_conn_s *conn)
+{
+  int nonblock = 1;
+  int ret;
+
+  /* Set the conn to nonblocking mode */
+
+  ret  = file_ioctl(&conn->lc_infile, FIONBIO, &nonblock);
+  ret |= file_ioctl(&conn->lc_outfile, FIONBIO, &nonblock);
+
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to set the conn to nonblocking mode: %d\n", ret);
+    }
+
+  return ret;
+}
+
 #endif /* CONFIG_NET && CONFIG_NET_LOCAL */

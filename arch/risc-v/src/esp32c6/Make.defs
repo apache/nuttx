@@ -19,20 +19,4 @@
 ############################################################################
 
 include common/Make.defs
-
-# Specify our HEAD assembly file.  This will be linked as
-# the first object file, so it will appear at address 0
-
-HEAD_ASRC = esp32c6_head.S
-
-CHIP_ASRCS = esp32c6_vectors.S
-
-# Specify our general Assembly files
-
-CMN_ASRCS := $(filter-out riscv_vectors.S,$(CMN_ASRCS))
-
-# Specify our C code within this directory to be included
-
-CHIP_CSRCS  = esp32c6_allocateheap.c esp32c6_start.c esp32c6_idle.c
-CHIP_CSRCS += esp32c6_irq.c esp32c6_timerisr.c esp32c6_systemreset.c
-CHIP_CSRCS += esp32c6_serial.c esp32c6_lowputc.c esp32c6_clockconfig.c
+include common/espressif/Make.defs

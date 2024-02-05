@@ -214,11 +214,16 @@ uint16_t can_datahandler(FAR struct net_driver_s *dev,
       can_readahead_signal(conn);
 #endif
       ret = iob->io_pktlen;
+
+      /* Device buffer has been enqueued, clear the handle */
+
+      netdev_iob_clear(dev);
     }
-
-  /* Device buffer must be enqueue or freed, clear the handle */
-
-  netdev_iob_clear(dev);
+  else
+    {
+      nerr("ERROR: Failed to queue the I/O buffer chain: %d\n", ret);
+      netdev_iob_release(dev);
+    }
 
   return ret;
 }

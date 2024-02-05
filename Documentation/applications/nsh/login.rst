@@ -1,9 +1,9 @@
-***********
+===========
 Shell Login
-***********
+===========
 
 Enabling Shell Logins
-*********************
+=====================
 
 NuttShell sessions can be protected by requiring that the user supply
 username and password credentials at the beginning of the session.
@@ -39,7 +39,7 @@ will be closed. That number is controlled by::
   CONFIG_NSH_LOGIN_FAILCOUNT=3
 
 Verification of Credentials
-***************************
+===========================
 
 There are three ways that NSH can be configured to verify user
 credentials at login time:
@@ -89,7 +89,7 @@ credentials at login time:
        CONFIG_NSH_LOGIN_PASSWD=y
 
 Password Files
-**************
+==============
 
 NuttX can also be configured to support a password file, by default at
 ``/etc/passwd``. This option enables support for a password file::
@@ -150,7 +150,7 @@ Instead, the password file will be consulted to verify the user
 credentials.
 
 Creating a Password File for a ROMFS File System
-************************************************
+================================================
 
 What we want to accomplish is a ROMFS file system, mounted at ``/etc``
 and containing the password file, ``passwd`` like::
@@ -257,7 +257,5 @@ configuration at
 `boards/sim/sim/sim/configs/nsh <https://github.com/apache/nuttx/blob/master/boards/sim/sim/sim/configs/nsh/>`__.
 The ROMFS support files are provided at
 `boards/sim/include <https://github.com/apache/nuttx/blob/master/boards/sim/sim/sim/include/>`__
-and the
-`README.txt <https://github.com/apache/nuttx/blob/master/boards/sim/sim/sim/README.txt>`__
-file at the location provides detailed information about creating and
-modifying the ROMFS file system.
+and the :doc:`/platforms/sim/sim/boards/sim/index` page provides detailed
+information about creating and modifying the ROMFS file system.

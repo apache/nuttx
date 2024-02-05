@@ -34,6 +34,26 @@
 #include "libc.h"
 
 /****************************************************************************
+ * Private Functions Prototypes
+ ****************************************************************************/
+
+static void lowoutstream_putc(FAR struct lib_outstream_s *self, int ch);
+static int lowoutstream_puts(FAR struct lib_outstream_s *self,
+                             FAR const void *buf, int len);
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+struct lib_outstream_s g_lowoutstream =
+{
+  0,
+  lowoutstream_putc,
+  lowoutstream_puts,
+  lib_noflush
+};
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 

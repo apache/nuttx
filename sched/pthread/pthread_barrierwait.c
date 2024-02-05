@@ -25,8 +25,8 @@
 #include <nuttx/config.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/semaphore.h>
 #include <pthread.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -80,11 +80,11 @@
 
 int pthread_barrier_wait(FAR pthread_barrier_t *barrier)
 {
-  int semcount;
-  int ret = OK;
   irqstate_t flags;
+  int semcount;
+  int ret;
 
-  if (!barrier)
+  if (barrier == NULL)
     {
       return EINVAL;
     }
@@ -95,11 +95,11 @@ int pthread_barrier_wait(FAR pthread_barrier_t *barrier)
 
   /* Find out how many threads are already waiting at the barrier */
 
-  ret = sem_getvalue(&barrier->sem, &semcount);
+  ret = nxsem_get_value(&barrier->sem, &semcount);
   if (ret != OK)
     {
       leave_critical_section(flags);
-      return get_errno();
+      return -ret;
     }
 
   /* If the number of waiters would be equal to the count, then we are done */
@@ -110,8 +110,8 @@ int pthread_barrier_wait(FAR pthread_barrier_t *barrier)
 
       while (semcount < 0)
         {
-          sem_post(&barrier->sem);
-          sem_getvalue(&barrier->sem, &semcount);
+          nxsem_post(&barrier->sem);
+          nxsem_get_value(&barrier->sem, &semcount);
         }
 
       /* Then return PTHREAD_BARRIER_SERIAL_THREAD to the final thread */
@@ -119,32 +119,28 @@ int pthread_barrier_wait(FAR pthread_barrier_t *barrier)
       leave_critical_section(flags);
       return PTHREAD_BARRIER_SERIAL_THREAD;
     }
-  else
+
+  /* Otherwise, this thread must wait as well */
+
+  while ((ret = nxsem_wait(&barrier->sem)) != OK)
     {
-      /* Otherwise, this thread must wait as well */
+      /* If the thread is awakened by a signal, just continue to wait */
 
-      while (sem_wait(&barrier->sem) != OK)
+      if (ret != -EINTR)
         {
-          /* If the thread is awakened by a signal, just continue to wait */
+          /* If it is awakened by some other error, then there is a
+           * problem
+           */
 
-          int errornumber = get_errno();
-          if (errornumber != EINTR)
-            {
-              /* If it is awakened by some other error, then there is a
-               * problem
-               */
-
-              leave_critical_section(flags);
-              return errornumber;
-            }
+          break;
         }
-
-      /* We will only get here when we are one of the N-1 threads that were
-       * waiting for the final thread at the barrier.  We just need to return
-       * zero.
-       */
-
-      leave_critical_section(flags);
-      return 0;
     }
+
+  /* We will only get here when we are one of the N-1 threads that were
+   * waiting for the final thread at the barrier.  We just need to return
+   * zero.
+   */
+
+  leave_critical_section(flags);
+  return -ret;
 }

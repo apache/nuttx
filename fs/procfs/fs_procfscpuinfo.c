@@ -79,6 +79,7 @@ const struct procfs_operations g_cpuinfo_operations =
   cpuinfo_close,  /* close */
   cpuinfo_read,   /* read */
   NULL,           /* write */
+  NULL,           /* poll */
   cpuinfo_dup,    /* dup */
   NULL,           /* opendir */
   NULL,           /* closedir */
@@ -156,6 +157,10 @@ static ssize_t cpuinfo_read(FAR struct file *filep, FAR char *buffer,
   if (copylen > 0)
     {
       filep->f_pos += copylen;
+    }
+  else
+    {
+      copylen = 0;
     }
 
   return copylen;

@@ -1121,13 +1121,19 @@ static void check_configuration(void)
           debug("check_configuration: Checking %s\n", g_buffer);
           if (!verify_file(g_buffer))
             {
-              fprintf(stderr, "ERROR: No Make.defs file in %s\n",
-                      g_configpath);
-              fprintf(stderr, "       No Make.defs file in %s\n",
-                      g_scriptspath);
-              fprintf(stderr, "Run tools/configure -L"
-                              " to list available configurations.\n");
-              exit(EXIT_FAILURE);
+              /* Let’s check if there is a script in the common directory */
+
+              snprintf(g_buffer, BUFFER_SIZE,
+                       "%s%c..%c..%c..%ccommon%cscripts%cMake.defs",
+                       g_configpath, g_delim, g_delim, g_delim, g_delim,
+                       g_delim, g_delim);
+              if (!verify_file(g_buffer))
+                {
+                  fprintf(stderr, "ERROR: No Make.defs file found\n");
+                  fprintf(stderr, "Run tools/configure -L"
+                                  " to list available configurations.\n");
+                  exit(EXIT_FAILURE);
+                }
             }
         }
       else
@@ -1441,6 +1447,7 @@ static void set_host(const char *destconfig)
                 printf("  Select Windows native host\n");
                 disable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
                 disable_feature(destconfig, "CONFIG_WINDOWS_MSYS");
+                enable_feature(destconfig, "CONFIG_EXPERIMENTAL");
                 enable_feature(destconfig, "CONFIG_WINDOWS_NATIVE");
                 break;
 

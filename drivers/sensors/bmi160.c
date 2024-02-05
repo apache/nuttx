@@ -147,7 +147,7 @@ static ssize_t bmi160_read(FAR struct file *filep, FAR char *buffer,
 
   if (len < sizeof(struct accel_gyro_st_s))
     {
-      snerr("Expected buffer size is %lu\n", sizeof(struct accel_gyro_st_s));
+      snerr("Expected buffer size is %u\n", sizeof(struct accel_gyro_st_s));
       return 0;
     }
 

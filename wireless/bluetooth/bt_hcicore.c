@@ -1499,6 +1499,10 @@ static void cmd_queue_deinit(void)
 static void cmd_queue_init(void)
 {
   int ret;
+#ifdef CONFIG_BLUETOOTH_TXCMD_PINNED_TO_CORE
+  cpu_set_t cpuset;
+#endif
+  int pid;
 
   /* When there is a command to be sent to the Bluetooth driver, it queued on
    * the Tx queue and received by logic on the Tx kernel thread.
@@ -1512,10 +1516,29 @@ static void cmd_queue_init(void)
 
   g_btdev.ncmd = 1;
   g_btdev.tx_status = OK;
-  ret = kthread_create("BT HCI Tx", CONFIG_BLUETOOTH_TXCMD_PRIORITY,
+
+#ifdef CONFIG_BLUETOOTH_TXCMD_PINNED_TO_CORE
+  sched_lock();
+#endif
+
+  pid = kthread_create("BT HCI Tx", CONFIG_BLUETOOTH_TXCMD_PRIORITY,
                        CONFIG_BLUETOOTH_TXCMD_STACKSIZE,
                        hci_tx_kthread, NULL);
-  DEBUGASSERT(ret > 0);
+  DEBUGASSERT(pid > 0);
+
+#ifdef CONFIG_BLUETOOTH_TXCMD_PINNED_TO_CORE
+  CPU_ZERO(&cpuset);
+  CPU_SET((CONFIG_BLUETOOTH_TXCMD_CORE - 1), &cpuset);
+  ret = nxsched_set_affinity(pid, sizeof(cpuset), &cpuset);
+  if (ret)
+    {
+      wlerr("Failed to set affinity error=%d\n", ret);
+      DEBUGPANIC();
+    }
+
+  sched_unlock();
+#endif
+
   UNUSED(ret);
 }
 

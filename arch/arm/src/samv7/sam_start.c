@@ -199,6 +199,10 @@ void __start(void)
     }
 #endif
 
+#ifdef CONFIG_ARMV7M_STACKCHECK
+  arm_stack_check_init();
+#endif
+
   /* Configure the UART so that we can get debug output as soon as possible */
 
   sam_clockconfig();

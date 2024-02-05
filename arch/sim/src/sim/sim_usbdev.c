@@ -428,7 +428,7 @@ static int sim_reqwrite(struct sim_usbdev_s *priv, struct sim_ep_s *privep)
 }
 
 /****************************************************************************
- * Name: sim_ep_configure
+ * Name: sim_usbdev_getctrlreq
  ****************************************************************************/
 
 static void sim_usbdev_getctrlreq(struct usb_ctrlreq_s *usb_req,
@@ -445,7 +445,7 @@ static void sim_usbdev_getctrlreq(struct usb_ctrlreq_s *usb_req,
 }
 
 /****************************************************************************
- * Name: sim_ep_configure
+ * Name: sim_usbdev_setepdesc
  ****************************************************************************/
 
 static void sim_usbdev_setepdesc(struct host_usb_epdesc_s *host_epdesc,
@@ -1131,7 +1131,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
    */
 
   flags = enter_critical_section();
-  host_usbdev_deinit();
+  CLASS_DISCONNECT(driver, &priv->usbdev);
   leave_critical_section(flags);
 
   /* Unbind the class driver */
@@ -1145,6 +1145,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
   /* Disconnect device */
 
   host_usbdev_pullup(false);
+  host_usbdev_deinit();
 
   /* Unhook the driver */
 

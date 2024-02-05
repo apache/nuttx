@@ -24,8 +24,14 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+#include <debug.h>
+#include <stdlib.h>
+
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
+
+#include "espressif/esp_systemreset.h"
 
 #ifdef CONFIG_BOARDCTL_RESET
 
@@ -55,6 +61,18 @@
 
 int board_reset(int status)
 {
+  syslog(LOG_INFO, "reboot status=%d\n", status);
+
+  switch (status)
+    {
+      case EXIT_SUCCESS:
+        up_shutdown_handler();
+        break;
+      case CONFIG_BOARD_ASSERT_RESET_VALUE:
+      default:
+        break;
+    }
+
   up_systemreset();
 
   return 0;

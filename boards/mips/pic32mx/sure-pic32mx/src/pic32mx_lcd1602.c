@@ -971,7 +971,7 @@ static int lcd_ioctl(struct file *filep, int cmd, unsigned long arg)
  ****************************************************************************/
 
 static int lcd_poll(struct file *filep, struct pollfd *fds,
-                        bool setup)
+                    bool setup)
 {
   if (setup)
     {

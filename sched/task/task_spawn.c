@@ -31,6 +31,7 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/sched.h>
 #include <nuttx/kthread.h>
 #include <nuttx/spawn.h>
@@ -80,7 +81,8 @@ static int nxtask_spawn_create(FAR const char *name, int priority,
                               FAR void *stack_addr, int stack_size,
                               main_t entry, FAR char * const argv[],
                               FAR char * const envp[],
-                              FAR const posix_spawn_file_actions_t *actions)
+                              FAR const posix_spawn_file_actions_t *actions,
+                              FAR const posix_spawnattr_t *attr)
 {
   FAR struct task_tcb_s *tcb;
   pid_t pid;
@@ -102,34 +104,37 @@ static int nxtask_spawn_create(FAR const char *name, int priority,
   /* Initialize the task */
 
   ret = nxtask_init(tcb, name, priority, stack_addr, stack_size,
-                    entry, argv, envp);
+                    entry, argv, envp, actions);
   if (ret < OK)
     {
       kmm_free(tcb);
       return ret;
     }
 
-  /* Perform file actions */
-
-  if (actions != NULL)
-    {
-      ret = spawn_file_actions(&tcb->cmn, actions);
-      if (ret < 0)
-        {
-          nxtask_uninit(tcb);
-          return ret;
-        }
-    }
-
   /* Get the assigned pid before we start the task */
 
   pid = tcb->cmn.pid;
+
+  /* Set the attributes */
+
+  if (attr)
+    {
+      ret = spawn_execattrs(pid, attr);
+      if (ret < 0)
+        {
+          goto errout_with_taskinit;
+        }
+    }
 
   /* Activate the task */
 
   nxtask_activate(&tcb->cmn);
 
   return pid;
+
+errout_with_taskinit:
+  nxtask_uninit(tcb);
+  return ret;
 }
 
 /****************************************************************************
@@ -188,13 +193,6 @@ static int nxtask_spawn_exec(FAR pid_t *pidp, FAR const char *name,
   int pid;
   int ret = OK;
 
-  /* Disable pre-emption so that we can modify the task parameters after
-   * we start the new task; the new task will not actually begin execution
-   * until we re-enable pre-emption.
-   */
-
-  sched_lock();
-
   /* Use the default priority and stack size if no attributes are provided */
 
   if (attr)
@@ -212,7 +210,7 @@ static int nxtask_spawn_exec(FAR pid_t *pidp, FAR const char *name,
       ret = nxsched_get_param(0, &param);
       if (ret < 0)
         {
-          goto errout;
+          return ret;
         }
 
       priority  = param.sched_priority;
@@ -223,12 +221,12 @@ static int nxtask_spawn_exec(FAR pid_t *pidp, FAR const char *name,
 
   pid = nxtask_spawn_create(name, priority, stackaddr,
                             stacksize, entry, argv,
-                            envp ? envp : environ, actions);
+                            envp ? envp : environ, actions, attr);
   if (pid < 0)
     {
       ret = pid;
       serr("ERROR: nxtask_spawn_create failed: %d\n", ret);
-      goto errout;
+      return ret;
     }
 
   /* Return the task ID to the caller */
@@ -238,20 +236,6 @@ static int nxtask_spawn_exec(FAR pid_t *pidp, FAR const char *name,
       *pidp = pid;
     }
 
-  /* Now set the attributes.  Note that we ignore all of the return values
-   * here because we have already successfully started the task.  If we
-   * return an error value, then we would also have to stop the task.
-   */
-
-  if (attr)
-    {
-      spawn_execattrs(pid, attr);
-    }
-
-  /* Re-enable pre-emption and return */
-
-errout:
-  sched_unlock();
   return ret;
 }
 
@@ -331,11 +315,6 @@ int task_spawn(FAR const char *name, main_t entry,
 
   sinfo("name=%s entry=%p file_actions=%p attr=%p argv=%p\n",
         name, entry, file_actions, attr, argv);
-
-  if (attr != NULL)
-    {
-      spawn_proxyattrs(attr);
-    }
 
   ret = nxtask_spawn_exec(&pid, name, entry,
                           file_actions != NULL ? *file_actions : NULL,

@@ -165,5 +165,5 @@ int board_bmi160_initialize(int bus)
   return ret;
 }
 
-#endif  /* CONFIG_SENSORS_BMI160_SCU_SPI */
-#endif  /* CONFIG_SENSORS_BMI160_SCU */
+#endif /* CONFIG_SENSORS_BMI160_SCU_SPI */
+#endif /* CONFIG_SENSORS_BMI160_SCU */

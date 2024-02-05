@@ -46,7 +46,9 @@
 #include "arm_internal.h"
 #include "hardware/imxrt_usbotg.h"
 #include "hardware/imxrt_usbphy.h"
-#include "hardware/rt106x/imxrt106x_ccm.h"
+#ifdef CONFIG_ARCH_FAMILY_IMXRT106x
+#  include "hardware/rt106x/imxrt106x_ccm.h"
+#endif
 #include "imxrt_periphclks.h"
 
 /****************************************************************************
@@ -2880,6 +2882,32 @@ void arm_usbinitialize(void)
   /* Clock run */
 
   imxrt_clockall_usboh3();
+
+#ifdef CONFIG_ARCH_FAMILY_IMXRT117x
+  up_mdelay(1);
+
+  putreg32(USBPHY1_PLL_SIC_PLL_POWER |
+           USBPHY1_PLL_SIC_PLL_REG_ENABLE,
+           IMXRT_USBPHY1_PLL_SIC_SET);
+
+  putreg32(USBPHY1_PLL_SIC_PLL_DIV_SEL_MASK,
+           IMXRT_USBPHY1_PLL_SIC_CLR);
+
+  putreg32(USBPHY1_PLL_SIC_PLL_DIV_SEL(3),
+           IMXRT_USBPHY1_PLL_SIC_SET);
+
+  putreg32(USBPHY1_PLL_SIC_PLL_BYPASS,
+           IMXRT_USBPHY1_PLL_SIC_CLR);
+
+  putreg32(USBPHY1_PLL_SIC_PLL_EN_USB_CLKS,
+           IMXRT_USBPHY1_PLL_SIC_SET);
+
+  putreg32(USBPHY_CTRL_CLKGATE,
+           IMXRT_USBPHY1_CTRL_CLR);
+
+  while ((getreg32(IMXRT_USBPHY1_PLL_SIC) & USBPHY1_PLL_SIC_PLL_LOCK) == 0);
+
+#endif
 
   /* Disable USB interrupts */
 

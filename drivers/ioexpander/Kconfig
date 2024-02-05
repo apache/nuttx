@@ -15,17 +15,17 @@ config IOEXPANDER
 if IOEXPANDER
 
 config IOEXPANDER_RPMSG
-	bool "IO expander rpmsg server and client"
+	bool "IO expander RPMSG server and client"
 	depends on RPTUN
 	default n
 	select IOEXPANDER_INT_ENABLE
 	---help---
-		This settings enable ioexpander rpmsg server and client.
+		This settings enable ioexpander RPMSG server and client.
 
 if IOEXPANDER_RPMSG
 
 config IOEXPANDER_RPMSG_INT_NCALLBACKS
-	int "number of ioexpander rpmsg interrupt callbacks"
+	int "number of ioexpander RPMSG interrupt callbacks"
 	default 32
 	---help---
 		This set the IO expander number in interrupt callbacks.
@@ -55,6 +55,24 @@ config IOEXPANDER_DUMMY_INT_POLLDELAY
 		This microsecond delay defines the polling rate for missed interrupts.
 
 endif # IOEXPANDER_DUMMY
+
+config IOEXPANDER_ICJX
+	bool "iC-JX SPI IO expander"
+	default n
+	depends on SPI
+	---help---
+		Enable support for the iC-JX expander from iC-Haus GmbH manufacturer.
+		SPI peripheral is used for the communication.
+
+if IOEXPANDER_ICJX
+
+config iC-JX_MULTIPLE
+	bool "Multiple iC-JX Devices"
+	default n
+	---help---
+		Can be defined to support multiple iC-JX devices on board.
+
+endif # IOEXPANDER_ICJX
 
 config IOEXPANDER_ISO1H812G
 	bool "ISO1H812G SPI IO expander"

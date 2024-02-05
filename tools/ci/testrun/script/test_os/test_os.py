@@ -7,7 +7,7 @@ do_not_support = ["sabre-6quad", "rv-virt", "rv-virt64", "esp32c3-devkit", "bl60
 
 
 def test_ostest(p):
-    ret = p.sendCommand("ostest", "Exiting with status", 300)
+    ret = p.sendCommand("ostest", "Exiting with status 0", 300)
     assert ret == 0
 
 
@@ -28,7 +28,7 @@ def test_cxxtest(p):
 def test_scanftest(p):
     if p.board in do_not_support:
         pytest.skip("unsupported at {}".format(p.board))
-    ret = p.sendCommand("scanftest", "Test #25")
+    ret = p.sendCommand("scanftest", "FAILED: 0")
     assert ret == 0
 
 
@@ -39,10 +39,14 @@ def test_getprime(p):
     assert ret == 0
 
 
-def test_fopencookie(p):
+def test_stdio(p):
     if p.board in do_not_support:
         pytest.skip("unsupported at {}".format(p.board))
     ret = p.sendCommand("fopencookie_test", "fopencokie tests were succesfull.")
+    assert ret == 0
+    ret = p.sendCommand("fmemopen_test", "FAILED: 0")
+    assert ret == 0
+    ret = p.sendCommand("open_memstream_test", "FAILED: 0")
     assert ret == 0
 
 
@@ -52,7 +56,7 @@ def test_fs_test(p):
         pytest.skip("unsupported at {}".format(p.board))
     fstest_dir = "{}/{}_fstest".format(p.fs, p.core)
     p.sendCommand("mkdir %s" % fstest_dir)
-    ret = p.sendCommand("fstest -n 10 -m %s" % fstest_dir, "Final memory usage", 2000)
+    ret = p.sendCommand("fstest -n 10 -m %s" % fstest_dir, "FAILED: 0", 2000)
     p.sendCommand("ls %s" % fstest_dir)
     p.sendCommand("rmdir %s" % fstest_dir)
     assert ret == 0

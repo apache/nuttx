@@ -32,7 +32,8 @@
 #include "xtensa.h"
 #include "esp32_efuse.h"
 #include "esp32_clockconfig.h"
-#include "hardware/efuse_reg.h"
+#include "hardware/esp32_apb_ctrl.h"
+#include "hardware/esp32_efuse.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -67,6 +68,7 @@ uint32_t g_start_efuse_wrreg[4] =
  * Private Prototypes
  ****************************************************************************/
 
+#ifdef CONFIG_ESP32_EFUSE
 static int esp_efuse_set_timing(void);
 void esp_efuse_burn_efuses(void);
 static uint32_t get_mask(uint32_t bit_count, uint32_t shift);
@@ -89,10 +91,16 @@ static int esp_efuse_fill_buff(uint32_t num_reg, int bit_offset,
                                int *bits_counter);
 static void esp_efuse_write_reg(uint32_t blk, uint32_t num_reg,
                                 uint32_t value);
+#endif /* CONFIG_ESP32_EFUSE */
+
+static uint32_t efuse_hal_get_major_chip_version(void);
+static uint32_t efuse_hal_get_minor_chip_version(void);
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+#ifdef CONFIG_ESP32_EFUSE
 
 static int esp_efuse_set_timing(void)
 {
@@ -428,9 +436,104 @@ static void esp_efuse_write_reg(uint32_t blk, uint32_t num_reg,
   putreg32(reg_to_write, addr_wr_reg);
 }
 
+#endif /* CONFIG_ESP32_EFUSE */
+
+/****************************************************************************
+ * Name: efuse_hal_get_major_chip_version
+ *
+ * Description:
+ *   Retrieves the major version of the chip. It reads the version
+ *   information from specific registers and combines them to determine
+ *   the major version.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The major version of the chip as an unsigned 32-bit integer.
+ *
+ ****************************************************************************/
+
+IRAM_ATTR static uint32_t efuse_hal_get_major_chip_version(void)
+{
+  uint8_t eco_bit0;
+  uint8_t eco_bit1;
+  uint8_t eco_bit2;
+  uint32_t combine_value;
+  uint32_t chip_ver = 0;
+
+  eco_bit0 = REG_GET_FIELD(EFUSE_BLK0_RDATA3_REG, EFUSE_RD_CHIP_VER_REV1);
+  eco_bit1 = REG_GET_FIELD(EFUSE_BLK0_RDATA5_REG, EFUSE_RD_CHIP_VER_REV2);
+  eco_bit2 = (getreg32(APB_CTRL_DATE_REG) & 0x80000000) >> 31;
+  combine_value = (eco_bit2 << 2) | (eco_bit1 << 1) | eco_bit0;
+
+  switch (combine_value)
+    {
+      case 0:
+          chip_ver = 0;
+          break;
+      case 1:
+          chip_ver = 1;
+          break;
+      case 3:
+          chip_ver = 2;
+          break;
+      case 7:
+          chip_ver = 3;
+          break;
+      default:
+          chip_ver = 0;
+          break;
+    }
+
+  return chip_ver;
+}
+
+/****************************************************************************
+ * Name: efuse_hal_get_minor_chip_version
+ *
+ * Description:
+ *   Retrieves the minor version of the chip. It reads the version
+ *   information from a specific register.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The minor version of the chip as an unsigned 32-bit integer.
+ *
+ ****************************************************************************/
+
+IRAM_ATTR static uint32_t efuse_hal_get_minor_chip_version(void)
+{
+  return REG_GET_FIELD(EFUSE_BLK0_RDATA5_REG, EFUSE_RD_WAFER_VERSION_MINOR);
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp_efuse_hal_chip_revision
+ *
+ * Description:
+ *   Returns the chip version in the format: Major * 100 + Minor.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The chip version as an unsigned 32-bit integer.
+ *
+ ****************************************************************************/
+
+IRAM_ATTR uint32_t esp_efuse_hal_chip_revision(void)
+{
+  return (efuse_hal_get_major_chip_version() * 100) +
+         efuse_hal_get_minor_chip_version();
+}
+
+#ifdef CONFIG_ESP32_EFUSE
 
 /* Read value from EFUSE, writing it into an array */
 
@@ -498,3 +601,4 @@ void esp_efuse_burn_efuses(void)
     };
 }
 
+#endif /* CONFIG_ESP32_EFUSE */

@@ -5,7 +5,7 @@
 
 menuconfig DRIVERS_VIRTIO
 	bool "Virtio Device Support"
-	depends on OPENAMP
+	select OPENAMP
 	default n
 
 if DRIVERS_VIRTIO

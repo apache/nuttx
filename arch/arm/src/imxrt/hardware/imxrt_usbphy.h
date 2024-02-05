@@ -32,9 +32,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define IMXRT_USBPHY_BASE_OFFSET            0x1000  /* USB PHY Base */
-
-#define IMXRT_USBPHY_BASE                   (IMXRT_ANATOP_BASE + IMXRT_USBPHY_BASE_OFFSET)  /* USB PHY Base */
+#define IMXRT_USBPHY_BASE                   (IMXRT_USBPHY1_BASE)  /* USB PHY Base */
 
 /* Register Offsets *********************************************************/
 
@@ -43,12 +41,21 @@
 #define IMXRT_USBPHY1_CTRL_OFFSET           0x0030  /* USBPHY1 USB PHY General Control Register */
 #define IMXRT_USBPHY1_CTRL_CLR_OFFSET       0x0038  /* USBPHY1 USB PHY General Control Register Clear */
 
+#define IMXRT_USBPHY1_PLL_SIC_OFFSET        0x00a0
+#define IMXRT_USBPHY1_PLL_SIC_SET_OFFSET    0x00a4
+#define IMXRT_USBPHY1_PLL_SIC_CLR_OFFSET    0x00a8
+#define IMXRT_USBPHY1_PLL_SIC_TOG_OFFSET    0x00ac
+
 /* Register addresses *******************************************************/
 
 #define IMXRT_USBPHY1_PWD                   (IMXRT_USBPHY_BASE + IMXRT_USBPHY1_PWD_OFFSET)      /* USBPHY1 USB PHY Power-Down Register */
 #define IMXRT_USBPHY1_PWD_CLR               (IMXRT_USBPHY_BASE + IMXRT_USBPHY1_PWD_CLR_OFFSET)  /* USBPHY1 USB PHY Power-Down Register Clear */
 #define IMXRT_USBPHY1_CTRL                  (IMXRT_USBPHY_BASE + IMXRT_USBPHY1_CTRL_OFFSET)     /* USBPHY1 USB PHY General Control Register */
 #define IMXRT_USBPHY1_CTRL_CLR              (IMXRT_USBPHY_BASE + IMXRT_USBPHY1_CTRL_CLR_OFFSET) /* USBPHY1 USB PHY General Control Register Clear */
+#define IMXRT_USBPHY1_PLL_SIC               (IMXRT_USBPHY_BASE + IMXRT_USBPHY1_PLL_SIC_OFFSET)
+#define IMXRT_USBPHY1_PLL_SIC_SET           (IMXRT_USBPHY_BASE + IMXRT_USBPHY1_PLL_SIC_SET_OFFSET)
+#define IMXRT_USBPHY1_PLL_SIC_CLR           (IMXRT_USBPHY_BASE + IMXRT_USBPHY1_PLL_SIC_CLR_OFFSET)
+#define IMXRT_USBPHY1_PLL_SIC_TOG           (IMXRT_USBPHY_BASE + IMXRT_USBPHY1_PLL_SIC_TOG_OFFSET)
 
 /* Register Bit Definitions *************************************************/
 
@@ -66,5 +73,21 @@
 
 #define USBPHY_CTRL_SFTRST          (1 << 31)  /* Bit 31: Soft-reset */
 #define USBPHY_CTRL_CLKGATE         (1 << 30)  /* Bit 30: Gate UTMI clocks */
+
+/* USB PHY PLL Control/Status Register (PLL_SIC, only in IMXRT117X) */
+#define USBPHY1_PLL_SIC_PLL_POSTDIV_SHIFT  (2)        /* Bits 2-5: PLL_POSTDIV */
+#define USBPHY1_PLL_SIC_PLL_POSTDIV_MASK   (0x7 << USBPHY1_PLL_SIC_PLL_POSTDIV_SHIFT)
+#define USBPHY1_PLL_SIC_PLL_POSTDIV(n)     (((n) << USBPHY1_PLL_SIC_PLL_POSTDIV_SHIFT) & USBPHY1_PLL_SIC_PLL_POSTDIV_MASK)
+#define USBPHY1_PLL_SIC_PLL_EN_USB_CLKS    (1 << 6)   /* Bit 6: PLL_EN_USB_CLKS */
+#define USBPHY1_PLL_SIC_PLL_POWER          (1 << 12)  /* Bit 12: PLL_POWER */
+#define USBPHY1_PLL_SIC_PLL_ENABLE         (1 << 13)  /* Bit 13: PLL_ENABLE */
+#define USBPHY1_PLL_SIC_PLL_BYPASS         (1 << 16)  /* Bit 16: PLL_BYPASS */
+#define USBPHY1_PLL_SIC_REFBIAS_PWD_SEL    (1 << 19)  /* Bit 19: REFBIAS_PWD_SEL */
+#define USBPHY1_PLL_SIC_REFBIAS_PWD        (1 << 20)  /* Bit 20: Power down the reference bias */
+#define USBPHY1_PLL_SIC_PLL_REG_ENABLE     (1 << 21)  /* Bit 21: PLL_REG_ENABLE */
+#define USBPHY1_PLL_SIC_PLL_DIV_SEL_SHIFT  (22)       /* Bits 22-25: PLL_DIV_SEL */
+#define USBPHY1_PLL_SIC_PLL_DIV_SEL_MASK   (0x7 << USBPHY1_PLL_SIC_PLL_DIV_SEL_SHIFT)
+#define USBPHY1_PLL_SIC_PLL_DIV_SEL(n)     (((n) << USBPHY1_PLL_SIC_PLL_DIV_SEL_SHIFT) & USBPHY1_PLL_SIC_PLL_DIV_SEL_MASK)
+#define USBPHY1_PLL_SIC_PLL_LOCK           (1 << 31)  /* Bit 31: PLL_LOCK */
 
 #endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_USBPHY_H */

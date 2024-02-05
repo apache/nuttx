@@ -42,6 +42,7 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/audio/audio.h>
 #include <nuttx/audio/audio_null.h>
+#include <nuttx/signal.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -171,7 +172,7 @@ static int null_sleep(FAR struct audio_lowerhalf_s *dev,
   uint64_t sleep_time;
 
   sleep_time = USEC_PER_SEC * (uint64_t)apb->nbytes / priv->scaler;
-  usleep(sleep_time);
+  nxsig_usleep(sleep_time);
 #ifdef CONFIG_AUDIO_MULTI_SESSION
   priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_DEQUEUE,
                   apb, OK, NULL);

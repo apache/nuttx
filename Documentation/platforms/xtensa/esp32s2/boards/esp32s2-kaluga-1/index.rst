@@ -60,7 +60,7 @@ The ESP32-S2-Kaluga-1 board has connectors for boards with:
 
 - Extension header (ESP-LyraT-8311A, ESP-LyraP-LCD32)
 - Camera header (ESP-LyraP-CAM)
-- Touch FPC coneector (ESP-LyraP-TouchA)
+- Touch FPC connector (ESP-LyraP-TouchA)
 - LCD FPC connector (no official extension boards yet)
 - I2C FPC connector (no official extension boards yet)
 
@@ -74,7 +74,7 @@ The ESP32-S2-Kaluga-1 board has connectors for boards with:
 
     ESP32-S2-Kaluga-1 (click to enlarge)
 
-All the four extension boards are specially desgined to support the following
+All the four extension boards are specially designed to support the following
 features:
 
 * Touch panel control
@@ -297,6 +297,22 @@ After successfully built and flashed, run on the boards' terminal::
 
     nxlooper> loopback 2 8 44100
 
+rtc
+---
+
+This configuration demonstrates the use of the RTC driver through alarms.
+You can set an alarm, check its progress and receive a notification after it expires::
+
+    nsh> alarm 10
+    alarm_daemon started
+    alarm_daemon: Running
+    Opening /dev/rtc0
+    Alarm 0 set in 10 seconds
+    nsh> alarm -r
+    Opening /dev/rtc0
+    Alarm 0 is active with 10 seconds to expiration
+    nsh> alarm_daemon: alarm 0 received
+
 twai
 ----
 
@@ -314,3 +330,21 @@ the ``Device Drivers -> CAN Driver Support -> CAN loopback mode`` option and run
       TSEG2: 4
         SJW: 3
       ID:    1 DLC: 1
+
+watchdog
+--------
+
+This config test the watchdog timers. It includes the 2 MWDTs,
+adds driver support, registers the WDTs as devices and includes the watchdog
+example.
+
+To test it, just run the following::
+
+    nsh> wdog -i /dev/watchdogx
+
+Where x is the watchdog instance.
+
+To test the XTWDT(/dev/watchdog3) an interrupt handler needs to be
+implemented because XTWDT does not have system reset feature. To implement
+an interrupt handler `WDIOC_CAPTURE` command can be used. When interrupt
+rises, XTAL32K clock can be restored with `WDIOC_RSTCLK` command.

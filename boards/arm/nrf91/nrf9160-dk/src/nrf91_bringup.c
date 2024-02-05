@@ -46,6 +46,10 @@
 #  include "nrf91_modem_at.h"
 #endif
 
+#ifdef CONFIG_NRF91_MODEM_GNSS
+#  include "nrf91_modem_gnss.h"
+#endif
+
 #ifdef CONFIG_NRF91_PROGMEM
 #  include "nrf91_progmem.h"
 #endif
@@ -60,7 +64,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define NRF91_TIMER (0)
+#define NRF91_TIMER         (0)
+#define NRF91_GNSS_BATCHNUM (10)
 
 /****************************************************************************
  * Private Functions
@@ -150,6 +155,17 @@ int nrf91_bringup(void)
     {
       syslog(LOG_ERR,
              "ERROR: Failed to initialize AT interface%d\n",  ret);
+    }
+#endif
+
+#ifdef CONFIG_NRF91_MODEM_GNSS
+  /* Initialize modem GNSS interface */
+
+  ret = nrf91_gnss_register(0, NRF91_GNSS_BATCHNUM);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize GNSS interface%d\n",  ret);
     }
 #endif
 

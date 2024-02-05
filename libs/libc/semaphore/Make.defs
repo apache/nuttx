@@ -20,10 +20,12 @@
 
 # Add the semaphore C files to the build
 
-CSRCS += sem_init.c sem_getprotocol.c sem_getvalue.c
+CSRCS += sem_init.c sem_setprotocol.c sem_getprotocol.c sem_getvalue.c
+CSRCS += sem_destroy.c sem_wait.c sem_trywait.c sem_timedwait.c
+CSRCS += sem_clockwait.c sem_post.c
 
-ifneq ($(CONFIG_PRIORITY_INHERITANCE),y)
-CSRCS += sem_setprotocol.c
+ifeq ($(CONFIG_FS_NAMED_SEMAPHORES),y)
+CSRCS += sem_open.c sem_close.c sem_unlink.c
 endif
 
 # Add the semaphore directory to the build

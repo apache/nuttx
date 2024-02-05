@@ -100,8 +100,7 @@ enum usrsock_message_types_e
 begin_packed_struct struct usrsock_request_common_s
 {
   uint32_t xid;
-  int8_t   reqid;
-  int8_t   reserved;
+  uint32_t reqid;
 } end_packed_struct;
 
 begin_packed_struct struct usrsock_request_socket_s
@@ -157,9 +156,9 @@ begin_packed_struct struct usrsock_request_sendto_s
   struct usrsock_request_common_s head;
 
   int16_t usockid;
+  uint16_t addrlen;
   int32_t flags;
   uint32_t buflen;
-  uint16_t addrlen;
 } end_packed_struct;
 
 begin_packed_struct struct usrsock_request_recvfrom_s
@@ -167,9 +166,9 @@ begin_packed_struct struct usrsock_request_recvfrom_s
   struct usrsock_request_common_s head;
 
   int16_t usockid;
+  uint16_t max_addrlen;
   int32_t flags;
   uint32_t max_buflen;
-  uint16_t max_addrlen;
 } end_packed_struct;
 
 begin_packed_struct struct usrsock_request_setsockopt_s
@@ -213,8 +212,8 @@ begin_packed_struct struct usrsock_request_ioctl_s
   struct usrsock_request_common_s head;
 
   int16_t usockid;
-  int32_t cmd;
   uint16_t arglen;
+  int32_t cmd;
 } end_packed_struct;
 
 begin_packed_struct struct usrsock_request_shutdown_s

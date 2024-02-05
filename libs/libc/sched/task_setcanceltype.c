@@ -22,8 +22,16 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <sched.h>
+#include <assert.h>
 #include <errno.h>
+#include <pthread.h>
+#include <stdlib.h>
+
+#include <nuttx/cancelpt.h>
+#include <nuttx/tls.h>
 
 /****************************************************************************
  * Public Functions
@@ -46,14 +54,63 @@
 
 int task_setcanceltype(int type, FAR int *oldtype)
 {
+  FAR struct tls_info_s *tls = tls_get_info();
+  int ret = OK;
+
   /* Return the current type if so requested */
 
   if (oldtype != NULL)
     {
-      *oldtype = TASK_CANCEL_ASYNCHRONOUS;
+      if ((tls->tl_cpstate & CANCEL_FLAG_CANCEL_ASYNC) != 0)
+        {
+          *oldtype = TASK_CANCEL_ASYNCHRONOUS;
+        }
+      else
+        {
+          *oldtype = TASK_CANCEL_DEFERRED;
+        }
     }
 
-  /* Check the requested cancellation type */
+  /* Set the new cancellation type */
 
-  return (type == TASK_CANCEL_ASYNCHRONOUS) ? OK : EINVAL;
+  if (type == TASK_CANCEL_ASYNCHRONOUS)
+    {
+      /* Set the asynchronous cancellation bit */
+
+      tls->tl_cpstate |= CANCEL_FLAG_CANCEL_ASYNC;
+
+#ifdef CONFIG_CANCELLATION_POINTS
+      /* If we just switched from deferred to asynchronous type and if a
+       * cancellation is pending, then exit now.
+       */
+
+      if ((tls->tl_cpstate & CANCEL_FLAG_CANCEL_PENDING) != 0 &&
+          (tls->tl_cpstate & CANCEL_FLAG_NONCANCELABLE) == 0)
+        {
+          tls->tl_cpstate &= ~CANCEL_FLAG_CANCEL_PENDING;
+
+          /* Exit according to the type of the thread */
+
+#ifndef CONFIG_DISABLE_PTHREAD
+          pthread_exit(PTHREAD_CANCELED);
+#else
+          exit(EXIT_FAILURE);
+#endif
+        }
+#endif
+    }
+#ifdef CONFIG_CANCELLATION_POINTS
+  else if (type == TASK_CANCEL_DEFERRED)
+    {
+      /* Set the deferred cancellation type */
+
+      tls->tl_cpstate &= ~CANCEL_FLAG_CANCEL_ASYNC;
+    }
+#endif
+  else
+    {
+      ret = EINVAL;
+    }
+
+  return ret;
 }

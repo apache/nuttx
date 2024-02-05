@@ -205,6 +205,12 @@ struct lib_rawoutstream_s
   int                    fd;
 };
 
+struct lib_fileoutstream_s
+{
+  struct lib_outstream_s common;
+  struct file            *file;
+};
+
 struct lib_rawsistream_s
 {
   struct lib_sistream_s  common;
@@ -309,6 +315,8 @@ extern "C"
 #  define EXTERN extern
 #endif
 
+extern struct lib_outstream_s g_lowoutstream;
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -394,6 +402,8 @@ void lib_rawinstream(FAR struct lib_rawinstream_s *stream, int fd);
 void lib_rawoutstream(FAR struct lib_rawoutstream_s *stream, int fd);
 void lib_rawsistream(FAR struct lib_rawsistream_s *stream, int fd);
 void lib_rawsostream(FAR struct lib_rawsostream_s *stream, int fd);
+void lib_fileoutstream(FAR struct lib_fileoutstream_s *stream,
+                       FAR struct file *file);
 
 /****************************************************************************
  * Name: lib_bufferedoutstream

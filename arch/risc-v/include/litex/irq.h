@@ -29,7 +29,7 @@
 #include CONFIG_LITEX_CUSTOM_IRQ_DEFINITIONS_PATH
 #else
 
-#include  <arch/mode.h>
+#include <arch/mode.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -37,15 +37,16 @@
 
 /* Map RISC-V exception code to NuttX IRQ */
 
-#define LITEX_IRQ_UART0    (RISCV_IRQ_EXT + 1)
-#define LITEX_IRQ_TIMER0   (RISCV_IRQ_EXT + 2)
-#define LITEX_IRQ_ETHMAC   (RISCV_IRQ_EXT + 3)
-#define LITEX_IRQ_SDCARD   (RISCV_IRQ_EXT + 4)
-#define LITEX_IRQ_GPIO     (RISCV_IRQ_EXT + 5)
+#define LITEX_IRQ_UART0       (RISCV_IRQ_EXT + 1)
+#define LITEX_IRQ_TIMER0      (RISCV_IRQ_EXT + 2)
+#define LITEX_IRQ_ETHMAC      (RISCV_IRQ_EXT + 3)
+#define LITEX_IRQ_SDCARD      (RISCV_IRQ_EXT + 4)
+#define LITEX_IRQ_GPIO_BASE   (RISCV_IRQ_EXT + 5)
+#define LITEX_IRQ_GPIO_LENGTH 8
 
 /* The last hardware IRQ number */
 
-#define LITEX_IRQ_LAST     (LITEX_IRQ_GPIO)
+#define LITEX_IRQ_LAST        (LITEX_IRQ_GPIO_BASE + LITEX_IRQ_GPIO_LENGTH)
 
 /* Second level GPIO interrupts.  GPIO interrupts are decoded and dispatched
  * as a second level of decoding:  The first level dispatches to the GPIO
@@ -53,7 +54,7 @@
  */
 
 #ifdef CONFIG_LITEX_GPIO_IRQ
-#  define LITEX_NIRQ_GPIO           32
+#  define LITEX_NIRQ_GPIO           LITEX_IRQ_GPIO_LENGTH * 32
 #  define LITEX_FIRST_GPIOIRQ       (LITEX_IRQ_LAST + 1)
 #  define LITEX_LAST_GPIOIRQ        (LITES_FIRST_GPIOIRQ + LITEX_NIRQ_GPIO)
 #else

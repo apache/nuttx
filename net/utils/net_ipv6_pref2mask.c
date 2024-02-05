@@ -42,15 +42,15 @@
  *   specifies the number of MS bits under mask (0-128)
  *
  * Input Parameters:
+ *   mask     - The location to return the netmask.
  *   preflen  - Determines the width of the netmask (in bits).  Range 0-128
- *   mask  - The location to return the netmask.
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void net_ipv6_pref2mask(uint8_t preflen, net_ipv6addr_t mask)
+void net_ipv6_pref2mask(net_ipv6addr_t mask, uint8_t preflen)
 {
   unsigned int bit;
   unsigned int i;
@@ -91,7 +91,7 @@ void net_ipv6_pref2mask(uint8_t preflen, net_ipv6addr_t mask)
                *          = 0xfc00
                */
 
-              mask[i] = 0xffff << (16 - (preflen - bit));
+              mask[i] = HTONS(0xffff << (16 - (preflen - bit)));
             }
         }
       else

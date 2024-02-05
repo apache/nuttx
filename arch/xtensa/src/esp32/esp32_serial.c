@@ -643,8 +643,7 @@ static void esp32_dmasend(struct uart_dev_s *dev)
       uint8_t *alloctp = NULL;
 #endif
 
-      /**
-       * If the buffer comes from PSRAM, allocate a new one from
+      /* If the buffer comes from PSRAM, allocate a new one from
        * Internal SRAM.
        */
 

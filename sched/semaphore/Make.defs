@@ -22,7 +22,7 @@
 
 CSRCS += sem_destroy.c sem_wait.c sem_trywait.c sem_tickwait.c
 CSRCS += sem_timedwait.c sem_clockwait.c sem_timeout.c sem_post.c
-CSRCS += sem_recover.c sem_reset.c sem_waitirq.c
+CSRCS += sem_recover.c sem_reset.c sem_waitirq.c sem_rw.c
 
 ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)
 CSRCS += sem_initialize.c sem_holder.c sem_setprotocol.c

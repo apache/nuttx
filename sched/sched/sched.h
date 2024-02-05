@@ -235,7 +235,7 @@ extern volatile int g_npidhash;
 
 extern const struct tasklist_s g_tasklisttable[NUM_TASK_STATES];
 
-#ifdef CONFIG_SCHED_CPULOAD
+#ifndef CONFIG_SCHED_CPULOAD_NONE
 /* This is the total number of clock tick counts.  Essentially the
  * 'denominator' for all CPU load calculations.
  */
@@ -381,7 +381,7 @@ void nxsched_suspend(FAR struct tcb_s *tcb);
 #endif
 
 #ifdef CONFIG_SMP
-FAR struct tcb_s *this_task(void);
+FAR struct tcb_s *this_task(void) noinstrument_function;
 
 int  nxsched_select_cpu(cpu_set_t affinity);
 int  nxsched_pause_cpu(FAR struct tcb_s *tcb);
@@ -416,5 +416,10 @@ void nxsched_suspend_critmon(FAR struct tcb_s *tcb);
 /* TCB operations */
 
 bool nxsched_verify_tcb(FAR struct tcb_s *tcb);
+
+/* Obtain TLS from kernel */
+
+struct tls_info_s; /* Forward declare */
+FAR struct tls_info_s *nxsched_get_tls(FAR struct tcb_s *tcb);
 
 #endif /* __SCHED_SCHED_SCHED_H */

@@ -55,14 +55,24 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static uint32_t s_flash_op_cache_state[CONFIG_SMP_NCPUS];
+
+/****************************************************************************
  * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
  * Name: spiflash_disable_cache
  ****************************************************************************/
 
-void IRAM_ATTR spi_disable_cache(int cpu, uint32_t *state)
+void IRAM_ATTR spi_disable_cache(int cpu)
 {
   const uint32_t cache_mask = 0x3f; /* Caches' bits in CTRL1_REG */
   uint32_t regval;
@@ -97,14 +107,14 @@ void IRAM_ATTR spi_disable_cache(int cpu, uint32_t *state)
     }
 
 #endif
-  *state = ret;
+  s_flash_op_cache_state[cpu] = ret;
 }
 
 /****************************************************************************
  * Name: spiflash_enable_cache
  ****************************************************************************/
 
-void IRAM_ATTR spi_enable_cache(int cpu, uint32_t state)
+void IRAM_ATTR spi_enable_cache(int cpu)
 {
   const uint32_t cache_mask = 0x3f;  /* Caches' bits in CTRL1_REG */
   uint32_t regval;
@@ -133,8 +143,35 @@ void IRAM_ATTR spi_enable_cache(int cpu, uint32_t state)
 
   regval  = getreg32(ctrl1reg);
   regval &= ~cache_mask;
-  regval |= state;
+  regval |= s_flash_op_cache_state[cpu];
   putreg32(regval, ctrl1reg);
+}
+
+/****************************************************************************
+ * Name: spi_flash_cache_enabled
+ *
+ * Description:
+ *   Check at runtime if flash cache is enabled on both CPUs.
+ *
+ * Returned Value:
+ *   True if both CPUs have flash cache enabled, false otherwise.
+ *
+ ****************************************************************************/
+
+bool spi_flash_cache_enabled(void)
+{
+  bool result = false;
+
+  if (((getreg32(DPORT_PRO_CACHE_CTRL_REG) & DPORT_PRO_CACHE_ENABLE) != 0)
+#ifdef CONFIG_SMP
+      && ((getreg32(DPORT_APP_CACHE_CTRL_REG) & DPORT_APP_CACHE_ENABLE) != 0)
+#endif
+       )
+    {
+      result = true;
+    }
+
+  return result;
 }
 
 #endif /* CONFIG_ESP32_SPICACHE */

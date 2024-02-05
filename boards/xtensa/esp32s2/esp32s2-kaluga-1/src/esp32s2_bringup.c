@@ -74,6 +74,20 @@
 #  include <nuttx/lcd/lcd_dev.h>
 #endif
 
+#ifdef CONFIG_SPI_DRIVER
+#  include "esp32s2_spi.h"
+#  include "esp32s2_board_spidev.h"
+#endif
+
+#ifdef CONFIG_SPI_SLAVE_DRIVER
+#  include "esp32s2_spi.h"
+#  include "esp32s2_board_spislavedev.h"
+#endif
+
+#ifdef CONFIG_RTC_DRIVER
+#  include "esp32s2_rtc_lowerhalf.h"
+#endif
+
 #include "esp32s2-kaluga-1.h"
 
 /****************************************************************************
@@ -135,6 +149,33 @@ int esp32s2_bringup(void)
     {
       syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
       return ret;
+    }
+#endif
+
+#ifdef CONFIG_ESP32S2_SPI2
+# ifdef CONFIG_SPI_DRIVER
+  ret = board_spidev_initialize(ESP32S2_SPI2);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize SPI%d driver: %d\n",
+             ESP32S2_SPI2, ret);
+    }
+# elif defined(CONFIG_SPI_SLAVE_DRIVER) && defined(CONFIG_ESP32S2_SPI2_SLAVE)
+  ret = board_spislavedev_initialize(ESP32S2_SPI2);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize SPI%d Slave driver: %d\n",
+             ESP32S2_SPI2, ret);
+    }
+# endif
+#endif
+
+#if defined(CONFIG_SPI_SLAVE_DRIVER) && defined(CONFIG_ESP32S2_SPI3_SLAVE)
+  ret = board_spislavedev_initialize(ESP32S2_SPI3);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize SPI%d Slave driver: %d\n",
+              ESP32S2_SPI3, ret);
     }
 #endif
 
@@ -274,6 +315,17 @@ int esp32s2_bringup(void)
 #endif /* CONFIG_AUDIO_ES8311 */
 
 #endif /* CONFIG_ESP32S2_I2S */
+
+#ifdef CONFIG_RTC_DRIVER
+  /* Instantiate the ESP32 RTC driver */
+
+  ret = esp32s2_rtc_driverinit();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to Instantiate the RTC driver: %d\n", ret);
+    }
+#endif
 
   /* If we got here then perhaps not all initialization was successful, but
    * at least enough succeeded to bring-up NSH with perhaps reduced

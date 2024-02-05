@@ -116,6 +116,8 @@
 #  define DEFAULT_PS_MODE WIFI_PS_NONE
 #endif
 
+#define ESP_MAX_PRIORITIES (25)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -259,7 +261,6 @@ static void esp_dport_access_stall_other_cpu_start(void);
 static void esp_dport_access_stall_other_cpu_end(void);
 static void wifi_apb80m_request(void);
 static void wifi_apb80m_release(void);
-static int32_t wifi_phy_update_country_info(const char *country);
 static int32_t esp_wifi_read_mac(uint8_t *mac, uint32_t type);
 static void esp_timer_arm(void *timer, uint32_t tmout, bool repeat);
 static void esp_timer_disarm(void *timer);
@@ -295,6 +296,11 @@ static int32_t esp_nvs_erase_key(uint32_t handle, const char *key);
 static int32_t esp_get_random(uint8_t *buf, size_t len);
 static int32_t esp_get_time(void *t);
 static uint32_t esp_clk_slowclk_cal_get_wrapper(void);
+static void esp_log_writev_wrapper(uint32_t level, const char *tag,
+                                   const char *format, va_list args);
+static void esp_log_write_wrapper(uint32_t level,
+                                  const char *tag,
+                                  const char *format, ...);
 static void *esp_malloc_internal(size_t size);
 static void *esp_realloc_internal(void *ptr, size_t size);
 static void *esp_calloc_internal(size_t n, size_t size);
@@ -487,7 +493,7 @@ wifi_osi_funcs_t g_wifi_osi_funcs =
   ._wifi_apb80m_release = wifi_apb80m_release,
   ._phy_disable = esp32s3_phy_disable,
   ._phy_enable = esp32s3_phy_enable,
-  ._phy_update_country_info = wifi_phy_update_country_info,
+  ._phy_update_country_info = esp32s3_phy_update_country_info,
   ._read_mac = esp_wifi_read_mac,
   ._timer_arm = esp_timer_arm,
   ._timer_disarm = esp_timer_disarm,
@@ -516,8 +522,8 @@ wifi_osi_funcs_t g_wifi_osi_funcs =
   ._get_time = esp_get_time,
   ._random = esp_random_ulong,
   ._slowclk_cal_get = esp_clk_slowclk_cal_get_wrapper,
-  ._log_write = esp_log_write,
-  ._log_writev = esp_log_writev,
+  ._log_write = esp_log_write_wrapper,
+  ._log_writev = esp_log_writev_wrapper,
   ._log_timestamp = esp_log_timestamp,
   ._malloc_internal =  esp_malloc_internal,
   ._realloc_internal = esp_realloc_internal,
@@ -1806,8 +1812,14 @@ static int32_t esp_task_create_pinned_to_core(void *entry,
   cpu_set_t cpuset;
 #endif
 
-  pid = kthread_create(name, prio, stack_depth, entry,
-                      (char * const *)param);
+  uint32_t target_prio = prio;
+  if (target_prio < ESP_MAX_PRIORITIES)
+    {
+      target_prio += esp_task_get_max_priority() - ESP_MAX_PRIORITIES;
+    }
+
+  pid = kthread_create(name, target_prio, stack_depth, entry,
+                       (char * const *)param);
   if (pid > 0)
     {
       if (task_handle != NULL)
@@ -2536,19 +2548,6 @@ static void wifi_apb80m_release(void)
 }
 
 /****************************************************************************
- * Name: wifi_phy_update_country_info
- *
- * Description:
- *   Don't support
- *
- ****************************************************************************/
-
-static int32_t wifi_phy_update_country_info(const char *country)
-{
-  return -1;
-}
-
-/****************************************************************************
  * Name: esp_wifi_read_mac
  *
  * Description:
@@ -3259,7 +3258,7 @@ static uint32_t esp_clk_slowclk_cal_get_wrapper(void)
 }
 
 /****************************************************************************
- * Name: esp_log_writev
+ * Name: esp_log_writev_wrapper
  *
  * Description:
  *   Output log with by format string and its arguments
@@ -3275,34 +3274,29 @@ static uint32_t esp_clk_slowclk_cal_get_wrapper(void)
  *
  ****************************************************************************/
 
-void esp_log_writev(uint32_t level, const char *tag,
-                           const char *format, va_list args)
+static void esp_log_writev_wrapper(uint32_t level, const char *tag,
+                                   const char *format, va_list args)
 {
-  switch (level)
+  esp_log_level_t max_level;
+
+#if defined (CONFIG_DEBUG_WIRELESS_INFO)
+  max_level = ESP_LOG_VERBOSE;
+#elif defined (CONFIG_DEBUG_WIRELESS_WARN)
+  max_level = ESP_LOG_WARN;
+#elif defined (CONFIG_DEBUG_WIRELESS_ERROR)
+  max_level = ESP_LOG_ERROR;
+#else
+  max_level = ESP_LOG_NONE;
+#endif
+
+  if (level <= max_level)
     {
-#ifdef CONFIG_DEBUG_WIRELESS_ERROR
-      case ESP_LOG_ERROR:
-        vsyslog(LOG_ERR, format, args);
-        break;
-#endif
-#ifdef CONFIG_DEBUG_WIRELESS_WARN
-      case ESP_LOG_WARN:
-        vsyslog(LOG_WARNING, format, args);
-        break;
-#endif
-#ifdef CONFIG_DEBUG_WIRELESS_INFO
-      case ESP_LOG_INFO:
-        vsyslog(LOG_INFO, format, args);
-        break;
-      default:
-        vsyslog(LOG_DEBUG, format, args);
-        break;
-#endif
+      esp_log_writev(level, tag, format, args);
     }
 }
 
 /****************************************************************************
- * Name: esp_log_write
+ * Name: esp_log_write_wrapper
  *
  * Description:
  *   Output log with by format string and its arguments
@@ -3317,33 +3311,29 @@ void esp_log_writev(uint32_t level, const char *tag,
  *
  ****************************************************************************/
 
-void esp_log_write(uint32_t level,
-                   const char *tag,
-                   const char *format, ...)
+static void esp_log_write_wrapper(uint32_t level,
+                                  const char *tag,
+                                  const char *format, ...)
 {
-  va_list list;
-  va_start(list, format);
-  esp_log_writev(level, tag, format, list);
-  va_end(list);
-}
+  esp_log_level_t max_level;
 
-/****************************************************************************
- * Name: esp_log_timestamp
- *
- * Description:
- *   Get system time by millim second
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   System time
- *
- ****************************************************************************/
+#if defined (CONFIG_DEBUG_WIRELESS_INFO)
+  max_level = ESP_LOG_VERBOSE;
+#elif defined (CONFIG_DEBUG_WIRELESS_WARN)
+  max_level = ESP_LOG_WARN;
+#elif defined (CONFIG_DEBUG_WIRELESS_ERROR)
+  max_level = ESP_LOG_ERROR;
+#else
+  max_level = ESP_LOG_NONE;
+#endif
 
-uint32_t esp_log_timestamp(void)
-{
-  return (uint32_t)(esp_timer_get_time() / 1000);
+  if (level <= max_level)
+    {
+      va_list list;
+      va_start(list, format);
+      esp_log_writev(level, tag, format, list);
+      va_end(list);
+    }
 }
 
 /****************************************************************************
@@ -5135,6 +5125,7 @@ int esp_wifi_sta_essid(struct iwreq *iwr, bool set)
     {
       memset(wifi_cfg.sta.ssid, 0x0, SSID_MAX_LEN);
       memcpy(wifi_cfg.sta.ssid, pdata, len);
+      memset(wifi_cfg.sta.sae_h2e_identifier, 0x0, SAE_H2E_IDENTIFIER_LEN);
       wifi_cfg.sta.sae_pwe_h2e = WPA3_SAE_PWE_BOTH;
 
       if (g_sta_connected)
@@ -6492,6 +6483,13 @@ int esp_wifi_softap_auth(struct iwreq *iwr, bool set)
 
                   case IW_AUTH_WPA_VERSION_WPA2:
                     wifi_cfg.ap.authmode = WIFI_AUTH_WPA2_PSK;
+                    break;
+
+                  case IW_AUTH_WPA_VERSION_WPA3:
+                    wifi_cfg.ap.pmf_cfg.required = true;
+                    wifi_cfg.ap.pmf_cfg.capable = false;
+                    wifi_cfg.ap.sae_pwe_h2e = WPA3_SAE_PWE_BOTH;
+                    wifi_cfg.ap.authmode = WIFI_AUTH_WPA3_PSK;
                     break;
 
                   default:

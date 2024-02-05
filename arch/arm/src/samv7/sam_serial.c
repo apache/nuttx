@@ -41,6 +41,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/serial/serial.h>
+#include <nuttx/signal.h>
 
 #include <arch/board/board.h>
 
@@ -1711,7 +1712,7 @@ static int sam_ioctl(struct file *filep, int cmd, unsigned long arg)
              * waiting to improve CPU utilization
              */
 
-            usleep((8 * 1000 * 1000) / priv->baud);
+            nxsig_usleep((8 * 1000 * 1000) / priv->baud);
 
             regval = sam_serialin(priv, SAM_UART_SR_OFFSET);
           }

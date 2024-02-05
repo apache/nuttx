@@ -41,10 +41,6 @@ ifeq ($(CONFIG_I2C_DRIVER),y)
 CSRCS += esp32s2_board_i2c.c
 endif
 
-ifeq ($(CONFIG_ESP32S2_SPI),y)
-CSRCS += esp32s2_board_spi.c
-endif
-
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += esp32s2_buttons.c
 endif

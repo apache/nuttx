@@ -168,6 +168,7 @@ const struct procfs_operations g_net_operations =
   netprocfs_close,      /* close */
   netprocfs_read,       /* read */
   NULL,                 /* write */
+  NULL,                 /* poll */
   netprocfs_dup,        /* dup */
 
   netprocfs_opendir,    /* opendir */

@@ -36,10 +36,14 @@ SECTIONS
     PROVIDE(__l2lim_end   = ORIGIN(l2lim) + LENGTH(l2lim));
 
     .text.sbi : {
-      */sbi*
-      */riscv_atomic*
-      */riscv_locks*
-      */riscv_asm*
+      _ssbi_ddr = ABSOLUTE(.);
+      sbi*
+      riscv_atomic*
+      riscv_locks*
+      riscv_asm*
+      _esbi_ddr = ABSOLUTE(.);
+      . = ALIGN(0x2000);
+      . += 16k; /* OpenSBI heap, aligned, at least 16k */
     } > ddr
 
     .l2_scratchpad : ALIGN(0x10)

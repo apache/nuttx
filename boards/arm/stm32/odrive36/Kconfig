@@ -1,0 +1,48 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_ODRIVE36
+
+choice
+	prompt "ODrive voltage version"
+	default ODRIVE_HW_VOLTAGE_56
+
+config ODRIVE_HW_VOLTAGE_56
+	bool "ODrive 56V version"
+
+config ODRIVE_HW_VOLTAGE_24
+	bool "ODrive 24V version"
+
+endchoice # ODrive voltage version
+
+if MOTOR_FOC
+
+config ODRIVE_FOC_FOC0
+	bool "ODrive enable support for FOC device 0"
+	default y
+
+if ODRIVE_FOC_FOC0
+
+endif # ODRIVE_FOC_FOC0
+
+config ODRIVE_FOC_FOC1
+	bool "ODrive enable support for FOC device 1"
+	default y
+
+if ODRIVE_FOC_FOC1
+
+endif # ODRIVE_FOC_FOC1
+
+config ODRIVE_FOC_VBUS
+	bool "ODrive VBUS ADC support"
+	default n
+
+config ODRIVE_FOC_TEMP
+	bool "ODrive Temperature ADC support"
+	default n
+
+endif # MOTOR_FOC
+
+endif # ARCH_BOARD_ODRIVE

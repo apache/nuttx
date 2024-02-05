@@ -72,6 +72,10 @@ ifeq ($(CONFIG_ESP32_WIFI),y)
   CSRCS += esp32_board_wlan.c
 endif
 
+ifeq ($(CONFIG_SENSORS_APDS9960),y)
+  CSRCS += esp32_board_apds9960.c
+endif
+
 ifeq ($(CONFIG_SENSORS_BMP180),y)
   CSRCS += esp32_bmp180.c
 endif
@@ -88,7 +92,7 @@ ifeq ($(CONFIG_SENSORS_SHT3X),y)
   CSRCS += esp32_sht3x.c
 endif
 
-ifeq ($(CONFIG_SENSORS_MS5611),y)
+ifeq ($(CONFIG_SENSORS_MS56XX),y)
   CSRCS += esp32_ms5611.c
 endif
 
@@ -108,12 +112,20 @@ ifeq ($(CONFIG_LCD_BACKPACK),y)
   CSRCS += esp32_lcd_backpack.c
 endif
 
+ifeq ($(CONFIG_LCD_DEV),y)
+  CSRCS += esp32_backlight.c
+endif
+
 ifeq ($(CONFIG_LCD_ILI9341),y)
   CSRCS += esp32_ili9341.c
 endif
 
 ifeq ($(CONFIG_LCD_ST7789),y)
   CSRCS += esp32_st7789.c
+endif
+
+ifeq ($(CONFIG_LCD_APA102),y)
+  CSRCS += esp32_board_apa102_lcd.c
 endif
 
 ifeq ($(CONFIG_LCD_SSD1306_I2C),y)
@@ -131,6 +143,10 @@ endif
 ifeq ($(CONFIG_ESP32_RMT),y)
   CSRCS += esp32_rmt.c
 endif
+
+#ifeq ($(CONFIG_DAC),y)
+  CSRCS += esp32_board_dac.c
+#endif
 
 DEPPATH += --dep-path src
 VPATH += :src

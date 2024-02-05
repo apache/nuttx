@@ -43,6 +43,10 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/ioctl.h>
 
+#if defined(CONFIG_ARCH_PHY_INTERRUPT)
+#  include <nuttx/net/phy.h>
+#endif
+
 #ifdef CONFIG_NET_PKT
 #  include <nuttx/net/pkt.h>
 #endif
@@ -87,7 +91,7 @@
 
 /* PHY Reset Timeout - in ms */
 
-#define LITEX_PHY_RESETTIMEOUT    (20)
+#define LITEX_PHY_RESETTIMEOUT    (20 * 1000)
 
 /* LITEX MDIO register bit definitions */
 
@@ -110,9 +114,21 @@
 #  define BOARD_PHYID1          MII_PHYID1_DP83848C
 #  define BOARD_PHYID2          MII_PHYID2_DP83848C
 #  define BOARD_PHY_STATUS      MII_DP83848C_STS
+#  define BOARD_PHY_INT_REG     MII_DP83848C_MISR
+#  define BOARD_PHY_SETEN       MII_DP83848C_LINK_INT_EN
 #  define BOARD_PHY_10BASET(s)  (((s) & MII_DP83848C_PHYSTS_SPEED) != 0)
 #  define BOARD_PHY_100BASET(s) (((s) & MII_DP83848C_PHYSTS_SPEED) == 0)
 #  define BOARD_PHY_ISDUPLEX(s) (((s) & MII_DP83848C_PHYSTS_DUPLEX) != 0)
+#elif defined(CONFIG_ETH0_PHY_KSZ8061)
+#  define BOARD_PHY_NAME        "KSZ8061"
+#  define BOARD_PHYID1          MII_PHYID1_KSZ8061
+#  define BOARD_PHYID2          MII_PHYID2_KSZ8061
+#  define BOARD_PHY_STATUS      MII_KSZ8061_PHY_CTRL_1
+#  define BOARD_PHY_INT_REG     MII_KSZ8061_INTR_CTRL_STAT
+#  define BOARD_PHY_SETEN       MII_KSZ80X1_INT_LDEN | MII_KSZ80X1_INT_LUEN
+#  define BOARD_PHY_10BASET(s)  (((s) & MII_KSZ8061_PC2_10T) != 0)
+#  define BOARD_PHY_100BASET(s) (((s) & MII_KSZ8061_PC2_100T) != 0)
+#  define BOARD_PHY_ISDUPLEX(s) (((s) & MII_KSZ8061_PC2_FD) != 0)
 #else
 #  error EMAC PHY unrecognized
 #endif
@@ -195,6 +211,9 @@ static int  litex_phyread(struct litex_emac_s *priv, uint8_t phyaddr,
 #ifdef CONFIG_NETDEV_IOCTL
 static int  litex_phywrite(struct litex_emac_s *priv, uint8_t phyaddr,
                            uint8_t regaddr, uint16_t phyval);
+#endif
+#ifdef CONFIG_ARCH_PHY_INTERRUPT
+static int litex_phyintenable(struct litex_emac_s *priv);
 #endif
 #if defined(CONFIG_DEBUG_NET) && defined(CONFIG_DEBUG_INFO)
 static void litex_phydump(struct litex_emac_s *priv);
@@ -820,7 +839,7 @@ static int litex_ifup(struct net_driver_s *dev)
   ret = litex_linkup(priv);
   if (ret != 0)
     {
-      nerr("ERROR: Failed to wait LINK UP error=%d\n", ret);
+      nerr("ERROR: Failed to wait LINK UP error= %d\n", ret);
       return ret;
     }
 
@@ -873,9 +892,6 @@ static int litex_ifdown(struct net_driver_s *dev)
   wd_cancel(&priv->txpoll);
   wd_cancel(&priv->txtimeout);
 
-  /* Hold the PHY device in reset and mark the interface as "down" */
-
-  putreg32(1, LITEX_ETHPHY_CRG_RESET);
   priv->ifup = false;
   leave_critical_section(flags);
 
@@ -1220,11 +1236,36 @@ static int litex_phyfind(struct litex_emac_s *priv, uint8_t phyaddr)
   model = (phyval[1] & 0x03f0) >> 4;
   revision = (phyval[1] & 0x000f);
 
-  ninfo("%s: PHY Found - OUI: 0x%04" PRIx32 "MODEL: %u REV: %u\n",
+  ninfo("%s: PHY Found - OUI: 0x%04" PRIx32 " MODEL: %u REV: %u\n",
         BOARD_PHY_NAME, oui, model, revision);
 
   return OK;
 }
+
+/****************************************************************************
+ * Function: litex_phyintenable
+ *
+ * Description:
+ *  Enable link up/down PHY interrupts.
+ *
+ * Input Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   Can currenly only return OK
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_PHY_INTERRUPT
+static int litex_phyintenable(struct litex_emac_s *priv)
+{
+  uint16_t value;
+  litex_phyread(priv, priv->phyaddr, BOARD_PHY_INT_REG, &value);
+  value |=  BOARD_PHY_SETEN;
+  litex_phywrite(priv, priv->phyaddr, BOARD_PHY_INT_REG, value);
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Function: litex_phyinit
@@ -1246,6 +1287,7 @@ static int litex_phyinit(struct litex_emac_s *priv)
 
   /* Reset PHY */
 
+  ninfo("%s: PHY RESET\n", BOARD_PHY_NAME);
   putreg32(1, LITEX_ETHPHY_CRG_RESET);
   nxsig_usleep(LITEX_PHY_RESETTIMEOUT);
   putreg32(0, LITEX_ETHPHY_CRG_RESET);
@@ -1328,6 +1370,24 @@ static int litex_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
                                req->reg_num, req->val_in);
         }
         break;
+
+#ifdef CONFIG_ARCH_PHY_INTERRUPT
+      case SIOCMIINOTIFY:
+        {
+          struct mii_ioctl_notify_s *req =
+            (struct mii_ioctl_notify_s *)((uintptr_t)arg);
+
+          ret = phy_notify_subscribe(dev->d_ifname, req->pid, &req->event);
+          if (ret == OK)
+            {
+              /* Enable PHY link up/down interrupts */
+
+              ret = litex_phyintenable(priv);
+            }
+        }
+      break;
+#endif
+
 #endif /* ifdef CONFIG_NETDEV_PHY_IOCTL */
 
       default:

@@ -300,7 +300,7 @@ static int gpint_enable(struct gpio_dev_s *dev, bool enable)
 
           /* Configure the interrupt for rising edge */
 
-          esp32s3_gpioirqenable(irq, GPIO_INTR_POSEDGE);
+          esp32s3_gpioirqenable(irq, RISING);
         }
     }
   else

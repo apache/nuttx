@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+
 #include <nuttx/board.h>
 
 #include "esp32c6-devkit.h"
@@ -73,7 +74,7 @@ int board_app_initialize(uintptr_t arg)
 #else
   /* Perform board-specific initialization */
 
-  return esp32c6_bringup();
+  return esp_bringup();
 #endif
 }
 

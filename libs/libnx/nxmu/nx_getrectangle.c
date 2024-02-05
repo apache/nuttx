@@ -90,10 +90,10 @@ int nx_getrectangle(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
 
   outmsg.sem_done = &sem_done;
 
-  ret = _SEM_INIT(&sem_done, 0, 0);
+  ret = nxsem_init(&sem_done, 0, 0);
   if (ret < 0)
     {
-      gerr("ERROR: _SEM_INIT failed: %d\n", _SEM_ERRNO(ret));
+      gerr("ERROR: nxsem_init failed: %d\n", ret);
       return ret;
     }
 
@@ -108,12 +108,12 @@ int nx_getrectangle(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
 
   if (ret == OK)
     {
-      ret = _SEM_WAIT(&sem_done);
+      ret = nxsem_wait(&sem_done);
     }
 
   /* Destroy the semaphore and return. */
 
-  _SEM_DESTROY(&sem_done);
+  nxsem_destroy(&sem_done);
 
   return ret;
 }

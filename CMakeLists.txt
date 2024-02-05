@@ -226,7 +226,7 @@ endif()
 
 if(NOT EXISTS "${NUTTX_BOARD_DIR}/CMakeLists.txt"
    AND NOT EXISTS "${NUTTX_BOARD_DIR}/../common/CMakeLists.txt")
-  message(FATAL_ERROR "No CMakeList.txt found at ${NUTTX_BOARD_DIR}")
+  message(FATAL_ERROR "No CMakeLists.txt found at ${NUTTX_BOARD_DIR}")
 endif()
 
 # Custom board ###################################################
@@ -260,15 +260,6 @@ if(EXISTS ${NUTTX_BOARD_ABS_DIR}/../drivers
 else()
   file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/drivers/platform)
   file(TOUCH ${CMAKE_BINARY_DIR}/drivers/platform/Kconfig)
-endif()
-
-# board common directory
-
-if(CONFIG_ARCH_BOARD_COMMON)
-  file(
-    GLOB NUTTX_COMMON_DIR
-    LIST_DIRECTORIES true
-    "${NUTTX_DIR}/boards/${CONFIG_ARCH}/${CONFIG_ARCH_CHIP}/common")
 endif()
 
 # Custom chip ###################################################
@@ -388,6 +379,15 @@ include(FetchContent)
 
 set(FETCHCONTENT_QUIET OFF)
 
+# Board common directory #####################################################
+
+if(CONFIG_ARCH_BOARD_COMMON)
+  file(
+    GLOB NUTTX_COMMON_DIR
+    LIST_DIRECTORIES true
+    "${NUTTX_DIR}/boards/${CONFIG_ARCH}/${CONFIG_ARCH_CHIP}/common")
+endif()
+
 # Setup toolchain ############################################################
 
 # This needs to happen before project() when binaries are searched for
@@ -436,6 +436,7 @@ if(CONFIG_ARCH_SIM)
     TARGET nuttx
     PROPERTY NUTTX_KERNEL_COMPILE_OPTIONS)
   target_compile_options(sim_head PRIVATE ${options})
+  target_compile_options(sim_head PRIVATE -fvisibility=default)
 
   # We need the relocatable object to be first in the list of libraries to be
   # linked against final nuttx binary
@@ -595,14 +596,15 @@ endif()
 get_property(nuttx_apps_libs GLOBAL PROPERTY NUTTX_APPS_LIBRARIES)
 get_property(nuttx_extra_libs GLOBAL PROPERTY NUTTX_EXTRA_LIBRARIES)
 
-set(nuttx_libs ${nuttx_kernel_libs} ${nuttx_system_libs} ${nuttx_apps_libs}
-               ${nuttx_extra_libs})
+set(nuttx_libs ${nuttx_kernel_libs} ${nuttx_system_libs} ${nuttx_apps_libs})
 
 if(NOT CONFIG_ARCH_SIM)
+
   # TODO: nostart/nodefault not applicable to nuttx toolchain
   target_link_libraries(
-    nuttx PRIVATE ${NUTTX_EXTRA_FLAGS} -Wl,--script=${ldscript}
-                  -Wl,--start-group ${nuttx_libs} -Wl,--end-group)
+    nuttx
+    PRIVATE ${NUTTX_EXTRA_FLAGS} -Wl,--script=${ldscript} -Wl,--start-group
+            ${nuttx_libs} ${nuttx_extra_libs} -Wl,--end-group)
 
   # generate binary outputs in different formats (.bin, .hex, etc)
   nuttx_generate_outputs(nuttx)
@@ -635,8 +637,8 @@ elseif(WIN32)
   add_custom_command(
     OUTPUT ${CMAKE_BINARY_DIR}/nuttx_all.lib
     COMMAND ${CMAKE_AR} /OUT:${CMAKE_BINARY_DIR}/nuttx_all.lib
-            ${nuttx_libs_paths}
-    DEPENDS ${nuttx_libs}
+            ${nuttx_libs_paths} ${nuttx_extra_libs}
+    DEPENDS ${nuttx_libs} ${nuttx_extra_libs}
     VERBATIM)
   add_custom_target(nuttx_all-lib DEPENDS ${CMAKE_BINARY_DIR}/nuttx_all.lib)
   add_dependencies(nuttx nuttx_all-lib)
@@ -687,16 +689,28 @@ else()
     list(APPEND nuttx_libs_paths $<TARGET_FILE:${lib}>)
   endforeach()
 
-  add_custom_command(
-    OUTPUT nuttx.rel
-    COMMAND
-      ${CMAKE_C_COMPILER} ARGS -r $<$<BOOL:${CONFIG_SIM_M32}>:-m32>
-      $<TARGET_OBJECTS:sim_head> $<$<NOT:$<BOOL:${APPLE}>>:-Wl,--start-group>
-      ${nuttx_libs_paths} $<$<NOT:$<BOOL:${APPLE}>>:-Wl,--end-group> -o
-      nuttx.rel
-    COMMAND ${CMAKE_OBJCOPY} --redefine-syms=nuttx-names.dat nuttx.rel
-    DEPENDS ${nuttx_libs_paths} sim_head
-    COMMAND_EXPAND_LISTS)
+  if(APPLE)
+    add_custom_command(
+      OUTPUT nuttx.rel
+      COMMAND
+        ${CMAKE_LINKER} ARGS -r $<$<BOOL:${CONFIG_SIM_M32}>:-m32>
+        $<TARGET_OBJECTS:sim_head> $<$<NOT:$<BOOL:${APPLE}>>:-Wl,--start-group>
+        ${nuttx_libs_paths} ${nuttx_extra_libs}
+        $<$<NOT:$<BOOL:${APPLE}>>:-Wl,--end-group> -o nuttx.rel
+      DEPENDS ${nuttx_libs} ${nuttx_extra_libs} sim_head
+      COMMAND_EXPAND_LISTS)
+  else()
+    add_custom_command(
+      OUTPUT nuttx.rel
+      COMMAND
+        ${CMAKE_C_COMPILER} ARGS -r $<$<BOOL:${CONFIG_SIM_M32}>:-m32>
+        $<TARGET_OBJECTS:sim_head> $<$<NOT:$<BOOL:${APPLE}>>:-Wl,--start-group>
+        ${nuttx_libs_paths} ${nuttx_extra_libs}
+        $<$<NOT:$<BOOL:${APPLE}>>:-Wl,--end-group> -o nuttx.rel
+      COMMAND ${CMAKE_OBJCOPY} --redefine-syms=nuttx-names.dat nuttx.rel
+      DEPENDS ${nuttx_libs} ${nuttx_extra_libs} sim_head
+      COMMAND_EXPAND_LISTS)
+  endif()
   add_custom_target(nuttx-rel DEPENDS nuttx.rel
                                       $<$<NOT:$<BOOL:${APPLE}>>:nuttx.ld>)
 

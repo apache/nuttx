@@ -24,12 +24,6 @@ ifeq ($(V),)
   MAKE := $(MAKE) -s --no-print-directory
 endif
 
-# Build any necessary tools needed early in the build.
-# incdir - Is needed immediately by all Make.defs file.
-
-DUMMY  := ${shell $(MAKE) -C tools -f Makefile.host incdir \
-          INCDIR="$(TOPDIR)/tools/incdir.sh"}
-
 include $(TOPDIR)/Make.defs
 
 # GIT directory present
@@ -222,6 +216,13 @@ include/setjmp.h: include/nuttx/lib/setjmp.h
 	$(Q) cp -f include/nuttx/lib/setjmp.h include/setjmp.h
 endif
 
+# Targets used to generate compiler-specific include paths
+# Build this tools needed early in the build
+# so we define it as a dependency of `context` target
+
+tools/incdir$(HOSTEXEEXT):
+	$(Q) $(MAKE) -C tools -f Makefile.host incdir INCDIR="$(TOPDIR)/tools/incdir.sh"
+
 # Targets used to build include/nuttx/version.h.  Creation of version.h is
 # part of the overall NuttX configuration sequence. Notice that the
 # tools/mkversion tool is built and used to create include/nuttx/version.h
@@ -279,10 +280,18 @@ include/arch:
 	$(Q) $(DIRLINK) $(TOPDIR)/$(ARCH_DIR)/include $@
 
 # Link the boards/<arch>/<chip>/<board>/include directory to include/arch/board
+# If the above path does not exist, then we try to link to common
+
+LINK_INCLUDE_DIR=$(BOARD_DIR)/include
+ifeq ($(wildcard $(LINK_INCLUDE_DIR)),)
+	ifneq ($(strip $(BOARD_COMMON_DIR)),)
+		LINK_INCLUDE_DIR = $(BOARD_COMMON_DIR)/include
+	endif
+endif
 
 include/arch/board: | include/arch
 	@echo "LN: $@ to $(BOARD_DIR)/include"
-	$(Q) $(DIRLINK) $(BOARD_DIR)/include $@
+	$(Q) $(DIRLINK) $(LINK_INCLUDE_DIR) $@
 
 # Link the boards/<arch>/<chip>/common dir to arch/<arch-name>/src/board
 # Link the boards/<arch>/<chip>/<board>/src dir to arch/<arch-name>/src/board/board
@@ -432,7 +441,7 @@ endif
 
 CONTEXTDIRS_DEPS = $(patsubst %,%/.context,$(CONTEXTDIRS))
 
-context: include/nuttx/config.h include/nuttx/version.h .dirlinks $(CONTEXTDIRS_DEPS) | staging
+context: tools/incdir$(HOSTEXEEXT) include/nuttx/config.h include/nuttx/version.h .dirlinks $(CONTEXTDIRS_DEPS) | staging
 
 staging:
 	$(Q) mkdir -p $@
@@ -731,7 +740,8 @@ savedefconfig: apps_preconfig
 # that the archiver is 'ar'
 
 export: $(NUTTXLIBS)
-	$(Q) MAKE="${MAKE}" $(MKEXPORT) $(MKEXPORT_ARGS) -l "$(EXPORTLIBS)"
+	$(Q) ZIG="${ZIG}" ZIGFLAGS="${ZIGFLAGS}" MAKE="${MAKE}" \
+		$(MKEXPORT) $(MKEXPORT_ARGS) -l "$(EXPORTLIBS)"
 
 # General housekeeping targets:  dependencies, cleaning, etc.
 #

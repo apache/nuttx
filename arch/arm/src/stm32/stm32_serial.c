@@ -218,7 +218,7 @@
                  CONFIG_USART_RXDMAPRIO)
 #  endif
 
-#endif  /* SERIAL_HAVE_RXDMA */
+#endif /* SERIAL_HAVE_RXDMA */
 
 #ifdef SERIAL_HAVE_TXDMA
 
@@ -368,7 +368,7 @@
 #    error "Unknown STM32 DMA"
 #  endif
 
-#endif  /* SERIAL_HAVE_TXDMA */
+#endif /* SERIAL_HAVE_TXDMA */
 
 /* Power management definitions */
 

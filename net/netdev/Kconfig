@@ -61,6 +61,24 @@ config NETDEV_IFINDEX
 		When enabled, these option also enables the user interfaces:
 		if_nametoindex() and if_indextoname().
 
+config NETDEV_MULTIPLE_IPv6
+	bool "Enable multiple IPv6 addresses support"
+	default n
+	select NETDEV_IFINDEX
+	depends on NET_IPv6
+	---help---
+		Enable support for multiple IPv6 addresses per network device.
+
+config NETDEV_MAX_IPv6_ADDR
+	int "Maximum number of IPv6 addresses per network device"
+	range 2 255
+	default 2
+	depends on NETDEV_MULTIPLE_IPv6
+	---help---
+		Maximum number of IPv6 addresses that can be assigned to a single
+		network device. Normally a link-local address and a global address
+		are needed.
+
 config NETDOWN_NOTIFIER
 	bool "Support network down notifications"
 	default n

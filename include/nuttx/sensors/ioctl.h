@@ -364,7 +364,7 @@
 
 /* Set proximity sensor cancellation level */
 
-#define SNIOC_PS_CANC_LVL          _SNIOC(0x0095) /* uint16_t level        */                                                  
+#define SNIOC_PS_CANC_LVL          _SNIOC(0x0095) /* uint16_t level        */
 
 /* IOCTL commands for MPU60x0 IMU */
 

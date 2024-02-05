@@ -65,4 +65,8 @@ else()
   list(APPEND PLATFORM_FLAGS -mfloat-abi=soft)
 endif()
 
+if(CONFIG_ARCH_INSTRUMENT_ALL AND NOT CONFIG_ARMV8M_STACKCHECK)
+  list(APPEND PLATFORM_FLAGS -finstrument-functions)
+endif()
+
 add_compile_options(${PLATFORM_FLAGS})

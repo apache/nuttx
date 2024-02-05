@@ -69,6 +69,9 @@ endif
 
 ifeq ($(CONFIG_ESP32S2_SPI),y)
 CHIP_CSRCS += esp32s2_spi.c
+ifeq ($(CONFIG_SPI_SLAVE),y)
+CHIP_CSRCS += esp32s2_spi_slave.c
+endif
 endif
 
 #ifeq ($(CONFIG_ESP32S2_SPIFLASH),y)
@@ -98,6 +101,18 @@ ifeq ($(CONFIG_WATCHDOG),y)
 CHIP_CSRCS += esp32s2_wdt_lowerhalf.c
 endif
 
+ifeq ($(CONFIG_ARCH_HAVE_EXTRA_HEAPS),y)
+CHIP_CSRCS += esp32s2_extraheaps.c
+endif
+
+ifeq ($(CONFIG_ESP32S2_RTC_HEAP),y)
+CHIP_CSRCS += esp32s2_rtcheap.c
+endif
+
+ifeq ($(CONFIG_ARCH_USE_TEXT_HEAP),y)
+CHIP_CSRCS += esp32s2_textheap.c
+endif
+
 ifeq ($(CONFIG_ESP32S2_FREERUN),y)
 CHIP_CSRCS += esp32s2_freerun.c
 endif
@@ -122,6 +137,12 @@ CHIP_CSRCS += esp32s2_spiram.c
 CHIP_CSRCS += esp32s2_psram.c
 endif
 
+CHIP_CSRCS += esp32s2_rtc.c
+
+ifeq ($(CONFIG_RTC_DRIVER),y)
+CHIP_CSRCS += esp32s2_rtc_lowerhalf.c
+endif
+
 #############################################################################
 # Espressif HAL for 3rd Party Platforms
 #############################################################################
@@ -130,7 +151,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = 45c33111b441363e1267158186a60f42525228ca
+	ESP_HAL_3RDPARTY_VERSION = 22804823777dbbb7f43925b7729b3a32331aa7cd
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL
@@ -147,7 +168,15 @@ chip/$(ESP_HAL_3RDPARTY_REPO):
 
 CFLAGS += -Wno-undef -Wno-unused-variable
 
+CHIP_SERIES = $(patsubst "%",%,$(CONFIG_ESPRESSIF_CHIP_SERIES))
+
+include chip/hal.mk
+
+include common/espressif/Make.defs
+
 include chip/Bootloader.mk
+
+context:: chip/$(ESP_HAL_3RDPARTY_REPO)
 
 distclean::
 	$(call DELDIR,chip/$(ESP_HAL_3RDPARTY_REPO))

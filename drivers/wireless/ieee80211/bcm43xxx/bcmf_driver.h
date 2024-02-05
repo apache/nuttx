@@ -82,6 +82,9 @@ struct bcmf_dev_s
   uint16_t control_rxdata_len; /* Received control frame out buffer length */
   FAR uint8_t *control_rxdata; /* Received control frame out buffer */
   uint32_t control_status;     /* Last received frame status */
+#ifdef CONFIG_NETDEV_IOCTL
+  mutex_t ioctl_mutex;         /* Avoid handle multiple ioctl requests */
+#endif
 
   /* AP Scan state machine.
    * During scan, control_mutex is locked to prevent control requests

@@ -34,9 +34,11 @@
 
 #include <nuttx/addrenv.h>
 #include <nuttx/arch.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/sched.h>
 #include <sched/sched.h>
+#include <task/spawn.h>
 #include <nuttx/spawn.h>
 #include <nuttx/binfmt/binfmt.h>
 
@@ -203,6 +205,7 @@ int exec_module(FAR struct binary_s *binp,
                 FAR const char *filename, FAR char * const *argv,
                 FAR char * const *envp,
                 FAR const posix_spawn_file_actions_t *actions,
+                FAR const posix_spawnattr_t *attr,
                 bool spawn)
 {
   FAR struct task_tcb_s *tcb;
@@ -253,6 +256,12 @@ int exec_module(FAR struct binary_s *binp,
       goto errout_with_args;
     }
 
+  ret = binfmt_copyactions(&actions, actions);
+  if (ret < 0)
+    {
+      goto errout_with_envp;
+    }
+
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   /* If there is no argument vector, the process name must be copied here */
 
@@ -268,7 +277,7 @@ int exec_module(FAR struct binary_s *binp,
   if (ret < 0)
     {
       berr("ERROR: addrenv_select() failed: %d\n", ret);
-      goto errout_with_envp;
+      goto errout_with_actions;
     }
 
   ret = up_addrenv_vheap(addrenv, &vheap);
@@ -307,12 +316,14 @@ int exec_module(FAR struct binary_s *binp,
   if (argv && argv[0])
     {
       ret = nxtask_init(tcb, argv[0], binp->priority, stackaddr,
-                        binp->stacksize, binp->entrypt, &argv[1], envp);
+                        binp->stacksize, binp->entrypt, &argv[1],
+                        envp, actions);
     }
   else
     {
       ret = nxtask_init(tcb, filename, binp->priority, stackaddr,
-                        binp->stacksize, binp->entrypt, argv, envp);
+                        binp->stacksize, binp->entrypt, argv,
+                        envp, actions);
     }
 
   if (ret < 0)
@@ -323,19 +334,9 @@ int exec_module(FAR struct binary_s *binp,
 
   /* The copied argv and envp can now be released */
 
+  binfmt_freeactions(actions);
   binfmt_freeargv(argv);
   binfmt_freeenv(envp);
-
-  /* Perform file actions */
-
-  if (actions != NULL)
-    {
-      ret = spawn_file_actions(&tcb->cmn, actions);
-      if (ret < 0)
-        {
-          goto errout_with_tcbinit;
-        }
-    }
 
 #ifdef CONFIG_PIC
   /* Add the D-Space address as the PIC base address.  By convention, this
@@ -393,10 +394,6 @@ int exec_module(FAR struct binary_s *binp,
 
   pid = tcb->cmn.pid;
 
-  /* Then activate the task at the provided priority */
-
-  nxtask_activate((FAR struct tcb_s *)tcb);
-
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   /* Restore the address environment of the caller */
 
@@ -407,6 +404,21 @@ int exec_module(FAR struct binary_s *binp,
       goto errout_with_tcbinit;
     }
 #endif
+
+  /* Set the attributes */
+
+  if (attr)
+    {
+      ret = spawn_execattrs(pid, attr);
+      if (ret < 0)
+        {
+          goto errout_with_tcbinit;
+        }
+    }
+
+  /* Then activate the task at the provided priority */
+
+  nxtask_activate((FAR struct tcb_s *)tcb);
 
   return pid;
 
@@ -424,8 +436,10 @@ errout_with_tcbinit:
 errout_with_addrenv:
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   addrenv_restore(binp->oldenv);
-errout_with_envp:
+errout_with_actions:
+  binfmt_freeactions(actions);
 #endif
+errout_with_envp:
   binfmt_freeenv(envp);
 errout_with_args:
   binfmt_freeargv(argv);

@@ -1164,7 +1164,7 @@ hciuart
 
 This configuration was used for test the HCI UART driver.  The HCI UART
 is enabled on USART3 as well as the test application at
-apps/wireless/bluetoot/btsak.
+apps/wireless/bluetooth/btsak.
 
 NOTES:
 
@@ -2177,6 +2177,6 @@ NOTES:
    The MSYS tools are probably also a option but are likely lower performance
    since they are based on Cygwin 1.3.
 
-   Host Compiler:  I use the MingGW compiler which can be downloaded from
+   Host Compiler:  I use the MingW compiler which can be downloaded from
    http://www.mingw.org/.  If you are using GNUWin32, then it is recommended
    the you not install the optional MSYS components as there may be conflicts.

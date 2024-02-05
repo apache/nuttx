@@ -29,8 +29,7 @@ CMN_CSRCS += arm_prefetchabort.c arm_schedulesigaction.c
 CMN_CSRCS += arm_sigdeliver.c arm_syscall.c arm_tcbinfo.c
 CMN_CSRCS += arm_undefinedinsn.c
 
-CMN_ASRCS += arm_cache.S arm_vectoraddrexcptn.S
-CMN_ASRCS += arm_vectors.S arm_vectortab.S
+CMN_ASRCS += arm_cache.S arm_vectors.S arm_vectortab.S
 CMN_ASRCS += arm_saveusercontext.S
 
 ifeq ($(CONFIG_PAGING),y)

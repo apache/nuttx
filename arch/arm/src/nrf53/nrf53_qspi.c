@@ -135,7 +135,7 @@ static const struct qspi_ops_s g_qspi_ops =
   .setbits           = nrf53_qspi_setbits,
 #ifdef CONFIG_QSPI_HWFEATURES
   .hwfeatures        = NULL,
-#endif  
+#endif
   .command           = nrf53_qspi_command,
   .memory            = nrf53_qspi_memory,
   .alloc             = nrf53_qspi_alloc,

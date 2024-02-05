@@ -74,7 +74,7 @@
 #define spiffs_unlock_volume(fs)     (nxrmutex_unlock(&fs->lock))
 
 /****************************************************************************
- * Private Type
+ * Private Types
  ****************************************************************************/
 
 struct spiffs_dir_s
@@ -143,6 +143,7 @@ const struct mountpt_operations g_spiffs_operations =
   spiffs_ioctl,      /* ioctl */
   NULL,              /* mmap */
   spiffs_truncate,   /* truncate */
+  NULL,              /* poll */
 
   spiffs_sync,       /* sync */
   spiffs_dup,        /* dup */
@@ -1123,7 +1124,6 @@ static int spiffs_dup(FAR const struct file *oldp, FAR struct file *newp)
   ret = spiffs_lock_volume(fs);
   if (ret >= 0)
     {
-      spiffs_lock_volume(fs);
       fobj->crefs++;
       spiffs_unlock_volume(fs);
 
@@ -1519,7 +1519,6 @@ static int spiffs_unbind(FAR void *handle, FAR struct inode **mtdinode,
 {
   FAR struct spiffs_s *fs = (FAR struct spiffs_s *)handle;
   FAR struct spiffs_file_s *fobj;
-  int ret;
 
   finfo("handle=%p mtdinode=%p flags=%02x\n",
         handle, mtdinode, flags);
@@ -1534,8 +1533,8 @@ static int spiffs_unbind(FAR void *handle, FAR struct inode **mtdinode,
   if (!dq_empty(&fs->objq) && (flags & MNT_FORCE) == 0)
     {
       fwarn("WARNING: Open files and umount not forced\n");
-      ret = -EBUSY;
-      goto errout_with_lock;
+      spiffs_unlock_volume(fs);
+      return spiffs_map_errno(-EBUSY);
     }
 
   /* Release all of the open file objects... Very scary stuff. */
@@ -1561,13 +1560,11 @@ static int spiffs_unbind(FAR void *handle, FAR struct inode **mtdinode,
 
   /* Free the volume memory (note that the mutex is now stale!) */
 
+  spiffs_unlock_volume(fs);
   nxrmutex_destroy(&fs->lock);
   kmm_free(fs);
-  ret = OK;
 
-errout_with_lock:
-  spiffs_unlock_volume(fs);
-  return spiffs_map_errno(ret);
+  return spiffs_map_errno(OK);
 }
 
 /****************************************************************************

@@ -170,6 +170,9 @@ for CONFIG in ${CONFIGS}; do
   DEFCONFIG=$CONFIGDIR/defconfig
   MAKEDEFS2=$CONFIGDIR/Make.defs
 
+  SCRIPTSDIR2=$BOARDDIR/../common/scripts
+  MAKEDEFS3=$SCRIPTSDIR2/Make.defs
+
   # Check the board configuration directory
 
   if [ ! -d $BOARDDIR ]; then
@@ -193,8 +196,12 @@ for CONFIG in ${CONFIGS}; do
     if [ -r $MAKEDEFS1 ]; then
       MAKEDEFS=$MAKEDEFS1
     else
-      echo "No readable Make.defs file at $MAKEDEFS1 or $MAKEDEFS2"
-      exit 1
+      if [ -r $MAKEDEFS3 ]; then
+        MAKEDEFS=$MAKEDEFS3
+      else
+        echo "No readable Make.defs file at $MAKEDEFS1 or $MAKEDEFS2 or $MAKEDEFS3"
+        exit 1
+      fi
     fi
   fi
 

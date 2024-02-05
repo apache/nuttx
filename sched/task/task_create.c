@@ -33,6 +33,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/sched.h>
 #include <nuttx/kthread.h>
+#include <nuttx/fs/fs.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
@@ -95,7 +96,7 @@ int nxthread_create(FAR const char *name, uint8_t ttype, int priority,
   /* Initialize the task */
 
   ret = nxtask_init(tcb, name, priority, stack_addr, stack_size,
-                    entry, argv, envp);
+                    entry, argv, envp, NULL);
   if (ret < OK)
     {
       kmm_free(tcb);

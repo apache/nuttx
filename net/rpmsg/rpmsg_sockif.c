@@ -141,30 +141,36 @@ static int        rpmsg_socket_setup(FAR struct socket *psock);
 static sockcaps_t rpmsg_socket_sockcaps(FAR struct socket *psock);
 static void       rpmsg_socket_addref(FAR struct socket *psock);
 static int        rpmsg_socket_bind(FAR struct socket *psock,
-                    FAR const struct sockaddr *addr, socklen_t addrlen);
+                                    FAR const struct sockaddr *addr,
+                                    socklen_t addrlen);
 static int        rpmsg_socket_getsockname(FAR struct socket *psock,
-                    FAR struct sockaddr *addr, FAR socklen_t *addrlen);
-static int        rpmsg_socket_getconnname(FAR struct socket *psock,
-                    FAR struct sockaddr *addr, FAR socklen_t *addrlen);
+                                           FAR struct sockaddr *addr,
+                                           FAR socklen_t *addrlen);
+static int        rpmsg_socket_getpeername(FAR struct socket *psock,
+                                           FAR struct sockaddr *addr,
+                                           FAR socklen_t *addrlen);
 static int        rpmsg_socket_listen(FAR struct socket *psock, int backlog);
 static int        rpmsg_socket_connect(FAR struct socket *psock,
-                    FAR const struct sockaddr *addr, socklen_t addrlen);
+                                       FAR const struct sockaddr *addr,
+                                       socklen_t addrlen);
 static int        rpmsg_socket_accept(FAR struct socket *psock,
-                    FAR struct sockaddr *addr, FAR socklen_t *addrlen,
-                    FAR struct socket *newsock, int flags);
+                                      FAR struct sockaddr *addr,
+                                      FAR socklen_t *addrlen,
+                                      FAR struct socket *newsock, int flags);
 static int        rpmsg_socket_poll(FAR struct socket *psock,
-                    FAR struct pollfd *fds, bool setup);
+                                    FAR struct pollfd *fds, bool setup);
 static ssize_t    rpmsg_socket_sendmsg(FAR struct socket *psock,
-                    FAR struct msghdr *msg, int flags);
+                                       FAR struct msghdr *msg, int flags);
 static ssize_t    rpmsg_socket_recvmsg(FAR struct socket *psock,
-                    FAR struct msghdr *msg, int flags);
+                                       FAR struct msghdr *msg, int flags);
 static int        rpmsg_socket_close(FAR struct socket *psock);
 static int        rpmsg_socket_ioctl(FAR struct socket *psock,
                                      int cmd, unsigned long arg);
 #ifdef CONFIG_NET_SOCKOPTS
 static int        rpmsg_socket_getsockopt(FAR struct socket *psock,
-                    int level, int option, FAR void *value,
-                    FAR socklen_t *value_len);
+                                          int level, int option,
+                                          FAR void *value,
+                                          FAR socklen_t *value_len);
 #endif
 
 /****************************************************************************
@@ -178,7 +184,7 @@ const struct sock_intf_s g_rpmsg_sockif =
   rpmsg_socket_addref,      /* si_addref */
   rpmsg_socket_bind,        /* si_bind */
   rpmsg_socket_getsockname, /* si_getsockname */
-  rpmsg_socket_getconnname, /* si_getconnname */
+  rpmsg_socket_getpeername, /* si_getpeername */
   rpmsg_socket_listen,      /* si_listen */
   rpmsg_socket_connect,     /* si_connect */
   rpmsg_socket_accept,      /* si_accept */
@@ -673,7 +679,7 @@ static int rpmsg_socket_getsockname(FAR struct socket *psock,
   return ret;
 }
 
-static int rpmsg_socket_getconnname(FAR struct socket *psock,
+static int rpmsg_socket_getpeername(FAR struct socket *psock,
                                     FAR struct sockaddr *addr,
                                     FAR socklen_t *addrlen)
 {
@@ -943,7 +949,7 @@ static int rpmsg_socket_poll(FAR struct socket *psock,
             }
         }
 
-      rpmsg_socket_poll_notify(conn, eventset);
+      poll_notify(&fds, 1, eventset);
     }
   else
     {
@@ -1295,7 +1301,7 @@ static ssize_t rpmsg_socket_recvmsg(FAR struct socket *psock,
                       _SO_TIMEOUT(conn->sconn.s_rcvtimeo));
   if (!conn->ept.rdev || conn->unbind)
     {
-      ret = -ECONNRESET;
+      ret = 0;
     }
 
   nxmutex_lock(&conn->recvlock);

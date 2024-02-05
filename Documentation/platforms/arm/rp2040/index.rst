@@ -1,6 +1,6 @@
-========
-rp2040
-========
+==================
+RaspberryPi rp2040
+==================
 
 The rp2040 is a dual core chip produced by the RaspberryPi Foundation that
 is based on ARM Cortex-M0+.
@@ -23,6 +23,7 @@ USB
 PIO            RP2040 Programmable I/O
 IRQs        
 DMA         
+Clock Output
 ws2812         Smart pixels (e.g. Neopixel)
 Flash ROM Boot
 SRAM Boot      If Pico SDK is available a nuttx.uf2 file will be created

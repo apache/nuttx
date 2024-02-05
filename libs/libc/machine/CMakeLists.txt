@@ -19,3 +19,7 @@
 # ##############################################################################
 
 add_subdirectory(${CONFIG_ARCH})
+
+if(CONFIG_LIBC_ARCH_ATOMIC)
+  target_sources(c PRIVATE arch_atomic.c)
+endif()

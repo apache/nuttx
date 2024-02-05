@@ -161,7 +161,7 @@
 #  if CONFIG_STM32_TIM1_MODE != 2
 #    error TIM1 must be configured in center-aligned mode 1
 #  endif
-#endif  /* CONFIG_STM32_FOC_FOC0 */
+#endif /* CONFIG_STM32_FOC_FOC0 */
 
 /* FOC1 always use TIMER8 for PWM */
 
@@ -671,27 +671,27 @@
 
 /* Get arch-specific FOC private part */
 
-#define STM32_FOC_PRIV_FROM_DEV_GET(d)              \
+#define STM32_FOCPIRV_FROM_DEV_GET(d)              \
   ((struct stm32_foc_priv_s *)(d)->lower->data)
 
 /* Get board-specific FOC data */
 
-#define STM32_FOC_BOARD_FROM_DEV_GET(d)         \
-  ((STM32_FOC_PRIV_FROM_DEV_GET(d))->board)
+#define STM32_FOCBOARD_FROM_DEV_GET(d)         \
+  ((STM32_FOCPIRV_FROM_DEV_GET(d))->board)
 
 /* Get arch-specific FOC devices */
 
-#define STM32_FOC_DEV_FROM_DEV_GET(d)           \
-  ((STM32_FOC_PRIV_FROM_DEV_GET(d))->dev)
+#define STM32_FOCDEV_FROM_DEV_GET(d)           \
+  ((STM32_FOCPIRV_FROM_DEV_GET(d))->dev)
 
 /* Get PWM device */
 
-#define PWM_FROM_FOC_DEV_GET(d) (STM32_FOC_DEV_FROM_DEV_GET(d)->pwm)
+#define PWM_FROM_FOC_DEV_GET(d) (STM32_FOCDEV_FROM_DEV_GET(d)->pwm)
 
 /* Get ADC device */
 
-#define ADC_FROM_FOC_DEV_GET(d)  (STM32_FOC_DEV_FROM_DEV_GET(d)->adc)
-#define VADC_FROM_FOC_DEV_GET(d) (STM32_FOC_DEV_FROM_DEV_GET(d)->vadc)
+#define ADC_FROM_FOC_DEV_GET(d)  (STM32_FOCDEV_FROM_DEV_GET(d)->adc)
+#define VADC_FROM_FOC_DEV_GET(d) (STM32_FOCDEV_FROM_DEV_GET(d)->vadc)
 
 /* Define PWM all outputs */
 
@@ -845,6 +845,8 @@ static int stm32_foc_start(struct foc_dev_s *dev, bool state);
 static int stm32_foc_pwm_duty_set(struct foc_dev_s *dev,
                                   foc_duty_t *duty);
 static int stm32_foc_pwm_off(struct foc_dev_s *dev, bool off);
+static int stm32_foc_info_get(struct foc_dev_s *dev,
+                              struct foc_info_s *info);
 static int stm32_foc_ioctl(struct foc_dev_s *dev, int cmd,
                            unsigned long arg);
 static int stm32_foc_bind(struct foc_dev_s *dev,
@@ -886,8 +888,6 @@ static void stm32_foc_adc_trgo_trg_set(struct foc_dev_s *dev,
 #  error Invalid FOC ADC trigger
 #endif
 
-static void stm32_foc_hw_config_get(struct foc_dev_s *dev);
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -901,7 +901,7 @@ static struct stm32_foc_adccmn_s g_stm32_foc_adccmn123 =
   .cntr = 0,
   .lock = NXMUTEX_INITIALIZER,
 };
-#  endif  /* CONFIG_STM32_HAVE_IP_ADC_V1 */
+#  endif /* CONFIG_STM32_HAVE_IP_ADC_V1 */
 
 #  ifdef CONFIG_STM32_HAVE_IP_ADC_V2
 #    if defined(CONFIG_STM32_HAVE_ADC1) || defined(CONFIG_STM32_HAVE_ADC2)
@@ -940,6 +940,7 @@ static struct foc_lower_ops_s g_stm32_foc_ops =
   .start          = stm32_foc_start,
   .pwm_duty_set   = stm32_foc_pwm_duty_set,
   .pwm_off        = stm32_foc_pwm_off,
+  .info_get       = stm32_foc_info_get,
   .ioctl          = stm32_foc_ioctl,
   .bind           = stm32_foc_bind,
   .fault_clear    = stm32_foc_fault_clear,
@@ -987,7 +988,7 @@ void stm32_foc_sync_all(void)
 
       /* Get FOC lower half devices */
 
-      foc_dev = STM32_FOC_DEV_FROM_DEV_GET(dev);
+      foc_dev = STM32_FOCDEV_FROM_DEV_GET(dev);
 
       /* Store EGR register address */
 
@@ -1015,7 +1016,7 @@ void stm32_foc_sync_all(void)
 
 static int stm32_foc_pwm_cfg(struct foc_dev_s *dev, uint32_t freq)
 {
-  struct stm32_foc_board_s *board = STM32_FOC_BOARD_FROM_DEV_GET(dev);
+  struct stm32_foc_board_s *board = STM32_FOCBOARD_FROM_DEV_GET(dev);
   struct stm32_pwm_dev_s   *pwm   = PWM_FROM_FOC_DEV_GET(dev);
   int                       ret   = OK;
 
@@ -1069,7 +1070,7 @@ errout:
 
 static int stm32_foc_pwm_freq_set(struct foc_dev_s *dev, uint32_t freq)
 {
-  struct stm32_foc_priv_s *priv = STM32_FOC_PRIV_FROM_DEV_GET(dev);
+  struct stm32_foc_priv_s *priv = STM32_FOCPIRV_FROM_DEV_GET(dev);
   struct stm32_pwm_dev_s  *pwm  = PWM_FROM_FOC_DEV_GET(dev);
   int                      ret  = OK;
 
@@ -1142,7 +1143,7 @@ errout:
 
 static int stm32_foc_pwm_start(struct foc_dev_s *dev, bool state)
 {
-  struct stm32_foc_board_s *board = STM32_FOC_BOARD_FROM_DEV_GET(dev);
+  struct stm32_foc_board_s *board = STM32_FOCBOARD_FROM_DEV_GET(dev);
   struct stm32_pwm_dev_s   *pwm   = PWM_FROM_FOC_DEV_GET(dev);
 
   DEBUGASSERT(dev);
@@ -1173,7 +1174,7 @@ static int stm32_foc_pwm_start(struct foc_dev_s *dev, bool state)
 
 static int stm32_foc_adc_start(struct foc_dev_s *dev, bool state)
 {
-  struct stm32_foc_dev_s *foc_dev = STM32_FOC_DEV_FROM_DEV_GET(dev);
+  struct stm32_foc_dev_s *foc_dev = STM32_FOCDEV_FROM_DEV_GET(dev);
   struct stm32_adc_dev_s *adc     = ADC_FROM_FOC_DEV_GET(dev);
 
   DEBUGASSERT(dev);
@@ -1222,7 +1223,7 @@ static int stm32_foc_adc_start(struct foc_dev_s *dev, bool state)
 
 static int stm32_foc_adc_cfg(struct foc_dev_s *dev)
 {
-  struct stm32_foc_dev_s *foc_dev = STM32_FOC_DEV_FROM_DEV_GET(dev);
+  struct stm32_foc_dev_s *foc_dev = STM32_FOCDEV_FROM_DEV_GET(dev);
 
   DEBUGASSERT(dev);
   DEBUGASSERT(foc_dev);
@@ -1317,12 +1318,14 @@ static void stm32_foc_adc_trgo_trg_set(struct foc_dev_s *dev,
 static int stm32_foc_configure(struct foc_dev_s *dev,
                                struct foc_cfg_s *cfg)
 {
-  struct stm32_foc_priv_s *priv = STM32_FOC_PRIV_FROM_DEV_GET(dev);
-  int                      ret  = OK;
+  struct stm32_foc_priv_s  *priv  = STM32_FOCPIRV_FROM_DEV_GET(dev);
+  struct stm32_foc_board_s *board = STM32_FOCBOARD_FROM_DEV_GET(dev);
+  int                       ret   = OK;
 
   DEBUGASSERT(dev);
   DEBUGASSERT(cfg);
   DEBUGASSERT(priv);
+  DEBUGASSERT(board);
   DEBUGASSERT(cfg->pwm_freq > 0);
   DEBUGASSERT(cfg->notifier_freq > 0);
 
@@ -1398,9 +1401,9 @@ errout:
 
 static int stm32_foc_setup(struct foc_dev_s *dev)
 {
-  struct stm32_foc_dev_s   *foc_dev = STM32_FOC_DEV_FROM_DEV_GET(dev);
-  struct stm32_foc_board_s *board   = STM32_FOC_BOARD_FROM_DEV_GET(dev);
-  struct stm32_foc_priv_s  *priv    = STM32_FOC_PRIV_FROM_DEV_GET(dev);
+  struct stm32_foc_dev_s   *foc_dev = STM32_FOCDEV_FROM_DEV_GET(dev);
+  struct stm32_foc_board_s *board   = STM32_FOCBOARD_FROM_DEV_GET(dev);
+  struct stm32_foc_priv_s  *priv    = STM32_FOCPIRV_FROM_DEV_GET(dev);
   struct stm32_adc_dev_s   *adc     = ADC_FROM_FOC_DEV_GET(dev);
 #ifdef CONFIG_MOTOR_FOC_BEMF_SENSE
   struct stm32_adc_dev_s   *vadc    = VADC_FROM_FOC_DEV_GET(dev);
@@ -1535,10 +1538,6 @@ static int stm32_foc_setup(struct foc_dev_s *dev)
       goto errout;
     }
 
-  /* Get HW configuration */
-
-  stm32_foc_hw_config_get(dev);
-
 #ifdef CONFIG_MOTOR_FOC_TRACE
   /* Initialize trace interface */
 
@@ -1580,9 +1579,9 @@ errout:
 
 static int stm32_foc_shutdown(struct foc_dev_s *dev)
 {
-  struct stm32_foc_dev_s   *foc_dev = STM32_FOC_DEV_FROM_DEV_GET(dev);
-  struct stm32_foc_board_s *board   = STM32_FOC_BOARD_FROM_DEV_GET(dev);
-  struct stm32_foc_priv_s  *priv    = STM32_FOC_PRIV_FROM_DEV_GET(dev);
+  struct stm32_foc_dev_s   *foc_dev = STM32_FOCDEV_FROM_DEV_GET(dev);
+  struct stm32_foc_board_s *board   = STM32_FOCBOARD_FROM_DEV_GET(dev);
+  struct stm32_foc_priv_s  *priv    = STM32_FOCPIRV_FROM_DEV_GET(dev);
   int                       ret     = OK;
 
   DEBUGASSERT(dev);
@@ -1657,7 +1656,14 @@ errout:
 static int stm32_foc_ioctl(struct foc_dev_s *dev, int cmd,
                            unsigned long arg)
 {
-  return -1;
+  struct stm32_foc_board_s *board = STM32_FOCBOARD_FROM_DEV_GET(dev);
+
+  if (board->ops->ioctl != NULL)
+    {
+      return board->ops->ioctl(dev, cmd, arg);
+    }
+
+  return -ENOTTY;
 }
 
 /****************************************************************************
@@ -1670,7 +1676,7 @@ static int stm32_foc_ioctl(struct foc_dev_s *dev, int cmd,
 
 static int stm32_foc_adc_calibration_handler(struct foc_dev_s *dev)
 {
-  struct stm32_foc_priv_s *priv = STM32_FOC_PRIV_FROM_DEV_GET(dev);
+  struct stm32_foc_priv_s *priv = STM32_FOCPIRV_FROM_DEV_GET(dev);
   int                      i    = 0;
 
   DEBUGASSERT(dev);
@@ -1769,14 +1775,14 @@ static int stm32_foc_adc_handler(int irq, void *context, void *arg)
 
       if (dev != NULL)
         {
-          priv = STM32_FOC_PRIV_FROM_DEV_GET(dev);
+          priv = STM32_FOCPIRV_FROM_DEV_GET(dev);
           DEBUGASSERT(priv);
 
-          foc_dev = STM32_FOC_DEV_FROM_DEV_GET(dev);
+          foc_dev = STM32_FOCDEV_FROM_DEV_GET(dev);
           DEBUGASSERT(foc_dev);
 
 #ifdef CONFIG_MOTOR_FOC_TRACE
-          board = STM32_FOC_BOARD_FROM_DEV_GET(dev);
+          board = STM32_FOCBOARD_FROM_DEV_GET(dev);
           DEBUGASSERT(board);
 
           board->ops->trace(dev, FOC_TRACE_LOWER, true);
@@ -1819,8 +1825,8 @@ static int stm32_foc_adc_handler(int irq, void *context, void *arg)
 
 static int stm32_foc_worker_handler(struct foc_dev_s *dev)
 {
-  struct stm32_foc_priv_s  *priv  = STM32_FOC_PRIV_FROM_DEV_GET(dev);
-  struct stm32_foc_board_s *board = STM32_FOC_BOARD_FROM_DEV_GET(dev);
+  struct stm32_foc_priv_s  *priv  = STM32_FOCPIRV_FROM_DEV_GET(dev);
+  struct stm32_foc_board_s *board = STM32_FOCBOARD_FROM_DEV_GET(dev);
   struct stm32_adc_dev_s   *adc   = ADC_FROM_FOC_DEV_GET(dev);
   int                       ret   = OK;
 
@@ -1877,9 +1883,9 @@ static int stm32_foc_worker_handler(struct foc_dev_s *dev)
 
 static int stm32_foc_calibration_start(struct foc_dev_s *dev)
 {
-  struct stm32_foc_dev_s   *foc_dev = STM32_FOC_DEV_FROM_DEV_GET(dev);
-  struct stm32_foc_priv_s  *priv    = STM32_FOC_PRIV_FROM_DEV_GET(dev);
-  struct stm32_foc_board_s *board   = STM32_FOC_BOARD_FROM_DEV_GET(dev);
+  struct stm32_foc_dev_s   *foc_dev = STM32_FOCDEV_FROM_DEV_GET(dev);
+  struct stm32_foc_priv_s  *priv    = STM32_FOCPIRV_FROM_DEV_GET(dev);
+  struct stm32_foc_board_s *board   = STM32_FOCBOARD_FROM_DEV_GET(dev);
   struct stm32_pwm_dev_s   *pwm     = PWM_FROM_FOC_DEV_GET(dev);
   struct stm32_adc_dev_s   *adc     = ADC_FROM_FOC_DEV_GET(dev);
 #ifdef CONFIG_MOTOR_FOC_BEMF_SENSE
@@ -2041,8 +2047,8 @@ errout:
 static int stm32_foc_pwm_duty_set(struct foc_dev_s *dev,
                                   foc_duty_t *duty)
 {
-  struct stm32_foc_priv_s *priv    = STM32_FOC_PRIV_FROM_DEV_GET(dev);
-  struct stm32_foc_dev_s  *foc_dev = STM32_FOC_DEV_FROM_DEV_GET(dev);
+  struct stm32_foc_priv_s *priv    = STM32_FOCPIRV_FROM_DEV_GET(dev);
+  struct stm32_foc_dev_s  *foc_dev = STM32_FOCDEV_FROM_DEV_GET(dev);
   uint16_t                 ccr[CONFIG_MOTOR_FOC_PHASES];
 
   DEBUGASSERT(dev);
@@ -2136,24 +2142,23 @@ static int stm32_foc_pwm_off(struct foc_dev_s *dev, bool off)
 }
 
 /****************************************************************************
- * Name: stm32_foc_hw_config_get
+ * Name: stm32_foc_info_get
  *
  * Description:
  *   Get HW configuration for FOC device
  *
  ****************************************************************************/
 
-static void stm32_foc_hw_config_get(struct foc_dev_s *dev)
+static int stm32_foc_info_get(struct foc_dev_s *dev, struct foc_info_s *info)
 {
-  struct stm32_foc_board_s *board = STM32_FOC_BOARD_FROM_DEV_GET(dev);
+  struct stm32_foc_board_s *board = STM32_FOCBOARD_FROM_DEV_GET(dev);
 
   DEBUGASSERT(dev);
   DEBUGASSERT(board);
 
   /* Get data from board configuration */
 
-  dev->info.hw_cfg.pwm_dt_ns = board->data->pwm_dt_ns;
-  dev->info.hw_cfg.pwm_max   = board->data->duty_max;
+  return board->ops->info_get(dev, info);
 }
 
 /****************************************************************************
@@ -2167,7 +2172,7 @@ static void stm32_foc_hw_config_get(struct foc_dev_s *dev)
 static void stm32_foc_curr_get(struct foc_dev_s *dev,
                                int16_t *curr, int shunts)
 {
-  struct stm32_foc_priv_s *priv = STM32_FOC_PRIV_FROM_DEV_GET(dev);
+  struct stm32_foc_priv_s *priv = STM32_FOCPIRV_FROM_DEV_GET(dev);
   struct stm32_adc_dev_s  *adc  = ADC_FROM_FOC_DEV_GET(dev);
   int                      i    = 0;
 
@@ -2205,7 +2210,7 @@ static void stm32_foc_curr_get(struct foc_dev_s *dev,
 
 static void stm32_foc_volt_get(struct foc_dev_s *dev, int16_t *volt)
 {
-  struct stm32_foc_priv_s *priv = STM32_FOC_PRIV_FROM_DEV_GET(dev);
+  struct stm32_foc_priv_s *priv = STM32_FOCPIRV_FROM_DEV_GET(dev);
   struct stm32_adc_dev_s  *vadc  = VADC_FROM_FOC_DEV_GET(dev);
   int                      i    = 0;
 
@@ -2259,7 +2264,7 @@ static void stm32_foc_volt_get(struct foc_dev_s *dev, int16_t *volt)
 
 static int stm32_foc_notifier_cfg(struct foc_dev_s *dev, uint32_t freq)
 {
-  struct stm32_foc_priv_s *priv = STM32_FOC_PRIV_FROM_DEV_GET(dev);
+  struct stm32_foc_priv_s *priv = STM32_FOCPIRV_FROM_DEV_GET(dev);
   int                      ret  = OK;
 
   DEBUGASSERT(dev);
@@ -2313,7 +2318,7 @@ errout:
 static int stm32_foc_bind(struct foc_dev_s *dev,
                           struct foc_callbacks_s *cb)
 {
-  struct stm32_foc_priv_s *priv = STM32_FOC_PRIV_FROM_DEV_GET(dev);
+  struct stm32_foc_priv_s *priv = STM32_FOCPIRV_FROM_DEV_GET(dev);
   int                      ret  = OK;
 
   DEBUGASSERT(dev);
@@ -2340,7 +2345,7 @@ static int stm32_foc_bind(struct foc_dev_s *dev,
 
 static int stm32_foc_fault_clear(struct foc_dev_s *dev)
 {
-  struct stm32_foc_board_s *board = STM32_FOC_BOARD_FROM_DEV_GET(dev);
+  struct stm32_foc_board_s *board = STM32_FOCBOARD_FROM_DEV_GET(dev);
 
   DEBUGASSERT(dev);
   DEBUGASSERT(board);
@@ -2360,7 +2365,7 @@ static int stm32_foc_fault_clear(struct foc_dev_s *dev)
 
 int stm32_foc_trace_init(struct foc_dev_s *dev)
 {
-  struct stm32_foc_board_s *board = STM32_FOC_BOARD_FROM_DEV_GET(dev);
+  struct stm32_foc_board_s *board = STM32_FOCBOARD_FROM_DEV_GET(dev);
 
   DEBUGASSERT(dev);
   DEBUGASSERT(board);
@@ -2380,7 +2385,7 @@ int stm32_foc_trace_init(struct foc_dev_s *dev)
 
 void stm32_foc_trace(struct foc_dev_s *dev, int type, bool state)
 {
-  struct stm32_foc_board_s *board = STM32_FOC_BOARD_FROM_DEV_GET(dev);
+  struct stm32_foc_board_s *board = STM32_FOCBOARD_FROM_DEV_GET(dev);
 
   DEBUGASSERT(dev);
   DEBUGASSERT(board);
@@ -2452,7 +2457,7 @@ struct adc_dev_s *stm32_foc_adc_init(struct stm32_foc_adc_s *adc_cfg)
     {
       adc_chan[i] = adc_cfg->chan[i - 1];
     }
-#endif  /* CONFIG_STM32_FOC_G4_ADCCHAN0_WORKAROUND */
+#endif /* CONFIG_STM32_FOC_G4_ADCCHAN0_WORKAROUND */
 
   /* Get the ADC interface */
 
@@ -2526,6 +2531,7 @@ stm32_foc_initialize(int inst, struct stm32_foc_board_s *board)
   DEBUGASSERT(board->ops->fault_clear);
   DEBUGASSERT(board->ops->pwm_start);
   DEBUGASSERT(board->ops->current_get);
+  DEBUGASSERT(board->ops->info_get);
 #ifdef CONFIG_MOTOR_FOC_TRACE
   DEBUGASSERT(board->ops->trace_init);
   DEBUGASSERT(board->ops->trace);
@@ -2732,7 +2738,7 @@ errout:
 
 struct adc_dev_s *stm32_foc_adcget(struct foc_dev_s *dev)
 {
-  struct stm32_foc_dev_s *foc_dev = STM32_FOC_DEV_FROM_DEV_GET(dev);
+  struct stm32_foc_dev_s *foc_dev = STM32_FOCDEV_FROM_DEV_GET(dev);
 
   DEBUGASSERT(dev);
   DEBUGASSERT(foc_dev);

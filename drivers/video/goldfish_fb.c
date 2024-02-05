@@ -223,10 +223,10 @@ static int goldfish_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_fbinitialize
+ * Name: goldfish_fb_register
  ****************************************************************************/
 
-int up_fbinitialize(int display)
+int goldfish_fb_register(int display, FAR void *regs, int irq)
 {
   FAR struct goldfish_fb_s *fb;
   uint32_t fmt;
@@ -256,8 +256,8 @@ int up_fbinitialize(int display)
       return -ENOMEM;
     }
 
-  fb->base = (FAR void *)CONFIG_GOLDFISH_FB_BASE;
-  fb->irq = CONFIG_GOLDFISH_FB_IRQ;
+  fb->base = regs;
+  fb->irq = irq;
 
   fmt = getreg32(fb->base + GOLDFISH_FB_GET_FORMAT);
 
@@ -300,38 +300,20 @@ int up_fbinitialize(int display)
   putreg32((uintptr_t)fb->planeinfo.fbmem,
            fb->base + GOLDFISH_FB_SET_BASE);
 
+  ret = fb_register_device(display, 0, (FAR struct fb_vtable_s *)fb);
+  if (ret < 0)
+    {
+      goto err_fb_register_failed;
+    }
+
   g_goldfish_fb = fb;
   return OK;
 
+err_fb_register_failed:
+  irq_detach(fb->irq);
 err_irq_attach_failed:
   kmm_free(fb->planeinfo.fbmem);
 err_fbmem_alloc_failed:
   kmm_free(fb);
   return ret;
-}
-
-/****************************************************************************
- * Name: up_fbgetvplane
- ****************************************************************************/
-
-FAR struct fb_vtable_s *up_fbgetvplane(int display, int vplane)
-{
-  return vplane || display ? NULL : &(g_goldfish_fb->vtable);
-}
-
-/****************************************************************************
- * Name: up_fbuninitialize
- ****************************************************************************/
-
-void up_fbuninitialize(int display)
-{
-  if (display == 0)
-    {
-      FAR struct goldfish_fb_s *fb = g_goldfish_fb;
-
-      irq_detach(fb->irq);
-      kmm_free(fb->planeinfo.fbmem);
-      kmm_free(fb);
-      g_goldfish_fb = NULL;
-    }
 }

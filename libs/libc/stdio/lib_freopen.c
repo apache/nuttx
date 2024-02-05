@@ -106,7 +106,7 @@ FAR FILE *freopen(FAR const char *path, FAR const char *mode,
 
       /* Flush the stream and invalidate the read buffer. */
 
-      lib_fflush_unlocked(stream, true);
+      lib_fflush_unlocked(stream);
 
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
       lib_rdflush_unlocked(stream);

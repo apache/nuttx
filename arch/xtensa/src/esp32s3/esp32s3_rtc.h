@@ -597,6 +597,25 @@ void esp32s3_rtc_clk_cpu_freq_set_config(
 void esp32s3_rtc_clk_cpu_freq_get_config(
              struct esp32s3_cpu_freq_config_s *out_config);
 
+/****************************************************************************
+ * Name: esp32s3_rtc_recalib_bbpll
+ *
+ * Description:
+ *   Re-calibration BBPLL, workaround for bootloader not calibration well
+ *   issue.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S3_SYSTEM_BBPLL_RECALIB
+void esp32s3_rtc_recalib_bbpll(void);
+#endif
+
 #ifdef CONFIG_RTC_DRIVER
 
 /****************************************************************************

@@ -44,6 +44,6 @@
 #  define UMM_MEMALIGN(a,s)  kumm_memalign(a,s)
 #  define UMM_FREE(p)        kumm_free(p)
 #  define UMM_HEAPMEMEBER(p) umm_heapmember(p)
-#endif
+#endif  /* CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP */
 
 #endif /* __ARCH_XTENSA_SRC_COMMON_XTENSA_MM_H */

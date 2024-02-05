@@ -105,7 +105,7 @@
                  DMA_CCR_MSIZE_8BITS   | \
                  CONFIG_USART_RXDMAPRIO)
 
-#endif  /* SERIAL_HAVE_RXDMA */
+#endif /* SERIAL_HAVE_RXDMA */
 
 #ifdef SERIAL_HAVE_TXDMA
 

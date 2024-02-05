@@ -26,7 +26,9 @@
 
 #include <string.h>
 #include <assert.h>
+#include <debug.h>
 #include <errno.h>
+#include <stdio.h>
 
 #include <net/if.h>
 #include <nuttx/net/netdev.h>
@@ -140,6 +142,77 @@ static int ifconf_ipv4_callback(FAR struct net_driver_s *dev, FAR void *arg)
 #endif
 
 /****************************************************************************
+ * Name: ifconf_ipv6_addr_callback
+ *
+ * Description:
+ *   Callback from netdev_ipv6_foreach() that does the real implementation of
+ *   netdev_ipv6_ifconf().
+ *
+ * Input Parameters:
+ *   dev  - The network device for this callback.
+ *   addr - The IPv6 address.
+ *   arg  - User callback argument
+ *
+ * Returned Value:
+ *   Zero is returned on success; a negated errno value is returned on any
+ *   failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+static int ifconf_ipv6_addr_callback(FAR struct net_driver_s *dev,
+                                     FAR struct netdev_ifaddr6_s *addr,
+                                     FAR void *arg)
+{
+  FAR struct ifconf_ipv6_info_s *info = (FAR struct ifconf_ipv6_info_s *)arg;
+  FAR struct lifconf *lifc = info->lifc;
+
+  if (lifc->lifc_len + sizeof(struct lifreq) <= info->bufsize)
+    {
+      FAR struct lifreq *req =
+        (FAR struct lifreq *)&lifc->lifc_buf[lifc->lifc_len];
+      FAR struct sockaddr_in6 *inaddr =
+        (FAR struct sockaddr_in6 *)&req->lifr_addr;
+#ifdef CONFIG_NETDEV_MULTIPLE_IPv6
+      int addr_idx = addr - dev->d_ipv6;
+
+      /* There is space for information about another adapter.  Within
+       * each ifreq structure, lifr_name will receive the interface
+       * name and lifr_addr the address.  The actual number of bytes
+       * transferred is returned in lifc_len.
+       */
+
+      if (addr_idx > 0)
+        {
+          /* eth0:0 represents the second addr on eth0 */
+
+          if (snprintf(req->lifr_name, IFNAMSIZ,
+                       "%s:%d", dev->d_ifname, addr_idx - 1) >= IFNAMSIZ)
+            {
+              nwarn("WARNING: ifname too long to print %s:%d\n",
+                    dev->d_ifname, addr_idx - 1);
+            }
+        }
+      else
+#endif
+        {
+          strlcpy(req->lifr_name, dev->d_ifname, IFNAMSIZ);
+        }
+
+      inaddr->sin6_family = AF_INET6;
+      inaddr->sin6_port   = 0;
+      net_ipv6addr_copy(inaddr->sin6_addr.s6_addr16, addr->addr);
+    }
+
+  /* Increment the size of the buffer in any event */
+
+  lifc->lifc_len += sizeof(struct lifreq);
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Name: ifconf_ipv6_callback
  *
  * Description:
@@ -160,17 +233,14 @@ static int ifconf_ipv4_callback(FAR struct net_driver_s *dev, FAR void *arg)
 static int ifconf_ipv6_callback(FAR struct net_driver_s *dev, FAR void *arg)
 {
   FAR struct ifconf_ipv6_info_s *info = (FAR struct ifconf_ipv6_info_s *)arg;
-  FAR struct lifconf *lifc;
 
   DEBUGASSERT(dev != NULL && info != NULL && info->lifc != NULL);
-  lifc = info->lifc;
 
   /* Check if this adapter has an IPv6 address assigned and is in the UP
    * state.
    */
 
-  if (!net_ipv6addr_cmp(dev->d_ipv6addr, g_ipv6_unspecaddr) &&
-      (dev->d_flags & IFF_UP) != 0)
+  if (NETDEV_HAS_V6ADDR(dev) && IFF_IS_UP(dev->d_flags))
     {
       /* Check if we would exceed the buffer space provided by the caller.
        * NOTE: A common usage model is:
@@ -187,29 +257,7 @@ static int ifconf_ipv6_callback(FAR struct net_driver_s *dev, FAR void *arg)
        * cases.
        */
 
-      if (lifc->lifc_len + sizeof(struct lifreq) <= info->bufsize)
-        {
-          FAR struct lifreq *req =
-            (FAR struct lifreq *)&lifc->lifc_buf[lifc->lifc_len];
-          FAR struct sockaddr_in6 *inaddr =
-            (FAR struct sockaddr_in6 *)&req->lifr_addr;
-
-          /* There is space for information about another adapter.  Within
-           * each ifreq structure, lifr_name will receive the interface
-           * name and lifr_addr the address.  The actual number of bytes
-           * transferred is returned in lifc_len.
-           */
-
-          strlcpy(req->lifr_name, dev->d_ifname, IFNAMSIZ);
-
-          inaddr->sin6_family = AF_INET6;
-          inaddr->sin6_port   = 0;
-          net_ipv6addr_copy(inaddr->sin6_addr.s6_addr16, dev->d_ipv6addr);
-        }
-
-      /* Increment the size of the buffer in any event */
-
-      lifc->lifc_len += sizeof(struct lifreq);
+      return netdev_ipv6_foreach(dev, ifconf_ipv6_addr_callback, arg);
     }
 
   return 0;

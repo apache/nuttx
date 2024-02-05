@@ -35,6 +35,7 @@
 #include "hardware/imxrt_memorymap.h"
 
 #include "imxrt_mpuinit.h"
+#include "arm_internal.h"
 
 #ifdef CONFIG_ARM_MPU
 
@@ -123,6 +124,9 @@ void imxrt_mpu_initialize(void)
 
   mpu_user_intsram(datastart, dataend - datastart);
 #else
+#  if defined(CONFIG_ARCH_FAMILY_IMXRT117x)
+#     include "imxrt117x_mpuinit.c"
+#  else
   mpu_configure_region(0xc0000000, 512 * 1024 * 1024,
                        MPU_RASR_TEX_DEV  | /* Device
                                             * Not Cacheable
@@ -194,7 +198,7 @@ void imxrt_mpu_initialize(void)
                                             * Not Shareable      */
                        MPU_RASR_AP_RWRW);  /* P:RW   U:RW
                                             * Instruction access */
-
+#endif /* CONFIG_ARCH_FAMILY_IMXRT117x */
   mpu_control(true, true, true);
   return;
 #endif

@@ -220,6 +220,10 @@ void __start(void)
     }
 #endif
 
+#ifdef CONFIG_ARMV7M_STACKCHECK
+  arm_stack_check_init();
+#endif
+
   /* Set FLASH wait states prior to the configuration of clocking */
 
   xmc4_flash_waitstates();

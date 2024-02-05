@@ -88,7 +88,7 @@ SECTIONS
     *libarch.a:xtensa_testset.*(.literal .text .literal.* .text.*)
 
 #ifdef CONFIG_ESP32S3_BLE
-    *libc.a:bin/sq_remlast.*(.literal .text .literal.* .text.*)
+    *libc.a:sq_remlast.*(.literal .text .literal.* .text.*)
 #endif
 
     *libdrivers.a:syslog_flush.*(.literal .text .literal.* .text.*)
@@ -121,7 +121,20 @@ SECTIONS
     *libsched.a:sched_mergepending.*(.literal.nxsched_merge_pending .text.nxsched_merge_pending)
     *libsched.a:sched_resumescheduler.*(.literal.nxsched_resume_scheduler .text.nxsched_resume_scheduler)
 
-    *libc.a:bin/sq_remfirst.*(.literal.sq_remfirst .text.sq_remfirst)
+    *libc.a:sq_remfirst.*(.literal.sq_remfirst .text.sq_remfirst)
+#endif
+
+    *libarch.a:esp32s3_spi_timing.*(.literal .text .literal.* .text.*)
+#ifdef CONFIG_ESP32S3_SPIRAM_MODE_QUAD
+    *libarch.a:esp32s3_psram_quad.*(.literal .text .literal.* .text.*)
+#endif
+#ifdef CONFIG_ESP32S3_SPIRAM_MODE_OCT
+    *libarch.a:esp32s3_psram_octal.*(.literal .text .literal.* .text.*)
+#endif
+#if defined(CONFIG_STACK_CANARIES) && \
+    (defined(CONFIG_ESP32S3_SPIFLASH) || \
+     defined(CONFIG_ESP32S3_SPIRAM))
+    *libc.a:lib_stackchk.*(.literal .text .literal.* .text.*)
 #endif
 
     *(.wifirxiram .wifirxiram.*)
@@ -207,6 +220,11 @@ SECTIONS
 
     *libphy.a:(.rodata  .rodata.*)
     *libarch.a:xtensa_context.*(.rodata  .rodata.*)
+#if defined(CONFIG_STACK_CANARIES) && \
+    (defined(CONFIG_ESP32S3_SPIFLASH) || \
+     defined(CONFIG_ESP32S3_SPIRAM))
+    *libc.a:lib_stackchk.*(.rodata  .rodata.*)
+#endif
 
     _edata = ABSOLUTE(.);
     . = ALIGN(4);
@@ -349,4 +367,15 @@ SECTIONS
     . = ALIGN(4);
     _iram_end = ABSOLUTE(.);
   } >iram0_0_seg
+
+  .rtc.data :
+  {
+    *(.rtc.data)
+    *(.rtc.rodata)
+
+   /* Whatever is left from the RTC memory is used as a special heap. */
+
+    . = ALIGN (4);
+    _srtcheap = ABSOLUTE(.);
+  } > rtc_slow_seg
 }

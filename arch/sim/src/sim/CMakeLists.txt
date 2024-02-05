@@ -57,7 +57,8 @@ list(
   sim_registerdump.c
   sim_saveusercontext.c
   sim_tcbinfo.c
-  sim_textheap.c)
+  sim_textheap.c
+  sim_checkhostfstypes.c)
 
 if(CONFIG_HOST_X86_64)
   if(CONFIG_SIM_M32)
@@ -139,6 +140,15 @@ list(
   sim_hosttime.c
   sim_hostuart.c)
 
+# Note: sim_macho_init.c is picky about the place in the object list for
+# linking. Namely, its constructor should be the first one in the executable.
+# For now, we are just assuming no other files in HOSTSRCS provide constructors.
+if(CONFIG_HOST_MACOS)
+  if(CONFIG_HAVE_CXXINITIALIZE)
+    list(APPEND HOSTSRCS sim_macho_init.c)
+  endif()
+endif()
+
 if(CONFIG_SIM_CAMERA_V4L2)
   list(APPEND HOSTSRCS sim_host_v4l2.c)
   list(APPEND SRCS sim_camera.c)
@@ -156,7 +166,12 @@ endif()
 
 if(CONFIG_SIM_X11FB)
   list(APPEND HOSTSRCS sim_x11framebuffer.c)
-  list(APPEND STDLIBS X11 Xext)
+
+  find_package(X11 REQUIRED)
+  if(X11_FOUND)
+    target_include_directories(nuttx PRIVATE ${X11_INCLUDE_DIR})
+    target_link_libraries(nuttx PRIVATE ${X11_LIBRARIES})
+  endif()
 
   if(CONFIG_SIM_TOUCHSCREEN)
     list(APPEND SRCS sim_touchscreen.c)
@@ -187,7 +202,8 @@ elseif(CONFIG_SIM_NETDEV_VPNKIT)
   list(APPEND SRCS sim_netdriver.c)
   list(APPEND HOST_DEFINITIONS
        CONFIG_SIM_NETDEV_VPNKIT_PATH=\"${CONFIG_SIM_NETDEV_VPNKIT_PATH}\")
-  list(APPEND HOSTSRCS sim_vpnkit.c vpnkit/protocol.c vpnkit/negotiate.c)
+  list(APPEND HOSTSRCS sim_vpnkit.c vpnkit/sim_protocol.c
+       vpnkit/sim_negotiate.c)
 endif()
 
 if(CONFIG_SIM_NETUSRSOCK)
@@ -228,14 +244,18 @@ list(APPEND HOST_DEFINITIONS CONFIG_NAME_MAX=${CONFIG_NAME_MAX})
 
 configure_file(${NUTTX_DIR}/include/nuttx/fs/hostfs.h
                ${CMAKE_CURRENT_BINARY_DIR}/hostfs.h COPYONLY)
+configure_file(${CMAKE_BINARY_DIR}/include/nuttx/config.h
+               ${CMAKE_CURRENT_BINARY_DIR}/config.h COPYONLY)
 target_include_directories(nuttx PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-target_include_directories(nuttx PRIVATE ${CMAKE_BINARY_DIR}/include/nuttx)
 target_include_directories(nuttx PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 
 target_include_directories(sim_head PUBLIC ${NUTTX_DIR}/sched)
 target_sources(sim_head PUBLIC sim_head.c sim_doirq.c)
+
+target_include_directories(arch PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_sources(arch PRIVATE ${SRCS})
+target_compile_options(arch PRIVATE -fvisibility=default)
 
 if(WIN32)
   set(HOSTDIR win)

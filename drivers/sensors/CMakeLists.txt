@@ -30,6 +30,9 @@ if(CONFIG_SENSORS)
   endif()
 
   if(CONFIG_SENSORS_GPS)
+    set_source_files_properties(
+      gps_uorb.c DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/..
+      PROPERTIES INCLUDE_DIRECTORIES ${NUTTX_DIR}/libs/libc/gpsutils)
     list(APPEND SRCS gps_uorb.c)
   endif()
 
@@ -185,8 +188,8 @@ if(CONFIG_SENSORS)
       list(APPEND SRCS mlx90614.c)
     endif()
 
-    if(CONFIG_SENSORS_MS5611)
-      list(APPEND SRCS ms5611_uorb.c)
+    if(CONFIG_SENSORS_MS56XX)
+      list(APPEND SRCS ms56xx_uorb.c)
     endif()
 
     if(CONFIG_SENSORS_MS58XX)

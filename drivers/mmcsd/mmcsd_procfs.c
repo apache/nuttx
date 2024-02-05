@@ -112,6 +112,7 @@ static const struct procfs_operations g_mmcsd_operations =
   mmcsd_close,      /* close */
   mmcsd_read,       /* read */
   NULL,             /* write */
+  NULL,             /* poll */
 
   mmcsd_dup,        /* dup */
 

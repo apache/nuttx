@@ -128,3 +128,9 @@ lvgl
 NuttShell configuration (console enabled in USB Port, at 115200 bps) with support for
 gc9a01 and LVGL demo (using lcd_dev).
 
+
+README.txt
+==========
+
+.. include:: README.txt
+   :literal:

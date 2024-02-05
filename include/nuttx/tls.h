@@ -197,12 +197,19 @@ struct tls_info_s
 #endif
 
 #if defined(CONFIG_PTHREAD_CLEANUP_STACKSIZE) && CONFIG_PTHREAD_CLEANUP_STACKSIZE > 0
-  /* tos   - The index to the next available entry at the top of the stack.
-   * stack - The pre-allocated clean-up stack memory.
+  /* tl_tos   - The index to the next available entry at the top of the
+   *            stack.
+   * tl_stack - The pre-allocated clean-up stack memory.
    */
 
-  uint8_t tos;
-  struct pthread_cleanup_s stack[CONFIG_PTHREAD_CLEANUP_STACKSIZE];
+  uint8_t tl_tos;
+  struct pthread_cleanup_s tl_stack[CONFIG_PTHREAD_CLEANUP_STACKSIZE];
+#endif
+
+  uint8_t tl_cpstate;                  /* Cancellation state */
+
+#ifdef CONFIG_CANCELLATION_POINTS
+  int16_t tl_cpcount;                  /* Nested cancellation point count */
 #endif
 
   int tl_errno;                        /* Per-thread error number */

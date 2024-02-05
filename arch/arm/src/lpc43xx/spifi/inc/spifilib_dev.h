@@ -1,11 +1,9 @@
 /****************************************************************************
  * arch/arm/src/lpc43xx/spifi/inc/spifilib_dev.h
  *
- * @note
  * Copyright(C) NXP Semiconductors, 2014
  * All rights reserved.
  *
- * @par
  * Software that is described herein is for illustrative purposes only
  * which provides customers with programming information regarding the
  * LPC products.  This software is supplied "AS IS" without any warranties
@@ -21,7 +19,6 @@
  * application will be suitable for the specified use without further testing
  * or modification.
  *
- * @par
  * Permission to use, copy, modify, and distribute this software and its
  * documentation is hereby granted, under NXP Semiconductors' and its
  * licensor's relevant copyrights in the software, without fee, provided that

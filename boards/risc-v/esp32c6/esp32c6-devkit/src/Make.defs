@@ -1,5 +1,5 @@
 #############################################################################
-# boards/risc-v/esp32c6/esp32c6-devkit/src/Makefile
+# boards/risc-v/esp32c6/esp32c6-devkit/src/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -20,13 +20,22 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS  = esp32c6_boot.c esp32c6_bringup.c
+CSRCS = esp32c6_boot.c esp32c6_bringup.c
 
 ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += esp32c6_appinit.c
-ifeq ($(CONFIG_BOARDCTL_RESET),y)
-CSRCS += esp32c6_reset.c
+  CSRCS += esp32c6_appinit.c
+
+  ifeq ($(CONFIG_BOARDCTL_RESET),y)
+    CSRCS += esp32c6_reset.c
+  endif
 endif
+
+ifeq ($(CONFIG_DEV_GPIO),y)
+  CSRCS += esp32c6_gpio.c
+endif
+
+ifeq ($(CONFIG_ARCH_BUTTONS),y)
+  CSRCS += esp32c6_buttons.c
 endif
 
 DEPPATH += --dep-path board

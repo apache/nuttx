@@ -198,6 +198,15 @@ config ESP32_RUN_IRAM
 		This loads all of NuttX inside IRAM.  Used to test somewhat small
 		images that can fit entirely in IRAM.
 
+config ESP32_EXCEPTION_ENABLE_CACHE
+	bool
+	default y
+	depends on ESP32_SPIFLASH
+	---help---
+		When an exception triggers, the panic function reenables the SPI Flash
+		cache to allow functions that are located in SPI Flash to run.
+		Disable this option to save IRAM space.
+
 menu "ESP32 Peripheral Selection"
 
 config ESP32_UART
@@ -720,6 +729,7 @@ config ESP32_BLE
 	bool "BLE"
 	default n
 	select ESP32_WIRELESS
+	select BLUETOOTH_TXCMD_PINNED_TO_CORE if SMP
 	---help---
 		Enable BLE support
 
@@ -756,6 +766,19 @@ config ESP32_WIFI_BT_COEXIST
 	bool "Wi-Fi and BT coexist"
 	default n
 	depends on ESP32_WIFI && ESP32_BLE
+
+menu "Interrupt Configuration"
+
+config ESP32_IRAM_ISR_DEBUG
+	bool "Enable debugging of the IRAM-enabled interrupts"
+	default n
+	---help---
+		This option enables keeping track of the IRAM-enabled interrupts by
+		registering its execution when non-IRAM interrupts are disabled. It
+		keeps track of the IRQ executed and register how many times since
+		boot it was executed.
+
+endmenu # Interrupt Configuration
 
 menu "Memory Configuration"
 
@@ -1847,6 +1870,7 @@ comment "Partition Table Configuration"
 config ESP32_PARTITION_TABLE
 	bool "Create MTD partitions from Partition Table"
 	default n
+	select ESP32_BOOTLOADER_BUILD_FROM_SOURCE
 	---help---
 		Decode partition table and initialize partitions as MTD.
 
@@ -1856,6 +1880,17 @@ config ESP32_PARTITION_MOUNTPT
 	depends on ESP32_PARTITION_TABLE
 
 endif # ESP32_PARTITION_TABLE
+
+config ESP32_SPIFLASH_OP_TASK_STACKSIZE
+	int "The SPI flash operation task stack size"
+	default 768
+	depends on SMP
+	---help---
+		When SMP is enabled, it is needed to create two tasks (one for each
+		core) to be able to run IRAM-enabled interrupts. These tasks ensures
+		that the core that isn't performing the SPI flash operation is able
+		to disable non-IRAM interrupts and wait for the SPI flash operation
+		to be finished.
 
 endif # ESP32_SPIFLASH
 
@@ -2092,7 +2127,7 @@ choice EXAMPLE_POWER_SAVE_MODE
 
 config EXAMPLE_POWER_SAVE_NONE
 	bool "none"
-	
+
 config EXAMPLE_POWER_SAVE_MIN_MODEM
 	bool "minimum modem"
 
@@ -2128,6 +2163,12 @@ config ESP32_BLE_TASK_STACK_SIZE
 config ESP32_BLE_TASK_PRIORITY
 	int "Controller task priority"
 	default 110
+
+config ESP32_BLE_INTERRUPT_SAVE_STATUS
+	int "Number of interrupt save status"
+	default 3
+	---help---
+		Number of interrupt save status variables to keep track. Increase it if any related bug is found.
 
 config ESP32_BLE_MAX_CONN
 	int "Maximum BLE simultaneous connections"
@@ -2314,6 +2355,35 @@ config ESP32_RTC_CLK_SRC_INT_8MD256
 endchoice
 endmenu # "RTC Configuration"
 
+menu "DAC Configuration"
+	depends on ANALOG && DAC
+
+config ESP32_DAC_DEVPATH
+	string "DAC device path"
+	default "/dev/dac0"
+
+choice ESP32_DAC_MODE
+	prompt "DAC mode of operation"
+	default ESP32_DAC_MODE_ONE_SHOT
+	---help---
+		One-shot mode requires to write every single value with a write call while
+		retaining the last value on output.
+
+		Following modes are not implemented yet.
+		Timer mode utilizes timer IRQs to call handler which can manage the write.
+		DMA is using a ring buffer accessed directly by the driver.
+		Cosine Wave Generator can output preset wave without the need to generate
+		the data and write in memory.
+
+config ESP32_DAC_MODE_ONE_SHOT
+	bool "One-shot mode"
+	---help---
+		One-shot mode requires to write every single value with a write call while
+		retaining the last value on output.
+
+endchoice # "DAC mode of operation"
+endmenu # "DAC Configuration"
+
 menu "LEDC Configuration"
 	depends on ESP32_LEDC
 
@@ -2403,41 +2473,28 @@ config ESP32_HAVE_OTA_PARTITION
 	bool
 	default n
 
-menu "Application Image Configuration"
-
-choice
-	prompt "Application Image Format"
-	default ESP32_APP_FORMAT_LEGACY
-	---help---
-		Depending on the chosen 2nd stage bootloader, the application may
-		be required to be perform a specific startup routine. Furthermore,
-		the image binary must be formatted according to the definition from
-		the 2nd stage bootloader.
+menu "Bootloader and Image Configuration"
 
 config ESP32_APP_FORMAT_LEGACY
-	bool "Legacy format"
+	bool
+	default y if !ESP32_APP_FORMAT_MCUBOOT
+	depends on !ESP32_APP_FORMAT_MCUBOOT
 	---help---
 		This is the legacy application image format, as supported by the ESP-IDF
 		2nd stage bootloader.
 
 config ESP32_APP_FORMAT_MCUBOOT
-	bool "MCUboot-bootable format"
+	bool "Enable MCUboot-bootable format"
+	depends on !MCUBOOT_BOOTLOADER
 	select ESP32_HAVE_OTA_PARTITION
+	select ESP32_BOOTLOADER_BUILD_FROM_SOURCE
 	---help---
-		The ESP32 port of MCUboot supports the loading of unsegmented firmware
-		images.
-
-endchoice # Application Image Format
-
-choice
-	prompt "Source for bootloader binaries"
-	default ESP32_BOOTLOADER_DOWNLOAD_PREBUILT
-	---help---
-		Select the action to be taken by the build system for the
-		"make bootloader" target.
+		Enables the Espressif port of MCUboot to be used as 2nd stage bootloader.
 
 config ESP32_BOOTLOADER_DOWNLOAD_PREBUILT
-	bool "Download prebuilt binaries"
+	bool
+	default y if !ESP32_BOOTLOADER_BUILD_FROM_SOURCE
+	depends on !ESP32_BOOTLOADER_BUILD_FROM_SOURCE
 	---help---
 		The build system will download the prebuilt binaries from
 		https://github.com/espressif/esp-nuttx-bootloader according to the chosen
@@ -2450,8 +2507,6 @@ config ESP32_BOOTLOADER_BUILD_FROM_SOURCE
 		the https://github.com/espressif/esp-nuttx-bootloader repository and build a
 		custom bootloader according to the chosen Application Image Format
 		(ESP32_APP_FORMAT_LEGACY or ESP32_APP_FORMAT_MCUBOOT) and partition information.
-
-endchoice
 
 choice
 	prompt "Target slot for image flashing"
@@ -2488,10 +2543,36 @@ config ESP32_APP_MCUBOOT_HEADER_SIZE
 	default 32
 	depends on ESP32_APP_FORMAT_MCUBOOT
 
-config ESP32_PARTITION_TABLE_OFFSET
-	hex "Partition Table offset"
+config ESP32_PARTITION_TABLE_OFFSET_DEFAULT
+	hex
 	default 0x8000
 	depends on ESP32_APP_FORMAT_LEGACY
+
+config ESP32_CUSTOM_PARTITION_TABLE_OFFSET
+	bool "Customize partition table offset"
+	default n
+	depends on ESP32_APP_FORMAT_LEGACY
+	select ESP32_BOOTLOADER_BUILD_FROM_SOURCE
+	---help---
+		Enable to select the offset of the partition table in the flash.
+
+if ESP32_CUSTOM_PARTITION_TABLE_OFFSET
+
+config ESP32_PARTITION_TABLE_OFFSET
+	hex "Partition Table offset"
+	default ESP32_PARTITION_TABLE_OFFSET_DEFAULT
+	depends on ESP32_APP_FORMAT_LEGACY
+
+endif # ESP32_CUSTOM_PARTITION_TABLE_OFFSET
+
+if !ESP32_CUSTOM_PARTITION_TABLE_OFFSET
+
+config ESP32_PARTITION_TABLE_OFFSET
+	hex
+	default ESP32_PARTITION_TABLE_OFFSET_DEFAULT
+	depends on ESP32_APP_FORMAT_LEGACY
+
+endif # !ESP32_CUSTOM_PARTITION_TABLE_OFFSET
 
 if BUILD_PROTECTED
 

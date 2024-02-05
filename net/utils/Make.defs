@@ -22,12 +22,12 @@
 
 NET_CSRCS += net_dsec2tick.c net_dsec2timeval.c net_timeval2dsec.c
 NET_CSRCS += net_chksum.c net_ipchksum.c net_incr32.c net_lock.c net_snoop.c
-NET_CSRCS += net_cmsg.c net_iob_concat.c
+NET_CSRCS += net_cmsg.c net_iob_concat.c net_getrandom.c net_mask2pref.c
 
 # IPv6 utilities
 
 ifeq ($(CONFIG_NET_IPv6),y)
-NET_CSRCS += net_ipv6_maskcmp.c net_ipv6_mask2pref.c net_ipv6_pref2mask.c
+NET_CSRCS += net_ipv6_maskcmp.c net_ipv6_pref2mask.c
 endif
 
 # TCP utilities

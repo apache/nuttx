@@ -29,6 +29,8 @@
 #include <stdbool.h>
 
 #include "xtensa_attr.h"
+#include "hardware/esp32_efuse.h"
+
 #include <nuttx/bits.h>
 
 /****************************************************************************
@@ -366,8 +368,6 @@
 #define ETS_MPU_IA_INTR_SOURCE                  67 /* Interrupt of MPU Invalid Access, LEVEL */
 #define ETS_CACHE_IA_INTR_SOURCE                68 /* Interrupt of Cache Invalied Access, LEVEL */
 
-#define EFUSE_BLK0_RDATA4_REG                   (DR_REG_EFUSE_BASE + 0x010)
-#define EFUSE_BLK0_RDATA3_REG                   (DR_REG_EFUSE_BASE + 0x00c)
 #define GPIO_STRAP_REG                          (DR_REG_GPIO_BASE + 0x0038)
 
 /* Interrupt cpu using table */
@@ -430,14 +430,6 @@
 #define APB_CTRL_SYSCLK_CONF_REG    (DR_REG_APB_CTRL_BASE + 0x0)
 #define APB_CTRL_XTAL_TICK_CONF_REG (DR_REG_APB_CTRL_BASE + 0x4)
 
-/* APB_CTRL_PRE_DIV_CNT : R/W ;bitpos:[9:0] ;default: 10'h0 ; */
-
-#define APB_CTRL_PRE_DIV_CNT        0x000003ff
-#define APB_CTRL_PRE_DIV_CNT_M      ((APB_CTRL_PRE_DIV_CNT_V) << \
-                                     (APB_CTRL_PRE_DIV_CNT_S))
-#define APB_CTRL_PRE_DIV_CNT_V      0x3ff
-#define APB_CTRL_PRE_DIV_CNT_S      0
-
 #define I2C_BBPLL_IR_CAL_DELAY      0
 #define I2C_BBPLL_IR_CAL_EXT_CAP    1
 #define I2C_BBPLL_OC_ENB_FCAL       4
@@ -486,84 +478,6 @@ extern int rom_i2c_writereg(int block, int block_id, int reg_add,
 #define BBPLL_OC_ENB_FCAL_VAL       0x9a
 #define BBPLL_OC_ENB_VCON_VAL       0x00
 #define BBPLL_BBADC_CAL_7_0_VAL     0x00
-
-#define EFUSE_BLK0_RDATA5_REG       (DR_REG_EFUSE_BASE + 0x014)
-
-/* EFUSE_RD_VOL_LEVEL_HP_INV: RO; bitpos:[23:22] */
-
-/* description: This field stores the voltage level for
- * CPU to run at 240 MHz, or for flash/PSRAM to run at 80 MHz.
- * 0x0: level 7; 0x1: level 6; 0x2: level 5; 0x3: level 4. (RO)
- */
-
-#define EFUSE_RD_VOL_LEVEL_HP_INV   0x03
-#define EFUSE_RD_VOL_LEVEL_HP_INV_M ((EFUSE_RD_VOL_LEVEL_HP_INV_V) << (EFUSE_RD_VOL_LEVEL_HP_INV_S))
-#define EFUSE_RD_VOL_LEVEL_HP_INV_V 0x03
-#define EFUSE_RD_VOL_LEVEL_HP_INV_S 22
-
-/* EFUSE_RD_SDIO_FORCE : RO ;bitpos:[16] ;default: 1'b0 ; */
-
-/* description: read for sdio_force */
-
-#define EFUSE_RD_SDIO_FORCE         (BIT(16))
-#define EFUSE_RD_SDIO_FORCE_M       (BIT(16))
-#define EFUSE_RD_SDIO_FORCE_V       0x1
-#define EFUSE_RD_SDIO_FORCE_S       16
-
-/* EFUSE_RD_XPD_SDIO_REG : RO ;bitpos:[14] ;default: 1'b0 ; */
-
-/* description: read for XPD_SDIO_REG */
-
-#define EFUSE_RD_XPD_SDIO_REG       (BIT(14))
-#define EFUSE_RD_XPD_SDIO_REG_M     (BIT(14))
-#define EFUSE_RD_XPD_SDIO_REG_V     0x1
-#define EFUSE_RD_XPD_SDIO_REG_S     14
-
-/* EFUSE_RD_SDIO_TIEH : RO ;bitpos:[15] ;default: 1'b0 ; */
-
-/* description: read for SDIO_TIEH */
-
-#define EFUSE_RD_SDIO_TIEH         (BIT(15))
-#define EFUSE_RD_SDIO_TIEH_M       (BIT(15))
-#define EFUSE_RD_SDIO_TIEH_V       0x1
-#define EFUSE_RD_SDIO_TIEH_S       15
-
-/* EFUSE_RD_BLK3_PART_RESERVE : R/W ; bitpos:[14] ; default: 1'b0; */
-
-/* description: If set, this bit indicates that
- * BLOCK3[143:96] is reserved for internal use
- */
-
-#define EFUSE_RD_BLK3_PART_RESERVE   (BIT(14))
-#define EFUSE_RD_BLK3_PART_RESERVE_M ((EFUSE_RD_BLK3_PART_RESERVE_V) << (EFUSE_RD_BLK3_PART_RESERVE_S))
-#define EFUSE_RD_BLK3_PART_RESERVE_V 0x1
-#define EFUSE_RD_BLK3_PART_RESERVE_S 14
-
-/* EFUSE_RD_SDIO_DREFH : RO ;bitpos:[9:8] ;default: 2'b0 ; */
-
-#define EFUSE_RD_SDIO_DREFH         0x00000003
-#define EFUSE_RD_SDIO_DREFH_M       ((EFUSE_RD_SDIO_DREFH_V) << (EFUSE_RD_SDIO_DREFH_S))
-#define EFUSE_RD_SDIO_DREFH_V       0x3
-#define EFUSE_RD_SDIO_DREFH_S       8
-
-/* EFUSE_RD_SDIO_DREFM : RO ;bitpos:[11:10] ;default: 2'b0 ; */
-
-#define EFUSE_RD_SDIO_DREFM         0x00000003
-#define EFUSE_RD_SDIO_DREFM_M       ((EFUSE_RD_SDIO_DREFM_V) << (EFUSE_RD_SDIO_DREFM_S))
-#define EFUSE_RD_SDIO_DREFM_V       0x3
-#define EFUSE_RD_SDIO_DREFM_S       10
-
-/* Note: EFUSE_ADC_VREF and SDIO_DREFH/M/L share the same address space.
- * Newer versions of ESP32 come with EFUSE_ADC_VREF already burned,
- * therefore SDIO_DREFH/M/L is only available in older versions of ESP32
- */
-
-/* EFUSE_RD_SDIO_DREFL : RO ;bitpos:[13:12] ;default: 2'b0 ; */
-
-#define EFUSE_RD_SDIO_DREFL         0x00000003
-#define EFUSE_RD_SDIO_DREFL_M       ((EFUSE_RD_SDIO_DREFL_V) << (EFUSE_RD_SDIO_DREFL_S))
-#define EFUSE_RD_SDIO_DREFL_V       0x3
-#define EFUSE_RD_SDIO_DREFL_S       12
 
 #define REG_TIMG_BASE(i)            (DR_REG_TIMERGROUP0_BASE + i*0x1000)
 #define TIMG_RTCCALICFG_REG(i)      (REG_TIMG_BASE(i) + 0x0068)
@@ -838,6 +752,25 @@ static inline bool IRAM_ATTR esp32_ptr_extram(const void *p)
 {
   return ((intptr_t)p >= SOC_EXTRAM_DATA_LOW &&
           (intptr_t)p < SOC_EXTRAM_DATA_HIGH);
+}
+
+/****************************************************************************
+ * Name: esp32_ptr_iram
+ *
+ * Description:
+ *   Check if the pointer is in IRAM
+ *
+ * Parameters:
+ *   p - Pointer to the address being checked.
+ *
+ * Return Value:
+ *   True if the address is a member of the internal memory. False if not.
+ *
+ ****************************************************************************/
+
+static inline bool IRAM_ATTR esp32_ptr_iram(const void *p)
+{
+  return ((intptr_t)p >= SOC_IRAM_LOW && (intptr_t)p < SOC_IRAM_HIGH);
 }
 
 /****************************************************************************

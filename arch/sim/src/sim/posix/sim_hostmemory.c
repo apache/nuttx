@@ -27,7 +27,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
-#include <stdatomic.h>
 
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -45,9 +44,6 @@
  * Private Data
  ****************************************************************************/
 
-static atomic_int g_aordblks;
-static atomic_int g_uordblks;
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -60,18 +56,18 @@ static atomic_int g_uordblks;
  *
  ****************************************************************************/
 
-void *host_allocheap(size_t sz)
+void *host_allocheap(size_t size, bool exec)
 {
   void *p;
 
 #if defined(CONFIG_HOST_MACOS) && defined(CONFIG_HOST_ARM64)
   /* see: https://developer.apple.com/forums/thread/672804 */
 
-  p = host_uninterruptible(mmap, NULL, sz, PROT_READ | PROT_WRITE,
+  p = host_uninterruptible(mmap, NULL, size, PROT_READ | PROT_WRITE,
                            MAP_ANON | MAP_SHARED, -1, 0);
 #else
-  p = host_uninterruptible(mmap, NULL, sz,
-                           PROT_READ | PROT_WRITE | PROT_EXEC,
+  p = host_uninterruptible(mmap, NULL, size, PROT_READ | PROT_WRITE |
+                           (exec ? PROT_EXEC : 0),
                            MAP_ANON | MAP_PRIVATE, -1, 0);
 #endif
 
@@ -175,31 +171,21 @@ void *host_memalign(size_t alignment, size_t size)
       return NULL;
     }
 
-  size = host_mallocsize(p);
-  atomic_fetch_add(&g_aordblks, 1);
-  atomic_fetch_add(&g_uordblks, size);
-
   return p;
 }
 
 void host_free(void *mem)
 {
-  size_t size;
-
   if (mem == NULL)
     {
       return;
     }
 
-  size = host_mallocsize(mem);
-  atomic_fetch_sub(&g_aordblks, 1);
-  atomic_fetch_sub(&g_uordblks, size);
   host_uninterruptible_no_return(free, mem);
 }
 
 void *host_realloc(void *oldmem, size_t size)
 {
-  size_t oldsize;
   void *mem;
 
   if (oldmem == NULL)
@@ -207,21 +193,6 @@ void *host_realloc(void *oldmem, size_t size)
       return host_memalign(sizeof(void *), size);
     }
 
-  oldsize = host_mallocsize(oldmem);
   mem = host_uninterruptible(realloc, oldmem, size);
-  if (mem == NULL)
-    {
-      return NULL;
-    }
-
-  size = host_mallocsize(mem);
-  atomic_fetch_add(&g_uordblks, size - oldsize);
-
   return mem;
-}
-
-void host_mallinfo(int *aordblks, int *uordblks)
-{
-  *aordblks = atomic_load(&g_aordblks);
-  *uordblks = atomic_load(&g_uordblks);
 }

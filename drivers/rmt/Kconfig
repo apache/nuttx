@@ -1,0 +1,47 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menuconfig RMT
+	bool "RMT (Remote Control) Driver Support"
+	default n
+	---help---
+		This option selects common RMT (Remote Control) options and should be
+		enabled by the platforms that implement a Remote Control Peripheral.
+
+if RMT
+
+config RMTCHAR
+	bool "RMT character driver (for testing only)"
+	default n
+	---help---
+		The RMT character driver is a simple character driver that supports
+		RMT transfers via read() and write(). This driver is primarily
+		intended to support RMT testing. It is not suitable for use in any
+		real driver application in its current form because its buffer
+		management heuristics are dependent on the lower half driver
+		(device-specific). Applications that use the RMT peripheral to
+		implement protocols such as NEC (for Remote Control), or use this
+		driver to implement other 1-wire protocols such as WS2812 LED must
+		provide their specific driver implementation.
+
+config RMT_DEFAULT_RX_BUFFER_SIZE
+	int "Default RX buffer size"
+	default 100
+	---help---
+		The RMT RX default buffer size. This is the expected buffer size
+		that should be returned on a `read()` operation.
+
+config RMT_LOOP_TEST_MODE
+	bool "RMT character driver loopback test mode (for testing only)"
+	depends on EXPERIMENTAL
+	default n
+	---help---
+		This enables a lower-half driver-specific loopback test
+		mode that attaches the transmitter to the receiver, being
+		able to test the RMT peripheral without any external
+		connection. This feature depends on lower-half driver
+		implementation.
+
+endif # RMT

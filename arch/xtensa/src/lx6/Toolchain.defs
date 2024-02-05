@@ -95,6 +95,12 @@ ifeq ($(CONFIG_ARCH_COVERAGE_ALL),y)
   ARCHOPTIMIZATION += -fprofile-generate -ftest-coverage
 endif
 
+# Instrumentation options
+
+ifeq ($(CONFIG_ARCH_INSTRUMENT_ALL),y)
+  ARCHOPTIMIZATION += -finstrument-functions
+endif
+
 ARCHCFLAGS += -fno-common
 ARCHCXXFLAGS += -fno-common -nostdinc++
 
@@ -160,7 +166,7 @@ endif
 
 LD = $(CROSSDEV)ld
 STRIP = $(CROSSDEV)strip --strip-unneeded
-AR = $(CROSSDEV)ar rcsP
+AR = $(CROSSDEV)ar rcs
 NM = $(CROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump

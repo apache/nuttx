@@ -49,7 +49,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
-#include <sys/random.h>
 
 #include <netinet/in.h>
 
@@ -70,6 +69,7 @@
 #include "icmpv6/icmpv6.h"
 #include "nat/nat.h"
 #include "netdev/netdev.h"
+#include "utils/utils.h"
 
 /****************************************************************************
  * Private Data
@@ -440,8 +440,7 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
 
       for (dev = g_netdevices; dev; dev = dev->flink)
         {
-          if (net_ipv6addr_cmp(addr->sin6_addr.in6_u.u6_addr16,
-                              dev->d_ipv6addr))
+          if (NETDEV_IS_MY_V6ADDR(dev, addr->sin6_addr.in6_u.u6_addr16))
             {
               ret = 0;
               break;
@@ -579,26 +578,14 @@ int tcp_selectport(uint8_t domain,
                    uint16_t portno)
 {
   static uint16_t g_last_tcp_port;
-  ssize_t ret;
 
   /* Generate port base dynamically */
 
   if (g_last_tcp_port == 0)
     {
-      ret = getrandom(&g_last_tcp_port, sizeof(uint16_t), 0);
-      if (ret < 0)
-        {
-          ret = getrandom(&g_last_tcp_port, sizeof(uint16_t), GRND_RANDOM);
-        }
+      net_getrandom(&g_last_tcp_port, sizeof(uint16_t));
 
-      if (ret != sizeof(uint16_t))
-        {
-          g_last_tcp_port = clock_systime_ticks() % 32000;
-        }
-      else
-        {
-          g_last_tcp_port = g_last_tcp_port % 32000;
-        }
+      g_last_tcp_port = g_last_tcp_port % 32000;
 
       if (g_last_tcp_port < 4096)
         {
@@ -1212,7 +1199,7 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
       conn->rport            = tcp->srcport;
       conn->tcpstateflags    = TCP_SYN_RCVD;
 
-      tcp_initsequence(conn->sndseq);
+      tcp_initsequence(conn);
 #if !defined(CONFIG_NET_TCP_WRITE_BUFFERS)
       conn->rexmit_seq       = tcp_getsequence(conn->sndseq);
 #endif
@@ -1332,7 +1319,7 @@ int tcp_bind(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
 int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
 {
   int port;
-  int ret;
+  int ret = OK;
 
   /* The connection is expected to be in the TCP_ALLOCATED state.. i.e.,
    * allocated via up_tcpalloc(), but not yet put into the active connections
@@ -1481,7 +1468,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
 
 #if defined(CONFIG_NET_ARP_SEND) || defined(CONFIG_NET_ICMPv6_NEIGHBOR)
 #ifdef CONFIG_NET_ARP_SEND
-#ifdef CONFIG_NET_ICMPv6_NEIGHBOR
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
   if (conn->domain == PF_INET)
 #endif
     {
@@ -1492,8 +1479,8 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
 #endif /* CONFIG_NET_ARP_SEND */
 
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
-#ifdef CONFIG_NET_ARP_SEND
-  else
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+  if (conn->domain == PF_INET6)
 #endif
     {
       /* Make sure that the IP address mapping is in the Neighbor Table */
@@ -1518,13 +1505,6 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
    */
 
   conn->tcpstateflags = TCP_SYN_SENT;
-  tcp_initsequence(conn->sndseq);
-
-  /* Save initial sndseq to rexmit_seq, otherwise it will be zero */
-
-#if !defined(CONFIG_NET_TCP_WRITE_BUFFERS)
-  conn->rexmit_seq = tcp_getsequence(conn->sndseq);
-#endif
 
   conn->tx_unacked = 1;    /* TCP length of the SYN is one. */
   conn->nrtx       = 0;
@@ -1538,6 +1518,16 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
   conn->isn        = 0;
   conn->sent       = 0;
   conn->sndseq_max = 0;
+#endif
+
+  /* Set initial sndseq when we have both local/remote addr and port */
+
+  tcp_initsequence(conn);
+
+  /* Save initial sndseq to rexmit_seq, otherwise it will be zero */
+
+#if !defined(CONFIG_NET_TCP_WRITE_BUFFERS)
+  conn->rexmit_seq = tcp_getsequence(conn->sndseq);
 #endif
 
 #ifdef CONFIG_NET_TCP_CC_NEWRENO

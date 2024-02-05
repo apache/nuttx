@@ -41,23 +41,101 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Current adjtime implementation uses periodic clock tick to adjust clock
- * period. Therefore this implementation will not work when tickless mode
- * is enabled by CONFIG_SCHED_TICKLESS=y
- */
-
-#ifdef CONFIG_SCHED_TICKLESS
-# error CONFIG_CLOCK_ADJTIME is not supported when CONFIG_SCHED_TICKLESS \
-        is enabled!
-#endif
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
+static struct wdog_s g_adjtime_wdog;
+static long g_adjtime_ppb;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/* Restore default rate after adjustment period expires */
+
+static void adjtime_wdog_callback(wdparm_t arg)
+{
+  UNUSED(arg);
+
+#ifdef CONFIG_ARCH_HAVE_ADJTIME
+  up_adjtime(0);
+#endif
+
+#ifdef CONFIG_RTC_ADJTIME
+  up_rtc_adjtime(0);
+#endif
+
+  g_adjtime_ppb = 0;
+}
+
+/* Query remaining adjustment in microseconds */
+
+static long long adjtime_remaining_usec(void)
+{
+  return (long long)g_adjtime_ppb
+    * TICK2MSEC(wd_gettime(&g_adjtime_wdog))
+    / (MSEC_PER_SEC * NSEC_PER_USEC);
+}
+
+/* Start new adjustment period */
+
+static int adjtime_start(long long adjust_usec)
+{
+  long long ppb;
+  long long ppb_limit;
+  irqstate_t flags;
+  int ret = OK;
+
+  /* Calculate rate adjustmend to get adjust_usec change over the
+   * CONFIG_CLOCK_ADJTIME_PERIOD_MS.
+   */
+
+  ppb = adjust_usec * NSEC_PER_USEC;
+  ppb = ppb * MSEC_PER_SEC / CONFIG_CLOCK_ADJTIME_PERIOD_MS;
+
+  /* Limit to maximum rate adjustment */
+
+  ppb_limit = CONFIG_CLOCK_ADJTIME_SLEWLIMIT_PPM * 1000;
+  if (ppb > ppb_limit)
+    {
+      ppb = ppb_limit;
+    }
+  else if (ppb < -ppb_limit)
+    {
+      ppb = -ppb_limit;
+    }
+
+  flags = enter_critical_section();
+
+  /* Set new adjustment */
+
+  g_adjtime_ppb = ppb;
+
+#ifdef CONFIG_ARCH_HAVE_ADJTIME
+  up_adjtime(g_adjtime_ppb);
+#endif
+
+#ifdef CONFIG_RTC_ADJTIME
+  ret = up_rtc_adjtime(g_adjtime_ppb);
+#endif
+
+  /* Queue cancellation of adjustment after configured period */
+
+  if (g_adjtime_ppb != 0)
+    {
+      wd_start(&g_adjtime_wdog, MSEC2TICK(CONFIG_CLOCK_ADJTIME_PERIOD_MS),
+              adjtime_wdog_callback, 0);
+    }
+  else
+    {
+      wd_cancel(&g_adjtime_wdog);
+    }
+
+  leave_critical_section(flags);
+
+  return ret;
+}
 
 /****************************************************************************
  * Public Functions
@@ -100,107 +178,32 @@
 
 int adjtime(FAR const struct timeval *delta, FAR struct timeval *olddelta)
 {
-  irqstate_t flags;
-  long long adjust_usec;
-  long long period_usec;
-  long long adjust_usec_old;
-  long long count;                /* Number of cycles over which
-                                   * we adjust the period
-                                   */
-  long long incr;                 /* Period increment applied on
-                                   * every cycle.
-                                   */
-  long long count_old;            /* Previous number of cycles over which
-                                   * we adjust the period
-                                   */
-  long long incr_old;             /* Previous period increment applied on
-                                   * every cycle.
-                                   */
-  long long incr_limit;
-  int is_negative;
+  long long adjust_usec = 0;
+  long long adjust_usec_old = 0;
+  int ret = OK;
 
-  is_negative = 0;
-
-  if (!delta)
-    {
-      set_errno(EINVAL);
-      return -1;
-    }
-
-  flags = enter_critical_section();
-
-  adjust_usec = (long long)delta->tv_sec * USEC_PER_SEC + delta->tv_usec;
-
-  if (adjust_usec < 0)
-    {
-      adjust_usec = -adjust_usec;
-      is_negative = 1;
-    }
-
-  /* Get period in usec. Target hardware has to provide support for
-   * this function call.
-   */
-
-  up_get_timer_period(&period_usec);
-
-  /* Determine how much we want to adjust timer period and the number
-   * of cycles over which we want to do the adjustment.
-   */
-
-  count = (USEC_PER_MSEC * CONFIG_CLOCK_ADJTIME_PERIOD_MS) / period_usec;
-  incr = adjust_usec / count;
-
-  /* Compute maximum possible period increase and check
-   * whether previously computed increase exceeds the maximum
-   * one.
-   */
-
-  incr_limit = CONFIG_CLOCK_ADJTIME_SLEWLIMIT_PPM
-               / (USEC_PER_SEC / period_usec);
-  if (incr > incr_limit)
-    {
-      /* It does... limit computed increase and increment count. */
-
-      incr = incr_limit;
-      count = adjust_usec / incr;
-    }
-
-  /* If requested adjustment is smaller than 1 microsecond per tick,
-   * adjust the count instead.
-   */
-
-  if (adjust_usec == 0)
-    {
-      incr = 0;
-      count = 0;
-    }
-  else if (incr == 0)
-    {
-      incr = 1;
-      count = adjust_usec / incr;
-    }
-
-  if (is_negative == 1)
-    {
-      /* Positive or negative? */
-
-      incr = -incr;
-    }
-
-  leave_critical_section(flags);
-
-  /* Initialize clock adjustment and get old adjust values. */
-
-  clock_set_adjust(incr, count, &incr_old, &count_old);
-
-  adjust_usec_old = count_old * incr_old;
   if (olddelta)
     {
+      adjust_usec_old = adjtime_remaining_usec();
       olddelta->tv_sec  = adjust_usec_old / USEC_PER_SEC;
       olddelta->tv_usec = adjust_usec_old;
     }
 
-  return OK;
+  if (delta)
+    {
+      adjust_usec = (long long)delta->tv_sec * USEC_PER_SEC + delta->tv_usec;
+      ret = adjtime_start(adjust_usec);
+    }
+
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      return -1;
+    }
+  else
+    {
+      return OK;
+    }
 }
 
 #endif /* CONFIG_CLOCK_ADJTIME */

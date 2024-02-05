@@ -32,6 +32,10 @@ ifeq ($(CONFIG_ESP32S3_SPIFLASH),y)
   CSRCS += esp32s3_board_spiflash.c
 endif
 
+ifeq ($(CONFIG_SPI_DRIVER),y)
+  CSRCS += esp32s3_board_spidev.c
+endif
+
 ifeq ($(CONFIG_ESP32S3_WIFI),y)
   CSRCS += esp32s3_board_wlan.c
 endif
@@ -54,6 +58,14 @@ endif
 
 ifeq ($(CONFIG_ESP32S3_OTG),y)
   CSRCS += esp32s3_board_usb.c
+endif
+
+ifeq ($(CONFIG_NET_LAN9250),y)
+  CSRCS += esp32s3_lan9250.c
+endif
+
+ifeq ($(CONFIG_ESP_RMT),y)
+  CSRCS += esp32s3_board_rmt.c
 endif
 
 DEPPATH += --dep-path src

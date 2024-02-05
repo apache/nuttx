@@ -22,12 +22,6 @@ export SHELL=cmd
 
 export TOPDIR := ${shell echo %CD%}
 
-# Build any necessary tools needed early in the build.
-# incdir - Is needed immediately by all Make.defs file.
-
-DUMMY  := ${shell $(MAKE) -C tools -f Makefile.host incdir \
-          INCDIR="$(TOPDIR)\tools\incdir.bat"}
-
 include $(TOPDIR)\Make.defs
 -include $(TOPDIR)\.version
 
@@ -210,6 +204,13 @@ else
 include\setjmp.h:
 endif
 
+# Targets used to generate compiler-specific include paths
+# Build this tools needed early in the build
+# so we define it as a dependency of `context` target
+
+tools\incdir$(HOSTEXEEXT):
+	$(Q) $(MAKE) -C tools -f Makefile.host incdir INCDIR="$(TOPDIR)\tools\incdir.bat"
+
 # Targets used to build include\nuttx\version.h.  Creation of version.h is
 # part of the overall NuttX configuration sequence. Notice that the
 # tools\mkversion tool is built and used to create include\nuttx\version.h
@@ -264,10 +265,18 @@ include\arch:
 	$(Q) $(DIRLINK) $(TOPDIR)\$(ARCH_DIR)\include $@
 
 # Link the boards\<arch>\<chip>\<board>\include directory to include\arch\board
+# If the above path does not exist, then we try to link to common
+
+LINK_INCLUDE_DIR=$(BOARD_DIR)/include
+ifeq ($(wildcard $(LINK_INCLUDE_DIR)),)
+	ifneq ($(strip $(BOARD_COMMON_DIR)),)
+		LINK_INCLUDE_DIR = $(BOARD_COMMON_DIR)/include
+	endif
+endif
 
 include\arch\board: | include\arch
 	@echo "LN: $@ to $(BOARD_DIR)\include"
-	$(Q) $(DIRLINK) $(BOARD_DIR)\include $@
+	$(Q) $(DIRLINK) $(LINK_INCLUDE_DIR) $@
 
 # Link the boards\<arch>\<chip>\common dir to arch\<arch-name>\src\board
 # Link the boards\<arch>\<chip>\<board>\src dir to arch\<arch-name>\src\board\board
@@ -416,7 +425,7 @@ endif
 
 CONTEXTDIRS_DEPS = $(patsubst %,%\.context,$(CONTEXTDIRS))
 
-context: include\nuttx\config.h include\nuttx\version.h $(CONTEXTDIRS_DEPS) .dirlinks | staging
+context: tools\incdir$(HOSTEXEEXT) include\nuttx\config.h include\nuttx\version.h $(CONTEXTDIRS_DEPS) .dirlinks | staging
 
 ifeq ($(NEED_MATH_H),y)
 context: include\math.h

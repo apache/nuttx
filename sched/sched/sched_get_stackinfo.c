@@ -61,7 +61,7 @@ int nxsched_get_stackinfo(pid_t pid, FAR struct stackinfo_s *stackinfo)
 
   DEBUGASSERT(rtcb != NULL && stackinfo != NULL);
 
-  /*  Pid of 0 means that we are querying ourself */
+  /* Pid of 0 means that we are querying ourself */
 
   if (pid == 0)
     {

@@ -42,6 +42,7 @@
 #  define CSR_IE            sie              /* Interrupt enable register */
 #  define CSR_CAUSE         scause           /* Interrupt cause register */
 #  define CSR_TVAL          stval            /* Trap value register */
+#  define CSR_TVEC          stvec            /* Trap vector base addr register */
 
 /* In status register */
 
@@ -76,6 +77,7 @@
 #  define CSR_IE            mie              /* Interrupt enable register */
 #  define CSR_CAUSE         mcause           /* Interrupt cause register */
 #  define CSR_TVAL          mtval            /* Trap value register */
+#  define CSR_TVEC          mtvec            /* Trap vector base addr register */
 
 /* In status register */
 

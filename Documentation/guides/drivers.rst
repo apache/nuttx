@@ -1,6 +1,7 @@
 .. include:: /substitutions.rst
 .. _drivers:
 
+=======
 Drivers
 =======
 
@@ -10,7 +11,7 @@ you will either need to port a driver from another chip, or write one yourself. 
 .. _drivers-porting:
 
 Porting a Driver
-----------------
+================
 
 Often support for on-chip peripherals exists in a closely related chip, or even a different family or from a different
 manufacturer. Many chips are made up of different Intellectual Property (IP) blocks that are licensed from vendors like
@@ -144,7 +145,7 @@ modification.
         200aaaa0: 0000 0000 0000 0000                      ........
 
 NuttX Drivers as a Reference
-----------------------------
+============================
 
 If you're not porting a NuttX driver from another architecture, it still helps to look at other similar NuttX
 drivers, if there are any. For instance, when implementing an Ethernet driver, look at other NuttX Ethernet drivers;
@@ -152,7 +153,7 @@ for an SD Card driver, look at other NuttX SD Card drivers. Even if the chip-spe
 structure to interface with NuttX can be used.
 
 Using Chip Datasheets
----------------------
+=====================
 
 To port or write a driver, you'll have to be familiar with the information in the chip datasheet. Definitely find
 the datasheet for your chip, and read the sections relevant to the peripheral you're working with. Doing so ahead
@@ -179,7 +180,7 @@ code implements the necessary algorithms often helps one understand how the driv
       examples.
 
 Logic Analyzers
----------------
+===============
 
 For drivers that involve input and output (I/O), especially that involve complex protocols like SD Cards, SPI, I2C,
 etc., actually seeing the waveform that goes in and out the chip's pins is extremely helpful. `Logic Analyzers <https://en.wikipedia.org/wiki/Logic_analyzer>`_
@@ -187,7 +188,7 @@ can capture that information and display it graphically, allowing you to see if 
 on the wire.
 
 DMA Debugging
--------------
+=============
 
 * Dump registers before, during, and after transfer. Some NuttX drivers (``sam_sdmmc.c`` or ``imxrt_sdmmc.c`` for
   example) have built-in code for debugging register states, and can sample registers before, during, and

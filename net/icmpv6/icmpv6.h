@@ -166,6 +166,26 @@ EXTERN const struct sock_intf_s g_icmpv6_sockif;
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: icmpv6_devinit
+ *
+ * Description:
+ *   Called when a new network device is registered to configure that device
+ *   for ICMPv6 support.
+ *
+ * Input Parameters:
+ *   dev   - The device driver structure to configure.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+void icmpv6_devinit(FAR struct net_driver_s *dev);
+
+/****************************************************************************
  * Name: icmpv6_input
  *
  * Description:
@@ -313,6 +333,7 @@ void icmpv6_rsolicit(FAR struct net_driver_s *dev);
  ****************************************************************************/
 
 void icmpv6_advertise(FAR struct net_driver_s *dev,
+                      const net_ipv6addr_t tgtaddr,
                       const net_ipv6addr_t destipaddr);
 
 /****************************************************************************
@@ -535,9 +556,9 @@ int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify, unsigned int timeout);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6_AUTOCONF
-void icmpv6_rnotify(FAR struct net_driver_s *dev);
+void icmpv6_rnotify(FAR struct net_driver_s *dev, int result);
 #else
-#  define icmpv6_rnotify(d) (0)
+#  define icmpv6_rnotify(d,r) (0)
 #endif
 
 /****************************************************************************

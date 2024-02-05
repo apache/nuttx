@@ -20,76 +20,8 @@
 
 ifeq ($(CONFIG_ARCH_BOARD_COMMON),y)
 
-ifeq ($(CONFIG_ESP32C3_SPI),y)
-  CSRCS += esp32c3_board_spi.c
-endif
-
-ifeq ($(CONFIG_SPI_DRIVER),y)
-  CSRCS += esp32c3_board_spidev.c
-endif
-
-ifeq ($(CONFIG_SPI_SLAVE_DRIVER),y)
-  CSRCS += esp32c3_board_spislavedev.c
-endif
-
-ifeq ($(CONFIG_ESP32C3_SPIFLASH),y)
-  CSRCS += esp32c3_board_spiflash.c
-endif
-
-ifeq ($(CONFIG_I2C_DRIVER),y)
-  CSRCS += esp32c3_board_i2c.c
-endif
-
-ifeq ($(CONFIG_ESP32C3_WIRELESS),y)
-  CSRCS += esp32c3_board_wlan.c
-endif
-
-ifeq ($(CONFIG_CAN),y)
-  CSRCS += esp32c3_board_twai.c
-endif
-
-ifeq ($(CONFIG_WATCHDOG),y)
-  CSRCS += esp32c3_board_wdt.c
-endif
-
-ifeq ($(CONFIG_ONESHOT),y)
-  CSRCS += esp32c3_board_oneshot.c
-endif
-
-ifeq ($(CONFIG_PWM),y)
-  CSRCS += esp32c3_board_ledc.c
-endif
-
-ifeq ($(CONFIG_ADC),y)
-  CSRCS += esp32c3_board_adc.c
-endif
-
-ifeq ($(CONFIG_SENSORS_BMP180),y)
-  CSRCS += esp32c3_board_bmp180.c
-endif
-
-ifeq ($(CONFIG_LCD_ST7735),y)
-  CSRCS += esp32c3_board_st7735.c
-endif
-
-ifeq ($(CONFIG_LCD_ST7789),y)
-  CSRCS += esp32c3_board_st7789.c
-endif
-
-ifeq ($(CONFIG_LCD_GC9A01),y)
-  CSRCS += esp32c3_board_gc9a01.c
-endif
-
-ifeq ($(CONFIG_SENSORS_APDS9960),y)
-  CSRCS += esp32c3_board_apds9960.c
-endif
-
-ifeq ($(CONFIG_LCD_APA102),y)
-  CSRCS += esp32c3_board_apa102.c
-endif
-
-ifeq ($(CONFIG_MPU60X0_I2C),y)
-  CSRCS += esp32c3_board_mpu60x0_i2c.c
+ifeq ($(CONFIG_ESPRESSIF_LEDC),y)
+  CSRCS += esp_board_ledc.c
 endif
 
 DEPPATH += --dep-path src

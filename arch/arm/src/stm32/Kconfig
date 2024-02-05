@@ -1216,17 +1216,17 @@ choice
 		ends with a number or letter that designates the FLASH size.
 
 				Designator  Size in KiB
-				   4   	16
-				   6   	32
-				   8   	64
-				   B   	128
-				   Z   	192
-				   C   	256
-				   D   	384
-				   E   	512
-				   F   	768
-				   G   	1024
-				   I   	2048
+				   4    16
+				   6    32
+				   8    64
+				   B    128
+				   Z    192
+				   C    256
+				   D    384
+				   E    512
+				   F    768
+				   G    1024
+				   I    2048
 
 		This configuration option defaults to using the configuration based
 		on that designator or the default smaller size if there is no last
@@ -9553,10 +9553,6 @@ config STM32_USART
 	bool
 	default n
 
-config STM32_USART_RXDMA
-	bool
-	default n
-
 config STM32_SERIALDRIVER
 	bool
 	default n
@@ -9623,7 +9619,6 @@ config USART1_RXDMA
 	bool "USART1 Rx DMA"
 	default n
 	depends on (((STM32_STM32F10XX || STM32_STM32L15XX) && STM32_DMA1) || (!STM32_STM32F10XX && STM32_DMA2))
-	select STM32_USART_RXDMA
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
@@ -9631,7 +9626,6 @@ config USART1_TXDMA
 	bool "USART1 Tx DMA"
 	default n
 	depends on (((STM32_STM32F10XX || STM32_STM32L15XX) && STM32_DMA1) || (!STM32_STM32F10XX && STM32_DMA2))
-	select STM32_USART_TXDMA
 	---help---
 		In high data rate usage, Tx DMA may reduce CPU load
 
@@ -9718,7 +9712,6 @@ config USART2_RXDMA
 	bool "USART2 Rx DMA"
 	default n
 	depends on STM32_DMA1
-	select STM32_USART_RXDMA
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
@@ -9726,7 +9719,6 @@ config USART2_TXDMA
 	bool "USART2 Tx DMA"
 	default n
 	depends on STM32_DMA1
-	select STM32_USART_TXDMA
 	---help---
 		In high data rate usage, Tx DMA may reduce CPU load
 
@@ -9813,7 +9805,6 @@ config USART3_RXDMA
 	bool "USART3 Rx DMA"
 	default n
 	depends on STM32_DMA1
-	select STM32_USART_RXDMA
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
@@ -9821,7 +9812,6 @@ config USART3_TXDMA
 	bool "USART3 Tx DMA"
 	default n
 	depends on STM32_DMA1
-	select STM32_USART_TXDMA
 	---help---
 		In high data rate usage, Tx DMA may reduce CPU load
 
@@ -9903,7 +9893,6 @@ config UART4_RXDMA
 	bool "UART4 Rx DMA"
 	default n
 	depends on STM32_DMA1
-	select STM32_USART_RXDMA
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
@@ -9911,7 +9900,6 @@ config UART4_TXDMA
 	bool "UART4 Tx DMA"
 	default n
 	depends on STM32_DMA1
-	select STM32_USART_TXDMA
 	---help---
 		In high data rate usage, Tx DMA may reduce CPU load
 
@@ -9957,7 +9945,6 @@ config UART5_RXDMA
 	bool "UART5 Rx DMA"
 	default n
 	depends on STM32_DMA1
-	select STM32_USART_RXDMA
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
@@ -9965,7 +9952,6 @@ config UART5_TXDMA
 	bool "UART5 Tx DMA"
 	default n
 	depends on STM32_DMA1
-	select STM32_USART_TXDMA
 	---help---
 		In high data rate usage, Tx DMA may reduce CPU load
 
@@ -10016,7 +10002,6 @@ config USART6_RXDMA
 	bool "USART6 Rx DMA"
 	default n
 	depends on STM32_DMA2
-	select STM32_USART_RXDMA
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
@@ -10024,7 +10009,6 @@ config USART6_TXDMA
 	bool "USART6 Tx DMA"
 	default n
 	depends on STM32_DMA2
-	select STM32_USART_TXDMA
 	---help---
 		In high data rate usage, Tx DMA may reduce CPU load
 
@@ -10111,7 +10095,6 @@ config UART7_RXDMA
 	bool "UART7 Rx DMA"
 	default n
 	depends on STM32_DMA1
-	select STM32_USART_RXDMA
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
@@ -10119,7 +10102,6 @@ config UART7_TXDMA
 	bool "UART7 Tx DMA"
 	default n
 	depends on STM32_DMA1
-	select STM32_USART_TXDMA
 	---help---
 		In high data rate usage, Tx DMA may reduce CPU load
 
@@ -10206,7 +10188,6 @@ config UART8_RXDMA
 	bool "UART8 Rx DMA"
 	default n
 	depends on STM32_DMA1
-	select STM32_USART_RXDMA
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
@@ -10214,7 +10195,6 @@ config UART8_TXDMA
 	bool "UART8 Tx DMA"
 	default n
 	depends on STM32_DMA1
-	select STM32_USART_TXDMA
 	---help---
 		In high data rate usage, Tx DMA may reduce CPU load
 
@@ -10263,7 +10243,6 @@ config STM32_SERIAL_RXDMA_BUFFER_SIZE
 	int "Rx DMA buffer size"
 	default 32
 	range 32 4096
-	depends on STM32_USART_RXDMA
 	---help---
 		The DMA buffer size when using RX DMA to emulate a FIFO.
 
@@ -10920,12 +10899,45 @@ config STM32_PHYSR_100FD
 		This must be provided if STM32_AUTONEG is defined.  This is the value
 		under the bit mask that represents the 100Mbps, full duplex setting.
 
+config STM32_ETH_ENHANCEDDESC
+	bool "Enable enhanced RX/TX descriptors"
+	default n
+	---help---
+		Enables double-length DMA descriptors that have space for packet
+		timestamps and checksum offloading.
+
 config STM32_ETH_PTP
 	bool "Precision Time Protocol (PTP)"
 	default n
 	---help---
-		Precision Time Protocol (PTP).  Not supported but some hooks are indicated
-		with this condition.
+		Enables Precision Time Protocol (PTP) hardware timer.
+
+config STM32_ETH_PTP_GPIO
+	bool "PTP pulse-per-second output signal"
+	depends on STM32_ETH_PTP
+	default n
+	---help---
+		Enables pulse-per-second output on GPIO pin.
+
+config STM32_ETH_PTP_RTC_HIRES
+	bool "Use PTP timer as system high-resolution RTC"
+	depends on STM32_ETH_PTP
+	default n
+	---help---
+		Uses the Ethernet peripheral PTP timer as the CONFIG_RTC_HIRES source.
+		This provides high resolution timestamps to clock_gettime().
+		Note that PTP timer is disabled when Ethernet interface is down or
+		being reset. During this time g_rtc_enabled is set to false and system
+		uses the lower resolution system tick counter.
+
+config STM32_ETH_TIMESTAMP_RX
+	bool "Hardware timestamping of received packets"
+	depends on STM32_ETH_PTP && NET_TIMESTAMP && STM32_ETH_ENHANCEDDESC
+	select ARCH_HAVE_NETDEV_TIMESTAMP
+	default n
+	---help---
+		Timestamp all received Ethernet packets.
+		Timestamp is available to application through SO_TIMESTAMP socket option.
 
 config STM32_RMII
 	bool
@@ -12208,6 +12220,7 @@ config STM32_FOC_USE_ADC4
 config STM32_FOC_G4_ADCCHAN0_WORKAROUND
 	bool "FOC G4 ADC channel 0 unwanted conversion workaround"
 	default n
+	depends on STM32_STM32G4XXX
 	---help---
 		Some STM32G4 family chips have an issue that causes unwanted ADC channel 0
 		conversion when a regular conversion is interrupted by an injected conversion.

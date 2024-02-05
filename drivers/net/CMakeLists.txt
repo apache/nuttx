@@ -75,8 +75,16 @@ if(CONFIG_NET)
     list(APPEND SRCS w5500.c)
   endif()
 
+  if(CONFIG_NET_LAN9250)
+    list(APPEND SRCS lan9250.c)
+  endif()
+
   if(CONFIG_ARCH_PHY_INTERRUPT)
     list(APPEND SRCS phy_notify.c)
+  endif()
+
+  if(CONFIG_DRIVERS_WIFI_SIM)
+    list(APPEND SRCS wifi_sim.c)
   endif()
 
   target_sources(drivers PRIVATE ${SRCS})

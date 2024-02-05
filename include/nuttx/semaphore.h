@@ -57,51 +57,6 @@
      {(c), (f), SEM_WAITLIST_INITIALIZER}
 #endif /* CONFIG_PRIORITY_INHERITANCE */
 
-/* Most internal nxsem_* interfaces are not available in the user space in
- * PROTECTED and KERNEL builds.  In that context, the application semaphore
- * interfaces must be used.  The differences between the two sets of
- * interfaces are:  (1) the nxsem_* interfaces do not cause cancellation
- * points and (2) they do not modify the errno variable.
- *
- * This is only important when compiling libraries (libc or libnx) that are
- * used both by the OS (libkc.a and libknx.a) or by the applications
- * (libc.a and libnx.a).  In that case, the correct interface must be
- * used for the build context.
- *
- * REVISIT:  In the flat build, the same functions must be used both by
- * the OS and by applications.  We have to use the normal user functions
- * in this case or we will fail to set the errno or fail to create the
- * cancellation point.
- */
-
-#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
-#  define _SEM_INIT(s,p,c)      nxsem_init(s,p,c)
-#  define _SEM_DESTROY(s)       nxsem_destroy(s)
-#  define _SEM_WAIT(s)          nxsem_wait(s)
-#  define _SEM_TRYWAIT(s)       nxsem_trywait(s)
-#  define _SEM_TIMEDWAIT(s,t)   nxsem_timedwait(s,t)
-#  define _SEM_CLOCKWAIT(s,c,t) nxsem_clockwait(s,c,t)
-#  define _SEM_POST(s)          nxsem_post(s)
-#  define _SEM_GETVALUE(s,v)    nxsem_get_value(s,v)
-#  define _SEM_GETPROTOCOL(s,p) nxsem_get_protocol(s,p)
-#  define _SEM_SETPROTOCOL(s,p) nxsem_set_protocol(s,p)
-#  define _SEM_ERRNO(r)         (-(r))
-#  define _SEM_ERRVAL(r)        (r)
-#else
-#  define _SEM_INIT(s,p,c)      sem_init(s,p,c)
-#  define _SEM_DESTROY(s)       sem_destroy(s)
-#  define _SEM_WAIT(s)          sem_wait(s)
-#  define _SEM_TRYWAIT(s)       sem_trywait(s)
-#  define _SEM_TIMEDWAIT(s,t)   sem_timedwait(s,t)
-#  define _SEM_CLOCKWAIT(s,c,t) sem_clockwait(s,c,t)
-#  define _SEM_GETVALUE(s,v)    sem_getvalue(s,v)
-#  define _SEM_POST(s)          sem_post(s)
-#  define _SEM_GETPROTOCOL(s,p) sem_getprotocol(s,p)
-#  define _SEM_SETPROTOCOL(s,p) sem_setprotocol(s,p)
-#  define _SEM_ERRNO(r)         errno
-#  define _SEM_ERRVAL(r)        (-errno)
-#endif
-
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -428,6 +383,98 @@ int nxsem_post(FAR sem_t *sem);
  ****************************************************************************/
 
 int nxsem_get_value(FAR sem_t *sem, FAR int *sval);
+
+/****************************************************************************
+ * Name: nxsem_open
+ *
+ * Description:
+ *   This function establishes a connection between named semaphores and a
+ *   task.  Following a call to sem_open() with the semaphore name, the task
+ *   may reference the semaphore associated with name using the address
+ *   returned by this call.  The semaphore may be used in subsequent calls
+ *   to sem_wait(), sem_trywait(), and sem_post().  The semaphore remains
+ *   usable until the semaphore is closed by a successful call to
+ *   sem_close().
+ *
+ *   If a task makes multiple calls to sem_open() with the same name, then
+ *   the same semaphore address is returned (provided there have been no
+ *   calls to sem_unlink()).
+ *
+ * Input Parameters:
+ *   name  - Semaphore name
+ *   oflags - Semaphore creation options.  This may either or both of the
+ *     following bit settings.
+ *     oflags = 0:  Connect to the semaphore only if it already exists.
+ *     oflags = O_CREAT:  Connect to the semaphore if it exists, otherwise
+ *        create the semaphore.
+ *     oflags = O_CREAT|O_EXCL:  Create a new semaphore
+ *        unless one of this name already exists.
+ *   Optional parameters.  When the O_CREAT flag is specified, two optional
+ *     parameters are expected:
+ *     1. mode_t mode, and
+ *     2. unsigned int value.  This initial value of the semaphore. Valid
+ *        initial values of the semaphore must be less than or equal to
+ *        SEM_VALUE_MAX.
+ *
+ * Returned Value:
+ *   A pointer to sem_t or negated errno if unsuccessful.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+FAR sem_t *nxsem_open(FAR const char *name, int oflags, ...);
+
+/****************************************************************************
+ * Name:  nxsem_close
+ *
+ * Description:
+ *   This function is called to indicate that the calling task is finished
+ *   with the specified named semaphore, 'sem'.  The sem_close() deallocates
+ *   any system resources allocated by the system for this named semaphore.
+ *
+ *   If the semaphore has not been removed with a call to sem_unlink(), then
+ *   sem_close() has no effect on the named semaphore.  However, when the
+ *   named semaphore has been fully unlinked, the semaphore will vanish when
+ *   the last task closes it.
+ *
+ * Input Parameters:
+ *  sem - semaphore descriptor
+ *
+ * Returned Value:
+ *  0 (OK), or negated errno if unsuccessful.
+ *
+ * Assumptions:
+ *   - Care must be taken to avoid risking the deletion of a semaphore that
+ *     another calling task has already locked.
+ *   - sem_close must not be called for an un-named semaphore
+ *
+ ****************************************************************************/
+
+int nxsem_close(FAR sem_t *sem);
+
+/****************************************************************************
+ * Name: nxsem_unlink
+ *
+ * Description:
+ *   This function removes the semaphore named by the input parameter 'name.'
+ *   If the semaphore named by 'name' is currently referenced by other task,
+ *   the sem_unlink() will have no effect on the state of the semaphore.  If
+ *   one or more processes have the semaphore open when sem_unlink() is
+ *   called, destruction of the semaphore will be postponed until all
+ *   references to the semaphore have been destroyed by calls of sem_close().
+ *
+ * Input Parameters:
+ *   name - Semaphore name
+ *
+ * Returned Value:
+ *  0 (OK), or negated errno if unsuccessful.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+int nxsem_unlink(FAR const char *name);
 
 /****************************************************************************
  * Name: nxsem_reset

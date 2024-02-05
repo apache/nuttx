@@ -567,8 +567,8 @@ static int adc_poll(FAR struct file *filep, struct pollfd *fds, bool setup)
 
       if (i >= CONFIG_ADC_NPOLLWAITERS)
         {
-          fds->priv    = NULL;
-          ret          = -EBUSY;
+          fds->priv = NULL;
+          ret       = -EBUSY;
           goto return_with_irqdisabled;
         }
 
@@ -576,7 +576,7 @@ static int adc_poll(FAR struct file *filep, struct pollfd *fds, bool setup)
 
       if (dev->ad_recv.af_head != dev->ad_recv.af_tail)
         {
-          poll_notify(dev->fds, CONFIG_ADC_NPOLLWAITERS, POLLIN);
+          poll_notify(&fds, 1, POLLIN);
         }
     }
   else if (fds->priv)
@@ -587,8 +587,8 @@ static int adc_poll(FAR struct file *filep, struct pollfd *fds, bool setup)
 
       /* Remove all memory of the poll setup */
 
-      *slot                = NULL;
-      fds->priv            = NULL;
+      *slot     = NULL;
+      fds->priv = NULL;
     }
 
 return_with_irqdisabled:

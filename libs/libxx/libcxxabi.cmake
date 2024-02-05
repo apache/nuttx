@@ -20,7 +20,7 @@
 
 if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/libcxxabi)
 
-  set(LIBCXXABI_VERSION CONFIG_LIBCXXABI_VERSION)
+  set(LIBCXXABI_VERSION ${CONFIG_LIBCXXABI_VERSION})
 
   FetchContent_Declare(
     libcxxabi
@@ -39,9 +39,7 @@ if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/libcxxabi)
         ""
         TEST_COMMAND
         ""
-    PATCH_COMMAND
-      patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-      ${CMAKE_CURRENT_LIST_DIR}/0001-libc-abi-avoid-the-waring-__EXCEPTIONS-is-not-define.patch
+    PATCH_COMMAND ""
     DOWNLOAD_NO_PROGRESS true
     TIMEOUT 30)
 
@@ -100,5 +98,8 @@ foreach(src ${SRCS})
   string(PREPEND src libcxxabi/src/)
   list(APPEND TARGET_SRCS ${src})
 endforeach()
+
+# RTTI is required for building the libcxxabi library
+target_compile_options(libcxxabi PRIVATE -frtti)
 
 target_sources(libcxxabi PRIVATE ${TARGET_SRCS})

@@ -3811,6 +3811,7 @@ static int stm32l4_usbinterrupt(int irq, void *context, void *arg)
         {
           usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_SOF),
                   (uint16_t)regval);
+          usbdev_sof_irq(&priv->usbdev, stm32l4_getframe(&priv->usbdev));
         }
 #endif
 

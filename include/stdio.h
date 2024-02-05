@@ -99,7 +99,6 @@
 
 #define setlinebuf(stream)   setvbuf(stream, NULL, _IOLBF, 0)
 
-#define clearerr_unlocked(stream) clearerr(stream)
 #define feof_unlocked(stream)     feof(stream)
 #define ferror_unlocked(stream)   ferror(stream)
 #define fileno_unlocked(stream)   fileno(stream)
@@ -140,8 +139,10 @@ extern "C"
 /* Operations on streams (FILE) */
 
 void   clearerr(FAR FILE *stream);
+void   clearerr_unlocked(FAR FILE *stream);
 int    fclose(FAR FILE *stream);
 int    fflush(FAR FILE *stream);
+int    fflush_unlocked(FAR FILE *stream);
 int    feof(FAR FILE *stream);
 int    ferror(FAR FILE *stream);
 int    fileno(FAR FILE *stream);
@@ -174,6 +175,7 @@ size_t fwrite(FAR const void *ptr, size_t size, size_t n_items,
 size_t fwrite_unlocked(FAR const void *ptr, size_t size, size_t n_items,
                        FAR FILE *stream);
 int     getc(FAR FILE *stream);
+int     getc_unlocked(FAR FILE *stream);
 int     getchar(void);
 int     getchar_unlocked(void);
 ssize_t getdelim(FAR char **lineptr, size_t *n, int delimiter,
@@ -248,6 +250,11 @@ int    vdprintf(int fd, FAR const IPTR char *fmt, va_list ap)
 
 FAR FILE *fopencookie(FAR void *cookie, FAR const char *mode,
                       cookie_io_functions_t io_funcs);
+
+/* Memory buffer stream */
+
+FAR FILE *fmemopen(FAR void *buf, size_t size, FAR const char *mode);
+FAR FILE *open_memstream(FAR char **bufp, FAR size_t *sizep);
 
 /* Operations on paths */
 

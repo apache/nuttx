@@ -33,6 +33,7 @@
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
+#include <fcntl.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
@@ -175,7 +176,8 @@ static void local_recvctl(FAR struct local_conn_s *conn,
   count = peer->lc_cfpcount;
   for (i = 0; i < count; i++)
     {
-      fds[i] = file_dup(peer->lc_cfps[i], 0, !!(flags & MSG_CMSG_CLOEXEC));
+      fds[i] = file_dup(peer->lc_cfps[i], 0,
+                        flags & MSG_CMSG_CLOEXEC ? O_CLOEXEC : 0);
       file_close(peer->lc_cfps[i]);
       kmm_free(peer->lc_cfps[i]);
       peer->lc_cfps[i] = NULL;
@@ -238,11 +240,6 @@ psock_stream_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   if (conn->lc_state != LOCAL_STATE_CONNECTED ||
       conn->lc_infile.f_inode == NULL)
     {
-      if (conn->lc_state == LOCAL_STATE_CONNECTING)
-        {
-          return -EAGAIN;
-        }
-
       nerr("ERROR: not connected\n");
       return -ENOTCONN;
     }

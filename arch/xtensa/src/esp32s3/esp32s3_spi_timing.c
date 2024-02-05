@@ -171,7 +171,7 @@
 #define MSPI_TIMING_FLASH_DTR_MODE           CONFIG_ESP32S3_FLASH_SAMPLE_MODE_DTR
 #define MSPI_TIMING_FLASH_STR_MODE           CONFIG_ESP32S3_FLASH_SAMPLE_MODE_STR
 
-#define MSPI_TIMING_TEST_DATA_LEN            64
+#define MSPI_TIMING_TEST_DATA_LEN            1024
 #define MSPI_TIMING_PSRAM_TEST_DATA_ADDR     0
 #define MSPI_TIMING_FLASH_TEST_DATA_ADDR     0
 
@@ -1356,7 +1356,7 @@ static void do_tuning(const uint8_t *reference_data,
  *
  ****************************************************************************/
 
-void esp32s3_spi_timing_set_pin_drive_strength(void)
+void IRAM_ATTR esp32s3_spi_timing_set_pin_drive_strength(void)
 {
   const uint32_t regs[] =
     {
@@ -1440,8 +1440,7 @@ void IRAM_ATTR esp32s3_spi_timing_set_mspi_high_speed(bool spi1)
 
 void IRAM_ATTR esp32s3_spi_timing_set_mspi_low_speed(bool spi1)
 {
-  /**
-   * Here we are going to set the SPI1 frequency to be 20MHz,
+  /* Here we are going to set the SPI1 frequency to be 20MHz,
    * so we need to set SPI1 din_num and din_mode regs.
    *
    * Because SPI0 and SPI1 share the din_num and din_mode regs,

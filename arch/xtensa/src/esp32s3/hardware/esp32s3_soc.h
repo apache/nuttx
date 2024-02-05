@@ -339,7 +339,7 @@
 #define SOC_RTC_DATA_LOW     0x50000000
 #define SOC_RTC_DATA_HIGH    0x50002000
 
-#define SOC_EXTRAM_DATA_LOW  0x3D000000
+#define SOC_EXTRAM_DATA_LOW  0x3C000000
 #define SOC_EXTRAM_DATA_HIGH 0x3E000000
 #define SOC_IROM_MASK_LOW    0x40000000
 #define SOC_IROM_MASK_HIGH   0x4001A100
@@ -551,6 +551,26 @@ static inline bool IRAM_ATTR esp32s3_ptr_exec(const void *p)
       || (ip >= SOC_CACHE_APP_LOW && ip < SOC_CACHE_APP_HIGH)
 #endif
       || (ip >= SOC_RTC_IRAM_LOW && ip < SOC_RTC_IRAM_HIGH);
+}
+
+/****************************************************************************
+ * Name: esp32s3_ptr_rtc
+ *
+ * Description:
+ *   Check if the buffer comes from the RTC RAM.
+ *
+ * Parameters:
+ *   p - Address of the buffer.
+ *
+ * Return Value:
+ *   True if given buffer comes from RTC RAM. False if not.
+ *
+ ****************************************************************************/
+
+static inline bool IRAM_ATTR esp32s3_ptr_rtc(const void *p)
+{
+  return ((intptr_t)p >= SOC_RTC_DATA_LOW &&
+          (intptr_t)p < SOC_RTC_DATA_HIGH);
 }
 
 #endif /* __ASSEMBLY__ */

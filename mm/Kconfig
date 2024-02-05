@@ -198,7 +198,6 @@ config MM_KMAP
 	bool "Support for dynamic kernel virtual mappings"
 	default n
 	depends on MM_PGALLOC && BUILD_KERNEL
-	select ARCH_VMA_MAPPING
 	---help---
 		Build support for dynamically mapping pages from the page pool into
 		kernel virtual memory. This includes pages that are already mapped
@@ -221,11 +220,11 @@ config MM_HEAP_MEMPOOL_EXPAND_SIZE
 		pool with insufficient memory in the multi-level memory pool.
 
 config MM_HEAP_MEMPOOL_DICTIONARY_EXPAND_SIZE
-	int "The expand size for multiple mempool's dictonary"
+	int "The expand size for multiple mempool's dictionary"
 	default MM_HEAP_MEMPOOL_EXPAND_SIZE
 	depends on MM_HEAP_MEMPOOL_THRESHOLD != 0
 	---help---
-		This size describes the multiple mempool dictonary expend.
+		This size describes the multiple mempool dictionary expand.
 
 config MM_HEAP_MEMPOOL_CHUNK_SIZE
 	int "The multiples pool chunk size"
@@ -358,5 +357,13 @@ config MM_PANIC_ON_FAILURE
 	bool "Panic on allocation failure"
 	default n
 	depends on DEBUG_MM
+
+config MM_FREE_DELAYCOUNT_MAX
+	int "Maximum memory nodes can be delayed to free"
+	default 0
+	---help---
+		Set to 0 to disable the delayed free mechanism. Otherwise,
+		the value decides the maximum number of memory nodes that
+		will be delayed to free.
 
 source "mm/iob/Kconfig"

@@ -89,22 +89,20 @@
 #  define TCB_FLAG_TTYPE_TASK      (0 << TCB_FLAG_TTYPE_SHIFT)   /*   Normal user task */
 #  define TCB_FLAG_TTYPE_PTHREAD   (1 << TCB_FLAG_TTYPE_SHIFT)   /*   User pthread */
 #  define TCB_FLAG_TTYPE_KERNEL    (2 << TCB_FLAG_TTYPE_SHIFT)   /*   Kernel thread */
-#define TCB_FLAG_NONCANCELABLE     (1 << 2)                      /* Bit 2: Pthread is non-cancelable */
-#define TCB_FLAG_CANCEL_DEFERRED   (1 << 3)                      /* Bit 3: Deferred (vs asynch) cancellation type */
-#define TCB_FLAG_CANCEL_PENDING    (1 << 4)                      /* Bit 4: Pthread cancel is pending */
-#define TCB_FLAG_POLICY_SHIFT      (5)                           /* Bit 5-6: Scheduling policy */
+#define TCB_FLAG_POLICY_SHIFT      (3)                           /* Bit 3-4: Scheduling policy */
 #define TCB_FLAG_POLICY_MASK       (3 << TCB_FLAG_POLICY_SHIFT)
 #  define TCB_FLAG_SCHED_FIFO      (0 << TCB_FLAG_POLICY_SHIFT)  /* FIFO scheding policy */
 #  define TCB_FLAG_SCHED_RR        (1 << TCB_FLAG_POLICY_SHIFT)  /* Round robin scheding policy */
 #  define TCB_FLAG_SCHED_SPORADIC  (2 << TCB_FLAG_POLICY_SHIFT)  /* Sporadic scheding policy */
-#define TCB_FLAG_CPU_LOCKED        (1 << 8)                      /* Bit 7: Locked to this CPU */
-#define TCB_FLAG_SIGNAL_ACTION     (1 << 9)                      /* Bit 8: In a signal handler */
-#define TCB_FLAG_SYSCALL           (1 << 10)                     /* Bit 9: In a system call */
-#define TCB_FLAG_EXIT_PROCESSING   (1 << 11)                     /* Bit 10: Exitting */
-#define TCB_FLAG_FREE_STACK        (1 << 12)                     /* Bit 12: Free stack after exit */
-#define TCB_FLAG_HEAP_CHECK        (1 << 13)                     /* Bit 13: Heap check */
-#define TCB_FLAG_HEAP_DUMP         (1 << 14)                     /* Bit 14: Heap dump */
-#define TCB_FLAG_DETACHED          (1 << 15)                     /* Bit 15: Pthread detached */
+#define TCB_FLAG_CPU_LOCKED        (1 << 5)                      /* Bit 5: Locked to this CPU */
+#define TCB_FLAG_SIGNAL_ACTION     (1 << 6)                      /* Bit 6: In a signal handler */
+#define TCB_FLAG_SYSCALL           (1 << 7)                      /* Bit 7: In a system call */
+#define TCB_FLAG_EXIT_PROCESSING   (1 << 8)                      /* Bit 8: Exitting */
+#define TCB_FLAG_FREE_STACK        (1 << 9)                      /* Bit 9: Free stack after exit */
+#define TCB_FLAG_HEAP_CHECK        (1 << 10)                     /* Bit 10: Heap check */
+#define TCB_FLAG_HEAP_DUMP         (1 << 11)                     /* Bit 11: Heap dump */
+#define TCB_FLAG_DETACHED          (1 << 12)                     /* Bit 12: Pthread detached */
+#define TCB_FLAG_FORCED_CANCEL     (1 << 13)                     /* Bit 13: Pthread cancel is forced */
 
 /* Values for struct task_group tg_flags */
 
@@ -573,9 +571,6 @@ struct tcb_s
 #ifdef CONFIG_IRQCOUNT
   int16_t  irqcount;                     /* 0=Not in critical section       */
 #endif
-#ifdef CONFIG_CANCELLATION_POINTS
-  int16_t  cpcount;                      /* Nested cancellation point count */
-#endif
   int16_t  errcode;                      /* Used to pass error information  */
 
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
@@ -625,7 +620,7 @@ struct tcb_s
 
   /* CPU load monitoring support ********************************************/
 
-#ifdef CONFIG_SCHED_CPULOAD
+#ifndef CONFIG_SCHED_CPULOAD_NONE
   uint32_t ticks;                        /* Number of ticks on this thread */
 #endif
 
@@ -649,6 +644,17 @@ struct tcb_s
 
 #if CONFIG_TASK_NAME_SIZE > 0
   char name[CONFIG_TASK_NAME_SIZE + 1];  /* Task name (with NUL terminator  */
+#endif
+
+#if CONFIG_SCHED_STACK_RECORD > 0
+  FAR void *stackrecord_pc[CONFIG_SCHED_STACK_RECORD];
+  FAR void *stackrecord_sp[CONFIG_SCHED_STACK_RECORD];
+  FAR void *stackrecord_pc_deepest[CONFIG_SCHED_STACK_RECORD];
+  FAR void *stackrecord_sp_deepest[CONFIG_SCHED_STACK_RECORD];
+  FAR void *sp_deepest;
+  size_t caller_deepest;
+  size_t level_deepest;
+  size_t level;
 #endif
 };
 
@@ -720,8 +726,7 @@ begin_packed_struct struct tcbinfo_s
   uint16_t stack_off;                    /* Offset of tcb.stack_alloc_ptr   */
   uint16_t stack_size_off;               /* Offset of tcb.adj_stack_size    */
   uint16_t regs_off;                     /* Offset of tcb.regs              */
-  uint16_t basic_num;                    /* Num of genernal regs            */
-  uint16_t total_num;                    /* Num of regs in tcbinfo.reg_offs */
+  uint16_t regs_num;                     /* Num of general regs             */
 
   /* Offset pointer of xcp.regs, order in GDB org.gnu.gdb.xxx feature.
    * Please refer:
@@ -928,7 +933,8 @@ FAR struct filelist *nxsched_get_files(void);
 
 int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
                 FAR void *stack, uint32_t stack_size, main_t entry,
-                FAR char * const argv[], FAR char * const envp[]);
+                FAR char * const argv[], FAR char * const envp[],
+                FAR const posix_spawn_file_actions_t *actions);
 
 /****************************************************************************
  * Name: nxtask_uninit
@@ -1572,6 +1578,22 @@ pid_t nxsched_getppid(void);
  ****************************************************************************/
 
 size_t nxsched_collect_deadlock(FAR pid_t *pid, size_t count);
+
+/****************************************************************************
+ * Name: nxsched_dumponexit
+ *
+ * Description:
+ *   Dump the state of all tasks whenever on task exits.  This is debug
+ *   instrumentation that was added to check file-related reference counting
+ *   but could be useful again sometime in the future.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DUMP_ON_EXIT
+void nxsched_dumponexit(void);
+#else
+#  define nxsched_dumponexit()
+#endif /* CONFIG_DUMP_ON_EXIT */
 
 #ifdef CONFIG_SMP_CALL
 /****************************************************************************

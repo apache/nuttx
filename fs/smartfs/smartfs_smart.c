@@ -47,7 +47,7 @@
 #include "smartfs.h"
 
 /****************************************************************************
- * Private Type
+ * Private Types
  ****************************************************************************/
 
 struct smartfs_dir_s
@@ -142,6 +142,7 @@ const struct mountpt_operations g_smartfs_operations =
   smartfs_ioctl,         /* ioctl */
   NULL,                  /* mmap */
   smartfs_truncate,      /* truncate */
+  NULL,                  /* poll */
 
   smartfs_sync,          /* sync */
   smartfs_dup,           /* dup */
@@ -1983,10 +1984,22 @@ int smartfs_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
       direntry = (FAR struct smartfs_entry_header_s *)
         &fs->fs_rwbuffer[oldentry.doffset];
 #if CONFIG_SMARTFS_ERASEDSTATE == 0xff
+#ifdef CONFIG_SMARTFS_ALIGNED_ACCESS
+      smartfs_wrle16(&direntry->flags,
+                     smartfs_rdle16(&direntry->flags)
+                     & ~SMARTFS_DIRENT_ACTIVE);
+#else
       direntry->flags &= ~SMARTFS_DIRENT_ACTIVE;
+#endif
+#else /* CONFIG_SMARTFS_ERASEDSTATE == 0xff */
+#ifdef CONFIG_SMARTFS_ALIGNED_ACCESS
+      smartfs_wrle16(&direntry->flags,
+                     smartfs_rdle16(&direntry->flags)
+                     | SMARTFS_DIRENT_ACTIVE);
 #else
       direntry->flags |= SMARTFS_DIRENT_ACTIVE;
 #endif
+#endif /* CONFIG_SMARTFS_ERASEDSTATE == 0xff */
 
       /* Now write the updated flags back to the device */
 

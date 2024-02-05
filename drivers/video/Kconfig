@@ -51,7 +51,7 @@ config VIDEO_FB
 	default n
 
 config VIDEO_FB_NPOLLWAITERS
-	int "Video fb poll count of each layer"
+	int "Video fb poll count of each open structure"
 	depends on VIDEO_FB
 	default 2
 
@@ -73,16 +73,6 @@ config GOLDFISH_FB_VIDEO_MODE
 	---help---
 		GOLDFISH_FB_VIDEO_MODE = y  enable video mode
 		GOLDFISH_FB_VIDEO_MODE = n  enable command mode
-
-config GOLDFISH_FB_IRQ
-	int "Goldfish fb irq"
-	depends on GOLDFISH_FB
-	default 48
-
-config GOLDFISH_FB_BASE
-	hex "Goldfish fb base"
-	depends on GOLDFISH_FB
-	default 0x0a020000
 
 config GOLDFISH_FB_FRAME_NBUFFER
 	int "Goldfish fb vsync size"

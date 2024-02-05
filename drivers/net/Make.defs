@@ -76,6 +76,10 @@ ifeq ($(CONFIG_NET_W5500),y)
   CSRCS += w5500.c
 endif
 
+ifeq ($(CONFIG_NET_LAN9250),y)
+  CSRCS += lan9250.c
+endif
+
 ifeq ($(CONFIG_ARCH_PHY_INTERRUPT),y)
   CSRCS += phy_notify.c
 endif
@@ -87,6 +91,10 @@ ifeq ($(CONFIG_NET_KSZ9477_I2C),y)
   CSRCS += ksz9477_i2c.c
 endif
 
+endif
+
+ifeq ($(CONFIG_DRIVERS_WIFI_SIM),y)
+  CSRCS += wifi_sim.c
 endif
 
 # Include network build support

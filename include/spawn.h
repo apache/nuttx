@@ -174,8 +174,7 @@ int posix_spawn_file_actions_addopen(
 
 int posix_spawnattr_init(FAR posix_spawnattr_t *attr);
 
-/* int posix_spawnattr_destroy(FAR posix_spawnattr_t *); */
-#define posix_spawnattr_destroy(attr) (0)
+int posix_spawnattr_destroy(FAR posix_spawnattr_t *attr);
 
 /* Get spawn attributes interfaces */
 

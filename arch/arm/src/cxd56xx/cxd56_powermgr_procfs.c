@@ -114,6 +114,7 @@ const struct procfs_operations cxd56_powermgr_procfs_operations =
   cxd56_powermgr_procfs_close,     /* close */
   cxd56_powermgr_procfs_read,      /* read */
   NULL,                            /* write */
+  NULL,                            /* poll */
   cxd56_powermgr_procfs_dup,       /* dup */
   cxd56_powermgr_procfs_opendir,   /* opendir */
   cxd56_powermgr_procfs_closedir,  /* closedir */

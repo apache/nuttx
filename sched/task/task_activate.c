@@ -84,6 +84,13 @@ void nxtask_activate(FAR struct tcb_s *tcb)
 
   nxsched_remove_blocked(tcb);
 
+#if CONFIG_TASK_NAME_SIZE > 0
+  sinfo("%s pid=%d,TCB=%p\n", tcb->name,
+#else
+  sinfo("pid=%d,TCB=%p\n",
+#endif  
+        tcb->pid, tcb);
+
   /* Add the task to ready-to-run task list, and
    * perform the context switch if one is needed
    */

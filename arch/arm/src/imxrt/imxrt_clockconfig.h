@@ -27,20 +27,14 @@
 
 #include <nuttx/config.h>
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
+/* IMXRT117X Clock pheripheral is different from IMXRT10XX
+ * hence we use a VER2 driver for clockconfig
+ */
 
-/****************************************************************************
- * Name: imxrt_clockconfig
- *
- * Description:
- *   Called to initialize the i.MXRT.  This does whatever setup is needed to
- *   put the SoC in a usable state.  This includes the initialization of
- *   clocking using the settings in board.h.
- *
- ****************************************************************************/
-
-void imxrt_clockconfig(void);
+#ifdef CONFIG_IMXRT_CLOCKCONFIG_VER2
+#include "imxrt_clockconfig_ver2.h"
+#else
+#include "imxrt_clockconfig_ver1.h"
+#endif
 
 #endif /* __ARCH_ARM_SRC_IMXRT_IMXRT_CLOCKCONFIG_H */

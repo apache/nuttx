@@ -18,11 +18,11 @@ config USENSOR
 		Allow application to register user sensor by /dev/usensor.
 
 config SENSORS_RPMSG
-	bool "Sensor rpmsg Support"
+	bool "Sensor RPMSG Support"
 	default n
 	depends on RPTUN
 	---help---
-		Allow application to read or control remote sensor device by rpmsg.
+		Allow application to read or control remote sensor device by RPMSG.
 
 config SENSORS_GPS
 	bool "GPS Support"
@@ -174,8 +174,8 @@ config SENSORS_BMI160_UORB
 	bool "BMI160 UORB Interface"
 	default n
 	---help---
-	Enables Work with the UORB or Character Device interface.
-	If not set, the Character Device is used by default.
+		Enables Work with the UORB or Character Device interface.
+		If not set, the Character Device is used by default.
 
 choice
 	prompt "BMI160 Interface"
@@ -193,7 +193,7 @@ config SENSORS_BMI160_SPI
 	---help---
 		Enables support for the SPI interface
 
-endchoice
+endchoice # BMI160 Interface
 
 choice
 	prompt "I2C Address"
@@ -210,8 +210,9 @@ config BMI160_I2C_ADDR_69
 	---help---
 		If SDO pin is pulled to VDDIO, use 0x69
 
-endchoice
-endif
+endchoice # I2C Address
+
+endif # SENSORS_BMI160
 
 config SENSORS_BMI270
 	bool "Bosch BMI270 Inertial Measurement Sensor support"
@@ -238,7 +239,7 @@ config SENSORS_BMI270_SPI
 	---help---
 		Enables support for the SPI interface
 
-endchoice
+endchoice # BMI270 Interface
 
 config SENSORS_BMI270_LOAD_FROM_HEAP
 	bool "BMI270 config loading from heap memory"
@@ -248,7 +249,7 @@ config SENSORS_BMI270_LOAD_FROM_HEAP
 		Some chips can not do DMA transfer from FLASH and therefore
 		it is necessary to transfer the configuration file to RAM.
 
-endif
+endif # SENSORS_BMI270
 
 config SENSORS_BMP180
 	bool "Bosch BMP180 Barometer Sensor support"
@@ -337,7 +338,6 @@ config SENSORS_BME680_THREAD_STACKSIZE
 	default 1024
 	---help---
 		The stack size for the worker thread.
-
 
 config SENSORS_DHTXX
 	bool "DHTxx humidity/temperature Sensor support"
@@ -722,7 +722,8 @@ config MLX90614_CRC
 	---help---
 		Enable checking of CRC-8 (PEC field) checking to guarantee that
 		read data is valid.
-endif
+
+endif # SENSORS_MLX90614
 
 config SENSORS_MCP9844
 	bool "MCP9844 Temperature Sensor"
@@ -737,45 +738,54 @@ config MCP9844_I2C_FREQUENCY
 	range 1 400000
 	depends on SENSORS_MCP9844
 
-config SENSORS_MS5611
-	bool "MS5611 Barometric Pressure Sensor support"
+config SENSORS_MS56XX
+	bool "MS56XX Barometric Pressure Sensor support"
 	default n
 	---help---
-		Enable driver support for MEAS MS5511 barometer.
+		Enable driver support for MS5611 Barometric Pressure Sensor.
 
-if SENSORS_MS5611
+if SENSORS_MS56XX
 
 choice
-	prompt "MS5611 Interface"
-	default MS5611_I2C
+	prompt "MS56XX Interface"
+	default MS56XX_I2C
 
-config MS5611_I2C
-	bool "MS5611 I2C Interface"
+config MS56XX_I2C
+	bool "MS56XX I2C Interface"
 	select I2C
 	---help---
 		Enables support for the I2C interface
 
-config MS5611_SPI
-	bool "MS5611 SPI Interface"
+config MS56XX_SPI
+	bool "MS56XX SPI Interface"
 	select SPI
 	---help---
 		Enables support for the SPI interface.
 
-endchoice
+endchoice # MS5611 Interface
 
-config MS5611_THREAD_STACKSIZE
+config MS56XX_SECOND_ORDER_COMPENSATE
+	bool "MS56XX second order compensation support"
+	default n
+	---help---
+		Enables second order compensation.
+		In order to obtain best accuracy over temperature range,
+		particularly in low temperature, it is recommended to
+		compensate the non-linearity over the temperature.
+
+config MS56XX_THREAD_STACKSIZE
 	int "Worker thread stack size"
 	default 1024
 	---help---
 		The stack size for the worker thread
 
-config MS5611_I2C_FREQUENCY
-	int "MS5611 I2C frequency"
+config MS56XX_I2C_FREQUENCY
+	int "MS56XX I2C frequency"
 	default 400000
 	range 1 400000
-	depends on MS5611_I2C
+	depends on MS56XX_I2C
 
-endif # SENSORS_MS5611
+endif # SENSORS_MS56XX
 
 config SENSORS_MS58XX
 	bool "MEAS MS58XX Altimeter support"
@@ -833,7 +843,7 @@ config ADXL345_I2C
 	---help---
 		Enables support for the I2C interface
 
-endchoice
+endchoice # ADXL345 Interface
 
 config ADXL345_ACTIVELOW
 	bool "Active Low Interrupt"
@@ -884,7 +894,7 @@ config MPU60X0_I2C
 		Enables support for the I2C interface (MPU6000
 		or MPU6050, autodetected during driver initialization)
 
-endchoice
+endchoice # MPU60x0 Interface
 
 config MPU60X0_I2C_FREQ
 	int "MPU60x0 I2C Frequency"
@@ -976,7 +986,7 @@ config MPU9250_I2C
 	---help---
 		Enables support for the I2C interface
 
-endchoice
+endchoice # MPU9250 Interface
 
 config MPU9250_I2C_FREQ
 	int "MPU9250 I2C Frequency"
@@ -1241,6 +1251,7 @@ config AHT10_I2C_FREQUENCY
 	int "AHT10 I2C frequency"
 	default 400000
 	range 1 400000
+
 endif # SENSORS_AHT10
 
 config SENSORS_SHT21

@@ -44,7 +44,7 @@
  *   where CONFIG_TLS_ALIGNED is *not* defined or __KERNEL__ is defined.
  *
  * Input Parameters:
- *   None
+ *   None.
  *
  * Returned Value:
  *   A reference to the thread-specific tls_info_s structure is return on

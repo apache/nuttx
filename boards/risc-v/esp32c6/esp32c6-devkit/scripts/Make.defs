@@ -20,16 +20,20 @@
 
 include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
-include $(TOPDIR)/tools/esp32c6/Config.mk
+include $(TOPDIR)/tools/espressif/Config.mk
 include $(TOPDIR)/arch/risc-v/src/common/Toolchain.defs
 
-ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32c6_rom.ld
+# Remove quotes from CONFIG_ESPRESSIF_CHIP_SERIES configuration
+
+CHIP_SERIES = $(patsubst "%",%,$(CONFIG_ESPRESSIF_CHIP_SERIES))
 
 # Pick the linker scripts from the board level if they exist, if not
 # pick the common linker scripts.
 
-ARCHSCRIPT += $(call FINDSCRIPT,flat_memory.ld)
-ARCHSCRIPT += $(call FINDSCRIPT,legacy_sections.ld)
+ARCHSCRIPT += $(BOARD_COMMON_DIR)/scripts/$(CHIP_SERIES)_aliases.ld
+
+ARCHSCRIPT += $(call FINDSCRIPT,$(CHIP_SERIES)_flat_memory.ld)
+ARCHSCRIPT += $(call FINDSCRIPT,$(CHIP_SERIES)_legacy_sections.ld)
 
 ARCHPICFLAGS = -fpic
 
@@ -53,4 +57,4 @@ CELFFLAGS = $(CFLAGS)
 CXXELFFLAGS = $(CXXFLAGS)
 
 LDELFFLAGS = -melf32lriscv -r -e main
-LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)binfmt$(DELIM)libelf$(DELIM)gnu-elf.ld)
+LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/binfmt/libelf/gnu-elf.ld)

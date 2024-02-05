@@ -77,6 +77,11 @@ int promisc_recv_lens_func(void *padapter, uint8_t *payload, uint8_t plen)
 void app_start(void)
 {
   __asm volatile("MSR msplim, %0" : : "r"(0));
+
+#ifdef CONFIG_ARMV8M_STACKCHECK
+  arm_stack_check_init();
+#endif
+
   arm_earlyserialinit();
 #ifdef CONFIG_MBEDTLS240_AMEBAZ_HARDWARE_CRYPTO
   extern int mbedtls_platform_set_calloc_free(

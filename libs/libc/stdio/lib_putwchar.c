@@ -51,13 +51,14 @@
  *
  ****************************************************************************/
 
-wint_t putwchar(wchar_t c)
+wint_t putwchar_unlocked(wchar_t c)
 {
 #ifdef CONFIG_FILE_STREAM
-  return fputwc(c, stdout);
+  return fputwc_unlocked(c, stdout);
 #else
   char mbc[MB_LEN_MAX];
   int l;
+
   l = wctomb(mbc, c);
   if (l < 0)
     {
@@ -66,4 +67,19 @@ wint_t putwchar(wchar_t c)
 
   return write(STDOUT_FILENO, mbc, l) == l ? c : WEOF;
 #endif
+}
+
+wint_t putwchar(wchar_t c)
+{
+  wint_t w;
+
+#ifdef CONFIG_FILE_STREAM
+  flockfile(stdout);
+#endif
+  w = putwchar_unlocked(c);
+#ifdef CONFIG_FILE_STREAM
+  funlockfile(stdout);
+#endif
+
+  return w;
 }

@@ -71,13 +71,13 @@ static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
         {
           /* Does not set the errno variable in the event of a failure */
 
-          ret = file_dup(filep, va_arg(ap, int), false);
+          ret = file_dup(filep, va_arg(ap, int), 0);
         }
         break;
 
       case F_DUPFD_CLOEXEC:
         {
-          ret = file_dup(filep, va_arg(ap, int), true);
+          ret = file_dup(filep, va_arg(ap, int), O_CLOEXEC);
         }
         break;
 

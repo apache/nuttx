@@ -4364,7 +4364,7 @@ static void stm32_ep_freereq(struct usbdev_ep_s *ep,
 #ifdef CONFIG_USBDEV_DMA
 static void *stm32_ep_allocbuffer(struct usbdev_ep_s *ep, uint16_t bytes)
 {
-  usbtrace(TRACE_EPALLOCBUFFER, privep->epphy);
+  usbtrace(TRACE_EPALLOCBUFFER, ((struct stm32_ep_s *)ep)->epphy);
 
 #ifdef CONFIG_USBDEV_DMAMEMORY
   return usbdev_dma_alloc(bytes);
@@ -4385,7 +4385,7 @@ static void *stm32_ep_allocbuffer(struct usbdev_ep_s *ep, uint16_t bytes)
 #ifdef CONFIG_USBDEV_DMA
 static void stm32_ep_freebuffer(struct usbdev_ep_s *ep, void *buf)
 {
-  usbtrace(TRACE_EPFREEBUFFER, privep->epphy);
+  usbtrace(TRACE_EPFREEBUFFER, ((struct stm32_ep_s *)ep)->epphy);
 
 #ifdef CONFIG_USBDEV_DMAMEMORY
   usbdev_dma_free(buf);

@@ -838,4 +838,22 @@ config CXD56_EMMC_POWER_PIN_UART2_CTS
 
 endchoice
 
+config CXD56_GNSS_ADDON
+	bool "CXD5610 GNSS Add-on board"
+	default n
+	depends on SENSORS_CXD5610_GNSS && CXD56_I2C0 && !CXD56_I2C0_SCUSEQ
+	---help---
+		The CXD5610 GNSS Add-on driver can be registered.
+
+if CXD56_GNSS_ADDON
+
+config CXD56_GNSS_ADDON_LATE_INITIALIZE
+	bool "CXD5610 GNSS driver late initialization"
+	default n
+	---help---
+		The CXD5610 gnss driver can be initialized on an application code
+		after system booted up by enabling this configuration switch.
+
+endif # CXD56_GNSS_ADDON
+
 endif

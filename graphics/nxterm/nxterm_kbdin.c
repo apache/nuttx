@@ -50,16 +50,12 @@ static void nxterm_pollnotify(FAR struct nxterm_state_s *priv,
                               pollevent_t eventset)
 {
   irqstate_t flags;
-  int i;
 
   /* This function may be called from an interrupt handler */
 
-  for (i = 0; i < CONFIG_NXTERM_NPOLLWAITERS; i++)
-    {
-      flags = enter_critical_section();
-      poll_notify(&priv->fds[i], 1, eventset);
-      leave_critical_section(flags);
-    }
+  flags = enter_critical_section();
+  poll_notify(priv->fds, CONFIG_NXTERM_NPOLLWAITERS, eventset);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -260,7 +256,7 @@ int nxterm_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
               /* Bind the poll structure and this slot */
 
               priv->fds[i] = fds;
-              fds->priv       = &priv->fds[i];
+              fds->priv    = &priv->fds[i];
               break;
             }
         }
@@ -269,8 +265,8 @@ int nxterm_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
         {
           gerr("ERROR: Too many poll waiters\n");
 
-          fds->priv    = NULL;
-          ret          = -EBUSY;
+          fds->priv = NULL;
+          ret       = -EBUSY;
           goto errout;
         }
 
@@ -287,7 +283,7 @@ int nxterm_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
           eventset |= POLLIN;
         }
 
-      nxterm_pollnotify(priv, eventset);
+      poll_notify(&fds, 1, eventset);
     }
   else if (fds->priv)
     {

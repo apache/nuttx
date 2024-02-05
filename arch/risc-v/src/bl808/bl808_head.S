@@ -1,0 +1,143 @@
+/****************************************************************************
+ * arch/risc-v/src/bl808/bl808_head.S
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+#include <arch/arch.h>
+#include <arch/irq.h>
+
+#include "chip.h"
+#include "riscv_internal.h"
+
+/****************************************************************************
+ * Public Symbols
+ ****************************************************************************/
+
+  /* Exported Symbols */
+
+  .section .text
+  .global __start
+
+__start:
+
+  /* DO NOT MODIFY. Image Header expected by Linux bootloaders.
+   *
+   * This `li` instruction has no meaningful effect except that
+   * its opcode forms the magic "MZ" signature of a PE/COFF file
+   * that is required for UEFI applications.
+   *
+   * Some bootloaders check the magic "MZ" to see if the image is a valid
+   * Linux image. But modifying the bootLoader is unnecessary unless we
+   * need to do a customized secure boot. So we just put "MZ" in the
+   * header to make the bootloader happy.
+   */
+
+  c.li    s4, -13              /* Magic Signature "MZ" (2 bytes) */
+  j       real_start           /* Jump to Kernel Start (2 bytes) */
+  .long   0                    /* Executable Code padded to 8 bytes */
+  .quad   0x200000             /* Image load offset from start of RAM */
+  .quad   _ebss - __start      /* Effective size of kernel image */
+  .quad   0                    /* Kernel flags, little-endian */
+  .long   2                    /* Version of this header */
+  .long   0                    /* Reserved */
+  .quad   0                    /* Reserved */
+  .ascii  "RISCV\x00\x00\x00"  /* Magic number, "RISCV" (8 bytes) */
+  .ascii  "RSC\x05"            /* Magic number 2, "RSC\x05" (4 bytes) */
+  .long   0                    /* Reserved for PE COFF offset */
+
+real_start:
+
+  /* Set stack pointer to the idle thread stack */
+
+  bnez a0, 1f
+  la   sp, BL808_IDLESTACK_TOP
+  j    2f
+1:
+
+  /* Load the number of CPUs that the kernel supports */
+
+#ifdef CONFIG_SMP
+  li   t1, CONFIG_SMP_NCPUS
+#else
+  li   t1, 1
+#endif
+
+  /* If a0 (hartid) >= t1 (the number of CPUs), stop here */
+
+  blt  a0, t1, 3f
+  csrw sie, zero
+  wfi
+
+3:
+  /* To get g_cpu_basestack[hartid], must get g_cpu_basestack first */
+
+  la   t0, g_cpu_basestack
+
+  /* Offset = pointer width * hart id */
+
+#ifdef CONFIG_ARCH_RV32
+  slli t1, a0, 2
+#else
+  slli t1, a0, 3
+#endif
+  add  t0, t0, t1
+
+  /* Load idle stack base to sp */
+
+  REGLOAD sp, 0(t0)
+
+  /*
+   * sp (stack top) = sp + idle stack size - XCPTCONTEXT_SIZE
+   *
+   * Note: Reserve some space used by up_initial_state since we are already
+   * running and using the per CPU idle stack.
+   */
+
+  li   t0, STACK_ALIGN_UP(CONFIG_IDLETHREAD_STACKSIZE - XCPTCONTEXT_SIZE)
+  add  sp, sp, t0
+
+2:
+
+  /* Disable all interrupts (i.e. timer, external) in sie */
+
+  csrw	sie, zero
+
+  la   t0, __trap_vec
+  csrw stvec, t0
+
+  /* Jump to bl808_start */
+
+  jal  x1, bl808_start
+
+  /* We shouldn't return from _start */
+
+  .global _init
+  .global _fini
+
+_init:
+_fini:
+
+  /* These don't have to do anything since we use init_array/fini_array. */
+
+  ret

@@ -24,23 +24,12 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/elf.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -121,7 +110,8 @@ bool up_checkarch(const Elf32_Ehdr *ehdr)
  *
  ****************************************************************************/
 
-int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
+int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr,
+                void *arch_data)
 {
   int32_t offset;
   uint32_t upper_insn;
@@ -133,7 +123,8 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
    */
 
   relotype = ELF32_R_TYPE(rel->r_info);
-  if (sym == NULL && relotype != R_ARM_NONE && relotype != R_ARM_V4BX)
+  if (sym == NULL && relotype != R_ARM_NONE && relotype != R_ARM_V4BX &&
+      relotype != R_ARM_RELATIVE && relotype != R_ARM_JUMP_SLOT)
     {
       return -EINVAL;
     }
@@ -152,11 +143,11 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
     case R_ARM_CALL:
     case R_ARM_JUMP24:
       {
-        binfo("Performing PC24 [%d] link at "
-              "addr %08lx [%08lx] to sym '%p' st_value=%08lx\n",
-              ELF32_R_TYPE(rel->r_info), (long)addr,
-              (long)(*(uint32_t *)addr),
-              sym, (long)sym->st_value);
+        binfo("Performing PC24 [%" PRId32 "] link at "
+              "addr %08" PRIxPTR " [%08" PRIx32 "] to "
+              "sym '%p' st_value=%08" PRIx32 "\n",
+              ELF32_R_TYPE(rel->r_info), addr,
+              *(uint32_t *)addr, sym, sym->st_value);
 
         offset = (*(uint32_t *)addr & 0x00ffffff) << 2;
         if (offset & 0x02000000)
@@ -168,8 +159,8 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
         if (offset & 3 || offset < (int32_t) 0xfe000000 ||
             offset >= (int32_t) 0x02000000)
           {
-            berr("ERROR:   ERROR: PC24 [%d] relocation out of range, "
-                 "offset=%08lx\n",
+            berr("ERROR:   ERROR: PC24 [%" PRId32 "] "
+                 "relocation out of range, offset=%08" PRIx32 "\n",
                  ELF32_R_TYPE(rel->r_info), offset);
 
             return -EINVAL;
@@ -185,14 +176,28 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
     case R_ARM_ABS32:
     case R_ARM_TARGET1:  /* New ABI:  TARGET1 always treated as ABS32 */
       {
-        binfo("Performing ABS32 link at addr=%08lx [%08lx] "
-              "to sym=%p st_value=%08lx\n",
-              (long)addr, (long)(*(uint32_t *)addr), sym,
-              (long)sym->st_value);
+        binfo("Performing ABS32 link "
+              "at addr=%08" PRIxPTR " [%08" PRIx32 "] to "
+              "sym=%p st_value=%08" PRIx32 "\n",
+              addr, *(uint32_t *)addr, sym, sym->st_value);
 
         *(uint32_t *)addr += sym->st_value;
       }
       break;
+
+#ifdef CONFIG_ARMV7M_TARGET2_PREL
+    case R_ARM_TARGET2:  /* TARGET2 is a platform-specific relocation: gcc-arm-none-eabi
+                          * performs a self relocation */
+      {
+        binfo("Performing TARGET2 link "
+              "at addr=%08" PRIx32 " [%08" PRIx32 "] to "
+              "sym=%p st_value=%08" PRIx32 "\n",
+              addr, *(uint32_t *)addr, sym, sym->st_value);
+
+        *(uint32_t *)addr += sym->st_value - addr;
+      }
+      break;
+#endif
 
     case R_ARM_THM_CALL:
     case R_ARM_THM_JUMP24:
@@ -216,11 +221,11 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
          * lower_insn:
          *
          *  1   1   1   1   1   1
-         *  5   4   3   2   1   0   9  8  7  6  5  4  3  2  1  0 Instructions
+         *  5   4   3   2   1   0  9  8  7  6  5  4   3  2  1  0 Instructions
          * +---+------------------------------------------------+
          * |OP |                                                | 32-Bit
          * +---+--+---+---+---+---------------------------------+
-         * |1   1 |J1 | 1 |J2 |              imm11              | BL
+         * |1   1 |J1 | 1 |J2 |            imm11                | BL
          * +------+---+---+---+---------------------------------+
          *
          * The branch target is encoded in these bits:
@@ -235,11 +240,12 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
         upper_insn = (uint32_t)(*(uint16_t *)addr);
         lower_insn = (uint32_t)(*(uint16_t *)(addr + 2));
 
-        binfo("Performing THM_JUMP24 [%d] link "
-              "at addr=%08lx [%04x %04x] to sym=%p st_value=%08lx\n",
-              ELF32_R_TYPE(rel->r_info), (long)addr,
+        binfo("Performing THM_JUMP24 [%" PRId32 "] link "
+              "at addr=%08" PRIxPTR " [%04x %04x] to "
+              "sym=%p st_value=%08" PRIx32 "\n",
+              ELF32_R_TYPE(rel->r_info), addr,
               (int)upper_insn, (int)lower_insn,
-              sym, (long)sym->st_value);
+              sym, sym->st_value);
 
         /* Extract the 25-bit offset from the 32-bit instruction:
          *
@@ -271,8 +277,9 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
 
         /* And perform the relocation */
 
-        binfo("  S=%d J1=%d J2=%d offset=%08lx branch target=%08lx\n",
-              S, J1, J2, (long)offset, offset + sym->st_value - addr);
+        binfo("  S=%" PRId32 " J1=%" PRId32 " J2=%" PRId32
+              " offset=%08" PRIx32 " branch target=%08" PRIx32 "\n",
+              S, J1, J2, offset, offset + sym->st_value - addr);
 
         offset += sym->st_value - addr;
 
@@ -282,8 +289,8 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
 
         if (ELF32_ST_TYPE(sym->st_info) == STT_FUNC && (offset & 1) == 0)
           {
-            berr("ERROR:   ERROR: JUMP24 [%d] "
-                 "requires odd offset, offset=%08lx\n",
+            berr("ERROR:   ERROR: JUMP24 [%" PRId32 "] "
+                 "requires odd offset, offset=%08" PRIx32 "\n",
                  ELF32_R_TYPE(rel->r_info), offset);
 
             return -EINVAL;
@@ -293,8 +300,8 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
 
         if (offset < (int32_t)0xff000000 || offset >= (int32_t)0x01000000)
           {
-            berr("ERROR:   ERROR: JUMP24 [%d] "
-                 "relocation out of range, branch target=%08lx\n",
+            berr("ERROR:   ERROR: JUMP24 [%" PRId32 "] "
+                 "relocation out of range, branch target=%08" PRIx32 "\n",
                  ELF32_R_TYPE(rel->r_info), offset);
 
             return -EINVAL;
@@ -316,15 +323,17 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
                       ((offset >> 1) & 0x07ff));
         *(uint16_t *)(addr + 2) = (uint16_t)lower_insn;
 
-        binfo("  S=%d J1=%d J2=%d insn [%04x %04x]\n",
-              S, J1, J2, (int)upper_insn, (int)lower_insn);
+        binfo("  S=%" PRId32 " J1=%" PRId32 " J2=%" PRId32
+              " insn [%04" PRIx32 " %04" PRIx32 "]\n",
+              S, J1, J2, upper_insn, lower_insn);
       }
       break;
 
     case R_ARM_V4BX:
       {
-        binfo("Performing V4BX link at addr=%08lx [%08lx]\n",
-              (long)addr, (long)(*(uint32_t *)addr));
+        binfo("Performing V4BX link at addr=%08" PRIxPTR
+              " [%08" PRIx32 "]\n",
+              addr, *(uint32_t *)addr);
 
          /* Preserve only Rm and the condition code */
 
@@ -339,9 +348,9 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
     case R_ARM_PREL31:
       {
         binfo("Performing PREL31 link "
-              "at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
-              (long)addr, (long)(*(uint32_t *)addr),
-              sym, (long)sym->st_value);
+              "at addr=%08" PRIxPTR " [%08" PRIx32 "] to "
+              "sym=%p st_value=%08" PRIx32 "\n",
+              addr, *(uint32_t *)addr, sym, sym->st_value);
 
         offset            = *(uint32_t *)addr + sym->st_value - addr;
         *(uint32_t *)addr = offset & 0x7fffffff;
@@ -351,11 +360,11 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
     case R_ARM_MOVW_ABS_NC:
     case R_ARM_MOVT_ABS:
       {
-        binfo("Performing MOVx_ABS [%d] link "
-              "at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
-              ELF32_R_TYPE(rel->r_info),
-              (long)addr, (long)(*(uint32_t *)addr),
-              sym, (long)sym->st_value);
+        binfo("Performing MOVx_ABS [%" PRId32 "] link "
+              "at addr=%08" PRIxPTR " [%08" PRIx32 "] to "
+              "sym=%p st_value=%08" PRIx32 "\n",
+              ELF32_R_TYPE(rel->r_info), addr,
+              *(uint32_t *)addr, sym, sym->st_value);
 
         offset = *(uint32_t *)addr;
         offset = ((offset & 0xf0000) >> 4) | (offset & 0xfff);
@@ -379,7 +388,7 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
          * upper_insn:
          *
          *  1   1   1   1   1   1
-         *  5   4   3   2   1   0   9  8  7  6  5  4  3  2  1  0 Instructions
+         *  5   4   3   2   1   0   9  8  7  6  5  4  3  2  1  0 Instruction
          * +----------+---+--------------------------+----------+
          * |1   1   1 |OP1|     OP2                  |          | 32-Bit
          * +----------+---+--+-----+-----------------+----------+
@@ -388,13 +397,13 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
          *
          * lower_insn:
          *
-         *  1   1   1   1   1  1
-         *  5   4   3   2   1  0  9  8  7  6  5  4   3  2  1  0 Instructions
-         * +---+-----------------------------------------------+
-         * |OP |                                               | 32-Bit
-         * +---+----------+-----------+------------------------+
-         * |0  |   imm3   |     Rd    |         imm8           | MOVT
-         * +---+----------+-----------+------------------------+
+         *  1   1   1   1   1   1
+         *  5   4   3   2   1   0   9  8  7  6  5  4  3  2  1  0 Instructions
+         * +---+-------------------------------------------------+
+         * |OP |                                                 | 32-Bit
+         * +---+----------+--------+-----------------------------+
+         * |0  |   imm3   |   Rd   |          imm8               | MOVT
+         * +---+----------+--------+-----------------------------+
          *
          * The 16-bit immediate value is encoded in these bits:
          *
@@ -407,11 +416,12 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
         upper_insn = (uint32_t)(*(uint16_t *)addr);
         lower_insn = (uint32_t)(*(uint16_t *)(addr + 2));
 
-        binfo("Performing THM_MOVx [%d] link "
-              "at addr=%08lx [%04x %04x] to sym=%p st_value=%08lx\n",
-              ELF32_R_TYPE(rel->r_info), (long)addr,
+        binfo("Performing THM_MOVx [%" PRId32 "] link "
+              "at addr=%08" PRIxPTR " [%04x %04x] to "
+              "sym=%p st_value=%08" PRIx32 "\n",
+              ELF32_R_TYPE(rel->r_info), addr,
               (int)upper_insn, (int)lower_insn,
-              sym, (long)sym->st_value);
+              sym, sym->st_value);
 
         /* Extract the 16-bit offset from the 32-bit instruction */
 
@@ -450,8 +460,53 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
       }
       break;
 
+    case R_ARM_THM_JUMP11:
+      {
+        offset = (uint32_t)(*(uint16_t *)addr & 0x7ff) << 1;
+        if (offset & 0x0800)
+          {
+            offset -= 0x1000;
+          }
+
+        offset += sym->st_value - addr;
+
+        if (ELF32_ST_TYPE(sym->st_info) == STT_FUNC && (offset & 1) == 0)
+          {
+            berr("ERROR: JUMP11 [%" PRId32 "] "
+                 "requires odd offset, offset=%08" PRIx32 "\n",
+                 ELF32_R_TYPE(rel->r_info), offset);
+
+            return -EINVAL;
+          }
+
+        /* Check the range of the offset */
+
+        if (offset < (int32_t)0xfffff800 || offset >= (int32_t)0x0800)
+          {
+            berr("ERROR: JUMP11 [%" PRId32 "] "
+                 "relocation out of range, branch target=%08" PRIx32 "\n",
+                 ELF32_R_TYPE(rel->r_info), offset);
+
+            return -EINVAL;
+          }
+
+        offset >>= 1;
+
+        *(uint16_t *)addr &= 0xf800;
+        *(uint16_t *)addr |= offset & 0x7ff;
+      }
+      break;
+
+    case R_ARM_RELATIVE:
+    case R_ARM_JUMP_SLOT:
+      {
+        *(uint32_t *)addr = (uint32_t)sym->st_value;
+      }
+      break;
+
     default:
-      berr("ERROR: Unsupported relocation: %d\n", ELF32_R_TYPE(rel->r_info));
+      berr("ERROR: Unsupported relocation: %" PRId32 "\n",
+           ELF32_R_TYPE(rel->r_info));
       return -EINVAL;
     }
 
@@ -459,7 +514,7 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
 }
 
 int up_relocateadd(const Elf32_Rela *rel, const Elf32_Sym *sym,
-                   uintptr_t addr)
+                   uintptr_t addr, void *arch_data)
 {
   berr("ERROR: RELA relocation not supported\n");
   return -ENOSYS;

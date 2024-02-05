@@ -164,4 +164,4 @@
 #define COMP_CSR_VALUE              (1 << 30)                     /* Bit 30: Comparator output status */
 #define COMP_CSR_LOCK               (1 << 31)                     /* Bit 31: Register lock */
 
-#endif                          /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXXX_COMP_H */
+#endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXXX_COMP_H */

@@ -43,20 +43,6 @@
 #include "pm.h"
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-struct pm_domain_state_s
-{
-  struct wdog_s wdog;
-};
-
-struct pm_greedy_governor_s
-{
-  struct pm_domain_state_s domain_states[CONFIG_PM_NDOMAINS];
-};
-
-/****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
@@ -81,8 +67,6 @@ static const struct pm_governor_s g_greedy_governor_ops =
   NULL                          /* priv */
 };
 
-static struct pm_greedy_governor_s g_pm_greedy_governor;
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -106,12 +90,10 @@ static void greedy_governor_statechanged(int domain,
 
 static enum pm_state_e greedy_governor_checkstate(int domain)
 {
-  FAR struct pm_domain_state_s *pdomstate;
   FAR struct pm_domain_s *pdom;
   irqstate_t flags;
   int state;
 
-  pdomstate = &g_pm_greedy_governor.domain_states[domain];
   pdom = &g_pmglobals.domain[domain];
   state = PM_NORMAL;
 
@@ -121,14 +103,11 @@ static enum pm_state_e greedy_governor_checkstate(int domain)
 
   flags = pm_domain_lock(domain);
 
-  if (!WDOG_ISACTIVE(&pdomstate->wdog))
-    {
-      /* Find the lowest power-level which is not locked. */
+  /* Find the lowest power-level which is not locked. */
 
-      while (dq_empty(&pdom->wakelock[state]) && state < (PM_COUNT - 1))
-        {
-          state++;
-        }
+  while (dq_empty(&pdom->wakelock[state]) && state < (PM_COUNT - 1))
+    {
+      state++;
     }
 
   pm_domain_unlock(domain, flags);
@@ -139,35 +118,12 @@ static enum pm_state_e greedy_governor_checkstate(int domain)
 }
 
 /****************************************************************************
- * Name: governor_timer_cb
- ****************************************************************************/
-
-static void greedy_governor_timer_cb(wdparm_t arg)
-{
-  pm_auto_updatestate((int)arg);
-}
-
-/****************************************************************************
  * Name: greedy_activity
  ****************************************************************************/
 
 static void greedy_governor_activity(int domain, int count)
 {
-  FAR struct pm_domain_state_s *pdomstate;
-  irqstate_t flags;
-
-  pdomstate = &g_pm_greedy_governor.domain_states[domain];
-  count = count ? count : 1;
-
-  flags = pm_domain_lock(domain);
-
-  if (TICK2SEC(wd_gettime(&pdomstate->wdog)) < count)
-    {
-      wd_start(&pdomstate->wdog, SEC2TICK(count),
-               greedy_governor_timer_cb, (wdparm_t)domain);
-    }
-
-  pm_domain_unlock(domain, flags);
+  pm_staytimeout(domain, PM_NORMAL, (count ? count : 1) * 1000);
 }
 
 /****************************************************************************

@@ -53,8 +53,8 @@
 
 /* Driver support ***********************************************************/
 
-/* This format is used to construct the /dev/skel[n] device driver path.  It
- * defined here so that it will be used consistently in all places.
+/* The format used to construct device file path, defined for consistent use
+ * from all places.
  */
 
 #define DEV_FORMAT          "/dev/skel%c"
@@ -73,9 +73,7 @@
  * Private Types
  ****************************************************************************/
 
-/* This structure contains the internal, private state of the USB host class
- * driver.
- */
+/* This is the internal, private state of the USB host class driver. */
 
 struct usbhost_state_s
 {
@@ -85,16 +83,16 @@ struct usbhost_state_s
 
   /* The remainder of the fields are provide to the class driver */
 
-  char                    devchar;      /* Character identifying the /dev/skel[n] device */
-  volatile bool           disconnected; /* TRUE: Device has been disconnected */
-  uint8_t                 ifno;         /* Interface number */
-  int16_t                 crefs;        /* Reference count on the driver instance */
-  mutex_t                 lock;         /* Used to maintain mutual exclusive access */
-  struct work_s           work;         /* For interacting with the worker thread */
-  FAR uint8_t            *tbuffer;      /* The allocated transfer buffer */
-  size_t                  tbuflen;      /* Size of the allocated transfer buffer */
-  usbhost_ep_t            epin;         /* IN endpoint */
-  usbhost_ep_t            epout;        /* OUT endpoint */
+  char            devchar;      /* char in /dev/skel[n] format name */
+  volatile bool   disconnected; /* TRUE: Device has been disconnected */
+  uint8_t         ifno;         /* Interface number */
+  int16_t         crefs;        /* Reference count on the driver instance */
+  mutex_t         lock;         /* Used for mutual exclusive access */
+  struct work_s   work;         /* For interacting with the worker thread */
+  FAR uint8_t    *tbuffer;      /* The allocated transfer buffer */
+  size_t          tbuflen;      /* Size of the allocated transfer buffer */
+  usbhost_ep_t    epin;         /* IN endpoint */
+  usbhost_ep_t    epout;        /* OUT endpoint */
 };
 
 /****************************************************************************
@@ -156,8 +154,8 @@ static int usbhost_disconnected(FAR struct usbhost_class_s *usbclass);
  * Private Data
  ****************************************************************************/
 
-/* This structure provides the registry entry ID information that will  be
- * used to associate the USB class driver to a connected USB device.
+/* This structure provides the registry entry ID information that will be
+ * used to associate the USB host class driver to a connected USB device.
  */
 
 static const struct usbhost_id_s g_id =
@@ -169,7 +167,7 @@ static const struct usbhost_id_s g_id =
   0   /* pid      */
 };
 
-/* This is the USB host storage class's registry entry */
+/* This is the USB host class' registry entry */
 
 static struct usbhost_registry_s g_skeleton =
 {
@@ -179,7 +177,7 @@ static struct usbhost_registry_s g_skeleton =
   &g_id                   /* id[]     */
 };
 
-/* This is a bitmap that is used to allocate device names /dev/skela-z. */
+/* The bitmap depicting allocated device names in "/dev/skel[a-z]". */
 
 static uint32_t g_devinuse;
 

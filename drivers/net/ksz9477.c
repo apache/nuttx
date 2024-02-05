@@ -36,6 +36,21 @@
  * Private Data
  ****************************************************************************/
 
+#ifdef CONFIG_NET_KSZ9477_PORT_VLAN
+
+static uint8_t g_port_vlan_config[] =
+{
+  CONFIG_NET_KSZ9477_PORT_VLAN_PHY1,
+  CONFIG_NET_KSZ9477_PORT_VLAN_PHY2,
+  CONFIG_NET_KSZ9477_PORT_VLAN_PHY3,
+  CONFIG_NET_KSZ9477_PORT_VLAN_PHY4,
+  CONFIG_NET_KSZ9477_PORT_VLAN_PHY5,
+  CONFIG_NET_KSZ9477_PORT_VLAN_RMII,
+  CONFIG_NET_KSZ9477_PORT_VLAN_SGMII
+};
+
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -198,6 +213,95 @@ static int ksz9477_sgmii_write_indirect(uint32_t address, uint16_t *value,
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: ksz9477_enable_port_vlan
+ *
+ * Description:
+ *   Enables static port-based VLAN, which can be configured in the switch
+ *   queue management's port control registers
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK or negative error number
+ *
+ ****************************************************************************/
+
+int ksz9477_enable_port_vlan(void)
+{
+  uint32_t reg;
+  int ret = ksz9477_reg_read32(KSZ9477_Q_MGMT_CONTROL0, &reg);
+  if (ret)
+    {
+      reg |= KSZ9477_Q_MGMT_PORT_VLAN_ENABLE;
+      ret = ksz9477_reg_write32(KSZ9477_Q_MGMT_CONTROL0, reg);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: ksz9477_disable_port_vlan
+ *
+ * Description:
+ *   Disables the static port-based VLAN
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK or negative error number
+ *
+ ****************************************************************************/
+
+int ksz9477_disable_port_vlan(void)
+{
+  uint32_t reg;
+  int ret = ksz9477_reg_read32(KSZ9477_Q_MGMT_CONTROL0, &reg);
+  if (ret)
+    {
+      reg &= ~KSZ9477_Q_MGMT_PORT_VLAN_ENABLE;
+      ret = ksz9477_reg_write32(KSZ9477_Q_MGMT_CONTROL0, reg);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: ksz9477_configure_port_vlan
+ *
+ * Description:
+ *   Configures the static port-based VLAN for a single port
+ *   The change will become effective next time when the switch is
+ *   initialized.
+ *
+ * Input Parameters:
+ *   port: The port being configured (1-7)
+ *   disable: Bitmask of ports where frames may not be forwarded to.
+ *            Bit 0 is for port 1, bit 1 for port 2 etc.
+ *   enable: Bitmask of ports where frames may be forwarded to.
+ *            Bit 0 is for port 1, bit 1 for port 2 etc.
+ *
+ * Returned Value:
+ *   OK or negative error number
+ *
+ ****************************************************************************/
+
+int ksz9477_configure_port_vlan(ksz9477_port_t port, uint8_t disable,
+                                uint8_t enable)
+{
+  if (port < KSZ9477_PORT_PHY1 || port > KSZ9477_PORT_SGMII)
+    {
+      return -EINVAL;
+    }
+
+  g_port_vlan_config[port - KSZ9477_PORT_PHY1] &= ~disable;
+  g_port_vlan_config[port - KSZ9477_PORT_PHY1] |= enable;
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: ksz9477_init
  *
  * Description:
@@ -215,6 +319,7 @@ static int ksz9477_sgmii_write_indirect(uint32_t address, uint16_t *value,
 int ksz9477_init(ksz9477_port_t master_port)
 {
   int ret;
+  int i;
   uint16_t regval16;
   uint32_t regval32;
 
@@ -255,6 +360,25 @@ int ksz9477_init(ksz9477_port_t master_port)
       ret = ksz9477_sgmii_write_indirect(KSZ9477_SGMII_AUTONEG_ADVERTISE,
                                          &regval16, 1);
     }
+
+  /* Configure the static port-based VLANs */
+
+#ifdef CONFIG_NET_KSZ9477_PORT_VLAN
+
+  /* Restrict traffic according to Q_MGMT_PORT_CONTROL1 registers */
+
+  ret = ksz9477_enable_port_vlan();
+
+  /* Configure traffic control for each port */
+
+  for (i = 0; ret == OK && i < 7; i++)
+    {
+      ret = ksz9477_reg_write32(
+              KSZ9477_Q_MGMT_PORT_CONTROL1(KSZ9477_PORT_PHY1 + i),
+              g_port_vlan_config[i]);
+    }
+
+#endif
 
   return ret;
 }

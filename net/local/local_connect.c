@@ -68,6 +68,7 @@ static int inline local_stream_connect(FAR struct local_conn_s *client,
                                        FAR struct local_conn_s *server,
                                        bool nonblock)
 {
+  FAR struct local_conn_s *conn;
   int ret;
   int sval;
 
@@ -85,11 +86,6 @@ static int inline local_stream_connect(FAR struct local_conn_s *client,
            server->u.server.lc_pending, server->u.server.lc_backlog);
       return -ECONNREFUSED;
     }
-
-  /* Increment the number of pending server connection s */
-
-  server->u.server.lc_pending++;
-  DEBUGASSERT(server->u.server.lc_pending != 0);
 
   /* Create the FIFOs needed for the connection */
 
@@ -117,40 +113,16 @@ static int inline local_stream_connect(FAR struct local_conn_s *client,
 
   DEBUGASSERT(client->lc_outfile.f_inode != NULL);
 
-  /* Set the busy "result" before giving the semaphore. */
+  ret = local_alloc_accept(server, client, &conn);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to alloc accept conn %s: %d\n",
+           client->lc_path, ret);
 
-  client->u.client.lc_result = -EBUSY;
+      goto errout_with_outfd;
+    }
+
   client->lc_state = LOCAL_STATE_ACCEPT;
-
-  /* Add ourself to the list of waiting connections and notify the server. */
-
-  dq_addlast(&client->u.client.lc_waiter, &server->u.server.lc_waiters);
-  local_event_pollnotify(server, POLLIN);
-
-  if (nxsem_get_value(&server->lc_waitsem, &sval) >= 0 && sval < 1)
-    {
-      nxsem_post(&server->lc_waitsem);
-    }
-
-  /* Wait for the server to accept the connections */
-
-  if (!nonblock)
-    {
-      do
-        {
-          net_sem_wait_uninterruptible(&client->lc_waitsem);
-          ret = client->u.client.lc_result;
-        }
-      while (ret == -EBUSY);
-
-      /* Did we successfully connect? */
-
-      if (ret < 0)
-        {
-          nerr("ERROR: Failed to connect: %d\n", ret);
-          goto errout_with_outfd;
-        }
-    }
 
   /* Yes.. open the read-only FIFO */
 
@@ -159,21 +131,32 @@ static int inline local_stream_connect(FAR struct local_conn_s *client,
     {
       nerr("ERROR: Failed to open write-only FIFOs for %s: %d\n",
            client->lc_path, ret);
-      goto errout_with_outfd;
+
+      goto errout_with_conn;
     }
 
   DEBUGASSERT(client->lc_infile.f_inode != NULL);
 
-  nxsem_post(&client->lc_donesem);
+  /* Increment the number of pending server connections */
 
-  if (!nonblock)
+  server->u.server.lc_pending++;
+  DEBUGASSERT(server->u.server.lc_pending != 0);
+
+  /* Add ourself to the list of waiting connections and notify the server. */
+
+  dq_addlast(&conn->u.accept.lc_waiter, &server->u.server.lc_waiters);
+  local_event_pollnotify(server, POLLIN);
+
+  if (nxsem_get_value(&server->lc_waitsem, &sval) >= 0 && sval < 1)
     {
-      client->lc_state = LOCAL_STATE_CONNECTED;
-      return ret;
+      nxsem_post(&server->lc_waitsem);
     }
 
-  client->lc_state = LOCAL_STATE_CONNECTING;
-  return -EINPROGRESS;
+  client->lc_state = LOCAL_STATE_CONNECTED;
+  return ret;
+
+errout_with_conn:
+  local_free(conn);
 
 errout_with_outfd:
   file_close(&client->lc_outfile);

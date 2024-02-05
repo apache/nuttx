@@ -25,9 +25,12 @@
 #include <nuttx/config.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mqueue.h>
+#include <nuttx/spinlock.h>
 
 #include <debug.h>
 #include <assert.h>
+#include <netinet/in.h>
+#include <sys/param.h>
 
 #include "xtensa.h"
 #include "hardware/esp32s3_efuse.h"
@@ -42,6 +45,7 @@
 #include "phy_init_data.h"
 
 #include "esp32s3_wireless.h"
+#include "esp32s3_partition.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -90,6 +94,7 @@ extern uint8_t phy_dig_reg_backup(bool init, uint32_t *regs);
 extern int  register_chipv7_phy(const esp_phy_init_data_t *init_data,
                                 esp_phy_calibration_data_t *cal_data,
                                 esp_phy_calibration_mode_t cal_mode);
+extern uint32_t crc32_le(uint32_t crc, uint8_t const *buf, uint32_t len);
 
 /****************************************************************************
  * Private Data
@@ -118,6 +123,83 @@ static uint8_t g_wifi_bt_pd_controller;
 /* Private data of the wireless common interface */
 
 static struct esp_wireless_priv_s g_esp_wireless_priv;
+
+#ifdef CONFIG_ESP32S3_PHY_INIT_DATA_IN_PARTITION
+static const char *phy_partion_label = "phy_init";
+#endif
+
+#ifdef CONFIG_ESP32S3_SUPPORT_MULTIPLE_PHY_INIT_DATA
+
+static phy_init_data_type_t g_phy_init_data_type;
+
+static phy_init_data_type_t g_current_apply_phy_init_data;
+
+static char g_phy_current_country[PHY_COUNTRY_CODE_LEN];
+
+/* Whether it is a new bin */
+
+static bool g_multiple_phy_init_data_bin;
+
+/* PHY init data type array */
+
+static const char *g_phy_type[ESP_PHY_INIT_DATA_TYPE_NUMBER] =
+{
+  "DEFAULT", "SRRC", "FCC", "CE", "NCC", "KCC", "MIC", "IC",
+  "ACMA", "ANATEL", "ISED", "WPC", "OFCA", "IFETEL", "RCM"
+};
+
+/* Country and PHY init data type map */
+
+static phy_country_to_bin_type_t g_country_code_map_type_table[] =
+{
+  {"01",  ESP_PHY_INIT_DATA_TYPE_DEFAULT},
+  {"AT",  ESP_PHY_INIT_DATA_TYPE_CE},
+  {"AU",  ESP_PHY_INIT_DATA_TYPE_ACMA},
+  {"BE",  ESP_PHY_INIT_DATA_TYPE_CE},
+  {"BG",  ESP_PHY_INIT_DATA_TYPE_CE},
+  {"BR",  ESP_PHY_INIT_DATA_TYPE_ANATEL},
+  {"CA",  ESP_PHY_INIT_DATA_TYPE_ISED},
+  {"CH",  ESP_PHY_INIT_DATA_TYPE_CE},
+  {"CN",  ESP_PHY_INIT_DATA_TYPE_SRRC},
+  {"CY",  ESP_PHY_INIT_DATA_TYPE_CE},
+  {"CZ",  ESP_PHY_INIT_DATA_TYPE_CE},
+  {"DE",  ESP_PHY_INIT_DATA_TYPE_CE},
+  {"DK",  ESP_PHY_INIT_DATA_TYPE_CE},
+  {"EE",  ESP_PHY_INIT_DATA_TYPE_CE},
+  {"ES",  ESP_PHY_INIT_DATA_TYPE_CE},
+  {"FI",  ESP_PHY_INIT_DATA_TYPE_CE},
+  {"FR",  ESP_PHY_INIT_DATA_TYPE_CE},
+  {"GB",  ESP_PHY_INIT_DATA_TYPE_CE},
+  {"GR",  ESP_PHY_INIT_DATA_TYPE_CE},
+  {"HK",  ESP_PHY_INIT_DATA_TYPE_OFCA},
+  {"HR",  ESP_PHY_INIT_DATA_TYPE_CE},
+  {"HU",  ESP_PHY_INIT_DATA_TYPE_CE},
+  {"IE",  ESP_PHY_INIT_DATA_TYPE_CE},
+  {"IN",  ESP_PHY_INIT_DATA_TYPE_WPC},
+  {"IS",  ESP_PHY_INIT_DATA_TYPE_CE},
+  {"IT",  ESP_PHY_INIT_DATA_TYPE_CE},
+  {"JP",  ESP_PHY_INIT_DATA_TYPE_MIC},
+  {"KR",  ESP_PHY_INIT_DATA_TYPE_KCC},
+  {"LI",  ESP_PHY_INIT_DATA_TYPE_CE},
+  {"LT",  ESP_PHY_INIT_DATA_TYPE_CE},
+  {"LU",  ESP_PHY_INIT_DATA_TYPE_CE},
+  {"LV",  ESP_PHY_INIT_DATA_TYPE_CE},
+  {"MT",  ESP_PHY_INIT_DATA_TYPE_CE},
+  {"MX",  ESP_PHY_INIT_DATA_TYPE_IFETEL},
+  {"NL",  ESP_PHY_INIT_DATA_TYPE_CE},
+  {"NO",  ESP_PHY_INIT_DATA_TYPE_CE},
+  {"NZ",  ESP_PHY_INIT_DATA_TYPE_RCM},
+  {"PL",  ESP_PHY_INIT_DATA_TYPE_CE},
+  {"PT",  ESP_PHY_INIT_DATA_TYPE_CE},
+  {"RO",  ESP_PHY_INIT_DATA_TYPE_CE},
+  {"SE",  ESP_PHY_INIT_DATA_TYPE_CE},
+  {"SI",  ESP_PHY_INIT_DATA_TYPE_CE},
+  {"SK",  ESP_PHY_INIT_DATA_TYPE_CE},
+  {"TW",  ESP_PHY_INIT_DATA_TYPE_NCC},
+  {"US",  ESP_PHY_INIT_DATA_TYPE_FCC},
+};
+
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -312,6 +394,481 @@ void IRAM_ATTR esp32s3_phy_disable_clock(void)
   esp32s3_periph_wifi_bt_common_module_disable();
 }
 
+#ifdef CONFIG_ESP32S3_SUPPORT_MULTIPLE_PHY_INIT_DATA
+
+/****************************************************************************
+ * Name: phy_crc_check
+ *
+ * Description:
+ *   Check the checksum value of data
+ *
+ * Input Parameters:
+ *   data     - Data buffer pointer
+ *   length   - Data length
+ *   checksum - Checksum pointer
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+static int phy_crc_check(uint8_t *data, const uint8_t *checksum,
+                         size_t length)
+{
+  uint32_t crc_data = crc32_le(0, data, length);
+  uint32_t crc_size_conversion = HTONL(crc_data);
+  uint32_t tmp_crc = checksum[0] | (checksum[1] << 8) | (checksum[2] << 16) |
+                     (checksum[3] << 24);
+  if (crc_size_conversion != tmp_crc)
+    {
+      return ERROR;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: phy_find_bin_type_according_country
+ *
+ * Description:
+ *   Find the PHY initialization data type according to country code
+ *
+ * Input Parameters:
+ *   country - Country code pointer
+ *
+ * Returned Value:
+ *   PHY initialization data type
+ *
+ ****************************************************************************/
+
+static uint8_t phy_find_bin_type_according_country(const char *country)
+{
+  uint8_t i;
+  uint8_t phy_init_data_type;
+  uint8_t num = nitems(g_country_code_map_type_table);
+  for (i = 0; i < num; i++)
+    {
+      if (memcmp(country, g_country_code_map_type_table[i].cc,
+                 sizeof(g_phy_current_country)) == 0)
+        {
+          phy_init_data_type = g_country_code_map_type_table[i].type;
+          wlinfo("Current country is %c%c, PHY init data type is %s\n",
+                  g_country_code_map_type_table[i].cc[0],
+                  g_country_code_map_type_table[i].cc[1],
+                  g_phy_type[g_country_code_map_type_table[i].type]);
+          break;
+        }
+    }
+
+  if (i == num)
+    {
+      phy_init_data_type = ESP_PHY_INIT_DATA_TYPE_DEFAULT;
+      wlerr("Use the default certification code beacuse %c%c doesn't "
+            "have a certificate\n", country[0], country[1]);
+    }
+
+  return phy_init_data_type;
+}
+
+/****************************************************************************
+ * Name: phy_find_bin_data_according_type
+ *
+ * Description:
+ *   Find the PHY initialization data according to PHY init data type
+ *
+ * Input Parameters:
+ *   output_data    - Output data buffer pointer
+ *   control_info   - PHY init data control infomation
+ *   input_data     - Input data buffer pointer
+ *   init_data_type - PHY init data type
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+static int phy_find_bin_data_according_type(uint8_t *output_data,
+        const phy_control_info_data_t *control_info,
+        const esp_phy_init_data_t *input_data,
+        phy_init_data_type_t init_data_type)
+{
+  int i;
+  for (i = 0; i < control_info->number; i++)
+    {
+      if (init_data_type == *((uint8_t *)(input_data + i)
+                              + PHY_INIT_DATA_TYPE_OFFSET))
+        {
+          memcpy(output_data + sizeof(phy_init_magic_pre),
+                 (input_data + i), sizeof(esp_phy_init_data_t));
+          break;
+        }
+    }
+
+  if (i == control_info->number)
+    {
+      return ERROR;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: phy_get_multiple_init_data
+ *
+ * Description:
+ *   Get multiple PHY init data according to PHY init data type
+ *
+ * Input Parameters:
+ *   data           - Data buffer pointer
+ *   length         - Data length
+ *   init_data_type - PHY init data type
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+static int phy_get_multiple_init_data(uint8_t *data, size_t length,
+                                      phy_init_data_type_t init_data_type)
+{
+  phy_control_info_data_t *control_info = (phy_control_info_data_t *)
+                                kmm_malloc(sizeof(phy_control_info_data_t));
+  if (control_info == NULL)
+    {
+      wlerr("ERROR: Failed to allocate memory for\
+            PHY init data control info\n");
+      return -ENOMEM;
+    }
+
+  int ret = esp32s3_partition_read(phy_partion_label, length, control_info,
+                                   sizeof(phy_control_info_data_t));
+  if (ret != OK)
+    {
+      kmm_free(control_info);
+      wlerr("ERROR: Failed to read PHY control info data partition\n");
+      return ret;
+    }
+
+  if ((control_info->check_algorithm) == PHY_CRC_ALGORITHM)
+    {
+      ret = phy_crc_check(control_info->multiple_bin_checksum,
+                          control_info->control_info_checksum,
+                          sizeof(phy_control_info_data_t) -
+                          sizeof(control_info->control_info_checksum));
+      if (ret != OK)
+        {
+          kmm_free(control_info);
+          wlerr("ERROR: PHY init data control info check error\n");
+          return ret;
+        }
+    }
+  else
+    {
+      kmm_free(control_info);
+      wlerr("ERROR: Check algorithm not CRC, PHY init data update failed\n");
+      return ERROR;
+    }
+
+  uint8_t *init_data_multiple = (uint8_t *)
+        kmm_malloc(sizeof(esp_phy_init_data_t) * control_info->number);
+  if (init_data_multiple == NULL)
+    {
+      kmm_free(control_info);
+      wlerr("ERROR: Failed to allocate memory for PHY init data\n");
+      return -ENOMEM;
+    }
+
+  ret = esp32s3_partition_read(phy_partion_label, length +
+          sizeof(phy_control_info_data_t), init_data_multiple,
+          sizeof(esp_phy_init_data_t) * control_info->number);
+  if (ret != OK)
+    {
+      kmm_free(init_data_multiple);
+      kmm_free(control_info);
+      wlerr("ERROR: Failed to read PHY init data multiple bin partition\n");
+      return ret;
+    }
+
+  if ((control_info->check_algorithm) == PHY_CRC_ALGORITHM)
+    {
+      ret = phy_crc_check(init_data_multiple,
+                    control_info->multiple_bin_checksum,
+                    sizeof(esp_phy_init_data_t) * control_info->number);
+      if (ret != OK)
+        {
+          kmm_free(init_data_multiple);
+          kmm_free(control_info);
+          wlerr("ERROR: PHY init data multiple bin check error\n");
+          return ret;
+        }
+    }
+  else
+    {
+      kmm_free(init_data_multiple);
+      kmm_free(control_info);
+      wlerr("ERROR: Check algorithm not CRC, PHY init data update failed\n");
+      return ERROR;
+    }
+
+  ret = phy_find_bin_data_according_type(data, control_info,
+          (const esp_phy_init_data_t *)init_data_multiple, init_data_type);
+  if (ret != OK)
+    {
+      wlerr("ERROR: %s has not been certified, use DEFAULT PHY init data\n",
+            g_phy_type[init_data_type]);
+      g_phy_init_data_type = ESP_PHY_INIT_DATA_TYPE_DEFAULT;
+    }
+  else
+    {
+      g_phy_init_data_type = init_data_type;
+    }
+
+  kmm_free(init_data_multiple);
+  kmm_free(control_info);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: phy_update_init_data
+ *
+ * Description:
+ *   Update PHY init data according to PHY init data type
+ *
+ * Input Parameters:
+ *   init_data_type - PHY init data type
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+static int phy_update_init_data(phy_init_data_type_t init_data_type)
+{
+  int ret;
+  size_t length = sizeof(phy_init_magic_pre) +
+      sizeof(esp_phy_init_data_t) + sizeof(phy_init_magic_post);
+  uint8_t *init_data_store = kmm_malloc(length);
+  if (init_data_store == NULL)
+    {
+      wlerr("ERROR: Failed to allocate memory for updated country code "
+            "PHY init data\n");
+      return -ENOMEM;
+    }
+
+  ret = esp32s3_partition_read(phy_partion_label, 0, init_data_store,
+                               length);
+  if (ret != OK)
+    {
+      kmm_free(init_data_store);
+      wlerr("ERROR: Failed to read updated country code PHY data\n");
+      return ret;
+    }
+
+  if (memcmp(init_data_store, PHY_INIT_MAGIC,
+             sizeof(phy_init_magic_pre)) != 0 ||
+      memcmp(init_data_store + length - sizeof(phy_init_magic_post),
+             PHY_INIT_MAGIC, sizeof(phy_init_magic_post)) != 0)
+    {
+      kmm_free(init_data_store);
+      wlerr("ERROR: Failed to validate updated country code PHY data\n");
+      return ERROR;
+    }
+
+  /* find init data bin according init data type */
+
+  if (init_data_type != ESP_PHY_INIT_DATA_TYPE_DEFAULT)
+    {
+      ret = phy_get_multiple_init_data(init_data_store, length,
+                                       init_data_type);
+      if (ret != OK)
+        {
+          kmm_free(init_data_store);
+#ifdef CONFIG_ESP32S3_PHY_INIT_DATA_ERROR
+          abort();
+#else
+          return ret;
+#endif
+        }
+    }
+  else
+    {
+      g_phy_init_data_type = ESP_PHY_INIT_DATA_TYPE_DEFAULT;
+    }
+
+  if (g_current_apply_phy_init_data != g_phy_init_data_type)
+    {
+      ret = esp_phy_apply_phy_init_data(init_data_store +
+                                        sizeof(phy_init_magic_pre));
+      if (ret != OK)
+        {
+          wlerr("ERROR: PHY init data failed to load\n");
+          kmm_free(init_data_store);
+          return ret;
+        }
+
+      wlinfo("PHY init data type updated from %s to %s\n",
+             g_phy_type[g_current_apply_phy_init_data],
+             g_phy_type[g_phy_init_data_type]);
+      g_current_apply_phy_init_data = g_phy_init_data_type;
+    }
+
+  kmm_free(init_data_store);
+  return OK;
+}
+
+#endif
+
+#ifdef CONFIG_ESP32S3_PHY_INIT_DATA_IN_PARTITION
+
+/****************************************************************************
+ * Name: esp_phy_get_init_data
+ *
+ * Description:
+ *   Get PHY init data
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Pointer to PHY init data structure
+ *
+ ****************************************************************************/
+
+const esp_phy_init_data_t *esp_phy_get_init_data(void)
+{
+  int ret;
+  size_t length = sizeof(phy_init_magic_pre) +
+                  sizeof(esp_phy_init_data_t) + sizeof(phy_init_magic_post);
+  uint8_t *init_data_store = kmm_malloc(length);
+  if (init_data_store == NULL)
+    {
+      wlerr("ERROR: Failed to allocate memory for PHY init data\n");
+      return NULL;
+    }
+
+  ret = esp32s3_partition_read(phy_partion_label, 0, init_data_store,
+                               length);
+  if (ret != OK)
+    {
+      wlerr("ERROR: Failed to get read data from MTD\n");
+      kmm_free(init_data_store);
+      return NULL;
+    }
+
+  if (memcmp(init_data_store, PHY_INIT_MAGIC, sizeof(phy_init_magic_pre))
+      != 0 || memcmp(init_data_store + length - sizeof(phy_init_magic_post),
+              PHY_INIT_MAGIC, sizeof(phy_init_magic_post)) != 0)
+    {
+#ifdef CONFIG_ESP32S3_PHY_DEFAULT_INIT_IF_INVALID
+      wlerr("ERROR: Failed to validate PHY data partition, restoring "
+            "default data into flash...");
+      memcpy(init_data_store, PHY_INIT_MAGIC, sizeof(phy_init_magic_pre));
+      memcpy(init_data_store + sizeof(phy_init_magic_pre),
+             &phy_init_data, sizeof(phy_init_data));
+      memcpy(init_data_store + sizeof(phy_init_magic_pre) +
+             sizeof(phy_init_data), PHY_INIT_MAGIC,
+             sizeof(phy_init_magic_post));
+      DEBUGASSERT(memcmp(init_data_store, PHY_INIT_MAGIC,
+                  sizeof(phy_init_magic_pre)) == 0);
+      DEBUGASSERT(memcmp(init_data_store + length -
+                  sizeof(phy_init_magic_post), PHY_INIT_MAGIC,
+                  sizeof(phy_init_magic_post)) == 0);
+
+      /* write default data */
+
+      ret = esp32s3_partition_write(phy_partion_label, 0, init_data_store,
+                                    length);
+      if (ret != OK)
+        {
+          wlerr("ERROR: Failed to write default PHY data partition\n");
+          kmm_free(init_data_store);
+          return NULL;
+        }
+#else /* CONFIG_ESP32S3_PHY_DEFAULT_INIT_IF_INVALID */
+      wlerr("ERROR: Failed to validate PHY data partition\n");
+      kmm_free(init_data_store);
+      return NULL;
+#endif
+    }
+
+#ifdef CONFIG_ESP32S3_SUPPORT_MULTIPLE_PHY_INIT_DATA
+  if (*(init_data_store + (sizeof(phy_init_magic_pre) +
+      PHY_SUPPORT_MULTIPLE_BIN_OFFSET)))
+    {
+      g_multiple_phy_init_data_bin = true;
+      wlinfo("Support multiple PHY init data bins\n");
+    }
+  else
+    {
+      wlinfo("Does not support multiple PHY init data bins\n");
+    }
+#endif
+
+  wlinfo("PHY data partition validated\n");
+  return (const esp_phy_init_data_t *)
+         (init_data_store + sizeof(phy_init_magic_pre));
+}
+
+/****************************************************************************
+ * Name: esp_phy_release_init_data
+ *
+ * Description:
+ *   Release PHY init data
+ *
+ * Input Parameters:
+ *   init_data - Pointer to PHY init data structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp_phy_release_init_data(const esp_phy_init_data_t *init_data)
+{
+  kmm_free((uint8_t *)init_data - sizeof(phy_init_magic_pre));
+}
+
+#else /* CONFIG_ESP32S3_PHY_INIT_DATA_IN_PARTITION */
+
+/****************************************************************************
+ * Name: esp_phy_get_init_data
+ *
+ * Description:
+ *   Get PHY init data
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Pointer to PHY init data structure
+ *
+ ****************************************************************************/
+
+const esp_phy_init_data_t *esp_phy_get_init_data(void)
+{
+  wlinfo("Loading PHY init data from application binary\n");
+  return &phy_init_data;
+}
+
+/****************************************************************************
+ * Name: esp_phy_release_init_data
+ *
+ * Description:
+ *   Release PHY init data
+ *
+ * Input Parameters:
+ *   init_data - Pointer to PHY init data structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp_phy_release_init_data(const esp_phy_init_data_t *init_data)
+{
+}
+#endif
+
 /****************************************************************************
  * Name: esp_read_mac
  *
@@ -396,6 +953,54 @@ int32_t esp_read_mac(uint8_t *mac, esp_mac_type_t type)
 }
 
 /****************************************************************************
+ * Name: esp32s3_phy_update_country_info
+ *
+ * Description:
+ *   Update PHY init data according to country code
+ *
+ * Input Parameters:
+ *   country - PHY init data type
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int esp32s3_phy_update_country_info(const char *country)
+{
+#ifdef CONFIG_ESP32S3_SUPPORT_MULTIPLE_PHY_INIT_DATA
+  uint8_t phy_init_data_type_map = 0;
+  if (memcmp(country, g_phy_current_country, sizeof(g_phy_current_country))
+      == 0)
+    {
+      return OK;
+    }
+
+  memcpy(g_phy_current_country, country, sizeof(g_phy_current_country));
+  if (!g_multiple_phy_init_data_bin)
+    {
+      wlerr("ERROR: Does not support multiple PHY init data bins\n");
+      return ERROR;
+    }
+
+  phy_init_data_type_map = phy_find_bin_type_according_country(country);
+  if (phy_init_data_type_map == g_phy_init_data_type)
+    {
+      return OK;
+    }
+
+  int ret =  phy_update_init_data(phy_init_data_type_map);
+  if (ret != OK)
+    {
+      wlerr("ERROR: Failed to update PHY init data\n");
+      return ret;
+    }
+#endif
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: esp32s3_phy_disable
  *
  * Description:
@@ -465,7 +1070,7 @@ void esp32s3_phy_enable(void)
       debug = true;
     }
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(NULL);
 
   if (g_phy_access_ref == 0)
     {
@@ -485,7 +1090,15 @@ void esp32s3_phy_enable(void)
           phy_bbpll_en_usb(true);
 #endif
           wlinfo("calibrating");
-          register_chipv7_phy(&phy_init_data, cal_data, PHY_RF_CAL_FULL);
+          const esp_phy_init_data_t *init_data = esp_phy_get_init_data();
+          if (init_data == NULL)
+            {
+              wlerr("ERROR: Failed to obtain PHY init data");
+              abort();
+            }
+
+          register_chipv7_phy(init_data, cal_data, PHY_RF_CAL_FULL);
+          esp_phy_release_init_data(init_data);
           g_is_phy_calibrated = true;
           kmm_free(cal_data);
         }
@@ -498,7 +1111,7 @@ void esp32s3_phy_enable(void)
 
   g_phy_access_ref++;
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************
@@ -741,7 +1354,7 @@ IRAM_ATTR void esp_post_semcache(struct esp_semcache_s *sc)
 
   sc->count++;
 
-  /* Enable CPU 0 interrupt. This will generate an IRQ as soon as non-IRAM
+  /* Enable CPU 2 interrupt. This will generate an IRQ as soon as non-IRAM
    * are (re)enabled.
    */
 

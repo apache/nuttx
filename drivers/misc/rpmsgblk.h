@@ -35,6 +35,7 @@
 
 #define RPMSGBLK_NAME_PREFIX     "rpmsgblk-"
 #define RPMSGBLK_NAME_PREFIX_LEN 9
+#define RPMSGBLK_NAME_MAX        32
 
 #define RPMSGBLK_OPEN            1
 #define RPMSGBLK_CLOSE           2
@@ -42,7 +43,6 @@
 #define RPMSGBLK_WRITE           4
 #define RPMSGBLK_GEOMETRY        5
 #define RPMSGBLK_IOCTL           6
-#define RPMSGBLK_UNLINK          7
 
 /****************************************************************************
  * Public Types
@@ -77,9 +77,12 @@ begin_packed_struct struct rpmsgblk_read_s
 begin_packed_struct struct rpmsgblk_geometry_s
 {
   struct rpmsgblk_header_s header;
-  uint64_t                 arg;
-  uint32_t                 arglen;
-  char                     buf[1];
+  uint16_t                 available;
+  uint16_t                 mediachanged;
+  uint16_t                 writeenabled;
+  uint16_t                 sectorsize;
+  uint64_t                 nsectors;
+  char                     model[RPMSGBLK_NAME_MAX + 1];
 } end_packed_struct;
 
 begin_packed_struct struct rpmsgblk_ioctl_s
@@ -89,11 +92,6 @@ begin_packed_struct struct rpmsgblk_ioctl_s
   uint32_t                 arglen;
   int32_t                  request;
   char                     buf[1];
-} end_packed_struct;
-
-begin_packed_struct struct rpmsgblk_unlink_s
-{
-  struct rpmsgblk_header_s header;
 } end_packed_struct;
 
 /****************************************************************************

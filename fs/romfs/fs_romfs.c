@@ -44,7 +44,7 @@
 #include "fs_romfs.h"
 
 /****************************************************************************
- * Private Type
+ * Private Types
  ****************************************************************************/
 
 /* This structure represents one entry node in the romfs file system */
@@ -123,6 +123,7 @@ const struct mountpt_operations g_romfs_operations =
   romfs_ioctl,     /* ioctl */
   romfs_mmap,      /* mmap */
   NULL,            /* truncate */
+  NULL,            /* poll */
 
   NULL,            /* sync */
   romfs_dup,       /* dup */

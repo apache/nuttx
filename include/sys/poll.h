@@ -61,6 +61,11 @@
  *     Device has been disconnected (revents only).
  *   POLLNVAL
  *     Invalid fd member (revents only).
+ *
+ *   POLLALWAYS
+ *     Indicate that should ALWAYS call the poll callback whether the
+ *     drvier notified the user expected event or not, and this value is
+ *     used inside kernal only (events only).
  */
 
 #define POLLIN       (0x01)  /* NuttX does not make priority distinctions */
@@ -77,6 +82,8 @@
 #define POLLHUP      (0x10)
 #define POLLRDHUP    (0x10)  /* NuttX does not support shutdown(fd, SHUT_RD) */
 #define POLLNVAL     (0x20)
+
+#define POLLALWAYS   (0x10000) /* For not conflict with Linux */
 
 /****************************************************************************
  * Public Type Definitions

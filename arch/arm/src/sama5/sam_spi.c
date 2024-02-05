@@ -302,7 +302,7 @@ static const struct spi_ops_s g_spi0ops =
   .setfrequency      = spi_setfrequency,
 #ifdef CONFIG_SPI_DELAY_CONTROL
   .setdelay          = spi_setdelay,
-#endif  
+#endif
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
 #ifdef CONFIG_SPI_HWFEATURES

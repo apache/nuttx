@@ -315,6 +315,37 @@ int lib_vscanf(FAR struct lib_instream_s *stream, FAR int *lastc,
                       fmt++;
                     }
                 }
+              else if (fmt_char(fmt) == 'z')
+                {
+                  switch (sizeof(size_t))
+                    {
+                    /* The only known cases that the default will be hit are
+                     * (1) the eZ80 which has sizeof(size_t) = 3 which is the
+                     * same as the sizeof(int).  And (2) if
+                     * CONFIG_HAVE_LONG_LONG
+                     * is not enabled and sizeof(size_t) is equal to
+                     * sizeof(unsigned long long).  This latter case is an
+                     * error.
+                     */
+
+                    default:
+                      continue;  /* Treat as integer with no size qualifier. */
+
+                    case sizeof(unsigned short):
+                      modifier = H_MOD;
+                      break;
+
+                    case sizeof(unsigned long):
+                      modifier = L_MOD;
+                      break;
+
+#if defined(CONFIG_HAVE_LONG_LONG) && ULLONG_MAX != ULONG_MAX
+                    case sizeof(unsigned long long):
+                      modifier = LL_MOD;
+                      break;
+#endif
+                    }
+                }
               else if (fmt_char(fmt) == 'j')
                 {
                   /* Same as long long if available. Otherwise, long. */

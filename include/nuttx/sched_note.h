@@ -226,15 +226,15 @@ struct note_common_s
 #ifdef CONFIG_SMP
   uint8_t nc_cpu;              /* CPU thread/task running on */
 #endif
-  uint8_t nc_pid[sizeof(pid_t)]; /* ID of the thread/task */
+  pid_t nc_pid;                /* ID of the thread/task */
 
   /* Time when note was buffered (sec) */
 
-  uint8_t nc_systime_sec[sizeof(time_t)];
+  time_t nc_systime_sec;
 
   /* Time when note was buffered (nsec) */
 
-  uint8_t nc_systime_nsec[sizeof(long)];
+  long nc_systime_nsec;
 };
 
 /* This is the specific form of the NOTE_START note */
@@ -319,7 +319,7 @@ struct note_cpu_resumed_s
 struct note_preempt_s
 {
   struct note_common_s npr_cmn; /* Common note parameters */
-  uint8_t npr_count[2];         /* Count of nested locks */
+  uint16_t npr_count;           /* Count of nested locks */
 };
 
 /* This is the specific form of the NOTE_CSECTION_ENTER/LEAVE note */
@@ -328,7 +328,7 @@ struct note_csection_s
 {
   struct note_common_s ncs_cmn; /* Common note parameters */
 #ifdef CONFIG_SMP
-  uint8_t ncs_count[2];         /* Count of nested csections */
+  uint16_t ncs_count;           /* Count of nested csections */
 #endif
 };
 
@@ -338,9 +338,9 @@ struct note_csection_s
 
 struct note_spinlock_s
 {
-  struct note_common_s nsp_cmn;             /* Common note parameters */
-  uint8_t nsp_spinlock[sizeof(uintptr_t)];  /* Address of spinlock */
-  uint8_t nsp_value;                        /* Value of spinlock */
+  struct note_common_s nsp_cmn; /* Common note parameters */
+  uintptr_t nsp_spinlock;       /* Address of spinlock */
+  uint8_t nsp_value;            /* Value of spinlock */
 };
 
 /* This is the specific form of the NOTE_SYSCALL_ENTER/LEAVE notes */
@@ -352,17 +352,17 @@ struct note_spinlock_s
 
 struct note_syscall_enter_s
 {
-  struct note_common_s nsc_cmn;                           /* Common note parameters */
-  uint8_t nsc_nr;                                         /* System call number */
-  uint8_t nsc_argc;                                       /* Number of system call arguments */
-  uint8_t nsc_args[sizeof(uintptr_t) * MAX_SYSCALL_ARGS]; /* System call arguments */
+  struct note_common_s nsc_cmn;         /* Common note parameters */
+  uint8_t nsc_nr;                       /* System call number */
+  uint8_t nsc_argc;                     /* Number of system call arguments */
+  uintptr_t nsc_args[MAX_SYSCALL_ARGS]; /* System call arguments */
 };
 
 struct note_syscall_leave_s
 {
-  struct note_common_s nsc_cmn;          /* Common note parameters */
-  uint8_t nsc_nr;                        /* System call number */
-  uint8_t nsc_result[sizeof(uintptr_t)]; /* Result of the system call */
+  struct note_common_s nsc_cmn;         /* Common note parameters */
+  uint8_t nsc_nr;                       /* System call number */
+  uintptr_t nsc_result;                 /* Result of the system call */
 };
 
 /* This is the specific form of the NOTE_IRQ_ENTER/LEAVE notes */
@@ -377,7 +377,7 @@ struct note_irqhandler_s
 struct note_string_s
 {
   struct note_common_s nst_cmn;      /* Common note parameters */
-  uint8_t nst_ip[sizeof(uintptr_t)]; /* Instruction pointer called from */
+  uintptr_t nst_ip;                  /* Instruction pointer called from */
   char    nst_data[1];               /* String data terminated by '\0' */
 };
 
@@ -387,7 +387,7 @@ struct note_string_s
 struct note_binary_s
 {
   struct note_common_s nbi_cmn;      /* Common note parameters */
-  uint8_t nbi_ip[sizeof(uintptr_t)]; /* Instruction pointer called from */
+  uintptr_t nbi_ip;                  /* Instruction pointer called from */
   uint8_t nbi_data[1];               /* Binary data */
 };
 

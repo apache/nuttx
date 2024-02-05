@@ -358,6 +358,11 @@ uintptr_t arm_intstack_top(void);
 void weak_function arm_initialize_stack(void);
 #endif
 
+/* Interrupt acknowledge and dispatch */
+
+void arm_ack_irq(int irq);
+uint32_t *arm_doirq(int irq, uint32_t *regs);
+
 /* Exception handling logic unique to the Cortex-M family */
 
 #if defined(CONFIG_ARCH_ARMV6M) || defined(CONFIG_ARCH_ARMV7M) || \
@@ -375,15 +380,12 @@ EXTERN const void *__vector_table[];
 EXTERN const void * const _vectors[];
 #endif
 
-/* Interrupt acknowledge and dispatch */
-
-void arm_ack_irq(int irq);
-uint32_t *arm_doirq(int irq, uint32_t *regs);
-
 /* Exception Handlers */
 
 int  arm_svcall(int irq, void *context, void *arg);
 int  arm_hardfault(int irq, void *context, void *arg);
+int  arm_enable_dbgmonitor(void);
+int  arm_dbgmonitor(int irq, void *context, void *arg);
 
 #  if defined(CONFIG_ARCH_ARMV7M) || defined(CONFIG_ARCH_ARMV8M)
 
@@ -399,10 +401,6 @@ int  arm_securefault(int irq, void *context, void *arg);
  */
 
 #elif defined(CONFIG_ARCH_ARMV7A) || defined(CONFIG_ARCH_ARMV7R) || defined(CONFIG_ARCH_ARMV8R)
-
-/* Interrupt acknowledge and dispatch */
-
-uint32_t *arm_doirq(int irq, uint32_t *regs);
 
 /* Paging support */
 
@@ -423,11 +421,6 @@ uint32_t *arm_undefinedinsn(uint32_t *regs);
 /* Exception handling logic common to other ARM7 and ARM9 family. */
 
 #else /* ARM7 | ARM9 */
-
-/* Interrupt acknowledge and dispatch */
-
-void arm_ack_irq(int irq);
-void arm_doirq(int irq, uint32_t *regs);
 
 /* Paging support (and exception handlers) */
 
@@ -538,6 +531,10 @@ void arm_stack_color(void *stackbase, size_t nbytes);
 int arm_gen_nonsecurefault(int irq, uint32_t *regs);
 #else
 # define arm_gen_nonsecurefault(i, r)  (0)
+#endif
+
+#if defined(CONFIG_ARMV7M_STACKCHECK) || defined(CONFIG_ARMV8M_STACKCHECK)
+void arm_stack_check_init(void) noinstrument_function;
 #endif
 
 #undef EXTERN

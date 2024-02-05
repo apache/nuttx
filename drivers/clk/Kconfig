@@ -8,11 +8,11 @@ menuconfig CLK
 if CLK
 
 config CLK_RPMSG
-	bool "rpmsg clk driver"
+	bool "RPMSG clk driver"
 	default n
 	depends on RPTUN
 	---help---
-		Rpmsg clk are proxy/master pairs clock that operate clks between client and
+		RPMSG clk are proxy/master pairs clock that operate clks between client and
 		server processor.
 
 endif

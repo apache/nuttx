@@ -127,4 +127,18 @@ config SAMA5_SDMMC1_WIDTH_D1_D4
 	default y
 	depends on SAMA5_SDMMC1
 
+config SAMA5_QSPI0_SIZE
+	int "QSPI0 memory size in bytes"
+	default 1073741824
+	depends on SAMA5_QSPI0
+	---help---
+		Size of QSPI0 memory mapped area in bytes. Default: 1GB
+
+config SAMA5_QSPI1_SIZE
+	int "QSPI1 memory size in bytes"
+	default 1073741824
+	depends on SAMA5_QSPI1
+	---help---
+		Size of QSPI1 memory mapped area in bytes. Default: 1GB
+
 endif # ARCH_BOARD_SAMA5D2_XULT

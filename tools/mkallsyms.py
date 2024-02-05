@@ -19,6 +19,7 @@
 #
 ############################################################################
 
+import argparse
 import errno
 import os
 import re
@@ -33,6 +34,7 @@ try:
 except ModuleNotFoundError:
     print("Please execute the following command to install dependencies:")
     print("pip install pyelftools cxxfilt")
+    os._exit(errno.EINVAL)
 
 
 class SymbolTables(object):
@@ -97,7 +99,7 @@ class SymbolTables(object):
 
             return section
 
-    def parse_symbol(self):
+    def parse_symbol(self, orderbyname=False):
         if self.elffile is None:
             return
         symtable = self.get_symtable()
@@ -108,48 +110,50 @@ class SymbolTables(object):
                     func_name = re.sub(r"\(.*$", "", symbol_name)
                 except cxxfilt.InvalidName:
                     symbol_name = symbol.name
-                self.symbol_list.append((symbol["st_value"] & ~0x01, func_name))
-        self.symbol_list = sorted(self.symbol_list, key=lambda item: item[0])
+                self.symbol_list.append((symbol["st_value"], func_name))
+        if orderbyname:
+            self.symbol_list = sorted(self.symbol_list, key=lambda item: item[1])
+        else:
+            self.symbol_list = sorted(self.symbol_list, key=lambda item: item[0])
 
     def emitline(self, s=""):
         self.output.write(str(s) + "\n")
 
 
 def usage():
-    print("Usage: mkallsyms.py [noconst] <ELFBIN> [output file]")
+    print(
+        "Usage: mkallsyms.py [noconst] <ELFBIN> [output file] [order symbols by name]"
+    )
     os._exit(errno.ENOENT)
 
 
-def parse_args(argv):
-    index = 1
-    argc = len(argv)
-    outfile = None
-    elffile = None
-
-    if argc > index and argv[index] == "--version":
-        print("mkallsyms.py: based on pyelftools %s" % __version__)
-        os.exit(0)
-
-    if argc > index and argv[index] == "noconst":
-        noconst = True
-        index += 1
-    else:
-        noconst = False
-
-    if argc > index:
-        elffile = argv[index]
-        index += 1
-
-    if argc > index:
-        outfile = open(argv[index], "w")
-    else:
-        outfile = sys.stdout
-
-    return noconst, elffile, outfile
-
-
 if __name__ == "__main__":
-    noconst, elffile, outfile = parse_args(sys.argv)
-    readelf = SymbolTables(elffile, outfile)
-    readelf.parse_symbol()
-    readelf.print_symbol_tables(noconst)
+    parser = argparse.ArgumentParser(
+        description="Process ELF binary to extract symbols."
+    )
+    parser.add_argument("elffile", help="Path to the ELF binary file.")
+    parser.add_argument(
+        "outfile",
+        nargs="?",
+        type=argparse.FileType("w"),
+        default=sys.stdout,
+        help="Output file to write symbols to (default: stdout).",
+    )
+    parser.add_argument("--noconst", action="store_true", help="Exclude const symbols.")
+    parser.add_argument(
+        "--version",
+        action="version",
+        version="mkallsyms.py: based on pyelftools %s" % __version__,
+    )
+    parser.add_argument(
+        "--orderbyname",
+        nargs="?",
+        const=False,
+        default=False,
+        help='Order symbols by name (specify "y" to enable, default: False).',
+    )
+    args = parser.parse_args()
+
+    readelf = SymbolTables(args.elffile, args.outfile)
+    readelf.parse_symbol(args.orderbyname)
+    readelf.print_symbol_tables(args.noconst)

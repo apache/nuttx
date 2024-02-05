@@ -21,9 +21,13 @@
 include $(TOPDIR)/Make.defs
 
 include board/Make.defs
+include src/Make.defs
 
 DEPPATH += --dep-path board
+DEPPATH += --dep-path src
 
 include $(TOPDIR)/boards/Board.mk
 
+ARCHSRCDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src
 BOARDDIR = $(ARCHSRCDIR)$(DELIM)board
+CFLAGS += ${INCDIR_PREFIX}$(BOARDDIR)$(DELIM)include

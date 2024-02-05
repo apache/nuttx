@@ -30,7 +30,7 @@ CMN_CSRCS += arm_memfault.c arm_perf.c arm_sau.c
 CMN_CSRCS += arm_schedulesigaction.c arm_securefault.c arm_secure_irq.c
 CMN_CSRCS += arm_sigdeliver.c arm_svcall.c
 CMN_CSRCS += arm_systemreset.c arm_tcbinfo.c
-CMN_CSRCS += arm_trigger_irq.c arm_usagefault.c arm_vectors.c
+CMN_CSRCS += arm_trigger_irq.c arm_usagefault.c arm_vectors.c arm_dbgmonitor.c
 
 ifeq ($(CONFIG_ARMV8M_SYSTICK),y)
   CMN_CSRCS += arm_systick.c

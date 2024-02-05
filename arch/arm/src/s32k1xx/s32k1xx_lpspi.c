@@ -1763,7 +1763,7 @@ static void s32k1xx_lpspi_exchange(struct spi_dev_s *dev,
                        (uintptr_t)rxbuffer + nbytes);
 }
 
-#endif  /* CONFIG_S32K1XX_SPI_DMA */
+#endif /* CONFIG_S32K1XX_SPI_DMA */
 
 /****************************************************************************
  * Name: s32k1xx_lpspi_sndblock

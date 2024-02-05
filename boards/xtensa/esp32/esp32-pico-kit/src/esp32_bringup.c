@@ -185,7 +185,7 @@ int esp32_bringup(void)
 #endif
 
 #ifdef CONFIG_ESP32_SPIFLASH
-  ret = esp32_spiflash_init();
+  ret = board_spiflash_init();
   if (ret)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SPI Flash\n");
@@ -388,7 +388,7 @@ int esp32_bringup(void)
              CONFIG_ESP32_I2S0, ret);
     }
 
-#endif  /* CONFIG_ESP32_I2S0 */
+#endif /* CONFIG_ESP32_I2S0 */
 
 #ifdef CONFIG_ESP32_I2S1
 
@@ -413,7 +413,7 @@ int esp32_bringup(void)
              CONFIG_ESP32_I2S1, ret);
     }
 
-#endif  /* CONFIG_ESP32_I2S1 */
+#endif /* CONFIG_ESP32_I2S1 */
 
 #endif /* CONFIG_ESP32_I2S */
 

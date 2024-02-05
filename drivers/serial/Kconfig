@@ -41,6 +41,18 @@ config SERIAL_CONSOLE
 	bool
 	default n
 
+config SERIAL_GDBSTUB
+	bool "GDBSTUB Serial support"
+	depends on ARCH_HAVE_DEBUG
+	default n
+
+config SERIAL_GDBSTUB_PATH
+	string "GDBSTUB Serial path"
+	depends on SERIAL_GDBSTUB
+	default "/dev/ttyS1"
+	---help---
+		The path to the serial device that will be used for GDB stub.
+
 menuconfig UART_PL011
 	bool "PL011 Chip support"
 	default n
@@ -72,7 +84,7 @@ config MCU_SERIAL
 	default n
 
 config RPMSG_UART
-	bool "UART rpmsg support"
+	bool "UART RPMSG support"
 	default n
 	depends on RPTUN
 	select ARCH_HAVE_SERIAL_TERMIOS
@@ -82,11 +94,11 @@ config RPMSG_UART
 	select SERIAL_IFLOWCONTROL
 
 config RPMSG_UART_CONSOLE
-	bool "UART rpmsg console support"
+	bool "UART RPMSG console support"
 	default n
 	depends on RPMSG_UART
 	---help---
-		Register the UART rpmsg device as /dev/console so that is will be used
+		Register the UART RPMSG device as /dev/console so that is will be used
 		as the console device.
 		NOTE: support for this option must be implemented in the board logic by
 		setting the \"isconsole\" argument in the uart_rpmsg_init() function to true.

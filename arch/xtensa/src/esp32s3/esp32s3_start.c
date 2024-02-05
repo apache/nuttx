@@ -170,7 +170,7 @@ uint32_t g_idlestack[IDLETHREAD_STACKWORDS]
  *
  ****************************************************************************/
 
-static void IRAM_ATTR configure_cpu_caches(void)
+noinstrument_function static void IRAM_ATTR configure_cpu_caches(void)
 {
   int s_instr_flash2spiram_off = 0;
   int s_rodata_flash2spiram_off = 0;
@@ -272,7 +272,7 @@ static void IRAM_ATTR disable_app_cpu(void)
  *
  ****************************************************************************/
 
-void noreturn_function IRAM_ATTR __esp32s3_start(void)
+noinstrument_function void noreturn_function IRAM_ATTR __esp32s3_start(void)
 {
   uint32_t sp;
 
@@ -354,6 +354,14 @@ void noreturn_function IRAM_ATTR __esp32s3_start(void)
     defined(CONFIG_ESP32S3_SPIRAM_MODE_OCT)
   esp_rom_opiflash_pin_config();
   esp32s3_spi_timing_set_pin_drive_strength();
+#endif
+
+  /* The PLL provided by bootloader is not stable enough, do calibration
+   * again here so that we can use better clock for the timing tuning.
+   */
+
+#ifdef CONFIG_ESP32S3_SYSTEM_BBPLL_RECALIB
+  esp32s3_rtc_recalib_bbpll();
 #endif
 
   esp32s3_spi_timing_set_mspi_flash_tuning();
@@ -508,7 +516,7 @@ static int map_rom_segments(void)
  *
  ****************************************************************************/
 
-void IRAM_ATTR __start(void)
+noinstrument_function void IRAM_ATTR __start(void)
 {
 #ifdef CONFIG_ESP32S3_APP_FORMAT_MCUBOOT
   if (map_rom_segments() != 0)

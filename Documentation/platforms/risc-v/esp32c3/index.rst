@@ -1,3 +1,5 @@
+.. _esp32c3:
+
 ==================
 Espressif ESP32-C3
 ==================
@@ -39,7 +41,7 @@ check for the current compiler version being used. For instance:
    FROM nuttx-toolchain-base AS nuttx-toolchain-riscv
    # Download the latest RISCV GCC toolchain prebuilt by xPack
    RUN mkdir riscv-none-elf-gcc && \
-   curl -s -L "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v12.3.0-1/xpack-riscv-none-elf-gcc-12.3.0-1-linux-x64.tar.gz" \
+   curl -s -L "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v12.3.0-2/xpack-riscv-none-elf-gcc-12.3.0-2-linux-x64.tar.gz" \
    | tar -C riscv-none-elf-gcc --strip-components 1 -xz
 
 It uses the xPack's prebuilt toolchain based on GCC 12.3.0.
@@ -57,7 +59,7 @@ Download and extract toolchain:
 
 .. code-block:: console
 
-   $ curl -s -L "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v12.3.0-1/xpack-riscv-none-elf-gcc-12.3.0-1-linux-x64.tar.gz" \
+   $ curl -s -L "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v12.3.0-2/xpack-riscv-none-elf-gcc-12.3.0-2-linux-x64.tar.gz" \
    | tar -C /path/to/your/toolchain/riscv-none-elf-gcc --strip-components 1 -xz
 
 Add the toolchain to your `PATH`:
@@ -143,26 +145,26 @@ The following list indicates the state of peripherals' support in NuttX:
 =========== ======= =====
 Peripheral  Support NOTES
 =========== ======= =====
-ADC          Yes
-AES          Yes
-Bluetooth    Yes
+ADC          No
+AES          No
+Bluetooth    No
 CDC Console  Yes    Rev.3
-DMA          Yes
-eFuse        Yes
+DMA          No
+eFuse        No
 GPIO         Yes
-I2C          Yes
+I2C          No
 LED_PWM      Yes
-RNG          Yes
-RSA          Yes
+RNG          No
+RSA          No
 RTC          Yes
-SHA          Yes
-SPI          Yes
-SPIFLASH     Yes
+SHA          No
+SPI          No
+SPIFLASH     No
 Timers       Yes
-Touch        Yes
+Touch        No
 UART         Yes
 Watchdog     Yes
-Wifi         Yes
+Wifi         No
 =========== ======= =====
 
 Secure Boot and Flash Encryption

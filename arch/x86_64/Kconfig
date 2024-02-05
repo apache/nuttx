@@ -63,10 +63,22 @@ config ARCH_BOARD
 
 endif # ARCH_CHIP_QEMU
 
-config ARCH_EXCLUDE_MULTIBOOT
-	bool "Don't append multiboot2 header"
-	default n
+config ARCH_MULTIBOOT2
+	bool "Append multiboot2 header"
+	default y
 	---help---
-		Some platforms, e.g. jailhouse, do not like to have a multiboot header
+		Include a multiboot2 header.  This also provides information to the
+		system to enable certain features like the low level framebuffer.
+
+if ARCH_MULTIBOOT2
+
+config MULTBOOT2_FB_TERM
+	bool "Multiboot2 framebuffer terminal"
+	default n
+	depends on NXFONTS
+    ---help---
+	Enable a framebuffer terminal for early debug printing
+
+endif # ARCH_MULTIBOOT2
 
 endif # ARCH_X86_64

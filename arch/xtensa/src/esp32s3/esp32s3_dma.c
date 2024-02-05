@@ -52,6 +52,8 @@
 #  define ALIGN_UP(num, align) (((num) + ((align) - 1)) & ~((align) - 1))
 #endif
 
+#define DMA_INVALID_PERIPH_ID        (0x3F)
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -164,6 +166,55 @@ int32_t esp32s3_dma_request(enum esp32s3_dma_periph_e periph,
 
   nxmutex_unlock(&g_dma_lock);
   return chan;
+}
+
+/****************************************************************************
+ * Name: esp32s3_dma_release
+ *
+ * Description:
+ *   Release DMA channel from peripheral.
+ *
+ * Input Parameters:
+ *   chan - Peripheral for which the DMA channel request was made
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32s3_dma_release(int chan)
+{
+  DEBUGASSERT(chan  < ESP32S3_DMA_CHAN_MAX);
+
+  nxmutex_lock(&g_dma_lock);
+
+  /* Disconnect DMA TX channel from peripheral */
+
+  SET_GDMA_CH_REG(DMA_OUT_PERI_SEL_CH0_REG, chan, DMA_INVALID_PERIPH_ID);
+
+  /* Disconnect DMA RX channel from peripheral */
+
+  SET_GDMA_CH_REG(DMA_IN_PERI_SEL_CH0_REG, chan, DMA_INVALID_PERIPH_ID);
+  CLR_GDMA_CH_BITS(DMA_IN_CONF0_CH0_REG, chan, DMA_MEM_TRANS_EN_CH0_M);
+
+  /* Disable DMA TX/RX channels burst sending data */
+
+  CLR_GDMA_CH_BITS(DMA_OUT_CONF0_CH0_REG, chan, DMA_OUT_DATA_BURST_EN_CH0_M);
+  CLR_GDMA_CH_BITS(DMA_IN_CONF0_CH0_REG, chan, DMA_IN_DATA_BURST_EN_CH0_M);
+
+  /* Disable DMA TX/RX channels burst reading descriptor link */
+
+  CLR_GDMA_CH_BITS(DMA_OUT_CONF0_CH0_REG, chan, DMA_OUTDSCR_BURST_EN_CH0_M);
+  CLR_GDMA_CH_BITS(DMA_IN_CONF0_CH0_REG, chan, DMA_INDSCR_BURST_EN_CH0_M);
+
+  /* Reset the priority to 0 (lowest) */
+
+  SET_GDMA_CH_REG(DMA_OUT_PRI_CH0_REG, chan, 0);
+  SET_GDMA_CH_REG(DMA_IN_PRI_CH0_REG, chan, 0);
+
+  g_dma_chan_used[chan] = false;
+
+  nxmutex_unlock(&g_dma_lock);
 }
 
 /****************************************************************************
@@ -463,3 +514,39 @@ void esp32s3_dma_init(void)
   nxmutex_unlock(&g_dma_lock);
 }
 
+/****************************************************************************
+ * Name: esp32s3_dma_deinit
+ *
+ * Description:
+ *   Deinitialize DMA driver.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32s3_dma_deinit(void)
+{
+  nxmutex_lock(&g_dma_lock);
+
+  g_dma_ref--;
+
+  if (!g_dma_ref)
+    {
+      /* Disable DMA clock gating */
+
+      modifyreg32(DMA_MISC_CONF_REG, DMA_CLK_EN_M, 0);
+
+      /* Disable DMA module by gating the clock and asserting the reset
+       * signal.
+       */
+
+      modifyreg32(SYSTEM_PERIP_CLK_EN1_REG, SYSTEM_DMA_CLK_EN_M, 0);
+      modifyreg32(SYSTEM_PERIP_RST_EN1_REG, 0, SYSTEM_DMA_RST_M);
+    }
+
+  nxmutex_unlock(&g_dma_lock);
+}

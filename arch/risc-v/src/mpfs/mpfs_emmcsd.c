@@ -48,6 +48,9 @@
 #include "mpfs_emmcsd.h"
 #include "riscv_internal.h"
 #include "hardware/mpfs_emmcsd.h"
+#include "hardware/mpfs_mpucfg.h"
+
+#include "mpfs_sdio_dev.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -82,11 +85,6 @@
                                        MPFS_SYSREG_SOFT_RESET_CR_OFFSET)
 #define MPFS_SYSREG_SUBBLK_CLOCK_CR   (MPFS_SYSREG_BASE + \
                                        MPFS_SYSREG_SUBBLK_CLOCK_CR_OFFSET)
-
-#define MPFS_PMPCFG_MMC_0             (MPFS_MPUCFG_BASE + 0x700)
-#define MPFS_PMPCFG_MMC_1             (MPFS_MPUCFG_BASE + 0x708)
-#define MPFS_PMPCFG_MMC_2             (MPFS_MPUCFG_BASE + 0x710)
-#define MPFS_PMPCFG_MMC_3             (MPFS_MPUCFG_BASE + 0x718)
 
 #define MPFS_MMC_CLOCK_400KHZ              400u
 #define MPFS_MMC_CLOCK_12_5MHZ             12500u
@@ -233,6 +231,7 @@
                                    MPFS_EMMCSD_SRS14_TC_IE)
 
 /* SD-Card IOMUX */
+
 #define LIBERO_SETTING_IOMUX1_CR_SD                     0x00000000UL
 #ifdef CONFIG_MPFS_EMMCSD_MUX_GPIO
 #define LIBERO_SETTING_IOMUX2_CR_SD   0X00BB0000UL
@@ -293,58 +292,6 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-
-/* This structure defines the state of the MPFS eMMCSD interface */
-
-struct mpfs_dev_s
-{
-  struct sdio_dev_s  dev;             /* Standard, base SDIO interface */
-
-  const uintptr_t    hw_base;         /* Base address */
-  const int          plic_irq;        /* PLIC interrupt */
-  bool               clk_enabled;     /* Clk state */
-
-  /* eMMC / SD and HW parameters */
-
-  const bool         emmc;            /* eMMC or SD */
-  int                bus_voltage;     /* Bus voltage */
-  int                bus_mode;        /* eMMC Bus mode */
-  bool               jumpers_3v3;     /* Jumper settings: 1v8 or 3v3 */
-
-  /* Event support */
-
-  sem_t              waitsem;         /* Implements event waiting */
-  sdio_eventset_t    waitevents;      /* Set of events to be waited for */
-  uint32_t           waitmask;        /* Interrupt enables for event waiting */
-  volatile sdio_eventset_t wkupevent; /* The event that caused the wakeup */
-  struct wdog_s      waitwdog;        /* Watchdog that handles event timeouts */
-
-  /* Callback support */
-
-  sdio_statset_t     cdstatus;        /* Card status */
-  sdio_eventset_t    cbevents;        /* Set of events to be cause callbacks */
-  worker_t           callback;        /* Registered callback function */
-  void              *cbarg;           /* Registered callback argument */
-  struct work_s      cbwork;          /* Callback work queue structure */
-
-  /* Interrupt mode data transfer support */
-
-  uint32_t          *buffer;          /* Address of current R/W buffer */
-  size_t             remaining;       /* Number of bytes remaining in the transfer */
-  size_t             receivecnt;      /* Real count to receive */
-  uint32_t           xfrmask;         /* Interrupt enables for data transfer */
-
-  bool               widebus;         /* Required for DMA support */
-  bool               onebit;          /* true: Only 1-bit transfers are supported */
-
-  /* DMA data transfer support */
-
-  bool               polltransfer;    /* Indicate a poll transfer, no DMA */
-
-  /* Misc */
-
-  uint32_t           blocksize;       /* Current block size */
-};
 
 /****************************************************************************
  * Private Function Prototypes
@@ -1138,14 +1085,14 @@ static int mpfs_emmcsd_interrupt(int irq, void *context, void *arg)
         {
           mcinfo("Card inserted!\n");
 
-          sdio_mediachange((struct sdio_dev_s *)priv, true);
+          mpfs_emmcsd_sdio_mediachange((struct sdio_dev_s *)priv, true);
           putreg32(MPFS_EMMCSD_SRS12_CIN, MPFS_EMMCSD_SRS12);
         }
       else if (status & MPFS_EMMCSD_SRS12_CR)
         {
           mcinfo("Card removed!\n");
 
-          sdio_mediachange((struct sdio_dev_s *)priv, false);
+          mpfs_emmcsd_sdio_mediachange((struct sdio_dev_s *)priv, false);
           putreg32(MPFS_EMMCSD_SRS12_CR, MPFS_EMMCSD_SRS12);
         }
       else
@@ -2951,7 +2898,7 @@ static void mpfs_callback(void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sdio_initialize
+ * Name: mpfs_emmcsd_sdio_initialize
  *
  * Description:
  *   Initialize SDIO for operation.
@@ -2965,7 +2912,7 @@ static void mpfs_callback(void *arg)
  *
  ****************************************************************************/
 
-struct sdio_dev_s *sdio_initialize(int slotno)
+struct sdio_dev_s *mpfs_emmcsd_sdio_initialize(int slotno)
 {
   struct mpfs_dev_s *priv = NULL;
   priv = &g_emmcsd_dev;
@@ -2976,14 +2923,14 @@ struct sdio_dev_s *sdio_initialize(int slotno)
 
   if (!mpfs_device_reset(&priv->dev))
     {
-      return NULL;
+      return (struct sdio_dev_s *)NULL;
     }
 
-  return &priv->dev;
+  return (struct sdio_dev_s *) &priv->dev;
 }
 
 /****************************************************************************
- * Name: sdio_mediachange
+ * Name: mpfs_emmcsd_sdio_mediachange
  *
  * Description:
  *   Called by board-specific logic -- possible from an interrupt handler --
@@ -3001,7 +2948,7 @@ struct sdio_dev_s *sdio_initialize(int slotno)
  *
  ****************************************************************************/
 
-void sdio_mediachange(struct sdio_dev_s *dev, bool cardinslot)
+void mpfs_emmcsd_sdio_mediachange(struct sdio_dev_s *dev, bool cardinslot)
 {
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
   sdio_statset_t cdstatus;
@@ -3034,7 +2981,7 @@ void sdio_mediachange(struct sdio_dev_s *dev, bool cardinslot)
 }
 
 /****************************************************************************
- * Name: sdio_wrprotect
+ * Name: mpfs_emmcsd_sdio_wrprotect
  *
  * Description:
  *   Called by board-specific logic to report if the card in the slot is
@@ -3049,7 +2996,7 @@ void sdio_mediachange(struct sdio_dev_s *dev, bool cardinslot)
  *
  ****************************************************************************/
 
-void sdio_wrprotect(struct sdio_dev_s *dev, bool wrprotect)
+void mpfs_emmcsd_sdio_wrprotect(struct sdio_dev_s *dev, bool wrprotect)
 {
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
   irqstate_t flags;

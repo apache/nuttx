@@ -692,6 +692,7 @@ NOTES
      running C++ static initializers until NuttX has been initialized.
 
 fb
+--
 
 A simple configuration used for some basic (non-graphic) debug of the
 framebuffer character drivers using apps/examples/fb.
@@ -1043,7 +1044,7 @@ NOTES
          @@ -117,7 +117,8 @@
             /* Execute the startup script */
 
-          #ifdef CONFIG_NSH_ROMFSETC
+          #ifdef CONFIG_ETC_ROMFS
          -  nsh_script(&pstate->cn_vtbl, "init", NSH_INITPATH);
          +// REMOVE ME
          +//  nsh_script(&pstate->cn_vtbl, "init", NSH_INITPATH);
@@ -1115,14 +1116,14 @@ rpproxy and rpserver
 
   rpserver: Remote master(host) server process.
             rpserver contains all the real hardware configuration, such as:
-              1.Universal Asynchronous Receiver/Transmitter (UART).
-              2.Specific File System.
-              3.Network protocol stack and real network card device.
-              4....
+              1. Universal Asynchronous Receiver/Transmitter (UART).
+              2. Specific File System.
+              3. Network protocol stack and real network card device.
+              4. ...
 
 Rpmsg driver used in this example include:
 
-1.Rpmsg Syslog
+1. Rpmsg Syslog
 
     Source::
 
@@ -1249,6 +1250,8 @@ To use this example:
               0     0   0 FIFO     Kthread N-- Ready              00000000 000000 Idle Task
               1     1 224 FIFO     Kthread --- Waiting  Signal    00000000 002032 hpwork
               3     3 100 FIFO     Task    --- Running            00000000 004080 init
+
+      To switch back the console, type ``"~."`` in the cu session.
 
 3. RpmsgFS:
 
@@ -1635,7 +1638,7 @@ This is a configuration with sim usbdev support.
 
   Make Raw Gadget:
   Run make in the raw_gadget and dummy_hcd directory. If raw_gadget build
-  fail, you need to check which register interface meets your kenel version,
+  fail, you need to check which register interface meets your kernel version,
   usb_gadget_probe_driver or usb_gadget_register_driver.
 
   Install Raw Gadget:
@@ -1776,3 +1779,10 @@ This is a configuration with sim usbhost support.
 
    Run sim usbhost with root mode, run sim usbdev or plug-in cdcacm usb device.
    Then you can use /dev/ttyACM to transfer data.
+
+
+README.txt
+==========
+
+.. include:: README.txt
+   :literal:

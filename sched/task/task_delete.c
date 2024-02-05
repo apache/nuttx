@@ -66,7 +66,6 @@ int nxtask_delete(pid_t pid)
 {
   FAR struct tcb_s *dtcb;
   FAR struct tcb_s *rtcb;
-  int ret;
 
   /* Check if the task to delete is the calling task:  PID=0 means to delete
    * the calling task.  In this case, task_delete() is much like exit()
@@ -132,13 +131,7 @@ int nxtask_delete(pid_t pid)
    * nxtask_terminate() do all of the heavy lifting.
    */
 
-  ret = nxtask_terminate(pid);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  return OK;
+  return nxtask_terminate(pid);
 }
 
 /****************************************************************************

@@ -40,6 +40,7 @@
 #include <nuttx/net/can.h>
 
 #include "utils/utils.h"
+#include "icmpv6/icmpv6.h"
 #include "igmp/igmp.h"
 #include "mld/mld.h"
 #include "netdev/netdev.h"
@@ -473,6 +474,12 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
       /* Configure the device for MLD support */
 
       mld_devinit(dev);
+#endif
+
+#ifdef NET_ICMPv6_HAVE_STACK
+      /* Configure the device for ICMPv6 support */
+
+      icmpv6_devinit(dev);
 #endif
 
       net_unlock();

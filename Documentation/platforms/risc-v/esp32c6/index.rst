@@ -39,7 +39,7 @@ check for the current compiler version being used. For instance:
    FROM nuttx-toolchain-base AS nuttx-toolchain-riscv
    # Download the latest RISCV GCC toolchain prebuilt by xPack
    RUN mkdir riscv-none-elf-gcc && \
-   curl -s -L "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v12.3.0-1/xpack-riscv-none-elf-gcc-12.3.0-1-linux-x64.tar.gz" \
+   curl -s -L "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v12.3.0-2/xpack-riscv-none-elf-gcc-12.3.0-2-linux-x64.tar.gz" \
    | tar -C riscv-none-elf-gcc --strip-components 1 -xz
 
 It uses the xPack's prebuilt toolchain based on GCC 12.3.0.
@@ -57,7 +57,7 @@ Download and extract toolchain:
 
 .. code-block:: console
 
-   $ curl -s -L "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v12.3.0-1/xpack-riscv-none-elf-gcc-12.3.0-1-linux-x64.tar.gz" \
+   $ curl -s -L "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v12.3.0-2/xpack-riscv-none-elf-gcc-12.3.0-2-linux-x64.tar.gz" \
    | tar -C /path/to/your/toolchain/riscv-none-elf-gcc --strip-components 1 -xz
 
 Add the toolchain to your `PATH`:
@@ -106,6 +106,35 @@ Note that this step is required only one time.  Once the bootloader and partitio
 table are flashed, we don't need to flash them again.  So subsequent builds
 would just require: ``make flash ESPTOOL_PORT=/dev/ttyUSBXX``
 
+Debugging with OpenOCD
+======================
+
+Download and build OpenOCD from Espressif, that can be found in
+https://github.com/espressif/openocd-esp32
+
+You don not need an external JTAG is to debug, the ESP32-C6 integrates a
+USB-to-JTAG adapter.
+
+OpenOCD can then be used::
+
+   openocd -c 'set ESP_RTOS none' -f board/esp32c6-builtin.cfg
+
+If you want to debug with an external JTAG adapter it can
+be connected as follows::
+
+  TMS -> GPIO4
+  TDI -> GPIO5
+  TCK -> GPIO6
+  TDO -> GPIO7
+
+Furthermore, an efuse needs to be burnt to be able to debug::
+
+  espefuse.py -p <port> burn_efuse DIS_USB_JTAG
+
+OpenOCD can then be used::
+
+  openocd  -c 'set ESP_RTOS none' -f board/esp32c6-ftdi.cfg
+
 Peripheral Support
 ==================
 
@@ -121,25 +150,25 @@ CAN/TWAI         No
 DMA              No
 ECC              No
 eFuse            No
-GPIO             No
+GPIO             Yes
 HMAC             No
 I2C              No
 I2S              No
 Int. Temp.       No
 LED              No
-LED_PWM          No
+LED_PWM          Yes
 MCPWM            No
 Pulse Counter    No
 RMT              No
 RNG              No
 RSA              No
-RTC              No
+RTC              Yes
 SD/MMC           No
 SDIO             No
 SHA              No
 SPI              No
 SPIFLASH         No
-Timers           No
+Timers           Yes
 UART             Yes
 Watchdog         Yes
 Wifi             No

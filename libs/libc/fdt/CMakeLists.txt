@@ -19,12 +19,20 @@
 # ##############################################################################
 if(CONFIG_LIBC_FDT)
 
-  set(VERSION CONFIG_LIBC_FDT_DTC_VERSION)
+  set(FDT_DIR ${CMAKE_CURRENT_LIST_DIR}/dtc)
+  if(NOT EXISTS ${FDT_DIR})
+    set(VERSION ${CONFIG_LIBC_FDT_DTC_VERSION})
 
-  FetchContent_Declare(
-    dtc URL https://github.com/dgibson/dtc/archive/v$(VERSION).zip)
-  FetchContent_Populate(dtc)
-  FetchContent_GetProperties(dtc)
+    FetchContent_Declare(
+      dtc
+      URL https://github.com/dgibson/dtc/archive/v${VERSION}.zip SOURCE_DIR
+          ${CMAKE_CURRENT_LIST_DIR}/dtc BINARY_DIR
+          ${CMAKE_BINARY_DIR}/libs/libc/fdt/dtc)
+    FetchContent_GetProperties(dtc)
+    if(NOT dtc_POPULATED)
+      FetchContent_Populate(dtc)
+    endif()
+  endif()
 
   set(SRCS
       fdt.c
@@ -37,8 +45,9 @@ if(CONFIG_LIBC_FDT)
       fdt_addresses.c
       fdt_overlay.c
       fdt_check.c)
-  list(TRANSFORM SRCS PREPEND ${dtc_SOURCE_DIR}/libfdt/)
+  list(TRANSFORM SRCS PREPEND ${FDT_DIR}/libfdt/)
+
   target_sources(c PRIVATE ${SRCS})
 
-  target_include_directories(c PRIVATE ${dtc_SOURCE_DIR}/libfdt)
+  target_include_directories(c PRIVATE ${FDT_DIR}/libfdt)
 endif()

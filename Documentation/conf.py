@@ -31,14 +31,17 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 # import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
 
+import sys
+
+# Add the '_extensions' directory to sys.path, to enable finding Sphinx
+# extensions within.
+sys.path.insert(0, "_extensions")
 
 # -- Project information -----------------------------------------------------
 
 project = "NuttX"
-copyright = "2020, The Apache Software Foundation"
+copyright = "2023, The Apache Software Foundation"
 author = "NuttX community"
 version = release = "latest"
 
@@ -55,6 +58,7 @@ extensions = [
     "sphinx.ext.todo",
     "sphinx_tabs.tabs",
     "sphinx_copybutton",
+    "warnings_filter",
 ]
 
 source_suffix = [".rst", ".md"]
@@ -73,7 +77,7 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "legacy_README.md"]
 
 # list of documentation versions to offer (besides latest). this will be
 # overridden by command line option but we can provide a sane default
@@ -124,3 +128,7 @@ linkcheck_ignore = [
 latex_engine = "lualatex"
 
 copybutton_exclude = ".linenos, .gp, .go"
+
+# -- Options for warnings_filter ------------------------------------------
+
+warnings_filter_config = "known-warnings.txt"

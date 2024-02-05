@@ -169,7 +169,7 @@ static void nrf91_spu_periph(void)
 
   modifyreg32(NRF91_SPU_GPIOPORTPERM(0), 0xffffffff, 0);
 }
-#endif  /* NRF91_CONFIG_NONSECURE */
+#endif /* NRF91_CONFIG_NONSECURE */
 
 /****************************************************************************
  * Public Functions

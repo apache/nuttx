@@ -53,7 +53,7 @@
 
 #ifdef CONFIG_LITEX_GPIO_IRQ
 /* Helper to calculate the GPIO port index from an IRQ number. */
-#define irq_to_gpio_index(_irqno) (( _irqno - LITEX_IRQ_GPIO) % 32)
+#define irq_to_gpio_index(_irqno) (( _irqno - LITEX_IRQ_GPIO_BASE) % 32)
 
 /* Helper to calculate the extended IRQ number from GPIO  port index. */
 #define gpio_index_to_irq(_i, _p) ((_i * 32) + _p + LITEX_FIRST_GPIOIRQ)
@@ -160,7 +160,8 @@ static int litex_gpio_interrupt(int irq, void * context, void * arg)
 
   gpiobase = gpiobase_at(gpioindex);
 
-  gpio_dispatch(LITEX_FIRST_GPIOIRQ, gpiobase, (uint32_t *)context);
+  gpio_dispatch(LITEX_FIRST_GPIOIRQ + (gpioindex * 32),
+                gpiobase, (uint32_t *)context);
   return OK;
 }
 #endif

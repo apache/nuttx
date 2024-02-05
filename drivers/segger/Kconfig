@@ -122,13 +122,12 @@ config SYSLOG_RTT
 	---help---
 		Use Segger J-Link RTT as a SYSLOG output device.
 
-if SYSLOG_RTT
 config SYSLOG_RTT_CHANNEL
 	int "SYSLOG RTT channel"
+	depends on SYSLOG_RTT
 	default 0
 	---help---
 		SYSLOG RTT channel number
-endif
 
 config SERIAL_RTT
 	bool
@@ -213,6 +212,7 @@ config NOTE_RTT_BUFFER_SIZE_UP
 	default 1024
 	---help---
 		Buffer size config for notertt jlink config buffer
+
 endif # NOTE_RTT
 
 config SEGGER_SYSVIEW
@@ -245,6 +245,7 @@ config SEGGER_SYSVIEW_RAM_BASE
 	default 0
 	---help---
 		The lowest RAM address used for IDs
+
 endif # SEGGER_SYSVIEW
 
 endif # DRIVERS_NOTE

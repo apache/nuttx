@@ -46,15 +46,15 @@ function arm-clang-toolchain {
     local flavor
     case ${os} in
       Linux)
-        flavor=linux
+        flavor=Linux
         ;;
     esac
     cd "${tools}"
-    curl -O -L -s https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-14.0.0/LLVMEmbeddedToolchainForArm-14.0.0-${flavor}.tar.gz
-    tar zxf LLVMEmbeddedToolchainForArm-14.0.0-${flavor}.tar.gz
-    mv LLVMEmbeddedToolchainForArm-14.0.0 clang-arm-none-eabi
+    curl -O -L -s https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-17.0.1/LLVMEmbeddedToolchainForArm-17.0.1-${flavor}-x86_64.tar.xz
+    xz -d LLVMEmbeddedToolchainForArm-17.0.1-${flavor}.tar.xz
+    mv LLVMEmbeddedToolchainForArm-17.0.1 clang-arm-none-eabi
     cp /usr/bin/clang-extdef-mapping-10 clang-arm-none-eabi/bin/clang-extdef-mapping
-    rm LLVMEmbeddedToolchainForArm-14.0.0-${flavor}.tar.gz
+    rm LLVMEmbeddedToolchainForArm-17.0.1-${flavor}.tar.xz
   fi
 
   command clang --version
@@ -64,21 +64,35 @@ function arm-gcc-toolchain {
   add_path "${tools}"/gcc-arm-none-eabi/bin
 
   if [ ! -f "${tools}/gcc-arm-none-eabi/bin/arm-none-eabi-gcc" ]; then
-    local flavor
+    local archivetool
+    local basefile
     case ${os} in
       Darwin)
-        flavor=-darwin
+        archivetool=tar
+        basefile=arm-gnu-toolchain-13.2.rel1-darwin-x86_64-arm-none-eabi
         ;;
       Linux)
-        flavor=
+       archivetool=tar
+        basefile=arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi
+        ;;
+      MSYS*)
+        archivetool=unzip
+        basefile=arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-arm-none-eabi
         ;;
     esac
     cd "${tools}"
-    wget --quiet https://developer.arm.com/-/media/Files/downloads/gnu/12.3.rel1/binrel/arm-gnu-toolchain-12.3.rel1${flavor}-x86_64-arm-none-eabi.tar.xz
-    xz -d arm-gnu-toolchain-12.3.rel1${flavor}-x86_64-arm-none-eabi.tar.xz
-    tar xf arm-gnu-toolchain-12.3.rel1${flavor}-x86_64-arm-none-eabi.tar
-    mv arm-gnu-toolchain-12.3.rel1${flavor}-x86_64-arm-none-eabi gcc-arm-none-eabi
-    rm arm-gnu-toolchain-12.3.rel1${flavor}-x86_64-arm-none-eabi.tar
+    if [ "$archivetool" == "tar" ]; then
+      wget --quiet https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/${basefile}.tar.xz
+      xz -d ${basefile}.tar.xz
+      tar xf ${basefile}.tar
+      mv ${basefile} gcc-arm-none-eabi
+      rm ${basefile}.tar
+    else
+      wget --quiet https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/${basefile}.zip
+      unzip -qo ${basefile}.zip
+      mv ${basefile} gcc-arm-none-eabi
+      rm ${basefile}.zip
+    fi
   fi
 
   command arm-none-eabi-gcc --version
@@ -91,18 +105,18 @@ function arm64-gcc-toolchain {
     local flavor
     case ${os} in
       Darwin)
-        flavor=darwin-x86_64
+        flavor=-darwin
         ;;
       Linux)
-        flavor=x86_64
+        flavor=
         ;;
     esac
     cd "${tools}"
-    wget --quiet https://developer.arm.com/-/media/Files/downloads/gnu/11.2-2022.02/binrel/gcc-arm-11.2-2022.02-${flavor}-aarch64-none-elf.tar.xz
-    xz -d gcc-arm-11.2-2022.02-${flavor}-aarch64-none-elf.tar.xz
-    tar xf gcc-arm-11.2-2022.02-${flavor}-aarch64-none-elf.tar
-    mv gcc-arm-11.2-2022.02-${flavor}-aarch64-none-elf gcc-aarch64-none-elf
-    rm gcc-arm-11.2-2022.02-${flavor}-aarch64-none-elf.tar
+    wget --quiet https://developer.arm.com/-/media/Files/downloads/gnu/13.2.Rel1/binrel/arm-gnu-toolchain-13.2.Rel1${flavor}-x86_64-aarch64-none-elf.tar.xz
+    xz -d arm-gnu-toolchain-13.2.Rel1${flavor}-x86_64-aarch64-none-elf.tar.xz
+    tar xf arm-gnu-toolchain-13.2.Rel1${flavor}-x86_64-aarch64-none-elf.tar
+    mv arm-gnu-toolchain-13.2.Rel1${flavor}-x86_64-aarch64-none-elf gcc-aarch64-none-elf
+    rm arm-gnu-toolchain-13.2.Rel1${flavor}-x86_64-aarch64-none-elf.tar
   fi
 
   command aarch64-none-elf-gcc --version
@@ -176,6 +190,10 @@ function c-cache {
         tar zxf ccache-3.7.7.tar.gz
         cd ccache-3.7.7; ./configure --prefix="${tools}"/ccache; make; make install
         cd "${tools}"; rm -rf ccache-3.7.7; rm ccache-3.7.7.tar.gz
+        ;;
+      MSYS*)
+        pacman -S --noconfirm --needed ccache
+        pacman -Q
         ;;
     esac
   fi
@@ -337,10 +355,10 @@ function riscv-gcc-toolchain {
         ;;
     esac
     cd "${tools}"
-    wget --quiet https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v12.3.0-1/xpack-riscv-none-elf-gcc-12.3.0-1-${flavor}.tar.gz
-    tar zxf xpack-riscv-none-elf-gcc-12.3.0-1-${flavor}.tar.gz
-    mv xpack-riscv-none-elf-gcc-12.3.0-1 riscv-none-elf-gcc
-    rm xpack-riscv-none-elf-gcc-12.3.0-1-${flavor}.tar.gz
+    wget --quiet https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v13.2.0-2/xpack-riscv-none-elf-gcc-13.2.0-2-${flavor}.tar.gz
+    tar zxf xpack-riscv-none-elf-gcc-13.2.0-2-${flavor}.tar.gz
+    mv xpack-riscv-none-elf-gcc-13.2.0-2 riscv-none-elf-gcc
+    rm xpack-riscv-none-elf-gcc-13.2.0-2-${flavor}.tar.gz
   fi
 
   command riscv-none-elf-gcc --version
@@ -590,6 +608,9 @@ case ${os} in
   Linux)
     install="arm-clang-toolchain arm-gcc-toolchain arm64-gcc-toolchain avr-gcc-toolchain binutils bloaty clang-tidy gen-romfs gperf kconfig-frontends mips-gcc-toolchain python-tools riscv-gcc-toolchain rust rx-gcc-toolchain sparc-gcc-toolchain xtensa-esp32-gcc-toolchain u-boot-tools util-linux wasi-sdk c-cache"
     ;;
+  MSYS*)
+    install="arm-gcc-toolchain kconfig-frontends"
+    ;;
 esac
 
   pushd .
@@ -598,7 +619,9 @@ esac
   done
   popd
 
-  setup_links
+  if [ -d "${CCACHE_DIR}" ]; then
+    setup_links
+  fi
   echo PATH="${EXTRA_PATH}"/"${PATH}" > "${tools}"/env.sh
 }
 
@@ -610,6 +633,9 @@ function run_builds {
       ncpus=$(sysctl -n hw.ncpu)
       ;;
     Linux)
+      ncpus=$(grep -c ^processor /proc/cpuinfo)
+      ;;
+    MSYS*)
       ncpus=$(grep -c ^processor /proc/cpuinfo)
       ;;
   esac

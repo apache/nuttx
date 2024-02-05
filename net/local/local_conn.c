@@ -120,7 +120,6 @@ FAR struct local_conn_s *local_alloc(void)
 
 #ifdef CONFIG_NET_LOCAL_STREAM
       nxsem_init(&conn->lc_waitsem, 0, 0);
-      nxsem_init(&conn->lc_donesem, 0, 0);
 
 #endif
 
@@ -145,6 +144,87 @@ FAR struct local_conn_s *local_alloc(void)
     }
 
   return conn;
+}
+
+/****************************************************************************
+ * Name: local_alloc_accept
+ *
+ * Description:
+ *    Called when a client calls connect and can find the appropriate
+ *    connection in LISTEN. In that case, this function will create
+ *    a new connection and initialize it.
+ *
+ ****************************************************************************/
+
+int local_alloc_accept(FAR struct local_conn_s *server,
+                       FAR struct local_conn_s *client,
+                       FAR struct local_conn_s **accept)
+{
+  FAR struct local_conn_s *conn;
+  int ret;
+
+  /* Create a new connection structure for the server side of the
+   * connection.
+   */
+
+  conn = local_alloc();
+  if (conn == NULL)
+    {
+      nerr("ERROR:  Failed to allocate new connection structure\n");
+      return -ENOMEM;
+    }
+
+  /* Initialize the new connection structure */
+
+  local_addref(conn);
+
+  conn->lc_proto  = SOCK_STREAM;
+  conn->lc_type   = LOCAL_TYPE_PATHNAME;
+  conn->lc_state  = LOCAL_STATE_CONNECTED;
+  conn->lc_peer   = client;
+  client->lc_peer = conn;
+
+  strlcpy(conn->lc_path, client->lc_path, sizeof(conn->lc_path));
+  conn->lc_instance_id = client->lc_instance_id;
+
+  /* Open the server-side write-only FIFO.  This should not
+   * block.
+   */
+
+  ret = local_open_server_tx(conn, false);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to open write-only FIFOs for %s: %d\n",
+           conn->lc_path, ret);
+      goto err;
+    }
+
+  /* Do we have a connection?  Is the write-side FIFO opened? */
+
+  DEBUGASSERT(conn->lc_outfile.f_inode != NULL);
+
+  /* Open the server-side read-only FIFO.  This should not
+   * block because the client side has already opening it
+   * for writing.
+   */
+
+  ret = local_open_server_rx(conn, false);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to open read-only FIFOs for %s: %d\n",
+           conn->lc_path, ret);
+      goto err;
+    }
+
+  /* Do we have a connection?  Are the FIFOs opened? */
+
+  DEBUGASSERT(conn->lc_infile.f_inode != NULL);
+  *accept = conn;
+  return OK;
+
+err:
+  local_free(conn);
+  return ret;
 }
 
 /****************************************************************************
@@ -212,7 +292,6 @@ void local_free(FAR struct local_conn_s *conn)
   local_release_fifos(conn);
 #ifdef CONFIG_NET_LOCAL_STREAM
   nxsem_destroy(&conn->lc_waitsem);
-  nxsem_destroy(&conn->lc_donesem);
 #endif
 
   /* Destory sem associated with the connection */

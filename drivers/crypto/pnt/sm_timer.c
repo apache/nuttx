@@ -26,11 +26,13 @@
 
 #include <unistd.h>
 
+#include <nuttx/signal.h>
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 void sm_sleep(uint32_t msec)
 {
-  usleep(1000 * msec);
+  nxsig_usleep(1000 * msec);
 }

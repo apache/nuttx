@@ -365,6 +365,14 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
             }
         }
 
+      /* Update heap statistics */
+
+      heap->mm_curused += newsize - oldsize;
+      if (heap->mm_curused > heap->mm_maxused)
+        {
+          heap->mm_maxused = heap->mm_curused;
+        }
+
       mm_unlock(heap);
       MM_ADD_BACKTRACE(heap, (FAR char *)newmem - MM_SIZEOF_ALLOCNODE);
 

@@ -48,18 +48,6 @@
 #define PMP_XLEN                (64)
 #endif
 
-/* Minimum supported block size */
-
-#if !defined CONFIG_ARCH_MPU_MIN_BLOCK_SIZE
-#define MIN_BLOCK_SIZE          (PMP_XLEN / 8)
-#else
-#define MIN_BLOCK_SIZE          CONFIG_ARCH_MPU_MIN_BLOCK_SIZE
-#endif
-
-/* Address and block size alignment mask */
-
-#define BLOCK_ALIGN_MASK        (MIN_BLOCK_SIZE - 1)
-
 #define PMP_CFG_BITS_CNT        (8)
 #define PMP_CFG_FLAG_MASK       ((uintptr_t)0xFF)
 
@@ -102,51 +90,6 @@ typedef struct pmp_entry_s pmp_entry_t;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pmp_check_addrmatch_type
- *
- * Description:
- *   Test if an address matching type is supported by the architecture.
- *
- * Input Parameters:
- *   type - The type to test.
- *
- * Returned Value:
- *   true if it is, false otherwise.
- *
- ****************************************************************************/
-
-static bool pmp_check_addrmatch_type(uintptr_t type)
-{
-  /* Parameter is potentially unused */
-
-  UNUSED(type);
-#ifdef CONFIG_ARCH_MPU_HAS_TOR
-  if (type == PMPCFG_A_TOR)
-    {
-      return true;
-    }
-
-#endif
-#ifdef CONFIG_ARCH_MPU_HAS_NO4
-  if (type == PMPCFG_A_NA4)
-    {
-      return true;
-    }
-
-#endif
-#ifdef CONFIG_ARCH_MPU_HAS_NAPOT
-  if (type == PMPCFG_A_NAPOT)
-    {
-      return true;
-    }
-#endif
-
-  /* None of the supported types match */
-
-  return false;
-}
-
-/****************************************************************************
  * Name: pmp_check_region_attrs
  *
  * Description:
@@ -155,6 +98,7 @@ static bool pmp_check_addrmatch_type(uintptr_t type)
  * Input Parameters:
  *   base - The base address of the region.
  *   size - The memory length of the region.
+ *   type - Address matching type.
  *
  * Returned Value:
  *   true if it is, false otherwise.
@@ -164,42 +108,54 @@ static bool pmp_check_addrmatch_type(uintptr_t type)
 static bool pmp_check_region_attrs(uintptr_t base, uintptr_t size,
                                    uintptr_t type)
 {
-  /* Check that the size is not too small */
+  switch (type)
+  {
+    case PMPCFG_A_TOR:
 
-  if ((type != PMPCFG_A_TOR) && (size < MIN_BLOCK_SIZE))
-    {
-      return false;
-    }
+      /* For TOR any size is good, but alignment requirement stands */
 
-  /* Check that the base address is aligned properly */
-
-  if ((base & BLOCK_ALIGN_MASK) != 0)
-    {
-      return false;
-    }
-
-  /* Check that the size is aligned properly */
-
-  if ((size & BLOCK_ALIGN_MASK) != 0)
-    {
-      return false;
-    }
-
-  /* Perform additional checks on base and size for NAPOT area */
-
-  if (type == PMPCFG_A_NAPOT)
-    {
-      /* Get the power-of-two for size, rounded up */
-
-      uintptr_t pot = LOG2_CEIL(size);
-
-      if ((base & ((UINT64_C(1) << pot) - 1)) != 0)
+      if ((base & 0x03) != 0)
         {
-          /* The start address is not properly aligned with size */
-
           return false;
         }
-    }
+
+      break;
+
+    case PMPCFG_A_NA4:
+
+      /* For NA4 only size 4 is good, and base must be aligned */
+
+      if ((base & 0x03) != 0 || size != 4)
+        {
+          return false;
+        }
+
+      break;
+
+    case PMPCFG_A_NAPOT:
+      {
+        /* For NAPOT, both base and size must be properly aligned */
+
+        if ((base & 0x07) != 0 || size < 8)
+          {
+            return false;
+          }
+
+        /* Get the power-of-two for size, rounded up */
+
+        if ((base & ((UINT64_C(1) << log2ceil(size)) - 1)) != 0)
+          {
+            /* The start address is not properly aligned with size */
+
+            return false;
+          }
+      }
+
+      break;
+
+    default:
+      break;
+  }
 
   return true;
 }
@@ -463,13 +419,6 @@ int riscv_config_pmp_region(uintptr_t region, uintptr_t attr,
   uintptr_t addr    = 0;
   uintptr_t cfg     = 0;
   uintptr_t type    = (attr & PMPCFG_A_MASK);
-
-  /* Check that the architecture supports address matching type */
-
-  if (pmp_check_addrmatch_type(type) == false)
-    {
-      return -EINVAL;
-    }
 
   /* Check the region attributes */
 

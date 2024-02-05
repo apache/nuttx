@@ -20,8 +20,17 @@
 
 if(CONFIG_MOTOR_FOC)
   set(SRCS foc_dev.c)
+
   if(CONFIG_MOTOR_FOC_DUMMY)
     list(APPEND SRCS foc_dummy.c)
+  endif()
+
+  if(CONFIG_MOTOR_FOC_FOCPWR)
+    list(APPEND SRCS foc_pwr.c)
+  endif()
+
+  if(CONFIG_MOTOR_FOC_DRV8301)
+    list(APPEND SRCS drv8301.c)
   endif()
 
   target_include_directories(drivers PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

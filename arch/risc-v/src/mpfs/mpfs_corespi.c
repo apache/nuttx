@@ -543,9 +543,9 @@ static uint32_t mpfs_spi_setfrequency(struct spi_dev_s *dev,
 
   priv->frequency = frequency;
 
-  /* Formula is SPICLK = PCLK/(2*(CFG_CLK + 1)) */
+  /* Formula is SPICLK = PCLK/(2*(CFG_CLK + 1)) (result is rounded up) */
 
-  divider = ((MPFS_FPGA_PERIPHERAL_CLK / frequency) >> 1) - 1;
+  divider = (MPFS_FPGA_PERIPHERAL_CLK / frequency) >> 1;
   priv->actual = MPFS_FPGA_PERIPHERAL_CLK / ((divider + 1) << 1);
 
   DEBUGASSERT(divider < 256u);
@@ -1434,6 +1434,22 @@ static void mpfs_spi_init(struct spi_dev_s *dev)
 
   mpfs_spi_set_master_mode(priv, 1);
   mpfs_spi_enable(priv, 1);
+
+  /* Disable all interrupt sources */
+
+  modifyreg32(MPFS_SPI_CONTROL, MPFS_SPI_INTTXTURUN |
+                                MPFS_SPI_INTRXOVRFLOW |
+                                MPFS_SPI_INTTXDONE,
+                                0);
+
+  /* Clear all interrupt sources */
+
+  putreg32(MPFS_SPI_TXCHUNDRUN |
+           MPFS_SPI_RXCHOVRFLW |
+           MPFS_SPI_DATA_RX |
+           MPFS_SPI_TXDONE, MPFS_SPI_INT_CLEAR);
+
+  /* Then enable the interrupt */
 
   up_enable_irq(priv->plic_irq);
 }

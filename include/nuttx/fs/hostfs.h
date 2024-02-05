@@ -108,30 +108,42 @@
 /* These must match the definitions in include/sys/types.h */
 
 typedef int16_t      nuttx_blksize_t;
+#  ifdef CONFIG_SMALL_MEMORY
 typedef int16_t      nuttx_gid_t;
 typedef int16_t      nuttx_uid_t;
+typedef uint16_t     nuttx_size_t;
+typedef int16_t      nuttx_ssize_t;
+#  else /* CONFIG_SMALL_MEMORY */
+typedef unsigned int nuttx_gid_t;
+typedef unsigned int nuttx_uid_t;
+typedef uintptr_t    nuttx_size_t;
+typedef intptr_t     nuttx_ssize_t;
+#  endif /* CONFIG_SMALL_MEMORY */
 typedef uint32_t     nuttx_dev_t;
 typedef uint16_t     nuttx_ino_t;
 typedef uint16_t     nuttx_nlink_t;
-#ifdef CONFIG_FS_LARGEFILE
+#  ifdef CONFIG_FS_LARGEFILE
 typedef int64_t      nuttx_off_t;
 typedef uint64_t     nuttx_blkcnt_t;
-#else
+#  else
 typedef int32_t      nuttx_off_t;
 typedef uint32_t     nuttx_blkcnt_t;
-#endif
+#  endif
 typedef unsigned int nuttx_mode_t;
-typedef uintptr_t    nuttx_size_t;
-typedef intptr_t     nuttx_ssize_t;
+typedef int          nuttx_fsid_t[2];
 
 /* These must match the definition in include/time.h */
 
+#  ifdef CONFIG_SYSTEM_TIME64
+typedef uint64_t     nuttx_time_t;
+#  else
 typedef uint32_t     nuttx_time_t;
+#  endif
 
 struct nuttx_timespec
 {
-    nuttx_time_t tv_sec;
-    long tv_nsec;
+  nuttx_time_t tv_sec;
+  long tv_nsec;
 };
 
 /* These must exactly match the definition from include/dirent.h: */
@@ -146,14 +158,15 @@ struct nuttx_dirent_s
 
 struct nuttx_statfs_s
 {
-  uint32_t     f_type;     /* Type of filesystem */
-  nuttx_size_t f_namelen;  /* Maximum length of filenames */
-  nuttx_size_t f_bsize;    /* Optimal block size for transfers */
-  nuttx_off_t  f_blocks;   /* Total data blocks in the file system of this size */
-  nuttx_off_t  f_bfree;    /* Free blocks in the file system */
-  nuttx_off_t  f_bavail;   /* Free blocks avail to non-superuser */
-  nuttx_off_t  f_files;    /* Total file nodes in the file system */
-  nuttx_off_t  f_ffree;    /* Free file nodes in the file system */
+  uint32_t       f_type;     /* Type of filesystem */
+  nuttx_size_t   f_namelen;  /* Maximum length of filenames */
+  nuttx_size_t   f_bsize;    /* Optimal block size for transfers */
+  nuttx_blkcnt_t f_blocks;   /* Total data blocks in the file system of this size */
+  nuttx_blkcnt_t f_bfree;    /* Free blocks in the file system */
+  nuttx_blkcnt_t f_bavail;   /* Free blocks avail to non-superuser */
+  nuttx_blkcnt_t f_files;    /* Total file nodes in the file system */
+  nuttx_blkcnt_t f_ffree;    /* Free file nodes in the file system */
+  nuttx_fsid_t   f_fsid;     /* Encode device type, not yet in use */
 };
 
 /* These must exactly match the definition from include/sys/stat.h: */
@@ -182,7 +195,7 @@ struct nuttx_stat_s
  ****************************************************************************/
 
 #ifdef __SIM__
-int           host_open(const char *pathname, int flags, nuttx_mode_t mode);
+int           host_open(const char *pathname, int flags, int mode);
 int           host_close(int fd);
 nuttx_ssize_t host_read(int fd, void *buf, nuttx_size_t count);
 nuttx_ssize_t host_write(int fd, const void *buf, nuttx_size_t count);
@@ -201,7 +214,7 @@ void          host_rewinddir(void *dirp);
 int           host_closedir(void *dirp);
 int           host_statfs(const char *path, struct nuttx_statfs_s *buf);
 int           host_unlink(const char *pathname);
-int           host_mkdir(const char *pathname, nuttx_mode_t mode);
+int           host_mkdir(const char *pathname, int mode);
 int           host_rmdir(const char *pathname);
 int           host_rename(const char *oldpath, const char *newpath);
 int           host_stat(const char *path, struct nuttx_stat_s *buf);

@@ -8,9 +8,9 @@
  * freely, subject to the following restrictions:
  *
  * 1. The origin of this software must not be misrepresented; you must not
- *    claim that you wrote the original software.@n
+ *    claim that you wrote the original software.
  * 2. Altered source versions must be plainly marked as such, and must not be
- *    misrepresented as being the original software.@n
+ *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
  * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Silicon Laboratories, Inc.
@@ -82,8 +82,8 @@
 #define EFM32_LETIMER_CMD_OFFSET             0x0004  /* Command Register */
 #define EFM32_LETIMER_STATUS_OFFSET          0x0008  /* Status Register */
 #define EFM32_LETIMER_CNT_OFFSET             0x000c  /* Counter Value Register */
-#define EFM32_LETIMER_COMP0_OFFSET           0x0010  /* Compare Value Register */ 0
-#define EFM32_LETIMER_COMP1_OFFSET           0x0014  /* Compare Value Register */ 1
+#define EFM32_LETIMER_COMP0_OFFSET           0x0010  /* Compare Value Register 0 */
+#define EFM32_LETIMER_COMP1_OFFSET           0x0014  /* Compare Value Register 1 */
 #define EFM32_LETIMER_REP0_OFFSET            0x0018  /* Repeat Counter Register 0 */
 #define EFM32_LETIMER_REP1_OFFSET            0x001c  /* Repeat Counter Register 1 */
 #define EFM32_LETIMER_IF_OFFSET              0x0020  /* Interrupt Flag Register */

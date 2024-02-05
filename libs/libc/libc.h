@@ -178,13 +178,6 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-/* Defined in lib_dtoa.c */
-
-#ifdef CONFIG_LIBC_FLOATINGPOINT
-FAR char *__dtoa(double d, int mode, int ndigits, FAR int *decpt,
-                 FAR int *sign, FAR char **rve);
-#endif
-
 /* Defined in lib_getfullpath.c */
 
 int lib_getfullpath(int dirfd, FAR const char *path,
@@ -216,10 +209,17 @@ FAR char *lib_fgets(FAR char *buf, size_t buflen, FILE *stream,
 FAR char *lib_fgets_unlocked(FAR char *buf, size_t buflen, FILE *stream,
                              bool keepnl, bool consume);
 
+/* Defined in lib_flushall.c */
+
+#ifdef CONFIG_FILE_STREAM
+int lib_flushall(FAR struct streamlist *list);
+int lib_flushall_unlocked(FAR struct streamlist *list);
+#endif
+
 /* Defined in lib_libfflush.c */
 
-ssize_t lib_fflush(FAR FILE *stream, bool bforce);
-ssize_t lib_fflush_unlocked(FAR FILE *stream, bool bforce);
+ssize_t lib_fflush(FAR FILE *stream);
+ssize_t lib_fflush_unlocked(FAR FILE *stream);
 
 /* Defined in lib_rdflush_unlocked.c */
 

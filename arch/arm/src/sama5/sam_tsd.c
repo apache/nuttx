@@ -206,9 +206,9 @@ struct sam_tsd_s
 
 static void sam_tsd_notify(struct sam_tsd_s *priv);
 static int  sam_tsd_sample(struct sam_tsd_s *priv,
-              struct sam_sample_s *sample);
+                           struct sam_sample_s *sample);
 static int  sam_tsd_waitsample(struct sam_tsd_s *priv,
-              struct sam_sample_s *sample);
+                               struct sam_sample_s *sample);
 static void sam_tsd_bottomhalf(void *arg);
 static int  sam_tsd_schedule(struct sam_tsd_s *priv);
 static void sam_tsd_expiry(wdparm_t arg);
@@ -357,12 +357,8 @@ static int sam_tsd_waitsample(struct sam_tsd_s *priv,
   /* Interrupts must be disabled when this is called to (1) prevent posting
    * of semaphores from interrupt handlers, and (2) to prevent sampled data
    * from changing until it has been reported.
-   *
-   * In addition, we will also disable pre-emption to prevent other threads
-   * from getting control while we muck with the semaphores.
    */
 
-  sched_lock();
   flags = enter_critical_section();
 
   /* Now release the semaphore that manages mutually exclusive access to
@@ -408,14 +404,6 @@ errout:
    */
 
   leave_critical_section(flags);
-
-  /* Restore pre-emption.  We might get suspended here but that is okay
-   * because we already have our sample.  Note:  this means that if there
-   * were two threads reading from the touchscreen ADC for some reason, the
-   * data might be read out of order.
-   */
-
-  sched_unlock();
   return ret;
 }
 
@@ -1185,8 +1173,8 @@ static int sam_tsd_poll(struct file *filep, struct pollfd *fds, bool setup)
 
       if (i >= CONFIG_SAMA5_TSD_NPOLLWAITERS)
         {
-          fds->priv    = NULL;
-          ret          = -EBUSY;
+          fds->priv = NULL;
+          ret       = -EBUSY;
           goto errout;
         }
 
@@ -1194,7 +1182,7 @@ static int sam_tsd_poll(struct file *filep, struct pollfd *fds, bool setup)
 
       if (priv->penchange)
         {
-          sam_tsd_notify(priv);
+          poll_notify(&fds, 1, POLLIN);
         }
     }
   else if (fds->priv)
@@ -1206,8 +1194,8 @@ static int sam_tsd_poll(struct file *filep, struct pollfd *fds, bool setup)
 
       /* Remove all memory of the poll setup */
 
-      *slot                = NULL;
-      fds->priv            = NULL;
+      *slot     = NULL;
+      fds->priv = NULL;
     }
 
 errout:

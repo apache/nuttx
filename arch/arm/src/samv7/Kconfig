@@ -360,6 +360,10 @@ config SAMV7_1WIREDRIVER
 	bool
 	default n
 
+config SAMV7_USART_IS_SPI_MASTER
+	bool
+	default n
+
 config SAMV7_HAVE_USART0
 	bool
 	default n
@@ -1339,6 +1343,21 @@ config SAMV7_USART0_1WIREDRIVER
 	bool "1-Wire driver"
 	select SAMV7_1WIREDRIVER
 
+config SAMV7_USART0_SPI_MASTER
+	bool "USART0 as SPI Master driver"
+	select SAMV7_USART_IS_SPI_MASTER
+	---help---
+		Switch USART0 to SPI master (host) mode. In this mode USART is used
+		to emulate SPI peripheral. Pin configuration is following:
+
+			TXD - MOSI
+			RXD - MISO
+			SCK - SCK
+			RTS - NSS (chip select)
+
+		There is only one chip select therefore SPI master can be used to
+		communicate only with one slave device.
+
 endchoice # "USART0 Driver Configuration"
 
 if SAMV7_USART0_SERIALDRIVER
@@ -1376,6 +1395,21 @@ config SAMV7_USART1_1WIREDRIVER
 	bool "1-Wire driver"
 	select SAMV7_1WIREDRIVER
 
+config SAMV7_USART1_SPI_MASTER
+	bool "USART1 as SPI Master driver"
+	select SAMV7_USART_IS_SPI_MASTER
+	---help---
+		Switch USART1 to SPI master (host) mode. In this mode USART is used
+		to emulate SPI peripheral. Pin configuration is following:
+
+			TXD - MOSI
+			RXD - MISO
+			SCK - SCK
+			RTS - NSS (chip select)
+
+		There is only one chip select therefore SPI master can be used to
+		communicate only with one slave device.
+
 endchoice # "USART1 Driver Configuration"
 
 if SAMV7_USART1_SERIALDRIVER
@@ -1412,6 +1446,21 @@ config SAMV7_USART2_SERIALDRIVER
 config SAMV7_USART2_1WIREDRIVER
 	bool "1-Wire driver"
 	select SAMV7_1WIREDRIVER
+
+config SAMV7_USART2_SPI_MASTER
+	bool "USART2 as SPI Master driver"
+	select SAMV7_USART_IS_SPI_MASTER
+	---help---
+		Switch USART2 to SPI master (host) mode. In this mode USART is used
+		to emulate SPI peripheral. Pin configuration is following:
+
+			TXD - MOSI
+			RXD - MISO
+			SCK - SCK
+			RTS - NSS (chip select)
+
+		There is only one chip select therefore SPI master can be used to
+		communicate only with one slave device.
 
 endchoice # "USART2 Driver Configuration"
 
@@ -1824,7 +1873,7 @@ config SAMV7_SPI_REGDEBUG
 endmenu # SPI device driver options
 
 menu "QSPI Device Driver Configuration"
-	depends on SAMV7_QSPI && !SAMV7_QSPI_IS_SPI
+	depends on SAMV7_QSPI && !SAMV7_QSPI_SPI_MODE
 
 config SAMV7_QSPI_DLYBS
 	int "Delay Before QSCK (nsec)"

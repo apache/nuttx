@@ -18,8 +18,7 @@
  *
  ****************************************************************************/
 
-/**
- * ESP32-S2 ROM address table (except symbols from libgcc and libc)
+/* ESP32-S2 ROM address table (except symbols from libgcc and libc)
  * Generated for ROM with MD5sum: 0a2c7ec5109c17884606d23b47045796
  *
  * These are all weak symbols that could be overwritten in ESP-IDF.
@@ -216,6 +215,7 @@ PROVIDE ( dummy_len_plus = 0x3ffffd54 );
 PROVIDE ( Enable_QMode = 0x40016690 );
 PROVIDE ( esp_crc8 = 0x40011a78 );
 PROVIDE ( esp_rom_config_pad_power_select = 0x40016e58 );
+PROVIDE ( esp_rom_delay_us = ets_delay_us );
 PROVIDE ( esp_rom_opiflash_cache_mode_config = 0x40016754 );
 PROVIDE ( esp_rom_opiflash_exec_cmd = 0x40017e30 );
 PROVIDE ( esp_rom_opiflash_exit_continuous_read_mode = 0x40017ee8 );

@@ -324,7 +324,6 @@ int lib_mode2oflags(FAR const char *mode)
 
                 default:
                   goto errout;
-                  break;
               }
             break;
 
@@ -401,7 +400,6 @@ int lib_mode2oflags(FAR const char *mode)
 
           default:
             goto errout;
-            break;
         }
     }
 

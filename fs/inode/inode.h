@@ -168,16 +168,6 @@ int inode_lock(void);
 void inode_unlock(void);
 
 /****************************************************************************
- * Name: inode_checkflags
- *
- * Description:
- *   Check if the access described by 'oflags' is supported on 'inode'
- *
- ****************************************************************************/
-
-int inode_checkflags(FAR struct inode *inode, int oflags);
-
-/****************************************************************************
  * Name: inode_search
  *
  * Description:
@@ -337,21 +327,6 @@ void inode_root_reserve(void);
 
 int inode_reserve(FAR const char *path,
                   mode_t mode, FAR struct inode **inode);
-
-/****************************************************************************
- * Name: inode_unlink
- *
- * Description:
- *   Given a path, remove a the node from the in-memory, inode tree that the
- *   path refers to.  This is normally done in preparation to removing or
- *   moving an inode.
- *
- * Assumptions/Limitations:
- *   The caller must hold the inode semaphore
- *
- ****************************************************************************/
-
-FAR struct inode *inode_unlink(FAR const char *path);
 
 /****************************************************************************
  * Name: inode_remove

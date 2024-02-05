@@ -45,7 +45,10 @@
  ****************************************************************************/
 
 extern FAR void *__dso_handle weak_data;
+
+#ifndef CONFIG_HOST_WINDOWS
 FAR void *__dso_handle = &__dso_handle;
+#endif
 
 /****************************************************************************
  * Public Functions

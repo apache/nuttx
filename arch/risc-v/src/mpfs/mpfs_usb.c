@@ -50,6 +50,7 @@
 #include <arch/board/board.h>
 
 #include "hardware/mpfs_usb.h"
+#include "hardware/mpfs_mpucfg.h"
 #include "mpfs_gpio.h"
 #include "riscv_internal.h"
 #include "chip.h"
@@ -107,13 +108,6 @@
 #define MPFS_TRACEINTID_DISPATCH           0x0013
 #define MPFS_TRACEINTID_EP0_STALLSENT      0x0014
 #define MPFS_TRACEINTID_DATA_END           0x0015
-
-/* USB PMP configuration registers */
-
-#define MPFS_PMPCFG_USB_0    (MPFS_MPUCFG_BASE + 0x600)
-#define MPFS_PMPCFG_USB_1    (MPFS_MPUCFG_BASE + 0x608)
-#define MPFS_PMPCFG_USB_2    (MPFS_MPUCFG_BASE + 0x610)
-#define MPFS_PMPCFG_USB_3    (MPFS_MPUCFG_BASE + 0x618)
 
 /* Reset and clock control registers */
 
@@ -1718,7 +1712,7 @@ static void *mpfs_ep_allocbuffer(struct usbdev_ep_s *ep, uint16_t nbytes)
 {
   /* There is not special buffer allocation requirement */
 
-  return kumm_malloc(nbytes);
+  return kmm_malloc(nbytes);
 }
 #endif
 
@@ -1745,7 +1739,7 @@ static void mpfs_ep_freebuffer(struct usbdev_ep_s *ep, void *buf)
 {
   /* There is not special buffer allocation requirement */
 
-  kumm_free(buf);
+  kmm_free(buf);
 }
 #endif
 
@@ -3619,7 +3613,7 @@ static void mpfs_usb_iomux(void)
 
 #ifdef CONFIG_USBDEV_DMA
   /* DMA operations need to open the USB PMP registers for proper
-   * operation. If not configured, apply default settings.
+   * operation.
    */
 
   uint64_t pmpcfg_usb_x;
@@ -3628,28 +3622,24 @@ static void mpfs_usb_iomux(void)
   if ((pmpcfg_usb_x & 0x1ffffff000000000llu) != 0x1f00000000000000llu)
     {
       uerr("Please check the MPFS_PMPCFG_USB_0 register.\n");
-      putreg64(0x1f00000fffffffffllu, MPFS_PMPCFG_USB_0);
     }
 
   pmpcfg_usb_x = getreg64(MPFS_PMPCFG_USB_1);
   if ((pmpcfg_usb_x & 0x1ffffff000000000llu) != 0x1f00000000000000llu)
     {
       uerr("Please check the MPFS_PMPCFG_USB_1 register.\n");
-      putreg64(0x1f00000fffffffffllu, MPFS_PMPCFG_USB_1);
     }
 
   pmpcfg_usb_x = getreg64(MPFS_PMPCFG_USB_2);
   if ((pmpcfg_usb_x & 0x1ffffff000000000llu) != 0x1f00000000000000llu)
     {
       uerr("Please check the MPFS_PMPCFG_USB_2 register.\n");
-      putreg64(0x1f00000fffffffffllu, MPFS_PMPCFG_USB_2);
     }
 
   pmpcfg_usb_x = getreg64(MPFS_PMPCFG_USB_3);
   if ((pmpcfg_usb_x & 0x1ffffff000000000llu) != 0x1f00000000000000llu)
     {
       uerr("Please check the MPFS_PMPCFG_USB_3 register.\n");
-      putreg64(0x1f00000fffffffffllu, MPFS_PMPCFG_USB_3);
     }
 #endif
 }

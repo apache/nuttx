@@ -1019,6 +1019,7 @@ static int up_setup(struct uart_dev_s *dev)
   up_shutdown(dev);
 
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
+#if defined(ATSAMA5D3) || defined(ATSAMA5D4)
   /* Setting the USART to operate with hardware handshaking is performed by
    * writing the USART_MODE field in the Mode Register (US_MR) to the value
    * 0x2. ... Using this mode requires using the PDC or DMAC channel for
@@ -1032,6 +1033,7 @@ static int up_setup(struct uart_dev_s *dev)
       regval = (UART_MR_MODE_HWHS | SAM_MR_USCLKS | UART_MR_CHMODE_NORMAL);
     }
   else
+#endif
 #endif
     {
 #if defined(ATSAMA5D2)

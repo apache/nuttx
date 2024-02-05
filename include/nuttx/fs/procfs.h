@@ -59,6 +59,8 @@ struct procfs_operations
   ssize_t (*write)(FAR struct file *filep,
                    FAR const char *buffer,
                    size_t buflen);
+  int     (*poll)(FAR struct file *filep, FAR struct pollfd *fds,
+                  bool setup);
 
   /* The two structures need not be common after this point. The following
    * are extended methods needed to deal with the unique needs of mounted

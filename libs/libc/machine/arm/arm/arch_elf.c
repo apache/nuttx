@@ -123,7 +123,8 @@ bool up_checkarch(const Elf32_Ehdr *ehdr)
  *
  ****************************************************************************/
 
-int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
+int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr,
+                void *arch_data)
 {
   int32_t offset;
   unsigned int relotype;
@@ -157,11 +158,11 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
     case R_ARM_CALL:
     case R_ARM_JUMP24:
       {
-        binfo("Performing PC24 [%" PRId32 "] link "
-              "at addr %08lx [%08lx] to sym '%p' st_value=%08lx\n",
-              ELF32_R_TYPE(rel->r_info), (long)addr,
-              (long)(*(uint32_t *)addr),
-              sym, (long)sym->st_value);
+        binfo("Performing PC24 [%" PRId32 "] link at "
+              "addr %08" PRIxPTR " [%08" PRIx32 "] to "
+              "sym '%p' st_value=%08" PRIx32 "\n",
+              ELF32_R_TYPE(rel->r_info), addr,
+              *(uint32_t *)addr, sym, sym->st_value);
 
         offset = (*(uint32_t *)addr & 0x00ffffff) << 2;
         if (offset & 0x02000000)
@@ -179,7 +180,7 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
             offset >= (int32_t) 0x02000000)
           {
             berr("ERROR: PC24 [%" PRId32 "] relocation out of range, "
-                 "offset=%08lx\n",
+                 "offset=%08" PRIx32 "\n",
                  ELF32_R_TYPE(rel->r_info), offset);
 
             return -EINVAL;
@@ -196,9 +197,9 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
     case R_ARM_TARGET1:  /* New ABI:  TARGET1 always treated as ABS32 */
       {
         binfo("Performing ABS32 link "
-              "at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
-              (long)addr, (long)(*(uint32_t *)addr), sym,
-              (long)sym->st_value);
+              "at addr=%08" PRIxPTR " [%08" PRIx32 "] to "
+              "sym=%p st_value=%08" PRIx32 "\n",
+              addr, *(uint32_t *)addr, sym, sym->st_value);
 
         *(uint32_t *)addr += sym->st_value;
       }
@@ -206,8 +207,9 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
 
     case R_ARM_V4BX:
       {
-        binfo("Performing V4BX link at addr=%08lx [%08lx]\n",
-              (long)addr, (long)(*(uint32_t *)addr));
+        binfo("Performing V4BX link at addr=%08" PRIxPTR
+              " [%08" PRIx32 "]\n",
+              addr, *(uint32_t *)addr);
 
          /* Preserve only Rm and the condition code */
 
@@ -222,9 +224,9 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
     case R_ARM_PREL31:
       {
         binfo("Performing PREL31 link "
-              "at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
-              (long)addr, (long)(*(uint32_t *)addr), sym,
-              (long)sym->st_value);
+              "at addr=%08" PRIxPTR " [%08" PRIx32 "] to "
+              "sym=%p st_value=%08" PRIx32 "\n",
+              addr, *(uint32_t *)addr, sym, sym->st_value);
 
         offset            = *(uint32_t *)addr + sym->st_value - addr;
         *(uint32_t *)addr = offset & 0x7fffffff;
@@ -235,10 +237,10 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
     case R_ARM_MOVT_ABS:
       {
         binfo("Performing MOVx_ABS [%" PRId32 "] link "
-              "at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
-              ELF32_R_TYPE(rel->r_info), (long)addr,
-              (long)(*(uint32_t *)addr),
-              sym, (long)sym->st_value);
+              "at addr=%08" PRIxPTR " [%08" PRIx32 "] to "
+              "sym=%p st_value=%08" PRIx32 "\n",
+              ELF32_R_TYPE(rel->r_info), addr,
+              *(uint32_t *)addr, sym, sym->st_value);
 
         offset = *(uint32_t *)addr;
         offset = ((offset & 0xf0000) >> 4) | (offset & 0xfff);
@@ -292,10 +294,11 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
         lower_insn = (uint32_t)(*(uint16_t *)(addr + 2));
 
         binfo("Performing THM_MOVx [%" PRId32 "] link "
-              "at addr=%08lx [%04x %04x] to sym=%p st_value=%08lx\n",
-              ELF32_R_TYPE(rel->r_info), (long)addr,
+              "at addr=%08" PRIxPTR " [%04x %04x] to "
+              "sym=%p st_value=%08" PRIx32 "\n",
+              ELF32_R_TYPE(rel->r_info), addr,
               (int)upper_insn, (int)lower_insn,
-              sym, (long)sym->st_value);
+              sym, sym->st_value);
 
         /* Extract the 16-bit offset from the 32-bit instruction */
 
@@ -361,7 +364,7 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
          * |OP |                                                | 32-Bit
          * +---+--+---+---+---+---------------------------------+
          * |1   1 |J1 | 1 |J2 |            imm11                | BL
-         * +------+---+---+---+--------------------------------+
+         * +------+---+---+---+---------------------------------+
          *
          * The branch target is encoded in these bits:
          *
@@ -376,10 +379,11 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
         lower_insn = (uint32_t)(*(uint16_t *)(addr + 2));
 
         binfo("Performing THM_JUMP24 [%" PRId32 "] link "
-              "at addr=%08lx [%04x %04x] to sym=%p st_value=%08lx\n",
-              ELF32_R_TYPE(rel->r_info), (long)addr,
+              "at addr=%08" PRIxPTR " [%04x %04x] to "
+              "sym=%p st_value=%08" PRIx32 "\n",
+              ELF32_R_TYPE(rel->r_info), addr,
               (int)upper_insn, (int)lower_insn,
-              sym, (long)sym->st_value);
+              sym, sym->st_value);
 
         /* Extract the 25-bit offset from the 32-bit instruction:
          *
@@ -474,7 +478,7 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
 }
 
 int up_relocateadd(const Elf32_Rela *rel, const Elf32_Sym *sym,
-                   uintptr_t addr)
+                   uintptr_t addr, void *arch_data)
 {
   berr("ERROR: RELA relocation not supported\n");
   return -ENOSYS;

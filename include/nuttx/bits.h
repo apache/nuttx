@@ -53,8 +53,8 @@
 #define BIT(nr)            (1ul << (nr))
 #define BIT_ULL(nr)        (1ull << (nr))
 
-/* Create a contiguous bitmask starting at bit position @l and ending at
- * position @h. For example
+/* Create a contiguous bitmask starting at bit position l and ending at
+ * position h. For example
  * GENMASK_ULL(39, 21) gives us the 64bit vector 0x000000ffffe00000.
  */
 

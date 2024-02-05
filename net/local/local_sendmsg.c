@@ -91,7 +91,7 @@ static int local_sendctl(FAR struct local_conn_s *conn,
       fds = (int *)CMSG_DATA(cmsg);
       count = (cmsg->cmsg_len - sizeof(struct cmsghdr)) / sizeof(int);
 
-      if (count + peer->lc_cfpcount > LOCAL_NCONTROLFDS)
+      if (count + peer->lc_cfpcount >= LOCAL_NCONTROLFDS)
         {
           ret = -EMFILE;
           goto fail;
@@ -189,11 +189,6 @@ static ssize_t local_send(FAR struct socket *psock,
           if (peer->lc_state != LOCAL_STATE_CONNECTED ||
               peer->lc_outfile.f_inode == NULL)
             {
-              if (peer->lc_state == LOCAL_STATE_CONNECTING)
-                {
-                  return -EAGAIN;
-                }
-
               nerr("ERROR: not connected\n");
               return -ENOTCONN;
             }

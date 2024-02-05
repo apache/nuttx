@@ -152,6 +152,10 @@ void __start(void)
 
   showprogress('C');
 
+#ifdef CONFIG_ARMV7M_STACKCHECK
+  arm_stack_check_init();
+#endif
+
 #ifdef CONFIG_ARMV7M_ITMSYSLOG
   /* Perform ARMv7-M ITM SYSLOG initialization */
 

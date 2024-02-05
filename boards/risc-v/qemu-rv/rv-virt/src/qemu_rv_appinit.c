@@ -108,7 +108,13 @@ int board_app_initialize(uintptr_t arg)
 
 #ifdef CONFIG_NSH_ARCHINIT
 
+#ifdef CONFIG_FS_PROCFS
   mount(NULL, "/proc", "procfs", 0, NULL);
+#endif
+
+#ifdef CONFIG_FS_TMPFS
+  mount(NULL, "/tmp", "tmpfs", 0, NULL);
+#endif
 
 #endif
 

@@ -105,6 +105,7 @@
 #endif
 #  define SAM_NDMAC        2         /* (2) XDMA controllers */
 #  define SAM_NDMACHAN     16        /* (16) DMA channels per XDMA controller */
+#  define SAM_NQSPI        2         /* (2) QuadSPI controllers */
 
 /* SAMA5D3 Family
  *

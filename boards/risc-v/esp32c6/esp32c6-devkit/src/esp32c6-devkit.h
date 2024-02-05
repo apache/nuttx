@@ -26,8 +26,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
-#include <stdint.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -38,7 +36,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public data
+ * Public Data
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
@@ -48,20 +46,42 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32c6_bringup
+ * Name: esp_bringup
  *
  * Description:
- *   Perform architecture-specific initialization
+ *   Perform architecture-specific initialization.
  *
  *   CONFIG_BOARD_LATE_INITIALIZE=y :
  *     Called from board_late_initialize().
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
- *     Called from the NSH library via board_app_initialize()
+ *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_BOARDCTL=y :
+ *     Called from the NSH library via board_app_initialize().
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned on
+ *   any failure.
  *
  ****************************************************************************/
 
-int esp32c6_bringup(void);
+int esp_bringup(void);
+
+/****************************************************************************
+ * Name: esp_gpio_init
+ *
+ * Description:
+ *   Configure the GPIO driver.
+ *
+ * Returned Value:
+ *   Zero (OK).
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_GPIO
+int esp_gpio_init(void);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_RISCV_ESP32C6_ESP32C6_DEVKIT_SRC_ESP32C6_DEVKIT_H */

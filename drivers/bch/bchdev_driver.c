@@ -55,13 +55,13 @@ static int     bch_open(FAR struct file *filep);
 static int     bch_close(FAR struct file *filep);
 static off_t   bch_seek(FAR struct file *filep, off_t offset, int whence);
 static ssize_t bch_read(FAR struct file *filep, FAR char *buffer,
-                 size_t buflen);
+                        size_t buflen);
 static ssize_t bch_write(FAR struct file *filep, FAR const char *buffer,
-                 size_t buflen);
+                         size_t buflen);
 static int     bch_ioctl(FAR struct file *filep, int cmd,
-                 unsigned long arg);
+                         unsigned long arg);
 static int     bch_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                 bool setup);
+                        bool setup);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int     bch_unlink(FAR struct inode *inode);
 #endif

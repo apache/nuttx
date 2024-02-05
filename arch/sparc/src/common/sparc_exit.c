@@ -31,58 +31,11 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
-#ifdef CONFIG_DUMP_ON_EXIT
-#  include <nuttx/fs/fs.h>
-#endif
 
 #include "task/task.h"
 #include "sched/sched.h"
 #include "group/group.h"
 #include "sparc_internal.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef CONFIG_DEBUG_SCHED_INFO
-#  undef CONFIG_DUMP_ON_EXIT
-#endif
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: _up_dumponexit
- *
- * Description:
- *   Dump the state of all tasks whenever on task exits.  This is debug
- *   instrumentation that was added to check file-related reference counting
- *   but could be useful again sometime in the future.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_DUMP_ON_EXIT
-static void _up_dumponexit(struct tcb_s *tcb, void *arg)
-{
-  struct filelist *filelist;
-  int i;
-
-  sinfo("  TCB=%p name=%s pid=%d\n", tcb, tcb->argv[0], tcb->pid);
-  sinfo("    priority=%d state=%d\n", tcb->sched_priority, tcb->task_state);
-
-  filelist = &tcb->group->tg_filelist;
-  for (i = 0; i < CONFIG_NFILE_DESCRIPTORS; i++)
-    {
-      struct inode *inode = filelist->fl_files[i].f_inode;
-      if (inode)
-        {
-          sinfo("      fd=%d refcount=%d\n",
-                i, inode->i_crefs);
-        }
-    }
-}
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -109,7 +62,7 @@ void up_exit(int status)
 
   (void)enter_critical_section();
 
-  sinfo("TCB=%p exiting\n", tcb);
+  nxsched_dumponexit();
 
   /* Update scheduler parameters */
 
@@ -118,11 +71,6 @@ void up_exit(int status)
   /* Destroy the task at the head of the ready to run list. */
 
   (void)nxtask_exit();
-
-#ifdef CONFIG_DUMP_ON_EXIT
-  sinfo("Other tasks:\n");
-  sched_foreach(_up_dumponexit, NULL);
-#endif
 
   /* Now, perform the context switch to the new ready-to-run task at the
    * head of the list.

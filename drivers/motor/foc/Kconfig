@@ -38,4 +38,14 @@ config MOTOR_FOC_DUMMY
 	---help---
 		Build a simulated lower-half FOC device
 
+config MOTOR_FOC_FOCPWR
+	bool
+
+config MOTOR_FOC_DRV8301
+	bool "DRV8301 Three-Phase Gate Driver"
+	default n
+	select MOTOR_FOC_FOCPWR
+	---help---
+		Enables FOC power-stage DRV8301 driver.
+
 endif #MOTOR_FOC

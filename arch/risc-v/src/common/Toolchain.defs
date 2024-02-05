@@ -146,31 +146,57 @@ ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
     endif
   endif
 
-  # Detect cpu ISA support flags
+  # Detect cpu ISA support flags:
+  #
+  # Naming Convention
+  # RISC-V defines an exact order that must be used to define the RISC-V ISA subset:
+  #
+  # RV [32, 64, 128] I, M, A, F, D, G, Q, L, C, B, J, T, P, V, N
+  #
+  # For example, RV32IMAFDQC is legal, whereas RV32IMAFDCQ is not.
+
+  ARCHCPUEXTFLAGS = i
 
   ifeq ($(CONFIG_ARCH_RV_ISA_M),y)
-    ARCHRVISAM = m
+    ARCHCPUEXTFLAGS := $(ARCHCPUEXTFLAGS)m
   endif
 
   ifeq ($(CONFIG_ARCH_RV_ISA_A),y)
-    ARCHRVISAA = a
-  endif
-
-  ifeq ($(CONFIG_ARCH_RV_ISA_C),y)
-    ARCHRVISAC = c
+    ARCHCPUEXTFLAGS := $(ARCHCPUEXTFLAGS)a
   endif
 
   ifeq ($(CONFIG_ARCH_FPU),y)
-    ARCHRVISAF = f
+    ARCHCPUEXTFLAGS := $(ARCHCPUEXTFLAGS)f
   endif
 
   ifeq ($(CONFIG_ARCH_DPFPU),y)
-    ARCHRVISAD = d
+    ARCHCPUEXTFLAGS := $(ARCHCPUEXTFLAGS)d
   endif
 
-  GCC_VERSION = ${shell $(CROSSDEV)gcc --version | grep gcc | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | tail -n 1 | cut -d"." -f1 }
-  ifeq ($(shell expr $(GCC_VERSION) \>= 12), 1)
-    ARCHRVISAZ = _zicsr_zifencei
+  ifeq ($(CONFIG_ARCH_QPFPU),y)
+    ARCHCPUEXTFLAGS := $(ARCHCPUEXTFLAGS)q
+  endif
+
+  ifeq ($(CONFIG_ARCH_RV_ISA_C),y)
+    ARCHCPUEXTFLAGS := $(ARCHCPUEXTFLAGS)c
+  endif
+
+  ifeq ($(CONFIG_ARCH_RV_ISA_V),y)
+    ARCHCPUEXTFLAGS := $(ARCHCPUEXTFLAGS)v
+  endif
+
+  ifeq ($(CONFIG_ARCH_RV_ISA_ZICSR_ZIFENCEI),y)
+    ifeq ($(GCCVER),)
+      export GCCVER = ${shell $(CROSSDEV)gcc --version | grep gcc | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | tail -n 1 | cut -d"." -f1 }
+    endif
+    ifeq ($(shell expr $(GCCVER) \>= 12), 1)
+      ARCHCPUEXTFLAGS := $(ARCHCPUEXTFLAGS)_zicsr_zifencei
+    endif
+  endif
+
+  ARCH_RV_ISA_VENDOR_EXTENSIONS = $(strip $(subst ",,$(CONFIG_ARCH_RV_ISA_VENDOR_EXTENSIONS)))
+  ifneq ($(ARCH_RV_ISA_VENDOR_EXTENSIONS),)
+      ARCHCPUEXTFLAGS := $(ARCHCPUEXTFLAGS)_$(ARCH_RV_ISA_VENDOR_EXTENSIONS)
   endif
 
   # Detect abi type
@@ -189,7 +215,6 @@ ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
 
   # Construct arch flags
 
-  ARCHCPUEXTFLAGS = i$(ARCHRVISAM)$(ARCHRVISAA)$(ARCHRVISAF)$(ARCHRVISAD)$(ARCHRVISAC)$(ARCHRVISAZ)
   ARCHCPUFLAGS += -march=$(ARCHTYPE)$(ARCHCPUEXTFLAGS)
 
   # Construct arch abi flags
@@ -251,6 +276,12 @@ ifeq ($(CONFIG_MM_UBSAN_TRAP_ON_ERROR),y)
   ARCHOPTIMIZATION += -fsanitize-undefined-trap-on-error
 endif
 
+# Instrumentation options
+
+ifeq ($(CONFIG_ARCH_INSTRUMENT_ALL),y)
+  ARCHOPTIMIZATION += -finstrument-functions
+endif
+
 # Default toolchain
 
 CC      = $(CROSSDEV)gcc
@@ -260,7 +291,7 @@ STRIP   = $(CROSSDEV)strip --strip-unneeded
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
 LD      = $(CROSSDEV)ld
-AR      = $(CROSSDEV)ar rcsP
+AR      = $(CROSSDEV)ar rcs
 NM      = $(CROSSDEV)nm
 
 # Link Time Optimization
@@ -269,7 +300,7 @@ ifeq ($(CONFIG_LTO_FULL),y)
   ARCHOPTIMIZATION += -flto
   ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
     LD := $(CROSSDEV)gcc
-    AR := $(CROSSDEV)gcc-ar rcsP
+    AR := $(CROSSDEV)gcc-ar rcs
     NM := $(CROSSDEV)gcc-nm
     ARCHOPTIMIZATION += -fuse-linker-plugin
     ARCHOPTIMIZATION += -fno-builtin

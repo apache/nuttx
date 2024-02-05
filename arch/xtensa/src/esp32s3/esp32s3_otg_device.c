@@ -3724,6 +3724,7 @@ static int esp32s3_usbinterrupt(int irq, void *context, void *arg)
         {
           usbtrace(TRACE_INTDECODE(ESP32S3_TRACEINTID_SOF),
                    (uint16_t)regval);
+          usbdev_sof_irq(&priv->usbdev, esp32s3_getframe(&priv->usbdev));
         }
 #endif
 
@@ -5062,14 +5063,22 @@ static int esp32s3_pullup(struct usbdev_s *dev, bool enable)
   usbtrace(TRACE_DEVPULLUP, (uint16_t)enable);
 
   irqstate_t flags = enter_critical_section();
-  regval = esp32s3_getreg(ESP32S3_OTG_DCTL);
   if (enable)
     {
       /* Connect the device by clearing the soft disconnect bit in the DCTL
        * register.
        */
 
+      regval = esp32s3_getreg(ESP32S3_OTG_DCTL);
       regval &= ~OTG_DCTL_SDIS;
+      esp32s3_putreg(regval, ESP32S3_OTG_DCTL);
+
+      /* Set DP pull-up */
+
+      regval  = esp32s3_getreg(USB_WRAP_OTG_CONF_REG);
+      regval &= ~USB_WRAP_DP_PULLDOWN;
+      regval |= USB_WRAP_DP_PULLUP;
+      esp32s3_putreg(regval, USB_WRAP_OTG_CONF_REG);
     }
   else
     {
@@ -5077,10 +5086,18 @@ static int esp32s3_pullup(struct usbdev_s *dev, bool enable)
        * register.
        */
 
+      regval = esp32s3_getreg(ESP32S3_OTG_DCTL);
       regval |= OTG_DCTL_SDIS;
+      esp32s3_putreg(regval, ESP32S3_OTG_DCTL);
+
+      /* Set DP pull-down */
+
+      regval  = esp32s3_getreg(USB_WRAP_OTG_CONF_REG);
+      regval &= ~USB_WRAP_DP_PULLUP;
+      regval |= USB_WRAP_DP_PULLDOWN;
+      esp32s3_putreg(regval, USB_WRAP_OTG_CONF_REG);
     }
 
-  esp32s3_putreg(regval, ESP32S3_OTG_DCTL);
   leave_critical_section(flags);
   return OK;
 }
@@ -5296,11 +5313,12 @@ static void esp32s3_hwinitialize(struct esp32s3_usbdev_s *priv)
   regval |= RTC_CNTL_SW_HW_USB_PHY_SEL | RTC_CNTL_SW_USB_PHY_SEL;
   esp32s3_putreg(regval, RTC_CNTL_RTC_USB_CONF_REG);
 
+  /* Set USB DM and DP pin pull-down */
+
   regval  = esp32s3_getreg(USB_WRAP_OTG_CONF_REG);
-  regval &= ~(USB_WRAP_PHY_SEL | USB_WRAP_DM_PULLUP |
-              USB_WRAP_DP_PULLDOWN | USB_WRAP_DM_PULLDOWN);
-  regval |= USB_WRAP_PAD_PULL_OVERRIDE | USB_WRAP_DP_PULLUP |
-            USB_WRAP_USB_PAD_ENABLE;
+  regval &= ~(USB_WRAP_PHY_SEL | USB_WRAP_DP_PULLUP | USB_WRAP_DM_PULLUP);
+  regval |= USB_WRAP_PAD_PULL_OVERRIDE | USB_WRAP_DP_PULLDOWN |
+            USB_WRAP_DM_PULLDOWN | USB_WRAP_USB_PAD_ENABLE;
   esp32s3_putreg(regval, USB_WRAP_OTG_CONF_REG);
 
   /* At start-up the core is in FS mode. */
@@ -5593,8 +5611,7 @@ void xtensa_usbinitialize(void)
   esp32s3_configgpio(USB_IOMUX_DM, DRIVE_3);
   esp32s3_configgpio(USB_IOMUX_DP, DRIVE_3);
 
-  /**
-   * USB_OTG_IDDIG_IN_IDX:     connected connector is mini-B side
+  /* USB_OTG_IDDIG_IN_IDX:     connected connector is mini-B side
    * USB_SRP_BVALID_IN_IDX:    HIGH to force USB device mode
    * USB_OTG_VBUSVALID_IN_IDX: receiving a valid Vbus from device
    * USB_OTG_AVALID_IN_IDX:    HIGH to force USB host mode

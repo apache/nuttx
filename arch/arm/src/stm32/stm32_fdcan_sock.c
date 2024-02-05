@@ -3191,7 +3191,7 @@ static int  fdcan_netdev_ioctl(struct net_driver_s *dev, int cmd,
 
   return ret;
 }
-#endif  /* CONFIG_NETDEV_IOCTL */
+#endif /* CONFIG_NETDEV_IOCTL */
 
 /****************************************************************************
  * Public Functions

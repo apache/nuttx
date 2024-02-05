@@ -219,14 +219,14 @@ static int rpmsgfs_statfs_handler(FAR struct rpmsg_endpoint *ept,
   cookie->result = header->result;
   if (cookie->result >= 0)
     {
-      buf->f_type    = rsp->buf.f_type;
-      buf->f_namelen = rsp->buf.f_namelen;
-      buf->f_bsize   = rsp->buf.f_bsize;
-      buf->f_blocks  = rsp->buf.f_blocks;
-      buf->f_bfree   = rsp->buf.f_bfree;
-      buf->f_bavail  = rsp->buf.f_bavail;
-      buf->f_files   = rsp->buf.f_files;
-      buf->f_ffree   = rsp->buf.f_ffree;
+      buf->f_type    = rsp->type;
+      buf->f_namelen = rsp->namelen;
+      buf->f_bsize   = rsp->bsize;
+      buf->f_blocks  = rsp->blocks;
+      buf->f_bfree   = rsp->bfree;
+      buf->f_bavail  = rsp->bavail;
+      buf->f_files   = rsp->files;
+      buf->f_ffree   = rsp->ffree;
     }
 
   rpmsg_post(ept, &cookie->sem);
@@ -247,19 +247,22 @@ static int rpmsgfs_stat_handler(FAR struct rpmsg_endpoint *ept,
   cookie->result = header->result;
   if (cookie->result >= 0)
     {
-      buf->st_dev     = rsp->buf.st_dev;
-      buf->st_ino     = rsp->buf.st_ino;
-      buf->st_mode    = rsp->buf.st_mode;
-      buf->st_nlink   = rsp->buf.st_nlink;
-      buf->st_uid     = rsp->buf.st_uid;
-      buf->st_gid     = rsp->buf.st_gid;
-      buf->st_rdev    = rsp->buf.st_rdev;
-      buf->st_size    = rsp->buf.st_size;
-      buf->st_atime   = rsp->buf.st_atime;
-      buf->st_mtime   = rsp->buf.st_mtime;
-      buf->st_ctime   = rsp->buf.st_ctime;
-      buf->st_blksize = rsp->buf.st_blksize;
-      buf->st_blocks  = rsp->buf.st_blocks;
+      buf->st_dev          = rsp->buf.dev;
+      buf->st_ino          = rsp->buf.ino;
+      buf->st_mode         = rsp->buf.mode;
+      buf->st_nlink        = rsp->buf.nlink;
+      buf->st_uid          = rsp->buf.uid;
+      buf->st_gid          = rsp->buf.gid;
+      buf->st_rdev         = rsp->buf.rdev;
+      buf->st_size         = rsp->buf.size;
+      buf->st_atim.tv_sec  = rsp->buf.atim_sec;
+      buf->st_atim.tv_nsec = rsp->buf.atim_nsec;
+      buf->st_mtim.tv_sec  = rsp->buf.mtim_sec;
+      buf->st_mtim.tv_nsec = rsp->buf.mtim_nsec;
+      buf->st_ctim.tv_sec  = rsp->buf.ctim_sec;
+      buf->st_ctim.tv_nsec = rsp->buf.ctim_nsec;
+      buf->st_blksize      = rsp->buf.blksize;
+      buf->st_blocks       = rsp->buf.blocks;
     }
 
   rpmsg_post(ept, &cookie->sem);
@@ -909,9 +912,24 @@ int rpmsgfs_client_fchstat(FAR void *handle, int fd,
 {
   struct rpmsgfs_fchstat_s msg =
   {
-    .flags = flags,
-    .buf = *buf,
-    .fd = fd,
+    .buf.dev       = buf->st_dev,
+    .buf.ino       = buf->st_ino,
+    .buf.mode      = buf->st_mode,
+    .buf.nlink     = buf->st_nlink,
+    .buf.uid       = buf->st_uid,
+    .buf.gid       = buf->st_gid,
+    .buf.rdev      = buf->st_rdev,
+    .buf.size      = buf->st_size,
+    .buf.atim_sec  = buf->st_atim.tv_sec,
+    .buf.atim_nsec = buf->st_atim.tv_nsec,
+    .buf.mtim_sec  = buf->st_mtim.tv_sec,
+    .buf.mtim_nsec = buf->st_mtim.tv_nsec,
+    .buf.ctim_sec  = buf->st_ctim.tv_sec,
+    .buf.ctim_nsec = buf->st_ctim.tv_nsec,
+    .buf.blksize   = buf->st_blksize,
+    .buf.blocks    = buf->st_blocks,
+    .flags            = flags,
+    .fd               = fd,
   };
 
   return rpmsgfs_send_recv(handle, RPMSGFS_FCHSTAT, true,

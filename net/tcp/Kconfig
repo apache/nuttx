@@ -158,6 +158,17 @@ config NET_TCP_CC_NEWRENO
 			The TCP Congestion Control defines four congestion control algorithms,
 			slow start, congestion avoidance, fast retransmit, and fast recovery.
 
+config NET_TCP_ISN_RFC6528
+	bool "Use Initial Sequence Number Algorithm from RFC 6528"
+	default n
+	depends on CRYPTO
+	---help---
+		Initial Sequence Number Generation Algorithm from RFC 6528:
+			ISN = M + F(localip, localport, remoteip, remoteport, secretkey)
+
+			M is the 4 microsecond timer, and F() is a pseudorandom
+			function (PRF) which is MD5 (suggested by RFC 6528).
+
 config NET_TCP_WINDOW_SCALE
 	bool "Enable TCP/IP Window Scale Option"
 	default n

@@ -41,7 +41,10 @@
 
 #include "xtensa.h"
 #include "xtensa_attr.h"
+#include "hardware/esp32s3_efuse.h"
+#include "hardware/esp32s3_extmem.h"
 #include "hardware/esp32s3_spi_mem_reg.h"
+#include "hardware/esp32s3_cache_memory.h"
 #include "rom/esp32s3_spiflash.h"
 #include "rom/esp32s3_opi_flash.h"
 #include "esp32s3_irq.h"
@@ -54,30 +57,35 @@
 /* RO data page in MMU index */
 
 #define DROM0_PAGES_START           (2)
-#define DROM0_PAGES_END             (128)
-
-/* MMU invalid value */
-
-#define INVALID_MMU_VAL             (0x100)
-
-/* MMU page size */
-
-#define SPI_FLASH_MMU_PAGE_SIZE     (0x10000)
+#define DROM0_PAGES_END             (512)
 
 /* MMU base virtual mapped address */
 
 #define VADDR0_START_ADDR           (0x3c020000)
 
+#define VADDR1_START_ADDR           (0x42000000)
+
 /* Flash MMU table for CPU */
 
 #define MMU_TABLE                   ((volatile uint32_t *)DR_REG_MMU_TABLE)
 
-#define MMU_ADDR2PAGE(_addr)        ((_addr) / SPI_FLASH_MMU_PAGE_SIZE)
-#define MMU_ADDR2OFF(_addr)         ((_addr) % SPI_FLASH_MMU_PAGE_SIZE)
-#define MMU_BYTES2PAGES(_n)         (((_n) + SPI_FLASH_MMU_PAGE_SIZE - 1) / \
-                                     SPI_FLASH_MMU_PAGE_SIZE)
+#define MMU_ADDR2PAGE(_addr)        ((_addr) / MMU_PAGE_SIZE)
+#define MMU_ADDR2OFF(_addr)         ((_addr) % MMU_PAGE_SIZE)
+#define MMU_BYTES2PAGES(_n)         (((_n) + MMU_PAGE_SIZE - 1) / \
+                                     MMU_PAGE_SIZE)
 
 #ifdef CONFIG_ESP32S3_SPI_FLASH_DONT_USE_ROM_CODE
+
+#define g_rom_flashchip             (rom_spiflash_legacy_data->chip)
+
+#define MMU_ALIGNUP_SIZE(_s)        (((_s) + MMU_PAGE_SIZE - 1) \
+                                     & ~(MMU_PAGE_SIZE - 1))
+#define MMU_ALIGNDOWN_SIZE(_s)      ((_s) & ~(MMU_PAGE_SIZE - 1))
+
+/* Flash MMU table for APP CPU */
+
+#define PRO_IRAM0_FIRST_PAGE        (0)
+#define IROM0_PAGES_END             (2)
 
 /* SPI port number */
 
@@ -111,7 +119,7 @@
 
 /* SPI flash operation */
 
-#  ifdef CONFIG_ESP32S3S_SPI_FLASH_USE_32BIT_ADDRESS
+#  ifdef CONFIG_ESP32S3_SPI_FLASH_USE_32BIT_ADDRESS
 #    define ADDR_BITS(addr)         (((addr) & 0xff000000) ? 32 : 24)
 #    define READ_CMD(addr)          (ADDR_BITS(addr) == 32 ? FLASH_CMD_FSTRD4B : \
                                                              FLASH_CMD_FSTRD)
@@ -171,35 +179,6 @@
 #endif /* CONFIG_ESP32S3_SPI_FLASH_DONT_USE_ROM_CODE */
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/* SPI Flash map request data */
-
-struct spiflash_map_req_s
-{
-  /* Request mapping SPI Flash base address */
-
-  uint32_t  src_addr;
-
-  /* Request mapping SPI Flash size */
-
-  uint32_t  size;
-
-  /* Mapped memory pointer */
-
-  void      *ptr;
-
-  /* Mapped started MMU page index */
-
-  uint32_t  start_page;
-
-  /* Mapped MMU page count */
-
-  uint32_t  page_cnt;
-};
-
-/****************************************************************************
  * Private Functions Declaration
  ****************************************************************************/
 
@@ -208,6 +187,7 @@ static void spiflash_end(void);
 static void spi_flash_disable_cache(uint32_t cpuid);
 static void spi_flash_restore_cache(uint32_t cpuid);
 #ifdef CONFIG_SMP
+static int spi_flash_op_block_task(int argc, char *argv[]);
 static int spiflash_init_spi_flash_op_block_task(int cpu);
 #endif
 
@@ -220,6 +200,7 @@ extern uint32_t cache_suspend_dcache(void);
 extern void cache_resume_icache(uint32_t val);
 extern void cache_resume_dcache(uint32_t val);
 extern int cache_invalidate_addr(uint32_t addr, uint32_t size);
+extern void cache_invalidate_icache_all(void);
 
 /****************************************************************************
  * Private Data
@@ -237,7 +218,6 @@ static struct spiflash_guard_funcs g_spi_flash_guard_funcs =
 
 static uint32_t s_flash_op_cache_state[CONFIG_SMP_NCPUS];
 
-static spinlock_t g_flash_op_lock;
 static rmutex_t g_flash_op_mutex;
 static volatile bool g_flash_op_can_start = false;
 static volatile bool g_flash_op_complete = false;
@@ -249,6 +229,48 @@ static sem_t g_disable_non_iram_isr_on_core[CONFIG_SMP_NCPUS];
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: spiflash_suspend_cache
+ *
+ * Description:
+ *   Suspend CPU cache.
+ *
+ ****************************************************************************/
+
+static void spiflash_suspend_cache(void)
+{
+  int cpu = up_cpu_index();
+#ifdef CONFIG_SMP
+  int other_cpu = cpu ? 0 : 1;
+#endif
+
+  spi_flash_disable_cache(cpu);
+#ifdef CONFIG_SMP
+  spi_flash_disable_cache(other_cpu);
+#endif
+}
+
+/****************************************************************************
+ * Name: spiflash_resume_cache
+ *
+ * Description:
+ *   Resume CPU cache.
+ *
+ ****************************************************************************/
+
+static void spiflash_resume_cache(void)
+{
+  int cpu = up_cpu_index();
+#ifdef CONFIG_SMP
+  int other_cpu = cpu ? 0 : 1;
+#endif
+
+  spi_flash_restore_cache(cpu);
+#ifdef CONFIG_SMP
+  spi_flash_restore_cache(other_cpu);
+#endif
+}
 
 /****************************************************************************
  * Name: spiflash_start
@@ -271,11 +293,11 @@ static void spiflash_start(void)
 
   DEBUGASSERT(cpu == 0 || cpu == 1);
 
+  /* Temporary raise schedule priority */
+
   nxsched_set_priority(tcb, SCHED_PRIORITY_MAX);
 
 #ifdef CONFIG_SMP
-
-  /* Temporary raise schedule priority */
 
   DEBUGASSERT(other_cpu == 0 || other_cpu == 1);
   DEBUGASSERT(other_cpu != cpu);
@@ -305,10 +327,7 @@ static void spiflash_start(void)
 
   esp32s3_irq_noniram_disable();
 
-  spi_flash_disable_cache(cpu);
-#ifdef CONFIG_SMP
-  spi_flash_disable_cache(other_cpu);
-#endif
+  spiflash_suspend_cache();
 }
 
 /****************************************************************************
@@ -321,7 +340,6 @@ static void spiflash_start(void)
 
 static void spiflash_end(void)
 {
-  struct tcb_s *tcb = this_task();
   const int cpu = up_cpu_index();
 #ifdef CONFIG_SMP
   const int other_cpu = cpu ? 0 : 1;
@@ -334,10 +352,8 @@ static void spiflash_end(void)
   DEBUGASSERT(other_cpu != cpu);
 #endif
 
-  spi_flash_restore_cache(cpu);
-#ifdef CONFIG_SMP
-  spi_flash_restore_cache(other_cpu);
-#endif
+  cache_invalidate_icache_all();
+  spiflash_resume_cache();
 
   /* Signal to spi_flash_op_block_task that flash operation is complete */
 
@@ -611,316 +627,108 @@ static void disable_flash_write(void)
     }
   while (1);
 }
-#endif /* CONFIG_ESP32S3_SPI_FLASH_DONT_USE_ROM_CODE */
 
 /****************************************************************************
- * Name: esp32s3_mmap
+ * Name: spiflash_pagecached
  *
  * Description:
- *   Mapped SPI Flash address to ESP32-S3's address bus, so that software
- *   can read SPI Flash data by reading data from memory access.
- *
- *   If SPI Flash hardware encryption is enable, the read from mapped
- *   address is decrypted.
+ *   Check if the given page is cached.
  *
  * Input Parameters:
- *   req - SPI Flash mapping requesting parameters
+ *   phypage - physical address page.
+ *   ptr     - Pointer to the virtual address.
  *
  * Returned Value:
- *   0 if success or a negative value if fail.
+ *   True if flash address has corresponding cache mapping, false otherwise.
  *
  ****************************************************************************/
 
-static int esp32s3_mmap(struct spiflash_map_req_s *req)
+static bool IRAM_ATTR spiflash_pagecached(uint32_t phypage, uint32_t *ptr)
 {
-  int ret;
+  int start[2];
+  int end[2];
   int i;
-  int start_page;
-  int flash_page;
-  int page_cnt;
-  uint32_t mapped_addr;
+  int j;
 
-  spiflash_start();
+  /* Data ROM start and end pages */
 
-  for (start_page = DROM0_PAGES_START;
-       start_page < DROM0_PAGES_END;
-       ++start_page)
+  start[0] = DROM0_PAGES_START;
+  end[0]   = DROM0_PAGES_END;
+
+  /* Instruction RAM start and end pages */
+
+  start[1] = PRO_IRAM0_FIRST_PAGE;
+  end[1]   = IROM0_PAGES_END;
+
+  for (i = 0; i < 2; i++)
     {
-      if (MMU_TABLE[start_page] == INVALID_MMU_VAL)
+      for (j = start[i]; j < end[i]; j++)
         {
-          break;
+          if (MMU_TABLE[j] == phypage)
+            {
+              if (i == 0)
+                {
+                  /* SPI_FLASH_MMAP_DATA */
+
+                  *ptr = (VADDR0_START_ADDR +
+                          MMU_PAGE_SIZE * (j - start[0]));
+                }
+              else
+                {
+                  /* SPI_FLASH_MMAP_INST */
+
+                  *ptr = (VADDR1_START_ADDR +
+                          MMU_PAGE_SIZE * (j - start[1]));
+                }
+
+              return true;
+            }
         }
     }
 
-  flash_page = MMU_ADDR2PAGE(req->src_addr);
-  page_cnt   = MMU_BYTES2PAGES(MMU_ADDR2OFF(req->src_addr) + req->size);
-
-  if (start_page + page_cnt < DROM0_PAGES_END)
-    {
-      mapped_addr = (start_page - DROM0_PAGES_START) *
-                    SPI_FLASH_MMU_PAGE_SIZE +
-                    VADDR0_START_ADDR;
-
-      for (i = 0; i < page_cnt; i++)
-        {
-          MMU_TABLE[start_page + i] = flash_page + i;
-          cache_invalidate_addr(mapped_addr + i * SPI_FLASH_MMU_PAGE_SIZE,
-                                SPI_FLASH_MMU_PAGE_SIZE);
-        }
-
-      req->start_page = start_page;
-      req->page_cnt = page_cnt;
-      req->ptr = (void *)(mapped_addr + MMU_ADDR2OFF(req->src_addr));
-      ret = OK;
-    }
-  else
-    {
-      ret = -ENOBUFS;
-    }
-
-  spiflash_end();
-
-  return ret;
+  return false;
 }
 
 /****************************************************************************
- * Name: esp32s3_ummap
+ * Name: spiflash_flushmapped
  *
  * Description:
- *   Unmap SPI Flash address in ESP32-S3's address bus, and free resource.
+ *   Writeback PSRAM data and invalidate the cache if the address is mapped.
  *
  * Input Parameters:
- *   req - SPI Flash mapping requesting parameters
+ *   start - SPI Flash address.
+ *   size  - SPI Flash size.
  *
  * Returned Value:
  *   None.
  *
  ****************************************************************************/
 
-static void esp32s3_ummap(const struct spiflash_map_req_s *req)
+static void IRAM_ATTR spiflash_flushmapped(size_t start, size_t size)
 {
-  int i;
+  uint32_t page_start;
+  uint32_t addr;
+  uint32_t page;
+  uint32_t vaddr;
 
-  spiflash_start();
+  page_start = MMU_ALIGNDOWN_SIZE(start);
+  size += (start - page_start);
+  size = MMU_ALIGNUP_SIZE(size);
 
-  for (i = req->start_page; i < req->start_page + req->page_cnt; ++i)
+  for (addr = page_start; addr < page_start + size;
+       addr += MMU_PAGE_SIZE)
     {
-      MMU_TABLE[i] = INVALID_MMU_VAL;
+      page = addr / MMU_PAGE_SIZE;
+      if (addr >= g_rom_flashchip.chip_size)
+        {
+          return;
+        }
+
+      if (spiflash_pagecached(page, &vaddr))
+        {
+          cache_invalidate_addr(vaddr, MMU_PAGE_SIZE);
+        }
     }
-
-  spiflash_end();
-}
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: spi_flash_read_encrypted
- *
- * Description:
- *   Read decrypted data from SPI Flash at designated address when
- *   enable SPI Flash hardware encryption.
- *
- * Input Parameters:
- *   addr   - target address
- *   buffer - data buffer pointer
- *   size   - data number
- *
- * Returned Value:
- *   OK if success or a negative value if fail.
- *
- ****************************************************************************/
-
-int spi_flash_read_encrypted(uint32_t addr, void *buffer, uint32_t size)
-{
-  int ret;
-  struct spiflash_map_req_s req =
-    {
-      .src_addr = addr,
-      .size = size
-    };
-
-  ret = esp32s3_mmap(&req);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  memcpy(buffer, req.ptr, size);
-
-  esp32s3_ummap(&req);
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: spi_flash_erase_sector
- *
- * Description:
- *   Erase the Flash sector.
- *
- * Parameters:
- *   sector - Sector number, the count starts at sector 0, 4KB per sector.
- *
- * Returned Values: esp_err_t
- *   Zero (OK) is returned or a negative error.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ESP32S3_SPI_FLASH_DONT_USE_ROM_CODE
-int spi_flash_erase_sector(uint32_t sector)
-{
-  int ret = OK;
-  uint32_t addr = sector * FLASH_SECTOR_SIZE;
-
-  spiflash_start();
-
-  wait_flash_idle();
-  enable_flash_write();
-
-  ERASE_FLASH_SECTOR(addr);
-
-  wait_flash_idle();
-  disable_flash_write();
-
-  spiflash_end();
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: spi_flash_erase_range
- *
- * Description:
- *   Erase a range of flash sectors
- *
- * Parameters:
- *   start_address - Address where erase operation has to start.
- *                   Must be 4kB-aligned
- *   size          - Size of erased range, in bytes. Must be divisible by
- *                   4kB.
- *
- * Returned Values:
- *   Zero (OK) is returned or a negative error.
- *
- ****************************************************************************/
-
-int spi_flash_erase_range(uint32_t start_address, uint32_t size)
-{
-  int ret = OK;
-  uint32_t addr = start_address;
-
-  spiflash_start();
-
-  for (uint32_t i = 0; i < size; i += FLASH_SECTOR_SIZE)
-    {
-      wait_flash_idle();
-      enable_flash_write();
-
-      ERASE_FLASH_SECTOR(addr);
-      addr += FLASH_SECTOR_SIZE;
-    }
-
-  wait_flash_idle();
-  disable_flash_write();
-
-  spiflash_end();
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: spi_flash_write
- *
- * Description:
- *   Write data to Flash.
- *
- * Parameters:
- *   dest_addr - Destination address in Flash.
- *   src       - Pointer to the source buffer.
- *   size      - Length of data, in bytes.
- *
- * Returned Values:
- *   Zero (OK) is returned or a negative error.
- *
- ****************************************************************************/
-
-int spi_flash_write(uint32_t dest_addr, const void *buffer, uint32_t size)
-{
-  int ret = OK;
-  const uint8_t *tx_buf = (const uint8_t *)buffer;
-  uint32_t tx_bytes = size;
-  uint32_t tx_addr = dest_addr;
-
-  spiflash_start();
-
-  for (int i = 0; i < size; i += SPI_BUFFER_BYTES)
-    {
-      uint32_t spi_buffer[SPI_BUFFER_WORDS];
-      uint32_t n = MIN(tx_bytes, SPI_BUFFER_BYTES);
-
-      memcpy(spi_buffer, tx_buf, n);
-
-      wait_flash_idle();
-      enable_flash_write();
-
-      WRITE_DATA_TO_FLASH(tx_addr, spi_buffer, n);
-
-      tx_bytes -= n;
-      tx_buf += n;
-      tx_addr += n;
-    }
-
-  wait_flash_idle();
-  disable_flash_write();
-
-  spiflash_end();
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: spi_flash_read
- *
- * Description:
- *   Read data from Flash.
- *
- * Parameters:
- *   src_addr - source address of the data in Flash.
- *   dest     - pointer to the destination buffer
- *   size     - length of data
- *
- * Returned Values:
- *   Zero (OK) is returned or a negative error.
- *
- ****************************************************************************/
-
-int spi_flash_read(uint32_t src_addr, void *dest, uint32_t size)
-{
-  int ret = OK;
-  uint8_t *rx_buf = (uint8_t *)dest;
-  uint32_t rx_bytes = size;
-  uint32_t rx_addr = src_addr;
-
-  spiflash_start();
-
-  for (uint32_t i = 0; i < size; i += SPI_BUFFER_BYTES)
-    {
-      uint32_t spi_buffer[SPI_BUFFER_WORDS];
-      uint32_t n = MIN(rx_bytes, SPI_BUFFER_BYTES);
-
-      READ_DATA_FROM_FLASH(rx_addr, spi_buffer, n);
-
-      memcpy(rx_buf, spi_buffer, n);
-      rx_bytes -= n;
-      rx_buf += n;
-      rx_addr += n;
-    }
-
-  spiflash_end();
-
-  return ret;
 }
 #endif /* CONFIG_ESP32S3_SPI_FLASH_DONT_USE_ROM_CODE */
 
@@ -1052,7 +860,7 @@ static int spi_flash_op_block_task(int argc, char *argv[])
  *
  ****************************************************************************/
 
-int spiflash_init_spi_flash_op_block_task(int cpu)
+static int spiflash_init_spi_flash_op_block_task(int cpu)
 {
   int pid;
   int ret = OK;
@@ -1096,6 +904,367 @@ int spiflash_init_spi_flash_op_block_task(int cpu)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: esp32s3_mmap
+ *
+ * Description:
+ *   Mapped SPI Flash address to ESP32-S3's address bus, so that software
+ *   can read SPI Flash data by reading data from memory access.
+ *
+ *   If SPI Flash hardware encryption is enable, the read from mapped
+ *   address is decrypted.
+ *
+ * Input Parameters:
+ *   req - SPI Flash mapping requesting parameters
+ *
+ * Returned Value:
+ *   0 if success or a negative value if fail.
+ *
+ ****************************************************************************/
+
+int esp32s3_mmap(struct spiflash_map_req_s *req)
+{
+  int ret;
+  int i;
+  int start_page;
+  int flash_page;
+  int page_cnt;
+  uint32_t mapped_addr;
+
+  spiflash_start();
+
+  for (start_page = DROM0_PAGES_START;
+       start_page < DROM0_PAGES_END;
+       ++start_page)
+    {
+      if (MMU_TABLE[start_page] == MMU_INVALID)
+        {
+          break;
+        }
+    }
+
+  flash_page = MMU_ADDR2PAGE(req->src_addr);
+  page_cnt   = MMU_BYTES2PAGES(MMU_ADDR2OFF(req->src_addr) + req->size);
+
+  if (start_page + page_cnt < DROM0_PAGES_END)
+    {
+      mapped_addr = (start_page - DROM0_PAGES_START) *
+                    MMU_PAGE_SIZE +
+                    VADDR0_START_ADDR;
+
+      for (i = 0; i < page_cnt; i++)
+        {
+          MMU_TABLE[start_page + i] = flash_page + i;
+        }
+
+      req->start_page = start_page;
+      req->page_cnt = page_cnt;
+      req->ptr = (void *)(mapped_addr + MMU_ADDR2OFF(req->src_addr));
+      ret = OK;
+      int regval = getreg32(EXTMEM_DCACHE_CTRL1_REG);
+      regval &= ~EXTMEM_DCACHE_SHUT_CORE0_BUS;
+      putreg32(regval, EXTMEM_DCACHE_CTRL1_REG);
+
+#if defined(CONFIG_SMP)
+      regval = getreg32(EXTMEM_DCACHE_CTRL1_REG);
+      regval &= ~EXTMEM_DCACHE_SHUT_CORE1_BUS;
+      putreg32(regval, EXTMEM_DCACHE_CTRL1_REG);
+#endif
+      cache_invalidate_addr(mapped_addr, page_cnt * MMU_PAGE_SIZE);
+    }
+  else
+    {
+      ret = -ENOBUFS;
+    }
+
+  spiflash_end();
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: esp32s3_ummap
+ *
+ * Description:
+ *   Unmap SPI Flash address in ESP32-S3's address bus, and free resource.
+ *
+ * Input Parameters:
+ *   req - SPI Flash mapping requesting parameters
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32s3_ummap(const struct spiflash_map_req_s *req)
+{
+  int i;
+
+  spiflash_start();
+
+  for (i = req->start_page; i < req->start_page + req->page_cnt; ++i)
+    {
+      MMU_TABLE[i] = MMU_INVALID;
+    }
+
+  spiflash_end();
+}
+
+/****************************************************************************
+ * Name: spi_flash_read_encrypted
+ *
+ * Description:
+ *   Read decrypted data from SPI Flash at designated address when
+ *   enable SPI Flash hardware encryption.
+ *
+ * Input Parameters:
+ *   addr   - target address
+ *   buffer - data buffer pointer
+ *   size   - data number
+ *
+ * Returned Value:
+ *   OK if success or a negative value if fail.
+ *
+ ****************************************************************************/
+
+int spi_flash_read_encrypted(uint32_t addr, void *buffer, uint32_t size)
+{
+  int ret;
+  struct spiflash_map_req_s req =
+    {
+      .src_addr = addr,
+      .size = size
+    };
+
+  ret = esp32s3_mmap(&req);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  memcpy(buffer, req.ptr, size);
+
+  esp32s3_ummap(&req);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: spi_flash_erase_sector
+ *
+ * Description:
+ *   Erase the Flash sector.
+ *
+ * Parameters:
+ *   sector - Sector number, the count starts at sector 0, 4KB per sector.
+ *
+ * Returned Values: esp_err_t
+ *   Zero (OK) is returned or a negative error.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S3_SPI_FLASH_DONT_USE_ROM_CODE
+int spi_flash_erase_sector(uint32_t sector)
+{
+  int ret = OK;
+  uint32_t addr = sector * FLASH_SECTOR_SIZE;
+
+  spiflash_start();
+
+  wait_flash_idle();
+  enable_flash_write();
+
+  ERASE_FLASH_SECTOR(addr);
+
+  wait_flash_idle();
+  disable_flash_write();
+  spiflash_flushmapped(addr, FLASH_SECTOR_SIZE);
+  spiflash_end();
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: spi_flash_erase_range
+ *
+ * Description:
+ *   Erase a range of flash sectors
+ *
+ * Parameters:
+ *   start_address - Address where erase operation has to start.
+ *                   Must be 4kB-aligned
+ *   size          - Size of erased range, in bytes. Must be divisible by
+ *                   4kB.
+ *
+ * Returned Values:
+ *   Zero (OK) is returned or a negative error.
+ *
+ ****************************************************************************/
+
+int spi_flash_erase_range(uint32_t start_address, uint32_t size)
+{
+  int ret = OK;
+  uint32_t addr = start_address;
+
+  spiflash_start();
+
+  for (uint32_t i = 0; i < size; i += FLASH_SECTOR_SIZE)
+    {
+      wait_flash_idle();
+      enable_flash_write();
+
+      ERASE_FLASH_SECTOR(addr);
+      addr += FLASH_SECTOR_SIZE;
+    }
+
+  wait_flash_idle();
+  disable_flash_write();
+  spiflash_flushmapped(start_address, FLASH_SECTOR_SIZE * size);
+  spiflash_end();
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: spi_flash_write
+ *
+ * Description:
+ *   Write data to Flash.
+ *
+ * Parameters:
+ *   dest_addr - Destination address in Flash.
+ *   src       - Pointer to the source buffer.
+ *   size      - Length of data, in bytes.
+ *
+ * Returned Values:
+ *   Zero (OK) is returned or a negative error.
+ *
+ ****************************************************************************/
+
+int spi_flash_write(uint32_t dest_addr, const void *buffer, uint32_t size)
+{
+  int ret = OK;
+  const uint8_t *tx_buf = (const uint8_t *)buffer;
+  uint32_t tx_bytes = size;
+  uint32_t tx_addr = dest_addr;
+#ifdef CONFIG_ESP32S3_SPIRAM
+  bool buffer_in_psram = esp32s3_ptr_extram(buffer);
+#endif
+
+  spiflash_start();
+
+  for (int i = 0; i < size; i += SPI_BUFFER_BYTES)
+    {
+      uint32_t spi_buffer[SPI_BUFFER_WORDS];
+      uint32_t n = MIN(tx_bytes, SPI_BUFFER_BYTES);
+
+#ifdef CONFIG_ESP32S3_SPIRAM
+
+      /* Re-enable cache, and then copy data from PSRAM to SRAM */
+
+      if (buffer_in_psram)
+        {
+          spiflash_resume_cache();
+        }
+#endif
+
+      memcpy(spi_buffer, tx_buf, n);
+
+#ifdef CONFIG_ESP32S3_SPIRAM
+
+      /* Disable cache, and then write data from SRAM to flash */
+
+      if (buffer_in_psram)
+        {
+          spiflash_suspend_cache();
+        }
+#endif
+
+      wait_flash_idle();
+      enable_flash_write();
+
+      WRITE_DATA_TO_FLASH(tx_addr, spi_buffer, n);
+
+      tx_bytes -= n;
+      tx_buf += n;
+      tx_addr += n;
+    }
+
+  wait_flash_idle();
+  disable_flash_write();
+  spiflash_flushmapped(dest_addr, size);
+  spiflash_end();
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: spi_flash_read
+ *
+ * Description:
+ *   Read data from Flash.
+ *
+ * Parameters:
+ *   src_addr - source address of the data in Flash.
+ *   dest     - pointer to the destination buffer
+ *   size     - length of data
+ *
+ * Returned Values:
+ *   Zero (OK) is returned or a negative error.
+ *
+ ****************************************************************************/
+
+int spi_flash_read(uint32_t src_addr, void *dest, uint32_t size)
+{
+  int ret = OK;
+  uint8_t *rx_buf = (uint8_t *)dest;
+  uint32_t rx_bytes = size;
+  uint32_t rx_addr = src_addr;
+#ifdef CONFIG_ESP32S3_SPIRAM
+  bool buffer_in_psram = esp32s3_ptr_extram(dest);
+#endif
+
+  spiflash_start();
+
+  for (uint32_t i = 0; i < size; i += SPI_BUFFER_BYTES)
+    {
+      uint32_t spi_buffer[SPI_BUFFER_WORDS];
+      uint32_t n = MIN(rx_bytes, SPI_BUFFER_BYTES);
+
+      READ_DATA_FROM_FLASH(rx_addr, spi_buffer, n);
+
+#ifdef CONFIG_ESP32S3_SPIRAM
+
+      /* Re-enable cache, and then copy data from SRAM to PSRAM */
+
+      if (buffer_in_psram)
+        {
+          spiflash_resume_cache();
+        }
+#endif
+
+      memcpy(rx_buf, spi_buffer, n);
+      rx_bytes -= n;
+      rx_buf += n;
+      rx_addr += n;
+
+#ifdef CONFIG_ESP32S3_SPIRAM
+
+      /* Disable cache, and then read data from flash to SRAM */
+
+      if (buffer_in_psram)
+        {
+          spiflash_suspend_cache();
+        }
+#endif
+    }
+
+  spiflash_end();
+
+  return ret;
+}
+#endif /* CONFIG_ESP32S3_SPI_FLASH_DONT_USE_ROM_CODE */
+
+/****************************************************************************
  * Name: esp32s3_spiflash_init
  *
  * Description:
@@ -1137,4 +1306,41 @@ int esp32s3_spiflash_init(void)
   spi_flash_guard_set(&g_spi_flash_guard_funcs);
 
   return ret;
+}
+
+/****************************************************************************
+ * Name: esp32s3_flash_encryption_enabled
+ *
+ * Description:
+ *   Check if ESP32-S3 enables SPI Flash encryption.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   True: SPI Flash encryption is enable, False if not.
+ *
+ ****************************************************************************/
+
+bool esp32s3_flash_encryption_enabled(void)
+{
+  bool enabled = false;
+  uint32_t regval;
+  uint32_t flash_crypt_cnt;
+
+  regval = getreg32(EFUSE_RD_REPEAT_DATA1_REG);
+  flash_crypt_cnt = (regval >> EFUSE_SPI_BOOT_CRYPT_CNT_S) &
+                    EFUSE_SPI_BOOT_CRYPT_CNT_V;
+
+  while (flash_crypt_cnt)
+    {
+      if (flash_crypt_cnt & 1)
+        {
+          enabled = !enabled;
+        }
+
+      flash_crypt_cnt >>= 1;
+    }
+
+  return enabled;
 }

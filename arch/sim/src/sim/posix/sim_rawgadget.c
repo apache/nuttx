@@ -26,6 +26,7 @@
 #include <sys/types.h>
 #include <sys/ioctl.h>
 
+#include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -183,7 +184,6 @@ struct usb_raw_fifo_s
 
 struct usb_raw_ep_entry_s
 {
-  bool                  halted;
   uint16_t              addr;
   uint16_t              raw_epaddr;
   uint16_t              raw_epid;
@@ -199,6 +199,7 @@ struct usb_raw_gadget_dev_t
   struct usb_raw_control_io_s ep0_ctrl;
   struct usb_raw_ep_entry_s   eps_entry[USB_RAW_EPS_NUM_MAX];
   struct usb_raw_eps_info_s   eps_info;
+  bool                        loop_stop;
 };
 
 /****************************************************************************
@@ -217,6 +218,16 @@ static struct usb_raw_gadget_dev_t g_raw_gadget_dev =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+static void host_raw_handle_signal(int signum)
+{
+  struct usb_raw_gadget_dev_t *dev = &g_raw_gadget_dev;
+
+  if (signum == SIGUSR2)
+    {
+      dev->loop_stop = true;
+    }
+}
 
 static void host_raw_fifocreate(struct usb_raw_fifo_s *fifo,
                                    uint16_t elem_size, uint16_t elem_num)
@@ -429,28 +440,6 @@ static int host_raw_ep0stall(int fd)
   return rv;
 }
 
-static int host_raw_epsethalt(int fd, int ep)
-{
-  int rv = ioctl(fd, USB_RAW_IOCTL_EP_SET_HALT, ep);
-  if (rv < 0)
-    {
-      ERROR("ioctl(USB_RAW_IOCTL_EP_SET_HALT) fail");
-    }
-
-  return rv;
-}
-
-static int host_raw_epclearhalt(int fd, int ep)
-{
-  int rv = ioctl(fd, USB_RAW_IOCTL_EP_CLEAR_HALT, ep);
-  if (rv < 0)
-    {
-      ERROR("ioctl(USB_RAW_IOCTL_EP_CLEAR_HALT) fail");
-    }
-
-  return rv;
-}
-
 static void
 host_raw_setctrlreq(struct host_usb_ctrlreq_s *host_req,
                     const struct usb_ctrlrequest *raw_req)
@@ -586,8 +575,13 @@ static void *host_raw_ep0handle(void *arg)
   struct usb_raw_gadget_dev_t *dev = &g_raw_gadget_dev;
   struct usb_raw_ep_entry_s *entry = &dev->eps_entry[0];
   struct usb_raw_control_event_s event;
+  struct sigaction action;
 
-  while (dev->fd >= 0)
+  memset(&action, 0, sizeof(action));
+  action.sa_handler = host_raw_handle_signal;
+  sigaction(SIGUSR2, &action, NULL);
+
+  while (!dev->loop_stop)
     {
       event.inner.type = 0;
       event.inner.length = sizeof(event.ctrl);
@@ -621,8 +615,13 @@ static void *host_raw_ephandle(void *arg)
   struct usb_raw_gadget_dev_t *dev = &g_raw_gadget_dev;
   struct usb_raw_ep_entry_s *entry = arg;
   struct usb_raw_data_io_s *io;
+  struct sigaction action;
 
-  while (dev->fd >= 0)
+  memset(&action, 0, sizeof(action));
+  action.sa_handler = host_raw_handle_signal;
+  sigaction(SIGUSR2, &action, NULL);
+
+  while (!dev->loop_stop)
     {
       io = (struct usb_raw_data_io_s *)
             host_raw_fifoalloc(&entry->fifo);
@@ -630,12 +629,6 @@ static void *host_raw_ephandle(void *arg)
       if (io)
         {
           int len;
-
-          if (entry->halted)
-            {
-              host_raw_epclearhalt(dev->fd, entry->raw_epid);
-              entry->halted = false;
-            }
 
           io->inner.ep = entry->raw_epid;
           io->inner.flags = 0;
@@ -649,12 +642,6 @@ static void *host_raw_ephandle(void *arg)
         }
       else
         {
-          if (!entry->halted)
-            {
-              host_raw_epsethalt(dev->fd, entry->raw_epid);
-              entry->halted = true;
-            }
-
           usleep(10);
         }
     }
@@ -687,6 +674,7 @@ int host_usbdev_init(uint32_t speed)
   host_raw_vbusdraw(fd, 0x32);
   host_raw_configure(fd);
   dev->fd = fd;
+  dev->loop_stop = false;
 
   host_raw_fifocreate(&dev->eps_entry[0].fifo,
                       (sizeof(struct host_usb_ctrlreq_s)
@@ -700,7 +688,20 @@ int host_usbdev_init(uint32_t speed)
 int host_usbdev_deinit(void)
 {
   struct usb_raw_gadget_dev_t *dev = &g_raw_gadget_dev;
+  int i;
+
+  for (i = 0; i < USB_RAW_EPS_NUM_MAX &&
+              dev->eps_entry[i].ep_thread > 0; i++)
+    {
+      pthread_kill(dev->eps_entry[i].ep_thread, SIGUSR2);
+      pthread_join(dev->eps_entry[i].ep_thread, NULL);
+    }
+
+  pthread_kill(dev->ep0_thread, SIGUSR2);
+  pthread_join(dev->ep0_thread, NULL);
   host_raw_close(dev->fd);
+  dev->fd = -1;
+
   return 0;
 }
 
@@ -749,7 +750,6 @@ int host_usbdev_epconfig(uint8_t epno,
   entry->addr = epdesc->addr;
   entry->raw_epaddr = raw_epdesc.bEndpointAddress;
   entry->raw_epid = ret;
-  entry->halted = false;
 
   if (USB_RAW_EP_DIR(epdesc->addr) == USB_DIR_OUT)
     {

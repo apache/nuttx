@@ -1403,7 +1403,7 @@ static int nrf24l01_poll(FAR struct file *filep, FAR struct pollfd *fds,
       nxmutex_lock(&dev->lock_fifo);
       if (dev->fifo_len > 0)
         {
-          poll_notify(&dev->pfd, 1, POLLIN);
+          poll_notify(&fds, 1, POLLIN);
         }
 
       nxmutex_unlock(&dev->lock_fifo);

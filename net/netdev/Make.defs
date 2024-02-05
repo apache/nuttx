@@ -34,6 +34,10 @@ ifeq ($(CONFIG_NETDOWN_NOTIFIER),y)
 SOCK_CSRCS += netdown_notifier.c
 endif
 
+ifeq ($(CONFIG_NET_IPv6),y)
+NETDEV_CSRCS += netdev_ipv6.c
+endif
+
 # Include netdev build support
 
 DEPPATH += --dep-path netdev

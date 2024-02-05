@@ -66,7 +66,7 @@ void sbi_init_mtimer(uintptr_t mtime, uintptr_t mtimecmp)
 
 uint64_t sbi_get_mtime(void)
 {
-#ifdef CONFIG_ARCH_RV64
+#if CONFIG_ARCH_RV_MMIO_BITS == 64
   return getreg64(g_mtime);
 #else
   uint32_t hi;
@@ -86,7 +86,7 @@ uint64_t sbi_get_mtime(void)
 void sbi_set_mtimecmp(uint64_t value)
 {
   uintptr_t mtimecmp = g_mtimecmp + READ_CSR(mhartid) * sizeof(uintptr_t);
-#ifdef CONFIG_ARCH_RV64
+#if CONFIG_ARCH_RV_MMIO_BITS == 64
   putreg64(value, mtimecmp);
 #else
   putreg32(UINT32_MAX, mtimecmp + 4);

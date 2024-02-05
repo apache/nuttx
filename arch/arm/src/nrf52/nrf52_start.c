@@ -188,6 +188,10 @@ void __start(void)
 
   showprogress('C');
 
+#ifdef CONFIG_ARMV7M_STACKCHECK
+  arm_stack_check_init();
+#endif
+
 #if defined(CONFIG_ARCH_CHIP_NRF52832)
   /* Initialize the errdata work-around */
 

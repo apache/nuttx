@@ -49,6 +49,19 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: esp32_spiflash_init
+ *
+ * Description:
+ *   Initialize ESP32 SPI flash driver.
+ *
+ * Returned Value:
+ *   OK if success or a negative value if fail.
+ *
+ ****************************************************************************/
+
+int esp32_spiflash_init(void);
+
+/****************************************************************************
  * Name: esp32_spiflash_alloc_mtdpart
  *
  * Description:

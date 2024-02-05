@@ -19,8 +19,16 @@
 # ##############################################################################
 
 if(CONFIG_BUILTIN)
-  set(SRCS lib_builtin_getname.c lib_builtin_isavail.c lib_builtin_forindex.c
-           lib_builtin_setlist.c)
+  set(SRCS lib_builtin_getname.c lib_builtin_isavail.c lib_builtin_forindex.c)
+
+  if(CONFIG_BUILD_PROTECTED)
+    list(APPEND SRCS lib_builtin_setlist.c)
+  endif()
+
+  if(CONFIG_SCHED_USER_IDENTITY)
+    list(APPEND SRCS lib_builtin_getuid.c lib_builtin_getgid.c
+         lib_builtin_getmode.c)
+  endif()
 
   target_sources(c PRIVATE ${SRCS})
 endif()

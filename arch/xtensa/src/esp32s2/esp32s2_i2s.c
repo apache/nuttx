@@ -356,12 +356,12 @@ static int      i2s_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
 static const struct i2s_ops_s g_i2sops =
 {
-  #ifdef I2S_HAVE_TX
+#ifdef I2S_HAVE_TX
   .i2s_txchannels     = i2s_txchannels,
   .i2s_txsamplerate   = i2s_txsamplerate,
   .i2s_txdatawidth    = i2s_txdatawidth,
   .i2s_send           = i2s_send,
-  #endif /* I2S_HAVE_TX */
+#endif /* I2S_HAVE_TX */
 
 #ifdef I2S_HAVE_RX
   .i2s_rxchannels     = i2s_rxchannels,

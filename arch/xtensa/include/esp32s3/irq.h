@@ -137,17 +137,19 @@
 #define ESP32S3_PERIPH_DCACHE_SYNC                         63
 #define ESP32S3_PERIPH_ICACHE_SYNC                         64
 #define ESP32S3_PERIPH_APB_ADC                             65
+
 #define ESP32S3_PERIPH_DMA_IN_CH0                          66
 #define ESP32S3_PERIPH_DMA_IN_CH1                          67
 #define ESP32S3_PERIPH_DMA_IN_CH2                          68
 #define ESP32S3_PERIPH_DMA_IN_CH3                          69
-
 #define ESP32S3_PERIPH_DMA_IN_CH4                          70
+
 #define ESP32S3_PERIPH_DMA_OUT_CH0                         71
 #define ESP32S3_PERIPH_DMA_OUT_CH1                         72
 #define ESP32S3_PERIPH_DMA_OUT_CH2                         73
 #define ESP32S3_PERIPH_DMA_OUT_CH3                         74
 #define ESP32S3_PERIPH_DMA_OUT_CH4                         75
+
 #define ESP32S3_PERIPH_RSA                                 76
 #define ESP32S3_PERIPH_AES                                 77
 #define ESP32S3_PERIPH_SHA                                 78

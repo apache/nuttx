@@ -127,6 +127,7 @@ const struct mountpt_operations g_fat_operations =
   fat_ioctl,         /* ioctl */
   NULL,              /* mmap */
   fat_truncate,      /* truncate */
+  NULL,              /* poll */
   fat_sync,          /* sync */
   fat_dup,           /* dup */
   fat_fstat,         /* fstat */
@@ -583,7 +584,7 @@ static ssize_t fat_read(FAR struct file *filep, FAR char *buffer,
           /* Find the next cluster in the FAT. */
 
           cluster = fat_getcluster(fs, ff->ff_currentcluster);
-          if (cluster < 2 || cluster >= fs->fs_nclusters)
+          if (cluster < 2 || cluster >= fs->fs_nclusters + 2)
             {
               ret = -EINVAL; /* Not the right error */
               goto errout_with_lock;
@@ -835,7 +836,7 @@ static ssize_t fat_write(FAR struct file *filep, FAR const char *buffer,
               ret = cluster;
               goto errout_with_lock;
             }
-          else if (cluster < 2 || cluster >= fs->fs_nclusters)
+          else if (cluster < 2 || cluster >= fs->fs_nclusters + 2)
             {
               ret = -ENOSPC;
               goto errout_with_lock;
@@ -1213,7 +1214,7 @@ static off_t fat_seek(FAR struct file *filep, off_t offset, int whence)
               break;
             }
 
-          if (cluster >= fs->fs_nclusters)
+          if (cluster >= fs->fs_nclusters + 2)
             {
               ret = -ENOSPC;
               goto errout_with_lock;

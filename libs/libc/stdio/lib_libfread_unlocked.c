@@ -229,7 +229,7 @@ ssize_t lib_fread_unlocked(FAR void *ptr, size_t count, FAR FILE *stream)
                         {
                           bytes_read = stream->fs_iofunc.read(
                                               stream->fs_cookie,
-                                              (FAR char *)stream->fs_bufread,
+                                              stream->fs_bufread,
                                               buffer_available);
                         }
                       else

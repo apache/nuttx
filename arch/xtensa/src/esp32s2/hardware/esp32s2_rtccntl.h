@@ -34,6 +34,7 @@
 /* Offset relative to each watchdog timer instance memory base */
 
 #define RWDT_CONFIG0_OFFSET         0x0094
+#define XTWDT_CONFIG0_OFFSET        0x0060
 
 /* RWDT */
 
@@ -45,6 +46,12 @@
 #define RWDT_WP_REG                 0x00ac
 #define RWDT_INT_ENA_REG_OFFSET     0x0040
 #define RWDT_INT_CLR_REG_OFFSET     0x004c
+
+/* XTWDT */
+
+#define XTWDT_TIMEOUT_OFFSET        0x00f4
+#define XTWDT_CLK_PRESCALE_OFFSET   0x00f0
+#define XTWDT_INT_ENA_REG_OFFSET    0x0040
 
 /* The value that needs to be written to RTC_CNTL_WDT_WKEY to
  * write-enable the wdt registers
@@ -58,9 +65,16 @@
 
 #define RTC_CNTL_SWD_WKEY_VALUE     0x8f1d312a
 
+#define RTC_CNTL_TIME0_REG      RTC_CNTL_TIME_LOW0_REG
+#define RTC_CNTL_TIME1_REG      RTC_CNTL_TIME_HIGH0_REG
+
 #define DPORT_CPUPERIOD_SEL_80          0
 #define DPORT_CPUPERIOD_SEL_160         1
 #define DPORT_CPUPERIOD_SEL_240         2
+
+#define DPORT_SOC_CLK_SEL_XTAL          0
+#define DPORT_SOC_CLK_SEL_PLL           1
+#define DPORT_SOC_CLK_SEL_8M            2
 
 #define RTC_APB_FREQ_REG            RTC_CNTL_STORE5_REG
 

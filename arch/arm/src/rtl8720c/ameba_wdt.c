@@ -38,8 +38,7 @@
  * Private Types
  ****************************************************************************/
 
-/**
- * This structure provides the private representation of the "lower-half"
+/* This structure provides the private representation of the "lower-half"
  * driver state structure.  This structure must be cast-compatible with the
  * well-known watchdog_lowerhalf_s structure.
  */

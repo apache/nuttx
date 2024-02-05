@@ -179,5 +179,9 @@ if(CONFIG_ARCH_BOARD_COMMON)
     list(APPEND SRCS src/cxd56_usbdevserialstr.c)
   endif()
 
+  if(CONFIG_CXD56_GNSS_ADDON)
+    list(APPEND SRCS src/cxd56_gnss_addon.c)
+  endif()
+
   target_sources(board PRIVATE ${SRCS})
 endif()

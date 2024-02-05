@@ -237,10 +237,6 @@ static int wlan_ioctl(struct net_driver_s *dev, int cmd,
                       unsigned long arg);
 #endif
 
-#ifdef CONFIG_NET_ICMPv6
-static void wlan_ipv6multicast(struct wlan_priv_s *priv);
-#endif
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -819,13 +815,6 @@ static int wlan_ifup(struct net_driver_s *dev)
       return ret;
     }
 
-#ifdef CONFIG_NET_ICMPv6
-
-  /* Set up IPv6 multicast address filtering */
-
-  wlan_ipv6multicast(priv);
-#endif
-
   IOB_QINIT(&priv->rxb);
   IOB_QINIT(&priv->txb);
 
@@ -993,76 +982,6 @@ static int wlan_rmmac(struct net_driver_s *dev, const uint8_t *mac)
   return OK;
 }
 #endif
-
-/****************************************************************************
- * Name: wlan_ipv6multicast
- *
- * Description:
- *   Configure the IPv6 multicast MAC address.
- *
- * Input Parameters:
- *   priv - A reference to the private driver state structure
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_ICMPv6
-static void wlan_ipv6multicast(struct wlan_priv_s *priv)
-{
-  struct net_driver_s *dev;
-  uint16_t tmp16;
-  uint8_t mac[6];
-
-  /* For ICMPv6, we need to add the IPv6 multicast address
-   *
-   * For IPv6 multicast addresses, the Ethernet MAC is derived by
-   * the four low-order octets OR'ed with the MAC 33:33:00:00:00:00,
-   * so for example the IPv6 address FF02:DEAD:BEEF::1:3 would map
-   * to the Ethernet MAC address 33:33:00:01:00:03.
-   *
-   * NOTES:  This appears correct for the ICMPv6 Router Solicitation
-   * Message, but the ICMPv6 Neighbor Solicitation message seems to
-   * use 33:33:ff:01:00:03.
-   */
-
-  mac[0] = 0x33;
-  mac[1] = 0x33;
-
-  dev    = &priv->dev;
-  tmp16  = dev->d_ipv6addr[6];
-  mac[2] = 0xff;
-  mac[3] = tmp16 >> 8;
-
-  tmp16  = dev->d_ipv6addr[7];
-  mac[4] = tmp16 & 0xff;
-  mac[5] = tmp16 >> 8;
-
-  ninfo("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
-        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-
-  wlan_addmac(dev, mac);
-
-#ifdef CONFIG_NET_ICMPv6_AUTOCONF
-  /* Add the IPv6 all link-local nodes Ethernet address.  This is the
-   * address that we expect to receive ICMPv6 Router Advertisement
-   * packets.
-   */
-
-  wlan_addmac(dev, g_ipv6_ethallnodes.ether_addr_octet);
-#endif /* CONFIG_NET_ICMPv6_AUTOCONF */
-
-#ifdef CONFIG_NET_ICMPv6_ROUTER
-  /* Add the IPv6 all link-local routers Ethernet address.  This is the
-   * address that we expect to receive ICMPv6 Router Solicitation
-   * packets.
-   */
-
-  wlan_addmac(dev, g_ipv6_ethallrouters.ether_addr_octet);
-#endif /* CONFIG_NET_ICMPv6_ROUTER */
-}
-#endif /* CONFIG_NET_ICMPv6 */
 
 /****************************************************************************
  * Name: wlan_ioctl
@@ -1258,7 +1177,7 @@ static int wlan_ioctl(struct net_driver_s *dev,
 
   return ret;
 }
-#endif  /* CONFIG_NETDEV_IOCTL */
+#endif /* CONFIG_NETDEV_IOCTL */
 
 /****************************************************************************
  * Name: esp32s3_net_initialize
@@ -1452,27 +1371,18 @@ static void wlan_softap_tx_done(uint8_t *data, uint16_t *len, bool status)
 #ifdef ESP32S3_WLAN_HAS_STA
 int esp32s3_wlan_sta_set_linkstatus(bool linkstatus)
 {
-  int ret = -EINVAL;
   struct wlan_priv_s *priv = &g_wlan_priv[ESP32S3_WLAN_STA_DEVNO];
 
-  if (priv != NULL)
+  if (linkstatus == true)
     {
-      if (linkstatus == true)
-        {
-          ret = netdev_carrier_on(&priv->dev);
-        }
-      else
-        {
-          ret = netdev_carrier_off(&priv->dev);
-        }
-
-      if (ret < 0)
-        {
-          nerr("ERROR: Failed to notify the networking layer\n");
-        }
+      netdev_carrier_on(&priv->dev);
+    }
+  else
+    {
+      netdev_carrier_off(&priv->dev);
     }
 
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
@@ -1595,4 +1505,4 @@ int esp32s3_wlan_softap_initialize(void)
 }
 #endif /* ESP32S3_WLAN_HAS_SOFTAP */
 
-#endif  /* CONFIG_ESP32S3_WIFI */
+#endif /* CONFIG_ESP32S3_WIFI */

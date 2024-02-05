@@ -28,7 +28,6 @@ config ARCH_ARM64
 	select ALARM_ARCH
 	select ARCH_HAVE_BACKTRACE
 	select ARCH_HAVE_INTERRUPTSTACK
-	select ARCH_HAVE_FORK
 	select ARCH_HAVE_STACKCHECK
 	select ARCH_HAVE_CUSTOMOPT
 	select ARCH_HAVE_STDARG_H
@@ -336,6 +335,13 @@ config ARCH_COVERAGE_ALL
 		will get image size increased and performance decreased
 		significantly.
 
+config ARCH_INSTRUMENT_ALL
+	bool "Instrument All"
+	default n
+	---help---
+		Add instrument to all source files. we can use instrument_register
+		to register the instrument function.
+
 comment "Architecture Options"
 
 config ARCH_NOINTC
@@ -405,6 +411,12 @@ config ARCH_HAVE_TEXT_HEAP
 	---help---
 		Special memory region for dynamic code loading
 
+config ARCH_HAVE_DATA_HEAP
+	bool
+	default n
+	---help---
+		Special memory region for dynamic data loading
+
 config ARCH_HAVE_COPY_SECTION
 	bool
 	default n
@@ -427,6 +439,11 @@ config ARCH_HAVE_DPFPU
 	bool
 	default n
 	select ARCH_HAVE_FPU
+
+config ARCH_HAVE_QPFPU
+	bool
+	default n
+	select ARCH_HAVE_DPFPU
 
 config ARCH_HAVE_LAZYFPU
 	bool
@@ -494,6 +511,10 @@ config ARCH_HAVE_BACKTRACE
 	bool
 	default n
 
+config ARCH_HAVE_DEBUG
+	bool "Architecture have debug support"
+	default n
+
 config ARCH_HAVE_PERF_EVENTS
 	bool
 	default n
@@ -502,7 +523,7 @@ config ARCH_HAVE_PERF_EVENTS
 
 config ARCH_PERF_EVENTS
 	bool "Configure hardware performance counting"
-	default y if SCHED_CRITMONITOR || SCHED_IRQMONITOR || RPTUN_PING || SEGGER_SYSVIEW
+	default y if SCHED_CRITMONITOR || SCHED_IRQMONITOR || RPMSG_PING || SEGGER_SYSVIEW
 	default n
 	depends on ARCH_HAVE_PERF_EVENTS
 	---help---
@@ -559,6 +580,14 @@ config ARCH_DPFPU
 	depends on ARCH_FPU && ARCH_HAVE_DPFPU
 	---help---
 		Enable toolchain support for double precision (64-bit) floating
+		point if both the toolchain and the hardware support it.
+
+config ARCH_QPFPU
+	bool "Quad-Precision FPU support"
+	default y
+	depends on ARCH_FPU && ARCH_HAVE_DPFPU && ARCH_HAVE_QPFPU
+	---help---
+		Enable toolchain support for quadruple precision (128 bits or 16 bytes) floating
 		point if both the toolchain and the hardware support it.
 
 config ARCH_LAZYFPU
@@ -626,6 +655,14 @@ config ARCH_USE_TEXT_HEAP
 		regions for instruction and data and the memory region used for
 		usual malloc doesn't work for instruction.
 
+config ARCH_USE_DATA_HEAP
+	bool "Enable separate data allocation for dynamic data loading"
+	default n
+	depends on ARCH_HAVE_DATA_HEAP
+	---help---
+		This option enables architecture-specific memory allocator
+		for dynamic data loading.
+
 menuconfig ARCH_ADDRENV
 	bool "Address environments"
 	default n
@@ -672,7 +709,7 @@ config ARCH_SHM_VBASE
 
 config ARCH_KMAP_VBASE
 	hex "Kernel dynamic virtual mappings base"
-	depends on ARCH_VMA_MAPPING
+	depends on MM_KMAP
 	---help---
 		The virtual address of the beginning of the kernel dynamic mapping
 		region.
@@ -729,6 +766,8 @@ config ARCH_SHM_NPAGES
 		maximum number of pages per region, and the configured size of
 		each page.
 
+endif # ARCH_VMA_MAPPING
+
 config ARCH_KMAP_NPAGES
 	int "Max kernel dynamic mapping pages"
 	default 1
@@ -740,8 +779,6 @@ config ARCH_KMAP_NPAGES
 		determined by the product of the maximum number of regions, the
 		maximum number of pages per region, and the configured size of
 		each page.
-
-endif # ARCH_VMA_MAPPING
 
 config ARCH_STACK_DYNAMIC
 	bool "Dynamic user stack"

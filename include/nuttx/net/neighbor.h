@@ -79,9 +79,10 @@ struct neighbor_addr_s
 
 struct neighbor_entry_s
 {
-  net_ipv6addr_t         ne_ipaddr;  /* IPv6 address of the Neighbor */
-  struct neighbor_addr_s ne_addr;    /* Link layer address of the Neighbor */
-  clock_t                ne_time;    /* For aging, units of tick */
+  net_ipv6addr_t           ne_ipaddr;  /* IPv6 address of the Neighbor */
+  struct neighbor_addr_s   ne_addr;    /* Link layer address of the Neighbor */
+  clock_t                  ne_time;    /* For aging, units of tick */
+  FAR struct net_driver_s *ne_dev;     /* The device driver structure */
 };
 
 #ifdef __cplusplus

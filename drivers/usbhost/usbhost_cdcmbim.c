@@ -256,6 +256,7 @@ static void usbhost_notification_work(FAR void *arg);
 static void usbhost_notification_callback(FAR void *arg, ssize_t nbytes);
 static void usbhost_rxdata_work(FAR void *arg);
 static void usbhost_bulkin_work(FAR void *arg);
+static void usbhost_bulkin_callback(FAR void *arg, ssize_t nbytes);
 
 static void usbhost_destroy(FAR void *arg);
 
@@ -572,8 +573,8 @@ static int cdcwdm_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (i >= CONFIG_USBHOST_CDCMBIM_NPOLLWAITERS)
         {
-          fds->priv    = NULL;
-          ret          = -EBUSY;
+          fds->priv = NULL;
+          ret       = -EBUSY;
           goto errout;
         }
 
@@ -583,8 +584,7 @@ static int cdcwdm_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (priv->comm_rxlen > 0)
         {
-          poll_notify(priv->fds, CONFIG_USBHOST_CDCMBIM_NPOLLWAITERS,
-                      POLLIN);
+          poll_notify(&fds, 1, POLLIN);
         }
     }
   else

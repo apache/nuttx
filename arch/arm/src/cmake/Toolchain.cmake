@@ -29,6 +29,8 @@ if(CONFIG_ARCH_ARMV7A) # ARMv7-A
   set(ARCH_SUBDIR armv7-a)
 elseif(CONFIG_ARCH_ARMV7R) # ARMv7-R
   set(ARCH_SUBDIR armv7-r)
+elseif(CONFIG_ARCH_ARMV8R) # ARMv8-R
+  set(ARCH_SUBDIR armv8-r)
 elseif(CONFIG_ARCH_ARMV7M) # ARMv7-M
   set(ARCH_SUBDIR armv7-m)
 elseif(CONFIG_ARCH_ARMV8M) # ARMv8-M
@@ -89,9 +91,9 @@ endif()
 
 # override the ARCHIVE command
 
-set(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> rcsP <TARGET> <LINK_FLAGS> <OBJECTS>")
-set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> rcsP <TARGET> <LINK_FLAGS> <OBJECTS>")
-set(CMAKE_ASM_ARCHIVE_CREATE "<CMAKE_AR> rcsP <TARGET> <LINK_FLAGS> <OBJECTS>")
+set(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
+set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
+set(CMAKE_ASM_ARCHIVE_CREATE "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
 
 # Architecture flags
 
@@ -184,11 +186,11 @@ endif()
 set(ARCHCFLAGS "-Wstrict-prototypes")
 set(ARCHCXXFLAGS "-nostdinc++")
 
-if(CONFIG_CXX_EXCEPTION)
+if(NOT CONFIG_CXX_EXCEPTION)
   string(APPEND ARCHCXXFLAGS " -fno-exceptions -fcheck-new")
 endif()
 
-if(CONFIG_CXX_RTTI)
+if(NOT CONFIG_CXX_RTTI)
   string(APPEND ARCHCXXFLAGS " -fno-rtti")
 endif()
 

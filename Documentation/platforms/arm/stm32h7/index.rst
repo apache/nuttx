@@ -120,7 +120,7 @@ Interprocessor communication between cores is realized with the NuttX RPTUN
 device based on the OpenAMP framework. ``HSEM`` is used for synchronization and
 notification between cores.
 
-32kB of the SRAM3 is reseved for shared memory and this is the only available
+32kB of the SRAM3 is reserved for shared memory and this is the only available
 option at the moment.
 
 Supported Boards

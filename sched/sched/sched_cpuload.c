@@ -32,8 +32,6 @@
 
 #include "sched/sched.h"
 
-#ifdef CONFIG_SCHED_CPULOAD
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -227,5 +225,3 @@ int clock_cpuload(int pid, FAR struct cpuload_s *cpuload)
   leave_critical_section(flags);
   return ret;
 }
-
-#endif /* CONFIG_SCHED_CPULOAD */

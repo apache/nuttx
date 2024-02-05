@@ -73,6 +73,7 @@ config DEV_URANDOM_ARCH
 		implementation.
 
 endchoice # /dev/urandom algorithm
+
 endif # DEV_URANDOM
 
 menuconfig DEV_SE05X
@@ -100,7 +101,7 @@ config DEV_SE05X_SCP03
 config DEV_SE05X_PLAIN
 	bool "plain communication"
 
-endchoice
+endchoice # Channel communication interface
 
 config DEV_SE05X_SCP03_KEY_FILE
 	string "SCP03 keys"
@@ -118,16 +119,21 @@ choice SE05X_LOG_LEVEL
 	---help---
 		The SE05x log is divided into the following levels: ERROR,WARNING,INFO,DEBUG.
 
-	config SE05X_LOG_NONE
-		bool "No output"
-	config SE05X_LOG_ERROR
-		bool "Error"
-	config SE05X_LOG_WARNING
-		bool "Warning"
-	config SE05X_LOG_INFO
-		bool "Info"
-	config SE05X_LOG_DEBUG
-		bool "Debug"
-endchoice
+config SE05X_LOG_NONE
+	bool "No output"
+
+config SE05X_LOG_ERROR
+	bool "Error"
+
+config SE05X_LOG_WARNING
+	bool "Warning"
+
+config SE05X_LOG_INFO
+	bool "Info"
+
+config SE05X_LOG_DEBUG
+	bool "Debug"
+
+endchoice # SE05x debug log level
 
 endif #DEV_SE05X

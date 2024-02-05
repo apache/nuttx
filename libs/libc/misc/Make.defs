@@ -24,7 +24,7 @@ CSRCS += lib_mknod.c lib_umask.c lib_utsname.c lib_getrandom.c
 CSRCS += lib_xorshift128.c lib_tea_encrypt.c lib_tea_decrypt.c
 CSRCS += lib_cxx_initialize.c lib_impure.c lib_memfd.c lib_mutex.c
 CSRCS += lib_fchmodat.c lib_fstatat.c lib_getfullpath.c lib_openat.c
-CSRCS += lib_mkdirat.c lib_utimensat.c lib_mallopt.c
+CSRCS += lib_mkdirat.c lib_utimensat.c lib_mallopt.c lib_memoryregion.c
 
 # Support for platforms that do not have long long types
 
@@ -40,7 +40,11 @@ endif
 CSRCS += lib_dumpbuffer.c lib_dumpvbuffer.c lib_fnmatch.c lib_debug.c
 CSRCS += lib_crc64.c lib_crc32.c lib_crc16.c lib_crc16ccitt.c lib_crc8.c
 CSRCS += lib_crc8ccitt.c lib_crc8table.c lib_glob.c lib_execinfo.c
-CSRCS += lib_ftok.c lib_err.c
+CSRCS += lib_ftok.c lib_err.c lib_instrument.c
+
+# Add generic integer math functions
+
+CSRCS += lib_log2ceil.c lib_log2floor.c
 
 # Keyboard driver encoder/decoder
 

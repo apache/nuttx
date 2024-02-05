@@ -217,6 +217,8 @@ static int board_foc_voltage_get(struct foc_dev_s *dev,
                                  int16_t *volt_raw,
                                  foc_voltage_t *volt);
 #endif
+static int board_foc_info_get(struct foc_dev_s *dev,
+                              struct foc_info_s *info);
 #ifdef CONFIG_MOTOR_FOC_TRACE
 static int board_foc_trace_init(struct foc_dev_s *dev);
 static void board_foc_trace(struct foc_dev_s *dev, int type, bool state);
@@ -373,6 +375,7 @@ static struct stm32_foc_board_ops_s g_stm32_foc_board_ops =
 #ifdef CONFIG_MOTOR_FOC_BEMF_SENSE
   .voltage_get = board_foc_voltage_get,
 #endif
+  .info_get  = board_foc_info_get,
 #ifdef CONFIG_MOTOR_FOC_TRACE
   .trace_init  = board_foc_trace_init,
   .trace       = board_foc_trace
@@ -383,13 +386,11 @@ static struct stm32_foc_board_ops_s g_stm32_foc_board_ops =
 
 static struct stm32_foc_board_data_s g_stm32_foc_board_data =
 {
-  .adc_cfg   = &g_adc_cfg,
+  .adc_cfg  = &g_adc_cfg,
 #ifdef CONFIG_MOTOR_FOC_BEMF_SENSE
-  .vadc_cfg   = &g_vadc_cfg,
+  .vadc_cfg = &g_vadc_cfg,
 #endif
-  .duty_max  = (MAX_DUTY_B16),
-  .pwm_dt    = (PWM_DEADTIME),
-  .pwm_dt_ns = (PWM_DEADTIME_NS)
+  .pwm_dt   = PWM_DEADTIME
 };
 
 /* Board specific configuration */
@@ -581,6 +582,36 @@ static int board_foc_voltage_get(struct foc_dev_s *dev,
   return OK;
 }
 #endif
+
+/****************************************************************************
+ * Name: board_foc_info_get
+ ****************************************************************************/
+
+static int board_foc_info_get(struct foc_dev_s *dev, struct foc_info_s *info)
+{
+  DEBUGASSERT(dev);
+  DEBUGASSERT(info);
+
+  UNUSED(dev);
+
+  /* PWM */
+
+  info->hw_cfg.pwm_dt_ns = PWM_DEADTIME_NS;
+  info->hw_cfg.pwm_max   = MAX_DUTY_B16;
+
+  /* ADC BEMF */
+
+#ifdef CONFIG_MOTOR_FOC_BEMF_SENSE
+  info->hw_cfg.bemf_scale = 0;      /* TODO */
+#endif
+
+  /* ADC Current - dynamic current scale not supported */
+
+  info->hw_cfg.iphase_max   = 40000;
+  info->hw_cfg.iphase_scale = -2939;
+
+  return OK;
+}
 
 #ifdef CONFIG_MOTOR_FOC_TRACE
 /****************************************************************************

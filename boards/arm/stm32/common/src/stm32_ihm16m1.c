@@ -111,6 +111,8 @@ static int board_foc_pwm_start(struct foc_dev_s *dev, bool state);
 static int board_foc_current_get(struct foc_dev_s *dev,
                                  int16_t *curr_raw,
                                  foc_current_t *curr);
+static int board_foc_info_get(struct foc_dev_s *dev,
+                              struct foc_info_s *info);
 #ifdef CONFIG_MOTOR_FOC_TRACE
 static int board_foc_trace_init(struct foc_dev_s *dev);
 static void board_foc_trace(struct foc_dev_s *dev, int type, bool state);
@@ -130,6 +132,7 @@ static struct stm32_foc_board_ops_s g_stm32_foc_board_ops =
   .fault_clear = board_foc_fault_clear,
   .pwm_start   = board_foc_pwm_start,
   .current_get = board_foc_current_get,
+  .info_get    = board_foc_info_get,
 #ifdef CONFIG_MOTOR_FOC_TRACE
   .trace_init  = board_foc_trace_init,
   .trace       = board_foc_trace
@@ -140,10 +143,8 @@ static struct stm32_foc_board_ops_s g_stm32_foc_board_ops =
 
 static struct stm32_foc_board_data_s g_stm32_foc_board_data =
 {
-  .adc_cfg   = NULL,     /* board-specific */
-  .duty_max  = (MAX_DUTY_B16),
-  .pwm_dt    = (PWM_DEADTIME),
-  .pwm_dt_ns = (PWM_DEADTIME_NS)
+  .adc_cfg = NULL,     /* board-specific */
+  .pwm_dt  = PWM_DEADTIME
 };
 
 /* Board specific configuration */
@@ -262,6 +263,37 @@ static int board_foc_current_get(struct foc_dev_s *dev,
   curr[0] = curr_raw[0];
   curr[1] = curr_raw[1];
   curr[2] = curr_raw[2];
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: board_foc_info_get
+ ****************************************************************************/
+
+static int board_foc_info_get(struct foc_dev_s *dev,
+                              struct foc_info_s *info)
+{
+  DEBUGASSERT(dev);
+  DEBUGASSERT(info);
+
+  UNUSED(dev);
+
+  /* PWM */
+
+  info->hw_cfg.pwm_dt_ns = PWM_DEADTIME_NS;
+  info->hw_cfg.pwm_max   = MAX_DUTY_B16;
+
+  /* ADC BEMF */
+
+#ifdef CONFIG_MOTOR_FOC_BEMF_SENSE
+  info->hw_cfg.bemf_scale = 0;      /* TODO */
+#endif
+
+  /* ADC Current - dynamic current scale not supported */
+
+  info->hw_cfg.iphase_max   = 1500;
+  info->hw_cfg.iphase_scale = -160;
 
   return OK;
 }

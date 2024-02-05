@@ -538,19 +538,50 @@ extern "C"
 
 #define CXD56_GNSS_IOCTL_SET_1PPS_OUTPUT 52
 
-/**
- * Get the current 1PPS output setting
+/* Get the current 1PPS output setting
  *
- * @param[out] arg
+ * param[out] arg
  * enable(1) or disable(0)
  */
 
 #define CXD56_GNSS_IOCTL_GET_1PPS_OUTPUT 53
 
+/* Get the firmware version
+ *
+ * param[in] arg
+ * string array of CXD56_GNSS_VERSION_MAXLEN
+ */
+
+#define CXD56_GNSS_IOCTL_GET_VERSION 54
+
+/* Sleep the firmware
+ *
+ * param[in] arg
+ * CXD56_GNSS_SLEEP(0) or CXD56_GNSS_DEEPSLEEP(1)
+ */
+
+#define CXD56_GNSS_IOCTL_SLEEP 55
+
+/* Wake up the firmware
+ *
+ * param arg
+ * Parameter is Unnecessary. Set Zero.
+ */
+
+#define CXD56_GNSS_IOCTL_WAKEUP 56
+
+/* Reset the firmware
+ *
+ * param arg
+ * Parameter is Unnecessary. Set Zero.
+ */
+
+#define CXD56_GNSS_IOCTL_RESET 57
+
 /* check macros for GNSS commands */
 
 #define CXD56_GNSS_IOCTL_INVAL 0
-#define CXD56_GNSS_IOCTL_MAX   54
+#define CXD56_GNSS_IOCTL_MAX   58
 
 /* Same value to GD Start mode CXD56_GNSS_STMOD_XXXX for fw_gd_start */
 

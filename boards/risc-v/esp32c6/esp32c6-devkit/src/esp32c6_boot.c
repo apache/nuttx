@@ -24,12 +24,7 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
-
-#include <nuttx/board.h>
-#include <arch/board/board.h>
-
-#include "esp32c6-devkit.h"
+#include "riscv_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -44,23 +39,24 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32c6_board_initialize
+ * Name: esp_board_initialize
  *
  * Description:
- *   All ESP32C6 architectures must provide the following entry point.
+ *   All Espressif boards must provide the following entry point.
  *   This entry point is called early in the initialization -- after all
  *   memory has been configured and mapped but before any devices have been
  *   initialized.
  *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
-void esp32c6_board_initialize(void)
+void esp_board_initialize(void)
 {
-  /* Configure on-board LEDs if LED support has been selected. */
-
-#ifdef CONFIG_ARCH_LEDS
-  board_autoled_initialize();
-#endif
 }
 
 /****************************************************************************
@@ -75,6 +71,12 @@ void esp32c6_board_initialize(void)
  *   phase may be used, for example, to initialize board-specific device
  *   drivers.
  *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
@@ -82,6 +84,6 @@ void board_late_initialize(void)
 {
   /* Perform board-specific initialization */
 
-  esp32c6_bringup();
+  esp_bringup();
 }
 #endif

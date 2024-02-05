@@ -280,7 +280,8 @@ void sim_netdriver_setmacaddr(int devidx, unsigned char *macaddr)
 
 void sim_netdriver_setmtu(int devidx, int mtu)
 {
-  g_sim_dev[devidx].dev.netdev.d_pktsize = mtu + ETH_HDRLEN;
+  g_sim_dev[devidx].dev.netdev.d_pktsize = MIN(SIM_NETDEV_BUFSIZE,
+                                               mtu + ETH_HDRLEN);
 }
 
 void sim_netdriver_loop(void)

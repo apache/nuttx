@@ -55,6 +55,8 @@ include note/Make.defs
 include pipes/Make.defs
 include power/Make.defs
 include regmap/Make.defs
+include rmt/Make.defs
+include rpmsg/Make.defs
 include rptun/Make.defs
 include sensors/Make.defs
 include serial/Make.defs
@@ -75,6 +77,8 @@ include rc/Make.defs
 include segger/Make.defs
 include usrsock/Make.defs
 include reset/Make.defs
+include pci/Make.defs
+include virt/Make.defs
 
 ifeq ($(CONFIG_SPECIFIC_DRIVERS),y)
 -include platform/Make.defs

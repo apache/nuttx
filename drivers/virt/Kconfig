@@ -1,0 +1,29 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+#
+#
+menuconfig VIRT
+	bool "Virtualization"
+	default n
+	---help---
+		Drivers for virtualized and emulated devices
+
+if VIRT
+
+config VIRT_QEMU_PCI_TEST
+	bool "Driver for QEMU PCI test device"
+	default n
+	select PCI
+	---help---
+		Driver for QEMU PCI test device
+
+config VIRT_QEMU_EDU
+	bool "Driver for QEMU EDU test device"
+	default n
+	select PCI
+	---help---
+		Driver for QEMU EDU test device
+
+endif # VIRT

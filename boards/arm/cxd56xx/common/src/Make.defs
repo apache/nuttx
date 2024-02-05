@@ -184,6 +184,10 @@ ifeq ($(CONFIG_PM),y)
   CSRCS += cxd56_pm.c
 endif
 
+ifeq ($(CONFIG_CXD56_GNSS_ADDON),y)
+  CSRCS += cxd56_gnss_addon.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src

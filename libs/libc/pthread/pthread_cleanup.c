@@ -56,13 +56,13 @@
 
 static void pthread_cleanup_pop_tls(FAR struct tls_info_s *tls, int execute)
 {
-  if (tls->tos > 0)
+  if (tls->tl_tos > 0)
     {
       unsigned int ndx;
 
       /* Get the index to the last cleaner function pushed onto the stack */
 
-      ndx = tls->tos - 1;
+      ndx = tls->tl_tos - 1;
       DEBUGASSERT(ndx >= 0 && ndx < CONFIG_PTHREAD_CLEANUP_STACKSIZE);
 
       /* Should we execute the cleanup routine at the top of the stack? */
@@ -73,11 +73,11 @@ static void pthread_cleanup_pop_tls(FAR struct tls_info_s *tls, int execute)
 
           /* Yes..  Execute the clean-up routine. */
 
-          cb  = &tls->stack[ndx];
+          cb  = &tls->tl_stack[ndx];
           cb->pc_cleaner(cb->pc_arg);
         }
 
-      tls->tos = ndx;
+      tls->tl_tos = ndx;
     }
 }
 
@@ -127,15 +127,15 @@ void pthread_cleanup_push(pthread_cleanup_t routine, FAR void *arg)
   FAR struct tls_info_s *tls = tls_get_info();
 
   DEBUGASSERT(tls != NULL);
-  DEBUGASSERT(tls->tos < CONFIG_PTHREAD_CLEANUP_STACKSIZE);
+  DEBUGASSERT(tls->tl_tos < CONFIG_PTHREAD_CLEANUP_STACKSIZE);
 
-  if (tls->tos < CONFIG_PTHREAD_CLEANUP_STACKSIZE)
+  if (tls->tl_tos < CONFIG_PTHREAD_CLEANUP_STACKSIZE)
     {
-      unsigned int ndx = tls->tos;
+      unsigned int ndx = tls->tl_tos;
 
-      tls->tos++;
-      tls->stack[ndx].pc_cleaner = routine;
-      tls->stack[ndx].pc_arg = arg;
+      tls->tl_tos++;
+      tls->tl_stack[ndx].pc_cleaner = routine;
+      tls->tl_stack[ndx].pc_arg = arg;
     }
 }
 
@@ -159,7 +159,7 @@ void pthread_cleanup_popall(FAR struct tls_info_s *tls)
 {
   DEBUGASSERT(tls != NULL);
 
-  while (tls->tos > 0)
+  while (tls->tl_tos > 0)
     {
       pthread_cleanup_pop_tls(tls, 1);
     }

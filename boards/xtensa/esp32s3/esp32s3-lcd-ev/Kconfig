@@ -58,7 +58,7 @@ config ESP32S3_BOARD_IOEXPANDER
 	default n
 	depends on ESP32S3_BOARD_I2C
 	---help---
-		Enable board IO expander support, IC is TC9554. 
+		Enable board IO expander support, IC is TC9554.
 
 config ESP32S3_BOARD_LCD
 	bool "Enable Board LCD"
@@ -66,13 +66,13 @@ config ESP32S3_BOARD_LCD
 	depends on ESP32S3_LCD
 	select ESP32S3_BOARD_IOEXPANDER
 	---help---
-		Enable board LCD support, IC is GC9503CV. 
+		Enable board LCD support, IC is GC9503CV.
 
 config ESP32S3_BOARD_TOUCHPAD
 	bool "Enable Board Touchpad"
 	default n
 	depends on ESP32S3_BOARD_I2C
 	---help---
-		Enable board touchpad support, IC is FT5X06. 
+		Enable board touchpad support, IC is FT5X06.
 
 endif # ARCH_BOARD_ESP32S3_LCD_EV

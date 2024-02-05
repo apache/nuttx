@@ -36,7 +36,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define OPCODE_SW       0x23
+#define OPCODE_AUIPC    0x17
 #define OPCODE_LUI      0x37
 
 #define RVI_OPCODE_MASK 0x7F
@@ -179,6 +179,117 @@ static void _calc_imm(long offset, long *imm_hi, long *imm_lo)
 }
 
 /****************************************************************************
+ * Name: _add_hi20
+ *
+ * Description:
+ *   Add PCREL_HI20 relocation offset to the LUT. When a PCREL_LO12_I/_S is
+ *   encountered, the corresponding PCREL_HI20 value can be found from it.
+ *
+ * Input Parameters:
+ *   arch_data   - Where the PCREL_HI20 relocations are listed.
+ *   hi20_rel    - The PCREL_HI20 relocation entry.
+ *   hi20_offset - The corresponding offset value.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void _add_hi20(void *arch_data, uintptr_t hi20_rel,
+                      uintptr_t hi20_offset)
+{
+  arch_elfdata_t *data = (arch_elfdata_t *)arch_data;
+  int i;
+
+  /* Try to find a free slot from the list */
+
+  for (i = 0; i < ARCH_ELF_RELCNT; i++)
+    {
+      struct hi20_rels_s *hi20 = &data->hi20_rels[i];
+
+      if (hi20->hi20_rel == 0)
+        {
+          hi20->hi20_rel = hi20_rel;
+          hi20->hi20_offset = hi20_offset;
+          break;
+        }
+    }
+}
+
+/****************************************************************************
+ * Name: _find_hi20
+ *
+ * Description:
+ *   Find PCREL_HI20 relocation offset from the LUT. When a PCREL_LO12_I/_S
+ *   is encountered, the corresponding PCREL_HI20 value is needed to do the
+ *   relocation.
+ *
+ * Input Parameters:
+ *   arch_data   - Where the PCREL_HI20 relocations are listed.
+ *   hi20_rel    - The PCREL_HI20 relocation entry.
+ *
+ * Returned Value:
+ *   The corresponding hi20_offset value.
+ *
+ ****************************************************************************/
+
+static uintptr_t _find_hi20(void *arch_data, uintptr_t hi20_rel)
+{
+  arch_elfdata_t *data = (arch_elfdata_t *)arch_data;
+  int i;
+
+  /* Try to find the hi20 value from the list */
+
+  for (i = 0; i < ARCH_ELF_RELCNT; i++)
+    {
+      struct hi20_rels_s *hi20 = &data->hi20_rels[i];
+
+      if (hi20->hi20_rel == hi20_rel)
+        {
+          /* Found it, we can clear the entry now */
+
+          hi20->hi20_rel = 0;
+          return hi20->hi20_offset;
+        }
+    }
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: _valid_hi20_imm
+ *
+ * Description:
+ *   Check that any XX_HI20 relocation has a valid upper 20-bit immediate.
+ *   Note that this test is not necessary for RV32 targets, the problem is
+ *   related to RV64 sign extension.
+ *
+ * Input Parameters:
+ *   imm_hi - The upper immediate value.
+ *
+ * Returned Value:
+ *   true if imm_hi is valid; false otherwise
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_LIBC_ARCH_ELF_64BIT
+static inline bool _valid_hi20_imm(long imm_hi)
+{
+  /* 32-bit sign extend imm_hi and compare with the original value */
+
+  long hi   = imm_hi & ((1 << 20) - 1);        /* 32-bit signed value */
+  long sign = -((imm_hi >> 19) & 1);           /* 32-bit sign value */
+  hi        = ((hi << 12) | sign << 32) >> 12; /* 32-bit sign extend */
+
+  /* If the values do not match, the immediate is invalid */
+
+  return imm_hi == hi;
+}
+#else
+#  define _valid_hi20_imm(imm_hi) 1
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -266,14 +377,15 @@ bool up_checkarch(const Elf_Ehdr *ehdr)
  *
  ****************************************************************************/
 
-int up_relocate(const Elf_Rel *rel, const Elf_Sym *sym, uintptr_t addr)
+int up_relocate(const Elf_Rel *rel, const Elf_Sym *sym, uintptr_t addr,
+                void *arch_data)
 {
   berr("Not implemented\n");
   return -ENOSYS;
 }
 
 int up_relocateadd(const Elf_Rela *rel, const Elf_Sym *sym,
-                   uintptr_t addr)
+                   uintptr_t addr, void *arch_data)
 {
   long offset;
   unsigned int relotype;
@@ -317,22 +429,59 @@ int up_relocateadd(const Elf_Rela *rel, const Elf_Sym *sym,
         break;
 
       case R_RISCV_PCREL_LO12_I:
-      case R_RISCV_PCREL_LO12_S:
         {
+          long imm_hi;
+          long imm_lo;
+
           binfo("%s at %08" PRIxPTR " [%08" PRIx32 "] "
                 "to sym=%p st_value=%08lx\n",
                 _get_rname(relotype),
                 addr, _get_val((uint16_t *)addr),
                 sym, sym->st_value);
 
-          /* NOTE: imm value for mv has been adjusted in previous HI20 */
+          offset = _find_hi20(arch_data, sym->st_value);
+
+          /* Adjust imm for MV(ADDI) / JR (JALR) : I-type */
+
+          _calc_imm(offset, &imm_hi, &imm_lo);
+
+          _add_val((uint16_t *)addr, (int32_t)imm_lo << 20);
+        }
+        break;
+
+      case R_RISCV_PCREL_LO12_S:
+        {
+          uint32_t val;
+          long imm_hi;
+          long imm_lo;
+
+          binfo("%s at %08" PRIxPTR " [%08" PRIx32 "] "
+                "to sym=%p st_value=%08lx\n",
+                _get_rname(relotype),
+                addr, _get_val((uint16_t *)addr),
+                sym, sym->st_value);
+
+          offset = _find_hi20(arch_data, sym->st_value);
+
+          /* Adjust imm for SW : S-type */
+
+          _calc_imm(offset, &imm_hi, &imm_lo);
+
+          val = (((int32_t)imm_lo >> 5) << 25) +
+                (((int32_t)imm_lo & 0x1f) << 7);
+
+          binfo("imm_lo=%ld (%lx), val=%" PRIx32 "\n", imm_lo, imm_lo, val);
+
+          _add_val((uint16_t *)addr, val);
         }
         break;
 
       case R_RISCV_PCREL_HI20:
-      case R_RISCV_CALL:
-      case R_RISCV_CALL_PLT:
         {
+          uint32_t insn;
+          long imm_hi;
+          long imm_lo;
+
           binfo("%s at %08" PRIxPTR " [%08" PRIx32 "] "
                 "to sym=%p st_value=%08lx\n",
                 _get_rname(relotype),
@@ -341,34 +490,60 @@ int up_relocateadd(const Elf_Rela *rel, const Elf_Sym *sym,
 
           offset = (long)sym->st_value + (long)rel->r_addend - (long)addr;
 
-          long imm_hi;
-          long imm_lo;
+          insn = _get_val((uint16_t *)addr);
+          ASSERT(OPCODE_AUIPC == (insn & RVI_OPCODE_MASK));
 
           _calc_imm(offset, &imm_hi, &imm_lo);
 
+          if (!_valid_hi20_imm(imm_hi))
+            {
+              berr("ERROR: %s at %08" PRIxPTR " bad:%08lx\n",
+                   _get_rname(relotype), addr, imm_hi << 12);
+
+              return -EINVAL;
+            }
+
           /* Adjust auipc (add upper immediate to pc) : 20bit */
 
-          _add_val((uint16_t *)addr, (imm_hi << 12));
+          _add_val((uint16_t *)addr, imm_hi << 12);
 
-          if ((_get_val((uint16_t *)(addr + 4)) & 0x7f) == OPCODE_SW)
+          /* Add the hi20 value to the cache */
+
+          _add_hi20(arch_data, addr, offset);
+        }
+        break;
+
+      case R_RISCV_CALL:
+      case R_RISCV_CALL_PLT:
+        {
+          long imm_hi;
+          long imm_lo;
+
+          binfo("%s at %08" PRIxPTR " [%08" PRIx32 "] "
+                "to sym=%p st_value=%08lx\n",
+                _get_rname(relotype),
+                addr, _get_val((uint16_t *)addr),
+                sym, sym->st_value);
+
+          offset = (long)sym->st_value + (long)rel->r_addend - (long)addr;
+
+          _calc_imm(offset, &imm_hi, &imm_lo);
+
+          if (!_valid_hi20_imm(imm_hi))
             {
-              /* Adjust imm for SW : S-type */
+              berr("ERROR: %s at %08" PRIxPTR " bad:%08lx\n",
+                   _get_rname(relotype), addr, imm_hi << 12);
 
-              uint32_t val =
-                (((int32_t)imm_lo >> 5) << 25) +
-                (((int32_t)imm_lo & 0x1f) << 7);
-
-              binfo("imm_lo=%ld (%lx), val=%" PRIx32 "\n",
-                    imm_lo, imm_lo, val);
-
-              _add_val((uint16_t *)(addr + 4), val);
+              return -EINVAL;
             }
-          else
-            {
-              /* Adjust imm for MV(ADDI)/JALR : I-type */
 
-              _add_val((uint16_t *)(addr + 4), ((int32_t)imm_lo << 20));
-            }
+          /* Adjust auipc (add upper immediate to pc) : 20bit */
+
+          _add_val((uint16_t *)addr, imm_hi << 12);
+
+          /* Adjust imm for CALL (JALR) : I-type */
+
+          _add_val((uint16_t *)(addr + 4), (int32_t)imm_lo << 20);
         }
         break;
 
@@ -436,6 +611,15 @@ int up_relocateadd(const Elf_Rela *rel, const Elf_Sym *sym,
           long imm_hi;
           long imm_lo;
           _calc_imm(offset, &imm_hi, &imm_lo);
+
+          if (!_valid_hi20_imm(imm_hi))
+            {
+              berr("ERROR: %s at %08" PRIxPTR " bad:%08lx\n",
+                   _get_rname(relotype), addr, imm_hi << 12);
+
+              return -EINVAL;
+            }
+
           insn = (insn & 0x00000fff) | (imm_hi << 12);
 
           _set_val((uint16_t *)addr, insn);

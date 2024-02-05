@@ -25,6 +25,7 @@ include clock/Make.defs
 include environ/Make.defs
 include group/Make.defs
 include init/Make.defs
+include instrument/Make.defs
 include irq/Make.defs
 include misc/Make.defs
 include mqueue/Make.defs

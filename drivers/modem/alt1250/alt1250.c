@@ -27,6 +27,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/signal.h>
 #include <poll.h>
 #include <errno.h>
 #include <arch/board/board.h>
@@ -818,7 +819,7 @@ static int parse_altcompkt(FAR struct alt1250_dev_s *dev, FAR uint8_t *pkt,
   uint16_t cid = parse_cid(h);
   uint16_t tid = parse_tid(h);
   parse_handler_t parser;
-  FAR alt_evtbuf_inst_t *inst;
+  FAR alt_evtbuf_inst_t *inst = NULL;
   FAR void **outparam;
   size_t outparamlen;
 
@@ -911,7 +912,7 @@ static int parse_altcompkt(FAR struct alt1250_dev_s *dev, FAR uint8_t *pkt,
           *bitmap = ALT1250_EVTBIT_REPLY;
         }
     }
-  else
+  else if (inst != NULL)
     {
       /* Unlock outparam because it has been updated. */
 
@@ -1050,7 +1051,7 @@ static int altcom_recvthread(int argc, FAR char *argv[])
                * does not accept any requests and must stay alive.
                */
 
-              sleep(1);
+              nxsig_sleep(1);
             }
         }
       else if (ret == ALTMDM_RETURN_EXIT)

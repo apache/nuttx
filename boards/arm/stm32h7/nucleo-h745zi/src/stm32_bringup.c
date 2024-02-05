@@ -57,14 +57,14 @@
 void rpmsg_serialinit(void)
 {
 #ifdef CONFIG_ARCH_CHIP_STM32H7_CORTEXM7
-  uart_rpmsg_init("cm7", "proxy", 4096, false);
+  uart_rpmsg_init("cm4", "proxy", 4096, false);
 #endif
 
 #ifdef CONFIG_ARCH_CHIP_STM32H7_CORTEXM4
 #  ifdef CONFIG_RPMSG_UART_CONSOLE
-  uart_rpmsg_init("cm4", "proxy", 4096, true);
+  uart_rpmsg_init("cm7", "proxy", 4096, true);
 #  else
-  uart_rpmsg_init("cm4", "proxy", 4096, false);
+  uart_rpmsg_init("cm7", "proxy", 4096, false);
 #  endif
 #endif
 }
@@ -104,9 +104,9 @@ int stm32_bringup(void)
 
 #ifdef CONFIG_RPTUN
 #  ifdef CONFIG_ARCH_CHIP_STM32H7_CORTEXM7
-  stm32_rptun_init("cm7-shmem", "cm7");
+  stm32_rptun_init("cm4");
 #  else
-  stm32_rptun_init("cm4-shmem", "cm4");
+  stm32_rptun_init("cm7");
 #  endif
 #endif
 

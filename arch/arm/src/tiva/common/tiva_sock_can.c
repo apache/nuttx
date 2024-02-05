@@ -1263,6 +1263,7 @@ static int tivacan_alloc_fifo(struct net_driver_s *dev, int depth)
   if (free_fifo_idx < 0)
     {
       canwarn("Max number of filters allocated.\n");
+      nxmutex_unlock(&canmod->fifo_lock);
       return -ENOMEM;
     }
 

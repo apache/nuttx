@@ -39,11 +39,11 @@
  ****************************************************************************/
 
 static ssize_t devnull_read(FAR struct file *filep, FAR char *buffer,
-                 size_t buflen);
+                            size_t buflen);
 static ssize_t devnull_write(FAR struct file *filep, FAR const char *buffer,
-                 size_t buflen);
+                             size_t buflen);
 static int     devnull_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                 bool setup);
+                            bool setup);
 
 /****************************************************************************
  * Private Data

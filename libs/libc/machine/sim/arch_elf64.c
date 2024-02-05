@@ -140,14 +140,15 @@ bool up_checkarch(const Elf64_Ehdr *ehdr)
  *
  ****************************************************************************/
 
-int up_relocate(const Elf64_Rel *rel, const Elf64_Sym *sym, uintptr_t addr)
+int up_relocate(const Elf64_Rel *rel, const Elf64_Sym *sym, uintptr_t addr,
+                FAR void *arch_data)
 {
   berr("Not implemented\n");
   return -ENOSYS;
 }
 
 int up_relocateadd(const Elf64_Rela *rel, const Elf64_Sym *sym,
-                   uintptr_t addr)
+                   uintptr_t addr, FAR void *arch_data)
 {
   unsigned int relotype;
   uint64_t value;

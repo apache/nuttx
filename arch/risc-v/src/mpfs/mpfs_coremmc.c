@@ -45,9 +45,11 @@
 
 #include <arch/board/board.h>
 
-#include "mpfs_emmcsd.h"
+#include "mpfs_coremmc.h"
 #include "riscv_internal.h"
 #include "hardware/mpfs_coremmc.h"
+
+#include "mpfs_sdio_dev.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -157,54 +159,6 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-
-/* This structure defines the state of the MPFS eMMCSD interface */
-
-struct mpfs_dev_s
-{
-  struct sdio_dev_s  dev;             /* Standard, base SDIO interface */
-
-  const uintptr_t    hw_base;         /* Base address */
-  const int          plic_irq;        /* PLIC interrupt */
-  bool               clk_enabled;     /* Clk state */
-
-  /* Event support */
-
-  sem_t              waitsem;         /* Implements event waiting */
-  sdio_eventset_t    waitevents;      /* Set of events to be waited for */
-  uint32_t           waitmask;        /* Interrupt enables for event waiting */
-  volatile sdio_eventset_t wkupevent; /* The event that caused the wakeup */
-  struct wdog_s      waitwdog;        /* Watchdog that handles event timeouts */
-
-  /* Callback support */
-
-  sdio_statset_t     cdstatus;        /* Card status */
-  sdio_eventset_t    cbevents;        /* Set of events to be cause callbacks */
-  worker_t           callback;        /* Registered callback function */
-  void              *cbarg;           /* Registered callback argument */
-  struct work_s      cbwork;          /* Callback work queue structure */
-
-  /* Interrupt mode data transfer support */
-
-  uint32_t          *buffer;          /* Address of current R/W buffer */
-  size_t             remaining;       /* Number of bytes remaining in the transfer */
-  size_t             receivecnt;      /* Real count to receive */
-  uint32_t           xfrmask;         /* Interrupt enables for data transfer */
-  uint32_t           xfr_blkmask;     /* Interrupt enables for SB/MB data transfer */
-
-  bool               widebus;         /* Required for DMA support */
-  bool               onebit;          /* true: Only 1-bit transfers are supported */
-
-  /* Data transfer support */
-
-  bool               polltransfer;    /* Indicate a poll transfer, no DMA */
-  bool               multiblock;      /* Indicate a multi-block transfer */
-
-  /* Misc */
-
-  uint32_t           blocksize;       /* Current block size */
-  uint32_t           fifo_depth;      /* Fifo size, read from the register */
-};
 
 union
 {
@@ -2277,7 +2231,7 @@ static void mpfs_callback(void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sdio_initialize
+ * Name: mpfs_coremmc_sdio_initialize
  *
  * Description:
  *   Initialize SDIO for operation.
@@ -2291,7 +2245,7 @@ static void mpfs_callback(void *arg)
  *
  ****************************************************************************/
 
-struct sdio_dev_s *sdio_initialize(int slotno)
+struct sdio_dev_s *mpfs_coremmc_sdio_initialize(int slotno)
 {
   struct mpfs_dev_s *priv = &g_coremmc_dev;
 
@@ -2308,7 +2262,7 @@ struct sdio_dev_s *sdio_initialize(int slotno)
 }
 
 /****************************************************************************
- * Name: sdio_mediachange
+ * Name: mpfs_coremmc_sdio_mediachange
  *
  * Description:
  *   Called by board-specific logic -- possible from an interrupt handler --
@@ -2326,7 +2280,7 @@ struct sdio_dev_s *sdio_initialize(int slotno)
  *
  ****************************************************************************/
 
-void sdio_mediachange(struct sdio_dev_s *dev, bool cardinslot)
+void mpfs_coremmc_sdio_mediachange(struct sdio_dev_s *dev, bool cardinslot)
 {
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
   sdio_statset_t cdstatus;
@@ -2359,7 +2313,7 @@ void sdio_mediachange(struct sdio_dev_s *dev, bool cardinslot)
 }
 
 /****************************************************************************
- * Name: sdio_wrprotect
+ * Name: mpfs_coremmc_sdio_wrprotect
  *
  * Description:
  *   Called by board-specific logic to report if the card in the slot is
@@ -2374,7 +2328,7 @@ void sdio_mediachange(struct sdio_dev_s *dev, bool cardinslot)
  *
  ****************************************************************************/
 
-void sdio_wrprotect(struct sdio_dev_s *dev, bool wrprotect)
+void mpfs_coremmc_sdio_wrprotect(struct sdio_dev_s *dev, bool wrprotect)
 {
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
   irqstate_t flags;

@@ -86,6 +86,12 @@ ifeq ($(CONFIG_MM_KASAN_DISABLE_WRITES_CHECK),y)
   ARCHOPTIMIZATION += --param asan-instrument-writes=0
 endif
 
+# Instrumentation options
+
+ifeq ($(CONFIG_ARCH_INSTRUMENT_ALL),y)
+  ARCHOPTIMIZATION += -finstrument-functions
+endif
+
 ifeq ($(CONFIG_UNWINDER_ARM),y)
   ARCHOPTIMIZATION += -funwind-tables -fasynchronous-unwind-tables
 endif
@@ -165,7 +171,7 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN_CLANG),y)
   CPP     = clang -E -P -x c
   LD      = ld.lld -m armelf
   STRIP   = llvm-strip --strip-unneeded
-  AR      = llvm-ar rcsP
+  AR      = llvm-ar rcs
   NM      = llvm-nm
   OBJCOPY = llvm-objcopy
   OBJDUMP = llvm-objdump
@@ -185,7 +191,14 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN_CLANG),y)
       TOOLCHAIN_CLANG_CONFIG := $(TOOLCHAIN_CLANG_CONFIG)_nosys
     endif
 
-    ARCHCPUFLAGS += $(TOOLCHAIN_CLANG_CONFIG).cfg
+    ifeq ($(CLANGVER),17.0)
+      TOOLCHAIN_CLANG_OPTION = -target
+      ARCHCPUFLAGS += --target=arm-none-eabi
+    else
+      TOOLCHAIN_CLANG_OPTION = --config
+    endif
+
+    ARCHCPUFLAGS := $(TOOLCHAIN_CLANG_OPTION) $(TOOLCHAIN_CLANG_CONFIG).cfg $(ARCHCPUFLAGS)
   endif
 
 # ARM Compiler Clang toolchain
@@ -197,7 +210,7 @@ else ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
   CPP     = armclang -E -P -x c
   LD      = armlink
   STRIP   = llvm-strip --strip-unneeded
-  AR      = armar -rcsP
+  AR      = armar -rcs
   NM      = llvm-nm
   OBJCOPY = llvm-objcopy
   OBJDUMP = llvm-objdump
@@ -238,7 +251,7 @@ else
   CPP     = $(CROSSDEV)gcc -E -P -x c
   LD      = $(CROSSDEV)ld
   STRIP   = $(CROSSDEV)strip --strip-unneeded
-  AR      = $(CROSSDEV)ar rcsP
+  AR      = $(CROSSDEV)ar rcs
   NM      = $(CROSSDEV)nm
   OBJCOPY = $(CROSSDEV)objcopy
   OBJDUMP = $(CROSSDEV)objdump
@@ -246,7 +259,7 @@ else
   ifeq ($(CONFIG_LTO_FULL),y)
     ifeq ($(CONFIG_ARM_TOOLCHAIN_GNU_EABI),y)
       LD := $(CROSSDEV)gcc
-      AR := $(CROSSDEV)gcc-ar rcsP
+      AR := $(CROSSDEV)gcc-ar rcs
       NM := $(CROSSDEV)gcc-nm
       ARCHOPTIMIZATION += -fno-builtin
     endif

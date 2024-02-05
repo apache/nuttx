@@ -60,7 +60,7 @@ void weak_function xmc4_spidev_initialize(void)
 
   /* Configure SPI2 chip selects */
 
-#if define(CONFIG_XMC4_SPI2) && defined(CONFIG_SENSORS_MAX6675)
+#if defined(CONFIG_XMC4_SPI2) && defined(CONFIG_SENSORS_MAX6675)
   xmc4_gpio_config(GPIO_CS_MAX6675);
 #endif
 

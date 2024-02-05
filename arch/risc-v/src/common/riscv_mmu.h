@@ -21,6 +21,10 @@
 #ifndef ___ARCH_RISC_V_SRC_COMMON_RISCV_MMU_H_
 #define ___ARCH_RISC_V_SRC_COMMON_RISCV_MMU_H_
 
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
 /* RV32/64 page size */
 
 #define RV_MMU_PAGE_SHIFT       (12)
@@ -151,6 +155,16 @@
 extern uintptr_t g_kernel_pgt_pbase;
 
 /****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+void weak_function mmu_flush_cache(uintptr_t);
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: mmu_satp_reg
  *
  * Description:
@@ -197,6 +211,13 @@ static inline void mmu_write_satp(uintptr_t reg)
       : "rK" (reg)
       : "memory"
     );
+
+  /* Flush the MMU Cache if needed (T-Head C906) */
+
+  if (mmu_flush_cache != NULL)
+    {
+      mmu_flush_cache(reg);
+    }
 }
 
 /****************************************************************************
@@ -367,7 +388,7 @@ static inline uintptr_t mmu_get_satp_pgbase(void)
  ****************************************************************************/
 
 void mmu_ln_setentry(uint32_t ptlevel, uintptr_t lnvaddr, uintptr_t paddr,
-                     uintptr_t vaddr, uint32_t mmuflags);
+                     uintptr_t vaddr, uint64_t mmuflags);
 
 /****************************************************************************
  * Name: mmu_ln_getentry
@@ -448,10 +469,10 @@ void mmu_ln_restore(uint32_t ptlevel, uintptr_t lnvaddr, uintptr_t vaddr,
  ****************************************************************************/
 
 void mmu_ln_map_region(uint32_t ptlevel, uintptr_t lnvaddr, uintptr_t paddr,
-                       uintptr_t vaddr, size_t size, uint32_t mmuflags);
+                       uintptr_t vaddr, size_t size, uint64_t mmuflags);
 
 /****************************************************************************
- * Name: mmu_ln_map_region
+ * Name: mmu_get_region_size
  *
  * Description:
  *   Get (giga/mega) page size for level n.

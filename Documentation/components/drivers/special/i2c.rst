@@ -2,8 +2,9 @@
 I2C Device Drivers
 ==================
 
--  ``include/nuttx/i2c/i2c.h``. All structures and APIs needed
-   to work with I2C drivers are provided in this header file.
+-  ``include/nuttx/i2c/i2c_master.h`` and ``include/nuttx/i2c/i2c_slave.h``.
+   All structures and APIs needed to work with I2C drivers are provided in
+   this header file.
 
 -  ``struct i2c_ops_s``. Each I2C device driver must implement
    an instance of ``struct i2c_ops_s``. That structure defines a

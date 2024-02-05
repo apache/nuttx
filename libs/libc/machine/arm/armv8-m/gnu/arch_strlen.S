@@ -66,6 +66,16 @@
 
 #ifdef LIBC_BUILD_STRLEN
 
+#include "acle-compat.h"
+
+#ifndef __ARM_FEATURE_BTI_DEFAULT
+#  define __ARM_FEATURE_BTI_DEFAULT 0
+#endif
+
+#ifndef __ARM_FEATURE_PAC_DEFAULT
+#  define __ARM_FEATURE_PAC_DEFAULT 0
+#endif
+
 	.macro def_fn f p2align=0
 	.text
 	.p2align \p2align
@@ -106,6 +116,13 @@
 #define tmp2		r5
 
 def_fn	strlen p2align=6
+#if __ARM_FEATURE_PAC_DEFAULT
+#  if __ARM_FEATURE_BTI_DEFAULT
+	pacbti	ip, lr, sp
+#  else
+	pac	ip, lr, sp
+#  endif /* __ARM_FEATURE_BTI_DEFAULT */
+#endif /* __ARM_FEATURE_PAC_DEFAULT */
 	pld	[srcin, #0]
 	strd	r4, r5, [sp, #-8]!
 	bic	src, srcin, #7
@@ -167,6 +184,9 @@ def_fn	strlen p2align=6
 	clz	data1a, data1a
 	ldrd	r4, r5, [sp], #8
 	add	result, result, data1a, lsr #3	/* Bits -> Bytes.  */
+#if __ARM_FEATURE_PAC_DEFAULT
+	aut	ip, lr, sp
+#endif /* __ARM_FEATURE_PAC_DEFAULT */
 	bx	lr
 
 .Lmisaligned8:

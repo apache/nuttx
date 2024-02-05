@@ -994,7 +994,7 @@ static int ads7843e_poll(FAR struct file *filep, FAR struct pollfd *fds,
   inode = filep->f_inode;
 
   DEBUGASSERT(inode->i_private);
-  priv  = inode->i_private;
+  priv = inode->i_private;
 
   /* Are we setting up the poll?  Or tearing it down? */
 
@@ -1034,8 +1034,8 @@ static int ads7843e_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (i >= CONFIG_ADS7843E_NPOLLWAITERS)
         {
-          fds->priv    = NULL;
-          ret          = -EBUSY;
+          fds->priv = NULL;
+          ret       = -EBUSY;
           goto errout;
         }
 
@@ -1043,7 +1043,7 @@ static int ads7843e_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (priv->penchange)
         {
-          ads7843e_notify(priv);
+          poll_notify(&fds, 1, POLLIN);
         }
     }
   else if (fds->priv)
@@ -1055,8 +1055,8 @@ static int ads7843e_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       /* Remove all memory of the poll setup */
 
-      *slot                = NULL;
-      fds->priv            = NULL;
+      *slot     = NULL;
+      fds->priv = NULL;
     }
 
 errout:

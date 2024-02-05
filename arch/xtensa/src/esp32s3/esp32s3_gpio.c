@@ -34,6 +34,9 @@
 #include <nuttx/irq.h>
 
 #include "xtensa.h"
+
+#include "soc/soc_caps.h"
+
 #include "esp32s3_gpio.h"
 #include "esp32s3_irq.h"
 #include "hardware/esp32s3_gpio.h"
@@ -446,6 +449,17 @@ void esp32s3_gpioirqenable(int irq, gpio_intrtype_t intrtype)
   regval |= GPIO_PIN0_INT_ENA_M;
   regval |= (uint32_t)intrtype << GPIO_PIN0_INT_TYPE_S;
   putreg32(regval, regaddr);
+
+  /* Clear pending GPIO interrupt status before enable IRQ */
+
+  if (pin < 32)
+    {
+      putreg32(1 << pin, GPIO_STATUS_W1TC_REG);
+    }
+  else
+    {
+      putreg32(1 << (pin - 32), GPIO_STATUS1_W1TC_REG);
+    }
 
   /* Configuration done. Re-enable the GPIO interrupt. */
 

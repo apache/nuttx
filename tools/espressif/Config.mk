@@ -72,6 +72,8 @@ ifdef ESPTOOL_BINDIR
 		BOOTLOADER      := $(ESPTOOL_BINDIR)/mcuboot-$(CHIP_SERIES).bin
 		FLASH_BL        := $(BL_OFFSET) $(BOOTLOADER)
 		ESPTOOL_BINS    := $(FLASH_BL)
+	else ifeq ($(CONFIG_ESPRESSIF_SIMPLE_BOOT),y)
+
 	else
 		BL_OFFSET       := 0x0
 		PT_OFFSET       := $(CONFIG_ESPRESSIF_PARTITION_TABLE_OFFSET)
@@ -98,6 +100,11 @@ ifeq ($(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT),y)
 	IMGTOOL_SIGN_ARGS  := --pad $(VERIFIED) $(IMGTOOL_ALIGN_ARGS) -v 0 -s auto \
 		-H $(CONFIG_ESPRESSIF_APP_MCUBOOT_HEADER_SIZE) --pad-header \
 		-S $(CONFIG_ESPRESSIF_OTA_SLOT_SIZE)
+else ifeq ($(CONFIG_ESPRESSIF_SIMPLE_BOOT),y)
+	APP_OFFSET     := 0x0000
+	APP_IMAGE      := nuttx.bin
+	FLASH_APP      := $(APP_OFFSET) $(APP_IMAGE)
+	ESPTOOL_BINDIR := .
 else
 	APP_OFFSET     := 0x10000
 	APP_IMAGE      := nuttx.bin
@@ -157,7 +164,7 @@ define MKIMAGE
 		echo "Missing Flash memory size configuration."; \
 		exit 1; \
 	fi
-	$(eval ELF2IMAGE_OPTS := -fs $(FLASH_SIZE) -fm $(FLASH_MODE) -ff $(FLASH_FREQ))
+	$(eval ELF2IMAGE_OPTS := $(if $(CONFIG_ESPRESSIF_SIMPLE_BOOT),--ram-only-header) -fs $(FLASH_SIZE) -fm $(FLASH_MODE) -ff $(FLASH_FREQ))
 	esptool.py -c $(CHIP_SERIES) elf2image $(ELF2IMAGE_OPTS) -o nuttx.bin nuttx
 	$(Q) echo nuttx.bin >> nuttx.manifest
 	$(Q) echo "Generated: nuttx.bin"

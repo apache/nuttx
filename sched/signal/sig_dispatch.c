@@ -101,6 +101,7 @@ static int nxsig_queue_action(FAR struct tcb_s *stcb, siginfo_t *info)
             }
 
           memcpy(&sigq->info, info, sizeof(siginfo_t));
+          sigq->info.si_user = sigact->act.sa_user;
 
           /* Put it at the end of the pending signals list */
 

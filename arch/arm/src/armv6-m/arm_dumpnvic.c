@@ -57,26 +57,30 @@ void arm_dumpnvic(const char *msg)
   flags = enter_critical_section();
 
   _info("NVIC: %s\n", msg);
-  _info("   ISER: %08x  ICER: %08x  ISPR: %08x  ICPR: %08x\n",
-       getreg32(ARMV6M_NVIC_ISER), getreg32(ARMV6M_NVIC_ICER),
-       getreg32(ARMV6M_NVIC_ISPR), getreg32(ARMV6M_NVIC_ICPR));
+  _info("   ISER: %08" PRIx32 "  ICER: %08" PRIx32
+        "  ISPR: %08" PRIx32 "  ICPR: %08" PRIx32 "\n",
+        getreg32(ARMV6M_NVIC_ISER), getreg32(ARMV6M_NVIC_ICER),
+        getreg32(ARMV6M_NVIC_ISPR), getreg32(ARMV6M_NVIC_ICPR));
 
   for (i = 0 ; i < 8; i += 4)
     {
-      _info("   IPR%d: %08x  IPR%d: %08x  IPR%d: %08x  IPR%d: %08x\n",
-           i,     getreg32(ARMV6M_NVIC_IPR(i)),
-           i + 1, getreg32(ARMV6M_NVIC_IPR(i + 1)),
-           i + 2, getreg32(ARMV6M_NVIC_IPR(i + 2)),
-           i + 3, getreg32(ARMV6M_NVIC_IPR(i + 3)));
+      _info("   IPR%d: %08" PRIx32 "  IPR%d: %08" PRIx32
+            "  IPR%d: %08" PRIx32 "  IPR%d: %08" PRIx32 "\n",
+            i,     getreg32(ARMV6M_NVIC_IPR(i)),
+            i + 1, getreg32(ARMV6M_NVIC_IPR(i + 1)),
+            i + 2, getreg32(ARMV6M_NVIC_IPR(i + 2)),
+            i + 3, getreg32(ARMV6M_NVIC_IPR(i + 3)));
     }
 
   _info("SYSCON:\n");
-  _info("  CPUID: %08x  ICSR: %08x AIRCR: %08x   SCR: %08x\n",
-       getreg32(ARMV6M_SYSCON_CPUID), getreg32(ARMV6M_SYSCON_ICSR),
-       getreg32(ARMV6M_SYSCON_AIRCR), getreg32(ARMV6M_SYSCON_SCR));
-  _info("    CCR: %08x SHPR2: %08x SHPR3: %08x\n",
-       getreg32(ARMV6M_SYSCON_CCR),   getreg32(ARMV6M_SYSCON_SHPR2),
-       getreg32(ARMV6M_SYSCON_SHPR3));
+  _info("  CPUID: %08" PRIx32 "  ICSR: %08" PRIx32
+        " AIRCR: %08" PRIx32 "   SCR: %08" PRIx32 "\n",
+        getreg32(ARMV6M_SYSCON_CPUID), getreg32(ARMV6M_SYSCON_ICSR),
+        getreg32(ARMV6M_SYSCON_AIRCR), getreg32(ARMV6M_SYSCON_SCR));
+  _info("    CCR: %08" PRIx32 " SHPR2: %08" PRIx32
+        " SHPR3: %08" PRIx32 "\n",
+        getreg32(ARMV6M_SYSCON_CCR),   getreg32(ARMV6M_SYSCON_SHPR2),
+        getreg32(ARMV6M_SYSCON_SHPR3));
 
   leave_critical_section(flags);
 #endif

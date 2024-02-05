@@ -5,7 +5,7 @@ ESP32-C6-DevKitC-1
 ESP32-C6-DevKitC-1 is an entry-level development board based on ESP32-C6-WROOM-1(U),
 a general-purpose module with a 8 MB SPI flash. This board integrates complete Wi-Fi,
 Bluetooth LE, Zigbee, and Thread functions. You can find the board schematic
-`here <https://espressif-docs.readthedocs-hosted.com/projects/espressif-esp-dev-kits/en/latest/_static/esp32-c6-devkitc-1/schematics/esp32-c6-devkitc-1-schematics_v1.2.pdf>`_.
+`here <https://espressif-docs.readthedocs-hosted.com/projects/esp-dev-kits/en/latest/_static/esp32-c6-devkitc-1/schematics/esp32-c6-devkitc-1-schematics_v1.2.pdf>`_.
 
 Most of the I/O pins are broken out to the pin headers on both sides for easy interfacing.
 Developers can either connect peripherals with jumper wires or mount ESP32-C6-DevKitC-1 on
@@ -98,7 +98,105 @@ disables the NuttShell to get the best possible score.
 .. note:: As the NSH is disabled, the application will start as soon as the
   system is turned on.
 
+gpio
+----
+
+This is a test for the GPIO driver. It uses GPIO1 and GPIO2 as outputs and
+GPIO9 as an interrupt pin.
+
+At the nsh, we can turn the outputs on and off with the following::
+
+    nsh> gpio -o 1 /dev/gpio0
+    nsh> gpio -o 1 /dev/gpio1
+
+    nsh> gpio -o 0 /dev/gpio0
+    nsh> gpio -o 0 /dev/gpio1
+
+We can use the interrupt pin to send a signal when the interrupt fires::
+
+    nsh> gpio -w 14 /dev/gpio2
+
+The pin is configured as a rising edge interrupt, so after issuing the
+above command, connect it to 3.3V.
+
 nsh
 ---
 
 Basic configuration to run the NuttShell (nsh).
+
+ostest
+------
+
+This is the NuttX test at ``apps/testing/ostest`` that is run against all new
+architecture ports to assure a correct implementation of the OS.
+
+pwm
+---
+
+This configuration demonstrates the use of PWM through a LED connected to GPIO8.
+To test it, just execute the ``pwm`` application::
+
+    nsh> pwm
+    pwm_main: starting output with frequency: 10000 duty: 00008000
+    pwm_main: stopping output
+
+rtc
+---
+
+This configuration demonstrates the use of the RTC driver through alarms.
+You can set an alarm, check its progress and receive a notification after it expires::
+
+    nsh> alarm 10
+    alarm_daemon started
+    alarm_daemon: Running
+    Opening /dev/rtc0
+    Alarm 0 set in 10 seconds
+    nsh> alarm -r
+    Opening /dev/rtc0
+    Alarm 0 is active with 10 seconds to expiration
+    nsh> alarm_daemon: alarm 0 received
+
+sotest
+------
+
+This config is to run apps/examples/sotest.
+
+timer
+-----
+
+This config test the general use purpose timers. It includes the 4 timers,
+adds driver support, registers the timers as devices and includes the timer
+example.
+
+To test it, just run the following::
+
+  nsh> timer -d /dev/timerx
+
+Where x in the timer instance.
+
+usbconsole
+----------
+
+This configuration tests the built-in USB-to-serial converter found in ESP32-C6.
+``esptool`` can be used to check the version of the chip and if this feature is
+supported.  Running ``esptool.py -p <port> chip_id`` should have ``Chip is
+ESP32-C6`` in its output.
+When connecting the board a new device should appear, a ``/dev/ttyACMX`` on Linux
+or a ``/dev/cu.usbmodemXXX`` om macOS.
+This can be used to flash and monitor the device with the usual commands::
+
+    make download ESPTOOL_PORT=/dev/ttyACM0
+    minicom -D /dev/ttyACM0
+
+watchdog
+--------
+
+This configuration tests the watchdog timers. It includes the 1 MWDTS,
+adds driver support, registers the WDTs as devices and includes the watchdog
+example application.
+
+To test it, just run the following command::
+
+    nsh> wdog -i /dev/watchdogX
+
+Where X is the watchdog instance.

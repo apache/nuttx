@@ -369,8 +369,8 @@ static int uart_bth4_poll(FAR struct file *filep, FAR struct pollfd *fds,
             {
               /* Bind the poll structure and this slot */
 
-              dev->fds[i]  = fds;
-              fds->priv    = &dev->fds[i];
+              dev->fds[i] = fds;
+              fds->priv   = &dev->fds[i];
               break;
             }
         }
@@ -388,7 +388,7 @@ static int uart_bth4_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       eventset |= POLLOUT;
 
-      uart_bth4_pollnotify(dev, eventset);
+      poll_notify(&fds, 1, eventset);
     }
   else if (fds->priv != NULL)
     {

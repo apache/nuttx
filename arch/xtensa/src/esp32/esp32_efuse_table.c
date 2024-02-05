@@ -314,7 +314,7 @@ static const efuse_desc_t SDIO_TIEH[] =
 static const efuse_desc_t SDIO_FORCE[] =
 {
   {
-    144, 1   /* EFUSE_RD_SDIO_FORCE */
+    144, 1   /* EFUSE_RD_XPD_SDIO_FORCE */
   },
 };
 

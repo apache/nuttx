@@ -5,8 +5,9 @@
 Installing
 ==========
 
-The first step to get started with NuttX is to install a series of required tools, a toolchain for the architecture
-you will be working with and, finally, download NuttX source code itself.
+The first step to get started with NuttX is to install a series of required tools,
+a toolchain for the architecture you will be working with and, finally, download
+NuttX source code itself.
 
 Prerequisites
 =============
@@ -75,7 +76,11 @@ First, install the following set of system dependencies according to your Operat
 KConfig frontend
 ----------------
 
-NuttX configuration system uses `KConfig <https://www.kernel.org/doc/Documentation/kbuild/kconfig-language.txt>`_ which is exposed via a series of interactive menu-based *frontends*, part of the ``kconfig-frontends`` package. Depending on your OS you may use a precompiled package or you will have to build it from source, which is available in the `NuttX tools repository <https://bitbucket.org/nuttx/tools/src/master/kconfig-frontends/>`_:
+NuttX configuration system uses `KConfig <https://www.kernel.org/doc/Documentation/kbuild/kconfig-language.txt>`_
+which is exposed via a series of interactive menu-based *frontends*, part of the
+``kconfig-frontends`` package. Depending on your OS you may use a precompiled
+package or you will have to build it from source, which is available in the
+`NuttX tools repository <https://bitbucket.org/nuttx/tools/src/master/kconfig-frontends/>`_:
 
 .. tabs::
 
@@ -110,7 +115,12 @@ NuttX configuration system uses `KConfig <https://www.kernel.org/doc/Documentati
     $ make
     $ sudo make install
 
-NuttX also supports `kconfiglib <https://github.com/ulfalizer/Kconfiglib>` by default, which is a Kconfig tool implemented in Python 2/3. Compared with kconfig-frontends, kconfiglib provides NuttX with the possibility of multi-platform support(configure NuttX in Winodws native/Visual Studio), and also kconfiglib has a stronger Kconfig syntax check, this will help developers to avoid some Kconfig syntax errors.  Install kconfiglib via following command:
+NuttX also supports `kconfiglib <https://github.com/ulfalizer/Kconfiglib>`_ by
+default, which is a Kconfig tool implemented in Python 2/3. Compared with
+``kconfig-frontends``, kconfiglib provides NuttX with the possibility of
+multi-platform support(configure NuttX in Winodws native/Visual Studio), and also
+``kconfiglib`` has a stronger Kconfig syntax check, this will help developers to avoid
+some Kconfig syntax errors.  Install kconfiglib via following command:
 
 .. code-block:: shell
 
@@ -124,7 +134,7 @@ If you are a working on Windows, which also need the support of windows-curses:
 
 .. tip::
   It should be noted that kconfiglib does not support **modules** attributes.
-  (<https://github.com/ulfalizer/Kconfiglib/blob/master/kconfiglib.py#L3239-L3254>,
+  (https://github.com/ulfalizer/Kconfiglib/blob/master/kconfiglib.py#L3239-L3254,
   the community seems to have stopped updating), if the features depends on
   ``CONFIG_BUILD_LOADABLE``, kconfiglib may not be a good choice.
 
@@ -205,7 +215,13 @@ ARM architecture:
 Download NuttX
 ==============
 
-Apache NuttX is actively developed on GitHub. There are two main repositories, `nuttx <https://github.com/apache/nuttx>`_ and `apps <https://github.com/apache/nuttx-apps>`_, where the latter is technically optional (but recommended for complete set of features). If you intend to contribute changes, you need the absolute latest version or you simply prefer to work using git, you should clone these repositories (recommended). Otherwise you can choose to download any `stable release <https://nuttx.apache.org/download/>`_ archive.
+Apache NuttX is actively developed on GitHub. There are two main repositories,
+`nuttx <https://github.com/apache/nuttx>`_ and `apps <https://github.com/apache/nuttx-apps>`_,
+where the latter is technically optional (but recommended for complete set of
+features). If you intend to contribute changes, you need the absolute latest
+version or you simply prefer to work using git, you should clone these
+repositories (recommended). Otherwise you can choose to download any
+`stable release <https://nuttx.apache.org/download/>`_ archive.
 
 .. tabs::
 

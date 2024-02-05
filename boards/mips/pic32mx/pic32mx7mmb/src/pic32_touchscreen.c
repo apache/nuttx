@@ -556,11 +556,12 @@ static int tc_waitsample(struct tc_dev_s *priv,
 {
   int ret;
 
-  /* Pre-emption must be disabled when this is called to prevent sampled
-   * data from changing until it has been reported.
+  /* Interrupts must be disabled when this is called to (1) prevent posting
+   * of semaphores from interrupt handlers, and (2) to prevent sampled data
+   * from changing until it has been reported.
    */
 
-  sched_lock();
+  flags = enter_critical_section();
 
   /* Now release the mutex that manages mutually exclusive access to
    * the device structure.  This may cause other tasks to become ready to
@@ -595,13 +596,12 @@ static int tc_waitsample(struct tc_dev_s *priv,
   ret = nxmutex_lock(&priv->devlock);
 
 errout:
-  /* Restore pre-emption.  We might get suspended here but that is okay
-   * because we already have our sample.  Note:  this means that if there
-   * were two threads reading from the touchscreen for some reason, the data
-   * might be read out of order.
+  /* Then re-enable interrupts.  We might get interrupt here and there
+   * could be a new sample.  But no new threads will run because we still
+   * have pre-emption disabled.
    */
 
-  sched_unlock();
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -1274,8 +1274,8 @@ static int tc_poll(struct file *filep, struct pollfd *fds, bool setup)
       if (i >= CONFIG_TOUCHSCREEN_NPOLLWAITERS)
         {
           ierr("ERROR: No available slot found: %d\n", i);
-          fds->priv    = NULL;
-          ret          = -EBUSY;
+          fds->priv = NULL;
+          ret       = -EBUSY;
           goto errout;
         }
 
@@ -1283,7 +1283,7 @@ static int tc_poll(struct file *filep, struct pollfd *fds, bool setup)
 
       if (priv->penchange)
         {
-          tc_notify(priv);
+          poll_notify(&fds, 1, POLLIN);
         }
     }
   else if (fds->priv)
@@ -1295,8 +1295,8 @@ static int tc_poll(struct file *filep, struct pollfd *fds, bool setup)
 
       /* Remove all memory of the poll setup */
 
-      *slot                = NULL;
-      fds->priv            = NULL;
+      *slot     = NULL;
+      fds->priv = NULL;
     }
 
 errout:

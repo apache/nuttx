@@ -57,5 +57,10 @@ int qemu_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_QEMU_PCI
+  /* Initialization of system */
+
+  qemu_pci_init();
+#endif
   return ret;
 }

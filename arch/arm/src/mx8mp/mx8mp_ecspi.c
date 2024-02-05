@@ -229,9 +229,9 @@ static void mx8mp_spi_enable(struct mx8mp_spi_s *priv)
  *
  ******************************************************************************/
 
-static inline int mx8mp_spi_wait_irq(struct mx8mp_spi_s *priv, int usec)
+static inline int mx8mp_spi_wait_irq(struct mx8mp_spi_s *priv, int nsec)
 {
-  return nxsem_tickwait(&priv->wait, USEC2TICK(usec));
+  return nxsem_tickwait(&priv->wait, NSEC2TICK(nsec));
 }
 
 /******************************************************************************
@@ -245,6 +245,7 @@ static inline int mx8mp_spi_wait_irq(struct mx8mp_spi_s *priv, int usec)
 static int mx8mp_spi_interrupt(int irq, void *context, void *arg)
 {
   struct mx8mp_spi_s *priv = (struct mx8mp_spi_s *)arg;
+  putreg32(0, priv->base + INTREG_OFFSET);
   nxsem_post(&priv->wait);
 
   return 0;
@@ -271,9 +272,13 @@ static int mx8mp_spi_transfer(struct mx8mp_spi_s *priv,
 
   /* WARNING: SPI FIFO works on 32 bits data only */
 
-  /* 1. clear IRQs */
+  /* 1. clear and enable IRQs */
 
-  modreg32(0, STATREG_TC | STATREG_RO, priv->base + STATREG_OFFSET);
+  putreg32(INTREG_RDREN, priv->base + INTREG_OFFSET);
+
+  modreg32(STATREG_TC | STATREG_RO,
+           STATREG_TC | STATREG_RO,
+           priv->base + STATREG_OFFSET);
 
   /* 2. compute words to process */
 
@@ -444,7 +449,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
 
   /* Store byte duration to adapt irq waiting time */
 
-  priv->byte_duration = (USEC_PER_SEC / priv->actual) * 8;
+  priv->byte_duration = (NSEC_PER_SEC / priv->actual) * 8;
 
   return priv->actual;
 }

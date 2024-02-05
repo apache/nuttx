@@ -147,7 +147,8 @@ Here are some general build instructions:
 -  You must have already configured NuttX in ``<some-dir>/nuttx``
 -  Download the buildroot package ``buildroot-0.x.y`` into
    ``<some-dir>``
--  Unpack ``<some-dir>/buildroot-0.x.y.tar.gz`` using a command like ``tar zxf buildroot-0.x.y``. This will result in a new directory like ``<some-dir>/buildroot-0.x.y``
+-  Unpack ``<some-dir>/buildroot-0.x.y.tar.gz`` using a command like ``tar zxf buildroot-0.x.y``.
+   This will result in a new directory like ``<some-dir>/buildroot-0.x.y``
 -  Move this into position:
    ``mv <some-dir>/buildroot-0.x.y``\ <some-dir>/buildroot
 -  ``cd``\ <some-dir>/buildroot

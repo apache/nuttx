@@ -52,9 +52,9 @@ static int  can_setup(FAR struct socket *psock);
 static sockcaps_t can_sockcaps(FAR struct socket *psock);
 static void can_addref(FAR struct socket *psock);
 static int  can_bind(FAR struct socket *psock,
-              FAR const struct sockaddr *addr, socklen_t addrlen);
+                     FAR const struct sockaddr *addr, socklen_t addrlen);
 static int  can_poll_local(FAR struct socket *psock, FAR struct pollfd *fds,
-              bool setup);
+                           bool setup);
 static int can_close(FAR struct socket *psock);
 
 /****************************************************************************
@@ -394,9 +394,9 @@ static int can_poll_local(FAR struct socket *psock, FAR struct pollfd *fds,
        * during callback processing.
        */
 
-      cb->flags   = NETDEV_DOWN;
-      cb->priv    = (FAR void *)info;
-      cb->event   = can_poll_eventhandler;
+      cb->flags = NETDEV_DOWN;
+      cb->priv  = info;
+      cb->event = can_poll_eventhandler;
 
       if ((fds->events & POLLOUT) != 0)
         {
@@ -412,7 +412,7 @@ static int can_poll_local(FAR struct socket *psock, FAR struct pollfd *fds,
        * for use during poll teardown as well.
        */
 
-      fds->priv = (FAR void *)info;
+      fds->priv = info;
 
       /* Check for read data availability now */
 

@@ -68,6 +68,7 @@
 #include "nat/nat.h"
 #include "netdev/netdev.h"
 #include "socket/socket.h"
+#include "igmp/igmp.h"
 #include "udp/udp.h"
 
 /****************************************************************************
@@ -881,8 +882,8 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
 
           for (dev = g_netdevices; dev; dev = dev->flink)
             {
-              if (net_ipv6addr_cmp(inaddr->sin6_addr.in6_u.u6_addr16,
-                                  dev->d_ipv6addr))
+              if (NETDEV_IS_MY_V6ADDR(dev,
+                                      inaddr->sin6_addr.in6_u.u6_addr16))
                 {
                   ret = 0;
                   break;
@@ -1079,5 +1080,36 @@ int udp_connect(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
 
   return OK;
 }
+
+#if defined(CONFIG_NET_IGMP)
+/****************************************************************************
+ * Name: udp_leavegroup
+ *
+ * Description:
+ *   This function leaves the multicast group to which the conn belongs.
+ *
+ * Input Parameters:
+ *   conn - A reference to UDP connection structure.  A value of NULL will
+ *          disconnect from any previously connected address.
+ *
+ * Assumptions:
+ *   This function is called (indirectly) from user code.  Interrupts may
+ *   be enabled.
+ *
+ ****************************************************************************/
+
+void udp_leavegroup(FAR struct udp_conn_s *conn)
+{
+  if (conn->mreq.imr_multiaddr.s_addr != 0)
+    {
+      FAR struct net_driver_s *dev;
+
+      if ((dev = netdev_findbyindex(conn->mreq.imr_ifindex)) != NULL)
+        {
+          igmp_leavegroup(dev, &conn->mreq.imr_multiaddr);
+        }
+    }
+}
+#endif
 
 #endif /* CONFIG_NET && CONFIG_NET_UDP */

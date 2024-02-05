@@ -493,6 +493,14 @@ int cxd56_bringup(void)
     }
 #endif
 
+#if defined(CONFIG_CXD56_GNSS_ADDON) && !defined(CONFIG_CXD56_GNSS_ADDON_LATE_INITIALIZE)
+  ret = board_gnss_addon_initialize("/dev/gps2", 0);
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to initialize gnss addon.\n");
+    }
+#endif
+
 #ifdef CONFIG_CXD56_GEOFENCE
   ret = cxd56_geofenceinitialize("/dev/geofence");
   if (ret < 0)

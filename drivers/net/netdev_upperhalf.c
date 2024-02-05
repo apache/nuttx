@@ -270,7 +270,16 @@ static int netdev_upper_txpoll(FAR struct net_driver_s *dev)
 #endif
 
   pkt = netpkt_get(dev, NETPKT_TX);
-  ret = lower->ops->transmit(lower, pkt);
+
+  if (netpkt_getdatalen(lower, pkt) > NETDEV_PKTSIZE(dev))
+    {
+      nerr("ERROR: Packet too long to send!\n");
+      ret = -EMSGSIZE;
+    }
+  else
+    {
+      ret = lower->ops->transmit(lower, pkt);
+    }
 
   if (ret != OK)
     {
@@ -1054,14 +1063,11 @@ int netdev_lower_unregister(FAR struct netdev_lowerhalf_s *dev)
  * Input Parameters:
  *   dev - The lower half device driver structure
  *
- * Returned Value:
- *   0:Success; negated errno on failure
- *
  ****************************************************************************/
 
-int netdev_lower_carrier_on(FAR struct netdev_lowerhalf_s *dev)
+void netdev_lower_carrier_on(FAR struct netdev_lowerhalf_s *dev)
 {
-  return netdev_carrier_on(&dev->netdev);
+  netdev_carrier_on(&dev->netdev);
 }
 
 /****************************************************************************
@@ -1074,14 +1080,11 @@ int netdev_lower_carrier_on(FAR struct netdev_lowerhalf_s *dev)
  * Input Parameters:
  *   dev - The lower half device driver structure
  *
- * Returned Value:
- *   0:Success; negated errno on failure
- *
  ****************************************************************************/
 
-int netdev_lower_carrier_off(FAR struct netdev_lowerhalf_s *dev)
+void netdev_lower_carrier_off(FAR struct netdev_lowerhalf_s *dev)
 {
-  return netdev_carrier_off(&dev->netdev);
+  netdev_carrier_off(&dev->netdev);
 }
 
 /****************************************************************************

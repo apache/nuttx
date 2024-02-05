@@ -582,7 +582,7 @@ struct stm32_adc_ops_s
   void (*dump_regs)(struct stm32_adc_dev_s *dev);
 };
 
-#endif  /* CONFIG_STM32L4_ADC_LL_OPS */
+#endif /* CONFIG_STM32L4_ADC_LL_OPS */
 
 /****************************************************************************
  * Public Function Prototypes

@@ -2890,17 +2890,6 @@ static int adc_setup(struct adc_dev_s *dev)
       return OK;
     }
 
-  /* Attach the ADC interrupt */
-
-#ifndef CONFIG_STM32_ADC_NOIRQ
-  ret = irq_attach(priv->irq, priv->isr, NULL);
-  if (ret < 0)
-    {
-      ainfo("irq_attach failed: %d\n", ret);
-      return ret;
-    }
-#endif
-
   /* Make sure that the ADC device is in the powered up, reset state */
 
   adc_reset(dev);
@@ -2954,9 +2943,18 @@ static int adc_setup(struct adc_dev_s *dev)
   if (priv->cmn->refcount == 0)
 #endif
     {
+#ifndef CONFIG_STM32_ADC_NOIRQ
+      /* Attach the ADC interrupt */
+
+      ret = irq_attach(priv->irq, priv->isr, NULL);
+      if (ret < 0)
+        {
+          ainfo("irq_attach failed: %d\n", ret);
+          return ret;
+        }
+
       /* Enable the ADC interrupt */
 
-#ifndef CONFIG_STM32_ADC_NOIRQ
       ainfo("Enable the ADC interrupt: irq=%d\n", priv->irq);
       up_enable_irq(priv->irq);
 #endif

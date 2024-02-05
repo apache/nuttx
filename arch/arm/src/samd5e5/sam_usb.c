@@ -392,9 +392,7 @@ enum sam_hoststate_e
   USB_HOSTSTATE_CONFIGURED     /* A valid configuration has been selected. */
 };
 
-/**
- * @brief      USB HCD pipe states
- */
+/* USB HCD pipe states */
 
 enum usb_h_pipe_state
 {

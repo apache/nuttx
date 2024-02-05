@@ -56,9 +56,6 @@
 #define MPFS_ACLINT_MSWI_ADDR      MPFS_CLINT_MSIP0
 #define MPFS_ACLINT_MTIMER_ADDR    MPFS_CLINT_MTIMECMP0
 
-#define MPFS_PMP_DEFAULT_ADDR      0xfffffffff
-#define MPFS_PMP_DEFAULT_PERM      0x000000009f
-
 #define MPFS_SYSREG_SOFT_RESET_CR     (MPFS_SYSREG_BASE + \
                                        MPFS_SYSREG_SOFT_RESET_CR_OFFSET)
 #define MPFS_SYSREG_SUBBLK_CLOCK_CR   (MPFS_SYSREG_BASE + \
@@ -87,6 +84,8 @@ typedef struct sbi_scratch_holder_s sbi_scratch_holder_t;
 
 extern const uint8_t __mpfs_nuttx_start[];
 extern const uint8_t __mpfs_nuttx_end[];
+extern const uint8_t _ssbi_ddr[];
+extern const uint8_t _esbi_ddr[];
 
 /****************************************************************************
  * Private Function Prototypes
@@ -99,8 +98,8 @@ static int  mpfs_irqchip_init(bool cold_boot);
 static int  mpfs_ipi_init(bool cold_boot);
 static int  mpfs_timer_init(bool cold_boot);
 #ifdef CONFIG_MPFS_IHC_SBI
-static int  mpfs_opensbi_vendor_ext_check(long extid);
-static int  mpfs_opensbi_ecall_handler(long extid, long funcid,
+static bool mpfs_opensbi_vendor_ext_check(void);
+static int  mpfs_opensbi_ecall_handler(long funcid,
                                        const struct sbi_trap_regs *regs,
                                        unsigned long *out_val,
                                        struct sbi_trap_info *out_trap);
@@ -151,7 +150,7 @@ static struct aclint_mtimer_data mpfs_mtimer =
   .mtimecmp_size  = ACLINT_DEFAULT_MTIMECMP_SIZE,
   .first_hartid   = 0,
   .hart_count     = MPFS_HART_COUNT,
-  .has_64bit_mmio = TRUE,
+  .has_64bit_mmio = true,
 };
 
 static const struct sbi_platform_operations platform_ops =
@@ -480,43 +479,45 @@ static void mpfs_opensbi_scratch_setup(uint32_t hartid)
    * them so that OpenSBI has no chance override then.
    */
 
-  g_scratches[hartid].scratch.fw_start = (unsigned long)__mpfs_nuttx_start;
-  g_scratches[hartid].scratch.fw_size  = (unsigned long)__mpfs_nuttx_end -
-                                         (unsigned long)__mpfs_nuttx_start;
-}
+  g_scratches[hartid].scratch.fw_start = (unsigned long)_ssbi_ddr;
+  g_scratches[hartid].scratch.fw_size  = (unsigned long)_esbi_ddr -
+                                         (unsigned long)_ssbi_ddr;
 
-/****************************************************************************
- * Name: mpfs_opensbi_pmp_setup
- *
- * Description:
- *   Initializes the PMP registers in a known default state.  All harts need
- *   to set these registers.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
+  g_scratches[hartid].scratch.fw_rw_offset =
+      (unsigned long)g_scratches[hartid].scratch.fw_size;
 
-static void mpfs_opensbi_pmp_setup(void)
-{
-  /* All access granted */
+  /* fw_rw_offset needs to be an aligned address */
 
-  csr_write(pmpaddr0, MPFS_PMP_DEFAULT_ADDR);
-  csr_write(pmpcfg0, MPFS_PMP_DEFAULT_PERM);
-  csr_write(pmpcfg2, 0);
+  g_scratches[hartid].scratch.fw_rw_offset += 1024 * 2;
+  g_scratches[hartid].scratch.fw_rw_offset &= 0xffffff800;
+  g_scratches[hartid].scratch.fw_size =
+      g_scratches[hartid].scratch.fw_rw_offset;
+
+  g_scratches[hartid].scratch.fw_heap_offset =
+      (unsigned long)g_scratches[hartid].scratch.fw_size;
+
+  /* Heap minimum is 16k.  Otherwise sbi_heap.c fails:
+   * hpctrl.hksize = hpctrl.size / HEAP_HOUSEKEEPING_FACTOR;
+   * hpctrl.hksize &= ~((unsigned long)HEAP_BASE_ALIGN - 1);
+   * eg. 8k:  (0x2000 / 16) & ~(1024 - 1) = 0      (Fail!)
+   *     16k: (0x4000 / 16) & ~(1024 - 1) = 0x400  (Ok)
+   * hpctrl.hksize gets to be zero making the OpenSBI crash.
+   */
+
+  g_scratches[hartid].scratch.fw_heap_size = 1024 * 16;
+  g_scratches[hartid].scratch.fw_size      =
+      g_scratches[hartid].scratch.fw_heap_offset +
+      g_scratches[hartid].scratch.fw_heap_size;
 }
 
 /****************************************************************************
  * Name: mpfs_opensbi_vendor_ext_check
  *
  * Description:
- *   Used by the OpenSBI in vendor probe to check the vendor ID.
+ *   Used by the OpenSBI to check if vendor extension is enabled.
  *
  * Input Parameters:
- *   extid       - Vendor ID to be checked
+ *   None
  *
  * Returned Value:
  *   1 on match, zero in case of no match
@@ -524,9 +525,9 @@ static void mpfs_opensbi_pmp_setup(void)
  ****************************************************************************/
 
 #ifdef CONFIG_MPFS_IHC_SBI
-static int mpfs_opensbi_vendor_ext_check(long extid)
+static bool mpfs_opensbi_vendor_ext_check(void)
 {
-  return (SBI_EXT_MICROCHIP_TECHNOLOGY == extid);
+  return true;
 }
 
 /****************************************************************************
@@ -537,7 +538,6 @@ static int mpfs_opensbi_vendor_ext_check(long extid)
  *   related to Inter-Hart Communication (IHC).
  *
  * Input Parameters:
- *   extid          - Vendor ID
  *   funcid         - One of the valid functions
  *   sbi_trap_regs  - SBI trap registers
  *   out_val        - Error code location
@@ -548,7 +548,7 @@ static int mpfs_opensbi_vendor_ext_check(long extid)
  *
  ****************************************************************************/
 
-static int mpfs_opensbi_ecall_handler(long extid, long funcid,
+static int mpfs_opensbi_ecall_handler(long funcid,
                                       const struct sbi_trap_regs *regs,
                                       unsigned long *out_val,
                                       struct sbi_trap_info *out_trap)
@@ -602,8 +602,6 @@ static int mpfs_opensbi_ecall_handler(long extid, long funcid,
 void __attribute__((noreturn)) mpfs_opensbi_setup(void)
 {
   uint32_t hartid = current_hartid();
-
-  mpfs_opensbi_pmp_setup();
 
   sbi_console_set_device(&mpfs_console);
   mpfs_opensbi_scratch_setup(hartid);

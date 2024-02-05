@@ -67,6 +67,13 @@ config ARCH_CHIP_GD32F470ZK
 	---help---
 		GD32 F4 Cortex M4, 3072 Kb FLASH, 256 Kb SRAM
 
+config ARCH_CHIP_GD32F470IK
+	bool "GD32F470IK"
+	select GD32F4_GD32F4XX
+	select GD32F4_GD32F470Z_I
+	---help---
+		GD32 F4 Cortex M4, 3072 Kb FLASH, 256 Kb SRAM
+
 endchoice # GD32F4 Chip Seclection
 
 choice
@@ -78,10 +85,10 @@ choice
 		ends with a number or letter that designates the FLASH size.
 
 				Designator  Size in KiB
-				   E   	512
-				   G   	1024
-				   I   	2048
-				   K   	3072
+				   E    512
+				   G    1024
+				   I    2048
+				   K    3072
 
 		This configuration option defaults to using the configuration based
 		on that designator or the default smaller size if there is no last
@@ -138,7 +145,7 @@ config GD32F4_GD32F450Z_I
 	select GD32F4_GD32F450
 	select GD32F4_HAVE_SPI5
 config GD32F4_GD32F470Z_I
-	# bool "GD32F470Z or GD32F70I"
+	# bool "GD32F470Z or GD32F470I"
 	bool
 	default n
 	select GD32F4_GD32F470
@@ -2043,7 +2050,7 @@ config GD32F4_PM_SERIAL_ACTIVITY
 		PM activity reported to power management logic on every serial
 		interrupt.
 
-endif
+endif # PM
 
 endmenu # USART Configuration
 
@@ -2154,6 +2161,7 @@ config GD32F4_RTC_HXTALCLOCK
 		The RTC clock source is the HXTAL clock, divided down to 1MHz.
 
 endchoice # RTC clock source
+
 endmenu # RTC configuration
 
 
@@ -2189,7 +2197,7 @@ config GD32F4_SDIO_WIDTH_D1_ONLY
 	---help---
 		Select 1-bit transfer mode.  Default: 4-bit transfer mode.
 
-endmenu
+endmenu # SDIO Configuration
 
 menu "SPI Configuration"
 	depends on GD32F4_SPI
@@ -2384,7 +2392,7 @@ config GD32F4_MII_EXTCLK
 		MII clock is provided by external clock. And not use CKOUT for
 		MII clock.
 
-endchoice
+endchoice # MII clock configuration
 
 config GD32F4_AUTO_NEGOTIATION
 	bool "Use autonegotiation"

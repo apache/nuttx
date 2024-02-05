@@ -32,12 +32,20 @@
 
 #include <nuttx/irq.h>
 
-#ifdef CONFIG_RW_SPINLOCK
-#include <stdatomic.h>
-typedef atomic_int rwlock_t;
-#define RW_SP_UNLOCKED      0
-#define RW_SP_READ_LOCKED   1
-#define RW_SP_WRITE_LOCKED -1
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+#if defined(CONFIG_RW_SPINLOCK)
+typedef int rwlock_t;
+#  define RW_SP_UNLOCKED      0
+#  define RW_SP_READ_LOCKED   1
+#  define RW_SP_WRITE_LOCKED -1
 #endif
 
 #ifndef CONFIG_SPINLOCK
@@ -45,18 +53,16 @@ typedef atomic_int rwlock_t;
 #  define SP_LOCKED   1  /* The Locked state */
 
 typedef uint8_t spinlock_t;
-#else
-
-#ifdef CONFIG_TICKET_SPINLOCK
+#elif defined(CONFIG_TICKET_SPINLOCK)
 
 union spinlock_u
 {
   struct
   {
-    uint16_t owner;
-    uint16_t next;
+    unsigned short owner;
+    unsigned short next;
   } tickets;
-  uint32_t value;
+  unsigned int value;
 };
 typedef union spinlock_u spinlock_t;
 
@@ -77,7 +83,7 @@ typedef union spinlock_u spinlock_t;
 
 #include <arch/spinlock.h>
 
-#endif
+#endif /* CONFIG_SPINLOCK */
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -384,8 +390,6 @@ void spin_clrbit(FAR volatile cpu_set_t *set, unsigned int cpu,
                  FAR volatile spinlock_t *orlock);
 #endif
 
-#endif /* CONFIG_SPINLOCK */
-
 /****************************************************************************
  * Name: spin_initialize
  *
@@ -500,7 +504,7 @@ void spin_unlock_irqrestore_wo_note(FAR spinlock_t *lock, irqstate_t flags);
 #  define spin_unlock_irqrestore_wo_note(l, f) up_irq_restore(f)
 #endif
 
-#ifdef CONFIG_RW_SPINLOCK
+#if defined(CONFIG_RW_SPINLOCK)
 
 /****************************************************************************
  * Name: rwlock_init
@@ -809,4 +813,10 @@ void write_unlock_irqrestore(FAR rwlock_t *lock, irqstate_t flags);
 #endif
 
 #endif /* CONFIG_RW_SPINLOCK */
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
 #endif /* __INCLUDE_NUTTX_SPINLOCK_H */

@@ -34,6 +34,7 @@
 #include "netdev/netdev.h"
 #include "route/cacheroute.h"
 #include "route/route.h"
+#include "utils/utils.h"
 
 #if defined(CONFIG_NET) && defined(CONFIG_NET_ROUTE)
 
@@ -67,6 +68,14 @@ struct route_ipv4_devmatch_s
 #else
   in_addr_t router;              /* IPv4 address of router a local networks */
 #endif
+#ifdef CONFIG_ROUTE_LONGEST_MATCH
+  /* Only match prefix longer than prefixlen, equals to entry.netmask if we
+   * have got a match (then we only find longer prefix later).
+   * Range: -1 ~ 32
+   */
+
+  int8_t prefixlen;
+#endif
 };
 #endif
 
@@ -79,6 +88,14 @@ struct route_ipv6_devmatch_s
   struct net_route_ipv6_s entry; /* Full entry from the IPv6 routing table */
 #else
   net_ipv6addr_t router;         /* IPv6 address of router a local networks */
+#endif
+#ifdef CONFIG_ROUTE_LONGEST_MATCH
+  /* Only match prefix longer than prefixlen, equals to entry.netmask if we
+   * have got a match (then we only find longer prefix later).
+   * Range: -1 ~ 128
+   */
+
+  int16_t prefixlen;
 #endif
 };
 #endif
@@ -109,16 +126,24 @@ static int net_ipv4_devmatch(FAR struct net_route_ipv4_s *route,
   FAR struct route_ipv4_devmatch_s *match =
     (FAR struct route_ipv4_devmatch_s *)arg;
   FAR struct net_driver_s *dev = match->dev;
+#ifdef CONFIG_ROUTE_LONGEST_MATCH
+  int8_t prefixlen = (int8_t)net_ipv4_mask2pref(route->netmask);
+#endif
 
   /* To match, (1) the masked target addresses must be the same, and (2) the
    * router address must like on the network provided by the device.
    *
-   * In the event of multiple matches, only the first is returned.  There
-   * not (yet) any concept for the precedence of networks.
+   * In the event of multiple matches, we try to get the longest prefix if
+   * CONFIG_ROUTE_LONGEST_MATCH is set, otherwise only the first match is
+   * returned.
    */
 
   if (net_ipv4addr_maskcmp(route->target, match->target, route->netmask) &&
-      net_ipv4addr_maskcmp(route->router, dev->d_ipaddr, dev->d_netmask))
+      net_ipv4addr_maskcmp(route->router, dev->d_ipaddr, dev->d_netmask)
+#ifdef CONFIG_ROUTE_LONGEST_MATCH
+      && prefixlen > match->prefixlen
+#endif
+      )
     {
 #ifdef CONFIG_ROUTE_IPv4_CACHEROUTE
       /* They match.. Copy the entire routing table entry */
@@ -129,7 +154,13 @@ static int net_ipv4_devmatch(FAR struct net_route_ipv4_s *route,
 
       net_ipv4addr_copy(match->router, route->router);
 #endif
+#ifdef CONFIG_ROUTE_LONGEST_MATCH
+      /* Cache the prefix length */
+
+      match->prefixlen = prefixlen;
+#else
       return 1;
+#endif
     }
 
   return 0;
@@ -158,17 +189,24 @@ static int net_ipv6_devmatch(FAR struct net_route_ipv6_s *route,
   FAR struct route_ipv6_devmatch_s *match =
     (FAR struct route_ipv6_devmatch_s *)arg;
   FAR struct net_driver_s *dev = match->dev;
+#ifdef CONFIG_ROUTE_LONGEST_MATCH
+  int16_t prefixlen = (int16_t)net_ipv6_mask2pref(route->netmask);
+#endif
 
   /* To match, (1) the masked target addresses must be the same, and (2) the
    * router address must like on the network provided by the device.
    *
-   * In the event of multiple matches, only the first is returned.  There
-   * not (yet) any concept for the precedence of networks.
+   * In the event of multiple matches, we try to get the longest prefix if
+   * CONFIG_ROUTE_LONGEST_MATCH is set, otherwise only the first match is
+   * returned.
    */
 
   if (net_ipv6addr_maskcmp(route->target, match->target, route->netmask) &&
-      net_ipv6addr_maskcmp(route->router, dev->d_ipv6addr,
-                           dev->d_ipv6netmask))
+      NETDEV_V6ADDR_ONLINK(dev, route->router)
+#ifdef CONFIG_ROUTE_LONGEST_MATCH
+      && prefixlen > match->prefixlen
+#endif
+      )
     {
 #ifdef CONFIG_ROUTE_IPv6_CACHEROUTE
       /* They match.. Copy the entire routing table entry */
@@ -179,7 +217,13 @@ static int net_ipv6_devmatch(FAR struct net_route_ipv6_s *route,
 
       net_ipv6addr_copy(match->router, route->router);
 #endif
+#ifdef CONFIG_ROUTE_LONGEST_MATCH
+      /* Cache the prefix length */
+
+      match->prefixlen = prefixlen;
+#else
       return 1;
+#endif
     }
 
   return 0;
@@ -223,6 +267,9 @@ void netdev_ipv4_router(FAR struct net_driver_s *dev, in_addr_t target,
   memset(&match, 0, sizeof(struct route_ipv4_devmatch_s));
   match.dev = dev;
   net_ipv4addr_copy(match.target, target);
+#ifdef CONFIG_ROUTE_LONGEST_MATCH
+  match.prefixlen = -1;
+#endif
 
 #ifdef CONFIG_ROUTE_IPv4_CACHEROUTE
   /* First see if we can find a router entry in the cache */
@@ -240,7 +287,12 @@ void netdev_ipv4_router(FAR struct net_driver_s *dev, in_addr_t target,
 
   /* Did we find a route? */
 
+#ifdef CONFIG_ROUTE_LONGEST_MATCH
+  UNUSED(ret);
+  if (match.prefixlen >= 0)
+#else
   if (ret > 0)
+#endif
     {
       /* We found a route. */
 
@@ -302,6 +354,9 @@ void netdev_ipv6_router(FAR struct net_driver_s *dev,
   memset(&match, 0, sizeof(struct route_ipv6_devmatch_s));
   match.dev = dev;
   net_ipv6addr_copy(match.target, target);
+#ifdef CONFIG_ROUTE_LONGEST_MATCH
+  match.prefixlen = -1;
+#endif
 
 #ifdef CONFIG_ROUTE_IPv6_CACHEROUTE
   /* First see if we can find a router entry in the cache */
@@ -319,7 +374,12 @@ void netdev_ipv6_router(FAR struct net_driver_s *dev,
 
   /* Did we find a route? */
 
+#ifdef CONFIG_ROUTE_LONGEST_MATCH
+  UNUSED(ret);
+  if (match.prefixlen >= 0)
+#else
   if (ret > 0)
+#endif
     {
       /* We found a route. */
 

@@ -33,6 +33,7 @@
 #include <debug.h>
 
 #include "xtensa.h"
+#include "esp32_spicache.h"
 
 /****************************************************************************
  * Public Data
@@ -323,6 +324,17 @@ static void advance_pc(uint32_t *regs, int diff)
 
 uint32_t *xtensa_user(int exccause, uint32_t *regs)
 {
+#ifdef CONFIG_ESP32_EXCEPTION_ENABLE_CACHE
+  if (!spi_flash_cache_enabled())
+    {
+      spi_enable_cache(0);
+#ifdef CONFIG_SMP
+      spi_enable_cache(1);
+#endif
+      _err("\nERROR: Cache was disabled and re-enabled\n");
+    }
+#endif
+
 #ifdef CONFIG_ARCH_USE_TEXT_HEAP
   /* Emulate byte access for module text.
    *

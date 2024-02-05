@@ -124,7 +124,7 @@
 #define REG_X3_NDX          3
 #define REG_X4_NDX          4
 
-/* $5-$7 = t0-t3: Temporary registers */
+/* $5-$7 = t0-t2: Temporary registers */
 
 #define REG_X5_NDX          5
 #define REG_X6_NDX          6
@@ -134,7 +134,7 @@
 
 #define REG_X8_NDX          8
 
-/* $89 s1 Saved register */
+/* $9 s1 Saved register */
 
 #define REG_X9_NDX          9
 
@@ -680,7 +680,7 @@ int up_cpu_index(void);
  *
  ****************************************************************************/
 
-static inline irqstate_t up_irq_save(void)
+noinstrument_function static inline irqstate_t up_irq_save(void)
 {
   irqstate_t flags;
 
@@ -709,7 +709,7 @@ static inline irqstate_t up_irq_save(void)
  *
  ****************************************************************************/
 
-static inline void up_irq_restore(irqstate_t flags)
+noinstrument_function static inline void up_irq_restore(irqstate_t flags)
 {
   __asm__ __volatile__
     (
@@ -729,7 +729,7 @@ static inline void up_irq_restore(irqstate_t flags)
  *
  ****************************************************************************/
 
-static inline bool up_interrupt_context(void)
+noinstrument_function static inline bool up_interrupt_context(void)
 {
 #ifdef CONFIG_SMP
   irqstate_t flags = up_irq_save();

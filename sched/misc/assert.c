@@ -25,7 +25,6 @@
 #include <nuttx/config.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/binfmt/binfmt.h>
 #include <nuttx/board.h>
 #include <nuttx/irq.h>
 #include <nuttx/tls.h>
@@ -47,6 +46,7 @@
 #include "irq/irq.h"
 #include "sched/sched.h"
 #include "group/group.h"
+#include "misc/coredump.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -70,20 +70,13 @@
 #  undef CONFIG_ARCH_USBDUMP
 #endif
 
+#define DUMP_PTR(p, x) ((uintptr_t)(&(p)[(x)]) < stack_top ? (p)[(x)] : 0)
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
 static uintptr_t g_last_regs[XCPTCONTEXT_REGS] aligned_data(16);
-
-#ifdef CONFIG_BOARD_COREDUMP
-static struct lib_syslogstream_s  g_syslogstream;
-static struct lib_hexdumpstream_s g_hexstream;
-#  ifdef CONFIG_BOARD_COREDUMP_COMPRESSION
-static struct lib_lzfoutstream_s  g_lzfstream;
-#  endif
-#endif
-
 static FAR const char *g_policy[4] =
 {
   "FIFO", "RR", "SPORADIC"
@@ -135,14 +128,16 @@ static void stack_dump(uintptr_t sp, uintptr_t stack_top)
 {
   uintptr_t stack;
 
-  for (stack = sp & ~0x1f; stack < (stack_top & ~0x1f); stack += 32)
+  for (stack = sp; stack <= stack_top; stack += 32)
     {
       FAR uint32_t *ptr = (FAR uint32_t *)stack;
+
       _alert("%p: %08" PRIx32 " %08" PRIx32 " %08" PRIx32
              " %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " %08" PRIx32
              " %08" PRIx32 "\n",
-             (FAR void *)stack, ptr[0], ptr[1], ptr[2], ptr[3],
-             ptr[4], ptr[5], ptr[6], ptr[7]);
+             (FAR void *)stack, DUMP_PTR(ptr, 0), DUMP_PTR(ptr , 1),
+             DUMP_PTR(ptr, 2), DUMP_PTR(ptr, 3), DUMP_PTR(ptr, 4),
+             DUMP_PTR(ptr, 5), DUMP_PTR(ptr , 6), DUMP_PTR(ptr, 7));
     }
 }
 
@@ -162,6 +157,14 @@ static void dump_stack(FAR const char *tag, uintptr_t sp,
   if (sp != 0)
     {
       _alert("    sp: %p\n", (FAR void *)sp);
+
+      /* Get more information */
+
+      if (sp - 32 >= base)
+        {
+          sp -= 32;
+        }
+
       stack_dump(sp, top);
     }
   else
@@ -297,7 +300,7 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
   size_t stack_filled = 0;
   size_t stack_used;
 #endif
-#ifdef CONFIG_SCHED_CPULOAD
+#ifndef CONFIG_SCHED_CPULOAD_NONE
   struct cpuload_s cpuload;
   size_t fracpart = 0;
   size_t intpart = 0;
@@ -341,7 +344,7 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
 #ifdef CONFIG_SMP
          "  %4d"
 #endif
-         " %3d %-8s %-7s %c%c%c"
+         " %3d %-8s %-7s %c"
          " %-18s"
          " " SIGSET_FMT
          " %p"
@@ -349,7 +352,7 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
 #ifdef CONFIG_STACK_COLORATION
          "   %7zu   %3zu.%1zu%%%c"
 #endif
-#ifdef CONFIG_SCHED_CPULOAD
+#ifndef CONFIG_SCHED_CPULOAD_NONE
          "   %3zu.%01zu%%"
 #endif
          "   %s%s\n"
@@ -363,8 +366,6 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
                     TCB_FLAG_POLICY_SHIFT]
          , g_ttypenames[(tcb->flags & TCB_FLAG_TTYPE_MASK)
                         >> TCB_FLAG_TTYPE_SHIFT]
-         , tcb->flags & TCB_FLAG_NONCANCELABLE ? 'N' : '-'
-         , tcb->flags & TCB_FLAG_CANCEL_PENDING ? 'P' : '-'
          , tcb->flags & TCB_FLAG_EXIT_PROCESSING ? 'P' : '-'
          , state
          , SIGSET_ELEM(&tcb->sigprocmask)
@@ -375,7 +376,7 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
          , stack_filled / 10, stack_filled % 10
          , (stack_filled >= 10 * 80 ? '!' : ' ')
 #endif
-#ifdef CONFIG_SCHED_CPULOAD
+#ifndef CONFIG_SCHED_CPULOAD_NONE
          , intpart, fracpart
 #endif
 #if CONFIG_TASK_NAME_SIZE > 0
@@ -431,7 +432,7 @@ static void dump_tasks(void)
 #ifdef CONFIG_STACK_COLORATION
          "      USED   FILLED "
 #endif
-#ifdef CONFIG_SCHED_CPULOAD
+#ifndef CONFIG_SCHED_CPULOAD_NONE
          "      CPU"
 #endif
          "   COMMAND\n");
@@ -450,7 +451,7 @@ static void dump_tasks(void)
 #  ifdef CONFIG_STACK_COLORATION
          "   %7zu   %3zu.%1zu%%%c"
 #  endif
-#  ifdef CONFIG_SCHED_CPULOAD
+#  ifndef CONFIG_SCHED_CPULOAD_NONE
          "     ----"
 #  endif
          "   irq\n"
@@ -470,53 +471,6 @@ static void dump_tasks(void)
   nxsched_foreach(dump_backtrace, NULL);
 #endif
 }
-
-/****************************************************************************
- * Name: dump_core
- ****************************************************************************/
-
-#ifdef CONFIG_BOARD_COREDUMP
-static void dump_core(pid_t pid)
-{
-  FAR void *stream;
-  int logmask;
-
-  logmask = setlogmask(LOG_ALERT);
-
-  _alert("Start coredump:\n");
-
-  /* Initialize hex output stream */
-
-  lib_syslogstream(&g_syslogstream, LOG_EMERG);
-
-  stream = &g_syslogstream;
-
-  lib_hexdumpstream(&g_hexstream, stream);
-
-  stream = &g_hexstream;
-
-#  ifdef CONFIG_BOARD_COREDUMP_COMPRESSION
-
-  /* Initialize LZF compression stream */
-
-  lib_lzfoutstream(&g_lzfstream, stream);
-  stream = &g_lzfstream;
-
-#  endif
-
-  /* Do core dump */
-
-  core_dump(NULL, stream, pid);
-
-#  ifdef CONFIG_BOARD_COREDUMP_COMPRESSION
-  _alert("Finish coredump (Compression Enabled).\n");
-#  else
-  _alert("Finish coredump.\n");
-#  endif
-
-  setlogmask(logmask);
-}
-#endif
 
 /****************************************************************************
  * Name: dump_deadlock
@@ -560,8 +514,8 @@ void _assert(FAR const char *filename, int linenum,
 #endif
   struct panic_notifier_s notifier_data;
   struct utsname name;
+  irqstate_t flags;
   bool fatal = true;
-  int flags;
 
 #if CONFIG_TASK_NAME_SIZE > 0
   if (rtcb->group && !(rtcb->flags & TCB_FLAG_TTYPE_KERNEL))
@@ -580,6 +534,10 @@ void _assert(FAR const char *filename, int linenum,
     {
       up_saveusercontext(g_last_regs);
       regs = g_last_regs;
+    }
+  else
+    {
+      memcpy(g_last_regs, regs, sizeof(g_last_regs));
     }
 
 #if CONFIG_BOARD_RESET_ON_ASSERT < 2
@@ -667,16 +625,17 @@ void _assert(FAR const char *filename, int linenum,
 
 #ifdef CONFIG_BOARD_CRASHDUMP
       board_crashdump(up_getsp(), rtcb, filename, linenum, msg, regs);
+#endif
 
-#elif defined(CONFIG_BOARD_COREDUMP)
+#if defined(CONFIG_BOARD_COREDUMP_SYSLOG) || \
+    defined(CONFIG_BOARD_COREDUMP_BLKDEV)
       /* Dump core information */
 
 #  ifdef CONFIG_BOARD_COREDUMP_FULL
-      dump_core(INVALID_PROCESS_ID);
+      coredump_dump(INVALID_PROCESS_ID);
 #  else
-      dump_core(rtcb->pid);
+      coredump_dump(rtcb->pid);
 #  endif
-
 #endif
 
       /* Flush any buffered SYSLOG data */

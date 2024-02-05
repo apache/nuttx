@@ -10,7 +10,6 @@ choice
 	default ARCH_CHIP_AT32F437VM
 	depends on ARCH_CHIP_AT32
 
-
 config ARCH_CHIP_AT32F437VM
 	bool "AT32F437VM"
 	select AT32_AT32F43XX
@@ -37,7 +36,7 @@ config ARCH_CHIP_AT32F437RG
 	select AT32_AT32F43XX
 	select AT32_AT32F437
 	---help---
-		AT32F43X 64-pin , 1024KB FLASH, 384KB SRAM		
+		AT32F43X 64-pin , 1024KB FLASH, 384KB SRAM
 
 config ARCH_CHIP_AT32F435VM
 	bool "AT32F435VM"
@@ -78,13 +77,13 @@ choice
 		ends with a number or letter that designates the FLASH size.
 
 				Designator  Size in KiB
-				   8   	64
-				   B   	128
-				   C   	256
-				   E   	512
-				   G   	1024
-				   I   	2048
-				   M	4032
+				   8    64
+				   B    128
+				   C    256
+				   E    512
+				   G    1024
+				   I    2048
+				   M    4032
 
 		This configuration option defaults to using the configuration based
 		on that designator or the default smaller size if there is no last
@@ -217,7 +216,6 @@ menu "AT32 Peripheral Support"
 
 # These "hidden" settings determine whether a peripheral option is available
 # for the selected MCU
-
 
 config AT32_HAVE_OVERDRIVE
 	bool
@@ -650,7 +648,7 @@ config AT32_DAC1CH2
 	bool "DAC1CH2"
 	default n
 
-endif #AT32_DAC1
+endif # AT32_DAC1
 
 config AT32_DAC2
 	bool "DAC2"
@@ -664,7 +662,7 @@ config AT32_DAC2CH1
 	bool "DAC2CH1"
 	default n
 
-endif #AT32_DAC2
+endif # AT32_DAC2
 
 config AT32_DAC3
 	bool "DAC3"
@@ -682,7 +680,7 @@ config AT32_DAC3CH2
 	bool "DAC3CH2 Internal"
 	default n
 
-endif #AT32_DAC3
+endif # AT32_DAC3
 
 config AT32_DAC4
 	bool "DAC4"
@@ -700,7 +698,7 @@ config AT32_DAC4CH2
 	bool "DAC4CH2 Internal"
 	default n
 
-endif #AT32_DAC4
+endif # AT32_DAC4
 
 config AT32_DCMI
 	bool "DCMI"
@@ -1067,7 +1065,6 @@ config AT32_NOEXT_VECTORS
 		Sometimes you may not need any Vector support beyond SysTick
 		and wish to save memory. This applies only to ARMv7-M architectures.
 
-
 choice
 	prompt "JTAG Configuration"
 	default AT32_JTAG_DISABLE
@@ -1086,7 +1083,7 @@ config AT32_JTAG_NOJNTRST_ENABLE
 config AT32_JTAG_SW_ENABLE
 	bool "Set JTAG-DP disabled and SW-DP enabled"
 
-endchoice
+endchoice # JTAG Configuration
 
 config AT32_DISABLE_IDLE_SLEEP_DURING_DEBUG
 	bool "Disable IDLE Sleep (WFI) in debug mode"
@@ -6858,7 +6855,7 @@ config AT32_PM_SERIAL_ACTIVITY
 		PM activity reported to power management logic on every serial
 		interrupt.
 
-endif
+endif # PM
 
 endmenu # U[S]ART Configuration
 
@@ -7131,7 +7128,7 @@ choice
 
 config AT32_MII_MCO1
 	bool "Use MC01 as MII clock"
-	depends on  AT32_AT32F43XX
+	depends on AT32_AT32F43XX
 	---help---
 		Use MCO1 to clock the MII interface.  Default:  Use MC01
 
@@ -7521,7 +7518,7 @@ config AT32_TIM1_QEPSC
 		This prescaler divides the number of recorded encoder pulses,
 		limiting the count rate at the expense of resolution.
 
-endif
+endif # AT32_TIM1_QE
 
 config AT32_TIM2_QE
 	bool "TIM2 QE"
@@ -7539,7 +7536,7 @@ config AT32_TIM2_QEPSC
 		This prescaler divides the number of recorded encoder pulses,
 		limiting the count rate at the expense of resolution.
 
-endif
+endif # AT32_TIM2_QE
 
 config AT32_TIM3_QE
 	bool "TIM3 QE"
@@ -7557,7 +7554,7 @@ config AT32_TIM3_QEPSC
 		This prescaler divides the number of recorded encoder pulses,
 		limiting the count rate at the expense of resolution.
 
-endif
+endif # AT32_TIM3_QE
 
 config AT32_TIM4_QE
 	bool "TIM4 QE"
@@ -7575,7 +7572,7 @@ config AT32_TIM4_QEPSC
 		This prescaler divides the number of recorded encoder pulses,
 		limiting the count rate at the expense of resolution.
 
-endif
+endif # AT32_TIM4_QE
 
 config AT32_TIM5_QE
 	bool "TIM5 QE"
@@ -7593,7 +7590,7 @@ config AT32_TIM5_QEPSC
 		This prescaler divides the number of recorded encoder pulses,
 		limiting the count rate at the expense of resolution.
 
-endif
+endif # AT32_TIM5_QE
 
 config AT32_TIM8_QE
 	bool "TIM8 QE"
@@ -7611,7 +7608,7 @@ config AT32_TIM8_QEPSC
 		This prescaler divides the number of recorded encoder pulses,
 		limiting the count rate at the expense of resolution.
 
-endif
+endif # AT32_TIM8_QE
 
 config AT32_QENCODER_FILTER
 	bool "Enable filtering on AT32 QEncoder input"
@@ -7643,7 +7640,7 @@ config AT32_QENCODER_SAMPLE_FDTS_16
 config AT32_QENCODER_SAMPLE_FDTS_32
 	bool "fDTS/32"
 
-endchoice
+endchoice # Input channel sampling frequency
 
 choice
 	depends on AT32_QENCODER_FILTER
@@ -7674,7 +7671,7 @@ config AT32_QENCODER_SAMPLE_EVENT_8
 	depends on !AT32_QENCODER_SAMPLE_FDTS
 	bool "8"
 
-endchoice
+endchoice # Input channel event count
 
 endmenu
 

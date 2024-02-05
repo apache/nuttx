@@ -1,6 +1,14 @@
 # Chose a minimalistic subset of board/configs due to macOS builds
 # being extremely slow on GitHub
 
+# ARM
+
+/arm/stm32/stm32f4discovery/configs/nsh,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+
+# ARM64
+
+/arm64/qemu/qemu-armv8a/configs/nsh_smp
+
 # AVR
 #
 # We do not have a toolchain for avr32 outside of Microchip login wall.
@@ -18,16 +26,8 @@
 # RISC-V
 
 /risc-v/bl602/bl602evb/configs/wifi
-
+/risc-v/esp32c3/esp32c3-devkit/configs/cxx
 /risc-v/esp32c3/esp32c3-devkit/configs/wifi
-
-# ARM
-
-/arm/stm32/stm32f4discovery/configs/nsh,CONFIG_ARM_TOOLCHAIN_GNU_EABI
-
-# XTENSA
-
-/xtensa/esp32/esp32-devkitc/configs/wifi
 
 # x86_64-elf-gcc from homebrew doesn't seem to
 # provide __udivdi3 etc for -m32, so we do not build
@@ -37,8 +37,6 @@
 
 /x86_64/intel64/qemu-intel64/configs/nsh
 
-# The gcc 11.2 toolcain for MACOS maybe fail when compile
-# with float, disable the cibuild check for MACOS
-# it will be enbaled while new toolchain release
+# XTENSA
 
-# /arm64/qemu/qemu-armv8a/configs/nsh_smp
+/xtensa/esp32/esp32-devkitc/configs/wifi

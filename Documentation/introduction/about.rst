@@ -120,7 +120,7 @@ Key features of NuttX include:
   * Graphics: framebuffer drivers, graphic- and segment-LCD drivers. VNC server.
   * Audio subsystem: CODECs, audio input and output drivers. Command line and graphic media player applications.
   * Cryptographic subsystem.
-  * :doc:`/components/power` sub-system.
+  * :doc:`/components/drivers/special/power/pm/index` sub-system.
   * ModBus support provided by built-in `FreeModBus <https://www.embedded-experts.at/en/freemodbus/>`__ version 1.5.0.
 
 * **C/C++ Libraries**
@@ -197,7 +197,7 @@ Key features of NuttX include:
   * NX: A graphics library, tiny windowing system and tiny font support that works with either
     framebuffer or LCD drivers. Documented in the :doc:`/components/nxgraphics/index` manual.
   * Font management sub-system.
-  * :doc:`/components/nxwidgets`: NXWidgets is library of graphic objects, or "widgets," (labels,
+  * :doc:`/applications/graphics/nxwidgets/index`: NXWidgets is library of graphic objects, or "widgets," (labels,
     buttons, text boxes, images, sliders, progress bars, etc.). NXWidgets is written in C++ and
     integrates seamlessly with the NuttX NX graphics and font management subsystems.
   * NxWM is the tiny NuttX window manager based on NX and NxWidgets.

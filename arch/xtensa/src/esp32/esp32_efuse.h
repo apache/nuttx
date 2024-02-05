@@ -18,6 +18,16 @@
  *
  ****************************************************************************/
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/efuse/efuse.h>
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
 /* Type of eFuse blocks for ESP32 */
 
 typedef enum
@@ -52,6 +62,24 @@ typedef int (*efuse_func_proc_t) (unsigned int num_reg,
  * Public Functions Prototypes
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: esp_efuse_hal_chip_revision
+ *
+ * Description:
+ *   Returns the chip version in the format: Major * 100 + Minor.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The chip version as an unsigned 32-bit integer.
+ *
+ ****************************************************************************/
+
+uint32_t esp_efuse_hal_chip_revision(void);
+
+#ifdef CONFIG_ESP32_EFUSE
+
 int esp_efuse_read_field(const efuse_desc_t *field[], void *dst,
                          size_t dst_size_bits);
 
@@ -61,3 +89,5 @@ int esp_efuse_write_field(const efuse_desc_t *field[],
 void esp_efuse_burn_efuses(void);
 
 int esp32_efuse_initialize(const char *devpath);
+
+#endif /* CONFIG_ESP32_EFUSE */

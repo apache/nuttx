@@ -67,6 +67,7 @@
 #include "stm32_tim.h"
 #include "stm32_dma.h"
 #include "stm32_adc.h"
+#include "stm32_dbgmcu.h"
 
 /* ADC "upper half" support must be enabled */
 
@@ -228,6 +229,7 @@ static void     tim_dumpregs(struct stm32_dev_s *priv,
 /* ADC Miscellaneous Helpers */
 
 static void adc_rccreset(struct stm32_dev_s *priv, bool reset);
+static void adc_setupclock(struct stm32_dev_s *priv);
 static void adc_enable(struct stm32_dev_s *priv);
 static uint32_t adc_sqrbits(struct stm32_dev_s *priv, int first,
                             int last, int offset);
@@ -1413,11 +1415,13 @@ static int adc_setup(struct adc_dev_s *dev)
 
   clrbits = ADC_CCR_PRESC_MASK | ADC_CCR_VREFEN |
             ADC_CCR_VSENSEEN | ADC_CCR_VBATEN;
-  setbits = ADC_CCR_PRESC_NOT_DIV | ADC_CCR_CKMODE_ASYCH;
+  setbits = ADC_CCR_CKMODE_ASYCH;
 
   adc_internal(priv, &setbits);
 
   adc_modifyregm(priv, STM32_ADC_CCR_OFFSET, clrbits, setbits);
+
+  adc_setupclock(priv);
 
 #ifdef ADC_HAVE_DMA
 
@@ -1569,6 +1573,147 @@ static void adc_rxint(struct adc_dev_s *dev, bool enable)
     }
 
   adc_putreg(priv, STM32_ADC_IER_OFFSET, regval);
+}
+
+/****************************************************************************
+ * Name: adc_setupclock
+ ****************************************************************************/
+
+static void adc_setupclock(struct stm32_dev_s *priv)
+{
+  uint32_t max_clock = 36000000;
+  uint32_t src_clock;
+  uint32_t adc_clock;
+  uint32_t setbits;
+
+  /* The maximum clock is different for rev Y devices and rev V devices.
+   * rev V can support an ADC clock of up to 50MHz. rev Y only supports
+   * up to 36MHz.
+   */
+
+  if ((getreg32(STM32_DEBUGMCU_BASE) & DBGMCU_IDCODE_REVID_MASK) ==
+      STM32_IDCODE_REVID_V)
+    {
+      /* The max fadc is 50MHz, but there is an always-present /2 divider
+       * after the configurable prescaler.  Therefore, the max clock out of
+       * the prescaler block is 2*50=100MHz
+       */
+
+      max_clock = 100000000;
+    }
+
+#if STM32_RCC_D3CCIPR_ADCSRC == RCC_D3CCIPR_ADCSEL_PLL2
+  src_clock = STM32_PLL2P_FREQUENCY;
+#elif STM32_RCC_D3CCIPR_ADCSRC == RCC_D3CCIPR_ADCSEL_PLL3
+  src_clock = STM32_PLL3R_FREQUENCY;
+#elif STM32_RCC_D3CCIPR_ADCSRC == RCC_D3CCIPR_ADCSEL_PER
+#  error ADCSEL_PER not supported
+#else
+  src_clock = STM32_PLL2P_FREQUENCY;
+#endif
+
+  if (src_clock <= max_clock)
+    {
+      setbits = ADC_CCR_PRESC_NOT_DIV;
+      adc_clock = src_clock;
+    }
+  else if (src_clock / 2 <= max_clock)
+    {
+      setbits = ADC_CCR_PRESC_DIV2;
+      adc_clock = src_clock / 2;
+    }
+  else if (src_clock / 4 <= max_clock)
+    {
+      setbits = ADC_CCR_PRESC_DIV4;
+      adc_clock = src_clock / 4;
+    }
+  else if (src_clock / 6 <= max_clock)
+    {
+      setbits = ADC_CCR_PRESC_DIV6;
+      adc_clock = src_clock / 6;
+    }
+  else if (src_clock / 8 <= max_clock)
+    {
+      setbits = ADC_CCR_PRESC_DIV8;
+      adc_clock = src_clock / 8;
+    }
+  else if (src_clock / 10 <= max_clock)
+    {
+      setbits = ADC_CCR_PRESC_DIV10;
+      adc_clock = src_clock / 10;
+    }
+  else if (src_clock / 12 <= max_clock)
+    {
+      setbits = ADC_CCR_PRESC_DIV12;
+      adc_clock = src_clock / 12;
+    }
+  else if (src_clock / 16 <= max_clock)
+    {
+      setbits = ADC_CCR_PRESC_DIV16;
+      adc_clock = src_clock / 16;
+    }
+  else if (src_clock / 32 <= max_clock)
+    {
+      setbits = ADC_CCR_PRESC_DIV32;
+      adc_clock = src_clock / 32;
+    }
+  else if (src_clock / 64 <= max_clock)
+    {
+      setbits = ADC_CCR_PRESC_DIV64;
+      adc_clock = src_clock / 64;
+    }
+  else if (src_clock / 128 <= max_clock)
+    {
+      setbits = ADC_CCR_PRESC_DIV128;
+      adc_clock = src_clock / 128;
+    }
+  else if (src_clock / 256 <= max_clock)
+    {
+      setbits = ADC_CCR_PRESC_DIV256;
+      adc_clock = src_clock / 256;
+    }
+  else
+    {
+      aerr("ERROR: source clock too high\n");
+    }
+
+  /* Write the prescaler to the CCR register */
+
+  adc_modifyregm(priv, STM32_ADC_CCR_OFFSET, ADC_CCR_PRESC_MASK, setbits);
+
+  if ((getreg32(STM32_DEBUGMCU_BASE) & DBGMCU_IDCODE_REVID_MASK) ==
+      STM32_IDCODE_REVID_V)
+    {
+      if (adc_clock >= 25000000)
+        {
+          setbits = ADC_CR_BOOST_50_MHZ;
+        }
+      else if (adc_clock >= 12500000)
+        {
+          setbits = ADC_CR_BOOST_25_MHZ;
+        }
+      else if (adc_clock >=  6250000)
+        {
+          setbits = ADC_CR_BOOST_12p5_MHZ;
+        }
+      else
+        {
+          setbits = ADC_CR_BOOST_6p25_MHZ;
+        }
+    }
+  else
+    {
+      if (adc_clock >= 20000000)
+        {
+          setbits = ADC_CR_BOOST;
+        }
+      else
+        {
+          setbits = 0;
+        }
+    }
+
+  adc_modifyregm(priv, STM32_ADC_CR_OFFSET, ADC_CR_BOOST_MASK, setbits);
 }
 
 /****************************************************************************

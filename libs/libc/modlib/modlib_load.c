@@ -84,7 +84,7 @@ static void modlib_elfsize(FAR struct mod_loadinfo_s *loadinfo)
               if (phdr->p_flags & PF_X)
                 {
                   textsize += phdr->p_memsz;
-                  textaddr = (FAR void *)phdr->p_vaddr;
+                  textaddr = (FAR void *)(uintptr_t)phdr->p_vaddr;
                 }
               else
                 {
@@ -338,8 +338,14 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
 
       if (loadinfo->datasize > 0)
         {
+#if defined(CONFIG_ARCH_USE_DATA_HEAP)
+          loadinfo->datastart = (uintptr_t)
+                                 up_dataheap_memalign(loadinfo->dataalign,
+                                                      loadinfo->datasize);
+#else
           loadinfo->datastart = (uintptr_t)lib_memalign(loadinfo->dataalign,
                                                         loadinfo->datasize);
+#endif
           if (!loadinfo->datastart)
             {
               berr("ERROR: Failed to allocate memory for the module data\n");

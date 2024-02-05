@@ -261,7 +261,7 @@
 
 #define DIRSEC_NDXMASK(f)   (((f)->fs_hwsectorsize - 1) >> 5)
 #define DIRSEC_NDIRS(f)     (((f)->fs_hwsectorsize) >> 5)
-#define DIRSEC_BYTENDX(f,i) (((i) & DIRSEC_NDXMASK(fs)) << 5)
+#define DIRSEC_BYTENDX(f,i) (((i) & DIRSEC_NDXMASK(f)) << 5)
 
 #define SEC_NDXMASK(f)      ((f)->fs_hwsectorsize - 1)
 #define SEC_NSECTORS(f,n)   ((n) / (f)->fs_hwsectorsize)

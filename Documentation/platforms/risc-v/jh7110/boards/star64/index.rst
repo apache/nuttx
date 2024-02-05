@@ -211,7 +211,7 @@ Serial Console is enabled on UART0 at 115.2 kbps.
 Peripheral Support
 ==================
 
-NuttX for PinePhone supports these peripherals:
+NuttX for Star64 supports these peripherals:
 
 ======================== ======= =====
 Peripheral               Support NOTES

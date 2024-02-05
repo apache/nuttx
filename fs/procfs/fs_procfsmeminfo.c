@@ -123,6 +123,7 @@ const struct procfs_operations g_meminfo_operations =
   meminfo_close,  /* close */
   meminfo_read,   /* read */
   NULL,           /* write */
+  NULL,           /* poll */
   meminfo_dup,    /* dup */
   NULL,           /* opendir */
   NULL,           /* closedir */
@@ -138,6 +139,7 @@ const struct procfs_operations g_memdump_operations =
   meminfo_close,  /* close */
   memdump_read,   /* read */
   memdump_write,  /* write */
+  NULL,           /* poll */
   meminfo_dup,    /* dup */
   NULL,           /* opendir */
   NULL,           /* closedir */
@@ -291,8 +293,9 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
   /* The first line is the headers */
 
   linesize  = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
-                              "%13s%11s%11s%11s%11s%7s%7s\n", "", "total",
-                              "used", "free", "largest", "nused", "nfree");
+                              "%13s%11s%11s%11s%11s%11s%7s%7s\n", "",
+                              "total", "used", "free", "maxused",
+                              "maxfree", "nused", "nfree");
 
   copysize  = procfs_memcpy(procfile->line, linesize, buffer, buflen,
                             &offset);
@@ -306,23 +309,24 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
     {
       if (buflen > 0)
         {
-          struct mallinfo minfo;
+          struct mallinfo info;
 
           buffer    += copysize;
           buflen    -= copysize;
 
           /* Show heap information */
 
-          minfo      = mm_mallinfo(entry->heap);
+          info      = mm_mallinfo(entry->heap);
           linesize   = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
-                                       "%12s:%11lu%11lu%11lu%11lu%7lu%7lu\n",
-                                       entry->name,
-                                       (unsigned long)minfo.arena,
-                                       (unsigned long)minfo.uordblks,
-                                       (unsigned long)minfo.fordblks,
-                                       (unsigned long)minfo.mxordblk,
-                                       (unsigned long)minfo.aordblks,
-                                       (unsigned long)minfo.ordblks);
+                                       "%12s:%11lu%11lu%11lu%11lu%11lu"
+                                       "%7lu%7lu\n", entry->name,
+                                       (unsigned long)info.arena,
+                                       (unsigned long)info.uordblks,
+                                       (unsigned long)info.fordblks,
+                                       (unsigned long)info.usmblks,
+                                       (unsigned long)info.mxordblk,
+                                       (unsigned long)info.aordblks,
+                                       (unsigned long)info.ordblks);
           copysize   = procfs_memcpy(procfile->line, linesize, buffer,
                                      buflen, &offset);
           totalsize += copysize;

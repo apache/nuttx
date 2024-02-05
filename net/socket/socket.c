@@ -104,9 +104,11 @@ int psock_socket(int domain, int type, int protocol,
 
   /* When usrsock daemon returns -ENOSYS or -ENOTSUP, it means to use
    * kernel's network stack, so fallback to kernel socket.
+   * When -ENETDOWN is returned, it means the usrsock daemon was never
+   * launched or is no longer running, so fallback to kernel socket.
    */
 
-  if (ret == 0 || (ret != -ENOSYS && ret != -ENOTSUP))
+  if (ret == 0 || (ret != -ENOSYS && ret != -ENOTSUP && ret != -ENETDOWN))
     {
       return ret;
     }
@@ -119,6 +121,14 @@ int psock_socket(int domain, int type, int protocol,
   if (sockif == NULL)
     {
       nerr("ERROR: socket address family unsupported: %d\n", domain);
+#ifdef CONFIG_NET_USRSOCK
+
+      /* We tried to fallback to kernel socket, but one is not available,
+       * so use the return code from usrsock.
+       */
+
+      return ret;
+#endif
       return -EAFNOSUPPORT;
     }
 

@@ -217,16 +217,8 @@
 #  endif
 #endif
 
-#ifdef CONFIG_STM32_ETH_PTP
-#  warning "CONFIG_STM32_ETH_PTP is not yet supported"
-#endif
+/* This driver does not use IPv4 checksum offloading. */
 
-/* This driver does not use enhanced descriptors.  Enhanced descriptors must
- * be used, however, if time stamping or and/or IPv4 checksum offload is
- * supported.
- */
-
-#undef CONFIG_STM32_ETH_ENHANCEDDESC
 #undef CONFIG_STM32_ETH_HWCHECKSUM
 
 /* Add 4 to the configured buffer size to account for the 2 byte checksum
@@ -629,6 +621,11 @@ struct stm32_ethmac_s
   uint16_t             segments;    /* RX segment count */
   uint16_t             inflight;    /* Number of TX transfers "in_flight" */
   sq_queue_t           freeb;       /* The free buffer list */
+
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_RX
+  uint32_t             rxtimelow;   /* Received packet timestamp subsecond */
+  uint32_t             rxtimehigh;  /* Received packet timestamp seconds */
+#endif
 };
 
 /****************************************************************************
@@ -650,6 +647,11 @@ static uint8_t g_alloc[STM32_ETH_NFREEBUFFERS *
                        CONFIG_STM32_ETH_BUFSIZE] aligned_data(4);
 
 static struct stm32_ethmac_s g_stm32ethmac[STM32_NETHERNET];
+
+#ifdef CONFIG_STM32_ETH_PTP_RTC_HIRES
+volatile bool g_rtc_enabled;
+static struct timespec g_stm32_eth_ptp_basetime;
+#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -759,11 +761,20 @@ static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv);
 static int  stm32_ethreset(struct stm32_ethmac_s *priv);
 static int  stm32_macconfig(struct stm32_ethmac_s *priv);
 static void stm32_macaddress(struct stm32_ethmac_s *priv);
-#ifdef CONFIG_NET_ICMPv6
-static void stm32_ipv6multicast(struct stm32_ethmac_s *priv);
-#endif
 static int  stm32_macenable(struct stm32_ethmac_s *priv);
 static int  stm32_ethconfig(struct stm32_ethmac_s *priv);
+
+/* PTP initialization and access */
+
+#ifdef CONFIG_STM32_ETH_PTP
+static int stm32_eth_ptp_adjust(long ppb);
+static void stm32_eth_ptp_init(uint64_t timestamp);
+static uint64_t stm32_eth_ptp_gettime(void);
+#endif
+
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_RX
+static void stm32_eth_ptp_convert_rxtime(struct stm32_ethmac_s *priv);
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -1623,6 +1634,11 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
                   dev->d_buf    = (uint8_t *)rxcurr->rdes2;
                   rxcurr->rdes2 = (uint32_t)buffer;
 
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_RX
+                  priv->rxtimelow = rxcurr->rdes6;
+                  priv->rxtimehigh = rxcurr->rdes7;
+#endif
+
                   /* Return success, remembering where we should re-start
                    * scanning and resetting the segment scanning logic
                    */
@@ -1718,6 +1734,10 @@ static void stm32_receive(struct stm32_ethmac_s *priv)
 
           continue;
         }
+
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_RX
+      stm32_eth_ptp_convert_rxtime(priv);
+#endif
 
       /* We only accept IP packets of the configured type and ARP packets */
 
@@ -2241,6 +2261,25 @@ static int stm32_ifup(struct net_driver_s *dev)
       return ret;
     }
 
+#ifdef CONFIG_STM32_ETH_PTP
+  /* Enable PTP timer */
+
+  stm32_eth_ptp_init(0);
+
+#ifdef CONFIG_STM32_ETH_PTP_RTC_HIRES
+  if (!g_rtc_enabled)
+    {
+      /* Transfer time from system low-resolution timer to PTP basetime */
+
+      struct timespec ts;
+      clock_gettime(CLOCK_REALTIME, &ts);
+      up_rtc_settime(&ts);
+      g_rtc_enabled = true;
+    }
+#endif /* CONFIG_STM32_ETH_PTP_RTC_HIRES */
+
+#endif /* CONFIG_STM32_ETH_PTP */
+
   /* Enable the Ethernet interrupt */
 
   priv->ifup = true;
@@ -2284,6 +2323,18 @@ static int stm32_ifdown(struct net_driver_s *dev)
   /* Cancel the TX timeout timers */
 
   wd_cancel(&priv->txtimeout);
+
+#ifdef CONFIG_STM32_ETH_PTP_RTC_HIRES
+  if (g_rtc_enabled)
+    {
+      /* Transfer back to system low-resolution timer */
+
+      struct timespec ts;
+      up_rtc_gettime(&ts);
+      g_rtc_enabled = false;
+      clock_settime(CLOCK_REALTIME, &ts);
+    }
+#endif
 
   /* Put the EMAC in its reset, non-operational state.  This should be
    * a known configuration that will guarantee the stm32_ifup() always
@@ -3483,12 +3534,266 @@ static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
 #  endif
 #endif
 
-#ifdef CONFIG_STM32_ETH_PTP
+#ifdef CONFIG_STM32_ETH_PTP_GPIO
   /* Enable pulse-per-second (PPS) output signal */
 
   stm32_configgpio(GPIO_ETH_PPS_OUT);
 #endif
 }
+
+#ifdef CONFIG_STM32_ETH_PTP
+
+/****************************************************************************
+ * Function: stm32_eth_ptp_adjust
+ *
+ * Description:
+ *   Adjust PTP timer run rate.
+ *
+ * Input Parameters:
+ *   ppb - Adjustment in parts per billion (nanoseconds per second).
+ *         Zero is default rate, positive value makes clock run faster
+ *         and negative value slower.
+ *
+ * Returned Value:
+ *   OK on success, negated errno on failure.
+ *
+ * Assumptions:
+ *   Adjustment is between -0.5e9 and +0.5e9 (+- 50%)
+ *
+ ****************************************************************************/
+
+static int stm32_eth_ptp_adjust(long ppb)
+{
+  uint32_t regval;
+  uint64_t addend;
+  uint32_t increment;
+
+  /* Compute addend value to achieve nominal timer rate.
+   * Increment is set by stm32_eth_ptp_init() and remains constants after
+   * that.
+   */
+
+  increment = stm32_getreg(STM32_ETH_PTPSSIR) & ETH_PTPSSIR_MASK;
+  addend = ((uint64_t)1 << (32 + 31)) / (STM32_SYSCLK_FREQUENCY * increment);
+
+  /* Apply rate adjustment, if any */
+
+  if (ppb != 0)
+    {
+      addend += (int64_t)addend * ppb / NSEC_PER_SEC;
+    }
+
+  /* Check for overflows */
+
+  if (addend == 0 || (uint32_t)addend != addend)
+    {
+      nerr("PTP adjustment out of range: ppb=%ld, addend=%lld\n",
+           ppb, addend);
+      return -EINVAL;
+    }
+
+  /* Perform addend register update */
+
+  stm32_putreg((uint32_t)addend, STM32_ETH_PTPTSAR);
+  regval = stm32_getreg(STM32_ETH_PTPTSCR);
+  stm32_putreg(regval | ETH_PTPTSCR_TSARU, STM32_ETH_PTPTSCR);
+  up_udelay(1);
+  if (stm32_getreg(STM32_ETH_PTPTSCR) & ETH_PTPTSCR_TSARU)
+    {
+      /* This can happen if Ethernet PHY clock is stopped */
+
+      nerr("PTP addend update failed\n");
+      return -EBUSY;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Function: stm32_eth_ptp_init
+ *
+ * Description:
+ *   Configure the PTP timestamp counter of the Ethernet peripheral.
+ *
+ * Input Parameters:
+ *   timestamp: Initial timestamp
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static void stm32_eth_ptp_init(uint64_t timestamp)
+{
+  uint32_t regval;
+  uint32_t increment;
+
+  /* The PPS timestamp counter consists of a 32-bit seconds counter and
+   * 31-bit subsecond counter. The PTP input clock (SYSCLK) is divided by
+   * 2^32 / ADDEND and multiplied by INCREMENT. This calculation aims for
+   * ADDEND of 2^31 to provide +- 50% rate adjustment range.
+   *
+   * ADDEND value is then adjusted to compensate for rounding errors in
+   * the 8-bit INCREMENT value. The final rounding error will be less than
+   * 1 ppb. The timer frequency is approximately half of SYSCLK frequency,
+   * with phase jitter of one SYSCLK period.
+   */
+
+  increment = ((uint32_t)1 << 31) / (STM32_SYSCLK_FREQUENCY / 2);
+  DEBUGASSERT(increment > 0 && (increment & ETH_PTPSSIR_MASK) == increment);
+
+  /* Timestamp counter initialization process
+   * (STM32F407 reference manual section 33.5.9
+   *  "Programming steps for system time generation initialization")
+   */
+
+  regval = ETH_PTPTSCR_TSE;
+  stm32_putreg(regval, STM32_ETH_PTPTSCR);
+  stm32_putreg(increment, STM32_ETH_PTPSSIR);
+
+  /* Update addend value to default rate */
+
+  stm32_eth_ptp_adjust(0);
+
+  /* Enable fine update mode */
+
+  regval |= ETH_PTPTSCR_TSFCU;
+  stm32_putreg(regval, STM32_ETH_PTPTSCR);
+
+  /* Initialize counter value */
+
+  stm32_putreg((uint32_t)(timestamp >> 32), STM32_ETH_PTPTSHUR);
+  stm32_putreg((uint32_t)(timestamp >> 1), STM32_ETH_PTPTSLUR);
+  stm32_putreg(regval | ETH_PTPTSCR_TSSTI, STM32_ETH_PTPTSCR);
+  up_udelay(1);
+
+  /* Initialization should complete within a few clock cycles.
+   * If not, there is probably something wrong with the PHY clock domain.
+   */
+
+  if (stm32_getreg(STM32_ETH_PTPTSCR) & ETH_PTPTSCR_TSSTI)
+    {
+      nerr("PTP timestamp initialization failed\n");
+    }
+
+  /* Enable packet timestamping */
+
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_RX
+  regval |= ETH_PTPTSCR_TSSARFE;
+  stm32_putreg(regval, STM32_ETH_PTPTSCR);
+#endif
+}
+
+/****************************************************************************
+ * Name: stm32_eth_ptp_gettime
+ *
+ * Description:
+ *   Read PTP timestamp registers. The 64-bit timestamp consists of two
+ *   registers that are updated continuously. This function employs
+ *   double-read pattern to correctly handle overflow of the lower register.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   64-bit timestamp, where upper 32 bits are the second count and lower
+ *   32-bits are the subsecond count.
+ *   If timer is not yet initialized, returns 0.
+ *
+ * Assumptions:
+ *   Can be called from interrupt or task context.
+ *
+ ****************************************************************************/
+
+static uint64_t stm32_eth_ptp_gettime(void)
+{
+  uint32_t high1;
+  uint32_t low;
+  uint32_t high2;
+
+  high1 = getreg32(STM32_ETH_PTPTSHR);
+  low = getreg32(STM32_ETH_PTPTSLR);
+  high2 = getreg32(STM32_ETH_PTPTSHR);
+
+  if (high1 == high2)
+    {
+      return ((uint64_t)high2 << 32) | ((low & ETH_PTPTSLR_MASK) << 1);
+    }
+  else
+    {
+      /* Lower counter overflowed between the two register reads.
+       * Take its value as 0.
+       */
+
+      return ((uint64_t)high2 << 32);
+    }
+}
+
+static inline void ptp_to_timespec(uint64_t timestamp, struct timespec *ts)
+{
+  ts->tv_sec = (timestamp >> 32);
+  ts->tv_nsec = ((uint32_t)timestamp * (uint64_t)NSEC_PER_SEC) >> 32;
+}
+
+/* Convert RX timestamp to CLOCK_REALTIME */
+#ifdef CONFIG_STM32_ETH_TIMESTAMP_RX
+static void stm32_eth_ptp_convert_rxtime(struct stm32_ethmac_s *priv)
+{
+  uint64_t timestamp;
+  struct timespec rxtime;
+
+  timestamp = ((uint64_t)priv->rxtimehigh << 32)
+            | ((priv->rxtimelow & ETH_PTPTSLR_MASK) << 1);
+
+  /* Timestamp of 0 indicates that Ethernet peripheral didn't store the
+   * timestamp. Timestamp of all ones indicates "corrupt timestamp"
+   * according to reference manual. In either case, we pass along
+   * a timestamp of all zeros to application.
+   */
+
+  if (timestamp == 0 || timestamp >= UINT64_MAX - 1)
+    {
+      nerr("Packet RX timestamp is invalid\n");
+      priv->dev.d_rxtime.tv_sec = 0;
+      priv->dev.d_rxtime.tv_nsec = 0;
+      return;
+    }
+
+#ifdef CONFIG_STM32_ETH_PTP_RTC_HIRES
+  /* PTP is the system time reference, just add the base time */
+
+  ptp_to_timespec(timestamp, &rxtime);
+  clock_timespec_add(&rxtime, &g_stm32_eth_ptp_basetime,
+                     &priv->dev.d_rxtime);
+
+#else
+    {
+      struct timespec realtime;
+      uint64_t ptptime;
+      irqstate_t flags;
+
+      /* Sample PTP and CLOCK_REALTIME close to each other */
+
+      flags = enter_critical_section();
+      clock_gettime(CLOCK_REALTIME, &realtime);
+      ptptime = stm32_eth_ptp_gettime();
+      leave_critical_section(flags);
+
+      /* Compute how much time has elapsed since packet reception
+       * and add that to current time.
+       */
+
+      timestamp = ptptime - timestamp;
+      ptp_to_timespec(timestamp, &rxtime);
+      clock_timespec_add(&rxtime, &realtime, &priv->dev.d_rxtime);
+    }
+#endif /* CONFIG_STM32_ETH_PTP_RTC_HIRES */
+}
+#endif /* CONFIG_STM32_ETH_TIMESTAMP_RX */
+
+#endif /* CONFIG_STM32_ETH_PTP */
 
 /****************************************************************************
  * Function: stm32_ethreset
@@ -3691,79 +3996,6 @@ static void stm32_macaddress(struct stm32_ethmac_s *priv)
 }
 
 /****************************************************************************
- * Function: stm32_ipv6multicast
- *
- * Description:
- *   Configure the IPv6 multicast MAC address.
- *
- * Input Parameters:
- *   priv - A reference to the private driver state structure
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_ICMPv6
-static void stm32_ipv6multicast(struct stm32_ethmac_s *priv)
-{
-  struct net_driver_s *dev;
-  uint16_t tmp16;
-  uint8_t mac[6];
-
-  /* For ICMPv6, we need to add the IPv6 multicast address
-   *
-   * For IPv6 multicast addresses, the Ethernet MAC is derived by
-   * the four low-order octets OR'ed with the MAC 33:33:00:00:00:00,
-   * so for example the IPv6 address FF02:DEAD:BEEF::1:3 would map
-   * to the Ethernet MAC address 33:33:00:01:00:03.
-   *
-   * NOTES:  This appears correct for the ICMPv6 Router Solicitation
-   * Message, but the ICMPv6 Neighbor Solicitation message seems to
-   * use 33:33:ff:01:00:03.
-   */
-
-  mac[0] = 0x33;
-  mac[1] = 0x33;
-
-  dev    = &priv->dev;
-  tmp16  = dev->d_ipv6addr[6];
-  mac[2] = 0xff;
-  mac[3] = tmp16 >> 8;
-
-  tmp16  = dev->d_ipv6addr[7];
-  mac[4] = tmp16 & 0xff;
-  mac[5] = tmp16 >> 8;
-
-  ninfo("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
-        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-
-  stm32_addmac(dev, mac);
-
-#ifdef CONFIG_NET_ICMPv6_AUTOCONF
-  /* Add the IPv6 all link-local nodes Ethernet address.  This is the
-   * address that we expect to receive ICMPv6 Router Advertisement
-   * packets.
-   */
-
-  stm32_addmac(dev, g_ipv6_ethallnodes.ether_addr_octet);
-
-#endif /* CONFIG_NET_ICMPv6_AUTOCONF */
-#ifdef CONFIG_NET_ICMPv6_ROUTER
-  /* Add the IPv6 all link-local routers Ethernet address.  This is the
-   * address that we expect to receive ICMPv6 Router Solicitation
-   * packets.
-   */
-
-  stm32_addmac(dev, g_ipv6_ethallrouters.ether_addr_octet);
-
-#endif /* CONFIG_NET_ICMPv6_ROUTER */
-}
-#endif /* CONFIG_NET_ICMPv6 */
-
-/****************************************************************************
  * Function: stm32_macenable
  *
  * Description:
@@ -3786,12 +4018,6 @@ static int stm32_macenable(struct stm32_ethmac_s *priv)
   /* Set the MAC address */
 
   stm32_macaddress(priv);
-
-#ifdef CONFIG_NET_ICMPv6
-  /* Set up the IPv6 multicast address */
-
-  stm32_ipv6multicast(priv);
-#endif
 
   /* Enable transmit state machine of the MAC for transmission on the MII */
 
@@ -4028,6 +4254,144 @@ void arm_netinitialize(void)
   stm32_ethinitialize(0);
 }
 #endif
+
+#ifdef CONFIG_STM32_ETH_PTP_RTC_HIRES
+
+/****************************************************************************
+ * Name: up_rtc_initialize
+ *
+ * Description:
+ *   Initialize the builtin, MCU hardware RTC per the selected
+ *   configuration.  This function is called once very early in the OS
+ *   initialization sequence.
+ *
+ *   NOTE that initialization of external RTC hardware that depends on the
+ *   availability of OS resources (such as SPI or I2C) must be deferred
+ *   until the system has fully booted.  Other, RTC-specific initialization
+ *   functions are used in that case.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int up_rtc_initialize(void)
+{
+  /* Nothing to do, the PTP RTC is not available until Ethernet peripheral
+   * is enabled.
+   */
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: up_rtc_gettime
+ *
+ * Description:
+ *   Get the current time from the high resolution RTC clock/counter.  This
+ *   interface is only supported by the high-resolution RTC/counter hardware
+ *   implementation.
+ *   It is used to replace the system timer.
+ *
+ * Input Parameters:
+ *   tp - The location to return the high resolution time value.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int up_rtc_gettime(FAR struct timespec *tp)
+{
+  uint64_t timestamp;
+  timestamp = stm32_eth_ptp_gettime();
+
+  if (timestamp == 0)
+    {
+      /* PTP timer is not initialized yet.
+       * Normally we shouldn't end up here because g_rtc_enabled is false.
+       */
+
+      DEBUGASSERT(!g_rtc_enabled);
+      return -EBUSY;
+    }
+
+  ptp_to_timespec(timestamp, tp);
+  clock_timespec_add(tp, &g_stm32_eth_ptp_basetime, tp);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: up_rtc_settime
+ *
+ * Description:
+ *   Set the RTC to the provided time.  All RTC implementations must be able
+ *   to set their time based on a standard timespec.
+ *
+ * Input Parameters:
+ *   tp - the time to use
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int up_rtc_settime(FAR const struct timespec *tp)
+{
+  struct timespec ptptime;
+  uint64_t timestamp;
+  timestamp = stm32_eth_ptp_gettime();
+
+  if (timestamp == 0)
+    {
+      /* PTP timer is not initialized yet.
+       * Normally we shouldn't end up here because g_rtc_enabled is false.
+       */
+
+      DEBUGASSERT(!g_rtc_enabled);
+      return -EBUSY;
+    }
+
+  /* Compute new basetime to get from PTP timestamp to wall clock time.
+   * We keep the PTP timer 0-based to avoid 32-bit seconds count
+   * overflow issues.
+   */
+
+  ptp_to_timespec(timestamp, &ptptime);
+  clock_timespec_subtract(tp, &ptptime, &g_stm32_eth_ptp_basetime);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: up_rtc_adjtime
+ *
+ * Description:
+ *   Adjust RTC frequency (running rate). Used by adjtime() when RTC is used
+ *   as system time source.
+ *
+ * Input Parameters:
+ *   ppb - Adjustment in parts per billion (nanoseconds per second).
+ *         Zero is default rate, positive value makes clock run faster
+ *         and negative value slower.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ * Assumptions:
+ *   Called from within a critical section.
+ ****************************************************************************/
+
+int up_rtc_adjtime(long ppb)
+{
+  return stm32_eth_ptp_adjust(ppb);
+}
+
+#endif /* CONFIG_STM32_ETH_PTP_RTC_HIRES */
 
 #endif /* STM32_NETHERNET > 0 */
 #endif /* CONFIG_NET && CONFIG_STM32_ETHMAC */

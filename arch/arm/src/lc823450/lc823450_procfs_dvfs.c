@@ -91,6 +91,7 @@ static const struct procfs_operations dvfs_procfsoperations =
   dvfs_close,     /* close */
   dvfs_read,      /* read */
   dvfs_write,     /* write */
+  NULL,           /* poll */
   dvfs_dup,       /* dup */
   NULL,           /* opendir */
   NULL,           /* closedir */
