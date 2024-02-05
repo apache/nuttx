@@ -564,6 +564,57 @@ static void note_record_taskname(pid_t pid, FAR const char *name)
  * Public Functions
  ****************************************************************************/
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+
+/****************************************************************************
+ * Name: sched_note_add
+ *
+ * Description:
+ *   Forward rpmsg note data to individual channels.This process does
+ *   not require filtering
+ *
+ * Input Parameters:
+ *   data - The forward note data.
+ *   len - The len of forward note data.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   We are within a critical section.
+ *
+ ****************************************************************************/
+
+void sched_note_add(FAR const void *data, size_t len)
+{
+  DEBUGASSERT(data);
+
+  while (len >= sizeof(struct note_common_s))
+    {
+      FAR struct note_common_s *note = (FAR struct note_common_s *)data;
+      size_t notelen = note->nc_length;
+      FAR struct note_driver_s **driver;
+
+      DEBUGASSERT(notelen >= sizeof(struct note_common_s) &&
+                  len >= notelen);
+      for (driver = g_note_drivers; *driver; driver++)
+        {
+          if ((*driver)->ops->add == NULL)
+            {
+              continue;
+            }
+
+          /* Add the note to circular buffer */
+
+          note_add(*driver, note, notelen);
+        }
+
+      data += notelen;
+      len -= notelen;
+    }
+}
+#endif
+
 /****************************************************************************
  * Name: sched_note_*
  *
