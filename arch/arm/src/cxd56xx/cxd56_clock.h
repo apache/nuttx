@@ -724,6 +724,26 @@ int cxd56_hostseq_clock_enable(void);
 
 int cxd56_hostseq_clock_disable(void);
 
+/****************************************************************************
+ * Name: cxd56_gnssram_clock_enable
+ *
+ * Description:
+ *   Enable clock of the GNSS RAM
+ *
+ ****************************************************************************/
+
+int cxd56_gnssram_clock_enable(void);
+
+/****************************************************************************
+ * Name: cxd56_gnssram_clock_disable
+ *
+ * Description:
+ *   Disable clock of the GNSS RAM
+ *
+ ****************************************************************************/
+
+int cxd56_gnssram_clock_disable(void);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
