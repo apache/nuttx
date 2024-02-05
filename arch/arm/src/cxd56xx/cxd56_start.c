@@ -164,6 +164,18 @@ void __start(void)
       *dest++ = 0;
     }
 
+#ifdef CONFIG_CXD56_GNSS_RAM
+  /* Clear .gnssram.bss section. */
+
+  extern uint8_t _gnssramsbss[];
+  extern uint8_t _gnssramebss[];
+
+  for (dest = (uint32_t *)_gnssramsbss; dest < (uint32_t *)_gnssramebss; )
+    {
+      *dest++ = 0;
+    }
+#endif
+
   /* Initialize the FPU (if configured) */
 
   arm_fpuconfig();
