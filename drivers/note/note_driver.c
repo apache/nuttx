@@ -224,9 +224,6 @@ static void note_common(FAR struct tcb_s *tcb,
                         FAR struct note_common_s *note,
                         uint8_t length, uint8_t type)
 {
-  struct timespec ts;
-  perf_convert(perf_gettime(), &ts);
-
   /* Save all of the common fields */
 
   note->nc_length = length;
@@ -244,8 +241,7 @@ static void note_common(FAR struct tcb_s *tcb,
       note->nc_pid = tcb->pid;
     }
 
-  note->nc_systime_sec = ts.tv_sec;
-  note->nc_systime_nsec = ts.tv_nsec;
+  note->nc_systime = perf_gettime();
 }
 
 /****************************************************************************
