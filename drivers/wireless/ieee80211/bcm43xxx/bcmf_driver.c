@@ -498,6 +498,8 @@ int bcmf_wl_active(FAR struct bcmf_dev_s *priv, bool active)
       goto errout_in_sdio_active;
     }
 
+  wlinfo("set roam_off as value %"PRIu32"\n", value);
+
   /* TODO configure EAPOL version to default */
 
   out_len = 8;
