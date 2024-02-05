@@ -256,6 +256,12 @@ ifeq ($(CONFIG_SIM_VIDEO_DECODER),y)
   STDLIBS += -lopenh264
 endif
 
+ifeq ($(CONFIG_SIM_VIDEO_ENCODER),y)
+  HOSTSRCS += sim_hostencoder.c
+  CSRCS += sim_encoder.c
+  STDLIBS += -lx264
+endif
+
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
 NUTTXOBJS = $(AOBJS) $(COBJS)
