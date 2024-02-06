@@ -698,7 +698,10 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
       v0sz = ALIGN_UP(vring_size(rsc->rpmsg_vring0.num, align0), align0);
       v1sz = ALIGN_UP(vring_size(rsc->rpmsg_vring1.num, align1), align1);
 
-      if (rsc->rpmsg_vring0.da == 0 || rsc->rpmsg_vring1.da == 0)
+      if (rsc->rpmsg_vring0.da == 0 ||
+          rsc->rpmsg_vring0.da == FW_RSC_U32_ADDR_ANY ||
+          rsc->rpmsg_vring1.da == 0 ||
+          rsc->rpmsg_vring1.da == FW_RSC_U32_ADDR_ANY)
         {
           tbsz = ALIGN_UP(sizeof(struct rptun_rsc_s), MAX(align0, align1));
 
