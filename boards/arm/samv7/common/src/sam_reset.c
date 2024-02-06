@@ -27,11 +27,82 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 
-#ifdef CONFIG_BOARDCTL_RESET
+#include "sam_systemreset.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: board_reset_cause
+ *
+ * Description:
+ *   Get the cause of last board reset. This should call architecture
+ *   specific logic to handle the register read.
+ *
+ * Input Parameters:
+ *   cause - Pointer to boardioc_reset_cause_s structure to which the
+ *      reason (and potentially subreason) is saved.
+ *
+ * Returned Value:
+ *   This functions should always return succesfully with 0. We save
+ *   BOARDIOC_RESETCAUSE_UNKOWN in cause structure if we are
+ *   not able to get last reset cause from HW (which is unlikely).
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARDCTL_RESET_CAUSE
+int board_reset_cause(FAR struct boardioc_reset_cause_s *cause)
+{
+  int rst_cause;
+
+  /* Get the reset cause from hardware */
+
+  rst_cause = sam_get_reset_cause();
+
+  switch (rst_cause)
+    {
+      case SAMV7_RESET_PWRUP:
+
+        /* Power up */
+
+        cause->cause = BOARDIOC_RESETCAUSE_SYS_CHIPPOR;
+        break;
+      case SAMV7_RESET_BACKUP:
+
+        /* Wake up from backup (low power) mode */
+
+        cause->cause = BOARDIOC_RESETCAUSE_LOWPOWER;
+        break;
+      case SAMV7_RESET_WDOG:
+
+        /* Watchdog error */
+
+        cause->cause = BOARDIOC_RESETCAUSE_CPU_RWDT;
+        break;
+      case SAMV7_RESET_SWRST:
+
+        /* SW reset */
+
+        cause->cause = BOARDIOC_RESETCAUSE_CPU_SOFT;
+        break;
+      case SAMV7_RESET_NRST:
+
+        /* Reset from user by pressing reset button */
+
+        cause->cause = BOARDIOC_RESETCAUSE_PIN;
+        break;
+      default:
+
+        /* Unknown cause returned from HW */
+
+        cause->cause = BOARDIOC_RESETCAUSE_UNKOWN;
+        break;
+    }
+
+  return 0;
+}
+#endif /* CONFIG_BOARDCTL_RESET_CAUSE */
 
 /****************************************************************************
  * Name: board_reset
@@ -53,10 +124,10 @@
  *
  ****************************************************************************/
 
+#ifdef CONFIG_BOARDCTL_RESET
 int board_reset(int status)
 {
   up_systemreset();
   return 0;
 }
-
 #endif /* CONFIG_BOARDCTL_RESET */
