@@ -249,6 +249,10 @@ ifeq ($(CONFIG_SIM_LIBUSB),y)
 endif
 endif
 
+ifeq ($(CONFIG_RPMSG_VIRTIO),y)
+  CSRCS += sim_rpmsg_virtio.c
+endif
+
 ifeq ($(CONFIG_RPTUN),y)
   CSRCS += sim_rptun.c
 endif
