@@ -104,15 +104,22 @@ static inline void __ic_ialluis(void)
   __asm__ volatile ("ic  ialluis" : : : "memory");
 }
 
-static size_t g_dcache_line_size;
-
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static inline uint32_t arm64_cache_get_info(uint32_t *sets, uint32_t *ways)
+static inline uint32_t arm64_cache_get_info(uint32_t *sets, uint32_t *ways,
+                                            bool icache)
 {
-  uint32_t ccsidr = read_sysreg(ccsidr_el1);
+  uint32_t csselr;
+  uint32_t ccsidr;
+
+  csselr = read_sysreg(csselr_el1);
+  write_sysreg((csselr & ~CSSELR_EL1_IND_MASK) |
+               (icache << CSSELR_EL1_IND_SHIFT),
+               csselr_el1);
+
+  ccsidr = read_sysreg(ccsidr_el1);
 
   if (sets)
     {
@@ -124,16 +131,18 @@ static inline uint32_t arm64_cache_get_info(uint32_t *sets, uint32_t *ways)
       *ways = ((ccsidr >> CCSIDR_EL1_WAYS_SHIFT) & CCSIDR_EL1_WAYS_MASK) + 1;
     }
 
+  write_sysreg(csselr, csselr_el1);
+
   return (1 << ((ccsidr & CCSIDR_EL1_LN_SZ_MASK) + 2)) * 4;
 }
 
-static inline size_t arm64_get_cache_size(void)
+static inline size_t arm64_get_cache_size(bool icache)
 {
   uint32_t sets;
   uint32_t ways;
   uint32_t line;
 
-  line = arm64_cache_get_info(&sets, &ways);
+  line = arm64_cache_get_info(&sets, &ways, icache);
 
   return sets * ways * line;
 }
@@ -334,7 +343,14 @@ static inline int arm64_dcache_all(int op)
 
 size_t up_get_icache_linesize(void)
 {
-  return arm64_cache_get_info(NULL, NULL);
+  static uint32_t clsize;
+
+  if (clsize == 0)
+    {
+      clsize = arm64_cache_get_info(NULL, NULL, true);
+    }
+
+  return clsize;
 }
 
 /****************************************************************************
@@ -357,7 +373,7 @@ size_t up_get_icache_size(void)
 
   if (csize == 0)
     {
-      csize = arm64_get_cache_size();
+      csize = arm64_get_cache_size(true);
     }
 
   return csize;
@@ -525,21 +541,14 @@ void up_invalidate_dcache_all(void)
 
 size_t up_get_dcache_linesize(void)
 {
-  uint64_t ctr_el0;
-  uint32_t dminline;
+  static uint32_t clsize;
 
-  if (g_dcache_line_size != 0)
+  if (clsize == 0)
     {
-      return g_dcache_line_size;
+      clsize = arm64_cache_get_info(NULL, NULL, false);
     }
 
-  /* get cache line size */
-
-  ctr_el0 = read_sysreg(CTR_EL0);
-  dminline = (ctr_el0 >> CTR_EL0_DMINLINE_SHIFT) & CTR_EL0_DMINLINE_MASK;
-  g_dcache_line_size = 4 << dminline;
-
-  return g_dcache_line_size;
+  return clsize;
 }
 
 /****************************************************************************
@@ -562,7 +571,7 @@ size_t up_get_dcache_size(void)
 
   if (csize == 0)
     {
-      csize = arm64_get_cache_size();
+      csize = arm64_get_cache_size(false);
     }
 
   return csize;
