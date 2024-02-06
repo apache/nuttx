@@ -22,3 +22,20 @@ config RPMSG_PING
 		channel, user can use it to get send/recv speed & latency.
 
 endif # RPMSG
+
+config RPMSG_VIRTIO
+	bool "rpmsg virtio transport support"
+	default n
+	select RPMSG
+
+if RPMSG_VIRTIO
+
+config RPMSG_VIRTIO_PRIORITY
+	int "rpmsg virtio rx thread priority"
+	default 224
+
+config RPMSG_VIRTIO_STACKSIZE
+	int "rpmsg virtio rx thread stack size"
+	default DEFAULT_TASK_STACKSIZE
+
+endif
