@@ -76,7 +76,7 @@ CMN_CSRCS += arm64_mpu.c
 endif
 
 ifeq ($(CONFIG_ARM64_PSCI),y)
-CMN_CSRCS += arm64_cpu_psci.c arm64_systemreset.c
+CMN_CSRCS += arm64_cpu_psci.c
 endif
 
 ifeq ($(CONFIG_SMP),y)

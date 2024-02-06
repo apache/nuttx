@@ -230,3 +230,53 @@ int arm_psci_init(const char *method)
 
   return psci_detect();
 }
+
+/***************************************************************************
+ * Name: up_systempoweroff
+ *
+ * Description:
+ *   Internal, arm poweroff logic.
+ *
+ ***************************************************************************/
+
+void up_systempoweroff(void)
+{
+  int ret;
+
+  /* Set up for the system poweroff */
+
+  ret = psci_cpu_off();
+  if (ret)
+    {
+      sinfo("Failed to power off CPU, error code: %d\n", ret);
+    }
+
+  /* Wait for power off */
+
+  for (; ; );
+}
+
+/***************************************************************************
+ * Name: up_systemreset
+ *
+ * Description:
+ *   Internal, arm reset logic.
+ *
+ ***************************************************************************/
+
+void up_systemreset(void)
+{
+  int ret;
+
+  /* Set up for the system reset */
+
+  ret = psci_cpu_reset();
+  if (ret)
+    {
+      sinfo("Failed to reset CPU, error code: %d\n", ret);
+    }
+
+  /* Wait for the reset */
+
+  for (; ; );
+}
