@@ -214,6 +214,18 @@ pid_t up_fork(void);
 void up_initialize(void);
 
 /****************************************************************************
+ * Name: up_systempoweroff
+ *
+ * Description:
+ *   The function up_systempoweroff() will power down the MCU.  Optional!
+ *   Availability of this function is dependent upon the architecture
+ *   support.
+ *
+ ****************************************************************************/
+
+void up_systempoweroff(void) noreturn_function;
+
+/****************************************************************************
  * Name: up_systemreset
  *
  * Description:
