@@ -48,7 +48,6 @@ endif()
 
 # Basic CMake configuration ##################################################
 
-set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_EXTENSIONS OFF)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
