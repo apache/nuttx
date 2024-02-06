@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/samv7/sam_systemreset.c
+ * arch/arm/src/samv7/sam_systemreset.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,25 +18,27 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_SAMV7_SAM_SYSTEMRESET_H
+#define __ARCH_ARM_SRC_SAMV7_SAM_SYSTEMRESET_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
 #include <stdint.h>
-#include <assert.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/board.h>
-#include <arch/samv7/chip.h>
-
-#include "arm_internal.h"
-#include "hardware/sam_rstc.h"
-#include "sam_systemreset.h"
 
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define SAMV7_RESET_PWRUP       1
+#define SAMV7_RESET_BACKUP      2
+#define SAMV7_RESET_WDOG        3
+#define SAMV7_RESET_SWRST       4
+#define SAMV7_RESET_NRST        5
+
+/****************************************************************************
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -55,68 +57,6 @@
  *
  ****************************************************************************/
 
-int sam_get_reset_cause(void)
-{
-  int ret;
-  uint32_t rstsr;
+int sam_get_reset_cause(void);
 
-  rstsr = getreg32(SAM_RSTC_SR);
-  switch (rstsr & RSTC_SR_RSTTYP_MASK)
-    {
-      case RSTC_SR_RSTTYP_PWRUP:
-        ret = SAMV7_RESET_PWRUP;
-        break;
-      case RSTC_SR_RSTTYP_BACKUP:
-        ret =  SAMV7_RESET_BACKUP;
-        break;
-      case RSTC_SR_RSTTYP_WDOG:
-        ret =  SAMV7_RESET_WDOG;
-        break;
-      case RSTC_SR_RSTTYP_SWRST:
-        ret =  SAMV7_RESET_SWRST;
-        break;
-      case RSTC_SR_RSTTYP_NRST:
-        ret = SAMV7_RESET_NRST;
-        break;
-      default:
-        ret = -1;
-        break;
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: up_systemreset
- *
- * Description:
- *   Internal reset logic.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SAMV7_SYSTEMRESET
-void up_systemreset(void)
-{
-  uint32_t rstcr;
-#if defined(CONFIG_SAMV7_EXTRESET_ERST) && CONFIG_SAMV7_EXTRESET_ERST != 0
-  uint32_t rstmr;
-#endif
-
-  rstcr  = (RSTC_CR_PROCRST | RSTC_CR_KEY);
-
-#if defined(CONFIG_SAMV7_EXTRESET_ERST) && CONFIG_SAMV7_EXTRESET_ERST != 0
-  rstcr |= RSTC_CR_EXTRST;
-
-  rstmr  = getreg32(SAM_RSTC_MR);
-  rstmr &= ~RSTC_MR_ERSTL_MASK;
-  rstmr &= RSTC_MR_ERSTL(CONFIG_SAMV7_EXTRESET_ERST - 1) | RSTC_MR_KEY;
-  putreg32(rstmr, SAM_RSTC_MR);
-#endif
-
-  putreg32(rstcr, SAM_RSTC_CR);
-
-  /* Wait for the reset */
-
-  for (; ; );
-}
-#endif /* CONFIG_SAMV7_SYSTEMRESET */
+#endif /* __ARCH_ARM_SRC_SAMV7_SAM_SYSTEMRESET_H */
