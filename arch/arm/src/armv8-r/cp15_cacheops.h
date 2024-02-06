@@ -1114,7 +1114,7 @@ void cp15_flush_dcache_all(void);
 uint32_t cp15_icache_size(void);
 
 /****************************************************************************
- * Name: cp15_cache_size
+ * Name: cp15_dcache_size
  *
  * Description:
  *   Get cp15 dcache size in byte
