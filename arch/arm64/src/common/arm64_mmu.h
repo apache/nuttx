@@ -212,6 +212,13 @@
     __arg;                                                          \
   })
 
+/* csselr_el1 */
+
+#define CSSELR_EL1_IND_SHIFT         0
+#define CSSELR_EL1_IND_MASK          BIT_MASK(1)
+#define CSSELR_EL1_LEVEL_SHIFT       1
+#define CSSELR_EL1_LEVEL_MASK        BIT_MASK(3)
+
 /* Convenience macros to represent the ARMv8-A-specific
  * configuration for memory access permission and
  * cache-ability attribution.
