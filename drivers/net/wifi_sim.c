@@ -1413,7 +1413,6 @@ static int get_scan_results(FAR struct wifi_sim_s *wifidev,
 {
   int ret;
   FAR char *rbuf;
-  char bss[128];
   FAR char *p;
   FAR char *s;
   struct wifi_sim_bss_s bss_info;
@@ -1438,11 +1437,7 @@ static int get_scan_results(FAR struct wifi_sim_s *wifidev,
           p++;
         }
 
-      memset(bss, 0, sizeof(bss));
-      memcpy(bss, s, p - s + 1);
-      ninfo("%s\n", bss);
-
-      wifidriver_get_bssinfo(&bss_info, bss, strlen(bss));
+      wifidriver_get_bssinfo(&bss_info, s, p - s + 1);
       ret = copy_scan_results(scan_reqs, &bss_info);
       if (ret < 0)
         {
