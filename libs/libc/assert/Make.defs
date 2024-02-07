@@ -24,8 +24,10 @@ ifeq ($(CONFIG_STACK_CANARIES),y)
 CSRCS += lib_stackchk.c
 endif
 
+ifeq ($(CONFIG_LTO_NONE),n)
 assert/lib_assert.c_CFLAGS += -fno-lto
 assert/lib_stackchk.c_CFLAGS += -fno-lto
+endif
 
 # Add the assert directory to the build
 

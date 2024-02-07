@@ -39,7 +39,8 @@ MEMORY
 SECTIONS
 {
     .text : {
-        _stext = ABSOLUTE(.);
+        . = ALIGN(4);
+        _stext = .;
         *(.vectors)
         *(.text .text.*)
         *(.fixup)
@@ -51,27 +52,29 @@ SECTIONS
         *(.got)
         *(.gcc_except_table)
         *(.gnu.linkonce.r.*)
-        _etext = ABSOLUTE(.);
+        . = ALIGN(4);
+        _etext = .;
     } > flash
 
-    _eronly = ABSOLUTE(.);      /* See below                    */
+    _eronly = .;                /* See below                    */
 
-    .data : {
-        _sdata = ABSOLUTE(.);
+    .data : AT(_etext) {
+        . = ALIGN(4);
+        _sdata = .;
         *(.data .data.*)
         *(.gnu.linkonce.d.*)
         CONSTRUCTORS
         . = ALIGN(4);
-        _edata = ABSOLUTE(.);
-    } > intram AT > flash
+        _edata = .;
+    } > intram
 
     .bss : {            /* BSS              */
-        _sbss = ABSOLUTE(.);
+        _sbss = .;
         *(.bss .bss.*)
         *(.gnu.linkonce.b.*)
         *(COMMON)
         . = ALIGN(4);
-        _ebss = ABSOLUTE(.);
+        _ebss = .;
     } > intram
     /* Stabs debugging sections.    */
     .stab 0 : { *(.stab) }
