@@ -1,5 +1,5 @@
 # ##############################################################################
-# arch/arm/src/stm32u5/CMakeLists.txt
+# boards/arm/stm32u5/nucleo-u5a5zj-q/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -18,45 +18,4 @@
 #
 # ##############################################################################
 
-set(SRCS
-    stm32_allocateheap.c
-    stm32_exti_gpio.c
-    stm32_gpio.c
-    stm32_irq.c
-    stm32_lowputc.c
-    stm32_rcc.c
-    stm32_i2c.c
-    stm32_serial.c
-    stm32_start.c
-    stm32_waste.c
-    stm32_uid.c
-    stm32_spi.c
-    stm32_lse.c
-    stm32_lsi.c
-    stm32u5xx_rcc.c
-    stm32_pwr.c
-    stm32_tim.c
-    stm32_flash.c
-    stm32_timerisr.c)
-
-if(NOT CONFIG_ARCH_IDLE_CUSTOM)
-  list(APPEND SRCS stm32_idle.c)
-endif()
-
-if(CONFIG_TIMER)
-  list(APPEND SRCS stm32_tim_lowerhalf.c)
-endif()
-
-if(CONFIG_BUILD_PROTECTED)
-  list(APPEND SRCS stm32_userspace.c stm32_mpuinit.c)
-endif()
-
-if(CONFIG_DEBUG_FEATURES)
-  list(APPEND SRCS stm32_dumpgpio.c)
-endif()
-
-if(CONFIG_USBDEV)
-  list(APPEND SRCS stm32_otgdev.c)
-endif()
-
-target_sources(arch PRIVATE ${SRCS})
+add_subdirectory(src)
