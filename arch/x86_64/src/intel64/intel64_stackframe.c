@@ -90,7 +90,7 @@ void *up_stack_frame(struct tcb_s *tcb, size_t frame_size)
   /* Save the adjusted stack values in the struct tcb_s */
 
   tcb->stack_base_ptr  = (uint8_t *)tcb->stack_base_ptr + frame_size;
-  tcb->adj_stack_size -= frame_size;
+  tcb->adj_stack_size -= frame_size + 8;
 
   /* And return the pointer to the allocated region */
 
