@@ -25,200 +25,188 @@
 #include <nuttx/config.h>
 #include <arch/irq.h>
 
-	.file	"broadwell_vectors.S"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+	.file "intel64_vectors.S"
 
 /****************************************************************************
  * .text
  ****************************************************************************/
 
 	.text
-    .code64
+	.code64
 
 /****************************************************************************
  * Public Symbols
  ****************************************************************************/
 
-	.globl	irq_handler
-	.globl	isr_handler
-	.globl	g_interrupt_stack
-	.globl	g_interrupt_stack_end
-	.globl	g_isr_stack
-	.globl	g_isr_stack_end
+	.globl    irq_handler
+	.globl    isr_handler
+	.globl    g_interrupt_stack
+	.globl    g_interrupt_stack_end
+	.globl    g_isr_stack
+	.globl    g_isr_stack_end
 
 /****************************************************************************
  * Macros
  ****************************************************************************/
 
-/* Trace macros, use like trace 'i' to print char to serial port. */
-
-	.macro	trace, ch
-	mov		$0x3f8, %dx
-	mov		$\ch, %al
-	out		%al, %dx
-	.endm
-
-/* This macro creates a stub for an ISR which does NOT pass it's own
- * error code (adds a dummy errcode byte).
- */
+	/* This macro creates a stub for an ISR which does NOT pass it's own
+	 * error code (adds a dummy errcode byte).
+	 */
 
 	.macro ISR_NOERRCODE, intno
-	.globl	vector_isr\intno
+	.globl vector_isr\intno
 vector_isr\intno:
-	cli							/* Disable interrupts firstly. */
+	cli               /* Disable interrupts firstly. */
 
-    // CPU has sawitched to the ISR stack using IST
+	/* CPU has sawitched to the ISR stack using IST */
 
-	pushq  $0				/* Push a dummy error code. */
+	pushq  $0         /* Push a dummy error code. */
 
-    // Save rdi, rsi
-    pushq   %rdi
-    pushq   %rsi
-	movq   $\intno,   %rsi     /* INT Number is saved to 2nd parameter of function call */
-	jmp		isr_common			/* Go to the common ISR handler code. */
+	/* Save rdi, rsi */
+	pushq   %rdi
+	pushq   %rsi
+	movq    $\intno,   %rsi     /* INT Number is saved to 2nd parameter of function call */
+	jmp     isr_common           /* Go to the common ISR handler code. */
 	.endm
 
-/* This macro creates a stub for an ISR which passes it's own
- * error code.
- */
+	/* This macro creates a stub for an ISR which passes it's own
+	 * error code.
+	 */
 
-	.macro	ISR_ERRCODE, intno
-	.globl	vector_isr\intno
+	.macro  ISR_ERRCODE, intno
+	.globl  vector_isr\intno
 vector_isr\intno:
-	cli							/* Disable interrupts firstly. */
+	cli               /* Disable interrupts firstly. */
 
-    // CPU has sawitched to the ISR stack using IST
+	/* CPU has sawitched to the ISR stack using IST */
 
-    // Save rdi, rsi
-    pushq   %rdi
-    pushq   %rsi
-	movq   $\intno,   %rsi     /* INT Number is saved to 2nd parameter of function call */
-	jmp		isr_common			/* Go to the common ISR handler code. */
+	/* Save rdi, rsi */
+	pushq   %rdi
+	pushq   %rsi
+	movq    $\intno,   %rsi     /* INT Number is saved to 2nd parameter of function call */
+	jmp     isr_common          /* Go to the common ISR handler code. */
 	.endm
 
-/* This macro creates a stub for an IRQ - the first parameter is
- * the IRQ number, the second is the ISR number it is remapped to.
- */
+	/* This macro creates a stub for an IRQ - the first parameter is
+	 * the IRQ number, the second is the ISR number it is remapped to.
+	 */
 
-	.macro	IRQ, irqno, intno
-	.globl	vector_irq\irqno
-vector_irq\irqno:
-	cli							/* Disable interrupts firstly. */
+	.macro  IRQ, irqno, intno
+	.globl  vector_irq\irqno
+	vector_irq\irqno:
+	cli               /* Disable interrupts firstly. */
 
-    // CPU has switched to the IRQ stack using IST
+	/* CPU has switched to the IRQ stack using IST */
 
-	pushq  $0				/* Push a dummy error code. */
+	pushq   $0         /* Push a dummy error code. */
 
-    // Save rdi, rsi
-    pushq   %rdi
-    pushq   %rsi
-	movq   $\intno,   %rsi     /* INT Number is saved to 2nd parameter of function call */
-	jmp		irq_common			/* Go to the common IRQ handler code. */
+	/* Save rdi, rsi */
+	pushq   %rdi
+	pushq   %rsi
+	movq    $\intno,   %rsi     /* INT Number is saved to 2nd parameter of function call */
+	jmp     irq_common          /* Go to the common IRQ handler code. */
 	.endm
 
 /****************************************************************************
  * IDT Vectors
  ****************************************************************************/
-/* The following will be the vector addresses programmed into the IDT */
+	/* The following will be the vector addresses programmed into the IDT */
 
-	ISR_NOERRCODE		ISR0
+	ISR_NOERRCODE     ISR0
 	.balign 16
-	ISR_NOERRCODE		ISR1
+	ISR_NOERRCODE     ISR1
 	.balign 16
-	ISR_NOERRCODE		ISR2
+	ISR_NOERRCODE     ISR2
 	.balign 16
-	ISR_NOERRCODE		ISR3
+	ISR_NOERRCODE     ISR3
 	.balign 16
-	ISR_NOERRCODE		ISR4
+	ISR_NOERRCODE     ISR4
 	.balign 16
-	ISR_NOERRCODE		ISR5
+	ISR_NOERRCODE     ISR5
 	.balign 16
-	ISR_NOERRCODE		ISR6
+	ISR_NOERRCODE     ISR6
 	.balign 16
-	ISR_NOERRCODE		ISR7
+	ISR_NOERRCODE     ISR7
 	.balign 16
-	ISR_ERRCODE			ISR8
+	ISR_ERRCODE       ISR8
 	.balign 16
-	ISR_NOERRCODE		ISR9
+	ISR_NOERRCODE     ISR9
 	.balign 16
-	ISR_ERRCODE			ISR10
+	ISR_ERRCODE       ISR10
 	.balign 16
-	ISR_ERRCODE			ISR11
+	ISR_ERRCODE       ISR11
 	.balign 16
-	ISR_ERRCODE			ISR12
+	ISR_ERRCODE       ISR12
 	.balign 16
-	ISR_ERRCODE			ISR13
+	ISR_ERRCODE       ISR13
 	.balign 16
-	ISR_ERRCODE			ISR14
+	ISR_ERRCODE       ISR14
 	.balign 16
-	ISR_NOERRCODE		ISR15
+	ISR_NOERRCODE     ISR15
 	.balign 16
-	ISR_NOERRCODE		ISR16
+	ISR_NOERRCODE     ISR16
 	.balign 16
-	ISR_NOERRCODE		ISR17
+	ISR_NOERRCODE     ISR17
 	.balign 16
-	ISR_NOERRCODE		ISR18
+	ISR_NOERRCODE     ISR18
 	.balign 16
-	ISR_NOERRCODE		ISR19
+	ISR_NOERRCODE     ISR19
 	.balign 16
-	ISR_NOERRCODE		ISR20
+	ISR_NOERRCODE     ISR20
 	.balign 16
-	ISR_NOERRCODE		ISR21
+	ISR_NOERRCODE     ISR21
 	.balign 16
-	ISR_NOERRCODE		ISR22
+	ISR_NOERRCODE     ISR22
 	.balign 16
-	ISR_NOERRCODE		ISR23
+	ISR_NOERRCODE     ISR23
 	.balign 16
-	ISR_NOERRCODE		ISR24
+	ISR_NOERRCODE     ISR24
 	.balign 16
-	ISR_NOERRCODE		ISR25
+	ISR_NOERRCODE     ISR25
 	.balign 16
-	ISR_NOERRCODE		ISR26
+	ISR_NOERRCODE     ISR26
 	.balign 16
-	ISR_NOERRCODE		ISR27
+	ISR_NOERRCODE     ISR27
 	.balign 16
-	ISR_NOERRCODE		ISR28
+	ISR_NOERRCODE     ISR28
 	.balign 16
-	ISR_NOERRCODE		ISR29
+	ISR_NOERRCODE     ISR29
 	.balign 16
-	ISR_NOERRCODE		ISR30
+	ISR_NOERRCODE     ISR30
 	.balign 16
-	ISR_NOERRCODE		ISR31
+	ISR_NOERRCODE     ISR31
 	.balign 16
-	IRQ				 0,	IRQ0
+	IRQ          0,   IRQ0
 	.balign 16
-	IRQ				 1,	IRQ1
+	IRQ          1,   IRQ1
 	.balign 16
-	IRQ 			 2,	IRQ2
+	IRQ          2,   IRQ2
 	.balign 16
-	IRQ				 3,	IRQ3
+	IRQ          3,   IRQ3
 	.balign 16
-	IRQ				 4,	IRQ4
+	IRQ          4,   IRQ4
 	.balign 16
-	IRQ				 5,	IRQ5
+	IRQ          5,   IRQ5
 	.balign 16
-	IRQ				 6,	IRQ6
+	IRQ          6,   IRQ6
 	.balign 16
-	IRQ				 7,	IRQ7
+	IRQ          7,   IRQ7
 	.balign 16
-	IRQ				 8,	IRQ8
+	IRQ          8,   IRQ8
 	.balign 16
-	IRQ				 9,	IRQ9
+	IRQ          9,   IRQ9
 	.balign 16
-	IRQ				10,	IRQ10
+	IRQ         10,   IRQ10
 	.balign 16
-	IRQ				11,	IRQ11
+	IRQ         11,   IRQ11
 	.balign 16
-	IRQ				12,	IRQ12
+	IRQ         12,   IRQ12
 	.balign 16
-	IRQ				13,	IRQ13
+	IRQ         13,   IRQ13
 	.balign 16
-	IRQ				14,	IRQ14
+	IRQ         14,   IRQ14
 	.balign 16
-	IRQ				15,	IRQ15
+	IRQ         15,   IRQ15
 	.balign 16
 
 /****************************************************************************
@@ -232,51 +220,50 @@ vector_irq\irqno:
  ****************************************************************************/
 
 isr_common:
-/*	trace	'S' */
-    /* Already swap to the interrupt stack */
-    /* stack is automatically recovered by iretq using task state */
+	/* Already swap to the interrupt stack */
+	/* stack is automatically recovered by iretq using task state */
 
-    /* x86_64 don't have pusha, we have to do things manually */
-    /* RDI and RSI are pushed above for handling IRQ no */
-    pushq   %rdx
-    pushq   %rcx
-    pushq   %r8
-    pushq   %r9
+	/* x86_64 don't have pusha, we have to do things manually */
+	/* RDI and RSI are pushed above for handling IRQ no */
+	pushq   %rdx
+	pushq   %rcx
+	pushq   %r8
+	pushq   %r9
 
-    pushq   %r15
-    pushq   %r14
-    pushq   %r13
-    pushq   %r12
-    pushq   %r11
-    pushq   %r10
-    pushq   %rbp
-    pushq   %rbx
-    pushq   %rax
+	pushq   %r15
+	pushq   %r14
+	pushq   %r13
+	pushq   %r12
+	pushq   %r11
+	pushq   %r10
+	pushq   %rbp
+	pushq   %rbx
+	pushq   %rax
 
-	mov		%ds, %ax			/* Lower 16-bits of rax. */
-	pushq	%rax				/* Save the data segment descriptor */
-	mov		%es, %ax			/* Lower 16-bits of rax. */
-	pushq	%rax				/* Save the data segment descriptor */
-	mov		%gs, %ax			/* Lower 16-bits of rax. */
-	pushq	%rax				/* Save the data segment descriptor */
-	mov		%fs, %ax			/* Lower 16-bits of rax. */
-	pushq	%rax				/* Save the data segment descriptor */
+	mov     %ds, %ax      /* Lower 16-bits of rax. */
+	pushq   %rax          /* Save the data segment descriptor */
+	mov     %es, %ax      /* Lower 16-bits of rax. */
+	pushq   %rax          /* Save the data segment descriptor */
+	mov     %gs, %ax      /* Lower 16-bits of rax. */
+	pushq   %rax          /* Save the data segment descriptor */
+	mov     %fs, %ax      /* Lower 16-bits of rax. */
+	pushq   %rax          /* Save the data segment descriptor */
 
-    /* align to 16-bytes boundary */
-    leaq -8(%rsp), %rsp
+	/* align to 16-bytes boundary */
+	leaq    -8(%rsp), %rsp
 
-    /* save xmm registers */
-    leaq -512(%rsp), %rsp
-    fxsaveq (%rsp)
+	/* save xmm registers */
+	leaq    -512(%rsp), %rsp
+	fxsaveq (%rsp)
 
 	/* The current value of the SP points to the beginning of the state save
 	 * structure.  Save that in RDI as the input parameter to isr_handler.
 	 */
 
-	mov		%rsp, %rdi
-	call	isr_handler
-	jmp		.Lreturn
-	.size	isr_common, . - isr_common
+	mov     %rsp, %rdi
+	call    isr_handler
+	jmp     .Lreturn
+	.size   isr_common, . - isr_common
 
 /****************************************************************************
  * Name: irq_common
@@ -288,51 +275,50 @@ isr_common:
  *
  ****************************************************************************/
 
-	.type	irq_common, @function
+	.type   irq_common, @function
 irq_common:
-/*	trace	'R' */
-    /* Already swap to the interrupt stack */
-    /* stack is automatically recovered by iretq using task state */
+	/* Already swap to the interrupt stack */
+	/* stack is automatically recovered by iretq using task state */
 
-    /* x86_64 don't have pusha, we have to do things manually */
-    /* RDI and RSI are pushed above for handling IRQ no */
-    pushq   %rdx
-    pushq   %rcx
-    pushq   %r8
-    pushq   %r9
+	/* x86_64 don't have pusha, we have to do things manually */
+	/* RDI and RSI are pushed above for handling IRQ no */
+	pushq   %rdx
+	pushq   %rcx
+	pushq   %r8
+	pushq   %r9
 
-    pushq   %r15
-    pushq   %r14
-    pushq   %r13
-    pushq   %r12
-    pushq   %r11
-    pushq   %r10
-    pushq   %rbp
-    pushq   %rbx
-    pushq   %rax
+	pushq   %r15
+	pushq   %r14
+	pushq   %r13
+	pushq   %r12
+	pushq   %r11
+	pushq   %r10
+	pushq   %rbp
+	pushq   %rbx
+	pushq   %rax
 
-	mov		%ds, %ax			/* Lower 16-bits of rax. */
-	pushq	%rax				/* Save the data segment descriptor */
-	mov		%es, %ax			/* Lower 16-bits of rax. */
-	pushq	%rax				/* Save the data segment descriptor */
-	mov		%gs, %ax			/* Lower 16-bits of rax. */
-	pushq	%rax				/* Save the data segment descriptor */
-	mov		%fs, %ax			/* Lower 16-bits of rax. */
-	pushq	%rax				/* Save the data segment descriptor */
+	mov     %ds, %ax      /* Lower 16-bits of rax. */
+	pushq   %rax          /* Save the data segment descriptor */
+	mov     %es, %ax      /* Lower 16-bits of rax. */
+	pushq   %rax          /* Save the data segment descriptor */
+	mov     %gs, %ax      /* Lower 16-bits of rax. */
+	pushq   %rax          /* Save the data segment descriptor */
+	mov     %fs, %ax      /* Lower 16-bits of rax. */
+	pushq   %rax          /* Save the data segment descriptor */
 
-    /* align to 16-bytes boundary */
-    leaq -8(%rsp), %rsp
+	/* align to 16-bytes boundary */
+	leaq    -8(%rsp), %rsp
 
-    /* save xmm registers */
-    leaq -512(%rsp), %rsp
-    fxsaveq (%rsp)
+	/* save xmm registers */
+	leaq    -512(%rsp), %rsp
+	fxsaveq (%rsp)
 
 	/* The current value of the SP points to the beginning of the state save
 	 * structure.  Save that in RDI as the input parameter to irq_handler.
 	 */
 
-	mov		%rsp, %rdi
-	call	irq_handler
+	mov     %rsp, %rdi
+	call    irq_handler
 
 	/* The common return point for both isr_handler and irq_handler */
 
@@ -341,55 +327,55 @@ irq_common:
 	 * return.  Are we switching to a new context?
 	 */
 
-	cmp		%rax, %rsp
-	je		.Lnoswitch
+	cmp     %rax, %rsp
+	je      .Lnoswitch
 
 	/* A context swith will be performed. EAX holds the address of the new
-	 * register save structure.
+   * register save structure.
 	 *
 	 * Jump to x86_64_fullcontextrestore().  We perform a call here, but that function
 	 * never returns.  The address of the new register save block is the argument
 	 * to the x86_64_fullcontextrestore().
-	 */
+	*/
 
 	mov     %rax, %rdi
-	call	x86_64_fullcontextrestore
+	call    x86_64_fullcontextrestore
 
 .Lnoswitch:
-    fxrstorq (%rsp)
-    leaq 512(%rsp), %rsp
-    leaq 8(%rsp), %rsp
+	fxrstorq (%rsp)
+	leaq    512(%rsp), %rsp
+	leaq    8(%rsp), %rsp
 
-    popq   %rax
-    mov    %fs, %ax
-    popq   %rax
-    mov    %gs, %ax
-    popq   %rax
-    mov    %es, %ax
-    popq   %rax
-    mov    %ds, %ax
+	popq    %rax
+	mov     %fs, %ax
+	popq    %rax
+	mov     %gs, %ax
+	popq    %rax
+	mov     %es, %ax
+	popq    %rax
+	mov     %ds, %ax
 
-    popq   %rax
-    popq   %rbx
-    popq   %rbp
-    popq   %r10
-    popq   %r11
-    popq   %r12
-    popq   %r13
-    popq   %r14
-    popq   %r15
+	popq    %rax
+	popq    %rbx
+	popq    %rbp
+	popq    %r10
+	popq    %r11
+	popq    %r12
+	popq    %r13
+	popq    %r14
+	popq    %r15
 
-    popq   %r9
-    popq   %r8
-    popq   %rcx
-    popq   %rdx
+	popq    %r9
+	popq    %r8
+	popq    %rcx
+	popq    %rdx
 
-    popq   %rsi
-    popq   %rdi
+	popq    %rsi
+	popq    %rdi
 
-	add		$8, %rsp			/* Cleans up the pushed error code */
+	add     $8, %rsp      /* Cleans up the pushed error code */
 
-	iretq						/* Pops 5 things at once: CS, RIP, RFLAGS and SS and RSP */
+	iretq                /* Pops 5 things at once: CS, RIP, RFLAGS and SS and RSP */
 	.size	irq_common, . - irq_common
 	.end
 
