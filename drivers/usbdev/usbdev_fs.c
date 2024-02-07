@@ -381,7 +381,7 @@ static int usbdev_fs_blocking_io(FAR struct usbdev_fs_ep_s *fs_ep,
                                  FAR usbdev_fs_waiter_sem_t **list,
                                  FAR struct sq_queue_s *queue)
 {
-  FAR usbdev_fs_waiter_sem_t sem;
+  usbdev_fs_waiter_sem_t sem;
   irqstate_t flags;
   int ret;
 
@@ -435,6 +435,8 @@ static int usbdev_fs_blocking_io(FAR struct usbdev_fs_ep_s *fs_ep,
                   cur_sem->next = sem.next;
                   break;
                 }
+
+              cur_sem = cur_sem->next;
             }
         }
 
