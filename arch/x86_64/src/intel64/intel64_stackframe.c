@@ -85,7 +85,7 @@ void *up_stack_frame(struct tcb_s *tcb, size_t frame_size)
     }
 
   ret = tcb->stack_base_ptr;
-  memset(ret, 0, tcb->adj_stack_size);
+  memset(ret, 0, frame_size);
 
   /* Save the adjusted stack values in the struct tcb_s */
 
