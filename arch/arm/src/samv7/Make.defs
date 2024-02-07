@@ -29,6 +29,7 @@ include armv7-m/Make.defs
 
 CHIP_CSRCS  = sam_start.c sam_clockconfig.c sam_irq.c sam_allocateheap.c
 CHIP_CSRCS += sam_lowputc.c sam_serial.c sam_gpio.c sam_pck.c sam_uid.c
+CHIP_CSRCS += sam_eefc.c
 
 # Configuration-dependent SAMV7 files
 
@@ -141,7 +142,7 @@ CHIP_CSRCS += sam_trng.c
 endif
 
 ifeq ($(CONFIG_SAMV7_PROGMEM),y)
-CHIP_CSRCS += sam_progmem.c sam_eefc.c
+CHIP_CSRCS += sam_progmem.c
 endif
 
 ifeq ($(CONFIG_SAMV7_PWM),y)
