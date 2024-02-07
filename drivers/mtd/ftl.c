@@ -287,6 +287,7 @@ static ssize_t ftl_mtd_bread(FAR struct ftl_struct_s *dev, off_t startblock,
     {
       off_t startphysicalblock;
       off_t starteraseblock;
+      off_t offset;
       size_t count;
 
       starteraseblock = startblock / dev->blkper;
@@ -296,11 +297,12 @@ static ssize_t ftl_mtd_bread(FAR struct ftl_struct_s *dev, off_t startblock,
           break;
         }
 
+      offset = startblock & mask;
       count = ftl_get_cblock(dev, starteraseblock,
-                             (nblocks + mask) / dev->blkper);
-      count = MIN(count * dev->blkper, nblocks);
+                             (offset + nblocks + mask) / dev->blkper);
+      count = MIN(count * dev->blkper - offset, nblocks);
       startphysicalblock = dev->lptable[starteraseblock] *
-                           dev->blkper + (startblock & mask);
+                           dev->blkper + offset;
       ret = MTD_BREAD(dev->mtd, startphysicalblock, count, buffer);
       if (ret == count || ret == -EUCLEAN)
         {
