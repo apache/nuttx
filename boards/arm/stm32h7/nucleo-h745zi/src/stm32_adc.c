@@ -26,6 +26,7 @@
 
 #include <errno.h>
 #include <debug.h>
+#include <stdio.h>
 
 #include <nuttx/board.h>
 #include <nuttx/analog/adc.h>
