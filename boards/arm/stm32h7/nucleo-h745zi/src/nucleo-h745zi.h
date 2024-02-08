@@ -264,7 +264,7 @@ void weak_function stm32_usbinitialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_ADC
-int stm32_adc_setup(void);
+int stm32_adc_setup(int adcno);
 #endif
 
 /****************************************************************************

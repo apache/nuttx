@@ -139,8 +139,17 @@ int stm32_bringup(void)
 
 #ifdef CONFIG_ADC
   /* Initialize ADC and register the ADC driver. */
-
-  ret = stm32_adc_setup();
+  int adcno = 0;
+  
+#ifdef CONFIG_STM32H7_ADC1
+  adcno = 0;
+#endif
+  
+#ifdef CONFIG_STM32H7_ADC3
+  adcno = 2;
+#endif
+  
+  ret = stm32_adc_setup(adcno);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);

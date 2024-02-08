@@ -128,19 +128,21 @@ static const uint32_t g_adc3_pinlist[ADC3_NCHANNELS] =
  *
  ****************************************************************************/
 
-int stm32_adc_setup(void)
+int stm32_adc_setup(int adcno)
 {
 #if defined(CONFIG_STM32H7_ADC1) || defined(CONFIG_STM32H7_ADC3)
   static bool initialized = false;
   struct adc_dev_s *adc;
   int ret;
   int i;
-  char devname[] = "/dev/adc0";
+  char devname[10];
 
   /* Check if we have already initialized */
 
   if (!initialized)
     {
+      snprintf(devname, 1, "/dev/adc%d", adcno);
+
 #endif
 #if defined(CONFIG_STM32H7_ADC1)
       /* Configure the pins as analog inputs for the selected channels */
