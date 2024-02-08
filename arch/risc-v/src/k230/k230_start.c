@@ -28,6 +28,7 @@
 #include <nuttx/init.h>
 #include <nuttx/arch.h>
 #include <nuttx/serial/uart_16550.h>
+#include <nuttx/serial/uart_rpmsg.h>
 #include <arch/board/board.h>
 
 #include "riscv_internal.h"
@@ -63,9 +64,7 @@ static void k230_clear_bss(void)
 {
   uint32_t *dest;
 
-  /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
-   * certain that there are no issues with the state of global variables.
-   */
+  /* Doing this inline just to be sure on the state of global variables. */
 
   for (dest = (uint32_t *)_sbss; dest < (uint32_t *)_ebss; )
     {
@@ -75,17 +74,17 @@ static void k230_clear_bss(void)
 
 #ifndef CONFIG_BUILD_KERNEL
 /****************************************************************************
- * Name: k230_copy_initialized
+ * Name: k230_copy_init_data
  ****************************************************************************/
 
-static void k230_copy_initialized(void)
+static void k230_copy_init_data(void)
 {
   const uint32_t *src;
   uint32_t *dest;
 
-  /* Move the initialized data section from his temporary holding spot in
-   * FLASH into the correct place in SRAM.  The correct place in SRAM is
-   * give by _sdata and _edata.  The temporary location is in FLASH at the
+  /* Move the initialized data from their temporary holding spot at FLASH
+   * into the correct place in SRAM.  The correct place in SRAM is given
+   * by _sdata and _edata.  The temporary location is in FLASH at the
    * end of all of the other read-only data (.text, .rodata) at _eronly.
    */
 
@@ -125,7 +124,7 @@ void k230_start(int mhartid, const char *dtb)
 #ifdef CONFIG_BUILD_KERNEL
       riscv_percpu_add_hart(mhartid);
 #else
-      k230_copy_initialized();
+      k230_copy_init_data();
 #endif
     }
 
@@ -184,10 +183,23 @@ cpux:
 
 void riscv_earlyserialinit(void)
 {
+#ifdef CONFIG_16550_UART
   u16550_earlyserialinit();
+#endif
 }
 
 void riscv_serialinit(void)
 {
+#ifdef CONFIG_16550_UART
   u16550_serialinit();
+#endif
 }
+
+#ifdef CONFIG_RPMSG_UART_CONSOLE
+int up_putc(int ch)
+{
+  /* place holder for now */
+
+  return ch;
+}
+#endif
