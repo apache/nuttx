@@ -1584,7 +1584,7 @@ static void adc_setupclock(struct stm32_dev_s *priv)
   uint32_t max_clock = 36000000;
   uint32_t src_clock;
   uint32_t adc_clock;
-  uint32_t setbits;
+  uint32_t setbits = 0;
 
   /* The maximum clock is different for rev Y devices and rev V devices.
    * rev V can support an ADC clock of up to 50MHz. rev Y only supports
