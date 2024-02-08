@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/k230/k230_hart.h
+ * arch/risc-v/src/k230/k230_rptun.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,27 +18,46 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_K230_K230_HART_H
-#define __ARCH_RISCV_SRC_K230_K230_HART_H
+#ifndef __ARCH_RISCV_SRC_K230_K230_RPTUN_H
+#define __ARCH_RISCV_SRC_K230_K230_RPTUN_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+#include <sys/types.h>
+
 /****************************************************************************
- * Public functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-#if !defined(CONFIG_BUILD_KERNEL) || defined(CONFIG_NUTTSBI)
 
-void k230_hart_init(void);            /* M-mode initialization  */
-int  k230_hart_is_big(void);          /* check if on big core   */
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
-#endif /* !defined(CONFIG_BUILD_KERNEL) || defined(CONFIG_NUTTSBI) */
+/****************************************************************************
+ * Name: k230_rptun_init
+ *
+ * Description: initializes K230 RPTUN device.
+ *
+ * Returns: OK on success, or negated number on error
+ *
+ ****************************************************************************/
 
-void k230_hart_big_boot(uintptr_t boot);  /* turn on big core w/ boot addr */
-void k230_hart_big_stop(void);            /* turn off big core */
+int k230_rptun_init(const char *peername);
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_RISCV_SRC_K230_K230_HART_H */
+#endif /* __ARCH_RISCV_SRC_K230_K230_RPTUN_H */
