@@ -156,25 +156,24 @@ static void _add_val(uint16_t *addr, uint32_t val)
 
 static void _calc_imm(long offset, long *imm_hi, long *imm_lo)
 {
-  long lo;
-  long hi = offset / 4096;
-  long r  = offset % 4096;
+  long hi = offset / 0x1000;
+  long lo = offset - hi * 0x1000;
 
-  if (2047 < r)
+  if (0x7ff < lo)
     {
       hi++;
+      lo -= 0x1000;
     }
-  else if (r < -2048)
+  else if (lo < -0x800)
     {
       hi--;
+      lo += 0x1000;
     }
-
-  lo = offset - (hi * 4096);
 
   binfo("offset=%ld: hi=%ld lo=%ld\n",
         offset, hi, lo);
 
-  ASSERT(-2048 <= lo && lo <= 2047);
+  ASSERT(-0x800 <= lo && lo <= 0x7ff);
 
   *imm_lo = lo;
   *imm_hi = hi;
