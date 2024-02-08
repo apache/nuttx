@@ -302,11 +302,11 @@ config ARCH_CHIP_K230
 	select ARCH_NEED_ADDRENV_MAPPING
 	select ARCH_HAVE_S_MODE
 	select ARCH_HAVE_ELF_EXECUTABLE
+	select NUTTSBI_LATE_INIT if NUTTSBI
 	select ONESHOT
 	select ALARM_ARCH
 	---help---
 		Kendryte K230 SoC (RV64GCV and RV64GCVX C908 cores).
-
 
 config ARCH_CHIP_RISCV_CUSTOM
 	bool "Custom RISC-V chip"

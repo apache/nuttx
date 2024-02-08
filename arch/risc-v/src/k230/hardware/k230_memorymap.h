@@ -25,21 +25,26 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* PLIC/CLINT Base Address **************************************************/
+/* Devices Base Address */
 
-#define K230_PLIC_BASE    0xF00000000
+#define K230_PLIC_BASE    0xF00000000UL
 #define K230_CLINT_BASE   (K230_PLIC_BASE + 0x04000000)
+#define K230_CPU1_BOOTA   0x91102104UL
+#define K230_CPU1_RESET   0x9110100cUL
 
 /* T-Head c908 specific CSR */
 
-#define CSR_MCOR         0x7c2
+#define CSR_MENVCFG      0x30a
+#define CSR_MXSTATUS     0x7c0
 #define CSR_MHCR         0x7c1
+#define CSR_MCOR         0x7c2
 #define CSR_MCCR2        0x7c3
 #define CSR_MHINT        0x7c5
-#define CSR_MXSTATUS     0x7c0
-#define CSR_MRMR         0x7c6
-#define CSR_MRVBR        0x7c7
 #define CSR_MSMPR        0x7f3
 #define CSR_PLIC_BASE    0xfc1
+#define CSR_MAGIC        0x7d9
 
+/* Enable RV PBMT */
+
+#define MENVCFG_PBMT     (1ul << 62)
 #endif /* __ARCH_RISCV_SRC_K230_HARDWARE_K230_MEMORYMAP_H */

@@ -1,0 +1,170 @@
+/****************************************************************************
+ * boards/risc-v/k230/canmv230/scripts/ld-rptun.script
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+/* Enlage kernel data size or pgpool config to reduce nuttx.bin size */
+
+#define KSRAM_SIZE   (1536*1024)
+
+/* We only respect RAM and PGPOOL configs for simplicity */
+
+#define PGRAM_ADDR   (CONFIG_ARCH_PGPOOL_PBASE)
+#define PGRAM_SIZE   (CONFIG_ARCH_PGPOOL_SIZE)
+#define PGRAM_END    (PGRAM_ADDR + PGRAM_SIZE)
+#define CFRAM_END    (CONFIG_RAM_START + CONFIG_RAM_SIZE)
+
+#if (PGRAM_ADDR < CONFIG_RAM_START) || (PGRAM_END > CFRAM_END)
+  #error invalid RAM or PGPOOL configuration!
+#endif
+
+#if (PGRAM_END < CFRAM_END)
+  # warn are we wasting CFRAM_END-PGRAM_END bytes?
+#endif
+
+#define KTEXT_ADDR   (CONFIG_RAM_START)
+#define KRAM_TOTAL   (PGRAM_ADDR - KTEXT_ADDR)  /* ignore space after pgpool */
+
+#define KTEXT_SIZE   (KRAM_TOTAL-KSRAM_SIZE)
+#define KSRAM_ADDR   (KTEXT_ADDR + KTEXT_SIZE)
+
+MEMORY
+{
+    kflash (rx) : ORIGIN = KTEXT_ADDR, LENGTH = KTEXT_SIZE   /* w/ cache */
+    ksram (rwx) : ORIGIN = KSRAM_ADDR, LENGTH = KSRAM_SIZE   /* w/ cache */
+    pgram (rwx) : ORIGIN = PGRAM_ADDR, LENGTH = PGRAM_SIZE   /* w/ cache */
+}
+
+OUTPUT_ARCH("riscv")
+
+/* Provide the kernel boundaries, used in board memory map */
+
+__kflash_start = ORIGIN(kflash);
+__kflash_size = LENGTH(kflash);
+__ksram_start = ORIGIN(ksram);
+__ksram_size = LENGTH(ksram);
+__ksram_end = ORIGIN(ksram) + LENGTH(ksram);
+
+/* Page heap */
+
+__pgheap_start = ORIGIN(pgram);
+__pgheap_size = LENGTH(pgram);
+
+SECTIONS
+{
+  . = KTEXT_ADDR;
+
+  .text :
+    {
+      _stext = . ;
+      *(.text)
+      *(.text.*)
+      *(.gnu.warning)
+      *(.stub)
+      *(.glue_7)
+      *(.glue_7t)
+      *(.jcr)
+
+      /* C++ support:  The .init and .fini sections contain specific logic
+       * to manage static constructors and destructors.
+       */
+
+      *(.gnu.linkonce.t.*)
+      *(.init)             /* Old ABI */
+      *(.fini)             /* Old ABI */
+      _etext = . ;
+    }
+
+  .rodata :
+    {
+      _srodata = . ;
+      *(.rodata)
+      *(.rodata1)
+      *(.rodata.*)
+      *(.gnu.linkonce.r*)
+      _erodata = . ;
+    }
+
+  .tdata : {
+      _stdata = ABSOLUTE(.);
+      *(.tdata .tdata.* .gnu.linkonce.td.*);
+      _etdata = ABSOLUTE(.);
+  }
+
+  .tbss : {
+      _stbss = ABSOLUTE(.);
+      *(.tbss .tbss.* .gnu.linkonce.tb.* .tcommon);
+      _etbss = ABSOLUTE(.);
+  }
+
+  _eronly = ABSOLUTE(.);
+
+  .data :
+    {
+      _sdata = . ;
+      *(.data)
+      *(.data1)
+      *(.data.*)
+      *(.gnu.linkonce.d*)
+      . = ALIGN(4);
+      _edata = . ;
+    }
+
+  .bss :
+    {
+      _sbss = . ;
+      *(.bss)
+      *(.bss.*)
+      *(.sbss)
+      *(.sbss.*)
+      *(.gnu.linkonce.b*)
+      *(COMMON)
+      _ebss = . ;
+    } > ksram
+
+    /* Page tables here, align to 4K boundary */
+
+    .pgtables (NOLOAD) : ALIGN(0x1000) {
+        *(.pgtables)
+        . = ALIGN(4);
+    } > ksram
+
+    /* Stack top */
+
+    .stack_top : {
+        . = ALIGN(32);
+        _ebss = ABSOLUTE(.);
+    } > ksram
+
+    /* Stabs debugging sections. */
+
+    .stab 0 : { *(.stab) }
+    .stabstr 0 : { *(.stabstr) }
+    .stab.excl 0 : { *(.stab.excl) }
+    .stab.exclstr 0 : { *(.stab.exclstr) }
+    .stab.index 0 : { *(.stab.index) }
+    .stab.indexstr 0 : { *(.stab.indexstr) }
+    .comment 0 : { *(.comment) }
+    .debug_abbrev 0 : { *(.debug_abbrev) }
+    .debug_info 0 : { *(.debug_info) }
+    .debug_line 0 : { *(.debug_line) }
+    .debug_pubnames 0 : { *(.debug_pubnames) }
+    .debug_aranges 0 : { *(.debug_aranges) }
+}
