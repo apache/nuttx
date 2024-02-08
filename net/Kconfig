@@ -359,6 +359,7 @@ menuconfig NET_6LOWPAN
 source "net/sixlowpan/Kconfig"
 source "net/ipforward/Kconfig"
 source "net/nat/Kconfig"
+source "net/ipfilter/Kconfig"
 source "net/netfilter/Kconfig"
 source "net/ipfrag/Kconfig"
 

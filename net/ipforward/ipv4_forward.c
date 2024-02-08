@@ -38,6 +38,7 @@
 #include "utils/utils.h"
 #include "sixlowpan/sixlowpan.h"
 #include "icmp/icmp.h"
+#include "ipfilter/ipfilter.h"
 #include "ipforward/ipforward.h"
 #include "nat/nat.h"
 #include "devif/devif.h"
@@ -213,6 +214,27 @@ static int ipv4_dev_forward(FAR struct net_driver_s *dev,
   int hdrsize;
 #endif
   int ret;
+
+#ifdef CONFIG_NET_IPFILTER
+  /* Do filter before forwarding, to make sure we drop silently before
+   * replying any other errors.
+   */
+
+  ret = ipv4_filter_fwd(dev, fwddev, ipv4);
+  if (ret < 0)
+    {
+      ninfo("Drop/Reject FORWARD packet due to filter %d\n", ret);
+
+      /* Let ipv4_forward reply the reject. */
+
+      if (ret == IPFILTER_TARGET_REJECT)
+        {
+          ret = -ENETUNREACH;
+        }
+
+      goto errout;
+    }
+#endif
 
   /* Verify that the full packet will fit within the forwarding device's MTU
    * if DF is set.
