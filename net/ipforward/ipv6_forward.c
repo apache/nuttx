@@ -40,6 +40,7 @@
 #include "sixlowpan/sixlowpan.h"
 #include "devif/devif.h"
 #include "icmpv6/icmpv6.h"
+#include "ipfilter/ipfilter.h"
 #include "ipforward/ipforward.h"
 
 #if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NET_IPv6)
@@ -336,6 +337,27 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
   int hdrsize;
 #endif
   int ret;
+
+#ifdef CONFIG_NET_IPFILTER
+  /* Do filter before forwarding, to make sure we drop silently before
+   * replying any other errors.
+   */
+
+  ret = ipv6_filter_fwd(dev, fwddev, ipv6);
+  if (ret < 0)
+    {
+      ninfo("Drop/Reject FORWARD packet due to filter %d\n", ret);
+
+      /* Let ipv6_forward reply the reject. */
+
+      if (ret == IPFILTER_TARGET_REJECT)
+        {
+          ret = -ENETUNREACH;
+        }
+
+      goto errout;
+    }
+#endif
 
   /* If the interface isn't "up", we can't forward. */
 

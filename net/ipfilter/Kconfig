@@ -1,0 +1,16 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config NET_IPFILTER
+	bool "Enable IP packet filter (firewall)"
+	default n
+	depends on NET_IPv4 || NET_IPv6
+	---help---
+		Enable this option to enable the IP packet filter (firewall).
+		Our IP packet filter is a netfilter-like packet filter that
+		operates on the IP (and transport) layer.  It is a stateless
+		packet filter that can be used to filter packets based on
+		source and destination IP addresses, source and destination
+		ports, protocol, and interface.
