@@ -1,527 +1,92 @@
 #!/usr/bin/env bash
-
-# Licensed to the Apache Software Foundation (ASF) under one
-# or more contributor license agreements.  See the NOTICE file
-# distributed with this work for additional information
-# regarding copyright ownership.  The ASF licenses this file
-# to you under the Apache License, Version 2.0 (the
-# "License"); you may not use this file except in compliance
-# with the License.  You may obtain a copy of the License at
+############################################################################
+# tools/ci/cibuild.sh
 #
-#  http://www.apache.org/licenses/LICENSE-2.0
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
 #
-# Unless required by applicable law or agreed to in writing,
-# software distributed under the License is distributed on an
-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied.  See the License for the
-# specific language governing permissions and limitations
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
 # under the License.
-
-# Prerequisites for macOS
-#  - Xcode (cc, etc)
-#  - homebrew
-#  - autoconf
-#  - wget
-
+#
+############################################################################
 set -e
 set -o xtrace
 
-WD=$(cd "$(dirname "$0")" && pwd)
-WORKSPACE=$(cd "${WD}"/../../../ && pwd -P)
-nuttx=${WORKSPACE}/nuttx
-apps=${WORKSPACE}/apps
-tools=${WORKSPACE}/tools
+
+CID=$(cd "$(dirname "$0")" && pwd)
+CIWORKSPACE=$(cd "${CID}"/../../../ && pwd -P)
+CIPLAT=${CIWORKSPACE}/nuttx/tools/ci/platforms
+nuttx=${CIWORKSPACE}/nuttx
+apps=${CIWORKSPACE}/apps
+
 os=$(uname -s)
-EXTRA_PATH=
+if [ -f /etc/os-release ]; then
+  osname=$(grep "^ID=" /etc/os-release | cut -d'=' -f2 | tr -d '"')
+else
+  osname=${os}
+fi
 
-function add_path {
-  PATH=$1:${PATH}
-  EXTRA_PATH=$1:${EXTRA_PATH}
+function to_do {
+  echo ""
+  echo "NuttX TODO: $1"
+  echo "The $1 platform does not appear to have been added to this project."
+  echo ""
+  exit 1
 }
 
-function arm-clang-toolchain {
-  add_path "${tools}"/clang-arm-none-eabi/bin
+function install_tools {
+  export NUTTXTOOLS=${CIWORKSPACE}/tools
+  mkdir -p "${NUTTXTOOLS}"
 
-  if [ ! -f "${tools}/clang-arm-none-eabi/bin/clang" ]; then
-    local flavor
-    case ${os} in
-      Linux)
-        flavor=Linux
-        ;;
-    esac
-    cd "${tools}"
-    curl -O -L -s https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-17.0.1/LLVMEmbeddedToolchainForArm-17.0.1-${flavor}-x86_64.tar.xz
-    xz -d LLVMEmbeddedToolchainForArm-17.0.1-${flavor}.tar.xz
-    mv LLVMEmbeddedToolchainForArm-17.0.1 clang-arm-none-eabi
-    cp /usr/bin/clang-extdef-mapping-10 clang-arm-none-eabi/bin/clang-extdef-mapping
-    rm LLVMEmbeddedToolchainForArm-17.0.1-${flavor}.tar.xz
-  fi
-
-  command clang --version
-}
-
-function arm-gcc-toolchain {
-  add_path "${tools}"/gcc-arm-none-eabi/bin
-
-  if [ ! -f "${tools}/gcc-arm-none-eabi/bin/arm-none-eabi-gcc" ]; then
-    local archivetool
-    local basefile
-    case ${os} in
-      Darwin)
-        archivetool=tar
-        basefile=arm-gnu-toolchain-13.2.rel1-darwin-x86_64-arm-none-eabi
-        ;;
-      Linux)
-       archivetool=tar
-        basefile=arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi
-        ;;
-      MSYS*)
-        archivetool=unzip
-        basefile=arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-arm-none-eabi
-        ;;
-    esac
-    cd "${tools}"
-    if [ "$archivetool" == "tar" ]; then
-      wget --quiet https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/${basefile}.tar.xz
-      xz -d ${basefile}.tar.xz
-      tar xf ${basefile}.tar
-      mv ${basefile} gcc-arm-none-eabi
-      rm ${basefile}.tar
-    else
-      wget --quiet https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/${basefile}.zip
-      unzip -qo ${basefile}.zip
-      mv ${basefile} gcc-arm-none-eabi
-      rm ${basefile}.zip
-    fi
-  fi
-
-  command arm-none-eabi-gcc --version
-}
-
-function arm64-gcc-toolchain {
-  add_path "${tools}"/gcc-aarch64-none-elf/bin
-
-  if [ ! -f "${tools}/gcc-aarch64-none-elf/bin/aarch64-none-elf-gcc" ]; then
-    local flavor
-    case ${os} in
-      Darwin)
-        flavor=-darwin
-        ;;
-      Linux)
-        flavor=
-        ;;
-    esac
-    cd "${tools}"
-    wget --quiet https://developer.arm.com/-/media/Files/downloads/gnu/13.2.Rel1/binrel/arm-gnu-toolchain-13.2.Rel1${flavor}-x86_64-aarch64-none-elf.tar.xz
-    xz -d arm-gnu-toolchain-13.2.Rel1${flavor}-x86_64-aarch64-none-elf.tar.xz
-    tar xf arm-gnu-toolchain-13.2.Rel1${flavor}-x86_64-aarch64-none-elf.tar
-    mv arm-gnu-toolchain-13.2.Rel1${flavor}-x86_64-aarch64-none-elf gcc-aarch64-none-elf
-    rm arm-gnu-toolchain-13.2.Rel1${flavor}-x86_64-aarch64-none-elf.tar
-  fi
-
-  command aarch64-none-elf-gcc --version
-}
-
-function avr-gcc-toolchain {
-  if ! type avr-gcc &> /dev/null; then
-    case ${os} in
-      Darwin)
-        brew tap osx-cross/avr
-        brew install avr-gcc
-        ;;
-      Linux)
-        apt-get install -y avr-libc gcc-avr
-        ;;
-    esac
-  fi
-
-  command avr-gcc --version
-}
-
-function binutils {
-  mkdir -p "${tools}"/bintools/bin
-  add_path "${tools}"/bintools/bin
-
-  if ! type objcopy &> /dev/null; then
-    case ${os} in
-      Darwin)
-        brew install binutils
-        # It is possible we cached prebuilt but did brew install so recreate
-        # symlink if it exists
-        rm -f "${tools}"/bintools/bin/objcopy
-        ln -s /usr/local/opt/binutils/bin/objcopy "${tools}"/bintools/bin/objcopy
-        ;;
-    esac
-  fi
-
-  command objcopy --version
-}
-
-function bloaty {
-  add_path "${tools}"/bloaty/bin
-
-  if [ ! -f "${tools}/bloaty/bin/bloaty" ]; then
-    git clone --branch main https://github.com/google/bloaty "${tools}"/bloaty-src
-    cd "${tools}"/bloaty-src
-    # Due to issues with latest MacOS versions use pinned commit.
-    # https://github.com/google/bloaty/pull/326
-    git checkout 52948c107c8f81045e7f9223ec02706b19cfa882
-    mkdir -p "${tools}"/bloaty
-    cmake -D BLOATY_PREFER_SYSTEM_CAPSTONE=NO -DCMAKE_SYSTEM_PREFIX_PATH="${tools}"/bloaty
-    make install -j 6
-    cd "${tools}"
-    rm -rf bloaty-src
-  fi
-
-  command bloaty --version
-}
-
-function c-cache {
-  add_path "${tools}"/ccache/bin
-
-  if ! type ccache &> /dev/null; then
-    case ${os} in
-      Darwin)
-        brew install ccache
-        ;;
-      Linux)
-        cd "${tools}";
-        wget https://github.com/ccache/ccache/releases/download/v3.7.7/ccache-3.7.7.tar.gz
-        tar zxf ccache-3.7.7.tar.gz
-        cd ccache-3.7.7; ./configure --prefix="${tools}"/ccache; make; make install
-        cd "${tools}"; rm -rf ccache-3.7.7; rm ccache-3.7.7.tar.gz
-        ;;
-      MSYS*)
-        pacman -S --noconfirm --needed ccache
-        pacman -Q
-        ;;
-    esac
-  fi
-
-  command ccache --version
-}
-
-function clang-tidy {
-  if ! type clang-tidy &> /dev/null; then
-    case ${os} in
-      Linux)
-        apt-get install -y clang clang-tidy
-        ;;
-    esac
-  fi
-
-  command clang-tidy --version
-}
-
-function elf-toolchain {
-  if ! type x86_64-elf-gcc &> /dev/null; then
-    case ${os} in
-      Darwin)
-        brew install x86_64-elf-gcc
-        ;;
-    esac
-  fi
-
-  command x86_64-elf-gcc --version
-}
-
-function util-linux {
-  if ! type flock &> /dev/null; then
-    case ${os} in
-      Darwin)
-        brew tap discoteq/discoteq
-        brew install flock
-        ;;
-      Linux)
-        apt-get install -y util-linux
-        ;;
-    esac
-  fi
-
-  command flock --version
-}
-
-function gen-romfs {
-  if ! type genromfs &> /dev/null; then
-    case ${os} in
-      Darwin)
-        brew tap PX4/px4
-        brew install genromfs
-        ;;
-      Linux)
-        apt-get install -y genromfs
-        ;;
-    esac
-  fi
-}
-
-function gperf {
-  add_path "${tools}"/gperf/bin
-
-  if [ ! -f "${tools}/gperf/bin/gperf" ]; then
-    cd "${tools}"
-    wget --quiet http://ftp.gnu.org/pub/gnu/gperf/gperf-3.1.tar.gz
-    tar zxf gperf-3.1.tar.gz
-    cd "${tools}"/gperf-3.1
-    ./configure --prefix="${tools}"/gperf; make; make install
-    cd "${tools}"
-    rm -rf gperf-3.1; rm gperf-3.1.tar.gz
-  fi
-
-  command gperf --version
-}
-
-function kconfig-frontends {
-  add_path "${tools}"/kconfig-frontends/bin
-
-  if [ ! -f "${tools}/kconfig-frontends/bin/kconfig-conf" ]; then
-    git clone https://bitbucket.org/nuttx/tools.git "${tools}"/nuttx-tools
-    cd "${tools}"/nuttx-tools/kconfig-frontends
-    ./configure --prefix="${tools}"/kconfig-frontends \
-      --disable-kconfig --disable-nconf --disable-qconf \
-      --disable-gconf --disable-mconf --disable-static \
-      --disable-shared --disable-L10n
-    # Avoid "aclocal/automake missing" errors
-    touch aclocal.m4 Makefile.in
-    make install
-    cd "${tools}"
-    rm -rf nuttx-tools
-  fi
-}
-
-function mips-gcc-toolchain {
-  if [ ! -d "${tools}/pinguino-compilers" ]; then
-    cd "${tools}"
-    git clone https://github.com/PinguinoIDE/pinguino-compilers
-  fi
-
-  case ${os} in
+  case ${osname} in
+    alpine)
+      to_do "alpine"
+      ;;
+    arch)
+      to_do "arch"
+      ;;
+    CYGWIN*)
+      to_do "CYGWIN"
+      ;;
+    debian)
+      to_do "debian"
+      ;;
+    fedora)
+      to_do "fedora"
+      ;;
+    freebsd)
+      to_do "freebsd"
+      ;;
     Darwin)
-      add_path "${tools}"/pinguino-compilers/macosx/p32/bin
-      command mips-elf-gcc --version
+      "${CIPLAT}"/darwin.sh
       ;;
     Linux)
-      add_path "${tools}"/pinguino-compilers/linux64/p32/bin
-      command p32-gcc --version
+      "${CIPLAT}"/linux.sh
+      ;;
+    manjaro)
+      to_do "manjaro"
+      ;;
+    msys2)
+      "${CIPLAT}"/msys2.sh
+      ;;
+    ubuntu)
+      "${CIPLAT}"/ubuntu.sh
+      ;;
+    *)
+      to_do "unknown"
       ;;
   esac
-}
 
-function python-tools {
-  # Python User Env
-  export PIP_USER=yes
-  export PYTHONUSERBASE=${tools}/pylocal
-  add_path "${PYTHONUSERBASE}"/bin
-
-  # workaround for Cython issue
-  # https://github.com/yaml/pyyaml/pull/702#issuecomment-1638930830
-  pip3 install "Cython<3.0"
-  git clone https://github.com/yaml/pyyaml.git && \
-  cd pyyaml && \
-  git checkout release/5.4.1 && \
-  sed -i.bak 's/Cython/Cython<3.0/g' pyproject.toml && \
-  python setup.py sdist && \
-  pip3 install --pre dist/PyYAML-5.4.1.tar.gz
-  cd ..
-
-  pip3 install \
-    cmake-format \
-    CodeChecker \
-    cvt2utf \
-    cxxfilt \
-    esptool==4.5.1 \
-    imgtool==1.9.0 \
-    kconfiglib \
-    pexpect==4.8.0 \
-    pyelftools \
-    pyserial==3.5 \
-    pytest==6.2.5 \
-    pytest-json==0.4.0 \
-    pytest-ordering==0.6 \
-    pytest-repeat==0.9.1
-}
-
-function riscv-gcc-toolchain {
-  add_path "${tools}"/riscv-none-elf-gcc/bin
-
-  if [ ! -f "${tools}/riscv-none-elf-gcc/bin/riscv-none-elf-gcc" ]; then
-    local flavor
-    case ${os} in
-      Darwin)
-        flavor=darwin-x64
-        ;;
-      Linux)
-        flavor=linux-x64
-        ;;
-    esac
-    cd "${tools}"
-    wget --quiet https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v13.2.0-2/xpack-riscv-none-elf-gcc-13.2.0-2-${flavor}.tar.gz
-    tar zxf xpack-riscv-none-elf-gcc-13.2.0-2-${flavor}.tar.gz
-    mv xpack-riscv-none-elf-gcc-13.2.0-2 riscv-none-elf-gcc
-    rm xpack-riscv-none-elf-gcc-13.2.0-2-${flavor}.tar.gz
-  fi
-
-  command riscv-none-elf-gcc --version
-}
-
-function rust {
-  mkdir -p "${tools}"/rust/bin
-  add_path "${tools}"/rust/bin
-
-  if ! type rustc &> /dev/null; then
-    case ${os} in
-      Darwin)
-        brew install rust
-        ;;
-      Linux)
-        # Currently Debian installed rustc doesn't support 2021 edition.
-        export CARGO_HOME=${tools}/rust
-        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-        ;;
-    esac
-  fi
-
-  command rustc --version
-}
-
-function rx-gcc-toolchain {
-  add_path "${tools}"/renesas-toolchain/rx-elf-gcc/bin
-
-  if [ ! -f "${tools}/renesas-toolchain/rx-elf-gcc/bin/rx-elf-gcc" ]; then
-    case ${os} in
-      Linux)
-        # Download toolchain source code
-        # RX toolchain is built from source code. Once prebuilt RX toolchain is made available, the below code snippet can be removed.
-        mkdir -p "${tools}"/renesas-tools/rx/source; cd "${tools}"/renesas-tools/rx/source
-        wget --quiet https://gcc-renesas.com/downloads/d.php?f=rx/binutils/4.8.4.201803-gnurx/rx_binutils2.24_2018Q3.tar.gz \
-          -O rx_binutils2.24_2018Q3.tar.gz
-        tar zxf rx_binutils2.24_2018Q3.tar.gz
-        wget --quiet https://gcc-renesas.com/downloads/d.php?f=rx/gcc/4.8.4.201803-gnurx/rx_gcc_4.8.4_2018Q3.tar.gz \
-          -O rx_gcc_4.8.4_2018Q3.tar.gz
-        tar zxf rx_gcc_4.8.4_2018Q3.tar.gz
-        wget --quiet https://gcc-renesas.com/downloads/d.php?f=rx/newlib/4.8.4.201803-gnurx/rx_newlib2.2.0_2018Q3.tar.gz \
-          -O rx_newlib2.2.0_2018Q3.tar.gz
-        tar zxf rx_newlib2.2.0_2018Q3.tar.gz
-
-        # Install binutils
-        cd "${tools}"/renesas-tools/rx/source/binutils; chmod +x ./configure ./mkinstalldirs
-        mkdir -p "${tools}"/renesas-tools/rx/build/binutils; cd "${tools}"/renesas-tools/rx/build/binutils
-        "${tools}"/renesas-tools/rx/source/binutils/configure --target=rx-elf --prefix="${tools}"/renesas-toolchain/rx-elf-gcc \
-          --disable-werror
-        make; make install
-
-        # Install gcc
-        cd "${tools}"/renesas-tools/rx/source/gcc
-        chmod +x ./contrib/download_prerequisites ./configure ./move-if-change ./libgcc/mkheader.sh
-        ./contrib/download_prerequisites
-        sed -i '1s/^/@documentencoding ISO-8859-1\n/' ./gcc/doc/gcc.texi
-        sed -i 's/@tex/\n&/g' ./gcc/doc/gcc.texi && sed -i 's/@end tex/\n&/g' ./gcc/doc/gcc.texi
-        mkdir -p "${tools}"/renesas-tools/rx/build/gcc; cd "${tools}"/renesas-tools/rx/build/gcc
-        "${tools}"/renesas-tools/rx/source/gcc/configure --target=rx-elf --prefix="${tools}"/renesas-toolchain/rx-elf-gcc \
-        --disable-shared --disable-multilib --disable-libssp --disable-libstdcxx-pch --disable-werror --enable-lto \
-        --enable-gold --with-pkgversion=GCC_Build_1.02 --with-newlib --enable-languages=c
-        make; make install
-
-        # Install newlib
-        cd "${tools}"/renesas-tools/rx/source/newlib; chmod +x ./configure
-        mkdir -p "${tools}"/renesas-tools/rx/build/newlib; cd "${tools}"/renesas-tools/rx/build/newlib
-        "${tools}"/renesas-tools/rx/source/newlib/configure --target=rx-elf --prefix="${tools}"/renesas-toolchain/rx-elf-gcc
-        make; make install
-        rm -rf "${tools}"/renesas-tools/
-        ;;
-    esac
-  fi
-
-  command rx-elf-gcc --version
-}
-
-function sparc-gcc-toolchain {
-  add_path "${tools}"/sparc-gaisler-elf-gcc/bin
-
-  if [ ! -f "${tools}/sparc-gaisler-elf-gcc/bin/sparc-gaisler-elf-gcc" ]; then
-    case ${os} in
-      Linux)
-        cd "${tools}"
-        wget --quiet https://www.gaisler.com/anonftp/bcc2/bin/bcc-2.1.0-gcc-linux64.tar.xz
-        xz -d bcc-2.1.0-gcc-linux64.tar.xz
-        tar xf bcc-2.1.0-gcc-linux64.tar
-        mv bcc-2.1.0-gcc sparc-gaisler-elf-gcc
-        rm bcc-2.1.0-gcc-linux64.tar
-        ;;
-    esac
-  fi
-
-  command sparc-gaisler-elf-gcc --version
-}
-
-function xtensa-esp32-gcc-toolchain {
-  add_path "${tools}"/xtensa-esp32-elf/bin
-
-  if [ ! -f "${tools}/xtensa-esp32-elf/bin/xtensa-esp32-elf-gcc" ]; then
-    cd "${tools}"
-    case ${os} in
-      Darwin)
-        wget --quiet https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/xtensa-esp32-elf-12.2.0_20230208-x86_64-apple-darwin.tar.xz
-        xz -d xtensa-esp32-elf-12.2.0_20230208-x86_64-apple-darwin.tar.xz
-        tar xf xtensa-esp32-elf-12.2.0_20230208-x86_64-apple-darwin.tar
-        rm xtensa-esp32-elf-12.2.0_20230208-x86_64-apple-darwin.tar
-        ;;
-      Linux)
-        wget --quiet https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/xtensa-esp32-elf-12.2.0_20230208-x86_64-linux-gnu.tar.xz
-        xz -d xtensa-esp32-elf-12.2.0_20230208-x86_64-linux-gnu.tar.xz
-        tar xf xtensa-esp32-elf-12.2.0_20230208-x86_64-linux-gnu.tar
-        rm xtensa-esp32-elf-12.2.0_20230208-x86_64-linux-gnu.tar
-        ;;
-    esac
-  fi
-
-  command xtensa-esp32-elf-gcc --version
-}
-
-function u-boot-tools {
-  if ! type mkimage &> /dev/null; then
-    case ${os} in
-      Darwin)
-        brew install u-boot-tools
-        ;;
-      Linux)
-        apt-get install -y u-boot-tools
-        ;;
-    esac
-  fi
-}
-
-function wasi-sdk {
-  add_path "${tools}"/wamrc
-
-  if [ ! -f "${tools}/wasi-sdk/bin/clang" ]; then
-    cd "${tools}"
-    mkdir wamrc
-
-    case ${os} in
-      Darwin)
-        wget --quiet https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-19/wasi-sdk-19.0-macos.tar.gz
-        tar xzf wasi-sdk-19.0-macos.tar.gz
-        mv wasi-sdk-19.0 wasi-sdk
-        cd wamrc
-        wget --quiet https://github.com/bytecodealliance/wasm-micro-runtime/releases/download/WAMR-1.1.2/wamrc-1.1.2-x86_64-macos-latest.tar.gz
-        tar xzf wamrc-1.1.2-x86_64-macos-latest.tar.gz
-        ;;
-      Linux)
-        wget --quiet https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-19/wasi-sdk-19.0-linux.tar.gz
-        tar xzf wasi-sdk-19.0-linux.tar.gz
-        mv wasi-sdk-19.0 wasi-sdk
-        cd wamrc
-        wget --quiet https://github.com/bytecodealliance/wasm-micro-runtime/releases/download/WAMR-1.1.2/wamrc-1.1.2-x86_64-ubuntu-20.04.tar.gz
-        tar xzf wamrc-1.1.2-x86_64-ubuntu-20.04.tar.gz
-        ;;
-    esac
-  fi
-
-  export WASI_SDK_PATH="${tools}/wasi-sdk"
-
-  command ${WASI_SDK_PATH}/bin/clang --version
-  command wamrc --version
+  source "${CIWORKSPACE}"/tools/env.sh
 }
 
 function usage {
@@ -534,38 +99,14 @@ function usage {
   echo "  -s setup repos"
   echo "  -c enable ccache"
   echo "  -* support all options in testbuild.sh"
-  echo "  -h will show this help test and terminate"
+  echo "  -h will show this help text and terminate"
   echo "  <testlist> select testlist file"
   echo ""
   exit 1
 }
 
 function enable_ccache {
-  export CCACHE_DIR="${tools}"/ccache
-}
-
-function setup_links {
-  mkdir -p "${tools}"/ccache/bin/
-  ln -sf "$(which ccache)" "${tools}"/ccache/bin/aarch64-none-elf-gcc
-  ln -sf "$(which ccache)" "${tools}"/ccache/bin/aarch64-none-elf-g++
-  ln -sf "$(which ccache)" "${tools}"/ccache/bin/arm-none-eabi-gcc
-  ln -sf "$(which ccache)" "${tools}"/ccache/bin/arm-none-eabi-g++
-  ln -sf "$(which ccache)" "${tools}"/ccache/bin/avr-gcc
-  ln -sf "$(which ccache)" "${tools}"/ccache/bin/avr-g++
-  ln -sf "$(which ccache)" "${tools}"/ccache/bin/cc
-  ln -sf "$(which ccache)" "${tools}"/ccache/bin/c++
-  ln -sf "$(which ccache)" "${tools}"/ccache/bin/clang
-  ln -sf "$(which ccache)" "${tools}"/ccache/bin/clang++
-  ln -sf "$(which ccache)" "${tools}"/ccache/bin/gcc
-  ln -sf "$(which ccache)" "${tools}"/ccache/bin/g++
-  ln -sf "$(which ccache)" "${tools}"/ccache/bin/p32-gcc
-  ln -sf "$(which ccache)" "${tools}"/ccache/bin/riscv64-unknown-elf-gcc
-  ln -sf "$(which ccache)" "${tools}"/ccache/bin/riscv64-unknown-elf-g++
-  ln -sf "$(which ccache)" "${tools}"/ccache/bin/sparc-gaisler-elf-gcc
-  ln -sf "$(which ccache)" "${tools}"/ccache/bin/sparc-gaisler-elf-g++
-  ln -sf "$(which ccache)" "${tools}"/ccache/bin/x86_64-elf-gcc
-  ln -sf "$(which ccache)" "${tools}"/ccache/bin/x86_64-elf-g++
-  ln -sf "$(which ccache)" "${tools}"/ccache/bin/xtensa-esp32-elf-gcc
+  export CCACHE_DIR="${CIWORKSPACE}"/tools/ccache
 }
 
 function setup_repos {
@@ -588,57 +129,13 @@ function setup_repos {
   popd
 }
 
-function install_tools {
-  mkdir -p "${tools}"
-
-case ${os} in
-  Darwin)
-    install="arm-gcc-toolchain arm64-gcc-toolchain avr-gcc-toolchain binutils bloaty elf-toolchain gen-romfs gperf kconfig-frontends mips-gcc-toolchain python-tools riscv-gcc-toolchain rust xtensa-esp32-gcc-toolchain u-boot-tools util-linux wasi-sdk c-cache"
-    mkdir -p "${tools}"/homebrew
-    export HOMEBREW_CACHE=${tools}/homebrew
-    # https://github.com/apache/arrow/issues/15025
-    rm -f /usr/local/bin/2to3* || :
-    rm -f /usr/local/bin/idle3* || :
-    rm -f /usr/local/bin/pydoc3* || :
-    rm -f /usr/local/bin/python3* || :
-    rm -f /usr/local/bin/python3-config || :
-    # same for openssl
-    rm -f /usr/local/bin/openssl || :
-    ;;
-  Linux)
-    install="arm-clang-toolchain arm-gcc-toolchain arm64-gcc-toolchain avr-gcc-toolchain binutils bloaty clang-tidy gen-romfs gperf kconfig-frontends mips-gcc-toolchain python-tools riscv-gcc-toolchain rust rx-gcc-toolchain sparc-gcc-toolchain xtensa-esp32-gcc-toolchain u-boot-tools util-linux wasi-sdk c-cache"
-    ;;
-  MSYS*)
-    install="arm-gcc-toolchain kconfig-frontends"
-    ;;
-esac
-
-  pushd .
-  for func in ${install}; do
-    ${func}
-  done
-  popd
-
-  if [ -d "${CCACHE_DIR}" ]; then
-    setup_links
-  fi
-  echo PATH="${EXTRA_PATH}"/"${PATH}" > "${tools}"/env.sh
-}
-
 function run_builds {
   local ncpus
-
-  case ${os} in
-    Darwin)
-      ncpus=$(sysctl -n hw.ncpu)
-      ;;
-    Linux)
-      ncpus=$(grep -c ^processor /proc/cpuinfo)
-      ;;
-    MSYS*)
-      ncpus=$(grep -c ^processor /proc/cpuinfo)
-      ;;
-  esac
+  if [ "X$osname" == "XDarwin" ]; then
+    ncpus=$(sysctl -n hw.ncpu)
+  else
+    ncpus=$(grep -c ^processor /proc/cpuinfo)
+  fi
 
   options+="-j ${ncpus}"
 
@@ -647,6 +144,7 @@ function run_builds {
   done
 
   if [ -d "${CCACHE_DIR}" ]; then
+    # Print a summary of configuration and statistics counters
     ccache -s
   fi
 }
