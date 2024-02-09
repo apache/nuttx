@@ -156,7 +156,7 @@ menu "Bootloader and Image Configuration"
 config ESPRESSIF_SIMPLE_BOOT
 	bool
 	depends on !ESPRESSIF_BOOTLOADER_MCUBOOT
-	default y if ESPRESSIF_ESP32C3 || ESPRESSIF_ESP32C6
+	default y
 
 config ESPRESSIF_BOOTLOADER_MCUBOOT
 	bool "Enable MCUboot-bootable format"

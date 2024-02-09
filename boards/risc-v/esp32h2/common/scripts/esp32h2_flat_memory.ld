@@ -34,11 +34,9 @@
 #define SRAM_IRAM_START       0x40800000
 #define SRAM_DRAM_START       0x40800000
 
-#define I_D_SRAM_OFFSET       (SRAM_IRAM_START - SRAM_DRAM_START)
-
 /* 2nd stage bootloader iram_loader_seg start address */
 
-#define SRAM_DRAM_END         (0x4083efd0 - I_D_SRAM_OFFSET)
+#define SRAM_DRAM_END         (0x4083efd0)
 
 #define SRAM_IRAM_ORG         (SRAM_IRAM_START)
 #define SRAM_DRAM_ORG         (SRAM_DRAM_START)
@@ -54,6 +52,13 @@
 
 MEMORY
 {
+#ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
+  /* The 0x20 offset is a convenience for the app binary image generation */
+
+  ROM (R) :              org = 0x20,
+                         len = IDRAM0_2_SEG_SIZE - 0x20
+#endif
+
   /* Below values assume the flash cache is on, and have the blocks this
    * uses subtracted from the length of the various regions. The 'data access
    * port' dram/drom regions map to the same iram/irom regions but are
@@ -106,7 +111,7 @@ MEMORY
 }
 
 /* The lines below define location alias for .rtc.data section
- * ESP32-C6 has no distinguished LP(RTC) fast and slow memory sections,
+ * ESP32-H2 has no distinguished LP(RTC) fast and slow memory sections,
  * instead, there is a unified LP_RAM section.
  * Thus, the following region segments are not configurable like on other targets
  */
