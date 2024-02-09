@@ -140,6 +140,35 @@ To test it, just execute the ``pwm`` application::
     pwm_main: starting output with frequency: 10000 duty: 00008000
     pwm_main: stopping output
 
+rmt
+---
+
+This configuration configures the transmitter and the receiver of the
+Remote Control Transceiver (RMT) peripheral on the ESP32-C6 using GPIOs 8
+and 2, respectively. The RMT peripheral is better explained
+`here <https://docs.espressif.com/projects/esp-idf/en/latest/esp32c6/api-reference/peripherals/rmt.html>`__,
+in the ESP-IDF documentation. The minimal data unit in the frame is called the
+RMT symbol, which is represented by ``rmt_item32_t`` in the driver:
+
+.. figure:: rmt_symbol.png
+   :align: center
+
+The example ``rmtchar`` can be used to test the RMT peripheral. Connecting
+these pins externally to each other will make the transmitter send RMT items
+and demonstrates the usage of the RMT peripheral::
+
+    nsh> rmtchar
+
+**WS2812 addressable RGB LEDs**
+
+This same configuration enables the usage of the RMT peripheral and the example
+``ws2812`` to drive addressable RGB LEDs::
+
+    nsh> ws2812
+
+Please note that this board contains an on-board WS2812 LED connected to GPIO8
+and, by default, this config configures the RMT transmitter in the same pin.
+
 rtc
 ---
 
