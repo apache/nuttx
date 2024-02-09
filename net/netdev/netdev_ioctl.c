@@ -1710,6 +1710,10 @@ ssize_t net_ioctl_arglen(uint8_t domain, int cmd)
       case SIOCDENYINETSOCK:
         return sizeof(uint8_t);
 
+      case SIOCGETCONTEXT:
+      case SIOCSETCONTEXT:
+        return sizeof(struct socket_context_s);
+
       default:
 #ifdef CONFIG_NETDEV_IOCTL
 #  ifdef CONFIG_NETDEV_WIRELESS_IOCTL
