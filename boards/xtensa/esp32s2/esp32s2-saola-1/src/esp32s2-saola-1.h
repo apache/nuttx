@@ -61,7 +61,7 @@
 #  define RMT_OUTPUT_PIN      0
 #else
 #  define RMT_INPUT_PIN       2
-#  define RMT_OUTPUT_PIN      4
+#  define RMT_OUTPUT_PIN      18
 #endif
 
 /****************************************************************************
