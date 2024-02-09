@@ -41,7 +41,7 @@
 #include "hardware/esp32s3_soc.h"
 #include "hardware/esp32s3_cache_memory.h"
 
-#include "xtensa_attr.h"
+#include "esp_attr.h"
 #include "esp32s3_spiflash.h"
 #include "esp32s3_spiram.h"
 
@@ -90,7 +90,7 @@ struct esp32s3_mtd_dev_s
 
   /* SPI Flash data */
 
-  const struct spiflash_legacy_data_s **data;
+  esp_rom_spiflash_legacy_data_t **data;
 };
 
 #ifdef CONFIG_ESP32S3_SPI_FLASH_SUPPORT_PSRAM_STACK
@@ -177,7 +177,7 @@ static const struct esp32s3_mtd_dev_s g_esp32s3_spiflash =
 #endif
             .name   = "esp32s3_spiflash"
           },
-  .data = (const struct spiflash_legacy_data_s **)
+  .data = (esp_rom_spiflash_legacy_data_t **)
           (&rom_spiflash_legacy_data),
 };
 
@@ -195,7 +195,7 @@ static const struct esp32s3_mtd_dev_s g_esp32s3_spiflash_encrypt =
 #endif
             .name   = "esp32s3_spiflash_encrypt"
           },
-  .data = (const struct spiflash_legacy_data_s **)
+  .data = (esp_rom_spiflash_legacy_data_t **)
           (&rom_spiflash_legacy_data),
 };
 
@@ -1087,7 +1087,7 @@ struct mtd_dev_s *esp32s3_spiflash_alloc_mtdpart(uint32_t mtd_offset,
                                                  bool encrypted)
 {
   const struct esp32s3_mtd_dev_s *priv;
-  const esp32s3_spiflash_chip_t *chip;
+  const esp_rom_spiflash_chip_t *chip;
   struct mtd_dev_s *mtd_part;
   uint32_t blocks;
   uint32_t startblock;

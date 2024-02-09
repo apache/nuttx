@@ -163,6 +163,41 @@ int esp32s3_efuse_write_field(const efuse_desc_t *field[],
 void esp32s3_efuse_burn_efuses(void);
 
 /****************************************************************************
+ * Name: esp32s3_efuse_read_reg
+ *
+ * Description:
+ *   Read efuse register.
+ *
+ * Input Parameters:
+ *   blk          - Block number of eFuse
+ *   num_reg      - The register number in the block
+ *
+ * Returned Value:
+ *   Return the value in the efuse register.
+ *
+ ****************************************************************************/
+
+uint32_t esp32s3_efuse_read_reg(uint32_t blk, uint32_t num_reg);
+
+/****************************************************************************
+ * Name: esp32s3_efuse_write_reg
+ *
+ * Description:
+ *   Write value to efuse register.
+ *
+ * Input Parameters:
+ *   blk          - Block number of eFuse
+ *   num_reg      - The register number in the block
+ *   value        - Value to write
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32s3_efuse_write_reg(uint32_t blk, uint32_t num_reg, uint32_t value);
+
+/****************************************************************************
  * Name: esp32s3_efuse_initialize
  *
  * Description:

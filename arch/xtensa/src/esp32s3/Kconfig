@@ -39,6 +39,10 @@ config ESPRESSIF_CHIP_SERIES
 	string
 	default "esp32s3"
 
+config ESPRESSIF_NUM_CPUS
+	int
+	default 2
+
 choice ESP32S3_DEFAULT_CPU_FREQ
 	prompt "CPU frequency"
 	default ESP32S3_DEFAULT_CPU_FREQ_240
@@ -530,6 +534,7 @@ config ESP32S3_WDT
 
 config ESP32S3_EFUSE
 	bool "EFUSE support"
+	select EFUSE
 	default n
 	---help---
 		Enable ESP32-S3 efuse support.
@@ -1887,15 +1892,13 @@ config ESP32S3_SPI_FLASH_SUPPORT_PSRAM_STACK
 			3. Once operation in step 2 triggers, CPU will trigger exception.
 		So related SPI flash functions should be sent and run in tasks which use SRAM as task stack.
 
-if ESP32S3_APP_FORMAT_LEGACY
-
 comment "Partition Table configuration"
 
 config ESP32S3_PARTITION_TABLE
 	bool "Create MTD partitions from Partition Table"
 	default n
-	depends on ESP32S3_MTD && ESP32S3_APP_FORMAT_LEGACY
-	select ESP32S3_BOOTLOADER_BUILD_FROM_SOURCE
+	depends on ESP32S3_MTD
+	select ESP32S3_APP_FORMAT_LEGACY
 	---help---
 		Decode partition table and initialize partitions as MTD.
 
@@ -1903,8 +1906,6 @@ config ESP32S3_PARTITION_MOUNTPT
 	string "Partition mount point"
 	default "/dev/esp/partition/"
 	depends on ESP32S3_PARTITION_TABLE
-
-endif # ESP32S3_APP_FORMAT_LEGACY
 
 endif # ESP32S3_SPIFLASH
 
@@ -2173,38 +2174,26 @@ endmenu
 
 menu "Bootloader and Image Configuration"
 
-config ESP32S3_APP_FORMAT_LEGACY
+config ESPRESSIF_SIMPLE_BOOT
 	bool
-	default y if !ESP32S3_APP_FORMAT_MCUBOOT
 	depends on !ESP32S3_APP_FORMAT_MCUBOOT
-	---help---
-		This is the legacy application image format, as supported by the ESP-IDF
-		2nd stage bootloader.
+	depends on !ESP32S3_APP_FORMAT_LEGACY
+	default y
 
 config ESP32S3_APP_FORMAT_MCUBOOT
 	bool "Enable MCUboot-bootable format"
 	depends on !MCUBOOT_BOOTLOADER
+	default n
 	select ESP32S3_HAVE_OTA_PARTITION
-	select ESP32S3_BOOTLOADER_BUILD_FROM_SOURCE
 	---help---
 		Enables the Espressif port of MCUboot to be used as 2nd stage bootloader.
 
-config ESP32S3_BOOTLOADER_DOWNLOAD_PREBUILT
+config ESP32S3_APP_FORMAT_LEGACY
 	bool
-	default y if !ESP32S3_BOOTLOADER_BUILD_FROM_SOURCE
-	depends on !ESP32S3_BOOTLOADER_BUILD_FROM_SOURCE
+	default y if BUILD_PROTECTED
 	---help---
-		The build system will download the prebuilt binaries from
-		https://github.com/espressif/esp-nuttx-bootloader according to the chosen
-		Application Image Format (ESP32S3_APP_FORMAT_LEGACY or ESP32S3_APP_FORMAT_MCUBOOT)
-
-config ESP32S3_BOOTLOADER_BUILD_FROM_SOURCE
-	bool "Build binaries from source"
-	---help---
-		The build system will build all the required binaries from source. It will clone
-		the https://github.com/espressif/esp-nuttx-bootloader repository and build a
-		custom bootloader according to the chosen Application Image Format
-		(ESP32S3_APP_FORMAT_LEGACY or ESP32S3_APP_FORMAT_MCUBOOT) and partition information.
+		This is the legacy application image format, as supported by the ESP-IDF
+		2nd stage bootloader.
 
 choice
 	prompt "Target slot for image flashing"
@@ -2250,7 +2239,6 @@ config ESP32S3_CUSTOM_PARTITION_TABLE_OFFSET
 	bool "Customize partition table offset"
 	default n
 	depends on ESP32S3_APP_FORMAT_LEGACY
-	select ESP32S3_BOOTLOADER_BUILD_FROM_SOURCE
 	---help---
 		Enable to select the offset of the partition table in the flash.
 

@@ -37,13 +37,14 @@
 #include <assert.h>
 
 #include "xtensa.h"
-#include "xtensa_attr.h"
+#include "esp_attr.h"
 #include "esp32s3_psram.h"
 #include "esp32s3_spiram.h"
 #include "hardware/esp32s3_soc.h"
 #include "hardware/esp32s3_cache_memory.h"
-#include "hardware/esp32s3_extmem.h"
 #include "hardware/esp32s3_iomux.h"
+
+#include "soc/extmem_reg.h"
 
 #define PSRAM_MODE PSRAM_VADDR_MODE_NORMAL
 
@@ -551,7 +552,7 @@ int IRAM_ATTR instruction_flash2spiram_offset(void)
 }
 #endif
 
-#if defined(CONFIG_ESP32_SPIRAM_RODATA)
+#if defined(CONFIG_ESP32S3_SPIRAM_RODATA)
 void rodata_flash_page_info_init(void)
 {
   uint32_t rodata_page_cnt = ((uint32_t)_rodata_reserved_end -

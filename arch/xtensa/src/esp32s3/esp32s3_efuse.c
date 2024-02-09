@@ -441,51 +441,6 @@ static int esp32s3_efuse_process(const efuse_desc_t *field[], void *ptr,
 }
 
 /****************************************************************************
- * Name: esp32s3_efuse_write_reg
- *
- * Description:
- *   Write value to efuse register.
- *
- * Input Parameters:
- *   blk          - Block number of eFuse
- *   num_reg      - The register number in the block
- *   value        - Value to write
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-static void esp32s3_efuse_write_reg(uint32_t blk, uint32_t num_reg,
-                                    uint32_t value)
-{
-  uint32_t addr_wr_reg;
-  uint32_t reg_to_write;
-  uint32_t blk_start = g_start_efuse_wrreg[blk];
-
-  DEBUGASSERT(blk >= 0 && blk < EFUSE_BLK_MAX);
-
-  DEBUGASSERT(num_reg <= 7);
-
-  /* The block 0 and register 7 doesn't exist */
-
-  if (blk == 0 && num_reg == 7)
-    {
-      merr("Block 0 Register 7 doesn't exist!\n");
-      return;
-    }
-
-  addr_wr_reg = blk_start + num_reg * 4;
-  reg_to_write = getreg32(addr_wr_reg) | value;
-
-  /* The register can be written in parts so we combine the new value
-   * with the one already available.
-   */
-
-  putreg32(reg_to_write, addr_wr_reg);
-}
-
-/****************************************************************************
  * Name: esp32s3_efuse_write_blob
  *
  * Description:
@@ -516,33 +471,6 @@ static int esp32s3_efuse_write_blob(uint32_t num_reg, int bit_offset,
   esp32s3_efuse_write_reg(block, num_reg, reg_to_write);
 
   return OK;
-}
-
-/****************************************************************************
- * Name: esp32s3_efuse_read_reg
- *
- * Description:
- *   Read efuse register.
- *
- * Input Parameters:
- *   blk          - Block number of eFuse
- *   num_reg      - The register number in the block
- *
- * Returned Value:
- *   Return the value in the efuse register.
- *
- ****************************************************************************/
-
-static uint32_t esp32s3_efuse_read_reg(uint32_t blk, uint32_t num_reg)
-{
-  DEBUGASSERT(blk >= 0 && blk < EFUSE_BLK_MAX);
-  uint32_t value;
-  uint32_t blk_start = g_start_efuse_rdreg[blk];
-
-  DEBUGASSERT(num_reg <= 7);
-
-  value = getreg32(blk_start + num_reg * 4);
-  return value;
 }
 
 /****************************************************************************
@@ -709,3 +637,73 @@ void esp32s3_efuse_burn_efuses(void)
     };
 }
 
+/****************************************************************************
+ * Name: esp32s3_efuse_read_reg
+ *
+ * Description:
+ *   Read efuse register.
+ *
+ * Input Parameters:
+ *   blk          - Block number of eFuse
+ *   num_reg      - The register number in the block
+ *
+ * Returned Value:
+ *   Return the value in the efuse register.
+ *
+ ****************************************************************************/
+
+uint32_t esp32s3_efuse_read_reg(uint32_t blk, uint32_t num_reg)
+{
+  DEBUGASSERT(blk >= 0 && blk < EFUSE_BLK_MAX);
+  uint32_t value;
+  uint32_t blk_start = g_start_efuse_rdreg[blk];
+
+  DEBUGASSERT(num_reg <= 7);
+
+  value = getreg32(blk_start + num_reg * 4);
+  return value;
+}
+
+/****************************************************************************
+ * Name: esp32s3_efuse_write_reg
+ *
+ * Description:
+ *   Write value to efuse register.
+ *
+ * Input Parameters:
+ *   blk          - Block number of eFuse
+ *   num_reg      - The register number in the block
+ *   value        - Value to write
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32s3_efuse_write_reg(uint32_t blk, uint32_t num_reg, uint32_t value)
+{
+  uint32_t addr_wr_reg;
+  uint32_t reg_to_write;
+  uint32_t blk_start = g_start_efuse_wrreg[blk];
+
+  DEBUGASSERT(blk >= 0 && blk < EFUSE_BLK_MAX);
+
+  DEBUGASSERT(num_reg <= 7);
+
+  /* The block 0 and register 7 doesn't exist */
+
+  if (blk == 0 && num_reg == 7)
+    {
+      merr("Block 0 Register 7 doesn't exist!\n");
+      return;
+    }
+
+  addr_wr_reg = blk_start + num_reg * 4;
+  reg_to_write = getreg32(addr_wr_reg) | value;
+
+  /* The register can be written in parts so we combine the new value
+   * with the one already available.
+   */
+
+  putreg32(reg_to_write, addr_wr_reg);
+}

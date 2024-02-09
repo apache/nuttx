@@ -35,7 +35,8 @@
 #include "esp32s3_spiflash_mtd.h"
 #include "hardware/esp32s3_soc.h"
 #include "hardware/esp32s3_cache_memory.h"
-#include "hardware/esp32s3_extmem.h"
+
+#include "soc/extmem_reg.h"
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -1,0 +1,6 @@
+/soc.h
+/reg_base.h
+/esp_attr.h
+/esp_assert.h
+/esp_bit_defs.h
+/sdkconfig.h

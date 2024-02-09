@@ -31,7 +31,7 @@
 #include <nuttx/config.h>
 #include <nuttx/list.h>
 
-#include "xtensa_attr.h"
+#include "esp_attr.h"
 #include "esp32s3_rt_timer.h"
 
 #include "esp_log.h"

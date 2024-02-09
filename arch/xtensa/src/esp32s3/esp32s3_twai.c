@@ -48,6 +48,7 @@
 #include "periph_ctrl.h"
 
 #include "hardware/esp32s3_system.h"
+#include "hardware/esp32s3_twai.h"
 #include "hardware/esp32s3_gpio_sigmap.h"
 
 #if defined(CONFIG_ESP32S3_TWAI)

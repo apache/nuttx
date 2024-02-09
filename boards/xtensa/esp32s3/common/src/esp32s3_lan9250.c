@@ -35,14 +35,13 @@
 #include <arch/board/board.h>
 
 #include "xtensa.h"
+#include "esp32s3_efuse.h"
 #include "esp32s3_gpio.h"
 #ifdef CONFIG_LAN9250_SPI
 #include "esp32s3_spi.h"
 #else
 #include "esp32s3_qspi.h"
 #endif
-#include "hardware/esp32s3_efuse.h"
-#include "hardware/esp32s3_gpio_sigmap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -175,8 +174,8 @@ static void lan9250_getmac(const struct lan9250_lower_s *lower, uint8_t *mac)
   uint32_t regval[2];
   uint8_t *data = (uint8_t *)regval;
 
-  regval[0] = getreg32(EFUSE_RD_MAC_SPI_SYS_0_REG);
-  regval[1] = getreg32(EFUSE_RD_MAC_SPI_SYS_1_REG);
+  regval[0] = esp32s3_efuse_read_reg(EFUSE_BLK1, 0);
+  regval[1] = esp32s3_efuse_read_reg(EFUSE_BLK1, 1);
 
   for (int i = 0; i < 6; i++)
     {
