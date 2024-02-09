@@ -554,6 +554,12 @@ int mrf24j40_getattr(FAR struct ieee802154_radio_s *radio,
         }
         break;
 
+      case IEEE802154_ATTR_PHY_REGDUMP:
+        {
+          ret = mrf24j40_regdump(dev);
+        }
+        break;
+
       default:
         ret = IEEE802154_STATUS_UNSUPPORTED_ATTRIBUTE;
     }
