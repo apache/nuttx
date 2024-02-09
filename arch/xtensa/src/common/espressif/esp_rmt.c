@@ -174,10 +174,12 @@ enum rmt_channel_e
   RMT_CHANNEL_1,  /* RMT channel number 1 */
   RMT_CHANNEL_2,  /* RMT channel number 2 */
   RMT_CHANNEL_3,  /* RMT channel number 3 */
+#if SOC_RMT_CHANNELS_PER_GROUP > 4
   RMT_CHANNEL_4,  /* RMT channel number 4 */
   RMT_CHANNEL_5,  /* RMT channel number 5 */
   RMT_CHANNEL_6,  /* RMT channel number 6 */
   RMT_CHANNEL_7,  /* RMT channel number 7 */
+#endif
   RMT_CHANNEL_MAX /* Number of RMT channels */
 };
 
@@ -415,9 +417,9 @@ static rmt_channel_t g_rx_channel = RMT_CHANNEL_MAX;
 #endif
 
 #if SOC_RMT_CHANNEL_CLK_INDEPENDENT
-static uint32_t s_rmt_source_clock_hz[RMT_CHANNEL_MAX];
+uint32_t g_rmt_source_clock_hz[RMT_CHANNEL_MAX];
 #else
-static uint32_t s_rmt_source_clock_hz;
+uint32_t g_rmt_source_clock_hz;
 #endif
 
 /* RMTMEM address is declared in <target>.peripherals.ld */
@@ -891,16 +893,16 @@ static int rmt_internal_config(rmt_dev_t *dev,
   spin_unlock_irqrestore(&g_rmtdev_common.rmt_spinlock, flags);
 
 #if SOC_RMT_CHANNEL_CLK_INDEPENDENT
-  s_rmt_source_clock_hz[channel] = rmt_source_clk_hz;
+  g_rmt_source_clock_hz[channel] = rmt_source_clk_hz;
 #else
-  if (s_rmt_source_clock_hz && rmt_source_clk_hz != s_rmt_source_clock_hz)
+  if (g_rmt_source_clock_hz && rmt_source_clk_hz != g_rmt_source_clock_hz)
     {
       rmterr("RMT clock source has been configured to %"PRIu32" by other "
              "channel, now reconfigure it to %"PRIu32"",
-             s_rmt_source_clock_hz, rmt_source_clk_hz);
+             g_rmt_source_clock_hz, rmt_source_clk_hz);
     }
 
-  s_rmt_source_clock_hz = rmt_source_clk_hz;
+  g_rmt_source_clock_hz = rmt_source_clk_hz;
 #endif
   rmtinfo("rmt_source_clk_hz: %"PRIu32, rmt_source_clk_hz);
 

@@ -45,15 +45,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define APB_PERIOD_PS (1000000000000 / APB_CLK_FREQ)
-#define RMT_PERIOD_PS (APB_PERIOD_PS / RMT_DEFAULT_CLK_DIV) // ps
-
-#define T0H ((uint16_t)(350000   / RMT_PERIOD_PS))   // cyles
-#define T0L ((uint16_t)(900000   / RMT_PERIOD_PS))   // cyles
-#define T1H ((uint16_t)(900000   / RMT_PERIOD_PS))   // cyles
-#define T1L ((uint16_t)(350000   / RMT_PERIOD_PS))   // cyles
-#define RES ((uint16_t)(60000000 / RMT_PERIOD_PS))   // cyles
-
 #define rmt_item32_t rmt_symbol_word_t
 
 /****************************************************************************
@@ -83,12 +74,32 @@ struct esp_ws2812_dev_s
   size_t               open_count;   /* Number of opens on this instance. */
 };
 
+/* RMT channel ID */
+
+enum rmt_channel_e
+{
+  RMT_CHANNEL_0,  /* RMT channel number 0 */
+  RMT_CHANNEL_1,  /* RMT channel number 1 */
+  RMT_CHANNEL_2,  /* RMT channel number 2 */
+  RMT_CHANNEL_3,  /* RMT channel number 3 */
+#if SOC_RMT_CHANNELS_PER_GROUP > 4
+  RMT_CHANNEL_4,  /* RMT channel number 4 */
+  RMT_CHANNEL_5,  /* RMT channel number 5 */
+  RMT_CHANNEL_6,  /* RMT channel number 6 */
+  RMT_CHANNEL_7,  /* RMT channel number 7 */
+#endif
+  RMT_CHANNEL_MAX /* Number of RMT channels */
+};
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static uint32_t map_byte_to_words(uint8_t byte, uint32_t *dst);
-static int map_leds_to_words(struct rgbw_led_s *leds,
+static uint32_t map_byte_to_words(struct esp_ws2812_dev_s *dev,
+                                  uint8_t byte,
+                                  uint32_t *dst);
+static int map_leds_to_words(struct esp_ws2812_dev_s *dev,
+                             struct rgbw_led_s *leds,
                              uint32_t n_leds,
                              uint32_t *dst,
                              bool has_white);
@@ -99,6 +110,12 @@ static int esp_write(struct file *filep, const char *data, size_t len);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+#if SOC_RMT_CHANNEL_CLK_INDEPENDENT
+extern uint32_t g_rmt_source_clock_hz[RMT_CHANNEL_MAX];
+#else
+extern uint32_t g_rmt_source_clock_hz;
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -114,6 +131,7 @@ static int esp_write(struct file *filep, const char *data, size_t len);
  *   RMT items are stored in the destination array.
  *
  * Input Parameters:
+ *   dev  - Pointer to the RMT-based WS2812 device structure.
  *   byte - The byte to be mapped.
  *   dst  - Destination array for the RMT items.
  *
@@ -122,10 +140,32 @@ static int esp_write(struct file *filep, const char *data, size_t len);
  *
  ****************************************************************************/
 
-static uint32_t map_byte_to_words(uint8_t byte, uint32_t *dst)
+static uint32_t map_byte_to_words(struct esp_ws2812_dev_s *dev,
+                                  uint8_t byte,
+                                  uint32_t *dst)
 {
   uint32_t mapped;
   uint8_t mask;
+  uint16_t t0h;
+  uint16_t t0l;
+  uint16_t t1h;
+  uint16_t t1l;
+  uint32_t clock_period_ps;
+  uint32_t rmt_period_ps;
+
+#if SOC_RMT_CHANNEL_CLK_INDEPENDENT
+  clock_period_ps = 1000000000000 / g_rmt_source_clock_hz[dev->rmt->minor];
+#else
+  clock_period_ps = 1000000000000 / g_rmt_source_clock_hz;
+#endif
+  rmt_period_ps = clock_period_ps / RMT_DEFAULT_CLK_DIV;
+
+  /* Calculate the RMT period to encode WS2812 frames */
+
+  t0h = ((uint16_t)(350000 / rmt_period_ps));
+  t0l = ((uint16_t)(900000 / rmt_period_ps));
+  t1h = ((uint16_t)(900000 / rmt_period_ps));
+  t1l = ((uint16_t)(350000 / rmt_period_ps));
 
   mapped = 0;
   mask = 0x80;
@@ -138,11 +178,11 @@ static uint32_t map_byte_to_words(uint8_t byte, uint32_t *dst)
 
       if (bit)
         {
-          word = (T1L << 16) | (0x8000 | T1H);
+          word = (t1l << 16) | (0x8000 | t1h);
         }
         else
         {
-          word = (T0L << 16) | (0x8000 | T0H);
+          word = (t0l << 16) | (0x8000 | t0h);
         }
 
       *dst = word;
@@ -165,6 +205,7 @@ static uint32_t map_byte_to_words(uint8_t byte, uint32_t *dst)
  *   array.
  *
  * Input Parameters:
+ *   dev       - Pointer to the RMT-based WS2812 device structure.
  *   leds      - Pointer to the array of LEDs.
  *   n_leds    - Number of LEDs in the array.
  *   dst       - Destination array for the RMT items.
@@ -176,7 +217,8 @@ static uint32_t map_byte_to_words(uint8_t byte, uint32_t *dst)
  *
  ****************************************************************************/
 
-static int map_leds_to_words(struct rgbw_led_s *leds,
+static int map_leds_to_words(struct esp_ws2812_dev_s *dev,
+                             struct rgbw_led_s *leds,
                              uint32_t n_leds,
                              uint32_t *dst,
                              bool has_white)
@@ -191,12 +233,20 @@ static int map_leds_to_words(struct rgbw_led_s *leds,
   dst_offset = 0;
   for (uint32_t led_idx = 0; led_idx < n_leds; led_idx++)
     {
-      dst_offset += map_byte_to_words(leds[led_idx].g, dst + dst_offset);
-      dst_offset += map_byte_to_words(leds[led_idx].r, dst + dst_offset);
-      dst_offset += map_byte_to_words(leds[led_idx].b, dst + dst_offset);
+      dst_offset += map_byte_to_words(dev,
+                                      leds[led_idx].g,
+                                      dst + dst_offset);
+      dst_offset += map_byte_to_words(dev,
+                                      leds[led_idx].r,
+                                      dst + dst_offset);
+      dst_offset += map_byte_to_words(dev,
+                                      leds[led_idx].b,
+                                      dst + dst_offset);
       if (has_white)
         {
-          dst_offset += map_byte_to_words(leds[led_idx].w, dst + dst_offset);
+          dst_offset += map_byte_to_words(dev,
+                                          leds[led_idx].w,
+                                          dst + dst_offset);
         }
     }
 
@@ -290,7 +340,9 @@ static int esp_open(struct file *filep)
 
       for (i = 0; i < dev_data->nleds; i++)
         {
-          map_leds_to_words(led, 1,
+          map_leds_to_words(priv,
+                            led,
+                            1,
                             ((uint32_t *)priv->buf + i * colors * 8),
                             dev_data->has_white);
         }
@@ -428,7 +480,8 @@ static ssize_t esp_write(struct file *filep, const char *data, size_t len)
           n_leds = dev->nleds - (position / WS2812_RW_PIXEL_SIZE);
         }
 
-      ret = map_leds_to_words((struct rgbw_led_s *)data,
+      ret = map_leds_to_words(priv,
+                              (struct rgbw_led_s *)data,
                               n_leds,
                               (uint32_t *)bp,
                               dev->has_white);
@@ -505,10 +558,10 @@ static ssize_t esp_write(struct file *filep, const char *data, size_t len)
  *
  ****************************************************************************/
 
-struct ws2812_dev_s *esp_ws2812_setup(const char *path,
-                                        struct rmt_dev_s *rmt,
-                                        uint16_t    pixel_count,
-                                        bool        has_white)
+struct ws2812_dev_s *esp_ws2812_setup(const char       *path,
+                                      struct rmt_dev_s *rmt,
+                                      uint16_t         pixel_count,
+                                      bool             has_white)
 {
   struct ws2812_dev_s       *dev;
   struct esp_ws2812_dev_s *priv;
