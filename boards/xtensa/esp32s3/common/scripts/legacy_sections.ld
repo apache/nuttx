@@ -237,6 +237,8 @@ SECTIONS
   .flash.text :
   {
     _stext = .;
+    _instruction_reserved_start = ABSOLUTE(.);
+
     *(.literal .text .literal.* .text.* .stub .gnu.warning .gnu.linkonce.literal.* .gnu.linkonce.t.*.literal .gnu.linkonce.t.*)
     *(.irom0.text) /* catch stray ICACHE_RODATA_ATTR */
     *(.fini.literal)
@@ -251,6 +253,7 @@ SECTIONS
 
     . += 16;
 
+    _instruction_reserved_end = ABSOLUTE(.);
     _etext = .;
   } >default_code_seg
 

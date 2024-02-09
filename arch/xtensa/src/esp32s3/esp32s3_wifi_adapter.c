@@ -54,7 +54,7 @@
 #include <nuttx/tls.h>
 
 #include "xtensa.h"
-#include "xtensa_attr.h"
+#include "esp_attr.h"
 #include "hardware/esp32s3_system.h"
 #include "hardware/esp32s3_rtccntl.h"
 #include "hardware/esp32s3_syscon.h"

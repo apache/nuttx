@@ -28,6 +28,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "esp_rom_spiflash.h"
+#include "rom/spi_flash.h"
+#include "rom/opi_flash.h"
+#include "esp_private/spi_flash_os.h"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -37,117 +42,15 @@ extern "C"
  * Pre-processor Definitions
  *****************************************************************************/
 
-#define PERIPHS_SPI_FLASH_CMD                 SPI_CMD_REG(1)
-#define PERIPHS_SPI_FLASH_ADDR                SPI_ADDR_REG(1)
-#define PERIPHS_SPI_FLASH_CTRL                SPI_CTRL_REG(1)
-#define PERIPHS_SPI_FLASH_CTRL1               SPI_CTRL1_REG(1)
-#define PERIPHS_SPI_FLASH_STATUS              SPI_RD_STATUS_REG(1)
-#define PERIPHS_SPI_FLASH_USRREG              SPI_USER_REG(1)
-#define PERIPHS_SPI_FLASH_USRREG1             SPI_USER1_REG(1)
-#define PERIPHS_SPI_FLASH_USRREG2             SPI_USER2_REG(1)
-#define PERIPHS_SPI_FLASH_C0                  SPI_W0_REG(1)
-#define PERIPHS_SPI_FLASH_C1                  SPI_W1_REG(1)
-#define PERIPHS_SPI_FLASH_C2                  SPI_W2_REG(1)
-#define PERIPHS_SPI_FLASH_C3                  SPI_W3_REG(1)
-#define PERIPHS_SPI_FLASH_C4                  SPI_W4_REG(1)
-#define PERIPHS_SPI_FLASH_C5                  SPI_W5_REG(1)
-#define PERIPHS_SPI_FLASH_C6                  SPI_W6_REG(1)
-#define PERIPHS_SPI_FLASH_C7                  SPI_W7_REG(1)
-#define PERIPHS_SPI_FLASH_TX_CRC              SPI_TX_CRC_REG(1)
-
-#define SPI1_R_QIO_DUMMY_CYCLELEN             5
-#define SPI1_R_QIO_ADDR_BITSLEN               23
-#define SPI1_R_FAST_DUMMY_CYCLELEN            7
-#define SPI1_R_DIO_DUMMY_CYCLELEN             3
-#define SPI1_R_DIO_ADDR_BITSLEN               23
-#define SPI1_R_FAST_ADDR_BITSLEN              23
-#define SPI1_R_SIO_ADDR_BITSLEN               23
-
-#define ESP_ROM_SPIFLASH_W_SIO_ADDR_BITSLEN   23
-
-#define ESP_ROM_SPIFLASH_TWO_BYTE_STATUS_EN   SPI_WRSR_2B
-
-/* SPI address register */
-
-#define ESP_ROM_SPIFLASH_BYTES_LEN            24
-#define ESP_ROM_SPIFLASH_BUFF_BYTE_WRITE_NUM  32
-#define ESP_ROM_SPIFLASH_BUFF_BYTE_READ_NUM   64
-#define ESP_ROM_SPIFLASH_BUFF_BYTE_READ_BITS  0x3f
-
-/* SPI status register */
-
-#define ESP_ROM_SPIFLASH_BUSY_FLAG            BIT0
-#define ESP_ROM_SPIFLASH_WRENABLE_FLAG        BIT1
-#define ESP_ROM_SPIFLASH_BP0                  BIT2
-#define ESP_ROM_SPIFLASH_BP1                  BIT3
-#define ESP_ROM_SPIFLASH_BP2                  BIT4
-#define ESP_ROM_SPIFLASH_WR_PROTECT           (ESP_ROM_SPIFLASH_BP0 | \
-                                               ESP_ROM_SPIFLASH_BP1 | \
-                                               ESP_ROM_SPIFLASH_BP2)
-#define ESP_ROM_SPIFLASH_QE                   BIT9
-
 /* Extra dummy for flash read */
 
 #define ESP_ROM_SPIFLASH_DUMMY_LEN_PLUS_20M   0
 #define ESP_ROM_SPIFLASH_DUMMY_LEN_PLUS_40M   1
 #define ESP_ROM_SPIFLASH_DUMMY_LEN_PLUS_80M   2
 
-#define FLASH_ID_GD25LQ32C  0xC86016
-
 /*****************************************************************************
  * Public Types
  *****************************************************************************/
-
-typedef enum
-{
-    ESP_ROM_SPIFLASH_QIO_MODE = 0,
-    ESP_ROM_SPIFLASH_QOUT_MODE,
-    ESP_ROM_SPIFLASH_DIO_MODE,
-    ESP_ROM_SPIFLASH_DOUT_MODE,
-    ESP_ROM_SPIFLASH_FASTRD_MODE,
-    ESP_ROM_SPIFLASH_SLOWRD_MODE,
-    ESP_ROM_SPIFLASH_OPI_STR_MODE,
-    ESP_ROM_SPIFLASH_OPI_DTR_MODE,
-    ESP_ROM_SPIFLASH_OOUT_MODE,
-    ESP_ROM_SPIFLASH_OIO_STR_MODE,
-    ESP_ROM_SPIFLASH_OIO_DTR_MODE,
-} esp_rom_spiflash_read_mode_t;
-
-typedef enum
-{
-    ESP_ROM_SPIFLASH_RESULT_OK,
-    ESP_ROM_SPIFLASH_RESULT_ERR,
-    ESP_ROM_SPIFLASH_RESULT_TIMEOUT
-} esp_rom_spiflash_result_t;
-
-typedef struct
-{
-    uint32_t device_id;
-    uint32_t chip_size;    /* chip size in bytes */
-    uint32_t block_size;
-    uint32_t sector_size;
-    uint32_t page_size;
-    uint32_t status_mask;
-} esp32s3_spiflash_chip_t;
-
-typedef struct
-{
-    uint8_t  data_length;
-    uint8_t  read_cmd0;
-    uint8_t  read_cmd1;
-    uint8_t  write_cmd;
-    uint16_t data_mask;
-    uint16_t data;
-} esp_rom_spiflash_common_cmd_t;
-
-/* Global ROM spiflash data, as used by legacy SPI flash functions */
-
-struct spiflash_legacy_data_s
-{
-  esp32s3_spiflash_chip_t chip;
-  uint8_t dummy_len_plus[3];
-  uint8_t sig_matrix;
-};
 
 /* Structure holding SPI flash access critical sections management functions.
  *
@@ -330,7 +233,7 @@ void esp_rom_spiflash_attach(uint32_t ishspi, bool legacy);
  *   Please do not call this function in SDK.
  *
  * Input Parameters:
- *   esp32s3_spiflash_chip_t *spi : The information for Flash, which is
+ *   esp_rom_spiflash_chip_t *spi : The information for Flash, which is
  *                                  exported from ld file.
  *
  *   uint32_t *status : The pointer to which to return the Flash status value.
@@ -343,7 +246,7 @@ void esp_rom_spiflash_attach(uint32_t ishspi, bool legacy);
  *****************************************************************************/
 
 esp_rom_spiflash_result_t
-esp_rom_spiflash_read_status(esp32s3_spiflash_chip_t *spi,
+esp_rom_spiflash_read_status(esp_rom_spiflash_chip_t *spi,
                              uint32_t *status);
 
 /*****************************************************************************
@@ -355,7 +258,7 @@ esp_rom_spiflash_read_status(esp32s3_spiflash_chip_t *spi,
  *   Please do not call this function in SDK.
  *
  * Input Parameters:
- *   esp32s3_spiflash_chip_t *spi : The information for Flash, which is
+ *   esp_rom_spiflash_chip_t *spi : The information for Flash, which is
  *                                  exported from ld file.
  *
  *   uint32_t *status : The pointer to which to return the Flash status value.
@@ -368,7 +271,7 @@ esp_rom_spiflash_read_status(esp32s3_spiflash_chip_t *spi,
  *****************************************************************************/
 
 esp_rom_spiflash_result_t
-esp32s3_spiflash_read_statushigh(esp32s3_spiflash_chip_t *spi,
+esp32s3_spiflash_read_statushigh(esp_rom_spiflash_chip_t *spi,
                                uint32_t *status);
 
 /*****************************************************************************
@@ -380,7 +283,7 @@ esp32s3_spiflash_read_statushigh(esp32s3_spiflash_chip_t *spi,
  *   Please do not call this function in SDK.
  *
  * Input Parameters:
- *   esp32s3_spiflash_chip_t *spi : The information for Flash, which is
+ *   esp_rom_spiflash_chip_t *spi : The information for Flash, which is
  *                                  exported from ld file.
  *
  *   uint32_t status_value : Value to .
@@ -393,7 +296,7 @@ esp32s3_spiflash_read_statushigh(esp32s3_spiflash_chip_t *spi,
  *****************************************************************************/
 
 esp_rom_spiflash_result_t
-esp32s3_spiflash_write_status(esp32s3_spiflash_chip_t *spi,
+esp32s3_spiflash_write_status(esp_rom_spiflash_chip_t *spi,
                             uint32_t status_value);
 
 /*****************************************************************************
@@ -405,7 +308,7 @@ esp32s3_spiflash_write_status(esp32s3_spiflash_chip_t *spi,
  *   Please do not call this function in SDK.
  *
  * Input Parameters:
- *   esp32s3_spiflash_chip_t *spi : The information for Flash, which is
+ *   esp_rom_spiflash_chip_t *spi : The information for Flash, which is
  *                                  exported from ld file.
  *
  *   uint32_t*status : The pointer to which to return the Flash status value.
@@ -803,7 +706,7 @@ esp_rom_spiflash_write_encrypted(uint32_t flash_addr,
  *
  *****************************************************************************/
 
-esp_rom_spiflash_result_t esp_rom_spiflash_wait_idle(esp32s3_spiflash_chip_t
+esp_rom_spiflash_result_t esp_rom_spiflash_wait_idle(esp_rom_spiflash_chip_t
                                                      *spi);
 
 /*****************************************************************************
@@ -851,7 +754,7 @@ void esp_rom_spiflash_select_qio_pins(uint8_t wp_gpio_num,
  *
  *****************************************************************************/
 
-void spi_flash_guard_set(const struct spiflash_guard_funcs *funcs);
+void spi_flash_guard_set(const spi_flash_guard_funcs_t *funcs);
 
 /*****************************************************************************
  * Name: spi_flash_write_encrypted
@@ -1004,8 +907,6 @@ void spi_flash_enable_cache(uint32_t cpuid);
 /*****************************************************************************
  * Public Data
  *****************************************************************************/
-
-extern struct spiflash_legacy_data_s *rom_spiflash_legacy_data;
 
 #ifdef __cplusplus
 }
