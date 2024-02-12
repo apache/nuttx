@@ -2625,10 +2625,10 @@ defined(CONFIG_NETDEV_CAN_FILTER_IOCTL)
           }
         priv->can.bittiming.bitrate = req->arbi_bitrate * 1000; /* bit/s */
 
-        if (req->arbi_samplep > 100 || req->arbi_samplep <= 0)
+        if (req->arbi_samplep > 100 || req->arbi_samplep < 0)
           {
             canerr("Invalid arbitration sample point. "
-                   "Range should be (0,100]%%.");
+                   "Range should be [0,100]%%.");
             ret = -EINVAL;
             break;
           }
@@ -2645,9 +2645,9 @@ defined(CONFIG_NETDEV_CAN_FILTER_IOCTL)
           }
         priv->can.data_bittiming.bitrate = req->data_bitrate * 1000; /* bit/s */
 
-        if (req->data_samplep > 100 || req->data_samplep <= 0)
+        if (req->data_samplep > 100 || req->data_samplep < 0)
           {
-            canerr("Invalid data sample point. Range should be (0,100]%%.");
+            canerr("Invalid data sample point. Range should be [0,100]%%.");
             ret = -EINVAL;
             break;
           }
