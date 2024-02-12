@@ -1,0 +1,36 @@
+From 59e2764f9d0598ad0135286d4a0ee1ac95893bba Mon Sep 17 00:00:00 2001
+From: Jukka Laitinen <jukkax@ssrc.tii.ae>
+Date: Mon, 12 Feb 2024 13:27:13 +0200
+Subject: [PATCH] libmetal/nuttx/io.c: Fix void pointer arithmetic in access
+ alignment
+
+Signed-off-by: Jukka Laitinen <jukkax@ssrc.tii.ae>
+---
+ libmetal/lib/system/nuttx/io.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/lib/system/nuttx/io.c libmetal/lib/system/nuttx/io.c
+index 3ce9cbe..ab9bc6a 100644
+--- a/lib/system/nuttx/io.c
++++ libmetal/lib/system/nuttx/io.c
+@@ -45,7 +45,7 @@ static int metal_io_block_read_(struct metal_io_region *io,
+ 		*(uint32_t *)dst = *(uint32_t *)va;
+ 	else if (len == 8) {
+ 		*(uint32_t *)dst = *(uint32_t *)va;
+-		*(uint32_t *)(dst + 4) = *(uint32_t *)(va + 4);
++		*((uint32_t *)dst + 1) = *((uint32_t *)va + 1);
+ 	} else
+ 		memcpy(dst, va, len);
+ 
+@@ -68,7 +68,7 @@ static int metal_io_block_write_(struct metal_io_region *io,
+ 		*(uint32_t *)va = *(uint32_t *)src;
+ 	else if (len == 8) {
+ 		*(uint32_t *)va = *(uint32_t *)src;
+-		*(uint32_t *)(va + 4) = *(uint32_t *)(src + 4);
++		*((uint32_t *)va + 1) = *((uint32_t *)src + 1);
+ 	} else
+ 		memcpy(va, src, len);
+ 
+-- 
+2.34.1
+
