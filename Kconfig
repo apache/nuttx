@@ -2230,6 +2230,38 @@ config DEBUG_PCI_INFO
 		Enable PCI driver informational output to SYSLOG.
 
 endif # DEBUG_PCI
+
+config DEBUG_RPMSG
+	bool "RPMSG Debug Features"
+	default n
+	depends on RPMSG
+	---help---
+		Enable RPMSG driver debug features.
+
+if DEBUG_RPMSG
+
+config DEBUG_RPMSG_ERROR
+	bool "RPMSG Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable RPMSG driver error output to SYSLOG.
+
+config DEBUG_RPMSG_WARN
+	bool "RPMSG Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable RPMSG driver warning output to SYSLOG.
+
+config DEBUG_RPMSG_INFO
+	bool "RPMSG Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable RPMSG driver informational output to SYSLOG.
+
+endif # DEBUG_RPMSG
 endif # DEBUG_FEATURES
 
 config ARCH_HAVE_STACKCHECK

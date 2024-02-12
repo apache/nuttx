@@ -938,6 +938,24 @@
 #  define pciinfo     _none
 #endif
 
+#ifdef CONFIG_DEBUG_RPMSG_ERROR
+#  define rpmsgerr       _err
+#else
+#  define rpmsgerr      _none
+#endif
+
+#ifdef CONFIG_DEBUG_RPMSG_WARN
+#  define rpmsgwarn     _warn
+#else
+#  define rpmsgwarn     _none
+#endif
+
+#ifdef CONFIG_DEBUG_RPMSG_INFO
+#  define rpmsginfo     _info
+#else
+#  define rpmsginfo     _none
+#endif
+
 /* Buffer dumping macros do not depend on varargs */
 
 #ifdef CONFIG_DEBUG_ERROR
