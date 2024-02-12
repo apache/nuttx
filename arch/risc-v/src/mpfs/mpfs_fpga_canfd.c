@@ -47,8 +47,11 @@
 
 #include <arch/board/board.h>
 
-#include "hardware/mpfs_fpga_canfd.h"
+#include "mpfs_fpga_canfd.h"
 #include "riscv_internal.h"
+#include "mpfs_memorymap.h"
+
+#include "hardware/mpfs_fpga_canfd.h"
 
 /****************************************************************************
  * Pre-processor Definitions
