@@ -79,6 +79,7 @@ libmetal.zip:
 	$(Q) mv libmetal-$(VERSION) libmetal
 	$(Q) patch -p0 < 0001-libmetal-add-metal_list_for_each_safe-support.patch
 	$(Q) patch -p0 < 0002-libmetal-nuttx-io.c-align-access-when-read-write-siz.patch
+	$(Q) patch -p0 < 0003-libmetal-nuttx-io.c-Fix-void-pointer-arithmetic-in-a.patch
 
 .libmetal_headers: libmetal.zip
 else
