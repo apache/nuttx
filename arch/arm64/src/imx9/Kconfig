@@ -1,0 +1,31 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_IMX9
+
+menu "i.MX9 Chip Selection"
+
+choice
+	prompt "i.MX9 Core Configuration"
+	default ARCH_CHIP_IMX93
+
+config ARCH_CHIP_IMX93
+	bool "i.MX9 Application Processor"
+	select ARCH_HAVE_MULTICPU
+	select ARMV8A_HAVE_GICv3
+	select ARCH_CORTEX_A55
+
+endchoice # i.MX9 Chip Selection
+
+endmenu # "i.MX9 Chip Selection"
+
+menu "i.MX9 Peripheral Selection"
+config IMX9_UART1
+	bool "UART1"
+	default n
+	select UART1_SERIALDRIVER
+endmenu # iMX Peripheral Selection
+
+endif # ARCH_CHIP_IMX9

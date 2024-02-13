@@ -91,6 +91,14 @@ config ARCH_CHIP_IMX8
 	---help---
 		NXP i.MX8 (ARMv8a) applications processors
 
+config ARCH_CHIP_IMX9
+	bool "NXP i.MX9 Platform (ARMv8.2a)"
+	select ARCH_HAVE_ADDRENV
+	select ARCH_HAVE_IRQTRIGGER
+	select ARCH_NEED_ADDRENV_MAPPING
+	---help---
+		NXP i.MX9 (ARMv8.2a) applications processors
+
 config ARCH_CHIP_ARM64_CUSTOM
 	bool "Custom ARM64 chip"
 	select ARCH_CHIP_CUSTOM
@@ -181,6 +189,18 @@ config ARCH_CORTEX_A53
 	select ARCH_HAVE_TESTSET
 	select ARM_HAVE_NEON
 
+config ARCH_CORTEX_A55
+	bool
+	default n
+	select ARCH_ARMV8A
+	select ARCH_HAVE_TRUSTZONE
+	select ARCH_DCACHE
+	select ARCH_ICACHE
+	select ARCH_HAVE_MMU
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_TESTSET
+	select ARM_HAVE_NEON
+
 config ARCH_CORTEX_A57
 	bool
 	default n
@@ -229,6 +249,7 @@ config ARCH_CHIP
 	default "goldfish"  if ARCH_CHIP_GOLDFISH
 	default "fvp-v8r"   if ARCH_CHIP_FVP_ARMV8R
 	default "imx8"      if ARCH_CHIP_IMX8
+	default "imx9"      if ARCH_CHIP_IMX9
 
 config ARM_HAVE_NEON
 	bool
@@ -309,6 +330,10 @@ endif
 
 if ARCH_CHIP_IMX8
 source "arch/arm64/src/imx8/Kconfig"
+endif
+
+if ARCH_CHIP_IMX9
+source "arch/arm64/src/imx9/Kconfig"
 endif
 
 if ARCH_CHIP_GOLDFISH
