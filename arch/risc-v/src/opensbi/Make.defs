@@ -44,9 +44,9 @@ SBI_DIR   := opensbi
 
 OPENSBI_UNPACK  = opensbi-3rdparty
 OPENSBI_COMMIT  = fbaaafe808f3da7745760d757c436ef1b293d3ed
-OPENSBI_URL     = https://github.com/riscv-software-src/opensbi/tarball
+OPENSBI_URL     = https://github.com/tiiuae/opensbi/tarball
 OPENSBI_TARBALL = opensbi.tar.gz
-OPENSBI_DIR     = riscv-software-src-opensbi-fbaaafe
+OPENSBI_DIR     = tiiuae-opensbi-fbaaafe
 
 $(OPENSBI_TARBALL):
 	$(call DOWNLOAD,$(OPENSBI_URL),$(OPENSBI_COMMIT),opensbi/$(OPENSBI_TARBALL))
