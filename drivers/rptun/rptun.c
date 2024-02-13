@@ -849,7 +849,7 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
 {
   struct metal_init_params params = METAL_INIT_DEFAULTS;
   FAR struct rptun_priv_s *priv;
-  static bool onceinit;
+  static bool onceinit = false;
   FAR char *argv[3];
   char arg1[19];
   char name[32];
