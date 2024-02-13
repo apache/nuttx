@@ -80,6 +80,7 @@
  *  USCI  - Universal Serial Interface
  */
 
+#define XMC4_UNCACHED_PFLASH_BASE   0X0c000000 /* Uncached PMU/flash start address */
 #define XMC4_PBA0_BASE              0x40000000 /* PBA0 */
 #define XMC4_VADC_BASE              0x40004000 /* VADC */
 #define XMC4_VADC_G0_BASE           0x40004400
