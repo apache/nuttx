@@ -32,13 +32,11 @@
 #ifndef __ASSEMBLY__
 #if !defined(CONFIG_BUILD_KERNEL) || defined(CONFIG_NUTTSBI)
 
-void k230_hart_init(void);            /* M-mode initialization  */
-int  k230_hart_is_big(void);          /* check if on big core   */
-
-#endif /* !defined(CONFIG_BUILD_KERNEL) || defined(CONFIG_NUTTSBI) */
-
-void k230_hart_big_boot(uintptr_t boot);  /* turn on big core w/ boot addr */
+void k230_hart_init(void);                /* M-mode initialization */
+bool k230_hart_is_big(void);              /* true if on big core */
+void k230_hart_big_boot(uintptr_t addr);  /* turn on big core w/ boot addr */
 void k230_hart_big_stop(void);            /* turn off big core */
 
+#endif /* !defined(CONFIG_BUILD_KERNEL) || defined(CONFIG_NUTTSBI) */
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISCV_SRC_K230_K230_HART_H */
