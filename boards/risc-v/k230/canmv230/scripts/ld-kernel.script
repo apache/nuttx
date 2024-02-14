@@ -20,8 +20,8 @@
 
 MEMORY
 {
-    kflash (rx) : ORIGIN = 0x08200000, LENGTH = 2048K   /* w/ cache */
-    ksram (rwx) : ORIGIN = 0x08400000, LENGTH = 2048K   /* w/ cache */
+    kflash (rx) : ORIGIN = 0x08200000, LENGTH = 1024K   /* w/ cache */
+    ksram (rwx) : ORIGIN = 0x08300000, LENGTH = 1024K   /* w/ cache */
     pgram (rwx) : ORIGIN = 0x08600000, LENGTH =   10M   /* w/ cache */
 }
 

@@ -61,6 +61,8 @@
 
 #define RISCV_PMBT_EN  (1 << 62)
 
+/* K230 cache flush instructions */
+
 #define K230_DAT_SYNC_B   ".long 0x0ff0000f\n"
 #define K230_INS_SYNC_B   ".long 0x0000100f\n .long 0x0220000f\n"
 #define K230_I_IALL       ".long 0x0100000b\n"
@@ -70,11 +72,26 @@
 
 #define ASM               __asm__ __volatile__
 
+/* Hart reset control bits and delays */
+
+#define RESET_DONE_BIT     (1 << 12)
+#define RESET_RQST_BIT     (1 << 0)
+#define RESET_DONE_ENW     (1 << (12 + 16))
+#define RESET_RQST_ENW     (1 << (0 + 16))
+
+#define RESET_WAIT_USEC    100
+
 /****************************************************************************
- * Private Functions
+ * Private Variables
  ****************************************************************************/
 
 #if !defined(CONFIG_BUILD_KERNEL) || defined(CONFIG_NUTTSBI)
+
+static bool g_big = false;    /* true if running on big core */
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: hart_cleanup
@@ -99,25 +116,9 @@ static void k230_hart_cleanup(void)
   ASM(K230_INS_SYNC_B);
 }
 
-#endif /* !defined(CONFIG_BUILD_KERNEL) || defined(CONFIG_NUTTSBI) */
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-#if !defined(CONFIG_BUILD_KERNEL) || defined(CONFIG_NUTTSBI)
-
-/****************************************************************************
- * Name: k230_hart_on_big()
- * Description: returns true if running on big core
- ****************************************************************************/
-
-int k230_hart_is_big(void)
-{
-  #define MISA_VECTOR_BIT   ('V'-'A')
-  #define MISA_VECOTR_MASK  ( 1 << MISA_VECTOR_BIT )
-
-  return (READ_CSR(CSR_MISA) & MISA_VECOTR_MASK);
-}
 
 /****************************************************************************
  * Name: k230_hart_init()
@@ -126,7 +127,10 @@ int k230_hart_is_big(void)
 
 void k230_hart_init(void)
 {
-  bool big = k230_hart_is_big();
+#define MISA_VECTOR_BIT   ('V'-'A')
+#define MISA_VECOTR_MASK  (1 << MISA_VECTOR_BIT)
+
+  g_big = (READ_CSR(CSR_MISA) & MISA_VECOTR_MASK);
 
   k230_hart_cleanup();
 
@@ -134,73 +138,68 @@ void k230_hart_init(void)
   WRITE_CSR(CSR_MHCR,  MHCR);
   WRITE_CSR(CSR_MCOR,  MCOR);
   WRITE_CSR(CSR_MSMPR, MSMPR);
-  WRITE_CSR(CSR_MCCR2, big ? MCCR2_BIG : MCCR2);
-  WRITE_CSR(CSR_MHINT, big ? MHINT_BIG : MHINT);
+  WRITE_CSR(CSR_MCCR2, g_big ? MCCR2_BIG : MCCR2);
+  WRITE_CSR(CSR_MHINT, g_big ? MHINT_BIG : MHINT);
 
 #ifdef RISCV_PBMT
   SET_CSR(CSR_MENVCFG, MENVCFG_PBMT);
 #endif
 }
 
-/* Hart reset control bits */
+/****************************************************************************
+ * Name: k230_hart_on_big()
+ * Description: returns true if running on big core
+ ****************************************************************************/
 
-#define CORE_DONE_BIT     (1 << 12)
-#define CORE_REST_BIT     (1 << 0)
-#define CORE_DONE_ENW     (1 << (12 + 16))
-#define CORE_REST_ENW     (1 << (0 + 16))
-
-#define RESET_DELAY_US    200
+bool k230_hart_is_big(void)
+{
+  return g_big;
+}
 
 /****************************************************************************
  * Name: k230_hart_big_stop()
- * Description: stop big core
+ * Description: stop big core, can run in S-mode
  ****************************************************************************/
 
 void k230_hart_big_stop(void)
 {
-  volatile uint32_t *rctl = (uint32_t *)K230_CPU1_RESET;
-
-  /* 0x10001000 clear DONE */
-
-  *rctl = CORE_DONE_BIT | CORE_DONE_ENW;
-  up_udelay(RESET_DELAY_US);
+  if (k230_hart_is_big()) return;
 
   /* 0x10001 set RESET */
 
-  *rctl = CORE_REST_BIT | CORE_REST_ENW;
-  up_udelay(RESET_DELAY_US);
+  putreg32(RESET_RQST_BIT | RESET_RQST_ENW, K230_CPU1_RESET);
+  up_udelay(RESET_WAIT_USEC);
+  sinfo("reg: %x\n", getreg32(K230_CPU1_RESET));
 }
 
 /****************************************************************************
  * Name: k230_hart_big_boot()
- * Description: start big core from given address
+ * Description: start big core from given address, can run in S-mode
  ****************************************************************************/
 
 void k230_hart_big_boot(uintptr_t addr)
 {
-  volatile uint32_t *bctl = (uint32_t *)K230_CPU1_BOOTA;
-  volatile uint32_t *rctl = (uint32_t *)K230_CPU1_RESET;
-
   if (k230_hart_is_big()) return;
 
   /* learned from U-Boot baremetal and RTT sysctl_reset_cpu */
 
-  if (addr) *bctl = (uint32_t)addr;
+  if (addr) putreg32(addr, K230_CPU1_BOOTA);
+  sinfo("addr=%lx\n", addr);
 
-  /* 0x10001000 clear DONE */
+  /* 0x10001000 clear DONE bit */
 
-  *rctl = CORE_DONE_BIT | CORE_DONE_ENW;
-  up_udelay(RESET_DELAY_US);
+  putreg32(RESET_DONE_BIT | RESET_DONE_ENW, K230_CPU1_RESET);
+  up_udelay(RESET_WAIT_USEC);
 
-  /* 0x10001 set RESET */
+  /* 0x10001 set RQST bit */
 
-  *rctl = CORE_REST_BIT | CORE_REST_ENW;
-  up_udelay(RESET_DELAY_US);
+  putreg32(RESET_RQST_BIT | RESET_RQST_ENW, K230_CPU1_RESET);
+  up_udelay(RESET_WAIT_USEC);
 
-  /* 0x10000 clear RESET */
+  /* 0x10000 clear RQST bit */
 
-  *rctl = CORE_REST_ENW;
-  up_udelay(RESET_DELAY_US);
+  putreg32(RESET_RQST_ENW, K230_CPU1_RESET);
+  up_udelay(RESET_WAIT_USEC);
 }
 
 #endif /* !defined(CONFIG_BUILD_KERNEL) || defined(CONFIG_NUTTSBI) */
@@ -216,7 +215,7 @@ void sbi_late_initialize(void)
 {
   /* delegate K230 plic enable to S-mode */
 
-  *((volatile uint32_t *)K230_PLIC_CTRL) = 1;
+  putreg32(1, K230_PLIC_CTRL);
   k230_hart_init();
 }
 #endif
