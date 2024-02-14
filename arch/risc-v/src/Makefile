@@ -19,6 +19,8 @@
 ############################################################################
 
 include $(TOPDIR)/Make.defs
+-include $(APPDIR)/Make.defs
+
 include chip/Make.defs
 ifeq ($(CONFIG_OPENSBI),y)
 include opensbi/Make.defs

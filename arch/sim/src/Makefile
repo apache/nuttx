@@ -19,6 +19,8 @@
 ############################################################################
 
 -include $(TOPDIR)/Make.defs
+-include $(APPDIR)/Make.defs
+
 
 ARCH_SRCDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src
 

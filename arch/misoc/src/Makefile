@@ -19,6 +19,8 @@
 ############################################################################
 
 include $(TOPDIR)/Make.defs
+-include $(APPDIR)/Make.defs
+
 include chip/Make.defs
 
 ifeq ($(CONFIG_ARCH_CHIP_LM32),y)

@@ -19,6 +19,8 @@
 ############################################################################
 
 -include $(TOPDIR)/Make.defs
+-include $(APPDIR)/Make.defs
+
 -include chip/Make.defs
 
 ARCH_SUBDIR = sparc_v8

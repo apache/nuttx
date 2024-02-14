@@ -21,6 +21,8 @@
 # Makefile fragments
 
 include $(TOPDIR)/Make.defs
+-include $(APPDIR)/Make.defs
+
 include chip/Make.defs
 
 # Compiler-Dependent Make:  SDCC, Clang, or ZiLOG ZDS-II

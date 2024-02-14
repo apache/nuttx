@@ -19,6 +19,8 @@
 ############################################################################
 
 -include $(TOPDIR)/Make.defs
+-include $(APPDIR)/Make.defs
+
 -include chip$(DELIM)Make.defs
 
 ifeq ($(CONFIG_ARCH_XC5),y)
