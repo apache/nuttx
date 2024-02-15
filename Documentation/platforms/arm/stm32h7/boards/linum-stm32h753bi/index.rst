@@ -393,3 +393,18 @@ can enable the ModBus to respond to queries::
 In your pc you will be able to read the ModBus registers using an application like ``mbpoll``::
 
     $ mbpoll -a 10 -b 38400 -t 3 -r 1000 -c 4 /dev/ttyUSB1 -R
+
+modbus_master
+-------------
+
+Configures the ModBus RTU Master located at apps/examples/modbusmaster. This
+configuration enables a RS485 on USART6.
+
+After configuring the desired pins on menuconfig and wiring the RS485 converter, you
+can enable the ModBus Master to create queries for device with address 10::
+
+    nsh> mbmaster
+
+In your pc you will be able to create a ModBus Slave with address 10 using an application like ``diagslave``::
+
+    $ sudo diagslave -a 10 -b 38400 /dev/ttyUSB0
