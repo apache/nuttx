@@ -43,7 +43,9 @@ if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/libcxx)
       patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
       ${CMAKE_CURRENT_LIST_DIR}/0001_fix_stdatomic_h_miss_typedef.patch && patch
       -p3 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
-      ${CMAKE_CURRENT_LIST_DIR}/mbstate_t.patch
+      ${CMAKE_CURRENT_LIST_DIR}/mbstate_t.patch && patch -p1 -d
+      ${CMAKE_CURRENT_LIST_DIR}/libcxx <
+      ${CMAKE_CURRENT_LIST_DIR}/0001-libcxx-remove-mach-time-h.patch
     DOWNLOAD_NO_PROGRESS true
     TIMEOUT 30)
 
