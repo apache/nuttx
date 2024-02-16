@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/nrf52/nrf9160-dk-nrf52/src/nrf52_bringup.c
+ * boards/arm/nrf52/common/include/nrf52_mrf24j40.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,65 +18,50 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARDS_ARM_NRF52_COMMON_INCLUDE_NRF52_MRF24J40_H
+#define __BOARDS_ARM_NRF52_COMMON_INCLUDE_NRF52_MRF24J40_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <syslog.h>
+#include <stdint.h>
 
-#include <nuttx/fs/fs.h>
-
-#ifdef CONFIG_NRF52_RADIO_IEEE802154
-#  include "nrf52_ieee802154.h"
-#endif
-
-#include "nrf9160-dk-nrf52.h"
+#include <nuttx/wireless/ieee802154/mrf24j40.h>
 
 /****************************************************************************
- * Public Functions
+ * Public Types
+ ****************************************************************************/
+
+struct nrf52_mrf24j40_s
+{
+  struct mrf24j40_lower_s  dev;
+  xcpt_t                   handler;
+  void                    *arg;
+  uint32_t                 intcfg;
+  uint8_t                  spidev;
+};
+
+/****************************************************************************
+ * Public Functions Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nrf52_bringup
+ * Name: nrf52_mrf24j40_devsetup
  *
  * Description:
- *   Perform architecture-specific initialization
+ *   Initialize one the MRF24J40 device in one mikroBUS slot
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_BOARDCTL=y :
- *     Called from the NSH library
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
  *
  ****************************************************************************/
 
-int nrf52_bringup(void)
-{
-  int ret;
-
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = nx_mount(NULL, NRF52_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to mount the PROC filesystem: %d\n",  ret);
-    }
-#endif /* CONFIG_FS_PROCFS */
-
-#ifdef CONFIG_NRF52_RADIO_IEEE802154
-  ret = nrf52_ieee802154_initialize();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize IEE802154 radio: %d\n",
-             ret);
-    }
+#ifdef CONFIG_IEEE802154_MRF24J40
+int nrf52_mrf24j40_devsetup(struct nrf52_mrf24j40_s *priv);
 #endif
 
-  UNUSED(ret);
-  return OK;
-}
+#endif /* __BOARDS_ARM_NRF52_COMMON_INCLUDE_NRF52_MRF24J40_H */

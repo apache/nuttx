@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/nrf52/nrf9160-dk-nrf52/src/nrf9160-dk-nrf52.h
+ * arch/arm/src/nrf52/nrf52_ieee802154_tim.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,63 +18,88 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_NRF52_NRF9160_DK_NRF52_SRC_NRF9160_DK_NRF52_H
-#define __BOARDS_ARM_NRF52_NRF9160_DK_NRF52_SRC_NRF9160_DK_NRF52_H
+#ifndef __ARCH_ARM_SRC_NRF52_NRF52_IEEE802154_TIM_H
+#define __ARCH_ARM_SRC_NRF52_NRF52_IEEE802154_TIM_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
 
-#include "nrf52_gpio.h"
+#include "nrf52_tim.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ************************************************************/
-
-/* procfs File System */
-
-#ifdef CONFIG_FS_PROCFS
-#  ifdef CONFIG_NSH_PROC_MOUNTPOINT
-#    define NRF52_PROCFS_MOUNTPOINT CONFIG_NSH_PROC_MOUNTPOINT
-#  else
-#    define NRF52_PROCFS_MOUNTPOINT "/proc"
-#  endif
-#endif
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
+enum nrf52_ieee802154_timer_e
+{
+  NRF52_TIMER_CHAN_ACK       = 0, /* Handle ACK time */
+  NRF52_TIMER_CHAN_TXDELAY   = 1, /* Handle TX delay */
+  NRF52_TIMER_CHAN_WAITACK   = 2, /* Handle ACK wait */
+  NRF52_TIMER_CHAN_CSMADELAY = 3, /* Handle CSMA wait */
+};
+
+/* Forward reference */
+
+struct nrf52_radioi8_tim_s;
+struct nrf52_radioi8_dev_s;
+
+/* Timer ops  */
+
+struct nrf52_radioi8_tim_ops_s
+{
+  /* Configure TIMER event */
+
+  int (*setup)(struct nrf52_radioi8_dev_s *dev, uint8_t chan, uint32_t val);
+
+  /* Stop timer */
+
+  void (*stop)(struct nrf52_radioi8_dev_s *dev);
+
+  /* Reset timer */
+
+  void (*reset)(struct nrf52_radioi8_dev_s *dev);
+};
+
+/* Timer interface */
+
+struct nrf52_radioi8_tim_s
+{
+  /* Timer lower-half */
+
+  struct nrf52_tim_dev_s *tim;
+
+  /* IEEE 802.15.4 timer operations */
+
+  struct nrf52_radioi8_tim_ops_s *ops;
+
+  /* Timer state */
+
+  int8_t tim_now;
+  bool   tim_pending;
+};
+
 /****************************************************************************
- * Public Data
+ * Public Function Prototypes
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-
 /****************************************************************************
- * Public Functions Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: nrf52_bringup
+ * Name: nrf52_radioi8_tim_init
  *
  * Description:
- *   Perform architecture-specific initialization
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_BOARDCTL=y :
- *     Called from the NSH library
+ *   Initialize high resoluton timer for IEEE802154 operations.
+ *   Used to handle short radio timeouts like ACK, IFS or delayed
+ *   transmitions.
  *
  ****************************************************************************/
 
-int nrf52_bringup(void);
+struct nrf52_radioi8_tim_s *
+nrf52_radioi8_tim_init(struct nrf52_radioi8_dev_s *dev);
 
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_NRF52_NRF9160_DK_NRF52_SRC_NRF9160_DK_NRF52_H */
+#endif  /* __ARCH_ARM_SRC_NRF52_NRF52_IEEE802154_TIM_H */

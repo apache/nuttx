@@ -64,6 +64,16 @@
 #define GPIO_BUTTON3 (GPIO_INPUT | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN(15))
 #define GPIO_BUTTON4 (GPIO_INPUT | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN(16))
 
+/* GPIO definitions *********************************************************/
+
+/* MRF24J40 pins
+ * CS   - P0.11
+ * INT  - P0.12
+ */
+
+#define GPIO_MRF24J40_CS    (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN(11))
+#define GPIO_MRF24J40_INT   (GPIO_INPUT  | GPIO_PORT0 | GPIO_PIN(12))
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -93,6 +103,34 @@
  ****************************************************************************/
 
 int nrf52_bringup(void);
+
+/****************************************************************************
+ * Name: nrf52_spidev_initialize
+ *
+ * Description:
+ *   Called to configure SPI chip select GPIO pins for the nrf52840-dk board.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NRF52_SPI_MASTER
+void nrf52_spidev_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: nrf52_mrf24j40_initialize
+ *
+ * Description:
+ *   Initialize the MRF24J40 device.
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IEEE802154_MRF24J40
+int nrf52_mrf24j40_initialize(void);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_NRF52_NRF52832_DK_SRC_NRF52832_DK_H */
