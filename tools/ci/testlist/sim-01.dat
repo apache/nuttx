@@ -36,9 +36,6 @@
 # macOS matter compilation is not currently supported
 -Darwin,sim:matter
 
-# macOS has trouble with sim:libcxxtest
--Darwin,sim:libcxxtest
-
 # Boards build by CMake
 CMake,sim:alsa
 CMake,sim:bluetooth
