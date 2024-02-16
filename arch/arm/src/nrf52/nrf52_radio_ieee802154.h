@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/nrf52/nrf9160-dk-nrf52/src/nrf52_bringup.c
+ * arch/arm/src/nrf52/nrf52_radio_ieee802154.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,65 +18,36 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_NRF52_NRF52_RADIO_IEEE802154_H
+#define __ARCH_ARM_SRC_NRF52_NRF52_RADIO_IEEE802154_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <syslog.h>
+#include <nuttx/wireless/ieee802154/ieee802154_radio.h>
 
-#include <nuttx/fs/fs.h>
-
-#ifdef CONFIG_NRF52_RADIO_IEEE802154
-#  include "nrf52_ieee802154.h"
-#endif
-
-#include "nrf9160-dk-nrf52.h"
+#include "nrf52_radio.h"
 
 /****************************************************************************
- * Public Functions
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nrf52_bringup
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nrf52_radioi8_register
  *
  * Description:
- *   Perform architecture-specific initialization
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_BOARDCTL=y :
- *     Called from the NSH library
+ *   Register NRF52 radio in IEEE802154 mode
  *
  ****************************************************************************/
 
-int nrf52_bringup(void)
-{
-  int ret;
+struct ieee802154_radio_s *
+nrf52_radioi8_register(struct nrf52_radio_board_s *board);
 
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = nx_mount(NULL, NRF52_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to mount the PROC filesystem: %d\n",  ret);
-    }
-#endif /* CONFIG_FS_PROCFS */
-
-#ifdef CONFIG_NRF52_RADIO_IEEE802154
-  ret = nrf52_ieee802154_initialize();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize IEE802154 radio: %d\n",
-             ret);
-    }
-#endif
-
-  UNUSED(ret);
-  return OK;
-}
+#endif /* __ARCH_ARM_SRC_NRF52_NRF52_RADIO_IEEE802154_H */
