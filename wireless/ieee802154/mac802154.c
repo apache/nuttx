@@ -458,9 +458,9 @@ static void mac802154_notify_worker(FAR void *arg)
  *    This function is called in the following scenarios:
  *        - The MAC receives a START.request primitive
  *        - Upon receiving the IEEE802154_SFEVENT_ENDOFACTIVE event from the
- *          this radio layer, the MAC checks the bf_update flag and if set
- *          calls function. The bf_update flag is set when various attributes
- *          that effect the beacon are updated.
+ *          this radio layer, the MAC checks the beaconupdate flag and if set
+ *          calls function. The beaconupdate flag is set when various
+ *          attributes that effect the beacon are updated.
  *
  *    Internal function used by various parts of the MAC layer. This function
  *    uses the various MAC attributes to update the beacon frame. It loads
@@ -778,8 +778,8 @@ static void mac802154_purge_worker(FAR void *arg)
  ****************************************************************************/
 
 static int
-  mac802154_radiopoll(FAR const struct ieee802154_radiocb_s *radiocb,
-                      bool gts, FAR struct ieee802154_txdesc_s **txdesc)
+mac802154_radiopoll(FAR const struct ieee802154_radiocb_s *radiocb,
+                    bool gts, FAR struct ieee802154_txdesc_s **txdesc)
 {
   FAR struct mac802154_radiocb_s *cb =
     (FAR struct mac802154_radiocb_s *)radiocb;
