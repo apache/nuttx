@@ -188,7 +188,7 @@ static void rpmsg_ping_logout_rate(uint64_t len, clock_t avg)
 int rpmsg_ping(FAR struct rpmsg_endpoint *ept,
                FAR const struct rpmsg_ping_s *ping)
 {
-  clock_t min = UINT_MAX;
+  clock_t min = CLOCK_MAX;
   clock_t max = 0;
   uint64_t total = 0;
   uint32_t buf_len = 0;
