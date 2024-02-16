@@ -138,3 +138,20 @@ usbnsh
 ------
 
 Basic NuttShell configuration (CDCACM console enabled in USB Port, at 115200 bps).
+
+ieee802154_6lowpan
+------------------
+
+Cheat Sheet.  Here is a concise summary of all all the steps needed to
+run the UDP test (C=Coordinator; E=Endpoint)::
+
+         C: nsh> i8 wpan0 startpan cd:ab
+         C: nsh> i8 set saddr 0A:00
+         C: nsh> i8 set ep_saddr 0B:00
+         C: nsh> i8 acceptassoc
+         E: nsh> i8 wpan0 assoc
+         C: nsh> ifup wpan0
+         C: nsh> ifconfig          <-- To get the <server-ip>
+         E: nsh> ifup wpan0
+         C: nsh> udpserver &
+         E: nsh> udpclient <server-ip> &

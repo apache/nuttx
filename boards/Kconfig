@@ -3650,6 +3650,15 @@ endif
 if ARCH_BOARD_NRF52840_DK
 source "boards/arm/nrf52/nrf52840-dk/Kconfig"
 endif
+if ARCH_BOARD_THINGY52
+source "boards/arm/nrf52/thingy52/Kconfig"
+endif
+if ARCH_BOARD_THINGY91_NRF52
+source "boards/arm/nrf52/thingy91-nrf52/Kconfig"
+endif
+if ARCH_BOARD_NRF9160_DK_NRF52
+source "boards/arm/nrf52/nrf9160-dk-nrf52/Kconfig"
+endif
 if ARCH_BOARD_NUTINY_NUC120
 source "boards/arm/nuc1xx/nutiny-nuc120/Kconfig"
 endif

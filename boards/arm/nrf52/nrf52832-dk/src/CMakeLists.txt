@@ -34,6 +34,14 @@ if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS nrf52_buttons.c)
 endif()
 
+if(CONFIG_NRF52_SPI_MASTER)
+  list(APPEND SRCS nrf52_spi.c)
+endif()
+
+if(CONFIG_IEEE802154_MRF24J40)
+  list(APPEND SRCS nrf52_ieee802154_mrf24j40.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 if(CONFIG_ARCH_BOARD_COMMON)

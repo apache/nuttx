@@ -94,6 +94,20 @@ endif()
 
 if(CONFIG_NRF52_RADIO)
   list(APPEND SRCS nrf52_radio.c)
+
+  if(CONFIG_NRF52_RADIO_IEEE802154)
+    list(APPEND SRCS nrf52_ieee802154_radio.c)
+    list(APPEND SRCS nrf52_ieee802154_tim.c)
+    list(APPEND SRCS nrf52_ieee802154.c)
+
+    if(CONFIG_NRF52_RADIO_IEEE802154_SUPERFRAME)
+      list(APPEND SRCS nrf52_ieee802154_rtc.c)
+    endif()
+
+    if(CONFIG_NRF52_RADIO_IEEE802154_TRACE)
+      list(APPEND SRCS nrf52_ieee802154_trace.c)
+    endif()
+  endif()
 endif()
 
 if(CONFIG_NRF52_TIMER)
