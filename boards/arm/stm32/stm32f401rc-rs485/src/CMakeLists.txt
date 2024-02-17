@@ -40,6 +40,10 @@ if(CONFIG_STM32_SDIO)
   list(APPEND SRCS stm32_sdio.c)
 endif()
 
+if(CONFIG_STM32_OTGFS)
+  list(APPEND SRCS stm32_usb.c)
+endif()
+
 if(CONFIG_STM32_CONFIG_I2C_EE_24XXEEPROM)
   list(APPEND SRCS stm32_at24.c)
 endif()
