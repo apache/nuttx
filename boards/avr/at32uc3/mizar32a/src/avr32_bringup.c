@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/avr/src/at32uc3/at32uc3a_pinmux.h
+ * boards/avr/at32uc3/mizar32a/src/avr32_bringup.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,32 +18,40 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_AVR_SRC_AT32UC3_AT32UC3A_PINMUX_H
-#define __ARCH_AVR_SRC_AT32UC3_AT32UC3A_PINMUX_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
+#include <debug.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define PINMUX_USART1_RXD_0        (GPIO_PERIPH | GPIO_FUNCA | GPIO_PORTA | 5)
-#define PINMUX_USART1_TXD_0        (GPIO_PERIPH | GPIO_FUNCA | GPIO_PORTA | 6)
-
 /****************************************************************************
- * Public Types
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions Prototypes
+ * Name: avr32_bringup
+ *
+ * Description:
+ *   Bring up board features
+ *
  ****************************************************************************/
 
-#endif /* __ARCH_AVR_SRC_AT32UC3_AT32UC3A_PINMUX_H */
+int avr32_bringup(void)
+{
+  int ret = OK;
+
+  #warning "Not Implemented"
+
+  return ret;
+}

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/avr/src/at32uc3/at32uc3a_pinmux.h
+ * boards/avr/at32uc3/mizar32a/src/avr32_boot.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,32 +18,51 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_AVR_SRC_AT32UC3_AT32UC3A_PINMUX_H
-#define __ARCH_AVR_SRC_AT32UC3_AT32UC3A_PINMUX_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <debug.h>
+
+#include <nuttx/board.h>
+#include <arch/board/board.h>
+
+#include "avr_internal.h"
+#include "at32uc3.h"
+#include "mizar32a.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define PINMUX_USART1_RXD_0        (GPIO_PERIPH | GPIO_FUNCA | GPIO_PORTA | 5)
-#define PINMUX_USART1_TXD_0        (GPIO_PERIPH | GPIO_FUNCA | GPIO_PORTA | 6)
-
 /****************************************************************************
- * Public Types
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions Prototypes
+ * Name: at32uc3_boardinitialize
+ *
+ * Description:
+ *   All AVR32 AT32UC3 architectures must provide the following entry point.
+ *   This entry point is called early in the initialization - after all
+ *   memory has been configured and mapped but before any devices have been
+ *   initialized.
+ *
  ****************************************************************************/
 
-#endif /* __ARCH_AVR_SRC_AT32UC3_AT32UC3A_PINMUX_H */
+void at32uc3_boardinitialize(void)
+{
+  /* Configure SPI chip selects */
+
+  /* Configure on-board LEDs if LED support has been selected. */
+
+#ifdef CONFIG_ARCH_LEDS
+  board_autoled_initializeialize();
+#endif
+}
