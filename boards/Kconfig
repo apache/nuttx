@@ -1084,6 +1084,15 @@ config ARCH_BOARD_MISOC_VERILATOR
 	---help---
 		This configuration is port to NuttX running on Verilator.
 
+config ARCH_BOARD_MIZAR32A
+	bool "Mizar32-A"
+	depends on ARCH_CHIP_AT32UC3A0512
+	select ARCH_HAVE_LEDS
+	---help---
+                This is a port of NuttX for the Mizar32-A board designed by SimpleMachines,
+                Italy. The board is based on the AT32UC3A0512 MCU and uses avr32-gcc
+                version 4.4.7 for its build on GNU/Linux.
+
 config ARCH_BOARD_MOTEINO_MEGA
 	bool "LowPowerLab MoteinoMEGA"
 	depends on ARCH_CHIP_ATMEGA1284P
@@ -3281,6 +3290,7 @@ config ARCH_BOARD
 	default "micropendous3"             if ARCH_BOARD_MICROPENDOUS3
 	default "mirtoo"                    if ARCH_BOARD_MIRTOO
 	default "misoc"                     if ARCH_BOARD_MISOC_QEMU || ARCH_BOARD_MISOC_VERILATOR
+	default "mizar32a"                  if ARCH_BOARD_MIZAR32A
 	default "moteino-mega"              if ARCH_BOARD_MOTEINO_MEGA
 	default "ne64badge"                 if ARCH_BOARD_NE64BADGE
 	default "nrf52-feather"             if ARCH_BOARD_NRF52_FEATHER
@@ -4228,6 +4238,9 @@ source "boards/arm/mx8mp/verdin-mx8mp/Kconfig"
 endif
 if ARCH_BOARD_AVR32DEV1
 source "boards/avr/at32uc3/avr32dev1/Kconfig"
+endif
+if ARCH_BOARD_MIZAR32A
+source "boards/avr/at32uc3/mizar32a/Kconfig"
 endif
 if ARCH_BOARD_MEGA1284P_XPLAINED
 source "boards/avr/atmega/mega1284p-xplained/Kconfig"

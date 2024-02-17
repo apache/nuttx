@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/avr/src/at32uc3/at32uc3_pm.h
+ * boards/avr/at32uc3/mizar32a/src/avr32_bringup.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,37 +18,40 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_AVR_SRC_AT32UC3_AT32UC3_PM_H
-#define __ARCH_AVR_SRC_AT32UC3_AT32UC3_PM_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_ARCH_CHIP_AT32UC3B)
-#  include "at32uc3b_pm.h"
-#elif defined(CONFIG_ARCH_CHIP_AT32UC3A)
-#  include "at32uc3a_pm.h"
-#else
-#  error "Unknown AVR32 chip"
-#endif
+#include <sys/types.h>
+#include <debug.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Types
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions Prototypes
+ * Name: avr32_bringup
+ *
+ * Description:
+ *   Bring up board features
+ *
  ****************************************************************************/
 
-#endif /* __ARCH_AVR_SRC_AT32UC3_AT32UC3_PM_H */
+int avr32_bringup(void)
+{
+  int ret = OK;
+
+  /* #warning "Not Implemented" */
+
+  return ret;
+}

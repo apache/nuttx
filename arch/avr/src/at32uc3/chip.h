@@ -27,6 +27,12 @@
 
 #include <nuttx/config.h>
 
+/* Include only the memory map.  Other chip hardware files should then
+ * include this file for the proper setup
+ */
+
+#include "at32uc3_memorymap.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -35,11 +41,30 @@
 
 /* UC3 A0/A1 Series */
 
+#if defined (CONFIG_ARCH_CHIP_AT32UC3A0512)
+#  define CONFIG_ARCH_CHIP_AT32UC3A  1            /* UC3 A series */
+#  define CONFIG_ARCH_CHIP_AT32UC3A0 1            /* UC3 A0 (144-pin) series */
+#  define AVR32_ONCHIP_FLASH_SIZE    (512*1024)   /* Size of on-chip FLASH (bytes) */
+#  define AVR32_ONCHIP_SRAM_SIZE     (64*1024)    /* Size of on-chip SRAM (bytes) */
+#  define AVR32_USB_FULLSPEED        1            /* USB full-speed support */
+#  define AVR32_USB_HOST             1            /* USB host support (OTG) */
+#  define AVR32_USB_DEVICE           1            /* USB device support */
+#  define AVR32_NUSART               4            /* Number of USARTs */
+#  define AVR32_NSPI                 2            /* Number of SPI */
+#  define AVR32_NTWI                 1            /* Number of TWI (I2C) */
+#  define AVR32_NSSC                 1            /* Number of SSC (I2S audio) */
+#  define AVR32_NGPIO                66           /* Number of GPIO pins */
+#  define AVR32_NTIMER               1            /* Number of Timers */
+#  define AVR32_NPWM                 7            /* Number of PWM channels */
+#  define AVR32_NOSC                 1            /* Number of crystal oscillators */
+#  define AVR32_NADC10               8            /* Number of 10-bit A/D channels */
+#  define AVR32_NDMAC                1            /* Number of DMA channels */
+
 /* UC3 A2/A3 Series */
 
 /* UC3 B0 (64-pin) / B1 (48-pin, no USB host) Series */
 
-#ifdef CONFIG_ARCH_CHIP_AT32UC3B064
+#elif defined(CONFIG_ARCH_CHIP_AT32UC3B064)
 #  define CONFIG_ARCH_CHIP_AT32UC3B  1            /* UC3 B series */
 #  define CONFIG_ARCH_CHIP_AT32UC3B0 1            /* UC3 B0 (64-pin) series */
 #  define AVR32_ONCHIP_FLASH_SIZE    (64*1024)    /* Size of on-chip FLASH (bytes) */
@@ -186,12 +211,6 @@
 #else
 #  error "Unsupported AVR32 chip"
 #endif
-
-/* Include only the memory map.  Other chip hardware files should then
- * include this file for the proper setup
- */
-
-#include "at32uc3_memorymap.h"
 
 /****************************************************************************
  * Public Types
