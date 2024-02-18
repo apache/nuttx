@@ -2976,6 +2976,14 @@ config ARCH_BOARD_S698PM_DKIT
 	---help---
 		none
 
+config ARCH_BOARD_HPM6360EVK
+	bool "Hpmicro hpm6360evk"
+	depends on ARCH_CHIP_HPM6360IPA
+	select ARCH_HAVE_LEDS
+	---help---
+		This is the board configuration for the port of NuttX to the Hpmicro hpm6750evk2
+		board.  This board features the RISC-V hpm6340.
+
 config ARCH_BOARD_HPM6750EVK2
 	bool "Hpmicro hpm6750evk2"
 	depends on ARCH_CHIP_HPM6750
@@ -3379,6 +3387,7 @@ config ARCH_BOARD
 	default "xx3803"                    if ARCH_BOARD_XX3803
 	default "xx3823"                    if ARCH_BOARD_XX3823
 	default "s698pm-dkit"               if ARCH_BOARD_S698PM_DKIT
+	default "hpm6360evk"				if ARCH_BOARD_HPM6360EVK
 	default "hpm6750evk2"               if ARCH_BOARD_HPM6750EVK2
 	default "at32f437-mini"             if ARCH_BOARD_AT32F437_MINI
 
@@ -4324,6 +4333,9 @@ source "boards/sparc/s698pm/s698pm-dkit/Kconfig"
 endif
 if ARCH_BOARD_TLSR8278ADK80D
 source "boards/arm/tlsr82/tlsr8278adk80d/Kconfig"
+endif
+if ARCH_BOARD_HPM6360EVK
+source "boards/risc-v/hpm6000/hpm6360evk/Kconfig"
 endif
 if ARCH_BOARD_HPM6750EVK2
 source "boards/risc-v/hpm6750/hpm6750evk2/Kconfig"
