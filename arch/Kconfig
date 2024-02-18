@@ -263,6 +263,10 @@ config ARCH_TOOLCHAIN_CLANG
 	select ARCH_TOOLCHAIN_GNU
 	default n
 
+config ARCH_TOOLCHAIN_TASKING
+	bool
+	default n
+
 choice
 	prompt "Link Time Optimization (LTO)"
 	default LTO_NONE

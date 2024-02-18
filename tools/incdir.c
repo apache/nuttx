@@ -67,7 +67,8 @@ enum compiler_e
   COMPILER_CLANG,
   COMPILER_MINGW,
   COMPILER_SDCC,
-  COMPILER_ZDSII
+  COMPILER_ZDSII,
+  COMPILER_TASKING
 };
 
 /****************************************************************************
@@ -199,6 +200,10 @@ static enum compiler_e get_compiler(char *ccname)
            strstr(ccname, "ez80cc") != NULL)
     {
       return COMPILER_ZDSII;
+    }
+  else if (strstr(ccname, "ctc") != NULL)
+    {
+      return COMPILER_TASKING;
     }
   else
     {
@@ -347,7 +352,7 @@ int main(int argc, char **argv, char **envp)
       wintool = true;
 #endif
     }
-  else if (compiler == COMPILER_SDCC)
+  else if (compiler == COMPILER_SDCC || compiler == COMPILER_TASKING)
     {
       cmdarg = "-I";
     }
