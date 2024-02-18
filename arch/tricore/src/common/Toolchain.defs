@@ -1,0 +1,127 @@
+############################################################################
+# arch/tricore/src/common/Toolchain.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+#
+# Supported toolchains
+#
+# Each toolchain definition should set:
+#
+#  CROSSDEV         The GNU toolchain triple (command prefix)
+#  ARCHCPUFLAGS     CPU-specific flags selecting the instruction set
+#                   FPU options, etc.
+#  ARCHOPTIMIZATION The optimization level that results in
+#                   reliable code generation.
+#
+
+ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
+  ARCHOPTIMIZATION += $(CONFIG_DEBUG_OPTLEVEL)
+else ifeq ($(CONFIG_DEBUG_FULLOPT),y)
+  ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
+    ARCHOPTIMIZATION += -Oz
+  else
+    ARCHOPTIMIZATION += -Os
+  endif
+endif
+
+# Tasking toolchain
+
+CC                = cctc
+CXX               = cctc
+CPP               = cctc $(ARCHOPTIMIZATION)
+LD                = cctc
+STRIP             = strip --strip-unneeded
+AR                = artc -r
+NM                = nm
+OBJCOPY           = echo
+OBJDUMP           = elfdump
+
+ARCHOPTIMIZATION += --lsl-core=vtc
+LDFLAGS          += --lsl-core=vtc
+ARCHOPTIMIZATION += --iso=99
+ARCHOPTIMIZATION += --language=+gcc,+volatile,-strings,-kanji
+
+# pragma align <4> (default: 0)
+
+ARCHOPTIMIZATION += --align=4
+
+# Always use 32-bit integers for enumeration
+
+ARCHOPTIMIZATION += --integer-enumeration
+
+# tradeoff between speed (-t0) and size (-t4) (default: 4)
+
+ARCHOPTIMIZATION += --tradeoff=2
+
+# enable symbolic debug information
+
+ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
+  ARCHOPTIMIZATION += --debug-info=default
+  ARCHOPTIMIZATION += --keep-temporary-files
+  LDFLAGS          += -g
+endif
+
+# merge source code with assembly output
+
+ARCHOPTIMIZATION += --source
+
+# generate alignment depending on assume_if hints
+
+ARCHOPTIMIZATION += --branch-target-align
+
+
+# Since nuttx uses too many of GNU extensions in the implementation of
+# FPU-related library functions, which is not supported in tasking,
+# so currently we cannot use FPU-related configurations to manage it.
+#
+# Just set fp-model to Double Precision:
+# --fp-model[=<flag>,...]         floating-point model (default: cFlnrSTz)
+#   0                               alias for --fp-model=CFLNRStZ (strict)
+#   1                               alias for --fp-model=cFLNRSTZ (precise)
+#   2                               alias for --fp-model=cFlnrSTz (fast-dp)
+#   3                               alias for --fp-model=cflnrSTz (fast-sp)
+
+ARCHOPTIMIZATION += --fp-model=2
+LDFLAGS          += --fp-model=2
+LDFLAGS          += -lfp_fpu
+
+LDFLAGS          += --hex-format=s -Wl-OtxYcL -Wl-mcrfiklsmnoduq
+LDFLAGS          += -lrt
+
+# ctc W500: ["stdio/lib_libvsprintf.c" 884/29] expression without effect
+# ctc W507: ["mm_heap/mm_malloc.c" 238/64] variable "nodesize" is possibly uninitialized
+# ctc W508: ["misc/lib_impure.c" 1/1] empty source file
+# ctc W525: ["getopt.c" 678/3] discarded 'const' qualifier at assignment: conversion from char const * to char *
+# ctc W527: ["stdlib/lib_strtold.c" 565/23] constant of type "double" saturated
+# ctc W526: ["include/sys/epoll.h" 87/5] enumeration constant shall be representable as 'int'
+# ctc W529: ["wchar/lib_mbrtowc.c" 88/35] overflow in constant expression of type "unsigned long int"
+# ctc W544: ["wqueue/kwork_thread.c" 210/32] unreachable code
+# ctc W549: ["unistd/lib_getopt_common.c" 544/15] condition is always true
+# ctc W553: ["vfs/fs_fcntl.c" 231/7] no 'break' or comment before case label
+# ctc W557: ["common/tricore_main.c" 58/11] possible infinite loop
+# ctc W560: ["tmpfs/fs_tmpfs.c" 232/25] possible truncation at implicit conversion to type "unsigned short int"
+# ctc W562: ["mm_heap/mm_memalign.c" 70/20] unary minus applied to unsigned value
+# ctc W558: ["include/nuttx/power/regulator.h" 224/36] struct/union/enum definition in parameter declaration
+# ctc W587: ["stdlib/lib_strtold.c" 571/23] underflow on constant of type "double"
+# ctc W588: ["misc/lib_glob.c" 150/13] dead assignment to "i" eliminated
+# ctc W589: ["inode/fs_inodesearch.c" 72/8] pointer assumed to be nonzero - test removed
+
+TASKING_WARNINGS  = 500,507,508,525,526,527,529,544,549,553,560,562,557,558,587,588,589
+
+ARCHOPTIMIZATION += --pass-c=--no-warnings=$(TASKING_WARNINGS)
