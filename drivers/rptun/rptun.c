@@ -127,7 +127,7 @@ static int rptun_wait(FAR struct rpmsg_s *rpmsg, FAR sem_t *sem);
 static int rptun_post(FAR struct rpmsg_s *rpmsg, FAR sem_t *sem);
 static int rptun_ioctl(FAR struct rpmsg_s *rpmsg, int cmd,
                        unsigned long arg);
-static void rptun_panic_(FAR struct rpmsg_s *rpmsg);
+static void rptun_panic(FAR struct rpmsg_s *rpmsg);
 static void rptun_dump(FAR struct rpmsg_s *rpmsg);
 static FAR const char *rptun_get_local_cpuname(FAR struct rpmsg_s *rpmsg);
 static FAR const char *rptun_get_cpuname(FAR struct rpmsg_s *rpmsg);
@@ -165,7 +165,7 @@ static const struct rpmsg_ops_s g_rptun_rpmsg_ops =
   rptun_wait,
   rptun_post,
   rptun_ioctl,
-  rptun_panic_,
+  rptun_panic,
   rptun_dump,
   rptun_get_local_cpuname,
   rptun_get_cpuname,
@@ -632,7 +632,7 @@ static int rptun_ioctl(FAR struct rpmsg_s *rpmsg, int cmd, unsigned long arg)
   return ret;
 }
 
-static void rptun_panic_(FAR struct rpmsg_s *rpmsg)
+static void rptun_panic(FAR struct rpmsg_s *rpmsg)
 {
   FAR struct rptun_priv_s *priv = (FAR struct rptun_priv_s *)rpmsg;
 
