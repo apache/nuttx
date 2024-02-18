@@ -1,0 +1,62 @@
+############################################################################
+# arch/tricore/src/tc3xx/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+ifeq ($(CONFIG_ARCH_CHIP_TC397),y)
+  -include tc3xx/tc397/Make.defs
+endif
+
+CHIP_CSRCS += tc3xx_timerisr.c
+CHIP_CSRCS += tc3xx_serial.c
+
+VPATH += tc3xx
+
+tc3xx_libc$(OBJEXT): tc3xx_libc.c
+	$(call COMPILE, $<, $@)
+
+libc_fpu$(LIBEXT): tc3xx_libc$(OBJEXT)
+	$(call ARCHIVE, $@, $<)
+
+EXTRA_LIBS += libc_fpu$(LIBEXT)
+LIBPATHS   += $(CURDIR)
+
+TC397_UNPACK  = tc397
+TC397_COMMIT  = master
+TC397_URL     = https://github.com/anchao/tc397_sdk/archive/refs/heads
+TC397_TARBALL = tc3xx/$(TC397_UNPACK).tar.gz
+TC397_DIR     = tc397_sdk-master
+
+$(TC397_TARBALL):
+	$(call DOWNLOAD,$(TC397_URL),$(TC397_COMMIT).tar.gz,$(TC397_TARBALL))
+
+tc3xx/.tc397_unpack: $(TC397_TARBALL)
+	$(Q) echo "Unpacking: TC397"
+	$(Q) tar xzf $(TC397_TARBALL) -C tc3xx
+	$(Q) mv tc3xx/$(TC397_DIR) tc3xx/$(TC397_UNPACK)
+	$(Q) touch tc3xx/.tc397_unpack
+
+
+ifeq ($(wildcard tc3xx/$(TC397_UNPACK)/.git),)
+context:: .tc397_unpack
+
+distclean::
+	$(call DELFILE, tc3xx/.tc397_unpack)
+	$(call DELFILE, $(TC397_TARBALL))
+	$(call DELDIR, tc3xx/$(TC397_UNPACK))
+endif

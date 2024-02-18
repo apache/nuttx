@@ -2040,6 +2040,12 @@ config ARCH_BOARD_SABRE_6QUAD
 		This options selects support for NuttX on the NXP/Freescale Sabre
 		board featuring the iMX 6Quad CPU.
 
+config ARCH_BOARD_TC397
+	bool "Infineon's AURIX TC397 board: KIT_A2G_TC397_5V_TFT"
+	---help---
+		This options selects support for NuttX on the Infineon's AURIX board
+		board featuring the TC397 6Quad CPU.
+
 config ARCH_BOARD_QEMU_ARMV7A
 	bool "Qemu ARMv7a CPUs board"
 	depends on ARCH_CHIP_QEMU_ARM
@@ -3284,6 +3290,7 @@ config ARCH_BOARD
 	default "canmv230"                  if ARCH_BOARD_K230_CANMV
 	default "ox64"                      if ARCH_BOARD_BL808_OX64
 	default "sabre-6quad"               if ARCH_BOARD_SABRE_6QUAD
+	default "tc397"                     if ARCH_BOARD_TC397
 	default "qemu-armv7a"               if ARCH_BOARD_QEMU_ARMV7A
 	default "qemu-armv8a"               if ARCH_BOARD_QEMU_ARMV8A
 	default "pinephone"                 if ARCH_BOARD_PINEPHONE
@@ -3485,6 +3492,9 @@ source "boards/arm/s32k3xx/mr-canhubk3/Kconfig"
 endif
 if ARCH_BOARD_SABRE_6QUAD
 source "boards/arm/imx6/sabre-6quad/Kconfig"
+endif
+if ARCH_BOARD_TC397
+source "boards/tricore/tc3xx/tc397/Kconfig"
 endif
 if ARCH_BOARD_QEMU_ARMV7A
 source "boards/arm/qemu/qemu-armv7a/Kconfig"
