@@ -198,7 +198,7 @@ static void syslog_rpmsg_addbuf(FAR struct syslog_rpmsg_s *priv,
 
   if (len <= 0)
     {
-     return;
+      return;
     }
 
   if (priv->head + len - priv->tail >= priv->size)
