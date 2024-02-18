@@ -22,6 +22,10 @@ if(CONFIG_RPTUN)
 
   list(APPEND SRCS rptun.c)
 
+  if(CONFIG_RPTUN_IVSHMEM)
+    list(APPEND SRCS rptun_ivshmem.c)
+  endif()
+
   target_include_directories(drivers PRIVATE ${NUTTX_DIR}/openamp/open-amp/lib)
   target_sources(drivers PRIVATE ${SRCS})
 endif()
