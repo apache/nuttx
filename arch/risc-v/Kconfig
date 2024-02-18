@@ -238,6 +238,17 @@ config ARCH_CHIP_QEMU_RV
 	---help---
 		QEMU Generic RV32/RV64 processor
 
+config ARCH_CHIP_HPM6000
+	bool "Hpmicro HPM6000"
+	select ARCH_RV32
+	select ARCH_RV_ISA_M
+	select ARCH_RV_ISA_A
+	select ARCH_RV_ISA_C
+	select ONESHOT
+	select ALARM_ARCH
+	---help---
+		Hpmicro HPM6000 processor (D45 RISC-V Core with MAC extensions).
+
 config ARCH_CHIP_HPM6750
 	bool "Hpmicro HPM6750"
 	select ARCH_RV32
@@ -399,6 +410,7 @@ config ARCH_CHIP
 	default "mpfs"					if ARCH_CHIP_MPFS
 	default "rv32m1"				if ARCH_CHIP_RV32M1
 	default "qemu-rv"				if ARCH_CHIP_QEMU_RV
+	default "hpm6000"				if ARCH_CHIP_HPM6000
 	default "hpm6750"				if ARCH_CHIP_HPM6750
 	default "jh7110"				if ARCH_CHIP_JH7110
 	default "bl808"					if ARCH_CHIP_BL808
@@ -565,6 +577,9 @@ source "arch/risc-v/src/rv32m1/Kconfig"
 endif
 if ARCH_CHIP_QEMU_RV
 source "arch/risc-v/src/qemu-rv/Kconfig"
+endif
+if ARCH_CHIP_HPM6000
+source "arch/risc-v/src/hpm6000/Kconfig"
 endif
 if ARCH_CHIP_HPM6750
 source "arch/risc-v/src/hpm6750/Kconfig"
