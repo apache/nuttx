@@ -20,7 +20,7 @@
 
 ifeq ($(CONFIG_PCI),y)
 
-CSRCS += pci.c pci_ecam.c
+CSRCS += pci.c pci_ecam.c pci_drivers.c
 
 # Include PCI device driver build support
 
