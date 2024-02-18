@@ -1,0 +1,116 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "HPM6000 Configuration Options"
+
+choice
+	prompt "HPM6000 Chip Selection"
+	default ARCH_CHIP_HPM6360IPA
+	depends on ARCH_CHIP_HPM6000
+
+config ARCH_CHIP_HPM6360IPA
+	bool "HPM6360IPA"
+	select ARCH_FAMILY_HPM6360
+
+endchoice # HPM6000 Chip Selection
+
+# HPM6000 Families
+
+config ARCH_FAMILY_HPM6360
+	bool
+	default n
+	select ARCH_FAMILY_HPM6300
+
+# Peripheral support
+
+menu "HPM6000 Peripheral Selection"
+
+config HPM_ENET
+	bool "Ethernet"
+	default n
+
+menu "Watchdog"
+
+config HPM_WDOG0
+	bool "WathDog"
+	default n
+
+config HPM_WDOG1
+	bool "WathDog"
+	default n
+
+config HPM_WDOG2
+	bool "WathDog"
+	default n
+
+endmenu # Watchdog
+
+menu "UART Peripherals"
+
+config HPM_UART0
+	bool "UART0"
+	default n
+	select UART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select HPM_HAVE_UART
+
+config HPM_UART1
+	bool "UART1"
+	default n
+	select UART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select HPM_HAVE_UART
+
+config HPM_UART2
+	bool "UART2"
+	default n
+	select UART2_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select HPM_HAVE_UART
+
+config HPM_UART3
+	bool "UART3"
+	default n
+	select UART3_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select HPM_HAVE_UART
+
+config HPM_UART4
+	bool "UART4"
+	default n
+	select UART4_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select HPM_HAVE_UART
+
+config HPM_UART5
+	bool "UART5"
+	default n
+	select UART5_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select HPM_HAVE_UART
+
+config HPM_UART6
+	bool "UART6"
+	default n
+	select UART6_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select HPM_HAVE_UART
+
+config HPM_UART7
+	bool "UART7"
+	default n
+	select UART7_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select HPM_HAVE_UART
+
+config HPM_PUART
+	bool "PUART"
+	default n
+	select PUART_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select HPM_HAVE_UART
+
+endmenu # UART Peripherals
+endmenu # HPM6000 Peripheral Selection
