@@ -40,7 +40,6 @@
 #include <nuttx/list.h>
 
 #include <sys/types.h>
-#include <pthread.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -147,17 +146,17 @@ struct task_info_s
 #endif
 };
 
-/* struct pthread_cleanup_s *************************************************/
+/* struct tls_cleanup_s *****************************************************/
 
 /* This structure describes one element of the pthread cleanup stack */
 
-#if defined(CONFIG_PTHREAD_CLEANUP_STACKSIZE) && CONFIG_PTHREAD_CLEANUP_STACKSIZE > 0
-struct pthread_cleanup_s
+typedef CODE void (*tls_cleanup_t)(FAR void *arg);
+
+struct tls_cleanup_s
 {
-  pthread_cleanup_t pc_cleaner;     /* Cleanup callback address */
-  FAR void *pc_arg;                 /* Argument that accompanies the callback */
+  tls_cleanup_t tc_cleaner; /* Cleanup callback address */
+  FAR void *tc_arg;         /* Argument that accompanies the callback */
 };
-#endif
 
 /* When TLS is enabled, up_createstack() will align allocated stacks to the
  * TLS_STACK_ALIGN value.  An instance of the following structure will be
@@ -201,14 +200,14 @@ struct tls_info_s
   uintptr_t tl_elem[CONFIG_TLS_NELEM]; /* TLS elements */
 #endif
 
-#if defined(CONFIG_PTHREAD_CLEANUP_STACKSIZE) && CONFIG_PTHREAD_CLEANUP_STACKSIZE > 0
   /* tl_tos   - The index to the next available entry at the top of the
    *            stack.
    * tl_stack - The pre-allocated clean-up stack memory.
    */
 
+#if CONFIG_TLS_NCLEANUP > 0
   uint8_t tl_tos;
-  struct pthread_cleanup_s tl_stack[CONFIG_PTHREAD_CLEANUP_STACKSIZE];
+  struct tls_cleanup_s tl_stack[CONFIG_TLS_NCLEANUP];
 #endif
 
   uint8_t tl_cpstate;                  /* Cancellation state */
@@ -359,6 +358,65 @@ void tls_destruct(void);
  ****************************************************************************/
 
 FAR struct task_info_s *task_get_info(void);
+
+#if CONFIG_TLS_NCLEANUP > 0
+/****************************************************************************
+ * Name: tls_cleanup_push
+ *
+ * Description:
+ *   Push a new entry onto the cleanup stack
+ *
+ * Input Parameters:
+ *   tls     - The TLS data structure
+ *   routine - The cleanup routine to be called
+ *   arg     - An argument that will be passed to the cleanup routine
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void tls_cleanup_push(FAR struct tls_info_s *tls,
+                      tls_cleanup_t routine, FAR void *arg);
+
+/****************************************************************************
+ * Name: tls_cleanup_pop
+ *
+ * Description:
+ *   Pop the top entry from the cleanup stack and execute the cleanup
+ *
+ * Input Parameters:
+ *   tls     - The TLS data structure
+ *   execute - Execute the cleanup routine (true) or just remove the
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void tls_cleanup_pop(FAR struct tls_info_s *tls, int execute);
+
+/****************************************************************************
+ * Name: tls_cleanup_popall
+ *
+ * Description:
+ *   Pop and execute all cleanup stack entries
+ *
+ * Input Parameters:
+ *   tls     - The TLS data structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void tls_cleanup_popall(FAR struct tls_info_s *tls);
+
+#else
+#  define tls_cleanup_push(tls, routine, arg) ((void)(tls), (void)(routine), (void)(arg))
+#  define tls_cleanup_pop(tls, execute) ((void)(tls), (void)(execute))
+#  define tls_cleanup_popall(tls) ((void)(tls))
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

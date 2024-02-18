@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/pthread/pthread_exit.c
+ * libs/libc/tls/tls_cleanup.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,48 +24,68 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
 #include <assert.h>
-#include <debug.h>
-#include <sched.h>
 
-#include <nuttx/pthread.h>
+#include <nuttx/sched.h>
 #include <nuttx/tls.h>
+#include <nuttx/pthread.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: pthread_exit
- *
- * Description:
- *   Terminate execution of a thread started with pthread_create.
- *
- * Input Parameters:
- *   exit_value - The pointer of the pthread_exit parameter
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-void pthread_exit(FAR void *exit_value)
+void tls_cleanup_push(FAR struct tls_info_s *tls,
+                      tls_cleanup_t routine, FAR void *arg)
 {
-  /* Mark the pthread as non-cancelable to avoid additional calls to
-   * pthread_exit() due to any cancellation point logic that might get
-   * kicked off by actions taken during pthread_exit processing.
-   */
+  DEBUGASSERT(tls != NULL);
+  DEBUGASSERT(tls->tl_tos < CONFIG_TLS_NCLEANUP);
 
-  task_setcancelstate(TASK_CANCEL_DISABLE, NULL);
+  if (tls->tl_tos < CONFIG_TLS_NCLEANUP)
+    {
+      unsigned int ndx = tls->tl_tos;
 
-  tls_cleanup_popall(tls_get_info());
+      tls->tl_tos++;
+      tls->tl_stack[ndx].tc_cleaner = routine;
+      tls->tl_stack[ndx].tc_arg = arg;
+    }
+}
 
-#if defined(CONFIG_TLS_NELEM) && CONFIG_TLS_NELEM > 0
-  tls_destruct();
-#endif
+void tls_cleanup_pop(FAR struct tls_info_s *tls, int execute)
+{
+  DEBUGASSERT(tls != NULL);
 
-  nx_pthread_exit(exit_value);
-  PANIC();
+  if (tls->tl_tos > 0)
+    {
+      unsigned int ndx;
+
+      /* Get the index to the last cleaner function pushed onto the stack */
+
+      ndx = tls->tl_tos - 1;
+      DEBUGASSERT(ndx >= 0 && ndx < CONFIG_TLS_NCLEANUP);
+
+      /* Should we execute the cleanup routine at the top of the stack? */
+
+      if (execute != 0)
+        {
+          FAR struct tls_cleanup_s *cb;
+
+          /* Yes..  Execute the clean-up routine. */
+
+          cb  = &tls->tl_stack[ndx];
+          cb->tc_cleaner(cb->tc_arg);
+        }
+
+      tls->tl_tos = ndx;
+    }
+}
+
+void tls_cleanup_popall(FAR struct tls_info_s *tls)
+{
+  DEBUGASSERT(tls != NULL);
+
+  while (tls->tl_tos > 0)
+    {
+      tls_cleanup_pop(tls, 1);
+    }
 }
