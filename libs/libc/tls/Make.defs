@@ -28,6 +28,10 @@ ifneq ($(CONFIG_TLS_NELEM),0)
 CSRCS += tls_destruct.c
 endif
 
+ifneq ($(CONFIG_TLS_NCLEANUP),0)
+CSRCS += tls_cleanup.c
+endif
+
 # Include tls build support
 
 DEPPATH += --dep-path tls
