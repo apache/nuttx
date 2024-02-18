@@ -578,6 +578,11 @@ ifeq ($(CONFIG_STACK_USAGE),y)
 	EXTRA += *.su
 endif
 
+ifeq ($(CONFIG_ARCH_TOOLCHAIN_TASKING),y)
+	EXTRA += *.d
+	EXTRA += *.src
+endif
+
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
 define CLEAN
 	$(Q) if exist *$(OBJEXT) (del /f /q *$(OBJEXT))
