@@ -206,6 +206,7 @@ static const char *g_white_prefix[] =
   "ub32",    /* Ref:  include/fixedmath.h */
   "lua_",    /* Ref:  apps/interpreters/lua/lua-5.x.x/src/lua.h */
   "luaL_",   /* Ref:  apps/interpreters/lua/lua-5.x.x/src/lauxlib.h */
+  "Ifx",     /* Ref:  arch/tricore/src */
 
   NULL
 };
@@ -569,6 +570,12 @@ static const char *g_white_content_list[] =
 static const char *g_white_headers[] =
 {
   "windows.h",
+
+  /* Ref:
+   * arch/tricore/src/common/tricore_serial.c
+   */
+
+  "IfxAsclin_Asc.h",
   NULL
 };
 
