@@ -260,8 +260,8 @@ int gd32_bringup(void)
             }
         }
 
-      syslog(LOG_INFO, "INFO: LittleFS volume /mnt/fmc mount " \
-            "on chip flash success: %d\n", ret);
+      syslog(LOG_INFO, "INFO: LittleFS volume /mnt/fmc mount "
+             "on chip flash success: %d\n", ret);
 #    endif
 #  endif
 
@@ -352,8 +352,8 @@ int gd32_bringup(void)
             }
         }
 
-    syslog(LOG_INFO, "INFO: FAT volume /mnt/sd mount " \
-        "sd card success: %d\n", ret);
+    syslog(LOG_INFO, "INFO: FAT volume /mnt/sd mount "
+           "sd card success: %d\n", ret);
 #endif
   return ret;
 }
