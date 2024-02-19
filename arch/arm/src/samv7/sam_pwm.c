@@ -594,14 +594,14 @@ static void pwm_set_deadtime(struct pwm_lowerhalf_s *dev, uint8_t channel,
 
   if (width_1 > (period - regval))
     {
-      pwmerr("ERROR: Dead Time value DTH has to be < period - duty! " \
+      pwmerr("ERROR: Dead Time value DTH has to be < period - duty! "
              "Setting DTH to 0\n");
       width_1 = 0;
     }
 
   if (width_2 > regval)
     {
-      pwmerr("ERROR: Dead Time value DTL has to be < duty! " \
+      pwmerr("ERROR: Dead Time value DTL has to be < duty! "
              "Setting DTL to 0\n");
       width_2 = 0;
     }
