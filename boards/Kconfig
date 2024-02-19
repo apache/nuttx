@@ -3263,7 +3263,7 @@ config ARCH_BOARD
 	default "pic32mx7mmb"               if ARCH_BOARD_PIC32MX7MMB
 	default "pic32mz-starterkit"        if ARCH_BOARD_PIC32MZ_STARTERKIT
 	default "qemu-i486"                 if ARCH_BOARD_QEMU_I486
-	default "intel64-qemu"              if ARCH_BOARD_INTEL64_QEMU
+	default "qemu-intel64"              if ARCH_BOARD_INTEL64_QEMU
 	default "raspberrypi-pico"          if ARCH_BOARD_RASPBERRYPI_PICO
 	default "raspberrypi-pico-w"        if ARCH_BOARD_RASPBERRYPI_PICO_W
 	default "pimoroni-tiny2040"         if ARCH_BOARD_PIMORONI_TINY2040
