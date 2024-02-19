@@ -32,7 +32,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/sensors/sensor.h>
-#include <nuttx/rptun/openamp.h>
+#include <nuttx/rpmsg/rpmsg.h>
 
 /****************************************************************************
  * Pre-processor Definitions

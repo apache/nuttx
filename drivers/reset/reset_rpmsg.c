@@ -33,7 +33,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/list.h>
-#include <nuttx/rptun/openamp.h>
+#include <nuttx/rpmsg/rpmsg.h>
 #include <nuttx/reset/reset.h>
 #include <nuttx/reset/reset-controller.h>
 

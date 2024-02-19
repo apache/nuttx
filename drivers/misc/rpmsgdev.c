@@ -39,7 +39,7 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/video/fb.h>
 #include <nuttx/mutex.h>
-#include <nuttx/rptun/openamp.h>
+#include <nuttx/rpmsg/rpmsg.h>
 #include <nuttx/net/ioctl.h>
 #include <nuttx/drivers/rpmsgdev.h>
 #include <nuttx/power/battery_ioctl.h>

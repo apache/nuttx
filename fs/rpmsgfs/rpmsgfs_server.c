@@ -34,7 +34,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/rptun/openamp.h>
+#include <nuttx/rpmsg/rpmsg.h>
 
 #include "rpmsgfs.h"
 #include "fs_heap.h"

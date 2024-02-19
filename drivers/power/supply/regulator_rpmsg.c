@@ -34,7 +34,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/list.h>
 #include <nuttx/power/consumer.h>
-#include <nuttx/rptun/openamp.h>
+#include <nuttx/rpmsg/rpmsg.h>
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -31,7 +31,7 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
-#include <nuttx/rptun/openamp.h>
+#include <nuttx/rpmsg/rpmsg.h>
 #include <nuttx/serial/serial.h>
 #include <nuttx/serial/uart_rpmsg.h>
 

@@ -36,7 +36,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/mm/circbuf.h>
-#include <nuttx/rptun/openamp.h>
+#include <nuttx/rpmsg/rpmsg.h>
 #include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/ioctl.h>

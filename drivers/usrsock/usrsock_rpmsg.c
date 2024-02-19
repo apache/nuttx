@@ -23,7 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/net/dns.h>
-#include <nuttx/rptun/openamp.h>
+#include <nuttx/rpmsg/rpmsg.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/usrsock/usrsock_rpmsg.h>
 

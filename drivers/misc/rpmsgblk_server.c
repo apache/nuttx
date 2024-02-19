@@ -29,7 +29,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/mmcsd.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/rptun/openamp.h>
+#include <nuttx/rpmsg/rpmsg.h>
 
 #include "inode.h"
 #include "rpmsgblk.h"
