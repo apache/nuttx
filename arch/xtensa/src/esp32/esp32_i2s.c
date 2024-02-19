@@ -361,6 +361,7 @@ static void     i2s_rx_channel_stop(struct esp32_i2s_s *priv);
 static int      i2s_rxchannels(struct i2s_dev_s *dev, uint8_t channels);
 static uint32_t i2s_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate);
 static uint32_t i2s_rxdatawidth(struct i2s_dev_s *dev, int bits);
+static void     i2s_cleanup_queues(struct esp32_i2s_s *priv);
 static int      i2s_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
                             i2s_callback_t callback, void *arg,
                             uint32_t timeout);
@@ -1304,6 +1305,7 @@ static void i2s_rx_worker(void *arg)
 
       apb_samp_t samp_size;
       uint32_t data_copied;
+      uint8_t carry_bytes;
       uint8_t padding;
       uint8_t *buf;
       uint8_t *samp;
@@ -1322,23 +1324,48 @@ static void i2s_rx_worker(void *arg)
       samp = &bfcontainer->apb->samp[bfcontainer->apb->curbyte];
       samp_size = (bfcontainer->apb->nbytes - bfcontainer->apb->curbyte);
 
+      data_copied = 0;
+      buf = bfcontainer->buf;
+
+      /* Copy the remaining bytes from previous transfer and
+       * complete the sample so that the next memcpy is aligned
+       * with the sample size.
+       */
+
+      if (priv->rx.carry.bytes)
+        {
+          memcpy(samp, &priv->rx.carry.value, priv->rx.carry.bytes);
+          samp += priv->rx.carry.bytes;
+          data_copied += priv->rx.carry.bytes;
+
+          memcpy(samp, buf, (bytes_per_sample - priv->rx.carry.bytes));
+          buf += (bytes_per_sample - priv->rx.carry.bytes);
+          samp += (bytes_per_sample - priv->rx.carry.bytes);
+          data_copied += (bytes_per_sample - priv->rx.carry.bytes);
+        }
+
       /* If there is no need to add padding bytes, the memcpy may be done at
        * once. Otherwise, the operation must add the padding bytes to each
        * sample in the internal buffer.
        */
 
-      data_copied = 0;
-      buf = bfcontainer->buf + padding;
+      buf += padding;
 
       if (padding)
         {
-          while (data_copied < samp_size)
+          while (data_copied + bytes_per_sample <= samp_size)
             {
               memcpy(samp, buf, bytes_per_sample);
               buf += (bytes_per_sample + padding);
               samp += bytes_per_sample;
               data_copied += bytes_per_sample;
             }
+
+          /* Store the carry bytes, if any */
+
+          carry_bytes = samp_size - data_copied;
+          memcpy(&priv->rx.carry.value, buf, carry_bytes);
+          priv->rx.carry.bytes = carry_bytes;
         }
       else
         {
@@ -2816,6 +2843,56 @@ errout_with_buf:
 #endif /* I2S_HAVE_RX */
 
 /****************************************************************************
+ * Name: i2s_cleanup_queues
+ *
+ * Description:
+ *   Wait for all buffers to be processed and free them after
+ *
+ ****************************************************************************/
+
+#ifdef I2S_HAVE_RX
+static void i2s_cleanup_queues(struct esp32_i2s_s *priv)
+{
+  irqstate_t flags;
+  struct esp32_buffer_s *bfcontainer;
+
+  while (sq_peek(&priv->rx.done) != NULL)
+    {
+      flags = enter_critical_section();
+      bfcontainer = (struct esp32_buffer_s *)sq_remfirst(&priv->rx.done);
+      leave_critical_section(flags);
+      bfcontainer->callback(&priv->dev, bfcontainer->apb,
+                            bfcontainer->arg, OK);
+      apb_free(bfcontainer->apb);
+      i2s_buf_free(priv, bfcontainer);
+    }
+
+  while (sq_peek(&priv->rx.act) != NULL)
+    {
+      flags = enter_critical_section();
+      bfcontainer = (struct esp32_buffer_s *)sq_remfirst(&priv->rx.act);
+      leave_critical_section(flags);
+      bfcontainer->callback(&priv->dev, bfcontainer->apb,
+                            bfcontainer->arg, OK);
+      apb_free(bfcontainer->apb);
+      i2s_buf_free(priv, bfcontainer);
+    }
+
+  while (sq_peek(&priv->rx.pend) != NULL)
+    {
+      flags = enter_critical_section();
+      bfcontainer = (struct esp32_buffer_s *)sq_remfirst(&priv->rx.pend);
+      leave_critical_section(flags);
+      bfcontainer->apb->flags |= AUDIO_APB_FINAL;
+      bfcontainer->callback(&priv->dev, bfcontainer->apb,
+                            bfcontainer->arg, OK);
+      apb_free(bfcontainer->apb);
+      i2s_buf_free(priv, bfcontainer);
+    }
+}
+#endif /* I2S_HAVE_RX */
+
+/****************************************************************************
  * Name: i2s_ioctl
  *
  * Description:
@@ -2838,6 +2915,25 @@ static int i2s_ioctl(struct i2s_dev_s *dev, int cmd, unsigned long arg)
       case AUDIOIOC_START:
         {
           i2sinfo("AUDIOIOC_START\n");
+
+          ret = OK;
+        }
+        break;
+
+      /* AUDIOIOC_STOP - Stop the audio stream.
+       *
+       *   ioctl argument:  Audio session
+       */
+
+      case AUDIOIOC_STOP:
+        {
+          i2sinfo("AUDIOIOC_STOP\n");
+
+#ifdef I2S_HAVE_RX
+          struct esp32_i2s_s *priv = (struct esp32_i2s_s *)dev;
+
+          i2s_cleanup_queues(priv);
+#endif /* I2S_HAVE_RX */
 
           ret = OK;
         }
