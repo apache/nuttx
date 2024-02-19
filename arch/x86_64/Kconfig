@@ -32,17 +32,6 @@ config ARCH_CHIP_X86_64_CUSTOM
 
 endchoice
 
-choice
-	prompt "x86_64 system selection"
-	default ARCH_BOARD_QEMU
-
-config ARCH_BOARD_QEMU
-	bool "Qemu environment"
-	---help---
-		Targeting virtualized qemu environment
-
-endchoice
-
 source "arch/x86_64/src/common/Kconfig"
 
 if ARCH_INTEL64
@@ -53,15 +42,6 @@ config ARCH_CHIP
 	default "intel64"
 
 endif # ARCH_INTEL64
-
-if ARCH_BOARD_QEMU
-source "arch/x86_64/src/qemu/Kconfig"
-
-config ARCH_BOARD
-	string
-	default "qemu-intel64"
-
-endif # ARCH_CHIP_QEMU
 
 config ARCH_MULTIBOOT2
 	bool "Append multiboot2 header"
