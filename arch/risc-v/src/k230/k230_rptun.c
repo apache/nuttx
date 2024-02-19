@@ -42,7 +42,6 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/wqueue.h>
 
-#include <nuttx/rptun/openamp.h>
 #include <nuttx/rptun/rptun.h>
 #include <nuttx/drivers/addrenv.h>
 #include <nuttx/list.h>

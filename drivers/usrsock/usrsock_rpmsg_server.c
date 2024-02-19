@@ -37,7 +37,7 @@
 #include <nuttx/net/dns.h>
 #include <nuttx/net/net.h>
 #include <nuttx/queue.h>
-#include <nuttx/rptun/openamp.h>
+#include <nuttx/rpmsg/rpmsg.h>
 #include <nuttx/usrsock/usrsock_rpmsg.h>
 #ifdef CONFIG_NETDEV_WIRELESS_IOCTL
 #include <nuttx/wireless/wireless.h>

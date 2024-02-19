@@ -28,7 +28,7 @@
 #include <nuttx/list.h>
 #include <nuttx/clock.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/rptun/openamp.h>
+#include <nuttx/rpmsg/rpmsg.h>
 #include <nuttx/mutex.h>
 #include <nuttx/timers/rpmsg_rtc.h>
 #include <nuttx/timers/arch_rtc.h>
