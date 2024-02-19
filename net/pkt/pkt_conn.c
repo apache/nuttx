@@ -194,24 +194,21 @@ void pkt_free(FAR struct pkt_conn_s *conn)
  *
  * Description:
  *   Find a connection structure that is the appropriate connection to be
- *   used with the provided Ethernet header
+ *   used with the provided network device
  *
  * Assumptions:
  *   This function is called from network logic at with the network locked.
  *
  ****************************************************************************/
 
-FAR struct pkt_conn_s *pkt_active(FAR struct eth_hdr_s *buf)
+FAR struct pkt_conn_s *pkt_active(FAR struct net_driver_s *dev)
 {
   FAR struct pkt_conn_s *conn =
     (FAR struct pkt_conn_s *)g_active_pkt_connections.head;
 
   while (conn)
     {
-      /* FIXME lmac in conn should have been set by pkt_bind() */
-
-      if (eth_addr_cmp(buf->dest, conn->lmac) ||
-          eth_addr_cmp(buf->src, conn->lmac))
+      if (dev->d_ifindex == conn->ifindex)
         {
           /* Matching connection found.. return a reference to it */
 
