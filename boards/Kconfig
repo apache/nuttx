@@ -1819,7 +1819,7 @@ config ARCH_BOARD_QEMU_I486
 
 config ARCH_BOARD_INTEL64_QEMU
 	bool "Intel64 for Qemu simulator"
-	depends on ARCH_X86_64 || ARCH_INTEL64
+	depends on ARCH_CHIP_INTEL64_QEMU
 	---help---
 		Port of NuttX to QEMU in intel64 mode.  This port will also run on real
 		generic Intel64 hardware.

@@ -6,6 +6,18 @@
 if ARCH_INTEL64
 comment "intel64 Configuration Options"
 
+choice
+	prompt "Intel64 Chip Selection"
+	default ARCH_CHIP_INTEL64_QEMU
+
+config ARCH_CHIP_INTEL64_QEMU
+	bool "Intel64 QEMU"
+
+config ARCH_CHIP_INTEL64_CUSTOM
+	bool "Custom Intel64 chip"
+
+endchoice # "Intel64 Chip Selection"
+
 config ARCH_INTEL64_HAVE_TSC_DEADLINE
 	bool "TSC DEADLINE timer support"
 	default y
