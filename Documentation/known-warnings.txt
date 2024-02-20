@@ -3,4 +3,15 @@
 
 # Function and (enum or struct) name
 .*Duplicate C declaration.*\n.*'\.\. c:.*:: net_driver_s'.*
-.*Duplicate C declaration.*\n.*'\.\. c:.*:: sigaction'.*
+.*Duplicate C declaration.*\n.*'\.\. c:.*::.*sigaction.*
+.*Duplicate C declaration.*\n.*'\.\. c:.*::.*open.*
+.*Duplicate C declaration.*\n.*'\.\. c:.*::.*close.*
+.*Duplicate C declaration.*\n.*'\.\. c:.*::.*read.*
+.*Duplicate C declaration.*\n.*'\.\. c:.*::.*write.*
+.*Duplicate C declaration.*\n.*'\.\. c:.*::.*ioctl.*
+.*Duplicate C declaration.*\n.*'\.\. c:.*::.*mmap.*
+.*Duplicate C declaration.*\n.*'\.\. c:.*::.*poll.*
+.*Duplicate C declaration.*\n.*'\.\. c:.*::.*dup.*
+.*Duplicate C declaration.*\n.*'\.\. c:.*::.*rewinddir.*
+.*Duplicate C declaration.*\n.*'\.\. c:.*::.*bind.*
+.*Duplicate C declaration.*\n.*'\.\. c:.*::.*unlink.*

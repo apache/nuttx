@@ -36,7 +36,7 @@
  * Name: file_syncfs
  *
  * Description:
- *   Equivalent to the standard syncsf() function except that is accepts a
+ *   Equivalent to the standard syncfs() function except that is accepts a
  *   struct file instance instead of a fd descriptor and it does not set
  *   the errno variable
  *

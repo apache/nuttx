@@ -23,10 +23,12 @@
 
 # You can set these variables from the command line, and also
 # from the environment for the first two.
-SPHINXOPTS    ?= -j 1 -W -A nuttx_versions="latest,${NUTTX_VERSIONS}"
-SPHINXBUILD   ?= sphinx-build
-SOURCEDIR     = .
-BUILDDIR      = _build
+SPHINXOPTS      ?= -j 1 -W -A nuttx_versions="latest,${NUTTX_VERSIONS}"
+SPHINXAUTOOPTS  ?= -j 8 -W
+SPHINXBUILD     ?= sphinx-build
+SPHINXAUTOBUILD ?= sphinx-autobuild
+SOURCEDIR       = .
+BUILDDIR        = _build
 
 # Put it first so that "make" without argument is like "make help".
 help:
@@ -37,7 +39,7 @@ help:
 html: clean
 
 autobuild: clean
-	sphinx-autobuild . _build -j=8
+	@$(SPHINXAUTOBUILD) "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXAUTOOPTS) $(O)
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
