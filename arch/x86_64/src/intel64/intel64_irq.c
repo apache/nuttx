@@ -72,7 +72,7 @@ uint8_t *g_isr_stack_end = g_isr_stack + IRQ_STACK_SIZE - 16;
  * Private Data
  ****************************************************************************/
 
-static struct idt_entry_s idt_entries[256];
+static struct idt_entry_s g_idt_entries[256];
 
 /****************************************************************************
  * Private Functions
@@ -176,8 +176,8 @@ static void up_ist_init(void)
 
   tss_l.limit_low = (((104 - 1) & 0xffff));    /* Segment limit = TSS size - 1 */
 
-  tss_l.base_low  = ((uintptr_t)ist64 & 0x00ffffff);          /* Low address 1 */
-  tss_l.base_high = (((uintptr_t)ist64 & 0xff000000) >> 24);  /* Low address 2 */
+  tss_l.base_low  = ((uintptr_t)g_ist64 & 0x00ffffff);          /* Low address 1 */
+  tss_l.base_high = (((uintptr_t)g_ist64 & 0xff000000) >> 24);  /* Low address 2 */
 
   tss_l.P = 1;
 
@@ -186,17 +186,17 @@ static void up_ist_init(void)
   tss_l.AC = 1;
   tss_l.EX = 1;
 
-  tss_h = (((uintptr_t)ist64 >> 32) & 0xffffffff);  /* High address */
+  tss_h = (((uintptr_t)g_ist64 >> 32) & 0xffffffff);  /* High address */
 
-  gdt64[X86_GDT_ISTL_SEL_NUM] = tss_l;
+  g_gdt64[X86_GDT_ISTL_SEL_NUM] = tss_l;
 
   /* memcpy used to handle type punning compiler warning */
 
-  memcpy((void *)&gdt64[X86_GDT_ISTH_SEL_NUM],
-      (void *)&tss_h, sizeof(gdt64[0]));
+  memcpy((void *)&g_gdt64[X86_GDT_ISTH_SEL_NUM],
+         (void *)&tss_h, sizeof(g_gdt64[0]));
 
-  ist64->IST1 = (uintptr_t)g_interrupt_stack_end;
-  ist64->IST2 = (uintptr_t)g_isr_stack_end;
+  g_ist64->IST1 = (uintptr_t)g_interrupt_stack_end;
+  g_ist64->IST2 = (uintptr_t)g_isr_stack_end;
 
   asm volatile ("mov $0x30, %%ax; ltr %%ax":::"memory", "rax");
 }
@@ -373,7 +373,7 @@ static void up_ioapic_init(void)
 static void up_idtentry(unsigned int index, uint64_t base, uint16_t sel,
                         uint8_t flags, uint8_t ist)
 {
-  struct idt_entry_s *entry = &idt_entries[index];
+  struct idt_entry_s *entry = &g_idt_entries[index];
 
   entry->lobase  = base & 0xffff;
   entry->hibase  = (base >> 16) & 0xffff;
@@ -404,7 +404,7 @@ struct idt_ptr_s idt_ptr;
 
 static inline void up_idtinit(void)
 {
-  memset(&idt_entries, 0, sizeof(struct idt_entry_s)*256);
+  memset(&g_idt_entries, 0, sizeof(struct idt_entry_s)*256);
 
   /* Set each ISR/IRQ to the appropriate vector with selector=8 and with
    * 32-bit interrupt gate.  Interrupt gate (vs. trap gate) will leave
@@ -463,7 +463,7 @@ static inline void up_idtinit(void)
 
   /* Then program the IDT */
 
-  setidt(&idt_entries, sizeof(struct idt_entry_s) * NR_IRQS - 1);
+  setidt(&g_idt_entries, sizeof(struct idt_entry_s) * NR_IRQS - 1);
 }
 
 /****************************************************************************
