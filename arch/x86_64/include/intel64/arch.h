@@ -357,25 +357,25 @@ begin_packed_struct struct ist_s
 
 /* These are defined in intel64_head.S */
 
-extern volatile uint8_t pdpt_low;
-extern volatile uint8_t pd_low;
-extern volatile uint8_t pt_low;
+extern volatile uint8_t g_pdpt_low;
+extern volatile uint8_t g_pd_low;
+extern volatile uint8_t g_pt_low;
 
-extern volatile uint8_t ist64_low;
-extern volatile uint8_t gdt64_low;
-extern volatile uint8_t gdt64_ist_low;
-extern volatile uint8_t gdt64_low_end;
+extern volatile uint8_t g_ist64_low;
+extern volatile uint8_t g_gdt64_low;
+extern volatile uint8_t g_gdt64_ist_low;
+extern volatile uint8_t g_gdt64_low_end;
 
 /* The actual address of the page table and gdt/ist after mapping the kernel
  * in high address
  */
 
-extern volatile uint64_t *pdpt;
-extern volatile uint64_t *pd;
-extern volatile uint64_t *pt;
+extern volatile uint64_t *g_pdpt;
+extern volatile uint64_t *g_pd;
+extern volatile uint64_t *g_pt;
 
-extern volatile struct ist_s *ist64;
-extern volatile struct gdt_entry_s *gdt64;
+extern volatile struct ist_s       *g_ist64;
+extern volatile struct gdt_entry_s *g_gdt64;
 
 /****************************************************************************
  * Public Function Prototypes

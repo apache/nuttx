@@ -38,8 +38,8 @@
 
 /* This holds information passed by the multiboot2 bootloader */
 
-uint32_t mb_magic __attribute__((section(".loader.bss")));
-uint32_t mb_info_struct __attribute__((section(".loader.bss")));
+uint32_t g_mb_magic __attribute__((section(".loader.bss")));
+uint32_t g_mb_info_struct __attribute__((section(".loader.bss")));
 
 /****************************************************************************
  * Private Functions
@@ -60,12 +60,12 @@ static void x86_64_mb2_config(void)
 
   /* Check that we were actually booted by a multiboot2 bootloader */
 
-  if (mb_magic != MULTIBOOT2_BOOTLOADER_MAGIC)
+  if (g_mb_magic != MULTIBOOT2_BOOTLOADER_MAGIC)
     {
       return;
     }
 
-  for (tag = (struct multiboot_tag *)(uintptr_t)(mb_info_struct + 8);
+  for (tag = (struct multiboot_tag *)(uintptr_t)(g_mb_info_struct + 8);
        tag->type != MULTIBOOT_TAG_TYPE_END;
        tag = (struct multiboot_tag *)((uint8_t *)tag +
                                       ((tag->size + 7) & ~7)))

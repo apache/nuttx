@@ -44,12 +44,12 @@
  * in high address.
  */
 
-volatile uint64_t *pdpt;
-volatile uint64_t *pd;
-volatile uint64_t *pt;
+volatile uint64_t *g_pdpt;
+volatile uint64_t *g_pd;
+volatile uint64_t *g_pt;
 
-volatile struct ist_s *ist64;
-volatile struct gdt_entry_s *gdt64;
+volatile struct ist_s       *g_ist64;
+volatile struct gdt_entry_s *g_gdt64;
 
 /****************************************************************************
  * Private Functions
@@ -78,16 +78,18 @@ void intel64_lowsetup(void)
 
   /* Setup pointers for accessing Page table and GDT in high address */
 
-  pdpt = (uint64_t *)((uintptr_t)&pdpt_low + X86_64_LOAD_OFFSET);
-  pd   = (uint64_t *)((uintptr_t)&pd_low   + X86_64_LOAD_OFFSET);
-  pt   = (uint64_t *)((uintptr_t)&pt_low   + X86_64_LOAD_OFFSET);
+  g_pdpt = (uint64_t *)((uintptr_t)&g_pdpt_low + X86_64_LOAD_OFFSET);
+  g_pd   = (uint64_t *)((uintptr_t)&g_pd_low   + X86_64_LOAD_OFFSET);
+  g_pt   = (uint64_t *)((uintptr_t)&g_pt_low   + X86_64_LOAD_OFFSET);
 
-  ist64 = (struct ist_s *)((uintptr_t)&ist64_low       + X86_64_LOAD_OFFSET);
-  gdt64 = (struct gdt_entry_s *)((uintptr_t)&gdt64_low + X86_64_LOAD_OFFSET);
+  g_ist64 = (struct ist_s *)((uintptr_t)&g_ist64_low +
+                             X86_64_LOAD_OFFSET);
+  g_gdt64 = (struct gdt_entry_s *)((uintptr_t)&g_gdt64_low +
+                                   X86_64_LOAD_OFFSET);
 
   /* reload the GDTR with mapped high memory address */
 
-  setgdt((void *)gdt64, (uintptr_t)(&gdt64_low_end - &gdt64_low) - 1);
+  setgdt((void *)g_gdt64, (uintptr_t)(&g_gdt64_low_end - &g_gdt64_low) - 1);
 
   /* Revoke the lower memory */
 
