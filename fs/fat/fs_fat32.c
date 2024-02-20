@@ -1316,7 +1316,7 @@ static int fat_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   /* ioctl calls are just passed through to the contained block driver */
 
   nxmutex_unlock(&fs->fs_lock);
-  return -ENOSYS;
+  return -ENOTTY;
 }
 
 /****************************************************************************
