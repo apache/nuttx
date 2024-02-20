@@ -233,7 +233,7 @@ static void syslog_rpmsg_addbuf(FAR struct syslog_rpmsg_s *priv,
   if (overwritten)
     {
       priv->tail = priv->head - priv->size;
-      priv->buffer[priv->tail] = 0;
+      priv->buffer[SYSLOG_RPMSG_TAILOFF(priv)] = 0;
       priv->tail++;
     }
 
