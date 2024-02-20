@@ -89,10 +89,6 @@ void intel64_lowsetup(void)
 
   setgdt((void *)gdt64, (uintptr_t)(&gdt64_low_end - &gdt64_low) - 1);
 
-  /* Do some checking on CPU compatibilities */
-
-  x86_64_check_and_enable_capability();
-
   /* Revoke the lower memory */
 
   __revoke_low_memory();
