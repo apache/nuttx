@@ -115,6 +115,12 @@ void up_initialize(void)
   x86_64_serialinit();
 #endif
 
+  /* Initialize the PCI bus */
+
+#ifdef CONFIG_PCI
+  x86_64_pci_init();
+#endif
+
   /* Initialize the network */
 
 #ifndef CONFIG_NETDEV_LATEINIT
@@ -124,5 +130,6 @@ void up_initialize(void)
   /* Initialize USB -- device and/or host */
 
   x86_64_usbinitialize();
+
   board_autoled_on(LED_IRQSENABLED);
 }
