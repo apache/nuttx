@@ -107,6 +107,24 @@ static void x86_64_mb2_config(void)
 
 void __nxstart(void)
 {
+  uint64_t *dest = NULL;
+
+  /* Do some checking on CPU compatibilities at the top of this function.
+   * BSS cleanup can be optimized with vector instructions, so we need to
+   * enable SSE at this point.
+   */
+
+  x86_64_check_and_enable_capability();
+
+  /* Clear .bss. The compiler can optimize this with vector instructions,
+   * so this *must be* called after enabling SSE instructions.
+   */
+
+  for (dest = (uint64_t *)_sbss; dest < (uint64_t *)_ebss; )
+    {
+      *dest++ = 0;
+    }
+
   /* Low-level, pre-OS initialization */
 
   intel64_lowsetup();

@@ -266,15 +266,6 @@ start64:
     mov     %ax,    %fs
     mov     %ax,    %gs
 
-    /* Clear out bss section */
-    movabs  $_sbss, %rbx
-    movabs  $_ebss, %rdx
-clear_bss:
-    movb    $0,    (%rbx)
-    inc     %rbx
-    cmp     %rbx,   %rdx
-    jne     clear_bss
-
     /* Properly setup RSP to idle stack */
     movabs  $g_idle_topstack,    %rbx
     mov     (%rbx),   %rsp
