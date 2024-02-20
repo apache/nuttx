@@ -127,10 +127,12 @@ static void k230_hart_cleanup(void)
 
 void k230_hart_init(void)
 {
-#define MISA_VECTOR_BIT   ('V'-'A')
-#define MISA_VECOTR_MASK  (1 << MISA_VECTOR_BIT)
+  #define MISA_VECTOR_BIT   ('V'-'A')
+  #define MISA_VECTOR_MASK  (1 << MISA_VECTOR_BIT)
 
-  g_big = (READ_CSR(CSR_MISA) & MISA_VECOTR_MASK);
+  /* When called from sbi_start(), MISA is 0 somehow. */
+
+  g_big = (READ_CSR(CSR_MISA) & MISA_VECTOR_MASK);
 
   k230_hart_cleanup();
 
@@ -147,8 +149,8 @@ void k230_hart_init(void)
 }
 
 /****************************************************************************
- * Name: k230_hart_on_big()
- * Description: returns true if running on big core
+ * Name: k230_hart_is_big()
+ * Description: returns true if running on big core.
  ****************************************************************************/
 
 bool k230_hart_is_big(void)

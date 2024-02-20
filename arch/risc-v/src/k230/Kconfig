@@ -22,22 +22,25 @@ config K230_RPTUN_SHM_SIZE
 	---help---
 		 RPTUN shared memory size in bytes.
 
-config K230_RPTUN_IPI
-	bool "use IPI for RPTUN"
-	default n
-	depends on K230_IPI
+config K230_RPTUN_IPI_DEV
+	int "IPI device num for RPTUN purpose"
+	default 0
 	---help---
-		Use Inter-Processor interruption to improve efficiency.
-		Not ready yet.
-
-
-config K230_RPTUN_WORK_DELAY
-	int "RPTUN work delay"
-	default 50
-	depends on !K230_RPTUN_IPI
-	---help---
-		 Ticks for polling RPTUN. Polling doesn't need IPI.
+		Choose the IPI device for RPTUN purpose, should be within 0..3
 
 endif # RPTUN
 
+config K230_IPI
+	bool "Enable K230 IPI driver"
+	default y if RPTUN
+	default n
 
+if K230_IPI
+
+config K230_IPI_RESET_UPON_INIT
+	bool "Reset K230 mailbox device upon initialization"
+	default n
+	---help---
+		Reset whole K230 mailbox device upon k230_ipi_init.
+
+endif # K230_IPI
