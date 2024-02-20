@@ -50,22 +50,17 @@
 
 #include <arch/board/board.h>
 #include "hardware/k230_memorymap.h"
-#include "k230_hart.h"
 #include "riscv_internal.h"
+#include "k230_hart.h"
+#include "k230_ipi.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_ERROR
-#  define rperr  _err
-#  define rpwarn _warn
-#  define rpinfo _info
-#else
-#  define rperr(x...)
-#  define rpwarn(x...)
-#  define rpinfo(x...)
-#endif
+#define rpinfo rpmsginfo
+#define rpwarn rpmsgwarn
+#define rperr  rpmsgerr
 
 /* Vring config parameters taken from nrf53_rptun */
 
@@ -82,21 +77,38 @@
 
 #define VRING_SHMEM_END (VRING_SHMEM + CONFIG_K230_RPTUN_SHM_SIZE)
 
-/****************************************************************************
- * Private Types
- ****************************************************************************/
+/* Design notes:
+ *
+ * Though there are 16 IPI lines per K230 IPI device, we use only 1 IPI
+ * line for each core to notify the peer. Later we will see if more lines
+ * are really needed.
+ *
+ * For configurations, master and remote builds should use same IPI device
+ * defined by CONFIG_K230_RPTUN_IPI_DEVN otherwise the IPI notifications
+ * won't reach each other.
+ */
+
+#define RPTUN_IPI_DEVN         CONFIG_K230_RPTUN_IPI_DEV
+#define RPTUN_IPI_LINE         0
+#define RPTUN_IPI_LINE_MASK    (1 << RPTUN_IPI_LINE)
+
+#if RPTUN_IPI_DEVN < 0 || RPTUN_IPI_DEVN > K230_IPI_DEVN_MAX
+#error Invalid K230_RPTUN_IPI_DEV number
+#endif
+
+#ifdef CONFIG_K230_RPTUN_MASTER
+#define RPTUN_IPI_ROLE        IPI_ROLE_MASTER
+#else
+#define RPTUN_IPI_ROLE        IPI_ROLE_REMOTE
+#endif
 
 /****************************************************************************
- * Use polling now as IPI is not ready initially.
+ * Private Types
  ****************************************************************************/
 
 struct k230_rptun_shmem_s
 {
   volatile uintptr_t         base;
-#ifndef CONFIG_K230_RPTUN_IPI
-  volatile uint32_t          seq_rmt;     /* seqno for remote to watch */
-  volatile uint32_t          seq_mst;     /* seqno for master to watch */
-#endif
   struct rptun_rsc_s         rsc;
 };
 
@@ -109,10 +121,6 @@ struct k230_rptun_dev_s
   struct k230_rptun_shmem_s *shmem;
   struct simple_addrenv_s    addrenv[VRINGS];
   char                       peername[RPMSG_NAME_SIZE + 1];
-#ifndef CONFIG_K230_RPTUN_IPI
-  volatile uint32_t          seq;
-  struct work_s              work;
-#endif
 };
 
 #define as_k230_rptun_dev(d) container_of(d, struct k230_rptun_dev_s, rptun)
@@ -129,10 +137,7 @@ static int rp_start(struct rptun_dev_s *dev);
 static int rp_stop(struct rptun_dev_s *dev);
 static int rp_notify(struct rptun_dev_s *dev, uint32_t notifyid);
 static int rp_set_callback(struct rptun_dev_s *, rptun_callback_t, void *);
-
-#ifndef CONFIG_K230_RPTUN_IPI
-static void k230_rptun_work(void *arg);
-#endif /* CONFIG_K230_RPTUN_IPI */
+static void k230_rptun_callback(uint16_t comb, void *args);
 
 /****************************************************************************
  * Private Data
@@ -156,28 +161,15 @@ static const struct rptun_ops_s g_k230_rptun_ops =
 
 static struct k230_rptun_dev_s    g_rptun_dev;
 
-#ifdef CONFIG_K230_RPTUN_IPI
-static sem_t                      g_rptun_rx_sig = SEM_INITIALIZER(0);
-#endif
-
 /****************************************************************************
  * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: rp_get_cpuname
  ****************************************************************************/
 
 static const char *rp_get_cpuname(struct rptun_dev_s *dev)
 {
   struct k230_rptun_dev_s *priv = as_k230_rptun_dev(dev);
-
   return priv->peername;
 }
-
-/****************************************************************************
- * Name: rp_get_resource
- ****************************************************************************/
 
 static struct rptun_rsc_s *rp_get_resource(struct rptun_dev_s *dev)
 {
@@ -223,7 +215,7 @@ static struct rptun_rsc_s *rp_get_resource(struct rptun_dev_s *dev)
 
       priv->shmem->base             = (uintptr_t)priv->shmem;
 
-      rpinfo("shmem:%p, dev:%p\n", priv->shmem->base, dev);
+      rpinfo("shmem:%lx, dev:%p\n", priv->shmem->base, dev);
     }
   else
     {
@@ -241,18 +233,10 @@ static struct rptun_rsc_s *rp_get_resource(struct rptun_dev_s *dev)
   return &priv->shmem->rsc;
 }
 
-/****************************************************************************
- * Name: rp_is_autostart
- ****************************************************************************/
-
 static bool rp_is_autostart(struct rptun_dev_s *dev)
 {
   return true;
 }
-
-/****************************************************************************
- * Name: rp_is_master
- ****************************************************************************/
 
 static bool rp_is_master(struct rptun_dev_s *dev)
 {
@@ -260,51 +244,31 @@ static bool rp_is_master(struct rptun_dev_s *dev)
   return priv->master;
 }
 
-/****************************************************************************
- * Name: rp_start
- ****************************************************************************/
-
 static int rp_start(struct rptun_dev_s *dev)
 {
+  rpinfo("%p\n", dev);
+#ifdef CONFIG_K230_RPTUN_MASTER
+  k230_hart_big_boot(0x7000000);
+#endif
   return 0;
 }
-
-/****************************************************************************
- * Name: rp_stop
- ****************************************************************************/
 
 static int rp_stop(struct rptun_dev_s *dev)
 {
+  rpinfo("%p\n", dev);
+#ifdef CONFIG_K230_RPTUN_MASTER
+  k230_hart_big_stop();
+#endif
   return 0;
 }
-
-/****************************************************************************
- * Name: rp_notify
- ****************************************************************************/
 
 static int rp_notify(struct rptun_dev_s *dev, uint32_t vqid)
 {
-#ifdef CONFIG_K230_RPTUN_IPI
-  k230_ipi_signal(RPTUN_IPI_NOTIFY_RX);
-#else
-  struct k230_rptun_dev_s *priv = as_k230_rptun_dev(dev);
-
-  if (priv->master)
-    {
-      priv->shmem->seq_rmt++;
-    }
-  else
-    {
-      priv->shmem->seq_mst++;
-    }
-
-#endif /* CONFIG_K230_RPTUN_IPI */
+  UNUSED(dev);
+  UNUSED(vqid);
+  k230_ipi_notify(RPTUN_IPI_DEVN, RPTUN_IPI_LINE);
   return 0;
 }
-
-/****************************************************************************
- * Name: rp_reg_cb
- ****************************************************************************/
 
 static int rp_set_callback(struct rptun_dev_s *dev, rptun_callback_t cb,
                            void *arg)
@@ -313,43 +277,15 @@ static int rp_set_callback(struct rptun_dev_s *dev, rptun_callback_t cb,
 
   priv->callback = cb;
   priv->arg      = arg;
-
-  rpinfo("%p, arg:%p\n", cb, arg);
-
   return 0;
 }
 
-#ifndef CONFIG_K230_RPTUN_IPI
-
-static void k230_rptun_work(void *arg)
+static void k230_rptun_callback(uint16_t comb, void *args)
 {
-  struct k230_rptun_dev_s *dev = arg;
-  bool should_notify = false;
-
-  if (dev->shmem != NULL)
-    {
-      if (dev->master && dev->seq != dev->shmem->seq_mst)
-        {
-          dev->seq = dev->shmem->seq_mst;
-          should_notify = true;
-        }
-      else if (!dev->master && dev->seq != dev->shmem->seq_rmt)
-        {
-          dev->seq = dev->shmem->seq_rmt;
-          should_notify = true;
-        }
-
-      if (should_notify && dev->callback != NULL)
-        {
-          dev->callback(dev->arg, RPTUN_NOTIFY_ALL);
-        }
-    }
-
-  work_queue(HPWORK, &dev->work, k230_rptun_work, dev,
-             CONFIG_K230_RPTUN_WORK_DELAY);
+  UNUSED(comb);
+  struct k230_rptun_dev_s *dev = args;
+  if (dev->callback) dev->callback(dev->arg, RPTUN_NOTIFY_ALL);
 }
-
-#endif /* !CONFIG_K230_RPTUN_IPI */
 
 /****************************************************************************
  * Public Functions
@@ -364,20 +300,19 @@ int k230_rptun_init(const char *peername)
   /* master is responsible for initializing shmem */
 
   memset((void *)SHMEM, 0, SHMEM_SIZE);
-  rpinfo("\ncleared %d @ %p\n", SHMEM_SIZE, SHMEM);
+  rpinfo("cleared %ld @ %p\n", SHMEM_SIZE, SHMEM);
   dev->master = true;
 #else
   dev->master = false;
 #endif
 
-#ifdef CONFIG_K230_RPTUN_IPI
-  k230_ipi_init();
-#ifdef CONFIG_K230_RPTUN_MASTER
-  k230_rptun_ipi_master(dev);
-#else
-  k230_rptun_ipi_remote(dev);
-#endif
-#endif /* CONFIG_K230_RPTUN_IPI */
+  ret = k230_ipi_init(RPTUN_IPI_DEVN, RPTUN_IPI_LINE_MASK, RPTUN_IPI_ROLE,
+                k230_rptun_callback, dev);
+  if (ret < 0)
+    {
+      rperr("k230_ipi_init failed %d\n", ret);
+      goto ipierr;
+    }
 
   /* Configure device */
 
@@ -387,26 +322,15 @@ int k230_rptun_init(const char *peername)
   ret = rptun_initialize(&dev->rptun);
   if (ret < 0)
     {
-      rperr("ERROR: rptun_initialize failed %d!\n", ret);
+      rperr("rptun_initialize failed %d!\n", ret);
       goto errout;
     }
 
-#ifdef CONFIG_K230_RPTUN_IPI
-  /* Create rptun RX thread */
-
-  ret = kthread_create("k230-rptun", CONFIG_RPTUN_PRIORITY,
-                       CONFIG_RPTUN_STACKSIZE, k230_rptun_thread, NULL);
-#else
-  /* Kick off work */
-
-  ret = work_queue(HPWORK, &dev->work, k230_rptun_work, dev, 0);
-#endif
-
-  if (ret < 0)
-    {
-      rperr("ERROR: kthread_create or work_queue failed %d\n", ret);
-    }
+  return 0;
 
 errout:
+  k230_ipi_finish(RPTUN_IPI_DEVN, RPTUN_IPI_LINE_MASK);
+
+ipierr:
   return ret;
 }

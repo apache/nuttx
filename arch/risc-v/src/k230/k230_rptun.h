@@ -45,11 +45,10 @@ extern "C"
 
 /****************************************************************************
  * Name: k230_rptun_init
- *
- * Description: initializes K230 RPTUN device.
- *
+ * Description: initializes a K230 RPTUN device.
+ * Parameters:
+ *   peername: the name of the peer that this RPTUN links to
  * Returns: OK on success, or negated number on error
- *
  ****************************************************************************/
 
 int k230_rptun_init(const char *peername);
