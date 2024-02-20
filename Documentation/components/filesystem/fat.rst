@@ -147,7 +147,7 @@ the volume is given to a file.
 File attributes
 --------------------
 
-File attributes are denoted by a bit flag of the size of a single bit.
+File attributes are denoted by a bit flag of the size of a single byte.
 The file flags in FAT, with their bit representation, are as follows:
 
 .. list-table:: File Attributes
