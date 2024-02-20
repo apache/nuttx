@@ -25,8 +25,6 @@
 #include <nuttx/config.h>
 
 #include <nuttx/arch.h>
-#include <arch/board/board.h>
-#include <arch/multiboot2.h>
 
 #include "x86_64_internal.h"
 
@@ -53,77 +51,24 @@ volatile uint64_t *pt;
 volatile struct ist_s *ist64;
 volatile struct gdt_entry_s *gdt64;
 
-/* This holds information passed by the multiboot2 bootloader */
-
-uint32_t mb_magic __attribute__((section(".loader.bss")));
-uint32_t mb_info_struct __attribute__((section(".loader.bss")));
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-#ifdef CONFIG_ARCH_MULTIBOOT2
-/****************************************************************************
- * Name: x86_64_mb2_config
- *
- * Description:
- *   Parse multiboot2 info.
- *
- ****************************************************************************/
-
-static void x86_64_mb2_config(void)
-{
-  struct multiboot_tag *tag;
-
-  /* Check that we were actually booted by a mulitboot2 bootloader */
-
-  if (mb_magic != MULTIBOOT2_BOOTLOADER_MAGIC)
-    {
-      return;
-    }
-
-  for (tag = (struct multiboot_tag *)(uintptr_t)(mb_info_struct + 8);
-       tag->type != MULTIBOOT_TAG_TYPE_END;
-       tag = (struct multiboot_tag *)((uint8_t *)tag +
-                                      ((tag->size + 7) & ~7)))
-    {
-      switch (tag->type)
-        {
-          case MULTIBOOT_TAG_TYPE_EFI64:
-            {
-              break;
-            }
-
-#ifdef CONFIG_MULTBOOT2_FB_TERM
-          case MULTIBOOT_TAG_TYPE_FRAMEBUFFER:
-            {
-              x86_64_mb2_fbinitialize(
-                (struct multiboot_tag_framebuffer *)tag);
-              break;
-            }
-#endif
-
-          default:
-            break;
-        }
-    }
-}
-#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_lowsetup
+ * Name: intel64_lowsetup
  *
  * Description:
- *   Called from intel64_head BEFORE starting the operating system in order
+ *   Called from __nxstart BEFORE starting the operating system in order
  *   perform any necessary, early initialization.
  *
  ****************************************************************************/
 
-void up_lowsetup(void)
+void intel64_lowsetup(void)
 {
   /* we should be in long mode at this point */
 
@@ -148,30 +93,7 @@ void up_lowsetup(void)
 
   x86_64_check_and_enable_capability();
 
-#ifdef CONFIG_ARCH_MULTIBOOT2
-  /* Handle multiboot2 info */
-
-  x86_64_mb2_config();
-#endif
-
   /* Revoke the lower memory */
 
   __revoke_low_memory();
-
-  /* perform board-specific initializations */
-
-  x86_64_boardinitialize();
-
-#ifdef USE_EARLYSERIALINIT
-  /* Early serial driver initialization */
-
-  x86_64_earlyserialinit();
-#endif
-
-  x86_64_timer_calibrate_freq();
-
-#ifdef CONFIG_LIB_SYSCALL
-  enable_syscall();
-#endif
 }
-

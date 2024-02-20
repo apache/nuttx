@@ -45,12 +45,11 @@
  ****************************************************************************/
 
 	.global    __pmode_entry                   /* The 32bit protected mode entry */
-	.global    __nxstart
 	.global    __enable_sse_avx
 	.global    __enable_pcid
 	.global    __revoke_low_memory
+	.global    __nxstart                       /* __nxstart is defined elsewhere */
 	.global    nx_start                        /* nx_start is defined elsewhere */
-	.global    up_lowsetup                     /* up_lowsetup is defined elsewhere */
 	.global    g_idle_topstack                 /* The end of the idle stack, the start of the heap */
 	.global    mb_info_struct
 	.global    mb_magic
@@ -267,28 +266,7 @@ start64:
     mov     %ax,    %fs
     mov     %ax,    %gs
 
-    /* Finally, we can start the OS */
-    movabs  $__nxstart,   %rbx
-    jmp     *%rbx
-    .size   __pmode_entry, . - __pmode_entry
-
-/****************************************************************************
- * Name: __nxstart
- *
- * Description:
- *   Do low-level initialization and call nx_start
- *
- ****************************************************************************/
-
-    .section .text, "ax"
-    .type   __nxstart, @function
-
-__nxstart:
-    /* We are now in high memory, will revoke the lower 128MB memory mapping
-     * in lowsetup
-     */
-
-    /* clear out bss section */
+    /* Clear out bss section */
     movabs  $_sbss, %rbx
     movabs  $_ebss, %rdx
 clear_bss:
@@ -301,20 +279,16 @@ clear_bss:
     movabs  $g_idle_topstack,    %rbx
     mov     (%rbx),   %rsp
 
-    /* Initialize and start NuttX */
-    call    up_lowsetup                     /* Low-level, pre-OS initialization */
+    /* We use jmp instruction below which doesn't push 1 byte on stack, so we
+     * have to push a dummy value here, otherwise SSE instructions calledd
+     * during initialization will fail.
+     */
+    pushq   $0
 
-    call    nx_start                        /* Start NuttX */
-
-    /* NuttX will not return */
-    /* We should never end up here */
-    /* If we really do, then we are doomed, halting the processor for ever */
-
-    cli
-hang:
-    hlt                                    /* Halt machine should NuttX return */
-    jmp    hang
-    .size    __nxstart, . - __nxstart
+    /* Finally, we can start the OS */
+    movabs  $__nxstart,   %rbx
+    jmp     *%rbx
+    .size   __pmode_entry, . - __pmode_entry
 
 /****************************************************************************
  * Name: __revoke_low_memory
@@ -324,6 +298,7 @@ hang:
  *
  ****************************************************************************/
 
+	.section .text, "ax"
 	.type   __revoke_low_memory, @function
 
 __revoke_low_memory:
