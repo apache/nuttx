@@ -4,12 +4,42 @@ import os
 import re
 import subprocess
 import time
+from enum import Enum
 
 import pexpect
 import pexpect.fdpexpect
+import pexpect.spawnbase
 import serial
 
 rootPath = os.path.dirname(os.path.abspath(__file__))
+
+tmp_read_nonblocking = pexpect.spawnbase.SpawnBase.read_nonblocking
+
+
+def enhanced_read_nonblocking(self, size=1, timeout=None):
+    return re.sub(
+        r"(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]",
+        "",
+        tmp_read_nonblocking(self, size, timeout).decode(errors="ignore"),
+    ).encode()
+
+
+pexpect.spawnbase.SpawnBase.read_nonblocking = enhanced_read_nonblocking
+
+
+class StatusCodeEnum(Enum):
+    NORMAL = (0, "Normal")
+    TIMEOUT_ERR = (-1, "Timeout")
+    EOF_ERR = (-2, "EOF")
+    CRASH_ERR = (-3, "Crash happened")
+    BUSYLOOP_ERR = (-4, "Busy loop happened")
+    UNKNOWN_ERR = (-5, "Unknown")
+
+    @staticmethod
+    def get_enum_msg_by_code(status_code):
+        for status in StatusCodeEnum:
+            if status.value[0] == status_code:
+                return status.value[1]
 
 
 class connectNuttx(object):
@@ -40,6 +70,7 @@ class connectNuttx(object):
         self.target = target
         self.enter = "\r"
         self.debug_flag = 0
+        self.format_str_len = 105
         # get PROMPT value and rate value
         self.PROMPT = getConfigValue(
             self.path, self.board, core=self.core, flag="NSH_PROMPT_STRING"
@@ -107,38 +138,130 @@ class connectNuttx(object):
             self.process.send(byte)
             time.sleep(1)
             self.process.send(byte)
-        time.sleep(1)
-        self.process.sendline("\n")
-        ret = self.process.expect_exact(expect)
-        return ret
+
+    def print_format_str(self, string, type="text"):
+        str_prefix = "+"
+        str_suffix = "+"
+
+        if type == "head":
+            rest_char_len = self.format_str_len - 2 - len(string)
+            half_len = int(rest_char_len / 2)
+            print(
+                str_prefix
+                + "-" * half_len
+                + string
+                + "-" * (rest_char_len - half_len)
+                + str_suffix
+            )
+        elif type == "tail":
+            rest_char_len = self.format_str_len - 2
+            print(str_prefix + "-" * rest_char_len + str_suffix)
+        elif type == "text":
+            str_prefix = "| "
+            str_suffix = " |"
+            rest_char_len = (
+                self.format_str_len - len(str_prefix) - len(str_suffix) - len(string)
+            )
+            print(
+                str_prefix
+                + string
+                + " " * (1 if rest_char_len < 1 else rest_char_len)
+                + str_suffix
+            )
+        else:
+            print(string)
+
+    def clean_buffer(self):
+        i = -1
+        while True:
+            if (
+                (
+                    self.process.before is not None
+                    and self.process.before.decode(errors="ignore")
+                    .replace("\r", "")
+                    .replace("\n", "")
+                    != ""
+                )
+                or (
+                    self.process.after is not None
+                    and self.process.after != pexpect.TIMEOUT
+                    and self.process.after.decode(errors="ignore")
+                    .replace("\r", "")
+                    .replace("\n", "")
+                    != ""
+                )
+                or i == 0
+            ):
+                i = self.process.expect(
+                    [re.compile(b".+"), pexpect.TIMEOUT, pexpect.EOF], timeout=0.1
+                )
+            else:
+                while True:
+                    try:
+                        self.process.read_nonblocking(
+                            size=self.process.maxread, timeout=0.1
+                        )
+                    except Exception:
+                        break
+                self.process.before = b""
+                self.process.after = b""
+                break
 
     # send command to nsh
-    def sendCommand(self, cmd, expect="", timeout=10, flag=""):
+    def sendCommand(self, cmd, *argc, **argv):
+        expect = []
+        timeout = 10
+        ret = StatusCodeEnum.NORMAL.value[0]
+        length = len(argc)
+        if length == 0:
+            expect.append(self.PROMPT)
+        else:
+            for i in argc:
+                expect.append(i)
+        length = len(argv)
+        if length != 0:
+            for key, value in argv.items():
+                if key == "timeout":
+                    timeout = value
         if self.method != "minicom":
             time.sleep(0.5)
-        if not expect:
-            expect = self.PROMPT
-        self.process.buffer = b""
-        self.process.sendline(cmd)
+        if self.target == "qemu":
+            self.clean_buffer()
+            self.process.sendline(cmd)
+        else:
+            self.clean_buffer()
+            self.process.sendline(cmd)
+            time.sleep(0.1)
+            self.process.send("\r\n\r\n")
         try:
-            ret = self.process.expect(expect, timeout=timeout)
-        except pexpect.TIMEOUT:
-            print("Debug: TIMEOUT '%s' exist and run next test case" % cmd)
-            ret = -1
-        except pexpect.EOF:
-            print("Debug: EOF raise exception")
-            ret = -2
-        finally:
-            if self.debug_flag:
-                self.debug(cmd, ret)
-            self.process.buffer = b""
-            self.process.sendline("\n")
-            if flag:
-                is_newline = self.process.expect_exact(flag, timeout=timeout)
+            for i in expect:
+                ret = self.process.expect(i, timeout=timeout)
+        except Exception as e:
+            self.print_format_str(" Catch Exception ", type="head")
+
+            if isinstance(e, pexpect.TIMEOUT):
+                ret = StatusCodeEnum.TIMEOUT_ERR.value[0]
+
+            elif isinstance(e, pexpect.EOF):
+                ret = StatusCodeEnum.EOF_ERR.value[0]
+                self.print_format_str(f"An pexpect.EOF error occurred: {str(e)}")
+
             else:
-                is_newline = self.process.expect_exact(self.PROMPT, timeout=timeout)
-            if self.debug_flag:
-                self.debug("NEWLINE", is_newline)
+                ret = StatusCodeEnum.UNKNOWN_ERR.value[0]
+                self.print_format_str(f"An unexpected error occurred: {str(e)}")
+
+            self.print_format_str(" Result ", type="head")
+            self.print_format_str(f"Command     : '{cmd}'")
+            self.print_format_str(f"Expect value: {str(expect)}")
+            self.print_format_str(f"Timeout     : {timeout}s")
+            self.print_format_str(
+                f"Test result : {StatusCodeEnum.get_enum_msg_by_code(ret)}"
+            )
+            self.print_format_str("", type="tail")
+
+        finally:
+            self.debug(cmd, ret)
+
             if self.method != "minicom":
                 time.sleep(0.5)
             return ret
@@ -151,15 +274,16 @@ class connectNuttx(object):
                 self.process.expect_exact(self.PROMPT)
 
     def debug(self, cmd, ret):
-        print("********************* DEBUG START ********************")
-        if cmd == "\n":
-            cmd = r"\n"
-        print("cmd: %s\n" % cmd)
-        print("ret: %s\n" % str(ret))
-        print("before: %s\n" % repr(self.process.before))
-        print("after: %s\n" % repr(self.process.after))
-        print("buffer: %s\n" % repr(self.process.buffer))
-        print("********************** DEBUG END **********************")
+        if self.debug_flag:
+            print("********************* DEBUG START ********************")
+            if cmd == "\n":
+                cmd = r"\n"
+            print("cmd: {}".format(cmd))
+            print("ret: {}".format(ret))
+            print("before: {}".format(self.process.before.decode(errors="ignore")))
+            print("after: {}".format(self.process.after.decode(errors="ignore")))
+            print("buffer: {}".format(self.process.buffer.decode(errors="ignore")))
+            print("********************** DEBUG END **********************")
 
     def cleanup(self):
         if self.target == "sim":
