@@ -68,7 +68,7 @@ int up_map_region(void *base, int size, int flags)
     {
       entry = (curr >> 12) & 0x7ffffff;
 
-      pt[entry] = curr | flags;
+      g_pt[entry] = curr | flags;
       curr += PAGE_SIZE;
     }
 

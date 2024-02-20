@@ -51,20 +51,20 @@
 	.global    __nxstart                       /* __nxstart is defined elsewhere */
 	.global    nx_start                        /* nx_start is defined elsewhere */
 	.global    g_idle_topstack                 /* The end of the idle stack, the start of the heap */
-	.global    mb_info_struct
-	.global    mb_magic
+	.global    g_mb_info_struct
+	.global    g_mb_magic
 
 	/* These are the page tables */
-	.global    pdpt_low
-	.global    pd_low
-	.global    pt_low
+	.global    g_pdpt_low
+	.global    g_pd_low
+	.global    g_pt_low
 
 	/* These are the GDT */
-	.global    gdt64_low
-	.global    gdt64_ist_low
-	.global    gdt64_low_end
+	.global    g_gdt64_low
+	.global    g_gdt64_ist_low
+	.global    g_gdt64_low_end
 
-	.global    ist64_low
+	.global    g_ist64_low
 
 /****************************************************************************
  * The multiboot2 header
@@ -162,13 +162,13 @@ start32_0:
 __pmode_entry:
 start32:
 #ifdef CONFIG_ARCH_MULTIBOOT2
-	movl    %ebx, mb_info_struct
-	movl    %eax, mb_magic
+	movl    %ebx, g_mb_info_struct
+	movl    %eax, g_mb_magic
 #endif
 
 	/* initialize rest of the page directory */
-	lea     pd_low, %edi
-	lea     pt_low, %esi
+	lea     g_pd_low, %edi
+	lea     g_pt_low, %esi
 
 	/* Popluate the lower 4GB as non-present
 	 * for ecx = 0...512 * 4 : Loop and setup the page directories
@@ -195,7 +195,7 @@ ept_loop:
 	jnz     epd_loop
 
 	/* Temporary populate the lower 128MB on 1:1 mapping */
-	lea     pd_low, %edi
+	lea     g_pd_low, %edi
 	mov     $(X86_PAGE_GLOBAL | X86_PAGE_WR | X86_PAGE_PRESENT | X86_PAGE_HUGE), %eax
 
 	/* for ecx = 0...64 : Loop and setup 64x 2MB page directories */
@@ -212,7 +212,7 @@ pd_loop:
 	/* Populate the 1GB after 4GB boundary with Global mapping to kernel code.
 	 * This creates maps the lower 1GB to 4GB~5GB
 	 */
-	lea     pdpt_low, %edi
+	lea     g_pdpt_low, %edi
 	mov     $(X86_PAGE_GLOBAL | X86_PAGE_WR | X86_PAGE_PRESENT | X86_PAGE_HUGE), %eax
 
 	mov     $0x4,   %ecx
@@ -294,8 +294,8 @@ start64:
 
 __revoke_low_memory:
 	/* Revoke the lower 128MB memory mapping */
-	lea     pd_low, %edi
-	lea     pt_low, %esi
+	lea     g_pd_low, %edi
+	lea     g_pt_low, %esi
 
 	/* for ecx = 0...64 : Loop and setup 64x 2MB page directories */
 	mov     $64,   %ecx
@@ -373,7 +373,7 @@ __enable_pcid:
 
 	/* IST for 64 bit long mode will be filled in up_irq */
 	.align(16)
-ist64_low:
+g_ist64_low:
 	.long   0
 	.quad   0xdeadbeefdeadbee0
 	.quad   0xdeadbeefdeadbee1
@@ -391,32 +391,32 @@ ist64_low:
 
 	/* GDT for 64 bit long mode */
 	.align(16)
-gdt64_low:
+g_gdt64_low:
 	.quad   0
 	.quad   X86_GDT_CODE64_ENTRY
 	.quad   X86_GDT_DATA_ENTRY
 	.quad   X86_GDT_CODE32_ENTRY
 	.quad   X86_GDT_DATA_ENTRY
 	.quad   X86_GDT_CODE64_ENTRY
-gdt64_ist_low:
+g_gdt64_ist_low:
 	.quad   0x0 /* TSS segment low */
 	.quad   0x0 /* TSS segment high */
-gdt64_low_end:
+g_gdt64_low_end:
 
 gdt64_ptr:
-	.short  gdt64_low_end - gdt64_low - 1
-	.long   gdt64_low
+	.short  g_gdt64_low_end - g_gdt64_low - 1
+	.long   g_gdt64_low
 
 mxcsr_mem:
 	.long   0x00001f80
 
 	.align(PAGE_SIZE)
 pml4:
-	.quad   pdpt_low + X86_PAGE_PRESENT + X86_PAGE_WR
+	.quad   g_pdpt_low + X86_PAGE_PRESENT + X86_PAGE_WR
 
 	.align(PAGE_SIZE)
-pdpt_low:
-	.quad   pd_low   + X86_PAGE_PRESENT + X86_PAGE_WR
+g_pdpt_low:
+	.quad   g_pd_low + X86_PAGE_PRESENT + X86_PAGE_WR
 	.quad   pd_2_low + X86_PAGE_PRESENT + X86_PAGE_WR
 	.quad   pd_3_low + X86_PAGE_PRESENT + X86_PAGE_WR
 	.quad   pd_4_low + X86_PAGE_PRESENT + X86_PAGE_WR
@@ -424,7 +424,7 @@ pdpt_low:
 	.fill   X86_NUM_PAGE_ENTRY - 4, X86_PAGE_ENTRY_SIZE, 0
 
 	.align(PAGE_SIZE)
-pd_low:
+g_pd_low:
 	.fill   X86_NUM_PAGE_ENTRY, X86_PAGE_ENTRY_SIZE, 0
 
 	.align(PAGE_SIZE)
@@ -440,7 +440,7 @@ pd_4_low:
 	.fill   X86_NUM_PAGE_ENTRY, X86_PAGE_ENTRY_SIZE, 0
 
 	.align(PAGE_SIZE)
-pt_low:
+g_pt_low:
 	.fill   X86_NUM_PAGE_ENTRY * X86_NUM_PAGE_ENTRY, X86_PAGE_ENTRY_SIZE, 0
 	.fill   X86_NUM_PAGE_ENTRY * X86_NUM_PAGE_ENTRY, X86_PAGE_ENTRY_SIZE, 0
 	.fill   X86_NUM_PAGE_ENTRY * X86_NUM_PAGE_ENTRY, X86_PAGE_ENTRY_SIZE, 0
