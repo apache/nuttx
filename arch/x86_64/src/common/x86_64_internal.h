@@ -235,6 +235,12 @@ void x86_64_usbuninitialize(void);
 #  define x86_64_usbuninitialize()
 #endif
 
+/* Defined in x86_64_pci.c */
+
+#ifdef CONFIG_PCI
+void x86_64_pci_init(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 
 #endif  /* __ARCH_X86_64_SRC_COMMON_UP_INTERNAL_H */
