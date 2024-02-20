@@ -698,7 +698,12 @@ static int bt_slip_send(FAR struct bt_driver_s *dev,
 
   priv = (FAR struct sliphci_s *)dev;
 
-  nxmutex_lock(&priv->sliplock);
+  ret = nxmutex_lock(&priv->sliplock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   if (bt_slip_unack_size(priv) >= priv->txwin)
     {
       bt_slip_send_ack(priv);
@@ -711,7 +716,11 @@ static int bt_slip_send(FAR struct bt_driver_s *dev,
         {
           nxmutex_unlock(&priv->sliplock);
           nxsem_wait_uninterruptible(&priv->sem);
-          nxmutex_lock(&priv->sliplock);
+          ret = nxmutex_lock(&priv->sliplock);
+          if (ret < 0)
+            {
+              return ret;
+            }
         }
     }
 
@@ -767,6 +776,7 @@ static int bt_slip_receive(FAR struct bt_driver_s *drv,
   uint16_t checksum;
   size_t remaining;
   uint8_t state;
+  int ret;
   enum
     {
       PACKET_START,
@@ -776,7 +786,12 @@ static int bt_slip_receive(FAR struct bt_driver_s *drv,
       PACKET_END,
     };
 
-  nxmutex_lock(&priv->sliplock);
+  ret = nxmutex_lock(&priv->sliplock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   for (packet = data, cursor = data, header = data, state = PACKET_START;
        packet < (FAR uint8_t *)data + len; packet++)
     {
