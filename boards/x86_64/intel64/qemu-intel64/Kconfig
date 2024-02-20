@@ -3,10 +3,3 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 #
-config QEMU_PCI
-	bool "Initialize and enumerate PCI Bus"
-	default n
-	select PCI
-
-	---help---
-		Enables initialization and scanning of standard x86-64 pci bus.

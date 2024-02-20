@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/x86_64/intel64/qemu-intel64/src/qemu_pci.c
+ * arch/x86_64/src/common/x86_64_pci.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -43,35 +43,31 @@
  * Private Functions Definitions
  ****************************************************************************/
 
-static void qemu_pci_cfg_write(struct pci_dev_s *dev, int reg,
+static void x86_64_pci_cfg_write(struct pci_dev_s *dev, int reg,
                                uint32_t val, int width);
-
-static uint32_t qemu_pci_cfg_read(struct pci_dev_s *dev, int reg,
+static uint32_t x86_64_pci_cfg_read(struct pci_dev_s *dev, int reg,
                                   int width);
-
-static int qemu_pci_map_bar(uint64_t addr, uint64_t len);
-
-static uint32_t qemu_pci_io_read(const volatile void *addr, int width);
-
-static void qemu_pci_io_write(const volatile void *addr, uint32_t val,
+static int x86_64_pci_map_bar(uint64_t addr, uint64_t len);
+static uint32_t x86_64_pci_io_read(const volatile void *addr, int width);
+static void x86_64_pci_io_write(const volatile void *addr, uint32_t val,
                               int width);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const struct pci_bus_ops_s g_qemu_pci_bus_ops =
+static const struct pci_bus_ops_s g_x86_64_pci_bus_ops =
 {
-  .pci_cfg_write = qemu_pci_cfg_write,
-  .pci_cfg_read  = qemu_pci_cfg_read,
-  .pci_map_bar   = qemu_pci_map_bar,
-  .pci_io_read   = qemu_pci_io_read,
-  .pci_io_write  = qemu_pci_io_write,
+  .pci_cfg_write = x86_64_pci_cfg_write,
+  .pci_cfg_read  = x86_64_pci_cfg_read,
+  .pci_map_bar   = x86_64_pci_map_bar,
+  .pci_io_read   = x86_64_pci_io_read,
+  .pci_io_write  = x86_64_pci_io_write,
 };
 
-static struct pci_bus_s g_qemu_pci_bus =
+static struct pci_bus_s g_x86_64_pci_bus =
 {
-  .ops = &g_qemu_pci_bus_ops,
+  .ops = &g_x86_64_pci_bus_ops,
 };
 
 /****************************************************************************
@@ -79,7 +75,7 @@ static struct pci_bus_s g_qemu_pci_bus =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: qemu_pci_cfg_write
+ * Name: x86_64_pci_cfg_write
  *
  * Description:
  *  Write 8, 16, 32, 64 bits data to PCI-E configuration space of device
@@ -95,7 +91,7 @@ static struct pci_bus_s g_qemu_pci_bus =
  *
  ****************************************************************************/
 
-static void qemu_pci_cfg_write(struct pci_dev_s *dev, int reg,
+static void x86_64_pci_cfg_write(struct pci_dev_s *dev, int reg,
                                uint32_t val, int width)
 {
   uint8_t offset_mask = (4 - width);
@@ -118,7 +114,7 @@ static void qemu_pci_cfg_write(struct pci_dev_s *dev, int reg,
 }
 
 /****************************************************************************
- * Name: qemu_pci_cfg_read
+ * Name: x86_64_pci_cfg_read
  *
  * Description:
  *  Read 8, 16, 32, 64 bits data from PCI-E configuration space of device
@@ -134,7 +130,7 @@ static void qemu_pci_cfg_write(struct pci_dev_s *dev, int reg,
  *
  ****************************************************************************/
 
-static uint32_t qemu_pci_cfg_read(struct pci_dev_s *dev, int reg,
+static uint32_t x86_64_pci_cfg_read(struct pci_dev_s *dev, int reg,
                                   int width)
 {
   uint32_t ret;
@@ -161,7 +157,7 @@ static uint32_t qemu_pci_cfg_read(struct pci_dev_s *dev, int reg,
   return 0;
 }
 
-static uint32_t qemu_pci_io_read(const volatile void *addr, int width)
+static uint32_t x86_64_pci_io_read(const volatile void *addr, int width)
 {
   uint16_t portaddr = (uint16_t)(intptr_t)addr;
 
@@ -181,7 +177,7 @@ static uint32_t qemu_pci_io_read(const volatile void *addr, int width)
   return 0;
 }
 
-static void qemu_pci_io_write(const volatile void *addr, uint32_t val,
+static void x86_64_pci_io_write(const volatile void *addr, uint32_t val,
                               int width)
 {
   uint16_t portaddr = (uint16_t)(intptr_t)addr;
@@ -203,7 +199,7 @@ static void qemu_pci_io_write(const volatile void *addr, uint32_t val,
   }
 }
 
-static int qemu_pci_map_bar(uint64_t addr, uint64_t len)
+static int x86_64_pci_map_bar(uint64_t addr, uint64_t len)
 {
   up_map_region((void *)(uintptr_t)addr, len,
       X86_PAGE_WR | X86_PAGE_PRESENT | X86_PAGE_NOCACHE | X86_PAGE_GLOBAL);
@@ -215,15 +211,15 @@ static int qemu_pci_map_bar(uint64_t addr, uint64_t len)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: qemu_pci_init
+ * Name: x86_64_pci_init
  *
  * Description:
- *  Initialize the PCI-E bus *
+ *  Initialize the PCI-E bus
  *
  ****************************************************************************/
 
-void qemu_pci_init(void)
+void x86_64_pci_init(void)
 {
   pciinfo("Initializing PCI Bus\n");
-  pci_initialize(&g_qemu_pci_bus);
+  pci_initialize(&g_x86_64_pci_bus);
 }

@@ -33,4 +33,8 @@ set(SRCS
     x86_64_udelay.c
     x86_64_tcbinfo.c)
 
+if(CONFIG_PCI)
+  list(APPEND SRCS x86_64_pci.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})
