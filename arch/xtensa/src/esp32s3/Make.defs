@@ -203,6 +203,8 @@ chip/$(ESP_HAL_3RDPARTY_REPO):
 	$(Q) git clone --quiet $(ESP_HAL_3RDPARTY_URL) chip/$(ESP_HAL_3RDPARTY_REPO)
 	$(Q) echo "Espressif HAL for 3rd Party Platforms: ${ESP_HAL_3RDPARTY_VERSION}"
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) checkout --quiet $(ESP_HAL_3RDPARTY_VERSION)
+	$(Q) echo "Applying patches... "
+	$(Q) patch -p1 -d chip/$(ESP_HAL_3RDPARTY_REPO) < chip/0001-nuttx-esp32s3-fix-compilation-mbedTLS-in-apps.patch
 
 # Silent preprocessor warnings
 

@@ -1,0 +1,54 @@
+From 9896d8c5c6d3825b0566e182910f5d57cc688219 Mon Sep 17 00:00:00 2001
+From: Petro Karashchenko <petro.karashchenko@gmail.com>
+Date: Wed, 21 Feb 2024 21:48:06 +0100
+Subject: [PATCH] nuttx: esp32s3: fix compilation when enable mbedTLS in apps
+
+Signed-off-by: Petro Karashchenko <petro.karashchenko@gmail.com>
+---
+ nuttx/esp32s3/include/sdkconfig.h | 24 +++++++-----------------
+ 1 file changed, 7 insertions(+), 17 deletions(-)
+
+diff --git a/nuttx/esp32s3/include/sdkconfig.h b/nuttx/esp32s3/include/sdkconfig.h
+index f80e22ca64..943af11f81 100644
+--- a/nuttx/esp32s3/include/sdkconfig.h
++++ b/nuttx/esp32s3/include/sdkconfig.h
+@@ -875,29 +875,19 @@
+ 
+ #include <nuttx/config.h>
+ 
+-#ifdef CONFIG_MBEDTLS_INTERNAL_MEM_ALLOC
+ #undef CONFIG_MBEDTLS_INTERNAL_MEM_ALLOC
+-#endif
+-
+-#ifdef CONFIG_MBEDTLS_PKCS7_C
+ #undef CONFIG_MBEDTLS_PKCS7_C
+-#endif
+-
+-#ifdef CONFIG_MBEDTLS_CERTIFICATE_BUNDLE
+ #undef CONFIG_MBEDTLS_CERTIFICATE_BUNDLE
+-#endif
+-
+-#ifdef CONFIG_MBEDTLS_HARDWARE_AES
+ #undef CONFIG_MBEDTLS_HARDWARE_AES
+-#endif
+-
+-#ifdef CONFIG_MBEDTLS_HARDWARE_MPI
+ #undef CONFIG_MBEDTLS_HARDWARE_MPI
+-#endif
+-
+-#ifdef CONFIG_MBEDTLS_HARDWARE_SHA
+ #undef CONFIG_MBEDTLS_HARDWARE_SHA
+-#endif
++#undef CONFIG_MBEDTLS_SSL_DTLS_CONNECTION_ID
++#undef CONFIG_MBEDTLS_CHACHAPOLY_C
++#undef CONFIG_MBEDTLS_POLY1305_C
++#undef CONFIG_MBEDTLS_CHACHA20_C
++#undef CONFIG_MBEDTLS_CAMELLIA_C
++#undef CONFIG_MBEDTLS_NIST_KW_C
++#undef CONFIG_MBEDTLS_RIPEMD160_C
+ 
+ #ifdef CONFIG_ESP32S3_BLE
+ #define CONFIG_BT_ENABLED 1
+-- 
+2.43.2
+
