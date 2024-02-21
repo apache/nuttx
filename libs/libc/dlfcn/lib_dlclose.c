@@ -132,6 +132,34 @@ static inline int dlremove(FAR void *handle)
 
   if (!modp->dynamic)
     {
+#ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
+      int i;
+
+      for (i = 0; i < modp->nsect && modp->sectalloc[i] != NULL; i++)
+        {
+#  ifdef CONFIG_ARCH_USE_TEXT_HEAP
+          if (up_textheap_heapmember(modp->sectalloc[i]))
+            {
+              up_textheap_free(modp->sectalloc[i]);
+              continue;
+            }
+#  endif
+
+#  ifdef CONFIG_ARCH_USE_DATA_HEAP
+          if (up_dataheap_heapmember(modp->sectalloc[i]))
+            {
+              up_dataheap_free(modp->sectalloc[i]);
+              continue;
+            }
+#  endif
+
+          lib_free(modp->sectalloc[i]);
+        }
+
+      lib_free(modp->sectalloc);
+      modp->sectalloc = NULL;
+      modp->nsect = 0;
+#else
       if (modp->textalloc != NULL)
         {
           /* Free the module memory */
@@ -147,8 +175,13 @@ static inline int dlremove(FAR void *handle)
         {
           /* Free the module memory */
 
+#if defined(CONFIG_ARCH_USE_DATA_HEAP)
+          up_dataheap_free((FAR void *)modp->dataalloc);
+#else
           lib_free((FAR void *)modp->dataalloc);
+#endif
         }
+#endif
     }
   else
     {

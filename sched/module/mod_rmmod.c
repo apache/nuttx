@@ -127,15 +127,44 @@ int rmmod(FAR void *handle)
 
       if (!modp->dynamic)
         {
-#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
+#ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
+          int i;
+
+          for (i = 0; i < modp->nsect && modp->sectalloc[i] != NULL; i++)
+            {
+#  ifdef CONFIG_ARCH_USE_TEXT_HEAP
+              if (up_textheap_heapmember(modp->sectalloc[i]))
+                {
+                  up_textheap_free(modp->sectalloc[i]);
+                  continue;
+                }
+#  endif
+
+#  ifdef CONFIG_ARCH_USE_DATA_HEAP
+              if (up_dataheap_heapmember(modp->sectalloc[i]))
+                {
+                  up_dataheap_free(modp->sectalloc[i]);
+                  continue;
+                }
+#  endif
+
+              kmm_free(modp->sectalloc[i]);
+            }
+
+          kmm_free(modp->sectalloc);
+          modp->sectalloc = NULL;
+          modp->nsect = 0;
+#else
+#  if defined(CONFIG_ARCH_USE_TEXT_HEAP)
           up_textheap_free((FAR void *)modp->textalloc);
-#else
+#  else
           kmm_free((FAR void *)modp->textalloc);
-#endif
-#if defined(CONFIG_ARCH_USE_DATA_HEAP)
+#  endif
+#  if defined(CONFIG_ARCH_USE_DATA_HEAP)
           up_dataheap_free((FAR void *)modp->dataalloc);
-#else
+#  else
           kmm_free((FAR void *)modp->dataalloc);
+#  endif
 #endif
         }
       else
