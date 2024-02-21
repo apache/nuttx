@@ -34,6 +34,8 @@ endif
 
 ifneq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += xmc4_timerisr.c
+else
+CHIP_CSRCS += xmc4_tickless.c
 endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
