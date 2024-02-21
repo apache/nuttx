@@ -238,6 +238,11 @@ static inline FAR void *dlinsert(FAR const char *filename)
 
   /* Save the load information */
 
+#ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
+  modp->sectalloc = (FAR void *)loadinfo.sectalloc;
+  modp->nsect = loadinfo.ehdr.e_shnum;
+#endif
+
   modp->textalloc = (FAR void *)loadinfo.textalloc;
   modp->dataalloc = (FAR void *)loadinfo.datastart;
   modp->dynamic   = (loadinfo.ehdr.e_type == ET_DYN);
