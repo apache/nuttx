@@ -83,7 +83,7 @@ def compare_dump_line(dump_line_list, str):
 
     find = 0
     for tmp in dump_line_list:
-        if tmp.mem == t.mem:
+        if tmp.mem == t.mem and tmp.size == t.size and t.mem != []:
             find = 1
             tmp.cnt += 1
             break
@@ -126,9 +126,9 @@ if __name__ == "__main__":
     total_dir = {}
     for t in list:
         if t.pid in total_dir:
-            total_dir[t.pid] += t.size
+            total_dir[t.pid] += t.size * t.cnt
         else:
-            total_dir.setdefault(t.pid, t.size)
+            total_dir.setdefault(t.pid, t.size * t.cnt)
 
     log.output("total memory used for ervey pid\n")
     log.output("pid       total size\n")
@@ -143,6 +143,7 @@ if __name__ == "__main__":
         memstr = ""
         log.output("%-4d  %-6d %-3d   %s   " % (t.cnt, t.size, t.pid, t.addr))
         if t.mem == []:
+            log.output("\n")
             continue
         for mem in t.mem:
             log.output("%s " % mem)
