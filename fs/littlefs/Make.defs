@@ -51,6 +51,7 @@ $(LITTLEFS_TARBALL):
 	$(Q) tar zxf littlefs/$(LITTLEFS_TARBALL) -C littlefs
 	$(Q) mv littlefs/littlefs-$(LITTLEFS_VERSION) littlefs/littlefs
 	$(Q) git apply littlefs/lfs_util.patch
+	$(Q) git apply littlefs/lfs_getpath.patch
 	$(Q) touch littlefs/.littlefsunpack
 
 # Download and unpack tarball if no git repo found
