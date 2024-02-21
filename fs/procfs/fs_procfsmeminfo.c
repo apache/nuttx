@@ -454,7 +454,6 @@ static ssize_t memdump_write(FAR struct file *filep, FAR const char *buffer,
                              size_t buflen)
 {
   FAR struct procfs_meminfo_entry_s *entry;
-  FAR struct meminfo_file_s *procfile;
   struct mm_memdump_s dump =
     {
       PID_MM_ALLOC,
@@ -475,8 +474,7 @@ static ssize_t memdump_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Recover our private data from the struct file instance */
 
-  procfile = filep->f_priv;
-  DEBUGASSERT(procfile);
+  DEBUGASSERT(filep->f_priv);
 
 #if CONFIG_MM_BACKTRACE > 0
   if (strcmp(buffer, "on") == 0)
