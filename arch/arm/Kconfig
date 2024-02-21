@@ -600,6 +600,7 @@ config ARCH_CHIP_XMC4
 	select ARCH_HAVE_I2CRESET
 	select ARM_HAVE_MPU_UNIFIED
 	select ARMV7M_HAVE_STACKCHECK
+	select ARCH_HAVE_TICKLESS
 	---help---
 		Infineon XMC4xxx(ARM Cortex-M4) architectures
 
