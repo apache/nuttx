@@ -40,9 +40,6 @@
 #define RPMSGIOC_PANIC              _RPMSGIOC(1)
 #define RPMSGIOC_DUMP               _RPMSGIOC(2)
 #define RPMSGIOC_PING               _RPMSGIOC(3)
-#define RPMSGIOC_START              _RPMSGIOC(4)
-#define RPMSGIOC_STOP               _RPMSGIOC(5)
-#define RPMSGIOC_RESET              _RPMSGIOC(6)
 
 /****************************************************************************
  * Public Types
