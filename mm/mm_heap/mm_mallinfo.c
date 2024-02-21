@@ -65,7 +65,7 @@ static void mallinfo_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
   else
     {
       FAR struct mm_freenode_s *fnode = (FAR void *)node;
-
+      UNUSED(fnode);
       DEBUGASSERT(nodesize >= MM_MIN_CHUNK);
       DEBUGASSERT(fnode->blink->flink == fnode);
       DEBUGASSERT(MM_SIZEOF_NODE(fnode->blink) <= nodesize);

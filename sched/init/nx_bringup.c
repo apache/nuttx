@@ -307,6 +307,7 @@ static inline void nx_start_application(void)
   posix_spawnattr_t attr;
 #endif
   int ret;
+  UNUSED(ret);
 
 #ifdef CONFIG_ETC_ROMFS
   nx_romfsetc();
