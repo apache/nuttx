@@ -159,6 +159,10 @@ struct module_s
   struct mod_info_s modinfo;           /* Module information */
   FAR void *textalloc;                 /* Allocated kernel text memory */
   FAR void *dataalloc;                 /* Allocated kernel memory */
+#ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
+  FAR void **sectalloc;                /* All sections memory allocated when ELF file was loaded */
+  uint16_t nsect;                      /* Number of entries in sectalloc array */
+#endif
   int dynamic;                         /* Module is a dynamic shared object */
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
   size_t textsize;                     /* Size of the kernel .text memory allocation */

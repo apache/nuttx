@@ -87,7 +87,7 @@ int modlib_unload(FAR struct mod_loadinfo_s *loadinfo)
           lib_free((FAR void *)loadinfo->sectalloc[i]);
         }
 
-    lib_free(loadinfo->sectalloc);
+      lib_free(loadinfo->sectalloc);
 #else
       if (loadinfo->textalloc != 0)
         {
