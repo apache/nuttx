@@ -389,6 +389,24 @@ static inline irqstate_t up_irq_enable(void)
   return cpsr;
 }
 
+/* Disable IRQs and return the previous IRQ state */
+
+static inline irqstate_t up_irq_disable(void)
+{
+  unsigned int cpsr;
+
+  __asm__ __volatile__
+    (
+      "\tmrs    %0, cpsr\n"
+      "\tcpsid  i\n"
+      : "=r" (cpsr)
+      :
+      : "memory"
+    );
+
+  return cpsr;
+}
+
 /* Restore saved IRQ & FIQ state */
 
 static inline void up_irq_restore(irqstate_t flags)
