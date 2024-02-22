@@ -131,7 +131,6 @@ static struct inode g_inotify_inode =
 static int g_inotify_event_cookie;
 static int g_inotify_watch_cookie;
 static struct hsearch_data g_inotify_hash;
-static char g_inotify_temp_buffer[2][PATH_MAX];
 static mutex_t g_inotify_hash_lock = NXMUTEX_INITIALIZER;
 
 /****************************************************************************
@@ -822,11 +821,19 @@ static void notify_queue_path_event(FAR const char *path, uint32_t mask)
 {
   FAR struct inotify_watch_list_s *list;
   FAR char *abspath;
+  FAR char *pathbuffer;
   uint32_t cookie = 0;
 
-  abspath = lib_realpath(path, g_inotify_temp_buffer[1], true);
+  pathbuffer = lib_get_pathbuffer();
+  if (pathbuffer == NULL)
+    {
+      return;
+    }
+
+  abspath = lib_realpath(path, pathbuffer, true);
   if (abspath == NULL)
     {
+      lib_put_pathbuffer(pathbuffer);
       return;
     }
 
@@ -842,6 +849,7 @@ static void notify_queue_path_event(FAR const char *path, uint32_t mask)
 
   list = inotify_get_watch_list(abspath);
   inotify_queue_parent_event(abspath, mask, cookie);
+  lib_put_pathbuffer(pathbuffer);
   if (list == NULL)
     {
       return;
@@ -906,6 +914,7 @@ static int notify_check_inode(FAR struct file *filep)
 static inline void notify_queue_filep_event(FAR struct file *filep,
                                             uint32_t mask)
 {
+  FAR char *pathbuffer;
   int ret;
 
   ret = notify_check_inode(filep);
@@ -914,11 +923,16 @@ static inline void notify_queue_filep_event(FAR struct file *filep,
       return;
     }
 
-  nxmutex_lock(&g_inotify_hash_lock);
-  ret = file_fcntl(filep, F_GETPATH, g_inotify_temp_buffer[0]);
+  pathbuffer = lib_get_pathbuffer();
+  if (pathbuffer == NULL)
+    {
+      return;
+    }
+
+  ret = file_fcntl(filep, F_GETPATH, pathbuffer);
   if (ret < 0)
     {
-      nxmutex_unlock(&g_inotify_hash_lock);
+      lib_put_pathbuffer(pathbuffer);
       return;
     }
 
@@ -927,7 +941,9 @@ static inline void notify_queue_filep_event(FAR struct file *filep,
       mask |= IN_ISDIR;
     }
 
-  notify_queue_path_event(g_inotify_temp_buffer[0], mask);
+  nxmutex_lock(&g_inotify_hash_lock);
+  notify_queue_path_event(pathbuffer, mask);
+  lib_put_pathbuffer(pathbuffer);
   nxmutex_unlock(&g_inotify_hash_lock);
 }
 
@@ -1259,12 +1275,21 @@ void notify_close(FAR struct file *filep)
 
 void notify_close2(FAR struct inode *inode)
 {
-  nxmutex_lock(&g_inotify_hash_lock);
-  if (inode_getpath(inode, g_inotify_temp_buffer[0], PATH_MAX) >= 0)
+  FAR char *pathbuffer;
+
+  pathbuffer = lib_get_pathbuffer();
+  if (pathbuffer == NULL)
     {
-      notify_queue_path_event(g_inotify_temp_buffer[0], IN_CLOSE_WRITE);
+      return;
     }
 
+  nxmutex_lock(&g_inotify_hash_lock);
+  if (inode_getpath(inode, pathbuffer, PATH_MAX) >= 0)
+    {
+      notify_queue_path_event(pathbuffer, IN_CLOSE_WRITE);
+    }
+
+  lib_put_pathbuffer(pathbuffer);
   nxmutex_unlock(&g_inotify_hash_lock);
 }
 
