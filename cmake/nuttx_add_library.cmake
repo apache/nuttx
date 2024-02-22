@@ -209,7 +209,7 @@ endfunction()
 # Usually used with Nuttx to include an external system that already supports
 # CMake compilation
 function(nuttx_add_external_library target)
-  cmake_parse_arguments(ARGS MODE "" "" ${ARGN})
+  cmake_parse_arguments(ARGS "" MODE "" ${ARGN})
   if(NOT ARGS_MODE)
     set_property(GLOBAL APPEND PROPERTY NUTTX_SYSTEM_LIBRARIES ${target})
   elseif("${ARGS_MODE}" STREQUAL "APPS")
