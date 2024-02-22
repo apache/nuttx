@@ -2257,6 +2257,29 @@ bool up_cpu_pausereq(int cpu);
 #endif
 
 /****************************************************************************
+ * Name: up_cpu_paused_save
+ *
+ * Description:
+ *   Handle a pause request from another CPU.  Normally, this logic is
+ *   executed from interrupt handling logic within the architecture-specific
+ *   However, it is sometimes necessary to perform the pending
+ *   pause operation in other contexts where the interrupt cannot be taken
+ *   in order to avoid deadlocks.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   On success, OK is returned.  Otherwise, a negated errno value indicating
+ *   the nature of the failure is returned.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+int up_cpu_paused_save(void);
+#endif
+
+/****************************************************************************
  * Name: up_cpu_paused
  *
  * Description:
@@ -2285,6 +2308,26 @@ bool up_cpu_pausereq(int cpu);
 
 #ifdef CONFIG_SMP
 int up_cpu_paused(int cpu);
+#endif
+
+/****************************************************************************
+ * Name: up_cpu_paused_restore
+ *
+ * Description:
+ *  Restore the state of the CPU after it was paused via up_cpu_pause(),
+ *  and resume normal tasking.
+ *
+ * Input Parameters:
+ *  None
+ *
+ * Returned Value:
+ *   On success, OK is returned.  Otherwise, a negated errno value indicating
+ *   the nature of the failure is returned.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+int up_cpu_paused_restore(void);
 #endif
 
 /****************************************************************************
