@@ -55,7 +55,6 @@ void mm_foreach(FAR struct mm_heap_s *heap, mm_node_handler_t handler,
 #  define region 0
 #endif
 
-  UNUSED(prev);
   DEBUGASSERT(handler);
 
   /* Visit each region */

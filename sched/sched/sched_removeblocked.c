@@ -55,10 +55,12 @@
 
 void nxsched_remove_blocked(FAR struct tcb_s *btcb)
 {
+  tstate_t task_state = btcb->task_state;
+
   /* Make sure the TCB is in a valid blocked state */
 
-  DEBUGASSERT(btcb->task_state >= FIRST_BLOCKED_STATE &&
-              btcb->task_state <= LAST_BLOCKED_STATE);
+  DEBUGASSERT(task_state >= FIRST_BLOCKED_STATE &&
+              task_state <= LAST_BLOCKED_STATE);
 
   /* Remove the TCB from the blocked task list associated
    * with this state
