@@ -151,6 +151,7 @@ static ssize_t
       DEBUGASSERT(conn->backlog > 0);
       conn->backlog--;
       DEBUGASSERT((int)conn->backlog == ieee802154_count_frames(conn));
+      UNUSED(ieee802154_count_frames);
 #endif
 
       /* Extract the IOB containing the frame from the container */

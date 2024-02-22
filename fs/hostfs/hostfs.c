@@ -451,6 +451,7 @@ static ssize_t hostfs_read(FAR struct file *filep, FAR char *buffer,
   fs    = inode->i_private;
 
   DEBUGASSERT(fs != NULL);
+  UNUSED(fs);
 
   /* Take the lock */
 
@@ -493,6 +494,7 @@ static ssize_t hostfs_write(FAR struct file *filep, const char *buffer,
   fs    = inode->i_private;
 
   DEBUGASSERT(fs != NULL);
+  UNUSED(fs);
 
   /* Take the lock */
 
@@ -547,6 +549,7 @@ static off_t hostfs_seek(FAR struct file *filep, off_t offset, int whence)
   fs    = inode->i_private;
 
   DEBUGASSERT(fs != NULL);
+  UNUSED(fs);
 
   /* Take the lock */
 
@@ -588,8 +591,7 @@ static int hostfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   hf    = filep->f_priv;
   inode = filep->f_inode;
   fs    = inode->i_private;
-
-  DEBUGASSERT(fs != NULL);
+  UNUSED(fs);
 
   /* Take the lock */
 
@@ -633,6 +635,7 @@ static int hostfs_sync(FAR struct file *filep)
   fs    = inode->i_private;
 
   DEBUGASSERT(fs != NULL);
+  UNUSED(fs);
 
   /* Take the lock */
 
@@ -707,6 +710,7 @@ static int hostfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 
   fs    = inode->i_private;
   DEBUGASSERT(fs != NULL);
+  UNUSED(fs);
 
   /* Take the lock */
 
@@ -753,6 +757,7 @@ static int hostfs_fchstat(FAR const struct file *filep,
 
   fs    = inode->i_private;
   DEBUGASSERT(fs != NULL);
+  UNUSED(fs);
 
   /* Take the lock */
 
@@ -794,6 +799,7 @@ static int hostfs_ftruncate(FAR struct file *filep, off_t length)
 
   fs    = inode->i_private;
   DEBUGASSERT(fs != NULL);
+  UNUSED(fs);
 
   /* Take the lock */
 

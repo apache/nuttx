@@ -1525,6 +1525,7 @@ static void cmd_queue_init(void)
                        CONFIG_BLUETOOTH_TXCMD_STACKSIZE,
                        hci_tx_kthread, NULL);
   DEBUGASSERT(pid > 0);
+  UNUSED(pid);
 
 #ifdef CONFIG_BLUETOOTH_TXCMD_PINNED_TO_CORE
   CPU_ZERO(&cpuset);
