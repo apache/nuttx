@@ -630,6 +630,8 @@ static void slip_receive(FAR struct slip_driver_s *self)
         }
     }
 
+  UNUSED(ret);
+
   /* Move remaining bytes in rxbuf to the front */
 
   DEBUGASSERT((pend - self->rxbuf) <= self->rxlen);

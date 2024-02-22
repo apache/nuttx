@@ -588,6 +588,7 @@ static int djoy_poll(FAR struct file *filep, FAR struct pollfd *fds,
   opriv = filep->f_priv;
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
+  UNUSED(inode);
 
   /* Get exclusive access to the driver structure */
 

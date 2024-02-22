@@ -176,6 +176,7 @@ static int ieee802154_queue_frame(FAR struct ieee802154_conn_s *conn,
     }
 
   DEBUGASSERT((int)conn->backlog == ieee802154_count_frames(conn));
+  UNUSED(ieee802154_count_frames);
 #endif
 
   return OK;

@@ -125,6 +125,7 @@ void mm_pgreserve(uintptr_t start, size_t size)
 {
   FAR void * ret = gran_reserve(g_pgalloc, start, size);
   DEBUGASSERT(ret != NULL);
+  UNUSED(ret);
 }
 
 /****************************************************************************

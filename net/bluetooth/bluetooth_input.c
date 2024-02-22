@@ -169,6 +169,7 @@ static int bluetooth_queue_frame(FAR struct bluetooth_conn_s *conn,
     }
 
   DEBUGASSERT((int)conn->bc_backlog == bluetooth_count_frames(conn));
+  UNUSED(bluetooth_count_frames);
 #endif
 
   return OK;

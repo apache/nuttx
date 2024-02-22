@@ -2855,13 +2855,12 @@ errout:
 
 static int sam_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
-  struct sam_rhport_s *rhport = (struct sam_rhport_s *)drvr;
   struct sam_eplist_s *eplist = (struct sam_eplist_s *)ep;
   struct sam_ed_s *ed;
   int ret;
   int ret2;
 
-  DEBUGASSERT(rhport != NULL && eplist != NULL &&
+  DEBUGASSERT(drvr != NULL && eplist != NULL &&
               eplist->ed != NULL && eplist->tail != NULL);
 
   /* There should not be any pending, real TDs linked to this ED */

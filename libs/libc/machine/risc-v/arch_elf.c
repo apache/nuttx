@@ -492,6 +492,7 @@ int up_relocateadd(const Elf_Rela *rel, const Elf_Sym *sym,
 
           insn = _get_val((uint16_t *)addr);
           ASSERT(OPCODE_AUIPC == (insn & RVI_OPCODE_MASK));
+          UNUSED(insn);
 
           _calc_imm(offset, &imm_hi, &imm_lo);
 
