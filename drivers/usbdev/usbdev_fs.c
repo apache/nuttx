@@ -721,7 +721,7 @@ static ssize_t usbdev_fs_write(FAR struct file *filep,
 
   /* Device ready for write */
 
-  while (len > 0 && !sq_empty(&fs_ep->reqq))
+  while (!sq_empty(&fs_ep->reqq))
     {
       uint16_t cur_len;
 
@@ -764,9 +764,12 @@ static ssize_t usbdev_fs_write(FAR struct file *filep,
 
       wlen += cur_len;
       len -= cur_len;
+      if (len == 0)
+        {
+          break;
+        }
     }
 
-  assert(wlen > 0);
   ret = wlen;
 
 errout:
