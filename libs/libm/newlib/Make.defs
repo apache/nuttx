@@ -39,6 +39,7 @@ newlib/newlib: $(NEWLIB_BASENAME)-$(NEWLIB_VERSION).tar.gz
 	$(Q) mv $(NEWLIB_BASENAME)-$(NEWLIB_VERSION) newlib/newlib
 	$(Q) patch -p0 < newlib/0001-newlib-libm-fix-__RCSID-build-error.patch
 	$(Q) patch -p0 < newlib/0002-newlib-libm-remove-include-reent.h.patch
+	$(Q) patch -p0 < newlib/0003-newlib-fix-compilation-for-x86.patch
 	$(Q) touch $@
 endif
 
@@ -80,6 +81,13 @@ endif
 
 CSRCS += $(wildcard newlib/newlib/newlib/libm/machine/$(ARCH)/*.c)
 VPATH += :newlib/newlib/newlib/libm/machine/$(ARCH)
+
+ifeq ($(CONFIG_ARCH_X86_64),y)
+CSRCS += $(wildcard newlib/newlib/newlib/libm/fenv/*.c)
+VPATH += :newlib/newlib/newlib/libm/fenv
+
+CFLAGS += ${INCDIR_PREFIX}newlib/newlib/newlib/libc/machine/shared_x86/sys
+endif
 
 ifeq ($(CONFIG_LIBM_NEWLIB_HW_FP),y)
   CSRCS += $(wildcard newlib/newlib/newlib/libm/mathfp/*.c)
