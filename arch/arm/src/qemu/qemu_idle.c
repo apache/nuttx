@@ -48,10 +48,19 @@
  *
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_TRUSTZONE_SECURE
+extern volatile uint32_t g_ap_entry;
+#endif
+
 void up_idle(void)
 {
 #ifdef CONFIG_ARCH_TRUSTZONE_SECURE
-  sm_switch_nsec();
+  if (g_ap_entry != 0)
+    {
+      up_irq_disable();
+      arm_sm_boot_nsec(g_ap_entry);
+      arm_sm_switch_nsec();
+    }
 #else
   #if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_TIMER_INTS)
   /* If the system is idle and there are no timer interrupts, then process
