@@ -252,6 +252,8 @@ try_again:
 
           else
             {
+              int paused = false;
+
               /* Make sure that the g_cpu_irqset was not already set
                * by previous logic on this CPU that was executed by the
                * interrupt handler.  We know that the bit in g_cpu_irqset
@@ -273,7 +275,13 @@ try_again_in_irq:
                        * handling the pause request now.
                        */
 
+                      if (!paused)
+                        {
+                          up_cpu_paused_save();
+                        }
+
                       DEBUGVERIFY(up_cpu_paused(cpu));
+                      paused = true;
 
                       /* NOTE: As the result of up_cpu_paused(cpu), this CPU
                        * might set g_cpu_irqset in nxsched_resume_scheduler()
@@ -305,6 +313,10 @@ try_again_in_irq:
 
               spin_setbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
                           &g_cpu_irqlock);
+              if (paused)
+                {
+                  up_cpu_paused_restore();
+                }
             }
         }
       else
