@@ -325,6 +325,7 @@ static uint16_t _to_uint16(char *str)
 {
   uint16_t ret = 0;
   int n;
+  UNUSED(n);
 
   n = sscanf(str, "%04hu", &ret);
   ASSERT(1 == n);
@@ -600,6 +601,7 @@ static void _remove_all_pkt(FAR struct gs2200m_dev_s *dev, uint8_t c)
   FAR struct pkt_dat_s *pkt_dat;
   uint32_t mask;
 
+  UNUSED(mask);
   mask = 1 << c;
   ASSERT(0 == (dev->valid_cid_bits & mask));
 
@@ -1091,6 +1093,7 @@ static void _parse_pkt_in_s1(FAR struct pkt_ctx_s *pkt_ctx,
   int msize;
   int n;
 
+  UNUSED(n);
   if (ASCII_LF != *(pkt_ctx->ptr))
     {
       return;
@@ -1251,6 +1254,7 @@ static void _parse_pkt_in_s4(FAR struct pkt_ctx_s *pkt_ctx,
   char port[6];
   int n;
 
+  UNUSED(n);
   ASSERT(pkt_dat);
 
   if ('z' == pkt_ctx->cid)
@@ -1691,6 +1695,7 @@ static enum pkt_type_e gs2200m_join_network(FAR struct gs2200m_dev_s *dev,
 
   /* Initialize pkt_dat and send command */
 
+  UNUSED(n);
   memset(&pkt_dat, 0, sizeof(pkt_dat));
 
   if (0 == dev->op_mode)
@@ -2207,6 +2212,8 @@ static enum pkt_type_e gs2200m_get_cstatus(FAR struct gs2200m_dev_s *dev,
       int  p[2];
       char type[8];
       char mode[8];
+
+      UNUSED(n);
       memset(type, 0, sizeof(type));
       memset(mode, 0, sizeof(mode));
       n = sscanf(pkt_dat.msg[i], "%c %7s %6s %d %d %d.%d.%d.%d",
@@ -2537,6 +2544,7 @@ static int gs2200m_ioctl_accept(FAR struct gs2200m_dev_s *dev,
   int ret = OK;
   int n;
 
+  UNUSED(n);
   wlinfo("+++ start: cid=%c\n", msg->cid);
 
   c = _cid_to_uint8(msg->cid);
@@ -2605,6 +2613,7 @@ static int gs2200m_ioctl_assoc_sta(FAR struct gs2200m_dev_s *dev,
 
   /* Remember assoc request msg for reconnection */
 
+  UNUSED(t);
   memcpy(&dev->reconnect_msg, msg, sizeof(struct gs2200m_assoc_msg));
 
   /* Disassociate */
@@ -2680,6 +2689,7 @@ static int gs2200m_ioctl_assoc_ap(FAR struct gs2200m_dev_s *dev,
 
   /* Set to AP mode */
 
+  UNUSED(t);
   t = gs2200m_set_opmode(dev, 2);
   ASSERT(TYPE_OK == t);
 
@@ -3372,6 +3382,7 @@ static int gs2200m_start(FAR struct gs2200m_dev_s *dev)
 
   /* Check boot msg */
 
+  UNUSED(t);
   wlinfo("*** wait for boot msg\n");
 
   while (dev->lower->dready(NULL))

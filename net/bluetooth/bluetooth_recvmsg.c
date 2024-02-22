@@ -152,7 +152,8 @@ static ssize_t
 
       DEBUGASSERT(conn->bc_backlog > 0);
       conn->bc_backlog--;
-      DEBUGASSERT((int)conn->bc_backlog == bluetooth_count_frames(conn));
+      ret = bluetooth_count_frames(conn);
+      DEBUGASSERT((int)conn->bc_backlog == ret);
 #endif
 
       /* Extract the IOB containing the frame from the container */

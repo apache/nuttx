@@ -1504,6 +1504,8 @@ static void cmd_queue_init(void)
 #endif
   int pid;
 
+  UNUSED(PID);
+
   /* When there is a command to be sent to the Bluetooth driver, it queued on
    * the Tx queue and received by logic on the Tx kernel thread.
    */

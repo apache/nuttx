@@ -31,6 +31,11 @@ CSRCS += lfs.c lfs_util.c
 DEPPATH += --dep-path littlefs/littlefs
 VPATH += :littlefs/littlefs
 
+# Fix warnings in littlefs
+# Error: littlefs/littlefs/lfs.c:450:13: error: 'lfs_mlist_isopen' defined but not used [-Werror=unused-function]
+
+littlefs/littlefs/lfs.c_CFLAGS += -Wno-error=unused-function
+
 CFLAGS += -DLFS_TRACE=finfo
 CFLAGS += -DLFS_DEBUG=finfo
 CFLAGS += -DLFS_WARN=fwarn

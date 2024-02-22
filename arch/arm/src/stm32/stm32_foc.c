@@ -1322,6 +1322,8 @@ static int stm32_foc_configure(struct foc_dev_s *dev,
   struct stm32_foc_board_s *board = STM32_FOCBOARD_FROM_DEV_GET(dev);
   int                       ret   = OK;
 
+  UNUSED(board);
+
   DEBUGASSERT(dev);
   DEBUGASSERT(cfg);
   DEBUGASSERT(priv);
@@ -1830,6 +1832,7 @@ static int stm32_foc_worker_handler(struct foc_dev_s *dev)
   struct stm32_adc_dev_s   *adc   = ADC_FROM_FOC_DEV_GET(dev);
   int                       ret   = OK;
 
+  UNUSED(adc);
   DEBUGASSERT(dev);
   DEBUGASSERT(priv);
   DEBUGASSERT(adc);
@@ -2176,6 +2179,7 @@ static void stm32_foc_curr_get(struct foc_dev_s *dev,
   struct stm32_adc_dev_s  *adc  = ADC_FROM_FOC_DEV_GET(dev);
   int                      i    = 0;
 
+  UNUSED(priv);
   DEBUGASSERT(dev);
   DEBUGASSERT(priv);
   DEBUGASSERT(adc);

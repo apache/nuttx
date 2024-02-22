@@ -493,6 +493,7 @@ static void w5500_lock(FAR struct w5500_driver_s *self)
 {
   int ret;
 
+  UNUSED(ret);
   ret = SPI_LOCK(self->spi_dev, true);
   DEBUGASSERT(ret == OK);
 
@@ -518,6 +519,7 @@ static void w5500_unlock(FAR struct w5500_driver_s *self)
 {
   int ret;
 
+  UNUSED(ret);
   SPI_SELECT(self->spi_dev, SPIDEV_ETHERNET(self->lower->spidevid), false);
   ret = SPI_LOCK(self->spi_dev, false);
   DEBUGASSERT(ret == OK);

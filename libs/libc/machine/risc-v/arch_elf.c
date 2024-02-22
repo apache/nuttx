@@ -482,6 +482,7 @@ int up_relocateadd(const Elf_Rela *rel, const Elf_Sym *sym,
           long imm_hi;
           long imm_lo;
 
+          UNUSED(insn);
           binfo("%s at %08" PRIxPTR " [%08" PRIx32 "] "
                 "to sym=%p st_value=%08lx\n",
                 _get_rname(relotype),

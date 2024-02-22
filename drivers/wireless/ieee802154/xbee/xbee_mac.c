@@ -295,7 +295,6 @@ int xbee_req_data(XBEEHANDLE xbee,
   int index;
   uint16_t apiframelen;
   uint8_t frametype;
-  int prevoffs = frame->io_offset;
 #ifdef CONFIG_XBEE_LOCKUP_WORKAROUND
   int retries = XBEE_LOCKUP_SENDATTEMPTS;
 #endif
@@ -352,7 +351,7 @@ int xbee_req_data(XBEEHANDLE xbee,
 
   frame->io_data[index++] = 0; /* Options byte. Currently we do not support anything here */
 
-  DEBUGASSERT(index == prevoffs);
+  DEBUGASSERT(index == frame->io_offset);
 
   /* Increment io_len by 1 to account for checksum */
 

@@ -239,6 +239,7 @@ static inline void xtensa_attach_fromcpu1_interrupt(void)
 
   /* Connect all CPU peripheral source to allocated CPU interrupt */
 
+  UNUSED(cpuint);
   cpuint = esp32_setup_irq(0, ESP32_PERIPH_CPU_CPU1, 1, ESP32_CPUINT_LEVEL);
   DEBUGASSERT(cpuint >= 0);
 

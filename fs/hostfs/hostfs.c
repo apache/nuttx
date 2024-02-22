@@ -435,8 +435,6 @@ okout:
 static ssize_t hostfs_read(FAR struct file *filep, FAR char *buffer,
                            size_t buflen)
 {
-  FAR struct inode *inode;
-  FAR struct hostfs_mountpt_s *fs;
   FAR struct hostfs_ofile_s *hf;
   ssize_t ret;
 
@@ -447,10 +445,7 @@ static ssize_t hostfs_read(FAR struct file *filep, FAR char *buffer,
   /* Recover our private data from the struct file instance */
 
   hf    = filep->f_priv;
-  inode = filep->f_inode;
-  fs    = inode->i_private;
-
-  DEBUGASSERT(fs != NULL);
+  DEBUGASSERT(filep->f_inode->i_private != NULL);
 
   /* Take the lock */
 
@@ -479,8 +474,6 @@ static ssize_t hostfs_read(FAR struct file *filep, FAR char *buffer,
 static ssize_t hostfs_write(FAR struct file *filep, const char *buffer,
                          size_t buflen)
 {
-  FAR struct inode *inode;
-  FAR struct hostfs_mountpt_s *fs;
   FAR struct hostfs_ofile_s *hf;
   ssize_t ret;
 
@@ -489,10 +482,7 @@ static ssize_t hostfs_write(FAR struct file *filep, const char *buffer,
   /* Recover our private data from the struct file instance */
 
   hf    = filep->f_priv;
-  inode = filep->f_inode;
-  fs    = inode->i_private;
-
-  DEBUGASSERT(fs != NULL);
+  DEBUGASSERT(filep->f_inode->i_private != NULL);
 
   /* Take the lock */
 
@@ -531,8 +521,6 @@ errout_with_lock:
 
 static off_t hostfs_seek(FAR struct file *filep, off_t offset, int whence)
 {
-  FAR struct inode *inode;
-  FAR struct hostfs_mountpt_s *fs;
   FAR struct hostfs_ofile_s *hf;
   off_t ret;
 
@@ -543,10 +531,7 @@ static off_t hostfs_seek(FAR struct file *filep, off_t offset, int whence)
   /* Recover our private data from the struct file instance */
 
   hf    = filep->f_priv;
-  inode = filep->f_inode;
-  fs    = inode->i_private;
-
-  DEBUGASSERT(fs != NULL);
+  DEBUGASSERT(filep->f_inode->i_private != NULL);
 
   /* Take the lock */
 
@@ -574,8 +559,6 @@ static off_t hostfs_seek(FAR struct file *filep, off_t offset, int whence)
 
 static int hostfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode *inode;
-  FAR struct hostfs_mountpt_s *fs;
   FAR struct hostfs_ofile_s *hf;
   int ret;
 
@@ -586,10 +569,7 @@ static int hostfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   /* Recover our private data from the struct file instance */
 
   hf    = filep->f_priv;
-  inode = filep->f_inode;
-  fs    = inode->i_private;
-
-  DEBUGASSERT(fs != NULL);
+  DEBUGASSERT(filep->f_inode->i_private != NULL);
 
   /* Take the lock */
 
@@ -617,8 +597,6 @@ static int hostfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
 static int hostfs_sync(FAR struct file *filep)
 {
-  FAR struct inode            *inode;
-  FAR struct hostfs_mountpt_s *fs;
   FAR struct hostfs_ofile_s   *hf;
   int ret;
 
@@ -629,10 +607,7 @@ static int hostfs_sync(FAR struct file *filep)
   /* Recover our private data from the struct file instance */
 
   hf    = filep->f_priv;
-  inode = filep->f_inode;
-  fs    = inode->i_private;
-
-  DEBUGASSERT(fs != NULL);
+  DEBUGASSERT(filep->f_inode->i_private != NULL);
 
   /* Take the lock */
 
@@ -690,8 +665,6 @@ static int hostfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
 static int hostfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 {
-  FAR struct inode *inode;
-  FAR struct hostfs_mountpt_s *fs;
   FAR struct hostfs_ofile_s *hf;
   int ret = OK;
 
@@ -703,10 +676,7 @@ static int hostfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 
   DEBUGASSERT(filep->f_priv != NULL);
   hf    = filep->f_priv;
-  inode = filep->f_inode;
-
-  fs    = inode->i_private;
-  DEBUGASSERT(fs != NULL);
+  DEBUGASSERT(filep->f_inode->i_private != NULL);
 
   /* Take the lock */
 
@@ -736,8 +706,6 @@ static int hostfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 static int hostfs_fchstat(FAR const struct file *filep,
                           FAR const struct stat *buf, int flags)
 {
-  FAR struct inode *inode;
-  FAR struct hostfs_mountpt_s *fs;
   FAR struct hostfs_ofile_s *hf;
   int ret = OK;
 
@@ -749,10 +717,7 @@ static int hostfs_fchstat(FAR const struct file *filep,
 
   DEBUGASSERT(filep->f_priv != NULL);
   hf    = filep->f_priv;
-  inode = filep->f_inode;
-
-  fs    = inode->i_private;
-  DEBUGASSERT(fs != NULL);
+  DEBUGASSERT(filep->f_inode->i_private != NULL);
 
   /* Take the lock */
 
@@ -781,8 +746,6 @@ static int hostfs_fchstat(FAR const struct file *filep,
 
 static int hostfs_ftruncate(FAR struct file *filep, off_t length)
 {
-  FAR struct inode *inode;
-  FAR struct hostfs_mountpt_s *fs;
   FAR struct hostfs_ofile_s *hf;
   int ret = OK;
 
@@ -790,10 +753,7 @@ static int hostfs_ftruncate(FAR struct file *filep, off_t length)
 
   DEBUGASSERT(filep->f_priv != NULL);
   hf    = filep->f_priv;
-  inode = filep->f_inode;
-
-  fs    = inode->i_private;
-  DEBUGASSERT(fs != NULL);
+  DEBUGASSERT(filep->f_inode->i_private != NULL);
 
   /* Take the lock */
 

@@ -31,6 +31,7 @@ COBJS = $(CSRCS:.c=$(OBJEXT))
 SRCS = $(ASRCS) $(CSRCS)
 OBJS = $(AOBJS) $(COBJS)
 
+CFLAGS += -Wno-error=unused-but-set-variable
 BIN = libopenamp$(LIBEXT)
 
 all: $(BIN)

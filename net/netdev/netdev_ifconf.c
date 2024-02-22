@@ -234,6 +234,7 @@ static int ifconf_ipv6_callback(FAR struct net_driver_s *dev, FAR void *arg)
 {
   FAR struct ifconf_ipv6_info_s *info = (FAR struct ifconf_ipv6_info_s *)arg;
 
+  UNUSED(info);
   DEBUGASSERT(dev != NULL && info != NULL && info->lifc != NULL);
 
   /* Check if this adapter has an IPv6 address assigned and is in the UP

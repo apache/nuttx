@@ -212,6 +212,7 @@ static void sdcard_enable(const struct automount_lower_s *lower,
 static bool sdcard_inserted(const struct automount_lower_s *lower)
 {
   const struct cxd56_automount_config_s *config;
+  UNUSED(config);
 
   config = (struct cxd56_automount_config_s *)lower;
   DEBUGASSERT(config && config->state);

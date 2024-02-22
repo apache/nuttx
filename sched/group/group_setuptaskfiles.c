@@ -67,6 +67,7 @@ int group_setuptaskfiles(FAR struct task_tcb_s *tcb,
   FAR struct tcb_s *rtcb = this_task();
 #endif
 
+  UNUSED(group);
   sched_trace_begin();
   DEBUGASSERT(group);
 #ifndef CONFIG_DISABLE_PTHREAD

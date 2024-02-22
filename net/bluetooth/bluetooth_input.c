@@ -98,6 +98,9 @@ static int bluetooth_queue_frame(FAR struct bluetooth_conn_s *conn,
                                   FAR struct bluetooth_frame_meta_s *meta)
 {
   FAR struct bluetooth_container_s *container;
+  int ret;
+
+  UNUSED(ret);
 
   /* Allocate a container for the frame */
 
@@ -168,7 +171,8 @@ static int bluetooth_queue_frame(FAR struct bluetooth_conn_s *conn,
       conn->bc_backlog++;
     }
 
-  DEBUGASSERT((int)conn->bc_backlog == bluetooth_count_frames(conn));
+  ret = bluetooth_count_frames(conn);
+  DEBUGASSERT((int)conn->bc_backlog == ret);
 #endif
 
   return OK;

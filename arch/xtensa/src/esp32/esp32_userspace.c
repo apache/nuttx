@@ -144,6 +144,7 @@ static noinline_function IRAM_ATTR void configure_flash_mmu(void)
   uint32_t irom_lma_aligned;
   uint32_t irom_vma_aligned;
   uint32_t irom_page_count;
+  int ret;
 
   size_t partition_offset = USER_IMAGE_OFFSET;
   uint32_t app_drom_lma = partition_offset + g_header.drom_lma;
@@ -153,40 +154,49 @@ static noinline_function IRAM_ATTR void configure_flash_mmu(void)
   uint32_t app_irom_size = g_header.irom_size;
   uint32_t app_irom_vma = g_header.irom_vma;
 
+  UNUSED(ret);
   cache_read_disable(0);
   cache_flush(0);
 
   drom_lma_aligned = app_drom_lma & MMU_FLASH_MASK;
   drom_vma_aligned = app_drom_vma & MMU_FLASH_MASK;
   drom_page_count = calc_mmu_pages(app_drom_size, app_drom_vma);
-  ASSERT(cache_flash_mmu_set(0, PIDCTRL_PID_KERNEL, drom_vma_aligned,
-                             drom_lma_aligned, 64,
-                             (int)drom_page_count) == 0);
-  ASSERT(cache_flash_mmu_set(1, PIDCTRL_PID_KERNEL, drom_vma_aligned,
-                             drom_lma_aligned, 64,
-                             (int)drom_page_count) == 0);
-  ASSERT(cache_flash_mmu_set(0, PIDCTRL_PID_USER, drom_vma_aligned,
-                             drom_lma_aligned, 64,
-                             (int)drom_page_count) == 0);
-  ASSERT(cache_flash_mmu_set(1, PIDCTRL_PID_USER, drom_vma_aligned,
-                             drom_lma_aligned, 64,
-                             (int)drom_page_count) == 0);
+  cache_flash_mmu_set(0, PIDCTRL_PID_KERNEL, drom_vma_aligned,
+                      drom_lma_aligned, 64,
+                      (int)drom_page_count);
+  ASSERT(ret == 0);
+  cache_flash_mmu_set(1, PIDCTRL_PID_KERNEL, drom_vma_aligned,
+                      drom_lma_aligned, 64,
+                      (int)drom_page_count);
+  ASSERT(ret == 0);
+  ret = cache_flash_mmu_set(0, PIDCTRL_PID_USER, drom_vma_aligned,
+                            drom_lma_aligned, 64,
+                            (int)drom_page_count);
+  ASSERT(ret == 0);
+  ret = cache_flash_mmu_set(1, PIDCTRL_PID_USER, drom_vma_aligned,
+                            drom_lma_aligned, 64,
+                            (int)drom_page_count);
+  ASSERT(ret == 0);
 
   irom_lma_aligned = app_irom_lma & MMU_FLASH_MASK;
   irom_vma_aligned = app_irom_vma & MMU_FLASH_MASK;
   irom_page_count = calc_mmu_pages(app_irom_size, app_irom_vma);
-  ASSERT(cache_flash_mmu_set(0, PIDCTRL_PID_KERNEL, irom_vma_aligned,
-                             irom_lma_aligned, 64,
-                             (int)irom_page_count) == 0);
-  ASSERT(cache_flash_mmu_set(1, PIDCTRL_PID_KERNEL, irom_vma_aligned,
-                             irom_lma_aligned, 64,
-                             (int)irom_page_count) == 0);
-  ASSERT(cache_flash_mmu_set(0, PIDCTRL_PID_USER, irom_vma_aligned,
-                             irom_lma_aligned, 64,
-                             (int)irom_page_count) == 0);
-  ASSERT(cache_flash_mmu_set(1, PIDCTRL_PID_USER, irom_vma_aligned,
-                             irom_lma_aligned, 64,
-                             (int)irom_page_count) == 0);
+  ret = cache_flash_mmu_set(0, PIDCTRL_PID_KERNEL, irom_vma_aligned,
+                            irom_lma_aligned, 64,
+                            (int)irom_page_count);
+  ASSERT(ret == 0);
+  ret = cache_flash_mmu_set(1, PIDCTRL_PID_KERNEL, irom_vma_aligned,
+                            irom_lma_aligned, 64,
+                            (int)irom_page_count);
+  ASSERT(ret == 0);
+  ret = cache_flash_mmu_set(0, PIDCTRL_PID_USER, irom_vma_aligned,
+                            irom_lma_aligned, 64,
+                            (int)irom_page_count);
+  ASSERT(ret == 0);
+  ret = cache_flash_mmu_set(1, PIDCTRL_PID_USER, irom_vma_aligned,
+                            irom_lma_aligned, 64,
+                            (int)irom_page_count);
+  ASSERT(ret == 0);
 
   cache_read_enable(0);
 }
@@ -254,14 +264,17 @@ static noinline_function IRAM_ATTR const void *map_flash(uint32_t src_addr,
 {
   uint32_t src_addr_aligned;
   uint32_t page_count;
+  int ret;
 
+  UNUSED(ret);
   cache_read_disable(0);
   cache_flush(0);
 
   src_addr_aligned = src_addr & MMU_FLASH_MASK;
   page_count = calc_mmu_pages(size, src_addr);
-  ASSERT(cache_flash_mmu_set(0, PIDCTRL_PID_KERNEL, MMU_BLOCK50_VADDR,
-                             src_addr_aligned, 64, (int)page_count) == 0);
+  ret = cache_flash_mmu_set(0, PIDCTRL_PID_KERNEL, MMU_BLOCK50_VADDR,
+                      src_addr_aligned, 64, (int)page_count);
+  ASSERT(ret == 0);
 
   cache_read_enable(0);
 
