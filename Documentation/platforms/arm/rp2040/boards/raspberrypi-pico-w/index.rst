@@ -149,7 +149,7 @@ audiopack
 ---------
 
 NuttShell configuration (console enabled in UART0, at 115200 bps) with
-support for NSPlayer audio player.
+support for NXPlayer audio player.
 
 composite
 ---------
