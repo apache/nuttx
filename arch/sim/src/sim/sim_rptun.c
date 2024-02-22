@@ -52,13 +52,13 @@
 
 struct sim_rptun_shmem_s
 {
-  volatile uintptr_t        base;
-  volatile unsigned int     seqs;
-  volatile unsigned int     seqm;
-  volatile unsigned int     cmds;
-  volatile unsigned int     cmdm;
-  volatile unsigned int     boots;
-  volatile unsigned int     bootm;
+  volatile uint64_t         base;
+  volatile uint32_t         seqs;
+  volatile uint32_t         seqm;
+  volatile uint32_t         cmds;
+  volatile uint32_t         cmdm;
+  volatile uint32_t         boots;
+  volatile uint32_t         bootm;
   struct rptun_rsc_s        rsc;
   char                      buf[0x10000];
 };
@@ -69,7 +69,7 @@ struct sim_rptun_dev_s
   rptun_callback_t          callback;
   void                     *arg;
   int                       master;
-  unsigned int              seq;
+  uint32_t                  seq;
   struct sim_rptun_shmem_s *shmem;
   struct simple_addrenv_s   addrenv[2];
   char                      cpuname[RPMSG_NAME_SIZE + 1];
