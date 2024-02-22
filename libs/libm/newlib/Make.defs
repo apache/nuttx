@@ -89,6 +89,13 @@ VPATH += :newlib/newlib/newlib/libm/fenv
 CFLAGS += ${INCDIR_PREFIX}newlib/newlib/newlib/libc/machine/shared_x86/sys
 endif
 
+# aggresive optimisation can replace occurrences of sinl() and cosl() with
+# sincosl(), but sincosl() is missing in newlib which causes error. So let's
+# use custom implementation here.
+
+CSRCS += newlib/sincosl.c
+VPATH += :newlib
+
 ifeq ($(CONFIG_LIBM_NEWLIB_HW_FP),y)
   CSRCS += $(wildcard newlib/newlib/newlib/libm/mathfp/*.c)
   VPATH += :newlib/newlib/newlib/libm/mathfp
