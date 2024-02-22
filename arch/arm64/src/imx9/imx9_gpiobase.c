@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm64/include/imx9/chip.h
+ * arch/arm64/src/imx9/imx9_gpiobase.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,62 +18,32 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM64_INCLUDE_IMX9_CHIP_H
-#define __ARCH_ARM64_INCLUDE_IMX9_CHIP_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include "imx9_gpio.h"
+
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Data
  ****************************************************************************/
 
-/* Number of bytes in x kibibytes/mebibytes/gibibytes */
-
-#define KB(x)   ((x) << 10)
-#define MB(x)   (KB(x) << 10)
-#define GB(x)   (MB(UINT64_C(x)) << 10)
-
 #if defined(CONFIG_ARCH_CHIP_IMX93)
+/* Base address for the GPIO memory mapped registers */
 
-#if CONFIG_ARM_GIC_VERSION == 3 || CONFIG_ARM_GIC_VERSION == 4
-
-#define CONFIG_GICD_BASE          0x48000000
-#define CONFIG_GICR_BASE          0x48040000
-#define CONFIG_GICR_OFFSET        0x20000
-
+const uintptr_t g_gpio_base[] =
+{
+  IMX9_GPIO1_BASE,
+  IMX9_GPIO2_BASE,
+  IMX9_GPIO3_BASE,
+  IMX9_GPIO4_BASE,
+};
 #else
-
-#error CONFIG_ARM_GIC_VERSION should be 2, 3 or 4
-
-#endif /* CONFIG_ARM_GIC_VERSION */
-
-#define CONFIG_RAMBANK1_ADDR      0x80000000
-#define CONFIG_RAMBANK1_SIZE      MB(128)
-
-#define CONFIG_DEVICEIO_BASEADDR  0x40000000
-#define CONFIG_DEVICEIO_SIZE      MB(512)
-
-#define MPID_TO_CLUSTER_ID(mpid)  ((mpid) & ~0xff)
-
-#define IMX9_GPIO_NPORTS          4
-
+#  error Unrecognized i.MX9 architecture
 #endif
 
 /****************************************************************************
- * Assembly Macros
+ * Public Functions
  ****************************************************************************/
-
-#ifdef __ASSEMBLY__
-
-.macro  get_cpu_id xreg0
-  mrs    \xreg0, mpidr_el1
-  ubfx   \xreg0, \xreg0, #0, #8
-.endm
-
-#endif /* __ASSEMBLY__ */
-
-#endif /* __ARCH_ARM64_INCLUDE_IMX9_CHIP_H */
