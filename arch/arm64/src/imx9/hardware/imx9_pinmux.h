@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm64/src/imx9/chip.h
+ * arch/arm64/src/imx9/hardware/imx9_pinmux.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM64_SRC_IMX9_CHIP_H
-#define __ARCH_ARM64_SRC_IMX9_CHIP_H
+#ifndef __ARCH_ARM64_SRC_IMX9_HARDWARE_IMX9_PINMUX_H
+#define __ARCH_ARM64_SRC_IMX9_HARDWARE_IMX9_PINMUX_H
 
 /****************************************************************************
  * Included Files
@@ -27,18 +27,10 @@
 
 #include <nuttx/config.h>
 
-#ifndef __ASSEMBLY__
-#  include <nuttx/arch.h>
-#  include <arch/irq.h>
-#  include <arch/imx9/chip.h>
+#if defined(CONFIG_ARCH_CHIP_IMX93)
+#  include "hardware/imx93/imx93_pinmux.h"
+#else
+#  error Unrecognized i.MX9 architecture
 #endif
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Macro Definitions
- ****************************************************************************/
-
-#endif /* __ARCH_ARM64_SRC_IMX9_CHIP_H */
+#endif /* __ARCH_ARM64_SRC_IMX9_HARDWARE_IMX9_PINMUX_H */

@@ -28,6 +28,10 @@ config IMX9_UART1
 	select UART1_SERIALDRIVER
 endmenu # iMX Peripheral Selection
 
+config IMX9_GPIO_IRQ
+	bool "GPIO Interrupt Support"
+	default n
+
 config IMX9_PLL
 	bool "PLL setup support (WIP)"
 	default n
