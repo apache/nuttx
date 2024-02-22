@@ -1150,6 +1150,35 @@ void spislave_dma_init(struct spislave_priv_s *priv)
 
   resetbits(SPI_RX_EOF_EN_M, SPI_DMA_CONF_REG(priv->config->id));
 }
+
+/****************************************************************************
+ * Name: spislave_dma_deinit
+ *
+ * Description:
+ *   Deinitialize ESP32-S3 SPI slave GDMA engine.
+ *
+ * Input Parameters:
+ *   dev - Device-specific state data
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void spislave_dma_deinit(struct spislave_priv_s *priv)
+{
+  /* Release a DMA channel from peripheral */
+
+  esp32s3_dma_release(priv->dma_channel);
+
+  /* Deinitialize DMA controller */
+
+  esp32s3_dma_deinit();
+
+  /* Disable DMA clock for the SPI peripheral */
+
+  modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, priv->config->dma_clk_bit, 0);
+}
 #endif
 
 /****************************************************************************
@@ -1390,7 +1419,7 @@ static void spislave_deinitialize(struct spi_slave_ctrlr_s *ctrlr)
   resetbits(SPI_TRANS_DONE_INT_ENA_M, SPI_DMA_INT_ENA_REG(priv->config->id));
 
 #ifdef CONFIG_ESP32S3_SPI_DMA
-  resetbits(priv->config->dma_clk_bit, SYSTEM_PERIP_CLK_EN0_REG);
+  spislave_dma_deinit(priv);
   priv->rx_dma_offset = 0;
 #endif
 
