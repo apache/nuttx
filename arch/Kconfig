@@ -132,6 +132,7 @@ config ARCH_X86_64
 	select ARCH_HAVE_TCBINFO
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_DPFPU
+	select ARCH_HAVE_TESTSET
 	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF
 	---help---
 		x86-64 architectures.

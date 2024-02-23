@@ -38,6 +38,10 @@ CHIP_ASRCS  = intel64_saveusercontext.S intel64_fullcontextrestore.S intel64_vec
 CHIP_CSRCS  = intel64_start.c intel64_handlers.c intel64_idle.c intel64_lowsetup.c
 CHIP_CSRCS += intel64_serial.c intel64_rng.c intel64_check_capability.c
 
+ifeq ($(CONFIG_ARCH_HAVE_TESTSET), y)
+CHIP_ASRCS += intel64_testset.S
+endif
+
 # Configuration-dependent intel64 files
 
 ifeq ($(CONFIG_MULTBOOT2_FB_TERM),y)
