@@ -31,7 +31,10 @@
 
 #include <nuttx/board.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/input/buttons.h>
+
+#ifdef CONFIG_ONESHOT
+#  include <nuttx/timers/oneshot.h>
+#endif
 
 #include "qemu_intel64.h"
 
@@ -45,6 +48,10 @@
 
 int qemu_bringup(void)
 {
+#ifdef CONFIG_ONESHOT
+  struct oneshot_lowerhalf_s *os = NULL;
+#endif
+
   int ret = OK;
 
 #ifdef CONFIG_FS_PROCFS
@@ -54,6 +61,14 @@ int qemu_bringup(void)
   if (ret < 0)
     {
       serr("ERROR: Failed to mount procfs at %s: %d\n", "/proc", ret);
+    }
+#endif
+
+#ifdef CONFIG_ONESHOT
+  os = oneshot_initialize(0, 10);
+  if (os)
+    {
+      oneshot_register("/dev/oneshot", os);
     }
 #endif
 
