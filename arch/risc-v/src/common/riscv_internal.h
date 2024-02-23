@@ -312,6 +312,7 @@ void riscv_netinitialize(void);
 
 uintptr_t *riscv_doirq(int irq, uintptr_t *regs);
 int riscv_exception(int mcause, void *regs, void *args);
+int riscv_fillpage(int mcause, void *regs, void *args);
 int riscv_misaligned(int irq, void *context, void *arg);
 
 /* Debug ********************************************************************/
