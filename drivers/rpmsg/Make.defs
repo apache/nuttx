@@ -33,6 +33,10 @@ CSRCS += rpmsg_virtio.c
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)openamp$(DELIM)open-amp$(DELIM)lib
 endif
 
+ifeq ($(CONFIG_RPMSG_VIRTIO_IVSHMEM),y)
+CSRCS += rpmsg_virtio_ivshmem.c
+endif
+
 DEPPATH += --dep-path rpmsg
 VPATH += :rpmsg
 
