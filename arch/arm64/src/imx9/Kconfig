@@ -28,4 +28,8 @@ config IMX9_UART1
 	select UART1_SERIALDRIVER
 endmenu # iMX Peripheral Selection
 
+config IMX9_PLL
+	bool "PLL setup support (WIP)"
+	default n
+
 endif # ARCH_CHIP_IMX9
