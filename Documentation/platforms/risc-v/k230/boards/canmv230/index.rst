@@ -166,8 +166,6 @@ Let's put the NuttX image files as ``master.bin`` and ``remote.bin`` respectivel
    k230# usb start
    k230# ping $serverip
    k230# tftp 7000000 remote.bin
-   k230# mw.l 80200000 0 8192
-   k230# boot_baremetal 1 7000000 $filesize
    k230# tftp 8000000 master.bin
    k230# go 8000000
 

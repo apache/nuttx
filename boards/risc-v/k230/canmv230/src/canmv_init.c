@@ -40,6 +40,10 @@
 #  include <nuttx/serial/uart_rpmsg.h>
 #endif
 
+#if !defined(CONFIG_BUILD_KERNEL) || defined(CONFIG_NUTTSBI)
+#  include "k230_hart.h"
+#endif
+
 #ifdef CONFIG_RPTUN
 #  include "k230_rptun.h"
 #endif
@@ -60,6 +64,15 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+static void debug_dumps(void)
+{
+  /* Dumps to aid investigation */
+
+#if !defined(CONFIG_BUILD_KERNEL) || defined(CONFIG_NUTTSBI)
+  sinfo("is_big=%d\n", k230_hart_is_big());
+#endif
+}
 
 /****************************************************************************
  * Public Functions
@@ -129,7 +142,7 @@ int board_app_initialize(uintptr_t arg)
   mount(NULL, "/proc", "procfs", 0, NULL);
 
 #endif
-
+  debug_dumps();
   return OK;
 #endif
 }
@@ -155,6 +168,8 @@ int board_app_initialize(uintptr_t arg)
 
 void board_late_initialize(void)
 {
+  debug_dumps();
+
   /* Perform board-specific initialization */
 
 #ifdef CONFIG_BUILD_KERNEL
