@@ -22,7 +22,7 @@ include common/Make.defs
 
 # i.MX9-specific C source files
 
-CHIP_CSRCS = imx9_boot.c
+CHIP_CSRCS = imx9_boot.c imx9_ccm.c imx9_clockconfig.c
 
 ifeq ($(CONFIG_ARCH_CHIP_IMX93),y)
   CHIP_CSRCS += imx9_lpuart.c
