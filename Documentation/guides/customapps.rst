@@ -232,7 +232,19 @@ Create a sub-directory under the ``CustomApps`` directory called ``CustomHello``
 
 The same ``CustomHello.c`` file as described above should be created here.
 
-2.5 CustomHello Makefile
+2.5 CustomHello Make.defs
+-------------------------
+
+Create a Make.defs in the ``CustomApps/CustomHello`` directory with the following lines:
+
+  .. code-block:: console
+
+    ifneq ($(CONFIG_CUSTOM_APPS_CUSTOM_HELLO),)
+    CONFIGURED_APPS += $(APPDIR)/CustomApps/CustomHello
+    endif
+
+
+2.6 CustomHello Makefile
 ------------------------
 
 Create a Makefile in the ``CustomApps/CustomHello`` directory with the following lines:
@@ -255,7 +267,7 @@ Create a Makefile in the ``CustomApps/CustomHello`` directory with the following
     include $(APPDIR)/Application.mk
 
 
-2.6 CustomHello Kconfig
+2.7 CustomHello Kconfig
 -----------------------
 
 Create a Kconfig file in the ``CustomApps/CustomHello`` directory, with the following lines. For
@@ -293,7 +305,7 @@ the purposes of this example, the Kconfig will only cover our single application
 
     endif
 
-2.7 Build and Run
+2.8 Build and Run
 -----------------
 
 Once these files have been created, run a ``make clean`` (you may need to run ``make distclean``
