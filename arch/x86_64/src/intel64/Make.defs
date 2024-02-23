@@ -60,6 +60,14 @@ ifeq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += intel64_tickless.c
 endif
 
+ifeq ($(CONFIG_INTEL64_HPET),y)
+CHIP_CSRCS += intel64_hpet.c
+endif
+
+ifeq ($(CONFIG_INTEL64_ONESHOT),y)
+CHIP_CSRCS += intel64_oneshot.c intel64_oneshot_lower.c
+endif
+
 ifeq ($(CONFIG_ARCH_FPU),y)
 CHIP_CSRCS += intel64_fpucmp.c
 endif

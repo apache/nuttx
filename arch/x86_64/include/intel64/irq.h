@@ -97,6 +97,11 @@
 #define IRQ_ERROR    51   /* APIC Error */
 #define IRQ_SPURIOUS 0xff /* Spurious Interrupts */
 
+/* Use legacy routing for HPET */
+
+#define HPET0_IRQ    IRQ2
+#define HPET1_IRQ    IRQ8
+
 #define NR_IRQS 48
 
 /* Common register save structure created by up_saveusercontext() and by

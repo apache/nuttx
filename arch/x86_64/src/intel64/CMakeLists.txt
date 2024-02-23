@@ -59,6 +59,14 @@ else()
   list(APPEND SRCS intel64_timerisr.c)
 endif()
 
+if(CONFIG_INTEL64_HPET)
+  list(APPEND SRCS intel64_hpet.c)
+endif()
+
+if(CONFIG_INTEL64_ONESHOT)
+  list(APPEND SRCS intel64_oneshot.c intel64_oneshot_lower.c)
+endif()
+
 if(CONFIG_ARCH_FPU)
   list(APPEND SRCS intel64_fpucmp.c)
 endif()

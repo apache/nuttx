@@ -46,6 +46,63 @@ config ARCH_INTEL64_APIC_FREQ_KHZ
 
 endif
 
+config INTEL64_HPET
+	bool "HPET timer support"
+	default n
+	---help---
+		Select to enable the HPET timer support
+
+if INTEL64_HPET
+
+config INTEL64_HPET_BASE
+	hex "HPET timer base address"
+	default 0xfed00000
+	---help---
+		Configure base address for HPET. In the future, we can get this address from
+		the ACPI table if ACPI support is enabled.
+
+config INTEL64_HPET_CHANNELS
+	int "HPET timer supported channels"
+	default 2
+	range 1 3
+	---help---
+		Configure the number of supported HPET channles (called HPET timers
+		in HPET spec). We use HPET legacy replacement for interrupts which
+		means that Timer 0 and Timer 1 interrupts are hardcoded, but Timer 2
+		needs additional attention to configure interrupt routing.
+		Timer 2 will most likely not work with QEMU.
+
+config INTEL64_HPET_MIN_DELAY
+	int "HPET minimum supported delay in micro-seconds"
+	default 1000
+	---help---
+		HPET use free runnin up-counter and a comparators which generate events
+		only on a equal event. This can results in event miss if we set too small
+		delay. In that case we must set a minimum value for delay that always work.
+		For the QEMU target this value should be as high as 1000, but for real
+		hardware it may go much lower (for i7-1255U CPU it works with values <10).
+
+endif # INTEL64_HPET
+
+config INTEL64_ONESHOT
+	bool "Oneshot timer support"
+	select INTEL64_HPET
+	default n
+	---help---
+		Select to enable the oneshot timer support
+
+if INTEL64_ONESHOT
+
+config INTEL64_ONESHOT_MAXTIMERS
+	int "Maximum number of oneshot timers"
+	default 1
+	range 1 3
+	---help---
+		Determines the maximum number of oneshot timers that can be
+		supported.
+
+endif
+
 config ARCH_INTEL64_HAVE_XSAVE
 	bool "XSAVE support"
 	default y
