@@ -282,7 +282,13 @@ static int create_region(arch_addrenv_t *addrenv, uintptr_t vaddr,
 
       /* Then allocate memory for the region data */
 
-      for (j = 0; j < ENTRIES_PER_PGT && nmapped < size; j++)
+      for (j = 0;
+#ifdef CONFIG_PAGING
+           j < 1;
+#else
+           j < ENTRIES_PER_PGT && nmapped < size;
+#endif
+           j++)
         {
           paddr = mm_pgalloc(1);
           if (!paddr)

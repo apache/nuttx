@@ -903,6 +903,16 @@ config ARCH_PGPOOL_SIZE
 endif # ARCH_PGPOOL_MAPPING
 endif # ARCH_ADDRENV && ARCH_NEED_ADDRENV_MAPPING
 
+config PAGING
+	bool "On-demand paging"
+	default n
+	depends on BUILD_KERNEL && ARCH_USE_MMU && !ARCH_ROMPGTABLE && !LEGACY_PAGING
+	---help---
+		If set =y in your configation file, this setting will enable on-demand
+		paging, which relies on a MMU to enable larger virtual memory spaces
+		and map it to physical memory on-demand (usually during a page-fault
+		exception).
+
 menuconfig LEGACY_PAGING
 	bool "Legacy On-demand paging"
 	default n
