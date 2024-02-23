@@ -24,6 +24,9 @@
 -Darwin,sim:usbdev
 -Darwin,sim:usbhost
 
+# this blocks CI checks see build #36009
+-Darwin,sim:posix_test
+
 # Boards build by CMake
 CMake,sim:ostest
 CMake,sim:ostest_oneholder
