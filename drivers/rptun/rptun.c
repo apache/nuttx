@@ -180,9 +180,20 @@ static const struct rpmsg_ops_s g_rptun_rpmsg_ops =
 static int rptun_buffer_nused(FAR struct rpmsg_virtio_device *rvdev, bool rx)
 {
   FAR struct virtqueue *vq = rx ? rvdev->rvq : rvdev->svq;
-  uint16_t nused = vq->vq_ring.avail->idx - vq->vq_ring.used->idx;
+  uint16_t nused;
+  bool is_host = rpmsg_virtio_get_role(rvdev) == RPMSG_HOST;
 
-  if ((rpmsg_virtio_get_role(rvdev) == RPMSG_HOST) ^ rx)
+  if (is_host)
+    {
+      RPTUN_INVALIDATE(vq->vq_ring.used->idx);
+    }
+  else
+    {
+      RPTUN_INVALIDATE(vq->vq_ring.avail->idx);
+    }
+
+  nused = vq->vq_ring.avail->idx - vq->vq_ring.used->idx;
+  if (is_host ^ rx)
     {
       return nused;
     }
@@ -269,10 +280,12 @@ static inline void rptun_update_rx(FAR struct rptun_priv_s *priv)
 
   if (rpmsg_virtio_get_role(rvdev) == RPMSG_HOST)
     {
+      RPTUN_INVALIDATE(rvq->vq_ring.used->idx);
       priv->headrx = rvq->vq_ring.used->idx;
     }
   else
     {
+      RPTUN_INVALIDATE(rvq->vq_ring.avail->idx);
       priv->headrx = rvq->vq_ring.avail->idx;
     }
 }
@@ -527,12 +540,16 @@ static void rptun_dump_buffer(FAR struct rpmsg_virtio_device *rvdev,
     {
       if ((rpmsg_virtio_get_role(rvdev) == RPMSG_HOST) ^ rx)
         {
+          RPTUN_INVALIDATE(vq->vq_ring.used->idx);
           desc_idx = (vq->vq_ring.used->idx + i) & (vq->vq_nentries - 1);
+          RPTUN_INVALIDATE(vq->vq_ring.avail->ring[desc_idx]);
           desc_idx = vq->vq_ring.avail->ring[desc_idx];
         }
       else
         {
+          RPTUN_INVALIDATE(vq->vq_ring.avail->idx);
           desc_idx = (vq->vq_ring.avail->idx + i) & (vq->vq_nentries - 1);
+          RPTUN_INVALIDATE(vq->vq_ring.used->ring[desc_idx].id);
           desc_idx = vq->vq_ring.used->ring[desc_idx].id;
         }
 
