@@ -29,6 +29,7 @@
 
 #ifdef CONFIG_RPTUN
 
+#include <metal/cache.h>
 #include <nuttx/rpmsg/rpmsg.h>
 #include <openamp/remoteproc.h>
 #include <openamp/rpmsg_virtio.h>
@@ -45,6 +46,11 @@
 #define RPTUNIOC_RESET              _RPTUNIOC(102)
 
 #define RPTUN_NOTIFY_ALL            (UINT32_MAX - 0)
+#ifdef CONFIG_OPENAMP_CACHE
+#  define RPTUN_INVALIDATE(x) metal_cache_invalidate(&x, sizeof(x))
+#else
+#  define RPTUN_INVALIDATE(x)
+#endif
 
 /* Access macros ************************************************************/
 
