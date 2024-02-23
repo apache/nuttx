@@ -7,6 +7,7 @@ Network Support
 
   sixlowpan.rst
   socketcan.rst
+  pkt.rst
   nat.rst
   netdev.rst
   netguardsize.rst
