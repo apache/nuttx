@@ -47,6 +47,10 @@
 
 #include <nuttx/board.h>
 
+#ifdef CONFIG_SENSORS_LM75
+#include "stm32_lm75.h"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -142,6 +146,16 @@ int stm32_bringup(void)
     {
       syslog(LOG_ERR, "Failed to initialize EEPROM HX24LCXXB: %d\n", ret);
       return ret;
+    }
+#endif
+
+#ifdef CONFIG_LM75_I2C
+  /* Configure and initialize the LM75 sensor */
+
+  ret = board_lm75_initialize(0, 1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_lm75_initialize() failed: %d\n", ret);
     }
 #endif
 
