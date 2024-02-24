@@ -155,7 +155,7 @@ Users can enable EERPOM support on STM32F4-RS485 by following below configuratio
 Temperature Sensor
 ==================
 
-The STM32F4-RS485 development board has a temperature sensor TMP75 (TMP75AIDR) connected through I2C as below:
+The STM32F4-RS485 development board has a temperature sensor TMP75 (compatible with LM75) connected through I2C as below:
 
 ====== =====
 I2C    PINS
@@ -401,3 +401,18 @@ The application modbusmaster will send 100 requests, you can check on diagslave:
        Slave  10: readHoldingRegisters from 2, 1 references
        Slave  10: readHoldingRegisters from 2, 1 references
        Slave  10: readHoldingRegisters from 2, 1 references
+
+lm75
+----
+
+Configures the NuttShell (nsh) over USB Serial (check usbserial configuration) and enables temperature sensor LM75.
+NSH commands::
+
+       nsh> lm75 -help
+       Usage: temp [OPTIONS]
+         [-n count] selects the samples to collect.  Default: 1 Current: 100
+         [-h] shows this message and exits
+       nsh> lm75 -n 3
+       30.13 degrees Celsius
+       30.13 degrees Celsius
+       30.13 degrees Celsius
