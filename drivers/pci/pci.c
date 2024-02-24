@@ -81,7 +81,7 @@
     (id)->subvendor == (dev)->subsystem_vendor) &&                  \
    ((id)->subdevice == PCI_ANY_ID ||                                \
     (id)->subdevice == (dev)->subsystem_device) &&                  \
-   (((id)->class ^ (dev)->class) & ((id)->class_mask == 0)))
+   ((((id)->class ^ (dev)->class) & (id)->class_mask) == 0))
 
 /****************************************************************************
  * Private Data
@@ -404,7 +404,7 @@ static void pci_setup_device(FAR struct pci_device_s *dev, int max_bar)
         {
           /* IO */
 
-          size  = pci_size(orig, mask, 0xfffffff0);
+          size  = pci_size(orig, mask, 0xfffffffe);
           flags = PCI_RESOURCE_IO;
           res   = &dev->bus->ctrl->io;
         }
@@ -413,7 +413,7 @@ static void pci_setup_device(FAR struct pci_device_s *dev, int max_bar)
         {
           /* Prefetchable MEM */
 
-          size  = pci_size(orig, mask, 0xfffffffe);
+          size  = pci_size(orig, mask, 0xfffffff0);
           flags = PCI_RESOURCE_MEM | PCI_RESOURCE_PREFETCH;
           res   = &dev->bus->ctrl->mem_pref;
         }
@@ -421,7 +421,7 @@ static void pci_setup_device(FAR struct pci_device_s *dev, int max_bar)
         {
           /* Non-prefetch MEM */
 
-          size  = pci_size(orig, mask, 0xfffffffe);
+          size  = pci_size(orig, mask, 0xfffffff0);
           flags = PCI_RESOURCE_MEM;
           res   = &dev->bus->ctrl->mem;
         }
