@@ -379,6 +379,11 @@
 
 #endif
 
+/* OTGFS */
+
+#define GPIO_OTGFS_DM  (GPIO_OTGFS_DM_0  | GPIO_SPEED_100MHz)
+#define GPIO_OTGFS_DP  (GPIO_OTGFS_DP_0  | GPIO_SPEED_100MHz)
+
 /* I2C4 - Used by Touchscreen and Audio Codec */
 
 #define GPIO_I2C4_SCL    (GPIO_I2C4_SCL_1 | GPIO_SPEED_50MHz)  /* PD12 */
