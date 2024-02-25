@@ -192,6 +192,43 @@ endchoice
 
 endif # ADC_MAX1161X
 
+config ADC_HX711
+	bool "Avia Semiconductor HX711 support"
+	default n
+	---help---
+		Enable driver to support Avia Semiconductor HX711 ADC
+		designed for weight scales.
+
+		Driver supports both 'a' and 'b' channels with 32, 64
+		and 128 gain.
+
+		Driver does not support continuous read and is not buffered.
+		Driver uses interrupts to not hog the CPU while waiting
+		for hx711 to be ready.
+
+if ADC_HX711
+
+config ADC_HA711_ADD_DELAY
+	bool "Add 1us delay between clock pulses"
+	default y if BOARD_LOOPSPERMSEC >= 15000
+	---help---
+		HX711 requires about 1us between clock pulses to work.
+		This is not an issue on slower chips, but faster chips
+		will most likely try to clock HX711 too fast, which
+		will result in data lose.
+
+		If this is enabled, code will insert 1us of delay to each
+		clock change. Enable this only if you get data lose, or
+		else you will just introduce unnecessary delay to your
+		program.
+
+		Best way to know if you need this, is to compile
+		HX711 demo program and run it. If there are no errors
+		reported during runtime, you can turn this of. If you
+		see communication errors, then you should enable this.
+
+endif # ADC_HX711
+
 endif # ADC
 
 config COMP
