@@ -120,7 +120,6 @@ struct rpmsg_socket_conn_s
   FAR struct rpmsg_socket_conn_s *next;
 
   /* server listen-scoket listening: backlog > 0;
-   * server listen-scoket closed: backlog = -1;
    * others: backlog = 0;
    */
 
@@ -825,11 +824,6 @@ static int rpmsg_socket_accept(FAR struct socket *psock,
   FAR struct rpmsg_socket_conn_s *server = psock->s_conn;
   int ret = 0;
 
-  if (server->backlog == -1)
-    {
-      return -ECONNRESET;
-    }
-
   if (!_SS_ISLISTENING(server->sconn.s_flags))
     {
       return -EINVAL;
@@ -875,11 +869,6 @@ static int rpmsg_socket_accept(FAR struct socket *psock,
           else
             {
               ret = net_sem_wait(&server->recvsem);
-              if (server->backlog == -1)
-                {
-                  ret = -ECONNRESET;
-                }
-
               if (ret < 0)
                 {
                   break;
@@ -930,12 +919,6 @@ static int rpmsg_socket_poll(FAR struct socket *psock,
 
       if (_SS_ISLISTENING(conn->sconn.s_flags))
         {
-          if (conn->backlog == -1)
-            {
-              ret = -ECONNRESET;
-              goto errout;
-            }
-
           if (conn->next)
             {
               eventset |= POLLIN;
