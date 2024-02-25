@@ -76,6 +76,29 @@
 #  endif
 #endif
 
+/* HX711 pins */
+
+#ifdef CONFIG_ADC_HX711
+#  ifdef CONFIG_STM32F411MINIMUM_HX711_CLK_PORTB
+#    define HX711_CLK_PORT GPIO_PORTB
+#  else
+#    define HX711_CLK_PORT GPIO_PORTA
+#  endif
+
+#  ifdef CONFIG_STM32F411MINIMUM_HX711_DATA_PORTB
+#    define HX711_DATA_PORT GPIO_PORTB
+#  else
+#    define HX711_DATA_PORT GPIO_PORTA
+#  endif
+
+#define HX711_CLK_PIN  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_OUTPUT_SET|\
+                        GPIO_SPEED_2MHz|GPIO_PULLUP|\
+                        HX711_CLK_PORT|CONFIG_STM32F411MINIMUM_HX711_CLK_PIN)
+#define HX711_DATA_PIN (GPIO_INPUT|GPIO_SPEED_2MHz|GPIO_PULLUP|GPIO_EXTI|\
+                        HX711_DATA_PORT|CONFIG_STM32F411MINIMUM_HX711_DATA_PIN)
+
+#endif /* CONFIG_HX711 */
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -98,6 +121,18 @@ extern struct spi_dev_s *g_spi2;
  ****************************************************************************/
 
 void stm32_spidev_initialize(void);
+
+/****************************************************************************
+ * Name: stm32_hx711_initialize
+ *
+ * Description:
+ *   Initialize hx711 chip
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ADC_HX711
+int stm32_hx711_initialize(void);
+#endif
 
 /****************************************************************************
  * Name: stm32_mmcsd_initialize
