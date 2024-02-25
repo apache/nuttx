@@ -56,6 +56,28 @@
 #  undef HAVE_RTC_DRIVER
 #endif
 
+/* USB OTG FS
+ *
+ * PA9   OTG_FS_VBUS VBUS sensing
+ * PI12  OTG_FS_PowerSwitchOn
+ * PI13  OTG_FS_Overcurrent
+ */
+
+#define GPIO_OTGFS_VBUS   (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz| \
+                           GPIO_OPENDRAIN|GPIO_PORTA|GPIO_PIN9)
+
+#define GPIO_OTGFS_PWRON  (GPIO_OUTPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|  \
+                           GPIO_PUSHPULL|GPIO_PORTI|GPIO_PIN12)
+
+#ifdef CONFIG_USBHOST
+#  define GPIO_OTGFS_OVER (GPIO_INPUT|GPIO_EXTI|GPIO_FLOAT| \
+                           GPIO_SPEED_100MHz|GPIO_PUSHPULL| \
+                           GPIO_PORTI|GPIO_PIN13)
+#else
+#  define GPIO_OTGFS_OVER (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz| \
+                           GPIO_PUSHPULL|GPIO_PORTI|GPIO_PIN13)
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -76,5 +98,18 @@
  ****************************************************************************/
 
 int stm32_bringup(void);
+
+/****************************************************************************
+ * Name: stm32_usbinitialize
+ *
+ * Description:
+ *   Called from stm32_usbinitialize very early in inialization to setup
+ *   USB-related GPIO pins for the LINUM-STM32H753BI board.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32H7_OTGFS
+void weak_function stm32_usbinitialize(void);
+#endif
 
 #endif /* __BOARDS_ARM_STM32H7_LINUM_STM32H753BI_SRC_LINUM_STM32H753BI_H */
