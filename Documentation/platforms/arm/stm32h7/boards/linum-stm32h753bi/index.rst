@@ -183,14 +183,15 @@ USB
 
 The LINUM-STM32H753BI has one usb port.
 
-  ======= =====
-  USB     PINS
-  ======= =====
-  USB_N   PA11
-  USB_P   PA12
-  USB_EN  PI12
-  USB_FLT PI13
-  ======= =====
+  ========= =====
+  USB       PINS
+  ========= =====
+  USB_VBUS  PA9
+  USB_N     PA11
+  USB_P     PA12
+  USB_EN    PI12
+  USB_FLT   PI13
+  ========= =====
 
 QUADSPI
 ==============
@@ -378,6 +379,27 @@ nsh
 
 Configures the NuttShell (nsh) located at apps/examples/nsh. This
 configuration enables a serial console on UART1.
+
+usbnsh
+------
+
+Configures the NuttShell (nsh) located at apps/examples/nsh. This configuration enables a serial console over USB.
+
+After flasing and reboot your board you should see in your dmesg logs::
+
+    $ sudo dmesg | tail
+    [ 9180.937813] usb 3-1.1.2: SerialNumber: 0
+    [ 9180.946974] cdc_acm 3-1.1.2:1.0: ttyACM0: USB ACM device
+    [ 9715.123387] usb 3-1.1.2: USB disconnect, device number 20
+    [ 9717.393142] usb 3-1.1.2: new full-speed USB device number 21 using xhci_hcd
+    [ 9717.494824] usb 3-1.1.2: New USB device found, idVendor=0525, idProduct=a4a7, bcdDevice= 1.01
+    [ 9717.494834] usb 3-1.1.2: New USB device strings: Mfr=1, Product=2, SerialNumber=3
+    [ 9717.494837] usb 3-1.1.2: Product: CDC/ACM Serial
+    [ 9717.494840] usb 3-1.1.2: Manufacturer: NuttX
+    [ 9717.494842] usb 3-1.1.2: SerialNumber: 0
+    [ 9717.504192] cdc_acm 3-1.1.2:1.0: ttyACM0: USB ACM device
+
+You may need to press ENTER 3 times before the NSH show up.
 
 modbus_slave
 ------------
