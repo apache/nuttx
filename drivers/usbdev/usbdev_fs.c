@@ -558,8 +558,6 @@ static ssize_t usbdev_fs_read(FAR struct file *filep, FAR char *buffer,
   irqstate_t flags;
   int ret;
 
-  assert(len > 0 && buffer != NULL);
-
   ret = nxmutex_lock(&fs_ep->lock);
   if (ret < 0)
     {
@@ -600,7 +598,7 @@ static ssize_t usbdev_fs_read(FAR struct file *filep, FAR char *buffer,
 
   /* Device ready for read */
 
-  while (!sq_empty(&fs_ep->reqq) && len > 0)
+  while (!sq_empty(&fs_ep->reqq))
     {
       FAR struct usbdev_fs_req_s *container;
       uint16_t reqlen;
@@ -616,16 +614,24 @@ static ssize_t usbdev_fs_read(FAR struct file *filep, FAR char *buffer,
         {
           /* Output buffer full */
 
-          memcpy(&buffer[retlen],
-                 &container->req->buf[container->offset],
-                 len);
+          if (buffer != NULL)
+            {
+              memcpy(&buffer[retlen],
+                     &container->req->buf[container->offset],
+                     len);
+            }
+
           container->offset += len;
           retlen += len;
           break;
         }
 
-      memcpy(&buffer[retlen],
-             &container->req->buf[container->offset], reqlen);
+      if (buffer != NULL)
+        {
+          memcpy(&buffer[retlen],
+                 &container->req->buf[container->offset], reqlen);
+        }
+
       retlen += reqlen;
       len -= reqlen;
 
