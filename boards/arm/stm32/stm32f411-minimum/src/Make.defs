@@ -30,6 +30,10 @@ ifeq ($(CONFIG_ARCH_LEDS),y)
   CSRCS += stm32_autoleds.c
 endif
 
+ifeq ($(CONFIG_ADC_HX711),y)
+  CSRCS += stm32_hx711.c
+endif
+
 ifeq ($(CONFIG_SPI),y)
   CSRCS += stm32_spi.c
 endif
