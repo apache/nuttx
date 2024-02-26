@@ -105,5 +105,32 @@ FAR struct ipt_replace *ipt_nat_init(void);
 int ipt_nat_apply(FAR const struct ipt_replace *repl);
 #endif
 
+/****************************************************************************
+ * Name: ipt_filter_init
+ *
+ * Description:
+ *   Init filter table data.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPFILTER
+FAR struct ipt_replace *ipt_filter_init(void);
+#endif
+
+/****************************************************************************
+ * Name: ipt_filter_apply
+ *
+ * Description:
+ *   Try to apply filter rules, will do nothing if failed.
+ *
+ * Input Parameters:
+ *   repl - The config got from user space to control filter table.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPFILTER
+int ipt_filter_apply(FAR const struct ipt_replace *repl);
+#endif
+
 #endif /* CONFIG_NET_IPTABLES */
 #endif /* __NET_NETFILTER_IPTABLES_H */

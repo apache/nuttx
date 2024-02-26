@@ -28,5 +28,9 @@ if(CONFIG_NET_IPTABLES)
     list(APPEND SRCS ipt_nat.c)
   endif()
 
+  if(CONFIG_NET_IPFILTER)
+    list(APPEND SRCS ipt_filter.c)
+  endif()
+
   target_sources(net PRIVATE ${SRCS})
 endif()

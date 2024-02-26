@@ -81,6 +81,9 @@ static struct ipt_table_s g_tables[] =
 #ifdef CONFIG_NET_NAT
   {NULL, ipt_nat_init, ipt_nat_apply},
 #endif
+#ifdef CONFIG_NET_IPFILTER
+  {NULL, ipt_filter_init, ipt_filter_apply},
+#endif
 };
 
 /****************************************************************************
