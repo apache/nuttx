@@ -303,9 +303,11 @@ int exec_module(FAR struct binary_s *binp,
     }
 #endif
 
-  /* Note that tcb->flags are not modified.  0=normal task */
+  /* Note that tcb->cmn.flags are not modified.  0=normal task */
 
-  /* tcb->flags |= TCB_FLAG_TTYPE_TASK; */
+  /* tcb->cmn.flags |= TCB_FLAG_TTYPE_TASK; */
+
+  tcb->cmn.flags |= TCB_FLAG_FREE_TCB;
 
   /* Initialize the task */
 

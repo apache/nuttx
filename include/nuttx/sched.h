@@ -104,6 +104,7 @@
 #define TCB_FLAG_HEAP_DUMP         (1 << 11)                     /* Bit 11: Heap dump */
 #define TCB_FLAG_DETACHED          (1 << 12)                     /* Bit 12: Pthread detached */
 #define TCB_FLAG_FORCED_CANCEL     (1 << 13)                     /* Bit 13: Pthread cancel is forced */
+#define TCB_FLAG_FREE_TCB          (1 << 14)                     /* Bit 14: Free tcb after exit */
 
 /* Values for struct task_group tg_flags */
 

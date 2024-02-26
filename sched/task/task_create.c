@@ -91,7 +91,7 @@ int nxthread_create(FAR const char *name, uint8_t ttype, int priority,
 
   /* Setup the task type */
 
-  tcb->cmn.flags = ttype;
+  tcb->cmn.flags = ttype | TCB_FLAG_FREE_TCB;
 
   /* Initialize the task */
 
