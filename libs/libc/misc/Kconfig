@@ -112,3 +112,11 @@ config LIBC_MEM_FD_VFS_PATH
 	depends on !LIBC_MEMFD_ERROR
 	---help---
 		The relative path to where memfd will exist in the tmpfs namespace.
+
+config LIBC_MAX_PATHBUFFER
+	int "Maximum size of a temporary file path buffer array"
+	range 0 32
+	default 2
+	---help---
+		This value is the maximum size of the buffer that will hold the full
+		file path.

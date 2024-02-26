@@ -116,6 +116,11 @@ FAR struct file_struct *lib_get_stream(int fd);
 
 unsigned long nrand(unsigned long limit);
 
+/* Functions defined in lib_pathbuffer.c ************************************/
+
+FAR char *lib_get_pathbuffer(void);
+void lib_put_pathbuffer(FAR char *buffer);
+
 #undef EXTERN
 #ifdef __cplusplus
 }
