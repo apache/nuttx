@@ -971,24 +971,11 @@ static metal_phys_addr_t rptun_da_to_pa(FAR struct rptun_dev_s *dev,
 
 int rptun_initialize(FAR struct rptun_dev_s *dev)
 {
-  struct metal_init_params params = METAL_INIT_DEFAULTS;
   FAR struct rptun_priv_s *priv;
-  static bool onceinit = false;
   FAR char *argv[3];
   char arg1[32];
   char name[32];
   int ret;
-
-  if (!onceinit)
-    {
-      ret = metal_init(&params);
-      if (ret < 0)
-        {
-          return ret;
-        }
-
-      onceinit = true;
-    }
 
   priv = kmm_zalloc(sizeof(struct rptun_priv_s));
   if (priv == NULL)
