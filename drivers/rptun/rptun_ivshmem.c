@@ -171,7 +171,7 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
         }
 
       priv->shmem->cmds  = 0;
-      priv->shmem->basem = (uint64_t)priv->shmem;
+      priv->shmem->basem = (uint64_t)(uintptr_t)priv->shmem;
     }
   else
     {
@@ -214,7 +214,7 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
           usleep(1000);
         }
 
-      priv->addrenv.va   = (uint64_t)priv->shmem;
+      priv->addrenv.va   = (uint64_t)(uintptr_t)priv->shmem;
       priv->addrenv.pa   = priv->shmem->basem;
       priv->addrenv.size = priv->shmem_size;
 
