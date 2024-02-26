@@ -248,6 +248,13 @@
 
 #define BITS_PER_LONG    64
 
+/* Reset Control Register (RST_CNT) */
+
+#define X86_RST_CNT_REG        0xcf9
+#  define X86_RST_CNT_SYS_RST  0x02
+#  define X86_RST_CNT_CPU_RST  0x04
+#  define X86_RST_CNT_FULL_RST 0x08
+
 #ifndef __ASSEMBLY__
 
 /****************************************************************************

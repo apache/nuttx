@@ -30,6 +30,7 @@ CMN_CSRCS += intel64_map_region.c intel64_regdump.c intel64_releasestack.c
 CMN_CSRCS += intel64_rtc.c intel64_restore_auxstate.c intel64_savestate.c
 CMN_CSRCS += intel64_stackframe.c intel64_schedulesigaction.c
 CMN_CSRCS += intel64_sigdeliver.c intel64_usestack.c x86_64_tcbinfo.c
+CMN_CSRCS += intel64_systemreset.c
 
 # Required Intel64 files
 

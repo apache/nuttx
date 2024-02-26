@@ -21,6 +21,7 @@ config ARCH_INTEL64
 	select ARCH_HAVE_TICKLESS
 	select ARCH_HAVE_STACKCHECK
 	select ARCH_HAVE_RNG
+	select ARCH_HAVE_RESET
 	---help---
 		Intel x86_64 architecture
 
