@@ -64,6 +64,7 @@
 
 #ifndef CONFIG_LIBC_ARCH_STPCPY
 #undef stpcpy /* See mm/README.txt */
+nosanitize_address
 FAR char *stpcpy(FAR char *dest, FAR const char *src)
 {
   FAR long *aligned_dst;

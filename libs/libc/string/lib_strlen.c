@@ -51,6 +51,7 @@
 
 #if !defined(CONFIG_LIBC_ARCH_STRLEN) && defined(LIBC_BUILD_STRLEN)
 #undef strlen /* See mm/README.txt */
+nosanitize_address
 size_t strlen(FAR const char *s)
 {
   FAR const char *start = s;
