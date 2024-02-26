@@ -1731,6 +1731,12 @@ config ARCH_BOARD_LINUM_STM32H753BI
 	---help---
 		The Linum board is based on the STMicro STM32H753BI MCU.
 
+config ARCH_BOARD_OPENH743I
+	bool "Waveshare OpenH743I board"
+	depends on ARCH_CHIP_STM32H743II
+	---help---
+		Waveshare OpenH743I board based on the STMicro STM32H743II MCU.
+
 config ARCH_BOARD_NUCLEO_L152RE
 	bool "STM32L152 Nucleo L152RE"
 	depends on ARCH_CHIP_STM32L152RE
@@ -3228,6 +3234,7 @@ config ARCH_BOARD
 	default "nucleo-h745zi"             if ARCH_BOARD_NUCLEO_H745ZI
 	default "stm32h745i-disco"          if ARCH_BOARD_STM32H745I_DISCO
 	default "linum-stm32h753bi"         if ARCH_BOARD_LINUM_STM32H753BI
+	default "openh743i"                 if ARCH_BOARD_OPENH743I
 	default "nucleo-l073rz"             if ARCH_BOARD_NUCLEO_L073RZ
 	default "nucleo-l152re"             if ARCH_BOARD_NUCLEO_L152RE
 	default "nucleo-l432kc"             if ARCH_BOARD_NUCLEO_L432KC
@@ -3855,6 +3862,9 @@ source "boards/arm/stm32h7/stm32h745i-disco/Kconfig"
 endif
 if ARCH_BOARD_LINUM_STM32H753BI
 source "boards/arm/stm32h7/linum-stm32h753bi/Kconfig"
+endif
+if ARCH_BOARD_OPENH743I
+source "boards/arm/stm32h7/openh743i/Kconfig"
 endif
 if ARCH_BOARD_B_L475E_IOT01A
 source "boards/arm/stm32l4/b-l475e-iot01a/Kconfig"
