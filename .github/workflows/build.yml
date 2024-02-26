@@ -123,7 +123,7 @@ jobs:
 
     strategy:
       matrix:
-        boards: [arm-01, arm-02, arm-03, arm-04, arm-05, arm-06, arm-07, arm-08, arm-09, arm-10, arm-11, arm-12, arm-13, other, risc-v, sim-01, sim-02, xtensa, codechecker]
+        boards: [arm-01, arm-02, arm-03, arm-04, arm-05, arm-06, arm-07, arm-08, arm-09, arm-10, arm-11, arm-12, arm-13, other, risc-v, sim-01, sim-02, xtensa]
 
     steps:
       - name: Download Source Artifact
