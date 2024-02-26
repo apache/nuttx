@@ -75,12 +75,4 @@ config STM32F411MINIMUM_HX711_DATA_PIN
 
 endif # STM32F411MINIMUM_HX711
 
-menuconfig STM32F411MINIMUM_GPIO
-	select DEV_GPIO
-	bool "enable gpio subsystem"
-
-if STM32F411MINIMUM_GPIO
-source boards/arm/stm32/stm32f411-minimum/Kconfig.gpio
-endif
-
 endif
