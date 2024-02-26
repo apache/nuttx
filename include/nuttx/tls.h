@@ -27,7 +27,14 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/arch.h>
+#include <stdint.h>
+#include <stdbool.h>
+
+#include <arch/arch.h>
+#include <arch/types.h>
+
+#include <nuttx/compiler.h>
+#include <nuttx/cache.h>
 #include <nuttx/atexit.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/list.h>
