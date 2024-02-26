@@ -104,7 +104,7 @@
  */
 
 #define XCPTCONTEXT_XMM_AREA_SIZE 512
-#define XMMAREA_OFFSET  XCPTCONTEXT_XMM_AREA_SIZE / 8
+#define XMMAREA_OFFSET            (XCPTCONTEXT_XMM_AREA_SIZE / 8)
 
 /* Data segments */
 

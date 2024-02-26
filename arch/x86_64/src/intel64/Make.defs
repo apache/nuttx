@@ -52,3 +52,6 @@ ifeq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += intel64_tickless.c
 endif
 
+ifeq ($(CONFIG_ARCH_FPU),y)
+CHIP_CSRCS += intel64_fpucmp.c
+endif
