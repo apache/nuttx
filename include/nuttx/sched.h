@@ -45,6 +45,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
 #include <nuttx/mm/map.h>
+#include <nuttx/tls.h>
 
 #include <arch/arch.h>
 
@@ -401,8 +402,6 @@ struct stackinfo_s
  * the struct task_group_s is free.
  */
 
-struct task_info_s;
-
 #ifndef CONFIG_DISABLE_PTHREAD
 struct join_s;                      /* Forward reference                        */
                                     /* Defined in sched/pthread/pthread.h       */
@@ -480,6 +479,9 @@ struct task_group_s
 
   /* Thread local storage ***************************************************/
 
+#ifndef CONFIG_MM_KERNEL_HEAP
+  struct task_info_s tg_info_;
+#endif
   FAR struct task_info_s *tg_info;
 
   /* POSIX Signal Control Fields ********************************************/
