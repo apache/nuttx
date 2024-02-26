@@ -844,7 +844,9 @@ int pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           DEBUGASSERT(peek && peek->buf);
 
-          ret = circbuf_peek(&dev->d_buffer, peek->buf, peek->size);
+          ret = circbuf_peekat(&dev->d_buffer,
+                               dev->d_buffer.tail + peek->offset,
+                               peek->buf, peek->size);
         }
         break;
 
