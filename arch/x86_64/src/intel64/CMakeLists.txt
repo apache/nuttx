@@ -54,4 +54,8 @@ else()
   list(APPEND SRCS intel64_timerisr.c)
 endif()
 
+if(CONFIG_ARCH_FPU)
+  list(APPEND SRCS intel64_fpucmp.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})
