@@ -123,6 +123,7 @@ struct local_conn_s
   char lc_path[UNIX_PATH_MAX];   /* Path assigned by bind() */
   int32_t lc_instance_id;        /* Connection instance ID for stream
                                   * server<->client connection pair */
+  sem_t lc_sendsem;              /* Use to wait for send smg */
 #ifdef CONFIG_NET_LOCAL_DGRAM
   uint16_t pktlen;                 /* Read-ahead packet length */
 #endif /* CONFIG_NET_LOCAL_DGRAM */

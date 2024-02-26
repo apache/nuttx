@@ -255,6 +255,7 @@ static ssize_t local_sendto(FAR struct socket *psock,
 {
 #ifdef CONFIG_NET_LOCAL_DGRAM
   FAR struct local_conn_s *conn = psock->s_conn;
+  FAR struct local_conn_s *server = NULL;
   FAR struct sockaddr_un *unaddr = (FAR struct sockaddr_un *)to;
   ssize_t ret;
 
@@ -287,6 +288,20 @@ static ssize_t local_sendto(FAR struct socket *psock,
 
       nerr("ERROR: Connected state\n");
       return -EISCONN;
+    }
+
+  while ((server = local_nextconn(server)) != NULL)
+    {
+      if (conn->lc_proto == server->lc_proto &&
+          strncmp(server->lc_path, unaddr->sun_path, UNIX_PATH_MAX - 1) == 0)
+        {
+          break;
+        }
+    }
+
+  if (server == NULL)
+    {
+      return -ENOENT;
     }
 
   /* The outgoing FIFO should not be open */
@@ -348,6 +363,11 @@ static ssize_t local_sendto(FAR struct socket *psock,
     }
 
   nxmutex_unlock(&conn->lc_sendlock);
+
+  if (ret >= 0)
+    {
+      nxsem_post(&server->lc_sendsem);
+    }
 
 errout_with_sender:
 
