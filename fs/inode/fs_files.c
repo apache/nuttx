@@ -78,11 +78,11 @@ static FAR struct file *files_fget_by_index(FAR struct filelist *list,
 static int files_extend(FAR struct filelist *list, size_t row)
 {
   FAR struct file **files;
+  size_t block_size;
   uint8_t orig_rows;
   FAR void *tmp;
   int flags;
   int i;
-  int j;
 
   if (row <= list->fl_rows)
     {
@@ -96,30 +96,18 @@ static int files_extend(FAR struct filelist *list, size_t row)
 
   orig_rows = list->fl_rows;
 
-  files = kmm_malloc(sizeof(FAR struct file *) * row);
-  DEBUGASSERT(files);
+  block_size = sizeof(struct file) * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK;
+
+  files = kmm_zalloc((sizeof(FAR struct file *) + block_size) * row);
   if (files == NULL)
     {
       return -ENFILE;
     }
 
-  i = list->fl_rows;
-  do
+  for (i = 0; i < row; i++)
     {
-      files[i] = kmm_zalloc(sizeof(struct file) *
-                            CONFIG_NFILE_DESCRIPTORS_PER_BLOCK);
-      if (files[i] == NULL)
-        {
-          while (--i >= list->fl_rows)
-            {
-              kmm_free(files[i]);
-            }
-
-          kmm_free(files);
-          return -ENFILE;
-        }
+      files[i] = (FAR void *)((uintptr_t)&files[row] + block_size * i);
     }
-  while (++i < row);
 
   flags = spin_lock_irqsave(&list->fl_lock);
 
@@ -131,21 +119,13 @@ static int files_extend(FAR struct filelist *list, size_t row)
   if (orig_rows != list->fl_rows && list->fl_rows >= row)
     {
       spin_unlock_irqrestore(&list->fl_lock, flags);
-
-      for (j = orig_rows; j < i; j++)
-        {
-          kmm_free(files[i]);
-        }
-
       kmm_free(files);
-
       return OK;
     }
 
   if (list->fl_files != NULL)
     {
-      memcpy(files, list->fl_files,
-             list->fl_rows * sizeof(FAR struct file *));
+      memcpy(files[0], list->fl_files[0], block_size * list->fl_rows);
     }
 
   tmp = list->fl_files;
@@ -308,8 +288,6 @@ void files_releaselist(FAR struct filelist *list)
         {
           file_close(&list->fl_files[i][j]);
         }
-
-      kmm_free(list->fl_files[i]);
     }
 
   kmm_free(list->fl_files);
