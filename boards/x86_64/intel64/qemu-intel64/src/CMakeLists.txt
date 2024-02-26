@@ -28,6 +28,10 @@ if(CONFIG_QEMU_PCI)
   list(APPEND SRCS qemu_pci.c)
 endif()
 
+if(CONFIG_BOARDCTL_RESET)
+  list(APPEND SRCS qemu_reset.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/qemu.ld")
