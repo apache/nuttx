@@ -84,18 +84,11 @@ int psock_local_bind(FAR struct socket *psock,
     }
   else
     {
-       FAR struct local_conn_s *server = NULL;
-
       /* Check if local address is already in use */
 
-      while ((server = local_nextconn(server)) != NULL)
+      if (local_active(conn, unaddr) != NULL)
         {
-          if (conn->lc_proto == server->lc_proto &&
-              strncmp(server->lc_path, unaddr->sun_path,
-                      UNIX_PATH_MAX - 1) == 0)
-            {
-              return -EADDRINUSE;
-            }
+          return -EADDRINUSE;
         }
 
       /* This is an normal, pathname Unix domain socket */
