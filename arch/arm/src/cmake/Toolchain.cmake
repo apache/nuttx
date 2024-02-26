@@ -184,7 +184,12 @@ if(CONFIG_DEBUG_SYMBOLS)
 endif()
 
 set(ARCHCFLAGS "-Wstrict-prototypes")
-set(ARCHCXXFLAGS "-nostdinc++")
+
+if(NOT CONFIG_LIBCXXTOOLCHAIN)
+  set(ARCHCXXFLAGS "${ARCHCXXFLAGS} -nostdinc++")
+else()
+  set(ARCHCXXFLAGS "${ARCHCXXFLAGS} -D_STDLIB_H_")
+endif()
 
 if(NOT CONFIG_CXX_EXCEPTION)
   string(APPEND ARCHCXXFLAGS " -fno-exceptions -fcheck-new")

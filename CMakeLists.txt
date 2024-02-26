@@ -481,13 +481,15 @@ if(WIN32)
 else()
   add_compile_options(
     # system wide warnings
-    -Wall
-    $<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes>
-    -Wshadow
-    -Wundef
+    -Wall $<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes> -Wshadow -Wundef
     # system wide options
-    $<$<COMPILE_LANGUAGE:CXX>:-nostdinc++>
     $<$<COMPILE_LANGUAGE:ASM>:-D__ASSEMBLY__>)
+endif()
+
+if(NOT CONFIG_LIBCXXTOOLCHAIN)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-nostdinc++>)
+else()
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-D_STDLIB_H_>)
 endif()
 
 if(NOT CONFIG_CXX_EXCEPTION)

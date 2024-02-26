@@ -102,7 +102,7 @@ endif
 # Add -fno-common because macOS "ld -r" doesn't seem to pick objects
 # for common symbols.
 ARCHCFLAGS += -fno-common
-ARCHCXXFLAGS += -fno-common -nostdinc++
+ARCHCXXFLAGS += -fno-common
 
 # Add -fvisibility=hidden
 # Because we don't want export nuttx's symbols to share libraries
@@ -115,6 +115,12 @@ ARCHCXXFLAGS += -ffunction-sections -fdata-sections
 
 ARCHCFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wundef -Wno-attributes -Wno-unknown-pragmas
 ARCHCXXFLAGS += -Wall -Wshadow -Wundef -Wno-attributes -Wno-unknown-pragmas
+
+ifneq ($(CONFIG_LIBCXXTOOLCHAIN),y)
+  ARCHCXXFLAGS += -nostdinc++
+else
+  ARCHCXXFLAGS += -D_STDLIB_H_
+endif
 
 ifneq ($(CONFIG_CXX_STANDARD),)
   ARCHCXXFLAGS += -std=$(CONFIG_CXX_STANDARD)

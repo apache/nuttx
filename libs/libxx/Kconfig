@@ -26,6 +26,11 @@ choice
 	prompt "C++ Library"
 	default LIBCXXMINI
 
+config LIBCXXTOOLCHAIN
+	bool "Toolchain C++ support"
+	---help---
+		Use Standard C++ library from toolchain.
+
 config LIBCXXMINI
 	bool "Basic C++ support"
 	---help---
