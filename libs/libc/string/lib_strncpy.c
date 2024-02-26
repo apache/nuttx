@@ -84,6 +84,7 @@
 
 #if !defined(CONFIG_LIBC_ARCH_STRNCPY) && defined(LIBC_BUILD_STRNCPY)
 #undef strncpy /* See mm/README.txt */
+nosanitize_address
 FAR char *strncpy(FAR char *dest, FAR const char *src, size_t n)
 {
 #ifdef CONFIG_LIBC_STRING_OPTIMIZE

@@ -61,6 +61,7 @@
 
 #if !defined(CONFIG_LIBC_ARCH_STRNCMP) && defined(LIBC_BUILD_STRNCMP)
 #undef strncmp /* See mm/README.txt */
+nosanitize_address
 int strncmp(FAR const char *cs, FAR const char *ct, size_t nb)
 {
 #ifdef CONFIG_LIBC_STRING_OPTIMIZE

@@ -76,6 +76,7 @@
 
 #if !defined(CONFIG_LIBC_ARCH_STRCHR) && defined(LIBC_BUILD_STRCHR)
 #undef strchr /* See mm/README.txt */
+nosanitize_address
 FAR char *strchr(FAR const char *s, int c)
 {
 #ifdef CONFIG_LIBC_STRING_OPTIMIZE
