@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <metal/sys.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
@@ -455,7 +456,20 @@ void rpmsg_device_destory(FAR struct rpmsg_s *rpmsg)
 int rpmsg_register(FAR const char *path, FAR struct rpmsg_s *rpmsg,
                    FAR const struct rpmsg_ops_s *ops)
 {
+  struct metal_init_params params = METAL_INIT_DEFAULTS;
+  static bool onceinit = false;
   int ret;
+
+  if (!onceinit)
+    {
+      ret = metal_init(&params);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      onceinit = true;
+    }
 
   ret = register_driver(path, &g_rpmsg_dev_ops, 0222, rpmsg);
   if (ret < 0)
