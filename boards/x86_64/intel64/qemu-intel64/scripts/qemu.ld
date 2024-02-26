@@ -79,6 +79,7 @@ SECTIONS
         *(.gcc_except_table)
         *(.gnu.linkonce.r.*)
         *(.eh_frame)
+        *(.note.gnu.*)
         _erodata = ABSOLUTE(.);
     }
 
