@@ -294,7 +294,8 @@ static int local_tx_open(FAR struct local_conn_s *conn, FAR const char *path,
 
   if (nonblock == false)
     {
-      ret = file_fcntl(&conn->lc_outfile, F_SETFL, O_WRONLY);
+      ret = nonblock;
+      ret = file_ioctl(&conn->lc_outfile, FIONBIO, &ret);
       if (ret < 0)
         {
           return ret;
