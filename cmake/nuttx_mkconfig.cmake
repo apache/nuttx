@@ -40,6 +40,14 @@ if(COMPARE_RESULT EQUAL 0 AND EXISTS ${CONFIG_H})
   return()
 endif()
 
+set(BASE_DEFCONFIG "${NUTTX_BOARD}/${NUTTX_CONFIG}")
+execute_process(
+  COMMAND ${CMAKE_COMMAND} -E compare_files ${CMAKE_BINARY_DIR}/.config
+          ${CMAKE_BINARY_DIR}/.config.orig RESULT_VARIABLE COMPARE_RESULT)
+if(COMPARE_RESULT)
+  string(APPEND BASE_DEFCONFIG "-dirty")
+endif()
+
 set(DEQUOTELIST
     # NuttX
     "CONFIG_DEBUG_OPTLEVEL" # Custom debug level
@@ -81,11 +89,16 @@ file(APPEND ${CONFIG_H} "#define CONFIG_y 1\n")
 file(APPEND ${CONFIG_H} "#define CONFIG_m 2\n\n")
 file(APPEND ${CONFIG_H}
      "/* General Definitions ***********************************/\n")
+file(APPEND ${CONFIG_H} "#define CONFIG_BASE_DEFCONFIG \"${BASE_DEFCONFIG}\"\n")
 
 file(STRINGS ${CMAKE_BINARY_DIR}/.config ConfigContents)
 foreach(NameAndValue ${ConfigContents})
   string(REGEX REPLACE "^[ ]+" "" NameAndValue ${NameAndValue})
   string(REGEX MATCH "^CONFIG[^=]+" NAME ${NameAndValue})
+  # skip BASE_DEFCONFIG here as it is handled above
+  if("${NAME}" STREQUAL "CONFIG_BASE_DEFCONFIG")
+    continue()
+  endif()
   string(REPLACE "${NAME}=" "" VALUE ${NameAndValue})
   if(NAME AND NOT "${VALUE}" STREQUAL "")
     if(${VALUE} STREQUAL "y")
