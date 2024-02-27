@@ -33,6 +33,12 @@
 #include "altcom_lwm2m_hdlr.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define NO_MEMBER (-1)
+
+/****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
@@ -361,7 +367,7 @@ static int parse_inst_number(FAR uint8_t **buf, FAR size_t *bufsz)
 
   if (!isdigit(**buf))
     {
-      return -1;
+      return NO_MEMBER;
     }
 
   while (*bufsz)
@@ -391,7 +397,7 @@ static int32_t server_op_notice_hndl(FAR uint8_t *pktbuf, size_t pktsz,
   FAR int *srvid = (FAR int *)&cb_args[1];
   FAR int *inst  = (FAR int *)cb_args[2];
 
-  /* The valiable of "inst" is a type of struct lwm2mstub_instance_s in fact.
+  /* The content of "inst" is a type of struct lwm2mstub_instance_s in fact.
    * But actually it is the same as int[4].
    * To make simpler logic, inst is defined as int[4] (int pointer).
    */
@@ -413,7 +419,7 @@ static int32_t server_op_notice_hndl(FAR uint8_t *pktbuf, size_t pktsz,
   *event = parse_inst_number(&pktbuf, &pktsz);
   if (*event < 0)
     {
-      return -1;
+      return ERROR;
     }
 
   if (pktsz > 0 && pktbuf[0] == ',')
@@ -434,7 +440,7 @@ static int32_t server_op_notice_hndl(FAR uint8_t *pktbuf, size_t pktsz,
         }
     }
 
-  return 1;
+  return OK;
 }
 
 /****************************************************************************
