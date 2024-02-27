@@ -308,6 +308,9 @@ void up_invalidate_dcache_all(void)
 
 void up_clean_dcache(uintptr_t start, uintptr_t end)
 {
+#ifdef CONFIG_SMP
+  cp15_clean_dcache(start, end);
+#else
   if ((end - start) < cp15_dcache_size())
     {
       cp15_clean_dcache(start, end);
@@ -316,6 +319,7 @@ void up_clean_dcache(uintptr_t start, uintptr_t end)
     {
       cp15_clean_dcache_all();
     }
+#endif
 
   l2cc_clean(start, end);
 }
@@ -372,6 +376,9 @@ void up_clean_dcache_all(void)
 
 void up_flush_dcache(uintptr_t start, uintptr_t end)
 {
+#ifdef CONFIG_SMP
+  cp15_flush_dcache(start, end);
+#else
   if ((end - start) < cp15_dcache_size())
     {
       cp15_flush_dcache(start, end);
@@ -380,6 +387,7 @@ void up_flush_dcache(uintptr_t start, uintptr_t end)
     {
       cp15_flush_dcache_all();
     }
+#endif
 
   l2cc_flush(start, end);
 }
