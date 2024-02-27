@@ -65,7 +65,12 @@ ifeq ($(CONFIG_SENSORS_DHTXX),y)
 endif
 
 ifeq ($(CONFIG_SENSORS_BMI270),y)
+  CSRCS += bmi270_base.c
+ifeq ($(CONFIG_SENSORS_BMI270_UORB),y)
+  CSRCS += bmi270_bmi.c
+else
   CSRCS += bmi270.c
+endif
 endif
 
 # These drivers depend on I2C support
