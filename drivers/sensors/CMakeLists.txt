@@ -65,7 +65,12 @@ if(CONFIG_SENSORS)
   endif()
 
   if(CONFIG_SENSORS_BMI270)
-    list(APPEND SRCS bmi270.c)
+    list(APPEND SRCS bmi270_base.c)
+    if(CONFIG_SENSORS_BMI270_UORB)
+      list(APPEND SRCS bmi270_uorb.c)
+    else()
+      list(APPEND SRCS bmi270.c)
+    endif()
   endif()
 
   # These drivers depend on I2C support
