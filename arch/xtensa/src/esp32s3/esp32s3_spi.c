@@ -909,7 +909,7 @@ static void esp32s3_spi_dma_exchange(struct esp32s3_spi_priv_s *priv,
                               SPI_DMA_TX_ENA_M);
 
       n = esp32s3_dma_setup(priv->dma_txdesc, SPI_DMA_DESC_NUM,
-                            tp, bytes, true);
+                            tp, bytes, true, priv->dma_channel);
       esp32s3_dma_load(priv->dma_txdesc, channel, true);
       esp32s3_dma_enable(channel, true);
 
@@ -935,7 +935,7 @@ static void esp32s3_spi_dma_exchange(struct esp32s3_spi_priv_s *priv,
                                   SPI_DMA_RX_ENA_M);
 
           esp32s3_dma_setup(priv->dma_rxdesc, SPI_DMA_DESC_NUM,
-                            rp, bytes, false);
+                            rp, bytes, false, priv->dma_channel);
           esp32s3_dma_load(priv->dma_rxdesc, channel, false);
           esp32s3_dma_enable(channel, false);
 

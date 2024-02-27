@@ -135,7 +135,7 @@
                                    ESP32S3_LCD_DATA_WIDTH)
 
 #define ESP32S3_LCD_DMADESC_NUM   (ESP32S3_LCD_FB_SIZE / \
-                                   ESP32S3_DMA_DATALEN_MAX + 1)
+                                   ESP32S3_DMA_BUFLEN_MAX + 1)
 
 #define ESP32S3_LCD_LAYERS        CONFIG_ESP32S3_LCD_BUFFER_LAYERS
 
@@ -666,7 +666,7 @@ static void esp32s3_lcd_dmasetup(void)
                         ESP32S3_LCD_DMADESC_NUM,
                         layer->framebuffer,
                         ESP32S3_LCD_FB_SIZE,
-                        true);
+                        true, priv->dma_channel);
     }
 }
 
