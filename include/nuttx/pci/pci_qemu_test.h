@@ -51,10 +51,6 @@ extern "C"
 int pci_register_qemu_test_driver(void);
 #endif
 
-#ifdef CONFIG_VIRT_QEMU_EDU
-extern const struct pci_dev_type_s g_pci_type_qemu_edu;
-#endif
-
 #undef EXTERN
 #ifdef __cplusplus
 }
