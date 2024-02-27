@@ -548,15 +548,21 @@ int file_getlk(FAR struct file *filep, FAR struct flock *flock)
 {
   FAR struct file_lock_bucket_s *bucket;
   FAR struct file_lock_s *file_lock;
-  char path[PATH_MAX];
+  FAR char *path;
   int ret;
 
   /* We need to get the unique identifier (Path) via filep */
 
+  path = lib_get_pathbuffer();
+  if (path == NULL)
+    {
+      return -ENOMEM;
+    }
+
   ret = file_lock_get_path(filep, path);
   if (ret < 0)
     {
-      return ret;
+      goto out_free;
     }
 
   /* Convert a flock to a posix lock */
@@ -564,11 +570,10 @@ int file_getlk(FAR struct file *filep, FAR struct flock *flock)
   ret = file_lock_normalize(filep, flock, flock);
   if (ret < 0)
     {
-      return ret;
+      goto out_free;
     }
 
   nxmutex_lock(&g_protect_lock);
-
   bucket = file_lock_find_bucket(path);
   if (bucket != NULL)
     {
@@ -602,6 +607,8 @@ out:
       flock->l_len = flock->l_end - flock->l_start + 1;
     }
 
+out_free:
+  lib_put_pathbuffer(path);
   return OK;
 }
 
@@ -626,16 +633,22 @@ int file_setlk(FAR struct file *filep, FAR struct flock *flock,
 {
   FAR struct file_lock_bucket_s *bucket;
   FAR struct file_lock_s *file_lock;
+  FAR char *path;
   struct flock request;
-  char path[PATH_MAX];
   int ret;
+
+  path = lib_get_pathbuffer();
+  if (path == NULL)
+    {
+      return -ENOMEM;
+    }
 
   /* We need to get the unique identifier (Path) via filep */
 
   ret = file_lock_get_path(filep, path);
   if (ret < 0)
     {
-      return ret;
+      goto out_free;
     }
 
   /* Convert a flock to a posix lock */
@@ -643,7 +656,7 @@ int file_setlk(FAR struct file *filep, FAR struct flock *flock,
   ret = file_lock_normalize(filep, flock, &request);
   if (ret < 0)
     {
-      return ret;
+      goto out_free;
     }
 
   request.l_pid = getpid();
@@ -659,8 +672,8 @@ int file_setlk(FAR struct file *filep, FAR struct flock *flock,
 
       if (request.l_type == F_UNLCK)
         {
-          nxmutex_unlock(&g_protect_lock);
-          return OK;
+          ret = OK;
+          goto out_lock;
         }
 
       /* It looks like we didn't find a bucket, let's go create one */
@@ -668,8 +681,8 @@ int file_setlk(FAR struct file *filep, FAR struct flock *flock,
       bucket = file_lock_create_bucket(path);
       if (bucket == NULL)
         {
-          nxmutex_unlock(&g_protect_lock);
-          return -ENOMEM;
+          ret = -ENOMEM;
+          goto out_lock;
         }
     }
   else if (request.l_type != F_UNLCK)
@@ -711,7 +724,10 @@ retry:
 
 out:
   file_lock_delete_bucket(bucket, path);
+out_lock:
   nxmutex_unlock(&g_protect_lock);
+out_free:
+  lib_put_pathbuffer(path);
   return ret;
 }
 
@@ -731,9 +747,15 @@ void file_closelk(FAR struct file *filep)
   FAR struct file_lock_bucket_s *bucket;
   FAR struct file_lock_s *file_lock;
   FAR struct file_lock_s *temp;
-  char path[PATH_MAX];
+  FAR char *path;
   bool deleted = false;
   int ret;
+
+  path = lib_get_pathbuffer();
+  if (path == NULL)
+    {
+      return;
+    }
 
   ret = file_lock_get_path(filep, path);
   if (ret < 0)
@@ -742,7 +764,7 @@ void file_closelk(FAR struct file *filep)
        * it.
        */
 
-      return;
+      goto out;
     }
 
   bucket = file_lock_find_bucket(path);
@@ -750,7 +772,7 @@ void file_closelk(FAR struct file *filep)
     {
       /* There is no bucket here, so we don't need to free it. */
 
-      return;
+      goto out;
     }
 
   nxmutex_lock(&g_protect_lock);
@@ -774,6 +796,8 @@ void file_closelk(FAR struct file *filep)
     }
 
   nxmutex_unlock(&g_protect_lock);
+out:
+  lib_put_pathbuffer(path);
 }
 
 /****************************************************************************
