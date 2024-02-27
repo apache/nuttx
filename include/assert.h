@@ -72,10 +72,6 @@
 #  define __ASSERT_LINE__ 0
 #endif
 
-#define PANIC() __assert(__ASSERT_FILE__, __ASSERT_LINE__, "panic")
-#define PANIC_WITH_REGS(msg, regs) _assert(__ASSERT_FILE__, \
-                                           __ASSERT_LINE__, msg, regs)
-
 #define __ASSERT__(f, file, line, _f) \
   do                                  \
     {                                 \
@@ -101,6 +97,9 @@
 #endif
 
 #ifdef CONFIG_DEBUG_ASSERTIONS
+#  define PANIC() __assert(__ASSERT_FILE__, __ASSERT_LINE__, "panic")
+#  define PANIC_WITH_REGS(msg, regs) _assert(__ASSERT_FILE__, \
+                                           __ASSERT_LINE__, msg, regs)
 #  define DEBUGPANIC()   __assert(__DEBUG_ASSERT_FILE__, __DEBUG_ASSERT_LINE__, "panic")
 #  define DEBUGASSERT(f) _ASSERT(f, __DEBUG_ASSERT_FILE__, __DEBUG_ASSERT_LINE__)
 #  define DEBUGVERIFY(f) _VERIFY(f, __DEBUG_ASSERT_FILE__, __DEBUG_ASSERT_LINE__)
@@ -108,6 +107,8 @@
 #  define DEBUGPANIC()
 #  define DEBUGASSERT(f) ((void)(1 || (f)))
 #  define DEBUGVERIFY(f) ((void)(f))
+#  define PANIC() do { } while (1)
+#  define PANIC_WITH_REGS(msg, regs) PANIC()
 #endif
 
 /* The C standard states that if NDEBUG is defined, assert will do nothing.
