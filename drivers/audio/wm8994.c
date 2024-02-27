@@ -113,7 +113,7 @@ static int      wm8994_configure(FAR struct audio_lowerhalf_s *dev,
 static int      wm8994_configure(FAR struct audio_lowerhalf_s *dev,
                   FAR const struct audio_caps_s *caps);
 #endif
-static int      wm8994_shutdown(FAR struct audio_lowerhalf_s *dev);
+static int      wm8994_shutdown(FAR struct audio_lowerhalf_s *dev, int cnt);
 static void     wm8994_senddone(FAR struct i2s_dev_s *i2s,
                   FAR struct ap_buffer_s *apb, FAR void *arg, int result);
 static void     wm8994_returnbuffers(FAR struct wm8994_dev_s *priv);
@@ -190,6 +190,7 @@ static void     wm8994_hw_reset(FAR struct wm8994_dev_s *priv);
 
 static const struct audio_ops_s g_audioops =
 {
+  NULL,                 /* setup          */
   wm8994_getcaps,       /* getcaps        */
   wm8994_configure,     /* configure      */
   wm8994_shutdown,      /* shutdown       */
@@ -993,7 +994,7 @@ static int wm8994_configure(FAR struct audio_lowerhalf_s *dev,
  *
  */
 
-static int wm8994_shutdown(FAR struct audio_lowerhalf_s *dev)
+static int wm8994_shutdown(FAR struct audio_lowerhalf_s *dev, int cnt)
 {
   FAR struct wm8994_dev_s *priv = (FAR struct wm8994_dev_s *)dev;
 

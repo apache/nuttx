@@ -104,7 +104,7 @@ static int sim_audio_resume(struct audio_lowerhalf_s *dev);
 static int sim_audio_reserve(struct audio_lowerhalf_s *dev);
 static int sim_audio_release(struct audio_lowerhalf_s *dev);
 #endif
-static int sim_audio_shutdown(struct audio_lowerhalf_s *dev);
+static int sim_audio_shutdown(struct audio_lowerhalf_s *dev, int cnt);
 static int sim_audio_enqueuebuffer(struct audio_lowerhalf_s *dev,
                                    struct ap_buffer_s *apb);
 static int sim_audio_ioctl(struct audio_lowerhalf_s *dev, int cmd,
@@ -115,6 +115,7 @@ static int sim_audio_ioctl(struct audio_lowerhalf_s *dev, int cmd,
 
 static const struct audio_ops_s g_sim_audio_ops =
 {
+  .setup         = NULL,
   .getcaps       = sim_audio_getcaps,
   .configure     = sim_audio_configure,
   .shutdown      = sim_audio_shutdown,
@@ -484,7 +485,7 @@ static int sim_audio_configure(struct audio_lowerhalf_s *dev,
   return ret;
 }
 
-static int sim_audio_shutdown(struct audio_lowerhalf_s *dev)
+static int sim_audio_shutdown(struct audio_lowerhalf_s *dev, int cnt)
 {
   return 0;
 }

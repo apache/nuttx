@@ -381,7 +381,7 @@ static int     cxd56_release(struct audio_lowerhalf_s *lower);
 
 static int     cxd56_getcaps(struct audio_lowerhalf_s *lower, int type,
                              struct audio_caps_s *caps);
-static int     cxd56_shutdown(struct audio_lowerhalf_s *lower);
+static int     cxd56_shutdown(struct audio_lowerhalf_s *lower, int opencnt);
 static int     cxd56_enqueuebuffer(struct audio_lowerhalf_s *lower,
                                    struct ap_buffer_s *apb);
 static int     cxd56_cancelbuffer(struct audio_lowerhalf_s *lower,
@@ -438,6 +438,7 @@ static uint16_t g_codec_start_count = 0;
 
 static const struct audio_ops_s g_audioops =
 {
+  NULL,                /* setup          */
   cxd56_getcaps,       /* getcaps        */
   cxd56_configure,     /* configure      */
   cxd56_shutdown,      /* shutdown       */
@@ -2698,7 +2699,7 @@ static int cxd56_getcaps(struct audio_lowerhalf_s *lower, int type,
  *
  ****************************************************************************/
 
-static int cxd56_shutdown(struct audio_lowerhalf_s *lower)
+static int cxd56_shutdown(struct audio_lowerhalf_s *lower, int opencnt)
 {
   int ret;
   struct cxd56_dev_s *priv = (struct cxd56_dev_s *)lower;
