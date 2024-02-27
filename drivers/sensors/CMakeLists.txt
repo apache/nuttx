@@ -137,7 +137,12 @@ if(CONFIG_SENSORS)
     endif()
 
     if(CONFIG_SENSORS_BMI160)
-      list(APPEND SRCS bmi160.c)
+      list(APPEND SRCS bmi160_base.c)
+      if(CONFIG_SENSORS_BMI160_UORB)
+        list(APPEND SRCS bmi160_uorb.c)
+      else()
+        list(APPEND SRCS bmi160.c)
+      endif()
     endif()
 
     if(CONFIG_SENSORS_BMP180)
