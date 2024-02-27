@@ -1,0 +1,2623 @@
+config STM32F411MINIMUM_GPIO_A0
+	bool "enable pin A0"
+	---help---
+		Assume direct control over this pin. You will not be able to use this
+		pin for anything else other than general input/output access via
+		/dev/gpio_A0 device node.
+
+if STM32F411MINIMUM_GPIO_A0
+
+config STM32F411MINIMUM_GPIO_A0_NAME
+	string "Pin name"
+	default "gpio_a0"
+	---help---
+		Pin name, it will accessible via /dev/%s file
+
+choice
+	prompt "Pin type"
+	default STM32F411MINIMUM_GPIO_A0_OUT
+
+config STM32F411MINIMUM_GPIO_A0_OUT
+	bool "output"
+config STM32F411MINIMUM_GPIO_A0_IN
+	bool "input"
+config STM32F411MINIMUM_GPIO_A0_INT
+	bool "interrupt"
+
+endchoice # A0 Pin type
+
+if STM32F411MINIMUM_GPIO_A0_OUT
+
+choice
+	prompt "output type"
+	default STM32F411MINIMUM_GPIO_A0_OUT_OD
+
+config STM32F411MINIMUM_GPIO_A0_OUT_OD
+	bool "open drain"
+config STM32F411MINIMUM_GPIO_A0_OUT_PP
+	bool "push pull"
+
+endchoice # A0 output type
+
+choice
+	prompt "default state"
+	default STM32F411MINIMUM_GPIO_A0_OUT_SET
+
+config STM32F411MINIMUM_GPIO_A0_OUT_SET
+	bool "set"
+config STM32F411MINIMUM_GPIO_A0_OUT_CLEAR
+	bool "clear"
+
+endchoice # A0 output default state
+
+endif # STM32F411MINIMUM_GPIO_A0_OUT
+
+choice
+	prompt "pull"
+	default STM32F411MINIMUM_GPIO_A0_PULL_UP
+
+config STM32F411MINIMUM_GPIO_A0_PULL_UP
+	bool "pull up"
+config STM32F411MINIMUM_GPIO_A0_PULL_DOWN
+	bool "pull down"
+config STM32F411MINIMUM_GPIO_A0_PULL_FLOAT
+	bool "float"
+
+endchoice # A0 pull
+
+choice
+	prompt "speed"
+	default STM32F411MINIMUM_GPIO_A0_SPEED_2MHz
+
+config STM32F411MINIMUM_GPIO_A0_SPEED_2MHz
+	bool "2MHz"
+config STM32F411MINIMUM_GPIO_A0_SPEED_25MHz
+	bool "25MHz"
+config STM32F411MINIMUM_GPIO_A0_SPEED_50MHz
+	bool "50MHz"
+
+endchoice # A0 speed
+
+endif # STM32F411MINIMUM_GPIO_A0
+
+config STM32F411MINIMUM_GPIO_A1
+	bool "enable pin A1"
+	---help---
+		Assume direct control over this pin. You will not be able to use this
+		pin for anything else other than general input/output access via
+		/dev/gpio_A1 device node.
+
+if STM32F411MINIMUM_GPIO_A1
+
+config STM32F411MINIMUM_GPIO_A1_NAME
+	string "Pin name"
+	default "gpio_a1"
+	---help---
+		Pin name, it will accessible via /dev/%s file
+
+choice
+	prompt "Pin type"
+	default STM32F411MINIMUM_GPIO_A1_OUT
+
+config STM32F411MINIMUM_GPIO_A1_OUT
+	bool "output"
+config STM32F411MINIMUM_GPIO_A1_IN
+	bool "input"
+config STM32F411MINIMUM_GPIO_A1_INT
+	bool "interrupt"
+
+endchoice # A1 Pin type
+
+if STM32F411MINIMUM_GPIO_A1_OUT
+
+choice
+	prompt "output type"
+	default STM32F411MINIMUM_GPIO_A1_OUT_OD
+
+config STM32F411MINIMUM_GPIO_A1_OUT_OD
+	bool "open drain"
+config STM32F411MINIMUM_GPIO_A1_OUT_PP
+	bool "push pull"
+
+endchoice # A1 output type
+
+choice
+	prompt "default state"
+	default STM32F411MINIMUM_GPIO_A1_OUT_SET
+
+config STM32F411MINIMUM_GPIO_A1_OUT_SET
+	bool "set"
+config STM32F411MINIMUM_GPIO_A1_OUT_CLEAR
+	bool "clear"
+
+endchoice # A1 output default state
+
+endif # STM32F411MINIMUM_GPIO_A1_OUT
+
+choice
+	prompt "pull"
+	default STM32F411MINIMUM_GPIO_A1_PULL_UP
+
+config STM32F411MINIMUM_GPIO_A1_PULL_UP
+	bool "pull up"
+config STM32F411MINIMUM_GPIO_A1_PULL_DOWN
+	bool "pull down"
+config STM32F411MINIMUM_GPIO_A1_PULL_FLOAT
+	bool "float"
+
+endchoice # A1 pull
+
+choice
+	prompt "speed"
+	default STM32F411MINIMUM_GPIO_A1_SPEED_2MHz
+
+config STM32F411MINIMUM_GPIO_A1_SPEED_2MHz
+	bool "2MHz"
+config STM32F411MINIMUM_GPIO_A1_SPEED_25MHz
+	bool "25MHz"
+config STM32F411MINIMUM_GPIO_A1_SPEED_50MHz
+	bool "50MHz"
+
+endchoice # A1 speed
+
+endif # STM32F411MINIMUM_GPIO_A1
+
+config STM32F411MINIMUM_GPIO_A2
+	bool "enable pin A2"
+	---help---
+		Assume direct control over this pin. You will not be able to use this
+		pin for anything else other than general input/output access via
+		/dev/gpio_A2 device node.
+
+if STM32F411MINIMUM_GPIO_A2
+
+config STM32F411MINIMUM_GPIO_A2_NAME
+	string "Pin name"
+	default "gpio_a2"
+	---help---
+		Pin name, it will accessible via /dev/%s file
+
+choice
+	prompt "Pin type"
+	default STM32F411MINIMUM_GPIO_A2_OUT
+
+config STM32F411MINIMUM_GPIO_A2_OUT
+	bool "output"
+config STM32F411MINIMUM_GPIO_A2_IN
+	bool "input"
+config STM32F411MINIMUM_GPIO_A2_INT
+	bool "interrupt"
+
+endchoice # A2 Pin type
+
+if STM32F411MINIMUM_GPIO_A2_OUT
+
+choice
+	prompt "output type"
+	default STM32F411MINIMUM_GPIO_A2_OUT_OD
+
+config STM32F411MINIMUM_GPIO_A2_OUT_OD
+	bool "open drain"
+config STM32F411MINIMUM_GPIO_A2_OUT_PP
+	bool "push pull"
+
+endchoice # A2 output type
+
+choice
+	prompt "default state"
+	default STM32F411MINIMUM_GPIO_A2_OUT_SET
+
+config STM32F411MINIMUM_GPIO_A2_OUT_SET
+	bool "set"
+config STM32F411MINIMUM_GPIO_A2_OUT_CLEAR
+	bool "clear"
+
+endchoice # A2 output default state
+
+endif # STM32F411MINIMUM_GPIO_A2_OUT
+
+choice
+	prompt "pull"
+	default STM32F411MINIMUM_GPIO_A2_PULL_UP
+
+config STM32F411MINIMUM_GPIO_A2_PULL_UP
+	bool "pull up"
+config STM32F411MINIMUM_GPIO_A2_PULL_DOWN
+	bool "pull down"
+config STM32F411MINIMUM_GPIO_A2_PULL_FLOAT
+	bool "float"
+
+endchoice # A2 pull
+
+choice
+	prompt "speed"
+	default STM32F411MINIMUM_GPIO_A2_SPEED_2MHz
+
+config STM32F411MINIMUM_GPIO_A2_SPEED_2MHz
+	bool "2MHz"
+config STM32F411MINIMUM_GPIO_A2_SPEED_25MHz
+	bool "25MHz"
+config STM32F411MINIMUM_GPIO_A2_SPEED_50MHz
+	bool "50MHz"
+
+endchoice # A2 speed
+
+endif # STM32F411MINIMUM_GPIO_A2
+
+config STM32F411MINIMUM_GPIO_A3
+	bool "enable pin A3"
+	---help---
+		Assume direct control over this pin. You will not be able to use this
+		pin for anything else other than general input/output access via
+		/dev/gpio_A3 device node.
+
+if STM32F411MINIMUM_GPIO_A3
+
+config STM32F411MINIMUM_GPIO_A3_NAME
+	string "Pin name"
+	default "gpio_a3"
+	---help---
+		Pin name, it will accessible via /dev/%s file
+
+choice
+	prompt "Pin type"
+	default STM32F411MINIMUM_GPIO_A3_OUT
+
+config STM32F411MINIMUM_GPIO_A3_OUT
+	bool "output"
+config STM32F411MINIMUM_GPIO_A3_IN
+	bool "input"
+config STM32F411MINIMUM_GPIO_A3_INT
+	bool "interrupt"
+
+endchoice # A3 Pin type
+
+if STM32F411MINIMUM_GPIO_A3_OUT
+
+choice
+	prompt "output type"
+	default STM32F411MINIMUM_GPIO_A3_OUT_OD
+
+config STM32F411MINIMUM_GPIO_A3_OUT_OD
+	bool "open drain"
+config STM32F411MINIMUM_GPIO_A3_OUT_PP
+	bool "push pull"
+
+endchoice # A3 output type
+
+choice
+	prompt "default state"
+	default STM32F411MINIMUM_GPIO_A3_OUT_SET
+
+config STM32F411MINIMUM_GPIO_A3_OUT_SET
+	bool "set"
+config STM32F411MINIMUM_GPIO_A3_OUT_CLEAR
+	bool "clear"
+
+endchoice # A3 output default state
+
+endif # STM32F411MINIMUM_GPIO_A3_OUT
+
+choice
+	prompt "pull"
+	default STM32F411MINIMUM_GPIO_A3_PULL_UP
+
+config STM32F411MINIMUM_GPIO_A3_PULL_UP
+	bool "pull up"
+config STM32F411MINIMUM_GPIO_A3_PULL_DOWN
+	bool "pull down"
+config STM32F411MINIMUM_GPIO_A3_PULL_FLOAT
+	bool "float"
+
+endchoice # A3 pull
+
+choice
+	prompt "speed"
+	default STM32F411MINIMUM_GPIO_A3_SPEED_2MHz
+
+config STM32F411MINIMUM_GPIO_A3_SPEED_2MHz
+	bool "2MHz"
+config STM32F411MINIMUM_GPIO_A3_SPEED_25MHz
+	bool "25MHz"
+config STM32F411MINIMUM_GPIO_A3_SPEED_50MHz
+	bool "50MHz"
+
+endchoice # A3 speed
+
+endif # STM32F411MINIMUM_GPIO_A3
+
+config STM32F411MINIMUM_GPIO_A4
+	bool "enable pin A4"
+	---help---
+		Assume direct control over this pin. You will not be able to use this
+		pin for anything else other than general input/output access via
+		/dev/gpio_A4 device node.
+
+if STM32F411MINIMUM_GPIO_A4
+
+config STM32F411MINIMUM_GPIO_A4_NAME
+	string "Pin name"
+	default "gpio_a4"
+	---help---
+		Pin name, it will accessible via /dev/%s file
+
+choice
+	prompt "Pin type"
+	default STM32F411MINIMUM_GPIO_A4_OUT
+
+config STM32F411MINIMUM_GPIO_A4_OUT
+	bool "output"
+config STM32F411MINIMUM_GPIO_A4_IN
+	bool "input"
+config STM32F411MINIMUM_GPIO_A4_INT
+	bool "interrupt"
+
+endchoice # A4 Pin type
+
+if STM32F411MINIMUM_GPIO_A4_OUT
+
+choice
+	prompt "output type"
+	default STM32F411MINIMUM_GPIO_A4_OUT_OD
+
+config STM32F411MINIMUM_GPIO_A4_OUT_OD
+	bool "open drain"
+config STM32F411MINIMUM_GPIO_A4_OUT_PP
+	bool "push pull"
+
+endchoice # A4 output type
+
+choice
+	prompt "default state"
+	default STM32F411MINIMUM_GPIO_A4_OUT_SET
+
+config STM32F411MINIMUM_GPIO_A4_OUT_SET
+	bool "set"
+config STM32F411MINIMUM_GPIO_A4_OUT_CLEAR
+	bool "clear"
+
+endchoice # A4 output default state
+
+endif # STM32F411MINIMUM_GPIO_A4_OUT
+
+choice
+	prompt "pull"
+	default STM32F411MINIMUM_GPIO_A4_PULL_UP
+
+config STM32F411MINIMUM_GPIO_A4_PULL_UP
+	bool "pull up"
+config STM32F411MINIMUM_GPIO_A4_PULL_DOWN
+	bool "pull down"
+config STM32F411MINIMUM_GPIO_A4_PULL_FLOAT
+	bool "float"
+
+endchoice # A4 pull
+
+choice
+	prompt "speed"
+	default STM32F411MINIMUM_GPIO_A4_SPEED_2MHz
+
+config STM32F411MINIMUM_GPIO_A4_SPEED_2MHz
+	bool "2MHz"
+config STM32F411MINIMUM_GPIO_A4_SPEED_25MHz
+	bool "25MHz"
+config STM32F411MINIMUM_GPIO_A4_SPEED_50MHz
+	bool "50MHz"
+
+endchoice # A4 speed
+
+endif # STM32F411MINIMUM_GPIO_A4
+
+config STM32F411MINIMUM_GPIO_A5
+	bool "enable pin A5"
+	---help---
+		Assume direct control over this pin. You will not be able to use this
+		pin for anything else other than general input/output access via
+		/dev/gpio_A5 device node.
+
+if STM32F411MINIMUM_GPIO_A5
+
+config STM32F411MINIMUM_GPIO_A5_NAME
+	string "Pin name"
+	default "gpio_a5"
+	---help---
+		Pin name, it will accessible via /dev/%s file
+
+choice
+	prompt "Pin type"
+	default STM32F411MINIMUM_GPIO_A5_OUT
+
+config STM32F411MINIMUM_GPIO_A5_OUT
+	bool "output"
+config STM32F411MINIMUM_GPIO_A5_IN
+	bool "input"
+config STM32F411MINIMUM_GPIO_A5_INT
+	bool "interrupt"
+
+endchoice # A5 Pin type
+
+if STM32F411MINIMUM_GPIO_A5_OUT
+
+choice
+	prompt "output type"
+	default STM32F411MINIMUM_GPIO_A5_OUT_OD
+
+config STM32F411MINIMUM_GPIO_A5_OUT_OD
+	bool "open drain"
+config STM32F411MINIMUM_GPIO_A5_OUT_PP
+	bool "push pull"
+
+endchoice # A5 output type
+
+choice
+	prompt "default state"
+	default STM32F411MINIMUM_GPIO_A5_OUT_SET
+
+config STM32F411MINIMUM_GPIO_A5_OUT_SET
+	bool "set"
+config STM32F411MINIMUM_GPIO_A5_OUT_CLEAR
+	bool "clear"
+
+endchoice # A5 output default state
+
+endif # STM32F411MINIMUM_GPIO_A5_OUT
+
+choice
+	prompt "pull"
+	default STM32F411MINIMUM_GPIO_A5_PULL_UP
+
+config STM32F411MINIMUM_GPIO_A5_PULL_UP
+	bool "pull up"
+config STM32F411MINIMUM_GPIO_A5_PULL_DOWN
+	bool "pull down"
+config STM32F411MINIMUM_GPIO_A5_PULL_FLOAT
+	bool "float"
+
+endchoice # A5 pull
+
+choice
+	prompt "speed"
+	default STM32F411MINIMUM_GPIO_A5_SPEED_2MHz
+
+config STM32F411MINIMUM_GPIO_A5_SPEED_2MHz
+	bool "2MHz"
+config STM32F411MINIMUM_GPIO_A5_SPEED_25MHz
+	bool "25MHz"
+config STM32F411MINIMUM_GPIO_A5_SPEED_50MHz
+	bool "50MHz"
+
+endchoice # A5 speed
+
+endif # STM32F411MINIMUM_GPIO_A5
+
+config STM32F411MINIMUM_GPIO_A6
+	bool "enable pin A6"
+	---help---
+		Assume direct control over this pin. You will not be able to use this
+		pin for anything else other than general input/output access via
+		/dev/gpio_A6 device node.
+
+if STM32F411MINIMUM_GPIO_A6
+
+config STM32F411MINIMUM_GPIO_A6_NAME
+	string "Pin name"
+	default "gpio_a6"
+	---help---
+		Pin name, it will accessible via /dev/%s file
+
+choice
+	prompt "Pin type"
+	default STM32F411MINIMUM_GPIO_A6_OUT
+
+config STM32F411MINIMUM_GPIO_A6_OUT
+	bool "output"
+config STM32F411MINIMUM_GPIO_A6_IN
+	bool "input"
+config STM32F411MINIMUM_GPIO_A6_INT
+	bool "interrupt"
+
+endchoice # A6 Pin type
+
+if STM32F411MINIMUM_GPIO_A6_OUT
+
+choice
+	prompt "output type"
+	default STM32F411MINIMUM_GPIO_A6_OUT_OD
+
+config STM32F411MINIMUM_GPIO_A6_OUT_OD
+	bool "open drain"
+config STM32F411MINIMUM_GPIO_A6_OUT_PP
+	bool "push pull"
+
+endchoice # A6 output type
+
+choice
+	prompt "default state"
+	default STM32F411MINIMUM_GPIO_A6_OUT_SET
+
+config STM32F411MINIMUM_GPIO_A6_OUT_SET
+	bool "set"
+config STM32F411MINIMUM_GPIO_A6_OUT_CLEAR
+	bool "clear"
+
+endchoice # A6 output default state
+
+endif # STM32F411MINIMUM_GPIO_A6_OUT
+
+choice
+	prompt "pull"
+	default STM32F411MINIMUM_GPIO_A6_PULL_UP
+
+config STM32F411MINIMUM_GPIO_A6_PULL_UP
+	bool "pull up"
+config STM32F411MINIMUM_GPIO_A6_PULL_DOWN
+	bool "pull down"
+config STM32F411MINIMUM_GPIO_A6_PULL_FLOAT
+	bool "float"
+
+endchoice # A6 pull
+
+choice
+	prompt "speed"
+	default STM32F411MINIMUM_GPIO_A6_SPEED_2MHz
+
+config STM32F411MINIMUM_GPIO_A6_SPEED_2MHz
+	bool "2MHz"
+config STM32F411MINIMUM_GPIO_A6_SPEED_25MHz
+	bool "25MHz"
+config STM32F411MINIMUM_GPIO_A6_SPEED_50MHz
+	bool "50MHz"
+
+endchoice # A6 speed
+
+endif # STM32F411MINIMUM_GPIO_A6
+
+config STM32F411MINIMUM_GPIO_A7
+	bool "enable pin A7"
+	---help---
+		Assume direct control over this pin. You will not be able to use this
+		pin for anything else other than general input/output access via
+		/dev/gpio_A7 device node.
+
+if STM32F411MINIMUM_GPIO_A7
+
+config STM32F411MINIMUM_GPIO_A7_NAME
+	string "Pin name"
+	default "gpio_a7"
+	---help---
+		Pin name, it will accessible via /dev/%s file
+
+choice
+	prompt "Pin type"
+	default STM32F411MINIMUM_GPIO_A7_OUT
+
+config STM32F411MINIMUM_GPIO_A7_OUT
+	bool "output"
+config STM32F411MINIMUM_GPIO_A7_IN
+	bool "input"
+config STM32F411MINIMUM_GPIO_A7_INT
+	bool "interrupt"
+
+endchoice # A7 Pin type
+
+if STM32F411MINIMUM_GPIO_A7_OUT
+
+choice
+	prompt "output type"
+	default STM32F411MINIMUM_GPIO_A7_OUT_OD
+
+config STM32F411MINIMUM_GPIO_A7_OUT_OD
+	bool "open drain"
+config STM32F411MINIMUM_GPIO_A7_OUT_PP
+	bool "push pull"
+
+endchoice # A7 output type
+
+choice
+	prompt "default state"
+	default STM32F411MINIMUM_GPIO_A7_OUT_SET
+
+config STM32F411MINIMUM_GPIO_A7_OUT_SET
+	bool "set"
+config STM32F411MINIMUM_GPIO_A7_OUT_CLEAR
+	bool "clear"
+
+endchoice # A7 output default state
+
+endif # STM32F411MINIMUM_GPIO_A7_OUT
+
+choice
+	prompt "pull"
+	default STM32F411MINIMUM_GPIO_A7_PULL_UP
+
+config STM32F411MINIMUM_GPIO_A7_PULL_UP
+	bool "pull up"
+config STM32F411MINIMUM_GPIO_A7_PULL_DOWN
+	bool "pull down"
+config STM32F411MINIMUM_GPIO_A7_PULL_FLOAT
+	bool "float"
+
+endchoice # A7 pull
+
+choice
+	prompt "speed"
+	default STM32F411MINIMUM_GPIO_A7_SPEED_2MHz
+
+config STM32F411MINIMUM_GPIO_A7_SPEED_2MHz
+	bool "2MHz"
+config STM32F411MINIMUM_GPIO_A7_SPEED_25MHz
+	bool "25MHz"
+config STM32F411MINIMUM_GPIO_A7_SPEED_50MHz
+	bool "50MHz"
+
+endchoice # A7 speed
+
+endif # STM32F411MINIMUM_GPIO_A7
+
+config STM32F411MINIMUM_GPIO_A8
+	bool "enable pin A8"
+	---help---
+		Assume direct control over this pin. You will not be able to use this
+		pin for anything else other than general input/output access via
+		/dev/gpio_A8 device node.
+
+if STM32F411MINIMUM_GPIO_A8
+
+config STM32F411MINIMUM_GPIO_A8_NAME
+	string "Pin name"
+	default "gpio_a8"
+	---help---
+		Pin name, it will accessible via /dev/%s file
+
+choice
+	prompt "Pin type"
+	default STM32F411MINIMUM_GPIO_A8_OUT
+
+config STM32F411MINIMUM_GPIO_A8_OUT
+	bool "output"
+config STM32F411MINIMUM_GPIO_A8_IN
+	bool "input"
+config STM32F411MINIMUM_GPIO_A8_INT
+	bool "interrupt"
+
+endchoice # A8 Pin type
+
+if STM32F411MINIMUM_GPIO_A8_OUT
+
+choice
+	prompt "output type"
+	default STM32F411MINIMUM_GPIO_A8_OUT_OD
+
+config STM32F411MINIMUM_GPIO_A8_OUT_OD
+	bool "open drain"
+config STM32F411MINIMUM_GPIO_A8_OUT_PP
+	bool "push pull"
+
+endchoice # A8 output type
+
+choice
+	prompt "default state"
+	default STM32F411MINIMUM_GPIO_A8_OUT_SET
+
+config STM32F411MINIMUM_GPIO_A8_OUT_SET
+	bool "set"
+config STM32F411MINIMUM_GPIO_A8_OUT_CLEAR
+	bool "clear"
+
+endchoice # A8 output default state
+
+endif # STM32F411MINIMUM_GPIO_A8_OUT
+
+choice
+	prompt "pull"
+	default STM32F411MINIMUM_GPIO_A8_PULL_UP
+
+config STM32F411MINIMUM_GPIO_A8_PULL_UP
+	bool "pull up"
+config STM32F411MINIMUM_GPIO_A8_PULL_DOWN
+	bool "pull down"
+config STM32F411MINIMUM_GPIO_A8_PULL_FLOAT
+	bool "float"
+
+endchoice # A8 pull
+
+choice
+	prompt "speed"
+	default STM32F411MINIMUM_GPIO_A8_SPEED_2MHz
+
+config STM32F411MINIMUM_GPIO_A8_SPEED_2MHz
+	bool "2MHz"
+config STM32F411MINIMUM_GPIO_A8_SPEED_25MHz
+	bool "25MHz"
+config STM32F411MINIMUM_GPIO_A8_SPEED_50MHz
+	bool "50MHz"
+
+endchoice # A8 speed
+
+endif # STM32F411MINIMUM_GPIO_A8
+
+config STM32F411MINIMUM_GPIO_A9
+	bool "enable pin A9"
+	---help---
+		Assume direct control over this pin. You will not be able to use this
+		pin for anything else other than general input/output access via
+		/dev/gpio_A9 device node.
+
+if STM32F411MINIMUM_GPIO_A9
+
+config STM32F411MINIMUM_GPIO_A9_NAME
+	string "Pin name"
+	default "gpio_a9"
+	---help---
+		Pin name, it will accessible via /dev/%s file
+
+choice
+	prompt "Pin type"
+	default STM32F411MINIMUM_GPIO_A9_OUT
+
+config STM32F411MINIMUM_GPIO_A9_OUT
+	bool "output"
+config STM32F411MINIMUM_GPIO_A9_IN
+	bool "input"
+config STM32F411MINIMUM_GPIO_A9_INT
+	bool "interrupt"
+
+endchoice # A9 Pin type
+
+if STM32F411MINIMUM_GPIO_A9_OUT
+
+choice
+	prompt "output type"
+	default STM32F411MINIMUM_GPIO_A9_OUT_OD
+
+config STM32F411MINIMUM_GPIO_A9_OUT_OD
+	bool "open drain"
+config STM32F411MINIMUM_GPIO_A9_OUT_PP
+	bool "push pull"
+
+endchoice # A9 output type
+
+choice
+	prompt "default state"
+	default STM32F411MINIMUM_GPIO_A9_OUT_SET
+
+config STM32F411MINIMUM_GPIO_A9_OUT_SET
+	bool "set"
+config STM32F411MINIMUM_GPIO_A9_OUT_CLEAR
+	bool "clear"
+
+endchoice # A9 output default state
+
+endif # STM32F411MINIMUM_GPIO_A9_OUT
+
+choice
+	prompt "pull"
+	default STM32F411MINIMUM_GPIO_A9_PULL_UP
+
+config STM32F411MINIMUM_GPIO_A9_PULL_UP
+	bool "pull up"
+config STM32F411MINIMUM_GPIO_A9_PULL_DOWN
+	bool "pull down"
+config STM32F411MINIMUM_GPIO_A9_PULL_FLOAT
+	bool "float"
+
+endchoice # A9 pull
+
+choice
+	prompt "speed"
+	default STM32F411MINIMUM_GPIO_A9_SPEED_2MHz
+
+config STM32F411MINIMUM_GPIO_A9_SPEED_2MHz
+	bool "2MHz"
+config STM32F411MINIMUM_GPIO_A9_SPEED_25MHz
+	bool "25MHz"
+config STM32F411MINIMUM_GPIO_A9_SPEED_50MHz
+	bool "50MHz"
+
+endchoice # A9 speed
+
+endif # STM32F411MINIMUM_GPIO_A9
+
+config STM32F411MINIMUM_GPIO_A10
+	bool "enable pin A10"
+	---help---
+		Assume direct control over this pin. You will not be able to use this
+		pin for anything else other than general input/output access via
+		/dev/gpio_A10 device node.
+
+if STM32F411MINIMUM_GPIO_A10
+
+config STM32F411MINIMUM_GPIO_A10_NAME
+	string "Pin name"
+	default "gpio_a10"
+	---help---
+		Pin name, it will accessible via /dev/%s file
+
+choice
+	prompt "Pin type"
+	default STM32F411MINIMUM_GPIO_A10_OUT
+
+config STM32F411MINIMUM_GPIO_A10_OUT
+	bool "output"
+config STM32F411MINIMUM_GPIO_A10_IN
+	bool "input"
+config STM32F411MINIMUM_GPIO_A10_INT
+	bool "interrupt"
+
+endchoice # A10 Pin type
+
+if STM32F411MINIMUM_GPIO_A10_OUT
+
+choice
+	prompt "output type"
+	default STM32F411MINIMUM_GPIO_A10_OUT_OD
+
+config STM32F411MINIMUM_GPIO_A10_OUT_OD
+	bool "open drain"
+config STM32F411MINIMUM_GPIO_A10_OUT_PP
+	bool "push pull"
+
+endchoice # A10 output type
+
+choice
+	prompt "default state"
+	default STM32F411MINIMUM_GPIO_A10_OUT_SET
+
+config STM32F411MINIMUM_GPIO_A10_OUT_SET
+	bool "set"
+config STM32F411MINIMUM_GPIO_A10_OUT_CLEAR
+	bool "clear"
+
+endchoice # A10 output default state
+
+endif # STM32F411MINIMUM_GPIO_A10_OUT
+
+choice
+	prompt "pull"
+	default STM32F411MINIMUM_GPIO_A10_PULL_UP
+
+config STM32F411MINIMUM_GPIO_A10_PULL_UP
+	bool "pull up"
+config STM32F411MINIMUM_GPIO_A10_PULL_DOWN
+	bool "pull down"
+config STM32F411MINIMUM_GPIO_A10_PULL_FLOAT
+	bool "float"
+
+endchoice # A10 pull
+
+choice
+	prompt "speed"
+	default STM32F411MINIMUM_GPIO_A10_SPEED_2MHz
+
+config STM32F411MINIMUM_GPIO_A10_SPEED_2MHz
+	bool "2MHz"
+config STM32F411MINIMUM_GPIO_A10_SPEED_25MHz
+	bool "25MHz"
+config STM32F411MINIMUM_GPIO_A10_SPEED_50MHz
+	bool "50MHz"
+
+endchoice # A10 speed
+
+endif # STM32F411MINIMUM_GPIO_A10
+
+config STM32F411MINIMUM_GPIO_A11
+	bool "enable pin A11"
+	---help---
+		Assume direct control over this pin. You will not be able to use this
+		pin for anything else other than general input/output access via
+		/dev/gpio_A11 device node.
+
+if STM32F411MINIMUM_GPIO_A11
+
+config STM32F411MINIMUM_GPIO_A11_NAME
+	string "Pin name"
+	default "gpio_a11"
+	---help---
+		Pin name, it will accessible via /dev/%s file
+
+choice
+	prompt "Pin type"
+	default STM32F411MINIMUM_GPIO_A11_OUT
+
+config STM32F411MINIMUM_GPIO_A11_OUT
+	bool "output"
+config STM32F411MINIMUM_GPIO_A11_IN
+	bool "input"
+config STM32F411MINIMUM_GPIO_A11_INT
+	bool "interrupt"
+
+endchoice # A11 Pin type
+
+if STM32F411MINIMUM_GPIO_A11_OUT
+
+choice
+	prompt "output type"
+	default STM32F411MINIMUM_GPIO_A11_OUT_OD
+
+config STM32F411MINIMUM_GPIO_A11_OUT_OD
+	bool "open drain"
+config STM32F411MINIMUM_GPIO_A11_OUT_PP
+	bool "push pull"
+
+endchoice # A11 output type
+
+choice
+	prompt "default state"
+	default STM32F411MINIMUM_GPIO_A11_OUT_SET
+
+config STM32F411MINIMUM_GPIO_A11_OUT_SET
+	bool "set"
+config STM32F411MINIMUM_GPIO_A11_OUT_CLEAR
+	bool "clear"
+
+endchoice # A11 output default state
+
+endif # STM32F411MINIMUM_GPIO_A11_OUT
+
+choice
+	prompt "pull"
+	default STM32F411MINIMUM_GPIO_A11_PULL_UP
+
+config STM32F411MINIMUM_GPIO_A11_PULL_UP
+	bool "pull up"
+config STM32F411MINIMUM_GPIO_A11_PULL_DOWN
+	bool "pull down"
+config STM32F411MINIMUM_GPIO_A11_PULL_FLOAT
+	bool "float"
+
+endchoice # A11 pull
+
+choice
+	prompt "speed"
+	default STM32F411MINIMUM_GPIO_A11_SPEED_2MHz
+
+config STM32F411MINIMUM_GPIO_A11_SPEED_2MHz
+	bool "2MHz"
+config STM32F411MINIMUM_GPIO_A11_SPEED_25MHz
+	bool "25MHz"
+config STM32F411MINIMUM_GPIO_A11_SPEED_50MHz
+	bool "50MHz"
+
+endchoice # A11 speed
+
+endif # STM32F411MINIMUM_GPIO_A11
+
+config STM32F411MINIMUM_GPIO_A12
+	bool "enable pin A12"
+	---help---
+		Assume direct control over this pin. You will not be able to use this
+		pin for anything else other than general input/output access via
+		/dev/gpio_A12 device node.
+
+if STM32F411MINIMUM_GPIO_A12
+
+config STM32F411MINIMUM_GPIO_A12_NAME
+	string "Pin name"
+	default "gpio_a12"
+	---help---
+		Pin name, it will accessible via /dev/%s file
+
+choice
+	prompt "Pin type"
+	default STM32F411MINIMUM_GPIO_A12_OUT
+
+config STM32F411MINIMUM_GPIO_A12_OUT
+	bool "output"
+config STM32F411MINIMUM_GPIO_A12_IN
+	bool "input"
+config STM32F411MINIMUM_GPIO_A12_INT
+	bool "interrupt"
+
+endchoice # A12 Pin type
+
+if STM32F411MINIMUM_GPIO_A12_OUT
+
+choice
+	prompt "output type"
+	default STM32F411MINIMUM_GPIO_A12_OUT_OD
+
+config STM32F411MINIMUM_GPIO_A12_OUT_OD
+	bool "open drain"
+config STM32F411MINIMUM_GPIO_A12_OUT_PP
+	bool "push pull"
+
+endchoice # A12 output type
+
+choice
+	prompt "default state"
+	default STM32F411MINIMUM_GPIO_A12_OUT_SET
+
+config STM32F411MINIMUM_GPIO_A12_OUT_SET
+	bool "set"
+config STM32F411MINIMUM_GPIO_A12_OUT_CLEAR
+	bool "clear"
+
+endchoice # A12 output default state
+
+endif # STM32F411MINIMUM_GPIO_A12_OUT
+
+choice
+	prompt "pull"
+	default STM32F411MINIMUM_GPIO_A12_PULL_UP
+
+config STM32F411MINIMUM_GPIO_A12_PULL_UP
+	bool "pull up"
+config STM32F411MINIMUM_GPIO_A12_PULL_DOWN
+	bool "pull down"
+config STM32F411MINIMUM_GPIO_A12_PULL_FLOAT
+	bool "float"
+
+endchoice # A12 pull
+
+choice
+	prompt "speed"
+	default STM32F411MINIMUM_GPIO_A12_SPEED_2MHz
+
+config STM32F411MINIMUM_GPIO_A12_SPEED_2MHz
+	bool "2MHz"
+config STM32F411MINIMUM_GPIO_A12_SPEED_25MHz
+	bool "25MHz"
+config STM32F411MINIMUM_GPIO_A12_SPEED_50MHz
+	bool "50MHz"
+
+endchoice # A12 speed
+
+endif # STM32F411MINIMUM_GPIO_A12
+
+config STM32F411MINIMUM_GPIO_A15
+	bool "enable pin A15"
+	---help---
+		Assume direct control over this pin. You will not be able to use this
+		pin for anything else other than general input/output access via
+		/dev/gpio_A15 device node.
+
+if STM32F411MINIMUM_GPIO_A15
+
+config STM32F411MINIMUM_GPIO_A15_NAME
+	string "Pin name"
+	default "gpio_a15"
+	---help---
+		Pin name, it will accessible via /dev/%s file
+
+choice
+	prompt "Pin type"
+	default STM32F411MINIMUM_GPIO_A15_OUT
+
+config STM32F411MINIMUM_GPIO_A15_OUT
+	bool "output"
+config STM32F411MINIMUM_GPIO_A15_IN
+	bool "input"
+config STM32F411MINIMUM_GPIO_A15_INT
+	bool "interrupt"
+
+endchoice # A15 Pin type
+
+if STM32F411MINIMUM_GPIO_A15_OUT
+
+choice
+	prompt "output type"
+	default STM32F411MINIMUM_GPIO_A15_OUT_OD
+
+config STM32F411MINIMUM_GPIO_A15_OUT_OD
+	bool "open drain"
+config STM32F411MINIMUM_GPIO_A15_OUT_PP
+	bool "push pull"
+
+endchoice # A15 output type
+
+choice
+	prompt "default state"
+	default STM32F411MINIMUM_GPIO_A15_OUT_SET
+
+config STM32F411MINIMUM_GPIO_A15_OUT_SET
+	bool "set"
+config STM32F411MINIMUM_GPIO_A15_OUT_CLEAR
+	bool "clear"
+
+endchoice # A15 output default state
+
+endif # STM32F411MINIMUM_GPIO_A15_OUT
+
+choice
+	prompt "pull"
+	default STM32F411MINIMUM_GPIO_A15_PULL_UP
+
+config STM32F411MINIMUM_GPIO_A15_PULL_UP
+	bool "pull up"
+config STM32F411MINIMUM_GPIO_A15_PULL_DOWN
+	bool "pull down"
+config STM32F411MINIMUM_GPIO_A15_PULL_FLOAT
+	bool "float"
+
+endchoice # A15 pull
+
+choice
+	prompt "speed"
+	default STM32F411MINIMUM_GPIO_A15_SPEED_2MHz
+
+config STM32F411MINIMUM_GPIO_A15_SPEED_2MHz
+	bool "2MHz"
+config STM32F411MINIMUM_GPIO_A15_SPEED_25MHz
+	bool "25MHz"
+config STM32F411MINIMUM_GPIO_A15_SPEED_50MHz
+	bool "50MHz"
+
+endchoice # A15 speed
+
+endif # STM32F411MINIMUM_GPIO_A15
+
+config STM32F411MINIMUM_GPIO_B0
+	bool "enable pin B0"
+	---help---
+		Assume direct control over this pin. You will not be able to use this
+		pin for anything else other than general input/output access via
+		/dev/gpio_B0 device node.
+
+if STM32F411MINIMUM_GPIO_B0
+
+config STM32F411MINIMUM_GPIO_B0_NAME
+	string "Pin name"
+	default "gpio_b0"
+	---help---
+		Pin name, it will accessible via /dev/%s file
+
+choice
+	prompt "Pin type"
+	default STM32F411MINIMUM_GPIO_B0_OUT
+
+config STM32F411MINIMUM_GPIO_B0_OUT
+	bool "output"
+config STM32F411MINIMUM_GPIO_B0_IN
+	bool "input"
+config STM32F411MINIMUM_GPIO_B0_INT
+	bool "interrupt"
+
+endchoice # B0 Pin type
+
+if STM32F411MINIMUM_GPIO_B0_OUT
+
+choice
+	prompt "output type"
+	default STM32F411MINIMUM_GPIO_B0_OUT_OD
+
+config STM32F411MINIMUM_GPIO_B0_OUT_OD
+	bool "open drain"
+config STM32F411MINIMUM_GPIO_B0_OUT_PP
+	bool "push pull"
+
+endchoice # B0 output type
+
+choice
+	prompt "default state"
+	default STM32F411MINIMUM_GPIO_B0_OUT_SET
+
+config STM32F411MINIMUM_GPIO_B0_OUT_SET
+	bool "set"
+config STM32F411MINIMUM_GPIO_B0_OUT_CLEAR
+	bool "clear"
+
+endchoice # B0 output default state
+
+endif # STM32F411MINIMUM_GPIO_B0_OUT
+
+choice
+	prompt "pull"
+	default STM32F411MINIMUM_GPIO_B0_PULL_UP
+
+config STM32F411MINIMUM_GPIO_B0_PULL_UP
+	bool "pull up"
+config STM32F411MINIMUM_GPIO_B0_PULL_DOWN
+	bool "pull down"
+config STM32F411MINIMUM_GPIO_B0_PULL_FLOAT
+	bool "float"
+
+endchoice # B0 pull
+
+choice
+	prompt "speed"
+	default STM32F411MINIMUM_GPIO_B0_SPEED_2MHz
+
+config STM32F411MINIMUM_GPIO_B0_SPEED_2MHz
+	bool "2MHz"
+config STM32F411MINIMUM_GPIO_B0_SPEED_25MHz
+	bool "25MHz"
+config STM32F411MINIMUM_GPIO_B0_SPEED_50MHz
+	bool "50MHz"
+
+endchoice # B0 speed
+
+endif # STM32F411MINIMUM_GPIO_B0
+
+config STM32F411MINIMUM_GPIO_B1
+	bool "enable pin B1"
+	---help---
+		Assume direct control over this pin. You will not be able to use this
+		pin for anything else other than general input/output access via
+		/dev/gpio_B1 device node.
+
+if STM32F411MINIMUM_GPIO_B1
+
+config STM32F411MINIMUM_GPIO_B1_NAME
+	string "Pin name"
+	default "gpio_b1"
+	---help---
+		Pin name, it will accessible via /dev/%s file
+
+choice
+	prompt "Pin type"
+	default STM32F411MINIMUM_GPIO_B1_OUT
+
+config STM32F411MINIMUM_GPIO_B1_OUT
+	bool "output"
+config STM32F411MINIMUM_GPIO_B1_IN
+	bool "input"
+config STM32F411MINIMUM_GPIO_B1_INT
+	bool "interrupt"
+
+endchoice # B1 Pin type
+
+if STM32F411MINIMUM_GPIO_B1_OUT
+
+choice
+	prompt "output type"
+	default STM32F411MINIMUM_GPIO_B1_OUT_OD
+
+config STM32F411MINIMUM_GPIO_B1_OUT_OD
+	bool "open drain"
+config STM32F411MINIMUM_GPIO_B1_OUT_PP
+	bool "push pull"
+
+endchoice # B1 output type
+
+choice
+	prompt "default state"
+	default STM32F411MINIMUM_GPIO_B1_OUT_SET
+
+config STM32F411MINIMUM_GPIO_B1_OUT_SET
+	bool "set"
+config STM32F411MINIMUM_GPIO_B1_OUT_CLEAR
+	bool "clear"
+
+endchoice # B1 output default state
+
+endif # STM32F411MINIMUM_GPIO_B1_OUT
+
+choice
+	prompt "pull"
+	default STM32F411MINIMUM_GPIO_B1_PULL_UP
+
+config STM32F411MINIMUM_GPIO_B1_PULL_UP
+	bool "pull up"
+config STM32F411MINIMUM_GPIO_B1_PULL_DOWN
+	bool "pull down"
+config STM32F411MINIMUM_GPIO_B1_PULL_FLOAT
+	bool "float"
+
+endchoice # B1 pull
+
+choice
+	prompt "speed"
+	default STM32F411MINIMUM_GPIO_B1_SPEED_2MHz
+
+config STM32F411MINIMUM_GPIO_B1_SPEED_2MHz
+	bool "2MHz"
+config STM32F411MINIMUM_GPIO_B1_SPEED_25MHz
+	bool "25MHz"
+config STM32F411MINIMUM_GPIO_B1_SPEED_50MHz
+	bool "50MHz"
+
+endchoice # B1 speed
+
+endif # STM32F411MINIMUM_GPIO_B1
+
+config STM32F411MINIMUM_GPIO_B2
+	bool "enable pin B2"
+	---help---
+		Assume direct control over this pin. You will not be able to use this
+		pin for anything else other than general input/output access via
+		/dev/gpio_B2 device node.
+
+if STM32F411MINIMUM_GPIO_B2
+
+config STM32F411MINIMUM_GPIO_B2_NAME
+	string "Pin name"
+	default "gpio_b2"
+	---help---
+		Pin name, it will accessible via /dev/%s file
+
+choice
+	prompt "Pin type"
+	default STM32F411MINIMUM_GPIO_B2_OUT
+
+config STM32F411MINIMUM_GPIO_B2_OUT
+	bool "output"
+config STM32F411MINIMUM_GPIO_B2_IN
+	bool "input"
+config STM32F411MINIMUM_GPIO_B2_INT
+	bool "interrupt"
+
+endchoice # B2 Pin type
+
+if STM32F411MINIMUM_GPIO_B2_OUT
+
+choice
+	prompt "output type"
+	default STM32F411MINIMUM_GPIO_B2_OUT_OD
+
+config STM32F411MINIMUM_GPIO_B2_OUT_OD
+	bool "open drain"
+config STM32F411MINIMUM_GPIO_B2_OUT_PP
+	bool "push pull"
+
+endchoice # B2 output type
+
+choice
+	prompt "default state"
+	default STM32F411MINIMUM_GPIO_B2_OUT_SET
+
+config STM32F411MINIMUM_GPIO_B2_OUT_SET
+	bool "set"
+config STM32F411MINIMUM_GPIO_B2_OUT_CLEAR
+	bool "clear"
+
+endchoice # B2 output default state
+
+endif # STM32F411MINIMUM_GPIO_B2_OUT
+
+choice
+	prompt "pull"
+	default STM32F411MINIMUM_GPIO_B2_PULL_UP
+
+config STM32F411MINIMUM_GPIO_B2_PULL_UP
+	bool "pull up"
+config STM32F411MINIMUM_GPIO_B2_PULL_DOWN
+	bool "pull down"
+config STM32F411MINIMUM_GPIO_B2_PULL_FLOAT
+	bool "float"
+
+endchoice # B2 pull
+
+choice
+	prompt "speed"
+	default STM32F411MINIMUM_GPIO_B2_SPEED_2MHz
+
+config STM32F411MINIMUM_GPIO_B2_SPEED_2MHz
+	bool "2MHz"
+config STM32F411MINIMUM_GPIO_B2_SPEED_25MHz
+	bool "25MHz"
+config STM32F411MINIMUM_GPIO_B2_SPEED_50MHz
+	bool "50MHz"
+
+endchoice # B2 speed
+
+endif # STM32F411MINIMUM_GPIO_B2
+
+config STM32F411MINIMUM_GPIO_B3
+	bool "enable pin B3"
+	---help---
+		Assume direct control over this pin. You will not be able to use this
+		pin for anything else other than general input/output access via
+		/dev/gpio_B3 device node.
+
+if STM32F411MINIMUM_GPIO_B3
+
+config STM32F411MINIMUM_GPIO_B3_NAME
+	string "Pin name"
+	default "gpio_b3"
+	---help---
+		Pin name, it will accessible via /dev/%s file
+
+choice
+	prompt "Pin type"
+	default STM32F411MINIMUM_GPIO_B3_OUT
+
+config STM32F411MINIMUM_GPIO_B3_OUT
+	bool "output"
+config STM32F411MINIMUM_GPIO_B3_IN
+	bool "input"
+config STM32F411MINIMUM_GPIO_B3_INT
+	bool "interrupt"
+
+endchoice # B3 Pin type
+
+if STM32F411MINIMUM_GPIO_B3_OUT
+
+choice
+	prompt "output type"
+	default STM32F411MINIMUM_GPIO_B3_OUT_OD
+
+config STM32F411MINIMUM_GPIO_B3_OUT_OD
+	bool "open drain"
+config STM32F411MINIMUM_GPIO_B3_OUT_PP
+	bool "push pull"
+
+endchoice # B3 output type
+
+choice
+	prompt "default state"
+	default STM32F411MINIMUM_GPIO_B3_OUT_SET
+
+config STM32F411MINIMUM_GPIO_B3_OUT_SET
+	bool "set"
+config STM32F411MINIMUM_GPIO_B3_OUT_CLEAR
+	bool "clear"
+
+endchoice # B3 output default state
+
+endif # STM32F411MINIMUM_GPIO_B3_OUT
+
+choice
+	prompt "pull"
+	default STM32F411MINIMUM_GPIO_B3_PULL_UP
+
+config STM32F411MINIMUM_GPIO_B3_PULL_UP
+	bool "pull up"
+config STM32F411MINIMUM_GPIO_B3_PULL_DOWN
+	bool "pull down"
+config STM32F411MINIMUM_GPIO_B3_PULL_FLOAT
+	bool "float"
+
+endchoice # B3 pull
+
+choice
+	prompt "speed"
+	default STM32F411MINIMUM_GPIO_B3_SPEED_2MHz
+
+config STM32F411MINIMUM_GPIO_B3_SPEED_2MHz
+	bool "2MHz"
+config STM32F411MINIMUM_GPIO_B3_SPEED_25MHz
+	bool "25MHz"
+config STM32F411MINIMUM_GPIO_B3_SPEED_50MHz
+	bool "50MHz"
+
+endchoice # B3 speed
+
+endif # STM32F411MINIMUM_GPIO_B3
+
+config STM32F411MINIMUM_GPIO_B4
+	bool "enable pin B4"
+	---help---
+		Assume direct control over this pin. You will not be able to use this
+		pin for anything else other than general input/output access via
+		/dev/gpio_B4 device node.
+
+if STM32F411MINIMUM_GPIO_B4
+
+config STM32F411MINIMUM_GPIO_B4_NAME
+	string "Pin name"
+	default "gpio_b4"
+	---help---
+		Pin name, it will accessible via /dev/%s file
+
+choice
+	prompt "Pin type"
+	default STM32F411MINIMUM_GPIO_B4_OUT
+
+config STM32F411MINIMUM_GPIO_B4_OUT
+	bool "output"
+config STM32F411MINIMUM_GPIO_B4_IN
+	bool "input"
+config STM32F411MINIMUM_GPIO_B4_INT
+	bool "interrupt"
+
+endchoice # B4 Pin type
+
+if STM32F411MINIMUM_GPIO_B4_OUT
+
+choice
+	prompt "output type"
+	default STM32F411MINIMUM_GPIO_B4_OUT_OD
+
+config STM32F411MINIMUM_GPIO_B4_OUT_OD
+	bool "open drain"
+config STM32F411MINIMUM_GPIO_B4_OUT_PP
+	bool "push pull"
+
+endchoice # B4 output type
+
+choice
+	prompt "default state"
+	default STM32F411MINIMUM_GPIO_B4_OUT_SET
+
+config STM32F411MINIMUM_GPIO_B4_OUT_SET
+	bool "set"
+config STM32F411MINIMUM_GPIO_B4_OUT_CLEAR
+	bool "clear"
+
+endchoice # B4 output default state
+
+endif # STM32F411MINIMUM_GPIO_B4_OUT
+
+choice
+	prompt "pull"
+	default STM32F411MINIMUM_GPIO_B4_PULL_UP
+
+config STM32F411MINIMUM_GPIO_B4_PULL_UP
+	bool "pull up"
+config STM32F411MINIMUM_GPIO_B4_PULL_DOWN
+	bool "pull down"
+config STM32F411MINIMUM_GPIO_B4_PULL_FLOAT
+	bool "float"
+
+endchoice # B4 pull
+
+choice
+	prompt "speed"
+	default STM32F411MINIMUM_GPIO_B4_SPEED_2MHz
+
+config STM32F411MINIMUM_GPIO_B4_SPEED_2MHz
+	bool "2MHz"
+config STM32F411MINIMUM_GPIO_B4_SPEED_25MHz
+	bool "25MHz"
+config STM32F411MINIMUM_GPIO_B4_SPEED_50MHz
+	bool "50MHz"
+
+endchoice # B4 speed
+
+endif # STM32F411MINIMUM_GPIO_B4
+
+config STM32F411MINIMUM_GPIO_B5
+	bool "enable pin B5"
+	---help---
+		Assume direct control over this pin. You will not be able to use this
+		pin for anything else other than general input/output access via
+		/dev/gpio_B5 device node.
+
+if STM32F411MINIMUM_GPIO_B5
+
+config STM32F411MINIMUM_GPIO_B5_NAME
+	string "Pin name"
+	default "gpio_b5"
+	---help---
+		Pin name, it will accessible via /dev/%s file
+
+choice
+	prompt "Pin type"
+	default STM32F411MINIMUM_GPIO_B5_OUT
+
+config STM32F411MINIMUM_GPIO_B5_OUT
+	bool "output"
+config STM32F411MINIMUM_GPIO_B5_IN
+	bool "input"
+config STM32F411MINIMUM_GPIO_B5_INT
+	bool "interrupt"
+
+endchoice # B5 Pin type
+
+if STM32F411MINIMUM_GPIO_B5_OUT
+
+choice
+	prompt "output type"
+	default STM32F411MINIMUM_GPIO_B5_OUT_OD
+
+config STM32F411MINIMUM_GPIO_B5_OUT_OD
+	bool "open drain"
+config STM32F411MINIMUM_GPIO_B5_OUT_PP
+	bool "push pull"
+
+endchoice # B5 output type
+
+choice
+	prompt "default state"
+	default STM32F411MINIMUM_GPIO_B5_OUT_SET
+
+config STM32F411MINIMUM_GPIO_B5_OUT_SET
+	bool "set"
+config STM32F411MINIMUM_GPIO_B5_OUT_CLEAR
+	bool "clear"
+
+endchoice # B5 output default state
+
+endif # STM32F411MINIMUM_GPIO_B5_OUT
+
+choice
+	prompt "pull"
+	default STM32F411MINIMUM_GPIO_B5_PULL_UP
+
+config STM32F411MINIMUM_GPIO_B5_PULL_UP
+	bool "pull up"
+config STM32F411MINIMUM_GPIO_B5_PULL_DOWN
+	bool "pull down"
+config STM32F411MINIMUM_GPIO_B5_PULL_FLOAT
+	bool "float"
+
+endchoice # B5 pull
+
+choice
+	prompt "speed"
+	default STM32F411MINIMUM_GPIO_B5_SPEED_2MHz
+
+config STM32F411MINIMUM_GPIO_B5_SPEED_2MHz
+	bool "2MHz"
+config STM32F411MINIMUM_GPIO_B5_SPEED_25MHz
+	bool "25MHz"
+config STM32F411MINIMUM_GPIO_B5_SPEED_50MHz
+	bool "50MHz"
+
+endchoice # B5 speed
+
+endif # STM32F411MINIMUM_GPIO_B5
+
+config STM32F411MINIMUM_GPIO_B6
+	bool "enable pin B6"
+	---help---
+		Assume direct control over this pin. You will not be able to use this
+		pin for anything else other than general input/output access via
+		/dev/gpio_B6 device node.
+
+if STM32F411MINIMUM_GPIO_B6
+
+config STM32F411MINIMUM_GPIO_B6_NAME
+	string "Pin name"
+	default "gpio_b6"
+	---help---
+		Pin name, it will accessible via /dev/%s file
+
+choice
+	prompt "Pin type"
+	default STM32F411MINIMUM_GPIO_B6_OUT
+
+config STM32F411MINIMUM_GPIO_B6_OUT
+	bool "output"
+config STM32F411MINIMUM_GPIO_B6_IN
+	bool "input"
+config STM32F411MINIMUM_GPIO_B6_INT
+	bool "interrupt"
+
+endchoice # B6 Pin type
+
+if STM32F411MINIMUM_GPIO_B6_OUT
+
+choice
+	prompt "output type"
+	default STM32F411MINIMUM_GPIO_B6_OUT_OD
+
+config STM32F411MINIMUM_GPIO_B6_OUT_OD
+	bool "open drain"
+config STM32F411MINIMUM_GPIO_B6_OUT_PP
+	bool "push pull"
+
+endchoice # B6 output type
+
+choice
+	prompt "default state"
+	default STM32F411MINIMUM_GPIO_B6_OUT_SET
+
+config STM32F411MINIMUM_GPIO_B6_OUT_SET
+	bool "set"
+config STM32F411MINIMUM_GPIO_B6_OUT_CLEAR
+	bool "clear"
+
+endchoice # B6 output default state
+
+endif # STM32F411MINIMUM_GPIO_B6_OUT
+
+choice
+	prompt "pull"
+	default STM32F411MINIMUM_GPIO_B6_PULL_UP
+
+config STM32F411MINIMUM_GPIO_B6_PULL_UP
+	bool "pull up"
+config STM32F411MINIMUM_GPIO_B6_PULL_DOWN
+	bool "pull down"
+config STM32F411MINIMUM_GPIO_B6_PULL_FLOAT
+	bool "float"
+
+endchoice # B6 pull
+
+choice
+	prompt "speed"
+	default STM32F411MINIMUM_GPIO_B6_SPEED_2MHz
+
+config STM32F411MINIMUM_GPIO_B6_SPEED_2MHz
+	bool "2MHz"
+config STM32F411MINIMUM_GPIO_B6_SPEED_25MHz
+	bool "25MHz"
+config STM32F411MINIMUM_GPIO_B6_SPEED_50MHz
+	bool "50MHz"
+
+endchoice # B6 speed
+
+endif # STM32F411MINIMUM_GPIO_B6
+
+config STM32F411MINIMUM_GPIO_B7
+	bool "enable pin B7"
+	---help---
+		Assume direct control over this pin. You will not be able to use this
+		pin for anything else other than general input/output access via
+		/dev/gpio_B7 device node.
+
+if STM32F411MINIMUM_GPIO_B7
+
+config STM32F411MINIMUM_GPIO_B7_NAME
+	string "Pin name"
+	default "gpio_b7"
+	---help---
+		Pin name, it will accessible via /dev/%s file
+
+choice
+	prompt "Pin type"
+	default STM32F411MINIMUM_GPIO_B7_OUT
+
+config STM32F411MINIMUM_GPIO_B7_OUT
+	bool "output"
+config STM32F411MINIMUM_GPIO_B7_IN
+	bool "input"
+config STM32F411MINIMUM_GPIO_B7_INT
+	bool "interrupt"
+
+endchoice # B7 Pin type
+
+if STM32F411MINIMUM_GPIO_B7_OUT
+
+choice
+	prompt "output type"
+	default STM32F411MINIMUM_GPIO_B7_OUT_OD
+
+config STM32F411MINIMUM_GPIO_B7_OUT_OD
+	bool "open drain"
+config STM32F411MINIMUM_GPIO_B7_OUT_PP
+	bool "push pull"
+
+endchoice # B7 output type
+
+choice
+	prompt "default state"
+	default STM32F411MINIMUM_GPIO_B7_OUT_SET
+
+config STM32F411MINIMUM_GPIO_B7_OUT_SET
+	bool "set"
+config STM32F411MINIMUM_GPIO_B7_OUT_CLEAR
+	bool "clear"
+
+endchoice # B7 output default state
+
+endif # STM32F411MINIMUM_GPIO_B7_OUT
+
+choice
+	prompt "pull"
+	default STM32F411MINIMUM_GPIO_B7_PULL_UP
+
+config STM32F411MINIMUM_GPIO_B7_PULL_UP
+	bool "pull up"
+config STM32F411MINIMUM_GPIO_B7_PULL_DOWN
+	bool "pull down"
+config STM32F411MINIMUM_GPIO_B7_PULL_FLOAT
+	bool "float"
+
+endchoice # B7 pull
+
+choice
+	prompt "speed"
+	default STM32F411MINIMUM_GPIO_B7_SPEED_2MHz
+
+config STM32F411MINIMUM_GPIO_B7_SPEED_2MHz
+	bool "2MHz"
+config STM32F411MINIMUM_GPIO_B7_SPEED_25MHz
+	bool "25MHz"
+config STM32F411MINIMUM_GPIO_B7_SPEED_50MHz
+	bool "50MHz"
+
+endchoice # B7 speed
+
+endif # STM32F411MINIMUM_GPIO_B7
+
+config STM32F411MINIMUM_GPIO_B8
+	bool "enable pin B8"
+	---help---
+		Assume direct control over this pin. You will not be able to use this
+		pin for anything else other than general input/output access via
+		/dev/gpio_B8 device node.
+
+if STM32F411MINIMUM_GPIO_B8
+
+config STM32F411MINIMUM_GPIO_B8_NAME
+	string "Pin name"
+	default "gpio_b8"
+	---help---
+		Pin name, it will accessible via /dev/%s file
+
+choice
+	prompt "Pin type"
+	default STM32F411MINIMUM_GPIO_B8_OUT
+
+config STM32F411MINIMUM_GPIO_B8_OUT
+	bool "output"
+config STM32F411MINIMUM_GPIO_B8_IN
+	bool "input"
+config STM32F411MINIMUM_GPIO_B8_INT
+	bool "interrupt"
+
+endchoice # B8 Pin type
+
+if STM32F411MINIMUM_GPIO_B8_OUT
+
+choice
+	prompt "output type"
+	default STM32F411MINIMUM_GPIO_B8_OUT_OD
+
+config STM32F411MINIMUM_GPIO_B8_OUT_OD
+	bool "open drain"
+config STM32F411MINIMUM_GPIO_B8_OUT_PP
+	bool "push pull"
+
+endchoice # B8 output type
+
+choice
+	prompt "default state"
+	default STM32F411MINIMUM_GPIO_B8_OUT_SET
+
+config STM32F411MINIMUM_GPIO_B8_OUT_SET
+	bool "set"
+config STM32F411MINIMUM_GPIO_B8_OUT_CLEAR
+	bool "clear"
+
+endchoice # B8 output default state
+
+endif # STM32F411MINIMUM_GPIO_B8_OUT
+
+choice
+	prompt "pull"
+	default STM32F411MINIMUM_GPIO_B8_PULL_UP
+
+config STM32F411MINIMUM_GPIO_B8_PULL_UP
+	bool "pull up"
+config STM32F411MINIMUM_GPIO_B8_PULL_DOWN
+	bool "pull down"
+config STM32F411MINIMUM_GPIO_B8_PULL_FLOAT
+	bool "float"
+
+endchoice # B8 pull
+
+choice
+	prompt "speed"
+	default STM32F411MINIMUM_GPIO_B8_SPEED_2MHz
+
+config STM32F411MINIMUM_GPIO_B8_SPEED_2MHz
+	bool "2MHz"
+config STM32F411MINIMUM_GPIO_B8_SPEED_25MHz
+	bool "25MHz"
+config STM32F411MINIMUM_GPIO_B8_SPEED_50MHz
+	bool "50MHz"
+
+endchoice # B8 speed
+
+endif # STM32F411MINIMUM_GPIO_B8
+
+config STM32F411MINIMUM_GPIO_B9
+	bool "enable pin B9"
+	---help---
+		Assume direct control over this pin. You will not be able to use this
+		pin for anything else other than general input/output access via
+		/dev/gpio_B9 device node.
+
+if STM32F411MINIMUM_GPIO_B9
+
+config STM32F411MINIMUM_GPIO_B9_NAME
+	string "Pin name"
+	default "gpio_b9"
+	---help---
+		Pin name, it will accessible via /dev/%s file
+
+choice
+	prompt "Pin type"
+	default STM32F411MINIMUM_GPIO_B9_OUT
+
+config STM32F411MINIMUM_GPIO_B9_OUT
+	bool "output"
+config STM32F411MINIMUM_GPIO_B9_IN
+	bool "input"
+config STM32F411MINIMUM_GPIO_B9_INT
+	bool "interrupt"
+
+endchoice # B9 Pin type
+
+if STM32F411MINIMUM_GPIO_B9_OUT
+
+choice
+	prompt "output type"
+	default STM32F411MINIMUM_GPIO_B9_OUT_OD
+
+config STM32F411MINIMUM_GPIO_B9_OUT_OD
+	bool "open drain"
+config STM32F411MINIMUM_GPIO_B9_OUT_PP
+	bool "push pull"
+
+endchoice # B9 output type
+
+choice
+	prompt "default state"
+	default STM32F411MINIMUM_GPIO_B9_OUT_SET
+
+config STM32F411MINIMUM_GPIO_B9_OUT_SET
+	bool "set"
+config STM32F411MINIMUM_GPIO_B9_OUT_CLEAR
+	bool "clear"
+
+endchoice # B9 output default state
+
+endif # STM32F411MINIMUM_GPIO_B9_OUT
+
+choice
+	prompt "pull"
+	default STM32F411MINIMUM_GPIO_B9_PULL_UP
+
+config STM32F411MINIMUM_GPIO_B9_PULL_UP
+	bool "pull up"
+config STM32F411MINIMUM_GPIO_B9_PULL_DOWN
+	bool "pull down"
+config STM32F411MINIMUM_GPIO_B9_PULL_FLOAT
+	bool "float"
+
+endchoice # B9 pull
+
+choice
+	prompt "speed"
+	default STM32F411MINIMUM_GPIO_B9_SPEED_2MHz
+
+config STM32F411MINIMUM_GPIO_B9_SPEED_2MHz
+	bool "2MHz"
+config STM32F411MINIMUM_GPIO_B9_SPEED_25MHz
+	bool "25MHz"
+config STM32F411MINIMUM_GPIO_B9_SPEED_50MHz
+	bool "50MHz"
+
+endchoice # B9 speed
+
+endif # STM32F411MINIMUM_GPIO_B9
+
+config STM32F411MINIMUM_GPIO_B10
+	bool "enable pin B10"
+	---help---
+		Assume direct control over this pin. You will not be able to use this
+		pin for anything else other than general input/output access via
+		/dev/gpio_B10 device node.
+
+if STM32F411MINIMUM_GPIO_B10
+
+config STM32F411MINIMUM_GPIO_B10_NAME
+	string "Pin name"
+	default "gpio_b10"
+	---help---
+		Pin name, it will accessible via /dev/%s file
+
+choice
+	prompt "Pin type"
+	default STM32F411MINIMUM_GPIO_B10_OUT
+
+config STM32F411MINIMUM_GPIO_B10_OUT
+	bool "output"
+config STM32F411MINIMUM_GPIO_B10_IN
+	bool "input"
+config STM32F411MINIMUM_GPIO_B10_INT
+	bool "interrupt"
+
+endchoice # B10 Pin type
+
+if STM32F411MINIMUM_GPIO_B10_OUT
+
+choice
+	prompt "output type"
+	default STM32F411MINIMUM_GPIO_B10_OUT_OD
+
+config STM32F411MINIMUM_GPIO_B10_OUT_OD
+	bool "open drain"
+config STM32F411MINIMUM_GPIO_B10_OUT_PP
+	bool "push pull"
+
+endchoice # B10 output type
+
+choice
+	prompt "default state"
+	default STM32F411MINIMUM_GPIO_B10_OUT_SET
+
+config STM32F411MINIMUM_GPIO_B10_OUT_SET
+	bool "set"
+config STM32F411MINIMUM_GPIO_B10_OUT_CLEAR
+	bool "clear"
+
+endchoice # B10 output default state
+
+endif # STM32F411MINIMUM_GPIO_B10_OUT
+
+choice
+	prompt "pull"
+	default STM32F411MINIMUM_GPIO_B10_PULL_UP
+
+config STM32F411MINIMUM_GPIO_B10_PULL_UP
+	bool "pull up"
+config STM32F411MINIMUM_GPIO_B10_PULL_DOWN
+	bool "pull down"
+config STM32F411MINIMUM_GPIO_B10_PULL_FLOAT
+	bool "float"
+
+endchoice # B10 pull
+
+choice
+	prompt "speed"
+	default STM32F411MINIMUM_GPIO_B10_SPEED_2MHz
+
+config STM32F411MINIMUM_GPIO_B10_SPEED_2MHz
+	bool "2MHz"
+config STM32F411MINIMUM_GPIO_B10_SPEED_25MHz
+	bool "25MHz"
+config STM32F411MINIMUM_GPIO_B10_SPEED_50MHz
+	bool "50MHz"
+
+endchoice # B10 speed
+
+endif # STM32F411MINIMUM_GPIO_B10
+
+config STM32F411MINIMUM_GPIO_B12
+	bool "enable pin B12"
+	---help---
+		Assume direct control over this pin. You will not be able to use this
+		pin for anything else other than general input/output access via
+		/dev/gpio_B12 device node.
+
+if STM32F411MINIMUM_GPIO_B12
+
+config STM32F411MINIMUM_GPIO_B12_NAME
+	string "Pin name"
+	default "gpio_b12"
+	---help---
+		Pin name, it will accessible via /dev/%s file
+
+choice
+	prompt "Pin type"
+	default STM32F411MINIMUM_GPIO_B12_OUT
+
+config STM32F411MINIMUM_GPIO_B12_OUT
+	bool "output"
+config STM32F411MINIMUM_GPIO_B12_IN
+	bool "input"
+config STM32F411MINIMUM_GPIO_B12_INT
+	bool "interrupt"
+
+endchoice # B12 Pin type
+
+if STM32F411MINIMUM_GPIO_B12_OUT
+
+choice
+	prompt "output type"
+	default STM32F411MINIMUM_GPIO_B12_OUT_OD
+
+config STM32F411MINIMUM_GPIO_B12_OUT_OD
+	bool "open drain"
+config STM32F411MINIMUM_GPIO_B12_OUT_PP
+	bool "push pull"
+
+endchoice # B12 output type
+
+choice
+	prompt "default state"
+	default STM32F411MINIMUM_GPIO_B12_OUT_SET
+
+config STM32F411MINIMUM_GPIO_B12_OUT_SET
+	bool "set"
+config STM32F411MINIMUM_GPIO_B12_OUT_CLEAR
+	bool "clear"
+
+endchoice # B12 output default state
+
+endif # STM32F411MINIMUM_GPIO_B12_OUT
+
+choice
+	prompt "pull"
+	default STM32F411MINIMUM_GPIO_B12_PULL_UP
+
+config STM32F411MINIMUM_GPIO_B12_PULL_UP
+	bool "pull up"
+config STM32F411MINIMUM_GPIO_B12_PULL_DOWN
+	bool "pull down"
+config STM32F411MINIMUM_GPIO_B12_PULL_FLOAT
+	bool "float"
+
+endchoice # B12 pull
+
+choice
+	prompt "speed"
+	default STM32F411MINIMUM_GPIO_B12_SPEED_2MHz
+
+config STM32F411MINIMUM_GPIO_B12_SPEED_2MHz
+	bool "2MHz"
+config STM32F411MINIMUM_GPIO_B12_SPEED_25MHz
+	bool "25MHz"
+config STM32F411MINIMUM_GPIO_B12_SPEED_50MHz
+	bool "50MHz"
+
+endchoice # B12 speed
+
+endif # STM32F411MINIMUM_GPIO_B12
+
+config STM32F411MINIMUM_GPIO_B13
+	bool "enable pin B13"
+	---help---
+		Assume direct control over this pin. You will not be able to use this
+		pin for anything else other than general input/output access via
+		/dev/gpio_B13 device node.
+
+if STM32F411MINIMUM_GPIO_B13
+
+config STM32F411MINIMUM_GPIO_B13_NAME
+	string "Pin name"
+	default "gpio_b13"
+	---help---
+		Pin name, it will accessible via /dev/%s file
+
+choice
+	prompt "Pin type"
+	default STM32F411MINIMUM_GPIO_B13_OUT
+
+config STM32F411MINIMUM_GPIO_B13_OUT
+	bool "output"
+config STM32F411MINIMUM_GPIO_B13_IN
+	bool "input"
+config STM32F411MINIMUM_GPIO_B13_INT
+	bool "interrupt"
+
+endchoice # B13 Pin type
+
+if STM32F411MINIMUM_GPIO_B13_OUT
+
+choice
+	prompt "output type"
+	default STM32F411MINIMUM_GPIO_B13_OUT_OD
+
+config STM32F411MINIMUM_GPIO_B13_OUT_OD
+	bool "open drain"
+config STM32F411MINIMUM_GPIO_B13_OUT_PP
+	bool "push pull"
+
+endchoice # B13 output type
+
+choice
+	prompt "default state"
+	default STM32F411MINIMUM_GPIO_B13_OUT_SET
+
+config STM32F411MINIMUM_GPIO_B13_OUT_SET
+	bool "set"
+config STM32F411MINIMUM_GPIO_B13_OUT_CLEAR
+	bool "clear"
+
+endchoice # B13 output default state
+
+endif # STM32F411MINIMUM_GPIO_B13_OUT
+
+choice
+	prompt "pull"
+	default STM32F411MINIMUM_GPIO_B13_PULL_UP
+
+config STM32F411MINIMUM_GPIO_B13_PULL_UP
+	bool "pull up"
+config STM32F411MINIMUM_GPIO_B13_PULL_DOWN
+	bool "pull down"
+config STM32F411MINIMUM_GPIO_B13_PULL_FLOAT
+	bool "float"
+
+endchoice # B13 pull
+
+choice
+	prompt "speed"
+	default STM32F411MINIMUM_GPIO_B13_SPEED_2MHz
+
+config STM32F411MINIMUM_GPIO_B13_SPEED_2MHz
+	bool "2MHz"
+config STM32F411MINIMUM_GPIO_B13_SPEED_25MHz
+	bool "25MHz"
+config STM32F411MINIMUM_GPIO_B13_SPEED_50MHz
+	bool "50MHz"
+
+endchoice # B13 speed
+
+endif # STM32F411MINIMUM_GPIO_B13
+
+config STM32F411MINIMUM_GPIO_B14
+	bool "enable pin B14"
+	---help---
+		Assume direct control over this pin. You will not be able to use this
+		pin for anything else other than general input/output access via
+		/dev/gpio_B14 device node.
+
+if STM32F411MINIMUM_GPIO_B14
+
+config STM32F411MINIMUM_GPIO_B14_NAME
+	string "Pin name"
+	default "gpio_b14"
+	---help---
+		Pin name, it will accessible via /dev/%s file
+
+choice
+	prompt "Pin type"
+	default STM32F411MINIMUM_GPIO_B14_OUT
+
+config STM32F411MINIMUM_GPIO_B14_OUT
+	bool "output"
+config STM32F411MINIMUM_GPIO_B14_IN
+	bool "input"
+config STM32F411MINIMUM_GPIO_B14_INT
+	bool "interrupt"
+
+endchoice # B14 Pin type
+
+if STM32F411MINIMUM_GPIO_B14_OUT
+
+choice
+	prompt "output type"
+	default STM32F411MINIMUM_GPIO_B14_OUT_OD
+
+config STM32F411MINIMUM_GPIO_B14_OUT_OD
+	bool "open drain"
+config STM32F411MINIMUM_GPIO_B14_OUT_PP
+	bool "push pull"
+
+endchoice # B14 output type
+
+choice
+	prompt "default state"
+	default STM32F411MINIMUM_GPIO_B14_OUT_SET
+
+config STM32F411MINIMUM_GPIO_B14_OUT_SET
+	bool "set"
+config STM32F411MINIMUM_GPIO_B14_OUT_CLEAR
+	bool "clear"
+
+endchoice # B14 output default state
+
+endif # STM32F411MINIMUM_GPIO_B14_OUT
+
+choice
+	prompt "pull"
+	default STM32F411MINIMUM_GPIO_B14_PULL_UP
+
+config STM32F411MINIMUM_GPIO_B14_PULL_UP
+	bool "pull up"
+config STM32F411MINIMUM_GPIO_B14_PULL_DOWN
+	bool "pull down"
+config STM32F411MINIMUM_GPIO_B14_PULL_FLOAT
+	bool "float"
+
+endchoice # B14 pull
+
+choice
+	prompt "speed"
+	default STM32F411MINIMUM_GPIO_B14_SPEED_2MHz
+
+config STM32F411MINIMUM_GPIO_B14_SPEED_2MHz
+	bool "2MHz"
+config STM32F411MINIMUM_GPIO_B14_SPEED_25MHz
+	bool "25MHz"
+config STM32F411MINIMUM_GPIO_B14_SPEED_50MHz
+	bool "50MHz"
+
+endchoice # B14 speed
+
+endif # STM32F411MINIMUM_GPIO_B14
+
+config STM32F411MINIMUM_GPIO_B15
+	bool "enable pin B15"
+	---help---
+		Assume direct control over this pin. You will not be able to use this
+		pin for anything else other than general input/output access via
+		/dev/gpio_B15 device node.
+
+if STM32F411MINIMUM_GPIO_B15
+
+config STM32F411MINIMUM_GPIO_B15_NAME
+	string "Pin name"
+	default "gpio_b15"
+	---help---
+		Pin name, it will accessible via /dev/%s file
+
+choice
+	prompt "Pin type"
+	default STM32F411MINIMUM_GPIO_B15_OUT
+
+config STM32F411MINIMUM_GPIO_B15_OUT
+	bool "output"
+config STM32F411MINIMUM_GPIO_B15_IN
+	bool "input"
+config STM32F411MINIMUM_GPIO_B15_INT
+	bool "interrupt"
+
+endchoice # B15 Pin type
+
+if STM32F411MINIMUM_GPIO_B15_OUT
+
+choice
+	prompt "output type"
+	default STM32F411MINIMUM_GPIO_B15_OUT_OD
+
+config STM32F411MINIMUM_GPIO_B15_OUT_OD
+	bool "open drain"
+config STM32F411MINIMUM_GPIO_B15_OUT_PP
+	bool "push pull"
+
+endchoice # B15 output type
+
+choice
+	prompt "default state"
+	default STM32F411MINIMUM_GPIO_B15_OUT_SET
+
+config STM32F411MINIMUM_GPIO_B15_OUT_SET
+	bool "set"
+config STM32F411MINIMUM_GPIO_B15_OUT_CLEAR
+	bool "clear"
+
+endchoice # B15 output default state
+
+endif # STM32F411MINIMUM_GPIO_B15_OUT
+
+choice
+	prompt "pull"
+	default STM32F411MINIMUM_GPIO_B15_PULL_UP
+
+config STM32F411MINIMUM_GPIO_B15_PULL_UP
+	bool "pull up"
+config STM32F411MINIMUM_GPIO_B15_PULL_DOWN
+	bool "pull down"
+config STM32F411MINIMUM_GPIO_B15_PULL_FLOAT
+	bool "float"
+
+endchoice # B15 pull
+
+choice
+	prompt "speed"
+	default STM32F411MINIMUM_GPIO_B15_SPEED_2MHz
+
+config STM32F411MINIMUM_GPIO_B15_SPEED_2MHz
+	bool "2MHz"
+config STM32F411MINIMUM_GPIO_B15_SPEED_25MHz
+	bool "25MHz"
+config STM32F411MINIMUM_GPIO_B15_SPEED_50MHz
+	bool "50MHz"
+
+endchoice # B15 speed
+
+endif # STM32F411MINIMUM_GPIO_B15
+
+config STM32F411MINIMUM_GPIO_C13
+	bool "enable pin C13"
+	---help---
+		Assume direct control over this pin. You will not be able to use this
+		pin for anything else other than general input/output access via
+		/dev/gpio_C13 device node.
+
+if STM32F411MINIMUM_GPIO_C13
+
+config STM32F411MINIMUM_GPIO_C13_NAME
+	string "Pin name"
+	default "gpio_c13"
+	---help---
+		Pin name, it will accessible via /dev/%s file
+
+choice
+	prompt "Pin type"
+	default STM32F411MINIMUM_GPIO_C13_OUT
+
+config STM32F411MINIMUM_GPIO_C13_OUT
+	bool "output"
+config STM32F411MINIMUM_GPIO_C13_IN
+	bool "input"
+config STM32F411MINIMUM_GPIO_C13_INT
+	bool "interrupt"
+
+endchoice # C13 Pin type
+
+if STM32F411MINIMUM_GPIO_C13_OUT
+
+choice
+	prompt "output type"
+	default STM32F411MINIMUM_GPIO_C13_OUT_OD
+
+config STM32F411MINIMUM_GPIO_C13_OUT_OD
+	bool "open drain"
+config STM32F411MINIMUM_GPIO_C13_OUT_PP
+	bool "push pull"
+
+endchoice # C13 output type
+
+choice
+	prompt "default state"
+	default STM32F411MINIMUM_GPIO_C13_OUT_SET
+
+config STM32F411MINIMUM_GPIO_C13_OUT_SET
+	bool "set"
+config STM32F411MINIMUM_GPIO_C13_OUT_CLEAR
+	bool "clear"
+
+endchoice # C13 output default state
+
+endif # STM32F411MINIMUM_GPIO_C13_OUT
+
+choice
+	prompt "pull"
+	default STM32F411MINIMUM_GPIO_C13_PULL_UP
+
+config STM32F411MINIMUM_GPIO_C13_PULL_UP
+	bool "pull up"
+config STM32F411MINIMUM_GPIO_C13_PULL_DOWN
+	bool "pull down"
+config STM32F411MINIMUM_GPIO_C13_PULL_FLOAT
+	bool "float"
+
+endchoice # C13 pull
+
+choice
+	prompt "speed"
+	default STM32F411MINIMUM_GPIO_C13_SPEED_2MHz
+
+config STM32F411MINIMUM_GPIO_C13_SPEED_2MHz
+	bool "2MHz"
+config STM32F411MINIMUM_GPIO_C13_SPEED_25MHz
+	bool "25MHz"
+config STM32F411MINIMUM_GPIO_C13_SPEED_50MHz
+	bool "50MHz"
+
+endchoice # C13 speed
+
+endif # STM32F411MINIMUM_GPIO_C13
+
+config STM32F411MINIMUM_GPIO_C14
+	bool "enable pin C14"
+	---help---
+		Assume direct control over this pin. You will not be able to use this
+		pin for anything else other than general input/output access via
+		/dev/gpio_C14 device node.
+
+if STM32F411MINIMUM_GPIO_C14
+
+config STM32F411MINIMUM_GPIO_C14_NAME
+	string "Pin name"
+	default "gpio_c14"
+	---help---
+		Pin name, it will accessible via /dev/%s file
+
+choice
+	prompt "Pin type"
+	default STM32F411MINIMUM_GPIO_C14_OUT
+
+config STM32F411MINIMUM_GPIO_C14_OUT
+	bool "output"
+config STM32F411MINIMUM_GPIO_C14_IN
+	bool "input"
+config STM32F411MINIMUM_GPIO_C14_INT
+	bool "interrupt"
+
+endchoice # C14 Pin type
+
+if STM32F411MINIMUM_GPIO_C14_OUT
+
+choice
+	prompt "output type"
+	default STM32F411MINIMUM_GPIO_C14_OUT_OD
+
+config STM32F411MINIMUM_GPIO_C14_OUT_OD
+	bool "open drain"
+config STM32F411MINIMUM_GPIO_C14_OUT_PP
+	bool "push pull"
+
+endchoice # C14 output type
+
+choice
+	prompt "default state"
+	default STM32F411MINIMUM_GPIO_C14_OUT_SET
+
+config STM32F411MINIMUM_GPIO_C14_OUT_SET
+	bool "set"
+config STM32F411MINIMUM_GPIO_C14_OUT_CLEAR
+	bool "clear"
+
+endchoice # C14 output default state
+
+endif # STM32F411MINIMUM_GPIO_C14_OUT
+
+choice
+	prompt "pull"
+	default STM32F411MINIMUM_GPIO_C14_PULL_UP
+
+config STM32F411MINIMUM_GPIO_C14_PULL_UP
+	bool "pull up"
+config STM32F411MINIMUM_GPIO_C14_PULL_DOWN
+	bool "pull down"
+config STM32F411MINIMUM_GPIO_C14_PULL_FLOAT
+	bool "float"
+
+endchoice # C14 pull
+
+choice
+	prompt "speed"
+	default STM32F411MINIMUM_GPIO_C14_SPEED_2MHz
+
+config STM32F411MINIMUM_GPIO_C14_SPEED_2MHz
+	bool "2MHz"
+config STM32F411MINIMUM_GPIO_C14_SPEED_25MHz
+	bool "25MHz"
+config STM32F411MINIMUM_GPIO_C14_SPEED_50MHz
+	bool "50MHz"
+
+endchoice # C14 speed
+
+endif # STM32F411MINIMUM_GPIO_C14
+
+config STM32F411MINIMUM_GPIO_C15
+	bool "enable pin C15"
+	---help---
+		Assume direct control over this pin. You will not be able to use this
+		pin for anything else other than general input/output access via
+		/dev/gpio_C15 device node.
+
+if STM32F411MINIMUM_GPIO_C15
+
+config STM32F411MINIMUM_GPIO_C15_NAME
+	string "Pin name"
+	default "gpio_c15"
+	---help---
+		Pin name, it will accessible via /dev/%s file
+
+choice
+	prompt "Pin type"
+	default STM32F411MINIMUM_GPIO_C15_OUT
+
+config STM32F411MINIMUM_GPIO_C15_OUT
+	bool "output"
+config STM32F411MINIMUM_GPIO_C15_IN
+	bool "input"
+config STM32F411MINIMUM_GPIO_C15_INT
+	bool "interrupt"
+
+endchoice # C15 Pin type
+
+if STM32F411MINIMUM_GPIO_C15_OUT
+
+choice
+	prompt "output type"
+	default STM32F411MINIMUM_GPIO_C15_OUT_OD
+
+config STM32F411MINIMUM_GPIO_C15_OUT_OD
+	bool "open drain"
+config STM32F411MINIMUM_GPIO_C15_OUT_PP
+	bool "push pull"
+
+endchoice # C15 output type
+
+choice
+	prompt "default state"
+	default STM32F411MINIMUM_GPIO_C15_OUT_SET
+
+config STM32F411MINIMUM_GPIO_C15_OUT_SET
+	bool "set"
+config STM32F411MINIMUM_GPIO_C15_OUT_CLEAR
+	bool "clear"
+
+endchoice # C15 output default state
+
+endif # STM32F411MINIMUM_GPIO_C15_OUT
+
+choice
+	prompt "pull"
+	default STM32F411MINIMUM_GPIO_C15_PULL_UP
+
+config STM32F411MINIMUM_GPIO_C15_PULL_UP
+	bool "pull up"
+config STM32F411MINIMUM_GPIO_C15_PULL_DOWN
+	bool "pull down"
+config STM32F411MINIMUM_GPIO_C15_PULL_FLOAT
+	bool "float"
+
+endchoice # C15 pull
+
+choice
+	prompt "speed"
+	default STM32F411MINIMUM_GPIO_C15_SPEED_2MHz
+
+config STM32F411MINIMUM_GPIO_C15_SPEED_2MHz
+	bool "2MHz"
+config STM32F411MINIMUM_GPIO_C15_SPEED_25MHz
+	bool "25MHz"
+config STM32F411MINIMUM_GPIO_C15_SPEED_50MHz
+	bool "50MHz"
+
+endchoice # C15 speed
+
+endif # STM32F411MINIMUM_GPIO_C15

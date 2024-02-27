@@ -84,6 +84,14 @@ int stm32_bringup(void)
 {
   int ret = OK;
 
+#ifdef CONFIG_STM32F411MINIMUM_GPIO
+  ret = stm32_gpio_initialize();
+  if (ret != OK)
+    {
+      gerr("ERROR: Failed to initialize gpio: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_ADC_HX711
   ret = stm32_hx711_initialize();
   if (ret != OK)

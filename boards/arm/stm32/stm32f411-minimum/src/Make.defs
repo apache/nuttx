@@ -38,6 +38,10 @@ ifeq ($(CONFIG_SPI),y)
   CSRCS += stm32_spi.c
 endif
 
+ifeq ($(CONFIG_STM32F411MINIMUM_GPIO),y)
+  CSRCS += stm32_gpio.c
+endif
+
 ifeq ($(CONFIG_MTD_W25),y)
   CSRCS += stm32_w25.c
 endif
