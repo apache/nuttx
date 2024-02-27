@@ -25,4 +25,10 @@ config PCI_QEMU_TEST
 	---help---
 		Driver for QEMU PCI test device
 
+config PCI_QEMU_EDU
+	bool "Driver for QEMU EDU test device"
+	default n
+	---help---
+		Driver for QEMU EDU test device
+
 endif # PCI
