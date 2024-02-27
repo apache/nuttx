@@ -43,6 +43,14 @@ SECTIONS
       _etext = . ;
     }
 
+    .init_section :
+    {
+      _sinit = ABSOLUTE(.);
+      KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
+      KEEP(*(.init_array .ctors))
+      _einit = ABSOLUTE(.);
+    }
+
   .rodata :
     {
       _srodata = . ;
@@ -76,30 +84,6 @@ SECTIONS
       *(.gnu.linkonce.d*)
       . = ALIGN(4);
       _edata = . ;
-    }
-
-  /* C++ support. For each global and static local C++ object,
-   * GCC creates a small subroutine to construct the object. Pointers
-   * to these routines (not the routines themselves) are stored as
-   * simple, linear arrays in the .ctors section of the object file.
-   * Similarly, pointers to global/static destructor routines are
-   * stored in .dtors.
-   */
-
-  .ctors :
-    {
-      _sctors = . ;
-      *(.ctors)       /* Old ABI:  Unallocated */
-      *(.init_array)  /* New ABI:  Allocated */
-      _edtors = . ;
-    }
-
-  .dtors :
-    {
-      _sdtors = . ;
-      *(.dtors)       /* Old ABI:  Unallocated */
-      *(.fini_array)  /* New ABI:  Allocated */
-      _edtors = . ;
     }
 
   .bss :
