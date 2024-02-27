@@ -53,6 +53,7 @@
 #endif
 
 #define DMA_INVALID_PERIPH_ID        (0x3F)
+#define GDMA_CH_REG_ADDR(_r, _ch)    ((_r) + (_ch) * GDMA_REG_OFFSET)
 
 /****************************************************************************
  * Private Data
@@ -230,6 +231,7 @@ void esp32s3_dma_release(int chan)
  *   pbuf    - RX/TX buffer pointer
  *   len     - RX/TX buffer length
  *   tx      - true: TX mode (transmitter); false: RX mode (receiver)
+ *   chan    - DMA channel of the receiver/transmitter
  *
  * Returned Value:
  *   Bound pbuf data bytes
@@ -237,7 +239,7 @@ void esp32s3_dma_release(int chan)
  ****************************************************************************/
 
 uint32_t esp32s3_dma_setup(struct esp32s3_dmadesc_s *dmadesc, uint32_t num,
-                           uint8_t *pbuf, uint32_t len, bool tx)
+                           uint8_t *pbuf, uint32_t len, bool tx, int chan)
 {
   int i;
   uint32_t regval;
@@ -245,19 +247,59 @@ uint32_t esp32s3_dma_setup(struct esp32s3_dmadesc_s *dmadesc, uint32_t num,
   uint8_t *pdata = pbuf;
   uint32_t data_len;
   uint32_t buf_len;
+  int alignment = 4;
+  int dma_size = ESP32S3_DMA_BUFFER_MAX_SIZE;
+  bool buffer_in_psram = esp32s3_ptr_extram(pdata);
+  int block_size_index = 0;
+  uint32_t addr = GDMA_CH_REG_ADDR(DMA_IN_CONF0_CH0_REG, chan);
+  bool burst_en = REG_GET_FIELD(addr, DMA_IN_DATA_BURST_EN_CH0);
 
   DEBUGASSERT(dmadesc != NULL);
   DEBUGASSERT(num > 0);
   DEBUGASSERT(pbuf != NULL);
   DEBUGASSERT(len > 0);
+  DEBUGASSERT(chan >= 0 && chan  < ESP32S3_DMA_CHAN_MAX);
+
+  if (!tx && buffer_in_psram)
+    {
+      addr = GDMA_CH_REG_ADDR(DMA_IN_CONF1_CH0_REG, chan);
+      block_size_index = REG_GET_FIELD(addr, DMA_IN_EXT_MEM_BK_SIZE_CH0);
+      switch (block_size_index)
+        {
+          case ESP32S3_DMA_EXT_MEMBLK_64B:
+            alignment = 64;
+            break;
+
+          case ESP32S3_DMA_EXT_MEMBLK_32B:
+            alignment = 32;
+            break;
+
+          case ESP32S3_DMA_EXT_MEMBLK_16B:
+          default:
+            alignment = 16;
+            break;
+        }
+
+      dma_size = 0x1000 - alignment;
+    }
+  else if(!tx && burst_en)
+    {
+      dma_size = ESP32S3_DMA_BUFLEN_MAX_4B_ALIGNED;
+    }
 
   for (i = 0; i < num; i++)
     {
-      data_len = MIN(bytes, ESP32S3_DMA_BUFLEN_MAX);
+      data_len = MIN(bytes, dma_size);
+      if (!tx && (burst_en || buffer_in_psram))
+        {
+          /* Buffer length must be rounded to next alignment boundary. */
 
-      /* Buffer length must be rounded to next 32-bit boundary. */
-
-      buf_len = ALIGN_UP(data_len, sizeof(uintptr_t));
+          buf_len = ALIGN_UP(data_len, alignment);
+        }
+      else
+        {
+          buf_len = data_len;
+        }
 
       dmadesc[i].ctrl = ESP32S3_DMA_CTRL_OWN;
 

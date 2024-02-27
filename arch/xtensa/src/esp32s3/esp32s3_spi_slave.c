@@ -904,7 +904,7 @@ static void spislave_setup_rx_dma(struct spislave_priv_s *priv)
                     SPI_DMA_DESC_NUM,
                     priv->rx_buffer + priv->rx_length,
                     length,
-                    false);
+                    false, priv->dma_channel);
   esp32s3_dma_load(priv->dma_rxdesc, priv->dma_channel, false);
 
   priv->rx_dma_offset = priv->rx_length;
@@ -948,7 +948,7 @@ static void spislave_setup_tx_dma(struct spislave_priv_s *priv)
                     SPI_DMA_DESC_NUM,
                     priv->tx_buffer,
                     SPI_SLAVE_BUFSIZE,
-                    true);
+                    true, priv->dma_channel);
   esp32s3_dma_load(priv->dma_txdesc, priv->dma_channel, true);
 
   spislave_dma_tx_fifo_reset(priv);
