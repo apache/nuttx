@@ -27,8 +27,13 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+#include <arch/chip/chip.h>
 
 #include <stdint.h>
+
+#ifdef CONFIG_STM32F411MINIMUM_GPIO
+#include "stm32f411-minimum-gpio.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -181,6 +186,18 @@ void stm32_usbinitialize(void);
 
 #if defined(CONFIG_STM32_OTGFS) && defined(CONFIG_USBHOST)
 int stm32_usbhost_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_gpio_initialize
+ *
+ * Description:
+ *   Initialize GPIO drivers
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32F411MINIMUM_GPIO
+int stm32_gpio_initialize(void);
 #endif
 
 /****************************************************************************
