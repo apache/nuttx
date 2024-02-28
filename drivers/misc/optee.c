@@ -569,7 +569,7 @@ static int optee_ioctl_cancel(FAR struct socket *psocket,
 static int
 optee_ioctl_shm_alloc(FAR struct tee_ioctl_shm_alloc_data *data)
 {
-  int memfd = memfd_create(OPTEE_SERVER_PATH, O_CREAT);
+  int memfd = memfd_create(OPTEE_SERVER_PATH, O_CREAT | O_CLOEXEC);
 
   if (memfd < 0)
     {
