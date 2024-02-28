@@ -47,13 +47,6 @@
 #define IPT_SO_GET_REVISION_TARGET (IPT_BASE_CTL + 3)
 #define IPT_SO_GET_MAX             IPT_SO_GET_REVISION_TARGET
 
-/* Values for "flag" field in struct ip6t_ip6 (general ip6 structure). */
-
-#define IP6T_F_PROTO               0x01    /* Set if rule cares about upper protocols */
-#define IP6T_F_TOS                 0x02    /* Match the TOS. */
-#define IP6T_F_GOTO                0x04    /* Set if jump is a goto */
-#define IP6T_F_MASK                0x07    /* All possible flag bits mask. */
-
 /* Values for "inv" field in struct ipt_ip. */
 
 #define IPT_INV_VIA_IN             0x01    /* Invert the sense of IN IFACE. */
