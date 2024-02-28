@@ -29,6 +29,10 @@ ifeq ($(CONFIG_PCI_QEMU_EDU),y)
 CSRCS += pci_qemu_edu.c
 endif
 
+ifeq ($(CONFIG_PCI_UIO_IVSHMEM),y)
+CSRCS += pci_uio_ivshmem.c
+endif
+
 # Include PCI device driver build support
 
 DEPPATH += --dep-path pci
