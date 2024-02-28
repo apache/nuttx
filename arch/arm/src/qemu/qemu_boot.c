@@ -36,6 +36,12 @@
 #  include <nuttx/fdt.h>
 #endif
 
+#include <nuttx/syslog/syslog_rpmsg.h>
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
 #ifdef CONFIG_SYSLOG_RPMSG
 static char g_syslog_rpmsg_buf[4096];
 #endif
