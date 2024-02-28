@@ -460,10 +460,12 @@ void up_clean_dcache(uintptr_t start, uintptr_t end)
 
   start &= ~(XCHAL_DCACHE_LINESIZE - 1);
 
+#ifndef CONFIG_SMP
   if ((end - start) >= XCHAL_DCACHE_SIZE)
     {
       return up_clean_dcache_all();
     }
+#endif
 
   for (; start < end; start += XCHAL_DCACHE_LINESIZE)
     {
@@ -542,10 +544,12 @@ void up_flush_dcache(uintptr_t start, uintptr_t end)
 
   start &= ~(XCHAL_DCACHE_LINESIZE - 1);
 
+#ifndef CONFIG_SMP
   if ((end - start) >= XCHAL_DCACHE_SIZE)
     {
       return up_clean_dcache_all();
     }
+#endif
 
   for (; start < end; start += XCHAL_DCACHE_LINESIZE)
     {
