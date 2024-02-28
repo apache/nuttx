@@ -23,7 +23,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL_STREAM)
 
 #include <string.h>
 #include <errno.h>
@@ -99,7 +98,7 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
                  FAR socklen_t *addrlen, FAR struct socket *newsock,
                  int flags)
 {
-  FAR struct local_conn_s *server;
+  FAR struct local_conn_s *server = psock->s_conn;
   FAR struct local_conn_s *conn;
   FAR dq_entry_t *waiter;
   bool nonblock = !!(flags & SOCK_NONBLOCK);
@@ -116,12 +115,6 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
       return -EOPNOTSUPP;
     }
 
-  /* Verify that a valid memory block has been provided to receive the
-   * address
-   */
-
-  server = psock->s_conn;
-
   if (server->lc_proto != SOCK_STREAM ||
       server->lc_state != LOCAL_STATE_LISTENING)
     {
@@ -137,7 +130,6 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
        */
 
       waiter = dq_remfirst(&server->u.server.lc_waiters);
-
       if (waiter)
         {
           conn = container_of(waiter, struct local_conn_s,
@@ -192,5 +184,3 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
         }
     }
 }
-
-#endif /* CONFIG_NET && CONFIG_NET_LOCAL_STREAM */

@@ -23,7 +23,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL)
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -178,18 +177,17 @@ static ssize_t local_send(FAR struct socket *psock,
       case SOCK_DGRAM:
 #endif /* CONFIG_NET_LOCAL_DGRAM */
         {
-          FAR struct local_conn_s *peer;
+          FAR struct local_conn_s *conn = psock->s_conn;
 
           /* Local TCP packet send */
 
           DEBUGASSERT(buf);
-          peer = psock->s_conn;
 
           /* Verify that this is a connected peer socket and that it has
            * opened the outgoing FIFO for write-only access.
            */
 
-          if (peer->lc_state != LOCAL_STATE_CONNECTED)
+          if (conn->lc_state != LOCAL_STATE_CONNECTED)
             {
               nerr("ERROR: not connected\n");
               return -ENOTCONN;
@@ -197,14 +195,14 @@ static ssize_t local_send(FAR struct socket *psock,
 
           /* Check shutdown state */
 
-          if (peer->lc_outfile.f_inode == NULL)
+          if (conn->lc_outfile.f_inode == NULL)
             {
               return -EPIPE;
             }
 
           /* Send the packet */
 
-          ret = nxmutex_lock(&peer->lc_sendlock);
+          ret = nxmutex_lock(&conn->lc_sendlock);
           if (ret < 0)
             {
               /* May fail because the task was canceled. */
@@ -212,9 +210,9 @@ static ssize_t local_send(FAR struct socket *psock,
               return ret;
             }
 
-          ret = local_send_packet(&peer->lc_outfile, buf, len,
+          ret = local_send_packet(&conn->lc_outfile, buf, len,
                                   psock->s_type == SOCK_DGRAM);
-          nxmutex_unlock(&peer->lc_sendlock);
+          nxmutex_unlock(&conn->lc_sendlock);
         }
         break;
       default:
@@ -433,5 +431,3 @@ ssize_t local_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   return len;
 }
-
-#endif /* CONFIG_NET && CONFIG_NET_LOCAL */
