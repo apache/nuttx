@@ -23,7 +23,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL)
 
 #include <sys/stat.h>
 #include <sys/ioctl.h>
@@ -156,7 +155,7 @@ static bool local_fifo_exists(FAR const char *path)
    * In that case, we will return false and mkfifo() will fail.
    */
 
-  return (bool)S_ISFIFO(buf.st_mode);
+  return S_ISFIFO(buf.st_mode);
 }
 
 /****************************************************************************
@@ -478,12 +477,12 @@ int local_release_fifos(FAR struct local_conn_s *conn)
   int ret1;
   int ret2;
 
-  /* Destroy the client-to-server FIFO if it exists. */
+  /* Destroy the server-to-client FIFO if it exists. */
 
   local_sc_name(conn, path);
   ret1 = local_release_fifo(path);
 
-  /* Destroy the server-to-client FIFO if it exists. */
+  /* Destroy the client-to-server FIFO if it exists. */
 
   local_cs_name(conn, path);
   ret2 = local_release_fifo(path);
@@ -610,7 +609,7 @@ int local_open_server_rx(FAR struct local_conn_s *server, bool nonblock)
 
   local_cs_name(server, path);
 
-  /* Then open the file for write-only access */
+  /* Then open the file for read-only access */
 
   ret = local_rx_open(server, path, nonblock);
   if (ret == OK)
@@ -627,7 +626,7 @@ int local_open_server_rx(FAR struct local_conn_s *server, bool nonblock)
  * Name: local_open_server_tx
  *
  * Description:
- *   Only the server-side of the server-to-client FIFO.
+ *   Open the server-side of the server-to-client FIFO.
  *
  ****************************************************************************/
 
@@ -640,7 +639,7 @@ int local_open_server_tx(FAR struct local_conn_s *server, bool nonblock)
 
   local_sc_name(server, path);
 
-  /* Then open the file for read-only access */
+  /* Then open the file for write-only access */
 
   ret = local_tx_open(server, path, nonblock);
   if (ret == OK)
@@ -657,7 +656,7 @@ int local_open_server_tx(FAR struct local_conn_s *server, bool nonblock)
  * Name: local_open_receiver
  *
  * Description:
- *   Only the receiving side of the half duplex FIFO.
+ *   Open the receiving side of the half duplex FIFO.
  *
  ****************************************************************************/
 
@@ -679,7 +678,6 @@ int local_open_receiver(FAR struct local_conn_s *conn, bool nonblock)
       /* Policy: Free FIFO resources when the buffer is empty. */
 
       ret = local_set_policy(&conn->lc_infile, 1);
-
       if (ret == 0)
         {
           /* Set POLLOUT threshold bigger than preamble len.
@@ -700,7 +698,7 @@ int local_open_receiver(FAR struct local_conn_s *conn, bool nonblock)
  * Name: local_open_sender
  *
  * Description:
- *   Only the sending side of the half duplex FIFO.
+ *   Open the sending side of the half duplex FIFO.
  *
  ****************************************************************************/
 
@@ -715,7 +713,7 @@ int local_open_sender(FAR struct local_conn_s *conn, FAR const char *path,
 
   local_hd_name(path, fullpath);
 
-  /* Then open the file for read-only access */
+  /* Then open the file for write-only access */
 
   ret = local_tx_open(conn, fullpath, nonblock);
   if (ret == OK)
@@ -726,7 +724,7 @@ int local_open_sender(FAR struct local_conn_s *conn, FAR const char *path,
       if (ret == 0)
         {
           /* Set POLLIN threshold bigger than preamble len.
-           * This is to avoid non-blocking read failed with -EAGAIN when
+           * This is to avoid non-blocking write failed with -EAGAIN when
            * only preamble len is sent and read by reader.
            */
 
@@ -764,5 +762,3 @@ int local_set_nonblocking(FAR struct local_conn_s *conn)
 
   return ret;
 }
-
-#endif /* CONFIG_NET && CONFIG_NET_LOCAL */

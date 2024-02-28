@@ -23,7 +23,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL_STREAM)
 
 #include <assert.h>
 #include <errno.h>
@@ -66,7 +65,7 @@
 
 int local_listen(FAR struct socket *psock, int backlog)
 {
-  FAR struct local_conn_s *server;
+  FAR struct local_conn_s *server = psock->s_conn;
 
   /* Verify that the sockfd corresponds to a connected SOCK_STREAM in this
    * address family.
@@ -80,8 +79,6 @@ int local_listen(FAR struct socket *psock, int backlog)
     }
 
   net_lock();
-
-  server = psock->s_conn;
 
   /* Some sanity checks */
 
@@ -119,5 +116,3 @@ int local_listen(FAR struct socket *psock, int backlog)
 
   return OK;
 }
-
-#endif /* CONFIG_NET && CONFIG_NET_LOCAL_STREAM */
