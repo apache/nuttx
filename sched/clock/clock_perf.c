@@ -26,8 +26,9 @@
 
 #include <stdint.h>
 
-#include <nuttx/clock.h>
 #include <nuttx/arch.h>
+#include <nuttx/clock.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/wdog.h>
 
 #if defined(CONFIG_PERF_OVERFLOW_CORRECTION) && ULONG_MAX != UINT64_MAX
@@ -39,6 +40,7 @@
 struct perf_s
 {
   struct wdog_s wdog;
+  spinlock_t lock;
   unsigned long last;
   unsigned long overflow;
 };
@@ -93,6 +95,8 @@ clock_t perf_gettime(void)
 {
   FAR struct perf_s *perf = &g_perf;
   unsigned long now = up_perf_gettime();
+  irqstate_t flags = spin_lock_irqsave(&perf->lock);
+  clock_t result;
 
   /* Check if overflow */
 
@@ -102,7 +106,9 @@ clock_t perf_gettime(void)
     }
 
   perf->last = now;
-  return (clock_t)now | (clock_t)perf->overflow << 32;
+  result = (clock_t)now | (clock_t)perf->overflow << 32;
+  spin_unlock_irqrestore(&perf->lock, flags);
+  return result;
 }
 
 /****************************************************************************
