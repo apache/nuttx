@@ -148,9 +148,6 @@ static int local_sockif_alloc(FAR struct socket *psock)
   /* Save the pre-allocated connection in the socket structure */
 
   psock->s_conn = conn;
-#if defined(CONFIG_NET_LOCAL_STREAM)
-  conn->lc_psock = psock;
-#endif
   return OK;
 }
 #endif
