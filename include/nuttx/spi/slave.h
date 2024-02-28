@@ -273,11 +273,11 @@
  *   synchronization by several words.
  *
  * Input Parameters:
- *   dev  - SPI Slave device interface instance
- *   data - Pointer to the new data that has been shifted in
- *   len  - Length of the new data in units of nbits wide,
- *          nbits being the data width previously provided to the bind()
- *          method.
+ *   dev    - SPI Slave device interface instance
+ *   data   - Pointer to the new data that has been shifted in
+ *   nwords - Length of the new data in units of nbits wide,
+ *            nbits being the data width previously provided to the bind()
+ *            method.
  *
  * Returned Value:
  *   Number of units accepted by the device. In other words,
@@ -291,7 +291,7 @@
  *
  ****************************************************************************/
 
-#define SPIS_DEV_RECEIVE(d,v,l)  ((d)->ops->receive(d,v,l))
+#define SPIS_DEV_RECEIVE(d,v,n)  ((d)->ops->receive(d,v,n))
 
 /****************************************************************************
  * Name: SPIS_DEV_NOTIFY
