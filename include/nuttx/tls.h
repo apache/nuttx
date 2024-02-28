@@ -212,6 +212,7 @@ struct tls_info_s
 #endif
 
   int tl_errno;                        /* Per-thread error number */
+  pid_t tl_tid;                        /* ID for thread */
 };
 
 /****************************************************************************
