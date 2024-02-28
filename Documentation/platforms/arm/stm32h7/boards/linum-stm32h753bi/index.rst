@@ -115,25 +115,26 @@ The LINUM-STM32H753BI board has two on-board RS-485 transceiver connected to USA
   DE     PG12  
   ====== =====
   
-SDCARD
+SDMMC
 ======
 
 The LINUM-STM32H753BI has one SDCard slot connected as below:
 
   ========== =====
-  SDMMC1       PINS
+  SDMMC1     PINS
   ========== =====
-  SDMMC_D0    PC8
-  SDMMC_D1    PC9
-  SDMMC_D2    PC10
-  SDMMC_D3    PC11
-  SDMMC_DK    PC12
+  SDMMC_D0   PC8
+  SDMMC_D1   PC9
+  SDMMC_D2   PC10
+  SDMMC_D3   PC11
+  SDMMC_DK   PC12
   ========== =====
 
   =============== =====
   GPIO            PINS
   =============== =====
   SDCARD_DETECTED PG7
+  SDCARD_PWR_EN   PD7
   =============== =====      
 
 ETHERNET
@@ -430,3 +431,19 @@ can enable the ModBus Master to create queries for device with address 10::
 In your pc you will be able to create a ModBus Slave with address 10 using an application like ``diagslave``::
 
     $ sudo diagslave -a 10 -b 38400 /dev/ttyUSB0
+
+sdcard
+------
+
+Configures the NuttShell (nsh) and enables SD card support. The board has an onboard microSD slot that should be
+automatically registered as the block device /dev/mmcsd0 when an SD card is present.
+
+The SD card can then be mounted by the NSH commands::
+
+    nsh> mount -t vfat /dev/mmcsd0 /mnt
+    nsh> mount
+    nsh> echo "Hello World!!" > /mnt/test_file.txt
+    nhs> ls /mnt/
+    test_file.txt
+    nsh> cat /mnt/test_file.txt
+    Hello World!!

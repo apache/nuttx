@@ -88,7 +88,7 @@
 
 /* PLL1, wide 4 - 8 MHz input, enable DIVP, DIVQ, DIVR
  *
- *   PLL1_VCO = (25,000,000 / 5) * 192 = 960 MHz
+ *   PLL1_VCO = (25 MHz / 5) * 192 = 960 MHz
  *
  *   PLL1P = PLL1_VCO/2  = 800 MHz / 2   = 480 MHz
  *   PLL1Q = PLL1_VCO/4  = 800 MHz / 4   = 240 MHz
@@ -100,32 +100,42 @@
                                   RCC_PLLCFGR_DIVP1EN | \
                                   RCC_PLLCFGR_DIVQ1EN | \
                                   RCC_PLLCFGR_DIVR1EN)
-#define STM32_PLLCFG_PLL1M       RCC_PLLCKSELR_DIVM1(5)
-#define STM32_PLLCFG_PLL1N       RCC_PLL1DIVR_N1(192)
-#define STM32_PLLCFG_PLL1P       RCC_PLL1DIVR_P1(2)
-#define STM32_PLLCFG_PLL1Q       RCC_PLL1DIVR_Q1(4)
-#define STM32_PLLCFG_PLL1R       RCC_PLL1DIVR_R1(4)
 
 #define STM32_VCO1_FREQUENCY     ((STM32_HSE_FREQUENCY / 5) * 192)
 #define STM32_PLL1P_FREQUENCY    (STM32_VCO1_FREQUENCY / 2)
 #define STM32_PLL1Q_FREQUENCY    (STM32_VCO1_FREQUENCY / 4)
 #define STM32_PLL1R_FREQUENCY    (STM32_VCO1_FREQUENCY / 4)
 
-/* PLL2 */
+#define STM32_PLLCFG_PLL1M       RCC_PLLCKSELR_DIVM1(5)
+#define STM32_PLLCFG_PLL1N       RCC_PLL1DIVR_N1(192)
+#define STM32_PLLCFG_PLL1P       RCC_PLL1DIVR_P1(2)
+#define STM32_PLLCFG_PLL1Q       RCC_PLL1DIVR_Q1(4)
+#define STM32_PLLCFG_PLL1R       RCC_PLL1DIVR_R1(4)
 
+/* PLL2, wide 4 - 8 MHz input, enable DIVP, DIVQ, DIVR
+ *
+ *   PLL1_VCO = (25 MHz / 2) * 48 = 600 MHz
+ *
+ *   PLL2P = PLL2_VCO/2  = 600 MHz / 8   = 75 MHz
+ *   PLL2Q = PLL2_VCO/4  = 600 MHz / 40  = 15 MHz
+ *   PLL2R = PLL2_VCO/8  = 600 MHz / 3   = 200 MHz
+ */
 #define STM32_PLLCFG_PLL2CFG (RCC_PLLCFGR_PLL2VCOSEL_WIDE | \
                               RCC_PLLCFGR_PLL2RGE_4_8_MHZ | \
-                              RCC_PLLCFGR_DIVP2EN)
-#define STM32_PLLCFG_PLL2M       RCC_PLLCKSELR_DIVM2(2)
-#define STM32_PLLCFG_PLL2N       RCC_PLL2DIVR_N2(48)
-#define STM32_PLLCFG_PLL2P       RCC_PLL2DIVR_P2(8)
-#define STM32_PLLCFG_PLL2Q       1
-#define STM32_PLLCFG_PLL2R       3
+                              RCC_PLLCFGR_DIVP2EN | \
+                              RCC_PLLCFGR_DIVQ2EN | \
+                              RCC_PLLCFGR_DIVR2EN )
 
 #define STM32_VCO2_FREQUENCY     ((STM32_HSE_FREQUENCY / 2) * 48)
 #define STM32_PLL2P_FREQUENCY    (STM32_VCO2_FREQUENCY / 8)
-#define STM32_PLL2Q_FREQUENCY
-#define STM32_PLL2R_FREQUENCY
+#define STM32_PLL2Q_FREQUENCY    (STM32_VCO2_FREQUENCY / 40)
+#define STM32_PLL2R_FREQUENCY    (STM32_VCO2_FREQUENCY / 3)
+
+#define STM32_PLLCFG_PLL2M       RCC_PLLCKSELR_DIVM2(2)
+#define STM32_PLLCFG_PLL2N       RCC_PLL2DIVR_N2(48)
+#define STM32_PLLCFG_PLL2P       RCC_PLL2DIVR_P2(8)
+#define STM32_PLLCFG_PLL2Q       RCC_PLL2DIVR_Q2(40)
+#define STM32_PLLCFG_PLL2R       RCC_PLL2DIVR_R2(3)
 
 /* PLL3 */
 
@@ -258,30 +268,18 @@
 
 /* SDMMC definitions ********************************************************/
 
-/* Init 400kHz, PLL1Q/(2*250) */
+/* Init 400 kHz, PLL1Q/(2*300) = 240 MHz / (2*300) = 400 Khz */
 
-#define STM32_SDMMC_INIT_CLKDIV     (250 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+#define STM32_SDMMC_INIT_CLKDIV     (300 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
 
-/* Just set these to 25 MHz for now,
- * PLL1Q/(2*4), for default speed 12.5MB/s
+/* Just set these to 24 MHz for now,
+ * PLL1Q/(2*5) = 240 MHz / (2*5) = 24 MHz
  */
 
-#define STM32_SDMMC_MMCXFR_CLKDIV   (4 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
-#define STM32_SDMMC_SDXFR_CLKDIV    (4 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+#define STM32_SDMMC_MMCXFR_CLKDIV   (5 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+#define STM32_SDMMC_SDXFR_CLKDIV    (5 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
 
 #define STM32_SDMMC_CLKCR_EDGE      STM32_SDMMC_CLKCR_NEGEDGE
-
-/* Ethernet definitions *****************************************************/
-
-#define GPIO_ETH_RMII_TXD0    (GPIO_ETH_RMII_TXD0_2 | GPIO_SPEED_100MHz)    /* PG13 */
-#define GPIO_ETH_RMII_TXD1    (GPIO_ETH_RMII_TXD1_1 | GPIO_SPEED_100MHz)    /* PB13 */
-#define GPIO_ETH_RMII_TX_EN   (GPIO_ETH_RMII_TX_EN_2 | GPIO_SPEED_100MHz)   /* PG11 */
-#define GPIO_ETH_MDC          (GPIO_ETH_MDC_0 | GPIO_SPEED_100MHz)          /* PC1 */
-#define GPIO_ETH_MDIO         (GPIO_ETH_MDIO_0 | GPIO_SPEED_100MHz)         /* PA2 */
-#define GPIO_ETH_RMII_RXD0    (GPIO_ETH_RMII_RXD0_0 | GPIO_SPEED_100MHz)    /* PC4 */
-#define GPIO_ETH_RMII_RXD1    (GPIO_ETH_RMII_RXD1_0 | GPIO_SPEED_100MHz)    /* PC5 */
-#define GPIO_ETH_RMII_CRS_DV  (GPIO_ETH_RMII_CRS_DV_0 | GPIO_SPEED_100MHz)  /* PA7 */
-#define GPIO_ETH_RMII_REF_CLK (GPIO_ETH_RMII_REF_CLK_0 | GPIO_SPEED_100MHz) /* PA1 */
 
 /* LED definitions **********************************************************/
 
@@ -384,85 +382,21 @@
 #define GPIO_OTGFS_DM  (GPIO_OTGFS_DM_0  | GPIO_SPEED_100MHz)
 #define GPIO_OTGFS_DP  (GPIO_OTGFS_DP_0  | GPIO_SPEED_100MHz)
 
-/* I2C4 - Used by Touchscreen and Audio Codec */
+/* SDMMC1 Pin mapping
+ * CLK - PC12
+ * CMD - PD2
+ *  D0 - PC8
+ *  D1 - PC9
+ *  D2 - PC10
+ *  D3 - PC11
+ */
 
-#define GPIO_I2C4_SCL    (GPIO_I2C4_SCL_1 | GPIO_SPEED_50MHz)  /* PD12 */
-#define GPIO_I2C4_SDA    (GPIO_I2C4_SDA_1 | GPIO_SPEED_50MHz)  /* PD13 */
-
-/* LTDC */
-
-#define GPIO_LTDC_R0     (GPIO_LTDC_R0_3 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_R1     (GPIO_LTDC_R1_3 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_R2     (GPIO_LTDC_R2_4 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_R3     (GPIO_LTDC_R3_3 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_R4     (GPIO_LTDC_R4_4 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_R5     (GPIO_LTDC_R5_4 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_R6     (GPIO_LTDC_R6_4 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_R7     (GPIO_LTDC_R7_3 | GPIO_SPEED_100MHz)
-
-#define GPIO_LTDC_G0     (GPIO_LTDC_G0_2 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_G1     (GPIO_LTDC_G1_2 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_G2     (GPIO_LTDC_G2_3 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_G3     (GPIO_LTDC_G3_4 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_G4     (GPIO_LTDC_G4_3 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_G5     (GPIO_LTDC_G5_3 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_G6     (GPIO_LTDC_G6_3 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_G7     (GPIO_LTDC_G7_3 | GPIO_SPEED_100MHz)
-
-#define GPIO_LTDC_B0     (GPIO_LTDC_B0_1 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_B1     (GPIO_LTDC_B1_2 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_B2     (GPIO_LTDC_B2_3 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_B3     (GPIO_LTDC_B3_3 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_B4     (GPIO_LTDC_B4_4 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_B5     (GPIO_LTDC_B5_3 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_B6     (GPIO_LTDC_B6_3 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_B7     (GPIO_LTDC_B7_3 | GPIO_SPEED_100MHz)
-
-#define GPIO_LTDC_VSYNC  (GPIO_LTDC_VSYNC_3 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_HSYNC  (GPIO_LTDC_HSYNC_3 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_DE     (GPIO_LTDC_DE_3 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_CLK    (GPIO_LTDC_CLK_3 | GPIO_SPEED_100MHz)
-
-/* DMA **********************************************************************/
-
-#define DMAMAP_SPI3_RX DMAMAP_DMA12_SPI3RX_0 /* DMA1 */
-#define DMAMAP_SPI3_TX DMAMAP_DMA12_SPI3TX_0 /* DMA1 */
-
-/* LCD definitions */
-
-#define BOARD_LTDC_WIDTH                480
-#define BOARD_LTDC_HEIGHT               272
-
-#define BOARD_LTDC_OUTPUT_BPP           24
-#define BOARD_LTDC_HFP                  32
-#define BOARD_LTDC_HBP                  13
-#define BOARD_LTDC_VFP                  2
-#define BOARD_LTDC_VBP                  2
-#define BOARD_LTDC_HSYNC                41
-#define BOARD_LTDC_VSYNC                10
-
-#define BOARD_LTDC_PLLSAIN              192
-#define BOARD_LTDC_PLLSAIR              5
-
-/* Pixel Clock Polarity */
-
-#define BOARD_LTDC_GCR_PCPOL            0 /* !LTDC_GCR_PCPOL */
-
-/* Data Enable Polarity */
-
-#define BOARD_LTDC_GCR_DEPOL            0 /* !LTDC_GCR_DEPOL */
-
-/* Vertical Sync Polarity */
-
-#define BOARD_LTDC_GCR_VSPOL            0 /* !LTDC_GCR_VSPOL */
-
-/* Horizontal Sync Polarity */
-
-#define BOARD_LTDC_GCR_HSPOL            0 /* !LTDC_GCR_HSPOL */
-
-/* GPIO pinset */
-
-#define GPIO_LTDC_PINS                  24 /* 24-bit display */
+#define GPIO_SDMMC1_CK   (GPIO_SDMMC1_CK_0  | GPIO_SPEED_100MHz)
+#define GPIO_SDMMC1_CMD  (GPIO_SDMMC1_CMD_0 | GPIO_SPEED_100MHz)
+#define GPIO_SDMMC1_D0   (GPIO_SDMMC1_D0_0  | GPIO_SPEED_100MHz)
+#define GPIO_SDMMC1_D1   (GPIO_SDMMC1_D1_0  | GPIO_SPEED_100MHz)
+#define GPIO_SDMMC1_D2   (GPIO_SDMMC1_D2_0  | GPIO_SPEED_100MHz)
+#define GPIO_SDMMC1_D3   (GPIO_SDMMC1_D3_0  | GPIO_SPEED_100MHz)
 
 /****************************************************************************
  * Public Data
