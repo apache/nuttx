@@ -139,12 +139,6 @@ static int local_sockif_alloc(FAR struct socket *psock)
       return -ENOMEM;
     }
 
-  /* Set the reference count on the connection structure.  This reference
-   * count will be incremented only if the socket is dup'ed
-   */
-
-  local_addref(conn);
-
   /* Save the pre-allocated connection in the socket structure */
 
   psock->s_conn = conn;

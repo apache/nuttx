@@ -118,9 +118,10 @@ FAR struct local_conn_s *local_alloc(void)
        * necessary to zerio-ize any structure elements.
        */
 
+      conn->lc_crefs = 1;
+
 #ifdef CONFIG_NET_LOCAL_STREAM
       nxsem_init(&conn->lc_waitsem, 0, 0);
-
 #endif
 
       /* This semaphore is used for sending safely in multithread.
@@ -173,10 +174,6 @@ int local_alloc_accept(FAR struct local_conn_s *server,
       nerr("ERROR:  Failed to allocate new connection structure\n");
       return -ENOMEM;
     }
-
-  /* Initialize the new connection structure */
-
-  local_addref(conn);
 
   conn->lc_proto  = SOCK_STREAM;
   conn->lc_type   = LOCAL_TYPE_PATHNAME;
