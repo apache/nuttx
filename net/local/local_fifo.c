@@ -679,13 +679,13 @@ int local_open_receiver(FAR struct local_conn_s *conn, bool nonblock)
       ret = local_set_policy(&conn->lc_infile, 1);
       if (ret == 0)
         {
-          /* Set POLLOUT threshold bigger than preamble len.
+          /* Set POLLIN threshold bigger than preamble len.
            * This is to avoid non-blocking read failed with -EAGAIN when
            * only preamble len is sent and read by reader.
            */
 
-          ret = local_set_polloutthreshold(&conn->lc_infile,
-                                           sizeof(uint16_t));
+          ret = local_set_pollinthreshold(&conn->lc_infile,
+                                          sizeof(uint16_t));
         }
     }
 
@@ -722,13 +722,13 @@ int local_open_sender(FAR struct local_conn_s *conn, FAR const char *path,
       ret = local_set_policy(&conn->lc_outfile, 1);
       if (ret == 0)
         {
-          /* Set POLLIN threshold bigger than preamble len.
+          /* Set POLLOUT threshold bigger than preamble len.
            * This is to avoid non-blocking write failed with -EAGAIN when
            * only preamble len is sent and read by reader.
            */
 
-          ret = local_set_pollinthreshold(&conn->lc_outfile,
-                                          sizeof(uint16_t));
+          ret = local_set_polloutthreshold(&conn->lc_outfile,
+                                           sizeof(uint16_t));
         }
     }
 
