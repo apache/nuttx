@@ -36,8 +36,6 @@
 
 #include "local/local.h"
 
-#if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL)
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -164,5 +162,3 @@ int local_send_packet(FAR struct file *filep, FAR const struct iovec *buf,
 
   return len16 > 0 ? len16 : ret;
 }
-
-#endif /* CONFIG_NET && CONFIG_NET_LOCAL */

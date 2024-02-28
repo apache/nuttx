@@ -23,7 +23,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL)
 
 #include <string.h>
 #include <assert.h>
@@ -347,5 +346,3 @@ void local_subref(FAR struct local_conn_s *conn)
       local_release(conn);
     }
 }
-
-#endif /* CONFIG_NET && CONFIG_NET_LOCAL */

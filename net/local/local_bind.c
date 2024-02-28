@@ -23,7 +23,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL)
 
 #include <sys/socket.h>
 #include <string.h>
@@ -38,7 +37,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: local_bind
+ * Name: psock_local_bind
  *
  * Description:
  *   This function implements the low-level parts of the standard local
@@ -49,7 +48,7 @@
 int psock_local_bind(FAR struct socket *psock,
                      FAR const struct sockaddr *addr, socklen_t addrlen)
 {
-  FAR struct local_conn_s *conn;
+  FAR struct local_conn_s *conn = psock->s_conn;
   FAR const struct sockaddr_un *unaddr =
     (FAR const struct sockaddr_un *)addr;
 
@@ -59,8 +58,6 @@ int psock_local_bind(FAR struct socket *psock,
     {
       return -EINVAL;
     }
-
-  conn = psock->s_conn;
 
   /* Save the address family */
 
@@ -95,5 +92,3 @@ int psock_local_bind(FAR struct socket *psock,
   conn->lc_state = LOCAL_STATE_BOUND;
   return OK;
 }
-
-#endif /* CONFIG_NET && CONFIG_NET_LOCAL */
