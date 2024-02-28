@@ -46,7 +46,6 @@ static int local_event_pollsetup(FAR struct local_conn_s *conn,
                                  FAR struct pollfd *fds,
                                  bool setup)
 {
-  pollevent_t eventset;
   int i;
 
   if (setup)
@@ -79,14 +78,11 @@ static int local_event_pollsetup(FAR struct local_conn_s *conn,
           return -EBUSY;
         }
 
-      eventset = 0;
       if (conn->lc_state == LOCAL_STATE_LISTENING &&
           dq_peek(&conn->u.server.lc_waiters) != NULL)
         {
-          eventset |= POLLIN;
+          poll_notify(&fds, 1, POLLIN);
         }
-
-      poll_notify(&fds, 1, eventset);
     }
   else
     {
