@@ -60,9 +60,9 @@
  * Private Functions Definitions
  ****************************************************************************/
 
-static int x86_64_pci_write(struct pci_bus_s *bus, unsigned int devfn,
+static int x86_64_pci_write(struct pci_bus_s *bus, uint32_t devfn,
                             int where, int size, uint32_t val);
-static int x86_64_pci_read(struct pci_bus_s *bus, unsigned int devfn,
+static int x86_64_pci_read(struct pci_bus_s *bus, uint32_t devfn,
                            int where, int size, uint32_t *val);
 static uintptr_t x86_64_pci_map(struct pci_bus_s *bus, uintptr_t start,
                                 uintptr_t end);
@@ -127,7 +127,7 @@ static struct pci_controller_s g_x86_64_pci =
  *
  ****************************************************************************/
 
-static int x86_64_pci_write(struct pci_bus_s *bus, unsigned int devfn,
+static int x86_64_pci_write(struct pci_bus_s *bus, uint32_t devfn,
                             int where, int size, uint32_t val)
 {
   uint8_t offset_mask = (4 - size);
@@ -173,7 +173,7 @@ static int x86_64_pci_write(struct pci_bus_s *bus, unsigned int devfn,
  *
  ****************************************************************************/
 
-static int x86_64_pci_read(struct pci_bus_s *bus, unsigned int devfn,
+static int x86_64_pci_read(struct pci_bus_s *bus, uint32_t devfn,
                            int where, int size, uint32_t *val)
 {
   uint8_t offset_mask = 4 - size;
