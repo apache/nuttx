@@ -758,7 +758,8 @@ static void pci_setup_device(FAR struct pci_device_s *dev, int max_bar,
       pci_write_config_dword(dev, base_address_0, res->start);
       if (mask & PCI_BASE_ADDRESS_MEM_TYPE_64)
         {
-          pci_write_config_dword(dev, base_address_1, res->start >> 32);
+          pci_write_config_dword(dev, base_address_1,
+                                 (uint64_t)res->start >> 32);
         }
 
       start = res->start;
@@ -865,7 +866,7 @@ static void pci_presetup_bridge(FAR struct pci_device_s *dev)
       pci_write_config_word(dev, PCI_PREF_MEMORY_BASE,
                             (ctrl->mem_pref.start & 0xfff00000) >> 16);
       pci_write_config_dword(dev, PCI_PREF_BASE_UPPER32,
-                             ctrl->mem_pref.start >> 32);
+                             (uint64_t)ctrl->mem_pref.start >> 32);
       cmdstat |= PCI_COMMAND_MEMORY;
     }
   else
@@ -929,7 +930,7 @@ static void pci_postsetup_bridge(FAR struct pci_device_s *dev)
       pci_write_config_word(dev, PCI_PREF_MEMORY_LIMIT,
                             ((ctrl->mem_pref.start - 1) & 0xfff00000) >> 16);
       pci_write_config_dword(dev, PCI_PREF_LIMIT_UPPER32,
-                             (ctrl->mem_pref.start - 1) >> 32);
+                             (uint64_t)(ctrl->mem_pref.start - 1) >> 32);
     }
 
   if (pci_resource_size(&ctrl->io))

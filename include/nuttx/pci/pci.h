@@ -313,9 +313,9 @@ struct pci_bus_s
 
 struct pci_ops_s
 {
-  CODE int (*read)(FAR struct pci_bus_s *bus, unsigned int devfn, int where,
+  CODE int (*read)(FAR struct pci_bus_s *bus, uint32_t devfn, int where,
                    int size, FAR uint32_t *val);
-  CODE int (*write)(FAR struct pci_bus_s *bus, unsigned int devfn, int where,
+  CODE int (*write)(FAR struct pci_bus_s *bus, uint32_t devfn, int where,
                     int size, uint32_t val);
 
   /* Return memory address for pci resource */
