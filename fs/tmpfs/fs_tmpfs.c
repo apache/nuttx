@@ -281,13 +281,27 @@ static int tmpfs_realloc_file(FAR struct tmpfs_file_s *tfo,
        * zero.
        */
 
-      if (newsize > 0)
+      if (newsize == 0)
+        {
+          /* Free the file object */
+
+          kmm_free(tfo->tfo_data);
+          tfo->tfo_data = NULL;
+          tfo->tfo_alloc = 0;
+          tfo->tfo_size = 0;
+          return OK;
+        }
+      else if (newsize > 0)
         {
           /* Otherwise, don't realloc unless the object has shrunk by a
            * lot.
            */
 
           delta = tfo->tfo_alloc - newsize;
+
+          /* We should make sure the shrunked memory be zero */
+
+          memset(tfo->tfo_data + newsize, 0, delta);
           if (delta <= CONFIG_FS_TMPFS_FILE_FREEGUARD)
             {
               /* Hasn't shrunk enough.. Return doing nothing for now */
