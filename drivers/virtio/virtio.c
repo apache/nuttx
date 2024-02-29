@@ -24,6 +24,7 @@
 
 #include <debug.h>
 
+#include <nuttx/nuttx.h>
 #include <nuttx/mutex.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/virtio/virtio.h>

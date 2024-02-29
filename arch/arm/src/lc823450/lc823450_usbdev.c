@@ -38,6 +38,7 @@
 #  include <system_property.h>
 #endif
 
+#include <nuttx/nuttx.h>
 #include <nuttx/arch.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/kmalloc.h>
