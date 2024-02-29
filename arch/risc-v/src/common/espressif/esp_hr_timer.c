@@ -33,6 +33,7 @@
 #include <string.h>
 #include <sys/types.h>
 
+#include <nuttx/nuttx.h>
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>

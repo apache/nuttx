@@ -34,6 +34,7 @@
 #include <sys/types.h>
 #include <time.h>
 
+#include <nuttx/nuttx.h>
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/kthread.h>
