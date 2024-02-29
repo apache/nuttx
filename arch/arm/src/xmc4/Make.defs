@@ -51,6 +51,6 @@ ifeq ($(CONFIG_XMC4_USCI_SPI),y)
 CHIP_CSRCS += xmc4_spi.c
 endif
 
-ifeq ($(CONFIG_ECAT),y)
+ifeq ($(CONFIG_XMC4_ECAT),y)
 CHIP_CSRCS += xmc4_ecat.c
 endif

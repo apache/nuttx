@@ -177,6 +177,23 @@ config XMC4_USIC2
 	---help---
 		Support USIC2
 
+config XMC4_ECAT
+	bool "Enable EtherCAT interface"
+	default y
+	depends on ARCH_CHIP_XMC4800
+	---help---
+			Enable start up of the EtherCAT interface and configure ports.
+
+config XMC4_ECAT_P0
+	bool "Enable EtherCAT port 0"
+	default y
+	depends on XMC4_ECAT
+
+config XMC4_ECAT_P1
+	bool "Enable EtherCAT port 1"
+	default n
+	depends on XMC4_ECAT
+
 endmenu
 
 menu "XMC4xxx USIC Configuration"
