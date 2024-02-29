@@ -39,7 +39,7 @@ if(CONFIG_BUILD_PROTECTED)
   list(APPEND SRCS xmc4_userspace.c xmc4_mpuinit.c)
 endif()
 
-if(CONFIG_ECAT)
+if(CONFIG_XMC4_ECAT)
   list(APPEND SRCS xmc4_ecat.c)
 endif()
 

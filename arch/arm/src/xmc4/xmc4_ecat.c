@@ -38,6 +38,7 @@
 
 void xmc4_ecat_initialize()
 {
+#ifdef CONFIG_XMC4_ECAT_P0
   /* Init inputs */
 
   xmc4_gpio_config(ECAT_P0_LINK_STATUS);
@@ -49,16 +50,6 @@ void xmc4_ecat_initialize()
   xmc4_gpio_config(ECAT_P0_RX_CLK);
   xmc4_gpio_config(ECAT_P0_RX_ERR);
   xmc4_gpio_config(ECAT_P0_TX_CLK);
-  xmc4_gpio_config(ECAT_P1_LINK_STATUS);
-  xmc4_gpio_config(ECAT_P1_RXD3);
-  xmc4_gpio_config(ECAT_P1_RXD2);
-  xmc4_gpio_config(ECAT_P1_RXD1);
-  xmc4_gpio_config(ECAT_P1_RXD0);
-  xmc4_gpio_config(ECAT_P1_RX_DV);
-  xmc4_gpio_config(ECAT_P1_RX_CLK);
-  xmc4_gpio_config(ECAT_P1_RX_ERR);
-  xmc4_gpio_config(ECAT_P1_TX_CLK);
-  xmc4_gpio_config(ECAT_MDO);
 
   /* Init outputs */
 
@@ -68,12 +59,32 @@ void xmc4_ecat_initialize()
   xmc4_gpio_config(ECAT_P0_TXD1);
   xmc4_gpio_config(ECAT_P0_TXD0);
   xmc4_gpio_config(ECAT_P0_TX_EN);
+#endif
+
+#ifdef CONFIG_XMC4_ECAT_P1
+  /* Init inputs */
+
+  xmc4_gpio_config(ECAT_P1_LINK_STATUS);
+  xmc4_gpio_config(ECAT_P1_RXD3);
+  xmc4_gpio_config(ECAT_P1_RXD2);
+  xmc4_gpio_config(ECAT_P1_RXD1);
+  xmc4_gpio_config(ECAT_P1_RXD0);
+  xmc4_gpio_config(ECAT_P1_RX_DV);
+  xmc4_gpio_config(ECAT_P1_RX_CLK);
+  xmc4_gpio_config(ECAT_P1_RX_ERR);
+  xmc4_gpio_config(ECAT_P1_TX_CLK);
+
+  /* Init outputs */
+
   xmc4_gpio_config(ECAT_P1_LED_LINK_ACT);
   xmc4_gpio_config(ECAT_P1_TXD3);
   xmc4_gpio_config(ECAT_P1_TXD2);
   xmc4_gpio_config(ECAT_P1_TXD1);
   xmc4_gpio_config(ECAT_P1_TXD0);
   xmc4_gpio_config(ECAT_P1_TX_EN);
+#endif
+
+  xmc4_gpio_config(ECAT_MDO);
   xmc4_gpio_config(ECAT_CLK_25);
   xmc4_gpio_config(ECAT_LED_ERR);
   xmc4_gpio_config(ECAT_LED_RUN);
@@ -394,6 +405,21 @@ void xmc4_ecat_initialize_port_control()
   }
 
   uint32_t ecat0_port0_conf = 0;
+#ifndef CONFIG_XMC4_ECAT_P0
+  /* When port 0 is not available, the unused MII need to be tied
+  * to not connected pins.
+  */
+
+  port0_rxd0_conf   = SCU_ECAT0CON_PORT0_RXD0D;
+  port0_rxd1_conf   = SCU_ECAT0CON_PORT0_RXD1D;
+  port0_rxd2_conf   = SCU_ECAT0CON_PORT0_RXD2D;
+  port0_rxd3_conf   = SCU_ECAT0CON_PORT0_RXD3D;
+  port0_rx_clk_conf = SCU_ECAT0CON_PORT0_RX_CLKD;
+  port0_rx_dv_conf  = SCU_ECAT0CON_PORT0_RX_DVD;
+  port0_rx_err_conf = SCU_ECAT0CON_PORT0_RX_ERRD;
+  port0_link_conf   = SCU_ECAT0CON_PORT0_LINKB;
+  port0_tx_clk_conf = SCU_ECAT0CON_PORT0_TX_CLKD;
+#endif
   ecat0_port0_conf |= port0_rxd0_conf;
   ecat0_port0_conf |= port0_rxd1_conf;
   ecat0_port0_conf |= port0_rxd2_conf;
@@ -651,11 +677,12 @@ void xmc4_ecat_initialize_port_control()
       }
   }
 
+  uint32_t ecat0_port1_conf = 0;
+#ifndef CONFIG_XMC4_ECAT_P1
   /* When port 1 is not available, the unused MII need to be tied
   * to not connected pins.
   */
 
-#ifndef CONFIG_ECAT_P1_ENABLE
   port1_rxd0_conf   = SCU_ECAT0CON_PORT1_RXD0D;
   port1_rxd1_conf   = SCU_ECAT0CON_PORT1_RXD1D;
   port1_rxd2_conf   = SCU_ECAT0CON_PORT1_RXD2D;
@@ -666,8 +693,6 @@ void xmc4_ecat_initialize_port_control()
   port1_link_conf   = SCU_ECAT0CON_PORT1_LINKB;
   port1_tx_clk_conf = SCU_ECAT0CON_PORT1_TX_CLKD;
 #endif
-
-  uint32_t ecat0_port1_conf = 0;
   ecat0_port1_conf |= port1_rxd0_conf;
   ecat0_port1_conf |= port1_rxd1_conf;
   ecat0_port1_conf |= port1_rxd2_conf;

@@ -58,7 +58,7 @@ void xmc4_board_initialize(void)
   xmc4_spidev_initialize();
 #endif
 
-#ifdef CONFIG_ECAT
+#ifdef CONFIG_XMC4_ECAT
   xmc4_ecat_initialize();
 #endif
 }
