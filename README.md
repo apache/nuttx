@@ -23,7 +23,7 @@ For brevity, many parts of the documentation will refer to Apache NuttX as simpl
 
 ## Getting Started
 First time on NuttX? Read the [Getting Started](https://nuttx.apache.org/docs/latest/quickstart/index.html) guide!
-If you don't have a board available, NuttX has its own simulator that you can run on terminal.
+If you don't have a board available, NuttX has its own simulator that you can run on a terminal.
 
 ## Documentation
 You can find the current NuttX documentation on the [Documentation Page](https://nuttx.apache.org/docs/latest/).
@@ -36,7 +36,7 @@ The old NuttX documentation is still available in the [Apache wiki](https://cwik
 NuttX supports a wide variety of platforms. See the full list on the [Supported Platforms](https://nuttx.apache.org/docs/latest/platforms/index.html) page.
 
 ## Contributing
-If you wish to contribute to the NuttX project, read the [Contributing](https://nuttx.apache.org/docs/latest/contributing/index.html) guidelines for information on Git usage, coding standard, workflow and the NuttX principles.
+If you wish to contribute to the NuttX project, read the [Contributing](https://nuttx.apache.org/docs/latest/contributing/index.html) guidelines for information on Git usage, coding standards, workflow and the NuttX principles.
 
 ## License
 The code in this repository is under either the Apache 2 license, or a license compatible with the Apache 2 license. See the [License Page](https://nuttx.apache.org/docs/latest/introduction/licensing.html) for more information.
