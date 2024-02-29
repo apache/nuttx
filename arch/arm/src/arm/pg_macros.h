@@ -41,14 +41,14 @@
 
 /* Configuration ************************************************************/
 
-#ifdef CONFIG_PAGING
+#ifdef CONFIG_LEGACY_PAGING
 
 /* Sanity check -- we cannot be using a ROM page table and supporting on-
  * demand paging.
  */
 
 #ifdef CONFIG_ARCH_ROMPGTABLE
-#  error "Cannot support both CONFIG_PAGING and CONFIG_ARCH_ROMPGTABLE"
+#  error "Cannot support both CONFIG_LEGACY_PAGING and CONFIG_ARCH_ROMPGTABLE"
 #endif
 
 /* Virtual Page Table Location **********************************************/
@@ -342,7 +342,7 @@
 #define PG_POOL_PGPADDR(ndx)    (PG_PAGED_PBASE + ((ndx) << PAGESHIFT))
 #define PG_POOL_PGVADDR(ndx)    (PG_PAGED_VBASE + ((ndx) << PAGESHIFT))
 
-#endif /* CONFIG_PAGING */
+#endif /* CONFIG_LEGACY_PAGING */
 
 /****************************************************************************
  * Assembly Macros
@@ -355,8 +355,8 @@
  *
  * Description:
  *   Write several, contiguous L2 page table entries.  npages entries will be
- *   written. This macro is used when CONFIG_PAGING is enable.  This case,
- *   it is used as follows:
+ *   written. This macro is used when CONFIG_LEGACY_PAGING is enable.
+ *   This case, it is used as follows:
  *
  *  ldr r0, =PGTABLE_L2_BASE_PADDR      <-- Address in L2 table
  *  ldr r1, =PG_LOCKED_PBASE            <-- Physical page memory address
@@ -385,7 +385,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_PAGING
+#ifdef CONFIG_LEGACY_PAGING
   .macro  pg_l2map, l2, ppage, npages, mmuflags, tmp
   b  2f
 1:
@@ -418,7 +418,7 @@
   cmp \npages, #0
   bgt 1b
   .endm
-#endif /* CONFIG_PAGING */
+#endif /* CONFIG_LEGACY_PAGING */
 
 /****************************************************************************
  * Name: pg_l1span
@@ -426,8 +426,8 @@
  * Description:
  *   Write several, contiguous unmapped coarse L1 page table entries.  As
  *   many entries will be written as  many as needed to span npages.  This
- *   macro is used when CONFIG_PAGING is enable.  This case, it is used as
- *   follows:
+ *   macro is used when CONFIG_LEGACY_PAGING is enable.
+ *   This case, it is used as follows:
  *
  * ldr r0, =PG_L1_PGTABLE_PADDR         <-- Address in the L1 table
  * ldr r1, =PG_L2_PGTABLE_PADDR         <-- Physical address of L2 page table
@@ -461,7 +461,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_PAGING
+#ifdef CONFIG_LEGACY_PAGING
   .macro pg_l1span, l1, l2, npages, ppage, mmuflags, tmp
   b 2f
 1:
@@ -499,7 +499,7 @@
   bgt 1b
   .endm
 
-#endif /* CONFIG_PAGING */
+#endif /* CONFIG_LEGACY_PAGING */
 #endif /* __ASSEMBLY__ */
 
 /****************************************************************************

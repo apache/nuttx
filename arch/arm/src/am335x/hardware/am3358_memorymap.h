@@ -461,12 +461,12 @@
 
 #else /* PGTABLE_BASE_PADDR || PGTABLE_BASE_VADDR */
 
-  /* If CONFIG_PAGING is selected, then parts of the 1-to-1 virtual memory
-   * map probably do not apply because paging logic will probably partition
-   * the SRAM section differently.  In particular, if the page table is
-   * located at the end of SRAM, then the virtual page table address defined
-   * below will probably be in error.  In that case PGTABLE_BASE_VADDR is
-   * defined in the file mmu.h
+  /* If CONFIG_LEGACY_PAGING is selected, then parts of the 1-to-1 virtual
+   * memory map probably do not apply because paging logic will probably
+   * partition the SRAM section differently.  In particular, if the page
+   * table is located at the end of SRAM, then the virtual page table address
+   * defined below will probably be in error.
+   * In that case PGTABLE_BASE_VADDR is defined in the file mmu.h
    *
    * We must declare the page table at the bottom or at the top of internal
    * SRAM.  We pick the bottom of internal SRAM *unless* there are vectors
@@ -547,7 +547,7 @@
 
 /* Paging L2 page table base addresses
  *
- * NOTE: If CONFIG_PAGING is defined, mmu.h will re-assign the virtual
+ * NOTE: If CONFIG_LEGACY_PAGING is defined, mmu.h will re-assign the virtual
  * address of the page table.
  */
 

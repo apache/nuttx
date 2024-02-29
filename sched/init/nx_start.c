@@ -142,7 +142,7 @@ dq_queue_t g_pendingtasks;
 
 dq_queue_t g_waitingforsignal;
 
-#ifdef CONFIG_PAGING
+#ifdef CONFIG_LEGACY_PAGING
 /* This is the list of all tasks that are blocking waiting for a page fill */
 
 dq_queue_t g_waitingforfill;
@@ -239,7 +239,7 @@ const struct tasklist_s g_tasklisttable[NUM_TASK_STATES] =
     TLIST_ATTR_PRIORITIZED | TLIST_ATTR_OFFSET
   }
 #endif
-#ifdef CONFIG_PAGING
+#ifdef CONFIG_LEGACY_PAGING
   ,
   {                                              /* TSTATE_WAIT_PAGEFILL */
     &g_waitingforfill,
