@@ -32,6 +32,14 @@ endif
 
 CFLAGS += -Delf_load=remoteproc_elf_load
 
+ifeq ($(CONFIG_OPENAMP_VIRTIO_DEVICE_ONLY),y)
+  CFLAGS += -DVIRTIO_DEVICE_ONLY
+endif
+
+ifeq ($(CONFIG_OPENAMP_VIRTIO_DRIVER_ONLY),y)
+  CFLAGS += -DVIRTIO_DRIVER_ONLY
+endif
+
 CSRCS += open-amp/lib/remoteproc/elf_loader.c
 CSRCS += open-amp/lib/remoteproc/remoteproc.c
 CSRCS += open-amp/lib/remoteproc/remoteproc_virtio.c

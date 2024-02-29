@@ -99,6 +99,14 @@ endif()
 
 add_compile_definitions(elf_load=remoteproc_elf_load)
 
+if(CONFIG_OPENAMP_VIRTIO_DEVICE_ONLY)
+  add_compile_definitions(VIRTIO_DEVICE_ONLY)
+endif()
+
+if(CONFIG_OPENAMP_VIRTIO_DRIVER_ONLY)
+  add_compile_definitions(VIRTIO_DRIVER_ONLY)
+endif()
+
 set(WITH_LIBMETAL_FIND OFF)
 
 if(NOT CMAKE_SYSTEM_PROCESSOR)
