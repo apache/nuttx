@@ -149,7 +149,7 @@ int pipecommon_open(FAR struct file *filep)
    * is first opened.
    */
 
-  if (dev->d_crefs == 0)
+  if (dev->d_crefs == 0 && PIPE_IS_POLICY_0(dev->d_flags))
     {
       ret = circbuf_init(&dev->d_buffer, NULL, dev->d_bufsize);
       if (ret < 0)
@@ -440,7 +440,7 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
     {
       /* If there are no writers on the pipe, then return end of file */
 
-      if (dev->d_nwriters <= 0)
+      if (dev->d_nwriters <= 0 && PIPE_IS_POLICY_0(dev->d_flags))
         {
           nxmutex_unlock(&dev->d_bflock);
           return 0;
@@ -556,7 +556,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
        * ignoring this signal, then write(2) fails with the error EPIPE."
        */
 
-      if (dev->d_nreaders <= 0)
+      if (dev->d_nreaders <= 0 && PIPE_IS_POLICY_0(dev->d_flags))
         {
           nxmutex_unlock(&dev->d_bflock);
           return nwritten == 0 ? -EPIPE : nwritten;
