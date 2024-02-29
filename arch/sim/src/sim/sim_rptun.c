@@ -22,6 +22,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/nuttx.h>
 #include <nuttx/drivers/addrenv.h>
 #include <nuttx/rptun/rptun.h>
 #include <nuttx/list.h>

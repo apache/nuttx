@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/nuttx.h>
 #include <nuttx/list.h>
 #include <nuttx/clock.h>
 #include <nuttx/kmalloc.h>

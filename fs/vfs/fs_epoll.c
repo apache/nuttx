@@ -33,6 +33,7 @@
 #include <string.h>
 #include <debug.h>
 
+#include <nuttx/nuttx.h>
 #include <nuttx/clock.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
