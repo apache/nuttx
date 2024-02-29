@@ -68,9 +68,8 @@ static const struct arm_mmu_region g_mmu_regions[] =
                         CONFIG_DEVICEPCIE_SIZE,
                         MT_NORMAL | MT_RW | MT_SECURE),
 
-  MMU_REGION_FLAT_ENTRY("IVSHMEM",
-                        CONFIG_IVSHMEM_BASEADDR,
-                        CONFIG_IVSHMEM_SIZE,
+  MMU_REGION_FLAT_ENTRY("PCI",
+                        CONFIG_PCI_BASEADDR, CONFIG_PCI_SIZE,
                         MT_NORMAL | MT_RW | MT_SECURE),
 };
 
