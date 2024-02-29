@@ -34,7 +34,7 @@
 #include "chip.h"
 #include "arm_internal.h"
 
-#ifdef CONFIG_PAGING
+#ifdef CONFIG_LEGACY_PAGING
 
 /****************************************************************************
  * Public Functions
@@ -90,4 +90,4 @@ uint32_t *arm_va2pte(uintptr_t vaddr)
   return &L2[ndx];
 }
 
-#endif /* CONFIG_PAGING */
+#endif /* CONFIG_LEGACY_PAGING */

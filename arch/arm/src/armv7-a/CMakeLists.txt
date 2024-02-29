@@ -60,7 +60,7 @@ if(CONFIG_ARMV7A_L2CC_PL310)
   list(APPEND SRCS arm_l2cc_pl310.c)
 endif()
 
-if(CONFIG_PAGING)
+if(CONFIG_LEGACY_PAGING)
   list(
     APPEND
     SRCS

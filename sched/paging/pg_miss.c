@@ -33,7 +33,7 @@
 #include <nuttx/page.h>
 #include <nuttx/signal.h>
 
-#ifdef CONFIG_PAGING
+#ifdef CONFIG_LEGACY_PAGING
 
 #include "sched/sched.h"
 #include "paging/paging.h"
@@ -183,4 +183,4 @@ void pg_miss(void)
     }
 }
 
-#endif /* CONFIG_PAGING */
+#endif /* CONFIG_LEGACY_PAGING */

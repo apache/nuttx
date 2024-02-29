@@ -95,7 +95,7 @@ void lpc31_boardinitialize(void)
 
   /* Set up mass storage device to support on demand paging */
 
-#if defined(CONFIG_PAGING)
+#if defined(CONFIG_LEGACY_PAGING)
   if (lpc31_pginitialize)
     {
       lpc31_pginitialize();

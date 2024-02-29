@@ -397,7 +397,7 @@ arm_vectordata:
 
 	mov	fp, #0			/* Init frame pointer */
 	mov	r0, sp			/* Get r0=xcp */
-#ifdef CONFIG_PAGING
+#ifdef CONFIG_LEGACY_PAGING
 	mrc	p15, 0, r1, c6, c0, 0	/* Get R1=FAR */
 	mrc	p15, 0, r2, c5, c0, 0	/* Get r2=FSR */
 #endif

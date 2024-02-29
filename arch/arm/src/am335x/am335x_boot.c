@@ -29,7 +29,7 @@
 #include <debug.h>
 
 #include <nuttx/cache.h>
-#ifdef CONFIG_PAGING
+#ifdef CONFIG_LEGACY_PAGING
 #  include <nuttx/page.h>
 #endif
 
@@ -198,7 +198,7 @@ static inline void am335x_remap(void)
  ****************************************************************************/
 
 #if !defined(CONFIG_ARCH_ROMPGTABLE) && defined(CONFIG_ARCH_LOWVECTORS) && \
-     defined(CONFIG_PAGING)
+     defined(CONFIG_LEGACY_PAGING)
 static void am335x_vectorpermissions(uint32_t mmuflags)
 {
   /* The PTE for the beginning of OCMC0 RAM is at the base of the L2 page
@@ -307,7 +307,7 @@ static void am335x_copyvectorblock(void)
   uint32_t *end;
   uint32_t *dest;
 
-#ifdef CONFIG_PAGING
+#ifdef CONFIG_LEGACY_PAGING
   /* If we are using re-mapped vectors in an area that has been marked
    * read only, then temporarily mark the mapping write-able (non-buffered).
    */
@@ -334,7 +334,7 @@ static void am335x_copyvectorblock(void)
       *dest++ = *src++;
     }
 
-#if !defined(CONFIG_ARCH_LOWVECTORS) && defined(CONFIG_PAGING)
+#if !defined(CONFIG_ARCH_LOWVECTORS) && defined(CONFIG_LEGACY_PAGING)
   /* Make the vectors read-only, cache-able again */
 
   am335x_vectorpermissions(MMU_L2_VECTORFLAGS);

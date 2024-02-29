@@ -32,7 +32,7 @@
 
 #include <nuttx/sched.h>
 
-#ifdef CONFIG_PAGING
+#ifdef CONFIG_LEGACY_PAGING
 
 #include <nuttx/page.h>
 
@@ -171,7 +171,7 @@ int up_allocpage(struct tcb_s *tcb, void **vpage)
    */
 
   pgndx = g_pgndx++;
-  if (g_pgndx >= CONFIG_PAGING)
+  if (g_pgndx >= CONFIG_LEGACY_PAGING)
     {
       g_pgndx  = 0;
       g_pgwrap = true;
@@ -225,4 +225,4 @@ int up_allocpage(struct tcb_s *tcb, void **vpage)
   return OK;
 }
 
-#endif /* CONFIG_PAGING */
+#endif /* CONFIG_LEGACY_PAGING */
