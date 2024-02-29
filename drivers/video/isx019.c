@@ -1984,7 +1984,7 @@ static int isx019_get_supported_value(FAR struct imgsensor_s *sensor,
       case IMGSENSOR_ID_EXPOSURE_ABSOLUTE:
         val->type = IMGSENSOR_CTRL_TYPE_INTEGER;
         SET_RANGE(val->u.range, MIN_EXPOSURETIME, MAX_EXPOSURETIME,
-                                STEP_EXPOSURETIME, def->exptime);
+                                STEP_EXPOSURETIME, 0); /* 0 means undefined */
         break;
 
       case IMGSENSOR_ID_AUTO_N_PRESET_WB:
@@ -2006,7 +2006,7 @@ static int isx019_get_supported_value(FAR struct imgsensor_s *sensor,
         SET_DISCRETE(val->u.discrete,
                      NR_ISO,
                      g_isx019_iso,
-                     def->iso);
+                     0); /* 0 means undefined */
         break;
 
       case IMGSENSOR_ID_ISO_SENSITIVITY_AUTO:
