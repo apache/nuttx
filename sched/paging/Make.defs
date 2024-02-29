@@ -18,7 +18,7 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_PAGING),y)
+ifeq ($(CONFIG_LEGACY_PAGING),y)
 
 CSRCS += pg_miss.c pg_worker.c
 

@@ -103,7 +103,7 @@ void weak_function lpc31_usbinitialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_PAGING
+#ifdef CONFIG_LEGACY_PAGING
 void weak_function lpc31_pginitialize(void);
 #endif
 

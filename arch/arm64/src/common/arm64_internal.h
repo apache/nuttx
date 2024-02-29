@@ -299,11 +299,11 @@ uint64_t *arm64_doirq(int irq, uint64_t *regs);
 
 /* Paging support */
 
-#ifdef CONFIG_PAGING
+#ifdef CONFIG_LEGACY_PAGING
 void arm64_pginitialize(void);
-#else /* CONFIG_PAGING */
+#else /* CONFIG_LEGACY_PAGING */
 #  define arm64_pginitialize()
-#endif /* CONFIG_PAGING */
+#endif /* CONFIG_LEGACY_PAGING */
 
 uint64_t * arm64_syscall_switch(uint64_t *regs);
 int arm64_syscall(uint64_t *regs);

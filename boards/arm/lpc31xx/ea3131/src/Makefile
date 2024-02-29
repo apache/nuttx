@@ -42,7 +42,7 @@ ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += lpc31_appinit.c
 endif
 
-ifeq ($(CONFIG_PAGING),y)
+ifeq ($(CONFIG_LEGACY_PAGING),y)
 CSRCS += lpc31_fillpage.c
 endif
 

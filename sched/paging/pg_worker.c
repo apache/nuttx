@@ -42,7 +42,7 @@
 #include "sched/sched.h"
 #include "paging/paging.h"
 
-#ifdef CONFIG_PAGING
+#ifdef CONFIG_LEGACY_PAGING
 
 /****************************************************************************
  * Public Data
@@ -693,4 +693,4 @@ int pg_worker(int argc, FAR char *argv[])
 
   return OK; /* To keep some compilers happy */
 }
-#endif /* CONFIG_PAGING */
+#endif /* CONFIG_LEGACY_PAGING */

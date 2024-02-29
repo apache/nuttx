@@ -53,7 +53,7 @@ static FAR const char * const g_statenames[] =
   , "Waiting,MQ empty"
   , "Waiting,MQ full"
 #endif
-#ifdef CONFIG_PAGING
+#ifdef CONFIG_LEGACY_PAGING
   , "Waiting,Paging fill"
 #endif
 #ifdef CONFIG_SIG_SIGSTOP_ACTION

@@ -31,7 +31,7 @@
 
 #include "arm_internal.h"
 
-#ifdef CONFIG_PAGING
+#ifdef CONFIG_LEGACY_PAGING
 
 /****************************************************************************
  * Public Functions
@@ -65,4 +65,4 @@ void arm_pginitialize(void)
    */
 }
 
-#endif /* CONFIG_PAGING */
+#endif /* CONFIG_LEGACY_PAGING */
