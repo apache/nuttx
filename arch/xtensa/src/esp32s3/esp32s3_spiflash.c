@@ -36,6 +36,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/init.h>
 #include <nuttx/kthread.h>
+#include <nuttx/signal.h>
 
 #include "sched/sched.h"
 
@@ -730,6 +731,28 @@ static void IRAM_ATTR spiflash_flushmapped(size_t start, size_t size)
         }
     }
 }
+
+/****************************************************************************
+ * Name: spiflash_os_yield
+ *
+ * Description:
+ *   Yield to other tasks, called during erase operations.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static inline void IRAM_ATTR spiflash_os_yield(void)
+{
+  /* Delay 1 tick */
+
+  useconds_t us = TICK2USEC(1);
+  nxsig_usleep(us);
+}
 #endif /* CONFIG_ESP32S3_SPI_FLASH_DONT_USE_ROM_CODE */
 
 /****************************************************************************
@@ -1105,19 +1128,25 @@ int spi_flash_erase_range(uint32_t start_address, uint32_t size)
   int ret = OK;
   uint32_t addr = start_address;
 
-  spiflash_start();
-
   for (uint32_t i = 0; i < size; i += FLASH_SECTOR_SIZE)
     {
+      if (i > 0)
+        {
+          spiflash_os_yield();
+        }
+
+      spiflash_start();
       wait_flash_idle();
       enable_flash_write();
 
       ERASE_FLASH_SECTOR(addr);
       addr += FLASH_SECTOR_SIZE;
+      wait_flash_idle();
+      disable_flash_write();
+      spiflash_end();
     }
 
-  wait_flash_idle();
-  disable_flash_write();
+  spiflash_start();
   spiflash_flushmapped(start_address, FLASH_SECTOR_SIZE * size);
   spiflash_end();
 
