@@ -38,7 +38,7 @@
  * Public Data
  ****************************************************************************/
 
-extern unsigned long x86_64_timer_freq;
+extern unsigned long g_x86_64_timer_freq;
 
 /****************************************************************************
  * Public Functions
@@ -84,14 +84,14 @@ void x86_64_timer_calibrate_freq(void)
 
   if (numerator == 0 || denominator == 0 || crystal_freq == 0)
     {
-      x86_64_timer_freq = CONFIG_ARCH_INTEL64_CORE_FREQ_KHZ * 1000L;
+      g_x86_64_timer_freq = CONFIG_ARCH_INTEL64_CORE_FREQ_KHZ * 1000L;
     }
   else
     {
-      x86_64_timer_freq = crystal_freq / denominator * numerator;
+      g_x86_64_timer_freq = crystal_freq / denominator * numerator;
     }
 
 #elif defined(CONFIG_ARCH_INTEL64_TSC)
-  x86_64_timer_freq = CONFIG_ARCH_INTEL64_APIC_FREQ_KHZ * 1000L;
+  g_x86_64_timer_freq = CONFIG_ARCH_INTEL64_APIC_FREQ_KHZ * 1000L;
 #endif
 }
