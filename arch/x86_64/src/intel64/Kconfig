@@ -18,13 +18,31 @@ config ARCH_CHIP_INTEL64_CUSTOM
 
 endchoice # "Intel64 Chip Selection"
 
-config ARCH_INTEL64_HAVE_TSC_DEADLINE
+config ARCH_INTEL64_HAVE_TSC
+	bool
+
+choice
+	prompt "System Timer Source"
+	default ARCH_INTEL64_TSC_DEADLINE
+	---help---
+		Choose which hardware resource will drive NuttX
+		system time
+
+config ARCH_INTEL64_TSC_DEADLINE
 	bool "TSC DEADLINE timer support"
-	default y
+	select ARCH_INTEL64_HAVE_TSC
 	---help---
 		Select to enable the use of TSC DEADLINE timer of x86_64
 
-if ARCH_INTEL64_HAVE_TSC_DEADLINE
+config ARCH_INTEL64_TSC
+	bool "TSC APIC timer support"
+	select ARCH_INTEL64_HAVE_TSC
+	---help---
+		Select to enable the use of TSC APIC timer of x86_64
+
+endchoice # System Timer Source
+
+if ARCH_INTEL64_TSC_DEADLINE
 
 config ARCH_INTEL64_CORE_FREQ_KHZ
 	int "CPU Core frequency in kHz"
@@ -35,7 +53,7 @@ config ARCH_INTEL64_CORE_FREQ_KHZ
 
 endif
 
-if !ARCH_INTEL64_HAVE_TSC_DEADLINE
+if ARCH_INTEL64_TSC
 
 config ARCH_INTEL64_APIC_FREQ_KHZ
 	int "APIC timer frequency in kHz"

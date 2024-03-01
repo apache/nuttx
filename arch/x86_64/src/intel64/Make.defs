@@ -52,12 +52,12 @@ ifeq ($(CONFIG_MULTBOOT2_FB_TERM),y)
 CHIP_CSRCS += intel64_mbfb.c
 endif
 
-ifneq ($(CONFIG_SCHED_TICKLESS),y)
-CHIP_CSRCS += intel64_timerisr.c
-endif
-
+ifeq ($(CONFIG_ARCH_INTEL64_HAVE_TSC),y)
 ifeq ($(CONFIG_SCHED_TICKLESS),y)
-CHIP_CSRCS += intel64_tickless.c
+CHIP_CSRCS += intel64_tsc_tickless.c
+else
+CHIP_CSRCS += intel64_tsc_timerisr.c
+endif
 endif
 
 ifeq ($(CONFIG_INTEL64_HPET),y)

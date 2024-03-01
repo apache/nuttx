@@ -71,7 +71,7 @@ extern unsigned long x86_64_timer_freq;
 
 void x86_64_timer_calibrate_freq(void)
 {
-#ifdef CONFIG_ARCH_INTEL64_HAVE_TSC_DEADLINE
+#ifdef CONFIG_ARCH_INTEL64_TSC_DEADLINE
 
   unsigned long crystal_freq;
   unsigned long numerator;
@@ -91,7 +91,7 @@ void x86_64_timer_calibrate_freq(void)
       x86_64_timer_freq = crystal_freq / denominator * numerator;
     }
 
-#else
+#elif defined(CONFIG_ARCH_INTEL64_TSC)
   x86_64_timer_freq = CONFIG_ARCH_INTEL64_APIC_FREQ_KHZ * 1000L;
 #endif
 }

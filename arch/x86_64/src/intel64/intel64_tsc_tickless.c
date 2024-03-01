@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/x86_64/src/intel64/intel64_tickless.c
+ * arch/x86_64/src/intel64/intel64_tsc_tickless.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -92,7 +92,7 @@ void up_mask_tmr(void)
 {
   /* Disable TSC Deadline interrupt */
 
-#ifdef CONFIG_ARCH_INTEL64_HAVE_TSC_DEADLINE
+#ifdef CONFIG_ARCH_INTEL64_TSC_DEADLINE
   write_msr(MSR_X2APIC_LVTT, TMR_IRQ | MSR_X2APIC_LVTT_TSC_DEADLINE |
             (1 << 16));
 #else
@@ -108,7 +108,7 @@ void up_unmask_tmr(void)
 {
   /* Enable TSC Deadline interrupt */
 
-#ifdef CONFIG_ARCH_INTEL64_HAVE_TSC_DEADLINE
+#ifdef CONFIG_ARCH_INTEL64_TSC_DEADLINE
   write_msr(MSR_X2APIC_LVTT, TMR_IRQ | MSR_X2APIC_LVTT_TSC_DEADLINE);
 #else
   write_msr(MSR_X2APIC_LVTT, TMR_IRQ);
