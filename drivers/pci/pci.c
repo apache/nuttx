@@ -1941,12 +1941,13 @@ int pci_register_device(FAR struct pci_device_s *dev)
               if (drv->probe(dev) >= 0)
                 {
                   dev->drv = drv;
-                  break;
+                  goto out;
                 }
             }
         }
     }
 
+out:
   nxmutex_unlock(&g_pci_lock);
   return ret;
 }
