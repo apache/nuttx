@@ -20,6 +20,7 @@
 ############################################################################
 
 # Darwin
+
 # Prerequisites for macOS
 #  - Xcode (cc, etc)
 #  - homebrew
@@ -284,7 +285,7 @@ wasi_sdk() {
     wasibasefile=wasi-sdk-19.0-macos
     wasmbasefile=wamrc-1.1.2-x86_64-macos-latest
     cd "${NUTTXTOOLS}"
-    mkdir wamrc
+    mkdir -p wamrc
     wget --quiet https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-19/${wasibasefile}.tar.gz
     tar xzf ${wasibasefile}.tar.gz
     mv wasi-sdk-19.0 wasi-sdk
