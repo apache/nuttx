@@ -26,7 +26,26 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
+#ifdef CONFIG_DEV_SIMPLE_ADDRENV
+#  include <nuttx/drivers/addrenv.h>
+#endif
+
 #include "x86_64_internal.h"
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_SIMPLE_ADDRENV
+/* Map 1:1 with 0x100000000 offset */
+
+struct simple_addrenv_s g_addrenv =
+{
+  .va   = X86_64_LOAD_OFFSET,
+  .pa   = 0,
+  .size = 0xffffffffffffffff
+};
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -60,6 +79,21 @@ static void up_calibratedelay(void)
 #endif
 
 /****************************************************************************
+ * Name: up_addrenv_init
+ *
+ * Description:
+ *   Initialize addrenv.
+ *
+ ****************************************************************************/
+
+static void x86_64_addrenv_init(void)
+{
+#ifdef CONFIG_DEV_SIMPLE_ADDRENV
+  simple_addrenv_initialize(&g_addrenv);
+#endif
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -85,6 +119,10 @@ void up_initialize(void)
   /* Add any extra memory fragments to the memory manager */
 
   x86_64_addregion();
+
+  /* Initialzie addrenv */
+
+  x86_64_addrenv_init();
 
 #ifdef CONFIG_PM
   /* Initialize the power management subsystem.  This MCU-specific function
