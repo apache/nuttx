@@ -116,7 +116,8 @@ endif
 ifeq ($(CONFIG_ESP32S3_SPI),y)
   ifeq ($(CONFIG_ESP32S3_SPI_IO_SPI),y)
     CHIP_CSRCS += esp32s3_spi.c
-  else
+  endif
+  ifeq ($(CONFIG_ESP32S3_SPI_IO_QIO),y)
     CHIP_CSRCS += esp32s3_qspi.c
   endif
 
