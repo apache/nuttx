@@ -154,6 +154,22 @@ In `nsh`, applications can be run from the `/system/bin` directory::
 
     nsh> /system/bin/hello
 
+.. _knsh32_paging:
+
+knsh32_paging
+-------------
+
+Similar to ``knsh32_romfs``, but enabling on-demand paging: this
+configuration simulates a 4MiB device (using QEMU), but sets the number of
+heap pages equal to ``CONFIG_ARCH_HEAP_NPAGES=2048``. This means that each
+process's heap is 8MiB, whereas ``CONFIG_POSIX_SPAWN_DEFAULT_STACKSIZE`` is
+``1048576`` (1MiB) represents the stack size of the processes (which is
+allocated from the process's heap). This configuration is used for 32-bit
+RISC-V which implements the Sv32 MMU specification and enables processes
+to have their own address space larger than the available physical memory.
+This is particularly useful for implementing a set of programming language
+interpreters.
+
 knsh32_romfs
 ------------
 
