@@ -28,6 +28,15 @@
 #include <nuttx/config.h>
 #include <arch/a1x/chip.h>
 
+/* A1X Virtual (mapped) Memory Map
+ *
+ * board_memorymap.h contains special mappings that are needed when a ROM
+ * memory map is used.  It is included in this odd location because it
+ * depends on some the virtual address definitions provided above.
+ */
+
+#include <arch/board/board_memorymap.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -278,15 +287,6 @@
 #define A1X_DE_MMUFLAGS      MMU_IOFLAGS
 #define A1X_DDR_MMUFLAGS     MMU_MEMFLAGS
 #define A1X_BROM_MMUFLAGS    MMU_ROMFLAGS
-
-/* A1X Virtual (mapped) Memory Map
- *
- * board_memorymap.h contains special mappings that are needed when a ROM
- * memory map is used.  It is included in this odd location because it
- * depends on some the virtual address definitions provided above.
- */
-
-#include <arch/board/board_memorymap.h>
 
 /* A1X Virtual (mapped) Memory Map.  These are the mappings that will
  * be created if the page table lies in RAM.  If the platform has another,
