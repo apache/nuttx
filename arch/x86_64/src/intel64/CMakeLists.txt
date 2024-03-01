@@ -37,6 +37,7 @@ set(SRCS
     intel64_sigdeliver.c
     intel64_usestack.c
     intel64_systemreset.c
+    intel64_freq.c
     intel64_start.c
     intel64_handlers.c
     intel64_idle.c
