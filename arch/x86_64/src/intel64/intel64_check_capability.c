@@ -63,7 +63,7 @@ void x86_64_check_and_enable_capability(void)
 
   /* Check timer availability */
 
-#ifdef CONFIG_ARCH_INTEL64_HAVE_TSC_DEADLINE
+#ifdef CONFIG_ARCH_INTEL64_TSC_DEADLINE
   require |= X86_64_CPUID_01_TSCDEA;
 #endif
 
