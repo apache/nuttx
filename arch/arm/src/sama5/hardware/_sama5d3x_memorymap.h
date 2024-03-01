@@ -28,6 +28,15 @@
 #include <nuttx/config.h>
 #include <arch/sama5/chip.h>
 
+/* SAMA5 Virtual (mapped) Memory Map
+ *
+ * board_memorymap.h contains special mappings that are needed when a ROM
+ * memory map is used.  It is included in this odd location because it
+ * depends on some the virtual address definitions provided above.
+ */
+
+#include <arch/board/board_memorymap.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -310,15 +319,6 @@
 #define SAM_PERIPHA_MMUFLAGS     MMU_IOFLAGS
 #define SAM_PERIPHB_MMUFLAGS     MMU_IOFLAGS
 #define SAM_SYSC_MMUFLAGS        MMU_IOFLAGS
-
-/* SAMA5 Virtual (mapped) Memory Map
- *
- * board_memorymap.h contains special mappings that are needed when a ROM
- * memory map is used.  It is included in this odd location because it
- * depends on some the virtual address definitions provided above.
- */
-
-#include <arch/board/board_memorymap.h>
 
 /* SAMA5 Virtual (mapped) Memory Map.  These are the mappings that will
  * be created if the page table lies in RAM.  If the platform has another,

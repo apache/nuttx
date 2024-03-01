@@ -28,6 +28,15 @@
 #include <nuttx/config.h>
 #include <arch/am335x/chip.h>
 
+/* AM335X Virtual (mapped) Memory Map
+ *
+ * board_memorymap.h contains special mappings that are needed when a ROM
+ * memory map is used.  It is included in this odd location because it
+ * depends on some the virtual address definitions provided above.
+ */
+
+#include <arch/board/board_memorymap.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -249,15 +258,6 @@
 #define AM335X_OCMC0_MMUFLAGS           MMU_MEMFLAGS
 #define AM335X_PERIPH_MMUFLAGS          MMU_IOFLAGS
 #define AM335X_DDR_MMUFLAGS             MMU_MEMFLAGS
-
-/* AM335X Virtual (mapped) Memory Map
- *
- * board_memorymap.h contains special mappings that are needed when a ROM
- * memory map is used.  It is included in this odd location because it
- * depends on some the virtual address definitions provided above.
- */
-
-#include <arch/board/board_memorymap.h>
 
 /* AM335X Virtual (mapped) Memory Map.  These are the mappings that will
  * be created if the page table lies in RAM.  If the platform has another,
