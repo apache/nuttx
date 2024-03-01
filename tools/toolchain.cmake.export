@@ -21,13 +21,12 @@ set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES
 add_compile_options(-nostdlib)
 add_compile_options(-ffunction-sections -fdata-sections)
 
-link_libraries(
-  "-L${NUTTX_PATH}/libs -Wl,--start-group ${LDLIBS} ${EXTRA_LIBS} -Wl,--end-group"
+set(CMAKE_C_LINK_EXECUTABLE
+    "<CMAKE_LINKER> ${LDFLAGS} --entry=__start -T${LINKER_SCRIPT} <OBJECTS> -o <TARGET> <LINK_LIBRARIES> -L${NUTTX_PATH}/libs --start-group ${LDLIBS} ${EXTRA_LIBS} --end-group"
 )
-add_link_options(-Wl,--entry=__start)
-add_link_options(-nostdlib)
-add_link_options(-Wl,--gc-sections)
-add_link_options(-T${LINKER_SCRIPT})
+set(CMAKE_CXX_LINK_EXECUTABLE
+    "<CMAKE_LINKER> ${LDFLAGS} --entry=__start -T${LINKER_SCRIPT} <OBJECTS> -o <TARGET> <LINK_LIBRARIES> -L${NUTTX_PATH}/libs --start-group ${LDLIBS} ${EXTRA_LIBS} --end-group"
+)
 
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
