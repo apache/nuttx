@@ -74,7 +74,7 @@
  * Private Data
  ****************************************************************************/
 
-unsigned long x86_64_timer_freq;
+unsigned long g_x86_64_timer_freq;
 
 static struct timespec g_goal_time_ts;
 static uint64_t g_last_stop_time;
@@ -138,16 +138,16 @@ void up_timer_initialize(void)
 
 static inline uint64_t up_ts2tick(const struct timespec *ts)
 {
-  return ROUND_INT_DIV((uint64_t)ts->tv_nsec * x86_64_timer_freq,
+  return ROUND_INT_DIV((uint64_t)ts->tv_nsec * g_x86_64_timer_freq,
                        NS_PER_SEC) +
-         (uint64_t)ts->tv_sec * x86_64_timer_freq;
+         (uint64_t)ts->tv_sec * g_x86_64_timer_freq;
 }
 
 static inline void up_tick2ts(uint64_t tick, struct timespec *ts)
 {
-  ts->tv_sec  = (tick / x86_64_timer_freq);
-  ts->tv_nsec = (uint64_t)(ROUND_INT_DIV((tick % x86_64_timer_freq) *
-                           NSEC_PER_SEC, x86_64_timer_freq));
+  ts->tv_sec  = (tick / g_x86_64_timer_freq);
+  ts->tv_nsec = (uint64_t)(ROUND_INT_DIV((tick % g_x86_64_timer_freq) *
+                           NSEC_PER_SEC, g_x86_64_timer_freq));
 }
 
 static inline void up_tmr_sync_up(void)
