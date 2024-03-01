@@ -133,6 +133,21 @@ else ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
     LDFLAGS += --cpu=Cortex-M3
   endif
 
+else ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+  MKDEP = $(TOPDIR)$(DELIM)tools$(DELIM)mknulldeps.sh
+
+  undefine PREPROCESS
+  define PREPROCESS
+    $(ECHO_BEGIN)"CPP: $1->$2 "
+    $(Q) $(CPP) $(CPPFLAGS) $($(strip $1)_CPPFLAGS) -filetype.cpp $1 -o $2
+    $(ECHO_END)
+  endef
+
+  undefine ARCHIVE
+  define ARCHIVE
+    $(AR) $2 -archive -o $1
+  endef
+
 endif
 
 ifeq ($(CONFIG_ARMV7M_STACKCHECK),y)
