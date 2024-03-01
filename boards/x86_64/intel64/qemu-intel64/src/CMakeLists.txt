@@ -18,7 +18,7 @@
 #
 # ##############################################################################
 
-set(SRCS qemu_boot.c qemu_bringup.c qemu_freq.c qemu_net.c)
+set(SRCS qemu_boot.c qemu_bringup.c qemu_net.c)
 
 if(CONFIG_BOARDCTL)
   list(APPEND SRCS qemu_appinit.c)
