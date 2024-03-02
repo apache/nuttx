@@ -36,6 +36,10 @@ if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS stm32_buttons.c)
 endif()
 
+if(CONFIG_ADC)
+  list(APPEND SRCS stm32_adc.c)
+endif()
+
 if(CONFIG_STM32_SDIO)
   list(APPEND SRCS stm32_sdio.c)
 endif()
