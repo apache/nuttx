@@ -394,7 +394,7 @@ choice
 	depends on NET_STAR
 	default NET_STARPOINT
 	---help---
-		Specifies the role of this not in the star configuration.
+		Specifies the role of this node in the star configuration.
 
 config NET_STARPOINT
 	bool "Point node in star"
