@@ -951,7 +951,7 @@ static void pci_scan_bus(FAR struct pci_bus_s *bus)
 {
   FAR struct pci_device_s *dev;
   FAR struct pci_bus_s *child_bus;
-  uint32_t devfn;
+  unsigned int devfn;
   uint32_t l;
   uint32_t class;
   uint8_t hdr_type;
