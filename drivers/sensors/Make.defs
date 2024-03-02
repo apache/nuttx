@@ -147,7 +147,12 @@ ifeq ($(CONFIG_ADXL345_I2C),y)
 endif
 
 ifeq ($(CONFIG_SENSORS_BH1749NUC),y)
+  CSRCS += bh1749nuc_base.c
+ifeq ($(CONFIG_SENSORS_BH1749NUC_UORB),y)
+  CSRCS += bh1749nuc_uorb.c
+else
   CSRCS += bh1749nuc.c
+endif
 endif
 
 ifeq ($(CONFIG_SENSORS_BH1750FVI),y)
