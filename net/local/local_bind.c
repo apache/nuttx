@@ -28,6 +28,7 @@
 #include <sys/socket.h>
 #include <string.h>
 #include <assert.h>
+#include <debug.h>
 
 #include <nuttx/net/net.h>
 
@@ -83,6 +84,13 @@ int psock_local_bind(FAR struct socket *psock,
     }
   else
     {
+      /* Check if local address is already in use */
+
+      if (local_active(conn, unaddr) != NULL)
+        {
+          return -EADDRINUSE;
+        }
+
       /* This is an normal, pathname Unix domain socket */
 
       conn->lc_type = LOCAL_TYPE_PATHNAME;
@@ -93,6 +101,40 @@ int psock_local_bind(FAR struct socket *psock,
     }
 
   conn->lc_state = LOCAL_STATE_BOUND;
+
+#ifdef CONFIG_NET_LOCAL_DGRAM
+  int ret;
+
+  if (psock->s_type == SOCK_DGRAM)
+    {
+      /* Make sure that half duplex FIFO has been created */
+
+      ret = local_create_halfduplex(conn, conn->lc_path);
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to create FIFO for %s: %d\n",
+               conn->lc_path, ret);
+          return ret;
+        }
+
+      /* Open the receiving side of the transfer */
+
+      ret = local_open_receiver(conn, _SS_ISNONBLOCK(conn->lc_conn.s_flags));
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to open FIFO for %s: %d\n",
+               conn->lc_path, ret);
+
+          /* Release our reference to the half duplex FIFO */
+
+          local_release_halfduplex(conn);
+          return ret;
+        }
+    }
+#endif
+
+  nxsem_init(&conn->lc_sendsem, 0, 0);
+
   return OK;
 }
 

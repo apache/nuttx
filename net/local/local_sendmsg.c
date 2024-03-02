@@ -264,7 +264,8 @@ static ssize_t local_sendto(FAR struct socket *psock,
 {
 #ifdef CONFIG_NET_LOCAL_DGRAM
   FAR struct local_conn_s *conn = psock->s_conn;
-  FAR struct sockaddr_un *unaddr = (FAR struct sockaddr_un *)to;
+  FAR struct local_conn_s *server = NULL;
+  FAR const struct sockaddr_un *unaddr = (FAR const struct sockaddr_un *)to;
   ssize_t ret;
 
   /* Verify that a valid address has been provided */
@@ -298,6 +299,12 @@ static ssize_t local_sendto(FAR struct socket *psock,
       return -EISCONN;
     }
 
+  if ((server = local_active(conn, unaddr)) == NULL)
+    {
+      nerr("ERROR: No such file or directory\n");
+      return -ENOENT;
+    }
+
   /* The outgoing FIFO should not be open */
 
   DEBUGASSERT(conn->lc_outfile.f_inode == NULL);
@@ -321,7 +328,7 @@ static ssize_t local_sendto(FAR struct socket *psock,
   if (ret < 0)
     {
       nerr("ERROR: Failed to create FIFO for %s: %zd\n",
-           conn->lc_path, ret);
+           unaddr->sun_path, ret);
       return ret;
     }
 
@@ -348,6 +355,14 @@ static ssize_t local_sendto(FAR struct socket *psock,
       goto errout_with_sender;
     }
 
+  /* Send the path */
+
+  ret = local_send_path(conn);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to send the path: %zd\n", ret);
+    }
+
   /* Send the packet */
 
   ret = local_send_packet(&conn->lc_outfile, buf, len, true);
@@ -357,6 +372,11 @@ static ssize_t local_sendto(FAR struct socket *psock,
     }
 
   nxmutex_unlock(&conn->lc_sendlock);
+
+  if (ret >= 0)
+    {
+      nxsem_post(&server->lc_sendsem);
+    }
 
 errout_with_sender:
 

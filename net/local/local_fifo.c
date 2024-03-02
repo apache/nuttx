@@ -236,10 +236,10 @@ static int local_release_fifo(FAR const char *path)
 static int local_rx_open(FAR struct local_conn_s *conn, FAR const char *path,
                          bool nonblock)
 {
-  int oflags = nonblock ? O_RDONLY | O_NONBLOCK : O_RDONLY;
   int ret;
 
-  ret = file_open(&conn->lc_infile, path, oflags | O_CLOEXEC);
+  ret = file_open(&conn->lc_infile, path,
+                  O_RDONLY | O_NONBLOCK | O_CLOEXEC);
   if (ret < 0)
     {
       nerr("ERROR: Failed on open %s for reading: %d\n",
@@ -254,6 +254,17 @@ static int local_rx_open(FAR struct local_conn_s *conn, FAR const char *path,
        */
 
       return ret == -ENOENT ? -EFAULT : ret;
+    }
+
+  /* Clear O_NONBLOCK if it's meant to be blocking */
+
+  if (nonblock == false)
+    {
+      ret = file_fcntl(&conn->lc_infile, F_SETFL, O_RDONLY | O_CLOEXEC);
+      if (ret < 0)
+        {
+          return ret;
+        }
     }
 
   return OK;
@@ -294,7 +305,7 @@ static int local_tx_open(FAR struct local_conn_s *conn, FAR const char *path,
 
   if (nonblock == false)
     {
-      ret = file_fcntl(&conn->lc_outfile, F_SETFL, O_WRONLY);
+      ret = file_fcntl(&conn->lc_outfile, F_SETFL, O_WRONLY | O_CLOEXEC);
       if (ret < 0)
         {
           return ret;

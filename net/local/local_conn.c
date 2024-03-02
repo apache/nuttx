@@ -70,6 +70,35 @@ FAR struct local_conn_s *local_nextconn(FAR struct local_conn_s *conn)
 }
 
 /****************************************************************************
+ * Name: local_active
+ *
+ * Description:
+ *   Traverse the connections list to find the server
+ *
+ * Assumptions:
+ *   This function must be called with the network locked.
+ *
+ ****************************************************************************/
+
+FAR struct local_conn_s *
+local_active(FAR const struct local_conn_s *conn,
+             FAR const struct sockaddr_un *unaddr)
+{
+  FAR struct local_conn_s *server = NULL;
+
+  while ((server = local_nextconn(server)) != NULL)
+    {
+      if (conn->lc_proto == server->lc_proto &&
+          strncmp(server->lc_path, unaddr->sun_path, UNIX_PATH_MAX - 1) == 0)
+        {
+          return server;
+        }
+    }
+
+  return NULL;
+}
+
+/****************************************************************************
  * Name: local_peerconn
  *
  * Description:

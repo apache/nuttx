@@ -96,6 +96,39 @@ static int local_fifo_write(FAR struct file *filep, FAR const uint8_t *buf,
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: local_send_path
+ *
+ * Description:
+ *   Send a packet on the write-only FIFO.
+ *
+ * Input Parameters:
+ * conn - A reference to local connection structure
+ *
+ * Returned Value:
+ *   Packet length is returned on success; a negated errno value is returned
+ *   on any failure.
+ *
+ ****************************************************************************/
+
+int local_send_path(FAR struct local_conn_s *conn)
+{
+  int ret;
+  uint16_t len16 =
+           conn->lc_state == LOCAL_STATE_BOUND ? strlen(conn->lc_path) : 0;
+
+  ret = local_fifo_write(&conn->lc_outfile, (FAR const uint8_t *)&len16,
+                         sizeof(uint16_t));
+  if (ret != sizeof(uint16_t))
+    {
+      nerr("ERROR: local send path length failed ret: %d\n", ret);
+      return ret;
+    }
+
+  return local_fifo_write(&conn->lc_outfile, (uint8_t *)conn->lc_path,
+                          len16);
+}
+
+/****************************************************************************
  * Name: local_send_packet
  *
  * Description:
@@ -149,6 +182,7 @@ int local_send_packet(FAR struct file *filep, FAR const struct iovec *buf,
       ret = local_fifo_write(filep, iov->iov_base, iov->iov_len);
       if (ret < 0)
         {
+          nerr("ERROR: local send packet failed ret: %d\n", ret);
           break;
         }
 
