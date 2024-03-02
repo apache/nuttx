@@ -169,6 +169,16 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_ADC
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = stm32_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
+    }
+#endif
+
 #ifdef HAVE_SDIO
   /* Initialize the SDIO block driver */
 
