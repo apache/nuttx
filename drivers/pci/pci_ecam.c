@@ -47,11 +47,13 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int pci_ecam_read_config(FAR struct pci_bus_s *bus, uint32_t devfn,
-                                int where, int size, FAR uint32_t *val);
+static int pci_ecam_read_config(FAR struct pci_bus_s *bus,
+                                unsigned int devfn, int where, int size,
+                                FAR uint32_t *val);
 
-static int pci_ecam_write_config(FAR struct pci_bus_s *bus, uint32_t devfn,
-                                 int where, int size, uint32_t val);
+static int pci_ecam_write_config(FAR struct pci_bus_s *bus,
+                                 unsigned int devfn, int where, int size,
+                                 uint32_t val);
 
 /****************************************************************************
  * Private Types
@@ -168,8 +170,9 @@ static bool pci_ecam_addr_valid(FAR const struct pci_bus_s *bus,
  *
  ****************************************************************************/
 
-static int pci_ecam_read_config(FAR struct pci_bus_s *bus, uint32_t devfn,
-                                int where, int size, FAR uint32_t *val)
+static int pci_ecam_read_config(FAR struct pci_bus_s *bus,
+                                unsigned int devfn, int where, int size,
+                                FAR uint32_t *val)
 {
   FAR void *addr;
 
@@ -225,8 +228,9 @@ static int pci_ecam_read_config(FAR struct pci_bus_s *bus, uint32_t devfn,
  *
  ****************************************************************************/
 
-static int pci_ecam_write_config(FAR struct pci_bus_s *bus, uint32_t devfn,
-                                 int where, int size, uint32_t val)
+static int pci_ecam_write_config(FAR struct pci_bus_s *bus,
+                                 unsigned int devfn, int where, int size,
+                                 uint32_t val)
 {
   FAR void *addr;
 
