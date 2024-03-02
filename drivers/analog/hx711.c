@@ -648,7 +648,7 @@ static ssize_t hx711_read(FAR struct file *filep,
   int ret;
   int32_t value; /* 24bit value from hx711 will be stored here */
   int32_t average;
-  unsigned i;
+  int i;
 
   value = 0;
   dev = filep->f_inode->i_private;
@@ -671,7 +671,7 @@ static ssize_t hx711_read(FAR struct file *filep,
       return ret;
     }
 
-  for (i = 1; i <= dev->average; i++)
+  for (i = 1; i <= (int)dev->average; i++)
     {
       value = hx711_single_read(dev);
       if (value == INT32_MIN)
