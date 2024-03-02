@@ -28,9 +28,9 @@
 #include <stdint.h>
 #include <sys/time.h>
 #include <sys/types.h>
+#include <sys/video_controls.h>
 
 #include <nuttx/fs/ioctl.h>
-#include <nuttx/video/video_controls.h>
 
 #ifdef __cplusplus
 extern "C"

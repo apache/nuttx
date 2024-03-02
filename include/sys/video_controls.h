@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/video/video_controls.h
+ * include/sys/video_controls.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_VIDEO_VIDEO_CONTROLS_H
-#define __INCLUDE_NUTTX_VIDEO_VIDEO_CONTROLS_H
+#ifndef __INCLUDE_SYS_VIDEO_CONTROLS_H
+#define __INCLUDE_SYS_VIDEO_CONTROLS_H
 
 /****************************************************************************
  * Included Files
@@ -224,4 +224,4 @@ enum v4l2_flash_led_mode
 
 #define V4L2_CID_JPEG_COMPRESSION_QUALITY (0) /* JPEG quality */
 
-#endif /* __INCLUDE_NUTTX_VIDEO_VIDEO_CONTROLS_H */
+#endif /* __INCLUDE_SYS_VIDEO_CONTROLS_H */
