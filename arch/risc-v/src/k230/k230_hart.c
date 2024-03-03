@@ -127,12 +127,9 @@ static void k230_hart_cleanup(void)
 
 void k230_hart_init(void)
 {
-  #define MISA_VECTOR_BIT   ('V'-'A')
-  #define MISA_VECTOR_MASK  (1 << MISA_VECTOR_BIT)
+  /* TODO: when called from sbi_start(), MISA is 0 somehow. */
 
-  /* When called from sbi_start(), MISA is 0 somehow. */
-
-  g_big = (READ_CSR(CSR_MISA) & MISA_VECTOR_MASK);
+  g_big = (READ_CSR(CSR_MISA) & (1 << 21));
 
   k230_hart_cleanup();
 
@@ -145,6 +142,12 @@ void k230_hart_init(void)
 
 #ifdef RISCV_PBMT
   SET_CSR(CSR_MENVCFG, MENVCFG_PBMT);
+#endif
+
+#ifdef CONFIG_NUTTSBI
+  /* Some PMP entries might have been locked */
+
+  k230_add_pmp(PMPCFG_A_NAPOT | PMPCFG_RWX_MASK, 0, 1024ul << 30);
 #endif
 }
 
