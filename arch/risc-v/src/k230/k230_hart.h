@@ -22,8 +22,19 @@
 #define __ARCH_RISCV_SRC_K230_K230_HART_H
 
 /****************************************************************************
- * Included Files
+ * Preprocessor Macros
  ****************************************************************************/
+
+/* add PMP entry with (attr, base, size) */
+
+#define k230_add_pmp(a, b, s)   riscv_config_pmp_region( \
+                                  riscv_next_free_pmp_region(), a, b, s)
+
+#define CSR_MSECCFG     0x747
+#define CSR_MSECCFGH    0x757
+
+#define MSECCFG_MML     (1 << 0)
+#define MSECCFG_RLB     (1 << 2)
 
 /****************************************************************************
  * Public functions
