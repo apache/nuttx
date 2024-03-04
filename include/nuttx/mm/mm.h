@@ -139,6 +139,10 @@
 #define MM_DUMP_LEAK(dump, pid) \
     ((dump) == PID_MM_LEAK && (pid) >= 0 && nxsched_get_tcb(pid) == NULL)
 
+#define MM_INIT_MAGIC    0xcc
+#define MM_ALLOC_MAGIC   0xaa
+#define MM_FREE_MAGIC    0x55
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

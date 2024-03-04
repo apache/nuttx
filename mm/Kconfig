@@ -322,8 +322,10 @@ config MM_FILL_ALLOCATIONS
 	bool "Fill allocations with debug value"
 	default n
 	---help---
-		Fill all malloc() allocations with 0xAA. This helps
-		detecting uninitialized variable errors.
+		Fill all malloc() allocations with MM_ALLOC_MAGIC.
+		Fill all add_addregion() with MM_INIT_MAGIC.
+		Fill all free() with MM_FREE_MAGIC.
+		This helps detecting uninitialized variable errors.
 
 config MM_BACKTRACE
 	int "The depth of backtrace"
