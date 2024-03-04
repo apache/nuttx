@@ -39,7 +39,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/rmt/rmt.h>
 #include <nuttx/spinlock.h>
-#include <nuttx/mm/circbuf.h>
+#include <nuttx/circbuf.h>
 
 #include "esp_gpio.h"
 #include "esp_irq.h"

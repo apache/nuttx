@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/mm/circbuf.h
+ * libs/libc/misc/lib_circbuf.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,9 +20,6 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_MM_CIRCBUF_H
-#define __INCLUDE_NUTTX_MM_CIRCBUF_H
-
 /* Note about locking: There is no locking required while only one reader
  * and one writer is using the circular buffer.
  * For multiple writer and one reader there is only a need to lock the
@@ -34,36 +31,20 @@
  * Included Files
  ****************************************************************************/
 
-#include <stdbool.h>
-#include <sys/types.h>
+#include <nuttx/config.h>
+
+#include <assert.h>
+
+#include <nuttx/circbuf.h>
+#include <nuttx/lib/lib.h>
 
 /****************************************************************************
- * Public Types
+ * Private Types
  ****************************************************************************/
-
-/* This structure describes circular buffer */
-
-struct circbuf_s
-{
-  FAR void *base;     /* The pointer to buffer space */
-  size_t    size;     /* The size of buffer space */
-  size_t    head;     /* The head of buffer space */
-  size_t    tail;     /* The tail of buffer space */
-  bool      external; /* The flag for external buffer */
-};
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
 
 /****************************************************************************
  * Name: circbuf_init
@@ -84,8 +65,29 @@ extern "C"
  *
  ****************************************************************************/
 
-int circbuf_init(FAR struct circbuf_s *circ,
-                  FAR void *base, size_t bytes);
+int circbuf_init(FAR struct circbuf_s *circ, FAR void *base, size_t bytes)
+{
+  DEBUGASSERT(circ);
+  DEBUGASSERT(!base || bytes);
+
+  circ->external = !!base;
+
+  if (!base && bytes)
+    {
+      base = lib_malloc(bytes);
+      if (!base)
+        {
+          return -ENOMEM;
+        }
+    }
+
+  circ->base = base;
+  circ->size = bytes;
+  circ->head = 0;
+  circ->tail = 0;
+
+  return 0;
+}
 
 /****************************************************************************
  * Name: circbuf_resize
@@ -102,19 +104,45 @@ int circbuf_init(FAR struct circbuf_s *circ,
  *
  ****************************************************************************/
 
-int circbuf_resize(FAR struct circbuf_s *circ, size_t bytes);
+int circbuf_resize(FAR struct circbuf_s *circ, size_t bytes)
+{
+  FAR void *tmp = NULL;
+  size_t len = 0;
 
-/****************************************************************************
- * Name: circbuf_uninit
- *
- * Description:
- *   Free the circular buffer.
- *
- * Input Parameters:
- *   circ  - Address of the circular buffer to be used.
- ****************************************************************************/
+  DEBUGASSERT(circ);
+  DEBUGASSERT(!circ->external);
+  if (bytes == circ->size)
+    {
+      return 0;
+    }
 
-void circbuf_uninit(FAR struct circbuf_s *circ);
+  if (bytes)
+    {
+      tmp = lib_malloc(bytes);
+      if (!tmp)
+        {
+          return -ENOMEM;
+        }
+
+      len = circbuf_used(circ);
+      if (bytes < len)
+        {
+          circbuf_skip(circ, len - bytes);
+          len = bytes;
+        }
+
+      circbuf_read(circ, tmp, len);
+    }
+
+  lib_free(circ->base);
+
+  circ->base = tmp;
+  circ->size = bytes;
+  circ->head = len;
+  circ->tail = 0;
+
+  return 0;
+}
 
 /****************************************************************************
  * Name: circbuf_reset
@@ -126,43 +154,33 @@ void circbuf_uninit(FAR struct circbuf_s *circ);
  *   circ  - Address of the circular buffer to be used.
  ****************************************************************************/
 
-void circbuf_reset(FAR struct circbuf_s *circ);
+void circbuf_reset(FAR struct circbuf_s *circ)
+{
+  DEBUGASSERT(circ);
+  circ->head = circ->tail = 0;
+}
 
 /****************************************************************************
- * Name: circbuf_is_init
+ * Name: circbuf_uninit
  *
  * Description:
- *   Return true if the circular buffer had been initialized.
+ *   Free the circular buffer.
  *
  * Input Parameters:
  *   circ  - Address of the circular buffer to be used.
  ****************************************************************************/
 
-bool circbuf_is_init(FAR struct circbuf_s *circ);
+void circbuf_uninit(FAR struct circbuf_s *circ)
+{
+  DEBUGASSERT(circ);
 
-/****************************************************************************
- * Name: circbuf_is_full
- *
- * Description:
- *   Return true if the circular buffer is full.
- *
- * Input Parameters:
- *   circ  - Address of the circular buffer to be used.
- ****************************************************************************/
+  if (!circ->external)
+    {
+      lib_free(circ->base);
+    }
 
-bool circbuf_is_full(FAR struct circbuf_s *circ);
-
-/****************************************************************************
- * Name: circbuf_is_empty
- *
- * Description:
- *   Return true if the circular buffer is empty.
- *
- * Input Parameters:
- *   circ  - Address of the circular buffer to be used.
- ****************************************************************************/
-
-bool circbuf_is_empty(FAR struct circbuf_s *circ);
+  memset(circ, 0, sizeof(*circ));
+}
 
 /****************************************************************************
  * Name: circbuf_size
@@ -174,7 +192,11 @@ bool circbuf_is_empty(FAR struct circbuf_s *circ);
  *   circ  - Address of the circular buffer to be used.
  ****************************************************************************/
 
-size_t circbuf_size(FAR struct circbuf_s *circ);
+size_t circbuf_size(FAR struct circbuf_s *circ)
+{
+  DEBUGASSERT(circ);
+  return circ->size;
+}
 
 /****************************************************************************
  * Name: circbuf_used
@@ -186,7 +208,11 @@ size_t circbuf_size(FAR struct circbuf_s *circ);
  *   circ  - Address of the circular buffer to be used.
  ****************************************************************************/
 
-size_t circbuf_used(FAR struct circbuf_s *circ);
+size_t circbuf_used(FAR struct circbuf_s *circ)
+{
+  DEBUGASSERT(circ);
+  return circ->head - circ->tail;
+}
 
 /****************************************************************************
  * Name: circbuf_space
@@ -198,7 +224,55 @@ size_t circbuf_used(FAR struct circbuf_s *circ);
  *   circ  - Address of the circular buffer to be used.
  ****************************************************************************/
 
-size_t circbuf_space(FAR struct circbuf_s *circ);
+size_t circbuf_space(FAR struct circbuf_s *circ)
+{
+  return circbuf_size(circ) - circbuf_used(circ);
+}
+
+/****************************************************************************
+ * Name: circbuf_is_init
+ *
+ * Description:
+ *   Return true if the circular buffer had been initialized.
+ *
+ * Input Parameters:
+ *   circ  - Address of the circular buffer to be used.
+ ****************************************************************************/
+
+bool circbuf_is_init(FAR struct circbuf_s *circ)
+{
+  return !!circ->base;
+}
+
+/****************************************************************************
+ * Name: circbuf_is_empty
+ *
+ * Description:
+ *   Return true if the circular buffer is empty.
+ *
+ * Input Parameters:
+ *   circ  - Address of the circular buffer to be used.
+ ****************************************************************************/
+
+bool circbuf_is_empty(FAR struct circbuf_s *circ)
+{
+  return !circbuf_used(circ);
+}
+
+/****************************************************************************
+ * Name: circbuf_is_full
+ *
+ * Description:
+ *   Return true if the circular buffer is full.
+ *
+ * Input Parameters:
+ *   circ  - Address of the circular buffer to be used.
+ ****************************************************************************/
+
+bool circbuf_is_full(FAR struct circbuf_s *circ)
+{
+  return !circbuf_space(circ);
+}
 
 /****************************************************************************
  * Name: circbuf_peekat
@@ -222,7 +296,42 @@ size_t circbuf_space(FAR struct circbuf_s *circ);
  ****************************************************************************/
 
 ssize_t circbuf_peekat(FAR struct circbuf_s *circ, size_t pos,
-                       FAR void *dst, size_t bytes);
+                       FAR void *dst, size_t bytes)
+{
+  size_t len;
+  size_t off;
+
+  DEBUGASSERT(circ);
+
+  if (!circ->size)
+    {
+      return 0;
+    }
+
+  if (circ->head - pos > circ->head - circ->tail)
+    {
+      pos = circ->tail;
+    }
+
+  len = circ->head - pos;
+  off = pos % circ->size;
+
+  if (bytes > len)
+    {
+      bytes = len;
+    }
+
+  len = circ->size - off;
+  if (bytes < len)
+    {
+      len = bytes;
+    }
+
+  memcpy(dst, (FAR char *)circ->base + off, len);
+  memcpy((FAR char *)dst + len, circ->base, bytes - len);
+
+  return bytes;
+}
 
 /****************************************************************************
  * Name: circbuf_peek
@@ -245,7 +354,10 @@ ssize_t circbuf_peekat(FAR struct circbuf_s *circ, size_t pos,
  ****************************************************************************/
 
 ssize_t circbuf_peek(FAR struct circbuf_s *circ,
-                      FAR void *dst, size_t bytes);
+                     FAR void *dst, size_t bytes)
+{
+  return circbuf_peekat(circ, circ->tail, dst, bytes);
+}
 
 /****************************************************************************
  * Name: circbuf_read
@@ -268,7 +380,16 @@ ssize_t circbuf_peek(FAR struct circbuf_s *circ,
  ****************************************************************************/
 
 ssize_t circbuf_read(FAR struct circbuf_s *circ,
-                      FAR void *dst, size_t bytes);
+                     FAR void *dst, size_t bytes)
+{
+  DEBUGASSERT(circ);
+  DEBUGASSERT(dst || !bytes);
+
+  bytes = circbuf_peek(circ, dst, bytes);
+  circ->tail += bytes;
+
+  return bytes;
+}
 
 /****************************************************************************
  * Name: circbuf_skip
@@ -276,7 +397,7 @@ ssize_t circbuf_read(FAR struct circbuf_s *circ,
  * Description:
  *   Skip data from the circular buffer.
  *
- * Note:
+ * Note :
  *   That with only one concurrent reader and one concurrent writer,
  *   you don't need extra locking to use these api.
  *
@@ -289,7 +410,23 @@ ssize_t circbuf_read(FAR struct circbuf_s *circ,
  *   A negated errno value is returned on any failure.
  ****************************************************************************/
 
-ssize_t circbuf_skip(FAR struct circbuf_s *circ, size_t bytes);
+ssize_t circbuf_skip(FAR struct circbuf_s *circ, size_t bytes)
+{
+  size_t len;
+
+  DEBUGASSERT(circ);
+
+  len = circbuf_used(circ);
+
+  if (bytes > len)
+    {
+      bytes = len;
+    }
+
+  circ->tail += bytes;
+
+  return bytes;
+}
 
 /****************************************************************************
  * Name: circbuf_write
@@ -297,7 +434,7 @@ ssize_t circbuf_skip(FAR struct circbuf_s *circ, size_t bytes);
  * Description:
  *   Write data to the circular buffer.
  *
- * Note:
+ * Note :
  *   That with only one concurrent reader and one concurrent writer,
  *   you don't need extra locking to use these api.
  *
@@ -312,7 +449,38 @@ ssize_t circbuf_skip(FAR struct circbuf_s *circ, size_t bytes);
  ****************************************************************************/
 
 ssize_t circbuf_write(FAR struct circbuf_s *circ,
-                       FAR const void *src, size_t bytes);
+                      FAR const void *src, size_t bytes)
+{
+  size_t space;
+  size_t off;
+
+  DEBUGASSERT(circ);
+  DEBUGASSERT(src || !bytes);
+
+  if (!circ->size)
+    {
+      return 0;
+    }
+
+  space = circbuf_space(circ);
+  off = circ->head % circ->size;
+  if (bytes > space)
+    {
+      bytes = space;
+    }
+
+  space = circ->size - off;
+  if (bytes < space)
+    {
+      space = bytes;
+    }
+
+  memcpy((FAR char *)circ->base + off, src, space);
+  memcpy(circ->base, (FAR char *)src + space, bytes - space);
+  circ->head += bytes;
+
+  return bytes;
+}
 
 /****************************************************************************
  * Name: circbuf_overwrite
@@ -337,7 +505,49 @@ ssize_t circbuf_write(FAR struct circbuf_s *circ,
  ****************************************************************************/
 
 ssize_t circbuf_overwrite(FAR struct circbuf_s *circ,
-                           FAR const void *src, size_t bytes);
+                          FAR const void *src, size_t bytes)
+{
+  size_t overwrite = 0;
+  size_t skip = 0;
+  size_t space;
+  size_t off;
+
+  DEBUGASSERT(circ);
+  DEBUGASSERT(src || !bytes);
+
+  if (!circ->size)
+    {
+      return 0;
+    }
+
+  if (bytes > circ->size)
+    {
+      skip = bytes - circ->size;
+      src = (FAR const void *)((FAR char *)src + skip);
+      bytes = circ->size;
+    }
+
+  space = circbuf_space(circ);
+  if (bytes > space)
+    {
+      overwrite = bytes - space + skip;
+    }
+
+  circ->head += skip;
+  off = circ->head % circ->size;
+  space = circ->size - off;
+  if (bytes < space)
+    {
+      space = bytes;
+    }
+
+  memcpy((FAR char *)circ->base + off, src, space);
+  memcpy(circ->base, (FAR char *)src + space, bytes - space);
+  circ->head += bytes;
+  circ->tail += overwrite;
+
+  return overwrite;
+}
 
 /****************************************************************************
  * Name: circbuf_get_writeptr
@@ -347,14 +557,33 @@ ssize_t circbuf_overwrite(FAR struct circbuf_s *circ,
  *
  * Input Parameters:
  *   circ  - Address of the circular buffer to be used.
- *   size  - Returns the maximum size that can be written consecutively.
+ *   size  - Returns the maximum size that can be written consecutively
  *
  * Returned Value:
  *   The write pointer of the circbuf.
  *
  ****************************************************************************/
 
-FAR void *circbuf_get_writeptr(FAR struct circbuf_s *circ, FAR size_t *size);
+FAR void *circbuf_get_writeptr(FAR struct circbuf_s *circ, FAR size_t *size)
+{
+  size_t off;
+  size_t pos;
+
+  DEBUGASSERT(circ);
+
+  off = circ->head % circ->size;
+  pos = circ->tail % circ->size;
+  if (off >= pos)
+    {
+      *size = circ->size - off;
+    }
+  else
+    {
+      *size = pos - off;
+    }
+
+  return (FAR char *)circ->base + off;
+}
 
 /****************************************************************************
  * Name: circbuf_get_readptr
@@ -371,7 +600,26 @@ FAR void *circbuf_get_writeptr(FAR struct circbuf_s *circ, FAR size_t *size);
  *
  ****************************************************************************/
 
-FAR void *circbuf_get_readptr(FAR struct circbuf_s *circ, FAR size_t *size);
+FAR void *circbuf_get_readptr(FAR struct circbuf_s *circ, size_t *size)
+{
+  size_t off;
+  size_t pos;
+
+  DEBUGASSERT(circ);
+
+  off = circ->head % circ->size;
+  pos = circ->tail % circ->size;
+  if (pos > off)
+    {
+      *size = circ->size - pos;
+    }
+  else
+    {
+      *size = off - pos;
+    }
+
+  return (FAR char *)circ->base + pos;
+}
 
 /****************************************************************************
  * Name: circbuf_writecommit
@@ -387,7 +635,11 @@ FAR void *circbuf_get_readptr(FAR struct circbuf_s *circ, FAR size_t *size);
  *
  ****************************************************************************/
 
-void circbuf_writecommit(FAR struct circbuf_s *circ, size_t writtensize);
+void circbuf_writecommit(FAR struct circbuf_s *circ, size_t writtensize)
+{
+  DEBUGASSERT(circ);
+  circ->head += writtensize;
+}
 
 /****************************************************************************
  * Name: circbuf_readcommit
@@ -403,10 +655,8 @@ void circbuf_writecommit(FAR struct circbuf_s *circ, size_t writtensize);
  *
  ****************************************************************************/
 
-void circbuf_readcommit(FAR struct circbuf_s *circ, size_t readsize);
-
-#undef EXTERN
-#if defined(__cplusplus)
+void circbuf_readcommit(FAR struct circbuf_s *circ, size_t readsize)
+{
+  DEBUGASSERT(circ);
+  circ->tail += readsize;
 }
-#endif
-#endif

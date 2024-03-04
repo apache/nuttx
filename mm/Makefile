@@ -30,7 +30,6 @@ include kmm_heap/Make.defs
 include mm_gran/Make.defs
 include shm/Make.defs
 include iob/Make.defs
-include circbuf/Make.defs
 include mempool/Make.defs
 include kasan/Make.defs
 include ubsan/Make.defs
