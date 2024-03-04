@@ -22,6 +22,14 @@ config ARCH_INTEL64
 	select ARCH_HAVE_STACKCHECK
 	select ARCH_HAVE_RNG
 	select ARCH_HAVE_RESET
+	select ARCH_HAVE_MMX
+	select ARCH_HAVE_SSE
+	select ARCH_HAVE_SSE2
+	select ARCH_HAVE_SSE3
+	select ARCH_HAVE_SSSE3
+	select ARCH_HAVE_SSE41
+	select ARCH_HAVE_SSE42
+	select ARCH_HAVE_SSE4A
 	---help---
 		Intel x86_64 architecture
 
@@ -32,6 +40,48 @@ config ARCH_CHIP_X86_64_CUSTOM
 		Select this option if there is no directory for the chip under arch/x86_64/src/.
 
 endchoice
+
+# CPU features
+
+config ARCH_HAVE_MMX
+	bool
+	default n
+
+config ARCH_HAVE_SSE
+	bool
+	default y
+
+config ARCH_HAVE_SSE2
+	bool
+	default y
+
+config ARCH_HAVE_SSE3
+	bool
+	default n
+
+config ARCH_HAVE_SSSE3
+	bool
+	default n
+
+config ARCH_HAVE_SSE41
+	bool
+	default n
+
+config ARCH_HAVE_SSE42
+	bool
+	default n
+
+config ARCH_HAVE_SSE4A
+	bool
+	default n
+
+config ARCH_HAVE_AVX
+	bool
+	default n
+
+config ARCH_HAVE_AVX512
+	bool
+	default n
 
 source "arch/x86_64/src/common/Kconfig"
 

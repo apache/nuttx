@@ -6,4 +6,54 @@
 if ARCH_X86_64
 comment "Common Configuration Options"
 
+config ARCH_X86_64_MMX
+	bool "MMX support"
+	depends on ARCH_HAVE_MMX
+	default y
+
+config ARCH_X86_64_SSE
+	bool "SSE support"
+	depends on ARCH_HAVE_SSE
+	default y
+
+config ARCH_X86_64_SSE2
+	bool "SSE2 support"
+	depends on ARCH_HAVE_SSE2
+	default y
+
+config ARCH_X86_64_SSE3
+	bool "SSE3 support"
+	depends on ARCH_HAVE_SSE3
+	default n
+
+config ARCH_X86_64_SSSE3
+	bool "SSSE3 support"
+	depends on ARCH_HAVE_SSSE3
+	default n
+
+config ARCH_X86_64_SSE41
+	bool "SSE41 support"
+	depends on ARCH_HAVE_SSE41
+	default n
+
+config ARCH_X86_64_SSE42
+	bool "SSE42 support"
+	depends on ARCH_HAVE_SSE42
+	default n
+
+config ARCH_X86_64_SSE4A
+	bool "SSE4A support"
+	depends on ARCH_HAVE_SSE4A
+	default n
+
+config ARCH_X86_64_AVX
+	bool "AVX support"
+	depends on ARCH_HAVE_AVX
+	default n
+
+config ARCH_X86_64_AVX512
+	bool "AVX512 support"
+	depends on ARCH_HAVE_AVX512
+	default n
+
 endif
