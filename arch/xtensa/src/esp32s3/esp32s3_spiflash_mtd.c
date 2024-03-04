@@ -369,7 +369,7 @@ static int esp32s3_erase(struct mtd_dev_s *dev, off_t startblock,
     }
 
 #ifdef CONFIG_ESP32S3_STORAGE_MTD_DEBUG
-  finfo("%s(%p, 0x%x, %d)\n", __func__, dev, startblock, nblocks);
+  finfo("%s(%p, 0x%" PRIxOFF ", %zu)\n", __func__, dev, startblock, nblocks);
 
   finfo("spi_flash_erase_range(0x%x, %d)\n", offset, nbytes);
 #endif
@@ -435,9 +435,10 @@ static ssize_t esp32s3_read(struct mtd_dev_s *dev, off_t offset,
   ssize_t ret;
 
 #ifdef CONFIG_ESP32S3_STORAGE_MTD_DEBUG
-  finfo("%s(%p, 0x%x, %d, %p)\n", __func__, dev, offset, nbytes, buffer);
+  finfo("%s(%p, 0x%" PRIxOFF ", %zu, %p)\n",
+        __func__, dev, offset, nbytes, buffer);
 
-  finfo("spi_flash_read(0x%x, %p, %d)\n", offset, buffer, nbytes);
+  finfo("spi_flash_read(0x%" PRIxOFF ", %p, %zu)\n", offset, buffer, nbytes);
 #endif
 
   /* Acquire the mutex. */
@@ -498,8 +499,8 @@ static ssize_t esp32s3_bread(struct mtd_dev_s *dev, off_t startblock,
   uint32_t size = nblocks * MTD_BLK_SIZE;
 
 #ifdef CONFIG_ESP32S3_STORAGE_MTD_DEBUG
-  finfo("%s(%p, 0x%x, %d, %p)\n", __func__, dev, startblock, nblocks,
-        buffer);
+  finfo("%s(%p, 0x%" PRIxOFF ", %zu, %p)\n",
+        __func__, dev, startblock, nblocks, buffer);
 #endif
 
   ret = esp32s3_read(dev, addr, size, buffer);
@@ -541,9 +542,11 @@ static ssize_t esp32s3_read_decrypt(struct mtd_dev_s *dev,
   ssize_t ret;
 
 #ifdef CONFIG_ESP32S3_STORAGE_MTD_DEBUG
-  finfo("%s(%p, 0x%x, %d, %p)\n", __func__, dev, offset, nbytes, buffer);
+  finfo("%s(%p, 0x%" PRIxOFF ", %zu, %p)\n",
+        __func__, dev, offset, nbytes, buffer);
 
-  finfo("spi_flash_read_encrypted(0x%x, %p, %d)\n", offset, buffer, nbytes);
+  finfo("spi_flash_read_encrypted(0x%" PRIxOFF ", %p, %zu)\n",
+        offset, buffer, nbytes);
 #endif
 
   /* Acquire the mutex. */
@@ -606,8 +609,8 @@ static ssize_t esp32s3_bread_decrypt(struct mtd_dev_s *dev,
   uint32_t size = nblocks * MTD_BLK_SIZE;
 
 #ifdef CONFIG_ESP32S3_STORAGE_MTD_DEBUG
-  finfo("%s(%p, 0x%x, %d, %p)\n", __func__, dev, startblock, nblocks,
-        buffer);
+  finfo("%s(%p, 0x%" PRIxOFF ", %zu, %p)\n",
+        __func__, dev, startblock, nblocks, buffer);
 #endif
 
   ret = esp32s3_read_decrypt(dev, addr, size, buffer);
@@ -653,9 +656,11 @@ static ssize_t esp32s3_write(struct mtd_dev_s *dev, off_t offset,
     }
 
 #ifdef CONFIG_ESP32S3_STORAGE_MTD_DEBUG
-  finfo("%s(%p, 0x%x, %d, %p)\n", __func__, dev, offset, nbytes, buffer);
+  finfo("%s(%p, 0x%" PRIxOFF ", %zu, %p)\n",
+        __func__, dev, offset, nbytes, buffer);
 
-  finfo("spi_flash_write(0x%x, %p, %d)\n", offset, buffer, nbytes);
+  finfo("spi_flash_write(0x%" PRIxOFF ", %p, %zu)\n",
+        offset, buffer, nbytes);
 #endif
 
   /* Acquire the mutex. */
@@ -718,10 +723,11 @@ static ssize_t esp32s3_bwrite_encrypt(struct mtd_dev_s *dev,
   uint32_t size = nblocks * MTD_BLK_SIZE;
 
 #ifdef CONFIG_ESP32S3_STORAGE_MTD_DEBUG
-  finfo("%s(%p, 0x%x, %d, %p)\n", __func__, dev, startblock,
+  finfo("%s(%p, 0x%" PRIxOFF ", %zu, %p)\n", __func__, dev, startblock,
         nblocks, buffer);
 
-  finfo("spi_flash_write_encrypted(0x%x, %p, %d)\n", addr, buffer, size);
+  finfo("spi_flash_write_encrypted(0x%x, %p, %" PRIu32 ")\n",
+        addr, buffer, size);
 #endif
 
   ret = nxmutex_lock(&g_lock);
@@ -780,7 +786,7 @@ static ssize_t esp32s3_bwrite(struct mtd_dev_s *dev, off_t startblock,
   uint32_t size = nblocks * MTD_BLK_SIZE;
 
 #ifdef CONFIG_ESP32S3_STORAGE_MTD_DEBUG
-  finfo("%s(%p, 0x%x, %d, %p)\n", __func__, dev, startblock,
+  finfo("%s(%p, 0x%" PRIxOFF ", %zu, %p)\n", __func__, dev, startblock,
         nblocks, buffer);
 #endif
 
