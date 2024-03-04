@@ -1900,8 +1900,8 @@ static void stm32_reset(struct sdio_dev_s *dev)
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
   irqstate_t flags;
   uint32_t regval;
-  uint32_t regaddress;
-  uint32_t restval;
+  uint32_t regaddress = 0;
+  uint32_t restval = 0;
 
   /* Disable clocking */
 
