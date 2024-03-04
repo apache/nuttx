@@ -124,3 +124,23 @@ endif()
 if(CONFIG_ARCH_INTEL64_HAVE_RDRAND)
   add_compile_options(-mrdrnd)
 endif()
+
+if(CONFIG_ARCH_X86_64_SSE3)
+  add_compile_options(-msse3)
+endif()
+
+if(CONFIG_ARCH_X86_64_SSSE3)
+  add_compile_options(-mssse3)
+endif()
+
+if(CONFIG_ARCH_X86_64_SSE41)
+  add_compile_options(-msse4.1)
+endif()
+
+if(CONFIG_ARCH_X86_64_SSE42)
+  add_compile_options(-msse4.2)
+endif()
+
+if(CONFIG_ARCH_X86_64_SSE4A)
+  add_compile_options(-msse4a)
+endif()
