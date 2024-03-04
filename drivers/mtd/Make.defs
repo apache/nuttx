@@ -60,6 +60,15 @@ CSRCS += mtd_nand.c mtd_onfi.c mtd_nandscheme.c mtd_nandmodel.c mtd_modeltab.c
 ifeq ($(CONFIG_MTD_NAND_SWECC),y)
 CSRCS += mtd_nandecc.c hamming.c
 endif
+
+ifeq ($(CONFIG_MTD_NAND_RAM), y)
+CSRCS += mtd_nandram.c
+endif
+
+ifeq ($(CONFIG_MTD_NAND_WRAPPER), y)
+CSRCS += mtd_nandwrapper.c
+endif
+
 endif
 
 ifeq ($(CONFIG_RAMMTD),y)

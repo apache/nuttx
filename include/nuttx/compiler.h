@@ -207,8 +207,8 @@
 
 /* Branch prediction */
 
-#  define predict_true(x) __builtin_expect(!!(x), 1)
-#  define predict_false(x) __builtin_expect((x), 0)
+#  define predict_true(x)  __builtin_expect(!!(x), 1)
+#  define predict_false(x) __builtin_expect(!!(x), 0)
 
 /* Code locate */
 
