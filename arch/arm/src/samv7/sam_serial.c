@@ -67,28 +67,44 @@
     defined(CONFIG_USART2_RXDMA)
 #  define SERIAL_HAVE_RXDMA
 #else
-# undef SERIAL_HAVE_RXDMA
+#  undef SERIAL_HAVE_RXDMA
 #endif
 
 #if defined(CONFIG_UART0_RXDMA) || defined(CONFIG_UART1_RXDMA) || \
     defined(CONFIG_UART2_RXDMA) || defined(CONFIG_UART3_RXDMA) || \
     defined(CONFIG_UART4_RXDMA)
-# warning RX DMA is currently supported only for USART driver.
+#  warning RX DMA is currently supported only for USART driver.
 #endif
 
 #if defined(SERIAL_HAVE_RXDMA) && !defined(CONFIG_SAMV7_XDMAC)
-# error SERIAL DMA requires CONFIG_SAMV7_XDMAC to be selected
+#  error SERIAL DMA requires CONFIG_SAMV7_XDMAC to be selected
 #endif
 
-#ifdef SERIAL_HAVE_CONSOLE_RXDMA
-# error RX DMA for serial console is currently not supported.
+#if defined(CONFIG_USART0_TXDMA) || defined(CONFIG_USART1_TXDMA) || \
+    defined(CONFIG_USART2_TXDMA)
+#  define SERIAL_HAVE_TXDMA
+#else
+#  undef SERIAL_HAVE_TXDMA
 #endif
 
 #if defined(CONFIG_UART0_TXDMA) || defined(CONFIG_UART1_TXDMA) || \
     defined(CONFIG_UART2_TXDMA) || defined(CONFIG_UART3_TXDMA) || \
-    defined(CONFIG_UART4_TXDMA) || defined(CONFIG_USART0_TXDMA) || \
-    defined(CONFIG_USART1_TXDMA) || defined(CONFIG_USART2_TXDMA)
-# warning TX DMA is currently not supported.
+    defined(CONFIG_UART4_TXDMA)
+#  warning TX DMA is currently supported only for USART driver.
+#endif
+
+#if defined(SERIAL_HAVE_TXDMA) && !defined(CONFIG_SAMV7_XDMAC)
+#  error SERIAL DMA requires CONFIG_SAMV7_XDMAC to be selected
+#endif
+
+#if defined(SERIAL_HAVE_TXDMA) && !defined(CONFIG_SCHED_WORKQUEUE)
+#  error Work queue support is required (CONFIG_SCHED_WORKQUEUE)
+#elif defined(SERIAL_HAVE_TXDMA) && !defined(CONFIG_SCHED_HPWORK)
+#  error Hi-priority work queue support is required (CONFIG_SCHED_HPWORK)
+#endif
+
+#ifdef SERIAL_HAVE_CONSOLE_DMA
+#  error DMA for serial console is currently not supported.
 #endif
 
 #ifndef CONFIG_SAMV7_SERIAL_DMA_TIMEOUT
@@ -123,6 +139,18 @@
                               & ~RXDMA_MUTIPLE_MASK)
 
 #endif  /* SERIAL_HAVE_RXDMA */
+
+#ifdef SERIAL_HAVE_TXDMA
+
+#  define DMA_TXFLAGS  (DMACH_FLAG_FIFOCFG_LARGEST | \
+     DMACH_FLAG_PERIPHH2SEL | DMACH_FLAG_PERIPHISPERIPH |  \
+     DMACH_FLAG_PERIPHWIDTH_8BITS | DMACH_FLAG_PERIPHCHUNKSIZE_1 | \
+     DMACH_FLAG_MEMPID_MAX | DMACH_FLAG_MEMAHB_AHB_IF0 | \
+     DMACH_FLAG_PERIPHAHB_AHB_IF1 | DMACH_FLAG_MEMWIDTH_8BITS | \
+     DMACH_FLAG_MEMINCREMENT | DMACH_FLAG_MEMCHUNKSIZE_1 | \
+     DMACH_FLAG_MEMBURST_1)
+
+#endif  /* SERIAL_HAVE_TXDMA */
 
 /* Which UART/USART with be tty0/console and which tty1-7? */
 
@@ -417,6 +445,7 @@ struct sam_dev_s
 #endif
 
   bool     has_rxdma;           /* True if RX DMA is enabled */
+  bool     has_txdma;
   bool     has_rs485;           /* True if RS-485 mode is enabled */
 
 #ifdef SERIAL_HAVE_RS485
@@ -435,6 +464,14 @@ struct sam_dev_s
   uint32_t * const   rxbuf[2];      /* Receive DMA buffer */
   struct chnext_view1_s *desc[2];
 #endif
+  /* TX DMA state */
+
+#ifdef SERIAL_HAVE_TXDMA
+  const unsigned int txdma_channel; /* DMA channel assigned */
+  DMA_HANDLE         txdma;         /* currently-open receive DMA stream */
+  struct work_s work;               /* Supports txavailable worker */
+  sem_t  txdma_sem;
+#endif
 };
 
 /****************************************************************************
@@ -447,23 +484,35 @@ static int  sam_attach(struct uart_dev_s *dev);
 static void sam_detach(struct uart_dev_s *dev);
 static int  sam_interrupt(int irq, void *context, void *arg);
 static int  sam_ioctl(struct file *filep, int cmd, unsigned long arg);
-#ifdef SERIAL_HAVE_NODMA_OPS
+#ifdef SERIAL_HAVE_NORXDMA_OPS
 static int  sam_receive(struct uart_dev_s *dev, unsigned int *status);
 static void sam_rxint(struct uart_dev_s *dev, bool enable);
 static bool sam_rxavailable(struct uart_dev_s *dev);
 #endif
 static void sam_send(struct uart_dev_s *dev, int ch);
+#ifdef SERIAL_HAVE_NOTXDMA_OPS
 static void sam_txint(struct uart_dev_s *dev, bool enable);
 static bool sam_txready(struct uart_dev_s *dev);
 static bool sam_txempty(struct uart_dev_s *dev);
+#endif
 
-#ifdef SERIAL_HAVE_RXDMA
+#if defined(SERIAL_HAVE_RXDMA) || defined(SERIAL_HAVE_TXDMA)
 static int  sam_dma_setup(struct uart_dev_s *dev);
 static void sam_dma_shutdown(struct uart_dev_s *dev);
+#endif
+
+#ifdef SERIAL_HAVE_RXDMA
 static int  sam_dma_receive(struct uart_dev_s *dev, unsigned int *status);
 static void sam_dma_rxint(struct uart_dev_s *dev, bool enable);
 static bool sam_dma_rxavailable(struct uart_dev_s *dev);
 static void sam_dma_rxcallback(DMA_HANDLE handle, void *arg, int status);
+#endif
+
+#ifdef SERIAL_HAVE_TXDMA
+static void sam_dma_send(struct uart_dev_s *dev);
+static void sam_dma_txint(struct uart_dev_s *dev, bool enable);
+static void sam_dma_txavailable(struct uart_dev_s *dev);
+static void sam_dma_txcallback(DMA_HANDLE handle, void *arg, int status);
 #endif
 
 /****************************************************************************
@@ -513,6 +562,54 @@ static const struct uart_ops_s g_uart_rxdma_ops =
   .txint          = sam_txint,
   .txready        = sam_txready,
   .txempty        = sam_txready,
+};
+#endif
+
+/* TX DMA is defined */
+
+#ifdef SERIAL_HAVE_TXDMA_OPS
+static const struct uart_ops_s g_uart_txdma_ops =
+{
+  .setup          = sam_dma_setup,
+  .shutdown       = sam_dma_shutdown,
+  .attach         = sam_attach,
+  .detach         = sam_detach,
+  .ioctl          = sam_ioctl,
+  .receive        = sam_receive,
+  .rxint          = sam_rxint,
+  .rxavailable    = sam_rxavailable,
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  .rxflowcontrol  = NULL,
+#endif
+  .send           = sam_send,
+  .txint          = sam_dma_txint,
+  .txready        = sam_txready,
+  .txempty        = sam_txready,
+  .dmatxavail     = sam_dma_txavailable,
+  .dmasend        = sam_dma_send,
+};
+#endif
+
+#ifdef SERIAL_HAVE_RXTXDMA_OPS
+static const struct uart_ops_s g_uart_rxtxdma_ops =
+{
+  .setup          = sam_dma_setup,
+  .shutdown       = sam_dma_shutdown,
+  .attach         = sam_attach,
+  .detach         = sam_detach,
+  .ioctl          = sam_ioctl,
+  .receive        = sam_dma_receive,
+  .rxint          = sam_dma_rxint,
+  .rxavailable    = sam_dma_rxavailable,
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  .rxflowcontrol  = NULL,
+#endif
+  .send           = sam_send,
+  .txint          = sam_dma_txint,
+  .txready        = sam_txready,
+  .txempty        = sam_txready,
+  .dmatxavail     = sam_dma_txavailable,
+  .dmasend        = sam_dma_send,
 };
 #endif
 
@@ -749,6 +846,9 @@ static struct sam_dev_s g_usart0priv =
   },
   .has_rxdma      = true,
 #  endif
+#  ifdef CONFIG_USART0_TXDMA
+  .has_txdma      = true,
+#  endif
 #  ifdef CONFIG_SAMV7_USART0_RS485MODE
   .has_rs485      = true,
   .rs485_dir_gpio = GPIO_USART0_RTS,
@@ -767,8 +867,12 @@ static uart_dev_t g_usart0port =
     .size   = CONFIG_USART0_TXBUFSIZE,
     .buffer = g_usart0txbuffer,
   },
-#  ifdef CONFIG_USART0_RXDMA
+#  if defined(CONFIG_USART0_RXDMA) && defined(CONFIG_USART0_TXDMA)
+  .ops      = &g_uart_rxtxdma_ops,
+#  elif defined(CONFIG_USART0_RXDMA) && !defined(CONFIG_USART0_TXDMA)
   .ops      = &g_uart_rxdma_ops,
+#  elif !defined(CONFIG_USART0_RXDMA) && defined(CONFIG_USART0_TXDMA)
+  .ops      = &g_uart_txdma_ops,
 #  else
   .ops      = &g_uart_ops,
 #  endif
@@ -804,6 +908,9 @@ static struct sam_dev_s g_usart1priv =
   },
   .has_rxdma      = true,
 #  endif
+#  ifdef CONFIG_USART1_TXDMA
+  .has_txdma      = true,
+#  endif
 #  ifdef CONFIG_SAMV7_USART1_RS485MODE
   .has_rs485      = true,
   .rs485_dir_gpio = GPIO_USART1_RTS,
@@ -822,8 +929,12 @@ static uart_dev_t g_usart1port =
     .size   = CONFIG_USART1_TXBUFSIZE,
     .buffer = g_usart1txbuffer,
   },
-#  ifdef CONFIG_USART1_RXDMA
+#  if defined(CONFIG_USART1_RXDMA) && defined(CONFIG_USART1_TXDMA)
+  .ops      = &g_uart_rxtxdma_ops,
+#  elif defined(CONFIG_USART1_RXDMA) && !defined(CONFIG_USART1_TXDMA)
   .ops      = &g_uart_rxdma_ops,
+#  elif !defined(CONFIG_USART1_RXDMA) && defined(CONFIG_USART1_TXDMA)
+  .ops      = &g_uart_txdma_ops,
 #  else
   .ops      = &g_uart_ops,
 #  endif
@@ -859,6 +970,9 @@ static struct sam_dev_s g_usart2priv =
   },
   .has_rxdma      = true,
 #  endif
+#  ifdef CONFIG_USART2_TXDMA
+  .has_txdma      = true,
+#  endif
 #  ifdef CONFIG_SAMV7_USART2_RS485MODE
   .has_rs485      = true,
   .rs485_dir_gpio = GPIO_USART2_RTS,
@@ -877,8 +991,12 @@ static uart_dev_t g_usart2port =
       .size   = CONFIG_USART2_TXBUFSIZE,
       .buffer = g_usart2txbuffer,
     },
-#  ifdef CONFIG_USART2_RXDMA
+#  if defined(CONFIG_USART2_RXDMA) && defined(CONFIG_USART2_TXDMA)
+  .ops        = &g_uart_rxtxdma_ops,
+#  elif defined(CONFIG_USART2_RXDMA) && !defined(CONFIG_USART2_TXDMA)
   .ops        = &g_uart_rxdma_ops,
+#  elif !defined(CONFIG_USART2_RXDMA) && defined(CONFIG_USART2_TXDMA)
+  .ops        = &g_uart_txdma_ops,
 #  else
   .ops        = &g_uart_ops,
 #  endif
@@ -1187,7 +1305,7 @@ static int sam_setup(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-#ifdef SERIAL_HAVE_RXDMA
+#if defined(SERIAL_HAVE_RXDMA) || defined(SERIAL_HAVE_TXDMA)
 static int sam_dma_setup(struct uart_dev_s *dev)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
@@ -1209,12 +1327,7 @@ static int sam_dma_setup(struct uart_dev_s *dev)
 
   if (priv->has_rxdma)
     {
-      /* Do this only if this peripheral has RX DMA. This might not be
-       * neccessary at current state of the driver as sam_dma_setup()
-       * cannot be called if USARTn does not have RX DMA but it will be
-       * needed when TX DMA is implemented. The sam_dma_setup() can be
-       * called even when TX DMA is defined and RX DMA is not.
-       */
+      /* Do this only if this peripheral has RX DMA enabled. */
 
       priv->rxdma = sam_dmachannel(0, DMA_RXFLAGS |
                                       DMACH_FLAG_PERIPHPID(priv->pid));
@@ -1261,6 +1374,18 @@ static int sam_dma_setup(struct uart_dev_s *dev)
       sam_serialout(priv, SAM_UART_RTOR_OFFSET,
                     CONFIG_SAMV7_SERIAL_DMA_TIMEOUT);
       sam_serialout(priv, SAM_UART_IER_OFFSET, UART_INT_TIMEOUT);
+    }
+
+#endif
+
+#ifdef SERIAL_HAVE_TXDMA
+  if (priv->has_txdma)
+    {
+      /* Do this only if this peripheral has TX DMA enabled. */
+
+      priv->txdma = sam_dmachannel(0, DMA_TXFLAGS | \
+                                      DMACH_FLAG_PERIPHPID(priv->pid));
+      sem_init(&priv->txdma_sem, 0, 1);
     }
 
 #endif
@@ -1318,7 +1443,7 @@ static void sam_shutdown(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-#ifdef SERIAL_HAVE_RXDMA
+#if defined(SERIAL_HAVE_RXDMA) || defined(SERIAL_HAVE_TXDMA)
 static void sam_dma_shutdown(struct uart_dev_s *dev)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
@@ -1328,14 +1453,31 @@ static void sam_dma_shutdown(struct uart_dev_s *dev)
   sam_shutdown(dev);
 
 #ifdef SERIAL_HAVE_RXDMA
-  /* Stop the RX DMA channel */
+  if (priv->has_rxdma)
+    {
+      /* Stop the RX DMA channel */
 
-  sam_dmastop(priv->rxdma);
+      sam_dmastop(priv->rxdma);
 
-  /* Release the RX DMA channel */
+      /* Release the RX DMA channel */
 
-  sam_dmafree(priv->rxdma);
-  priv->rxdma = NULL;
+      sam_dmafree(priv->rxdma);
+      priv->rxdma = NULL;
+    }
+#endif
+
+#ifdef SERIAL_HAVE_TXDMA
+  if (priv->has_txdma)
+    {
+      /* Stop the TX DMA channel */
+
+      sam_dmastop(priv->txdma);
+
+      /* Release the TX DMA channel */
+
+      sam_dmafree(priv->txdma);
+      priv->txdma = NULL;
+    }
 #endif
 }
 #endif
@@ -1746,7 +1888,7 @@ static int sam_ioctl(struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-#ifdef SERIAL_HAVE_NODMA_OPS
+#ifdef SERIAL_HAVE_NORXDMA_OPS
 static int sam_receive(struct uart_dev_s *dev, unsigned int *status)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
@@ -1770,7 +1912,7 @@ static int sam_receive(struct uart_dev_s *dev, unsigned int *status)
  *
  ****************************************************************************/
 
-#ifdef SERIAL_HAVE_NODMA_OPS
+#ifdef SERIAL_HAVE_NORXDMA_OPS
 static void sam_rxint(struct uart_dev_s *dev, bool enable)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
@@ -1800,7 +1942,7 @@ static void sam_rxint(struct uart_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-#ifdef SERIAL_HAVE_NODMA_OPS
+#ifdef SERIAL_HAVE_NORXDMA_OPS
 static bool sam_rxavailable(struct uart_dev_s *dev)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
@@ -1957,7 +2099,7 @@ static void sam_send(struct uart_dev_s *dev, int ch)
  *
  ****************************************************************************/
 
-#if defined(SERIAL_HAVE_RXDMA_OPS) || defined(SERIAL_HAVE_NODMA_OPS)
+#ifdef SERIAL_HAVE_NOTXDMA_OPS
 static void sam_txint(struct uart_dev_s *dev, bool enable)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
@@ -2001,11 +2143,13 @@ static void sam_txint(struct uart_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
+#ifdef SERIAL_HAVE_NOTXDMA_OPS
 static bool sam_txready(struct uart_dev_s *dev)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
   return ((sam_serialin(priv, SAM_UART_SR_OFFSET) & UART_INT_TXRDY) != 0);
 }
+#endif
 
 /****************************************************************************
  * Name: sam_dma_rxcallback
@@ -2037,11 +2181,196 @@ static void sam_dma_rxcallback(DMA_HANDLE handle, void *arg, int status)
  *
  ****************************************************************************/
 
+#ifdef SERIAL_HAVE_NODMA_OPS
 static bool sam_txempty(struct uart_dev_s *dev)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
   return ((sam_serialin(priv, SAM_UART_SR_OFFSET) & UART_INT_TXEMPTY) != 0);
 }
+#endif
+
+/****************************************************************************
+ * Name: sam_dma_send
+ *
+ * Description:
+ *   This method will initiates DMA transfer for sending bytes over UART.
+ *
+ ****************************************************************************/
+
+#ifdef SERIAL_HAVE_TXDMA
+static void sam_dma_send(struct uart_dev_s *dev)
+{
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
+  uint32_t maddr;
+  uint32_t paddr;
+  size_t buflen;
+
+  /* We need to stop DMA before reconfiguration */
+
+  sam_dmastop(priv->txdma);
+
+  /* Flush the contents of the TX buffer into physical memory */
+
+  up_flush_dcache((uintptr_t)dev->dmatx.buffer,
+                  (uintptr_t)dev->dmatx.buffer + dev->dmatx.length);
+
+  /* Setup first half */
+
+  paddr = priv->usartbase + SAM_UART_THR_OFFSET;
+
+  maddr = (uint32_t) dev->dmatx.buffer;
+  buflen = (size_t) dev->dmatx.length;
+
+  /* Is this a split transfer? */
+
+  sam_dmatxsetup(priv->txdma, paddr, maddr, buflen);
+
+  /* Start transmission with the callback on DMA completion */
+
+  sam_dmastart(priv->txdma, sam_dma_txcallback, (void *)dev);
+}
+
+/****************************************************************************
+ * Name: sam_dma_txint
+ *
+ * Description:
+ *   This method handles TX interrupt if DMA is enabled.
+ *
+ ****************************************************************************/
+
+static void sam_dma_txint(struct uart_dev_s *dev, bool enable)
+{
+  /* Nothing to do. */
+
+  /* In case of DMA transfer we do not want to make use of UART interrupts.
+   * Instead, we use DMA interrupts that are activated once during boot
+   * sequence. Furthermore we can use sam_dma_txcallback() to handle staff at
+   * half DMA transfer or after transfer completion (depending configuration,
+   * see stm32_dmastart(...) ).
+   */
+}
+
+/****************************************************************************
+ * Name: sam_dma_txavailable
+ *
+ * Description:
+ *   This method waits on semaphore until DMA is available.
+ *
+ ****************************************************************************/
+
+static void sam_dma_txavailable(struct uart_dev_s *dev)
+{
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
+  int rv;
+
+  /* Only send when the DMA is idle */
+
+  if (sam_dmaresidual(priv->txdma) == 0)
+    {
+      uart_xmitchars_dma(dev);
+    }
+}
+
+/****************************************************************************
+ * Name: sam_dma_txavailable_worker
+ *
+ * Description:
+ *   This method waits on semaphore until DMA is available.
+ *
+ ****************************************************************************/
+
+static void sam_dma_txavailable_worker(void *arg)
+{
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
+
+  /* Just call sam_dma_txavailable. We cannot have sam_dma_txavailable
+   * directly as a worker because the function is defined with
+   * struct uart_dev_s *dev parameter.
+   */
+
+  sam_dma_txavailable(dev);
+}
+
+/****************************************************************************
+ * Name: sam_dma_txcallback
+ *
+ * Description:
+ *   This method implements callback after DMA is done.
+ *
+ ****************************************************************************/
+
+static void sam_dma_txcallback(DMA_HANDLE handle, void *arg, int status)
+{
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
+  uint32_t maddr;
+  uint32_t paddr;
+  size_t buflen;
+
+  if (status != OK)
+    {
+      /* This means some error occured during DMA transfer. This is most
+       * likely just rare error so schedule work again. Note that this is not
+       * ideal and we could end in an infinite loop. Better approach would be
+       * to use some error counter and report error to serial driver if
+       * counter exceeds some limit. However there currently is no way how to
+       * report DMA error to upper layer driver.
+       */
+
+      DEBUGASSERT(work_available(&priv->work));
+      DEBUGVERIFY(work_queue(HPWORK, &priv->work, sam_dma_txavailable_worker,
+                        (void *)dev, 0));
+      return;
+    }
+
+  /* Update 'nbytes' indicating number of bytes actually transferred by DMA.
+   * This is important to free TX buffer space by 'uart_xmitchars_done'.
+   */
+
+  dev->dmatx.nbytes = dev->dmatx.length;
+  if (priv->dev.dmatx.nlength)
+    {
+      /* Set up DMA on next buffer */
+
+      up_flush_dcache((uintptr_t)dev->dmatx.nbuffer,
+                      (uintptr_t)dev->dmatx.nbuffer + dev->dmatx.nlength);
+
+      paddr = priv->usartbase + SAM_UART_THR_OFFSET;
+      maddr = (uint32_t)dev->dmatx.nbuffer;
+      buflen = (size_t)dev->dmatx.nlength;
+
+      /* Start transmission with the callback on DMA completion */
+
+      sam_dmatxsetup(priv->txdma, paddr, maddr, buflen);
+
+      /* Set length for next completion */
+
+      priv->dev.dmatx.length  = priv->dev.dmatx.nlength;
+      priv->dev.dmatx.nlength = 0;
+
+      /* Start transmission with the callback on DMA completion */
+
+      sam_dmastart(priv->txdma, sam_dma_txcallback, (void *)dev);
+
+      return;
+    }
+
+  /* Finish DMA transfer and let waiting task (if any) know it is free
+   * to use.
+   */
+
+  uart_xmitchars_done(dev);
+
+  /* Check for available transfer. This is handled by HP worker as we
+   * are currently in DMA interrupt. So just schedule next work and return
+   * from the interrupt.
+   */
+
+  DEBUGASSERT(work_available(&priv->work));
+  DEBUGVERIFY(work_queue(HPWORK, &priv->work, sam_dma_txavailable_worker,
+                        (void *)dev, 0));
+}
+#endif /* SERIAL_HAVE_TXDMA */
 
 /****************************************************************************
  * Public Functions
@@ -2164,7 +2493,7 @@ void arm_serialinit(void)
   uart_register("/dev/console", &CONSOLE_DEV);
 #endif
 
-#ifdef SERIAL_HAVE_CONSOLE_RXDMA
+#ifdef SERIAL_HAVE_CONSOLE_DMA
   /* If we need to re-initialise the console to enable DMA do that here. */
 
   sam_dma_setup(&CONSOLE_DEV);
