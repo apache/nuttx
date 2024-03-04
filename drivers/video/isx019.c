@@ -226,6 +226,7 @@ struct isx019_dev_s
   mutex_t fpga_lock;
   mutex_t i2c_lock;
   FAR struct i2c_master_s *i2c;
+  struct i2c_config_s i2c_cfg;
   float clock_ratio;
   isx019_default_value_t  default_value;
   imgsensor_stream_type_t stream;
@@ -934,21 +935,18 @@ static const int32_t g_isx019_ae[] =
 static int fpga_i2c_write(FAR isx019_dev_t *priv, uint8_t addr,
                           FAR const void *data, uint8_t size)
 {
-  struct i2c_config_s config;
   static uint8_t buf[FPGA_I2C_REGSIZE_MAX + FPGA_I2C_REGADDR_LEN];
   int ret;
 
   DEBUGASSERT(size <= FPGA_I2C_REGSIZE_MAX);
 
-  config.frequency = FPGA_I2C_FREQUENCY;
-  config.address   = FPGA_I2C_SLVADDR;
-  config.addrlen   = FPGA_I2C_SLVADDR_LEN;
+  priv->i2c_cfg.address = FPGA_I2C_SLVADDR;
 
   nxmutex_lock(&priv->i2c_lock);
   buf[FPGA_I2C_OFFSET_ADDR] = addr;
   memcpy(&buf[FPGA_I2C_OFFSET_WRITEDATA], data, size);
   ret = i2c_write(priv->i2c,
-                  &config,
+                  &priv->i2c_cfg,
                   buf,
                   size + FPGA_I2C_REGADDR_LEN);
   nxmutex_unlock(&priv->i2c_lock);
@@ -960,22 +958,19 @@ static int fpga_i2c_read(FAR isx019_dev_t *priv, uint8_t addr,
                          FAR void *data, uint8_t size)
 {
   int ret;
-  struct i2c_config_s config;
 
   DEBUGASSERT(size <= FPGA_I2C_REGSIZE_MAX);
 
-  config.frequency = FPGA_I2C_FREQUENCY;
-  config.address   = FPGA_I2C_SLVADDR;
-  config.addrlen   = FPGA_I2C_SLVADDR_LEN;
+  priv->i2c_cfg.address   = FPGA_I2C_SLVADDR;
 
   nxmutex_lock(&priv->i2c_lock);
   ret = i2c_write(priv->i2c,
-                  &config,
+                  &priv->i2c_cfg,
                   &addr,
                   FPGA_I2C_REGADDR_LEN);
   if (ret >= 0)
     {
-      ret = i2c_read(priv->i2c, &config, data, size);
+      ret = i2c_read(priv->i2c, &priv->i2c_cfg, data, size);
     }
 
   nxmutex_unlock(&priv->i2c_lock);
@@ -1120,20 +1115,17 @@ static int isx019_i2c_write(FAR isx019_dev_t *priv,
                             uint8_t size)
 {
   int ret;
-  struct i2c_config_s config;
 
   DEBUGASSERT(size <= ISX019_I2C_REGSIZE_MAX);
 
-  config.frequency = ISX019_I2C_FREQUENCY;
-  config.address   = ISX019_I2C_SLVADDR;
-  config.addrlen   = ISX019_I2C_SLVADDR_LEN;
+  priv->i2c_cfg.address   = ISX019_I2C_SLVADDR;
 
   nxmutex_lock(&priv->i2c_lock);
 
-  ret = send_write_cmd(priv, &config, cat, addr, data, size);
+  ret = send_write_cmd(priv, &priv->i2c_cfg, cat, addr, data, size);
   if (ret == OK)
     {
-      ret = recv_write_response(priv, &config);
+      ret = recv_write_response(priv, &priv->i2c_cfg);
     }
 
   nxmutex_unlock(&priv->i2c_lock);
@@ -1177,20 +1169,17 @@ static int isx019_i2c_read(FAR isx019_dev_t *priv,
                            uint8_t size)
 {
   int ret;
-  struct i2c_config_s config;
 
   DEBUGASSERT(size <= ISX019_I2C_REGSIZE_MAX);
 
-  config.frequency = ISX019_I2C_FREQUENCY;
-  config.address   = ISX019_I2C_SLVADDR;
-  config.addrlen   = ISX019_I2C_SLVADDR_LEN;
+  priv->i2c_cfg.address   = ISX019_I2C_SLVADDR;
 
   nxmutex_lock(&priv->i2c_lock);
 
-  ret = send_read_cmd(priv, &config, cat, addr, size);
+  ret = send_read_cmd(priv, &priv->i2c_cfg, cat, addr, size);
   if (ret == OK)
     {
-      ret = recv_read_response(priv, &config, data, size);
+      ret = recv_read_response(priv, &priv->i2c_cfg, data, size);
     }
 
   nxmutex_unlock(&priv->i2c_lock);
@@ -1291,6 +1280,8 @@ static int try_fpga_i2c(FAR isx019_dev_t *priv)
 static void power_on(FAR isx019_dev_t *priv)
 {
   priv->i2c = board_isx019_initialize();
+  priv->i2c_cfg.frequency = ISX019_I2C_FREQUENCY;
+  priv->i2c_cfg.addrlen   = ISX019_I2C_SLVADDR_LEN;
   board_isx019_power_on();
   board_isx019_release_reset();
 }
