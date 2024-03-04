@@ -516,7 +516,7 @@ void nx_start(void)
 
       /* Allocate the IDLE group */
 
-      DEBUGVERIFY(group_allocate(&g_idletcb[i], g_idletcb[i].cmn.flags));
+      DEBUGVERIFY(group_initialize(&g_idletcb[i], g_idletcb[i].cmn.flags));
       g_idletcb[i].cmn.group->tg_info->ta_argv = &g_idleargv[i][0];
 
 #ifdef CONFIG_SMP
@@ -543,7 +543,7 @@ void nx_start(void)
        * of child status in the IDLE group.
        */
 
-      group_initialize(&g_idletcb[i]);
+      group_postinitialize(&g_idletcb[i]);
       g_idletcb[i].cmn.group->tg_flags = GROUP_FLAG_NOCLDWAIT |
                                          GROUP_FLAG_PRIVILEGED;
     }

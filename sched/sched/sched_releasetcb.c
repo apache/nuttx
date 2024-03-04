@@ -97,6 +97,9 @@ static void nxsched_releasepid(pid_t pid)
 
 int nxsched_release_tcb(FAR struct tcb_s *tcb, uint8_t ttype)
 {
+#ifndef CONFIG_DISABLE_PTHREAD
+  FAR struct task_tcb_s *ttcb;
+#endif
   int ret = OK;
 
   if (tcb)
@@ -160,6 +163,23 @@ int nxsched_release_tcb(FAR struct tcb_s *tcb, uint8_t ttype)
       /* Leave the group (if we did not already leave in task_exithook.c) */
 
       group_leave(tcb);
+
+      /* Kernel thread and group still reference by pthread */
+
+#ifndef CONFIG_DISABLE_PTHREAD
+      if (ttype != TCB_FLAG_TTYPE_PTHREAD)
+        {
+          ttcb = (FAR struct task_tcb_s *)tcb;
+          if (!sq_empty(&ttcb->group.tg_members)
+#if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
+              || ttcb->group.tg_nwaiters > 0
+#endif
+              )
+            {
+              return ret;
+            }
+        }
+#endif
 
       /* And, finally, release the TCB itself */
 
