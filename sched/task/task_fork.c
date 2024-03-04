@@ -142,9 +142,11 @@ FAR struct task_tcb_s *nxtask_setup_fork(start_t retaddr)
       goto errout;
     }
 
+  child->cmn.flags |= TCB_FLAG_FREE_TCB;
+
   /* Allocate a new task group with the same privileges as the parent */
 
-  ret = group_allocate(child, ttype);
+  ret = group_initialize(child, ttype);
   if (ret < 0)
     {
       goto errout_with_tcb;
@@ -214,7 +216,7 @@ FAR struct task_tcb_s *nxtask_setup_fork(start_t retaddr)
 
   /* Now we have enough in place that we can join the group */
 
-  group_initialize(child);
+  group_postinitialize(child);
   sinfo("parent=%p, returning child=%p\n", parent, child);
   return child;
 

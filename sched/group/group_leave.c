@@ -29,6 +29,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/nuttx.h>
 #include <nuttx/irq.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
@@ -67,7 +68,8 @@
  *
  ****************************************************************************/
 
-static inline void group_release(FAR struct task_group_s *group)
+static inline void
+group_release(FAR struct task_group_s *group, uint8_t ttype)
 {
   task_uninit_info(group);
 
@@ -124,7 +126,12 @@ static inline void group_release(FAR struct task_group_s *group)
 
   /* Then drop the group freeing the allocated memory */
 
-  group_drop(group);
+#ifndef CONFIG_DISABLE_PTHREAD
+  if (ttype == TCB_FLAG_TTYPE_PTHREAD)
+    {
+      group_drop(group);
+    }
+#endif
 }
 
 /****************************************************************************
@@ -166,6 +173,12 @@ void group_leave(FAR struct tcb_s *tcb)
   group = tcb->group;
   if (group)
     {
+      /* In any event, we can detach the group from the TCB so that we won't
+       * do this again.
+       */
+
+      tcb->group = NULL;
+
       /* Remove the member from group. */
 
 #ifdef HAVE_GROUP_MEMBERS
@@ -180,14 +193,8 @@ void group_leave(FAR struct tcb_s *tcb)
         {
           /* Yes.. Release all of the resource held by the task group */
 
-          group_release(group);
+          group_release(group, tcb->flags & TCB_FLAG_TTYPE_MASK);
         }
-
-      /* In any event, we can detach the group from the TCB so that we won't
-       * do this again.
-       */
-
-      tcb->group = NULL;
     }
 }
 
@@ -214,6 +221,8 @@ void group_leave(FAR struct tcb_s *tcb)
 
 void group_drop(FAR struct task_group_s *group)
 {
+  FAR struct task_tcb_s *tcb;
+
 #if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
   /* If there are threads waiting for this group to be freed, then we cannot
    * yet free the memory resources.  Instead just mark the group deleted
@@ -228,13 +237,17 @@ void group_drop(FAR struct task_group_s *group)
     }
   else
 #endif
-
   /* Finally, if no one needs the group and it has been deleted, remove it */
 
   if (group->tg_flags & GROUP_FLAG_DELETED)
     {
+      tcb = container_of(group, struct task_tcb_s, group);
+
       /* Release the group container itself */
 
-      kmm_free(group);
+      if (tcb->cmn.flags & TCB_FLAG_FREE_TCB)
+        {
+          kmm_free(tcb);
+        }
     }
 }

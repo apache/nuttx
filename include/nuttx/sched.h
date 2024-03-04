@@ -680,6 +680,10 @@ struct task_tcb_s
 
   struct tcb_s cmn;                      /* Common TCB fields               */
 
+  /* Task Group *************************************************************/
+
+  struct task_group_s group;            /* Pointer to shared task group data */
+
   /* Task Management Fields *************************************************/
 
 #ifdef CONFIG_SCHED_STARTHOOK
