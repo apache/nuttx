@@ -26,6 +26,13 @@ function(nuttx_add_library_internal target)
   # ensure nuttx_context is created before this
   add_dependencies(${target} nuttx_context)
 
+  # add specified search directories for CXX targets
+  target_include_directories(
+    ${target}
+    PRIVATE
+      $<$<COMPILE_LANGUAGE:CXX>:$<GENEX_EVAL:$<TARGET_PROPERTY:nuttx,NUTTX_CXX_INCLUDE_DIRECTORIES>>>
+  )
+
   # add main include directories
   target_include_directories(
     ${target} SYSTEM
