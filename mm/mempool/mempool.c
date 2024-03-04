@@ -274,7 +274,7 @@ retry:
     }
 
 #ifdef CONFIG_MM_FILL_ALLOCATIONS
-  memset(blk, 0xaa, pool->blocksize);
+  memset(blk, MM_ALLOC_MAGIC, pool->blocksize);
 #endif
 
 #if CONFIG_MM_BACKTRACE >= 0
@@ -317,7 +317,7 @@ void mempool_free(FAR struct mempool_s *pool, FAR void *blk)
 #endif
 
 #ifdef CONFIG_MM_FILL_ALLOCATIONS
-  memset(blk, 0x55, pool->blocksize);
+  memset(blk, MM_FREE_MAGIC, pool->blocksize);
 #endif
 
   if (pool->interruptsize > blocksize)

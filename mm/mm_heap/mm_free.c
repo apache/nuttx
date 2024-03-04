@@ -90,7 +90,7 @@ void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem, bool delay)
     }
 
 #ifdef CONFIG_MM_FILL_ALLOCATIONS
-  memset(mem, 0x55, mm_malloc_size(heap, mem));
+  memset(mem, MM_FREE_MAGIC, mm_malloc_size(heap, mem));
 #endif
 
   kasan_poison(mem, mm_malloc_size(heap, mem));
