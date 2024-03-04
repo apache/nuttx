@@ -27,7 +27,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/mutex.h>
-#include <nuttx/mm/circbuf.h>
+#include <nuttx/circbuf.h>
 #include <sys/types.h>
 
 #include <stdint.h>

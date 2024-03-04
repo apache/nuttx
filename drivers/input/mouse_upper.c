@@ -32,7 +32,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/list.h>
-#include <nuttx/mm/circbuf.h>
+#include <nuttx/circbuf.h>
 
 /****************************************************************************
  * Private Types

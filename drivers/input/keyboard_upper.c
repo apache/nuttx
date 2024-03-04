@@ -34,7 +34,7 @@
 #include <nuttx/input/virtio-input-event-codes.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/list.h>
-#include <nuttx/mm/circbuf.h>
+#include <nuttx/circbuf.h>
 #include <nuttx/mutex.h>
 
 /****************************************************************************

@@ -25,7 +25,7 @@
 #include <nuttx/config.h>
 #include <nuttx/ipcc.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/mm/circbuf.h>
+#include <nuttx/circbuf.h>
 
 #include <assert.h>
 #include <errno.h>

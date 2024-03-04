@@ -39,7 +39,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/rmt/rmt.h>
 #include <nuttx/spinlock.h>
-#include <nuttx/mm/circbuf.h>
+#include <nuttx/circbuf.h>
 
 #include "xtensa.h"
 #ifdef CONFIG_ARCH_CHIP_ESP32

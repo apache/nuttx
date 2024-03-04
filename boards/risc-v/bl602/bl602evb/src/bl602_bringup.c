@@ -58,7 +58,7 @@
 #include <nuttx/net/bluetooth.h>
 #include <nuttx/wireless/bluetooth/bt_driver.h>
 #include <nuttx/wireless/bluetooth/bt_uart.h>
-#include <nuttx/mm/circbuf.h>
+#include <nuttx/circbuf.h>
 #if defined(CONFIG_UART_BTH4)
 #include <nuttx/serial/uart_bth4.h>
 #endif

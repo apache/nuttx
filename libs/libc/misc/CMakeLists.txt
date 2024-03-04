@@ -27,6 +27,7 @@ list(
   APPEND
   SRCS
   lib_bitmap.c
+  lib_circbuf.c
   lib_mknod.c
   lib_umask.c
   lib_utsname.c

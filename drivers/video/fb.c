@@ -41,7 +41,7 @@
 #include <nuttx/video/fb.h>
 #include <nuttx/clock.h>
 #include <nuttx/wdog.h>
-#include <nuttx/mm/circbuf.h>
+#include <nuttx/circbuf.h>
 
 /****************************************************************************
  * Pre-processor definitions
