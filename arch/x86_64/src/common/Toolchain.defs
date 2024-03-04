@@ -61,3 +61,23 @@ AFLAGS += -Wa,--divide
 endif
 
 EXEEXT = .elf
+
+ifeq ($(CONFIG_ARCH_X86_64_SSE3),y)
+  ARCHCPUFLAGS += -msse3
+endif
+
+ifeq ($(CONFIG_ARCH_X86_64_SSSE3),y)
+  ARCHCPUFLAGS += -mssse3
+endif
+
+ifeq ($(CONFIG_ARCH_X86_64_SSE41),y)
+  ARCHCPUFLAGS += -msse41
+endif
+
+ifeq ($(CONFIG_ARCH_X86_64_SSE42),y)
+  ARCHCPUFLAGS += -msse42
+endif
+
+ifeq ($(CONFIG_ARCH_X86_64_SSE4a),y)
+  ARCHCPUFLAGS += -msse4a
+endif
