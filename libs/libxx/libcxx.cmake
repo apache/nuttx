@@ -55,27 +55,18 @@ if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/libcxx)
     FetchContent_Populate(libcxx)
   endif()
 
-  execute_process(
-    COMMAND
-      sh -c
-      "ln -s ${CMAKE_CURRENT_LIST_DIR}/libcxx/include ${NUTTX_DIR}/include/libcxx"
-    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
-  execute_process(
-    COMMAND
-      sh -c
-      "cp ${CMAKE_CURRENT_LIST_DIR}/__config_site ${NUTTX_DIR}/include/libcxx/__config_site"
-    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 endif()
 
-set_property(
-  TARGET nuttx
-  APPEND
-  PROPERTY NUTTX_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_LIST_DIR}/libcxx/include)
+nuttx_create_symlink(${CMAKE_CURRENT_LIST_DIR}/libcxx/include
+                     ${CMAKE_BINARY_DIR}/include/libcxx)
+
+configure_file(${CMAKE_CURRENT_LIST_DIR}/__config_site
+               ${CMAKE_BINARY_DIR}/include/libcxx/__config_site COPYONLY)
 
 set_property(
   TARGET nuttx
   APPEND
-  PROPERTY NUTTX_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_LIST_DIR}/libcxx/src)
+  PROPERTY NUTTX_CXX_INCLUDE_DIRECTORIES ${CMAKE_BINARY_DIR}/include/libcxx)
 
 add_compile_definitions(_LIBCPP_BUILDING_LIBRARY)
 if(CONFIG_LIBSUPCXX)
@@ -84,6 +75,7 @@ endif()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS ON)
 
 set(SRCS)
 set(SRCSTMP)
@@ -126,6 +118,11 @@ if(GCCVER GREATER_EQUAL 12)
                               PROPERTIES COMPILE_FLAGS -Wno-maybe-uninitialized)
 endif()
 
+if(GCCVER GREATER_EQUAL 13)
+  set_source_files_properties(
+    libcxx/src/string.cpp PROPERTIES COMPILE_FLAGS -Wno-alloc-size-larger-than)
+endif()
+
 set_source_files_properties(libcxx/src/barrier.cpp PROPERTIES COMPILE_FLAGS
                                                               -Wno-shadow)
 set_source_files_properties(libcxx/src/locale.cpp PROPERTIES COMPILE_FLAGS
@@ -137,3 +134,10 @@ set_source_files_properties(libcxx/src/condition_variable.cpp
 
 nuttx_add_system_library(libcxx)
 target_sources(libcxx PRIVATE ${SRCS})
+if(CONFIG_LIBCXXABI)
+  target_include_directories(
+    libcxx BEFORE PRIVATE ${CMAKE_CURRENT_LIST_DIR}/libcxxabi/include)
+endif()
+
+target_include_directories(libcxx BEFORE
+                           PRIVATE ${CMAKE_CURRENT_LIST_DIR}/libcxx/src)
