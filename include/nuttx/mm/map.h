@@ -125,7 +125,7 @@ void mm_map_unlock(void);
  * Name: mm_map_initialize
  *
  * Description:
- *   Initialization function, called only by group_initialize
+ *   Initialization function, called only by group_postinitialize
  *
  * Input Parameters:
  *   mm     - Pointer to the mm_map structure to be initialized
