@@ -370,10 +370,6 @@ static void elf_emit_tcb_stack(FAR struct elf_dumpinfo_s *cinfo,
             (tcb->stack_base_ptr - tcb->stack_alloc_ptr);
     }
 
-  sp  = ROUNDDOWN(buf, PROGRAM_ALIGNMENT);
-  len = ROUNDUP(len + (buf - sp), PROGRAM_ALIGNMENT);
-  buf = sp;
-
   elf_emit(cinfo, (FAR void *)buf, len);
 
   /* Align to page */
