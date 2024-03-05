@@ -50,65 +50,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: group_remove
- *
- * Description:
- *   Remove a group from the list of groups.
- *
- * Input Parameters:
- *   group - The group to be removed.
- *
- * Returned Value:
- *   None.
- *
- * Assumptions:
- *   Called during task deletion in a safe context.  No special precautions
- *   are required here.
- *
- ****************************************************************************/
-
-#if defined(HAVE_GROUP_MEMBERS)
-static void group_remove(FAR struct task_group_s *group)
-{
-  FAR struct task_group_s *curr;
-  FAR struct task_group_s *prev;
-  irqstate_t flags;
-
-  /* Let's be especially careful while access the global task group list.
-   * This is probably un-necessary.
-   */
-
-  flags = enter_critical_section();
-
-  /* Find the task group structure */
-
-  for (prev = NULL, curr = g_grouphead;
-       curr && curr != group;
-       prev = curr, curr = curr->flink);
-
-  /* Did we find it?  If so, remove it from the list. */
-
-  if (curr)
-    {
-      /* Do we remove it from mid-list?  Or from the head of the list? */
-
-      if (prev)
-        {
-          prev->flink = curr->flink;
-        }
-      else
-        {
-          g_grouphead = curr->flink;
-        }
-
-      curr->flink = NULL;
-    }
-
-  leave_critical_section(flags);
-}
-#endif
-
-/****************************************************************************
  * Name: group_release
  *
  * Description:
@@ -163,12 +104,6 @@ static inline void group_release(FAR struct task_group_s *group)
   /* Destroy the mm_map list */
 
   mm_map_destroy(&group->tg_mm_map);
-
-#if defined(HAVE_GROUP_MEMBERS)
-  /* Remove the group from the list of groups */
-
-  group_remove(group);
-#endif
 
 #ifdef HAVE_GROUP_MEMBERS
   /* Release the members array */

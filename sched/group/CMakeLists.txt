@@ -22,7 +22,6 @@ set(SRCS
     group_create.c
     group_join.c
     group_leave.c
-    group_find.c
     group_setupidlefiles.c
     group_setuptaskfiles.c
     group_foreachchild.c
