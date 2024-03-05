@@ -19,12 +19,15 @@
 ############################################################################
 
 ifeq ($(CONFIG_PCI),y)
+CSRCS += pci.c pci_ecam.c pci_drivers.c
 
-CSRCS += pci.c pci_ecam.c
+ifeq ($(CONFIG_PCI_QEMU_TEST),y)
+CSRCS += pci_qemu_test.c
+endif
 
 # Include PCI device driver build support
 
 DEPPATH += --dep-path pci
 VPATH += :pci
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)pci
-endif
+endif # CONFIG_PCI
