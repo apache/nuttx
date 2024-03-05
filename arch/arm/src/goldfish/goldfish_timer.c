@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/timers/arch_alarm.h>
+#include <nuttx/fdt.h>
 
 #include "arm_timer.h"
 
@@ -32,5 +33,20 @@
 
 void up_timer_initialize(void)
 {
+#if defined(CONFIG_GOLDFISH_TIMER) && defined(CONFIG_LIBC_FDT)
+  FAR struct oneshot_lowerhalf_s *lower;
+  const void *fdt = fdt_get();
+
+  DEBUGASSERT(fdt != NULL);
+
+  lower = goldfish_timer_initialize(
+            fdt_get_reg_base_by_path(fdt, "/goldfish_rtc"),
+            fdt_get_irq_by_path(fdt, "/goldfish_rtc"), QEMU_SPI_IRQ_BASE);
+
+  DEBUGASSERT(lower != NULL);
+
+  up_alarm_set_lowerhalf(lower);
+#else
   up_alarm_set_lowerhalf(arm_timer_initialize(0));
+#endif
 }
