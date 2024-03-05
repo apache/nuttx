@@ -251,7 +251,6 @@ reset_control_get_internal(FAR struct reset_controller_dev *rcdev,
                            unsigned int index, bool shared, bool acquired)
 {
   FAR struct reset_control *rstc;
-  int ret;
 
   DEBUGASSERT(nxmutex_is_locked(&g_reset_list_mutex));
 
@@ -295,7 +294,8 @@ reset_control_get_internal(FAR struct reset_controller_dev *rcdev,
 
   if (rcdev->ops->acquire)
     {
-      ret = rcdev->ops->acquire(rcdev, index, shared, acquired);
+      int ret = rcdev->ops->acquire(rcdev, index, shared, acquired);
+
       if (ret < 0)
         {
           kmm_free(rstc);
