@@ -77,6 +77,13 @@ static uint32_t execute_ftfc_command(void)
   uint8_t regval;
   uint32_t retval;
 
+  /* AN12003: only one FlexNVM operation can be executed at a time.
+   * Disable ISR during this time so an ISR doesn't cause a hardfault
+   * from a simultaneous read.
+   */
+
+  irqstate_t flags = enter_critical_section();
+
   /* Clear CCIF to launch command */
 
   regval = getreg8(S32K1XX_FTFC_FSTAT);
@@ -86,6 +93,8 @@ static uint32_t execute_ftfc_command(void)
   wait_ftfc_ready();
 
   retval = getreg8(S32K1XX_FTFC_FSTAT);
+
+  leave_critical_section(flags);
 
   if (retval & (FTTC_FSTAT_MGSTAT0 | FTTC_FSTAT_FPVIOL |
                 FTTC_FSTAT_ACCERR | FTTC_FSTAT_RDCOLERR))
