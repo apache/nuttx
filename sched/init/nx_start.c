@@ -517,7 +517,7 @@ void nx_start(void)
       /* Allocate the IDLE group */
 
       DEBUGVERIFY(group_allocate(&g_idletcb[i], g_idletcb[i].cmn.flags));
-      g_idletcb[i].cmn.group->tg_info->argv = &g_idleargv[i][0];
+      g_idletcb[i].cmn.group->tg_info->ta_argv = &g_idleargv[i][0];
 
 #ifdef CONFIG_SMP
       /* Create a stack for all CPU IDLE threads (except CPU0 which already

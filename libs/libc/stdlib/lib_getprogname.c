@@ -40,5 +40,5 @@ FAR const char *getprogname(void)
   FAR struct task_info_s *info;
 
   info = task_get_info();
-  return info->argv[0];
+  return info->ta_argv[0];
 }
