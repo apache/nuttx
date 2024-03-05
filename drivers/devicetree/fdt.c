@@ -28,6 +28,7 @@
 #include <assert.h>
 #include <nuttx/compiler.h>
 #include <nuttx/fdt.h>
+#include <libfdt.h>
 
 /****************************************************************************
  * Private Data
@@ -39,20 +40,6 @@ static FAR const char *g_fdt_base = NULL;
 
 /****************************************************************************
  * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: fdt_register
- *
- * Description:
- *   Store the pointer to the flattened device tree and verify that it at
- *   least appears to be valid. This function will not fully parse the FDT.
- *
- * Return:
- *   Return -EINVAL if the fdt header does not have the expected magic value.
- *   otherwise return OK. If OK is not returned the existing entry for FDT
- *   is not modified.
- *
  ****************************************************************************/
 
 int fdt_register(FAR const char *fdt_base)
@@ -71,16 +58,100 @@ int fdt_register(FAR const char *fdt_base)
   return OK;
 }
 
-/****************************************************************************
- * Name: fdt_get
- *
- * Description:
- *   Return the pointer to a raw FDT. NULL is returned if no FDT has been
- *   loaded.
- *
- ****************************************************************************/
-
 FAR const char *fdt_get(void)
 {
   return g_fdt_base;
 }
+
+int fdt_get_irq(FAR const void *fdt, int nodeoffset,
+                int offset, int irqbase)
+{
+  FAR const fdt32_t *pv;
+  int irq = -1;
+
+  pv = fdt_getprop(fdt, nodeoffset, "interrupts", NULL);
+  if (pv != NULL)
+    {
+      irq = fdt32_ld(pv + offset) + irqbase;
+    }
+
+  return irq;
+}
+
+int fdt_get_irq_by_path(FAR const void *fdt, int offset,
+                        const char *path, int irqbase)
+{
+  return fdt_get_irq(fdt, fdt_path_offset(fdt, path), offset, irqbase);
+}
+
+int fdt_get_parent_address_cells(FAR const void *fdt, int offset)
+{
+  int parentoff;
+
+  parentoff = fdt_parent_offset(fdt, offset);
+  if (parentoff < 0)
+    {
+      return parentoff;
+    }
+
+  return fdt_address_cells(fdt, parentoff);
+}
+
+int fdt_get_parent_size_cells(FAR const void *fdt, int offset)
+{
+  int parentoff;
+
+  parentoff = fdt_parent_offset(fdt, offset);
+  if (parentoff < 0)
+    {
+      return parentoff;
+    }
+
+  return fdt_size_cells(fdt, parentoff);
+}
+
+uintptr_t fdt_ld_by_cells(FAR const void *value, int cells)
+{
+  if (cells == 2)
+    {
+      return fdt64_ld(value);
+    }
+  else
+    {
+      return fdt32_ld(value);
+    }
+}
+
+uintptr_t fdt_get_reg_base(FAR const void *fdt, int offset)
+{
+  FAR const void *reg;
+  uintptr_t addr = 0;
+
+  reg = fdt_getprop(fdt, offset, "reg", NULL);
+  if (reg != NULL)
+    {
+      addr = fdt_ld_by_cells(reg, fdt_get_parent_address_cells(fdt, offset));
+    }
+
+  return addr;
+}
+
+uintptr_t fdt_get_reg_size(FAR const void *fdt, int offset)
+{
+  FAR const void *reg;
+  uintptr_t size = 0;
+
+  reg = fdt_getprop(fdt, offset, "reg", NULL);
+  if (reg != NULL)
+    {
+      size = fdt_ld_by_cells(reg, fdt_get_parent_size_cells(fdt, offset));
+    }
+
+  return size;
+}
+
+uintptr_t fdt_get_reg_base_by_path(FAR const void *fdt, FAR const char *path)
+{
+  return fdt_get_reg_base(fdt, fdt_path_offset(fdt, path));
+}
+

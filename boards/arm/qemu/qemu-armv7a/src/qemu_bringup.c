@@ -41,96 +41,15 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define QEMU_SPI_IRQ_BASE            32
+#ifndef QEMU_SPI_IRQ_BASE
+#define QEMU_SPI_IRQ_BASE     32
+#endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 #if defined(CONFIG_LIBC_FDT) && defined(CONFIG_DEVICE_TREE)
-
-/****************************************************************************
- * Name: fdt_get_irq
- *
- * Description:
- *   Only can be use when the corresponding node's parent interrupt
- *   controller is intc node.
- *
- ****************************************************************************/
-
-static int unused_code
-fdt_get_irq(const void *fdt, int offset)
-{
-  const fdt32_t *pv;
-  int irq = -ENOENT;
-
-  pv = fdt_getprop(fdt, offset, "interrupts", NULL);
-  if (pv != NULL)
-    {
-      irq = fdt32_ld(pv + 1) + QEMU_SPI_IRQ_BASE;
-    }
-
-  return irq;
-}
-
-/****************************************************************************
- * Name: fdt_get_irq_by_path
- *
- * Description:
- *   Only can be use when the corresponding node's parent interrupt
- *   controller is intc node.
- *
- ****************************************************************************/
-
-static int unused_code
-fdt_get_irq_by_path(const void *fdt, const char *path)
-{
-  return fdt_get_irq(fdt, fdt_path_offset(fdt, path));
-}
-
-/****************************************************************************
- * Name: fdt_get_reg_base
- ****************************************************************************/
-
-static uintptr_t unused_code
-fdt_get_reg_base(const void *fdt, int offset)
-{
-  const void *reg;
-  uintptr_t addr = 0;
-  int parentoff;
-
-  parentoff = fdt_parent_offset(fdt, offset);
-  if (parentoff < 0)
-    {
-      return addr;
-    }
-
-  reg = fdt_getprop(fdt, offset, "reg", NULL);
-  if (reg != NULL)
-    {
-      if (fdt_address_cells(fdt, parentoff) == 2)
-        {
-          addr = fdt64_ld(reg);
-        }
-      else
-        {
-          addr = fdt32_ld(reg);
-        }
-    }
-
-  return addr;
-}
-
-/****************************************************************************
- * Name: fdt_get_reg_base_by_path
- ****************************************************************************/
-
-static uintptr_t unused_code
-fdt_get_reg_base_by_path(const void *fdt, const char *path)
-{
-  return fdt_get_reg_base(fdt, fdt_path_offset(fdt, path));
-}
-
 #ifdef CONFIG_DRIVERS_VIRTIO_MMIO
 
 /****************************************************************************
@@ -152,7 +71,7 @@ static void register_virtio_devices_from_fdt(const void *fdt)
         }
 
       addr = fdt_get_reg_base(fdt, offset);
-      irqnum = fdt_get_irq(fdt, offset);
+      irqnum = fdt_get_irq(fdt, offset, 1, QEMU_SPI_IRQ_BASE);
       if (addr > 0 && irqnum >= 0)
         {
           virtio_register_mmio_device((void *)addr, irqnum);
