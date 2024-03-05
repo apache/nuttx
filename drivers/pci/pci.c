@@ -74,6 +74,36 @@
     return ret;                                                                 \
   }
 
+#define PCI_BUS_READ_IO(len, type, size)                                        \
+  int pci_bus_read_io_##len(FAR struct pci_bus_s *bus, uintptr_t where,         \
+                            FAR type *value)                                    \
+  {                                                                             \
+    int ret = -EINVAL;                                                          \
+    uint32_t data = 0;                                                          \
+                                                                                \
+    if (!PCI_##len##_BAD)                                                       \
+      {                                                                         \
+        ret = bus->ctrl->ops->read_io(bus, where, size, &data);                  \
+      }                                                                         \
+                                                                                \
+    *value = (type)data;                                                        \
+    return ret;                                                                 \
+  }
+
+#define PCI_BUS_WRITE_IO(len, type, size)                                       \
+  int pci_bus_write_io_##len(FAR struct pci_bus_s *bus, uintptr_t where,        \
+                             type value)                                        \
+  {                                                                             \
+    int ret = -EINVAL;                                                          \
+                                                                                \
+    if (!PCI_##len##_BAD)                                                       \
+      {                                                                         \
+        ret = bus->ctrl->ops->write_io(bus, where, size, value);                \
+      }                                                                         \
+                                                                                \
+    return ret;                                                                 \
+  }
+
 #define pci_match_one_device(id, dev)                               \
   (((id)->vendor == PCI_ANY_ID || (id)->vendor == (dev)->vendor) && \
    ((id)->device == PCI_ANY_ID || (id)->device == (dev)->device) && \
@@ -1171,3 +1201,9 @@ PCI_BUS_READ_CONFIG(dword, uint32_t, 4)
 PCI_BUS_WRITE_CONFIG(byte, uint8_t, 1)
 PCI_BUS_WRITE_CONFIG(word, uint16_t, 2)
 PCI_BUS_WRITE_CONFIG(dword, uint32_t, 4)
+PCI_BUS_READ_IO(byte, uint8_t, 1)
+PCI_BUS_READ_IO(word, uint16_t, 2)
+PCI_BUS_READ_IO(dword, uint32_t, 4)
+PCI_BUS_WRITE_IO(byte, uint8_t, 1)
+PCI_BUS_WRITE_IO(word, uint16_t, 2)
+PCI_BUS_WRITE_IO(dword, uint32_t, 4)
