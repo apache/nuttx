@@ -614,7 +614,7 @@ int nxsig_dispatch(pid_t pid, FAR siginfo_t *info)
        * created the task group. Try looking it up.
        */
 
-      group = group_findbypid(pid);
+      group = task_getgroup(pid);
     }
 
   /* Did we locate the group? */

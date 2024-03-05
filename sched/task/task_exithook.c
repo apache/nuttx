@@ -147,7 +147,7 @@ static inline void nxtask_sigchild(pid_t ppid, FAR struct tcb_s *ctcb,
    * this case, the child task group has been orphaned.
    */
 
-  pgrp = group_findbypid(ppid);
+  pgrp = task_getgroup(ppid);
   if (!pgrp)
     {
       /* Set the task group ID to an invalid group ID.  The dead parent

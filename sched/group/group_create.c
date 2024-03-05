@@ -51,12 +51,6 @@
  * Public Data
  ****************************************************************************/
 
-#if defined(HAVE_GROUP_MEMBERS)
-/* This is the head of a list of all group members */
-
-FAR struct task_group_s *g_grouphead;
-#endif
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -234,9 +228,6 @@ errout_with_group:
 void group_initialize(FAR struct task_tcb_s *tcb)
 {
   FAR struct task_group_s *group;
-#if defined(HAVE_GROUP_MEMBERS)
-  irqstate_t flags;
-#endif
 
   DEBUGASSERT(tcb && tcb->cmn.group);
   group = tcb->cmn.group;
@@ -263,13 +254,4 @@ void group_initialize(FAR struct task_tcb_s *tcb)
   /* Mark that there is one member in the group, the main task */
 
   group->tg_nmembers = 1;
-
-#if defined(HAVE_GROUP_MEMBERS)
-  /* Add the initialized entry to the list of groups */
-
-  flags = enter_critical_section();
-  group->flink = g_grouphead;
-  g_grouphead = group;
-  leave_critical_section(flags);
-#endif
 }
