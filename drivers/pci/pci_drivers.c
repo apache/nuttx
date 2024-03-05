@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/virt/qemu_pci.h
+ * drivers/pci/pci_drivers.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,40 +18,41 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_VIRT_QEMU_PCI_H
-#define __INCLUDE_NUTTX_VIRT_QEMU_PCI_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <debug.h>
 
-#include <stdbool.h>
+#include <nuttx/pci/pci.h>
+#include <nuttx/pci/pci_qemu_test.h>
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
+/****************************************************************************
+ * Name: pci_register_drivers
+ *
+ * Description:
+ *   Register all the pci drivers to pci bus
+ *
+ ****************************************************************************/
+
+int pci_register_drivers(void)
 {
-#else
-#define EXTERN extern
+  int ret;
+
+  /* Initialization pci qemu test driver */
+
+#ifdef CONFIG_PCI_QEMU_TEST
+  ret = pci_register_qemu_test_driver();
+  if (ret < 0)
+    {
+      pcierr("pci_register_qemu_test_driver failed, ret=%d\n", ret);
+    }
 #endif
 
-#ifdef CONFIG_VIRT_QEMU_PCI_TEST
-extern const struct pci_dev_type_s g_pci_type_qemu_pci_test;
-#endif
-
-#ifdef CONFIG_VIRT_QEMU_EDU
-extern const struct pci_dev_type_s g_pci_type_qemu_edu;
-#endif
-
-#undef EXTERN
-#ifdef __cplusplus
+  UNUSED(ret);
+  return ret;
 }
-#endif
-
-#endif /* __INCLUDE_NUTTX_VIRT_QEMU_PCI_H */
