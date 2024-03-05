@@ -122,7 +122,8 @@ struct pthread_atfork_s
 struct task_info_s
 {
   mutex_t         ta_lock;
-  FAR char      **argv;                         /* Name+start-up parameters     */
+  int             ta_argc;                         /* Number of arguments     */
+  FAR char      **ta_argv;                         /* Name+start-up parameters     */
 #if CONFIG_TLS_TASK_NELEM > 0
   uintptr_t       ta_telem[CONFIG_TLS_TASK_NELEM]; /* Task local storage elements */
 #endif

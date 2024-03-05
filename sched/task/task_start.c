@@ -40,16 +40,6 @@
 #include "task/task.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* This is an artificial limit to detect error conditions where an argv[]
- * list is not properly terminated.
- */
-
-#define MAX_START_ARGS 256
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -75,67 +65,55 @@
 
 void nxtask_start(void)
 {
-  FAR struct task_tcb_s *tcb = (FAR struct task_tcb_s *)this_task();
+  FAR struct tcb_s *tcb = this_task();
+#ifdef CONFIG_SCHED_STARTHOOK
+  FAR struct task_tcb_s *ttcb = (FAR struct task_tcb_s *)tcb;
+#endif
   int exitcode = EXIT_FAILURE;
   int argc;
 
-  DEBUGASSERT((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) != \
+  DEBUGASSERT((tcb->flags & TCB_FLAG_TTYPE_MASK) != \
               TCB_FLAG_TTYPE_PTHREAD);
 
 #ifdef CONFIG_SIG_DEFAULT
-  if ((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
+  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
     {
       /* Set up default signal actions for NON-kernel thread */
 
-      nxsig_default_initialize(&tcb->cmn);
+      nxsig_default_initialize(tcb);
     }
 #endif
 
   /* Execute the start hook if one has been registered */
 
 #ifdef CONFIG_SCHED_STARTHOOK
-  if (tcb->starthook != NULL)
+  if (ttcb->starthook != NULL)
     {
-      tcb->starthook(tcb->starthookarg);
+      ttcb->starthook(ttcb->starthookarg);
     }
 #endif
 
-  /* Count how many non-null arguments we are passing. The first non-null
-   * argument terminates the list .
-   */
+  /* Add program name */
 
-  argc = 1;
-  while (tcb->cmn.group->tg_info->argv[argc])
-    {
-      /* Increment the number of args.  Here is a sanity check to
-       * prevent running away with an unterminated argv[] list.
-       * MAX_START_ARGS should be sufficiently large that this never
-       * happens in normal usage.
-       */
-
-      if (++argc > MAX_START_ARGS)
-        {
-          _exit(EXIT_FAILURE);
-        }
-    }
+  argc = tcb->group->tg_info->ta_argc + 1;
 
   /* Call the 'main' entry point passing argc and argv.  In the kernel build
    * this has to be handled differently if we are starting a user-space task;
    * we have to switch to user-mode before calling the task.
    */
 
-  if ((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
+  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
     {
-      exitcode = tcb->cmn.entry.main(argc, tcb->cmn.group->tg_info->argv);
+      exitcode = tcb->entry.main(argc, tcb->group->tg_info->ta_argv);
     }
   else
     {
 #ifdef CONFIG_BUILD_FLAT
-      nxtask_startup(tcb->cmn.entry.main, argc,
-                     tcb->cmn.group->tg_info->argv);
+      nxtask_startup(tcb->entry.main, argc,
+                     tcb->group->tg_info->ta_argv);
 #else
-      up_task_start(tcb->cmn.entry.main, argc,
-                    tcb->cmn.group->tg_info->argv);
+      up_task_start(tcb->entry.main, argc,
+                    tcb->group->tg_info->ta_argv);
 #endif
     }
 
