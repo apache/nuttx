@@ -18,4 +18,11 @@ config PCI_ASSIGN_ALL_BUSES
 	---help---
 		Assign resources to all buses. This is required for some
 		platforms that have multiple PCI buses.
-endif
+
+config PCI_QEMU_TEST
+	bool "Driver for QEMU PCI test device"
+	default n
+	---help---
+		Driver for QEMU PCI test device
+
+endif # PCI
