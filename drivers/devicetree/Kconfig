@@ -6,5 +6,6 @@
 menuconfig DEVICE_TREE
 	bool "Device Tree Support"
 	default n
+	select LIBC_FDT
 	---help---
 		Interface for interacting with devicetree.
