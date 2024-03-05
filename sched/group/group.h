@@ -44,12 +44,6 @@ typedef int (*foreachchild_t)(pid_t pid, FAR void *arg);
  * Public Data
  ****************************************************************************/
 
-#if defined(HAVE_GROUP_MEMBERS)
-/* This is the head of a list of all group members */
-
-extern FAR struct task_group_s *g_grouphead;
-#endif
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -73,10 +67,6 @@ void group_drop(FAR struct task_group_s *group);
 #if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
 void group_add_waiter(FAR struct task_group_s *group);
 void group_del_waiter(FAR struct task_group_s *group);
-#endif
-
-#if defined(HAVE_GROUP_MEMBERS)
-FAR struct task_group_s *group_findbypid(pid_t pid);
 #endif
 
 #ifdef HAVE_GROUP_MEMBERS
