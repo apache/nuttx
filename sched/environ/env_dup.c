@@ -70,16 +70,16 @@ int env_dup(FAR struct task_group_s *group, FAR char * const *envcp)
 
   DEBUGASSERT(group != NULL);
 
-  /* Pre-emption must be disabled throughout the following because the
-   * environment may be shared.
-   */
-
-  sched_lock();
-
   /* Is there an environment ? */
 
   if (envcp != NULL)
     {
+      /* Pre-emption must be disabled throughout the following because the
+       * environment may be shared.
+       */
+
+      sched_lock();
+
       /* Count the strings */
 
       while (envcp[envc] != NULL)
@@ -138,9 +138,10 @@ int env_dup(FAR struct task_group_s *group, FAR char * const *envcp)
       /* Save the child environment allocation. */
 
       group->tg_envp = envp;
+
+      sched_unlock();
     }
 
-  sched_unlock();
   return ret;
 }
 
