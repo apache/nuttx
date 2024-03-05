@@ -152,6 +152,24 @@
 #define pci_write_config_dword(dev, where, val) \
   pci_bus_write_config_dword((dev)->bus, (dev)->devfn, where, val)
 
+#define pci_read_io_byte(dev, addr, val) \
+  pci_bus_read_io_byte((dev)->bus, addr, val)
+
+#define pci_read_io_word(dev, addr, val) \
+  pci_bus_read_io_word((dev)->bus, addr, val)
+
+#define pci_read_io_dword(dev, addr, val) \
+  pci_bus_read_io_dword((dev)->bus, addr, val)
+
+#define pci_write_io_byte(dev, addr, val) \
+  pci_bus_write_io_byte((dev)->bus, addr, val)
+
+#define pci_write_io_word(dev, addr, val) \
+  pci_bus_write_io_word((dev)->bus, addr, val)
+
+#define pci_write_io_dword(dev, addr, val) \
+  pci_bus_write_io_dword((dev)->bus, addr, val)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -232,6 +250,10 @@ struct pci_ops_s
 
   CODE uintptr_t (*map)(FAR struct pci_bus_s *bus, uintptr_t start,
                         uintptr_t end);
+  CODE int (*read_io)(FAR struct pci_bus_s *bus, uintptr_t addr,
+                      int size, FAR uint32_t *val);
+  CODE int (*write_io)(FAR struct pci_bus_s *bus, uintptr_t addr,
+                       int size, uint32_t val);
 };
 
 /* Each pci channel is a top-level PCI bus seem by CPU.  A machine with
