@@ -185,6 +185,8 @@
 #define AUDIO_SUBFMT_MIDI_0         0x10
 #define AUDIO_SUBFMT_MIDI_1         0x11
 #define AUDIO_SUBFMT_MIDI_2         0x12
+#define AUDIO_SUBFMT_AMRNB          0x13
+#define AUDIO_SUBFMT_AMRWB          0x14
 
 /* Audio Hardware-Format Types **********************************************/
 
