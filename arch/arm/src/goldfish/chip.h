@@ -31,6 +31,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define QEMU_SPI_IRQ_BASE     32
 #define CHIP_MPCORE_VBASE     0x8000000
 #define MPCORE_ICD_OFFSET     0x0000
 #define MPCORE_ICC_OFFSET     0x10000
