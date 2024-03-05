@@ -1842,7 +1842,7 @@ static void mpu9250_mag_data(FAR struct mpu9250_sensor_s *priv,
  *              read.
  *
  * Parameter:
- *   argc - Number opf arguments
+ *   argc - Number of arguments
  *   argv - Pointer to argument list
  ****************************************************************************/
 
