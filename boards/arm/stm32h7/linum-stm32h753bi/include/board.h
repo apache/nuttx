@@ -382,21 +382,19 @@
 #define GPIO_OTGFS_DM  (GPIO_OTGFS_DM_0  | GPIO_SPEED_100MHz)
 #define GPIO_OTGFS_DP  (GPIO_OTGFS_DP_0  | GPIO_SPEED_100MHz)
 
-/* SDMMC1 Pin mapping
- * CLK - PC12
- * CMD - PD2
- *  D0 - PC8
- *  D1 - PC9
- *  D2 - PC10
- *  D3 - PC11
- */
+/* SDMMC1 - Used SD Card memory */
 
-#define GPIO_SDMMC1_CK   (GPIO_SDMMC1_CK_0  | GPIO_SPEED_100MHz)
-#define GPIO_SDMMC1_CMD  (GPIO_SDMMC1_CMD_0 | GPIO_SPEED_100MHz)
-#define GPIO_SDMMC1_D0   (GPIO_SDMMC1_D0_0  | GPIO_SPEED_100MHz)
-#define GPIO_SDMMC1_D1   (GPIO_SDMMC1_D1_0  | GPIO_SPEED_100MHz)
-#define GPIO_SDMMC1_D2   (GPIO_SDMMC1_D2_0  | GPIO_SPEED_100MHz)
-#define GPIO_SDMMC1_D3   (GPIO_SDMMC1_D3_0  | GPIO_SPEED_100MHz)
+#define GPIO_SDMMC1_CK   (GPIO_SDMMC1_CK_0  | GPIO_SPEED_100MHz) /* PC12 */
+#define GPIO_SDMMC1_CMD  (GPIO_SDMMC1_CMD_0 | GPIO_SPEED_100MHz) /* PD2 */
+#define GPIO_SDMMC1_D0   (GPIO_SDMMC1_D0_0  | GPIO_SPEED_100MHz) /* PC8 */
+#define GPIO_SDMMC1_D1   (GPIO_SDMMC1_D1_0  | GPIO_SPEED_100MHz) /* PC9 */
+#define GPIO_SDMMC1_D2   (GPIO_SDMMC1_D2_0  | GPIO_SPEED_100MHz) /* PC10 */
+#define GPIO_SDMMC1_D3   (GPIO_SDMMC1_D3_0  | GPIO_SPEED_100MHz) /* PC11 */
+
+/* I2C3 - Used by eeprom memory */
+
+#define GPIO_I2C3_SCL (GPIO_I2C3_SCL_2 | GPIO_SPEED_100MHz) /* PH7 */
+#define GPIO_I2C3_SDA (GPIO_I2C3_SDA_2 | GPIO_SPEED_100MHz) /* PH8 */
 
 /****************************************************************************
  * Public Data
