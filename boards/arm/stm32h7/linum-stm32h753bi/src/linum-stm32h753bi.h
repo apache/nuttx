@@ -160,4 +160,16 @@ int stm32_dma_alloc_init(void);
 int stm32_sdio_initialize(void);
 #endif
 
+/****************************************************************************
+ * Name: stm32_at24_init
+ *
+ * Description:
+ *   Initialize and register the EEPROM for 24XX  driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_I2C_EE_24XX
+int stm32_at24_init(char *path);
+#endif
+
 #endif /* __BOARDS_ARM_STM32H7_LINUM_STM32H753BI_SRC_LINUM_STM32H753BI_H */
