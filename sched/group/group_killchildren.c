@@ -191,7 +191,7 @@ int group_kill_children(FAR struct tcb_s *tcb)
   ret = CONFIG_GROUP_KILL_CHILDREN_TIMEOUT_MS;
   while (1)
     {
-      if (tcb->group->tg_nmembers <= 1)
+      if (sq_empty(&tcb->group->tg_members))
         {
           break;
         }

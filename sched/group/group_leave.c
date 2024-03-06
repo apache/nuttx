@@ -105,16 +105,6 @@ static inline void group_release(FAR struct task_group_s *group)
 
   mm_map_destroy(&group->tg_mm_map);
 
-#ifdef HAVE_GROUP_MEMBERS
-  /* Release the members array */
-
-  if (group->tg_members)
-    {
-      kmm_free(group->tg_members);
-      group->tg_members = NULL;
-    }
-#endif
-
 #ifdef CONFIG_BINFMT_LOADABLE
   /* If the exiting task was loaded into RAM from a file, then we need to
    * lease all of the memory resource when the last thread exits the task
@@ -136,58 +126,6 @@ static inline void group_release(FAR struct task_group_s *group)
 
   group_drop(group);
 }
-
-/****************************************************************************
- * Name: group_removemember
- *
- * Description:
- *   Remove a member from a group.
- *
- * Input Parameters:
- *   group - The group from which to remove the member.
- *   pid - The member to be removed.
- *
- * Returned Value:
- *   On success, returns the number of members remaining in the group (>=0).
- *   Can fail only if the member is not found in the group.  On failure,
- *   returns -ENOENT
- *
- * Assumptions:
- *   Called during task deletion and also from the reparenting logic, both
- *   in a safe context.  No special precautions are required here.
- *
- ****************************************************************************/
-
-#ifdef HAVE_GROUP_MEMBERS
-static inline void group_removemember(FAR struct task_group_s *group,
-                                      pid_t pid)
-{
-  irqstate_t flags;
-  int i;
-
-  DEBUGASSERT(group);
-
-  /* Find the member in the array of members and remove it */
-
-  for (i = 0; i < group->tg_nmembers; i++)
-    {
-      /* Does this member have the matching pid */
-
-      if (group->tg_members[i] == pid)
-        {
-          /* Remove the member from the array of members.  This must be an
-           * atomic operation because the member array may be accessed from
-           * interrupt handlers (read-only).
-           */
-
-          flags = enter_critical_section();
-          group->tg_members[i] = group->tg_members[group->tg_nmembers - 1];
-          group->tg_nmembers--;
-          leave_critical_section(flags);
-        }
-    }
-}
-#endif /* HAVE_GROUP_MEMBERS */
 
 /****************************************************************************
  * Public Functions
@@ -214,10 +152,12 @@ static inline void group_removemember(FAR struct task_group_s *group,
  *
  ****************************************************************************/
 
-#ifdef HAVE_GROUP_MEMBERS
 void group_leave(FAR struct tcb_s *tcb)
 {
   FAR struct task_group_s *group;
+#ifdef HAVE_GROUP_MEMBERS
+  irqstate_t flags;
+#endif
 
   DEBUGASSERT(tcb);
 
@@ -226,17 +166,17 @@ void group_leave(FAR struct tcb_s *tcb)
   group = tcb->group;
   if (group)
     {
-      /* Remove the member from group.  This function may be called
-       * during certain error handling before the PID has been
-       * added to the group.  In this case tcb->pid will be uninitialized
-       * group_removemember() will fail.
-       */
+      /* Remove the member from group. */
 
-      group_removemember(group, tcb->pid);
+#ifdef HAVE_GROUP_MEMBERS
+      flags = spin_lock_irqsave(NULL);
+      sq_rem(&tcb->member, &group->tg_members);
+      spin_unlock_irqrestore(NULL, flags);
 
       /* Have all of the members left the group? */
 
-      if (group->tg_nmembers == 0)
+      if (sq_empty(&group->tg_members))
+#endif
         {
           /* Yes.. Release all of the resource held by the task group */
 
@@ -250,47 +190,6 @@ void group_leave(FAR struct tcb_s *tcb)
       tcb->group = NULL;
     }
 }
-
-#else /* HAVE_GROUP_MEMBERS */
-
-void group_leave(FAR struct tcb_s *tcb)
-{
-  FAR struct task_group_s *group;
-
-  DEBUGASSERT(tcb);
-
-  /* Make sure that we have a group */
-
-  group = tcb->group;
-  if (group)
-    {
-      /* Yes, we have a group.. Is this the last member of the group? */
-
-      if (group->tg_nmembers > 1)
-        {
-          /* No.. just decrement the number of members in the group */
-
-          group->tg_nmembers--;
-        }
-
-      /* Yes.. that was the last member remaining in the group */
-
-      else
-        {
-          /* Release all of the resource held by the task group */
-
-          group_release(group);
-        }
-
-      /* In any event, we can detach the group from the TCB so we won't do
-       * this again.
-       */
-
-      tcb->group = NULL;
-    }
-}
-
-#endif /* HAVE_GROUP_MEMBERS */
 
 /****************************************************************************
  * Name: group_drop
