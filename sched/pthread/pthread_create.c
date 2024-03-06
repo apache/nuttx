@@ -216,6 +216,8 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
       return ENOMEM;
     }
 
+  ptcb->cmn.flags |= TCB_FLAG_FREE_TCB;
+
   /* Bind the parent's group to the new TCB (we have not yet joined the
    * group).
    */
