@@ -225,7 +225,7 @@ The LINUM-STM32H753BI connects the EEPROM memory and the touchscreen sensor to I
 EEPROM MEMORY
 --------------
 
-EEPROM memory used is the 24LC256 with 256Kb.
+EEPROM memory used is the 24LC256 with 256Kb with the control bytes value 0x54.
 
 TOUCHSCREEN SENSOR
 ------------------
@@ -447,3 +447,14 @@ The SD card can then be mounted by the NSH commands::
     test_file.txt
     nsh> cat /mnt/test_file.txt
     Hello World!!
+
+eeprom
+------
+
+Use dd command to write and read data from EEPROM as below:::
+
+    nsh> dd if=/dev/console of=/dev/eeprom bs=1 count=35
+    Witte-Tech Linum-STM32H753BI board
+    nsh> dd if=/dev/eeprom of=/dev/console bs=4 count=35
+    Witte-Tech Linum-STM32H753BI board
+    nsh> 
