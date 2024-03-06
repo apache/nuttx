@@ -115,12 +115,6 @@ void up_initialize(void)
   x86_64_serialinit();
 #endif
 
-  /* Initialize the PCI bus */
-
-#ifdef CONFIG_PCI
-  x86_64_pci_init();
-#endif
-
   /* Initialize the network */
 
 #ifndef CONFIG_NETDEV_LATEINIT
