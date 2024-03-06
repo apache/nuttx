@@ -159,7 +159,7 @@ RSA          No
 RTC          Yes
 SHA          No
 SPI          No
-SPIFLASH     No
+SPIFLASH     Yes
 Timers       Yes
 Touch        No
 UART         Yes
