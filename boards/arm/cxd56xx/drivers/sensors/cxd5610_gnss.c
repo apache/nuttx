@@ -1546,7 +1546,7 @@ static int cxd5610_gnss_initialize(struct cxd5610_gnss_dev_s *priv)
 
   /* Create thread for receiving from CXD5610 device */
 
-  snprintf(arg1, 16, "0x%" PRIxPTR, (uintptr_t)priv);
+  snprintf(arg1, 16, "%p", priv);
   argv[0] = arg1;
   argv[1] = NULL;
 

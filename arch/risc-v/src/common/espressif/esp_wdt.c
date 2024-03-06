@@ -428,7 +428,7 @@ static xcpt_t wdt_capture(struct watchdog_lowerhalf_s *lower, xcpt_t handler)
 
   DEBUGASSERT(priv != NULL);
 
-  wdinfo("Entry: handler=0x%" PRIxPTR "\n", (uintptr_t)handler);
+  wdinfo("Entry: handler=%p\n", handler);
 
   oldhandler = priv->handler;
 
