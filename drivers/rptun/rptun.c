@@ -787,7 +787,7 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
     }
 
   priv->rvdev.rdev.ns_unbind_cb = rpmsg_ns_unbind;
-  priv->rvdev.rdev.notify_wait_cb = rptun_notify_wait;
+  priv->rvdev.notify_wait_cb = rptun_notify_wait;
 
   /* Remote proc start */
 
