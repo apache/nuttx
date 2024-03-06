@@ -414,9 +414,6 @@ struct binary_s;                    /* Forward reference                        
 
 struct task_group_s
 {
-#if defined(HAVE_GROUP_MEMBERS)
-  struct task_group_s *flink;       /* Supports a singly linked list            */
-#endif
   pid_t tg_pid;                     /* The ID of the task within the group      */
   pid_t tg_ppid;                    /* This is the ID of the parent thread      */
   uint8_t tg_flags;                 /* See GROUP_FLAG_* definitions             */
