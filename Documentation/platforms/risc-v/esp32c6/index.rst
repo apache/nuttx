@@ -167,7 +167,7 @@ SD/MMC           No
 SDIO             No
 SHA              No
 SPI              No
-SPIFLASH         No
+SPIFLASH         Yes
 Timers           Yes
 UART             Yes
 Watchdog         Yes
