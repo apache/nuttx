@@ -150,10 +150,17 @@ You can set an alarm, check its progress and receive a notification after it exp
     Alarm 0 is active with 10 seconds to expiration
     nsh> alarm_daemon: alarm 0 received
 
-sotest
-------
+spiflash
+--------
 
-This config is to run apps/examples/sotest.
+This config tests the external SPI that comes with the ESP32-C3 module connected
+through SPI1.
+
+By default a SmartFS file system is selected.
+Once booted you can use the following commands to mount the file system::
+
+    nsh> mksmartfs /dev/smart0
+    nsh> mount -t smartfs /dev/smart0 /mnt
 
 timer
 -----
