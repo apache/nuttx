@@ -91,7 +91,7 @@ static inline uint16_t up_getsp(void)
  ****************************************************************************/
 
 /* This holds a references to the current interrupt level register storage
- * structure.  If is non-NULL only during interrupt processing.
+ * structure.  It is non-NULL only during interrupt processing.
  */
 
 EXTERN volatile uint8_t *g_current_regs;
