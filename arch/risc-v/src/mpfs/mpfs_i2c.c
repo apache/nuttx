@@ -1128,7 +1128,7 @@ struct i2c_master_s *mpfs_i2cbus_initialize(int port)
       nxmutex_unlock(&priv->lock);
 
       i2cinfo("Returning previously initialized I2C bus. "
-              "Handler: %" PRIxPTR "\n", (uintptr_t)priv);
+              "Handler: %p\n", priv);
 
       return (struct i2c_master_s *)priv;
     }
@@ -1154,7 +1154,7 @@ struct i2c_master_s *mpfs_i2cbus_initialize(int port)
 
   nxmutex_unlock(&priv->lock);
 
-  i2cinfo("I2C bus initialized! Handler: %" PRIxPTR "\n", (uintptr_t)priv);
+  i2cinfo("I2C bus initialized! Handler: %p\n", priv);
 
   return (struct i2c_master_s *)priv;
 }
