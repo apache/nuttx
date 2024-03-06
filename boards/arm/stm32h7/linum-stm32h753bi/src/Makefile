@@ -24,10 +24,10 @@ CSRCS = stm32_boot.c stm32_bringup.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += stm32_autoleds.c
-endif
-
-ifeq ($(CONFIG_USERLED),y)
-CSRCS += stm32_userleds.c
+else
+  ifeq ($(CONFIG_USERLED),y)
+  CSRCS += stm32_userleds.c
+  endif
 endif
 
 ifeq ($(CONFIG_STM32H7_OTGFS),y)
@@ -48,6 +48,10 @@ endif
 
 ifeq ($(CONFIG_PWM),y)
 CSRCS += stm32_pwm.c
+endif
+
+ifeq ($(CONFIG_MTD_W25QXXXJV),y)
+CSRCS += stm32_w25q.c
 endif
 
 ifeq ($(CONFIG_BOARDCTL),y)

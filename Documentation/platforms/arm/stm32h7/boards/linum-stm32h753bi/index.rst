@@ -552,3 +552,41 @@ If you don't have a SDCard on your board, you can mount the TMPFS at /tmp and tr
 but you cannot transfer big files because TMPFS could use the free RAM of your board::
 
     nsh> mount -t tmpfs /tmp
+
+nxffs
+-----
+This example use the flash memory W25Q128JV via qspi with the nxffs file system::
+
+    NuttShell (NSH) NuttX-12.5.1-RC0
+    nsh> ls
+    /:
+    dev/
+    w25/
+    nsh> cd /w25
+    nsh> echo "hello world!" > message.txt
+    nsh> ls
+    /w25:
+    message.txt
+    nsh> cat message.txt
+    hello world!
+
+littlefs
+--------
+This example use the flash memory W25Q128JV via qspi with the littlefs file system::
+
+    NuttShell (NSH) NuttX-12.5.1-RC0
+    nsh> ls
+    /:
+    dev/
+    w25/
+    nsh> cd /w25
+    nsh> mkdir folder1
+    nsh> cd folder1
+    nsh> echo "hello world!!!!" > message.txt
+    nsh> cat message.txt
+    hello world!!!!
+    nsh> ls
+    /w25/folder1:
+    .
+    ..
+    message.txt
