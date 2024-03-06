@@ -92,11 +92,8 @@ if(CONFIG_OPENAMP_CACHE)
   set(WITH_DCACHE_VRINGS ON)
 endif()
 
-if(CONFIG_OPENAMP_RPMSG_DEBUG)
+if(CONFIG_OPENAMP_DEBUG)
   add_compile_definitions(RPMSG_DEBUG)
-endif()
-
-if(CONFIG_OPENAMP_VQUEUE_DEBUG)
   add_compile_definitions(VQUEUE_DEBUG)
 endif()
 
