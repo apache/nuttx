@@ -141,7 +141,7 @@ void weak_function stm32_usbinitialize(void);
  * Name: stm32_dma_alloc_init
  *
  * Description:
- *   Called to create a FAT DMA allocator
+ *   Called to create a FAT DMA allocator.
  *
  * Returned Value:
  *   0 on success or -ENOMEM
@@ -156,7 +156,7 @@ int stm32_dma_alloc_init(void);
  * Name: stm32_sdio_initialize
  *
  * Description:
- *   Initialize SDIO-based MMC/SD card support
+ *   Initialize SDIO-based MMC/SD card support.
  *
  ****************************************************************************/
 
@@ -168,7 +168,7 @@ int stm32_sdio_initialize(void);
  * Name: stm32_at24_init
  *
  * Description:
- *   Initialize and register the EEPROM for 24XX  driver.
+ *   Initialize and register the EEPROM for 24XX driver.
  *
  ****************************************************************************/
 
@@ -186,6 +186,17 @@ int stm32_at24_init(char *path);
 
 #ifdef CONFIG_PWM
 int stm32_pwm_setup(void);
+#endif
+/****************************************************************************
+ * Name: stm32_n25qxxx_setup
+ *
+ * Description:
+ *   Initialize and register the FLash for N25QXXX driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_W25QXXXJV
+int stm32_w25qxxx_setup(void);
 #endif
 
 #endif /* __BOARDS_ARM_STM32H7_LINUM_STM32H753BI_SRC_LINUM_STM32H753BI_H */
