@@ -44,6 +44,9 @@
 #define BT_FILTER_TYPE_BLE     1
 #define BT_FILTER_TYPE_COUNT   2
 
+#define BT_FILTER_CMD_RESET    0
+#define BT_FILTER_CMD_COUNT    1
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -70,6 +73,7 @@ struct bt_bridge_s
   FAR struct snoop_s       *snoop;
 #endif /* CONFIG_BLUETOOTH_BRIDGE_BTSNOOP */
   atomic_uint               refs;
+  bool                      dispatched[BT_FILTER_CMD_COUNT];
 };
 
 /****************************************************************************
@@ -411,6 +415,45 @@ static int bt_bridge_open(FAR struct bt_driver_s *drv)
   return OK;
 }
 
+static int bt_bridge_send_reset_response(FAR struct bt_driver_s *driver)
+{
+  uint8_t reset_response[6];
+
+  reset_response[0] = BT_HCI_EVT_CMD_COMPLETE;
+  reset_response[1] = 0x04;
+  reset_response[2] = 0x01;
+  reset_response[3] = BT_HCI_OP_RESET & 0xff;
+  reset_response[4] = (BT_HCI_OP_RESET >> 8) & 0xff;
+  reset_response[5] = BT_HCI_SUCCESS;
+
+  return bt_netdev_receive(driver, BT_EVT, reset_response,
+                           sizeof(reset_response));
+}
+
+static inline bool bt_bridge_filter_command(FAR struct bt_bridge_s *bridge,
+                                            FAR struct bt_driver_s *driver,
+                                            uint8_t *data)
+{
+  uint16_t opcode = BT_LE162HOST(((uint16_t *)data)[0]);
+
+  switch (opcode)
+    {
+      case BT_HCI_OP_RESET:
+        if (bridge->dispatched[BT_FILTER_CMD_RESET])
+          {
+            bt_bridge_send_reset_response(driver);
+            return true;
+          }
+
+        bridge->dispatched[BT_FILTER_CMD_RESET] = true;
+        break;
+      default:
+        break;
+    }
+
+  return false;
+}
+
 static int bt_bridge_send(FAR struct bt_driver_s *drv,
                           enum bt_buf_type_e type,
                           FAR void *data, size_t len)
@@ -422,6 +465,13 @@ static int bt_bridge_send(FAR struct bt_driver_s *drv,
   irqstate_t flags;
 
   flags = enter_critical_section();
+
+  if (bt_bridge_filter_command(bridge, drv, data))
+    {
+      leave_critical_section(flags);
+      return len;
+    }
+
   if (bt_filter_can_send(&device->filter, type, data, len))
     {
       leave_critical_section(flags);
