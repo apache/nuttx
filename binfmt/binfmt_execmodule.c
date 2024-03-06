@@ -121,7 +121,7 @@ static void exec_swap(FAR struct tcb_s *ptcb, FAR struct tcb_s *chtcb)
   pid_t      pid;
   irqstate_t flags;
 #ifdef HAVE_GROUP_MEMBERS
-  FAR pid_t  *tg_members;
+  sq_queue_t tg_members;
 #endif
 #ifdef CONFIG_SCHED_HAVE_PARENT
 #  ifdef CONFIG_SCHED_CHILD_STATUS

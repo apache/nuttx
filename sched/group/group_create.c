@@ -40,14 +40,6 @@
 #include "tls/tls.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Is this worth making a configuration option? */
-
-#define GROUP_INITIAL_MEMBERS 4
-
-/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -147,18 +139,9 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
 #endif /* defined(CONFIG_MM_KERNEL_HEAP) */
 
 #ifdef HAVE_GROUP_MEMBERS
-  /* Allocate space to hold GROUP_INITIAL_MEMBERS members of the group */
+  /* Initialize member list of the group */
 
-  group->tg_members = kmm_malloc(GROUP_INITIAL_MEMBERS * sizeof(pid_t));
-  if (!group->tg_members)
-    {
-      ret = -ENOMEM;
-      goto errout_with_group;
-    }
-
-  /* Number of members in allocation */
-
-  group->tg_mxmembers = GROUP_INITIAL_MEMBERS;
+  sq_init(&group->tg_members);
 #endif
 
   /* Attach the group to the TCB */
@@ -178,7 +161,7 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
   ret = task_init_info(group);
   if (ret < 0)
     {
-      goto errout_with_member;
+      goto errout_with_group;
     }
 
 #ifndef CONFIG_DISABLE_PTHREAD
@@ -195,11 +178,7 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
 
   return OK;
 
-errout_with_member:
-#ifdef HAVE_GROUP_MEMBERS
-  kmm_free(group->tg_members);
 errout_with_group:
-#endif
   kmm_free(group);
   return ret;
 }
@@ -240,7 +219,7 @@ void group_initialize(FAR struct task_tcb_s *tcb)
 #ifdef HAVE_GROUP_MEMBERS
   /* Assign the PID of this new task as a member of the group. */
 
-  group->tg_members[0] = tcb->cmn.pid;
+  sq_addlast(&tcb->cmn.member, &group->tg_members);
 #endif
 
   /* Save the ID of the main task within the group of threads.  This needed
@@ -250,8 +229,4 @@ void group_initialize(FAR struct task_tcb_s *tcb)
    */
 
   group->tg_pid = tcb->cmn.pid;
-
-  /* Mark that there is one member in the group, the main task */
-
-  group->tg_nmembers = 1;
 }
