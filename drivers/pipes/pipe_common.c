@@ -144,12 +144,9 @@ int pipecommon_open(FAR struct file *filep)
       return ret;
     }
 
-  /* If this the first reference on the device, then allocate the buffer.
-   * In the case of policy 1, the buffer already be present when the pipe
-   * is first opened.
-   */
+  /* If d_buffer is not initialized, init it. */
 
-  if (dev->d_crefs == 0 && PIPE_IS_POLICY_0(dev->d_flags))
+  if (!circbuf_is_init(&dev->d_buffer))
     {
       ret = circbuf_init(&dev->d_buffer, NULL, dev->d_bufsize);
       if (ret < 0)
