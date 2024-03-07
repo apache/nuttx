@@ -119,8 +119,7 @@ void sbi_start(void)
 
   /* Open everything for PMP */
 
-  WRITE_CSR(pmpaddr0, -1);
-  WRITE_CSR(pmpcfg0, (PMPCFG_A_NAPOT | PMPCFG_R | PMPCFG_W | PMPCFG_X));
+  riscv_append_pmp_region(PMPCFG_A_NAPOT | PMPCFG_RWX_MASK, 0, -1);
 
   /* Then jump to the S-mode start function */
 
