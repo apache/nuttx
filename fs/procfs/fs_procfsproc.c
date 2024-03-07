@@ -1040,6 +1040,24 @@ static ssize_t proc_stack(FAR struct proc_file_s *procfile,
   buffer    += copysize;
   remaining -= copysize;
 
+#ifdef CONFIG_STACK_COLORATION
+  if (totalsize >= buflen)
+    {
+      return totalsize;
+    }
+
+  /* Show the stack size */
+
+  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%ld\n",
+                               "StackUsed:", (long)up_check_tcbstack(tcb));
+  copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
+                             &offset);
+
+  totalsize += copysize;
+  buffer    += copysize;
+  remaining -= copysize;
+#endif
+
 #if CONFIG_SCHED_STACK_RECORD > 0
   linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%zu\n",
                               "StackMax: ",
@@ -1089,24 +1107,6 @@ static ssize_t proc_stack(FAR struct proc_file_s *procfile,
       buffer    += copysize;
       remaining -= copysize;
     }
-#endif
-
-#ifdef CONFIG_STACK_COLORATION
-  if (totalsize >= buflen)
-    {
-      return totalsize;
-    }
-
-  /* Show the stack size */
-
-  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%ld\n",
-                               "StackUsed:", (long)up_check_tcbstack(tcb));
-  copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
-                             &offset);
-
-  totalsize += copysize;
-  buffer    += copysize;
-  remaining -= copysize;
 #endif
 
   return totalsize;
