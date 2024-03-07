@@ -406,6 +406,8 @@ static void pci_setup_device(FAR struct pci_device_s *dev, int max_bar)
   pci_read_config_byte(dev, PCI_COMMAND, &cmd);
   pci_write_config_byte(dev, PCI_COMMAND,
                         cmd & ~PCI_COMMAND_IO & ~PCI_COMMAND_MEMORY);
+#else
+  uint32_t tmp;
 #endif
 
   for (bar = 0; bar < max_bar; bar++)
@@ -483,8 +485,7 @@ static void pci_setup_device(FAR struct pci_device_s *dev, int max_bar)
       start = res->start;
       res->start += size;
 #else
-      uint32_t tmp;
-
+      UNUSED(res);
       pci_read_config_dword(dev, base_address_0, &tmp);
       if (mask & PCI_BASE_ADDRESS_SPACE_IO)
         {
@@ -660,7 +661,6 @@ static void pci_postsetup_bridge(FAR struct pci_device_s *dev)
 
 static void pci_scan_bus(FAR struct pci_bus_s *bus)
 {
-  FAR struct pci_controller_s *ctrl = bus->ctrl;
   FAR struct pci_device_s *dev;
   FAR struct pci_bus_s *child_bus;
   unsigned int devfn;
@@ -744,7 +744,7 @@ static void pci_scan_bus(FAR struct pci_bus_s *bus)
           child_bus->parent_bus = bus;
 
 #ifdef CONFIG_PCI_ASSIGN_ALL_BUSES
-          child_bus->number = ctrl->busno++;
+          child_bus->number = bus->ctrl->busno++;
 #endif
 
           list_add_tail(&bus->children, &child_bus->node);
