@@ -52,33 +52,6 @@ struct simple_addrenv_s g_addrenv =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_calibratedelay
- *
- * Description:
- *   Delay loops are provided for short timing loops.  This function, if
- *   enabled, will just wait for 100 seconds.  Using a stopwatch, you can
- *   can then determine if the timing loops are properly calibrated.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_ARCH_CALIBRATION) && defined(CONFIG_DEBUG_FEATURES)
-static void up_calibratedelay(void)
-{
-  int i;
-
-  _warn("Beginning 100s delay\n");
-  for (i = 0; i < 100; i++)
-    {
-      up_mdelay(1000);
-    }
-
-  _warn("End 100s delay\n");
-}
-#else
-#  define up_calibratedelay()
-#endif
-
-/****************************************************************************
  * Name: up_addrenv_init
  *
  * Description:
