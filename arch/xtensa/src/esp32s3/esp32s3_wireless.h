@@ -34,7 +34,14 @@
 #include "xtensa_attr.h"
 #include "esp32s3_rt_timer.h"
 
-#include "esp_hal_wifi.h"
+#include "esp_log.h"
+#include "esp_mac.h"
+#include "esp_private/phy.h"
+#include "esp_private/wifi.h"
+#include "esp_random.h"
+#include "esp_timer.h"
+#include "rom/ets_sys.h"
+#include "soc/soc_caps.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -75,87 +82,6 @@ struct esp_queuecache_s
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-/****************************************************************************
- * Name: esp_read_mac
- *
- * Description:
- *   Read MAC address from efuse
- *
- * Input Parameters:
- *   mac  - MAC address buffer pointer
- *   type - MAC address type
- *
- * Returned Value:
- *   0 if success or -1 if fail
- *
- ****************************************************************************/
-
-int32_t esp_read_mac(uint8_t *mac, esp_mac_type_t type);
-
-/****************************************************************************
- * Name: esp32s3_phy_enable
- *
- * Description:
- *   Initialize PHY hardware
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void esp32s3_phy_enable(void);
-
-/****************************************************************************
- * Name: esp32s3_phy_disable
- *
- * Description:
- *   Deinitialize PHY hardware
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void IRAM_ATTR esp32s3_phy_disable(void);
-
-/****************************************************************************
- * Name: esp32s3_phy_enable_clock
- *
- * Description:
- *   Enable PHY clock
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void IRAM_ATTR esp32s3_phy_enable_clock(void);
-
-/****************************************************************************
- * Name: esp32s3_phy_disable_clock
- *
- * Description:
- *   Disable PHY clock
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void esp32s3_phy_disable_clock(void);
 
 /****************************************************************************
  * Name: esp32s3_phy_update_country_info
@@ -208,22 +134,6 @@ uint32_t IRAM_ATTR esp_dport_access_reg_read(uint32_t reg);
  ****************************************************************************/
 
 int phy_printf(const char *format, ...) printf_like(1, 2);
-
-/****************************************************************************
- * Name: esp_wifi_bt_power_domain_on
- *
- * Description:
- *   Initialize Bluetooth and Wi-Fi power domain
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void IRAM_ATTR esp_wifi_bt_power_domain_on(void);
 
 /****************************************************************************
  * Name: esp_timer_create

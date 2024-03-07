@@ -35,7 +35,16 @@
 #include "esp32s3_wifi_adapter.h"
 #include "esp32s3_wifi_utils.h"
 #include "esp32s3_wireless.h"
-#include "esp_hal_wifi.h"
+
+#include "esp_log.h"
+#include "esp_mac.h"
+#include "esp_private/phy.h"
+#include "esp_private/wifi.h"
+#include "esp_random.h"
+#include "esp_timer.h"
+#include "esp_wpa.h"
+#include "rom/ets_sys.h"
+#include "soc/soc_caps.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -221,7 +230,7 @@ int esp_wifi_start_scan(struct iwreq *iwr)
         }
     }
 
-  if (config != NULL)
+  if (config)
     {
       kmm_free(config);
       config = NULL;
@@ -549,7 +558,7 @@ scan_result_full:
       wlerr("ERROR: No more space in scan_result buffer\n");
     }
 
-  if (ap_list_buffer != NULL)
+  if (ap_list_buffer)
     {
       kmm_free(ap_list_buffer);
       ap_list_buffer = NULL;

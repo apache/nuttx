@@ -55,17 +55,24 @@
 #include "xtensa.h"
 #include "xtensa_attr.h"
 #include "esp32s3_irq.h"
-#include "esp32s3_periph.h"
 #include "esp32s3_rt_timer.h"
 #include "esp32s3_rtc.h"
 #include "esp32s3_spiflash.h"
 #include "esp32s3_wireless.h"
 
-#include "esp32s3_ble_adapter.h"
+#include "esp_bt.h"
+#include "esp_log.h"
+#include "esp_mac.h"
+#include "esp_private/phy.h"
+#include "esp_private/wifi.h"
+#include "esp_random.h"
+#include "esp_timer.h"
+#include "periph_ctrl.h"
+#include "rom/ets_sys.h"
+#include "xtensa/xtensa_api.h"
+#include "esp_coexist_internal.h"
 
-#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
-#  include "esp_coexist_internal.h"
-#endif
+#include "esp32s3_ble_adapter.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -319,7 +326,6 @@ static void btdm_sleep_enter_phase1_wrapper(uint32_t lpcycles);
 static void btdm_sleep_enter_phase2_wrapper(void);
 static void btdm_sleep_exit_phase3_wrapper(void);
 
-void IRAM_ATTR esp_wifi_bt_power_domain_on(void);
 void IRAM_ATTR btdm_hw_mac_power_down_wrapper(void);
 void IRAM_ATTR btdm_hw_mac_power_up_wrapper(void);
 void IRAM_ATTR btdm_backup_dma_copy_wrapper(uint32_t reg, uint32_t mem_addr,
@@ -1898,7 +1904,7 @@ static void btdm_sleep_enter_phase2_wrapper(void)
     {
       if (g_lp_stat.phy_enabled)
         {
-          esp32s3_phy_disable();
+          esp_phy_disable();
           g_lp_stat.phy_enabled = false;
         }
       else
@@ -1944,7 +1950,7 @@ static void btdm_sleep_exit_phase3_wrapper(void)
     {
       if (!g_lp_stat.phy_enabled)
         {
-          esp32s3_phy_enable();
+          esp_phy_enable();
           g_lp_stat.phy_enabled = true;
         }
     }
@@ -2289,6 +2295,12 @@ int esp32s3_bt_controller_init(void)
   cfg->controller_task_run_cpu    = CONFIG_BT_CTRL_PINNED_TO_CORE;
   cfg->magic                      = ESP_BT_CTRL_CONFIG_MAGIC_VAL;
 
+#if CONFIG_MAC_BB_PD
+  esp_mac_bb_pd_mem_init();
+#endif
+
+  esp_phy_modem_init();
+
   esp_bt_power_domain_on();
 
   btdm_controller_mem_init();
@@ -2460,15 +2472,15 @@ int esp32s3_bt_controller_init(void)
   coex_init();
 #endif
 
-  esp32s3_periph_module_enable(PERIPH_BT_MODULE);
-  esp32s3_periph_module_reset(PERIPH_BT_MODULE);
+  periph_module_enable(PERIPH_BT_MODULE);
+  periph_module_reset(PERIPH_BT_MODULE);
 
-  esp32s3_phy_enable();
+  esp_phy_enable();
   g_lp_stat.phy_enabled = true;
 
   if (btdm_controller_init(cfg) != 0)
     {
-      esp32s3_phy_disable();
+      esp_phy_disable();
       g_lp_stat.phy_enabled = false;
       return -EIO;
     }
@@ -2537,11 +2549,11 @@ int esp32s3_bt_controller_deinit(void)
 
 static void esp32s3_bt_controller_deinit_internal(void)
 {
-  esp32s3_periph_module_disable(PERIPH_BT_MODULE);
+  periph_module_disable(PERIPH_BT_MODULE);
 
   if (g_lp_stat.phy_enabled)
     {
-      esp32s3_phy_disable();
+      esp_phy_disable();
       g_lp_stat.phy_enabled = 0;
     }
 
