@@ -24,3 +24,5 @@ ifeq ($(CONFIG_WS2812_NON_SPI_DRIVER),y)
 CHIP_CSRCS += esp_ws2812.c
 endif
 endif
+
+INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)common$(DELIM)espressif$(DELIM)platform_include
