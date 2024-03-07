@@ -36,6 +36,8 @@
 #include <arch/io.h>
 #include <arch/board/board.h>
 
+#include <nuttx/spinlock.h>
+
 #include "x86_64_internal.h"
 #include "intel64.h"
 
@@ -46,6 +48,15 @@
 #define UART_BASE 0x3f8
 
 #define IRQ_STACK_SIZE 0x2000
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+struct intel64_irq_priv_s
+{
+  uint8_t busy;
+};
 
 /****************************************************************************
  * Private Function Prototypes
@@ -72,7 +83,9 @@ uint8_t *g_isr_stack_end = g_isr_stack + IRQ_STACK_SIZE - 16;
  * Private Data
  ****************************************************************************/
 
-static struct idt_entry_s g_idt_entries[256];
+static struct idt_entry_s        g_idt_entries[MAX_NR_IRQS];
+static struct intel64_irq_priv_s g_irq_priv[MAX_NR_IRQS];
+static spinlock_t                g_irq_spin;
 
 /****************************************************************************
  * Private Functions
@@ -404,7 +417,7 @@ struct idt_ptr_s idt_ptr;
 
 static inline void up_idtinit(void)
 {
-  memset(&g_idt_entries, 0, sizeof(struct idt_entry_s)*256);
+  memset(&g_idt_entries, 0, sizeof(struct idt_entry_s) * MAX_NR_IRQS);
 
   /* Set each ISR/IRQ to the appropriate vector with selector=8 and with
    * 32-bit interrupt gate.  Interrupt gate (vs. trap gate) will leave
@@ -518,10 +531,31 @@ void up_irqinitialize(void)
 void up_disable_irq(int irq)
 {
 #ifndef CONFIG_ARCH_INTEL64_DISABLE_INT_INIT
-  if (irq >= IRQ0)
+  irqstate_t flags = spin_lock_irqsave(&g_irq_spin);
+
+  if (irq > IRQ15)
     {
-      up_ioapic_mask_pin(irq - IRQ0);
+      /* Not supported yet */
+
+      ASSERT(0);
     }
+
+  if (g_irq_priv[irq].busy > 0)
+    {
+      g_irq_priv[irq].busy -= 1;
+    }
+
+  if (g_irq_priv[irq].busy == 0)
+    {
+      /* One time disable */
+
+      if (irq >= IRQ0)
+        {
+          up_ioapic_mask_pin(irq - IRQ0);
+        }
+    }
+
+  spin_unlock_irqrestore(&g_irq_spin, flags);
 #endif
 }
 
@@ -536,10 +570,37 @@ void up_disable_irq(int irq)
 void up_enable_irq(int irq)
 {
 #ifndef CONFIG_ARCH_INTEL64_DISABLE_INT_INIT
-  if (irq >= IRQ0)
+  irqstate_t flags = spin_lock_irqsave(&g_irq_spin);
+
+#  ifndef CONFIG_IRQCHAIN
+  /* Check if IRQ is free if we don't support IRQ chains */
+
+  if (g_irq_priv[irq].busy)
     {
-      up_ioapic_unmask_pin(irq - IRQ0);
+      ASSERT(0);
     }
+#  endif
+
+  if (irq > IRQ15)
+    {
+      /* Not supported yet */
+
+      ASSERT(0);
+    }
+
+  if (g_irq_priv[irq].busy == 0)
+    {
+      /* One time enable */
+
+      if (irq >= IRQ0)
+        {
+          up_ioapic_unmask_pin(irq - IRQ0);
+        }
+    }
+
+  g_irq_priv[irq].busy += 1;
+
+  spin_unlock_irqrestore(&g_irq_spin, flags);
 #endif
 }
 
