@@ -207,6 +207,7 @@ chip/$(ESP_HAL_3RDPARTY_REPO):
 # Silent preprocessor warnings
 
 CFLAGS += -Wno-undef -Wno-unused-variable
+CFLAGS += ${DEFINE_PREFIX}_RETARGETABLE_LOCKING
 
 # Files that require the HAL recipe
 
