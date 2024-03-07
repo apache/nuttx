@@ -18,6 +18,10 @@
 #
 ############################################################################
 
+ifeq ($(CONFIG_ARCH_ARMV7M),y)
+include armv7-m/Make.defs
+else
 include armv8-m/Make.defs
+endif
 
 CHIP_CSRCS = mps_start.c mps_serial.c mps_irq.c mps_timer.c mps_allocateheap.c
