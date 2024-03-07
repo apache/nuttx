@@ -160,6 +160,9 @@
      __asm__ __volatile__("csrc " __STR(reg) ", %0" :: "rK"(bits)); \
   })
 
+#define riscv_append_pmp_region(a, b, s) \
+  riscv_config_pmp_region(riscv_next_free_pmp_region(), a, b, s)
+
 #endif
 
 /****************************************************************************
