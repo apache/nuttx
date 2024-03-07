@@ -120,9 +120,6 @@ static void exec_swap(FAR struct tcb_s *ptcb, FAR struct tcb_s *chtcb)
   int        chndx;
   pid_t      pid;
   irqstate_t flags;
-#ifdef HAVE_GROUP_MEMBERS
-  sq_queue_t tg_members;
-#endif
 #ifdef CONFIG_SCHED_HAVE_PARENT
 #  ifdef CONFIG_SCHED_CHILD_STATUS
   FAR struct child_status_s *tg_children;
@@ -162,12 +159,6 @@ static void exec_swap(FAR struct tcb_s *ptcb, FAR struct tcb_s *chtcb)
   pid = chtcb->group->tg_ppid;
   chtcb->group->tg_ppid = ptcb->group->tg_ppid;
   ptcb->group->tg_ppid = pid;
-
-#ifdef HAVE_GROUP_MEMBERS
-  tg_members = chtcb->group->tg_members;
-  chtcb->group->tg_members = ptcb->group->tg_members;
-  ptcb->group->tg_members = tg_members;
-#endif
 
 #ifdef CONFIG_SCHED_HAVE_PARENT
 #  ifdef CONFIG_SCHED_CHILD_STATUS
