@@ -429,8 +429,10 @@ struct task_group_s
 
   /* Group membership *******************************************************/
 
+  uint8_t    tg_nmembers;           /* Number of members in the group           */
 #ifdef HAVE_GROUP_MEMBERS
-  sq_queue_t tg_members;            /* List of members for task             */
+  uint8_t    tg_mxmembers;          /* Number of members in allocation          */
+  FAR pid_t *tg_members;            /* Members of the group                     */
 #endif
 
 #ifdef CONFIG_BINFMT_LOADABLE
@@ -535,12 +537,6 @@ struct tcb_s
   /* Task Group *************************************************************/
 
   FAR struct task_group_s *group;        /* Pointer to shared task group data */
-
-  /* Group membership *******************************************************/
-
-#ifdef HAVE_GROUP_MEMBERS
-  sq_entry_t member;                     /* List entry of task member       */
-#endif
 
   /* Address Environment ****************************************************/
 

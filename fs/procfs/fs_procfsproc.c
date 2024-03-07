@@ -43,7 +43,6 @@
 #  include <time.h>
 #endif
 
-#include <nuttx/nuttx.h>
 #include <nuttx/irq.h>
 #include <nuttx/tls.h>
 #include <nuttx/sched.h>
@@ -54,7 +53,6 @@
 #include <nuttx/fs/procfs.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mm/mm.h>
-#include <nuttx/queue.h>
 
 #if !defined(CONFIG_SCHED_CPULOAD_NONE) || defined(CONFIG_SCHED_CRITMONITOR)
 #  include <nuttx/clock.h>
@@ -1124,8 +1122,7 @@ static ssize_t proc_groupstatus(FAR struct proc_file_s *procfile,
   size_t copysize;
   size_t totalsize;
 #ifdef HAVE_GROUP_MEMBERS
-  FAR sq_entry_t *curr;
-  FAR sq_entry_t *next;
+  int i;
 #endif
 
   DEBUGASSERT(group != NULL);
@@ -1171,14 +1168,13 @@ static ssize_t proc_groupstatus(FAR struct proc_file_s *procfile,
   buffer    += copysize;
   remaining -= copysize;
 
-#ifdef HAVE_GROUP_MEMBERS
   if (totalsize >= buflen)
     {
       return totalsize;
     }
 
-  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%zu\n",
-                               "Members:", sq_count(&group->tg_members));
+  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n",
+                               "Members:", group->tg_nmembers);
   copysize   = procfs_memcpy(procfile->line, linesize, buffer,
                              remaining, &offset);
 
@@ -1186,6 +1182,7 @@ static ssize_t proc_groupstatus(FAR struct proc_file_s *procfile,
   buffer    += copysize;
   remaining -= copysize;
 
+#ifdef HAVE_GROUP_MEMBERS
   if (totalsize >= buflen)
     {
       return totalsize;
@@ -1205,11 +1202,10 @@ static ssize_t proc_groupstatus(FAR struct proc_file_s *procfile,
       return totalsize;
     }
 
-  sq_for_every_safe(&group->tg_members, curr, next)
+  for (i = 0; i < group->tg_nmembers; i++)
     {
-      tcb = container_of(curr, struct tcb_s, member);
       linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, " %d",
-                                   tcb->pid);
+                                   group->tg_members[i]);
       copysize   = procfs_memcpy(procfile->line, linesize, buffer,
                                  remaining, &offset);
 
