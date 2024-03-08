@@ -33,8 +33,8 @@
  * Pre-processor definitions
  ****************************************************************************/
 
-#define RPMSGDEV_NAME_PREFIX     "rpmsgdev-"
-#define RPMSGDEV_NAME_PREFIX_LEN 9
+#define RPMSGDEV_NAME_PREFIX     "rpdev-"
+#define RPMSGDEV_NAME_PREFIX_LEN 6
 
 #define RPMSGDEV_OPEN            1
 #define RPMSGDEV_CLOSE           2

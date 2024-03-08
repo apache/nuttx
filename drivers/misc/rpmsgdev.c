@@ -1160,6 +1160,9 @@ int rpmsgdev_register(FAR const char *remotecpu, FAR const char *remotepath,
       return -EINVAL;
     }
 
+  DEBUGASSERT(strlen(remotepath) + RPMSGDEV_NAME_PREFIX_LEN <=
+              RPMSG_NAME_SIZE);
+
   dev = kmm_zalloc(sizeof(*dev));
   if (dev == NULL)
     {
