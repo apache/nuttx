@@ -25,11 +25,6 @@
  * Preprocessor Macros
  ****************************************************************************/
 
-/* add PMP entry with (attr, base, size) */
-
-#define k230_add_pmp(a, b, s)   riscv_config_pmp_region( \
-                                  riscv_next_free_pmp_region(), a, b, s)
-
 #define CSR_MSECCFG     0x747
 #define CSR_MSECCFGH    0x757
 
