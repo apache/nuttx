@@ -1793,7 +1793,9 @@ static int emac_ifdown(struct net_driver_s *dev)
 
   emac_reset_regbits(EMAC_CR_OFFSET, EMAC_TX_E | EMAC_RX_E);
 
-  up_disable_irq(priv->cpuint);
+  /* Disable the Ethernet interrupt */
+
+  up_disable_irq(ESP32_IRQ_EMAC);
 
   /* Cancel the TX timeout timers */
 
