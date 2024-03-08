@@ -87,6 +87,10 @@ int nrf91_bringup(void)
 {
   int ret;
 
+#if defined(CONFIG_I2C) && defined(CONFIG_SYSTEM_I2CTOOL)
+  nrf91_i2ctool();
+#endif
+
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 
@@ -119,6 +123,16 @@ int nrf91_bringup(void)
              ret);
     }
 #endif
+
+  /* Initialzie on-board sensors */
+
+  ret = nrf91_sensors_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize sensors: %d\n",
+             ret);
+    }
 
 #ifdef CONFIG_NRF91_MODEM
   /* Initialize modem */

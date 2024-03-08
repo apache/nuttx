@@ -20,10 +20,18 @@
 #
 # ##############################################################################
 
-set(SRCS nrf91_boot.c nrf91_bringup.c)
+set(SRCS nrf91_boot.c nrf91_bringup.c nrf91_sensors.c)
 
 if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS nrf91_buttons.c)
+endif()
+
+if(CONFIG_NRF91_SPI_MASTER)
+  list(APPEND SRCS nrf91_spi.c)
+endif()
+
+if(CONFIG_I2C)
+  list(APPEND SRCS nrf91_i2c.c)
 endif()
 
 if(CONFIG_NRF91_MODEM)

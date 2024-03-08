@@ -1,7 +1,5 @@
 /****************************************************************************
- * boards/arm/nrf91/thingy91/src/nrf91_boot.c
- *
- * SPDX-License-Identifier: Apache-2.0
+ * boards/arm/nrf91/thingy91/src/nrf91_i2c.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -26,62 +24,95 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/debug.h>
+#include <syslog.h>
 
-#include <nuttx/board.h>
-#include <arch/board/board.h>
-
-#include "arm_internal.h"
-#include "thingy91.h"
+#ifdef CONFIG_I2C
+#  include "nrf91_i2c.h"
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nrf91_board_initialize
+ * Name: nrf91_i2c_register
  *
  * Description:
- *   All NRF91xxx architectures must provide the following entry point.
- *   This entry point is called early in the initialization -- after all
- *   memory has been configured and mapped but before any devices have been
- *   initialized.
+ *   Register one I2C drivers for the I2C tool.
  *
  ****************************************************************************/
 
-void nrf91_board_initialize(void)
+#ifdef CONFIG_SYSTEM_I2CTOOL
+int nrf91_i2c_register(int bus)
 {
-  /* Configure on-board LEDs if LED support has been selected. */
+  struct i2c_master_s *i2c;
+  int ret = OK;
 
-#ifdef CONFIG_ARCH_LEDS
-  board_autoled_initialize();
-#endif
+  i2c = nrf91_i2cbus_initialize(bus);
+  if (i2c == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to get I2C%d interface\n", bus);
+    }
+  else
+    {
+      ret = i2c_register(i2c, bus);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n",
+                 bus, ret);
+          nrf91_i2cbus_uninitialize(i2c);
+        }
+    }
 
-#ifdef CONFIG_NRF91_SPI_MASTER
-  /* Configure SPI chip selects */
-
-  nrf91_spidev_initialize();
-#endif
+  return ret;
 }
+#endif
 
 /****************************************************************************
- * Name: board_late_initialize
+ * Name: nrf91_i2ctool
  *
  * Description:
- *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
- *   initialization call will be performed in the boot-up sequence to a
- *   function called board_late_initialize(). board_late_initialize() will be
- *   called immediately after up_initialize() is called and just before the
- *   initial application is started.  This additional initialization phase
- *   may be used, for example, to initialize board-specific device drivers.
+ *   Register I2C drivers for the I2C tool.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_BOARD_LATE_INITIALIZE
-void board_late_initialize(void)
+#ifdef CONFIG_SYSTEM_I2CTOOL
+int nrf91_i2ctool(void)
 {
-  /* Perform board-specific initialization */
+  int ret = OK;
 
-  nrf91_bringup();
+#ifdef CONFIG_NRF91_I2C0_MASTER
+  ret = nrf91_i2c_register(0);
+  if (ret != OK)
+    {
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_NRF91_I2C1_MASTER
+  ret = nrf91_i2c_register(1);
+  if (ret != OK)
+    {
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_NRF91_I2C2_MASTER
+  ret = nrf91_i2c_register(2);
+  if (ret != OK)
+    {
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_NRF91_I2C3_MASTER
+  ret = nrf91_i2c_register(3);
+  if (ret != OK)
+    {
+      return ret;
+    }
+#endif
+
+  return ret;
 }
 #endif
