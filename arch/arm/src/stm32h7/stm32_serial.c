@@ -964,6 +964,7 @@ static struct up_dev_s g_usart1priv =
 #endif
 #ifdef CONFIG_USART1_TXDMA
   .txdma_channel = DMAMAP_USART1_TX,
+  .txdmasem      = SEM_INITIALIZER(1),
 #endif
 #ifdef CONFIG_USART1_RXDMA
   .rxdma_channel = DMAMAP_USART1_RX,
@@ -1033,6 +1034,7 @@ static struct up_dev_s g_usart2priv =
 #endif
 #ifdef CONFIG_USART2_TXDMA
   .txdma_channel = DMAMAP_USART2_TX,
+  .txdmasem      = SEM_INITIALIZER(1),
 #endif
 #ifdef CONFIG_USART2_RXDMA
   .rxdma_channel = DMAMAP_USART2_RX,
@@ -1102,6 +1104,7 @@ static struct up_dev_s g_usart3priv =
 #endif
 #ifdef CONFIG_USART3_TXDMA
   .txdma_channel = DMAMAP_USART3_TX,
+  .txdmasem      = SEM_INITIALIZER(1),
 #endif
 #ifdef CONFIG_USART3_RXDMA
   .rxdma_channel = DMAMAP_USART3_RX,
@@ -1171,6 +1174,7 @@ static struct up_dev_s g_uart4priv =
   .rx_gpio       = GPIO_UART4_RX,
 #ifdef CONFIG_UART4_TXDMA
   .txdma_channel = DMAMAP_UART4_TX,
+  .txdmasem      = SEM_INITIALIZER(1),
 #endif
 #ifdef CONFIG_UART4_RXDMA
   .rxdma_channel = DMAMAP_UART4_RX,
@@ -1240,6 +1244,7 @@ static struct up_dev_s g_uart5priv =
   .rx_gpio       = GPIO_UART5_RX,
 #ifdef CONFIG_UART5_TXDMA
   .txdma_channel = DMAMAP_UART5_TX,
+  .txdmasem      = SEM_INITIALIZER(1),
 #endif
 #ifdef CONFIG_UART5_RXDMA
   .rxdma_channel = DMAMAP_UART5_RX,
@@ -1309,6 +1314,7 @@ static struct up_dev_s g_usart6priv =
 #endif
 #ifdef CONFIG_USART6_TXDMA
   .txdma_channel = DMAMAP_USART6_TX,
+  .txdmasem      = SEM_INITIALIZER(1),
 #endif
 #ifdef CONFIG_USART6_RXDMA
   .rxdma_channel = DMAMAP_USART6_RX,
@@ -1378,6 +1384,7 @@ static struct up_dev_s g_uart7priv =
 #endif
 #ifdef CONFIG_UART7_TXDMA
   .txdma_channel = DMAMAP_UART7_TX,
+  .txdmasem      = SEM_INITIALIZER(1),
 #endif
 #ifdef CONFIG_UART7_RXDMA
   .rxdma_channel = DMAMAP_UART7_RX,
@@ -1447,6 +1454,7 @@ static struct up_dev_s g_uart8priv =
 #endif
 #ifdef CONFIG_UART8_TXDMA
   .txdma_channel = DMAMAP_UART8_TX,
+  .txdmasem      = SEM_INITIALIZER(1),
 #endif
 #ifdef CONFIG_UART8_RXDMA
   .rxdma_channel = DMAMAP_UART8_RX,
