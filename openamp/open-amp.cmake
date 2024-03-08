@@ -97,6 +97,8 @@ if(CONFIG_OPENAMP_DEBUG)
   add_compile_definitions(VQUEUE_DEBUG)
 endif()
 
+add_compile_definitions(elf_load=remoteproc_elf_load)
+
 set(WITH_LIBMETAL_FIND OFF)
 
 if(NOT CMAKE_SYSTEM_PROCESSOR)
