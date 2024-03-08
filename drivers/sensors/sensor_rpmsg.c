@@ -1049,7 +1049,7 @@ static int sensor_rpmsg_sub_handler(FAR struct rpmsg_endpoint *ept,
   int ret;
 
   dev = sensor_rpmsg_find_dev(msg->path);
-  if (!dev)
+  if (!dev || (dev->nadvertisers == 0 && !dev->lower.persist))
     {
       return 0;
     }
