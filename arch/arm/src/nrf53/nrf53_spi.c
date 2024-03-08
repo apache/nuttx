@@ -210,7 +210,7 @@ static const struct spi_ops_s g_spi1ops =
 #  ifdef CONFIG_SPI_EXCHANGE
   .exchange          = nrf53_spi_exchange,
 #  else
-  .sndlock           = nrf53_spi_sndblock,
+  .sndblock          = nrf53_spi_sndblock,
   .recvblock         = nrf53_spi_recvblock,
 #  endif
 #ifdef CONFIG_SPI_TRIGGER
