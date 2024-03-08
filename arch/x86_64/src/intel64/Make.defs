@@ -18,16 +18,7 @@
 #
 ############################################################################
 
-# Common x86_64 and intel64 files
-
-CMN_CSRCS += x86_64_allocateheap.c x86_64_copystate.c x86_64_exit.c
-CMN_CSRCS += x86_64_getintstack.c x86_64_mdelay.c x86_64_initialize.c
-CMN_CSRCS += x86_64_modifyreg8.c x86_64_modifyreg16.c x86_64_modifyreg32.c
-CMN_CSRCS += x86_64_nputs.c x86_64_switchcontext.c x86_64_udelay.c
-
-ifeq ($(CONFIG_PCI),y)
-CMN_CSRCS += x86_64_pci.c
-endif
+include common/Make.defs
 
 CMN_CSRCS += intel64_createstack.c intel64_initialstate.c intel64_irq.c
 CMN_CSRCS += intel64_map_region.c intel64_regdump.c intel64_releasestack.c
