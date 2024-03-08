@@ -3356,17 +3356,13 @@ static void up_dma_txcallback(DMA_HANDLE handle, uint8_t status, void *arg)
 static void up_dma_txavailable(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
-  irqstate_t flags =  enter_critical_section();
 
   /* Only send when the DMA is idle */
 
-  if ((priv->dev.dmatx.length && priv->dev.dmatx.nlength) == 0 &&
-      stm32_dmaresidual(priv->txdma) == 0)
+  if (stm32_dmaresidual(priv->txdma) == 0)
     {
       uart_xmitchars_dma(dev);
     }
-
-  leave_critical_section(flags);
 }
 #endif
 
