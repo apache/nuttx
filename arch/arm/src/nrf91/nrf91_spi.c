@@ -348,59 +348,6 @@ static struct nrf91_spidev_s g_spi3dev =
 };
 #endif
 
-/* SPI4 */
-
-#ifdef CONFIG_NRF91_SPI4_MASTER
-static const struct spi_ops_s g_spi4ops =
-{
-  .lock              = nrf91_spi_lock,
-  .select            = nrf91_spi4select,
-  .setfrequency      = nrf91_spi_setfrequency,
-  .setmode           = nrf91_spi_setmode,
-  .setbits           = nrf91_spi_setbits,
-#  ifdef CONFIG_SPI_HWFEATURES
-  .hwfeatures        = nrf91_spi_hwfeatures,
-#  endif
-  .status            = nrf91_spi4status,
-#  ifdef CONFIG_SPI_CMDDATA
-  .cmddata           = nrf91_spi4cmddata,
-#  endif
-  .send              = nrf91_spi_send,
-#  ifdef CONFIG_SPI_EXCHANGE
-  .exchange          = nrf91_spi_exchange,
-#  else
-  .sndlock           = nrf91_spi_sndblock,
-  .recvblock         = nrf91_spi_recvblock,
-#  endif
-#ifdef CONFIG_SPI_TRIGGER
-  .trigger           = nrf91_spi_trigger,
-#endif
-#ifdef CONFIG_SPI_CALLBACK
-  .registercallback  = nrf91_spi4register,  /* Provided externally */
-#else
-  .registercallback  = NULL,                /* Not implemented */
-#endif
-};
-
-static struct nrf91_spidev_s g_spi4dev =
-{
-  .spidev    =
-  {
-    .ops     = &g_spi4ops,
-  },
-
-  .base      = NRF91_SPIM4_BASE,
-  .lock      = NXMUTEX_INITIALIZER,
-#ifdef CONFIG_NRF91_SPI_MASTER_INTERRUPTS
-  .sem_isr   = SEM_INITIALIZER(0),
-  .irq       = NRF91_IRQ_SPI4,
-#endif
-  .sck_pin   = BOARD_SPI4_SCK_PIN,
-  .frequency = 0,
-  .mode      = 0
-};
-#endif
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -620,23 +567,6 @@ static void nrf91_spi_gpioinit(struct nrf91_spidev_s *priv)
 #endif
     }
 #endif
-
-#ifdef CONFIG_NRF91_SPI4_MASTER
-  if (priv == &g_spi4dev)
-    {
-#ifdef BOARD_SPI4_MISO_PIN
-      nrf91_gpio_config(BOARD_SPI4_MISO_PIN);
-      nrf91_spi_pselinit(priv, NRF91_SPIM_PSELMISO_OFFSET,
-                         BOARD_SPI4_MISO_PIN);
-#endif
-#ifdef BOARD_SPI4_MOSI_PIN
-      nrf91_gpio_config(BOARD_SPI4_MOSI_PIN);
-      nrf91_spi_pselinit(priv, NRF91_SPIM_PSELMOSI_OFFSET,
-                         BOARD_SPI4_MOSI_PIN);
-      nrf91_gpio_write(BOARD_SPI4_MOSI_PIN, false);
-#endif
-    }
-#endif
 }
 
 #ifdef CONFIG_PM
@@ -696,18 +626,6 @@ static void nrf91_spi_gpiodeinit(struct nrf91_spidev_s *priv)
 #endif
 #ifdef BOARD_SPI3_MOSI_PIN
       nrf91_gpio_unconfig(BOARD_SPI3_MOSI_PIN);
-#endif
-    }
-#endif
-
-#ifdef CONFIG_NRF91_SPI4_MASTER
-  if (priv == &g_spi4dev)
-    {
-#ifdef BOARD_SPI4_MISO_PIN
-      nrf91_gpio_unconfig(BOARD_SPI4_MISO_PIN);
-#endif
-#ifdef BOARD_SPI4_MOSI_PIN
-      nrf91_gpio_unconfig(BOARD_SPI4_MOSI_PIN);
 #endif
     }
 #endif
@@ -782,7 +700,7 @@ static uint32_t nrf91_spi_setfrequency(struct spi_dev_s *dev,
 
   /* Frequency > 8MHz available only for SPIM4 */
 
-  if (frequency > 8000000 && priv->base != NRF91_SPIM4_BASE)
+  if (frequency > 8000000)
     {
       frequency = 8000000;
       spiwarn("Reduce freq to %" PRId32 "\n", frequency);
@@ -831,18 +749,6 @@ static uint32_t nrf91_spi_setfrequency(struct spi_dev_s *dev,
       case 8000000:
         {
           regval = SPIM_FREQUENCY_8MBPS;
-          break;
-        }
-
-      case 16000000:
-        {
-          regval = SPIM_FREQUENCY_16MBPS;
-          break;
-        }
-
-      case 32000000:
-        {
-          regval = SPIM_FREQUENCY_32MBPS;
           break;
         }
 
@@ -1298,9 +1204,6 @@ static int nrf91_spi_pm_prepare(struct pm_callback_s *cb, int domain,
 #ifdef CONFIG_NRF91_SPI3_MASTER
       active |= nrf91_spi_getreg(&g_spi3dev, SPIM_EVENTS_STARTED);
 #endif
-#ifdef CONFIG_NRF91_SPI4_MASTER
-      active |= nrf91_spi_getreg(&g_spi4dev, SPIM_EVENTS_STARTED);
-#endif
 
       if (active)
         {
@@ -1361,13 +1264,6 @@ static void nrf91_spi_pm_notify(struct pm_callback_s *cb, int domain,
           nrf91_spi_deinit(&g_spi3dev);
         }
 #endif
-
-#ifdef CONFIG_NRF91_SPI4_MASTER
-      if (g_spi4dev.initialized)
-        {
-          nrf91_spi_deinit(&g_spi4dev);
-        }
-#endif
     }
   else
     {
@@ -1398,13 +1294,6 @@ static void nrf91_spi_pm_notify(struct pm_callback_s *cb, int domain,
       if (g_spi3dev.initialized)
         {
           nrf91_spi_init(&g_spi3dev);
-        }
-#endif
-
-#ifdef CONFIG_NRF91_SPI4_MASTER
-      if (g_spi4dev.initialized)
-        {
-          nrf91_spi_init(&g_spi4dev);
         }
 #endif
     }
@@ -1465,14 +1354,6 @@ struct spi_dev_s *nrf91_spibus_initialize(int port)
       case 3:
         {
           priv = &g_spi3dev;
-          break;
-        }
-#endif
-
-#ifdef CONFIG_NRF91_SPI4_MASTER
-      case 4:
-        {
-          priv = &g_spi4dev;
           break;
         }
 #endif
