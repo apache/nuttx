@@ -664,6 +664,10 @@ else
   endif
 endif
 
+ifeq ($(CONFIG_LIBCXXABI),y)
+ARCHXXINCLUDES += ${INCSYSDIR_PREFIX}$(TOPDIR)$(DELIM)include$(DELIM)libcxxabi
+endif
+
 ifeq ($(CONFIG_LIBM_NEWLIB),y)
   ARCHINCLUDES += ${INCSYSDIR_PREFIX}$(TOPDIR)$(DELIM)include$(DELIM)newlib
   ARCHXXINCLUDES += ${INCSYSDIR_PREFIX}$(TOPDIR)$(DELIM)include$(DELIM)newlib
