@@ -20,6 +20,8 @@
 
 LIBCXXABI_VERSION=$(patsubst "%",%,$(CONFIG_LIBCXXABI_VERSION))
 
+# Download and unpack tarball if no git repo found
+ifeq ($(wildcard libcxxabi/.git),)
 libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz:
 	$(call DOWNLOAD,https://github.com/llvm/llvm-project/releases/download/llvmorg-$(LIBCXXABI_VERSION),libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz)
 
@@ -27,14 +29,19 @@ libcxxabi: libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz
 	$(Q) tar -xf libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz
 	$(Q) mv libcxxabi-$(LIBCXXABI_VERSION).src libcxxabi
 	$(Q) touch $@
+endif
 
-# Download and unpack tarball if no git repo found
-ifeq ($(wildcard libcxxabi/.git),)
+$(TOPDIR)/include/libcxxabi: libcxxabi
+	$(Q) $(DIRLINK) $(CURDIR)/libcxxabi/include $(TOPDIR)/include/libcxxabi
+	$(Q) cp $(CURDIR)/__config_site $(TOPDIR)/include/libcxxabi/__config_site
+
+context:: $(TOPDIR)/include/libcxxabi
+
 distclean::
-	$(Q) $(DELFILE) libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz
+	$(Q) $(DIRUNLINK) $(TOPDIR)/include/libcxxabi
+ifeq ($(wildcard libcxxabi/.git),)
+	$(Q) $(DELFILE) libcxxabi-$(LIBCXX_VERSION).src.tar.xz
 	$(call DELDIR, libcxxabi)
-
-context:: libcxxabi
 endif
 
 ifeq ($(CONFIG_LIBCXXABI), y)
