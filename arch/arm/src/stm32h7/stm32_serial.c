@@ -3314,11 +3314,7 @@ static void up_dma_txcallback(DMA_HANDLE handle, uint8_t status, void *arg)
    * This is important to free TX buffer space by 'uart_xmitchars_done'.
    */
 
-  if (status & DMA_SCR_HTIE)
-    {
-      priv->dev.dmatx.nbytes += priv->dev.dmatx.length / 2;
-    }
-  else if (status & DMA_SCR_TCIE)
+  if (status & DMA_SCR_TCIE)
     {
       priv->dev.dmatx.nbytes += priv->dev.dmatx.length;
       if (priv->dev.dmatx.nlength)
@@ -3346,11 +3342,20 @@ static void up_dma_txcallback(DMA_HANDLE handle, uint8_t status, void *arg)
         }
     }
 
-  nxsem_post(&priv->txdmasem);
-
   /* Adjust the pointers */
 
   uart_xmitchars_done(&priv->dev);
+
+  /* Initiate another transmit if data is ready */
+
+  if (priv->dev.xmit.tail != priv->dev.xmit.head)
+    {
+      uart_xmitchars_dma(&priv->dev);
+    }
+  else
+    {
+      nxsem_post(&priv->txdmasem);
+    }
 }
 #endif
 
@@ -3372,6 +3377,14 @@ static void up_dma_txavailable(struct uart_dev_s *dev)
   int rv = nxsem_trywait(&priv->txdmasem);
   if (rv == OK)
     {
+      if (dev->xmit.head == dev->xmit.tail)
+        {
+          /* No data to transfer. Release semaphore. */
+
+          nxsem_post(&priv->txdmasem);
+          return;
+        }
+
       uart_xmitchars_dma(dev);
     }
 }
