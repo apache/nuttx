@@ -34,7 +34,6 @@
 
 #include "k230_userspace.h"
 #include "riscv_internal.h"
-#include "k230_hart.h"
 
 #ifdef CONFIG_BUILD_PROTECTED
 
@@ -128,8 +127,8 @@ void k230_userspace(void)
 
 static void configure_mpu(void)
 {
-  k230_add_pmp(UFLASH_F, UFLASH_START, UFLASH_SIZE);
-  k230_add_pmp(USRAM_F, USRAM_START, USRAM_SIZE);
+  riscv_append_pmp_region(UFLASH_F, UFLASH_START, UFLASH_SIZE);
+  riscv_append_pmp_region(USRAM_F, USRAM_START, USRAM_SIZE);
 }
 
 #endif /* CONFIG_BUILD_PROTECTED */

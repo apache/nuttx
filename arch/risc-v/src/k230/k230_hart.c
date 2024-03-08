@@ -87,7 +87,7 @@
 
 #if !defined(CONFIG_BUILD_KERNEL) || defined(CONFIG_NUTTSBI)
 
-static bool g_big = false;    /* true if running on big core */
+static volatile uint64_t g_misa = 0;
 
 /****************************************************************************
  * Private Functions
@@ -127,28 +127,21 @@ static void k230_hart_cleanup(void)
 
 void k230_hart_init(void)
 {
-  /* TODO: when called from sbi_start(), MISA is 0 somehow. */
-
-  g_big = (READ_CSR(CSR_MISA) & (1 << 21));
-
   k230_hart_cleanup();
 
   WRITE_CSR(CSR_MXSTATUS, XSTATUS);
   WRITE_CSR(CSR_MHCR,  MHCR);
   WRITE_CSR(CSR_MCOR,  MCOR);
   WRITE_CSR(CSR_MSMPR, MSMPR);
-  WRITE_CSR(CSR_MCCR2, g_big ? MCCR2_BIG : MCCR2);
-  WRITE_CSR(CSR_MHINT, g_big ? MHINT_BIG : MHINT);
+  WRITE_CSR(CSR_MCCR2, MCCR2);
+  WRITE_CSR(CSR_MHINT, MHINT);
 
 #ifdef RISCV_PBMT
   SET_CSR(CSR_MENVCFG, MENVCFG_PBMT);
 #endif
+  /* TODO: why 0 when reading from NuttSBI S-mode? */
 
-#ifdef CONFIG_NUTTSBI
-  /* Some PMP entries might have been locked */
-
-  k230_add_pmp(PMPCFG_A_NAPOT | PMPCFG_RWX_MASK, 0, 1024ul << 30);
-#endif
+  while (!(g_misa = READ_CSR(CSR_MISA)));
 }
 
 /****************************************************************************
@@ -158,7 +151,8 @@ void k230_hart_init(void)
 
 bool k230_hart_is_big(void)
 {
-  return g_big;
+  sinfo("g_misa=%lx\n", g_misa);
+  return g_misa & (1 << 21);
 }
 
 /****************************************************************************
