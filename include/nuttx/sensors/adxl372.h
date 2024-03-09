@@ -95,54 +95,54 @@
 
 /* ADXL372 Accelerometer Register definitions */
 
-#define ADXL372_DEVID_AD                (0x00 << 1)
+#define ADXL372_DEVID_AD                0x00
 #   define ADXL372_DEVID_AD_VALUE       0xad
-#define ADXL372_DEVID_MST               (0x01 << 1)
-#   define ADXL372_DEVID_MST_VALUE      0x1D
-#define ADXL372_PARTID                  (0x02 << 1)
+#define ADXL372_DEVID_MST               0x01
+#   define ADXL372_DEVID_MST_VALUE      0x1d
+#define ADXL372_PARTID                  0x02
 #   define ADXL372_PARTID_VALUE         0xfa
-#define ADXL372_REVID                   (0x03 << 1)
-#define ADXL372_STATUS                  (0x04 << 1)
-#define ADXL372_STATUS2                 (0x05 << 1)
-#define ADXL372_FIFO_ENTRIES2           (0x06 << 1)
-#define ADXL372_FIFO_ENTRIES            (0x07 << 1)
-#define ADXL372_XDATA_H                 (0x08 << 1)
-#define ADXL372_XDATA_L                 (0x09 << 1)
-#define ADXL372_YDATA_H                 (0x0a << 1)
-#define ADXL372_YDATA_L                 (0x0b << 1)
-#define ADXL372_ZDATA_H                 (0x0c << 1)
-#define ADXL372_ZDATA_L                 (0x0d << 1)
-#define ADXL372_THRESH_ACT_X_H          (0x23 << 1)
-#define ADXL372_FIFO_CTL                (0x3a << 1)
+#define ADXL372_REVID                   0x03
+#define ADXL372_STATUS                  0x04
+#define ADXL372_STATUS2                 0x05
+#define ADXL372_FIFO_ENTRIES2           0x06
+#define ADXL372_FIFO_ENTRIES            0x07
+#define ADXL372_XDATA_H                 0x08
+#define ADXL372_XDATA_L                 0x09
+#define ADXL372_YDATA_H                 0x0a
+#define ADXL372_YDATA_L                 0x0b
+#define ADXL372_ZDATA_H                 0x0c
+#define ADXL372_ZDATA_L                 0x0d
+#define ADXL372_THRESH_ACT_X_H          0x23
+#define ADXL372_FIFO_CTL                0x3a
 #   define ADXL372_FIFO_BYPASSED        0x00
 #   define ADXL372_FIFO_STREAMED        0x02
-#define ADXL372_INT1_MAP                (0x3b << 1)
+#define ADXL372_INT1_MAP                0x3b
 #   define ADXL372_INT1_MAP_DR          0x01
 #   define ADXL372_INT1_MAP_FRDY        0x02
 #   define ADXL372_INT1_MAP_FFULL       0x04
-#define ADXL372_TIMING                  (0x3d << 1)
+#define ADXL372_TIMING                  0x3d
 #   define ADXL372_TIMING_ODR400        (0x0 << 5)      /* 400 Hz ODR */
 #   define ADXL372_TIMING_ODR800        (0x1 << 5)      /* 800 Hz ODR */
 #   define ADXL372_TIMING_ODR1600       (0x2 << 5)      /* 1600 Hz ODR */
 #   define ADXL372_TIMING_ODR3200       (0x3 << 5)      /* 3200 Hz ODR */
 #   define ADXL372_TIMING_ODR6400       (0x4 << 5)      /* 6400 Hz ODR */
-#define ADXL372_MEASURE                 (0x3e << 1)
+#define ADXL372_MEASURE                 0x3e
 #   define ADXL372_MEAS_BW200           0x0     /* 200 Hz Bandwidth */
 #   define ADXL372_MEAS_BW400           0x1     /* 400 Hz Bandwidth */
 #   define ADXL372_MEAS_BW800           0x2     /* 800 Hz Bandwidth */
 #   define ADXL372_MEAS_BW1600          0x3     /* 1600 Hz Bandwidth */
 #   define ADXL372_MEAS_BW3200          0x4     /* 3200 Hz Bandwidth */
-#define ADXL372_POWER_CTL               (0x3f << 1)
+#define ADXL372_POWER_CTL               0x3f
 #   define ADXL372_POWER_LPF_DISABLE    (1 << 3)
 #   define ADXL372_POWER_HPF_DISABLE    (1 << 2)
 #   define ADXL372_POWER_MODE_STANDBY   0x0
 #   define ADXL372_POWER_MODE_WAKEUP    0x1
 #   define ADXL372_POWER_MODE_INSTON    0x2
 #   define ADXL372_POWER_MODE_MEASURE   0x3
-#define ADXL372_RESET                   (0x41 << 1)
+#define ADXL372_RESET                   0x41
 #   define ADXL372_RESET_VALUE          0x52
-#define ADXL372_FIFO_DATA               (0x42 << 1)
-#define ADXL372_LAST                    (0x42 << 1)
+#define ADXL372_FIFO_DATA               0x42
+#define ADXL372_LAST                    0x42
 #define ADXL372_SCRATCH                 ADXL372_THRESH_ACT_X_H
 
 /* SPI Bus Parameters */
@@ -153,6 +153,8 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+#ifndef CONFIG_SENSORS_ADXL372_UORB
 
 /* A reference to a structure of this type must be passed to the ADXL372
  * driver. This structure provides information about the configuration
@@ -227,6 +229,7 @@ struct adxl372_config_s
 
   FAR const struct adxl372_dvr_entry_vector_s *sc_ops;
 };
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -258,9 +261,13 @@ extern "C"
  *
  ****************************************************************************/
 
+#ifndef CONFIG_SENSORS_ADXL372_UORB
 int adxl372_register(FAR const char *devpath,
                      FAR struct spi_dev_s *spi,
                      FAR struct adxl372_config_s *config);
+#else
+int adxl372_register_uorb(int devno, FAR struct spi_dev_s *spi);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus
