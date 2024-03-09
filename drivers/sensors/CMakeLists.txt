@@ -277,7 +277,11 @@ if(CONFIG_SENSORS)
     endif()
 
     if(CONFIG_SENSORS_ADXL372)
-      list(APPEND SRCS adxl372.c)
+      if(CONFIG_SENSORS_ADXL372_UORB)
+        list(APPEND SRCS adxl372_uorb.c)
+      else()
+        list(APPEND SRCS adxl372.c)
+      endif()
     endif()
 
     if(CONFIG_LIS3DSH)
