@@ -789,9 +789,9 @@ config SAMV7_PWM0_PA9
 	bool "External fault input from PA9"
 	default n
 
-if SAMV7_PWM1_PA9
+if SAMV7_PWM0_PA9
 
-config SAMV7_PWM1_PA9_POL
+config SAMV7_PWM0_PA9_POL
 	bool "Inverted polarity"
 	default n
 	---help---
@@ -804,9 +804,9 @@ config SAMV7_PWM0_PD8
 	bool "External fault input from PD8"
 	default n
 
-if SAMV7_PWM1_PD8
+if SAMV7_PWM0_PD8
 
-config SAMV7_PWM1_PD8_POL
+config SAMV7_PWM0_PD8_POL
 	bool "Inverted polarity"
 	default n
 	---help---
@@ -819,9 +819,9 @@ config SAMV7_PWM0_PD9
 	bool "External fault input from PD9"
 	default n
 
-if SAMV7_PWM1_PD9
+if SAMV7_PWM0_PD9
 
-config SAMV7_PWM1_PD9_POL
+config SAMV7_PWM0_PD9_POL
 	bool "Inverted polarity"
 	default n
 	---help---
