@@ -24,12 +24,11 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/mm/kasan.h>
 #include <nuttx/spinlock.h>
 
 #include <assert.h>
 #include <stdint.h>
-
-#include "kasan.h"
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -1,5 +1,5 @@
 /****************************************************************************
- * mm/kasan/kasan.h
+ * include/nuttx/mm/kasan.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __MM_KASAN_KASAN_H
-#define __MM_KASAN_KASAN_H
+#ifndef __INCLUDE_NUTTX_MM_KASAN_H
+#define __INCLUDE_NUTTX_MM_KASAN_H
 
 /****************************************************************************
  * Included Files
@@ -150,4 +150,4 @@ void kasan_init_early(void);
 
 #endif /* CONFIG_MM_KASAN */
 
-#endif /* __MM_KASAN_KASAN_H */
+#endif /* __INCLUDE_NUTTX_MM_KASAN_H */
