@@ -1,5 +1,5 @@
 /****************************************************************************
- * mm/kasan/kasan.h
+ * include/nuttx/mm/kasan.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __MM_KASAN_KASAN_H
-#define __MM_KASAN_KASAN_H
+#ifndef __INCLUDE_NUTTX_MM_KASAN_H
+#define __INCLUDE_NUTTX_MM_KASAN_H
 
 /****************************************************************************
  * Included Files
@@ -148,4 +148,4 @@ void kasan_init_early(void);
 
 #endif /* CONFIG_MM_KASAN */
 
-#endif /* __MM_KASAN_KASAN_H */
+#endif /* __INCLUDE_NUTTX_MM_KASAN_H */
