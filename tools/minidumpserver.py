@@ -43,9 +43,16 @@ GDB_SIGNAL_DEFAULT = 7
 
 DEFAULT_GDB_INIT_CMD = "-ex 'bt full' -ex 'info reg' -ex 'display /40i $pc-40'"
 
-
 logger = logging.getLogger()
 
+# The global register table is dictionary like {arch:{reg:ndx}}
+#
+# where arch is the CPU architecture name;
+#       reg  is the name of the register as used in log file
+#       ndx  is the index of the register in GDB group registers list
+#
+# Registers with multiple convenient names can have multiple entries here, one
+# for each name and with the same index.
 reg_table = {
     "arm": {
         "R0": 0,
@@ -104,6 +111,7 @@ reg_table = {
         "PC": 15,
         "CPSR": 41,
     },
+    # rv64 works with gdb-multiarch on Ubuntu
     "riscv": {
         "ZERO": 0,
         "RA": 1,
@@ -138,6 +146,8 @@ reg_table = {
         "T5": 30,
         "T6": 31,
         "PC": 32,
+        "S0": 8,
+        "EPC": 32,
     },
     # use xtensa-esp32s3-elf-gdb register table
     "esp32s3": {
@@ -213,6 +223,9 @@ reg_fix_value = {
         "WINDOWSTART": 1,
         "PS": 0x40000,
     },
+    "riscv": {
+        "ZERO": 0,
+    },
 }
 
 
@@ -238,10 +251,14 @@ class DumpELFFile:
     def __init__(self, elffile: str):
         self.elffile = elffile
         self.__memories = []
+        self.__arch = None
+        self.__xlen = None
 
     def parse(self):
         self.__memories = []
         elf = ELFFile.load_from_path(self.elffile)
+        self.__arch = elf.get_machine_arch().lower().replace("-", "")
+        self.__xlen = elf.elfclass
 
         for section in elf.iter_sections():
             # REALLY NEED to match exact type as all other sections
@@ -290,6 +307,12 @@ class DumpELFFile:
     def get_memories(self):
         return self.__memories
 
+    def arch(self):
+        return self.__arch
+
+    def xlen(self):
+        return self.__xlen
+
 
 class DumpLogFile:
     def __init__(self, logfile):
@@ -299,6 +322,7 @@ class DumpLogFile:
         self.reg_table = dict()
 
     def _init_register(self):
+        # registers list should be able to hold the max index
         self.registers = [b"x"] * (max(self.reg_table.values()) + 1)
 
     def _parse_register(self, line):
@@ -314,6 +338,9 @@ class DumpLogFile:
             if reg_name in self.reg_table:
                 reg_index = self.reg_table[reg_name]
                 self.registers[reg_index] = int(reg_val, 16)
+            else:
+                raise Exception("Unknown register name: ", reg_name)
+
         return True
 
     def _parse_fix_register(self, arch):
@@ -394,6 +421,7 @@ class GDBStub:
         self.socket = None
         self.gdb_signal = GDB_SIGNAL_DEFAULT
         self.mem_regions = self.elffile.get_memories() + self.logfile.get_memories()
+        self.reg_digits = elffile.xlen() // 4
 
         self.mem_regions.sort(key=lambda x: x["start"])
 
@@ -465,7 +493,7 @@ class GDBStub:
         self.put_gdb_packet(pkt)
 
     def handle_register_group_read_packet(self):
-        reg_fmt = "<I"
+        reg_fmt = "<Q"
         pkt = b""
 
         for reg in self.logfile.registers:
@@ -475,12 +503,12 @@ class GDBStub:
             else:
                 # Register not in coredump -> unknown value
                 # Send in "xxxxxxxx"
-                pkt += b"x" * 8
+                pkt += b"x" * self.reg_digits
 
         self.put_gdb_packet(pkt)
 
     def handle_register_single_read_packet(self, pkt):
-        reg_fmt = "<I"
+        reg_fmt = "<Q"
         logger.debug(f"pkt: {pkt}")
 
         reg = int("0x" + pkt[1:].decode("utf8"), 16)
@@ -488,7 +516,7 @@ class GDBStub:
             bval = struct.pack(reg_fmt, self.logfile.registers[reg])
             self.put_gdb_packet(binascii.hexlify(bval))
         else:
-            self.put_gdb_packet(b"x" * 8)
+            self.put_gdb_packet(b"x" * self.reg_digits)
 
     def handle_register_group_write_packet(self):
         # the 'G' packet for writing to a group of registers
@@ -605,8 +633,8 @@ def arg_parser():
     parser.add_argument(
         "-a",
         "--arch",
-        help="select architecture,if not use this options",
-        required=True,
+        help="Only use if can't be learnt from ELFFILE.",
+        required=False,
         choices=[arch for arch in reg_table.keys()],
     )
     parser.add_argument("-p", "--port", help="gdbport", type=int, default=1234)
@@ -701,10 +729,18 @@ def main(args):
 
     selected_log = auto_parse_log_file(args.logfile)
 
-    log = DumpLogFile(selected_log)
-    log.parse(args.arch)
+    # parse ELF fisrt to get arch
     elf = DumpELFFile(args.elffile)
     elf.parse()
+
+    log = DumpLogFile(selected_log)
+    if args.arch:
+        log.parse(args.arch)
+    elif elf.arch() in reg_table.keys():
+        log.parse(elf.arch())
+    else:
+        logger.error("Architecture unknown, exiting...")
+        sys.exit(2)
 
     gdb_stub = GDBStub(log, elf)
 
