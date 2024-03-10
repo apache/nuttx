@@ -113,6 +113,15 @@
      GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN5)
 #endif
 
+/* PWM
+ *
+ * The STM32F401RC-RS485 has no real on-board PWM devices, but the board can
+ * be configured to output a pulse train using TIM3 CH1 on PA6.
+ */
+
+#define STM32F401RCRS485_PWMTIMER   3
+#define STM32F401RCRS485_PWMCHANNEL 1
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -183,6 +192,21 @@ void stm32_usbinitialize(void);
 
 #ifdef CONFIG_ADC
 int stm32_adc_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ * Return Value:
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PWM
+int stm32_pwm_setup(void);
 #endif
 
 /****************************************************************************

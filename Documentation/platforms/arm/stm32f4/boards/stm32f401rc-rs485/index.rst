@@ -442,3 +442,26 @@ NSH commands::
        1: channel: 4 value: 2682
 
 Currently there is a bug that causes the application to always read the same value for channel 0 and 4. If you want to read the value from channel 2, you will need to enable the config "ADC1 Scan Mode".
+
+dac
+---
+
+Configures the NuttShell (nsh) over USB Serial (check usbserial configuration) and enables PWM 3 on channel 1.
+Use pwm command on NSH to change dutty cycle, frequency and duration, use dac_out_2 to measure the output voltage. 
+NSH commands::
+
+       nsh> pwm -h
+       Usage: pwm [OPTIONS]
+
+       Arguments are "sticky".  For example, once the PWM frequency is
+       specified, that frequency will be re-used until it is changed.
+
+       "sticky" OPTIONS include:
+         [-p devpath] selects the PWM device.  Default: /dev/pwm0 Current: NONE
+         [-f frequency] selects the pulse frequency.  Default: 100 Hz Current: 100 Hz
+         [-d duty] selects the pulse duty as a percentage.  Default: 50 % Current: 50 %
+         [-t duration] is the duration of the pulse train in seconds.  Default: 5 Current: 5
+         [-h] shows this message and exits
+       nsh> pwm -d 50 -t 3
+       pwm_main: starting output with frequency: 50 duty: 00007fff
+       pwm_main: stopping output
