@@ -98,12 +98,6 @@ config MM_REGIONS
 		that the memory manager must handle and enables the API
 		mm_addregion(heap, start, end);
 
-config MM_MAP_COUNT_MAX
-	int "The maximum number of memory map areas for each task"
-	default 1024
-	---help---
-		The maximum number of memory map areas for each task.
-
 config MM_FILL_ALLOCATIONS
 	bool "Fill allocations with debug value"
 	default n
