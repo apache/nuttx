@@ -40,11 +40,10 @@
 #include <nuttx/fs/procfs.h>
 #include <nuttx/mutex.h>
 #include <nuttx/mm/mm.h>
-#include <nuttx/sched.h>
+#include <nuttx/mm/kasan.h>
 #include <nuttx/mm/mempool.h>
 
 #include "tlsf/tlsf.h"
-#include "kasan/kasan.h"
 
 /****************************************************************************
  * Pre-processor Definitions

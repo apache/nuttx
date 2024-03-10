@@ -22,6 +22,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/mm/kasan.h>
 #include <nuttx/irq.h>
 
 #include <assert.h>
@@ -29,8 +30,6 @@
 #include <execinfo.h>
 #include <stdint.h>
 #include <stdio.h>
-
-#include "kasan.h"
 
 /****************************************************************************
  * Private Functions

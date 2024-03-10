@@ -31,10 +31,9 @@
 #include <syslog.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/mm/kasan.h>
 #include <nuttx/mm/mempool.h>
 #include <nuttx/sched.h>
-
-#include "kasan/kasan.h"
 
 /****************************************************************************
  * Pre-processor Definitions
