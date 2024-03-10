@@ -20,17 +20,19 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_MM_KASAN),y)
+CSRCS += hook.c
 
-CSRCS += kasan.c
+ifeq ($(CONFIG_MM_KASAN),y)
+CSRCS += generic.c
 
 # Disable kernel-address in mm subsystem
 
-ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
-  CFLAGS += -fno-sanitize=kernel-address
-  ifeq ($(CONFIG_LTO_NONE),n)
-    CFLAGS += -fno-lto
-  endif
+  ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
+    CFLAGS += -fno-sanitize=kernel-address
+    ifeq ($(CONFIG_LTO_NONE),n)
+      CFLAGS += -fno-lto
+    endif
+
 endif
 
 # Add the core heap directory to the build
@@ -38,4 +40,4 @@ endif
 DEPPATH += --dep-path kasan
 VPATH += :kasan
 
-endif
+
