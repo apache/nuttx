@@ -1094,6 +1094,7 @@ int sensor_register(FAR struct sensor_lowerhalf_s *lower, int devno)
 
   DEBUGASSERT(lower != NULL);
 
+  lower->devno = devno;
   snprintf(path, PATH_MAX, DEVNAME_FMT,
            g_sensor_info[lower->type].name,
            lower->uncalibrated ? DEVNAME_UNCAL : "",

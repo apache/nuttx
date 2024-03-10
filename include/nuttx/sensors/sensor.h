@@ -1031,6 +1031,10 @@ struct sensor_lowerhalf_s
 
   int type;
 
+  /* Device number */
+
+  int devno;
+
   /* The number of events that the circular buffer can hold.
    * This sensor circular buffer is used to slove issue that application
    * can't read sensor event in time. If this number of events is too large,
