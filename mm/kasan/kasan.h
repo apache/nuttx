@@ -25,6 +25,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <stdbool.h>
 #include <stddef.h>
 
 /****************************************************************************
@@ -32,10 +33,12 @@
  ****************************************************************************/
 
 #ifndef CONFIG_MM_KASAN
+#  define kasan_is_poisoned(addr, size) false
 #  define kasan_poison(addr, size)
 #  define kasan_unpoison(addr, size)
 #  define kasan_register(addr, size)
-#endif
+#  define kasan_init_early()
+#else
 
 /****************************************************************************
  * Public Function Prototypes
@@ -49,7 +52,22 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#ifdef CONFIG_MM_KASAN
+/****************************************************************************
+ * Name: kasan_is_poisoned
+ *
+ * Description:
+ *   Check if the memory range is poisoned
+ *
+ * Input Parameters:
+ *   addr - range start address
+ *   size - range size
+ *
+ * Returned Value:
+ *   true if the memory range is poisoned, false otherwise.
+ *
+ ****************************************************************************/
+
+bool kasan_is_poisoned(FAR const void *addr, size_t size);
 
 /****************************************************************************
  * Name: kasan_poison
@@ -105,11 +123,29 @@ void kasan_unpoison(FAR const void *addr, size_t size);
 
 void kasan_register(FAR void *addr, FAR size_t *size);
 
-#endif /* CONFIG_MM_KASAN */
+/****************************************************************************
+ * Name: kasan_init_early
+ *
+ * Description:
+ *   Initialize the kasan early, setup g_region_init variable.
+ *   This used for some platfroms clear bss late, and error use kasan before
+ *   called kasan_register().
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void kasan_init_early(void);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* CONFIG_MM_KASAN */
 
 #endif /* __MM_KASAN_KASAN_H */
