@@ -73,7 +73,7 @@ static bool pthread_notifywaiters(FAR struct join_s *pjoin)
 
       do
         {
-          status = pthread_sem_give(&pjoin->exit_sem);
+          status = nxsem_post(&pjoin->exit_sem);
           if (status == OK)
             {
               status = nxsem_get_value(&pjoin->exit_sem, &ntasks_waiting);
