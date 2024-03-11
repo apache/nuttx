@@ -61,7 +61,8 @@ extern "C"
 #  define ESP32_WLAN_DEVS         2
 #endif
 
-/* Needed to fix coex_adapter_funcs_t definition */
+#define SSID_MAX_LEN                (32)
+#define PWD_MAX_LEN                 (64)
 
 #define CONFIG_IDF_TARGET_ESP32   1
 

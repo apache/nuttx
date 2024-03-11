@@ -48,6 +48,9 @@
 
 #include "hardware/esp32_dport.h"
 #include "hardware/esp32_gpio_sigmap.h"
+#include "hardware/esp32_twai.h"
+
+#include "soc/soc.h"
 
 #if defined(CONFIG_ESP32_TWAI)
 

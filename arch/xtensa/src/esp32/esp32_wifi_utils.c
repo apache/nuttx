@@ -35,7 +35,15 @@
 #include "esp32_wifi_adapter.h"
 #include "esp32_wifi_utils.h"
 #include "esp32_wireless.h"
-#include "espidf_wifi.h"
+
+#include "esp_log.h"
+#include "esp_mac.h"
+#include "esp_private/phy.h"
+#include "esp_private/wifi.h"
+#include "esp_random.h"
+#include "esp_timer.h"
+#include "rom/ets_sys.h"
+#include "soc/soc_caps.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -53,7 +61,6 @@
 #endif
 
 #define SCAN_TIME_SEC                (5)
-#define SSID_LEN                     (33)
 
 /* Maximum number of channels for Wi-Fi 2.4Ghz */
 
@@ -114,13 +121,13 @@ int esp_wifi_start_scan(struct iwreq *iwr)
 {
   struct wifi_scan_result *priv = &g_scan_priv;
   wifi_scan_config_t *config = NULL;
-  uint8_t target_ssid[SSID_LEN];
   struct iw_scan_req *req;
   int ret = 0;
   int i;
   uint8_t target_mac[MAC_LEN];
+  uint8_t target_ssid[SSID_MAX_LEN + 1];
+  memset(target_ssid, 0x0, sizeof(SSID_MAX_LEN + 1));
 
-  memset(target_ssid, 0x0, sizeof(SSID_LEN));
   if (iwr == NULL)
     {
       wlerr("ERROR: Invalid ioctl cmd.\n");
@@ -132,7 +139,7 @@ int esp_wifi_start_scan(struct iwreq *iwr)
       return OK;
     }
 
-  config = kmm_malloc(sizeof(wifi_scan_config_t));
+  config = kmm_calloc(1, sizeof(wifi_scan_config_t));
   if (config == NULL)
     {
       wlerr("ERROR: Cannot allocate result buffer\n");
@@ -141,7 +148,7 @@ int esp_wifi_start_scan(struct iwreq *iwr)
 
   g_channel_num = 0;
   memset(g_channel_list, 0x0, CHANNEL_MAX_NUM);
-  memset(config, 0x0, sizeof(wifi_scan_config_t));
+
   if (iwr->u.data.pointer &&
       iwr->u.data.length >= sizeof(struct iw_scan_req))
     {
@@ -153,6 +160,8 @@ int esp_wifi_start_scan(struct iwreq *iwr)
         {
           /* Scan specific ESSID */
 
+          config->show_hidden = true;
+          config->bssid = NULL;
           memcpy(&target_ssid[0], req->essid, req->essid_len);
           config->ssid = &target_ssid[0];
           config->ssid[req->essid_len] = '\0';
@@ -196,8 +205,6 @@ int esp_wifi_start_scan(struct iwreq *iwr)
     }
 
   esp_wifi_start();
-
-  esp_wifi_scan_stop();
   ret = esp_wifi_scan_start(config, false);
   if (ret != OK)
     {
@@ -257,17 +264,24 @@ int esp_wifi_get_scan_results(struct iwreq *iwr)
 
   if (g_scan_priv.scan_status == ESP_SCAN_RUN)
     {
+      irqstate_t irqstate = enter_critical_section();
       if (scan_block == false)
         {
           scan_block = true;
+          leave_critical_section(irqstate);
           nxsem_tickwait(&priv->scan_signal, SEC2TICK(SCAN_TIME_SEC));
           scan_block = false;
         }
       else
         {
+          leave_critical_section(irqstate);
           ret = -EINVAL;
           goto exit_failed;
         }
+    }
+  else if (g_scan_priv.scan_status == ESP_SCAN_DISABLED)
+    {
+      return -EINVAL;
     }
 
   if ((iwr == NULL) || (g_scan_priv.scan_status != ESP_SCAN_DONE))
@@ -276,7 +290,7 @@ int esp_wifi_get_scan_results(struct iwreq *iwr)
       goto exit_failed;
     }
 
-  if (!priv->scan_result)
+  if (priv->scan_result == NULL)
     {
       /* Result have already been requested */
 
@@ -352,19 +366,26 @@ void esp_wifi_scan_event_parse(void)
   uint8_t bss_count = 0;
   bool parse_done = false;
 
+  if (priv->scan_status != ESP_SCAN_RUN)
+    {
+      return;
+    }
+
   esp_wifi_scan_get_ap_num(&bss_total);
   if (bss_total == 0)
     {
       priv->scan_status = ESP_SCAN_DONE;
       wlinfo("INFO: None AP is scanned\n");
+      nxsem_post(&priv->scan_signal);
       return;
     }
 
-  ap_list_buffer = kmm_zalloc(bss_total * sizeof(wifi_ap_record_t));
+  ap_list_buffer = kmm_calloc(bss_total, sizeof(wifi_ap_record_t));
   if (ap_list_buffer == NULL)
     {
       priv->scan_status = ESP_SCAN_DONE;
-      wlerr("ERROR: Failed to malloc buffer to print scan results");
+      wlerr("ERROR: Failed to calloc buffer to print scan results");
+      nxsem_post(&priv->scan_signal);
       return;
     }
 
@@ -377,6 +398,7 @@ void esp_wifi_scan_event_parse(void)
       size_t essid_len_aligned;
       bool is_target_channel = true;
       int i;
+
       for (bss_count = 0; bss_count < bss_total; bss_count++)
         {
           if (g_channel_num > 1)
@@ -421,16 +443,16 @@ void esp_wifi_scan_event_parse(void)
               /* Copy ESSID */
 
               essid_len = MIN(strlen((const char *)
-                                     ap_list_buffer[bss_count].ssid), 32);
+                              ap_list_buffer[bss_count].ssid), SSID_MAX_LEN);
               essid_len_aligned = (essid_len + 3) & -4;
-              if (result_size < ESP_IW_EVENT_SIZE(essid)+essid_len_aligned)
+              if (result_size < ESP_IW_EVENT_SIZE(essid) + essid_len_aligned)
                 {
                   goto scan_result_full;
                 }
 
               iwe = (struct iw_event *)
                     &priv->scan_result[priv->scan_result_size];
-              iwe->len = ESP_IW_EVENT_SIZE(essid)+essid_len_aligned;
+              iwe->len = ESP_IW_EVENT_SIZE(essid) + essid_len_aligned;
               iwe->cmd = SIOCGIWESSID;
               iwe->u.essid.flags = 0;
               iwe->u.essid.length = essid_len;
@@ -442,10 +464,12 @@ void esp_wifi_scan_event_parse(void)
               iwe->u.essid.pointer = (void *)sizeof(iwe->u.essid);
               memcpy(&iwe->u.essid + 1,
                     ap_list_buffer[bss_count].ssid, essid_len);
+
               wlinfo("INFO: ssid %s\n", ap_list_buffer[bss_count].ssid);
+
               priv->scan_result_size +=
-                    ESP_IW_EVENT_SIZE(essid)+essid_len_aligned;
-              result_size -= ESP_IW_EVENT_SIZE(essid)+essid_len_aligned;
+                    ESP_IW_EVENT_SIZE(essid) + essid_len_aligned;
+              result_size -= ESP_IW_EVENT_SIZE(essid) + essid_len_aligned;
 
               /* Copy link quality info */
 
@@ -459,7 +483,9 @@ void esp_wifi_scan_event_parse(void)
               iwe->len = ESP_IW_EVENT_SIZE(qual);
               iwe->cmd = IWEVQUAL;
               iwe->u.qual.qual = 0x00;
+
               wlinfo("INFO: signal %d\n", ap_list_buffer[bss_count].rssi);
+
               iwe->u.qual.level = ap_list_buffer[bss_count].rssi;
               iwe->u.qual.noise = 0x00;
               iwe->u.qual.updated = IW_QUAL_DBM | IW_QUAL_ALL_UPDATED;

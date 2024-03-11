@@ -23,8 +23,6 @@
 
 /* AES acceleration registers */
 
-#define DR_REG_AES_BASE         (0x3ff01000)
-
 #define AES_START_REG           ((DR_REG_AES_BASE) + 0x00)
 #define AES_IDLE_REG            ((DR_REG_AES_BASE) + 0x04)
 #define AES_MODE_REG            ((DR_REG_AES_BASE) + 0x08)

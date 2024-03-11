@@ -33,6 +33,8 @@
 
 #include <nuttx/bits.h>
 
+#include "soc/soc.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -77,113 +79,6 @@
 
 /* Registers Operation */
 
-#define ETS_UNCACHED_ADDR(addr) (addr)
-#define ETS_CACHED_ADDR(addr) (addr)
-
-/* Write value to register */
-
-#define REG_WRITE(_r, _v)    (*(volatile uint32_t *)(_r)) = (_v)
-
-/* Read value from register */
-
-#define REG_READ(_r) (*(volatile uint32_t *)(_r))
-
-/* Get bit or get bits from register */
-
-#define REG_GET_BIT(_r, _b)  (*(volatile uint32_t*)(_r) & (_b))
-
-/* Set bit or set bits to register */
-
-#define REG_SET_BIT(_r, _b)  (*(volatile uint32_t*)(_r) |= (_b))
-
-/* Clear bit or clear bits of register */
-
-#define REG_CLR_BIT(_r, _b)  (*(volatile uint32_t*)(_r) &= ~(_b))
-
-/* Set bits of register controlled by mask */
-
-#define REG_SET_BITS(_r, _b, _m) (*(volatile uint32_t*)(_r) = (*(volatile uint32_t*)(_r) & ~(_m)) | ((_b) & (_m)))
-
-/* Get field from register,
- * used when _f is not left shifted by _f##_S
- */
-
-#define REG_GET_FIELD(addr, field) ((getreg32(addr) >> (field##_S)) & (field##_V))
-
-/* Set field to register,
- * used when _f is not left shifted by _f##_S
- */
-
-#define REG_SET_FIELD(addr, field, val) (modifyreg32((addr), (field##_M), (((uint32_t) val) & (field##_V)) << (field##_S)))
-
-/* Set field value from a variable,
- * used when _f is not left shifted by _f##_S
- */
-
-#define VALUE_GET_FIELD(_r, _f) (((_r) >> (_f##_S)) & (_f))
-
-/* Get field value from a variable,
- * used when _f is left shifted by _f##_S
- */
-
-#define VALUE_GET_FIELD2(_r, _f) (((_r) & (_f))>> (_f##_S))
-
-/* Set field value to a variable,
- * used when _f is not left shifted by _f##_S
- */
-
-#define VALUE_SET_FIELD(_r, _f, _v) ((_r)=(((_r) & ~((_f) << (_f##_S)))|((_v)<<(_f##_S))))
-
-/* Set field value to a variable,
- * used when _f is left shifted by _f##_S
- */
-
-#define VALUE_SET_FIELD2(_r, _f, _v) ((_r)=(((_r) & ~(_f))|((_v)<<(_f##_S))))
-
-/* Generate a value from a field value,
- * used when _f is not left shifted by _f##_S
- */
-
-#define FIELD_TO_VALUE(_f, _v) (((_v)&(_f))<<_f##_S)
-
-/* Generate a value from a field value,
- * used when _f is left shifted by _f##_S
- */
-
-#define FIELD_TO_VALUE2(_f, _v) (((_v)<<_f##_S) & (_f))
-
-/* Read value from register */
-
-#define READ_PERI_REG(addr) (*((volatile uint32_t *)ETS_UNCACHED_ADDR(addr)))
-
-/* Write value to register */
-
-#define WRITE_PERI_REG(addr, val) (*((volatile uint32_t *)ETS_UNCACHED_ADDR(addr))) = (uint32_t)(val)
-
-/* Clear bits of register controlled by mask */
-
-#define CLEAR_PERI_REG_MASK(reg, mask) WRITE_PERI_REG((reg), (READ_PERI_REG(reg)&(~(mask))))
-
-/* Set bits of register controlled by mask */
-
-#define SET_PERI_REG_MASK(reg, mask)   WRITE_PERI_REG((reg), (READ_PERI_REG(reg)|(mask)))
-
-/* Get bits of register controlled by mask */
-
-#define GET_PERI_REG_MASK(reg, mask)   (READ_PERI_REG(reg) & (mask))
-
-/* Get bits of register controlled by highest bit and lowest bit */
-
-#define GET_PERI_REG_BITS(reg, hipos,lowpos)      ((READ_PERI_REG(reg)>>(lowpos))&((1<<((hipos)-(lowpos)+1))-1))
-
-/* Set bits of register controlled by mask and shift */
-
-#define SET_PERI_REG_BITS(reg,bit_map,value,shift) (WRITE_PERI_REG((reg),(READ_PERI_REG(reg)&(~((bit_map)<<(shift))))|(((value) & bit_map)<<(shift)) ))
-
-/* Get field of register */
-
-#define GET_PERI_REG_BITS2(reg, mask,shift)      ((READ_PERI_REG(reg)>>(shift))&(mask))
-
 /* Extract the field from the register and shift it to avoid wrong reading */
 
 #define REG_MASK(_reg, _field) (((_reg) & (_field##_M)) >> (_field##_S))
@@ -194,65 +89,15 @@
 
 /* Periheral Clock */
 
-#define APB_CLK_FREQ_ROM                        26 * 1000000
 #define CPU_CLK_FREQ_ROM                        APB_CLK_FREQ_ROM
 #define CPU_CLK_FREQ                            APB_CLK_FREQ
-#define APB_CLK_FREQ                            80 * 1000000    /* Unit: Hz */
-#define REF_CLK_FREQ                            (1000000)
 #define UART_CLK_FREQ                           APB_CLK_FREQ
 #define MWDT_CLK_FREQ                           APB_CLK_FREQ
-#define TIMER_CLK_FREQ                          (80000000 >> 4) /* 80MHz divided by 16 */
 #define SPI_CLK_DIV                             4
 #define TICKS_PER_US_ROM                        26              /* CPU is 80MHz */
 
-#define DR_REG_DPORT_BASE                       0x3ff00000
-#define DR_REG_UART_BASE                        0x3ff40000
-#define DR_REG_SPI1_BASE                        0x3ff42000
-#define DR_REG_SPI0_BASE                        0x3ff43000
-#define DR_REG_GPIO_BASE                        0x3ff44000
-#define DR_REG_GPIO_SD_BASE                     0x3ff44f00
-#define DR_REG_FE2_BASE                         0x3ff45000
-#define DR_REG_FE_BASE                          0x3ff46000
-#define DR_REG_FRC_TIMER_BASE                   0x3ff47000
-#define DR_REG_RTCCNTL_BASE                     0x3ff48000
-#define DR_REG_RTCIO_BASE                       0x3ff48400
-#define DR_REG_SENS_BASE                        0x3ff48800
-#define DR_REG_IO_MUX_BASE                      0x3ff49000
-#define DR_REG_EFUSE_BASE                       0x3ff5a000
-#define DR_REG_RTCMEM0_BASE                     0x3ff61000
-#define DR_REG_RTCMEM1_BASE                     0x3ff62000
-#define DR_REG_RTCMEM2_BASE                     0x3ff63000
-#define DR_REG_HINF_BASE                        0x3ff4b000
-#define DR_REG_UHCI1_BASE                       0x3ff4c000
-#define DR_REG_I2S_BASE                         0x3ff4f000
-#define DR_REG_UART1_BASE                       0x3ff50000
-#define DR_REG_BT_BASE                          0x3ff51000
-#define DR_REG_I2C_EXT_BASE                     0x3ff53000
-#define DR_REG_UHCI0_BASE                       0x3ff54000
-#define DR_REG_SLCHOST_BASE                     0x3ff55000
-#define DR_REG_RMT_BASE                         0x3ff56000
-#define DR_REG_PCNT_BASE                        0x3ff57000
-#define DR_REG_SLC_BASE                         0x3ff58000
-#define DR_REG_LEDC_BASE                        0x3ff59000
-#define DR_REG_EFUSE_BASE                       0x3ff5a000
-#define DR_REG_SPI_ENCRYPT_BASE                 0x3ff5b000
-#define DR_REG_NRX_BASE                         0x3ff5cc00
-#define DR_REG_BB_BASE                          0x3ff5d000
-#define DR_REG_PWM_BASE                         0x3ff5e000
-#define DR_REG_TIMERGROUP0_BASE                 0x3ff5f000
-#define DR_REG_TIMERGROUP1_BASE                 0x3ff60000
-#define DR_REG_SPI2_BASE                        0x3ff64000
-#define DR_REG_SPI3_BASE                        0x3ff65000
-#define DR_REG_I2C1_EXT_BASE                    0x3ff67000
-#define DR_REG_SDMMC_BASE                       0x3ff68000
-#define DR_REG_EMAC_BASE                        0x3ff69000
-#define DR_REG_TWAI_BASE                        0x3ff6b000
-#define DR_REG_CAN_BASE                         DR_REG_TWAI_BASE
-#define DR_REG_PWM1_BASE                        0x3ff6c000
-#define DR_REG_I2S1_BASE                        0x3ff6d000
-#define DR_REG_UART2_BASE                       0x3ff6e000
-#define DR_REG_PWM2_BASE                        0x3ff6f000
-#define DR_REG_PWM3_BASE                        0x3ff70000
+#define DR_REG_TWAI_BASE                        DR_REG_CAN_BASE
+
 #define PERIPHS_SPI_ENCRYPT_BASEADDR            DR_REG_SPI_ENCRYPT_BASE
 
 /* Some AHB addresses can be used instead of DPORT addresses
@@ -266,107 +111,13 @@
 
 /* Overall memory map */
 
-#define SOC_DROM_LOW            0x3f400000
-#define SOC_DROM_HIGH           0x3f800000
-#define SOC_DRAM_LOW            0x3ffae000
-#define SOC_DRAM_HIGH           0x40000000
-#define SOC_IROM_LOW            0x400d0000
-#define SOC_IROM_HIGH           0x40400000
-#define SOC_IROM_MASK_LOW       0x40000000
-#define SOC_IROM_MASK_HIGH      0x40064f00
-#define SOC_CACHE_PRO_LOW       0x40070000
-#define SOC_CACHE_PRO_HIGH      0x40078000
-#define SOC_CACHE_APP_LOW       0x40078000
-#define SOC_CACHE_APP_HIGH      0x40080000
-#define SOC_IRAM_LOW            0x40080000
-#define SOC_IRAM_HIGH           0x400a0000
-#define SOC_RTC_IRAM_LOW        0x400c0000
-#define SOC_RTC_IRAM_HIGH       0x400c2000
-#define SOC_RTC_DRAM_LOW        0x3ff80000
-#define SOC_RTC_DRAM_HIGH       0x3ff82000
-#define SOC_RTC_SLOW_LOW        0x50000000
-#define SOC_RTC_SLOW_HIGH       0x50002000
-#define SOC_EXTRAM_DATA_LOW     0x3f800000
-#define SOC_EXTRAM_DATA_HIGH    0x3fc00000
+#define SOC_RTC_SLOW_LOW        SOC_RTC_DATA_LOW
+#define SOC_RTC_SLOW_HIGH       SOC_RTC_DATA_HIGH
 
 /* Virtual address 0 */
 
 #define VADDR0_START_ADDR       SOC_DROM_LOW
 #define VADDR0_END_ADDR         (SOC_DROM_HIGH - 1)
-
-/* Interrupt hardware source table
- * This table is decided by hardware, don't touch this.
- */
-
-#define ETS_WIFI_MAC_INTR_SOURCE                0  /* Interrupt of Wi-Fi MAC, level */
-#define ETS_WIFI_MAC_NMI_SOURCE                 1  /* Interrupt of Wi-Fi MAC, NMI, use if MAC have bug to fix in NMI */
-#define ETS_WIFI_BB_INTR_SOURCE                 2  /* Interrupt of Wi-Fi BB, level, we can do some calibartion */
-#define ETS_BT_MAC_INTR_SOURCE                  3  /* will be cancelled */
-#define ETS_BT_BB_INTR_SOURCE                   4  /* Interrupt of BT BB, level */
-#define ETS_BT_BB_NMI_SOURCE                    5  /* Interrupt of BT BB, NMI, use if BB have bug to fix in NMI */
-#define ETS_RWBT_INTR_SOURCE                    6  /* Interrupt of RWBT, level */
-#define ETS_RWBLE_INTR_SOURCE                   7  /* Interrupt of RWBLE, level */
-#define ETS_RWBT_NMI_SOURCE                     8  /* Interrupt of RWBT, NMI, use if RWBT have bug to fix in NMI */
-#define ETS_RWBLE_NMI_SOURCE                    9  /* Interrupt of RWBLE, NMI, use if RWBT have bug to fix in NMI */
-#define ETS_SLC0_INTR_SOURCE                    10 /* Interrupt of SLC0, level */
-#define ETS_SLC1_INTR_SOURCE                    11 /* Interrupt of SLC1, level */
-#define ETS_UHCI0_INTR_SOURCE                   12 /* Interrupt of UHCI0, level */
-#define ETS_UHCI1_INTR_SOURCE                   13 /* Interrupt of UHCI1, level */
-#define ETS_TG0_T0_LEVEL_INTR_SOURCE            14 /* Interrupt of TIMER_GROUP0, TIMER0, level, we would like use EDGE for timer if permission */
-#define ETS_TG0_T1_LEVEL_INTR_SOURCE            15 /* Interrupt of TIMER_GROUP0, TIMER1, level, we would like use EDGE for timer if permission */
-#define ETS_TG0_WDT_LEVEL_INTR_SOURCE           16 /* Interrupt of TIMER_GROUP0, WATCHDOG, level */
-#define ETS_TG0_LACT_LEVEL_INTR_SOURCE          17 /* Interrupt of TIMER_GROUP0, LACT, level */
-#define ETS_TG1_T0_LEVEL_INTR_SOURCE            18 /* Interrupt of TIMER_GROUP1, TIMER0, level, we would like use EDGE for timer if permission */
-#define ETS_TG1_T1_LEVEL_INTR_SOURCE            19 /* Interrupt of TIMER_GROUP1, TIMER1, level, we would like use EDGE for timer if permission */
-#define ETS_TG1_WDT_LEVEL_INTR_SOURCE           20 /* Interrupt of TIMER_GROUP1, WATCHDOG, level */
-#define ETS_TG1_LACT_LEVEL_INTR_SOURCE          21 /* Interrupt of TIMER_GROUP1, LACT, level */
-#define ETS_GPIO_INTR_SOURCE                    22 /* Interrupt of GPIO, level */
-#define ETS_GPIO_NMI_SOURCE                     23 /* Interrupt of GPIO, NMI */
-#define ETS_FROM_CPU_INTR0_SOURCE               24 /* Interrupt0 generated from a CPU, level */
-#define ETS_FROM_CPU_INTR1_SOURCE               25 /* Interrupt1 generated from a CPU, level */
-#define ETS_FROM_CPU_INTR2_SOURCE               26 /* Interrupt2 generated from a CPU, level */
-#define ETS_FROM_CPU_INTR3_SOURCE               27 /* Interrupt3 generated from a CPU, level */
-#define ETS_SPI0_INTR_SOURCE                    28 /* Interrupt of SPI0, level, SPI0 is for Cache Access, do not use this */
-#define ETS_SPI1_INTR_SOURCE                    29 /* Interrupt of SPI1, level, SPI1 is for flash read/write, do not use this */
-#define ETS_SPI2_INTR_SOURCE                    30 /* Interrupt of SPI2, level */
-#define ETS_SPI3_INTR_SOURCE                    31 /* Interrupt of SPI3, level */
-#define ETS_I2S0_INTR_SOURCE                    32 /* Interrupt of I2S0, level */
-#define ETS_I2S1_INTR_SOURCE                    33 /* Interrupt of I2S1, level */
-#define ETS_UART0_INTR_SOURCE                   34 /* Interrupt of UART0, level */
-#define ETS_UART1_INTR_SOURCE                   35 /* Interrupt of UART1, level */
-#define ETS_UART2_INTR_SOURCE                   36 /* Interrupt of UART2, level */
-#define ETS_SDIO_HOST_INTR_SOURCE               37 /* Interrupt of SD/SDIO/MMC HOST, level */
-#define ETS_ETH_MAC_INTR_SOURCE                 38 /* Interrupt of ethernet mac, level */
-#define ETS_PWM0_INTR_SOURCE                    39 /* Interrupt of PWM0, level, Reserved */
-#define ETS_PWM1_INTR_SOURCE                    40 /* Interrupt of PWM1, level, Reserved */
-#define ETS_PWM2_INTR_SOURCE                    41 /* Interrupt of PWM2, level */
-#define ETS_PWM3_INTR_SOURCE                    42 /* Interruot of PWM3, level */
-#define ETS_LEDC_INTR_SOURCE                    43 /* Interrupt of LED PWM, level */
-#define ETS_EFUSE_INTR_SOURCE                   44 /* Interrupt of efuse, level, not likely to use */
-#define ETS_CAN_INTR_SOURCE                     45 /* Interrupt of can, level */
-#define ETS_RTC_CORE_INTR_SOURCE                46 /* Interrupt of rtc core, level, include rtc watchdog */
-#define ETS_RMT_INTR_SOURCE                     47 /* Interrupt of remote controller, level */
-#define ETS_PCNT_INTR_SOURCE                    48 /* Interrupt of pulse count, level */
-#define ETS_I2C_EXT0_INTR_SOURCE                49 /* Interrupt of I2C controller1, level */
-#define ETS_I2C_EXT1_INTR_SOURCE                50 /* Interrupt of I2C controller0, level */
-#define ETS_RSA_INTR_SOURCE                     51 /* Interrupt of RSA accelerator, level */
-#define ETS_SPI1_DMA_INTR_SOURCE                52 /* Interrupt of SPI1 DMA, SPI1 is for flash read/write, do not use this */
-#define ETS_SPI2_DMA_INTR_SOURCE                53 /* Interrupt of SPI2 DMA, level */
-#define ETS_SPI3_DMA_INTR_SOURCE                54 /* Interrupt of SPI3 DMA, level */
-#define ETS_WDT_INTR_SOURCE                     55 /* will be cancelled */
-#define ETS_TIMER1_INTR_SOURCE                  56 /* will be cancelled */
-#define ETS_TIMER2_INTR_SOURCE                  57 /* will be cancelled */
-#define ETS_TG0_T0_EDGE_INTR_SOURCE             58 /* Interrupt of TIMER_GROUP0, TIMER0, EDGE */
-#define ETS_TG0_T1_EDGE_INTR_SOURCE             59 /* Interrupt of TIMER_GROUP0, TIMER1, EDGE */
-#define ETS_TG0_WDT_EDGE_INTR_SOURCE            60 /* Interrupt of TIMER_GROUP0, WATCH DOG, EDGE */
-#define ETS_TG0_LACT_EDGE_INTR_SOURCE           61 /* Interrupt of TIMER_GROUP0, LACT, EDGE */
-#define ETS_TG1_T0_EDGE_INTR_SOURCE             62 /* Interrupt of TIMER_GROUP1, TIMER0, EDGE */
-#define ETS_TG1_T1_EDGE_INTR_SOURCE             63 /* Interrupt of TIMER_GROUP1, TIMER1, EDGE */
-#define ETS_TG1_WDT_EDGE_INTR_SOURCE            64 /* Interrupt of TIMER_GROUP1, WATCHDOG, EDGE */
-#define ETS_TG1_LACT_EDGE_INTR_SOURCE           65 /* Interrupt of TIMER_GROUP0, LACT, EDGE */
-#define ETS_MMU_IA_INTR_SOURCE                  66 /* Interrupt of MMU Invalid Access, LEVEL */
-#define ETS_MPU_IA_INTR_SOURCE                  67 /* Interrupt of MPU Invalid Access, LEVEL */
-#define ETS_CACHE_IA_INTR_SOURCE                68 /* Interrupt of Cache Invalied Access, LEVEL */
 
 #define GPIO_STRAP_REG                          (DR_REG_GPIO_BASE + 0x0038)
 

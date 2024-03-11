@@ -178,8 +178,9 @@ static bool g_non_iram_int_disabled_flag[CONFIG_SMP_NCPUS];
  */
 
 static uint32_t g_cpu0_freeints = ESP32_CPUINT_PERIPHSET &
-                                  (~ESP32_WIFI_RESERVE_INT &
-                                   ~ESP32_BLE_RESERVE_INT);
+                                  ~(ESP32_WIFI_RESERVE_INT |
+                                    ESP32_BLE_RESERVE_INT);
+
 #ifdef CONFIG_SMP
 static uint32_t g_cpu1_freeints = ESP32_CPUINT_PERIPHSET;
 #endif
@@ -517,6 +518,8 @@ void up_irqinitialize(void)
   /* Hard code special cases. */
 
   g_irqmap[XTENSA_IRQ_TIMER0] = IRQ_MKMAP(0, ESP32_CPUINT_TIMER0);
+  g_irqmap[XTENSA_IRQ_SWINT] = IRQ_MKMAP(0, ESP32_CPUINT_SOFTWARE1);
+  g_irqmap[XTENSA_IRQ_SWINT] = IRQ_MKMAP(1, ESP32_CPUINT_SOFTWARE1);
 
 #ifdef CONFIG_ESP32_WIFI
   g_irqmap[ESP32_IRQ_MAC] = IRQ_MKMAP(0, ESP32_CPUINT_MAC);
@@ -527,9 +530,6 @@ void up_irqinitialize(void)
   g_irqmap[ESP32_IRQ_RWBT_NMI]  = IRQ_MKMAP(0, ESP32_PERIPH_RWBT_NMI);
   g_irqmap[ESP32_IRQ_RWBLE_IRQ] = IRQ_MKMAP(0, ESP32_PERIPH_RWBLE_IRQ);
 #endif
-
-  g_irqmap[XTENSA_IRQ_SWINT] = IRQ_MKMAP(0, ESP32_CPUINT_SOFTWARE1);
-  g_irqmap[XTENSA_IRQ_SWINT] = IRQ_MKMAP(1, ESP32_CPUINT_SOFTWARE1);
 
   /* Initialize CPU interrupts */
 
@@ -681,7 +681,7 @@ void up_enable_irq(int irq)
 
       /* Enable the CPU interrupt now for internal CPU. */
 
-      xtensa_enable_cpuint(&g_intenable[cpu], 1ul << cpuint);
+      xtensa_enable_cpuint(&g_intenable[cpu], (1ul << cpuint));
     }
   else
     {
@@ -711,8 +711,8 @@ void up_enable_irq(int irq)
 
       DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS);
 
-      /* Attach the interrupt to the peripheral; the CPU interrupt was
-       * already enabled when allocated.
+      /* For peripheral interrupts, attach the interrupt to the peripheral;
+       * the CPU interrupt was already enabled when allocated.
        */
 
       int periph = ESP32_IRQ2PERIPH(irq);
