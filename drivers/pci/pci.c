@@ -450,7 +450,9 @@ static uint8_t pci_bus_find_start_cap(FAR struct pci_bus_s *bus,
       return 0;
     }
 
-  switch (hdr_type)
+  /* Ignore MF bit */
+
+  switch (hdr_type & 0x7f)
   {
     case PCI_HEADER_TYPE_NORMAL:
     case PCI_HEADER_TYPE_BRIDGE:
@@ -1057,6 +1059,244 @@ static void pci_scan_bus(FAR struct pci_bus_s *bus)
 }
 
 /****************************************************************************
+ * Name: pci_get_msi_base
+ *
+ * Description:
+ *  Get MSI and MSI-X base
+ *
+ * Input Parameters:
+ *   dev  - device
+ *   msi  - returned MSI base
+ *   msix - returned MSI-X base
+ *
+ * Return value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void pci_get_msi_base(FAR struct pci_device_s *dev, FAR uint8_t *msi,
+                             FAR uint8_t *msix)
+{
+  if (msi != NULL)
+    {
+      *msi = pci_find_capability(dev, PCI_CAP_ID_MSI);
+    }
+
+  if (msix != NULL)
+    {
+      *msix = pci_find_capability(dev, PCI_CAP_ID_MSIX);
+    }
+}
+
+/****************************************************************************
+ * Name: pci_enable_msi
+ *
+ * Description:
+ *   Configure and enable MSI.
+ *
+ * Input Parameters:
+ *   dev - device
+ *   irq - allocated vectors
+ *   num - number of vectors
+ *   msi - MSI base address
+ *
+ * Return value:
+ *   OK on success or a negative error code on failure
+ *
+ ****************************************************************************/
+
+static int pci_enable_msi(FAR struct pci_device_s *dev, FAR int *irq,
+                          int num, uint8_t msi)
+{
+  uint32_t  mdr   = 0;
+  uint16_t  flags = 0;
+  uintptr_t mar   = 0;
+  uint16_t  mme   = 0;
+  uint32_t  mmc   = 0;
+  int       ret   = OK;
+
+  /* Suppoted messages */
+
+  for (mme = 0; (1 << mme) < num; mme++);
+
+  /* Get Message Control Register */
+
+  pci_read_config_word(dev, msi + PCI_MSI_FLAGS, &flags);
+  mmc = (flags & PCI_MSI_FLAGS_QMASK) >> PCI_MSI_FLAGS_QMASK_SHIFT;
+  if (mme > mmc)
+    {
+      mme = mmc;
+      num = 1 << mme;
+      pciinfo("Limit MME to %x, num to %d\n", mmc, num);
+    }
+
+  /* Configure MSI (arch-specific) */
+
+  ret = dev->bus->ctrl->ops->connect_irq(dev->bus, irq, num, &mar, &mdr);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Write Message Address Regsiter */
+
+  pci_write_config_dword(dev, msi + PCI_MSI_ADDRESS_LO, mar);
+
+  /* Write Message Data Register */
+
+  if ((flags & PCI_MSI_FLAGS_64BIT) != 0)
+    {
+      pci_write_config_dword(dev, msi + PCI_MSI_ADDRESS_HI, (mar >> 32));
+      pci_write_config_dword(dev, msi + PCI_MSI_DATA_64, mdr);
+    }
+  else
+    {
+      pci_write_config_word(dev, msi + PCI_MSI_DATA_32, mdr);
+    }
+
+  flags |= mme << PCI_MSI_FLAGS_QSIZE_SHIFT;
+
+  /* Enable MSI */
+
+  flags |= PCI_MSI_FLAGS_ENABLE;
+
+  /* Write Message Control Register */
+
+  pci_write_config_word(dev, msi + PCI_MSI_FLAGS, flags);
+  return OK;
+}
+
+#ifdef CONFIG_PCI_MSIX
+/****************************************************************************
+ * Name: pci_disable_msi
+ *
+ * Description:
+ *  Disable MSI.
+ *
+ * Input Parameters:
+ *   dev  - device
+ *   msi  - MSI base address
+ *
+ * Return value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void pci_disable_msi(FAR struct pci_device_s *dev, uint8_t msi)
+{
+  uint16_t flags = 0;
+
+  pci_read_config_word(dev, msi + PCI_MSI_FLAGS, &flags);
+
+  flags &= ~PCI_MSI_FLAGS_ENABLE;
+  pci_write_config_word(dev, msi + PCI_MSI_FLAGS, flags);
+}
+
+/****************************************************************************
+ * Name: pci_enable_msix
+ *
+ * Description:
+ *   Configure and enable MSI-X.
+ *
+ * Input Parameters:
+ *   dev  - device
+ *   irq  - allocated vectors
+ *   num  - number of vectors
+ *   msix - MSI-X base address
+ *
+ * Return value:
+ *   OK on success or a negative error code on failure
+ *
+ ****************************************************************************/
+
+static int pci_enable_msix(FAR struct pci_device_s *dev, FAR int *irq,
+                           int num, uint8_t msix)
+{
+  uint32_t  mdr       = 0;
+  uint16_t  flags     = 0;
+  uintptr_t mar       = 0;
+  uintptr_t tbladdr   = 0;
+  uintptr_t tblend    = 0;
+  uint32_t  tbloffset = 0;
+  uint32_t  tblbar    = 0;
+  uint32_t  tbl       = 0;
+  uint16_t  tblsize   = 0;
+  int       i         = 0;
+  int       ret       = OK;
+
+  /* Get Flags */
+
+  pci_read_config_word(dev, msix + PCI_MSIX_FLAGS, &flags);
+
+  /* Table Size is N - 1 encoded */
+
+  tblsize = (flags & PCI_MSIX_FLAGS_QSIZE) + 1;
+
+  /* Get MSI-X table */
+
+  pci_read_config_dword(dev, msix + PCI_MSIX_TABLE, &tbl);
+
+  /* Extract table address */
+
+  tblbar = tbl & PCI_MSIX_TABLE_BIR;
+  tbladdr = pci_resource_start(dev, tblbar);
+  tbloffset = (tbl & PCI_MSIX_TABLE_OFFSET) >> PCI_MSIX_TABLE_OFFSET_SHIFT;
+  tbladdr += tbloffset;
+
+  /* Map MSI-X table */
+
+  tblend = tbladdr + tblsize * PCI_MSIX_ENTRY_SIZE;
+  tbladdr = dev->bus->ctrl->ops->map(dev->bus, tbladdr, tblend);
+
+  /* Limit tblsize */
+
+  if (num > tblsize)
+    {
+      pciinfo("Limit tblszie to %xu\n", tblsize);
+      num = tblsize;
+    }
+
+  for (i = 0; i < num; i++)
+    {
+      /* Connect MSI-X (arch-specific) */
+
+      ret = dev->bus->ctrl->ops->connect_irq(dev->bus, &irq[i], 1,
+                                             &mar, &mdr);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      /* Write Message Address Register */
+
+      pci_write_mmio_dword(dev, tbladdr + PCI_MSIX_ENTRY_LOWER_ADDR, mar);
+
+      pci_write_mmio_dword(dev, tbladdr + PCI_MSIX_ENTRY_UPPER_ADDR,
+                           (mar >> 32));
+
+      /* Write Message Data Register */
+
+      pci_write_mmio_dword(dev, tbladdr + PCI_MSIX_ENTRY_DATA, mdr);
+
+      /* Write Vector Control register */
+
+      pci_write_mmio_dword(dev, tbladdr + PCI_MSIX_ENTRY_VECTOR_CTRL, 0);
+
+      /* Next vector */
+
+      tbladdr += PCI_MSIX_ENTRY_SIZE;
+    }
+
+  /* Enable MSI-X */
+
+  flags |= PCI_MSIX_FLAGS_ENABLE;
+  pci_write_config_word(dev, msix + PCI_MSIX_FLAGS, flags);
+
+  return OK;
+}
+#endif  /* CONFIG_PCI_MSIX */
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -1406,6 +1646,154 @@ uint8_t pci_find_next_capability(FAR struct pci_device_s *dev, uint8_t pos,
 {
   return pci_find_next_cap(dev->bus, dev->devfn,
                            pos + PCI_CAP_LIST_NEXT, cap);
+}
+
+/****************************************************************************
+ * Name: pci_stat_line
+ *
+ * Description:
+ *  Determine if the interrupt line is active for a given device
+ *
+ * Input Parameters:
+ *   dev - device
+ *
+ * Return value:
+ *   True if interrupt is active
+ *
+ ****************************************************************************/
+
+bool pci_stat_line(FAR struct pci_device_s *dev)
+{
+  uint16_t tmp1;
+  uint16_t tmp2;
+
+  /* Interrupts enabled if Interrupt Disable is not set and Interrupt Status
+   * is set.
+   */
+
+  pci_read_config_word(dev, PCI_COMMAND, &tmp1);
+  pci_read_config_word(dev, PCI_STATUS, &tmp2);
+
+  return (!(tmp1 & PCI_COMMAND_INTX_DISABLE) &&
+          (tmp2 & PCI_STATUS_INTERRUPT));
+}
+
+/****************************************************************************
+ * Name: pci_get_irq
+ *
+ * Description:
+ *  Get interrupt number associated with a device PCI interrupt line
+ *
+ * Input Parameters:
+ *   dev - PCI device
+ *
+ * Return value:
+ *   Return interrupt number associated with a given INTx.
+ *
+ ****************************************************************************/
+
+int pci_get_irq(FAR struct pci_device_s *dev)
+{
+  uint8_t line = 0;
+
+  pci_read_config_byte(dev, PCI_INTERRUPT_LINE, &line);
+  return dev->bus->ctrl->ops->get_irq(dev->bus, line);
+}
+
+/****************************************************************************
+ * Name: pci_alloc_irq
+ *
+ * Description:
+ *   Allocate MSI or MSI-X vectors
+ *
+ * Input Parameters:
+ *   dev - PCI device
+ *   irq - allocated vectors
+ *   num - number of vectors
+ *
+ * Return value:
+ *   Return the number of allocated vectors on succes or negative errno
+ *   on failure.
+ *
+ ****************************************************************************/
+
+int pci_alloc_irq(FAR struct pci_device_s *dev, FAR int *irq, int num)
+{
+  return dev->bus->ctrl->ops->alloc_irq(dev->bus, irq, num);
+}
+
+/****************************************************************************
+ * Name: pci_release_irq
+ *
+ * Description:
+ *   Release MSI or MSI-X vectors
+ *
+ * Input Parameters:
+ *   dev - PCI device
+ *   irq - allocated vectors
+ *   num - number of vectors
+ *
+ * Return value:
+ *   Failed if return a negative value, otherwise success
+ *
+ ****************************************************************************/
+
+void pci_release_irq(FAR struct pci_device_s *dev, FAR int *irq, int num)
+{
+  dev->bus->ctrl->ops->release_irq(dev->bus, irq, num);
+}
+
+/****************************************************************************
+ * Name: pci_connect_irq
+ *
+ * Description:
+ *   Connect MSI or MSI-X if available.
+ *
+ * Input Parameters:
+ *   dev - PCI device
+ *   irq - allocated vectors
+ *   num - number of vectors
+ *
+ * Return value:
+ *   Return -ENOSETUP if MSI/MSI-X not available. Return OK on success.
+ *
+ ****************************************************************************/
+
+int pci_connect_irq(FAR struct pci_device_s *dev, FAR int *irq, int num)
+{
+  uint8_t msi = 0;
+  uint8_t msix = 0;
+
+  /* Get MSI base */
+
+  pci_get_msi_base(dev, &msi, &msix);
+  if (msi == 0 && msix == 0)
+    {
+      /* MSI and MSI-X not supported */
+
+      return -ENOTSUP;
+    }
+
+  /* Configure MSI or MSI-X */
+
+#ifdef CONFIG_PCI_MSIX
+  if (msix != 0)
+    {
+      /* Disalbe MSI */
+
+      pci_disable_msi(dev, msi);
+
+      /* Enable MSI-X */
+
+      return pci_enable_msix(dev, irq, num, msix);
+    }
+  else
+#endif
+    {
+      /* Enable MSI */
+
+      return pci_enable_msi(dev, irq, num, msi);
+    }
 }
 
 /****************************************************************************
