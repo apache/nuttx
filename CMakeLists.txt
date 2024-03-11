@@ -245,7 +245,7 @@ else()
 endif()
 
 if(NOT EXISTS ${CMAKE_BINARY_DIR}/boards/dummy/Kconfig)
-  if(CONFIG_ARCH_BOARD_CUSTOM)
+  if(CONFIG_ARCH_BOARD_CUSTOM AND EXISTS ${NUTTX_BOARD_ABS_DIR}/Kconfig)
     nuttx_create_symlink(${NUTTX_BOARD_ABS_DIR}/Kconfig
                          ${CMAKE_BINARY_DIR}/boards/dummy/Kconfig)
   else()
@@ -282,7 +282,7 @@ if(NOT EXISTS ${CMAKE_BINARY_DIR}/arch/dummy)
 endif()
 
 if(NOT EXISTS ${CMAKE_BINARY_DIR}/arch/dummy/Kconfig)
-  if(CONFIG_ARCH_CHIP_CUSTOM)
+  if(CONFIG_ARCH_CHIP_CUSTOM AND EXISTS ${NUTTX_CHIP_ABS_DIR}/Kconfig)
     nuttx_create_symlink(${NUTTX_CHIP_ABS_DIR}/Kconfig
                          ${CMAKE_BINARY_DIR}/arch/dummy/Kconfig)
   else()
