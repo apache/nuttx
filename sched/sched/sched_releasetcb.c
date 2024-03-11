@@ -176,6 +176,10 @@ int nxsched_release_tcb(FAR struct tcb_s *tcb, uint8_t ttype)
 #endif
               )
             {
+              /* Mark the group as deleted now */
+
+              ttcb->group.tg_flags |= GROUP_FLAG_DELETED;
+
               return ret;
             }
         }

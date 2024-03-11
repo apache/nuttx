@@ -120,15 +120,15 @@ group_release(FAR struct task_group_s *group, uint8_t ttype)
     }
 #endif
 
-  /* Mark the group as deleted now */
-
-  group->tg_flags |= GROUP_FLAG_DELETED;
-
   /* Then drop the group freeing the allocated memory */
 
 #ifndef CONFIG_DISABLE_PTHREAD
   if (ttype == TCB_FLAG_TTYPE_PTHREAD)
     {
+      /* Mark the group as deleted now */
+
+      group->tg_flags |= GROUP_FLAG_DELETED;
+
       group_drop(group);
     }
 #endif
