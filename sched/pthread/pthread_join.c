@@ -187,7 +187,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
            * will know that we have received the data.
            */
 
-          pthread_sem_give(&pjoin->data_sem);
+          nxsem_post(&pjoin->data_sem);
 
           /* Retake the join semaphore, we need to hold this when
            * pthread_destroyjoin is called.
