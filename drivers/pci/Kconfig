@@ -12,6 +12,14 @@ menuconfig PCI
 
 if PCI
 
+config PCI_LATE_DRIVERS_REGISTER
+	bool
+	default n
+	---help---
+		This option disables PCI driver registration in drivers_initialize().
+		Care must be taken to call pci_register_drivers() in later code, most likely
+		as board specific code.
+
 config PCI_MSIX
 	bool "PCI MSI-X support"
 	default n
