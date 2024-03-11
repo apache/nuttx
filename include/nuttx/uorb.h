@@ -317,6 +317,10 @@
 
 #define SENSOR_GPS_SAT_INFO_MAX                     4
 
+/* Maximum length of sensor device information name and path name. */
+
+#define SENSOR_INFO_NAME_SIZE                       32
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -656,6 +660,74 @@ struct sensor_ioctl_s
 {
   size_t len;                  /* The length of argument of ioctl */
   char data[1];                /* The argument buf of ioctl */
+};
+
+/* This structure describes the information of the sensor device and
+ * requires the manufacturer to implement the device info function.
+ */
+
+struct sensor_device_info_s
+{
+  /* Version of the hardware part + driver. */
+
+  uint32_t      version;
+
+  /* Rough estimate of this sensor's power consumption in mA.
+   * Divide the current data by 1000 to get the real data.
+   */
+
+  uint32_t      power;
+
+  /* Maximum range of this sensor's value in SI units. */
+
+  float         max_range;
+
+  /* Smallest difference between two values reported by this sensor. */
+
+  float         resolution;
+
+  /* This value depends on the reporting mode:
+   *
+   *   continuous: minimum sample period allowed in microseconds
+   *   on-change : 0
+   *   one-shot  :-1
+   *   special   : 0, unless otherwise noted
+   */
+
+  long          min_delay;
+
+  /* This value is defined only for continuous mode and on-change sensors.
+   * it is the delay between two sensor events corresponding to the lowest
+   * frequency that this sensor supports. when lower frequencies are
+   * requested through batch()/set_interval() the events will be generated
+   * at this frequency instead. it can be used by the framework or
+   * applications to estimate when the batch FIFO may be full.
+   */
+
+  unsigned long max_delay;
+
+  /* Number of events reserved for this sensor in the batch mode FIFO.
+   * if there is a dedicated FIFO for this sensor, then this is the
+   * size of this FIFO. If the FIFO is shared with other sensors,
+   * this is the size reserved for that sensor and it can be zero.
+   */
+
+  uint32_t      fifo_reserved_event_count;
+
+  /* Maximum number of events of this sensor that could be batched.
+   * this is especially relevant when the FIFO is shared between
+   * several sensors; this value is then set to the size of that FIFO.
+   */
+
+  uint32_t      fifo_max_event_count;
+
+  /* Name of this sensor. */
+
+  char          name[SENSOR_INFO_NAME_SIZE];
+
+  /* Vendor of the hardware part. */
+
+  char          vendor[SENSOR_INFO_NAME_SIZE];
 };
 
 #endif /* __INCLUDE_NUTTX_SENSORS_SENSOR_H */

@@ -435,4 +435,20 @@
 
 #define SNIOC_HEAT             _SNIOC(0x009B)
 
+/* Command:      SNIOC_GET_INFO
+ * Description:  Get device information.
+ * Argument:     This is the device info pointer.
+ */
+
+#define SNIOC_GET_INFO                _SNIOC(0x009B)
+
+#ifdef CONFIG_USENSOR
+/* Command:      SNIOC_SET_INFO
+ * Description:  Set device information. Only used by user space.
+ * Argument:     This is the device info pointer.
+ */
+
+#  define SNIOC_SET_INFO              _SNIOC(0x009C)
+#endif
+
 #endif /* __INCLUDE_NUTTX_SENSORS_IOCTL_H */
