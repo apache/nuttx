@@ -108,7 +108,7 @@ void *up_dataheap_memalign(size_t align, size_t size)
   if (g_dataheap == NULL)
     {
       g_dataheap = mm_initialize("dataheap",
-                                 host_allocheap(SIM_HEAP_SIZE, true),
+                                 host_allocheap(SIM_HEAP_SIZE, false),
                                  SIM_HEAP_SIZE);
     }
 
