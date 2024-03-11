@@ -215,6 +215,9 @@ static int sensor_rpmsg_set_calibvalue(FAR struct sensor_lowerhalf_s *lower,
 static int sensor_rpmsg_calibrate(FAR struct sensor_lowerhalf_s *lower,
                                   FAR struct file *filep,
                                   unsigned long arg);
+static int sensor_rpmsg_get_info(FAR struct sensor_lowerhalf_s *lower,
+                                 FAR struct file *filep,
+                                 FAR struct sensor_device_info_s *info);
 static int sensor_rpmsg_control(FAR struct sensor_lowerhalf_s *lower,
                                 FAR struct file *filep,
                                 int cmd, unsigned long arg);
@@ -262,6 +265,7 @@ static const struct sensor_ops_s g_sensor_rpmsg_ops =
   .selftest       = sensor_rpmsg_selftest,
   .set_calibvalue = sensor_rpmsg_set_calibvalue,
   .calibrate      = sensor_rpmsg_calibrate,
+  .get_info       = sensor_rpmsg_get_info,
   .control        = sensor_rpmsg_control
 };
 
@@ -691,6 +695,28 @@ SENSOR_RPMSG_FUNCTION(selftest, SNIOC_SELFTEST, arg, arg, 0, true)
 SENSOR_RPMSG_FUNCTION(set_calibvalue, SNIOC_SET_CALIBVALUE,
                       arg, arg, 256, true)
 SENSOR_RPMSG_FUNCTION(calibrate, SNIOC_CALIBRATE, arg, arg, 256, true)
+
+static int sensor_rpmsg_get_info(FAR struct sensor_lowerhalf_s *lower,
+                                 FAR struct file *filep,
+                                 FAR struct sensor_device_info_s *info)
+{
+  FAR struct sensor_rpmsg_dev_s *dev = lower->priv;
+  FAR struct sensor_lowerhalf_s *drv = dev->drv;
+  int ret = -ENOTTY;
+
+  if (drv->ops->get_info)
+    {
+      ret = drv->ops->get_info(drv, filep, info);
+    }
+  else if (!(filep->f_oflags & SENSOR_REMOTE))
+    {
+      ret = sensor_rpmsg_ioctl(dev, SNIOC_GET_INFO,
+                               (unsigned long)(uintptr_t)info,
+                               sizeof(struct sensor_device_info_s), true);
+    }
+
+  return ret;
+}
 
 static int sensor_rpmsg_control(FAR struct sensor_lowerhalf_s *lower,
                                 FAR struct file *filep,
