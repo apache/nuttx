@@ -714,7 +714,6 @@ struct pthread_tcb_s
 
   pthread_trampoline_t trampoline;       /* User-space pthread startup function */
   pthread_addr_t arg;                    /* Startup argument                    */
-  FAR void *joininfo;                    /* Detach-able info to support join    */
   bool join_complete;                    /* Join was completed                  */
 };
 #endif /* !CONFIG_DISABLE_PTHREAD */
