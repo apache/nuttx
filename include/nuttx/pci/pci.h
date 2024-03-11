@@ -170,6 +170,24 @@
 #define pci_write_io_dword(dev, addr, val) \
   pci_bus_write_io_dword((dev)->bus, addr, val)
 
+#define pci_write_mmio_byte(dev, addr, val)  \
+  (*((FAR volatile uint8_t *)(addr))) = val
+
+#define pci_write_mmio_word(dev, addr, val)  \
+  (*((FAR volatile uint16_t *)(addr))) = val
+
+#define pci_write_mmio_dword(dev, addr, val)  \
+  (*((FAR volatile uint32_t *)(addr))) = val
+
+#define pci_read_mmio_byte(dev, addr, val)    \
+  (*val) = *((FAR volatile uint8_t *)(addr))
+
+#define pci_read_mmio_word(dev, addr, val)    \
+  (*val) = *((FAR volatile uint16_t *)(addr))
+
+#define pci_read_mmio_dword(dev, addr, val)   \
+  (*val) = *((FAR volatile uint32_t *)(addr))
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -254,6 +272,21 @@ struct pci_ops_s
                       int size, FAR uint32_t *val);
   CODE int (*write_io)(FAR struct pci_bus_s *bus, uintptr_t addr,
                        int size, uint32_t val);
+
+  /* Get interrupt number associated with a given INTx line */
+
+  CODE int (*get_irq)(FAR struct pci_bus_s *bus, uint8_t line);
+
+  /* Allocate interrupt for MSI/MSI-X */
+
+  CODE int (*alloc_irq)(FAR struct pci_bus_s *bus, FAR int *irq, int num);
+
+  CODE void (*release_irq)(FAR struct pci_bus_s *bus, FAR int *irq, int num);
+
+  /* Connect interrupt for MSI/MSI-X */
+
+  CODE int (*connect_irq)(FAR struct pci_bus_s *bus, FAR int *irq,
+                          int num, FAR uintptr_t *mar, FAR uint32_t *mdr);
 };
 
 /* Each pci channel is a top-level PCI bus seem by CPU.  A machine with
@@ -521,6 +554,93 @@ uint8_t pci_find_capability(FAR struct pci_device_s *dev, int cap);
 
 uint8_t pci_find_next_capability(FAR struct pci_device_s *dev, uint8_t pos,
                                  int cap);
+
+/****************************************************************************
+ * Name: pci_stat_line
+ *
+ * Description:
+ *  Determine if the interrupt line is active for a given device
+ *
+ * Input Parameters:
+ *   dev - device
+ *
+ * Return value:
+ *   True if interrupt is active
+ *
+ ****************************************************************************/
+
+bool pci_stat_line(FAR struct pci_device_s *dev);
+
+/****************************************************************************
+ * Name: pci_get_irq
+ *
+ * Description:
+ *  Get interrupt number associated with a device PCI interrupt line
+ *
+ * Input Parameters:
+ *   dev - PCI device
+ *
+ * Return value:
+ *   Return interrupt number associated with a given INTx.
+ *
+ ****************************************************************************/
+
+int pci_get_irq(FAR struct pci_device_s *dev);
+
+/****************************************************************************
+ * Name: pci_alloc_irq
+ *
+ * Description:
+ *   Allocate MSI or MSI-X vectors
+ *
+ * Input Parameters:
+ *   dev - PCI device
+ *   irq - allocated vectors
+ *   num - number of vectors
+ *
+ * Return value:
+ *   Return the number of allocated vectors on succes or negative errno
+ *   on failure.
+ *
+ ****************************************************************************/
+
+int pci_alloc_irq(FAR struct pci_device_s *dev, FAR int *irq, int num);
+
+/****************************************************************************
+ * Name: pci_release_irq
+ *
+ * Description:
+ *   Release MSI or MSI-X vectors
+ *
+ * Input Parameters:
+ *   dev - PCI device
+ *   irq - allocated vectors
+ *   num - number of vectors
+ *
+ * Return value:
+ *   None
+ *
+ ****************************************************************************/
+
+void pci_release_irq(FAR struct pci_device_s *dev, FAR int *irq, int num);
+
+/****************************************************************************
+ * Name: pci_connect_irq
+ *
+ * Description:
+ *   Connect MSI or MSI-X if available.
+ *
+ * Input Parameters:
+ *   dev - PCI device
+ *   irq - allocated vectors
+ *   num - number of vectors
+ *
+ * Return value:
+ *   Return -ENOSETUP if MSI/MSI-X not available. Return OK on success.
+ *
+ ****************************************************************************/
+
+int pci_connect_irq(FAR struct pci_device_s *dev, FAR int *irq, int num);
 
 /****************************************************************************
  * Name: pci_register_driver
