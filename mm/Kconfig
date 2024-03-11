@@ -60,7 +60,7 @@ config MM_KERNEL_HEAPSIZE
 		user-mode heap.  This value may need to be aligned to units of the
 		size of the smallest memory protection region.
 
-config MM_DFAULT_ALIGNMENT
+config MM_DEFAULT_ALIGNMENT
 	int "Memory default alignment in bytes"
 	default 0
 	range 0 64
