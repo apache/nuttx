@@ -255,6 +255,10 @@ EXTRA_LIBS += -lbtdm_app
   endif
 endif
 
+ifeq ($(CONFIG_ESP32_OPENETH),y)
+CHIP_CSRCS += esp32_openeth.c
+endif
+
 #############################################################################
 # Espressif HAL for 3rd Party Platforms
 #############################################################################
