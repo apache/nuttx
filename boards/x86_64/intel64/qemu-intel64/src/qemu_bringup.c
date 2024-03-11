@@ -36,7 +36,10 @@
 #  include <nuttx/timers/oneshot.h>
 #endif
 
-#include "x86_64_internal.h"
+#ifdef CONFIG_PCI
+#  include <nuttx/pci/pci.h>
+#endif
+
 #include "qemu_intel64.h"
 
 /****************************************************************************
@@ -68,10 +71,10 @@ int qemu_bringup(void)
 
   int ret = OK;
 
-  /* Initialize the PCI bus */
-
 #ifdef CONFIG_PCI
-  x86_64_pci_init();
+  /* Register the PCI bus drivers */
+
+  pci_register_drivers();
 #endif
 
 #ifdef CONFIG_FS_PROCFS

@@ -254,7 +254,7 @@ void drivers_initialize(void)
   mtd_loop_register();
 #endif
 
-#ifdef CONFIG_PCI
+#if defined(CONFIG_PCI) && !defined(CONFIG_PCI_LATE_DRIVERS_REGISTER)
   pci_register_drivers();
 #endif
 
