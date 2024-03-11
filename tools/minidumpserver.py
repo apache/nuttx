@@ -587,6 +587,11 @@ class GDBStub:
     def handle_general_query_packet(self, pkt):
         self.put_gdb_packet(b"")
 
+    def handle_vkill_packet(self, pkt):
+        self.put_gdb_packet(b"OK")
+        logger.debug("quit with gdb")
+        sys.exit(0)
+
     def run(self, socket: socket.socket):
         self.socket = socket
 
@@ -618,9 +623,9 @@ class GDBStub:
                 self.handle_memory_write_packet(pkt)
             elif pkt_type == b"q":
                 self.handle_general_query_packet(pkt)
-            elif pkt_type == b"k":
+            elif pkt.startswith(b"vKill") or pkt_type == b"k":
                 # GDB quits
-                break
+                self.handle_vkill_packet(pkt)
             else:
                 self.put_gdb_packet(b"")
 
