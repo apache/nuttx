@@ -47,6 +47,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define IRQ_MSI_START  IRQ32
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -54,6 +56,7 @@
 struct intel64_irq_priv_s
 {
   cpu_set_t busy;
+  bool      msi;
 };
 
 /****************************************************************************
@@ -75,6 +78,7 @@ static inline void up_idtinit(void);
 
 static struct idt_entry_s        g_idt_entries[NR_IRQS];
 static struct intel64_irq_priv_s g_irq_priv[NR_IRQS];
+static int                       g_msi_now = IRQ_MSI_START;
 static spinlock_t                g_irq_spinlock;
 
 /****************************************************************************
@@ -491,6 +495,14 @@ void up_disable_irq(int irq)
       ASSERT(0);
     }
 
+  /* Do nothing if this is MSI/MSI-X */
+
+  if (g_irq_priv[irq].msi)
+    {
+      spin_unlock_irqrestore(&g_irq_spinlock, flags);
+      return;
+    }
+
   if (g_irq_priv[irq].busy > 0)
     {
       g_irq_priv[irq].busy -= 1;
@@ -533,6 +545,14 @@ void up_enable_irq(int irq)
       ASSERT(0);
     }
 #  endif
+
+  /* Do nothing if this is MSI/MSI-X */
+
+  if (g_irq_priv[irq].msi)
+    {
+      spin_unlock_irqrestore(&g_irq_spinlock, flags);
+      return;
+    }
 
   if (irq > IRQ255)
     {
@@ -600,4 +620,73 @@ void up_trigger_irq(int irq, cpu_set_t cpuset)
                     irq);
         }
     }
+}
+
+/****************************************************************************
+ * Name: up_alloc_irq_msi
+ *
+ * Description:
+ *   Reserve vector for MSI/MSI-X
+ *
+ ****************************************************************************/
+
+int up_alloc_irq_msi(int *num)
+{
+  irqstate_t flags = spin_lock_irqsave(&g_irq_spin);
+  int        irq   = 0;
+  int        i     = 0;
+
+  /* Limit requested number of vectors */
+
+  if (g_msi_now + *num > IRQ255)
+    {
+      *num = IRQ255 - g_msi_now;
+    }
+
+  if (*num <= 0)
+    {
+      spin_unlock_irqrestore(&g_irq_spin, flags);
+
+      /* No IRQs available */
+
+      return -ENODEV;
+    }
+
+  irq = g_msi_now;
+  g_msi_now += *num;
+
+  /* Mark IRQs as MSI/MSI-X */
+
+  for (i = 0; i < *num; i++)
+    {
+      ASSERT(g_irq_priv[irq + i].busy == 0);
+      g_irq_priv[irq + i].msi = true;
+    }
+
+  spin_unlock_irqrestore(&g_irq_spin, flags);
+
+  return irq;
+}
+
+/****************************************************************************
+ * Name: up_release_irq_msi
+ *
+ * Description:
+ *   Release MSI/MSI-X vector
+ *
+ ****************************************************************************/
+
+void up_release_irq_msi(int *irq, int num)
+{
+  irqstate_t flags = spin_lock_irqsave(&g_irq_spin);
+  int        i     = 0;
+
+  /* Mark IRQ as MSI/MSI-X */
+
+  for (i = 0; i < num; i++)
+    {
+      g_irq_priv[irq[i]].msi = false;
+    }
+
+  spin_unlock_irqrestore(&g_irq_spin, flags);
 }
