@@ -74,3 +74,12 @@ config PCI_UIO_IVSHMEM_NPOLLWAITERS
 	depends on PCI_UIO_IVSHMEM
 
 endif # PCI
+
+menuconfig PCI_ENDPOINT
+	bool "PCI Endpoint Support"
+	default n
+	---help---
+		Enable this configuration option to support configurable PCI
+		endpoint. This should be enabled if the platform has a PCI
+		controller that can operate in endpoint mode.
+
