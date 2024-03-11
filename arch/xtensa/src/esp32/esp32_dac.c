@@ -31,6 +31,7 @@
 #include "esp32_rtc_gpio.h"
 #include "hardware/esp32_rtc_io.h"
 #include "hardware/esp32_dport.h"
+#include "hardware/esp32_sens.h"
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -99,6 +99,10 @@ config ARCH_CHIP_ESP32PICOD4
 
 endchoice # ESP32 Chip Selection
 
+config ESPRESSIF_CHIP_SERIES
+	string
+	default "esp32"
+
 config ESP32_SINGLE_CPU
 	bool
 	default n
@@ -791,8 +795,10 @@ endmenu # ESP32 Peripheral Selection
 
 config ESP32_WIFI_BT_COEXIST
 	bool "Wi-Fi and BT coexist"
+	default y if ESP32_WIFI && ESP32_BLE
 	default n
 	depends on ESP32_WIFI && ESP32_BLE
+	select ESP32_WIFI_STA_DISCONNECT_PM
 
 menu "Interrupt Configuration"
 

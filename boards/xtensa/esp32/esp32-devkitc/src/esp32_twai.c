@@ -30,8 +30,6 @@
 #include <nuttx/can/can.h>
 #include <arch/board/board.h>
 
-#include "chip.h"
-
 #include "esp32_twai.h"
 #include "esp32-devkitc.h"
 
