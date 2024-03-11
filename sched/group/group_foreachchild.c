@@ -62,7 +62,7 @@ int group_foreachchild(FAR struct task_group_s *group,
 {
   FAR sq_entry_t *curr;
   FAR sq_entry_t *next;
-  int ret = OK;
+  int ret;
 
   DEBUGASSERT(group);
 

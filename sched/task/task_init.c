@@ -111,7 +111,7 @@ int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
 
   /* Create a new task group */
 
-  ret = group_initialize(tcb, tcb->cmn.flags);
+  ret = group_allocate(tcb, tcb->cmn.flags);
   if (ret < 0)
     {
       sched_trace_end();
@@ -179,7 +179,7 @@ int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
 
   /* Now we have enough in place that we can join the group */
 
-  group_postinitialize(tcb);
+  group_initialize(tcb);
   sched_trace_end();
   return ret;
 

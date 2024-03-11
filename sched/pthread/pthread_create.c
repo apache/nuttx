@@ -208,7 +208,8 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
 
   /* Allocate a TCB for the new task. */
 
-  ptcb = kmm_zalloc(sizeof(struct pthread_tcb_s));
+  ptcb = (FAR struct pthread_tcb_s *)
+            kmm_zalloc(sizeof(struct pthread_tcb_s));
   if (!ptcb)
     {
       serr("ERROR: Failed to allocate TCB\n");
