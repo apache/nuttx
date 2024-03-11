@@ -241,6 +241,32 @@ config ESP32_EMAC
 	---help---
 		Enable ESP32 ethernet support.
 
+config ESP32_OPENETH
+	bool "Opencores Ethernet MAC"
+	default n
+	depends on !ESP32_EMAC
+	select NET
+	select SCHED_WORKQUEUE
+	---help---
+		Enable ESP32 ethernet opencores support for use with QEMU.
+		Disable this if you are using the real device.
+
+if ESP32_OPENETH
+	config ESP32_OPENETH_DMA_RX_BUFFER_NUM
+		int "Number of Ethernet DMA Rx buffers"
+		range 1 64
+		default 4
+		help
+			Number of DMA receive buffers, each buffer is 1600 bytes.
+
+	config ESP32_OPENETH_DMA_TX_BUFFER_NUM
+		int "Number of Ethernet DMA Tx buffers"
+		range 1 64
+		default 1
+		help
+			Number of DMA transmit buffers, each buffer is 1600 bytes.
+endif
+
 config ESP32_I2C
 	bool
 	default n

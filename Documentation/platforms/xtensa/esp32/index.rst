@@ -405,6 +405,13 @@ A QEMU-compatible ``nuttx.merged.bin`` binary image will be created. It can be r
 
  $ qemu-system-xtensa -nographic -machine esp32 -drive file=nuttx.merged.bin,if=mtd,format=raw
 
+QEMU Networking
+---------------
+
+Networking is possible using the openeth MAC driver. Enable ``ESP32_OPENETH`` option and set the nic in QEMU:
+
+ $ qemu-system-xtensa -nographic -machine esp32 -drive file=nuttx.merged.bin,if=mtd,format=raw -nic user,model=open_eth
+
 Secure Boot and Flash Encryption
 ================================
 
