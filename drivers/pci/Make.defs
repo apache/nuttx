@@ -37,6 +37,10 @@ ifeq ($(CONFIG_PCI_UIO_IVSHMEM),y)
 CSRCS += pci_uio_ivshmem.c
 endif
 
+ifeq ($(CONFIG_PCI_ENDPOINT),y)
+CSRCS += pci_epc.c pci_epc_mem.c pci_epf.c
+endif
+
 # Include PCI device driver build support
 
 DEPPATH += --dep-path pci

@@ -41,3 +41,11 @@ if(CONFIG_PCI)
   target_sources(drivers PRIVATE ${SRCS})
 
 endif() # CONFIG_PCI
+
+if(CONFIG_PCI_ENDPOINT)
+
+  set(SRCS pci_epc.c pci_epc_mem.c pci_epf.c)
+
+  target_sources(drivers PRIVATE ${SRCS})
+
+endif() # CONFIG_PCI_ENDPOINT
