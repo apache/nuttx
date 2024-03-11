@@ -466,6 +466,9 @@ int     getentropy(FAR void *buffer, size_t length);
 void    sync(void);
 int     syncfs(int fd);
 
+int     profil(FAR unsigned short *buf, size_t bufsiz,
+               size_t offset, unsigned int scale);
+
 #if CONFIG_FORTIFY_SOURCE > 0
 fortify_function(getcwd) FAR char *getcwd(FAR char *buf,
                                           size_t size)

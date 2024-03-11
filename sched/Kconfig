@@ -1162,6 +1162,13 @@ config SCHED_CPULOAD_TIMECONSTANT
 		tick count exceeds this time constant.  This time constant is in
 		units of seconds.
 
+config SCHED_PROFILE_TICKSPERSEC
+	int "Profile sampling rate"
+	default 1000
+	---help---
+		This is the frequency at which the profil functon will sample the
+		running program. The default is 1000Hz.
+
 menuconfig SCHED_INSTRUMENTATION
 	bool "System performance monitor hooks"
 	default n

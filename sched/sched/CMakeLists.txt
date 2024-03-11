@@ -21,6 +21,7 @@
 # ##############################################################################
 set(SRCS
     sched_getfiles.c
+    sched_profil.c
     sched_addreadytorun.c
     sched_removereadytorun.c
     sched_addprioritized.c
