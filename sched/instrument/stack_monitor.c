@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/instrument/stack_record.c
+ * sched/instrument/stack_monitor.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -33,21 +33,21 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static void stack_record_enter(FAR void *this_fn, FAR void *call_site,
-                               FAR void *arg) noinstrument_function
-                               nooptimiziation_function;
-static void stack_record_leave(FAR void *this_fn, FAR void *call_site,
-                               FAR void *arg) noinstrument_function
-                               nooptimiziation_function;
+static void stack_monitor_enter(FAR void *this_fn, FAR void *call_site,
+                                FAR void *arg) noinstrument_function
+                                nooptimiziation_function;
+static void stack_monitor_leave(FAR void *this_fn, FAR void *call_site,
+                                FAR void *arg) noinstrument_function
+                                nooptimiziation_function;
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-struct instrument_s g_stack_record =
+struct instrument_s g_stack_monitor =
 {
-  .enter = stack_record_enter,
-  .leave = stack_record_leave
+  .enter = stack_monitor_enter,
+  .leave = stack_monitor_leave
 };
 
 /****************************************************************************
@@ -58,8 +58,8 @@ struct instrument_s g_stack_record =
  * Name: stack_statistics
  ****************************************************************************/
 
-static void stack_record_enter(FAR void *this_fn, FAR void *call_site,
-                               FAR void *arg)
+static void stack_monitor_enter(FAR void *this_fn, FAR void *call_site,
+                                FAR void *arg)
 {
   FAR struct tcb_s *tcb = running_task();
   FAR void *sp = &tcb;
@@ -98,8 +98,8 @@ static void stack_record_enter(FAR void *this_fn, FAR void *call_site,
  * Name: stackrecord_leave
  ****************************************************************************/
 
-static void stack_record_leave(FAR void *this_fn, FAR void *call_site,
-                               FAR void *arg)
+static void stack_monitor_leave(FAR void *this_fn, FAR void *call_site,
+                                FAR void *arg)
 {
   FAR struct tcb_s *tcb = running_task();
   FAR void *sp = &tcb;
