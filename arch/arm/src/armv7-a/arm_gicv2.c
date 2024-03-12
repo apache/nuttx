@@ -35,6 +35,12 @@
 #include "arm_internal.h"
 #include "gic.h"
 
+#if defined(CONFIG_ARCH_TRUSTZONE_SECURE) || defined(CONFIG_ARCH_TRUSTZONE_NONSECURE)
+# if defined(CONFIG_ARCH_HIPRI_INTERRUPT)
+#  error "ARCH_HIPRI_INTERRUPT must configure with ARCH_TRUSTZONE_DISABLED or no trustzone"
+# endif
+#endif
+
 #ifdef CONFIG_ARMV7A_HAVE_GICv2
 
 /****************************************************************************
