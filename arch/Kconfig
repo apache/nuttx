@@ -573,14 +573,17 @@ config ARCH_HAVE_TRUSTZONE
 
 choice
 	prompt "TrustZone Configuration"
-	default ARCH_TRUSTZONE_NONSECURE
+	default ARCH_TRUSTZONE_DISABLED
 	depends on ARCH_HAVE_TRUSTZONE
 
+config ARCH_TRUSTZONE_DISABLED
+	bool "TrustZone disabled, all CPUs operate in secure state"
+
 config ARCH_TRUSTZONE_SECURE
-	bool "All CPUs operate secure state"
+	bool "TrustZone enabled, all CPUs operate secure state"
 
 config ARCH_TRUSTZONE_NONSECURE
-	bool "All CPUs operate non-secure state"
+	bool "TrustZone enabled, all CPUs operate non-secure state"
 
 endchoice # TrustZone Configuration
 
