@@ -23,7 +23,7 @@
 CSRCS += instrument.c
 
 ifneq ($(CONFIG_SCHED_STACK_RECORD),0)
-CSRCS += stack_record.c
+CSRCS += stack_monitor.c
 endif
 
 ifeq ($(CONFIG_SCHED_GPROF),y)
