@@ -26,6 +26,10 @@ ifneq ($(CONFIG_SCHED_STACK_RECORD),0)
 CSRCS += stack_record.c
 endif
 
+ifeq ($(CONFIG_SCHED_GPROF),y)
+CSRCS += profile_monitor.c
+endif
+
 # Include instrument build support
 
 DEPPATH += --dep-path instrument

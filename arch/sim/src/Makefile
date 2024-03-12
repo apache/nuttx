@@ -144,6 +144,10 @@ ifeq ($(CONFIG_SCHED_GCOV),y)
   STDLIBS += -lgcov
 endif
 
+ifeq ($(CONFIG_SIM_GPROF),y)
+  HOSTCFLAGS += -pg
+endif
+
 ifeq ($(CONFIG_STACK_COLORATION),y)
   CSRCS += sim_checkstack.c
 endif
@@ -423,7 +427,8 @@ nuttx$(EXEEXT): libarch$(LIBEXT) board/libboard$(LIBEXT) $(HEADOBJ) $(LINKOBJS) 
 ifneq ($(CONFIG_HOST_MACOS),y)
 	$(Q) $(OBJCOPY) --redefine-syms=nuttx-names.dat nuttx.rel
 	$(Q) $(CC) $(CFLAGS) -Wl,-verbose 2>&1 | \
-	     sed -e '/====/,/====/!d;//d' -e 's/__executable_start/_stext/g' \
+	     sed -e '/====/,/====/!d;//d' \
+	         -e '/__executable_start/s/$$/PROVIDE(_stext = .);/' \
 	         -e 's/^\(\s\+\)\(\.init_array\)/\1\2 : { }\n\1.sinit/g' \
 	         -e 's/^\(\s\+\)\(\.fini_array\)/\1\2 : { }\n\1.einit/g' \
 	         -e 's/__init_array_start/_sinit/g' -e 's/__init_array_end/_einit/g' \

@@ -97,6 +97,13 @@ config SIM_GCOV_ALL
 		This option activates code coverage instrumentation for the
 		entire image.
 
+config SIM_GPROF
+	bool "Enable gprof"
+	depends on !SCHED_GPROF
+	default n
+	---help---
+		Enable support gprof profiling tool.
+
 choice
 	prompt "X64_64 ABI"
 	default SIM_X8664_SYSTEMV if HOST_LINUX

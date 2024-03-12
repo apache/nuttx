@@ -76,6 +76,10 @@ ifeq ($(CONFIG_SIM_GCOV_ALL),y)
   ARCHOPTIMIZATION += -fprofile-generate -ftest-coverage
 endif
 
+ifneq ($(CONFIG_SCHED_GPROF_ALL)$(CONFIG_SIM_GPROF),)
+  ARCHOPTIMIZATION += -pg
+endif
+
 ifeq ($(CONFIG_SIM_ASAN),y)
   ARCHOPTIMIZATION += -fsanitize=address -fsanitize-address-use-after-scope
   ARCHOPTIMIZATION += -fsanitize=pointer-compare -fsanitize=pointer-subtract

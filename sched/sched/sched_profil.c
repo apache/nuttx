@@ -130,7 +130,7 @@ int profil(FAR unsigned short *buf, size_t bufsiz,
     }
 
   memset(buf, 0, bufsiz);
-  highpc = (uintmax_t)bufsiz * 32768 / scale;
+  highpc = (uintmax_t)bufsiz * 65536 / scale;
 
   flags = spin_lock_irqsave(&prof->lock);
   prof->counter = buf;

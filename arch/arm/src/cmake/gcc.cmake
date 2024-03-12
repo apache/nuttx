@@ -167,6 +167,10 @@ if(CONFIG_ARCH_INSTRUMENT_ALL)
   add_compile_options(-finstrument-functions)
 endif()
 
+if(CONFIG_SCHED_GPROF_ALL)
+  add_compile_options(-pg)
+endif()
+
 if(CONFIG_UNWINDER_ARM)
   add_compile_options(-funwind-tables -fasynchronous-unwind-tables)
 endif()
