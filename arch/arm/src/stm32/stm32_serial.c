@@ -2227,11 +2227,14 @@ static int up_interrupt(int irq, void *context, void *arg)
 static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
 #if defined(CONFIG_SERIAL_TERMIOS) || defined(CONFIG_SERIAL_TIOCSERGSTRUCT) \
-    || defined(CONFIG_STM32_SERIALBRK_BSDCOMPAT)
+    || defined(CONFIG_STM32_SERIALBRK_BSDCOMPAT) \
+    || defined(CONFIG_STM32_USART_SINGLEWIRE)
   struct inode      *inode = filep->f_inode;
   struct uart_dev_s *dev   = inode->i_private;
 #endif
-#if defined(CONFIG_SERIAL_TERMIOS) || defined(CONFIG_STM32_SERIALBRK_BSDCOMPAT)
+#if defined(CONFIG_SERIAL_TERMIOS) \
+    || defined(CONFIG_STM32_SERIALBRK_BSDCOMPAT) \
+    || defined(CONFIG_STM32_USART_SINGLEWIRE)
   struct up_dev_s   *priv  = (struct up_dev_s *)dev->priv;
 #endif
   int                ret   = OK;
