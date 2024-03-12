@@ -28,75 +28,14 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/nuttx.h>
+
 #include "group/group.h"
 #include "pthread/pthread.h"
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: pthread_createjoininfo
- *
- * Description:
- *    Allocate a detachable structure to support pthread_join logic and add
- *    the joininfo to the thread.
- *
- * Input Parameters:
- *   ptcb
- *
- * Output Parameters:
- *   pjoin - joininfo point
- *
- * Returned Value:
- *   0 if successful.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-int pthread_createjoininfo(FAR struct pthread_tcb_s *ptcb,
-                           FAR struct join_s **pjoin)
-{
-  /* Allocate a detachable structure to support pthread_join logic */
-
-  *pjoin = kmm_zalloc(sizeof(struct join_s));
-  if (*pjoin == NULL)
-    {
-      serr("ERROR: Failed to allocate join\n");
-      return EINVAL;
-    }
-
-  (*pjoin)->thread = (pthread_t)ptcb->cmn.pid;
-
-  /* Initialize the semaphore in the join structure to zero. */
-
-  if (nxsem_init(&(*pjoin)->exit_sem, 0, 0) < 0)
-    {
-      kmm_free(*pjoin);
-      return EINVAL;
-    }
-  else
-    {
-      FAR struct task_group_s *group = ptcb->cmn.group;
-
-      /* Attach the join info to the TCB. */
-
-      (*pjoin)->next = NULL;
-      if (!group->tg_jointail)
-        {
-          group->tg_joinhead = *pjoin;
-        }
-      else
-        {
-          group->tg_jointail->next = *pjoin;
-        }
-
-      group->tg_jointail = *pjoin;
-    }
-
-  return OK;
-}
 
 /****************************************************************************
  * Public Functions
@@ -128,55 +67,48 @@ int pthread_createjoininfo(FAR struct pthread_tcb_s *ptcb,
  *
  ****************************************************************************/
 
-int pthread_findjoininfo(FAR struct task_group_s *group,
-                         pid_t pid, FAR struct join_s **pjoin)
+int pthread_findjoininfo(FAR struct task_group_s *group, pid_t pid,
+                         FAR struct task_join_s **pjoin, bool create)
 {
-  FAR struct pthread_tcb_s *ptcb;
-  FAR struct tcb_s *tcb;
+  FAR struct task_join_s *join;
+  FAR sq_entry_t *curr;
+  FAR sq_entry_t *next;
 
-  DEBUGASSERT(group);
+  nxrmutex_lock(&group->tg_joinlock);
 
-  /* Find the entry with the matching pid */
-
-  for (*pjoin = group->tg_joinhead;
-       (*pjoin && (pid_t)(*pjoin)->thread != pid);
-       *pjoin = (*pjoin)->next);
-
-  /* and return it */
-
-  if (*pjoin)
+  sq_for_every_safe(&group->tg_joinqueue, curr, next)
     {
-      return OK;
+      join = container_of(curr, struct task_join_s, entry);
+
+      if (join->pid == pid)
+        {
+          goto found;
+        }
     }
 
-  /* Task has been deleted, return ESRCH */
+  nxrmutex_unlock(&group->tg_joinlock);
 
-  tcb = nxsched_get_tcb(pid);
-  if (tcb == NULL)
-    {
-      return ESRCH;
-    }
-
-  /* Task was detached or not a pthread, return EINVAL */
-
-  if ((tcb->flags & TCB_FLAG_DETACHED) != 0 ||
-      (tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
+  if (!create)
     {
       return EINVAL;
     }
 
-  ptcb = (FAR struct pthread_tcb_s *)tcb;
-
-  /* Task was join completed, is in the process
-   * of being deleted, return ESRCH
-   */
-
-  if (ptcb->join_complete)
+  join = kmm_zalloc(sizeof(struct task_join_s));
+  if (join == NULL)
     {
-      return ESRCH;
+      return ENOMEM;
     }
 
-  /* Else create joininfo for the task */
+  join->pid = pid;
 
-  return pthread_createjoininfo(ptcb, pjoin);
+  nxrmutex_lock(&group->tg_joinlock);
+
+  sq_addfirst(&join->entry, &group->tg_joinqueue);
+
+found:
+  nxrmutex_unlock(&group->tg_joinlock);
+
+  *pjoin = join;
+
+  return OK;
 }

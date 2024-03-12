@@ -31,6 +31,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 
+#include "task/task.h"
 #include "sched/sched.h"
 #include "group/group.h"
 #include "timer/timer.h"
@@ -164,9 +165,13 @@ int nxsched_release_tcb(FAR struct tcb_s *tcb, uint8_t ttype)
 
       group_leave(tcb);
 
+#ifndef CONFIG_DISABLE_PTHREAD
+      /* Destroy the pthread join mutex */
+
+      nxtask_joindestroy(tcb);
+
       /* Kernel thread and group still reference by pthread */
 
-#ifndef CONFIG_DISABLE_PTHREAD
       if (ttype != TCB_FLAG_TTYPE_PTHREAD)
         {
           ttcb = (FAR struct task_tcb_s *)tcb;

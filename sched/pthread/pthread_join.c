@@ -34,7 +34,6 @@
 #include <nuttx/cancelpt.h>
 
 #include "sched/sched.h"
-#include "group/group.h"
 #include "pthread/pthread.h"
 
 /****************************************************************************
@@ -74,153 +73,103 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
 {
   FAR struct tcb_s *rtcb = this_task();
   FAR struct task_group_s *group = rtcb->group;
-  FAR struct join_s *pjoin;
-  int ret;
-
-  sinfo("thread=%d group=%p\n", thread, group);
-  DEBUGASSERT(group);
+  FAR struct task_join_s *join;
+  FAR struct tcb_s *tcb;
+  int ret = OK;
 
   /* pthread_join() is a cancellation point */
 
   enter_cancellation_point();
 
-  /* First make sure that this is not an attempt to join to
-   * ourself.
-   */
+  nxrmutex_lock(&group->tg_joinlock);
 
-  if ((pid_t)thread == nxsched_gettid())
+  tcb = nxsched_get_tcb((pid_t)thread);
+  if (tcb == NULL || (tcb->flags & TCB_FLAG_JOIN_COMPLETED) != 0)
     {
-      leave_cancellation_point();
-      return EDEADLK;
-    }
-
-  /* Make sure no other task is mucking with the data structures
-   * while we are performing the following operations.  NOTE:
-   * we can be also sure that pthread_exit() will not execute
-   * because it will also attempt to get this semaphore.
-   */
-
-  nxmutex_lock(&group->tg_joinlock);
-
-  /* Find the join information associated with this thread.
-   * This can fail for one of three reasons:  (1) There is no
-   * thread associated with 'thread,' (2) the thread is a task
-   * and does not have join information, or (3) the thread
-   * was detached and has exited.
-   */
-
-  ret = pthread_findjoininfo(group, (pid_t)thread, &pjoin);
-  if (ret == OK)
-    {
-      if (pjoin->detached)
+      ret = pthread_findjoininfo(group, (pid_t)thread, &join, false);
+      if (ret == OK)
         {
-          nxmutex_unlock(&group->tg_joinlock);
-          leave_cancellation_point();
-          return EINVAL;
-        }
+          /* If the task is terminated, maintain the same behavior as Linux:
+           * 1. Join detached task will always return EINVAL.
+           * 2. Other threads will destroy the join information after
+           *    obtain the exit value, ESRCH will return if calling
+           *    pthread_join() again
+           */
 
-      /* NOTE: sched_lock() is not enough for SMP
-       * because another CPU would continue the pthread and exit
-       * sequences so need to protect it with a critical section
-       */
-
-#ifdef CONFIG_SMP
-      irqstate_t flags = enter_critical_section();
-#endif
-
-      /* We found the join info structure.  Increment for the reference
-       * to the join structure that we have.  This will keep things
-       * stable for we have to do
-       */
-
-      sched_lock();
-      pjoin->crefs++;
-
-      /* Check if the thread is still running.  If not, then things are
-       * simpler.  There are still race conditions to be concerned with.
-       * For example, there could be multiple threads executing in the
-       * 'else' block below when we enter!
-       */
-
-      if (pjoin->terminated)
-        {
-          sinfo("Thread has terminated\n");
-
-          /* Get the thread exit value from the terminated thread. */
-
-          if (pexit_value)
+          if (join->detached)
             {
-              sinfo("exit_value=%p\n", pjoin->exit_value);
-              *pexit_value = pjoin->exit_value;
+              ret = EINVAL;
+            }
+          else
+            {
+              if (pexit_value != NULL)
+                {
+                  *pexit_value = join->exit_value;
+                }
+
+              pthread_destroyjoin(group, join);
             }
         }
       else
         {
-          sinfo("Thread is still running\n");
-
-          /* Relinquish the data set semaphore.  Since pre-emption is
-           * disabled, we can be certain that no task has the
-           * opportunity to run between the time we relinquish the
-           * join semaphore and the time that we wait on the thread exit
-           * semaphore.
-           */
-
-          nxmutex_unlock(&group->tg_joinlock);
-
-          /* Take the thread's thread exit semaphore.  We will sleep here
-           * until the thread exits.  We need to exercise caution because
-           * there could be multiple threads waiting here for the same
-           * pthread to exit.
-           */
-
-          nxsem_wait_uninterruptible(&pjoin->exit_sem);
-
-          /* The thread has exited! Get the thread exit value */
-
-          if (pexit_value)
-            {
-              *pexit_value = pjoin->exit_value;
-              sinfo("exit_value=%p\n", pjoin->exit_value);
-            }
-
-          /* Post the thread's data semaphore so that the exiting thread
-           * will know that we have received the data.
-           */
-
-          nxsem_post(&pjoin->data_sem);
-
-          /* Retake the join semaphore, we need to hold this when
-           * pthread_destroyjoin is called.
-           */
-
-          nxmutex_lock(&group->tg_joinlock);
+          ret = ESRCH;
         }
 
-      /* Pre-emption is okay now. The logic still cannot be re-entered
-       * because we hold the join semaphore
-       */
-
-      sched_unlock();
-
-#ifdef CONFIG_SMP
-      leave_critical_section(flags);
-#endif
-
-      /* Release our reference to the join structure and, if the reference
-       * count decrements to zero, deallocate the join structure.
-       */
-
-      if (--pjoin->crefs <= 0)
-        {
-          pthread_destroyjoin(group, pjoin);
-        }
-
-      ret = OK;
+      goto errout;
     }
 
-  nxmutex_unlock(&group->tg_joinlock);
+  /* First make sure that this is not an attempt to join to
+   * ourself.
+   */
+
+  if (tcb == rtcb)
+    {
+      ret = EDEADLK;
+      goto errout;
+    }
+
+  /* Task was detached or not a pthread, return EINVAL */
+
+  if ((tcb->group != group) ||
+      (tcb->flags & TCB_FLAG_DETACHED) != 0)
+    {
+      ret = EINVAL;
+      goto errout;
+    }
+
+  /* Relinquish the data set semaphore.  Since pre-emption is
+   * disabled, we can be certain that no task has the
+   * opportunity to run between the time we relinquish the
+   * join semaphore and the time that we wait on the thread exit
+   * semaphore.
+   */
+
+  sq_addfirst(&rtcb->join_entry, &tcb->join_queue);
+
+  nxrmutex_unlock(&group->tg_joinlock);
+
+  /* Take the thread's thread exit semaphore.  We will sleep here
+   * until the thread exits.  We need to exercise caution because
+   * there could be multiple threads waiting here for the same
+   * pthread to exit.
+   */
+
+  nxsem_wait_uninterruptible(&rtcb->join_sem);
+
+  nxrmutex_lock(&group->tg_joinlock);
+
+  /* The thread has exited! Get the thread exit value */
+
+  if (pexit_value != NULL)
+    {
+      *pexit_value = rtcb->join_val;
+    }
+
+errout:
+  nxrmutex_unlock(&group->tg_joinlock);
 
   leave_cancellation_point();
-  sinfo("Returning %d\n", ret);
+
+  sinfo("Returning %d, exit_value %p\n", ret, *pexit_value);
   return ret;
 }

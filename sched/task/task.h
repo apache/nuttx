@@ -58,4 +58,14 @@ void nxtask_recover(FAR struct tcb_s *tcb);
 
 bool nxnotify_cancellation(FAR struct tcb_s *tcb);
 
+/* Task Join */
+
+#ifndef CONFIG_DISABLE_PTHREAD
+void nxtask_joininit(FAR struct tcb_s *tcb);
+void nxtask_joindestroy(FAR struct tcb_s *tcb);
+#else
+#  define nxtask_joininit(tcb)
+#  define nxtask_joindestroy(tcb)
+#endif
+
 #endif /* __SCHED_TASK_TASK_H */

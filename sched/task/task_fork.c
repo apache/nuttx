@@ -144,6 +144,10 @@ FAR struct task_tcb_s *nxtask_setup_fork(start_t retaddr)
 
   child->cmn.flags |= TCB_FLAG_FREE_TCB;
 
+  /* Initialize the task join */
+
+  nxtask_joininit(&child->cmn);
+
   /* Allocate a new task group with the same privileges as the parent */
 
   ret = group_initialize(child, ttype);
