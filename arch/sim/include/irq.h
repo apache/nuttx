@@ -169,6 +169,19 @@ static inline bool up_interrupt_context(void)
   return ret;
 }
 
+/****************************************************************************
+ * Name: up_getusrpc
+ *
+ * Description:
+ *   Get the PC value, The interrupted context PC register cannot be
+ *   correctly obtained in sim It will return the PC of the interrupt
+ *   handler function, normally it will return sim_doirq
+ *
+ ****************************************************************************/
+
+#define up_getusrpc(regs) \
+    (((xcpt_reg_t *)((regs) ? (regs) : up_current_regs()))[JB_PC])
+
 #undef EXTERN
 #ifdef __cplusplus
 }

@@ -48,6 +48,13 @@ extern "C"
 
 uintptr_t up_getsp(void);
 
+/****************************************************************************
+ * Name: up_getusrpc
+ ****************************************************************************/
+
+#define up_getusrpc(regs) \
+    (((FAR chipreg_t *)((regs) ? (regs) : up_current_regs()))[XCPT_PC])
+
 #undef EXTERN
 #ifdef __cplusplus
 }
