@@ -236,7 +236,7 @@ static inline int can_readahead(struct can_recvfrom_s *pstate)
 
   pstate->pr_recvlen = -1;
 
-  if ((iob = iob_peek_queue(&conn->readahead)) != NULL &&
+  if ((iob = iob_remove_queue(&conn->readahead)) != NULL &&
       pstate->pr_buflen > 0)
     {
       DEBUGASSERT(iob->io_pktlen > 0);
@@ -249,17 +249,7 @@ static inline int can_readahead(struct can_recvfrom_s *pstate)
 
       if (can_recv_filter(conn, can_id) == 0)
         {
-          FAR struct iob_s *tmp;
-
-          /* Remove the I/O buffer chain from the head of the read-ahead
-           * buffer queue.
-           */
-
-          tmp = iob_remove_queue(&conn->readahead);
-          DEBUGASSERT(tmp == iob);
-          UNUSED(tmp);
-
-          /* And free the I/O buffer chain */
+          /* Free the I/O buffer chain */
 
           iob_free_chain(iob);
           return 0;
@@ -288,17 +278,7 @@ static inline int can_readahead(struct can_recvfrom_s *pstate)
 
       static_assert(sizeof(struct can_frame) <= CONFIG_IOB_BUFSIZE);
 
-      FAR struct iob_s *tmp;
-
-      /* Remove the I/O buffer chain from the head of the read-ahead
-       * buffer queue.
-       */
-
-      tmp = iob_remove_queue(&conn->readahead);
-      DEBUGASSERT(tmp == iob);
-      UNUSED(tmp);
-
-      /* And free the I/O buffer chain */
+      /* Free the I/O buffer chain */
 
       iob_free_chain(iob);
 
