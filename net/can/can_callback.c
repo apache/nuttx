@@ -68,6 +68,10 @@ can_data_event(FAR struct net_driver_s *dev, FAR struct can_conn_s *conn,
   uint16_t recvlen;
   uint16_t ret;
 
+#ifdef CONFIG_NET_TIMESTAMP
+  buflen -= sizeof(struct timeval);
+#endif
+
   ret = (flags & ~CAN_NEWDATA);
 
   /* Save as the packet data as in the read-ahead buffer.  NOTE that
