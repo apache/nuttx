@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pthread/pthread_detach.c
+ * sched/task/task_join.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,86 +24,41 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/nuttx.h>
 #include <sys/types.h>
 #include <stdbool.h>
 #include <pthread.h>
-#include <errno.h>
 #include <assert.h>
+#include <errno.h>
 #include <debug.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
 #include "pthread/pthread.h"
 
+#ifndef CONFIG_DISABLE_PTHREAD
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_detach
- *
- * Description:
- *    A thread object may be "detached" to specify that the return value
- *    and completion status will not be requested.
- *
- *    The caller's task/thread must belong to the same "task group" as the
- *    pthread is (or was) a member of.  The thread may or may not still
- *    be running.
- *
- * Input Parameters:
- *   thread
- *
- * Returned Value:
- *   0 if successful.  Otherwise, an error code.
- *
- * Assumptions:
- *
+ * Name: nxtask_joindestroy
  ****************************************************************************/
 
-int pthread_detach(pthread_t thread)
+void nxtask_joindestroy(FAR struct tcb_s *tcb)
 {
-  FAR struct tcb_s *rtcb = this_task();
-  FAR struct task_group_s *group = rtcb->group;
-  FAR struct task_join_s *join;
-  FAR struct tcb_s *tcb;
-  int ret;
-
-  nxrmutex_lock(&group->tg_joinlock);
-
-  tcb = nxsched_get_tcb((pid_t)thread);
-  if (tcb == NULL)
-    {
-      /* If tcb has been destroyed, update the pending join
-       * status in the group.
-       */
-
-      ret = pthread_findjoininfo(group, (pid_t)thread, &join, false);
-      if (ret == OK)
-        {
-          join->detached = true;
-        }
-      else
-        {
-          ret = ESRCH;
-        }
-
-      goto errout;
-    }
-
-  if ((group != tcb->group) ||
-      (tcb->flags & TCB_FLAG_DETACHED) != 0)
-    {
-      ret = EINVAL;
-    }
-  else
-    {
-      tcb->flags |= TCB_FLAG_DETACHED;
-      ret = OK;
-    }
-
-errout:
-  nxrmutex_unlock(&group->tg_joinlock);
-
-  sinfo("Returning %d\n", ret);
-  return ret;
+  nxsem_destroy(&tcb->join_sem);
 }
+
+/****************************************************************************
+ * Name: nxtask_joininit
+ ****************************************************************************/
+
+void nxtask_joininit(FAR struct tcb_s *tcb)
+{
+  sq_init(&tcb->join_queue);
+  nxsem_init(&tcb->join_sem, 0, 0);
+}
+
+#endif /* !CONFIG_DISABLE_PTHREAD */

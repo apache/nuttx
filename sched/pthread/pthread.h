@@ -37,29 +37,6 @@
 #include <nuttx/sched.h>
 
 /****************************************************************************
- * Public Type Declarations
- ****************************************************************************/
-
-/* The following defines an entry in the pthread logic's local data set.
- * Note that this structure is used to implemented a singly linked list.
- * This structure is used (instead of, say, a binary search tree) because
- * the data set will be searched using the pid as a key -- a process IDs will
- * always be created in a montonically increasing fashion.
- */
-
-struct join_s
-{
-  FAR struct join_s *next;       /* Implements link list */
-  uint8_t            crefs;      /* Reference count */
-  bool               detached;   /* true: pthread_detached'ed */
-  bool               terminated; /* true: detach'ed+exit'ed */
-  pthread_t          thread;     /* Includes pid */
-  sem_t              exit_sem;   /* Implements join */
-  sem_t              data_sem;   /* Implements join */
-  pthread_addr_t     exit_value; /* Returned data */
-};
-
-/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -83,9 +60,9 @@ int pthread_setup_scheduler(FAR struct pthread_tcb_s *tcb, int priority,
 
 int pthread_completejoin(pid_t pid, FAR void *exit_value);
 void pthread_destroyjoin(FAR struct task_group_s *group,
-                         FAR struct join_s *pjoin);
-int pthread_findjoininfo(FAR struct task_group_s *group,
-                         pid_t pid, FAR struct join_s **join);
+                         FAR struct task_join_s *pjoin);
+int pthread_findjoininfo(FAR struct task_group_s *group, pid_t pid,
+                         FAR struct task_join_s **join, bool create);
 void pthread_release(FAR struct task_group_s *group);
 
 int pthread_sem_take(FAR sem_t *sem, FAR const struct timespec *abs_timeout);
