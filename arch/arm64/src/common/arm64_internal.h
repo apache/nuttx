@@ -308,6 +308,10 @@ void arm64_pginitialize(void);
 uint64_t * arm64_syscall_switch(uint64_t *regs);
 int arm64_syscall(uint64_t *regs);
 
+/* Low level serial output **************************************************/
+
+void arm64_lowputc(char ch);
+
 #ifdef USE_SERIALDRIVER
 /****************************************************************************
  * Name: arm64_serialinit
