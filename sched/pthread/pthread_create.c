@@ -40,6 +40,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/pthread.h>
 
+#include "task/task.h"
 #include "sched/sched.h"
 #include "group/group.h"
 #include "clock/clock.h"
@@ -216,6 +217,10 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
     }
 
   ptcb->cmn.flags |= TCB_FLAG_FREE_TCB;
+
+  /* Initialize the task join */
+
+  nxtask_joininit(&ptcb->cmn);
 
   /* Bind the parent's group to the new TCB (we have not yet joined the
    * group).

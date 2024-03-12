@@ -118,6 +118,12 @@ int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
       return ret;
     }
 
+#ifndef CONFIG_DISABLE_PTHREAD
+  /* Initialize the task join */
+
+  nxtask_joininit(&tcb->cmn);
+#endif
+
   /* Duplicate the parent tasks environment */
 
   ret = env_dup(tcb->cmn.group, envp);
@@ -203,6 +209,8 @@ errout_with_group:
           up_release_stack(&tcb->cmn, ttype);
         }
     }
+
+  nxtask_joindestroy(&tcb->cmn);
 
   group_leave(&tcb->cmn);
 

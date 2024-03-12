@@ -104,7 +104,8 @@
 #define TCB_FLAG_HEAP_DUMP         (1 << 11)                     /* Bit 11: Heap dump */
 #define TCB_FLAG_DETACHED          (1 << 12)                     /* Bit 12: Pthread detached */
 #define TCB_FLAG_FORCED_CANCEL     (1 << 13)                     /* Bit 13: Pthread cancel is forced */
-#define TCB_FLAG_FREE_TCB          (1 << 14)                     /* Bit 14: Free tcb after exit */
+#define TCB_FLAG_JOIN_COMPLETED    (1 << 14)                     /* Bit 14: Pthread join completed */
+#define TCB_FLAG_FREE_TCB          (1 << 15)                     /* Bit 15: Free tcb after exit */
 
 /* Values for struct task_group tg_flags */
 
@@ -378,6 +379,18 @@ struct stackinfo_s
                                          /* from the stack.                  */
 };
 
+/* struct task_join_s *******************************************************/
+
+/* Used to save task join information */
+
+struct task_join_s
+{
+  sq_entry_t     entry;                  /* Implements link list            */
+  pid_t          pid;                    /* Includes pid                    */
+  bool           detached;               /* true: pthread_detached'ed       */
+  pthread_addr_t exit_value;             /* Returned data                   */
+};
+
 /* struct task_group_s ******************************************************/
 
 /* All threads created by pthread_create belong in the same task group (along
@@ -388,7 +401,6 @@ struct stackinfo_s
  * This structure should contain *all* resources shared by tasks and threads
  * that belong to the same task group:
  *
- *   Child exit status
  *   Environment variables
  *   PIC data space and address environments
  *   File descriptors
@@ -403,10 +415,6 @@ struct stackinfo_s
  * the struct task_group_s is free.
  */
 
-#ifndef CONFIG_DISABLE_PTHREAD
-struct join_s;                      /* Forward reference                        */
-                                    /* Defined in sched/pthread/pthread.h       */
-#endif
 #ifdef CONFIG_BINFMT_LOADABLE
 struct binary_s;                    /* Forward reference                        */
                                     /* Defined in include/nuttx/binfmt/binfmt.h */
@@ -466,11 +474,8 @@ struct task_group_s
 #ifndef CONFIG_DISABLE_PTHREAD
   /* Pthreads ***************************************************************/
 
-                              /* Pthread join Info:                         */
-
-  mutex_t tg_joinlock;            /* Mutually exclusive access to join data */
-  FAR struct join_s *tg_joinhead; /* Head of a list of join data            */
-  FAR struct join_s *tg_jointail; /* Tail of a list of join data            */
+  rmutex_t   tg_joinlock;           /* Mutually exclusive access to join queue */
+  sq_queue_t tg_joinqueue;          /* List of join status of tcb           */
 #endif
 
   /* Thread local storage ***************************************************/
@@ -542,6 +547,15 @@ struct tcb_s
   sq_entry_t member;                     /* List entry of task member       */
 #endif
 
+  /* Task join **************************************************************/
+
+#ifndef CONFIG_DISABLE_PTHREAD
+  sq_queue_t     join_queue;             /* List of wait entries for task   */
+  sq_entry_t     join_entry;             /* List entry of task join         */
+  sem_t          join_sem;               /* Semaphore for task join         */
+  pthread_addr_t join_val;               /* Returned data                   */
+#endif
+
   /* Address Environment ****************************************************/
 
 #ifdef CONFIG_ARCH_ADDRENV
@@ -570,7 +584,7 @@ struct tcb_s
   uint8_t  cpu;                          /* CPU index if running/assigned   */
   cpu_set_t affinity;                    /* Bit set of permitted CPUs       */
 #endif
-  uint16_t flags;                        /* Misc. general status flags      */
+  uint32_t flags;                        /* Misc. general status flags      */
   int16_t  lockcount;                    /* 0=preemptible (not-locked)      */
 #ifdef CONFIG_IRQCOUNT
   int16_t  irqcount;                     /* 0=Not in critical section       */
@@ -714,7 +728,6 @@ struct pthread_tcb_s
 
   pthread_trampoline_t trampoline;       /* User-space pthread startup function */
   pthread_addr_t arg;                    /* Startup argument                    */
-  bool join_complete;                    /* Join was completed                  */
 };
 #endif /* !CONFIG_DISABLE_PTHREAD */
 

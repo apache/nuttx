@@ -161,9 +161,10 @@ int group_initialize(FAR struct task_tcb_s *tcb, uint8_t ttype)
     }
 
 #ifndef CONFIG_DISABLE_PTHREAD
-  /* Initialize the pthread join mutex */
+  /* Initialize the task group join */
 
-  nxmutex_init(&group->tg_joinlock);
+  nxrmutex_init(&group->tg_joinlock);
+  sq_init(&group->tg_joinqueue);
 #endif
 
 #if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
