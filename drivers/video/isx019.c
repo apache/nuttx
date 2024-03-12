@@ -196,15 +196,12 @@ struct isx019_default_value_s
   int32_t vflip_still;
   int32_t sharpness;
   int32_t ae;
-  int32_t exptime;
   int32_t wbmode;
   int32_t hdr;
-  int32_t iso;
   int32_t iso_auto;
   int32_t meter;
   int32_t spot_pos;
   int32_t threealock;
-  int32_t threeastatus;
   int32_t jpgquality;
 };
 
@@ -1346,15 +1343,12 @@ static void store_default_value(FAR isx019_dev_t *priv)
   def->vflip_still  = get_value32(priv, IMGSENSOR_ID_VFLIP_STILL);
   def->sharpness    = get_value32(priv, IMGSENSOR_ID_SHARPNESS);
   def->ae           = get_value32(priv, IMGSENSOR_ID_EXPOSURE_AUTO);
-  def->exptime      = get_value32(priv, IMGSENSOR_ID_EXPOSURE_ABSOLUTE);
   def->wbmode       = get_value32(priv, IMGSENSOR_ID_AUTO_N_PRESET_WB);
   def->hdr          = get_value32(priv, IMGSENSOR_ID_WIDE_DYNAMIC_RANGE);
-  def->iso          = get_value32(priv, IMGSENSOR_ID_ISO_SENSITIVITY);
   def->iso_auto     = get_value32(priv, IMGSENSOR_ID_ISO_SENSITIVITY_AUTO);
   def->meter        = get_value32(priv, IMGSENSOR_ID_EXPOSURE_METERING);
   def->spot_pos     = get_value32(priv, IMGSENSOR_ID_SPOT_POSITION);
   def->threealock   = get_value32(priv, IMGSENSOR_ID_3A_LOCK);
-  def->threeastatus = get_value32(priv, IMGSENSOR_ID_3A_STATUS);
   def->jpgquality   = get_value32(priv, IMGSENSOR_ID_JPEG_QUALITY);
 }
 
@@ -2036,8 +2030,10 @@ static int isx019_get_supported_value(FAR struct imgsensor_s *sensor,
 
       case IMGSENSOR_ID_3A_STATUS:
         val->type = IMGSENSOR_CTRL_TYPE_INTEGER;
-        SET_RANGE(val->u.range, MIN_3ASTATUS, MAX_3ASTATUS,
-                                STEP_3ASTATUS, def->threeastatus);
+        SET_RANGE(val->u.range, MIN_3ASTATUS,
+                                MAX_3ASTATUS, STEP_3ASTATUS,
+                                IMGSENSOR_3A_STATUS_AE_OPERATING
+                                | IMGSENSOR_3A_STATUS_AWB_OPERATING);
         break;
 
       case IMGSENSOR_ID_JPEG_QUALITY:
