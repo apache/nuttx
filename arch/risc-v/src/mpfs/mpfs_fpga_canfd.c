@@ -701,6 +701,12 @@ static void mpfs_receive_work(void *arg)
 
       mpfs_can_retrieve_rx_frame(priv, cf, ffw);
 
+      /* Lock the network; we have to protect the dev.d_len, dev.d_buf
+       * and dev.d_iob from the devif_poll path
+       */
+
+      net_lock();
+
       /* Copy the buffer pointer to priv->dev..  Set amount of data
        * in priv->dev.d_len
        */
@@ -713,6 +719,8 @@ static void mpfs_receive_work(void *arg)
 
       NETDEV_RXPACKETS(&priv->dev);
       can_input(&priv->dev);
+
+      net_unlock();
 
       /* Point the packet buffer back to the next Tx buffer that will be
        * used during the next write.  If the write queue is full, then
