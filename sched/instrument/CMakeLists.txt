@@ -26,4 +26,8 @@ if(NOT "${CONFIG_SCHED_STACK_RECORD}" STREQUAL "0")
   list(APPEND SRCS stack_record.c)
 endif()
 
+if(CONFIG_SCHED_GPROF)
+  list(APPEND SRCS profile_monitor.c)
+endif()
+
 target_sources(sched PRIVATE ${SRCS})
