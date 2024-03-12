@@ -460,6 +460,13 @@ noinstrument_function static inline_function bool up_interrupt_context(void)
 }
 #endif
 
+/****************************************************************************
+ * Name: up_getusrpc
+ ****************************************************************************/
+
+#define up_getusrpc(regs) \
+    (((uint32_t *)((regs) ? (regs) : up_current_regs()))[REG_PC])
+
 #undef EXTERN
 #ifdef __cplusplus
 }

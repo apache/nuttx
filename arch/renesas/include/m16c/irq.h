@@ -341,6 +341,13 @@ static inline irqstate_t up_irq_enable(void)
  * Public Functions Prototypes
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: up_getusrpc
+ ****************************************************************************/
+
+#define up_getusrpc(regs) \
+    (((uint32_t *)((regs) ? (regs) : up_current_regs()))[REG_PC])
+
 #undef EXTERN
 #ifdef __cplusplus
 }

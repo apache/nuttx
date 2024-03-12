@@ -147,6 +147,13 @@ static inline_function bool up_interrupt_context(void)
   return up_current_regs() != NULL;
 }
 
+/****************************************************************************
+ * Name: up_getusrpc
+ ****************************************************************************/
+
+#define up_getusrpc(regs) \
+    (((uint64_t *)((regs) ? (regs) : up_current_regs()))[REG_RIP])
+
 #undef EXTERN
 #ifdef __cplusplus
 }

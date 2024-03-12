@@ -1079,6 +1079,13 @@ static inline void up_irq_restore(irqstate_t flags)
   }
 }
 
+/****************************************************************************
+ * Name: up_getusrpc
+ ****************************************************************************/
+
+#define up_getusrpc(regs) \
+    (((uint32_t *)((regs) ? (regs) : up_current_regs()))[REG_PC])
+
 #endif /* __ASSEMBLY__ */
 
 #endif /* __ARCH_RENESAS_INCLUDE_RX65N_IRQ_H */
