@@ -288,37 +288,26 @@ static inline int can_readahead(struct can_recvfrom_s *pstate)
 
       recvlen = iob_copyout(pstate->pr_buffer, iob, pstate->pr_buflen, 0);
 
-      /* If we took all of the data from the I/O buffer chain is empty, then
-       * release it.  If there is still data available in the I/O buffer
-       * chain, then just trim the data that we have taken from the
-       * beginning of the I/O buffer chain.
+      /* We should have taken all of the data from the I/O buffer chain,
+       * so release it. There is no trimming needed, since One CAN/CANFD
+       * frame can always fit in one IOB.
        */
 
-      if (recvlen >= iob->io_pktlen)
-        {
-          FAR struct iob_s *tmp;
+      static_assert(sizeof(struct can_frame) <= CONFIG_IOB_BUFSIZE);
 
-          /* Remove the I/O buffer chain from the head of the read-ahead
-           * buffer queue.
-           */
+      FAR struct iob_s *tmp;
 
-          tmp = iob_remove_queue(&conn->readahead);
-          DEBUGASSERT(tmp == iob);
-          UNUSED(tmp);
+      /* Remove the I/O buffer chain from the head of the read-ahead
+       * buffer queue.
+       */
 
-          /* And free the I/O buffer chain */
+      tmp = iob_remove_queue(&conn->readahead);
+      DEBUGASSERT(tmp == iob);
+      UNUSED(tmp);
 
-          iob_free_chain(iob);
-        }
-      else
-        {
-          /* The bytes that we have received from the head of the I/O
-           * buffer chain (probably changing the head of the I/O
-           * buffer queue).
-           */
+      /* And free the I/O buffer chain */
 
-          iob_trimhead_queue(&conn->readahead, recvlen);
-        }
+      iob_free_chain(iob);
 
       /* do not pass frames with DLC > 8 to a legacy socket */
 #if defined(CONFIG_NET_CANPROTO_OPTIONS) && defined(CONFIG_NET_CAN_CANFD)
