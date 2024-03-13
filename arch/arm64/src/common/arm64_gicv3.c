@@ -69,8 +69,6 @@
 #  define IGROUPR_SGI_VAL 0xFFFFFFFFU
 #endif
 
-#define SMP_FUNC_CALL_IPI GIC_IRQ_SGI3
-
 #define PENDING_GRP1NS_INTID 1021
 #define SPURIOUS_INT         1023
 
@@ -657,9 +655,10 @@ static void gicv3_dist_init(void)
 #ifdef CONFIG_SMP
   /* Attach SGI interrupt handlers. This attaches the handler to all CPUs. */
 
-  DEBUGVERIFY(irq_attach(GIC_IRQ_SGI2, arm64_pause_handler, NULL));
+  DEBUGVERIFY(irq_attach(GIC_SMP_CPUPAUSE, arm64_pause_handler, NULL));
+
 #  ifdef CONFIG_SMP_CALL
-  DEBUGVERIFY(irq_attach(SMP_FUNC_CALL_IPI,
+  DEBUGVERIFY(irq_attach(GIC_SMP_CPUCALL,
                          nxsched_smp_call_handler, NULL));
 #  endif
 #endif
@@ -957,9 +956,9 @@ static void arm64_gic_init(void)
   gicv3_cpuif_init();
 
 #ifdef CONFIG_SMP
-  up_enable_irq(GIC_IRQ_SGI2);
+  up_enable_irq(GIC_SMP_CPUPAUSE);
 #  ifdef CONFIG_SMP_CALL
-  up_enable_irq(SMP_FUNC_CALL_IPI);
+  up_enable_irq(GIC_SMP_CPUCALL);
 #  endif
 #endif
 }
@@ -987,11 +986,11 @@ void arm64_gic_secondary_init(void)
 {
   arm64_gic_init();
 }
-#endif
 
-#ifdef CONFIG_SMP_CALL
+#  ifdef CONFIG_SMP_CALL
 void up_send_smp_call(cpu_set_t cpuset)
 {
-  up_trigger_irq(SMP_FUNC_CALL_IPI, cpuset);
+  up_trigger_irq(GIC_SMP_CPUCALL, cpuset);
 }
+#  endif
 #endif
