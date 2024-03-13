@@ -606,6 +606,16 @@
 
 #define GIC_IRQ_SPI              32 /* First SPI interrupt ID */
 
+#ifdef CONFIG_ARCH_TRUSTZONE_SECURE
+#  define GIC_SMP_CPUSTART       GIC_IRQ_SGI9
+#  define GIC_SMP_CPUPAUSE       GIC_IRQ_SGI10
+#  define GIC_SMP_CPUCALL        GIC_IRQ_SGI11
+#else
+#  define GIC_SMP_CPUSTART       GIC_IRQ_SGI1
+#  define GIC_SMP_CPUPAUSE       GIC_IRQ_SGI2
+#  define GIC_SMP_CPUCALL        GIC_IRQ_SGI3
+#endif
+
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
@@ -670,6 +680,22 @@ static inline void arm_cpu_sgi(int sgi, unsigned int cpuset)
   regval = GIC_ICDSGIR_INTID(sgi) | GIC_ICDSGIR_CPUTARGET(0) |
            GIC_ICDSGIR_TGTFILTER_THIS;
 #endif
+
+#if defined(CONFIG_ARCH_TRUSTZONE_SECURE)
+  if (sgi >= GIC_IRQ_SGI0 && sgi <= GIC_IRQ_SGI7)
+#endif
+    {
+      /* Set NSATT be 1: forward the SGI specified in the SGIINTID field to a
+       * specified CPU interfaces only if the SGI is configured as Group 1 on
+       * that interface.
+       * For non-secure context, the configuration of GIC_ICDSGIR_NSATT_GRP1
+       * is not mandatory in the GICv2 specification, but for SMP scenarios,
+       * this value needs to be configured, otherwise issues may occur in the
+       * SMP scenario.
+       */
+
+      regval |= GIC_ICDSGIR_NSATT_GRP1;
+    }
 
   putreg32(regval, GIC_ICDSGIR);
 }

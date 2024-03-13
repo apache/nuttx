@@ -543,7 +543,11 @@
 #define GIC_ICDSGIR_INTID_MASK        (0x3ff << GIC_ICDSGIR_INTID_SHIFT)
 #  define GIC_ICDSGIR_INTID(n)        ((uint32_t)(n) << GIC_ICDSGIR_INTID_SHIFT)
                                              /* Bits 10-14: Reserved */
-#define GIC_ICDSGIR_NSATT             (1 << 15)
+#define GIC_ICDSGIR_NSATT_SHIFT       (15)
+#define GIC_ICDSGIR_NSATT_MASK        (1 << GIC_ICDSGIR_NSATT_SHIFT)
+#  define GIC_ICDSGIR_NSATT_GRP0      (0 << GIC_ICDSGIR_NSATT_SHIFT)
+#  define GIC_ICDSGIR_NSATT_GRP1      (1 << GIC_ICDSGIR_NSATT_SHIFT)
+
 #define GIC_ICDSGIR_CPUTARGET_SHIFT   (16)   /* Bits 16-23: CPU target */
 #define GIC_ICDSGIR_CPUTARGET_MASK    (0xff << GIC_ICDSGIR_CPUTARGET_SHIFT)
 #  define GIC_ICDSGIR_CPUTARGET(n)    ((uint32_t)(n) << GIC_ICDSGIR_CPUTARGET_SHIFT)
@@ -735,6 +739,22 @@ static inline void arm_cpu_sgi(int sgi, unsigned int cpuset)
            GIC_ICDSGIR_TGTFILTER_THIS;
 #endif
 
+#if defined(CONFIG_ARCH_TRUSTZONE_SECURE)
+  if (sgi >= GIC_IRQ_SGI0 && sgi <= GIC_IRQ_SGI7)
+#endif
+    {
+      /* Set NSATT be 1: forward the SGI specified in the SGIINTID field to a
+       * specified CPU interfaces only if the SGI is configured as Group 1 on
+       * that interface.
+       * For non-secure context, the configuration of GIC_ICDSGIR_NSATT_GRP1
+       * is not mandatory in the GICv2 specification, but for SMP scenarios,
+       * this value needs to be configured, otherwise issues may occur in the
+       * SMP scenario.
+       */
+
+      regval |= GIC_ICDSGIR_NSATT_GRP1;
+    }
+
   putreg32(regval, GIC_ICDSGIR);
 }
 
@@ -890,7 +910,12 @@ static void arm_gic0_initialize(void)
 #ifdef CONFIG_SMP
   /* Attach SGI interrupt handlers. This attaches the handler to all CPUs. */
 
-  DEBUGVERIFY(irq_attach(GIC_IRQ_SGI2, arm64_pause_handler, NULL));
+  DEBUGVERIFY(irq_attach(GIC_SMP_CPUPAUSE, arm64_pause_handler, NULL));
+
+#  ifdef CONFIG_SMP_CALL
+  DEBUGVERIFY(irq_attach(GIC_SMP_CPUCALL,
+                         nxsched_smp_call_handler, NULL));
+#  endif
 #endif
 }
 
@@ -1461,6 +1486,13 @@ int arm64_gic_raise_sgi(unsigned int sgi, uint16_t cpuset)
   arm_cpu_sgi(sgi, cpuset);
   return 0;
 }
+
+#  ifdef CONFIG_SMP_CALL
+void up_send_smp_call(cpu_set_t cpuset)
+{
+  up_trigger_irq(GIC_SMP_CPUCALL, cpuset);
+}
+#  endif
 #endif /* CONFIG_SMP */
 
 #endif /* CONFIG_ARM64_GIC_VERSION == 2 */
