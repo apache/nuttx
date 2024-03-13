@@ -228,7 +228,7 @@ static struct rptun_rsc_s *rp_get_resource(struct rptun_dev_s *dev)
           nxsig_usleep(100);
         }
 
-      rpinfo("ready to go!\n");
+      rpinfo("shmem:%lx, dev:%p\n", priv->shmem->base, dev);
     }
 
   return &priv->shmem->rsc;
@@ -297,6 +297,8 @@ int k230_rptun_init(const char *peername)
   struct k230_rptun_dev_s  *dev = &g_rptun_dev;
   int                       ret = OK;
 
+  memset(dev, 0, sizeof(*dev));
+
 #ifdef CONFIG_K230_RPTUN_MASTER
   /* master is responsible for initializing shmem */
 
@@ -308,7 +310,7 @@ int k230_rptun_init(const char *peername)
 #endif
 
   ret = k230_ipi_init(RPTUN_IPI_DEVN, RPTUN_IPI_LINE_MASK, RPTUN_IPI_ROLE,
-                k230_rptun_callback, dev);
+                      k230_rptun_callback, dev);
   if (ret < 0)
     {
       rperr("k230_ipi_init failed %d\n", ret);
