@@ -35,6 +35,7 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/netstats.h>
 
+#include "nat/nat.h"
 #include "netdev/netdev.h"
 #include "sixlowpan/sixlowpan.h"
 #include "devif/devif.h"
@@ -423,6 +424,17 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
           goto errout_with_fwd;
         }
 
+#ifdef CONFIG_NET_NAT66
+      /* Try NAT outbound, rule matching will be performed in NAT module. */
+
+      ret = ipv6_nat_outbound(fwd->f_dev, ipv6, NAT_MANIP_SRC);
+      if (ret < 0)
+        {
+          nwarn("WARNING: Performing NAT66 outbound failed, dropping!\n");
+          goto errout_with_fwd;
+        }
+#endif
+
       /* Then set up to forward the packet according to the protocol. */
 
       ret = ipfwd_forward(fwd);
@@ -560,6 +572,11 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
 {
   FAR struct net_driver_s *fwddev;
   int ret;
+#ifdef CONFIG_NET_ICMPv6
+  int icmpv6_reply_type;
+  int icmpv6_reply_code;
+  int icmpv6_reply_data;
+#endif /* CONFIG_NET_ICMP */
 
   /* Search for a device that can forward this packet. */
 
@@ -659,18 +676,22 @@ drop:
   switch (ret)
     {
       case -ENETUNREACH:
-        icmpv6_reply(dev, ICMPv6_DEST_UNREACHABLE, ICMPv6_ADDR_UNREACH, 0);
-        return OK;
+        icmpv6_reply_type = ICMPv6_DEST_UNREACHABLE;
+        icmpv6_reply_code = ICMPv6_ADDR_UNREACH;
+        icmpv6_reply_data = 0;
+        goto reply;
 
       case -EFBIG:
-        icmpv6_reply(dev, ICMPv6_PACKET_TOO_BIG, 0,
-                     NETDEV_PKTSIZE(fwddev) - NET_LL_HDRLEN(fwddev));
-        return OK;
+        icmpv6_reply_type = ICMPv6_PACKET_TOO_BIG;
+        icmpv6_reply_code = 0;
+        icmpv6_reply_data = NETDEV_PKTSIZE(fwddev) - NET_LL_HDRLEN(fwddev);
+        goto reply;
 
       case -EMULTIHOP:
-        icmpv6_reply(dev, ICMPv6_PACKET_TIME_EXCEEDED, ICMPV6_EXC_HOPLIMIT,
-                     0);
-        return OK;
+        icmpv6_reply_type = ICMPv6_PACKET_TIME_EXCEEDED;
+        icmpv6_reply_code = ICMPV6_EXC_HOPLIMIT;
+        icmpv6_reply_data = 0;
+        goto reply;
 
       default:
         break; /* We don't know how to reply, just go on (to drop). */
@@ -679,6 +700,20 @@ drop:
 
   dev->d_len = 0;
   return ret;
+
+#ifdef CONFIG_NET_ICMPv6
+reply:
+#  ifdef CONFIG_NET_NAT66
+  /* Before we reply ICMPv6, call NAT outbound to try to translate
+   * destination address & port back to original status.
+   */
+
+  ipv6_nat_outbound(dev, ipv6, NAT_MANIP_DST);
+#  endif /* CONFIG_NET_NAT66 */
+
+  icmpv6_reply(dev, icmpv6_reply_type, icmpv6_reply_code, icmpv6_reply_data);
+  return OK;
+#endif /* CONFIG_NET_ICMP */
 }
 
 /****************************************************************************
