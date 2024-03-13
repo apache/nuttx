@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/mps/chip.h
+ * boards/arm/mps/mps2-an500/include/board.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,24 +18,44 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_MPS_CHIP_H
-#define __ARCH_ARM_SRC_MPS_CHIP_H
+#ifndef __BOARDS_ARM_MSP_MSP2_AN500_INCLUDE_BOARD_H
+#define __BOARDS_ARM_MSP_MSP2_AN500_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/mps/irq.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_ARMV7M
-#  define ARMV7M_PERIPHERAL_INTERRUPTS NR_IRQS
+#define MPS_SYSTICK_CLOCK   (32 * 1000 * 1000)
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
 #else
-#  define ARMV8M_PERIPHERAL_INTERRUPTS NR_IRQS
+#define EXTERN extern
 #endif
 
-#endif /* __ARCH_ARM_SRC_MPS_CHIP_H */
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __BOARDS_ARM_MSP_MSP2_AN500_INCLUDE_BOARD_H */
