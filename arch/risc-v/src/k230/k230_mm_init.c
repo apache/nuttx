@@ -229,11 +229,15 @@ void k230_kernel_mappings(void)
 
   /* dump page tables */
 
+#ifdef DEBUG_MM
   dump_pgtable(m_l1_pgtable, PGT_L1_SIZE, "L1");
   dump_pgtable(m_l2_pgt_dev, PGT_L2_SIZE, "L2_DEV");
   dump_pgtable(m_l2_pgt_int, PGT_L2_SIZE, "L2_INT");
   dump_pgtable(m_l2_pgt_ddr, PGT_L2_SIZE, "L2_DDR");
   dump_pgtable(m_l3_pgt_ddr, PGT_L3_SIZE, "L3_DDR");
+#else
+  UNUSED(dump_pgtable);
+#endif
 }
 
 /****************************************************************************
