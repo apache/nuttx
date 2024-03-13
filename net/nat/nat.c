@@ -27,6 +27,8 @@
 #include <debug.h>
 
 #include "icmp/icmp.h"
+#include "icmpv6/icmpv6.h"
+#include "inet/inet.h"
 #include "nat/nat.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
@@ -57,7 +59,8 @@
 
 #if (defined(CONFIG_NET_TCP) && defined(CONFIG_NET_TCP_NO_STACK))  || \
     (defined(CONFIG_NET_UDP) && defined(CONFIG_NET_UDP_NO_STACK))  || \
-    (defined(CONFIG_NET_ICMP) && !defined(CONFIG_NET_ICMP_SOCKET))
+    (defined(CONFIG_NET_ICMP) && !defined(CONFIG_NET_ICMP_SOCKET)) || \
+    (defined(CONFIG_NET_ICMPv6) && !defined(CONFIG_NET_ICMPv6_SOCKET))
 
 static uint16_t nat_port_select_without_stack(
     uint8_t domain, uint8_t protocol, FAR const union ip_addr_u *ip,
@@ -145,8 +148,11 @@ int nat_disable(FAR struct net_driver_s *dev)
 
   /* Clear entries related to dev. */
 
-#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_NAT44
   ipv4_nat_entry_clear(dev);
+#endif
+#ifdef CONFIG_NET_NAT66
+  ipv6_nat_entry_clear(dev);
 #endif
 
   IFF_CLR_NAT(dev->d_flags);
@@ -175,11 +181,19 @@ int nat_disable(FAR struct net_driver_s *dev)
 bool nat_port_inuse(uint8_t domain, uint8_t protocol,
                     FAR const union ip_addr_u *ip, uint16_t port)
 {
-#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_NAT44
   if (domain == PF_INET)
     {
       return !!ipv4_nat_inbound_entry_find(protocol, ip->ipv4, port,
                                            INADDR_ANY, 0, false);
+    }
+#endif
+
+#ifdef CONFIG_NET_NAT66
+  if (domain == PF_INET6)
+    {
+      return !!ipv6_nat_inbound_entry_find(protocol, ip->ipv6, port,
+                                           g_ipv6_unspecaddr, 0, false);
     }
 #endif
 
@@ -239,8 +253,25 @@ uint16_t nat_port_select(FAR struct net_driver_s *dev,
         {
 #ifndef CONFIG_NET_UDP_NO_STACK
           union ip_binding_u u;
-          u.ipv4.laddr = external_ip->ipv4;
-          u.ipv4.raddr = INADDR_ANY;
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+          if (domain == PF_INET)
+#endif
+            {
+              u.ipv4.laddr = external_ip->ipv4;
+              u.ipv4.raddr = INADDR_ANY;
+            }
+#endif
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+          else
+#endif
+            {
+              net_ipv6addr_copy(u.ipv6.laddr, external_ip->ipv6);
+              net_ipv6addr_copy(u.ipv6.raddr, g_ipv6_unspecaddr);
+            }
+#endif
 
           /* TODO: Try keep origin port as possible. */
 
@@ -274,6 +305,33 @@ uint16_t nat_port_select(FAR struct net_driver_s *dev,
           return id;
 #else
           return nat_port_select_without_stack(domain, IP_PROTO_ICMP,
+                                               external_ip, local_port);
+#endif
+        }
+#endif
+
+#ifdef CONFIG_NET_ICMPv6
+      case IP_PROTO_ICMP6:
+        {
+#ifdef CONFIG_NET_ICMPv6_SOCKET
+          uint16_t id = local_port;
+          uint16_t hid = NTOHS(id);
+          while (icmpv6_active(id) ||
+                 nat_port_inuse(domain, IP_PROTO_ICMP6, external_ip, id))
+            {
+              ++hid;
+              if (hid >= CONFIG_NET_DEFAULT_MAX_PORT ||
+                  hid < CONFIG_NET_DEFAULT_MIN_PORT)
+                {
+                  hid = CONFIG_NET_DEFAULT_MIN_PORT;
+                }
+
+              id = HTONS(hid);
+            }
+
+          return id;
+#else
+          return nat_port_select_without_stack(domain, IP_PROTO_ICMP6,
                                                external_ip, local_port);
 #endif
         }
@@ -330,6 +388,12 @@ uint32_t nat_expire_time(uint8_t protocol)
       case IP_PROTO_ICMP:
         return TICK2SEC(clock_systime_ticks()) +
                CONFIG_NET_NAT_ICMP_EXPIRE_SEC;
+#endif
+
+#ifdef CONFIG_NET_ICMPv6
+      case IP_PROTO_ICMP6:
+        return TICK2SEC(clock_systime_ticks()) +
+               CONFIG_NET_NAT_ICMPv6_EXPIRE_SEC;
 #endif
 
       default:

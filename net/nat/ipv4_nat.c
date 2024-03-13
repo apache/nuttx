@@ -37,7 +37,7 @@
 #include "nat/nat.h"
 #include "utils/utils.h"
 
-#if defined(CONFIG_NET_NAT) && defined(CONFIG_NET_IPv4)
+#ifdef CONFIG_NET_NAT44
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -732,15 +732,10 @@ ipv4_nat_outbound_internal(FAR struct net_driver_s *dev,
  *   dev   - The device on which the packet is received.
  *   ipv4  - Points to the IPv4 header with dev->d_buf.
  *
- * Returned Value:
- *   Zero is returned if NAT is successfully applied, or is not enabled for
- *   this packet;
- *   A negated errno value is returned if error occured.
- *
  ****************************************************************************/
 
-int ipv4_nat_inbound(FAR struct net_driver_s *dev,
-                     FAR struct ipv4_hdr_s *ipv4)
+void ipv4_nat_inbound(FAR struct net_driver_s *dev,
+                      FAR struct ipv4_hdr_s *ipv4)
 {
   /* We only process packets from NAT device and targeting at the address
    * assigned to the device.
@@ -755,11 +750,9 @@ int ipv4_nat_inbound(FAR struct net_driver_s *dev,
         {
           /* Inbound without entry is OK (e.g. towards NuttX itself), skip. */
 
-          return OK;
+          return;
         }
     }
-
-  return OK;
 }
 
 /****************************************************************************
@@ -801,11 +794,11 @@ int ipv4_nat_outbound(FAR struct net_driver_s *dev,
         {
           /* Outbound entry creation failed, should have entry. */
 
-          return -ENOMEM;
+          return -ENOENT;
         }
     }
 
   return OK;
 }
 
-#endif /* CONFIG_NET_NAT && CONFIG_NET_IPv4 */
+#endif /* CONFIG_NET_NAT44 */

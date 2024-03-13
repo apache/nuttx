@@ -24,8 +24,12 @@ if(CONFIG_NET_NAT)
 
   list(APPEND SRCS nat.c)
 
-  if(CONFIG_NET_IPv4)
+  if(CONFIG_NET_NAT44)
     list(APPEND SRCS ipv4_nat.c ipv4_nat_entry.c)
+  endif()
+
+  if(CONFIG_NET_NAT66)
+    list(APPEND SRCS ipv6_nat.c ipv6_nat_entry.c)
   endif()
 
   target_sources(net PRIVATE ${SRCS})

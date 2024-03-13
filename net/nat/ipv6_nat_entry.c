@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/nat/ipv4_nat_entry.c
+ * net/nat/ipv6_nat_entry.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -32,55 +32,43 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/nuttx.h>
 
+#include "inet/inet.h"
 #include "nat/nat.h"
 
-#ifdef CONFIG_NET_NAT44
+#ifdef CONFIG_NET_NAT66
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static DECLARE_HASHTABLE(g_nat44_inbound, CONFIG_NET_NAT_HASH_BITS);
-static DECLARE_HASHTABLE(g_nat44_outbound, CONFIG_NET_NAT_HASH_BITS);
+static DECLARE_HASHTABLE(g_nat66_inbound, CONFIG_NET_NAT_HASH_BITS);
+static DECLARE_HASHTABLE(g_nat66_outbound, CONFIG_NET_NAT_HASH_BITS);
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ipv4_nat_inbound_key
+ * Name: ipv6_nat_hash_key
  *
  * Description:
- *   Create an inbound hash key for NAT.
+ *   Create a hash key for NAT66.
  *
  ****************************************************************************/
 
-static inline uint32_t ipv4_nat_inbound_key(in_addr_t external_ip,
-                                            uint16_t external_port,
-                                            uint8_t protocol)
+static inline uint32_t ipv6_nat_hash_key(const net_ipv6addr_t ip,
+                                         uint16_t port, uint8_t protocol)
 {
-  return NTOHL(external_ip) ^ /* external ip may different in higher bits. */
-         ((uint32_t)protocol << 16) ^ external_port;
+  uint32_t key = (((uint32_t)ip[0] << 16) | ip[1]) ^
+                 (((uint32_t)ip[2] << 16) | ip[3]) ^
+                 (((uint32_t)ip[4] << 16) | ip[5]) ^
+                 (((uint32_t)ip[6] << 16) | ip[7]);
+
+  return key ^ ((uint32_t)protocol << 16) ^ port;
 }
 
 /****************************************************************************
- * Name: ipv4_nat_outbound_key
- *
- * Description:
- *   Create an outbound hash key for NAT.
- *
- ****************************************************************************/
-
-static inline uint32_t ipv4_nat_outbound_key(in_addr_t local_ip,
-                                             uint16_t local_port,
-                                             uint8_t protocol)
-{
-  return NTOHL(local_ip) ^ /* NTOHL makes sure difference is in lower bits. */
-         ((uint32_t)protocol << 8) ^ ((uint32_t)local_port << 16);
-}
-
-/****************************************************************************
- * Name: ipv4_nat_entry_refresh
+ * Name: ipv6_nat_entry_refresh
  *
  * Description:
  *   Refresh a NAT entry, update its expiration time.
@@ -90,13 +78,13 @@ static inline uint32_t ipv4_nat_outbound_key(in_addr_t local_ip,
  *
  ****************************************************************************/
 
-static void ipv4_nat_entry_refresh(FAR struct ipv4_nat_entry *entry)
+static void ipv6_nat_entry_refresh(FAR struct ipv6_nat_entry *entry)
 {
   entry->expire_time = nat_expire_time(entry->protocol);
 }
 
 /****************************************************************************
- * Name: ipv4_nat_entry_create
+ * Name: ipv6_nat_entry_create
  *
  * Description:
  *   Create a NAT entry and insert into entry list.
@@ -115,42 +103,44 @@ static void ipv4_nat_entry_refresh(FAR struct ipv4_nat_entry *entry)
  *
  ****************************************************************************/
 
-static FAR struct ipv4_nat_entry *
-ipv4_nat_entry_create(uint8_t protocol,
-                      in_addr_t external_ip, uint16_t external_port,
-                      in_addr_t local_ip, uint16_t local_port,
-                      in_addr_t peer_ip, uint16_t peer_port)
+static FAR struct ipv6_nat_entry *
+ipv6_nat_entry_create(uint8_t protocol, const net_ipv6addr_t external_ip,
+                      uint16_t external_port, const net_ipv6addr_t local_ip,
+                      uint16_t local_port, const net_ipv6addr_t peer_ip,
+                      uint16_t peer_port)
 {
-  FAR struct ipv4_nat_entry *entry =
-      kmm_malloc(sizeof(struct ipv4_nat_entry));
+  FAR struct ipv6_nat_entry *entry =
+      kmm_malloc(sizeof(struct ipv6_nat_entry));
   if (entry == NULL)
     {
-      nwarn("WARNING: Failed to allocate IPv4 NAT entry\n");
+      nwarn("WARNING: Failed to allocate IPv6 NAT entry\n");
       return NULL;
     }
 
   entry->protocol      = protocol;
-  entry->external_ip   = external_ip;
   entry->external_port = external_port;
-  entry->local_ip      = local_ip;
   entry->local_port    = local_port;
-#ifdef CONFIG_NET_NAT44_SYMMETRIC
-  entry->peer_ip       = peer_ip;
+#ifdef CONFIG_NET_NAT66_SYMMETRIC
   entry->peer_port     = peer_port;
 #endif
+  net_ipv6addr_copy(entry->external_ip, external_ip);
+  net_ipv6addr_copy(entry->local_ip, local_ip);
+#ifdef CONFIG_NET_NAT66_SYMMETRIC
+  net_ipv6addr_copy(entry->peer_ip, peer_ip);
+#endif
 
-  ipv4_nat_entry_refresh(entry);
+  ipv6_nat_entry_refresh(entry);
 
-  hashtable_add(g_nat44_inbound, &entry->hash_inbound,
-                ipv4_nat_inbound_key(external_ip, external_port, protocol));
-  hashtable_add(g_nat44_outbound, &entry->hash_outbound,
-                ipv4_nat_outbound_key(local_ip, local_port, protocol));
+  hashtable_add(g_nat66_inbound, &entry->hash_inbound,
+                ipv6_nat_hash_key(external_ip, external_port, protocol));
+  hashtable_add(g_nat66_outbound, &entry->hash_outbound,
+                ipv6_nat_hash_key(local_ip, local_port, protocol));
 
   return entry;
 }
 
 /****************************************************************************
- * Name: ipv4_nat_entry_delete
+ * Name: ipv6_nat_entry_delete
  *
  * Description:
  *   Delete a NAT entry and remove from entry list.
@@ -160,27 +150,30 @@ ipv4_nat_entry_create(uint8_t protocol,
  *
  ****************************************************************************/
 
-static void ipv4_nat_entry_delete(FAR struct ipv4_nat_entry *entry)
+static void ipv6_nat_entry_delete(FAR struct ipv6_nat_entry *entry)
 {
-  ninfo("INFO: Removing NAT44 entry proto=%" PRIu8
-        ", local=%" PRIx32 ":%" PRIu16 ", external=:%" PRIu16 "\n",
-        entry->protocol, entry->local_ip, entry->local_port,
-        entry->external_port);
+  ninfo("INFO: Removing NAT66 entry proto=%" PRIu8
+        ", local=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x:%" PRIu16
+        ", external=:%" PRIu16 "\n",
+        entry->protocol, entry->local_ip[0], entry->local_ip[1],
+        entry->local_ip[2], entry->local_ip[3], entry->local_ip[4],
+        entry->local_ip[5], entry->local_ip[6], entry->local_ip[7],
+        entry->local_port, entry->external_port);
 
-  hashtable_delete(g_nat44_inbound, &entry->hash_inbound,
-                   ipv4_nat_inbound_key(entry->external_ip,
-                                        entry->external_port,
-                                        entry->protocol));
-  hashtable_delete(g_nat44_outbound, &entry->hash_outbound,
-                   ipv4_nat_outbound_key(entry->local_ip,
-                                         entry->local_port,
-                                         entry->protocol));
+  hashtable_delete(g_nat66_inbound, &entry->hash_inbound,
+                   ipv6_nat_hash_key(entry->external_ip,
+                                     entry->external_port,
+                                     entry->protocol));
+  hashtable_delete(g_nat66_outbound, &entry->hash_outbound,
+                   ipv6_nat_hash_key(entry->local_ip,
+                                     entry->local_port,
+                                     entry->protocol));
 
   kmm_free(entry);
 }
 
 /****************************************************************************
- * Name: ipv4_nat_reclaim_entry
+ * Name: ipv6_nat_reclaim_entry
  *
  * Description:
  *   Try reclaim all expired NAT entries.
@@ -196,7 +189,7 @@ static void ipv4_nat_entry_delete(FAR struct ipv4_nat_entry *entry)
  ****************************************************************************/
 
 #if CONFIG_NET_NAT_ENTRY_RECLAIM_SEC > 0
-static void ipv4_nat_reclaim_entry(int32_t current_time)
+static void ipv6_nat_reclaim_entry(int32_t current_time)
 {
   static int32_t next_reclaim_time = CONFIG_NET_NAT_ENTRY_RECLAIM_SEC;
 
@@ -207,26 +200,26 @@ static void ipv4_nat_reclaim_entry(int32_t current_time)
       int count = 0;
       int i;
 
-      ninfo("INFO: Reclaiming all expired NAT44 entries.\n");
+      ninfo("INFO: Reclaiming all expired NAT66 entries.\n");
 
-      hashtable_for_every_safe(g_nat44_inbound, p, tmp, i)
+      hashtable_for_every_safe(g_nat66_inbound, p, tmp, i)
         {
-          FAR struct ipv4_nat_entry *entry =
-            container_of(p, struct ipv4_nat_entry, hash_inbound);
+          FAR struct ipv6_nat_entry *entry =
+            container_of(p, struct ipv6_nat_entry, hash_inbound);
 
           if (entry->expire_time - current_time <= 0)
             {
-              ipv4_nat_entry_delete(entry);
+              ipv6_nat_entry_delete(entry);
               count++;
             }
         }
 
-      ninfo("INFO: %d expired NAT44 entries reclaimed.\n", count);
+      ninfo("INFO: %d expired NAT66 entries reclaimed.\n", count);
       next_reclaim_time = current_time + CONFIG_NET_NAT_ENTRY_RECLAIM_SEC;
     }
 }
 #else
-#  define ipv4_nat_reclaim_entry(t)
+#  define ipv6_nat_reclaim_entry(t)
 #endif
 
 /****************************************************************************
@@ -234,7 +227,7 @@ static void ipv4_nat_reclaim_entry(int32_t current_time)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ipv4_nat_entry_clear
+ * Name: ipv6_nat_entry_clear
  *
  * Description:
  *   Clear all entries related to dev. Called when NAT will be disabled on
@@ -248,28 +241,28 @@ static void ipv4_nat_reclaim_entry(int32_t current_time)
  *
  ****************************************************************************/
 
-void ipv4_nat_entry_clear(FAR struct net_driver_s *dev)
+void ipv6_nat_entry_clear(FAR struct net_driver_s *dev)
 {
   FAR hash_node_t *p;
   FAR hash_node_t *tmp;
   int i;
 
-  ninfo("INFO: Clearing all NAT44 entries for %s\n", dev->d_ifname);
+  ninfo("INFO: Clearing all NAT66 entries for %s\n", dev->d_ifname);
 
-  hashtable_for_every_safe(g_nat44_inbound, p, tmp, i)
+  hashtable_for_every_safe(g_nat66_inbound, p, tmp, i)
     {
-      FAR struct ipv4_nat_entry *entry =
-        container_of(p, struct ipv4_nat_entry, hash_inbound);
+      FAR struct ipv6_nat_entry *entry =
+        container_of(p, struct ipv6_nat_entry, hash_inbound);
 
-      if (net_ipv4addr_cmp(entry->external_ip, dev->d_ipaddr))
+      if (NETDEV_IS_MY_V6ADDR(dev, entry->external_ip))
         {
-          ipv4_nat_entry_delete(entry);
+          ipv6_nat_entry_delete(entry);
         }
     }
 }
 
 /****************************************************************************
- * Name: ipv4_nat_inbound_entry_find
+ * Name: ipv6_nat_inbound_entry_find
  *
  * Description:
  *   Find the inbound entry in NAT entry list.
@@ -287,47 +280,49 @@ void ipv4_nat_entry_clear(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-FAR struct ipv4_nat_entry *
-ipv4_nat_inbound_entry_find(uint8_t protocol, in_addr_t external_ip,
-                            uint16_t external_port, in_addr_t peer_ip,
+FAR struct ipv6_nat_entry *
+ipv6_nat_inbound_entry_find(uint8_t protocol,
+                            const net_ipv6addr_t external_ip,
+                            uint16_t external_port,
+                            const net_ipv6addr_t peer_ip,
                             uint16_t peer_port, bool refresh)
 {
   FAR hash_node_t *p;
   FAR hash_node_t *tmp;
-  bool skip_ip = net_ipv4addr_cmp(external_ip, INADDR_ANY);
-#ifdef CONFIG_NET_NAT44_SYMMETRIC
-  bool skip_peer = net_ipv4addr_cmp(peer_ip, INADDR_ANY);
+  bool skip_ip = net_ipv6addr_cmp(external_ip, g_ipv6_unspecaddr);
+#ifdef CONFIG_NET_NAT66_SYMMETRIC
+  bool skip_peer = net_ipv6addr_cmp(peer_ip, g_ipv6_unspecaddr);
 #endif
   int32_t current_time = TICK2SEC(clock_systime_ticks());
 
-  ipv4_nat_reclaim_entry(current_time);
+  ipv6_nat_reclaim_entry(current_time);
 
-  hashtable_for_every_possible_safe(g_nat44_inbound, p, tmp,
-                  ipv4_nat_inbound_key(external_ip, external_port, protocol))
+  hashtable_for_every_possible_safe(g_nat66_inbound, p, tmp,
+                    ipv6_nat_hash_key(external_ip, external_port, protocol))
     {
-      FAR struct ipv4_nat_entry *entry =
-        container_of(p, struct ipv4_nat_entry, hash_inbound);
+      FAR struct ipv6_nat_entry *entry =
+        container_of(p, struct ipv6_nat_entry, hash_inbound);
 
       /* Remove expired entries. */
 
       if (entry->expire_time - current_time <= 0)
         {
-          ipv4_nat_entry_delete(entry);
+          ipv6_nat_entry_delete(entry);
           continue;
         }
 
       if (entry->protocol == protocol &&
-          (skip_ip || net_ipv4addr_cmp(entry->external_ip, external_ip)) &&
+          (skip_ip || net_ipv6addr_cmp(entry->external_ip, external_ip)) &&
           entry->external_port == external_port
-#ifdef CONFIG_NET_NAT44_SYMMETRIC
-          && (skip_peer || (net_ipv4addr_cmp(entry->peer_ip, peer_ip) &&
+#ifdef CONFIG_NET_NAT66_SYMMETRIC
+          && (skip_peer || (net_ipv6addr_cmp(entry->peer_ip, peer_ip) &&
                             entry->peer_port == peer_port))
 #endif
           )
         {
           if (refresh)
             {
-              ipv4_nat_entry_refresh(entry);
+              ipv6_nat_entry_refresh(entry);
             }
 
           return entry;
@@ -336,16 +331,19 @@ ipv4_nat_inbound_entry_find(uint8_t protocol, in_addr_t external_ip,
 
   if (refresh) /* false = a test of whether entry exists, no need to warn */
     {
-      nwarn("WARNING: Failed to find IPv4 inbound NAT entry for "
-            "proto=%" PRIu8 ", external=%" PRIx32 ":%" PRIu16 "\n",
-            protocol, external_ip, external_port);
+      nwarn("WARNING: Failed to find IPv6 inbound NAT entry for proto="
+            "%" PRIu8 ",external=[%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x]:"
+            "%" PRIu16 "\n",
+            protocol, external_ip[0], external_ip[1], external_ip[2],
+            external_ip[3], external_ip[4], external_ip[5], external_ip[6],
+            external_ip[7], external_port);
     }
 
   return NULL;
 }
 
 /****************************************************************************
- * Name: ipv4_nat_outbound_entry_find
+ * Name: ipv6_nat_outbound_entry_find
  *
  * Description:
  *   Find the outbound entry in NAT entry list. Create one if corresponding
@@ -365,44 +363,46 @@ ipv4_nat_inbound_entry_find(uint8_t protocol, in_addr_t external_ip,
  *
  ****************************************************************************/
 
-FAR struct ipv4_nat_entry *
-ipv4_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
-                             in_addr_t local_ip, uint16_t local_port,
-                             in_addr_t peer_ip, uint16_t peer_port,
-                             bool try_create)
+FAR struct ipv6_nat_entry *
+ipv6_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
+                             const net_ipv6addr_t local_ip,
+                             uint16_t local_port,
+                             const net_ipv6addr_t peer_ip,
+                             uint16_t peer_port, bool try_create)
 {
   FAR hash_node_t *p;
   FAR hash_node_t *tmp;
+  FAR union ip_addr_u *external_ip;
   uint16_t external_port;
   int32_t current_time = TICK2SEC(clock_systime_ticks());
 
-  ipv4_nat_reclaim_entry(current_time);
+  ipv6_nat_reclaim_entry(current_time);
 
-  hashtable_for_every_possible_safe(g_nat44_outbound, p, tmp,
-                      ipv4_nat_outbound_key(local_ip, local_port, protocol))
+  hashtable_for_every_possible_safe(g_nat66_outbound, p, tmp,
+                          ipv6_nat_hash_key(local_ip, local_port, protocol))
     {
-      FAR struct ipv4_nat_entry *entry =
-        container_of(p, struct ipv4_nat_entry, hash_outbound);
+      FAR struct ipv6_nat_entry *entry =
+        container_of(p, struct ipv6_nat_entry, hash_outbound);
 
       /* Remove expired entries. */
 
       if (entry->expire_time - current_time <= 0)
         {
-          ipv4_nat_entry_delete(entry);
+          ipv6_nat_entry_delete(entry);
           continue;
         }
 
       if (entry->protocol == protocol &&
-          net_ipv4addr_cmp(entry->external_ip, dev->d_ipaddr) &&
-          net_ipv4addr_cmp(entry->local_ip, local_ip) &&
+          NETDEV_IS_MY_V6ADDR(dev, entry->external_ip) &&
+          net_ipv6addr_cmp(entry->local_ip, local_ip) &&
           entry->local_port == local_port
-#ifdef CONFIG_NET_NAT44_SYMMETRIC
-          && net_ipv4addr_cmp(entry->peer_ip, peer_ip) &&
+#ifdef CONFIG_NET_NAT66_SYMMETRIC
+          && net_ipv6addr_cmp(entry->peer_ip, peer_ip) &&
           entry->peer_port == peer_port
 #endif
           )
         {
-          ipv4_nat_entry_refresh(entry);
+          ipv6_nat_entry_refresh(entry);
           return entry;
         }
     }
@@ -414,20 +414,24 @@ ipv4_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
 
   /* Failed to find the entry, create one. */
 
-  ninfo("INFO: Failed to find IPv4 outbound NAT entry for "
-        "proto=%" PRIu8 ", local=%" PRIx32 ":%" PRIu16 ", try create one.\n",
-        protocol, local_ip, local_port);
+  ninfo("INFO: Failed to find IPv6 outbound NAT entry for proto=%" PRIu8
+        ", local=[%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x]:%" PRIu16
+        ", try create one.\n",
+        protocol, local_ip[0], local_ip[1], local_ip[2], local_ip[3],
+        local_ip[4], local_ip[5], local_ip[6], local_ip[7], local_port);
 
-  external_port = nat_port_select(dev, PF_INET, protocol,
-                          (FAR union ip_addr_u *)&dev->d_ipaddr, local_port);
+  external_ip = (FAR union ip_addr_u *)netdev_ipv6_srcaddr(dev, peer_ip);
+  external_port = nat_port_select(dev, PF_INET6, protocol,
+                                  external_ip, local_port);
+
   if (!external_port)
     {
       nwarn("WARNING: Failed to find an available port!\n");
       return NULL;
     }
 
-  return ipv4_nat_entry_create(protocol, dev->d_ipaddr, external_port,
+  return ipv6_nat_entry_create(protocol, external_ip->ipv6, external_port,
                                local_ip, local_port, peer_ip, peer_port);
 }
 
-#endif /* CONFIG_NET_NAT44 */
+#endif /* CONFIG_NET_NAT66 */
