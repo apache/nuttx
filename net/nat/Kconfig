@@ -15,6 +15,25 @@ config NET_NAT
 		and NAT may need a continuous buffer of at least 68 Bytes
 		(IPv4 20B + ICMP 8B + IPv4 20B + TCP 20B).
 
+choice
+	prompt "NAT Type"
+	default NET_NAT_FULL_CONE
+	depends on NET_NAT
+
+config NET_NAT_FULL_CONE
+	bool "Full Cone NAT"
+	---help---
+		Full Cone NAT is easier to traverse than Symmetric NAT, and uses
+		less resources than Symmetric NAT.
+
+config NET_NAT_SYMMETRIC
+	bool "Symmetric NAT"
+	---help---
+		Symmetric NAT will be safer than Full Cone NAT, be more difficult
+		to traverse, and has more entries which may lead to heavier load.
+
+endchoice
+
 config NET_NAT_HASH_BITS
 	int "The bits of NAT entry hashtable"
 	default 5

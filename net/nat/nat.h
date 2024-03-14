@@ -55,13 +55,20 @@ struct ipv4_nat_entry
    *                |----------------|
    *
    * Full cone NAT only need to save local ip:port and external ip:port.
+   * Symmetric NAT need to save peer ip:port as well.
    * For ICMP, save id in port field.
    */
 
   in_addr_t  local_ip;       /* IP address of the local (private) host. */
   in_addr_t  external_ip;    /* External IP address. */
+#ifdef CONFIG_NET_NAT_SYMMETRIC
+  in_addr_t  peer_ip;        /* Peer IP address. */
+#endif
   uint16_t   local_port;     /* Port of the local (private) host. */
   uint16_t   external_port;  /* The external port of local (private) host. */
+#ifdef CONFIG_NET_NAT_SYMMETRIC
+  uint16_t   peer_port;      /* Peer port. */
+#endif
   uint8_t    protocol;       /* L4 protocol (TCP, UDP etc). */
 
   int32_t    expire_time;    /* The expiration time of this entry. */
@@ -203,6 +210,8 @@ void ipv4_nat_entry_clear(FAR struct net_driver_s *dev);
  *   protocol      - The L4 protocol of the packet.
  *   external_ip   - The external ip of the packet, supports INADDR_ANY.
  *   external_port - The external port of the packet.
+ *   peer_ip       - The peer ip of the packet.
+ *   peer_port     - The peer port of the packet.
  *   refresh       - Whether to refresh the selected entry.
  *
  * Returned Value:
@@ -212,7 +221,8 @@ void ipv4_nat_entry_clear(FAR struct net_driver_s *dev);
 
 FAR struct ipv4_nat_entry *
 ipv4_nat_inbound_entry_find(uint8_t protocol, in_addr_t external_ip,
-                            uint16_t external_port, bool refresh);
+                            uint16_t external_port, in_addr_t peer_ip,
+                            uint16_t peer_port, bool refresh);
 
 /****************************************************************************
  * Name: ipv4_nat_outbound_entry_find
@@ -226,6 +236,8 @@ ipv4_nat_inbound_entry_find(uint8_t protocol, in_addr_t external_ip,
  *   protocol   - The L4 protocol of the packet.
  *   local_ip   - The local ip of the packet.
  *   local_port - The local port of the packet.
+ *   peer_ip    - The peer ip of the packet.
+ *   peer_port  - The peer port of the packet.
  *   try_create - Try create the entry if no entry found.
  *
  * Returned Value:
@@ -236,6 +248,7 @@ ipv4_nat_inbound_entry_find(uint8_t protocol, in_addr_t external_ip,
 FAR struct ipv4_nat_entry *
 ipv4_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
                              in_addr_t local_ip, uint16_t local_port,
+                             in_addr_t peer_ip, uint16_t peer_port,
                              bool try_create);
 
 #endif /* CONFIG_NET_NAT && CONFIG_NET_IPv4 */

@@ -295,6 +295,8 @@ static void ipv4_nat_entry_refresh(FAR struct ipv4_nat_entry *entry)
  *   external_port - The external port of the packet.
  *   local_ip      - The local ip of the packet.
  *   local_port    - The local port of the packet.
+ *   peer_ip       - The peer ip of the packet.
+ *   peer_port     - The peer port of the packet.
  *
  * Returned Value:
  *   Pointer to entry on success; null on failure
@@ -304,7 +306,8 @@ static void ipv4_nat_entry_refresh(FAR struct ipv4_nat_entry *entry)
 static FAR struct ipv4_nat_entry *
 ipv4_nat_entry_create(uint8_t protocol,
                       in_addr_t external_ip, uint16_t external_port,
-                      in_addr_t local_ip, uint16_t local_port)
+                      in_addr_t local_ip, uint16_t local_port,
+                      in_addr_t peer_ip, uint16_t peer_port)
 {
   FAR struct ipv4_nat_entry *entry =
       kmm_malloc(sizeof(struct ipv4_nat_entry));
@@ -319,6 +322,10 @@ ipv4_nat_entry_create(uint8_t protocol,
   entry->external_port = external_port;
   entry->local_ip      = local_ip;
   entry->local_port    = local_port;
+#ifdef CONFIG_NET_NAT_SYMMETRIC
+  entry->peer_ip       = peer_ip;
+  entry->peer_port     = peer_port;
+#endif
 
   ipv4_nat_entry_refresh(entry);
 
@@ -456,6 +463,8 @@ void ipv4_nat_entry_clear(FAR struct net_driver_s *dev)
  *   protocol      - The L4 protocol of the packet.
  *   external_ip   - The external ip of the packet, supports INADDR_ANY.
  *   external_port - The external port of the packet.
+ *   peer_ip       - The peer ip of the packet.
+ *   peer_port     - The peer port of the packet.
  *   refresh       - Whether to refresh the selected entry.
  *
  * Returned Value:
@@ -465,11 +474,15 @@ void ipv4_nat_entry_clear(FAR struct net_driver_s *dev)
 
 FAR struct ipv4_nat_entry *
 ipv4_nat_inbound_entry_find(uint8_t protocol, in_addr_t external_ip,
-                            uint16_t external_port, bool refresh)
+                            uint16_t external_port, in_addr_t peer_ip,
+                            uint16_t peer_port, bool refresh)
 {
   FAR hash_node_t *p;
   FAR hash_node_t *tmp;
   bool skip_ip = net_ipv4addr_cmp(external_ip, INADDR_ANY);
+#ifdef CONFIG_NET_NAT_SYMMETRIC
+  bool skip_peer = net_ipv4addr_cmp(peer_ip, INADDR_ANY);
+#endif
   int32_t current_time = TICK2SEC(clock_systime_ticks());
 
 #if CONFIG_NET_NAT_ENTRY_RECLAIM_SEC > 0
@@ -492,7 +505,12 @@ ipv4_nat_inbound_entry_find(uint8_t protocol, in_addr_t external_ip,
 
       if (entry->protocol == protocol &&
           (skip_ip || net_ipv4addr_cmp(entry->external_ip, external_ip)) &&
-          entry->external_port == external_port)
+          entry->external_port == external_port
+#ifdef CONFIG_NET_NAT_SYMMETRIC
+          && (skip_peer || (net_ipv4addr_cmp(entry->peer_ip, peer_ip) &&
+                            entry->peer_port == peer_port))
+#endif
+          )
         {
           if (refresh)
             {
@@ -525,6 +543,8 @@ ipv4_nat_inbound_entry_find(uint8_t protocol, in_addr_t external_ip,
  *   protocol   - The L4 protocol of the packet.
  *   local_ip   - The local ip of the packet.
  *   local_port - The local port of the packet.
+ *   peer_ip    - The peer ip of the packet.
+ *   peer_port  - The peer port of the packet.
  *   try_create - Try create the entry if no entry found.
  *
  * Returned Value:
@@ -535,6 +555,7 @@ ipv4_nat_inbound_entry_find(uint8_t protocol, in_addr_t external_ip,
 FAR struct ipv4_nat_entry *
 ipv4_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
                              in_addr_t local_ip, uint16_t local_port,
+                             in_addr_t peer_ip, uint16_t peer_port,
                              bool try_create)
 {
   FAR hash_node_t *p;
@@ -562,7 +583,12 @@ ipv4_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
       if (entry->protocol == protocol &&
           net_ipv4addr_cmp(entry->external_ip, dev->d_ipaddr) &&
           net_ipv4addr_cmp(entry->local_ip, local_ip) &&
-          entry->local_port == local_port)
+          entry->local_port == local_port
+#ifdef CONFIG_NET_NAT_SYMMETRIC
+          && net_ipv4addr_cmp(entry->peer_ip, peer_ip) &&
+          entry->peer_port == peer_port
+#endif
+          )
         {
           ipv4_nat_entry_refresh(entry);
           return entry;
@@ -588,7 +614,7 @@ ipv4_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
     }
 
   return ipv4_nat_entry_create(protocol, dev->d_ipaddr, external_port,
-                               local_ip, local_port);
+                               local_ip, local_port, peer_ip, peer_port);
 }
 
 #endif /* CONFIG_NET_NAT && CONFIG_NET_IPv4 */
