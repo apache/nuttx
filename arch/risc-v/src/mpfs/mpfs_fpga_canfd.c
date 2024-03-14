@@ -1131,6 +1131,11 @@ static void mpfs_err_interrupt(struct mpfs_driver_s *priv, uint32_t isr)
         case CAN_STATE_ERROR_PASSIVE:
           priv->can.can_stats.error_passive++;
           canwarn("Change to ERROR_PASSIVE error state\n");
+
+          /* Mask BERR interrupts */
+
+          putreg32(MPFS_CANFD_INT_STAT_ALI | MPFS_CANFD_INT_STAT_BEI,
+                   priv->base + MPFS_CANFD_INT_MASK_SET_OFFSET);
           break;
         case CAN_STATE_ERROR_WARNING:
           priv->can.can_stats.error_warning++;
@@ -1138,6 +1143,11 @@ static void mpfs_err_interrupt(struct mpfs_driver_s *priv, uint32_t isr)
           break;
         case CAN_STATE_ERROR_ACTIVE:
           caninfo("Change to ERROR_ACTIVE error state\n");
+
+          /* Unmask BERR interrupts */
+
+          putreg32(MPFS_CANFD_INT_STAT_ALI | MPFS_CANFD_INT_STAT_BEI,
+                   priv->base + MPFS_CANFD_INT_MASK_CLR_OFFSET);
           return;
         default:
           canwarn("Unhandled error state %d\n", state);
@@ -2371,16 +2381,14 @@ static int mpfs_can_controller_start(struct mpfs_driver_s *priv)
             MPFS_CANFD_INT_STAT_FCSI |
             MPFS_CANFD_INT_STAT_DOI;
 
+  int_msk = ~int_ena; /* Initially allow all but errors */
+
   /* Bus error reporting -> Allow Error/Arb.lost interrupts */
 
   if (priv->can.ctrlmode & CAN_CTRLMODE_BERR_REPORTING)
     {
       int_ena |= MPFS_CANFD_INT_STAT_ALI | MPFS_CANFD_INT_STAT_BEI;
     }
-
-  int_msk = ~int_ena; /* Mask all disabled interrupts */
-
-  /* It's after reset, so there is no need to clear anything */
 
   uint32_t mask = 0xffffffff;
   putreg32(mask, priv->base + MPFS_CANFD_INT_MASK_CLR_OFFSET);
