@@ -156,7 +156,7 @@ file_mq_timedreceive_internal(FAR struct file *mq, FAR char *msg,
    * because messages can be sent from interrupt level.
    */
 
-  flags = enter_critical_section();
+  flags = enter_critical_section_nonirq();
 
   /* Check if the message queue is empty.  If it is NOT empty, then we
    * will not need to start timer.
@@ -231,7 +231,7 @@ file_mq_timedreceive_internal(FAR struct file *mq, FAR char *msg,
   /* We can now restore interrupts */
 
 errout_in_critical_section:
-  leave_critical_section(flags);
+  leave_critical_section_nonirq(flags);
 
   return ret;
 }
