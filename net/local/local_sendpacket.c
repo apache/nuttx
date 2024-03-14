@@ -183,7 +183,11 @@ int local_send_packet(FAR struct file *filep, FAR const struct iovec *buf,
       ret = local_fifo_write(filep, iov->iov_base, iov->iov_len);
       if (ret < 0)
         {
-          nerr("ERROR: local send packet failed ret: %d\n", ret);
+          if (ret != -EAGAIN)
+            {
+              nerr("ERROR: local send packet failed ret: %d\n", ret);
+            }
+
           break;
         }
 
