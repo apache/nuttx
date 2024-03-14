@@ -425,7 +425,7 @@ static uint8_t g_rx_pool1[(sizeof(struct canfd_frame) + TIMESTAMP_SIZE) *
 
 /* (from interrupt) RX related functions */
 
-static void mpfs_can_retrieve_rx_frame(struct mpfs_driver_s *priv,
+static bool mpfs_can_retrieve_rx_frame(struct mpfs_driver_s *priv,
                                        struct canfd_frame *cf,
                                        uint32_t ffw);
 static void mpfs_receive_work(void *arg);
@@ -436,7 +436,7 @@ static void mpfs_can_update_txb_prio(struct mpfs_driver_s *priv);
 static void mpfs_can_send_txb_cmd(struct mpfs_driver_s *priv,
                                   enum mpfs_can_txb_command cmd,
                                   uint8_t buf);
-static void mpfs_txdone(struct mpfs_driver_s *priv);
+static bool mpfs_txdone(struct mpfs_driver_s *priv);
 static void mpfs_txdone_work(void *arg);
 
 /* (from interrupt) Error handling related functions */
@@ -520,6 +520,38 @@ static int mpfs_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg);
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: mpfs_can_read_frame_data
+ *
+ * Description:
+ *  Retrieve 4 bytes of CAN/CANFD frame data from RX Buffer
+ *
+ * Input Parameters:
+ *  priv  - Pointer to the private CAN driver state structure
+ *  data  - Pointer to data to be written
+ *
+ * Returned Value:
+ *  true if data was read successfulle
+ *  false if buffer is empty or next data would be the frame format word
+ *
+ ****************************************************************************/
+
+static bool mpfs_can_read_frame_data(struct mpfs_driver_s *priv,
+                                     uint32_t *data)
+{
+  uint32_t rx_status = getreg32(priv->base + MPFS_CANFD_RX_STATUS_OFFSET);
+  if ((rx_status & MPFS_CANFD_RX_STATUS_RXMOF) == 0 ||
+      (rx_status & MPFS_CANFD_RX_STATUS_RXE) != 0)
+    {
+      /* Reached the beginning of the next frame or buffer is empty */
+
+      return false;
+    }
+
+  *data = getreg32(priv->base + MPFS_CANFD_RX_DATA_OFFSET);
+  return true;
+}
+
+/****************************************************************************
  * Name: mpfs_can_retrieve_rx_frame
  *
  * Description:
@@ -531,18 +563,19 @@ static int mpfs_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg);
  *  ffw   - Previously read frame format word
  *
  * Returned Value:
- *  None
+ *  true if frame was read successfully, false otherwise
  *
  * Assumptions:
  *  Frame format word is already parsed in advance and provided as 'ffw' arg
  *
  ****************************************************************************/
 
-static void mpfs_can_retrieve_rx_frame(struct mpfs_driver_s *priv,
-                                   struct canfd_frame *cf,
-                                   uint32_t ffw)
+static bool mpfs_can_retrieve_rx_frame(struct mpfs_driver_s *priv,
+                                       struct canfd_frame *cf,
+                                       uint32_t ffw)
 {
   uint32_t idw;
+  uint32_t tmp;
   unsigned int i;
   unsigned int data_wc; /* data word count */
   unsigned int data_bc; /* data byte count */
@@ -551,7 +584,11 @@ static void mpfs_can_retrieve_rx_frame(struct mpfs_driver_s *priv,
 
   /* CAN ID */
 
-  idw = getreg32(priv->base + MPFS_CANFD_RX_DATA_OFFSET);
+  if (!mpfs_can_read_frame_data(priv, &idw))
+    {
+      return false;
+    }
+
   if (MPFS_CANFD_FRAME_FORMAT_W_IDE & ffw)
     {
       cf->can_id = (idw & CAN_EFF_MASK) | CAN_EFF_FLAG;
@@ -617,27 +654,26 @@ static void mpfs_can_retrieve_rx_frame(struct mpfs_driver_s *priv,
 
   /* Timestamp - Read and throw away */
 
-  getreg32(priv->base + MPFS_CANFD_RX_DATA_OFFSET);
-  getreg32(priv->base + MPFS_CANFD_RX_DATA_OFFSET);
+  if (!mpfs_can_read_frame_data(priv, &tmp) ||
+      !mpfs_can_read_frame_data(priv, &tmp))
+    {
+      return false;
+    }
 
   /* Data */
 
   for (i = 0; i < len; i += 4)
     {
-      uint32_t data = getreg32(priv->base + MPFS_CANFD_RX_DATA_OFFSET);
+      uint32_t data;
+      if (!mpfs_can_read_frame_data(priv, &data))
+        {
+          return false;
+        }
 
       *(uint32_t *)(cf->data + i) = data;
     }
 
-  /* Read and discard exceeding data that does not fit any frame. read
-   * pointer is automatically increased if RX buffer is not empty.
-   */
-
-  while (expect_false(i < data_bc))
-    {
-      getreg32(priv->base + MPFS_CANFD_RX_DATA_OFFSET);
-      i += 4;
-    }
+  return true;
 }
 
 /****************************************************************************
@@ -663,6 +699,7 @@ static void mpfs_receive_work(void *arg)
 
   uint32_t status;
   uint32_t frame_count;
+  uint32_t tmp;
   bool is_classical_can_frame = false;
 
   frame_count = (getreg32(priv->base + MPFS_CANFD_RX_STATUS_OFFSET) &
@@ -671,6 +708,13 @@ static void mpfs_receive_work(void *arg)
     {
       struct canfd_frame *cf = (struct canfd_frame *)priv->rxdesc;
       uint32_t ffw;
+
+      /* Error recovery: if for any reason the RX buffer pointer points to
+       * a middle of a frame, read until the start of the first frame is
+       * found. This may happen after bus errors or rx overflow.
+       */
+
+      while (mpfs_can_read_frame_data(priv, &tmp));
 
       ffw = getreg32(priv->base + MPFS_CANFD_RX_DATA_OFFSET);
 
@@ -699,7 +743,12 @@ static void mpfs_receive_work(void *arg)
 
       /* Retrieve the classical or CANFD or remote frame */
 
-      mpfs_can_retrieve_rx_frame(priv, cf, ffw);
+      if (!mpfs_can_retrieve_rx_frame(priv, cf, ffw))
+      {
+        /* Didn't receive full frame, bail out */
+
+        goto out;
+      }
 
       /* Lock the network; we have to protect the dev.d_len, dev.d_buf
        * and dev.d_iob from the devif_poll path
@@ -735,19 +784,19 @@ static void mpfs_receive_work(void *arg)
         MPFS_CANFD_RX_STATUS_RXFRC) >> MPFS_CANFD_RX_STATUS_RXFRC_SHIFT;
     }
 
+out:
+
   /* Check for RX FIFO Overflow */
 
   status = getreg32(priv->base + MPFS_CANFD_STATUS_OFFSET);
   if (MPFS_CANFD_STATUS_DOR & status)
     {
-      /* Notify to socket interface */
-
-      NETDEV_RXERRORS(&priv->dev);
-
-      /* Clear Data Overrun */
+      /* Clear and re-enable Data Overrun interrupt */
 
       putreg32(MPFS_CANFD_COMMAND_CDO,
                priv->base + MPFS_CANFD_COMMAND_OFFSET);
+      putreg32(MPFS_CANFD_INT_STAT_DOI,
+               priv->base + MPFS_CANFD_INT_MASK_CLR_OFFSET);
     }
 
   /* Clear and re-enable RBNEI */
@@ -825,14 +874,14 @@ static void mpfs_can_send_txb_cmd(struct mpfs_driver_s *priv,
  *  priv  - Pointer to the private CAN driver state structure
  *
  * Returned Value:
- *  None
+ *  true on success, false on any error
  *
  * Assumptions:
  *  None
  *
  ****************************************************************************/
 
-static void mpfs_txdone(struct mpfs_driver_s *priv)
+static bool mpfs_txdone(struct mpfs_driver_s *priv)
 {
   bool first_buffer = true;
   bool buffer_processed;
@@ -876,12 +925,9 @@ static void mpfs_txdone(struct mpfs_driver_s *priv)
 
                   mpfs_can_send_txb_cmd(priv, TXT_CMD_SET_EMPTY, txb_id);
 
-                  /* Something is fishy. CLear txb status change interrupt */
+                  /* Something is fishy, bail out */
 
-                  putreg32(MPFS_CANFD_INT_STAT_TXBHCI,
-                           priv->base + MPFS_CANFD_INT_STAT_OFFSET);
-
-                  return;
+                  return false;
                 }
               break;
             }
@@ -905,20 +951,10 @@ static void mpfs_txdone(struct mpfs_driver_s *priv)
               mpfs_can_send_txb_cmd(priv, TXT_CMD_SET_EMPTY, txb_id);
             }
         }
-
-      if (buffer_processed)
-        {
-          /* Since there are some buffers processed and the number of TXT
-           * used now matched the number of processed buffer, we can clear
-           * the interrupt in order to avoid any erroneous interrupt after
-           * the last true TXT buffer interrupt is processed.
-           */
-
-          putreg32(MPFS_CANFD_INT_STAT_TXBHCI,
-                   priv->base + MPFS_CANFD_INT_STAT_OFFSET);
-        }
     }
   while (buffer_processed);
+
+  return true;
 }
 
 /****************************************************************************
@@ -1121,6 +1157,20 @@ static void mpfs_err_interrupt(struct mpfs_driver_s *priv, uint32_t isr)
       priv->can.can_stats.bus_error++;
     }
 
+  if (MPFS_CANFD_INT_STAT_DOI & isr)
+    {
+      canerr("DOI interrupt\n");
+
+      /* Mask the interrupt until it is handled in worker */
+
+      putreg32(MPFS_CANFD_INT_STAT_DOI,
+               priv->base + MPFS_CANFD_INT_MASK_SET_OFFSET);
+
+      /* Notify to socket interface */
+
+      NETDEV_RXERRORS(&priv->dev);
+    }
+
   /* Notify to socket interface. */
 
   NETDEV_ERRORS(&priv->dev);
@@ -1150,126 +1200,68 @@ static int mpfs_interrupt(int irq, void *context, void *arg)
 
   uint32_t isr;
   uint32_t icr;
-  uint32_t imask;
-  int irq_loops;
 
-  for (irq_loops = 0; irq_loops < 10000; irq_loops++)
+  /* Get the interrupt status */
+
+  isr  = getreg32(priv->base + MPFS_CANFD_INT_STAT_OFFSET);
+
+  /* Receive Buffer Not Empty Interrupt */
+
+  if (isr & MPFS_CANFD_INT_STAT_RBNEI)
     {
-      /* Get the interrupt status */
+      /* Mask RBNEI until receive is handled be the worker */
 
-      isr  = getreg32(priv->base + MPFS_CANFD_INT_STAT_OFFSET);
+      icr = MPFS_CANFD_INT_STAT_RBNEI;
+      putreg32(icr, priv->base + MPFS_CANFD_INT_MASK_SET_OFFSET);
 
-      /* Check and exit interrupt service routine if there is no int flag in
-       * INT_STAT reg.
-       */
-
-      if (!isr)
-        {
-          return irq_loops ? OK : -1;
-        }
-
-      /* Receive Buffer Not Empty Interrupt */
-
-      if (isr & MPFS_CANFD_INT_STAT_RBNEI)
-        {
-          /* Mask RBNEI first, then clear interrupt. Even if
-          * another IRQ fires, RBNEI will always be 0 (masked).
-          */
-
-          icr = MPFS_CANFD_INT_STAT_RBNEI;
-          putreg32(icr, priv->base + MPFS_CANFD_INT_MASK_SET_OFFSET);
-          putreg32(icr, priv->base + MPFS_CANFD_INT_STAT_OFFSET);
-
-          /* Schedule work to process RX frame from CAN controller */
-
-          work_queue(CANWORK, &priv->rxwork, mpfs_receive_work, priv, 0);
-        }
-
-      /* TXT Buffer HW Command Interrupt */
-
-      if (isr & MPFS_CANFD_INT_STAT_TXBHCI)
-        {
-          /* Clear TX interrupt flags */
-
-          mpfs_txdone(priv);
-
-          /* Schedule work to poll for next available tx frame from the
-           * network.
-           */
-
-          work_queue(CANWORK, &priv->txdwork, mpfs_txdone_work, priv, 0);
-        }
-
-      /* Error Interrupts */
-
-      if (isr & MPFS_CANFD_INT_STAT_EWLI ||
-          isr & MPFS_CANFD_INT_STAT_FCSI ||
-          isr & MPFS_CANFD_INT_STAT_ALI ||
-          isr & MPFS_CANFD_INT_STAT_BEI)
-        {
-          icr = isr & (MPFS_CANFD_INT_STAT_EWLI |
-                      MPFS_CANFD_INT_STAT_FCSI |
-                      MPFS_CANFD_INT_STAT_ALI |
-                      MPFS_CANFD_INT_STAT_BEI);
-          canerr("Some error interrupts. Clearing 0x%08x\n", icr);
-          putreg32(icr, priv->base + MPFS_CANFD_INT_STAT_OFFSET);
-          mpfs_err_interrupt(priv, isr);
-        }
+      work_queue(CANWORK, &priv->rxwork, mpfs_receive_work, priv, 0);
     }
 
-  /* Now, it seems that there are still some interrupt flags that remain
-   * stuck in INT_STAT reg.
-   */
-
-  canerr("Stuck interrupt (isr=%08x)\n", isr);
-
-  /* Check if any of the stuck one belongs to txb status. */
+  /* TXT Buffer HW Command Interrupt */
 
   if (isr & MPFS_CANFD_INT_STAT_TXBHCI)
     {
-      canerr("TXBHCI interrupt\n");
+      /* Handle TX interrupt */
+
+      if (!mpfs_txdone(priv))
+        {
+          canerr("TXBHCI error\n");
 
 #ifdef CONFIG_DEBUG_CAN_INFO
-      caninfo("txb_sent=0x%08x txb_processed=0x%08x\n", priv->txb_sent,
-              priv->txb_processed);
-      for (int i = 0; i < priv->ntxbufs; i++)
-        {
-          uint32_t status = mpfs_can_get_txb_status(priv, i);
-          caninfo("txb[%d] txb status=0x%08x\n", i, status);
-        }
+          caninfo("txb_sent=0x%08x txb_processed=0x%08x\n", priv->txb_sent,
+                  priv->txb_processed);
+          for (int i = 0; i < priv->ntxbufs; i++)
+            {
+              uint32_t status = mpfs_can_get_txb_status(priv, i);
+              caninfo("txb[%d] txb status=0x%08x\n", i, status);
+            }
 #endif
-      /* Notify to socket interface */
+          /* Notify to socket interface */
 
-      NETDEV_TXERRORS(&priv->dev);
+          NETDEV_TXERRORS(&priv->dev);
+        }
 
-      /* Clear txb status change interrupt */
+      /* Schedule work to poll for next available tx frame from the
+       * network.
+       */
 
-      putreg32(MPFS_CANFD_INT_STAT_TXBHCI,
-               priv->base + MPFS_CANFD_INT_STAT_OFFSET);
+      work_queue(CANWORK, &priv->txdwork, mpfs_txdone_work, priv, 0);
     }
 
-  /* Check if any of the stuck one belongs to RX buffer data overrun */
+  /* Error Interrupts */
 
-  if (isr & MPFS_CANFD_INT_STAT_DOI)
+  if ((isr & (MPFS_CANFD_INT_STAT_EWLI | MPFS_CANFD_INT_STAT_FCSI |
+              MPFS_CANFD_INT_STAT_ALI | MPFS_CANFD_INT_STAT_BEI |
+              MPFS_CANFD_INT_STAT_DOI)) != 0)
     {
-      canerr("DOI interrupt\n");
-
-      /* Notify to socket interface */
-
-      NETDEV_RXERRORS(&priv->dev);
-
-      /* Clear Data Overrun interrupt */
-
-      putreg32(MPFS_CANFD_INT_STAT_DOI,
-               priv->base + MPFS_CANFD_INT_STAT_OFFSET);
+      canerr("Some error interrupts: 0x%08x\n", isr);
+      mpfs_err_interrupt(priv, isr);
     }
 
-  /* Clear and reset all interrupt. */
+  /* All interrupts are now handled, clear them */
 
-  canwarn("Reset all interrupts...\n");
-  imask = 0xffffffff;
-  putreg32(imask, priv->base + MPFS_CANFD_INT_ENA_CLR_OFFSET);
-  putreg32(imask, priv->base + MPFS_CANFD_INT_ENA_SET_OFFSET);
+  putreg32(isr, priv->base + MPFS_CANFD_INT_STAT_OFFSET);
+
   return OK;
 }
 
