@@ -38,19 +38,6 @@
     .file    "arm64_vectors.S"
 
 /****************************************************************************
- * Assembly Macros
- ****************************************************************************/
-
-.macro arm64_exception_context_save xreg0, xreg1 xfp
-
-    /* Save the current task's SP_EL0 and exception depth */
-    mrs    \xreg0, sp_el0
-    mrs    \xreg1, tpidrro_el0
-    stp    \xreg0, \xreg1, [\xfp, #8 * REG_SP_EL0]
-
-.endm
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -94,8 +81,6 @@ SECTION_FUNC(text, up_saveusercontext)
     mrs    x5,  spsr_el1
 #endif
     stp    x4,  x5,  [x0, #8 * REG_ELR]
-
-    arm64_exception_context_save x4 x5 x0
 
     ret
 
