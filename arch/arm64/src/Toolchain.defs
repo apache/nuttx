@@ -79,7 +79,11 @@ ifeq ($(CONFIG_MM_UBSAN_TRAP_ON_ERROR),y)
 endif
 
 ifeq ($(CONFIG_MM_KASAN_ALL),y)
-  ARCHOPTIMIZATION += -fsanitize=kernel-address
+  ifeq ($(CONFIG_MM_KASAN_GENERIC),y)
+    ARCHOPTIMIZATION += -fsanitize=kernel-address
+  else ifeq ($(CONFIG_MM_KASAN_SW_TAGS),y)
+    ARCHOPTIMIZATION += -fsanitize=kernel-hwaddress
+  endif
 endif
 
 ifeq ($(CONFIG_MM_KASAN_GLOBAL),y)

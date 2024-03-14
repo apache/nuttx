@@ -32,6 +32,46 @@
 #include <stdio.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define DEFINE_ASAN_LOAD_STORE(size) \
+  void __asan_report_load##size##_noabort(FAR void *addr) \
+  { \
+    kasan_report(addr, size, false, return_address(0)); \
+  } \
+  void __asan_report_store##size##_noabort(FAR void *addr) \
+  { \
+    kasan_report(addr, size, true, return_address(0)); \
+  } \
+  void __asan_load##size##_noabort(FAR void *addr) \
+  { \
+    kasan_check_report(addr, size, false, return_address(0)); \
+  } \
+  void __asan_store##size##_noabort(FAR void *addr) \
+  { \
+    kasan_check_report(addr, size, true, return_address(0)); \
+  } \
+  void __asan_load##size(FAR void *addr) \
+  { \
+    kasan_check_report(addr, size, false, return_address(0)); \
+  } \
+  void __asan_store##size(FAR void *addr) \
+  { \
+    kasan_check_report(addr, size, true, return_address(0)); \
+  }
+
+#define DEFINE_HWASAN_LOAD_STORE(size) \
+  void __hwasan_load##size##_noabort(void *addr) \
+  { \
+    kasan_check_report(addr, size, false, return_address(0)); \
+  } \
+  void __hwasan_store##size##_noabort(void *addr) \
+  { \
+    kasan_check_report(addr, size, true, return_address(0)); \
+  }
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -181,34 +221,28 @@ void __asan_storeN(FAR void *addr, size_t size)
   kasan_check_report(addr, size, true, return_address(0));
 }
 
-#define DEFINE_ASAN_LOAD_STORE(size) \
-  void __asan_report_load##size##_noabort(FAR void *addr) \
-  { \
-    kasan_report(addr, size, false, return_address(0)); \
-  } \
-  void __asan_report_store##size##_noabort(FAR void *addr) \
-  { \
-    kasan_report(addr, size, true, return_address(0)); \
-  } \
-  void __asan_load##size##_noabort(FAR void *addr) \
-  { \
-    kasan_check_report(addr, size, false, return_address(0)); \
-  } \
-  void __asan_store##size##_noabort(FAR void *addr) \
-  { \
-    kasan_check_report(addr, size, true, return_address(0)); \
-  } \
-  void __asan_load##size(FAR void *addr) \
-  { \
-    kasan_check_report(addr, size, false, return_address(0)); \
-  } \
-  void __asan_store##size(FAR void *addr) \
-  { \
-    kasan_check_report(addr, size, true, return_address(0)); \
-  }
+/* Generic KASan will instrument the following functions */
 
 DEFINE_ASAN_LOAD_STORE(1)
 DEFINE_ASAN_LOAD_STORE(2)
 DEFINE_ASAN_LOAD_STORE(4)
 DEFINE_ASAN_LOAD_STORE(8)
 DEFINE_ASAN_LOAD_STORE(16)
+
+/* Soft tags KASan will instrument the following functions */
+
+void __hwasan_loadN_noabort(FAR void *addr, size_t size)
+{
+  kasan_check_report(addr, size, false, return_address(0));
+}
+
+void __hwasan_storeN_noabort(FAR void *addr, size_t size)
+{
+  kasan_check_report(addr, size, true, return_address(0));
+}
+
+DEFINE_HWASAN_LOAD_STORE(1)
+DEFINE_HWASAN_LOAD_STORE(2)
+DEFINE_HWASAN_LOAD_STORE(4)
+DEFINE_HWASAN_LOAD_STORE(8)
+DEFINE_HWASAN_LOAD_STORE(16)

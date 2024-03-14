@@ -30,6 +30,7 @@
 #include <debug.h>
 
 #include <nuttx/mm/mm.h>
+#include <nuttx/mm/kasan.h>
 
 #include "mm_heap/mm.h"
 
@@ -56,6 +57,7 @@
 
 bool mm_heapmember(FAR struct mm_heap_s *heap, FAR void *mem)
 {
+  mem = kasan_reset_tag(mem);
 #if CONFIG_MM_REGIONS > 1
   int i;
 
