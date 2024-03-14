@@ -119,11 +119,6 @@ int up_backtrace(struct tcb_s *tcb,
   struct regs_context * p_regs;
   int ret;
 
-  if (rtcb == NULL)
-    {
-      rtcb = running_task();
-    }
-
   if (size <= 0 || !buffer)
     {
       return 0;
