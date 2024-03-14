@@ -628,7 +628,7 @@ struct tcb_s
   sigset_t   sigwaitmask;                /* Waiting for pending signals     */
   sq_queue_t sigpendactionq;             /* List of pending signal actions  */
   sq_queue_t sigpostedq;                 /* List of posted signals          */
-  siginfo_t  sigunbinfo;                 /* Signal info when task unblocked */
+  siginfo_t  *sigunbinfo;                /* Signal info when task unblocked */
 
   /* Robust mutex support ***************************************************/
 
