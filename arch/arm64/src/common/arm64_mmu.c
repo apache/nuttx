@@ -153,6 +153,12 @@
 #define TCR_PS_BITS             TCR_PS_BITS_4GB
 #endif
 
+#ifdef CONFIG_MM_KASAN_SW_TAGS
+#define TCR_KASAN_SW_FLAGS (TCR_TBI0 | TCR_TBI1 | TCR_ASID_8)
+#else
+#define TCR_KASAN_SW_FLAGS 0
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -254,7 +260,8 @@ static uint64_t get_tcr(int el)
    * inner shareable
    */
 
-  tcr |= TCR_TG0_4K | TCR_SHARED_INNER | TCR_ORGN_WBWA | TCR_IRGN_WBWA;
+  tcr |= TCR_TG0_4K | TCR_SHARED_INNER | TCR_ORGN_WBWA |
+         TCR_IRGN_WBWA | TCR_KASAN_SW_FLAGS;
 
   return tcr;
 }

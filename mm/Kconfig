@@ -258,6 +258,25 @@ config MM_KASAN
 		bugs in native code. After turn on this option, Please
 		add -fsanitize=kernel-address to CFLAGS/CXXFLAGS too.
 
+if MM_KASAN
+
+choice
+	prompt "KAsan Mode"
+	default MM_KASAN_GENERIC
+
+config MM_KASAN_GENERIC
+	bool "KAsan generic mode"
+	---help---
+		KASan generic mode that does not require hardware support at all
+
+config MM_KASAN_SW_TAGS
+	bool "KAsan SW tags"
+	depends on ARCH_ARM64
+	---help---
+		KAsan based on software tags
+
+endchoice
+
 config MM_KASAN_ALL
 	bool "Enable KASan for the entire image"
 	depends on MM_KASAN
@@ -288,7 +307,7 @@ config MM_KASAN_DISABLE_WRITES_CHECK
 
 config MM_KASAN_GLOBAL
 	bool "Enable global data check"
-	depends on MM_KASAN
+	depends on MM_KASAN_GENERIC
 	default n
 	---help---
 		This option enables KASan global data check.
