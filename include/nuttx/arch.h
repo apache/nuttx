@@ -2831,9 +2831,9 @@ void arch_sporadic_resume(FAR struct tcb_s *tcb);
  ****************************************************************************/
 
 void up_perf_init(FAR void *arg);
-unsigned long up_perf_gettime(void);
+clock_t up_perf_gettime(void);
 unsigned long up_perf_getfreq(void);
-void up_perf_convert(unsigned long elapsed, FAR struct timespec *ts);
+void up_perf_convert(clock_t elapsed, FAR struct timespec *ts);
 
 /****************************************************************************
  * Name: up_show_cpuinfo
