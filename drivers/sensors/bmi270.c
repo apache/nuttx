@@ -57,18 +57,18 @@
 #define BMI270_DATA_5           (0x09) /* MAG Z 15:8 (MSB) */
 #define BMI270_DATA_6           (0x0A) /* RHALL  7:0 (LSB) */
 #define BMI270_DATA_7           (0x0B) /* RHALL 15:8 (MSB) */
-#define BMI270_DATA_8           (0x0C) /* GYR X  7:0 (LSB) */
-#define BMI270_DATA_9           (0x0D) /* GYR X 15:8 (MSB) */
-#define BMI270_DATA_10          (0x0E) /* GYR Y  7:0 (LSB) */
-#define BMI270_DATA_11          (0x0F) /* GYR Y 15:8 (MSB) */
-#define BMI270_DATA_12          (0x10) /* GYR Z  7:0 (LSB) */
-#define BMI270_DATA_13          (0x11) /* GYR Z 15:8 (MSB) */
-#define BMI270_DATA_14          (0x12) /* ACC X  7:0 (LSB) */
-#define BMI270_DATA_15          (0x13) /* ACC X 15:8 (MSB) */
-#define BMI270_DATA_16          (0x14) /* ACC Y  7:0 (LSB) */
-#define BMI270_DATA_17          (0x15) /* ACC Y 15:8 (MSB) */
-#define BMI270_DATA_18          (0x16) /* ACC Z  7:0 (LSB) */
-#define BMI270_DATA_19          (0x17) /* ACC Z 15:8 (MSB) */
+#define BMI270_DATA_8           (0x0C) /* ACC X  7:0 (LSB) */
+#define BMI270_DATA_9           (0x0D) /* ACC X 15:8 (MSB) */
+#define BMI270_DATA_10          (0x0E) /* ACC Y  7:0 (LSB) */
+#define BMI270_DATA_11          (0x0F) /* ACC Y 15:8 (MSB) */
+#define BMI270_DATA_12          (0x10) /* ACC Z  7:0 (LSB) */
+#define BMI270_DATA_13          (0x11) /* ACC Z 15:8 (MSB) */
+#define BMI270_DATA_14          (0x12) /* GRY X  7:0 (LSB) */
+#define BMI270_DATA_15          (0x13) /* GRY X 15:8 (MSB) */
+#define BMI270_DATA_16          (0x14) /* GRY Y  7:0 (LSB) */
+#define BMI270_DATA_17          (0x15) /* GRY Y 15:8 (MSB) */
+#define BMI270_DATA_18          (0x16) /* GRY Z  7:0 (LSB) */
+#define BMI270_DATA_19          (0x17) /* GRY Z 15:8 (MSB) */
 #define BMI270_SENSORTIME_0     (0x18) /* Sensor time 0 */
 #define BMI270_SENSORTIME_1     (0x19) /* Sensor time 1 */
 #define BMI270_SENSORTIME_2     (0x1A) /* Sensor time 2 */
