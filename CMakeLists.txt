@@ -550,11 +550,15 @@ endif()
 
 # Add apps/ to the build (if present)
 
-if(EXISTS ${NUTTX_APPS_DIR}/CMakeLists.txt)
-  add_subdirectory(${NUTTX_APPS_DIR} apps)
-else()
-  message(
-    STATUS "Application directory not found at ${NUTTX_APPS_DIR}, skipping")
+if(NOT CONFIG_BUILD_KERNEL)
+
+  if(EXISTS ${NUTTX_APPS_DIR}/CMakeLists.txt)
+    add_subdirectory(${NUTTX_APPS_DIR} apps)
+  else()
+    message(
+      STATUS "Application directory not found at ${NUTTX_APPS_DIR}, skipping")
+  endif()
+
 endif()
 
 # Link step ##################################################################
@@ -597,11 +601,15 @@ endif()
 file(TOUCH ${CMAKE_BINARY_DIR}/nuttx.manifest)
 
 get_property(nuttx_kernel_libs GLOBAL PROPERTY NUTTX_KERNEL_LIBRARIES)
+get_property(nuttx_extra_libs GLOBAL PROPERTY NUTTX_EXTRA_LIBRARIES)
+
 if(CONFIG_BUILD_FLAT)
   get_property(nuttx_system_libs GLOBAL PROPERTY NUTTX_SYSTEM_LIBRARIES)
 endif()
-get_property(nuttx_apps_libs GLOBAL PROPERTY NUTTX_APPS_LIBRARIES)
-get_property(nuttx_extra_libs GLOBAL PROPERTY NUTTX_EXTRA_LIBRARIES)
+
+if(NOT CONFIG_BUILD_KERNEL)
+  get_property(nuttx_apps_libs GLOBAL PROPERTY NUTTX_APPS_LIBRARIES)
+endif()
 
 set(nuttx_libs ${nuttx_kernel_libs} ${nuttx_system_libs} ${nuttx_apps_libs})
 
@@ -734,7 +742,7 @@ endif()
 
 # Userspace portion ##########################################################
 
-if(NOT CONFIG_BUILD_FLAT)
+if(CONFIG_BUILD_PROTECTED)
   add_executable(nuttx_user)
 
   get_property(nuttx_system_libs GLOBAL PROPERTY NUTTX_SYSTEM_LIBRARIES)
@@ -778,4 +786,9 @@ if(NOT CONFIG_BUILD_FLAT)
   endif()
 
   # TODO: could also merge elf binaries
+endif()
+
+if(CONFIG_BUILD_KERNEL)
+  # TODO: generate nuttx-export-xxx.tar.gz for userland development
+
 endif()
