@@ -107,7 +107,7 @@ int nxsem_clockwait(FAR sem_t *sem, clockid_t clockid,
    * enabled while we are blocked waiting for the semaphore.
    */
 
-  flags = enter_critical_section();
+  flags = enter_critical_section_nonirq();
 
   /* Try to take the semaphore without waiting. */
 
@@ -173,7 +173,7 @@ int nxsem_clockwait(FAR sem_t *sem, clockid_t clockid,
   /* We can now restore interrupts and delete the watchdog */
 
 out:
-  leave_critical_section(flags);
+  leave_critical_section_nonirq(flags);
   return ret;
 }
 

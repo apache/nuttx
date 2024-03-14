@@ -84,7 +84,7 @@ int nxsem_wait(FAR sem_t *sem)
    * handler.
    */
 
-  flags = enter_critical_section();
+  flags = enter_critical_section_nonirq();
 
   /* Make sure we were supplied with a valid semaphore. */
 
@@ -215,7 +215,7 @@ int nxsem_wait(FAR sem_t *sem)
 #endif
     }
 
-  leave_critical_section(flags);
+  leave_critical_section_nonirq(flags);
   return ret;
 }
 
