@@ -30,6 +30,10 @@ if(CONFIG_PCI)
     list(APPEND SRCS pci_qemu_edu.c)
   endif()
 
+  if(CONFIG_PCI_UIO_IVSHMEM)
+    list(APPEND SRCS pci_uio_ivshmem.c)
+  endif()
+
   target_sources(drivers PRIVATE ${SRCS})
 
 endif()
