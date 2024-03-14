@@ -35,9 +35,10 @@
 #ifndef CONFIG_MM_KASAN
 #  define kasan_is_poisoned(addr, size) false
 #  define kasan_poison(addr, size)
-#  define kasan_unpoison(addr, size)
+#  define kasan_unpoison(addr, size) addr
 #  define kasan_register(addr, size)
 #  define kasan_init_early()
+#  define kasan_reset_tag(addr) addr
 #else
 
 /****************************************************************************
@@ -97,11 +98,11 @@ void kasan_poison(FAR const void *addr, size_t size);
  *   size - range size
  *
  * Returned Value:
- *   None.
+ *   Return tagged address
  *
  ****************************************************************************/
 
-void kasan_unpoison(FAR const void *addr, size_t size);
+FAR void *kasan_unpoison(FAR const void *addr, size_t size);
 
 /****************************************************************************
  * Name: kasan_register
@@ -140,6 +141,19 @@ void kasan_register(FAR void *addr, FAR size_t *size);
  ****************************************************************************/
 
 void kasan_init_early(void);
+
+/****************************************************************************
+ * Name: kasan_reset_tag
+ *
+ * Input Parameters:
+ *   addr - The address of the memory to reset the tag.
+ *
+ * Returned Value:
+ *   Unlabeled address
+ *
+ ****************************************************************************/
+
+FAR void *kasan_reset_tag(FAR const void *addr);
 
 #undef EXTERN
 #ifdef __cplusplus
