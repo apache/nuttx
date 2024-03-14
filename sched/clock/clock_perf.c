@@ -94,7 +94,7 @@ void perf_init(void)
 clock_t perf_gettime(void)
 {
   FAR struct perf_s *perf = &g_perf;
-  unsigned long now = up_perf_gettime();
+  clock_t now = up_perf_gettime();
   irqstate_t flags = spin_lock_irqsave(&perf->lock);
   clock_t result;
 
