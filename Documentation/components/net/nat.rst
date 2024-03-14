@@ -2,7 +2,7 @@
 Network Address Translation (NAT)
 =================================
 
-NuttX supports full cone NAT logic, which currently supports
+NuttX supports full cone or symmetric NAT logic, which currently supports
 
 - TCP
 
@@ -46,6 +46,12 @@ Configuration Options
 ``CONFIG_NET_NAT``
   Enable or disable Network Address Translation (NAT) function.
   Depends on ``CONFIG_NET_IPFORWARD``.
+``CONFIG_NET_NAT_FULL_CONE``
+  Enable Full Cone NAT logic. Full Cone NAT is easier to traverse than
+  Symmetric NAT, and uses less resources than Symmetric NAT.
+``CONFIG_NET_NAT_SYMMETRIC``
+  Enable Symmetric NAT logic. Symmetric NAT will be safer than Full Cone NAT,
+  be more difficult to traverse, and has more entries which may lead to heavier load.
 ``CONFIG_NET_NAT_HASH_BITS``
   The bits of the hashtable of NAT entries, hashtable has (1 << bits) buckets.
 ``CONFIG_NET_NAT_TCP_EXPIRE_SEC``
@@ -101,7 +107,8 @@ Validated on Ubuntu 22.04 x86_64 with NuttX SIM by following steps:
       # CONFIG_SIM_NET_BRIDGE is not set
       CONFIG_SIM_NETDEV_NUMBER=2
 
-2. Call ``ipv4_nat_enable`` on one dev on startup
+2. Call ``ipv4_nat_enable`` on one dev on startup, or manually enable NAT
+   with ``iptables`` command (either may work).
 
   ..  code-block:: c
 
@@ -112,6 +119,10 @@ Validated on Ubuntu 22.04 x86_64 with NuttX SIM by following steps:
         ipv4_nat_enable(&g_sim_dev[0]);
         ...
       }
+
+  ..  code-block:: shell
+
+      iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 
 3. Set IP Address for NuttX on startup
 
