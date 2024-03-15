@@ -52,6 +52,10 @@ ifeq ($(CONFIG_GOLDFISH_FB),y)
   CSRCS += goldfish_fb.c
 endif
 
+ifeq ($(CONFIG_GOLDFISH_GPU_FB),y)
+  CSRCS += goldfish_gpu_fb.c
+endif
+
 # These video drivers depend on SPI support
 
 ifeq ($(CONFIG_SPI),y)

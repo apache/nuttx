@@ -67,6 +67,11 @@ config GOLDFISH_FB
 	depends on VIDEO_FB
 	default n
 
+config GOLDFISH_GPU_FB
+	bool "Goldfish GPU Framebuffer character driver"
+	depends on VIDEO_FB
+	default n
+
 config GOLDFISH_FB_VIDEO_MODE
 	bool "Goldfish Framebuffer display mode"
 	depends on GOLDFISH_FB
