@@ -30,8 +30,9 @@
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/pci/pci.h>
-#include <nuttx/pci/pci_qemu_edu.h>
 #include <nuttx/semaphore.h>
+
+#include "pci_drivers.h"
 
 /****************************************************************************
  * Pre-processor Definitions
