@@ -5,6 +5,38 @@
 
 if ARCH_CHIP_ESP32C6
 
+comment "ESP32-C6 Configuration Options"
+
+choice
+	prompt "ESP32-C6 Chip Selection"
+	default ARCH_CHIP_ESP32C6WROOM1
+	depends on ARCH_CHIP_ESP32C6
+
+config ARCH_CHIP_ESP32C6X
+	bool "ESP32-C6"
+	---help---
+		ESP32 chip with a single RISC-V IMC core, no embedded Flash memory
+
+config ARCH_CHIP_ESP32C6FX4
+	bool "ESP32-C6Fx4"
+	---help---
+		ESP32 chip with a single RISC-V IMC core, 4 MB of in-package Flash memory
+
+config ARCH_CHIP_ESP32C6MINI1
+	bool "ESP32-C6-MINI-1"
+	---help---
+		Generic module with an embedded ESP32-C6Fx4 chip
+
+config ARCH_CHIP_ESP32C6WROOM1
+	bool "ESP32-C6-WROOM-1"
+	---help---
+		Generic module with an embedded ESP32-C6 chip, 4/8 MB of Flash memory
+
+endchoice # ESP32-C6 Chip Selection
+
+comment "Selected ESP32-C6 chip without embedded Flash, an external Flash memory is required."
+	depends on ARCH_CHIP_ESP32C6X
+
 source "arch/risc-v/src/common/espressif/Kconfig"
 
 endif # ARCH_CHIP_ESP32C6
