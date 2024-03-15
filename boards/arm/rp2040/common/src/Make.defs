@@ -91,6 +91,10 @@ ifeq ($(CONFIG_LCD_BACKPACK),y)
   CSRCS += rp2040_lcd_backpack.c
 endif
 
+ifeq ($(CONFIG_BOARDCTL_UNIQUEID),y)
+  CSRCS += rp2040_uniqueid.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src
