@@ -40,6 +40,7 @@
 #include <nuttx/spinlock.h>
 #include <nuttx/mm/map.h>
 #include <nuttx/spawn.h>
+#include <nuttx/queue.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -538,7 +539,7 @@ struct filelist
 #ifdef CONFIG_FILE_STREAM
 struct file_struct
 {
-  FAR struct file_struct *fs_next;      /* Pointer to next file stream */
+  sq_entry_t              fs_entry;     /* Entry of file stream */
   rmutex_t                fs_lock;      /* Recursive lock */
   cookie_io_functions_t   fs_iofunc;    /* Callbacks to user / system functions */
   FAR void               *fs_cookie;    /* Pointer to file descriptor / cookie struct */
@@ -563,8 +564,7 @@ struct streamlist
 {
   mutex_t                 sl_lock;   /* For thread safety */
   struct file_struct      sl_std[3];
-  FAR struct file_struct *sl_head;
-  FAR struct file_struct *sl_tail;
+  sq_queue_t              sl_queue;
 };
 #endif /* CONFIG_FILE_STREAM */
 

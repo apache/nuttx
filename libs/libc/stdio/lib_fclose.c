@@ -59,8 +59,6 @@
 int fclose(FAR FILE *stream)
 {
   FAR struct streamlist *slist;
-  FAR FILE *prev = NULL;
-  FAR FILE *next;
   int errcode = EINVAL;
   int ret = ERROR;
   int status;
@@ -91,27 +89,7 @@ int fclose(FAR FILE *stream)
       slist = lib_get_streams();
       nxmutex_lock(&slist->sl_lock);
 
-      for (next = slist->sl_head; next; prev = next, next = next->fs_next)
-        {
-          if (next == stream)
-            {
-              if (next == slist->sl_head)
-                {
-                  slist->sl_head = next->fs_next;
-                }
-              else
-                {
-                  prev->fs_next = next->fs_next;
-                }
-
-              if (next == slist->sl_tail)
-                {
-                  slist->sl_tail = prev;
-                }
-
-              break;
-            }
-        }
+      sq_rem(&stream->fs_entry, &slist->sl_queue);
 
       nxmutex_unlock(&slist->sl_lock);
 

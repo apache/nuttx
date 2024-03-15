@@ -52,8 +52,7 @@ static void task_init_stream(FAR struct streamlist *list)
   /* Initialize the list access mutex */
 
   nxmutex_init(&list->sl_lock);
-  list->sl_head = NULL;
-  list->sl_tail = NULL;
+  sq_init(&list->sl_queue);
 
   /* Initialize stdin, stdout and stderr stream */
 
