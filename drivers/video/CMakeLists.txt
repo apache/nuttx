@@ -54,6 +54,10 @@ if(CONFIG_DRIVERS_VIDEO)
     list(APPEND SRCS goldfish_fb.c)
   endif()
 
+  if(CONFIG_GOLDFISH_GPU_FB)
+    list(APPEND SRCS goldfish_gpu_fb.c)
+  endif()
+
   if(CONFIG_GOLDFISH_CAMERA)
     list(APPEND SRCS goldfish_camera.c)
   endif()
