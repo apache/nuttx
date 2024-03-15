@@ -120,6 +120,7 @@ config ARCH_SIM
 	select SERIAL_IFLOWCONTROL
 	select SCHED_HPWORK
 	select ARCH_HAVE_CPUINFO
+	select ARCH_MATH_H if LIBCXX
 	---help---
 		Linux/Cygwin user-mode simulation.
 
