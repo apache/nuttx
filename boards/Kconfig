@@ -495,6 +495,14 @@ config ARCH_BOARD_ESP32C6_DEVKIT
 	---help---
 		The ESP32-C6 DevKit features the ESP32-C6 CPU with a RISC-V core.
 
+config ARCH_BOARD_ESP32C6_DEVKITM
+	bool "Espressif ESP32-C6 DevKitM-1"
+	depends on ARCH_CHIP_ESP32C6MINI1
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		The ESP32-C6 DevKitM-1 features the ESP32-C6 CPU with a RISC-V core.
+
 config ARCH_BOARD_ESP32H2_DEVKIT
 	bool "Espressif ESP32-H2 Generic DevKit"
 	depends on ESPRESSIF_ESP32H2
@@ -3165,6 +3173,7 @@ config ARCH_BOARD
 	default "esp32s3-lcd-ev"            if ARCH_BOARD_ESP32S3_LCD_EV
 	default "esp32s3-box"               if ARCH_BOARD_ESP32S3_BOX
 	default "esp32c6-devkit"            if ARCH_BOARD_ESP32C6_DEVKIT
+	default "esp32c6-devkitm"           if ARCH_BOARD_ESP32C6_DEVKITM
 	default "esp32h2-devkit"           	if ARCH_BOARD_ESP32H2_DEVKIT
 	default "et-stm32-stamp"            if ARCH_BOARD_ET_STM32_STAMP
 	default "tlsr8278adk80d"            if ARCH_BOARD_TLSR8278ADK80D
@@ -4290,6 +4299,9 @@ source "boards/xtensa/esp32s3/esp32s3-box/Kconfig"
 endif
 #if ARCH_BOARD_ESP32C6_DEVKIT
 #source "boards/risc-v/esp32c6/esp32c6-devkit/Kconfig"
+#endif
+#if ARCH_BOARD_ESP32C6_DEVKITM
+#source "boards/risc-v/esp32c6/esp32c6-devkitm/Kconfig"
 #endif
 if ARCH_BOARD_ESP32H2_DEVKIT
 source "boards/risc-v/esp32h2/esp32h2-devkit/Kconfig"
