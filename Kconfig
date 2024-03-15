@@ -273,14 +273,17 @@ config BASE_DEFCONFIG
 		current configuration. It is useful for getting the current configuration
 		on runtime.
 
-config BUILD_LOADABLE
+config MODULES
 	bool
-	option modules
 	---help---
 		Automatically selected if KERNEL build is selected.
-		This selection only effects the behavior of the 'make export'
-		target and currently has no effect unless you wish to build
-		loadable applications in a FLAT build.
+		This selection marks the implementation of Kconfig
+		to enable the module build function, and is used to
+		enable 'm' in the triate state. Its semantics are
+		consistent with Kernel. This selection also effects
+		the behavior of the 'make export' target and currently
+		has no effect unless you wish to build loadable applications
+		in a FLAT build.
 
 choice
 	prompt "Memory organization"
@@ -312,8 +315,8 @@ config BUILD_PROTECTED
 config BUILD_KERNEL
 	bool "NuttX kernel build"
 	depends on ARCH_USE_MMU && ARCH_ADDRENV
-	select BUILD_LOADABLE
 	select LIB_SYSCALL
+	select MODULES
 	---help---
 		Builds NuttX as a separately compiled kernel.  No applications are
 		built.  All user applications must reside in a file system where
