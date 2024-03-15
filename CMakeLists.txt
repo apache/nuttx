@@ -335,15 +335,9 @@ if(NOT EXISTS ${CMAKE_BINARY_DIR}/.config OR NOT "${NUTTX_DEFCONFIG}" STREQUAL
   # store original expanded .config
   configure_file(${CMAKE_BINARY_DIR}/.config ${CMAKE_BINARY_DIR}/.config.orig
                  COPYONLY)
-
-  string(REPLACE "\n" ";" KCONFIG_ESTRING ${KCONFIG_ERROR})
-  foreach(estring ${KCONFIG_ESTRING})
-    string(REGEX MATCH "the 'modules' option is not supported" result
-                 ${estring})
-    if(NOT result)
-      message(WARNING "Kconfig Configuration Error: ${estring}")
-    endif()
-  endforeach()
+  if(KCONFIG_ERROR)
+    message(WARNING "Kconfig Configuration Error: ${KCONFIG_ERROR}")
+  endif()
 
   if(KCONFIG_STATUS AND NOT KCONFIG_STATUS EQUAL 0)
     message(
