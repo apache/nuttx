@@ -3842,6 +3842,7 @@ arch/arm/src/rp2040/rp2040_pio.h
 arch/arm/src/rp2040/rp2040_pio_instructions.h
 arch/arm/src/rp2040/rp2040_pll.c
 arch/arm/src/rp2040/rp2040_xosc.c
+boards/arm/rp2040/common/src/rp2040_uniqueid.c
 ==========================================================
 Based upon the software originally developed by
   Raspberry Pi (Trading) Ltd.
