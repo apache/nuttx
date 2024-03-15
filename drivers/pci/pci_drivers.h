@@ -105,4 +105,28 @@ int pci_register_epf_test_driver(void);
 int pci_register_ep_test_driver(void);
 #endif
 
+/****************************************************************************
+ * Name: pci_register_qemu_test_driver
+ *
+ * Description:
+ *   Register qemu test device pci driver
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PCI_QEMU_TEST
+int pci_register_qemu_test_driver(void);
+#endif
+
+/****************************************************************************
+ * Name: pci_register_qemu_edu_driver
+ *
+ * Description:
+ *   Register qemu edu device pci driver
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PCI_QEMU_EDU
+int pci_register_qemu_edu_driver(void);
+#endif
+
 #endif /* __DRIVERS_PCI_PCI_DRIVERS_H */
