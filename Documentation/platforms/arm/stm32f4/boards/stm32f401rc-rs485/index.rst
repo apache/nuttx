@@ -465,3 +465,32 @@ NSH commands::
        nsh> pwm -d 50 -t 3
        pwm_main: starting output with frequency: 50 duty: 00007fff
        pwm_main: stopping output
+
+qencoder
+--------
+
+Configures the NuttShell (nsh) over USB Serial (check usbserial configuration) and enables Timer 3 on channels 1 and
+2 to handle Quadrature Encoder.
+NSH commands::
+
+       nsh> qe -help
+
+       Usage: qe [OPTIONS]
+
+       OPTIONS include:
+         [-p devpath] QE device path
+         [-n samples] Number of samples
+         [-t msec]    Delay between samples (msec)
+         [-r]         Reset the position to zero
+         [-h]         Shows this message and exits
+         nsh> qe -p /dev/qe0 -n 5 -t 100 -r
+         nsh: qe: too many arguments
+         qe_main: Hardware initialized. Opening the encoder device: /dev/qe0
+         qe_main: Resetting the count...
+         qe_main: Number of samples: 5
+         qe_main:   1. 0
+         qe_main:   2. 0
+         qe_main:   3. 4
+         qe_main:   4. 2
+         qe_main:   5. 2
+         Terminating!

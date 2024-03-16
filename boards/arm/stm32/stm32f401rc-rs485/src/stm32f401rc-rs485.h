@@ -122,6 +122,13 @@
 #define STM32F401RCRS485_PWMTIMER   3
 #define STM32F401RCRS485_PWMCHANNEL 1
 
+/* Quadrature Encoder
+ *
+ * Use Timer 3 (TIM3) on channels 1 and 2 for QEncoder, using PB4 and PA7.
+ */
+
+#define STM32F401RCRS485_QETIMER 3
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
