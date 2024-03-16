@@ -51,6 +51,10 @@
 #include "stm32_lm75.h"
 #endif
 
+#ifdef CONFIG_SENSORS_QENCODER
+#include "board_qencoder.h"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -197,6 +201,19 @@ int stm32_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize MMC/SD driver: %d\n",
               ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_QENCODER
+  /* Initialize and register the qencoder driver */
+
+  ret = board_qencoder_initialize(0, STM32F401RCRS485_QETIMER);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the qencoder: %d\n",
+             ret);
       return ret;
     }
 #endif
