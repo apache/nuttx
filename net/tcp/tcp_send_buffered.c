@@ -629,6 +629,10 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 #endif
 #endif
                     }
+
+#ifdef CONFIG_NET_TCP_CC_NEWRENO
+                  conn->dupacks = 0;
+#endif
                 }
             }
         }
