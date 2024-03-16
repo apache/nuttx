@@ -46,6 +46,10 @@ ifeq ($(CONFIG_I2C_EE_24XX),y)
 CSRCS += stm32_at24.c
 endif
 
+ifeq ($(CONFIG_PWM),y)
+CSRCS += stm32_pwm.c
+endif
+
 ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += stm32_appinitialize.c
 endif

@@ -99,6 +99,10 @@
 #define SDIO_SLOTNO        0
 #define SDIO_MINOR         0
 
+/* PWM */
+
+#define BUZZER_PWMTIMER 4
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -170,6 +174,18 @@ int stm32_sdio_initialize(void);
 
 #ifdef CONFIG_I2C_EE_24XX
 int stm32_at24_init(char *path);
+#endif
+
+/****************************************************************************
+ * Name: stm32_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PWM
+int stm32_pwm_setup(void);
 #endif
 
 #endif /* __BOARDS_ARM_STM32H7_LINUM_STM32H753BI_SRC_LINUM_STM32H753BI_H */

@@ -396,6 +396,11 @@
 #define GPIO_I2C3_SCL (GPIO_I2C3_SCL_2 | GPIO_SPEED_100MHz) /* PH7 */
 #define GPIO_I2C3_SDA (GPIO_I2C3_SDA_2 | GPIO_SPEED_100MHz) /* PH8 */
 
+/* PWM - Buzzer */
+
+#define GPIO_TIM17_CH1OUT  (GPIO_TIM17_CH1NOUT_1) /* PB7 */
+#define GPIO_TIM4_CH2OUT   (GPIO_TIM4_CH2OUT_1)   /* PB7 */
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
