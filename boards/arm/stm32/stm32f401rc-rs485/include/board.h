@@ -290,6 +290,14 @@ extern "C"
 
 #define GPIO_TIM3_CH1OUT  GPIO_TIM3_CH1OUT_1
 
+/* Quadrature Encoder
+ *
+ * Use Timer 3 (TIM3) on channels 1 and 2 for QEncoder, using PB4 and PA7.
+ */
+
+#define  GPIO_TIM3_CH1IN GPIO_TIM3_CH1IN_2
+#define  GPIO_TIM3_CH2IN GPIO_TIM3_CH2IN_1
+
 /* I2C
  *
  * The optional _GPIO configurations allow the I2C driver to manually
