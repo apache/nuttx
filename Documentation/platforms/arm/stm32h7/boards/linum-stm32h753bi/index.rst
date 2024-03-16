@@ -49,6 +49,8 @@ Expansion connector 2 features.
   - 6 PWM Channels
   - 10 ADCs
 
+Board documentation: https://wittetech.com/
+
 LEDs
 ====
 
@@ -301,42 +303,37 @@ LCD
 =======
 The LINUM-STM32H753BI use the LTDC to support one LCD with RGB connection.
 
-  =========== =====
-  LTDC        PINS
-  =========== =====
-  LTDC_B0     PF0
-  LTDC_B1     PJ13
-  LTDC_B2     PJ14
-  LTDC_B3     PJ15
-  LTDC_B4     PK3
-  LTDC_B5     PK4
-  LTDC_B6     PK5
-  LTDC_B7     PK6
-  LTDC_CLK    PI14
-  LTDC_DE     PK7
-  LTDC_G0     PJ7
-  LTDC_G1     PJ8
-  LTDC_G2     PJ9
-  LTDC_G3     PJ10
-  LTDC_G4     PJ11
-  LTDC_G5     PK0
-  LTDC_G6     PK1
-  LTDC_G7     PK2
-  LTDC_HSYNC  PI10
-  LTDC_R0     PI15
-  LTDC_R1     PJ0
-  LTDC_R2     PJ1
-  LTDC_R3     PJ2
-  LTDC_R4     PJ3
-  LTDC_R5     PJ4
-  LTDC_R6     PJ5
-  LTDC_R7     PJ6
-  LTDC_VSYNC  PI9
-  =========== =====
-
   ============= =====
-  PWM           PINS
+  LTDC          PINS
   ============= =====
+  LTDC_B0       PF0
+  LTDC_B1       PJ13
+  LTDC_B2       PJ14
+  LTDC_B3       PJ15
+  LTDC_B4       PK3
+  LTDC_B5       PK4
+  LTDC_B6       PK5
+  LTDC_B7       PK6
+  LTDC_CLK      PI14
+  LTDC_DE       PK7
+  LTDC_G0       PJ7
+  LTDC_G1       PJ8
+  LTDC_G2       PJ9
+  LTDC_G3       PJ10
+  LTDC_G4       PJ11
+  LTDC_G5       PK0
+  LTDC_G6       PK1
+  LTDC_G7       PK2
+  LTDC_HSYNC    PI10
+  LTDC_R0       PI15
+  LTDC_R1       PJ0
+  LTDC_R2       PJ1
+  LTDC_R3       PJ2
+  LTDC_R4       PJ3
+  LTDC_R5       PJ4
+  LTDC_R6       PJ5
+  LTDC_R7       PJ6
+  LTDC_VSYNC    PI9
   PWM_BACKLIGHT PH6
   ============= =====
 
@@ -352,15 +349,15 @@ The LINUM-STM32H753BI has one I2S output.
   I2S2_SDO PI3
   ======== =====
 
-BUZZER
+PWM
 =======
-The LINUM-STM32H753BI has a buzzer without internal oscillator
+The LINUM-STM32H753BI has a buzzer without internal oscillator connected to PB7
 
-  ======= =====
-  GPIO    PINS
-  ======= =====
-  BUZZER  PC13  
-  ======= =====
+  ========= =====
+  GPIO      PINS
+  ========= =====
+  BUZZER    PB7  
+  ========= =====
 
 ==============
 
@@ -451,10 +448,29 @@ The SD card can then be mounted by the NSH commands::
 eeprom
 ------
 
-Use dd command to write and read data from EEPROM as below:::
+Use **dd** command to write and read data from EEPROM as below:::
 
     nsh> dd if=/dev/console of=/dev/eeprom bs=1 count=35
     Witte-Tech Linum-STM32H753BI board
     nsh> dd if=/dev/eeprom of=/dev/console bs=4 count=35
     Witte-Tech Linum-STM32H753BI board
-    nsh> 
+    nsh>
+
+buzzer
+------
+
+This example use the timer 4 with channel 2 to generate a PWM output signal on buzzer pin::
+
+    nsh> ls /dev
+    /dev:
+    console
+    null
+    pwm0
+    rtc0
+    ttyS0
+    nsh> pwm -d 75 -t 3
+    pwm_main: starting output with frequency: 100 duty: 0000bfff
+    pwm_main: stopping output
+    nsh> pwm -f 300 -t 3
+    pwm_main: starting output with frequency: 300 duty: 0000bfff
+    pwm_main: stopping output
