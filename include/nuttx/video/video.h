@@ -77,82 +77,82 @@ struct v4l2_s
 
 struct v4l2_ops_s
 {
-  CODE int (*querycap)(FAR struct v4l2_s *ctx,
+  CODE int (*querycap)(FAR struct file *filep,
                        FAR struct v4l2_capability *cap);
   CODE int (*g_input)(FAR int *num);
-  CODE int (*enum_input)(FAR struct v4l2_s *ctx,
+  CODE int (*enum_input)(FAR struct file *filep,
                          FAR struct v4l2_input *input);
-  CODE int (*reqbufs)(FAR struct v4l2_s *ctx,
+  CODE int (*reqbufs)(FAR struct file *filep,
                       FAR struct v4l2_requestbuffers *reqbufs);
-  CODE int (*querybuf)(FAR struct v4l2_s *ctx,
+  CODE int (*querybuf)(FAR struct file *filep,
                        FAR struct v4l2_buffer *buf);
-  CODE int (*qbuf)(FAR struct v4l2_s *ctx,
+  CODE int (*qbuf)(FAR struct file *filep,
                    FAR struct v4l2_buffer *buf);
-  CODE int (*dqbuf)(FAR struct v4l2_s *ctx,
-                    FAR struct v4l2_buffer *buf, int oflags);
-  CODE int (*cancel_dqbuf)(FAR struct v4l2_s *ctx,
+  CODE int (*dqbuf)(FAR struct file *filep,
+                    FAR struct v4l2_buffer *buf);
+  CODE int (*cancel_dqbuf)(FAR struct file *filep,
                            enum v4l2_buf_type type);
-  CODE int (*g_fmt)(FAR struct v4l2_s *ctx,
+  CODE int (*g_fmt)(FAR struct file *filep,
                     FAR struct v4l2_format *fmt);
-  CODE int (*s_fmt)(FAR struct v4l2_s *ctx,
+  CODE int (*s_fmt)(FAR struct file *filep,
                     FAR struct v4l2_format *fmt);
-  CODE int (*try_fmt)(FAR struct v4l2_s *ctx,
+  CODE int (*try_fmt)(FAR struct file *filep,
                       FAR struct v4l2_format *v4l2);
-  CODE int (*g_parm)(FAR struct v4l2_s *ctx,
+  CODE int (*g_parm)(FAR struct file *filep,
                      FAR struct v4l2_streamparm *parm);
-  CODE int (*s_parm)(FAR struct v4l2_s *ctx,
+  CODE int (*s_parm)(FAR struct file *filep,
                      FAR struct v4l2_streamparm *parm);
-  CODE int (*streamon)(FAR struct v4l2_s *ctx,
+  CODE int (*streamon)(FAR struct file *filep,
                        FAR enum v4l2_buf_type *type);
-  CODE int (*streamoff)(FAR struct v4l2_s *ctx,
+  CODE int (*streamoff)(FAR struct file *filep,
                         FAR enum v4l2_buf_type *type);
-  CODE int (*do_halfpush)(FAR struct v4l2_s *ctx,
+  CODE int (*do_halfpush)(FAR struct file *filep,
                           bool enable);
-  CODE int (*takepict_start)(FAR struct v4l2_s *ctx,
+  CODE int (*takepict_start)(FAR struct file *filep,
                              int32_t capture_num);
-  CODE int (*takepict_stop)(FAR struct v4l2_s *ctx,
+  CODE int (*takepict_stop)(FAR struct file *filep,
                             bool halfpush);
-  CODE int (*s_selection)(FAR struct v4l2_s *ctx,
+  CODE int (*s_selection)(FAR struct file *filep,
                           FAR struct v4l2_selection *clip);
-  CODE int (*g_selection)(FAR struct v4l2_s *ctx,
+  CODE int (*g_selection)(FAR struct file *filep,
                           FAR struct v4l2_selection *clip);
-  CODE int (*queryctrl)(FAR struct v4l2_s *ctx,
+  CODE int (*queryctrl)(FAR struct file *filep,
                         FAR struct v4l2_queryctrl *ctrl);
-  CODE int (*query_ext_ctrl)(FAR struct v4l2_s *ctx,
+  CODE int (*query_ext_ctrl)(FAR struct file *filep,
                              FAR struct v4l2_query_ext_ctrl *ctrl);
-  CODE int (*querymenu)(FAR struct v4l2_s *ctx,
+  CODE int (*querymenu)(FAR struct file *filep,
                         FAR struct v4l2_querymenu *menu);
-  CODE int (*g_ctrl)(FAR struct v4l2_s *ctx,
+  CODE int (*g_ctrl)(FAR struct file *filep,
                      FAR struct v4l2_control *ctrl);
-  CODE int (*s_ctrl)(FAR struct v4l2_s *ctx,
+  CODE int (*s_ctrl)(FAR struct file *filep,
                      FAR struct v4l2_control *ctrl);
-  CODE int (*g_ext_ctrls)(FAR struct v4l2_s *ctx,
+  CODE int (*g_ext_ctrls)(FAR struct file *filep,
                           FAR struct v4l2_ext_controls *ctrls);
-  CODE int (*s_ext_ctrls)(FAR struct v4l2_s *ctx,
+  CODE int (*s_ext_ctrls)(FAR struct file *filep,
                           FAR struct v4l2_ext_controls *ctrls);
-  CODE int (*query_ext_ctrl_scene)(FAR struct v4l2_s *ctx,
+  CODE int (*query_ext_ctrl_scene)(FAR struct file *filep,
               FAR struct v4s_query_ext_ctrl_scene *ctrl);
-  CODE int (*querymenu_scene)(FAR struct v4l2_s *ctx,
+  CODE int (*querymenu_scene)(FAR struct file *filep,
               FAR struct v4s_querymenu_scene *menu);
-  CODE int (*g_ext_ctrls_scene)(FAR struct v4l2_s *ctx,
+  CODE int (*g_ext_ctrls_scene)(FAR struct file *filep,
               FAR struct v4s_ext_controls_scene *ctrls);
-  CODE int (*s_ext_ctrls_scene)(FAR struct v4l2_s *ctx,
+  CODE int (*s_ext_ctrls_scene)(FAR struct file *filep,
               FAR struct v4s_ext_controls_scene *ctrls);
-  CODE int (*enum_fmt)(FAR struct v4l2_s *ctx,
+  CODE int (*enum_fmt)(FAR struct file *filep,
                        FAR struct v4l2_fmtdesc *f);
-  CODE int (*enum_frminterval)(FAR struct v4l2_s *ctx,
+  CODE int (*enum_frminterval)(FAR struct file *filep,
                                FAR struct v4l2_frmivalenum *f);
-  CODE int (*enum_frmsize)(FAR struct v4l2_s *ctx,
+  CODE int (*enum_frmsize)(FAR struct file *filep,
                            FAR struct v4l2_frmsizeenum *f);
-  CODE int (*cropcap)(FAR struct v4l2_s *ctx,
+  CODE int (*cropcap)(FAR struct file *filep,
                       FAR struct v4l2_cropcap *cropcap);
-  CODE int (*dqevent)(FAR struct v4l2_s *ctx,
+  CODE int (*dqevent)(FAR struct file *filep,
                       FAR struct v4l2_event *event);
-  CODE int (*subscribe_event)(FAR struct v4l2_s *ctx,
+  CODE int (*subscribe_event)(FAR struct file *filep,
                               FAR struct v4l2_event_subscription *sub);
-  CODE int (*decoder_cmd)(FAR struct v4l2_s *ctx,
+  CODE int (*decoder_cmd)(FAR struct file *filep,
                           FAR struct v4l2_decoder_cmd *cmd);
-  CODE int (*encoder_cmd)(FAR struct v4l2_s *ctx,
+  CODE int (*encoder_cmd)(FAR struct file *filep,
                           FAR struct v4l2_encoder_cmd *cmd);
 };
 
