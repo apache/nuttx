@@ -152,6 +152,13 @@
 #define STM32_RCC_PLLSAICFGR_PLLSAIQ    RCC_PLLSAICFGR_PLLSAIQ(2)
 #define STM32_RCC_PLLSAICFGR_PLLSAIR    RCC_PLLSAICFGR_PLLSAIR(2)
 
+/* SAIx input frequency = 25 / M * N / Q / P
+ *   25000000 / 25 * 384 / 2 / 8
+ */
+
+#define STM32F7_SAI1_FREQUENCY           (49142857)
+#define STM32F7_SAI2_FREQUENCY           (49142857)
+
 /* Configure Dedicated Clock Configuration Register */
 
 #define STM32_RCC_DCKCFGR1_PLLI2SDIVQ  RCC_DCKCFGR1_PLLI2SDIVQ(1)
@@ -377,6 +384,10 @@
 
 /* DMA Channel/Stream Selections ********************************************/
 
+#define DMACHAN_SAI2_A          DMAMAP_SAI2_A
+#define DMACHAN_SAI2_B          DMAMAP_SAI2_B
+#define DMACHAN_SAI1_B          DMAMAP_SAI1_B
+
 /* SDMMC */
 
 /* Stream selections are arbitrary for now but might become important in the
@@ -469,6 +480,16 @@
 
 #define GPIO_I2C1_SCL        (GPIO_I2C1_SCL_1|GPIO_SPEED_50MHz)
 #define GPIO_I2C1_SDA        (GPIO_I2C1_SDA_1|GPIO_SPEED_50MHz)
+
+/* I2S2 - CS4344 configuration uses I2S2 */
+
+#define GPIO_I2S2_SD      (GPIO_I2S2_SD_1  | GPIO_SPEED_100MHz)  /* PB15 */
+#define GPIO_I2S2_CK      (GPIO_I2S2_CK_3  | GPIO_SPEED_100MHz)  /* PB13 */
+#define GPIO_I2S2_WS      (GPIO_I2S2_WS_1  | GPIO_SPEED_100MHz)  /* PB12 */
+#define GPIO_I2S2_MCK     (GPIO_I2S2_MCK_0 | GPIO_SPEED_100MHz)  /* PC6 */
+
+#define DMACHAN_I2S3_RX   DMAMAP_SPI3_RX_2
+#define DMACHAN_I2S3_TX   DMAMAP_SPI3_TX_2
 
 /* QSPI Mapping  */
 
