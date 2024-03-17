@@ -103,8 +103,10 @@ int video_framebuff_realloc_container(video_framebuff_t *fbuf, int sz)
 {
   vbuf_container_t *vbuf;
 
+  nxmutex_lock(&fbuf->lock_empty);
   if (fbuf->container_size == sz)
     {
+      nxmutex_unlock(&fbuf->lock_empty);
       return OK;
     }
 
@@ -119,6 +121,7 @@ int video_framebuff_realloc_container(video_framebuff_t *fbuf, int sz)
         }
       else
         {
+          nxmutex_unlock(&fbuf->lock_empty);
           return -ENOMEM;
         }
     }
@@ -130,6 +133,8 @@ int video_framebuff_realloc_container(video_framebuff_t *fbuf, int sz)
     }
 
   init_buf_chain(fbuf);
+  nxmutex_unlock(&fbuf->lock_empty);
+
   return OK;
 }
 
