@@ -24,7 +24,6 @@
 
 #include <string.h>
 #include <errno.h>
-#include <syslog.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
@@ -173,7 +172,7 @@ void video_framebuff_queue_container(video_framebuff_t *fbuf,
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&fbuf->lock_queue);
   if (fbuf->vbuf_top != NULL)
     {
       fbuf->vbuf_tail->next = tgt;
@@ -198,7 +197,7 @@ void video_framebuff_queue_container(video_framebuff_t *fbuf,
       tgt->next = NULL;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&fbuf->lock_queue, flags);
 }
 
 vbuf_container_t *video_framebuff_dq_valid_container(video_framebuff_t *fbuf)
@@ -206,13 +205,13 @@ vbuf_container_t *video_framebuff_dq_valid_container(video_framebuff_t *fbuf)
   vbuf_container_t *ret = NULL;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&fbuf->lock_queue);
   if (fbuf->vbuf_top != NULL && fbuf->vbuf_top != fbuf->vbuf_next)
     {
       ret = dequeue_vbuf_unsafe(fbuf);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&fbuf->lock_queue, flags);
   return ret;
 }
 
@@ -222,9 +221,9 @@ video_framebuff_get_vacant_container(video_framebuff_t *fbuf)
   vbuf_container_t *ret;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&fbuf->lock_queue);
   ret = fbuf->vbuf_next;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&fbuf->lock_queue, flags);
 
   return ret;
 }
@@ -233,17 +232,18 @@ void video_framebuff_capture_done(video_framebuff_t *fbuf)
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&fbuf->lock_queue);
   if (fbuf->vbuf_next != NULL)
     {
       fbuf->vbuf_next = fbuf->vbuf_next->next;
       if (fbuf->vbuf_next == fbuf->vbuf_top)  /* RING mode case. */
         {
-          syslog(LOG_WARNING, "video buffer is overflow.\n");
           fbuf->vbuf_top  = fbuf->vbuf_top->next;
           fbuf->vbuf_tail = fbuf->vbuf_tail->next;
         }
     }
+
+  spin_unlock_irqrestore(&fbuf->lock_queue, flags);
 }
 
 void video_framebuff_change_mode(video_framebuff_t  *fbuf,
@@ -251,7 +251,7 @@ void video_framebuff_change_mode(video_framebuff_t  *fbuf,
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&fbuf->lock_queue);
   if (fbuf->mode != mode)
     {
       if (fbuf->vbuf_tail)
@@ -270,7 +270,7 @@ void video_framebuff_change_mode(video_framebuff_t  *fbuf,
       fbuf->mode = mode;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&fbuf->lock_queue, flags);
 }
 
 vbuf_container_t *video_framebuff_pop_curr_container(video_framebuff_t *fbuf)
@@ -278,12 +278,12 @@ vbuf_container_t *video_framebuff_pop_curr_container(video_framebuff_t *fbuf)
   vbuf_container_t *ret = NULL;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&fbuf->lock_queue);
   if (fbuf->vbuf_top != NULL)
     {
       ret = dequeue_vbuf_unsafe(fbuf);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&fbuf->lock_queue, flags);
   return ret;
 }
