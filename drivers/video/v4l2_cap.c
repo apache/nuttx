@@ -209,72 +209,72 @@ static size_t get_bufsize(FAR video_format_t *vf);
 
 /* ioctl function for each cmds of ioctl */
 
-static int capture_querycap(FAR struct v4l2_s *v4l2,
+static int capture_querycap(FAR struct file *filep,
                             FAR struct v4l2_capability *cap);
 static int capture_g_input(FAR int *num);
-static int capture_enum_input(FAR struct v4l2_s *v4l2,
+static int capture_enum_input(FAR struct file *filep,
                               FAR struct v4l2_input *input);
-static int capture_reqbufs(FAR struct v4l2_s *v4l2,
+static int capture_reqbufs(FAR struct file *filep,
                            FAR struct v4l2_requestbuffers *reqbufs);
-static int capture_querybuf(FAR struct v4l2_s *v4l2,
+static int capture_querybuf(FAR struct file *filep,
                             FAR struct v4l2_buffer *buf);
-static int capture_qbuf(FAR struct v4l2_s *v4l2,
+static int capture_qbuf(FAR struct file *filep,
                         FAR struct v4l2_buffer *buf);
-static int capture_dqbuf(FAR struct v4l2_s *v4l2,
-                         FAR struct v4l2_buffer *buf, int oflags);
-static int capture_cancel_dqbuf(FAR struct v4l2_s *v4l2,
+static int capture_dqbuf(FAR struct file *filep,
+                         FAR struct v4l2_buffer *buf);
+static int capture_cancel_dqbuf(FAR struct file *filep,
                                 enum v4l2_buf_type type);
-static int capture_g_fmt(FAR struct v4l2_s *v4l2,
+static int capture_g_fmt(FAR struct file *filep,
                          FAR struct v4l2_format *fmt);
-static int capture_s_fmt(FAR struct v4l2_s *v4l2,
+static int capture_s_fmt(FAR struct file *filep,
                          FAR struct v4l2_format *fmt);
-static int capture_try_fmt(FAR struct v4l2_s *v4l2,
+static int capture_try_fmt(FAR struct file *filep,
                            FAR struct v4l2_format *fmt);
-static int capture_g_parm(FAR struct v4l2_s *v4l2,
+static int capture_g_parm(FAR struct file *filep,
                           FAR struct v4l2_streamparm *parm);
-static int capture_s_parm(FAR struct v4l2_s *v4l2,
+static int capture_s_parm(FAR struct file *filep,
                           FAR struct v4l2_streamparm *parm);
-static int capture_streamon(FAR struct v4l2_s *v4l2,
+static int capture_streamon(FAR struct file *filep,
                             FAR enum v4l2_buf_type *type);
-static int capture_streamoff(FAR struct v4l2_s *v4l2,
+static int capture_streamoff(FAR struct file *filep,
                              FAR enum v4l2_buf_type *type);
-static int capture_do_halfpush(FAR struct v4l2_s *v4l2,
+static int capture_do_halfpush(FAR struct file *filep,
                                bool enable);
-static int capture_takepict_start(FAR struct v4l2_s *v4l2,
+static int capture_takepict_start(FAR struct file *filep,
                                   int32_t capture_num);
-static int capture_takepict_stop(FAR struct v4l2_s *v4l2,
+static int capture_takepict_stop(FAR struct file *filep,
                                  bool halfpush);
-static int capture_s_selection(FAR struct v4l2_s *v4l2,
+static int capture_s_selection(FAR struct file *filep,
                                FAR struct v4l2_selection *clip);
-static int capture_g_selection(FAR struct v4l2_s *v4l2,
+static int capture_g_selection(FAR struct file *filep,
                                FAR struct v4l2_selection *clip);
-static int capture_queryctrl(FAR struct v4l2_s *v4l2,
+static int capture_queryctrl(FAR struct file *filep,
                              FAR struct v4l2_queryctrl *ctrl);
-static int capture_query_ext_ctrl(FAR struct v4l2_s *v4l2,
+static int capture_query_ext_ctrl(FAR struct file *filep,
                                   FAR struct v4l2_query_ext_ctrl *ctrl);
-static int capture_querymenu(FAR struct v4l2_s *v4l2,
+static int capture_querymenu(FAR struct file *filep,
                              FAR struct v4l2_querymenu *menu);
-static int capture_g_ctrl(FAR struct v4l2_s *v4l2,
+static int capture_g_ctrl(FAR struct file *filep,
                           FAR struct v4l2_control *ctrl);
-static int capture_s_ctrl(FAR struct v4l2_s *v4l2,
+static int capture_s_ctrl(FAR struct file *filep,
                           FAR struct v4l2_control *ctrl);
-static int capture_g_ext_ctrls(FAR struct v4l2_s *v4l2,
+static int capture_g_ext_ctrls(FAR struct file *filep,
                                FAR struct v4l2_ext_controls *ctrls);
-static int capture_s_ext_ctrls(FAR struct v4l2_s *v4l2,
+static int capture_s_ext_ctrls(FAR struct file *filep,
                                FAR struct v4l2_ext_controls *ctrls);
-static int capture_query_ext_ctrl_scene(FAR struct v4l2_s *v4l2,
+static int capture_query_ext_ctrl_scene(FAR struct file *filep,
              FAR struct v4s_query_ext_ctrl_scene *ctrl);
-static int capture_querymenu_scene(FAR struct v4l2_s *v4l2,
+static int capture_querymenu_scene(FAR struct file *filep,
              FAR struct v4s_querymenu_scene *menu);
-static int capture_g_ext_ctrls_scene(FAR struct v4l2_s *v4l2,
+static int capture_g_ext_ctrls_scene(FAR struct file *filep,
              FAR struct v4s_ext_controls_scene *ctrls);
-static int capture_s_ext_ctrls_scene(FAR struct v4l2_s *v4l2,
+static int capture_s_ext_ctrls_scene(FAR struct file *filep,
              FAR struct v4s_ext_controls_scene *ctrls);
-static int capture_enum_fmt(FAR struct v4l2_s *v4l2,
+static int capture_enum_fmt(FAR struct file *filep,
                             FAR struct v4l2_fmtdesc *f);
-static int capture_enum_frminterval(FAR struct v4l2_s *v4l2,
+static int capture_enum_frminterval(FAR struct file *filep,
                                     FAR struct v4l2_frmivalenum *f);
-static int capture_enum_frmsize(FAR struct v4l2_s *v4l2,
+static int capture_enum_frmsize(FAR struct file *filep,
                                 FAR struct v4l2_frmsizeenum *f);
 
 /* File operations function */
@@ -2054,10 +2054,11 @@ get_connected_imgsensor(FAR struct imgsensor_s **sensors,
  * Ioctl Functions
  ****************************************************************************/
 
-static int capture_querycap(FAR struct v4l2_s *v4l2,
+static int capture_querycap(FAR struct file *filep,
                             FAR struct v4l2_capability *cap)
 {
-  FAR capture_mng_t *cmng = (FAR capture_mng_t *)v4l2;
+  FAR struct inode *inode = filep->f_inode;
+  FAR capture_mng_t *cmng = inode->i_private;
   FAR const char *name;
 
   if (cmng == NULL || cap == NULL)
@@ -2089,10 +2090,11 @@ static int capture_g_input(FAR int *num)
   return OK;
 }
 
-static int capture_enum_input(FAR struct v4l2_s *v4l2,
+static int capture_enum_input(FAR struct file *filep,
                               FAR struct v4l2_input *input)
 {
-  FAR capture_mng_t *cmng = (FAR capture_mng_t *)v4l2;
+  FAR struct inode *inode = filep->f_inode;
+  FAR capture_mng_t *cmng = inode->i_private;
   FAR const char *name;
 
   if (cmng == NULL || input->index > 0)
@@ -2115,10 +2117,11 @@ static int capture_enum_input(FAR struct v4l2_s *v4l2,
   return OK;
 }
 
-static int capture_reqbufs(FAR struct v4l2_s *v4l2,
+static int capture_reqbufs(FAR struct file *filep,
                            FAR struct v4l2_requestbuffers *reqbufs)
 {
-  FAR capture_mng_t *cmng = (FAR capture_mng_t *)v4l2;
+  FAR struct inode *inode = filep->f_inode;
+  FAR capture_mng_t *cmng = inode->i_private;
   FAR capture_type_inf_t *type_inf;
   struct imgdata_s *imgdata = cmng->imgdata;
 
@@ -2191,10 +2194,11 @@ static int capture_reqbufs(FAR struct v4l2_s *v4l2,
   return ret;
 }
 
-static int capture_querybuf(FAR struct v4l2_s *v4l2,
+static int capture_querybuf(FAR struct file *filep,
                             FAR struct v4l2_buffer *buf)
 {
-  FAR capture_mng_t *cmng = (FAR capture_mng_t *)v4l2;
+  FAR struct inode *inode = filep->f_inode;
+  FAR capture_mng_t *cmng = inode->i_private;
   FAR capture_type_inf_t *type_inf;
 
   if (cmng == NULL || buf == NULL || buf->memory != V4L2_MEMORY_MMAP)
@@ -2219,10 +2223,11 @@ static int capture_querybuf(FAR struct v4l2_s *v4l2,
   return OK;
 }
 
-static int capture_qbuf(FAR struct v4l2_s *v4l2,
+static int capture_qbuf(FAR struct file *filep,
                         FAR struct v4l2_buffer *buf)
 {
-  FAR capture_mng_t *cmng = (FAR capture_mng_t *)v4l2;
+  FAR struct inode *inode = filep->f_inode;
+  FAR capture_mng_t *cmng = inode->i_private;
   FAR capture_type_inf_t *type_inf;
   FAR vbuf_container_t *container;
   enum capture_state_e next_capture_state;
@@ -2304,10 +2309,11 @@ static int capture_qbuf(FAR struct v4l2_s *v4l2,
   return OK;
 }
 
-static int capture_dqbuf(FAR struct v4l2_s *v4l2,
-                         FAR struct v4l2_buffer *buf, int oflags)
+static int capture_dqbuf(FAR struct file *filep,
+                         FAR struct v4l2_buffer *buf)
 {
-  FAR capture_mng_t *cmng = (FAR capture_mng_t *)v4l2;
+  FAR struct inode *inode = filep->f_inode;
+  FAR capture_mng_t *cmng = inode->i_private;
   FAR capture_type_inf_t *type_inf;
   FAR vbuf_container_t *container;
   FAR sem_t *dqbuf_wait_flg;
@@ -2328,7 +2334,7 @@ static int capture_dqbuf(FAR struct v4l2_s *v4l2,
   container = video_framebuff_dq_valid_container(&type_inf->bufinf);
   if (container == NULL)
     {
-      if (oflags & O_NONBLOCK)
+      if (filep->f_oflags & O_NONBLOCK)
         {
           return -EAGAIN;
         }
@@ -2379,10 +2385,11 @@ static int capture_dqbuf(FAR struct v4l2_s *v4l2,
   return OK;
 }
 
-static int capture_cancel_dqbuf(FAR struct v4l2_s *v4l2,
+static int capture_cancel_dqbuf(FAR struct file *filep,
                                 enum v4l2_buf_type type)
 {
-  FAR capture_mng_t *cmng = (FAR capture_mng_t *)v4l2;
+  FAR struct inode *inode = filep->f_inode;
+  FAR capture_mng_t *cmng = inode->i_private;
   FAR capture_type_inf_t *type_inf;
 
   if (cmng == NULL)
@@ -2410,10 +2417,11 @@ static int capture_cancel_dqbuf(FAR struct v4l2_s *v4l2,
   return nxsem_post(&type_inf->wait_capture.dqbuf_wait_flg);
 }
 
-static int capture_g_fmt(FAR struct v4l2_s *v4l2,
+static int capture_g_fmt(FAR struct file *filep,
                          FAR struct v4l2_format *fmt)
 {
-  FAR capture_mng_t *cmng = (FAR capture_mng_t *)v4l2;
+  FAR struct inode *inode = filep->f_inode;
+  FAR capture_mng_t *cmng = inode->i_private;
   FAR capture_type_inf_t *type_inf;
 
   if (cmng == NULL)
@@ -2435,10 +2443,11 @@ static int capture_g_fmt(FAR struct v4l2_s *v4l2,
   return OK;
 }
 
-static int capture_s_fmt(FAR struct v4l2_s *v4l2,
+static int capture_s_fmt(FAR struct file *filep,
                          FAR struct v4l2_format *fmt)
 {
-  FAR capture_mng_t *cmng = (FAR capture_mng_t *)v4l2;
+  FAR struct inode *inode = filep->f_inode;
+  FAR capture_mng_t *cmng = inode->i_private;
   FAR capture_type_inf_t *type_inf;
   int ret;
 
@@ -2447,7 +2456,7 @@ static int capture_s_fmt(FAR struct v4l2_s *v4l2,
       return -EINVAL;
     }
 
-  ret = capture_try_fmt(v4l2, fmt);
+  ret = capture_try_fmt(filep, fmt);
   if (ret != 0)
     {
       return ret;
@@ -2494,10 +2503,11 @@ static int capture_s_fmt(FAR struct v4l2_s *v4l2,
   return OK;
 }
 
-static int capture_try_fmt(FAR struct v4l2_s *v4l2,
+static int capture_try_fmt(FAR struct file *filep,
                            FAR struct v4l2_format *fmt)
 {
-  FAR capture_mng_t *cmng = (FAR capture_mng_t *)v4l2;
+  FAR struct inode *inode = filep->f_inode;
+  FAR capture_mng_t *cmng = inode->i_private;
   FAR capture_type_inf_t *type_inf;
   video_format_t vf[MAX_CAPTURE_FMT];
   uint8_t nr_fmt;
@@ -2562,10 +2572,11 @@ static int capture_try_fmt(FAR struct v4l2_s *v4l2,
                                 &type_inf->frame_interval);
 }
 
-static int capture_g_parm(FAR struct v4l2_s *v4l2,
+static int capture_g_parm(FAR struct file *filep,
                           FAR struct v4l2_streamparm *parm)
 {
-  FAR capture_mng_t *cmng = (FAR capture_mng_t *)v4l2;
+  FAR struct inode *inode = filep->f_inode;
+  FAR capture_mng_t *cmng = inode->i_private;
   FAR capture_type_inf_t *type_inf;
   int ret = -EINVAL;
 
@@ -2607,10 +2618,11 @@ static int capture_g_parm(FAR struct v4l2_s *v4l2,
   return OK;
 }
 
-static int capture_s_parm(FAR struct v4l2_s *v4l2,
+static int capture_s_parm(FAR struct file *filep,
                           FAR struct v4l2_streamparm *parm)
 {
-  FAR capture_mng_t *cmng = (FAR capture_mng_t *)v4l2;
+  FAR struct inode *inode = filep->f_inode;
+  FAR capture_mng_t *cmng = inode->i_private;
   FAR capture_type_inf_t *type_inf;
   int ret;
 
@@ -2650,10 +2662,11 @@ static int capture_s_parm(FAR struct v4l2_s *v4l2,
   return ret;
 }
 
-static int capture_streamon(FAR struct v4l2_s *v4l2,
+static int capture_streamon(FAR struct file *filep,
                             FAR enum v4l2_buf_type *type)
 {
-  FAR capture_mng_t *cmng = (FAR capture_mng_t *)v4l2;
+  FAR struct inode *inode = filep->f_inode;
+  FAR capture_mng_t *cmng = inode->i_private;
   FAR capture_type_inf_t *type_inf;
   enum capture_state_e next_capture_state;
   int ret = OK;
@@ -2693,10 +2706,11 @@ static int capture_streamon(FAR struct v4l2_s *v4l2,
   return ret;
 }
 
-static int capture_streamoff(FAR struct v4l2_s *v4l2,
+static int capture_streamoff(FAR struct file *filep,
                              FAR enum v4l2_buf_type *type)
 {
-  FAR capture_mng_t *cmng = (FAR capture_mng_t *)v4l2;
+  FAR struct inode *inode = filep->f_inode;
+  FAR capture_mng_t *cmng = inode->i_private;
   FAR capture_type_inf_t *type_inf;
   enum capture_state_e next_capture_state;
   irqstate_t flags;
@@ -2738,15 +2752,10 @@ static int capture_streamoff(FAR struct v4l2_s *v4l2,
   return ret;
 }
 
-static int capture_do_halfpush(FAR struct v4l2_s *v4l2, bool enable)
+static int capture_do_halfpush(FAR struct file *filep, bool enable)
 {
   struct v4l2_ext_controls ext_controls;
   struct v4l2_ext_control  control[2];
-
-  if (v4l2 == NULL)
-    {
-      return -EINVAL;
-    }
 
   /* Replace to VIDIOC_S_EXT_CTRLS format */
 
@@ -2762,13 +2771,14 @@ static int capture_do_halfpush(FAR struct v4l2_s *v4l2, bool enable)
 
   /* Execute VIDIOC_S_EXT_CTRLS */
 
-  return capture_s_ext_ctrls(v4l2, &ext_controls);
+  return capture_s_ext_ctrls(filep, &ext_controls);
 }
 
-static int capture_takepict_start(FAR struct v4l2_s *v4l2,
+static int capture_takepict_start(FAR struct file *filep,
                                   int32_t capture_num)
 {
-  FAR capture_mng_t *cmng = (FAR capture_mng_t *)v4l2;
+  FAR struct inode *inode = filep->f_inode;
+  FAR capture_mng_t *cmng = inode->i_private;
   enum capture_state_e next_capture_state;
   FAR vbuf_container_t *container;
   irqstate_t flags;
@@ -2833,10 +2843,11 @@ static int capture_takepict_start(FAR struct v4l2_s *v4l2,
   return ret;
 }
 
-static int capture_takepict_stop(FAR struct v4l2_s *v4l2,
+static int capture_takepict_stop(FAR struct file *filep,
                                  bool halfpush)
 {
-  FAR capture_mng_t *cmng = (FAR capture_mng_t *)v4l2;
+  FAR struct inode *inode = filep->f_inode;
+  FAR capture_mng_t *cmng = inode->i_private;
   enum capture_state_e next_capture_state;
   irqstate_t flags;
   int ret = OK;
@@ -2879,10 +2890,11 @@ static int capture_takepict_stop(FAR struct v4l2_s *v4l2,
   return ret;
 }
 
-static int capture_s_selection(FAR struct v4l2_s *v4l2,
+static int capture_s_selection(FAR struct file *filep,
                                FAR struct v4l2_selection *clip)
 {
-  FAR capture_mng_t *cmng = (FAR capture_mng_t *)v4l2;
+  FAR struct inode *inode = filep->f_inode;
+  FAR capture_mng_t *cmng = inode->i_private;
   FAR capture_type_inf_t *type_inf;
   uint32_t p_u32[IMGSENSOR_CLIP_NELEM];
   imgsensor_value_t val;
@@ -2942,10 +2954,11 @@ static int capture_s_selection(FAR struct v4l2_s *v4l2,
   return ret;
 }
 
-static int capture_g_selection(FAR struct v4l2_s *v4l2,
+static int capture_g_selection(FAR struct file *filep,
                                FAR struct v4l2_selection *clip)
 {
-  FAR capture_mng_t *cmng = (FAR capture_mng_t *)v4l2;
+  FAR struct inode *inode = filep->f_inode;
+  FAR capture_mng_t *cmng = inode->i_private;
   FAR capture_type_inf_t *type_inf;
 
   if (cmng == NULL || clip == NULL)
@@ -2963,13 +2976,13 @@ static int capture_g_selection(FAR struct v4l2_s *v4l2,
   return OK;
 }
 
-static int capture_queryctrl(FAR struct v4l2_s *v4l2,
+static int capture_queryctrl(FAR struct file *filep,
                              FAR struct v4l2_queryctrl *ctrl)
 {
   struct v4l2_query_ext_ctrl ext_ctrl;
   int ret;
 
-  if (v4l2 == NULL || ctrl == NULL)
+  if (ctrl == NULL)
     {
       return -EINVAL;
     }
@@ -2979,7 +2992,7 @@ static int capture_queryctrl(FAR struct v4l2_s *v4l2,
   ext_ctrl.ctrl_class = ctrl->ctrl_class;
   ext_ctrl.id         = ctrl->id;
 
-  ret = capture_query_ext_ctrl(v4l2, &ext_ctrl);
+  ret = capture_query_ext_ctrl(filep, &ext_ctrl);
   if (ret != OK)
     {
       return ret;
@@ -3008,10 +3021,11 @@ static int capture_queryctrl(FAR struct v4l2_s *v4l2,
   return OK;
 }
 
-static int capture_query_ext_ctrl(FAR struct v4l2_s *v4l2,
+static int capture_query_ext_ctrl(FAR struct file *filep,
                                   FAR struct v4l2_query_ext_ctrl *attr)
 {
-  FAR capture_mng_t *cmng = (FAR capture_mng_t *)v4l2;
+  FAR struct inode *inode = filep->f_inode;
+  FAR capture_mng_t *cmng = inode->i_private;
   imgsensor_supported_value_t value;
   imgsensor_capability_range_t *range = &value.u.range;
   imgsensor_capability_discrete_t *disc = &value.u.discrete;
@@ -3086,10 +3100,11 @@ static int capture_query_ext_ctrl(FAR struct v4l2_s *v4l2,
   return OK;
 }
 
-static int capture_querymenu(FAR struct v4l2_s *v4l2,
+static int capture_querymenu(FAR struct file *filep,
                              FAR struct v4l2_querymenu *menu)
 {
-  FAR capture_mng_t *cmng = (FAR capture_mng_t *)v4l2;
+  FAR struct inode *inode = filep->f_inode;
+  FAR capture_mng_t *cmng = inode->i_private;
   imgsensor_supported_value_t value;
   int ret;
 
@@ -3141,14 +3156,14 @@ static int capture_querymenu(FAR struct v4l2_s *v4l2,
   return OK;
 }
 
-static int capture_g_ctrl(FAR struct v4l2_s *v4l2,
+static int capture_g_ctrl(FAR struct file *filep,
                           FAR struct v4l2_control *ctrl)
 {
   struct v4l2_ext_controls ext_controls;
   struct v4l2_ext_control control;
   int ret;
 
-  if (v4l2 == NULL || ctrl == NULL)
+  if (ctrl == NULL)
     {
       return -EINVAL;
     }
@@ -3166,7 +3181,7 @@ static int capture_g_ctrl(FAR struct v4l2_s *v4l2,
 
   /* Execute VIDIOC_G_EXT_CTRLS */
 
-  ret = capture_g_ext_ctrls(v4l2, &ext_controls);
+  ret = capture_g_ext_ctrls(filep, &ext_controls);
   if (ret == OK)
     {
       /* Replace gotten value to VIDIOC_G_CTRL parameter */
@@ -3177,13 +3192,13 @@ static int capture_g_ctrl(FAR struct v4l2_s *v4l2,
   return ret;
 }
 
-static int capture_s_ctrl(FAR struct v4l2_s *v4l2,
+static int capture_s_ctrl(FAR struct file *filep,
                           FAR struct v4l2_control *ctrl)
 {
   struct v4l2_ext_controls ext_controls;
   struct v4l2_ext_control control;
 
-  if (v4l2 == NULL || ctrl == NULL)
+  if (ctrl == NULL)
     {
       return -EINVAL;
     }
@@ -3199,13 +3214,14 @@ static int capture_s_ctrl(FAR struct v4l2_s *v4l2,
 
   /* Execute VIDIOC_S_EXT_CTRLS */
 
-  return capture_s_ext_ctrls(v4l2, &ext_controls);
+  return capture_s_ext_ctrls(filep, &ext_controls);
 }
 
-static int capture_g_ext_ctrls(FAR struct v4l2_s *v4l2,
+static int capture_g_ext_ctrls(FAR struct file *filep,
                                FAR struct v4l2_ext_controls *ctrls)
 {
-  FAR capture_mng_t *cmng = (FAR capture_mng_t *)v4l2;
+  FAR struct inode *inode = filep->f_inode;
+  FAR capture_mng_t *cmng = inode->i_private;
   FAR struct v4l2_ext_control *control;
   int ret = OK;
   int cnt;
@@ -3244,10 +3260,11 @@ static int capture_g_ext_ctrls(FAR struct v4l2_s *v4l2,
   return ret;
 }
 
-static int capture_s_ext_ctrls(FAR struct v4l2_s *v4l2,
+static int capture_s_ext_ctrls(FAR struct file *filep,
                                FAR struct v4l2_ext_controls *ctrls)
 {
-  FAR capture_mng_t *cmng = (FAR capture_mng_t *)v4l2;
+  FAR struct inode *inode = filep->f_inode;
+  FAR capture_mng_t *cmng = inode->i_private;
   FAR struct v4l2_ext_control *control;
   int ret = OK;
   int cnt;
@@ -3296,32 +3313,33 @@ static int capture_s_ext_ctrls(FAR struct v4l2_s *v4l2,
   return ret;
 }
 
-static int capture_query_ext_ctrl_scene(FAR struct v4l2_s *v4l2,
+static int capture_query_ext_ctrl_scene(FAR struct file *filep,
              FAR struct v4s_query_ext_ctrl_scene *attr)
 {
-  if (v4l2 == NULL || attr == NULL)
+  if (attr == NULL)
     {
       return -EINVAL;
     }
 
-  return capture_query_ext_ctrl(v4l2, &attr->control);
+  return capture_query_ext_ctrl(filep, &attr->control);
 }
 
-static int capture_querymenu_scene(FAR struct v4l2_s *v4l2,
+static int capture_querymenu_scene(FAR struct file *filep,
              FAR struct v4s_querymenu_scene *menu)
 {
-  if (v4l2 == NULL || menu == NULL)
+  if (menu == NULL)
     {
       return -EINVAL;
     }
 
-  return capture_querymenu(v4l2, &menu->menu);
+  return capture_querymenu(filep, &menu->menu);
 }
 
-static int capture_s_ext_ctrls_scene(FAR struct v4l2_s *v4l2,
+static int capture_s_ext_ctrls_scene(FAR struct file *filep,
              FAR struct v4s_ext_controls_scene *ctrls)
 {
-  FAR capture_mng_t *cmng = (FAR capture_mng_t *)v4l2;
+  FAR struct inode *inode = filep->f_inode;
+  FAR capture_mng_t *cmng = inode->i_private;
   FAR struct v4l2_ext_control *control;
   int ret = OK;
   int cnt;
@@ -3346,10 +3364,11 @@ static int capture_s_ext_ctrls_scene(FAR struct v4l2_s *v4l2,
   return ret;
 }
 
-static int capture_g_ext_ctrls_scene(FAR struct v4l2_s *v4l2,
+static int capture_g_ext_ctrls_scene(FAR struct file *filep,
              FAR struct v4s_ext_controls_scene *ctrls)
 {
-  FAR capture_mng_t *cmng = (FAR capture_mng_t *)v4l2;
+  FAR struct inode *inode = filep->f_inode;
+  FAR capture_mng_t *cmng = inode->i_private;
   FAR struct v4l2_ext_control *control;
   int ret = OK;
   int cnt;
@@ -3376,10 +3395,11 @@ static int capture_g_ext_ctrls_scene(FAR struct v4l2_s *v4l2,
   return ret;
 }
 
-static int capture_enum_fmt(FAR struct v4l2_s *v4l2,
+static int capture_enum_fmt(FAR struct file *filep,
                             FAR struct v4l2_fmtdesc *f)
 {
-  FAR capture_mng_t *cmng = (FAR capture_mng_t *)v4l2;
+  FAR struct inode *inode = filep->f_inode;
+  FAR capture_mng_t *cmng = inode->i_private;
 
   if (cmng == NULL || f == NULL)
     {
@@ -3413,10 +3433,11 @@ static int capture_enum_fmt(FAR struct v4l2_s *v4l2,
   return 0;
 }
 
-static int capture_enum_frmsize(FAR struct v4l2_s *v4l2,
+static int capture_enum_frmsize(FAR struct file *filep,
                                 FAR struct v4l2_frmsizeenum *f)
 {
-  FAR capture_mng_t *cmng = (FAR capture_mng_t *)v4l2;
+  FAR struct inode *inode = filep->f_inode;
+  FAR capture_mng_t *cmng = inode->i_private;
 
   if (cmng == NULL || f == NULL)
     {
@@ -3457,10 +3478,11 @@ static int capture_enum_frmsize(FAR struct v4l2_s *v4l2,
   return 0;
 }
 
-static int capture_enum_frminterval(FAR struct v4l2_s *v4l2,
+static int capture_enum_frminterval(FAR struct file *filep,
                                     FAR struct v4l2_frmivalenum *f)
 {
-  FAR capture_mng_t *cmng = (FAR capture_mng_t *)v4l2;
+  FAR struct inode *inode = filep->f_inode;
+  FAR capture_mng_t *cmng = inode->i_private;
 
   if (cmng == NULL || f == NULL)
     {
