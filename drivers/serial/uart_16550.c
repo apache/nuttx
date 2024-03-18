@@ -754,7 +754,8 @@ static int u16550_setup(FAR struct uart_dev_s *dev)
   FAR struct u16550_s *priv = (FAR struct u16550_s *)dev->priv;
   uint16_t div;
   uint32_t lcr;
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL) || \
+    defined(CONFIG_16550_SET_MCR_OUT2)
   uint32_t mcr;
 #endif
 
@@ -844,6 +845,13 @@ static int u16550_setup(FAR struct uart_dev_s *dev)
                    (priv->rxtrigger << UART_FCR_RXTRIGGER_SHIFT |
                     UART_FCR_TXRST | UART_FCR_RXRST |
                     UART_FCR_FIFOEN));
+
+#ifdef CONFIG_16550_SET_MCR_OUT2
+  /* Set OUT2 bit in MCR register */
+
+  mcr = u16550_serialin(priv, UART_MCR_OFFSET);
+  u16550_serialout(priv, UART_MCR_OFFSET, mcr | UART_MCR_OUT2);
+#endif
 
   /* Set up the auto flow control */
 
