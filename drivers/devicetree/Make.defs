@@ -25,4 +25,8 @@ CSRCS += fdt.c
 DEPPATH += --dep-path devicetree
 VPATH += :devicetree
 
+ifeq ($(CONFIG_LIBC_FDT),y)
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)fdt$(DELIM)dtc$(DELIM)libfdt
+endif
+
 endif

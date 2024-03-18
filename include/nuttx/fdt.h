@@ -30,6 +30,11 @@
 #include <stdint.h>
 #include <nuttx/compiler.h>
 
+#ifdef CONFIG_LIBC_FDT
+#include <stdbool.h>
+#include <stddef.h>
+#endif /* CONFIG_LIBC_FDT */
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -57,6 +62,180 @@ struct fdt_header_s
 /****************************************************************************
  * Public Functions Definitions
  ****************************************************************************/
+
+#ifdef CONFIG_LIBC_FDT
+
+/****************************************************************************
+ * Name: fdt_get_node_label
+ *
+ * Description:
+ *  Get the label for a given node. The device tree must be compiled with
+ *  the -@ option in order for the symbol table to be generated.
+ *
+ * Input Parameters:
+ *  node:   The offset to the node to query.
+ *
+ * Returned Value:
+ *  Node label if found. NULL is returned if no label if found for the given
+ *  node.
+ *
+ ****************************************************************************/
+
+const char *fdt_get_node_label(int node);
+
+/****************************************************************************
+ * Name: fdt_get_size_cells
+ *
+ * Description:
+ *  Get the size cell count for the parent of the given node.
+ *
+ * Input Parameters:
+ *  node:   The offset to the node to query.
+ *
+ * Returned Value:
+ *  Numeric value of the size cells. Negative value returned on error.
+ *
+ ****************************************************************************/
+
+int fdt_get_size_cells(int node);
+
+/****************************************************************************
+ * Name: fdt_get_address_cells
+ *
+ * Description:
+ *  Get the address cell count for the parent of the given node.
+ *
+ * Input Parameters:
+ *  node:   The offset to the node to query.
+ *
+ * Returned Value:
+ *  Numeric value of the address cells. Negative value returned on error.
+ *
+ ****************************************************************************/
+
+int fdt_get_address_cells(int node);
+
+/****************************************************************************
+ * Name: fdt_get_clock_frequency_from_clocks
+ *
+ * Description:
+ *  Get the "clock-frequency" property for the given node, using the phandle
+ *  specified in the "clocks" property
+ *
+ * Input Parameters:
+ *  node:   The offset to the node to query.
+ *  offset: The offset the phandle in the clocks property
+ *
+ * Returned Value:
+ *  The value of the clock-frequency property of the node, following the
+ *  specified phandle in the "clocks"' property. Return 0 if:
+ *   - The node doesn't have a "clocks" property
+ *   - The offset given is larger than the length of the "clocks" property
+ *   - The phandle specified by the "clocks" property doesn't contain a
+ *     "clock-frequency" property.
+ *
+ ****************************************************************************/
+
+size_t fdt_get_clock_frequency_from_clocks(int node, int offset);
+
+/****************************************************************************
+ * Name: fdt_get_clock_frequency
+ *
+ * Description:
+ *  Get the value of the "clock-frequency" value for the given node.
+ *
+ * Input Parameters:
+ *  node:   The offset to the node to query.
+ *
+ * Returned Value:
+ *  The value of the clock-frequency property of the node. Zero is
+ *  returnded if the node doesn't contain a clock-frequency property.
+ *
+ ****************************************************************************/
+
+size_t fdt_get_clock_frequency(int node);
+
+/****************************************************************************
+ * Name: fdt_get_reg_by_name
+ *
+ * Description:
+ *  Get the value of the "reg" property by its offset in the "reg-names"
+ *  property
+ *
+ * Input Parameters:
+ *  node:   The offset to the node to query.
+ *  offset: The name of the register given in the "reg-names" property.
+ *
+ * Returned Value:
+ *  The register address determined by its name. Returns 0 if:
+ *   - The reg-names property doesn't exist.
+ *   - The reg property doesn't exits.
+ *   - The reg-names property doesn't contain the "reg_name".
+ *   - The offset combined with the size is larger than the width of the
+ *     "reg" field
+ *
+ ****************************************************************************/
+
+uintptr_t fdt_get_reg_by_name(int node, const char *reg_name);
+
+/****************************************************************************
+ * Name: fdt_get_reg
+ *
+ * Description:
+ *  Get the value of the "reg" property at a specified offset.
+ *
+ * Input Parameters:
+ *  node:   The offset to the node to query.
+ *  offset: The offset of the register address inside the reg property.
+ *
+ * Returned Value:
+ *  The register address at the given offset. Returns 0 if the "reg" property
+ *  doesn't exist or the offset if larger than the size of the "reg"
+ *  property.
+ *
+ ****************************************************************************/
+
+uintptr_t fdt_get_reg(int node, int offset);
+
+/****************************************************************************
+ * Name: fdt_get_irq
+ *
+ * Description:
+ *  Get the numeric value of the "interrupts" property in the selected node.
+ *
+ * Input Parameters:
+ *  node:   The offset to the node to query.
+ *  offset: The offset of the interrupt number in the interrupts property.
+ *
+ * Returned Value:
+ *  The interrupt number for the node. -ENOENT is return if the selected
+ *  node doesn't contain an "interrupts" property.
+ *
+ ****************************************************************************/
+
+int fdt_get_irq(int node, int offset);
+
+/****************************************************************************
+ * Name: fdt_device_is_available
+ *
+ * Description:
+ *  Test if node contains the "status" property with field set to okay or
+ *ok.
+ *
+ * Input Parameters:
+ *  node: The offset to the node to query.
+ *
+ * Returned Value:
+ *  true:  The node contains the status propertry, and is set to okay or
+ *         ok.
+ *  false: The node contains the status propertry, but it is set to
+ *         something other than ok or okay.
+ *  Always returns true if the node doesn't contain a status property.
+ *
+ ****************************************************************************/
+
+bool fdt_device_is_available(int node);
+#endif /* CONFIG_LIBC_FDT */
 
 /****************************************************************************
  * Name: fdt_register

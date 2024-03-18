@@ -8,3 +8,13 @@ menuconfig DEVICE_TREE
 	default n
 	---help---
 		Interface for interacting with devicetree.
+
+if LIBC_FDT
+
+config LIBC_FDT_PATH_MAX
+	int "Maximum length of a path in the FDT"
+	default 128
+	---help---
+		The path length is only used when resolving node labels from their
+		full path, in the fdt_get_node_label function call.
+endif
