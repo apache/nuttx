@@ -29,6 +29,7 @@ openlibm/openlibm: openlibm-$(OPENLIBM_VERSION).zip
 	$(Q) mv openlibm-$(OPENLIBM_VERSION) openlibm/openlibm
 	$(Q) patch -p0 < openlibm/0001-fix-build-float_t-error-float_t-has-not-been-declare.patch
 	$(Q) patch -p0 < openlibm/0002-add-math.h-and-complex.h-to-openlibm.patch
+	$(Q) patch -p0 < openlibm/0003-nuttx-openlibm-Fix-openlibm-M_PI-undeclared-error.patch
 endif
 
 distclean::
@@ -105,12 +106,10 @@ VPATH += :openlibm/openlibm/bsdsrc
 CFLAGS += ${INCDIR_PREFIX}openlibm/openlibm
 CFLAGS += ${INCDIR_PREFIX}openlibm/openlibm/$(ARCH)
 CFLAGS += ${INCDIR_PREFIX}openlibm/openlibm/src
-CFLAGS += ${DEFINE_PREFIX}__BSD_VISIBLE
 
 AFLAGS += ${INCDIR_PREFIX}openlibm/openlibm
 AFLAGS += ${INCDIR_PREFIX}openlibm/openlibm/$(ARCH)
 AFLAGS += ${INCDIR_PREFIX}openlibm/openlibm/src
-AFLAGS += ${DEFINE_PREFIX}__BSD_VISIBLE
 
 CSRCS := $(sort $(filter %.c,$(SRCS)))
 ASRCS := $(sort $(filter %.S,$(SRCS)))
