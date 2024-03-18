@@ -123,6 +123,14 @@ config MX8MP_SPI_DRIVER
 
 endif # MX8MP_SPI
 
+config MX8MP_RPMSG
+	bool "RPMSG support"
+	default y
+	depends on DEV_RPMSG
+	---help---
+		Enable RPMSG shared memory and behave as a client device that can be
+		accessed by the IMX8MP A53 core running Linux IMX.
+
 endmenu # i.MX8MP Peripheral Selection
 
 # These "hidden" settings determine whether a peripheral option is available
