@@ -454,11 +454,11 @@ static DRAM_ATTR void * g_light_sleep_pm_lock;
 
 /* BT interrupt private data */
 
-static sq_queue_t g_int_flags_free;
+static sq_queue_t g_ble_int_flags_free;
 
-static sq_queue_t g_int_flags_used;
+static sq_queue_t g_ble_int_flags_used;
 
-static struct irqstate_list_s g_int_flags[NR_IRQSTATE_FLAGS];
+static struct irqstate_list_s g_ble_int_flags[NR_IRQSTATE_FLAGS];
 
 /* Cached queue control variables */
 
@@ -823,13 +823,13 @@ static void IRAM_ATTR interrupt_disable(void)
 {
   struct irqstate_list_s *irqstate;
 
-  irqstate = (struct irqstate_list_s *)sq_remlast(&g_int_flags_free);
+  irqstate = (struct irqstate_list_s *)sq_remlast(&g_ble_int_flags_free);
 
-  DEBUGASSERT(irqstate != NULL);
+  ASSERT(irqstate != NULL);
 
   irqstate->flags = enter_critical_section();
 
-  sq_addlast((sq_entry_t *)irqstate, &g_int_flags_used);
+  sq_addlast((sq_entry_t *)irqstate, &g_ble_int_flags_used);
 }
 
 /****************************************************************************
@@ -851,13 +851,13 @@ static void IRAM_ATTR interrupt_restore(void)
 {
   struct irqstate_list_s *irqstate;
 
-  irqstate = (struct irqstate_list_s *)sq_remlast(&g_int_flags_used);
+  irqstate = (struct irqstate_list_s *)sq_remlast(&g_ble_int_flags_used);
 
-  DEBUGASSERT(irqstate != NULL);
+  ASSERT(irqstate != NULL);
 
   leave_critical_section(irqstate->flags);
 
-  sq_addlast((sq_entry_t *)irqstate, &g_int_flags_free);
+  sq_addlast((sq_entry_t *)irqstate, &g_ble_int_flags_free);
 }
 
 /****************************************************************************
@@ -2239,12 +2239,12 @@ int esp32s3_bt_controller_init(void)
   bool set_div_ret;
   int i;
 
-  sq_init(&g_int_flags_free);
-  sq_init(&g_int_flags_used);
+  sq_init(&g_ble_int_flags_free);
+  sq_init(&g_ble_int_flags_used);
 
   for (i = 0; i < NR_IRQSTATE_FLAGS; i++)
     {
-      sq_addlast((sq_entry_t *)&g_int_flags[i], &g_int_flags_free);
+      sq_addlast((sq_entry_t *)&g_ble_int_flags[i], &g_ble_int_flags_free);
     }
 
   if (btdm_controller_status != ESP_BT_CONTROLLER_STATUS_IDLE)
