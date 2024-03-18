@@ -88,9 +88,9 @@ First make sure that ``esptool.py`` is installed.  This tool is used to convert
 the ELF to a compatible ESP32-C6 image and to flash the image into the board.
 It can be installed with: ``pip install esptool``.
 
-Configure the NuttX project: ``./tools/configure.sh esp32c6-devkit:nsh``
-Run ``make`` to build the project.  Note that the conversion mentioned above is
-included in the build process.
+Configure the NuttX project: ``./tools/configure.sh esp32c6-devkitc:nsh`` or
+``./tools/configure.sh esp32c6-devkitm:nsh``Run ``make`` to build the project.
+Note that the conversion mentioned above is included in the build process.
 The ``esptool.py`` command to flash all the binaries is::
 
      esptool.py --chip esp32c6 --port /dev/ttyUSBXX --baud 921600 write_flash 0x0 bootloader.bin 0x8000 partition-table.bin 0x10000 nuttx.bin
