@@ -487,13 +487,13 @@ config ARCH_BOARD_ESP32S3_MEADOW
 		The ESP32-S3-Meadow is a small-sized board produced by WildernessLabs
 		featuring the ESP32-S3 CPU with 32MiB Octal SPI PSRAM and 64 MiB flash.
 
-config ARCH_BOARD_ESP32C6_DEVKIT
-	bool "Espressif ESP32-C6 Generic DevKit"
-	depends on ESPRESSIF_ESP32C6
+config ARCH_BOARD_ESP32C6_DEVKITC
+	bool "Espressif ESP32-C6-DevKitC-1"
+	depends on ARCH_CHIP_ESP32C6WROOM1
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
-		The ESP32-C6 DevKit features the ESP32-C6 CPU with a RISC-V core.
+		The ESP32-C6 DevKitC-1 features the ESP32-C6 CPU with a RISC-V core.
 
 config ARCH_BOARD_ESP32C6_DEVKITM
 	bool "Espressif ESP32-C6 DevKitM-1"
@@ -3172,7 +3172,7 @@ config ARCH_BOARD
 	default "esp32s3-meadow"            if ARCH_BOARD_ESP32S3_MEADOW
 	default "esp32s3-lcd-ev"            if ARCH_BOARD_ESP32S3_LCD_EV
 	default "esp32s3-box"               if ARCH_BOARD_ESP32S3_BOX
-	default "esp32c6-devkit"            if ARCH_BOARD_ESP32C6_DEVKIT
+	default "esp32c6-devkitc"           if ARCH_BOARD_ESP32C6_DEVKITC
 	default "esp32c6-devkitm"           if ARCH_BOARD_ESP32C6_DEVKITM
 	default "esp32h2-devkit"           	if ARCH_BOARD_ESP32H2_DEVKIT
 	default "et-stm32-stamp"            if ARCH_BOARD_ET_STM32_STAMP
@@ -4297,8 +4297,8 @@ endif
 if ARCH_BOARD_ESP32S3_BOX
 source "boards/xtensa/esp32s3/esp32s3-box/Kconfig"
 endif
-#if ARCH_BOARD_ESP32C6_DEVKIT
-#source "boards/risc-v/esp32c6/esp32c6-devkit/Kconfig"
+#if ARCH_BOARD_ESP32C6_DEVKITC
+#source "boards/risc-v/esp32c6/esp32c6-devkitc/Kconfig"
 #endif
 #if ARCH_BOARD_ESP32C6_DEVKITM
 #source "boards/risc-v/esp32c6/esp32c6-devkitm/Kconfig"
