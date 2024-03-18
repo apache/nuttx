@@ -567,10 +567,9 @@ uint16_t udp_select_port(uint8_t domain, FAR union ip_binding_u *u)
         }
     }
   while (udp_find_conn(domain, u, HTONS(g_last_udp_port), 0) != NULL
-#if defined(CONFIG_NET_NAT) && defined(CONFIG_NET_IPv4)
-         || (domain == PF_INET &&
-             ipv4_nat_port_inuse(IP_PROTO_UDP, u->ipv4.laddr,
-                                 HTONS(g_last_udp_port)))
+#ifdef CONFIG_NET_NAT
+         || nat_port_inuse(domain, IP_PROTO_UDP, (FAR union ip_addr_u *)u,
+                           HTONS(g_last_udp_port))
 #endif
   );
 
@@ -939,10 +938,9 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
                         0
 #endif
                        ) == NULL
-#if defined(CONFIG_NET_NAT) && defined(CONFIG_NET_IPv4)
-          && !(conn->domain == PF_INET &&
-               ipv4_nat_port_inuse(IP_PROTO_UDP, conn->u.ipv4.laddr,
-                                   portno))
+#ifdef CONFIG_NET_NAT
+          && !nat_port_inuse(conn->domain, IP_PROTO_UDP,
+                             (FAR union ip_addr_u *)&conn->u, portno)
 #endif
       )
         {

@@ -26,7 +26,6 @@
 
 #include <assert.h>
 #include <debug.h>
-#include <errno.h>
 #include <stdint.h>
 #include <string.h>
 #include <sys/types.h>
@@ -43,28 +42,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* Adjust checksums in headers. */
-
-#define chksum_adjust(chksum,optr,nptr,len) \
-  net_chksum_adjust((FAR uint16_t *)(chksum), (FAR uint16_t *)(optr), len, \
-                    (FAR uint16_t *)(nptr), len)
-
-/* Getting IP & Port to manipulate from L3/L4 header. */
-
-#define MANIP_IPADDR(iphdr,manip_type) \
-  ((manip_type) == NAT_MANIP_SRC ? (iphdr)->srcipaddr : (iphdr)->destipaddr)
-
-#define MANIP_PORT(l4hdr,manip_type) \
-  ((manip_type) == NAT_MANIP_SRC ? &(l4hdr)->srcport : &(l4hdr)->destport)
-
-/* Getting peer IP & Port (just other than MANIP) */
-
-#define PEER_IPADDR(iphdr,manip_type) \
-  ((manip_type) != NAT_MANIP_SRC ? (iphdr)->srcipaddr : (iphdr)->destipaddr)
-
-#define PEER_PORT(l4hdr,manip_type) \
-  ((manip_type) != NAT_MANIP_SRC ? &(l4hdr)->srcport : &(l4hdr)->destport)
 
 /* Getting L4 header from IPv4 header. */
 
@@ -151,10 +128,10 @@ static void ipv4_nat_ip_adjust(FAR struct ipv4_hdr_s *ipv4,
 {
   if (l4chksum != NULL)
     {
-      chksum_adjust(l4chksum, old_ip, &new_ip, sizeof(new_ip));
+      nat_chksum_adjust(l4chksum, old_ip, &new_ip, sizeof(new_ip));
     }
 
-  chksum_adjust(&ipv4->ipchksum, old_ip, &new_ip, sizeof(new_ip));
+  nat_chksum_adjust(&ipv4->ipchksum, old_ip, &new_ip, sizeof(new_ip));
   net_ipv4addr_hdrcopy(old_ip, &new_ip);
 }
 
@@ -176,7 +153,7 @@ static void ipv4_nat_port_adjust(FAR uint16_t *l4chksum,
 {
   if (l4chksum != NULL)
     {
-      chksum_adjust(l4chksum, old_port, &new_port, sizeof(new_port));
+      nat_chksum_adjust(l4chksum, old_port, &new_port, sizeof(new_port));
     }
 
   *old_port = new_port;
@@ -400,8 +377,8 @@ ipv4_nat_inbound_icmp(FAR struct ipv4_hdr_s *ipv4,
              * and the overall checksum of IPv4 header will not change.
              */
 
-            chksum_adjust(&icmp->icmpchksum, inner_l4hdrbak, inner_l4,
-                          inner_l4hdrlen);
+            nat_chksum_adjust(&icmp->icmpchksum, inner_l4hdrbak, inner_l4,
+                              inner_l4hdrlen);
 
             return entry;
           }
@@ -639,8 +616,8 @@ ipv4_nat_outbound_icmp(FAR struct net_driver_s *dev,
              * and the overall checksum of IPv4 header will not change.
              */
 
-            chksum_adjust(&icmp->icmpchksum, inner_l4hdrbak, inner_l4,
-                          inner_l4hdrlen);
+            nat_chksum_adjust(&icmp->icmpchksum, inner_l4hdrbak, inner_l4,
+                              inner_l4hdrlen);
 
             return entry;
           }
@@ -746,74 +723,6 @@ ipv4_nat_outbound_internal(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ipv4_nat_enable
- *
- * Description:
- *   Enable NAT function on a network device.
- *
- * Input Parameters:
- *   dev   - The device on which the outbound packets will be masqueraded.
- *
- * Returned Value:
- *   Zero is returned if NAT function is successfully enabled on the device;
- *   A negated errno value is returned if failed.
- *
- ****************************************************************************/
-
-int ipv4_nat_enable(FAR struct net_driver_s *dev)
-{
-  net_lock();
-
-  if (IFF_IS_NAT(dev->d_flags))
-    {
-      nwarn("WARNING: NAT was already enabled for %s!\n", dev->d_ifname);
-      net_unlock();
-      return -EEXIST;
-    }
-
-  IFF_SET_NAT(dev->d_flags);
-
-  net_unlock();
-  return OK;
-}
-
-/****************************************************************************
- * Name: ipv4_nat_disable
- *
- * Description:
- *   Disable NAT function on a network device.
- *
- * Input Parameters:
- *   dev   - The device on which the NAT function will be disabled.
- *
- * Returned Value:
- *   Zero is returned if NAT function is successfully disabled on the device;
- *   A negated errno value is returned if failed.
- *
- ****************************************************************************/
-
-int ipv4_nat_disable(FAR struct net_driver_s *dev)
-{
-  net_lock();
-
-  if (!IFF_IS_NAT(dev->d_flags))
-    {
-      nwarn("WARNING: NAT was not enabled for %s!\n", dev->d_ifname);
-      net_unlock();
-      return -ENODEV;
-    }
-
-  /* Clear entries related to dev. */
-
-  ipv4_nat_entry_clear(dev);
-
-  IFF_CLR_NAT(dev->d_flags);
-
-  net_unlock();
-  return OK;
-}
-
-/****************************************************************************
  * Name: ipv4_nat_inbound
  *
  * Description:
@@ -897,30 +806,6 @@ int ipv4_nat_outbound(FAR struct net_driver_s *dev,
     }
 
   return OK;
-}
-
-/****************************************************************************
- * Name: ipv4_nat_port_inuse
- *
- * Description:
- *   Check whether a port is currently used by NAT.
- *
- * Input Parameters:
- *   protocol      - The L4 protocol of the packet.
- *   ip            - The IP bind with the port (in network byte order).
- *   port          - The port number to check (in network byte order).
- *
- * Returned Value:
- *   True if the port is already used by NAT, otherwise false.
- *
- ****************************************************************************/
-
-bool ipv4_nat_port_inuse(uint8_t protocol, in_addr_t ip, uint16_t port)
-{
-  FAR struct ipv4_nat_entry *entry =
-      ipv4_nat_inbound_entry_find(protocol, ip, port, INADDR_ANY, 0, false);
-
-  return entry != NULL;
 }
 
 #endif /* CONFIG_NET_NAT && CONFIG_NET_IPv4 */

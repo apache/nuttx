@@ -31,12 +31,8 @@
 #include <nuttx/hashtable.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/nuttx.h>
-#include <nuttx/queue.h>
 
-#include "icmp/icmp.h"
 #include "nat/nat.h"
-#include "tcp/tcp.h"
-#include "udp/udp.h"
 
 #if defined(CONFIG_NET_NAT) && defined(CONFIG_NET_IPv4)
 
@@ -84,152 +80,6 @@ static inline uint32_t ipv4_nat_outbound_key(in_addr_t local_ip,
 }
 
 /****************************************************************************
- * Name: ipv4_nat_select_port_without_stack
- *
- * Description:
- *   Select an available port number for TCP/UDP protocol, or id for ICMP.
- *   Used when corresponding stack is disabled.
- *
- * Input Parameters:
- *   protocol   - The L4 protocol of the packet.
- *   ip         - The IP bind with the port (in network byte order).
- *   portno     - The local port (in network byte order), as reference.
- *
- * Returned Value:
- *   port number on success; 0 on failure
- *
- ****************************************************************************/
-
-#if (defined(CONFIG_NET_TCP) && defined(CONFIG_NET_TCP_NO_STACK)) || \
-    (defined(CONFIG_NET_UDP) && defined(CONFIG_NET_UDP_NO_STACK)) || \
-    (defined(CONFIG_NET_ICMP) && !defined(CONFIG_NET_ICMP_SOCKET))
-
-static uint16_t ipv4_nat_select_port_without_stack(
-    uint8_t protocol, in_addr_t ip, uint16_t portno)
-{
-  uint16_t hport = NTOHS(portno);
-  while (ipv4_nat_port_inuse(protocol, ip, portno))
-    {
-      ++hport;
-      if (hport >= CONFIG_NET_DEFAULT_MAX_PORT ||
-          hport < CONFIG_NET_DEFAULT_MIN_PORT)
-        {
-          hport = CONFIG_NET_DEFAULT_MIN_PORT;
-        }
-
-      portno = HTONS(hport);
-    }
-
-  return portno;
-}
-
-#endif
-
-/****************************************************************************
- * Name: ipv4_nat_select_port
- *
- * Description:
- *   Select an available port number for TCP/UDP protocol, or id for ICMP.
- *
- * Input Parameters:
- *   dev        - The device on which the packet will be sent.
- *   protocol   - The L4 protocol of the packet.
- *   local_port - The local port of the packet, as reference.
- *
- * Returned Value:
- *   port number on success; 0 on failure
- *
- ****************************************************************************/
-
-static uint16_t ipv4_nat_select_port(FAR struct net_driver_s *dev,
-                                     uint8_t protocol,
-                                     uint16_t local_port)
-{
-  switch (protocol)
-    {
-#ifdef CONFIG_NET_TCP
-      case IP_PROTO_TCP:
-        {
-#ifndef CONFIG_NET_TCP_NO_STACK
-          /* Try to select local_port first. */
-
-          int ret = tcp_selectport(PF_INET,
-                        (FAR const union ip_addr_u *)&dev->d_ipaddr,
-                        local_port);
-
-          /* If failed, try select another unused port. */
-
-          if (ret < 0)
-            {
-              ret = tcp_selectport(PF_INET,
-                        (FAR const union ip_addr_u *)&dev->d_ipaddr, 0);
-            }
-
-          return ret > 0 ? ret : 0;
-#else
-          return ipv4_nat_select_port_without_stack(IP_PROTO_TCP,
-                                                    dev->d_ipaddr,
-                                                    local_port);
-#endif
-        }
-#endif
-
-#ifdef CONFIG_NET_UDP
-      case IP_PROTO_UDP:
-        {
-#ifndef CONFIG_NET_UDP_NO_STACK
-          union ip_binding_u u;
-          u.ipv4.laddr = dev->d_ipaddr;
-          u.ipv4.raddr = INADDR_ANY;
-
-          /* TODO: Try keep origin port as possible. */
-
-          return HTONS(udp_select_port(PF_INET, &u));
-#else
-          return ipv4_nat_select_port_without_stack(IP_PROTO_UDP,
-                                                    dev->d_ipaddr,
-                                                    local_port);
-#endif
-        }
-#endif
-
-#ifdef CONFIG_NET_ICMP
-      case IP_PROTO_ICMP:
-        {
-#ifdef CONFIG_NET_ICMP_SOCKET
-          uint16_t id = local_port;
-          uint16_t hid = NTOHS(id);
-          while (icmp_findconn(dev, id) ||
-                 ipv4_nat_port_inuse(IP_PROTO_ICMP, dev->d_ipaddr, id))
-            {
-              ++hid;
-              if (hid >= CONFIG_NET_DEFAULT_MAX_PORT ||
-                  hid < CONFIG_NET_DEFAULT_MIN_PORT)
-                {
-                  hid = CONFIG_NET_DEFAULT_MIN_PORT;
-                }
-
-              id = HTONS(hid);
-            }
-
-          return id;
-#else
-          return ipv4_nat_select_port_without_stack(IP_PROTO_ICMP,
-                                                    dev->d_ipaddr,
-                                                    local_port);
-#endif
-        }
-#endif
-    }
-
-  /* TODO: Currently select original port for unsupported protocol, maybe
-   * return zero to indicate failure.
-   */
-
-  return local_port;
-}
-
-/****************************************************************************
  * Name: ipv4_nat_entry_refresh
  *
  * Description:
@@ -242,40 +92,7 @@ static uint16_t ipv4_nat_select_port(FAR struct net_driver_s *dev,
 
 static void ipv4_nat_entry_refresh(FAR struct ipv4_nat_entry *entry)
 {
-  /* Note: May add logic here to move recent node to head side if each chain
-   * in hashtable is still too long (with long expire time).
-   */
-
-  switch (entry->protocol)
-    {
-#ifdef CONFIG_NET_TCP
-      case IP_PROTO_TCP:
-        /* NOTE: According to RFC2663, Section 2.6, Page 5, we can reduce the
-         * time to 4min if we have received FINs from both side of one
-         * connection, and keep 24h for other TCP connections. However, full
-         * cone NAT may have multiple connections on one entry, so this
-         * optimization may not work and we only use one expiration time.
-         */
-
-        entry->expire_time = TICK2SEC(clock_systime_ticks()) +
-                             CONFIG_NET_NAT_TCP_EXPIRE_SEC;
-        break;
-#endif
-
-#ifdef CONFIG_NET_UDP
-      case IP_PROTO_UDP:
-        entry->expire_time = TICK2SEC(clock_systime_ticks()) +
-                             CONFIG_NET_NAT_UDP_EXPIRE_SEC;
-        break;
-#endif
-
-#ifdef CONFIG_NET_ICMP
-      case IP_PROTO_ICMP:
-        entry->expire_time = TICK2SEC(clock_systime_ticks()) +
-                             CONFIG_NET_NAT_ICMP_EXPIRE_SEC;
-        break;
-#endif
-  }
+  entry->expire_time = nat_expire_time(entry->protocol);
 }
 
 /****************************************************************************
@@ -556,6 +373,7 @@ ipv4_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
 {
   FAR hash_node_t *p;
   FAR hash_node_t *tmp;
+  uint16_t external_port;
   int32_t current_time = TICK2SEC(clock_systime_ticks());
 
 #if CONFIG_NET_NAT_ENTRY_RECLAIM_SEC > 0
@@ -602,7 +420,8 @@ ipv4_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
         "proto=%" PRIu8 ", local=%" PRIx32 ":%" PRIu16 ", try create one.\n",
         protocol, local_ip, local_port);
 
-  uint16_t external_port = ipv4_nat_select_port(dev, protocol, local_port);
+  external_port = nat_port_select(dev, PF_INET, protocol,
+                          (FAR union ip_addr_u *)&dev->d_ipaddr, local_port);
   if (!external_port)
     {
       nwarn("WARNING: Failed to find an available port!\n");

@@ -75,10 +75,10 @@ Configuration Options
 Usage
 =====
 
-  - :c:func:`ipv4_nat_enable()`
-  - :c:func:`ipv4_nat_disable()`
+  - :c:func:`nat_enable()`
+  - :c:func:`nat_disable()`
 
-.. c:function:: int ipv4_nat_enable(FAR struct net_driver_s *dev);
+.. c:function:: int nat_enable(FAR struct net_driver_s *dev);
 
   Enable NAT function on a network device, on which the outbound packets
   will be masqueraded.
@@ -86,7 +86,7 @@ Usage
   :return: Zero is returned if NAT function is successfully enabled on
     the device; A negated errno value is returned if failed.
 
-.. c:function:: int ipv4_nat_disable(FAR struct net_driver_s *dev);
+.. c:function:: int nat_disable(FAR struct net_driver_s *dev);
 
   Disable NAT function on a network device.
 
@@ -107,7 +107,7 @@ Validated on Ubuntu 22.04 x86_64 with NuttX SIM by following steps:
       # CONFIG_SIM_NET_BRIDGE is not set
       CONFIG_SIM_NETDEV_NUMBER=2
 
-2. Call ``ipv4_nat_enable`` on one dev on startup, or manually enable NAT
+2. Call ``nat_enable`` on one dev on startup, or manually enable NAT
    with ``iptables`` command (either may work).
 
   ..  code-block:: c
@@ -116,7 +116,7 @@ Validated on Ubuntu 22.04 x86_64 with NuttX SIM by following steps:
       int netdriver_init(void)
       {
         ...
-        ipv4_nat_enable(&g_sim_dev[0]);
+        nat_enable(&g_sim_dev[0]);
         ...
       }
 

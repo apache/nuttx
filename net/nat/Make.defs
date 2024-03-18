@@ -22,6 +22,8 @@
 
 ifeq ($(CONFIG_NET_NAT),y)
 
+NET_CSRCS += nat.c
+
 ifeq ($(CONFIG_NET_IPv4),y)
 NET_CSRCS += ipv4_nat.c ipv4_nat_entry.c
 endif
