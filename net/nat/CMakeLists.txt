@@ -22,8 +22,12 @@
 
 if(CONFIG_NET_NAT)
 
+  list(APPEND SRCS nat.c)
+
   if(CONFIG_NET_IPv4)
-    target_sources(net PRIVATE ipv4_nat.c ipv4_nat_entry.c)
+    list(APPEND SRCS ipv4_nat.c ipv4_nat_entry.c)
   endif()
+
+  target_sources(net PRIVATE ${SRCS})
 
 endif()
