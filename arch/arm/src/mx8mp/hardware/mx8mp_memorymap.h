@@ -105,6 +105,8 @@
 #define MX8M_ECSPI2                  0x30830000u
 #define MX8M_ECSPI3                  0x30840000u
 
+#define MX8M_MUB                     0x30AB0000u
+
 #define MX8M_GPIO                    0x30200000u
 #define MX8M_GPIO1                   (MX8M_GPIO + 0x10000 * 0)
 #define MX8M_GPIO2                   (MX8M_GPIO + 0x10000 * 1)
