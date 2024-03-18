@@ -1253,7 +1253,7 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcmbim_s *priv,
 
             else if (ifdesc->classid  == USB_CLASS_CDC_DATA &&
                      ifdesc->subclass == CDC_SUBCLASS_NONE &&
-                     ifdesc->protocol == CDC_DATA_PROTO_NTB)
+                     ifdesc->protocol == CDC_DATA_PROTO_MBIMNTB)
               {
                 priv->dataif  = ifdesc->ifno;
                 found        |= USBHOST_DATAIFFOUND;

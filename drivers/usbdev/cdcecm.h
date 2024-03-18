@@ -58,4 +58,7 @@
 #define CDCECM_SELFPOWERED       (0)
 #define CDCECM_REMOTEWAKEUP      (0)
 
+#define CDCECM_LOW_BITRATE       (19 * 64 * 1 * 1000 * 8)
+#define CDCECM_HIGH_BITRATE      (13 * 512 * 8 * 1000 * 8)
+
 #endif /* __DRIVERS_USBDEV_CDCECM_H */

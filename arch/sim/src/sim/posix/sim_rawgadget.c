@@ -79,7 +79,11 @@
 #define UDC_NAME_LENGTH_MAX         128
 
 #define USB_RAW_EP0_MAX_LEN         256
-#define USB_RAW_EP_MAX_LEN          1024
+#ifdef CONFIG_NET_CDCNCM
+#  define USB_RAW_EP_MAX_LEN        16384
+#else
+#  define USB_RAW_EP_MAX_LEN        1024
+#endif
 
 #define USB_RAW_RX_BUF_NUM          8
 
