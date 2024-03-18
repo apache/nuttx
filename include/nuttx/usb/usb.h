@@ -65,10 +65,35 @@
 #define MSBYTE(u16)                             ((u16) >> 8)     /* Get MS byte from uint16_t */
 #define LSBYTE(u16)                             ((u16) & 0xff)   /* Get LS byte from uint16_t */
 
-#define GETUINT16(p)                            ((uint16_t)((uint16_t)(p[1] << 8) | (uint16_t)p[0]))
-#define GETUINT32(p)                            ((uint32_t)((uint32_t)p[3] << 24) | \
-                                                           ((uint32_t)p[2] << 16) | \
-                                                           ((uint32_t)p[1] << 8) | (uint32_t)p[0])
+#define GETUINT16(p)                            ((uint16_t)(((uint16_t)(p)[1] << 8) | \
+                                                             (uint16_t)(p)[0]))
+
+#define PUTUINT16(p, v)                         do                                   \
+                                                  {                                  \
+                                                    uint8_t *__p;       \
+                                                     __p   = (FAR uint8_t *)(p);     \
+                                                    *__p++ = ((uint16_t)(v) & 0xff); \
+                                                    *__p   = ((uint16_t)(v) >> 8);   \
+                                                  }                                  \
+                                                while (0)
+
+/* All 32-bit values must be little-endian */
+
+#define GETUINT32(p)                            ((uint32_t)(((uint32_t)(p)[3] << 24) | \
+                                                            ((uint32_t)(p)[2] << 16) | \
+                                                            ((uint32_t)(p)[1] << 8)  | \
+                                                             (uint32_t)(p)[0]))
+
+#define PUTUINT32(p, v)                         do                                          \
+                                                  {                                         \
+                                                    uint8_t *__p;              \
+                                                     __p   = (FAR uint8_t *)(p);            \
+                                                    *__p++ = ((uint32_t)(v)        & 0xff); \
+                                                    *__p++ = ((uint32_t)(v) >> 8)  & 0xff;  \
+                                                    *__p++ = ((uint32_t)(v) >> 16) & 0xff;  \
+                                                    *__p   = ((uint32_t)(v) >> 24);         \
+                                                  }                                         \
+                                                while (0)
 
 /* USB directions (in endpoint addresses) */
 
