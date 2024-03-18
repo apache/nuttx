@@ -46,6 +46,8 @@ config ARCH_CHIP_LITEX
 	select ARCH_DCACHE
 	select ARCH_HAVE_TICKLESS
 	select ARCH_HAVE_RESET
+	select LIBC_FDT
+	select DEVICE_TREE
 	---help---
 		Enjoy Digital LITEX VEXRISCV softcore processor (RV32IMA).
 
