@@ -255,6 +255,26 @@ void net_ipv6_pref2mask(net_ipv6addr_t mask, uint8_t preflen);
 #endif
 
 /****************************************************************************
+ * Name: net_ipv6_payload
+ *
+ * Description:
+ *   Given a pointer to the IPv6 header, this function will return a pointer
+ *   to the beginning of the L4 payload.
+ *
+ * Input Parameters:
+ *   ipv6  - A pointer to the IPv6 header.
+ *   proto - The location to return the protocol number in the IPv6 header.
+ *
+ * Returned Value:
+ *   A pointer to the beginning of the payload.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+FAR void *net_ipv6_payload(FAR struct ipv6_hdr_s *ipv6, FAR uint8_t *proto);
+#endif
+
+/****************************************************************************
  * Name: net_iob_concat
  *
  * Description:
