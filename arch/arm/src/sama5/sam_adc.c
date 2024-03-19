@@ -481,7 +481,9 @@ static void sam_adc_gain(struct sam_adc_s *priv);
 static void sam_adc_analogchange(struct sam_adc_s *priv);
 static void sam_adc_sequencer(struct sam_adc_s *priv);
 static void sam_adc_channels(struct sam_adc_s *priv);
+#if defined(CONFIG_SAMA5_ADC_PERIODIC_TRIG)
 static void sam_adc_trigperiod(struct sam_adc_s *priv, uint32_t period);
+#endif
 #endif
 
 /****************************************************************************
@@ -858,7 +860,7 @@ static int sam_adc_dmasetup(struct sam_adc_s *priv, uint8_t *buffer,
  *   None
  *
  ****************************************************************************/
-
+#if defined(CONFIG_SAMA5_ADC_PERIODIC_TRIG)
 static void sam_adc_trigperiod(struct sam_adc_s *priv, uint32_t period)
 {
   uint32_t trigper;
@@ -909,6 +911,7 @@ static void sam_adc_trigperiod(struct sam_adc_s *priv, uint32_t period)
   regval |=  ADC_TRGR_TRGPER(trigper);
   sam_adc_putreg(priv, SAM_ADC_TRGR, regval);
 }
+#endif
 
 /****************************************************************************
  * ADC interrupt handling
@@ -1103,7 +1106,11 @@ static int sam_adc_bind(struct adc_dev_s *dev,
 
 static void sam_adc_reset(struct adc_dev_s *dev)
 {
+#if defined(CONFIG_SAMA5_ADC_REGDEBUG) || \
+    defined(CONFIG_SAMA5_ADC_DMA)      || \
+    defined(CONFIG_SAMA5_ADC_TIOATRIG)
   struct sam_adc_s *priv = (struct sam_adc_s *)dev->ad_priv;
+#endif
   uint32_t regval;
 
   ainfo("Resetting..\n");
