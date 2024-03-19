@@ -39,6 +39,7 @@
 #  include "riscv_mmu.h"
 #endif
 
+#include "sched/sched.h"
 #include "riscv_internal.h"
 #include "chip.h"
 
@@ -80,6 +81,9 @@ static const char *g_reasons_str[RISCV_MAX_EXCEPTION + 1] =
 
 int riscv_exception(int mcause, void *regs, void *args)
 {
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  FAR struct tcb_s *tcb = this_task();
+#endif
   uintptr_t cause = mcause & RISCV_IRQ_MASK;
 
   _alert("EXCEPTION: %s. MCAUSE: %" PRIxREG ", EPC: %" PRIxREG
@@ -87,10 +91,33 @@ int riscv_exception(int mcause, void *regs, void *args)
          mcause > RISCV_MAX_EXCEPTION ? "Unknown" : g_reasons_str[cause],
          cause, READ_CSR(CSR_EPC), READ_CSR(CSR_TVAL));
 
-  _alert("PANIC!!! Exception = %" PRIxREG "\n", cause);
-  up_irq_save();
-  CURRENT_REGS = regs;
-  PANIC_WITH_REGS("panic", regs);
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
+    {
+      _alert("Segmentation fault in PID %d: %s\n", tcb->pid, tcb->name);
+
+      tcb->flags |= TCB_FLAG_FORCED_CANCEL;
+
+      /* Return to _exit function in privileged mode with argument SIGSEGV */
+
+      CURRENT_REGS[REG_EPC] = (uintptr_t)_exit;
+      CURRENT_REGS[REG_A0] = SIGSEGV;
+      CURRENT_REGS[REG_INT_CTX] |= STATUS_PPP;
+
+      /* Continue with kernel stack in use. The frame(s) in kernel stack
+       * are no longer needed, so just set it to top
+       */
+
+      CURRENT_REGS[REG_SP] = (uintptr_t)tcb->xcp.ktopstk;
+    }
+  else
+#endif
+    {
+      _alert("PANIC!!! Exception = %" PRIxREG "\n", cause);
+      up_irq_save();
+      CURRENT_REGS = regs;
+      PANIC_WITH_REGS("panic", regs);
+    }
 
   return 0;
 }
