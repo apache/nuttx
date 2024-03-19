@@ -274,10 +274,6 @@ int i3c_device_send_ccc_cmd(FAR const struct i3c_device *dev,
   i3c_bus_normaluse_lock(dev->bus);
 
   ret = i3c_master_send_ccc_cmd_locked(master, cmd);
-  if (ret < 0)
-    {
-      ret = cmd->err;
-    }
 
   i3c_bus_normaluse_unlock(dev->bus);
 
