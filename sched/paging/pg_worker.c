@@ -136,7 +136,8 @@ static void pg_callback(FAR struct tcb_s *tcb, int result)
   pginfo("g_pftcb: %p\n", g_pftcb);
   if (g_pftcb)
     {
-      FAR struct tcb_s *htcb = (FAR struct tcb_s *)g_waitingforfill.head;
+      FAR struct tcb_s *htcb = (FAR struct tcb_s *)
+                               list_waitingforfill()->head;
       FAR struct tcb_s *wtcb = nxsched_get_tcb(g_pgworker);
 
       /* Find the higher priority between the task waiting for the fill to
@@ -225,7 +226,7 @@ static inline bool pg_dequeue(void)
     {
       /* Remove the TCB from the head of the list (if any) */
 
-      g_pftcb = (FAR struct tcb_s *)dq_remfirst(&g_waitingforfill);
+      g_pftcb = (FAR struct tcb_s *)dq_remfirst(list_waitingforfill());
       pginfo("g_pftcb: %p\n", g_pftcb);
       if (g_pftcb != NULL)
         {

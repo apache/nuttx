@@ -72,7 +72,7 @@ static FAR struct tcb_s *nxsched_nexttcb(FAR struct tcb_s *tcb)
     {
       /* Search for the highest priority task that can run on tcb->cpu. */
 
-      for (rtrtcb = (FAR struct tcb_s *)g_readytorun.head;
+      for (rtrtcb = (FAR struct tcb_s *)list_readytorun()->head;
            rtrtcb != NULL && !CPU_ISSET(tcb->cpu, &rtrtcb->affinity);
            rtrtcb = rtrtcb->flink);
 
@@ -154,7 +154,7 @@ static inline void nxsched_running_setpriority(FAR struct tcb_s *tcb,
               DEBUGASSERT(check == false);
               UNUSED(check);
 
-              nxsched_add_prioritized(nxttcb, &g_pendingtasks);
+              nxsched_add_prioritized(nxttcb, list_pendingtasks());
               nxttcb->task_state = TSTATE_TASK_PENDING;
 
 #ifdef CONFIG_SMP
