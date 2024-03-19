@@ -181,30 +181,34 @@ int group_kill_children(FAR struct tcb_s *tcb)
 
 #if defined(CONFIG_GROUP_KILL_CHILDREN_TIMEOUT_MS) && \
             CONFIG_GROUP_KILL_CHILDREN_TIMEOUT_MS != 0
-  /* Send SIGTERM for each first */
 
-  group_foreachchild(tcb->group, group_kill_children_handler,
-                     (FAR void *)((uintptr_t)tcb->pid));
-
-  /* Wait a bit for child exit */
-
-  ret = CONFIG_GROUP_KILL_CHILDREN_TIMEOUT_MS;
-  while (1)
+  if ((tcb->flags & TCB_FLAG_FORCED_CANCEL) == 0)
     {
-      if (sq_empty(&tcb->group->tg_members) ||
-          sq_is_singular(&tcb->group->tg_members))
-        {
-          break;
-        }
+      /* Send SIGTERM for each first */
 
-      nxsig_usleep(USEC_PER_MSEC);
+      group_foreachchild(tcb->group, group_kill_children_handler,
+                         (FAR void *)((uintptr_t)tcb->pid));
+
+      /* Wait a bit for child exit */
+
+      ret = CONFIG_GROUP_KILL_CHILDREN_TIMEOUT_MS;
+      while (1)
+        {
+          if (sq_empty(&tcb->group->tg_members) ||
+              sq_is_singular(&tcb->group->tg_members))
+            {
+              break;
+            }
+
+          nxsig_usleep(USEC_PER_MSEC);
 
 #  if CONFIG_GROUP_KILL_CHILDREN_TIMEOUT_MS > 0
-      if (--ret < 0)
-        {
-          break;
-        }
+          if (--ret < 0)
+            {
+              break;
+            }
 #  endif
+        }
     }
 #endif
 
