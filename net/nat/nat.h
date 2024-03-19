@@ -68,7 +68,7 @@
  * Public Types
  ****************************************************************************/
 
-struct ipv4_nat_entry
+struct ipv4_nat_entry_s
 {
   hash_node_t hash_inbound;
   hash_node_t hash_outbound;
@@ -100,7 +100,7 @@ struct ipv4_nat_entry
   int32_t    expire_time;    /* The expiration time of this entry. */
 };
 
-struct ipv6_nat_entry
+struct ipv6_nat_entry_s
 {
   hash_node_t    hash_inbound;
   hash_node_t    hash_outbound;
@@ -119,6 +119,9 @@ struct ipv6_nat_entry
 
   int32_t        expire_time;   /* The expiration time of this entry. */
 };
+
+typedef struct ipv4_nat_entry_s ipv4_nat_entry_t;
+typedef struct ipv6_nat_entry_s ipv6_nat_entry_t;
 
 /* NAT IP/Port manipulate type, to indicate whether to manipulate source or
  * destination IP/Port in a packet.
@@ -320,13 +323,13 @@ void ipv6_nat_entry_clear(FAR struct net_driver_s *dev);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_NAT44
-FAR struct ipv4_nat_entry *
+FAR ipv4_nat_entry_t *
 ipv4_nat_inbound_entry_find(uint8_t protocol, in_addr_t external_ip,
                             uint16_t external_port, in_addr_t peer_ip,
                             uint16_t peer_port, bool refresh);
 #endif
 #ifdef CONFIG_NET_NAT66
-FAR struct ipv6_nat_entry *
+FAR ipv6_nat_entry_t *
 ipv6_nat_inbound_entry_find(uint8_t protocol,
                             const net_ipv6addr_t external_ip,
                             uint16_t external_port,
@@ -356,14 +359,14 @@ ipv6_nat_inbound_entry_find(uint8_t protocol,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_NAT44
-FAR struct ipv4_nat_entry *
+FAR ipv4_nat_entry_t *
 ipv4_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
                              in_addr_t local_ip, uint16_t local_port,
                              in_addr_t peer_ip, uint16_t peer_port,
                              bool try_create);
 #endif
 #ifdef CONFIG_NET_NAT66
-FAR struct ipv6_nat_entry *
+FAR ipv6_nat_entry_t *
 ipv6_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
                              const net_ipv6addr_t local_ip,
                              uint16_t local_port,

@@ -60,11 +60,11 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static FAR struct ipv4_nat_entry *
+static FAR ipv4_nat_entry_t *
 ipv4_nat_inbound_internal(FAR struct ipv4_hdr_s *ipv4,
                           enum nat_manip_type_e manip_type);
 
-static FAR struct ipv4_nat_entry *
+static FAR ipv4_nat_entry_t *
 ipv4_nat_outbound_internal(FAR struct net_driver_s *dev,
                            FAR struct ipv4_hdr_s *ipv4,
                            enum nat_manip_type_e manip_type);
@@ -180,16 +180,16 @@ static void ipv4_nat_port_adjust(FAR uint16_t *l4chksum,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
-static FAR struct ipv4_nat_entry *
+static FAR ipv4_nat_entry_t *
 ipv4_nat_inbound_tcp(FAR struct ipv4_hdr_s *ipv4,
                      enum nat_manip_type_e manip_type)
 {
-  FAR struct tcp_hdr_s      *tcp           = L4_HDR(ipv4);
-  FAR uint16_t              *external_ip   = MANIP_IPADDR(ipv4, manip_type);
-  FAR uint16_t              *external_port = MANIP_PORT(tcp, manip_type);
-  FAR uint16_t              *peer_ip       = PEER_IPADDR(ipv4, manip_type);
-  FAR uint16_t              *peer_port     = PEER_PORT(tcp, manip_type);
-  FAR struct ipv4_nat_entry *entry         =
+  FAR struct tcp_hdr_s *tcp           = L4_HDR(ipv4);
+  FAR uint16_t         *external_ip   = MANIP_IPADDR(ipv4, manip_type);
+  FAR uint16_t         *external_port = MANIP_PORT(tcp, manip_type);
+  FAR uint16_t         *peer_ip       = PEER_IPADDR(ipv4, manip_type);
+  FAR uint16_t         *peer_port     = PEER_PORT(tcp, manip_type);
+  FAR ipv4_nat_entry_t *entry         =
                  ipv4_nat_inbound_entry_find(IP_PROTO_TCP,
                                              net_ip4addr_conv32(external_ip),
                                              *external_port,
@@ -233,17 +233,17 @@ ipv4_nat_inbound_tcp(FAR struct ipv4_hdr_s *ipv4,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_UDP
-static FAR struct ipv4_nat_entry *
+static FAR ipv4_nat_entry_t *
 ipv4_nat_inbound_udp(FAR struct ipv4_hdr_s *ipv4,
                      enum nat_manip_type_e manip_type)
 {
-  FAR struct udp_hdr_s      *udp           = L4_HDR(ipv4);
-  FAR uint16_t              *external_ip   = MANIP_IPADDR(ipv4, manip_type);
-  FAR uint16_t              *external_port = MANIP_PORT(udp, manip_type);
-  FAR uint16_t              *peer_ip       = PEER_IPADDR(ipv4, manip_type);
-  FAR uint16_t              *peer_port     = PEER_PORT(udp, manip_type);
-  FAR uint16_t              *udpchksum;
-  FAR struct ipv4_nat_entry *entry         =
+  FAR struct udp_hdr_s *udp           = L4_HDR(ipv4);
+  FAR uint16_t         *external_ip   = MANIP_IPADDR(ipv4, manip_type);
+  FAR uint16_t         *external_port = MANIP_PORT(udp, manip_type);
+  FAR uint16_t         *peer_ip       = PEER_IPADDR(ipv4, manip_type);
+  FAR uint16_t         *peer_port     = PEER_PORT(udp, manip_type);
+  FAR uint16_t         *udpchksum;
+  FAR ipv4_nat_entry_t *entry         =
                  ipv4_nat_inbound_entry_find(IP_PROTO_UDP,
                                              net_ip4addr_conv32(external_ip),
                                              *external_port,
@@ -287,14 +287,14 @@ ipv4_nat_inbound_udp(FAR struct ipv4_hdr_s *ipv4,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMP
-static FAR struct ipv4_nat_entry *
+static FAR ipv4_nat_entry_t *
 ipv4_nat_inbound_icmp(FAR struct ipv4_hdr_s *ipv4,
                       enum nat_manip_type_e manip_type)
 {
-  FAR struct icmp_hdr_s     *icmp = L4_HDR(ipv4);
-  FAR uint16_t              *external_ip = MANIP_IPADDR(ipv4, manip_type);
-  FAR uint16_t              *peer_ip     = PEER_IPADDR(ipv4, manip_type);
-  FAR struct ipv4_nat_entry *entry;
+  FAR struct icmp_hdr_s *icmp = L4_HDR(ipv4);
+  FAR uint16_t          *external_ip = MANIP_IPADDR(ipv4, manip_type);
+  FAR uint16_t          *peer_ip     = PEER_IPADDR(ipv4, manip_type);
+  FAR ipv4_nat_entry_t  *entry;
 
   switch (icmp->type)
     {
@@ -409,17 +409,17 @@ ipv4_nat_inbound_icmp(FAR struct ipv4_hdr_s *ipv4,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
-static FAR struct ipv4_nat_entry *
+static FAR ipv4_nat_entry_t *
 ipv4_nat_outbound_tcp(FAR struct net_driver_s *dev,
                       FAR struct ipv4_hdr_s *ipv4,
                       enum nat_manip_type_e manip_type)
 {
-  FAR struct tcp_hdr_s      *tcp        = L4_HDR(ipv4);
-  FAR uint16_t              *local_ip   = MANIP_IPADDR(ipv4, manip_type);
-  FAR uint16_t              *local_port = MANIP_PORT(tcp, manip_type);
-  FAR uint16_t              *peer_ip    = PEER_IPADDR(ipv4, manip_type);
-  FAR uint16_t              *peer_port  = PEER_PORT(tcp, manip_type);
-  FAR struct ipv4_nat_entry *entry;
+  FAR struct tcp_hdr_s *tcp        = L4_HDR(ipv4);
+  FAR uint16_t         *local_ip   = MANIP_IPADDR(ipv4, manip_type);
+  FAR uint16_t         *local_port = MANIP_PORT(tcp, manip_type);
+  FAR uint16_t         *peer_ip    = PEER_IPADDR(ipv4, manip_type);
+  FAR uint16_t         *peer_port  = PEER_PORT(tcp, manip_type);
+  FAR ipv4_nat_entry_t *entry;
 
   /* Only create entry when it's the outermost packet (manip type is SRC). */
 
@@ -465,18 +465,18 @@ ipv4_nat_outbound_tcp(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_UDP
-static FAR struct ipv4_nat_entry *
+static FAR ipv4_nat_entry_t *
 ipv4_nat_outbound_udp(FAR struct net_driver_s *dev,
                       FAR struct ipv4_hdr_s *ipv4,
                       enum nat_manip_type_e manip_type)
 {
-  FAR struct udp_hdr_s      *udp        = L4_HDR(ipv4);
-  FAR uint16_t              *local_ip   = MANIP_IPADDR(ipv4, manip_type);
-  FAR uint16_t              *local_port = MANIP_PORT(udp, manip_type);
-  FAR uint16_t              *peer_ip    = PEER_IPADDR(ipv4, manip_type);
-  FAR uint16_t              *peer_port  = PEER_PORT(udp, manip_type);
-  FAR uint16_t              *udpchksum;
-  FAR struct ipv4_nat_entry *entry;
+  FAR struct udp_hdr_s *udp        = L4_HDR(ipv4);
+  FAR uint16_t         *local_ip   = MANIP_IPADDR(ipv4, manip_type);
+  FAR uint16_t         *local_port = MANIP_PORT(udp, manip_type);
+  FAR uint16_t         *peer_ip    = PEER_IPADDR(ipv4, manip_type);
+  FAR uint16_t         *peer_port  = PEER_PORT(udp, manip_type);
+  FAR uint16_t         *udpchksum;
+  FAR ipv4_nat_entry_t *entry;
 
   /* Only create entry when it's the outermost packet (manip type is SRC). */
 
@@ -521,15 +521,15 @@ ipv4_nat_outbound_udp(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMP
-static FAR struct ipv4_nat_entry *
+static FAR ipv4_nat_entry_t *
 ipv4_nat_outbound_icmp(FAR struct net_driver_s *dev,
                        FAR struct ipv4_hdr_s *ipv4,
                        enum nat_manip_type_e manip_type)
 {
-  FAR struct icmp_hdr_s     *icmp     = L4_HDR(ipv4);
-  FAR uint16_t              *local_ip = MANIP_IPADDR(ipv4, manip_type);
-  FAR uint16_t              *peer_ip  = PEER_IPADDR(ipv4, manip_type);
-  FAR struct ipv4_nat_entry *entry;
+  FAR struct icmp_hdr_s *icmp     = L4_HDR(ipv4);
+  FAR uint16_t          *local_ip = MANIP_IPADDR(ipv4, manip_type);
+  FAR uint16_t          *peer_ip  = PEER_IPADDR(ipv4, manip_type);
+  FAR ipv4_nat_entry_t  *entry;
 
   switch (icmp->type)
     {
@@ -647,7 +647,7 @@ ipv4_nat_outbound_icmp(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static FAR struct ipv4_nat_entry *
+static FAR ipv4_nat_entry_t *
 ipv4_nat_inbound_internal(FAR struct ipv4_hdr_s *ipv4,
                           enum nat_manip_type_e manip_type)
 {
@@ -692,7 +692,7 @@ ipv4_nat_inbound_internal(FAR struct ipv4_hdr_s *ipv4,
  *
  ****************************************************************************/
 
-static FAR struct ipv4_nat_entry *
+static FAR ipv4_nat_entry_t *
 ipv4_nat_outbound_internal(FAR struct net_driver_s *dev,
                            FAR struct ipv4_hdr_s *ipv4,
                            enum nat_manip_type_e manip_type)
@@ -744,7 +744,7 @@ void ipv4_nat_inbound(FAR struct net_driver_s *dev,
   if (IFF_IS_NAT(dev->d_flags) &&
       net_ipv4addr_hdrcmp(ipv4->destipaddr, &dev->d_ipaddr))
     {
-      FAR struct ipv4_nat_entry *entry =
+      FAR ipv4_nat_entry_t *entry =
           ipv4_nat_inbound_internal(ipv4, NAT_MANIP_DST);
       if (!entry)
         {
@@ -788,7 +788,7 @@ int ipv4_nat_outbound(FAR struct net_driver_s *dev,
     {
       /* TODO: Skip broadcast? */
 
-      FAR struct ipv4_nat_entry *entry =
+      FAR ipv4_nat_entry_t *entry =
           ipv4_nat_outbound_internal(dev, ipv4, manip_type);
       if (manip_type == NAT_MANIP_SRC && !entry)
         {
