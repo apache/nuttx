@@ -263,11 +263,11 @@ void esp_lowputc_config_pins(const struct esp_uart_s *priv)
 {
   /* Configure the pins */
 
-  esp_configgpio(priv->txpin, OUTPUT);
-  esp_gpio_matrix_out(priv->txpin, priv->txsig, 0, 0);
-
   esp_configgpio(priv->rxpin, INPUT | PULLUP);
   esp_gpio_matrix_in(priv->rxpin, priv->rxsig, 0);
+
+  esp_configgpio(priv->txpin, OUTPUT);
+  esp_gpio_matrix_out(priv->txpin, priv->txsig, 0, 0);
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   if (priv->iflow)
