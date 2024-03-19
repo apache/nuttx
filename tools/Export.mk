@@ -81,7 +81,7 @@ endif
 	@echo "OBJEXT=\"$(OBJEXT)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "STRIP=\"$(STRIP)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "NUTTX_ARCH=\"$(CONFIG_ARCH)\"" >> $(EXPORTDIR)/makeinfo.sh
-ifdef NUTTX_ARCH_CHIP
+ifdef CONFIG_ARCH_CHIP
 	@echo "NUTTX_ARCH_CHIP=\"$(CONFIG_ARCH_CHIP)\"" >> $(EXPORTDIR)/makeinfo.sh
 else
 	@echo "NUTTX_ARCH_CHIP=\"$(ARCH_CHIP_CUSTOM_NAME)\"" >> $(EXPORTDIR)/makeinfo.sh
