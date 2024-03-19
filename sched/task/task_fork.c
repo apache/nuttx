@@ -318,7 +318,7 @@ void nxtask_abort_fork(FAR struct task_tcb_s *child, int errcode)
 {
   /* The TCB was added to the active task list by nxtask_setup_scheduler() */
 
-  dq_rem((FAR dq_entry_t *)child, &g_inactivetasks);
+  dq_rem((FAR dq_entry_t *)child, list_inactivetasks());
 
   /* Release the TCB */
 

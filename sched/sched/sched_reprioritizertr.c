@@ -82,7 +82,7 @@ bool nxsched_reprioritize_rtr(FAR struct tcb_s *tcb, int priority)
    * time to add any pending tasks back into the ready-to-run list.
    */
 
-  if (switch_needed && g_pendingtasks.head)
+  if (switch_needed && list_pendingtasks()->head)
     {
       nxsched_merge_pending();
     }

@@ -143,7 +143,7 @@ void pg_miss(void)
   /* Add the task to the specified blocked task list */
 
   ftcb->task_state = TSTATE_WAIT_PAGEFILL;
-  nxsched_add_prioritized(ftcb, &g_waitingforfill);
+  nxsched_add_prioritized(ftcb, list_waitingforfill());
 
   /* Now, perform the context switch if one is needed */
 

@@ -110,7 +110,7 @@ static void nxsig_timeout(wdparm_t arg)
 
       /* Remove the task from waitting list */
 
-      dq_rem((FAR dq_entry_t *)wtcb, &g_waitingforsignal);
+      dq_rem((FAR dq_entry_t *)wtcb, list_waitingforsignal());
 
       /* Add the task to ready-to-run task list, and
        * perform the context switch if one is needed
@@ -177,7 +177,7 @@ void nxsig_wait_irq(FAR struct tcb_s *wtcb, int errcode)
 
       /* Remove the task from waitting list */
 
-      dq_rem((FAR dq_entry_t *)wtcb, &g_waitingforsignal);
+      dq_rem((FAR dq_entry_t *)wtcb, list_waitingforsignal());
 
       /* Add the task to ready-to-run task list, and
        * perform the context switch if one is needed
@@ -361,7 +361,7 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
               /* Add the task to the specified blocked task list */
 
               rtcb->task_state = TSTATE_WAIT_SIG;
-              dq_addlast((FAR dq_entry_t *)rtcb, &g_waitingforsignal);
+              dq_addlast((FAR dq_entry_t *)rtcb, list_waitingforsignal());
 
               /* Now, perform the context switch if one is needed */
 
@@ -403,7 +403,7 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
           /* Add the task to the specified blocked task list */
 
           rtcb->task_state = TSTATE_WAIT_SIG;
-          dq_addlast((FAR dq_entry_t *)rtcb, &g_waitingforsignal);
+          dq_addlast((FAR dq_entry_t *)rtcb, list_waitingforsignal());
 
           /* Now, perform the context switch if one is needed */
 
