@@ -99,6 +99,7 @@
 
 /* SPI flash hardware definition */
 
+#  define FLASH_PAGE_SIZE           (256)
 #  define FLASH_SECTOR_SIZE         (4096)
 
 /* SPI flash command */
@@ -1181,10 +1182,11 @@ int spi_flash_write(uint32_t dest_addr, const void *buffer, uint32_t size)
 
   spiflash_start();
 
-  for (int i = 0; i < size; i += SPI_BUFFER_BYTES)
+  while (tx_bytes)
     {
       uint32_t spi_buffer[SPI_BUFFER_WORDS];
-      uint32_t n = MIN(tx_bytes, SPI_BUFFER_BYTES);
+      uint32_t n = FLASH_PAGE_SIZE - tx_addr % FLASH_PAGE_SIZE;
+      n = MIN(n, MIN(tx_bytes, SPI_BUFFER_BYTES));
 
 #ifdef CONFIG_ESP32S3_SPIRAM
 
