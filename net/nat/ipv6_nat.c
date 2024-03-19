@@ -42,11 +42,11 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static FAR struct ipv6_nat_entry *
+static FAR ipv6_nat_entry_t *
 ipv6_nat_inbound_internal(FAR struct ipv6_hdr_s *ipv6,
                           enum nat_manip_type_e manip_type);
 
-static FAR struct ipv6_nat_entry *
+static FAR ipv6_nat_entry_t *
 ipv6_nat_outbound_internal(FAR struct net_driver_s *dev,
                            FAR struct ipv6_hdr_s *ipv6,
                            enum nat_manip_type_e manip_type);
@@ -130,15 +130,15 @@ static void ipv6_nat_port_adjust(FAR uint16_t *l4chksum,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
-static FAR struct ipv6_nat_entry *
+static FAR ipv6_nat_entry_t *
 ipv6_nat_inbound_tcp(FAR struct ipv6_hdr_s *ipv6, FAR struct tcp_hdr_s *tcp,
                      enum nat_manip_type_e manip_type)
 {
-  FAR uint16_t              *external_ip   = MANIP_IPADDR(ipv6, manip_type);
-  FAR uint16_t              *external_port = MANIP_PORT(tcp, manip_type);
-  FAR uint16_t              *peer_ip       = PEER_IPADDR(ipv6, manip_type);
-  FAR uint16_t              *peer_port     = PEER_PORT(tcp, manip_type);
-  FAR struct ipv6_nat_entry *entry         =
+  FAR uint16_t         *external_ip   = MANIP_IPADDR(ipv6, manip_type);
+  FAR uint16_t         *external_port = MANIP_PORT(tcp, manip_type);
+  FAR uint16_t         *peer_ip       = PEER_IPADDR(ipv6, manip_type);
+  FAR uint16_t         *peer_port     = PEER_PORT(tcp, manip_type);
+  FAR ipv6_nat_entry_t *entry         =
                  ipv6_nat_inbound_entry_find(IP_PROTO_TCP,
                                              external_ip, *external_port,
                                              peer_ip, *peer_port, true);
@@ -181,16 +181,16 @@ ipv6_nat_inbound_tcp(FAR struct ipv6_hdr_s *ipv6, FAR struct tcp_hdr_s *tcp,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_UDP
-static FAR struct ipv6_nat_entry *
+static FAR ipv6_nat_entry_t *
 ipv6_nat_inbound_udp(FAR struct ipv6_hdr_s *ipv6, FAR struct udp_hdr_s *udp,
                      enum nat_manip_type_e manip_type)
 {
-  FAR uint16_t              *external_ip   = MANIP_IPADDR(ipv6, manip_type);
-  FAR uint16_t              *external_port = MANIP_PORT(udp, manip_type);
-  FAR uint16_t              *peer_ip       = PEER_IPADDR(ipv6, manip_type);
-  FAR uint16_t              *peer_port     = PEER_PORT(udp, manip_type);
-  FAR uint16_t              *udpchksum;
-  FAR struct ipv6_nat_entry *entry         =
+  FAR uint16_t         *external_ip   = MANIP_IPADDR(ipv6, manip_type);
+  FAR uint16_t         *external_port = MANIP_PORT(udp, manip_type);
+  FAR uint16_t         *peer_ip       = PEER_IPADDR(ipv6, manip_type);
+  FAR uint16_t         *peer_port     = PEER_PORT(udp, manip_type);
+  FAR uint16_t         *udpchksum;
+  FAR ipv6_nat_entry_t *entry         =
                  ipv6_nat_inbound_entry_find(IP_PROTO_UDP,
                                              external_ip, *external_port,
                                              peer_ip, *peer_port, true);
@@ -233,14 +233,14 @@ ipv6_nat_inbound_udp(FAR struct ipv6_hdr_s *ipv6, FAR struct udp_hdr_s *udp,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6
-static FAR struct ipv6_nat_entry *
+static FAR ipv6_nat_entry_t *
 ipv6_nat_inbound_icmpv6(FAR struct ipv6_hdr_s *ipv6,
                         FAR struct icmpv6_hdr_s *icmpv6,
                         enum nat_manip_type_e manip_type)
 {
-  FAR uint16_t              *external_ip = MANIP_IPADDR(ipv6, manip_type);
-  FAR uint16_t              *peer_ip     = PEER_IPADDR(ipv6, manip_type);
-  FAR struct ipv6_nat_entry *entry;
+  FAR uint16_t         *external_ip = MANIP_IPADDR(ipv6, manip_type);
+  FAR uint16_t         *peer_ip     = PEER_IPADDR(ipv6, manip_type);
+  FAR ipv6_nat_entry_t *entry;
 
   switch (icmpv6->type)
     {
@@ -325,16 +325,16 @@ ipv6_nat_inbound_icmpv6(FAR struct ipv6_hdr_s *ipv6,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
-static FAR struct ipv6_nat_entry *
+static FAR ipv6_nat_entry_t *
 ipv6_nat_outbound_tcp(FAR struct net_driver_s *dev,
                       FAR struct ipv6_hdr_s *ipv6, FAR struct tcp_hdr_s *tcp,
                       enum nat_manip_type_e manip_type)
 {
-  FAR uint16_t              *local_ip   = MANIP_IPADDR(ipv6, manip_type);
-  FAR uint16_t              *local_port = MANIP_PORT(tcp, manip_type);
-  FAR uint16_t              *peer_ip    = PEER_IPADDR(ipv6, manip_type);
-  FAR uint16_t              *peer_port  = PEER_PORT(tcp, manip_type);
-  FAR struct ipv6_nat_entry *entry;
+  FAR uint16_t         *local_ip   = MANIP_IPADDR(ipv6, manip_type);
+  FAR uint16_t         *local_port = MANIP_PORT(tcp, manip_type);
+  FAR uint16_t         *peer_ip    = PEER_IPADDR(ipv6, manip_type);
+  FAR uint16_t         *peer_port  = PEER_PORT(tcp, manip_type);
+  FAR ipv6_nat_entry_t *entry;
 
   /* Only create entry when it's the outermost packet (manip type is SRC). */
 
@@ -380,17 +380,17 @@ ipv6_nat_outbound_tcp(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_UDP
-static FAR struct ipv6_nat_entry *
+static FAR ipv6_nat_entry_t *
 ipv6_nat_outbound_udp(FAR struct net_driver_s *dev,
                       FAR struct ipv6_hdr_s *ipv6, FAR struct udp_hdr_s *udp,
                       enum nat_manip_type_e manip_type)
 {
-  FAR uint16_t              *local_ip   = MANIP_IPADDR(ipv6, manip_type);
-  FAR uint16_t              *local_port = MANIP_PORT(udp, manip_type);
-  FAR uint16_t              *peer_ip    = PEER_IPADDR(ipv6, manip_type);
-  FAR uint16_t              *peer_port  = PEER_PORT(udp, manip_type);
-  FAR uint16_t              *udpchksum;
-  FAR struct ipv6_nat_entry *entry;
+  FAR uint16_t         *local_ip   = MANIP_IPADDR(ipv6, manip_type);
+  FAR uint16_t         *local_port = MANIP_PORT(udp, manip_type);
+  FAR uint16_t         *peer_ip    = PEER_IPADDR(ipv6, manip_type);
+  FAR uint16_t         *peer_port  = PEER_PORT(udp, manip_type);
+  FAR uint16_t         *udpchksum;
+  FAR ipv6_nat_entry_t *entry;
 
   /* Only create entry when it's the outermost packet (manip type is SRC). */
 
@@ -435,15 +435,15 @@ ipv6_nat_outbound_udp(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6
-static FAR struct ipv6_nat_entry *
+static FAR ipv6_nat_entry_t *
 ipv6_nat_outbound_icmpv6(FAR struct net_driver_s *dev,
                          FAR struct ipv6_hdr_s *ipv6,
                          FAR struct icmpv6_hdr_s *icmpv6,
                          enum nat_manip_type_e manip_type)
 {
-  FAR uint16_t              *local_ip = MANIP_IPADDR(ipv6, manip_type);
-  FAR uint16_t              *peer_ip  = PEER_IPADDR(ipv6, manip_type);
-  FAR struct ipv6_nat_entry *entry;
+  FAR uint16_t         *local_ip = MANIP_IPADDR(ipv6, manip_type);
+  FAR uint16_t         *peer_ip  = PEER_IPADDR(ipv6, manip_type);
+  FAR ipv6_nat_entry_t *entry;
 
   switch (icmpv6->type)
     {
@@ -531,7 +531,7 @@ ipv6_nat_outbound_icmpv6(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static FAR struct ipv6_nat_entry *
+static FAR ipv6_nat_entry_t *
 ipv6_nat_inbound_internal(FAR struct ipv6_hdr_s *ipv6,
                           enum nat_manip_type_e manip_type)
 {
@@ -579,7 +579,7 @@ ipv6_nat_inbound_internal(FAR struct ipv6_hdr_s *ipv6,
  *
  ****************************************************************************/
 
-static FAR struct ipv6_nat_entry *
+static FAR ipv6_nat_entry_t *
 ipv6_nat_outbound_internal(FAR struct net_driver_s *dev,
                            FAR struct ipv6_hdr_s *ipv6,
                            enum nat_manip_type_e manip_type)
@@ -634,7 +634,7 @@ void ipv6_nat_inbound(FAR struct net_driver_s *dev,
   if (IFF_IS_NAT(dev->d_flags) &&
       NETDEV_IS_MY_V6ADDR(dev, ipv6->destipaddr))
     {
-      FAR struct ipv6_nat_entry *entry =
+      FAR ipv6_nat_entry_t *entry =
           ipv6_nat_inbound_internal(ipv6, NAT_MANIP_DST);
       if (!entry)
         {
@@ -676,7 +676,7 @@ int ipv6_nat_outbound(FAR struct net_driver_s *dev,
       !NETDEV_IS_MY_V6ADDR(dev, ipv6->srcipaddr) &&
       !NETDEV_IS_MY_V6ADDR(dev, ipv6->destipaddr))
     {
-      FAR struct ipv6_nat_entry *entry =
+      FAR ipv6_nat_entry_t *entry =
           ipv6_nat_outbound_internal(dev, ipv6, manip_type);
       if (manip_type == NAT_MANIP_SRC && !entry)
         {

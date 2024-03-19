@@ -78,7 +78,7 @@ static inline uint32_t ipv6_nat_hash_key(const net_ipv6addr_t ip,
  *
  ****************************************************************************/
 
-static void ipv6_nat_entry_refresh(FAR struct ipv6_nat_entry *entry)
+static void ipv6_nat_entry_refresh(FAR ipv6_nat_entry_t *entry)
 {
   entry->expire_time = nat_expire_time(entry->protocol);
 }
@@ -103,14 +103,13 @@ static void ipv6_nat_entry_refresh(FAR struct ipv6_nat_entry *entry)
  *
  ****************************************************************************/
 
-static FAR struct ipv6_nat_entry *
+static FAR ipv6_nat_entry_t *
 ipv6_nat_entry_create(uint8_t protocol, const net_ipv6addr_t external_ip,
                       uint16_t external_port, const net_ipv6addr_t local_ip,
                       uint16_t local_port, const net_ipv6addr_t peer_ip,
                       uint16_t peer_port)
 {
-  FAR struct ipv6_nat_entry *entry =
-      kmm_malloc(sizeof(struct ipv6_nat_entry));
+  FAR ipv6_nat_entry_t *entry = kmm_malloc(sizeof(ipv6_nat_entry_t));
   if (entry == NULL)
     {
       nwarn("WARNING: Failed to allocate IPv6 NAT entry\n");
@@ -150,7 +149,7 @@ ipv6_nat_entry_create(uint8_t protocol, const net_ipv6addr_t external_ip,
  *
  ****************************************************************************/
 
-static void ipv6_nat_entry_delete(FAR struct ipv6_nat_entry *entry)
+static void ipv6_nat_entry_delete(FAR ipv6_nat_entry_t *entry)
 {
   ninfo("INFO: Removing NAT66 entry proto=%" PRIu8
         ", local=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x:%" PRIu16
@@ -204,8 +203,8 @@ static void ipv6_nat_reclaim_entry(int32_t current_time)
 
       hashtable_for_every_safe(g_nat66_inbound, p, tmp, i)
         {
-          FAR struct ipv6_nat_entry *entry =
-            container_of(p, struct ipv6_nat_entry, hash_inbound);
+          FAR ipv6_nat_entry_t *entry =
+            container_of(p, ipv6_nat_entry_t, hash_inbound);
 
           if (entry->expire_time - current_time <= 0)
             {
@@ -251,8 +250,8 @@ void ipv6_nat_entry_clear(FAR struct net_driver_s *dev)
 
   hashtable_for_every_safe(g_nat66_inbound, p, tmp, i)
     {
-      FAR struct ipv6_nat_entry *entry =
-        container_of(p, struct ipv6_nat_entry, hash_inbound);
+      FAR ipv6_nat_entry_t *entry =
+        container_of(p, ipv6_nat_entry_t, hash_inbound);
 
       if (NETDEV_IS_MY_V6ADDR(dev, entry->external_ip))
         {
@@ -280,7 +279,7 @@ void ipv6_nat_entry_clear(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-FAR struct ipv6_nat_entry *
+FAR ipv6_nat_entry_t *
 ipv6_nat_inbound_entry_find(uint8_t protocol,
                             const net_ipv6addr_t external_ip,
                             uint16_t external_port,
@@ -300,8 +299,8 @@ ipv6_nat_inbound_entry_find(uint8_t protocol,
   hashtable_for_every_possible_safe(g_nat66_inbound, p, tmp,
                     ipv6_nat_hash_key(external_ip, external_port, protocol))
     {
-      FAR struct ipv6_nat_entry *entry =
-        container_of(p, struct ipv6_nat_entry, hash_inbound);
+      FAR ipv6_nat_entry_t *entry =
+        container_of(p, ipv6_nat_entry_t, hash_inbound);
 
       /* Remove expired entries. */
 
@@ -363,7 +362,7 @@ ipv6_nat_inbound_entry_find(uint8_t protocol,
  *
  ****************************************************************************/
 
-FAR struct ipv6_nat_entry *
+FAR ipv6_nat_entry_t *
 ipv6_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
                              const net_ipv6addr_t local_ip,
                              uint16_t local_port,
@@ -381,8 +380,8 @@ ipv6_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
   hashtable_for_every_possible_safe(g_nat66_outbound, p, tmp,
                           ipv6_nat_hash_key(local_ip, local_port, protocol))
     {
-      FAR struct ipv6_nat_entry *entry =
-        container_of(p, struct ipv6_nat_entry, hash_outbound);
+      FAR ipv6_nat_entry_t *entry =
+        container_of(p, ipv6_nat_entry_t, hash_outbound);
 
       /* Remove expired entries. */
 

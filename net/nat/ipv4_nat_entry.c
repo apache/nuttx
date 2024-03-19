@@ -90,7 +90,7 @@ static inline uint32_t ipv4_nat_outbound_key(in_addr_t local_ip,
  *
  ****************************************************************************/
 
-static void ipv4_nat_entry_refresh(FAR struct ipv4_nat_entry *entry)
+static void ipv4_nat_entry_refresh(FAR ipv4_nat_entry_t *entry)
 {
   entry->expire_time = nat_expire_time(entry->protocol);
 }
@@ -115,14 +115,13 @@ static void ipv4_nat_entry_refresh(FAR struct ipv4_nat_entry *entry)
  *
  ****************************************************************************/
 
-static FAR struct ipv4_nat_entry *
+static FAR ipv4_nat_entry_t *
 ipv4_nat_entry_create(uint8_t protocol,
                       in_addr_t external_ip, uint16_t external_port,
                       in_addr_t local_ip, uint16_t local_port,
                       in_addr_t peer_ip, uint16_t peer_port)
 {
-  FAR struct ipv4_nat_entry *entry =
-      kmm_malloc(sizeof(struct ipv4_nat_entry));
+  FAR ipv4_nat_entry_t *entry = kmm_malloc(sizeof(ipv4_nat_entry_t));
   if (entry == NULL)
     {
       nwarn("WARNING: Failed to allocate IPv4 NAT entry\n");
@@ -160,7 +159,7 @@ ipv4_nat_entry_create(uint8_t protocol,
  *
  ****************************************************************************/
 
-static void ipv4_nat_entry_delete(FAR struct ipv4_nat_entry *entry)
+static void ipv4_nat_entry_delete(FAR ipv4_nat_entry_t *entry)
 {
   ninfo("INFO: Removing NAT44 entry proto=%" PRIu8
         ", local=%" PRIx32 ":%" PRIu16 ", external=:%" PRIu16 "\n",
@@ -211,8 +210,8 @@ static void ipv4_nat_reclaim_entry(int32_t current_time)
 
       hashtable_for_every_safe(g_nat44_inbound, p, tmp, i)
         {
-          FAR struct ipv4_nat_entry *entry =
-            container_of(p, struct ipv4_nat_entry, hash_inbound);
+          FAR ipv4_nat_entry_t *entry =
+            container_of(p, ipv4_nat_entry_t, hash_inbound);
 
           if (entry->expire_time - current_time <= 0)
             {
@@ -258,8 +257,8 @@ void ipv4_nat_entry_clear(FAR struct net_driver_s *dev)
 
   hashtable_for_every_safe(g_nat44_inbound, p, tmp, i)
     {
-      FAR struct ipv4_nat_entry *entry =
-        container_of(p, struct ipv4_nat_entry, hash_inbound);
+      FAR ipv4_nat_entry_t *entry =
+        container_of(p, ipv4_nat_entry_t, hash_inbound);
 
       if (net_ipv4addr_cmp(entry->external_ip, dev->d_ipaddr))
         {
@@ -287,7 +286,7 @@ void ipv4_nat_entry_clear(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-FAR struct ipv4_nat_entry *
+FAR ipv4_nat_entry_t *
 ipv4_nat_inbound_entry_find(uint8_t protocol, in_addr_t external_ip,
                             uint16_t external_port, in_addr_t peer_ip,
                             uint16_t peer_port, bool refresh)
@@ -305,8 +304,8 @@ ipv4_nat_inbound_entry_find(uint8_t protocol, in_addr_t external_ip,
   hashtable_for_every_possible_safe(g_nat44_inbound, p, tmp,
                   ipv4_nat_inbound_key(external_ip, external_port, protocol))
     {
-      FAR struct ipv4_nat_entry *entry =
-        container_of(p, struct ipv4_nat_entry, hash_inbound);
+      FAR ipv4_nat_entry_t *entry =
+        container_of(p, ipv4_nat_entry_t, hash_inbound);
 
       /* Remove expired entries. */
 
@@ -365,7 +364,7 @@ ipv4_nat_inbound_entry_find(uint8_t protocol, in_addr_t external_ip,
  *
  ****************************************************************************/
 
-FAR struct ipv4_nat_entry *
+FAR ipv4_nat_entry_t *
 ipv4_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
                              in_addr_t local_ip, uint16_t local_port,
                              in_addr_t peer_ip, uint16_t peer_port,
@@ -381,8 +380,8 @@ ipv4_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
   hashtable_for_every_possible_safe(g_nat44_outbound, p, tmp,
                       ipv4_nat_outbound_key(local_ip, local_port, protocol))
     {
-      FAR struct ipv4_nat_entry *entry =
-        container_of(p, struct ipv4_nat_entry, hash_outbound);
+      FAR ipv4_nat_entry_t *entry =
+        container_of(p, ipv4_nat_entry_t, hash_outbound);
 
       /* Remove expired entries. */
 
