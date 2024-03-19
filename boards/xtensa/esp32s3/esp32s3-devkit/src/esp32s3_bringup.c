@@ -105,6 +105,10 @@
 #include "esp32s3_board_spidev.h"
 #endif
 
+#ifdef CONFIG_ESP32S3_AES_ACCELERATOR
+#  include "esp32s3_aes.h"
+#endif
+
 #include "esp32s3-devkit.h"
 
 /****************************************************************************
@@ -436,6 +440,20 @@ int esp32s3_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SPI ethernet LAN9250.\n");
     }
+#endif
+
+#ifdef CONFIG_ESP32S3_AES_ACCELERATOR
+  ret = esp32s3_aes_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize AES: %d\n", ret);
+    }
+#ifdef CONFIG_ESP32S3_AES_ACCELERATOR_TEST
+  else
+    {
+      esp32s3_aes_test();
+    }
+#endif
 #endif
 
   /* If we got here then perhaps not all initialization was successful, but

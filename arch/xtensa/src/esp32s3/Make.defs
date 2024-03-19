@@ -183,6 +183,10 @@ ifeq ($(CONFIG_ESP32S3_LCD),y)
 CHIP_CSRCS += esp32s3_lcd.c
 endif
 
+ifeq ($(CONFIG_ESP32S3_AES_ACCELERATOR),y)
+CHIP_CSRCS += esp32s3_aes.c
+endif
+
 #############################################################################
 # Espressif HAL for 3rd Party Platforms
 #############################################################################

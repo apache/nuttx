@@ -753,6 +753,10 @@ config ESP32S3_LCD
 	---help---
 		LCD controller that outputs parallel data and supports RGB interface.
 
+config ESP32S3_AES_ACCELERATOR
+	bool "AES Accelerator"
+	default n
+
 endmenu # ESP32-S3 Peripheral Selection
 
 menuconfig ESP32S3_WIFI_BT_COEXIST
@@ -2306,5 +2310,14 @@ config ESP32S3_KERNEL_RAM_SIZE
 endif # BUILD_PROTECTED
 
 endmenu # Bootloader and Image Configuration
+
+menu "AES accelerate"
+	depends on ESP32S3_AES_ACCELERATOR
+
+config ESP32S3_AES_ACCELERATOR_TEST
+	bool "AES driver test"
+	default n
+
+endmenu # ESP32S3_AES_ACCELERATOR
 
 endif # ARCH_CHIP_ESP32S3
