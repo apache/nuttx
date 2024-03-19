@@ -563,7 +563,7 @@ void leave_critical_section(irqstate_t flags)
                    * section then.
                    */
 
-                  if (g_pendingtasks.head != NULL &&
+                  if (list_pendingtasks()->head != NULL &&
                       !nxsched_islocked_global())
                     {
                       /* Release any ready-to-run tasks that have collected

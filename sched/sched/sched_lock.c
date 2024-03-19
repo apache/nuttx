@@ -213,8 +213,8 @@ int sched_lock(void)
        * unlocked and nxsched_merge_pending() is called.
        */
 
-      nxsched_merge_prioritized(&g_readytorun,
-                                &g_pendingtasks,
+      nxsched_merge_prioritized(list_readytorun(),
+                                list_pendingtasks(),
                                 TSTATE_TASK_PENDING);
 
       leave_critical_section(flags);

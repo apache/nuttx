@@ -132,7 +132,7 @@ int sigsuspend(FAR const sigset_t *set)
       /* Add the task to the specified blocked task list */
 
       rtcb->task_state = TSTATE_WAIT_SIG;
-      dq_addlast((FAR dq_entry_t *)rtcb, &g_waitingforsignal);
+      dq_addlast((FAR dq_entry_t *)rtcb, list_waitingforsignal());
 
       /* Now, perform the context switch if one is needed */
 
