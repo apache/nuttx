@@ -536,6 +536,7 @@ static void enable_mmu_el1(unsigned int flags)
 
   /* Ensure these changes are seen before MMU is enabled */
 
+  ARM64_DSB();
   ARM64_ISB();
 
   /* Enable the MMU and data cache */
