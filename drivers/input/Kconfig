@@ -15,6 +15,9 @@ if INPUT
 
 config INPUT_GOLDFISH_EVENTS
 	bool "Goldfish input events driver"
+	select INPUT_TOUCHSCREEN
+	select INPUT_KEYBOARD
+	select INPUT_MOUSE
 	default n
 
 config INPUT_GOLDFISH_NBUFFER
