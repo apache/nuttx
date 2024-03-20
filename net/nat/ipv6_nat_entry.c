@@ -34,6 +34,7 @@
 
 #include "inet/inet.h"
 #include "nat/nat.h"
+#include "netlink/netlink.h"
 
 #ifdef CONFIG_NET_NAT66
 
@@ -135,6 +136,10 @@ ipv6_nat_entry_create(uint8_t protocol, const net_ipv6addr_t external_ip,
   hashtable_add(g_nat66_outbound, &entry->hash_outbound,
                 ipv6_nat_hash_key(local_ip, local_port, protocol));
 
+#ifdef CONFIG_NETLINK_NETFILTER
+  netlink_conntrack_notify(IPCTNL_MSG_CT_NEW, PF_INET6, entry);
+#endif
+
   return entry;
 }
 
@@ -167,6 +172,10 @@ static void ipv6_nat_entry_delete(FAR ipv6_nat_entry_t *entry)
                    ipv6_nat_hash_key(entry->local_ip,
                                      entry->local_port,
                                      entry->protocol));
+
+#ifdef CONFIG_NETLINK_NETFILTER
+  netlink_conntrack_notify(IPCTNL_MSG_CT_DELETE, PF_INET6, entry);
+#endif
 
   kmm_free(entry);
 }

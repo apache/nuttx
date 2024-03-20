@@ -117,6 +117,15 @@ config NETLINK_VALIDATE_POLICY
 		you pass in are valid.
 
 endif # NETLINK_ROUTE
+
+config NETLINK_NETFILTER
+	bool "Netlink Netfilter protocol"
+	default n
+	depends on NET_NAT
+	---help---
+		Support the NETLINK_NETFILTER protocol option, mainly
+		for conntrack with NAT.
+
 endmenu # Netlink Protocols
 endif # NET_NETLINK
 endmenu # Netlink Socket Support

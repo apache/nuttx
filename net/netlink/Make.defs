@@ -29,6 +29,10 @@ ifeq ($(CONFIG_NETLINK_ROUTE),y)
 NET_CSRCS += netlink_route.c netlink_attr.c
 endif
 
+ifeq ($(CONFIG_NETLINK_NETFILTER),y)
+NET_CSRCS += netlink_netfilter.c
+endif
+
 # Include netlink build support
 
 DEPPATH += --dep-path netlink
