@@ -34,3 +34,4 @@ Guides
   stackrecord.rst
   etcromfs.rst
   thread_local_storage.rst
+  devicetree.rst
