@@ -181,6 +181,7 @@ static int     vs1053_ioctl(FAR struct audio_lowerhalf_s *lower, int cmd,
 
 static const struct audio_ops_s g_audioops =
 {
+  NULL,                 /* setup          */
   vs1053_getcaps,       /* getcaps        */
   vs1053_configure,     /* configure      */
   vs1053_shutdown,      /* shutdown       */
@@ -932,7 +933,7 @@ static int vs1053_hardreset(FAR struct vs1053_struct_s *dev)
  *
  ****************************************************************************/
 
-static int vs1053_shutdown(FAR struct audio_lowerhalf_s *lower)
+static int vs1053_shutdown(FAR struct audio_lowerhalf_s *lower, int cnt)
 {
   FAR struct vs1053_struct_s *dev = (struct vs1053_struct_s *) lower;
   FAR struct spi_dev_s  *spi = dev->spi;

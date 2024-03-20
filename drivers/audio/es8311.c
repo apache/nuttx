@@ -91,7 +91,7 @@ static int  es8311_configure(FAR struct audio_lowerhalf_s *dev,
 static int  es8311_configure(FAR struct audio_lowerhalf_s *dev,
                              FAR const struct audio_caps_s *caps);
 #endif /* !CONFIG_AUDIO_MULTI_SESSION */
-static int  es8311_shutdown(FAR struct audio_lowerhalf_s *dev);
+static int  es8311_shutdown(FAR struct audio_lowerhalf_s *dev, int cnt);
 static void es8311_processdone(FAR struct i2s_dev_s *i2s,
                                   FAR struct ap_buffer_s *apb,
                                   FAR void *arg,
@@ -154,6 +154,7 @@ static int  es8311_get_mclk_src(void);
 
 static const struct audio_ops_s g_audioops =
 {
+  NULL,                 /* setup          */
   es8311_getcaps,       /* getcaps        */
   es8311_configure,     /* configure      */
   es8311_shutdown,      /* shutdown       */
@@ -1107,7 +1108,7 @@ static int es8311_configure(FAR struct audio_lowerhalf_s *dev,
  *
  ****************************************************************************/
 
-static int es8311_shutdown(FAR struct audio_lowerhalf_s *dev)
+static int es8311_shutdown(FAR struct audio_lowerhalf_s *dev, int cnt)
 {
   FAR struct es8311_dev_s *priv = (FAR struct es8311_dev_s *)dev;
 
