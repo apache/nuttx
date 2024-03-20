@@ -64,9 +64,14 @@
 #    undef  USE_SERIALDRIVER
 #    undef  USE_EARLYSERIALINIT
 #    undef  CONFIG_DEV_LOWCONSOLE
-#  elif defined(CONFIG_16550_UART)
+#  elif defined(CONFIG_16550_UART) && \
+        !defined(CONFIG_16550_NO_SERIAL_CONSOLE)
 #    define USE_SERIALDRIVER 1
 #    define USE_EARLYSERIALINIT 1
+#  elif defined(CONFIG_16550_PCI_UART) && \
+        !defined(CONFIG_16550_PCI_NO_SERIAL_CONSOLE)
+#    define USE_SERIALDRIVER 1
+#    undef  USE_EARLYSERIALINIT
 #  endif
 #endif
 
