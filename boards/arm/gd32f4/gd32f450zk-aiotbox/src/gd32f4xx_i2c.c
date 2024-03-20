@@ -64,7 +64,7 @@ void gd32_i2c_initialize(void)
           i2cinfo("registering i2c0 successed.\n");
         }
     }
-    
+
     i2c = NULL;
 #endif
 #ifdef CONFIG_GD32F4_I2C1

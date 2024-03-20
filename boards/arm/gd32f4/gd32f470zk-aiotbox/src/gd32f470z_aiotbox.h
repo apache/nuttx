@@ -55,7 +55,7 @@
 
 /* LED
  *
- * The GD32F470ZK-AIOTBOX board has three LEDs, LED1, LED2 and LED3, that can be
+ * The GD32F470ZK board has three LEDs, LED1, LED2 and LED3, that can be
  * controlled by software.
  * The following definitions assume the default Solder Bridges are installed.
  */
