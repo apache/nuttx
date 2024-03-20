@@ -62,7 +62,7 @@ bool sched_idletask(void)
    * have been initialized and, in that case, rtcb may be NULL.
    */
 
-  DEBUGASSERT(rtcb != NULL || g_nx_initstate < OSINIT_TASKLISTS);
+  DEBUGASSERT(rtcb != NULL || nxsched_initstate() < OSINIT_TASKLISTS);
   if (rtcb != NULL)
     {
       /* The IDLE task TCB is distinguishable by a few things:

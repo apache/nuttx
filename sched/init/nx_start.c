@@ -322,7 +322,7 @@ void nx_start(void)
 
   /* Boot up is complete */
 
-  g_nx_initstate = OSINIT_BOOT;
+  nxsched_initstate() = OSINIT_BOOT;
 
   /* Initialize RTOS Data ***************************************************/
 
@@ -427,7 +427,7 @@ void nx_start(void)
 
   /* Task lists are initialized */
 
-  g_nx_initstate = OSINIT_TASKLISTS;
+  nxsched_initstate() = OSINIT_TASKLISTS;
 
   /* Initialize RTOS facilities *********************************************/
 
@@ -495,14 +495,15 @@ void nx_start(void)
 
   /* Initialize the logic that determine unique process IDs. */
 
-  g_npidhash = 4;
-  while (g_npidhash <= CONFIG_SMP_NCPUS)
+  nxsched_npidhash() = 4;
+  while (nxsched_npidhash() <= CONFIG_SMP_NCPUS)
     {
-      g_npidhash <<= 1;
+      nxsched_npidhash() <<= 1;
     }
 
-  g_pidhash = kmm_zalloc(sizeof(*g_pidhash) * g_npidhash);
-  DEBUGASSERT(g_pidhash);
+  nxsched_pidhash() =
+    kmm_zalloc(sizeof(*nxsched_pidhash()) * nxsched_npidhash());
+  DEBUGASSERT(nxsched_pidhash());
 
   /* IDLE Group Initialization **********************************************/
 
@@ -513,7 +514,7 @@ void nx_start(void)
       /* Assign the process ID(s) of ZERO to the idle task(s) */
 
       hashndx            = PIDHASH(i);
-      g_pidhash[hashndx] = &g_idletcb[i].cmn;
+      nxsched_pidhash()[hashndx] = &g_idletcb[i].cmn;
 
       /* Allocate the IDLE group */
 
@@ -553,11 +554,11 @@ void nx_start(void)
                                          GROUP_FLAG_PRIVILEGED;
     }
 
-  g_lastpid = CONFIG_SMP_NCPUS - 1;
+  nxsched_lastpid() = CONFIG_SMP_NCPUS - 1;
 
   /* The memory manager is available */
 
-  g_nx_initstate = OSINIT_MEMORY;
+  nxsched_initstate() = OSINIT_MEMORY;
 
   /* Initialize tasking data structures */
 
@@ -643,7 +644,7 @@ void nx_start(void)
 
   /* Hardware resources are now available */
 
-  g_nx_initstate = OSINIT_HARDWARE;
+  nxsched_initstate() = OSINIT_HARDWARE;
 
   /* Setup for Multi-Tasking ************************************************/
 
@@ -689,7 +690,7 @@ void nx_start(void)
 
   /* The OS is fully initialized and we are beginning multi-tasking */
 
-  g_nx_initstate = OSINIT_OSREADY;
+  nxsched_initstate() = OSINIT_OSREADY;
 
   /* Create initial tasks and bring-up the system */
 
@@ -697,7 +698,7 @@ void nx_start(void)
 
   /* Enter to idleloop */
 
-  g_nx_initstate = OSINIT_IDLELOOP;
+  nxsched_initstate() = OSINIT_IDLELOOP;
 
   /* Let other threads have access to the memory manager */
 

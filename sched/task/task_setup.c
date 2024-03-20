@@ -88,12 +88,12 @@ static int nxtask_assign_pid(FAR struct tcb_s *tcb)
   int   i;
 
   /* NOTE:
-   * ERROR means that the g_pidhash[] table is completely full.
+   * ERROR means that the nxsched_pidhash()[] table is completely full.
    * We cannot allow another task to be started.
    */
 
   /* Protect the following operation with a critical section
-   * because g_pidhash is accessed from an interrupt context
+   * because nxsched_pidhash() is accessed from an interrupt context
    */
 
   irqstate_t flags = enter_critical_section();
@@ -104,8 +104,8 @@ retry:
 
   /* Get the next process ID candidate */
 
-  next_pid = g_lastpid + 1;
-  for (i = 0; i < g_npidhash; i++)
+  next_pid = nxsched_lastpid() + 1;
+  for (i = 0; i < nxsched_npidhash(); i++)
     {
       /* Verify that the next_pid is in the valid range */
 
@@ -120,13 +120,13 @@ retry:
 
       /* Check if there is a (potential) duplicate of this pid */
 
-      if (!g_pidhash[hash_ndx])
+      if (!nxsched_pidhash()[hash_ndx])
         {
           /* Assign this PID to the task */
 
-          g_pidhash[hash_ndx] = tcb;
+          nxsched_pidhash()[hash_ndx] = tcb;
           tcb->pid = next_pid;
-          g_lastpid = next_pid;
+          nxsched_lastpid() = next_pid;
 
           leave_critical_section(flags);
           return OK;
@@ -135,35 +135,35 @@ retry:
       next_pid++;
     }
 
-  /* If we get here, then the g_pidhash[] table is completely full.
-   * We will alloc new space and copy original g_pidhash to it to
+  /* If we get here, then the nxsched_pidhash()[] table is completely full.
+   * We will alloc new space and copy original nxsched_pidhash() to it to
    * expand space.
    */
 
-  pidhash = kmm_zalloc(g_npidhash * 2 * sizeof(*pidhash));
+  pidhash = kmm_zalloc(nxsched_npidhash() * 2 * sizeof(*pidhash));
   if (pidhash == NULL)
     {
       leave_critical_section(flags);
       return -ENOMEM;
     }
 
-  g_npidhash *= 2;
+  nxsched_npidhash() *= 2;
 
   /* All original pid and hash_ndx are mismatch,
    * so we need to rebuild their relationship
    */
 
-  for (i = 0; i < g_npidhash / 2; i++)
+  for (i = 0; i < nxsched_npidhash() / 2; i++)
     {
-      hash_ndx = PIDHASH(g_pidhash[i]->pid);
+      hash_ndx = PIDHASH(nxsched_pidhash()[i]->pid);
       DEBUGASSERT(pidhash[hash_ndx] == NULL);
-      pidhash[hash_ndx] = g_pidhash[i];
+      pidhash[hash_ndx] = nxsched_pidhash()[i];
     }
 
   /* Release resource for original g_pidhash, using new g_pidhash */
 
-  temp = g_pidhash;
-  g_pidhash = pidhash;
+  temp = nxsched_pidhash();
+  nxsched_pidhash() = pidhash;
   kmm_free(temp);
 
   /* Let's try every allowable pid again */

@@ -136,13 +136,13 @@ static void exec_swap(FAR struct tcb_s *ptcb, FAR struct tcb_s *chtcb)
   pndx  = PIDHASH(ptcb->pid);
   chndx = PIDHASH(chtcb->pid);
 
-  DEBUGASSERT(g_pidhash[pndx]);
-  DEBUGASSERT(g_pidhash[chndx]);
+  DEBUGASSERT(nxsched_pidhash()[pndx]);
+  DEBUGASSERT(nxsched_pidhash()[chndx]);
 
-  /* Exchange g_pidhash index */
+  /* Exchange nxsched_pidhash() index */
 
-  g_pidhash[pndx] = chtcb;
-  g_pidhash[chndx] = ptcb;
+  nxsched_pidhash()[pndx] = chtcb;
+  nxsched_pidhash()[chndx] = ptcb;
 
   /* Exchange pid */
 
