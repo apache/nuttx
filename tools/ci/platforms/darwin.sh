@@ -205,6 +205,7 @@ python_tools() {
   python setup.py sdist && \
   pip3 install --pre dist/PyYAML-5.4.1.tar.gz
   cd ..
+  rm -rf pyyaml
 
   pip3 install \
     cmake-format \
