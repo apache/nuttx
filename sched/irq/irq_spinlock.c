@@ -100,7 +100,7 @@ irqstate_t spin_lock_irqsave(spinlock_t *lock)
 
   if (NULL == lock)
     {
-      int me = this_cpu();
+      int me = up_cpu_index();
       if (0 == g_irq_spin_count[me])
         {
           spin_lock(&g_irq_spin);
@@ -128,7 +128,7 @@ irqstate_t spin_lock_irqsave_wo_note(spinlock_t *lock)
 
   if (NULL == lock)
     {
-      int me = this_cpu();
+      int me = up_cpu_index();
       if (0 == g_irq_spin_count[me])
         {
           spin_lock_wo_note(&g_irq_spin);
@@ -178,7 +178,7 @@ void spin_unlock_irqrestore(spinlock_t *lock, irqstate_t flags)
 {
   if (NULL == lock)
     {
-      int me = this_cpu();
+      int me = up_cpu_index();
       DEBUGASSERT(0 < g_irq_spin_count[me]);
       g_irq_spin_count[me]--;
 
@@ -203,7 +203,7 @@ void spin_unlock_irqrestore_wo_note(spinlock_t *lock, irqstate_t flags)
 {
   if (NULL == lock)
     {
-      int me = this_cpu();
+      int me = up_cpu_index();
       DEBUGASSERT(0 < g_irq_spin_count[me]);
       g_irq_spin_count[me]--;
 
@@ -351,7 +351,7 @@ irqstate_t write_lock_irqsave(rwlock_t *lock)
 
   if (NULL == lock)
     {
-      int me = this_cpu();
+      int me = up_cpu_index();
       if (0 == g_irq_rwspin_count[me])
         {
           write_lock(&g_irq_rwspin);
@@ -401,7 +401,7 @@ void write_unlock_irqrestore(rwlock_t *lock, irqstate_t flags)
 {
   if (NULL == lock)
     {
-      int me = this_cpu();
+      int me = up_cpu_index();
       DEBUGASSERT(0 < g_irq_rwspin_count[me]);
       g_irq_rwspin_count[me]--;
 

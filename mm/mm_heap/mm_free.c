@@ -28,6 +28,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/sched.h>
 #include <nuttx/mm/mm.h>
 
 #include "mm_heap/mm.h"
@@ -47,11 +48,11 @@ static void add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
 
   flags = up_irq_save();
 
-  tmp->flink = heap->mm_delaylist[up_cpu_index()];
-  heap->mm_delaylist[up_cpu_index()] = tmp;
+  tmp->flink = heap->mm_delaylist[this_cpu()];
+  heap->mm_delaylist[this_cpu()] = tmp;
 
 #if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
-  heap->mm_delaycount[up_cpu_index()]++;
+  heap->mm_delaycount[this_cpu()]++;
 #endif
 
   up_irq_restore(flags);

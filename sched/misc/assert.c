@@ -581,7 +581,7 @@ void _assert(FAR const char *filename, int linenum,
          msg ? msg : "",
          filename ? filename : "", linenum,
 #ifdef CONFIG_SMP
-         up_cpu_index(),
+         this_cpu(),
 #endif
 #if CONFIG_TASK_NAME_SIZE > 0
          rtcb->name,
