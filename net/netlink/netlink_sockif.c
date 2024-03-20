@@ -129,6 +129,11 @@ static int netlink_setup(FAR struct socket *psock)
         break;
 #endif
 
+#ifdef CONFIG_NETLINK_NETFILTER
+      case NETLINK_NETFILTER:
+        break;
+#endif
+
       default:
         return -EPROTONOSUPPORT;
     }
@@ -618,6 +623,15 @@ static ssize_t netlink_sendmsg(FAR struct socket *psock,
                                    msg->msg_iov->iov_len, flags,
                                    (FAR const struct sockaddr_nl *)to,
                                    tolen);
+        break;
+#endif
+
+#ifdef CONFIG_NETLINK_NETFILTER
+      case NETLINK_NETFILTER:
+        ret = netlink_netfilter_sendto(conn, nlmsg,
+                                       msg->msg_iov->iov_len, flags,
+                                       (FAR const struct sockaddr_nl *)to,
+                                       tolen);
         break;
 #endif
 
