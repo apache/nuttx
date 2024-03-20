@@ -79,6 +79,10 @@ if 16550_UART
 source "drivers/serial/Kconfig-16550"
 endif
 
+if PCI
+source "drivers/serial/Kconfig-pci"
+endif
+
 #
 # MCU serial peripheral driver?
 #
