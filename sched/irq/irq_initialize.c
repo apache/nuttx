@@ -47,11 +47,12 @@
 
 /* This is the interrupt vector table */
 
-#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
-struct irq_info_s g_irqvector[CONFIG_ARCH_NUSER_INTERRUPTS];
-#else
-struct irq_info_s g_irqvector[NR_IRQS];
-#endif
+struct irq_info_s g_irqvector[TAB_SIZE] =
+{
+  /* Point all interrupt vectors to the unexpected interrupt */
+
+  [0 ... (TAB_SIZE - 1)].handler = irq_unexpected_isr
+};
 
 /****************************************************************************
  * Public Functions
@@ -67,16 +68,7 @@ struct irq_info_s g_irqvector[NR_IRQS];
 
 void irq_initialize(void)
 {
-  int i;
-
   sched_trace_begin();
-
-  /* Point all interrupt vectors to the unexpected interrupt */
-
-  for (i = 0; i < TAB_SIZE; i++)
-    {
-      g_irqvector[i].handler = irq_unexpected_isr;
-    }
 
 #ifdef CONFIG_IRQCHAIN
   /* Initialize IRQ chain support */
