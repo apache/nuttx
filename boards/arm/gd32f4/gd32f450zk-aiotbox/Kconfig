@@ -1,0 +1,87 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_GD32F450ZK_AIOTBOX
+
+choice
+	prompt "Select Console wiring."
+	default GD32F450ZK_AIOTBOX_CONSOLE_BOARD
+	---help---
+		Select where you will connect the console.
+
+		Virtual COM Port:
+
+		Advantage: Use the ST-Link as a console. No Extra wiring
+		needed.
+
+		Disadvantage: Not the best choice for initial bring up.
+
+		BOARD USART Connector:
+
+		Advantage: You have a shield so it is easy.
+
+		Disadvantage: You loose the use of the
+		other functions on PA9, PA10
+
+				GD32F450ZK_AIOTBOX
+			USART0 GPIO
+			-- ----- --------- ----
+			RX    USART0_RX PB7
+			TX    USART0_TX PB6
+			-- ----- --------- ---
+
+config GD32F450ZK_AIOTBOX_CONSOLE_BOARD
+	bool "Aiotbox Com Connector"
+	select GD32_USART0
+	select USART0_SERIALDRIVER
+
+config GD32F450ZK_AIOTBOX_CONSOLE_VIRTUAL
+	bool "Aiotbox Virtual ComPort"
+	select GD32_USART3
+	select USART3_SERIALDRIVER
+
+config GD32F450ZK_AIOTBOX_CONSOLE_NONE
+	bool "No Serial Console"
+
+endchoice # "Select Console wiring"
+
+
+choice
+	prompt "GD32F4 MCU Crystal Selected"
+	default GD32F4_BOARD_USE_HXTAL_AIOTBOX
+
+config GD32F4_BOARD_USE_HXTAL_AIOTBOX
+	bool "Aiotbox Use Hxtal as clock source"
+	# select GD32F4_BOARD_HXTAL_VALUE
+
+config GD32F4_BOARD_USE_IRC16_AIOTBOX
+	bool "Aiotbox Use IRC16M as clock source"
+
+endchoice # CPU Frequency
+
+config GD32F4_BOARD_HXTAL_VALUE
+	int "GD32F450Z Aiotbox Board Hxtal Value"
+	default 25000000
+	depends on GD32F4_BOARD_USE_HXTAL_AIOTBOX
+	---help---
+		GD32F450Z Aiotbox Board Hxtal Value, default is 25MHz.
+
+choice
+	prompt "GD32F4 MCU System Frequency"
+	default GD32F4_200MHZ_AIOTBOX
+
+config GD32F4_200MHZ_AIOTBOX
+	bool "200 MHz"
+
+config GD32F4_168MHZ_AIOTBOX
+	bool "168 MHz"
+
+config GD32F4_120MHZ_AIOTBOX
+	bool "120 MHz"
+
+endchoice # CPU Frequency
+
+
+endif # ARCH_BOARD_GD32F450ZK_AIOTBOX
