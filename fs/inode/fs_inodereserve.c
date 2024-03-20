@@ -141,7 +141,7 @@ static void inode_insert(FAR struct inode *node,
 
 void inode_root_reserve(void)
 {
-  g_root_inode = inode_alloc("", 0777);
+  inode_root() = inode_alloc("", 0777);
 }
 
 /****************************************************************************
