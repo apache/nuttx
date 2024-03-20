@@ -41,6 +41,7 @@
 #include <nuttx/mutex.h>
 #include <nuttx/sched.h>
 #include <nuttx/spawn.h>
+#include <nuttx/spinlock.h>
 
 #ifdef CONFIG_FDSAN
 #  include <android/fdsan.h>
@@ -66,11 +67,11 @@ static FAR struct file *files_fget_by_index(FAR struct filelist *list,
   FAR struct file *filep;
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(&list->fl_lock);
+  flags = spin_lock_irqsave(NULL);
 
   filep = &list->fl_files[l1][l2];
 
-  spin_unlock_irqrestore(&list->fl_lock, flags);
+  spin_unlock_irqrestore(NULL, flags);
 
   return filep;
 }
@@ -125,7 +126,7 @@ static int files_extend(FAR struct filelist *list, size_t row)
     }
   while (++i < row);
 
-  flags = spin_lock_irqsave(&list->fl_lock);
+  flags = spin_lock_irqsave(NULL);
 
   /* To avoid race condition, if the file list is updated by other threads
    * and list rows is greater or equal than temp list,
@@ -134,7 +135,7 @@ static int files_extend(FAR struct filelist *list, size_t row)
 
   if (orig_rows != list->fl_rows && list->fl_rows >= row)
     {
-      spin_unlock_irqrestore(&list->fl_lock, flags);
+      spin_unlock_irqrestore(NULL, flags);
 
       for (j = orig_rows; j < i; j++)
         {
@@ -156,7 +157,7 @@ static int files_extend(FAR struct filelist *list, size_t row)
   list->fl_files = files;
   list->fl_rows = row;
 
-  spin_unlock_irqrestore(&list->fl_lock, flags);
+  spin_unlock_irqrestore(NULL, flags);
 
   if (tmp != NULL && tmp != &list->fl_prefile)
     {
@@ -484,13 +485,13 @@ int file_allocate_from_tcb(FAR struct tcb_s *tcb, FAR struct inode *inode,
 
   /* Find free file */
 
-  flags = spin_lock_irqsave(&list->fl_lock);
+  flags = spin_lock_irqsave(NULL);
 
   for (; ; i++, j = 0)
     {
       if (i >= list->fl_rows)
         {
-          spin_unlock_irqrestore(&list->fl_lock, flags);
+          spin_unlock_irqrestore(NULL, flags);
 
           ret = files_extend(list, i + 1);
           if (ret < 0)
@@ -498,7 +499,7 @@ int file_allocate_from_tcb(FAR struct tcb_s *tcb, FAR struct inode *inode,
               return ret;
             }
 
-          flags = spin_lock_irqsave(&list->fl_lock);
+          flags = spin_lock_irqsave(NULL);
         }
 
       do
@@ -518,7 +519,7 @@ int file_allocate_from_tcb(FAR struct tcb_s *tcb, FAR struct inode *inode,
     }
 
 found:
-  spin_unlock_irqrestore(&list->fl_lock, flags);
+  spin_unlock_irqrestore(NULL, flags);
 
   if (addref)
     {

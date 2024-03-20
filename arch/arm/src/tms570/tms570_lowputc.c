@@ -52,6 +52,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
+#include <nuttx/spinlock.h>
 
 #include "arm_internal.h"
 #include "hardware/tms570_sci.h"
