@@ -196,6 +196,16 @@
 
 #define get_current_mm()             (get_group_mm(nxsched_self()->group))
 
+/* These are macros to access the current CPU and the current task on a CPU.
+ * These macros are intended to support a future SMP implementation.
+ */
+
+#ifdef CONFIG_SMP
+#  define this_cpu()                 up_cpu_index()
+#else
+#  define this_cpu()                 (0)
+#endif
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
