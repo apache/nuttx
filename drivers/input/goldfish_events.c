@@ -75,18 +75,11 @@ struct goldfish_events_s
   FAR void                      *base;
   int                           irq;
   struct work_s                 work;           /* Supports the interrupt handling "bottom half" */
-
-#ifdef CONFIG_INPUT_MOUSE
   struct mouse_lowerhalf_s      mouselower;     /* Mouse device lowerhalf instance */
   struct mouse_report_s         mousesample;    /* Mouse event */
-#endif
-#ifdef CONFIG_INPUT_KEYBOARD
   struct keyboard_lowerhalf_s   keyboardlower;  /* Keyboard device lowerhalf instance */
-#endif
-#ifdef CONFIG_INPUT_TOUCHSCREEN
   struct touch_lowerhalf_s      touchlower;     /* Touchpad device lowerhalf instance */
   struct touch_sample_s         touchsample;    /* Touchpad event */
-#endif
 };
 
 /****************************************************************************
@@ -104,8 +97,6 @@ goldfish_events_interrupt(int irq, FAR void *dev_id, FAR void *arg);
  * Private Functions
  ****************************************************************************/
 
-#ifdef CONFIG_INPUT_KEYBOARD
-
 /****************************************************************************
  * Name: goldfish_events_send_keyboard_event
  ****************************************************************************/
@@ -118,15 +109,12 @@ goldfish_events_send_keyboard_event(FAR struct goldfish_events_s *events,
     {
       keyboard_event(&(events->keyboardlower),
                      keyboard_translate_virtio_code(evt->code),
-                     evt->value);
+                     !evt->value);
       return true;
     }
 
   return false;
 }
-#endif
-
-#ifdef CONFIG_INPUT_MOUSE
 
 /****************************************************************************
  * Name: goldfish_events_send_mouse_event
@@ -187,9 +175,6 @@ goldfish_events_send_mouse_event(FAR struct goldfish_events_s *events,
 
   return false;
 }
-#endif
-
-#ifdef CONFIG_INPUT_TOUCHSCREEN
 
 /****************************************************************************
  * Name: goldfish_events_send_touch_event
@@ -249,7 +234,6 @@ goldfish_events_send_touch_event(FAR struct goldfish_events_s *events,
 
   return false;
 }
-#endif
 
 /****************************************************************************
  * Name: goldfish_events_worker
@@ -273,23 +257,17 @@ static void goldfish_events_worker(FAR void *arg)
   iinfo("goldfish_events_interrupt events(%" PRIu32 ", %" PRIu32 ", \
         %" PRIu32 ").\n", evt.type, evt.code, evt.value);
 
-#ifdef CONFIG_INPUT_TOUCHSCREEN
   if (goldfish_events_send_touch_event(events, &evt))
     {
       goto out;
     }
-#endif
 
-#ifdef CONFIG_INPUT_MOUSE
   if (goldfish_events_send_mouse_event(events, &evt))
     {
       goto out;
     }
-#endif
 
-#ifdef CONFIG_INPUT_KEYBOARD
   goldfish_events_send_keyboard_event(events, &evt);
-#endif
 
 out:
   up_enable_irq(events->irq);
@@ -316,7 +294,6 @@ goldfish_events_interrupt(int irq, FAR void *dev_id, FAR void *arg)
 
 static void goldfish_drivers_register(FAR struct goldfish_events_s *events)
 {
-#ifdef CONFIG_INPUT_KEYBOARD
   putreg32(GOLDFISH_EVENTS_PAGE_EVBITS | EV_KEY,
            events->base + GOLDFISH_EVENTS_SET_PAGE);
   if (getreg32(events->base + GOLDFISH_EVENTS_LEN))
@@ -330,9 +307,7 @@ static void goldfish_drivers_register(FAR struct goldfish_events_s *events)
                             CONFIG_INPUT_GOLDFISH_NBUFFER);
         }
     }
-#endif
 
-#ifdef CONFIG_INPUT_MOUSE
   putreg32(GOLDFISH_EVENTS_PAGE_EVBITS | EV_REL,
            events->base + GOLDFISH_EVENTS_SET_PAGE);
   if (getreg32(events->base + GOLDFISH_EVENTS_LEN))
@@ -346,9 +321,7 @@ static void goldfish_drivers_register(FAR struct goldfish_events_s *events)
                          CONFIG_INPUT_GOLDFISH_NBUFFER);
         }
     }
-#endif
 
-#ifdef CONFIG_INPUT_TOUCHSCREEN
   putreg32(GOLDFISH_EVENTS_PAGE_EVBITS | EV_ABS,
            events->base + GOLDFISH_EVENTS_SET_PAGE);
   if (getreg32(events->base + GOLDFISH_EVENTS_LEN))
@@ -362,7 +335,6 @@ static void goldfish_drivers_register(FAR struct goldfish_events_s *events)
                          CONFIG_INPUT_GOLDFISH_NBUFFER);
         }
     }
-#endif
 }
 
 /****************************************************************************
