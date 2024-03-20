@@ -365,7 +365,7 @@ static ssize_t noteram_get(FAR struct noteram_driver_s *drv,
     {
       /* Skip the large note so that we do not get constipated. */
 
-      drv->ni_read = noteram_next(drv, read, notelen);
+      drv->ni_read = noteram_next(drv, read, NOTE_ALIGN(notelen));
 
       /* and return an error */
 
@@ -387,7 +387,7 @@ static ssize_t noteram_get(FAR struct noteram_driver_s *drv,
       remaining--;
     }
 
-  drv->ni_read = NOTE_ALIGN(read);
+  drv->ni_read = noteram_next(drv, drv->ni_read, NOTE_ALIGN(notelen));
 
   return notelen;
 }
