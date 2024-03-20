@@ -103,6 +103,10 @@
 #  define CRITMONITOR_PANIC(fmt, ...) _alert(fmt, ##__VA_ARGS__)
 #endif
 
+#define nxsched_pidhash()        g_pidhash
+#define nxsched_npidhash()       g_npidhash
+#define nxsched_lastpid()        g_lastpid
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/

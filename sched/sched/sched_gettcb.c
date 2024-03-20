@@ -62,7 +62,7 @@ FAR struct tcb_s *nxsched_get_tcb(pid_t pid)
    * whether the PID is within range.
    */
 
-  if (g_pidhash != NULL && pid >= 0)
+  if (nxsched_pidhash() != NULL && pid >= 0)
     {
       /* The test and the return setup should be atomic.  This still does
        * not provide proper protection if the recipient of the TCB does not
@@ -76,11 +76,12 @@ FAR struct tcb_s *nxsched_get_tcb(pid_t pid)
 
       /* Verify that the correct TCB was found. */
 
-      if (g_pidhash[hash_ndx] != NULL && pid == g_pidhash[hash_ndx]->pid)
+      if (nxsched_pidhash()[hash_ndx] != NULL &&
+          pid == nxsched_pidhash()[hash_ndx]->pid)
         {
           /* Return the TCB associated with this pid (if any) */
 
-          ret = g_pidhash[hash_ndx];
+          ret = nxsched_pidhash()[hash_ndx];
         }
     }
 

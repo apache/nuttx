@@ -164,11 +164,11 @@ static void note_sysview_send_tasklist(void)
 {
   int i;
 
-  for (i = 0; i < g_npidhash; i++)
+  for (i = 0; i < nxsched_npidhash(); i++)
     {
-      if (g_pidhash[i] != NULL)
+      if (nxsched_pidhash()[i] != NULL)
         {
-          note_sysview_send_taskinfo(g_pidhash[i]);
+          note_sysview_send_taskinfo(nxsched_pidhash()[i]);
         }
     }
 }
