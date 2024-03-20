@@ -57,7 +57,7 @@ static void nxsched_releasepid(pid_t pid)
    * total for all threads.
    */
 
-  g_cpuload_total -= g_pidhash[hash_ndx]->ticks;
+  g_cpuload_total -= nxsched_pidhash()[hash_ndx]->ticks;
 #endif
 
   /* Make any pid associated with this hash available.  Note:
@@ -65,7 +65,7 @@ static void nxsched_releasepid(pid_t pid)
    * following action is atomic
    */
 
-  g_pidhash[hash_ndx] = NULL;
+  nxsched_pidhash()[hash_ndx] = NULL;
 
   leave_critical_section(flags);
 }
