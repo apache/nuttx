@@ -1839,6 +1839,7 @@ int pci_register_driver(FAR struct pci_driver_s *drv)
         {
           if (pci_match_one_device(id, dev))
             {
+              dev->id = id;
               if (drv->probe(dev) >= 0)
                 {
                   dev->drv = drv;
@@ -1927,6 +1928,7 @@ int pci_register_device(FAR struct pci_device_s *dev)
         {
           if (pci_match_one_device(id, dev))
             {
+              dev->id = id;
               if (drv->probe(dev) >= 0)
                 {
                   dev->drv = drv;

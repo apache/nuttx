@@ -219,6 +219,17 @@ enum
 
 /* The pci_device_s structure is used to describe PCI devices. */
 
+struct pci_device_id_s
+{
+  uint16_t vendor;    /* Vendor id */
+  uint16_t device;    /* Device id */
+  uint32_t subvendor; /* Sub vendor id */
+  uint32_t subdevice; /* Sub device id */
+  uint32_t class;     /* (Class, subclass, prog-if) triplet */
+  uint32_t class_mask;
+  uintptr_t driver_data;
+};
+
 struct pci_device_s
 {
   struct list_node node;
@@ -239,6 +250,7 @@ struct pci_device_s
 
   struct pci_resource_s resource[PCI_NUM_RESOURCES];
 
+  FAR const struct pci_device_id_s *id;
   FAR struct pci_driver_s *drv;
   FAR void *priv; /* Used by pci driver */
 };
@@ -304,16 +316,6 @@ struct pci_controller_s
   FAR struct pci_bus_s *bus;
   struct list_node node;
   uint8_t busno;
-};
-
-struct pci_device_id_s
-{
-  uint16_t vendor;    /* Vendor id */
-  uint16_t device;    /* Device id */
-  uint32_t subvendor; /* Sub vendor id */
-  uint32_t subdevice; /* Sub device id */
-  uint32_t class;     /* (Class, subclass, prog-if) triplet */
-  uint32_t class_mask;
 };
 
 struct pci_driver_s
