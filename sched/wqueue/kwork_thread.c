@@ -305,7 +305,7 @@ void work_foreach(int qid, work_foreach_t handler, FAR void *arg)
 #ifdef CONFIG_SCHED_HPWORK
   if (qid == HPWORK)
     {
-      wqueue  = (FAR struct kwork_wqueue_s *)&g_hpwork;
+      wqueue  = (FAR struct kwork_wqueue_s *)&hpwork();
       nthread = CONFIG_SCHED_HPNTHREADS;
     }
   else
@@ -313,7 +313,7 @@ void work_foreach(int qid, work_foreach_t handler, FAR void *arg)
 #ifdef CONFIG_SCHED_LPWORK
   if (qid == LPWORK)
     {
-      wqueue  = (FAR struct kwork_wqueue_s *)&g_lpwork;
+      wqueue  = (FAR struct kwork_wqueue_s *)&lpwork();
       nthread = CONFIG_SCHED_LPNTHREADS;
     }
   else
@@ -352,7 +352,7 @@ int work_start_highpri(void)
   return work_thread_create(HPWORKNAME, CONFIG_SCHED_HPWORKPRIORITY,
                             CONFIG_SCHED_HPWORKSTACKSIZE,
                             CONFIG_SCHED_HPNTHREADS,
-                            (FAR struct kwork_wqueue_s *)&g_hpwork);
+                            (FAR struct kwork_wqueue_s *)&hpwork());
 }
 #endif /* CONFIG_SCHED_HPWORK */
 
@@ -380,7 +380,7 @@ int work_start_lowpri(void)
   return work_thread_create(LPWORKNAME, CONFIG_SCHED_LPWORKPRIORITY,
                             CONFIG_SCHED_LPWORKSTACKSIZE,
                             CONFIG_SCHED_LPNTHREADS,
-                            (FAR struct kwork_wqueue_s *)&g_lpwork);
+                            (FAR struct kwork_wqueue_s *)&lpwork());
 }
 #endif /* CONFIG_SCHED_LPWORK */
 

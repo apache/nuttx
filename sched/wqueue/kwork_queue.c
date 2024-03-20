@@ -67,7 +67,7 @@
 static void hp_work_timer_expiry(wdparm_t arg)
 {
   irqstate_t flags = enter_critical_section();
-  queue_work(g_hpwork, arg);
+  queue_work(hpwork(), arg);
   leave_critical_section(flags);
 }
 #endif
@@ -80,7 +80,7 @@ static void hp_work_timer_expiry(wdparm_t arg)
 static void lp_work_timer_expiry(wdparm_t arg)
 {
   irqstate_t flags = enter_critical_section();
-  queue_work(g_lpwork, arg);
+  queue_work(lpwork(), arg);
   leave_critical_section(flags);
 }
 #endif
@@ -152,7 +152,7 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
 
       if (!delay)
         {
-          queue_work(g_hpwork, work);
+          queue_work(hpwork(), work);
         }
       else
         {
@@ -169,7 +169,7 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
 
       if (!delay)
         {
-          queue_work(g_lpwork, work);
+          queue_work(lpwork(), work);
         }
       else
         {
