@@ -45,7 +45,7 @@
 
 int pci_register_drivers(void)
 {
-  int ret;
+  int ret = OK;
 
 #ifdef CONFIG_PCI_IVSHMEM
   ret = pci_ivshmem_register();
