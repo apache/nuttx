@@ -99,6 +99,7 @@
 #define _SEIOCBASE      (0x3a00) /* Secure element ioctl commands */
 #define _SYSLOGBASE     (0x3c00) /* Syslog device ioctl commands */
 #define _STEPIOBASE     (0x3d00) /* Stepper device ioctl commands */
+#define _FPGACFGBASE    (0x3e00) /* FPGA configuration ioctl commands */
 #define _WLIOCBASE      (0x8b00) /* Wireless modules ioctl network commands */
 
 /* boardctl() commands share the same number space */
@@ -693,6 +694,11 @@
 
 #define _BOARDIOCVALID(c) (_IOC_TYPE(c)==_BOARDBASE)
 #define _BOARDIOC(nr)     _IOC(_BOARDBASE,nr)
+
+/* FPAG configuration ioctl definitions *************************************/
+
+#define _FPGACFGVALID(c) (_IOC_TYPE(c) == _FPGACFGBASE)
+#define _FPGACFGIOC(nr) _IOC(_FPGACFGBASE, nr)
 
 /****************************************************************************
  * Public Type Definitions
