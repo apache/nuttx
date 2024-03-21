@@ -915,7 +915,6 @@ static bool IRAM_ATTR wifi_is_from_isr(void)
 
 static void *esp_spin_lock_create(void)
 {
-#ifdef CONFIG_SMP
   spinlock_t *lock;
   int tmp;
 
@@ -930,11 +929,6 @@ static void *esp_spin_lock_create(void)
   spin_initialize(lock, SP_UNLOCKED);
 
   return lock;
-#else
-  /* If return NULL, code may check fail  */
-
-  return (void *)1;
-#endif
 }
 
 /****************************************************************************
@@ -953,11 +947,7 @@ static void *esp_spin_lock_create(void)
 
 static void esp_spin_lock_delete(void *lock)
 {
-#ifdef CONFIG_SMP
   kmm_free(lock);
-#else
-  DEBUGASSERT((int)lock == 1);
-#endif
 }
 
 /****************************************************************************
@@ -4117,6 +4107,8 @@ static IRAM_ATTR void esp_wifi_tx_done_cb(uint8_t ifidx, uint8_t *data,
     }
 }
 
+#ifdef ESP32S3_WLAN_HAS_STA
+
 /****************************************************************************
  * Name: esp_wifi_auth_trans
  *
@@ -4216,6 +4208,8 @@ static int esp_wifi_cipher_trans(uint32_t wifi_cipher)
 
   return cipher_mode;
 }
+
+#endif /* ESP32S3_WLAN_HAS_STA */
 
 /****************************************************************************
  * Name: esp_freq_to_channel
@@ -4404,92 +4398,6 @@ int32_t esp_event_send_internal(esp_event_base_t event_base,
 
   ret = esp_event_post(event_base, event_id, event_data,
                        event_data_size, ticks_to_wait);
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: esp_wifi_init
- *
- * Description:
- *   Initialize Wi-Fi
- *
- * Input Parameters:
- *   config - Initialization config parameters
- *
- * Returned Value:
- *   0 if success or others if fail
- *
- ****************************************************************************/
-
-int32_t esp_wifi_init(const wifi_init_config_t *config)
-{
-  int32_t ret;
-
-  esp_wifi_power_domain_on();
-
-#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
-  ret = coex_init();
-  if (ret)
-    {
-      wlerr("ERROR: Failed to initialize coex error=%d\n", ret);
-      return ret;
-    }
-#endif
-
-  esp_wifi_internal_set_log_level(WIFI_LOG_DEBUG);
-
-  ret = esp_wifi_init_internal(config);
-  if (ret)
-    {
-      wlerr("Failed to initialize Wi-Fi error=%d\n", ret);
-      return ret;
-    }
-
-  esp_phy_modem_init();
-
-  ret = esp_supplicant_init();
-  if (ret)
-    {
-      wlerr("Failed to initialize WPA supplicant error=%d\n", ret);
-      esp_wifi_deinit_internal();
-      return ret;
-    }
-
-  return 0;
-}
-
-/****************************************************************************
- * Name: esp_wifi_deinit
- *
- * Description:
- *   Deinitialize Wi-Fi and free resource
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   0 if success or others if fail
- *
- ****************************************************************************/
-
-int32_t esp_wifi_deinit(void)
-{
-  int ret;
-
-  ret = esp_supplicant_deinit();
-  if (ret)
-    {
-      wlerr("Failed to deinitialize supplicant\n");
-      return ret;
-    }
-
-  ret = esp_wifi_deinit_internal();
-  if (ret != 0)
-    {
-      wlerr("Failed to deinitialize Wi-Fi\n");
-      return ret;
-    }
 
   return ret;
 }
@@ -5691,6 +5599,8 @@ int esp_wifi_sta_bitrate(struct iwreq *iwr, bool set)
   return OK;
 }
 
+#endif /* ESP32S3_WLAN_HAS_STA */
+
 /****************************************************************************
  * Name: esp_wifi_sta_get_txpower
  *
@@ -5771,7 +5681,7 @@ int esp_wifi_sta_txpower(struct iwreq *iwr, bool set)
 }
 
 /****************************************************************************
- * Name: esp_wifi_sta_get_channel_range
+ * Name: esp_wifi_sta_channel
  *
  * Description:
  *   Get station range of channel parameters.
@@ -5883,6 +5793,8 @@ int esp_wifi_sta_country(struct iwreq *iwr, bool set)
 
   return OK;
 }
+
+#ifdef ESP32S3_WLAN_HAS_STA
 
 /****************************************************************************
  * Name: esp_wifi_sta_rssi

@@ -40,8 +40,14 @@
 #include "esp32s3_irq.h"
 #include "esp32s3_partition.h"
 
-#include "esp_phy_init.h"
+#include "esp_private/phy.h"
+#ifdef CONFIG_ESP32S3_WIFI
+#  include "esp_private/wifi.h"
+#  include "esp_wpa.h"
+#endif
+#include "esp_coexist_internal.h"
 #include "periph_ctrl.h"
+#include "esp_phy_init.h"
 #include "phy_init_data.h"
 
 #include "esp32s3_wireless.h"
@@ -77,6 +83,7 @@ struct esp_wireless_priv_s
 
 static inline void phy_digital_regs_store(void);
 static inline void phy_digital_regs_load(void);
+static int esp_swi_irq(int irq, void *context, void *arg);
 
 /****************************************************************************
  * Extern Functions declaration
@@ -293,6 +300,41 @@ static int esp_swi_irq(int irq, void *context, void *arg)
   return OK;
 }
 
+#ifdef CONFIG_ESP32S3_WIFI
+
+/****************************************************************************
+ * Name: esp_wifi_set_log_level
+ *
+ * Description:
+ *   Sets the log level for the ESP32 WiFi module based on preprocessor
+ *   definitions. The log level can be verbose, warning, or error.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void esp_wifi_set_log_level(void)
+{
+  wifi_log_level_t wifi_log_level = WIFI_LOG_NONE;
+
+  /* set WiFi log level */
+
+#if defined(CONFIG_DEBUG_WIRELESS_INFO)
+  wifi_log_level = WIFI_LOG_VERBOSE;
+#elif defined(CONFIG_DEBUG_WIRELESS_WARN)
+  wifi_log_level = WIFI_LOG_WARNING;
+#elif defined(CONFIG_LOG_MAXIMUM_LEVEL)
+  wifi_log_level = WIFI_LOG_ERROR;
+#endif
+
+  esp_wifi_internal_set_log_level(wifi_log_level);
+}
+#endif /* CONFIG_ESP32S3_WIFI */
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -493,7 +535,9 @@ static int phy_get_multiple_init_data(uint8_t *data, size_t length,
       return -ENOMEM;
     }
 
-  int ret = esp32s3_partition_read(phy_partion_label, length, control_info,
+  int ret = esp32s3_partition_read(phy_partion_label,
+                                   length,
+                                   control_info,
                                    sizeof(phy_control_info_data_t));
   if (ret != OK)
     {
@@ -545,8 +589,8 @@ static int phy_get_multiple_init_data(uint8_t *data, size_t length,
   if ((control_info->check_algorithm) == PHY_CRC_ALGORITHM)
     {
       ret = phy_crc_check(init_data_multiple,
-                    control_info->multiple_bin_checksum,
-                    sizeof(esp_phy_init_data_t) * control_info->number);
+              control_info->multiple_bin_checksum,
+              sizeof(esp_phy_init_data_t) * control_info->number);
       if (ret != OK)
         {
           kmm_free(init_data_multiple);
@@ -1217,3 +1261,92 @@ int esp_wireless_deinit(void)
 
   return OK;
 }
+
+#ifdef CONFIG_ESP32S3_WIFI
+
+/****************************************************************************
+ * Name: esp_wifi_init
+ *
+ * Description:
+ *   Initialize Wi-Fi
+ *
+ * Input Parameters:
+ *   config - Initialization config parameters
+ *
+ * Returned Value:
+ *   0 if success or others if fail
+ *
+ ****************************************************************************/
+
+int32_t esp_wifi_init(const wifi_init_config_t *config)
+{
+  int32_t ret;
+
+  esp_wifi_power_domain_on();
+
+#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+  ret = coex_init();
+  if (ret)
+    {
+      wlerr("ERROR: Failed to initialize coex error=%d\n", ret);
+      return ret;
+    }
+#endif /* CONFIG_ESP32S3_WIFI_BT_COEXIST */
+
+  esp_wifi_set_log_level();
+
+  ret = esp_wifi_init_internal(config);
+  if (ret)
+    {
+      wlerr("Failed to initialize Wi-Fi error=%d\n", ret);
+      return ret;
+    }
+
+  esp_phy_modem_init();
+
+  ret = esp_supplicant_init();
+  if (ret)
+    {
+      wlerr("Failed to initialize WPA supplicant error=%d\n", ret);
+      esp_wifi_deinit_internal();
+      return ret;
+    }
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: esp_wifi_deinit
+ *
+ * Description:
+ *   Deinitialize Wi-Fi and free resource
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   0 if success or others if fail
+ *
+ ****************************************************************************/
+
+int32_t esp_wifi_deinit(void)
+{
+  int ret;
+
+  ret = esp_supplicant_deinit();
+  if (ret)
+    {
+      wlerr("Failed to deinitialize supplicant\n");
+      return ret;
+    }
+
+  ret = esp_wifi_deinit_internal();
+  if (ret != 0)
+    {
+      wlerr("Failed to deinitialize Wi-Fi\n");
+      return ret;
+    }
+
+  return ret;
+}
+#endif /* CONFIG_ESP32S3_WIFI */

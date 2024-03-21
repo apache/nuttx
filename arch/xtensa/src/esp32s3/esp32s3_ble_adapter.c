@@ -69,7 +69,7 @@
 #include "esp_timer.h"
 #include "periph_ctrl.h"
 #include "rom/ets_sys.h"
-#include "xtensa/xtensa_api.h"
+#include "soc/soc_caps.h"
 #include "esp_coexist_internal.h"
 
 #include "esp32s3_ble_adapter.h"
@@ -77,10 +77,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#define OSI_FUNCS_TIME_BLOCKING          0xffffffff
-#define OSI_VERSION                      0x00010006
-#define OSI_MAGIC_VALUE                  0xfadebead
 
 #define BTDM_MIN_TIMER_UNCERTAINTY_US    (1800)
 
@@ -96,9 +92,13 @@
 #define BTDM_LPCLK_SEL_RTC_SLOW          (2)
 #define BTDM_LPCLK_SEL_8M                (3)
 
+#define OSI_FUNCS_TIME_BLOCKING          0xffffffff
+#define OSI_VERSION                      0x00010006
+#define OSI_MAGIC_VALUE                  0xfadebead
+
 #ifdef CONFIG_ESP32S3_SPIFLASH
 #  define BLE_TASK_EVENT_QUEUE_ITEM_SIZE  8
-#  define BLE_TASK_EVENT_QUEUE_LEN        1
+#  define BLE_TASK_EVENT_QUEUE_LEN        8
 #endif
 
 #ifdef CONFIG_ESP32S3_BLE_INTERRUPT_SAVE_STATUS
@@ -358,12 +358,14 @@ static void esp_update_time(struct timespec *timespec, uint32_t ticks);
 static void IRAM_ATTR btdm_slp_tmr_callback(void *arg);
 static int IRAM_ATTR esp_int_adpt_cb(int irq, void *context, void *arg);
 static void IRAM_ATTR btdm_sleep_exit_phase0(void *param);
-static void btdm_controller_mem_init(void);
-static void bt_controller_deinit_internal(void);
 #if CONFIG_MAC_BB_PD
 static void IRAM_ATTR btdm_mac_bb_power_down_cb(void);
 static void IRAM_ATTR btdm_mac_bb_power_up_cb(void);
 #endif
+static void btdm_controller_mem_init(void);
+static void bt_controller_deinit_internal(void);
+static bool async_wakeup_request(int event);
+static void async_wakeup_request_end(int event);
 
 /****************************************************************************
  * Extern Functions declaration and value
@@ -507,7 +509,7 @@ static DRAM_ATTR struct osi_funcs_s *osi_funcs_p;
 
 /* Controller status */
 
-static DRAM_ATTR esp_bt_controller_status_t btdm_controller_status =
+static DRAM_ATTR esp_bt_controller_status_t g_btdm_controller_status =
     ESP_BT_CONTROLLER_STATUS_IDLE;
 
 /* measured average low power clock period in micro seconds */
@@ -535,8 +537,6 @@ static DRAM_ATTR void * g_wakeup_req_sem = NULL;
 static DRAM_ATTR esp_timer_handle_t g_btdm_slp_tmr;
 
 #ifdef CONFIG_PM
-
-static DRAM_ATTR void * g_pm_lock;
 
 /* pm_lock to prevent light sleep due to incompatibility currently */
 
@@ -1149,13 +1149,20 @@ static void *queue_create_wrapper(uint32_t queue_len, uint32_t item_size)
   mq_adpt->msgsize = item_size;
 
 #ifdef CONFIG_ESP32S3_SPIFLASH
-  if (queue_len == BLE_TASK_EVENT_QUEUE_LEN &&
+  if (queue_len <= BLE_TASK_EVENT_QUEUE_LEN &&
       item_size == BLE_TASK_EVENT_QUEUE_ITEM_SIZE)
     {
       esp_init_queuecache(&g_esp_queuecache,
                           &mq_adpt->mq,
                           g_esp_queuecache_buffer,
                           BLE_TASK_EVENT_QUEUE_ITEM_SIZE);
+    }
+  else
+    {
+      wlerr("Failed to create queue cache."
+            " Please incresase BLE_TASK_EVENT_QUEUE_LEN to, at least, %d",
+            queue_len);
+      return NULL;
     }
 #endif
 
@@ -1602,7 +1609,7 @@ static void btdm_sleep_enter_phase1_wrapper(uint32_t lpcycles)
   uint32_t us_to_sleep;
   uint32_t uncertainty;
 
-  if (!g_lp_cntl.wakeup_timer_required)
+  if (g_lp_cntl.wakeup_timer_required == 0)
     {
       return;
     }
@@ -1619,7 +1626,7 @@ static void btdm_sleep_enter_phase1_wrapper(uint32_t lpcycles)
       uncertainty = BTDM_MIN_TIMER_UNCERTAINTY_US;
     }
 
-  DEBUGASSERT(g_lp_stat.wakeup_timer_started == false);
+  DEBUGASSERT(g_lp_stat.wakeup_timer_started == 0);
 
   if (esp_timer_start_once(g_btdm_slp_tmr,
                            us_to_sleep - uncertainty) == ESP_OK)
@@ -1654,19 +1661,19 @@ static void btdm_sleep_enter_phase2_wrapper(void)
       if (g_lp_stat.phy_enabled)
         {
           esp_phy_disable();
-          g_lp_stat.phy_enabled = false;
+          g_lp_stat.phy_enabled = 0;
         }
       else
         {
           DEBUGPANIC();
         }
 
-      if (!g_lp_stat.pm_lock_released)
+      if (g_lp_stat.pm_lock_released == 0)
         {
 #ifdef CONFIG_PM_ENABLE
           esp32s3_pm_lockrelease();
 #endif
-          g_lp_stat.pm_lock_released = true;
+          g_lp_stat.pm_lock_released = 1;
         }
     }
 }
@@ -1691,23 +1698,23 @@ static void btdm_sleep_exit_phase3_wrapper(void)
   if (g_lp_stat.pm_lock_released)
     {
       esp32s3_pm_lockacquire();
-      g_lp_stat.pm_lock_released = false;
+      g_lp_stat.pm_lock_released = 0;
     }
 #endif
 
   if (btdm_controller_get_sleep_mode() == ESP_BT_SLEEP_MODE_1)
     {
-      if (!g_lp_stat.phy_enabled)
+      if (g_lp_stat.phy_enabled == 0)
         {
           esp_phy_enable();
-          g_lp_stat.phy_enabled = true;
+          g_lp_stat.phy_enabled = 1;
         }
     }
 
   if (g_lp_cntl.wakeup_timer_required && g_lp_stat.wakeup_timer_started)
     {
       esp_timer_stop(g_btdm_slp_tmr);
-      g_lp_stat.wakeup_timer_started = false;
+      g_lp_stat.wakeup_timer_started = 0;
     }
 
   while (btdm_sleep_clock_sync());
@@ -1916,6 +1923,15 @@ static int32_t esp_task_create_pinned_to_core(void *entry,
 
   DEBUGASSERT(task_handle != NULL);
 
+#ifdef CONFIG_SMP
+  ret = sched_lock();
+  if (ret)
+    {
+      wlerr("Failed to lock scheduler before creating pinned thread\n");
+      return false;
+    }
+#endif
+
   pid = kthread_create(name, prio, stack_depth, entry,
                        (char * const *)param);
   if (pid > 0)
@@ -1943,6 +1959,15 @@ static int32_t esp_task_create_pinned_to_core(void *entry,
     {
       wlerr("Failed to create task, error %d\n", pid);
     }
+
+#ifdef CONFIG_SMP
+  ret = sched_unlock();
+  if (ret)
+    {
+      wlerr("Failed to unlock scheduler after creating pinned thread\n");
+      return false;
+    }
+#endif
 
   return pid > 0;
 }
@@ -2115,7 +2140,7 @@ static void IRAM_ATTR btdm_sleep_exit_phase0(void *param)
   if (g_lp_stat.pm_lock_released)
     {
       esp32s3_pm_lockacquire();
-      g_lp_stat.pm_lock_released = false;
+      g_lp_stat.pm_lock_released = 0;
     }
 #endif
 
@@ -2130,7 +2155,7 @@ static void IRAM_ATTR btdm_sleep_exit_phase0(void *param)
   if (g_lp_cntl.wakeup_timer_required && g_lp_stat.wakeup_timer_started)
     {
       esp_timer_stop(g_btdm_slp_tmr);
-      g_lp_stat.wakeup_timer_started = false;
+      g_lp_stat.wakeup_timer_started = 0;
     }
 
   if (event == BTDM_ASYNC_WAKEUP_SRC_VHCI ||
@@ -2138,140 +2163,6 @@ static void IRAM_ATTR btdm_sleep_exit_phase0(void *param)
     {
       semphr_give_wrapper(g_wakeup_req_sem);
     }
-}
-
-
-
-/****************************************************************************
- * Name: btdm_controller_mem_init
- *
- * Description:
- *   Initialize BT controller to allocate task and other resource.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void btdm_controller_mem_init(void)
-{
-  extern void btdm_controller_rom_data_init(void);
-  btdm_controller_rom_data_init();
-}
-
-/****************************************************************************
- * Name: bt_controller_deinit_internal
- *
- * Description:
- *   Deinit BT internal controller.
- *
- * Input Parameters:
- *    None
- *
- * Returned Value:
- *    None
- *
- ****************************************************************************/
-
-static void bt_controller_deinit_internal(void)
-{
-  periph_module_disable(PERIPH_BT_MODULE);
-
-  if (g_lp_stat.phy_enabled)
-    {
-      esp_phy_disable();
-      g_lp_stat.phy_enabled = 0;
-    }
-
-  /* deinit low power control resources */
-
-#if CONFIG_MAC_BB_PD
-  if (g_lp_cntl.mac_bb_pd)
-    {
-      btdm_deep_sleep_mem_deinit();
-      g_lp_cntl.mac_bb_pd = 0;
-    }
-#endif
-
-#ifdef CONFIG_PM
-  if (g_lp_cntl.no_light_sleep)
-    {
-      if (g_light_sleep_pm_lock != NULL)
-        {
-          esp_pm_lock_delete(g_light_sleep_pm_lock);
-          g_light_sleep_pm_lock = NULL;
-        }
-    }
-
-  if (g_pm_lock != NULL)
-    {
-      esp_pm_lock_delete(g_pm_lock);
-      g_pm_lock = NULL;
-      g_lp_stat.pm_lock_released = 0;
-    }
-#endif
-
-  if (g_lp_cntl.wakeup_timer_required)
-    {
-      if (g_lp_stat.wakeup_timer_started)
-        {
-          esp_timer_stop(g_btdm_slp_tmr);
-        }
-
-      g_lp_stat.wakeup_timer_started = 0;
-      esp_timer_delete(g_btdm_slp_tmr);
-      g_btdm_slp_tmr = NULL;
-    }
-
-  if (g_lp_cntl.enable)
-    {
-      btdm_vnd_offload_task_deregister(BTDM_VND_OL_SIG_WAKEUP_TMR);
-      if (g_wakeup_req_sem != NULL)
-        {
-          semphr_delete_wrapper(g_wakeup_req_sem);
-          g_wakeup_req_sem = NULL;
-        }
-    }
-
-  if (g_lp_cntl.lpclk_sel == BTDM_LPCLK_SEL_XTAL)
-    {
-#ifdef CONFIG_BT_CTRL_MAIN_XTAL_PU_DURING_LIGHT_SLEEP
-      if (g_lp_cntl.main_xtal_pu)
-        {
-          esp_sleep_pd_config(ESP_PD_DOMAIN_XTAL, ESP_PD_OPTION_OFF);
-          g_lp_cntl.main_xtal_pu = 0;
-        }
-#endif
-
-      btdm_lpclk_select_src(BTDM_LPCLK_SEL_RTC_SLOW);
-      btdm_lpclk_set_div(0);
-#if CONFIG_ESP32S3_WIFI_BT_COEXIST
-      coex_update_lpclk_interval();
-#endif
-    }
-
-  g_btdm_lpcycle_us = 0;
-
-#if CONFIG_MAC_BB_PD
-  esp_unregister_mac_bb_pd_callback(btdm_mac_bb_power_down_cb);
-  esp_unregister_mac_bb_pu_callback(btdm_mac_bb_power_up_cb);
-#endif
-
-  esp_bt_power_domain_off();
-#if CONFIG_MAC_BB_PD
-  esp_mac_bb_pd_mem_deinit();
-#endif
-
-  if (osi_funcs_p != NULL)
-    {
-      kmm_free(osi_funcs_p);
-      osi_funcs_p = NULL;
-    }
-
-    btdm_controller_status = ESP_BT_CONTROLLER_STATUS_IDLE;
 }
 
 #if CONFIG_MAC_BB_PD
@@ -2332,6 +2223,209 @@ static void IRAM_ATTR btdm_mac_bb_power_up_cb(void)
 #endif
 
 /****************************************************************************
+ * Name: btdm_controller_mem_init
+ *
+ * Description:
+ *   Initialize BT controller to allocate task and other resource.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void btdm_controller_mem_init(void)
+{
+  extern void btdm_controller_rom_data_init(void);
+  btdm_controller_rom_data_init();
+}
+
+/****************************************************************************
+ * Name: bt_controller_deinit_internal
+ *
+ * Description:
+ *   Deinit BT internal controller.
+ *
+ * Input Parameters:
+ *    None
+ *
+ * Returned Value:
+ *    None
+ *
+ ****************************************************************************/
+
+static void bt_controller_deinit_internal(void)
+{
+  periph_module_disable(PERIPH_BT_MODULE);
+
+  if (g_lp_stat.phy_enabled)
+    {
+      esp_phy_disable();
+      g_lp_stat.phy_enabled = 0;
+    }
+
+  /* deinit low power control resources */
+
+#if CONFIG_MAC_BB_PD
+  if (g_lp_cntl.mac_bb_pd)
+    {
+      btdm_deep_sleep_mem_deinit();
+      g_lp_cntl.mac_bb_pd = 0;
+    }
+#endif
+
+#ifdef CONFIG_PM
+  g_lp_stat.pm_lock_released = 0;
+#endif
+
+  if (g_lp_cntl.wakeup_timer_required)
+    {
+      if (g_lp_stat.wakeup_timer_started)
+        {
+          esp_timer_stop(g_btdm_slp_tmr);
+        }
+
+      g_lp_stat.wakeup_timer_started = 0;
+      esp_timer_delete(g_btdm_slp_tmr);
+      g_btdm_slp_tmr = NULL;
+    }
+
+  if (g_lp_cntl.enable)
+    {
+      btdm_vnd_offload_task_deregister(BTDM_VND_OL_SIG_WAKEUP_TMR);
+      if (g_wakeup_req_sem != NULL)
+        {
+          semphr_delete_wrapper(g_wakeup_req_sem);
+          g_wakeup_req_sem = NULL;
+        }
+    }
+
+  if (g_lp_cntl.lpclk_sel == BTDM_LPCLK_SEL_XTAL)
+    {
+#ifdef CONFIG_BT_CTRL_MAIN_XTAL_PU_DURING_LIGHT_SLEEP
+      if (g_lp_cntl.main_xtal_pu)
+        {
+          esp_sleep_pd_config(ESP_PD_DOMAIN_XTAL, ESP_PD_OPTION_OFF);
+          g_lp_cntl.main_xtal_pu = 0;
+        }
+#endif
+
+      btdm_lpclk_select_src(BTDM_LPCLK_SEL_RTC_SLOW);
+      btdm_lpclk_set_div(0);
+#if CONFIG_ESP32S3_WIFI_BT_COEXIST
+      coex_update_lpclk_interval();
+#endif
+    }
+
+  g_btdm_lpcycle_us = 0;
+
+#if CONFIG_MAC_BB_PD
+  esp_unregister_mac_bb_pd_callback(btdm_mac_bb_power_down_cb);
+  esp_unregister_mac_bb_pu_callback(btdm_mac_bb_power_up_cb);
+#endif
+
+  esp_bt_power_domain_off();
+#if CONFIG_MAC_BB_PD
+  esp_mac_bb_pd_mem_deinit();
+#endif
+  esp_phy_modem_deinit();
+
+  if (osi_funcs_p != NULL)
+    {
+      kmm_free(osi_funcs_p);
+      osi_funcs_p = NULL;
+    }
+
+    g_btdm_controller_status = ESP_BT_CONTROLLER_STATUS_IDLE;
+}
+
+/****************************************************************************
+ * Name: async_wakeup_request
+ *
+ * Description:
+ *   Request the BLE Controller to wakeup
+ *
+ * Input Parameters:
+ *   event - the event that triggered the wakeup
+ *
+ * Returned Value:
+ *   true if request lock is needed, false otherwise
+ *
+ ****************************************************************************/
+
+static bool async_wakeup_request(int event)
+{
+  bool do_wakeup_request = false;
+
+  if (g_lp_cntl.enable == 0)
+    {
+      return false;
+    }
+
+  switch (event)
+    {
+      case BTDM_ASYNC_WAKEUP_SRC_VHCI:
+      case BTDM_ASYNC_WAKEUP_SRC_DISA:
+        btdm_in_wakeup_requesting_set(true);
+
+        if (btdm_power_state_active() == false)
+          {
+            r_btdm_vnd_offload_post(BTDM_VND_OL_SIG_WAKEUP_TMR,
+                                    (void *)event);
+            do_wakeup_request = true;
+            semphr_take_wrapper(g_wakeup_req_sem, OSI_FUNCS_TIME_BLOCKING);
+          }
+        break;
+      default:
+        return false;
+    }
+
+  return do_wakeup_request;
+}
+
+/****************************************************************************
+ * Name: async_wakeup_request_end
+ *
+ * Description:
+ *   Finish a wakeup request
+ *
+ * Input Parameters:
+ *   event - the event that triggered the wakeup
+ *
+ * Returned Value:
+ *   true if request lock is needed, false otherwise
+ *
+ ****************************************************************************/
+
+static void async_wakeup_request_end(int event)
+{
+  bool allow_to_sleep;
+
+  if (g_lp_cntl.enable == 0)
+    {
+      return;
+    }
+
+  switch (event)
+    {
+      case BTDM_ASYNC_WAKEUP_SRC_VHCI:
+      case BTDM_ASYNC_WAKEUP_SRC_DISA:
+        allow_to_sleep = true;
+        break;
+      default:
+        allow_to_sleep = true;
+        break;
+    }
+
+  if (allow_to_sleep)
+    {
+      btdm_in_wakeup_requesting_set(false);
+    }
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -2357,6 +2451,7 @@ int esp32s3_bt_controller_init(void)
   bool select_src_ret;
   bool set_div_ret;
   int i;
+  int err;
 
   sq_init(&g_ble_int_flags_free);
   sq_init(&g_ble_int_flags_used);
@@ -2366,7 +2461,7 @@ int esp32s3_bt_controller_init(void)
       sq_addlast((sq_entry_t *)&g_ble_int_flags[i], &g_ble_int_flags_free);
     }
 
-  if (btdm_controller_status != ESP_BT_CONTROLLER_STATUS_IDLE)
+  if (g_btdm_controller_status != ESP_BT_CONTROLLER_STATUS_IDLE)
     {
       wlerr("Invalid controller status");
       return ERROR;
@@ -2374,7 +2469,7 @@ int esp32s3_bt_controller_init(void)
 
   if (cfg == NULL)
     {
-      return ESP_ERR_INVALID_ARG;
+      return -EINVAL;
     }
 
   if (cfg->controller_task_prio != ESP_TASK_BT_CONTROLLER_PRIO ||
@@ -2424,6 +2519,20 @@ int esp32s3_bt_controller_init(void)
 
   btdm_controller_mem_init();
 
+#if CONFIG_MAC_BB_PD
+  if (esp_register_mac_bb_pd_callback(btdm_mac_bb_power_down_cb) != 0)
+    {
+      err = -EINVAL;
+      goto error;
+    }
+
+  if (esp_register_mac_bb_pu_callback(btdm_mac_bb_power_up_cb) != 0)
+    {
+      err = -EINVAL;
+      goto error;
+    }
+#endif
+
   osi_funcs_p = kmm_malloc(sizeof(struct osi_funcs_s));
   if (osi_funcs_p == NULL)
     {
@@ -2431,7 +2540,6 @@ int esp32s3_bt_controller_init(void)
     }
 
   memcpy(osi_funcs_p, &g_osi_funcs, sizeof(struct osi_funcs_s));
-
   if (btdm_osi_funcs_register(osi_funcs_p) != 0)
     {
       wlerr("Error, probably invalid OSI Functions\n");
@@ -2462,6 +2570,7 @@ int esp32s3_bt_controller_init(void)
 #if CONFIG_MAC_BB_PD
           if (!btdm_deep_sleep_mem_init())
             {
+              err = -ENOMEM;
               goto error;
             }
 
@@ -2498,6 +2607,8 @@ int esp32s3_bt_controller_init(void)
             }
         }
 
+      /* set default bluetooth sleep clock cycle and its fractional bits */
+
       g_btdm_lpcycle_us_frac = RTC_CLK_CAL_FRACT;
       g_btdm_lpcycle_us = 2 << (g_btdm_lpcycle_us_frac);
 
@@ -2506,7 +2617,9 @@ int esp32s3_bt_controller_init(void)
       g_lp_cntl.lpclk_sel = BTDM_LPCLK_SEL_XTAL; /* set default value */
 
 #if CONFIG_BT_CTRL_LPCLK_SEL_EXT_32K_XTAL
-      if (esp32s3_rtc_clk_slow_freq_get() == RTC_SLOW_FREQ_32K_XTAL)
+      /* check whether or not EXT_CRYS is working */
+
+      if (esp32s3_rtc_clk_slow_freq_get() == RTC_SLOW_FREQ_32K_XTAL) /* External 32 kHz XTAL */
         {
           g_lp_cntl.lpclk_sel = BTDM_LPCLK_SEL_XTAL32K;
         }
@@ -2514,7 +2627,7 @@ int esp32s3_bt_controller_init(void)
         {
           wlwarn("32.768kHz XTAL not detected");
 #if !CONFIG_BT_CTRL_MAIN_XTAL_PU_DURING_LIGHT_SLEEP
-          g_lp_cntl.lpclk_sel = BTDM_LPCLK_SEL_XTAL;
+          g_lp_cntl.no_light_sleep = 1;
 #endif
         }
 #elif (CONFIG_BT_CTRL_LPCLK_SEL_MAIN_XTAL)
@@ -2544,7 +2657,8 @@ int esp32s3_bt_controller_init(void)
         {
           uint32_t rtc_clk_xtal_freq = 0;
 #ifdef CONFIG_BT_CTRL_MAIN_XTAL_PU_DURING_LIGHT_SLEEP
-          s_lp_cntl.main_xtal_pu = 1;
+          ASSERT(esp_sleep_pd_config(ESP_PD_DOMAIN_XTAL, ESP_PD_OPTION_ON));
+          g_lp_cntl.main_xtal_pu = 1;
 #endif
           select_src_ret = btdm_lpclk_select_src(BTDM_LPCLK_SEL_XTAL);
           rtc_clk_xtal_freq = esp32s3_rtc_clk_xtal_freq_get();
@@ -2574,6 +2688,8 @@ int esp32s3_bt_controller_init(void)
         }
       else
         {
+          UNUSED(select_src_ret);
+          UNUSED(set_div_ret);
           goto error;
         }
 
@@ -2595,18 +2711,18 @@ int esp32s3_bt_controller_init(void)
   periph_module_reset(PERIPH_BT_MODULE);
 
   esp_phy_enable();
-  g_lp_stat.phy_enabled = true;
+  g_lp_stat.phy_enabled = 1;
 
   if (btdm_controller_init(cfg) != 0)
     {
       esp_phy_disable();
-      g_lp_stat.phy_enabled = false;
+      g_lp_stat.phy_enabled = 0;
       return -EIO;
     }
 
   coex_pti_v2();
 
-  btdm_controller_status = ESP_BT_CONTROLLER_STATUS_INITED;
+  g_btdm_controller_status = ESP_BT_CONTROLLER_STATUS_INITED;
 
 #ifdef CONFIG_ESP32S3_SPIFLASH
   if (esp_wireless_init() != OK)
@@ -2640,7 +2756,7 @@ error:
 
 int esp32s3_bt_controller_deinit(void)
 {
-  if (btdm_controller_status != ESP_BT_CONTROLLER_STATUS_INITED)
+  if (g_btdm_controller_status != ESP_BT_CONTROLLER_STATUS_INITED)
     {
       return ERROR;
     }
@@ -2673,7 +2789,7 @@ int esp32s3_bt_controller_enable(esp_bt_mode_t mode)
 {
   int ret = OK;
 
-  if (btdm_controller_status != ESP_BT_CONTROLLER_STATUS_INITED)
+  if (g_btdm_controller_status != ESP_BT_CONTROLLER_STATUS_INITED)
     {
       return ERROR;
     }
@@ -2692,8 +2808,13 @@ int esp32s3_bt_controller_enable(esp_bt_mode_t mode)
 #ifdef CONFIG_PM
   /* enable low power mode */
 
+  if (g_lp_cntl.no_light_sleep)
+    {
+      esp32s3_pm_lockacquire();
+    }
+
   esp32s3_pm_lockacquire();
-  g_lp_stat.pm_lock_released = false;
+  g_lp_stat.pm_lock_released = 0;
 #endif
 
   if (g_lp_cntl.enable)
@@ -2707,7 +2828,7 @@ int esp32s3_bt_controller_enable(esp_bt_mode_t mode)
       goto error;
     }
 
-  btdm_controller_status = ESP_BT_CONTROLLER_STATUS_ENABLED;
+  g_btdm_controller_status = ESP_BT_CONTROLLER_STATUS_ENABLED;
 
   return ret;
 
@@ -2718,10 +2839,15 @@ error:
   btdm_controller_enable_sleep(false);
 
 #ifdef CONFIG_PM
-  if (!g_lp_stat.pm_lock_released)
+  if (g_lp_cntl.no_light_sleep)
     {
       esp32s3_pm_lockrelease();
-      g_lp_stat.pm_lock_released = true;
+    }
+
+  if (g_lp_stat.pm_lock_released == 0)
+    {
+      esp32s3_pm_lockrelease();
+      g_lp_stat.pm_lock_released = 1;
     }
 #endif
 
@@ -2749,11 +2875,12 @@ error:
 
 int esp32s3_bt_controller_disable(void)
 {
-  if (btdm_controller_status != ESP_BT_CONTROLLER_STATUS_ENABLED)
+  if (g_btdm_controller_status != ESP_BT_CONTROLLER_STATUS_ENABLED)
     {
       return ERROR;
     }
 
+  async_wakeup_request(BTDM_ASYNC_WAKEUP_SRC_DISA);
   while (!btdm_power_state_active())
     {
       nxsig_usleep(1000); /* wait */
@@ -2761,19 +2888,26 @@ int esp32s3_bt_controller_disable(void)
 
   btdm_controller_disable();
 
+  async_wakeup_request_end(BTDM_ASYNC_WAKEUP_SRC_DISA);
+
 #ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
   coex_disable();
 #endif
 
-  btdm_controller_status = ESP_BT_CONTROLLER_STATUS_INITED;
+  g_btdm_controller_status = ESP_BT_CONTROLLER_STATUS_INITED;
 
 #ifdef CONFIG_PM
   /* disable low power mode */
 
-  if (!g_lp_stat.pm_lock_released)
+  if (g_lp_cntl.no_light_sleep)
+    {
+      esp_pm_lock_release(s_light_sleep_pm_lock);
+    }
+
+  if (g_lp_stat.pm_lock_released == 0)
     {
       esp32s3_pm_lockrelease();
-      g_lp_stat.pm_lock_released = true;
+      g_lp_stat.pm_lock_released = 1;
     }
   else
     {
@@ -2800,7 +2934,7 @@ int esp32s3_bt_controller_disable(void)
 
 esp_bt_controller_status_t esp32s3_bt_controller_get_status(void)
 {
-  return btdm_controller_status;
+  return g_btdm_controller_status;
 }
 
 /****************************************************************************
@@ -2819,7 +2953,7 @@ esp_bt_controller_status_t esp32s3_bt_controller_get_status(void)
 
 bool esp32s3_vhci_host_check_send_available(void)
 {
-  if (btdm_controller_status != ESP_BT_CONTROLLER_STATUS_ENABLED)
+  if (g_btdm_controller_status != ESP_BT_CONTROLLER_STATUS_ENABLED)
     {
       return false;
     }
@@ -2844,12 +2978,16 @@ bool esp32s3_vhci_host_check_send_available(void)
 
 void esp32s3_vhci_host_send_packet(uint8_t *data, uint16_t len)
 {
-  if (btdm_controller_status != ESP_BT_CONTROLLER_STATUS_ENABLED)
+  if (g_btdm_controller_status != ESP_BT_CONTROLLER_STATUS_ENABLED)
     {
       return;
     }
 
+  async_wakeup_request(BTDM_ASYNC_WAKEUP_SRC_VHCI);
+
   api_vhci_host_send_packet(data, len);
+
+  async_wakeup_request_end(BTDM_ASYNC_WAKEUP_SRC_VHCI);
 }
 
 /****************************************************************************
@@ -2869,7 +3007,7 @@ void esp32s3_vhci_host_send_packet(uint8_t *data, uint16_t len)
 int esp32s3_vhci_register_callback(const esp_vhci_host_callback_t *callback)
 {
   int ret = ERROR;
-  if (btdm_controller_status != ESP_BT_CONTROLLER_STATUS_ENABLED)
+  if (g_btdm_controller_status != ESP_BT_CONTROLLER_STATUS_ENABLED)
     {
       return ret;
     }
