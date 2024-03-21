@@ -84,22 +84,6 @@ struct esp_queuecache_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32s3_phy_update_country_info
- *
- * Description:
- *   Update PHY init data according to country code
- *
- * Input Parameters:
- *   country - PHY init data type
- *
- * Returned Value:
- *   OK on success; a negated errno on failure
- *
- ****************************************************************************/
-
-int esp32s3_phy_update_country_info(const char *country);
-
-/****************************************************************************
  * Functions needed by libphy.a
  ****************************************************************************/
 
@@ -218,6 +202,22 @@ int32_t esp_timer_stop(esp_timer_handle_t timer);
  ****************************************************************************/
 
 int32_t esp_timer_delete(esp_timer_handle_t timer);
+
+/****************************************************************************
+ * Name: esp32s3_phy_update_country_info
+ *
+ * Description:
+ *   Update PHY init data according to country code
+ *
+ * Input Parameters:
+ *   country - PHY init data type
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int esp32s3_phy_update_country_info(const char *country);
 
 /****************************************************************************
  * Name: esp_init_semcache
