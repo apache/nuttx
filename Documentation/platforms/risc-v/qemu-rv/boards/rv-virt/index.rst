@@ -72,6 +72,17 @@ citest
 This configuration is the default configuration intended to be used by the automated
 testing on CI of 32-bit RISC-V using QEMU.
 
+To run it with QEMU, use the following command::
+
+    $ qemu-system-riscv32 -semihosting -M virt -cpu rv32 \
+      -drive index=0,id=userdata,if=none,format=raw,file=./fatfs.img \
+      -device virtio-blk-device,bus=virtio-mmio-bus.0,drive=userdata \
+      -bios none -kernel nuttx -nographic
+
+To run the CI scripts, use the following command::
+
+    $ ./nuttx/boards/risc-v/qemu-rv/rv-virt/configs/citest/run
+
 citest64
 --------
 

@@ -344,15 +344,26 @@ class start:
             )
         if flag1 == "qemu-rv":
             flag2 = getConfigValue(path, board, core=None, flag="ARCH_RV64")
+            options = ""
             if flag2:
                 riscv = "qemu-system-riscv64"
             else:
                 riscv = "qemu-system-riscv32"
+            fs_flag = getConfigValue(path, board, core=None, flag="DRIVERS_VIRTIO_BLK")
+            if fs_flag:
+                os.system("dd if=/dev/zero of=fatfs.img bs=512 count=128K")
+                os.system("mkfs.fat fatfs.img")
+                os.system("chmod 777 ./fatfs.img")
+                options = (
+                    "-drive index=0,id=userdata,if=none,format=raw,file=./fatfs.img "
+                    "-device virtio-blk-device,bus=virtio-mmio-bus.0,drive=userdata"
+                )
             self.process = pexpect.spawn(
                 "bash",
                 [
                     "-c",
-                    "%s -M virt -bios ./nuttx -nographic | tee %s" % (riscv, self.log),
+                    "%s -M virt -bios ./nuttx -nographic %s | tee %s"
+                    % (riscv, options, self.log),
                 ],
             )
         self.process.expect(self.PROMPT)
