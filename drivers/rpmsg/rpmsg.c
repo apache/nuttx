@@ -491,7 +491,11 @@ int rpmsg_ioctl(FAR const char *cpuname, int cmd, unsigned long arg)
   FAR struct metal_list *node;
   int ret = OK;
 
-  nxrmutex_lock(&g_rpmsg_lock);
+  if (!up_interrupt_context())
+    {
+      nxrmutex_lock(&g_rpmsg_lock);
+    }
+
   metal_list_for_each(&g_rpmsg, node)
     {
       FAR struct rpmsg_s *rpmsg =
@@ -507,7 +511,11 @@ int rpmsg_ioctl(FAR const char *cpuname, int cmd, unsigned long arg)
         }
     }
 
-  nxrmutex_unlock(&g_rpmsg_lock);
+  if (!up_interrupt_context())
+    {
+      nxrmutex_unlock(&g_rpmsg_lock);
+    }
+
   return ret;
 }
 
