@@ -195,38 +195,51 @@ static void ipv4_nat_entry_delete(FAR ipv4_nat_entry_t *entry)
  ****************************************************************************/
 
 #if CONFIG_NET_NAT_ENTRY_RECLAIM_SEC > 0
+static void ipv4_nat_reclaim_entry_cb(FAR ipv4_nat_entry_t *entry,
+                                      FAR void *arg)
+{
+  int32_t current_time = *(FAR int32_t *)arg;
+
+  if (entry->expire_time - current_time <= 0)
+    {
+      ipv4_nat_entry_delete(entry);
+    }
+}
+
 static void ipv4_nat_reclaim_entry(int32_t current_time)
 {
   static int32_t next_reclaim_time = CONFIG_NET_NAT_ENTRY_RECLAIM_SEC;
 
   if (next_reclaim_time - current_time <= 0)
     {
-      FAR hash_node_t *p;
-      FAR hash_node_t *tmp;
-      int count = 0;
-      int i;
-
       ninfo("INFO: Reclaiming all expired NAT44 entries.\n");
-
-      hashtable_for_every_safe(g_nat44_inbound, p, tmp, i)
-        {
-          FAR ipv4_nat_entry_t *entry =
-            container_of(p, ipv4_nat_entry_t, hash_inbound);
-
-          if (entry->expire_time - current_time <= 0)
-            {
-              ipv4_nat_entry_delete(entry);
-              count++;
-            }
-        }
-
-      ninfo("INFO: %d expired NAT44 entries reclaimed.\n", count);
+      ipv4_nat_entry_foreach(ipv4_nat_reclaim_entry_cb, &current_time);
       next_reclaim_time = current_time + CONFIG_NET_NAT_ENTRY_RECLAIM_SEC;
     }
 }
 #else
 #  define ipv4_nat_reclaim_entry(t)
 #endif
+
+/****************************************************************************
+ * Name: ipv4_nat_entry_clear_cb
+ *
+ * Description:
+ *   Clear an entry related to dev. Called when NAT will be disabled on
+ *   any device.
+ *
+ ****************************************************************************/
+
+static void ipv4_nat_entry_clear_cb(FAR ipv4_nat_entry_t *entry,
+                                    FAR void *arg)
+{
+  FAR struct net_driver_s *dev = arg;
+
+  if (net_ipv4addr_cmp(entry->external_ip, dev->d_ipaddr))
+    {
+      ipv4_nat_entry_delete(entry);
+    }
+}
 
 /****************************************************************************
  * Public Functions
@@ -249,21 +262,34 @@ static void ipv4_nat_reclaim_entry(int32_t current_time)
 
 void ipv4_nat_entry_clear(FAR struct net_driver_s *dev)
 {
+  ninfo("INFO: Clearing all NAT44 entries for %s\n", dev->d_ifname);
+  ipv4_nat_entry_foreach(ipv4_nat_entry_clear_cb, dev);
+}
+
+/****************************************************************************
+ * Name: ipv4_nat_entry_foreach
+ *
+ * Description:
+ *   Call the callback function for each NAT entry.
+ *
+ * Input Parameters:
+ *   cb  - The callback function.
+ *   arg - The argument to pass to the callback function.
+ *
+ ****************************************************************************/
+
+void ipv4_nat_entry_foreach(ipv4_nat_entry_cb_t cb, FAR void *arg)
+{
   FAR hash_node_t *p;
   FAR hash_node_t *tmp;
   int i;
-
-  ninfo("INFO: Clearing all NAT44 entries for %s\n", dev->d_ifname);
 
   hashtable_for_every_safe(g_nat44_inbound, p, tmp, i)
     {
       FAR ipv4_nat_entry_t *entry =
         container_of(p, ipv4_nat_entry_t, hash_inbound);
 
-      if (net_ipv4addr_cmp(entry->external_ip, dev->d_ipaddr))
-        {
-          ipv4_nat_entry_delete(entry);
-        }
+      cb(entry, arg);
     }
 }
 

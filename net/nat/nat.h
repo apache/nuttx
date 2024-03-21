@@ -123,6 +123,11 @@ struct ipv6_nat_entry_s
 typedef struct ipv4_nat_entry_s ipv4_nat_entry_t;
 typedef struct ipv6_nat_entry_s ipv6_nat_entry_t;
 
+typedef CODE void (*ipv4_nat_entry_cb_t)(FAR ipv4_nat_entry_t *entry,
+                                         FAR void *arg);
+typedef CODE void (*ipv6_nat_entry_cb_t)(FAR ipv6_nat_entry_t *entry,
+                                         FAR void *arg);
+
 /* NAT IP/Port manipulate type, to indicate whether to manipulate source or
  * destination IP/Port in a packet.
  */
@@ -280,6 +285,25 @@ uint16_t nat_port_select(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 uint32_t nat_expire_time(uint8_t protocol);
+
+/****************************************************************************
+ * Name: ipv4/ipv6_nat_entry_foreach
+ *
+ * Description:
+ *   Call the callback function for each NAT entry.
+ *
+ * Input Parameters:
+ *   cb  - The callback function.
+ *   arg - The argument to pass to the callback function.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_NAT44
+void ipv4_nat_entry_foreach(ipv4_nat_entry_cb_t cb, FAR void *arg);
+#endif
+#ifdef CONFIG_NET_NAT66
+void ipv6_nat_entry_foreach(ipv6_nat_entry_cb_t cb, FAR void *arg);
+#endif
 
 /****************************************************************************
  * Name: ipv4/ipv6_nat_entry_clear
