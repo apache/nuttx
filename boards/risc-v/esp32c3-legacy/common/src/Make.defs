@@ -92,6 +92,10 @@ ifeq ($(CONFIG_MPU60X0_I2C),y)
   CSRCS += esp32c3_board_mpu60x0_i2c.c
 endif
 
+ifeq ($(CONFIG_SPI_ICE40),y)
+  CSRCS += esp32c3_board_ice40.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src
