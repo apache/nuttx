@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 # encoding: utf-8
+import os
+
 import pytest
 
 pytestmark = [pytest.mark.common, pytest.mark.qemu]
@@ -7,6 +9,10 @@ do_not_support = ["sabre-6quad", "rv-virt", "rv-virt64", "esp32c3-devkit", "bl60
 
 
 def test_ostest(p):
+    if p.board == "sim":
+        os.mkdir("./test")
+        ret = p.sendCommand("mount -t hostfs -o fs=./test /data")
+
     ret = p.sendCommand("ostest", "Exiting with status 0", timeout=300)
     assert ret == 0
 
@@ -59,6 +65,9 @@ def test_fs_test(p):
     ret = p.sendCommand("fstest -n 10 -m %s" % fstest_dir, "FAILED: 0", timeout=2000)
     p.sendCommand("ls %s" % fstest_dir)
     p.sendCommand("rmdir %s" % fstest_dir)
+
+    if p.board == "sim":
+        os.rmdir("./test")
     assert ret == 0
 
 
