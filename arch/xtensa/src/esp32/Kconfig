@@ -296,14 +296,6 @@ config ESP32_PCNT
 		Pulse Counter is currently used to implement Quadracture
 		Encoder.
 
-config ESP32_RMT
-	bool "Remote Control Module (RMT)"
-	default n
-	depends on EXPERIMENTAL
-	---help---
-		Remote Control Module is currently used to control WS2812
-		RGB LED normally used on LED strips.
-
 config ESP32_RNG
 	bool "Random Number Generator (RNG)"
 	default n
