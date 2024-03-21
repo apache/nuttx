@@ -181,6 +181,10 @@ ifeq ($(CONFIG_ESP32C3_BROWNOUT_DET),y)
 CHIP_CSRCS += esp32c3_brownout.c
 endif
 
+ifeq ($(CONFIG_SPI_ICE40),y)
+CHIP_CSRCS += esp32c3_ice40.c
+endif
+
 ifeq ($(CONFIG_ESP32C3_WIRELESS),y)
 WIRELESS_DRV_UNPACK = esp-wireless-drivers-3rdparty
 WIRELESS_DRV_ID     = 45701c0

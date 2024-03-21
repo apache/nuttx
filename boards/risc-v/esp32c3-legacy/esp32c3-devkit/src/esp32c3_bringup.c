@@ -54,6 +54,7 @@
 #include "esp32c3_board_wdt.h"
 #include "esp32c3_board_wlan.h"
 #include "esp32c3_board_mpu60x0_i2c.h"
+#include "esp32c3_board_ice40.h"
 
 #ifdef CONFIG_SPI
 #  include "esp32c3_spi.h"
@@ -383,6 +384,14 @@ int esp32c3_bringup(void)
     {
       syslog(LOG_ERR, "Failed to initialize MPU60x0 "
                        "Driver for I2C0: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SPI_ICE40
+  ret = esp32c3_ice40_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize ICE40: %d\n", ret);
     }
 #endif
 
