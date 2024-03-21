@@ -399,6 +399,29 @@ void netlink_notifier_teardown(FAR struct netlink_conn_s *conn);
 void netlink_notifier_signal(FAR struct netlink_conn_s *conn);
 
 /****************************************************************************
+ * Name: netlink_add_terminator
+ *
+ * Description:
+ *   Add one NLMSG_DONE response to handle.
+ *
+ * Input Parameters:
+ *   handle - The handle previously provided to the sendto() implementation
+ *            for the protocol.  This is an opaque reference to the Netlink
+ *            socket state structure.
+ *   req    - The request message header.
+ *   group  - The broadcast group index, 0 for normal response.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned if the terminator was successfully added to the
+ *   response list.
+ *   A negated error value is returned if an unexpected error occurred.
+ *
+ ****************************************************************************/
+
+int netlink_add_terminator(NETLINK_HANDLE handle,
+                           FAR const struct nlmsghdr *req, int group);
+
+/****************************************************************************
  * Name: netlink_tryget_response
  *
  * Description:
