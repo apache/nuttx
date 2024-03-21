@@ -250,6 +250,12 @@ ifeq ($(CONFIG_SIM_CAMERA_V4L2),y)
   STDLIBS += -lv4l2
 endif
 
+ifeq ($(CONFIG_SIM_VIDEO_DECODER),y)
+  HOSTSRCS += sim_hostdecoder.c
+  CSRCS += sim_decoder.c
+  STDLIBS += -lopenh264
+endif
+
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
 NUTTXOBJS = $(AOBJS) $(COBJS)
