@@ -252,20 +252,21 @@ config ESP32_OPENETH
 		Disable this if you are using the real device.
 
 if ESP32_OPENETH
-	config ESP32_OPENETH_DMA_RX_BUFFER_NUM
-		int "Number of Ethernet DMA Rx buffers"
-		range 1 64
-		default 4
-		help
-			Number of DMA receive buffers, each buffer is 1600 bytes.
+config ESP32_OPENETH_DMA_RX_BUFFER_NUM
+	int "Number of Ethernet DMA Rx buffers"
+	range 1 64
+	default 4
+	---help---
+		Number of DMA receive buffers, each buffer is 1600 bytes.
 
-	config ESP32_OPENETH_DMA_TX_BUFFER_NUM
-		int "Number of Ethernet DMA Tx buffers"
-		range 1 64
-		default 1
-		help
-			Number of DMA transmit buffers, each buffer is 1600 bytes.
-endif
+config ESP32_OPENETH_DMA_TX_BUFFER_NUM
+	int "Number of Ethernet DMA Tx buffers"
+	range 1 64
+	default 1
+	---help---
+		Number of DMA transmit buffers, each buffer is 1600 bytes.
+
+endif # ESP32_OPENETH
 
 config ESP32_I2C
 	bool
