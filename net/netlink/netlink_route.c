@@ -441,66 +441,6 @@ netlink_get_ifaddr(FAR struct net_driver_s *dev, int domain, int type,
 #endif
 
 /****************************************************************************
- * Name: netlink_get_terminator
- *
- * Description:
- *   Generate one NLMSG_DONE response.
- *
- ****************************************************************************/
-
-static FAR struct netlink_response_s *
-netlink_get_terminator(FAR const struct nlroute_sendto_request_s *req)
-{
-  FAR struct netlink_response_s *resp;
-  FAR struct nlmsghdr *hdr;
-
-  /* Allocate the list terminator */
-
-  resp = kmm_zalloc(sizeof(struct netlink_response_s));
-  if (resp == NULL)
-    {
-      nerr("ERROR: Failed to allocate response terminator.\n");
-      return NULL;
-    }
-
-  /* Initialize and send the list terminator */
-
-  hdr              = &resp->msg;
-  hdr->nlmsg_len   = sizeof(struct nlmsghdr);
-  hdr->nlmsg_type  = NLMSG_DONE;
-  hdr->nlmsg_flags = req ? req->hdr.nlmsg_flags : 0;
-  hdr->nlmsg_seq   = req ? req->hdr.nlmsg_seq : 0;
-  hdr->nlmsg_pid   = req ? req->hdr.nlmsg_pid : 0;
-
-  /* Finally, return the response */
-
-  return resp;
-}
-
-/****************************************************************************
- * Name: netlink_add_terminator
- *
- * Description:
- *   Add one NLMSG_DONE response to handle.
- *
- ****************************************************************************/
-
-static int netlink_add_terminator(NETLINK_HANDLE handle,
-                              FAR const struct nlroute_sendto_request_s *req)
-{
-  FAR struct netlink_response_s * resp;
-
-  resp = netlink_get_terminator(req);
-  if (resp == NULL)
-    {
-      return -ENOMEM;
-    }
-
-  netlink_add_response(handle, resp);
-  return OK;
-}
-
-/****************************************************************************
  * Name: netlink_get_devlist
  *
  * Description:
@@ -544,7 +484,7 @@ static int netlink_get_devlist(NETLINK_HANDLE handle,
       return ret;
     }
 
-  return netlink_add_terminator(handle, req);
+  return netlink_add_terminator(handle, &req->hdr, 0);
 }
 #endif
 
@@ -803,7 +743,7 @@ static int netlink_get_ipv4route(NETLINK_HANDLE handle,
 
   /* Terminate the routing table */
 
-  return netlink_add_terminator(handle, req);
+  return netlink_add_terminator(handle, &req->hdr, 0);
 }
 #endif
 
@@ -869,7 +809,7 @@ static int netlink_ipv6_route(FAR struct net_route_ipv6_s *route,
 #endif
 
 /****************************************************************************
- * Name: netlink_get_ip6vroute
+ * Name: netlink_get_ipv6route
  *
  * Description:
  *   Dump a list of all network devices of the specified type.
@@ -877,7 +817,7 @@ static int netlink_ipv6_route(FAR struct net_route_ipv6_s *route,
  ****************************************************************************/
 
 #if defined(CONFIG_NET_IPv6) && !defined(CONFIG_NETLINK_DISABLE_GETROUTE)
-static int netlink_get_ip6vroute(NETLINK_HANDLE handle,
+static int netlink_get_ipv6route(NETLINK_HANDLE handle,
                               FAR const struct nlroute_sendto_request_s *req)
 {
   struct nlroute_info_s info;
@@ -896,7 +836,7 @@ static int netlink_get_ip6vroute(NETLINK_HANDLE handle,
 
   /* Terminate the routing table */
 
-  return netlink_add_terminator(handle, req);
+  return netlink_add_terminator(handle, &req->hdr, 0);
 }
 #endif
 
@@ -1188,7 +1128,7 @@ static int netlink_get_addr(NETLINK_HANDLE handle,
       return ret;
     }
 
-  return netlink_add_terminator(handle, req);
+  return netlink_add_terminator(handle, &req->hdr, 0);
 }
 #endif
 
@@ -1278,7 +1218,7 @@ ssize_t netlink_route_sendto(NETLINK_HANDLE handle,
 #ifdef CONFIG_NET_IPv6
         if (req->gen.rtgen_family == AF_INET6)
           {
-            ret = netlink_get_ip6vroute(handle, req);
+            ret = netlink_get_ipv6route(handle, req);
           }
         else
 #endif
@@ -1394,12 +1334,7 @@ void netlink_device_notify(FAR struct net_driver_s *dev)
   if (resp != NULL)
     {
       netlink_add_broadcast(RTNLGRP_LINK, resp);
-
-      resp = netlink_get_terminator(NULL);
-      if (resp != NULL)
-        {
-          netlink_add_broadcast(RTNLGRP_LINK, resp);
-        }
+      netlink_add_terminator(NULL, NULL, RTNLGRP_LINK);
     }
 }
 #endif
@@ -1448,12 +1383,7 @@ void netlink_device_notify_ipaddr(FAR struct net_driver_s *dev,
         }
 
       netlink_add_broadcast(group, resp);
-
-      resp = netlink_get_terminator(NULL);
-      if (resp != NULL)
-        {
-          netlink_add_broadcast(group, resp);
-        }
+      netlink_add_terminator(NULL, NULL, group);
     }
 }
 #endif
