@@ -28,6 +28,7 @@
 
 #include <nuttx/addrenv.h>
 
+#include "sched/sched.h"
 #include "riscv_internal.h"
 
 /****************************************************************************
@@ -59,6 +60,12 @@ void *riscv_perform_syscall(uintptr_t *regs)
 
   if (regs != CURRENT_REGS)
     {
+      /* Record the new "running" task.  g_running_tasks[] is only used by
+       * assertion logic for reporting crashes.
+       */
+
+      g_running_tasks[this_cpu()] = this_task();
+
       /* Restore the cpu lock */
 
       restore_critical_section();
