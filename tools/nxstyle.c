@@ -452,6 +452,35 @@ static const char *g_white_content_list[] =
   "XUnmapWindow",
 
   /* Ref:
+   * nuttx/arch/sim/src/sim_hostdecoder.*
+   */
+
+  "ISVCDecoder",
+  "SBufferInfo",
+  "SDecodingParam",
+  "eEcActiveIdc",
+  "sVideoProperty",
+  "eVideoBsType",
+  "cmResultSuccess",
+  "uiInBsTimeStamp",
+  "dsErrorFree",
+  "iBufferStatus",
+  "UsrData",
+  "sSystemBuffer",
+  "iWidth",
+  "iHeight",
+  "iStride",
+  "uiOutYuvTimeStamp",
+  "WelsCreateDecoder",
+  "WelsDestroyDecoder",
+  "Initialize",
+  "Uninitialize",
+  "DecodeFrame2",
+  "FlushFrame",
+  "SetOption",
+  "GetOption",
+
+  /* Ref:
    * sim/posix/sim_deviceimage.c
    */
 

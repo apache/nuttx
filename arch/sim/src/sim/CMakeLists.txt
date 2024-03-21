@@ -155,6 +155,12 @@ if(CONFIG_SIM_CAMERA_V4L2)
   list(APPEND STDLIBS v4l2)
 endif()
 
+if(CONFIG_SIM_VIDEO_DECODER)
+  list(APPEND HOSTSRCS sim_hostdecoder.c)
+  list(APPEND SRCS sim_decoder.c)
+  list(APPEND STDLIBS openh264)
+endif()
+
 if(CONFIG_SPINLOCK)
   list(APPEND HOSTSRCS sim_testset.c)
 endif()

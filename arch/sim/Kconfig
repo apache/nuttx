@@ -331,6 +331,20 @@ config SIM_CAMERA_DEV_PATH
 
 endif
 
+menu "Simulated v4l2m2m support"
+
+config SIM_VIDEO_DECODER
+	bool "Video decoder support on sim"
+	depends on VIDEO
+	default n
+
+config SIM_VIDEO_DECODER_DEV_PATH
+	string "Video decoder device path"
+	depends on SIM_VIDEO_DECODER
+	default "/dev/video1"
+
+endmenu
+
 menu "Simulated Graphics/Input"
 
 config SIM_X11FB

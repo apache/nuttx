@@ -435,6 +435,10 @@ int sim_camera_initialize(void);
 void sim_camera_loop(void);
 #endif
 
+#ifdef CONFIG_SIM_VIDEO_DECODER
+int sim_decoder_initialize(void);
+#endif
+
 /* sim_usbdev.c *************************************************************/
 
 #ifdef CONFIG_SIM_USB_DEV
