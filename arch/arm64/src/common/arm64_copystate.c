@@ -60,13 +60,13 @@
 int arch_save_fpucontext(void *saveregs)
 {
   irqstate_t    flags;
-  uint64_t      *p_save;
+  uintptr_t     p_save;
 
   /* Take a snapshot of the thread context right now */
 
   flags = enter_critical_section();
 
-  p_save = saveregs + XCPTCONTEXT_GP_SIZE;
+  p_save = (uintptr_t)saveregs + XCPTCONTEXT_GP_SIZE;
   arm64_fpu_save((struct fpu_reg *)p_save);
   ARM64_DSB();
 
