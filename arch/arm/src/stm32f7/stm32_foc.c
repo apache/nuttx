@@ -718,6 +718,7 @@ static struct foc_lower_ops_s g_stm32_foc_ops =
   .start          = stm32_foc_start,
   .pwm_duty_set   = stm32_foc_pwm_duty_set,
   .pwm_off        = stm32_foc_pwm_off,
+  .info_get       = stm32_foc_info_get,
   .ioctl          = stm32_foc_ioctl,
   .bind           = stm32_foc_bind,
   .fault_clear    = stm32_foc_fault_clear,
