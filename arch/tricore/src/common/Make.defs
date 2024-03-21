@@ -46,5 +46,9 @@ CMN_CSRCS += tricore_trapcall.c
 CMN_CSRCS += tricore_systimer.c
 CMN_CSRCS += tricore_usestack.c
 
+ifeq ($(CONFIG_SPINLOCK),y)
+  CMN_CSRCS += tricore_testset.c
+endif
+
 CFLAGS += -DIFX_CFG_EXTEND_TRAP_HOOKS
 CFLAGS += -DIFX_USE_SW_MANAGED_INT
