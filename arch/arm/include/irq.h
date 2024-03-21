@@ -84,34 +84,6 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/****************************************************************************
- * Inline functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: up_interrupt_context
- *
- * Description:
- *   Return true is we are currently executing in the interrupt
- *   handler context.
- *
- ****************************************************************************/
-
-noinstrument_function
-static inline bool up_interrupt_context(void)
-{
-#ifdef CONFIG_SMP
-  irqstate_t flags = up_irq_save();
-#endif
-
-  bool ret = up_current_regs() != NULL;
-
-#ifdef CONFIG_SMP
-  up_irq_restore(flags);
-#endif
-
-  return ret;
-}
 #endif /* __ASSEMBLY__ */
 
 #undef EXTERN

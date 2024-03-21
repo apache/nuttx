@@ -433,17 +433,7 @@ static inline_function void up_set_current_regs(uint64_t *regs)
 
 static inline bool up_interrupt_context(void)
 {
-#ifdef CONFIG_SMP
-  irqstate_t flags = up_irq_save();
-#endif
-
-  bool ret = (up_current_regs() != NULL);
-
-#ifdef CONFIG_SMP
-  up_irq_restore(flags);
-#endif
-
-  return ret;
+  return up_current_regs() != NULL;
 }
 
 #undef EXTERN
