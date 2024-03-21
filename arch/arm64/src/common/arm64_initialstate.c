@@ -56,7 +56,7 @@
 
 void arm64_new_task(struct tcb_s * tcb)
 {
-  char *stack_ptr = tcb->stack_base_ptr + tcb->adj_stack_size;
+  uint64_t stack_ptr = (uintptr_t)tcb->stack_base_ptr + tcb->adj_stack_size;
   struct regs_context *pinitctx;
 
 #ifdef CONFIG_ARCH_FPU
@@ -67,7 +67,7 @@ void arm64_new_task(struct tcb_s * tcb)
   /* set fpu context */
 
   arm64_init_fpu(tcb);
-  stack_ptr  = (char *)pfpuctx;
+  stack_ptr  = (uintptr_t)pfpuctx;
 #endif
 
   pinitctx = STACK_PTR_TO_FRAME(struct regs_context, stack_ptr);
