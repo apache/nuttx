@@ -750,8 +750,12 @@ static int bt_slip_send(FAR struct bt_driver_s *dev,
   frame->type = type;
   frame->pktlen = len;
   memcpy(frame->data, data, len);
-  work_queue(HPWORK, &priv->retxworker, bt_slip_retx_work,
-             priv, BT_SLIP_RTX_TIMEOUT);
+
+  if (work_available(&priv->retxworker))
+    {
+      work_queue(HPWORK, &priv->retxworker, bt_slip_retx_work,
+                 priv, BT_SLIP_RTX_TIMEOUT);
+    }
 
 end:
   nxmutex_unlock(&priv->sliplock);
