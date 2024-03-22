@@ -1853,6 +1853,8 @@ config ARCH_BOARD_RASPBERRYPI_PICO
 	bool "Raspberry Pi Pico board (not W)"
 	depends on ARCH_CHIP_RP2040
 	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		This is a port to the Raspberry Pi Pico board.
 
