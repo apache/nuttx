@@ -50,7 +50,7 @@ SECTIONS
   .text  :
     {
       _stext = ABSOLUTE(.);  /* Text section */
-      *(.text.__start)       /* Place __start here */
+      *(.start .start.*)     /* Place __start here */
       *(.text .text.*)
       *(.text.cold)
       *(.text.unlikely)
