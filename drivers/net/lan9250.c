@@ -1521,7 +1521,7 @@ static void lan9250_txavail_work(FAR void *arg)
 
   /* Ignore the notification if the interface is not yet up */
 
-  if (IFF_IS_UP(dev->d_flags))
+  if (IFF_IS_UP(dev->d_flags) && priv->tx_available)
     {
       /* Check if there is room in the hardware to hold another outgoing
        * packet.
@@ -2258,29 +2258,8 @@ static int lan9250_txavail(FAR struct net_driver_s *dev)
 {
   FAR struct lan9250_driver_s *priv =
         (FAR struct lan9250_driver_s *)dev->d_private;
-  irqstate_t flags;
 
-  /* Lock the SPI bus so that we have exclusive access for but SPI and
-   * LAN9250 SPI private data.
-   */
-
-  lan9250_lock_spi(priv);
-
-  flags = enter_critical_section();
-
-  /* Since SPI is locked, so interrupt work must not really process when
-   * CPU run here, so:
-   *
-   *   - priv->tx_available = true, TX data FIFO is available and its related
-   *     interrupt is disable.
-   *   - priv->tx_available = false, TX data FIFO is unavailable and its
-   *     related interrupt is enable, so when this interrupt triggers,
-   *     function "devif_poll" will poll the network for new XMIT data.
-   */
-
-  if (IFF_IS_UP(dev->d_flags) &&
-      priv->tx_available &&
-      work_available(&priv->txpoll_work))
+  if (work_available(&priv->txpoll_work))
     {
       /* Schedule to serialize the poll on the worker thread. */
 
@@ -2288,10 +2267,6 @@ static int lan9250_txavail(FAR struct net_driver_s *dev)
                  lan9250_txavail_work, priv, 0);
     }
 
-  /* Un-lock the SPI bus */
-
-  leave_critical_section(flags);
-  lan9250_unlock_spi(priv);
   return OK;
 }
 
