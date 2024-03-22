@@ -31,7 +31,7 @@
 
 #include "sched/sched.h"
 
-#if defined(CONFIG_SMP)
+#if defined(CONFIG_SPINLOCK)
 
 /****************************************************************************
  * Public Data
@@ -418,4 +418,4 @@ void write_unlock_irqrestore(rwlock_t *lock, irqstate_t flags)
   up_irq_restore(flags);
 }
 #endif /* CONFIG_RW_SPINLOCK */
-#endif /* CONFIG_SMP */
+#endif /* CONFIG_SPINLOCK */
