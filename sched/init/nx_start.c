@@ -184,77 +184,7 @@ volatile int g_npidhash;
  * ordered list or not.
  */
 
-const struct tasklist_s g_tasklisttable[NUM_TASK_STATES] =
-{
-  {                                              /* TSTATE_TASK_INVALID */
-    NULL,
-    0
-  },
-  {                                              /* TSTATE_TASK_PENDING */
-    &g_pendingtasks,
-    TLIST_ATTR_PRIORITIZED
-  },
-#ifdef CONFIG_SMP
-  {                                              /* TSTATE_TASK_READYTORUN */
-    &g_readytorun,
-    TLIST_ATTR_PRIORITIZED
-  },
-  {                                              /* TSTATE_TASK_ASSIGNED */
-    g_assignedtasks,
-    TLIST_ATTR_PRIORITIZED | TLIST_ATTR_INDEXED | TLIST_ATTR_RUNNABLE
-  },
-  {                                              /* TSTATE_TASK_RUNNING */
-    g_assignedtasks,
-    TLIST_ATTR_PRIORITIZED | TLIST_ATTR_INDEXED | TLIST_ATTR_RUNNABLE
-  },
-#else
-  {                                              /* TSTATE_TASK_READYTORUN */
-    &g_readytorun,
-    TLIST_ATTR_PRIORITIZED | TLIST_ATTR_RUNNABLE
-  },
-  {                                              /* TSTATE_TASK_RUNNING */
-    &g_readytorun,
-    TLIST_ATTR_PRIORITIZED | TLIST_ATTR_RUNNABLE
-  },
-#endif
-  {                                              /* TSTATE_TASK_INACTIVE */
-    &g_inactivetasks,
-    0
-  },
-  {                                              /* TSTATE_WAIT_SEM */
-    (FAR void *)offsetof(sem_t, waitlist),
-    TLIST_ATTR_PRIORITIZED | TLIST_ATTR_OFFSET
-  },
-  {                                              /* TSTATE_WAIT_SIG */
-    &g_waitingforsignal,
-    0
-  }
-#ifndef CONFIG_DISABLE_MQUEUE
-  ,
-  {                                              /* TSTATE_WAIT_MQNOTEMPTY */
-    (FAR void *)offsetof(struct mqueue_inode_s, cmn.waitfornotempty),
-    TLIST_ATTR_PRIORITIZED | TLIST_ATTR_OFFSET
-  },
-  {                                              /* TSTATE_WAIT_MQNOTFULL */
-    (FAR void *)offsetof(struct mqueue_inode_s, cmn.waitfornotfull),
-    TLIST_ATTR_PRIORITIZED | TLIST_ATTR_OFFSET
-  }
-#endif
-#ifdef CONFIG_LEGACY_PAGING
-  ,
-  {                                              /* TSTATE_WAIT_PAGEFILL */
-    &g_waitingforfill,
-    TLIST_ATTR_PRIORITIZED
-  }
-#endif
-#ifdef CONFIG_SIG_SIGSTOP_ACTION
-  ,
-  {                                              /* TSTATE_TASK_STOPPED */
-    &g_stoppedtasks,
-    0                                            /* See tcb->prev_state */
-  },
-#endif
-};
+struct tasklist_s g_tasklisttable[NUM_TASK_STATES];
 
 /* This is the current initialization state.  The level of initialization
  * is only important early in the start-up sequence when certain OS or
@@ -297,6 +227,118 @@ static FAR char *g_idleargv[CONFIG_SMP_NCPUS][2];
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: tasklist_initialize
+ *
+ * Description:
+ *   Initialization of table of task lists.This table is indexed by the
+ *   task state enumeration type (tstate_t) and provides a pointer to
+ *   the associated static task list (if there is one) as well as a set
+ *   of attribute flags indicating properties of the list, for example,
+ *   if the list is an ordered list or not.
+ *
+ ****************************************************************************/
+
+static void tasklist_initialize(void)
+{
+  FAR struct tasklist_s *tlist = (FAR void *)&g_tasklisttable;
+
+  /* TSTATE_TASK_INVALID */
+
+  tlist[TSTATE_TASK_INVALID].list = NULL;
+  tlist[TSTATE_TASK_INVALID].attr = 0;
+
+  /* TSTATE_TASK_PENDING */
+
+  tlist[TSTATE_TASK_PENDING].list = list_pendingtasks();
+  tlist[TSTATE_TASK_PENDING].attr = TLIST_ATTR_PRIORITIZED;
+
+#ifdef CONFIG_SMP
+
+  /* TSTATE_TASK_READYTORUN */
+
+  tlist[TSTATE_TASK_READYTORUN].list = list_readytorun();
+  tlist[TSTATE_TASK_READYTORUN].attr = TLIST_ATTR_PRIORITIZED;
+
+  /* TSTATE_TASK_ASSIGNED */
+
+  tlist[TSTATE_TASK_ASSIGNED].list = list_assignedtasks(0);
+  tlist[TSTATE_TASK_ASSIGNED].attr = TLIST_ATTR_PRIORITIZED |
+                                     TLIST_ATTR_INDEXED |
+                                     TLIST_ATTR_RUNNABLE;
+
+  /* TSTATE_TASK_RUNNING */
+
+  tlist[TSTATE_TASK_RUNNING].list = list_assignedtasks(0);
+  tlist[TSTATE_TASK_RUNNING].attr = TLIST_ATTR_PRIORITIZED |
+                                    TLIST_ATTR_INDEXED |
+                                    TLIST_ATTR_RUNNABLE;
+#else
+
+  /* TSTATE_TASK_READYTORUN */
+
+  tlist[TSTATE_TASK_READYTORUN].list = list_readytorun();
+  tlist[TSTATE_TASK_READYTORUN].attr = TLIST_ATTR_PRIORITIZED |
+                                       TLIST_ATTR_RUNNABLE;
+
+  /* TSTATE_TASK_RUNNING */
+
+  tlist[TSTATE_TASK_RUNNING].list = list_readytorun();
+  tlist[TSTATE_TASK_RUNNING].attr = TLIST_ATTR_PRIORITIZED |
+                                    TLIST_ATTR_RUNNABLE;
+#endif
+
+  /* TSTATE_TASK_INACTIVE */
+
+  tlist[TSTATE_TASK_INACTIVE].list = list_inactivetasks();
+  tlist[TSTATE_TASK_INACTIVE].attr = 0;
+
+  /* TSTATE_WAIT_SEM */
+
+  tlist[TSTATE_WAIT_SEM].list = (FAR void *)offsetof(sem_t, waitlist);
+  tlist[TSTATE_WAIT_SEM].attr = TLIST_ATTR_PRIORITIZED |
+                                TLIST_ATTR_OFFSET;
+
+  /* TSTATE_WAIT_SIG */
+
+  tlist[TSTATE_WAIT_SIG].list = list_waitingforsignal();
+  tlist[TSTATE_WAIT_SIG].attr = 0;
+
+#ifndef CONFIG_DISABLE_MQUEUE
+
+  /* TSTATE_WAIT_MQNOTEMPTY */
+
+  tlist[TSTATE_WAIT_MQNOTEMPTY].list =
+    (FAR void *)offsetof(struct mqueue_inode_s, cmn.waitfornotempty);
+  tlist[TSTATE_WAIT_MQNOTEMPTY].attr = TLIST_ATTR_PRIORITIZED |
+                                       TLIST_ATTR_OFFSET;
+
+  /* TSTATE_WAIT_MQNOTFULL */
+
+  tlist[TSTATE_WAIT_MQNOTFULL].list =
+    (FAR void *)offsetof(struct mqueue_inode_s, cmn.waitfornotfull);
+  tlist[TSTATE_WAIT_MQNOTFULL].attr = TLIST_ATTR_PRIORITIZED |
+                                      TLIST_ATTR_OFFSET;
+#endif
+
+#ifdef CONFIG_LEGACY_PAGING
+
+  /* TSTATE_WAIT_PAGEFILL */
+
+  tlist[TSTATE_WAIT_PAGEFILL].list = list_waitingforfill();
+  tlist[TSTATE_WAIT_PAGEFILL].attr = TLIST_ATTR_PRIORITIZED;
+#endif
+
+#ifdef CONFIG_SIG_SIGSTOP_ACTION
+
+  /* TSTATE_TASK_STOPPED */
+
+  tlist[TSTATE_TASK_STOPPED].list = list_stoppedtasks();
+  tlist[TSTATE_TASK_STOPPED].attr = 0;
+
+#endif
+}
 
 /****************************************************************************
  * Name: idle_task_initialize
@@ -502,6 +544,10 @@ void nx_start(void)
   /* Initialize RTOS Data ***************************************************/
 
   sched_trace_begin();
+
+  /* Initialize task list table *********************************************/
+
+  tasklist_initialize();
 
   /* Initialize the IDLE task TCB *******************************************/
 
