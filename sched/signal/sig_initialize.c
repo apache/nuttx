@@ -69,110 +69,55 @@ sq_queue_t  g_sigpendingsignal;
 sq_queue_t  g_sigpendingirqsignal;
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/* g_sigpendingactionalloc is a pointer to the start of the allocated
- * blocks of pending signal actions.
- */
-
-static sigq_t     *g_sigpendingactionalloc;
-
-/* g_sigpendingirqactionalloc is a pointer to the start of the allocated
- * block of pending signal actions.
- */
-
-static sigq_t     *g_sigpendingirqactionalloc;
-
-/* g_sigpendingsignalalloc is a pointer to the start of the allocated
- * blocks of pending signals.
- */
-
-static sigpendq_t *g_sigpendingsignalalloc;
-
-/* g_sigpendingirqsignalalloc is a pointer to the start of the allocated
- * blocks of pending signals.
- */
-
-static sigpendq_t *g_sigpendingirqsignalalloc;
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-static sigq_t     *nxsig_alloc_block(sq_queue_t *siglist, uint16_t nsigs,
-                                     uint8_t sigtype);
-static sigpendq_t *nxsig_alloc_pendingsignalblock(sq_queue_t *siglist,
-                                                  uint16_t nsigs,
-                                                  uint8_t sigtype);
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxsig_alloc_block
+ * Name: nxsig_init_block
  *
  * Description:
- *   Allocate a block of pending signal actions and place them
+ *   Initialize a block of pending signal actions and place them
  *   on the free list.
  *
  ****************************************************************************/
 
-static FAR sigq_t *nxsig_alloc_block(sq_queue_t *siglist, uint16_t nsigs,
-                                     uint8_t sigtype)
+static void *nxsig_init_block(sq_queue_t *siglist, FAR sigq_t *sigq,
+                              uint16_t nsigs, uint8_t sigtype)
 {
-  FAR sigq_t *sigqalloc;
-  FAR sigq_t *sigq;
   int i;
 
-  /* Allocate a block of pending signal actions. */
-
-  sigqalloc = kmm_malloc(sizeof(sigq_t) * nsigs);
-  if (sigqalloc != NULL)
+  for (i = 0; i < nsigs; i++)
     {
-      sigq = sigqalloc;
-      for (i = 0; i < nsigs; i++)
-        {
-          sigq->type = sigtype;
-          sq_addlast((FAR sq_entry_t *)sigq++, siglist);
-        }
+      sigq->type = sigtype;
+      sq_addlast((FAR sq_entry_t *)sigq++, siglist);
     }
 
-  return sigqalloc;
+  return sigq;
 }
 
 /****************************************************************************
- * Name: nxsig_alloc_pendingsignalblock
+ * Name: nxsig_init_pendingsignalblock
  *
  * Description:
- *   Allocate a block of pending signal structures  and place them on
+ *   Initialize a block of pending signal structures  and place them on
  *   the free list.
  *
  ****************************************************************************/
 
-static sigpendq_t *nxsig_alloc_pendingsignalblock(sq_queue_t *siglist,
-                                                  uint16_t nsigs,
-                                                  uint8_t sigtype)
+static void *nxsig_init_pendingsignalblock(FAR sq_queue_t *siglist,
+                                           FAR sigpendq_t *sigpend,
+                                           uint16_t nsigs,
+                                           uint8_t sigtype)
 {
-  FAR sigpendq_t *sigpendalloc;
-  FAR sigpendq_t *sigpend;
   int i;
 
-  /* Allocate a block of pending signal structures  */
-
-  sigpendalloc = kmm_malloc(sizeof(sigpendq_t) * nsigs);
-  if (sigpendalloc != NULL)
+  for (i = 0; i < nsigs; i++)
     {
-      sigpend = sigpendalloc;
-      for (i = 0; i < nsigs; i++)
-        {
-          sigpend->type = sigtype;
-          sq_addlast((FAR sq_entry_t *)sigpend++, siglist);
-        }
+      sigpend->type = sigtype;
+      sq_addlast((FAR sq_entry_t *)sigpend++, siglist);
     }
 
-  return sigpendalloc;
+  return sigpend;
 }
 
 /****************************************************************************
@@ -189,6 +134,8 @@ static sigpendq_t *nxsig_alloc_pendingsignalblock(sq_queue_t *siglist,
 
 void nxsig_initialize(void)
 {
+  FAR void *sigpool;
+
   sched_trace_begin();
 
   /* Initialize free lists */
@@ -201,28 +148,24 @@ void nxsig_initialize(void)
 
   /* Add a block of signal structures to each list */
 
-  g_sigpendingactionalloc =
-    nxsig_alloc_block(&g_sigpendingaction,
-                      NUM_PENDING_ACTIONS,
-                      SIG_ALLOC_FIXED);
-  DEBUGASSERT(g_sigpendingactionalloc != NULL);
+  sigpool =
+    kmm_malloc(sizeof(sigq_t) *
+               (NUM_PENDING_ACTIONS + CONFIG_SIG_PREALLOC_IRQ_ACTIONS)
+               + sizeof(sigpendq_t) *
+                 (NUM_SIGNALS_PENDING + CONFIG_SIG_PREALLOC_IRQ_ACTIONS));
 
-  g_sigpendingirqactionalloc =
-    nxsig_alloc_block(&g_sigpendingirqaction,
-                      CONFIG_SIG_PREALLOC_IRQ_ACTIONS,
-                      SIG_ALLOC_IRQ);
-  DEBUGASSERT(g_sigpendingirqactionalloc != NULL);
+  DEBUGASSERT(sigpool != NULL);
 
-  g_sigpendingsignalalloc =
-    nxsig_alloc_pendingsignalblock(&g_sigpendingsignal,
-                                   NUM_SIGNALS_PENDING,
-                                   SIG_ALLOC_FIXED);
-  DEBUGASSERT(g_sigpendingsignalalloc != NULL);
-
-  g_sigpendingirqsignalalloc =
-    nxsig_alloc_pendingsignalblock(&g_sigpendingirqsignal,
-                                   CONFIG_SIG_PREALLOC_IRQ_ACTIONS,
-                                   SIG_ALLOC_IRQ);
-  DEBUGASSERT(g_sigpendingirqsignalalloc != NULL);
+  sigpool = nxsig_init_block(&g_sigpendingaction, sigpool,
+                             NUM_PENDING_ACTIONS, SIG_ALLOC_FIXED);
+  sigpool = nxsig_init_block(&g_sigpendingirqaction, sigpool,
+                             CONFIG_SIG_PREALLOC_IRQ_ACTIONS,
+                             SIG_ALLOC_IRQ);
+  sigpool = nxsig_init_pendingsignalblock(&g_sigpendingsignal, sigpool,
+                                          NUM_SIGNALS_PENDING,
+                                          SIG_ALLOC_FIXED);
+  sigpool = nxsig_init_pendingsignalblock(&g_sigpendingirqsignal, sigpool,
+                                          CONFIG_SIG_PREALLOC_IRQ_ACTIONS,
+                                          SIG_ALLOC_IRQ);
   sched_trace_end();
 }
