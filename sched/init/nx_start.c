@@ -539,7 +539,7 @@ void nx_start(void)
 
   /* Boot up is complete */
 
-  nxsched_initstate() = OSINIT_BOOT;
+  nxsched_set_initstate(OSINIT_BOOT);
 
   /* Initialize RTOS Data ***************************************************/
 
@@ -555,7 +555,7 @@ void nx_start(void)
 
   /* Task lists are initialized */
 
-  nxsched_initstate() = OSINIT_TASKLISTS;
+  nxsched_set_initstate(OSINIT_TASKLISTS);
 
   /* Initialize RTOS facilities *********************************************/
 
@@ -641,7 +641,7 @@ void nx_start(void)
 
   /* The memory manager is available */
 
-  nxsched_initstate() = OSINIT_MEMORY;
+  nxsched_set_initstate(OSINIT_MEMORY);
 
   /* Initialize tasking data structures */
 
@@ -727,7 +727,7 @@ void nx_start(void)
 
   /* Hardware resources are now available */
 
-  nxsched_initstate() = OSINIT_HARDWARE;
+  nxsched_set_initstate(OSINIT_HARDWARE);
 
   /* Setup for Multi-Tasking ************************************************/
 
@@ -773,7 +773,7 @@ void nx_start(void)
 
   /* The OS is fully initialized and we are beginning multi-tasking */
 
-  nxsched_initstate() = OSINIT_OSREADY;
+  nxsched_set_initstate(OSINIT_OSREADY);
 
   /* Create initial tasks and bring-up the system */
 
@@ -781,7 +781,7 @@ void nx_start(void)
 
   /* Enter to idleloop */
 
-  nxsched_initstate() = OSINIT_IDLELOOP;
+  nxsched_set_initstate(OSINIT_IDLELOOP);
 
   /* Let other threads have access to the memory manager */
 

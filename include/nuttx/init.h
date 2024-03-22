@@ -38,13 +38,14 @@
  * initialization.
  */
 
-#define nxsched_initstate()       g_nx_initstate
+#define nxsched_set_initstate(s)  g_nx_initstate = (s)
+#define nxsched_get_initstate()   g_nx_initstate
 
-#define OSINIT_MM_READY()        (nxsched_initstate() >= OSINIT_MEMORY)
-#define OSINIT_HW_READY()        (nxsched_initstate() >= OSINIT_HARDWARE)
-#define OSINIT_OS_READY()        (nxsched_initstate() >= OSINIT_OSREADY)
-#define OSINIT_IDLELOOP()        (nxsched_initstate() >= OSINIT_IDLELOOP)
-#define OSINIT_OS_INITIALIZING() (nxsched_initstate()  < OSINIT_OSREADY)
+#define OSINIT_MM_READY()        (nxsched_get_initstate() >= OSINIT_MEMORY)
+#define OSINIT_HW_READY()        (nxsched_get_initstate() >= OSINIT_HARDWARE)
+#define OSINIT_OS_READY()        (nxsched_get_initstate() >= OSINIT_OSREADY)
+#define OSINIT_IDLELOOP()        (nxsched_get_initstate() >= OSINIT_IDLELOOP)
+#define OSINIT_OS_INITIALIZING() (nxsched_get_initstate()  < OSINIT_OSREADY)
 
 /****************************************************************************
  * Public Types
