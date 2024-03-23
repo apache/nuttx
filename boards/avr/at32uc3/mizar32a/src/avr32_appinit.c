@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/avr/src/at32uc3/at32uc3a_pinmux.h
+ * boards/avr/at32uc3/mizar32a/src/avr32_appinit.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,32 +18,54 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_AVR_SRC_AT32UC3_AT32UC3A_PINMUX_H
-#define __ARCH_AVR_SRC_AT32UC3_AT32UC3A_PINMUX_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#include <stdint.h>
 
-#define PINMUX_USART1_RXD_0        (GPIO_PERIPH | GPIO_FUNCA | GPIO_PORTA | 5)
-#define PINMUX_USART1_TXD_0        (GPIO_PERIPH | GPIO_FUNCA | GPIO_PORTA | 6)
+#include <arch/board/board.h>
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+#include "mizar32a.h"
 
 /****************************************************************************
- * Public Data
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions Prototypes
+ * Name: board_app_initialize
+ *
+ * Description:
+ *   Perform application specific initialization.  This function is never
+ *   called directly from application code, but only indirectly via the
+ *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
+ *
+ * Input Parameters:
+ *   arg - The boardctl() argument is passed to the board_app_initialize()
+ *         implementation without modification.  The argument has no
+ *         meaning to NuttX; the meaning of the argument is a contract
+ *         between the board-specific initialization logic and the
+ *         matching application logic.  The value could be such things as a
+ *         mode enumeration value, a set of DIP switch switch settings, a
+ *         pointer to configuration data read from a file or serial FLASH,
+ *         or whatever you would like to do with it.  Every implementation
+ *         should accept zero/NULL as a default configuration.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure to indicate the nature of the failure.
+ *
  ****************************************************************************/
 
-#endif /* __ARCH_AVR_SRC_AT32UC3_AT32UC3A_PINMUX_H */
+int board_app_initialize(uintptr_t arg)
+{
+#ifndef CONFIG_BOARD_LATE_INITIALIZE
+  /* Perform board initialization */
+
+  return avr32_bringup();
+#else
+  return OK;
+#endif /* CONFIG_BOARD_LATE_INITIALIZE */
+}

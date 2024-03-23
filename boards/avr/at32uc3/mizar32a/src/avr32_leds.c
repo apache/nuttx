@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/avr/src/at32uc3/at32uc3a_pinmux.h
+ * boards/avr/at32uc3/mizar32a/src/avr32_leds.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,32 +18,90 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_AVR_SRC_AT32UC3_AT32UC3A_PINMUX_H
-#define __ARCH_AVR_SRC_AT32UC3_AT32UC3A_PINMUX_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <nuttx/board.h>
+#include <arch/board/board.h>
+
+#include "at32uc3.h"
+#include "mizar32a.h"
+
+#ifdef CONFIG_ARCH_LEDS
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define PINMUX_USART1_RXD_0        (GPIO_PERIPH | GPIO_FUNCA | GPIO_PORTA | 5)
-#define PINMUX_USART1_TXD_0        (GPIO_PERIPH | GPIO_FUNCA | GPIO_PORTA | 6)
-
 /****************************************************************************
- * Public Types
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Private Functions
+ ****************************************************************************/
+
+static inline void set_led(bool v)
+{
+  at32uc3_gpiowrite(PINMUX_GPIO_LED1, v);
+}
+
+/****************************************************************************
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions Prototypes
+ * Name: board_autoled_initializeialize
  ****************************************************************************/
 
-#endif /* __ARCH_AVR_SRC_AT32UC3_AT32UC3A_PINMUX_H */
+void board_autoled_initializeialize(void)
+{
+  at32uc3_configgpio(PINMUX_GPIO_LED1);
+}
+
+/****************************************************************************
+ * Name: board_autoled_on
+ ****************************************************************************/
+
+void board_autoled_on(int led)
+{
+  switch (led)
+    {
+    case LED_STARTED:
+    case LED_HEAPALLOCATE:
+      /* As the board provides only one soft controllable LED,
+       * we simply turn it on when the board boots
+       */
+
+      set_led(false);
+      break;
+    case LED_PANIC:
+
+      /* For panic state, the LED is blinking */
+
+      set_led(false);
+      break;
+    }
+}
+
+/****************************************************************************
+ * Name: board_autoled_off
+ ****************************************************************************/
+
+void board_autoled_off(int led)
+{
+  switch (led)
+    {
+    case LED_PANIC:
+
+      /* For panic state, the LED is blinking */
+
+      set_led(true);
+      break;
+    }
+}
+
+#endif /* CONFIG_ARCH_LEDS */
