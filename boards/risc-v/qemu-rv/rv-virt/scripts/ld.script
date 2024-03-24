@@ -22,6 +22,19 @@ SECTIONS
 {
   . = 0x80000000;
 
+  /* where the global variable out-of-bounds detection information located */
+#ifdef CONFIG_MM_KASAN_GLOBAL
+  .kasan.unused :
+  {
+    *(.data..LASANLOC*)
+  }
+  .kasan.global :
+  {
+    KEEP (*(.data..LASAN0))
+    KEEP (*(.data.rel.local..LASAN0))
+  }
+#endif
+
   .text :
     {
       _stext = . ;

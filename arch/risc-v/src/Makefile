@@ -162,13 +162,27 @@ $(KBIN): $(OBJS)
 board/libboard$(LIBEXT):
 	$(Q) $(MAKE) -C board libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
 
-define LINK_ALLSYMS
+# When multiple linking, these two additional linking objects will be included
+
+ifeq ($(CONFIG_MM_KASAN_GLOBAL),y)
+EXTRA_LIBS += kasan_globals$(OBJEXT)
+endif
+ifeq ($(CONFIG_ALLSYMS),y)
+EXTRA_LIBS += allsyms$(OBJEXT)
+endif
+
+define LINK_ALLSYMS_KASAN
+	$(if $(CONFIG_ALLSYMS),
 	$(Q) $(TOPDIR)/tools/mkallsyms.py $(NUTTX) allsyms.tmp --orderbyname $(CONFIG_SYMTAB_ORDEREDBYNAME)
 	$(Q) $(call COMPILE, allsyms.tmp, allsyms$(OBJEXT), -x c)
+	$(Q) $(call DELFILE, allsyms.tmp))
+	$(if $(CONFIG_MM_KASAN_GLOBAL),
+	$(Q) $(TOPDIR)/tools/kasan_global.py -e $(NUTTX) -o kasan_globals.tmp
+	$(Q) $(call COMPILE, kasan_globals.tmp, kasan_globals$(OBJEXT) -fno-sanitize=kernel-address, -x c)
+	$(Q) $(call DELFILE, kasan_globals.tmp))
 	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
-		-o $(NUTTX) $(HEAD_OBJ) allsyms$(OBJEXT) $(EXTRA_OBJS) \
+		-o $(NUTTX) $(HEAD_OBJ) $(EXTRA_OBJS) \
 		$(LDSTARTGROUP) $(LDLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
-	$(Q) $(call DELFILE, allsyms.tmp allsyms$(OBJEXT))
 endef
 
 $(addsuffix .tmp,$(ARCHSCRIPT)): $(ARCHSCRIPT)
@@ -176,17 +190,19 @@ $(addsuffix .tmp,$(ARCHSCRIPT)): $(ARCHSCRIPT)
 
 nuttx$(EXEEXT): $(HEAD_OBJ) board/libboard$(LIBEXT) $(addsuffix .tmp,$(ARCHSCRIPT))
 	$(Q) echo "LD: nuttx"
-ifneq ($(CONFIG_ALLSYMS),y)
+ifeq ($(CONFIG_ALLSYMS)$(CONFIG_MM_KASAN_GLOBAL),)
 	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
 		-o $(NUTTX) $(HEAD_OBJ) $(EXTRA_OBJS) \
 		$(LDSTARTGROUP) $(LDLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
 else
-	$(Q) # Link and generate default table
-	$(Q) $(if $(wildcard $(shell echo $(NUTTX))),,$(call LINK_ALLSYMS,$^))
-	$(Q) # Extract all symbols
-	$(Q) $(call LINK_ALLSYMS, $^)
-	$(Q) # Extract again since the table offset may changed
-	$(Q) $(call LINK_ALLSYMS, $^)
+	$(Q) $(call LINK_ALLSYMS_KASAN)
+	$(Q) $(call LINK_ALLSYMS_KASAN)
+	$(Q) $(call LINK_ALLSYMS_KASAN)
+	$(Q) $(call LINK_ALLSYMS_KASAN)
+endif
+ifeq ($(CONFIG_MM_KASAN_GLOBAL),y)
+	$(Q) $(OBJCOPY) -R .kasan.global $(NUTTX)
+	$(Q) $(OBJCOPY) -R .kasan.unused $(NUTTX)
 endif
 ifneq ($(CONFIG_WINDOWS_NATIVE),y)
 	$(Q) $(NM) $(NUTTX) | \
