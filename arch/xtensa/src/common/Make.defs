@@ -52,10 +52,6 @@ ifeq ($(CONFIG_SCHED_BACKTRACE),y)
   CMN_CSRCS += xtensa_backtrace.c
 endif
 
-ifeq ($(CONFIG_SPINLOCK),y)
-  CMN_CSRCS += xtensa_testset.c
-endif
-
 ifeq ($(CONFIG_SMP),y)
   CMN_CSRCS += xtensa_cpupause.c
 endif

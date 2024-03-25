@@ -104,6 +104,37 @@ typedef uintptr_t spinlock_t;
  *
  ****************************************************************************/
 
+#if defined(CONFIG_ARCH_RV_ISA_A)
+static inline_function spinlock_t up_testset(FAR volatile spinlock_t *lock)
+{
+  spinlock_t ret = SP_UNLOCKED;
+
+  __asm__ __volatile__
+  (
+    "1:                   \n"
+#ifdef CONFIG_ARCH_RV32
+    "lr.w    %0, (%2)     \n"
+#else
+    "lr.d    %0, (%2)     \n"
+#endif
+    "beq     %0, %1, 2f   \n"
+#ifdef CONFIG_ARCH_RV32
+    "sc.w    %0, %1, (%2) \n"
+#else
+    "sc.d    %0, %1, (%2) \n"
+#endif
+    "bnez    %0, 1b       \n"
+    "fence                \n"
+    "2:                   \n"
+    : "+r" (ret)
+    : "r" (SP_LOCKED), "r" (lock)
+    : "memory"
+  );
+
+  return ret;
+}
+#endif
+
 /* See prototype in nuttx/include/nuttx/spinlock.h */
 
 #endif /* __ASSEMBLY__ */

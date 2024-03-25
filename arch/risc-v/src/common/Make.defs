@@ -89,10 +89,6 @@ ifeq ($(CONFIG_ARCH_RV_ISA_V),y)
 CMN_ASRCS += riscv_vpu.S
 endif
 
-ifeq ($(CONFIG_ARCH_RV_ISA_A),y)
-CMN_ASRCS += riscv_testset.S
-endif
-
 ifeq ($(CONFIG_ARCH_RV_HAVE_APLIC),y)
 CMN_CSRCS += riscv_aia.c
 endif
