@@ -83,6 +83,7 @@ include usrsock/Make.defs
 include reset/Make.defs
 include pci/Make.defs
 include coresight/Make.defs
+include aie/Make.defs
 
 ifeq ($(CONFIG_SPECIFIC_DRIVERS),y)
 -include platform/Make.defs
