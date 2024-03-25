@@ -235,6 +235,21 @@ static void ramlog_pollnotify(FAR struct ramlog_dev_s *priv)
 }
 
 /****************************************************************************
+ * Name: ramlog_flush
+ ****************************************************************************/
+
+static void ramlog_bufferflush(FAR struct ramlog_dev_s *priv)
+{
+  FAR struct ramlog_user_s *upriv;
+
+  priv->rl_header->rl_head = 0;
+  list_for_every_entry(&priv->rl_list, upriv, struct ramlog_user_s, rl_node)
+    {
+      upriv->rl_tail = 0;
+    }
+}
+
+/****************************************************************************
  * Name: ramlog_copybuf
  ****************************************************************************/
 
@@ -535,7 +550,7 @@ static int ramlog_file_ioctl(FAR struct file *filep, int cmd,
         upriv->rl_threashold = (uint32_t)arg;
         break;
       case BIOC_FLUSH:
-        priv->rl_header->rl_head = 0;
+        ramlog_bufferflush(priv);
         break;
       default:
         ret = -ENOTTY;
