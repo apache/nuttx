@@ -1265,7 +1265,6 @@ def test_ltp_interfaces_pthread_spin_trylock_4_1(p):
 
 
 def test_ltp_interfaces_sigpause_1_1(p):
-    pytest.skip("unsupported")
     ret = p.sendCommand(
         "ltp_interfaces_sigpause_1_1",
         ["PASSED", "passed", "Passed", "PASS"],
@@ -2140,7 +2139,6 @@ def test_ltp_interfaces_sigaction_12_40(p):
 
 
 def test_ltp_interfaces_sigpause_2_1(p):
-    pytest.skip("unsupported")
     ret = p.sendCommand(
         "ltp_interfaces_sigpause_2_1",
         ["PASSED", "passed", "Passed", "PASS"],
@@ -3016,7 +3014,6 @@ def test_ltp_interfaces_sigaction_28_1(p):
 
 
 def test_ltp_interfaces_sigpause_4_1(p):
-    pytest.skip("unsupported")
     ret = p.sendCommand(
         "ltp_interfaces_sigpause_4_1",
         ["PASSED", "passed", "Passed", "PASS"],
@@ -6576,7 +6573,6 @@ def test_ltp_interfaces_sigaction_2_23(p):
 
 
 def test_ltp_interfaces_sigpause_3_1(p):
-    pytest.skip("unsupported")
     ret = p.sendCommand(
         "ltp_interfaces_sigpause_3_1",
         ["PASSED", "passed", "Passed", "PASS"],
