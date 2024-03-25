@@ -126,9 +126,9 @@ extern uint32_t g_rmt_source_clock_hz;
  *
  * Description:
  *   Maps a byte to a sequence of RMT items. Each bit in the byte is
- *   represented by an RMT item (32-bit value). Iterates over each bit in
- *   the byte, creating an RMT item for each bit, set or not. The created
- *   RMT items are stored in the destination array.
+ *   represented by an RMT item (32-bit value). The function iterates over
+ *   each bit in the byte, creating an RMT item for each bit, HIGH or LOW.
+ *   The created RMT items are stored in the destination array.
  *
  * Input Parameters:
  *   dev  - Pointer to the RMT-based WS2812 device structure.

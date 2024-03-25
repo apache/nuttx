@@ -74,10 +74,10 @@
  * Name: board_rmt_rxinitialize
  *
  * Description:
- *   Initialize the RMT peripheral and register a RX device.
+ *   Initialize the RMT peripheral and register an RX device.
  *
  * Input Parameters:
- *   ch  - the RMT's channel that will be used
+ *   ch  - The RMT's channel that will be used
  *   pin - The pin used for the RX channel
  *
  * Returned Value:
@@ -105,10 +105,10 @@ int board_rmt_rxinitialize(int ch, int pin)
  * Name: board_rmt_txinitialize
  *
  * Description:
- *   Initialize the RMT peripheral and register a TX device.
+ *   Initialize the RMT peripheral and register an TX device.
  *
  * Input Parameters:
- *   ch  - the RMT's channel that will be used
+ *   ch  - The RMT's channel that will be used
  *   pin - The pin used for the TX channel
  *
  * Returned Value:
@@ -141,7 +141,7 @@ int board_rmt_txinitialize(int ch, int pin)
 
 #ifdef CONFIG_WS2812_NON_SPI_DRIVER
   led = esp_ws2812_setup("/dev/leds0", rmt,
-                           CONFIG_WS2812_LED_COUNT, false);
+                         CONFIG_WS2812_LED_COUNT, false);
 
   if (led == NULL)
     {
