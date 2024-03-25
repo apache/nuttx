@@ -50,6 +50,14 @@
 #define MPU_RBAR_AP_POS     2U
 #define MPU_RBAR_AP_MSK     (0x3UL << MPU_RBAR_AP_POS)
 
+/* TCR_EL1 */
+
+#define TCR_AS_SHIFT        36U
+#define TCR_ASID_8          (0ULL << TCR_AS_SHIFT)
+#define TCR_ASID_16         (1ULL << TCR_AS_SHIFT)
+#define TCR_TBI0            (1ULL << 37)
+#define TCR_TBI1            (1ULL << 38)
+
 /* RBAR_EL1 XN */
 
 #define MPU_RBAR_XN_POS     1U

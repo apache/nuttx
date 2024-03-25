@@ -387,6 +387,12 @@ void arm64_mpu_init(bool is_primary_core)
   uint64_t  val;
   uint32_t  r_index;
 
+#ifdef CONFIG_MM_KASAN_SW_TAGS
+  val  = read_sysreg(tcr_el1);
+  val |= (TCR_TBI0 | TCR_TBI1 | TCR_ASID_8);
+  write_sysreg(val, tcr_el1);
+#endif
+
   /* Current MPU code supports only EL1 */
 
   __asm__ volatile ("mrs %0, CurrentEL" : "=r" (val));
