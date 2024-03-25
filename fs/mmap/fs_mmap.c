@@ -73,7 +73,6 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
    * things.
    */
 
-#ifdef CONFIG_DEBUG_FEATURES
   /* A flags with MAP_PRIVATE and MAP_SHARED is invalid. */
 
   if ((flags & MAP_PRIVATE) && (flags & MAP_SHARED))
@@ -99,7 +98,6 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
       ferr("ERROR: Invalid length, length=%zu\n", length);
       return -EINVAL;
     }
-#endif /* CONFIG_DEBUG_FEATURES */
 
   /* Check if we are just be asked to allocate memory, i.e., MAP_ANONYMOUS
    * set meaning that the memory is not backed up from a file.  The file
