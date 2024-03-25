@@ -198,6 +198,20 @@
 
 #define REG_PIC             REG_R10
 
+/* Multiprocessor Affinity Register (MPIDR): CRn=c0, opc1=0, CRm=c0, opc2=5 */
+
+#define MPIDR_CPUID_SHIFT   (0)       /* Bits 0-1: CPU ID */
+#define MPIDR_CPUID_MASK    (3 << MPIDR_CPUID_SHIFT)
+#  define MPIDR_CPUID_CPU0  (0 << MPIDR_CPUID_SHIFT)
+#  define MPIDR_CPUID_CPU1  (1 << MPIDR_CPUID_SHIFT)
+#  define MPIDR_CPUID_CPU2  (2 << MPIDR_CPUID_SHIFT)
+#  define MPIDR_CPUID_CPU3  (3 << MPIDR_CPUID_SHIFT)
+                                      /* Bits 2-7: Reserved */
+#define MPIDR_CLUSTID_SHIFT (8)       /* Bits 8-11: Cluster ID value */
+#define MPIDR_CLUSTID_MASK  (15 << MPIDR_CLUSTID_SHIFT)
+                                      /* Bits 12-29: Reserved */
+#define MPIDR_U             (1 << 30) /* Bit 30: Multiprocessing Extensions. */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -419,6 +433,44 @@ static inline void up_irq_restore(irqstate_t flags)
       : "memory"
     );
 }
+
+/****************************************************************************
+ * Name: up_cpu_index
+ *
+ * Description:
+ *   Return an index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
+ *   corresponds to the currently executing CPU.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   An integer index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
+ *   corresponds to the currently executing CPU.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+noinstrument_function
+static inline_function int up_cpu_index(void)
+{
+  uint32_t mpidr;
+
+  /* Read the Multiprocessor Affinity Register (MPIDR) */
+
+  __asm__ __volatile__
+  (
+    "mrc " "p15, " "0" ", %0, " "c0" ", " "c0" ", " "5" "\n"
+    : "=r"(mpidr)
+  );
+
+  /* And return the CPU ID field */
+
+  return (mpidr & MPIDR_CPUID_MASK) >> MPIDR_CPUID_SHIFT;
+}
+#else
+#  define up_cpu_index() 0
+#endif /* CONFIG_SMP */
 
 static inline_function uint32_t up_getsp(void)
 {

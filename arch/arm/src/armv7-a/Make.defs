@@ -90,7 +90,7 @@ ifeq ($(CONFIG_ARCH_FPU),y)
 endif
 
 ifeq ($(CONFIG_SMP),y)
-  CMN_CSRCS += arm_cpuindex.c arm_cpustart.c arm_cpupause.c arm_cpuidlestack.c
+  CMN_CSRCS += arm_cpustart.c arm_cpupause.c arm_cpuidlestack.c
   CMN_CSRCS += arm_scu.c
 endif
 
