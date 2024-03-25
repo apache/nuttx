@@ -426,6 +426,8 @@ static int mpfs_i2c_init(struct mpfs_i2c_priv_s *priv)
 
       putreg32(MPFS_I2C_CTRL_ENS1_MASK, MPFS_I2C_CTRL);
 
+      nxsem_reset(&priv->sem_isr, 0);
+
       priv->initialized = true;
     }
 
@@ -470,8 +472,27 @@ static void mpfs_i2c_deinit(struct mpfs_i2c_priv_s *priv)
 
 static int mpfs_i2c_sem_waitdone(struct mpfs_i2c_priv_s *priv)
 {
+  int res = 0;
   uint32_t timeout = mpfs_i2c_timeout(priv->msgc, priv->msgv);
-  return nxsem_tickwait_uninterruptible(&priv->sem_isr, USEC2TICK(timeout));
+
+  res = nxsem_tickwait_uninterruptible(&priv->sem_isr, USEC2TICK(timeout));
+
+  /* -> race condition <- */
+
+  priv->inflight = false;
+
+  /* Handle a race condition above in which interrupt MPFS_I2C_ST_STOP_SENT
+   * was received right after semaphore timeout. In that case semaphore is
+   * signalled and has the incorrect state when the next transfer starts.
+   */
+
+  if (res < 0)
+    {
+      res = nxsem_tickwait_uninterruptible(&priv->sem_isr,
+                                           USEC2TICK(timeout));
+    }
+
+  return res;
 }
 
 /****************************************************************************
@@ -873,7 +894,6 @@ static int mpfs_i2c_transfer(struct i2c_master_s *dev,
       if (mpfs_i2c_sem_waitdone(priv) < 0)
         {
           i2cinfo("Message %" PRIu8 " timed out.\n", priv->msgid);
-          priv->inflight = false;
           ret = -ETIMEDOUT;
           break;
         }
@@ -933,6 +953,8 @@ static int mpfs_i2c_reset(struct i2c_master_s *dev)
   int ret;
 
   nxmutex_lock(&priv->lock);
+
+  i2cerr("i2c bus %d reset\n", priv->id);
 
   mpfs_i2c_deinit(priv);
 
