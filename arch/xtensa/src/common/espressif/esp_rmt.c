@@ -268,7 +268,7 @@ struct rmt_dev_common_s
 
 struct rmt_dev_lowerhalf_s
 {
-  /* The following block is part of the upper-hald device struct */
+  /* The following block is part of the upper-half device struct */
 
   FAR const struct rmt_ops_s *ops;
   FAR struct circbuf_s       *circbuf;
@@ -287,18 +287,18 @@ struct rmt_obj_s
   size_t tx_len_rem;
   size_t tx_sub_len;
   bool wait_done;     /* Mark whether wait tx done */
-  bool loop_autostop; /* mark whether loop auto-stop is enabled */
+  bool loop_autostop; /* Mark whether loop auto-stop is enabled */
   rmt_channel_t channel;
   const rmt_item32_t *tx_data;
   sem_t tx_sem;
-#if CONFIG_SPIRAM_USE_MALLOC
+#ifdef CONFIG_SPIRAM_USE_MALLOC
   int intr_alloc_flags;
   sem_t tx_sem_buffer;
 #endif
   rmt_item32_t *tx_buf;
   struct circbuf_s rx_buf;
   sem_t rx_sem;
-#if SOC_RMT_SUPPORT_RX_PINGPONG
+#ifdef SOC_RMT_SUPPORT_RX_PINGPONG
   rmt_item32_t *rx_item_buf;
   uint32_t rx_item_buf_size;
   uint32_t rx_item_len;
@@ -479,7 +479,7 @@ static void rmt_module_enable(void)
  *
  ****************************************************************************/
 
-#if SOC_RMT_SUPPORT_RX_PINGPONG
+#ifdef SOC_RMT_SUPPORT_RX_PINGPONG
 static int rmt_set_rx_thr_intr_en(rmt_channel_t channel, bool en,
                                   uint16_t evt_thresh)
 {
@@ -543,7 +543,7 @@ static int rmt_rx_start(rmt_channel_t channel, bool rx_idx_rst)
 {
   irqstate_t flags;
   rmt_channel_t ch = RMT_DECODE_RX_CHANNEL(channel);
-#if SOC_RMT_SUPPORT_RX_PINGPONG
+#ifdef SOC_RMT_SUPPORT_RX_PINGPONG
   const uint32_t item_block_len =
     rmt_ll_rx_get_mem_blocks(g_rmtdev_common.hal.regs, ch) *
     RMT_MEM_ITEM_NUM;
@@ -564,7 +564,7 @@ static int rmt_rx_start(rmt_channel_t channel, bool rx_idx_rst)
   rmt_ll_enable_interrupt(g_rmtdev_common.hal.regs,
                           RMT_LL_EVENT_RX_DONE(ch), true);
 
-#if SOC_RMT_SUPPORT_RX_PINGPONG
+#ifdef SOC_RMT_SUPPORT_RX_PINGPONG
   p_rmt_obj[channel]->rx_item_start_idx = 0;
   p_rmt_obj[channel]->rx_item_len = 0;
   rmt_set_rx_thr_intr_en(channel, true, item_block_len / 2);
@@ -607,7 +607,7 @@ static int rmt_tx_start(rmt_channel_t channel, bool tx_idx_rst)
   rmt_ll_clear_interrupt_status(g_rmtdev_common.hal.regs,
                                 RMT_LL_EVENT_TX_DONE(channel));
 
-  /* enable tx end interrupt in non-loop mode */
+  /* Enable tx end interrupt in non-loop mode */
 
   if (!rmt_ll_tx_is_loop_enabled(g_rmtdev_common.hal.regs, channel))
     {
@@ -985,7 +985,7 @@ static int rmt_internal_config(rmt_dev_t *dev,
       rmt_ll_rx_enable_filter(dev, RMT_DECODE_RX_CHANNEL(channel),
                               rmt_param->rx_config.filter_en);
 
-#if SOC_RMT_SUPPORT_RX_PINGPONG
+#ifdef SOC_RMT_SUPPORT_RX_PINGPONG
 
       /* always enable rx ping-pong */
 
@@ -1283,7 +1283,7 @@ static int IRAM_ATTR rmt_driver_isr_default(int irq, void *context,
 
               addr = (rmt_item32_t *)
                 RMTMEM.chan[RMT_ENCODE_RX_CHANNEL(channel)].data32;
-#if SOC_RMT_SUPPORT_RX_PINGPONG
+#ifdef SOC_RMT_SUPPORT_RX_PINGPONG
               if (item_len > p_rmt->rx_item_start_idx)
                 {
                   item_len = item_len - p_rmt->rx_item_start_idx;
@@ -1323,7 +1323,7 @@ static int IRAM_ATTR rmt_driver_isr_default(int irq, void *context,
               rmterr("RMT RX BUFFER ERROR");
             }
 
-#if SOC_RMT_SUPPORT_RX_PINGPONG
+#ifdef SOC_RMT_SUPPORT_RX_PINGPONG
           p_rmt->rx_item_start_idx = 0;
           p_rmt->rx_item_len = 0;
           memset((void *)p_rmt->rx_item_buf, 0, p_rmt->rx_item_buf_size);
@@ -1338,7 +1338,7 @@ static int IRAM_ATTR rmt_driver_isr_default(int irq, void *context,
                                     RMT_LL_EVENT_RX_DONE(channel));
     }
 
-#if SOC_RMT_SUPPORT_RX_PINGPONG
+#ifdef SOC_RMT_SUPPORT_RX_PINGPONG
 
   /* Rx thres interrupt */
 
@@ -1514,8 +1514,8 @@ static int rmt_driver_install(rmt_channel_t channel, size_t rx_buf_size,
     }
 #endif
 
-#if !CONFIG_SPIRAM_USE_MALLOC
-  p_rmt_obj[channel] = calloc(1, sizeof(rmt_obj_t));
+#ifndef CONFIG_SPIRAM_USE_MALLOC
+  p_rmt_obj[channel] = kmm_calloc(1, sizeof(rmt_obj_t));
 #else
   if (!(intr_alloc_flags & ESP_INTR_FLAG_IRAM))
     {
@@ -1523,9 +1523,7 @@ static int rmt_driver_install(rmt_channel_t channel, size_t rx_buf_size,
     }
   else
     {
-      p_rmt_obj[channel] = heap_caps_calloc(1, sizeof(rmt_obj_t),
-                                            MALLOC_CAP_INTERNAL | \
-                                            MALLOC_CAP_8BIT);
+      p_rmt_obj[channel] = kmm_calloc(1, sizeof(rmt_obj_t));
     }
 #endif
 
@@ -1543,7 +1541,7 @@ static int rmt_driver_install(rmt_channel_t channel, size_t rx_buf_size,
   p_rmt_obj[channel]->wait_done = false;
   p_rmt_obj[channel]->loop_autostop = false;
 
-#if !CONFIG_SPIRAM_USE_MALLOC
+#ifndef CONFIG_SPIRAM_USE_MALLOC
   nxsem_init(&p_rmt_obj[channel]->tx_sem, 0, 0);
   nxsem_init(&p_rmt_obj[channel]->rx_sem, 0, 0);
 #endif
@@ -1555,24 +1553,22 @@ static int rmt_driver_install(rmt_channel_t channel, size_t rx_buf_size,
       circbuf_init(&p_rmt_obj[channel]->rx_buf, NULL, rx_buf_size);
     }
 
-#if SOC_RMT_SUPPORT_RX_PINGPONG
+#ifdef SOC_RMT_SUPPORT_RX_PINGPONG
   if (p_rmt_obj[channel]->rx_item_buf == NULL && rx_buf_size > 0)
     {
-#if !CONFIG_SPIRAM_USE_MALLOC
-      p_rmt_obj[channel]->rx_item_buf = calloc(1, rx_buf_size);
-#else
+#  ifndef CONFIG_SPIRAM_USE_MALLOC
+      p_rmt_obj[channel]->rx_item_buf = kmm_calloc(1, rx_buf_size);
+#  else
       if (!(p_rmt_obj[channel]->intr_alloc_flags & ESP_INTR_FLAG_IRAM))
         {
           p_rmt_obj[channel]->rx_item_buf = calloc(1, rx_buf_size);
         }
       else
         {
-          p_rmt_obj[channel]->rx_item_buf =
-              heap_caps_calloc(1, rx_buf_size,
-                               MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+          p_rmt_obj[channel]->rx_item_buf = kmm_calloc(1, rx_buf_size);
         }
 
-#endif
+#  endif
       if (p_rmt_obj[channel]->rx_item_buf == NULL)
         {
           rmterr("RMT malloc fail");
@@ -1656,12 +1652,12 @@ static int rmt_write_items(rmt_channel_t channel,
                                                  channel);
 
   DEBUGASSERT(mem_blocks + channel <= SOC_RMT_CHANNELS_PER_GROUP);
-#if CONFIG_SPIRAM_USE_MALLOC
+#ifdef CONFIG_SPIRAM_USE_MALLOC
   if (p_rmt_obj[channel]->intr_alloc_flags & ESP_INTR_FLAG_IRAM)
     {
       if (!esp_ptr_internal(rmt_item))
         {
-          remterr(RMT_PSRAM_BUFFER_WARN_STR);
+          rmterr(RMT_PSRAM_BUFFER_WARN_STR);
           return ESP_ERR_INVALID_ARG;
         }
     }
@@ -1955,7 +1951,7 @@ static struct rmt_dev_s
  *   Initialize the selected RMT device in TX mode
  *
  * Input Parameters:
- *   ch   - the RMT's channel that will be used
+ *   ch   - The RMT's channel that will be used
  *   pin  - The pin used for the TX channel
  *
  * Returned Value:
@@ -1977,7 +1973,7 @@ struct rmt_dev_s *esp_rmt_tx_init(int ch, int pin)
  *   Initialize the selected RMT device in RC mode
  *
  * Input Parameters:
- *   ch   - the RMT's channel that will be used
+ *   ch   - The RMT's channel that will be used
  *   pin  - The pin used for the RX channel
  *
  * Returned Value:

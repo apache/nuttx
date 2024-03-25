@@ -65,9 +65,9 @@ extern "C"
  ****************************************************************************/
 
 struct ws2812_dev_s *esp_ws2812_setup(const char *path,
-                                        struct rmt_dev_s *rmt,
-                                        uint16_t    pixel_count,
-                                        bool        has_white);
+                                      struct rmt_dev_s *rmt,
+                                      uint16_t    pixel_count,
+                                      bool        has_white);
 
 /****************************************************************************
  * Name: esp_ws2812_release
