@@ -3360,7 +3360,8 @@ static void up_dma_txavailable(struct uart_dev_s *dev)
 
   /* Only send when the DMA is idle */
 
-  if ((priv->dev.dmatx.length && priv->dev.dmatx.nlength) == 0 &&
+  if (priv->dev.dmatx.length == 0 &&
+      priv->dev.dmatx.nlength == 0 &&
       stm32_dmaresidual(priv->txdma) == 0)
     {
       uart_xmitchars_dma(dev);
