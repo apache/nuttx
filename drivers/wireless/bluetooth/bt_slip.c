@@ -320,6 +320,7 @@ static uint8_t *bt_slip_slip_byte(FAR uint8_t *packet, FAR uint8_t byte)
       packet[0] = SLIP_ESC;
       packet[1] = SLIP_ESC_ESC;
       offset = 2;
+      break;
     default:
       packet[0] = byte;
       break;
