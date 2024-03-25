@@ -777,6 +777,7 @@ static int bt_slip_receive(FAR struct bt_driver_s *drv,
   FAR uint8_t *packet;
   FAR uint8_t *cursor;
   FAR uint8_t *header;
+  FAR uint8_t *pointer;
   uint8_t byte = 0;
   uint16_t checksum;
   size_t remaining;
@@ -818,13 +819,14 @@ static int bt_slip_receive(FAR struct bt_driver_s *drv,
                 break;
               }
 
-            packet = bt_slip_unslip_byte(packet, &byte);
-            if (!packet)
+            pointer = bt_slip_unslip_byte(packet, &byte);
+            if (!pointer)
               {
                 state = PACKET_START;
                 break;
               }
 
+            packet = pointer;
             *cursor++ = byte;
             remaining--;
 
@@ -898,13 +900,14 @@ static int bt_slip_receive(FAR struct bt_driver_s *drv,
           break;
         case PACKET_PAYLOAD:
           {
-            packet = bt_slip_unslip_byte(packet, &byte);
-            if (!packet)
+            pointer = bt_slip_unslip_byte(packet, &byte);
+            if (!pointer)
               {
                 state = PACKET_START;
                 break;
               }
 
+            packet = pointer;
             *cursor++ = byte;
             remaining--;
 
@@ -926,13 +929,14 @@ static int bt_slip_receive(FAR struct bt_driver_s *drv,
           break;
         case PACKET_DICHECK:
           {
-            packet = bt_slip_unslip_byte(packet, &byte);
-            if (!packet)
+            pointer = bt_slip_unslip_byte(packet, &byte);
+            if (!pointer)
               {
                 state = PACKET_START;
                 break;
               }
 
+            packet = pointer;
             *cursor++ = byte;
             remaining--;
 
