@@ -988,17 +988,13 @@ config ESP32S3_RTCIO_IRQ
 menu "SPI configuration"
 	depends on ESP32S3_SPI
 
-choice
-	prompt "SPI I/O Mode"
-	default ESP32S3_SPI_IO_SPI
-
 config ESP32S3_SPI_IO_SPI
 	bool "SPI (4-line)"
+	default y
 
 config ESP32S3_SPI_IO_QIO
 	bool "QIO (6-line)"
-
-endchoice # SPI I/O Mode
+	default n
 
 config ESP32S3_SPI_SWCS
 	bool "SPI software CS"
