@@ -37,10 +37,6 @@ endif
 CMN_ASRCS  = arm64_vector_table.S arm64_vectors.S arm64_smccc.S
 CMN_ASRCS += arm64_fork_func.S
 
-ifeq ($(CONFIG_ARCH_HAVE_TESTSET),y)
-CMN_ASRCS += arm64_testset.S
-endif
-
 # Common C source files ( OS call up_xxx)
 CMN_CSRCS =  arm64_initialize.c arm64_initialstate.c arm64_boot.c
 CMN_CSRCS += arm64_nputs.c arm64_copystate.c arm64_createstack.c

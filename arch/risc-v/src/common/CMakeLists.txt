@@ -85,10 +85,6 @@ if(CONFIG_ARCH_RV_ISA_V)
   list(APPEND SRCS riscv_vpu.S)
 endif()
 
-if(CONFIG_ARCH_RV_ISA_A)
-  list(APPEND SRCS riscv_testset.S)
-endif()
-
 if(CONFIG_ARCH_RV_HAVE_APLIC)
   list(APPEND SRCS riscv_aplic.c)
 endif()
