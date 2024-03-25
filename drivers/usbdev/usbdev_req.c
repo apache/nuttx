@@ -47,7 +47,11 @@
 #  define EP_ALLOCBUFFER(ep,nb)    (ep)->ops->allocbuffer(ep,nb)
 #  define EP_FREEBUFFER(ep,buf)    (ep)->ops->freebuffer(ep,buf)
 #else
-#  define EP_ALLOCBUFFER(ep,nb)    kmm_malloc(nb)
+#  if CONFIG_USBDEV_EPBUFFER_ALIGNMENT != 0
+#    define EP_ALLOCBUFFER(ep,nb)  kmm_memalign(CONFIG_USBDEV_EPBUFFER_ALIGNMENT, nb)
+#  else
+#    define EP_ALLOCBUFFER(ep,nb)  kmm_malloc(nb)
+#  endif
 #  define EP_FREEBUFFER(ep,buf)    kmm_free(buf)
 #endif
 
