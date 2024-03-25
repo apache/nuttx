@@ -146,7 +146,7 @@ static int bthcisock_receive(struct bt_driver_s *drv)
       return ret;
     }
 
-  dev->rxlen += ret;
+  dev->rxlen += (uint16_t)ret;
 
   while (dev->rxlen)
     {
