@@ -58,6 +58,30 @@
  * Private Data
  ****************************************************************************/
 
+static uint32_t g_pll_freqs[] =
+{
+  [OSC_24M]          = 24000000U,   /* 24MHZ OSCILLATOR.     */
+  [ARM_PLL]          = 2000000000U, /* ARM PLL               */
+  [ARM_PLLOUT]       = 2000000000U, /* ARM PLL OUT           */
+  [SYS_PLL1_IN]      = 4000000000U, /* SYSTEM PLL1 IN        */
+  [SYS_PLL1PFD0_IN]  = 1000000000U, /* SYSTEM PLL1 PFD0 IN   */
+  [SYS_PLL1PFD0]     = 1000000000U, /* SYSTEM PLL1 PFD0      */
+  [SYS_PLL1PFD0DIV2] = 500000000U,  /* SYSTEM PLL1 PFD0 DIV2 */
+  [SYS_PLL1PFD1_IN]  = 800000000U,  /* SYSTEM PLL1 PFD1 IN   */
+  [SYS_PLL1PFD1]     = 800000000U,  /* SYSTEM PLL1 PFD1      */
+  [SYS_PLL1PFD1DIV2] = 400000000U,  /* SYSTEM PLL1 PFD1 DIV2 */
+  [SYS_PLL1PFD2_IN]  = 625000000U,  /* SYSTEM PLL1 PFD2 IN   */
+  [SYS_PLL1PFD2]     = 625000000U,  /* SYSTEM PLL1 PFD2      */
+  [SYS_PLL1PFD2DIV2] = 312500000U,  /* SYSTEM PLL1 PFD2 DIV2 */
+  [AUDIO_PLL1]       = 0U,          /* AUDIO PLL1            */
+  [AUDIO_PLL1OUT]    = 0U,          /* AUDIO PLL1 OUT        */
+  [DRAM_PLL]         = 1000000000U, /* DRAM PLL              */
+  [DRAM_PLLOUT]      = 1000000000U, /* DRAM PLL OUT          */
+  [VIDEO_PLL1]       = 0U,          /* VIDEO PLL1            */
+  [VIDEO_PLL1OUT]    = 0U,          /* VIDEO PLL1 OUT        */
+  [EXT]              = 0U           /* EXT                   */
+};
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -213,4 +237,84 @@ void imx9_clockconfig(void)
    *
    * By default, all peripheral root clocks are set to the 24 MHz oscillator.
    */
+}
+
+/****************************************************************************
+ * Name: imx9_get_clock
+ *
+ * Description:
+ *   This function returns the clock frequency of the specified functional
+ *   clock.
+ *
+ * Input Parameters:
+ *   clkname   - Identifies the clock of interest
+ *   frequency - The location where the peripheral clock frequency will be
+ *              returned
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.  -ENODEV is returned if the clock is not enabled or is not
+ *   being clocked.
+ *
+ ****************************************************************************/
+
+int imx9_get_clock(int clkname, uint32_t *frequency)
+{
+  if (clkname >= EXT)
+    {
+      *frequency = 0;
+      return -ENODEV;
+    }
+
+  *frequency = g_pll_freqs[clkname];
+  return OK;
+}
+
+/****************************************************************************
+ * Name: imx9_get_rootclock
+ *
+ * Description:
+ *   This function returns the clock frequency of the specified root
+ *   functional clock.
+ *
+ * Input Parameters:
+ *   clkroot   - Identifies the peripheral clock of interest
+ *   frequency - The location where the peripheral clock frequency will be
+ *              returned
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.  -ENODEV is returned if the clock is not enabled or is not
+ *   being clocked.
+ *
+ ****************************************************************************/
+
+int imx9_get_rootclock(int clkroot, uint32_t *frequency)
+{
+  uint32_t reg;
+  uint32_t div;
+  uint32_t mux;
+  int clk_name;
+
+  if (clkroot <= CCM_CR_COUNT)
+    {
+      reg = getreg32(IMX9_CCM_CR_CTRL(clkroot));
+
+      if ((reg & CCM_CR_CTRL_OFF) == CCM_CR_CTRL_OFF)
+        {
+          *frequency = 0;
+        }
+      else
+        {
+          mux = (reg & CCM_CR_CTRL_MUX_MASK) >> CCM_CR_CTRL_MUX_SHIFT;
+          clk_name = g_ccm_root_mux[clkroot][mux];
+          imx9_get_clock(clk_name, frequency);
+          div = ((reg & CCM_CR_CTRL_DIV_MASK) >> CCM_CR_CTRL_DIV_SHIFT) + 1;
+          *frequency = *frequency / div;
+        }
+
+      return OK;
+    }
+
+  return -ENODEV;
 }

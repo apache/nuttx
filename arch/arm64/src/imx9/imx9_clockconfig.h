@@ -27,6 +27,8 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -42,5 +44,47 @@
  ****************************************************************************/
 
 void imx9_clockconfig(void);
+
+/****************************************************************************
+ * Name: imx9_get_clock
+ *
+ * Description:
+ *   This function returns the clock frequency of the specified functional
+ *   clock.
+ *
+ * Input Parameters:
+ *   clkname   - Identifies the clock of interest
+ *   frequency - The location where the peripheral clock frequency will be
+ *              returned
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.  -ENODEV is returned if the clock is not enabled or is not
+ *   being clocked.
+ *
+ ****************************************************************************/
+
+int imx9_get_clock(int clkname, uint32_t *frequency);
+
+/****************************************************************************
+ * Name: imx9_get_rootclock
+ *
+ * Description:
+ *   This function returns the clock frequency of the specified root
+ *   functional clock.
+ *
+ * Input Parameters:
+ *   clkroot   - Identifies the peripheral clock of interest
+ *   frequency - The location where the peripheral clock frequency will be
+ *              returned
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.  -ENODEV is returned if the clock is not enabled or is not
+ *   being clocked.
+ *
+ ****************************************************************************/
+
+int imx9_get_rootclock(int clkroot, uint32_t *frequency);
 
 #endif /* __ARCH_ARM64_SRC_IMX9_IMX9_CLOCKCONFIG_H */
