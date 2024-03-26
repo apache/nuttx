@@ -31,6 +31,7 @@
 #include <nuttx/mutex.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mm/mempool.h>
+#include <nuttx/mm/kasan.h>
 
 #include <assert.h>
 
@@ -169,7 +170,7 @@ mempool_multiple_alloc_chunk(FAR struct mempool_multiple_s *mpool,
           mpool->alloced += mpool->alloc_size(mpool->arg, ret);
         }
 
-      return ret;
+      return kasan_reset_tag(ret);
     }
 
   chunk = (FAR struct mpool_chunk_s *)sq_peek(&mpool->chunk_queue);
@@ -184,6 +185,8 @@ retry:
         {
           return NULL;
         }
+
+      tmp = kasan_reset_tag(tmp);
 
       mpool->alloced += mpool->alloc_size(mpool->arg, tmp);
       chunk = (FAR struct mpool_chunk_s *)(tmp + mpool->chunk_size);
@@ -447,8 +450,7 @@ mempool_multiple_init(FAR const char *name,
   mpool->arg = arg;
   mpool->alloced = alloc_size(arg, mpool);
   sq_init(&mpool->chunk_queue);
-  pools = mempool_multiple_alloc_chunk(mpool, sizeof(uintptr_t),
-                                       npools * sizeof(struct mempool_s));
+  pools = alloc(arg, sizeof(uintptr_t), npools * sizeof(struct mempool_s));
   if (pools == NULL)
     {
       goto err_with_mpool;
@@ -594,6 +596,7 @@ FAR void *mempool_multiple_realloc(FAR struct mempool_multiple_s *mpool,
       return mempool_multiple_alloc(mpool, size);
     }
 
+  oldblk = kasan_reset_tag(oldblk);
   dict = mempool_multiple_get_dict(mpool, oldblk);
   if (dict == NULL)
     {
@@ -632,6 +635,7 @@ int mempool_multiple_free(FAR struct mempool_multiple_s *mpool,
 {
   FAR struct mpool_dict_s *dict;
 
+  blk = kasan_reset_tag(blk);
   dict = mempool_multiple_get_dict(mpool, blk);
   if (dict == NULL)
     {
@@ -667,6 +671,7 @@ ssize_t mempool_multiple_alloc_size(FAR struct mempool_multiple_s *mpool,
 
   DEBUGASSERT(blk != NULL);
 
+  blk = kasan_reset_tag(blk);
   dict = mempool_multiple_get_dict(mpool, blk);
   if (dict == NULL)
     {
@@ -895,7 +900,7 @@ void mempool_multiple_deinit(FAR struct mempool_multiple_s *mpool)
     }
 
   mempool_multiple_free_chunk(mpool, mpool->dict);
-  mempool_multiple_free_chunk(mpool, mpool->pools);
   nxrmutex_destroy(&mpool->lock);
+  mpool->free(mpool->arg, mpool->pools);
   mpool->free(mpool->arg, mpool);
 }
