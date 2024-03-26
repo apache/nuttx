@@ -84,10 +84,6 @@ else
 CSRCS += sched_processtimer.c
 endif
 
-ifeq ($(CONFIG_SMP),y)
-CSRCS += sched_thistask.c
-endif
-
 ifeq ($(CONFIG_SCHED_CRITMONITOR),y)
 CSRCS += sched_critmonitor.c
 endif
