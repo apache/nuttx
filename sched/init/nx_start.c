@@ -684,12 +684,6 @@ void nx_start(void)
   nxmq_initialize();
 #endif
 
-#ifndef CONFIG_DISABLE_MQUEUE_SYSV
-  /* Initialize the System V message queue facility (if in link) */
-
-  nxmsg_initialize();
-#endif
-
 #ifdef CONFIG_NET
   /* Initialize the networking system */
 

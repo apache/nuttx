@@ -19,6 +19,11 @@
 # ##############################################################################
 
 set(SRCS)
+
+if(NOT CONFIG_DISABLE_MQUEUE OR NOT CONFIG_DISABLE_MQUEUE)
+  list(APPEND SRCS mq_initialize.c mq_waitirq.c mq_recover.c)
+endif()
+
 if(NOT CONFIG_DISABLE_MQUEUE)
 
   list(
@@ -30,13 +35,10 @@ if(NOT CONFIG_DISABLE_MQUEUE)
     mq_receive.c
     mq_timedreceive.c
     mq_rcvinternal.c
-    mq_initialize.c
     mq_msgfree.c
     mq_msgqalloc.c
     mq_msgqfree.c
-    mq_recover.c
     mq_setattr.c
-    mq_waitirq.c
     mq_notify.c
     mq_getattr.c)
 

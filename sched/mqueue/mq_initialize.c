@@ -29,10 +29,13 @@
 #include <nuttx/trace.h>
 
 #include "mqueue/mqueue.h"
+#include "mqueue/msg.h"
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_MQUEUE
 
 /* The g_msgfree is a list of messages that are available for general
  * use.  The number of messages in this list is a system configuration
@@ -47,45 +50,58 @@ struct list_node g_msgfree = LIST_INITIAL_VALUE(g_msgfree);
 
 struct list_node g_msgfreeirq = LIST_INITIAL_VALUE(g_msgfreeirq);
 
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mq_msgblockalloc
+ * Name: mq_msgblockinit
  *
  * Description:
- *   Allocate a block of messages and place them on the free list.
+ *   Initialize a block of messages and place them on the free list.
  *
  * Input Parameters:
  *  queue
  *
  ****************************************************************************/
 
-static void
-mq_msgblockalloc(FAR struct list_node *list, uint16_t nmsgs,
-                 uint8_t alloc_type)
+#ifndef CONFIG_DISABLE_MQUEUE
+static FAR void * mq_msgblockinit(FAR struct list_node *list,
+                                   FAR struct mqueue_msg_s *mqmsgblock,
+                                   uint16_t nmsgs, uint8_t alloc_type)
 {
-  FAR struct mqueue_msg_s *mqmsgblock;
-
-  /* The list must be loaded at initialization time to hold the
-   * configured number of messages.
-   */
-
-  mqmsgblock = (FAR struct mqueue_msg_s *)
-    kmm_malloc(sizeof(struct mqueue_msg_s) * nmsgs);
-
-  if (mqmsgblock)
+  int i;
+  for (i = 0; i < nmsgs; i++)
     {
-      int i;
-      for (i = 0; i < nmsgs; i++)
-        {
-          mqmsgblock->type = alloc_type;
-          list_add_tail(list, &mqmsgblock->node);
-          mqmsgblock++;
-        }
+      mqmsgblock->type = alloc_type;
+      list_add_tail(list, &mqmsgblock->node);
+      mqmsgblock++;
     }
+
+  return mqmsgblock;
 }
+#endif
+
+/****************************************************************************
+ * Name: sysv_msgblockinit
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_MQUEUE_SYSV
+static FAR void *sysv_msgblockinit(FAR struct list_node *list,
+                                   FAR struct msgbuf_s *msg, uint16_t nmsgs)
+{
+  int i;
+  for (i = 0; i < nmsgs; i++)
+    {
+      list_add_tail(&g_msgfreelist, &msg->node);
+      msg++;
+    }
+
+  return msg;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -109,19 +125,39 @@ mq_msgblockalloc(FAR struct list_node *list, uint16_t nmsgs,
 
 void nxmq_initialize(void)
 {
+  FAR void *msg;
+
   sched_trace_begin();
 
-  /* Allocate a block of messages for general use */
+  msg = kmm_malloc(
+#ifndef CONFIG_DISABLE_MQUEUE
+                   sizeof(struct mqueue_msg_s) *
+                   (CONFIG_PREALLOC_MQ_MSGS + CONFIG_PREALLOC_MQ_IRQ_MSGS)
+#endif
+#ifndef CONFIG_DISABLE_MQUEUE_SYSV
+                   + sizeof(struct msgbuf_s) * CONFIG_PREALLOC_MQ_MSGS
+#endif
+                   );
 
-  mq_msgblockalloc(&g_msgfree, CONFIG_PREALLOC_MQ_MSGS,
-                   MQ_ALLOC_FIXED);
+  DEBUGASSERT(msg != NULL);
 
-  /* Allocate a block of messages for use exclusively by
+  /* Initialize a block of messages for general use */
+
+#ifndef CONFIG_DISABLE_MQUEUE
+  msg = mq_msgblockinit(&g_msgfree, msg, CONFIG_PREALLOC_MQ_MSGS,
+                         MQ_ALLOC_FIXED);
+
+  /* Initialize a block of messages for use exclusively by
    * interrupt handlers
    */
 
-  mq_msgblockalloc(&g_msgfreeirq, CONFIG_PREALLOC_MQ_IRQ_MSGS,
-                   MQ_ALLOC_IRQ);
+  msg = mq_msgblockinit(&g_msgfreeirq, msg, CONFIG_PREALLOC_MQ_IRQ_MSGS,
+                         MQ_ALLOC_IRQ);
+#endif
+
+#ifndef CONFIG_DISABLE_MQUEUE_SYSV
+  msg = sysv_msgblockinit(&g_msgfreelist, msg, CONFIG_PREALLOC_MQ_MSGS);
+#endif
 
   sched_trace_end();
 }
