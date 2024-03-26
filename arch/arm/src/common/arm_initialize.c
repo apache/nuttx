@@ -38,7 +38,10 @@
  * [get/set]_current_regs for portability.
  */
 
+#if defined(CONFIG_ARCH_ARMV7M) || defined(CONFIG_ARCH_ARMV8M) || \
+      defined(CONFIG_ARCH_ARMV6M) || defined(CONFIG_ARCH_ARM)
 volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
+#endif
 
 /****************************************************************************
  * Private Functions

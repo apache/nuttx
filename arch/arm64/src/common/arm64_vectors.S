@@ -48,12 +48,6 @@
     mrs    \xreg1, tpidrro_el0
     stp    \xreg0, \xreg1, [\xfp, #8 * REG_SP_EL0]
 
-    /* Save the TPIDR0/TPIDR1, which is the current tcb */
-
-    mrs    \xreg0, tpidr_el0
-    mrs    \xreg1, tpidr_el1
-    stp    \xreg0, \xreg1, [\xfp, #8 * REG_TPIDR_EL0]
-
 .endm
 
 /****************************************************************************
@@ -141,24 +135,12 @@ SECTION_FUNC(text, arm64_context_switch)
     mrs    x5, tpidrro_el0
     stp    x4, x5, [x1, #8 * REG_SP_EL0]
 
-    /* Save the TPIDR0/TPIDR1, which is the current tcb */
-
-    mrs    x4, tpidr_el0
-    mrs    x5, tpidr_el1
-    stp    x4, x5, [x1, #8 * REG_TPIDR_EL0]
-
 restore_new:
 
     /* Restore SP_EL0 and thread's exception dept */
     ldp    x4,  x5,  [x0, #8 * REG_SP_EL0]
     msr    tpidrro_el0, x5
     msr    sp_el0, x4
-
-    /* restore the TPIDR0/TPIDR1 */
-
-    ldp    x4,  x5,  [x0, #8 * REG_TPIDR_EL0]
-    msr    tpidr_el0, x4
-    msr    tpidr_el1, x5
 
     /* retrieve new thread's SP_ELx */
     ldr    x4, [x0, #8 * REG_SP_ELX]

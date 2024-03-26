@@ -137,8 +137,7 @@ static void arm64_smp_init_top(void *arg)
   /* core n, idle n */
 
   write_sysreg(0, tpidrro_el0);
-  write_sysreg(tcb, tpidr_el1);
-  write_sysreg(tcb, tpidr_el0);
+  UNUSED(tcb);
 
   cpu_boot_params.cpu_ready_flag = 1;
   SP_SEV();

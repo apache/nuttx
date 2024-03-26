@@ -85,38 +85,8 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* g_current_regs[] holds a references to the current interrupt level
- * register storage structure.  If is non-NULL only during interrupt
- * processing.  Access to g_current_regs[] must be through the
- * [get/set]_current_regs for portability.
- */
-
-/* For the case of architectures with multiple CPUs, then there must be one
- * such value for each processor that can receive an interrupt.
- */
-
-EXTERN volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
  * Inline functions
  ****************************************************************************/
-
-static inline_function uint32_t *up_current_regs(void)
-{
-  return (uint32_t *)g_current_regs[up_cpu_index()];
-}
-
-static inline_function void up_set_current_regs(uint32_t *regs)
-{
-  g_current_regs[up_cpu_index()] = regs;
-}
 
 /****************************************************************************
  * Name: up_interrupt_context
