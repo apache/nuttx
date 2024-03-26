@@ -51,6 +51,8 @@ set(SRCS
 # File lock support
 
 if(NOT "${CONFIG_FS_LOCK_BUCKET_SIZE}" STREQUAL "0")
+  set_source_files_properties(fs_lock.c DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/..
+                              PROPERTIES INCLUDE_DIRECTORIES ${NUTTX_DIR}/sched)
   list(APPEND SRCS fs_lock.c)
 endif()
 
