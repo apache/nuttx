@@ -108,10 +108,6 @@ else()
   list(APPEND SRCS sched_processtimer.c)
 endif()
 
-if(CONFIG_SMP)
-  list(APPEND SRCS sched_thistask.c)
-endif()
-
 if(CONFIG_SCHED_CRITMONITOR)
   list(APPEND SRCS sched_critmonitor.c)
 endif()

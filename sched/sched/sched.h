@@ -353,7 +353,28 @@ void nxsched_suspend(FAR struct tcb_s *tcb);
 #endif
 
 #ifdef CONFIG_SMP
-FAR struct tcb_s *this_task(void) noinstrument_function;
+noinstrument_function
+static inline_function FAR struct tcb_s *this_task(void)
+{
+  FAR struct tcb_s *tcb;
+  irqstate_t flags;
+
+  /* If the CPU supports suppression of interprocessor interrupts, then
+   * simple disabling interrupts will provide sufficient protection for
+   * the following operations.
+   */
+
+  flags = up_irq_save();
+
+  /* Obtain the TCB which is currently running on this CPU */
+
+  tcb = current_task(this_cpu());
+
+  /* Enable local interrupts */
+
+  up_irq_restore(flags);
+  return tcb;
+}
 
 int  nxsched_select_cpu(cpu_set_t affinity);
 int  nxsched_pause_cpu(FAR struct tcb_s *tcb);
