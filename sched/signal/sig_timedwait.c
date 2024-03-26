@@ -99,13 +99,13 @@ static void nxsig_timeout(wdparm_t arg)
     {
       FAR struct tcb_s *rtcb = this_task();
 
-      wtcb->sigunbinfo->si_signo           = SIG_WAIT_TIMEOUT;
-      wtcb->sigunbinfo->si_code            = SI_TIMER;
-      wtcb->sigunbinfo->si_errno           = ETIMEDOUT;
-      wtcb->sigunbinfo->si_value.sival_int = 0;
+      wtcb->sigunbinfo.si_signo           = SIG_WAIT_TIMEOUT;
+      wtcb->sigunbinfo.si_code            = SI_TIMER;
+      wtcb->sigunbinfo.si_errno           = ETIMEDOUT;
+      wtcb->sigunbinfo.si_value.sival_int = 0;
 #ifdef CONFIG_SCHED_HAVE_PARENT
-      wtcb->sigunbinfo->si_pid             = 0;  /* Not applicable */
-      wtcb->sigunbinfo->si_status          = OK;
+      wtcb->sigunbinfo.si_pid             = 0;  /* Not applicable */
+      wtcb->sigunbinfo.si_status          = OK;
 #endif
 
       /* Remove the task from waitting list */
@@ -166,13 +166,13 @@ void nxsig_wait_irq(FAR struct tcb_s *wtcb, int errcode)
     {
       FAR struct tcb_s *rtcb = this_task();
 
-      wtcb->sigunbinfo->si_signo           = SIG_CANCEL_TIMEOUT;
-      wtcb->sigunbinfo->si_code            = SI_USER;
-      wtcb->sigunbinfo->si_errno           = errcode;
-      wtcb->sigunbinfo->si_value.sival_int = 0;
+      wtcb->sigunbinfo.si_signo           = SIG_CANCEL_TIMEOUT;
+      wtcb->sigunbinfo.si_code            = SI_USER;
+      wtcb->sigunbinfo.si_errno           = errcode;
+      wtcb->sigunbinfo.si_value.sival_int = 0;
 #ifdef CONFIG_SCHED_HAVE_PARENT
-      wtcb->sigunbinfo->si_pid             = 0;  /* Not applicable */
-      wtcb->sigunbinfo->si_status          = OK;
+      wtcb->sigunbinfo.si_pid             = 0;  /* Not applicable */
+      wtcb->sigunbinfo.si_status          = OK;
 #endif
 
       /* Remove the task from waitting list */
@@ -244,7 +244,6 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
   irqstate_t flags;
   sclock_t waitticks;
   bool switch_needed;
-  siginfo_t sinfo;
   int ret;
 
   DEBUGASSERT(set != NULL);
@@ -311,8 +310,6 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
           return -ECANCELED;
         }
 #endif
-
-      rtcb->sigunbinfo = (info == NULL) ? &sinfo : info;
 
       /* Check if we should wait for the timeout */
 
@@ -421,19 +418,26 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
        * or timeout) that awakened us.
        */
 
-      if (GOOD_SIGNO(rtcb->sigunbinfo->si_signo))
+      if (GOOD_SIGNO(rtcb->sigunbinfo.si_signo))
         {
           /* We were awakened by a signal... but is it one of the signals
            * that we were waiting for?
            */
 
-          if (nxsig_ismember(set, rtcb->sigunbinfo->si_signo))
+          if (nxsig_ismember(set, rtcb->sigunbinfo.si_signo))
             {
+              /* Return the signal info to the caller if so requested */
+
+              if (info != NULL)
+                {
+                  memcpy(info, &rtcb->sigunbinfo, sizeof(struct siginfo));
+                }
+
               /* Yes.. the return value is the number of the signal that
                * awakened us.
                */
 
-              ret = rtcb->sigunbinfo->si_signo;
+              ret = rtcb->sigunbinfo.si_signo;
             }
           else
             {
@@ -449,11 +453,11 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
            */
 
 #ifdef CONFIG_CANCELLATION_POINTS
-          if (rtcb->sigunbinfo->si_signo == SIG_CANCEL_TIMEOUT)
+          if (rtcb->sigunbinfo.si_signo == SIG_CANCEL_TIMEOUT)
             {
               /* The wait was canceled */
 
-              ret = -rtcb->sigunbinfo->si_errno;
+              ret = -rtcb->sigunbinfo.si_errno;
               DEBUGASSERT(ret < 0);
             }
           else
@@ -463,12 +467,10 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
                * error.
                */
 
-              DEBUGASSERT(rtcb->sigunbinfo->si_signo == SIG_WAIT_TIMEOUT);
+              DEBUGASSERT(rtcb->sigunbinfo.si_signo == SIG_WAIT_TIMEOUT);
               ret = -EAGAIN;
             }
         }
-
-      rtcb->sigunbinfo = NULL;
 
       leave_critical_section(flags);
     }
