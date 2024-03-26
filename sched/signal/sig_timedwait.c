@@ -99,14 +99,17 @@ static void nxsig_timeout(wdparm_t arg)
     {
       FAR struct tcb_s *rtcb = this_task();
 
-      wtcb->sigunbinfo->si_signo           = SIG_WAIT_TIMEOUT;
-      wtcb->sigunbinfo->si_code            = SI_TIMER;
-      wtcb->sigunbinfo->si_errno           = ETIMEDOUT;
-      wtcb->sigunbinfo->si_value.sival_int = 0;
+      if (wtcb->sigunbinfo != NULL)
+        {
+          wtcb->sigunbinfo->si_signo           = SIG_WAIT_TIMEOUT;
+          wtcb->sigunbinfo->si_code            = SI_TIMER;
+          wtcb->sigunbinfo->si_errno           = ETIMEDOUT;
+          wtcb->sigunbinfo->si_value.sival_int = 0;
 #ifdef CONFIG_SCHED_HAVE_PARENT
-      wtcb->sigunbinfo->si_pid             = 0;  /* Not applicable */
-      wtcb->sigunbinfo->si_status          = OK;
+          wtcb->sigunbinfo->si_pid             = 0;  /* Not applicable */
+          wtcb->sigunbinfo->si_status          = OK;
 #endif
+        }
 
       /* Remove the task from waitting list */
 
@@ -166,14 +169,17 @@ void nxsig_wait_irq(FAR struct tcb_s *wtcb, int errcode)
     {
       FAR struct tcb_s *rtcb = this_task();
 
-      wtcb->sigunbinfo->si_signo           = SIG_CANCEL_TIMEOUT;
-      wtcb->sigunbinfo->si_code            = SI_USER;
-      wtcb->sigunbinfo->si_errno           = errcode;
-      wtcb->sigunbinfo->si_value.sival_int = 0;
+      if (wtcb->sigunbinfo != NULL)
+        {
+          wtcb->sigunbinfo->si_signo           = SIG_CANCEL_TIMEOUT;
+          wtcb->sigunbinfo->si_code            = SI_USER;
+          wtcb->sigunbinfo->si_errno           = errcode;
+          wtcb->sigunbinfo->si_value.sival_int = 0;
 #ifdef CONFIG_SCHED_HAVE_PARENT
-      wtcb->sigunbinfo->si_pid             = 0;  /* Not applicable */
-      wtcb->sigunbinfo->si_status          = OK;
+          wtcb->sigunbinfo->si_pid             = 0;  /* Not applicable */
+          wtcb->sigunbinfo->si_status          = OK;
 #endif
+        }
 
       /* Remove the task from waitting list */
 
@@ -376,6 +382,8 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
             }
           else
             {
+              rtcb->sigunbinfo = NULL;
+
               leave_critical_section(flags);
               return -EAGAIN;
             }

@@ -398,7 +398,11 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
           (masked == 0 ||
            nxsig_ismember(&stcb->sigwaitmask, info->si_signo)))
         {
-          memcpy(stcb->sigunbinfo, info, sizeof(siginfo_t));
+          if (stcb->sigunbinfo != NULL)
+            {
+              memcpy(stcb->sigunbinfo, info, sizeof(siginfo_t));
+            }
+
           sigemptyset(&stcb->sigwaitmask);
 
           if (WDOG_ISACTIVE(&stcb->waitdog))
@@ -461,7 +465,11 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 
       if (stcb->task_state == TSTATE_WAIT_SIG)
         {
-          memcpy(stcb->sigunbinfo, info, sizeof(siginfo_t));
+          if (stcb->sigunbinfo != NULL)
+            {
+              memcpy(stcb->sigunbinfo, info, sizeof(siginfo_t));
+            }
+
           sigemptyset(&stcb->sigwaitmask);
 
           if (WDOG_ISACTIVE(&stcb->waitdog))
