@@ -628,6 +628,7 @@ struct up_dev_s
 #ifdef SERIAL_HAVE_TXDMA
   const unsigned int txdma_channel; /* DMA channel assigned */
   DMA_HANDLE        txdma;          /* currently-open trasnmit DMA stream */
+  sem_t             txdmasem;       /* Indicate TX DMA completion */
 #endif
 
   /* RX DMA state */
@@ -964,6 +965,7 @@ static struct up_dev_s g_usart1priv =
 #endif
 #ifdef CONFIG_USART1_TXDMA
   .txdma_channel = DMAMAP_USART1_TX,
+  .txdmasem      = SEM_INITIALIZER(1),
 #endif
 #ifdef CONFIG_USART1_RXDMA
   .rxdma_channel = DMAMAP_USART1_RX,
@@ -1033,6 +1035,7 @@ static struct up_dev_s g_usart2priv =
 #endif
 #ifdef CONFIG_USART2_TXDMA
   .txdma_channel = DMAMAP_USART2_TX,
+  .txdmasem      = SEM_INITIALIZER(1),
 #endif
 #ifdef CONFIG_USART2_RXDMA
   .rxdma_channel = DMAMAP_USART2_RX,
@@ -1102,6 +1105,7 @@ static struct up_dev_s g_usart3priv =
 #endif
 #ifdef CONFIG_USART3_TXDMA
   .txdma_channel = DMAMAP_USART3_TX,
+  .txdmasem      = SEM_INITIALIZER(1),
 #endif
 #ifdef CONFIG_USART3_RXDMA
   .rxdma_channel = DMAMAP_USART3_RX,
@@ -1171,6 +1175,7 @@ static struct up_dev_s g_uart4priv =
   .rx_gpio       = GPIO_UART4_RX,
 #ifdef CONFIG_UART4_TXDMA
   .txdma_channel = DMAMAP_UART4_TX,
+  .txdmasem      = SEM_INITIALIZER(1),
 #endif
 #ifdef CONFIG_UART4_RXDMA
   .rxdma_channel = DMAMAP_UART4_RX,
@@ -1240,6 +1245,7 @@ static struct up_dev_s g_uart5priv =
   .rx_gpio       = GPIO_UART5_RX,
 #ifdef CONFIG_UART5_TXDMA
   .txdma_channel = DMAMAP_UART5_TX,
+  .txdmasem      = SEM_INITIALIZER(1),
 #endif
 #ifdef CONFIG_UART5_RXDMA
   .rxdma_channel = DMAMAP_UART5_RX,
@@ -1309,6 +1315,7 @@ static struct up_dev_s g_usart6priv =
 #endif
 #ifdef CONFIG_USART6_TXDMA
   .txdma_channel = DMAMAP_USART6_TX,
+  .txdmasem      = SEM_INITIALIZER(1),
 #endif
 #ifdef CONFIG_USART6_RXDMA
   .rxdma_channel = DMAMAP_USART6_RX,
@@ -1378,6 +1385,7 @@ static struct up_dev_s g_uart7priv =
 #endif
 #ifdef CONFIG_UART7_TXDMA
   .txdma_channel = DMAMAP_UART7_TX,
+  .txdmasem      = SEM_INITIALIZER(1),
 #endif
 #ifdef CONFIG_UART7_RXDMA
   .rxdma_channel = DMAMAP_UART7_RX,
@@ -1447,6 +1455,7 @@ static struct up_dev_s g_uart8priv =
 #endif
 #ifdef CONFIG_UART8_TXDMA
   .txdma_channel = DMAMAP_UART8_TX,
+  .txdmasem      = SEM_INITIALIZER(1),
 #endif
 #ifdef CONFIG_UART8_RXDMA
   .rxdma_channel = DMAMAP_UART8_RX,
@@ -3290,9 +3299,8 @@ static bool up_dma_rxavailable(struct uart_dev_s *dev)
  * Name: up_dma_txcallback
  *
  * Description:
- *   This function clears dma buffer at completion of DMA transfer. It wakes
- *   up threads waiting for space in buffer and restarts the DMA if there is
- *   more data to send.
+ *   This function clears dma buffer at complete of DMA transfer and wakes up
+ *   threads waiting for space in buffer.
  *
  ****************************************************************************/
 
@@ -3338,9 +3346,16 @@ static void up_dma_txcallback(DMA_HANDLE handle, uint8_t status, void *arg)
 
   uart_xmitchars_done(&priv->dev);
 
-  /* Send more if availaible */
+  /* Initiate another transmit if data is ready */
 
-  up_dma_txavailable(&priv->dev);
+  if (priv->dev.xmit.tail != priv->dev.xmit.head)
+    {
+      uart_xmitchars_dma(&priv->dev);
+    }
+  else
+    {
+      nxsem_post(&priv->txdmasem);
+    }
 }
 #endif
 
@@ -3356,17 +3371,22 @@ static void up_dma_txcallback(DMA_HANDLE handle, uint8_t status, void *arg)
 static void up_dma_txavailable(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
-  irqstate_t flags =  enter_critical_section();
 
   /* Only send when the DMA is idle */
 
-  if ((priv->dev.dmatx.length && priv->dev.dmatx.nlength) == 0 &&
-      stm32_dmaresidual(priv->txdma) == 0)
+  int rv = nxsem_trywait(&priv->txdmasem);
+  if (rv == OK)
     {
+      if (dev->xmit.head == dev->xmit.tail)
+        {
+          /* No data to transfer. Release semaphore. */
+
+          nxsem_post(&priv->txdmasem);
+          return;
+        }
+
       uart_xmitchars_dma(dev);
     }
-
-  leave_critical_section(flags);
 }
 #endif
 
