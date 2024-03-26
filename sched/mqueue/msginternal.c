@@ -100,26 +100,6 @@ static FAR struct msgq_s *nxmsg_alloc_internal(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxmsg_initialize
- ****************************************************************************/
-
-void nxmsg_initialize(void)
-{
-  FAR struct msgbuf_s *msg;
-
-  msg = kmm_malloc(sizeof(*msg) * CONFIG_PREALLOC_MQ_MSGS);
-  if (msg)
-    {
-      int i;
-      for (i = 0; i < CONFIG_PREALLOC_MQ_MSGS; i++)
-        {
-          list_add_tail(&g_msgfreelist, &msg->node);
-          msg++;
-        }
-    }
-}
-
-/****************************************************************************
  * Name: nxmsg_alloc
  ****************************************************************************/
 
