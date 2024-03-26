@@ -107,7 +107,6 @@ static void kasan_set_poison(FAR const void *addr,
   irqstate_t flags;
   FAR uint8_t *p;
 
-  addr = kasan_reset_tag(addr);
   p = kasan_mem_to_shadow(addr, size);
   if (p == NULL)
     {
