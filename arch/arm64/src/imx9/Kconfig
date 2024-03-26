@@ -67,6 +67,107 @@ config IMX9_FLEXIO2_PWM_CHANNEL_PINS
 	hex "FlexIO outputs used for FLEXIO2 timers"
 	default 0x0000000000000000
 
+config IMX9_TPM_PWM
+	bool
+	select PWM_MULTICHAN
+	default n
+
+config IMX9_TPM1_PWM
+	depends on PWM
+	bool "Enable TPM1 based PWM generation"
+	select IMX9_TPM_PWM
+	default n
+
+config IMX9_TPM1_PWM_NCHANNELS
+	depends on IMX9_TPM1_PWM
+	int "Number of channels for TPM1"
+	default 1
+
+config IMX9_TPM1_PWM_CHMUX
+	depends on IMX9_TPM1_PWM
+	hex "Channel mux for TPM1"
+	default 0x03020100
+
+config IMX9_TPM2_PWM
+	depends on PWM
+	bool "Enable TPM2 based PWM generation"
+	select IMX9_TPM_PWM
+	default n
+
+config IMX9_TPM2_PWM_NCHANNELS
+	depends on IMX9_TPM2_PWM
+	int "Number of channels for TPM2"
+	default 1
+
+config IMX9_TPM2_PWM_CHMUX
+	depends on IMX9_TPM2_PWM
+	hex "Channel mux for TPM2"
+	default 0x03020100
+
+config IMX9_TPM3_PWM
+	depends on PWM
+	bool "Enable TPM3 based PWM generation"
+	select IMX9_TPM_PWM
+	default n
+
+config IMX9_TPM3_PWM_NCHANNELS
+	depends on IMX9_TPM3_PWM
+	int "Number of channels for TPM3"
+	default 1
+
+config IMX9_TPM3_PWM_CHMUX
+	depends on IMX9_TPM3_PWM
+	hex "Channel mux for TPM3"
+	default 0x03020100
+
+config IMX9_TPM4_PWM
+	depends on PWM
+	bool "Enable TPM4 based PWM generation"
+	select IMX9_TPM_PWM
+	default n
+
+config IMX9_TPM4_PWM_NCHANNELS
+	depends on IMX9_TPM4_PWM
+	int "Number of channels for TPM4"
+	default 1
+
+config IMX9_TPM4_PWM_CHMUX
+	depends on IMX9_TPM4_PWM
+	hex "Channel mux for TPM4"
+	default 0x03020100
+
+config IMX9_TPM5_PWM
+	depends on PWM
+	bool "Enable TPM5 based PWM generation"
+	select IMX9_TPM_PWM
+	default n
+
+config IMX9_TPM5_PWM_NCHANNELS
+	depends on IMX9_TPM5_PWM
+	int "Number of channels for TPM5"
+	default 1
+
+config IMX9_TPM5_PWM_CHMUX
+	depends on IMX9_TPM5_PWM
+	hex "Channel mux for TPM5"
+	default 0x03020100
+
+config IMX9_TPM6_PWM
+	depends on PWM
+	bool "Enable TPM6 based PWM generation"
+	select IMX9_TPM_PWM
+	default n
+
+config IMX9_TPM6_PWM_NCHANNELS
+	depends on IMX9_TPM6_PWM
+	int "Number of channels for TPM6"
+	default 1
+
+config IMX9_TPM6_PWM_CHMUX
+	depends on IMX9_TPM6_PWM
+	hex "Channel mux for TPM6"
+	default 0x03020100
+
 config IMX9_USBDEV
 	bool
 	default n

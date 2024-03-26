@@ -39,6 +39,10 @@ ifeq ($(CONFIG_IMX9_FLEXIO_PWM),y)
   CHIP_CSRCS += imx9_flexio_pwm.c
 endif
 
+ifeq ($(CONFIG_IMX9_TPM_PWM),y)
+  CHIP_CSRCS += imx9_tpm_pwm.c
+endif
+
 ifeq ($(CONFIG_IMX9_USBDEV),y)
   CHIP_CSRCS += imx9_usbdev.c
 endif
