@@ -115,7 +115,7 @@ static int backtrace(uintptr_t *base, uintptr_t *limit,
 int up_backtrace(struct tcb_s *tcb,
                  void **buffer, int size, int skip)
 {
-  struct tcb_s *rtcb = (struct tcb_s *)arch_get_current_tcb();
+  struct tcb_s *rtcb = running_task();
   struct regs_context * p_regs;
   int ret;
 

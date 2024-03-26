@@ -145,12 +145,10 @@
 #define REG_SPSR            (33)
 #define REG_SP_EL0          (34)
 #define REG_EXE_DEPTH       (35)
-#define REG_TPIDR_EL0       (36)
-#define REG_TPIDR_EL1       (37)
 
 /* In Armv8-A Architecture, the stack must align with 16 byte */
 
-#define XCPTCONTEXT_GP_REGS (38)
+#define XCPTCONTEXT_GP_REGS (36)
 #define XCPTCONTEXT_GP_SIZE (8 * XCPTCONTEXT_GP_REGS)
 
 #ifdef CONFIG_ARCH_FPU
@@ -242,24 +240,6 @@ extern "C"
  * Public Data
  ****************************************************************************/
 
-/* g_current_regs[] holds a references to the current interrupt level
- * register storage structure.  It is non-NULL only during interrupt
- * processing.  Access to g_current_regs[] must be through the macro
- * current_regs for portability.
- */
-
-/* For the case of architectures with multiple CPUs, then there must be one
- * such value for each processor that can receive an interrupt.
- */
-
-EXTERN volatile uint64_t *g_current_regs[CONFIG_SMP_NCPUS];
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
 struct xcptcontext
 {
   /* The following function pointer is non-zero if there are pending signals
@@ -327,8 +307,6 @@ struct xcptcontext
 #  endif
 #endif
 };
-
-#endif /* __ASSEMBLY__ */
 
 /* Name: up_irq_save, up_irq_restore, and friends.
  *
@@ -418,14 +396,31 @@ static inline void up_irq_restore(irqstate_t flags)
 #  define up_cpu_index() (0)
 #endif
 
+/****************************************************************************
+ * Name:
+ *   up_current_regs/up_set_current_regs
+ *
+ * Description:
+ *   We use the following code to manipulate the tpidr_el1 register,
+ *   which exists uniquely for each CPU and is primarily designed to store
+ *   current thread information. Currently, we leverage it to store interrupt
+ *   information, with plans to further optimize its use for storing both
+ *   thread and interrupt information in the future.
+ *
+ ****************************************************************************/
+
+noinstrument_function
 static inline_function uint64_t *up_current_regs(void)
 {
-  return (uint64_t *)g_current_regs[up_cpu_index()];
+  uint64_t *regs;
+  __asm__ volatile ("mrs %0, " "tpidr_el1" : "=r" (regs));
+  return regs;
 }
 
+noinstrument_function
 static inline_function void up_set_current_regs(uint64_t *regs)
 {
-  g_current_regs[up_cpu_index()] = regs;
+  __asm__ volatile ("msr " "tpidr_el1" ", %0" : : "r" (regs));
 }
 
 /****************************************************************************

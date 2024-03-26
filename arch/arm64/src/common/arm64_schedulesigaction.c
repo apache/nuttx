@@ -86,8 +86,7 @@ void arm64_init_signal_process(struct tcb_s *tcb, struct regs_context *regs)
   psigctx->sp_el0    = (uint64_t)psigctx;
 #endif
   psigctx->exe_depth = 1;
-  psigctx->tpidr_el0 = (uint64_t)tcb;
-  psigctx->tpidr_el1 = (uint64_t)tcb;
+
   tcb->xcp.regs      = (uint64_t *)psigctx;
 }
 
