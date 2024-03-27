@@ -325,6 +325,57 @@ To test it, just run the ``oneshot`` example::
     Waiting...
     Finished
 
+pm
+-------
+
+This config demonstrate the use of power management present on the ESP32-S3.
+You can use the pmconfig command to test the power management.
+Enables PM support. You can define standby mode and sleep mode delay time::
+
+    $ make menuconfig
+    -> Board Selection
+        -> (15) PM_STANDBY delay (seconds)
+           (0)  PM_STANDBY delay (nanoseconds)
+           (20) PM_SLEEP delay (seconds)
+           (0)  PM_SLEEP delay (nanoseconds)
+
+Before switching PM status, you need to query the current PM status::
+    nsh> pmconfig
+    Last state 0, Next state 0
+
+    /proc/pm/state0:
+    DOMAIN0           WAKE         SLEEP         TOTAL
+    normal          0s 00%        0s 00%        0s 00%
+    idle            0s 00%        0s 00%        0s 00%
+    standby         0s 00%        0s 00%        0s 00%
+    sleep           0s 00%        0s 00%        0s 00%
+
+    /proc/pm/wakelock0:
+    DOMAIN0      STATE     COUNT      TIME
+    system       normal        2        1s
+    system       idle          1        1s
+    system       standby       1        1s
+    system       sleep         1        1s
+
+System switch to the PM idle mode, you need to enter::
+
+    nsh> pmconfig relax normal
+    nsh> pmconfig relax normal
+
+System switch to the PM standby mode, you need to enter::
+
+    nsh> pmconfig relax idle
+    nsh> pmconfig relax normal
+    nsh> pmconfig relax normal
+
+System switch to the PM sleep mode, you need to enter::
+    nsh> pmconfig relax standby
+    nsh> pmconfig relax idle
+    nsh> pmconfig relax normal
+    nsh> pmconfig relax normal
+
+Note: when normal mode COUNT is 0, it will switch to the next PM state where COUNT is not 0.
+
 psram_quad
 ----------
 
