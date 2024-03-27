@@ -19,7 +19,7 @@
 ############################################################################
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION = -g
+  ARCHOPTIMIZATION = -g3
 endif
 
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)

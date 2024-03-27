@@ -156,7 +156,7 @@ ifeq ($(CONFIG_DEBUG_LINK_WHOLE_ARCHIVE),y)
 endif
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION += -g
+  ARCHOPTIMIZATION += -g3
 endif
 
 # Default toolchain
