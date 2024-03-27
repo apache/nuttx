@@ -148,8 +148,13 @@ static ssize_t virtio_rng_read(FAR struct file *filep, FAR char *buffer,
    * cookie. (virtqueue_get_buffer() will return cookie).
    */
 
-  vb.buf = buffer;
   vb.len = buflen;
+  vb.buf = virtio_zalloc_buf(priv->vdev, buflen, 16);
+  if (vb.buf == NULL)
+    {
+      return -ENOMEM;
+    }
+
   ret = virtqueue_add_buffer(vq, &vb, 0, 1, &cookie);
   if (ret < 0)
     {
@@ -163,6 +168,8 @@ static ssize_t virtio_rng_read(FAR struct file *filep, FAR char *buffer,
   /* Wait fot completion */
 
   nxsem_wait_uninterruptible(&cookie.sem);
+  memcpy(buffer, vb.buf, cookie.len);
+  virtio_free_buf(priv->vdev, vb.buf);
   return cookie.len;
 }
 
