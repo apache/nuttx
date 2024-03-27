@@ -1039,6 +1039,20 @@ void netdev_iob_clear(FAR struct net_driver_s *dev);
 void netdev_iob_release(FAR struct net_driver_s *dev);
 
 /****************************************************************************
+ * Name: netdev_iob_clone
+ *
+ * Description:
+ *   Backup the current iob buffer for a given NIC by cloning it.
+ *
+ * Assumptions:
+ *   The caller has locked the network.
+ *
+ ****************************************************************************/
+
+FAR struct iob_s *netdev_iob_clone(FAR struct net_driver_s *dev,
+                                   bool throttled);
+
+/****************************************************************************
  * Name: netdev_ipv6_add/del
  *
  * Description:
