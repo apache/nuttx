@@ -25,6 +25,7 @@ if(CONFIG_MM_KASAN)
   list(APPEND SRCS generic.c)
   set_source_files_properties(generic.c PROPERTIES COMPILE_FLAGS
                                                    -fno-sanitize=kernel-address)
+  set_source_files_properties(generic.c PROPERTIES COMPILE_FLAGS -fno-builtin)
   set_source_files_properties(generic.c PROPERTIES COMPILE_FLAGS -fno-lto)
 endif()
 
