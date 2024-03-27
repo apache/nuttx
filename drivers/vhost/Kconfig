@@ -10,4 +10,8 @@ menuconfig DRIVERS_VHOST
 
 if DRIVERS_VHOST
 
+config DRIVERS_VHOST_RNG
+	bool "Virtual Host Rng Device Support"
+	default n
+
 endif # DRIVERS_VHOST
