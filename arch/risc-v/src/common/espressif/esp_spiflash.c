@@ -49,6 +49,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifndef CONFIG_ESPRESSIF_SPI_FLASH_USE_ROM_CODE
 /* SPI buffer size */
 
 #  define SPI_BUFFER_WORDS          (16)
@@ -124,7 +125,8 @@
  * Private Types
  ****************************************************************************/
 
-spi_mem_dev_t *dev;
+spi_mem_dev_t *dev = spimem_flash_ll_get_hw(SPI1_HOST);
+#endif /* CONFIG_ESPRESSIF_SPI_FLASH_USE_ROM_CODE */
 
 /****************************************************************************
  * Private Functions Declaration
@@ -132,6 +134,10 @@ spi_mem_dev_t *dev;
 
 static void spiflash_start(void);
 static void spiflash_end(void);
+#ifndef CONFIG_ESPRESSIF_SPI_FLASH_USE_ROM_CODE
+extern bool spi_flash_check_and_flush_cache(size_t start_addr,
+                                            size_t length);
+#endif /* CONFIG_ESPRESSIF_SPI_FLASH_USE_ROM_CODE */
 
 /****************************************************************************
  * Private Data
@@ -156,7 +162,7 @@ static volatile bool s_sched_suspended[CONFIG_ESPRESSIF_NUM_CPUS];
  ****************************************************************************/
 
 /****************************************************************************
- * Name: spiflash_opstart
+ * Name: spiflash_start
  *
  * Description:
  *   Prepare for an SPIFLASH operation.
@@ -189,7 +195,7 @@ static IRAM_ATTR void spiflash_start(void)
 }
 
 /****************************************************************************
- * Name: spiflash_opdone
+ * Name: spiflash_end
  *
  * Description:
  *   Undo all the steps of opstart.
@@ -205,12 +211,16 @@ static IRAM_ATTR void spiflash_start(void)
 static IRAM_ATTR void spiflash_end(void)
 {
   extern void cache_resume_icache(uint32_t);
+  extern void cache_invalidate_icache_all(void);
+
   int cpu;
   irqstate_t flags;
 
   flags = enter_critical_section();
 
   cpu = up_cpu_index();
+
+  cache_invalidate_icache_all();
   cache_resume_icache(s_flash_op_cache_state[cpu] >> 16);
 
   esp_intr_noniram_enable();
@@ -242,6 +252,7 @@ static IRAM_ATTR void spiflash_end(void)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_ESPRESSIF_SPI_FLASH_USE_ROM_CODE
 static IRAM_ATTR void esp_spi_trans(uint32_t command,
                                     uint32_t command_bits,
                                     uint32_t address,
@@ -332,7 +343,17 @@ static IRAM_ATTR void esp_spi_trans(uint32_t command,
 
 static IRAM_ATTR void wait_flash_idle(void)
 {
-  while (!spi_flash_ll_host_idle(dev));
+  uint32_t status;
+
+  do
+    {
+      READ_SR1_FROM_FLASH(FLASH_CMD_RDSR, &status);
+      if ((status & FLASH_SR1_BUSY) == 0)
+        {
+          break;
+        }
+    }
+  while (1);
 }
 
 /****************************************************************************
@@ -509,6 +530,7 @@ IRAM_ATTR int spi_flash_erase_range(uint32_t start_address, uint32_t size)
 
   wait_flash_idle();
   disable_flash_write();
+  spi_flash_check_and_flush_cache(start_address, size);
 
   spiflash_end();
 
@@ -561,11 +583,13 @@ IRAM_ATTR int spi_flash_write(uint32_t dest_addr,
 
   wait_flash_idle();
   disable_flash_write();
+  spi_flash_check_and_flush_cache(dest_addr, size);
 
   spiflash_end();
 
   return ret;
 }
+#endif /* CONFIG_ESPRESSIF_SPI_FLASH_USE_ROM_CODE */
 
 /****************************************************************************
  * Name: esp_spiflash_init
@@ -588,7 +612,6 @@ int esp_spiflash_init(void)
   nxmutex_init(&s_flash_op_mutex);
 
   spi_flash_guard_set(&g_spi_flash_guard_funcs);
-  dev = spimem_flash_ll_get_hw(SPI1_HOST);
 
   return OK;
 }
