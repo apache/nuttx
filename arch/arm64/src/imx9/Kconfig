@@ -16,16 +16,57 @@ config ARCH_CHIP_IMX93
 	select ARCH_HAVE_MULTICPU
 	select ARMV8A_HAVE_GICv3
 	select ARCH_CORTEX_A55
+	select ARCH_HAVE_PWM_MULTICHAN
 
 endchoice # i.MX9 Chip Selection
 
 endmenu # "i.MX9 Chip Selection"
+
+config IMX9_FLEXIO_PWM
+	bool
+	select PWM_MULTICHAN
+	default n
 
 menu "i.MX9 Peripheral Selection"
 config IMX9_UART1
 	bool "UART1"
 	default n
 	select UART1_SERIALDRIVER
+
+config IMX9_FLEXIO1_PWM
+	depends on PWM
+	bool "Enable FLEXIO1 based PWM generation"
+	select IMX9_FLEXIO_PWM
+	default n
+
+config IMX9_FLEXIO2_PWM
+	depends on PWM
+	bool "Enable FLEXIO2 based PWM generation"
+	select IMX9_FLEXIO_PWM
+	default n
+
+config IMX9_FLEXIO1_PWM_NCHANNELS
+	depends on IMX9_FLEXIO1_PWM
+	int "Number of channels for FLEXIO1"
+	default 4
+	range 1 7
+
+config IMX9_FLEXIO1_PWM_CHANNEL_PINS
+	depends on IMX9_FLEXIO1_PWM
+	hex "FlexIO outputs used for FLEXIO1 timers"
+	default 0x0000000007060504
+
+config IMX9_FLEXIO2_PWM_NCHANNELS
+	depends on IMX9_FLEXIO2_PWM
+	int "Number of channels for FLEXIO2"
+	default 1
+	range 1 7
+
+config IMX9_FLEXIO2_PWM_CHANNEL_PINS
+	depends on IMX9_FLEXIO2_PWM
+	hex "FlexIO outputs used for FLEXIO2 timers"
+	default 0x0000000000000000
+
 endmenu # iMX Peripheral Selection
 
 config IMX9_GPIO_IRQ
