@@ -281,6 +281,16 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_AUDIO_TONE
+  /* Configure and initialize the tone generator. */
+
+  ret = board_tone_initialize(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_tone_initialize() failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_NETDEV_LATEINIT
 
 #  ifdef CONFIG_STM32H7_FDCAN1

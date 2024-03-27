@@ -103,7 +103,12 @@
 
 /* PWM */
 
-#define BUZZER_PWMTIMER 4
+#define BUZZER_PWMTIMER    4
+
+/* OneShot Timer */
+
+#define BOARD_TONE_ONESHOT_TIM     17  /* Timer 17 - Oneshot timer for note timings */
+#define BOARD_TONE_ONESHOT_TIM_RES 10  /* Timer 17 - Oneshot timer resolution (us)  */
 
 /* Ethernet
  *
@@ -265,6 +270,21 @@ int board_qencoder_initialize(int devno, int timerno);
 
 #ifdef CONFIG_CL_MFRC522
 int stm32_mfrc522initialize(const char *devpath);
+#endif
+
+/****************************************************************************
+ * Name: board_tone_initialize
+ *
+ * Input Parameters:
+ *   devno - The device number, used to build the device path as /dev/toneN
+ *
+ * Description:
+ *   Configure and initialize the tone generator.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_AUDIO_TONE
+int board_tone_initialize(int devno);
 #endif
 
 #endif /* __BOARDS_ARM_STM32H7_LINUM_STM32H753BI_SRC_LINUM_STM32H753BI_H */
