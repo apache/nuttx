@@ -476,6 +476,14 @@ config ESPRESSIF_FLASH_FREQ_20M
 
 endchoice # ESPRESSIF_FLASH_FREQ
 
+config ESPRESSIF_SPI_FLASH_USE_ROM_CODE
+	bool "Use SPI flash driver in ROM"
+	default n
+	depends on ESPRESSIF_ESP32C3
+	---help---
+		Use functions in ROM for SPI flash driver instead of
+		source code.
+
 config ESPRESSIF_SPI_FLASH_USE_32BIT_ADDRESS
 	bool "SPI flash uses 32-bit address"
 	default n

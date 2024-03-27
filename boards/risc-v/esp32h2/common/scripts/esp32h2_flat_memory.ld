@@ -53,10 +53,8 @@
 MEMORY
 {
 #ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
-  /* The 0x20 offset is a convenience for the app binary image generation */
-
-  ROM (R) :              org = 0x20,
-                         len = IDRAM0_2_SEG_SIZE - 0x20
+  ROM (R) :              org = ORIGIN(ROM),
+                         len = IDRAM0_2_SEG_SIZE
 #endif
 
   /* Below values assume the flash cache is on, and have the blocks this
@@ -76,7 +74,7 @@ MEMORY
    * constraint that (paddr % 64KB == vaddr % 64KB).
    */
 
-  irom_seg    (RX) :      org = 0x42000020, len = IDRAM0_2_SEG_SIZE - 0x20
+  irom_seg    (RX) :      org = 0x42000000, len = IDRAM0_2_SEG_SIZE
 
   /* Shared data RAM, excluding memory reserved for ROM bss/data/stack.
    * Enabling Bluetooth & Trace Memory features in menuconfig will decrease
@@ -94,7 +92,7 @@ MEMORY
    * constraint that (paddr % 64KB == vaddr % 64KB).
    */
 
-  drom_seg    (R) :       org = 0x42000020, len = IDRAM0_2_SEG_SIZE - 0x20
+  drom_seg    (R) :       org = 0x42000000, len = IDRAM0_2_SEG_SIZE
 
   /* RTC fast memory (executable). Persists over deep sleep. */
 

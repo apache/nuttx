@@ -98,7 +98,7 @@ MEMORY
    * constraint that (paddr % 64KB == vaddr % 64KB).
    */
 
-  irom0_0_seg (RX) :      org = 0x42000020, len = FLASH_SIZE - 0x20
+  irom0_0_seg (RX) :      org = 0x42000000, len = FLASH_SIZE
 #endif
 
   /* Shared data RAM, excluding memory reserved for ROM bss/data/stack. */
@@ -131,7 +131,7 @@ MEMORY
    * constraint that (paddr % 64KB == vaddr % 64KB).
    */
 
-  drom0_0_seg (R) :      org = 0x3c000020, len = FLASH_SIZE - 0x20
+  drom0_0_seg (R) :      org = 0x3c000000, len = FLASH_SIZE
 #endif
 
   /* RTC fast memory (executable). Persists over deep sleep. */
