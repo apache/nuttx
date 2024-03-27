@@ -314,10 +314,12 @@ extern "C"
  */
 
 #ifdef __HAVE_KERNEL_GLOBALS
-EXTERN volatile clock_t g_system_ticks;
+#define g_system_ticks() g_system_ticks[this_bcpu()]
+
+EXTERN volatile clock_t g_system_ticks[CONFIG_BMP_NCPUS];
 
 #  ifndef CONFIG_SYSTEM_TIME64
-#    define clock_systime_ticks() g_system_ticks
+#    define clock_systime_ticks() g_system_ticks[this_bcpu()]
 #  endif
 #endif
 

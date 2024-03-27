@@ -51,7 +51,9 @@ static FAR const char *_inode_getcwd(void);
  * Public Data
  ****************************************************************************/
 
-FAR struct inode *g_root_inode = NULL;
+FAR struct inode *g_root_inode[CONFIG_BMP_NCPUS] =
+{
+};
 
 /****************************************************************************
  * Private Functions

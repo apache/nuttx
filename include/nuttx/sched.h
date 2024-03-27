@@ -201,8 +201,13 @@
  */
 
 #ifdef CONFIG_SMP
+#  define this_bcpu()                (0)
 #  define this_cpu()                 up_cpu_index()
+#elif defined(CONFIG_BMP)
+#  define this_bcpu()                up_cpu_index()
+#  define this_cpu()                 (0)
 #else
+#  define this_bcpu()                (0)
 #  define this_cpu()                 (0)
 #endif
 

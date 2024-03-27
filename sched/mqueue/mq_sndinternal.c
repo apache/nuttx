@@ -140,7 +140,7 @@ FAR struct mqueue_msg_s *nxmq_alloc_msg(void)
 
   /* Try to get the message from the generally available free list. */
 
-  mqmsg = list_remove_head(&g_msgfree);
+  mqmsg = list_remove_head(&g_msgfree());
   if (mqmsg == NULL)
     {
       /* If we were called from an interrupt handler, then try to get the
@@ -152,7 +152,7 @@ FAR struct mqueue_msg_s *nxmq_alloc_msg(void)
         {
           /* Try the free list reserved for interrupt handlers */
 
-          mqmsg = list_remove_head(&g_msgfreeirq);
+          mqmsg = list_remove_head(&g_msgfreeirq());
         }
 
       /* We were not called from an interrupt handler. */

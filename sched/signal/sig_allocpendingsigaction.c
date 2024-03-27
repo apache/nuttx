@@ -55,7 +55,7 @@ FAR sigq_t *nxsig_alloc_pendingsigaction(void)
     {
       /* Try to get the pending signal action structure from the free list */
 
-      sigq = (FAR sigq_t *)sq_remfirst(&g_sigpendingaction);
+      sigq = (FAR sigq_t *)sq_remfirst(&g_sigpendingaction());
 
       /* If so, then try the special list of structures reserved for
        * interrupt handlers
@@ -63,7 +63,7 @@ FAR sigq_t *nxsig_alloc_pendingsigaction(void)
 
       if (!sigq)
         {
-          sigq = (FAR sigq_t *)sq_remfirst(&g_sigpendingirqaction);
+          sigq = (FAR sigq_t *)sq_remfirst(&g_sigpendingirqaction());
         }
     }
 
@@ -76,7 +76,7 @@ FAR sigq_t *nxsig_alloc_pendingsigaction(void)
       /* Try to get the pending signal action structure from the free list */
 
       flags = enter_critical_section();
-      sigq = (FAR sigq_t *)sq_remfirst(&g_sigpendingaction);
+      sigq = (FAR sigq_t *)sq_remfirst(&g_sigpendingaction());
       leave_critical_section(flags);
 
       /* Check if we got one. */

@@ -71,7 +71,7 @@
 
 /* These are not standard but are defined for Linux compatibility */
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP) || defined(CONFIG_BMP)
 
 /* void CPU_ZERO(FAR cpu_set_t *set); */
 

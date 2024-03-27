@@ -113,12 +113,12 @@ int irq_attach(int irq, xcpt_t isr, FAR void *arg)
 
       /* Save the new ISR and its argument in the table. */
 
-      g_irqvector[ndx].handler = isr;
-      g_irqvector[ndx].arg     = arg;
+      g_irqvector()[ndx].handler = isr;
+      g_irqvector()[ndx].arg     = arg;
 #ifdef CONFIG_SCHED_IRQMONITOR
-      g_irqvector[ndx].start   = clock_systime_ticks();
-      g_irqvector[ndx].time    = 0;
-      g_irqvector[ndx].count   = 0;
+      g_irqvector()[ndx].start   = clock_systime_ticks();
+      g_irqvector()[ndx].time    = 0;
+      g_irqvector()[ndx].count   = 0;
 #endif
 
       leave_critical_section(flags);

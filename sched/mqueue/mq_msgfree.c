@@ -64,7 +64,7 @@ void nxmq_free_msg(FAR struct mqueue_msg_s *mqmsg)
        * list from interrupt handlers.
        */
 
-      list_add_tail(&g_msgfree, &mqmsg->node);
+      list_add_tail(&g_msgfree(), &mqmsg->node);
     }
 
   /* If this is a message pre-allocated for interrupts,
@@ -77,7 +77,7 @@ void nxmq_free_msg(FAR struct mqueue_msg_s *mqmsg)
        * list from interrupt handlers.
        */
 
-      list_add_tail(&g_msgfreeirq, &mqmsg->node);
+      list_add_tail(&g_msgfreeirq(), &mqmsg->node);
     }
 
   /* Otherwise, deallocate it.  Note:  interrupt handlers

@@ -124,7 +124,7 @@
 #else
 /* Otherwise, the user heap data structures are in common .bss */
 
-#  define USR_HEAP g_mmheap
+#  define USR_HEAP g_mmheap[this_bcpu()]
 #endif
 
 #ifdef CONFIG_MM_KERNEL_HEAP
@@ -192,7 +192,7 @@ extern unsigned long g_mm_seqno;
 #if defined(CONFIG_BUILD_FLAT) || !defined(__KERNEL__)
 /* Otherwise, the user heap data structures are in common .bss */
 
-EXTERN FAR struct mm_heap_s *g_mmheap;
+EXTERN FAR struct mm_heap_s *g_mmheap[CONFIG_BMP_NCPUS];
 #endif
 
 #ifdef CONFIG_MM_KERNEL_HEAP

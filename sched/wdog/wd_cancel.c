@@ -80,7 +80,7 @@ int wd_cancel(FAR struct wdog_s *wdog)
        */
 
       prev = NULL;
-      curr = (FAR struct wdog_s *)g_wdactivelist.head;
+      curr = (FAR struct wdog_s *)g_wdactivelist().head;
 
       while ((curr) && (curr != wdog))
         {
@@ -109,13 +109,13 @@ int wd_cancel(FAR struct wdog_s *wdog)
         {
           /* Remove the watchdog from mid- or end-of-queue */
 
-          sq_remafter((FAR sq_entry_t *)prev, &g_wdactivelist);
+          sq_remafter((FAR sq_entry_t *)prev, &g_wdactivelist());
         }
       else
         {
           /* Remove the watchdog at the head of the queue */
 
-          sq_remfirst(&g_wdactivelist);
+          sq_remfirst(&g_wdactivelist());
 
           /* Reassess the interval timer that will generate the next
            * interval event.

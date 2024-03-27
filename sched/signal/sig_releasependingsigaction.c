@@ -57,7 +57,7 @@ void nxsig_release_pendingsigaction(FAR sigq_t *sigq)
        */
 
       flags = enter_critical_section();
-      sq_addlast((FAR sq_entry_t *)sigq, &g_sigpendingaction);
+      sq_addlast((FAR sq_entry_t *)sigq, &g_sigpendingaction());
       leave_critical_section(flags);
     }
 
@@ -72,7 +72,7 @@ void nxsig_release_pendingsigaction(FAR sigq_t *sigq)
        */
 
       flags = enter_critical_section();
-      sq_addlast((FAR sq_entry_t *)sigq, &g_sigpendingirqaction);
+      sq_addlast((FAR sq_entry_t *)sigq, &g_sigpendingirqaction());
       leave_critical_section(flags);
     }
 

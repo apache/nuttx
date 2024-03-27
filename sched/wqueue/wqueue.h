@@ -105,17 +105,17 @@ struct lp_wqueue_s
 #ifdef CONFIG_SCHED_HPWORK
 /* The state of the kernel mode, high priority work queue. */
 
-#define hpwork()          g_hpwork
+#define hpwork()          g_hpwork[this_bcpu()]
 
-extern struct hp_wqueue_s g_hpwork;
+extern struct hp_wqueue_s g_hpwork[CONFIG_BMP_NCPUS];
 #endif
 
 #ifdef CONFIG_SCHED_LPWORK
 /* The state of the kernel mode, low priority work queue(s). */
 
-#define lpwork()          g_lpwork
+#define lpwork()          g_lpwork[this_bcpu()]
 
-extern struct lp_wqueue_s g_lpwork;
+extern struct lp_wqueue_s g_lpwork[CONFIG_BMP_NCPUS];
 #endif
 
 /****************************************************************************

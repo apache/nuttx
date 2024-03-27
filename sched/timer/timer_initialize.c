@@ -37,6 +37,8 @@
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
 
+#define g_prealloctimers() g_prealloctimers[this_bcpu()]
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -44,7 +46,8 @@
 /* These are the preallocated times */
 
 #if CONFIG_PREALLOC_TIMERS > 0
-static struct posix_timer_s g_prealloctimers[CONFIG_PREALLOC_TIMERS];
+static struct posix_timer_s g_prealloctimers[CONFIG_BMP_NCPUS]
+                                            [CONFIG_PREALLOC_TIMERS];
 #endif
 
 /****************************************************************************
@@ -54,7 +57,7 @@ static struct posix_timer_s g_prealloctimers[CONFIG_PREALLOC_TIMERS];
 #if CONFIG_PREALLOC_TIMERS > 0
 /* This is a list of free, preallocated timer structures */
 
-volatile sq_queue_t g_freetimers;
+volatile sq_queue_t g_freetimers[CONFIG_BMP_NCPUS];
 #endif
 
 /* This is a list of instantiated timer structures -- active and inactive.
@@ -62,7 +65,7 @@ volatile sq_queue_t g_freetimers;
  * list by timer_delete() or when the owning thread exits.
  */
 
-volatile sq_queue_t g_alloctimers;
+volatile sq_queue_t g_alloctimers[CONFIG_BMP_NCPUS];
 
 /****************************************************************************
  * Public Functions
@@ -91,19 +94,19 @@ void timer_initialize(void)
 
   /* Place all of the pre-allocated timers into the free timer list */
 
-  sq_init((FAR sq_queue_t *)&g_freetimers);
+  sq_init((FAR sq_queue_t *)&g_freetimers());
 
   for (i = 0; i < CONFIG_PREALLOC_TIMERS; i++)
     {
-      g_prealloctimers[i].pt_flags = PT_FLAGS_PREALLOCATED;
-      sq_addlast((FAR sq_entry_t *)&g_prealloctimers[i],
-                 (FAR sq_queue_t *)&g_freetimers);
+      g_prealloctimers()[i].pt_flags = PT_FLAGS_PREALLOCATED;
+      sq_addlast((FAR sq_entry_t *)&g_prealloctimers()[i],
+                 (FAR sq_queue_t *)&g_freetimers());
     }
 #endif
 
   /* Initialize the list of allocated timers */
 
-  sq_init((FAR sq_queue_t *)&g_alloctimers);
+  sq_init((FAR sq_queue_t *)&g_alloctimers());
   sched_trace_end();
 }
 
@@ -133,7 +136,7 @@ void timer_deleteall(pid_t pid)
   irqstate_t flags;
 
   flags = enter_critical_section();
-  for (timer = (FAR struct posix_timer_s *)g_alloctimers.head;
+  for (timer = (FAR struct posix_timer_s *)g_alloctimers().head;
        timer != NULL;
        timer = next)
     {
@@ -173,7 +176,7 @@ FAR struct posix_timer_s *timer_gethandle(timer_t timerid)
     {
       intflags = enter_critical_section();
 
-      sq_for_every(&g_alloctimers, entry)
+      sq_for_every(&g_alloctimers(), entry)
         {
           if (entry == timerid)
             {

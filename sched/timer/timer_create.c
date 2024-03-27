@@ -62,7 +62,7 @@ static FAR struct posix_timer_s *timer_allocate(void)
 #if CONFIG_PREALLOC_TIMERS > 0
   flags = spin_lock_irqsave(NULL);
   ret   = (FAR struct posix_timer_s *)
-    sq_remfirst((FAR sq_queue_t *)&g_freetimers);
+    sq_remfirst((FAR sq_queue_t *)&g_freetimers());
   spin_unlock_irqrestore(NULL, flags);
 
   /* Did we get one? */
@@ -93,7 +93,7 @@ static FAR struct posix_timer_s *timer_allocate(void)
       /* And add it to the end of the list of allocated timers */
 
       flags = spin_lock_irqsave(NULL);
-      sq_addlast((FAR sq_entry_t *)ret, (FAR sq_queue_t *)&g_alloctimers);
+      sq_addlast((FAR sq_entry_t *)ret, (FAR sq_queue_t *)&g_alloctimers());
       spin_unlock_irqrestore(NULL, flags);
     }
 

@@ -39,14 +39,17 @@
 #define timespec_to_nsec(ts) \
     ((uint64_t)(ts)->tv_sec * NSEC_PER_SEC + (ts)->tv_nsec)
 
+#define g_oneshot_lower() g_oneshot_lower[this_bcpu()]
+#define g_current_tick() g_current_tick[this_bcpu()]
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static FAR struct oneshot_lowerhalf_s *g_oneshot_lower;
+static FAR struct oneshot_lowerhalf_s *g_oneshot_lower[CONFIG_BMP_NCPUS];
 
 #ifndef CONFIG_SCHED_TICKLESS
-static clock_t g_current_tick;
+static clock_t g_current_tick[CONFIG_BMP_NCPUS];
 #endif
 
 /****************************************************************************
@@ -67,13 +70,13 @@ static void udelay_accurate(useconds_t microseconds)
   struct timespec end;
   struct timespec delta;
 
-  ONESHOT_CURRENT(g_oneshot_lower, &now);
+  ONESHOT_CURRENT(g_oneshot_lower(), &now);
   timespec_from_nsec(&delta, (uint64_t)microseconds * NSEC_PER_USEC);
   clock_timespec_add(&now, &delta, &end);
 
   while (clock_timespec_compare(&now, &end) < 0)
     {
-      ONESHOT_CURRENT(g_oneshot_lower, &now);
+      ONESHOT_CURRENT(g_oneshot_lower(), &now);
     }
 }
 
@@ -130,7 +133,7 @@ static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
   clock_t now = 0;
 
 #ifdef CONFIG_SCHED_TICKLESS
-  ONESHOT_TICK_CURRENT(g_oneshot_lower, &now);
+  ONESHOT_TICK_CURRENT(g_oneshot_lower(), &now);
   nxsched_alarm_tick_expiration(now);
 #else
   clock_t delta;
@@ -140,13 +143,13 @@ static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
       clock_t next;
 
       nxsched_process_timer();
-      next = ++g_current_tick;
-      ONESHOT_TICK_CURRENT(g_oneshot_lower, &now);
+      next = ++g_current_tick();
+      ONESHOT_TICK_CURRENT(g_oneshot_lower(), &now);
       delta = next - now;
     }
   while ((sclock_t)delta <= 0);
 
-  ONESHOT_TICK_START(g_oneshot_lower, oneshot_callback, NULL, delta);
+  ONESHOT_TICK_START(g_oneshot_lower(), oneshot_callback, NULL, delta);
 #endif
 }
 
@@ -160,14 +163,14 @@ void up_alarm_set_lowerhalf(FAR struct oneshot_lowerhalf_s *lower)
   clock_t ticks;
 #endif
 
-  g_oneshot_lower = lower;
+  g_oneshot_lower() = lower;
 
 #ifdef CONFIG_SCHED_TICKLESS
-  ONESHOT_TICK_MAX_DELAY(g_oneshot_lower, &ticks);
+  ONESHOT_TICK_MAX_DELAY(g_oneshot_lower(), &ticks);
   g_oneshot_maxticks = ticks < UINT32_MAX ? ticks : UINT32_MAX;
 #else
-  ONESHOT_TICK_CURRENT(g_oneshot_lower, &g_current_tick);
-  ONESHOT_TICK_START(g_oneshot_lower, oneshot_callback, NULL, 1);
+  ONESHOT_TICK_CURRENT(g_oneshot_lower(), &g_current_tick());
+  ONESHOT_TICK_START(g_oneshot_lower(), oneshot_callback, NULL, 1);
 #endif
 }
 
@@ -209,11 +212,11 @@ void weak_function up_timer_getmask(FAR clock_t *mask)
 {
   *mask = 0;
 
-  if (g_oneshot_lower != NULL)
+  if (g_oneshot_lower() != NULL)
     {
       clock_t maxticks;
 
-      ONESHOT_TICK_MAX_DELAY(g_oneshot_lower, &maxticks);
+      ONESHOT_TICK_MAX_DELAY(g_oneshot_lower(), &maxticks);
 
       for (; ; )
         {
@@ -234,9 +237,9 @@ int weak_function up_timer_gettick(FAR clock_t *ticks)
 {
   int ret = -EAGAIN;
 
-  if (g_oneshot_lower != NULL)
+  if (g_oneshot_lower() != NULL)
     {
-      ret = ONESHOT_TICK_CURRENT(g_oneshot_lower, ticks);
+      ret = ONESHOT_TICK_CURRENT(g_oneshot_lower(), ticks);
     }
 
   return ret;
@@ -282,10 +285,10 @@ int weak_function up_alarm_tick_cancel(FAR clock_t *ticks)
 {
   int ret = -EAGAIN;
 
-  if (g_oneshot_lower != NULL)
+  if (g_oneshot_lower() != NULL)
     {
-      ret = ONESHOT_TICK_CANCEL(g_oneshot_lower, ticks);
-      ONESHOT_TICK_CURRENT(g_oneshot_lower, ticks);
+      ret = ONESHOT_TICK_CANCEL(g_oneshot_lower(), ticks);
+      ONESHOT_TICK_CURRENT(g_oneshot_lower(), ticks);
     }
 
   return ret;
@@ -321,19 +324,19 @@ int weak_function up_alarm_tick_start(clock_t ticks)
 {
   int ret = -EAGAIN;
 
-  if (g_oneshot_lower != NULL)
+  if (g_oneshot_lower() != NULL)
     {
       clock_t now;
       clock_t delta;
 
-      ONESHOT_TICK_CURRENT(g_oneshot_lower, &now);
+      ONESHOT_TICK_CURRENT(g_oneshot_lower(), &now);
       delta = ticks - now;
       if ((sclock_t)delta < 0)
         {
           delta = 0;
         }
 
-      ret = ONESHOT_TICK_START(g_oneshot_lower, oneshot_callback,
+      ret = ONESHOT_TICK_START(g_oneshot_lower(), oneshot_callback,
                                NULL, delta);
     }
 
@@ -370,11 +373,11 @@ unsigned long up_perf_gettime(void)
 {
   unsigned long ret = 0;
 
-  if (g_oneshot_lower != NULL)
+  if (g_oneshot_lower() != NULL)
     {
       struct timespec ts;
 
-      ONESHOT_CURRENT(g_oneshot_lower, &ts);
+      ONESHOT_CURRENT(g_oneshot_lower(), &ts);
       ret = timespec_to_nsec(&ts);
     }
 
@@ -418,7 +421,7 @@ void weak_function up_mdelay(unsigned int milliseconds)
 
 void weak_function up_udelay(useconds_t microseconds)
 {
-  if (g_oneshot_lower != NULL)
+  if (g_oneshot_lower() != NULL)
     {
       udelay_accurate(microseconds);
     }

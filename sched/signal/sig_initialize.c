@@ -41,32 +41,32 @@
  * action structures.
  */
 
-sq_queue_t  g_sigfreeaction;
+sq_queue_t  g_sigfreeaction[CONFIG_BMP_NCPUS];
 
 /* The g_sigpendingaction data structure is a list of available pending
  * signal action structures.
  */
 
-sq_queue_t  g_sigpendingaction;
+sq_queue_t  g_sigpendingaction[CONFIG_BMP_NCPUS];
 
 /* The g_sigpendingirqaction is a list of available pending signal actions
  * that are reserved for use by interrupt handlers.
  */
 
-sq_queue_t  g_sigpendingirqaction;
+sq_queue_t  g_sigpendingirqaction[CONFIG_BMP_NCPUS];
 
 /* The g_sigpendingsignal data structure is a list of available pending
  * signal structures.
  */
 
-sq_queue_t  g_sigpendingsignal;
+sq_queue_t  g_sigpendingsignal[CONFIG_BMP_NCPUS];
 
 /* The g_sigpendingirqsignal data structure is a list of available
  * pending signal structures that are reserved for use by interrupt
  * handlers.
  */
 
-sq_queue_t  g_sigpendingirqsignal;
+sq_queue_t  g_sigpendingirqsignal[CONFIG_BMP_NCPUS];
 
 /****************************************************************************
  * Private Functions
@@ -140,11 +140,11 @@ void nxsig_initialize(void)
 
   /* Initialize free lists */
 
-  sq_init(&g_sigfreeaction);
-  sq_init(&g_sigpendingaction);
-  sq_init(&g_sigpendingirqaction);
-  sq_init(&g_sigpendingsignal);
-  sq_init(&g_sigpendingirqsignal);
+  sq_init(&g_sigfreeaction());
+  sq_init(&g_sigpendingaction());
+  sq_init(&g_sigpendingirqaction());
+  sq_init(&g_sigpendingsignal());
+  sq_init(&g_sigpendingirqsignal());
 
   /* Add a block of signal structures to each list */
 
@@ -156,15 +156,15 @@ void nxsig_initialize(void)
 
   DEBUGASSERT(sigpool != NULL);
 
-  sigpool = nxsig_init_block(&g_sigpendingaction, sigpool,
+  sigpool = nxsig_init_block(&g_sigpendingaction(), sigpool,
                              NUM_PENDING_ACTIONS, SIG_ALLOC_FIXED);
-  sigpool = nxsig_init_block(&g_sigpendingirqaction, sigpool,
+  sigpool = nxsig_init_block(&g_sigpendingirqaction(), sigpool,
                              CONFIG_SIG_PREALLOC_IRQ_ACTIONS,
                              SIG_ALLOC_IRQ);
-  sigpool = nxsig_init_pendingsignalblock(&g_sigpendingsignal, sigpool,
+  sigpool = nxsig_init_pendingsignalblock(&g_sigpendingsignal(), sigpool,
                                           NUM_SIGNALS_PENDING,
                                           SIG_ALLOC_FIXED);
-  sigpool = nxsig_init_pendingsignalblock(&g_sigpendingirqsignal, sigpool,
+  sigpool = nxsig_init_pendingsignalblock(&g_sigpendingirqsignal(), sigpool,
                                           CONFIG_SIG_PREALLOC_IRQ_ACTIONS,
                                           SIG_ALLOC_IRQ);
   sched_trace_end();

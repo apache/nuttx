@@ -40,11 +40,13 @@
 #include "group/group.h"
 #include "signal/signal.h"
 
+#define g_sigaction_spin() g_sigaction_spin[this_bcpu()]
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static spinlock_t g_sigaction_spin;
+static spinlock_t g_sigaction_spin[CONFIG_BMP_NCPUS];
 
 /****************************************************************************
  * Private Functions
@@ -70,14 +72,14 @@ static void nxsig_alloc_actionblock(void)
   sigact = kmm_malloc((sizeof(sigactq_t)) * NUM_SIGNAL_ACTIONS);
   if (sigact != NULL)
     {
-      flags = spin_lock_irqsave(&g_sigaction_spin);
+      flags = spin_lock_irqsave(&g_sigaction_spin());
 
       for (i = 0; i < NUM_SIGNAL_ACTIONS; i++)
         {
-          sq_addlast((FAR sq_entry_t *)sigact++, &g_sigfreeaction);
+          sq_addlast((FAR sq_entry_t *)sigact++, &g_sigfreeaction());
         }
 
-      spin_unlock_irqrestore(&g_sigaction_spin, flags);
+      spin_unlock_irqrestore(&g_sigaction_spin(), flags);
     }
 }
 
@@ -96,9 +98,9 @@ static FAR sigactq_t *nxsig_alloc_action(void)
 
   /* Try to get the signal action structure from the free list */
 
-  flags = spin_lock_irqsave(&g_sigaction_spin);
-  sigact = (FAR sigactq_t *)sq_remfirst(&g_sigfreeaction);
-  spin_unlock_irqrestore(&g_sigaction_spin, flags);
+  flags = spin_lock_irqsave(&g_sigaction_spin());
+  sigact = (FAR sigactq_t *)sq_remfirst(&g_sigfreeaction());
+  spin_unlock_irqrestore(&g_sigaction_spin(), flags);
 
   /* Check if we got one. */
 
@@ -110,9 +112,9 @@ static FAR sigactq_t *nxsig_alloc_action(void)
 
       /* And try again */
 
-      flags = spin_lock_irqsave(&g_sigaction_spin);
-      sigact = (FAR sigactq_t *)sq_remfirst(&g_sigfreeaction);
-      spin_unlock_irqrestore(&g_sigaction_spin, flags);
+      flags = spin_lock_irqsave(&g_sigaction_spin());
+      sigact = (FAR sigactq_t *)sq_remfirst(&g_sigfreeaction());
+      spin_unlock_irqrestore(&g_sigaction_spin(), flags);
     }
 
   return sigact;
@@ -411,7 +413,7 @@ void nxsig_release_action(FAR sigactq_t *sigact)
 
   /* Just put it back on the free list */
 
-  flags = spin_lock_irqsave(&g_sigaction_spin);
-  sq_addlast((FAR sq_entry_t *)sigact, &g_sigfreeaction);
-  spin_unlock_irqrestore(&g_sigaction_spin, flags);
+  flags = spin_lock_irqsave(&g_sigaction_spin());
+  sq_addlast((FAR sq_entry_t *)sigact, &g_sigfreeaction());
+  spin_unlock_irqrestore(&g_sigaction_spin(), flags);
 }

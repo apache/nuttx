@@ -43,6 +43,8 @@
 #define MSG_MAX_BYTES   CONFIG_MQ_MAXMSGSIZE
 #define MSG_MAX_MSGS    16
 
+#define g_msgfreelist() g_msgfreelist[this_bcpu()]
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -77,7 +79,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-EXTERN struct list_node g_msgfreelist;
+EXTERN struct list_node g_msgfreelist[CONFIG_BMP_NCPUS];
 
 /****************************************************************************
  * Public Function Prototypes

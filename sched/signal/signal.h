@@ -46,6 +46,36 @@
 #define NUM_PENDING_ACTIONS      4
 #define NUM_SIGNALS_PENDING      4
 
+/* The g_sigfreeaction data structure is a list of available signal action
+ * structures.
+ */
+
+#define g_sigfreeaction() g_sigfreeaction[this_bcpu()]
+
+/* The g_sigpendingaction data structure is a list of available pending
+ * signal action structures.
+ */
+
+#define g_sigpendingaction() g_sigpendingaction[this_bcpu()]
+
+/* The g_sigpendingirqaction is a list of available pending signal actions
+ * that are reserved for use by interrupt handlers.
+ */
+
+#define g_sigpendingirqaction() g_sigpendingirqaction[this_bcpu()]
+
+/* The g_sigpendingsignal data structure is a list of available pending
+ * signal structures.
+ */
+
+#define g_sigpendingsignal() g_sigpendingsignal[this_bcpu()]
+
+/* The g_sigpendingirqsignal data structure is a list of available pending
+ * signal structures that are reserved for use by interrupt handlers.
+ */
+
+#define g_sigpendingirqsignal() g_sigpendingirqsignal[this_bcpu()]
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -109,31 +139,31 @@ typedef struct sigq_s sigq_t;
  * structures.
  */
 
-extern sq_queue_t  g_sigfreeaction;
+extern sq_queue_t  g_sigfreeaction[CONFIG_BMP_NCPUS];
 
 /* The g_sigpendingaction data structure is a list of available pending
  * signal action structures.
  */
 
-extern sq_queue_t  g_sigpendingaction;
+extern sq_queue_t  g_sigpendingaction[CONFIG_BMP_NCPUS];
 
 /* The g_sigpendingirqaction is a list of available pending signal actions
  * that are reserved for use by interrupt handlers.
  */
 
-extern sq_queue_t  g_sigpendingirqaction;
+extern sq_queue_t  g_sigpendingirqaction[CONFIG_BMP_NCPUS];
 
 /* The g_sigpendingsignal data structure is a list of available pending
  * signal structures.
  */
 
-extern sq_queue_t  g_sigpendingsignal;
+extern sq_queue_t  g_sigpendingsignal[CONFIG_BMP_NCPUS];
 
 /* The g_sigpendingirqsignal data structure is a list of available pending
  * signal structures that are reserved for use by interrupt handlers.
  */
 
-extern sq_queue_t  g_sigpendingirqsignal;
+extern sq_queue_t  g_sigpendingirqsignal[CONFIG_BMP_NCPUS];
 
 /****************************************************************************
  * Public Function Prototypes

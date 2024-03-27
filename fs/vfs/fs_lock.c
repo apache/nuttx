@@ -50,6 +50,9 @@
 
 #define l_end l_len
 
+#define file_protect_lock() g_protect_lock[this_bcpu()]
+#define file_lock_table() g_file_lock_table[this_bcpu()]
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -82,8 +85,14 @@ struct file_lock_bucket_s
  * Private Data
  ****************************************************************************/
 
-static struct hsearch_data g_file_lock_table;
-static mutex_t g_protect_lock = NXMUTEX_INITIALIZER;
+static struct hsearch_data g_file_lock_table[CONFIG_BMP_NCPUS];
+static mutex_t g_protect_lock[CONFIG_BMP_NCPUS] =
+{
+  [0 ... CONFIG_BMP_NCPUS - 1] =
+  {
+    NXMUTEX_INITIALIZER,
+  },
+};
 
 /****************************************************************************
  * Private Functions
@@ -244,7 +253,7 @@ static void file_lock_delete_bucket(FAR struct file_lock_bucket_s *bucket,
        */
 
       item.key = (FAR char *)filepath;
-      hsearch_r(item, DELETE, NULL, &g_file_lock_table);
+      hsearch_r(item, DELETE, NULL, &file_lock_table());
     }
 }
 
@@ -284,7 +293,7 @@ file_lock_find_bucket(FAR const char *filepath)
   item.key = (FAR char *)filepath;
   item.data = NULL;
 
-  if (hsearch_r(item, FIND, &hretvalue, &g_file_lock_table) == 1)
+  if (hsearch_r(item, FIND, &hretvalue, &file_lock_table()) == 1)
     {
       return hretvalue->data;
     }
@@ -320,7 +329,7 @@ file_lock_create_bucket(FAR const char *filepath)
 
   item.data = bucket;
 
-  if (hsearch_r(item, ENTER, &hretvalue, &g_file_lock_table) == 0)
+  if (hsearch_r(item, ENTER, &hretvalue, &file_lock_table()) == 0)
     {
       lib_free(item.key);
       kmm_free(bucket);
@@ -568,7 +577,7 @@ int file_getlk(FAR struct file *filep, FAR struct flock *flock)
       return ret;
     }
 
-  nxmutex_lock(&g_protect_lock);
+  nxmutex_lock(&file_protect_lock());
 
   bucket = file_lock_find_bucket(path);
   if (bucket != NULL)
@@ -593,7 +602,7 @@ int file_getlk(FAR struct file *filep, FAR struct flock *flock)
    */
 
 out:
-  nxmutex_unlock(&g_protect_lock);
+  nxmutex_unlock(&file_protect_lock());
   if (flock->l_end == OFFSET_MAX)
     {
       flock->l_len = 0;
@@ -649,7 +658,7 @@ int file_setlk(FAR struct file *filep, FAR struct flock *flock,
 
   request.l_pid = getpid();
 
-  nxmutex_lock(&g_protect_lock);
+  nxmutex_lock(&file_protect_lock());
 
   bucket = file_lock_find_bucket(path);
   if (bucket == NULL)
@@ -660,7 +669,7 @@ int file_setlk(FAR struct file *filep, FAR struct flock *flock,
 
       if (request.l_type == F_UNLCK)
         {
-          nxmutex_unlock(&g_protect_lock);
+          nxmutex_unlock(&file_protect_lock());
           return OK;
         }
 
@@ -669,7 +678,7 @@ int file_setlk(FAR struct file *filep, FAR struct flock *flock,
       bucket = file_lock_create_bucket(path);
       if (bucket == NULL)
         {
-          nxmutex_unlock(&g_protect_lock);
+          nxmutex_unlock(&file_protect_lock());
           return -ENOMEM;
         }
     }
@@ -688,9 +697,9 @@ retry:
                 }
 
               bucket->nwaiter++;
-              nxmutex_unlock(&g_protect_lock);
+              nxmutex_unlock(&file_protect_lock());
               nxsem_wait(&bucket->wait);
-              nxmutex_lock(&g_protect_lock);
+              nxmutex_lock(&file_protect_lock());
               bucket->nwaiter--;
               goto retry;
             }
@@ -712,7 +721,7 @@ retry:
 
 out:
   file_lock_delete_bucket(bucket, path);
-  nxmutex_unlock(&g_protect_lock);
+  nxmutex_unlock(&file_protect_lock());
   return ret;
 }
 
@@ -754,7 +763,7 @@ void file_closelk(FAR struct file *filep)
       return;
     }
 
-  nxmutex_lock(&g_protect_lock);
+  nxmutex_lock(&file_protect_lock());
   list_for_every_entry_safe(&bucket->list, file_lock, temp,
                             struct file_lock_s, fl_node)
     {
@@ -774,7 +783,7 @@ void file_closelk(FAR struct file *filep)
       file_lock_delete_bucket(bucket, path);
     }
 
-  nxmutex_unlock(&g_protect_lock);
+  nxmutex_unlock(&file_protect_lock());
 }
 
 /****************************************************************************
@@ -789,5 +798,5 @@ void file_initlk(void)
 {
   /* Initialize file lock context hash table */
 
-  hcreate_r(CONFIG_FS_LOCK_BUCKET_SIZE, &g_file_lock_table);
+  hcreate_r(CONFIG_FS_LOCK_BUCKET_SIZE, &file_lock_table());
 }

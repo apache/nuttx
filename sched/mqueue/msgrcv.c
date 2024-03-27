@@ -231,7 +231,7 @@ ssize_t msgrcv(int msqid, FAR void *msgp, size_t msgsz, long msgtyp,
   buf->mtype = msg->mtype;
   memcpy(buf->mtext, msg->mtext, ret);
 
-  list_add_tail(&g_msgfreelist, &msg->node);
+  list_add_tail(&g_msgfreelist(), &msg->node);
 
   /* Check if any tasks are waiting for the MQ not full event. */
 
