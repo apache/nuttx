@@ -39,6 +39,7 @@
 #include <nuttx/signal.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/power/battery_gauge.h>
+#include <nuttx/power/battery_ioctl.h>
 #include <nuttx/power/bq27426.h>
 
 /* This driver requires:
