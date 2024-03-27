@@ -507,6 +507,7 @@ struct task_group_s
   /* Environment variables **************************************************/
 
   FAR char **tg_envp;               /* Allocated environment strings        */
+  ssize_t    tg_envpc;              /* Maximum entries of environment array */
   ssize_t    tg_envc;               /* Number of environment strings        */
 #endif
 
