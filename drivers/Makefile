@@ -70,6 +70,7 @@ include usbdev/Make.defs
 include usbhost/Make.defs
 include usbmisc/Make.defs
 include usbmonitor/Make.defs
+include vhost/Make.defs
 include video/Make.defs
 include virtio/Make.defs
 include wireless/Make.defs

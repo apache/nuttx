@@ -920,6 +920,24 @@
 #  define vrtinfo     _none
 #endif
 
+#ifdef CONFIG_DEBUG_VHOST_ERROR
+#  define vhosterr     _err
+#else
+#  define vhosterr     _none
+#endif
+
+#ifdef CONFIG_DEBUG_VHOST_WARN
+#  define vhostwarn    _warn
+#else
+#  define vhostwarn    _none
+#endif
+
+#ifdef CONFIG_DEBUG_VHOST_INFO
+#  define vhostinfo    _info
+#else
+#  define vhostinfo    _none
+#endif
+
 #ifdef CONFIG_DEBUG_RESET_ERROR
 #  define rsterr       _err
 #else
