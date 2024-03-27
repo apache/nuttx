@@ -188,15 +188,16 @@ static FAR struct udp_conn_s *udp_find_conn(uint8_t domain,
 
 #ifdef CONFIG_NET_IPv4
 static inline FAR struct udp_conn_s *
-  udp_ipv4_active(FAR struct net_driver_s *dev, FAR struct udp_hdr_s *udp)
+udp_ipv4_active(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn,
+                FAR struct udp_hdr_s *udp)
 {
 #ifdef CONFIG_NET_BROADCAST
   static const in_addr_t bcast = INADDR_BROADCAST;
 #endif
   FAR struct ipv4_hdr_s *ip = IPv4BUF;
-  FAR struct udp_conn_s *conn;
 
-  conn = (FAR struct udp_conn_s *)g_active_udp_connections.head;
+  conn = udp_nextconn(conn);
+
   while (conn)
     {
       /* If the local UDP port is non-zero, the connection is considered
@@ -330,12 +331,13 @@ static inline FAR struct udp_conn_s *
 
 #ifdef CONFIG_NET_IPv6
 static inline FAR struct udp_conn_s *
-  udp_ipv6_active(FAR struct net_driver_s *dev, FAR struct udp_hdr_s *udp)
+udp_ipv6_active(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn,
+                FAR struct udp_hdr_s *udp)
 {
   FAR struct ipv6_hdr_s *ip = IPv6BUF;
-  FAR struct udp_conn_s *conn;
 
-  conn = (FAR struct udp_conn_s *)g_active_udp_connections.head;
+  conn = udp_nextconn(conn);
+
   while (conn != NULL)
     {
       /* If the local UDP port is non-zero, the connection is considered
@@ -747,6 +749,7 @@ void udp_free(FAR struct udp_conn_s *conn)
  ****************************************************************************/
 
 FAR struct udp_conn_s *udp_active(FAR struct net_driver_s *dev,
+                                  FAR struct udp_conn_s *conn,
                                   FAR struct udp_hdr_s *udp)
 {
 #ifdef CONFIG_NET_IPv6
@@ -754,7 +757,7 @@ FAR struct udp_conn_s *udp_active(FAR struct net_driver_s *dev,
   if (IFF_IS_IPv6(dev->d_flags))
 #endif
     {
-      return udp_ipv6_active(dev, udp);
+      return udp_ipv6_active(dev, conn, udp);
     }
 #endif /* CONFIG_NET_IPv6 */
 
@@ -763,7 +766,7 @@ FAR struct udp_conn_s *udp_active(FAR struct net_driver_s *dev,
   else
 #endif
     {
-      return udp_ipv4_active(dev, udp);
+      return udp_ipv4_active(dev, conn, udp);
     }
 #endif /* CONFIG_NET_IPv4 */
 }
