@@ -2228,6 +2228,38 @@ config DEBUG_VIRTIO_INFO
 
 endif # DEBUG_VIDEO
 
+config DEBUG_VHOST
+	bool "Vhost Debug Features"
+	default n
+	depends on DRIVERS_VHOST
+	---help---
+		Enable vhost debug features.
+
+if DEBUG_VHOST
+
+config DEBUG_VHOST_ERROR
+	bool "Vhost Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable vhost error output to SYSLOG.
+
+config DEBUG_VHOST_WARN
+	bool "Vhost Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable vhost warning output to SYSLOG.
+
+config DEBUG_VHOST_INFO
+	bool "Vhost Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable vhost informational output to SYSLOG.
+
+endif # DEBUG_VHOST
+
 config DEBUG_RESET
 	bool "RESET Debug Features"
 	default n
