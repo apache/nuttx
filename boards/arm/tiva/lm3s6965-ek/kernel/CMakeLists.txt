@@ -1,5 +1,5 @@
 # ##############################################################################
-# boards/arm/tiva/lm3s6965-ek/CMakeLists.txt
+# boards/arm/tiva/lm3s6965-ek/kernel/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -18,11 +18,4 @@
 #
 # ##############################################################################
 
-add_subdirectory(src)
-
-if(CONFIG_BUILD_PROTECTED)
-  add_subdirectory(kernel)
-  set_property(
-    GLOBAL PROPERTY LD_SCRIPT_USER ${CMAKE_CURRENT_LIST_DIR}/scripts/memory.ld
-                    ${CMAKE_CURRENT_LIST_DIR}/scripts/user-space.ld)
-endif()
+target_sources(nuttx_user PRIVATE lm_userspace.c)

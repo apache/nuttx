@@ -416,6 +416,10 @@ include(platform)
 # Setup main nuttx target ####################################################
 
 add_executable(nuttx)
+if(CONFIG_BUILD_PROTECTED)
+  add_executable(nuttx_user)
+endif()
+
 add_dependencies(nuttx nuttx_context)
 
 if(WIN32)
@@ -604,9 +608,6 @@ get_property(nuttx_extra_libs GLOBAL PROPERTY NUTTX_EXTRA_LIBRARIES)
 
 if(CONFIG_BUILD_FLAT)
   get_property(nuttx_system_libs GLOBAL PROPERTY NUTTX_SYSTEM_LIBRARIES)
-endif()
-
-if(NOT CONFIG_BUILD_KERNEL)
   get_property(nuttx_apps_libs GLOBAL PROPERTY NUTTX_APPS_LIBRARIES)
 endif()
 
@@ -742,25 +743,36 @@ endif()
 # Userspace portion ##########################################################
 
 if(CONFIG_BUILD_PROTECTED)
-  add_executable(nuttx_user)
 
   get_property(nuttx_system_libs GLOBAL PROPERTY NUTTX_SYSTEM_LIBRARIES)
+
+  get_property(nuttx_apps_libs GLOBAL PROPERTY NUTTX_APPS_LIBRARIES)
 
   get_property(user_ldscript GLOBAL PROPERTY LD_SCRIPT_USER)
   list(TRANSFORM user_ldscript PREPEND "-Wl,--script=")
 
+  execute_process(
+    COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAGS} ${NUTTX_EXTRA_FLAGS}
+            --print-libgcc-file-name
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    OUTPUT_VARIABLE nuttx_user_libgcc)
+
+  # reset link options for userspace to prevent sections from being accidentally
+  # deleted
+  set_target_properties(nuttx_user PROPERTIES LINK_OPTIONS "")
+
   target_link_options(
     nuttx_user PRIVATE -nostartfiles -nodefaultlibs
-    -Wl,--entry=${CONFIG_USER_ENTRYPOINT}
-    -Wl,--undefined=${CONFIG_USER_ENTRYPOINT})
+    -Wl,--entry=${CONFIG_INIT_ENTRYPOINT}
+    -Wl,--undefined=${CONFIG_INIT_ENTRYPOINT})
 
   target_link_libraries(
     nuttx_user
     PRIVATE ${user_ldscript}
-            userspace
             $<$<NOT:$<BOOL:${APPLE}>>:-Wl,--start-group>
             ${nuttx_system_libs}
-            gcc
+            ${nuttx_apps_libs}
+            ${nuttx_user_libgcc}
             $<$<BOOL:${CONFIG_HAVE_CXX}>:supc++>
             $<$<NOT:$<BOOL:${APPLE}>>:-Wl,--end-group>)
 
