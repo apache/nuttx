@@ -253,6 +253,7 @@ class DumpELFFile:
         self.__memories = []
         self.__arch = None
         self.__xlen = None
+        self.__text = 0
 
     def parse(self):
         self.__memories = []
@@ -301,8 +302,19 @@ class DumpELFFile:
 
                 self.__memories.append(memory)
 
+        # record first text segment address
+        for segment in elf.iter_segments():
+            if segment.header.p_flags & 1 and not self.__text:
+                self.__text = segment.header.p_vaddr
+
         elf.close()
         return True
+
+    def merge(self, other):
+        if other.arch() == self.arch() and other.xlen() == self.xlen():
+            self.__memories += other.get_memories()
+        else:
+            raise TypeError("inconsistent ELF types")
 
     def get_memories(self):
         return self.__memories
@@ -312,6 +324,9 @@ class DumpELFFile:
 
     def xlen(self):
         return self.__xlen
+
+    def text(self):
+        return self.__text
 
 
 class DumpLogFile:
@@ -633,7 +648,9 @@ class GDBStub:
 def arg_parser():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-e", "--elffile", required=True, help="elffile")
+    parser.add_argument(
+        "-e", "--elffile", required=True, action="append", help="elffile"
+    )
     parser.add_argument("-l", "--logfile", required=True, help="logfile")
     parser.add_argument(
         "-a",
@@ -722,9 +739,11 @@ def auto_parse_log_file(logfile):
 
 
 def main(args):
-    if not os.path.isfile(args.elffile):
-        logger.error(f"Cannot find file {args.elffile}, exiting...")
-        sys.exit(1)
+    args.elffile = tuple(set(args.elffile))
+    for name in args.elffile:
+        if not os.path.isfile(name):
+            logger.error(f"Cannot find file {name}, exiting...")
+            sys.exit(1)
 
     if not os.path.isfile(args.logfile):
         logger.error(f"Cannot find file {args.logfile}, exiting...")
@@ -735,8 +754,14 @@ def main(args):
     selected_log = auto_parse_log_file(args.logfile)
 
     # parse ELF fisrt to get arch
-    elf = DumpELFFile(args.elffile)
+    elf = DumpELFFile(args.elffile[0])
     elf.parse()
+    elf_texts = [elf.text()]
+    for name in args.elffile[1:]:
+        other = DumpELFFile(name)
+        other.parse()
+        elf_texts.append(other.text())
+        elf.merge(other)
 
     log = DumpLogFile(selected_log)
     if args.arch:
@@ -767,10 +792,16 @@ def main(args):
         else:
             gdb_init_cmd = DEFAULT_GDB_INIT_CMD
 
-    gdb_cmd = (
-        f"{gdb_exec} {args.elffile} -ex 'target remote localhost:{args.port}' "
+    gdb_cmd = [
+        f"{gdb_exec} {args.elffile[0]} -ex 'target remote localhost:{args.port}' "
         f"{gdb_init_cmd}"
-    )
+    ]
+    for i in range(len(elf_texts[1:])):
+        name = args.elffile[1 + i]
+        text = hex(elf_texts[1 + i])
+        gdb_cmd.append(f"-ex 'add-symbol-file {name} {text}'")
+    gdb_cmd = "".join(gdb_cmd)
+
     logger.info(f"Waiting GDB connection on port {args.port} ...")
 
     if not args.gdb:
