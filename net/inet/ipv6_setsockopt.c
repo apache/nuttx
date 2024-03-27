@@ -137,13 +137,11 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
         ret = OK;
         break;
       }
-#endif
+#endif /* NET_UDP_HAVE_STACK */
+#endif /* CONFIG_NET_MLD */
 
       /* The following IPv6 socket options are defined, but not implemented */
 
-      case IPV6_MULTICAST_LOOP:   /* Multicast packets are delivered back to
-                                   * the local application */
-#endif
       case IPV6_V6ONLY:           /* Restrict AF_INET6 socket to IPv6
                                    * communications only */
         nwarn("WARNING: Unimplemented IPv6 option: %d\n", option);
@@ -160,6 +158,10 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
         }
         break;
 
+#ifdef CONFIG_NET_MLD
+      case IPV6_MULTICAST_LOOP:   /* Multicast packets are delivered back to
+                                   * the local application */
+#endif
       case IPV6_RECVPKTINFO:
       case IPV6_RECVHOPLIMIT:
         {
