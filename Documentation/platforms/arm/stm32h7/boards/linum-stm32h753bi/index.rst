@@ -867,3 +867,9 @@ search the function **lv_nuttx_fbdev_set_file** and modify line 156 as follows:
     dsc->mem_off_screen = malloc(data_size);
     to
     dsc->mem_off_screen = (void*)0xC00000000;
+
+tone
+----
+
+This example demonstrates how to use PWM4 and Timer17 to play music using the Tone library and the board's buzzer.
+
