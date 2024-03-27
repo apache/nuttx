@@ -29,6 +29,8 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/vhost/vhost.h>
 
+#include "vhost-rng.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -375,4 +377,15 @@ out:
 
 void vhost_register_drivers(void)
 {
+  int ret;
+
+#ifdef CONFIG_DRIVERS_VHOST_RNG
+  ret = vhost_register_rng_driver();
+  if (ret < 0)
+    {
+      vrterr("vhost_register_rng_driver failed, ret=%d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
 }

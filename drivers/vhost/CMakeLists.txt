@@ -23,5 +23,9 @@ if(CONFIG_DRIVERS_VHOST)
   list(APPEND SRCS vhost.c)
 endif()
 
+if(CONFIG_DRIVERS_VHOST_RNG)
+  list(APPEND SRCS vhost_rng.c)
+endif()
+
 target_sources(drivers PRIVATE ${SRCS})
 target_include_directories(drivers PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
