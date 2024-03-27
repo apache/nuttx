@@ -67,6 +67,16 @@ int imx9_bringup(void)
     }
 #endif
 
+#if defined(CONFIG_I2C_DRIVER)
+  /* Configure I2C peripheral interfaces */
+
+  ret = imx9_i2c_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize I2C driver: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }

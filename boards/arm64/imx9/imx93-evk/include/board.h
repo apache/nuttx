@@ -31,6 +31,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define IOMUX_LPI2C_DEFAULT  (IOMUXC_PAD_OD_ENABLE | IOMUXC_PAD_FSEL_SFAST | IOMUXC_PAD_DSE_X6)
+
 /* FLEXIO to PWM pin muxings */
 
 /* EVK signals
@@ -48,6 +50,16 @@
 /* TPM3 ch3 to PWM pin GPIO_IO24 muxing */
 
 #define TPM3_PWM3_MUX IOMUX_CFG(IOMUXC_PAD_GPIO_IO24_TPM3_CH3, IOMUXC_PAD_FSEL_SFAST | IOMUXC_PAD_DSE_X6, 0)
+
+/* LPI2Cs */
+
+#define MUX_LPI2C1_SCL       IOMUX_CFG(IOMUXC_PAD_I2C1_SCL_LPI2C1_SCL, IOMUX_LPI2C_DEFAULT, IOMUXC_MUX_SION_ON)
+#define MUX_LPI2C1_SDA       IOMUX_CFG(IOMUXC_PAD_I2C1_SDA_LPI2C1_SDA, IOMUX_LPI2C_DEFAULT, IOMUXC_MUX_SION_ON)
+
+/* I2C reset functionality */
+
+#define GPIO_LPI2C1_SCL_RESET  (GPIO_PORT1 | GPIO_PIN0 | GPIO_OUTPUT | GPIO_OUTPUT_ONE)
+#define GPIO_LPI2C1_SDA_RESET  (GPIO_PORT1 | GPIO_PIN1 | GPIO_OUTPUT | GPIO_OUTPUT_ONE)
 
 /****************************************************************************
  * Public Data

@@ -46,3 +46,7 @@ endif
 ifeq ($(CONFIG_IMX9_USBDEV),y)
   CHIP_CSRCS += imx9_usbdev.c
 endif
+
+ifeq ($(CONFIG_IMX9_LPI2C),y)
+  CHIP_CSRCS += imx9_lpi2c.c
+endif

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm64/imx9/imx93-evk/src/imx93-evk.h
+ * boards/arm64/imx9/imx93-evk/src/imx9_i2c.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,66 +18,60 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM64_IMX9_IMX93_EVK_SRC_IMX93_EVK_H
-#define __BOARDS_ARM64_IMX9_IMX93_EVK_SRC_IMX93_EVK_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
+#include <debug.h>
+#include <errno.h>
+#include <sys/types.h>
+
+#include <nuttx/i2c/i2c_master.h>
+
+#include "imx9_lpi2c.h"
 
 /****************************************************************************
- * Public Types
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Public Functions Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: imx9_bringup
+ * Name: board_i2c_init
  *
  * Description:
- *   Bring up board features
+ *   Configure the I2C driver.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_BOARDCTL) || defined(CONFIG_BOARD_LATE_INITIALIZE)
-int imx9_bringup(void);
+int imx9_i2c_initialize(void)
+{
+  int ret = OK;
+
+#ifdef CONFIG_IMX9_LPI2C1
+  struct i2c_master_s *i2c;
+
+  i2c = imx9_i2cbus_initialize(1);
+  if (i2c == NULL)
+    {
+      i2cerr("ERROR: Failed to init I2C0 interface\n");
+      return -ENODEV;
+    }
 #endif
 
-/****************************************************************************
- * Name: imx9_pwm_setup
- *
- * Description:
- *   Initialize PWM outputs
- *
- ****************************************************************************/
-
-#if defined(CONFIG_PWM)
-int imx9_pwm_setup(void);
+#ifdef CONFIG_I2C_DRIVER
+  ret = i2c_register(i2c, 0);
+  if (ret < 0)
+    {
+      i2cerr("ERROR: Failed to register I2C0 driver: %d\n", ret);
+      imx9_i2cbus_uninitialize(i2c);
+      return ret;
+    }
 #endif
 
-/****************************************************************************
- * Name: imx9_i2c_setup
- *
- * Description:
- *   Initialize I2C devices and driver
- *
- ****************************************************************************/
-
-#if defined(CONFIG_I2C_DRIVER)
-int imx9_i2c_initialize(void);
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM64_IMX9_IMX93_EVK_SRC_IMX93_EVK_H */
+  return OK;
+}

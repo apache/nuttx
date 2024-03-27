@@ -218,8 +218,257 @@ config IMX9_GPIO_IRQ
 	bool "GPIO Interrupt Support"
 	default n
 
+config IMX9_LPI2C
+	bool "LPI2C support"
+	default n
+
 config IMX9_PLL
 	bool "PLL setup support (WIP)"
 	default n
+
+menu "LPI2C Peripherals"
+
+menuconfig IMX9_LPI2C1
+	bool "LPI2C1"
+	default n
+	select IMX9_LPI2C
+
+if IMX9_LPI2C1
+
+config IMX9_LPI2C1_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
+
+config IMX9_LPI2C1_DMA
+	bool "Enable DMA for I2C1"
+	default n
+	depends on IMX9_LPI2C_DMA
+
+config IMX9_LPI2C1_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
+
+config IMX9_LPI2C1_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
+
+endif # IMX9_LPI2C1
+
+menuconfig IMX9_LPI2C2
+	bool "LPI2C2"
+	default n
+	select IMX9_LPI2C
+
+if IMX9_LPI2C2
+
+config IMX9_LPI2C2_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
+
+config IMX9_LPI2C2_DMA
+	bool "Enable DMA for I2C2"
+	default n
+	depends on IMX9_LPI2C_DMA
+
+config IMX9_LPI2C2_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
+
+config IMX9_LPI2C2_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
+
+endif # IMX9_LPI2C2
+
+menuconfig IMX9_LPI2C3
+	bool "LPI2C3"
+	default n
+	select IMX9_LPI2C
+
+if IMX9_LPI2C3
+
+config IMX9_LPI2C3_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
+
+config IMX9_LPI2C3_DMA
+	bool "Enable DMA for I2C3"
+	default n
+	depends on IMX9_LPI2C_DMA
+
+config IMX9_LPI2C3_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
+
+config IMX9_LPI2C3_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
+
+endif # IMX9_LPI2C3
+
+menuconfig IMX9_LPI2C4
+	bool "LPI2C4"
+	default n
+	select IMX9_LPI2C
+
+if IMX9_LPI2C4
+
+config IMX9_LPI2C4_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
+
+config IMX9_LPI2C4_DMA
+	bool "Enable DMA for I2C4"
+	default n
+	depends on IMX9_LPI2C_DMA
+
+config IMX9_LPI2C4_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
+
+config IMX9_LPI2C4_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
+
+endif # IMX9_LPI2C4
+
+menuconfig IMX9_LPI2C5
+	bool "LPI2C5"
+	default n
+	select IMX9_LPI2C
+
+if IMX9_LPI2C5
+
+config IMX9_LPI2C5_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
+
+config IMX9_LPI2C5_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
+
+config IMX9_LPI2C5_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
+
+endif # IMX9_LPI2C5
+
+menuconfig IMX9_LPI2C6
+	bool "LPI2C6"
+	default n
+	select IMX9_LPI2C
+
+if IMX9_LPI2C6
+
+config IMX9_LPI2C6_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
+
+config IMX9_LPI2C6_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
+
+config IMX9_LPI2C6_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
+
+endif # IMX9_LPI2C6
+
+menuconfig IMX9_LPI2C7
+	bool "LPI2C7"
+	default n
+	select IMX9_LPI2C
+
+if IMX9_LPI2C7
+
+config IMX9_LPI2C7_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
+
+config IMX9_LPI2C7_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
+
+config IMX9_LPI2C7_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
+
+endif # IMX9_LPI2C7
+
+menuconfig IMX9_LPI2C8
+	bool "LPI2C8"
+	default n
+	select IMX9_LPI2C
+
+if IMX9_LPI2C8
+
+config IMX9_LPI2C8_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
+
+config IMX9_LPI2C8_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
+
+config IMX9_LPI2C8_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
+
+endif # IMX9_LPI2C8
+
+endmenu # LPI2C Peripherals
+menu "LPI2C Configuration"
+	depends on IMX9_LPI2C
+
+config IMX9_LPI2C_DMA
+	bool "I2C DMA Support"
+	default n
+	depends on IMX9_LPI2C && IMX9_EDMA && !I2C_POLLED
+	---help---
+		This option enables the DMA for I2C transfers.
+		Note: The user can define CONFIG_I2C_DMAPRIO: a custom priority value
+		for the I2C dma streams, else the default priority level is set to
+		medium.
+
+config IMX9_LPI2C_DMA_MAXMSG
+	int "Maximum number messages that will be DMAed"
+	default 8
+	depends on IMX9_LPI2C_DMA
+	---help---
+		This option set the mumber of mesg that can be in a transfer.
+		It is used to allocate space for the 16 bit LPI2C commands
+		that will be DMA-ed to the LPI2C device.
+
+config IMX9_LPI2C_DYNTIMEO
+	bool "Use dynamic timeouts"
+	default n
+	depends on IMX9_LPI2C
+
+config IMX9_LPI2C_DYNTIMEO_USECPERBYTE
+	int "Timeout Microseconds per Byte"
+	default 500
+	depends on IMX9_LPI2C_DYNTIMEO
+
+config IMX9_LPI2C_DYNTIMEO_STARTSTOP
+	int "Timeout for Start/Stop (Milliseconds)"
+	default 1000
+	depends on IMX9_LPI2C_DYNTIMEO
+
+config IMX9_LPI2C_TIMEOSEC
+	int "Timeout seconds"
+	default 0
+	depends on IMX9_LPI2C
+
+config IMX9_LPI2C_TIMEOMS
+	int "Timeout Milliseconds"
+	default 500
+	depends on IMX9_LPI2C && !IMX9_LPI2C_DYNTIMEO
+
+config IMX9_LPI2C_TIMEOTICKS
+	int "Timeout for Done and Stop (ticks)"
+	default 500
+	depends on IMX9_LPI2C && !IMX9_LPI2C_DYNTIMEO
+
+endmenu # LPI2C Configuration
 
 endif # ARCH_CHIP_IMX9
