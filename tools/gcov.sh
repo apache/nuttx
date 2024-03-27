@@ -21,29 +21,68 @@
 
 ROOT_DIR=$(cd $(dirname $0)/../../; pwd)
 
+show_help() {
+    echo "Usage: $0 [-d gcov_dir] [-t gcov_tool]"
+    echo "  -d gcov_dir: directory to store gcov data and report"
+    echo "  -t gcov_tool: path to gcov tool, e.g. ./nuttx/tools/gcov.sh -t arm-none-eabi-gcov"
+    exit 1
+}
+
+while getopts "d:t:h" opt
+do
+    case $opt in
+        d)
+            GCOV_DIR=$OPTARG
+            ;;
+        t)
+            GCOV_TOOL="--gcov-tool $OPTARG"
+            ;;
+        h)
+            show_help
+            ;;
+        ?)
+            show_help
+            ;;
+    esac
+done
+
 if [ $# == 1 ]; then
     GCOV_DIR=$1
 else
     GCOV_DIR=${ROOT_DIR}/gcov
 fi
 
-files=$(find -name "*.gcda" 2> /dev/null | wc -l)
-if [ "$files" == "0" ] ;then
-    echo "Please run ./nuttx before using gcov.sh to generate the coverage report"
+if [ -z "$GCOV_TOOL" ]; then
+    echo "Error: -t is a required option."
+    show_help
     exit 1
 fi
 
-type lcov
+type lcov > /dev/null 2>&1
 if [ $? -ne 0 ]; then
     echo "Code coverage generation tool is not detected, please install lcov"
     exit 1
 fi
 
-mkdir -p ${GCOV_DIR}
+mkdir -p ${GCOV_DIR} ${GCOV_DIR}/data
 cd ${GCOV_DIR}
 
+# Collect gcda/gcno files
+
+find ${ROOT_DIR}/ -name "*.gcno" -exec cp {} ${GCOV_DIR}/data > /dev/null 2>&1 \;
+find ${ROOT_DIR}/ -name "*.gcda" -exec cp {} ${GCOV_DIR}/data > /dev/null 2>&1 \;
+
+files=$(find ${GCOV_DIR}/data -name "*.gcda" 2> /dev/null | wc -l)
+if [ "$files" == "0" ] ;then
+    echo "gcda file not found in directory ${ROOT_DIR}"
+    echo "Please run ./nuttx before using gcov.sh to generate the coverage report"
+    echo "Or copy the gcda file in the device to ${ROOT_DIR}"
+    exit 1
+fi
+
 # Generate coverage text report
-lcov -c -d ${ROOT_DIR} -o coverage.info --rc lcov_branch_coverage=1
+lcov -c -d ${GCOV_DIR}/data -o coverage.info --rc lcov_branch_coverage=1 ${GCOV_TOOL}
+
 # Generate coverage page report
 genhtml --branch-coverage -o result coverage.info
 
