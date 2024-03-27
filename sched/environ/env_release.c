@@ -83,8 +83,9 @@ void env_release(FAR struct task_group_s *group)
    * task group structure are reset to initial values.
    */
 
-  group->tg_envp = NULL;
-  group->tg_envc = 0;
+  group->tg_envp  = NULL;
+  group->tg_envpc = 0;
+  group->tg_envc  = 0;
 }
 
 #endif /* CONFIG_DISABLE_ENVIRON */
