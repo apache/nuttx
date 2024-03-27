@@ -94,6 +94,7 @@ config ARCH_CHIP_IMX8
 config ARCH_CHIP_IMX9
 	bool "NXP i.MX9 Platform (ARMv8.2a)"
 	select ARCH_HAVE_ADDRENV
+	select ARCH_HAVE_I2CRESET
 	select ARCH_HAVE_IRQTRIGGER
 	select ARCH_NEED_ADDRENV_MAPPING
 	---help---

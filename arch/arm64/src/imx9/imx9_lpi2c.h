@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm64/imx9/imx93-evk/src/imx93-evk.h
+ * arch/arm64/src/imx9/imx9_lpi2c.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,66 +18,54 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM64_IMX9_IMX93_EVK_SRC_IMX93_EVK_H
-#define __BOARDS_ARM64_IMX9_IMX93_EVK_SRC_IMX93_EVK_H
+#ifndef __ARCH_ARM64_SRC_IMX9_IMX9_LPI2C_H
+#define __ARCH_ARM64_SRC_IMX9_IMX9_LPI2C_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <stdint.h>
+#include <nuttx/i2c/i2c_master.h>
 
 /****************************************************************************
- * Public Types
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Public Functions Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: imx9_bringup
+ * Name: imx9_i2cbus_initialize
  *
  * Description:
- *   Bring up board features
+ *   Initialize the selected I2C port. And return a unique instance of struct
+ *   struct i2c_master_s.  This function may be called to obtain multiple
+ *   instances of the interface, each of which may be set up with a
+ *   different frequency and slave address.
+ *
+ * Input Parameters:
+ *   Port number (for hardware that has multiple I2C interfaces)
+ *
+ * Returned Value:
+ *   Valid I2C device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 
-#if defined(CONFIG_BOARDCTL) || defined(CONFIG_BOARD_LATE_INITIALIZE)
-int imx9_bringup(void);
-#endif
+struct i2c_master_s *imx9_i2cbus_initialize(int port);
 
 /****************************************************************************
- * Name: imx9_pwm_setup
+ * Name: imx9_i2cbus_uninitialize
  *
  * Description:
- *   Initialize PWM outputs
+ *   De-initialize the selected I2C port, and power down the device.
+ *
+ * Input Parameters:
+ *   Device structure as returned by the imx9_i2cbus_initialize()
+ *
+ * Returned Value:
+ *   OK on success, ERROR when internal reference count mismatch or dev
+ *   points to invalid hardware device.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_PWM)
-int imx9_pwm_setup(void);
-#endif
+int imx9_i2cbus_uninitialize(struct i2c_master_s *dev);
 
-/****************************************************************************
- * Name: imx9_i2c_setup
- *
- * Description:
- *   Initialize I2C devices and driver
- *
- ****************************************************************************/
-
-#if defined(CONFIG_I2C_DRIVER)
-int imx9_i2c_initialize(void);
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM64_IMX9_IMX93_EVK_SRC_IMX93_EVK_H */
+#endif /* __ARCH_ARM64_SRC_IMX9_IMX9_LPI2C_H */

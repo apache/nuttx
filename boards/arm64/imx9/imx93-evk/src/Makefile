@@ -30,4 +30,8 @@ ifeq ($(CONFIG_PWM),y)
 CSRCS += imx9_pwm.c
 endif
 
+ifeq ($(CONFIG_IMX9_LPI2C),y)
+CSRCS += imx9_i2c.c
+endif
+
 include $(TOPDIR)/boards/Board.mk
