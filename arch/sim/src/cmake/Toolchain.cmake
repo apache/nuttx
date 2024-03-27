@@ -30,7 +30,7 @@ endif()
 add_compile_options(-fno-common)
 
 if(CONFIG_DEBUG_SYMBOLS)
-  add_compile_options(-g)
+  add_compile_options(-g3)
 endif()
 
 if(CONFIG_SIM_M32)

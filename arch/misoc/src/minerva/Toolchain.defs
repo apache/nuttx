@@ -40,7 +40,7 @@ endif
 LDFLAGS += -nostdlib
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION += -g
+  ARCHOPTIMIZATION += -g3
 endif
 
 ARCHCFLAGS += -fno-common

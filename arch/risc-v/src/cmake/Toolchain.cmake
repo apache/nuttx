@@ -220,7 +220,7 @@ if(CONFIG_DEBUG_LINK_MAP)
 endif()
 
 if(CONFIG_DEBUG_SYMBOLS)
-  add_compile_options(-g)
+  add_compile_options(-g3)
 endif()
 
 # Generic GNU RVG toolchain
