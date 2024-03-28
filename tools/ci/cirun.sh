@@ -42,6 +42,7 @@ find ${nuttx}/tools/ci/testrun -name '.pytest_cache' |xargs rm -rf
 rm -rf ${logs}
 rm -rf ${nuttx}/../apps/testing/ltp/ltp/
 rm -f ${nuttx}/../apps/testing/cmocka/cmocka.zip
+rm -f ${nuttx}/fatfs.img
 
 
 echo $ret
