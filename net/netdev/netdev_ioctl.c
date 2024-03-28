@@ -1031,7 +1031,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
         else
 #endif
           {
-            nerr("Unsupported link layer\n");
+            nwarn("WARNING: Unsupported link layer\n");
             ret = -EAFNOSUPPORT;
           }
         break;
