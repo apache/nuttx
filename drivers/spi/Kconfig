@@ -234,6 +234,14 @@ config SPI_DRIVER
 		this driver is to support SPI testing.  It is not suitable for use
 		in any real driver application.
 
+config SPI_ICE40
+	bool "SPI iCE40 driver"
+	default n
+	depends on SPI_EXCHANGE
+	---help---
+		Enable support for a character driver at /dev/ice40-[N] for the iCE40 FPGA.
+		This driver is intended for uploading the bitsream to the FPGA.
+
 config SPI_BITBANG
 	bool "SPI bit-bang device"
 	default n

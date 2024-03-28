@@ -516,6 +516,31 @@ endif # ESP32C3_SPI2
 
 endmenu # SPI configuration
 
+menu "iCE40 Configuration"
+	depends on SPI_ICE40
+
+config ESP32C3_ICE40_CSPIN
+	int "iCE40 CS Pin"
+	default 6
+	range 0 21
+
+config ESP32C3_ICE40_CDONEPIN
+	int "iCE40 CDONE Pin"
+	default 0
+	range 0 21
+
+config ESP32C3_ICE40_CRSTPIN
+	int "iCE40 CRST Pin"
+	default 1
+	range 0 21
+
+config ESP32C3_ICE40_SPI_PORT
+	int "iCE40 SPI port number"
+	default 2
+	range 0 5
+
+endmenu
+
 menu "UART configuration"
 	depends on ESP32C3_UART
 
