@@ -929,6 +929,18 @@ static void mpfs_spi_irq_exchange(struct mpfs_spi_priv_s *priv,
                                 MPFS_SPI_INTTXDONE,
                                 0);
 
+  /* TX_DONE interrupt can be received after a semaphore timeout, but before
+   * interrupts are disabled. This will leave the semaphore to the signaled
+   * state.
+   * After a timeout the semaphore is always reset to non-signaled state
+   * to fix this race condition.
+   */
+
+  if (priv->error == -ETIMEDOUT)
+    {
+      nxsem_reset(&priv->sem_isr, 0);
+    }
+
   putreg32(MPFS_SPI_TXCHUNDRUN |
            MPFS_SPI_RXCHOVRFLW |
            MPFS_SPI_DATA_RX |
