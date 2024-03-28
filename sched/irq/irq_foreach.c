@@ -86,10 +86,10 @@ int irq_foreach(irq_foreach_t callback, FAR void *arg)
 
   for (irq = 0; irq < TAB_SIZE; irq++)
     {
-      if (g_irqvector[irq].handler != NULL &&
-          g_irqvector[irq].handler != irq_unexpected_isr)
+      if (g_irqvector()[irq].handler != NULL &&
+          g_irqvector()[irq].handler != irq_unexpected_isr)
         {
-          ret = callback(irq, &g_irqvector[irq], arg);
+          ret = callback(irq, &g_irqvector()[irq], arg);
           if (ret != 0)
             {
               return ret;

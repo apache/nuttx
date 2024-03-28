@@ -66,10 +66,20 @@ void up_initial_state(struct tcb_s *tcb)
 
   if (tcb->pid == IDLE_PROCESS_ID)
     {
-      tcb->stack_alloc_ptr = (void *)(g_idle_topstack -
-                                      CONFIG_IDLETHREAD_STACKSIZE);
-      tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
-      tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
+#ifdef CONFIG_BMP
+      if (up_cpu_index() > 0)
+        {
+          up_cpu_idlestack(up_cpu_index(), tcb,
+                           CONFIG_IDLETHREAD_STACKSIZE);
+        }
+      else
+#endif
+        {
+          tcb->stack_alloc_ptr = (void *)(g_idle_topstack -
+                                          CONFIG_IDLETHREAD_STACKSIZE);
+          tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
+          tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
+        }
 
 #ifdef CONFIG_STACK_COLORATION
       /* If stack debug is enabled, then fill the stack with a

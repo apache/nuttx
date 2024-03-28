@@ -579,7 +579,7 @@
 #define MMU_ROMFLAGS         (PMD_TYPE_SECT | PMD_SECT_AP_R1 | PMD_CACHEABLE | \
                               PMD_SECT_DOM(0))
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP) || defined(CONFIG_BMP)
 #define MMU_MEMFLAGS         (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | PMD_CACHEABLE | \
                               PMD_SECT_S | PMD_SECT_DOM(0))
 #else
@@ -605,7 +605,7 @@
 #endif
 
 #define MMU_L1_DATAFLAGS      (PMD_TYPE_PTE | PMD_PTE_PXN | PMD_PTE_DOM(0))
-#ifndef CONFIG_SMP
+#if !defined(CONFIG_SMP) && !defined(CONFIG_BMP)
 #  define MMU_L2_UDATAFLAGS   (PTE_TYPE_SMALL | PTE_WRITE_BACK | PTE_AP_RW01)
 #  define MMU_L2_KDATAFLAGS   (PTE_TYPE_SMALL | PTE_WRITE_BACK | PTE_AP_RW1)
 #  define MMU_L2_UALLOCFLAGS  (PTE_TYPE_SMALL | PTE_WRITE_BACK | PTE_AP_RW01)

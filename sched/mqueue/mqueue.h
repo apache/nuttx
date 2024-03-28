@@ -47,6 +47,9 @@
 #define MQ_MAX_MSGS    16
 #define MQ_PRIO_MAX    _POSIX_MQ_PRIO_MAX
 
+#define g_msgfree()    g_msgfree[this_bcpu()]
+#define g_msgfreeirq() g_msgfreeirq[this_bcpu()]
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -89,13 +92,13 @@ extern "C"
  * The number of messages in this list is a system configuration item.
  */
 
-EXTERN struct list_node g_msgfree;
+EXTERN struct list_node g_msgfree[CONFIG_BMP_NCPUS];
 
 /* The g_msgfreeirq is a list of messages that are reserved for use by
  * interrupt handlers.
  */
 
-EXTERN struct list_node g_msgfreeirq;
+EXTERN struct list_node g_msgfreeirq[CONFIG_BMP_NCPUS];
 
 /****************************************************************************
  * Public Function Prototypes

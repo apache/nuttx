@@ -28,6 +28,9 @@
 
 #include "irq/irq.h"
 
+#define g_irqchainpool()     g_irqchainpool[this_bcpu()]
+#define g_irqchainfreelist() g_irqchainfreelist[this_bcpu()]
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -44,17 +47,18 @@ struct irqchain_s
  * Private Data
  ****************************************************************************/
 
-/* g_irqchainpool is a list of pre-allocated irq chain. The number of irq
+/* g_irqchainpool() is a list of pre-allocated irq chain. The number of irq
  * chains in the pool is a configuration item.
  */
 
-static struct irqchain_s g_irqchainpool[CONFIG_PREALLOC_IRQCHAIN];
+static struct irqchain_s g_irqchainpool[CONFIG_BMP_NCPUS]
+                                       [CONFIG_PREALLOC_IRQCHAIN];
 
 /* The g_irqchainfreelist data structure is a single linked list of irqchains
  * available to the system for delayed function use.
  */
 
-static sq_queue_t g_irqchainfreelist;
+static sq_queue_t g_irqchainfreelist[CONFIG_BMP_NCPUS];
 
 /****************************************************************************
  * Private Functions
@@ -65,14 +69,14 @@ static void irqchain_detach_all(int ndx)
   FAR struct irqchain_s *curr;
   FAR struct irqchain_s *prev;
 
-  g_irqvector[ndx].handler = irq_unexpected_isr;
+  g_irqvector()[ndx].handler = irq_unexpected_isr;
 
-  curr = g_irqvector[ndx].arg;
+  curr = g_irqvector()[ndx].arg;
   while (curr != NULL)
     {
       prev = curr;
       curr = curr->next;
-      sq_addlast((FAR struct sq_entry_s *)prev, &g_irqchainfreelist);
+      sq_addlast((FAR struct sq_entry_s *)prev, &g_irqchainfreelist());
     }
 }
 
@@ -89,7 +93,7 @@ static int irqchain_dispatch(int irq, FAR void *context, FAR void *arg)
   ndx = irq;
 #endif
 
-  curr = g_irqvector[ndx].arg;
+  curr = g_irqvector()[ndx].arg;
   while (curr != NULL)
     {
       prev = curr;
@@ -106,31 +110,31 @@ static int irqchain_dispatch(int irq, FAR void *context, FAR void *arg)
 
 void irqchain_initialize(void)
 {
-  FAR struct irqchain_s *irqchain = g_irqchainpool;
+  FAR struct irqchain_s *irqchain = g_irqchainpool();
   int i;
 
   /* Initialize irqchain free lists */
 
-  sq_init(&g_irqchainfreelist);
+  sq_init(&g_irqchainfreelist());
 
-  /* The g_irqchainfreelist must be loaded at initialization time to hold the
-   * configured number of irqchain.
+  /* The g_irqchainfreelist() must be loaded at initialization time to
+   * hold the configured number of irqchain.
    */
 
   for (i = 0; i < CONFIG_PREALLOC_IRQCHAIN; i++)
     {
-      sq_addlast((FAR struct sq_entry_s *)irqchain++, &g_irqchainfreelist);
+      sq_addlast((FAR struct sq_entry_s *)irqchain++, &g_irqchainfreelist());
     }
 }
 
 bool is_irqchain(int ndx, xcpt_t isr)
 {
-  if (g_irqvector[ndx].handler == irq_unexpected_isr ||
-      g_irqvector[ndx].handler == NULL)
+  if (g_irqvector()[ndx].handler == irq_unexpected_isr ||
+      g_irqvector()[ndx].handler == NULL)
     {
       return false;
     }
-  else if (g_irqvector[ndx].handler == irqchain_dispatch)
+  else if (g_irqvector()[ndx].handler == irqchain_dispatch)
     {
       return true;
     }
@@ -147,25 +151,25 @@ int irqchain_attach(int ndx, xcpt_t isr, FAR void *arg)
 
   if (isr != irq_unexpected_isr)
     {
-      if (g_irqvector[ndx].handler != irqchain_dispatch)
+      if (g_irqvector()[ndx].handler != irqchain_dispatch)
         {
-          if (sq_count(&g_irqchainfreelist) < 2)
+          if (sq_count(&g_irqchainfreelist()) < 2)
             {
               return -ENOMEM;
             }
 
-          node = (FAR struct irqchain_s *)sq_remfirst(&g_irqchainfreelist);
+          node = (FAR struct irqchain_s *)sq_remfirst(&g_irqchainfreelist());
           DEBUGASSERT(node != NULL);
 
-          node->handler = g_irqvector[ndx].handler;
-          node->arg     = g_irqvector[ndx].arg;
+          node->handler = g_irqvector()[ndx].handler;
+          node->arg     = g_irqvector()[ndx].arg;
           node->next    = NULL;
 
-          g_irqvector[ndx].handler = irqchain_dispatch;
-          g_irqvector[ndx].arg     = node;
+          g_irqvector()[ndx].handler = irqchain_dispatch;
+          g_irqvector()[ndx].arg     = node;
         }
 
-      node = (FAR struct irqchain_s *)sq_remfirst(&g_irqchainfreelist);
+      node = (FAR struct irqchain_s *)sq_remfirst(&g_irqchainfreelist());
       if (node == NULL)
         {
           return -ENOMEM;
@@ -175,7 +179,7 @@ int irqchain_attach(int ndx, xcpt_t isr, FAR void *arg)
       node->arg     = arg;
       node->next    = NULL;
 
-      curr = g_irqvector[ndx].arg;
+      curr = g_irqvector()[ndx].arg;
       while (curr->next != NULL)
         {
           curr = curr->next;
@@ -220,9 +224,9 @@ int irqchain_detach(int irq, xcpt_t isr, FAR void *arg)
 
       flags = enter_critical_section();
 
-      if (g_irqvector[ndx].handler == irqchain_dispatch)
+      if (g_irqvector()[ndx].handler == irqchain_dispatch)
         {
-          first = g_irqvector[ndx].arg;
+          first = g_irqvector()[ndx].arg;
           for (prev = NULL, curr = first;
                curr != NULL;
                prev = curr, curr = curr->next)
@@ -231,7 +235,7 @@ int irqchain_detach(int irq, xcpt_t isr, FAR void *arg)
                 {
                   if (curr == first)
                     {
-                      g_irqvector[ndx].arg = curr->next;
+                      g_irqvector()[ndx].arg = curr->next;
                     }
                   else if (curr->next == NULL)
                     {
@@ -243,15 +247,15 @@ int irqchain_detach(int irq, xcpt_t isr, FAR void *arg)
                     }
 
                   sq_addlast((FAR struct sq_entry_s *)curr,
-                             &g_irqchainfreelist);
+                             &g_irqchainfreelist());
 
-                  first = g_irqvector[ndx].arg;
+                  first = g_irqvector()[ndx].arg;
                   if (first->next == NULL)
                     {
-                      g_irqvector[ndx].handler = first->handler;
-                      g_irqvector[ndx].arg     = first->arg;
+                      g_irqvector()[ndx].handler = first->handler;
+                      g_irqvector()[ndx].arg     = first->arg;
                       sq_addlast((FAR struct sq_entry_s *)first,
-                                 &g_irqchainfreelist);
+                                 &g_irqchainfreelist());
                     }
 
                   ret = OK;

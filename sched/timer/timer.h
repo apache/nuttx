@@ -42,6 +42,9 @@
 
 #define PT_FLAGS_PREALLOCATED 0x01 /* Timer comes from a pool of preallocated timers */
 
+#define g_freetimers()  g_freetimers[this_bcpu()]
+#define g_alloctimers() g_alloctimers[this_bcpu()]
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -69,7 +72,7 @@ struct posix_timer_s
 #if CONFIG_PREALLOC_TIMERS > 0
 /* This is a list of free, preallocated timer structures */
 
-extern volatile sq_queue_t g_freetimers;
+extern volatile sq_queue_t g_freetimers[CONFIG_BMP_NCPUS];
 #endif
 
 /* This is a list of instantiated timer structures -- active and inactive.
@@ -77,7 +80,7 @@ extern volatile sq_queue_t g_freetimers;
  * list by timer_delete() or when the owning thread exits.
  */
 
-extern volatile sq_queue_t g_alloctimers;
+extern volatile sq_queue_t g_alloctimers[CONFIG_BMP_NCPUS];
 
 /****************************************************************************
  * Public Function Prototypes

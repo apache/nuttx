@@ -78,10 +78,13 @@
 #if defined(CONFIG_SCHED_HPWORK)
 /* The state of the kernel mode, high priority work queue(s). */
 
-struct hp_wqueue_s g_hpwork =
+struct hp_wqueue_s g_hpwork[CONFIG_BMP_NCPUS] =
 {
-  {NULL, NULL},
-  SEM_INITIALIZER(0),
+  [0 ... CONFIG_BMP_NCPUS - 1] =
+  {
+    {NULL, NULL},
+    SEM_INITIALIZER(0),
+  },
 };
 
 #endif /* CONFIG_SCHED_HPWORK */
@@ -89,10 +92,13 @@ struct hp_wqueue_s g_hpwork =
 #if defined(CONFIG_SCHED_LPWORK)
 /* The state of the kernel mode, low priority work queue(s). */
 
-struct lp_wqueue_s g_lpwork =
+struct lp_wqueue_s g_lpwork[CONFIG_BMP_NCPUS] =
 {
-  {NULL, NULL},
-  SEM_INITIALIZER(0),
+  [0 ... CONFIG_BMP_NCPUS - 1] =
+  {
+    {NULL, NULL},
+    SEM_INITIALIZER(0),
+  },
 };
 
 #endif /* CONFIG_SCHED_LPWORK */

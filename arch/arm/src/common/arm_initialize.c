@@ -38,7 +38,7 @@
  * CURRENT_REGS for portability.
  */
 
-volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
+volatile uint32_t *g_current_regs[CONFIG_NR_CPUS];
 
 /****************************************************************************
  * Private Functions
@@ -56,7 +56,7 @@ volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
 #if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 3
 static inline void arm_color_intstack(void)
 {
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP) || defined(CONFIG_BMP)
   uint32_t *ptr = (uint32_t *)arm_intstack_alloc();
 #else
   uint32_t *ptr = (uint32_t *)g_intstackalloc;

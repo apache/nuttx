@@ -45,7 +45,10 @@
  * Private Data
  ****************************************************************************/
 
-static rmutex_t g_inode_lock = NXRMUTEX_INITIALIZER;
+static rmutex_t g_inode_lock[CONFIG_BMP_NCPUS] =
+{
+  [0 ... CONFIG_BMP_NCPUS - 1] = NXRMUTEX_INITIALIZER,
+};
 
 /****************************************************************************
  * Public Functions
@@ -77,7 +80,7 @@ void inode_initialize(void)
 
 int inode_lock(void)
 {
-  return nxrmutex_lock(&g_inode_lock);
+  return nxrmutex_lock(&g_inode_lock[this_bcpu()]);
 }
 
 /****************************************************************************
@@ -90,5 +93,5 @@ int inode_lock(void)
 
 void inode_unlock(void)
 {
-  DEBUGVERIFY(nxrmutex_unlock(&g_inode_lock));
+  DEBUGVERIFY(nxrmutex_unlock(&g_inode_lock[this_bcpu()]));
 }

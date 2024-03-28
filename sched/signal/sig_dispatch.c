@@ -141,7 +141,7 @@ static FAR sigpendq_t *nxsig_alloc_pendingsignal(void)
     {
       /* Try to get the pending signal structure from the free list */
 
-      sigpend = (FAR sigpendq_t *)sq_remfirst(&g_sigpendingsignal);
+      sigpend = (FAR sigpendq_t *)sq_remfirst(&g_sigpendingsignal());
       if (!sigpend)
         {
           /* If no pending signal structure is available in the free list,
@@ -149,7 +149,7 @@ static FAR sigpendq_t *nxsig_alloc_pendingsignal(void)
            * interrupt handlers
            */
 
-          sigpend = (FAR sigpendq_t *)sq_remfirst(&g_sigpendingirqsignal);
+          sigpend = (FAR sigpendq_t *)sq_remfirst(&g_sigpendingirqsignal());
         }
     }
 
@@ -162,7 +162,7 @@ static FAR sigpendq_t *nxsig_alloc_pendingsignal(void)
       /* Try to get the pending signal structure from the free list */
 
       flags = enter_critical_section();
-      sigpend = (FAR sigpendq_t *)sq_remfirst(&g_sigpendingsignal);
+      sigpend = (FAR sigpendq_t *)sq_remfirst(&g_sigpendingsignal());
       leave_critical_section(flags);
 
       /* Check if we got one. */

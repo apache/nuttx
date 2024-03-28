@@ -270,20 +270,20 @@ static const struct uart_ops_s g_uart_ops =
 /* I/O buffers */
 
 #ifdef CONFIG_UART0_PL011
-static char g_uart0rxbuffer[CONFIG_UART0_RXBUFSIZE];
-static char g_uart0txbuffer[CONFIG_UART0_TXBUFSIZE];
+static char g_uart0rxbuffer[CONFIG_BMP_NCPUS][CONFIG_UART0_RXBUFSIZE];
+static char g_uart0txbuffer[CONFIG_BMP_NCPUS][CONFIG_UART0_TXBUFSIZE];
 #endif
 #ifdef CONFIG_UART1_PL011
-static char g_uart1rxbuffer[CONFIG_UART1_RXBUFSIZE];
-static char g_uart1txbuffer[CONFIG_UART1_TXBUFSIZE];
+static char g_uart1rxbuffer[CONFIG_BMP_NCPUS][CONFIG_UART1_RXBUFSIZE];
+static char g_uart1txbuffer[CONFIG_BMP_NCPUS][CONFIG_UART1_TXBUFSIZE];
 #endif
 #ifdef CONFIG_UART2_PL011
-static char g_uart2rxbuffer[CONFIG_UART2_RXBUFSIZE];
-static char g_uart2txbuffer[CONFIG_UART2_TXBUFSIZE];
+static char g_uart2rxbuffer[CONFIG_BMP_NCPUS][CONFIG_UART2_RXBUFSIZE];
+static char g_uart2txbuffer[CONFIG_BMP_NCPUS][CONFIG_UART2_TXBUFSIZE];
 #endif
 #ifdef CONFIG_UART3_PL011
-static char g_uart3rxbuffer[CONFIG_UART3_RXBUFSIZE];
-static char g_uart3txbuffer[CONFIG_UART3_TXBUFSIZE];
+static char g_uart3rxbuffer[CONFIG_BMP_NCPUS][CONFIG_UART3_RXBUFSIZE];
+static char g_uart3txbuffer[CONFIG_BMP_NCPUS][CONFIG_UART3_TXBUFSIZE];
 #endif
 
 /* This describes the state of the uart0 port. */
@@ -309,23 +309,7 @@ static struct pl011_uart_port_s g_uart0priv =
 
 /* I/O buffers */
 
-static struct uart_dev_s g_uart0port =
-{
-  .recv =
-    {
-      .size   = CONFIG_UART0_RXBUFSIZE,
-      .buffer = g_uart0rxbuffer,
-    },
-
-  .xmit =
-    {
-      .size   = CONFIG_UART0_TXBUFSIZE,
-      .buffer = g_uart0txbuffer,
-    },
-
-  .ops  = &g_uart_ops,
-  .priv = &g_uart0priv,
-};
+static struct uart_dev_s g_uart0port[CONFIG_BMP_NCPUS];
 
 #endif /* CONFIG_UART0_PL011 */
 
@@ -352,23 +336,7 @@ static struct pl011_uart_port_s g_uart1priv =
 
 /* I/O buffers */
 
-static struct uart_dev_s g_uart1port =
-{
-  .recv =
-    {
-      .size   = CONFIG_UART1_RXBUFSIZE,
-      .buffer = g_uart1rxbuffer,
-    },
-
-  .xmit =
-    {
-      .size   = CONFIG_UART1_TXBUFSIZE,
-      .buffer = g_uart1txbuffer,
-    },
-
-  .ops  = &g_uart_ops,
-  .priv = &g_uart1priv,
-};
+static struct uart_dev_s g_uart1port[CONFIG_BMP_NCPUS];
 
 #endif /* CONFIG_UART1_PL011 */
 
@@ -395,23 +363,7 @@ static struct pl011_uart_port_s g_uart2priv =
 
 /* I/O buffers */
 
-static struct uart_dev_s g_uart2port =
-{
-  .recv =
-    {
-      .size   = CONFIG_UART2_RXBUFSIZE,
-      .buffer = g_uart2rxbuffer,
-    },
-
-  .xmit =
-    {
-      .size   = CONFIG_UART2_TXBUFSIZE,
-      .buffer = g_uart2txbuffer,
-    },
-
-  .ops  = &g_uart_ops,
-  .priv = &g_uart2priv,
-};
+static struct uart_dev_s g_uart2port[CONFIG_BMP_NCPUS];
 
 #endif /* CONFIG_UART2_PL011 */
 
@@ -438,50 +390,34 @@ static struct pl011_uart_port_s g_uart3priv =
 
 /* I/O buffers */
 
-static struct uart_dev_s g_uart3port =
-{
-  .recv =
-    {
-      .size   = CONFIG_UART3_RXBUFSIZE,
-      .buffer = g_uart3rxbuffer,
-    },
-
-  .xmit =
-    {
-      .size   = CONFIG_UART3_TXBUFSIZE,
-      .buffer = g_uart3txbuffer,
-    },
-
-  .ops  = &g_uart_ops,
-  .priv = &g_uart3priv,
-};
+static struct uart_dev_s g_uart3port[CONFIG_BMP_NCPUS];
 
 #endif /* CONFIG_UART3_PL011 */
 
 #if defined(CONFIG_UART0_SERIAL_CONSOLE)
-#  define CONSOLE_DEV     g_uart0port         /* UART0 is console */
+#  define CONSOLE_DEV     g_uart0port[this_bcpu()]         /* UART0 is console */
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE)
-#  define CONSOLE_DEV     g_uart1port         /* UART1 is console */
+#  define CONSOLE_DEV     g_uart1port[this_bcpu()]         /* UART1 is console */
 #elif defined(CONFIG_UART2_SERIAL_CONSOLE)
-#  define CONSOLE_DEV     g_uart2port         /* UART2 is console */
+#  define CONSOLE_DEV     g_uart2port[this_bcpu()]         /* UART2 is console */
 #elif defined(CONFIG_UART3_SERIAL_CONSOLE)
-#  define CONSOLE_DEV     g_uart3port         /* UART3 is console */
+#  define CONSOLE_DEV     g_uart3port[this_bcpu()]         /* UART3 is console */
 #endif
 
 #ifdef CONFIG_UART0_PL011
-#  define TTYS0_DEV       g_uart0port
+#  define TTYS0_DEV       g_uart0port[this_bcpu()]
 #endif
 
 #ifdef CONFIG_UART1_PL011
-#  define TTYS1_DEV       g_uart1port
+#  define TTYS1_DEV       g_uart1port[this_bcpu()]
 #endif
 
 #ifdef CONFIG_UART2_PL011
-#  define TTYS2_DEV       g_uart2port
+#  define TTYS2_DEV       g_uart2port[this_bcpu()]
 #endif
 
 #ifdef CONFIG_UART3_PL011
-#  define TTYS3_DEV       g_uart3port
+#  define TTYS3_DEV       g_uart3port[this_bcpu()]
 #endif
 
 /***************************************************************************
@@ -974,9 +910,60 @@ static int pl011_setup(FAR struct uart_dev_s *dev)
 
 void pl011_earlyserialinit(void)
 {
+  int i;
+
   /* Enable the console UART.  The other UARTs will be initialized if and
    * when they are first opened.
    */
+
+#ifdef CONFIG_UART0_PL011
+  for (i = 0; i < CONFIG_BMP_NCPUS; i++)
+    {
+      g_uart0port[i].ops = &g_uart_ops;
+      g_uart0port[i].priv = &g_uart0priv;
+      g_uart0port[i].recv.size = CONFIG_UART0_RXBUFSIZE;
+      g_uart0port[i].recv.buffer = g_uart0rxbuffer[i];
+      g_uart0port[i].xmit.size = CONFIG_UART0_TXBUFSIZE;
+      g_uart0port[i].xmit.buffer = g_uart0txbuffer[i];
+    }
+#endif
+
+#ifdef CONFIG_UART1_PL011
+  for (i = 0; i < CONFIG_BMP_NCPUS; i++)
+    {
+      g_uart1port[i].ops = &g_uart_ops;
+      g_uart1port[i].priv = &g_uart1priv;
+      g_uart1port[i].recv.size = CONFIG_UART1_RXBUFSIZE;
+      g_uart1port[i].recv.buffer = g_uart1rxbuffer[i];
+      g_uart1port[i].xmit.size = CONFIG_UART1_TXBUFSIZE;
+      g_uart1port[i].xmit.buffer = g_uart1txbuffer[i];
+    }
+#endif
+
+#ifdef CONFIG_UART2_PL011
+  for (i = 0; i < CONFIG_BMP_NCPUS; i++)
+    {
+      g_uart2port[i].ops = &g_uart_ops;
+      g_uart2port[i].priv = &g_uart2priv;
+      g_uart2port[i].recv.size = CONFIG_UART2_RXBUFSIZE;
+      g_uart2port[i].recv.buffer = g_uart2rxbuffer[i];
+      g_uart2port[i].xmit.size = CONFIG_UART2_TXBUFSIZE;
+      g_uart2port[i].xmit.buffer = g_uart2txbuffer[i];
+    }
+#endif
+
+#ifdef CONFIG_UART3_PL011
+  for (i = 0; i < CONFIG_BMP_NCPUS; i++)
+    {
+      g_uart3port[i].ops = &g_uart_ops;
+      g_uart3port[i].priv = &g_uart3priv;
+      g_uart3port[i].recv.size = CONFIG_UART3_RXBUFSIZE;
+      g_uart3port[i].recv.buffer = g_uart3rxbuffer[i];
+      g_uart3port[i].xmit.size = CONFIG_UART3_TXBUFSIZE;
+      g_uart3port[i].xmit.buffer = g_uart3txbuffer[i];
+    }
+#endif
+
 #ifdef CONSOLE_DEV
   CONSOLE_DEV.isconsole = true;
   pl011_setup(&CONSOLE_DEV);
@@ -995,6 +982,7 @@ void pl011_earlyserialinit(void)
 void pl011_serialinit(void)
 {
 #ifdef CONSOLE_DEV
+  CONSOLE_DEV.isconsole = true;
   uart_register("/dev/console", &CONSOLE_DEV);
 #endif
 #ifdef TTYS0_DEV

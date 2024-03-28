@@ -42,7 +42,7 @@ static FAR struct msgq_s **g_msgqs; /* The pointer of two layer file descriptors
  * Public Data
  ****************************************************************************/
 
-struct list_node g_msgfreelist = LIST_INITIAL_VALUE(g_msgfreelist);
+struct list_node g_msgfreelist[CONFIG_BMP_NCPUS];
 
 /****************************************************************************
  * Private Functions
@@ -145,7 +145,7 @@ void nxmsg_free(FAR struct msgq_s *msgq)
                             tmp, struct msgbuf_s, node)
     {
       list_delete(&entry->node);
-      list_add_tail(&g_msgfreelist, &entry->node);
+      list_add_tail(&g_msgfreelist(), &entry->node);
     }
 
   kmm_free(g_msgqs[index]);

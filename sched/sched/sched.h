@@ -40,7 +40,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define PIDHASH(pid)             ((pid) & (g_npidhash - 1))
+#define PIDHASH(pid)             ((pid) & (nxsched_npidhash() - 1))
 
 /* The state of a task is indicated both by the task_state field of the TCB
  * and by a series of task lists.  All of these tasks lists are declared
@@ -50,12 +50,12 @@
  * need to be prioritized).
  */
 
-#define list_readytorun()        (&g_readytorun)
-#define list_pendingtasks()      (&g_pendingtasks)
-#define list_waitingforsignal()  (&g_waitingforsignal)
-#define list_waitingforfill()    (&g_waitingforfill)
-#define list_stoppedtasks()      (&g_stoppedtasks)
-#define list_inactivetasks()     (&g_inactivetasks)
+#define list_readytorun()        (&g_readytorun[this_bcpu()])
+#define list_pendingtasks()      (&g_pendingtasks[this_bcpu()])
+#define list_waitingforsignal()  (&g_waitingforsignal[this_bcpu()])
+#define list_waitingforfill()    (&g_waitingforfill[this_bcpu()])
+#define list_stoppedtasks()      (&g_stoppedtasks[this_bcpu()])
+#define list_inactivetasks()     (&g_inactivetasks[this_bcpu()])
 #define list_assignedtasks(cpu)  (&g_assignedtasks[cpu])
 
 /* These are macros to access the current CPU and the current task on a CPU.
@@ -66,8 +66,8 @@
 #ifdef CONFIG_SMP
 #  define current_task(cpu)      ((FAR struct tcb_s *)list_assignedtasks(cpu)->head)
 #else
-#  define current_task(cpu)      ((FAR struct tcb_s *)list_readytorun()->head)
-#  define this_task()            (current_task(up_cpu_index()))
+#  define current_task(cpu)      ((FAR struct tcb_s *)(&g_readytorun[cpu])->head)
+#  define this_task()            (current_task(this_bcpu()))
 #endif
 
 #define is_idle_task(t)          ((t)->pid < CONFIG_SMP_NCPUS)
@@ -86,7 +86,7 @@
 #define TLIST_ATTR_RUNNABLE      (1 << 2) /* Bit 2: List includes running tasks */
 #define TLIST_ATTR_OFFSET        (1 << 3) /* Bit 3: Pointer of task list is offset */
 
-#define __TLIST_ATTR(s)          g_tasklisttable[s].attr
+#define __TLIST_ATTR(s)          g_tasklisttable[this_bcpu()][s].attr
 #define TLIST_ISPRIORITIZED(s)   ((__TLIST_ATTR(s) & TLIST_ATTR_PRIORITIZED) != 0)
 #define TLIST_ISINDEXED(s)       ((__TLIST_ATTR(s) & TLIST_ATTR_INDEXED) != 0)
 #define TLIST_ISRUNNABLE(s)      ((__TLIST_ATTR(s) & TLIST_ATTR_RUNNABLE) != 0)
@@ -94,7 +94,7 @@
 
 #define __TLIST_HEAD(t) \
   (TLIST_ISOFFSET((t)->task_state) ? (FAR dq_queue_t *)((FAR uint8_t *)((t)->waitobj) + \
-  (uintptr_t)g_tasklisttable[(t)->task_state].list) : g_tasklisttable[(t)->task_state].list)
+  (uintptr_t)g_tasklisttable[this_bcpu()][(t)->task_state].list) : g_tasklisttable[this_bcpu()][(t)->task_state].list)
 
 #ifdef CONFIG_SMP
 #  define TLIST_HEAD(t,c) \
@@ -117,9 +117,9 @@
 #  define CRITMONITOR_PANIC(fmt, ...) _alert(fmt, ##__VA_ARGS__)
 #endif
 
-#define nxsched_pidhash()        g_pidhash
-#define nxsched_npidhash()       g_npidhash
-#define nxsched_lastpid()        g_lastpid
+#define nxsched_pidhash()        g_pidhash[this_bcpu()]
+#define nxsched_npidhash()       g_npidhash[this_bcpu()]
+#define nxsched_lastpid()        g_lastpid[this_bcpu()]
 
 /****************************************************************************
  * Public Type Definitions
@@ -156,7 +156,7 @@ struct tasklist_s
  * task, is always the IDLE task.
  */
 
-extern dq_queue_t g_readytorun;
+extern dq_queue_t g_readytorun[CONFIG_BMP_NCPUS];
 
 #ifdef CONFIG_SMP
 /* In order to support SMP, the function of the g_readytorun list changes,
@@ -196,7 +196,7 @@ extern dq_queue_t g_assignedtasks[CONFIG_SMP_NCPUS];
  * It is valid only when up_interrupt_context() returns true.
  */
 
-extern FAR struct tcb_s *g_running_tasks[CONFIG_SMP_NCPUS];
+extern FAR struct tcb_s *g_running_tasks[CONFIG_NR_CPUS];
 
 /* This is the list of all tasks that are ready-to-run, but cannot be placed
  * in the g_readytorun list because:  (1) They are higher priority than the
@@ -204,16 +204,16 @@ extern FAR struct tcb_s *g_running_tasks[CONFIG_SMP_NCPUS];
  * currently active task has disabled pre-emption.
  */
 
-extern dq_queue_t g_pendingtasks;
+extern dq_queue_t g_pendingtasks[CONFIG_BMP_NCPUS];
 
 /* This is the list of all tasks that are blocked waiting for a signal */
 
-extern dq_queue_t g_waitingforsignal;
+extern dq_queue_t g_waitingforsignal[CONFIG_BMP_NCPUS];
 
 /* This is the list of all tasks that are blocking waiting for a page fill */
 
 #ifdef CONFIG_LEGACY_PAGING
-extern dq_queue_t g_waitingforfill;
+extern dq_queue_t g_waitingforfill[CONFIG_BMP_NCPUS];
 #endif
 
 /* This is the list of all tasks that have been stopped
@@ -221,18 +221,18 @@ extern dq_queue_t g_waitingforfill;
  */
 
 #ifdef CONFIG_SIG_SIGSTOP_ACTION
-extern dq_queue_t g_stoppedtasks;
+extern dq_queue_t g_stoppedtasks[CONFIG_BMP_NCPUS];
 #endif
 
 /* This the list of all tasks that have been initialized, but not yet
  * activated. NOTE:  This is the only list that is not prioritized.
  */
 
-extern dq_queue_t g_inactivetasks;
+extern dq_queue_t g_inactivetasks[CONFIG_BMP_NCPUS];
 
 /* This is the value of the last process ID assigned to a task */
 
-extern volatile pid_t g_lastpid;
+extern volatile pid_t g_lastpid[CONFIG_BMP_NCPUS];
 
 /* The following hash table is used for two things:
  *
@@ -241,8 +241,8 @@ extern volatile pid_t g_lastpid;
  * 2. Is used to quickly map a process ID into a TCB.
  */
 
-extern FAR struct tcb_s **g_pidhash;
-extern volatile int g_npidhash;
+extern FAR struct tcb_s **g_pidhash[CONFIG_BMP_NCPUS];
+extern volatile int g_npidhash[CONFIG_BMP_NCPUS];
 
 /* This is a table of task lists.  This table is indexed by the task stat
  * enumeration type (tstate_t) and provides a pointer to the associated
@@ -251,7 +251,7 @@ extern volatile int g_npidhash;
  * ordered list or not.
  */
 
-extern struct tasklist_s g_tasklisttable[NUM_TASK_STATES];
+extern struct tasklist_s g_tasklisttable[CONFIG_BMP_NCPUS][NUM_TASK_STATES];
 
 #ifndef CONFIG_SCHED_CPULOAD_NONE
 /* This is the total number of clock tick counts.  Essentially the

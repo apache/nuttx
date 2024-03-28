@@ -58,6 +58,14 @@ void arm_boot(void)
 
   arm_fpuconfig();
 
+#ifdef USE_EARLYSERIALINIT
+  /* Perform early serial initialization if we are going to use the serial
+   * driver.
+   */
+
+  arm_earlyserialinit();
+#endif
+
 #if defined(CONFIG_ARCH_HAVE_PSCI)
   arm_psci_init("hvc");
 #endif

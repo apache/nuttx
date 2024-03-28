@@ -60,8 +60,12 @@ typedef int (*holderhandler_t)(FAR struct semholder_s *pholder,
 /* Preallocated holder structures */
 
 #if CONFIG_SEM_PREALLOCHOLDERS > 0
-static struct semholder_s g_holderalloc[CONFIG_SEM_PREALLOCHOLDERS];
-static FAR struct semholder_s *g_freeholders;
+static struct semholder_s g_holderalloc[CONFIG_BMP_NCPUS]
+                                       [CONFIG_SEM_PREALLOCHOLDERS];
+static FAR struct semholder_s *g_freeholders[CONFIG_BMP_NCPUS];
+
+#define g_holderalloc() g_holderalloc[this_bcpu()]
+#define g_freeholders() g_freeholders[this_bcpu()]
 #endif
 
 /****************************************************************************
@@ -79,14 +83,14 @@ nxsem_allocholder(FAR sem_t *sem, FAR struct tcb_s *htcb)
    */
 
 #if CONFIG_SEM_PREALLOCHOLDERS > 0
-  pholder = g_freeholders;
+  pholder = g_freeholders();
   if (pholder != NULL)
     {
       /* Remove the holder from the free list and
        * put it into the semaphore's holder list
        */
 
-      g_freeholders  = pholder->flink;
+      g_freeholders()  = pholder->flink;
       pholder->flink = sem->hhead;
       sem->hhead     = pholder;
     }
@@ -221,8 +225,8 @@ static inline void nxsem_freeholder(FAR sem_t *sem,
 
   /* And put it in the free list */
 
-  pholder->flink = g_freeholders;
-  g_freeholders  = pholder;
+  pholder->flink = g_freeholders();
+  g_freeholders()  = pholder;
 #endif
 }
 
@@ -541,13 +545,13 @@ void nxsem_initialize_holders(void)
 
   /* Put all of the pre-allocated holder structures into the free list */
 
-  g_freeholders = g_holderalloc;
+  g_freeholders() = g_holderalloc();
   for (i = 0; i < (CONFIG_SEM_PREALLOCHOLDERS - 1); i++)
     {
-      g_holderalloc[i].flink = &g_holderalloc[i + 1];
+      g_holderalloc()[i].flink = &g_holderalloc[i + 1];
     }
 
-  g_holderalloc[CONFIG_SEM_PREALLOCHOLDERS - 1].flink = NULL;
+  g_holderalloc()[CONFIG_SEM_PREALLOCHOLDERS - 1].flink = NULL;
 #endif
 }
 
@@ -941,7 +945,7 @@ int nxsem_nfreeholders(void)
   FAR struct semholder_s *pholder;
   int n;
 
-  for (pholder = g_freeholders, n = 0; pholder; pholder = pholder->flink)
+  for (pholder = g_freeholders(), n = 0; pholder; pholder = pholder->flink)
     {
       n++;
     }

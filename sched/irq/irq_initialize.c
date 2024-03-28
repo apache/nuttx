@@ -47,11 +47,7 @@
 
 /* This is the interrupt vector table */
 
-#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
-struct irq_info_s g_irqvector[CONFIG_ARCH_NUSER_INTERRUPTS];
-#else
-struct irq_info_s g_irqvector[NR_IRQS];
-#endif
+struct irq_info_s g_irqvector[CONFIG_BMP_NCPUS][TAB_SIZE];
 
 /****************************************************************************
  * Public Functions
@@ -75,7 +71,7 @@ void irq_initialize(void)
 
   for (i = 0; i < TAB_SIZE; i++)
     {
-      g_irqvector[i].handler = irq_unexpected_isr;
+      g_irqvector()[i].handler = irq_unexpected_isr;
     }
 
 #ifdef CONFIG_IRQCHAIN

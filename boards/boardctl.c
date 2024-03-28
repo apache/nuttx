@@ -30,6 +30,7 @@
 #include <errno.h>
 #include <assert.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/lib/modlib.h>
 #include <nuttx/binfmt/symtab.h>
@@ -831,6 +832,30 @@ int boardctl(unsigned int cmd, uintptr_t arg)
 
           DEBUGASSERT(cause != NULL);
           ret = board_reset_cause(cause);
+        }
+        break;
+#endif
+
+#ifdef CONFIG_BOARDCTL_IRQ_AFFINITY
+      /* CMD:           BOARDIOC_IRQ_AFFINITY
+       * DESCRIPTION:   Set an IRQ affinity by software.
+       * ARG:           Integer array:
+                        member 0 is the interrupt number
+                        member 1 is the CPU index
+       * CONFIGURATION: CONFIG_BOARDCTL_IRQ_AFFINITY
+       * DEPENDENCIES:  Bound Multi-Processing (CONFIG_BMP)
+       */
+
+      case BOARDIOC_IRQ_AFFINITY:
+        {
+          FAR int *affinity = (FAR int *)arg;
+          cpu_set_t cpuset;
+
+          CPU_ZERO(&cpuset);
+          CPU_SET(affinity[1], &cpuset);
+
+          up_affinity_irq(affinity[0], cpuset);
+          ret = OK;
         }
         break;
 #endif

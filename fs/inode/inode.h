@@ -65,7 +65,7 @@
     } \
   while (0)
 
-#define inode_root() g_root_inode
+#define inode_root() g_root_inode[this_bcpu()]
 
 /****************************************************************************
  * Public Types
@@ -132,7 +132,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-EXTERN FAR struct inode *g_root_inode;
+EXTERN FAR struct inode *g_root_inode[CONFIG_BMP_NCPUS];
 
 /****************************************************************************
  * Public Function Prototypes

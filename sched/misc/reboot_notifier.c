@@ -32,7 +32,7 @@
  * Private Data
  ****************************************************************************/
 
-static ATOMIC_NOTIFIER_HEAD(g_reboot_notifier_list);
+static ATOMIC_NOTIFIER_HEAD(g_reboot_notifier_list[CONFIG_BMP_NCPUS]);
 
 /****************************************************************************
  * Public Functions
@@ -51,7 +51,7 @@ static ATOMIC_NOTIFIER_HEAD(g_reboot_notifier_list);
 
 void register_reboot_notifier(FAR struct notifier_block *nb)
 {
-  atomic_notifier_chain_register(&g_reboot_notifier_list, nb);
+  atomic_notifier_chain_register(&g_reboot_notifier_list[this_bcpu()], nb);
 }
 
 /****************************************************************************
@@ -67,7 +67,7 @@ void register_reboot_notifier(FAR struct notifier_block *nb)
 
 void unregister_reboot_notifier(FAR struct notifier_block *nb)
 {
-  atomic_notifier_chain_unregister(&g_reboot_notifier_list, nb);
+  atomic_notifier_chain_unregister(&g_reboot_notifier_list[this_bcpu()], nb);
 }
 
 /****************************************************************************
@@ -84,5 +84,6 @@ void unregister_reboot_notifier(FAR struct notifier_block *nb)
 
 void reboot_notifier_call_chain(unsigned long action, FAR void *data)
 {
-  atomic_notifier_call_chain(&g_reboot_notifier_list, action, data);
+  atomic_notifier_call_chain(&g_reboot_notifier_list[this_bcpu()],
+                             action, data);
 }

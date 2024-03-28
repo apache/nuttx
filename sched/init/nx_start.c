@@ -89,7 +89,7 @@
  * task, is always the IDLE task.
  */
 
-dq_queue_t g_readytorun;
+dq_queue_t g_readytorun[CONFIG_BMP_NCPUS];
 
 /* In order to support SMP, the function of the g_readytorun list changes,
  * The g_readytorun is still used but in the SMP case it will contain only:
@@ -129,7 +129,7 @@ dq_queue_t g_assignedtasks[CONFIG_SMP_NCPUS];
  * It is valid only when up_interrupt_context() returns true.
  */
 
-FAR struct tcb_s *g_running_tasks[CONFIG_SMP_NCPUS];
+FAR struct tcb_s *g_running_tasks[CONFIG_NR_CPUS];
 
 /* This is the list of all tasks that are ready-to-run, but cannot be placed
  * in the g_readytorun list because:  (1) They are higher priority than the
@@ -137,16 +137,16 @@ FAR struct tcb_s *g_running_tasks[CONFIG_SMP_NCPUS];
  * currently active task has disabled pre-emption.
  */
 
-dq_queue_t g_pendingtasks;
+dq_queue_t g_pendingtasks[CONFIG_BMP_NCPUS];
 
 /* This is the list of all tasks that are blocked waiting for a signal */
 
-dq_queue_t g_waitingforsignal;
+dq_queue_t g_waitingforsignal[CONFIG_BMP_NCPUS];
 
 #ifdef CONFIG_LEGACY_PAGING
 /* This is the list of all tasks that are blocking waiting for a page fill */
 
-dq_queue_t g_waitingforfill;
+dq_queue_t g_waitingforfill[CONFIG_BMP_NCPUS];
 #endif
 
 #ifdef CONFIG_SIG_SIGSTOP_ACTION
@@ -154,18 +154,18 @@ dq_queue_t g_waitingforfill;
  * via SIGSTOP or SIGTSTP
  */
 
-dq_queue_t g_stoppedtasks;
+dq_queue_t g_stoppedtasks[CONFIG_BMP_NCPUS];
 #endif
 
 /* This list of all tasks that have been initialized, but not yet
  * activated. NOTE:  This is the only list that is not prioritized.
  */
 
-dq_queue_t g_inactivetasks;
+dq_queue_t g_inactivetasks[CONFIG_BMP_NCPUS];
 
 /* This is the value of the last process ID assigned to a task */
 
-volatile pid_t g_lastpid;
+volatile pid_t g_lastpid[CONFIG_BMP_NCPUS];
 
 /* The following hash table is used for two things:
  *
@@ -174,8 +174,8 @@ volatile pid_t g_lastpid;
  * 2. Is used to quickly map a process ID into a TCB.
  */
 
-FAR struct tcb_s **g_pidhash;
-volatile int g_npidhash;
+FAR struct tcb_s **g_pidhash[CONFIG_BMP_NCPUS];
+volatile int g_npidhash[CONFIG_BMP_NCPUS];
 
 /* This is a table of task lists.  This table is indexed by the task state
  * enumeration type (tstate_t) and provides a pointer to the associated
@@ -184,14 +184,14 @@ volatile int g_npidhash;
  * ordered list or not.
  */
 
-struct tasklist_s g_tasklisttable[NUM_TASK_STATES];
+struct tasklist_s g_tasklisttable[CONFIG_BMP_NCPUS][NUM_TASK_STATES];
 
 /* This is the current initialization state.  The level of initialization
  * is only important early in the start-up sequence when certain OS or
  * hardware resources may not yet be available to the kernel logic.
  */
 
-uint8_t g_nx_initstate;  /* See enum nx_initstate_e */
+volatile uint8_t g_nx_initstate[CONFIG_BMP_NCPUS];  /* See enum nx_initstate_e */
 
 /****************************************************************************
  * Private Data
@@ -205,11 +205,11 @@ uint8_t g_nx_initstate;  /* See enum nx_initstate_e */
  * bringing up the rest of the system.
  */
 
-static struct task_tcb_s g_idletcb[CONFIG_SMP_NCPUS];
+static struct task_tcb_s g_idletcb[CONFIG_NR_CPUS];
 
 /* This is the name of the idle task */
 
-#if CONFIG_TASK_NAME_SIZE <= 0 || !defined(CONFIG_SMP)
+#if CONFIG_TASK_NAME_SIZE <= 0 || (!defined(CONFIG_SMP) && !defined(CONFIG_BMP))
 #  ifdef CONFIG_SMP
 static const char g_idlename[] = "CPU_Idle";
 #  else
@@ -222,7 +222,7 @@ static const char g_idlename[] = "Idle_Task";
  * do things little differently here for the IDLE tasks.
  */
 
-static FAR char *g_idleargv[CONFIG_SMP_NCPUS][2];
+static FAR char *g_idleargv[CONFIG_NR_CPUS][2];
 
 /****************************************************************************
  * Private Functions
@@ -242,7 +242,8 @@ static FAR char *g_idleargv[CONFIG_SMP_NCPUS][2];
 
 static void tasklist_initialize(void)
 {
-  FAR struct tasklist_s *tlist = (FAR void *)&g_tasklisttable;
+  FAR struct tasklist_s *tlist =
+    (FAR void *)&g_tasklisttable[this_bcpu()];
 
   /* TSTATE_TASK_INVALID */
 
@@ -354,7 +355,11 @@ static void idle_task_initialize(void)
   FAR dq_queue_t *tasklist;
   int i;
 
+#ifndef CONFIG_SMP
+  i = this_bcpu();
+#else
   for (i = 0; i < CONFIG_SMP_NCPUS; i++)
+#endif
     {
       tcb = &g_idletcb[i];
 
@@ -366,7 +371,11 @@ static void idle_task_initialize(void)
        */
 
       memset(tcb, 0, sizeof(struct task_tcb_s));
+#ifdef CONFIG_BMP
+      tcb->cmn.pid        = 0;
+#else
       tcb->cmn.pid        = i;
+#endif
       tcb->cmn.task_state = TSTATE_TASK_RUNNING;
 
       /* Set the entry point.  This is only for debug purposes.  NOTE: that
@@ -413,7 +422,7 @@ static void idle_task_initialize(void)
 #if CONFIG_TASK_NAME_SIZE > 0
       /* Set the IDLE task name */
 
-#  ifdef CONFIG_SMP
+#  if defined(CONFIG_SMP) || defined(CONFIG_BMP)
       snprintf(tcb->cmn.name, CONFIG_TASK_NAME_SIZE, "CPU%d IDLE", i);
 #  else
       strlcpy(tcb->cmn.name, g_idlename, CONFIG_TASK_NAME_SIZE);
@@ -465,11 +474,19 @@ static void idle_group_initialize(void)
 
   /* Assign the process ID(s) of ZERO to the idle task(s) */
 
+#ifndef CONFIG_SMP
+  i = this_bcpu();
+#else
   for (i = 0; i < CONFIG_SMP_NCPUS; i++)
+#endif
     {
       tcb = &g_idletcb[i];
 
+#ifdef CONFIG_BMP
+      hashndx = PIDHASH(0);
+#else
       hashndx = PIDHASH(i);
+#endif
       nxsched_pidhash()[hashndx] = &tcb->cmn;
 
       /* Allocate the IDLE group */

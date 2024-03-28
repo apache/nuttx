@@ -44,6 +44,8 @@
 #  error CONFIG_ARCH_NUSER_INTERRUPTS is not defined
 #endif
 
+#define g_irqvector() g_irqvector[this_bcpu()]
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -82,9 +84,10 @@ typedef CODE int (*irq_foreach_t)(int irq, FAR struct irq_info_s *info,
  */
 
 #ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
-extern struct irq_info_s g_irqvector[CONFIG_ARCH_NUSER_INTERRUPTS];
+extern struct irq_info_s g_irqvector[CONFIG_BMP_NCPUS]
+                                    [CONFIG_ARCH_NUSER_INTERRUPTS];
 #else
-extern struct irq_info_s g_irqvector[NR_IRQS];
+extern struct irq_info_s g_irqvector[CONFIG_BMP_NCPUS][NR_IRQS];
 #endif
 
 #ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE

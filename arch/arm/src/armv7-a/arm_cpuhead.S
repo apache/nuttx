@@ -34,7 +34,7 @@
 #include "chip.h"
 #include "arm_internal.h"
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP) || defined(CONFIG_BMP)
 
 	.file	"arm_cpuhead.S"
 
@@ -81,7 +81,7 @@
  *
  ****************************************************************************/
 
-#if CONFIG_SMP_NCPUS > 1
+#if CONFIG_NR_CPUS > 1
 	.global	__cpu1_start
 	.type	__cpu1_start, #function
 
@@ -104,7 +104,7 @@ __cpu1_start:
 	.long	.Lcpu1_stacktop
 	.size	__cpu1_start, .-__cpu1_start
 
-#if CONFIG_SMP_NCPUS > 2
+#if CONFIG_NR_CPUS > 2
 	.global	__cpu2_start
 	.type	__cpu2_start, #function
 
@@ -127,7 +127,7 @@ __cpu2_start:
 	.long	.Lcpu2_stacktop
 	.size	__cpu2_start, .-__cpu2_start
 
-#if CONFIG_SMP_NCPUS > 3
+#if CONFIG_NR_CPUS > 3
 	.global	__cpu3_start
 	.type	__cpu3_start, #function
 
@@ -150,13 +150,13 @@ __cpu3_start:
 	.long	.Lcpu3_stacktop
 	.size	__cpu3_start, .-__cpu3_start
 
-#if CONFIG_SMP_NCPUS > 4
-#  error This logic needs to extended for CONFIG_SMP_NCPUS > 4
+#if CONFIG_NR_CPUS > 4
+#  error This logic needs to extended for CONFIG_NR_CPUS > 4
 
-#endif /* CONFIG_SMP_NCPUS > 4 */
-#endif /* CONFIG_SMP_NCPUS > 3 */
-#endif /* CONFIG_SMP_NCPUS > 2 */
-#endif /* CONFIG_SMP_NCPUS > 1 */
+#endif /* CONFIG_NR_CPUS > 4 */
+#endif /* CONFIG_NR_CPUS > 3 */
+#endif /* CONFIG_NR_CPUS > 2 */
+#endif /* CONFIG_NR_CPUS > 1 */
 
 /****************************************************************************
  * Name: .Lcpu_start
@@ -458,7 +458,7 @@ __cpu3_start:
 
 	.section	.noinit, "aw"
 
-#if CONFIG_SMP_NCPUS > 1
+#if CONFIG_NR_CPUS > 1
 	.align	8
 	.globl	g_cpu1_idlestack
 	.type	g_cpu1_idlestack, object
@@ -468,7 +468,7 @@ g_cpu1_idlestack:
 .Lcpu1_stacktop:
 	.size	g_cpu1_idlestack, .Lcpu1_stacktop-g_cpu1_idlestack
 
-#if CONFIG_SMP_NCPUS > 2
+#if CONFIG_NR_CPUS > 2
 	.align	8
 	.globl	g_cpu2_idlestack
 	.type	g_cpu2_idlestack, object
@@ -478,7 +478,7 @@ g_cpu2_idlestack:
 .Lcpu2_stacktop:
 	.size	g_cpu2_idlestack, .Lcpu2_stacktop-g_cpu2_idlestack
 
-#if CONFIG_SMP_NCPUS > 3
+#if CONFIG_NR_CPUS > 3
 	.align	8
 	.globl	g_cpu3_idlestack
 	.type	g_cpu3_idlestack, object
@@ -488,12 +488,12 @@ g_cpu3_idlestack:
 .Lcpu3_stacktop:
 	.size	g_cpu3_idlestack, .Lcpu3_stacktop-g_cpu3_idlestack
 
-#if CONFIG_SMP_NCPUS > 4
-#  error This logic needs to extended for CONFIG_SMP_NCPUS > 4
+#if CONFIG_NR_CPUS > 4
+#  error This logic needs to extended for CONFIG_NR_CPUS > 4
 
-#endif /* CONFIG_SMP_NCPUS > 4 */
-#endif /* CONFIG_SMP_NCPUS > 3 */
-#endif /* CONFIG_SMP_NCPUS > 2 */
-#endif /* CONFIG_SMP_NCPUS > 1 */
+#endif /* CONFIG_NR_CPUS > 4 */
+#endif /* CONFIG_NR_CPUS > 3 */
+#endif /* CONFIG_NR_CPUS > 2 */
+#endif /* CONFIG_NR_CPUS > 1 */
 #endif /* CONFIG_SMP */
 	.end

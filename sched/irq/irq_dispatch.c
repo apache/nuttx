@@ -64,10 +64,10 @@
          elapsed = perf_gettime() - start; \
          if (ndx < NUSER_IRQS) \
            { \
-             g_irqvector[ndx].count++; \
-             if (elapsed > g_irqvector[ndx].time) \
+             g_irqvector()[ndx].count++; \
+             if (elapsed > g_irqvector()[ndx].time) \
                { \
-                 g_irqvector[ndx].time = elapsed; \
+                 g_irqvector()[ndx].time = elapsed; \
                } \
            } \
          if (CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQ > 0 && \
@@ -113,17 +113,17 @@ void irq_dispatch(int irq, FAR void *context)
       ndx = g_irqmap[irq];
       if (ndx < CONFIG_ARCH_NUSER_INTERRUPTS)
         {
-          if (g_irqvector[ndx].handler)
+          if (g_irqvector()[ndx].handler)
             {
-              vector = g_irqvector[ndx].handler;
-              arg    = g_irqvector[ndx].arg;
+              vector = g_irqvector()[ndx].handler;
+              arg    = g_irqvector()[ndx].arg;
             }
         }
 #else
-      if (g_irqvector[ndx].handler)
+      if (g_irqvector()[ndx].handler)
         {
-          vector = g_irqvector[ndx].handler;
-          arg    = g_irqvector[ndx].arg;
+          vector = g_irqvector()[ndx].handler;
+          arg    = g_irqvector()[ndx].arg;
         }
 #endif
     }

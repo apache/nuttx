@@ -211,7 +211,7 @@ int msgsnd(int msqid, FAR const void *msgp, size_t msgsz, int msgflg)
     {
       /* Now allocate the message. */
 
-      msg = (FAR struct msgbuf_s *)list_remove_head(&g_msgfreelist);
+      msg = (FAR struct msgbuf_s *)list_remove_head(&g_msgfreelist());
       if (msg == NULL)
         {
           ret = -ENOMEM;

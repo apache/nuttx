@@ -58,6 +58,8 @@
 
 #define MEMINFO_LINELEN 256
 
+#define g_procfs_meminfo() g_procfs_meminfo[this_bcpu()]
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -149,7 +151,7 @@ const struct procfs_operations g_memdump_operations =
 };
 #endif
 
-static FAR struct procfs_meminfo_entry_s *g_procfs_meminfo = NULL;
+static FAR struct procfs_meminfo_entry_s *g_procfs_meminfo[CONFIG_BMP_NCPUS];
 
 /****************************************************************************
  * Private Functions
@@ -305,7 +307,7 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
 
   FAR const struct procfs_meminfo_entry_s *entry;
 
-  for (entry = g_procfs_meminfo; entry != NULL; entry = entry->next)
+  for (entry = g_procfs_meminfo(); entry != NULL; entry = entry->next)
     {
       if (buflen > 0)
         {
@@ -481,7 +483,7 @@ static ssize_t memdump_write(FAR struct file *filep, FAR const char *buffer,
 #if CONFIG_MM_BACKTRACE > 0
   if (strcmp(buffer, "on") == 0)
     {
-      for (entry = g_procfs_meminfo; entry != NULL; entry = entry->next)
+      for (entry = g_procfs_meminfo(); entry != NULL; entry = entry->next)
         {
           entry->backtrace = true;
         }
@@ -490,7 +492,7 @@ static ssize_t memdump_write(FAR struct file *filep, FAR const char *buffer,
     }
   else if (strcmp(buffer, "off") == 0)
     {
-      for (entry = g_procfs_meminfo; entry != NULL; entry = entry->next)
+      for (entry = g_procfs_meminfo(); entry != NULL; entry = entry->next)
         {
           entry->backtrace = false;
         }
@@ -578,7 +580,7 @@ dump:
 #endif
     }
 
-  for (entry = g_procfs_meminfo; entry != NULL; entry = entry->next)
+  for (entry = g_procfs_meminfo(); entry != NULL; entry = entry->next)
     {
       mm_memdump(entry->heap, &dump);
     }
@@ -665,8 +667,8 @@ void procfs_register_meminfo(FAR struct procfs_meminfo_entry_s *entry)
       return;
     }
 
-  entry->next = g_procfs_meminfo;
-  g_procfs_meminfo = entry;
+  entry->next = g_procfs_meminfo();
+  g_procfs_meminfo() = entry;
 }
 
 /****************************************************************************
@@ -684,7 +686,7 @@ void procfs_unregister_meminfo(FAR struct procfs_meminfo_entry_s *entry)
 {
   FAR struct procfs_meminfo_entry_s **cur;
 
-  for (cur = &g_procfs_meminfo; *cur != NULL; cur = &(*cur)->next)
+  for (cur = &g_procfs_meminfo(); *cur != NULL; cur = &(*cur)->next)
     {
       if (*cur == entry)
         {

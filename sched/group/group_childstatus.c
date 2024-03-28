@@ -47,6 +47,8 @@
 #  undef CONFIG_DEBUG_CHILDSTATUS
 #endif
 
+#define g_child_pool() g_child_pool[this_bcpu()]
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -63,7 +65,7 @@ struct child_pool_s
  * Private Data
  ****************************************************************************/
 
-static struct child_pool_s g_child_pool;
+static struct child_pool_s g_child_pool[CONFIG_BMP_NCPUS];
 
 /****************************************************************************
  * Private Functions
@@ -134,11 +136,11 @@ void task_initialize(void)
 
   /* Save all of the child status structures in a free list */
 
-  prev = &g_child_pool.alloc[0];
-  g_child_pool.freelist = prev;
+  prev = &g_child_pool().alloc[0];
+  g_child_pool().freelist = prev;
   for (i = 0; i < CONFIG_PREALLOC_CHILDSTATUS; i++)
     {
-      curr        = &g_child_pool.alloc[i];
+      curr        = &g_child_pool().alloc[i];
       prev->flink = curr;
       prev        = curr;
     }
@@ -170,10 +172,10 @@ FAR struct child_status_s *group_alloc_child(void)
 
   /* Return the status block at the head of the free list */
 
-  ret = g_child_pool.freelist;
+  ret = g_child_pool().freelist;
   if (ret)
     {
-      g_child_pool.freelist = ret->flink;
+      g_child_pool().freelist = ret->flink;
       ret->flink            = NULL;
     }
   else
@@ -208,8 +210,8 @@ void group_free_child(FAR struct child_status_s *child)
 
   if (child)
     {
-      child->flink          = g_child_pool.freelist;
-      g_child_pool.freelist = child;
+      child->flink          = g_child_pool().freelist;
+      g_child_pool().freelist = child;
     }
 }
 
