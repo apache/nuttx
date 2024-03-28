@@ -225,4 +225,34 @@ FAR struct can_conn_s *can_nextconn(FAR struct can_conn_s *conn)
     }
 }
 
+/****************************************************************************
+ * Name: can_active()
+ *
+ * Description:
+ *   Traverse the list of NetLink connections that match dev
+ *
+ * Input Parameters:
+ *   dev  - The device to search for.
+ *   conn - The current connection; may be NULL to start the search at the
+ *          beginning
+ *
+ * Assumptions:
+ *   This function is called from NetLink device logic.
+ *
+ ****************************************************************************/
+
+FAR struct can_conn_s *can_active(FAR struct net_driver_s *dev,
+                                  FAR struct can_conn_s *conn)
+{
+  while ((conn = can_nextconn(conn)) != NULL)
+    {
+      if (conn->dev == NULL || conn->dev == dev)
+        {
+          break;
+        }
+    }
+
+  return conn;
+}
+
 #endif /* CONFIG_NET_CAN */
