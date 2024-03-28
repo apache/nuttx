@@ -206,11 +206,10 @@ function(nuttx_add_application)
     # using target_link_libraries for dependencies provides linking as well as
     # interface include and libraries
     foreach(dep ${DEPENDS})
+      nuttx_add_dependencies(TARGET ${TARGET} DEPENDS ${dep})
       get_target_property(dep_type ${dep} TYPE)
       if(${dep_type} STREQUAL "STATIC_LIBRARY")
         target_link_libraries(${TARGET} PRIVATE ${dep})
-      else()
-        add_dependencies(${TARGET} ${dep})
       endif()
     endforeach()
   endif()
