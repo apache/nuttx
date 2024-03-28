@@ -981,6 +981,7 @@ static int rptun_store_load(FAR void *store_, size_t offset,
 {
   FAR struct rptun_store_s *store = store_;
   FAR char *tmp;
+  ssize_t ret;
 
   if (pa == METAL_BAD_PHYS)
     {
@@ -1003,7 +1004,13 @@ static int rptun_store_load(FAR void *store_, size_t offset,
     }
 
   file_seek(&store->file, offset, SEEK_SET);
-  return file_read(&store->file, tmp, size);
+  ret = file_read(&store->file, tmp, size);
+  if (ret > 0)
+    {
+      metal_cache_flush(tmp, ret);
+    }
+
+  return ret;
 }
 #endif
 
