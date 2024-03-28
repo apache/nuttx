@@ -39,6 +39,18 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Special address description flags for the CAN_ID */
+
+#define CAN_EFF_FLAG 0x80000000  /* EFF/SFF is set in the MSB */
+#define CAN_RTR_FLAG 0x40000000  /* Remote transmission request */
+#define CAN_ERR_FLAG 0x20000000  /* Error message frame */
+
+/* Valid bits in CAN ID for frame formats */
+
+#define CAN_SFF_MASK 0x000007ff  /* Standard frame format (SFF) */
+#define CAN_EFF_MASK 0x1fffffff  /* Extended frame format (EFF) */
+#define CAN_ERR_MASK 0x1fffffff  /* Omit EFF, RTR, ERR flags */
+
 /* Ioctl Commands ***********************************************************/
 
 /* Ioctl commands supported by the upper half CAN driver.
@@ -298,6 +310,14 @@ struct can_response_s
   /* Message-specific data may follow */
 }; /* FIXME remove */
 
+/* Controller Area Network Identifier structure
+ *
+ *   Bit 0-28: CAN identifier (11/29 bit)
+ *   Bit 29:   Error message frame flag (0 = data frame, 1 = error message)
+ *   Bit 30:   Remote transmission request flag (1 = rtr frame)
+ *   Bit 31:   Frame format flag (0 = standard 11 bit, 1 = extended 29 bit)
+ */
+
 typedef uint32_t canid_t;
 
 /* Controller Area Network Error Message Frame Mask structure
@@ -321,12 +341,12 @@ typedef uint32_t can_err_mask_t;
 
 struct can_frame
 {
-  canid_t can_id;   /* 32 bit CAN_ID + EFF/RTR/ERR flags */
-  uint8_t  can_dlc; /* frame payload length in byte (0 .. CAN_MAX_DLEN) */
-  uint8_t  __pad;   /* padding */
-  uint8_t  __res0;  /* reserved / padding */
-  uint8_t  __res1;  /* reserved / padding */
-  uint8_t  data[CAN_MAX_DLEN] aligned_data(8);
+  canid_t can_id;  /* 32 bit CAN_ID + EFF/RTR/ERR flags */
+  uint8_t can_dlc; /* frame payload length in byte (0 .. CAN_MAX_DLEN) */
+  uint8_t __pad;   /* padding */
+  uint8_t __res0;  /* reserved / padding */
+  uint8_t __res1;  /* reserved / padding */
+  uint8_t data[CAN_MAX_DLEN] aligned_data(8);
 };
 
 /* struct canfd_frame - CAN flexible data rate frame structure
