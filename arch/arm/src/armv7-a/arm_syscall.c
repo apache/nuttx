@@ -590,7 +590,7 @@ uint32_t *arm_syscall(uint32_t *regs)
        * assertion logic for reporting crashes.
        */
 
-      g_running_tasks[this_cpu()] = this_task();
+      g_running_tasks[up_cpu_index()] = this_task();
 
       restore_critical_section();
       regs = (uint32_t *)CURRENT_REGS;

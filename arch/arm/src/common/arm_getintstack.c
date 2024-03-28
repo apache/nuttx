@@ -39,7 +39,7 @@
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 uintptr_t up_get_intstackbase(void)
 {
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP) || defined(CONFIG_BMP)
   return arm_intstack_alloc();
 #else
   return (uintptr_t)g_intstackalloc;
