@@ -4703,6 +4703,13 @@ config BOARDCTL_TESTSET
 		Enables support for the BOARDIOC_SPINLOCK boardctl() command.
 		Architecture specific logic must provide up_testset() interface.
 
+config BOARDCTL_IRQ_AFFINITY
+	bool "Set an IRQ affinity to CPUs by software"
+	default n
+	depends on SMP
+	---help---
+		Enables support for Set an IRQ affinity to CPUs by software.
+
 config BOARDCTL_IOCTL
 	bool "Board-specific boardctl() commands"
 	default n
