@@ -51,8 +51,8 @@ Expansion connector 2 features.
 
 Board documentation: https://wittetech.com/
 
-LEDs
-====
+BOARD-LEDs
+==========
 
 The LINUM-STM32H753BI has 3 software controllable LEDs.
 
@@ -474,3 +474,29 @@ This example use the timer 4 with channel 2 to generate a PWM output signal on b
     nsh> pwm -f 300 -t 3
     pwm_main: starting output with frequency: 300 duty: 0000bfff
     pwm_main: stopping output
+
+leds
+------
+
+Example to blink 3 leds, the example use the gpios(PB0, PB1 and PC13) located on the expancion IO board::
+
+    nsh> leds
+    leds_main: Starting the led_daemon
+    leds_main: led_daemon started
+
+    led_daemon (pid# 3): Running
+    led_daemon: Opening /dev/userleds
+    led_daemon: Supported LEDs 0x07
+    led_daemon: LED set 0x01
+    nsh> led_daemon: LED set 0x02
+    led_daemon: LED set 0x03
+    led_daemon: LED set 0x04
+    led_daemon: LED set 0x05
+    led_daemon: LED set 0x06
+    led_daemon: LED set 0x07
+    led_daemon: LED set 0x06
+    led_daemon: LED set 0x05
+    led_daemon: LED set 0x04
+    led_daemon: LED set 0x03
+    led_daemon: LED set 0x02
+    led_daemon: LED set 0x01
