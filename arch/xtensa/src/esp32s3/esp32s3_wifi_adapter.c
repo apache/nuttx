@@ -77,7 +77,16 @@
 #  endif
 #endif
 
-#include "esp_hal_wifi.h"
+#include "esp_log.h"
+#include "esp_mac.h"
+#include "esp_private/phy.h"
+#include "esp_private/wifi.h"
+#include "esp_random.h"
+#include "esp_timer.h"
+#include "esp_wpa.h"
+#include "periph_ctrl.h"
+#include "rom/ets_sys.h"
+#include "soc/soc_caps.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -272,6 +281,7 @@ static void wifi_clock_enable(void);
 static void wifi_clock_disable(void);
 static void wifi_rtc_enable_iso(void);
 static void wifi_rtc_disable_iso(void);
+static int64_t esp32s3_timer_get_time(void);
 static int32_t esp_nvs_set_i8(uint32_t handle, const char *key,
                               int8_t value);
 static int32_t esp_nvs_get_i8(uint32_t handle, const char *key,
@@ -335,15 +345,6 @@ static void *coex_schm_curr_phase_get_wrapper(void);
 static int coex_register_start_cb_wrapper(int (* cb)(void));
 static int coex_schm_process_restart_wrapper(void);
 static int coex_schm_register_cb_wrapper(int type, int(*cb)(int));
-
-/****************************************************************************
- * Public Functions declaration
- ****************************************************************************/
-
-int64_t esp_timer_get_time(void);
-void esp_fill_random(void *buf, size_t len);
-uint32_t esp_log_timestamp(void);
-uint8_t esp_crc8(const uint8_t *p, uint32_t len);
 
 /****************************************************************************
  * Private Data
@@ -424,7 +425,7 @@ coex_adapter_funcs_t g_coex_adapter_funcs =
   ._is_in_isr = is_in_isr_wrapper,
   ._malloc_internal =  esp_malloc_internal,
   ._free = esp_free,
-  ._esp_timer_get_time = esp_timer_get_time,
+  ._esp_timer_get_time = esp32s3_timer_get_time,
   ._timer_disarm = esp_timer_disarm,
   ._timer_done = esp32s3_timer_done,
   ._timer_setfn = esp_timer_setfn,
@@ -491,8 +492,8 @@ wifi_osi_funcs_t g_wifi_osi_funcs =
       esp_dport_access_stall_other_cpu_end,
   ._wifi_apb80m_request = wifi_apb80m_request,
   ._wifi_apb80m_release = wifi_apb80m_release,
-  ._phy_disable = esp32s3_phy_disable,
-  ._phy_enable = esp32s3_phy_enable,
+  ._phy_disable = esp_phy_disable,
+  ._phy_enable = esp_phy_enable,
   ._phy_update_country_info = esp32s3_phy_update_country_info,
   ._read_mac = esp_wifi_read_mac,
   ._timer_arm = esp_timer_arm,
@@ -505,7 +506,7 @@ wifi_osi_funcs_t g_wifi_osi_funcs =
   ._wifi_clock_disable = wifi_clock_disable,
   ._wifi_rtc_enable_iso = wifi_rtc_enable_iso,
   ._wifi_rtc_disable_iso = wifi_rtc_disable_iso,
-  ._esp_timer_get_time = esp_timer_get_time,
+  ._esp_timer_get_time = esp32s3_timer_get_time,
   ._nvs_set_i8 = esp_nvs_set_i8,
   ._nvs_get_i8 = esp_nvs_get_i8,
   ._nvs_set_u8 = esp_nvs_set_u8,
@@ -914,7 +915,6 @@ static bool IRAM_ATTR wifi_is_from_isr(void)
 
 static void *esp_spin_lock_create(void)
 {
-#ifdef CONFIG_SMP
   spinlock_t *lock;
   int tmp;
 
@@ -929,11 +929,6 @@ static void *esp_spin_lock_create(void)
   spin_initialize(lock, SP_UNLOCKED);
 
   return lock;
-#else
-  /* If return NULL, code may check fail  */
-
-  return (void *)1;
-#endif
 }
 
 /****************************************************************************
@@ -952,11 +947,7 @@ static void *esp_spin_lock_create(void)
 
 static void esp_spin_lock_delete(void *lock)
 {
-#ifdef CONFIG_SMP
   kmm_free(lock);
-#else
-  DEBUGASSERT((int)lock == 1);
-#endif
 }
 
 /****************************************************************************
@@ -1811,8 +1802,8 @@ static int32_t esp_task_create_pinned_to_core(void *entry,
   int ret;
   cpu_set_t cpuset;
 #endif
-
   uint32_t target_prio = prio;
+
   if (target_prio < ESP_MAX_PRIORITIES)
     {
       target_prio += esp_task_get_max_priority() - ESP_MAX_PRIORITIES;
@@ -2749,8 +2740,7 @@ static void esp_timer_arm_us(void *ptimer, uint32_t us, bool repeat)
 
 static void wifi_reset_mac(void)
 {
-  modifyreg32(SYSCON_WIFI_RST_EN_REG, 0, SYSTEM_WIFIMAC_RST);
-  modifyreg32(SYSCON_WIFI_RST_EN_REG, SYSTEM_WIFIMAC_RST, 0);
+  periph_module_reset(PERIPH_WIFI_MODULE);
 }
 
 /****************************************************************************
@@ -2769,7 +2759,7 @@ static void wifi_reset_mac(void)
 
 static void wifi_clock_enable(void)
 {
-  modifyreg32(SYSTEM_WIFI_CLK_EN_REG, 0, SYSTEM_WIFI_CLK_WIFI_EN_M);
+  wifi_module_enable();
 }
 
 /****************************************************************************
@@ -2788,7 +2778,7 @@ static void wifi_clock_enable(void)
 
 static void wifi_clock_disable(void)
 {
-  modifyreg32(SYSTEM_WIFI_CLK_EN_REG, SYSTEM_WIFI_CLK_WIFI_EN_M, 0);
+  wifi_module_disable();
 }
 
 /****************************************************************************
@@ -2816,7 +2806,7 @@ static void wifi_rtc_disable_iso(void)
 }
 
 /****************************************************************************
- * Name: esp_timer_get_time
+ * Name: esp32s3_timer_get_time
  *
  * Description:
  *   Get system time of type int64_t
@@ -2829,7 +2819,7 @@ static void wifi_rtc_disable_iso(void)
  *
  ****************************************************************************/
 
-int64_t esp_timer_get_time(void)
+int64_t esp32s3_timer_get_time(void)
 {
   return (int64_t)esp32s3_rt_timer_time_us();
 }
@@ -3115,38 +3105,6 @@ static int32_t esp_nvs_erase_key(uint32_t handle, const char *key)
   DEBUGPANIC();
 
   return -1;
-}
-
-/****************************************************************************
- * Name: esp_fill_random
- *
- * Description:
- *   Fill random data int given buffer of given length
- *
- * Input Parameters:
- *   buf - buffer pointer
- *   len - buffer length
- *
- * Returned Value:
- *
- ****************************************************************************/
-
-void esp_fill_random(void *buf, size_t len)
-{
-  uint8_t *p = (uint8_t *)buf;
-  uint32_t tmp;
-  uint32_t n;
-
-  while (len > 0)
-    {
-      tmp = esp_random();
-      n = len < 4 ? len : 4;
-
-      memcpy(p, &tmp, n);
-
-      p += n;
-      len -= n;
-    }
 }
 
 /****************************************************************************
@@ -3446,10 +3404,13 @@ static void *esp_calloc_internal(size_t n, size_t size)
   return xtensa_imm_calloc(n, size);
 #else
   void *ptr = kmm_calloc(n, size);
-  if (esp32s3_ptr_extram(ptr))
+  if (ptr != NULL)
     {
-      kmm_free(ptr);
-      return NULL;
+      if (esp32s3_ptr_extram(ptr))
+        {
+          kmm_free(ptr);
+          return NULL;
+        }
     }
 
   return ptr;
@@ -3478,10 +3439,13 @@ static void *esp_zalloc_internal(size_t size)
   return xtensa_imm_zalloc(size);
 #else
   void *ptr = kmm_zalloc(size);
-  if (esp32s3_ptr_extram(ptr))
+  if (ptr != NULL)
     {
-      kmm_free(ptr);
-      return NULL;
+      if (esp32s3_ptr_extram(ptr))
+        {
+          kmm_free(ptr);
+          return NULL;
+        }
     }
 
   return ptr;
@@ -4143,6 +4107,8 @@ static IRAM_ATTR void esp_wifi_tx_done_cb(uint8_t ifidx, uint8_t *data,
     }
 }
 
+#ifdef ESP32S3_WLAN_HAS_STA
+
 /****************************************************************************
  * Name: esp_wifi_auth_trans
  *
@@ -4242,6 +4208,8 @@ static int esp_wifi_cipher_trans(uint32_t wifi_cipher)
 
   return cipher_mode;
 }
+
+#endif /* ESP32S3_WLAN_HAS_STA */
 
 /****************************************************************************
  * Name: esp_freq_to_channel
@@ -4399,10 +4367,6 @@ int coexist_printf(const char *format, ...)
 }
 
 /****************************************************************************
- * Functions needed by libwpa_supplicant.a
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -4434,88 +4398,6 @@ int32_t esp_event_send_internal(esp_event_base_t event_base,
 
   ret = esp_event_post(event_base, event_id, event_data,
                        event_data_size, ticks_to_wait);
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: esp_wifi_init
- *
- * Description:
- *   Initialize Wi-Fi
- *
- * Input Parameters:
- *   config - Initialization config parameters
- *
- * Returned Value:
- *   0 if success or others if fail
- *
- ****************************************************************************/
-
-int32_t esp_wifi_init(const wifi_init_config_t *config)
-{
-  int32_t ret;
-
-#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
-  ret = coex_init();
-  if (ret)
-    {
-      wlerr("ERROR: Failed to initialize coex error=%d\n", ret);
-      return ret;
-    }
-#endif
-
-  esp_wifi_internal_set_log_level(WIFI_LOG_DEBUG);
-
-  ret = esp_wifi_init_internal(config);
-  if (ret)
-    {
-      wlerr("Failed to initialize Wi-Fi error=%d\n", ret);
-      return ret;
-    }
-
-  ret = esp_supplicant_init();
-  if (ret)
-    {
-      wlerr("Failed to initialize WPA supplicant error=%d\n", ret);
-      esp_wifi_deinit_internal();
-      return ret;
-    }
-
-  return 0;
-}
-
-/****************************************************************************
- * Name: esp_wifi_deinit
- *
- * Description:
- *   Deinitialize Wi-Fi and free resource
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   0 if success or others if fail
- *
- ****************************************************************************/
-
-int32_t esp_wifi_deinit(void)
-{
-  int ret;
-
-  ret = esp_supplicant_deinit();
-  if (ret)
-    {
-      wlerr("Failed to deinitialize supplicant\n");
-      return ret;
-    }
-
-  ret = esp_wifi_deinit_internal();
-  if (ret != 0)
-    {
-      wlerr("Failed to deinitialize Wi-Fi\n");
-      return ret;
-    }
 
   return ret;
 }
@@ -5717,6 +5599,8 @@ int esp_wifi_sta_bitrate(struct iwreq *iwr, bool set)
   return OK;
 }
 
+#endif /* ESP32S3_WLAN_HAS_STA */
+
 /****************************************************************************
  * Name: esp_wifi_sta_get_txpower
  *
@@ -5797,7 +5681,7 @@ int esp_wifi_sta_txpower(struct iwreq *iwr, bool set)
 }
 
 /****************************************************************************
- * Name: esp_wifi_sta_get_channel_range
+ * Name: esp_wifi_sta_channel
  *
  * Description:
  *   Get station range of channel parameters.
@@ -5909,6 +5793,8 @@ int esp_wifi_sta_country(struct iwreq *iwr, bool set)
 
   return OK;
 }
+
+#ifdef ESP32S3_WLAN_HAS_STA
 
 /****************************************************************************
  * Name: esp_wifi_sta_rssi

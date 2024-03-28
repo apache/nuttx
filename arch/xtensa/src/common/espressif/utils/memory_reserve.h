@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32/esp32_dac.h
+ * arch/xtensa/src/common/espressif/utils/memory_reserve.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,46 +18,68 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32_ESP32_DAC_H
-#define __ARCH_XTENSA_SRC_ESP32_ESP32_DAC_H
+#pragma once
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <nuttx/analog/dac.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include "sdkconfig.h"
 
-/****************************************************************************
- * Pre-processor definitions
- ****************************************************************************/
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
+/* Region descriptor holds a description for a particular region of
+ * memory reserved on this SoC for a particular use (ie not available
+ * for stack/heap usage.)
+ */
+
+typedef struct
+{
+  intptr_t start;
+  intptr_t end;
+} soc_reserved_region_t;
+
 /****************************************************************************
- * Public Data
+ * Helper Macros/Inline Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32_dac_initialize
+ * Name: SOC_RESERVE_MEMORY_REGION
  *
  * Description:
- *   Initialize the DAC.
+ *   Macro to reserve a fixed region of RAM (hardcoded addresses) for a
+ *   particular purpose. Usually used to mark out memory addresses needed
+ *   for hardware or ROM code purposes. Not intended for user code which
+ *   can use normal C static allocation instead.
  *
  * Input Parameters:
- *   None
+ *   START - Start address to be reserved.
+ *   END   - One memory address after the address of the last byte to be
+ *           reserved.
+ *           (ie length of the reserved region is (END - START) in bytes.)
+ *   NAME -  Name for the reserved region. Must be a valid variable name,
+ *           unique to this source file.
  *
  * Returned Value:
- *   Valid dac device structure reference on success; a NULL on failure.
+ *   None
  *
  ****************************************************************************/
 
-struct dac_dev_s *esp32_dac_initialize(void);
+#define SOC_RESERVE_MEMORY_REGION(START, END, NAME) \
+  __attribute__((section(".reserved_memory_address"))) \
+  __attribute__((used)) \
+  static soc_reserved_region_t reserved_region_##NAME = { START, END };
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_DAC_H */
+#ifdef __cplusplus
+}
+#endif

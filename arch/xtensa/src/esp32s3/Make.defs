@@ -30,7 +30,6 @@ CHIP_CSRCS  = esp32s3_irq.c esp32s3_clockconfig.c esp32s3_region.c
 CHIP_CSRCS += esp32s3_systemreset.c esp32s3_user.c esp32s3_allocateheap.c
 CHIP_CSRCS += esp32s3_wdt.c esp32s3_gpio.c esp32s3_lowputc.c esp32s3_serial.c
 CHIP_CSRCS += esp32s3_rtc_gpio.c esp32s3_libc_stubs.c esp32s3_spi_timing.c
-CHIP_CSRCS += esp32s3_periph.c
 
 # Configuration-dependent ESP32-S3 files
 
@@ -195,7 +194,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = 55b60d9ed1930f7a284fe0555a17db441cee9ab4
+	ESP_HAL_3RDPARTY_VERSION = 966f1bbf7d80d3fac9a43f414e864985cbcfd680
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL

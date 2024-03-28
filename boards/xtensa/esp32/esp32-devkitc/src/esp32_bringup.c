@@ -161,10 +161,6 @@
 #  include "esp32_max6675.h"
 #endif
 
-#ifdef CONFIG_ESP32_RMT
-#  include "esp32_rmt.h"
-#endif
-
 #ifdef CONFIG_DAC
 #  include "esp32_board_dac.h"
 #endif
@@ -646,14 +642,6 @@ int esp32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: lcddev_register() failed: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_ESP32_RMT
-  ret = board_rmt_initialize(RMT_CHANNEL, RMT_OUTPUT_PIN);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: board_rmt_initialize() failed: %d\n", ret);
     }
 #endif
 

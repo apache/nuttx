@@ -1,5 +1,5 @@
 ############################################################################
-# arch/xtensa/src/esp32s3/Wireless.mk
+# arch/xtensa/src/esp32/Wireless.mk
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -18,30 +18,29 @@
 #
 ############################################################################
 
-INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)bt$(DELIM)include$(DELIM)esp32c3$(DELIM)include
+INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)bt$(DELIM)include$(DELIM)$(CHIP_SERIES)$(DELIM)include
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_coex$(DELIM)include
-INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)soc$(DELIM)$(CHIP_SERIES)$(DELIM)include
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)nuttx$(DELIM)$(CHIP_SERIES)$(DELIM)include
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)nuttx$(DELIM)include$(DELIM)esp_wifi
 
-EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)bt$(DELIM)controller$(DELIM)lib_esp32c3_family$(DELIM)$(CHIP_SERIES)
+EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)bt$(DELIM)controller$(DELIM)lib_esp32$(DELIM)$(CHIP_SERIES)
 EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_coex$(DELIM)lib$(DELIM)$(CHIP_SERIES)
 EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_phy$(DELIM)lib$(DELIM)$(CHIP_SERIES)
 EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_wifi$(DELIM)lib$(DELIM)$(CHIP_SERIES)
 
-EXTRA_LIBS += -lphy -lcoexist
+EXTRA_LIBS += -lrtc -lphy -lcoexist
 
 # Wireless interfaces.
 
-CHIP_CSRCS += esp32s3_wireless.c
+CHIP_CSRCS += esp32_wireless.c
 
-ifeq ($(CONFIG_ESP32S3_BLE),y)
-CHIP_CSRCS += esp32s3_ble_adapter.c esp32s3_ble.c
-EXTRA_LIBS += -lbtbb -lbtdm_app
+ifeq ($(CONFIG_ESP32_BLE),y)
+CHIP_CSRCS += esp32_ble_adapter.c esp32_ble.c
+EXTRA_LIBS += -lbtdm_app
 endif
 
-ifeq ($(CONFIG_ESP32S3_WIFI),y)
-CHIP_CSRCS += esp32s3_wlan.c esp32s3_wifi_utils.c esp32s3_wifi_adapter.c
+ifeq ($(CONFIG_ESP32_WIFI),y)
+CHIP_CSRCS += esp32_wlan.c esp32_wifi_utils.c esp32_wifi_adapter.c
 EXTRA_LIBS += -lcore -lnet80211 -lpp
 
 ifeq ($(CONFIG_WPA_WAPI_PSK),y)

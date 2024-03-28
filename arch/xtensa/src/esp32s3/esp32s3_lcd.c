@@ -41,12 +41,13 @@
 #include "esp32s3_gpio.h"
 #include "esp32s3_dma.h"
 #include "esp32s3_irq.h"
-#include "esp32s3_periph.h"
 
 #include "xtensa.h"
 #include "hardware/esp32s3_system.h"
 #include "hardware/esp32s3_gpio_sigmap.h"
 #include "hardware/esp32s3_lcd_cam.h"
+
+#include "periph_ctrl.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -735,7 +736,7 @@ static void esp32s3_lcd_enableclk(void)
   lcdinfo("PCLK=%d/(%d + %d/%d)\n", ESP32S3_LCD_CLK_MHZ,
           ESP32S3_LCD_CLK_N, clk_b, clk_a);
 
-  esp32s3_periph_module_enable(PERIPH_LCD_CAM_MODULE);
+  periph_module_enable(PERIPH_LCD_CAM_MODULE);
 
   regval = (1 << LCD_CAM_LCD_CLKCNT_N_S) |
            LCD_CAM_CLK_EN_M |

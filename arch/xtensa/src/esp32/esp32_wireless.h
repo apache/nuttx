@@ -32,8 +32,16 @@
 #include <nuttx/list.h>
 
 #include "xtensa_attr.h"
+#include "esp32_rt_timer.h"
 
-#include "espidf_wifi.h"
+#include "esp_log.h"
+#include "esp_mac.h"
+#include "esp_private/phy.h"
+#include "esp_private/wifi.h"
+#include "esp_random.h"
+#include "esp_timer.h"
+#include "rom/ets_sys.h"
+#include "soc/soc_caps.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -82,87 +90,6 @@ struct esp_queuecache_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp_read_mac
- *
- * Description:
- *   Read MAC address from efuse
- *
- * Input Parameters:
- *   mac  - MAC address buffer pointer
- *   type - MAC address type
- *
- * Returned Value:
- *   0 if success or -1 if fail
- *
- ****************************************************************************/
-
-int32_t esp_read_mac(uint8_t *mac, esp_mac_type_t type);
-
-/****************************************************************************
- * Name: esp32_phy_enable
- *
- * Description:
- *   Initialize PHY hardware
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void esp32_phy_enable(void);
-
-/****************************************************************************
- * Name: esp32_phy_disable
- *
- * Description:
- *   Deinitialize PHY hardware
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void esp32_phy_disable(void);
-
-/****************************************************************************
- * Name: esp32_phy_enable_clock
- *
- * Description:
- *   Enable PHY clock
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void esp32_phy_enable_clock(void);
-
-/****************************************************************************
- * Name: esp32_phy_disable_clock
- *
- * Description:
- *   Disable PHY clock
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void esp32_phy_disable_clock(void);
-
-/****************************************************************************
  * Functions needed by libphy.a
  ****************************************************************************/
 
@@ -183,38 +110,6 @@ void esp32_phy_disable_clock(void);
 uint32_t IRAM_ATTR esp_dport_access_reg_read(uint32_t reg);
 
 /****************************************************************************
- * Name: phy_enter_critical
- *
- * Description:
- *   Enter critical state
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   CPU PS value
- *
- ****************************************************************************/
-
-uint32_t IRAM_ATTR phy_enter_critical(void);
-
-/****************************************************************************
- * Name: phy_exit_critical
- *
- * Description:
- *   Exit from critical state
- *
- * Input Parameters:
- *   level - CPU PS value
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void IRAM_ATTR phy_exit_critical(uint32_t level);
-
-/****************************************************************************
  * Name: phy_printf
  *
  * Description:
@@ -229,6 +124,90 @@ void IRAM_ATTR phy_exit_critical(uint32_t level);
  ****************************************************************************/
 
 int phy_printf(const char *format, ...) printf_like(1, 2);
+
+/****************************************************************************
+ * Name: esp_timer_create
+ *
+ * Description:
+ *   Create timer with given arguments
+ *
+ * Input Parameters:
+ *   create_args - Timer arguments data pointer
+ *   out_handle  - Timer handle pointer
+ *
+ * Returned Value:
+ *   0 if success or -1 if fail
+ *
+ ****************************************************************************/
+
+int32_t esp_timer_create(const esp_timer_create_args_t *create_args,
+                         esp_timer_handle_t *out_handle);
+
+/****************************************************************************
+ * Name: esp_timer_start_once
+ *
+ * Description:
+ *   Start timer with one shot mode
+ *
+ * Input Parameters:
+ *   timer      - Timer handle pointer
+ *   timeout_us - Timeout value by micro second
+ *
+ * Returned Value:
+ *   0 if success or -1 if fail
+ *
+ ****************************************************************************/
+
+int32_t esp_timer_start_once(esp_timer_handle_t timer, uint64_t timeout_us);
+
+/****************************************************************************
+ * Name: esp_timer_start_periodic
+ *
+ * Description:
+ *   Start timer with periodic mode
+ *
+ * Input Parameters:
+ *   timer  - Timer handle pointer
+ *   period - Timeout value by micro second
+ *
+ * Returned Value:
+ *   0 if success or -1 if fail
+ *
+ ****************************************************************************/
+
+int32_t esp_timer_start_periodic(esp_timer_handle_t timer, uint64_t period);
+
+/****************************************************************************
+ * Name: esp_timer_stop
+ *
+ * Description:
+ *   Stop timer
+ *
+ * Input Parameters:
+ *   timer  - Timer handle pointer
+ *
+ * Returned Value:
+ *   0 if success or -1 if fail
+ *
+ ****************************************************************************/
+
+int32_t esp_timer_stop(esp_timer_handle_t timer);
+
+/****************************************************************************
+ * Name: esp_timer_delete
+ *
+ * Description:
+ *   Delete timer and free resource
+ *
+ * Input Parameters:
+ *   timer  - Timer handle pointer
+ *
+ * Returned Value:
+ *   0 if success or -1 if fail
+ *
+ ****************************************************************************/
+
+int32_t esp_timer_delete(esp_timer_handle_t timer);
 
 /****************************************************************************
  * Name: esp32_phy_update_country_info

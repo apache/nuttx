@@ -463,17 +463,21 @@ static inline void spi_reset_regbits(struct esp32_spiflash_s *priv,
 static void esp32_spiflash_opstart(void)
 {
   struct tcb_s *tcb = this_task();
-  int cpu = up_cpu_index();
   int saved_priority = tcb->sched_priority;
+  int cpu;
 #ifdef CONFIG_SMP
-  int other_cpu = cpu ? 0 : 1;
+  int other_cpu;
 #endif
-
-  DEBUGASSERT(cpu == 0 || cpu == 1);
-
   /* Temporary raise schedule priority */
 
   nxsched_set_priority(tcb, SCHED_PRIORITY_MAX);
+
+  cpu = up_cpu_index();
+#ifdef CONFIG_SMP
+  other_cpu = cpu == 1 ? 0 : 1;
+#endif
+
+  DEBUGASSERT(cpu == 0 || cpu == 1);
 
 #ifdef CONFIG_SMP
   DEBUGASSERT(other_cpu == 0 || other_cpu == 1);
