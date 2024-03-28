@@ -745,4 +745,11 @@ config WIFI_SIM_CONFDIR
 		BSS configuration will be accessed.  This is a string and should not
 		include any trailing '/'.
 
+config WIFI_SIM_NUMBER
+	int "Number of Simulated WiFi Device"
+	default 0
+	depends on DRIVERS_WIFI_SIM
+	---help---
+		The number of simulated wifi network devices.
+
 endif # NETDEVICES
