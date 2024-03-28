@@ -508,10 +508,10 @@ int up_prioritize_irq(int irq, int priority)
  ****************************************************************************/
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
-uintptr_t sparc_intstack_top(void)
+uintptr_t sparc_intstack_top(int cpu)
 {
 #if defined(CONFIG_SMP)
-  return g_cpu_intstack_top[up_cpu_index()];
+  return g_cpu_intstack_top[cpu];
 #else
   return g_cpu_intstack_top[0];
 #endif
@@ -528,10 +528,10 @@ uintptr_t sparc_intstack_top(void)
  ****************************************************************************/
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
-uintptr_t sparc_intstack_alloc(void)
+uintptr_t sparc_intstack_alloc(int cpu)
 {
 #if defined(CONFIG_SMP)
-  return g_cpu_intstack_top[up_cpu_index()] - INTSTACK_SIZE;
+  return g_cpu_intstack_top[cpu] - INTSTACK_SIZE;
 #else
   return g_cpu_intstack_top[0] - INTSTACK_SIZE;
 #endif

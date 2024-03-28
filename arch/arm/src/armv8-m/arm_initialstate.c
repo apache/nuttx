@@ -187,9 +187,9 @@ void up_initial_state(struct tcb_s *tcb)
 noinline_function void arm_initialize_stack(void)
 {
 #ifdef CONFIG_SMP
-  uint32_t stack = (uint32_t)arm_intstack_top();
+  uint32_t stack = (uint32_t)arm_intstack_top(up_cpu_index());
 #ifdef CONFIG_ARMV8M_STACKCHECK_HARDWARE
-  uint32_t stacklim = (uint32_t)arm_intstack_alloc();
+  uint32_t stacklim = (uint32_t)arm_intstack_alloc(up_cpu_index());
 #endif
 #else
   uint32_t stack = (uint32_t)g_intstacktop;

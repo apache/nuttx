@@ -187,7 +187,8 @@ void board_crashdump(uintptr_t sp, struct tcb_s *tcb,
   /* Get the limits on the interrupt stack memory */
 
 #ifdef CONFIG_SMP
-  pdump->info.stacks.interrupt.top = (uint32_t)arm_intstack_top();
+  pdump->info.stacks.interrupt.top =
+      (uint32_t)arm_intstack_top(up_cpu_index());
 #else
   pdump->info.stacks.interrupt.top = (uint32_t)g_intstacktop;
 #endif

@@ -198,8 +198,8 @@ void sparc_sigdeliver(void);
 /* Interrupt handling *******************************************************/
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
-uintptr_t sparc_intstack_alloc(void);
-uintptr_t sparc_intstack_top(void);
+uintptr_t sparc_intstack_alloc(int cpu);
+uintptr_t sparc_intstack_top(int cpu);
 #endif
 
 /* Chip-specific functions **************************************************/
