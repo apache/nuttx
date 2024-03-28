@@ -305,10 +305,6 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
 
       /* The following IPv4 socket options are defined, but not implemented */
 
-      case IP_MULTICAST_LOOP:         /* Set/read boolean that determines
-                                       * whether sent multicast packets
-                                       * should be looped back to local
-                                       * sockets. */
       case IP_UNBLOCK_SOURCE:         /* Unblock previously blocked multicast
                                        * source */
       case IP_BLOCK_SOURCE:           /* Stop receiving multicast data from
@@ -327,8 +323,12 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
         nwarn("WARNING: Unimplemented IPv4 option: %d\n", option);
         ret = -ENOSYS;
         break;
-#endif /* CONFIG_NET_IGMP */
 
+      case IP_MULTICAST_LOOP:         /* Set/read boolean that determines
+                                       * whether sent multicast packets
+                                       * should be looped back to local
+                                       * sockets. */
+#endif /* CONFIG_NET_IGMP */
       case IP_PKTINFO:
         {
           FAR struct socket_conn_s *conn;

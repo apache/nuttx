@@ -153,3 +153,41 @@ void netdev_iob_release(FAR struct net_driver_s *dev)
 
   dev->d_buf = NULL;
 }
+
+/****************************************************************************
+ * Name: netdev_iob_clone
+ *
+ * Description:
+ *   Backup the current iob buffer for a given NIC by cloning it.
+ *
+ * Assumptions:
+ *   The caller has locked the network.
+ *
+ ****************************************************************************/
+
+FAR struct iob_s *netdev_iob_clone(FAR struct net_driver_s *dev,
+                                   bool throttled)
+{
+  FAR struct iob_s *iob;
+  int ret;
+
+  iob = iob_tryalloc(throttled);
+  if (iob == NULL)
+    {
+      nwarn("WARNING: IOB alloc failed for dev %s!\n", dev->d_ifname);
+      return NULL;
+    }
+
+  iob_reserve(iob, CONFIG_NET_LL_GUARDSIZE);
+  ret = iob_clone_partial(dev->d_iob, dev->d_iob->io_pktlen, 0,
+                          iob, 0, throttled, false);
+  if (ret < 0)
+    {
+      iob_free_chain(iob);
+      nwarn("WARNING: IOB clone failed for dev %s, ret=%d!\n",
+            dev->d_ifname, ret);
+      return NULL;
+    }
+
+  return iob;
+}
