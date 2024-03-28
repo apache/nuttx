@@ -51,7 +51,9 @@ endif()
 if(NOT CONFIG_BUILD_FLAT)
   list(APPEND SRCS riscv_task_start.c riscv_pthread_start.c
        riscv_signal_dispatch.c)
-  target_sources(arch_interface PRIVATE riscv_signal_handler.S)
+  if(CONFIG_BUILD_PROTECTED)
+    target_sources(arch_interface PRIVATE riscv_signal_handler.S)
+  endif()
 endif()
 
 if(CONFIG_SCHED_BACKTRACE)
