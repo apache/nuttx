@@ -120,7 +120,7 @@ size_t up_check_tcbstack(struct tcb_s *tcb)
 }
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-size_t up_check_intstack(void)
+size_t up_check_intstack(int cpu)
 {
   return or1k_stack_check((uintptr_t)g_intstackalloc,
                           (CONFIG_ARCH_INTERRUPTSTACK & ~3));

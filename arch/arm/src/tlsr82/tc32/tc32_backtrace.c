@@ -477,7 +477,7 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
           ret = backtrace_push(
 #  ifdef CONFIG_SMP
-                               arm_intstack_top(),
+                               arm_intstack_top(up_cpu_index()),
 #  else
                                g_intstacktop,
 #  endif /* CONFIG_SMP */

@@ -350,8 +350,8 @@ void arm_pminitialize(void);
 /* Interrupt handling *******************************************************/
 
 #if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
-uintptr_t arm_intstack_alloc(void);
-uintptr_t arm_intstack_top(void);
+uintptr_t arm_intstack_alloc(int cpu);
+uintptr_t arm_intstack_top(int cpu);
 #endif
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 7

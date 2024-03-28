@@ -696,9 +696,9 @@ void up_enable_irq(int irq)
  ****************************************************************************/
 
 #if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
-uintptr_t xtensa_intstack_top(void)
+uintptr_t xtensa_intstack_top(int cpu)
 {
-  return g_cpu_intstack_top[up_cpu_index()];
+  return g_cpu_intstack_top[cpu];
 }
 
 /****************************************************************************
@@ -710,9 +710,9 @@ uintptr_t xtensa_intstack_top(void)
  *
  ****************************************************************************/
 
-uintptr_t xtensa_intstack_alloc(void)
+uintptr_t xtensa_intstack_alloc(int cpu)
 {
-  return g_cpu_intstack_top[up_cpu_index()] - INTSTACK_SIZE;
+  return g_cpu_intstack_top[cpu] - INTSTACK_SIZE;
 }
 #endif
 

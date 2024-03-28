@@ -168,8 +168,8 @@ INIT_STACK_ARRAY_DEFINE_EXTERN(g_interrupt_fiq_stacks, CONFIG_SMP_NCPUS,
                           INTSTACK_SIZE);
 #endif
 
-uintptr_t arm64_intstack_alloc(void);
-uintptr_t arm64_intstack_top(void);
+uintptr_t arm64_intstack_alloc(int cpu);
+uintptr_t arm64_intstack_top(int cpu);
 #else
 /* idle thread stack for primary core */
 

@@ -260,7 +260,7 @@ int up_backtrace(struct tcb_s *tcb,
           unsigned long top;
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
 #  ifdef CONFIG_SMP
-          top = arm_intstack_top();
+          top = arm_intstack_top(up_cpu_index());
 #  else
           top = (unsigned long)g_intstacktop;
 #  endif /* CONFIG_SMP */

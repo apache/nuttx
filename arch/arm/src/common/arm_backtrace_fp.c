@@ -122,7 +122,7 @@ int up_backtrace(struct tcb_s *tcb,
         {
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
 #  ifdef CONFIG_SMP
-          istacklimit = (void *)arm_intstack_top();
+          istacklimit = (void *)arm_intstack_top(up_cpu_index());
 #  else
           istacklimit = g_intstacktop;
 #  endif /* CONFIG_SMP */

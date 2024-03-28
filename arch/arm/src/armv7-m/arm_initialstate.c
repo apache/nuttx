@@ -181,7 +181,7 @@ void up_initial_state(struct tcb_s *tcb)
 noinline_function void arm_initialize_stack(void)
 {
 #ifdef CONFIG_SMP
-  uint32_t stack = (uint32_t)arm_intstack_top();
+  uint32_t stack = (uint32_t)arm_intstack_top(up_cpu_index());
 #else
   uint32_t stack = (uint32_t)g_intstacktop;
 #endif

@@ -2536,12 +2536,12 @@ void irq_dispatch(int irq, FAR void *context);
 struct tcb_s;
 size_t up_check_tcbstack(FAR struct tcb_s *tcb);
 #if defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 3
-size_t up_check_intstack(void);
+size_t up_check_intstack(int cpu);
 #endif
 #endif
 
 #if defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 3
-uintptr_t up_get_intstackbase(void);
+uintptr_t up_get_intstackbase(int cpu);
 #endif
 
 /****************************************************************************

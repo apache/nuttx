@@ -194,7 +194,7 @@ static void dump_stack(FAR const char *tag, uintptr_t sp,
 static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
 {
 #if CONFIG_ARCH_INTERRUPTSTACK > 0
-  uintptr_t intstack_base = up_get_intstackbase();
+  uintptr_t intstack_base = up_get_intstackbase(up_cpu_index());
   size_t intstack_size = CONFIG_ARCH_INTERRUPTSTACK;
   uintptr_t intstack_top = intstack_base + intstack_size;
   uintptr_t intstack_sp = 0;
@@ -243,7 +243,7 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
                  intstack_base,
                  intstack_size,
 #ifdef CONFIG_STACK_COLORATION
-                 up_check_intstack()
+                 up_check_intstack(up_cpu_index())
 #else
                  0
 #endif
@@ -405,17 +405,8 @@ static void dump_backtrace(FAR struct tcb_s *tcb, FAR void *arg)
 
 static void dump_tasks(void)
 {
-#if CONFIG_ARCH_INTERRUPTSTACK > 0 && defined(CONFIG_STACK_COLORATION)
-  size_t stack_used = up_check_intstack();
-  size_t stack_filled = 0;
-
-  if (stack_used > 0)
-    {
-      /* Use fixed-point math with one decimal place */
-
-      stack_filled = 10 * 100 *
-                     stack_used / CONFIG_ARCH_INTERRUPTSTACK;
-    }
+#if CONFIG_ARCH_INTERRUPTSTACK > 0
+  int cpu;
 #endif
 
   /* Dump interesting properties of each task in the crash environment */
@@ -438,31 +429,50 @@ static void dump_tasks(void)
          "   COMMAND\n");
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 0
-  _alert("  ----   ---"
-#  ifdef CONFIG_SMP
-         "  ----"
-#  endif
-         " --- --------"
-         " ------- ---"
-         " ------- ----------"
-         " ----------------"
-         " %p"
-         "   %7u"
+  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
+    {
 #  ifdef CONFIG_STACK_COLORATION
-         "   %7zu   %3zu.%1zu%%%c"
+      size_t stack_used = up_check_intstack(cpu);
+      size_t stack_filled = 0;
+
+      if (stack_used > 0)
+        {
+          /* Use fixed-point math with one decimal place */
+
+          stack_filled = 10 * 100 *
+                         stack_used / CONFIG_ARCH_INTERRUPTSTACK;
+        }
+#  endif
+
+      _alert("  ----   ---"
+#  ifdef CONFIG_SMP
+             "  %4d"
+#  endif
+             " --- --------"
+             " ------- ---"
+             " ------- ----------"
+             " ----------------"
+             " %p"
+             "   %7u"
+#  ifdef CONFIG_STACK_COLORATION
+             "   %7zu   %3zu.%1zu%%%c"
 #  endif
 #  ifndef CONFIG_SCHED_CPULOAD_NONE
-         "     ----"
+             "     ----"
 #  endif
-         "   irq\n"
-         , (FAR void *)up_get_intstackbase()
-         , CONFIG_ARCH_INTERRUPTSTACK
+             "   irq\n"
+#ifdef CONFIG_SMP
+             , cpu
+#endif
+             , (FAR void *)up_get_intstackbase(cpu)
+             , CONFIG_ARCH_INTERRUPTSTACK
 #  ifdef CONFIG_STACK_COLORATION
-         , stack_used
-         , stack_filled / 10, stack_filled % 10,
-         (stack_filled >= 10 * 80 ? '!' : ' ')
+             , stack_used
+             , stack_filled / 10, stack_filled % 10,
+             (stack_filled >= 10 * 80 ? '!' : ' ')
 #  endif
-        );
+            );
+    }
 #endif
 
   nxsched_foreach(dump_task, NULL);

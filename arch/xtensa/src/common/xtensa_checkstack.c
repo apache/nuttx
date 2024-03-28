@@ -163,9 +163,9 @@ size_t up_check_tcbstack(struct tcb_s *tcb)
 }
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
-size_t up_check_intstack(void)
+size_t up_check_intstack(int cpu)
 {
-  return xtensa_stack_check(up_get_intstackbase(), INTSTACK_SIZE);
+  return xtensa_stack_check(up_get_intstackbase(cpu), INTSTACK_SIZE);
 }
 #endif
 
