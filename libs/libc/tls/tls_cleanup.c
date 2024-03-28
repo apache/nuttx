@@ -62,7 +62,7 @@ void tls_cleanup_pop(FAR struct tls_info_s *tls, int execute)
       /* Get the index to the last cleaner function pushed onto the stack */
 
       ndx = tls->tl_tos - 1;
-      DEBUGASSERT(ndx >= 0 && ndx < CONFIG_TLS_NCLEANUP);
+      DEBUGASSERT(ndx < CONFIG_TLS_NCLEANUP);
 
       /* Should we execute the cleanup routine at the top of the stack? */
 
