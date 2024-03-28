@@ -778,11 +778,6 @@ static int perf_event_sched_in(FAR struct perf_event_s *event)
       return -EPERM;
     }
 
-  if (ctx->tcb != NULL && ctx->tcb != this_task())
-    {
-      return -EAGAIN;
-    }
-
 #ifdef CONFIG_SMP
   event->oncpu = this_cpu();
 #endif
