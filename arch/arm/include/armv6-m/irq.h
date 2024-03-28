@@ -394,17 +394,7 @@ static inline_function void up_set_current_regs(uint32_t *regs)
 noinstrument_function
 static inline_function bool up_interrupt_context(void)
 {
-#ifdef CONFIG_SMP
-  irqstate_t flags = up_irq_save();
-#endif
-
-  bool ret = up_current_regs() != NULL;
-
-#ifdef CONFIG_SMP
-  up_irq_restore(flags);
-#endif
-
-  return ret;
+  return getipsr() != 0;
 }
 
 /****************************************************************************
