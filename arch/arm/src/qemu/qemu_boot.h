@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/qemu/qemu_boot.c
+ * arch/arm/src/qemu/qemu_boot.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,67 +18,66 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_QEMU_QEMU_BOOT_H
+#define __ARCH_ARM_SRC_QEMU_QEMU_BOOT_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include "arm_internal.h"
-
-#include "qemu_boot.h"
-#include "qemu_irq.h"
-#include "qemu_memorymap.h"
-
-#ifdef CONFIG_DEVICE_TREE
-#  include <nuttx/fdt.h>
-#endif
+#include <nuttx/compiler.h>
+#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <arch/chip/chip.h>
 
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arm_boot
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Name: qemu_cpu_enable
  *
  * Description:
- *   Complete boot operations started in arm_head.S
+ *   Called from CPU0 to enable all other CPUs.  The enabled CPUs will start
+ *   execution at __cpuN_start and, after very low-level CPU initialization
+ *   has been performed, will branch to arm_cpu_boot()
+ *   (see arch/arm/src/armv7-a/smp.h)
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
-void arm_boot(void)
-{
-  /* Perf init */
-
-  up_perf_init(0);
-
-  /* Set the page table for section */
-
-  qemu_setupmappings();
-
-  arm_fpuconfig();
-
-#if defined(CONFIG_ARCH_HAVE_PSCI)
-  arm_psci_init("hvc");
+#ifdef CONFIG_SMP
+void qemu_cpu_enable(void);
+#else
+#  define qemu_cpu_enable()
 #endif
 
-#ifdef CONFIG_DEVICE_TREE
-  fdt_register((const char *)0x40000000);
-#endif
-
-#ifdef USE_EARLYSERIALINIT
-  /* Perform early serial initialization if we are going to use the serial
-   * driver.
-   */
-
-  arm_earlyserialinit();
-#endif
-
-  /* Now we can enable all other CPUs.  The enabled CPUs will start execution
-   * at __cpuN_start and, after very low-level CPU initialization has been
-   * performed, will branch to arm_cpu_boot()
-   * (see arch/arm/src/armv7-a/smp.h)
-   */
-
-  qemu_cpu_enable();
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_QEMU_QEMU_BOOT_H */
