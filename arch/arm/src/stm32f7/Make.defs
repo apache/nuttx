@@ -93,6 +93,10 @@ ifeq ($(CONFIG_STM32F7_I2C),y)
 CHIP_CSRCS += stm32_i2c.c
 endif
 
+ifeq ($(CONFIG_STM32F7_I2S),y)
+CHIP_CSRCS += stm32_i2s.c
+endif
+
 ifeq ($(CONFIG_STM32F7_SPI),y)
 CHIP_CSRCS += stm32_spi.c
 endif

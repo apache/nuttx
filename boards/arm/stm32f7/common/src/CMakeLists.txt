@@ -28,4 +28,8 @@ if(CONFIG_SENSORS_BMI270_I2C)
   list(APPEND SRCS stm32_bmi270.c)
 endif()
 
+if(CONFIG_AUDIO_CS4344)
+  list(APPEND SRCS stm32_cs4344.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
