@@ -61,17 +61,15 @@ volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
 static inline void xtensa_color_intstack(void)
 {
 #ifdef CONFIG_SMP
-  uint32_t *ptr = (uint32_t *)xtensa_intstack_alloc(up_cpu_index());
-#else
-  uint32_t *ptr = (uint32_t *)g_intstackalloc;
-#endif
-  ssize_t size;
+  int cpu;
 
-  for (size = INTSTACK_SIZE * CONFIG_SMP_NCPUS;
-       size > 0; size -= sizeof(uint32_t))
+  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
     {
-      *ptr++ = INTSTACK_COLOR;
+      xtensa_stack_color((void *)xtensa_intstack_alloc(cpu), INTSTACK_SIZE);
     }
+#else
+  xtensa_stack_color((void *)g_intstackalloc, INTSTACK_SIZE);
+#endif
 }
 #else
 #  define xtensa_color_intstack()
