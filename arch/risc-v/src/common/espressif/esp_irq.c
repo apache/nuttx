@@ -153,7 +153,7 @@ static int esp_cpuint_alloc(int irq)
 {
   uint32_t bitmask;
   uint32_t intset;
-  int cpuint;
+  int cpuint = ESP_NCPUINTS;
 
   /* Check if there are CPU interrupts with the requested properties
    * available.
