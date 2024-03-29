@@ -64,7 +64,7 @@ endif
 ARCHCFLAGS += -fno-common -Wno-attributes
 ARCHCXXFLAGS += -fno-common -Wno-attributes -nostdinc++
 
-ARCHCPUFLAGS = -fno-pic -mcmodel=large -fno-stack-protector -mno-red-zone -mrdrnd
+ARCHCPUFLAGS = -fno-pic -mcmodel=large -mno-red-zone -mrdrnd
 ARCHPICFLAGS = -fPIC
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 
@@ -77,6 +77,29 @@ endif
 
 ifeq ($(CONFIG_HOST_MACOS),y)
 CROSSDEV = x86_64-elf-
+endif
+
+ifneq ($(CONFIG_CXX_STANDARD),)
+  ARCHCXXFLAGS += -std=$(CONFIG_CXX_STANDARD)
+endif
+
+ifeq ($(CONFIG_STACK_CANARIES),y)
+  ARCHOPTIMIZATION += -fstack-protector-all
+else
+  ARCHOPTIMIZATION += -fno-stack-protector
+endif
+
+ifneq ($(CONFIG_CXX_EXCEPTION),y)
+  ARCHCXXFLAGS += -fno-exceptions -fcheck-new
+endif
+
+ifneq ($(CONFIG_CXX_RTTI),y)
+  ARCHCXXFLAGS += -fno-rtti
+endif
+
+ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
+  LDFLAGS          += --gc-sections
+  ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
 endif
 
 ifeq ($(CONFIG_DEBUG_LINK_WHOLE_ARCHIVE),y)
@@ -101,6 +124,7 @@ ifeq ($(CONFIG_LIBCXX),y)
 endif
 
 CC = $(CROSSDEV)gcc
+CXX = $(CROSSDEV)g++
 CPP = $(CROSSDEV)gcc -E -x c
 LD = $(CROSSDEV)ld
 STRIP = $(CROSSDEV)strip --strip-unneeded
@@ -173,16 +197,14 @@ ifeq ($(CONFIG_ARCH_X86_64_AVX512VBMI),y)
   ARCHCPUFLAGS += -mavx512vbmi
 endif
 
-
 CFLAGS := $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
+CXXFLAGS := $(ARCHOPTIMIZATION) $(ARCHCXXFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 AFLAGS := $(CFLAGS) -D__ASSEMBLY__
 
 ifeq ($(CONFIG_HOST_MACOS),y)
 AFLAGS += -Wa,--divide
 endif
-
-LDFLAGS += -nostdlib -static
 
 # Loadable module definitions
 
