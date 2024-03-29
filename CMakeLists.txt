@@ -779,8 +779,14 @@ if(CONFIG_BUILD_PROTECTED)
     OUTPUT_VARIABLE nuttx_user_libgcc)
 
   # reset link options for userspace to prevent sections from being accidentally
-  # deleted
-  set_target_properties(nuttx_user PROPERTIES LINK_OPTIONS "")
+  # deleted Toolchain link options
+  get_target_property(nuttx_user_LINK_OPTIONS nuttx_user LINK_OPTIONS)
+  list(REMOVE_ITEM nuttx_user_LINK_OPTIONS "-Wl,--gc-sections")
+  list(REMOVE_ITEM nuttx_user_LINK_OPTIONS "-Wl,--cref")
+  list(REMOVE_ITEM nuttx_user_LINK_OPTIONS "-Wl,-Map=nuttx.map")
+  list(REMOVE_ITEM nuttx_user_LINK_OPTIONS "-Wl,--entry=__start")
+  set_target_properties(nuttx_user PROPERTIES LINK_OPTIONS
+                                              "${nuttx_user_LINK_OPTIONS}")
 
   target_link_options(
     nuttx_user PRIVATE -nostartfiles -nodefaultlibs
