@@ -57,18 +57,15 @@ volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
 static inline void arm_color_intstack(void)
 {
 #ifdef CONFIG_SMP
-  uint32_t *ptr = (uint32_t *)arm_intstack_alloc(up_cpu_index());
-#else
-  uint32_t *ptr = (uint32_t *)g_intstackalloc;
-#endif
-  ssize_t size;
+  int cpu;
 
-  for (size = ((CONFIG_ARCH_INTERRUPTSTACK & ~3) * CONFIG_SMP_NCPUS);
-       size > 0;
-       size -= sizeof(uint32_t))
+  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
     {
-      *ptr++ = INTSTACK_COLOR;
+      arm_stack_color((void *)arm_intstack_alloc(cpu), INTSTACK_SIZE);
     }
+#else
+  arm_stack_color((void *)g_intstackalloc, INTSTACK_SIZE);
+#endif
 }
 #else
 #  define arm_color_intstack()

@@ -137,11 +137,15 @@ uintptr_t arm64_intstack_top(int cpu)
 static void up_color_intstack(void)
 {
 #ifdef CONFIG_SMP
-  void *ptr = (void *)g_interrupt_stacks[up_cpu_index()];
+  int cpu;
+
+  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
+    {
+      arm64_stack_color((void *)arm64_intstack_alloc(cpu), INTSTACK_SIZE);
+    }
 #else
-  void *ptr = (void *)g_interrupt_stack;
+  arm64_stack_color((void *)g_interrupt_stack, INTSTACK_SIZE);
 #endif
-  arm64_stack_color(ptr, INTSTACK_SIZE);
 }
 #else
 #  define up_color_intstack()
