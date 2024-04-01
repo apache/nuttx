@@ -18,6 +18,25 @@
 #
 ############################################################################
 
+# NuttX is sometimes built as a native target.
+# In that case, the __NuttX__ macro is predefined by the compiler.
+# https://github.com/NuttX/buildroot
+#
+# In other cases, __NuttX__ is an ordinary user-definded macro.
+# It's especially the case for NuttX sim, which is a target to run
+# the entire NuttX as a program on the host OS, which can be Linux,
+# macOS, Windows, etc.
+# https://cwiki.apache.org/confluence/display/NUTTX/NuttX+Simulation
+# In that case, the host OS compiler is used to build NuttX.
+# Thus, eg. NuttX sim on macOS is built with __APPLE__.
+# We #undef predefined macros for those possible host OSes here
+# because the OS APIs this library should use are of NuttX,
+# not the host OS.
+
+ARCHDEFINES += -U_AIX -U_WIN32 -U__APPLE__ -U__FreeBSD__
+ARCHDEFINES += -U__NetBSD__ -U__linux__ -U__sun__ -U__unix__
+ARCHDEFINES += -U__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
+
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION = $(CONFIG_DEBUG_SYMBOLS_LEVEL)
 endif
@@ -53,6 +72,23 @@ endif
 
 ifeq ($(CONFIG_DEBUG_LINK_WHOLE_ARCHIVE),y)
   LDFLAGS += --whole-archive
+endif
+
+ifeq ($(CONFIG_LIBCXX),y)
+  # Linux C++ ABI seems vary.
+  # Probably __GLIBCXX__ is the best bet.
+  # XXX what to do for windows?
+
+  CXXFLAGS += -D__GLIBCXX__
+
+  # Disable availability macros.
+  # The availability on Host OS is not likely appropriate for NuttX.
+  #
+  # Note: When compiling NuttX apps, we undefine __APPLE__.
+  # It makes libcxx __availability header unhappy.
+  # https://github.com/llvm/llvm-project/blob/2e2999cd44f6ec9a5e396fa0113497ea82582f69/libcxx/include/__availability#L258
+
+  CXXFLAGS += -D_LIBCPP_DISABLE_AVAILABILITY
 endif
 
 CC = $(CROSSDEV)gcc
