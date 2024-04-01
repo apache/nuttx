@@ -232,6 +232,7 @@
 #define GICR_TYPER_VLPIS            BIT(1)
 #define GICR_TYPER_DIRECTLPIS       BIT(3)
 #define GICR_TYPER_LAST             BIT(4)
+#define GICR_TYPER_AFFINITY_VALUE_SHIFT		32
 
 /* GICR_WAKER */
 #define GICR_WAKER_PS               1

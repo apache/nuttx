@@ -889,14 +889,52 @@ static int gic_validate_redist_version(void)
   return 0;
 }
 
+
+static uint64_t arm64_gic_mpidr_to_affinity(uint64_t mpidr)
+{
+  uint64_t aff0, aff1, aff2, aff3;
+
+  aff0 = MPIDR_AFFLVL(mpidr, 0);
+  aff1 = MPIDR_AFFLVL(mpidr, 1);
+  aff2 = MPIDR_AFFLVL(mpidr, 2);
+  aff3 = MPIDR_AFFLVL(mpidr, 3);
+
+  return (aff3 << 24 | aff2 << 16 | aff1 << 8 | aff0);
+
+}
+
+static uint64_t arm64_gic_iterate_rdists(void)
+{
+	uint64_t aff = arm64_gic_mpidr_to_affinity(GET_MPIDR());
+
+	for (uint64_t rdist_addr = CONFIG_GICR_BASE;
+		rdist_addr < CONFIG_GICR_BASE + CONFIG_GICR_OFFSET * CONFIG_SMP_NCPUS;
+		rdist_addr += CONFIG_GICR_OFFSET) 
+  {
+		uint64_t val = getreg64(rdist_addr + GICR_TYPER);
+		uint64_t gicr_aff = (val >> GICR_TYPER_AFFINITY_VALUE_SHIFT);
+
+		if (aff == gicr_aff) 
+    {
+			return rdist_addr;
+		}
+	}
+
+	return (uint64_t)0;
+}
+
 static void arm64_gic_init(void)
 {
   uint8_t   cpu;
   int       err;
 
   cpu             = this_cpu();
-  gic_rdists[cpu] = CONFIG_GICR_BASE +
-                    up_cpu_index() * CONFIG_GICR_OFFSET;
+  gic_rdists[cpu] = arm64_gic_iterate_rdists();
+  if (!gic_rdists[cpu])
+  {
+    sinfo("redistributor typer affinity is not matched.\n");
+    return;
+  }
 
   err = gic_validate_redist_version();
   if (err)
