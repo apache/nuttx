@@ -34,11 +34,15 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ROUNDUP(x, y)     (((x) + (y) - 1) / (y) * (y))
-
 /* Fix the I/O Buffer size with specified alignment size */
 
-#define IOB_ALIGN_SIZE    ROUNDUP(sizeof(struct iob_s), CONFIG_IOB_ALIGNMENT)
+#ifdef CONFIG_IOB_ALLOC
+#  define IOB_ALIGN_SIZE  ROUNDUP(sizeof(struct iob_s) + CONFIG_IOB_BUFSIZE, \
+                                  CONFIG_IOB_ALIGNMENT)
+#else
+#  define IOB_ALIGN_SIZE  ROUNDUP(sizeof(struct iob_s), CONFIG_IOB_ALIGNMENT)
+#endif
+
 #define IOB_BUFFER_SIZE   (IOB_ALIGN_SIZE * CONFIG_IOB_NBUFFERS + \
                            CONFIG_IOB_ALIGNMENT - 1)
 
@@ -138,8 +142,12 @@ void iob_initialize(void)
 
       /* Add the pre-allocate I/O buffer to the head of the free list */
 
-      iob->io_flink  = g_iob_freelist;
-      g_iob_freelist = iob;
+      iob->io_flink   = g_iob_freelist;
+#ifdef CONFIG_IOB_ALLOC
+      iob->io_bufsize = CONFIG_IOB_BUFSIZE;
+      iob->io_data    = (FAR uint8_t *)(iob + 1);
+#endif
+      g_iob_freelist  = iob;
     }
 
 #if CONFIG_IOB_NCHAINS > 0
