@@ -30,6 +30,9 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#ifdef CONFIG_IOB_ALLOC
+#  include <nuttx/kmalloc.h>
+#endif
 #include <nuttx/mm/iob.h>
 
 #include "iob.h"
@@ -111,6 +114,15 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
       iobinfo("next=%p io_pktlen=%u io_len=%u\n",
               next, next->io_pktlen, next->io_len);
     }
+
+#ifdef CONFIG_IOB_ALLOC
+  if (iob->io_free != NULL)
+    {
+      iob->io_free(iob->io_data);
+      kmm_free(iob);
+      return next;
+    }
+#endif
 
   /* Free the I/O buffer by adding it to the head of the free or the
    * committed list. We don't know what context we are called from so

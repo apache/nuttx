@@ -30,6 +30,9 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
+#ifdef CONFIG_IOB_ALLOC
+#  include <nuttx/kmalloc.h>
+#endif
 #include <nuttx/mm/iob.h>
 
 #include "iob.h"
@@ -197,6 +200,23 @@ static FAR struct iob_s *iob_allocwait(bool throttled, unsigned int timeout)
   return iob;
 }
 
+#ifdef CONFIG_IOB_ALLOC
+/****************************************************************************
+ * Name: iob_free_dynamic
+ *
+ * Description:
+ *   Dummy free callback function, do nothing.
+ *
+ * Input Parameters:
+ *   data -
+ *
+ ****************************************************************************/
+
+static void iob_free_dynamic(FAR void *data)
+{
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -329,3 +349,91 @@ FAR struct iob_s *iob_tryalloc(bool throttled)
   spin_unlock_irqrestore(&g_iob_lock, flags);
   return NULL;
 }
+
+#ifdef CONFIG_IOB_ALLOC
+
+/****************************************************************************
+ * Name: iob_alloc_dynamic
+ *
+ * Description:
+ *   Allocate an I/O buffer and playload from heap
+ *
+ * Input Parameters:
+ *   size    - The size of the io_data that is allocated.
+ *
+ *             +---------+
+ *             |   IOB   |
+ *             | io_data |--+
+ *             | buffer  |<-+
+ *             +---------+
+ *
+ ****************************************************************************/
+
+FAR struct iob_s *iob_alloc_dynamic(uint16_t size)
+{
+  FAR struct iob_s *iob;
+  size_t alignsize;
+
+  alignsize = ROUNDUP(sizeof(struct iob_s), CONFIG_IOB_ALIGNMENT) + size;
+
+  iob = kmm_memalign(CONFIG_IOB_ALIGNMENT, alignsize);
+  if (iob)
+    {
+      iob->io_flink   = NULL;             /* Not in a chain */
+      iob->io_len     = 0;                /* Length of the data in the entry */
+      iob->io_offset  = 0;                /* Offset to the beginning of data */
+      iob->io_bufsize = size;             /* Total length of the iob buffer */
+      iob->io_pktlen  = 0;                /* Total length of the packet */
+      iob->io_free    = iob_free_dynamic; /* Customer free callback */
+      iob->io_data    = (FAR uint8_t *)ROUNDUP((uintptr_t)(iob + 1),
+                                               CONFIG_IOB_ALIGNMENT);
+    }
+
+  return iob;
+}
+
+/****************************************************************************
+ * Name: iob_alloc_with_data
+ *
+ * Description:
+ *   Allocate an I/O buffer from heap and attach the external payload
+ *
+ * Input Parameters:
+ *   data    - Make io_data point to a specific address, the caller is
+ *             responsible for the memory management. The caller should
+ *             ensure that the memory is not freed before the iob is freed.
+ *
+ *             +---------+  +-->+--------+
+ *             |   IOB   |  |   |  data  |
+ *             | io_data |--+   +--------+
+ *             +---------+
+ *
+ *   size    - The size of the data parameter
+ *   free_cb - Notify the caller when the iob is freed. The caller can
+ *             perform additional operations on the data before it is freed.
+ *             The free_cb is called when the iob is freed.
+ *
+ ****************************************************************************/
+
+FAR struct iob_s *iob_alloc_with_data(FAR void *data, uint16_t size,
+                                      iob_free_cb_t free_cb)
+{
+  FAR struct iob_s *iob;
+
+  DEBUGASSERT(free_cb != NULL);
+
+  iob = kmm_malloc(sizeof(struct iob_s));
+  if (iob)
+    {
+      iob->io_flink   = NULL;    /* Not in a chain */
+      iob->io_len     = 0;       /* Length of the data in the entry */
+      iob->io_offset  = 0;       /* Offset to the beginning of data */
+      iob->io_bufsize = size;    /* Total length of the iob buffer */
+      iob->io_pktlen  = 0;       /* Total length of the packet */
+      iob->io_free    = free_cb; /* Customer free callback */
+      iob->io_data    = data;
+    }
+
+  return iob;
+}
+#endif
