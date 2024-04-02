@@ -37,7 +37,7 @@
 #include "stm32.h"
 #include "linum-stm32h753bi.h"
 
-#ifdef CONFIG_USERLED
+#ifndef CONFIG_ARCH_LEDS
 
 /****************************************************************************
  * Private Data
@@ -47,9 +47,9 @@
 
 static uint32_t g_ledcfg[BOARD_NLEDS] =
 {
-  GPIO_LED1,
-  GPIO_LED2,
-  GPIO_LED3
+  GPIO_LED_RED,
+  GPIO_LED_GREEN,
+  GPIO_LED_BLUE
 };
 
 /****************************************************************************
@@ -165,10 +165,10 @@ uint32_t board_userled_initialize(void)
 {
   /* Configure LED1-4 GPIOs for output */
 
-  stm32_configgpio(GPIO_LED1);
-  stm32_configgpio(GPIO_LED2);
-  stm32_configgpio(GPIO_LED3);
-  return LED_NUM;
+  stm32_configgpio(GPIO_LED_RED);
+  stm32_configgpio(GPIO_LED_GREEN);
+  stm32_configgpio(GPIO_LED_BLUE);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************
@@ -177,7 +177,7 @@ uint32_t board_userled_initialize(void)
 
 void board_userled(int led, bool ledon)
 {
-  if ((unsigned)led < LED_NUM)
+  if ((unsigned)led < BOARD_NLEDS)
     {
       stm32_gpiowrite(g_ledcfg[led], ledon);
     }
@@ -189,9 +189,9 @@ void board_userled(int led, bool ledon)
 
 void board_userled_all(uint32_t ledset)
 {
-  stm32_gpiowrite(GPIO_LED1, (ledset & LED1_BIT) == 0);
-  stm32_gpiowrite(GPIO_LED2, (ledset & LED2_BIT) == 0);
-  stm32_gpiowrite(GPIO_LED3, (ledset & LED3_BIT) == 0);
+  stm32_gpiowrite(GPIO_LED_RED, (ledset & BOARD_LED1_BIT) == 0);
+  stm32_gpiowrite(GPIO_LED_GREEN, (ledset & BOARD_LED2_BIT) == 0);
+  stm32_gpiowrite(GPIO_LED_BLUE, (ledset & BOARD_LED3_BIT) == 0);
 }
 
 /****************************************************************************

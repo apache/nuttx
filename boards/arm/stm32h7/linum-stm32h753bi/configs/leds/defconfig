@@ -5,8 +5,10 @@
 # You can then do "make savedefconfig" to generate a new defconfig file that includes your
 # modifications.
 #
+# CONFIG_ARCH_LEDS is not set
 # CONFIG_NSH_DISABLE_IFCONFIG is not set
 # CONFIG_NSH_DISABLE_PS is not set
+# CONFIG_NSH_QUOTE is not set
 # CONFIG_STANDARD_SERIAL is not set
 # CONFIG_STM32H7_USE_LEGACY_PINMAP is not set
 CONFIG_ARCH="arm"

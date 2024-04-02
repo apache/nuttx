@@ -49,19 +49,6 @@
 #define GPIO_LED_GREEN   GPIO_LD2
 #define GPIO_LED_BLUE    GPIO_LD3
 
-/* LED of shield */
-
-#define GPIO_LED1       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
-                        GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN0)
-#define GPIO_LED2       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
-                        GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN1)
-#define GPIO_LED3       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
-                        GPIO_OUTPUT_SET | GPIO_PORTC | GPIO_PIN13)
-
-#define LED1_BIT    (1 << 0)
-#define LED2_BIT    (1 << 1)
-#define LED3_BIT    (1 << 2)
-#define LED_NUM     3
 /* Check if we can support the RTC driver */
 
 #define HAVE_RTC_DRIVER 1
