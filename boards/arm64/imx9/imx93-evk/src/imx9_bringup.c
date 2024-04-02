@@ -57,6 +57,16 @@ int imx9_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_PWM
+  /* Configure PWM outputs */
+
+  ret = imx9_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed initialize PWM outputs: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }

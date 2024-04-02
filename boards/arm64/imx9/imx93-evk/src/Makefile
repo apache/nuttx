@@ -26,4 +26,8 @@ ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += imx9_appinit.c
 endif
 
+ifeq ($(CONFIG_PWM),y)
+CSRCS += imx9_pwm.c
+endif
+
 include $(TOPDIR)/boards/Board.mk
