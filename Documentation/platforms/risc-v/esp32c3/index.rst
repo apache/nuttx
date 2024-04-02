@@ -148,6 +148,7 @@ Peripheral  Support NOTES
 ADC          No
 AES          No
 Bluetooth    No
+CAN/TWAI     Yes
 CDC Console  Yes    Rev.3
 DMA          No
 eFuse        No

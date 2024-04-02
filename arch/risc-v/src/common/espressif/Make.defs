@@ -65,6 +65,10 @@ ifeq ($(CONFIG_ESPRESSIF_HR_TIMER),y)
   CHIP_CSRCS += esp_hr_timer.c
 endif
 
+ifeq ($(CONFIG_ESPRESSIF_TWAI),y)
+  CHIP_CSRCS += esp_twai.c
+endif
+
 ifeq ($(CONFIG_ESPRESSIF_LEDC),y)
   CHIP_CSRCS += esp_ledc.c
 endif

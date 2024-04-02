@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c6/esp32c6-devkitm/src/esp32c6-devkitm.h
+ * boards/risc-v/esp32c6/common/src/esp_board_twai.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,68 +18,29 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RISCV_ESP32C6_ESP32C6_DEVKITM_SRC_ESP32C6_DEVKITM_H
-#define __BOARDS_RISCV_ESP32C6_ESP32C6_DEVKITM_SRC_ESP32C6_DEVKITM_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <errno.h>
+#include <debug.h>
+
+#include <nuttx/can/can.h>
+#include <arch/board/board.h>
+
+#include "espressif/esp_twai.h"
+
+#ifdef CONFIG_CAN
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* RMT gpio */
-
-#define RMT_RXCHANNEL       2
-#define RMT_TXCHANNEL       0
-
-#ifdef CONFIG_RMT_LOOP_TEST_MODE
-#  define RMT_INPUT_PIN     0
-#  define RMT_OUTPUT_PIN    0
-#else
-#  define RMT_INPUT_PIN     2
-#  define RMT_OUTPUT_PIN    8
-#endif
-
 /****************************************************************************
- * Public Types
+ * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: esp_bringup
- *
- * Description:
- *   Perform architecture-specific initialization.
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_BOARDCTL=y :
- *     Called from the NSH library via board_app_initialize().
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned on
- *   any failure.
- *
- ****************************************************************************/
-
-int esp_bringup(void);
 
 /****************************************************************************
  * Name: board_twai_setup
@@ -96,24 +57,49 @@ int esp_bringup(void);
  *
  ****************************************************************************/
 
+int board_twai_setup(int port)
+{
 #ifdef CONFIG_ESPRESSIF_TWAI
-int board_twai_setup(int port);
+  struct can_dev_s *twai;
+  int ret;
+
+  /* Call esp_twaiinitialize() to get an instance of the TWAI
+   * interface
+   * */
+
+  twai = esp_twaiinitialize(port);
+  if (twai == NULL)
+    {
+      canerr("ERROR:  Failed to get TWAI interface\n");
+      return -ENODEV;
+    }
+
+#ifdef CONFIG_ESPRESSIF_TWAI0
+  /* Register the TWAI driver at "/dev/can0" */
+
+  ret = can_register("/dev/can0", twai);
+  if (ret < 0)
+    {
+      canerr("ERROR: TWAI0 register failed: %d\n", ret);
+      return ret;
+    }
+#endif /* CONFIG_ESPRESSIF_TWAI0 */
+
+#ifdef CONFIG_ESPRESSIF_TWAI1
+  /* Register the TWAI driver at "/dev/can1" */
+
+  ret = can_register("/dev/can1", twai);
+  if (ret < 0)
+    {
+      canerr("ERROR: TWAI1 register failed: %d\n", ret);
+      return ret;
+    }
+#endif /* CONFIG_ESPRESSIF_TWAI1 */
+
+  return OK;
+#else
+  return -ENODEV;
 #endif
+}
 
-/****************************************************************************
- * Name: esp_gpio_init
- *
- * Description:
- *   Configure the GPIO driver.
- *
- * Returned Value:
- *   Zero (OK).
- *
- ****************************************************************************/
-
-#ifdef CONFIG_DEV_GPIO
-int esp_gpio_init(void);
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_RISCV_ESP32C6_ESP32C6_DEVKITM_SRC_ESP32C6_DEVKITM_H */
+#endif /* CONFIG_CAN */
