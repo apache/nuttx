@@ -88,10 +88,36 @@ void up_disable_irq(int irq)
 void up_enable_irq(int irq)
 {
   volatile Ifx_SRC_SRCR *src = &SRC_CPU_CPU0_SB + irq;
+  int cpu = up_cpu_index();
 
-  IfxSrc_init(src, IfxSrc_Tos_cpu0, irq);
+  IfxSrc_init(src, (cpu == 0) ? 0 : (cpu + 1), irq);
   IfxSrc_enable(src);
 }
+
+/****************************************************************************
+ * Name: up_affinity_irq
+ *
+ * Description:
+ *   Set an IRQ affinity by software.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BMP
+void up_affinity_irq(int irq, cpu_set_t cpuset)
+{
+  volatile Ifx_SRC_SRCR *src = &SRC_CPU_CPU0_SB + irq;
+  int i;
+
+  for (i = 0; i < CONFIG_NR_CPUS; i++)
+    {
+      if (CPU_ISSET(i, &cpuset))
+        {
+          IfxSrc_init(src, (i == 0) ? 0 : (i + 1), irq);
+          IfxSrc_enable(src);
+        }
+    }
+}
+#endif
 
 /****************************************************************************
  * Name: tricore_ack_irq

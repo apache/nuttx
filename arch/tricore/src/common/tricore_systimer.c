@@ -77,11 +77,6 @@ static const struct oneshot_operations_s g_tricore_systimer_ops =
   .current   = tricore_systimer_current,
 };
 
-static struct tricore_systimer_lowerhalf_s g_systimer_lower =
-{
-  .lower.ops = &g_tricore_systimer_ops,
-};
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -309,10 +304,17 @@ static int tricore_systimer_interrupt(int irq, void *context, void *arg)
 struct oneshot_lowerhalf_s *
 tricore_systimer_initialize(void *tbase, int irq, uint64_t freq)
 {
-  struct tricore_systimer_lowerhalf_s *priv = &g_systimer_lower;
+  struct tricore_systimer_lowerhalf_s *priv;
+
+  priv = kmm_malloc(sizeof(*priv));
+  if (priv == NULL)
+    {
+      return NULL;
+    }
 
   priv->tbase = tbase;
   priv->freq  = freq;
+  priv->lower.ops = &g_tricore_systimer_ops;
 
   IfxStm_setCompareControl(tbase,
       IfxStm_Comparator_0,

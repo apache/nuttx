@@ -39,6 +39,18 @@
 #define SCU_FREQUENCY 100000000UL
 
 /****************************************************************************
+ * Public Type Definitions
+ ****************************************************************************/
+
+/** \brief Module address and index map */
+
+struct systimer_map_s
+{
+  volatile void *timer; /**< \brief Module address */
+  int            irq;   /**< \brief Module irq */
+};
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -54,9 +66,20 @@
 void up_timer_initialize(void)
 {
   struct oneshot_lowerhalf_s *lower;
+  int cpu = up_cpu_index();
 
-  lower = tricore_systimer_initialize(&MODULE_STM0, 192, SCU_FREQUENCY);
+  struct systimer_map_s stmaps[] =
+    {
+      {&MODULE_STM0, 192},
+      {&MODULE_STM1, 194},
+      {&MODULE_STM2, 196},
+      {&MODULE_STM3, 198},
+      {&MODULE_STM4, 200},
+      {&MODULE_STM5, 202}
+    };
 
+  lower = tricore_systimer_initialize(stmaps[cpu].timer,
+                                      stmaps[cpu].irq, SCU_FREQUENCY);
   DEBUGASSERT(lower != NULL);
 
   up_alarm_set_lowerhalf(lower);

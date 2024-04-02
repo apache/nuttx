@@ -70,7 +70,7 @@ extern "C"
  * such value for each processor that can receive an interrupt.
  */
 
-EXTERN volatile uintptr_t *g_current_regs[CONFIG_SMP_NCPUS];
+EXTERN volatile uintptr_t *g_current_regs[CONFIG_NR_CPUS];
 #define CURRENT_REGS (g_current_regs[up_cpu_index()])
 
 /****************************************************************************
@@ -93,8 +93,11 @@ EXTERN volatile uintptr_t *g_current_regs[CONFIG_SMP_NCPUS];
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
-int up_cpu_index(void) noinstrument_function;
+#if defined(CONFIG_SMP) || defined(CONFIG_BMP)
+static inline int up_cpu_index(void)
+{
+  return __mfcr(CPU_CUS_ID);
+}
 #else
 #  define up_cpu_index() (0)
 #endif
