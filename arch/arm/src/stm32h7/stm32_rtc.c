@@ -758,7 +758,7 @@ static int rtchw_set_alrmar(rtc_alarmreg_t alarmreg)
 
   putreg32(alarmreg, STM32_RTC_ALRMAR);
   putreg32(0, STM32_RTC_ALRMASSR);
-  rtcinfo("  ALRMAR: %08x\n", getreg32(STM32_RTC_ALRMAR));
+  rtcinfo("  ALRMAR: %08" PRIx32 "\n", getreg32(STM32_RTC_ALRMAR));
 
   /* Enable RTC alarm A */
 
