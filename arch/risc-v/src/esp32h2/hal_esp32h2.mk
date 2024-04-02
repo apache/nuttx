@@ -51,6 +51,7 @@ INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)/chip/$(ESP_HAL_3RDPARTY_REPO)/compone
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)/chip/$(ESP_HAL_3RDPARTY_REPO)/components/soc/$(CHIP_SERIES)/include
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)/chip/$(ESP_HAL_3RDPARTY_REPO)/components/spi_flash/include
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)/chip/$(ESP_HAL_3RDPARTY_REPO)/components/spi_flash/include/spi_flash
+INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)/chip/$(ESP_HAL_3RDPARTY_REPO)/components/driver/twai/include
 
 ifeq ($(CONFIG_ESPRESSIF_SIMPLE_BOOT),y)
   INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)/chip/$(ESP_HAL_3RDPARTY_REPO)/components/bootloader_support/include
@@ -152,6 +153,8 @@ ifeq ($(CONFIG_ESPRESSIF_SIMPLE_BOOT),y)
   CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/esp_rom/patches/esp_rom_spiflash.c
   CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/efuse/src/esp_efuse_fields.c
   CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/efuse/src/efuse_controller/keys/with_key_purposes/esp_efuse_api_key.c
+  CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/twai_hal.c
+  CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/twai_hal_iram.c
 
   LDFLAGS += --wrap=bootloader_print_banner
 endif

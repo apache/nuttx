@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c6/esp32c6-devkitm/src/esp32c6-devkitm.h
+ * arch/risc-v/src/common/espressif/esp_twai.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,31 +18,19 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RISCV_ESP32C6_ESP32C6_DEVKITM_SRC_ESP32C6_DEVKITM_H
-#define __BOARDS_RISCV_ESP32C6_ESP32C6_DEVKITM_SRC_ESP32C6_DEVKITM_H
+#ifndef __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_TWAI_H
+#define __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_TWAI_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/can/can.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* RMT gpio */
-
-#define RMT_RXCHANNEL       2
-#define RMT_TXCHANNEL       0
-
-#ifdef CONFIG_RMT_LOOP_TEST_MODE
-#  define RMT_INPUT_PIN     0
-#  define RMT_OUTPUT_PIN    0
-#else
-#  define RMT_INPUT_PIN     2
-#  define RMT_OUTPUT_PIN    8
-#endif
 
 /****************************************************************************
  * Public Types
@@ -53,67 +41,36 @@
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp_bringup
+ * Name: esp_twaiinitialize
  *
  * Description:
- *   Perform architecture-specific initialization.
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_BOARDCTL=y :
- *     Called from the NSH library via board_app_initialize().
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned on
- *   any failure.
- *
- ****************************************************************************/
-
-int esp_bringup(void);
-
-/****************************************************************************
- * Name: board_twai_setup
- *
- * Description:
- *  Initialize TWAI and register the TWAI device
+ *   Initialize CAN port
  *
  * Input Parameters:
  *   port - Port number (for hardware that has multiple TWAI interfaces)
  *
  * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned on
- *   any failure.
+ *   Valid TWAI device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ESPRESSIF_TWAI
-int board_twai_setup(int port);
+#if defined(CONFIG_CAN) && defined(CONFIG_ESPRESSIF_TWAI)
+struct can_dev_s *esp_twaiinitialize(int port);
 #endif
 
-/****************************************************************************
- * Name: esp_gpio_init
- *
- * Description:
- *   Configure the GPIO driver.
- *
- * Returned Value:
- *   Zero (OK).
- *
- ****************************************************************************/
-
-#ifdef CONFIG_DEV_GPIO
-int esp_gpio_init(void);
+#ifdef __cplusplus
+}
 #endif
-
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_RISCV_ESP32C6_ESP32C6_DEVKITM_SRC_ESP32C6_DEVKITM_H */
+
+#endif /* __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_TWAI_H */

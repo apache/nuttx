@@ -269,6 +269,27 @@ config ESPRESSIF_UART1
 	select UART1_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
+config ESPRESSIF_TWAI
+	bool "TWAI (CAN)"
+	default n
+	select ARCH_HAVE_CAN_ERRORS
+	select CAN
+
+config ESPRESSIF_TWAI0
+	bool "TWAI0 (CAN)"
+	default n
+	select ESPRESSIF_TWAI
+	select ARCH_HAVE_CAN_ERRORS
+	select CAN
+
+config ESPRESSIF_TWAI1
+	bool "TWAI1 (CAN)"
+	default n
+	depends on ESPRESSIF_ESP32C6
+	select ESPRESSIF_TWAI
+	select ARCH_HAVE_CAN_ERRORS
+	select CAN
+
 config ESPRESSIF_USBSERIAL
 	bool "USB-Serial-JTAG Driver"
 	default n
@@ -394,6 +415,104 @@ config ESPRESSIF_UART1_CTSPIN
 endif # ESPRESSIF_UART1
 
 endmenu # UART Configuration
+
+menu "TWAI driver options"
+	depends on ESPRESSIF_TWAI
+
+if ESPRESSIF_TWAI0
+
+config ESPRESSIF_TWAI0_TXPIN
+	int "TWAI0 TX Pin"
+	default 2
+
+config ESPRESSIF_TWAI0_RXPIN
+	int "TWAI0 RX Pin"
+	default 3
+
+choice ESPRESSIF_TWAI0_TIMING
+	prompt "TWAI0 Timing config"
+	default TWAI0_TIMING_100KBITS
+	---help---
+		These options control timing of TWAI0.
+
+config TWAI0_TIMING_100KBITS
+	bool "100 KBits"
+
+config TWAI0_TIMING_125KBITS
+	bool "125 KBits"
+
+config TWAI0_TIMING_250KBITS
+	bool "250 KBits"
+
+config TWAI0_TIMING_500KBITS
+	bool "500 KBits"
+
+config TWAI0_TIMING_800KBITS
+	bool "800 KBits"
+
+endchoice # ESPRESSIF_TWAI0_TIMING
+
+config ESPRESSIF_TWAI0_SAM
+	bool "TWAI0 sampling"
+	default n
+	---help---
+		The bus is sampled 3 times (recommended for low to medium speed buses
+		to spikes on the bus-line).
+
+endif # ESPRESSIF_TWAI0
+
+if ESPRESSIF_TWAI1
+
+config ESPRESSIF_TWAI1_TXPIN
+	int "TWAI1 TX Pin"
+	default 4
+
+config ESPRESSIF_TWAI1_RXPIN
+	int "TWAI1 RX Pin"
+	default 5
+
+choice ESPRESSIF_TWAI1_TIMING
+	prompt "TWAI1 Timing config"
+	default TWAI1_TIMING_100KBITS
+	---help---
+		These options control timing of TWAI1.
+
+config TWAI1_TIMING_100KBITS
+	bool "100 KBits"
+
+config TWAI1_TIMING_125KBITS
+	bool "125 KBits"
+
+config TWAI1_TIMING_250KBITS
+	bool "250 KBits"
+
+config TWAI1_TIMING_500KBITS
+	bool "500 KBits"
+
+config TWAI1_TIMING_800KBITS
+	bool "800 KBits"
+
+endchoice # ESPRESSIF_TWAI1_TIMING
+
+config ESPRESSIF_TWAI1_SAM
+	bool "TWAI1 sampling"
+	default n
+	---help---
+		The bus is sampled 3 times (recommended for low to medium speed buses
+		to spikes on the bus-line).
+
+endif # ESPRESSIF_TWAI1
+
+config ESPRESSIF_TWAI_TEST_MODE
+	bool "TWAI character driver loopback test mode (for testing only)"
+	default n
+	depends on CAN_LOOPBACK
+	---help---
+		This enables a loopback test mode that attaches the transmitter
+		to the receiver internally, being able to test the TWAI
+		peripheral without any external connection.
+
+endmenu #ESPRESSIF_TWAI
 
 menu "SPI Flash Configuration"
 

@@ -184,6 +184,17 @@ int esp_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_ESPRESSIF_TWAI
+
+  /* Initialize TWAI and register the TWAI driver. */
+
+  ret = board_twai_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_twai_setup failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_DEV_GPIO
   ret = esp_gpio_init();
   if (ret < 0)

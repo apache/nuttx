@@ -138,7 +138,7 @@ Peripheral      Support
 ADC              No
 AES              No
 Bluetooth        No
-CAN/TWAI         No
+CAN/TWAI         Yes
 DMA              No
 ECC              No
 eFuse            No

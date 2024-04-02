@@ -82,6 +82,25 @@
 int esp_bringup(void);
 
 /****************************************************************************
+ * Name: board_twai_setup
+ *
+ * Description:
+ *  Initialize TWAI and register the TWAI device
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESPRESSIF_TWAI
+int board_twai_setup(void);
+#endif
+
+/****************************************************************************
  * Name: esp_gpio_init
  *
  * Description:
