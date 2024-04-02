@@ -55,5 +55,17 @@
 int imx9_bringup(void);
 #endif
 
+/****************************************************************************
+ * Name: imx9_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM outputs
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_PWM)
+int imx9_pwm_setup(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM64_IMX9_IMX93_EVK_SRC_IMX93_EVK_H */

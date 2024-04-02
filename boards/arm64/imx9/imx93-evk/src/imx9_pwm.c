@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm64/imx9/imx93-evk/include/board.h
+ * boards/arm64/imx9/imx93-evk/src/imx9_pwm.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,56 +18,76 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM64_IMX9_IMX93_EVK_INCLUDE_BOARD_H
-#define __BOARDS_ARM64_IMX9_IMX93_EVK_INCLUDE_BOARD_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/timers/pwm.h>
+#include <arch/board/board.h>
+
+#include <errno.h>
+
+#include "imx9_flexio_pwm.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* FLEXIO to PWM pin muxings */
-
-/* EVK signals
- * GPIO_IO04 -> FLEXIO1_04
- * GPIO_IO05 -> FLEXIO1_05
- * GPIO_IO06 -> FLEXIO1_06
- * GPIO_IO07 -> FLEXIO1_07
- */
-
-#define FLEXIO1_PWM0_MUX IOMUX_CFG(IOMUXC_PAD_GPIO_IO04_FLEXIO1_FLEXIO04, IOMUXC_PAD_FSEL_SFAST | IOMUXC_PAD_DSE_X6, 0)
-#define FLEXIO1_PWM1_MUX IOMUX_CFG(IOMUXC_PAD_GPIO_IO05_FLEXIO1_FLEXIO05, IOMUXC_PAD_FSEL_SFAST | IOMUXC_PAD_DSE_X6, 0)
-#define FLEXIO1_PWM2_MUX IOMUX_CFG(IOMUXC_PAD_GPIO_IO06_FLEXIO1_FLEXIO06, IOMUXC_PAD_FSEL_SFAST | IOMUXC_PAD_DSE_X6, 0)
-#define FLEXIO1_PWM3_MUX IOMUX_CFG(IOMUXC_PAD_GPIO_IO07_FLEXIO1_FLEXIO07, IOMUXC_PAD_FSEL_SFAST | IOMUXC_PAD_DSE_X6, 0)
-
 /****************************************************************************
- * Public Data
+ * Public Functions
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
+/****************************************************************************
+ * Name: imx9_pwm_setup
+ *
+ * Description:
+ *
+ *   Initialize PWM and register PWM devices
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   0 on success, negated error value on error
+ *
+ ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
+int imx9_pwm_setup(void)
 {
-#else
-#define EXTERN extern
+  struct pwm_lowerhalf_s *lower_half = NULL;
+  int ret = 0;
+
+#ifdef CONFIG_IMX9_FLEXIO1_PWM
+  lower_half = imx9_flexio_pwm_init(PWM_FLEXIO1);
+
+  if (lower_half)
+    {
+      ret = pwm_register("/dev/pwm0", lower_half);
+    }
+  else
+    {
+      ret = -ENODEV;
+    }
+
+  if (ret < 0)
+    {
+      return ret;
+    }
 #endif
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
+#ifdef CONFIG_IMX9_FLEXIO2_PWM
+  lower_half = imx9_flexio_pwm_init(PWM_FLEXIO2);
 
-#undef EXTERN
-#if defined(__cplusplus)
+  if (lower_half)
+    {
+      ret = pwm_register("/dev/pwm1", lower_half);
+    }
+  else
+    {
+      ret = -ENODEV;
+    }
+#endif
+
+  return ret;
 }
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM64_IMX9_IMX93_EVK_INCLUDE_BOARD_H */
