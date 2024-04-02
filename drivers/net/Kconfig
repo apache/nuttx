@@ -768,4 +768,37 @@ config WIFI_SIM_NUMBER
 	---help---
 		The number of simulated wifi network devices.
 
+menuconfig NET_E1000
+	bool "Intel E1000 support"
+	default n
+	depends on PCI
+	---help---
+		Enable E1000 PCI Ethernet driver.
+
+if NET_E1000
+
+config NET_E1000_RXSPARE
+	int "Intel E1000 spare RX buffers"
+	default 8
+
+config NET_E1000_I219
+	bool "Intel I219"
+	default n
+	---help---
+		Enable Intel I219 Ethernet driver.
+
+config NET_E1000_82540EM
+	bool "Intel 82540EM"
+	default n
+	---help---
+		Enable Intel 82540EM Ethernet driver (-device e1000 on QEMU).
+
+config NET_E1000_82574L
+	bool "Intel 82574L"
+	default n
+	---help---
+		Enable Intel 82574L Ethernet driver (-device e1000e on QEMU).
+
+endif # NET_E1000
+
 endif # NETDEVICES
