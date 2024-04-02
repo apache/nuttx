@@ -77,6 +77,16 @@ int imx9_bringup(void)
     }
 #endif
 
+#if defined(CONFIG_SPI_DRIVER)
+  /* Configure SPI peripheral interfaces */
+
+  ret = imx9_spi_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize SPI driver: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }

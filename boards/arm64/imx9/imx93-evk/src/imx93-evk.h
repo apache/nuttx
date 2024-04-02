@@ -79,5 +79,17 @@ int imx9_pwm_setup(void);
 int imx9_i2c_initialize(void);
 #endif
 
+/****************************************************************************
+ * Name: imx9_spi_setup
+ *
+ * Description:
+ *   Initialize SPI devices and driver
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SPI_DRIVER)
+int imx9_spi_initialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM64_IMX9_IMX93_EVK_SRC_IMX93_EVK_H */

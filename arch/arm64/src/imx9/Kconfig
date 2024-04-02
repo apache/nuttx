@@ -301,6 +301,10 @@ config IMX9_LPI2C
 	bool "LPI2C support"
 	default n
 
+config IMX9_LPSPI
+	bool "LPSPI support"
+	default n
+
 config IMX9_PLL
 	bool "PLL setup support (WIP)"
 	default n
@@ -496,6 +500,51 @@ config IMX9_LPI2C8_FILTSDA
 endif # IMX9_LPI2C8
 
 endmenu # LPI2C Peripherals
+
+menu "LPSPI Peripherals"
+
+menuconfig IMX9_LPSPI1
+	bool "LPSPI1"
+	default n
+	select IMX9_LPSPI
+
+menuconfig IMX9_LPSPI2
+	bool "LPSPI2"
+	default n
+	select IMX9_LPSPI
+
+menuconfig IMX9_LPSPI3
+	bool "LPSPI3"
+	default n
+	select IMX9_LPSPI
+
+menuconfig IMX9_LPSPI4
+	bool "LPSPI4"
+	default n
+	select IMX9_LPSPI
+
+menuconfig IMX9_LPSPI5
+	bool "LPSPI5"
+	default n
+	select IMX9_LPSPI
+
+menuconfig IMX9_LPSPI6
+	bool "LPSPI6"
+	default n
+	select IMX9_LPSPI
+
+menuconfig IMX9_LPSPI7
+	bool "LPSPI7"
+	default n
+	select IMX9_LPSPI
+
+menuconfig IMX9_LPSPI8
+	bool "LPSPI8"
+	default n
+	select IMX9_LPSPI
+
+endmenu # LPSPI Peripherals
+
 menu "LPI2C Configuration"
 	depends on IMX9_LPI2C
 
@@ -549,5 +598,82 @@ config IMX9_LPI2C_TIMEOTICKS
 	depends on IMX9_LPI2C && !IMX9_LPI2C_DYNTIMEO
 
 endmenu # LPI2C Configuration
+
+menu "LPSPI Configuration"
+	depends on IMX9_LPSPI
+
+config IMX9_LPSPI_DMA
+	bool "LPSPI DMA"
+	depends on IMX9_EDMA
+	default n
+	---help---
+		Use DMA to improve LPSPI transfer performance.
+
+config IMX9_LPSPI_DMATHRESHOLD
+	int "LPSPI DMA threshold"
+	default 4
+	depends on IMX9_LPSPI_DMA
+	---help---
+		When SPI DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  But we need a threshold value to determine what
+		is small.
+
+config IMX9_LPSPI1_DMA
+	bool "LPSPI1 DMA"
+	default n
+	depends on IMX9_LPSPI1 && IMX9_LPSPI_DMA
+	---help---
+		Use DMA to improve LPSPI1 transfer performance.
+
+config IMX9_LPSPI2_DMA
+	bool "LPSPI2 DMA"
+	default n
+	depends on IMX9_LPSPI2 && IMX9_LPSPI_DMA
+	---help---
+		Use DMA to improve LPSPI2 transfer performance.
+
+config IMX9_LPSPI3_DMA
+	bool "LPSPI3 DMA"
+	default n
+	depends on IMX9_LPSPI3 && IMX9_LPSPI_DMA
+	---help---
+		Use DMA to improve LPSPI3 transfer performance.
+
+config IMX9_LPSPI4_DMA
+	bool "LPSPI4 DMA"
+	default n
+	depends on IMX9_LPSPI4 && IMX9_LPSPI_DMA
+	---help---
+		Use DMA to improve SPI4 transfer performance.
+
+config IMX9_LPSPI5_DMA
+	bool "LPSPI5 DMA"
+	default n
+	depends on IMX9_LPSPI5 && IMX9_LPSPI_DMA
+	---help---
+		Use DMA to improve SPI5 transfer performance.
+
+config IMX9_LPSPI6_DMA
+	bool "LPSPI6 DMA"
+	default n
+	depends on IMX9_LPSPI6 && IMX9_LPSPI_DMA
+	---help---
+		Use DMA to improve SPI6 transfer performance.
+
+config IMX9_LPSPI7_DMA
+	bool "LPSPI7 DMA"
+	default n
+	depends on IMX9_LPSPI7 && IMX9_LPSPI_DMA
+	---help---
+		Use DMA to improve SPI7 transfer performance.
+
+config IMX9_LPSPI8_DMA
+	bool "LPSPI8 DMA"
+	default n
+	depends on IMX9_LPSPI8 && IMX9_LPSPI_DMA
+	---help---
+		Use DMA to improve SPI8 transfer performance.
+
+endmenu # LPSPI Configuration
 
 endif # ARCH_CHIP_IMX9
