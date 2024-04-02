@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #include <nuttx/arch.h>
@@ -90,15 +91,39 @@
                                  EXTMEM_ICACHE_SHUT_DBUS_M)
 
 #  define CHECKSUM_ALIGN        16
-#  define IS_PADD(addr) (addr == 0)
-#  define IS_DRAM(addr) (addr >= SOC_DRAM_LOW && addr < SOC_DRAM_HIGH)
-#  define IS_IRAM(addr) (addr >= SOC_IRAM_LOW && addr < SOC_IRAM_HIGH)
-#  define IS_IROM(addr) (addr >= SOC_IROM_LOW && addr < SOC_IROM_HIGH)
-#  define IS_DROM(addr) (addr >= SOC_DROM_LOW && addr < SOC_DROM_HIGH)
+#  define IS_PADD(addr) ((addr) == 0)
+#  define IS_DRAM(addr) ((addr) >= SOC_DRAM_LOW && (addr) < SOC_DRAM_HIGH)
+#  define IS_IRAM(addr) ((addr) >= SOC_IRAM_LOW && (addr) < SOC_IRAM_HIGH)
+#  define IS_IROM(addr) ((addr) >= SOC_IROM_LOW && (addr) < SOC_IROM_HIGH)
+#  define IS_DROM(addr) ((addr) >= SOC_DROM_LOW && (addr) < SOC_DROM_HIGH)
 #  define IS_SRAM(addr) (IS_IRAM(addr) || IS_DRAM(addr))
 #  define IS_MMAP(addr) (IS_IROM(addr) || IS_DROM(addr))
-#  define IS_NONE(addr) (!IS_IROM(addr) && !IS_DROM(addr) \
-                      && !IS_IRAM(addr) && !IS_DRAM(addr) && !IS_PADD(addr))
+#  ifdef SOC_RTC_FAST_MEM_SUPPORTED
+#    define IS_RTC_FAST_IRAM(addr) \
+                        ((addr) >= SOC_RTC_IRAM_LOW \
+                         && (addr) < SOC_RTC_IRAM_HIGH)
+#    define IS_RTC_FAST_DRAM(addr) \
+                        ((addr) >= SOC_RTC_DRAM_LOW \
+                         && (addr) < SOC_RTC_DRAM_HIGH)
+#  else
+#    define IS_RTC_FAST_IRAM(addr) false
+#    define IS_RTC_FAST_DRAM(addr) false
+#  endif
+#  ifdef SOC_RTC_SLOW_MEM_SUPPORTED
+#    define IS_RTC_SLOW_DRAM(addr) \
+                        ((addr) >= SOC_RTC_DATA_LOW \
+                         && (addr) < SOC_RTC_DATA_HIGH)
+#  else
+#    define IS_RTC_SLOW_DRAM(addr) false
+#  endif
+#  define IS_NONE(addr) (!IS_IROM(addr) \
+                         && !IS_DROM(addr) \
+                         && !IS_IRAM(addr) \
+                         && !IS_DRAM(addr) \
+                         && !IS_RTC_FAST_IRAM(addr) \
+                         && !IS_RTC_FAST_DRAM(addr) \
+                         && !IS_RTC_SLOW_DRAM(addr) \
+                         && !IS_PADD(addr))
 
 #  define IS_MAPPING(addr) IS_IROM(addr) || IS_DROM(addr)
 #endif
@@ -262,15 +287,27 @@ static int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
           break;
         }
 
+      if (IS_RTC_FAST_IRAM(segment_hdr.load_addr) ||
+          IS_RTC_FAST_DRAM(segment_hdr.load_addr) ||
+          IS_RTC_SLOW_DRAM(segment_hdr.load_addr))
+        {
+          /* RTC segment is loaded by ROM bootloader */
+
+          ram_segments++;
+        }
+
       ets_printf("%s: lma 0x%08x vma 0x%08lx len 0x%-6lx (%lu)\n",
-                 IS_NONE(segment_hdr.load_addr) ? "???" :
-                   IS_MMAP(segment_hdr.load_addr) ?
-                     IS_IROM(segment_hdr.load_addr) ? "imap" : "dmap" :
-                       IS_PADD(segment_hdr.load_addr) ? "padd" :
-                         IS_DRAM(segment_hdr.load_addr) ? "dram" : "iram",
-                 offset + sizeof(esp_image_segment_header_t),
-                 segment_hdr.load_addr, segment_hdr.data_len,
-                 segment_hdr.data_len);
+          IS_NONE(segment_hdr.load_addr) ? "???" :
+            IS_RTC_FAST_IRAM(segment_hdr.load_addr) ||
+            IS_RTC_FAST_DRAM(segment_hdr.load_addr) ||
+            IS_RTC_SLOW_DRAM(segment_hdr.load_addr) ? "rtc" :
+              IS_MMAP(segment_hdr.load_addr) ?
+                IS_IROM(segment_hdr.load_addr) ? "imap" : "dmap" :
+                  IS_PADD(segment_hdr.load_addr) ? "padd" :
+                    IS_DRAM(segment_hdr.load_addr) ? "dram" : "iram",
+          offset + sizeof(esp_image_segment_header_t),
+          segment_hdr.load_addr, segment_hdr.data_len,
+          segment_hdr.data_len);
 
       /* Fix drom and irom produced be the linker, as this
        * is later invalidated by the elf2image command.
