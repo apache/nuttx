@@ -366,6 +366,7 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
 
           btcb->cpu        = cpu;
           btcb->task_state = TSTATE_TASK_ASSIGNED;
+          doswitch         = false;
         }
 
       /* All done, restart the other CPU (if it was paused). */
