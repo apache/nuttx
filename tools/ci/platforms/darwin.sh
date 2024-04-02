@@ -209,7 +209,6 @@ python_tools() {
 
   pip3 install \
     cmake-format \
-    CodeChecker \
     cvt2utf \
     cxxfilt \
     esptool==4.5.1 \
