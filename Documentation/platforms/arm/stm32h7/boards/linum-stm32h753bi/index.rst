@@ -478,8 +478,18 @@ This example use the timer 4 with channel 2 to generate a PWM output signal on b
 leds
 ------
 
-Example to blink 3 leds, the example use the gpios(PB0, PB1 and PC13) located on the expancion IO board::
+Example to blink the RBG led of board, using this example the board led status support stop to work::
 
+    # turn on led red
+    printf \x00000001 > /dev/userleds
+
+    # turn on led green
+    printf \x00000002 > /dev/userleds
+
+    # turn on led blue
+    printf \x00000004 > /dev/userleds
+
+    # Run blink leds sample
     nsh> leds
     leds_main: Starting the led_daemon
     leds_main: led_daemon started
