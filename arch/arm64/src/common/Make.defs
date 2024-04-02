@@ -54,6 +54,7 @@ CMN_CSRCS += arm64_perf.c arm64_tcbinfo.c
 CMN_CSRCS += arm64_arch_timer.c arm64_cache.c
 CMN_CSRCS += arm64_doirq.c arm64_fatal.c
 CMN_CSRCS += arm64_syscall.c
+CMN_CSRCS += arm64_modifyreg8.c arm64_modifyreg16.c arm64_modifyreg32.c
 
 # Use common heap allocation for now (may need to be customized later)
 CMN_CSRCS += arm64_allocateheap.c
