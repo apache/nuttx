@@ -349,8 +349,7 @@ begin_packed_struct struct ist_s
   uint64_t IST6;                 /* Interrupt Stack 6 */
   uint64_t IST7;                 /* Interrupt Stack 7 */
   uint64_t reserved3;            /* reserved */
-  uint64_t reserved4;            /* reserved */
-  uint16_t reserved5;            /* reserved */
+  uint16_t reserved4;            /* reserved */
   uint16_t IOPB_OFFSET;          /* IOPB_offset */
 } end_packed_struct;
 
