@@ -30,6 +30,8 @@ config ARCH_INTEL64
 	select ARCH_HAVE_SSE41
 	select ARCH_HAVE_SSE42
 	select ARCH_HAVE_SSE4A
+	select ARCH_ICACHE
+	select ARCH_DCACHE
 	---help---
 		Intel x86_64 architecture
 

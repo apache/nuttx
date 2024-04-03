@@ -21,6 +21,34 @@ endchoice # "Intel64 Chip Selection"
 config ARCH_INTEL64_HAVE_TSC
 	bool
 
+config ARCH_INTEL64_CACHE_LINESIZE
+	int "Cache line size (hardcoded)"
+	depends on ARCH_DCACHE || ARCH_ICACHE
+	default 64
+	---help---
+		Cache line size. If set to 0, we read the value from CPUID,
+		(Probably) all new Intel CPUs have this value equal to 64.
+
+config ARCH_INTEL64_DCACHE_SIZE
+	int "Data cache line size (L1d)"
+	depends on ARCH_DCACHE
+	default 0
+	---help---
+		Data cache line size (L1d). If set to 0, we read the value from CPUID.
+
+config ARCH_INTEL64_ICACHE_SIZE
+	int "Instruction cache line size (L1i)"
+	depends on ARCH_ICACHE
+	default 0
+	---help---
+		Instruction cache line size (L1i). If set to 0, we read the value from CPUID.
+
+config ARCH_INTEL64_HAVE_CLWB
+	bool "CLWB support"
+	default n
+	---help---
+		Select to enable the use of CLWB to write back cache line
+
 choice
 	prompt "System Timer Source"
 	default ARCH_INTEL64_TSC_DEADLINE
