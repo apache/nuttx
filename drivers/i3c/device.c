@@ -88,7 +88,7 @@ int i3c_device_do_priv_xfers(FAR const struct i3c_device *dev,
 void i3c_device_get_info(FAR const struct i3c_device *dev,
                          FAR struct i3c_device_info *info)
 {
-  if (!info)
+  if (info == NULL)
     {
       return;
     }
@@ -198,7 +198,7 @@ int i3c_device_request_ibi(FAR const struct i3c_device *dev,
 {
   int ret = -ENOENT;
 
-  if (!req->handler || !req->num_slots)
+  if (req->handler == NULL || !req->num_slots)
     {
       return -EINVAL;
     }
