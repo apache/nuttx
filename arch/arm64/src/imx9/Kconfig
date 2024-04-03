@@ -67,6 +67,50 @@ config IMX9_FLEXIO2_PWM_CHANNEL_PINS
 	hex "FlexIO outputs used for FLEXIO2 timers"
 	default 0x0000000000000000
 
+config IMX9_USBDEV
+	bool
+	default n
+	select USBDEV
+
+config IMX9_USBDEV_USBC1
+	bool "USB Device using controller 1"
+	default n
+	select IMX9_USBDEV
+
+config IMX9_USBDEV_USBC2
+	depends on !IMX9_USBDEV_USBC1
+	bool "USB Device using controller 2"
+	default n
+	select IMX9_USBDEV
+
+if IMX9_USBDEV
+
+menu "USB device controller driver (DCD) options"
+
+config IMX9_USBDEV_NOVBUS
+	bool "No USB VBUS sensing"
+	default n
+
+config IMX9_USBDEV_FRAME_INTERRUPT
+	bool "USB frame interrupt"
+	default n
+	---help---
+		Handle USB Start-Of-Frame events.  Enable reading SOF from interrupt
+		handler vs. simply reading on demand. Probably a bad idea... Unless
+		there is some issue with sampling the SOF from hardware asynchronously.
+
+config IMX9_USBDEV_REGDEBUG
+	bool "Register level debug"
+	depends on DEBUG_USB_INFO
+	default n
+	---help---
+		Output detailed register-level USB device debug information.  Requires
+		also CONFIG_DEBUG_USB_INFO.
+
+endmenu # USB device controller driver (DCD) options
+
+endif # IMX9_USBDEV
+
 endmenu # iMX Peripheral Selection
 
 config IMX9_GPIO_IRQ
