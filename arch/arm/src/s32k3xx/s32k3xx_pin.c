@@ -70,7 +70,7 @@ int s32k3xx_pinconfig(uint32_t cfgset)
 
   DEBUGASSERT(port < S32K3XX_NPORTS);
   DEBUGASSERT(pin < S32K3XX_NPINS);
-  if ((port >= S32K3XX_NPORTS) && (pin >= S32K3XX_NPINS))
+  if ((port >= S32K3XX_NPORTS) || (pin >= S32K3XX_NPINS))
     {
       return -EINVAL; /* Invalid port or pin number */
     }
