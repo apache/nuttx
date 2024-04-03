@@ -56,6 +56,7 @@
 
 void x86_64_check_and_enable_capability(void)
 {
+  unsigned long ebx;
   unsigned long ecx;
   unsigned long require;
 
@@ -80,11 +81,29 @@ void x86_64_check_and_enable_capability(void)
 #endif
 
   asm volatile("cpuid" : "=c" (ecx) : "a" (X86_64_CPUID_CAP)
-      : "rbx", "rdx", "memory");
+      : "rdx", "memory");
 
-  /* Check x2APIC availability */
+  /* Check features availability from ECX */
 
   if ((ecx & require) != require)
+    {
+      goto err;
+    }
+
+  /* Extended features */
+
+  require = 0;
+
+#ifdef CONFIG_ARCH_INTEL64_HAVE_CLWB
+  require |= X86_64_CPUID_07_CLWB;
+#endif
+
+  asm volatile("cpuid" : "=b" (ebx) : "a" (X86_64_CPUID_EXTCAP), "c" (0)
+               : "rdx", "memory");
+
+  /* Check features availability */
+
+  if ((ebx & require) != require)
     {
       goto err;
     }
@@ -96,6 +115,11 @@ void x86_64_check_and_enable_capability(void)
 #ifdef CONFIG_ARCH_INTEL64_HAVE_PCID
   __enable_pcid();
 #endif
+
+  /* Enable I- and D-Caches */
+
+  up_enable_icache();
+  up_enable_dcache();
 
   return;
 

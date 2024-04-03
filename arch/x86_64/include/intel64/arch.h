@@ -135,14 +135,31 @@
 
 /* CPUID Leaf Definitions */
 
-#define X86_64_CPUID_CAP         0x01
-#  define X86_64_CPUID_01_SSE3   (1 << 0)
-#  define X86_64_CPUID_01_PCID   (1 << 17)
-#  define X86_64_CPUID_01_X2APIC (1 << 21)
-#  define X86_64_CPUID_01_TSCDEA (1 << 24)
-#  define X86_64_CPUID_01_XSAVE  (1 << 26)
-#  define X86_64_CPUID_01_RDRAND (1 << 30)
-#define X86_64_CPUID_TSC         0x15
+#define X86_64_CPUID_VENDOR           0x00
+#define X86_64_CPUID_CAP              0x01
+#  define X86_64_CPUID_01_SSE3        (1 << 0)
+#  define X86_64_CPUID_01_SSSE3       (1 << 9)
+#  define X86_64_CPUID_01_PCID        (1 << 17)
+#  define X86_64_CPUID_01_SSE41       (1 << 19)
+#  define X86_64_CPUID_01_SSE42       (1 << 20)
+#  define X86_64_CPUID_01_X2APIC      (1 << 21)
+#  define X86_64_CPUID_01_TSCDEA      (1 << 24)
+#  define X86_64_CPUID_01_XSAVE       (1 << 26)
+#  define X86_64_CPUID_01_RDRAND      (1 << 30)
+#  define X86_64_CPUID_01_APICID(ebx) ((ebx) >> 24)
+#define X86_64_CPUID_EXTCAP           0x07
+#  define X86_64_CPUID_07_AVX2        (1 << 5)
+#  define X86_64_CPUID_07_AVX512F     (1 << 16)
+#  define X86_64_CPUID_07_AVX512DQ    (1 << 17)
+#  define X86_64_CPUID_07_SMAP        (1 << 20)
+#  define X86_64_CPUID_07_AVX512IFMA  (1 << 21)
+#  define X86_64_CPUID_07_CLWB        (1 << 24)
+#  define X86_64_CPUID_07_AVX512PF    (1 << 26)
+#  define X86_64_CPUID_07_AVX512ER    (1 << 27)
+#  define X86_64_CPUID_07_AVX512CD    (1 << 28)
+#  define X86_64_CPUID_07_AVX512BW    (1 << 30)
+#  define X86_64_CPUID_07_AVX512VL    (1 << 31)
+#define X86_64_CPUID_TSC              0x15
 
 /* MSR Definitions */
 
