@@ -130,7 +130,7 @@ void __nxstart(void)
 {
   uint64_t *dest = NULL;
 
-  /* This is only for BSP core. */
+  /* This is only for BSP core. AP cores are handled by x86_64_ap_boot() */
 
   /* Do some checking on CPU compatibilities at the top of this function.
    * BSS cleanup can be optimized with vector instructions, so we need to

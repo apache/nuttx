@@ -140,7 +140,7 @@ typedef void (*up_vector_t)(void);
  * end of the heap is CONFIG_RAM_END
  */
 
-extern const uintptr_t g_idle_topstack;
+extern const uintptr_t g_idle_topstack[];
 
 /* Address of the saved user stack pointer */
 

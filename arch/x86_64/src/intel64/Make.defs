@@ -38,6 +38,12 @@ ifeq ($(CONFIG_ARCH_HAVE_TESTSET), y)
 CHIP_ASRCS += intel64_testset.S
 endif
 
+ifeq ($(CONFIG_SMP),y)
+CHIP_CSRCS += intel64_cpuidlestack.c
+CHIP_CSRCS += intel64_cpupause.c
+CHIP_CSRCS += intel64_cpustart.c
+endif
+
 # Configuration-dependent intel64 files
 
 ifeq ($(CONFIG_MULTBOOT2_FB_TERM),y)
