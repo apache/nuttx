@@ -71,6 +71,11 @@ static void collect_deadlock(FAR struct tcb_s *tcb, FAR void *arg)
               size_t i;
 
               next = ((FAR mutex_t *)sem)->holder;
+              if (next == NXMUTEX_NO_HOLDER)
+                {
+                  break;
+                }
+
               for (i = info->found; i < index; i++)
                 {
                   if (info->pid[i] == next)
@@ -82,6 +87,10 @@ static void collect_deadlock(FAR struct tcb_s *tcb, FAR void *arg)
 
               info->pid[index] = tcb->pid;
               tcb = nxsched_get_tcb(next);
+              if (tcb == NULL)
+                {
+                  break;
+                }
             }
         }
     }
