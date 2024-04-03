@@ -3786,6 +3786,19 @@ config SAMV7_TC3_QE
 	---help---
 		Reserve TC3 for use by QEncoder.
 
+config SAMV7_QENCODER_ENABLE_GETINDEX
+	bool "Support ioctl GETINDEX call"
+	default n
+	---help---
+		Index signal does not reset the internal counter.
+		However, each time index is hit, capture A and B registers
+		are used to save the counter's value instead of
+		resetting it.
+
+		This provides support for the GETINDEX ioctl call
+		with the qe_index_s struct. The 16 to 32 bit extension
+		of the driver's counter is also done.
+
 config SAMV7_QENCODER_FILTER
 	bool "Enable filtering on SAMV7 QEncoder input"
 	default y
