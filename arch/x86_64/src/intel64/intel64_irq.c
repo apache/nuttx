@@ -53,7 +53,7 @@
 
 struct intel64_irq_priv_s
 {
-  uint8_t busy;
+  cpu_set_t busy;
 };
 
 /****************************************************************************
@@ -433,27 +433,36 @@ static inline void up_idtinit(void)
 
 void up_irqinitialize(void)
 {
+  int cpu = up_cpu_index();
+
   /* Initialize the TSS */
 
-  x86_64_cpu_tss_init(0);
+  x86_64_cpu_tss_init(cpu);
 
   /* Initialize the APIC */
 
   up_apic_init();
 
+  if (cpu == 0)
+    {
 #ifndef CONFIG_ARCH_INTEL64_DISABLE_INT_INIT
-  /* Disable 8259 PIC */
+      /* Disable 8259 PIC */
 
-  up_deinit_8259();
+      up_deinit_8259();
 
-  /* Initialize the IOAPIC */
+      /* Initialize the IOAPIC */
 
-  up_ioapic_init();
+      up_ioapic_init();
 #endif
 
-  /* Initialize the IDT */
+      /* Initialize the IDT */
 
-  up_idtinit();
+      up_idtinit();
+    }
+
+  /* Program the IDT - one per all cores */
+
+  setidt(&g_idt_entries, sizeof(struct idt_entry_s) * NR_IRQS - 1);
 
   /* And finally, enable interrupts */
 
@@ -487,7 +496,9 @@ void up_disable_irq(int irq)
       g_irq_priv[irq].busy -= 1;
     }
 
-  if (g_irq_priv[irq].busy == 0)
+  CPU_CLR(up_cpu_index(), &g_irq_priv[irq].busy);
+
+  if (CPU_COUNT(&g_irq_priv[irq].busy) == 0)
     {
       /* One time disable */
 
@@ -517,7 +528,7 @@ void up_enable_irq(int irq)
 #  ifndef CONFIG_IRQCHAIN
   /* Check if IRQ is free if we don't support IRQ chains */
 
-  if (g_irq_priv[irq].busy)
+  if (CPU_ISSET(up_cpu_index(), &g_irq_priv[irq].busy))
     {
       ASSERT(0);
     }
@@ -530,7 +541,7 @@ void up_enable_irq(int irq)
       ASSERT(0);
     }
 
-  if (g_irq_priv[irq].busy == 0)
+  if (CPU_COUNT(&g_irq_priv[irq].busy) == 0)
     {
       /* One time enable */
 
@@ -540,7 +551,7 @@ void up_enable_irq(int irq)
         }
     }
 
-  g_irq_priv[irq].busy += 1;
+  CPU_SET(up_cpu_index(), &g_irq_priv[irq].busy);
 
   spin_unlock_irqrestore(&g_irq_spin, flags);
 #endif

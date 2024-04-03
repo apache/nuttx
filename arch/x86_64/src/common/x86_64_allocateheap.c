@@ -37,6 +37,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define IDLE_STACK_SIZE CONFIG_IDLETHREAD_STACKSIZE
+
+#if CONFIG_IDLETHREAD_STACKSIZE % 16 != 0
+#  error CONFIG_IDLETHREAD_STACKSIZE must be aligned to 16
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -49,8 +55,28 @@
  * Public Functions
  ****************************************************************************/
 
-const uintptr_t g_idle_topstack = (uintptr_t)_ebss +
-  CONFIG_IDLETHREAD_STACKSIZE;
+static const uintptr_t g_idle_stackalloc = (uintptr_t)_ebss +
+  CONFIG_IDLETHREAD_STACKSIZE * CONFIG_SMP_NCPUS;
+
+const uintptr_t g_idle_topstack[CONFIG_SMP_NCPUS] =
+{
+  (uintptr_t)g_idle_stackalloc + (1 * IDLE_STACK_SIZE) - 16,
+#if CONFIG_SMP_NCPUS > 1
+  (uintptr_t)g_idle_stackalloc + (2 * IDLE_STACK_SIZE) - 16,
+#endif
+#if CONFIG_SMP_NCPUS > 2
+  (uintptr_t)g_idle_stackalloc + (3 * IDLE_STACK_SIZE) - 16,
+#endif
+#if CONFIG_SMP_NCPUS > 3
+  (uintptr_t)g_idle_stackalloc + (4 * IDLE_STACK_SIZE) - 16,
+#endif
+#if CONFIG_SMP_NCPUS > 4
+  (uintptr_t)g_idle_stackalloc + (5 * IDLE_STACK_SIZE) - 16,
+#endif
+#if CONFIG_SMP_NCPUS > 5
+#  error missing logic
+#endif
+};
 
 /****************************************************************************
  * Name: up_allocate_heap
@@ -69,11 +95,16 @@ const uintptr_t g_idle_topstack = (uintptr_t)_ebss +
 
 void up_allocate_heap(void **heap_start, size_t *heap_size)
 {
+  uintptr_t hstart;
+  uintptr_t topstack;
+
   board_autoled_on(LED_HEAPALLOCATE);
+
+  topstack = g_idle_topstack[CONFIG_SMP_NCPUS - 1] + 8;
 
   /* Calculate the end of .bss section */
 
-  uintptr_t hstart = (g_idle_topstack + PAGE_SIZE - 1) & PAGE_MASK;
+  hstart = (topstack + PAGE_SIZE - 1) & PAGE_MASK;
   *heap_start = (void *)hstart;
 
   /* The size is the rest of the RAM */

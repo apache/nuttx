@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 #include <arch/arch.h>
 #include <arch/multiboot2.h>
+#include <sys/types.h>
 
 	.file "intel64_head.S"
 
@@ -33,7 +34,7 @@
  ****************************************************************************/
 
 /* Memory Map: _sbss is the start of the BSS region (see ld.script) _ebss is
- * the end of the BSS regsion (see ld.script). The idle task stack starts at
+ * the end of the BSS region (see ld.script). The idle task stack starts at
  * the end of BSS and is of size CONFIG_IDLETHREAD_STACKSIZE.  The IDLE thread
  * is the thread that the system boots on and, eventually, becomes the idle,
  * do nothing task that runs only when there is nothing else to run.  The
@@ -45,11 +46,15 @@
  ****************************************************************************/
 
 	.global    __pmode_entry                   /* The 32bit protected mode entry */
+#ifdef CONFIG_SMP
+	.global    __ap_entry                      /* The 32bit real mode entry for AP */
+#endif
 	.global    __enable_sse_avx
 	.global    __enable_pcid
 	.global    __revoke_low_memory
 	.global    __nxstart                       /* __nxstart is defined elsewhere */
 	.global    nx_start                        /* nx_start is defined elsewhere */
+	.global    x86_64_ap_boot                  /* x86_64_ap_boot is defined elsewhere */
 	.global    g_idle_topstack                 /* The end of the idle stack, the start of the heap */
 	.global    g_mb_info_struct
 	.global    g_mb_magic
@@ -118,7 +123,7 @@ __reset_entry:
 	movl    $loader_gdt_ptr, %ebx
 	lgdtl   (%ebx)
 
-	/* enable protected mode in CR0 */
+	/* Enable protected mode in CR0 */
 	mov     %cr0, %eax
 	or      $X86_CR0_PE, %al
 	mov     %eax, %cr0
@@ -134,10 +139,39 @@ loader_gdt:
 	.quad   0x00cf9a000000ffff
 	.quad   0x00cf92000000ffff
 loader_gdt_ptr:
-	.short	loader_gdt_ptr - loader_gdt - 1
+	.short  loader_gdt_ptr - loader_gdt - 1
 	.long   loader_gdt
 
 	.size   __reset_entry, . - __reset_entry
+
+bsp_done:
+	.long   0
+
+#ifdef CONFIG_SMP
+/****************************************************************************
+ * Name: __ap_entry
+ *
+ * Description:
+ *   Entry point for AP CPU 32-bit real mode which must be aligned to 4096
+ *   bytes. This is simply copy of __reset_entry.
+ *
+ ****************************************************************************/
+
+	.type   __ap_entry, @function
+	.align(4096)
+__ap_entry:
+	/* Load a GDT for protected mode */
+	movl    $loader_gdt_ptr, %ebx
+	lgdtl   (%ebx)
+
+	/* enable protected mode in CR0 */
+	mov     %cr0, %eax
+	or      $X86_CR0_PE, %al
+	mov     %eax, %cr0
+
+	/* Long jump into protected mode. Hardcode the address. */
+	ljmpl   $0x8, $0x100000
+#endif
 
 /****************************************************************************
  * .text
@@ -168,6 +202,11 @@ start32:
 	movl    %ebx, g_mb_info_struct
 	movl    %eax, g_mb_magic
 #endif
+
+	/* Jump to 64 bit initialiation if this is AP core */
+	mov     bsp_done, %eax
+	cmp     $0, %eax
+	jne     start64_init
 
 	/* initialize rest of the page directory */
 	lea     g_pd_low, %edi
@@ -212,6 +251,7 @@ pd_loop:
 	dec     %ecx
 	jnz     pd_loop
 
+start64_init:
 	/* Populate the 1GB after 4GB boundary with Global mapping to kernel code.
 	 * This creates maps the lower 1GB to 4GB~5GB
 	 */
@@ -260,29 +300,56 @@ pd_loop:
 	ljmpl   $(X86_GDT_CODE_SEL),   $start64
 
 	.code64
+
 start64:
-    /* Set Segement Registers for proper iret, etc. operation */
-    mov     $(X86_GDT_DATA_SEL),  %ax
-    mov     %ax,    %ss
-    mov     %ax,    %ds
-    mov     %ax,    %es
-    mov     %ax,    %fs
-    mov     %ax,    %gs
+	/* Set Segement Registers for proper iret, etc. operation */
+	mov     $(X86_GDT_DATA_SEL),  %ax
+	mov     %ax,    %ss
+	mov     %ax,    %ds
+	mov     %ax,    %es
+	mov     %ax,    %fs
+	mov     %ax,    %gs
 
-    /* Properly setup RSP to idle stack */
-    movabs  $g_idle_topstack,    %rbx
-    mov     (%rbx),   %rsp
+	/* Start BSP or AP */
+	mov     bsp_done, %eax
+	cmp     $0, %eax
+	jne     ap_start
 
-    /* We use jmp instruction below which doesn't push 1 byte on stack, so we
-     * have to push a dummy value here, otherwise SSE instructions calledd
-     * during initialization will fail.
-     */
-    pushq   $0
+	/* Properly setup RSP to idle stack */
+	movabs  $g_idle_topstack,    %rbx
+	mov     (%rbx),   %rsp
 
-    /* Finally, we can start the OS */
-    movabs  $__nxstart,   %rbx
-    jmp     *%rbx
-    .size   __pmode_entry, . - __pmode_entry
+	/* Set bsp_done flag */
+	movl     $1, bsp_done
+
+	/* We use jmp instruction below which doesn't push 1 byte on stack, so we
+	 * have to push a dummy value here, otherwise SSE instructions called
+	 * during initialization will fail.
+	 */
+	pushq   $0
+
+	/* Finally, we can start the OS */
+	movabs  $__nxstart,   %rbx
+	jmp     *%rbx
+
+ap_start:
+#ifdef CONFIG_SMP
+	/* Get CPU ID */
+	movl    g_cpu_count, %edi
+
+	/* Setup AP stack */
+	movabs  $g_idle_topstack,    %rbx
+	movl    %edi, %eax
+	imul    $8, %eax, %eax
+	add     %rax, %rbx
+	mov     (%rbx),   %rsp
+
+	/* Jump to ap_start routine */
+	movabs  $x86_64_ap_boot,   %rbx
+	jmp     *%rbx
+#endif
+
+	.size   __pmode_entry, . - __pmode_entry
 
 g_cpu_count:
        .long 1
@@ -377,23 +444,10 @@ __enable_pcid:
 
 	.section ".loader.data", "ax"
 
-	/* IST for 64 bit long mode will be filled in up_irq */
+	/* TSS (IST) for 64 bit long mode will be filled in up_irq. */
 	.align(16)
 g_ist64_low:
-	.long   0
-	.quad   0xdeadbeefdeadbee0
-	.quad   0xdeadbeefdeadbee1
-	.quad   0xdeadbeefdeadbee2
-	.quad   0
-	.quad   0
-	.quad   0
-	.quad   0
-	.quad   0
-	.quad   0
-	.quad   0
-	.quad   0
-	.quad   0
-	.word   0
+	.fill   X86_TSS_SIZE * CONFIG_SMP_NCPUS, 1, 0
 
 	/* GDT for 64 bit long mode */
 	.align(16)
@@ -405,8 +459,9 @@ g_gdt64_low:
 	.quad   X86_GDT_DATA_ENTRY
 	.quad   X86_GDT_CODE64_ENTRY
 g_gdt64_ist_low:
-	.quad   0x0 /* TSS segment low */
-	.quad   0x0 /* TSS segment high */
+	/* TSS segment low + segment high per CPU */
+	.fill   CONFIG_SMP_NCPUS * 16, 1, 0
+
 g_gdt64_low_end:
 
 gdt64_ptr:
