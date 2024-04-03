@@ -6,6 +6,28 @@
 if ARCH_X86_64
 comment "Common Configuration Options"
 
+config ARCH_X86_64_ACPI
+	bool "ACPI support"
+	default y
+	---help---
+		Select to enable ACPI parser.
+
+if ARCH_X86_64_ACPI
+
+config ARCH_X86_64_ACPI_DUMP
+	bool "ACPI dump"
+	default DEBUG_FEATURES
+	---help---
+		Select to dump ACPI tables.
+
+config ARCH_X86_64_ACPI_BIOS
+	bool "Look for ACPI RSDP in BIOS legacy region"
+	default y
+	---help---
+		Look for RSDP in BIOS legacy region (0x000e0000-0x000fffff).
+
+endif # ARCH_X86_64_ACPI
+
 config ARCH_X86_64_MMX
 	bool "MMX support"
 	depends on ARCH_HAVE_MMX
