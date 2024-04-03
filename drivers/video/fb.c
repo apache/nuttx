@@ -553,7 +553,7 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode *inode;
   FAR struct fb_chardev_s *fb;
-  int ret;
+  int ret = OK;
 
   ginfo("cmd: %d arg: %ld\n", cmd, arg);
 
@@ -670,8 +670,12 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           DEBUGASSERT(priv != NULL && fb->vtable != NULL &&
                       fb->vtable->getoverlayinfo != NULL);
-          memset(&oinfo, 0, sizeof(oinfo));
-          ret = fb->vtable->getoverlayinfo(fb->vtable, arg, &oinfo);
+          if (arg != FB_NO_OVERLAY)
+            {
+              memset(&oinfo, 0, sizeof(oinfo));
+              ret = fb->vtable->getoverlayinfo(fb->vtable, arg, &oinfo);
+            }
+
           if (ret >= 0)
             {
               priv->overlay = arg;
@@ -817,7 +821,6 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           DEBUGASSERT(power != NULL && fb->vtable != NULL &&
                       fb->vtable->getpower != NULL);
           *(power) = fb->vtable->getpower(fb->vtable);
-          ret = OK;
         }
         break;
 
@@ -828,7 +831,6 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           DEBUGASSERT(rate != NULL && fb->vtable != NULL &&
                       fb->vtable->getframerate != NULL);
           *(rate) = fb->vtable->getframerate(fb->vtable);
-          ret = OK;
         }
         break;
 
@@ -862,7 +864,6 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case FBIOSET_VSYNCOFFSET:
         {
           fb->vsyncoffset = USEC2TICK(arg);
-          ret = OK;
         }
         break;
 
