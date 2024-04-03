@@ -208,8 +208,8 @@
 #define IMX9_IRQ_ENET_QOS               (IMX9_IRQ_EXT + 184)   /* ENET QOS interrupt */
 #define IMX9_IRQ_RESERVED217            (IMX9_IRQ_EXT + 185)   /* Reserved interrupt */
 #define IMX9_IRQ_RESERVED218            (IMX9_IRQ_EXT + 186)   /* Reserved interrupt */
-#define IMX9_IRQ_RESERVED219            (IMX9_IRQ_EXT + 187)   /* USB-1 Wake-up Interrupt */
-#define IMX9_IRQ_RESERVED220            (IMX9_IRQ_EXT + 188)   /* USB-2 Wake-up Interrupt */
+#define IMX9_IRQ_USB1                   (IMX9_IRQ_EXT + 187)   /* USB-1 Wake-up Interrupt */
+#define IMX9_IRQ_USB2                   (IMX9_IRQ_EXT + 188)   /* USB-2 Wake-up Interrupt */
 #define IMX9_IRQ_GPIO4_0_15             (IMX9_IRQ_EXT + 189)   /* General Purpose Input/Output 4 interrupt 0 */
 #define IMX9_IRQ_GPIO4_16_31            (IMX9_IRQ_EXT + 190)   /* General Purpose Input/Output 4 interrupt 1 */
 #define IMX9_IRQ_LPSPI5                 (IMX9_IRQ_EXT + 191)   /* Low Power Serial Peripheral Interface 5 */
