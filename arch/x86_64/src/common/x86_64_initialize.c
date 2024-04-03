@@ -30,6 +30,8 @@
 #  include <nuttx/drivers/addrenv.h>
 #endif
 
+#include <arch/acpi.h>
+
 #include "x86_64_internal.h"
 
 /****************************************************************************
@@ -135,6 +137,12 @@ void up_initialize(void)
   /* Initialize USB -- device and/or host */
 
   x86_64_usbinitialize();
+
+#ifdef CONFIG_ARCH_X86_64_ACPI_DUMP
+  /* Dump ACPI tables */
+
+  acpi_dump();
+#endif
 
   board_autoled_on(LED_IRQSENABLED);
 }

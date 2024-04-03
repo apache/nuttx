@@ -37,4 +37,8 @@ if(CONFIG_PCI)
   list(APPEND SRCS x86_64_pci.c)
 endif()
 
+if(CONFIG_ARCH_X86_64_ACPI)
+  list(APPEND SRCS x86_64_acpi.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})

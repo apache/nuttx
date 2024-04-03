@@ -87,9 +87,11 @@ header_start:
 
 	.short  MULTIBOOT_HEADER_TAG_INFORMATION_REQUEST
 	.short  0    /* flags, none set */
-	.long   16   /* size, including itself (short + short + long) */
+	.long   24   /* size, including itself (short + short + long) */
 	.long   MULTIBOOT_TAG_TYPE_EFI64
 	.long   MULTIBOOT_TAG_TYPE_FRAMEBUFFER
+	.long   MULTIBOOT_TAG_TYPE_ACPI_OLD
+	.long   MULTIBOOT_TAG_TYPE_ACPI_NEW
 
 	.short  MULTIBOOT_HEADER_TAG_END
 	.short  0    /* flags, none set */

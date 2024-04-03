@@ -29,6 +29,8 @@
 #include <arch/board/board.h>
 #include <arch/multiboot2.h>
 
+#include <arch/acpi.h>
+
 #include "x86_64_internal.h"
 #include "intel64.h"
 
@@ -40,6 +42,7 @@
 
 uint32_t g_mb_magic __attribute__((section(".loader.bss")));
 uint32_t g_mb_info_struct __attribute__((section(".loader.bss")));
+uintptr_t g_acpi_rsdp = 0;
 
 /****************************************************************************
  * Private Functions
@@ -74,6 +77,22 @@ static void x86_64_mb2_config(void)
         {
           case MULTIBOOT_TAG_TYPE_EFI64:
             {
+              break;
+            }
+
+          case MULTIBOOT_TAG_TYPE_ACPI_OLD:
+            {
+              struct multiboot_tag_old_acpi *acpi
+                  = (struct multiboot_tag_old_acpi *)tag;
+              g_acpi_rsdp = (uintptr_t)acpi->rsdp;
+              break;
+            }
+
+          case MULTIBOOT_TAG_TYPE_ACPI_NEW:
+            {
+              struct multiboot_tag_new_acpi *acpi =
+                (struct multiboot_tag_new_acpi *)tag;
+              g_acpi_rsdp = (uintptr_t)acpi->rsdp;
               break;
             }
 
@@ -134,6 +153,12 @@ void __nxstart(void)
   /* Low-level, pre-OS initialization */
 
   intel64_lowsetup();
+
+#ifdef CONFIG_ARCH_X86_64_ACPI
+  /* Initialize ACPI */
+
+  acpi_init(g_acpi_rsdp);
+#endif
 
   /* perform board-specific initializations */
 
