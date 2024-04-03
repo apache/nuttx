@@ -348,7 +348,7 @@ static int i3cdrvr_unlink(FAR struct inode *inode)
  * Input Parameters:
  *   master - the lower half of an the controller object about I3C master
  *     driver.
- *   bus - The I3C bus number.  This will be used as the I3C device minor
+ *   bus    - The I3C bus number.  This will be used as the I3C device minor
  *     number.  The I3C character device will be registered as /dev/i3cN
  *     where N is the minor number
  *

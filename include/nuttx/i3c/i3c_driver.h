@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef _INCLUDE_NUTTX_I3C_DRIVER_H
-#define _INCLUDE_NUTTX_I3C_DRIVER_H
+#ifndef _INCLUDE_NUTTX_I3C_I3C_DRIVER_H
+#define _INCLUDE_NUTTX_I3C_I3C_DRIVER_H
 
 /****************************************************************************
  * Included Files
@@ -174,4 +174,4 @@ int i3c_register(FAR struct i3c_master_controller *master, int bus);
 #if defined(__cplusplus)
 }
 #endif
-#endif /* _INCLUDE_NUTTX_I3C_DRIVER_H */
+#endif /* _INCLUDE_NUTTX_I3C_I3C_DRIVER_H */

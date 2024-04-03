@@ -358,7 +358,7 @@ i3c_master_alloc_i3c_dev(FAR struct i3c_master_controller *master,
   FAR struct i3c_dev_desc *dev;
 
   dev = kmm_zalloc(sizeof(*dev));
-  if (!dev)
+  if (dev == NULL)
     {
       return NULL;
     }
@@ -378,7 +378,7 @@ static int i3c_master_rstdaa_locked(FAR struct i3c_master_controller *master,
   struct i3c_ccc_cmd cmd;
   int ret;
 
-  if (!master)
+  if (master == NULL)
     {
       return -EINVAL;
     }
@@ -409,7 +409,7 @@ static int i3c_master_enec_disec_locked(
   int ret;
 
   events = i3c_ccc_cmd_dest_init(&dest, addr, sizeof(*events));
-  if (!events)
+  if (events == NULL)
     {
       return -ENOMEM;
     }
@@ -440,7 +440,7 @@ static int i3c_master_setda_locked(FAR struct i3c_master_controller *master,
     }
 
   setda = i3c_ccc_cmd_dest_init(&dest, oldaddr, sizeof(*setda));
-  if (!setda)
+  if (setda == NULL)
     {
       return -ENOMEM;
     }
@@ -471,7 +471,7 @@ static int i3c_master_getmrl_locked(FAR struct i3c_master_controller *master,
   int ret;
 
   mrl = i3c_ccc_cmd_dest_init(&dest, info->dyn_addr, sizeof(*mrl));
-  if (!mrl)
+  if (mrl == NULL)
     {
       return -ENOMEM;
     }
@@ -525,7 +525,7 @@ static int i3c_master_getmwl_locked(FAR struct i3c_master_controller *master,
   int ret;
 
   mwl = i3c_ccc_cmd_dest_init(&dest, info->dyn_addr, sizeof(*mwl));
-  if (!mwl)
+  if (mwl == NULL)
     {
       return -ENOMEM;
     }
@@ -562,7 +562,7 @@ static int i3c_master_getmxds_locked(
 
   getmaxds = i3c_ccc_cmd_dest_init(&dest, info->dyn_addr,
                                     sizeof(*getmaxds));
-  if (!getmaxds)
+  if (getmaxds == NULL)
     {
       return -ENOMEM;
     }
@@ -606,7 +606,7 @@ static int i3c_master_gethdrcap_locked(
 
   gethdrcap = i3c_ccc_cmd_dest_init(&dest, info->dyn_addr,
                                     sizeof(*gethdrcap));
-  if (!gethdrcap)
+  if (gethdrcap == NULL)
     {
       return -ENOMEM;
     }
@@ -642,7 +642,7 @@ static int i3c_master_getpid_locked(FAR struct i3c_master_controller *master,
   int i;
 
   getpid = i3c_ccc_cmd_dest_init(&dest, info->dyn_addr, sizeof(*getpid));
-  if (!getpid)
+  if (getpid == NULL)
     {
       return -ENOMEM;
     }
@@ -676,7 +676,7 @@ static int i3c_master_getbcr_locked(FAR struct i3c_master_controller *master,
   int ret;
 
   getbcr = i3c_ccc_cmd_dest_init(&dest, info->dyn_addr, sizeof(*getbcr));
-  if (!getbcr)
+  if (getbcr == NULL)
     {
       return -ENOMEM;
     }
@@ -705,7 +705,7 @@ static int i3c_master_getdcr_locked(FAR struct i3c_master_controller *master,
   int ret;
 
   getdcr = i3c_ccc_cmd_dest_init(&dest, info->dyn_addr, sizeof(*getdcr));
-  if (!getdcr)
+  if (getdcr == NULL)
     {
       return -ENOMEM;
     }
@@ -937,7 +937,7 @@ i3c_master_register_new_i3c_devs(FAR struct i3c_master_controller *master)
         }
 
       desc->dev = kmm_zalloc(sizeof(*desc->dev));
-      if (!desc->dev)
+      if (desc->dev == NULL)
         {
           continue;
         }
@@ -1018,7 +1018,7 @@ static int i3c_master_bus_init(FAR struct i3c_master_controller *master)
    * complain if this was not the case.
    */
 
-  if (!master->this)
+  if (master->this == NULL)
     {
       i3cerr("master_set_info() was not called in ->bus_init()\n");
       ret = -EINVAL;
@@ -1110,12 +1110,12 @@ static int i3c_master_i2c_adapter_xfer(FAR struct i2c_master_s *i2c,
   int ret;
   uint16_t addr;
 
-  if (!xfers || !master || nxfers <= 0)
+  if (xfers == NULL || master == NULL || nxfers <= 0)
     {
       return -EINVAL;
     }
 
-  if (!master->ops->i2c_xfers)
+  if (master->ops->i2c_xfers == NULL)
     {
       return -ENOTSUP;
     }
@@ -1150,7 +1150,7 @@ static void i3c_master_unregister_i3c_devs(
 
   i3c_bus_for_each_i3cdev(&master->bus, i3cdev)
     {
-      if (!i3cdev->dev)
+      if (i3cdev->dev == NULL)
         {
           continue;
         }
@@ -1194,15 +1194,16 @@ static void i3c_master_init_ibi_slot(FAR struct i3c_dev_desc *dev,
 static int i3c_master_check_ops(
             FAR const struct i3c_master_controller_ops *ops)
 {
-  if (!ops || !ops->bus_init || !ops->priv_xfers ||
-      !ops->send_ccc_cmd || !ops->do_daa || !ops->i2c_xfers)
+  if (ops == NULL || ops->bus_init == NULL || ops->priv_xfers == NULL ||
+      ops->send_ccc_cmd == NULL || ops->do_daa == NULL ||
+      ops->i2c_xfers == NULL)
     {
       return -EINVAL;
     }
 
   if (ops->request_ibi &&
-      (!ops->enable_ibi || !ops->disable_ibi || !ops->free_ibi ||
-      !ops->recycle_ibi_slot))
+      (ops->enable_ibi == NULL || ops->disable_ibi == NULL ||
+       ops->free_ibi == NULL || ops->recycle_ibi_slot == NULL))
     {
       return -EINVAL;
     }
@@ -1264,7 +1265,7 @@ int i3c_master_send_ccc_cmd_locked(
 {
   int ret;
 
-  if (!cmd || !master)
+  if (cmd == NULL || master == NULL)
     {
       return -EINVAL;
     }
@@ -1275,12 +1276,12 @@ int i3c_master_send_ccc_cmd_locked(
       return -EINVAL;
     }
 
-  if (!master->ops->send_ccc_cmd)
+  if (master->ops->send_ccc_cmd == NULL)
     {
       return -ENOTSUP;
     }
 
-  if ((cmd->id & I3C_CCC_DIRECT) && (!cmd->dests || !cmd->ndests))
+  if ((cmd->id & I3C_CCC_DIRECT) && (cmd->dests == NULL || !cmd->ndests))
     {
       return -EINVAL;
     }
@@ -1625,7 +1626,7 @@ int i3c_master_add_i3c_dev_locked(FAR struct i3c_master_controller *master,
   int ret;
 
   memset(&ibireq, 0, sizeof(struct i3c_ibi_setup));
-  if (!master)
+  if (master == NULL)
     {
       return -EINVAL;
     }
@@ -1868,7 +1869,7 @@ i3c_generic_ibi_alloc_pool(FAR struct i3c_dev_desc *dev,
   struct i3c_generic_ibi_pool *ret;
 
   pool = kmm_zalloc(sizeof(*pool));
-  if (!pool)
+  if (pool == NULL)
     {
       return NULL;
     }
@@ -1877,7 +1878,7 @@ i3c_generic_ibi_alloc_pool(FAR struct i3c_dev_desc *dev,
   list_initialize(&pool->pending);
 
   pool->slots = kmm_calloc(req->num_slots, sizeof(*slot));
-  if (!pool->slots)
+  if (pool->slots == NULL)
     {
       ret = NULL;
       goto err_free_pool;
@@ -1887,7 +1888,7 @@ i3c_generic_ibi_alloc_pool(FAR struct i3c_dev_desc *dev,
     {
       pool->payload_buf = kmm_calloc(req->num_slots,
               req->max_payload_len);
-      if (!pool->payload_buf)
+      if (pool->payload_buf == NULL)
         {
           ret = NULL;
           goto err_free_pool;
@@ -1978,7 +1979,7 @@ void i3c_generic_ibi_recycle_slot(FAR struct i3c_generic_ibi_pool *pool,
   FAR struct i3c_generic_ibi_slot *slot;
   unsigned long flags;
 
-  if (!s)
+  if (s == NULL)
     {
       return;
     }
@@ -1995,18 +1996,18 @@ int i3c_dev_do_priv_xfers_locked(FAR struct i3c_dev_desc *dev,
 {
   FAR struct i3c_master_controller *master;
 
-  if (!dev)
+  if (dev == NULL)
     {
       return -ENOENT;
     }
 
   master = i3c_dev_get_master(dev);
-  if (!master || !xfers)
+  if (master == NULL || xfers == NULL)
     {
       return -EINVAL;
     }
 
-  if (!master->ops->priv_xfers)
+  if (master->ops->priv_xfers == NULL)
     {
       return -ENOTSUP;
     }
@@ -2019,7 +2020,7 @@ int i3c_dev_disable_ibi_locked(FAR struct i3c_dev_desc *dev)
   FAR struct i3c_master_controller *master;
   int ret;
 
-  if (!dev->ibi)
+  if (dev->ibi == NULL)
     {
       return -EINVAL;
     }
@@ -2047,7 +2048,7 @@ int i3c_dev_enable_ibi_locked(FAR struct i3c_dev_desc *dev)
   FAR struct i3c_master_controller *master = i3c_dev_get_master(dev);
   int ret;
 
-  if (!dev->ibi)
+  if (dev->ibi == NULL)
     {
       return -EINVAL;
     }
@@ -2068,7 +2069,7 @@ int i3c_dev_request_ibi_locked(FAR struct i3c_dev_desc *dev,
   FAR struct i3c_device_ibi_info *ibi;
   int ret;
 
-  if (!master->ops->request_ibi)
+  if (master->ops->request_ibi == NULL)
     {
       return -ENOTSUP;
     }
@@ -2079,7 +2080,7 @@ int i3c_dev_request_ibi_locked(FAR struct i3c_dev_desc *dev,
     }
 
   ibi = kmm_zalloc(sizeof(*ibi));
-  if (!ibi)
+  if (ibi == NULL)
     {
       return -ENOMEM;
     }
@@ -2105,7 +2106,7 @@ void i3c_dev_free_ibi_locked(FAR struct i3c_dev_desc *dev)
 {
   FAR struct i3c_master_controller *master = i3c_dev_get_master(dev);
 
-  if (!dev->ibi)
+  if (dev->ibi == NULL)
     {
       return;
     }
@@ -2225,7 +2226,7 @@ int i3c_master_register(FAR struct i3c_master_controller *master,
   /* Expose I2C driver node so by the i2c_driver on our I3C Bus */
 
   master->i2c.ops = &i3c_master_i2c_algo;
-  i2c_register(&master->i2c, master->i2c_bus_id);
+  ret = i2c_register(&master->i2c, master->i2c_bus_id);
   if (ret < 0)
     {
       i3cerr("ERROR: Failed to register I2C%d.\n", master->i2c_bus_id);
