@@ -30,7 +30,8 @@
 #include <arch/multiboot2.h>
 
 #include "x86_64_internal.h"
-#include "intel64.h"
+
+#include "intel64_lowsetup.h"
 
 /****************************************************************************
  * Public Data

@@ -69,19 +69,6 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: intel64_lowsetup
- *
- * Description:
- *   Called at the very beginning of _nxstart.
- *   Performs low level initializationincluding setup of the console UART.
- *   This UART done early so that the serial console is available for
- *   debugging very early in the boot sequence.
- *
- ****************************************************************************/
-
-void intel64_lowsetup(void);
-
-/****************************************************************************
  * Name: vector_*
  *
  * Description:
