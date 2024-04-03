@@ -358,6 +358,7 @@ legacy_pic_irq_handler(int irq, uint32_t *regs, void *arg)
 #ifndef CONFIG_ARCH_INTEL64_DISABLE_INT_INIT
 static void up_ioapic_init(void)
 {
+  uint32_t maxintr;
   int i;
 
   up_map_region((void *)IOAPIC_BASE, HUGE_PAGE_SIZE,
@@ -365,7 +366,7 @@ static void up_ioapic_init(void)
 
   /* Setup the IO-APIC, remap the interrupt to 32~ */
 
-  uint32_t maxintr = (up_ioapic_read(IOAPIC_REG_VER) >> 16) & 0xff;
+  maxintr = (up_ioapic_read(IOAPIC_REG_VER) >> 16) & 0xff;
 
   for (i = 0; i < maxintr; i++)
     {
