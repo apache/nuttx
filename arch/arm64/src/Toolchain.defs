@@ -30,22 +30,20 @@
 #                   reliable code generation.
 #
 
-ifeq ($(CONFIG_ARCH_ARMV8A),y)
-  ARCHCPUFLAGS += -march=armv8-a
-endif
-
-ifeq ($(CONFIG_ARCH_ARMV8R),y)
-  ARCHCPUFLAGS += -march=armv8-r
-endif
-
 ifeq ($(CONFIG_ARCH_CORTEX_A53),y)
   ARCHCPUFLAGS += -mcpu=cortex-a53
+else ifeq ($(CONFIG_ARCH_CORTEX_A55),y)
+  ARCHCPUFLAGS += -mcpu=cortex-a55
 else ifeq ($(CONFIG_ARCH_CORTEX_A57),y)
   ARCHCPUFLAGS += -mcpu=cortex-a57
 else ifeq ($(CONFIG_ARCH_CORTEX_A72),y)
   ARCHCPUFLAGS += -mcpu=cortex-a72
 else ifeq ($(CONFIG_ARCH_CORTEX_R82),y)
   ARCHCPUFLAGS += -mcpu=cortex-r82
+else ifeq ($(CONFIG_ARCH_ARMV8A),y)
+  ARCHCPUFLAGS += -march=armv8-a
+else ifeq ($(CONFIG_ARCH_ARMV8R),y)
+  ARCHCPUFLAGS += -march=armv8-r
 endif
 
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
