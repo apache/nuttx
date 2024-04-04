@@ -46,7 +46,7 @@ To build the custom board, the syntax is slightly different to in-tree boards an
 
     .. code-block:: console
 
-      $ .tools/configure -l ../CustomBoards/MyCustomBoardName/MyCustomConfig
+      $ .tools/configure -l ../CustomBoards/MyCustomBoardName/configs/MyCustomConfig
       Copy files
       Select CONFIG_HOST_LINUX=y
       Refreshing...
