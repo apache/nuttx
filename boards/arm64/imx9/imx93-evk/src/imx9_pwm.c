@@ -29,6 +29,7 @@
 #include <errno.h>
 
 #include "imx9_flexio_pwm.h"
+#include "imx9_tpm_pwm.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -82,6 +83,24 @@ int imx9_pwm_setup(void)
   if (lower_half)
     {
       ret = pwm_register("/dev/pwm1", lower_half);
+    }
+  else
+    {
+      ret = -ENODEV;
+    }
+
+  if (ret < 0)
+    {
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_IMX9_TPM3_PWM
+  lower_half = imx9_flexio_pwm_init(PWM_TPM3);
+
+  if (lower_half)
+    {
+      ret = pwm_register("/dev/pwm2", lower_half);
     }
   else
     {
