@@ -31,9 +31,9 @@ The CustomApps directory need only to contain the minimum three files:
 1.1 Makefile
 ------------
 
-The custom application directory must include a Makefile to make all of the targets
-expected by the NuttX build and must generate an archive called libapps.a in the
-top-level of the custom directory structure.
+The custom application directory must include a Makefile to make all of the
+targets expected by the NuttX build and must generate an archive called
+libapps.a in the top-level of the custom directory structure.
 
 The Makefile has just those minimum required targets:
 
@@ -104,9 +104,10 @@ The Makefile has just those minimum required targets:
 1.2 Kconfig
 -----------
 
-A Kconfig file must be included but need not be populated with any meaningful options.
-This is a place where you can add settings to generate customized builds of your custom
-application and/or choose which of your apps to include.
+A Kconfig file must be included but need not be populated with any meaningful
+options.
+This is a place where you can add settings to generate customized builds of
+your custom application and/or choose which of your apps to include.
 
 In the minimum case, Kconfig is only:
 
@@ -116,7 +117,8 @@ In the minimum case, Kconfig is only:
       # see the file kconfig-language.txt in the NuttX tools repository.
       #
 
-or
+but it is more usual to include at least the basic information any NuttX app
+requires, as well as anything else your app may need:
 
     .. code-block:: console
 
@@ -124,7 +126,30 @@ or
       # see the file kconfig-language.txt in the NuttX tools repository.
       #
 
+      config CUSTOM_APPS_MY_APP
+	        tristate "My App"
+	        default n
+	        ---help---
+		      Enable My App
+		
+      if CUSTOM_APPS_MY_APP
 
+      config CUSTOM_APPS_MY_APP_PROGNAME
+      	  string "Program name"
+      	  default "myapp"
+      	  ---help---
+      		    This is the name of the program that will be used when the NSH ELF
+      		    program is installed.
+      	
+      config CUSTOM_APPS_MY_APP_PRIORITY
+      	  int "My App task priority"
+      	  default 100
+
+      config CUSTOM_APPS_MY_APP_STACKSIZE
+      	  int "My App stack size"
+      	  default DEFAULT_TASK_STACKSIZE
+
+      endif
 
 1.3 CustomHello.c
 -----------------
