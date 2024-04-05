@@ -36,59 +36,67 @@ CHIP_CSRCS += esp_lowputc.c esp_serial.c
 CHIP_CSRCS += esp_systemreset.c
 
 ifeq ($(CONFIG_SCHED_TICKLESS),y)
-  CHIP_CSRCS += esp_tickless.c
+	CHIP_CSRCS += esp_tickless.c
 else
-  CHIP_CSRCS += esp_timerisr.c
+	CHIP_CSRCS += esp_timerisr.c
 endif
 
 ifeq ($(CONFIG_WATCHDOG),y)
-  CHIP_CSRCS += esp_wdt.c
+	CHIP_CSRCS += esp_wdt.c
 endif
 
 ifneq ($(CONFIG_DEV_RANDOM)$(CONFIG_DEV_URANDOM_ARCH),)
-  CHIP_CSRCS += esp_random.c
+	CHIP_CSRCS += esp_random.c
 endif
 
 ifeq ($(CONFIG_TIMER),y)
-  CHIP_CSRCS += esp_timer.c
+	CHIP_CSRCS += esp_timer.c
 endif
 
 ifeq ($(CONFIG_ONESHOT),y)
-  CHIP_CSRCS += esp_oneshot.c
+	CHIP_CSRCS += esp_oneshot.c
 endif
 
 ifeq ($(CONFIG_RTC),y)
-  CHIP_CSRCS += esp_rtc.c
+	CHIP_CSRCS += esp_rtc.c
 endif
 
 ifeq ($(CONFIG_ESPRESSIF_HR_TIMER),y)
-  CHIP_CSRCS += esp_hr_timer.c
+	CHIP_CSRCS += esp_hr_timer.c esp_ets_timer_legacy.c
 endif
 
 ifeq ($(CONFIG_ESPRESSIF_TWAI),y)
-  CHIP_CSRCS += esp_twai.c
+	CHIP_CSRCS += esp_twai.c
 endif
 
 ifeq ($(CONFIG_ESPRESSIF_LEDC),y)
-  CHIP_CSRCS += esp_ledc.c
+	CHIP_CSRCS += esp_ledc.c
 endif
 
 ifeq ($(CONFIG_ESPRESSIF_USBSERIAL),y)
-  CHIP_CSRCS += esp_usbserial.c
+	CHIP_CSRCS += esp_usbserial.c
 endif
 
 ifeq ($(CONFIG_ESP_RMT),y)
-  CHIP_CSRCS += esp_rmt.c
-  ifeq ($(CONFIG_WS2812_NON_SPI_DRIVER),y)
-    CHIP_CSRCS += esp_ws2812.c
-  endif
+	CHIP_CSRCS += esp_rmt.c
+	ifeq ($(CONFIG_WS2812_NON_SPI_DRIVER),y)
+		CHIP_CSRCS += esp_ws2812.c
+	endif
 endif
 
 ifeq ($(CONFIG_ESPRESSIF_SPIFLASH),y)
-  CHIP_CSRCS += esp_spiflash.c
-  ifeq ($(CONFIG_ESPRESSIF_MTD),y)
-    CHIP_CSRCS += esp_spiflash_mtd.c
-  endif
+	CHIP_CSRCS += esp_spiflash.c
+	ifeq ($(CONFIG_ESPRESSIF_MTD),y)
+		CHIP_CSRCS += esp_spiflash_mtd.c
+	endif
+endif
+
+ifeq ($(CONFIG_ESP_WIRELESS),y)
+	ifeq ($(CONFIG_ESPRESSIF_WIFI),y)
+		CHIP_CSRCS += esp_wifi_init.c
+		CHIP_CSRCS += esp_wlan.c
+		CHIP_CSRCS += esp_wifi_utils.c
+	endif
 endif
 
 #############################################################################
@@ -99,7 +107,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = 54aca80daef2002b0169e67bcde36f19f59cf6cf
+	ESP_HAL_3RDPARTY_VERSION = 581540ed0a5ce9674da44f9ece6a63d052058985
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL
@@ -111,6 +119,13 @@ chip/$(ESP_HAL_3RDPARTY_REPO):
 	$(Q) git clone --quiet $(ESP_HAL_3RDPARTY_URL) chip/$(ESP_HAL_3RDPARTY_REPO)
 	$(Q) echo "Espressif HAL for 3rd Party Platforms: ${ESP_HAL_3RDPARTY_VERSION}"
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) checkout --quiet $(ESP_HAL_3RDPARTY_VERSION)
+ifeq ($(CONFIG_ESP_WIRELESS),y)
+	$(Q) echo "Espressif HAL for 3rd Party Platforms: initializing submodules..."
+	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule --quiet update --init --depth=1 components/mbedtls/mbedtls components/esp_phy/lib components/esp_wifi/lib components/esp_coex/lib
+	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO)/components/mbedtls/mbedtls reset --quiet --hard
+	$(Q) echo "Applying patches..."
+	$(Q) cd chip/$(ESP_HAL_3RDPARTY_REPO)/components/mbedtls/mbedtls && git apply ../../../nuttx/patches/components/mbedtls/mbedtls/*.patch
+endif
 
 include common$(DELIM)espressif$(DELIM)Bootloader.mk
 
@@ -124,6 +139,10 @@ CHIP_SERIES = $(patsubst "%",%,$(CONFIG_ESPRESSIF_CHIP_SERIES))
 
 include chip/hal_${CHIP_SERIES}.mk
 
+ifeq ($(CONFIG_ESP_WIRELESS),y)
+	include common$(DELIM)espressif$(DELIM)Wireless.mk
+endif
+
 context:: chip/$(ESP_HAL_3RDPARTY_REPO)
 	$(call COPYFILE,chip/$(ESP_HAL_3RDPARTY_REPO)/components/soc/$(CHIP_SERIES)/include/soc/gpio_sig_map.h,../include/chip/)
 	$(call COPYFILE,chip/$(ESP_HAL_3RDPARTY_REPO)/nuttx/$(CHIP_SERIES)/include/irq.h,../include/chip/)
@@ -134,4 +153,5 @@ distclean::
 	$(call DELDIR,chip/$(ESP_HAL_3RDPARTY_REPO))
 
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)common$(DELIM)espressif
+INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)common$(DELIM)espressif$(DELIM)platform_include
 VPATH += common$(DELIM)espressif

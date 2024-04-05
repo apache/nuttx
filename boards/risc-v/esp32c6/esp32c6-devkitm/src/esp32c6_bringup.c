@@ -65,6 +65,14 @@
 #  include "esp_board_rmt.h"
 #endif
 
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
+#  include "esp_coexist_internal.h"
+#endif
+
+#ifdef CONFIG_ESPRESSIF_WIFI
+#  include "esp_board_wlan.h"
+#endif
+
 #include "esp32c6-devkitm.h"
 
 /****************************************************************************
@@ -203,6 +211,20 @@ int esp_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: board_twai_setup failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
+  esp_coex_adapter_register(&g_coex_adapter_funcs);
+  coex_pre_init();
+#endif
+
+#ifdef CONFIG_ESPRESSIF_WIFI
+  ret = board_wlan_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize wireless subsystem=%d\n",
+             ret);
     }
 #endif
 

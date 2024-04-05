@@ -174,6 +174,45 @@ void esp_intr_noniram_disable(void);
 
 void esp_intr_noniram_enable(void);
 
+/****************************************************************************
+ * Name:  esp_get_irq
+ *
+ * Description:
+ *   This function returns the IRQ associated with a CPU interrupt
+ *
+ * Input Parameters:
+ *   cpuint - The CPU interrupt associated to the IRQ
+ *
+ * Returned Value:
+ *   The IRQ associated with such CPU interrupt or CPUINT_UNASSIGNED if
+ *   IRQ is not yet assigned to a CPU interrupt.
+ *
+ ****************************************************************************/
+
+int esp_get_irq(int cpuint);
+
+/****************************************************************************
+ * Name:  esp_set_irq
+ *
+ * Description:
+ *   This function assigns a CPU interrupt to a specific IRQ number. It
+ *   updates the mapping between IRQ numbers and CPU interrupts, allowing
+ *   the system to correctly route hardware interrupts to the appropriate
+ *   handlers. Please note that this function is intended to be used only
+ *   when a CPU interrupt is already assigned to an IRQ number. Otherwise,
+ *   please check esp_setup_irq.
+ *
+ * Input Parameters:
+ *   irq    - The IRQ number to be associated with the CPU interrupt.
+ *   cpuint - The CPU interrupt to be associated with the IRQ number.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp_set_irq(int irq, int cpuint);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

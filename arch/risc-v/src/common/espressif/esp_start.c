@@ -152,6 +152,8 @@ extern uint8_t _image_drom_size[];
 extern int ets_printf(const char *fmt, ...) printf_like(1, 2);
 #endif
 
+extern void cache_set_idrom_mmu_size(uint32_t irom_size, uint32_t drom_size);
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -173,6 +175,11 @@ HDR_ATTR static void (*_entry_point)(void) = __start;
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
+extern uint8_t _instruction_reserved_start[];
+extern uint8_t _instruction_reserved_end[];
+extern uint8_t _rodata_reserved_start[];
+extern uint8_t _rodata_reserved_end[];
 
 /****************************************************************************
  * Private Functions
@@ -384,6 +391,11 @@ static int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
 
 void __esp_start(void)
 {
+#ifdef CONFIG_ESP_ROM_NEEDS_SET_CACHE_MMU_SIZE
+  uint32_t _instruction_size;
+  uint32_t cache_mmu_irom_size;
+#endif
+
 #ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
   if (bootloader_init() != 0)
     {
@@ -409,6 +421,19 @@ void __esp_start(void)
       while (true);
     }
 #endif
+
+#if CONFIG_ESP_ROM_NEEDS_SET_CACHE_MMU_SIZE
+  _instruction_size = (uint32_t)&_instruction_reserved_end - \
+                      (uint32_t)&_instruction_reserved_start;
+  cache_mmu_irom_size =
+      ((_instruction_size + SPI_FLASH_MMU_PAGE_SIZE - 1) / \
+      SPI_FLASH_MMU_PAGE_SIZE) * sizeof(uint32_t);
+
+  /* Configure the Cache MMU size for instruction and rodata in flash. */
+
+  cache_set_idrom_mmu_size(cache_mmu_irom_size,
+                           CACHE_DROM_MMU_MAX_END - cache_mmu_irom_size);
+#endif /* CONFIG_ESP_ROM_NEEDS_SET_CACHE_MMU_SIZE */
 
 #ifdef CONFIG_ESPRESSIF_REGION_PROTECTION
   /* Configure region protection */

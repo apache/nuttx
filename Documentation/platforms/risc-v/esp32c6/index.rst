@@ -163,7 +163,7 @@ SPIFLASH         Yes
 Timers           Yes
 UART             Yes
 Watchdog         Yes
-Wifi             No
+Wifi             Yes
 XTS              No
 ==============  =======
 
