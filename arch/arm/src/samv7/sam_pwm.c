@@ -332,7 +332,7 @@ static void pwm_set_deadtime(struct pwm_lowerhalf_s *dev, uint8_t channel,
                              ub16_t duty);
 #endif
 static void pwm_set_polarity(struct pwm_lowerhalf_s *dev, uint8_t channel,
-                             uint8_t cpol);
+                             uint8_t cpol, uint8_t dcpol);
 
 /****************************************************************************
  * Private Functions
@@ -631,6 +631,7 @@ static void pwm_set_deadtime(struct pwm_lowerhalf_s *dev, uint8_t channel,
  *   dev         - A reference to the lower half PWM driver state structure
  *   channel     - Channel to by updated
  *   cpol        - Desired polarity
+ *   dcpol       - Desired default polarity of a disabled channel
  *
  * Returned Value:
  *   None
@@ -638,16 +639,24 @@ static void pwm_set_deadtime(struct pwm_lowerhalf_s *dev, uint8_t channel,
  ****************************************************************************/
 
 static void pwm_set_polarity(struct pwm_lowerhalf_s *dev, uint8_t channel,
-                             uint8_t cpol)
+                             uint8_t cpol, uint8_t dcpol)
 {
   struct sam_pwm_s *priv = (struct sam_pwm_s *)dev;
   uint16_t regval;
 
   regval = pwm_getreg(priv, SAMV7_PWM_CMRX + (channel * CHANNEL_OFFSET));
   regval &= ~CMR_CPOL;
+  regval &= ~CMR_DPOLI;
+
   if (cpol == PWM_CPOL_HIGH)
     {
       regval |= CMR_CPOL;
+    }
+
+  if ((dcpol == PWM_DCPOL_LOW && cpol == PWM_CPOL_HIGH) ||
+      (dcpol == PWM_DCPOL_HIGH && cpol == PWM_CPOL_LOW))
+    {
+      regval |= CMR_DPOLI;
     }
 
   pwm_putreg(priv, SAMV7_PWM_CMRX + (channel * CHANNEL_OFFSET), regval);
@@ -846,7 +855,8 @@ static int pwm_start(struct pwm_lowerhalf_s *dev,
                                info->channels[i].duty);
 #endif
               pwm_set_polarity(dev, priv->channels[index - 1].channel,
-                               info->channels[i].cpol);
+                               info->channels[i].cpol,
+                               info->channels[i].dcpol);
               pwm_set_output(dev, priv->channels[index - 1].channel,
                              info->channels[i].duty);
 #ifdef CONFIG_PWM_OVERWRITE
@@ -879,7 +889,7 @@ static int pwm_start(struct pwm_lowerhalf_s *dev,
                        info->dead_time_a, info->dead_time_b);
 #endif
       pwm_set_polarity(dev, priv->channels[0].channel,
-                       info->cpol);
+                       info->cpol, info->dcpol);
       pwm_set_output(dev, priv->channels[0].channel, info->duty);
 #endif
 
