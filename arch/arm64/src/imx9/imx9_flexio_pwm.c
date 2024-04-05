@@ -444,8 +444,7 @@ static int pwm_update_frequency(struct imx9_pwmtimer_s *priv, int freq)
 static int pwm_update_duty(struct imx9_pwmtimer_s *priv, int pwm_ch,
                            ub16_t duty16)
 {
-  uint64_t duty = ub16toi(duty16);
-  uint32_t edge = (duty * priv->period + 0x8000) >> 16;
+  uint32_t edge = ub16toi(duty16 * priv->period + b16HALF);
   int timer = pwm_ch - 1; /* map pwm ch 1 to timer 0 etc.. */
   uint32_t regval;
 
@@ -477,7 +476,7 @@ static int pwm_update_duty(struct imx9_pwmtimer_s *priv, int pwm_ch,
    * timer fully, otherwise just update the duty cycle
    */
 
-  flexio_putreg(priv, IMX9_FLEXIO_TIMCMP_OFFSET(timer), duty);
+  flexio_putreg(priv, IMX9_FLEXIO_TIMCMP_OFFSET(timer), edge);
 
   if (priv->frequency == 0)
     {
