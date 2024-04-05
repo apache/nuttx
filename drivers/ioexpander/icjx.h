@@ -98,5 +98,29 @@
 #define ICJX_CTRL_WORD_2_NIOL   (1 << 3)
 #define ICJX_CTRL_WORD_2_NIOH   (1 << 7)
 
+/* Control Word 4 */
+
+#define ICJX_CTRL_WORD_4_EOI    (1 << 7)
+
+/* Interrupt Status Register A */
+
+#define ICJX_ISR_A_SCS   (1 << 0)
+#define ICJX_ISR_A_ET1   (1 << 1)
+#define ICJX_ISR_A_ET2   (1 << 2)
+#define ICJX_ISR_A_ISCI  (1 << 4)
+#define ICJX_ISR_A_IET1  (1 << 5)
+#define ICJX_ISR_A_IET2  (1 << 6)
+#define ICJX_ISR_A_DCHI  (1 << 7)
+
+/* Interrupt Status Register B */
+
+#define ICJX_ISR_B_USA   (1 << 0)
+#define ICJX_ISR_B_USD   (1 << 1)
+#define ICJX_ISR_B_EOC   (1 << 2)
+#define ICJX_ISR_B_IUSA  (1 << 4)
+#define ICJX_ISR_B_IUSD  (1 << 5)
+#define ICJX_ISR_B_ISD   (1 << 6)
+#define ICJX_ISR_B_IOEC  (1 << 7)
+
 #endif /* CONFIG_IOEXPANDER && CONFIG_IOEXPANDER_ICJX */
 #endif /* __DRIVERS_IOEXPANDER_ICJX_H */

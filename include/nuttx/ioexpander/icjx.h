@@ -67,6 +67,20 @@ struct icjx_config_s
   uint8_t addr;         /* Device address (set by A(1:0) pins) */
   uint8_t mode;         /* SPI mode */
   uint32_t frequency;   /* SPI frequency */
+
+#ifdef CONFIG_IOEXPANDER_INT_ENABLE
+  /* IRQ/GPIO access callbacks.  These operations all hidden behind
+   * callbacks to isolate the iC-JX driver from differences in GPIO
+   * interrupt handling by varying boards and MCUs.
+   *
+   * attach  - Attach the iC-JX interrupt handler to the GPIO interrupt
+   * enable  - Enable or disable the GPIO interrupt
+   */
+
+  CODE int  (*attach)(FAR struct icjx_config_s *config, xcpt_t handler,
+                      FAR void *arg);
+  CODE void (*enable)(FAR struct icjx_config_s *config, bool enable);
+#endif
 };
 
 /****************************************************************************
