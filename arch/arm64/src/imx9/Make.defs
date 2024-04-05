@@ -51,3 +51,7 @@ endif
 ifeq ($(CONFIG_IMX9_LPSPI), y)
   CHIP_CSRCS += imx9_lpspi.c
 endif
+
+ifeq ($(CONFIG_IMX9_EDMA), y)
+  CHIP_CSRCS += imx9_edma.c
+endif
