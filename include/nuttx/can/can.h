@@ -286,7 +286,7 @@
  *   CANIOC_A_CMD2          _CANIOC(CAN_A_FIRST+1)
  *   CANIOC_A_CMD3          _CANIOC(CAN_A_FIRST+2)
  *   ...
- *   CANIOC_A_CMD42            _CANIOC(CAN_A_FIRST+41)
+ *   CANIOC_A_CMD42         _CANIOC(CAN_A_FIRST+41)
  *
  * The next reservation would look like:
  *
@@ -296,16 +296,16 @@
 
 /* Convenience macros *******************************************************/
 
-#define dev_reset(dev)            dev->cd_ops->co_reset(dev)
-#define dev_setup(dev)            dev->cd_ops->co_setup(dev)
-#define dev_shutdown(dev)         dev->cd_ops->co_shutdown(dev)
-#define dev_txint(dev,enable)     dev->cd_ops->co_txint(dev,enable)
-#define dev_rxint(dev,enable)     dev->cd_ops->co_rxint(dev,enable)
-#define dev_ioctl(dev,cmd,arg)    dev->cd_ops->co_ioctl(dev,cmd,arg)
-#define dev_remoterequest(dev,id) dev->cd_ops->co_remoterequest(dev,id)
-#define dev_send(dev,m)           dev->cd_ops->co_send(dev,m)
-#define dev_txready(dev)          dev->cd_ops->co_txready(dev)
-#define dev_txempty(dev)          dev->cd_ops->co_txempty(dev)
+#define dev_reset(dev)            (dev)->cd_ops->co_reset(dev)
+#define dev_setup(dev)            (dev)->cd_ops->co_setup(dev)
+#define dev_shutdown(dev)         (dev)->cd_ops->co_shutdown(dev)
+#define dev_txint(dev,enable)     (dev)->cd_ops->co_txint(dev,enable)
+#define dev_rxint(dev,enable)     (dev)->cd_ops->co_rxint(dev,enable)
+#define dev_ioctl(dev,cmd,arg)    (dev)->cd_ops->co_ioctl(dev,cmd,arg)
+#define dev_remoterequest(dev,id) (dev)->cd_ops->co_remoterequest(dev,id)
+#define dev_send(dev,m)           (dev)->cd_ops->co_send(dev,m)
+#define dev_txready(dev)          (dev)->cd_ops->co_txready(dev)
+#define dev_txempty(dev)          (dev)->cd_ops->co_txempty(dev)
 
 /* CAN message support ******************************************************/
 
@@ -408,7 +408,7 @@
 #  define CANH_ERROR4_SHORT2VCC   0x03
 #  define CANH_ERROR4_SHORT2GND   0x04
 
-#  define CANL_ERROR4_MASK        0xf0 /* Bits 0-3: CANL */
+#  define CANL_ERROR4_MASK        0xf0 /* Bits 4-7: CANL */
 #  define CANL_ERROR4_NOWIRE      0x10
 #  define CANL_ERROR4_SHORT2BAT   0x20
 #  define CANL_ERROR4_SHORT2VCC   0x30
@@ -568,7 +568,7 @@ struct can_txfifo_s
 
 struct can_rtrwait_s
 {
-  sem_t         cr_sem;                  /* Wait for response/is the cd_rtr entry available */
+  sem_t                 cr_sem;          /* Wait for response/is the cd_rtr entry available */
   FAR struct can_msg_s *cr_msg;          /* This is where the RTR response goes */
 };
 
@@ -859,8 +859,6 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
  *
  * Input Parameters:
  *   dev  - The specific CAN device
- *   hdr  - The 16-bit CAN header
- *   data - An array contain the CAN data.
  *
  * Returned Value:
  *   OK on success; a negated errno on failure.

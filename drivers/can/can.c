@@ -43,14 +43,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/can/can.h>
 #include <nuttx/kmalloc.h>
-
-#ifdef CONFIG_CAN_TXREADY
-#  include <nuttx/wqueue.h>
-#endif
-
 #include <nuttx/irq.h>
-
-#ifdef CONFIG_CAN
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -218,7 +211,7 @@ static uint8_t can_dlc2bytes(uint8_t dlc)
  ****************************************************************************/
 
 #if 0 /* Not used */
-static uint8_t can_bytes2dlc(FAR struct sam_can_s *priv, uint8_t nbytes)
+static uint8_t can_bytes2dlc(uint8_t nbytes)
 {
   if (nbytes <= 8)
     {
@@ -320,9 +313,6 @@ static FAR struct can_reader_s *init_can_reader(FAR struct file *filep)
   FAR struct can_reader_s *reader = kmm_zalloc(sizeof(struct can_reader_s));
   DEBUGASSERT(reader != NULL);
 
-  reader->fifo.rx_head  = 0;
-  reader->fifo.rx_tail  = 0;
-
   nxsem_init(&reader->fifo.rx_sem, 0, 0);
   filep->f_priv = reader;
 
@@ -422,7 +412,6 @@ static int can_close(FAR struct file *filep)
   FAR struct can_dev_s *dev   = inode->i_private;
   irqstate_t            flags;
   FAR struct list_node *node;
-  FAR struct list_node *tmp;
   int                   ret;
 
 #ifdef  CONFIG_DEBUG_CAN_INFO
@@ -435,7 +424,7 @@ static int can_close(FAR struct file *filep)
       return ret;
     }
 
-  list_for_every_safe(&dev->cd_readers, node, tmp)
+  list_for_every(&dev->cd_readers, node)
     {
       if (((FAR struct can_reader_s *)node) ==
           ((FAR struct can_reader_s *)filep->f_priv))
@@ -496,14 +485,13 @@ errout:
 static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
                         size_t buflen)
 {
-  FAR struct can_reader_s  *reader;
-  FAR struct can_rxfifo_s  *fifo;
-  size_t                    nread;
-  irqstate_t                flags;
-  int                       ret = 0;
+  FAR struct can_reader_s *reader;
+  FAR struct can_rxfifo_s *fifo;
+  irqstate_t               flags;
+  int                      ret = 0;
 #ifdef CONFIG_CAN_ERRORS
-  FAR struct inode         *inode = filep->f_inode;
-  FAR struct can_dev_s     *dev = inode->i_private;
+  FAR struct inode        *inode = filep->f_inode;
+  FAR struct can_dev_s    *dev = inode->i_private;
 #endif
 
   caninfo("buflen: %zu\n", buflen);
@@ -517,7 +505,6 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
     {
       DEBUGASSERT(filep->f_priv != NULL);
       reader = (FAR struct can_reader_s *)filep->f_priv;
-
       fifo = &reader->fifo;
 
       /* Interrupts must be disabled while accessing the cd_recv FIFO */
@@ -594,7 +581,6 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
        * in the user buffer.
        */
 
-      nread = 0;
       do
         {
           /* Will the next message in the FIFO fit into the user buffer? */
@@ -603,15 +589,15 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
           int nbytes = can_dlc2bytes(msg->cm_hdr.ch_dlc);
           int msglen = CAN_MSGLEN(nbytes);
 
-          if (nread + msglen > buflen)
+          if (ret + msglen > buflen)
             {
               break;
             }
 
           /* Copy the message to the user buffer */
 
-          memcpy(&buffer[nread], msg, msglen);
-          nread += msglen;
+          memcpy(&buffer[ret], msg, msglen);
+          ret += msglen;
 
           /* Increment the head of the circular message buffer */
 
@@ -631,10 +617,6 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
 
           nxsem_post(&fifo->rx_sem);
         }
-
-      /* Return the number of bytes that were read. */
-
-      ret = nread;
 
 return_with_irqdisabled:
       leave_critical_section(flags);
@@ -761,7 +743,7 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
    * shorter than the minimum.
    */
 
-  while (((ssize_t)buflen - nsent) >= CAN_MSGLEN(0))
+  while (buflen - nsent >= CAN_MSGLEN(0))
     {
       /* Check if adding this new message would over-run the drivers ability
        * to enqueue xmit data.
@@ -871,7 +853,7 @@ return_with_irqdisabled:
 static inline ssize_t can_rtrread(FAR struct file *filep,
                                   FAR struct canioc_rtr_s *request)
 {
-  FAR struct can_dev_s *dev = filep->f_inode->i_private;
+  FAR struct can_dev_s     *dev = filep->f_inode->i_private;
   FAR struct can_rtrwait_s *wait = NULL;
   irqstate_t                flags;
   int                       i;
@@ -889,7 +871,6 @@ static inline ssize_t can_rtrread(FAR struct file *filep,
       FAR struct can_rtrwait_s *tmp = &dev->cd_rtr[i];
 
       ret = nxsem_get_value(&tmp->cr_sem, &sval);
-
       if (ret < 0)
         {
           continue;
@@ -901,7 +882,6 @@ static inline ssize_t can_rtrread(FAR struct file *filep,
 
           tmp->cr_msg     = request->ci_msg;
           dev->cd_npendrtr++;
-
           wait            = tmp;
           break;
         }
@@ -938,7 +918,7 @@ static inline ssize_t can_rtrread(FAR struct file *filep,
 
           request->ci_msg->cm_hdr.ch_rtr = 1;
           ret = can_write(filep,
-                          (const char *) request->ci_msg,
+                          (FAR const char *)request->ci_msg,
                           CAN_MSGLEN(request->ci_msg->cm_hdr.ch_dlc));
           request->ci_msg->cm_hdr.ch_rtr = 0;
 #else
@@ -970,8 +950,7 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct inode        *inode  = filep->f_inode;
   FAR struct can_dev_s    *dev    = inode->i_private;
   FAR struct can_reader_s *reader = filep->f_priv;
-
-  int                     ret     = OK;
+  int                      ret    = OK;
 
   caninfo("cmd: %d arg: %ld\n", cmd, arg);
 
@@ -1075,10 +1054,10 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
                     bool setup)
 {
-  FAR struct inode *inode = (FAR struct inode *)filep->f_inode;
+  FAR struct inode *inode = filep->f_inode;
   FAR struct can_dev_s *dev = inode->i_private;
   FAR struct can_reader_s *reader = NULL;
-  pollevent_t eventset;
+  pollevent_t eventset = 0;
   int ndx;
   int sval;
   irqstate_t flags;
@@ -1152,8 +1131,6 @@ static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
        * should, but that would be a little awkward).
        */
 
-      eventset = 0;
-
       DEBUGASSERT(dev->cd_ntxwaiters < 255);
       dev->cd_ntxwaiters++;
       do
@@ -1223,7 +1200,6 @@ static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
 errout:
   nxmutex_unlock(&dev->cd_polllock);
-
 return_with_irqdisabled:
   leave_critical_section(flags);
   return ret;
@@ -1237,7 +1213,7 @@ return_with_irqdisabled:
  * Name: can_register
  *
  * Description:
- *   Register serial console and serial ports.
+ *   Register a CAN driver.
  *
  ****************************************************************************/
 
@@ -1303,15 +1279,11 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
                 FAR uint8_t *data)
 {
   FAR struct can_rxfifo_s *fifo;
-  FAR uint8_t             *dest;
   FAR struct list_node    *node;
-  FAR struct list_node    *tmp;
   int                      nexttail;
-  int                      errcode = -ENOMEM;
+  int                      ret = -ENOMEM;
   int                      i;
-  int                      j;
   int                      sval;
-  int                      ret;
 
   caninfo("ID: %" PRId32 " DLC: %d\n", (uint32_t)hdr->ch_id, hdr->ch_dlc);
 
@@ -1336,21 +1308,18 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
 
           /* Check if the entry is in use and whether the ID matches */
 
-          ret = nxsem_get_value(&wait->cr_sem, &sval);
-
-          if (ret < 0)
+          if (nxsem_get_value(&wait->cr_sem, &sval) < 0)
             {
               continue;
             }
-
           else if (sval < 0
 #ifdef CONFIG_CAN_ERRORS
-                && hdr->ch_error == false
+                   && hdr->ch_error == false
 #endif
 #ifdef CONFIG_CAN_EXTID
-                && waitmsg->cm_hdr.ch_extid == hdr->ch_extid
+                   && waitmsg->cm_hdr.ch_extid == hdr->ch_extid
 #endif
-                && waitmsg->cm_hdr.ch_id == hdr->ch_id)
+                   && waitmsg->cm_hdr.ch_id == hdr->ch_id)
             {
               int nbytes;
 
@@ -1359,11 +1328,7 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
               memcpy(&waitmsg->cm_hdr, hdr, sizeof(struct can_hdr_s));
 
               nbytes = can_dlc2bytes(hdr->ch_dlc);
-              for (j = 0, dest = waitmsg->cm_data; j < nbytes; j++)
-                {
-                  *dest++ = *data++;
-                }
-
+              memcpy(waitmsg->cm_data, data, nbytes);
               dev->cd_npendrtr--;
 
               /* Restart the waiting thread and mark the entry unused */
@@ -1373,7 +1338,7 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
         }
     }
 
-  list_for_every_safe(&dev->cd_readers, node, tmp)
+  list_for_every(&dev->cd_readers, node)
     {
       FAR struct can_reader_s *reader = (FAR struct can_reader_s *)node;
       fifo = &reader->fifo;
@@ -1416,7 +1381,6 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
 
           poll_notify(dev->cd_fds, CONFIG_CAN_NPOLLWAITERS, POLLIN);
 
-          sval = 0;
           if (nxsem_get_value(&fifo->rx_sem, &sval) < 0)
             {
               DEBUGPANIC();
@@ -1438,7 +1402,7 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
               nxsem_post(&fifo->rx_sem);
             }
 
-          errcode = OK;
+          ret = OK;
         }
 #ifdef CONFIG_CAN_ERRORS
       else
@@ -1450,7 +1414,7 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
 #endif
     }
 
-  return errcode;
+  return ret;
 }
 
 /****************************************************************************
@@ -1511,8 +1475,6 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
  *
  * Input Parameters:
  *   dev  - The specific CAN device
- *   hdr  - The 16-bit CAN header
- *   data - An array contain the CAN data.
  *
  * Returned Value:
  *   OK on success; a negated errno on failure.
@@ -1694,4 +1656,3 @@ int can_txready(FAR struct can_dev_s *dev)
   return ret;
 }
 #endif /* CONFIG_CAN_TXREADY */
-#endif /* CONFIG_CAN */
