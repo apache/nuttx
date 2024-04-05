@@ -33,7 +33,6 @@
 #include <debug.h>
 #include <errno.h>
 
-#include <nuttx/can.h>
 #include <nuttx/wdog.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
@@ -41,7 +40,6 @@
 #include <nuttx/signal.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/can.h>
-#include <netpacket/can.h>
 
 #if defined(CONFIG_NET_CAN_RAW_TX_DEADLINE) || defined(CONFIG_NET_TIMESTAMP)
 #include <sys/time.h>
@@ -1142,8 +1140,10 @@ static void fdcan_receive_work(void *arg)
       /* Read the frame contents */
 
 #ifdef CONFIG_NET_CAN_CANFD
-      if (rf->header.fdf) /* CAN FD frame */
+      if (rf->header.fdf)
         {
+          /* CAN FD frame */
+
           struct canfd_frame *frame = (struct canfd_frame *)priv->rx_pool;
 
           if (rf->header.id.xtd)
@@ -1181,9 +1181,11 @@ static void fdcan_receive_work(void *arg)
           priv->dev.d_len = sizeof(struct canfd_frame);
           priv->dev.d_buf = (uint8_t *)frame;
         }
-      else /* CAN 2.0 Frame */
+      else
 #endif
         {
+          /* CAN 2.0 Frame */
+
           struct can_frame *frame = (struct can_frame *)priv->rx_pool;
 
           if (rf->header.id.xtd)

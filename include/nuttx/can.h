@@ -27,6 +27,8 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
+#include <sys/socket.h>
 #include <stdint.h>
 
 #ifdef CONFIG_NET_CAN
@@ -34,6 +36,25 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Special address description flags for the CAN_ID */
+
+#define CAN_EFF_FLAG 0x80000000  /* EFF/SFF is set in the MSB */
+#define CAN_RTR_FLAG 0x40000000  /* Remote transmission request */
+#define CAN_ERR_FLAG 0x20000000  /* Error message frame */
+#define CAN_EVT_FLAG 0x10000000  /* Lower_half use this flags to report state switch event */
+
+/* Valid bits in CAN ID for frame formats */
+
+#define CAN_SFF_MASK 0x000007ff  /* Standard frame format (SFF) */
+#define CAN_EFF_MASK 0x1fffffff  /* Extended frame format (EFF) */
+#define CAN_ERR_MASK 0x1fffffff  /* Omit EFF, RTR, ERR flags */
+
+#define CAN_SFF_ID_BITS 11
+#define CAN_EFF_ID_BITS 29
+
+#define CAN_MTU (sizeof(struct can_frame))
+#define CANFD_MTU (sizeof(struct canfd_frame))
 
 /* CAN payload length and DLC definitions according to ISO 11898-1 */
 
@@ -63,10 +84,58 @@
  * frames.
  */
 
-#define CANFD_BRS 0x01 /* bit rate switch (second bitrate for payload data) */
-#define CANFD_ESI 0x02 /* error state indicator of the transmitting node */
+#define CANFD_BRS 0x01 /* Bit rate switch (second bitrate for payload data) */
+#define CANFD_ESI 0x02 /* Error state indicator of the transmitting node */
+#define CANFD_FDF 0x04 /* Mark CAN FD for dual use of struct canfd_frame */
 
-#define CAN_INV_FILTER     0x20000000U /* to be set in can_filter.can_id */
+#define CAN_INV_FILTER 0x20000000u /* To be set in can_filter.can_id */
+
+/* PF_CAN protocols */
+
+#define CAN_RAW      1           /* RAW sockets */
+#define CAN_BCM      2           /* Broadcast Manager */
+#define CAN_TP16     3           /* VAG Transport Protocol v1.6 */
+#define CAN_TP20     4           /* VAG Transport Protocol v2.0 */
+#define CAN_MCNET    5           /* Bosch MCNet */
+#define CAN_ISOTP    6           /* ISO 15765-2 Transport Protocol */
+#define CAN_J1939    7           /* SAE J1939 */
+#define CAN_NPROTO   8
+
+#define SOL_CAN_BASE 100
+#define SOL_CAN_RAW  (SOL_CAN_BASE + CAN_RAW)
+
+/* CAN_RAW socket options */
+
+#define CAN_RAW_FILTER         (__SO_PROTOCOL + 0)
+                                 /* Set 0 .. n can_filter(s) */
+#define CAN_RAW_ERR_FILTER     (__SO_PROTOCOL + 1)
+                                 /* Set filter for error frames */
+#define CAN_RAW_LOOPBACK       (__SO_PROTOCOL + 2)
+                                 /* Local loopback (default:on) */
+#define CAN_RAW_RECV_OWN_MSGS  (__SO_PROTOCOL + 3)
+                                 /* Receive my own msgs (default:off) */
+#define CAN_RAW_FD_FRAMES      (__SO_PROTOCOL + 4)
+                                 /* Allow CAN FD frames (default:off) */
+#define CAN_RAW_JOIN_FILTERS   (__SO_PROTOCOL + 5)
+                                 /* All filters must match to trigger */
+#define CAN_RAW_TX_DEADLINE    (__SO_PROTOCOL + 6)
+                                 /* Abort frame when deadline passed */
+
+/* CAN filter support (Hardware level filtering) ****************************/
+
+/* Some CAN hardware supports a notion of prioritizing messages that match
+ * filters. Only two priority levels are currently supported and are encoded
+ * as defined below:
+ */
+
+#define CAN_MSGPRIO_LOW   0
+#define CAN_MSGPRIO_HIGH  1
+
+/* Filter type.  Not all CAN hardware will support all filter types. */
+
+#define CAN_FILTER_MASK   0  /* Address match under a mask */
+#define CAN_FILTER_DUAL   1  /* Dual address match */
+#define CAN_FILTER_RANGE  2  /* Match a range of addresses */
 
 /* CAN Error Indications ****************************************************/
 
@@ -143,11 +212,42 @@
 
 /* Data[4]: Error status of CAN-transceiver */
 
-#define CAN_ERR_TRX_UNSPEC       0x00     /* Unspecified error */
+#define CAN_ERR_TRX_UNSPEC             0x00 /* Unspecified error */
+#define CAN_ERR_TRX_CANH_NO_WIRE       0x04
+#define CAN_ERR_TRX_CANH_SHORT_TO_BAT  0x05
+#define CAN_ERR_TRX_CANH_SHORT_TO_VCC  0x06
+#define CAN_ERR_TRX_CANH_SHORT_TO_GND  0x07
+#define CAN_ERR_TRX_CANL_NO_WIRE       0x40
+#define CAN_ERR_TRX_CANL_SHORT_TO_BAT  0x50
+#define CAN_ERR_TRX_CANL_SHORT_TO_VCC  0x60
+#define CAN_ERR_TRX_CANL_SHORT_TO_GND  0x70
+#define CAN_ERR_TRX_CANL_SHORT_TO_CANH 0x80
+
+/* CAN state thresholds
+ *
+ * Error counter        Error state
+ * -----------------------------------
+ * 0 -  95              Error-active
+ * 96 - 127             Error-warning
+ * 128 - 255            Error-passive
+ * 256 and greater      Bus-off
+ */
+
+#define CAN_ERROR_WARNING_THRESHOLD 96
+#define CAN_ERROR_PASSIVE_THRESHOLD 128
+#define CAN_BUS_OFF_THRESHOLD       256
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+/* Controller Area Network Identifier structure
+ *
+ * bit 0-28: CAN identifier (11/29 bit)
+ * bit 29: error message frame flag (0 = data frame, 1 = error message)
+ * bit 30: remote transmission request flag (1 = rtr frame)
+ * bit 31: frame format flag (0 = standard 11 bit, 1 = extended 29 bit)
+ */
 
 typedef uint32_t canid_t;
 
@@ -199,8 +299,53 @@ struct canfd_frame
   uint8_t data[CANFD_MAX_DLEN];
 };
 
+/* The sockaddr structure for CAN sockets
+ *
+ *   can_family:  Address family number AF_CAN.
+ *   can_ifindex: CAN network interface index.
+ *   can_addr:    Protocol specific address information
+ */
+
+struct sockaddr_can
+{
+  sa_family_t can_family;
+  int16_t     can_ifindex;
+  union
+  {
+    /* Transport protocol class address information */
+
+    struct
+    {
+      canid_t rx_id;
+      canid_t tx_id;
+    } tp;
+
+    /* J1939 address information */
+
+    struct
+    {
+      /* 8 byte name when using dynamic addressing */
+
+      uint64_t name;
+
+      /* pgn:
+       *   8 bit: PS in PDU2 case, else 0
+       *   8 bit: PF
+       *   1 bit: DP
+       *   1 bit: reserved
+       */
+
+      uint32_t pgn;
+
+      /* 1 byte address */
+
+      uint8_t addr;
+    } j1939;
+  } can_addr;
+};
+
 /* struct can_filter - CAN ID based filter in can_register().
- * can_id:   relevant bits of CAN ID which are not masked out.
+ * can_id:   Relevant bits of CAN ID which are not masked out.
  * can_mask: CAN mask (see description)
  *
  * Description:

@@ -30,8 +30,6 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <netpacket/can.h>
-
 #include <nuttx/net/net.h>
 #include <nuttx/net/can.h>
 
@@ -58,7 +56,7 @@
  *
  *   See <sys/socket.h> a complete list of values for the socket-level
  *   'option' argument.  Protocol-specific options are are protocol specific
- *   header files (such as netpacket/can.h for the case of the CAN protocol).
+ *   header files (such as nuttx/can.h for the case of the CAN protocol).
  *
  * Input Parameters:
  *   psock     Socket structure of the socket to query

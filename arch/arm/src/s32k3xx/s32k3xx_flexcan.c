@@ -35,7 +35,6 @@
 #include <debug.h>
 #include <errno.h>
 
-#include <nuttx/can.h>
 #include <nuttx/wdog.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
@@ -1021,9 +1020,11 @@ static void s32k3xx_receive(struct s32k3xx_driver_s *priv, uint32_t flags)
       /* Read the frame contents */
 
 #ifdef CONFIG_NET_CAN_CANFD
-      if (rf->cs.edl) /* CAN FD frame */
+      if (rf->cs.edl)
         {
-        struct canfd_frame *frame = (struct canfd_frame *)priv->rxdesc;
+          /* CAN FD frame */
+
+          struct canfd_frame *frame = (struct canfd_frame *)priv->rxdesc;
 
           if (rf->cs.ide)
             {
