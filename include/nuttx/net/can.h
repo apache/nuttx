@@ -52,10 +52,11 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 #ifdef CONFIG_NET_CAN_CANFD
-#define NET_CAN_PKTSIZE sizeof(struct canfd_frame)
+#  define NET_CAN_PKTSIZE sizeof(struct canfd_frame)
 #else
-#define NET_CAN_PKTSIZE sizeof(struct can_frame)
+#  define NET_CAN_PKTSIZE sizeof(struct can_frame)
 #endif
 
 /****************************************************************************
@@ -70,8 +71,8 @@
 
 /* Lookup tables convert can_dlc <-> payload len */
 
-extern const uint8_t can_dlc_to_len[16];
-extern const uint8_t len_to_can_dlc[65];
+extern const uint8_t g_can_dlc_to_len[16];
+extern const uint8_t g_len_to_can_dlc[65];
 
 #endif
 
