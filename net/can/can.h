@@ -30,7 +30,6 @@
 #include <sys/types.h>
 #include <poll.h>
 
-#include <netpacket/can.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/can.h>
 #include <nuttx/net/net.h>
@@ -374,7 +373,7 @@ void can_readahead_signal(FAR struct can_conn_s *conn);
  *   'option' argument to the value pointed to by the 'value' argument for
  *   the socket specified by the 'psock' argument.
  *
- *   See <netinet/can.h> for the a complete list of values of CAN protocol
+ *   See <nuttx/can.h> for the a complete list of values of CAN protocol
  *   options.
  *
  * Input Parameters:
@@ -409,7 +408,7 @@ int can_setsockopt(FAR struct socket *psock, int level, int option,
  *
  *   See <sys/socket.h> a complete list of values for the socket-level
  *   'option' argument.  Protocol-specific options are are protocol specific
- *   header files (such as netpacket/can.h for the case of the CAN protocol).
+ *   header files (such as nuttx/can.h for the case of the CAN protocol).
  *
  * Input Parameters:
  *   psock     Socket structure of the socket to query
