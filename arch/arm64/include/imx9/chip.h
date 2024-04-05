@@ -31,6 +31,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Cache line sizes (in bytes)for the i.MX9 (Cortex-A55) */
+
+#define ARMV8A_DCACHE_LINESIZE 64  /* 64 bytes (16 words) */
+#define ARMV8A_ICACHE_LINESIZE 64  /* 64 bytes (16 words) */
+
 /* Number of bytes in x kibibytes/mebibytes/gibibytes */
 
 #define KB(x)   ((x) << 10)

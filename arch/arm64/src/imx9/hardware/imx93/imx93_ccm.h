@@ -454,8 +454,8 @@
 #define CCM_LPCG_SEMA2          18
 #define CCM_LPCG_MU_A           19
 #define CCM_LPCG_MU_B           20
-#define CCM_LPCG_EDMA1          21
-#define CCM_LPCG_EDMA2          22
+#define CCM_LPCG_EDMA3          21
+#define CCM_LPCG_EDMA4          22
 #define CCM_LPCG_ROMCP_A55      23
 #define CCM_LPCG_ROMCP_M33      24
 #define CCM_LPCG_FLEXSPI1       25
