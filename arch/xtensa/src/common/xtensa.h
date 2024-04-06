@@ -229,11 +229,6 @@ void xtensa_window_spill(void);
 
 /* IRQs */
 
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
-uintptr_t xtensa_intstack_alloc(int cpu);
-uintptr_t xtensa_intstack_top(int cpu);
-#endif
-
 uint32_t *xtensa_int_decode(uint32_t cpuints, uint32_t *regs);
 uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs);
 uint32_t xtensa_enable_cpuint(uint32_t *shadow, uint32_t intmask);

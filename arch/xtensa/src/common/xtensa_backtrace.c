@@ -235,16 +235,11 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
       if (up_interrupt_context())
         {
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
-          void *istackbase;
-#ifdef CONFIG_SMP
-          istackbase = xtensa_intstack_alloc(up_cpu_index());
-#else
-          istackbase = g_intstackalloc;
-#endif
-          xtensa_window_spill();
+          void *istackbase = (void *)up_get_intstackbase(up_cpu_index());
 
+          xtensa_window_spill();
           ret = backtrace_stack(istackbase,
-                                (istackbase + CONFIG_ARCH_INTERRUPTSTACK),
+                                istackbase + CONFIG_ARCH_INTERRUPTSTACK,
                                 (void *)up_getsp(), NULL,
                                 buffer, size, &skip);
 #else

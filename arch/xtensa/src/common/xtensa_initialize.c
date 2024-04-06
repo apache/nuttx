@@ -60,16 +60,12 @@ volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
 #if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 15
 static inline void xtensa_color_intstack(void)
 {
-#ifdef CONFIG_SMP
   int cpu;
 
   for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
     {
-      xtensa_stack_color((void *)xtensa_intstack_alloc(cpu), INTSTACK_SIZE);
+      xtensa_stack_color((void *)up_get_intstackbase(cpu), INTSTACK_SIZE);
     }
-#else
-  xtensa_stack_color((void *)g_intstackalloc, INTSTACK_SIZE);
-#endif
 }
 #else
 #  define xtensa_color_intstack()

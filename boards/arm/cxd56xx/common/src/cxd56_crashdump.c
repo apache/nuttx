@@ -186,13 +186,9 @@ void board_crashdump(uintptr_t sp, struct tcb_s *tcb,
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
   /* Get the limits on the interrupt stack memory */
 
-#ifdef CONFIG_SMP
   pdump->info.stacks.interrupt.top =
-      (uint32_t)arm_intstack_top(up_cpu_index());
-#else
-  pdump->info.stacks.interrupt.top = (uint32_t)g_intstacktop;
-#endif
-  pdump->info.stacks.interrupt.size = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
+    up_get_intstackbase(up_cpu_index()) + INTSTACK_SIZE;
+  pdump->info.stacks.interrupt.size = INTSTACK_SIZE;
 
   /* If In interrupt Context save the interrupt stack data centered
    * about the interrupt stack pointer
