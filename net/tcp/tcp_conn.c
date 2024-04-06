@@ -514,8 +514,8 @@ static FAR struct tcp_conn_s *tcp_alloc_conn(void)
   if (dq_peek(&g_free_tcp_connections) == NULL)
     {
 #if CONFIG_NET_TCP_MAX_CONNS > 0
-      if (dq_count(&g_active_tcp_connections) + CONFIG_NET_TCP_ALLOC_CONNS
-          >= CONFIG_NET_TCP_MAX_CONNS)
+      if (dq_count(&g_active_tcp_connections) +
+          CONFIG_NET_TCP_ALLOC_CONNS > CONFIG_NET_TCP_MAX_CONNS)
         {
           return NULL;
         }

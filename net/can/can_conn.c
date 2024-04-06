@@ -112,8 +112,8 @@ FAR struct can_conn_s *can_alloc(void)
   if (dq_peek(&g_free_can_connections) == NULL)
     {
 #if CONFIG_CAN_MAX_CONNS > 0
-      if (dq_count(&g_active_can_connections) + CONFIG_CAN_ALLOC_CONNS
-          >= CONFIG_CAN_MAX_CONNS)
+      if (dq_count(&g_active_can_connections) +
+          CONFIG_CAN_ALLOC_CONNS > CONFIG_CAN_MAX_CONNS)
         {
           nxmutex_unlock(&g_free_lock);
           return NULL;

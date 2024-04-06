@@ -144,7 +144,7 @@ FAR struct netlink_conn_s *netlink_alloc(void)
     {
 #if CONFIG_NETLINK_MAX_CONNS > 0
       if (dq_count(&g_active_netlink_connections) +
-          CONFIG_NETLINK_ALLOC_CONNS >= CONFIG_NETLINK_MAX_CONNS)
+          CONFIG_NETLINK_ALLOC_CONNS > CONFIG_NETLINK_MAX_CONNS)
         {
           nxmutex_unlock(&g_free_lock);
           return NULL;

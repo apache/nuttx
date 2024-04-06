@@ -125,7 +125,7 @@ FAR struct bluetooth_conn_s *bluetooth_conn_alloc(void)
     {
 #if CONFIG_NET_BLUETOOTH_MAX_CONNS > 0
       if (dq_count(&g_active_bluetooth_connections) +
-          CONFIG_NET_BLUETOOTH_ALLOC_CONNS >= CONFIG_NET_BLUETOOTH_MAX_CONNS)
+          CONFIG_NET_BLUETOOTH_ALLOC_CONNS > CONFIG_NET_BLUETOOTH_MAX_CONNS)
         {
           net_unlock();
           return NULL;
