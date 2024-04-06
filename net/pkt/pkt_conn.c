@@ -117,8 +117,8 @@ FAR struct pkt_conn_s *pkt_alloc(void)
   if (dq_peek(&g_free_pkt_connections) == NULL)
     {
 #if CONFIG_NET_PKT_MAX_CONNS > 0
-      if (dq_count(&g_active_pkt_connections) + CONFIG_NET_PKT_ALLOC_CONNS
-          >= CONFIG_NET_PKT_MAX_CONNS)
+      if (dq_count(&g_active_pkt_connections) +
+          CONFIG_NET_PKT_ALLOC_CONNS > CONFIG_NET_PKT_MAX_CONNS)
         {
           nxmutex_unlock(&g_free_lock);
           return NULL;

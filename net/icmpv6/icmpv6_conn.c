@@ -115,7 +115,7 @@ FAR struct icmpv6_conn_s *icmpv6_alloc(void)
         {
 #if CONFIG_NET_ICMPv6_MAX_CONNS > 0
           if (dq_count(&g_active_icmpv6_connections) +
-              CONFIG_NET_ICMPv6_ALLOC_CONNS >= CONFIG_NET_ICMPv6_MAX_CONNS)
+              CONFIG_NET_ICMPv6_ALLOC_CONNS > CONFIG_NET_ICMPv6_MAX_CONNS)
             {
               nxmutex_unlock(&g_free_lock);
               return NULL;
