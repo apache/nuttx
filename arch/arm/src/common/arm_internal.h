@@ -349,11 +349,6 @@ void arm_pminitialize(void);
 
 /* Interrupt handling *******************************************************/
 
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
-uintptr_t arm_intstack_alloc(int cpu);
-uintptr_t arm_intstack_top(int cpu);
-#endif
-
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
 void weak_function arm_initialize_stack(void);
 #endif

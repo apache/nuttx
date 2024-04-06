@@ -687,22 +687,7 @@ void up_enable_irq(int irq)
 }
 
 /****************************************************************************
- * Name: xtensa_intstack_top
- *
- * Description:
- *   Return a pointer to the top of the correct interrupt stack for the
- *   given CPU.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
-uintptr_t xtensa_intstack_top(int cpu)
-{
-  return g_cpu_intstack_top[cpu];
-}
-
-/****************************************************************************
- * Name: xtensa_intstack_alloc
+ * Name: up_get_intstackbase
  *
  * Description:
  *   Return a pointer to the "alloc" the correct interrupt stack allocation
@@ -710,7 +695,8 @@ uintptr_t xtensa_intstack_top(int cpu)
  *
  ****************************************************************************/
 
-uintptr_t xtensa_intstack_alloc(int cpu)
+#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
+uintptr_t up_get_intstackbase(int cpu)
 {
   return g_cpu_intstack_top[cpu] - INTSTACK_SIZE;
 }

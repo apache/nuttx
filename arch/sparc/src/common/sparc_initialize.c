@@ -107,7 +107,7 @@ static inline void up_color_intstack(void)
 
   for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
     {
-      sparc_stack_color((void *)sparc_intstack_alloc(cpu), INTSTACK_SIZE);
+      sparc_stack_color((void *)up_get_intstackbase(cpu), INTSTACK_SIZE);
     }
 }
 #else

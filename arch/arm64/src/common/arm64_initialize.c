@@ -94,7 +94,7 @@ INIT_STACK_DEFINE(g_interrupt_fiq_stack, INTSTACK_SIZE);
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arm64_intstack_alloc
+ * Name: up_get_intstackbase
  *
  * Description:
  *   Return a pointer to the "alloc" the correct interrupt stack allocation
@@ -103,25 +103,10 @@ INIT_STACK_DEFINE(g_interrupt_fiq_stack, INTSTACK_SIZE);
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-uintptr_t arm64_intstack_alloc(int cpu)
+uintptr_t up_get_intstackbase(int cpu)
 {
   return (uintptr_t)(g_interrupt_stacks[cpu]);
 }
-
-/****************************************************************************
- * Name: arm64_intstack_top
- *
- * Description:
- *   Return a pointer to the top the correct interrupt stack allocation
- *   for the current CPU.
- *
- ****************************************************************************/
-
-uintptr_t arm64_intstack_top(int cpu)
-{
-  return (uintptr_t)(g_interrupt_stacks[cpu] + INTSTACK_SIZE);
-}
-
 #endif
 
 /****************************************************************************
@@ -141,7 +126,7 @@ static void up_color_intstack(void)
 
   for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
     {
-      arm64_stack_color((void *)arm64_intstack_alloc(cpu), INTSTACK_SIZE);
+      arm64_stack_color((void *)up_get_intstackbase(cpu), INTSTACK_SIZE);
     }
 #else
   arm64_stack_color((void *)g_interrupt_stack, INTSTACK_SIZE);

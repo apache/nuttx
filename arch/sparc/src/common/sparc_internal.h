@@ -195,13 +195,6 @@ int sparc_swint1(int irq, void *context, void *arg);
 
 void sparc_sigdeliver(void);
 
-/* Interrupt handling *******************************************************/
-
-#if CONFIG_ARCH_INTERRUPTSTACK > 7
-uintptr_t sparc_intstack_alloc(int cpu);
-uintptr_t sparc_intstack_top(int cpu);
-#endif
-
 /* Chip-specific functions **************************************************/
 
 /* Chip specific functions defined in arch/sparc/src/<chip> */

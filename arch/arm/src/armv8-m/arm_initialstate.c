@@ -186,17 +186,8 @@ void up_initial_state(struct tcb_s *tcb)
 
 noinline_function void arm_initialize_stack(void)
 {
-#ifdef CONFIG_SMP
-  uint32_t stack = (uint32_t)arm_intstack_top(up_cpu_index());
-#ifdef CONFIG_ARMV8M_STACKCHECK_HARDWARE
-  uint32_t stacklim = (uint32_t)arm_intstack_alloc(up_cpu_index());
-#endif
-#else
-  uint32_t stack = (uint32_t)g_intstacktop;
-#ifdef CONFIG_ARMV8M_STACKCHECK_HARDWARE
-  uint32_t stacklim = (uint32_t)g_intstackalloc;
-#endif
-#endif
+  uint32_t stacklim = up_get_intstackbase(up_cpu_index());
+  uint32_t stack = stacklim + INTSTACK_SIZE;
   uint32_t temp = 0;
 
   __asm__ __volatile__

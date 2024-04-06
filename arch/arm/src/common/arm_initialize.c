@@ -61,7 +61,7 @@ static inline void arm_color_intstack(void)
 
   for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
     {
-      arm_stack_color((void *)arm_intstack_alloc(cpu), INTSTACK_SIZE);
+      arm_stack_color((void *)up_get_intstackbase(cpu), INTSTACK_SIZE);
     }
 #else
   arm_stack_color((void *)g_intstackalloc, INTSTACK_SIZE);

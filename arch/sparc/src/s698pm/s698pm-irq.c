@@ -499,27 +499,7 @@ int up_prioritize_irq(int irq, int priority)
 }
 
 /****************************************************************************
- * Name: sparc_intstack_top
- *
- * Description:
- *   Return a pointer to the top the correct interrupt stack allocation
- *   for the current CPU.
- *
- ****************************************************************************/
-
-#if CONFIG_ARCH_INTERRUPTSTACK > 7
-uintptr_t sparc_intstack_top(int cpu)
-{
-#if defined(CONFIG_SMP)
-  return g_cpu_intstack_top[cpu];
-#else
-  return g_cpu_intstack_top[0];
-#endif
-}
-#endif
-
-/****************************************************************************
- * Name: sparc_intstack_alloc
+ * Name: up_get_intstackbase
  *
  * Description:
  *   Return a pointer to the "alloc" the correct interrupt stack allocation
@@ -528,7 +508,7 @@ uintptr_t sparc_intstack_top(int cpu)
  ****************************************************************************/
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
-uintptr_t sparc_intstack_alloc(int cpu)
+uintptr_t up_get_intstackbase(int cpu)
 {
 #if defined(CONFIG_SMP)
   return g_cpu_intstack_top[cpu] - INTSTACK_SIZE;

@@ -724,11 +724,8 @@ int up_backtrace(struct tcb_s *tcb,
       if (up_interrupt_context())
         {
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
-#  ifdef CONFIG_SMP
-          frame.stack_top = arm_intstack_top(up_cpu_index());
-#  else
-          frame.stack_top = (unsigned long)&g_intstacktop;
-#  endif /* CONFIG_SMP */
+          frame.stack_top = up_get_intstackbase(up_cpu_index()) +
+                            INTSTACK_SIZE;
 #endif /* CONFIG_ARCH_INTERRUPTSTACK > 7 */
 
           ret = backtrace_unwind(&frame, buffer, size, &skip);

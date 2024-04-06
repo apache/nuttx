@@ -24,8 +24,6 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-
 #include "arm_internal.h"
 
 /****************************************************************************
@@ -36,14 +34,9 @@
  * Name: up_get_intstackbase
  ****************************************************************************/
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 3
 uintptr_t up_get_intstackbase(int cpu)
 {
-#ifdef CONFIG_SMP
-  return arm_intstack_alloc(cpu);
-#else
   return (uintptr_t)g_intstackalloc;
-#endif
 }
 #endif
-

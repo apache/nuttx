@@ -820,23 +820,7 @@ int lc823450_irq_register(int irq, struct lc823450_irq_ops *ops)
 #endif /* CONFIG_LC823450_VIRQ */
 
 /****************************************************************************
- * Name: arm_intstack_top
- *
- * Description:
- *   Return a pointer to the top the correct interrupt stack allocation
- *   for the current CPU.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
-uintptr_t arm_intstack_top(int cpu)
-{
-  return g_cpu_intstack_top[cpu];
-}
-#endif
-
-/****************************************************************************
- * Name: arm_intstack_alloc
+ * Name: up_get_intstackbase
  *
  * Description:
  *   Return a pointer to the "alloc" the correct interrupt stack allocation
@@ -845,7 +829,7 @@ uintptr_t arm_intstack_top(int cpu)
  ****************************************************************************/
 
 #if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
-uintptr_t arm_intstack_alloc(int cpu)
+uintptr_t up_get_intstackbase(int cpu)
 {
   return g_cpu_intstack_top[cpu] - INTSTACK_SIZE;
 }

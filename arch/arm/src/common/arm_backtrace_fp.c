@@ -105,9 +105,6 @@ int up_backtrace(struct tcb_s *tcb,
                  void **buffer, int size, int skip)
 {
   struct tcb_s *rtcb = running_task();
-#if CONFIG_ARCH_INTERRUPTSTACK > 7
-  void *istacklimit;
-#endif
   irqstate_t flags;
   int ret;
 
@@ -121,13 +118,10 @@ int up_backtrace(struct tcb_s *tcb,
       if (up_interrupt_context())
         {
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
-#  ifdef CONFIG_SMP
-          istacklimit = (void *)arm_intstack_top(up_cpu_index());
-#  else
-          istacklimit = g_intstacktop;
-#  endif /* CONFIG_SMP */
-          ret = backtrace(istacklimit - (CONFIG_ARCH_INTERRUPTSTACK & ~7),
-                          istacklimit,
+          void *istackbase = (void *)up_get_intstackbase(up_cpu_index());
+
+          ret = backtrace(istackbase,
+                          istackbase + INTSTACK_SIZE,
                           (void *)__builtin_frame_address(0),
                           NULL, buffer, size, &skip);
 #else
