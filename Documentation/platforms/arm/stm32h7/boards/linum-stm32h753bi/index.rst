@@ -510,3 +510,45 @@ Example to blink the RBG led of board, using this example the board led status s
     led_daemon: LED set 0x03
     led_daemon: LED set 0x02
     led_daemon: LED set 0x01
+
+zmodem
+------
+
+This example use the nsh via usb and the SDCard to storage the files exchanged.
+By default the zmodem lib use the path /tmp to storage the files.
+
+Sending files to target::
+
+    # Mount the SDCard at /tmp
+    nsh> mount -t vfat /dev/mmcsd0 /tmp
+
+    # Waiting for a new file.
+    nsh> rz
+
+    # Transmitting a file to target.
+    my_pc$ sz --zmodem nuttx_logo.txt > /dev/ttyACM0 < /dev/ttyACM0
+
+    # Check if the file was received
+    nsh> ls -l /tmp
+    /tmp:
+    -rw-rw-rw-        1942 nuttx_logo.txt
+
+Transmiting a file to PC::
+
+    # Sending the file nuttx_logo.txt to PC
+    nsh> sz -x 1 /tmp/nuttx_logo.txt
+    **B00000000000000
+
+    # Using zmodem to receive a file from target
+    my_pc/temp$ rz > /dev/ttyACM0 < /dev/ttyACM0
+    Receiving: nuttx_logo.txt                         
+    Bytes received:    1942/   1942   BPS:124544
+
+    Transfer complete
+    my_pc/temp$ ls -l
+    -rw-------  1 nuttx nuttx    1942 abr  6 16:07 nuttx_logo.txt
+
+If you don't have a SDCard on your board, you can mount the TMPFS at /tmp and transfer files to it, 
+but you cannot transfer big files because TMPFS could use the free RAM of your board::
+
+    nsh> mount -t tmpfs /tmp
