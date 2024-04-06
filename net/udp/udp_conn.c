@@ -476,8 +476,8 @@ static FAR struct udp_conn_s *udp_alloc_conn(void)
   if (dq_peek(&g_free_udp_connections) == NULL)
     {
 #if CONFIG_NET_UDP_MAX_CONNS > 0
-      if (dq_count(&g_active_udp_connections) + CONFIG_NET_UDP_ALLOC_CONNS
-          >= CONFIG_NET_UDP_MAX_CONNS)
+      if (dq_count(&g_active_udp_connections) +
+          CONFIG_NET_UDP_ALLOC_CONNS > CONFIG_NET_UDP_MAX_CONNS)
         {
           return NULL;
         }
