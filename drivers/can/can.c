@@ -424,6 +424,8 @@ static int can_close(FAR struct file *filep)
       return ret;
     }
 
+  flags = enter_critical_section(); /* Disable interrupts */
+
   list_for_every(&dev->cd_readers, node)
     {
       if (((FAR struct can_reader_s *)node) ==
@@ -465,11 +467,10 @@ static int can_close(FAR struct file *filep)
 
   /* Free the IRQ and disable the CAN device */
 
-  flags = enter_critical_section(); /* Disable interrupts */
-  dev_shutdown(dev);                /* Disable the CAN */
-  leave_critical_section(flags);
+  dev_shutdown(dev); /* Disable the CAN */
 
 errout:
+  leave_critical_section(flags);
   nxmutex_unlock(&dev->cd_closelock);
   return ret;
 }
@@ -843,14 +844,9 @@ static inline ssize_t can_rtrread(FAR struct file *filep,
 {
   FAR struct can_dev_s     *dev = filep->f_inode->i_private;
   FAR struct can_rtrwait_s *wait = NULL;
-  irqstate_t                flags;
   int                       i;
   int                       sval;
   int                       ret = -ENOMEM;
-
-  /* Disable interrupts through this operation */
-
-  flags = enter_critical_section();
 
   /* Find an available slot in the pending RTR list */
 
@@ -925,7 +921,6 @@ static inline ssize_t can_rtrread(FAR struct file *filep,
         }
     }
 
-  leave_critical_section(flags);
   return ret;
 }
 
@@ -939,8 +934,13 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct can_dev_s    *dev    = inode->i_private;
   FAR struct can_reader_s *reader = filep->f_priv;
   int                      ret    = OK;
+  irqstate_t               flags;
 
   caninfo("cmd: %d arg: %ld\n", cmd, arg);
+
+  /* Disable interrupts through this operation */
+
+  flags = enter_critical_section();
 
   /* Handle built-in ioctl commands */
 
@@ -1037,6 +1037,7 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
     }
 
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -1244,12 +1245,15 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
 {
   FAR struct can_rxfifo_s *fifo;
   FAR struct list_node    *node;
+  irqstate_t               flags;
   int                      nexttail;
   int                      ret = -ENOMEM;
   int                      i;
   int                      sval;
 
   caninfo("ID: %" PRId32 " DLC: %d\n", (uint32_t)hdr->ch_id, hdr->ch_dlc);
+
+  flags = enter_critical_section();
 
   /* Check if adding this new message would over-run the drivers ability to
    * enqueue read data.
@@ -1380,6 +1384,7 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
       poll_notify(dev->cd_fds, CONFIG_CAN_NPOLLWAITERS, POLLIN);
     }
 
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -1456,9 +1461,12 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
 int can_txdone(FAR struct can_dev_s *dev)
 {
   int ret = -ENOENT;
+  irqstate_t flags;
 
   caninfo("xmit head: %d queue: %d tail: %d\n",
           dev->cd_xmit.tx_head, dev->cd_xmit.tx_queue, dev->cd_xmit.tx_tail);
+
+  flags = enter_critical_section();
 
   /* Verify that the xmit FIFO is not empty */
 
@@ -1503,6 +1511,7 @@ int can_txdone(FAR struct can_dev_s *dev)
         }
     }
 
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -1567,10 +1576,13 @@ int can_txdone(FAR struct can_dev_s *dev)
 int can_txready(FAR struct can_dev_s *dev)
 {
   int ret = -ENOENT;
+  irqstate_t flags;
 
   caninfo("xmit head: %d queue: %d tail: %d waiters: %d\n",
           dev->cd_xmit.tx_head, dev->cd_xmit.tx_queue, dev->cd_xmit.tx_tail,
           dev->cd_ntxwaiters);
+
+  flags = enter_critical_section();
 
   /* Verify that the xmit FIFO is not empty.  This is safe because interrupts
    * are always disabled when calling into can_xmit(); this cannot collide
@@ -1619,6 +1631,7 @@ int can_txready(FAR struct can_dev_s *dev)
 #endif
     }
 
+  leave_critical_section(flags);
   return ret;
 }
 #endif /* CONFIG_CAN_TXREADY */
