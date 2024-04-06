@@ -365,10 +365,6 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
   FAR struct can_rxfifo_s *fifo;
   irqstate_t               flags;
   int                      ret = 0;
-#ifdef CONFIG_CAN_ERRORS
-  FAR struct inode        *inode = filep->f_inode;
-  FAR struct can_dev_s    *dev = inode->i_private;
-#endif
 
   caninfo("buflen: %zu\n", buflen);
 
@@ -388,18 +384,9 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
       flags = enter_critical_section();
 
 #ifdef CONFIG_CAN_ERRORS
-
-      /* Check for reader fifo overflow */
-
-      if (fifo->rx_overflow)
-        {
-          dev->cd_error |= CAN_ERROR5_RXOVERFLOW;
-          fifo->rx_overflow = false;
-        }
-
       /* Check for internal errors */
 
-      if (dev->cd_error != 0)
+      if (fifo->rx_error != 0)
         {
           FAR struct can_msg_s *msg;
 
@@ -422,11 +409,11 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
 #endif
           msg->cm_hdr.ch_unused = 0;
           memset(&(msg->cm_data), 0, CAN_ERROR_DLC);
-          msg->cm_data[5]       = dev->cd_error;
+          msg->cm_data[5]       = fifo->rx_error;
 
           /* Reset the error flag */
 
-          dev->cd_error         = 0;
+          fifo->rx_error        = 0;
 
           ret = CAN_MSGLEN(CAN_ERROR_DLC);
           goto return_with_irqdisabled;
@@ -572,6 +559,7 @@ static int can_xmit(FAR struct can_dev_s *dev)
       if (ret < 0)
         {
           canerr("dev_send failed: %d\n", ret);
+          dev->cd_xmit.tx_queue = tmpndx;
           break;
         }
     }
@@ -893,19 +881,24 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      /* FIONWRITE: Return the number of CAN messages in the send queue     */
+      /* FIONWRITE: Return the number of CAN messages in the send queue */
 
       case FIONWRITE:
         {
-          *(FAR uint8_t *)arg = dev->cd_xmit.tx_tail;
+          *(FAR uint8_t *)arg = CONFIG_CAN_FIFOSIZE - 1 -
+                            (dev->cd_xmit.tx_tail - dev->cd_xmit.tx_head);
         }
         break;
 
-      /* FIONREAD: Return the number of CAN messages in the receive FIFO    */
+      /* FIONREAD: Return the number of CAN messages in the receive FIFO */
 
       case FIONREAD:
         {
-          *(FAR uint8_t *)arg = reader->fifo.rx_tail;
+          *(FAR uint8_t *)arg =
+#ifdef CONFIG_CAN_ERRORS
+                            (reader->fifo.rx_error != 0) +
+#endif
+                            reader->fifo.rx_tail - reader->fifo.rx_head;
         }
         break;
 
@@ -934,9 +927,8 @@ static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
   FAR struct can_dev_s *dev = inode->i_private;
   FAR struct can_reader_s *reader = NULL;
   pollevent_t eventset = 0;
-  int ndx;
-  int sval;
   irqstate_t flags;
+  int ndx;
   int ret;
   int i;
 
@@ -1001,20 +993,7 @@ static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       /* Should we immediately notify on any of the requested events?
        * First, check if the xmit buffer is full.
-       *
-       * Get exclusive access to the cd_xmit buffer indices.  NOTE: that
-       * we do not let this wait be interrupted by a signal (we probably
-       * should, but that would be a little awkward).
        */
-
-      DEBUGASSERT(dev->cd_ntxwaiters < 255);
-      dev->cd_ntxwaiters++;
-      do
-        {
-          ret = nxsem_wait(&dev->cd_xmit.tx_sem);
-        }
-      while (ret < 0);
-      dev->cd_ntxwaiters--;
 
       ndx = dev->cd_xmit.tx_tail + 1;
       if (ndx >= CONFIG_CAN_FIFOSIZE)
@@ -1027,29 +1006,17 @@ static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
           eventset |= POLLOUT;
         }
 
-      nxsem_post(&dev->cd_xmit.tx_sem);
-
       /* Check whether there are messages in the RX FIFO. */
 
-      ret = nxsem_get_value(&reader->fifo.rx_sem, &sval);
-
-      if (ret < 0)
+      if (reader->fifo.rx_head != reader->fifo.rx_tail
+#ifdef CONFIG_CAN_ERRORS
+          || reader->fifo.rx_error != 0
+#endif
+         )
         {
-          DEBUGPANIC();
-          goto return_with_irqdisabled;
-        }
-      else if (sval > 0)
-        {
-          if (reader->fifo.rx_head != reader->fifo.rx_tail)
-            {
-              /* No need to wait, just notify the application immediately */
+          /* No need to wait, just notify the application immediately */
 
-              eventset |= POLLIN;
-            }
-          else
-            {
-              canerr("RX FIFO sem not locked but FIFO is empty.\n");
-            }
+          eventset |= POLLIN;
         }
 
       poll_notify(&fds, 1, eventset);
@@ -1102,14 +1069,11 @@ int can_register(FAR const char *path, FAR struct can_dev_s *dev)
   dev->cd_crefs      = 0;
   dev->cd_npendrtr   = 0;
   dev->cd_ntxwaiters = 0;
-#ifdef CONFIG_CAN_ERRORS
-  dev->cd_error      = 0;
-#endif
   list_initialize(&dev->cd_readers);
 
   /* Initialize semaphores */
 
-  nxsem_init(&dev->cd_xmit.tx_sem, 0, 1);
+  nxsem_init(&dev->cd_xmit.tx_sem, 0, 0);
   nxmutex_init(&dev->cd_closelock);
   nxmutex_init(&dev->cd_polllock);
 
@@ -1251,21 +1215,14 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
 
           fifo->rx_tail = nexttail;
 
-          /* Notify all poll/select waiters that they can read from the
-           * cd_recv buffer
-           */
-
-          poll_notify(dev->cd_fds, CONFIG_CAN_NPOLLWAITERS, POLLIN);
-
           if (nxsem_get_value(&fifo->rx_sem, &sval) < 0)
             {
-              DEBUGPANIC();
 #ifdef CONFIG_CAN_ERRORS
               /* Report unspecified error */
 
-              dev->cd_error |= CAN_ERROR5_UNSPEC;
+              fifo->rx_error |= CAN_ERROR5_UNSPEC;
 #endif
-              return -EINVAL;
+              continue;
             }
 
           /* Unlock the binary semaphore, waking up can_read if it is
@@ -1285,9 +1242,18 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
         {
           /* Report rx overflow error */
 
-          fifo->rx_overflow = true;
+          fifo->rx_error |= CAN_ERROR5_RXOVERFLOW;
         }
 #endif
+    }
+
+  /* Notify all poll/select waiters that they can read from the
+   * cd_recv buffer
+   */
+
+  if (ret == OK)
+    {
+      poll_notify(dev->cd_fds, CONFIG_CAN_NPOLLWAITERS, POLLIN);
     }
 
   return ret;
