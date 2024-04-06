@@ -5914,7 +5914,6 @@ endmenu # STM32H7_FDCAN2
 
 config STM32H7_FDCAN_REGDEBUG
 	bool "Enable register dump debugging"
-	depends on DEBUG_CAN_INFO
 	depends on DEBUG_NET_INFO
 	default n
 	---help---
