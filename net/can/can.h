@@ -104,22 +104,11 @@ struct can_conn_s
   struct can_poll_s pollinfo[4]; /* FIXME make dynamic */
 
 #ifdef CONFIG_NET_CANPROTO_OPTIONS
-  int32_t loopback;
-  int32_t recv_own_msgs;
-#  ifdef CONFIG_NET_CAN_CANFD
-  int32_t fd_frames;
-#  endif
   struct can_filter filters[CONFIG_NET_CAN_RAW_FILTER_MAX];
   int32_t filter_count;
 #  ifdef CONFIG_NET_CAN_ERRORS
   can_err_mask_t err_mask;
 #  endif
-#  ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE
-  int32_t tx_deadline;
-#  endif
-#endif
-#ifdef CONFIG_NET_TIMESTAMP
-  int32_t timestamp; /* Socket timestamp enabled/disabled */
 #endif
 };
 
