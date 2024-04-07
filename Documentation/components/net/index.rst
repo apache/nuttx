@@ -10,6 +10,7 @@ Network Support
   pkt.rst
   nat.rst
   netdev.rst
+  netdriver.rst
   netguardsize.rst
   slip.rst
   wqueuedeadlocks.rst
