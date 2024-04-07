@@ -75,9 +75,6 @@ int up_shmat(uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
   unsigned int nmapped;
   unsigned int shmndx;
 
-  shminfo("pages=%p npages=%d vaddr=%08lx\n",
-          pages, npages, (unsigned long)vaddr);
-
   /* Sanity checks */
 
   DEBUGASSERT(pages && npages > 0 && tcb && tcb->addrenv_own);
@@ -197,8 +194,6 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages)
   uintptr_t paddr;
   unsigned int nunmapped;
   unsigned int shmndx;
-
-  shminfo("npages=%d vaddr=%08lx\n", npages, (unsigned long)vaddr);
 
   /* Sanity checks */
 
