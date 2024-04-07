@@ -8,6 +8,13 @@ Network Devices
    interface and is passed to the network via
    ``netdev_register()``.
 
+-  ``include/nuttx/net/netdev_lowerhalf.h``. (Recommended for new
+   drivers, see :ref:`Network Drivers <netdriver>`)
+   This header file defines the interface between the network device
+   and the network stack. The network device is a lower-half driver
+   that provides the network stack with the ability to send and receive
+   packets.
+
 IP Addresses
 ============
 
