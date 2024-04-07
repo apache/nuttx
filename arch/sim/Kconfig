@@ -15,18 +15,22 @@ config HOST_X86_64
 	select ARCH_HAVE_STACKCHECK
 	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF && !SIM_M32
 	select ARCH_HAVE_MATH_H
+	select ARCH_TOOLCHAIN_GNU
 
 config HOST_X86
 	bool "x86"
 	select ARCH_HAVE_STACKCHECK
+	select ARCH_TOOLCHAIN_GNU
 
 config HOST_ARM
 	bool "arm"
 	select ARCH_HAVE_STACKCHECK
+	select ARCH_TOOLCHAIN_GNU
 
 config HOST_ARM64
 	bool "arm64"
 	select ARCH_HAVE_STACKCHECK
+	select ARCH_TOOLCHAIN_GNU
 
 endchoice # Host CPU Type
 
