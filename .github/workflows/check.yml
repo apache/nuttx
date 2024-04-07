@@ -45,3 +45,10 @@ jobs:
           git log --oneline $commits
           echo "../nuttx/tools/checkpatch.sh -u -m -g $commits"
           ../nuttx/tools/checkpatch.sh -u -m -g $commits
+
+  build_sync_check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: alephao/Reginald@v0.1.0
+      with:
+        repo-token: "${{ secrets.GITHUB_TOKEN }}"
