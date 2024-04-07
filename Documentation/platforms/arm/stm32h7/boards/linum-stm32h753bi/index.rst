@@ -873,3 +873,23 @@ tone
 
 This example demonstrates how to use PWM4 and Timer17 to play music using the Tone library and the board's buzzer.
 
+socketcan
+---------
+
+This example demonstrates how to use the CAN-FD peripherals can0 and can1 with the SocketCAN protocol.::
+
+  # Configure the can0 and can1 to send messages
+  nsh> ifup can0
+  ifup can0...OK
+  nsh> ifup can1
+  ifup can1 ...OK
+  nsh> cansend can0 123#DEADBEEF
+  nsh> cansend can1 5A1#11.2233.44556677.88
+
+  # Reset the board and configure the can0 peripheral to receive messages
+  nsh> ifup can0
+  ifup can0...OK
+  nsh> candump can0
+    can0  051   [8]  00 11 22 33 44 55 66 77
+    can0  051  [16]  00 11 22 33 44 55 66 77 88 99 AA BB CC DD EE FF
+
