@@ -25,6 +25,7 @@ set(SRCS
     lib_base64.c
     lib_htons.c
     lib_htonl.c
+    lib_htonq.c
     lib_inetaddr.c
     lib_inetaton.c
     lib_inetntoa.c

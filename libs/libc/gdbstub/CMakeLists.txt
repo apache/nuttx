@@ -19,3 +19,7 @@
 # the License.
 #
 # ##############################################################################
+
+if(CONFIG_LIB_GDBSTUB)
+  target_sources(c PRIVATE lib_gdbstub.c)
+endif()
