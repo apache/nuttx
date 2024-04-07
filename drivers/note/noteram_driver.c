@@ -133,7 +133,11 @@ static const struct file_operations g_noteram_fops =
   noteram_ioctl, /* ioctl */
 };
 
-static uint8_t g_ramnote_buffer[CONFIG_DRIVERS_NOTERAM_BUFSIZE];
+static
+#ifdef DRIVERS_NOTERAM_SECTION
+locate_data(DRIVERS_NOTERAM_SECTION)
+#endif
+uint8_t g_ramnote_buffer[CONFIG_DRIVERS_NOTERAM_BUFSIZE];
 
 static const struct note_driver_ops_s g_noteram_ops =
 {

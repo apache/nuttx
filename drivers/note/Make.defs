@@ -53,5 +53,9 @@ ifeq ($(CONFIG_DRIVERS_NOTERPMSG),y)
   CSRCS += noterpmsg_driver.c
 endif
 
+ifneq ($(CONFIG_DRIVERS_NOTERAM_SECTION),"")
+  CFLAGS += ${DEFINE_PREFIX}DRIVERS_NOTERAM_SECTION=CONFIG_DRIVERS_NOTERAM_SECTION
+endif
+
 DEPPATH += --dep-path note
 VPATH += :note
