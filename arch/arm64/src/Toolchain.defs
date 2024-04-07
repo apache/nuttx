@@ -84,6 +84,10 @@ ifeq ($(CONFIG_MM_KASAN_ALL),y)
   ARCHOPTIMIZATION += -fsanitize=kernel-address
 endif
 
+ifeq ($(CONFIG_MM_KASAN_GLOBAL),y)
+  ARCHOPTIMIZATION += --param asan-globals=1
+endif
+
 # Instrumentation options
 
 ifeq ($(CONFIG_ARCH_INSTRUMENT_ALL),y)
