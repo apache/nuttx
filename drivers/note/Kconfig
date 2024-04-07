@@ -71,6 +71,11 @@ config DRIVERS_NOTERAM_BUFSIZE
 	---help---
 		The size of the in-memory, circular instrumentation buffer (in bytes).
 
+config DRIVERS_NOTERAM_SECTION
+	string "Note RAM section"
+	---help---
+		Enable section information.
+
 config DRIVERS_NOTERAM_DEFAULT_NOOVERWRITE
 	bool "Disable overwrite by default"
 	default n
