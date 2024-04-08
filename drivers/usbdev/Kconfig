@@ -1389,6 +1389,15 @@ config CDCNCM_PRODUCTSTR
 	default "CDC/NCM Ethernet"
 
 endif # !CDCNCM_COMPOSITE
+
+config CDCNCM_QUOTA_TX
+	int "The drive holds the maximum quota of TX"
+	default 8
+
+config CDCNCM_QUOTA_RX
+	int "The drive holds the maximum quota of RX"
+	default 8
+
 endif # CDCNCM
 
 config USBDEV_FS
