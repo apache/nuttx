@@ -280,7 +280,7 @@ typedef CODE void (*addrenv_sigtramp_t)(_sa_sigaction_t sighand, int signo,
                                         FAR siginfo_t *info,
                                         FAR void *ucontext);
 
-struct mm_heaps_s; /* Forward reference */
+struct mm_heap_s; /* Forward reference */
 
 /* This structure describes the format of the .bss/.data reserved area */
 
