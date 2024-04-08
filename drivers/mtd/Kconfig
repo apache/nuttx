@@ -496,7 +496,7 @@ config AT24XX_FREQUENCY
 	int "AT24xx I2C bus frequency"
 	default 100000
 	---help---
-		Set the I2C frequency to use when accessing the AT24CXX EEPROM. 
+		Set the I2C frequency to use when accessing the AT24CXX EEPROM.
 		This value must represent a valid I2C speed (normally less than
 		400.000) or the driver might fail.
 
@@ -509,7 +509,7 @@ config MTD_AT25EE
 	select MTD_BYTE_WRITE
 	---help---
 		Build support for SPI-based AT25xx type EEPROMs. MTD on EEPROM can
-		perform poorly, so it is possible only usable if the EEPROM has a 
+		perform poorly, so it is possible only usable if the EEPROM has a
 		clock speed 10MHz or higher. EEPROMs that use the same commands as
 		the 25AA160 should work OK.
 
@@ -525,7 +525,7 @@ choice
 		pages so that the file system block size is, say, 128, 256 or
 		512 bytes.
 
-		In any event, the block size *must* be an even multiple of the 
+		In any event, the block size *must* be an even multiple of the
 		number of pages and, often, needs to be a factor 2.
 
 		This is up to the user to check!

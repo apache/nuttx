@@ -3174,7 +3174,7 @@ config ARCH_BOARD
 	default "esp32s3-box"               if ARCH_BOARD_ESP32S3_BOX
 	default "esp32c6-devkitc"           if ARCH_BOARD_ESP32C6_DEVKITC
 	default "esp32c6-devkitm"           if ARCH_BOARD_ESP32C6_DEVKITM
-	default "esp32h2-devkit"           	if ARCH_BOARD_ESP32H2_DEVKIT
+	default "esp32h2-devkit"            if ARCH_BOARD_ESP32H2_DEVKIT
 	default "et-stm32-stamp"            if ARCH_BOARD_ET_STM32_STAMP
 	default "tlsr8278adk80d"            if ARCH_BOARD_TLSR8278ADK80D
 	default "ez80f910200kitg"           if ARCH_BOARD_EZ80F910200KITG
@@ -3443,7 +3443,7 @@ config ARCH_BOARD
 	default "xx3803"                    if ARCH_BOARD_XX3803
 	default "xx3823"                    if ARCH_BOARD_XX3823
 	default "s698pm-dkit"               if ARCH_BOARD_S698PM_DKIT
-	default "hpm6360evk"				if ARCH_BOARD_HPM6360EVK
+	default "hpm6360evk"                if ARCH_BOARD_HPM6360EVK
 	default "hpm6750evk2"               if ARCH_BOARD_HPM6750EVK2
 	default "at32f437-mini"             if ARCH_BOARD_AT32F437_MINI
 

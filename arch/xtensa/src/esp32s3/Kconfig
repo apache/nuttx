@@ -1884,10 +1884,10 @@ config ESP32S3_SPI_FLASH_SUPPORT_PSRAM_STACK
 		can do SPI Flash read/write/erase/map/unmap. Otherwise,
 		it may cause exception, the root cause is as following:
 			1. When operating SPI flash, cache is also disable,
-		   		then software can't access PSRAM by data cache.
+				then software can't access PSRAM by data cache.
 			2. SPI flash read/write/erase functions have instruction like
 				stack-pop and stack-push which may use stack buffer which is
-		   		PSRAM space or load/store temp variables which locate in PSRAM space too.
+				PSRAM space or load/store temp variables which locate in PSRAM space too.
 			3. Once operation in step 2 triggers, CPU will trigger exception.
 		So related SPI flash functions should be sent and run in tasks which use SRAM as task stack.
 
