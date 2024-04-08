@@ -75,7 +75,7 @@
  * Public Type Definitions
  ****************************************************************************/
 
-struct mm_heaps_s; /* Forward reference */
+struct mm_heap_s; /* Forward reference */
 
 /* Every user-space blob starts with a header that provides information about
  * the blob.  The form of that header is provided by struct userspace_s. An
