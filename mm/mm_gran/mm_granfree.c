@@ -25,11 +25,12 @@
 #include <nuttx/config.h>
 
 #include <assert.h>
-#include <errno.h>
+#include <debug.h>
 
 #include <nuttx/mm/gran.h>
 
 #include "mm_gran/mm_gran.h"
+#include "mm_gran/mm_grantable.h"
 
 #ifdef CONFIG_GRAN
 
@@ -37,100 +38,35 @@
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: gran_free
- *
- * Description:
- *   Return memory to the granule heap.
- *
- * Input Parameters:
- *   handle - The handle previously returned by gran_initialize
- *   memory - A pointer to memory previoiusly allocated by gran_alloc.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
 void gran_free(GRAN_HANDLE handle, FAR void *memory, size_t size)
 {
-  FAR struct gran_s *priv = (FAR struct gran_s *)handle;
-  unsigned int granno;
-  unsigned int gatidx;
-  unsigned int gatbit;
-  unsigned int granmask;
-  unsigned int ngranules;
-  unsigned int avail;
-  uint32_t     gatmask;
-  int          ret;
+  FAR    gran_t *gran = (FAR gran_t *)handle;
+  uint   ngran;
+  size_t posi;
+  int    ret;
 
-  DEBUGASSERT(priv != NULL && memory && size <= 32 * (1 << priv->log2gran));
+  DEBUGASSERT(gran && memory && size);
+  DEBUGASSERT(GRAN_PRODUCT(gran, memory));
+  DEBUGASSERT(GRAN_INRANGE(gran, (((uintptr_t)memory) + size - 1)));
 
-  /* Get exclusive access to the GAT */
+  posi  = MEM2GRAN(gran, memory);
+  ngran = NGRANULE(gran, size);
+
+  graninfo(" heap=%"PRIxPTR" posi=%zu addr=%zx size=%zu n=%d\n",
+           gran->heapstart, posi, (size_t)memory, size, ngran);
 
   do
     {
-      ret = gran_enter_critical(priv);
-
-      /* The only error Should happen on task cancellation.  We must
-       * try again in this case to avoid stranding the granule memory.
-       */
-
+      ret = gran_enter_critical(gran);
       DEBUGASSERT(ret == OK || ret == -ECANCELED);
     }
-  while (ret < 0);
+  while (ret < 0);  /* Retry upon task cancellation */
 
-  /* Determine the granule number of the first granule in the allocation */
+  /* check double free */
 
-  granno = ((uintptr_t)memory - priv->heapstart) >> priv->log2gran;
-
-  /* Determine the GAT table index and bit number associated with the
-   * allocation.
-   */
-
-  gatidx = granno >> 5;
-  gatbit = granno & 31;
-
-  /* Determine the number of granules in the allocation */
-
-  granmask =  (1 << priv->log2gran) - 1;
-  ngranules = (size + granmask) >> priv->log2gran;
-
-  /* Clear bits in the GAT entry or entries */
-
-  avail = 32 - gatbit;
-  if (ngranules > avail)
-    {
-      /* Clear bits in the first GAT entry */
-
-      gatmask = (0xffffffff << gatbit);
-      DEBUGASSERT((priv->gat[gatidx] & gatmask) == gatmask);
-
-      priv->gat[gatidx] &= ~gatmask;
-      ngranules -= avail;
-
-      /* Clear bits in the second GAT entry */
-
-      gatmask = 0xffffffff >> (32 - ngranules);
-      DEBUGASSERT((priv->gat[gatidx + 1] & gatmask) == gatmask);
-
-      priv->gat[gatidx + 1] &= ~gatmask;
-    }
-
-  /* Handle the case where where all of the granules came from one entry */
-
-  else
-    {
-      /* Clear bits in a single GAT entry */
-
-      gatmask   = 0xffffffff >> (32 - ngranules);
-      gatmask <<= gatbit;
-      DEBUGASSERT((priv->gat[gatidx] & gatmask) == gatmask);
-
-      priv->gat[gatidx] &= ~gatmask;
-    }
-
-  gran_leave_critical(priv);
+  DEBUGASSERT(gran_match(gran, posi, ngran, 1, NULL));
+  gran_clear(gran, posi, ngran);
+  gran_leave_critical(gran);
 }
 
 #endif /* CONFIG_GRAN */
