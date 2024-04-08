@@ -29,7 +29,6 @@
 
 #include <nuttx/config.h>
 
-#include <arpa/inet.h>
 #include <assert.h>
 #include <debug.h>
 #include <errno.h>
@@ -37,23 +36,14 @@
 #include <stdint.h>
 #include <string.h>
 #include <time.h>
-#include <sys/types.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/net/ip.h>
-#include <nuttx/net/netdev.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/net/netdev_lowerhalf.h>
 #include <nuttx/usb/cdc.h>
 #include <nuttx/usb/cdcncm.h>
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbdev_trace.h>
 #include <nuttx/wqueue.h>
-
-#ifdef CONFIG_NET_PKT
-#  include <nuttx/net/pkt.h>
-#endif
 
 #ifdef CONFIG_BOARD_USBDEV_SERIALSTR
 #  include <nuttx/board.h>
@@ -87,10 +77,6 @@
 
 #define CDCNCM_TXTIMEOUT             (60*CLK_TCK)
 #define CDCNCM_DGRAM_COMBINE_PERIOD   1
-
-/* This is a helper pointer for accessing the contents of Ethernet header */
-
-#define BUF ((FAR struct eth_hdr_s *)self->dev.d_buf)
 
 #define NTB_DEFAULT_IN_SIZE           16384
 #define NTB_OUT_SIZE                  16384
@@ -304,9 +290,6 @@ struct cdcncm_driver_s
   FAR struct usbdev_ep_s       *epbulkout;   /* Bulk OUT endpoint */
   uint8_t                       config;      /* Selected configuration number */
 
-  uint16_t                      pktbuf[(CONFIG_NET_ETH_PKTSIZE +
-                                        CONFIG_NET_GUARDSIZE + 1) / 2];
-
   FAR struct usbdev_req_s      *rdreq;       /* Single read request */
   bool                          rxpending;   /* Packet available in rdreq */
 
@@ -327,15 +310,14 @@ struct cdcncm_driver_s
                                               * to the work queue */
   struct work_s                 notifywork;  /* For deferring notify work
                                               * to the work queue */
-  struct work_s                 pollwork;    /* For deferring poll work to
-                                              * the work queue */
   struct work_s                 delaywork;   /* For deferring tx work
                                               * to the work queue */
 
   /* This holds the information visible to the NuttX network */
 
-  struct net_driver_s           dev;         /* Interface understood by the
+  struct netdev_lowerhalf_s     dev;         /* Interface understood by the
                                               * network */
+  netpkt_queue_t                rx_queue;    /* RX packet queue */
 };
 
 /****************************************************************************
@@ -344,14 +326,8 @@ struct cdcncm_driver_s
 
 /* Network Device ***********************************************************/
 
-/* Common TX logic */
-
-static int  cdcncm_transmit(FAR struct cdcncm_driver_s *priv);
-static int  cdcncm_txpoll(FAR struct net_driver_s *dev);
-
 /* Interrupt handling */
 
-static void cdcncm_reply(FAR struct cdcncm_driver_s *priv);
 static void cdcncm_receive(FAR struct cdcncm_driver_s *priv);
 static void cdcncm_txdone(FAR struct cdcncm_driver_s *priv);
 
@@ -359,22 +335,21 @@ static void cdcncm_interrupt_work(FAR void *arg);
 
 /* NuttX callback functions */
 
-static int  cdcncm_ifup(FAR struct net_driver_s *dev);
-static int  cdcncm_ifdown(FAR struct net_driver_s *dev);
-
-static void cdcncm_txavail_work(FAR void *arg);
-static int  cdcncm_txavail(FAR struct net_driver_s *dev);
+static int  cdcncm_ifup(FAR struct netdev_lowerhalf_s *dev);
+static int  cdcncm_ifdown(FAR struct netdev_lowerhalf_s *dev);
+static int  cdcncm_send(struct netdev_lowerhalf_s *dev, netpkt_t *pkt);
+static FAR netpkt_t *cdcncm_recv(FAR struct netdev_lowerhalf_s *dev);
 
 #if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
-static int cdcncm_addmac(FAR struct net_driver_s *dev,
-                         FAR const uint8_t *mac);
+static int  cdcncm_addmac(FAR struct netdev_lowerhalf_s *dev,
+                          FAR const uint8_t *mac);
 #ifdef CONFIG_NET_MCASTGROUP
-static int cdcncm_rmmac(FAR struct net_driver_s *dev,
-                        FAR const uint8_t *mac);
+static int  cdcncm_rmmac(FAR struct netdev_lowerhalf_s *dev,
+                         FAR const uint8_t *mac);
 #endif
 #endif
 #ifdef CONFIG_NETDEV_IOCTL
-static int  cdcncm_ioctl(FAR struct net_driver_s *dev, int cmd,
+static int  cdcncm_ioctl(FAR struct netdev_lowerhalf_s *dev, int cmd,
                          unsigned long arg);
 #endif
 
@@ -475,6 +450,21 @@ static const struct usb_cdc_ncm_ntb_parameters_s g_ntbparameters =
   .ndpoutalignment        = 4,
 };
 
+static const struct netdev_ops_s g_netops =
+{
+  cdcncm_ifup,   /* ifup */
+  cdcncm_ifdown, /* ifdown */
+  cdcncm_send,   /* transmit */
+  cdcncm_recv,   /* receive */
+#ifdef CONFIG_NET_MCASTGROUP
+  cdcncm_addmac, /* addmac */
+  cdcncm_rmmac,  /* rmmac */
+#endif
+#ifdef CONFIG_NETDEV_IOCTL
+  cdcncm_ioctl,  /* ioctl */
+#endif
+};
+
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
@@ -558,22 +548,24 @@ void cdcncm_put(FAR uint8_t **address, size_t size, uint32_t value)
  * Name: cdcncm_transmit_format
  *
  * Description:
- *   Format the data to be sent
+ *   Format the data to be transmitted to the host in the format specified by
+ *   the NCM protocol (Network Control Model) and the NCM NTB (Network
+ *   Transfer Block) format.
  *
  * Input Parameters:
  *   self - Reference to the driver state structure
+ *   pkt  - Reference to the packet to be transmitted
  *
  * Returned Value:
  *   None
  *
- * Assumptions:
- *   The network is locked.
- *
  ****************************************************************************/
 
-static void cdcncm_transmit_format(FAR struct cdcncm_driver_s *self)
+static void cdcncm_transmit_format(FAR struct cdcncm_driver_s *self,
+                                   FAR netpkt_t *pkt)
 {
   FAR const struct ndp_parser_opts_s *opts = self->parseropts;
+  unsigned int dglen = netpkt_getdatalen(&self->dev, pkt);
   const int div = g_ntbparameters.ndpindivisor;
   const int rem = g_ntbparameters.ndpinpayloadremainder;
   const int dgramidxlen = 2 * opts->dgramitemlen;
@@ -612,12 +604,13 @@ static void cdcncm_transmit_format(FAR struct cdcncm_driver_s *self)
   tmp = self->wrreq->buf + ndpindex + opts->ndpsize +
         self->dgramcount * dgramidxlen;
   cdcncm_put(&tmp, opts->dgramitemlen, self->dgramaddr - self->wrreq->buf);
-  cdcncm_put(&tmp, opts->dgramitemlen, self->dev.d_len);
+  cdcncm_put(&tmp, opts->dgramitemlen, dglen);
 
-  /* Fill IP packet: address=self->dev.d_buf, length=self->dev.d_len */
+  /* Fill IP packet */
 
-  memcpy(self->dgramaddr, self->dev.d_buf, self->dev.d_len);
-  self->dgramaddr += self->dev.d_len;
+  netpkt_copyout(&self->dev, self->dgramaddr, pkt, dglen, 0);
+
+  self->dgramaddr += dglen;
   self->dgramaddr  = (FAR uint8_t *)NCM_ALIGN((uintptr_t)self->dgramaddr,
                                               div) + rem;
 
@@ -657,8 +650,6 @@ static void cdcncm_transmit_work(FAR void *arg)
     {
     }
 
-  net_lock();
-
   ncblen   = opts->nthsize;
   ndpindex = NCM_ALIGN(ncblen, ndpalign);
 
@@ -683,122 +674,6 @@ static void cdcncm_transmit_work(FAR void *arg)
   self->wrreq->len = totallen;
 
   EP_SUBMIT(self->epbulkin, self->wrreq);
-
-  net_unlock();
-}
-
-/****************************************************************************
- * Name: cdcncm_transmit
- *
- * Description:
- *   Start hardware transmission.  Called either from the txdone interrupt
- *   handling or from watchdog based polling
- *
- * Input Parameters:
- *   priv - Reference to the driver state structure
- *
- * Returned Value:
- *   OK on success; a negated errno on failure
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static int cdcncm_transmit(FAR struct cdcncm_driver_s *self)
-{
-  /* Increment statistics */
-
-  NETDEV_TXPACKETS(self->dev);
-
-  cdcncm_transmit_format(self);
-
-  if ((self->wrreq->buf + NTB_OUT_SIZE - self->dgramaddr <
-       self->dev.d_pktsize) || self->dgramcount >= TX_MAX_NUM_DPE)
-    {
-      work_cancel(ETHWORK, &self->delaywork);
-      cdcncm_transmit_work(self);
-    }
-  else
-    {
-      work_queue(ETHWORK, &self->delaywork, cdcncm_transmit_work, self,
-                 MSEC2TICK(CDCNCM_DGRAM_COMBINE_PERIOD));
-    }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: cdcncm_txpoll
- *
- * Description:
- *   The transmitter is available, check if the network has any outgoing
- *   packets ready to send.  This is a callback from devif_poll().
- *   devif_poll() may be called:
- *
- *   1. When the preceding TX packet send is complete,
- *   2. When the preceding TX packet send times out and the interface is
- *      reset
- *   3. During normal TX polling
- *
- * Input Parameters:
- *   dev - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   OK on success; a negated errno on failure
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static int cdcncm_txpoll(FAR struct net_driver_s *dev)
-{
-  FAR struct cdcncm_driver_s *priv =
-    (FAR struct cdcncm_driver_s *)dev->d_private;
-
-  /* Send the packet */
-
-  cdcncm_transmit(priv);
-
-  /* Check if there is room in the device to hold another packet. If
-   * not, return a non-zero value to terminate the poll.
-   */
-
-  return 1;
-}
-
-/****************************************************************************
- * Name: cdcncm_reply
- *
- * Description:
- *   After a packet has been received and dispatched to the network, it
- *   may return return with an outgoing packet.  This function checks for
- *   that case and performs the transmission if necessary.
- *
- * Input Parameters:
- *   priv - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static void cdcncm_reply(FAR struct cdcncm_driver_s *priv)
-{
-  /* If the packet dispatch resulted in data that should be sent out on the
-   * network, the field d_len will set to a value > 0.
-   */
-
-  if (priv->dev.d_len > 0)
-    {
-      /* And send the packet */
-
-      cdcncm_transmit(priv);
-    }
 }
 
 /****************************************************************************
@@ -813,77 +688,33 @@ static void cdcncm_reply(FAR struct cdcncm_driver_s *priv)
  * Returned Value:
  *   None
  *
- * Assumptions:
- *   The network is locked.
- *
  ****************************************************************************/
 
-static void cdcncm_packet_handler(FAR struct cdcncm_driver_s *self)
+static int cdcncm_packet_handler(FAR struct cdcncm_driver_s *self,
+                                 FAR uint8_t *dgram, uint32_t dglen)
 {
-  /* Check for errors and update statistics */
+  FAR netpkt_t *pkt = netpkt_alloc(&self->dev, NETPKT_RX);
+  int ret = -ENOMEM;
 
-#ifdef CONFIG_NET_PKT
-  /* When packet sockets are enabled, feed the frame into the tap */
-
-  pkt_input(&self->dev);
-#endif
-
-  /* We only accept IP packets of the configured type and ARP packets */
-
-#ifdef CONFIG_NET_IPv4
-  if (BUF->type == HTONS(ETHTYPE_IP))
+  if (pkt == NULL)
     {
-      ninfo("IPv4 frame\n");
-      NETDEV_RXIPV4(&self->dev);
-
-      /* Receive an IPv4 packet from the network device */
-
-      ipv4_input(&self->dev);
-
-      /* Check for a reply to the IPv4 packet */
-
-      cdcncm_reply(self);
+      return ret;
     }
-  else
-#endif
-#ifdef CONFIG_NET_IPv6
-  if (BUF->type == HTONS(ETHTYPE_IP6))
+
+  ret = netpkt_copyin(&self->dev, pkt, dgram, dglen, 0);
+  if (ret < 0)
     {
-      ninfo("IPv6 frame\n");
-      NETDEV_RXIPV6(&self->dev);
-
-      /* Dispatch IPv6 packet to the network layer */
-
-      ipv6_input(&self->dev);
-
-      /* Check for a reply to the IPv6 packet */
-
-      cdcncm_reply(self);
+      netpkt_free(&self->dev, pkt, NETPKT_RX);
+      return ret;
     }
-  else
-#endif
-#ifdef CONFIG_NET_ARP
-  if (BUF->type == HTONS(ETHTYPE_ARP))
+
+  ret = netpkt_tryadd_queue(pkt, &self->rx_queue);
+  if (ret != 0)
     {
-      /* Dispatch ARP packet to the network layer */
-
-      arp_input(&self->dev);
-      NETDEV_RXARP(&self->dev);
-
-      /* If the above function invocation resulted in data that should be
-       * sent out on the network, d_len field will set to a value > 0.
-       */
-
-      if (self->dev.d_len > 0)
-        {
-          cdcncm_transmit(self);
-        }
+      netpkt_free(&self->dev, pkt, NETPKT_RX);
     }
-  else
-#endif
-    {
-      NETDEV_RXDROPPED(&self->dev);
-    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -897,9 +728,6 @@ static void cdcncm_packet_handler(FAR struct cdcncm_driver_s *self)
  *
  * Returned Value:
  *   None
- *
- * Assumptions:
- *   The network is locked.
  *
  ****************************************************************************/
 
@@ -997,14 +825,11 @@ static void cdcncm_receive(FAR struct cdcncm_driver_s *self)
               break;
             }
 
-          /* Copy the data data from the hardware to self->dev.d_buf.  Set
-           * amount of data in self->dev.d_len
-           */
-
-          memcpy(self->dev.d_buf, self->rdreq->buf + index, dglen);
-          self->dev.d_len = dglen;
           dgramcounter++;
-          cdcncm_packet_handler(self);
+
+          /* Copy the data from the hardware to self->rx_queue. */
+
+          cdcncm_packet_handler(self, self->rdreq->buf + index, dglen);
 
           ndplen -= 2 * (opts->dgramitemlen);
         }
@@ -1025,20 +850,13 @@ static void cdcncm_receive(FAR struct cdcncm_driver_s *self)
  * Returned Value:
  *   None
  *
- * Assumptions:
- *   The network is locked.
- *
  ****************************************************************************/
 
 static void cdcncm_txdone(FAR struct cdcncm_driver_s *priv)
 {
-  /* Check for errors and update statistics */
-
-  NETDEV_TXDONE(priv->dev);
-
   /* In any event, poll the network for new TX data */
 
-  devif_poll(&priv->dev, cdcncm_txpoll);
+  netdev_lower_txdone(&priv->dev);
 }
 
 /****************************************************************************
@@ -1063,19 +881,12 @@ static void cdcncm_interrupt_work(FAR void *arg)
   FAR struct cdcncm_driver_s *self = (FAR struct cdcncm_driver_s *)arg;
   irqstate_t flags;
 
-  /* Lock the network and serialize driver operations if necessary.
-   * NOTE: Serialization is only required in the case where the driver work
-   * is performed on an LP worker thread and where more than one LP worker
-   * thread has been configured.
-   */
-
-  net_lock();
-
   /* Check if we received an incoming packet, if so, call cdcncm_receive() */
 
   if (self->rxpending)
     {
       cdcncm_receive(self);
+      netdev_lower_rxready(&self->dev);
 
       flags = enter_critical_section();
       self->rxpending = false;
@@ -1100,8 +911,6 @@ static void cdcncm_interrupt_work(FAR void *arg)
     {
       leave_critical_section(flags);
     }
-
-  net_unlock();
 }
 
 /****************************************************************************
@@ -1122,21 +931,22 @@ static void cdcncm_interrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int cdcncm_ifup(FAR struct net_driver_s *dev)
+static int cdcncm_ifup(FAR struct netdev_lowerhalf_s *dev)
 {
   FAR struct cdcncm_driver_s *priv =
-    (FAR struct cdcncm_driver_s *)dev->d_private;
+    container_of(dev, struct cdcncm_driver_s, dev);
 
 #ifdef CONFIG_NET_IPv4
   ninfo("Bringing up: %u.%u.%u.%u\n",
-        ip4_addr1(dev->d_ipaddr), ip4_addr2(dev->d_ipaddr),
-        ip4_addr3(dev->d_ipaddr), ip4_addr4(dev->d_ipaddr));
+        ip4_addr1(dev->netdev.d_ipaddr), ip4_addr2(dev->netdev.d_ipaddr),
+        ip4_addr3(dev->netdev.d_ipaddr), ip4_addr4(dev->netdev.d_ipaddr));
 #endif
 #ifdef CONFIG_NET_IPv6
   ninfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
-        dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
-        dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
+        dev->netdev.d_ipv6addr[0], dev->netdev.d_ipv6addr[1],
+        dev->netdev.d_ipv6addr[2], dev->netdev.d_ipv6addr[3],
+        dev->netdev.d_ipv6addr[4], dev->netdev.d_ipv6addr[5],
+        dev->netdev.d_ipv6addr[6], dev->netdev.d_ipv6addr[7]);
 #endif
 
   priv->bifup = true;
@@ -1160,10 +970,10 @@ static int cdcncm_ifup(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static int cdcncm_ifdown(FAR struct net_driver_s *dev)
+static int cdcncm_ifdown(FAR struct netdev_lowerhalf_s *dev)
 {
   FAR struct cdcncm_driver_s *priv =
-    (FAR struct cdcncm_driver_s *)dev->d_private;
+    container_of(dev, struct cdcncm_driver_s, dev);
   irqstate_t flags;
 
   /* Disable the Ethernet interrupt */
@@ -1179,85 +989,70 @@ static int cdcncm_ifdown(FAR struct net_driver_s *dev)
 
   priv->bifup = false;
   leave_critical_section(flags);
+
   return OK;
 }
 
 /****************************************************************************
- * Name: cdcncm_txavail_work
+ * Name: cdcncm_send
  *
  * Description:
- *   Perform an out-of-cycle poll on the worker thread.
+ *   Transmit a packet through the USB interface
  *
  * Input Parameters:
- *   arg - Reference to the NuttX driver state structure (cast to void*)
+ *   dev - Reference to the NuttX netdev lowerhalf driver structure
+ *   pkt - The packet to be sent
  *
  * Returned Value:
- *   None
- *
- * Assumptions:
- *   Runs on a work queue thread.
+ *   OK on success
  *
  ****************************************************************************/
 
-static void cdcncm_txavail_work(FAR void *arg)
+static int cdcncm_send(FAR struct netdev_lowerhalf_s *dev, FAR netpkt_t *pkt)
 {
-  FAR struct cdcncm_driver_s *self = (FAR struct cdcncm_driver_s *)arg;
+  FAR struct cdcncm_driver_s *self;
 
-  /* Lock the network and serialize driver operations if necessary.
-   * NOTE: Serialization is only required in the case where the driver work
-   * is performed on an LP worker thread and where more than one LP worker
-   * thread has been configured.
-   */
+  self = container_of(dev, struct cdcncm_driver_s, dev);
+  cdcncm_transmit_format(self, pkt);
+  netpkt_free(dev, pkt, NETPKT_TX);
 
-  net_lock();
-
-  /* Ignore the notification if the interface is not yet up */
-
-  if (self->bifup)
+  if ((self->wrreq->buf + NTB_OUT_SIZE - self->dgramaddr <
+       self->dev.netdev.d_pktsize) || self->dgramcount >= TX_MAX_NUM_DPE)
     {
-      devif_poll(&self->dev, cdcncm_txpoll);
+      work_cancel(ETHWORK, &self->delaywork);
+      cdcncm_transmit_work(self);
     }
-
-  net_unlock();
-}
-
-/****************************************************************************
- * Name: cdcncm_txavail
- *
- * Description:
- *   Driver callback invoked when new TX data is available.  This is a
- *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
- *   latency.
- *
- * Input Parameters:
- *   dev - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static int cdcncm_txavail(FAR struct net_driver_s *dev)
-{
-  FAR struct cdcncm_driver_s *priv =
-    (FAR struct cdcncm_driver_s *)dev->d_private;
-
-  /* Is our single work structure available?  It may not be if there are
-   * pending interrupt actions and we will have to ignore the Tx
-   * availability action.
-   */
-
-  if (work_available(&priv->pollwork))
+  else
     {
-      /* Schedule to serialize the poll on the worker thread. */
-
-      work_queue(ETHWORK, &priv->pollwork, cdcncm_txavail_work, priv, 0);
+      work_queue(ETHWORK, &self->delaywork, cdcncm_transmit_work, self,
+                 MSEC2TICK(CDCNCM_DGRAM_COMBINE_PERIOD));
     }
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: cdcncm_recv
+ *
+ * Description:
+ *   Receive a packet from the USB interface
+ *
+ * Input Parameters:
+ *   dev - Reference to the NuttX netdev lowerhalf driver structure
+ *
+ * Returned Value:
+ *   The received packet, or NULL if no packet is available
+ *
+ ****************************************************************************/
+
+static FAR netpkt_t *cdcncm_recv(FAR struct netdev_lowerhalf_s *dev)
+{
+  FAR struct cdcncm_driver_s *self;
+  FAR netpkt_t *pkt;
+
+  self = container_of(dev, struct cdcncm_driver_s, dev);
+  pkt  = netpkt_remove_queue(&self->rx_queue);
+  return pkt;
 }
 
 /****************************************************************************
@@ -1277,7 +1072,7 @@ static int cdcncm_txavail(FAR struct net_driver_s *dev)
  ****************************************************************************/
 
 #if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
-static int cdcncm_addmac(FAR struct net_driver_s *dev,
+static int cdcncm_addmac(FAR struct netdev_lowerhalf_s *dev,
                          FAR const uint8_t *mac)
 {
   return OK;
@@ -1301,7 +1096,8 @@ static int cdcncm_addmac(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_MCASTGROUP
-static int cdcncm_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
+static int cdcncm_rmmac(FAR struct netdev_lowerhalf_s *dev,
+                        FAR const uint8_t *mac)
 {
   return OK;
 }
@@ -1327,7 +1123,7 @@ static int cdcncm_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NETDEV_IOCTL
-static int cdcncm_ioctl(FAR struct net_driver_s *dev, int cmd,
+static int cdcncm_ioctl(FAR struct netdev_lowerhalf_s *dev, int cmd,
                         unsigned long arg)
 {
   return -ENOTTY;
@@ -1449,7 +1245,7 @@ static void cdcncm_resetconfig(FAR struct cdcncm_driver_s *self)
 
       /* Inform the networking layer that the link is down */
 
-      self->dev.d_ifdown(&self->dev);
+      cdcncm_ifdown(&self->dev);
 
       /* Disable endpoints.  This should force completion of all pending
        * transfers.
@@ -1545,14 +1341,14 @@ static int cdcncm_setconfig(FAR struct cdcncm_driver_s *self, uint8_t config)
 
   /* Set client's MAC address */
 
-  memcpy(self->dev.d_mac.ether.ether_addr_octet,
+  memcpy(self->dev.netdev.d_mac.ether.ether_addr_octet,
          "\x00\xe0\xde\xad\xbe\xef", IFHWADDRLEN);
 
   /* Report link up to networking layer */
 
-  if (self->dev.d_ifup(&self->dev) == OK)
+  if (cdcncm_ifup(&self->dev) == OK)
     {
-      self->dev.d_flags |= IFF_UP;
+      self->dev.netdev.d_flags |= IFF_UP;
     }
 
   return OK;
@@ -1583,8 +1379,8 @@ static int ncm_notify(FAR struct cdcncm_driver_s *self)
         /* Notifying the host of the NIC modification status */
 
         req->req      = NCM_NETWORK_CONNECTION;
-        req->value[0] = LSBYTE(IFF_IS_RUNNING(self->dev.d_flags));
-        req->value[1] = MSBYTE(IFF_IS_RUNNING(self->dev.d_flags));
+        req->value[0] = LSBYTE(IFF_IS_RUNNING(self->dev.netdev.d_flags));
+        req->value[1] = MSBYTE(IFF_IS_RUNNING(self->dev.netdev.d_flags));
         req->len[0]   = 0;
         req->len[1]   = 0;
         ret           = sizeof(*req);
@@ -1662,7 +1458,7 @@ static int cdcncm_setinterface(FAR struct cdcncm_driver_s *self,
           self->notify = NCM_NOTIFY_SPEED;
         }
 
-      netdev_carrier_on(&self->dev);
+      netdev_lower_carrier_on(&self->dev);
       work_queue(ETHWORK, &self->notifywork, ncm_do_notify, self,
                  MSEC2TICK(100));
     }
@@ -2246,7 +2042,6 @@ static int cdcncm_bind(FAR struct usbdevclass_driver_s *driver,
     }
 
   self->txdone    = false;
-  self->dev.d_len = 0;
 
 #ifndef CONFIG_CDCNCM_COMPOSITE
 #ifdef CONFIG_USBDEV_SELFPOWERED
@@ -2342,9 +2137,9 @@ static void cdcncm_unbind(FAR struct usbdevclass_driver_s *driver,
       self->epbulkin = NULL;
     }
 
-  /* Clear out all data in the buffer */
+  /* Clear out all data in the rx_queue */
 
-  self->dev.d_len = 0;
+  netpkt_free_queue(&self->rx_queue);
 }
 
 static int cdcncm_setup(FAR struct usbdevclass_driver_s *driver,
@@ -2514,18 +2309,9 @@ static int cdcncm_classobject(int minor,
 
   /* Network device initialization */
 
-  self->dev.d_buf     = (FAR uint8_t *)self->pktbuf;
-  self->dev.d_ifup    = cdcncm_ifup;     /* I/F up (new IP address) callback */
-  self->dev.d_ifdown  = cdcncm_ifdown;   /* I/F down callback */
-  self->dev.d_txavail = cdcncm_txavail;  /* New TX data callback */
-#ifdef CONFIG_NET_MCASTGROUP
-  self->dev.d_addmac  = cdcncm_addmac;   /* Add multicast MAC address */
-  self->dev.d_rmmac   = cdcncm_rmmac;    /* Remove multicast MAC address */
-#endif
-#ifdef CONFIG_NETDEV_IOCTL
-  self->dev.d_ioctl   = cdcncm_ioctl;    /* Handle network IOCTL commands */
-#endif
-  self->dev.d_private = self;            /* Used to recover private state from dev */
+  self->dev.ops              = &g_netops;
+  self->dev.quota[NETPKT_TX] = CONFIG_CDCNCM_QUOTA_TX;
+  self->dev.quota[NETPKT_RX] = CONFIG_CDCNCM_QUOTA_RX;
 
   /* USB device initialization */
 
@@ -2545,19 +2331,19 @@ static int cdcncm_classobject(int minor,
   cdcncm_ifdown(&self->dev);
 
   /* Read the MAC address from the hardware into
-   * priv->dev.d_mac.ether.ether_addr_octet
+   * priv->dev.netdev.d_mac.ether.ether_addr_octet
    * Applies only if the Ethernet MAC has its own internal address.
    */
 
-  memcpy(self->dev.d_mac.ether.ether_addr_octet,
+  memcpy(self->dev.netdev.d_mac.ether.ether_addr_octet,
          "\x00\xe0\xde\xad\xbe\xef", IFHWADDRLEN);
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  ret = netdev_register(&self->dev, NET_LL_ETHERNET);
+  ret = netdev_lower_register(&self->dev, NET_LL_ETHERNET);
   if (ret < 0)
     {
-      nerr("netdev_register failed. ret: %d\n", ret);
+      nerr("netdev_lower_register failed. ret: %d\n", ret);
     }
 
   *classdev = (FAR struct usbdevclass_driver_s *)self;
@@ -2592,10 +2378,10 @@ static void cdcncm_uninitialize(FAR struct usbdevclass_driver_s *classdev)
 
   /* Un-register the CDC/ECM netdev device */
 
-  ret = netdev_unregister(&self->dev);
+  ret = netdev_lower_unregister(&self->dev);
   if (ret < 0)
     {
-      nerr("ERROR: netdev_unregister failed. ret: %d\n", ret);
+      nerr("ERROR: netdev_lower_unregister failed. ret: %d\n", ret);
     }
 
 #ifndef CONFIG_CDCNCM_COMPOSITE

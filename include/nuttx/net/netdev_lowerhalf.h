@@ -81,6 +81,7 @@
  */
 
 typedef struct iob_s netpkt_t;
+typedef struct iob_queue_s netpkt_queue_t;
 
 enum netpkt_type_e
 {
@@ -509,5 +510,56 @@ bool netpkt_is_fragmented(FAR netpkt_t *pkt);
 
 int netpkt_to_iov(FAR struct netdev_lowerhalf_s *dev, FAR netpkt_t *pkt,
                   FAR struct iovec *iov, int iovcnt);
+
+/****************************************************************************
+ * Name: netpkt_tryadd_queue
+ *
+ * Description:
+ *   Add one net packet to the end of a queue without waiting for resources
+ *   to become free.
+ *
+ * Input Parameters:
+ *   pkt   - The packet to add
+ *   queue - The queue to add the packet to
+ *
+ * Returned Value:
+ *   0:Success; negated errno on failure
+ *
+ ****************************************************************************/
+
+#define netpkt_tryadd_queue(pkt, queue) iob_tryadd_queue(pkt, queue)
+
+/****************************************************************************
+ * Name: netpkt_remove_queue
+ *
+ * Description:
+ *   Remove one net packet from the head of a queue.
+ *
+ * Input Parameters:
+ *   queue - The queue to remove the packet from
+ *
+ * Returned Value:
+ *   The packet removed from the queue.  NULL is returned if the queue is
+ *   empty.
+ *
+ ****************************************************************************/
+
+#define netpkt_remove_queue(queue) iob_remove_queue(queue)
+
+/****************************************************************************
+ * Name: netpkt_free_queue
+ *
+ * Description:
+ *   Free all net packets in a queue.
+ *
+ * Input Parameters:
+ *   queue - The queue to free
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#define netpkt_free_queue(queue) iob_free_queue(queue)
 
 #endif /* __INCLUDE_NUTTX_NET_NETDEV_LOWERHALF_H */
