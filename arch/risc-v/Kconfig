@@ -328,7 +328,7 @@ config ARCH_CHIP_RISCV_CUSTOM
 	---help---
 		Select this option if there is no directory for the chip under arch/risc-v/src/.
 
-endchoice
+endchoice # RISC-V chip selection
 
 config ARCH_RV32
 	bool
@@ -389,35 +389,35 @@ config ARCH_RV_ISA_VENDOR_EXTENSIONS
 config ARCH_RV_MMIO_BITS
 	int
 	# special cases
-	default 32		if ARCH_CHIP_K230
+	default 32 if ARCH_CHIP_K230
 	# general fallbacks
-	default 32 		if ARCH_RV32
-	default 64		if ARCH_RV64
+	default 32 if ARCH_RV32
+	default 64 if ARCH_RV64
 
 config ARCH_FAMILY
 	string
-	default "rv32"		if ARCH_RV32
-	default "rv64"		if ARCH_RV64
+	default "rv32" if ARCH_RV32
+	default "rv64" if ARCH_RV64
 
 config ARCH_CHIP
 	string
-	default "fe310"					if ARCH_CHIP_FE310
-	default "k210"					if ARCH_CHIP_K210
-	default "litex"					if ARCH_CHIP_LITEX
-	default "bl602"					if ARCH_CHIP_BL602
-	default "esp32c3-legacy"			if ARCH_CHIP_ESP32C3
-	default "esp32c3"				if ARCH_CHIP_ESP32C3_GENERIC
-	default "esp32c6"				if ARCH_CHIP_ESP32C6
-	default "esp32h2"				if ARCH_CHIP_ESP32H2
-	default "c906"					if ARCH_CHIP_C906
-	default "mpfs"					if ARCH_CHIP_MPFS
-	default "rv32m1"				if ARCH_CHIP_RV32M1
-	default "qemu-rv"				if ARCH_CHIP_QEMU_RV
-	default "hpm6000"				if ARCH_CHIP_HPM6000
-	default "hpm6750"				if ARCH_CHIP_HPM6750
-	default "jh7110"				if ARCH_CHIP_JH7110
-	default "bl808"					if ARCH_CHIP_BL808
-	default "k230"					if ARCH_CHIP_K230
+	default "fe310"                 if ARCH_CHIP_FE310
+	default "k210"                  if ARCH_CHIP_K210
+	default "litex"                 if ARCH_CHIP_LITEX
+	default "bl602"                 if ARCH_CHIP_BL602
+	default "esp32c3-legacy"        if ARCH_CHIP_ESP32C3
+	default "esp32c3"               if ARCH_CHIP_ESP32C3_GENERIC
+	default "esp32c6"               if ARCH_CHIP_ESP32C6
+	default "esp32h2"               if ARCH_CHIP_ESP32H2
+	default "c906"                  if ARCH_CHIP_C906
+	default "mpfs"                  if ARCH_CHIP_MPFS
+	default "rv32m1"                if ARCH_CHIP_RV32M1
+	default "qemu-rv"               if ARCH_CHIP_QEMU_RV
+	default "hpm6000"               if ARCH_CHIP_HPM6000
+	default "hpm6750"               if ARCH_CHIP_HPM6750
+	default "jh7110"                if ARCH_CHIP_JH7110
+	default "bl808"                 if ARCH_CHIP_BL808
+	default "k230"                  if ARCH_CHIP_K230
 
 config ARCH_RISCV_INTXCPT_EXTENSIONS
 	bool "RISC-V Integer Context Extensions"
@@ -498,7 +498,7 @@ config RISCV_TOOLCHAIN_GNU_RV32
 		This option should work for any modern GNU toolchain (GCC 5.2 or newer)
 		configured for riscv32-unknown-elf.
 
-endchoice
+endchoice # Toolchain Selection
 
 config RISCV_SEMIHOSTING_HOSTFS
 	bool "Semihosting HostFS"
@@ -517,7 +517,7 @@ config RISCV_SEMIHOSTING_HOSTFS_CACHE_COHERENCE
 	---help---
 		Flush & Invalidte cache before & after bkpt instruction.
 
-endif
+endif # RISCV_SEMIHOSTING_HOSTFS
 
 if ARCH_CHIP_LITEX
 
@@ -538,9 +538,9 @@ config LITEX_CORE_VEXRISCV_SMP
 	select ARCH_HAVE_S_MODE
 	select ARCH_HAVE_ELF_EXECUTABLE
 
-endchoice
+endchoice # LITEX Core Selection
 
-endif
+endif # ARCH_CHIP_LITEX
 
 source "arch/risc-v/src/opensbi/Kconfig"
 source "arch/risc-v/src/nuttsbi/Kconfig"
@@ -596,4 +596,4 @@ endif
 if ARCH_CHIP_K230
 source "arch/risc-v/src/k230/Kconfig"
 endif
-endif
+endif # ARCH_RISCV

@@ -2613,7 +2613,7 @@ config IMXRT_SRAM_HEAPOFFSET
 		Used to reserve memory at the beginning of SRAM for, as an example,
 		a framebuffer.
 
-endmenu  # i.MX RT Heap Configuration
+endmenu # i.MX RT Heap Configuration
 
 config IMXRT_FLEXRAM_PARTITION
 	bool "Set FlexRAM Paritioning"
