@@ -47,7 +47,7 @@
 
 /* Debug */
 
-#ifdef CONFIG_DEBUG_GRAM
+#ifdef CONFIG_DEBUG_GRAN
 #  define granerr                    _err
 #  define granwarn                   _warn
 #  define graninfo                   _info
