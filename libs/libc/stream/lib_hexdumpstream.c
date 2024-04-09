@@ -136,8 +136,8 @@ static int hexdumpstream_puts(FAR struct lib_outstream_s *self,
       ret = bin2hex(p, ret, stream->buffer + stream->pending,
                     (outlen - stream->pending) / 2);
 
-      p              += ret;
-      remain         -= ret;
+      p               += ret;
+      remain          -= ret;
       stream->pending += ret * 2;
 
       if (stream->pending == outlen)
@@ -181,6 +181,6 @@ void lib_hexdumpstream(FAR struct lib_hexdumpstream_s *stream,
   public->flush   = hexdumpstream_flush;
   public->nput    = 0;
 
-  stream->pending  = 0;
-  stream->backend  = backend;
+  stream->pending = 0;
+  stream->backend = backend;
 }
