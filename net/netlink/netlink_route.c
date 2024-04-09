@@ -663,15 +663,14 @@ static int netlink_get_nbtable(NETLINK_HANDLE handle,
  ****************************************************************************/
 
 #if defined(CONFIG_NET_IPv4) && !defined(CONFIG_NETLINK_DISABLE_GETROUTE)
-static int netlink_ipv4_route(FAR struct net_route_ipv4_s *route,
-                              FAR void *arg)
+static FAR struct netlink_response_s *
+netlink_get_ipv4_route(FAR const struct net_route_ipv4_s *route, int type,
+                       FAR const struct nlroute_sendto_request_s *req)
 {
   FAR struct getroute_recvfrom_ipv4resplist_s *alloc;
   FAR struct getroute_recvfrom_ipv4response_s *resp;
-  FAR struct nlroute_info_s *info;
 
-  DEBUGASSERT(route != NULL && arg != NULL);
-  info = (FAR struct nlroute_info_s *)arg;
+  DEBUGASSERT(route != NULL);
 
   /* Allocate the response */
 
@@ -679,19 +678,19 @@ static int netlink_ipv4_route(FAR struct net_route_ipv4_s *route,
     kmm_zalloc(sizeof(struct getroute_recvfrom_ipv4resplist_s));
   if (alloc == NULL)
     {
-      return -ENOMEM;
+      return NULL;
     }
 
   /* Format the response */
 
   resp                  = &alloc->payload;
   resp->hdr.nlmsg_len   = sizeof(struct getroute_recvfrom_ipv4response_s);
-  resp->hdr.nlmsg_type  = RTM_NEWROUTE;
-  resp->hdr.nlmsg_flags = info->req->hdr.nlmsg_flags;
-  resp->hdr.nlmsg_seq   = info->req->hdr.nlmsg_seq;
-  resp->hdr.nlmsg_pid   = info->req->hdr.nlmsg_pid;
+  resp->hdr.nlmsg_type  = type;
+  resp->hdr.nlmsg_flags = req ? req->hdr.nlmsg_flags : 0;
+  resp->hdr.nlmsg_seq   = req ? req->hdr.nlmsg_seq : 0;
+  resp->hdr.nlmsg_pid   = req ? req->hdr.nlmsg_pid : 0;
 
-  resp->rte.rtm_family   = info->req->gen.rtgen_family;
+  resp->rte.rtm_family   = AF_INET;
   resp->rte.rtm_table    = RT_TABLE_MAIN;
   resp->rte.rtm_protocol = RTPROT_STATIC;
   resp->rte.rtm_scope    = RT_SCOPE_SITE;
@@ -708,15 +707,39 @@ static int netlink_ipv4_route(FAR struct net_route_ipv4_s *route,
   resp->gateway.attr.rta_type = RTA_GATEWAY;
   resp->gateway.addr          = route->router;
 
+  return (FAR struct netlink_response_s *)alloc;
+}
+
+/****************************************************************************
+ * Name: netlink_ipv4route_callback
+ *
+ * Input Parameters:
+ *   route - The entry of IPV4 routing table.
+ *   arg   - The netlink info of request.
+ *
+ ****************************************************************************/
+
+static int netlink_ipv4route_callback(FAR struct net_route_ipv4_s *route,
+                                      FAR void *arg)
+{
+  FAR struct nlroute_info_s *info = arg;
+  FAR struct netlink_response_s *resp;
+
+  resp = netlink_get_ipv4_route(route, RTM_NEWROUTE, info->req);
+  if (resp == NULL)
+    {
+      return -ENOENT;
+    }
+
   /* Finally, add the response to the list of pending responses */
 
-  netlink_add_response(info->handle, (FAR struct netlink_response_s *)alloc);
+  netlink_add_response(info->handle, resp);
   return OK;
 }
 #endif
 
 /****************************************************************************
- * Name: netlink_get_ipv4route
+ * Name: netlink_list_ipv4_route
  *
  * Description:
  *   Dump a list of all network devices of the specified type.
@@ -724,7 +747,7 @@ static int netlink_ipv4_route(FAR struct net_route_ipv4_s *route,
  ****************************************************************************/
 
 #if defined(CONFIG_NET_IPv4) && !defined(CONFIG_NETLINK_DISABLE_GETROUTE)
-static int netlink_get_ipv4route(NETLINK_HANDLE handle,
+static int netlink_list_ipv4_route(NETLINK_HANDLE handle,
                               FAR const struct nlroute_sendto_request_s *req)
 {
   struct nlroute_info_s info;
@@ -735,7 +758,7 @@ static int netlink_get_ipv4route(NETLINK_HANDLE handle,
   info.handle = handle;
   info.req    = req;
 
-  ret = net_foreachroute_ipv4(netlink_ipv4_route, &info);
+  ret = net_foreachroute_ipv4(netlink_ipv4route_callback, &info);
   if (ret < 0)
     {
       return ret;
@@ -748,7 +771,7 @@ static int netlink_get_ipv4route(NETLINK_HANDLE handle,
 #endif
 
 /****************************************************************************
- * Name: netlink_ipv6_route
+ * Name: netlink_get_ipv6_route
  *
  * Description:
  *   Dump a list of all network devices of the specified type.
@@ -756,15 +779,14 @@ static int netlink_get_ipv4route(NETLINK_HANDLE handle,
  ****************************************************************************/
 
 #if defined(CONFIG_NET_IPv6) && !defined(CONFIG_NETLINK_DISABLE_GETROUTE)
-static int netlink_ipv6_route(FAR struct net_route_ipv6_s *route,
-                              FAR void *arg)
+static FAR struct netlink_response_s *
+netlink_get_ipv6_route(FAR const struct net_route_ipv6_s *route, int type,
+                       FAR const struct nlroute_sendto_request_s *req)
 {
   FAR struct getroute_recvfrom_ipv6resplist_s *alloc;
   FAR struct getroute_recvfrom_ipv6response_s *resp;
-  FAR struct nlroute_info_s *info;
 
-  DEBUGASSERT(route != NULL && arg != NULL);
-  info = (FAR struct nlroute_info_s *)arg;
+  DEBUGASSERT(route != NULL);
 
   /* Allocate the response */
 
@@ -772,19 +794,19 @@ static int netlink_ipv6_route(FAR struct net_route_ipv6_s *route,
     kmm_zalloc(sizeof(struct getroute_recvfrom_ipv6resplist_s));
   if (alloc == NULL)
     {
-      return -ENOMEM;
+      return NULL;
     }
 
   /* Format the response */
 
   resp                  = &alloc->payload;
   resp->hdr.nlmsg_len   = sizeof(struct getroute_recvfrom_ipv6response_s);
-  resp->hdr.nlmsg_type  = RTM_NEWROUTE;
-  resp->hdr.nlmsg_flags = info->req->hdr.nlmsg_flags;
-  resp->hdr.nlmsg_seq   = info->req->hdr.nlmsg_seq;
-  resp->hdr.nlmsg_pid   = info->req->hdr.nlmsg_pid;
+  resp->hdr.nlmsg_type  = type;
+  resp->hdr.nlmsg_flags = req ? req->hdr.nlmsg_flags : 0;
+  resp->hdr.nlmsg_seq   = req ? req->hdr.nlmsg_seq : 0;
+  resp->hdr.nlmsg_pid   = req ? req->hdr.nlmsg_pid : 0;
 
-  resp->rte.rtm_family   = info->req->gen.rtgen_family;
+  resp->rte.rtm_family   = AF_INET6;
   resp->rte.rtm_table    = RT_TABLE_MAIN;
   resp->rte.rtm_protocol = RTPROT_STATIC;
   resp->rte.rtm_scope    = RT_SCOPE_SITE;
@@ -801,9 +823,37 @@ static int netlink_ipv6_route(FAR struct net_route_ipv6_s *route,
   resp->gateway.attr.rta_type = RTA_GATEWAY;
   net_ipv6addr_copy(resp->gateway.addr, route->router);
 
+  return (FAR struct netlink_response_s *)alloc;
+}
+
+/****************************************************************************
+ * Name: netlink_ipv6route_callback
+ *
+ * Description:
+ *   Response netlink message from ipv6 route list.
+ *
+ * Input Parameters:
+ *   route - The entry of IPV6 routing table.
+ *   arg   - The netlink info of request.
+ *
+ ****************************************************************************/
+
+static int netlink_ipv6route_callback(FAR struct net_route_ipv6_s *route,
+                                      FAR void *arg)
+{
+  FAR struct nlroute_info_s *info = arg;
+  FAR struct netlink_response_s *resp;
+
+  resp = netlink_get_ipv6_route(route, RTM_NEWROUTE, info->req);
+  if (resp == NULL)
+    {
+      return -ENOENT;
+    }
+
   /* Finally, add the response to the list of pending responses */
 
-  netlink_add_response(info->handle, (FAR struct netlink_response_s *)alloc);
+  netlink_add_response(info->handle, resp);
+
   return OK;
 }
 #endif
@@ -817,7 +867,7 @@ static int netlink_ipv6_route(FAR struct net_route_ipv6_s *route,
  ****************************************************************************/
 
 #if defined(CONFIG_NET_IPv6) && !defined(CONFIG_NETLINK_DISABLE_GETROUTE)
-static int netlink_get_ipv6route(NETLINK_HANDLE handle,
+static int netlink_list_ipv6_route(NETLINK_HANDLE handle,
                               FAR const struct nlroute_sendto_request_s *req)
 {
   struct nlroute_info_s info;
@@ -828,7 +878,7 @@ static int netlink_get_ipv6route(NETLINK_HANDLE handle,
   info.handle = handle;
   info.req    = req;
 
-  ret = net_foreachroute_ipv6(netlink_ipv6_route, &info);
+  ret = net_foreachroute_ipv6(netlink_ipv6route_callback, &info);
   if (ret < 0)
     {
       return ret;
@@ -1211,14 +1261,14 @@ ssize_t netlink_route_sendto(NETLINK_HANDLE handle,
 #ifdef CONFIG_NET_IPv4
         if (req->gen.rtgen_family == AF_INET)
           {
-            ret = netlink_get_ipv4route(handle, req);
+            ret = netlink_list_ipv4_route(handle, req);
           }
         else
 #endif
 #ifdef CONFIG_NET_IPv6
         if (req->gen.rtgen_family == AF_INET6)
           {
-            ret = netlink_get_ipv6route(handle, req);
+            ret = netlink_list_ipv6_route(handle, req);
           }
         else
 #endif
@@ -1382,6 +1432,59 @@ void netlink_device_notify_ipaddr(FAR struct net_driver_s *dev,
           return;
         }
 
+      netlink_add_broadcast(group, resp);
+      netlink_add_terminator(NULL, NULL, group);
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: netlink_route_notify
+ *
+ * Description:
+ *   Perform the route broadcast for the NETLINK_NETFILTER protocol.
+ *
+ * Input Parameters:
+ *   route  - The route entry
+ *   type   - The type of the message, RTM_*ROUTE
+ *   domain - The domain of the message
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_NETLINK_DISABLE_GETROUTE
+void netlink_route_notify(FAR const void *route, int type, int domain)
+{
+  FAR struct netlink_response_s *resp;
+  int group;
+
+  DEBUGASSERT(route != NULL);
+
+#ifdef CONFIG_NET_IPv4
+  if (domain == AF_INET)
+    {
+      resp = netlink_get_ipv4_route((FAR struct net_route_ipv4_s *)route,
+                                    type, NULL);
+      group = RTNLGRP_IPV4_ROUTE;
+    }
+  else
+#endif
+#ifdef CONFIG_NET_IPv6
+  if (domain == AF_INET6)
+    {
+      resp = netlink_get_ipv6_route((FAR struct net_route_ipv6_s *)route,
+                                    type, NULL);
+      group = RTNLGRP_IPV6_ROUTE;
+    }
+    else
+#endif
+    {
+      nwarn("netlink_route_notify unknown type %d domain %d\n",
+            type, domain);
+      return;
+    }
+
+  if (resp != NULL)
+    {
       netlink_add_broadcast(group, resp);
       netlink_add_terminator(NULL, NULL, group);
     }
