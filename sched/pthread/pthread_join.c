@@ -89,26 +89,14 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
       ret = pthread_findjoininfo(group, (pid_t)thread, &join, false);
       if (ret == OK)
         {
-          /* If the task is terminated, maintain the same behavior as Linux:
-           * 1. Join detached task will always return EINVAL.
-           * 2. Other threads will destroy the join information after
-           *    obtain the exit value, ESRCH will return if calling
-           *    pthread_join() again
-           */
+          /* Destroy the join information after obtain the exit value */
 
-          if (join->detached)
+          if (pexit_value != NULL)
             {
-              ret = EINVAL;
+              *pexit_value = join->exit_value;
             }
-          else
-            {
-              if (pexit_value != NULL)
-                {
-                  *pexit_value = join->exit_value;
-                }
 
-              pthread_destroyjoin(group, join);
-            }
+          pthread_destroyjoin(group, join);
         }
       else
         {

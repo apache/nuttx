@@ -95,12 +95,12 @@ int pthread_completejoin(pid_t pid, FAR void *exit_value)
           nxsem_post(&wtcb->join_sem);
         }
     }
-  else if (!sq_is_singular(&tcb->group->tg_members))
+  else if (!sq_is_singular(&tcb->group->tg_members) &&
+           (tcb->flags & TCB_FLAG_DETACHED) == 0)
     {
       ret = pthread_findjoininfo(tcb->group, pid, &join, true);
       if (ret == OK)
         {
-          join->detached = !!(tcb->flags & TCB_FLAG_DETACHED);
           join->exit_value = exit_value;
         }
     }

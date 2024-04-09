@@ -397,7 +397,6 @@ struct task_join_s
 {
   sq_entry_t     entry;                  /* Implements link list            */
   pid_t          pid;                    /* Includes pid                    */
-  bool           detached;               /* true: pthread_detached'ed       */
   pthread_addr_t exit_value;             /* Returned data                   */
 };
 
