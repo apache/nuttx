@@ -264,7 +264,11 @@
 
 /* The nooptimiziation_function attribute no optimize */
 
-#  define nooptimiziation_function __attribute__((optimize(0)))
+#  if defined(__clang__)
+#    define nooptimiziation_function __attribute__((optnone))
+#  else
+#    define nooptimiziation_function __attribute__((optimize("O0")))
+#  endif
 
 /* The nosanitize_address attribute informs GCC don't sanitize it */
 
