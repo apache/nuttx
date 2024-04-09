@@ -360,7 +360,8 @@ static void ipv4_nat_entry_delete(FAR struct ipv4_nat_entry *entry)
                                         entry->external_port,
                                         entry->protocol));
   hashtable_delete(g_table_outbound, &entry->hash_outbound,
-                   ipv4_nat_outbound_key(entry->local_ip, entry->local_port,
+                   ipv4_nat_outbound_key(entry->local_ip,
+                                         entry->local_port,
                                          entry->protocol));
 
   kmm_free(entry);

@@ -140,17 +140,15 @@ static inline uint8_t ipv4_nat_l4_hdrlen(uint8_t proto)
  * Input Parameters:
  *   ipv4       - Points to the IPv4 header to adjust.
  *   l4chksum   - Points to the L4 checksum to adjust, NULL for not adjust.
+ *   old_ip     - The IP to be set.
  *   new_ip     - The IP to set into header.
- *   manip_type - Whether manipulate source ip or destination ip.
  *
  ****************************************************************************/
 
 static void ipv4_nat_ip_adjust(FAR struct ipv4_hdr_s *ipv4,
-                               FAR uint16_t *l4chksum, in_addr_t new_ip,
-                               enum nat_manip_type_e manip_type)
+                               FAR uint16_t *l4chksum, FAR uint16_t *old_ip,
+                               in_addr_t new_ip)
 {
-  FAR uint16_t *old_ip = MANIP_IPADDR(ipv4, manip_type);
-
   if (l4chksum != NULL)
     {
       chksum_adjust(l4chksum, old_ip, &new_ip, sizeof(new_ip));
@@ -231,7 +229,7 @@ ipv4_nat_inbound_tcp(FAR struct ipv4_hdr_s *ipv4,
    */
 
   ipv4_nat_port_adjust(&tcp->tcpchksum, external_port, entry->local_port);
-  ipv4_nat_ip_adjust(ipv4, &tcp->tcpchksum, entry->local_ip, manip_type);
+  ipv4_nat_ip_adjust(ipv4, &tcp->tcpchksum, external_ip, entry->local_ip);
 
   return entry;
 }
@@ -285,7 +283,7 @@ ipv4_nat_inbound_udp(FAR struct ipv4_hdr_s *ipv4,
   udpchksum = udp->udpchksum != 0 ? &udp->udpchksum : NULL;
 
   ipv4_nat_port_adjust(udpchksum, external_port, entry->local_port);
-  ipv4_nat_ip_adjust(ipv4, udpchksum, entry->local_ip, manip_type);
+  ipv4_nat_ip_adjust(ipv4, udpchksum, external_ip, entry->local_ip);
 
   return entry;
 }
@@ -317,16 +315,14 @@ ipv4_nat_inbound_icmp(FAR struct ipv4_hdr_s *ipv4,
                       enum nat_manip_type_e manip_type)
 {
   FAR struct icmp_hdr_s     *icmp = L4_HDR(ipv4);
-  FAR uint16_t              *external_ip;
-  FAR uint16_t              *peer_ip;
+  FAR uint16_t              *external_ip = MANIP_IPADDR(ipv4, manip_type);
+  FAR uint16_t              *peer_ip     = PEER_IPADDR(ipv4, manip_type);
   FAR struct ipv4_nat_entry *entry;
 
   switch (icmp->type)
     {
       case ICMP_ECHO_REQUEST:
       case ICMP_ECHO_REPLY:
-        external_ip = MANIP_IPADDR(ipv4, manip_type);
-        peer_ip     = PEER_IPADDR(ipv4, manip_type);
         entry = ipv4_nat_inbound_entry_find(IP_PROTO_ICMP,
                                             net_ip4addr_conv32(external_ip),
                                             icmp->id,
@@ -339,7 +335,7 @@ ipv4_nat_inbound_icmp(FAR struct ipv4_hdr_s *ipv4,
 
         ipv4_nat_port_adjust(&icmp->icmpchksum,
                              &icmp->id, entry->local_port);
-        ipv4_nat_ip_adjust(ipv4, NULL, entry->local_ip, manip_type);
+        ipv4_nat_ip_adjust(ipv4, NULL, external_ip, entry->local_ip);
         return entry;
 
       case ICMP_DEST_UNREACHABLE:
@@ -397,7 +393,7 @@ ipv4_nat_inbound_icmp(FAR struct ipv4_hdr_s *ipv4,
 
             /* Adjust outer IP */
 
-            ipv4_nat_ip_adjust(ipv4, NULL, entry->local_ip, manip_type);
+            ipv4_nat_ip_adjust(ipv4, NULL, external_ip, entry->local_ip);
 
             /* Recalculate ICMP checksum, we only need to re-calc data in L4
              * header, because the inner IPv4 header's checksum is updated,
@@ -453,7 +449,7 @@ ipv4_nat_outbound_tcp(FAR struct net_driver_s *dev,
   entry = ipv4_nat_outbound_entry_find(dev, IP_PROTO_TCP,
               net_ip4addr_conv32(local_ip), *local_port,
               net_ip4addr_conv32(peer_ip), *peer_port,
-              (manip_type == NAT_MANIP_SRC));
+              manip_type == NAT_MANIP_SRC);
   if (!entry)
     {
       return NULL;
@@ -465,7 +461,7 @@ ipv4_nat_outbound_tcp(FAR struct net_driver_s *dev,
    */
 
   ipv4_nat_port_adjust(&tcp->tcpchksum, local_port, entry->external_port);
-  ipv4_nat_ip_adjust(ipv4, &tcp->tcpchksum, entry->external_ip, manip_type);
+  ipv4_nat_ip_adjust(ipv4, &tcp->tcpchksum, local_ip, entry->external_ip);
 
   return entry;
 }
@@ -510,7 +506,7 @@ ipv4_nat_outbound_udp(FAR struct net_driver_s *dev,
   entry = ipv4_nat_outbound_entry_find(dev, IP_PROTO_UDP,
               net_ip4addr_conv32(local_ip), *local_port,
               net_ip4addr_conv32(peer_ip), *peer_port,
-              (manip_type == NAT_MANIP_SRC));
+              manip_type == NAT_MANIP_SRC);
   if (!entry)
     {
       return NULL;
@@ -521,7 +517,7 @@ ipv4_nat_outbound_udp(FAR struct net_driver_s *dev,
   udpchksum = udp->udpchksum != 0 ? &udp->udpchksum : NULL;
 
   ipv4_nat_port_adjust(udpchksum, local_port, entry->external_port);
-  ipv4_nat_ip_adjust(ipv4, udpchksum, entry->external_ip, manip_type);
+  ipv4_nat_ip_adjust(ipv4, udpchksum, local_ip, entry->external_ip);
 
   return entry;
 }
@@ -570,7 +566,7 @@ ipv4_nat_outbound_icmp(FAR struct net_driver_s *dev,
         entry = ipv4_nat_outbound_entry_find(dev, IP_PROTO_ICMP,
                     net_ip4addr_conv32(local_ip), icmp->id,
                     net_ip4addr_conv32(peer_ip), icmp->id,
-                    (manip_type == NAT_MANIP_SRC));
+                    manip_type == NAT_MANIP_SRC);
         if (!entry)
           {
             return NULL;
@@ -578,7 +574,7 @@ ipv4_nat_outbound_icmp(FAR struct net_driver_s *dev,
 
         ipv4_nat_port_adjust(&icmp->icmpchksum,
                              &icmp->id, entry->external_port);
-        ipv4_nat_ip_adjust(ipv4, NULL, entry->external_ip, manip_type);
+        ipv4_nat_ip_adjust(ipv4, NULL, local_ip, entry->external_ip);
         return entry;
 
       case ICMP_DEST_UNREACHABLE:
@@ -636,7 +632,7 @@ ipv4_nat_outbound_icmp(FAR struct net_driver_s *dev,
 
             /* Adjust outer IP */
 
-            ipv4_nat_ip_adjust(ipv4, NULL, entry->external_ip, manip_type);
+            ipv4_nat_ip_adjust(ipv4, NULL, local_ip, entry->external_ip);
 
             /* Recalculate ICMP checksum, we only need to re-calc data in L4
              * header, because the inner IPv4 header's checksum is updated,
