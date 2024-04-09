@@ -243,6 +243,16 @@ struct lib_hexdumpstream_s
   char                        buffer[CONFIG_STREAM_HEXDUMP_BUFFER_SIZE + 1];
 };
 
+struct lib_base64outstream_s
+{
+  struct lib_outstream_s      common;
+  FAR struct lib_outstream_s *backend;
+  int                         pending;
+  unsigned char               bytes[3];
+  int                         nbytes;
+  char                        buffer[CONFIG_STREAM_BASE64_BUFFER_SIZE + 1];
+};
+
 /* This is a special stream that does buffered character I/O.  NOTE that is
  * CONFIG_SYSLOG_BUFFER is not defined, it is the same as struct
  * lib_outstream_s
@@ -445,6 +455,25 @@ void lib_bufferedoutstream(FAR struct lib_bufferedoutstream_s *stream,
 
 void lib_hexdumpstream(FAR struct lib_hexdumpstream_s *stream,
                        FAR struct lib_outstream_s *backend);
+
+/****************************************************************************
+ * Name: lib_base64stream
+ *
+ * Description:
+ *   Convert binary stream to base64 and redirect to syslog
+ *
+ * Input Parameters:
+ *   stream    - User allocated, uninitialized instance of struct
+ *               lib_base64stream_s to be initialized.
+ *   backend   - Stream backend port.
+ *
+ * Returned Value:
+ *   None (User allocated instance initialized).
+ *
+ ****************************************************************************/
+
+void lib_base64outstream(FAR struct lib_base64outstream_s *stream,
+                         FAR struct lib_outstream_s *backend);
 
 /****************************************************************************
  * Name: lib_lowoutstream
