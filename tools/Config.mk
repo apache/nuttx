@@ -659,7 +659,7 @@ endef
 
 # CLEAN - Default clean target
 
-ifeq ($(CONFIG_ARCH_COVERAGE),y)
+ifeq ($(CONFIG_SCHED_GCOV),y)
 	EXTRA = *.gcno *.gcda
 endif
 
