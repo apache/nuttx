@@ -71,16 +71,14 @@ int pthread_detach(pthread_t thread)
   nxrmutex_lock(&group->tg_joinlock);
 
   tcb = nxsched_get_tcb((pid_t)thread);
-  if (tcb == NULL)
+  if (tcb == NULL || (tcb->flags & TCB_FLAG_JOIN_COMPLETED) != 0)
     {
-      /* If tcb has been destroyed, update the pending join
-       * status in the group.
-       */
+      /* Destroy the join information */
 
       ret = pthread_findjoininfo(group, (pid_t)thread, &join, false);
       if (ret == OK)
         {
-          join->detached = true;
+          pthread_destroyjoin(group, join);
         }
       else
         {
