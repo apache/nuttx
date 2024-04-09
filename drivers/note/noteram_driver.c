@@ -101,6 +101,7 @@ struct noteram_dump_cpu_context_s
 struct noteram_dump_context_s
 {
   struct noteram_dump_cpu_context_s cpu[NCPUS];
+  unsigned int mode;
 };
 
 /****************************************************************************
@@ -453,30 +454,39 @@ static ssize_t noteram_read(FAR struct file *filep, FAR char *buffer,
   FAR struct noteram_driver_s *drv = filep->f_inode->i_private;
   FAR struct lib_memoutstream_s stream;
   ssize_t ret;
+  irqstate_t flags;
 
-  lib_memoutstream(&stream, buffer, buflen);
-
-  do
+  if (ctx->mode == NOTERAM_MODE_READ_BINARY)
     {
-      irqstate_t flags;
-      uint8_t note[256];
-
-      /* Get the next note (removing it from the buffer) */
-
       flags = spin_lock_irqsave_wo_note(&drv->lock);
-      ret = noteram_get(drv, note, sizeof(note));
+      ret = noteram_get(drv, (FAR uint8_t *)buffer, buflen);
       spin_unlock_irqrestore_wo_note(&drv->lock, flags);
-      if (ret <= 0)
-        {
-          return ret;
-        }
-
-      /* Parse notes into text format */
-
-      ret = noteram_dump_one(note, (FAR struct lib_outstream_s *)&stream,
-                             ctx);
     }
-  while (ret == 0);
+  else
+    {
+      lib_memoutstream(&stream, buffer, buflen);
+
+      do
+        {
+          uint8_t note[256];
+
+          /* Get the next note (removing it from the buffer) */
+
+          flags = spin_lock_irqsave_wo_note(&drv->lock);
+          ret = noteram_get(drv, note, sizeof(note));
+          spin_unlock_irqrestore_wo_note(&drv->lock, flags);
+          if (ret <= 0)
+            {
+              return ret;
+            }
+
+          /* Parse notes into text format */
+
+          ret = noteram_dump_one(note, (FAR struct lib_outstream_s *)&stream,
+                                 ctx);
+        }
+      while (ret == 0);
+    }
 
   return ret;
 }
@@ -535,6 +545,44 @@ static int noteram_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         else
           {
             drv->ni_overwrite = *(FAR unsigned int *)arg;
+            ret = OK;
+          }
+        break;
+
+      /* NOTERAM_GETREADMODE
+       *      - Get read mode
+       *        Argument: A writable pointer to unsigned int
+       */
+
+      case NOTERAM_GETREADMODE:
+        if (arg == 0)
+          {
+            ret = -EINVAL;
+          }
+        else
+          {
+            FAR struct noteram_dump_context_s *ctx = filep->f_priv;
+
+            *(FAR unsigned int *)arg = ctx->mode;
+            ret = OK;
+          }
+        break;
+
+      /* NOTERAM_SETREADMODE
+       *      - Set read mode
+       *        Argument: A read-only pointer to unsigned int
+       */
+
+      case NOTERAM_SETREADMODE:
+        if (arg == 0)
+          {
+            ret = -EINVAL;
+          }
+        else
+          {
+            FAR struct noteram_dump_context_s *ctx = filep->f_priv;
+
+            ctx->mode = *(FAR unsigned int *)arg;
             ret = OK;
           }
         break;
