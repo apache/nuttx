@@ -309,25 +309,6 @@ config ARCH_SIZET_LONG
 		C++ library routines because the NuttX size_t might not have
 		the same underlying type as your toolchain's size_t.
 
-config ARCH_COVERAGE
-	bool "Enable code coverage analysis"
-	select HAVE_CXXINITIALIZE
-	default n
-	---help---
-		Generate code coverage
-
-config ARCH_COVERAGE_ALL
-	bool "Enable code coverage for the entire image"
-	depends on ARCH_COVERAGE
-	default n
-	---help---
-		This option activates code coverage instrumentation for the
-		entire image. If you don't enable this option, you have to
-		explicitly specify "-fprofile-generate -ftest-coverage" for
-		the files/directories you want to check. Enabling this option
-		will get image size increased and performance decreased
-		significantly.
-
 config ARCH_INSTRUMENT_ALL
 	bool "Instrument All"
 	default n

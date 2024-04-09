@@ -158,7 +158,7 @@ if(${CONFIG_STACK_USAGE_WARNING})
   endif()
 endif()
 
-if(CONFIG_ARCH_COVERAGE)
+if(CONFIG_SCHED_GCOV)
   add_compile_options(-fprofile-generate -ftest-coverage)
 endif()
 

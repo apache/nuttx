@@ -90,6 +90,14 @@ config SIM_UBSAN_DUMMY
 	---help---
 		Keep SIM_UBSAN compile time but disable runtime actions.
 
+config SIM_GCOV_ALL
+	bool "Enable code coverage for the entire image"
+	depends on COVERAGE
+	default n
+	---help---
+		This option activates code coverage instrumentation for the
+		entire image.
+
 choice
 	prompt "X64_64 ABI"
 	default SIM_X8664_SYSTEMV if HOST_LINUX

@@ -66,10 +66,6 @@ ifeq ($(CONFIG_STACK_CANARIES),y)
   ARCHOPTIMIZATION += -fstack-protector-all
 endif
 
-ifeq ($(CONFIG_ARCH_COVERAGE_ALL),y)
-  ARCHOPTIMIZATION += -fprofile-generate -ftest-coverage
-endif
-
 ifeq ($(CONFIG_MM_UBSAN_ALL),y)
   ARCHOPTIMIZATION += $(CONFIG_MM_UBSAN_OPTION)
 endif
@@ -196,6 +192,6 @@ ifeq ($(CONFIG_LIBSUPCXX),y)
   EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a))
 endif
 
-ifeq ($(CONFIG_ARCH_COVERAGE),y)
+ifeq ($(CONFIG_SCHED_GCOV),y)
   EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libgcov.a))
 endif
