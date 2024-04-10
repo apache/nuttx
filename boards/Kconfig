@@ -4666,6 +4666,13 @@ config BOARD_COREDUMP_COMPRESSION
 	---help---
 		Enable LZF compression algorithm for core dump content
 
+config BOARD_COREDUMP_BASE64STREAM
+	bool "Enable base64 encoding for output stream"
+	default n
+	depends on BOARD_COREDUMP_SYSLOG
+	---help---
+		Enable based64 encoded stream instead of default hexstream.
+
 config BOARD_ENTROPY_POOL
 	bool "Enable Board level storing of entropy pool structure"
 	default n
@@ -4890,4 +4897,3 @@ config BOARD_MEMORY_RANGE
 		end: end address of memory range
 		flags: Readable 0x1, writable 0x2, executable 0x4
 		example:0x1000,0x2000,0x1,0x2000,0x3000,0x3,0x3000,0x4000,0x7
-
