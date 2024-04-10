@@ -33,8 +33,8 @@ EK-TM4C1294XL and DK-TM4C129X
   from the DK-T4C129X. Refer to the following README files for additional
   information that may be relevant to this board as well:
 
-    boards/arm/tiva/tm4c1294-launchpad/README.txt
-    boards/arm/tiva/dk-tm4c129x/README.txt
+    Documentation/platforms/arm/tiva/boards/tm4c1294-launchpad/README.txt
+    Documentation/platforms/arm/tiva/boards/dk-tm4c129x/README.txt
 
 Status
 ======

@@ -14,7 +14,7 @@ Where the reference line is:
 
 No workaround is known at this time. This is a show stopper for M16C.
 Refer to the NuttX board
-`README <https://github.com/apache/nuttx/blob/master/boards/renesas/m16c/skp16c26/README.txt>`__
+`README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/renesas/m16c/boards/skp16c26/README.txt>`__
 file for further information.
 
 Supported Boards

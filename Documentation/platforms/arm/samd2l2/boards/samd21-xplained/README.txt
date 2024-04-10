@@ -27,7 +27,7 @@ Contents
 STATUS/ISSUES
 =============
 
-    1. See boards/arm/samd2l2/samd20-xplained/README.txt.
+    1. See Documentation/platforms/arm/samd2l2/boards/samd20-xplained/README.txt.
        This port derives from the SAMD20 Xplained board board and all issues
        there should apply.
 

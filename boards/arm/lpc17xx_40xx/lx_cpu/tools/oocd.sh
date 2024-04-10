@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# See boards/arm/lpc17xx_40xx/lx_cpu/README.txt for information about
+# See Documentation/platforms/arm/lpc40xx/boards/lx_cpu/README.txt for information about
 # this file.
 
 TOPDIR=$1

@@ -28,7 +28,7 @@ The basic, port was be released in NuttX-5.13. A complete port will
 include drivers for additional AVR32 UC3 devices -- like SPI and USB ---
 and will be available in a later release, time permitting. Refer to the
 NuttX board
-`README <https://github.com/apache/nuttx/blob/master/boards/avr/at32uc3/avr32dev1/README.txt>`__
+`README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/avr/at32uc3/boards/avr32dev1/README.txt>`__
 file for further information.
 
 Supported Boards

@@ -13,7 +13,7 @@ examples under QEMU. The port is reported to be functional on the
 Lizhuoyi contributed additional keyboard and VGA drivers. This is a
 great, stable starting point for anyone interested in fleshing out the
 x86 port! Refer to the NuttX
-`README <https://github.com/apache/nuttx/blob/master/boards/x86/qemu/qemu-i486/README.txt>`__
+`README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/x86/qemu/boards/qemu-i486/README.txt>`__
 file for further information.
 
 Supported Boards

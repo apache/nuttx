@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# See boards/arm/lpc214x/zp214xpa/README.txt for information about
+# See Documentation/platforms/arm/lpc214x/boards/zp214xpa/README.txt for information about
 # this file.
 
 TOPDIR=$1

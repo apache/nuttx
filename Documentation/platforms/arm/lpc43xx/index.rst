@@ -12,7 +12,7 @@ website <http://shop.ngxtechnologies.com/product_info.php?cPath=21_37&products_i
 for further information about this board.
 
 -  **STATUS:** Refer to the NuttX board
-   `README <https://github.com/apache/nuttx/blob/master/boards/arm/lpc43xx/lpc4330-xplorer/README.txt>`__
+   `README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/lpc43xx/boards/lpc4330-xplorer/README.txt>`__
    file for more detailed information about this port.
 
 -  **NuttX-6.20** The basic LPC4330-Xplorer port is complete. The basic
@@ -28,7 +28,7 @@ website <http://www.nxp.com/news/news-archive/2013/nxp-development-kit-based-on-
 for more detailed information about the LPC4357 and the LPC4357-EVB.
 
 -  **STATUS:** Refer to the NuttX board
-   `README <https://github.com/apache/nuttx/blob/master/boards/arm/lpc43xx/lpc4357-evb/README.txt>`__
+   `README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/lpc43xx/boards/lpc4357-evb/README.txt>`__
    file for more detailed information about this port.
 
 -  **NuttX-7.6**. The basic port is was contributed by Toby Duckworth.
@@ -42,7 +42,7 @@ for more detailed information about the LPC4357 and the LPC4357-EVB.
 development board featuring the NXP LPC4370FET100 MCU.
 
 -  **STATUS:** Refer to the NuttX board
-   `README <https://github.com/apache/nuttx/blob/master/boards/arm/lpc43xx/lpc4370-link2/README.txt>`__
+   `README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/lpc43xx/boards/lpc4370-link2/README.txt>`__
    file for more detailed information about this port.
 
 -  **NuttX-7.12** The NXP LPC4370-Link2 port is was contributed by Lok
@@ -52,7 +52,7 @@ development board featuring the NXP LPC4370FET100 MCU.
 LPC4337-WS development board featuring the NXP LPC4337JBD144 MCU.
 
 -  **STATUS:** Refer to the NuttX board
-   `README <https://github.com/apache/nuttx/blob/master/boards/arm/lpc43xx/lpc4337-ws/README.txt>`__
+   `README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/lpc43xx/boards/lpc4337-ws/README.txt>`__
    file for more detailed information about this port.
 
 -  **NuttX-7.14** The NXP WaveShare LPC4337-WS port is was contributed

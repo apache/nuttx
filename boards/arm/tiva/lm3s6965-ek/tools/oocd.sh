@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# See boards/arm/tiva/lm3s6965-ek/README.txt for information about
+# See Documentation/platforms/arm/tiva/boards/lm3s6965-ek/README.txt for information about
 # this file.
 
 TOPDIR=$1
