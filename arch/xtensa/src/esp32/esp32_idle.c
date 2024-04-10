@@ -219,7 +219,6 @@ static void esp32_idlepm(void)
             esp32_pmsleep(CONFIG_PM_SLEEP_WAKEUP_SEC * 1000000 +
                                 CONFIG_PM_SLEEP_WAKEUP_NSEC / 1000);
           }
-          break;
 
         default:
           break;
@@ -227,13 +226,6 @@ static void esp32_idlepm(void)
     }
   else
     {
-      if (oldstate == PM_NORMAL)
-        {
-          /* Relax normal operation */
-
-          pm_relax(PM_IDLE_DOMAIN, PM_NORMAL);
-        }
-
 #ifdef CONFIG_WATCHDOG
       /* Announce the power management state change to feed watchdog */
 

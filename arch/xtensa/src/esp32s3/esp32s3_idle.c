@@ -140,7 +140,6 @@ static void up_idlepm(void)
             esp32s3_pmsleep(CONFIG_PM_SLEEP_WAKEUP_SEC * 1000000 +
                             CONFIG_PM_SLEEP_WAKEUP_NSEC / 1000);
           }
-          break;
 
         default:
           break;
