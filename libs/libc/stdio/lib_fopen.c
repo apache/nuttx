@@ -105,6 +105,12 @@ FAR FILE *fdopen(int fd, FAR const char *mode)
       /* Initialize the mutex the manages access to the buffer */
 
       nxrmutex_init(&filep->fs_lock);
+
+#ifdef CONFIG_FDSAN
+      android_fdsan_exchange_owner_tag(fd, 0,
+          android_fdsan_create_owner_tag(ANDROID_FDSAN_OWNER_TYPE_FILE,
+                                        (uintptr_t)filep));
+#endif
     }
   else
     {
@@ -134,12 +140,6 @@ FAR FILE *fdopen(int fd, FAR const char *mode)
 
   filep->fs_cookie   = (FAR void *)(intptr_t)fd;
   filep->fs_oflags   = oflags;
-
-#ifdef CONFIG_FDSAN
-  android_fdsan_exchange_owner_tag(fd, 0,
-      android_fdsan_create_owner_tag(ANDROID_FDSAN_OWNER_TYPE_FILE,
-                                     (uintptr_t)filep));
-#endif
 
   /* Assign custom callbacks to NULL. */
 
