@@ -702,6 +702,6 @@ irqstate_t up_irq_enable(void)
 
   /* Read mstatus & set machine interrupt enable (MIE) in mstatus */
 
-  flags = READ_AND_SET_CSR(mstatus, MSTATUS_MIE);
+  flags = READ_AND_SET_CSR(CSR_MSTATUS, MSTATUS_MIE);
   return flags;
 }

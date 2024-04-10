@@ -224,8 +224,8 @@ static void configure_mpu(void)
 {
   /* Open everything for PMP */
 
-  WRITE_CSR(pmpaddr0, UINT64_C(~0));
-  WRITE_CSR(pmpcfg0, (PMPCFG_A_NAPOT | PMPCFG_R | PMPCFG_W | PMPCFG_X));
+  WRITE_CSR(CSR_PMPADDR0, UINT64_C(~0));
+  WRITE_CSR(CSR_PMPCFG0, (PMPCFG_A_NAPOT | PMPCFG_R | PMPCFG_W | PMPCFG_X));
 }
 
 /****************************************************************************

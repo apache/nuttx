@@ -47,13 +47,13 @@ __start:
 
   /* Disable all interrupts (i.e. timer, external) in mie */
 
-  csrw mie, zero
+  csrw CSR_MIE, zero
 
   /* Initialize the Machine Trap Vector */
 
   lui  t0, %hi(__trap_vec)
   addi t0, t0, %lo(__trap_vec)
-  csrw  mtvec, t0
+  csrw CSR_MTVEC, t0
 
   /* Jump to __litex_start */
 

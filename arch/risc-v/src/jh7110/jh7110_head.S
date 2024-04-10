@@ -92,7 +92,7 @@ real_start:
   /* If a0 (hartid) >= t1 (the number of CPUs), stop here */
 
   blt  a0, t1, 3f
-  csrw sie, zero
+  csrw CSR_SIE, zero
   wfi
 
 3:
@@ -127,10 +127,10 @@ real_start:
 
   /* Disable all interrupts (i.e. timer, external) in sie */
 
-  csrw	sie, zero
+  csrw CSR_SIE, zero
 
   la   t0, __trap_vec
-  csrw stvec, t0
+  csrw CSR_STVEC, t0
 
   /* Jump to jh7110_start */
 

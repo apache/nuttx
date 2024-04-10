@@ -44,7 +44,7 @@ __start:
   /* Preserve a1 as it contains the pointer to DTB */
   /* Load mhartid (cpuid) */
 
-  csrr a0, mhartid
+  csrr a0, CSR_MHARTID
 
   /* Set stack pointer to the idle thread stack */
 
@@ -64,7 +64,7 @@ __start:
   /* If a0 (mhartid) >= t1 (the number of CPUs), stop here */
 
   blt  a0, t1, 3f
-  csrw mie, zero
+  csrw CSR_MIE, zero
   wfi
 
 3:
@@ -99,10 +99,10 @@ __start:
 
   /* Disable all interrupts (i.e. timer, external) in mie */
 
-	csrw	mie, zero
+	csrw CSR_MIE, zero
 
   la   t0, __trap_vec
-  csrw mtvec, t0
+  csrw CSR_MTVEC, t0
 
   /* Jump to qemu_rv_start */
 

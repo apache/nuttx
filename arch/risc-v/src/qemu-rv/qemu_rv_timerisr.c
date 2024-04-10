@@ -75,7 +75,7 @@ static int qemu_rv_ssoft_interrupt(int irq, void *context, void *arg)
 {
   /* Cleaer Supervisor Software Interrupt */
 
-  CLEAR_CSR(sip, SIP_SSIP);
+  CLEAR_CSR(CSR_SIP, SIP_SSIP);
 
   if (g_stimer_pending)
     {
@@ -111,7 +111,7 @@ static void qemu_rv_reload_mtimecmp(void)
   uint64_t current;
   uint64_t next;
 
-  current = READ_CSR(time);
+  current = READ_CSR(CSR_TIME);
   next = current + TICK_COUNT;
   putreg64(next, QEMU_RV_CLINT_MTIMECMP);
 }
@@ -165,7 +165,7 @@ void up_mtimer_initialize(void)
 
   /* Set the irq stack base to mscratch */
 
-  WRITE_CSR(mscratch,
+  WRITE_CSR(CSR_MSCRATCH,
             irqstacktop - STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK));
 
   /* NOTE: we do not attach a handler for mtimer,
@@ -203,7 +203,7 @@ void qemu_rv_mtimer_interrupt(void)
     {
       /* Post Supervisor Software Interrupt */
 
-      SET_CSR(sip, SIP_SSIP);
+      SET_CSR(CSR_SIP, SIP_SSIP);
     }
 }
 
