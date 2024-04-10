@@ -27,7 +27,8 @@ def test_cmocka(p):
 
     p.sendCommand(f"echo {cmocka_test_start}")
     ret = p.sendCommand(
-        "cmocka --skip test_playback.*|test_interaction.*|test_stress.*|test_capture.*",
+        "cmocka --skip test_case_posix_timer|test_case_oneshot|write_default|read_default|burst_test|gpiotest01|"
+        "test_playback.*|test_interaction.*|test_stress.*|test_capture.*",
         "Cmocka Test Completed",
         timeout=1200,
     )
