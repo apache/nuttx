@@ -312,6 +312,8 @@ int mempool_init(FAR struct mempool_s *pool, FAR const char *name)
   mempool_procfs_register(&pool->procfs, name);
 #  ifdef CONFIG_MM_BACKTRACE_DEFAULT
   pool->procfs.backtrace = true;
+#  elif CONFIG_MM_BACKTRACE > 0
+  pool->procfs.backtrace = false;
 #  endif
 #endif
 
