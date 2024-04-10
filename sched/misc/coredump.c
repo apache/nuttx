@@ -39,7 +39,11 @@ static struct lib_lzfoutstream_s  g_lzfstream;
 
 #ifdef CONFIG_BOARD_COREDUMP_SYSLOG
 static struct lib_syslogstream_s  g_syslogstream;
+#  ifdef CONFIG_BOARD_COREDUMP_BASE64STREAM
+static struct lib_base64outstream_s g_base64stream;
+#  else
 static struct lib_hexdumpstream_s g_hexstream;
+#  endif
 #endif
 
 #ifdef CONFIG_BOARD_COREDUMP_BLKDEV
@@ -65,6 +69,7 @@ static const struct memory_region_s *g_regions;
 static void coredump_dump_syslog(pid_t pid)
 {
   FAR void *stream;
+  FAR const char *streamname;
   int logmask;
 
   logmask = setlogmask(LOG_ALERT);
@@ -75,8 +80,16 @@ static void coredump_dump_syslog(pid_t pid)
 
   lib_syslogstream(&g_syslogstream, LOG_EMERG);
   stream = &g_syslogstream;
+#ifdef CONFIG_BOARD_COREDUMP_BASE64STREAM
+  lib_base64outstream(&g_base64stream, stream);
+  stream = &g_base64stream;
+  streamname = "base64";
+#else
   lib_hexdumpstream(&g_hexstream, stream);
   stream = &g_hexstream;
+  streamname = "hex";
+#endif
+
 #  ifdef CONFIG_BOARD_COREDUMP_COMPRESSION
 
   /* Initialize LZF compression stream */
@@ -90,9 +103,10 @@ static void coredump_dump_syslog(pid_t pid)
   core_dump(g_regions, stream, pid);
 
 #  ifdef CONFIG_BOARD_COREDUMP_COMPRESSION
-  _alert("Finish coredump (Compression Enabled).\n");
+  _alert("Finish coredump (Compression Enabled). %s formatted\n",
+         streamname);
 #  else
-  _alert("Finish coredump.\n");
+  _alert("Finish coredump. %s formatted\n", streamname);
 #  endif
 
   setlogmask(logmask);
