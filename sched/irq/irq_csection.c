@@ -550,35 +550,6 @@ void leave_critical_section(irqstate_t flags)
               DEBUGASSERT(spin_is_locked(&g_cpu_irqlock) &&
                           (g_cpu_irqset & (1 << cpu)) != 0);
 
-              /* Check if releasing the lock held by this CPU will unlock the
-               * critical section.
-               */
-
-              if ((g_cpu_irqset & ~(1 << cpu)) == 0)
-                {
-                  /* Yes.. Check if there are pending tasks and that pre-
-                   * emption is also enabled.  This is necessary because we
-                   * may have deferred the nxsched_merge_pending() call in
-                   * sched_unlock() because we were within a critical
-                   * section then.
-                   */
-
-                  if (list_pendingtasks()->head != NULL &&
-                      !nxsched_islocked_global())
-                    {
-                      /* Release any ready-to-run tasks that have collected
-                       * in g_pendingtasks.  NOTE: This operation has a very
-                       * high likelihood of causing this task to be switched
-                       * out!
-                       */
-
-                      if (nxsched_merge_pending())
-                        {
-                          up_switch_context(this_task(), rtcb);
-                        }
-                    }
-                }
-
               /* Now, possibly on return from a context switch, clear our
                * count on the lock.  If all CPUs have released the lock,
                * then unlock the global IRQ spinlock.
