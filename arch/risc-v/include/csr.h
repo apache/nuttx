@@ -286,16 +286,23 @@
 
 /* Debug/Trace Registers */
 
-#define CSR_TSELECT         0x7a0
-#define CSR_TDATA1          0x7a1
-#define CSR_TDATA2          0x7a2
-#define CSR_TDATA3          0x7a3
+#define CSR_TSELECT         0x7a0 /* Trigger Select */
+#define CSR_TDATA1          0x7a1 /* Trigger Data 1 */
+#define CSR_TDATA2          0x7a2 /* Trigger Data 2 */
+#define CSR_TDATA3          0x7a3 /* Trigger Data 3 */
+#define CSR_TINFO           0x7a4 /* Trigger Info */
+#define CSR_TCONTROL        0x7a5 /* Trigger Control */
+#define CSR_MCONTEXT        0x7a8 /* Machine Context */
+#define CSR_MSCONTEXT       0x7aa /* Machine Supervisor Context */
+#define CSR_SCONTEXT        0x5a8 /* Supervisor Context */
+#define CSR_HCONTEXT        0x5aa /* Hypervisor Context */
 
 /* Debug interface CSRs */
 
-#define CSR_DCSR            0x7b0
-#define CSR_DPC             0x7b1
-#define CSR_DSCRATCH        0x7b2
+#define CSR_DCSR            0x7b0 /* Debug Control and Status */
+#define CSR_DPC             0x7b1 /* Debug PC */
+#define CSR_DSCRATCH0       0x7b2 /* Debug Scratch 0 */
+#define CSR_DSCRATCH1       0x7b3 /* Debug Scratch 1 */
 
 /* In mstatus register */
 
