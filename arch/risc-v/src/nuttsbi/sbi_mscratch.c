@@ -77,7 +77,7 @@ void sbi_mscratch_assign(uintptr_t hartid)
   stack_top = (uintptr_t)&g_mintstacktop;
 #endif
 
-  WRITE_CSR(mscratch, stack_top);
+  WRITE_CSR(CSR_MSCRATCH, stack_top);
 
   /* Make sure mscratch is updated before continuing */
 

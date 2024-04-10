@@ -90,7 +90,7 @@ static uint64_t riscv_mtimer_get_mtime(struct riscv_mtimer_lowerhalf_s *priv)
    *    it could be read from the CSR "time".
    */
 
-  return -1 == priv->mtime ? READ_CSR(time) : getreg64(priv->mtime);
+  return -1 == priv->mtime ? READ_CSR(CSR_TIME) : getreg64(priv->mtime);
 #else
   uint32_t hi;
   uint32_t lo;

@@ -278,6 +278,6 @@
   csrr    \out, CSR_SCRATCH
   REGLOAD \out, RISCV_PERCPU_HARTID(\out)
 #else
-  csrr    \out, mhartid
+  csrr    \out, CSR_MHARTID
 #endif
 .endm

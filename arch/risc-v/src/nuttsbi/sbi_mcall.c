@@ -71,8 +71,8 @@ void sbi_mcall_handle(uintptr_t *regs)
 #else
       sbi_set_mtimecmp(regs[REG_A1] + ((uint64_t)regs[REG_A2] << 32));
 #endif
-      CLEAR_CSR(mip, MIP_STIP);
-      SET_CSR(mie, MIE_MTIE);
+      CLEAR_CSR(CSR_MIP, MIP_STIP);
+      SET_CSR(CSR_MIE, MIE_MTIE);
       break;
 
     default:

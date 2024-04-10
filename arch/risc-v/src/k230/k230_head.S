@@ -61,7 +61,7 @@ __start:
 #ifndef CONFIG_BUILD_KERNEL
   /* Load mhartid (cpuid) */
 
-  csrr a0, mhartid
+  csrr a0, CSR_MHARTID
 #endif
 
   /* Set stack pointer to the idle thread stack */
@@ -113,11 +113,11 @@ __start:
 
   /* Disable all interrupts (i.e. timer, external) */
 
-	csrw	CSR_IE, zero
-  
+	csrw CSR_IE, zero
+
   la   t0, __trap_vec        /* __trap_dump */
   csrw CSR_TVEC, t0
-  
+
   /* Jump to k230_start, a0=mhartid, a1=dtb */
 
   jal  x1, k230_start

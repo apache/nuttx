@@ -68,7 +68,7 @@ __start:
 
   /* Load mhartid (cpuid) */
 
-  csrr a0, mhartid
+  csrr a0, CSR_MHARTID
 
   /* Set stack pointer to the idle thread stack */
 
@@ -76,13 +76,13 @@ __start:
 
   /* Disable all interrupts (i.e. timer, external) in mie */
 
-  csrw mie, zero
-  csrw mip, zero
+  csrw CSR_MIE, zero
+  csrw CSR_MIP, zero
 
   /* Initialize the Machine Trap Vector */
 
   la   t0, __trap_vec
-  csrw mtvec, t0
+  csrw CSR_MTVEC, t0
 
   /* Jump to __c906_start with mhartid */
 

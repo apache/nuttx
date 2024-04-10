@@ -53,7 +53,7 @@ void up_irqinitialize(void)
 
 #ifdef CONFIG_ARCH_USE_S_MODE
   putreg32(0x0, LITEX_PLIC_ENABLE1);
-#else 
+#else
   asm volatile ("csrw %0, %1" :: "i"(LITEX_MMASK_CSR), "r"(0));
 #endif
 
@@ -147,13 +147,13 @@ void up_disable_irq(int irq)
     {
       /* Read mstatus & clear machine software interrupt enable in mie */
 
-      CLEAR_CSR(mie, MIE_MSIE);
+      CLEAR_CSR(CSR_MIE, MIE_MSIE);
     }
   else if (irq == RISCV_IRQ_MTIMER)
     {
       /* Read mstatus & clear machine timer interrupt enable in mie */
 
-      CLEAR_CSR(mie, MIE_MTIE);
+      CLEAR_CSR(CSR_MIE, MIE_MTIE);
     }
   else if (irq > RISCV_IRQ_MEXT)
     {
@@ -228,13 +228,13 @@ void up_enable_irq(int irq)
     {
       /* Read mstatus & set machine software interrupt enable in mie */
 
-      SET_CSR(mie, MIE_MSIE);
+      SET_CSR(CSR_MIE, MIE_MSIE);
     }
   else if (irq == RISCV_IRQ_MTIMER)
     {
       /* Read mstatus & set machine timer interrupt enable in mie */
 
-      SET_CSR(mie, MIE_MTIE);
+      SET_CSR(CSR_MIE, MIE_MTIE);
     }
   else if (irq > RISCV_IRQ_MEXT)
     {

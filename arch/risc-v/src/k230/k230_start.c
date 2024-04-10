@@ -134,7 +134,7 @@ void k230_start(int mhartid, const char *dtb)
 
   /* Disable MMU */
 
-  WRITE_CSR(satp, 0x0);
+  WRITE_CSR(CSR_SATP, 0x0);
 
   /* Configure FPU */
 

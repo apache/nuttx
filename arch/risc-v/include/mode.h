@@ -36,13 +36,13 @@
 
 /* CSR definitions */
 
-#  define CSR_STATUS        sstatus          /* Global status register */
-#  define CSR_SCRATCH       sscratch         /* Scratch register */
-#  define CSR_EPC           sepc             /* Exception program counter */
-#  define CSR_IE            sie              /* Interrupt enable register */
-#  define CSR_CAUSE         scause           /* Interrupt cause register */
-#  define CSR_TVAL          stval            /* Trap value register */
-#  define CSR_TVEC          stvec            /* Trap vector base addr register */
+#  define CSR_STATUS        CSR_SSTATUS      /* Global status register */
+#  define CSR_SCRATCH       CSR_SSCRATCH     /* Scratch register */
+#  define CSR_EPC           CSR_SEPC         /* Exception program counter */
+#  define CSR_IE            CSR_SIE          /* Interrupt enable register */
+#  define CSR_CAUSE         CSR_SCAUSE       /* Interrupt cause register */
+#  define CSR_TVAL          CSR_STVAL        /* Trap value register */
+#  define CSR_TVEC          CSR_STVEC        /* Trap vector base addr register */
 
 /* In status register */
 
@@ -71,13 +71,13 @@
 
 /* CSR definitions */
 
-#  define CSR_STATUS        mstatus          /* Global status register */
-#  define CSR_SCRATCH       mscratch         /* Scratch register */
-#  define CSR_EPC           mepc             /* Exception program counter */
-#  define CSR_IE            mie              /* Interrupt enable register */
-#  define CSR_CAUSE         mcause           /* Interrupt cause register */
-#  define CSR_TVAL          mtval            /* Trap value register */
-#  define CSR_TVEC          mtvec            /* Trap vector base addr register */
+#  define CSR_STATUS        CSR_MSTATUS      /* Global status register */
+#  define CSR_SCRATCH       CSR_MSCRATCH     /* Scratch register */
+#  define CSR_EPC           CSR_MEPC         /* Exception program counter */
+#  define CSR_IE            CSR_MIE          /* Interrupt enable register */
+#  define CSR_CAUSE         CSR_MCAUSE       /* Interrupt cause register */
+#  define CSR_TVAL          CSR_MTVAL        /* Trap value register */
+#  define CSR_TVEC          CSR_MTVEC        /* Trap vector base addr register */
 
 /* In status register */
 

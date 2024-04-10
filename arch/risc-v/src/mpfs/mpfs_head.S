@@ -45,25 +45,25 @@ __start:
 
   /* Disable all interrupts (i.e. timer, external) in mie */
 
-  csrw mie, zero
-  csrw mip, zero
+  csrw CSR_MIE, zero
+  csrw CSR_MIP, zero
 
   /* Initialize the Machine Trap Vector */
 
   la   t0, __trap_vec
-  csrw mtvec, t0
+  csrw CSR_MTVEC, t0
 
   /* Make sure that mtvec is updated before continuing */
 
 1:
-  csrr t1, mtvec
+  csrr t1, CSR_MTVEC
   bne  t0, t1, 1b
 
   /* mscratch must be init to zero- we are not using scratch memory */
 
-  csrw mscratch, zero
-  csrw mcause, zero
-  csrw mepc, zero
+  csrw CSR_MSCRATCH, zero
+  csrw CSR_MCAUSE, zero
+  csrw CSR_MEPC, zero
   li   x1,  0
   li   x2,  0
   li   x3,  0
@@ -97,17 +97,17 @@ __start:
   li   x31, 0
 
   /* Skip delegation register, mmu and floating point initializations if E51 */
-  csrr a0, mhartid
+  csrr a0, CSR_MHARTID
   beqz a0, .skip_e51
 
   /* Delegation registers must be explicitly reset */
 
-  csrw mideleg, 0
-  csrw medeleg, 0
+  csrw CSR_MIDELEG, 0
+  csrw CSR_MEDELEG, 0
 
   /* Remove MMU mappings (if any) */
 
-  csrw satp, zero
+  csrw CSR_SATP, zero
   fence
 
   /* Flush TLB (does not make a difference really) */
@@ -131,8 +131,8 @@ __start:
 #ifdef CONFIG_MPFS_BOOTLOADER
   /* Clear PMP */
 
-  csrw pmpcfg0, zero
-  csrw pmpcfg2, zero
+  csrw CSR_PMPCFG0, zero
+  csrw CSR_PMPCFG2, zero
 
   /* Set all but the boot hart into wfi */
 
@@ -142,7 +142,7 @@ __start:
   /* Enable IRQ_M_SOFT */
 
   li a2, (1U << 3)
-  csrw mie, a2     /* Set MSIE bit to receive IPI */
+  csrw CSR_MIE, a2     /* Set MSIE bit to receive IPI */
 
   /* flush the instruction cache */
   fence.i
@@ -155,15 +155,15 @@ __start:
    * interrupt
    */
 
-  csrr a2, mip
+  csrr a2, CSR_MIP
   andi a2, a2, (1U << 3) /* MIP_MSIP */
   beqz a2, .wait_boot
 
   /* Disable and clear all interrupts (the sw interrupt) */
   li a2, 0x00000008      /* MSTATUS_MIE */
-  csrc mstatus, a2
-  csrw mie, zero
-  csrw mip, zero
+  csrc CSR_MSTATUS, a2
+  csrw CSR_MIE, zero
+  csrw CSR_MIP, zero
 
   /* Jump to application */
   tail mpfs_jump_to_app

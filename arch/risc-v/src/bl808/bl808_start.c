@@ -284,11 +284,11 @@ void bl808_start(int mhartid)
 
   /* Disable MMU */
 
-  WRITE_CSR(satp, 0x0);
+  WRITE_CSR(CSR_SATP, 0x0);
 
   /* Set the trap vector for S-mode */
 
-  WRITE_CSR(stvec, (uintptr_t)__trap_vec);
+  WRITE_CSR(CSR_STVEC, (uintptr_t)__trap_vec);
 
   /* Start S-mode */
 

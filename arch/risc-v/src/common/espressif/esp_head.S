@@ -59,7 +59,7 @@ __start:
 
   /* Disable all interrupts (i.e. timer, external) in mstatus */
 
-  csrw mstatus, zero
+  csrw CSR_MSTATUS, zero
 
   .option pop
 
@@ -67,7 +67,7 @@ __start:
 
   lui  t0, %hi(_vector_table)
   addi t0, t0, %lo(_vector_table)
-  csrw  mtvec, t0
+  csrw  CSR_MTVEC, t0
 
   /* Jump to __esp_start */
 

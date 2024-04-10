@@ -44,7 +44,7 @@ __start:
 
   /* Load mhartid (cpuid) */
 
-  csrr a0, mhartid
+  csrr a0, CSR_MHARTID
 
   /* Set stack pointer to the idle thread stack */
 
@@ -56,7 +56,7 @@ __start:
   /* In case of single CPU config, stop here */
 
 #if !defined(CONFIG_SMP) || (CONFIG_SMP_NCPUS == 1)
-  csrw mie, zero
+  csrw CSR_MIE, zero
   wfi
 #endif
 
@@ -87,12 +87,12 @@ __start:
 
   /* Disable all interrupts (i.e. timer, external) in mie */
 
-  csrw mie, zero
+  csrw CSR_MIE, zero
 
   /* Initialize the Machine Trap Vector */
 
   la   t0, __trap_vec
-  csrw mtvec, t0
+  csrw CSR_MTVEC, t0
 
   /* Jump to __k210_start with mhartid */
 
