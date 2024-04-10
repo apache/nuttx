@@ -13,9 +13,9 @@ environment is either Windows native or Cygwin under Windows.
 **STATUS:** This release has been verified only on the ZiLOG ZDS-II
 Z8Encore! chip simulation as of nuttx-0.3.9. Refer to the NuttX board
 README files for the
-`z8encore000zco <https://github.com/apache/nuttx/blob/master/boards/z80/z8/z8encore000zco/README.txt>`__
+`z8encore000zco <https://github.com/apache/nuttx/blob/master/Documentation/platforms/z80/z8/boards/z8encore000zco/README.txt>`__
 and for
-the\ `z8f64200100kit <https://github.com/apache/nuttx/blob/master/boards/z80/z8/z8f64200100kit/README.txt>`__
+the\ `z8f64200100kit <https://github.com/apache/nuttx/blob/master/Documentation/platforms/z80/z8/boards/z8f64200100kit/README.txt>`__
 for further information.
 
 Supported Boards

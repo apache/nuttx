@@ -10,7 +10,7 @@ This initial support is very minimal: There is a NuttShell
 (:ref:`NSH <nsh>`) configuration that might be the basis for an
 application development. As of this writing, more device drivers are
 needed to make this a more complete port. Refer to the NuttX board
-`README <https://github.com/apache/nuttx/blob/master/boards/arm/nuc1xx/nutiny-nuc120/README.txt>`__
+`README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/nuc1xx/boards/nutiny-nuc120/README.txt>`__
 file for further information.
 
 **Memory Usage**. For a full-featured RTOS such as NuttX, providing

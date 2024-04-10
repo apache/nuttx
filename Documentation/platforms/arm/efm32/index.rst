@@ -29,7 +29,7 @@ This is a port for the Silicon Laboratories' EFM32
    supported are included, but not fully tested.
 
    Refer to the EFM32 Gecko Starter Kit
-   `README.txt <https://github.com/apache/nuttx/blob/master/boards/arm/efm32/efm32-g8xx-stk/README.txt>`__
+   `README.txt <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/efm32/boards/efm32-g8xx-stk/README.txt>`__
    file for further information.
 
 #. **Olimex EFM32G880F120-STK**. This board features:
@@ -50,7 +50,7 @@ This is a port for the Silicon Laboratories' EFM32
    required to make further progress in testing.
 
    Refer to the Olimex EFM32G880F120-STK
-   `README.txt <https://github.com/apache/nuttx/blob/master/boards/arm/efm32/olimex-efm32g880f128-stk/README.txt>`__
+   `README.txt <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/efm32/boards/olimex-efm32g880f128-stk/README.txt>`__
    for further information.
 
 SiLabs EFM32 Giant Gecko

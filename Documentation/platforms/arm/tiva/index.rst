@@ -63,7 +63,7 @@ Header file support was contributed by Tiago
 Maluta for this part. Jose Pablo Rojas V. is used those header file
 changes to port NuttX to the TI/Stellaris EKK-LM3S9B96. That port was
 available in the NuttX-6.20 release. Refer to the NuttX board
-`README <https://github.com/apache/nuttx/blob/master/boards/arm/tiva/ekk-lm3s9b96/README.txt>`__
+`README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/tiva/boards/ekk-lm3s9b96/README.txt>`__
 file for further information.
 
 TI/SimpleLink CC13x0
@@ -115,7 +115,7 @@ LaunchPad `(EK-TM4C1294XL) <http://www.ti.com/tool/ek-tm4c1294xl>`__.
    NuttX-7.25.
 
 Refer to the EK-TM4C1294XL board
-`README <https://github.com/apache/nuttx/blob/master/boards/arm/tiva/tm4c1294-launchpad/README.txt>`__
+`README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/tiva/boards/tm4c1294-launchpad/README.txt>`__
 file for more detailed information about this port.
 
 TI/Tiva TM4C129E
@@ -133,7 +133,7 @@ LaunchPad `(EK-TM4C129EXL) <https://www.ti.com/tool/EK-TM4C129EXL>`__.
    example in the NuttX apps repository.
 
 Refer to the EK-TM4C129EXL board
-`README <https://github.com/apache/nuttx/blob/master/boards/arm/tiva/tm4c129e-launchpad/README.txt>`__
+`README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/tiva/boards/tm4c129e-launchpad/README.txt>`__
 file for more detailed information about this port.
 
 TI/Tiva TM4C129X
@@ -154,13 +154,13 @@ Development Kit `(DK-TM4C129X) <http://www.ti.com/tool/dk-tm4c129x>`__.
    (:ref:`NSH <nsh>`). Both
    are networked enabled: One configured to support IPv4 and one
    configured to supported IPv6. Instructions are included in the board
-   `README <https://github.com/apache/nuttx/blob/master/boards/arm/tiva/dk-tm4c129x/README.txt>`__
+   `README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/tiva/boards/dk-tm4c129x/README.txt>`__
    file for configuring both IPv4 and IPv6 simultaneously.
 -  Tiva PWM and Quadrature Encoder drivers were contributed to NuttX in
    7.18 by Young.
 
 Refer to the DK-TM4C129X board
-`README <https://github.com/apache/nuttx/blob/master/boards/arm/tiva/dk-tm4c129x/README.txt>`__
+`README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/tiva/boards/dk-tm4c129x/README.txt>`__
 file for more detailed information about this port.
 
 TI/SimpleLink CC13x2

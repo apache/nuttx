@@ -29,7 +29,7 @@ Semiconductor <http://www.onsemi.com/PowerSolutions/evalBoard.do?id=LC823450XGEV
 website as are LC823450 `related technical
 documents <http://www.onsemi.com/PowerSolutions/supportDoc.do?type=AppNotes&rpn=LC823450>`__.
 Refer to the NuttX board
-`README <https://github.com/apache/nuttx/blob/master/boards/arm/lc823450/lc823450-xgevk/README.txt>`__
+`README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/lc823450/boards/lc823450-xgevk/README.txt>`__
 file for details of the NuttX port.
 
 This port is intended to test LC823450 features including SMP. Supported

@@ -6,7 +6,7 @@ The basic port has been completed for the following i.MX6 board:
 
 -  **Sabre-6Quad**. This is a port to the NXP/Freescale Sabre-6Quad
    board. Refer to the NuttX board
-   `README <https://github.com/apache/nuttx/blob/master/boards/arm/imx6/sabre-6quad/README.txt>`__
+   `README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/imx6/boards/sabre-6quad/README.txt>`__
    file for further information.
 
    **STATUS:** The basic, minimal port is code complete and introduced
@@ -18,7 +18,7 @@ The basic port has been completed for the following i.MX6 board:
    Basic support of NuttX running in SMP mode on the i.MX6Q was also
    accomplished in NuttX-7.16. However, there are still known issues
    with SMP support on this platform as described in the
-   `README <https://github.com/apache/nuttx/blob/master/boards/arm/imx6/sabre-6quad/README.txt>`__
+   `README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/imx6/boards/sabre-6quad/README.txt>`__
    file for the board.
 
 Supported Boards

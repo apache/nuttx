@@ -52,7 +52,7 @@ NuttX 7.17. Initial release includes two NSH configurations with support
 for on-board LEDs, buttons, and Ethernet with the on-board KSZ8081 PHY.
 SDHC supported has been integrated, but not verified. Refer to the NuttX
 board
-`README <https://github.com/apache/nuttx/blob/master/boards/arm/kinetis/freedom-k64f/README.txt>`__
+`README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/kinetis/boards/freedom-k64f/README.txt>`__
 file for further information.
 
 **MK64FN1M0VMD12**. Architecture support for the \_MK64FN1M0VMD12 was
@@ -67,7 +67,7 @@ by
 `TWR-SER <http://www.nxp.com/pages/serial-usb-ethernet-can-rs232-485-tower-system-module:TWR-SER>`__
 which includes (among other things), an RS232 and Ethernet connections.
 Refer to the NuttX board
-`README <https://github.com/apache/nuttx/blob/master/boards/arm/kinetis/twr-k64f120m/README.txt>`__
+`README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/kinetis/boards/twr-k64f120m/README.txt>`__
 file for further information.
 
 **Driver Status**.
@@ -90,7 +90,7 @@ NXP/FreeScale Kinetis K66
 Support for the Kinetis K64 family and
 specifically for the **NXP/Freescale Freedom K66F** board was
 contributed by David Sidrane in NuttX 7.20. Refer to the NuttX board
-`README <https://github.com/apache/nuttx/blob/master/boards/arm/kinetis/freedom-k66f/README.txt>`__
+`README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/kinetis/boards/freedom-k66f/README.txt>`__
 file for further information.
 
 **Driver Status**.
