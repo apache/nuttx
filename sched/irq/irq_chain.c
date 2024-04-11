@@ -44,17 +44,19 @@ struct irqchain_s
  * Private Data
  ****************************************************************************/
 
-/* g_irqchainpool is a list of pre-allocated irq chain. The number of irq
+/* g_irqchainpool() is a list of pre-allocated irq chain. The number of irq
  * chains in the pool is a configuration item.
  */
 
 static struct irqchain_s g_irqchainpool[CONFIG_PREALLOC_IRQCHAIN];
+#define g_irqchainpool   this_cpu_var(g_irqchainpool)
 
 /* The g_irqchainfreelist data structure is a single linked list of irqchains
  * available to the system for delayed function use.
  */
 
 static sq_queue_t g_irqchainfreelist;
+#define g_irqchainfreelist this_cpu_var(g_irqchainfreelist)
 
 /****************************************************************************
  * Private Functions
@@ -113,8 +115,8 @@ void irqchain_initialize(void)
 
   sq_init(&g_irqchainfreelist);
 
-  /* The g_irqchainfreelist must be loaded at initialization time to hold the
-   * configured number of irqchain.
+  /* The g_irqchainfreelist must be loaded at initialization time to
+   * hold the configured number of irqchain.
    */
 
   for (i = 0; i < CONFIG_PREALLOC_IRQCHAIN; i++)

@@ -40,7 +40,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define PIDHASH(pid)             ((pid) & (g_npidhash - 1))
+#define PIDHASH(pid)             ((pid) & (nxsched_npidhash() - 1))
 
 /* The state of a task is indicated both by the task_state field of the TCB
  * and by a series of task lists.  All of these tasks lists are declared
@@ -50,12 +50,12 @@
  * need to be prioritized).
  */
 
-#define list_readytorun()        (&g_readytorun)
-#define list_pendingtasks()      (&g_pendingtasks)
-#define list_waitingforsignal()  (&g_waitingforsignal)
-#define list_waitingforfill()    (&g_waitingforfill)
-#define list_stoppedtasks()      (&g_stoppedtasks)
-#define list_inactivetasks()     (&g_inactivetasks)
+#define list_readytorun()        (&this_cpu_var(g_readytorun))
+#define list_pendingtasks()      (&this_cpu_var(g_pendingtasks))
+#define list_waitingforsignal()  (&this_cpu_var(g_waitingforsignal))
+#define list_waitingforfill()    (&this_cpu_var(g_waitingforfill))
+#define list_stoppedtasks()      (&this_cpu_var(g_stoppedtasks))
+#define list_inactivetasks()     (&this_cpu_var(g_inactivetasks))
 #define list_assignedtasks(cpu)  (&g_assignedtasks[cpu])
 
 /* These are macros to access the current CPU and the current task on a CPU.
@@ -66,7 +66,7 @@
 #ifdef CONFIG_SMP
 #  define current_task(cpu)      ((FAR struct tcb_s *)list_assignedtasks(cpu)->head)
 #else
-#  define current_task(cpu)      ((FAR struct tcb_s *)list_readytorun()->head)
+#  define current_task(cpu)      ((FAR struct tcb_s *)(&this_cpu_var(g_readytorun))->head)
 #  define this_task()            (current_task(up_cpu_index()))
 #endif
 
@@ -77,7 +77,7 @@
  */
 
 #define running_task() \
-  (up_interrupt_context() ? g_running_tasks[up_cpu_index()] : this_task())
+  (up_interrupt_context() ? g_running_tasks[this_cpu()] : this_task())
 
 /* List attribute flags */
 
@@ -94,7 +94,7 @@
 
 #define __TLIST_HEAD(t) \
   (TLIST_ISOFFSET((t)->task_state) ? (FAR dq_queue_t *)((FAR uint8_t *)((t)->waitobj) + \
-  (uintptr_t)g_tasklisttable[(t)->task_state].list) : g_tasklisttable[(t)->task_state].list)
+  (uintptr_t)this_cpu_var(g_tasklisttable)[(t)->task_state].list) : this_cpu_var(g_tasklisttable)[(t)->task_state].list)
 
 #ifdef CONFIG_SMP
 #  define TLIST_HEAD(t,c) \
@@ -117,9 +117,9 @@
 #  define CRITMONITOR_PANIC(fmt, ...) _alert(fmt, ##__VA_ARGS__)
 #endif
 
-#define nxsched_pidhash()        g_pidhash
-#define nxsched_npidhash()       g_npidhash
-#define nxsched_lastpid()        g_lastpid
+#define nxsched_pidhash()        this_cpu_var(g_pidhash)
+#define nxsched_npidhash()       this_cpu_var(g_npidhash)
+#define nxsched_lastpid()        this_cpu_var(g_lastpid)
 
 /****************************************************************************
  * Public Type Definitions
@@ -197,6 +197,7 @@ extern dq_queue_t g_assignedtasks[CONFIG_SMP_NCPUS];
  */
 
 extern FAR struct tcb_s *g_running_tasks[CONFIG_SMP_NCPUS];
+#define g_running_tasks this_cpu_var(g_running_tasks)
 
 /* This is the list of all tasks that are ready-to-run, but cannot be placed
  * in the g_readytorun list because:  (1) They are higher priority than the

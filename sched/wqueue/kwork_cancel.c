@@ -148,7 +148,7 @@ int work_cancel(int qid, FAR struct work_s *work)
     {
       /* Cancel high priority work */
 
-      return work_qcancel((FAR struct kwork_wqueue_s *)&hpwork(),
+      return work_qcancel((FAR struct kwork_wqueue_s *)&g_hpwork,
                           -1, work);
     }
   else
@@ -158,7 +158,7 @@ int work_cancel(int qid, FAR struct work_s *work)
     {
       /* Cancel low priority work */
 
-      return work_qcancel((FAR struct kwork_wqueue_s *)&lpwork(),
+      return work_qcancel((FAR struct kwork_wqueue_s *)&g_lpwork,
                           -1, work);
     }
   else
@@ -196,7 +196,7 @@ int work_cancel_sync(int qid, FAR struct work_s *work)
     {
       /* Cancel high priority work */
 
-      return work_qcancel((FAR struct kwork_wqueue_s *)&hpwork(),
+      return work_qcancel((FAR struct kwork_wqueue_s *)&g_hpwork,
                           CONFIG_SCHED_HPNTHREADS, work);
     }
   else
@@ -206,7 +206,7 @@ int work_cancel_sync(int qid, FAR struct work_s *work)
     {
       /* Cancel low priority work */
 
-      return work_qcancel((FAR struct kwork_wqueue_s *)&lpwork(),
+      return work_qcancel((FAR struct kwork_wqueue_s *)&g_lpwork,
                           CONFIG_SCHED_LPNTHREADS, work);
     }
   else

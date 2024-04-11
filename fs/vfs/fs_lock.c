@@ -84,6 +84,8 @@ struct file_lock_bucket_s
 
 static struct hsearch_data g_file_lock_table;
 static mutex_t g_protect_lock = NXMUTEX_INITIALIZER;
+#define g_file_lock_table this_cpu_var(g_file_lock_table)
+#define g_protect_lock    this_cpu_var(g_protect_lock)
 
 /****************************************************************************
  * Private Functions

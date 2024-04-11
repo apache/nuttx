@@ -187,7 +187,7 @@ int foreach_inode(foreach_inode_t handler, FAR void *arg)
   ret = inode_lock();
   if (ret >= 0)
     {
-      ret = foreach_inodelevel(inode_root()->i_child, info);
+      ret = foreach_inodelevel(g_root_inode->i_child, info);
       inode_unlock();
     }
 
@@ -211,7 +211,7 @@ int foreach_inode(foreach_inode_t handler, FAR void *arg)
   ret = inode_lock();
   if (ret >= 0)
     {
-      ret = foreach_inodelevel(inode_root()->i_child, &info);
+      ret = foreach_inodelevel(g_root_inode->i_child, &info);
       inode_unlock();
     }
 

@@ -64,6 +64,7 @@ struct child_pool_s
  ****************************************************************************/
 
 static struct child_pool_s g_child_pool;
+#define g_child_pool this_cpu_var(g_child_pool)
 
 /****************************************************************************
  * Private Functions

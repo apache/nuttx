@@ -33,6 +33,7 @@
  ****************************************************************************/
 
 static ATOMIC_NOTIFIER_HEAD(g_reboot_notifier_list);
+#define g_reboot_notifier_list this_cpu_var(g_reboot_notifier_list)
 
 /****************************************************************************
  * Public Functions

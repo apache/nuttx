@@ -34,41 +34,6 @@
 #include "signal/signal.h"
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* The g_sigfreeaction data structure is a list of available signal
- * action structures.
- */
-
-sq_queue_t  g_sigfreeaction;
-
-/* The g_sigpendingaction data structure is a list of available pending
- * signal action structures.
- */
-
-sq_queue_t  g_sigpendingaction;
-
-/* The g_sigpendingirqaction is a list of available pending signal actions
- * that are reserved for use by interrupt handlers.
- */
-
-sq_queue_t  g_sigpendingirqaction;
-
-/* The g_sigpendingsignal data structure is a list of available pending
- * signal structures.
- */
-
-sq_queue_t  g_sigpendingsignal;
-
-/* The g_sigpendingirqsignal data structure is a list of available
- * pending signal structures that are reserved for use by interrupt
- * handlers.
- */
-
-sq_queue_t  g_sigpendingirqsignal;
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -169,3 +134,43 @@ void nxsig_initialize(void)
                                           SIG_ALLOC_IRQ);
   sched_trace_end();
 }
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* The g_sigfreeaction data structure is a list of available signal
+ * action structures.
+ */
+
+#undef g_sigfreeaction
+sq_queue_t  g_sigfreeaction;
+
+/* The g_sigpendingaction data structure is a list of available pending
+ * signal action structures.
+ */
+
+#undef g_sigpendingaction
+sq_queue_t  g_sigpendingaction;
+
+/* The g_sigpendingirqaction is a list of available pending signal actions
+ * that are reserved for use by interrupt handlers.
+ */
+
+#undef g_sigpendingirqaction
+sq_queue_t  g_sigpendingirqaction;
+
+/* The g_sigpendingsignal data structure is a list of available pending
+ * signal structures.
+ */
+
+#undef g_sigpendingsignal
+sq_queue_t  g_sigpendingsignal;
+
+/* The g_sigpendingirqsignal data structure is a list of available
+ * pending signal structures that are reserved for use by interrupt
+ * handlers.
+ */
+
+#undef g_sigpendingirqsignal
+sq_queue_t  g_sigpendingirqsignal;

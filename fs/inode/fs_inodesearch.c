@@ -48,12 +48,6 @@ static int _inode_search(FAR struct inode_search_s *desc);
 static FAR const char *_inode_getcwd(void);
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-FAR struct inode *g_root_inode = NULL;
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -214,7 +208,7 @@ static int _inode_linktarget(FAR struct inode *node,
 static int _inode_search(FAR struct inode_search_s *desc)
 {
   FAR const char   *name;
-  FAR struct inode *node    = inode_root();
+  FAR struct inode *node    = g_root_inode;
   FAR struct inode *left    = NULL;
   FAR struct inode *above   = NULL;
   FAR const char   *relpath = NULL;
@@ -567,3 +561,10 @@ FAR const char *inode_nextname(FAR const char *name)
 
   return name;
 }
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#undef g_root_inode
+FAR struct inode *g_root_inode = NULL;

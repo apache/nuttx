@@ -42,18 +42,6 @@
 #endif
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* This is the interrupt vector table */
-
-#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
-struct irq_info_s g_irqvector[CONFIG_ARCH_NUSER_INTERRUPTS];
-#else
-struct irq_info_s g_irqvector[NR_IRQS];
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -87,3 +75,12 @@ void irq_initialize(void)
   up_irqinitialize();
   sched_trace_end();
 }
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* This is the interrupt vector table */
+
+#undef g_irqvector
+struct irq_info_s g_irqvector[TAB_SIZE];
