@@ -723,6 +723,12 @@ static int sim_audio_ioctl(struct audio_lowerhalf_s *dev, int cmd,
           struct ap_buffer_info_s *info =
               (struct ap_buffer_info_s *)arg;
 
+          if (priv->offload && priv->playback)
+            {
+              priv->nbuffers = CONFIG_SIM_OFFLOAD_NUM_BUFFERS;
+              priv->buffer_size = CONFIG_SIM_OFFLOAD_BUFFER_NUMBYTES;
+            }
+
           if (priv->ops && priv->ops->get_samples)
             {
               priv->buffer_size = MAX(priv->buffer_size,
