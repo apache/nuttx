@@ -42,7 +42,7 @@ static FAR struct msgq_s **g_msgqs; /* The pointer of two layer file descriptors
  * Public Data
  ****************************************************************************/
 
-struct list_node g_msgfreelist = LIST_INITIAL_VALUE(g_msgfreelist);
+struct list_node g_msgfreelist;
 
 /****************************************************************************
  * Private Functions

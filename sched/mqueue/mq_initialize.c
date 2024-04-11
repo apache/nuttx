@@ -42,13 +42,13 @@
  * item.
  */
 
-struct list_node g_msgfree = LIST_INITIAL_VALUE(g_msgfree);
+struct list_node g_msgfree;
 
 /* The g_msgfreeInt is a list of messages that are reserved for use by
  * interrupt handlers.
  */
 
-struct list_node g_msgfreeirq = LIST_INITIAL_VALUE(g_msgfreeirq);
+struct list_node g_msgfreeirq;
 
 #endif
 
@@ -95,7 +95,7 @@ static FAR void *sysv_msgblockinit(FAR struct list_node *list,
   int i;
   for (i = 0; i < nmsgs; i++)
     {
-      list_add_tail(&g_msgfreelist, &msg->node);
+      list_add_tail(list, &msg->node);
       msg++;
     }
 
@@ -144,6 +144,8 @@ void nxmq_initialize(void)
   /* Initialize a block of messages for general use */
 
 #ifndef CONFIG_DISABLE_MQUEUE
+  list_initialize(&g_msgfree);
+
   msg = mq_msgblockinit(&g_msgfree, msg, CONFIG_PREALLOC_MQ_MSGS,
                          MQ_ALLOC_FIXED);
 
@@ -151,11 +153,15 @@ void nxmq_initialize(void)
    * interrupt handlers
    */
 
+  list_initialize(&g_msgfreeirq);
+
   msg = mq_msgblockinit(&g_msgfreeirq, msg, CONFIG_PREALLOC_MQ_IRQ_MSGS,
                          MQ_ALLOC_IRQ);
 #endif
 
 #ifndef CONFIG_DISABLE_MQUEUE_SYSV
+  list_initialize(&g_msgfreelist);
+
   msg = sysv_msgblockinit(&g_msgfreelist, msg, CONFIG_PREALLOC_MQ_MSGS);
 #endif
 
