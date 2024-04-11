@@ -312,7 +312,7 @@ config TICKET_SPINLOCK
 
 config RW_SPINLOCK
 	bool "Support read-write Spinlocks"
-	default y
+	default n
 	---help---
 		Spinlocks are spilit into read and write lock.
 		Reader can take read lock simultaneously and only one writer
