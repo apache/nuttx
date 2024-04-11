@@ -112,6 +112,8 @@ static void hexdumpstream_putc(FAR struct lib_outstream_s *self, int ch)
     {
       hexdumpstream_flush(self);
     }
+
+  self->nput++;
 }
 
 /****************************************************************************
