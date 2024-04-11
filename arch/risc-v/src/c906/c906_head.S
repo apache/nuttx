@@ -59,12 +59,10 @@ __start:
    * mxstatus is a CSR which locates at 0x7C0.
    */
 
-#ifdef __riscv_xthead
-  li t0, (1 << 22) | (1 << 21) | (1 << 15)
-  csrr t1, mxstatus
+  li t0, THEAD_MXSTATUS_ISAEE | THEAD_MXSTATUS_MAEE | THEAD_MXSTATUS_MM
+  csrr t1, THEAD_CSR_MXSTATUS
   or  t0, t1, t0
-  csrw mxstatus, t0
-#endif
+  csrw THEAD_CSR_MXSTATUS, t0
 
   /* Load mhartid (cpuid) */
 
