@@ -45,6 +45,7 @@
  ****************************************************************************/
 
 static spinlock_t g_sigaction_spin;
+#define g_sigaction_spin this_cpu_var(g_sigaction_spin)
 
 /****************************************************************************
  * Private Functions

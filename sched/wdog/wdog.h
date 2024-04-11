@@ -34,6 +34,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/queue.h>
 #include <nuttx/wdog.h>
+#include <nuttx/sched.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -74,6 +75,7 @@ extern "C"
  */
 
 extern sq_queue_t g_wdactivelist;
+#define g_wdactivelist this_cpu_var(g_wdactivelist)
 
 /* This is wdog tickbase, for wd_gettime() may called many times
  * between 2 times of wd_timer(), we use it to update wd_gettime().

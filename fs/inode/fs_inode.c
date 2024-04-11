@@ -46,6 +46,7 @@
  ****************************************************************************/
 
 static rmutex_t g_inode_lock = NXRMUTEX_INITIALIZER;
+#define g_inode_lock this_cpu_var(g_inode_lock)
 
 /****************************************************************************
  * Public Functions

@@ -47,14 +47,6 @@
  * Public Data
  ****************************************************************************/
 
-#ifndef CONFIG_SCHED_TICKLESS
-#ifdef CONFIG_SYSTEM_TIME64
-volatile uint64_t g_system_ticks = INITIAL_SYSTEM_TIMER_TICKS;
-#else
-volatile uint32_t g_system_ticks = INITIAL_SYSTEM_TIMER_TICKS;
-#endif
-#endif
-
 #ifndef CONFIG_CLOCK_TIMEKEEPING
 struct timespec   g_basetime;
 #endif
@@ -427,4 +419,17 @@ void clock_timer(void)
 
   g_system_ticks++;
 }
+#endif
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifndef CONFIG_SCHED_TICKLESS
+#undef g_system_ticks
+#ifdef CONFIG_SYSTEM_TIME64
+volatile uint64_t g_system_ticks = INITIAL_SYSTEM_TIMER_TICKS;
+#else
+volatile uint32_t g_system_ticks = INITIAL_SYSTEM_TIMER_TICKS;
+#endif
 #endif

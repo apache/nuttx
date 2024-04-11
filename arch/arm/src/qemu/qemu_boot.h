@@ -68,7 +68,7 @@ extern "C"
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP) || defined(CONFIG_BMP)
 void qemu_cpu_enable(void);
 #else
 #  define qemu_cpu_enable()

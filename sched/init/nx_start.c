@@ -69,131 +69,6 @@
 #define SCHED_ALL_CPUS           ((1 << CONFIG_SMP_NCPUS) - 1)
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* Task Lists ***************************************************************/
-
-/* The state of a task is indicated both by the task_state field of the TCB
- * and by a series of task lists.  All of these tasks lists are declared
- * below. Although it is not always necessary, most of these lists are
- * prioritized so that common list handling logic can be used (only the
- * g_readytorun, the g_pendingtasks, and the g_waitingforsemaphore lists
- * need to be prioritized).
- */
-
-/* This is the list of all tasks that are ready to run.  This is a
- * prioritized list with head of the list holding the highest priority
- * (unassigned) task.  In the non-SMP case, the head of this list is the
- * currently active task and the tail of this list, the lowest priority
- * task, is always the IDLE task.
- */
-
-dq_queue_t g_readytorun;
-
-/* In order to support SMP, the function of the g_readytorun list changes,
- * The g_readytorun is still used but in the SMP case it will contain only:
- *
- *  - Only tasks/threads that are eligible to run, but not currently running,
- *    and
- *  - Tasks/threads that have not been assigned to a CPU.
- *
- * Otherwise, the TCB will be retained in an assigned task list,
- * g_assignedtasks.  As its name suggests, on 'g_assignedtasks queue for CPU
- * 'n' would contain only tasks/threads that are assigned to CPU 'n'.  Tasks/
- * threads would be assigned a particular CPU by one of two mechanisms:
- *
- *  - (Semi-)permanently through an RTOS interfaces such as
- *    pthread_attr_setaffinity(), or
- *  - Temporarily through scheduling logic when a previously unassigned task
- *    is made to run.
- *
- * Tasks/threads that are assigned to a CPU via an interface like
- * pthread_attr_setaffinity() would never go into the g_readytorun list, but
- * would only go into the g_assignedtasks[n] list for the CPU 'n' to which
- * the thread has been assigned.  Hence, the g_readytorun list would hold
- * only unassigned tasks/threads.
- *
- * Like the g_readytorun list in in non-SMP case, each g_assignedtask[] list
- * is prioritized:  The head of the list is the currently active task on this
- * CPU.  Tasks after the active task are ready-to-run and assigned to this
- * CPU. The tail of this assigned task list, the lowest priority task, is
- * always the CPU's IDLE task.
- */
-
-#ifdef CONFIG_SMP
-dq_queue_t g_assignedtasks[CONFIG_SMP_NCPUS];
-#endif
-
-/* g_running_tasks[] holds a references to the running task for each cpu.
- * It is valid only when up_interrupt_context() returns true.
- */
-
-FAR struct tcb_s *g_running_tasks[CONFIG_SMP_NCPUS];
-
-/* This is the list of all tasks that are ready-to-run, but cannot be placed
- * in the g_readytorun list because:  (1) They are higher priority than the
- * currently active task at the head of the g_readytorun list, and (2) the
- * currently active task has disabled pre-emption.
- */
-
-dq_queue_t g_pendingtasks;
-
-/* This is the list of all tasks that are blocked waiting for a signal */
-
-dq_queue_t g_waitingforsignal;
-
-#ifdef CONFIG_LEGACY_PAGING
-/* This is the list of all tasks that are blocking waiting for a page fill */
-
-dq_queue_t g_waitingforfill;
-#endif
-
-#ifdef CONFIG_SIG_SIGSTOP_ACTION
-/* This is the list of all tasks that have been stopped
- * via SIGSTOP or SIGTSTP
- */
-
-dq_queue_t g_stoppedtasks;
-#endif
-
-/* This list of all tasks that have been initialized, but not yet
- * activated. NOTE:  This is the only list that is not prioritized.
- */
-
-dq_queue_t g_inactivetasks;
-
-/* This is the value of the last process ID assigned to a task */
-
-volatile pid_t g_lastpid;
-
-/* The following hash table is used for two things:
- *
- * 1. This hash table greatly speeds the determination of a new unique
- *    process ID for a task, and
- * 2. Is used to quickly map a process ID into a TCB.
- */
-
-FAR struct tcb_s **g_pidhash;
-volatile int g_npidhash;
-
-/* This is a table of task lists.  This table is indexed by the task state
- * enumeration type (tstate_t) and provides a pointer to the associated
- * static task list (if there is one) as well as a set of attribute flags
- * indicating properties of the list, for example, if the list is an
- * ordered list or not.
- */
-
-struct tasklist_s g_tasklisttable[NUM_TASK_STATES];
-
-/* This is the current initialization state.  The level of initialization
- * is only important early in the start-up sequence when certain OS or
- * hardware resources may not yet be available to the kernel logic.
- */
-
-uint8_t g_nx_initstate;  /* See enum nx_initstate_e */
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -206,10 +81,11 @@ uint8_t g_nx_initstate;  /* See enum nx_initstate_e */
  */
 
 static struct task_tcb_s g_idletcb[CONFIG_SMP_NCPUS];
+#define g_idletcb this_cpu_var(g_idletcb)
 
 /* This is the name of the idle task */
 
-#if CONFIG_TASK_NAME_SIZE <= 0 || !defined(CONFIG_SMP)
+#if CONFIG_TASK_NAME_SIZE <= 0 || (!defined(CONFIG_SMP) && !defined(CONFIG_BMP))
 #  ifdef CONFIG_SMP
 static const char g_idlename[] = "CPU_Idle";
 #  else
@@ -223,6 +99,7 @@ static const char g_idlename[] = "Idle_Task";
  */
 
 static FAR char *g_idleargv[CONFIG_SMP_NCPUS][2];
+#define g_idleargv this_cpu_var(g_idleargv)
 
 /****************************************************************************
  * Private Functions
@@ -242,7 +119,7 @@ static FAR char *g_idleargv[CONFIG_SMP_NCPUS][2];
 
 static void tasklist_initialize(void)
 {
-  FAR struct tasklist_s *tlist = (FAR void *)&g_tasklisttable;
+  FAR struct tasklist_s *tlist = (FAR void *)&this_cpu_var(g_tasklisttable);
 
   /* TSTATE_TASK_INVALID */
 
@@ -413,8 +290,11 @@ static void idle_task_initialize(void)
 #if CONFIG_TASK_NAME_SIZE > 0
       /* Set the IDLE task name */
 
-#  ifdef CONFIG_SMP
+#  if defined(CONFIG_SMP)
       snprintf(tcb->cmn.name, CONFIG_TASK_NAME_SIZE, "CPU%d IDLE", i);
+#  elif defined(CONFIG_BMP)
+      snprintf(tcb->cmn.name, CONFIG_TASK_NAME_SIZE, "CPU%d IDLE",
+               up_cpu_index());
 #  else
       strlcpy(tcb->cmn.name, g_idlename, CONFIG_TASK_NAME_SIZE);
 #  endif
@@ -469,7 +349,11 @@ static void idle_group_initialize(void)
     {
       tcb = &g_idletcb[i];
 
+#ifdef CONFIG_BMP
+      hashndx = PIDHASH(0);
+#else
       hashndx = PIDHASH(i);
+#endif
       nxsched_pidhash()[hashndx] = &tcb->cmn;
 
       /* Allocate the IDLE group */
@@ -796,3 +680,129 @@ void nx_start(void)
     }
 #endif
 }
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* Task Lists ***************************************************************/
+
+/* The state of a task is indicated both by the task_state field of the TCB
+ * and by a series of task lists.  All of these tasks lists are declared
+ * below. Although it is not always necessary, most of these lists are
+ * prioritized so that common list handling logic can be used (only the
+ * g_readytorun, the g_pendingtasks, and the g_waitingforsemaphore lists
+ * need to be prioritized).
+ */
+
+/* This is the list of all tasks that are ready to run.  This is a
+ * prioritized list with head of the list holding the highest priority
+ * (unassigned) task.  In the non-SMP case, the head of this list is the
+ * currently active task and the tail of this list, the lowest priority
+ * task, is always the IDLE task.
+ */
+
+dq_queue_t g_readytorun;
+
+/* In order to support SMP, the function of the g_readytorun list changes,
+ * The g_readytorun is still used but in the SMP case it will contain only:
+ *
+ *  - Only tasks/threads that are eligible to run, but not currently running,
+ *    and
+ *  - Tasks/threads that have not been assigned to a CPU.
+ *
+ * Otherwise, the TCB will be retained in an assigned task list,
+ * g_assignedtasks.  As its name suggests, on 'g_assignedtasks queue for CPU
+ * 'n' would contain only tasks/threads that are assigned to CPU 'n'.  Tasks/
+ * threads would be assigned a particular CPU by one of two mechanisms:
+ *
+ *  - (Semi-)permanently through an RTOS interfaces such as
+ *    pthread_attr_setaffinity(), or
+ *  - Temporarily through scheduling logic when a previously unassigned task
+ *    is made to run.
+ *
+ * Tasks/threads that are assigned to a CPU via an interface like
+ * pthread_attr_setaffinity() would never go into the g_readytorun list, but
+ * would only go into the g_assignedtasks[n] list for the CPU 'n' to which
+ * the thread has been assigned.  Hence, the g_readytorun list would hold
+ * only unassigned tasks/threads.
+ *
+ * Like the g_readytorun list in in non-SMP case, each g_assignedtask[] list
+ * is prioritized:  The head of the list is the currently active task on this
+ * CPU.  Tasks after the active task are ready-to-run and assigned to this
+ * CPU. The tail of this assigned task list, the lowest priority task, is
+ * always the CPU's IDLE task.
+ */
+
+#ifdef CONFIG_SMP
+dq_queue_t g_assignedtasks[CONFIG_SMP_NCPUS];
+#endif
+
+/* g_running_tasks[] holds a references to the running task for each cpu.
+ * It is valid only when up_interrupt_context() returns true.
+ */
+
+#undef g_running_tasks
+FAR struct tcb_s *g_running_tasks[CONFIG_SMP_NCPUS];
+
+/* This is the list of all tasks that are ready-to-run, but cannot be placed
+ * in the g_readytorun list because:  (1) They are higher priority than the
+ * currently active task at the head of the g_readytorun list, and (2) the
+ * currently active task has disabled pre-emption.
+ */
+
+dq_queue_t g_pendingtasks;
+
+/* This is the list of all tasks that are blocked waiting for a signal */
+
+dq_queue_t g_waitingforsignal;
+
+#ifdef CONFIG_LEGACY_PAGING
+/* This is the list of all tasks that are blocking waiting for a page fill */
+
+dq_queue_t g_waitingforfill;
+#endif
+
+#ifdef CONFIG_SIG_SIGSTOP_ACTION
+/* This is the list of all tasks that have been stopped
+ * via SIGSTOP or SIGTSTP
+ */
+
+dq_queue_t g_stoppedtasks;
+#endif
+
+/* This list of all tasks that have been initialized, but not yet
+ * activated. NOTE:  This is the only list that is not prioritized.
+ */
+
+dq_queue_t g_inactivetasks;
+
+/* This is the value of the last process ID assigned to a task */
+
+volatile pid_t g_lastpid;
+
+/* The following hash table is used for two things:
+ *
+ * 1. This hash table greatly speeds the determination of a new unique
+ *    process ID for a task, and
+ * 2. Is used to quickly map a process ID into a TCB.
+ */
+
+FAR struct tcb_s **g_pidhash;
+volatile int g_npidhash;
+
+/* This is a table of task lists.  This table is indexed by the task state
+ * enumeration type (tstate_t) and provides a pointer to the associated
+ * static task list (if there is one) as well as a set of attribute flags
+ * indicating properties of the list, for example, if the list is an
+ * ordered list or not.
+ */
+
+struct tasklist_s g_tasklisttable[NUM_TASK_STATES];
+
+/* This is the current initialization state.  The level of initialization
+ * is only important early in the start-up sequence when certain OS or
+ * hardware resources may not yet be available to the kernel logic.
+ */
+
+volatile uint8_t g_nx_initstate;  /* See enum nx_initstate_e */

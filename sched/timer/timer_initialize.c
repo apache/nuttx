@@ -45,24 +45,8 @@
 
 #if CONFIG_PREALLOC_TIMERS > 0
 static struct posix_timer_s g_prealloctimers[CONFIG_PREALLOC_TIMERS];
+#define g_prealloctimers this_cpu_var(g_prealloctimers)
 #endif
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#if CONFIG_PREALLOC_TIMERS > 0
-/* This is a list of free, preallocated timer structures */
-
-volatile sq_queue_t g_freetimers;
-#endif
-
-/* This is a list of instantiated timer structures -- active and inactive.
- * The timers are place on this list by timer_create() and removed from the
- * list by timer_delete() or when the owning thread exits.
- */
-
-volatile sq_queue_t g_alloctimers;
 
 /****************************************************************************
  * Public Functions
@@ -187,5 +171,24 @@ FAR struct posix_timer_s *timer_gethandle(timer_t timerid)
 
   return timer;
 }
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#if CONFIG_PREALLOC_TIMERS > 0
+/* This is a list of free, preallocated timer structures */
+
+#undef g_freetimers
+volatile sq_queue_t g_freetimers;
+#endif
+
+/* This is a list of instantiated timer structures -- active and inactive.
+ * The timers are place on this list by timer_create() and removed from the
+ * list by timer_delete() or when the owning thread exits.
+ */
+
+#undef g_alloctimers
+volatile sq_queue_t g_alloctimers;
 
 #endif /* CONFIG_DISABLE_POSIX_TIMERS */

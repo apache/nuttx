@@ -44,9 +44,11 @@
  ****************************************************************************/
 
 static FAR struct oneshot_lowerhalf_s *g_oneshot_lower;
+#define g_oneshot_lower this_cpu_var(g_oneshot_lower)
 
 #ifndef CONFIG_SCHED_TICKLESS
 static clock_t g_current_tick;
+#define g_current_tick  this_cpu_var(g_current_tick)
 #endif
 
 /****************************************************************************

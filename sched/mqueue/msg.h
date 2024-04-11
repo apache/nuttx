@@ -78,6 +78,7 @@ extern "C"
 #endif
 
 EXTERN struct list_node g_msgfreelist;
+#define g_msgfreelist   this_cpu_var(g_msgfreelist)
 
 /****************************************************************************
  * Public Function Prototypes

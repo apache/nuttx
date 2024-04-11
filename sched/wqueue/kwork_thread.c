@@ -72,32 +72,6 @@
 #endif
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#if defined(CONFIG_SCHED_HPWORK)
-/* The state of the kernel mode, high priority work queue(s). */
-
-struct hp_wqueue_s g_hpwork =
-{
-  {NULL, NULL},
-  SEM_INITIALIZER(0),
-};
-
-#endif /* CONFIG_SCHED_HPWORK */
-
-#if defined(CONFIG_SCHED_LPWORK)
-/* The state of the kernel mode, low priority work queue(s). */
-
-struct lp_wqueue_s g_lpwork =
-{
-  {NULL, NULL},
-  SEM_INITIALIZER(0),
-};
-
-#endif /* CONFIG_SCHED_LPWORK */
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -305,7 +279,7 @@ void work_foreach(int qid, work_foreach_t handler, FAR void *arg)
 #ifdef CONFIG_SCHED_HPWORK
   if (qid == HPWORK)
     {
-      wqueue  = (FAR struct kwork_wqueue_s *)&hpwork();
+      wqueue  = (FAR struct kwork_wqueue_s *)&g_hpwork;
       nthread = CONFIG_SCHED_HPNTHREADS;
     }
   else
@@ -313,7 +287,7 @@ void work_foreach(int qid, work_foreach_t handler, FAR void *arg)
 #ifdef CONFIG_SCHED_LPWORK
   if (qid == LPWORK)
     {
-      wqueue  = (FAR struct kwork_wqueue_s *)&lpwork();
+      wqueue  = (FAR struct kwork_wqueue_s *)&g_lpwork;
       nthread = CONFIG_SCHED_LPNTHREADS;
     }
   else
@@ -352,7 +326,7 @@ int work_start_highpri(void)
   return work_thread_create(HPWORKNAME, CONFIG_SCHED_HPWORKPRIORITY,
                             CONFIG_SCHED_HPWORKSTACKSIZE,
                             CONFIG_SCHED_HPNTHREADS,
-                            (FAR struct kwork_wqueue_s *)&hpwork());
+                            (FAR struct kwork_wqueue_s *)&g_hpwork);
 }
 #endif /* CONFIG_SCHED_HPWORK */
 
@@ -380,8 +354,44 @@ int work_start_lowpri(void)
   return work_thread_create(LPWORKNAME, CONFIG_SCHED_LPWORKPRIORITY,
                             CONFIG_SCHED_LPWORKSTACKSIZE,
                             CONFIG_SCHED_LPNTHREADS,
-                            (FAR struct kwork_wqueue_s *)&lpwork());
+                            (FAR struct kwork_wqueue_s *)&g_lpwork);
 }
+#endif /* CONFIG_SCHED_LPWORK */
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#if defined(CONFIG_SCHED_HPWORK)
+/* The state of the kernel mode, high priority work queue(s). */
+
+#undef g_hpwork
+
+struct hp_wqueue_s g_hpwork =
+{
+    {
+      NULL, NULL
+    },
+
+    SEM_INITIALIZER(0),
+};
+
+#endif /* CONFIG_SCHED_HPWORK */
+
+#if defined(CONFIG_SCHED_LPWORK)
+/* The state of the kernel mode, low priority work queue(s). */
+
+#undef g_lpwork
+
+struct lp_wqueue_s g_lpwork =
+{
+    {
+      NULL, NULL
+    },
+
+    SEM_INITIALIZER(0),
+};
+
 #endif /* CONFIG_SCHED_LPWORK */
 
 #endif /* CONFIG_SCHED_WORKQUEUE */

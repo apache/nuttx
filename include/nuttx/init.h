@@ -28,6 +28,7 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
+#include <sys/types.h>
 #include <stdint.h>
 
 /****************************************************************************
@@ -38,8 +39,8 @@
  * initialization.
  */
 
-#define nxsched_set_initstate(s)  g_nx_initstate = (s)
-#define nxsched_get_initstate()   g_nx_initstate
+#define nxsched_set_initstate(s) this_cpu_var(g_nx_initstate) = (s)
+#define nxsched_get_initstate()  this_cpu_var(g_nx_initstate)
 
 #define OSINIT_MM_READY()        (nxsched_get_initstate() >= OSINIT_MEMORY)
 #define OSINIT_HW_READY()        (nxsched_get_initstate() >= OSINIT_HARDWARE)
@@ -91,7 +92,7 @@ extern "C"
  * hardware resources may not yet be available to the OS-internal logic.
  */
 
-EXTERN uint8_t g_nx_initstate;  /* See enum nx_initstate_e */
+EXTERN volatile uint8_t g_nx_initstate;  /* See enum nx_initstate_e */
 
 /****************************************************************************
  * Public Function Prototypes

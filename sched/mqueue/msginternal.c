@@ -36,13 +36,9 @@
  ****************************************************************************/
 
 static uint8_t             g_nmsgq; /* The number of groups of msgs array */
+#define g_nmsgq            this_cpu_var(g_nmsgq)
 static FAR struct msgq_s **g_msgqs; /* The pointer of two layer file descriptors array */
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-struct list_node g_msgfreelist = LIST_INITIAL_VALUE(g_msgfreelist);
+#define g_msgqs            this_cpu_var(g_msgqs)
 
 /****************************************************************************
  * Private Functions
@@ -165,3 +161,10 @@ FAR struct msgq_s *nxmsg_lookup(key_t key)
 
   return g_msgqs[key - 1];
 }
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#undef g_msgfreelist
+struct list_node g_msgfreelist;
