@@ -62,8 +62,7 @@ FAR void *vm_alloc_region(FAR struct mm_map_s *mm, FAR void *vaddr,
         }
       else
         {
-          ret = gran_reserve(mm->mm_map_vpages, (uintptr_t)vaddr,
-                             size);
+          ret = gran_reserve(mm->mm_map_vpages, (uintptr_t)vaddr, size);
         }
     }
 
