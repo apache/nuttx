@@ -319,6 +319,24 @@ endchoice
 
 endif
 
+config SIM_OFFLOAD_NUM_BUFFERS
+	int "Number of offload buffers for audio processing"
+	default 2
+	---help---
+		Specifies the number of offload buffers to allocate for audio processing.
+		If Driver Specified buffer sizes is enabled (below), then the
+		low-level drivers will have the opportunity to override this
+		value.
+
+config SIM_OFFLOAD_BUFFER_NUMBYTES
+	int "Size of each offload buffer for audio processing"
+	default 32767
+	---help---
+		Specifies the allocation size for each offload buffer
+		If Driver Specified buffer sizes is enabled (below), then the
+		low-level drivers will have the opportunity to override this
+		value.
+
 config SIM_CAMERA
 	bool "Simulated video support"
 	depends on VIDEO
