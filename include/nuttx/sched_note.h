@@ -517,6 +517,12 @@ struct note_filter_mode_s
 #endif
 };
 
+struct note_filter_named_mode_s
+{
+  char name[NAME_MAX];
+  struct note_filter_mode_s mode;
+};
+
 /* This is the type of the argument passed to the NOTECTL_GETSYSCALLFILTER
  * and NOTECTL_SETSYSCALLFILTER ioctls
  */
@@ -525,6 +531,12 @@ struct note_filter_mode_s
 struct note_filter_syscall_s
 {
   uint8_t syscall_mask[(SYS_nsyscalls + 7) / 8];
+};
+
+struct note_filter_named_syscall_s
+{
+  char name[NAME_MAX];
+  struct note_filter_syscall_s syscall_mask;
 };
 #endif
 
@@ -537,9 +549,21 @@ struct note_filter_irq_s
   uint8_t irq_mask[(NR_IRQS + 7) / 8];
 };
 
+struct note_filter_named_irq_s
+{
+  char name[NAME_MAX];
+  struct note_filter_irq_s irq_mask;
+};
+
 struct note_filter_tag_s
 {
   uint8_t tag_mask[(NOTE_TAG_MAX + 7) / 8];
+};
+
+struct note_filter_named_tag_s
+{
+  char name[NAME_MAX];
+  struct note_filter_tag_s tag_mask;
 };
 
 /****************************************************************************
@@ -682,8 +706,8 @@ void sched_note_printf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
-void sched_note_filter_mode(FAR struct note_filter_mode_s *oldm,
-                            FAR struct note_filter_mode_s *newm);
+void sched_note_filter_mode(FAR struct note_filter_named_mode_s *oldm,
+                            FAR struct note_filter_named_mode_s *newm);
 #endif
 
 /****************************************************************************
@@ -708,8 +732,8 @@ void sched_note_filter_mode(FAR struct note_filter_mode_s *oldm,
 
 #if defined(CONFIG_SCHED_INSTRUMENTATION_FILTER) && \
     defined(CONFIG_SCHED_INSTRUMENTATION_SYSCALL)
-void sched_note_filter_syscall(FAR struct note_filter_syscall_s *oldf,
-                               FAR struct note_filter_syscall_s *newf);
+void sched_note_filter_syscall(FAR struct note_filter_named_syscall_s *oldf,
+                               FAR struct note_filter_named_syscall_s *newf);
 #endif
 
 /****************************************************************************
@@ -734,14 +758,14 @@ void sched_note_filter_syscall(FAR struct note_filter_syscall_s *oldf,
 
 #if defined(CONFIG_SCHED_INSTRUMENTATION_FILTER) && \
     defined(CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER)
-void sched_note_filter_irq(FAR struct note_filter_irq_s *oldf,
-                           FAR struct note_filter_irq_s *newf);
+void sched_note_filter_irq(FAR struct note_filter_named_irq_s *oldf,
+                           FAR struct note_filter_named_irq_s *newf);
 #endif
 
 #if defined(CONFIG_SCHED_INSTRUMENTATION_FILTER) && \
     defined(CONFIG_SCHED_INSTRUMENTATION_DUMP)
-void sched_note_filter_tag(FAR struct note_filter_tag_s *oldf,
-                           FAR struct note_filter_tag_s *newf);
+void sched_note_filter_tag(FAR struct note_filter_named_tag_s *oldf,
+                           FAR struct note_filter_named_tag_s *newf);
 #endif
 
 #endif /* defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT) */

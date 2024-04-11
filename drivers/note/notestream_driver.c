@@ -65,6 +65,17 @@ static const struct note_driver_ops_s g_notestream_ops =
 struct notestream_driver_s g_notestream_lowerout =
 {
   {
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
+    "lowerout",
+    {
+      {
+        CONFIG_SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE,
+#  ifdef CONFIG_SMP
+        CONFIG_SCHED_INSTRUMENTATION_CPUSET
+#  endif
+      },
+    },
+#endif
     &g_notestream_ops
   },
   &g_lowoutstream
@@ -91,13 +102,31 @@ static void notestream_add(FAR struct note_driver_s *drv,
 int notefile_register(FAR const char *filename)
 {
   FAR struct notestream_file_s *notefile;
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
+  size_t len = strlen(filename) + 1;
+#else
+  size_t len = 0;
+#endif
   int ret;
 
-  notefile = kmm_zalloc(sizeof(struct notestream_file_s));
+  notefile = kmm_zalloc(sizeof(struct notestream_file_s) + len);
   if (notefile == NULL)
     {
       return -ENOMEM;
     }
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
+  memcpy(notefile + 1, filename, len);
+  notefile->driver.driver.name  = (FAR const char *)(notefile + 1);
+  notefile->driver.driver.filter.mode.flag =
+                      CONFIG_SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE;
+
+#  ifdef CONFIG_SMP
+  notefile->driver.driver.filter.mode.cpuset =
+                      CONFIG_SCHED_INSTRUMENTATION_CPUSET;
+#  endif
+
+#endif
 
   notefile->driver.stream = &notefile->filestream.common;
   ret = file_open(&notefile->file, filename, O_WRONLY);

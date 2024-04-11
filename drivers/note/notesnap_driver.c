@@ -150,7 +150,20 @@ static const struct note_driver_ops_s g_notesnap_ops =
 
 static struct notesnap_s g_notesnap =
 {
-  {&g_notesnap_ops}
+  {
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
+    "snap",
+    {
+      {
+        CONFIG_SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE,
+#  ifdef CONFIG_SMP
+        CONFIG_SCHED_INSTRUMENTATION_CPUSET
+#  endif
+      },
+    },
+#endif
+    &g_notesnap_ops
+  }
 };
 
 static FAR const char *g_notesnap_type[] =

@@ -55,6 +55,17 @@ static const struct note_driver_ops_s g_notertt_ops =
 struct notertt_s g_notertt =
 {
   {
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
+    "rtt",
+    {
+      {
+        CONFIG_SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE,
+#  ifdef CONFIG_SMP
+        CONFIG_SCHED_INSTRUMENTATION_CPUSET
+#  endif
+      },
+    },
+#endif
     &g_notertt_ops
   }
 };

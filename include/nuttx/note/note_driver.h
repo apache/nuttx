@@ -32,6 +32,7 @@
 #include <stddef.h>
 
 #include <nuttx/sched.h>
+#include <nuttx/sched_note.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -108,8 +109,28 @@ struct note_driver_ops_s
 #endif
 };
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
+struct note_filter_s
+{
+  struct note_filter_mode_s mode;
+#  ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
+  struct note_filter_tag_s tag_mask;
+#  endif
+#  ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
+  struct note_filter_irq_s irq_mask;
+#  endif
+#  ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
+  struct note_filter_syscall_s syscall_mask;
+#  endif
+};
+#endif
+
 struct note_driver_s
 {
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
+  FAR const char *name;
+  struct note_filter_s filter;
+#endif
   FAR const struct note_driver_ops_s *ops;
 };
 
