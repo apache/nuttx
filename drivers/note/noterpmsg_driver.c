@@ -67,7 +67,20 @@ static const struct note_driver_ops_s g_noterpmsg_ops =
 
 struct noterpmsg_driver_s g_noterpmsg_driver =
 {
-  {&g_noterpmsg_ops},
+  {
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
+    "rpmsg",
+    {
+      {
+        CONFIG_SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE,
+#  ifdef CONFIG_SMP
+        CONFIG_SCHED_INSTRUMENTATION_CPUSET
+#  endif
+      },
+    },
+#endif
+    &g_noterpmsg_ops
+  },
 };
 
 /****************************************************************************

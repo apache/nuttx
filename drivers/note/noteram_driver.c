@@ -146,7 +146,20 @@ static const struct note_driver_ops_s g_noteram_ops =
 
 struct noteram_driver_s g_noteram_driver =
 {
-  {&g_noteram_ops},
+  {
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
+    "ram",
+    {
+      {
+        CONFIG_SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE,
+#  ifdef CONFIG_SMP
+        CONFIG_SCHED_INSTRUMENTATION_CPUSET
+#  endif
+      },
+    },
+#endif
+    &g_noteram_ops
+  },
   g_ramnote_buffer,
   CONFIG_DRIVERS_NOTERAM_BUFSIZE,
 #ifdef CONFIG_DRIVERS_NOTERAM_DEFAULT_NOOVERWRITE
@@ -1339,17 +1352,35 @@ FAR struct note_driver_s *
 noteram_initialize(FAR const char *devpath, size_t bufsize, bool overwrite)
 {
   FAR struct noteram_driver_s *drv;
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
+  size_t len = strlen(devpath) + 1;
+#else
+  size_t len = 0;
+#endif
   int ret;
 
-  drv = kmm_malloc(sizeof(*drv) + bufsize);
+  drv = kmm_malloc(sizeof(*drv) + len + bufsize);
   if (drv == NULL)
     {
       return NULL;
     }
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
+
+  memcpy(drv + 1, devpath, len);
+  drv->driver.name = (FAR const char *)(drv + 1);
+  drv->driver.filter.mode.flag =
+                      CONFIG_SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE;
+
+#  ifdef CONFIG_SMP
+  drv->driver.filter.mode.cpuset =
+                      CONFIG_SCHED_INSTRUMENTATION_CPUSET;
+#  endif
+
+#endif
 
   drv->driver.ops = &g_noteram_ops;
   drv->ni_bufsize = bufsize;
-  drv->ni_buffer = (FAR uint8_t *)(drv + 1);
+  drv->ni_buffer = (FAR uint8_t *)(drv + 1) + len;
   drv->ni_overwrite = overwrite;
   drv->ni_head = 0;
   drv->ni_tail = 0;

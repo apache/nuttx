@@ -124,6 +124,17 @@ static const struct note_driver_ops_s g_notelog_ops =
 
 struct note_driver_s g_notelog_driver =
 {
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
+    "log",
+    {
+      {
+        CONFIG_SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE,
+#  ifdef CONFIG_SMP
+        CONFIG_SCHED_INSTRUMENTATION_CPUSET
+#  endif
+      },
+    },
+#endif
   &g_notelog_ops,
 };
 
