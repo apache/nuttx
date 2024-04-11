@@ -33,7 +33,7 @@
 #include "smp.h"
 #include "arm_internal.h"
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP) || defined(CONFIG_BMP)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -47,17 +47,17 @@
  * Private Data
  ****************************************************************************/
 
-#if CONFIG_SMP_NCPUS > 1
-static const uint32_t *g_cpu_stackalloc[CONFIG_SMP_NCPUS] =
+#if CONFIG_NR_CPUS > 1
+static const uint32_t *g_cpu_stackalloc[CONFIG_NR_CPUS] =
 {
     0
   , g_cpu1_idlestack
-#if CONFIG_SMP_NCPUS > 2
+#if CONFIG_NR_CPUS > 2
   , g_cpu2_idlestack
-#if CONFIG_SMP_NCPUS > 3
+#if CONFIG_NR_CPUS > 3
   , g_cpu3_idlestack
-#endif /* CONFIG_SMP_NCPUS > 3 */
-#endif /* CONFIG_SMP_NCPUS > 2 */
+#endif /* CONFIG_NR_CPUS > 3 */
+#endif /* CONFIG_NR_CPUS > 2 */
 };
 #endif
 
@@ -110,10 +110,10 @@ static const uint32_t *g_cpu_stackalloc[CONFIG_SMP_NCPUS] =
 
 int up_cpu_idlestack(int cpu, struct tcb_s *tcb, size_t stack_size)
 {
-#if CONFIG_SMP_NCPUS > 1
+#if CONFIG_NR_CPUS > 1
   uintptr_t stack_alloc;
 
-  DEBUGASSERT(cpu > 0 && cpu < CONFIG_SMP_NCPUS && tcb != NULL &&
+  DEBUGASSERT(cpu > 0 && cpu < CONFIG_NR_CPUS && tcb != NULL &&
               stack_size <= SMP_STACK_SIZE);
 
   /* Get the top of the stack */

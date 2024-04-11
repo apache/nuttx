@@ -31,7 +31,7 @@
 #include "cp15.h"
 #include "sctlr.h"
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP) || defined(CONFIG_BMP)
 
 /****************************************************************************
  * Public Functions
