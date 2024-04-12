@@ -125,6 +125,11 @@ static bool syslog_rpmsg_transfer(FAR struct syslog_rpmsg_s *priv, bool wait)
   size_t off;
   size_t len_end;
 
+  if (!is_rpmsg_ept_ready(&priv->ept))
+    {
+      return false;
+    }
+
   do
     {
       msg = rpmsg_get_tx_payload_buffer(&priv->ept, &space, wait);
