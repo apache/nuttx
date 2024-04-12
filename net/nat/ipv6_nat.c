@@ -634,14 +634,7 @@ void ipv6_nat_inbound(FAR struct net_driver_s *dev,
   if (IFF_IS_NAT(dev->d_flags) &&
       NETDEV_IS_MY_V6ADDR(dev, ipv6->destipaddr))
     {
-      FAR ipv6_nat_entry_t *entry =
-          ipv6_nat_inbound_internal(ipv6, NAT_MANIP_DST);
-      if (!entry)
-        {
-          /* Inbound without entry is OK (e.g. towards NuttX itself), skip. */
-
-          return;
-        }
+      ipv6_nat_inbound_internal(ipv6, NAT_MANIP_DST);
     }
 }
 
