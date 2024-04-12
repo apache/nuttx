@@ -366,9 +366,11 @@
 /* In mip (machine interrupt pending) register */
 
 #define MIP_SSIP            (0x1 << 1)
+#define MIP_MSIP            (0x1 << 3)
 #define MIP_STIP            (0x1 << 5)
 #define MIP_MTIP            (0x1 << 7)
 #define MIP_SEIP            (0x1 << 9)
+#define MIP_MEIP            (0x1 << 11)
 
 /* In sstatus register (which is a view of mstatus) */
 
