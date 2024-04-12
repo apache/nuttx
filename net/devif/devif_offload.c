@@ -141,21 +141,34 @@ FAR struct iob_s *devif_pkt_segment(FAR struct iob_s *pkt, uint32_t features)
     {
       /* 1. create segment */
 
-      /* 1.1 malloc data as iob, alloc_iob */
-
-      new_pkt = iob_alloc_dynamic(size);
-      if (new_pkt == NULL)
+      if (need_alloc == false)
         {
-          nerr("ERROR: Failed to allocate an I/O buffer.");
-          if (segs)
+          /* The first segment. */
+
+          if (tmp == NULL)
             {
+              tmp = pkt;
+              segs = pkt;
+            }
+          else
+            {
+              new_pkt = tmp->io_flink;
+            }
+        }
+      else
+        {
+          /* 1.1 malloc data as iob, alloc_iob */
+
+          new_pkt = iob_alloc_dynamic(size);
+          if (new_pkt == NULL)
+            {
+              nerr("ERROR: Failed to allocate an I/O buffer.");
               iob_free_chain(segs);
+              return NULL;
             }
 
-          return NULL;
+          new_pkt->io_flink = NULL;
         }
-
-      new_pkt->io_flink = NULL;
 
       /* need to init the iob and gso_info */
 
@@ -174,13 +187,15 @@ FAR struct iob_s *devif_pkt_segment(FAR struct iob_s *pkt, uint32_t features)
       /* 1.3 copy data */
 
       payload_len = data_len > mss ? mss : data_len;
+      if (need_alloc)
+        {
+          /* pointer to data */
 
-      /* pointer to data */
+          new_pkt->io_offset = header_len + pkt->io_offset;
 
-      new_pkt->io_offset = header_len + pkt->io_offset;
-
-      iob_copyout(new_pkt->io_data + new_pkt->io_offset, pkt,
-                  payload_len, segs_num * mss);
+          iob_copyout(new_pkt->io_data + new_pkt->io_offset, pkt,
+                      payload_len, segs_num * mss);
+        }
 
       /* 2. update left data_len */
 
@@ -188,21 +203,27 @@ FAR struct iob_s *devif_pkt_segment(FAR struct iob_s *pkt, uint32_t features)
       new_pkt->io_pktlen = header_len + payload_len;
       new_pkt->io_len = new_pkt->io_pktlen;
 
-      PKT_GSOINFO(new_pkt)->seg_list = NULL;
-      new_pkt->io_flink = NULL;
-
-      /* The first segment. */
-
-      if (segs == NULL)
+      if (need_alloc == true)
         {
-          segs = new_pkt;
-          tmp  = new_pkt;
-          memcpy(PKT_GSOINFO(tmp), PKT_GSOINFO(pkt),
-              sizeof(struct gso_cb));
+          PKT_GSOINFO(new_pkt)->seg_list = NULL;
+          new_pkt->io_flink = NULL;
+
+          /* The first segment. */
+
+          if (segs == NULL)
+            {
+              segs = new_pkt;
+              tmp  = new_pkt;
+              memcpy(PKT_GSOINFO(tmp), PKT_GSOINFO(pkt),
+                     sizeof(struct gso_cb));
+            }
         }
 
-      PKT_GSOINFO(tmp)->seg_list = new_pkt;
-      tmp = new_pkt;
+      if (tmp != new_pkt)
+        {
+          PKT_GSOINFO(tmp)->seg_list = new_pkt;
+          tmp = new_pkt;
+        }
     }
 
   /* Assumption that a packet uses a single iob structure. */
@@ -503,3 +524,130 @@ void netdev_enable_gso(FAR struct net_driver_s *dev)
   dev->d_gso_max_segs = GSO_MAX_SIZE;
 }
 
+/****************************************************************************
+ * Name: netdev_enable_lro
+ *
+ * Description:
+ *   Enable the GRO_HW function for the dev.
+ *   Set the features and GRO-related maximum value.
+ *
+ * Input Parameters:
+ *   dev -  The structure of the network driver that enables the LRO
+ *          function.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void netdev_enable_lro(FAR struct net_driver_s *dev)
+{
+  dev->d_features |= NETIF_F_GRO_HW;
+  dev->d_gro_max_size = GRO_MAX_SIZE;
+  dev->d_gro_max_segs = GRO_MAX_SEGS;
+}
+
+/****************************************************************************
+ * Name: devif_init_pkt_groinfo
+ *
+ * Description:
+ *  Initialize the GRO information for the GRO packet.
+ *
+ * Input Parameters:
+ *   dev  -  The structure of the network driver that received the packet.
+ *   pkt  - The received packet is GRO packet.
+ *   gro_type  - That indicates the GRO type of the received packet.
+ *   gro_size  - That indicates the GRO Size of the received packet.
+ *   count  - That indicates the number of segments.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   The segments of the gro packet are list by iob->io_flink.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_GRO
+void devif_init_pkt_groinfo(FAR struct net_driver_s *dev,
+                            FAR struct iob_s *pkt, int gro_type,
+                            uint16_t gro_size, uint8_t count)
+{
+  /* 1. pkt is gro pkt ? */
+
+  if (PKT_GROINFO(pkt)->gro_size == 0)
+    {
+      return;
+    }
+
+  /* 2. dev is enable gro ? */
+
+  if (!(dev->d_features & NETIF_F_GRO_HW))
+    {
+      return;
+    }
+
+  /* gso_type gso_size gso_segs */
+
+  PKT_GROINFO(pkt)->proto      = gro_type;
+  PKT_GROINFO(pkt)->gro_size   = gro_size;
+  PKT_GROINFO(pkt)->segs_count = count;
+}
+#endif
+
+/****************************************************************************
+ * Name: devif_forward_gro_pkt
+ *
+ * Description:
+ *   Initialize the GRO information for the GRO packet.
+ *
+ * Input Parameters:
+ *   dev - An initialized instance of the common forwarding structure that
+ *         includes everything needed to perform the forwarding operation.
+ *   pkt - The packets to be forwarded.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   The gro packets are list by iob->io_flink.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_GRO
+void devif_forward_gro_pkt(FAR struct net_driver_s *dev,
+                           FAR struct iob_s *pkt)
+{
+  /* 1. pkt is gro pkt ? */
+
+#ifdef CONFIG_NET_GSO
+  if (PKT_GROINFO(pkt)->gro_size == 0
+      && pkt->io_pktlen <= devif_get_max_pktsize(dev))
+    {
+      return;
+    }
+
+  /* 2. dev is enable gso ? */
+
+  if (!(dev->d_features & NETIF_F_GSO))
+    {
+      return;
+    }
+
+  /* 3. set the gso information (gso_type/gso_size/gso_segs). */
+
+  PKT_GSOINFO(pkt)->gso_type = PKT_GROINFO(pkt)->proto;
+
+  /* For the gro pkt, save the MTU and then recalculate the gso_size and
+   * gso_segs.
+   */
+
+  PKT_GSOINFO(pkt)->gso_size = devif_get_mtu(dev);
+  PKT_GSOINFO(pkt)->gso_segs = PKT_GROINFO(pkt)->segs_count;
+
+  /* 4. set the forward flag for the gso seg list. */
+
+  PKT_GSOINFO(pkt)->is_fwd = true;
+#endif
+}
+#endif

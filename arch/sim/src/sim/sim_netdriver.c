@@ -304,6 +304,9 @@ int sim_netdriver_init(void)
 #ifdef CONFIG_NET_GSO
       netdev_enable_gso(&dev->netdev);
 #endif
+#ifdef CONFIG_NET_GRO
+      netdev_enable_lro(&dev->netdev);
+#endif
 #endif
       /* Register the device with the OS so that socket IOCTLs can be
        * performed

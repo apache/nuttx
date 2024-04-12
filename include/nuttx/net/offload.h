@@ -405,6 +405,71 @@ FAR struct iob_s *udp6_gso_segment(FAR struct iob_s *pkt, uint32_t features);
 #endif
 
 #endif /* CONFIG_NET_GSO */
+
+/****************************************************************************
+ * Name: devif_init_pkt_groinfo
+ *
+ * Description:
+ *  Initialize the GRO information for the GRO packet.
+ *
+ * Input Parameters:
+ *   dev  -  The structure of the network driver that received the packet.
+ *   pkt  - The received packet is GRO packet.
+ *   gro_type  - That indicates the GRO type of the received packet.
+ *   gro_size  - That indicates the GRO Size of the received packet.
+ *   count  - That indicates the number of segments.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_GRO
+void devif_init_pkt_groinfo(FAR struct net_driver_s *dev,
+                            FAR struct iob_s *pkt, int gro_type,
+                            uint16_t gro_size, uint8_t count);
+
+/****************************************************************************
+ * Name: devif_forward_gro_pkt
+ *
+ * Description:
+ *   Initialize the GRO information for the GRO packet.
+ *
+ * Input Parameters:
+ *   dev - An initialized instance of the common forwarding structure that
+ *         includes everything needed to perform the forwarding operation.
+ *   pkt - The packets to be forwarded.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   The gro packets are list by iob->io_flink.
+ *
+ ****************************************************************************/
+
+void devif_forward_gro_pkt(FAR struct net_driver_s *dev,
+                           FAR struct iob_s *pkt);
+
+/****************************************************************************
+ * Name: netdev_enable_lro
+ *
+ * Description:
+ *   Enable the GRO_HW function for the dev.
+ *   Set the features and GRO-related maximum value.
+ *
+ * Input Parameters:
+ *   dev -  The structure of the network driver that enables the LRO
+ *          function.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void netdev_enable_lro(FAR struct net_driver_s *dev);
+#endif
+
 #endif /* CONFIG_NET_SEG_OFFLOAD */
 
 #endif /* __INCLUDE_NUTTX_NET_SEG_OFFLOAD_H */

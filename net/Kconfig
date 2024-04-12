@@ -451,6 +451,13 @@ config NET_GSO
 		The function includes the UDP GSO and TCP GSO. And the TCP GSO is to
 		to be enabled by default.
 
+config NET_GRO
+	bool "Enable GRO function"
+	default n
+	---help---
+		The function just refers to the LRO feature, supporting the UDP
+		and TCP.
+
 endmenu # Net Segment Offload
 source "net/route/Kconfig"
 
