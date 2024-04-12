@@ -267,6 +267,25 @@ void inet_update_iphdr_len(FAR struct iob_s *pkt, int type);
 FAR struct iob_s *devif_send_gso_pkt(FAR struct iob_s *pkt,
                        unsigned int sndlen, unsigned int offset,
                        unsigned int hdrlen, uint16_t gso_size);
+
+/****************************************************************************
+ * Name: devif_prepare_gso_segments
+ *
+ * Description:
+ *   Allocate the iob for the GSO packet, based on the size and count.
+ *
+ * Input Parameters:
+ *   size  - the sum of L3 header length, L4 header length, and gso_size.
+ *   count  - the features are supported by the target dev of the packet.
+ *
+ * Returned Value:
+ *   The NULL indicates that the allocation is failure.
+ *   The segs is the head of the multiple iob.
+ *
+ ****************************************************************************/
+
+FAR struct iob_s *devif_prepare_gso_segments(uint16_t size, uint32_t count);
+
 /****************************************************************************
  * Name: inet_gso_segment
  *
@@ -345,7 +364,47 @@ FAR struct iob_s *ipv6_gso_segment(FAR struct iob_s *pkt, uint32_t features);
 struct iob_s *tcp6_gso_segment(FAR struct iob_s *pkt, uint32_t features);
 #endif
 
-#endif
+/****************************************************************************
+ * Name: udp4_gso_segment
+ *
+ * Description:
+ *   Check whether the IPv4 UDP packet can be segmented.
+ *
+ * Input Parameters:
+ *   pkt  - the packet to be sent by the NIC driver.
+ *   features  - the features are supported by the target dev of the packet.
+ *
+ * Returned Value:
+ *   The NULL indicates that the devision is failure.
+ *   The segs is the head of the multiple packets.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv4
+FAR struct iob_s *udp4_gso_segment(FAR struct iob_s *pkt, uint32_t features);
 #endif
 
-#endif /* __INCLUDE_NUTTX_NET_SEG_OFFLOAD_H*/
+/****************************************************************************
+ * Name: udp6_gso_segment
+ *
+ * Description:
+ *   Check whether the IPv6 UDP packet can be segmented.
+ *
+ * Input Parameters:
+ *   pkt  - the packet to be sent by the NIC driver.
+ *   features  - the features are supported by the target dev of the packet.
+ *
+ * Returned Value:
+ *   The NULL indicates that the devision is failure.
+ *   The segs is the head of the multiple packets.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+FAR struct iob_s *udp6_gso_segment(FAR struct iob_s *pkt, uint32_t features);
+#endif
+
+#endif /* CONFIG_NET_GSO */
+#endif /* CONFIG_NET_SEG_OFFLOAD */
+
+#endif /* __INCLUDE_NUTTX_NET_SEG_OFFLOAD_H */

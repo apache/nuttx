@@ -125,6 +125,12 @@ struct udp_conn_s
   sem_t    sndsem;        /* Semaphore signals send completion */
 #endif
 
+#ifdef CONFIG_NET_UDP_OFFLOAD
+  uint16_t gso_max_size;  /* Maximum segment size for gso */
+  uint16_t gso_max_segs;  /* Maximum segment number for gso */
+  uint16_t gso_size;      /* segment size for udp gso */
+#endif
+
   /* Read-ahead buffering.
    *
    *   readahead - An IOB chain where the UDP/IP read-ahead data is retained.
@@ -1015,6 +1021,54 @@ void udp_sendbuffer_notify(FAR struct udp_conn_s *conn);
  ****************************************************************************/
 
 uint16_t udpip_hdrsize(FAR struct udp_conn_s *conn);
+
+#ifdef CONFIG_NET_UDP_OFFLOAD
+int udp_send_gso_pkt(FAR struct udp_conn_s *conn,
+                     FAR struct net_driver_s *dev,
+                     FAR struct iob_s *pkt, unsigned int sndlen,
+                     unsigned int offset, uint8_t hdrlen);
+
+/****************************************************************************
+ * Name: udp_prepare_gso_pkt
+ *
+ * Description:
+ *   pre-allocate the iob buffers for the GSO packets.
+ *
+ * Input Parameters:
+ *
+ *   conn    - the UDP connection structure.
+ *   sndlen  - the length of data to be sent.
+ *
+ * Returned Value:
+ *   The I/O buffers are allocated for the GSO packets.
+ *
+ ****************************************************************************/
+
+FAR struct iob_s *udp_prepare_gso_pkt(FAR struct udp_conn_s *conn,
+                                      unsigned int sndlen);
+
+/****************************************************************************
+ * Name: udp_copy_gso_pkt
+ *
+ * Description:
+ *  Copy data 'len' bytes from a user buffer into the I/O buffer chain,
+ *  starting at 'offset', extending the chain as necessary based on gso_size.
+ *
+ *   segs  - The I/O buffers chain.
+ *   src   - The user data.
+ *   len   - The length of user data.
+ *   hdrlen    - The length of L3 and L4 header.
+ *   gso_size  - The size of UDP packet payload.
+ *
+ * Returned Value:
+ *   The length of data that is copied into the segs I/O buffers.
+ *
+ ****************************************************************************/
+
+int udp_copy_gso_pkt(FAR struct iob_s *segs, FAR const uint8_t *src,
+                     unsigned int len, int hdrlen, int gso_size);
+
+#endif /* CONFIG_NET_UDP_OFFLOAD */
 
 #undef EXTERN
 #ifdef __cplusplus

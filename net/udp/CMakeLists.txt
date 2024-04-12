@@ -43,6 +43,10 @@ if(CONFIG_NET_UDP AND NOT CONFIG_NET_UDP_NO_STACK)
     endif()
   endif()
 
+  if(CONFIG_NET_UDP_OFFLOAD)
+    list(APPEND SRCS udp_offload.c)
+  endif()
+
   # Transport layer
 
   list(

@@ -31,6 +31,7 @@
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/tcp.h>
+#include <nuttx/net/udp.h>
 #include <nuttx/net/offload.h>
 
 /****************************************************************************
@@ -137,6 +138,11 @@ FAR struct iob_s *inet_gso_segment(FAR struct iob_s *pkt, uint32_t features)
           segs = tcp4_gso_segment(pkt, features);
           break;
 #endif
+#ifdef CONFIG_NET_UDP_OFFLOAD
+      case IP_PROTO_UDP:
+          segs = udp4_gso_segment(pkt, features);
+          break;
+#endif
       default:
           return NULL;
     }
@@ -204,6 +210,11 @@ FAR struct iob_s *ipv6_gso_segment(FAR struct iob_s *pkt, uint32_t features)
 #ifdef CONFIG_NET_TCP_OFFLOAD
       case IP_PROTO_TCP:
           segs = tcp6_gso_segment(pkt, features);
+          break;
+#endif
+#ifdef CONFIG_NET_UDP_OFFLOAD
+      case IP_PROTO_UDP:
+          segs = udp6_gso_segment(pkt, features);
           break;
 #endif
     default:
