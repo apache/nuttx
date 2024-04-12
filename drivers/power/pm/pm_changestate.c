@@ -272,16 +272,19 @@ int pm_changestate(int domain, enum pm_state_e newstate)
    */
 
   pm_changeall(domain, newstate);
-  if (newstate != PM_RESTORE)
-    {
-      g_pmglobals.domain[domain].state = newstate;
-    }
 
   /* Notify governor of (possible) state change */
 
   if (g_pmglobals.domain[domain].governor->statechanged)
     {
       g_pmglobals.domain[domain].governor->statechanged(domain, newstate);
+    }
+
+  /* Domain state update after statechanged done */
+
+  if (newstate != PM_RESTORE)
+    {
+      g_pmglobals.domain[domain].state = newstate;
     }
 
   /* Restore the interrupt state */
