@@ -60,15 +60,6 @@ extern "C"
 * Public Types
 *****************************************************************************/
 
-struct video_format_s
-{
-  uint16_t width;
-  uint16_t height;
-  uint32_t pixelformat;
-};
-
-typedef struct video_format_s video_format_t;
-
 struct v4l2_s
 {
   FAR const struct v4l2_ops_s      *vops;

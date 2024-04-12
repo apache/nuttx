@@ -74,6 +74,15 @@ enum capture_waitend_cause_e
   WAITEND_CAUSE_STILLSTOP   = 2,
 };
 
+struct video_format_s
+{
+  uint16_t width;
+  uint16_t height;
+  uint32_t pixelformat;
+};
+
+typedef struct video_format_s video_format_t;
+
 struct capture_wait_capture_s
 {
   sem_t                dqbuf_wait_flg;
