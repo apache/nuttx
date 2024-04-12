@@ -70,6 +70,7 @@
 #include "socket/socket.h"
 #include "igmp/igmp.h"
 #include "udp/udp.h"
+#include "utils/utils.h"
 
 /****************************************************************************
  * Private Data
@@ -525,7 +526,7 @@ static FAR struct udp_conn_s *udp_alloc_conn(void)
  *   None
  *
  * Returned Value:
- *   Next available port number
+ *   Next available port number in host byte order, 0 for failure.
  *
  ****************************************************************************/
 
@@ -540,30 +541,24 @@ uint16_t udp_select_port(uint8_t domain, FAR union ip_binding_u *u)
 
   if (g_last_udp_port == 0)
     {
-      g_last_udp_port = clock_systime_ticks() %
-                        (CONFIG_NET_DEFAULT_MAX_PORT -
-                         CONFIG_NET_DEFAULT_MIN_PORT + 1);
-      g_last_udp_port += CONFIG_NET_DEFAULT_MIN_PORT;
+      NET_PORT_RANDOM_INIT(g_last_udp_port);
     }
 
   /* Find an unused local port number.  Loop until we find a valid
    * listen port number that is not being used by any other connection.
    */
 
+  portno = g_last_udp_port; /* Record a starting port number */
+
   do
     {
-      /* Guess that the next available port number will be the one after
-       * the last port number assigned.
-       */
-
-      ++g_last_udp_port;
-
-      /* Make sure that the port number is within range */
-
-      if (g_last_udp_port > CONFIG_NET_DEFAULT_MAX_PORT ||
-          g_last_udp_port < CONFIG_NET_DEFAULT_MIN_PORT)
+      NET_PORT_NEXT_H(g_last_udp_port);
+      if (g_last_udp_port == portno)
         {
-          g_last_udp_port = CONFIG_NET_DEFAULT_MIN_PORT;
+          /* We have looped back, failed. */
+
+          portno = 0;
+          goto errout;
         }
     }
   while (udp_find_conn(domain, u, HTONS(g_last_udp_port), 0) != NULL
@@ -578,6 +573,8 @@ uint16_t udp_select_port(uint8_t domain, FAR union ip_binding_u *u)
    */
 
   portno = g_last_udp_port;
+
+errout:
   net_unlock();
 
   return portno;
@@ -918,8 +915,16 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
     {
       /* Yes.. Select any unused local port number */
 
-      conn->lport = HTONS(udp_select_port(conn->domain, &conn->u));
-      ret         = OK;
+      portno = HTONS(udp_select_port(conn->domain, &conn->u));
+      if (portno == 0)
+        {
+          ret         = -EADDRINUSE;
+        }
+      else
+        {
+          conn->lport = portno;
+          ret         = OK;
+        }
     }
   else
     {
@@ -1000,6 +1005,11 @@ int udp_connect(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
        */
 
       conn->lport = HTONS(udp_select_port(conn->domain, &conn->u));
+      if (!conn->lport)
+        {
+          nerr("ERROR: Failed to get a local port!\n");
+          return -EADDRINUSE;
+        }
     }
 
   /* Is there a remote port (rport)? */

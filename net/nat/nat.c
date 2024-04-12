@@ -32,24 +32,9 @@
 #include "nat/nat.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
+#include "utils/utils.h"
 
 #ifdef CONFIG_NET_NAT
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define NEXT_PORT(nport, hport) \
-  do \
-    { \
-      ++(hport); \
-      if ((hport) >= CONFIG_NET_DEFAULT_MAX_PORT || \
-          (hport) < CONFIG_NET_DEFAULT_MIN_PORT) \
-        { \
-          (hport) = CONFIG_NET_DEFAULT_MIN_PORT; \
-        } \
-      (nport) = HTONS(hport); \
-    } while (0)
 
 /****************************************************************************
  * Private Functions
@@ -86,7 +71,7 @@ static uint16_t nat_port_select_without_stack(
   uint16_t hport = NTOHS(portno);
   while (nat_port_inuse(domain, protocol, ip, portno))
     {
-      NEXT_PORT(portno, hport);
+      NET_PORT_NEXT_NH(portno, hport);
       if (portno == local_port)
         {
           /* We have looped back, failed. */
@@ -308,7 +293,7 @@ uint16_t nat_port_select(FAR struct net_driver_s *dev,
           while (icmp_findconn(dev, id) ||
                  nat_port_inuse(domain, IP_PROTO_ICMP, external_ip, id))
             {
-              NEXT_PORT(id, hid);
+              NET_PORT_NEXT_NH(id, hid);
               if (id == local_port)
                 {
                   /* We have looped back, failed. */
@@ -334,7 +319,7 @@ uint16_t nat_port_select(FAR struct net_driver_s *dev,
           while (icmpv6_active(id) ||
                  nat_port_inuse(domain, IP_PROTO_ICMP6, external_ip, id))
             {
-              NEXT_PORT(id, hid);
+              NET_PORT_NEXT_NH(id, hid);
               if (id == local_port)
                 {
                   /* We have looped back, failed. */

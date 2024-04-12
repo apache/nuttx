@@ -265,6 +265,9 @@ FAR struct udp_conn_s *udp_nextconn(FAR struct udp_conn_s *conn);
  *   implementation, it is reasonable to assume that that error cannot happen
  *   and that a port number will always be available.
  *
+ * Returned Value:
+ *   Next available port number in host byte order, 0 for failure.
+ *
  ****************************************************************************/
 
 uint16_t udp_select_port(uint8_t domain, FAR union ip_binding_u *u);
