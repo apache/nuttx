@@ -36,6 +36,7 @@
 
 #include "sched/sched.h"
 #include "riscv_internal.h"
+#include "riscv_ipi.h"
 #include "chip.h"
 
 /****************************************************************************
@@ -230,7 +231,7 @@ int riscv_pause_handler(int irq, void *c, void *arg)
 
   /* Clear IPI (Inter-Processor-Interrupt) */
 
-  putreg32(0, (uintptr_t)RISCV_IPI + (4 * cpu));
+  riscv_ipi_clear(cpu);
 
   /* Check for false alarms.  Such false could occur as a consequence of
    * some deadlock breaking logic that might have already serviced the SG2
@@ -306,7 +307,7 @@ int up_cpu_pause(int cpu)
 
   /* Execute Pause IRQ to CPU(cpu) */
 
-  putreg32(1, (uintptr_t)RISCV_IPI + (4 * cpu));
+  riscv_ipi_send(cpu);
 
   /* Wait for the other CPU to unlock g_cpu_paused meaning that
    * it is fully paused and ready for up_cpu_resume();
