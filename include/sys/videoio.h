@@ -899,8 +899,8 @@ struct v4l2_frmivalenum
 
 struct v4l2_pix_format
 {
-  uint16_t  width;              /* Image width in pixels */
-  uint16_t  height;             /* Image height in pixels */
+  uint32_t  width;              /* Image width in pixels */
+  uint32_t  height;             /* Image height in pixels */
   uint32_t  pixelformat;        /* The pixel format or type of compression. */
   uint32_t  field;              /* enum #v4l2_field */
   uint32_t  bytesperline;       /* For padding, zero if unused */
