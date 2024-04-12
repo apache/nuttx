@@ -117,12 +117,6 @@ static inline int arm64_dcache_range(uintptr_t start_addr,
   if ((start_addr & (line_size - 1)) != 0)
     {
       start_addr = LINE_ALIGN_DOWN(start_addr, line_size);
-
-      if (op == CACHE_OP_INVD)
-        {
-          dc_ops("civac", start_addr);
-          start_addr += line_size;
-        }
     }
 
   while (start_addr < end_addr)
@@ -137,14 +131,7 @@ static inline int arm64_dcache_range(uintptr_t start_addr,
 
         case CACHE_OP_INVD:
           {
-            if (start_addr + line_size <= end_addr)
-              {
-                dc_ops("ivac", start_addr);
-              }
-            else
-              {
-                dc_ops("civac", start_addr);
-              }
+            dc_ops("ivac", start_addr);
             break;
           }
 
