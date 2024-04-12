@@ -38,6 +38,7 @@
 #include <nuttx/net/ip.h>
 #include <nuttx/net/udp.h>
 #include <netinet/in.h>
+#include <netinet/udp.h>
 
 #include "netdev/netdev.h"
 #include "devif/devif.h"
@@ -78,6 +79,22 @@ static void udp_store_cmsg_timestamp(FAR struct udp_recvfrom_s *pstate,
 #endif
 
 #ifdef CONFIG_NET_SOCKOPTS
+
+#ifdef CONFIG_NET_UDP_OFFLOAD
+static void udp_recv_gro_pkt(FAR struct udp_recvfrom_s *pstate,
+                             FAR struct gro_cb *gro_info)
+{
+  FAR struct msghdr     *msg  = pstate->ir_msg;
+  FAR struct udp_conn_s *conn = pstate->ir_conn;
+  int gro_size = gro_info->gro_size;
+
+  if (conn->gro_enable == true && gro_size != 0)
+    {
+      cmsg_append(msg, SOL_UDP, UDP_GRO, &gro_size, sizeof(gro_size));
+    }
+}
+#endif
+
 static void udp_recvpktinfo(FAR struct udp_recvfrom_s *pstate,
                             FAR void *srcaddr, uint8_t ifindex)
 {
@@ -255,6 +272,9 @@ static inline void udp_readahead(struct udp_recvfrom_s *pstate)
                  pstate->ir_msg->msg_namelen);
         }
 
+#ifdef CONFIG_NET_UDP_OFFLOAD
+      udp_recv_gro_pkt(pstate, &iob->gro_info);
+#endif
       udp_recvpktinfo(pstate, srcaddr, ifindex);
 
       /* Remove the packet from the head of the I/O buffer chain. */
@@ -477,6 +497,9 @@ static uint16_t udp_eventhandler(FAR struct net_driver_s *dev,
 
           udp_sender(dev, pstate);
 
+#ifdef CONFIG_NET_UDP_OFFLOAD
+          udp_recv_gro_pkt(pstate, &dev->d_iob->gro_info);
+#endif
           /* Copy the data from the packet */
 
           udp_recvfrom_newdata(dev, pstate);

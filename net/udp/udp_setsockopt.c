@@ -107,6 +107,16 @@ int udp_setsockopt(FAR struct socket *psock, int option,
             conn->gso_size = gso_size;
           }
         break;
+      case UDP_GRO:
+        if (value_len < sizeof(int))
+          {
+            ret = -EINVAL;
+          }
+        else
+          {
+            conn->gro_enable = (bool)(*(FAR int *)value);
+          }
+        break;
 #endif
       default:
         nerr("ERROR: Unrecognized UDP option: %d\n", option);

@@ -290,6 +290,14 @@ static int sendto_next_transfer(FAR struct udp_conn_s *conn)
       return -EHOSTUNREACH;
     }
 
+#ifdef CONFIG_NET_UDP_OFFLOAD
+  if ((udpip_hdrsize(conn) + conn->gso_size) >  devif_get_mtu(dev))
+    {
+      nerr("ERROR: GSO size is out of range!\n");
+      return -E2BIG;
+    }
+#endif
+
 #ifndef CONFIG_NET_IPFRAG
   /* Sanity check if the packet len (with IP hdr) is greater than the MTU */
 

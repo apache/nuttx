@@ -146,7 +146,7 @@ if NET_SEG_OFFLOAD
 config NET_UDP_OFFLOAD
 	bool "Enable udp segment offload"
 	default n
-	depends on NET_GSO
+	depends on NET_GSO && NET_GRO
 	---help---
 		Enable the UDP segment offload.
 

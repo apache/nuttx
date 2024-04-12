@@ -129,6 +129,8 @@ struct udp_conn_s
   uint16_t gso_max_size;  /* Maximum segment size for gso */
   uint16_t gso_max_segs;  /* Maximum segment number for gso */
   uint16_t gso_size;      /* segment size for udp gso */
+
+  bool     gro_enable;    /* Request GRO aggregation */
 #endif
 
   /* Read-ahead buffering.
