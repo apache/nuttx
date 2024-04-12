@@ -74,19 +74,6 @@ static inline void mempool_add_queue(FAR sq_queue_t *queue,
     }
 }
 
-static inline size_t mempool_sq_count(FAR sq_queue_t *queue)
-{
-  FAR sq_entry_t *node;
-  size_t count = 0;
-
-  sq_for_every(queue, node)
-    {
-      count++;
-    }
-
-  return count;
-}
-
 #if CONFIG_MM_BACKTRACE >= 0
 static inline void mempool_add_backtrace(FAR struct mempool_s *pool,
                                          FAR struct mempool_backtrace_s *buf)
@@ -377,14 +364,14 @@ int mempool_info(FAR struct mempool_s *pool, FAR struct mempoolinfo_s *info)
   DEBUGASSERT(pool != NULL && info != NULL);
 
   flags = spin_lock_irqsave(&pool->lock);
-  info->ordblks = mempool_sq_count(&pool->queue);
-  info->iordblks = mempool_sq_count(&pool->iqueue);
+  info->ordblks = sq_count(&pool->queue);
+  info->iordblks = sq_count(&pool->iqueue);
 #if CONFIG_MM_BACKTRACE >= 0
   info->aordblks = list_length(&pool->alist);
 #else
   info->aordblks = pool->nalloc;
 #endif
-  info->arena = mempool_sq_count(&pool->equeue) * sizeof(sq_entry_t) +
+  info->arena = sq_count(&pool->equeue) * sizeof(sq_entry_t) +
     (info->aordblks + info->ordblks + info->iordblks) * blocksize;
   spin_unlock_irqrestore(&pool->lock, flags);
   info->sizeblks = blocksize;
@@ -420,9 +407,8 @@ mempool_info_task(FAR struct mempool_s *pool,
 
   if (task->pid == PID_MM_FREE)
     {
-      size_t count = mempool_sq_count(&pool->queue) +
-                     mempool_sq_count(&pool->iqueue);
-
+      size_t count = sq_count(&pool->queue) +
+                     sq_count(&pool->iqueue);
       info.aordblks += count;
       info.uordblks += count * blocksize;
     }
