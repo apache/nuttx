@@ -31,6 +31,47 @@
 #include <nuttx/net/netdev.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Some utils for port selection */
+
+#define NET_PORT_RANDOM_INIT(port) \
+  do \
+    { \
+      net_getrandom(&(port), sizeof(port)); \
+      (port) = (port) % (CONFIG_NET_DEFAULT_MAX_PORT - \
+                         CONFIG_NET_DEFAULT_MIN_PORT + 1); \
+      (port) += CONFIG_NET_DEFAULT_MIN_PORT; \
+    } while (0)
+
+/* Get next net port number, and make sure that the port number is within
+ * range.  In host byte order.
+ */
+
+#define NET_PORT_NEXT_H(hport) \
+  do \
+    { \
+      ++(hport); \
+      if ((hport) > CONFIG_NET_DEFAULT_MAX_PORT || \
+          (hport) < CONFIG_NET_DEFAULT_MIN_PORT) \
+        { \
+          (hport) = CONFIG_NET_DEFAULT_MIN_PORT; \
+        } \
+    } while (0)
+
+/* Get next net port number, and make sure that the port number is within
+ * range.  In both network & host byte order.
+ */
+
+#define NET_PORT_NEXT_NH(nport, hport) \
+  do \
+    { \
+      NET_PORT_NEXT_H(hport); \
+      (nport) = HTONS(hport); \
+    } while (0)
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 

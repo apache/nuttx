@@ -583,38 +583,30 @@ int tcp_selectport(uint8_t domain,
 
   if (g_last_tcp_port == 0)
     {
-      net_getrandom(&g_last_tcp_port, sizeof(uint16_t));
-
-      g_last_tcp_port = g_last_tcp_port %
-                        (CONFIG_NET_DEFAULT_MAX_PORT -
-                         CONFIG_NET_DEFAULT_MIN_PORT + 1);
-      g_last_tcp_port += CONFIG_NET_DEFAULT_MIN_PORT;
+      NET_PORT_RANDOM_INIT(g_last_tcp_port);
     }
 
   if (portno == 0)
     {
+      uint16_t loop_start = g_last_tcp_port;
+
       /* No local port assigned. Loop until we find a valid listen port
-       * number that is not being used by any other connection. NOTE the
-       * following loop is assumed to terminate but could not if all
-       * 32000-4096+1 ports are in used (unlikely).
+       * number that is not being used by any other connection.
        */
 
       do
         {
           /* Guess that the next available port number will be the one after
-           * the last port number assigned. Make sure that the port number
-           * is within range.
+           * the last port number assigned.
            */
 
-          ++g_last_tcp_port;
-
-          if (g_last_tcp_port > CONFIG_NET_DEFAULT_MAX_PORT ||
-              g_last_tcp_port < CONFIG_NET_DEFAULT_MIN_PORT)
+          NET_PORT_NEXT_NH(portno, g_last_tcp_port);
+          if (g_last_tcp_port == loop_start)
             {
-              g_last_tcp_port = CONFIG_NET_DEFAULT_MIN_PORT;
-            }
+              /* We have looped back, failed. */
 
-          portno = HTONS(g_last_tcp_port);
+              return -EADDRINUSE;
+            }
         }
       while (tcp_listener(domain, ipaddr, portno)
 #ifdef CONFIG_NET_NAT

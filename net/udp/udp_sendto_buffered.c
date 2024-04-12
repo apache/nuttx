@@ -263,6 +263,11 @@ static int sendto_next_transfer(FAR struct udp_conn_s *conn)
        */
 
       conn->lport = HTONS(udp_select_port(conn->domain, &conn->u));
+      if (!conn->lport)
+        {
+          nerr("ERROR: Failed to get a local port!\n");
+          return -EADDRINUSE;
+        }
     }
 
   /* Get the device that will handle the remote packet transfers.  This
