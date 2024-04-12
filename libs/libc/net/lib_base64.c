@@ -83,7 +83,12 @@ int b64_ntop(FAR const unsigned char *src, size_t srclen,
       *target++ = g_pad64;
     }
 
-  *target = '\0';
+  if (datalen >= targsize)
+    {
+      return -1;
+    }
+
+  *target = '\0'; /* Returned length doesn't include '\0' */
   return datalen;
 }
 
