@@ -50,6 +50,12 @@ ifeq ($(CONFIG_MM_IOB),y)
   NET_CSRCS += devif_iobsend.c
   NET_CSRCS += devif_filesend.c
 
+  # Net offload
+
+  ifeq ($(CONFIG_NET_SEG_OFFLOAD),y)
+    NET_CSRCS += devif_offload.c
+  endif
+
 endif
 
 # Include network device interface build support

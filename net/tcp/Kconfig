@@ -341,4 +341,14 @@ endif # NET_TCP_DEBUG_DROP_SEND
 
 endif # NET_STATISTICS
 
+if NET_SEG_OFFLOAD
+
+config NET_TCP_OFFLOAD
+	bool "Enable TCP offload"
+	default n
+	---help---
+		Enable the tcp segment offload.
+
+endif # NET_SEG_OFFLOAD
+
 endmenu # TCP/IP Networking

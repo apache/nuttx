@@ -45,8 +45,7 @@
  *   data payload as necessary.
  *
  * Input Parameters:
- *   dev   - The network driver instance.  The packet data is in the d_buf
- *           of the device.
+ *   pkt   - The packet data is in the d_iob of the device.
  *   proto - The protocol being supported
  *
  * Returned Value:
@@ -56,9 +55,9 @@
 
 #if !defined(CONFIG_NET_ARCH_CHKSUM) && \
     defined(CONFIG_NET_IPv4) && defined(CONFIG_MM_IOB)
-uint16_t ipv4_upperlayer_chksum(FAR struct net_driver_s *dev, uint8_t proto)
+uint16_t ipv4_upperlayer_chksum(FAR struct iob_s *pkt, uint8_t proto)
 {
-  FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
+  FAR struct ipv4_hdr_s *ipv4 = (FAR struct ipv4_hdr_s *)IOB_DATA(pkt);
   uint16_t upperlen;
   uint16_t iphdrlen;
   uint16_t sum;
@@ -87,7 +86,7 @@ uint16_t ipv4_upperlayer_chksum(FAR struct net_driver_s *dev, uint8_t proto)
 
   /* Sum IP payload data. */
 
-  sum = chksum_iob(sum, dev->d_iob, iphdrlen);
+  sum = chksum_iob(sum, pkt, iphdrlen);
 
   return (sum == 0) ? 0xffff : HTONS(sum);
 }
@@ -101,8 +100,7 @@ uint16_t ipv4_upperlayer_chksum(FAR struct net_driver_s *dev, uint8_t proto)
  *   data payload as necessary.
  *
  * Input Parameters:
- *   dev   - The network driver instance.  The packet data is in the d_buf
- *           of the device.
+ *   iob   - The packet data is in the d_iob of the device.
  *   proto - The protocol being supported
  *   iplen - The size of the IPv6 header.  This may be larger than
  *           IPv6_HDRLEN the IPv6 header if IPv6 extension headers are
@@ -115,14 +113,14 @@ uint16_t ipv4_upperlayer_chksum(FAR struct net_driver_s *dev, uint8_t proto)
 
 #if !defined(CONFIG_NET_ARCH_CHKSUM) && \
     defined(CONFIG_NET_IPv6) && defined(CONFIG_MM_IOB)
-uint16_t ipv6_upperlayer_chksum(FAR struct net_driver_s *dev,
+uint16_t ipv6_upperlayer_chksum(FAR struct iob_s *iob,
                                 uint8_t proto, unsigned int iplen)
 {
-  FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
+  FAR struct ipv6_hdr_s *ipv6 = (FAR struct ipv6_hdr_s *)IOB_DATA(iob);
   uint16_t upperlen;
   uint16_t sum;
 
-  DEBUGASSERT(dev != NULL && iplen >= IPv6_HDRLEN);
+  DEBUGASSERT(iob != NULL && iplen >= IPv6_HDRLEN);
 
   /* The length reported in the IPv6 header is the length of the payload
    * that follows the header.  If extension heders are present, then this
@@ -149,7 +147,7 @@ uint16_t ipv6_upperlayer_chksum(FAR struct net_driver_s *dev,
 
   /* Sum IP payload data. */
 
-  sum = chksum_iob(sum, dev->d_iob, iplen);
+  sum = chksum_iob(sum, iob, iplen);
 
   return (sum == 0) ? 0xffff : HTONS(sum);
 }

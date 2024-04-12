@@ -245,6 +245,13 @@ struct tcp_conn_s
   uint16_t user_mss;      /* Configured maximum segment size for the
                            * connection */
 #endif
+
+#ifdef CONFIG_NET_TCP_OFFLOAD
+  uint16_t gso_max_size;  /* Maximum segment size for gso */
+  uint16_t gso_segs;      /* current segment number for gso */
+  uint16_t gso_max_segs;  /* Maximum segment number for gso */
+#endif
+
   uint32_t rcv_adv;       /* The right edge of the recv window advertized */
 #ifdef CONFIG_NET_TCP_CC_NEWRENO
   uint32_t last_ackno;    /* The ack number at the last receive ack */
@@ -2239,6 +2246,103 @@ int tcp_ofoseg_bufsize(FAR struct tcp_conn_s *conn);
  ****************************************************************************/
 
 bool tcp_reorder_ofosegs(int nofosegs, FAR struct tcp_ofoseg_s *ofosegs);
+
+/****************************************************************************
+ * Name: tcp_send_mss
+ *
+ * Description:
+ *
+ * Input Parameters:
+ *   conn - The TCP connection.
+ *   *size_goal  - The maximum lenght of the packet that can be sent.
+ *
+ * Returned Value:
+ *   The current mss value of the TCP connection.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_TCP_OFFLOAD
+int tcp_send_mss(FAR struct tcp_conn_s *conn, FAR int *size_goal);
+
+/****************************************************************************
+ * Name: tcp_gso_size_goal
+ *
+ * Description:
+ *   Calculate the maximum length of the packet that can be sent currently.
+ *
+ * Input Parameters:
+ *   conn  - The TCP connection of interest.
+ *
+ * Returned Value:
+ *   The maximum lenght of the packet that can be sent.
+ *
+ ****************************************************************************/
+
+int tcp_gso_size_goal(FAR struct tcp_conn_s *conn);
+
+/****************************************************************************
+ * Name: tcp_gso_segs
+ *
+ * Description:
+ *   Calculates the number of the GSO packet that can be segmented.
+ *
+ * Input Parameters:
+ *   conn  - The TCP connection of interest.
+ *   pktlen  - The length of packet that will be sent.
+ *
+ * Returned Value:
+ *   The number of segments.
+ *
+ ****************************************************************************/
+
+int tcp_gso_segs(FAR struct tcp_conn_s *conn, int pktlen);
+
+/****************************************************************************
+ * Name: tcp_set_gso
+ *
+ * Description:
+ *   Set the gso information of the packet to be sent,
+ *   including gso_type, gso_size, gso_segs.
+ *
+ * Input Parameters:
+ *   conn - The TCP connection.
+ *   pkt  - Packet to be sent.
+ *   len  - The payload length of the packet.
+ *
+ * Returned Value:
+ *   A negative integer (ENOMEM) indicates that no memory available.
+ *   A positive integer is the length of the packet to be sent.
+ *
+ ****************************************************************************/
+
+void tcp_set_gso(FAR struct tcp_conn_s *conn, FAR struct iob_s *pkt,
+                 size_t len);
+
+/****************************************************************************
+ * Name: tcp_send_gso_pkt
+ *
+ * Description:
+ *   Pre-allocate the iobs for the TCP packets to be sent, and copy the data
+ *   into the iobs, in order to reduce the data copy on GSO segmentation.
+ *
+ * Input Parameters:
+ *   conn - The TCP connection.
+ *   dev  - The netdevice structure.
+ *   pkt  - Packet to be sent.
+ *   sndlen  - The length of the packet.
+ *   offset  - The offset of the packet in the iob structure.
+ *
+ * Returned Value:
+ *   A negative integer (ENOMEM) indicates that no memory available.
+ *   A positive integer is the length of the packet to be sent.
+ *
+ ****************************************************************************/
+
+int tcp_send_gso_pkt(FAR struct tcp_conn_s *conn,
+                     FAR struct net_driver_s *dev,
+                     FAR struct iob_s *pkt, unsigned int sndlen,
+                     unsigned int offset);
+#endif
 
 /****************************************************************************
  * Name: tcp_cc_init

@@ -38,6 +38,10 @@ ifeq ($(CONFIG_NET_IPv6),y)
 SOCK_CSRCS += ipv6_setsockopt.c ipv6_getsockname.c ipv6_getpeername.c ipv6_build_header.c ipv6_getsockopt.c
 endif
 
+ifeq ($(CONFIG_NET_SEG_OFFLOAD),y)
+SOCK_CSRCS += inet_offload.c
+endif
+
 # Include inet build support
 
 DEPPATH += --dep-path inet

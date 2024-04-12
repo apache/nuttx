@@ -212,7 +212,11 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
        * MSS (the minimum of the MSS and the available window).
        */
 
+#ifdef CONFIG_NET_TCP_OFFLOAD
+      DEBUGASSERT(dev->d_sndlen <= conn->gso_max_size);
+#else
       DEBUGASSERT(dev->d_sndlen <= conn->mss);
+#endif
 
 #if !defined(CONFIG_NET_TCP_WRITE_BUFFERS) || defined(CONFIG_NET_SENDFILE)
 

@@ -188,8 +188,14 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
 
       /* Calculate TCP checksum. */
 
-      tcp->tcpchksum = 0;
-      tcp->tcpchksum = ~tcp_ipv6_chksum(dev);
+#ifdef CONFIG_NET_TCP_OFFLOAD
+      if (PKT_GSOINFO(dev->d_iob)->gso_size == 0)
+#endif
+        {
+          tcp->tcpchksum = 0;
+          tcp->tcpchksum = ~tcp_ipv6_chksum(dev);
+        }
+
 #ifdef CONFIG_NET_STATISTICS
       g_netstats.ipv6.sent++;
 #endif
@@ -208,8 +214,14 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
 
       /* Calculate TCP checksum. */
 
-      tcp->tcpchksum = 0;
-      tcp->tcpchksum = ~tcp_ipv4_chksum(dev);
+#ifdef CONFIG_NET_TCP_OFFLOAD
+      if (PKT_GSOINFO(dev->d_iob)->gso_size == 0)
+#endif
+        {
+          tcp->tcpchksum = 0;
+          tcp->tcpchksum = ~tcp_ipv4_chksum(dev);
+        }
+
 #ifdef CONFIG_NET_STATISTICS
       g_netstats.ipv4.sent++;
 #endif

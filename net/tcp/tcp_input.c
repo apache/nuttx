@@ -1240,6 +1240,11 @@ found:
 
             conn->tcpstateflags = TCP_ESTABLISHED;
 
+#ifdef CONFIG_NET_TCP_OFFLOAD
+            conn->gso_max_segs = dev->d_gso_max_segs;
+            conn->gso_max_size = dev->d_gso_max_size;
+#endif
+
             /* Wake up any listener waiting for a connection on this port */
 
             if (tcp_accept_connection(dev, conn, tcp->destport) != OK)
@@ -1324,6 +1329,10 @@ found:
             conn->rcv_adv = tcp_getsequence(conn->rcvseq);
             tcp_snd_wnd_init(conn, tcp);
             tcp_snd_wnd_update(conn, tcp);
+#ifdef CONFIG_NET_TCP_OFFLOAD
+            conn->gso_max_segs = dev->d_gso_max_segs;
+            conn->gso_max_size = dev->d_gso_max_size;
+#endif
 
 #ifdef CONFIG_NET_TCP_CC_NEWRENO
             tcp_cc_update(conn, tcp);
