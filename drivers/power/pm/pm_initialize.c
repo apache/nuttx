@@ -89,6 +89,8 @@ void pm_initialize(void)
       gov = pm_greedy_governor_initialize();
 #elif defined(CONFIG_PM_GOVERNOR_ACTIVITY)
       gov = pm_activity_governor_initialize();
+#elif defined(CONFIG_PM_GOVERNOR_STABILITY)
+      gov = pm_stability_governor_initialize();
 #else
       static struct pm_governor_s null;
       gov = &null;

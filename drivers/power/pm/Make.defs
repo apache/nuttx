@@ -39,6 +39,12 @@ endif
 
 # Governor implementations
 
+ifeq ($(CONFIG_PM_GOVERNOR_STABILITY),y)
+
+CSRCS += stability_governor.c
+
+endif
+
 ifeq ($(CONFIG_PM_GOVERNOR_ACTIVITY),y)
 
 CSRCS += activity_governor.c
