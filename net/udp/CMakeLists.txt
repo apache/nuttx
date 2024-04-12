@@ -27,6 +27,7 @@ if(CONFIG_NET_UDP AND NOT CONFIG_NET_UDP_NO_STACK)
 
   if(CONFIG_NET_UDPPROTO_OPTIONS)
     list(APPEND SRCS udp_setsockopt.c)
+    list(APPEND SRCS udp_getsockopt.c)
   endif()
 
   if(CONFIG_NET_UDP_WRITE_BUFFERS)

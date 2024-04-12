@@ -477,6 +477,45 @@ int udp_setsockopt(FAR struct socket *psock, int option,
 #endif
 
 /****************************************************************************
+ * Name: udp_getsockopt
+ *
+ * Description:
+ *   udp_getsockopt() retrieves the value for the option specified by the
+ *   'option' argument for the socket specified by the 'psock' argument.  If
+ *   the size of the option value is greater than 'value_len', the value
+ *   stored in the object pointed to by the 'value' argument will be silently
+ *   truncated. Otherwise, the length pointed to by the 'value_len' argument
+ *   will be modified to indicate the actual length of the 'value'.
+ *
+ *   The 'level' argument specifies the protocol level of the option. To
+ *   retrieve options at the socket level, specify the level argument as
+ *   SOL_SOCKET; to retrieve options at the UDP-protocol level, the level
+ *   argument is SOL_UDP.
+ *
+ *   See <sys/socket.h> a complete list of values for the socket-level
+ *   'option' argument.  Protocol-specific options are are protocol specific
+ *   header files (such as netinet/udp.h for the case of the UDP protocol).
+ *
+ * Input Parameters:
+ *   psock     Socket structure of the socket to query
+ *   level     Protocol level to set the option
+ *   option    identifies the option to get
+ *   value     Points to the argument value
+ *   value_len The length of the argument value
+ *
+ * Returned Value:
+ *   Returns zero (OK) on success.  On failure, it returns a negated errno
+ *   value to indicate the nature of the error.  See psock_getsockopt() for
+ *   the complete list of appropriate return error codes.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_UDPPROTO_OPTIONS
+int udp_getsockopt(FAR struct socket *psock, int option,
+                   FAR void *value, FAR socklen_t *value_len);
+#endif
+
+/****************************************************************************
  * Name: udp_wrbuffer_initialize
  *
  * Description:

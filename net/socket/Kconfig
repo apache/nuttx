@@ -49,7 +49,7 @@ config NET_TCPPROTO_OPTIONS
 		Enable or disable support for TCP protocol level socket options.
 
 config NET_UDPPROTO_OPTIONS
-	bool
+	bool "UDP proto socket options"
 	default n
 	---help---
 		Enable or disable support for UDP protocol level socket options.
