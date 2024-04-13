@@ -539,7 +539,10 @@ int up_addrenv_destroy(arch_addrenv_t *addrenv)
   ptprev = (uintptr_t *)riscv_pgvaddr(addrenv->spgtables[ARCH_SPGTS - 1]);
   if (ptprev)
     {
-      for (i = 0; i < ENTRIES_PER_PGT; i++, vaddr += pgsize)
+      /* walk user space only */
+
+      i = (ARCH_SPGTS < 2) ? vaddr / pgsize : 0;
+      for (; i < ENTRIES_PER_PGT; i++, vaddr += pgsize)
         {
           ptlast = (uintptr_t *)riscv_pgvaddr(mmu_pte_to_paddr(ptprev[i]));
           if (ptlast)
