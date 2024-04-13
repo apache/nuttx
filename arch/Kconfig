@@ -722,6 +722,10 @@ config ARCH_VMA_MAPPING
 	bool "Support runtime memory mapping into SHM area"
 	default n
 
+config ARCH_KVMA_MAPPING
+	bool
+	default n
+
 config ARCH_SHM_VBASE
 	hex "Shared memory base"
 	depends on ARCH_VMA_MAPPING
@@ -730,7 +734,7 @@ config ARCH_SHM_VBASE
 
 config ARCH_KMAP_VBASE
 	hex "Kernel dynamic virtual mappings base"
-	depends on MM_KMAP
+	depends on ARCH_KVMA_MAPPING
 	---help---
 		The virtual address of the beginning of the kernel dynamic mapping
 		region.
@@ -792,7 +796,7 @@ endif # ARCH_VMA_MAPPING
 config ARCH_KMAP_NPAGES
 	int "Max kernel dynamic mapping pages"
 	default 1
-	depends on MM_KMAP
+	depends on ARCH_KVMA_MAPPING
 	---help---
 		The maximum amount of pages that a kernel can use for dynamically
 		mapping physical pages to itself.
