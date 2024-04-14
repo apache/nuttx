@@ -25,6 +25,8 @@
  * Included Files
  ****************************************************************************/
 
+#include "riscv_internal.h"
+
 #include "hardware/rv32m1_memorymap.h"
 
 /****************************************************************************
@@ -39,7 +41,7 @@
 #define RV32M1_IDLESTACK_BASE  _ebss
 #endif
 
-#define RV32M1_IDLESTACK_SIZE (CONFIG_IDLETHREAD_STACKSIZE & ~3)
+#define RV32M1_IDLESTACK_SIZE SMP_STACK_SIZE
 #define RV32M1_IDLESTACK_TOP  (RV32M1_IDLESTACK_BASE + RV32M1_IDLESTACK_SIZE)
 
 #endif /* __ARCH_RISCV_SRC_RV32M1_RV32M1_MEMORYMAP_H */

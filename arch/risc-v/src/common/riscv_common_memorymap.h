@@ -67,8 +67,7 @@ EXTERN uintptr_t g_idle_topstack;
 
 /* Address of per-cpu idle stack base */
 
-EXTERN uint8_t aligned_data(16)
-g_cpux_idlestack[CONFIG_SMP_NCPUS - 1][SMP_STACK_SIZE];
+EXTERN const uint8_t *g_cpux_idlestack[CONFIG_SMP_NCPUS];
 
 /* Address of the saved user stack pointer */
 

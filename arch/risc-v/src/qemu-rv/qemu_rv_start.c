@@ -87,10 +87,11 @@ void qemu_rv_clear_bss(void)
  ****************************************************************************/
 
 /* NOTE: g_idle_topstack needs to point the top of the idle stack
- * for CPU0 and this value is used in up_initial_state()
+ * for last CPU and this value is used in up_initial_state()
  */
 
-uintptr_t g_idle_topstack = QEMU_RV_IDLESTACK_TOP;
+uintptr_t g_idle_topstack = QEMU_RV_IDLESTACK_BASE +
+                              SMP_STACK_SIZE * CONFIG_SMP_NCPUS;
 
 /****************************************************************************
  * Public Functions
@@ -117,6 +118,8 @@ void qemu_rv_start(int mhartid, const char *dtb)
 
 #ifndef CONFIG_BUILD_KERNEL
   qemu_rv_clear_bss();
+
+  riscv_set_basestack(QEMU_RV_IDLESTACK_BASE, SMP_STACK_SIZE);
 
 #ifdef CONFIG_RISCV_PERCPU_SCRATCH
   riscv_percpu_add_hart(mhartid);

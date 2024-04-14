@@ -27,6 +27,8 @@
 
 #include <nuttx/config.h>
 
+#include "riscv_common_memorymap.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -39,6 +41,6 @@
 #define ESP_IDLESTACK_BASE  g_idlestack
 #endif
 
-#define ESP_IDLESTACK_TOP  (ESP_IDLESTACK_BASE + CONFIG_IDLETHREAD_STACKSIZE)
+#define ESP_IDLESTACK_TOP  (ESP_IDLESTACK_BASE + SMP_STACK_SIZE)
 
 #endif /* __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_MEMORYMAP_H */

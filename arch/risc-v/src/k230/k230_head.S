@@ -30,6 +30,7 @@
 
 #include "chip.h"
 #include "riscv_internal.h"
+#include "riscv_macros.S"
 
 /****************************************************************************
  * Public Symbols
@@ -64,13 +65,6 @@ __start:
   csrr a0, CSR_MHARTID
 #endif
 
-  /* Set stack pointer to the idle thread stack */
-
-  bnez a0, 1f
-  la   sp, K230_IDLESTACK_TOP
-  j    2f
-1:
-
   /* Load the number of CPUs that the kernel supports */
 
 #ifdef CONFIG_SMP
@@ -86,30 +80,8 @@ __start:
   wfi
 
 3:
-  /* Get start address of idle stack array */
-
-  la   t0, g_cpux_idlestack
-
-  /* Get idle stack offset */
-
-  li   t1, SMP_STACK_SIZE
-  mul  t1, t1, a0
-
-  /* Load idle stack top to sp */
-
-  add  sp, t0, t1
-
-  /*
-   * sp (stack top) = sp (stack top) - XCPTCONTEXT_SIZE
-   *
-   * Note: Reserve some space used by up_initial_state since we are already
-   * running and using the per CPU idle stack.
-   */
-
-  li   t0, -STACK_ALIGN_UP(XCPTCONTEXT_SIZE)
-  add  sp, sp, t0
-
-2:
+  /* Set stack pointer to the idle thread stack */
+  riscv_set_inital_sp K230_IDLESTACK_BASE, SMP_STACK_SIZE, a0
 
   /* Disable all interrupts (i.e. timer, external) */
 

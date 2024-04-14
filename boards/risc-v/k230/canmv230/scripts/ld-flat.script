@@ -114,6 +114,7 @@ SECTIONS
       *(.sbss.*)
       *(.gnu.linkonce.b*)
       *(COMMON)
+      . = ALIGN(32);
       _ebss = . ;
     }
 

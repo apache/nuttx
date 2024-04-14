@@ -25,6 +25,8 @@
  * Included Files
  ****************************************************************************/
 
+#include "riscv_common_memorymap.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -37,6 +39,6 @@
 #define ESP32C3_IDLESTACK_BASE  g_idlestack
 #endif
 
-#define ESP32C3_IDLESTACK_TOP  (ESP32C3_IDLESTACK_BASE + CONFIG_IDLETHREAD_STACKSIZE)
+#define ESP32C3_IDLESTACK_TOP  (ESP32C3_IDLESTACK_BASE + SMP_STACK_SIZE)
 
 #endif /* __ARCH_RISCV_SRC_ESP32C3_LEGACY_ESP32C3_MEMORYMAP_H */

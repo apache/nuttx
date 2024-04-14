@@ -43,17 +43,11 @@
  * Private Data
  ****************************************************************************/
 
-/* Note:
- *   1. QEMU-RV supports up to 8 cores currently.
- *   2. RISC-V requires a 16-byte stack alignment.
- */
-
-uint8_t aligned_data(16)
-g_cpux_idlestack[CONFIG_SMP_NCPUS - 1][SMP_STACK_SIZE];
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
+const uint8_t *g_cpux_idlestack[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
  * Public Functions
@@ -112,7 +106,7 @@ int up_cpu_idlestack(int cpu, struct tcb_s *tcb, size_t stack_size)
 
   /* Get the top of the stack */
 
-  stack_alloc = (uintptr_t)g_cpux_idlestack[cpu - 1];
+  stack_alloc = (uintptr_t)g_cpux_idlestack[cpu];
   DEBUGASSERT(stack_alloc != 0 && STACK_ISALIGNED(stack_alloc));
 
   tcb->adj_stack_size  = SMP_STACK_SIZE;

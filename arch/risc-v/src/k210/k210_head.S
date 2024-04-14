@@ -28,6 +28,7 @@
 #include "chip.h"
 #include "k210_memorymap.h"
 #include "riscv_internal.h"
+#include "riscv_macros.S"
 
 /****************************************************************************
  * Public Symbols
@@ -46,44 +47,17 @@ __start:
 
   csrr a0, CSR_MHARTID
 
-  /* Set stack pointer to the idle thread stack */
-
-  bnez a0, 1f
-  la   sp, K210_IDLESTACK0_TOP
-  j    2f
-1:
-
   /* In case of single CPU config, stop here */
 
 #if !defined(CONFIG_SMP) || (CONFIG_SMP_NCPUS == 1)
+  beqz a0, 2f
   csrw CSR_MIE, zero
   wfi
 #endif
 
-  /* Get start address of idle stack array */
-
-  la   t0, g_cpux_idlestack
-
-  /* Get idle stack offset */
-
-  li   t1, SMP_STACK_SIZE
-  mul  t1, t1, a0
-
-  /* Load idle stack top to sp */
-
-  add  sp, t0, t1
-
-  /*
-   * sp (stack top) = sp (stack top) - XCPTCONTEXT_SIZE
-   *
-   * Note: Reserve some space used by up_initial_state since we are already
-   * running and using the per CPU idle stack.
-   */
-
-  li   t0, -STACK_ALIGN_UP(XCPTCONTEXT_SIZE)
-  add  sp, sp, t0
-
 2:
+  /* Set stack pointer to the idle thread stack */
+  riscv_set_inital_sp K210_IDLESTACK_BASE, SMP_STACK_SIZE, a0
 
   /* Disable all interrupts (i.e. timer, external) in mie */
 

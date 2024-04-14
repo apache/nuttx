@@ -52,8 +52,6 @@
 #define showprogress(c)
 #endif
 
-#define BL602_IDLESTACK_SIZE (CONFIG_IDLETHREAD_STACKSIZE)
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -68,7 +66,7 @@
  * address.
  */
 
-uint8_t g_idle_stack[BL602_IDLESTACK_SIZE]
+uint8_t g_idle_stack[SMP_STACK_SIZE]
   locate_data(".noinit_idle_stack");
 
 /* Dont change the name of variable, since we refer this
@@ -167,7 +165,11 @@ void bfl_main(void)
 
   /* Configure IDLE stack */
 
-  g_idle_topstack = ((uint32_t)g_idle_stack + BL602_IDLESTACK_SIZE);
+  g_idle_topstack = ((uint32_t)g_idle_stack + SMP_STACK_SIZE);
+
+  /* Setup base stack */
+
+  riscv_set_basestack((uintptr_t)g_idle_stack, SMP_STACK_SIZE);
 
   /* Configure the UART so we can get debug output */
 
