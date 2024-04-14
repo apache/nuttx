@@ -23,6 +23,13 @@ config RPMSG_PING
 
 endif # RPMSG
 
+config RPMSG_ROUTER
+	bool "rpmsg router support"
+	default n
+	---help---
+		Rpmsg router driver for enabling communication
+		without physical channels.
+
 config RPMSG_PORT
 	bool
 	default n

@@ -45,6 +45,10 @@ if(CONFIG_RPMSG)
     list(APPEND SRCS rpmsg_virtio_ivshmem.c)
   endif()
 
+  if(CONFIG_RPMSG_ROUTER)
+    list(APPEND SRCS rpmsg_router_hub.c rpmsg_router_edge.c)
+  endif()
+
   target_include_directories(drivers PRIVATE ${NUTTX_DIR}/openamp/open-amp/lib)
   target_sources(drivers PRIVATE ${SRCS})
 endif()

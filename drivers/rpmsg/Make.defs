@@ -28,6 +28,10 @@ ifeq ($(CONFIG_RPMSG_PING),y)
 CSRCS += rpmsg_ping.c
 endif
 
+ifeq ($(CONFIG_RPMSG_ROUTER),y)
+CSRCS += rpmsg_router_hub.c rpmsg_router_edge.c
+endif
+
 ifeq ($(CONFIG_RPMSG_PORT),y)
 CSRCS += rpmsg_port.c
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)openamp$(DELIM)open-amp$(DELIM)lib
