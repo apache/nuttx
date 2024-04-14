@@ -305,6 +305,7 @@ config ARCH_CHIP_NRF91
 	select ARCH_HAVE_TRUSTZONE
 	select ARCH_HAVE_TICKLESS
 	select ARCH_DMA_NO_FLASH_TRANSFER
+	select ARCH_HAVE_FPU
 	depends on EXPERIMENTAL
 	---help---
 		Nordic nRF91 architectures (ARM Cortex-M33 with integrated
