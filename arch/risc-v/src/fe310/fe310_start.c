@@ -81,6 +81,10 @@ void __fe310_start(void)
       *dest++ = 0;
     }
 
+  /* Setup base stack */
+
+  riscv_set_basestack(FE310_IDLESTACK_BASE, SMP_STACK_SIZE);
+
   /* Move the initialized data section from his temporary holding spot in
    * FLASH into the correct place in SRAM.  The correct place in SRAM is
    * give by _sdata and _edata.  The temporary location is in FLASH at the

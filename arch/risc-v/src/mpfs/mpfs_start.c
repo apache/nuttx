@@ -98,6 +98,10 @@ void __mpfs_start(uint64_t mhartid)
       *dest++ = 0;
     }
 
+  /* Setup base stack */
+
+  riscv_set_basestack(MPFS_IDLESTACK_BASE, MPFS_IDLESTACK_SIZE);
+
   /* Move the initialized data section from his temporary holding spot in
    * FLASH into the correct place in SRAM.  The correct place in SRAM is
    * give by _sdata and _edata.  The temporary location is in FLASH at the

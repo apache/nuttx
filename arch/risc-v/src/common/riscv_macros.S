@@ -364,3 +364,45 @@
   csrr    \out, CSR_MHARTID
 #endif
 .endm
+
+/****************************************************************************
+ * Name: riscv_set_inital_sp
+ *
+ * Description:
+ *   Set inital sp for riscv core. This function should be only called
+ *   when initing.
+ *
+ *   sp (stack top) = sp base + idle stack size * hart id
+ *   sp (stack base) = sp (stack top) + idle stack size * - XCPTCONTEXT_SIZE
+ *
+ *   Note: The XCPTCONTEXT_SIZE byte after stack base is reserved for
+ *         up_initial_state since we are already running and using
+ *         the per CPU idle stack.
+ *
+ *   TODO: Support non-zero boot hart.
+ *
+ * Parameter:
+ *   base - Pointer to where the stack is allocated (e.g. _ebss)
+ *   size - Stack size for pre cpu to allocate
+ *   size - Hart id register of this hart (Usually a0)
+ *
+ ****************************************************************************/
+.macro riscv_set_inital_sp base, size, hartid
+  la      t0, \base
+  li      t1, \size
+  mul     t1, \hartid, t1
+  add     t0, t0, t1
+
+  /* ensure the last XCPTCONTEXT_SIZE is reserved for non boot CPU */
+
+  bnez \hartid, 998f
+  li   t1, STACK_ALIGN_DOWN(\size)
+  j    999f
+
+998:
+  li   t1, STACK_ALIGN_DOWN(\size - XCPTCONTEXT_SIZE)
+
+999:
+  add  t0, t0, t1
+  mv   sp, t0
+.endm

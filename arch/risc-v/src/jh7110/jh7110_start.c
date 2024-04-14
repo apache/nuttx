@@ -53,10 +53,11 @@ extern void __trap_vec(void);
  ****************************************************************************/
 
 /* NOTE: g_idle_topstack needs to point the top of the idle stack
- * for CPU0 and this value is used in up_initial_state()
+ * for last CPU and this value is used in up_initial_state()
  */
 
-uintptr_t g_idle_topstack = JH7110_IDLESTACK_TOP;
+uintptr_t g_idle_topstack = JH7110_IDLESTACK_BASE +
+                              SMP_STACK_SIZE * CONFIG_SMP_NCPUS;
 
 /****************************************************************************
  * Public Functions
@@ -138,6 +139,10 @@ void jh7110_start(int mhartid)
   if (0 == mhartid)
     {
       jh7110_clear_bss();
+
+      /* Setup base stack */
+
+      riscv_set_basestack(JH7110_IDLESTACK_BASE, SMP_STACK_SIZE);
 
       /* Initialize the per CPU areas */
 
