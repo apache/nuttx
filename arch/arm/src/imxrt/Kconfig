@@ -226,6 +226,7 @@ endmenu # Application Image Configuration
 config IMXRT_USDHC
 	bool
 	default n
+	select ARCH_HAVE_SDIO_PREFLIGHT
 
 config IMXRT_FLEXIO
 	bool
