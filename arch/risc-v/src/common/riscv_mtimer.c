@@ -127,6 +127,19 @@ static void riscv_mtimer_set_mtimecmp(struct riscv_mtimer_lowerhalf_s *priv,
   __MB();
 }
 #else
+
+#ifdef CONFIG_ARCH_RV_EXT_SSTC
+static inline void riscv_write_stime(uint64_t value)
+{
+#ifdef CONFIG_ARCH_RV64
+  WRITE_CSR(CSR_STIMECMP, value);
+#else
+  WRITE_CSR(CSR_STIMECMP, (uint32_t)value);
+  WRITE_CSR(CSR_STIMECMPH, (uint32_t)(value >> 32));
+#endif
+}
+#endif
+
 static uint64_t riscv_mtimer_get_mtime(struct riscv_mtimer_lowerhalf_s *priv)
 {
   UNUSED(priv);
@@ -137,7 +150,11 @@ static void riscv_mtimer_set_mtimecmp(struct riscv_mtimer_lowerhalf_s *priv,
                                       uint64_t value)
 {
   UNUSED(priv);
+#ifndef CONFIG_ARCH_RV_EXT_SSTC
   riscv_sbi_set_timer(value);
+#else
+  riscv_write_stime(value);
+#endif
 }
 #endif
 
