@@ -31,8 +31,8 @@
 #define IMX9_IRQ_RESERVED39             (IMX9_IRQ_EXT + 7)     /* 1-bit or 2-bit ECC or Parity error from CA55 platform cache */
 #define IMX9_IRQ_CAN1                   (IMX9_IRQ_EXT + 8)     /* CAN1 interrupt */
 #define IMX9_IRQ_CAN1_ERROR             (IMX9_IRQ_EXT + 9)     /* CAN1 error interrupt */
-#define IMX9_IRQ_GPIO1_0_15             (IMX9_IRQ_EXT + 10)    /* General Purpose Input/Output 1 interrupt 0 */
-#define IMX9_IRQ_GPIO1_16_31            (IMX9_IRQ_EXT + 11)    /* General Purpose Input/Output 1 interrupt 1 */
+#define IMX9_IRQ_GPIO1_0                (IMX9_IRQ_EXT + 10)    /* General Purpose Input/Output 1 interrupt 0 */
+#define IMX9_IRQ_GPIO1_1                (IMX9_IRQ_EXT + 11)    /* General Purpose Input/Output 1 interrupt 1 */
 #define IMX9_IRQ_I3C1                   (IMX9_IRQ_EXT + 12)    /* Improved Inter-Integrated Circuit 1 interrupt */
 #define IMX9_IRQ_LPI2C1                 (IMX9_IRQ_EXT + 13)    /* Low Power Inter-Integrated Circuit module 1 */
 #define IMX9_IRQ_LPI2C2                 (IMX9_IRQ_EXT + 14)    /* Low Power Inter-Integrated Circuit module 2 */
@@ -78,10 +78,10 @@
 #define IMX9_IRQ_FLEXIO2                (IMX9_IRQ_EXT + 54)    /* Flexible IO 2 interrupt */
 #define IMX9_IRQ_FLEXSPI1               (IMX9_IRQ_EXT + 55)    /* FlexSPI controller interface interrupt 1 */
 #define IMX9_IRQ_RESERVED88             (IMX9_IRQ_EXT + 56)    /* Reserved interrupt */
-#define IMX9_IRQ_GPIO2_0_15             (IMX9_IRQ_EXT + 57)    /* General Purpose Input/Output 2 interrupt 0 */
-#define IMX9_IRQ_GPIO2_16_31            (IMX9_IRQ_EXT + 58)    /* General Purpose Input/Output 2 interrupt 1 */
-#define IMX9_IRQ_GPIO3_0_15             (IMX9_IRQ_EXT + 59)    /* General Purpose Input/Output 3 interrupt 0 */
-#define IMX9_IRQ_GPIO3_16_31            (IMX9_IRQ_EXT + 60)    /* General Purpose Input/Output 3 interrupt 1 */
+#define IMX9_IRQ_GPIO2_0                (IMX9_IRQ_EXT + 57)    /* General Purpose Input/Output 2 interrupt 0 */
+#define IMX9_IRQ_GPIO2_1                (IMX9_IRQ_EXT + 58)    /* General Purpose Input/Output 2 interrupt 1 */
+#define IMX9_IRQ_GPIO3_0                (IMX9_IRQ_EXT + 59)    /* General Purpose Input/Output 3 interrupt 0 */
+#define IMX9_IRQ_GPIO3_1                (IMX9_IRQ_EXT + 60)    /* General Purpose Input/Output 3 interrupt 1 */
 #define IMX9_IRQ_I3C2                   (IMX9_IRQ_EXT + 61)    /* Improved Inter-Integrated Circuit 2 interrupt */
 #define IMX9_IRQ_LPI2C3                 (IMX9_IRQ_EXT + 62)    /* Low Power Inter-Integrated Circuit module 3 */
 #define IMX9_IRQ_LPI2C4                 (IMX9_IRQ_EXT + 63)    /* Low Power Inter-Integrated Circuit module 4 */
@@ -210,8 +210,8 @@
 #define IMX9_IRQ_RESERVED218            (IMX9_IRQ_EXT + 186)   /* Reserved interrupt */
 #define IMX9_IRQ_USB1                   (IMX9_IRQ_EXT + 187)   /* USB-1 Wake-up Interrupt */
 #define IMX9_IRQ_USB2                   (IMX9_IRQ_EXT + 188)   /* USB-2 Wake-up Interrupt */
-#define IMX9_IRQ_GPIO4_0_15             (IMX9_IRQ_EXT + 189)   /* General Purpose Input/Output 4 interrupt 0 */
-#define IMX9_IRQ_GPIO4_16_31            (IMX9_IRQ_EXT + 190)   /* General Purpose Input/Output 4 interrupt 1 */
+#define IMX9_IRQ_GPIO4_0                (IMX9_IRQ_EXT + 189)   /* General Purpose Input/Output 4 interrupt 0 */
+#define IMX9_IRQ_GPIO4_1                (IMX9_IRQ_EXT + 190)   /* General Purpose Input/Output 4 interrupt 1 */
 #define IMX9_IRQ_LPSPI5                 (IMX9_IRQ_EXT + 191)   /* Low Power Serial Peripheral Interface 5 */
 #define IMX9_IRQ_LPSPI6                 (IMX9_IRQ_EXT + 192)   /* Low Power Serial Peripheral Interface 6 */
 #define IMX9_IRQ_LPSPI7                 (IMX9_IRQ_EXT + 193)   /* Low Power Serial Peripheral Interface 7 */
