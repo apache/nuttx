@@ -81,6 +81,9 @@
 #define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
 #define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
 
+/* Interrupt Stack macros */
+#define INT_STACK_SIZE  (STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK))
+
 /* Format output with register width and hex */
 
 #ifdef CONFIG_ARCH_RV32

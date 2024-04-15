@@ -182,7 +182,7 @@ exception_common:
 
 /* Total required interrupt stack size */
 
-#define STACK_ALLOC_SIZE (CONFIG_ARCH_INTERRUPTSTACK * CONFIG_SMP_NCPUS)
+#define STACK_ALLOC_SIZE (INT_STACK_SIZE * CONFIG_SMP_NCPUS)
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
   .bss
