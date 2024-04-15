@@ -240,17 +240,9 @@ static int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
   bool padding_checksum = false;
   unsigned int segments = 0;
   unsigned int ram_segments = 0;
+  unsigned int rom_segments = 0;
   size_t offset = CONFIG_BOOTLOADER_OFFSET_IN_FLASH;
 #endif
-
-  ets_printf("\nIROM lma: 0x%lx  vma: 0x%lx  size: 0x%lx\n",
-             (uint32_t)_image_irom_lma,
-             (uint32_t)_image_irom_vma,
-             (uint32_t)_image_irom_size);
-  ets_printf("DROM lma: 0x%lx  vma: 0x%lx  size: 0x%lx\n",
-             (uint32_t)_image_drom_lma,
-             (uint32_t)_image_drom_vma,
-             (uint32_t)_image_drom_size);
 
 #ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
 
@@ -268,7 +260,7 @@ static int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
 
   /* Iterate for segment information parsing */
 
-  while (segments++ < 16)
+  while (segments++ < 16 && rom_segments < 2)
     {
       /* Read segment header */
 
@@ -318,6 +310,7 @@ static int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
         {
           app_drom_start = offset + sizeof(esp_image_segment_header_t);
           app_drom_start_aligned = app_drom_start & MMU_FLASH_MASK;
+          rom_segments++;
         }
 
       if (IS_IROM(segment_hdr.load_addr) &&
@@ -325,6 +318,7 @@ static int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
         {
           app_irom_start = offset + sizeof(esp_image_segment_header_t);
           app_irom_start_aligned = app_irom_start & MMU_FLASH_MASK;
+          rom_segments++;
         }
 
       if (IS_SRAM(segment_hdr.load_addr))
