@@ -727,7 +727,7 @@ else()
         ${nuttx_libs_paths} ${nuttx_extra_libs}
         $<$<NOT:$<BOOL:${APPLE}>>:-Wl,--end-group> -o nuttx.rel
       COMMAND ${CMAKE_OBJCOPY} --redefine-syms=nuttx-names.dat nuttx.rel
-      DEPENDS ${nuttx_libs} ${nuttx_extra_libs} sim_head
+      DEPENDS ${nuttx_libs} ${nuttx_extra_libs} sim_head sim_redefine_symbols
       COMMAND_EXPAND_LISTS)
   endif()
   add_custom_target(nuttx-rel DEPENDS nuttx.rel
