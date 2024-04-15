@@ -520,6 +520,11 @@ config ARCH_USE_S_MODE
 		and/or U-mode (in case of separate kernel-/userspaces). This provides
 		an option to run the kernel in S-mode, if the target supports it.
 
+config ARCH_RV_EXT_SSTC
+	bool "Enable RISC-V SSTC extension support"
+	default n
+	depends on ARCH_USE_S_MODE
+
 choice
 	prompt "Toolchain Selection"
 	default RISCV_TOOLCHAIN_GNU_RV64

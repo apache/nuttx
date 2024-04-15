@@ -44,6 +44,7 @@
 #  define CSR_CAUSE         CSR_SCAUSE       /* Interrupt cause register */
 #  define CSR_TVAL          CSR_STVAL        /* Trap value register */
 #  define CSR_TVEC          CSR_STVEC        /* Trap vector base addr register */
+#  define CSR_ENVCFG        CSR_SENVCFG      /* Env configuration register */
 
 /* In status register */
 
@@ -86,6 +87,7 @@
 #  define CSR_CAUSE         CSR_MCAUSE       /* Interrupt cause register */
 #  define CSR_TVAL          CSR_MTVAL        /* Trap value register */
 #  define CSR_TVEC          CSR_MTVEC        /* Trap vector base addr register */
+#  define CSR_ENVCFG        CSR_MENVCFG      /* Env configuration register */
 
 /* In status register */
 
