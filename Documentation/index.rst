@@ -38,5 +38,6 @@ Last Updated: |today|
    faq/index.rst
    guides/index.rst
    glossary.rst
+   logos/index.rst
 
 .. include:: substitutions.rst

@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg8"
+   sodipodi:docname="NuttX_Logo.svg"
+   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"
+   inkscape:export-filename="/home/alan/bitmap.png"
+   inkscape:export-xdpi="135"
+   inkscape:export-ydpi="135">
+  <title
+     id="title839">NuttX Logo</title>
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.70710678"
+     inkscape:cx="431.88103"
+     inkscape:cy="397.65901"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="1016"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>NuttX Logo</dc:title>
+        <dc:date>5 Nov 2021</dc:date>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Alan Carvalho de Assis</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:rights>
+          <cc:Agent>
+            <dc:title>Alan Carvalho de Assis</dc:title>
+          </cc:Agent>
+        </dc:rights>
+        <dc:publisher>
+          <cc:Agent>
+            <dc:title>Alan Carvalho de Assis</dc:title>
+          </cc:Agent>
+        </dc:publisher>
+        <dc:subject>
+          <rdf:Bag>
+            <rdf:li>NuttX</rdf:li>
+            <rdf:li>Logo</rdf:li>
+          </rdf:Bag>
+        </dc:subject>
+        <dc:description>This is the NuttX Logo created on Inkscape by Alan Carvalho de Assis</dc:description>
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/by/4.0/" />
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/licenses/by/4.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Notice" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Attribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="opacity:1;fill:#3c34e3;fill-opacity:1;stroke:#3c34e3;stroke-width:0.87061661;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect21-3"
+       width="125.31765"
+       height="125.31765"
+       x="-66.472198"
+       y="89.897842"
+       transform="rotate(-44.664693)" />
+    <path
+       style="fill:#2b2787;fill-opacity:1;stroke:#2b2787;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 94.687764,116.68644 v 13.72527 L 61.69753,65.043101 65.831645,60.809765 Z"
+       id="path876"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:#2b2787;fill-opacity:1;stroke:#2b2787;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 62.747838,158.32883 0.140317,-52.37455 -7.718393,-13.530945 0.09434,58.403545 z"
+       id="path874"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccc" />
+    <path
+       style="opacity:1;fill:#2b2787;fill-opacity:1;stroke:#2b2787;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 131.28244,93.428919 3.40768,-6.447874 -16.83798,-33.30178 c -2.28294,-4.282766 -5.12984,-5.593835 -8.5593,-3.835318 z"
+       id="path909"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccc" />
+    <path
+       style="fill:#2b2787;fill-opacity:1;stroke:#2b2787;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 159.47765,76.866662 4.92787,5.15938 -15.59021,31.240948 14.40583,28.62457 -4.91108,4.63044 -17.20547,-33.71605 z"
+       id="path901"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccccc" />
+    <rect
+       style="opacity:1;fill:#3c34e3;fill-opacity:0.03999999;stroke:#000000;stroke-width:0.82758737;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect21"
+       width="119.12396"
+       height="119.12396"
+       x="-63.152172"
+       y="92.989571"
+       transform="rotate(-44.664693)" />
+    <path
+       style="fill:#5a96bd;fill-opacity:1;stroke:#5a96bd;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 163.22114,141.89156 11.33776,22.1553 c 4.91866,9.54228 -5.07606,21.13237 -14.9248,13.87976 l -2.15735,-3.27989 c 5.43256,0.54485 12.64788,-4.58278 9.72003,-10.84241 l -8.91802,-17.06286 z"
+       id="path903"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccccc" />
+    <path
+       style="fill:#5a96bd;fill-opacity:1;stroke:#5a96bd;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 46.004432,175.57277 v 6.89571 h 16.751432 v -23.79597 l -7.491016,-7.49101 v 24.32756 z"
+       id="path872"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:#2b2787;fill-opacity:1;stroke:#2b2787;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 131.61722,129.27406 4.25627,7.81095 -18.70589,38.26098 c -4.10148,6.25673 -10.35834,4.34615 -14.40112,2.03253 3.26058,-0.0787 5.99296,-1.36046 7.67015,-5.04573 z"
+       id="path863"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccccc" />
+    <path
+       style="fill:#cee3f1;fill-opacity:1;stroke:#cee3f1;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 38.742565,175.41361 16.536457,0.0292 V 91.910118 l 41.042842,81.577412 c 3.499539,5.39763 10.948486,4.51348 13.356706,0.13364 l 21.93865,-44.34711 21.31404,41.83006 c 3.56716,6.66697 17.271,4.63704 14.26552,-7.2998 L 141.10459,112.80595 169.17935,57.228149 C 172.57493,44.124744 158.28515,40.98774 154.11303,48.714222 L 131.28244,93.428919 110.80914,52.645465 C 106.25083,43.049513 94.823303,46.356049 94.604759,55.785882 L 94.541299,130.32193 55.778751,53.806218 C 51.5022,44.839397 40.192407,44.92802 38.862488,56.215816 Z"
+       id="path846"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccccccccccccccccc" />
+    <path
+       style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 42.614458,175.45702 h 8.830468 V 72.385289 l 46.692702,94.061661 c 2.074702,4.4845 6.777942,6.19614 9.331092,0.11693 l 23.80703,-47.09958 25.26866,50.03453 c 2.57849,2.43431 6.9759,0.56294 5.98775,-3.44159 l -26.91662,-54.00927 28.74037,-56.794455 c 1.52693,-4.323715 -4.31438,-6.646808 -6.49032,-2.902048 L 131.50961,104.47383 107.09454,56.064645 c -2.52017,-5.701576 -8.1876,-5.501085 -8.535963,0.912057 V 152.92038 L 51.014671,57.00009 C 48.585838,51.460328 42.948533,52.179698 42.74769,58.4555 Z"
+       id="path860"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccccccccccccccccc" />
+    <path
+       style="fill:#cee3f1;fill-opacity:1;stroke:#ffffff;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 106.46311,151.83064 V 71.101895 l 20.1318,40.077905 z"
+       id="path862"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:#3c34e3;fill-opacity:1;stroke:#3c34e3;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 110.53446,89.64226 0.14174,42.64432 11.08476,-21.35152 z"
+       id="path856"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccc" />
+    <path
+       style="fill:#2b2787;fill-opacity:1;stroke:#2b2787;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 110.6762,132.28658 7.22606,-13.91808 -0.0167,-14.81675 -7.35109,-13.90949 0.14174,42.64432 v 0"
+       id="path858"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:#5a96bd;fill-opacity:1;stroke:#5a96bd;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 61.69753,65.043101 54.418581,51.161022 c 2.175944,-1.516779 5.063837,-1.856295 7.202307,1.138751 l 4.210757,8.509992 z"
+       id="path878"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccc" />
+    <path
+       style="fill:#5a96bd;fill-opacity:1;stroke:#5a96bd;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 164.40552,82.026042 9.8888,-20.96823 c 2.117,-5.996766 -2.60674,-9.618412 -4.61083,-10.365522 0.82913,2.30771 0.40252,4.476119 -0.50414,6.535858 l -9.7017,19.638514 z"
+       id="path907"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccccc" />
+    <g
+       aria-label="NuttX RTOS"
+       transform="matrix(0.65456192,0,0,0.65456192,-5.0466915,-327.56811)"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:48px;line-height:1.25;font-family:'Bitstream Vera Serif';-inkscape-font-specification:'Bitstream Vera Serif';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+       id="flowRoot827">
+      <path
+         d="m 10.0625,835.83984 h 10.078125 l 12.726562,24 v -24 h 8.554688 v 34.99219 H 31.34375 l -12.726563,-24 v 24 H 10.0625 Z"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Bitstream Vera Sans';-inkscape-font-specification:'Bitstream Vera Sans Bold'"
+         id="path832" />
+      <path
+         d="m 49.578125,860.61328 v -16.03125 h 8.4375 v 2.625 q 0,2.13281 -0.02344,5.36719 -0.02344,3.21094 -0.02344,4.28906 0,3.16406 0.164062,4.57031 0.164063,1.38282 0.5625,2.01563 0.515625,0.82031 1.335938,1.26562 0.84375,0.44532 1.921875,0.44532 2.625,0 4.125,-2.01563 1.5,-2.01562 1.5,-5.60156 v -12.96094 h 8.390625 v 26.25 h -8.390625 v -3.79687 q -1.898438,2.29687 -4.03125,3.39843 -2.109375,1.07813 -4.664063,1.07813 -4.546875,0 -6.9375,-2.78906 -2.367187,-2.78907 -2.367187,-8.10938 z"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Bitstream Vera Sans';-inkscape-font-specification:'Bitstream Vera Sans Bold'"
+         id="path834" />
+      <path
+         d="m 93.195312,837.12891 v 7.45312 h 8.648438 v 6 h -8.648438 v 11.13281 q 0,1.82813 0.726563,2.48438 0.726562,0.63281 2.882812,0.63281 h 4.312503 v 6 h -7.195315 q -4.96875,0 -7.054688,-2.0625 -2.0625,-2.08594 -2.0625,-7.05469 v -11.13281 h -4.171875 v -6 h 4.171875 v -7.45312 z"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Bitstream Vera Sans';-inkscape-font-specification:'Bitstream Vera Sans Bold'"
+         id="path836" />
+      <path
+         d="m 116.14063,837.12891 v 7.45312 h 8.64843 v 6 h -8.64843 v 11.13281 q 0,1.82813 0.72656,2.48438 0.72656,0.63281 2.88281,0.63281 h 4.3125 v 6 h -7.19531 q -4.96875,0 -7.05469,-2.0625 -2.0625,-2.08594 -2.0625,-7.05469 v -11.13281 h -4.17187 v -6 H 107.75 v -7.45312 z"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Bitstream Vera Sans';-inkscape-font-specification:'Bitstream Vera Sans Bold'"
+         id="path838" />
+      <path
+         d="m 149.79687,852.97266 12.14063,17.85937 h -9.39844 l -8.17969,-11.95312 -8.10937,11.95312 h -9.44531 l 12.14062,-17.85937 -11.67187,-17.13282 h 9.42187 l 7.66406,11.27344 L 152,835.83984 h 9.46875 z"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Bitstream Vera Sans';-inkscape-font-specification:'Bitstream Vera Sans Bold'"
+         id="path840" />
+      <path
+         d="m 196.83594,851.35547 q 2.83593,0 4.05468,-1.05469 1.24219,-1.05469 1.24219,-3.46875 0,-2.39062 -1.24219,-3.42187 -1.21875,-1.03125 -4.05468,-1.03125 h -3.79688 v 8.97656 z m -3.79688,6.23437 v 13.24219 h -9.02344 v -34.99219 h 13.78125 q 6.91407,0 10.125,2.32032 3.23438,2.32031 3.23438,7.33593 0,3.46875 -1.6875,5.69532 -1.66406,2.22656 -5.03906,3.28125 1.85156,0.42187 3.30468,1.92187 1.47657,1.47656 2.97657,4.5 l 4.89843,9.9375 H 206 l -4.26563,-8.69531 q -1.28906,-2.625 -2.625,-3.58594 -1.3125,-0.96094 -3.51562,-0.96094 z"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Bitstream Vera Sans';-inkscape-font-specification:'Bitstream Vera Sans Bold'"
+         id="path842" />
+      <path
+         d="m 214.64844,835.83984 h 32.25 v 6.82032 h -11.60157 v 28.17187 h -9.02343 v -28.17187 h -11.625 z"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Bitstream Vera Sans';-inkscape-font-specification:'Bitstream Vera Sans Bold'"
+         id="path844" />
+      <path
+         d="m 267.54687,841.74609 q -4.125,0 -6.39843,3.04688 -2.27344,3.04687 -2.27344,8.57812 0,5.50782 2.27344,8.55469 2.27343,3.04688 6.39843,3.04688 4.14844,0 6.42188,-3.04688 2.27344,-3.04687 2.27344,-8.55469 0,-5.53125 -2.27344,-8.57812 -2.27344,-3.04688 -6.42188,-3.04688 z m 0,-6.53906 q 8.4375,0 13.21875,4.82813 4.78125,4.82812 4.78125,13.33593 0,8.48438 -4.78125,13.3125 -4.78125,4.82813 -13.21875,4.82813 -8.41406,0 -13.21875,-4.82813 -4.78125,-4.82812 -4.78125,-13.3125 0,-8.50781 4.78125,-13.33593 4.80469,-4.82813 13.21875,-4.82813 z"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Bitstream Vera Sans';-inkscape-font-specification:'Bitstream Vera Sans Bold'"
+         id="path847" />
+      <path
+         d="m 316.71875,836.94141 v 7.40625 q -2.88281,-1.28907 -5.625,-1.94532 -2.74219,-0.65625 -5.17969,-0.65625 -3.23437,0 -4.78125,0.89063 -1.54687,0.89062 -1.54687,2.76562 0,1.40625 1.03125,2.20313 1.05468,0.77344 3.79687,1.33594 l 3.84375,0.77343 q 5.83594,1.17188 8.29688,3.5625 2.46093,2.39063 2.46093,6.79688 0,5.78906 -3.44531,8.625 -3.42187,2.8125 -10.47656,2.8125 -3.32813,0 -6.67969,-0.63281 -3.35156,-0.63282 -6.70312,-1.875 v -7.61719 q 3.35156,1.78125 6.46875,2.69531 3.14062,0.89063 6.04687,0.89063 2.95313,0 4.52344,-0.98438 1.57031,-0.98437 1.57031,-2.8125 0,-1.64062 -1.07812,-2.53125 Q 308.1875,857.75391 305,857.05078 l -3.49219,-0.77344 q -5.25,-1.125 -7.6875,-3.58593 -2.41406,-2.46094 -2.41406,-6.63282 0,-5.22656 3.375,-8.03906 3.375,-2.8125 9.70312,-2.8125 2.88282,0 5.92969,0.44531 3.04688,0.42188 6.30469,1.28907 z"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Bitstream Vera Sans';-inkscape-font-specification:'Bitstream Vera Sans Bold'"
+         id="path849" />
+    </g>
+  </g>
+</svg>
