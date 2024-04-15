@@ -57,13 +57,14 @@ function(nuttx_add_romfs)
     message(FATAL_ERROR "Either PATH or FILES must be specified")
   endif()
 
+  string(REPLACE " " ";" ROMFS_CMAKE_C_FLAGS ${CMAKE_C_FLAGS})
   foreach(rcsrc ${RCSRCS})
     get_filename_component(rcpath ${rcsrc} DIRECTORY)
     add_custom_command(
       OUTPUT ${rcsrc}
       COMMAND ${CMAKE_COMMAND} -E make_directory ${rcpath}
       COMMAND
-        ${CMAKE_C_COMPILER} ${CMAKE_C_FLAGS} -E -P -x c
+        ${CMAKE_C_COMPILER} ${ROMFS_CMAKE_C_FLAGS} -E -P -x c
         -I${CMAKE_BINARY_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/${rcsrc} >
         ${rcsrc}
       DEPENDS nuttx_context ${CMAKE_CURRENT_SOURCE_DIR}/${rcsrc})

@@ -28,6 +28,7 @@ set(NXSYMBOLS
     bind
     calloc
     chmod
+    chdir
     chown
     clock_gettime
     close
@@ -66,6 +67,7 @@ set(NXSYMBOLS
     malloc_size
     malloc_usable_size
     memcpy
+    memfd_create
     mkdir
     mmap
     mprotect
@@ -75,6 +77,7 @@ set(NXSYMBOLS
     perror
     poll
     posix_memalign
+    posix_spawn
     pthread_attr_init
     pthread_attr_setstack
     pthread_attr_destroy
@@ -83,18 +86,16 @@ set(NXSYMBOLS
     pthread_cond_signal
     pthread_cond_wait
     pthread_create
-    pthread_getspecific
-    pthread_key_create
     pthread_kill
     pthread_mutex_destroy
     pthread_mutex_init
     pthread_mutex_lock
     pthread_mutex_unlock
-    pthread_setspecific
     pthread_sigmask
     puts
     read
     readdir
+    readlink
     readv
     realloc
     recvfrom
@@ -109,6 +110,8 @@ set(NXSYMBOLS
     setbuf
     setjmp
     setsockopt
+    shm_open
+    shm_unlink
     shutdown
     sigaction
     sigaddset
@@ -118,7 +121,6 @@ set(NXSYMBOLS
     socket
     stat
     statvfs
-    stderr
     strcat
     strchr
     strerror
@@ -126,13 +128,20 @@ set(NXSYMBOLS
     strtol
     sysconf
     syslog
+    system
     tcgetattr
     tcsetattr
     unlink
     usleep
     utimensat
     write
-    writev)
+    writev
+    waitpid)
+
+if(CONFIG_TLS_NELEM AND CONFIG_TLS_NELEM GREATER_EQUAL 0)
+  list(APPEND NXSYMBOLS pthread_getspecific pthread_key_create
+       pthread_setspecific)
+endif()
 
 set(NXSYMBOL_RENAMES)
 foreach(NXSYMBOL ${NXSYMBOLS})

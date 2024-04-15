@@ -27,24 +27,18 @@ if(WIN32)
   return()
 endif()
 
-add_compile_options(-fno-common)
+add_compile_options(-U_AIX -U_WIN32 -U__APPLE__ -U__FreeBSD__)
+add_compile_options(-U__NetBSD__ -U__linux__ -U__sun__ -U__unix__)
+add_compile_options(-U__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__)
 
 if(CONFIG_DEBUG_SYMBOLS)
   add_compile_options(-g)
 endif()
 
-if(CONFIG_SIM_M32)
-  add_compile_options(-m32)
-endif()
-
 if(CONFIG_DEBUG_CUSTOMOPT)
   add_compile_options(${CONFIG_DEBUG_OPTLEVEL})
 elseif(CONFIG_DEBUG_FULLOPT)
-  if(CONFIG_ARCH_TOOLCHAIN_CLANG)
-    add_compile_options(-Oz)
-  else()
-    add_compile_options(-Os)
-  endif()
+  add_compile_options(-O2)
 endif()
 
 if(NOT CONFIG_DEBUG_NOOPT)
@@ -69,8 +63,12 @@ if(CONFIG_STACK_USAGE_WARNING)
   add_compile_options(-Wstack-usage=${CONFIG_STACK_USAGE_WARNING})
 endif()
 
-if(CONFIG_ARCH_COVERAGE)
+if(CONFIG_ARCH_COVERAGE_ALL)
   add_compile_options(-fprofile-generate -ftest-coverage)
+endif()
+
+if(CONFIG_SCHED_GPROF_ALL OR CONFIG_SIM_GPROF)
+  add_compile_options(-pg)
 endif()
 
 if(CONFIG_SIM_ASAN)
@@ -94,16 +92,25 @@ else()
   endif()
 endif()
 
-if(CONFIG_CXX_STANDARD)
-  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=${CONFIG_CXX_STANDARD}>)
+if(CONFIG_ARCH_INSTRUMENT_ALL)
+  add_compile_options(-finstrument-functions)
 endif()
 
-set(ARCHCFLAGS "-Wstrict-prototypes")
+set(ARCHCFLAGS
+    "-fno-common -fvisibility=hidden -ffunction-sections -fdata-sections -Wall -Wstrict-prototypes -Wshadow -Wundef -Wno-attributes -Wno-unknown-pragmas"
+)
+set(ARCHCXXFLAGS
+    "-fno-common -nostdinc++ -fvisibility=hidden -ffunction-sections -fdata-sections -Wall -Wshadow -Wundef -Wno-attributes -Wno-unknown-pragmas"
+)
 
 if(NOT CONFIG_LIBCXXTOOLCHAIN)
   set(ARCHCXXFLAGS "${ARCHCXXFLAGS} -nostdinc++")
 else()
   set(ARCHCXXFLAGS "${ARCHCXXFLAGS} -D_STDLIB_H_")
+endif()
+
+if(CONFIG_CXX_STANDARD)
+  string(APPEND ARCHCXXFLAGS " -std=${CONFIG_CXX_STANDARD}")
 endif()
 
 if(NOT CONFIG_CXX_EXCEPTION)
