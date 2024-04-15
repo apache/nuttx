@@ -56,6 +56,10 @@ if(CONFIG_SENSORS)
     list(APPEND SRCS adxl345_base.c)
   endif()
 
+  if(CONFIG_SENSORS_ADXL362)
+    list(APPEND SRCS adxl362_uorb.c)
+  endif()
+
   if(CONFIG_SENSORS_DHTXX)
     list(APPEND SRCS dhtxx.c)
   endif()
