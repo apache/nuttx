@@ -1,5 +1,5 @@
 ############################################################################
-# arch/arm64/src/qemu/Make.defs
+# arch/arm64/src/goldfish/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
