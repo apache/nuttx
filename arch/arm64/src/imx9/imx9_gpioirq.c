@@ -66,16 +66,17 @@ static struct imx9_portisr_s g_isrtab[IMX9_GPIO_NPORTS];
  ****************************************************************************/
 
 /****************************************************************************
- * Name: imx9_gpioN_A_B_interrupt
+ * Name: imx9_gpio_interrupt
  *
  * Description:
- *   GPIO interrupt handlers.
+ *   GPIO interrupt handlers. iMX9 has two interrupt sources for each pin,
+ *   the NuttX driver uses source 0.
  *
  ****************************************************************************/
 
-static int imx9_gpio_0_15_interrupt(int irq, void *context, void *arg)
+static int imx9_gpio_interrupt(int irq, void *context, void *arg)
 {
-  uint32_t port = *(uint32_t *)arg;
+  uint32_t port = (uint32_t)((uintptr_t)arg) >> GPIO_PORT_SHIFT;
   uint32_t status;
   uint32_t pin;
   uint32_t regaddr;
@@ -83,56 +84,13 @@ static int imx9_gpio_0_15_interrupt(int irq, void *context, void *arg)
   /* Get the pending interrupt indications */
 
   regaddr = IMX9_GPIO_ISFR0(port);
-  status  = getreg32(regaddr) & 0x0000ffff;
+  status  = getreg32(regaddr);
 
   /* Decode the pending interrupts */
 
-  for (pin = 0; pin < 16 && status != 0; pin++)
+  for (pin = 0; pin < 32 && status != 0; pin++)
     {
-      /* Is the IRQ associate with this pin pending? */
-
-      uint32_t mask = (1 << pin);
-      if ((status & mask) != 0)
-        {
-          struct imx9_portisr_s *isrtab;
-
-          /* Yes, clear the status bit and dispatch the interrupt */
-
-          putreg32(mask, regaddr);
-          status &= ~mask;
-
-          /* Get the interrupt table for this port */
-
-          isrtab = &g_isrtab[port];
-          if (isrtab->pins[pin].isr != NULL)
-            {
-              /* Run the user handler with the user's argument */
-
-              isrtab->pins[pin].isr(irq, context, isrtab->pins[pin].arg);
-            }
-        }
-    }
-
-  return OK;
-}
-
-static int imx9_gpio_16_31_interrupt(int irq, void *context, void *arg)
-{
-  uint32_t port = *(uint32_t *)arg;
-  uint32_t status;
-  uint32_t pin;
-  uint32_t regaddr;
-
-  /* Get the pending interrupt indications */
-
-  regaddr = IMX9_GPIO_ISFR0(port);
-  status  = getreg32(regaddr) & 0xffff0000;
-
-  /* Decode the pending interrupts */
-
-  for (pin = 16; pin < 32 && status != 0; pin++)
-    {
-      /* Is the IRQ associate with this pin pending? */
+      /* Is the IRQ associated with this pin pending? */
 
       uint32_t mask = (1 << pin);
       if ((status & mask) != 0)
@@ -189,51 +147,37 @@ void imx9_gpioirq_initialize(void)
         }
     }
 
-  /* Disable all unconfigured GPIO interrupts at the NVIC */
+  /* Disable all GPIO interrupts */
 
-  up_disable_irq(IMX9_IRQ_GPIO1_0_15);
-  up_disable_irq(IMX9_IRQ_GPIO1_16_31);
+  up_disable_irq(IMX9_IRQ_GPIO1_0);
+  up_disable_irq(IMX9_IRQ_GPIO1_1);
 
-  up_disable_irq(IMX9_IRQ_GPIO2_0_15);
-  up_disable_irq(IMX9_IRQ_GPIO2_16_31);
+  up_disable_irq(IMX9_IRQ_GPIO2_0);
+  up_disable_irq(IMX9_IRQ_GPIO2_1);
 
-  up_disable_irq(IMX9_IRQ_GPIO3_0_15);
-  up_disable_irq(IMX9_IRQ_GPIO3_16_31);
+  up_disable_irq(IMX9_IRQ_GPIO3_0);
+  up_disable_irq(IMX9_IRQ_GPIO3_1);
 
-  up_disable_irq(IMX9_IRQ_GPIO4_0_15);
-  up_disable_irq(IMX9_IRQ_GPIO4_16_31);
+  up_disable_irq(IMX9_IRQ_GPIO4_0);
+  up_disable_irq(IMX9_IRQ_GPIO4_1);
 
-  /* Attach all configured GPIO interrupts and enable the interrupt at the
-   * NVIC
-   */
+  /* Attach the common GPIO interrupt handler and enable the interrupt */
 
-  DEBUGVERIFY(irq_attach(IMX9_IRQ_GPIO1_0_15,
-                         imx9_gpio_0_15_interrupt, (void *)1));
-  up_enable_irq(IMX9_IRQ_GPIO1_0_15);
-  DEBUGVERIFY(irq_attach(IMX9_IRQ_GPIO1_16_31,
-                         imx9_gpio_16_31_interrupt, (void *)1));
-  up_enable_irq(IMX9_IRQ_GPIO1_16_31);
+  DEBUGVERIFY(irq_attach(IMX9_IRQ_GPIO1_0,
+                         imx9_gpio_interrupt, (void *)GPIO_PORT1));
+  up_enable_irq(IMX9_IRQ_GPIO1_0);
 
-  DEBUGVERIFY(irq_attach(IMX9_IRQ_GPIO2_0_15,
-                         imx9_gpio_0_15_interrupt, (void *)2));
-  up_enable_irq(IMX9_IRQ_GPIO1_0_15);
-  DEBUGVERIFY(irq_attach(IMX9_IRQ_GPIO2_16_31,
-                         imx9_gpio_16_31_interrupt, (void *)2));
-  up_enable_irq(IMX9_IRQ_GPIO1_16_31);
+  DEBUGVERIFY(irq_attach(IMX9_IRQ_GPIO2_0,
+                         imx9_gpio_interrupt, (void *)GPIO_PORT2));
+  up_enable_irq(IMX9_IRQ_GPIO2_0);
 
-  DEBUGVERIFY(irq_attach(IMX9_IRQ_GPIO3_0_15,
-                         imx9_gpio_0_15_interrupt, (void *)3));
-  up_enable_irq(IMX9_IRQ_GPIO1_0_15);
-  DEBUGVERIFY(irq_attach(IMX9_IRQ_GPIO3_16_31,
-                         imx9_gpio_16_31_interrupt, (void *)3));
-  up_enable_irq(IMX9_IRQ_GPIO1_16_31);
+  DEBUGVERIFY(irq_attach(IMX9_IRQ_GPIO3_0,
+                         imx9_gpio_interrupt, (void *)GPIO_PORT3));
+  up_enable_irq(IMX9_IRQ_GPIO3_0);
 
-  DEBUGVERIFY(irq_attach(IMX9_IRQ_GPIO4_0_15,
-                         imx9_gpio_0_15_interrupt, (void *)4));
-  up_enable_irq(IMX9_IRQ_GPIO1_0_15);
-  DEBUGVERIFY(irq_attach(IMX9_IRQ_GPIO4_16_31,
-                         imx9_gpio_16_31_interrupt, (void *)4));
-  up_enable_irq(IMX9_IRQ_GPIO1_16_31);
+  DEBUGVERIFY(irq_attach(IMX9_IRQ_GPIO4_0,
+                         imx9_gpio_interrupt, (void *)GPIO_PORT4));
+  up_enable_irq(IMX9_IRQ_GPIO4_0);
 }
 
 /****************************************************************************

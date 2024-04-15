@@ -275,6 +275,20 @@ void imx9_gpio_write(gpio_pinset_t pinset, bool value);
 bool imx9_gpio_read(gpio_pinset_t pinset);
 
 /****************************************************************************
+ * Name: imx9_gpioirq_attach
+ *
+ * Description:
+ *   Attach a pin interrupt handler.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IMX9_GPIO_IRQ
+int imx9_gpioirq_attach(gpio_pinset_t pinset, xcpt_t isr, void *arg);
+#else
+#define imx9_gpioirq_attach(pinset, isr, arg) 0
+#endif
+
+/****************************************************************************
  * Name: imx9_gpioirq_configure
  *
  * Description:
