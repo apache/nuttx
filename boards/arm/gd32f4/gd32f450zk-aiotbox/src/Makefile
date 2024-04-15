@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/gd32f4/gd32f450zk-aiotbox/src/Make.defs
+# boards/arm/gd32f4/gd32f450zk-aiotbox/src/Makefile
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
