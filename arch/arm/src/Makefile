@@ -117,7 +117,7 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),)
     LDENDGROUP   ?= -Wl,--end-group
     LDFLAGS      := $(addprefix -Xlinker ,$(LDFLAGS))
     LDFLAGS      += $(filter-out $(STRIPCFLAGS),$(CFLAGS))
-  else
+  else ifneq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
     LDSTARTGROUP ?= --start-group
     LDENDGROUP   ?= --end-group
   endif

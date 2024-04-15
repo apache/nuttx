@@ -1,5 +1,7 @@
 *.a
 *.adb
+*.dba
+*.dbo
 *.asm
 *.bin
 *.d

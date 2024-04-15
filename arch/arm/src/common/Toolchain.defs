@@ -47,7 +47,11 @@ endif
 ifeq ($(CONFIG_FRAME_POINTER),y)
   ARCHOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
 else
-  ARCHOPTIMIZATION += -fomit-frame-pointer
+  ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+    ARCHOPTIMIZATION += -noga
+  else
+    ARCHOPTIMIZATION += -fomit-frame-pointer
+  endif
 endif
 
 ifeq ($(CONFIG_STACK_CANARIES),y)
@@ -150,20 +154,24 @@ endif
 ARCHCPUFLAGS += $(TOOLCHAIN_MARCH) $(TOOLCHAIN_MTUNE) $(TOOLCHAIN_MFLOAT)
 
 ifeq ($(CONFIG_ARM_THUMB),y)
-  ARCHCPUFLAGS += -mthumb
+  ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+    ARCHCPUFLAGS += -thumb
+  else
+    ARCHCPUFLAGS += -mthumb
 
-  # GCC Manual:
-  # -mthumb
-  # ... If you want to force assembler files to be interpreted as Thumb
-  # code, either add a `.thumb' directive to the source or pass the
-  # -mthumb option directly to the assembler by prefixing it with -Wa.
+    # GCC Manual:
+    # -mthumb
+    # ... If you want to force assembler files to be interpreted as Thumb
+    # code, either add a `.thumb' directive to the source or pass the
+    # -mthumb option directly to the assembler by prefixing it with -Wa.
 
-  ARCHCPUFLAGS += -Wa,-mthumb
+    ARCHCPUFLAGS += -Wa,-mthumb
 
-  # Outputs an implicit IT block when there is a conditional instruction
-  # without an enclosing IT block.
+    # Outputs an implicit IT block when there is a conditional instruction
+    # without an enclosing IT block.
 
-  ARCHCPUFLAGS += -Wa,-mimplicit-it=always
+    ARCHCPUFLAGS += -Wa,-mimplicit-it=always
+  endif
 endif
 
 # Clang toolchain
@@ -312,8 +320,13 @@ endif
 
 # Architecture flags
 
-ARCHCFLAGS += -Wstrict-prototypes -Wno-attributes -Wno-unknown-pragmas
-ARCHCXXFLAGS += -Wno-attributes -Wno-unknown-pragmas
+ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+  ARCHCFLAGS += -gcc -gnu99 -preprocess_assembly_files --diag_suppress=68,111,174,222,236,257,826,1143,1721
+  ARCHCXXFLAGS += --gnu_asm --diag_suppress=540,826
+else
+  ARCHCFLAGS += -Wstrict-prototypes -Wno-attributes -Wno-unknown-pragmas
+  ARCHCXXFLAGS += -Wno-attributes -Wno-unknown-pragmas
+endif
 
 # When all C++ code is built using GCC 7.1 or a higher version,
 # we can safely disregard warnings of the type "parameter passing for X changed in GCC 7.1."
@@ -324,23 +337,37 @@ ifneq ($(CONFIG_LIBCXXTOOLCHAIN),y)
 endif
 
 ifneq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
-  ARCHCFLAGS += -Wno-psabi
-  ARCHCXXFLAGS += -Wno-psabi
+  ifneq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+    ARCHCFLAGS += -Wno-psabi
+    ARCHCXXFLAGS += -Wno-psabi
+  endif
 endif
 
 ifneq ($(CONFIG_CXX_STANDARD),)
-  ARCHCXXFLAGS += -std=$(CONFIG_CXX_STANDARD)
+  ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+    ARCHCXXFLAGS += --$(CONFIG_CXX_STANDARD)
+  else
+    ARCHCXXFLAGS += -std=$(CONFIG_CXX_STANDARD)
+  endif
 endif
 
 ifneq ($(CONFIG_CXX_EXCEPTION),y)
-  ARCHCXXFLAGS += -fno-exceptions -fcheck-new
+  ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+    ARCHCXXFLAGS += --no_exceptions -check=alloc
+  else
+    ARCHCXXFLAGS += -fno-exceptions -fcheck-new
+  endif
 endif
 
 ifneq ($(CONFIG_CXX_RTTI),y)
   ARCHCXXFLAGS += -fno-rtti
 endif
-
-ARCHOPTIMIZATION += -fno-common -Wall -Wshadow -Wundef
+ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+ARCHOPTIMIZATION += --no_commons
+else
+ARCHOPTIMIZATION += -fno-common
+endif
+ARCHOPTIMIZATION += -Wall -Wshadow -Wundef
 
 ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
   ARCHOPTIMIZATION += -nostdlib
