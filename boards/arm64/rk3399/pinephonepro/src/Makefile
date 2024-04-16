@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm64/a64/pinephone/src/Makefile
+# boards/arm64/rk3399/pinephonepro/src/Makefile
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with

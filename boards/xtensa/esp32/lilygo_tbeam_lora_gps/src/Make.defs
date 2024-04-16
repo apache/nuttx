@@ -1,5 +1,5 @@
 ############################################################################
-# boards/xtensa/esp32/ttgo_lora_esp32/src/Make.defs
+# boards/xtensa/esp32/lilygo_tbeam_lora_gps/src/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with

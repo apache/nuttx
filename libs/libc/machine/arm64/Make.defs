@@ -1,5 +1,5 @@
 ############################################################################
-# libs/libc/machine/ARM64/Make.defs
+# libs/libc/machine/arm64/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with

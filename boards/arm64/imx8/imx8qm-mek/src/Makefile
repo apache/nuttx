@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/imx6/sabre-6quad/src/Makefile
+# boards/arm64/imx8/imx8qm-mek/src/Makefile
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
