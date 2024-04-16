@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32f7/nucleo-144/configs/f746-cansock/Make.defs
+# boards/arm/stm32f7/nucleo-144/configs/f722-cansock/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with

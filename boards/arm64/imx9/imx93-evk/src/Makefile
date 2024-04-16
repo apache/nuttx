@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm64/imx9/emx93-evk/src/Makefile
+# boards/arm64/imx9/imx93-evk/src/Makefile
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
