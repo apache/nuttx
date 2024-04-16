@@ -1248,6 +1248,16 @@ menuconfig NET_CDCNCM
 
 if NET_CDCNCM
 
+config NET_CDCMBIM
+	bool "CDC-MBIM Ethernet-over-USB"
+	default n
+	---help---
+		This option may require CONFIG_NETDEV_LATEINIT=y, otherwise the
+		power-up initialization may call the non-existent xxx_netinitialize().
+		This option is not automatically selected because it may be that
+		you have an additional network device that requires the early
+		xxx_netinitialize() call.
+
 menuconfig CDCNCM_COMPOSITE
 	bool "CDC/NCM composite support"
 	default n
@@ -1385,8 +1395,16 @@ config CDCNCM_VENDORSTR
 	default "NuttX"
 
 config CDCNCM_PRODUCTSTR
-	string "Product string"
+	string "CDCNCM Product string"
 	default "CDC/NCM Ethernet"
+
+if NET_CDCMBIM
+
+config CDCMBIM_PRODUCTSTR
+	string "CDCMBIM Product string"
+	default "CDC/MBIM Ethernet"
+
+endif # NET_CDCMBIM
 
 endif # !CDCNCM_COMPOSITE
 

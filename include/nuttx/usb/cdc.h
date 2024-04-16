@@ -343,6 +343,16 @@
 #define NCM_NETWORK_CONNECTION  ECM_NETWORK_CONNECTION
 #define NCM_SPEED_CHANGE        ECM_SPEED_CHANGE
 
+/* Table 16: Requests, Mobile Broadband Interface Model */
+
+#define MBIM_SEND_COMMAND       ECM_SEND_COMMAND
+#define MBIM_GET_RESPONSE       ECM_GET_RESPONSE
+
+/* Table 17: Notifications, Networking Control Model */
+
+#define MBIM_NETWORK_CONNECTION NCM_NETWORK_CONNECTION
+#define MBIM_SPEED_CHANGE       NCM_SPEED_CHANGE
+
 /* Descriptors ***************************************************************/
 
 /* Table 25: bDescriptor SubType in Functional Descriptors */
@@ -912,6 +922,25 @@ struct cdc_ncm_funcdesc_s
 };
 
 #define SIZEOF_NCM_FUNCDESC 6
+
+struct cdc_mbim_funcdesc_s
+{
+  uint8_t size;       /* bLength, Size of this descriptor */
+  uint8_t type;       /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
+  uint8_t subtype;    /* bDescriptorSubType, CDC_DSUBTYPE_NCM as defined in
+                       * Table 25.
+                       */
+  uint8_t version[2]; /* bcdNcmVersion, the NCM version 0x0100 */
+  uint8_t maxctrlmsg[2];
+  uint8_t numfilter;
+  uint8_t maxfiltersize;
+  uint8_t maxsegmentsize[2];
+  uint8_t netcaps;    /* bmNetworkCapabilities, The NCM net types the device
+                       * supports.
+                       */
+};
+
+#define SIZEOF_MBIM_FUNCDESC 12
 
 /* Table 43: ATM Networking Functional Descriptor */
 
