@@ -88,10 +88,6 @@ ifeq ($(CONFIG_RGBLED),y)
 CSRCS += stm32_rgbled.c
 endif
 
-ifeq ($(CONFIG_RTC_DS1307),y)
-CSRCS += stm32_ds1307.c
-endif
-
 ifeq ($(CONFIG_PWM),y)
 CSRCS += stm32_pwm.c
 endif

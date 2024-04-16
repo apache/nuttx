@@ -60,6 +60,10 @@ ifeq ($(CONFIG_LCD_SSD1306),y)
   CSRCS += stm32_ssd1306.c
 endif
 
+ifeq ($(CONFIG_RTC_DS1307),y)
+  CSRCS += stm32_ds1307.c
+endif
+
 ifeq ($(CONFIG_SENSORS_LM75),y)
   CSRCS += stm32_lm75.c
 endif
