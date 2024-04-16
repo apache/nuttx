@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f4discovery/src/stm32_ds1307.c
+ * boards/arm/stm32/common/src/stm32_ds1307.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -33,7 +33,6 @@
 
 #include "stm32.h"
 #include "stm32_i2c.h"
-#include "stm32f4discovery.h"
 
 #if defined(CONFIG_I2C) && defined(CONFIG_RTC_DS1307)
 
@@ -41,60 +40,56 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define DS1307_I2C_ADDR    0x6f /* DS1307 I2C Address */
-#define DS1307_I2C_BUS     1    /* DS1307 is on I2C1 */
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_ds1307_init
+ * Name: board_ds1307_initialize
  *
  * Description:
  *   Initialize and configure the DS1307 RTC
  *
+ * Input Parameters:
+ *   busno - The I2C bus number where DS1307 is connected.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
  ****************************************************************************/
 
-int stm32_ds1307_init(void)
+int board_ds1307_initialize(int busno)
 {
   struct i2c_master_s *i2c;
-  static bool initialized = false;
   int ret;
 
-  /* Have we already initialized? */
+  rtcinfo("Initialize I2C%d\n", DS1307_I2C_BUS);
 
-  if (!initialized)
+  /* Initialize I2C */
+
+  i2c = stm32_i2cbus_initialize(busno);
+  if (!i2c)
     {
-      /* No.. Get the I2C bus driver */
-
-      rtcinfo("Initialize I2C%d\n", DS1307_I2C_BUS);
-      i2c = stm32_i2cbus_initialize(DS1307_I2C_BUS);
-      if (!i2c)
-        {
-          rtcerr("ERROR: Failed to initialize I2C%d\n", DS1307_I2C_BUS);
-          return -ENODEV;
-        }
-
-      /* Now bind the I2C interface to the DS1307 RTC driver */
-
-      rtcinfo("Bind the DS1307 RTC driver to I2C%d\n", DS1307_I2C_BUS);
-      ret = dsxxxx_rtc_initialize(i2c);
-      if (ret < 0)
-        {
-          rtcerr("ERROR: Failed to bind I2C%d to the DS1307 RTC driver\n",
-                 DS1307_I2C_BUS);
-          return -ENODEV;
-        }
-
-      /* Synchronize the system time to the RTC time */
-
-      clock_synchronize(NULL);
-
-      /* Now we are initialized */
-
-      initialized = true;
+      rtcerr("ERROR: Failed to initialize I2C%d\n", busno);
+      return -ENODEV;
     }
+
+  /* Now bind the I2C interface to the DS1307 RTC driver */
+
+  rtcinfo("Bind the DS1307 RTC driver to I2C%d\n", busno);
+  ret = dsxxxx_rtc_initialize(i2c);
+  if (ret < 0)
+    {
+      rtcerr("ERROR: Failed to bind I2C%d to the DS1307 RTC driver\n",
+             DS1307_I2C_BUS);
+      return -ENODEV;
+    }
+
+  /* Synchronize the system time to the RTC time */
+
+  clock_synchronize(NULL);
+
+  /* Now we are initialized */
 
   return OK;
 }
