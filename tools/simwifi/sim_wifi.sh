@@ -23,6 +23,7 @@
 
 NUTTX_BR_IF="nuttx0"
 RUN_DIR="/var/run/simwifi"
+LINK_DIR="/usr/bin"
 CUR_DIR=""
 DBG_LEVEL=1
 
@@ -509,6 +510,8 @@ init()
 
   init_env
 
+  ln -s $CUR_DIR/sim_wifi.sh $LINK_DIR/sim_wifi.sh
+
   echo "defwan:$1" > $DEFCONF_FILE
   [ -n "$1" -a  -n "$(ifconfig | grep $1)" ] && start_bridge $1
 
@@ -526,6 +529,8 @@ clean()
   }
 
   recovery_to_init
+
+  rm $LINK_DIR/sim_wifi.sh
 
   cur_mode=$(get_var mode $DEFCONF_FILE)
   [ "$cur_mode" = "hwsim" ] &&  modprobe -r mac80211_hwsim

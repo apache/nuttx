@@ -56,7 +56,7 @@
 
 #define HOSTAPD_CTRL_PATH " -p /var/run/simwifi/hostapd "
 #define HOSTAPD_CLI "/usr/bin/sudo /usr/sbin/hostapd_cli "
-#define SIMWIFI_FILE "tools/simwifi/sim_wifi.sh "
+#define SIMWIFI_FILE "/usr/bin/sim_wifi.sh "
 
 #define WPA_SET_NETWORK(wifidev, fmt, args...) \
     set_cmd(wifidev,"set_network %d "fmt, (wifidev)->network_id, ##args)
@@ -1360,8 +1360,8 @@ static int wifidriver_set_mode(struct sim_netdev_s *wifidev,
       /* Start the sta config, including wpa_supplicant and udhcpc. */
 
       ret = host_system(NULL, 0,
-                        "/usr/bin/sudo %s/"SIMWIFI_FILE" start_sta %s",
-                        TOPDIR, wifidev->host_ifname);
+                        "/usr/bin/sudo "SIMWIFI_FILE" start_sta %s",
+                        wifidev->host_ifname);
       if (ret == 0)
         {
           /* Check the network number, if no network, should add new network.
@@ -1389,8 +1389,8 @@ static int wifidriver_set_mode(struct sim_netdev_s *wifidev,
       /* Start the hostapd. */
 
       ret = host_system(NULL, 0,
-                        "/usr/bin/sudo %s/"SIMWIFI_FILE" start_ap %s",
-                        TOPDIR, wifidev->host_ifname);
+                        "/usr/bin/sudo "SIMWIFI_FILE" start_ap %s",
+                        wifidev->host_ifname);
 
       break;
     default:
