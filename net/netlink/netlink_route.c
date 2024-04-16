@@ -489,7 +489,7 @@ static int netlink_get_devlist(NETLINK_HANDLE handle,
 #endif
 
 /****************************************************************************
- * Name: netlink_get_arptable()
+ * Name: netlink_fill_arptable()
  *
  * Description:
  *   Return the entire ARP table.
@@ -497,13 +497,122 @@ static int netlink_get_devlist(NETLINK_HANDLE handle,
  ****************************************************************************/
 
 #if defined(CONFIG_NET_ARP) && !defined(CONFIG_NETLINK_DISABLE_GETNEIGH)
-static int netlink_get_arptable(NETLINK_HANDLE handle,
-                              FAR const struct nlroute_sendto_request_s *req)
+static size_t netlink_fill_arptable(
+                              FAR struct getneigh_recvfrom_rsplist_s **entry)
 {
-  FAR struct getneigh_recvfrom_rsplist_s *entry;
   unsigned int ncopied;
   size_t allocsize;
   size_t tabsize;
+  size_t rspsize;
+
+  /* Lock the network so that the ARP table will be stable, then copy
+   * the ARP table into the allocated memory.
+   */
+
+  net_lock();
+  ncopied = arp_snapshot((FAR struct arpreq *)(*entry)->payload.data,
+                         CONFIG_NET_ARPTAB_SIZE);
+  net_unlock();
+
+  /* Now we have the real number of valid entries in the ARP table and
+   * we can trim the allocation.
+   */
+
+  if (ncopied > 0)
+    {
+      FAR struct getneigh_recvfrom_rsplist_s *newentry;
+
+      tabsize = ncopied * sizeof(struct arpreq);
+      rspsize = SIZEOF_NLROUTE_RECVFROM_RESPONSE_S(tabsize);
+      allocsize = SIZEOF_NLROUTE_RECVFROM_RSPLIST_S(tabsize);
+
+      newentry = kmm_realloc(*entry, allocsize);
+
+      if (newentry != NULL)
+        {
+          *entry = newentry;
+        }
+
+      (*entry)->payload.hdr.nlmsg_len = rspsize;
+      (*entry)->payload.attr.rta_len  = RTA_LENGTH(tabsize);
+    }
+
+  return ncopied;
+}
+#endif
+
+/****************************************************************************
+ * Name: netlink_fill_nbtable()
+ *
+ * Description:
+ *   Return the entire IPv6 neighbor table.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_IPv6) && !defined(CONFIG_NETLINK_DISABLE_GETNEIGH)
+static size_t netlink_fill_nbtable(
+                              FAR struct getneigh_recvfrom_rsplist_s **entry)
+{
+  unsigned int ncopied;
+  size_t allocsize;
+  size_t tabsize;
+  size_t rspsize;
+
+  /* Lock the network so that the Neighbor table will be stable, then
+   * copy the Neighbor table into the allocated memory.
+   */
+
+  net_lock();
+  ncopied = neighbor_snapshot(
+                      (FAR struct neighbor_entry_s *)(*entry)->payload.data,
+                      CONFIG_NET_IPv6_NCONF_ENTRIES);
+  net_unlock();
+
+  /* Now we have the real number of valid entries in the Neighbor table
+   * and we can trim the allocation.
+   */
+
+  if (ncopied > 0)
+    {
+      FAR struct getneigh_recvfrom_rsplist_s *newentry;
+
+      tabsize   = ncopied * sizeof(struct neighbor_entry_s);
+      rspsize   = SIZEOF_NLROUTE_RECVFROM_RESPONSE_S(tabsize);
+      allocsize = SIZEOF_NLROUTE_RECVFROM_RSPLIST_S(tabsize);
+
+      newentry = kmm_realloc(*entry, allocsize);
+
+      if (newentry != NULL)
+        {
+          *entry = newentry;
+        }
+
+      (*entry)->payload.hdr.nlmsg_len = rspsize;
+      (*entry)->payload.attr.rta_len  = RTA_LENGTH(tabsize);
+    }
+
+  return ncopied;
+}
+#endif
+
+/****************************************************************************
+ * Name: netlink_fill_nbtable()
+ *
+ * Description:
+ *   Return the entire IPv6 neighbor table.
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_NETLINK_DISABLE_GETNEIGH)
+static FAR struct netlink_response_s *
+netlink_get_neighbor(FAR const void *neigh, int domain, int type,
+                     FAR const struct nlroute_sendto_request_s *req)
+{
+  FAR struct getneigh_recvfrom_rsplist_s *alloc;
+  FAR struct getneigh_recvfrom_response_s *resp;
+  size_t allocsize;
+  size_t tabsize;
+  size_t tabnum;
   size_t rspsize;
 
   /* Preallocate memory to hold the maximum sized ARP table
@@ -512,147 +621,105 @@ static int netlink_get_arptable(NETLINK_HANDLE handle,
    * the number of valid entries in the ARP table.
    */
 
-  tabsize   = CONFIG_NET_ARPTAB_SIZE * sizeof(struct arpreq);
+#if defined(CONFIG_NET_ARP)
+  if (domain == AF_INET)
+    {
+      tabnum  = req ? CONFIG_NET_ARPTAB_SIZE : 1;
+      tabsize = tabnum * sizeof(struct arpreq);
+    }
+  else
+#endif
+#if defined(CONFIG_NET_IPv6)
+  if (domain == AF_INET6)
+    {
+      tabnum  = req ? CONFIG_NET_IPv6_NCONF_ENTRIES : 1;
+      tabsize = tabnum * sizeof(struct neighbor_entry_s);
+    }
+  else
+#endif
+    {
+      return NULL;
+    }
+
   rspsize   = SIZEOF_NLROUTE_RECVFROM_RESPONSE_S(tabsize);
   allocsize = SIZEOF_NLROUTE_RECVFROM_RSPLIST_S(tabsize);
 
-  entry = kmm_zalloc(allocsize);
-  if (entry == NULL)
+  /* Allocate the response buffer */
+
+  alloc = kmm_zalloc(allocsize);
+  if (alloc == NULL)
     {
       nerr("ERROR: Failed to allocate response buffer.\n");
-      return -ENOMEM;
+      return NULL;
     }
 
-  /* Populate the entry */
+  /* Initialize the response buffer */
 
-  memcpy(&entry->payload.hdr, &req->hdr, sizeof(struct nlmsghdr));
-  entry->payload.hdr.nlmsg_len  = rspsize;
-  entry->payload.msg.ndm_family = req->gen.rtgen_family;
-  entry->payload.attr.rta_len   = RTA_LENGTH(tabsize);
+  resp                  = &alloc->payload;
+  resp->hdr.nlmsg_len   = rspsize;
+  resp->hdr.nlmsg_type  = type;
+  resp->hdr.nlmsg_flags = req ? req->hdr.nlmsg_flags : 0;
+  resp->hdr.nlmsg_seq   = req ? req->hdr.nlmsg_seq : 0;
+  resp->hdr.nlmsg_pid   = req ? req->hdr.nlmsg_pid : 0;
 
-  /* Lock the network so that the ARP table will be stable, then copy
-   * the ARP table into the allocated memory.
-   */
+  resp->msg.ndm_family = domain;
+  resp->attr.rta_len   = RTA_LENGTH(tabsize);
 
-  net_lock();
-  ncopied = arp_snapshot((FAR struct arpreq *)entry->payload.data,
-                         CONFIG_NET_ARPTAB_SIZE);
-  net_unlock();
+  /* Copy neigh or arp entries into resp data */
 
-  /* Now we have the real number of valid entries in the ARP table and
-   * we can trim the allocation.
-   */
-
-  if (ncopied < CONFIG_NET_ARPTAB_SIZE)
+  if (req == NULL)
     {
-      FAR struct getneigh_recvfrom_rsplist_s *newentry;
-
-      tabsize = ncopied * sizeof(struct arpreq);
-      rspsize = SIZEOF_NLROUTE_RECVFROM_RESPONSE_S(tabsize);
-      allocsize = SIZEOF_NLROUTE_RECVFROM_RSPLIST_S(tabsize);
-
-      newentry = (FAR struct getneigh_recvfrom_rsplist_s *)
-        kmm_realloc(entry, allocsize);
-
-      if (newentry != NULL)
+      if (neigh == NULL)
         {
-           entry = newentry;
+          return NULL;
         }
 
-      entry->payload.hdr.nlmsg_len = rspsize;
-      entry->payload.attr.rta_len  = RTA_LENGTH(tabsize);
+      /* Only one entry need to notify */
+
+      memcpy(resp->data, neigh, tabsize);
     }
-
-  /* Finally, add the data to the list of pending responses */
-
-  netlink_add_response(handle, (FAR struct netlink_response_s *)entry);
-  return OK;
-}
+#if defined(CONFIG_NET_ARP)
+  else if (domain == AF_INET)
+    {
+      tabnum = netlink_fill_arptable(&alloc);
+    }
+#endif
+#if defined(CONFIG_NET_IPv6)
+  else if (domain == AF_INET6)
+    {
+      tabnum = netlink_fill_nbtable(&alloc);
+    }
 #endif
 
-/****************************************************************************
- * Name: netlink_get_nbtable()
- *
- * Description:
- *   Return the entire IPv6 neighbor table.
- *
- ****************************************************************************/
+  /* If no entry in table, just free alloc */
 
-#if defined(CONFIG_NET_IPv6) && !defined(CONFIG_NETLINK_DISABLE_GETNEIGH)
-static int netlink_get_nbtable(NETLINK_HANDLE handle,
+  if (tabnum <= 0)
+    {
+      kmm_free(alloc);
+      nwarn("WARNING: Failed to get entry in %s table.\n",
+            domain == AF_INET ? "ARP" : "neighbor");
+      return NULL;
+    }
+
+  return (FAR struct netlink_response_s *)alloc;
+}
+
+static int netlink_get_neighborlist(NETLINK_HANDLE handle, int domain,
                               FAR const struct nlroute_sendto_request_s *req)
 {
-  FAR struct getneigh_recvfrom_rsplist_s *entry;
-  unsigned int ncopied;
-  size_t allocsize;
-  size_t tabsize;
-  size_t rspsize;
+  FAR struct netlink_response_s *resp;
 
-  /* Preallocate memory to hold the maximum sized Neighbor table
-   * REVISIT:  This is probably excessively large and could cause false
-   * memory out conditions.  A better approach would be to actually count
-   * the number of valid entries in the Neighbor table.
-   */
-
-  tabsize   = CONFIG_NET_IPv6_NCONF_ENTRIES *
-              sizeof(struct neighbor_entry_s);
-  rspsize   = SIZEOF_NLROUTE_RECVFROM_RESPONSE_S(tabsize);
-  allocsize = SIZEOF_NLROUTE_RECVFROM_RSPLIST_S(tabsize);
-
-  entry = kmm_zalloc(allocsize);
-  if (entry == NULL)
+  resp = netlink_get_neighbor(NULL, domain, RTM_GETNEIGH, req);
+  if (resp == NULL)
     {
-      nerr("ERROR: Failed to allocate response buffer.\n");
-      return -ENOMEM;
+      return -ENOENT;
     }
 
-  /* Populate the entry */
+  netlink_add_response(handle, resp);
 
-  memcpy(&entry->payload.hdr, &req->hdr, sizeof(struct nlmsghdr));
-  entry->payload.hdr.nlmsg_len  = rspsize;
-  entry->payload.msg.ndm_family = req->gen.rtgen_family;
-  entry->payload.attr.rta_len   = RTA_LENGTH(tabsize);
-
-  /* Lock the network so that the Neighbor table will be stable, then
-   * copy the Neighbor table into the allocated memory.
-   */
-
-  net_lock();
-  ncopied = neighbor_snapshot(
-    (FAR struct neighbor_entry_s *)entry->payload.data,
-    CONFIG_NET_IPv6_NCONF_ENTRIES);
-  net_unlock();
-
-  /* Now we have the real number of valid entries in the Neighbor table
-   * and we can trim the allocation.
-   */
-
-  if (ncopied < CONFIG_NET_IPv6_NCONF_ENTRIES)
-    {
-      FAR struct getneigh_recvfrom_rsplist_s *newentry;
-
-      tabsize   = ncopied * sizeof(struct neighbor_entry_s);
-      rspsize   = SIZEOF_NLROUTE_RECVFROM_RESPONSE_S(tabsize);
-      allocsize = SIZEOF_NLROUTE_RECVFROM_RSPLIST_S(tabsize);
-
-      newentry = (FAR struct getneigh_recvfrom_rsplist_s *)
-        kmm_realloc(entry, allocsize);
-
-      if (newentry != NULL)
-        {
-           entry = newentry;
-        }
-
-      entry->payload.hdr.nlmsg_len = rspsize;
-      entry->payload.attr.rta_len  = RTA_LENGTH(tabsize);
-    }
-
-  /* Finally, add the response to the list of pending responses */
-
-  netlink_add_response(handle, (FAR struct netlink_response_s *)entry);
-  return OK;
+  return netlink_add_terminator(handle, &req->hdr, 0);
 }
-#endif
+#endif /* CONFIG_NETLINK_DISABLE_GETNEIGH */
 
 /****************************************************************************
  * Name: netlink_ipv4_route
@@ -1234,7 +1301,7 @@ ssize_t netlink_route_sendto(NETLINK_HANDLE handle,
 
         if (req->gen.rtgen_family == AF_INET)
           {
-            ret = netlink_get_arptable(handle, req);
+            ret = netlink_get_neighborlist(handle, AF_INET, req);
           }
         else
 #endif
@@ -1244,7 +1311,7 @@ ssize_t netlink_route_sendto(NETLINK_HANDLE handle,
 
         if (req->gen.rtgen_family == AF_INET6)
           {
-             ret = netlink_get_nbtable(handle, req);
+             ret = netlink_get_neighborlist(handle, AF_INET6, req);
           }
         else
 #endif
@@ -1488,6 +1555,30 @@ void netlink_route_notify(FAR const void *route, int type, int domain)
       netlink_add_broadcast(group, resp);
       netlink_add_terminator(NULL, NULL, group);
     }
+}
+#endif
+
+/****************************************************************************
+ * Name: netlink_neigh_notify()
+ *
+ * Description:
+ *   Perform the neigh broadcast for the NETLINK_ROUTE protocol.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_NETLINK_DISABLE_GETNEIGH
+void netlink_neigh_notify(FAR const void *neigh, int type, int domain)
+{
+  FAR struct netlink_response_s *resp;
+
+  resp = netlink_get_neighbor(neigh, domain, type, NULL);
+  if (resp == NULL)
+    {
+      return;
+    }
+
+  netlink_add_broadcast(RTNLGRP_NEIGH, resp);
+  netlink_add_terminator(NULL, NULL, RTNLGRP_NEIGH);
 }
 #endif
 

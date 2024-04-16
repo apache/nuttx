@@ -47,6 +47,7 @@
 #  define netlink_device_notify(dev)
 #  define netlink_device_notify_ipaddr(dev, type, domain, addr, preflen)
 #  define netlink_route_notify(route, type, domain)
+#  define netlink_neigh_notify(neigh, type, domain)
 #endif
 
 #ifdef CONFIG_NET_NETLINK
@@ -530,6 +531,25 @@ void netlink_device_notify_ipaddr(FAR struct net_driver_s *dev,
 # define netlink_route_notify(route, type, domain)
 #else
 void netlink_route_notify(FAR const void *route, int type, int domain);
+#endif
+
+/****************************************************************************
+ * Name: netlink_neigh_notify()
+ *
+ * Description:
+ *   Perform the neigh broadcast for the NETLINK_ROUTE protocol.
+ *
+ * Input Parameters:
+ *   neigh  - The ARP entry or neighbour entry
+ *   type   - The type of the message, RTM_*NEIGH
+ *   domain - The domain of the message
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NETLINK_DISABLE_GETNEIGH)
+#  define netlink_neigh_notify(neigh, type, domain)
+#else
+void netlink_neigh_notify(FAR const void *neigh, int type, int domain);
 #endif
 
 /****************************************************************************
