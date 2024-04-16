@@ -87,17 +87,6 @@ int stm32_ds1307_init(void)
           return -ENODEV;
         }
 
-#ifdef CONFIG_I2C_DRIVER
-      /* Register the I2C to get the "nsh> i2c bus" command working */
-
-      ret = i2c_register(i2c, DS1307_I2C_BUS);
-      if (ret < 0)
-        {
-          rtcerr("ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
-          return -ENODEV;
-        }
-#endif
-
       /* Synchronize the system time to the RTC time */
 
       clock_synchronize(NULL);
