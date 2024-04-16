@@ -28,10 +28,89 @@ config IMX9_FLEXIO_PWM
 	default n
 
 menu "i.MX9 Peripheral Selection"
-config IMX9_UART1
-	bool "UART1"
+
+menu "LPUART"
+
+config IMX9_LPUART
+	bool
 	default n
-	select UART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config IMX9_LPUART1
+	bool "LPUART1"
+	default n
+	select IMX9_LPUART
+	select LPUART1_SERIALDRIVER
+
+config IMX9_LPUART2
+	bool "LPUART2"
+	default n
+	select IMX9_LPUART
+	select LPUART2_SERIALDRIVER
+
+config IMX9_LPUART3
+	bool "LPUART3"
+	default n
+	select IMX9_LPUART
+	select LPUART3_SERIALDRIVER
+
+config IMX9_LPUART4
+	bool "LPUART4"
+	default n
+	select IMX9_LPUART
+	select LPUART4_SERIALDRIVER
+
+config IMX9_LPUART5
+	bool "LPUART5"
+	default n
+	select IMX9_LPUART
+	select LPUART5_SERIALDRIVER
+
+config IMX9_LPUART6
+	bool "LPUART6"
+	default n
+	select IMX9_LPUART
+	select LPUART6_SERIALDRIVER
+
+config IMX9_LPUART7
+	bool "LPUART7"
+	default n
+	select IMX9_LPUART
+	select LPUART7_SERIALDRIVER
+
+config IMX9_LPUART8
+	bool "LPUART8"
+	default n
+	select IMX9_LPUART
+	select LPUART8_SERIALDRIVER
+
+menu "LPUART Configuration"
+	depends on IMX9_LPUART
+
+config IMX9_LPUART_INVERT
+	bool "Signal Invert Support"
+	default n
+
+config IMX9_LPUART_SINGLEWIRE
+	bool "Signal Wire Support"
+	default n
+
+config IMX9_SERIAL_RXDMA_BUFFER_SIZE
+	int "RX DMA buffer size"
+	default 64
+	depends on LPUART1_RXDMA || LPUART2_RXDMA || LPUART3_RXDMA || LPUART4_RXDMA || \
+	           LPUART5_RXDMA || LPUART6_RXDMA || LPUART7_RXDMA || LPUART8_RXDMA
+	---help---
+		The DMA buffer size when using RX DMA to emulate a FIFO.
+
+		When streaming data, the generic serial layer will be called
+		every time the FIFO receives half this number of bytes.
+
+		Value given here will be rounded up to next multiple of 64 bytes.
+
+endmenu # LPUART Configuration
+
+endmenu # LPUART
 
 config IMX9_FLEXIO1_PWM
 	depends on PWM

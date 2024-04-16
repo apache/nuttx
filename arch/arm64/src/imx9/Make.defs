@@ -25,10 +25,7 @@ include common/Make.defs
 CHIP_CSRCS = imx9_boot.c imx9_ccm.c imx9_clockconfig.c imx9_gpio.c imx9_iomuxc.c
 
 ifeq ($(CONFIG_ARCH_CHIP_IMX93),y)
-  CHIP_CSRCS += imx9_lpuart.c
-  ifeq ($(CONFIG_ARCH_EARLY_PRINT),y)
-    CHIP_ASRCS = imx93_lowputc.S
-  endif
+  CHIP_CSRCS += imx9_lpuart.c imx9_lowputc.c
 endif
 
 ifeq ($(CONFIG_IMX9_GPIO_IRQ),y)
