@@ -32,18 +32,14 @@
 #include <assert.h>
 #include <debug.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <stdbool.h>
-#include <stdint.h>
-#include <string.h>
-#include <time.h>
+#include <sys/poll.h>
 
-#include <nuttx/kmalloc.h>
 #include <nuttx/net/netdev_lowerhalf.h>
 #include <nuttx/usb/cdc.h>
 #include <nuttx/usb/cdcncm.h>
-#include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbdev_trace.h>
-#include <nuttx/wqueue.h>
 
 #ifdef CONFIG_BOARD_USBDEV_SERIALSTR
 #  include <nuttx/board.h>
@@ -95,6 +91,9 @@
 #define CDC_NCM_NDP16_NOCRC_SIGN      0x304D434E /* NCM0 */
 #define CDC_NCM_NDP32_NOCRC_SIGN      0x306D636E /* ncm0 */
 
+#define CDC_MBIM_NDP16_NOCRC_SIGN     0x00535049 /* IPS<sessionID> : IPS0 for now */
+#define CDC_MBIM_NDP32_NOCRC_SIGN     0x00737069 /* ips<sessionID> : ips0 for now */
+
 #define INIT_NDP16_OPTS {                               \
     .nthsign      = CDC_NCM_NTH16_SIGN,                 \
     .ndpsign      = CDC_NCM_NDP16_NOCRC_SIGN,           \
@@ -125,11 +124,25 @@
     .nextndpindex = 4,                                  \
   }
 
-#define CDC_NCM_NCAP_ETH_FILTER (1 << 0)
-#define NCAPS                   (CDC_NCM_NCAP_ETH_FILTER)
+#define CDC_NCM_NCAP_ETH_FILTER     (1 << 0)
+#define NCAPS                       (CDC_NCM_NCAP_ETH_FILTER)
 
-#define NCM_ALIGN_MASK(x, mask) (((x) + (mask)) & ~(mask))
-#define NCM_ALIGN(x, a)         NCM_ALIGN_MASK((x), ((typeof(x))(a) - 1))
+#define NCM_ALIGN_MASK(x, mask)     (((x) + (mask)) & ~(mask))
+#define NCM_ALIGN(x, a)             NCM_ALIGN_MASK((x), ((typeof(x))(a) - 1))
+
+#define CDC_MBIM_DEVFORMAT          "/dev/cdc-wdm%d"
+#define CDC_MBIM_DEVNAMELEN         16
+#define CDC_MBIM_NPOLLWAITERS       2
+
+#define CDCMBIM_MAX_CTRL_MESSAGE    0x1000
+
+#ifndef CONFIG_NET_CDCMBIM
+#  define cdcmbim_mkcfgdesc         cdcncm_mkcfgdesc
+#  define cdcmbim_mkstrdesc         cdcncm_mkstrdesc
+#  define cdcmbim_classobject       cdcncm_classobject
+#  define cdcmbim_uninitialize      cdcncm_uninitialize
+#  define CONFIG_CDCMBIM_PRODUCTSTR CONFIG_CDCNCM_PRODUCTSTR
+#endif
 
 /****************************************************************************
  * Private Types
@@ -279,50 +292,76 @@ begin_packed_struct struct usb_cdc_ncm_ntb_parameters_s
 
 struct cdcncm_driver_s
 {
-  /* USB CDC-ECM device */
+  /* USB CDC-NCM device */
 
-  struct usbdevclass_driver_s   usbdev;      /* USB device class vtable */
-  struct usbdev_devinfo_s       devinfo;
-  FAR struct usbdev_req_s      *ctrlreq;     /* Allocated control request */
-  FAR struct usbdev_req_s      *notifyreq;   /* Allocated norify request */
-  FAR struct usbdev_ep_s       *epint;       /* Interrupt IN endpoint */
-  FAR struct usbdev_ep_s       *epbulkin;    /* Bulk IN endpoint */
-  FAR struct usbdev_ep_s       *epbulkout;   /* Bulk OUT endpoint */
-  uint8_t                       config;      /* Selected configuration number */
+  struct usbdevclass_driver_s usbdev;      /* USB device class vtable */
+  struct usbdev_devinfo_s     devinfo;
+  FAR struct usbdev_req_s    *ctrlreq;     /* Allocated control request */
+  FAR struct usbdev_req_s    *notifyreq;   /* Allocated norify request */
+  FAR struct usbdev_ep_s     *epint;       /* Interrupt IN endpoint */
+  FAR struct usbdev_ep_s     *epbulkin;    /* Bulk IN endpoint */
+  FAR struct usbdev_ep_s     *epbulkout;   /* Bulk OUT endpoint */
+  uint8_t                     config;      /* Selected configuration number */
 
-  FAR struct usbdev_req_s      *rdreq;       /* Single read request */
-  bool                          rxpending;   /* Packet available in rdreq */
+  FAR struct usbdev_req_s    *rdreq;       /* Single read request */
+  bool                        rxpending;   /* Packet available in rdreq */
 
-  FAR struct usbdev_req_s      *wrreq;       /* Single write request */
-  sem_t                         wrreq_idle;  /* Is the wrreq available? */
-  bool                          txdone;      /* Did a write request complete? */
-  enum ncm_notify_state_e       notify;      /* State of notify */
+  FAR struct usbdev_req_s    *wrreq;       /* Single write request */
+  sem_t                       wrreq_idle;  /* Is the wrreq available? */
+  bool                        txdone;      /* Did a write request complete? */
+  enum ncm_notify_state_e     notify;      /* State of notify */
   FAR const struct ndp_parser_opts_s
-                               *parseropts;  /* Options currently used to parse NTB */
-  uint32_t                      ndpsign;     /* NDP signature */
-  int                           dgramcount;  /* The current tx cache dgram count */
-  FAR uint8_t                  *dgramaddr;   /* The next tx cache dgram address */
+                             *parseropts;  /* Options currently used to parse NTB */
+  uint32_t                    ndpsign;     /* NDP signature */
+  int                         dgramcount;  /* The current tx cache dgram count */
+  FAR uint8_t                *dgramaddr;   /* The next tx cache dgram address */
+  bool                        isncm;       /* true:NCM false:MBIM */
 
   /* Network device */
 
-  bool                          bifup;       /* true:ifup false:ifdown */
-  struct work_s                 irqwork;     /* For deferring interrupt work
-                                              * to the work queue */
-  struct work_s                 notifywork;  /* For deferring notify work
-                                              * to the work queue */
-  struct work_s                 delaywork;   /* For deferring tx work
-                                              * to the work queue */
+  bool                        bifup;       /* true:ifup false:ifdown */
+  struct work_s               irqwork;     /* For deferring interrupt work
+                                            * to the work queue */
+  struct work_s               notifywork;  /* For deferring notify work
+                                            * to the work queue */
+  struct work_s               delaywork;   /* For deferring tx work
+                                            * to the work queue */
 
   /* This holds the information visible to the NuttX network */
 
-  struct netdev_lowerhalf_s     dev;         /* Interface understood by the
-                                              * network */
-  netpkt_queue_t                rx_queue;    /* RX packet queue */
+  struct netdev_lowerhalf_s   dev;         /* Interface understood by the
+                                            * network */
+  netpkt_queue_t              rx_queue;    /* RX packet queue */
+};
+
+/* The cdcmbim_driver_s encapsulates all state information for a single
+ * hardware interface
+ */
+
+struct cdcmbim_driver_s
+{
+  struct cdcncm_driver_s ncmdriver; /* CDC/NCM driver structure, must keep first */
+  mutex_t                lock;      /* Used to maintain mutual exclusive access */
+  sem_t                  read_sem;  /* Used to wait for data to be readable */
+  FAR struct pollfd     *fds[CDC_MBIM_NPOLLWAITERS];
+  struct iob_queue_s     rx_queue;  /* RX control message queue */
+  struct iob_queue_s     tx_queue;  /* TX control message queue */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
+/* Control interface driver methods */
+
+#ifdef CONFIG_NET_CDCMBIM
+static ssize_t cdcmbim_read(FAR struct file *filep, FAR char *buffer,
+                            size_t buflen);
+static ssize_t cdcmbim_write(FAR struct file *filep, FAR const char *buffer,
+                             size_t buflen);
+static int     cdcmbim_poll(FAR struct file *filep, FAR struct pollfd *fds,
+                            bool setup);
+#endif
 
 /* Network Device ***********************************************************/
 
@@ -400,8 +439,25 @@ static const struct usbdevclass_driverops_s g_usbdevops =
   NULL
 };
 
+/* File operations for control channel */
+
+#ifdef CONFIG_NET_CDCMBIM
+static const struct file_operations g_usbdevfops =
+{
+  NULL,          /* open */
+  NULL,          /* close */
+  cdcmbim_read,  /* read */
+  cdcmbim_write, /* write */
+  NULL,          /* seek */
+  NULL,          /* ioctl */
+  NULL,          /* mmap */
+  NULL,          /* truncate */
+  cdcmbim_poll   /* poll */
+};
+#endif
+
 #ifndef CONFIG_CDCNCM_COMPOSITE
-static const struct usb_devdesc_s g_devdesc =
+static const struct usb_devdesc_s g_ncmdevdesc =
 {
   USB_SIZEOF_DEVDESC,
   USB_DESC_TYPE_DEVICE,
@@ -425,12 +481,43 @@ static const struct usb_devdesc_s g_devdesc =
     LSBYTE(CDCECM_VERSIONNO),
     MSBYTE(CDCECM_VERSIONNO)
   },
-  CDCNCM_MANUFACTURERSTRID,
-  CDCNCM_PRODUCTSTRID,
-  CDCNCM_SERIALSTRID,
+  CDCECM_MANUFACTURERSTRID,
+  CDCECM_PRODUCTSTRID,
+  CDCECM_SERIALSTRID,
   CDCECM_NCONFIGS
 };
-#endif
+#  ifdef CONFIG_NET_CDCMBIM
+static const struct usb_devdesc_s g_mbimdevdesc =
+{
+  USB_SIZEOF_DEVDESC,
+  USB_DESC_TYPE_DEVICE,
+  {
+    LSBYTE(0x0200),
+    MSBYTE(0x0200)
+  },
+  USB_CLASS_CDC,
+  CDC_SUBCLASS_MBIM,
+  CDC_PROTO_NONE,
+  CONFIG_CDCNCM_EP0MAXPACKET,
+  {
+    LSBYTE(CONFIG_CDCNCM_VENDORID),
+    MSBYTE(CONFIG_CDCNCM_VENDORID)
+  },
+  {
+    LSBYTE(CONFIG_CDCNCM_PRODUCTID),
+    MSBYTE(CONFIG_CDCNCM_PRODUCTID)
+  },
+  {
+    LSBYTE(CDCECM_VERSIONNO),
+    MSBYTE(CDCECM_VERSIONNO)
+  },
+  CDCECM_MANUFACTURERSTRID,
+  CDCECM_PRODUCTSTRID,
+  CDCECM_SERIALSTRID,
+  CDCECM_NCONFIGS
+};
+#  endif /* CONFIG_NET_CDCMBIM */
+#endif /* CONFIG_CDCNCM_COMPOSITE */
 
 static const struct ndp_parser_opts_s g_ndp16_opts = INIT_NDP16_OPTS;
 static const struct ndp_parser_opts_s g_ndp32_opts = INIT_NDP32_OPTS;
@@ -543,6 +630,184 @@ void cdcncm_put(FAR uint8_t **address, size_t size, uint32_t value)
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * File operations for control channel
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_CDCMBIM
+static ssize_t cdcmbim_read(FAR struct file *filep, FAR char *buffer,
+                            size_t buflen)
+{
+  FAR struct inode *inode;
+  FAR struct cdcmbim_driver_s *self;
+  FAR struct iob_s *iob;
+  ssize_t ret;
+
+  inode = filep->f_inode;
+  self  = inode->i_private;
+
+  for (; ; )
+    {
+      nxmutex_lock(&self->lock);
+      if ((iob = iob_peek_queue(&self->rx_queue)) != NULL)
+        {
+          ret = iob_copyout((FAR uint8_t *)buffer, iob, buflen, 0);
+          if (ret == iob->io_pktlen)
+            {
+              iob_remove_queue(&self->rx_queue);
+              iob_free_chain(iob);
+            }
+          else if (ret > 0)
+            {
+              iob_trimhead_queue(&self->rx_queue, ret);
+            }
+
+          break;
+        }
+      else
+        {
+          if (filep->f_oflags & O_NONBLOCK)
+            {
+              ret = -EAGAIN;
+              break;
+            }
+
+          nxmutex_unlock(&self->lock);
+          nxsem_wait(&self->read_sem);
+        }
+    }
+
+  nxmutex_unlock(&self->lock);
+  return ret;
+}
+
+static ssize_t cdcmbim_write(FAR struct file *filep, FAR const char *buffer,
+                             size_t buflen)
+{
+  FAR struct inode *inode;
+  FAR struct cdcmbim_driver_s *self;
+  FAR struct iob_s *iob;
+  int ret;
+
+  inode = filep->f_inode;
+  self  = inode->i_private;
+
+  if (buflen > CDCMBIM_MAX_CTRL_MESSAGE)
+    {
+      buflen = CDCMBIM_MAX_CTRL_MESSAGE;
+    }
+
+  nxmutex_lock(&self->lock);
+
+  iob = iob_tryalloc(true);
+  if (iob == NULL)
+    {
+      ret = -ENOMEM;
+      goto errout;
+    }
+
+  ret = iob_copyin(iob, (FAR uint8_t *)buffer, buflen, 0, true);
+  if (ret < 0)
+    {
+      iob_free_chain(iob);
+      uerr("CDCMBIM copyin failed: %d\n", ret);
+      goto errout;
+    }
+
+  ret = iob_tryadd_queue(iob, &self->tx_queue);
+  if (ret < 0)
+    {
+      iob_free_chain(iob);
+      uerr("CDCMBIM add tx queue failed: %d\n", ret);
+      goto errout;
+    }
+
+  uinfo("wrote %zd bytes\n", buflen);
+
+errout:
+  nxmutex_unlock(&self->lock);
+  return ret < 0 ? ret : buflen;
+}
+
+/****************************************************************************
+ * Name: usbhost_poll
+ *
+ * Description:
+ *   Standard character driver poll method.
+ *
+ ****************************************************************************/
+
+static int cdcmbim_poll(FAR struct file *filep, FAR struct pollfd *fds,
+                        bool setup)
+{
+  FAR struct inode *inode;
+  FAR struct cdcmbim_driver_s *self;
+  int ret = OK;
+  int i;
+
+  DEBUGASSERT(fds);
+  inode = filep->f_inode;
+  self  = inode->i_private;
+
+  /* Make sure that we have exclusive access to the private data structure */
+
+  DEBUGASSERT(self);
+  nxmutex_lock(&self->lock);
+  if (setup)
+    {
+      /* This is a request to set up the poll.  Find an available slot for
+       * the poll structure reference
+       */
+
+      for (i = 0; i < CDC_MBIM_NPOLLWAITERS; i++)
+        {
+          /* Find an available slot */
+
+          if (!self->fds[i])
+            {
+              /* Bind the poll structure and this slot */
+
+              self->fds[i] = fds;
+              fds->priv    = &self->fds[i];
+              break;
+            }
+        }
+
+      if (i >= CDC_MBIM_NPOLLWAITERS)
+        {
+          fds->priv = NULL;
+          ret       = -EBUSY;
+          goto errout;
+        }
+
+      /* Should we immediately notify on any of the requested events? Notify
+       * the POLLIN event if there is a buffered message.
+       */
+
+      if (iob_get_queue_entry_count(&self->rx_queue))
+        {
+          poll_notify(&fds, 1, POLLIN);
+        }
+    }
+  else
+    {
+      /* This is a request to tear down the poll. */
+
+      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+      DEBUGASSERT(slot);
+
+      /* Remove all memory of the poll setup */
+
+      *slot     = NULL;
+      fds->priv = NULL;
+    }
+
+errout:
+  nxmutex_unlock(&self->lock);
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Name: cdcncm_transmit_format
@@ -913,6 +1178,8 @@ static void cdcncm_interrupt_work(FAR void *arg)
     }
 }
 
+/* NuttX netdev callback functions */
+
 /****************************************************************************
  * Name: cdcncm_ifup
  *
@@ -1257,7 +1524,8 @@ static void cdcncm_resetconfig(FAR struct cdcncm_driver_s *self)
     }
 
   self->parseropts = &g_ndp16_opts;
-  self->ndpsign    = self->parseropts->ndpsign;
+  self->ndpsign    = self->isncm ? self->parseropts->ndpsign :
+                                   CDC_MBIM_NDP16_NOCRC_SIGN;
   self->notify     = NCM_NOTIFY_NONE;
 }
 
@@ -1472,14 +1740,15 @@ static int cdcncm_setinterface(FAR struct cdcncm_driver_s *self,
 }
 
 /****************************************************************************
- * Name: cdcncm_mkstrdesc
+ * Name: cdcnm_mkstrdesc
  *
  * Description:
  *   Construct a string descriptor
  *
  ****************************************************************************/
 
-static int cdcncm_mkstrdesc(uint8_t id, FAR struct usb_strdesc_s *strdesc)
+static int cdcnm_mkstrdesc(uint8_t id, FAR struct usb_strdesc_s *strdesc,
+                           bool isncm)
 {
   FAR uint8_t *data = (FAR uint8_t *)(strdesc + 1);
   FAR const char *str;
@@ -1496,20 +1765,20 @@ static int cdcncm_mkstrdesc(uint8_t id, FAR struct usb_strdesc_s *strdesc)
 
         strdesc->len  = 4;
         strdesc->type = USB_DESC_TYPE_STRING;
-        data[0] = LSBYTE(CDCNCM_STR_LANGUAGE);
-        data[1] = MSBYTE(CDCNCM_STR_LANGUAGE);
+        data[0] = LSBYTE(CDCECM_STR_LANGUAGE);
+        data[1] = MSBYTE(CDCECM_STR_LANGUAGE);
         return 4;
       }
 
-    case CDCNCM_MANUFACTURERSTRID:
+    case CDCECM_MANUFACTURERSTRID:
       str = CONFIG_CDCNCM_VENDORSTR;
       break;
 
-    case CDCNCM_PRODUCTSTRID:
-      str = CONFIG_CDCNCM_PRODUCTSTR;
+    case CDCECM_PRODUCTSTRID:
+      str = isncm ? CONFIG_CDCNCM_PRODUCTSTR : CONFIG_CDCMBIM_PRODUCTSTR;
       break;
 
-    case CDCNCM_SERIALSTRID:
+    case CDCECM_SERIALSTRID:
 #ifdef CONFIG_BOARD_USBDEV_SERIALSTR
       str = board_usbdev_serialstr();
 #else
@@ -1517,7 +1786,7 @@ static int cdcncm_mkstrdesc(uint8_t id, FAR struct usb_strdesc_s *strdesc)
 #endif
       break;
 
-    case CDCNCM_CONFIGSTRID:
+    case CDCECM_CONFIGSTRID:
       str = "Default";
       break;
 #endif
@@ -1551,6 +1820,34 @@ static int cdcncm_mkstrdesc(uint8_t id, FAR struct usb_strdesc_s *strdesc)
   strdesc->type = USB_DESC_TYPE_STRING;
   return strdesc->len;
 }
+
+/****************************************************************************
+ * Name: cdcncm_mkstrdesc
+ *
+ * Description:
+ *   Construct a string descriptor
+ *
+ ****************************************************************************/
+
+static int cdcncm_mkstrdesc(uint8_t id, FAR struct usb_strdesc_s *strdesc)
+{
+  return cdcnm_mkstrdesc(id, strdesc, true);
+}
+
+/****************************************************************************
+ * Name: cdcmbim_mkstrdesc
+ *
+ * Description:
+ *   Construct a string descriptor
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_CDCMBIM
+static int cdcmbim_mkstrdesc(uint8_t id, FAR struct usb_strdesc_s *strdesc)
+{
+  return cdcnm_mkstrdesc(id, strdesc, false);
+}
+#endif
 
 /****************************************************************************
  * Name: cdcncm_mkepdesc
@@ -1623,7 +1920,7 @@ static void cdcncm_mkepdesc(int epidx, FAR struct usb_epdesc_s *epdesc,
 }
 
 /****************************************************************************
- * Name: cdcncm_mkcfgdesc
+ * Name: cdcnm_mkcfgdesc
  *
  * Description:
  *   Construct the config descriptor
@@ -1631,12 +1928,13 @@ static void cdcncm_mkepdesc(int epidx, FAR struct usb_epdesc_s *epdesc,
  ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-static int16_t cdcncm_mkcfgdesc(FAR uint8_t *desc,
-                                FAR struct usbdev_devinfo_s *devinfo,
-                                uint8_t speed, uint8_t type)
+static int16_t cdcnm_mkcfgdesc(FAR uint8_t *desc,
+                               FAR struct usbdev_devinfo_s *devinfo,
+                               uint8_t speed, uint8_t type, bool isncm)
 #else
-static int16_t cdcncm_mkcfgdesc(FAR uint8_t *desc,
-                                FAR struct usbdev_devinfo_s *devinfo)
+static int16_t cdcnm_mkcfgdesc(FAR uint8_t *desc,
+                               FAR struct usbdev_devinfo_s *devinfo,
+                               bool isncm)
 #endif
 {
   FAR struct usb_cfgdesc_s *cfgdesc = NULL;
@@ -1662,9 +1960,9 @@ static int16_t cdcncm_mkcfgdesc(FAR uint8_t *desc,
       cfgdesc->type        = USB_DESC_TYPE_CONFIG;
       cfgdesc->ninterfaces = CDCECM_NINTERFACES;
       cfgdesc->cfgvalue    = CDCECM_CONFIGID;
-      cfgdesc->icfg        = devinfo->strbase + CDCNCM_CONFIGSTRID;
-      cfgdesc->attr        = USB_CONFIG_ATTR_ONE | CDCNCM_SELFPOWERED |
-                             CDCNCM_REMOTEWAKEUP;
+      cfgdesc->icfg        = devinfo->strbase + CDCECM_CONFIGSTRID;
+      cfgdesc->attr        = USB_CONFIG_ATTR_ONE | CDCECM_SELFPOWERED |
+                             CDCECM_REMOTEWAKEUP;
       cfgdesc->mxpower     = (CONFIG_USBDEV_MAXPOWER + 1) / 2;
 
       desc += USB_SIZEOF_CFGDESC;
@@ -1686,7 +1984,8 @@ static int16_t cdcncm_mkcfgdesc(FAR uint8_t *desc,
       iaddesc->firstif   = devinfo->ifnobase;                   /* Number of first interface of the function */
       iaddesc->nifs      = devinfo->ninterfaces;                /* Number of interfaces associated with the function */
       iaddesc->classid   = USB_CLASS_CDC;                       /* Class code */
-      iaddesc->subclass  = CDC_SUBCLASS_NCM;                    /* Sub-class code */
+      iaddesc->subclass  = isncm ? CDC_SUBCLASS_NCM :
+                                   CDC_SUBCLASS_MBIM;           /* Sub-class code */
       iaddesc->protocol  = CDC_PROTO_NONE;                      /* Protocol code */
       iaddesc->ifunction = 0;                                   /* Index to string identifying the function */
 
@@ -1709,7 +2008,7 @@ static int16_t cdcncm_mkcfgdesc(FAR uint8_t *desc,
       ifdesc->alt      = 0;
       ifdesc->neps     = 1;
       ifdesc->classid  = USB_CLASS_CDC;
-      ifdesc->subclass = CDC_SUBCLASS_NCM;
+      ifdesc->subclass = isncm ? CDC_SUBCLASS_NCM : CDC_SUBCLASS_MBIM;
       ifdesc->protocol = CDC_PROTO_NONE;
       ifdesc->iif      = 0;
 
@@ -1774,22 +2073,48 @@ static int16_t cdcncm_mkcfgdesc(FAR uint8_t *desc,
 
   len += SIZEOF_ECM_FUNCDESC;
 
-  if (desc)
+  if (isncm)
     {
-      FAR struct cdc_ncm_funcdesc_s *ncmdesc;
+      if (desc)
+        {
+          FAR struct cdc_ncm_funcdesc_s *ncmdesc;
 
-      ncmdesc = (FAR struct cdc_ncm_funcdesc_s *)desc;
-      ncmdesc->size       = SIZEOF_NCM_FUNCDESC;
-      ncmdesc->type       = USB_DESC_TYPE_CSINTERFACE;
-      ncmdesc->subtype    = CDC_DSUBTYPE_NCM;
-      ncmdesc->version[0] = LSBYTE(CDCECM_VERSIONNO);
-      ncmdesc->version[1] = MSBYTE(CDCECM_VERSIONNO);
-      ncmdesc->netcaps    = NCAPS;
+          ncmdesc = (FAR struct cdc_ncm_funcdesc_s *)desc;
+          ncmdesc->size       = SIZEOF_NCM_FUNCDESC;
+          ncmdesc->type       = USB_DESC_TYPE_CSINTERFACE;
+          ncmdesc->subtype    = CDC_DSUBTYPE_NCM;
+          ncmdesc->version[0] = LSBYTE(CDCECM_VERSIONNO);
+          ncmdesc->version[1] = MSBYTE(CDCECM_VERSIONNO);
+          ncmdesc->netcaps    = NCAPS;
+          desc += SIZEOF_NCM_FUNCDESC;
+        }
 
-      desc += SIZEOF_NCM_FUNCDESC;
+      len += SIZEOF_NCM_FUNCDESC;
     }
+  else
+    {
+      if (desc)
+        {
+          FAR struct cdc_mbim_funcdesc_s *mbimdesc;
 
-  len += SIZEOF_NCM_FUNCDESC;
+          mbimdesc = (FAR struct cdc_mbim_funcdesc_s *)desc;
+          mbimdesc->size              = SIZEOF_MBIM_FUNCDESC;
+          mbimdesc->type              = USB_DESC_TYPE_CSINTERFACE;
+          mbimdesc->subtype           = CDC_DSUBTYPE_MBIM;
+          mbimdesc->version[0]        = LSBYTE(CDCECM_VERSIONNO);
+          mbimdesc->version[1]        = MSBYTE(CDCECM_VERSIONNO);
+          mbimdesc->maxctrlmsg[0]     = LSBYTE(CDCMBIM_MAX_CTRL_MESSAGE);
+          mbimdesc->maxctrlmsg[1]     = MSBYTE(CDCMBIM_MAX_CTRL_MESSAGE);
+          mbimdesc->numfilter         = 0x20;
+          mbimdesc->maxfiltersize     = 0x80;
+          mbimdesc->maxsegmentsize[0] = LSBYTE(0x800);
+          mbimdesc->maxsegmentsize[1] = LSBYTE(0x800);
+          mbimdesc->netcaps           = 0x20;
+          desc += SIZEOF_MBIM_FUNCDESC;
+        }
+
+      len += SIZEOF_MBIM_FUNCDESC;
+    }
 
   if (desc)
     {
@@ -1815,7 +2140,8 @@ static int16_t cdcncm_mkcfgdesc(FAR uint8_t *desc,
       ifdesc->neps     = 0;
       ifdesc->classid  = USB_CLASS_CDC_DATA;
       ifdesc->subclass = 0;
-      ifdesc->protocol = CDC_DATA_PROTO_NCMNTB;
+      ifdesc->protocol = isncm ? CDC_DATA_PROTO_NCMNTB :
+                                 CDC_DATA_PROTO_MBIMNTB;
       ifdesc->iif      = 0;
 
       desc += USB_SIZEOF_IFDESC;
@@ -1835,7 +2161,8 @@ static int16_t cdcncm_mkcfgdesc(FAR uint8_t *desc,
       ifdesc->neps     = 2;
       ifdesc->classid  = USB_CLASS_CDC_DATA;
       ifdesc->subclass = 0;
-      ifdesc->protocol = CDC_DATA_PROTO_NCMNTB;
+      ifdesc->protocol = isncm ? CDC_DATA_PROTO_NCMNTB :
+                                 CDC_DATA_PROTO_MBIMNTB;
       ifdesc->iif      = 0;
 
       desc += USB_SIZEOF_IFDESC;
@@ -1874,10 +2201,50 @@ static int16_t cdcncm_mkcfgdesc(FAR uint8_t *desc,
 }
 
 /****************************************************************************
+ * Name: cdcncm_mkcfgdesc
+ *
+ * Description:
+ *   Construct the config descriptor
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_USBDEV_DUALSPEED
+static int16_t cdcncm_mkcfgdesc(FAR uint8_t *desc,
+                                FAR struct usbdev_devinfo_s *devinfo,
+                                uint8_t speed, uint8_t type)
+{
+  return cdcnm_mkcfgdesc(desc, devinfo, speed, type, true);
+}
+
+#  ifdef CONFIG_NET_CDCMBIM
+static int16_t cdcmbim_mkcfgdesc(FAR uint8_t *desc,
+                                 FAR struct usbdev_devinfo_s *devinfo,
+                                 uint8_t speed, uint8_t type)
+{
+  return cdcnm_mkcfgdesc(desc, devinfo, speed, type, false);
+}
+#  endif
+#else
+static int16_t cdcncm_mkcfgdesc(FAR uint8_t *desc,
+                                FAR struct usbdev_devinfo_s *devinfo)
+{
+  return cdcnm_mkcfgdesc(desc, devinfo, true);
+}
+
+#  ifdef CONFIG_NET_CDCMBIM
+static int16_t cdcmbim_mkcfgdesc(FAR uint8_t *desc,
+                                 FAR struct usbdev_devinfo_s *devinfo)
+{
+  return cdcnm_mkcfgdesc(desc, devinfo, false);
+}
+#  endif
+#endif
+
+/****************************************************************************
  * Name: cdcncm_getdescriptor
  *
  * Description:
- *   Copy the USB CDC-ECM Device USB Descriptor of a given Type and a given
+ *   Copy the USB CDC-NCM Device USB Descriptor of a given Type and a given
  *   Index into the provided Descriptor Buffer.
  *
  * Input Parameter:
@@ -1900,10 +2267,18 @@ static int cdcncm_getdescriptor(FAR struct cdcncm_driver_s *self,
     {
 #ifndef CONFIG_CDCNCM_COMPOSITE
     case USB_DESC_TYPE_DEVICE:
-      {
-        memcpy(desc, &g_devdesc, sizeof(g_devdesc));
-        return (int)sizeof(g_devdesc);
-      }
+      if (self->isncm)
+        {
+          memcpy(desc, &g_ncmdevdesc, sizeof(g_ncmdevdesc));
+          return sizeof(g_ncmdevdesc);
+        }
+#  ifdef CONFIG_NET_CDCMBIM
+      else
+        {
+          memcpy(desc, &g_mbimdevdesc, sizeof(g_mbimdevdesc));
+          return sizeof(g_mbimdevdesc);
+        }
+#  endif
       break;
 #endif
 
@@ -1911,21 +2286,15 @@ static int cdcncm_getdescriptor(FAR struct cdcncm_driver_s *self,
     case USB_DESC_TYPE_OTHERSPEEDCONFIG:
 #endif /* CONFIG_USBDEV_DUALSPEED */
     case USB_DESC_TYPE_CONFIG:
-      {
 #ifdef CONFIG_USBDEV_DUALSPEED
-        return cdcncm_mkcfgdesc((FAR uint8_t *)desc, &self->devinfo,
-                                self->usbdev.speed, type);
+      return cdcncm_mkcfgdesc((FAR uint8_t *)desc, &self->devinfo,
+                              self->usbdev.speed, type);
 #else
-        return cdcncm_mkcfgdesc((FAR uint8_t *)desc, &self->devinfo);
+      return cdcncm_mkcfgdesc((FAR uint8_t *)desc, &self->devinfo);
 #endif
-      }
-      break;
 
     case USB_DESC_TYPE_STRING:
-      {
-        return cdcncm_mkstrdesc(index, (FAR struct usb_strdesc_s *)desc);
-      }
-      break;
+      return cdcncm_mkstrdesc(index, (FAR struct usb_strdesc_s *)desc);
 
     default:
       uerr("Unsupported descriptor type: 0x%02hhx\n", type);
@@ -2145,8 +2514,7 @@ static void cdcncm_unbind(FAR struct usbdevclass_driver_s *driver,
 static int cdcncm_setup(FAR struct usbdevclass_driver_s *driver,
                         FAR struct usbdev_s *dev,
                         FAR const struct usb_ctrlreq_s *ctrl,
-                        FAR uint8_t *dataout,
-                        size_t outlen)
+                        FAR uint8_t *dataout, size_t outlen)
 {
   FAR struct cdcncm_driver_s *self = (FAR struct cdcncm_driver_s *)driver;
   uint16_t value = GETUINT16(ctrl->value);
@@ -2227,7 +2595,6 @@ static int cdcncm_setup(FAR struct usbdevclass_driver_s *driver,
                 default:
                   break;
               }
-
             break;
 
           case NCM_GET_NTB_INPUT_SIZE:
@@ -2239,10 +2606,62 @@ static int cdcncm_setup(FAR struct usbdevclass_driver_s *driver,
             if (len == 4 && value == 0)
               {
                 uinfo("NCM_SET_NTB_INPUT_SIZE len %d NTB input size %d\n",
-                      len, *(int *)dataout);
+                      len, *(FAR int *)dataout);
                 ret = 0;
               }
             break;
+
+#ifdef CONFIG_NET_CDCMBIM
+          case MBIM_SEND_COMMAND:
+            {
+              FAR struct cdcmbim_driver_s *mbim =
+                                         (FAR struct cdcmbim_driver_s *)self;
+              FAR struct iob_s *iob = iob_tryalloc(true);
+
+              if (iob == NULL)
+                {
+                  return -ENOMEM;
+                }
+
+              ret = iob_copyin(iob, dataout, len, 0, true);
+              if (ret < 0)
+                {
+                  iob_free_chain(iob);
+                  uerr("CDCMBIM copyin failed: %d\n", ret);
+                  return ret;
+                }
+
+              ret = iob_tryadd_queue(iob, &mbim->rx_queue);
+              if (ret < 0)
+                {
+                  iob_free_chain(iob);
+                  uerr("CDCMBIM add rx queue failed: %d\n", ret);
+                  return ret;
+                }
+
+              nxsem_post(&mbim->read_sem);
+              poll_notify(mbim->fds, CDC_MBIM_NPOLLWAITERS, POLLIN);
+            }
+            break;
+
+          case MBIM_GET_RESPONSE:
+            {
+              FAR struct cdcmbim_driver_s *mbim =
+                                         (FAR struct cdcmbim_driver_s *)self;
+              FAR struct iob_s *iob;
+              ret = -ENOSPC;
+
+              if ((iob = iob_remove_queue(&mbim->tx_queue)) != NULL)
+                {
+                  ret = iob_copyout(self->ctrlreq->buf, iob, len, 0);
+                  if (ret >= 0)
+                    {
+                      iob_free_chain(iob);
+                    }
+                }
+            }
+            break;
+#endif
 
           default:
             uerr("Unsupported class req: 0x%02hhx\n", ctrl->req);
@@ -2284,7 +2703,7 @@ static void cdcncm_disconnect(FAR struct usbdevclass_driver_s *driver,
  * Name: cdcncm_classobject
  *
  * Description:
- *   Register USB CDC/ECM and return the class object.
+ *   Register USB CDC/NCM and return the class object.
  *
  * Returned Value:
  *   A pointer to the allocated class object (NULL on failure).
@@ -2307,6 +2726,8 @@ static int cdcncm_classobject(int minor,
       return -ENOMEM;
     }
 
+  self->isncm = true;
+
   /* Network device initialization */
 
   self->dev.ops              = &g_netops;
@@ -2316,11 +2737,11 @@ static int cdcncm_classobject(int minor,
   /* USB device initialization */
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-  self->usbdev.speed  = USB_SPEED_HIGH;
+  self->usbdev.speed = USB_SPEED_HIGH;
 #else
-  self->usbdev.speed  = USB_SPEED_FULL;
+  self->usbdev.speed = USB_SPEED_FULL;
 #endif
-  self->usbdev.ops    = &g_usbdevops;
+  self->usbdev.ops   = &g_usbdevops;
 
   memcpy(&self->devinfo, devinfo, sizeof(struct usbdev_devinfo_s));
 
@@ -2351,17 +2772,105 @@ static int cdcncm_classobject(int minor,
 }
 
 /****************************************************************************
+ * Name: cdcmbim_classobject
+ *
+ * Description:
+ *   Register USB CDC/MBIM and return the class object.
+ *
+ * Returned Value:
+ *   A pointer to the allocated class object (NULL on failure).
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_CDCMBIM
+static int cdcmbim_classobject(int minor,
+                               FAR struct usbdev_devinfo_s *devinfo,
+                               FAR struct usbdevclass_driver_s **classdev)
+{
+  FAR struct cdcmbim_driver_s *self;
+  FAR struct cdcncm_driver_s *ncm;
+  int ret;
+
+  /* Initialize the driver structure */
+
+  self = kmm_zalloc(sizeof(struct cdcmbim_driver_s));
+  if (!self)
+    {
+      nerr("Out of memory!\n");
+      return -ENOMEM;
+    }
+
+  ncm = &self->ncmdriver;
+  ncm->isncm = false;
+
+  /* Network device initialization */
+
+  ncm->dev.ops              = &g_netops;
+  ncm->dev.quota[NETPKT_TX] = CONFIG_CDCNCM_QUOTA_TX;
+  ncm->dev.quota[NETPKT_RX] = CONFIG_CDCNCM_QUOTA_RX;
+
+  /* USB device initialization */
+
+#ifdef CONFIG_USBDEV_DUALSPEED
+  ncm->usbdev.speed = USB_SPEED_HIGH;
+#else
+  ncm->usbdev.speed = USB_SPEED_FULL;
+#endif
+  ncm->usbdev.ops   = &g_usbdevops;
+
+  memcpy(&ncm->devinfo, devinfo, sizeof(struct usbdev_devinfo_s));
+
+  nxmutex_init(&self->lock);
+  nxsem_init(&self->read_sem, 0, 0);
+
+  uinfo("Register character driver\n");
+
+  /* Put the interface in the down state.  This usually amounts to resetting
+   * the device and/or calling cdcncm_ifdown().
+   */
+
+  g_netops.ifdown(&self->ncmdriver.dev);
+
+  /* Register the device with the OS so that socket IOCTLs can be performed */
+
+  ret = netdev_lower_register(&self->ncmdriver.dev, NET_LL_MBIM);
+  if (ret < 0)
+    {
+      nerr("netdev_lower_register failed. ret: %d\n", ret);
+    }
+  else
+    {
+      char devname[CDC_MBIM_DEVNAMELEN];
+      uint8_t index = 0;
+
+#ifdef CONFIG_NETDEV_IFINDEX
+      index = self->ncmdriver.dev.netdev.d_ifindex;
+#endif
+      snprintf(devname, CDC_MBIM_DEVNAMELEN, CDC_MBIM_DEVFORMAT, index);
+      ret = register_driver(devname, &g_usbdevfops, 0666, self);
+      if (ret < 0)
+        {
+          nerr("register_driver failed. ret: %d\n", ret);
+        }
+    }
+
+  *classdev = (FAR struct usbdevclass_driver_s *)self;
+  return ret;
+}
+#endif
+
+/****************************************************************************
  * Name: cdcncm_uninitialize
  *
  * Description:
- *   Un-initialize the USB CDC/ECM class driver.  This function is used
- *   internally by the USB composite driver to uninitialize the CDC/ECM
+ *   Un-initialize the USB CDC/NCM class driver.  This function is used
+ *   internally by the USB composite driver to uninitialize the CDC/NCM
  *   driver.  This same interface is available (with an untyped input
- *   parameter) when the CDC/ECM driver is used standalone.
+ *   parameter) when the CDC/NCM driver is used standalone.
  *
  * Input Parameters:
  *   There is one parameter, it differs in typing depending upon whether the
- *   CDC/ECM driver is an internal part of a composite device, or a
+ *   CDC/NCM driver is an internal part of a composite device, or a
  *   standalone USB driver:
  *
  *     classdev - The class object returned by cdcncm_classobject()
@@ -2376,7 +2885,7 @@ static void cdcncm_uninitialize(FAR struct usbdevclass_driver_s *classdev)
   FAR struct cdcncm_driver_s *self = (FAR struct cdcncm_driver_s *)classdev;
   int ret;
 
-  /* Un-register the CDC/ECM netdev device */
+  /* Un-register the CDC/NCM netdev device */
 
   ret = netdev_lower_unregister(&self->dev);
   if (ret < 0)
@@ -2394,29 +2903,55 @@ static void cdcncm_uninitialize(FAR struct usbdevclass_driver_s *classdev)
 }
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: cdcncm_initialize
+ * Name: cdcmbim_uninitialize
  *
  * Description:
- *   Register CDC/ECM USB device interface. Register the corresponding
- *   network driver to NuttX and bring up the network.
+ *   Un-initialize the USB CDC/MBIM class driver.  This function is used
+ *   internally by the USB composite driver to uninitialize the CDC/MBIM
+ *   driver.  This same interface is available (with an untyped input
+ *   parameter) when the CDC/MBIM driver is used standalone.
  *
  * Input Parameters:
- *   minor - Device minor number.
- *   handle - An optional opaque reference to the CDC/ECM class object that
- *     may subsequently be used with cdcncm_uninitialize().
+ *   There is one parameter, it differs in typing depending upon whether the
+ *   CDC/MBIM driver is an internal part of a composite device, or a
+ *   standalone USB driver:
+ *
+ *     classdev - The class object returned by cdcmbim_classobject()
  *
  * Returned Value:
- *   Zero (OK) means that the driver was successfully registered.  On any
- *   failure, a negated errno value is returned.
+ *   None
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_CDCMBIM
+static void cdcmbim_uninitialize(FAR struct usbdevclass_driver_s *classdev)
+{
+  FAR struct cdcmbim_driver_s *self =
+      (FAR struct cdcmbim_driver_s *)classdev;
+  int ret;
+
+  /* Un-register the CDC/MBIM netdev device */
+
+  ret = netdev_lower_unregister(&self->ncmdriver.dev);
+  if (ret < 0)
+    {
+      nerr("ERROR: netdev_lower_unregister failed. ret: %d\n", ret);
+    }
+
+#  ifndef CONFIG_CDCNCM_COMPOSITE
+  usbdev_unregister(&self->ncmdriver.usbdev);
+#  endif
+
+  /* And free the driver structure */
+
+  nxmutex_destroy(&self->lock);
+  nxsem_destroy(&self->read_sem);
+  kmm_free(self);
+}
+#endif
+
 #ifndef CONFIG_CDCNCM_COMPOSITE
-int cdcncm_initialize(int minor, FAR void **handle)
+static int cdcnm_initialize(int minor, FAR void **handle, bool isncm)
 {
   FAR struct usbdevclass_driver_s *drvr = NULL;
   struct usbdev_devinfo_s devinfo;
@@ -2430,7 +2965,9 @@ int cdcncm_initialize(int minor, FAR void **handle)
   devinfo.epno[CDCNCM_EP_BULKIN_IDX]  = CONFIG_CDCNCM_EPBULKIN;
   devinfo.epno[CDCNCM_EP_BULKOUT_IDX] = CONFIG_CDCNCM_EPBULKOUT;
 
-  ret = cdcncm_classobject(minor, &devinfo, &drvr);
+  ret = isncm ? cdcncm_classobject(minor, &devinfo, &drvr) :
+                cdcmbim_classobject(minor, &devinfo, &drvr);
+
   if (ret == OK)
     {
       ret = usbdev_register(drvr);
@@ -2442,43 +2979,29 @@ int cdcncm_initialize(int minor, FAR void **handle)
 
   if (handle)
     {
-      *handle = (FAR void *)drvr;
+      *handle = drvr;
     }
 
   return ret;
 }
 #endif
 
-/****************************************************************************
- * Name: cdcncm_get_composite_devdesc
- *
- * Description:
- *   Helper function to fill in some constants into the composite
- *   configuration struct.
- *
- * Input Parameters:
- *     dev - Pointer to the configuration struct we should fill
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
 #ifdef CONFIG_CDCNCM_COMPOSITE
-void cdcncm_get_composite_devdesc(FAR struct composite_devdesc_s *dev)
+static void cdcnm_get_composite_devdesc(FAR struct composite_devdesc_s *dev,
+                                        bool isncm)
 {
   memset(dev, 0, sizeof(struct composite_devdesc_s));
 
-  /* The callback functions for the CDC/ECM class.
+  /* The callback functions for the CDC/NCM class.
    *
    * classobject() and uninitialize() must be provided by board-specific
    * logic
    */
 
-  dev->mkconfdesc   = cdcncm_mkcfgdesc;
-  dev->mkstrdesc    = cdcncm_mkstrdesc;
-  dev->classobject  = cdcncm_classobject;
-  dev->uninitialize = cdcncm_uninitialize;
+  dev->mkconfdesc   = isncm ? cdcncm_mkcfgdesc : cdcmbim_mkcfgdesc;
+  dev->mkstrdesc    = isncm ? cdcncm_mkstrdesc : cdcmbim_mkstrdesc;
+  dev->classobject  = isncm ? cdcncm_classobject : cdcmbim_classobject;
+  dev->uninitialize = isncm ? cdcncm_uninitialize : cdcmbim_uninitialize;
 
   dev->nconfigs     = CDCECM_NCONFIGS; /* Number of configurations supported  */
   dev->configid     = CDCECM_CONFIGID; /* The only supported configuration ID */
@@ -2486,9 +3009,12 @@ void cdcncm_get_composite_devdesc(FAR struct composite_devdesc_s *dev)
   /* Let the construction function calculate the size of config descriptor */
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-  dev->cfgdescsize  = cdcncm_mkcfgdesc(NULL, NULL, USB_SPEED_UNKNOWN, 0);
+  dev->cfgdescsize  = isncm ?
+                      cdcncm_mkcfgdesc(NULL, NULL, USB_SPEED_UNKNOWN, 0) :
+                      cdcmbim_mkcfgdesc(NULL, NULL, USB_SPEED_UNKNOWN, 0);
 #else
-  dev->cfgdescsize  = cdcncm_mkcfgdesc(NULL, NULL);
+  dev->cfgdescsize  = isncm ? cdcncm_mkcfgdesc(NULL, NULL) :
+                              cdcmbim_mkcfgdesc(NULL, NULL);
 #endif
 
   /* Board-specific logic must provide the device minor */
@@ -2514,6 +3040,71 @@ void cdcncm_get_composite_devdesc(FAR struct composite_devdesc_s *dev)
 
   dev->devinfo.nendpoints  = CDCECM_NUM_EPS;
 }
+#endif /* CONFIG_CDCNCM_COMPOSITE */
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: cdcncm_initialize / cdcmbim_initialize
+ *
+ * Description:
+ *   Register CDC_NCM/MBIM USB device interface. Register the corresponding
+ *   network driver to NuttX and bring up the network.
+ *
+ * Input Parameters:
+ *   minor - Device minor number.
+ *   handle - An optional opaque reference to the CDC_NCM/MBIM class object
+ *     that may subsequently be used with cdcncm_uninitialize().
+ *
+ * Returned Value:
+ *   Zero (OK) means that the driver was successfully registered.  On any
+ *   failure, a negated errno value is returned.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_CDCNCM_COMPOSITE
+int cdcncm_initialize(int minor, FAR void **handle)
+{
+  return cdcnm_initialize(minor, handle, true);
+}
+
+#ifdef CONFIG_NET_CDCMBIM
+int cdcmbim_initialize(int minor, FAR void **handle)
+{
+  return cdcnm_initialize(minor, handle, false);
+}
+#  endif /* CONFIG_NET_CDCMBIM */
+#endif /* CONFIG_CDCNCM_COMPOSITE */
+
+/****************************************************************************
+ * Name: cdcncm_get_composite_devdesc / cdcmbim_get_composite_devdesc
+ *
+ * Description:
+ *   Helper function to fill in some constants into the composite
+ *   configuration struct.
+ *
+ * Input Parameters:
+ *     dev - Pointer to the configuration struct we should fill
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CDCNCM_COMPOSITE
+void cdcncm_get_composite_devdesc(FAR struct composite_devdesc_s *dev)
+{
+  cdcnm_get_composite_devdesc(dev, true);
+}
+
+#  ifdef CONFIG_NET_CDCMBIM
+void cdcmbim_get_composite_devdesc(FAR struct composite_devdesc_s *dev)
+{
+  cdcnm_get_composite_devdesc(dev, false);
+}
+#  endif /* CONFIG_NET_CDCMBIM */
 #endif /* CONFIG_CDCNCM_COMPOSITE */
 
 #endif /* CONFIG_NET_CDCNCM */
