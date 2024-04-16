@@ -228,7 +228,6 @@ config NET_LOOPBACK_PKTSIZE
 
 menuconfig NET_MBIM
 	bool "MBIM modem support"
-	depends on USBHOST_CDCMBIM
 	default n
 
 menuconfig NET_SLIP

@@ -57,16 +57,16 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: cdcncm_initialize
+ * Name: cdcncm_initialize / cdcmbim_initialize
  *
  * Description:
- *   Register CDC/NCM USB device interface. Register the corresponding
+ *   Register CDC_NCM/MBIM USB device interface. Register the corresponding
  *   network driver to NuttX and bring up the network.
  *
  * Input Parameters:
  *   minor - Device minor number.
- *   handle - An optional opaque reference to the CDC/NCM class object that
- *     may subsequently be used with cdcncm_uninitialize().
+ *   handle - An optional opaque reference to the CDC_NCM/MBIM class object
+ *   that may subsequently be used with cdcncm_uninitialize().
  *
  * Returned Value:
  *   Zero (OK) means that the driver was successfully registered.  On any
@@ -76,10 +76,13 @@ extern "C"
 
 #ifndef CONFIG_CDCNCM_COMPOSITE
 int cdcncm_initialize(int minor, FAR void **handle);
+#  ifdef CONFIG_NET_CDCMBIM
+int cdcmbim_initialize(int minor, FAR void **handle);
+#  endif
 #endif
 
 /****************************************************************************
- * Name: cdcncm_get_composite_devdesc
+ * Name: cdcncm_get_composite_devdesc / cdcmbim_get_composite_devdesc
  *
  * Description:
  *   Helper function to fill in some constants into the composite
@@ -95,6 +98,9 @@ int cdcncm_initialize(int minor, FAR void **handle);
 
 #ifdef CONFIG_CDCNCM_COMPOSITE
 void cdcncm_get_composite_devdesc(FAR struct composite_devdesc_s *dev);
+#  ifdef CONFIG_NET_CDCMBIM
+void cdcmbim_get_composite_devdesc(FAR struct composite_devdesc_s *dev);
+#  endif
 #endif
 
 #undef EXTERN
