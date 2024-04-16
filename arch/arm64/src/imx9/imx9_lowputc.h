@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm64/src/imx9/imx9_boot.c
+ * arch/arm64/src/imx9/imx9_lowputc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,102 +18,67 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_IMX9_IMX9_LOWPUTC_H
+#define __ARCH_ARM_SRC_IMX9_IMX9_LOWPUTC_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
+#include <sys/types.h>
 #include <stdint.h>
-#include <assert.h>
-#include <debug.h>
+#include <stdbool.h>
 
-#include <nuttx/cache.h>
-#ifdef CONFIG_PAGING
-#  include <nuttx/page.h>
-#endif
-
-#include <arch/chip/chip.h>
-#include "arm64_arch.h"
 #include "arm64_internal.h"
-#include "arm64_mmu.h"
-#include "imx9_boot.h"
-#include "imx9_serial.h"
-#include "imx9_lowputc.h"
 
 /****************************************************************************
- * Private Data
+ * Public Types
  ****************************************************************************/
 
-static const struct arm_mmu_region g_mmu_regions[] =
-{
-    MMU_REGION_FLAT_ENTRY("DEVICE_REGION",
-                          CONFIG_DEVICEIO_BASEADDR, CONFIG_DEVICEIO_SIZE,
-                          MT_DEVICE_NGNRNE | MT_RW | MT_SECURE),
+/* This structure describes the configuration of an UART */
 
-    MMU_REGION_FLAT_ENTRY("DRAM0_S0",
-                          CONFIG_RAMBANK1_ADDR, CONFIG_RAMBANK1_SIZE,
-                          MT_NORMAL | MT_RW | MT_SECURE),
-};
-
-const struct arm_mmu_config g_mmu_config =
+struct uart_config_s
 {
-  .num_regions = nitems(g_mmu_regions),
-  .mmu_regions = g_mmu_regions,
+  uint32_t baud;          /* Configured baud */
+  uint8_t  parity;        /* 0=none, 1=odd, 2=even */
+  uint8_t  bits;          /* Number of bits (5-9) */
+  bool     stopbits2;     /* true: Configure with 2 stop bits instead of 1 */
+  bool     userts;        /* True: Assert RTS when there are data to be sent */
+  bool     invrts;        /* True: Invert sense of RTS pin (true=active high) */
+  bool     usects;        /* True: Condition transmission on CTS asserted */
+  bool     users485;      /* True: Assert RTS while transmission progresses */
 };
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arm64_el_init
+ * Name: imx9_lowsetup
  *
  * Description:
- *   The function called from arm64_head.S at very early stage for these
- * platform, it's use to:
- *   - Handling special hardware initialize routine which is need to
- *     run at high ELs
- *   - Initialize system software such as hypervisor or security firmware
- *     which is need to run at high ELs
+ *   Called at the very beginning of _start.  Performs low level
+ *   initialization including setup of the console UART.  This UART done
+ *   early so that the serial console is available for debugging very early
+ *   in the boot sequence.
  *
  ****************************************************************************/
 
-void arm64_el_init(void)
-{
-}
+void imx9_lowsetup(void);
 
 /****************************************************************************
- * Name: arm64_chip_boot
+ * Name: imx9_lpuart_configure
  *
  * Description:
- *   Complete boot operations started in arm64_head.S
+ *   Configure a UART for non-interrupt driven operation
  *
  ****************************************************************************/
 
-void arm64_chip_boot(void)
-{
-  /* MAP IO and DRAM, enable MMU. */
+int imx9_lpuart_configure(uint32_t base,
+                          int uartnum,
+                          const struct uart_config_s *config);
 
-  arm64_mmu_init(true);
-
-  /* Do UART early initialization & pin muxing */
-
-#ifdef CONFIG_IMX9_LPUART
-  imx9_lowsetup();
-#endif
-
-  /* Perform board-specific device initialization. This would include
-   * configuration of board specific resources such as GPIOs, LEDs, etc.
-   */
-
-  imx9_board_initialize();
-
-#ifdef USE_EARLYSERIALINIT
-  /* Perform early serial initialization if we are going to use the serial
-   * driver.
-   */
-
-  arm64_earlyserialinit();
-#endif
-}
+#endif /* __ARCH_ARM_SRC_IMX9_IMX9_LOWPUTC_H */
