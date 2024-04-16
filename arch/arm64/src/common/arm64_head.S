@@ -354,17 +354,18 @@ out:
  */
 
 boot_stage_puts:
+    stp   xzr, x30, [sp, #-16]!
+1:
     ldrb  w0, [x1], #1       /* Load next char */
     cmp   w0, 0
-    beq   1f                 /* Exit on nul */
-    stp   xzr, x30, [sp, #-16]!
+    beq   2f                 /* Exit on nul */
     bl    arm64_lowputc
+    b     1b                 /* Loop */
+2:
     ldp   xzr, x30, [sp], #16
-    b     boot_stage_puts
-1:
     ret
 
-.type boot_low_puts, %function;
+.type boot_stage_puts, %function;
 
 #endif /* !CONFIG_ARCH_EARLY_PRINT */
 
