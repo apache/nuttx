@@ -70,6 +70,7 @@ int nxsched_get_param(pid_t pid, FAR struct sched_param *param)
 {
   FAR struct tcb_s *rtcb;
   FAR struct tcb_s *tcb;
+  irqstate_t flags;
   int ret = OK;
 
   if (param == NULL)
@@ -93,7 +94,7 @@ int nxsched_get_param(pid_t pid, FAR struct sched_param *param)
     {
       /* Get the TCB associated with this PID */
 
-      sched_lock();
+      flags = enter_critical_section();
       tcb = nxsched_get_tcb(pid);
       if (!tcb)
         {
@@ -137,7 +138,7 @@ int nxsched_get_param(pid_t pid, FAR struct sched_param *param)
 #endif
         }
 
-      sched_unlock();
+      leave_critical_section(flags);
     }
 
   return ret;
