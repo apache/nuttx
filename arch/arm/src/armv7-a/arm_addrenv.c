@@ -556,7 +556,7 @@ int up_addrenv_select(const arch_addrenv_t *addrenv)
         }
       else
         {
-          binfo("data: clear l1 (vaddr=%x)\n", vaddr);
+          binfo("heap: clear l1 (vaddr=%x)\n", vaddr);
           mmu_l1_clrentry(vaddr);
         }
     }
