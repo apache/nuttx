@@ -96,7 +96,7 @@ int imx9_pwm_setup(void)
 #endif
 
 #ifdef CONFIG_IMX9_TPM3_PWM
-  lower_half = imx9_flexio_pwm_init(PWM_TPM3);
+  lower_half = imx9_tpm_pwm_init(PWM_TPM3);
 
   if (lower_half)
     {
