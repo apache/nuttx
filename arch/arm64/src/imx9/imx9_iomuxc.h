@@ -18,6 +18,9 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM64_SRC_IMX9_IMX9_IOMUXC_H
+#define __ARCH_ARM64_SRC_IMX9_IMX9_IOMUXC_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -36,10 +39,10 @@
 #define IOMUX_PADCFG(_ctlreg, _mode, _dsyreg, _dsy, _padreg) \
   {                                                          \
     .ctlreg = (_ctlreg),                                     \
-    .mode   = (_mode),                                       \
-    .dsyreg = (_dsyreg),                                     \
-    .dsy    = (_dsy),                                        \
     .padreg = (_padreg),                                     \
+    .dsyreg = (_dsyreg),                                     \
+    .mode   = (_mode),                                       \
+    .dsy    = (_dsy),                                        \
   }
 
 #define IOMUX_CFG(_padcfg, _pad, _mux) \
@@ -82,6 +85,19 @@ struct iomux_cfg_s
 typedef struct iomux_cfg_s iomux_cfg_t;
 
 /****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
  * Name: imx9_iomux_configure
  *
  * Description:
@@ -115,3 +131,9 @@ int imx9_iomux_configure(iomux_cfg_t cfg);
  ****************************************************************************/
 
 int imx9_iomux_gpio(iomux_cfg_t cfg, bool sion);
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+#endif /* __ARCH_ARM64_SRC_IMX9_IMX9_IOMUXC_H */
