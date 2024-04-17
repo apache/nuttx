@@ -24,10 +24,6 @@ if(CONFIG_ARCH_DEADLOCKDUMP)
   list(APPEND SRCS deadlock.c)
 endif()
 
-if(CONFIG_DUMP_ON_EXIT)
-  list(APPEND SRCS dump.c)
-endif()
-
 if(CONFIG_BOARD_COREDUMP_SYSLOG OR CONFIG_BOARD_COREDUMP_BLKDEV)
   list(APPEND SRCS coredump.c)
 endif()

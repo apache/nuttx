@@ -120,6 +120,10 @@ if(CONFIG_SCHED_BACKTRACE)
   list(APPEND SRCS sched_backtrace.c)
 endif()
 
+if(CONFIG_DUMP_ON_EXIT)
+  list(APPEND SRCS sched_dumponexit.c)
+endif()
+
 if(CONFIG_SMP_CALL)
   list(APPEND SRCS sched_smp.c)
 endif()
