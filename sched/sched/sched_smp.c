@@ -137,6 +137,14 @@ int nxsched_smp_call_handler(int irq, FAR void *context,
       ret = call_data->func(call_data->arg);
 
       flags = enter_critical_section();
+      if (spin_is_locked(&call_data->lock))
+        {
+          if (--call_data->refcount == 0)
+            {
+              spin_unlock(&call_data->lock);
+            }
+        }
+
       if (call_data->cookie != NULL)
         {
           if (ret < 0)
@@ -145,14 +153,6 @@ int nxsched_smp_call_handler(int irq, FAR void *context,
             }
 
           nxsem_post(&call_data->cookie->sem);
-        }
-
-      if (spin_is_locked(&call_data->lock))
-        {
-          if (--call_data->refcount == 0)
-            {
-              spin_unlock(&call_data->lock);
-            }
         }
     }
 
