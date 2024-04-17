@@ -117,8 +117,7 @@ void mm_map_initialize(FAR struct mm_map_s *mm, bool kernel)
   if (!kernel)
     {
       mm->mm_map_vpages = gran_initialize((FAR void *)CONFIG_ARCH_SHM_VBASE,
-                                          ARCH_SHM_MAXPAGES << MM_PGSHIFT,
-                                          MM_PGSHIFT, MM_PGSHIFT);
+                                     ARCH_SHM_SIZE, MM_PGSHIFT, MM_PGSHIFT);
       if (!mm->mm_map_vpages)
         {
           merr("gran_initialize() failed\n");
