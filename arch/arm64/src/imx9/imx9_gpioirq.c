@@ -236,8 +236,8 @@ int imx9_gpioirq_enable(gpio_pinset_t pinset)
 {
   uint32_t  port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   uint32_t  pin  = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
-  uint32_t  icr  = (pinset & GPIO_INTCFG_MASK) >> GPIO_INTCFG_SHIFT;
   uint32_t  both = (pinset & GPIO_INTBOTHCFG_MASK) >> GPIO_INTBOTHCFG_SHIFT;
+  uint32_t  icr  = (pinset & GPIO_INTCFG_MASK);
   uint32_t  regval;
   uintptr_t regaddr;
 
