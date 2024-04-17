@@ -1888,9 +1888,7 @@ static ssize_t perf_read(FAR struct file *filep, FAR char *buffer,
 static int perf_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct perf_event_s *event = filep->f_priv;
-  FAR struct perf_event_context_s *ctx;
   nxsched_smp_call_t func = NULL;
-  irqstate_t flags;
   int ret = OK;
 
   ASSERT(event != NULL);
@@ -1910,10 +1908,6 @@ static int perf_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         return -EINVAL;
     }
 
-  ctx = event->ctx;
-
-  flags = spin_lock_irqsave(&ctx->lock);
-
   if (arg & PERF_IOC_FLAG_GROUP)
     {
       ret = perf_event_for_group(event, func);
@@ -1923,7 +1917,6 @@ static int perf_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       ret = perf_event_for_child(event, func);
     }
 
-  spin_unlock_irqrestore(&ctx->lock, flags);
   return ret;
 }
 
