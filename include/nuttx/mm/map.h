@@ -193,6 +193,45 @@ void vm_release_region(FAR struct mm_map_s *mm, FAR void *vaddr,
 
 #endif
 
+#ifdef CONFIG_ARCH_VMA_MAPPING
+
+/****************************************************************************
+ * Name: vm_map_region
+ *
+ * Description:
+ *   Allocate virtual memory and maps given physical memory into user space
+ *   of the current process.
+ *
+ * Input Parameters:
+ *   paddr - Starting physical address
+ *   size  - Size of the address range
+ *
+ * Returned Value:
+ *   Virtual address if success, or NULL if error
+ *
+ ****************************************************************************/
+
+FAR void *vm_map_region(uintptr_t paddr, size_t size);
+
+/****************************************************************************
+ * Name: vm_unmap_region
+ *
+ * Description:
+ *   Unmap previously mapped userspace device and release the virtual memory.
+ *
+ * Input Parameters:
+ *   vaddr - Starting virtual address of the mapped device
+ *   size - Size of the address range
+ *
+ * Returned Value:
+ *   OK for success or negative value for error
+ *
+ ****************************************************************************/
+
+int vm_unmap_region(FAR void *vaddr, size_t size);
+
+#endif /* CONFIG_ARCH_VMA_MAPPING */
+
 /****************************************************************************
  * Name: mm_map_add
  *

@@ -191,8 +191,9 @@ config MM_SHM
 	depends on MM_PGALLOC && BUILD_KERNEL
 	select ARCH_VMA_MAPPING
 	---help---
-		Build in support for the shared memory interfaces shmget(), shmat(),
-		shmctl(), and shmdt().
+		Build support for mapping physical memory to user-space via
+		shared memory interfaces like shmget(), shmat(), shmctl(),
+		etc, or device mapping interfaces like vm_map_region() etc.
 
 config MM_KMAP
 	bool "Support for dynamic kernel virtual mappings"
