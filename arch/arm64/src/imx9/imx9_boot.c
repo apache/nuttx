@@ -37,8 +37,10 @@
 #include "arm64_arch.h"
 #include "arm64_internal.h"
 #include "arm64_mmu.h"
+
 #include "imx9_boot.h"
 #include "imx9_serial.h"
+#include "imx9_gpio.h"
 #include "imx9_lowputc.h"
 
 /****************************************************************************
@@ -101,6 +103,12 @@ void arm64_chip_boot(void)
 
 #ifdef CONFIG_IMX9_LPUART
   imx9_lowsetup();
+#endif
+
+  /* Initialize pin interrupt support */
+
+#ifdef CONFIG_IMX9_GPIO_IRQ
+  imx9_gpioirq_initialize();
 #endif
 
   /* Perform board-specific device initialization. This would include
