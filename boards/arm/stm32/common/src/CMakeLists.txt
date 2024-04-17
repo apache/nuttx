@@ -56,6 +56,10 @@ if(CONFIG_LCD_SSD1306)
   list(APPEND SRCS stm32_ssd1306.c)
 endif()
 
+if(CONFIG_RTC_DS1307)
+  list(APPEND SRCS stm32_ds1307.c)
+endif()
+
 if(CONFIG_SENSORS_LM75)
   list(APPEND SRCS stm32_lm75.c)
 endif()
