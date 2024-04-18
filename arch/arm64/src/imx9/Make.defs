@@ -55,3 +55,7 @@ endif
 ifeq ($(CONFIG_IMX9_EDMA), y)
   CHIP_CSRCS += imx9_edma.c
 endif
+
+ifeq ($(CONFIG_IMX9_DMA_ALLOC),y)
+  CHIP_CSRCS += imx9_dma_alloc.c
+endif

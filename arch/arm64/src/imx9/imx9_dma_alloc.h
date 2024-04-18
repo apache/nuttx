@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm64/imx9/imx93-evk/src/imx9_bringup.c
+ * arch/arm64/src/imx9/imx9_dma_alloc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,87 +18,71 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM64_SRC_IMX9_IMX9_DMA_ALLOC_H
+#define __ARCH_ARM64_SRC_IMX9_IMX9_DMA_ALLOC_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <syslog.h>
-
-#include <nuttx/fs/fs.h>
-
-#include "imx9_dma_alloc.h"
-
-#include "imx93-evk.h"
+#include <stdint.h>
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: imx_bringup
+ * Name: imx9_dma_alloc_init
  *
  * Description:
- *   Bring up board features
+ *   Initialize the DMA memory allocator.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on failure.
  *
  ****************************************************************************/
 
-int imx9_bringup(void)
-{
-  int ret;
+int imx9_dma_alloc_init(void);
 
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
+/****************************************************************************
+ * Name: imx9_dma_alloc
+ *
+ * Description:
+ *   Allocate a contiguous block of physical memory for DMA.
+ *
+ * Input Parameters:
+ *   size - Size of the requested block in bytes.
+ *
+ * Returned Value:
+ *   Physical address of the first page on success; NULL on failure.
+ *
+ ****************************************************************************/
 
-  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
-    }
+void *imx9_dma_alloc(size_t size);
+
+/****************************************************************************
+ * Name: imx9_dma_free
+ *
+ * Description:
+ *   Free a previously allocated DMA memory block.
+ *
+ * Input Parameters:
+ *   memory - Physical address of the first page of DMA memory.
+ *   size   - Size of the allocated block in bytes.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void imx9_dma_free(void *memory, size_t size);
+
+#ifdef CONFIG_FAT_DMAMEMORY
+#  define fat_dma_alloc(s)  imx9_dma_alloc(s)
+#  define fat_dma_free(m,s) imx9_dma_free(m,s)
 #endif
 
-#ifdef CONFIG_IMX9_DMA_ALLOC
-  /* Initialize the DMA memory allocator */
-
-  ret = imx9_dma_alloc_init();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed initialize DMA allocator: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_PWM
-  /* Configure PWM outputs */
-
-  ret = imx9_pwm_setup();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed initialize PWM outputs: %d\n", ret);
-    }
-#endif
-
-#if defined(CONFIG_I2C_DRIVER)
-  /* Configure I2C peripheral interfaces */
-
-  ret = imx9_i2c_initialize();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "Failed to initialize I2C driver: %d\n", ret);
-    }
-#endif
-
-#if defined(CONFIG_SPI_DRIVER)
-  /* Configure SPI peripheral interfaces */
-
-  ret = imx9_spi_initialize();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "Failed to initialize SPI driver: %d\n", ret);
-    }
-#endif
-
-  UNUSED(ret);
-  return OK;
-}
+#endif /* __ARCH_ARM64_SRC_IMX9_IMX9_DMA_ALLOC_H */
