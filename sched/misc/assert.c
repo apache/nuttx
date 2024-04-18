@@ -536,8 +536,6 @@ void _assert(FAR const char *filename, int linenum,
 
   flags = enter_critical_section();
 
-  sched_lock();
-
   /* try to save current context if regs is null */
 
   if (regs == NULL)
@@ -671,8 +669,6 @@ void _assert(FAR const char *filename, int linenum,
         }
 #endif
     }
-
-  sched_unlock();
 
   leave_critical_section(flags);
 }
