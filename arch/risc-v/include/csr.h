@@ -304,6 +304,16 @@
 #define CSR_DSCRATCH0       0x7b2 /* Debug Scratch 0 */
 #define CSR_DSCRATCH1       0x7b3 /* Debug Scratch 1 */
 
+/* Vector CSRs */
+
+#define CSR_VSTART          0x008 /* Vector Start Position */
+#define CSR_VXSAT           0x009 /* Fixed-Point Saturate Flag */
+#define CSR_VXRM            0x00a /* Fixed-Point Rounding Mode */
+#define CSR_VCSR            0x00f /* Vector Control and Status */
+#define CSR_VL              0xc20 /* Vector Length */
+#define CSR_VTYPE           0xc21 /* Vector Data Type */
+#define CSR_VLENB           0xc22 /* Vector Length in Bytes (VLEN/8) */
+
 /* In mstatus register */
 
 #define MSTATUS_UIE         (0x1 << 0)  /* User Interrupt Enable */
