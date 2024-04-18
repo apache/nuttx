@@ -491,6 +491,23 @@ void esp_hr_timer_stop(struct esp_hr_timer_s *timer)
             }
         }
     }
+  else if (timer->state == HR_TIMER_TIMEOUT)
+    {
+      /* If the timer is in the timeout list, remove it from the list,
+       * execute its callback function and set its state to idle.
+       */
+
+      DEBUGASSERT(!list_is_empty(&priv->toutlist));
+
+      list_delete(&timer->list);
+      timer->state = HR_TIMER_IDLE;
+
+      spin_unlock_irqrestore(&priv->lock, flags);
+
+      timer->callback(timer->arg);
+
+      flags = spin_lock_irqsave(&priv->lock);
+    }
 
   spin_unlock_irqrestore(&priv->lock, flags);
 }
