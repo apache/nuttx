@@ -30,7 +30,6 @@ CHIP_CSRCS += qemu_rv_timerisr.c qemu_rv_allocateheap.c
 
 ifeq ($(CONFIG_BUILD_KERNEL),y)
 CHIP_CSRCS += qemu_rv_mm_init.c
-CMN_ASRCS  += qemu_rv_exception_m.S
 endif
 
 ifeq ($(CONFIG_MM_PGALLOC),y)

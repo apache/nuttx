@@ -314,6 +314,8 @@ static inline void riscv_set_basestack(uintptr_t base, uintptr_t size)
 #ifdef CONFIG_ARCH_USE_S_MODE
 void riscv_sbi_set_timer(uint64_t stime_value);
 uint64_t riscv_sbi_get_time(void);
+uintptr_t riscv_sbi_boot_secondary(uint32_t hartid, uintptr_t addr,
+                                   uintptr_t a1);
 #endif
 
 /* Power management *********************************************************/
