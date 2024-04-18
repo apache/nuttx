@@ -45,7 +45,9 @@ __start:
   /* Preserve a1 as it contains the pointer to DTB */
   /* Load mhartid (cpuid) */
 
+#ifndef CONFIG_BUILD_KERNEL
   csrr a0, CSR_MHARTID
+#endif
 
   /* Load the number of CPUs that the kernel supports */
   li   t1, CONFIG_SMP_NCPUS
@@ -53,7 +55,7 @@ __start:
   /* If a0 (mhartid) >= t1 (the number of CPUs), stop here */
 
   blt  a0, t1, 2f
-  csrw CSR_MIE, zero
+  csrw CSR_IE, zero
   wfi
 
 2:
@@ -62,10 +64,10 @@ __start:
 
   /* Disable all interrupts (i.e. timer, external) in mie */
 
-	csrw CSR_MIE, zero
+  csrw CSR_IE, zero
 
   la   t0, __trap_vec
-  csrw CSR_MTVEC, t0
+  csrw CSR_TVEC, t0
 
   /* Jump to qemu_rv_start */
 

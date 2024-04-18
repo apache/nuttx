@@ -59,16 +59,14 @@
  ****************************************************************************/
 
 #ifdef CONFIG_BUILD_KERNEL
-extern void __trap_vec(void);
-extern void __trap_vec_m(void);
-extern void up_mtimer_initialize(void);
+extern void __start(void);
 #endif
 
 /****************************************************************************
  * Name: qemu_rv_clear_bss
  ****************************************************************************/
 
-void qemu_rv_clear_bss(void)
+static void qemu_rv_clear_bss(void)
 {
   uint32_t *dest;
 
@@ -81,6 +79,31 @@ void qemu_rv_clear_bss(void)
       *dest++ = 0;
     }
 }
+
+#ifdef CONFIG_BUILD_KERNEL
+static void qemu_boot_secondary(int mhartid, uintptr_t dtb)
+{
+  int i;
+
+  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
+    {
+      if (i == mhartid)
+        {
+          continue;
+        }
+
+      riscv_sbi_boot_secondary(i, (uintptr_t)&__start, dtb);
+    }
+}
+#endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_BUILD_KERNEL
+static bool boot_secondary = false;
+#endif
 
 /****************************************************************************
  * Public Data
@@ -101,12 +124,18 @@ uintptr_t g_idle_topstack = QEMU_RV_IDLESTACK_BASE +
  * Name: qemu_rv_start
  ****************************************************************************/
 
-#ifdef CONFIG_BUILD_KERNEL
-void qemu_rv_start_s(int mhartid, const char *dtb)
-#else
 void qemu_rv_start(int mhartid, const char *dtb)
-#endif
 {
+#ifdef CONFIG_BUILD_KERNEL
+  /* Boot other cores */
+
+  if (!boot_secondary)
+    {
+      boot_secondary = true;
+      qemu_boot_secondary(mhartid, (uintptr_t)dtb);
+    }
+#endif
+
   /* Configure FPU */
 
   riscv_fpuconfig();
@@ -116,15 +145,12 @@ void qemu_rv_start(int mhartid, const char *dtb)
       goto cpux;
     }
 
-#ifndef CONFIG_BUILD_KERNEL
   qemu_rv_clear_bss();
 
   riscv_set_basestack(QEMU_RV_IDLESTACK_BASE, SMP_STACK_SIZE);
 
 #ifdef CONFIG_RISCV_PERCPU_SCRATCH
   riscv_percpu_add_hart(mhartid);
-#endif
-
 #endif
 
 #ifdef CONFIG_DEVICE_TREE
@@ -164,77 +190,6 @@ cpux:
       asm("WFI");
     }
 }
-
-#ifdef CONFIG_BUILD_KERNEL
-
-/****************************************************************************
- * Name: qemu_rv_start
- ****************************************************************************/
-
-void qemu_rv_start(int mhartid, const char *dtb)
-{
-  /* NOTE: still in M-mode */
-
-  if (0 == mhartid)
-    {
-      qemu_rv_clear_bss();
-
-      /* Initialize the per CPU areas */
-
-      riscv_percpu_add_hart(mhartid);
-    }
-
-  /* Disable MMU and enable PMP */
-
-  WRITE_CSR(CSR_SATP, 0x0);
-  WRITE_CSR(CSR_PMPADDR0, 0x3fffffffffffffull);
-  WRITE_CSR(CSR_PMPCFG0, 0xf);
-
-  /* Set exception and interrupt delegation for S-mode */
-
-  WRITE_CSR(CSR_MEDELEG, 0xffff);
-  WRITE_CSR(CSR_MIDELEG, 0xffff);
-
-  /* Allow to write satp from S-mode */
-
-  CLEAR_CSR(CSR_MSTATUS, MSTATUS_TVM);
-
-  /* Set mstatus to S-mode */
-
-  CLEAR_CSR(CSR_MSTATUS, MSTATUS_MPP_MASK);
-  SET_CSR(CSR_MSTATUS, MSTATUS_MPPS);
-
-  /* Set the trap vector for S-mode */
-
-  WRITE_CSR(CSR_STVEC, (uintptr_t)__trap_vec);
-
-  /* Set the trap vector for M-mode */
-
-  WRITE_CSR(CSR_MTVEC, (uintptr_t)__trap_vec_m);
-
-  if (0 == mhartid)
-    {
-      /* Only the primary CPU needs to initialize mtimer
-       * before entering to S-mode
-       */
-
-      up_mtimer_initialize();
-    }
-
-  /* Set mepc to the entry */
-
-  WRITE_CSR(CSR_MEPC, (uintptr_t)qemu_rv_start_s);
-
-  /* Set a0 to mhartid and a1 to dtb explicitly and enter to S-mode */
-
-  asm volatile (
-      "mv a0, %0 \n"
-      "mv a1, %1 \n"
-      "mret \n"
-      :: "r" (mhartid), "r" (dtb)
-  );
-}
-#endif
 
 void riscv_earlyserialinit(void)
 {

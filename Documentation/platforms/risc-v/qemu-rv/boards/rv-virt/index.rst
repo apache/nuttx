@@ -65,6 +65,8 @@ And, for 64-bit configurations::
 
     $ qemu-system-riscv64 -semihosting -M virt,aclint=on -cpu rv64 -smp 8 -bios none -kernel nuttx -nographic
 
+If testing with kernel build, remove the ``-bios none`` option. Kernel build
+requires SBI to function properly.
 
 citest
 ------
@@ -135,7 +137,7 @@ To run it with QEMU, use the following command::
       -device virtio-net-device,netdev=u1,bus=virtio-mmio-bus.2 \
       -drive file=./mydisk-1gb.img,if=none,format=raw,id=hd \
       -device virtio-blk-device,bus=virtio-mmio-bus.3,drive=hd \
-      -bios none -kernel ./nuttx/nuttx -nographic
+      -kernel ./nuttx/nuttx -nographic
 
 knetnsh64_smp
 -------------
@@ -198,7 +200,7 @@ A ROMFS image is generated and linked to the kernel. This requires re-running ``
 
 To run it, use the following command::
 
-    $ qemu-system-riscv32 -M virt,aclint=on -cpu rv32 -smp 8 -bios none -kernel nuttx -nographic
+    $ qemu-system-riscv32 -M virt,aclint=on -cpu rv32 -smp 8 -kernel nuttx -nographic
 
 In `nsh`, applications can be run from the `/system/bin` directory::
 
