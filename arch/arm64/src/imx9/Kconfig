@@ -718,6 +718,13 @@ config IMX9_LPSPI_DMATHRESHOLD
 		by polling logic.  But we need a threshold value to determine what
 		is small.
 
+config IMX9_LPSPI_DMA_BUFFER_SIZE
+	int "LPSPI DMA buffer size"
+	default 4096
+	depends on IMX9_LPSPI_DMA
+	---help---
+		Set the LPSPI driver DMA buffer size.
+
 config IMX9_LPSPI1_DMA
 	bool "LPSPI1 DMA"
 	default n

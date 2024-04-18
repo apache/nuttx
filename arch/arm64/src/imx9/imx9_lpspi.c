@@ -67,6 +67,7 @@
 #include "arm64_internal.h"
 #include "imx9_ccm.h"
 #include "imx9_clockconfig.h"
+#include "imx9_dma_alloc.h"
 #include "imx9_gpio.h"
 #include "imx9_iomuxc.h"
 #include "imx9_lpspi.h"
@@ -131,6 +132,8 @@ struct imx9_lpspidev_s
   DMACH_HANDLE      txdma;      /* DMA channel handle for TX transfers */
   sem_t             rxsem;      /* Wait for RX DMA to complete */
   sem_t             txsem;      /* Wait for TX DMA to complete */
+  void             *txbuf;      /* Driver DMA safe buffer for TX */
+  void             *rxbuf;      /* Driver DMA safe buffer for RX */
 #endif
 };
 
@@ -1305,13 +1308,13 @@ static void imx9_lpspi_exchange(struct spi_dev_s *dev,
                                 const void *txbuffer,
                                 void *rxbuffer, size_t nwords)
 {
+  struct imx9_lpspidev_s  *priv = (struct imx9_lpspidev_s *)dev;
   int                      ret;
   size_t                   adjust;
   ssize_t                  nbytes;
   static uint8_t           rxdummy[4] aligned_data(4);
   static const uint16_t    txdummy = 0xffff;
   uint32_t                 regval;
-  struct imx9_lpspidev_s  *priv = (struct imx9_lpspidev_s *)dev;
 
   DEBUGASSERT(priv != NULL);
   DEBUGASSERT(priv && priv->spibase);
@@ -1334,6 +1337,17 @@ static void imx9_lpspi_exchange(struct spi_dev_s *dev,
 #endif
       )
     {
+      imx9_lpspi_exchange_nodma(dev, txbuffer, rxbuffer, nwords);
+      return;
+    }
+
+  /* Check if the transfer is too long */
+
+  if (nbytes > CONFIG_IMX9_LPSPI_DMA_BUFFER_SIZE)
+    {
+      /* Transfer is too long, revert to slow non-DMA method */
+
+      spiwarn("frame %lu too long, fall back to no DMA transfer\n", nbytes);
       imx9_lpspi_exchange_nodma(dev, txbuffer, rxbuffer, nwords);
       return;
     }
@@ -1362,13 +1376,22 @@ static void imx9_lpspi_exchange(struct spi_dev_s *dev,
 
   if (txbuffer)
     {
-      up_clean_dcache((uintptr_t)txbuffer, (uintptr_t)txbuffer + nbytes);
+      /* Move the user data to device internal buffer */
+
+      memcpy(priv->txbuf, txbuffer, nbytes);
+
+      /* And flush it to RAM */
+
+      up_clean_dcache((uintptr_t)priv->txbuf,
+                      (uintptr_t)priv->txbuf + nbytes);
     }
 
   if (rxbuffer)
     {
-      up_invalidate_dcache((uintptr_t)rxbuffer,
-                           (uintptr_t)rxbuffer + nbytes);
+      /* Prepare the RX buffer for DMA */
+
+      up_invalidate_dcache((uintptr_t)priv->rxbuf,
+                           (uintptr_t)priv->rxbuf + nbytes);
     }
 
   /* Set up the DMA */
@@ -1378,7 +1401,7 @@ static void imx9_lpspi_exchange(struct spi_dev_s *dev,
   struct imx9_edma_xfrconfig_s config;
 
   config.saddr  = priv->spibase + IMX9_LPSPI_RDR_OFFSET;
-  config.daddr  = (uintptr_t) (rxbuffer ? rxbuffer : rxdummy);
+  config.daddr  = (uintptr_t) (rxbuffer ? priv->rxbuf : rxdummy);
   config.soff   = 0;
   config.doff   = rxbuffer ? adjust : 0;
   config.iter   = nbytes;
@@ -1391,7 +1414,7 @@ static void imx9_lpspi_exchange(struct spi_dev_s *dev,
 #endif
   imx9_dmach_xfrsetup(priv->rxdma, &config);
 
-  config.saddr  = (uintptr_t) (txbuffer ? txbuffer : &txdummy);
+  config.saddr  = (uintptr_t) (txbuffer ? priv->txbuf : &txdummy);
   config.daddr  = priv->spibase + IMX9_LPSPI_TDR_OFFSET;
   config.soff   = txbuffer ? adjust : 0;
   config.doff   = 0;
@@ -1436,10 +1459,16 @@ static void imx9_lpspi_exchange(struct spi_dev_s *dev,
 
   imx9_lpspi_putreg32(priv, IMX9_LPSPI_DER_OFFSET, 0);
 
-  if (rxbuffer)
+  if (rxbuffer && ret >= 0)
     {
-      up_invalidate_dcache((uintptr_t)rxbuffer,
-                           (uintptr_t)rxbuffer + nbytes);
+      /* Flush the RX data to ram */
+
+      up_invalidate_dcache((uintptr_t)priv->rxbuf,
+                           (uintptr_t)priv->rxbuf + nbytes);
+
+      /* Copy data to user buffer */
+
+      memcpy(rxbuffer, priv->rxbuf, nbytes);
     }
 }
 
@@ -2043,6 +2072,13 @@ struct spi_dev_s *imx9_lpspibus_initialize(int bus)
           priv->txdma = imx9_dmach_alloc(priv->txch, 0);
           priv->rxdma = imx9_dmach_alloc(priv->rxch, 0);
           DEBUGASSERT(priv->rxdma && priv->txdma);
+        }
+
+      if (priv->txbuf == NULL && priv->rxbuf == NULL)
+        {
+          priv->txbuf = imx9_dma_alloc(CONFIG_IMX9_LPSPI_DMA_BUFFER_SIZE);
+          priv->rxbuf = imx9_dma_alloc(CONFIG_IMX9_LPSPI_DMA_BUFFER_SIZE);
+          DEBUGASSERT(priv->txbuf && priv->rxbuf);
         }
     }
   else
