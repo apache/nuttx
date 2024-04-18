@@ -498,6 +498,10 @@ config RISCV_TOOLCHAIN_GNU_RV32
 		This option should work for any modern GNU toolchain (GCC 5.2 or newer)
 		configured for riscv32-unknown-elf.
 
+config RISCV_TOOLCHAIN_CLANG
+	bool "LLVM Clang toolchain"
+	select ARCH_TOOLCHAIN_CLANG
+
 endchoice # Toolchain Selection
 
 config RISCV_SEMIHOSTING_HOSTFS
