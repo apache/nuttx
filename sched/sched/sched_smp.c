@@ -136,6 +136,7 @@ int nxsched_smp_call_handler(int irq, FAR void *context,
 
       ret = call_data->func(call_data->arg);
 
+      flags = enter_critical_section();
       if (call_data->cookie != NULL)
         {
           if (ret < 0)
@@ -153,8 +154,6 @@ int nxsched_smp_call_handler(int irq, FAR void *context,
               spin_unlock(&call_data->lock);
             }
         }
-
-      flags = enter_critical_section();
     }
 
   up_cpu_paused_restore();
