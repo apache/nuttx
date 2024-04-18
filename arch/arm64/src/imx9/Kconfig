@@ -24,6 +24,24 @@ endchoice # i.MX9 Chip Selection
 
 endmenu # "i.MX9 Chip Selection"
 
+config IMX9_DMA_ALLOC
+	bool "Enable DMA capable memory allocator"
+	depends on GRAN
+	default y if CONFIG_FAT_DMAMEMORY
+
+menu "DMA Allocator Configuration"
+	depends on IMX9_DMA_ALLOC
+
+config IMX9_DMA_ALLOC_POOL_SIZE
+	int "DMA allocator memory pool size in bytes"
+	default 4096
+
+config IMX9_DMA_ALLOC_SECT
+	string "Section for DMA allocator memory pool, default is .bss"
+	default ".bss"
+
+endmenu # DMA Allocator Configuration
+
 config IMX9_FLEXIO_PWM
 	bool
 	select PWM_MULTICHAN
