@@ -249,6 +249,7 @@ int syslog_add_intbuffer(int ch)
 int syslog_flush_intbuffer(bool force)
 {
   syslog_putc_t putfunc;
+  irqstate_t flags;
   int ch;
   int i;
 
@@ -256,7 +257,7 @@ int syslog_flush_intbuffer(bool force)
    * concurrent modification by other tasks.
    */
 
-  sched_lock();
+  flags = enter_critical_section();
 
   do
     {
@@ -293,7 +294,7 @@ int syslog_flush_intbuffer(bool force)
     }
   while (ch != EOF);
 
-  sched_unlock();
+  leave_critical_section(flags);
 
   return ch;
 }
