@@ -46,7 +46,15 @@ FAR struct shmfs_object_s *shmfs_alloc_object(size_t length)
    * chunk in kernel heap
    */
 
-  object = kmm_zalloc(sizeof(struct shmfs_object_s) + length);
+  size_t alloc_size = sizeof(struct shmfs_object_s) + length;
+  if (alloc_size < length)
+    {
+      /* There must have been an integer overflow */
+
+      return NULL;
+    }
+
+  object = kmm_zalloc(alloc_size);
   if (object)
     {
       object->paddr = (FAR char *)(object + 1);
