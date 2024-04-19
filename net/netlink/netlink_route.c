@@ -29,6 +29,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
+#include <arpa/inet.h>
 
 #include <net/route.h>
 #include <netpacket/netlink.h>
@@ -177,6 +178,32 @@ struct getaddr_recvfrom_rsplist_s
 {
   sq_entry_t flink;
   struct getaddr_recvfrom_response_s payload;
+};
+
+struct getprefix_recvfrom_addr_s
+{
+  struct rtattr  attr;
+  net_ipv6addr_t addr;
+};
+
+struct getprefix_recvfrom_cache_s
+{
+  struct rtattr           attr;
+  struct prefix_cacheinfo pci;
+};
+
+struct getprefix_recvfrom_response_s
+{
+  struct nlmsghdr  hdr;
+  struct prefixmsg pmsg;
+  struct getprefix_recvfrom_addr_s  prefix;
+  struct getprefix_recvfrom_cache_s pci;
+};
+
+struct getprefix_recvfrom_rsplist_s
+{
+  sq_entry_t flink;
+  struct getprefix_recvfrom_response_s payload;
 };
 
 /* netdev_foreach() callback */
@@ -1249,6 +1276,58 @@ static int netlink_get_addr(NETLINK_HANDLE handle,
 }
 #endif
 
+#if !defined(CONFIG_NETLINK_DISABLE_NEWADDR) && defined(CONFIG_NET_IPV6)
+static FAR struct netlink_response_s *
+netlink_fill_ipv6prefix(FAR struct net_driver_s *dev, int type,
+                        FAR const struct icmpv6_prefixinfo_s *pinfo)
+{
+  FAR struct getprefix_recvfrom_rsplist_s *alloc;
+  FAR struct getprefix_recvfrom_response_s *resp;
+
+  DEBUGASSERT(dev != NULL && pinfo != NULL);
+
+  alloc = kmm_zalloc(sizeof(struct getprefix_recvfrom_rsplist_s));
+  if (alloc == NULL)
+    {
+      nerr("ERROR: Failed to allocate response buffer.\n");
+      return NULL;
+    }
+
+  /* Initialize the response buffer */
+
+  resp                  = &alloc->payload;
+
+  resp->hdr.nlmsg_len   = sizeof(struct getprefix_recvfrom_response_s);
+  resp->hdr.nlmsg_type  = type;
+  resp->hdr.nlmsg_flags = 0;
+  resp->hdr.nlmsg_seq   = 0;
+  resp->hdr.nlmsg_pid   = 0;
+
+  resp->pmsg.prefix_family = AF_INET6;
+#ifdef CONFIG_NETDEV_IFINDEX
+  resp->pmsg.prefix_ifindex = dev->d_ifindex;
+#endif
+  resp->pmsg.prefix_len  = pinfo->optlen;
+  resp->pmsg.prefix_type = pinfo->opttype;
+
+  resp->prefix.attr.rta_len  = RTA_LENGTH(sizeof(net_ipv6addr_t));
+  resp->prefix.attr.rta_type = PREFIX_ADDRESS;
+  net_ipv6addr_copy(resp->prefix.addr, pinfo->prefix);
+
+  resp->pci.attr.rta_len  = RTA_LENGTH(sizeof(struct prefix_cacheinfo));
+  resp->pci.attr.rta_type = PREFIX_CACHEINFO;
+
+  resp->pci.pci.preferred_time  = NTOHS(pinfo->plifetime[0]) << 16;
+  resp->pci.pci.preferred_time |= NTOHS(pinfo->plifetime[1]);
+  resp->pci.pci.valid_time      = NTOHS(pinfo->vlifetime[0]) << 16;
+  resp->pci.pci.valid_time     |= NTOHS(pinfo->vlifetime[1]);
+
+  /* Finally, return the response */
+
+  return (FAR struct netlink_response_s *)alloc;
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -1579,6 +1658,31 @@ void netlink_neigh_notify(FAR const void *neigh, int type, int domain)
 
   netlink_add_broadcast(RTNLGRP_NEIGH, resp);
   netlink_add_terminator(NULL, NULL, RTNLGRP_NEIGH);
+}
+#endif
+
+/****************************************************************************
+ * Name: netlink_ipv6_prefix_notify()
+ *
+ * Description:
+ *   Perform the RA prefix for the NETLINK_ROUTE protocol.
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_NETLINK_DISABLE_NEWADDR) && defined(CONFIG_NET_IPV6)
+void netlink_ipv6_prefix_notify(FAR struct net_driver_s *dev, int type,
+                                FAR const struct icmpv6_prefixinfo_s *pinfo)
+{
+  FAR struct netlink_response_s *resp;
+
+  resp = netlink_fill_ipv6prefix(dev, type, pinfo);
+  if (resp == NULL)
+    {
+      return;
+    }
+
+  netlink_add_broadcast(RTNLGRP_IPV6_PREFIX, resp);
+  netlink_add_terminator(NULL, NULL, RTNLGRP_IPV6_PREFIX);
 }
 #endif
 

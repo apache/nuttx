@@ -32,6 +32,7 @@
 
 #include <netpacket/netlink.h>
 #include <nuttx/queue.h>
+#include <nuttx/net/icmpv6.h>
 #include <nuttx/net/netlink.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/wqueue.h>
@@ -48,6 +49,7 @@
 #  define netlink_device_notify_ipaddr(dev, type, domain, addr, preflen)
 #  define netlink_route_notify(route, type, domain)
 #  define netlink_neigh_notify(neigh, type, domain)
+#  define netlink_ipv6_prefix_notify(dev, type, pinfo)
 #endif
 
 #ifdef CONFIG_NET_NETLINK
@@ -550,6 +552,21 @@ void netlink_route_notify(FAR const void *route, int type, int domain);
 #  define netlink_neigh_notify(neigh, type, domain)
 #else
 void netlink_neigh_notify(FAR const void *neigh, int type, int domain);
+#endif
+
+/****************************************************************************
+ * Name: netlink_ipv6_prefix_notify()
+ *
+ * Description:
+ *   Perform the RA prefix for the NETLINK_ROUTE protocol.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NETLINK_DISABLE_NEWPREFIX) || !defined(CONFIG_NET_IPV6)
+#  define netlink_ipv6_prefix_notify(dev, type, pinfo)
+#else
+void netlink_ipv6_prefix_notify(FAR struct net_driver_s *dev, int type,
+                                FAR const struct icmpv6_prefixinfo_s *pinfo);
 #endif
 
 /****************************************************************************
