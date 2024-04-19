@@ -241,3 +241,33 @@ class Nxlistcheck(gdb.Command):
 
 
 Nxlistcheck()
+
+
+class Nxlistforentry(gdb.Command):
+    """Dump list members for a given list"""
+
+    def __init__(self):
+        super(Nxlistforentry, self).__init__(
+            "listforentry", gdb.COMMAND_DATA, gdb.COMPLETE_EXPRESSION
+        )
+
+    def invoke(self, arg, from_tty):
+        argv = gdb.string_to_argv(arg)
+
+        if len(argv) != 3:
+            gdb.write("listforentry takes three arguments"
+                      "head, type, member\n")
+            gdb.write("eg: listforentry &g_list 'struct type' 'node '\n")
+            return
+
+        i = 0
+        for entry in list_for_each_entry(
+                gdb.parse_and_eval(argv[0]),
+                gdb.lookup_type(argv[1]).pointer(),
+                argv[2]):
+            gdb.write(f"{i}: ({argv[1]} *){entry}\n")
+            gdb.execute(f"print *({argv[1]} *){entry}")
+            i += 1
+
+
+Nxlistforentry()
