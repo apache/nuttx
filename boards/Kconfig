@@ -1915,6 +1915,16 @@ config ARCH_BOARD_WAVESHARE_RP2040_LCD_1_28
 		This is a port to the Waveshare RP2040 LCD 1.28 board.
 		Support is derived from Raspberry Pi Pico support.
 
+config ARCH_BOARD_W5500_EVB_PICO
+	bool "WIZnet W5500-EVB-Pico board"
+	depends on ARCH_CHIP_RP2040
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This is a port to the WIZnet W5500-EVB-Pico board.
+		Support is derived from Raspberry Pi Pico support.
+
 config ARCH_BOARD_RX65N
 	bool "RX65N renesas board"
 	depends on ARCH_CHIP_R5F565NEDDFC
@@ -3319,6 +3329,7 @@ config ARCH_BOARD
 	default "adafruit-kb2040"           if ARCH_BOARD_ADAFRUIT_KB2040
 	default "adafruit-qt-py-rp2040"     if ARCH_BOARD_ADAFRUIT_QT_PY_RP2040
 	default "waveshare-rp2040-lcd-1.28" if ARCH_BOARD_WAVESHARE_RP2040_LCD_1_28
+	default "w5500-evb-pico"            if ARCH_BOARD_W5500_EVB_PICO
 	default "rx65n"                     if ARCH_BOARD_RX65N
 	default "rx65n-rsk1mb"              if ARCH_BOARD_RX65N_RSK1MB
 	default "rx65n-rsk2mb"              if ARCH_BOARD_RX65N_RSK2MB
