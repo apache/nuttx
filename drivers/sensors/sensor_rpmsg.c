@@ -833,6 +833,7 @@ static void sensor_rpmsg_push_event_one(FAR struct sensor_rpmsg_dev_s *dev,
           if (sre->buffer)
             {
               rpmsg_send_nocopy(&sre->ept, sre->buffer, sre->written);
+              sre->buffer = NULL;
             }
 
           msg = rpmsg_get_tx_payload_buffer(&sre->ept, &sre->space, true);
