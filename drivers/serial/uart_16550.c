@@ -684,17 +684,6 @@ static inline void u16550_disableuartint(FAR struct u16550_s *priv,
 }
 
 /****************************************************************************
- * Name: u16550_restoreuartint
- ****************************************************************************/
-
-static inline void u16550_restoreuartint(FAR struct u16550_s *priv,
-                                         uint32_t ier)
-{
-  priv->ier |= ier & UART_IER_ALLIE;
-  u16550_serialout(priv, UART_IER_OFFSET, priv->ier);
-}
-
-/****************************************************************************
  * Name: u16550_enablebreaks
  ****************************************************************************/
 
