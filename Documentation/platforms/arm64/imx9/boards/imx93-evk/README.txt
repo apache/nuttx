@@ -52,6 +52,7 @@ Automated option:
 
 1. Replace the default bootcmd to disable dcache automatically:
 
+    u-boot=> setenv bootdelay 0
     u-boot=> setenv bootcmd dcache off
     u-boot=> saveenv
     Saving Environment to MMC... Writing to MMC(0)... OK
