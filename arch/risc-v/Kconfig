@@ -371,6 +371,18 @@ config ARCH_RV_ISA_ZICSR_ZIFENCEI
 		clang < 17 or GCC < 11.3.0, for which this is not possible or need
 		special treatment.
 
+config ARCH_RV_EXPERIMENTAL_EXTENSIONS
+	string "LLVM RISC-V Experimental Extensions"
+	default ""
+	depends on RISCV_TOOLCHAIN_CLANG
+	---help---
+		This option allows the platform to enable experimental extensions,
+		LLVM supports (to various degrees) a number of experimental extensions.
+		All experimental extensions have experimental- as a prefix. There is
+		explicitly no compatibility promised between versions of the toolchain,
+		and regular users are strongly advised not to make use of experimental
+		extensions before they reach ratification.
+
 config ARCH_RV_ISA_VENDOR_EXTENSIONS
 	string "Vendor Custom RISC-V Instruction Set Architecture Extensions"
 	default ""
