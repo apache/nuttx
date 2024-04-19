@@ -47,7 +47,7 @@ config DISABLE_ENVIRON
 endif # DISABLE_OS_API
 
 config DISABLE_IDLE_LOOP
-	bool
+	bool "Disable idle loop support"
 	default n
 	---help---
 		This option allows nx_start to return instead of
