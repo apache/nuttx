@@ -54,6 +54,21 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#if !defined(ARMV8A_DCACHE_LINESIZE) || ARMV8A_DCACHE_LINESIZE == 0
+#  undef ARMV8A_DCACHE_LINESIZE
+#  define ARMV8A_DCACHE_LINESIZE 64
+#endif
+
+#define DCACHE_LINEMASK (ARMV8A_DCACHE_LINESIZE - 1)
+
+#if !defined(CONFIG_ARM64_DCACHE_DISABLE)
+#  define cache_aligned_alloc(s) kmm_memalign(ARMV8A_DCACHE_LINESIZE,(s))
+#  define CACHE_ALIGNED_DATA     aligned_data(ARMV8A_DCACHE_LINESIZE)
+#else
+#  define cache_aligned_alloc    kmm_malloc
+#  define CACHE_ALIGNED_DATA
+#endif
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_USBDEV_EP0_MAXSIZE
@@ -203,31 +218,31 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
 };
 #endif
 
-#if defined(CONFIG_ARMV7M_DCACHE)
-#  define cache_aligned_alloc(s) kmm_memalign(ARMV7M_DCACHE_LINESIZE,(s))
-#  define CACHE_ALIGNED_DATA     aligned_data(ARMV7M_DCACHE_LINESIZE)
-#else
-#  define cache_aligned_alloc kmm_malloc
-#  define CACHE_ALIGNED_DATA
-#endif
-
 /* Hardware interface *******************************************************/
 
-/* This represents a Endpoint Transfer Descriptor - note these must be 32
- * byte aligned.
- */
+/* This represents a Endpoint Transfer Descriptor dQH overlay (32 bytes) */
+
+#define IMX9_DTD_S                                                                          \
+  volatile uint32_t       nextdesc;      /* Address of the next DMA descripto in RAM */     \
+  volatile uint32_t       config;        /* Misc. bit encoded configuration information */  \
+  uint32_t                buffer0;       /* Buffer start address */                         \
+  uint32_t                buffer1;       /* Buffer start address */                         \
+  uint32_t                buffer2;       /* Buffer start address */                         \
+  uint32_t                buffer3;       /* Buffer start address */                         \
+  uint32_t                buffer4;       /* Buffer start address */                         \
+  uint32_t                xfer_len;      /* Software only - transfer len that was queued */ \
+
+struct imx9_dtd_ovl_s
+{
+  IMX9_DTD_S
+};
+
+/* This represents a Endpoint Transfer Descriptor - cache line aligned */
 
 struct imx9_dtd_s
 {
-  volatile uint32_t       nextdesc;      /* Address of the next DMA descripto in RAM */
-  volatile uint32_t       config;        /* Misc. bit encoded configuration information */
-  uint32_t                buffer0;       /* Buffer start address */
-  uint32_t                buffer1;       /* Buffer start address */
-  uint32_t                buffer2;       /* Buffer start address */
-  uint32_t                buffer3;       /* Buffer start address */
-  uint32_t                buffer4;       /* Buffer start address */
-  uint32_t                xfer_len;      /* Software only - transfer len that was queued */
-};
+  IMX9_DTD_S
+} CACHE_ALIGNED_DATA;
 
 /* DTD nextdesc field */
 
@@ -244,18 +259,15 @@ struct imx9_dtd_s
 #define DTD_CONFIG_BUFFER_ERROR      (1 << 5)    /* Bit 6      : Status Buffer Error */
 #define DTD_CONFIG_TRANSACTION_ERROR (1 << 3)    /* Bit 3      : Status Transaction Error */
 
-/* This represents a queue head  - note these must be aligned to a 2048 byte
- * boundary
- */
+/* This represents a queue head */
 
 struct imx9_dqh_s
 {
   uint32_t                capability; /* Endpoint capability */
   uint32_t                currdesc;   /* Current dTD pointer */
-  struct imx9_dtd_s       overlay;    /* DTD overlay */
+  struct imx9_dtd_ovl_s   overlay;    /* DTD overlay */
   volatile uint32_t       setup[2];   /* Set-up buffer */
-  uint32_t                gap[4];     /* align to 64 bytes */
-};
+} CACHE_ALIGNED_DATA;
 
 /* DQH capability field */
 
@@ -351,10 +363,10 @@ struct imx9_ep_s
 
 struct imx9_ep0_s
 {
-  uint8_t                 buf[64] CACHE_ALIGNED_DATA;  /* buffer for EP0 short transfers */
-  uint16_t                buf_len;                     /* buffer length */
-  struct usb_ctrlreq_s    ctrl;                        /* structure for EP0 short transfers */
-  uint8_t                 state;                       /* state of certain EP0 operations */
+  uint8_t * const         buf;     /* buffer for EP0 short transfers */
+  uint16_t                buf_len; /* buffer length */
+  struct usb_ctrlreq_s    ctrl;    /* structure for EP0 short transfers */
+  uint8_t                 state;   /* state of certain EP0 operations */
 };
 
 /* This structure retains the state of the USB device controller */
@@ -391,10 +403,8 @@ struct imx9_usb_s
   /* The endpoint list */
 
   struct imx9_ep_s             eplist[IMX9_NPHYSENDPOINTS];
-
-  struct imx9_dqh_s            qh[IMX9_NPHYSENDPOINTS] aligned_data(2048);
-
-  struct imx9_dtd_s            td[IMX9_NPHYSENDPOINTS] aligned_data(32);
+  struct imx9_dqh_s * const    qh;
+  struct imx9_dtd_s * const    td;
 };
 
 #define EP0STATE_IDLE             0        /* Idle State, leave on receiving a setup packet or epsubmit */
@@ -513,12 +523,31 @@ static int         imx9_pullup(struct usbdev_s *dev, bool enable);
  * Private Data
  ****************************************************************************/
 
+/* Note: dqh lists must be aligned to a 2048 byte
+ * boundary, since ENDPTLISTADDR register last 10 bits are tied to 0
+ */
+
+#ifdef CONFIG_IMX9_USBDEV_USBC1
+static uint8_t g_usb0_ep0buf[64] CACHE_ALIGNED_DATA;
+static struct imx9_dqh_s g_usb0_qh[IMX9_NPHYSENDPOINTS] aligned_data(2048);
+static struct imx9_dtd_s g_usb0_td[IMX9_NPHYSENDPOINTS];
+#endif
+
+#ifdef CONFIG_IMX9_USBDEV_USBC2
+static uint8_t g_usb1_ep0buf[64] CACHE_ALIGNED_DATA;
+static struct imx9_dqh_s g_usb1_qh[IMX9_NPHYSENDPOINTS] aligned_data(2048);
+static struct imx9_dtd_s g_usb1_td[IMX9_NPHYSENDPOINTS];
+#endif
+
 static struct imx9_usb_s g_usbdev[] =
 {
 #ifdef CONFIG_IMX9_USBDEV_USBC1 
   {
     .id = 0,
     .base = IMX9_USB_OTG1_BASE,
+    .ep0.buf = g_usb0_ep0buf,
+    .qh = g_usb0_qh,
+    .td = g_usb0_td,
   },
 #endif
 
@@ -526,6 +555,9 @@ static struct imx9_usb_s g_usbdev[] =
   {
     .id = 1,
     .base = IMX9_USB_OTG2_BASE,
+    .ep0.buf = g_usb1_ep0buf,
+    .qh = g_usb1_qh,
+    .td = g_usb1_td,
   },
 #endif
 };
@@ -742,9 +774,9 @@ static inline void imx9_writedtd(struct imx9_dtd_s *dtd,
   dtd->buffer4   = (uint32_t)(((uintptr_t) data) + 0x4000) & 0xfffff000;
   dtd->xfer_len  = nbytes;
 
-  up_flush_dcache((uintptr_t)dtd,
+  up_clean_dcache((uintptr_t)dtd,
                   (uintptr_t)dtd + sizeof(struct imx9_dtd_s));
-  up_flush_dcache((uintptr_t)data,
+  up_clean_dcache((uintptr_t)data,
                   (uintptr_t)data + nbytes);
 }
 
@@ -836,6 +868,9 @@ static void imx9_readsetup(struct imx9_usb_s *priv, uint8_t epphy,
   /* Clear the trip wire */
 
   imx9_modifyreg(priv, IMX9_USBDEV_USBCMD_OFFSET, USBDEV_USBCMD_SUTW, 0);
+
+  up_clean_dcache((uintptr_t)dqh,
+                  (uintptr_t)dqh + sizeof(struct imx9_dqh_s));
 
   /* Clear the Setup Interrupt */
 
@@ -1083,6 +1118,11 @@ static void imx9_dispatchrequest(struct imx9_usb_s *priv,
   usbtrace(TRACE_INTDECODE(IMX9_TRACEINTID_DISPATCH), 0);
   if (priv->driver)
     {
+      /* Invalidate buffer data cache */
+
+      up_invalidate_dcache((uintptr_t)priv->ep0.buf,
+                           (uintptr_t)priv->ep0.buf + sizeof(priv->ep0.buf));
+
       /* Forward to the control request to the class driver implementation */
 
       ret = CLASS_SETUP(priv->driver, &priv->usbdev, ctrl, priv->ep0.buf,
@@ -1705,14 +1745,6 @@ static void imx9_ep0complete(struct imx9_usb_s *priv, uint8_t epphy)
       break;
 
     case EP0STATE_SHORTREAD:
-
-      /* Make sure we have updated data after the DMA transfer.
-       * This invalidation matches the flush in writedtd().
-       */
-
-      up_invalidate_dcache((uintptr_t)priv->ep0.buf,
-                           (uintptr_t)priv->ep0.buf + sizeof(priv->ep0.buf));
-
       imx9_dispatchrequest(priv, &priv->ep0.ctrl);
       imx9_ep0state(priv, EP0STATE_WAIT_NAK_IN);
       break;
@@ -1834,9 +1866,7 @@ bool imx9_epcomplete(struct imx9_usb_s *priv, uint8_t epphy)
       return true;
     }
 
-  /* Make sure we have updated data after the DMA transfer.
-   * This invalidation matches the flush in writedtd().
-   */
+  /* Make sure we have updated data after the DMA transfer. */
 
   up_invalidate_dcache((uintptr_t)dtd,
                        (uintptr_t)dtd + sizeof(struct imx9_dtd_s));
