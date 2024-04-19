@@ -181,4 +181,17 @@ void rp2040_common_initialize(void)
   rp2040_gpio_setdir(CONFIG_RP2040_SPI1_CS_GPIO, true);
   rp2040_gpio_put(CONFIG_RP2040_SPI1_CS_GPIO, true);
 #endif
+
+#ifdef CONFIG_NET_W5500
+  /* W5500 Reset output */
+
+  rp2040_gpio_setdir(CONFIG_RP2040_W5500_RST_GPIO, true);
+  rp2040_gpio_put(CONFIG_RP2040_W5500_RST_GPIO, false);
+  rp2040_gpio_set_function(CONFIG_RP2040_W5500_RST_GPIO,
+                           RP2040_GPIO_FUNC_SIO);
+
+  /* W5500 Interrupt input */
+
+  rp2040_gpio_init(CONFIG_RP2040_W5500_INT_GPIO);
+#endif
 }
