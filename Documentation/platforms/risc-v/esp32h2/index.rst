@@ -28,21 +28,21 @@ ESP32-H2 Toolchain
 
 A generic RISC-V toolchain can be used to build ESP32-H2 projects. It's recommended to use the same
 toolchain used by NuttX CI. Please refer to the Docker
-`container <https://github.com/apache/nuttx/tree/master/tools/ci/docker/linux/Dockerfile>`_ and
+`container <https://github.com/apache/nuttx/tree/master/tools/ci/docker/linux/Dockerfile>`_ and 
 check for the current compiler version being used. For instance:
 
 .. code-block::
 
-   ###############################################################################
-   # Build image for tool required by RISCV builds
-   ###############################################################################
-   FROM nuttx-toolchain-base AS nuttx-toolchain-riscv
-   # Download the latest RISCV GCC toolchain prebuilt by xPack
-   RUN mkdir riscv-none-elf-gcc && \
-   curl -s -L "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v12.3.0-2/xpack-riscv-none-elf-gcc-12.3.0-2-linux-x64.tar.gz" \
-   | tar -C riscv-none-elf-gcc --strip-components 1 -xz
+  ###############################################################################
+  # Build image for tool required by RISCV builds
+  ###############################################################################
+  FROM nuttx-toolchain-base AS nuttx-toolchain-riscv
+  # Download the latest RISCV GCC toolchain prebuilt by xPack
+  RUN mkdir riscv-none-elf-gcc && \
+  curl -s -L "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v13.2.0-2/xpack-riscv-none-elf-gcc-13.2.0-2-linux-x64.tar.gz" \
+  | tar -C riscv-none-elf-gcc --strip-components 1 -xz
 
-It uses the xPack's prebuilt toolchain based on GCC 12.3.0.
+It uses the xPack's prebuilt toolchain based on GCC 13.2.0-2.
 
 Installing
 ----------
@@ -51,60 +51,52 @@ First, create a directory to hold the toolchain:
 
 .. code-block:: console
 
-   $ mkdir -p /path/to/your/toolchain/riscv-none-elf-gcc
+  $ mkdir -p /path/to/your/toolchain/riscv-none-elf-gcc
 
 Download and extract toolchain:
 
 .. code-block:: console
 
-   $ curl -s -L "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v12.3.0-2/xpack-riscv-none-elf-gcc-12.3.0-2-linux-x64.tar.gz" \
-   | tar -C /path/to/your/toolchain/riscv-none-elf-gcc --strip-components 1 -xz
+  $ curl -s -L "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v13.2.0-2/xpack-riscv-none-elf-gcc-13.2.0-2-linux-x64.tar.gz" \
+  | tar -C /path/to/your/toolchain/riscv-none-elf-gcc --strip-components 1 -xz
 
 Add the toolchain to your `PATH`:
 
 .. code-block:: console
 
-   $ echo "export PATH=/path/to/your/toolchain/riscv-none-elf-gcc/bin:$PATH" >> ~/.bashrc
+  $ echo "export PATH=/path/to/your/toolchain/riscv-none-elf-gcc/bin:$PATH" >> ~/.bashrc
 
 You can edit your shell's rc files if you don't use bash.
 
-Second stage bootloader and partition table
-===========================================
+Second stage bootloader
+=======================
 
-The NuttX port for now relies on IDF's second stage bootloader to carry on some hardware
-initializations.  The binaries for the bootloader and the partition table can be found in
-this repository: https://github.com/espressif/esp-nuttx-bootloader
-That repository contains a dummy IDF project that's used to build the bootloader and
-partition table, these are then presented as Github assets and can be downloaded
-from: https://github.com/espressif/esp-nuttx-bootloader/releases
-Download ``bootloader-esp32h2.bin`` and ``partition-table-esp32h2.bin`` and place them
-in a folder, the path to this folder will be used later to program them. This
-can be: ``../esp-bins``
+Nuttx can boot the ESP32-H2 directly using the so-called "Simple Boot". 
+An externally-built 2nd stage bootloader is not required in this case as all
+functions required to boot the device are built within Nuttx. Simple boot does not
+require any specific configuration (it is selectable by default if no other
+2nd stage bootloader is used). For compatibility among other SoCs and future options
+of 2nd stage bootloaders, the commands ``make bootloader`` and the ``ESPTOOL_BINDIR``
+option (for the ``make flash``) are kept (and ignored if Simple Boot is used).
 
 Building and flashing
 =====================
 
-First make sure that ``esptool.py`` is installed.  This tool is used to convert
+First, make sure that ``esptool.py`` is installed.  This tool is used to convert
 the ELF to a compatible ESP32-H2 image and to flash the image into the board.
 It can be installed with: ``pip install esptool``.
 
 Configure the NuttX project: ``./tools/configure.sh esp32h2-devkit:nsh``
 Run ``make`` to build the project.  Note that the conversion mentioned above is
 included in the build process.
-The ``esptool.py`` command to flash all the binaries is::
+The ``esptool.py`` is used to flash all the binaries. However, this is also
+included in the build process and we can build and flash with::
 
-     esptool.py --chip esp32h2 --port /dev/ttyUSBXX --baud 921600 write_flash 0x0 bootloader.bin 0x8000 partition-table.bin 0x10000 nuttx.bin
+  make flash ESPTOOL_PORT=<port> ESPTOOL_BINDIR=./
 
-However, this is also included in the build process and we can build and flash with::
-
-   make flash ESPTOOL_PORT=<port> ESPTOOL_BINDIR=../esp-bins
-
-Where ``<port>`` is typically ``/dev/ttyUSB0`` or similar and ``../esp-bins`` is
-the path to the folder containing the bootloader and the partition table
-for the ESP32-H2 as explained above.
-Note that this step is required only one time.  Once the bootloader and partition
-table are flashed, we don't need to flash them again.  So subsequent builds
-would just require: ``make flash ESPTOOL_PORT=/dev/ttyUSBXX``
+Where ``<port>`` is typically ``/dev/ttyUSB0`` or similar and ``./`` is
+the path to the folder containing the externally-built 2nd stage bootloader for
+the ESP32-H2 as explained above.
 
 Debugging with OpenOCD
 ======================
@@ -117,7 +109,7 @@ USB-to-JTAG adapter.
 
 OpenOCD can then be used::
 
-   openocd -c 'set ESP_RTOS none' -f board/esp32h2-builtin.cfg
+  openocd -c 'set ESP_RTOS none' -f board/esp32h2-builtin.cfg
 
 If you want to debug with an external JTAG adapter it can
 be connected as follows::
@@ -179,7 +171,7 @@ Supported Boards
 ================
 
 .. toctree::
-   :glob:
-   :maxdepth: 1
+  :glob:
+  :maxdepth: 1
 
-   boards/*/*
+  boards/*/*

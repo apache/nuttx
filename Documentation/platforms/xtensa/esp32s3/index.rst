@@ -16,16 +16,61 @@ On dual-core SoCs, the two CPUs are typically named "PRO_CPU" and "APP_CPU"
 (for "protocol" and "application"), however for most purposes the
 two CPUs are interchangeable.
 
-Toolchain
-=========
+ESP32-S3 Toolchain
+==================
 
-You can use the prebuilt `toolchain <https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/api-guides/tools/idf-tools.html#xtensa-esp32s3-elf>`__
-for Xtensa architecture and `OpenOCD <https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/api-guides/tools/idf-tools.html#openocd-esp32>`__
-for ESP32-S3 by Espressif.
+The toolchain used to build ESP32-S3 firmware can be either downloaded or built from the sources.
+It is **highly** recommended to use (download or build) the same toolchain version that is being
+used by the NuttX CI.
 
-For flashing firmware, you will need to install ``esptool.py`` by running::
+Please refer to the Docker
+`container <https://github.com/apache/nuttx/tree/master/tools/ci/docker/linux/Dockerfile>`_ and
+check for the current compiler version being used. For instance:
 
-    $ pip install esptool
+.. code-block::
+
+  ###############################################################################
+  # Build image for tool required by ESP32 builds
+  ###############################################################################
+  FROM nuttx-toolchain-base AS nuttx-toolchain-esp32
+  # Download the latest ESP32 GCC toolchain prebuilt by Espressif
+  RUN mkdir -p xtensa-esp32-elf-gcc && \
+    curl -s -L "https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/xtensa-esp32-elf-12.2.0_20230208-x86_64-linux-gnu.tar.xz" \
+    | tar -C xtensa-esp32-elf-gcc --strip-components 1 -xJ
+
+  RUN mkdir -p xtensa-esp32s2-elf-gcc && \
+    curl -s -L "https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/xtensa-esp32s2-elf-12.2.0_20230208-x86_64-linux-gnu.tar.xz" \
+    | tar -C xtensa-esp32s2-elf-gcc --strip-components 1 -xJ
+
+  RUN mkdir -p xtensa-esp32s3-elf-gcc && \
+    curl -s -L "https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/xtensa-esp32s3-elf-12.2.0_20230208-x86_64-linux-gnu.tar.xz" \
+    | tar -C xtensa-esp32s3-elf-gcc --strip-components 1 -xJ
+
+For ESP32-S3, the toolchain version is based on GGC 12.2.0 (``xtensa-esp32s3-elf-12.2.0_20230208``)
+
+The prebuilt Toolchain (Recommended)
+------------------------------------
+
+First, create a directory to hold the toolchain:
+
+.. code-block:: console
+
+  $ mkdir -p /path/to/your/toolchain/xtensa-esp32s3-elf-gcc
+
+Download and extract toolchain:
+
+.. code-block:: console
+
+  $ curl -s -L "https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/xtensa-esp32s3-elf-12.2.0_20230208-x86_64-linux-gnu.tar.xz" \
+  | tar -C xtensa-esp32s3-elf-gcc --strip-components 1 -xJ
+
+Add the toolchain to your `PATH`:
+
+.. code-block:: console
+
+  $ echo "export PATH=/path/to/your/toolchain/xtensa-esp32s3-elf-gcc/bin:$PATH" >> ~/.bashrc
+
+You can edit your shell's rc files if you don't use bash.
 
 Building from source
 --------------------
@@ -51,35 +96,51 @@ build the toolchain with crosstool-NG on Linux are as follows
 These steps are given in the setup guide in
 `ESP-IDF documentation <https://docs.espressif.com/projects/esp-idf/en/latest/get-started/linux-setup-scratch.html>`_.
 
-Flashing
-========
-
-Firmware for ESP32-S3 is flashed via the USB/UART or internal USB DEVICE JTAG interface using the
-``esptool.py`` tool.
-It's a two step process where the first converts the ELF file into a ESP32-S3 compatible binary
-and the second flashes it to the board.  These steps are included into the build system and you can
-flash your NuttX firmware simply by running::
-
-    $ make flash ESPTOOL_PORT=<port>
-
-where ``<port>`` is typically ``/dev/ttyUSB0`` or similar. You can change the baudrate by passing ``ESPTOOL_BAUD``.
+Building and flashing NuttX
+===========================
 
 Bootloader and partitions
 -------------------------
 
-ESP32-S3 requires a bootloader to be flashed as well as a set of FLASH partitions. This is only needed the first time
-(or any time you which to modify either of these). An easy way is to use prebuilt binaries for NuttX `from here <https://github.com/espressif/esp-nuttx-bootloader>`_. In there you will find instructions to rebuild these if necessary.
-Once you downloaded both binaries, you can flash them by adding an ``ESPTOOL_BINDIR`` parameter, pointing to the directory where these binaries were downloaded:
+Nuttx can boot the ESP32-S3 directly using the so-called "Simple Boot". An externally-built
+2nd stage bootloader is not required in this case as all functions required to boot the device
+are built within Nuttx. Simple boot does not require any specific configuration (it is selectable
+by default if no other 2nd stage bootloader is used).
 
-.. code-block:: console
+If other features are required, an externally-built 2nd stage bootloader is needed. The bootloader
+is built using the ``make bootloader`` command. This command generates the firmware in the
+``nuttx`` folder. The ``ESPTOOL_BINDIR`` is used in the ``make flash`` command to specify the path
+to the bootloader. For compatibility among other SoCs and future options of 2nd stage bootloaders,
+the commands ``make bootloader`` and the ``ESPTOOL_BINDIR`` option (for the ``make flash``) can be
+used even if no externally-built 2nd stage bootloader is being built (they will be ignored if
+Simple Boot is used, for instance)::
 
-   $ make flash ESPTOOL_PORT=<port> ESPTOOL_BINDIR=<dir>
+  $ make bootloader
 
-.. note:: It is recommended that if this is the first time you are using the board with NuttX that you perform a complete SPI FLASH erase.
+.. note:: It is recommended that if this is the first time you are using the board with NuttX to
+   perform a complete SPI FLASH erase.
 
-   .. code-block:: console
+    .. code-block:: console
 
       $ esptool.py erase_flash
+
+Building and Flashing
+---------------------
+
+First, make sure that ``esptool.py`` is installed.  This tool is used to convert the ELF to a
+compatible ESP32-S3 image and to flash the image into the board.
+It can be installed with: ``pip install esptool``.
+
+It's a two-step process where the first converts the ELF file into an ESP32-S3 compatible binary
+and the second flashes it to the board. These steps are included in the build system and it is
+possible to build and flash the NuttX firmware simply by running::
+
+    $ make flash ESPTOOL_PORT=<port> ESPTOOL_BINDIR=./
+
+where ``<port>`` is typically ``/dev/ttyUSB0`` or similar. ``ESPTOOL_BINDIR=./`` is the path of the
+externally-built 2nd stage bootloader and the partition table (if applicable): when built using the
+``make bootloader``, these files are placed into ``nuttx`` folder. ``ESPTOOL_BAUD`` is able to
+change the flash baudrate if desired.
 
 Peripheral Support
 ==================
@@ -169,64 +230,11 @@ using WPA2.
 
 The ``dhcpd_start`` is necessary to let your board to associate an IP to your smartphone.
 
-Memory Map
-==========
-
-Address Mapping
----------------
-
-================== ========== ========== =============== ===============
-BUS TYPE           START      LAST       DESCRIPTION     NOTES
-================== ========== ========== =============== ===============
-To be added
-================== ========== ========== =============== ===============
-
-Embedded Memory
----------------
-
-=========== ========== ========== =============== ===============
-BUS TYPE    START      LAST       DESCRIPTION     NOTES
-=========== ========== ========== =============== ===============
-To be added
-=========== ========== ========== =============== ===============
-
-Boundary Address (Embedded)
----------------------------
-
-====================== ========== ========== =============== ===============
-BUS TYPE               START      LAST       DESCRIPTION     NOTES
-====================== ========== ========== =============== ===============
-To be added
-====================== ========== ========== =============== ===============
-
-External Memory
----------------
-
-=========== ========== ========== =============== ===============
-BUS TYPE    START      LAST       DESCRIPTION     NOTES
-=========== ========== ========== =============== ===============
-To be added
-=========== ========== ========== =============== ===============
-
-Boundary Address (External)
----------------------------
-
-To be added
-
-Linker Segments
----------------
-
-+---------------------+------------+------------+------+------------------------------+
-| DESCRIPTION         | START      | END        | ATTR | LINKER SEGMENT NAME          |
-+=====================+============+============+======+==============================+
-| To be added         |            |            |      |                              |
-+---------------------+------------+------------+------+------------------------------+
-
 Supported Boards
 ================
 
 .. toctree::
-   :glob:
-   :maxdepth: 1
+  :glob:
+  :maxdepth: 1
 
-   boards/*/*
+  boards/*/*
