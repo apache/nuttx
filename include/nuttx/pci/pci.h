@@ -192,22 +192,38 @@
   while (0)
 
 #define pci_write_mmio_byte(dev, addr, val)  \
-  (*((FAR volatile uint8_t *)(addr))) = val
+  *((FAR volatile uint8_t *)(addr)) = val
 
 #define pci_write_mmio_word(dev, addr, val)  \
-  (*((FAR volatile uint16_t *)(addr))) = val
+  *((FAR volatile uint16_t *)(addr)) = val
 
 #define pci_write_mmio_dword(dev, addr, val)  \
-  (*((FAR volatile uint32_t *)(addr))) = val
+  *((FAR volatile uint32_t *)(addr)) = val
+
+#define pci_write_mmio_qword(dev, addr, val)  \
+  do \
+    { \
+      *((FAR volatile uint32_t *)(addr)) = (uint32_t)(val); \
+      *((FAR volatile uint32_t *)((FAR char *)(addr) + sizeof(uint32_t))) = (val) >> 32; \
+    } \
+  while (0)
 
 #define pci_read_mmio_byte(dev, addr, val)    \
-  (*val) = *((FAR volatile uint8_t *)(addr))
+  *(val) = *((FAR volatile uint8_t *)(addr))
 
 #define pci_read_mmio_word(dev, addr, val)    \
-  (*val) = *((FAR volatile uint16_t *)(addr))
+  *(val) = *((FAR volatile uint16_t *)(addr))
 
 #define pci_read_mmio_dword(dev, addr, val)   \
-  (*val) = *((FAR volatile uint32_t *)(addr))
+  *(val) = *((FAR volatile uint32_t *)(addr))
+
+#define pci_read_mmio_qword(dev, addr, val)  \
+  do \
+    { \
+      *(val) = *((FAR volatile uint32_t *)(addr)) | \
+               *((FAR volatile uint32_t *)((FAR char *)(addr) + sizeof(uint32_t))); \
+    } \
+  while (0)
 
 #define pci_map_region(dev, start, size) pci_bus_map_region((dev)->bus, start, size)
 
