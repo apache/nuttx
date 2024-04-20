@@ -524,3 +524,18 @@ NSH commands::
        ...
        10 packets transmitted, 10 received, 0% packet loss, time 10100 ms
        rtt min/avg/max/mdev = 0.000/0.000/0.000/0.000 ms
+
+usbmsc
+------
+
+Configures the NuttShell (nsh), enables a serial console on USART6 and enables USB Mass Storage.
+NSH commands::
+
+       nsh> msconn
+       mcsonn_main: Creating block drivers
+       mcsonn_main: Configuring with NLUNS=1
+       mcsonn_main: handle=0x20004c10
+       mcsonn_main: Bind LUN=0 to /dev/mmcsd0
+       mcsonn_main: Connected
+
+       nsh> msdis
