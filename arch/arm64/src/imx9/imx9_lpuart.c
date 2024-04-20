@@ -71,43 +71,43 @@
  * the FIFO receives half this number of bytes.
  *
  * This buffer size should be an even multiple of the Cortex-A55 D-Cache line
- * size, ARMV8M_DCACHE_LINESIZE, so that it can be individually invalidated.
+ * size, ARMV8A_DCACHE_LINESIZE, so that it can be individually invalidated.
  */
 
-#  if !defined(ARMV8M_DCACHE_LINESIZE) || ARMV8M_DCACHE_LINESIZE == 0
-#    undef ARMV8M_DCACHE_LINESIZE
-#    define ARMV8M_DCACHE_LINESIZE 64
+#  if !defined(ARMV8A_DCACHE_LINESIZE) || ARMV8A_DCACHE_LINESIZE == 0
+#    undef ARMV8A_DCACHE_LINESIZE
+#    define ARMV8A_DCACHE_LINESIZE 64
 #  endif
 
 #  if !defined(CONFIG_IMX9_SERIAL_RXDMA_BUFFER_SIZE) || \
-      (CONFIG_IMX9_SERIAL_RXDMA_BUFFER_SIZE < ARMV8M_DCACHE_LINESIZE)
+      (CONFIG_IMX9_SERIAL_RXDMA_BUFFER_SIZE < ARMV8A_DCACHE_LINESIZE)
 #    undef CONFIG_IMX9_SERIAL_RXDMA_BUFFER_SIZE
-#    define CONFIG_IMX9_SERIAL_RXDMA_BUFFER_SIZE ARMV8M_DCACHE_LINESIZE
+#    define CONFIG_IMX9_SERIAL_RXDMA_BUFFER_SIZE ARMV8A_DCACHE_LINESIZE
 #  endif
 
-#  define RXDMA_BUFFER_MASK   (ARMV8M_DCACHE_LINESIZE - 1)
+#  define RXDMA_BUFFER_MASK   (ARMV8A_DCACHE_LINESIZE - 1)
 #  define RXDMA_BUFFER_SIZE   ((CONFIG_IMX9_SERIAL_RXDMA_BUFFER_SIZE \
                                 + RXDMA_BUFFER_MASK) & ~RXDMA_BUFFER_MASK)
 
 /* The DMA buffer size when using TX DMA.
  *
  * This TX buffer size should be an even multiple of the Cortex-A55 D-Cache
- * line size, ARMV8M_DCACHE_LINESIZE, so that it can be individually
+ * line size, ARMV8A_DCACHE_LINESIZE, so that it can be individually
  * invalidated.
  */
 
-#define TXDMA_BUFFER_MASK   (ARMV8M_DCACHE_LINESIZE - 1)
+#define TXDMA_BUFFER_MASK   (ARMV8A_DCACHE_LINESIZE - 1)
 #define TXDMA_BUFFER_SIZE   ((CONFIG_IMX9_SERIAL_RXDMA_BUFFER_SIZE \
                               + RXDMA_BUFFER_MASK) & ~RXDMA_BUFFER_MASK)
 
-/* Buffers need to be aligned and multiples of ARMV8M_DCACHE_LINESIZE */
+/* Buffers need to be aligned and multiples of ARMV8A_DCACHE_LINESIZE */
 
 #if defined(CONFIG_ARM64_DCACHE_DISABLE)
 #  define TXDMA_BUF_SIZE(b)  (b)
 #  define TXDMA_BUF_ALIGN
 #else
 #  define TXDMA_BUF_SIZE(b) (((b) + TXDMA_BUFFER_MASK) & ~TXDMA_BUFFER_MASK)
-#  define TXDMA_BUF_ALIGN   aligned_data(ARMV8M_DCACHE_LINESIZE);
+#  define TXDMA_BUF_ALIGN   aligned_data(ARMV8A_DCACHE_LINESIZE);
 #endif
 
 #if !defined(CONFIG_LPUART1_TXDMA)
@@ -518,42 +518,42 @@ const struct uart_ops_s *g_o1 = &g_lpuart_txdma_ops;
 
 #ifdef CONFIG_LPUART1_RXDMA
 static char g_lpuart1rxfifo[RXDMA_BUFFER_SIZE]
-  aligned_data(ARMV8M_DCACHE_LINESIZE);
+  aligned_data(ARMV8A_DCACHE_LINESIZE);
 #endif
 
 # ifdef CONFIG_LPUART2_RXDMA
 static char g_lpuart2rxfifo[RXDMA_BUFFER_SIZE]
-  aligned_data(ARMV8M_DCACHE_LINESIZE);
+  aligned_data(ARMV8A_DCACHE_LINESIZE);
 #endif
 
 #ifdef CONFIG_LPUART3_RXDMA
 static char g_lpuart3rxfifo[RXDMA_BUFFER_SIZE]
-  aligned_data(ARMV8M_DCACHE_LINESIZE);
+  aligned_data(ARMV8A_DCACHE_LINESIZE);
 #endif
 
 #ifdef CONFIG_LPUART4_RXDMA
 static char g_lpuart4rxfifo[RXDMA_BUFFER_SIZE]
-  aligned_data(ARMV8M_DCACHE_LINESIZE);
+  aligned_data(ARMV8A_DCACHE_LINESIZE);
 #endif
 
 #ifdef CONFIG_LPUART5_RXDMA
 static char g_lpuart5rxfifo[RXDMA_BUFFER_SIZE]
-  aligned_data(ARMV8M_DCACHE_LINESIZE);
+  aligned_data(ARMV8A_DCACHE_LINESIZE);
 #endif
 
 #ifdef CONFIG_LPUART6_RXDMA
 static char g_lpuart6rxfifo[RXDMA_BUFFER_SIZE]
-  aligned_data(ARMV8M_DCACHE_LINESIZE);
+  aligned_data(ARMV8A_DCACHE_LINESIZE);
 #endif
 
 #ifdef CONFIG_LPUART7_RXDMA
 static char g_lpuart7rxfifo[RXDMA_BUFFER_SIZE]
-  aligned_data(ARMV8M_DCACHE_LINESIZE);
+  aligned_data(ARMV8A_DCACHE_LINESIZE);
 #endif
 
 #ifdef CONFIG_LPUART8_RXDMA
 static char g_lpuart8rxfifo[RXDMA_BUFFER_SIZE]
-  aligned_data(ARMV8M_DCACHE_LINESIZE);
+  aligned_data(ARMV8A_DCACHE_LINESIZE);
 #endif
 
 #ifdef CONFIG_IMX9_LPUART1
