@@ -53,42 +53,33 @@ Start GDB to connect to QEMU
 
     .. code-block:: console
 
-       $ gdb-multiarch -ix tools/nuttx-gdbinit nuttx
-       (gdb) target extended-remote localhost:1234
-       Remote debugging using localhost:1234
-       0x000012ee in up_mdelay (milliseconds=milliseconds@entry=250)
-           at common/arm_mdelay.c:51
-       51	      for (j = 0; j < CONFIG_BOARD_LOOPSPERMSEC; j++)
+       $ gdb-multiarch nuttx -ex "source tools/gdb/__init__.py" -ex "target remote 127.0.0.1:1234"
+        Type "apropos word" to search for commands related to "word"...
+        Reading symbols from nuttx...
+        set pagination off
+        source tools/gdb/lists.py
+        source tools/gdb/utils.py
+        source tools/gdb/memdump.py
+
+        if use thread command, please don't use 'continue', use 'c' instead !!!
+        source tools/gdb/thread.py
+        "handle SIGUSR1 "nostop" "pass" "noprint"
+        Remote debugging using 127.0.0.1:1234
+        0x0000a45a in up_idle () at chip/common/tiva_idle.c:62
+        62      }
        (gdb)
 
 #. From (gdb) prompt you can run commands to inpect NuttX:
 
     .. code-block:: console
 
-       (gdb) info_nxthreads
-       target examined
-       _target_arch.name=armv7
-       $_target_has_fpu : 1
-       $_target_has_smp : 0
-       saved current_tcb (pid=0)
-       * 
-       0 Thread 0x20001538  (Name: Idle Task, State: Running, Priority: 0, Stack: 464/1000) PC: 0x12fc in up_mdelay()
-       saved current_tcb (pid=0)
-       
-       1 Thread 0x20005060  (Name: hpwork, State: Waiting,Semaphore, Priority: 224, Stack: 320/1992) PC: 0x47dd in work_thread()
-       saved current_tcb (pid=0)
-       
-       2 Thread 0x20005c30  (Name: nsh_main, State: Waiting,Semaphore, Priority: 100, Stack: 1016/2000) PC: 0x1 in _vectors()
-       saved current_tcb (pid=0)
-       
-       3 Thread 0x20006b40  (Name: NTP daemon, State: Waiting,Signal, Priority: 100, Stack: 864/1952) PC: 0x0 in _vectors()
-       saved current_tcb (pid=0)
-       
-       4 Thread 0x20008540  (Name: telnetd, State: Waiting,Semaphore, Priority: 100, Stack: 616/2008) PC: 0x20008fd4 in No()
-       saved current_tcb (pid=0)
-       saved current_tcb (pid=0)
-       saved current_tcb (pid=0)
-       saved current_tcb (pid=0)
+        (gdb) info threads
+        Id   Thread                Info                                                                             Frame
+        *0   Thread 0x2000168c     (Name: Idle_Task, State: Running, Priority: 0, Stack: 1008)                      0xa45a up_idle() at chip/common/tiva_idle.c:62
+        1    Thread 0x20005270     (Name: hpwork, State: Waiting,Semaphore, Priority: 224, Stack: 1984)             0xa68c up_switch_context() at common/arm_switchcontext.c:95
+        2    Thread 0x20005e30     (Name: nsh_main, State: Waiting,Semaphore, Priority: 100, Stack: 2008)           0xa68c up_switch_context() at common/arm_switchcontext.c:95
+        3    Thread 0x20006d48     (Name: NTP_daemon, State: Waiting,Signal, Priority: 100, Stack: 1960)            0xa68c up_switch_context() at common/arm_switchcontext.c:95
+        4    Thread 0x20008b60     (Name: telnetd, State: Waiting,Semaphore, Priority: 100, Stack: 2016)            0xa68c up_switch_context() at common/arm_switchcontext.c:95
        (gdb) 
 
 As you can see QEMU and GDB are powerful tools to debug NuttX without using external board or expensive debugging hardware.
