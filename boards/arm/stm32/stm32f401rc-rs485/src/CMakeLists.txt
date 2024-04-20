@@ -56,6 +56,10 @@ if(CONFIG_STM32_PWM)
   list(APPEND SRCS stm32_pwm.c)
 endif()
 
+if(CONFIG_USBMSC)
+  list(APPEND SRCS stm32_usbmsc.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 if(CONFIG_ARCH_CHIP_STM32F401RC)
