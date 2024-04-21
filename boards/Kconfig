@@ -4736,6 +4736,12 @@ config BOARD_USBDEV_SERIALSTR
 	---help---
 		Use board unique serial number to iSerialNumber in the device descriptor.
 
+config BOARD_USBDEV_PIDVID
+	bool "Board-specific usbdev pid/vid"
+	default n
+	---help---
+		Use board unique pid/vid.
+
 config BOARD_MEMORY_RANGE
 	string "Board memory range"
 	default ""

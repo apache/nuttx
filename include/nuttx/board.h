@@ -451,6 +451,23 @@ FAR const char *board_usbdev_serialstr(void);
 #endif
 
 /****************************************************************************
+ * Name:  board_usbdev_pid,board_usbdev_vid
+ *
+ * Description:
+ *   Use board unique pid/vid in the device descriptor. This is for that
+ *   usb can be dynamically configured while the board is running
+ *
+ * Returned Value:
+ *   The board unique pid/vid.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_BOARD_USBDEV_PIDVID)
+uint16_t board_usbdev_pid(void);
+uint16_t board_usbdev_vid(void);
+#endif
+
+/****************************************************************************
  * Name: board_graphics_setup
  *
  * Description:

@@ -644,6 +644,20 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
                 {
                   ret = USB_SIZEOF_DEVDESC;
                   memcpy(ctrlreq->buf, priv->descs->devdesc, ret);
+#ifdef CONFIG_BOARD_USBDEV_PIDVID
+                  {
+                    uint16_t pid = board_usbdev_pid();
+                    uint16_t vid = board_usbdev_vid();
+                    FAR struct usb_devdesc_s *p_desc =
+                               (FAR struct usb_devdesc_s *)ctrlreq->buf;
+
+                    p_desc->vendor[0] = LSBYTE(vid);
+                    p_desc->vendor[1] = MSBYTE(vid);
+
+                    p_desc->product[0] = LSBYTE(pid);
+                    p_desc->product[1] = MSBYTE(pid);
+                  }
+#endif
                 }
                 break;
 
