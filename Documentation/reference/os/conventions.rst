@@ -9,7 +9,7 @@ Naming and Header File Conventions
    the architecture-specific implementation in ``arch/``.
 
       ``up_`` is supposed to stand for microprocessor; the ``u``
-      is like the Greek letter micron: ľ. So it would be ``ľP``
+      is like the Greek letter micron: μ. So it would be ``μP``
       which is a common shortening of the word microprocessor. I
       don't like that name very much. I wish I would have used a
       more obvious prefix like ``arch_`` instead -- then I would
@@ -51,8 +51,8 @@ Naming and Header File Conventions
    case I am referring to the OS as layered into application
    interface, common internal OS logic, and lower level
    platform-specific layers. The platform-specific layers all
-   reside in the either ``arch/`` sub-directories on the
-   ``config/`` subdirectories: The former sub-directories are
+   reside in the either ``arch/`` sub-directories or the
+   ``boards/`` subdirectories: The former sub-directories are
    reserved for microcontroller-specific logic and the latter for
    board-specific logic.
 
@@ -66,7 +66,7 @@ Naming and Header File Conventions
 
    This strict layering is enforced in the NuttX build system by
    controlling the compiler include paths: Higher level code can
-   never include header files from either; of the
+   never include header files from either of the
    platform-specific source directories; microcontroller-specific
    code can never include header files from the board-specific
    source directories. The board-specific directories are, then,
