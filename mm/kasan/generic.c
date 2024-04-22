@@ -211,6 +211,11 @@ bool kasan_is_poisoned(FAR const void *addr, size_t size)
       return false;
     }
 
+  if (size <= KASAN_SHADOW_SCALE)
+    {
+      return ((*p >> bit) & 1);
+    }
+
   nbit = KASAN_BITS_PER_WORD - bit % KASAN_BITS_PER_WORD;
   mask = KASAN_FIRST_WORD_MASK(bit);
   size /= KASAN_SHADOW_SCALE;
