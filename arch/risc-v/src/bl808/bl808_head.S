@@ -90,31 +90,27 @@ real_start:
   wfi
 
 3:
-  /* To get g_cpu_basestack[hartid], must get g_cpu_basestack first */
+  /* Get start address of idle stack array */
 
-  la   t0, g_cpu_basestack
+  la   t0, g_cpux_idlestack
 
-  /* Offset = pointer width * hart id */
+  /* Get idle stack offset */
 
-#ifdef CONFIG_ARCH_RV32
-  slli t1, a0, 2
-#else
-  slli t1, a0, 3
-#endif
-  add  t0, t0, t1
+  li   t1, SMP_STACK_SIZE
+  mul  t1, t1, a0
 
-  /* Load idle stack base to sp */
+  /* Load idle stack top to sp */
 
-  REGLOAD sp, 0(t0)
+  add  sp, t0, t1
 
   /*
-   * sp (stack top) = sp + idle stack size - XCPTCONTEXT_SIZE
+   * sp (stack top) = sp (stack top) - XCPTCONTEXT_SIZE
    *
    * Note: Reserve some space used by up_initial_state since we are already
    * running and using the per CPU idle stack.
    */
 
-  li   t0, STACK_ALIGN_UP(CONFIG_IDLETHREAD_STACKSIZE - XCPTCONTEXT_SIZE)
+  li   t0, -STACK_ALIGN_UP(XCPTCONTEXT_SIZE)
   add  sp, sp, t0
 
 2:
