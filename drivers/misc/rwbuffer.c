@@ -819,7 +819,7 @@ int rwb_initialize(FAR struct rwbuffer_s *rwb)
 
       /* Allocate the write buffer */
 
-      allocsize     = rwb->wrmaxblocks * rwb->blocksize * 2;
+      allocsize     = rwb->wrmaxblocks * rwb->blocksize;
       rwb->wrbuffer = kmm_malloc(allocsize);
       if (!rwb->wrbuffer)
         {
