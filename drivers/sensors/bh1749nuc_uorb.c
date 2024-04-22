@@ -236,11 +236,11 @@ static int bh1749nuc_fetch(FAR struct sensor_lowerhalf_s *lower,
 
       rgb_data.timestamp = now;
       tmp = bh1749nuc_read16(dev, BH1749NUC_RED_DATA_LSB);
-      rgb_data.r = (tmp * dev->scale_r);
+      rgb_data.r = (tmp * priv->dev->scale_r);
       tmp = bh1749nuc_read16(dev, BH1749NUC_GREEN_DATA_LSB);
-      rgb_data.g = (tmp * dev->scale_g);
+      rgb_data.g = (tmp * priv->dev->scale_g);
       tmp = bh1749nuc_read16(dev, BH1749NUC_BLUE_DATA_LSB);
-      rgb_data.b = (tmp * dev->scale_b);
+      rgb_data.b = (tmp * priv->dev->scale_b);
 
       memcpy(buffer, &rgb_data, sizeof(rgb_data));
       ret = sizeof(rgb_data);
@@ -255,7 +255,7 @@ static int bh1749nuc_fetch(FAR struct sensor_lowerhalf_s *lower,
 
       ir_data.timestamp = now;
       tmp = bh1749nuc_read16(dev, BH1749NUC_IR_DATA_LSB);
-      ir_data.ir = (tmp * dev->scale_ir);
+      ir_data.ir = (tmp * priv->dev->scale_ir);
 
       memcpy(buffer, &ir_data, sizeof(ir_data));
       ret = sizeof(ir_data);
