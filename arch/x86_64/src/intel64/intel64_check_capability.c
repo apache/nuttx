@@ -108,8 +108,22 @@ void x86_64_check_and_enable_capability(void)
       goto err;
     }
 
-#ifdef CONFIG_ARCH_INTEL64_HAVE_XSAVE
+#if defined(CONFIG_ARCH_HAVE_SSE) || defined(CONFIG_ARCH_X86_64_AVX) || \
+    defined(CONFIG_ARCH_X86_64_AVX512)
   __enable_sse_avx();
+#endif
+
+#ifdef CONFIG_ARCH_X86_64_HAVE_XSAVE
+  /* Check XSAVE state area size for the current XCR0 state */
+
+  asm volatile("cpuid" : "=b" (ebx)
+               : "a" (X86_64_CPUID_XSAVE), "c" (0)
+               : "rdx", "memory");
+
+  if (XCPTCONTEXT_XMM_AREA_SIZE < ebx)
+    {
+      goto err;
+    }
 #endif
 
 #ifdef CONFIG_ARCH_INTEL64_HAVE_PCID

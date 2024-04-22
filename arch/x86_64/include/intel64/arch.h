@@ -114,6 +114,30 @@
 #define X86_CR4_XMMEXCPT 0x00000400
 #define X86_CR4_FGSBASE  0x00010000
 #define X86_CR4_PCIDE    0x00020000
+#define X86_CR4_OSXSAVE  0x00040000
+
+/* XCR0 */
+
+#define X86_XCR0_X87       (1 << 0)
+#define X86_XCR0_SSE       (1 << 1)
+#define X86_XCR0_AVX       (1 << 2)
+#define X86_XCR0_BNDREG    (1 << 3)
+#define X86_XCR0_BNDCSR    (1 << 4)
+#define X86_XCR0_OPMASK    (1 << 5)
+#define X86_XCR0_HI256     (1 << 6)
+#define X86_XCR0_HI16      (1 << 7)
+#define X86_XCR0_PT        (1 << 8)
+#define X86_XCR0_PKRU      (1 << 9)
+#define X86_XCR0_PASID     (1 << 10)
+#define X86_XCR0_CETU      (1 << 11)
+#define X86_XCR0_CETS      (1 << 12)
+#define X86_XCR0_HDC       (1 << 13)
+#define X86_XCR0_UINTR     (1 << 14)
+#define X86_XCR0_LBR       (1 << 15)
+#define X86_XCR0_HWP       (1 << 16)
+#define X86_XCR0_XTILECFG  (1 << 17)
+#define X86_XCR0_XTILEDATA (1 << 18)
+#define X86_XCR0_APX       (1 << 19)
 
 /* PAGE TABLE ENTRY Definitions */
 
@@ -161,6 +185,7 @@
 #  define X86_64_CPUID_07_AVX512CD    (1 << 28)
 #  define X86_64_CPUID_07_AVX512BW    (1 << 30)
 #  define X86_64_CPUID_07_AVX512VL    (1 << 31)
+#define X86_64_CPUID_XSAVE            0x0d
 #define X86_64_CPUID_TSC              0x15
 
 /* MSR Definitions */
@@ -243,6 +268,7 @@
 #define MSR_X2APIC_TMICT        0x838
 #define MSR_X2APIC_TMCCT        0x839
 #define MSR_X2APIC_TDCR         0x83e
+#define MSR_IA32_XSS            0xda0
 
 /* IOAPIC related Definitions */
 
@@ -280,6 +306,42 @@
 #  define X86_RST_CNT_SYS_RST  0x02
 #  define X86_RST_CNT_CPU_RST  0x04
 #  define X86_RST_CNT_FULL_RST 0x08
+
+/* XSAVE state component bitmap */
+
+#define X86_XSAVE_X87           (1 << 0)  /* Bit 0: X87 state */
+#define X86_XSAVE_SSE           (1 << 1)  /* Bit 1: SSE state (512 bytes) */
+#define X86_XSAVE_AVX           (1 << 2)  /* Bit 2: AVX state (256 bytes) */
+#define X86_XSAVE_MPX_BNDREGS   (1 << 3)  /* Bit 3: MPX BNDREGS (64 bytes) */
+#define X86_XSAVE_MPX_BNDCSR    (1 << 4)  /* Bit 4: MPX BNDCSR (16 bytes) */
+#define X86_XSAVE_AVX512_OPMASK (1 << 5)  /* Bit 5: AVX-512 opmask (64 bytes) */
+#define X86_XSAVE_AVX512_HI256  (1 << 6)  /* Bit 6: AVX-512 ZMM_Hi256 (512 bytes) */
+#define X86_XSAVE_AVX512_HI16   (1 << 7)  /* Bit 7: AVX-512 Hi16_ZMM (1024 bytes) */
+#define X86_XSAVE_PT            (1 << 8)  /* Bit 8: PT (72 bytes) */
+#define X86_XSAVE_PKRU          (1 << 9)  /* Bit 9: PKRU (4 bytes) */
+#define X86_XSAVE_PASID         (1 << 10) /* Bit 10: PASID state */
+#define X86_XSAVE_CET_U         (1 << 11) /* Bit 11: CET_U state */
+#define X86_XSAVE_CET_S         (1 << 12) /* Bit 12: CET_S state */
+#define X86_XSAVE_HDC           (1 << 13) /* Bit 13: HDC */
+#define X86_XSAVE_UINTR         (1 << 14) /* Bit 14: UINTR state */
+#define X86_XSAVE_LBR           (1 << 15) /* Bit 15: LBR state */
+#define X86_XSAVE_HWP           (1 << 16) /* Bit 16: HWP state */
+#define X86_XSAVE_AMX_TILECFG   (1 << 17) /* Bit 17: AMX TILECFG state (64 bytes) */
+#define X86_XSAVE_AMX_TILEDATA  (1 << 18) /* Bit 18: AMX TILEDATA state (8192 bytes) */
+
+/* XSAVE area size */
+
+#define XSAVE_LEGACY_SIZE       (512) /* X87 + SSE */
+#define XSAVE_HEADER_SIZE       (64)  /* XSAVE header */
+#define XSAVE_AVX_SIZE          (256)
+#define XSAVE_MXP_BNDREGS_SIZE  (64)
+#define XSAVE_MXP_BNDCSR_SIZE   (16)
+#define XSAVE_AVX512OPMASK_SIZE (64)
+#define XSAVE_AVX512HI256_SIZE  (512)
+#define XSAVE_AVX512HI16_SIZE   (1024)
+#define XSAVE_PT_SIZE           (72)
+#define XSAVE_PKRU_SIZE         (4)
+#define XSAVE_HDC_SIZE          (8)
 
 #ifndef __ASSEMBLY__
 

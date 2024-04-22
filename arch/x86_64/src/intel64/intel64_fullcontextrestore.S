@@ -53,6 +53,15 @@ x86_64_fullcontextrestore:
 
 	cli
 
+#ifndef CONFIG_ARCH_X86_64_HAVE_XSAVE
+	/* Restore xmm registers */
+	fxrstorq (%rdi)
+#else
+	movl     $XSAVE_STATE_COMPONENTS, %eax
+	xor      %edx, %edx
+	xrstor   (%rdi)
+#endif
+
 	/* Create an interrupt stack frame for the final iret.
 	*
 	*
@@ -114,9 +123,6 @@ x86_64_fullcontextrestore:
 	* mov        (8*REG_FS)(%rdi), %fs // Disabled, otherwise we will destroy MSR_FS_BASE
 	* XXX: Should use wrgsbase and wrfsbase to restore the gs and fs register
 	*/
-
-	/* restore xmm registers */
-	fxrstorq (%rdi)
 
 	/* Restore the correct value of EAX and then return */
 

@@ -34,9 +34,10 @@
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #  include <stdbool.h>
-#  include <arch/arch.h>
 #  include <time.h>
 #endif
+
+#include <arch/arch.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -353,53 +354,120 @@
  * ISR/IRQ interrupt processing.
  */
 
-#define XCPTCONTEXT_XMM_AREA_SIZE 512
-#define XMMAREA_OFFSET            (XCPTCONTEXT_XMM_AREA_SIZE / 8)
+#ifndef CONFIG_ARCH_X86_64_HAVE_XSAVE
+
+/* Only legacy area if XSAVE not supported */
+
+#  define XCPTCONTEXT_XMM_AREA_SIZE 512
+#else
+
+/* XSAVE state depneds on enabled features */
+
+#  ifdef CONFIG_ARCH_X86_64_AVX
+#    define XSTATE_AVX_STATE    X86_XSAVE_AVX
+#    define XSTATE_AVX_SIZE     XSAVE_AVX_SIZE
+#  else
+#    define XSTATE_AVX_STATE    0
+#    define XSTATE_AVX_SIZE     0
+#  endif
+
+#  ifdef CONFIG_ARCH_X86_64_AVX512
+#    define XSTATE_AVX512_STATE (X86_XSAVE_AVX512_OPMASK |  \
+                                 X86_XSAVE_AVX512_HI256 |   \
+                                 X86_XSAVE_AVX512_HI16)
+#    define XSTATE_AVX512_SIZE  (XSAVE_MXP_BNDREGS_SIZE +   \
+                                 XSAVE_MXP_BNDCSR_SIZE +    \
+                                 XSAVE_AVX512OPMASK_SIZE +  \
+                                 XSAVE_AVX512HI256_SIZE +   \
+                                 XSAVE_AVX512HI16_SIZE)
+#  else
+#    define XSTATE_AVX512_STATE 0
+#    define XSTATE_AVX512_SIZE  0
+#  endif
+
+/* State component bitmap */
+
+#  define XSAVE_STATE_COMPONENTS    (X86_XSAVE_X87 |    \
+                                     X86_XSAVE_SSE |    \
+                                     XSTATE_AVX_STATE | \
+                                     XSTATE_AVX512_STATE)
+
+/* Area for XSAVE - standard area format */
+
+#  define XCPTCONTEXT_XMM_AREA_SIZE (XSAVE_LEGACY_SIZE +  \
+                                     XSAVE_HEADER_SIZE +  \
+                                     XSTATE_AVX_SIZE +    \
+                                     XSTATE_AVX512_SIZE)
+#endif
+
+/* Align registers to 64-bytes */
+
+#ifdef CONFIG_ARCH_X86_64_AVX512
+#  define XMMAREA_REG_ALIGN (13)
+#else
+#  define XMMAREA_REG_ALIGN (7)
+#endif
+
+/* Register offset in XMMAREA */
+
+#define XMMAREA_OFFSET     (XCPTCONTEXT_XMM_AREA_SIZE / 8)
+#define XMMAREA_REG_OFFSET (XMMAREA_REG_ALIGN + XMMAREA_OFFSET)
 
 /* Data segments */
 
-#define REG_ALIGN         (0 + XMMAREA_OFFSET)  /* "    " "" "     " "" "       " "        " */
-#define REG_FS            (1 + XMMAREA_OFFSET)  /* "    " "" "     " "" "       " "        " */
-#define REG_GS            (2 + XMMAREA_OFFSET)  /* "    " "" "     " "" "       " "        " */
-#define REG_ES            (3 + XMMAREA_OFFSET)  /* "    " "" "     " "" "       " "        " */
-#define REG_DS            (4 + XMMAREA_OFFSET)  /* Data segment selector */
+#define REG_FS            (0 + XMMAREA_REG_OFFSET)  /* "    " "" "     " "" "       " "        " */
+#define REG_GS            (1 + XMMAREA_REG_OFFSET)  /* "    " "" "     " "" "       " "        " */
+#define REG_ES            (2 + XMMAREA_REG_OFFSET)  /* "    " "" "     " "" "       " "        " */
+#define REG_DS            (3 + XMMAREA_REG_OFFSET)  /* Data segment selector */
 
 /* Remaining regs */
 
-#define REG_RAX           (5 + XMMAREA_OFFSET)  /* "   " "" "   " */
-#define REG_RBX           (6 + XMMAREA_OFFSET)  /* "   " "" "   " */
-#define REG_RBP           (7 + XMMAREA_OFFSET)  /* "   " "" "   " */
-#define REG_R10           (8 + XMMAREA_OFFSET)  /* "   " "" "   " */
-#define REG_R11           (9 + XMMAREA_OFFSET)  /* "   " "" "   " */
-#define REG_R12          (10 + XMMAREA_OFFSET)  /* "   " "" "   " */
-#define REG_R13          (11 + XMMAREA_OFFSET)  /* "   " "" "   " */
-#define REG_R14          (12 + XMMAREA_OFFSET)  /* "   " "" "   " */
-#define REG_R15          (13 + XMMAREA_OFFSET)  /* "   " "" "   " */
+#define REG_RAX           (4 + XMMAREA_REG_OFFSET)  /* "   " "" "   " */
+#define REG_RBX           (5 + XMMAREA_REG_OFFSET)  /* "   " "" "   " */
+#define REG_RBP           (6 + XMMAREA_REG_OFFSET)  /* "   " "" "   " */
+#define REG_R10           (7 + XMMAREA_REG_OFFSET)  /* "   " "" "   " */
+#define REG_R11           (8 + XMMAREA_REG_OFFSET)  /* "   " "" "   " */
+#define REG_R12           (9 + XMMAREA_REG_OFFSET)  /* "   " "" "   " */
+#define REG_R13          (10 + XMMAREA_REG_OFFSET)  /* "   " "" "   " */
+#define REG_R14          (11 + XMMAREA_REG_OFFSET)  /* "   " "" "   " */
+#define REG_R15          (12 + XMMAREA_REG_OFFSET)  /* "   " "" "   " */
 
 /* ABI calling convention */
 
-#define REG_R9           (14 + XMMAREA_OFFSET)  /* "   " "" "   " */
-#define REG_R8           (15 + XMMAREA_OFFSET)  /* "   " "" "   " */
-#define REG_RCX          (16 + XMMAREA_OFFSET)  /* "   " "" "   " */
-#define REG_RDX          (17 + XMMAREA_OFFSET)  /* "   " "" "   " */
-#define REG_RSI          (18 + XMMAREA_OFFSET)  /* "   " "" "   " */
-#define REG_RDI          (19 + XMMAREA_OFFSET)  /* "   " "" "   " */
+#define REG_R9           (13 + XMMAREA_REG_OFFSET)  /* "   " "" "   " */
+#define REG_R8           (14 + XMMAREA_REG_OFFSET)  /* "   " "" "   " */
+#define REG_RCX          (15 + XMMAREA_REG_OFFSET)  /* "   " "" "   " */
+#define REG_RDX          (16 + XMMAREA_REG_OFFSET)  /* "   " "" "   " */
+#define REG_RSI          (17 + XMMAREA_REG_OFFSET)  /* "   " "" "   " */
+#define REG_RDI          (18 + XMMAREA_REG_OFFSET)  /* "   " "" "   " */
 
 /* IRQ saved */
 
-#define REG_ERRCODE      (20 + XMMAREA_OFFSET)  /* Error code */
-#define REG_RIP          (21 + XMMAREA_OFFSET)  /* Pushed by process on interrupt processing */
-#define REG_CS           (22 + XMMAREA_OFFSET)  /* "    " "" "     " "" "       " "        " */
-#define REG_RFLAGS       (23 + XMMAREA_OFFSET)  /* "    " "" "     " "" "       " "        " */
-#define REG_RSP          (24 + XMMAREA_OFFSET)  /* "    " "" "     " "" "       " "        " */
-#define REG_SS           (25 + XMMAREA_OFFSET)  /* "    " "" "     " "" "       " "        " */
+#define REG_ERRCODE      (19 + XMMAREA_REG_OFFSET)  /* Error code */
+#define REG_RIP          (20 + XMMAREA_REG_OFFSET)  /* Pushed by process on interrupt processing */
+#define REG_CS           (21 + XMMAREA_REG_OFFSET)  /* "    " "" "     " "" "       " "        " */
+#define REG_RFLAGS       (22 + XMMAREA_REG_OFFSET)  /* "    " "" "     " "" "       " "        " */
+#define REG_RSP          (23 + XMMAREA_REG_OFFSET)  /* "    " "" "     " "" "       " "        " */
+#define REG_SS           (24 + XMMAREA_REG_OFFSET)  /* "    " "" "     " "" "       " "        " */
+
+#define XMMAREA_REGS     (25)
 
 /* NOTE 2: This is not really state data.  Rather, this is just a convenient
  *   way to pass parameters from the interrupt handler to C code.
  */
 
-#define XCPTCONTEXT_REGS (26 + XCPTCONTEXT_XMM_AREA_SIZE / 8)
-#define XCPTCONTEXT_SIZE (8 * XCPTCONTEXT_REGS + XCPTCONTEXT_XMM_AREA_SIZE)
+#define XCPTCONTEXT_REGS (XMMAREA_REGS + XMMAREA_REG_ALIGN + \
+                          XCPTCONTEXT_XMM_AREA_SIZE / 8)
+
+#define XCPTCONTEXT_SIZE (8 * XCPTCONTEXT_REGS)
+
+/* Always align XCPTCONTEXT to 64-bytes to support XSAVE */
+
+#define XCPTCONTEXT_ALIGN (64)
+
+#define XCP_ALIGN_MASK    (XCPTCONTEXT_ALIGN - 1)
+#define XCP_ALIGN_DOWN(a) ((a) & ~XCP_ALIGN_MASK)
+#define XCP_ALIGN_UP(a)   (((a) + XCP_ALIGN_MASK) & ~XCP_ALIGN_MASK)
 
 /****************************************************************************
  * Public Types
@@ -432,9 +500,9 @@ struct xcptcontext
   uint64_t saved_rflags;
   uint64_t saved_rsp;
 
-  /* Register save area */
+  /* Register save area - allocated from stack in up_initial_state() */
 
-  uint64_t regs[XCPTCONTEXT_REGS] aligned_data(16);
+  uint64_t *regs;
 };
 #endif
 

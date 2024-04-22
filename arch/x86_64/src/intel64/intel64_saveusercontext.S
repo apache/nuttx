@@ -68,8 +68,14 @@ up_saveusercontext:
 	movq    %r14, (8*REG_R14)(%rdi)
 	movq    %r15, (8*REG_R15)(%rdi)
 
-	/* save xmm registers */
+#ifndef CONFIG_ARCH_X86_64_HAVE_XSAVE
+	/* Save xmm registers */
 	fxsaveq (%rdi)
+#else
+	movl    $XSAVE_STATE_COMPONENTS, %eax
+	xor     %edx, %edx
+	xsave   (%rdi)
+#endif
 
 	/* Save the value of SP as will be at the time of the IRET that will
 	 * appear to be the return from this function.
