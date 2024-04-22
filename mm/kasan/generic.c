@@ -274,6 +274,35 @@ void kasan_register(FAR void *addr, FAR size_t *size)
   *size -= KASAN_REGION_SIZE(*size);
 }
 
+void kasan_unregister(FAR void *addr)
+{
+  FAR struct kasan_region_s *prev = NULL;
+  FAR struct kasan_region_s *region;
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(&g_lock);
+  for (region = g_region; region != NULL; region = region->next)
+    {
+      if (region->begin == (uintptr_t)addr)
+        {
+          if (region == g_region)
+            {
+              g_region = region->next;
+            }
+          else
+            {
+              prev->next = region->next;
+            }
+
+          break;
+        }
+
+      prev = region;
+    }
+
+  spin_unlock_irqrestore(&g_lock, flags);
+}
+
 void kasan_init_early(void)
 {
   g_region_init = 0;
