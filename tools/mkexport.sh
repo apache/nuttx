@@ -182,10 +182,15 @@ cp "${TOPDIR}/tools/incdir.c" "${EXPORTDIR}/tools/."
 
 # Copy the board specific linker if found, or use the default when not.
 
-if [ -f "${BOARDDIR}/scripts/gnu-elf.ld" ]; then
-  cp -f "${BOARDDIR}/scripts/gnu-elf.ld" "${EXPORTDIR}/scripts/."
+APPLD=gnu-elf.ld
+if [ -f "${BOARDDIR}/scripts/${APPLD}" ]; then
+  cp -f "${BOARDDIR}/scripts/${APPLD}" "${EXPORTDIR}/scripts/."
 else
-  cp -f "${TOPDIR}/binfmt/libelf/gnu-elf.ld" "${EXPORTDIR}/scripts/."
+  cp -f "${TOPDIR}/binfmt/libelf/${APPLD}" "${EXPORTDIR}/scripts/."
+fi
+
+if [ "${NUTTX_BUILD}" = "kernel" ]; then
+  LDNAME=${APPLD}
 fi
 
 # Copy the board config script
@@ -260,6 +265,7 @@ echo "LDELFFLAGS       = ${LDELFFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "NUTTX_ARCH       = ${NUTTX_ARCH}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "NUTTX_ARCH_CHIP  = ${NUTTX_ARCH_CHIP}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "NUTTX_BOARD      = ${NUTTX_BOARD}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "NUTTX_BUILD      = ${NUTTX_BUILD}" >>"${EXPORTDIR}/scripts/Make.defs"
 
 echo "set(ARCHCFLAGS          \"${ARCHCFLAGS}\")"       > "${EXPORTDIR}/scripts/target.cmake"
 echo "set(ARCHCPUFLAGS        \"${ARCHCPUFLAGS}\")"     >>"${EXPORTDIR}/scripts/target.cmake"
@@ -289,6 +295,7 @@ echo "set(LDELFFLAGS          \"${LDELFFLAGS}\")"       >>"${EXPORTDIR}/scripts/
 echo "set(NUTTX_ARCH          \"${NUTTX_ARCH}\")"       >>"${EXPORTDIR}/scripts/target.cmake"
 echo "set(NUTTX_ARCH_CHIP     \"${NUTTX_ARCH_CHIP}\")"  >>"${EXPORTDIR}/scripts/target.cmake"
 echo "set(NUTTX_BOARD         \"${NUTTX_BOARD}\")"      >>"${EXPORTDIR}/scripts/target.cmake"
+echo "set(NUTTX_BUILD         \"${NUTTX_BUILD}\")"      >>"${EXPORTDIR}/scripts/target.cmake"
 
 
 # Additional compilation options when the kernel is built

@@ -143,7 +143,7 @@ static void exec_dtors(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _start
+ * Name: __start
  *
  * Description:
  *   This function is the low level entry point into the main thread of
@@ -162,7 +162,7 @@ static void exec_dtors(void)
  *
  ****************************************************************************/
 
-void _start(int argc, char *argv[])
+void __start(int argc, char *argv[])
 {
   int ret;
 
