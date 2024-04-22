@@ -415,7 +415,8 @@ static const struct syscall_stub_table g_stub_table =
 
 void esp_setup_syscall_table(void)
 {
-  static_assert(sizeof(struct __lock) >= sizeof(mutex_t));
+  static_assert(sizeof(struct __lock) >= sizeof(mutex_t),
+                "Invalid size of struct __lock");
 
   syscall_table_ptr = (struct syscall_stub_table *)&g_stub_table;
 
