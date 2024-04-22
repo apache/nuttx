@@ -53,6 +53,7 @@
 	.global    g_idle_topstack                 /* The end of the idle stack, the start of the heap */
 	.global    g_mb_info_struct
 	.global    g_mb_magic
+	.global    g_cpu_count
 
 	/* These are the page tables */
 	.global    g_pdpt_low
@@ -282,6 +283,9 @@ start64:
     movabs  $__nxstart,   %rbx
     jmp     *%rbx
     .size   __pmode_entry, . - __pmode_entry
+
+g_cpu_count:
+       .long 1
 
 /****************************************************************************
  * Name: __revoke_low_memory

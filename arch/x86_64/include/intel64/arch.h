@@ -79,6 +79,8 @@
 #define X86_GDT_DATA_SEL_NUM    2
 #  define X86_GDT_DATA_SEL      (X86_GDT_DATA_SEL_NUM * X86_GDT_ENTRY_SIZE)
 
+/* The first TSS entry */
+
 #define X86_GDT_ISTL_SEL_NUM    6
 #define X86_GDT_ISTH_SEL_NUM    (X86_GDT_ISTL_SEL_NUM + 1)
 
@@ -263,7 +265,12 @@
 #define X86_PIC_8086           1
 #define X86_PIC_EOI            0x20
 
-#define BITS_PER_LONG    64
+#define BITS_PER_LONG          64
+
+/* Interrupt Stack Table size */
+
+#define X86_IST_SIZE           104
+#define X86_TSS_SIZE           (104 + 8)
 
 /* Reset Control Register (RST_CNT) */
 
@@ -370,9 +377,13 @@ begin_packed_struct struct ist_s
   uint16_t IOPB_OFFSET;          /* IOPB_offset */
 } end_packed_struct;
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+/* TSS */
+
+begin_packed_struct struct tss_s
+{
+  struct ist_s  ist;    /* IST  */
+  void         *cpu;    /* CPU private data */
+} end_packed_struct;
 
 /****************************************************************************
  * Public Data

@@ -111,7 +111,15 @@
  * referenced is passed to get the state from the TCB.
  */
 
-#define x86_64_restorestate(regs) (g_current_regs = regs)
+#define x86_64_restorestate(regs) (up_set_current_regs(regs))
+
+/* ISR/IRQ stack size */
+
+#if CONFIG_ARCH_INTERRUPTSTACK == 0
+#  define IRQ_STACK_SIZE 0x2000
+#else
+#  define IRQ_STACK_SIZE CONFIG_ARCH_INTERRUPTSTACK
+#endif
 
 /****************************************************************************
  * Public Types
@@ -138,7 +146,7 @@ extern const uintptr_t g_idle_topstack;
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 extern uint8_t g_intstackalloc[];
-extern uint8_t g_intstacktop[];
+extern uint8_t g_intstackalloc[];
 #endif
 
 /* These symbols are setup by the linker script. */

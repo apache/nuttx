@@ -45,7 +45,8 @@ set(SRCS
     intel64_lowsetup.c
     intel64_serial.c
     intel64_rng.c
-    intel64_check_capability.c)
+    intel64_check_capability.c
+    intel64_cpu.c)
 
 if(CONFIG_ARCH_HAVE_TESTSET)
   list(APPEND SRCS intel64_testset.S)
