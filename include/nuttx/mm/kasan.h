@@ -39,6 +39,7 @@
 #  define kasan_poison(addr, size)
 #  define kasan_unpoison(addr, size) addr
 #  define kasan_register(addr, size)
+#  define kasan_unregister(addr)
 #  define kasan_init_early()
 #  define kasan_reset_tag(addr) addr
 #else
@@ -125,6 +126,22 @@ FAR void *kasan_unpoison(FAR const void *addr, size_t size);
  ****************************************************************************/
 
 void kasan_register(FAR void *addr, FAR size_t *size);
+
+/****************************************************************************
+ * Name: kasan_unregister
+ *
+ * Description:
+ *   Stop monitoring the memory range
+ *
+ * Input Parameters:
+ *   addr - range start address
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void kasan_unregister(FAR void *addr);
 
 /****************************************************************************
  * Name: kasan_init_early
