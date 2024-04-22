@@ -54,7 +54,7 @@
 void x86_64_sigdeliver(void)
 {
   struct tcb_s *rtcb = this_task();
-  uint64_t regs_area[XCPTCONTEXT_REGS + 2];
+  uint64_t regs_area[XCPTCONTEXT_REGS + 8];
   uint64_t *regs;
 
 #ifdef CONFIG_SMP
@@ -72,9 +72,9 @@ void x86_64_sigdeliver(void)
         rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
   DEBUGASSERT(rtcb->xcp.sigdeliver != NULL);
 
-  /* Align regs to 16 byte boundary for SSE instructions. */
+  /* Align regs to 64 byte boundary for XSAVE */
 
-  regs = (uint64_t *)(((uint64_t)(regs_area) + 15) & (~(uint64_t)15));
+  regs = (uint64_t *)(((uint64_t)(regs_area) + 63) & (~(uint64_t)63));
 
   /* Save the real return state on the stack ASAP before any chance we went
    * sleeping and break the register profile.  We entered this function with

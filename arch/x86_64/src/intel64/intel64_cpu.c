@@ -64,8 +64,8 @@ struct intel64_cpu_s g_cpu_priv[CONFIG_SMP_NCPUS];
 
 /* Allocate stack for interrupts and isr */
 
-uint8_t  g_intstackalloc[IRQ_STACK_ALLOC] aligned_data(16);
-uint8_t  g_isrstackalloc[IRQ_STACK_ALLOC] aligned_data(16);
+uint8_t  g_intstackalloc[IRQ_STACK_ALLOC] aligned_data(64);
+uint8_t  g_isrstackalloc[IRQ_STACK_ALLOC] aligned_data(64);
 
 /****************************************************************************
  * Private Functions

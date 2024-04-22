@@ -28,6 +28,13 @@ config ARCH_X86_64_ACPI_BIOS
 
 endif # ARCH_X86_64_ACPI
 
+config ARCH_X86_64_HAVE_XSAVE
+	bool "XSAVE support"
+	default y
+	---help---
+		Select to enable the use of XSAVE and FPU/SSE/AVX functions
+		of x86_64
+
 config ARCH_X86_64_MMX
 	bool "MMX support"
 	depends on ARCH_HAVE_MMX

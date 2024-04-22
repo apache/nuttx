@@ -34,6 +34,14 @@
 #include "sched/sched.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#if XCPTCONTEXT_SIZE % XCPTCONTEXT_ALIGN != 0
+#  error XCPTCONTEXT_SIZE must be aligned to XCPTCONTEXT_ALIGN !
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -83,22 +91,39 @@ void up_initial_state(struct tcb_s *tcb)
 
   memset(xcp, 0, sizeof(struct xcptcontext));
 
-  /* set the FCW to 1f80 */
+  /* Allocate area for XCPTCONTEXT */
+
+  xcp->regs = (uint64_t *)XCP_ALIGN_DOWN((uintptr_t)tcb->stack_base_ptr +
+                                         tcb->adj_stack_size -
+                                         XCPTCONTEXT_SIZE);
+
+  /* Reset the xcp registers */
+
+  memset(xcp->regs, 0, XCPTCONTEXT_SIZE);
+
+#ifndef CONFIG_ARCH_X86_64_HAVE_XSAVE
+  /* Set the FCW to 1f80 */
 
   xcp->regs[1]          = (uint64_t)0x0000037f00000000;
 
-  /* set the MXCSR to 1f80 */
+  /* Set the MXCSR to 1f80 */
 
   xcp->regs[3]          = (uint64_t)0x0000000000001f80;
+#else
+  /* Initialize XSAVE region with a valid state */
+
+  asm volatile("xsave %0"
+               : "=m" (*xcp->regs)
+               : "a" (XSAVE_STATE_COMPONENTS), "d" (0)
+               : "memory");
+#endif
 
   /* Save the initial stack pointer... the value of the stackpointer before
    * the "interrupt occurs."
    */
 
-  xcp->regs[REG_RSP]    = (uint64_t)tcb->stack_base_ptr +
-                                    tcb->adj_stack_size;
-  xcp->regs[REG_RBP]    = (uint64_t)tcb->stack_base_ptr +
-                                    tcb->adj_stack_size;
+  xcp->regs[REG_RSP]    = (uint64_t)xcp->regs - 8;
+  xcp->regs[REG_RBP]    = (uint64_t)xcp->regs - 8;
 
   /* Save the task entry point */
 

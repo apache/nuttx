@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 #include <arch/arch.h>
+#include <arch/irq.h>
 #include <arch/multiboot2.h>
 #include <sys/types.h>
 
@@ -32,6 +33,25 @@
 /****************************************************************************
  * Pre-processor definitions
  ****************************************************************************/
+
+/* Get XCR0 register value */
+
+#if defined(CONFIG_ARCH_X86_64_AVX512)
+#  define X86_XCR0_VAL (X86_XCR0_X87 | X86_XCR0_SSE | X86_XCR0_AVX | \
+                        X86_XCR0_OPMASK | X86_XCR0_HI256 | X86_XCR0_HI16)
+#elif defined(CONFIG_ARCH_X86_64_AVX)
+#  define X86_XCR0_VAL (X86_XCR0_X87 | X86_XCR0_SSE | X86_XCR0_AVX)
+#else
+#  define X86_XCR0_VAL (X86_XCR0_X87 | X86_XCR0_SSE)
+#endif
+
+/* Get CR4 register value */
+
+#ifdef CONFIG_ARCH_X86_64_HAVE_XSAVE
+#  define X86_CR4_FPU_VAL (X86_CR4_OSXSAVE | X86_CR4_OSXFSR | X86_CR4_XMMEXCPT)
+#else
+#  define X86_CR4_FPU_VAL (X86_CR4_OSXFSR | X86_CR4_XMMEXCPT)
+#endif
 
 /* Memory Map: _sbss is the start of the BSS region (see ld.script) _ebss is
  * the end of the BSS region (see ld.script). The idle task stack starts at
@@ -319,6 +339,9 @@ start64:
 	movabs  $g_idle_topstack,    %rbx
 	mov     (%rbx),   %rsp
 
+	/* Allocate space XCPTCONTEXT */
+	leaq    -XCPTCONTEXT_SIZE(%rsp), %rsp
+
 	/* Set bsp_done flag */
 	movl     $1, bsp_done
 
@@ -352,7 +375,7 @@ ap_start:
 	.size   __pmode_entry, . - __pmode_entry
 
 g_cpu_count:
-       .long 1
+	.long 1
 
 /****************************************************************************
  * Name: __revoke_low_memory
@@ -408,11 +431,21 @@ __enable_sse_avx:
 
 	/* Enable Saving XMM context */
 	mov     %cr4,   %rax
-	or      $(X86_CR4_OSXFSR | X86_CR4_XMMEXCPT),   %rax
+	or      $X86_CR4_FPU_VAL,   %rax
 	mov     %rax,   %cr4
 
+#ifdef CONFIG_ARCH_X86_64_HAVE_XSAVE
+	/* Configure XSAVE/XRSTOR for user state*/
+	mov     $X86_XCR0_VAL, %eax
+
+	xor     %rdx,  %rdx
+	xor     %rcx,  %rcx
+	xsetbv
+
+#else
 	/* Setup MXCSR, masking all SSE precision exception */
 	ldmxcsr mxcsr_mem
+#endif
 
 	ret
 
