@@ -56,16 +56,6 @@ NM = $(CROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
 
-CFLAGS := $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
-CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
-AFLAGS := $(CFLAGS) -D__ASSEMBLY__
-
-ifeq ($(CONFIG_HOST_MACOS),y)
-AFLAGS += -Wa,--divide
-endif
-
-EXEEXT = .elf
-
 ifeq ($(CONFIG_ARCH_X86_64_SSE3),y)
   ARCHCPUFLAGS += -msse3
 endif
@@ -75,13 +65,67 @@ ifeq ($(CONFIG_ARCH_X86_64_SSSE3),y)
 endif
 
 ifeq ($(CONFIG_ARCH_X86_64_SSE41),y)
-  ARCHCPUFLAGS += -msse41
+  ARCHCPUFLAGS += -msse4.1
 endif
 
 ifeq ($(CONFIG_ARCH_X86_64_SSE42),y)
-  ARCHCPUFLAGS += -msse42
+  ARCHCPUFLAGS += -msse4.2
 endif
 
-ifeq ($(CONFIG_ARCH_X86_64_SSE4a),y)
+ifeq ($(CONFIG_ARCH_X86_64_SSE4A),y)
   ARCHCPUFLAGS += -msse4a
 endif
+
+ifeq ($(CONFIG_ARCH_X86_64_FMA),y)
+  ARCHCPUFLAGS += -mfma
+endif
+
+ifeq ($(CONFIG_ARCH_X86_64_AVX),y)
+  ARCHCPUFLAGS += -mavx
+endif
+
+ifeq ($(CONFIG_ARCH_X86_64_AVX512),y)
+  ARCHCPUFLAGS += -mavx512f
+endif
+
+ifeq ($(CONFIG_ARCH_X86_64_AVX512PF),y)
+  ARCHCPUFLAGS += -mavx512pf
+endif
+
+ifeq ($(CONFIG_ARCH_X86_64_AVX512ER),y)
+  ARCHCPUFLAGS += -mavx512er
+endif
+
+ifeq ($(CONFIG_ARCH_X86_64_AVX512CD),y)
+  ARCHCPUFLAGS += -mavx512cd
+endif
+
+ifeq ($(CONFIG_ARCH_X86_64_AVX512VL),y)
+  ARCHCPUFLAGS += -mavx512vl
+endif
+
+ifeq ($(CONFIG_ARCH_X86_64_AVX512BW),y)
+  ARCHCPUFLAGS += -mavx512bw
+endif
+
+ifeq ($(CONFIG_ARCH_X86_64_AVX512DQ),y)
+  ARCHCPUFLAGS += -mavx512dq
+endif
+
+ifeq ($(CONFIG_ARCH_X86_64_AVX512IFMA),y)
+  ARCHCPUFLAGS += -mavx512ifma
+endif
+
+ifeq ($(CONFIG_ARCH_X86_64_AVX512VBMI),y)
+  ARCHCPUFLAGS += -mavx512vbmi
+endif
+
+CFLAGS := $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
+AFLAGS := $(CFLAGS) -D__ASSEMBLY__
+
+ifeq ($(CONFIG_HOST_MACOS),y)
+AFLAGS += -Wa,--divide
+endif
+
+EXEEXT = .elf

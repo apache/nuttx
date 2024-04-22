@@ -30,6 +30,9 @@ config ARCH_INTEL64
 	select ARCH_HAVE_SSE41
 	select ARCH_HAVE_SSE42
 	select ARCH_HAVE_SSE4A
+	select ARCH_HAVE_FMA if ARCH_X86_64_HAVE_XSAVE
+	select ARCH_HAVE_AVX if ARCH_X86_64_HAVE_XSAVE
+	select ARCH_HAVE_AVX512 if ARCH_X86_64_HAVE_XSAVE
 	select ARCH_ICACHE
 	select ARCH_DCACHE
 	select ARCH_HAVE_IRQTRIGGER
@@ -75,6 +78,10 @@ config ARCH_HAVE_SSE42
 	default n
 
 config ARCH_HAVE_SSE4A
+	bool
+	default n
+
+config ARCH_HAVE_FMA
 	bool
 	default n
 

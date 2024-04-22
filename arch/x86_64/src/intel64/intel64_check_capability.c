@@ -58,9 +58,47 @@ void x86_64_check_and_enable_capability(void)
 {
   unsigned long ebx;
   unsigned long ecx;
-  unsigned long require;
+  unsigned long require = 0;
 
-  require = X86_64_CPUID_01_X2APIC;
+  /* Check SSE3 instructions availability */
+
+#ifdef CONFIG_ARCH_X86_64_SSE3
+  require |= X86_64_CPUID_01_SSE3;
+#endif
+
+  /* Check Suplement SSE3 instructions availability */
+
+#ifdef CONFIG_ARCH_X86_64_SSEE3
+  require |= X86_64_CPUID_01_SSEE3;
+#endif
+
+  /* Check Fused multiply-add (FMA) instructions availability */
+
+#ifdef CONFIG_ARCH_X86_64_FMA
+  require |= X86_64_CPUID_01_FMA;
+#endif
+
+  /* Check process context identifiers availability */
+
+#ifdef CONFIG_ARCH_INTEL64_HAVE_PCID
+  require |= X86_64_CPUID_01_PCID;
+#endif
+
+  /* Check SSE4.1 instructions availability */
+
+#ifdef CONFIG_ARCH_X86_64_SSE41
+  require |= X86_64_CPUID_01_SSE41;
+#endif
+
+  /* Check SSE4.2 instructions availability */
+
+#ifdef CONFIG_ARCH_X86_64_SSE42
+  require |= X86_64_CPUID_01_SSE42;
+#endif
+
+  /* Check x2APIC availability */
+
+  require |= X86_64_CPUID_01_X2APIC;
 
   /* Check timer availability */
 
@@ -68,16 +106,22 @@ void x86_64_check_and_enable_capability(void)
   require |= X86_64_CPUID_01_TSCDEA;
 #endif
 
-#ifdef CONFIG_ARCH_INTEL64_HAVE_XSAVE
+  /* Check XSAVE/XRSTOR availability */
+
+#ifdef CONFIG_ARCH_X86_64_HAVE_XSAVE
   require |= X86_64_CPUID_01_XSAVE;
 #endif
 
-#ifdef CONFIG_ARCH_INTEL64_HAVE_RDRAND
-  require |= X86_64_CPUID_01_RDRAND;
+  /* Check AVX instructions availability */
+
+#ifdef CONFIG_ARCH_X86_64_AVX
+  require |= X86_64_CPUID_01_AVX;
 #endif
 
-#ifdef CONFIG_ARCH_INTEL64_HAVE_PCID
-  require |= X86_64_CPUID_01_PCID;
+  /* Check RDRAND feature availability */
+
+#ifdef CONFIG_ARCH_INTEL64_HAVE_RDRAND
+  require |= X86_64_CPUID_01_RDRAND;
 #endif
 
   asm volatile("cpuid" : "=c" (ecx) : "a" (X86_64_CPUID_CAP)
@@ -93,6 +137,14 @@ void x86_64_check_and_enable_capability(void)
   /* Extended features */
 
   require = 0;
+
+  /* Check AVX512 Foundation instructions availability */
+
+#ifdef CONFIG_ARCH_X86_64_AVX512
+  require |= X86_64_CPUID_07_AVX512F;
+#endif
+
+  /* Check CLWB instruction availability */
 
 #ifdef CONFIG_ARCH_INTEL64_HAVE_CLWB
   require |= X86_64_CPUID_07_CLWB;
