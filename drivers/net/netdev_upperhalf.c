@@ -406,6 +406,69 @@ static void eth_input(FAR struct net_driver_s *dev)
 #endif
 
 /****************************************************************************
+ * Name: ip_input
+ *
+ * Description:
+ *   Handle L3 packet input.
+ *
+ * Input Parameters:
+ *   dev - Reference to the NuttX network driver state structure
+ *
+ * Assumptions:
+ *   Called with the network locked.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_MBIM
+static void ip_input(FAR struct net_driver_s *dev)
+{
+  /* We only accept IP packets of the configured type */
+
+#ifdef CONFIG_NET_IPv4
+  if ((IPv4BUF->vhl & IP_VERSION_MASK) == IPv4_VERSION)
+    {
+      ninfo("IPv4 frame\n");
+      NETDEV_RXIPV4(dev);
+
+      /* Receive an IPv4 packet from the network device */
+
+      ipv4_input(dev);
+    }
+  else
+#endif
+#ifdef CONFIG_NET_IPv6
+  if ((IPv6BUF->vtc & IP_VERSION_MASK) == IPv6_VERSION)
+    {
+      ninfo("IPv6 frame\n");
+      NETDEV_RXIPV6(dev);
+
+      /* Give the IPv6 packet to the network layer */
+
+      ipv6_input(dev);
+    }
+  else
+#endif
+    {
+      ninfo("INFO: Dropped, Unknown type\n");
+      NETDEV_RXDROPPED(dev);
+      dev->d_len = 0;
+    }
+
+  /* If the above function invocation resulted in data
+   * that should be sent out on the network,
+   * the field d_len will set to a value > 0.
+   */
+
+  if (dev->d_len > 0)
+    {
+      /* And send the packet */
+
+      netdev_upper_txpoll(dev);
+    }
+}
+#endif
+
+/****************************************************************************
  * Function: netdev_upper_rxpoll_work
  *
  * Description:
@@ -463,6 +526,11 @@ static void netdev_upper_rxpoll_work(FAR struct netdev_upperhalf_s *upper)
 #if defined(CONFIG_NET_LOOPBACK) || defined(CONFIG_NET_ETHERNET) || \
     defined(CONFIG_DRIVERS_IEEE80211)
           eth_input(dev);
+          break;
+#endif
+#ifdef CONFIG_NET_MBIM
+        case NET_LL_MBIM:
+          ip_input(dev);
           break;
 #endif
 #ifdef CONFIG_NET_CAN
