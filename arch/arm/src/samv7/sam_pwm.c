@@ -136,44 +136,64 @@ static struct sam_pwm_channel_s g_pwm0_channels[] =
 #ifdef CONFIG_SAMV7_PWM0_CH0
   {
     .channel = 0,
+#ifdef CONFIG_SAMV7_PWM0_CH0_LONLY
+    .pin_h   = 0,
+    .pin_l   = GPIO_PWMC0_L0,
+#else
     .pin_h   = GPIO_PWMC0_H0,
 #ifdef CONFIG_SAMV7_PWM0_CH0_COMP
     .pin_l   = GPIO_PWMC0_L0,
 #else
     .pin_l   = 0,
 #endif
+#endif
   },
 #endif
 #ifdef CONFIG_SAMV7_PWM0_CH1
   {
     .channel = 1,
+#ifdef CONFIG_SAMV7_PWM0_CH1_LONLY
+    .pin_h   = 0,
+    .pin_l   = GPIO_PWMC0_L1,
+#else
     .pin_h   = GPIO_PWMC0_H1,
 #ifdef CONFIG_SAMV7_PWM0_CH1_COMP
     .pin_l   = GPIO_PWMC0_L1,
 #else
     .pin_l   = 0,
 #endif
+#endif
   },
 #endif
 #ifdef CONFIG_SAMV7_PWM0_CH2
   {
     .channel = 2,
+#ifdef CONFIG_SAMV7_PWM0_CH2_LONLY
+    .pin_h   = 0,
+    .pin_l   = GPIO_PWMC0_L2,
+#else
     .pin_h   = GPIO_PWMC0_H2,
 #ifdef CONFIG_SAMV7_PWM0_CH2_COMP
     .pin_l   = GPIO_PWMC0_L2,
 #else
     .pin_l   = 0,
 #endif
+#endif
   },
 #endif
 #ifdef CONFIG_SAMV7_PWM0_CH3
   {
     .channel = 3,
+#ifdef CONFIG_SAMV7_PWM0_CH3_LONLY
+    .pin_h   = 0,
+    .pin_l   = GPIO_PWMC0_L3,
+#else
     .pin_h   = GPIO_PWMC0_H3,
 #ifdef CONFIG_SAMV7_PWM0_CH3_COMP
     .pin_l   = GPIO_PWMC0_L3,
 #else
     .pin_l   = 0,
+#endif
 #endif
   },
 #endif
@@ -227,44 +247,64 @@ static struct sam_pwm_channel_s g_pwm1_channels[] =
 #ifdef CONFIG_SAMV7_PWM1_CH0
   {
     .channel = 0,
+#ifdef CONFIG_SAMV7_PWM1_CH0_LONLY
+    .pin_h   = 0,
+    .pin_l   = GPIO_PWMC1_L0,
+#else
     .pin_h   = GPIO_PWMC1_H0,
 #ifdef CONFIG_SAMV7_PWM1_CH0_COMP
     .pin_l   = GPIO_PWMC1_L0,
 #else
     .pin_l   = 0,
 #endif
+#endif
   },
 #endif
 #ifdef CONFIG_SAMV7_PWM1_CH1
   {
     .channel = 1,
+#ifdef CONFIG_SAMV7_PWM1_CH1_LONLY
+    .pin_h   = 0,
+    .pin_l   = GPIO_PWMC1_L1,
+#else
     .pin_h   = GPIO_PWMC1_H1,
 #ifdef CONFIG_SAMV7_PWM1_CH1_COMP
     .pin_l   = GPIO_PWMC1_L1,
 #else
     .pin_l   = 0,
 #endif
+#endif
   },
 #endif
 #ifdef CONFIG_SAMV7_PWM1_CH2
   {
     .channel = 2,
+#ifdef CONFIG_SAMV7_PWM1_CH2_LONLY
+    .pin_h   = 0,
+    .pin_l   = GPIO_PWMC1_L2,
+#else
     .pin_h   = GPIO_PWMC1_H2,
 #ifdef CONFIG_SAMV7_PWM1_CH2_COMP
     .pin_l   = GPIO_PWMC1_L2,
 #else
     .pin_l   = 0,
 #endif
+#endif
   },
 #endif
 #ifdef CONFIG_SAMV7_PWM1_CH3
   {
     .channel = 3,
+#ifdef CONFIG_SAMV7_PWM1_CH3_LONLY
+    .pin_h   = 0,
+    .pin_l   = GPIO_PWMC1_L3,
+#else
     .pin_h   = GPIO_PWMC1_H3,
 #ifdef CONFIG_SAMV7_PWM1_CH3_COMP
     .pin_l   = GPIO_PWMC1_L3,
 #else
     .pin_l   = 0,
+#endif
 #endif
   },
 #endif

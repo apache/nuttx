@@ -671,8 +671,13 @@ config SAMV7_PWM0_CH0
 
 if SAMV7_PWM0_CH0
 
+config SAMV7_PWM0_CH0_LONLY
+	bool "Use only L output"
+	default n
+
 config SAMV7_PWM0_CH0_COMP
 	bool "Use complementary output"
+	depends on !SAMV7_PWM0_CH0_LONLY
 	default n
 
 endif
@@ -683,8 +688,13 @@ config SAMV7_PWM0_CH1
 
 if SAMV7_PWM0_CH1
 
+config SAMV7_PWM0_CH1_LONLY
+	bool "Use only L output"
+	default n
+
 config SAMV7_PWM0_CH1_COMP
 	bool "Use complementary output"
+	depends on !SAMV7_PWM0_CH1_LONLY
 	default n
 
 endif
@@ -695,8 +705,13 @@ config SAMV7_PWM0_CH2
 
 if SAMV7_PWM0_CH2
 
+config SAMV7_PWM0_CH2_LONLY
+	bool "Use only L output"
+	default n
+
 config SAMV7_PWM0_CH2_COMP
 	bool "Use complementary output"
+	depends on !SAMV7_PWM0_CH2_LONLY
 	default n
 
 endif
@@ -707,8 +722,13 @@ config SAMV7_PWM0_CH3
 
 if SAMV7_PWM0_CH3
 
+config SAMV7_PWM0_CH3_LONLY
+	bool "Use only L output"
+	default n
+
 config SAMV7_PWM0_CH3_COMP
 	bool "Use complementary output"
+	depends on !SAMV7_PWM0_CH3_LONLY
 	default n
 
 endif
@@ -887,8 +907,13 @@ config SAMV7_PWM1_CH0
 
 if SAMV7_PWM1_CH0
 
+config SAMV7_PWM1_CH0_LONLY
+	bool "Use only L output"
+	default n
+
 config SAMV7_PWM1_CH0_COMP
 	bool "Use complementary output"
+	depends on !SAMV7_PWM1_CH0_LONLY
 	default n
 
 endif
@@ -899,8 +924,13 @@ config SAMV7_PWM1_CH1
 
 if SAMV7_PWM1_CH1
 
+config SAMV7_PWM1_CH1_LONLY
+	bool "Use only L output"
+	default n
+
 config SAMV7_PWM1_CH1_COMP
 	bool "Use complementary output"
+	depends on !SAMV7_PWM1_CH1_LONLY
 	default n
 
 endif
@@ -911,8 +941,13 @@ config SAMV7_PWM1_CH2
 
 if SAMV7_PWM1_CH2
 
+config SAMV7_PWM1_CH2_LONLY
+	bool "Use only L output"
+	default n
+
 config SAMV7_PWM1_CH2_COMP
 	bool "Use complementary output"
+	depends on !SAMV7_PWM1_CH2_LONLY
 	default n
 
 endif
@@ -923,8 +958,13 @@ config SAMV7_PWM1_CH3
 
 if SAMV7_PWM1_CH3
 
+config SAMV7_PWM1_CH3_LONLY
+	bool "Use only L output"
+	default n
+
 config SAMV7_PWM1_CH3_COMP
 	bool "Use complementary output"
+	depends on !SAMV7_PWM1_CH3_LONLY
 	default n
 
 endif
