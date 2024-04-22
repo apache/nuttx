@@ -79,6 +79,10 @@ CMN_ASRCS += riscv_fpu.S
 CMN_CSRCS += riscv_fpucmp.c
 endif
 
+ifeq ($(CONFIG_ARCH_RV_ISA_V),y)
+CMN_ASRCS += riscv_vpu.S
+endif
+
 ifeq ($(CONFIG_ARCH_RV_ISA_A),y)
 CMN_ASRCS += riscv_testset.S
 endif

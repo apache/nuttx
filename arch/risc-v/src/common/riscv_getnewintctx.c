@@ -68,6 +68,9 @@ uintptr_t riscv_get_newintctx(void)
 #ifdef CONFIG_ARCH_FPU
                  | MSTATUS_FS_INIT
 #endif
+#ifdef CONFIG_ARCH_RV_ISA_V
+                 | MSTATUS_VS_INIT
+#endif
   );
 }
 

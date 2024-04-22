@@ -231,6 +231,24 @@ static inline uintptr_t *riscv_fpuregs(struct tcb_s *tcb)
 #  define riscv_fpuregs(tcb)
 #endif
 
+#ifdef CONFIG_ARCH_RV_ISA_V
+void riscv_vpuconfig(void);
+void riscv_savevpu(uintptr_t *regs, uintptr_t *vregs);
+void riscv_restorevpu(uintptr_t *regs, uintptr_t *vregs);
+
+/* Get VPU register save area */
+
+static inline uintptr_t *riscv_vpuregs(struct tcb_s *tcb)
+{
+  return tcb->xcp.vregs;
+}
+#else
+#  define riscv_vpuconfig()
+#  define riscv_savevpu(regs, vregs)
+#  define riscv_restorevpu(regs, vregs)
+#  define riscv_vpuregs(tcb)
+#endif
+
 /* Save / restore context of task */
 
 static inline void riscv_savecontext(struct tcb_s *tcb)
@@ -242,6 +260,12 @@ static inline void riscv_savecontext(struct tcb_s *tcb)
 
   riscv_savefpu(tcb->xcp.regs, riscv_fpuregs(tcb));
 #endif
+
+#ifdef CONFIG_ARCH_RV_ISA_V
+  /* Save current process VPU state to TCB */
+
+  riscv_savevpu(tcb->xcp.regs, riscv_vpuregs(tcb));
+#endif
 }
 
 static inline void riscv_restorecontext(struct tcb_s *tcb)
@@ -252,6 +276,12 @@ static inline void riscv_restorecontext(struct tcb_s *tcb)
   /* Restore FPU state for next process */
 
   riscv_restorefpu(tcb->xcp.regs, riscv_fpuregs(tcb));
+#endif
+
+#ifdef CONFIG_ARCH_RV_ISA_V
+  /* Restore VPU state for next process */
+
+  riscv_restorevpu(tcb->xcp.regs, riscv_vpuregs(tcb));
 #endif
 }
 

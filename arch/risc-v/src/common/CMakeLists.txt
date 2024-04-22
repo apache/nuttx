@@ -76,6 +76,10 @@ if(CONFIG_ARCH_FPU)
   list(APPEND SRCS riscv_fpu.S riscv_fpucmp.c)
 endif()
 
+if(CONFIG_ARCH_RV_ISA_V)
+  list(APPEND SRCS riscv_vpu.S)
+endif()
+
 if(CONFIG_ARCH_RV_ISA_A)
   list(APPEND SRCS riscv_testset.S)
 endif()

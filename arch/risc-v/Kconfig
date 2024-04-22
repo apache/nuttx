@@ -357,6 +357,23 @@ config ARCH_RV_ISA_V
 	default n
 	depends on ARCH_FPU
 
+if ARCH_RV_ISA_V
+
+config ARCH_RV_VECTOR_BYTE_LENGTH
+	int "Vector Register Length in bytes"
+	default 32
+	---help---
+		Predefined vector register length. If CSR vlenb is greater than the
+		current reserved value, appropriate memory will be allocated to
+		save/restore the vector registers.
+		The XLEN-bit-wide read-only CSR vlenb holds the value VLEN/8, i.e.,
+		the vector register length in bytes.  The value in vlenb is a
+		design-time constant in any implementation.  Without this CSR, several
+		instructions are needed to calculate VLEN in bytes. The code has to
+		disturb current vl and vtype settings which require them to be saved and restored.
+
+endif
+
 config ARCH_RV_ISA_ZICSR_ZIFENCEI
 	bool
 	default y

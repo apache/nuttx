@@ -141,6 +141,48 @@
 .endm
 
 /****************************************************************************
+ * Name: riscv_savevpu
+ *
+ * Parameter:
+ *   in - Pointer to where the save is performed (e.g. sp)
+ *
+ * Description:
+ *   Save the VPU context registers (i.e. work / temp / etc).
+ *
+ ****************************************************************************/
+
+.macro riscv_savevpu in
+
+  /* Store all vector registers */
+
+  mv         t1, \in
+
+  csrr       t0,  CSR_VSTART
+  REGSTORE   t0,  REG_VSTART(t1)
+  csrr       t0,  CSR_VTYPE
+  REGSTORE   t0,  REG_VTYPE(t1)
+  csrr       t0,  CSR_VL
+  REGSTORE   t0,  REG_VL(t1)
+  csrr       t0,  CSR_VCSR
+  REGSTORE   t0,  REG_VCSR(t1)
+  csrr       t0,  CSR_VLENB
+  REGSTORE   t0,  REG_VLENB(t1)
+
+  addi       t1,  t1, VPU_XCPT_SIZE
+
+  vsetvli    t2,  x0, e8, m8, ta, ma
+
+  vse8.v     v0,  (t1)
+  add        t1,  t1, t2
+  vse8.v     v8,  (t1)
+  add        t1,  t1, t2
+  vse8.v     v16, (t1)
+  add        t1,  t1, t2
+  vse8.v     v24, (t1)
+
+.endm
+
+/****************************************************************************
  * Name: load_ctx
  *
  * Parameter:
@@ -240,6 +282,47 @@
 
   REGLOAD      t0, REG_FCSR(\out)
   fscsr        t0
+
+.endm
+
+/****************************************************************************
+ * Name: riscv_loadvpu
+ *
+ * Parameter:
+ *   out - Pointer to where the load is performed (e.g. sp)
+ *
+ * Description:
+ *   Load the VPU context registers (i.e. work / temp / etc).
+ *
+ ****************************************************************************/
+
+.macro riscv_loadvpu out
+
+  /* Load all vector registers */
+
+  mv         t0, \out
+  addi       t1, t0, VPU_XCPT_SIZE
+
+  vsetvli    t2, x0, e8, m8, ta, ma
+
+  vle8.v     v0,  (t1)
+  add        t1,  t1, t2
+  vle8.v     v8,  (t1)
+  add        t1,  t1, t2
+  vle8.v     v16, (t1)
+  add        t1,  t1, t2
+  vle8.v     v24, (t1)
+
+  mv         t1, t0
+
+  REGLOAD    t0, REG_VTYPE(t1)
+  REGLOAD    t3, REG_VL(t1)
+  vsetvl     x0, t3, t0
+
+  REGLOAD    t0, REG_VSTART(t1)
+  csrw       CSR_VSTART, t0
+  REGLOAD    t0, REG_VCSR(t1)
+  csrw       CSR_VCSR, t0
 
 .endm
 
