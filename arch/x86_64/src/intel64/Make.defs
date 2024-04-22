@@ -32,6 +32,7 @@ CMN_CSRCS += intel64_systemreset.c intel64_freq.c intel64_cache.c
 CHIP_ASRCS  = intel64_saveusercontext.S intel64_fullcontextrestore.S intel64_vectors.S intel64_head.S
 CHIP_CSRCS  = intel64_start.c intel64_handlers.c intel64_idle.c intel64_lowsetup.c
 CHIP_CSRCS += intel64_serial.c intel64_rng.c intel64_check_capability.c
+CHIP_CSRCS += intel64_cpu.c
 
 ifeq ($(CONFIG_ARCH_HAVE_TESTSET), y)
 CHIP_ASRCS += intel64_testset.S
