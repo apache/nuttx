@@ -76,15 +76,15 @@ FAR char *strcpy(FAR char *dest, FAR const char *src)
 #ifdef CONFIG_LIBC_STRING_OPTIMIZE
   FAR char *dst0 = dest;
   FAR const char *src0 = src;
-  FAR long *aligned_dst;
-  FAR const long *aligned_src;
+  FAR unsigned long *aligned_dst;
+  FAR const unsigned long *aligned_src;
 
   /* If SRC or DEST is unaligned, then copy bytes. */
 
   if (!UNALIGNED(src0, dst0))
     {
-      aligned_dst = (FAR long *)dst0;
-      aligned_src = (FAR long *)src0;
+      aligned_dst = (FAR unsigned long *)dst0;
+      aligned_src = (FAR unsigned long *)src0;
 
       /* SRC and DEST are both "long int" aligned, try to do "long int"
        * sized copies.
