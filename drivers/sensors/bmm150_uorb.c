@@ -371,6 +371,8 @@ static int bmm150_activate(FAR struct sensor_lowerhalf_s *lower,
 #endif
   uint8_t                         val          = 0;
 
+  dev = (FAR struct bmm150_sensor_dev_s *)lower;
+
   nxmutex_lock(&dev->lock);
 
   if (enable)
@@ -558,9 +560,9 @@ static int bmm150_fetch(FAR struct sensor_lowerhalf_s *lower,
   /* Get compensated data */
 
   mag_data.timestamp = now;
-  mag_data.x = bmm150_getx(priv, data);
-  mag_data.y = bmm150_gety(priv, data);
-  mag_data.z = bmm150_getz(priv, data);
+  mag_data.x = bmm150_getx(dev, data);
+  mag_data.y = bmm150_gety(dev, data);
+  mag_data.z = bmm150_getz(dev, data);
 
   memcpy(buffer, &mag_data, sizeof(mag_data));
   ret = sizeof(mag_data);
