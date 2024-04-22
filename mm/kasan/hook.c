@@ -121,26 +121,21 @@ static void kasan_show_memory(FAR const uint8_t *addr, size_t size,
 static void kasan_report(FAR const void *addr, size_t size,
                          bool is_write, FAR void *return_address)
 {
-  static int recursion;
   irqstate_t flags;
 
   flags = enter_critical_section();
-  if (++recursion == 1)
-    {
-      _alert("kasan detected a %s access error, address at %p,"
-             "size is %zu, return address: %p\n",
-             is_write ? "write" : "read",
-             addr, size, return_address);
+  _alert("kasan detected a %s access error, address at %p,"
+         "size is %zu, return address: %p\n",
+         is_write ? "write" : "read",
+         addr, size, return_address);
 
-      kasan_show_memory(addr, size, 80);
+  kasan_show_memory(addr, size, 80);
 #ifndef CONFIG_MM_KASAN_DISABLE_PANIC
-      PANIC();
+  PANIC();
 #else
-      dump_stack();
+  dump_stack();
 #endif
-    }
 
-  --recursion;
   leave_critical_section(flags);
 }
 
