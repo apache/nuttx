@@ -133,16 +133,16 @@
 
 #define READ_CSR(reg) \
   ({ \
-     uintptr_t regval; \
-     __asm__ __volatile__("csrr %0, " __STR(reg) : "=r"(regval)); \
-     regval; \
+     uintptr_t __regval; \
+     __asm__ __volatile__("csrr %0, " __STR(reg) : "=r"(__regval)); \
+     __regval; \
   })
 
 #define READ_AND_SET_CSR(reg, bits) \
   ({ \
-     uintptr_t regval; \
-     __asm__ __volatile__("csrrs %0, " __STR(reg) ", %1": "=r"(regval) : "rK"(bits)); \
-     regval; \
+     uintptr_t __regval; \
+     __asm__ __volatile__("csrrs %0, " __STR(reg) ", %1": "=r"(__regval) : "rK"(bits)); \
+     __regval; \
   })
 
 #define WRITE_CSR(reg, val) \
