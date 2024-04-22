@@ -257,6 +257,29 @@
 #define XCPTCONTEXT_SIZE    (INT_XCPT_SIZE + FPU_XCPT_SIZE)
 #endif
 
+#ifdef CONFIG_ARCH_RV_ISA_V
+#  define REG_VSTART_NDX    (0)
+#  define REG_VTYPE_NDX     (1)
+#  define REG_VL_NDX        (2)
+#  define REG_VCSR_NDX      (3)
+#  define REG_VLENB_NDX     (4)
+
+#  define VPU_XCPT_REGS     (5)
+#  define VPU_XCPT_SIZE     (INT_REG_SIZE * VPU_XCPT_REGS)
+
+#  if CONFIG_ARCH_RV_VECTOR_BYTE_LENGTH > 0
+
+/* There are 32 vector registers(v0 - v31) with vlenb length. */
+
+#    define VPU_XCPTC_SIZE  (CONFIG_ARCH_RV_VECTOR_BYTE_LENGTH * 32 + VPU_XCPT_SIZE)
+
+#  endif
+#else /* !CONFIG_ARCH_RV_ISA_V */
+#  define VPU_XCPT_REGS     (0)
+#  define VPU_XCPT_SIZE     (0)
+#  define VPU_XCPTC_SIZE    (0)
+#endif /* CONFIG_ARCH_RV_ISA_V */
+
 /* In assembly language, values have to be referenced as byte address
  * offsets.  But in C, it is more convenient to reference registers as
  * register save table offsets.
@@ -333,6 +356,14 @@
 #  define REG_FCSR          (INT_REG_SIZE*REG_FCSR_NDX)
 #endif
 
+#ifdef CONFIG_ARCH_RV_ISA_V
+#  define REG_VSTART        (INT_REG_SIZE*REG_VSTART_NDX)
+#  define REG_VTYPE         (INT_REG_SIZE*REG_VTYPE_NDX)
+#  define REG_VL            (INT_REG_SIZE*REG_VL_NDX)
+#  define REG_VCSR          (INT_REG_SIZE*REG_VCSR_NDX)
+#  define REG_VLENB         (INT_REG_SIZE*REG_VLENB_NDX)
+#endif
+
 #else
 #  define REG_EPC           REG_EPC_NDX
 #  define REG_X1            REG_X1_NDX
@@ -402,6 +433,14 @@
 #  define REG_F30           REG_F30_NDX
 #  define REG_F31           REG_F31_NDX
 #  define REG_FCSR          REG_FCSR_NDX
+#endif
+
+#ifdef CONFIG_ARCH_RV_ISA_V
+#  define REG_VSTART        REG_VSTART_NDX
+#  define REG_VTYPE         REG_VTYPE_NDX
+#  define REG_VL            REG_VL_NDX
+#  define REG_VCSR          REG_VCSR_NDX
+#  define REG_VLENB         REG_VLENB_NDX
 #endif
 
 #endif
@@ -578,6 +617,16 @@ struct xcptcontext
 
 #if defined(CONFIG_ARCH_FPU) && defined(CONFIG_ARCH_LAZYFPU)
   uintptr_t fregs[FPU_XCPT_REGS];
+#endif
+
+#ifdef CONFIG_ARCH_RV_ISA_V
+#  if CONFIG_ARCH_RV_VECTOR_BYTE_LENGTH > 0
+  /* There are 32 vector registers(v0 - v31) with vlenb length. */
+
+  uintptr_t vregs[VPU_XCPTC_SIZE];
+#  else
+  uintptr_t *vregs;
+#  endif
 #endif
 };
 
