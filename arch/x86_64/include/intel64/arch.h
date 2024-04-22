@@ -165,12 +165,14 @@
 #define X86_64_CPUID_CAP              0x01
 #  define X86_64_CPUID_01_SSE3        (1 << 0)
 #  define X86_64_CPUID_01_SSSE3       (1 << 9)
+#  define X86_64_CPUID_01_FMA         (1 << 12)
 #  define X86_64_CPUID_01_PCID        (1 << 17)
 #  define X86_64_CPUID_01_SSE41       (1 << 19)
 #  define X86_64_CPUID_01_SSE42       (1 << 20)
 #  define X86_64_CPUID_01_X2APIC      (1 << 21)
 #  define X86_64_CPUID_01_TSCDEA      (1 << 24)
 #  define X86_64_CPUID_01_XSAVE       (1 << 26)
+#  define X86_64_CPUID_01_AVX         (1 << 28)
 #  define X86_64_CPUID_01_RDRAND      (1 << 30)
 #  define X86_64_CPUID_01_APICID(ebx) ((ebx) >> 24)
 #define X86_64_CPUID_EXTCAP           0x07

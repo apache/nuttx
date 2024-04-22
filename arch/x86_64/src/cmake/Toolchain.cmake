@@ -143,3 +143,43 @@ endif()
 if(CONFIG_ARCH_X86_64_SSE4A)
   add_compile_options(-msse4a)
 endif()
+
+if(CONFIG_ARCH_X86_64_AVX)
+  add_compile_options(-mavx)
+endif()
+
+if(CONFIG_ARCH_X86_64_AVX512)
+  add_compile_options(-mavx512f)
+endif()
+
+if(CONFIG_ARCH_X86_64_AVX512PF)
+  add_compile_options(-mavx512pf)
+endif()
+
+if(CONFIG_ARCH_X86_64_AVX512ER)
+  add_compile_options(-mavx512er)
+endif()
+
+if(CONFIG_ARCH_X86_64_AVX512CD)
+  add_compile_options(-mavx512cd)
+endif()
+
+if(CONFIG_ARCH_X86_64_AVX512VL)
+  add_compile_options(-mavx512vl)
+endif()
+
+if(CONFIG_ARCH_X86_64_AVX512BW)
+  add_compile_options(-mavx512bw)
+endif()
+
+if(CONFIG_ARCH_X86_64_AVX512DQ)
+  add_compile_options(-mavx512dq)
+endif()
+
+if(CONFIG_ARCH_X86_64_AVX512IFMA)
+  add_compile_options(-mavx512ifma)
+endif()
+
+if(CONFIG_ARCH_X86_64_AVX512VBMI)
+  add_compile_options(-mavx512vbmi)
+endif()
