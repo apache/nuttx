@@ -120,7 +120,7 @@
 #  define _alert      _none
 #elif defined(CONFIG_CPP_HAVE_VARARGS)
 #  define _alert(format, ...) \
-   __arch_syslog(LOG_EMERG, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
+   __arch_syslog(LOG_ALERT, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
 #endif
 
 #if !defined(CONFIG_DEBUG_ERROR)
