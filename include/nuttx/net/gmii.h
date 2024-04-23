@@ -80,6 +80,21 @@
 #define GMII_KSZ90X1_RRDPSR           261             /* RGMII RX data pad skew */
 #define GMII_KSZ90x1_ATR              263             /* Analog test register */
 
+/* Realtek RTL8211 PHY Extended Registers */
+
+#define GMII_RTL8211F_NAME            "RTL8211F"
+#define GMII_RTL8211F_INER_A42        18      /* Interrupt Enable Register */
+#define GMII_RTL8211F_PHYCR1_A43      24      /* PHY Specific Control Register 1 */
+#define GMII_RTL8211F_PHYCR2_A43      25      /* PHY Specific Control Register 2 */
+#define GMII_RTL8211F_PHYSR_A43       26      /* PHY Specific Status Register */
+#define GMII_RTL8211F_INSR_A43        29      /* Interrupt Status Register */
+#define GMII_RTL8211F_PAGSR           31      /* Page Select Register */
+#define GMII_RTL8211F_PHYSCR_A46      20      /* PHY Special Cofig Register */
+#define GMII_RTL8211F_LCR_D04         16      /* LED Control Register */
+#define GMII_RTL8211F_EEELCR_D04      17      /* EEE LED Control Register */
+#define GMII_RTL8211F_MIICR_D08       21      /* MII Control Register */
+#define GMII_RTL8211F_INTBCR_D40      22      /* INTB Pin Control Register */
+
 /* MII register bit settings ************************************************/
 
 /* MII Control register bit definitions */
@@ -279,6 +294,18 @@
 #define GMII_KSZ90x1_INT_LD           (1 << 2)  /* Link down fault interrupt */
 #define GMII_KSZ90x1_INT_RF           (1 << 1)  /* Remote fault interrupt */
 #define GMII_KSZ90x1_INT_LU           (1 << 0)  /* Link up interrupt */
+
+/* RTL8211 register bit settings ********************************************/
+
+/* RTL8211F MII ID1/2 register bits */
+
+#define GMII_PHYID1_RTL8211F           0x001c   /* ID1 value for Realtek RTL8211F */
+#define GMII_PHYID2_RTL8211F           0xc878   /* ID2 value for Realtek RTL8211F */
+#define GMII_RTL8211F_PHYSR_SPEED_MASK 0x30
+#define GMII_RTL8211F_PHYSR_10MBPS     0x00
+#define GMII_RTL8211F_PHYSR_100MBPS    0x10
+#define GMII_RTL8211F_PHYSR_1000MBPS   0x20
+#define GMII_RTL8211F_PHYSR_DUPLEX     0x8
 
 /****************************************************************************
  * Type Definitions
