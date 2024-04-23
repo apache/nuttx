@@ -70,6 +70,7 @@
 #define ADXL362_TMEP_L                0x14
 #define ADXL362_TEMP_H                0x15
 #define ADXL362_SOFT_RESET            0x1f
+#  define ADXL362_SOFT_RESET_VALUE    0x52
 #define ADXL362_THRESH_ACT_L          0x20
 #define ADXL362_THRESH_ACT_H          0x21
 #define ADXL362_TIME_ACT              0x22
@@ -83,6 +84,7 @@
 #define ADXL362_INTMAP1               0x2a
 #define ADXL362_INTMAP2               0x2b
 #define ADXL362_FILTER_CTL            0x2c
+#  define ADXL362_FILTER_CTL_DEFAULT  0x13
 #define ADXL362_POWER_CTL             0x2d
 #   define ADXL362_LOW_NOISE          (0 << 4)
 #   define ADXL362_ULTRALOW_NOISE     (2 << 4)
@@ -282,7 +284,7 @@ static void adxl362_getregs(FAR struct adxl362_sensor_s *priv,
 
 static int16_t adxl362_data(FAR uint8_t *data)
 {
-  return (int16_t)(data[0]  | (data[1]) << 8);
+  return (int16_t)(data[0] | (data[1]) << 8);
 }
 
 /****************************************************************************
@@ -322,12 +324,30 @@ static int adxl362_checkid(FAR struct adxl362_sensor_s *priv)
 }
 
 /****************************************************************************
+ * Name: adxl362_reset
+ *
+ * Description:
+ *   Soft reset
+ *
+ ****************************************************************************/
+
+static void adxl362_reset(FAR struct adxl362_sensor_s *priv)
+{
+  adxl362_putreg8(priv, ADXL362_SOFT_RESET, ADXL362_SOFT_RESET_VALUE);
+  up_mdelay(5);
+}
+
+/****************************************************************************
  * Name: adxl362_start
  ****************************************************************************/
 
 static void adxl362_start(FAR struct adxl362_sensor_s *priv)
 {
   adxl362_putreg8(priv, ADXL362_POWER_CTL, ADXL362_POWER_MODE_MEASURE);
+
+  /* Wait for sensor ready - otherwise the first measuremet is garbage */
+
+  up_mdelay(5);
 }
 
 /****************************************************************************
@@ -459,8 +479,8 @@ static int adxl362_fetch(FAR struct sensor_lowerhalf_s *lower,
 
   accel.timestamp   = sensor_get_timestamp();
   accel.x           = (float)adxl362_data(&data[0]) * priv->scale;
-  accel.y           = (float)adxl362_data(&data[1]) * priv->scale;
-  accel.z           = (float)adxl362_data(&data[2]) * priv->scale;
+  accel.y           = (float)adxl362_data(&data[2]) * priv->scale;
+  accel.z           = (float)adxl362_data(&data[4]) * priv->scale;
   accel.temperature = (float)adxl362_data(&data[6]) * ADXL362_TEMP_SCALE;
 
   memcpy(buffer, &accel, sizeof(accel));
@@ -508,6 +528,10 @@ static int adxl362_thread(int argc, FAR char **argv)
 
       if (priv->enabled)
         {
+          /* Wait for data ready */
+
+          while (!(adxl362_getreg8(priv, ADXL362_STATUS) & 0x01));
+
           adxl362_getregs(priv, ADXL362_XDATA_L, (FAR uint8_t *)data, 8);
 
           accel.timestamp   = sensor_get_timestamp();
@@ -592,6 +616,10 @@ int adxl362_register(int devno, FAR struct spi_dev_s *spi)
       kmm_free(priv);
       return ret;
     }
+
+  /* Soft reset */
+
+  adxl362_reset(priv);
 
   /* Register the character driver */
 
