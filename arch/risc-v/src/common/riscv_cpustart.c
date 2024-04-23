@@ -77,11 +77,13 @@ void riscv_cpu_boot(int cpu)
 
   asm("WFI");
 
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_RISCV_PERCPU_SCRATCH
   /* Initialize the per CPU areas */
 
   riscv_percpu_add_hart((uintptr_t)cpu);
+#endif
 
+#ifdef CONFIG_BUILD_KERNEL
   /* Enable MMU */
 
   binfo("mmu_enable: satp=%lx\n", g_kernel_pgt_pbase);

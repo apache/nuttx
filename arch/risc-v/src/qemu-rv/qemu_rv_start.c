@@ -119,6 +119,10 @@ void qemu_rv_start(int mhartid, const char *dtb)
   qemu_rv_clear_bss();
 #endif
 
+#ifdef CONFIG_RISCV_PERCPU_SCRATCH
+  riscv_percpu_add_hart(mhartid);
+#endif
+
 #ifdef CONFIG_DEVICE_TREE
   fdt_register(dtb);
 #endif

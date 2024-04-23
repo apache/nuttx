@@ -357,7 +357,7 @@
  ****************************************************************************/
 
 .macro  riscv_mhartid out
-#ifdef CONFIG_ARCH_USE_S_MODE
+#ifdef CONFIG_RISCV_PERCPU_SCRATCH
   csrr    \out, CSR_SCRATCH
   REGLOAD \out, RISCV_PERCPU_HARTID(\out)
 #else

@@ -119,7 +119,7 @@ void __litex_start(int hart_index, const void * fdt, int arg)
       fdt_register((const char *)CONFIG_LITEX_FDT_MEMORY_ADDRESS);
     }
 
-#ifdef CONFIG_LITEX_CORE_VEXRISCV_SMP
+#ifdef CONFIG_RISCV_PERCPU_SCRATCH
   riscv_percpu_add_hart(0);
 #endif
 
