@@ -273,6 +273,17 @@ static ssize_t local_sendto(FAR struct socket *psock,
       return -EAFNOSUPPORT;
     }
 
+  /* At present, only standard pathname type address are support */
+
+  if (tolen < sizeof(sa_family_t) + 2)
+    {
+      /* EFAULT
+       * - An invalid user space address was specified for a parameter
+       */
+
+      return -EFAULT;
+    }
+
   /* If this is a connected socket, then return EISCONN */
 
   if (psock->s_type != SOCK_DGRAM)
@@ -301,20 +312,20 @@ static ssize_t local_sendto(FAR struct socket *psock,
       return -ENOENT;
     }
 
+  /* Make sure that dgram is sent safely */
+
+  ret = nxmutex_lock(&conn->lc_sendlock);
+  if (ret < 0)
+    {
+      /* May fail because the task was canceled. */
+
+      nerr("ERROR: Failed to get localsocket sendlock: %zd\n", ret);
+      return ret;
+    }
+
   /* The outgoing FIFO should not be open */
 
   DEBUGASSERT(conn->lc_outfile.f_inode == NULL);
-
-  /* At present, only standard pathname type address are support */
-
-  if (tolen < sizeof(sa_family_t) + 2)
-    {
-      /* EFAULT
-       * - An invalid user space address was specified for a parameter
-       */
-
-      return -EFAULT;
-    }
 
   /* Make sure that half duplex FIFO has been created.
    * REVISIT:  Or should be just make sure that it already exists?
@@ -325,7 +336,7 @@ static ssize_t local_sendto(FAR struct socket *psock,
     {
       nerr("ERROR: Failed to create FIFO for %s: %zd\n",
            unaddr->sun_path, ret);
-      return ret;
+      goto errout_with_lock;
     }
 
   /* Open the sending side of the transfer */
@@ -341,22 +352,13 @@ static ssize_t local_sendto(FAR struct socket *psock,
       goto errout_with_halfduplex;
     }
 
-  /* Make sure that dgram is sent safely */
-
-  ret = nxmutex_lock(&conn->lc_sendlock);
-  if (ret < 0)
-    {
-      /* May fail because the task was canceled. */
-
-      goto errout_with_sender;
-    }
-
   /* Send the preamble */
 
   ret = local_send_preamble(conn, &conn->lc_outfile, buf, len);
   if (ret < 0)
     {
       nerr("ERROR: Failed to send the preamble: %zd\n", ret);
+      goto errout_with_sender;
     }
 
   /* Send the packet */
@@ -365,9 +367,8 @@ static ssize_t local_sendto(FAR struct socket *psock,
   if (ret < 0)
     {
       nerr("ERROR: Failed to send the packet: %zd\n", ret);
+      goto errout_with_sender;
     }
-
-  nxmutex_unlock(&conn->lc_sendlock);
 
 errout_with_sender:
 
@@ -381,6 +382,12 @@ errout_with_halfduplex:
   /* Release our reference to the half duplex FIFO */
 
   local_release_halfduplex(conn);
+
+errout_with_lock:
+
+  /* Release localsocket sendlock */
+
+  nxmutex_unlock(&conn->lc_sendlock);
   return ret;
 #else
   return -EISCONN;
