@@ -1146,7 +1146,8 @@ static int pci_enable_msi(FAR struct pci_device_s *dev, FAR int *irq,
 
   if ((flags & PCI_MSI_FLAGS_64BIT) != 0)
     {
-      pci_write_config_dword(dev, msi + PCI_MSI_ADDRESS_HI, (mar >> 32));
+      pci_write_config_dword(dev, msi + PCI_MSI_ADDRESS_HI,
+                             ((uint64_t)mar >> 32));
       pci_write_config_dword(dev, msi + PCI_MSI_DATA_64, mdr);
     }
   else
