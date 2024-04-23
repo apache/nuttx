@@ -164,7 +164,7 @@ static int bmi270_activate(FAR struct sensor_lowerhalf_s *lower,
 
       start = true;
     }
-  else if (tmp == 1)
+  else if (!enable && tmp == 1)
     {
       /* One time stop */
 
