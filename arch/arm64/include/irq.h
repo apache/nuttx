@@ -149,8 +149,8 @@
 
 /* In Armv8-A Architecture, the stack must align with 16 byte */
 
-#define XCPTCONTEXT_GP_REGS (36)
-#define XCPTCONTEXT_GP_SIZE (8 * XCPTCONTEXT_GP_REGS)
+#define ARM64_CONTEXT_REGS  (38)
+#define ARM64_CONTEXT_SIZE  (8 * ARM64_CONTEXT_REGS)
 
 #ifdef CONFIG_ARCH_FPU
 
@@ -166,58 +166,63 @@
 
 /* 128bit registers */
 
-#define FPU_REG_Q0          (0)
-#define FPU_REG_Q1          (1)
-#define FPU_REG_Q2          (2)
-#define FPU_REG_Q3          (3)
-#define FPU_REG_Q4          (4)
-#define FPU_REG_Q5          (5)
-#define FPU_REG_Q6          (6)
-#define FPU_REG_Q7          (7)
-#define FPU_REG_Q8          (8)
-#define FPU_REG_Q9          (9)
-#define FPU_REG_Q10         (10)
-#define FPU_REG_Q11         (11)
-#define FPU_REG_Q12         (12)
-#define FPU_REG_Q13         (13)
-#define FPU_REG_Q14         (14)
-#define FPU_REG_Q15         (15)
-#define FPU_REG_Q16         (16)
-#define FPU_REG_Q17         (17)
-#define FPU_REG_Q18         (18)
-#define FPU_REG_Q19         (19)
-#define FPU_REG_Q20         (20)
-#define FPU_REG_Q21         (21)
-#define FPU_REG_Q22         (22)
-#define FPU_REG_Q23         (23)
-#define FPU_REG_Q24         (24)
-#define FPU_REG_Q25         (25)
-#define FPU_REG_Q26         (26)
-#define FPU_REG_Q27         (27)
-#define FPU_REG_Q28         (28)
-#define FPU_REG_Q29         (29)
-#define FPU_REG_Q30         (30)
-#define FPU_REG_Q31         (31)
+#define REG_Q0              (0)
+#define REG_Q1              (1)
+#define REG_Q2              (2)
+#define REG_Q3              (3)
+#define REG_Q4              (4)
+#define REG_Q5              (5)
+#define REG_Q6              (6)
+#define REG_Q7              (7)
+#define REG_Q8              (8)
+#define REG_Q9              (9)
+#define REG_Q10             (10)
+#define REG_Q11             (11)
+#define REG_Q12             (12)
+#define REG_Q13             (13)
+#define REG_Q14             (14)
+#define REG_Q15             (15)
+#define REG_Q16             (16)
+#define REG_Q17             (17)
+#define REG_Q18             (18)
+#define REG_Q19             (19)
+#define REG_Q20             (20)
+#define REG_Q21             (21)
+#define REG_Q22             (22)
+#define REG_Q23             (23)
+#define REG_Q24             (24)
+#define REG_Q25             (25)
+#define REG_Q26             (26)
+#define REG_Q27             (27)
+#define REG_Q28             (28)
+#define REG_Q29             (29)
+#define REG_Q30             (30)
+#define REG_Q31             (31)
 
 /* 32 bit registers
  */
-#define FPU_REG_FPSR        (0)
-#define FPU_REG_FPCR        (1)
+#define REG_FPSR            (0)
+#define REG_FPCR            (1)
 
 /* FPU registers(Q0~Q31, 128bit): 32x2 = 64
  * FPU FPSR/SPSR(32 bit) : 1
  * FPU TRAP: 1
  * 64 + 1 + 1 = 66
  */
-#define XCPTCONTEXT_FPU_REGS      (66)
+#define FPU_CONTEXT_REGS    (66)
 #else
-#define XCPTCONTEXT_FPU_REGS      (0)
+#define FPU_CONTEXT_REGS    (0)
 #endif
 
-#define FPUCONTEXT_SIZE     (8 * XCPTCONTEXT_FPU_REGS)
+#define FPU_CONTEXT_SIZE    (8 * FPU_CONTEXT_REGS)
 
-#define XCPTCONTEXT_REGS    (XCPTCONTEXT_GP_REGS + XCPTCONTEXT_FPU_REGS)
+#define XCPTCONTEXT_REGS    (ARM64_CONTEXT_REGS + FPU_CONTEXT_REGS)
 #define XCPTCONTEXT_SIZE    (8 * XCPTCONTEXT_REGS)
+
+/* Friendly register names */
+
+#define REG_FP              REG_X29
+#define REG_LR              REG_X30
 
 #ifdef CONFIG_ARM64_DECODEFIQ
 #  define IRQ_DAIF_MASK (3)

@@ -295,15 +295,15 @@ void arm64_fpu_disable(void)
 bool up_fpucmp(const void *saveregs1, const void *saveregs2)
 {
   const uint64_t *regs1 = (uint64_t *)((uintptr_t)saveregs1 +
-                                       XCPTCONTEXT_GP_SIZE);
+                                       ARM64_CONTEXT_SIZE);
   const uint64_t *regs2 = (uint64_t *)((uintptr_t)saveregs2 +
-                                       XCPTCONTEXT_GP_SIZE);
+                                       ARM64_CONTEXT_SIZE);
 
   /* Only compare callee-saved registers, caller-saved registers do not
    * need to be preserved.
    */
 
-  return memcmp(&regs1[FPU_REG_Q4], &regs2[FPU_REG_Q4],
+  return memcmp(&regs1[REG_Q4], &regs2[REG_Q4],
                 8 * FPU_CALLEE_REGS) == 0;
 }
 
