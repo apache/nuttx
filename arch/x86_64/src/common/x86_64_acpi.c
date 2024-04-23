@@ -454,6 +454,10 @@ int acpi_init(uintptr_t rsdp)
       acpi->rsdp = (struct acpi_rsdp_s *)rsdp;
     }
 
+  /* Make sure that RSDP is mapped */
+
+  acpi_map_region((uintptr_t)acpi->rsdp, sizeof(struct acpi_rsdp_s));
+
   /* Parse RSDP */
 
   ret = acpi_rsdp_parse(acpi->rsdp);
