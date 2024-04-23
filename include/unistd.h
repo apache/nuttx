@@ -469,6 +469,8 @@ int     syncfs(int fd);
 int     profil(FAR unsigned short *buf, size_t bufsiz,
                size_t offset, unsigned int scale);
 
+FAR char *getpass(FAR const char *prompt);
+
 #if CONFIG_FORTIFY_SOURCE > 0
 fortify_function(getcwd) FAR char *getcwd(FAR char *buf,
                                           size_t size)
