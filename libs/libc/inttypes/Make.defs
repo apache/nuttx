@@ -20,7 +20,7 @@
 
 # Add the inttypes C files to the build
 
-CSRCS += lib_imaxabs.c lib_strtoimax.c lib_strtoumax.c
+CSRCS += lib_imaxabs.c lib_imaxdiv.c lib_strtoimax.c lib_strtoumax.c
 
 # Add the inttypes directory to the build
 
