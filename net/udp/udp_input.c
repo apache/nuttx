@@ -64,6 +64,53 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: udp_is_broadcast
+ *
+ * Description:
+ *   Check if the destination address is a broadcast/multicast address.
+ *
+ * Input Parameters:
+ *   dev - The device driver structure containing the received UDP packet
+ *
+ * Returned Value:
+ *   True if the destination address is a broadcast/multicast address
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_SOCKOPTS) && defined(CONFIG_NET_BROADCAST)
+static bool udp_is_broadcast(FAR struct net_driver_s *dev)
+{
+  /* Check if the destination address is a broadcast/multicast address */
+
+#ifdef CONFIG_NET_IPv4
+#  ifdef CONFIG_NET_IPv6
+  if (IFF_IS_IPv4(dev->d_flags))
+#  endif
+    {
+      FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
+      in_addr_t destipaddr = net_ip4addr_conv32(ipv4->destipaddr);
+
+      return net_ipv4addr_cmp(destipaddr, INADDR_BROADCAST) ||
+             IN_MULTICAST(NTOHL(destipaddr)) ||
+             (net_ipv4addr_maskcmp(destipaddr, dev->d_ipaddr, dev->d_netmask)
+              && net_ipv4addr_broadcast(destipaddr, dev->d_netmask));
+    }
+#endif
+#ifdef CONFIG_NET_IPv6
+#  ifdef CONFIG_NET_IPv4
+  else
+#  endif
+    {
+      FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
+      return net_is_addr_mcast(ipv6->destipaddr);
+    }
+#endif
+
+  return false;
+}
+#endif
+
+/****************************************************************************
  * Name: udp_input_conn
  *
  * Description:
@@ -162,7 +209,7 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
 {
   FAR struct udp_hdr_s *udp;
   FAR struct udp_conn_s *conn;
-#ifdef CONFIG_NET_SOCKOPTS
+#if defined(CONFIG_NET_SOCKOPTS) && defined(CONFIG_NET_BROADCAST)
   FAR struct udp_conn_s *nextconn;
   FAR struct iob_s *iob;
 #endif
@@ -243,32 +290,38 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
         {
           /* We'll only get multiple conn when we support SO_REUSEADDR */
 
-#ifdef CONFIG_NET_SOCKOPTS
-          /* Do we have second connection that can hold this packet? */
+#if defined(CONFIG_NET_SOCKOPTS) && defined(CONFIG_NET_BROADCAST)
+          /* Check if the destination is a broadcast/multicast address */
 
-          while ((nextconn = udp_active(dev, conn, udp)) != NULL)
+          if (udp_is_broadcast(dev))
             {
-              /* Yes... There are multiple listeners on the same port.
-               * We need to clone the packet and deliver it to each listener.
-               */
+              /* Do we have second connection that can hold this packet? */
 
-              iob = netdev_iob_clone(dev, true);
-              if (iob == NULL)
+              while ((nextconn = udp_active(dev, conn, udp)) != NULL)
                 {
-                  nerr("ERROR: IOB clone failed.\n");
-                  break; /* We can still process one time without clone. */
-                }
+                  /* Yes... There are multiple listeners on the same port.
+                   * We need to clone the packet and deliver it to each
+                   * listener.
+                   */
 
-              ret = udp_input_conn(dev, conn, udpiplen);
-              if (ret < 0)
-                {
-                  nwarn("WARNING: A conn failed to process the packet %d\n",
-                        ret); /* We can still continue for next conn. */
-                }
+                  iob = netdev_iob_clone(dev, true);
+                  if (iob == NULL)
+                    {
+                      nerr("ERROR: IOB clone failed.\n");
+                      break; /* We can still process once without clone. */
+                    }
 
-              netdev_iob_replace(dev, iob);
-              udp  = IPBUF(iplen);
-              conn = nextconn;
+                  ret = udp_input_conn(dev, conn, udpiplen);
+                  if (ret < 0)
+                    {
+                      nwarn("WARNING: A conn failed to process the pkt %d\n",
+                            ret); /* We can still continue for next conn. */
+                    }
+
+                  netdev_iob_replace(dev, iob);
+                  udp  = IPBUF(iplen);
+                  conn = nextconn;
+                }
             }
 #endif
 
