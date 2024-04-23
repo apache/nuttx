@@ -105,8 +105,11 @@ if(CONFIG_ARCH_ADDRENV)
   list(APPEND SRCS riscv_addrenv_utils.c riscv_addrenv_shm.c)
 endif()
 
-if(CONFIG_BUILD_KERNEL)
+if(CONFIG_RISCV_PERCPU_SCRATCH)
   list(APPEND SRCS riscv_percpu.c)
+endif()
+
+if(CONFIG_BUILD_KERNEL)
   add_subdirectory(supervisor)
 endif()
 

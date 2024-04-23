@@ -108,3 +108,13 @@ ifeq ($(CONFIG_ARCH_ADDRENV),y)
 CMN_CSRCS += riscv_addrenv.c riscv_pgalloc.c riscv_addrenv_perms.c
 CMN_CSRCS += riscv_addrenv_utils.c riscv_addrenv_shm.c riscv_addrenv_pgmap.c
 endif
+
+ifeq ($(CONFIG_RISCV_PERCPU_SCRATCH),y)
+CMN_CSRCS += riscv_percpu.c
+endif
+
+# Kernel runs in supervisor mode or machine mode ?
+
+ifeq ($(CONFIG_ARCH_USE_S_MODE),y)
+include common/supervisor/Make.defs
+endif

@@ -121,7 +121,7 @@ void k230_start(int mhartid, const char *dtb)
     {
       k230_clear_bss();
 
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_RISCV_PERCPU_SCRATCH
       riscv_percpu_add_hart(mhartid);
 #else
       k230_copy_init_data();

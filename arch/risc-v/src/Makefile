@@ -26,12 +26,6 @@ else ifeq ($(CONFIG_NUTTSBI),y)
 include nuttsbi/Make.defs
 endif
 
-# Kernel runs in supervisor mode or machine mode ?
-
-ifeq ($(CONFIG_ARCH_USE_S_MODE),y)
-include common/supervisor/Make.defs
-endif
-
 ARCH_SRCDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src
 
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)chip

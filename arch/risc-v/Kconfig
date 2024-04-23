@@ -489,6 +489,16 @@ config RISCV_MISALIGNED_HANDLER
 	depends on ARCH_HAVE_MISALIGN_EXCEPTION
 	default y
 
+config RISCV_PERCPU_SCRATCH
+	bool "Enable Scratch-based Per-CPU storage"
+	default n
+	---help---
+		In some special chipsets, multiple CPUs may be bundled in one hardware
+		thread cluster, which results in hartid and cpuindex not being exactly
+		the same.
+		This option will enable Scratch-based Per-CPU storage to distinguish
+		the real cpu index.
+
 # Option to run NuttX in supervisor mode. This is obviously not usable in
 # flat mode, is questionable in protected mode, but is mandatory in kernel
 # mode.
@@ -504,6 +514,7 @@ config ARCH_USE_S_MODE
 	bool "Run the NuttX kernel in S-mode"
 	default n
 	depends on ARCH_HAVE_S_MODE && BUILD_KERNEL && ARCH_USE_MMU
+	select RISCV_PERCPU_SCRATCH
 	---help---
 		Most of the RISC-V implementations run in M-mode (flat addressing)
 		and/or U-mode (in case of separate kernel-/userspaces). This provides
