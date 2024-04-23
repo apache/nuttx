@@ -59,8 +59,8 @@
  *            all memory accesses are complete
  */
 
-#define SP_DSB(n) __asm__ __volatile__ ("dsb sy" : : : "memory")
-#define SP_DMB(n) __asm__ __volatile__ ("dmb st" : : : "memory")
+#define SP_DSB() __asm__ __volatile__ ("dsb sy" : : : "memory")
+#define SP_DMB() __asm__ __volatile__ ("dmb st" : : : "memory")
 
 #ifdef CONFIG_ARM_HAVE_WFE_SEV
 #define SP_WFE() __asm__ __volatile__ ("wfe" : : : "memory")
