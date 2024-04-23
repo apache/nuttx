@@ -72,6 +72,18 @@
 #  define CONFIG_SCHED_SPORADIC_MAXREPL 3
 #endif
 
+#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD
+#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD -1
+#endif
+
+#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION
+#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION -1
+#endif
+
+#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION
+#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION -1
+#endif
+
 /* Task Management Definitions **********************************************/
 
 /* Special task IDS.  Any negative PID is invalid. */
