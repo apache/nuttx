@@ -258,6 +258,16 @@
 
 #  define nosanitize_address __attribute__((no_sanitize_address))
 
+/* the Greenhills compiler do not support the following atttributes */
+
+#  if defined(__ghs__)
+#    undef nooptimiziation_function
+#    define nooptimiziation_function
+
+#    undef nosanitize_address
+#    define nosanitize_address
+#  endif
+
 /* The nosanitize_undefined attribute informs GCC don't sanitize it */
 
 #  define nosanitize_undefined __attribute__((no_sanitize("undefined")))
