@@ -155,7 +155,7 @@
 #define PLL_DIV_ODIV_MASK  (0xff << PLL_DIV_ODIV_SHIFT)
 #define PLL_DIV_ODIV(n)    (((n) << PLL_DIV_ODIV_SHIFT) & PLL_DIV_ODIV_MASK)
 #define PLL_DIV_RDIV_SHIFT (13) /* Bits 13-15: Input Clock Predivider */
-#define PLL_DIV_RDIV_MASK  (0xe << PLL_DIV_RDIV_SHIFT)
+#define PLL_DIV_RDIV_MASK  (0x7 << PLL_DIV_RDIV_SHIFT)
 #define PLL_DIV_RDIV(n)    (((n) << PLL_DIV_RDIV_SHIFT) & PLL_DIV_RDIV_MASK)
 #define PLL_DIV_MFI_SHIFT  (16) /* Bits 16-24: Integer Portion of Loop Divider */
 #define PLL_DIV_MFI_MASK   (0x1ff << PLL_DIV_MFI_SHIFT)

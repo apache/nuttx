@@ -99,6 +99,10 @@ void arm64_chip_boot(void)
 
   arm64_mmu_init(true);
 
+  /* Initialize system clocks to some sensible state */
+
+  imx9_clockconfig();
+
   /* Do UART early initialization & pin muxing */
 
 #ifdef CONFIG_IMX9_LPUART
