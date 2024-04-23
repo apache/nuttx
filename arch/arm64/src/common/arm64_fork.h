@@ -66,7 +66,7 @@
 #define FORK_REG_SP          (31) /* Stack pointer*/
 
 #ifdef CONFIG_ARCH_FPU
-#define FORK_REGS_SIZE       (32 + XCPTCONTEXT_FPU_REGS)
+#define FORK_REGS_SIZE       (32 + FPU_CONTEXT_REGS)
 #else
 #define FORK_REGS_SIZE       (32)
 #endif

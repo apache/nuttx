@@ -40,7 +40,7 @@
 
 /* Save Corruptible Registers and exception context
  * on the task stack
- * note: allocate stackframe with XCPTCONTEXT_GP_REGS
+ * note: allocate stackframe with ARM64_CONTEXT_REGS
  *     which is ARM64_ESF_REGS + ARM64_CS_REGS
  *     but only save ARM64_ESF_REGS
  */
@@ -92,7 +92,7 @@
     /* Save the FPU registers */
 
 #ifdef CONFIG_ARCH_FPU
-    add    x0, sp, #8 * XCPTCONTEXT_GP_REGS
+    add    x0, sp, #8 * ARM64_CONTEXT_REGS
     bl     arm64_fpu_save
     ldr    x0, [sp, #8 * REG_X0]
 #endif
@@ -250,7 +250,7 @@ SECTION_SUBSEC_FUNC(exc_vector_table,_vector_table_section,_vector_table)
 GTEXT(arm64_exit_exception)
 SECTION_FUNC(text, arm64_exit_exception)
 #ifdef CONFIG_ARCH_FPU
-    add    x0, sp, #8 * XCPTCONTEXT_GP_REGS
+    add    x0, sp, #8 * ARM64_CONTEXT_REGS
     bl     arm64_fpu_restore
 #endif
 
