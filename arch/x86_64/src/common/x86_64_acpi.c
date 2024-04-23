@@ -99,9 +99,9 @@ static void acpi_map_region(uintptr_t addr, size_t size)
 
 static void acpi_map_rsdt(void)
 {
-  void                *tps   = NULL;
-  uint32_t            *tp32  = NULL;
-  uint32_t            *end32 = NULL;
+  void     *tps   = NULL;
+  uint32_t *tp32  = NULL;
+  uint32_t *end32 = NULL;
 
   tps = &g_acpi.rsdt->table_ptrs;
   tp32  = (uint32_t *)tps;
@@ -128,11 +128,11 @@ static void acpi_map_rsdt(void)
 
 static void acpi_map_xsdt(void)
 {
-  void                *tps   = NULL;
-  uint64_t            *tp64  = NULL;
-  uint64_t            *end64 = NULL;
+  void     *tps   = NULL;
+  uint64_t *tp64  = NULL;
+  uint64_t *end64 = NULL;
 
-  tps = &g_acpi.rsdt->table_ptrs;
+  tps   = &g_acpi.rsdt->table_ptrs;
   tp64  = (uint64_t *)tps;
   end64 = (uint64_t *)((uintptr_t)g_acpi.xsdt + g_acpi.xsdt->sdt.length);
 
@@ -277,8 +277,7 @@ static bool acpi_rsdp_find_bios(struct acpi_s *acpi)
 
   while (now < end)
     {
-      if (strncmp(now, ACPI_SIG_RSDP,
-                  sizeof(ACPI_SIG_RSDP) - 1) == 0)
+      if (strncmp(now, ACPI_SIG_RSDP, sizeof(ACPI_SIG_RSDP) - 1) == 0)
         {
           acpi->rsdp = (struct acpi_rsdp_s *)now;
           break;
@@ -331,7 +330,7 @@ static int acpi_table64_find(const char *sig, struct acpi_sdt_s **sdt)
       /* Compare signature */
 
       tmp = (struct acpi_sdt_s *)(uintptr_t)*tp;
-      if (!strncmp(tmp->signature, sig, 4))
+      if (strncmp(tmp->signature, sig, 4) == 0)
         {
           *sdt = tmp;
           return OK;
@@ -368,7 +367,7 @@ static int acpi_table32_find(const char *sig, struct acpi_sdt_s **sdt)
       /* Compare signature */
 
       tmp = (struct acpi_sdt_s *)(uintptr_t)*tp;
-      if (!strncmp(tmp->signature, sig, 4))
+      if (strncmp(tmp->signature, sig, 4) == 0)
         {
           *sdt = tmp;
           return OK;
@@ -575,7 +574,7 @@ void acpi_dump(void)
 
   if (g_acpi.xsdt != 0)
     {
-      tps = &g_acpi.rsdt->table_ptrs;
+      tps   = &g_acpi.rsdt->table_ptrs;
       tp64  = (uint64_t *)tps;
       end64 = (uint64_t *)((uintptr_t)g_acpi.xsdt + g_acpi.xsdt->sdt.length);
 
@@ -594,7 +593,7 @@ void acpi_dump(void)
     }
   else
     {
-      tps = &g_acpi.rsdt->table_ptrs;
+      tps   = &g_acpi.rsdt->table_ptrs;
       tp32  = (uint32_t *)tps;
       end32 = (uint32_t *)((uintptr_t)g_acpi.rsdt + g_acpi.rsdt->sdt.length);
 
