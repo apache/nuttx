@@ -50,46 +50,15 @@
     }              \
   while (0)
 
-/****************************************************************************
- * Private Types
- ****************************************************************************/
+/* The base oscillator frequency is 24MHz */
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static uint32_t g_pll_freqs[] =
-{
-  [OSC_24M]          = 24000000U,   /* 24MHZ OSCILLATOR.     */
-  [ARM_PLL]          = 2000000000U, /* ARM PLL               */
-  [ARM_PLLOUT]       = 2000000000U, /* ARM PLL OUT           */
-  [SYS_PLL1_IN]      = 4000000000U, /* SYSTEM PLL1 IN        */
-  [SYS_PLL1PFD0_IN]  = 1000000000U, /* SYSTEM PLL1 PFD0 IN   */
-  [SYS_PLL1PFD0]     = 1000000000U, /* SYSTEM PLL1 PFD0      */
-  [SYS_PLL1PFD0DIV2] = 500000000U,  /* SYSTEM PLL1 PFD0 DIV2 */
-  [SYS_PLL1PFD1_IN]  = 800000000U,  /* SYSTEM PLL1 PFD1 IN   */
-  [SYS_PLL1PFD1]     = 800000000U,  /* SYSTEM PLL1 PFD1      */
-  [SYS_PLL1PFD1DIV2] = 400000000U,  /* SYSTEM PLL1 PFD1 DIV2 */
-  [SYS_PLL1PFD2_IN]  = 625000000U,  /* SYSTEM PLL1 PFD2 IN   */
-  [SYS_PLL1PFD2]     = 625000000U,  /* SYSTEM PLL1 PFD2      */
-  [SYS_PLL1PFD2DIV2] = 312500000U,  /* SYSTEM PLL1 PFD2 DIV2 */
-  [AUDIO_PLL1]       = 0U,          /* AUDIO PLL1            */
-  [AUDIO_PLL1OUT]    = 0U,          /* AUDIO PLL1 OUT        */
-  [DRAM_PLL]         = 1000000000U, /* DRAM PLL              */
-  [DRAM_PLLOUT]      = 1000000000U, /* DRAM PLL OUT          */
-  [VIDEO_PLL1]       = 0U,          /* VIDEO PLL1            */
-  [VIDEO_PLL1OUT]    = 0U,          /* VIDEO PLL1 OUT        */
-  [EXT]              = 0U           /* EXT                   */
-};
+#define XTAL_FREQ 24000000u
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 #ifdef CONFIG_IMX9_PLL
-
-#  error "Missing logic"
-
 static int pll_init(uintptr_t reg, bool frac, struct pll_parms *parm)
 {
   uint32_t val;
@@ -137,9 +106,9 @@ static int pll_init(uintptr_t reg, bool frac, struct pll_parms *parm)
 
 static int pll_pfd_init(uintptr_t reg, int pfd, struct pfd_parms *pfdparm)
 {
-  uintptr_t ctrl;
-  uintptr_t div;
-  uint32_t  val;
+  uint32_t ctrl;
+  uint32_t div;
+  uint32_t val;
 
   /* Determine the PFD register set */
 
@@ -196,6 +165,185 @@ static int pll_pfd_init(uintptr_t reg, int pfd, struct pfd_parms *pfdparm)
 
   return OK;
 }
+
+static uint32_t calculate_vco_freq(const struct pll_parms *parm, bool frac)
+{
+  /* Base clock is common for all VCO:s */
+
+  if (frac)
+    {
+      return (uint64_t)XTAL_FREQ * (parm->mfi * parm->mfd + parm->mfn) /
+             parm->mfd / parm->rdiv;
+    }
+  else
+    {
+      return (uint64_t)XTAL_FREQ * parm->mfi / parm->rdiv;
+    }
+}
+
+static uint32_t vco_freq_out(uintptr_t reg, bool frac)
+{
+  struct pll_parms parm;
+  uint32_t ctrl;
+  uint32_t status;
+  uint32_t div;
+
+  /* Check if the PLL on or off */
+
+  ctrl = getreg32(PLL_CTRL(reg));
+  if ((ctrl & PLL_CTRL_POWERUP) == 0)
+    {
+
+      return 0;
+    }
+
+  /* Check if the PLL is stable */
+
+  status = getreg32(PLL_PLL_STATUS(reg));
+  if ((status & PLL_PLL_STATUS_PLL_LOCK) == 0)
+    {
+
+      return 0;
+    }
+
+  /* Populate the integer and fractional PLL parameters */
+
+  div       = getreg32(PLL_DIV(reg));
+  parm.rdiv = (div & PLL_DIV_RDIV_MASK) >> PLL_DIV_RDIV_SHIFT;
+  parm.mfi  = (div & PLL_DIV_MFI_MASK) >> PLL_DIV_MFI_SHIFT;
+
+  /* RDIV values 0 and 1 both mean a divisor of 1 */
+
+  if (parm.rdiv == 0)
+    {
+      parm.rdiv = 1;
+    }
+
+  if (frac)
+    {
+      /* Fill the fractional parameters */
+
+      parm.mfn   = getreg32(PLL_NUMERATOR(reg)) & PLL_NUMERATOR_MFN_MASK;
+      parm.mfn >>= PLL_NUMERATOR_MFN_SHIFT;
+      parm.mfd   = getreg32(PLL_DENOMINATOR(reg)) & PLL_DENOMINATOR_MFD_MASK;
+      parm.mfd >>= PLL_DENOMINATOR_MFD_SHIFT;
+    }
+
+  return calculate_vco_freq(&parm, frac);
+}
+
+static uint32_t pll_freq_out(uintptr_t reg, bool frac)
+{
+  uint32_t ctrl;
+  uint32_t div;
+  uint32_t vco;
+
+  /* Read the MUX control register and check if bypass mode is enabled */
+
+  ctrl = getreg32(PLL_CTRL(reg));
+  if (ctrl & PLL_CTRL_CLKMUX_BYPASS)
+    {
+      return XTAL_FREQ;
+    }
+
+  /* If the mux is disabled output frequency is 0 */
+
+  if ((ctrl & PLL_CTRL_CLKMUX_EN) == 0)
+    {
+
+      return 0;
+    }
+
+  /* Get input VCO frequency */
+
+  vco = vco_freq_out(reg, frac);
+  if (vco == 0)
+    {
+      /* The VCO is off or unstable */
+
+      return 0;
+    }
+
+  /* Calculate the output clock divider */
+
+  div = (getreg32(PLL_DIV(reg)) & PLL_DIV_ODIV_MASK) >> PLL_DIV_ODIV_SHIFT;
+
+  /* According to spec, div0 = 2 and div1 = 3 */
+
+  if (div == 0)
+    {
+      div = 2;
+    }
+  else if (div == 1)
+    {
+      div = 3;
+    }
+
+  return vco / div;
+}
+
+static uint32_t pll_pfd_freq_out(uintptr_t reg, int pfd, int div2)
+{
+  struct pfd_parms parm;
+  uint32_t ctrl;
+  uint32_t div;
+  uint32_t vco;
+
+  /* Read the correct PFD register set */
+
+  switch (pfd)
+    {
+      case 0:
+        ctrl = getreg32(PLL_DFS_CTRL_0(reg));
+        div  = getreg32(PLL_DFS_DIV_0(reg));
+        break;
+
+      case 1:
+        ctrl = getreg32(PLL_DFS_CTRL_1(reg));
+        div  = getreg32(PLL_DFS_DIV_1(reg));
+        break;
+
+      case 2:
+        ctrl = getreg32(PLL_DFS_CTRL_2(reg));
+        div  = getreg32(PLL_DFS_DIV_2(reg));
+        break;
+
+      default:
+        return 0;
+    }
+
+  /* Get input VCO frequency */
+
+  vco = vco_freq_out(reg, true);
+  if (vco == 0)
+    {
+      /* The VCO is off or unstable */
+
+      return 0;
+    }
+
+  /* If the DFS part is bypassed, the output is the VCO directly */
+
+  if (ctrl & PLL_DFS_BYPASS_EN)
+    {
+      return vco;
+    }
+
+  /* Check if the DFS part is disabled */
+
+  if ((ctrl & PLL_DFS_ENABLE) == 0)
+    {
+      return 0;
+    }
+
+  /* Populate the DFS parameters */
+
+   parm.mfi = (div & PLL_DFS_MFI_MASK) >> PLL_DFS_MFI_SHIFT;
+   parm.mfn = (div & PLL_DFS_MFN_MASK) >> PLL_DFS_MFN_SHIFT;
+
+   return ((uint64_t)vco * 5) / (parm.mfi * 5 + parm.mfn) / div2;
+}
+
 #endif
 
 /****************************************************************************
@@ -260,13 +408,60 @@ void imx9_clockconfig(void)
 
 int imx9_get_clock(int clkname, uint32_t *frequency)
 {
-  if (clkname >= EXT)
+  switch (clkname)
     {
-      *frequency = 0;
-      return -ENODEV;
+      case OSC_24M:
+        *frequency = XTAL_FREQ;
+        break;
+
+      case ARM_PLL:
+        *frequency = pll_freq_out(IMX9_ARMPLL_BASE, false);
+        break;
+
+      case SYS_PLL1_IN:
+        *frequency = pll_freq_out(IMX9_SYSPLL_BASE, false);
+        break;
+
+      case SYS_PLL1PFD0:
+        *frequency = pll_pfd_freq_out(IMX9_SYSPLL_BASE, 0, 1);
+        break;
+
+      case SYS_PLL1PFD0DIV2:
+        *frequency = pll_pfd_freq_out(IMX9_SYSPLL_BASE, 0, 2);
+        break;
+
+      case SYS_PLL1PFD1:
+        *frequency = pll_pfd_freq_out(IMX9_SYSPLL_BASE, 1, 1);
+        break;
+
+      case SYS_PLL1PFD1DIV2:
+        *frequency = pll_pfd_freq_out(IMX9_SYSPLL_BASE, 1, 2);
+        break;
+
+      case SYS_PLL1PFD2:
+        *frequency = pll_pfd_freq_out(IMX9_SYSPLL_BASE, 2, 1);
+        break;
+
+      case SYS_PLL1PFD2DIV2:
+        *frequency = pll_pfd_freq_out(IMX9_SYSPLL_BASE, 2, 2);
+        break;
+
+      case AUDIO_PLL1OUT:
+        *frequency = pll_freq_out(IMX9_AUDIOPLL_BASE, true);
+        break;
+
+      case DRAM_PLLOUT:
+        *frequency = pll_freq_out(IMX9_DRAMPLL_BASE, true);
+        break;
+
+      case VIDEO_PLL1OUT:
+        *frequency = pll_freq_out(IMX9_VIDEOPLL_BASE, true);
+        break;
+
+      default:
+        return -ENODEV;
     }
 
-  *frequency = g_pll_freqs[clkname];
   return OK;
 }
 
