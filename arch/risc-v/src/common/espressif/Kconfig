@@ -869,6 +869,21 @@ config ESPRESSIF_SPI_UDCS
 
 if ESPRESSIF_SPI2
 
+config ESPRESSIF_SPI2_SLAVE
+	bool "SPI2 Slave mode"
+	default n
+	depends on SPI_SLAVE
+	select ESPRESSIF_GPIO_IRQ
+	---help---
+		Configure SPI2 to operate in Slave mode.
+
+config ESPRESSIF_SPI2_SLAVE_BUFSIZE
+	int "SPI2 Slave buffer size"
+	default 2048
+	depends on ESPRESSIF_SPI2_SLAVE
+	---help---
+		Configure the size of SPI2 Slave controller's internal buffers.
+
 config ESPRESSIF_SPI2_CSPIN
 	int "SPI2 CS Pin"
 	default 10
