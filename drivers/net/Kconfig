@@ -610,6 +610,9 @@ config ETH0_PHY_LAN8740A
 config ETH0_PHY_LAN8742A
 	bool "SMSC LAN8742A PHY"
 
+config ETH0_PHY_RTL8211F
+	bool "Realtek RTL8211F PHY"
+
 config ETH0_PHY_DM9161
 	bool "Davicom DM9161 PHY"
 
@@ -662,6 +665,9 @@ config ETH1_PHY_TJA1101
 
 config ETH1_PHY_LAN8720
 	bool "SMSC LAN8720 PHY"
+
+config ETH1_PHY_RTL8211F
+	bool "Realtek RTL8211F PHY"
 
 config ETH1_PHY_DM9161
 	bool "Davicom DM9161 PHY"
