@@ -128,7 +128,7 @@ static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
 
               /* Yes.. We can extend this buffer to the up to the very end. */
 
-              maxlen = CONFIG_IOB_BUFSIZE - iob->io_offset;
+              maxlen = IOB_BUFSIZE(iob) - iob->io_offset;
 
               /* This is the new buffer length that we need.  Of course,
                * clipped to the maximum possible size in this buffer.
