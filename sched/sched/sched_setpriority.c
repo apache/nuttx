@@ -312,7 +312,7 @@ static inline void nxsched_blocked_setpriority(FAR struct tcb_s *tcb,
                                                int sched_priority)
 {
   FAR dq_queue_t *tasklist;
-  tstate_t task_state = tcb->task_state;
+  tstate_t task_state = (tstate_t)tcb->task_state;
 
   /* CASE 3a. The task resides in a prioritized list. */
 
