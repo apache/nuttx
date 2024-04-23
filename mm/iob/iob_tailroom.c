@@ -48,5 +48,5 @@ unsigned int iob_tailroom(FAR struct iob_s *iob)
       iob = iob->io_flink;
     }
 
-  return CONFIG_IOB_BUFSIZE - (iob->io_offset + iob->io_len);
+  return IOB_BUFSIZE(iob) - (iob->io_offset + iob->io_len);
 }

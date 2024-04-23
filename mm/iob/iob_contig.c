@@ -57,7 +57,7 @@ int iob_contig(FAR struct iob_s *iob, unsigned int len)
    * then you will need to increase CONFIG_IOB_BUFSIZE.
    */
 
-  DEBUGASSERT(len <= CONFIG_IOB_BUFSIZE);
+  DEBUGASSERT(len <= IOB_BUFSIZE(iob));
 
   /* Check if there is already sufficient, contiguous space at the beginning
    * of the packet
