@@ -160,6 +160,7 @@
 #define AUDIO_FMT_MSBC              0x0e
 #define AUDIO_FMT_CVSD              0x0f
 #define AUDIO_FMT_AMR               0x10
+#define AUDIO_FMT_OPUS              0x11
 
 /* Audio Sub-Format Types ***************************************************/
 
