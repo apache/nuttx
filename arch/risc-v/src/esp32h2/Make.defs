@@ -20,3 +20,5 @@
 
 include common/Make.defs
 include common/espressif/Make.defs
+
+CFLAGS += ${DEFINE_PREFIX}_RETARGETABLE_LOCKING
