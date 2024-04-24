@@ -722,6 +722,7 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
 
   tcpiplen = iplen + TCP_HDRLEN;
 
+#ifdef CONFIG_NET_TCP_CHECKSUMS
   /* Start of TCP input header processing code. */
 
   if (tcp_chksum(dev) != 0xffff)
@@ -735,6 +736,7 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
       nwarn("WARNING: Bad TCP checksum\n");
       goto drop;
     }
+#endif
 
   /* Demultiplex this segment. First check any active connections. */
 

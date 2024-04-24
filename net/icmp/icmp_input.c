@@ -324,7 +324,7 @@ void icmp_input(FAR struct net_driver_s *dev)
       /* The quick way -- Since only the type has changed, just adjust the
        * checksum for the change of type
        */
-
+#ifdef CONFIG_NET_ICMP_CHECKSUMS
       if (icmp->icmpchksum >= HTONS(0xffff - (ICMP_ECHO_REQUEST << 8)))
         {
           icmp->icmpchksum += HTONS(ICMP_ECHO_REQUEST << 8) + 1;
@@ -333,6 +333,10 @@ void icmp_input(FAR struct net_driver_s *dev)
         {
           icmp->icmpchksum += HTONS(ICMP_ECHO_REQUEST << 8);
         }
+#else
+      icmp->icmpchksum = 0;
+#endif
+
 #endif
 
       ninfo("Outgoing ICMP packet length: %d (%d)\n",
