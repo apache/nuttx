@@ -102,8 +102,6 @@ set(ARCHCFLAGS "-Wstrict-prototypes")
 
 if(NOT CONFIG_LIBCXXTOOLCHAIN)
   set(ARCHCXXFLAGS "${ARCHCXXFLAGS} -nostdinc++")
-else()
-  set(ARCHCXXFLAGS "${ARCHCXXFLAGS} -D_STDLIB_H_")
 endif()
 
 if(NOT CONFIG_CXX_EXCEPTION)

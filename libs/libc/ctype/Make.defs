@@ -23,7 +23,7 @@
 CSRCS += lib_isalnum.c lib_isalpha.c lib_isascii.c lib_isblank.c
 CSRCS += lib_iscntrl.c lib_isdigit.c lib_isgraph.c lib_islower.c
 CSRCS += lib_isprint.c lib_ispunct.c lib_isspace.c lib_isupper.c
-CSRCS += lib_isxdigit.c lib_tolower.c lib_toupper.c
+CSRCS += lib_isxdigit.c lib_tolower.c lib_toupper.c lib_ctype.c
 
 DEPPATH += --dep-path ctype
 VPATH += :ctype

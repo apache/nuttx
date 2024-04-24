@@ -113,8 +113,6 @@ ARCHCXXFLAGS += -Wall -Wshadow -Wundef -Wno-attributes -Wno-unknown-pragmas
 
 ifneq ($(CONFIG_LIBCXXTOOLCHAIN),y)
   ARCHCXXFLAGS += -nostdinc++
-else
-  ARCHCXXFLAGS += -D_STDLIB_H_
 endif
 
 ifneq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
