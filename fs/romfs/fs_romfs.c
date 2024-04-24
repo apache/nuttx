@@ -605,6 +605,21 @@ static int romfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       strlcat(ptr, rf->rf_path, PATH_MAX);
       return OK;
     }
+  else if (cmd == FIOC_XIPBASE)
+    {
+      FAR struct romfs_mountpt_s *rm = filep->f_inode->i_private;
+      FAR uintptr_t *ptr = (FAR uintptr_t *)arg;
+
+      if (rm->rm_xipbase != 0)
+        {
+          *ptr = (uintptr_t)rm->rm_xipbase + rf->rf_startoffset;
+          return OK;
+        }
+      else
+        {
+          return -ENXIO;
+        }
+    }
 
   return -ENOTTY;
 }

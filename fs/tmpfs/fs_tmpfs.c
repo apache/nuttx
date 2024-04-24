@@ -1825,6 +1825,13 @@ static int tmpfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           return ret;
         }
     }
+  else if (cmd == FIOC_XIPBASE)
+    {
+      FAR uintptr_t *ptr = (FAR uintptr_t *)arg;
+
+      *ptr = (uintptr_t)tfo->tfo_data;
+      return OK;
+    }
 
   return ret;
 }
