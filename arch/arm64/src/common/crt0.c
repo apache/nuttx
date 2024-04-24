@@ -91,7 +91,7 @@ static void sig_trampoline(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: __start
+ * Name: _start
  *
  * Description:
  *   This function is the low level entry point into the main thread of
@@ -110,7 +110,7 @@ static void sig_trampoline(void)
  *
  ****************************************************************************/
 
-void __start(int argc, char *argv[])
+void _start(int argc, char *argv[])
 {
   int ret;
 
