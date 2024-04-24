@@ -381,6 +381,7 @@ static int ipv4_in(FAR struct net_driver_s *dev)
     }
 #endif
 
+#ifdef CONFIG_NET_IPV4_CHECKSUMS
   if (ipv4_chksum(IPv4BUF) != 0xffff)
     {
       /* Compute and check the IP header checksum. */
@@ -392,6 +393,7 @@ static int ipv4_in(FAR struct net_driver_s *dev)
       nwarn("WARNING: Bad IP checksum\n");
       goto drop;
     }
+#endif
 
 #ifdef CONFIG_NET_IPFILTER
   if (ipv4_filter_in(dev) != IPFILTER_TARGET_ACCEPT)

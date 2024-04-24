@@ -186,11 +186,14 @@ void icmpv6_reply(FAR struct net_driver_s *dev, int type, int code, int data)
   /* Calculate the ICMPv6 checksum over the ICMPv6 header and payload. */
 
   icmpv6->chksum = 0;
+
+#ifdef CONFIG_NET_ICMPv6_CHECKSUMS
   icmpv6->chksum = ~icmpv6_chksum(dev, IPv6_HDRLEN);
   if (icmpv6->chksum == 0)
     {
       icmpv6->chksum = 0xffff;
     }
+#endif
 
   ninfo("Outgoing ICMPv6 packet length: %d\n", dev->d_len);
 }
