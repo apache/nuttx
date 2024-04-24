@@ -310,10 +310,6 @@ config IMX9_LPSPI
 	bool "LPSPI support"
 	default n
 
-config IMX9_PLL
-	bool "PLL setup support"
-	default n
-
 menu "LPI2C Peripherals"
 
 menuconfig IMX9_LPI2C1

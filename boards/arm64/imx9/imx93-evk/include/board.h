@@ -88,6 +88,39 @@
 #define MUX_LPSPI6_CS        IOMUX_CFG(IOMUXC_PAD_GPIO_IO00_GPIO2_IO00,  IOMUX_GPIO_DEFAULT, IOMUXC_MUX_SION_ON)
 #define GPIO_LPSPI6_CS       (GPIO_PORT2 | GPIO_PIN0 | GPIO_OUTPUT | GPIO_OUTPUT_ONE)
 
+/* Set the PLL clocks as follows:
+ *
+ * - OSC24M       : 24   MHz
+ * - ARMPLL_OUT   : 1692 MHz
+ * - DRAMPLL      : 933  MHz
+ * - SYSPLL1      : 4000 MHz
+ * - SYSPLL_PFD0  : 1000 MHz
+ * - SYSPLL_PFD1  : 800  MHz
+ * - SYSPLL_PFD2  : 625  MHz
+ * - AUDIOPLL_OUT : OFF
+ * - VIDEOPLL_OUT : OFF
+ *
+ * After reset all clock sources (OSCPLL) and root clocks (CLOCK_ROOT) are
+ * running, but gated (LPCG).
+ *
+ * By default, all peripheral root clocks are set to the 24 MHz oscillator.
+ */
+
+#define ARMPLL_CFG  PLL_CFG(IMX9_ARMPLL_BASE, false, PLL_PARMS(1, 2, 141, 0, 0))
+#define DRAMPLL_CFG PLL_CFG(IMX9_DRAMPLL_BASE, true, PLL_PARMS(1, 2, 155, 1, 2))
+
+#define PLL_CFGS \
+  { \
+    PLL_CFG(IMX9_SYSPLL_BASE,  true, PLL_PARMS(1, 4, 166, 2, 3)), \
+  }
+
+#define PFD_CFGS \
+  { \
+    PFD_CFG(IMX9_SYSPLL_BASE, 0, PFD_PARMS(4, 0, true)), \
+    PFD_CFG(IMX9_SYSPLL_BASE, 1, PFD_PARMS(5, 0, true)), \
+    PFD_CFG(IMX9_SYSPLL_BASE, 2, PFD_PARMS(6, 2, true)), \
+  }
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
