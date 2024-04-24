@@ -54,6 +54,10 @@ ifeq ($(CONFIG_MTD_W25QXXXJV),y)
 CSRCS += stm32_w25q.c
 endif
 
+ifeq ($(CONFIG_USBMSC),y)
+CSRCS += stm32_usbmsc.c
+endif
+
 ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += stm32_appinitialize.c
 endif
