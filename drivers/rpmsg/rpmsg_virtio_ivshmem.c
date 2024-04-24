@@ -149,8 +149,7 @@ rpmsg_virtio_ivshmem_get_resource(FAR struct rpmsg_virtio_s *dev)
       memset(priv->shmem, 0, priv->shmem_size);
       rsc->rpmsg_vdev.id            = VIRTIO_ID_RPMSG;
       rsc->rpmsg_vdev.dfeatures     = 1 << VIRTIO_RPMSG_F_NS |
-                                      1 << VIRTIO_RPMSG_F_ACK |
-                                      1 << VIRTIO_RPMSG_F_BUFSZ;
+                                      1 << VIRTIO_RPMSG_F_ACK;
       rsc->rpmsg_vdev.config_len    = sizeof(struct fw_rsc_config);
       rsc->rpmsg_vdev.num_of_vrings = 2;
       rsc->rpmsg_vring0.da          = 0;
