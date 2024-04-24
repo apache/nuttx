@@ -227,6 +227,8 @@ static int lpc17_40_i2c_start(struct lpc17_40_i2cdev_s *priv)
   uint32_t timeout;
   int i;
 
+  nxsem_reset(&priv->wait, 0);
+
   putreg32(I2C_CONCLR_STAC | I2C_CONCLR_SIC,
            priv->base + LPC17_40_I2C_CONCLR_OFFSET);
   putreg32(I2C_CONSET_STA, priv->base + LPC17_40_I2C_CONSET_OFFSET);
