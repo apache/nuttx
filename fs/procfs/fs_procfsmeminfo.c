@@ -293,7 +293,7 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
   /* The first line is the headers */
 
   linesize  = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
-                              "%13s%11s%11s%11s%11s%11s%7s%7s\n", "",
+                              "%11s%11s%11s%11s%11s%11s%7s%7s\n", "",
                               "total", "used", "free", "maxused",
                               "maxfree", "nused", "nfree");
 
@@ -318,7 +318,7 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
 
           info      = mm_mallinfo(entry->heap);
           linesize   = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
-                                       "%12s:%11lu%11lu%11lu%11lu%11lu"
+                                       "%10s:%11lu%11lu%11lu%11lu%11lu"
                                        "%7lu%7lu\n", entry->name,
                                        (unsigned long)info.arena,
                                        (unsigned long)info.uordblks,
@@ -355,7 +355,7 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
       max        = (unsigned long)pg_info.mxfree << MM_PGSHIFT;
 
       linesize   = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
-                                   "%12s:%11lu%11lu%11lu%11lu\n",
+                                   "%10s:%11lu%11lu%11lu%11lu\n",
                                    "Page", total, allocated, available, max);
 
       copysize   = procfs_memcpy(procfile->line, linesize, buffer, buflen,
@@ -377,7 +377,7 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
       meminfo_progmem(&progmem);
 
       linesize   = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
-                                   "%12s:%11lu%11lu%11lu%11lu%7lu%7lu\n",
+                                   "%10s:%11lu%11lu%11lu%11lu%7lu%7lu\n",
                                    "Prog",
                                    (unsigned long)progmem.arena,
                                    (unsigned long)progmem.uordblks,
