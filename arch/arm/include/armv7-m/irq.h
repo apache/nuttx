@@ -440,7 +440,7 @@ static inline void up_irq_enable(void)
 {
   /* In this case, we are always retaining or lowering the priority value */
 
-  setbasepri(NVIC_SYSH_PRIORITY_MIN);
+  setbasepri(0);
   __asm__ __volatile__ ("\tcpsie  i\n");
 }
 
