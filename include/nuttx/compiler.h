@@ -87,6 +87,15 @@
 #  define CONFIG_HAVE_CXX14 1
 #endif
 
+/* Green Hills Software definitions *****************************************/
+
+#if defined(__ghs__)
+
+#  pragma weak __gh_long_long_printf
+#  pragma weak __gh_float_printf
+
+#endif
+
 /* GCC-specific definitions *************************************************/
 
 #ifdef __GNUC__
