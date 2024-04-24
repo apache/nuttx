@@ -277,6 +277,10 @@ if [ -z "${appdir}" ]; then
 
   if [ -d "${TOPDIR}/../apps" ]; then
     appdir="../apps"
+  elif [ -d "${TOPDIR}/../nuttx-apps" ]; then
+    appdir="../nuttx-apps"
+  elif [ -d "${TOPDIR}/../nuttx-apps.git" ]; then
+    appdir="../nuttx-apps.git"
   else
     # Check for a versioned apps/ directory
 
