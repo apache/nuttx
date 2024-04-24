@@ -67,11 +67,13 @@
  * Private Functions
  ****************************************************************************/
 
+#ifdef CONFIG_NET_IGMP_CHECKSUMS
 static uint16_t igmp_chksum(FAR uint8_t *buffer, int buflen)
 {
   uint16_t sum = net_chksum((FAR uint16_t *)buffer, buflen);
   return sum ? sum : 0xffff;
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -157,7 +159,10 @@ void igmp_send(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group,
   /* Calculate the IGMP checksum. */
 
   igmp->chksum      = 0;
+
+#ifdef CONFIG_NET_IGMP_CHECKSUMS
   igmp->chksum      = ~igmp_chksum(&igmp->type, IGMP_HDRLEN);
+#endif
 
   IGMP_STATINCR(g_netstats.igmp.poll_send);
   IGMP_STATINCR(g_netstats.ipv4.sent);

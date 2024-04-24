@@ -45,6 +45,12 @@ config NET_ICMPv6_SOCKET
 		for application level support for sending ICMPv7 ECHO requests and
 		receiving associated ICMPv6 ECHO replies.
 
+config NET_ICMPv6_CHECKSUMS
+	bool "ICMPv6 checksums"
+	default y
+	---help---
+		Enable/disable ICMPv6 checksum support.
+
 config NET_ICMPv6_NEIGHBOR
 	bool "Solicit destination addresses"
 	default n
