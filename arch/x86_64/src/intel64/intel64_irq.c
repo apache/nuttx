@@ -564,3 +564,29 @@ int up_prioritize_irq(int irq, int priority)
   return OK;
 }
 #endif
+
+/****************************************************************************
+ * Name: up_trigger_irq
+ *
+ * Description:
+ *   Trigger IRQ interrupt.
+ *
+ ****************************************************************************/
+
+void up_trigger_irq(int irq, cpu_set_t cpuset)
+{
+  uint32_t cpu = 0;
+
+  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
+    {
+      if (CPU_ISSET(cpu, &cpuset))
+        {
+          write_msr(MSR_X2APIC_ICR,
+                    MSR_X2APIC_ICR_FIXED |
+                    MSR_X2APIC_ICR_ASSERT |
+                    MSR_X2APIC_DESTINATION(
+                      (uint64_t)x86_64_cpu_to_loapic(cpu)) |
+                    irq);
+        }
+    }
+}
