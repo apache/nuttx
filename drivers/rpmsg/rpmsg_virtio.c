@@ -32,6 +32,7 @@
 #include <nuttx/kthread.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/rpmsg/rpmsg_virtio.h>
+#include <rpmsg/rpmsg_internal.h>
 
 /****************************************************************************
  * Pre-processor Definitions
