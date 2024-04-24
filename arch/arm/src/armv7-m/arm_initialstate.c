@@ -163,7 +163,7 @@ void up_initial_state(struct tcb_s *tcb)
 #else /* CONFIG_SUPPRESS_INTERRUPTS */
 
 #ifdef CONFIG_ARMV7M_USEBASEPRI
-  xcp->regs[REG_BASEPRI] = NVIC_SYSH_PRIORITY_MIN;
+  xcp->regs[REG_BASEPRI] = 0;
 #endif
 
 #endif /* CONFIG_SUPPRESS_INTERRUPTS */
