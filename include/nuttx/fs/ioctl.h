@@ -226,6 +226,9 @@
 #define FIOC_SETLKW         _FIOC(0x0014) /* IN:  Pointer to flock
                                            * OUT: None
                                            */
+#define FIOC_XIPBASE        _FIOC(0x0015) /* IN:  uinptr_t *
+                                           * OUT: Current file xip base address
+                                           */
 
 /* NuttX file system ioctl definitions **************************************/
 
