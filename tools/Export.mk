@@ -100,6 +100,11 @@ endif
 ifdef CONFIG_BUILD_KERNEL
 	@echo "NUTTX_BUILD=\"kernel\"" >> $(EXPORTDIR)/makeinfo.sh
 endif
+ifdef CONFIG_LIBCXX
+	@echo "NUTTX_CXX=\"libcxx\"" >> $(EXPORTDIR)/makeinfo.sh
+else
+	@echo "NUTTX_CXX=\"cxx\"" >> $(EXPORTDIR)/makeinfo.sh
+endif
 	$(Q) chmod 755 $(EXPORTDIR)/makeinfo.sh
 
 clean:
