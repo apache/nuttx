@@ -523,7 +523,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
        * must be unblocked when a signal is received.
        */
 
-      if (stcb->task_state == TSTATE_WAIT_MQNOTEMPTY ||
+      else if (stcb->task_state == TSTATE_WAIT_MQNOTEMPTY ||
           stcb->task_state == TSTATE_WAIT_MQNOTFULL)
         {
           nxmq_wait_irq(stcb, EINTR);
@@ -535,7 +535,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
        * if SIGCONT is received.
        */
 
-      if (stcb->task_state == TSTATE_TASK_STOPPED &&
+      else if (stcb->task_state == TSTATE_TASK_STOPPED &&
           info->si_signo == SIGCONT)
         {
 #ifdef HAVE_GROUP_MEMBERS
