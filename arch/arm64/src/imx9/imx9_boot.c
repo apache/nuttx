@@ -39,6 +39,7 @@
 #include "arm64_mmu.h"
 
 #include "imx9_boot.h"
+#include "imx9_clockconfig.h"
 #include "imx9_serial.h"
 #include "imx9_gpio.h"
 #include "imx9_lowputc.h"

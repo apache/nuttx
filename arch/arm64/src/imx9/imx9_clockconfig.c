@@ -30,6 +30,8 @@
 #include <sys/param.h>
 #include <sys/types.h>
 
+#include <arch/board/board.h>
+
 #include "barriers.h"
 
 #include "arm64_internal.h"
@@ -42,6 +44,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* The base oscillator frequency is 24MHz */
+
+#define XTAL_FREQ 24000000u
+
+/* Common barrier */
+
 #define mb()       \
   do               \
     {              \
@@ -50,16 +58,12 @@
     }              \
   while (0)
 
-/* The base oscillator frequency is 24MHz */
-
-#define XTAL_FREQ 24000000u
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-#ifdef CONFIG_IMX9_PLL
-static int pll_init(uintptr_t reg, bool frac, struct pll_parms *parm)
+#ifdef CONFIG_IMX9_BOOTLOADER
+static int pll_init(uintptr_t reg, bool frac, struct pll_parms_s *parm)
 {
   uint32_t val;
 
@@ -104,7 +108,7 @@ static int pll_init(uintptr_t reg, bool frac, struct pll_parms *parm)
   return OK;
 }
 
-static int pll_pfd_init(uintptr_t reg, int pfd, struct pfd_parms *pfdparm)
+static int pll_pfd_init(uintptr_t reg, int pfd, struct pfd_parms_s *pfdparm)
 {
   uint32_t ctrl;
   uint32_t div;
@@ -136,12 +140,13 @@ static int pll_pfd_init(uintptr_t reg, int pfd, struct pfd_parms *pfdparm)
   /* Bypass and disable DFS */
 
   putreg32(PLL_DFS_BYPASS_EN, PLL_SET(ctrl));
-  putreg32(PLL_DFS_CLKOUT_EN | PLL_DFS_ENABLE, PLL_CLR(ctrl));
+  putreg32(PLL_DFS_CLKOUT_EN | PLL_DFS_CLKOUT_DIVBY2_EN | PLL_DFS_ENABLE,
+           PLL_CLR(ctrl));
 
   /* Set the divider */
 
   val = PLL_DFS_MFI(pfdparm->mfi) | PLL_DFS_MFN(pfdparm->mfn);
-  putreg32(val, PLL_SET(div));
+  putreg32(val, PLL_VAL(div));
 
   /* Enable (or disable) the divby2 output */
 
@@ -163,10 +168,16 @@ static int pll_pfd_init(uintptr_t reg, int pfd, struct pfd_parms *pfdparm)
 
   while (!(getreg32(PLL_DFS_STATUS(reg)) & (1 << pfd)));
 
+  /* Then disable bypass */
+
+  putreg32(PLL_DFS_BYPASS_EN, PLL_CLR(ctrl));
+  mb();
+
   return OK;
 }
+#endif
 
-static uint32_t calculate_vco_freq(const struct pll_parms *parm, bool frac)
+static uint32_t calculate_vco_freq(const struct pll_parms_s *parm, bool frac)
 {
   /* Base clock is common for all VCO:s */
 
@@ -183,7 +194,7 @@ static uint32_t calculate_vco_freq(const struct pll_parms *parm, bool frac)
 
 static uint32_t vco_freq_out(uintptr_t reg, bool frac)
 {
-  struct pll_parms parm;
+  struct pll_parms_s parm;
   uint32_t ctrl;
   uint32_t status;
   uint32_t div;
@@ -193,7 +204,6 @@ static uint32_t vco_freq_out(uintptr_t reg, bool frac)
   ctrl = getreg32(PLL_CTRL(reg));
   if ((ctrl & PLL_CTRL_POWERUP) == 0)
     {
-
       return 0;
     }
 
@@ -202,7 +212,6 @@ static uint32_t vco_freq_out(uintptr_t reg, bool frac)
   status = getreg32(PLL_PLL_STATUS(reg));
   if ((status & PLL_PLL_STATUS_PLL_LOCK) == 0)
     {
-
       return 0;
     }
 
@@ -250,7 +259,6 @@ static uint32_t pll_freq_out(uintptr_t reg, bool frac)
 
   if ((ctrl & PLL_CTRL_CLKMUX_EN) == 0)
     {
-
       return 0;
     }
 
@@ -284,7 +292,7 @@ static uint32_t pll_freq_out(uintptr_t reg, bool frac)
 
 static uint32_t pll_pfd_freq_out(uintptr_t reg, int pfd, int div2)
 {
-  struct pfd_parms parm;
+  struct pfd_parms_s parm;
   uint32_t ctrl;
   uint32_t div;
   uint32_t vco;
@@ -338,13 +346,11 @@ static uint32_t pll_pfd_freq_out(uintptr_t reg, int pfd, int div2)
 
   /* Populate the DFS parameters */
 
-   parm.mfi = (div & PLL_DFS_MFI_MASK) >> PLL_DFS_MFI_SHIFT;
-   parm.mfn = (div & PLL_DFS_MFN_MASK) >> PLL_DFS_MFN_SHIFT;
+  parm.mfi = (div & PLL_DFS_MFI_MASK) >> PLL_DFS_MFI_SHIFT;
+  parm.mfn = (div & PLL_DFS_MFN_MASK) >> PLL_DFS_MFN_SHIFT;
 
-   return ((uint64_t)vco * 5) / (parm.mfi * 5 + parm.mfn) / div2;
+  return ((uint64_t)vco * 5) / (parm.mfi * 5 + parm.mfn) / div2;
 }
-
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -362,29 +368,34 @@ static uint32_t pll_pfd_freq_out(uintptr_t reg, int pfd, int div2)
 
 void imx9_clockconfig(void)
 {
-  /* REVISIT: Define a clock config and run it. For now we rely on the fact
-   * that the boot code + bootloader will have set us up.
-   *
-   * During boot the ROM code initializes the PLL clocks as follows:
-   *
-   * - OSC24M       : 24   MHz
-   * - ARMPLL       : 2000 MHz
-   * - ARMPLL_OUT   : 2000 MHz
-   * - DRAMPLL      : 1000 MHz
-   * - SYSPLL1      : 4000 MHz
-   * - SYSPLL_PFD0  : 1000 MHz
-   * - SYSPLL_PFD1  : 800  MHz
-   * - SYSPLL_PFD2  : 625  MHz
-   * - AUDIOPLL     : OFF
-   * - AUDIOPLL_OUT : OFF
-   * - VIDEOPLL     : OFF
-   * - VIDEOPLL_OUT : OFF
-   *
-   * After reset all clock sources (OSCPLL) and root clocks (CLOCK_ROOT) are
-   * running, but gated (LPCG).
-   *
-   * By default, all peripheral root clocks are set to the 24 MHz oscillator.
-   */
+#ifdef CONFIG_IMX9_BOOTLOADER
+  struct imx9_pll_cfg_s pll_cfgs[] = PLL_CFGS;
+  struct imx9_pfd_cfg_s pfd_cfgs[] = PFD_CFGS;
+  struct imx9_pll_cfg_s pll_arm    = ARMPLL_CFG;
+  int i;
+
+  /* Set the CPU clock */
+
+  putreg32(IMX9_CCM_GPR_SH_CLR(CCM_SHARED_A55_CLK), CCM_GPR_A55_CLK_SEL_PLL);
+  pll_init(pll_arm.reg, pll_arm.frac, &pll_arm.parms);
+  putreg32(IMX9_CCM_GPR_SH_SET(CCM_SHARED_A55_CLK), CCM_GPR_A55_CLK_SEL_PLL);
+
+  /* Run the PLL configuration */
+
+  for (i = 0; i < nitems(pll_cfgs); i++)
+    {
+      struct imx9_pll_cfg_s *cfg = &pll_cfgs[i];
+      pll_init(cfg->reg, cfg->frac, &cfg->parms);
+    }
+
+  /* Run the PFD configuration */
+
+  for (i = 0; i < nitems(pfd_cfgs); i++)
+    {
+      struct imx9_pfd_cfg_s *cfg = &pfd_cfgs[i];
+      pll_pfd_init(cfg->reg, cfg->pfd, &cfg->parms);
+    }
+#endif
 }
 
 /****************************************************************************

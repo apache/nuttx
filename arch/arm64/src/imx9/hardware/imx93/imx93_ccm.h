@@ -168,6 +168,10 @@
 
 #define CCM_GPR_SH_GPR_SHIFT              (0)       /* Bits 0-31:  General purpose register, shared for all CPU domains (GPR) */
 #define CCM_GPR_SH_GPR_MASK               (0xffffffff << CCM_GPR_SH_GPR_SHIFT)
+#define CCM_GPR_A55_CLK_SEL_SHIFT         (0)
+#define CCM_GPR_A55_CLK_SEL_MASK          (0x01 << CCM_GPR_A55_CLK_SEL_SHIFT)
+#define CCM_GPR_A55_CLK_SEL_CCM           (0 << 0)
+#define CCM_GPR_A55_CLK_SEL_PLL           (1 << 0)
 
 /* General Purpose Register (GPR_SHAREDn_AUTHEN, n=0..7) */
 
@@ -560,6 +564,12 @@
 #define CCM_LPCG_TSTMR2         124
 #define CCM_LPCG_TMC            125
 #define CCM_LPCG_PMRO           126
+
+/* Shared register indices */
+
+#define CCM_SHARED_EXT_CLK      0
+#define CCM_SHARED_A55_CLK      1
+#define CCM_SHARED_DRAM_CLK     2
 
 /* Other parameters */
 

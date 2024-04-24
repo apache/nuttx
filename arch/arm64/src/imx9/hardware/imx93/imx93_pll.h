@@ -175,7 +175,7 @@
 #define PLL_DFS_MFN_MASK         (0x7 << PLL_DFS_MFN_SHIFT)
 #define PLL_DFS_MFN(n)           (((n) << PLL_DFS_MFN_SHIFT) & PLL_DFS_MFN_MASK)
 #define PLL_DFS_MFI_SHIFT        (8) /* Bits 8-15: MFI */
-#define PLL_DFS_MFI_MASK         (0xFF << PLL_DFS_MFI_SHIFT)
+#define PLL_DFS_MFI_MASK         (0xff << PLL_DFS_MFI_SHIFT)
 #define PLL_DFS_MFI(n)           (((n) << PLL_DFS_MFI_SHIFT) & PLL_DFS_MFI_MASK)
 
 /* PLL Dividers (DIV) */
@@ -191,36 +191,5 @@
 #define PLL_DFS_STATUS_DFS_OK_SHIFT (0) /* Bits 0-2: DFS OK status */
 #define PLL_DFS_STATUS_DFS_OK_MASK  (0x7 << PLL_DFS_STATUS_DFS_OK_SHIFT)
 #define PLL_DFS_STATUS_DFS_OK(n)    (((n) << PLL_DFS_STATUS_DFS_OK_SHIFT) & PLL_DFS_STATUS_DFS_OK_MASK)
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-struct pll_parms
-{
-  /* Integer part (DIV) */
-
-  struct
-  {
-    uint32_t rdiv; /* Input clock divider */
-    uint32_t odiv; /* PLL output divider */
-    uint32_t mfi;  /* PLL integer divider */
-  };
-
-  /* Fractional part (NUMERATOR / DENOMINATOR) */
-
-  struct
-  {
-    uint32_t mfn;  /* PLL fractional divider numerator */
-    uint32_t mfd;  /* PLL fractional divider denominator */
-  };
-};
-
-struct pfd_parms
-{
-  uint32_t mfi;       /* PLL integer divider */
-  uint32_t mfn;       /* PLL fractional divider numerator */
-  bool     divby2_en; /* Enable the divide-by-2 output */
-};
 
 #endif /* __ARCH_ARM64_SRC_IMX9_HARDWARE_IMX93_IMX93_PLL_H_*/
