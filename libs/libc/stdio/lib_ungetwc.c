@@ -70,7 +70,7 @@ wint_t ungetwc_unlocked(wint_t wc, FAR FILE *f)
 
   /* Try conversion early so we can fail without locking if invalid */
 
-  if ((l = wctomb(mbc, wc)) < 0)
+  if ((l = wctomb(mbc, wc)) <= 0)
     {
       return WEOF;
     }
