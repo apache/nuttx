@@ -41,7 +41,7 @@ config RPMSG_VIRTIO_STACKSIZE
 config RPMSG_VIRTIO_IVSHMEM
 	bool "rpmsg virtio ivshmem support"
 	default n
-	depends on PCI
+	depends on PCI_IVSHMEM
 	---help---
 		This is rpmsg virtio driver based on pci ivshmem.
 
@@ -50,11 +50,11 @@ if RPMSG_VIRTIO_IVSHMEM
 config RPMSG_VIRTIO_IVSHMEM_NAME
 	string "rpmsg virtio ivshmem name"
 	---help---
-		Using this config to custom the rpmsg virtio ivshmem cpuname and role,
+		Using this config to custom the rpmsg virtio ivshmem id, cpuname and role,
 		using ";" to split the names.
-		For example, if RPMSG_VIRTIO_IVSHMEM_CPUNAME = "cpu1:m;cpu2:s" and pass
+		For example, if RPMSG_VIRTIO_IVSHMEM_CPUNAME = "0:cpu1:m;1:cpu2:s" and pass
 		two ivshmem devices to the qemu, we will get two rpmsg virtio ivshmem drivers
-		with remote cpu names: "cpu1", "cpu2", and roles: "master", "slave"
+		with remote cpu ids: "0","1", names: "cpu1", "cpu2", and roles: "master", "slave"
 
 config RPMSG_VIRTIO_IVSHMEM_BUFFSIZE
 	int "rpmsg virtio ivshmem rpmsg buffer size"

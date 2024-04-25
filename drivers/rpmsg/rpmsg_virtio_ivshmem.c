@@ -29,7 +29,7 @@
 #include <stdio.h>
 
 #include <nuttx/drivers/addrenv.h>
-#include <nuttx/pci/pci.h>
+#include <nuttx/pci/pci_ivshmem.h>
 #include <nuttx/rpmsg/rpmsg_virtio.h>
 #include <nuttx/rpmsg/rpmsg_virtio_ivshmem.h>
 
@@ -37,8 +37,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define RPMSG_VIRTIO_IVSHMEM_SHMEM_BAR     2
-#define RPMSG_VIRTIO_IVSHMEM_READY         0x1
+#define rpmsg_virtio_ivshmem_from(dev) \
+  container_of(ivshmem_get_driver(dev), struct rpmsg_virtio_ivshmem_dev_s, drv)
+
 #define RPMSG_VIRTIO_IVSHMEM_WORK_DELAY    1
 
 #define RPMSG_VIRTIO_VRING_ALIGNMENT       8
@@ -60,6 +61,8 @@ struct rpmsg_virtio_ivshmem_mem_s
 struct rpmsg_virtio_ivshmem_dev_s
 {
   struct rpmsg_virtio_s                  dev;
+  struct ivshmem_driver_s                drv;
+  FAR struct ivshmem_device_s           *ivdev;
   rpmsg_virtio_callback_t                callback;
   FAR void                              *arg;
   uint32_t                               seq;
@@ -91,9 +94,8 @@ static int
 rpmsg_virtio_ivshmem_register_callback(FAR struct rpmsg_virtio_s *dev,
                                        rpmsg_virtio_callback_t callback,
                                        FAR void *arg);
-
-static int rpmsg_virtio_ivshmem_probe(FAR struct pci_device_s *dev);
-static void rpmsg_virtio_ivshmem_remove(FAR struct pci_device_s *dev);
+static int rpmsg_virtio_ivshmem_probe(FAR struct ivshmem_device_s *ivdev);
+static void rpmsg_virtio_ivshmem_remove(FAR struct ivshmem_device_s *ivdev);
 
 /****************************************************************************
  * Private Data
@@ -107,21 +109,6 @@ static const struct rpmsg_virtio_ops_s g_rpmsg_virtio_ivshmem_ops =
   .notify            = rpmsg_virtio_ivshmem_notify,
   .register_callback = rpmsg_virtio_ivshmem_register_callback,
 };
-
-static const struct pci_device_id_s g_rpmsg_virtio_ivshmem_ids[] =
-{
-  { PCI_DEVICE(0x1af4, 0x1110) },
-  { 0, }
-};
-
-static struct pci_driver_s g_rpmsg_virtio_ivshmem_drv =
-{
-  g_rpmsg_virtio_ivshmem_ids,  /* PCI id_tables */
-  rpmsg_virtio_ivshmem_probe,  /* Probe function */
-  rpmsg_virtio_ivshmem_remove, /* Remove function */
-};
-
-static int g_rpmsg_virtio_ivshmem_idx = 0;
 
 /****************************************************************************
  * Private Functions
@@ -199,7 +186,11 @@ static int rpmsg_virtio_ivshmem_notify(FAR struct rpmsg_virtio_s *dev,
   FAR struct rpmsg_virtio_ivshmem_dev_s *priv =
     (FAR struct rpmsg_virtio_ivshmem_dev_s *)dev;
 
-  if (priv->master)
+  if (ivshmem_support_irq(priv->ivdev))
+    {
+      ivshmem_kick_peer(priv->ivdev);
+    }
+  else if (priv->master)
     {
       priv->shmem->seqm++;
     }
@@ -221,6 +212,23 @@ rpmsg_virtio_ivshmem_register_callback(FAR struct rpmsg_virtio_s *dev,
 
   priv->callback = callback;
   priv->arg      = arg;
+  return 0;
+}
+
+/****************************************************************************
+ * Name: rpmsg_virtio_ivshmem_interrupt
+ ****************************************************************************/
+
+static int rpmsg_virtio_ivshmem_interrupt(int irq, FAR void *context,
+                                          FAR void *arg)
+{
+  FAR struct rpmsg_virtio_ivshmem_dev_s *priv = arg;
+
+  if (priv->callback != NULL)
+    {
+      priv->callback(priv->arg, RPMSG_VIRTIO_NOTIFY_ALL);
+    }
+
   return 0;
 }
 
@@ -254,83 +262,23 @@ static void rpmsg_virtio_ivshmem_work(FAR void *arg)
 }
 
 /****************************************************************************
- * Name: rpmsg_virtio_ivshmem_get_info
- ****************************************************************************/
-
-static int rpmsg_virtio_ivshmem_get_info(FAR char *cpuname, FAR int *master)
-{
-  FAR const char *name = CONFIG_RPMSG_VIRTIO_IVSHMEM_NAME;
-  int start = 0;
-  int i;
-  int j;
-
-  for (i = 0, j = 0; name[start] != '\0'; i++)
-    {
-      if (name[i] == ';' || name[i] == '\0')
-        {
-          if (j++ == g_rpmsg_virtio_ivshmem_idx)
-            {
-              snprintf(cpuname, RPMSG_NAME_SIZE, "%.*s", i - start - 2,
-                       &name[start]);
-              *master = name[i - 1] == 'm';
-              return 0;
-            }
-
-          start = i + 1;
-        }
-    }
-
-  return -ENODEV;
-}
-
-/****************************************************************************
  * Name: rpmsg_virtio_ivshmem_probe
  ****************************************************************************/
 
-static int rpmsg_virtio_ivshmem_probe(FAR struct pci_device_s *dev)
+static int rpmsg_virtio_ivshmem_probe(FAR struct ivshmem_device_s *ivdev)
 {
-  FAR struct rpmsg_virtio_ivshmem_dev_s *priv;
+  FAR struct rpmsg_virtio_ivshmem_dev_s *priv =
+    rpmsg_virtio_ivshmem_from(ivdev);
   int ret;
-
-  priv = kmm_zalloc(sizeof(*priv));
-  if (priv == NULL)
-    {
-      return -ENOMEM;
-    }
 
   /* Do the rpmsg virtio ivshmem init */
 
+  priv->ivdev = ivdev;
   priv->dev.ops = &g_rpmsg_virtio_ivshmem_ops;
-  priv->ivshmem = dev;
-  ret = rpmsg_virtio_ivshmem_get_info(priv->cpuname, &priv->master);
-  if (ret < 0)
-    {
-      goto err_priv;
-    }
+  priv->shmem = ivshmem_get_shmem(ivdev, &priv->shmem_size);
 
-  /* Configure the ivshmem device and get share memory address */
-
-  ret = pci_enable_device(dev);
-  if (ret < 0)
-    {
-      pcierr("Enable device failed, ret=%d\n", ret);
-      goto err_priv;
-    }
-
-  pci_set_master(dev);
-
-  priv->shmem = (FAR struct rpmsg_virtio_ivshmem_mem_s *)
-    pci_map_bar(dev, RPMSG_VIRTIO_IVSHMEM_SHMEM_BAR);
-  if (priv->shmem == NULL)
-    {
-      ret = -ENOTSUP;
-      pcierr("Device not support share memory bar\n");
-      goto err_master;
-    }
-
-  priv->shmem_size = pci_resource_len(dev, RPMSG_VIRTIO_IVSHMEM_SHMEM_BAR);
-
-  pciinfo("shmem addr=%p size=%zu\n", priv->shmem, priv->shmem_size);
+  ivshmem_attach_irq(ivdev, rpmsg_virtio_ivshmem_interrupt, priv);
+  ivshmem_control_irq(ivdev, true);
 
   /* Do rpmsg virtio initialize */
 
@@ -338,18 +286,20 @@ static int rpmsg_virtio_ivshmem_probe(FAR struct pci_device_s *dev)
   if (ret < 0)
     {
       pcierr("rpmsg virtio intialize failed, ret=%d\n", ret);
-      goto err_master;
+      goto err;
     }
 
-  work_queue(HPWORK, &priv->worker, rpmsg_virtio_ivshmem_work, priv, 0);
-  g_rpmsg_virtio_ivshmem_idx++;
+  if (!ivshmem_support_irq(ivdev))
+    {
+      work_queue(HPWORK, &priv->worker, rpmsg_virtio_ivshmem_work, priv, 0);
+    }
+
   return ret;
 
-err_master:
-  pci_clear_master(dev);
-  pci_disable_device(dev);
-err_priv:
-  kmm_free(priv);
+err:
+  ivshmem_unregister_driver(&priv->drv);
+  ivshmem_control_irq(ivdev, false);
+  ivshmem_detach_irq(ivdev);
   return ret;
 }
 
@@ -357,9 +307,15 @@ err_priv:
  * Name: rpmsg_virtio_ivshmem_remove
  ****************************************************************************/
 
-static void rpmsg_virtio_ivshmem_remove(FAR struct pci_device_s *dev)
+static void rpmsg_virtio_ivshmem_remove(FAR struct ivshmem_device_s *ivdev)
 {
-  pciwarn("Not support remove for now\n");
+  FAR struct rpmsg_virtio_ivshmem_dev_s *priv =
+    rpmsg_virtio_ivshmem_from(ivdev);
+
+  work_cancel_sync(HPWORK, &priv->worker);
+  ivshmem_control_irq(ivdev, false);
+  ivshmem_detach_irq(ivdev);
+  kmm_free(priv);
 }
 
 /****************************************************************************
@@ -368,5 +324,41 @@ static void rpmsg_virtio_ivshmem_remove(FAR struct pci_device_s *dev)
 
 int pci_register_rpmsg_virtio_ivshmem_driver(void)
 {
-  return pci_register_driver(&g_rpmsg_virtio_ivshmem_drv);
+  FAR char *name = CONFIG_RPMSG_VIRTIO_IVSHMEM_NAME;
+
+  while (name != NULL)
+    {
+      FAR const char *str;
+
+      FAR struct rpmsg_virtio_ivshmem_dev_s * priv =
+        kmm_zalloc(sizeof(*priv));
+      if (priv == NULL)
+        {
+          return -ENOMEM;
+        }
+
+      priv->drv.id = strtoul(name, &name, 0);
+      str = strchr(++name, ':');
+      snprintf(priv->cpuname, RPMSG_NAME_SIZE, "%.*s", (int)(str - name),
+               name);
+      priv->master = *(str + 1) == 'm';
+
+      pciinfo("Register ivshmem driver, id=%d, cpuname=%s, master=%d\n",
+              priv->drv.id, priv->cpuname, priv->master);
+
+      priv->drv.probe = rpmsg_virtio_ivshmem_probe;
+      priv->drv.remove = rpmsg_virtio_ivshmem_remove;
+      if (ivshmem_register_driver(&priv->drv) < 0)
+        {
+          kmm_free(priv);
+        }
+
+      name = strchr(str, ';');
+      if (name != NULL)
+        {
+          name++;
+        }
+    }
+
+  return 0;
 }
