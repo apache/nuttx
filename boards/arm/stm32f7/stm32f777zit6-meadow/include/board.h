@@ -152,6 +152,13 @@
 #define STM32_RCC_PLLSAICFGR_PLLSAIQ    RCC_PLLSAICFGR_PLLSAIQ(2)
 #define STM32_RCC_PLLSAICFGR_PLLSAIR    RCC_PLLSAICFGR_PLLSAIR(2)
 
+/* SAIx input frequency = 25 / M * N / Q / P
+ *   25000000 / 25 * 384 / 2 / 8
+ */
+
+#define STM32F7_SAI1_FREQUENCY           (49142857)
+#define STM32F7_SAI2_FREQUENCY           (49142857)
+
 /* Configure Dedicated Clock Configuration Register */
 
 #define STM32_RCC_DCKCFGR1_PLLI2SDIVQ  RCC_DCKCFGR1_PLLI2SDIVQ(1)
@@ -163,12 +170,13 @@
 #define STM32_RCC_DCKCFGR1_DFSDM1SRC   0
 #define STM32_RCC_DCKCFGR1_ADFSDM1SRC  0
 
-/* Configure factors for  PLLI2S clock */
+/* Configure factors for PLLI2S clock */
 
+#define CONFIG_STM32F7_PLLI2S          1
 #define STM32_RCC_PLLI2SCFGR_PLLI2SN   RCC_PLLI2SCFGR_PLLI2SN(192)
-#define STM32_RCC_PLLI2SCFGR_PLLI2SP   RCC_PLLI2SCFGR_PLLI2SP(2)
-#define STM32_RCC_PLLI2SCFGR_PLLI2SQ   RCC_PLLI2SCFGR_PLLI2SQ(2)
-#define STM32_RCC_PLLI2SCFGR_PLLI2SR   RCC_PLLI2SCFGR_PLLI2SR(2)
+#define STM32_RCC_PLLI2SCFGR_PLLI2SP   RCC_PLLI2SCFGR_PLLI2SP(4)
+#define STM32_RCC_PLLI2SCFGR_PLLI2SQ   RCC_PLLI2SCFGR_PLLI2SQ(4)
+#define STM32_RCC_PLLI2SCFGR_PLLI2SR   RCC_PLLI2SCFGR_PLLI2SR(4)
 
 /* Configure Dedicated Clock Configuration Register 2 */
 
@@ -377,6 +385,10 @@
 
 /* DMA Channel/Stream Selections ********************************************/
 
+#define DMACHAN_SAI2_A          DMAMAP_SAI2_A
+#define DMACHAN_SAI2_B          DMAMAP_SAI2_B
+#define DMACHAN_SAI1_B          DMAMAP_SAI1_B
+
 /* SDMMC */
 
 /* Stream selections are arbitrary for now but might become important in the
@@ -469,6 +481,25 @@
 
 #define GPIO_I2C1_SCL        (GPIO_I2C1_SCL_1|GPIO_SPEED_50MHz)
 #define GPIO_I2C1_SDA        (GPIO_I2C1_SDA_1|GPIO_SPEED_50MHz)
+
+/* Dumb definition to SPI2, just because it is needed by i2s driver */
+
+#define GPIO_SPI2_SCK     GPIO_SPI2_SCK_5
+#define GPIO_SPI2_MISO    GPIO_SPI2_MISO_3
+#define GPIO_SPI2_MOSI    GPIO_SPI2_MOSI_3
+
+#define DMAMAP_SPI2_TX    DMAMAP_SPI2_TX_2
+#define DMAMAP_SPI2_RX    DMAMAP_SPI2_RX_2
+
+/* I2S2 - CS4344 configuration uses I2S2 */
+
+#define GPIO_I2S2_SD      (GPIO_I2S2_SD_1)  /* PB15 */
+#define GPIO_I2S2_CK      (GPIO_I2S2_CK_3)  /* PB13 */
+#define GPIO_I2S2_WS      (GPIO_I2S2_WS_1)  /* PB12 */
+#define GPIO_I2S2_MCK     (GPIO_I2S2_MCK_0) /* PC6 */
+
+#define DMACHAN_I2S2_RX   DMAMAP_SPI2_RX_2
+#define DMACHAN_I2S2_TX   DMAMAP_SPI2_TX_2
 
 /* QSPI Mapping  */
 
