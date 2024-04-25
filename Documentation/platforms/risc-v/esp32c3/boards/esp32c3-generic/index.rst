@@ -162,6 +162,26 @@ Once booted you can use the following commands to mount the file system::
     nsh> mksmartfs /dev/smart0
     nsh> mount -t smartfs /dev/smart0 /mnt
 
+sta_softap
+----------
+
+With this configuration you can run these commands to be able
+to connect your smartphone or laptop to your board::
+
+  nsh> ifup wlan1
+  nsh> dhcpd_start wlan1
+  nsh> wapi psk wlan1 mypasswd 3
+  nsh> wapi essid wlan1 nuttxap 1
+
+In this case, you are creating the access point ``nuttxapp`` in your board and to
+connect to it on your smartphone you will be required to type the password ``mypasswd``
+using WPA2.
+
+.. tip:: Please refer to :ref:`ESP32 Wi-Fi SoftAP Mode <esp32_wi-fi_softap>`
+  for more information.
+
+The ``dhcpd_start`` is necessary to let your board to associate an IP to your smartphone.
+
 timer
 -----
 
@@ -220,3 +240,24 @@ To test it, just run the following command::
     nsh> wdog -i /dev/watchdogX
 
 Where X is the watchdog instance.
+
+wifi
+----
+
+Enables Wi-Fi support. You can define your credentials this way::
+
+    $ make menuconfig
+    -> Application Configuration
+        -> Network Utilities
+            -> Network initialization (NETUTILS_NETINIT [=y])
+                -> WAPI Configuration
+
+Or if you don't want to keep it saved in the firmware you can do it
+at runtime::
+
+    nsh> wapi psk wlan0 mypasswd 3
+    nsh> wapi essid wlan0 myssid 1
+    nsh> renew wlan0
+
+.. tip:: Please refer to :ref:`ESP32 Wi-Fi Station Mode <esp32_wi-fi_sta>`
+  for more information.

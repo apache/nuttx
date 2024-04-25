@@ -28,10 +28,7 @@ EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$
 EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_phy$(DELIM)lib$(DELIM)$(CHIP_SERIES)
 EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_wifi$(DELIM)lib$(DELIM)$(CHIP_SERIES)
 
-EXTRA_LIBS += -lphy -lcoexist
-ifeq ($(CHIP_SERIES),esp32c6)
-EXTRA_LIBS += -lmesh
-endif
+EXTRA_LIBS += -lphy -lcoexist -lmesh
 
 ifeq ($(CONFIG_ESPRESSIF_WIFI),y)
 

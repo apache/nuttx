@@ -50,6 +50,7 @@
 #include "soc/extmem_reg.h"
 #include "soc/mmu.h"
 #include "soc/reg_base.h"
+#include "spi_flash_mmap.h"
 #include "rom/cache.h"
 
 #ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT

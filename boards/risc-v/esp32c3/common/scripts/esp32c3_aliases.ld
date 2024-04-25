@@ -18,6 +18,7 @@
  *
  ****************************************************************************/
 
+cache_set_idrom_mmu_size = Cache_Set_IDROM_MMU_Size;
 cache_dbus_mmu_set = Cache_Dbus_MMU_Set;
 cache_ibus_mmu_set = Cache_Ibus_MMU_Set;
 cache_invalidate_icache_all = Cache_Invalidate_ICache_All;

@@ -47,6 +47,8 @@ SECTIONS
     *libarch.a:*esp_clk_tree_common.*(.text .text.* .literal .literal.*)
     *libarch.a:*clk_tree_hal.*(.text .text.* .literal .literal.*)
     *libarch.a:*rtc_init.*(.text .text.* .literal .literal.*)
+    *libarch.a:*regi2c_ctrl.*(.text .text.* .literal .literal.*)
+    *libarch.a:*gpio_periph.*(.text .text.* .literal .literal.*)
     *libarch.a:*rtc_clk.*(.text .text.* .literal .literal.*)
     *libarch.a:*rtc_clk_init.*(.text .text.* .literal .literal.*)
     *libarch.a:*rtc_sleep.*(.text .text.* .literal .literal.*)
@@ -85,12 +87,19 @@ SECTIONS
     *libarch.a:*esp_rom_spiflash.*(.text .text.* .literal .literal.*)
     *libarch.a:*esp_efuse_fields.*(.text .text.* .literal .literal.*)
     *libarch.a:*esp_efuse_api_key.*(.text .text.* .literal .literal.*)
+    *libarch.a:*efuse_hal.*(.text .text.* .literal .literal.*)
     *libarch.a:*log.*(.text .text.* .literal .literal.*)
     *libarch.a:*log_noos.*(.text .text.* .literal .literal.*)
     *libarch.a:esp_spiflash.*(.literal .text .literal.* .text.*)
 
     esp_head.*(.literal .text .literal.* .text.*)
     esp_start.*(.literal .text .literal.* .text.*)
+
+    *(.wifi0iram.*)
+    *(.wifirxiram.*)
+    *(.wifislpiram.*)
+    *(.wifiorslpiram.*)
+    *(.wifislprxiram.*)
 
   } >iram0_0_seg AT > ROM
 
@@ -144,6 +153,8 @@ SECTIONS
     *libarch.a:*esp_clk_tree_common.*(.rodata .rodata.*)
     *libarch.a:*clk_tree_hal.*(.rodata .rodata.*)
     *libarch.a:*rtc_init.*(.rodata .rodata.*)
+    *libarch.a:*regi2c_ctrl.*(.rodata .rodata.*)
+    *libarch.a:*gpio_periph.*(.rodata .rodata.*)
     *libarch.a:*rtc_clk.*(.rodata .rodata.*)
     *libarch.a:*rtc_clk_init.*(.rodata .rodata.*)
     *libarch.a:*rtc_sleep.*(.rodata .rodata.*)
@@ -182,6 +193,7 @@ SECTIONS
     *libarch.a:*esp_rom_spiflash.*(.rodata .rodata.*)
     *libarch.a:*esp_efuse_fields.*(.rodata .rodata.*)
     *libarch.a:*esp_efuse_api_key.*(.rodata .rodata.*)
+    *libarch.a:*efuse_hal.*(.rodata .rodata.*)
     *libarch.a:*log.*(.rodata .rodata.*)
     *libarch.a:*log_noos.*(.rodata .rodata.*)
     *libarch.a:esp_spiflash.*(.rodata .rodata.*)
@@ -228,12 +240,17 @@ SECTIONS
   .flash.text : ALIGN(0xFFFF)
   {
     _stext = .;
+    _instruction_reserved_start = ABSOLUTE(.);  /* This is a symbol marking the flash.text start, this can be used for mmu driver to maintain virtual address */
+    _text_start = ABSOLUTE(.);
 
     *(.literal .text .literal.* .text.* .stub .gnu.warning .gnu.linkonce.literal.* .gnu.linkonce.t.*.literal .gnu.linkonce.t.*)
     *(.irom0.text) /* catch stray ICACHE_RODATA_ATTR */
     *(.fini.literal)
     *(.fini)
     *(.gnu.version)
+
+    _text_end = ABSOLUTE(.);
+    _instruction_reserved_end = ABSOLUTE(.);  /* This is a symbol marking the flash.text end, this can be used for mmu driver to maintain virtual address */
     _etext = .;
 
     /* Similar to _iram_start, this symbol goes here so it is
@@ -265,6 +282,17 @@ SECTIONS
   _image_drom_lma = LOADADDR(.flash.rodata);
   _image_drom_size = LOADADDR(.flash.rodata) + SIZEOF(.flash.rodata) - _image_drom_lma;
 
+  .flash.appdesc : ALIGN(0x10)
+  {
+    _rodata_reserved_start = ABSOLUTE(.);  /* This is a symbol marking the flash.rodata start, this can be used for mmu driver to maintain virtual address */
+    _rodata_start = ABSOLUTE(.);
+
+    /* Create an empty gap within this section. Thanks to this, the end of this
+     * section will match .flash.rodata's begin address. Thus, both sections
+     * will be merged when creating the final bin image. */
+    . = ALIGN(ALIGNOF(.flash.rodata));
+  } >default_rodata_seg
+
   .flash.rodata : ALIGN(0xFFFF)
   {
     _srodata = ABSOLUTE(.);
@@ -273,6 +301,11 @@ SECTIONS
 
     *(.rodata)
     *(.rodata.*)
+    *(.rodata_wlog_verbose.*)
+    *(.rodata_wlog_debug.*)
+    *(.rodata_wlog_info.*)
+    *(.rodata_wlog_warning.*)
+    *(.rodata_wlog_error.*)
 
     *(.srodata.*)
 
@@ -323,6 +356,16 @@ SECTIONS
     _lit4_end = ABSOLUTE(.);
     . = ALIGN(4);
   } >default_rodata_seg AT > ROM
+
+  .flash.rodata_noload (NOLOAD) :
+  {
+    /*
+      This is a symbol marking the flash.rodata end, this can be used for mmu driver to maintain virtual address
+      We don't need to include the noload rodata in this section
+    */
+    _rodata_reserved_end = ABSOLUTE(.);
+    . = ALIGN (4);
+  } > default_rodata_seg AT > ROM
 
   /* Marks the end of IRAM code segment */
 

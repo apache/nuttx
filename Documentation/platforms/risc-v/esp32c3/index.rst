@@ -142,9 +142,9 @@ Peripheral Support
 
 The following list indicates the state of peripherals' support in NuttX:
 
-=========== ======= =====
+=========== ======= ====================
 Peripheral  Support NOTES
-=========== ======= =====
+=========== ======= ====================
 ADC          No
 AES          No
 Bluetooth    No
@@ -165,8 +165,8 @@ Timers       Yes
 Touch        No
 UART         Yes
 Watchdog     Yes
-Wifi         No
-=========== ======= =====
+Wifi         Yes     WPA3-SAE supported
+=========== ======= ====================
 
 Secure Boot and Flash Encryption
 ================================

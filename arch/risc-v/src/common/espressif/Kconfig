@@ -350,7 +350,7 @@ config ESP_WIRELESS
 
 config ESPRESSIF_WIFI
 	bool "Wi-Fi"
-	depends on ESPRESSIF_ESP32C6
+	depends on ESPRESSIF_ESP32C3 || ESPRESSIF_ESP32C6
 	default n
 	select ESP_WIRELESS
 	---help---
