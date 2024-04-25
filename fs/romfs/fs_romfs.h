@@ -154,6 +154,7 @@ struct romfs_mountpt_s
   uint32_t rm_cachesector;        /* Current sector in the rm_buffer */
   FAR uint8_t *rm_xipbase;        /* Base address of directly accessible media */
   FAR uint8_t *rm_buffer;         /* Device sector buffer, allocated if rm_xipbase==0 */
+  FAR uint8_t *rm_devbuffer;      /* Device sector buffer, allocated for write if rm_xipbase != 0 */
 #ifdef CONFIG_FS_ROMFS_WRITEABLE
   struct list_node rm_sparelist;  /* The list of spare space */
 #endif
@@ -231,6 +232,7 @@ int  romfs_datastart(FAR struct romfs_mountpt_s *rm,
 void romfs_freenode(FAR struct romfs_nodeinfo_s *node);
 #endif
 #ifdef CONFIG_FS_ROMFS_WRITEABLE
+int romfs_mkfs(FAR struct romfs_mountpt_s *rm);
 void romfs_free_sparelist(FAR struct list_node *list);
 #endif
 

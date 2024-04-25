@@ -408,7 +408,7 @@ static FAR struct romfs_sparenode_s *
 romfs_alloc_sparenode(uint32_t start, uint32_t end)
 {
   FAR struct romfs_sparenode_s *node;
-  node = kmm_malloc(sizeof(struct romfs_sparenode_s));
+  node = fs_heap_malloc(sizeof(struct romfs_sparenode_s));
   if (node == NULL)
     {
       ferr("romfs_alloc_sparenode: no memory\n");
@@ -474,7 +474,7 @@ static int romfs_alloc_spareregion(FAR struct list_node *list,
           /* Delete the node */
 
           list_delete(&node->node);
-          kmm_free(node);
+          fs_heap_free(node);
           return 0;
         }
       else if (start == node->start)
@@ -513,6 +513,78 @@ static int romfs_alloc_spareregion(FAR struct list_node *list,
   ferr("No space for start %" PRIu32 ", end %" PRIu32 "\n", start,
         end);
   return -ENOENT;
+}
+
+/****************************************************************************
+ * Name: romfs_devwrite32
+ *
+ * Description:
+ *   Write the big-endian 32-bit value to the mount device buffer
+ *
+ ****************************************************************************/
+
+static void romfs_devwrite32(FAR struct romfs_mountpt_s *rm,
+                             int ndx, uint32_t value)
+{
+  /* Write the 32-bit value to the specified index in the buffer */
+
+  rm->rm_devbuffer[ndx]     = (uint8_t)(value >> 24) & 0xff;
+  rm->rm_devbuffer[ndx + 1] = (uint8_t)(value >> 16) & 0xff;
+  rm->rm_devbuffer[ndx + 2] = (uint8_t)(value >> 8) & 0xff;
+  rm->rm_devbuffer[ndx + 3] = (uint8_t)(value & 0xff);
+}
+
+/****************************************************************************
+ * Name: romfs_hwwrite
+ *
+ * Description:
+ *   Write the specified number of sectors to the block device
+ *
+ ****************************************************************************/
+
+static int romfs_hwwrite(FAR struct romfs_mountpt_s *rm, FAR uint8_t *buffer,
+                         uint32_t sector, unsigned int nsectors)
+{
+  FAR struct inode *inode = rm->rm_blkdriver;
+  ssize_t ret = -ENODEV;
+
+  if (inode->u.i_bops->write)
+    {
+      ret = inode->u.i_bops->write(inode, buffer, sector, nsectors);
+    }
+
+  if (ret == (ssize_t)nsectors)
+    {
+      ret = OK;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: romfs_devcachewrite
+ *
+ * Description:
+ *   Write the specified sector for specified offset into the sector cache.
+ *
+ ****************************************************************************/
+
+static int romfs_devcachewrite(FAR struct romfs_mountpt_s *rm,
+                               uint32_t sector)
+{
+  int ret;
+
+  ret = romfs_hwwrite(rm, rm->rm_devbuffer, sector, 1);
+  if (ret == OK)
+    {
+      rm->rm_cachesector = sector;
+    }
+  else
+    {
+      rm->rm_cachesector = (uint32_t)-1;
+    }
+
+  return ret;
 }
 #endif
 
@@ -800,6 +872,14 @@ int romfs_hwconfigure(FAR struct romfs_mountpt_s *rm)
 
   rm->rm_cachesector = (uint32_t)-1;
 
+  /* Allocate the device cache buffer for normal sector accesses */
+
+  rm->rm_devbuffer = fs_heap_malloc(rm->rm_hwsectorsize);
+  if (!rm->rm_devbuffer)
+    {
+      return -ENOMEM;
+    }
+
   if (inode->u.i_bops->ioctl)
     {
       ret = inode->u.i_bops->ioctl(inode, BIOC_XIPBASE,
@@ -816,14 +896,9 @@ int romfs_hwconfigure(FAR struct romfs_mountpt_s *rm)
         }
     }
 
-  /* Allocate the device cache buffer for normal sector accesses */
+  /* The device cache buffer for normal sector accesses */
 
-  rm->rm_buffer = fs_heap_malloc(rm->rm_hwsectorsize);
-  if (!rm->rm_buffer)
-    {
-      return -ENOMEM;
-    }
-
+  rm->rm_buffer = rm->rm_devbuffer;
   return OK;
 }
 
@@ -843,7 +918,7 @@ void romfs_free_sparelist(FAR struct list_node *list)
   list_for_every_entry_safe(list, node, tmp, struct romfs_sparenode_s, node)
     {
       list_delete(&node->node);
-      kmm_free(node);
+      fs_heap_free(node);
     }
 }
 #endif
@@ -1343,3 +1418,50 @@ int romfs_datastart(FAR struct romfs_mountpt_s *rm,
   return -EINVAL; /* Won't get here */
 #endif
 }
+
+#ifdef CONFIG_FS_ROMFS_WRITEABLE
+
+/****************************************************************************
+ * Name: romfs_mkfs
+ *
+ * Description:
+ *   Format the romfs filesystem
+ *
+ ****************************************************************************/
+
+int romfs_mkfs(FAR struct romfs_mountpt_s *rm)
+{
+  /* Write the magic number at that identifies this as a ROMFS filesystem */
+
+  memcpy(rm->rm_devbuffer + ROMFS_VHDR_ROM1FS, ROMFS_VHDR_MAGIC,
+         ROMFS_VHDR_SIZE);
+
+  /* Init the ROMFS volume to zero */
+
+  romfs_devwrite32(rm, ROMFS_VHDR_SIZE, 0);
+
+  /* Write the volume name */
+
+  memcpy(rm->rm_devbuffer + ROMFS_VHDR_VOLNAME, "romfs", 6);
+
+  /* Write the root node . */
+
+  romfs_devwrite32(rm, 0x20 + ROMFS_FHDR_NEXT, 0x40 | RFNEXT_DIRECTORY);
+  romfs_devwrite32(rm, 0x20 + ROMFS_FHDR_INFO, 0x20);
+  romfs_devwrite32(rm, 0x20 + ROMFS_FHDR_SIZE, 0);
+  romfs_devwrite32(rm, 0x20 + ROMFS_FHDR_CHKSUM, 0);
+  memcpy(rm->rm_devbuffer + 0x20 + ROMFS_FHDR_NAME, ".", 2);
+
+  /* Write the root node .. */
+
+  romfs_devwrite32(rm, 0x40 + ROMFS_FHDR_NEXT, RFNEXT_HARDLINK);
+  romfs_devwrite32(rm, 0x40 + ROMFS_FHDR_INFO, 0x20);
+  romfs_devwrite32(rm, 0x40 + ROMFS_FHDR_SIZE, 0);
+  romfs_devwrite32(rm, 0x40 + ROMFS_FHDR_CHKSUM, 0);
+  memcpy(rm->rm_devbuffer + 0x40 + ROMFS_FHDR_NAME, "..", 3);
+
+  /* Write the buffer to sector zero */
+
+  return romfs_devcachewrite(rm, 0);
+}
+#endif
