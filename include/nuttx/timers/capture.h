@@ -36,6 +36,7 @@
 
 #define CAPIOC_DUTYCYCLE _CAPIOC(1)
 #define CAPIOC_FREQUENCE _CAPIOC(2)
+#define CAPIOC_EDGES     _CAPIOC(3)
 
 /****************************************************************************
  * Public Types
@@ -67,6 +68,11 @@ struct cap_ops_s
 
   CODE int (*getfreq)(FAR struct cap_lowerhalf_s *lower,
                       FAR uint32_t *freq);
+
+  /* Get the result pwm capture edges value */
+
+  CODE int (*getedges)(FAR struct cap_lowerhalf_s *lower,
+                      FAR uint32_t *edges);
 };
 
 /* This structure provides the publicly visible representation of the
