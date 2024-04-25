@@ -304,6 +304,131 @@ extern const struct arm64_mpu_config g_mpu_config;
  * Public Function Prototypes
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: mpu_allocregion
+ *
+ * Description:
+ *   Allocate the next region
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The index of the allocated region.
+ *
+ ****************************************************************************/
+
+unsigned int mpu_allocregion(void);
+
+/****************************************************************************
+ * Name: mpu_freeregion
+ *
+ * Description:
+ *   Free target region.
+ *
+ * Input Parameters:
+ *  region - The index of the region to be freed.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void mpu_freeregion(unsigned int region);
+
+/****************************************************************************
+ * Name: arm64_mpu_enable
+ *
+ * Description:
+ *   Enable the MPU
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Return Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void arm64_mpu_enable(void);
+
+/****************************************************************************
+ * Name: arm64_mpu_disable
+ *
+ * Description:
+ *   Disable the MPU
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Return Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void arm64_mpu_disable(void);
+
+/****************************************************************************
+ * Name: mpu_dump_region
+ *
+ * Description:
+ *   Dump the region that has been used.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ ****************************************************************************/
+
+void mpu_dump_region(void);
+
+/****************************************************************************
+ * Name: mpu_modify_region
+ *
+ * Description:
+ *   Modify a region for privileged, strongly ordered memory
+ *
+ * Input Parameters:
+ *   region - The index of the MPU region to modify.
+ *   table  - Pointer to a struct containing the configuration
+ *            parameters for the region.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void mpu_modify_region(unsigned int region,
+                       const struct arm64_mpu_region *table);
+
+/****************************************************************************
+ * Name: mpu_configure_region
+ *
+ * Description:
+ *   Configure a region for privileged, strongly ordered memory
+ *
+ * Input Parameters:
+ *   table - Pointer to a struct containing the configuration
+ *           parameters for the region.
+ *
+ * Returned Value:
+ *   The region number allocated for the configured region.
+ *
+ ****************************************************************************/
+
+unsigned int mpu_configure_region(const struct arm64_mpu_region *
+                                  table);
+
+/****************************************************************************
+ * Name: arm64_mpu_init
+ *
+ * Description:
+ *   This function here provides the default configuration mechanism
+ *   for the Memory Protection Unit (MPU).
+ *
+ ****************************************************************************/
+
 void arm64_mpu_init(bool is_primary_core);
 
 #endif  /* __ASSEMBLY__ */

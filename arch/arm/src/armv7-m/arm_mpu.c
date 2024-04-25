@@ -26,6 +26,7 @@
 
 #include <stdint.h>
 #include <assert.h>
+#include <debug.h>
 
 #include "mpu.h"
 #include "arm_internal.h"
@@ -69,9 +70,9 @@ static const uint8_t g_ls_regionmask[9] =
   0x00, 0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f, 0xff
 };
 
-/* The next available region number */
+/* The available region bitmap */
 
-static uint8_t g_region;
+static unsigned int g_mpu_region;
 
 /****************************************************************************
  * Private Functions
@@ -88,6 +89,13 @@ static uint8_t g_region;
  * Assumption:
  *   l2size has the same properties as the return value from
  *   mpu_log2regionceil()
+ *
+ * Input Parameters:
+ *   size: The size of the region.
+ *   l2size: The L2 size of the region.
+ *
+ * Returned Value:
+ *   The sub-region bitmask.
  *
  ****************************************************************************/
 
@@ -140,6 +148,13 @@ static inline uint32_t mpu_subregion_ms(size_t size, uint8_t l2size)
  *   l2size has the same properties as the return value from
  *   mpu_log2regionceil()
  *
+ * Input Parameters:
+ *   offset: The offset of the region.
+ *   l2size: The L2 size of the region.
+ *
+ * Returned Value:
+ *   The sub-region bitmask.
+ *
  ****************************************************************************/
 
 static inline uint32_t mpu_subregion_ls(size_t offset, uint8_t l2size)
@@ -184,6 +199,12 @@ static inline uint32_t mpu_subregion_ls(size_t offset, uint8_t l2size)
  * Description:
  *   Resets the MPU to disabled.
  *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 #if defined(CONFIG_ARM_MPU_RESET) || defined(CONFIG_ARM_MPU_EARLY_RESET)
@@ -218,17 +239,51 @@ static void mpu_reset_internal()
  * Description:
  *   Allocate the next region
  *
- * Assumptions:
- *   - Regions are never deallocated
- *   - Regions are only allocated early in initialization, so no special
- *     protection against re-entrancy is required;
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The index of the allocated region.
  *
  ****************************************************************************/
 
 unsigned int mpu_allocregion(void)
 {
-  DEBUGASSERT(g_region < CONFIG_ARM_MPU_NREGIONS);
-  return (unsigned int)g_region++;
+  unsigned int i = ffs(~g_mpu_region) - 1;
+
+  /* There are not enough regions to apply */
+
+  DEBUGASSERT(i < CONFIG_ARM_MPU_NREGIONS);
+  g_mpu_region |= 1 << i;
+  return i;
+}
+
+/****************************************************************************
+ * Name: mpu_freeregion
+ *
+ * Description:
+ *   Free target region.
+ *
+ * Input Parameters:
+ *  region - The index of the region to be freed.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void mpu_freeregion(unsigned int region)
+{
+  DEBUGASSERT(region < CONFIG_ARM_MPU_NREGIONS);
+
+  /* Clear and disable the given MPU Region */
+
+  putreg32(region, MPU_RNR);
+  putreg32(0, MPU_RASR);
+  putreg32(0, MPU_RBAR);
+  g_mpu_region &= ~(1 << region);
+  ARM_DSB();
+  ARM_ISB();
 }
 
 /****************************************************************************
@@ -239,6 +294,12 @@ unsigned int mpu_allocregion(void)
  *   following is true:
  *
  *   size <= (1 << l2size)
+ *
+ * Input Parameters:
+ *   size - The size of the region.
+ *
+ * Returned Value:
+ *   The logarithm base 2 of the ceiling value for the MPU region size.
  *
  ****************************************************************************/
 
@@ -260,6 +321,12 @@ uint8_t mpu_log2regionceil(size_t size)
  *   following is true:
  *
  *   size >= (1 << l2size)
+ *
+ * Input Parameters:
+ *   size - The size of the region.
+ *
+ * Returned Value:
+ *   The logarithm base 2 of the floor value for the MPU region size.
  *
  ****************************************************************************/
 
@@ -286,6 +353,14 @@ uint8_t mpu_log2regionfloor(size_t size)
  * Assumption:
  *   l2size has the same properties as the return value from
  *   mpu_log2regionceil()
+ *
+ * Input Parameters:
+ *   base   - The base address of the region.
+ *   size   - The size of the region.
+ *   l2size - Log2 of the actual region size is <= (1 << l2size).
+ *
+ * Returned Value:
+ *   The subregion settings as a 32-bit value.
  *
  ****************************************************************************/
 
@@ -338,6 +413,16 @@ uint32_t mpu_subregion(uintptr_t base, size_t size, uint8_t l2size)
  * Description:
  *   Configure and enable (or disable) the MPU
  *
+ * Input Parameters:
+ *   enable     - Flag indicating whether to enable the MPU.
+ *   hfnmiena   - Flag indicating whether to enable the MPU during hard
+ *                fult, NMI, and FAULTMAS.
+ *   privdefena - Flag indicating whether to enable privileged access to
+ *                the default memory map.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void mpu_control(bool enable, bool hfnmiena, bool privdefena)
@@ -368,21 +453,33 @@ void mpu_control(bool enable, bool hfnmiena, bool privdefena)
 }
 
 /****************************************************************************
- * Name: mpu_configure_region
+ * Name: mpu_modify_region
  *
  * Description:
- *   Configure a region for privileged, strongly ordered memory
+ *   Modify a region for privileged, strongly ordered memory
+ *
+ * Input Parameters:
+ *   region - Region number to modify.
+ *   base   - Base address of the region.
+ *   size   - Size of the region.
+ *   flags  - Flags to configure the region.
+ *
+ * Returned Value:
+ *   None.
  *
  ****************************************************************************/
 
-void mpu_configure_region(uintptr_t base, size_t size,
-                                        uint32_t flags)
+void mpu_modify_region(unsigned int region, uintptr_t base, size_t size,
+                       uint32_t flags)
 {
-  unsigned int region = mpu_allocregion();
   uint32_t     regval;
   uint8_t      l2size;
   uint8_t      subregions;
   uintptr_t    alignedbase;
+
+  /* Check that the region is valid */
+
+  DEBUGASSERT(g_mpu_region & (1 << region));
 
   /* Ensure the base address alignment
    *
@@ -430,11 +527,122 @@ void mpu_configure_region(uintptr_t base, size_t size,
 }
 
 /****************************************************************************
+ * Name: mpu_configure_region
+ *
+ * Description:
+ *   Configure a region for privileged, strongly ordered memory
+ *
+ * Input Parameters:
+ *   base  - Base address of the region.
+ *   size  - Size of the region.
+ *   flags - Flags to configure the region.
+ *
+ * Returned Value:
+ *   The region number allocated for the configured region.
+ *
+ ****************************************************************************/
+
+unsigned int mpu_configure_region(uintptr_t base, size_t size,
+                                  uint32_t flags)
+{
+  unsigned int region = mpu_allocregion();
+  mpu_modify_region(region, base, size, flags);
+  return region;
+}
+
+/****************************************************************************
+ * Name: mpu_initialize
+ *
+ * Description:
+ *   Configure a region for privileged, strongly ordered memory
+ *
+ * Input Parameters:
+ *   table      - MPU initialization table.
+ *   hfnmiena   - A boolean indicating whether the MPU should enable the
+ *                HFNMIENA bit.
+ *   privdefena - A boolean indicating whether the MPU should enable the
+ *                PRIVDEFENA bit.
+ *
+ * Returned Value:
+ *   NULL.
+ *
+ ****************************************************************************/
+
+void mpu_initialize(const struct mpu_region_s *table, bool hfnmiena,
+                    bool privdefena)
+{
+  const struct mpu_region_s *conf;
+  int index;
+
+  mpu_control(false, false, false);
+  for (index = 0; index < nitems(table); index++)
+    {
+      conf = &table[index];
+      mpu_configure_region(conf->base, conf->size, conf->flags);
+    }
+
+  mpu_control(true, hfnmiena, privdefena);
+}
+
+/****************************************************************************
+ * Name: mpu_dump_region
+ *
+ * Description:
+ *   Dump the region that has been used.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void mpu_dump_region(void)
+{
+  int i;
+  int count = 0;
+  uint32_t rasr;
+  uint32_t rbar;
+  uint32_t ctrl;
+
+  /* Get free region */
+
+  ctrl = getreg32(MPU_CTRL);
+  _info("MPU-CTRL Enable:%" PRIu32 ", HFNMIENA:%"PRIu32","
+        "PRIVDEFENA:%" PRIu32 "\n", ctrl & MPU_CTRL_ENABLE,
+        ctrl & MPU_CTRL_HFNMIENA, ctrl & MPU_CTRL_PRIVDEFENA);
+  for (i = 0; i < CONFIG_ARM_MPU_NREGIONS; i++)
+    {
+      putreg32(i, MPU_RNR);
+      rasr = getreg32(MPU_RASR);
+      rbar = getreg32(MPU_RBAR);
+      _info("MPU-%d, alignedbase=0%08X l2size=%"PRIu32" SRD=%X"
+            "AP=%X XN=%u\n", i, rbar & MPU_RBAR_ADDR_MASK,
+            rasr & MPU_RASR_SIZE_MASK, rasr & MPU_RASR_SRD_MASK,
+            rasr & MPU_RASR_AP_MASK, rasr & MPU_RASR_XN);
+      if (rasr & MPU_RASR_ENABLE)
+        {
+          count++;
+        }
+    }
+
+  _info("Total Use Region:%d, Remaining Available:%d\n", count,
+        CONFIG_ARM_MPU_NREGIONS - count);
+}
+
+/****************************************************************************
  * Name: mpu_reset
  *
  * Description:
  *   Conditional public interface that resets the MPU to disabled during
  *   MPU initialization.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
  *
  ****************************************************************************/
 #if defined(CONFIG_ARM_MPU_RESET)
@@ -450,6 +658,12 @@ void mpu_reset()
  * Description:
  *   Conditional public interface that resets the MPU to disabled immediately
  *   after reset.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
  *
  ****************************************************************************/
 #if defined(CONFIG_ARM_MPU_EARLY_RESET)
