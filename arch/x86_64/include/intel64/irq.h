@@ -346,9 +346,10 @@
 #define HPET0_IRQ    IRQ2
 #define HPET1_IRQ    IRQ8
 
-/* Use IRQ15 for SMP */
+/* Use IRQ15 IRQ16 for SMP */
 
 #define SMP_IPI_IRQ  IRQ15
+#define SMP_IPI_ASYNC_IRQ  IRQ16
 
 /* Common register save structure created by up_saveusercontext() and by
  * ISR/IRQ interrupt processing.

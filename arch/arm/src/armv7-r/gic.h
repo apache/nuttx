@@ -610,10 +610,12 @@
 #  define GIC_SMP_CPUSTART       GIC_IRQ_SGI9
 #  define GIC_SMP_CPUPAUSE       GIC_IRQ_SGI10
 #  define GIC_SMP_CPUCALL        GIC_IRQ_SGI11
+#  define GIC_SMP_CPUPAUSE_ASYNC GIC_IRQ_SGI12
 #else
 #  define GIC_SMP_CPUSTART       GIC_IRQ_SGI1
 #  define GIC_SMP_CPUPAUSE       GIC_IRQ_SGI2
 #  define GIC_SMP_CPUCALL        GIC_IRQ_SGI3
+#  define GIC_SMP_CPUPAUSE_ASYNC GIC_IRQ_SGI4
 #endif
 
 /****************************************************************************
@@ -825,6 +827,30 @@ int arm_start_handler(int irq, void *context, void *arg);
 
 #ifdef CONFIG_SMP
 int arm_pause_handler(int irq, void *context, void *arg);
+#endif
+
+/****************************************************************************
+ * Name: arm_pause_async_handler
+ *
+ * Description:
+ *   This is the handler for async pause.
+ *
+ *   1. It saves the current task state at the head of the current assigned
+ *      task list.
+ *   2. It porcess g_delivertasks
+ *   3. Returns from interrupt, restoring the state of the new task at the
+ *      head of the ready to run list.
+ *
+ * Input Parameters:
+ *   Standard interrupt handling
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+int arm_pause_async_handler(int irq, void *context, void *arg);
 #endif
 
 /****************************************************************************
