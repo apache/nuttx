@@ -56,6 +56,20 @@ CSRCS += libmetal/lib/version.c
 
 CFLAGS += -DMETAL_INTERNAL
 
+# Check whether the current toolchain supports 64-bit atomic
+ATOMIC_DETECT_CODE := detect_64_atomic.c
+ATOMIC_DETECT_BIN := detect_64_atomic_bin
+DETECT_ATOMIC_SUPPORT = \
+    echo '\#include <stdatomic.h>' > $(ATOMIC_DETECT_CODE); \
+    echo 'int main() { _Atomic long long x = 0; return x; }' >> $(ATOMIC_DETECT_CODE); \
+    if $(CC) -o $(ATOMIC_DETECT_BIN) $(ATOMIC_DETECT_CODE) 2>/dev/null; then \
+        echo ""; \
+    else \
+        echo "-DNO_ATOMIC_64_SUPPORT"; \
+    fi; \
+
+CFLAGS += $(shell $(DETECT_ATOMIC_SUPPORT))
+
 LIBMETAL_HDRS_SEDEXP := \
 	"s/@PROJECT_VERSION_MAJOR@/0/g; \
 	 s/@PROJECT_VERSION_MINOR@/1/g; \
@@ -105,5 +119,7 @@ ifeq ($(wildcard libmetal/.git),)
 	$(call DELFILE, libmetal.zip)
 endif
 	$(call DELFILE, .libmetal_headers)
+	$(call DELFILE, $(ATOMIC_DETECT_CODE))
+	$(call DELFILE, $(ATOMIC_DETECT_BIN))
 
 endif
