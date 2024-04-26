@@ -911,6 +911,8 @@ static void arm_gic0_initialize(void)
   /* Attach SGI interrupt handlers. This attaches the handler to all CPUs. */
 
   DEBUGVERIFY(irq_attach(GIC_SMP_CPUPAUSE, arm64_pause_handler, NULL));
+  DEBUGVERIFY(irq_attach(GIC_SMP_CPUPAUSE_ASYNC,
+                         arm64_pause_async_handler, NULL));
   DEBUGVERIFY(irq_attach(GIC_SMP_CPUCALL,
                          nxsched_smp_call_handler, NULL));
 #endif
