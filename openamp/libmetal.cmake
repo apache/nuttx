@@ -60,80 +60,37 @@ else()
   set(LIBMETAL_ARCH ${CONFIG_ARCH})
 endif()
 
-set(PROJECT_VERSION_MAJOR 0)
-set(PROJECT_VERSION_MINOR 1)
-set(PROJECT_VERSION_PATCH 0)
-set(PROJECT_VERSION 0.1.0)
 set(PROJECT_SYSTEM nuttx)
-set(PROJECT_PROCESSOR ${LIBMETAL_ARCH})
-set(PROJECT_MACHINE ${CONFIG_ARCH_CHIP})
-set(PROJECT_SYSTEM_UPPER nuttx)
-set(PROJECT_PROCESSOR_UPPER ${LIBMETAL_ARCH})
-set(PROJECT_MACHINE_UPPER ${CONFIG_ARCH_CHIP})
+set(CMAKE_SYSTEM_PROCESSOR ${LIBMETAL_ARCH})
+set(MACHINE ${CONFIG_ARCH})
+set(CMAKE_SYSTEM_NAME NuttX)
+set(WITH_DOC OFF)
 
-set(headers)
-file(
-  GLOB headers
-  LIST_DIRECTORIES false
-  RELATIVE ${CMAKE_CURRENT_LIST_DIR}/libmetal/lib
-  ${CMAKE_CURRENT_LIST_DIR}/libmetal/lib/*.h)
-foreach(header ${headers})
-  configure_file(${CMAKE_CURRENT_LIST_DIR}/libmetal/lib/${header}
-                 ${CMAKE_BINARY_DIR}/include/metal/${header})
-endforeach()
+# cmake-format: off
+set(ATOMIC_TEST_CODE
+  [-[
+    #include <stdatomic.h>
+    int main() {
+        _Atomic long long x = 0;
+        return x;
+    }
+  ]-]
+)
+# cmake-format: on
 
-set(headers)
-file(
-  GLOB headers
-  LIST_DIRECTORIES false
-  RELATIVE ${CMAKE_CURRENT_LIST_DIR}/libmetal/lib/system/nuttx
-  ${CMAKE_CURRENT_LIST_DIR}/libmetal/lib/system/nuttx/*.h)
-foreach(header ${headers})
-  configure_file(${CMAKE_CURRENT_LIST_DIR}/libmetal/lib/system/nuttx/${header}
-                 ${CMAKE_BINARY_DIR}/include/metal/system/nuttx/${header})
-endforeach()
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test_atomic.c ${ATOMIC_TEST_CODE})
 
-set(headers)
-file(
-  GLOB headers
-  LIST_DIRECTORIES false
-  RELATIVE ${CMAKE_CURRENT_LIST_DIR}/libmetal/lib/processor/${LIBMETAL_ARCH}
-  ${CMAKE_CURRENT_LIST_DIR}/libmetal/lib/processor/${LIBMETAL_ARCH}/*.h)
-foreach(header ${headers})
-  configure_file(
-    ${CMAKE_CURRENT_LIST_DIR}/libmetal/lib/processor/${LIBMETAL_ARCH}/${header}
-    ${CMAKE_BINARY_DIR}/include/metal/processor/${LIBMETAL_ARCH}/${header})
-endforeach()
+try_compile(HAS_64BIT_ATOMIC_SUPPORT ${CMAKE_CURRENT_BINARY_DIR}
+            ${CMAKE_CURRENT_BINARY_DIR}/test_atomic.c)
 
-set(headers)
-file(
-  GLOB headers
-  LIST_DIRECTORIES false
-  RELATIVE ${CMAKE_CURRENT_LIST_DIR}/libmetal/lib/compiler/gcc
-  ${CMAKE_CURRENT_LIST_DIR}/libmetal/lib/compiler/gcc/*.h)
-foreach(header ${headers})
-  configure_file(${CMAKE_CURRENT_LIST_DIR}/libmetal/lib/compiler/gcc/${header}
-                 ${CMAKE_BINARY_DIR}/include/metal/compiler/gcc/${header})
-endforeach()
+if(NOT HAS_64BIT_ATOMIC_SUPPORT)
+  add_compile_options(-DNO_ATOMIC_64_SUPPORT)
+endif()
 
-nuttx_add_kernel_library(lib_metal)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libmetal
+                 ${CMAKE_CURRENT_BINARY_DIR}/libmetal EXCLUDE_FROM_ALL)
 
-target_sources(
-  lib_metal
-  PRIVATE libmetal/lib/system/nuttx/condition.c
-          libmetal/lib/system/nuttx/device.c
-          libmetal/lib/system/nuttx/init.c
-          libmetal/lib/system/nuttx/io.c
-          libmetal/lib/system/nuttx/irq.c
-          libmetal/lib/system/nuttx/shmem.c
-          libmetal/lib/system/nuttx/time.c
-          libmetal/lib/device.c
-          libmetal/lib/dma.c
-          libmetal/lib/init.c
-          libmetal/lib/io.c
-          libmetal/lib/irq.c
-          libmetal/lib/log.c
-          libmetal/lib/shmem.c
-          libmetal/lib/version.c)
+nuttx_create_symlink(${CMAKE_CURRENT_BINARY_DIR}/libmetal/lib/include/metal
+                     ${CMAKE_BINARY_DIR}/include/metal)
 
-target_compile_definitions(lib_metal PRIVATE METAL_INTERNAL)
+nuttx_add_external_library(metal-static MODE KERNEL)

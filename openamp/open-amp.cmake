@@ -86,28 +86,25 @@ if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/open-amp)
   endif()
 endif()
 
-nuttx_add_kernel_library(openamp)
-
 if(CONFIG_OPENAMP_CACHE)
-  target_compile_options(openamp PRIVATE -DVIRTIO_CACHED_BUFFERS)
-  target_compile_options(openamp PRIVATE -DVIRTIO_CACHED_VRINGS)
+  set(WITH_DCACHE_VRINGS ON)
 endif()
 
 if(CONFIG_OPENAMP_RPMSG_DEBUG)
-  target_compile_options(openamp PRIVATE -DRPMSG_DEBUG)
+  add_compile_definitions(RPMSG_DEBUG)
 endif()
 
 if(CONFIG_OPENAMP_VQUEUE_DEBUG)
-  target_compile_options(openamp PRIVATE -DVQUEUE_DEBUG)
+  add_compile_definitions(VQUEUE_DEBUG)
 endif()
 
-target_sources(
-  openamp
-  PRIVATE open-amp/lib/remoteproc/elf_loader.c
-          open-amp/lib/remoteproc/remoteproc.c
-          open-amp/lib/remoteproc/remoteproc_virtio.c
-          open-amp/lib/remoteproc/rsc_table_parser.c
-          open-amp/lib/rpmsg/rpmsg.c
-          open-amp/lib/rpmsg/rpmsg_virtio.c
-          open-amp/lib/virtio/virtio.c
-          open-amp/lib/virtio/virtqueue.c)
+set(WITH_LIBMETAL_FIND OFF)
+
+if(NOT CMAKE_SYSTEM_PROCESSOR)
+  set(CMAKE_SYSTEM_PROCESSOR ${CONFIG_ARCH})
+endif()
+
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/open-amp
+                 ${CMAKE_CURRENT_BINARY_DIR}/open-amp EXCLUDE_FROM_ALL)
+
+nuttx_add_external_library(open_amp-static MODE KERNEL)
