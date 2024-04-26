@@ -247,6 +247,13 @@ static int ivshmem_probe(FAR struct pci_device_s *dev)
                           (FAR char *)ivdev->reg + IVSHMEM_REG_IVPOSITION,
                           &ivdev->vmid);
 
+      if (ivdev->vmid != 0 && ivdev->vmid != 1)
+        {
+          ret = -EINVAL;
+          pcierr("Vmid must be 0 or 1\n");
+          goto err_master;
+        }
+
       ret = pci_alloc_irq(dev, &ivdev->irq, 1);
       if (ret != 1)
         {
@@ -296,7 +303,7 @@ static void ivshmem_remove(FAR struct pci_device_s *dev)
   FAR struct ivshmem_device_s *ivdev = dev->priv;
 
   ivshmem_unregister_device(ivdev);
-  if (ivdev->reg != NULL)
+  if (ivdev->vmid != IVSHMEM_INVALID_VMID)
     {
       pci_release_irq(dev, &ivdev->irq, 1);
     }
