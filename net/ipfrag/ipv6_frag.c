@@ -570,7 +570,7 @@ int32_t ipv6_fragout(FAR struct net_driver_s *dev, uint16_t mtu)
   uint32_t nfrags;
   uint16_t hdroff;
   uint16_t hdrtype;
-  FAR struct iob_s *frag;
+  FAR struct iob_s *frag = NULL;
   FAR struct ipv6_hdr_s *ref = NULL;
   FAR struct ipv6_fragment_extension_s *fraghdr;
   struct iob_queue_s fragq =
@@ -590,8 +590,14 @@ int32_t ipv6_fragout(FAR struct net_driver_s *dev, uint16_t mtu)
    */
 
   nfrags = ip_fragout_slice(dev->d_iob, PF_INET6, mtu, unfraglen, &fragq);
-  ASSERT(nfrags > 1);
   netdev_iob_clear(dev);
+
+  /* No I/O Buffer is the only cause of failure */
+
+  if (nfrags == 0)
+    {
+      goto fail;
+    }
 
   ipid = ++g_ipv6id;
 
