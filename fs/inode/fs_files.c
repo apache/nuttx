@@ -90,17 +90,16 @@ static int files_extend(FAR struct filelist *list, size_t row)
   int i;
   int j;
 
-  if (row <= list->fl_rows)
+  orig_rows = list->fl_rows;
+  if (row <= orig_rows)
     {
       return 0;
     }
 
-  if (files_countlist(list) > OPEN_MAX)
+  if (CONFIG_NFILE_DESCRIPTORS_PER_BLOCK * orig_rows > OPEN_MAX)
     {
       return -EMFILE;
     }
-
-  orig_rows = list->fl_rows;
 
   files = kmm_malloc(sizeof(FAR struct file *) * row);
   DEBUGASSERT(files);
@@ -109,14 +108,14 @@ static int files_extend(FAR struct filelist *list, size_t row)
       return -ENFILE;
     }
 
-  i = list->fl_rows;
+  i = orig_rows;
   do
     {
       files[i] = kmm_zalloc(sizeof(struct file) *
                             CONFIG_NFILE_DESCRIPTORS_PER_BLOCK);
       if (files[i] == NULL)
         {
-          while (--i >= list->fl_rows)
+          while (--i >= orig_rows)
             {
               kmm_free(files[i]);
             }
