@@ -1298,8 +1298,9 @@ static int romfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
 
   /* Everything else follows in units of sectors */
 
-  buf->f_blocks  = SEC_NSECTORS(rm, rm->rm_volsize + SEC_NDXMASK(rm));
-  buf->f_bfree   = rm->rm_hwnsectors - buf->f_blocks;
+  buf->f_blocks  = rm->rm_hwnsectors;
+  buf->f_bfree   = buf->f_blocks -
+                   SEC_NSECTORS(rm, rm->rm_volsize + SEC_NDXMASK(rm));
   buf->f_bavail  = buf->f_bfree;
   buf->f_namelen = NAME_MAX;
 
