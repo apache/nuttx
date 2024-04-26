@@ -65,6 +65,13 @@
 #define PWM_RES          65535
 #define COMP_UNITS_NUM   8
 
+/* Sync offset flags defines */
+
+#define CH0_SYNC_FLAG    (1 << 0)
+#define CH1_SYNC_FLAG    (1 << 1)
+#define CH2_SYNC_FLAG    (1 << 2)
+#define CH3_SYNC_FLAG    (1 << 3)
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -104,6 +111,7 @@ struct sam_pwm_s
   const struct sam_pwm_fault_s *fault;
   uint8_t channels_num;           /* Number of channels */
   uintptr_t base;                 /* Base address of peripheral register */
+  uint8_t sync;                   /* Flags of synchronized channels */
 };
 
 /* PWM driver methods */
@@ -229,6 +237,38 @@ static struct sam_pwm_fault_s g_pwm0_fault =
   .gpio_2 = GPIO_PWMC0_FI2,
 };
 
+/* Define sync flags */
+
+#ifdef CONFIG_SAMV7_PWM0_SYNC
+  #define PWM0_CH0_SYNC_FLAG     CH0_SYNC_FLAG
+
+  #ifdef CONFIG_SAMV7_PWM0_CH1_SYNC
+    #define PWM0_CH1_SYNC_FLAG   CH1_SYNC_FLAG
+  #else
+    #define PWM0_CH1_SYNC_FLAG   0
+  #endif
+
+  #ifdef CONFIG_SAMV7_PWM0_CH2_SYNC
+    #define PWM0_CH2_SYNC_FLAG   CH2_SYNC_FLAG
+  #else
+    #define PWM0_CH2_SYNC_FLAG   0
+  #endif
+
+  #ifdef CONFIG_SAMV7_PWM0_CH3_SYNC
+    #define PWM0_CH3_SYNC_FLAG   CH3_SYNC_FLAG
+  #else
+    #define PWM0_CH3_SYNC_FLAG   0
+  #endif
+#else
+  #define PWM0_CH0_SYNC_FLAG     0
+  #define PWM0_CH1_SYNC_FLAG     0
+  #define PWM0_CH2_SYNC_FLAG     0
+  #define PWM0_CH3_SYNC_FLAG     0
+#endif
+
+#define PWM0_SYNC_FLAGS          (PWM0_CH0_SYNC_FLAG | PWM0_CH1_SYNC_FLAG | \
+                                  PWM0_CH2_SYNC_FLAG | PWM0_CH3_SYNC_FLAG)
+
 static struct sam_pwm_s g_pwm0 =
 {
   .ops = &g_pwmops,
@@ -237,6 +277,7 @@ static struct sam_pwm_s g_pwm0 =
   .fault = &g_pwm0_fault,
   .channels_num = PWM0_NCHANNELS,
   .base = SAM_PWM0_BASE,
+  .sync = PWM0_SYNC_FLAGS,
 };
 #endif /* CONFIG_SAMV7_PWM0 */
 
@@ -340,6 +381,38 @@ static struct sam_pwm_fault_s g_pwm1_fault =
   .gpio_2 = GPIO_PWMC1_FI2,
 };
 
+/* Define sync flags */
+
+#ifdef CONFIG_SAMV7_PWM1_SYNC
+  #define PWM1_CH0_SYNC_FLAG     CH0_SYNC_FLAG
+
+  #ifdef CONFIG_SAMV7_PWM1_CH1_SYNC
+    #define PWM1_CH1_SYNC_FLAG   CH1_SYNC_FLAG
+  #else
+    #define PWM1_CH1_SYNC_FLAG   0
+  #endif
+
+  #ifdef CONFIG_SAMV7_PWM1_CH2_SYNC
+    #define PWM1_CH2_SYNC_FLAG   CH2_SYNC_FLAG
+  #else
+    #define PWM1_CH2_SYNC_FLAG   0
+  #endif
+
+  #ifdef CONFIG_SAMV7_PWM1_CH3_SYNC
+    #define PWM1_CH3_SYNC_FLAG   CH3_SYNC_FLAG
+  #else
+    #define PWM1_CH3_SYNC_FLAG   0
+  #endif
+#else
+  #define PWM1_CH0_SYNC_FLAG     0
+  #define PWM1_CH1_SYNC_FLAG     0
+  #define PWM1_CH2_SYNC_FLAG     0
+  #define PWM1_CH3_SYNC_FLAG     0
+#endif
+
+#define PWM1_SYNC_FLAGS          (PWM1_CH0_SYNC_FLAG | PWM1_CH1_SYNC_FLAG | \
+                                  PWM1_CH2_SYNC_FLAG | PWM1_CH3_SYNC_FLAG)
+
 static struct sam_pwm_s g_pwm1 =
 {
   .ops = &g_pwmops,
@@ -348,6 +421,7 @@ static struct sam_pwm_s g_pwm1 =
   .fault = &g_pwm1_fault,
   .channels_num = PWM1_NCHANNELS,
   .base = SAM_PWM1_BASE,
+  .sync = PWM1_SYNC_FLAGS,
 };
 
 #endif
@@ -496,10 +570,14 @@ static void pwm_set_output(struct pwm_lowerhalf_s *dev, uint8_t channel,
                  width);
     }
 
-  /* Enable the channel */
-
   regval = CHID_SEL(1 << channel);
-  pwm_putreg(priv, SAMV7_PWM_ENA, regval);
+
+  /* The enabling of a channel should be only done on unsynced channels */
+
+  if (!(priv->sync & regval))
+    {
+      pwm_putreg(priv, SAMV7_PWM_ENA, regval);
+    }
 }
 
 /****************************************************************************
@@ -684,6 +762,13 @@ static void pwm_set_polarity(struct pwm_lowerhalf_s *dev, uint8_t channel,
   struct sam_pwm_s *priv = (struct sam_pwm_s *)dev;
   uint16_t regval;
 
+  /* Can't change polarity, if the channel is enabled! */
+
+  if (pwm_getreg(priv, SAMV7_PWM_SR) & CHID_SEL(1 << channel))
+    {
+      return;
+    }
+
   regval = pwm_getreg(priv, SAMV7_PWM_CMRX + (channel * CHANNEL_OFFSET));
   regval &= ~CMR_CPOL;
   regval &= ~CMR_DPOLI;
@@ -810,6 +895,14 @@ static int pwm_setup(struct pwm_lowerhalf_s *dev)
   pwm_putreg(priv, SAMV7_PWM_FPV1, 0);
   pwm_putreg(priv, SAMV7_PWM_FPV2, 0);
 
+  /* Enable synchronous channels. The flags in priv->sync
+   * correspond to the lowest bits in PWM_SCM.
+   * UPDM[1:0] is set to zero (manual update of deadtime, duty).
+   */
+
+  regval = (uint32_t)priv->sync;
+  pwm_putreg(priv, SAMV7_PWM_SCM, regval);
+
   return OK;
 }
 
@@ -864,9 +957,7 @@ static int pwm_start(struct pwm_lowerhalf_s *dev,
                      const struct pwm_info_s *info)
 {
   struct sam_pwm_s *priv = (struct sam_pwm_s *)dev;
-#ifdef CONFIG_PWM_OVERWRITE
   uint32_t regval;
-#endif
 
 #ifdef CONFIG_PWM_MULTICHAN
       for (int i = 0; i < PWM_NCHANNELS; i++)
@@ -920,6 +1011,25 @@ static int pwm_start(struct pwm_lowerhalf_s *dev,
 #endif
             }
         }
+
+      /* Perform the update of synchronized PWM channels */
+
+      if (priv->sync)
+        {
+          regval = SCUC_UPDULOCK;
+
+          /* Enable the Channel 0 if synchronous channels are used.
+           * Channel 0's counter is used by all synchronous channels and
+           * enabling CH0 results in enabling all synchronous channels.
+           *
+           * Enable the CH0 here after all setting all channel parameters,
+           * because setting polarity configurations requires disabled
+           * channels.
+           */
+
+          pwm_putreg(priv, SAMV7_PWM_ENA, CHID_SEL(1));
+          pwm_putreg(priv, SAMV7_PWM_SCUC, regval);
+        }
 #else
       /* Set the frequency and enable PWM output just for first channel */
 
@@ -969,6 +1079,12 @@ static int pwm_stop(struct pwm_lowerhalf_s *dev)
       pwm_putreg(priv, SAMV7_PWM_DIS, regval);
     }
 
+  /* Just to be sure, disable all sync channels too */
+
+  regval = pwm_getreg(priv, SAMV7_PWM_SCM);
+  regval &= ~(CHID_SEL(1 << 0) | CHID_SEL(1 << 1) |
+              CHID_SEL(1 << 2) | CHID_SEL(1 << 3));
+  pwm_putreg(priv, SAMV7_PWM_SCM, regval);
 #else
   regval = CHID_SEL(1 << priv->channels[0].channel);
   pwm_putreg(priv, SAMV7_PWM_DIS, regval);
