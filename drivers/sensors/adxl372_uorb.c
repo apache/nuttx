@@ -493,6 +493,10 @@ static int adxl372_thread(int argc, FAR char **argv)
 
       if (priv->enabled)
         {
+          /* Wait for data ready */
+
+          while (!(adxl372_getreg8(priv, ADXL372_STATUS) & 0x01));
+
           adxl372_getregs(priv, ADXL372_XDATA_H, (FAR uint8_t *)data, 6);
 
           accel.timestamp   = sensor_get_timestamp();
