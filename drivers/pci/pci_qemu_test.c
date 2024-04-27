@@ -319,6 +319,10 @@ static int pci_qemu_test_probe(FAR struct pci_device_s *dev)
         {
           ops = &g_pci_qemu_test_io_ops;
         }
+      else
+        {
+          PANIC();
+        }
 
       for (test_cnt = 0; test_cnt < 0xff; test_cnt++)
         {
