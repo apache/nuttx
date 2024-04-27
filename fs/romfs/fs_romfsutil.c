@@ -563,8 +563,8 @@ static int romfs_cachenode(FAR struct romfs_mountpt_s *rm,
         }
 
       rm->rm_volsize += totalsize;
-      ret = romfs_alloc_spareregion(&rm->rm_sparelist, offset,
-                                    offset + totalsize);
+      ret = romfs_alloc_spareregion(&rm->rm_sparelist, origoffset,
+                                    origoffset + totalsize);
       if (ret < 0)
         {
           return ret;
