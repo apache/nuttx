@@ -125,6 +125,12 @@ uint64_t riscv_sbi_get_time(void)
 #endif
 }
 
+uintptr_t riscv_sbi_send_ipi(uint32_t hmask, uintptr_t hbase)
+{
+  return sbi_ecall(SBI_EXT_IPI, SBI_EXT_IPI_SEND_IPI,
+      hmask, hbase, 0, 0, 0, 0);
+}
+
 #ifndef CONFIG_NUTTSBI
 uintptr_t riscv_sbi_boot_secondary(uint32_t hartid, uintptr_t addr,
                                    uintptr_t a1)

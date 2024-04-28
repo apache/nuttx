@@ -24,6 +24,8 @@ if(CONFIG_NUTTSBI)
 
   list(APPEND SRCS sbi_mtimer.c sbi_mexception.c sbi_mcall.c sbi_mscratch.c)
 
+  list(APPEND SRCS sbi_ipi.c)
+
   target_sources(arch PRIVATE ${SRCS})
 
 endif()
