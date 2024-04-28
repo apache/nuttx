@@ -168,6 +168,19 @@
 
 #endif
 
+/* SBI Extension IDs */
+
+#define SBI_EXT_HSM             0x48534D
+#define SBI_EXT_TIME            0x54494D45
+
+/* SBI function IDs for TIME extension */
+
+#define SBI_EXT_TIME_SET_TIMER  0x0
+
+/* SBI function IDs for HSM extension */
+
+#define SBI_EXT_HSM_HART_START  0x0
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
