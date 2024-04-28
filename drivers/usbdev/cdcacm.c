@@ -1491,7 +1491,6 @@ static void cdcacm_unbind(FAR struct usbdevclass_driver_s *driver,
        */
 
       cdcacm_resetconfig(priv);
-      up_mdelay(50);
 
       /* Free the pre-allocated control request */
 
