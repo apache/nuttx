@@ -70,10 +70,19 @@ machine_trap:
 
   sll        a0, a0, 1            /* Shift msbit out */
   li         a1, MTIMER_IRQ * 2   /* Machine timer irq ? (shifted left) */
+  beq        a0, a1, 2f
+  li         a1, IPI_IRQ * 2      /* Machine IPI irq ? (shifted left) */
   bne        a0, a1, 1f
 
   /* Delegate interrupt to S-mode handler */
 
+  li         a0, MIP_MSIP
+  csrc       CSR_MIE, a0
+  li         a0, MIP_SSIP
+  csrs       CSR_MIP, a0
+  j          1f
+
+2:
   li         a0, MIP_MTIP
   csrc       CSR_MIE, a0
   li         a0, MIP_STIP
