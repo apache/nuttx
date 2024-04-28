@@ -384,7 +384,7 @@
  * Parameter:
  *   base - Pointer to where the stack is allocated (e.g. _ebss)
  *   size - Stack size for pre cpu to allocate
- *   size - Hart id register of this hart (Usually a0)
+ *   hartid - Hart id register of this hart (Usually a0)
  *
  ****************************************************************************/
 .macro riscv_set_inital_sp base, size, hartid
