@@ -53,7 +53,9 @@
 int modlib_remove(FAR void *handle)
 {
   FAR struct module_s *modp = (FAR struct module_s *)handle;
+  FAR void (**array)(void);
   int ret;
+  int i;
 
   DEBUGASSERT(modp != NULL);
 
@@ -83,6 +85,12 @@ int modlib_remove(FAR void *handle)
 
   /* Is there an uninitializer? */
 
+  array = (FAR void (**)(void))modp->finiarr;
+  for (i = 0; i < modp->nfini; i++)
+    {
+      array[i]();
+    }
+
   if (modp->modinfo.uninitializer != NULL)
     {
       /* Try to uninitialize the module */
@@ -97,11 +105,12 @@ int modlib_remove(FAR void *handle)
           goto errout_with_lock;
         }
 
+      modlib_freesymtab(modp);
+
       /* Nullify so that the uninitializer cannot be called again */
 
       modp->modinfo.uninitializer = NULL;
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
-      modp->initializer           = NULL;
       modp->modinfo.arg           = NULL;
       modp->modinfo.exports       = NULL;
       modp->modinfo.nexports      = 0;

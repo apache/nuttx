@@ -137,8 +137,8 @@ static int modprocfs_callback(FAR struct module_s *modp, FAR void *arg)
   priv = (FAR struct modprocfs_file_s *)arg;
 
   linesize = snprintf(priv->line, MOD_LINELEN,
-                      "%s,%p,%p,%p,%u,%p,%lu,%p,%lu\n",
-                      modp->modname, modp->initializer,
+                      "%s,%p,%p,%u,%p,%lu,%p,%lu\n",
+                      modp->modname,
                       modp->modinfo.uninitializer, modp->modinfo.arg,
                       modp->modinfo.nexports,
                       modp->textalloc,

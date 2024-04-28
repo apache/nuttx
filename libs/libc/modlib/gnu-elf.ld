@@ -33,6 +33,16 @@ SECTIONS
       _etext = . ;
     }
 
+  .init_array :
+    {
+      *(.init_array)
+    }
+
+  .fini_array :
+    {
+      *(.fini_array)
+    }
+
   .rodata :
     {
       _srodata = . ;
