@@ -49,6 +49,10 @@
 #include "stm32_fdcan_sock.h"
 #endif
 
+#ifdef CONFIG_RNDIS
+#include <nuttx/usb/rndis.h>
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -240,6 +244,17 @@ int stm32_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: stm32_n25qxxx_setup failed: %d\n", ret);
     }
+#endif
+
+#if defined(CONFIG_RNDIS) && !defined(CONFIG_RNDIS_COMPOSITE)
+  uint8_t mac[6];
+  mac[0] = 0xa0;
+  mac[1] = (CONFIG_NETINIT_MACADDR_2 >> (8 * 0)) & 0xff;
+  mac[2] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 3)) & 0xff;
+  mac[3] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 2)) & 0xff;
+  mac[4] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 1)) & 0xff;
+  mac[5] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 0)) & 0xff;
+  usbdev_rndis_initialize(mac);
 #endif
 
   return OK;

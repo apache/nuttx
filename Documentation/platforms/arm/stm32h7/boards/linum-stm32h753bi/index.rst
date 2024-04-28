@@ -590,3 +590,104 @@ This example use the flash memory W25Q128JV via qspi with the littlefs file syst
     .
     ..
     message.txt
+
+rndis
+-----
+This exemple use ethernet over usb and show how configure ip and download file with wget command from server.
+
+After flash the board check if the linux found and recognized the new network driver:: 
+
+    $ sudo dmesg | tail
+    [30260.873245] rndis_host 3-1.3:1.0 enxa0e0deadbeef: unregister 'rndis_host' usb-0000:00:14.0-1.3, RNDIS device
+    [30265.461419] usb 3-1.3: new full-speed USB device number 34 using xhci_hcd
+    [30265.563354] usb 3-1.3: New USB device found, idVendor=584e, idProduct=5342, bcdDevice= 0.01
+    [30265.563359] usb 3-1.3: New USB device strings: Mfr=1, Product=2, SerialNumber=3
+    [30265.563361] usb 3-1.3: Product: RNDIS gadget
+    [30265.563362] usb 3-1.3: Manufacturer: NuttX
+    [30265.563363] usb 3-1.3: SerialNumber: 1234
+    [30265.572179] rndis_host 3-1.3:1.0: dev can't take 1558 byte packets (max 660), adjusting MTU to 602
+    [30265.573517] rndis_host 3-1.3:1.0 eth0: register 'rndis_host' at usb-0000:00:14.0-1.3, RNDIS device, a0:e0:de:ad:be:ef
+    [30265.584924] rndis_host 3-1.3:1.0 enxa0e0deadbeef: renamed from eth0
+
+    $ ifconfig
+    enxa0e0deadbeef: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 602
+    inet 10.42.0.1  netmask 255.255.255.0  broadcast 10.42.0.255
+    ether a0:e0:de:ad:be:ef  txqueuelen 1000  (Ethernet)
+    RX packets 87  bytes 10569 (10.5 KB)
+    RX errors 0  dropped 0  overruns 0  frame 0
+    TX packets 99  bytes 22896 (22.8 KB)
+    TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+obs: In network settings of PC enable "Shared to other computers"
+
+Configure the IP of target::
+
+    nsh> ifconfig eth0 10.42.0.2
+    nsh> ifconfig
+    lo	Link encap:Local Loopback at RUNNING mtu 1518
+    inet addr:127.0.0.1 DRaddr:127.0.0.1 Mask:255.0.0.0
+
+    eth0	Link encap:Ethernet HWaddr 00:e0:de:ad:be:ef at UP mtu 576
+    inet addr:10.42.0.2 DRaddr:10.42.0.1 Mask:255.255.255.0
+
+                IPv4   TCP   UDP  ICMP
+    Received     012a  0000  0126  0000
+    Dropped      0004  0000  0000  0000
+      IPv4        VHL: 0000   Frg: 0001
+      Checksum   0000  0000  0000  ----
+      TCP         ACK: 0000   SYN: 0000
+                  RST: 0000  0000
+      Type       0000  ----  ----  0000
+    Sent         0000  0000  0000  0000
+      Rexmit     ----  0000  ----  ----
+    nsh> 
+
+Testing communication with PC using ping command::
+
+    nsh> ping 10.42.0.1
+    PING 10.42.0.1 56 bytes of data
+    56 bytes from 10.42.0.1: icmp_seq=0 time=0.0 ms
+    56 bytes from 10.42.0.1: icmp_seq=1 time=0.0 ms
+    56 bytes from 10.42.0.1: icmp_seq=2 time=0.0 ms
+    56 bytes from 10.42.0.1: icmp_seq=3 time=0.0 ms
+    56 bytes from 10.42.0.1: icmp_seq=4 time=0.0 ms
+    56 bytes from 10.42.0.1: icmp_seq=5 time=0.0 ms
+    56 bytes from 10.42.0.1: icmp_seq=6 time=0.0 ms
+    56 bytes from 10.42.0.1: icmp_seq=7 time=0.0 ms
+    56 bytes from 10.42.0.1: icmp_seq=8 time=0.0 ms
+    56 bytes from 10.42.0.1: icmp_seq=9 time=0.0 ms
+    10 packets transmitted, 10 received, 0% packet loss, time 10100 ms
+    rtt min/avg/max/mdev = 0.000/0.000/0.000/0.000 ms
+
+In your pc you will be able connect to target using telnet and access their shell nsh::
+
+    $ telnet 10.42.0.2
+    Trying 10.42.0.2...
+    Connected to 10.42.0.2.
+    Escape character is '^]'.
+
+    NuttShell (NSH) NuttX-12.5.1
+    nsh> uname -a
+    NuttX  12.5.1 c148e8f2af-dirty Apr 28 2024 10:27:50 arm linum-stm32h753bi
+    nsh> exit
+    Connection closed by foreign host.
+    $
+    
+Testing wget to download file from server::
+
+    # PC: Creating a http server and sharing local folder.
+    $ sudo python3 -m http.server 80 -d ./
+
+    # log of server
+    Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ...
+    10.42.0.2 - - [28/Apr/2024 16:14:39] "GET /nuttx_logo.txt HTTP/1.0" 200 -
+
+    # Using wget on target    
+    nsh> mount -t tmpfs /tmp
+    nsh> cd /tmp
+    nsh> pwd
+    /tmp
+    nsh> wget http://10.42.0.1/nuttx_logo.txt
+    nsh> ls
+    /tmp:
+    nuttx_logo.txt
