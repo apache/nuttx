@@ -494,3 +494,33 @@ NSH commands::
          qe_main:   4. 2
          qe_main:   5. 2
          Terminating!
+
+rndis
+-----
+
+Configures the NuttShell (nsh), enables a serial console on USART6 and enables RNDIS over USB.
+NSH commands::
+
+       nsh> ping -h
+
+       Usage: ping [-c <count>] [-i <interval>] [-W <timeout>] [-s <size>] <hostname>
+       ping -h
+
+       Where:
+       <hostname> is either an IPv4 address or the name of the remote host
+       that is requested the ICMPv4 ECHO reply.
+       -c <count> determines the number of pings.  Default 10.
+       -i <interval> is the default delay between pings (milliseconds).
+       Default 1000.
+       -W <timeout> is the timeout for wait response (milliseconds).
+       Default 1000.
+       -s <size> specifies the number of data bytes to be sent.  Default 56.
+       -h shows this text and exits.
+       
+       nsh> ping 10.42.0.1
+       PING 10.42.0.1 56 bytes of data
+       56 bytes from 10.42.0.1: icmp_seq=0 time=0.0 ms
+       56 bytes from 10.42.0.1: icmp_seq=1 time=0.0 ms
+       ...
+       10 packets transmitted, 10 received, 0% packet loss, time 10100 ms
+       rtt min/avg/max/mdev = 0.000/0.000/0.000/0.000 ms

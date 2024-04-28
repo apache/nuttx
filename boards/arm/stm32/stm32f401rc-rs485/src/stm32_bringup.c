@@ -55,6 +55,10 @@
 #include "board_qencoder.h"
 #endif
 
+#ifdef CONFIG_RNDIS
+#  include <nuttx/usb/rndis.h>
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -216,6 +220,17 @@ int stm32_bringup(void)
              ret);
       return ret;
     }
+#endif
+
+#if defined(CONFIG_RNDIS) && !defined(CONFIG_RNDIS_COMPOSITE)
+  uint8_t mac[6];
+  mac[0] = 0xa0; /* TODO */
+  mac[1] = (CONFIG_NETINIT_MACADDR_2 >> (8 * 0)) & 0xff;
+  mac[2] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 3)) & 0xff;
+  mac[3] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 2)) & 0xff;
+  mac[4] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 1)) & 0xff;
+  mac[5] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 0)) & 0xff;
+  usbdev_rndis_initialize(mac);
 #endif
 
   return ret;
