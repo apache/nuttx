@@ -605,7 +605,7 @@ static void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem,
   if (delay)
 #endif
     {
-      memset(mem, MM_FREE_MAGIC, nodesize);
+      memset(mem, MM_FREE_MAGIC, size);
     }
 #endif
 
@@ -1486,8 +1486,10 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
                      size_t size)
 {
   FAR void *newmem;
+#ifndef CONFIG_MM_KASAN
   size_t oldsize;
   size_t newsize;
+#endif
 
   /* If oldmem is NULL, then realloc is equivalent to malloc */
 
