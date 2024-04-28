@@ -814,32 +814,6 @@ static int modlib_relocatedyn(FAR struct module_s *modp,
         }
     }
 
-  /* Iterate through the dynamic symbol table looking for global symbols
-   * to put in our own symbol table for use with dlgetsym()
-   */
-
-  /* Relocate the entries in the table */
-
-  for (i = 0; i < symhdr->sh_size / sizeof(Elf_Sym); i++)
-    {
-      FAR Elf_Shdr *s = &loadinfo->shdr[sym[i].st_shndx];
-
-      if (sym[i].st_shndx != SHN_UNDEF)
-        {
-          if (s->sh_addr < loadinfo->datasec)
-            {
-              sym[i].st_value = sym[i].st_value + loadinfo->textalloc;
-            }
-          else
-            {
-              sym[i].st_value = sym[i].st_value -
-                                loadinfo->datasec + loadinfo->datastart;
-            }
-        }
-    }
-
-  ret = modlib_insertsymtab(modp, loadinfo, symhdr, sym);
-
   lib_free(sym);
   lib_free(rels);
   lib_free(dyn);
@@ -872,6 +846,8 @@ static int modlib_relocatedyn(FAR struct module_s *modp,
 int modlib_bind(FAR struct module_s *modp,
                 FAR struct mod_loadinfo_s *loadinfo)
 {
+  FAR Elf_Shdr *symhdr;
+  FAR Elf_Sym *sym;
   int ret;
   int i;
 
@@ -937,7 +913,8 @@ int modlib_bind(FAR struct module_s *modp,
            * relocate sections that were not loaded into memory.
            */
 
-          if ((loadinfo->shdr[infosec].sh_flags & SHF_ALLOC) == 0)
+          if ((loadinfo->shdr[i].sh_flags & SHF_ALLOC) == 0 &&
+              (loadinfo->shdr[i].sh_flags & SHF_INFO_LINK) == 0)
             {
               continue;
             }
@@ -952,6 +929,16 @@ int modlib_bind(FAR struct module_s *modp,
               case SHT_RELA:
                 ret = modlib_relocateadd(modp, loadinfo, i);
                 break;
+              case SHT_INIT_ARRAY:
+                loadinfo->initarr = loadinfo->shdr[i].sh_addr;
+                loadinfo->ninit = loadinfo->shdr[i].sh_size /
+                                  sizeof(uintptr_t);
+                break;
+              case SHT_FINI_ARRAY:
+                loadinfo->finiarr = loadinfo->shdr[i].sh_addr;
+                loadinfo->nfini = loadinfo->shdr[i].sh_size /
+                                  sizeof(uintptr_t);
+                break;
             }
         }
 
@@ -959,6 +946,37 @@ int modlib_bind(FAR struct module_s *modp,
         {
           break;
         }
+    }
+
+  symhdr = &loadinfo->shdr[loadinfo->symtabidx];
+  sym = lib_malloc(symhdr->sh_size);
+
+  ret = modlib_read(loadinfo, (FAR uint8_t *)sym, symhdr->sh_size,
+                    symhdr->sh_offset);
+
+  if (ret < 0)
+    {
+      berr("Failed to read symbol table\n");
+      lib_free(sym);
+      return ret;
+    }
+
+  for (i = 0; i < symhdr->sh_size / sizeof(Elf_Sym); i++)
+    {
+      FAR Elf_Shdr *s = &loadinfo->shdr[sym[i].st_shndx];
+
+      if (sym[i].st_shndx != SHN_UNDEF)
+        {
+          sym[i].st_value = sym[i].st_value + s->sh_addr;
+        }
+    }
+
+  ret = modlib_insertsymtab(modp, loadinfo, symhdr, sym);
+  lib_free(sym);
+  if (ret != 0)
+    {
+      binfo("Failed to export symbols program binary: %d\n", ret);
+      return ret;
     }
 
   /* Ensure that the I and D caches are coherent before starting the newly

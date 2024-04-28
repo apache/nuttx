@@ -155,9 +155,6 @@ struct module_s
 #ifdef HAVE_MODLIB_NAMES
   char modname[MODLIB_NAMEMAX];        /* Module name */
 #endif
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
-  mod_initializer_t initializer;       /* Module initializer function */
-#endif
   struct mod_info_s modinfo;           /* Module information */
   FAR void *textalloc;                 /* Allocated kernel text memory */
   FAR void *dataalloc;                 /* Allocated kernel memory */
