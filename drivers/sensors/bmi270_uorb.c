@@ -177,14 +177,6 @@ static int bmi270_activate(FAR struct sensor_lowerhalf_s *lower,
 
   if (start)
     {
-      /* Initialization sequence */
-
-      ret = bmi270_init_seq(&priv->base);
-      if (ret != 0)
-        {
-          return ret;
-        }
-
       /* Set normal mode */
 
       bmi270_set_normal_imu(&priv->base);
@@ -633,8 +625,6 @@ int bmi270_register_uorb(int devno, FAR struct spi_dev_s *spi)
       goto gyro_err;
     }
 
-  bmi270_accel_scale(tmp, 2);
-
   /* Gyroscope register */
 
   tmp                = &dev->priv[BMI270_GYRO_IDX];
@@ -660,8 +650,6 @@ int bmi270_register_uorb(int devno, FAR struct spi_dev_s *spi)
       goto gyro_err;
     }
 
-  bmi270_gyro_scale(tmp, 2000);
-
 #ifdef CONFIG_SENSORS_BMI270_SPI
   /* BMI270 detects communication bus is SPI by rising edge of CS. */
 
@@ -669,6 +657,19 @@ int bmi270_register_uorb(int devno, FAR struct spi_dev_s *spi)
   bmi270_getreg8(&tmp->base, 0x00);
   up_udelay(200);
 #endif
+
+  /* Initialization sequence */
+
+  ret = bmi270_init_seq(&tmp->base);
+  if (ret != 0)
+    {
+      return ret;
+    }
+
+  /* Set default scale */
+
+  bmi270_accel_scale(&dev->priv[BMI270_ACCEL_IDX], 2);
+  bmi270_gyro_scale(&dev->priv[BMI270_GYRO_IDX], 2000);
 
 #ifdef CONFIG_SENSORS_BMI270_POLL
   /* Create thread for polling sensor data */
