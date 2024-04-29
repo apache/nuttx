@@ -41,7 +41,7 @@
 #include "sam_tc.h"
 #include "sam_qencoder.h"
 
-#ifdef CONFIG_SENSORS_QENCODER
+#if defined(CONFIG_SENSORS_QENCODER) && defined(CONFIG_SAMV7_QENCODER)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -541,4 +541,4 @@ int sam_qeinitialize(const char *devpath, int tc)
   return OK;
 }
 
-#endif /* CONFIG_SENSORS_QENCODER */
+#endif /* CONFIG_SENSORS_QENCODER && CONFIG_SAMV7_QENCODER */
