@@ -70,7 +70,7 @@ static int modlib_section_alloc(FAR struct mod_loadinfo_s *loadinfo,
       /* Allocate memory info for all sections */
 
       loadinfo->sectalloc = lib_zalloc(sizeof(uintptr_t) *
-                                      loadinfo->ehdr.e_shnum);
+                                       loadinfo->ehdr.e_shnum);
       if (loadinfo->sectalloc == NULL)
         {
           return -ENOMEM;
