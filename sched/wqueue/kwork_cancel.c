@@ -96,7 +96,7 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue, int nthread,
       work->worker = NULL;
       ret = OK;
     }
-  else if (nthread > 0)
+  else if (!up_interrupt_context() && !sched_idletask() && nthread > 0)
     {
       int wndx;
 
