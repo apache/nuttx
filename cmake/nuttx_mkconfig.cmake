@@ -92,7 +92,10 @@ file(APPEND ${CONFIG_H}
 file(APPEND ${CONFIG_H} "#define CONFIG_BASE_DEFCONFIG \"${BASE_DEFCONFIG}\"\n")
 
 file(STRINGS ${CMAKE_BINARY_DIR}/.config ConfigContents)
+encode_brackets(ConfigContents)
 foreach(NameAndValue ${ConfigContents})
+  decode_brackets(NameAndValue)
+  encode_semicolon(NameAndValue)
   string(REGEX REPLACE "^[ ]+" "" NameAndValue ${NameAndValue})
   string(REGEX MATCH "^CONFIG[^=]+" NAME ${NameAndValue})
   # skip BASE_DEFCONFIG here as it is handled above
@@ -121,6 +124,7 @@ foreach(NameAndValue ${ConfigContents})
         endif()
       endforeach()
       if(NOT "${VALUE}" STREQUAL "")
+        decode_semicolon(VALUE)
         file(APPEND ${CONFIG_H} "#define ${NAME} ${VALUE}\n")
       endif()
     endif()
