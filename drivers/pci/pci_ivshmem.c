@@ -414,6 +414,19 @@ int ivshmem_control_irq(FAR struct ivshmem_device_s *dev, bool on)
 }
 
 /****************************************************************************
+ * Name: ivshmem_support_irq
+ *
+ * Description:
+ *   Judge if support ivshmem interrupt
+ *
+ ****************************************************************************/
+
+bool ivshmem_support_irq(FAR struct ivshmem_device_s *dev)
+{
+  return dev->vmid != IVSHMEM_INVALID_VMID;
+}
+
+/****************************************************************************
  * Name: ivshmem_kick_peer
  *
  * Description:
