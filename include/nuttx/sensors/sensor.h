@@ -353,6 +353,36 @@ struct sensor_ops_s
                     FAR char *buffer, size_t buflen);
 
   /**************************************************************************
+   * Name: flush
+   *
+   * When sensor data accumulates in the hardware buffer but does not
+   * reach the watermark, the upper-layer application can immediately push
+   * the fifo data to the upper layer circbuffer through the flush operation.
+   *
+   * The flush operation is an asynchronous operation. The lower half driver
+   * must call push event with data is NULL and len is zero when the flush
+   * action is completed, then upper half driver triggers the POLLPRI event,
+   * and update user state event to tell application the flush complete
+   * event.
+   *
+   * You can call the flush operation at any time. When the sensor is not
+   * activated, flsuh returns -EINVAL. When the sensor does not support fifo,
+   * it immediately returns the POLLPRI event, indicating that the flush
+   * is completed.
+   *
+   * Input Parameters:
+   *   lower      - The instance of lower half sensor driver.
+   *   filep      - The pointer of file, represents each user using sensor.
+   *
+   * Returned Value:
+   *   Zero (OK) on success; a negated errno value on failure.
+   *
+   **************************************************************************/
+
+  CODE int (*flush)(FAR struct sensor_lowerhalf_s *lower,
+                    FAR struct file *filep);
+
+  /**************************************************************************
    * Name: selftest
    *
    * Selftest allows for the testing of the mechanical and electrical
