@@ -162,29 +162,30 @@ int unload_module(FAR struct binary_s *binp)
         }
 
 #ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
-  for (i = 0; binp->sectalloc[i] != NULL && i < binp->nsect; i++)
-    {
-#  ifdef CONFIG_ARCH_USE_TEXT_HEAP
-      if (up_textheap_heapmember(binp->sectalloc[i]))
+      for (i = 0; binp->sectalloc[i] != NULL && i < binp->nsect; i++)
         {
-          up_textheap_free(binp->sectalloc[i]);
-          continue;
-        }
+#  ifdef CONFIG_ARCH_USE_TEXT_HEAP
+          if (up_textheap_heapmember(binp->sectalloc[i]))
+            {
+              up_textheap_free(binp->sectalloc[i]);
+            }
+          else
 #  endif
 
 #  ifdef CONFIG_ARCH_USE_DATA_HEAP
-      if (up_dataheap_heapmember(binp->sectalloc[i]))
-        {
-          up_dataheap_free(binp->sectalloc[i]);
-          continue;
-        }
+          if (up_dataheap_heapmember(binp->sectalloc[i]))
+            {
+              up_dataheap_free(binp->sectalloc[i]);
+            }
+          else
 #  endif
+            {
+              kumm_free(binp->sectalloc[i]);
+            }
+        }
 
-      kumm_free(binp->sectalloc[i]);
-    }
-
-  binp->alloc[0] = NULL;
-  binp->alloc[1] = NULL;
+      binp->alloc[0] = NULL;
+      binp->alloc[1] = NULL;
 #endif
 
       /* Free allocated address spaces */
