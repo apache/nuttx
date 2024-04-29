@@ -133,23 +133,6 @@ int tcp_getsockopt(FAR struct socket *psock, int option,
           }
         break;
 
-      case TCP_NODELAY:  /* Avoid coalescing of small segments. */
-        if (*value_len < sizeof(int))
-          {
-            ret                = -EINVAL;
-          }
-        else
-          {
-            FAR int *nodelay   = (FAR int *)value;
-
-            /* Always true here since we do not support Nagle. */
-
-            *nodelay           = 1;
-            *value_len         = sizeof(int);
-            ret                = OK;
-          }
-        break;
-
       case TCP_KEEPIDLE:  /* Start keepalives after this IDLE period */
       case TCP_KEEPINTVL: /* Interval between keepalives */
         {
@@ -217,6 +200,23 @@ int tcp_getsockopt(FAR struct socket *psock, int option,
           }
         break;
 #endif /* CONFIG_NET_TCP_KEEPALIVE */
+
+      case TCP_NODELAY:  /* Avoid coalescing of small segments. */
+        if (*value_len < sizeof(int))
+          {
+            ret                = -EINVAL;
+          }
+        else
+          {
+            FAR int *nodelay   = (FAR int *)value;
+
+            /* Always true here since we do not support Nagle. */
+
+            *nodelay           = 1;
+            *value_len         = sizeof(int);
+            ret                = OK;
+          }
+        break;
 
       case TCP_MAXSEG:   /* The maximum segment size */
         if (*value_len < sizeof(int))
