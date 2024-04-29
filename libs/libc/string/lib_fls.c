@@ -19,13 +19,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Included Files
- ****************************************************************************/
-
-#include <nuttx/compiler.h>
-#include <strings.h>
-
-/****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
@@ -55,11 +48,6 @@ int fls(int j)
 
   if (j != 0)
     {
-#ifdef CONFIG_HAVE_BUILTIN_CLZ
-      /* Count leading zeros function can be used to implement fls. */
-
-      ret = NBITS - __builtin_clz(j);
-#else
       unsigned int value = (unsigned int)j;
       int bitno;
 
@@ -71,7 +59,6 @@ int fls(int j)
               break;
             }
         }
-#endif
     }
 
   return ret;
