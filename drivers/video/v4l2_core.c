@@ -188,7 +188,6 @@ static int v4l2_ioctl(FAR struct file *filep,
 
         return v4l2->vops->qbuf(filep,
                              (FAR struct v4l2_buffer *)arg);
-        break;
 
       case VIDIOC_DQBUF:
         if (v4l2->vops->dqbuf == NULL)
