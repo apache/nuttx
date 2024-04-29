@@ -87,6 +87,8 @@ struct sensor_user_s
   bool             changed;    /* This is used to indicate event happens and need to
                                 * asynchronous notify other users
                                 */
+  unsigned int     event;      /* The event of this sensor, eg: SENSOR_EVENT_FLUSH_COMPLETE. */
+  bool             flushing;   /* The is used to indicate user is flushing */
   sem_t            buffersem;  /* Wakeup user waiting for data in circular buffer */
   size_t           bufferpos;  /* The index of user generation in buffer */
 
@@ -879,6 +881,51 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+     case SNIOC_GET_EVENTS:
+        {
+          nxrmutex_lock(&upper->lock);
+          *(FAR unsigned int *)(uintptr_t)arg = user->event;
+          user->event = 0;
+          nxrmutex_unlock(&upper->lock);
+        }
+
+     case SNIOC_FLUSH:
+        {
+          nxrmutex_lock(&upper->lock);
+
+          /* If the sensor is not activated, return -EINVAL. */
+
+          if (upper->state.nsubscribers == 0)
+            {
+              nxrmutex_unlock(&upper->lock);
+              return -EINVAL;
+            }
+
+          if (lower->ops->flush != NULL)
+            {
+              /* Lower half driver will do flush in asynchronous mode,
+               * flush will be completed until push event happened with
+               * bytes is zero.
+               */
+
+              ret = lower->ops->flush(lower, filep);
+              if (ret >= 0)
+                {
+                  user->flushing = true;
+                }
+            }
+          else
+            {
+              /* If flush is not supported, complete immediately */
+
+              user->event |= SENSOR_EVENT_FLUSH_COMPLETE;
+              sensor_pollnotify_one(user, POLLPRI);
+            }
+
+          nxrmutex_unlock(&upper->lock);
+        }
+        break;
+
       default:
 
         /* Lowerhalf driver process other cmd. */
@@ -972,13 +1019,31 @@ static ssize_t sensor_push_event(FAR void *priv, FAR const void *data,
   int semcount;
   int ret;
 
-  envcount = bytes / upper->state.esize;
-  if (!envcount || bytes != envcount * upper->state.esize)
+  nxrmutex_lock(&upper->lock);
+  if (bytes == 0)
     {
+      list_for_every_entry(&upper->userlist, user, struct sensor_user_s,
+                           node)
+        {
+          if (user->flushing)
+            {
+              user->flushing = false;
+              user->event |= SENSOR_EVENT_FLUSH_COMPLETE;
+              sensor_pollnotify_one(user, POLLPRI);
+            }
+        }
+
+      nxrmutex_unlock(&upper->lock);
+      return 0;
+    }
+
+  envcount = bytes / upper->state.esize;
+  if (bytes != envcount * upper->state.esize)
+    {
+      nxrmutex_unlock(&upper->lock);
       return -EINVAL;
     }
 
-  nxrmutex_lock(&upper->lock);
   if (!circbuf_is_init(&upper->buffer))
     {
       /* Initialize sensor buffer when data is first generated */

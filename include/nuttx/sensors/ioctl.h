@@ -451,4 +451,17 @@
 #  define SNIOC_SET_INFO              _SNIOC(0x009C)
 #endif
 
+/* Command:      SNIOC_FLUSH
+ * Description:  Flush sensor harware fifo buffer.
+ */
+
+#define SNIOC_FLUSH                   _SNIOC(0x009D)
+
+/* Command:      SNIOC_GET_EVENTS
+ * Description:  Get events of the sensor device.
+ * Argument:     The events pointer, (unsigned int *)
+ */
+
+#define SNIOC_GET_EVENTS              _SNIOC(0x009E)
+
 #endif /* __INCLUDE_NUTTX_SENSORS_IOCTL_H */
