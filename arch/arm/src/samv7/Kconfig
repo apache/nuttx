@@ -275,6 +275,10 @@ config SAMV7_DAC
 	bool
 	default n
 
+config SAMV7_QENCODER
+	bool
+	default n
+
 config SAMV7_HAVE_DAC1
 	bool
 	default n
@@ -3794,6 +3798,7 @@ config SAMV7_TC0_QE
 	bool "TC0"
 	default n
 	depends on SAMV7_TC0
+	select SAMV7_QENCODER
 	select SAMV7_TC0_TIOA0
 	select SAMV7_TC0_TIOB0
 	---help---
@@ -3803,6 +3808,7 @@ config SAMV7_TC1_QE
 	bool "TC1"
 	default n
 	depends on SAMV7_TC1
+	select SAMV7_QENCODER
 	select SAMV7_TC1_TIOA3
 	select SAMV7_TC1_TIOB3
 	---help---
@@ -3812,6 +3818,7 @@ config SAMV7_TC2_QE
 	bool "TC2"
 	default n
 	depends on SAMV7_TC2
+	select SAMV7_QENCODER
 	select SAMV7_TC2_TIOA6
 	select SAMV7_TC2_TIOB6
 	---help---
@@ -3821,6 +3828,7 @@ config SAMV7_TC3_QE
 	bool "TC3"
 	default n
 	depends on SAMV7_TC3
+	select SAMV7_QENCODER
 	select SAMV7_TC3_TIOA9
 	select SAMV7_TC3_TIOB9
 	---help---
