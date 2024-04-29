@@ -1,7 +1,5 @@
 /****************************************************************************
- * sched/module/mod_modhandle.c
- *
- * SPDX-License-Identifier: Apache-2.0
+ * libs/libc/modlib/modlib_gethandle.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -25,37 +23,58 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <assert.h>
+#include <debug.h>
+#include <errno.h>
 
-#include <nuttx/module.h>
 #include <nuttx/lib/modlib.h>
-
-#ifdef CONFIG_MODULE
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: modhandle
+ * Name: modlib_modhandle
  *
  * Description:
- *   modhandle() returns the module handle for the installed module with the
- *   provided name.  A secondary use of this function is to determine if a
- *   module has been loaded or not.
+ *   modlib_modhandle() returns the module handle for the installed
+ *   module with the provided name.  A secondary use of this function is to
+ *   determine if a module has been loaded or not.
  *
  * Input Parameters:
  *   name   - A pointer to the module name string.
  *
  * Returned Value:
- *   The non-NULL module handle previously returned by insmod() is returned
- *   on success.  If no module with that name is installed, modhandle() will
- *   return a NULL handle and the errno variable will be set appropriately.
+ *   The non-NULL module handle previously returned by modlib_insert() is
+ *   returned on success.  If no module with that name is installed,
+ *   modlib_modhandle() will return a NULL handle and the errno variable
+ *   will be set appropriately.
  *
  ****************************************************************************/
 
-FAR void *modhandle(FAR const char *name)
+#ifdef HAVE_MODLIB_NAMES
+
+FAR void *modlib_gethandle(FAR const char *name)
 {
-  return modlib_gethandle(name);
+  FAR struct module_s *modp;
+
+  DEBUGASSERT(name != NULL);
+
+  /* Get exclusive access to the module registry */
+
+  modlib_registry_lock();
+
+  /* Find the module entry for this name in the registry */
+
+  modp = modlib_registry_find(name);
+  if (modp == NULL)
+    {
+      berr("ERROR: Failed to find module %s\n", name);
+      set_errno(ENOENT);
+    }
+
+  modlib_registry_unlock();
+  return modp;
 }
 
-#endif /* CONFIG_MODULE */
+#endif /* HAVE_MODLIB_NAMES */

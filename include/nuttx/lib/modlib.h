@@ -196,7 +196,7 @@ struct mod_loadinfo_s
    */
 
 #ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
-  uintptr_t    *sectalloc;   /* All sections memory allocated when ELF file was loaded */
+  FAR uintptr_t *sectalloc;  /* All sections memory allocated when ELF file was loaded */
 #endif
 
   uintptr_t     textalloc;   /* .text memory allocated when module was loaded */
@@ -562,5 +562,107 @@ int modlib_registry_foreach(mod_callback_t callback, FAR void *arg);
  ****************************************************************************/
 
 void modlib_freesymtab(FAR struct module_s *modp);
+
+/****************************************************************************
+ * Name: modlib_insert
+ *
+ * Description:
+ *   Verify that the file is an ELF module binary and, if so, load the
+ *   module into kernel memory and initialize it for use.
+ *
+ *   NOTE: modlib_setsymtab() had to have been called in board-specific OS
+ *   logic prior to calling this function from application logic (perhaps via
+ *   boardctl(BOARDIOC_OS_SYMTAB).  Otherwise, insmod will be unable to
+ *   resolve symbols in the OS module.
+ *
+ * Input Parameters:
+ *
+ *   filename - Full path to the module binary to be loaded
+ *   modname  - The name that can be used to refer to the module after
+ *     it has been loaded.
+ *
+ * Returned Value:
+ *   A non-NULL module handle that can be used on subsequent calls to other
+ *   module interfaces is returned on success.  If modlib_insert() was
+ *   unable to load the module modlib_insert() will return a NULL handle
+ *   and the errno variable will be set appropriately.
+ *
+ ****************************************************************************/
+
+FAR void *modlib_insert(FAR const char *filename, FAR const char *modname);
+
+/****************************************************************************
+ * Name: modlib_getsymbol
+ *
+ * Description:
+ *   modlib_getsymbol() returns the address of a symbol defined within the
+ *   object that was previously made accessible through a modlib_getsymbol()
+ *   call.  handle is the value returned from a call to modlib_insert() (and
+ *   which has not since been released via a call to modlib_remove()),
+ *   name is the symbol's name as a character string.
+ *
+ *   The returned symbol address will remain valid until modlib_remove() is
+ *   called.
+ *
+ * Input Parameters:
+ *   handle - The opaque, non-NULL value returned by a previous successful
+ *            call to modlib_insert().
+ *   name   - A pointer to the symbol name string.
+ *
+ * Returned Value:
+ *   The address associated with the symbol is returned on success.
+ *   If handle does not refer to a valid module opened by modlib_insert(),
+ *   or if the named modlib_symbol cannot be found within any of the objects
+ *   associated with handle, modlib_getsymbol() will return NULL and the
+ *   errno variable will be set appropriately.
+ *
+ *   NOTE: This means that the address zero can never be a valid return
+ *   value.
+ *
+ ****************************************************************************/
+
+FAR const void *modlib_getsymbol(FAR void *handle, FAR const char *name);
+
+/****************************************************************************
+ * Name: modlib_remove
+ *
+ * Description:
+ *   Remove a previously installed module from memory.
+ *
+ * Input Parameters:
+ *   handle - The module handler previously returned by modlib_insert().
+ *
+ * Returned Value:
+ *   Zero (OK) on success.  On any failure, -1 (ERROR) is returned the
+ *   errno value is set appropriately.
+ *
+ ****************************************************************************/
+
+int modlib_remove(FAR void *handle);
+
+/****************************************************************************
+ * Name: modlib_modhandle
+ *
+ * Description:
+ *   modlib_modhandle() returns the module handle for the installed
+ *   module with the provided name.  A secondary use of this function is to
+ *   determine if a module has been loaded or not.
+ *
+ * Input Parameters:
+ *   name   - A pointer to the module name string.
+ *
+ * Returned Value:
+ *   The non-NULL module handle previously returned by modlib_insert() is
+ *   returned on success.  If no module with that name is installed,
+ *   modlib_modhandle() will return a NULL handle and the errno variable
+ *   will be set appropriately.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_MODLIB_NAMES
+FAR void *modlib_gethandle(FAR const char *name);
+#else
+#  define modlib_gethandle(n) NULL
+#endif
 
 #endif /* __INCLUDE_NUTTX_LIB_MODLIB_H */
