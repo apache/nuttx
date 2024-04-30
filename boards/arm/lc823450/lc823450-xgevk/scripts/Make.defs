@@ -47,14 +47,6 @@ NXFLATLDFLAGS1 = -r -d -warn-common
 NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-pcrel.ld -no-check-sections
 LDNXFLATFLAGS = -e main -s 2048
 
-# ELF module definitions
-
-CELFFLAGS = $(CFLAGS) -mlong-calls # --target1-abs
-CXXELFFLAGS = $(CXXFLAGS) -mlong-calls # --target1-abs
-
-LDELFFLAGS = -r -e main
-LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/binfmt/libelf/gnu-elf.ld)
-
 # Linker flags
 
 ifeq ($(CONFIG_LC823450_SDIF_PATCH),y)
