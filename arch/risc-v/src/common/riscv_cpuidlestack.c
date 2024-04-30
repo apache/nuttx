@@ -50,8 +50,6 @@
 uintptr_t g_idle_topstack = (uintptr_t)_ebss +
                                        SMP_STACK_SIZE * CONFIG_SMP_NCPUS;
 
-const uint8_t *g_cpux_idlestack[CONFIG_SMP_NCPUS];
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -109,7 +107,7 @@ int up_cpu_idlestack(int cpu, struct tcb_s *tcb, size_t stack_size)
 
   /* Get the top of the stack */
 
-  stack_alloc = (uintptr_t)g_cpux_idlestack[cpu];
+  stack_alloc = (uintptr_t)g_cpux_idlestack(cpu);
   DEBUGASSERT(stack_alloc != 0 && STACK_ISALIGNED(stack_alloc));
 
   tcb->adj_stack_size  = SMP_STACK_SIZE;

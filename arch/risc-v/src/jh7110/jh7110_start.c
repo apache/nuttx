@@ -133,10 +133,6 @@ void jh7110_start(int mhartid)
     {
       jh7110_clear_bss();
 
-      /* Setup base stack */
-
-      riscv_set_basestack(JH7110_IDLESTACK_BASE, SMP_STACK_SIZE);
-
       /* Initialize the per CPU areas */
 
       riscv_percpu_add_hart(mhartid);

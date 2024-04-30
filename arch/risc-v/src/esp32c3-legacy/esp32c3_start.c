@@ -288,10 +288,6 @@ void __esp32c3_start(void)
       *dest++ = 0;
     }
 
-  /* Setup base stack */
-
-  riscv_set_basestack((uintptr_t)_ebss, SMP_STACK_SIZE);
-
   /* Setup the syscall table needed by the ROM code */
 
   setup_syscall_table();
