@@ -76,8 +76,8 @@ riscv_vpuconfig:
  * Name: riscv_savevpu
  *
  * Description:
- *   Given the pointer to a register save area (in A0), save the state of the
- *   floating point registers.
+ *   Given the pointer to a register save area (in A1), save the state of the
+ *   vector point registers.
  *
  * C Function Prototype:
  *   void riscv_savevpu(uintptr_t *regs, uintptr_t *fregs);
@@ -85,7 +85,7 @@ riscv_vpuconfig:
  * Input Parameters:
  *   regs  - A pointer to the integer registers that contain the status
  *   fregs - A pointer to the register save area in which to save the
- *           floating point registers
+ *           vector point registers
  *
  * Returned Value:
  *   None
@@ -120,15 +120,15 @@ riscv_savevpu:
  * Name: riscv_restorevpu
  *
  * Description:
- *   Given the pointer to a register save area (in A0), restore the state of
- *   the floating point registers.
+ *   Given the pointer to a register save area (in A1), restore the state of
+ *   the vector point registers.
  *
  * C Function Prototype:
  *   void riscv_restorevpu(uintptr_t *regs, uintptr_t *fregs);
  *
  * Input Parameters:
  *   regs  - A pointer to the integer registers that contain the status
- *   fregs - A pointer to the register save area containing the floating
+ *   fregs - A pointer to the register save area containing the vector
  *           point registers.
  *
  * Returned Value:
