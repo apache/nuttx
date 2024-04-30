@@ -1329,7 +1329,7 @@ int sensor_custom_register(FAR struct sensor_lowerhalf_s *lower,
   if (lower == NULL)
     {
       ret = -EIO;
-      goto drv_err;
+      goto rpmsg_err;
     }
 #endif
 
@@ -1345,6 +1345,11 @@ int sensor_custom_register(FAR struct sensor_lowerhalf_s *lower,
   return ret;
 
 drv_err:
+#ifdef CONFIG_SENSORS_RPMSG
+  sensor_rpmsg_unregister(lower);
+rpmsg_err:
+#endif
+
   nxrmutex_destroy(&upper->lock);
 
   kmm_free(upper);
