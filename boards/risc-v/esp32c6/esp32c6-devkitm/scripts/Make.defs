@@ -52,15 +52,8 @@ AFLAGS := $(CFLAGS) -D__ASSEMBLY__
 
 # Loadable module definitions
 
-CMODULEFLAGS = $(CFLAGS)
-
-LDMODULEFLAGS = -melf32lriscv -r -e module_initialize
-LDMODULEFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
+LDMODULEFLAGS += -melf32lriscv
 
 # ELF module definitions
 
-CELFFLAGS = $(CFLAGS)
-CXXELFFLAGS = $(CXXFLAGS)
-
-LDELFFLAGS = -melf32lriscv -r -e main
-LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/binfmt/libelf/gnu-elf.ld)
+LDELFFLAGS += -melf32lriscv
