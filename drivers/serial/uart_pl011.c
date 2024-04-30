@@ -301,7 +301,7 @@ static struct pl011_uart_port_s g_uart0priv =
   .config =
     {
       .uart         = (FAR volatile struct pl011_regs *)CONFIG_UART0_BASE,
-      .sys_clk_freq = 24000000,
+      .sys_clk_freq = CONFIG_UART0_CLK_FREQ,
     },
 
     .irq_num    = CONFIG_UART0_IRQ,
@@ -344,7 +344,7 @@ static struct pl011_uart_port_s g_uart1priv =
   .config =
     {
       .uart         = (FAR volatile struct pl011_regs *)CONFIG_UART1_BASE,
-      .sys_clk_freq = 24000000,
+      .sys_clk_freq = CONFIG_UART1_CLK_FREQ,
     },
 
     .irq_num    = CONFIG_UART1_IRQ,
@@ -387,7 +387,7 @@ static struct pl011_uart_port_s g_uart2priv =
   .config =
     {
       .uart         = (FAR volatile struct pl011_regs *)CONFIG_UART2_BASE,
-      .sys_clk_freq = 24000000,
+      .sys_clk_freq = CONFIG_UART2_CLK_FREQ,
     },
 
     .irq_num    = CONFIG_UART2_IRQ,
@@ -430,7 +430,7 @@ static struct pl011_uart_port_s g_uart3priv =
   .config =
     {
       .uart         = (FAR volatile struct pl011_regs *)CONFIG_UART3_BASE,
-      .sys_clk_freq = 24000000,
+      .sys_clk_freq = CONFIG_UART3_CLK_FREQ,
     },
 
     .irq_num    = CONFIG_UART3_IRQ,
