@@ -267,10 +267,6 @@ void bl808_start(int mhartid)
 
       bl808_clear_bss();
 
-      /* Setup base stack */
-
-      riscv_set_basestack(BL808_IDLESTACK_BASE, SMP_STACK_SIZE);
-
       /* Copy the RAM Disk */
 
       bl808_copy_ramdisk();

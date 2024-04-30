@@ -140,8 +140,6 @@ void qemu_rv_start(int mhartid, const char *dtb)
 
   qemu_rv_clear_bss();
 
-  riscv_set_basestack(QEMU_RV_IDLESTACK_BASE, SMP_STACK_SIZE);
-
 #ifdef CONFIG_RISCV_PERCPU_SCRATCH
   riscv_percpu_add_hart(mhartid);
 #endif

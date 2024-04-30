@@ -115,8 +115,6 @@ void k230_start(int mhartid, const char *dtb)
     {
       k230_clear_bss();
 
-      riscv_set_basestack(K230_IDLESTACK_BASE, SMP_STACK_SIZE);
-
 #ifdef CONFIG_RISCV_PERCPU_SCRATCH
       riscv_percpu_add_hart(mhartid);
 #else

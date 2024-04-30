@@ -148,10 +148,6 @@ void bfl_main(void)
 
   asm volatile("csrw mtvec, %0" ::"r"((uintptr_t)exception_common + 2));
 
-  /* Setup base stack */
-
-  riscv_set_basestack((uintptr_t)_ebss, SMP_STACK_SIZE);
-
   /* Configure the UART so we can get debug output */
 
   bl602_lowsetup();

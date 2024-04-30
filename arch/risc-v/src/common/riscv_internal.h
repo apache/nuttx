@@ -331,18 +331,6 @@ int riscv_check_pmp_access(uintptr_t attr, uintptr_t base, uintptr_t size);
 int riscv_configured_pmp_regions(void);
 int riscv_next_free_pmp_region(void);
 
-/* RISC-V Memorymap Config **************************************************/
-
-static inline void riscv_set_basestack(uintptr_t base, uintptr_t size)
-{
-  unsigned int i;
-
-  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
-    {
-      g_cpux_idlestack[i] = (const uint8_t *)(base + size * i);
-    }
-}
-
 /* RISC-V SBI wrappers ******************************************************/
 
 #ifdef CONFIG_ARCH_USE_S_MODE
