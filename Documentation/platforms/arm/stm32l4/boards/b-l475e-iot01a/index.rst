@@ -13,7 +13,7 @@ Board Features
 
 B-L475E-IOT01A Discovery kit key features and specifications:
 
-- MCU:  STM32L475 Series MCU based on ARM Cortex-M4 core with 1 MB Flash memory, 128 KB SRAM
+- MCU: STM32L475 Series MCU based on ARM Cortex-M4 core with 1 MB Flash memory, 128 KB SRAM
 - Storage: 64 Mbit (8MB)  Quad-SPI Flash memory (Macronix)
 - Connectivity:
   - Bluetooth 4.1 LE module (SPBTLE-RF)
@@ -84,7 +84,7 @@ corresponding GPIO.::
 These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
 selected.  In that case, the usage by the board port is defined in
 include/board.h and src/lpc31_leds.c. The LEDs are used to encode
-OS-related events as follows:
+OS-related events as follows::
 
     SYMBOL                Meaning                   LED2     LED1
     -------------------  -----------------------  -------- --------
@@ -114,7 +114,7 @@ Serial Console
 Arduino Serial Shield
 ---------------------
 
-An TLL-to-RS232 Converter shield may be used with UART4:
+An TLL-to-RS232 Converter shield may be used with UART4::
 
     UART4:
 
@@ -129,7 +129,7 @@ Virtual COM Port
 ----------------
 
 The serial interface USART1 is directly available as a virtual COM port
-of the PC connected to the ST-LINK/V2-1 USB connector CN7.
+of the PC connected to the ST-LINK/V2-1 USB connector CN7. ::
 
     USART1:
 
@@ -146,7 +146,7 @@ no parity, 1 stop bit, no flow control.
 Other Options
 -------------
 
-USART2 - Available on CN10 if solder bridges closed.
+USART2 - Available on CN10 if solder bridges closed::
 
     -------------- ----------------  ---------------------------
     STM32L475VGTx  Board Signal      PMOD / Solder Bridges
@@ -155,7 +155,7 @@ USART2 - Available on CN10 if solder bridges closed.
     USART2_TX PD5  PMOD-UART2_TX     CN10 pin2 TX/D1 (SB20)
     -------------- ----------------  ---------------------------
 
-USART3 - Dedicated to ISM43362-M3G-L44 Serial-to-Wifi Module.
+USART3 - Dedicated to ISM43362-M3G-L44 Serial-to-Wifi Module::
 
     -------------- ----------------  ------------------
     STM32L475VGTx  Board Signal      Arduino Connector
@@ -389,14 +389,14 @@ NOTES:
 
      Test Matrix:
        The following configurations have been tested successfully (with
-       CRC disabled):
+       CRC disabled)::
 
          =========== ===== ===== ======
          COMPRESSION UDP   TCP   Telnet
          =========== ===== ===== ======
-         hc06        08/04 08/04 08/05 
-         hc1         
-         ipv6        
+         hc06        08/04 08/04 08/05
+         hc1
+         ipv6
          =========== ===== ===== ======
 
          Other configuration options have not been specifically addressed
@@ -470,7 +470,7 @@ configuration and most of the notes there apply here as well.
 
    Where <server-ip> is the IP address of the E1 endpoint.
 
-   Similarly for the UDP test:
+   Similarly for the UDP test::
 
          E1: nsh> udpserver &
          E2: nsh> udpclient <server-ip> &
@@ -498,7 +498,7 @@ configuration and most of the notes there apply here as well.
    will map the all-nodes IPv6 to the Spirit destination address 0xff and
    the packet will be broadcast to all Spirit nodes.
 
-   Here are the procedures for using the test
+   Here are the procedures for using the test::
 
          C:  nsh> ifup wpan0           <-- Brings up the network on the hub
 
