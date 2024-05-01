@@ -221,10 +221,9 @@ static int bh1749nuc_fetch(FAR struct sensor_lowerhalf_s *lower,
       goto errout;
     }
 
-  /* Wait for data */
-
-  while (!(bh1749nuc_getreg8(dev, BH1749NUC_MODE_CONTROL2) &
-           BH1749NUC_MODE_CONTROL2_VALID));
+  /* Get data without wait for VALID flag - otherwise the sensor freezes
+   * when we read RBG and IR data one after another
+   */
 
   if (lower->type == SENSOR_TYPE_RGB)
     {
