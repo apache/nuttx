@@ -505,6 +505,11 @@ int bh1749nuc_register_uorb(int devno, FAR struct bh1749nuc_config_s *config)
       goto ir_err;
     }
 
+  /* SW Reset */
+
+  bh1749nuc_putreg8(&dev->dev, BH1749NUC_SYSTEM_CONTROL,
+                    BH1749NUC_SYSTEM_CONTROL_SW_RESET);
+
 #ifdef CONFIG_SENSORS_BH1749NUC_POLL
   /* Create thread for polling sensor data */
 
