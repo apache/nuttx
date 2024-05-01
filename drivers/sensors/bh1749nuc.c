@@ -203,7 +203,7 @@ int bh1749nuc_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   priv->i2c   = i2c;
   priv->addr  = addr;
-  priv->freq  = BH1749NUC_I2C_FREQ;
+  priv->freq  = CONFIG_BH1749NUC_I2C_FREQUENCY;
 
   /* Check Device ID */
 

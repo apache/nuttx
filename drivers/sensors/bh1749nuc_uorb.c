@@ -450,7 +450,7 @@ int bh1749nuc_register_uorb(int devno, FAR struct bh1749nuc_config_s *config)
 
   dev->dev.i2c  = config->i2c;
   dev->dev.addr = config->addr;
-  dev->dev.freq = BH1749NUC_I2C_FREQ;
+  dev->dev.freq = CONFIG_BH1749NUC_I2C_FREQUENCY;
 
   /* Check Device ID */
 
