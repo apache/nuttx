@@ -70,8 +70,8 @@ int  arm64_fpu_procfs_register(void);
 void arm64_fpu_disable(void);
 void arm64_fpu_enable(void);
 
-void arm64_fpu_save(struct fpu_reg *saved_fp_context);
-void arm64_fpu_restore(struct fpu_reg *saved_fp_context);
+void arm64_fpu_save(uint64_t *context);
+void arm64_fpu_restore(uint64_t *context);
 
 #endif /* __ASSEMBLY__ */
 

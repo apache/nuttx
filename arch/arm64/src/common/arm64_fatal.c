@@ -69,10 +69,8 @@ struct fatal_handle_info
  * Can be override by other handler
  */
 
-static int default_debug_handler(struct regs_context *regs,
-                                 uint64_t far, uint64_t esr);
-static int default_fatal_handler(struct regs_context *regs,
-                                 uint64_t far, uint64_t esr);
+static int default_debug_handler(uint64_t *regs, uint64_t far, uint64_t esr);
+static int default_fatal_handler(uint64_t *regs, uint64_t far, uint64_t esr);
 
 /****************************************************************************
  * Private Data
@@ -305,8 +303,7 @@ static void print_ec_cause(uint64_t esr)
   serr("%s\n", esr_get_desc_string(esr));
 }
 
-static int default_fatal_handler(struct regs_context *regs,
-                                 uint64_t far, uint64_t esr)
+static int default_fatal_handler(uint64_t *regs, uint64_t far, uint64_t esr)
 {
   struct fatal_handle_info *inf = g_fatal_handler + (esr & ESR_ELX_FSC);
 
@@ -317,8 +314,7 @@ static int default_fatal_handler(struct regs_context *regs,
   return -EINVAL; /* "fault" */
 }
 
-static int default_debug_handler(struct regs_context *regs,
-                                 uint64_t far, uint64_t esr)
+static int default_debug_handler(uint64_t *regs, uint64_t far, uint64_t esr)
 {
   struct fatal_handle_info *inf = g_debug_handler + DBG_ESR_EVT(esr);
 
@@ -326,7 +322,7 @@ static int default_debug_handler(struct regs_context *regs,
   return -1; /* "fault" */
 }
 
-static int arm64_el1_abort(struct regs_context *regs, uint64_t esr)
+static int arm64_el1_abort(uint64_t *regs, uint64_t esr)
 {
   uint64_t                  far = read_sysreg(far_el1);
   struct fatal_handle_info *inf = g_fatal_handler + (esr & ESR_ELX_FSC);
@@ -334,7 +330,7 @@ static int arm64_el1_abort(struct regs_context *regs, uint64_t esr)
   return inf->handle_fn(regs, far, esr);
 }
 
-static int arm64_el1_pc(struct regs_context *regs, uint64_t esr)
+static int arm64_el1_pc(uint64_t *regs, uint64_t esr)
 {
   uint64_t far = read_sysreg(far_el1);
 
@@ -342,7 +338,7 @@ static int arm64_el1_pc(struct regs_context *regs, uint64_t esr)
   return -EINVAL; /* "fault" */
 }
 
-static int arm64_el1_bti(struct regs_context *regs, uint64_t esr)
+static int arm64_el1_bti(uint64_t *regs, uint64_t esr)
 {
   uint64_t far = read_sysreg(far_el1);
 
@@ -350,26 +346,27 @@ static int arm64_el1_bti(struct regs_context *regs, uint64_t esr)
   return -EINVAL; /* "fault" */
 }
 
-static int arm64_el1_undef(struct regs_context *regs, uint64_t esr)
+static int arm64_el1_undef(uint64_t *regs, uint64_t esr)
 {
   uint32_t insn;
+  uint64_t elr = regs[REG_ELR];
 
-  serr("Undefined instruction at 0x%" PRIx64 ", dump:\n", regs->elr);
-  memcpy(&insn, (void *)(regs->elr - 8), 4);
-  serr("0x%" PRIx64 " : 0x%" PRIx32 "\n", regs->elr - 8, insn);
-  memcpy(&insn, (void *)(regs->elr - 4), 4);
-  serr("0x%" PRIx64 " : 0x%" PRIx32 "\n", regs->elr - 4, insn);
-  memcpy(&insn, (void *)(regs->elr), 4);
-  serr("0x%" PRIx64 " : 0x%" PRIx32 "\n", regs->elr, insn);
-  memcpy(&insn, (void *)(regs->elr + 4), 4);
-  serr("0x%" PRIx64 " : 0x%" PRIx32 "\n", regs->elr + 4, insn);
-  memcpy(&insn, (void *)(regs->elr + 8), 4);
-  serr("0x%" PRIx64 " : 0x%" PRIx32 "\n", regs->elr + 8, insn);
+  serr("Undefined instruction at 0x%" PRIx64 ", dump:\n", elr);
+  memcpy(&insn, (void *)(elr - 8), 4);
+  serr("0x%" PRIx64 " : 0x%" PRIx32 "\n", elr - 8, insn);
+  memcpy(&insn, (void *)(elr - 4), 4);
+  serr("0x%" PRIx64 " : 0x%" PRIx32 "\n", elr - 4, insn);
+  memcpy(&insn, (void *)(elr), 4);
+  serr("0x%" PRIx64 " : 0x%" PRIx32 "\n", elr, insn);
+  memcpy(&insn, (void *)(elr + 4), 4);
+  serr("0x%" PRIx64 " : 0x%" PRIx32 "\n", elr + 4, insn);
+  memcpy(&insn, (void *)(elr + 8), 4);
+  serr("0x%" PRIx64 " : 0x%" PRIx32 "\n", elr + 8, insn);
 
   return -1;
 }
 
-static int arm64_el1_fpac(struct regs_context *regs, uint64_t esr)
+static int arm64_el1_fpac(uint64_t *regs, uint64_t esr)
 {
   uint64_t far = read_sysreg(far_el1);
 
@@ -379,7 +376,7 @@ static int arm64_el1_fpac(struct regs_context *regs, uint64_t esr)
   return -EINVAL;
 }
 
-static int arm64_el1_dbg(struct regs_context *regs, uint64_t esr)
+static int arm64_el1_dbg(uint64_t *regs, uint64_t esr)
 {
   uint64_t                  far = read_sysreg(far_el1);
   struct fatal_handle_info *inf = g_debug_handler + DBG_ESR_EVT(esr);
@@ -388,7 +385,7 @@ static int arm64_el1_dbg(struct regs_context *regs, uint64_t esr)
 }
 
 static int arm64_el1_exception_handler(uint64_t esr,
-                                       struct regs_context *regs)
+                                       uint64_t *regs)
 {
   uint32_t  ec = ESR_ELX_EC(esr);
   int       ret;
@@ -471,7 +468,7 @@ static int arm64_el1_exception_handler(uint64_t esr,
   return ret;
 }
 
-static int arm64_exception_handler(struct regs_context *regs)
+static int arm64_exception_handler(uint64_t *regs)
 {
   uint64_t    el;
   uint64_t    esr;
@@ -542,7 +539,7 @@ static int arm64_exception_handler(struct regs_context *regs)
  * Public Functions
  ****************************************************************************/
 
-void arm64_fatal_handler(struct regs_context *regs)
+void arm64_fatal_handler(uint64_t *regs)
 {
   int ret;
 

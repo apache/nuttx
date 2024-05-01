@@ -267,6 +267,11 @@ struct xcptcontext
 
   uint64_t *saved_reg;
 
+#ifdef CONFIG_ARCH_FPU
+  uint64_t *fpu_regs;
+  uint64_t *saved_fpu_regs;
+#endif
+
   /* Extra fault address register saved for common paging logic.  In the
    * case of the pre-fetch abort, this value is the same as regs[REG_ELR];
    * For the case of the data abort, this value is the value of the fault
