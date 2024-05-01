@@ -143,6 +143,10 @@ config SENSORS_BH1749NUC
 
 if SENSORS_BH1749NUC
 
+config BH1749NUC_I2C_FREQUENCY
+	int "BH1749NUC I2C frequency"
+	default 400000
+
 config SENSORS_BH1749NUC_UORB
 	bool "BH1749NUC UORB Interface"
 	default n
