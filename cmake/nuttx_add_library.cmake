@@ -138,16 +138,19 @@ function(nuttx_add_kernel_library target)
 
   # Add kernel options & definitions See note above in
   # nuttx_add_library_internal() on syntax and nuttx target use
-  target_compile_options(
-    ${kernel_target}
-    PRIVATE $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx,NUTTX_KERNEL_COMPILE_OPTIONS>>)
-  target_compile_definitions(
-    ${kernel_target}
-    PRIVATE $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx,NUTTX_KERNEL_DEFINITIONS>>)
-  target_include_directories(
-    ${kernel_target}
-    PRIVATE
-      $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx,NUTTX_KERNEL_INCLUDE_DIRECTORIES>>)
+  if(NOT ARGS_SPLIT OR NOT "${target}" STREQUAL "${kernel_target}")
+    target_compile_options(
+      ${kernel_target}
+      PRIVATE
+        $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx,NUTTX_KERNEL_COMPILE_OPTIONS>>)
+    target_compile_definitions(
+      ${kernel_target}
+      PRIVATE $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx,NUTTX_KERNEL_DEFINITIONS>>)
+    target_include_directories(
+      ${kernel_target}
+      PRIVATE
+        $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx,NUTTX_KERNEL_INCLUDE_DIRECTORIES>>)
+  endif()
 
   if(NOT "${target}" STREQUAL "${kernel_target}")
     # The k${target} lib will have the same sources added to that ${target} lib.
