@@ -181,8 +181,8 @@ static void arm64_start_cpu(int cpu_num, char *stack, int stack_sz,
 #ifdef CONFIG_ARCH_HAVE_PSCI
   if (psci_cpu_on(cpu_mpid, (uint64_t)__start))
     {
-      sinfo("Failed to boot secondary CPU core %d (MPID:%#lx)\n", cpu_num,
-            cpu_mpid);
+      serr("Failed to boot secondary CPU core %d (MPID:%#lx)\n", cpu_num,
+           cpu_mpid);
       return;
     }
 #else

@@ -852,7 +852,7 @@ static int gic_validate_dist_version(void)
     }
   else
     {
-      sinfo("No GIC version detect\n");
+      serr("No GIC version detect\n");
       return -ENODEV;
     }
 
@@ -871,7 +871,7 @@ static int gic_validate_dist_version(void)
 
   if (typer & GICD_TYPER_MBIS)
     {
-      sinfo("MBIs is present, But No support\n");
+      swarn("MBIs is present, But No support\n");
     }
 
   return 0;
@@ -892,7 +892,7 @@ static int gic_validate_redist_version(void)
   if (reg != GICR_PIDR2_ARCH_GICV3 &&
              reg != GICR_PIDR2_ARCH_GICV4)
     {
-      sinfo("No redistributor present 0x%lx\n", redist_base);
+      serr("No redistributor present 0x%lx\n", redist_base);
       return -ENODEV;
     }
 
@@ -926,7 +926,7 @@ static void arm64_gic_init(void)
   err = gic_validate_redist_version();
   if (err)
     {
-      sinfo("no redistributor detected, giving up ret=%d\n", err);
+      swarn("no redistributor detected, giving up ret=%d\n", err);
       return;
     }
 
@@ -949,7 +949,7 @@ int arm64_gic_initialize(void)
   err = gic_validate_dist_version();
   if (err)
     {
-      sinfo("no distributor detected, giving up ret=%d\n", err);
+      swarn("no distributor detected, giving up ret=%d\n", err);
       return err;
     }
 
