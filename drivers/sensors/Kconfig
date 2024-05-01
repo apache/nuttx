@@ -326,6 +326,10 @@ config SENSORS_BMM150
 
 if SENSORS_BMM150
 
+config BMM150_I2C_FREQUENCY
+	int "BMM150 I2C frequency"
+	default 400000
+
 config SENSORS_BMM150_POLL
 	bool "Enables polling sensor data"
 	default n
