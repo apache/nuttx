@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm64/imx9/imx93-evk/src/imx9_bringup.c
+ * boards/arm64/imx9/imx93-evk/src/imx9_usdhc.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,90 +24,61 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <syslog.h>
+#include <debug.h>
+#include <errno.h>
+#include <nuttx/mmcsd.h>
 
-#include <nuttx/fs/fs.h>
-
-#include "imx9_dma_alloc.h"
-
+#include "imx9_usdhc.h"
 #include "imx93-evk.h"
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static struct sdio_dev_s *g_sdio_dev;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: imx_bringup
+ * Name: imx9_usdhc_init
  *
  * Description:
- *   Bring up board features
+ *   Configure the uSDHC driver.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
  *
  ****************************************************************************/
 
-int imx9_bringup(void)
+int imx9_usdhc_init(void)
 {
   int ret;
 
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
+  /* First, get an instance of the SDIO interface */
 
-  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
-  if (ret < 0)
+  finfo("Initializing SDIO slot %d\n", SDIO_SLOTNO);
+
+  g_sdio_dev = imx9_usdhc_initialize(SDIO_SLOTNO);
+  if (!g_sdio_dev)
     {
-      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
+      ferr("ERROR: Failed to initialize SDIO slot %d\n", SDIO_SLOTNO);
+      return -ENODEV;
     }
-#endif
 
-#ifdef CONFIG_IMX9_DMA_ALLOC
-  /* Initialize the DMA memory allocator */
+  /* Now bind the SDIO interface to the MMC/SD driver */
 
-  ret = imx9_dma_alloc_init();
-  if (ret < 0)
+  finfo("Bind SDIO to the MMC/SD driver, minor=%d\n", SDIO_MINOR);
+
+  ret = mmcsd_slotinitialize(SDIO_MINOR, g_sdio_dev);
+  if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed initialize DMA allocator: %d\n", ret);
+      ferr("ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+      return ret;
     }
-#endif
 
-#ifdef CONFIG_PWM
-  /* Configure PWM outputs */
-
-  ret = imx9_pwm_setup();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed initialize PWM outputs: %d\n", ret);
-    }
-#endif
-
-#if defined(CONFIG_I2C_DRIVER)
-  /* Configure I2C peripheral interfaces */
-
-  ret = imx9_i2c_initialize();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "Failed to initialize I2C driver: %d\n", ret);
-    }
-#endif
-
-#if defined(CONFIG_SPI_DRIVER)
-  /* Configure SPI peripheral interfaces */
-
-  ret = imx9_spi_initialize();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "Failed to initialize SPI driver: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_MMCSD
-  ret = imx9_usdhc_init();
-
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "Failed to init MMCSD driver: %d\n", ret);
-    }
-#endif
-
-  UNUSED(ret);
   return OK;
 }
+
