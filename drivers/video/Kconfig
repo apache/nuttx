@@ -49,6 +49,7 @@ if DRIVERS_VIDEO
 config VIDEO_FB
 	bool "Framebuffer character driver"
 	default n
+	select ARCH_VMA_MAPPING if BUILD_KERNEL
 
 config VIDEO_FB_NPOLLWAITERS
 	int "Video fb poll count of each open structure"
