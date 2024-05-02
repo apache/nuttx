@@ -1032,7 +1032,12 @@ static int fb_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
   if (map->offset >= 0 && map->offset < panelinfo.fblen &&
       map->length && map->offset + map->length <= panelinfo.fblen)
     {
+#ifdef CONFIG_BUILD_KERNEL
+      map->vaddr = vm_map_region((uintptr_t)panelinfo.fbmem + map->offset,
+                                 panelinfo.fblen);
+#else
       map->vaddr = (FAR char *)panelinfo.fbmem + map->offset;
+#endif
       return OK;
     }
 
