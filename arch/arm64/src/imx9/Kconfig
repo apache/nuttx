@@ -316,6 +316,12 @@ endmenu # USB device controller driver (DCD) options
 
 endif # IMX9_USBDEV
 
+config IMX9_ENET
+	bool "Ethernet"
+	default n
+	select ARCH_HAVE_PHY
+	select ARCH_HAVE_NETDEV_STATISTICS
+
 config IMX9_GPIO_IRQ
 	bool "GPIO Interrupt Support"
 	default n
@@ -782,6 +788,113 @@ config IMX9_LPSPI8_DMA
 		Use DMA to improve SPI8 transfer performance.
 
 endmenu # LPSPI Configuration
+
+menu "Ethernet Configuration"
+	depends on IMX9_ENET
+
+config IMX9_ENET1
+	bool "Ethernet MAC (non-QoS)"
+	depends on IMX9_ENET
+	default y
+
+config IMX9_ENET_NRXBUFFERS
+	int "Number of Rx buffers"
+	default 6
+
+config IMX9_ENET_NTXBUFFERS
+	int "Number of Tx buffers"
+	default 2
+
+config IMX9_ENET_USE_OTP_MAC
+	bool "Use MAC address from OCOTP"
+	default n
+	depends on IMX9_ENET
+
+config IMX9_ENET1_OTP_MAC_ADDR
+	hex "MAC address offset in OCOTP"
+	default 0x4ec
+	depends on IMX9_ENET_USE_OTP_MAC
+
+config IMX9_ENET1_PROMISCUOUS
+	bool "Set promiscuous mode"
+	depends on IMX9_ENET1
+	default n
+
+choice
+	prompt "i.MX9 ENET1 interface type"
+	default IMX9_ENET1_RMII
+	depends on IMX9_ENET1
+
+config IMX9_ENET1_RMII
+	bool "RMII"
+
+config IMX9_ENET1_RGMII
+	bool "RGMII"
+
+endchoice
+
+config IMX9_ENET1_PHY_AUTONEG
+	bool "ENET1 PHY autonegotiation enable"
+	default y
+	---help---
+		Enable PHY autonegotiation. If set to n, configure the speed
+		and duplex mode manually. Note that only disabling this doesn't
+		disable the autonegotiation completely; it just sets the MAC
+		speed and duplex, and disables autonegotiation advertisement
+		for other than the configured mode. To disable autonegotiation
+		completely, also set the FORCE_SPEED flag.
+
+choice
+	prompt "Select ENET1 PHY link duplex mode"
+	default IMX9_ENET1_PHY_FD
+	depends on !IMX9_ENET1_PHY_AUTONEG
+
+config IMX9_ENET1_PHY_FD
+	bool "Full Duplex"
+
+config IMX9_ENET1_PHY_HD
+	bool "Half Duplex"
+endchoice
+
+choice
+	prompt "Select ENET1 PHY link speed"
+	default IMX9_ENET1_PHY_100MBPS if IMX9_ENET1_RMII
+	default IMX9_ENET1_PHY_1000MBPS if IMX9_ENET1_RGMII
+	depends on !IMX9_ENET1_PHY_AUTONEG
+
+config IMX9_ENET1_PHY_10MBPS
+	bool "10 MBPS"
+
+config IMX9_ENET1_PHY_100MBPS
+	bool "100 MBPS"
+
+config IMX9_ENET1_PHY_1000MBPS
+	bool "1000 MBPS"
+	depends on IMX9_ENET1_RGMII
+endchoice
+
+config IMX9_ENET1_PHY_FORCE_SPEED
+	bool "Disable PHY autonegotiation and force speed and duplex"
+	depends on !IMX9_ENET1_PHY_AUTONEG
+	default n
+	---help---
+		This disables PHY autonegotiation completely. Note that
+		if the link partner has got autonegotiation enabled, the
+		duplex mode is not auto-detected by the link partner. Only
+		enable if you really know what you are doing!
+
+config IMX9_ENET1_PHYINIT
+	bool "Board-specific PHY Initialization for ENET1"
+	default n
+	---help---
+		Some boards require specialized initialization of the PHY before it
+		can be used.  This may include such things as configuring GPIOs,
+		resetting the PHY, etc.  If CONFIG_IMX9_ENET_PHYINIT is defined in
+		the configuration then the board specific logic must provide
+		imx9_phy_boardinitialize();  The i.MX9 ENET driver will call this
+		function one time before it first uses the PHY.
+
+endmenu # IMX9_ENET
 
 endmenu # iMX Peripheral Selection
 
