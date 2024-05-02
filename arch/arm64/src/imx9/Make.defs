@@ -59,3 +59,7 @@ endif
 ifeq ($(CONFIG_IMX9_DMA_ALLOC),y)
   CHIP_CSRCS += imx9_dma_alloc.c
 endif
+
+ifeq ($(CONFIG_IMX9_ENET),y)
+CHIP_CSRCS += imx9_enet.c
+endif

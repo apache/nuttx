@@ -26,6 +26,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/net/mii.h>
+#include <nuttx/net/gmii.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -120,6 +122,85 @@
     PFD_CFG(IMX9_SYSPLL_BASE, 1, PFD_PARMS(5, 0, true)), \
     PFD_CFG(IMX9_SYSPLL_BASE, 2, PFD_PARMS(6, 2, true)), \
   }
+
+/* Ethernet configuration */
+
+#define BOARD_ENET1_PHY_LIST                             \
+{                                                        \
+  {                                                      \
+    .name = GMII_RTL8211F_NAME,                           \
+    .id1 = GMII_PHYID1_RTL8211F,                                \
+    .id2 = GMII_PHYID2_RTL8211F,                                \
+    .status = GMII_RTL8211F_PHYSR_A43,                             \
+    .address_lo = 2,                                                   \
+    .address_high = 0xffff,                                              \
+    .mbps10 = GMII_RTL8211F_PHYSR_10MBPS,                          \
+    .mbps100 = GMII_RTL8211F_PHYSR_100MBPS,                         \
+    .duplex = GMII_RTL8211F_PHYSR_DUPLEX,                          \
+    .clause = 22,                                                  \
+    .mbps1000 = GMII_RTL8211F_PHYSR_1000MBPS,                       \
+    .speed_mask = GMII_RTL8211F_PHYSR_SPEED_MASK,                    \
+  },                                                     \
+}
+
+#endif /* CONFIG_IMX9_ENET1 */
+
+#ifdef CONFIG_IMX9_ENET1
+
+#define MUX_ENET1_MDIO        IOMUX_CFG(IOMUXC_PAD_ENET2_MDIO_ENET1_MDIO, IOMUXC_PAD_FSEL_FAST | IOMUXC_PAD_DSE_X6, IOMUXC_MUX_SION_ON)
+#define MUX_ENET1_MDC         IOMUX_CFG(IOMUXC_PAD_ENET2_MDC_ENET1_MDC, IOMUXC_PAD_FSEL_FAST | IOMUXC_PAD_DSE_X6, 0)
+
+#define MUX_ENET1_RX_DATA00   IOMUX_CFG(IOMUXC_PAD_ENET2_RD0_ENET1_RGMII_RD0, 0, 0)
+#define MUX_ENET1_RX_DATA01   IOMUX_CFG(IOMUXC_PAD_ENET2_RD1_ENET1_RGMII_RD1, 0, 0)
+
+#define MUX_ENET1_TX_DATA00   IOMUX_CFG(IOMUXC_PAD_ENET2_TD0_ENET1_RGMII_TD0, IOMUXC_PAD_FSEL_FAST | IOMUXC_PAD_DSE_X6, 0)
+#define MUX_ENET1_TX_DATA01   IOMUX_CFG(IOMUXC_PAD_ENET2_TD1_ENET1_RGMII_TD1, IOMUXC_PAD_FSEL_FAST | IOMUXC_PAD_DSE_X6, 0)
+
+#if defined(CONFIG_IMX9_ENET1_RGMII)
+
+#  define MUX_ENET1_RX_DATA02 IOMUX_CFG(IOMUXC_PAD_ENET2_RD2_ENET1_RGMII_RD2, 0, 0)
+#  define MUX_ENET1_RX_DATA03 IOMUX_CFG(IOMUXC_PAD_ENET2_RD3_ENET1_RGMII_RD3, 0, 0)
+#  define MUX_ENET1_TX_DATA02 IOMUX_CFG(IOMUXC_PAD_ENET2_TD2_ENET1_RGMII_TD2, IOMUXC_PAD_FSEL_FAST | IOMUXC_PAD_DSE_X6, 0)
+#  define MUX_ENET1_TX_DATA03 IOMUX_CFG(IOMUXC_PAD_ENET2_TD3_ENET1_RGMII_TD3, IOMUXC_PAD_FSEL_FAST | IOMUXC_PAD_DSE_X6, 0)
+#  define MUX_ENET1_RXC       IOMUX_CFG(IOMUXC_PAD_ENET2_RXC_ENET1_RGMII_RXC, 0, 0)
+#  define MUX_ENET1_TX_CTL    IOMUX_CFG(IOMUXC_PAD_ENET2_TX_CTL_ENET1_RGMII_TX_CTL, IOMUXC_PAD_FSEL_FAST | IOMUXC_PAD_DSE_X6, 0)
+#  define MUX_ENET1_RX_CTL    IOMUX_CFG(IOMUXC_PAD_ENET2_RX_CTL_ENET1_RGMII_RX_CTL, 0, 0)
+
+#elif defined(CONFIG_IMX9_ENET1_RMII)
+
+/* Same pin as TX_CTL for RGMII */
+
+#  define MUX_ENET1_TX_EN     IOMUX_CFG(IOMUXC_PAD_ENET2_TX_CTL_ENET1_RGMII_TX_CTL, IOMUXC_PAD_FSEL_FAST | IOMUXC_PAD_DSE_X6, 0)
+
+/* Same pin as TX_DATA02 for RGMII */
+
+#  define MUX_ENET1_REF_CLK   IOMUX_CFG(IOMUXC_PAD_ENET2_TD2_ENET1_RGMII_TD2, IOMUXC_PAD_FSEL_FAST | IOMUXC_PAD_DSE_X6, 0)
+
+/* Same pin as RX_CTL for RGMII */
+
+#  define MUX_ENET1_CRS_DV    IOMUX_CFG(IOMUXC_PAD_ENET2_RX_CTL_ENET1_RGMII_RX_CTL, 0, 0)
+
+#else
+#error ENET1 supports only RMII and RGMII
+#endif
+
+#define BOARD_ENET1_PHY_LIST                             \
+{                                                        \
+  {                                                      \
+    GMII_RTL8211F_NAME,                                  \
+    GMII_PHYID1_RTL8211F,                                \
+    GMII_PHYID2_RTL8211F,                                \
+    GMII_RTL8211F_PHYSR_A43,                             \
+    2,                                                   \
+    0xffff,                                              \
+    GMII_RTL8211F_PHYSR_10MBPS,                          \
+    GMII_RTL8211F_PHYSR_100MBPS,                         \
+    GMII_RTL8211F_PHYSR_DUPLEX,                          \
+    22,                                                  \
+    GMII_RTL8211F_PHYSR_1000MBPS,                        \
+    GMII_RTL8211F_PHYSR_SPEED_MASK,                      \
+  },                                                     \
+}
 
 /****************************************************************************
  * Public Data
