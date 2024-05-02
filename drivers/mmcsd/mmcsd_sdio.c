@@ -3395,7 +3395,7 @@ static int mmcsd_sdinitialize(FAR struct mmcsd_state_s *priv)
 
   mmcsd_decode_scr(priv, scr);
 
-  if ((priv->caps & SDIO_CAPS_4BIT_ONLY) != 0)
+  if ((priv->caps & SDIO_CAPS_4BIT) != 0)
     {
       /* Select width (4-bit) bus operation (if the card supports it) */
 
