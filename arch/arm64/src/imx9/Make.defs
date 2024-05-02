@@ -48,7 +48,7 @@ ifeq ($(CONFIG_IMX9_LPI2C),y)
   CHIP_CSRCS += imx9_lpi2c.c
 endif
 
-ifeq ($(CONFIG_IMX9_LPSPI), y)
+ifeq ($(CONFIG_IMX9_LPSPI),y)
   CHIP_CSRCS += imx9_lpspi.c
 endif
 
@@ -61,5 +61,9 @@ ifeq ($(CONFIG_IMX9_DMA_ALLOC),y)
 endif
 
 ifeq ($(CONFIG_IMX9_ENET),y)
-CHIP_CSRCS += imx9_enet.c
+  CHIP_CSRCS += imx9_enet.c
+endif
+
+ifeq ($(CONFIG_IMX9_USDHC),y)
+  CHIP_CSRCS += imx9_usdhc.c
 endif
