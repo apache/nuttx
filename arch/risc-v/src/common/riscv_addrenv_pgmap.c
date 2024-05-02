@@ -198,7 +198,7 @@ int up_addrenv_kmap_init(void)
   next    =  g_kernel_pgt_pbase;
   vaddr   =  CONFIG_ARCH_KMAP_VBASE;
 
-  for (i = 0; i < (ARCH_SPGTS - 1); i++)
+  for (i = 0; i < ARCH_SPGTS; i++)
     {
       /* Connect the static page tables */
 
@@ -210,6 +210,10 @@ int up_addrenv_kmap_init(void)
   /* Set the page directory root */
 
   addrenv->satp = mmu_satp_reg(g_kernel_pgt_pbase, 0);
+
+  /* When all is set and done, flush the data caches */
+
+  __DMB();
 
   return OK;
 }
