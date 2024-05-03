@@ -171,4 +171,4 @@ void nrf52_ppi_grp_enable(uint8_t group, bool enable);
 }
 #endif
 
-#endif // __ARCH_ARM_SRC_NRF52_NRF52_PPI_H
+#endif /* __ARCH_ARM_SRC_NRF52_NRF52_PPI_H */

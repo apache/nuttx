@@ -943,4 +943,4 @@
 #define ADC_CC_CS_PIOSC          (0x001)                  /* PIOSC */
 #define ADC_CC_CS_MOSC           (0x002)                  /* MOSC */
 
-#endif // __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_ADC_H
+#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_ADC_H */
