@@ -408,7 +408,7 @@ You have these options:
    or code when they could be re-designed to use critical sections over shorter code
    sequences.
 
-#. In some cases, use of critical sections or disabling of pre-emption could replaced
+#. In some cases, use of critical sections or disabling of pre-emption could be replaced
    with a locking semaphore. The scope of the locking effect for the use of such locks
    is not global but is limited only to tasks that share the same resource. Critical
    sections should correctly be used only to protect resources that are shared between
