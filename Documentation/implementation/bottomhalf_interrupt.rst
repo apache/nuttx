@@ -6,7 +6,7 @@ RTOS Interrupts
 ===============
 
 A well-design RTOS depends on the most minimal of interrupt level processing.
-This is a very different concept that for bare metal programming:
+This is a very different concept from that for bare metal programming:
 
 * With bare metal programming most of the real-time work is usually performed
   in interrupt handlers. Interrupt handler execution may then extend in time
