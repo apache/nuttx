@@ -81,4 +81,4 @@
  * Public Functions Prototypes
  ****************************************************************************/
 
-#endif // __ARCH_ARM_SRC_STR71X_STR71X_MAP_H
+#endif /* __ARCH_ARM_SRC_STR71X_STR71X_MAP_H */

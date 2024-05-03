@@ -415,4 +415,4 @@
 
 /* Flash Memory Protection Program Enable 0-15 (32-bit, bit-encoded) */
 
-#endif // __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C_FLASH_H
+#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C_FLASH_H */
