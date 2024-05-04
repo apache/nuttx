@@ -34,6 +34,10 @@ Build and install ``qemu``::
   $ make
   $ sudo make install
 
+QEMU 7.2.9 or later and OpenSBI v1.1 or later (usually shipped with QEMU) is required, to support RISC-V "Sstc" Extension. It is also recommended to use the latest QEMU and OpenSBI.
+
+For users who wish to use their own OpenSBI, please refer to `OpenSBI repository <https://github.com/riscv-software-src/opensbi>`_.
+
 Configurations
 ==============
 
