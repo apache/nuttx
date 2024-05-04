@@ -138,6 +138,15 @@ int stm32_bringup(void)
   struct rtc_lowerhalf_s *lower;
 #endif
 
+#ifdef CONFIG_STM32H7_RMII
+  /* Reset Ethernet PHY */
+
+  stm32_configgpio(GPIO_ETH_RESET);
+  stm32_gpiowrite(GPIO_ETH_RESET, 0);
+  usleep(50000);
+  stm32_gpiowrite(GPIO_ETH_RESET, 1);
+#endif
+
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 
