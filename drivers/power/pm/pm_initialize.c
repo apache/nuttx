@@ -95,6 +95,10 @@ void pm_initialize(void)
 #endif
       pm_set_governor(i, gov);
 
+#if defined(CONFIG_PM_PROCFS)
+      clock_systime_timespec(&g_pmglobals.domain[i].start);
+#endif
+
       nxrmutex_init(&g_pmglobals.domain[i].lock);
 
 #if CONFIG_PM_GOVERNOR_EXPLICIT_RELAX
