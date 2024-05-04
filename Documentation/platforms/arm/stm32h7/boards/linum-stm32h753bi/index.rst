@@ -720,3 +720,38 @@ After that check if your PC recognized the usb driver::
     [27228.147377] FAT-fs (sda1): Volume was not properly unmounted. Some data may be corrupt. Please run fsck.
 
 **OBS:** This example disable the macro CONFIG_STM32H7_SDMMC_IDMA, for more information read the file: arch/arm/stm32h7/stm32_sdmmc.c
+
+netnsh
+------
+
+This configuration is focused on network testing using the ethernet periferal::
+
+    $ nsh> ifconfig
+      eth0	Link encap:Ethernet HWaddr 00:e0:de:ad:be:ef at UP mtu 1486
+        inet addr:192.168.1.6 DRaddr:192.168.1.1 Mask:255.255.255.0
+
+                  IPv4   TCP   UDP  ICMP
+      Received     01b9  0025  0194  0000
+      Dropped      0000  0000  0000  0000
+        IPv4        VHL: 0000   Frg: 0000
+        Checksum   0000  0000  0000  ----
+        TCP         ACK: 0000   SYN: 0000
+                    RST: 0000  0000
+        Type       0000  ----  ----  0000
+      Sent         0028  0025  0003  0000
+        Rexmit     ----  0000  ----  ----
+
+      nsh> ping google.com
+      PING 142.251.129.110 56 bytes of data
+      56 bytes from 142.251.129.110: icmp_seq=0 time=10.0 ms
+      56 bytes from 142.251.129.110: icmp_seq=1 time=0.0 ms
+      56 bytes from 142.251.129.110: icmp_seq=2 time=0.0 ms
+      56 bytes from 142.251.129.110: icmp_seq=3 time=0.0 ms
+      56 bytes from 142.251.129.110: icmp_seq=4 time=0.0 ms
+      56 bytes from 142.251.129.110: icmp_seq=5 time=0.0 ms
+      56 bytes from 142.251.129.110: icmp_seq=6 time=0.0 ms
+      56 bytes from 142.251.129.110: icmp_seq=7 time=0.0 ms
+      56 bytes from 142.251.129.110: icmp_seq=8 time=0.0 ms
+      56 bytes from 142.251.129.110: icmp_seq=9 time=0.0 ms
+      10 packets transmitted, 10 received, 0% packet loss, time 10100 ms
+      rtt min/avg/max/mdev = 0.000/1.000/10.000/3.000 ms

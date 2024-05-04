@@ -423,6 +423,22 @@
 /* Select PLL2R to source clock of QSPI */
 #define BOARD_QSPI_CLK  RCC_D1CCIPR_QSPISEL_PLL2
 
+/* Ethernet */
+
+#define BOARD_CFGR_MC01_SOURCE   (RCC_CFGR_MCO1_HSE)
+#define BOARD_CFGR_MC01_DIVIDER  (RCC_CFGR_MCO1PRE(0))
+#define GPIO_MCO1                (GPIO_MCO1_0)                            /* PA8 */
+
+#define GPIO_ETH_MDC          (GPIO_ETH_MDC_0|GPIO_SPEED_100MHz)          /* PC1 */
+#define GPIO_ETH_MDIO         (GPIO_ETH_MDIO_0|GPIO_SPEED_100MHz)         /* PA2 */
+#define GPIO_ETH_RMII_CRS_DV  (GPIO_ETH_RMII_CRS_DV_0|GPIO_SPEED_100MHz)  /* PA7 */
+#define GPIO_ETH_RMII_REF_CLK (GPIO_ETH_RMII_REF_CLK_0|GPIO_SPEED_100MHz) /* PA1 */
+#define GPIO_ETH_RMII_RXD0    (GPIO_ETH_RMII_RXD0_0|GPIO_SPEED_100MHz)    /* PC4 */
+#define GPIO_ETH_RMII_RXD1    (GPIO_ETH_RMII_RXD1_0|GPIO_SPEED_100MHz)    /* PC5 */
+#define GPIO_ETH_RMII_TXD0    (GPIO_ETH_RMII_TXD0_2|GPIO_SPEED_100MHz)    /* PG13 */
+#define GPIO_ETH_RMII_TXD1    (GPIO_ETH_RMII_TXD1_3|GPIO_SPEED_100MHz)    /* PG14 */
+#define GPIO_ETH_RMII_TX_EN   (GPIO_ETH_RMII_TX_EN_2|GPIO_SPEED_100MHz)   /* PG11 */
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
