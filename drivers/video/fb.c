@@ -135,6 +135,12 @@ static int     fb_sem_wait(FAR struct fb_chardev_s *fb,
 static void    fb_sem_post(FAR struct fb_chardev_s *fb, int overlay);
 #endif
 
+#ifdef CONFIG_BUILD_KERNEL
+static int     fb_munmap(FAR struct task_group_s *group,
+                         FAR struct mm_map_entry_s *entry,
+                         FAR void *start, size_t length);
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -1002,6 +1008,22 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   return ret;
 }
 
+#ifdef CONFIG_BUILD_KERNEL
+static int fb_munmap(FAR struct task_group_s *group,
+                     FAR struct mm_map_entry_s *entry,
+                     FAR void *start, size_t length)
+{
+  if (group && entry)
+    {
+      ginfo("%p, len=%zu\n", entry->vaddr, entry->length);
+      vm_unmap_region(entry->vaddr, entry->length);
+      mm_map_remove(get_current_mm(), entry);
+    }
+
+  return OK;
+}
+#endif
+
 static int fb_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
 {
   FAR struct inode *inode;
@@ -1035,6 +1057,9 @@ static int fb_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
 #ifdef CONFIG_BUILD_KERNEL
       map->vaddr = vm_map_region((uintptr_t)panelinfo.fbmem + map->offset,
                                  panelinfo.fblen);
+      map->length = panelinfo.fblen;
+      map->munmap = fb_munmap;
+      mm_map_add(get_current_mm(), map);
 #else
       map->vaddr = (FAR char *)panelinfo.fbmem + map->offset;
 #endif
