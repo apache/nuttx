@@ -51,6 +51,10 @@
 
 #include "stm32l4_i2c.h"
 
+#ifdef CONFIG_SENSORS_BMP280
+#  include "stm32_bmp280.h"
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -426,6 +430,21 @@ int board_app_initialize(uintptr_t arg)
       syslog(LOG_ERR, "ERROR: stm32l4_cc1101_initialize failed: %d\n",
              ret);
       return ret;
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_BMP280
+  /* Try to register BMP280 device in I2C1 */
+
+  ret = board_bmp280_initialize(0, 1);
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize BMP280 driver: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_ERR, "Initialized BMP280 driver: %d\n", ret);
     }
 #endif
 
