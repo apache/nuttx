@@ -132,6 +132,21 @@ int nxmutex_destroy(FAR mutex_t *mutex);
 bool nxmutex_is_hold(FAR mutex_t *mutex);
 
 /****************************************************************************
+ * Name: nxmutex_get_holder
+ *
+ * Description:
+ *   This function get the holder of the mutex referenced by 'mutex'.
+ *
+ * Parameters:
+ *   mutex - mutex descriptor.
+ *
+ * Return Value:
+ *
+ ****************************************************************************/
+
+int nxmutex_get_holder(FAR mutex_t *mutex);
+
+/****************************************************************************
  * Name: nxmutex_is_locked
  *
  * Description:
@@ -190,6 +205,34 @@ int nxmutex_lock(FAR mutex_t *mutex);
  ****************************************************************************/
 
 int nxmutex_trylock(FAR mutex_t *mutex);
+
+/****************************************************************************
+ * Name: nxmutex_clocklock
+ *
+ * Description:
+ *   This function attempts to lock the mutex referenced by 'mutex'.  If the
+ *   mutex value is (<=) zero, then the calling task will not return until it
+ *   successfully acquires the lock or timed out
+ *
+ * Input Parameters:
+ *   mutex   - Mutex object
+ *   clockid - The clock to be used as the time base
+ *   abstime - The absolute time when the mutex lock timed out
+ *
+ * Returned Value:
+ *   OK        The mutex successfully acquires
+ *   EINVAL    The mutex argument does not refer to a valid mutex.  Or the
+ *             thread would have blocked, and the abstime parameter specified
+ *             a nanoseconds field value less than zero or greater than or
+ *             equal to 1000 million.
+ *   ETIMEDOUT The mutex could not be locked before the specified timeout
+ *             expired.
+ *   EDEADLK   A deadlock condition was detected.
+ *
+ ****************************************************************************/
+
+int nxmutex_clocklock(FAR mutex_t *mutex, clockid_t clockid,
+                      FAR const struct timespec *abstime);
 
 /****************************************************************************
  * Name: nxmutex_timedlock
@@ -350,6 +393,21 @@ int nxrmutex_destroy(FAR rmutex_t *rmutex);
 bool nxrmutex_is_hold(FAR rmutex_t *rmutex);
 
 /****************************************************************************
+ * Name: nxrmutex_get_holder
+ *
+ * Description:
+ *   This function get the holder of the mutex referenced by 'mutex'.
+ *
+ * Parameters:
+ *   rmutex - Rmutex descriptor.
+ *
+ * Return Value:
+ *
+ ****************************************************************************/
+
+int nxrmutex_get_holder(FAR rmutex_t *rmutex);
+
+/****************************************************************************
  * Name: nxrmutex_is_locked
  *
  * Description:
@@ -410,6 +468,34 @@ int nxrmutex_lock(FAR rmutex_t *rmutex);
  ****************************************************************************/
 
 int nxrmutex_trylock(FAR rmutex_t *rmutex);
+
+/****************************************************************************
+ * Name: nxrmutex_clocklock
+ *
+ * Description:
+ *   This function attempts to lock the mutex referenced by 'mutex'.  If the
+ *   mutex value is (<=) zero, then the calling task will not return until it
+ *   successfully acquires the lock or timed out
+ *
+ * Input Parameters:
+ *   rmutex  - Rmutex object
+ *   clockid - The clock to be used as the time base
+ *   abstime - The absolute time when the mutex lock timed out
+ *
+ * Returned Value:
+ *   OK        The mutex successfully acquires
+ *   EINVAL    The mutex argument does not refer to a valid mutex.  Or the
+ *             thread would have blocked, and the abstime parameter specified
+ *             a nanoseconds field value less than zero or greater than or
+ *             equal to 1000 million.
+ *   ETIMEDOUT The mutex could not be locked before the specified timeout
+ *             expired.
+ *   EDEADLK   A deadlock condition was detected.
+ *
+ ****************************************************************************/
+
+int nxrmutex_clocklock(FAR rmutex_t *rmutex, clockid_t clockid,
+                       FAR const struct timespec *abstime);
 
 /****************************************************************************
  * Name: nxrmutex_timedlock
