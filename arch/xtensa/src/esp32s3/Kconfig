@@ -288,6 +288,12 @@ menu "ESP32-S3 Peripheral Selection"
 
 source "arch/xtensa/src/common/espressif/Kconfig"
 
+config ESP32S3_ADC
+        bool "ADC"
+        default n
+        select ANALOG
+        select ADC
+
 config ESP32S3_UART
 	bool
 	default n
@@ -1284,6 +1290,73 @@ config ESP32S3_UART2_CTSPIN
 endif # ESP32S3_UART2
 
 endmenu # UART Configuration
+
+menu "ADC Configuration"
+	depends on ESP32S3_ADC
+
+if ESP32S3_ADC
+
+choice ESP32S3_ADC_VOL_RANGES
+        prompt "ADC voltage ranges"
+        default ESP32S3_ADC_VOL_3100
+
+config ESP32S3_ADC_VOL_950
+        bool "0~950mV"
+
+config ESP32S3_ADC_VOL_1250
+        bool "0~1250mV"
+
+config ESP32S3_ADC_VOL_1750
+        bool "0~1750mV"
+
+config ESP32S3_ADC_VOL_3100
+        bool "0~3100mV"
+
+endchoice
+
+config ESP32S3_ADC1_CHANNEL0
+        bool "ADC1 channel 0"
+        default n
+
+config ESP32S3_ADC1_CHANNEL1
+        bool "ADC1 channel 1"
+        default n
+
+config ESP32S3_ADC1_CHANNEL2
+        bool "ADC1 channel 2"
+        default n
+
+config ESP32S3_ADC1_CHANNEL3
+        bool "ADC1 channel 3"
+        default n
+
+config ESP32S3_ADC1_CHANNEL4
+        bool "ADC1 channel 4"
+        default n
+
+config ESP32S3_ADC1_CHANNEL5
+        bool "ADC1 channel 5"
+        default n
+
+config ESP32S3_ADC1_CHANNEL6
+        bool "ADC1 channel 6"
+        default n
+
+config ESP32S3_ADC1_CHANNEL7
+        bool "ADC1 channel 7"
+        default n
+
+config ESP32S3_ADC1_CHANNEL8
+        bool "ADC1 channel 8"
+        default n
+
+config ESP32S3_ADC1_CHANNEL9
+        bool "ADC1 channel 9"
+        default n
+
+endif # ESP32S3_ADC
+
+endmenu # ADC Configuration
 
 menu "I2C Configuration"
 	depends on ESP32S3_I2C
