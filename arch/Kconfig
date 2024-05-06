@@ -92,6 +92,7 @@ config ARCH_RISCV
 	select ARCH_HAVE_RDWR_MEM_CPU_RUN
 	select ARCH_HAVE_TCBINFO
 	select ARCH_HAVE_THREAD_LOCAL
+	select ARCH_HAVE_POWEROFF
 	select ARCH_HAVE_LAZYFPU if ARCH_HAVE_FPU
 	---help---
 		RISC-V 32 and 64-bit RV32 / RV64 architectures.
