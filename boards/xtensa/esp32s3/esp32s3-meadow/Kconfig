@@ -15,6 +15,10 @@ config ESP32S3_STORAGE_MTD_OFFSET
 config ESP32S3_STORAGE_MTD_SIZE
 	hex "Storage MTD size in SPI Flash"
 	default 0x100000
+	range 0x0 0x400000 if ESP32S3_FLASH_4M
+	range 0x0 0x800000 if ESP32S3_FLASH_8M
+	range 0x0 0x1000000 if ESP32S3_FLASH_16M
+	range 0x0 0x2000000 if ESP32S3_FLASH_32M
 	depends on ESP32S3_MTD
 	---help---
 		MTD size in SPI Flash.
