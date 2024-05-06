@@ -306,6 +306,13 @@ static int tun_txpoll(FAR struct net_driver_s *dev)
   int ret;
 
   DEBUGASSERT(priv->read_buf == NULL);
+
+#ifdef CONFIG_NET_PKT
+  /* When packet sockets are enabled, feed the frame into the tap */
+
+  pkt_input(dev);
+#endif
+
   priv->read_d_len = dev->d_len;
   priv->read_buf   = dev->d_iob;
   netdev_iob_clear(dev);
