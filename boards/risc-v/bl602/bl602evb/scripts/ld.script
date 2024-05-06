@@ -164,39 +164,21 @@ SECTIONS
     PROVIDE ( __boot2_flash_cfg_end = . );
   } > ram_tcm
 
-  .noinit (NOLOAD) :
-  {
-    . = ALIGN(16);
-    *(.noinit_idle_stack*)
-  } > ram_tcm
-
   .bss (NOLOAD)   :
   {
-    PROVIDE( __bss_start = ADDR(.bss) );
-    PROVIDE( __bss_end = ADDR(.bss) + SIZEOF(.bss) );
-
-    PROVIDE( _sbss = __bss_start );
-    PROVIDE( _ebss = __bss_end );
+    PROVIDE( _sbss = ADDR(.bss) );
 
     *(.sbss*)
     *(.gnu.linkonce.sb.*)
     *(.bss .bss.*)
     *(.gnu.linkonce.b.*)
     *(COMMON)
+    . = ALIGN(32);
+    _ebss = ABSOLUTE(.);
   } > ram_tcm
 
-  . = ALIGN(4);
-
-  PROVIDE( _heap_start = . );
-  PROVIDE( _heap_size = ADDR(.stack) - _heap_start );
-
-  /* .stack ORIGIN(ram_tcm) + LENGTH(ram_tcm) - __stack_size (NOLOAD) : */
-  .stack ORIGIN(ram_tcm) + LENGTH(ram_tcm) (NOLOAD) :
-  {
-    PROVIDE( _sp_irq_base = . );
-    /* . = . + __stack_size; */
-    /* PROVIDE( _sp_main = . ); */
-  } >ram_tcm
+  /* Heap end used in code */
+  PROVIDE(__heap_end = ORIGIN(ram_tcm) + LENGTH(ram_tcm));
 
   /*CFG FW used in code*/
   PROVIDE( _ld_bl_static_cfg_entry_start = _bl_static_fw_cfg_entry_start );

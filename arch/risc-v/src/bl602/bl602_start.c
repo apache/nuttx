@@ -56,19 +56,6 @@
  * Private Data
  ****************************************************************************/
 
-/* g_idle_topstack: _sbss is the start of the BSS region as defined by the
- * linker script. _ebss lies at the end of the BSS region. The idle task
- * stack starts at the end of BSS and is of size CONFIG_IDLETHREAD_STACKSIZE.
- * The IDLE thread is the thread that the system boots on and, eventually,
- * becomes the IDLE, do nothing task that runs only when there is nothing
- * else to run.  The heap continues from there until the end of memory.
- * g_idle_topstack is a read-only variable the provides this computed
- * address.
- */
-
-uint8_t g_idle_stack[SMP_STACK_SIZE]
-  locate_data(".noinit_idle_stack");
-
 /* Dont change the name of variable, since we refer this
  * g_boot2_partition_table in linker script
  */
@@ -79,7 +66,7 @@ static struct boot2_partition_table_s g_boot2_partition_table used_data;
  * Public Data
  ****************************************************************************/
 
-uintptr_t g_idle_topstack;
+uintptr_t g_idle_topstack = (uintptr_t)_ebss + SMP_STACK_SIZE;
 
 /****************************************************************************
  * Public Functions
@@ -163,13 +150,9 @@ void bfl_main(void)
 
   asm volatile("csrw mtvec, %0" ::"r"((uintptr_t)exception_common + 2));
 
-  /* Configure IDLE stack */
-
-  g_idle_topstack = ((uint32_t)g_idle_stack + SMP_STACK_SIZE);
-
   /* Setup base stack */
 
-  riscv_set_basestack((uintptr_t)g_idle_stack, SMP_STACK_SIZE);
+  riscv_set_basestack((uintptr_t)_ebss, SMP_STACK_SIZE);
 
   /* Configure the UART so we can get debug output */
 
