@@ -316,7 +316,11 @@ mm_initialize_pool(FAR const char *name,
 
       for (i = 0; i < MEMPOOL_NPOOLS; i++)
         {
+#  if CONFIG_MM_MIN_BLKSIZE != 0
+          poolsize[i] = (i + 1) * CONFIG_MM_MIN_BLKSIZE;
+#  else
           poolsize[i] = (i + 1) * MM_MIN_CHUNK;
+#  endif
         }
 
       def.poolsize        = poolsize;
