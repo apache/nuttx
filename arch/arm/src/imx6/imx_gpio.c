@@ -29,6 +29,7 @@
 #include <errno.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 
 #include "chip.h"
 #include "arm_internal.h"
@@ -512,7 +513,7 @@ int imx_config_gpio(gpio_pinset_t pinset)
 
   /* Configure the pin as an input initially to avoid any spurious outputs */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(NULL);
 
   /* Configure based upon the pin mode */
 
@@ -555,7 +556,7 @@ int imx_config_gpio(gpio_pinset_t pinset)
         break;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(NULL, flags);
   return ret;
 }
 
