@@ -19,11 +19,17 @@
 # the License.
 #
 # ##############################################################################
-set(SRCS lib_getpwnam.c lib_getpwnamr.c lib_getpwuid.c lib_getpwuidr.c
-         lib_getpwent.c lib_pwd_globals.c)
+set(SRCS
+    lib_getpwnam.c
+    lib_getpwnamr.c
+    lib_getpwuid.c
+    lib_getpwuidr.c
+    lib_getpwent.c
+    lib_pwd_globals.c
+    lib_getspnam.c)
 
 if(CONFIG_LIBC_PASSWD_FILE)
-  list(APPEND SRCS lib_find_pwdfile.c)
+  list(APPEND SRCS lib_find_pwdfile.c lib_getspnamr.c)
 else()
   list(APPEND SRCS lib_getpwbuf.c lib_getpwbufr.c)
 endif()

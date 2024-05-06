@@ -1,7 +1,5 @@
 /****************************************************************************
- * libs/libc/pwd/lib_pwd_globals.c
- *
- * SPDX-License-Identifier: Apache-2.0
+ * libs/libc/pwd/lib_getspnam.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -26,19 +24,37 @@
 
 #include <nuttx/config.h>
 
+#include <pwd.h>
+#include <shadow.h>
+#include <string.h>
+
 #include "pwd/lib_pwd.h"
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* Data for non-reentrant group functions */
-
-int g_passwd_index;
-struct passwd g_passwd;
-struct spwd g_spwd;
-char g_passwd_buffer[CONFIG_LIBC_PASSWD_LINESIZE];
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+FAR struct spwd *getspnam(FAR const char *name)
+{
+  FAR struct spwd *result = NULL;
+
+#ifdef CONFIG_LIBC_PASSWD_FILE
+  getspnam_r(name, &g_spwd, g_passwd_buffer,
+             sizeof(g_passwd_buffer), &result);
+#else
+  if (strcmp(name, ROOT_NAME) == 0)
+    {
+      size_t nsize = sizeof(ROOT_NAME);
+      size_t psize = sizeof(ROOT_PWDP);
+      result = &g_spwd;
+
+      result->sp_namp = g_passwd_buffer;
+      result->sp_pwdp = &g_passwd_buffer[nsize];
+
+      strlcpy(result->sp_namp, ROOT_NAME, nsize);
+      strlcpy(result->sp_pwdp, ROOT_PWDP, psize);
+    }
+#endif
+
+  return result;
+}
