@@ -378,6 +378,10 @@ static int  imx9_registercallback(struct sdio_dev_s *dev,
 /* DMA */
 
 #ifdef CONFIG_IMX9_USDHC_DMA
+#  if defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
+static int  imx9_dmapreflight(struct sdio_dev_s *dev,
+                               const uint8_t *buffer, size_t buflen);
+#  endif
 static int  imx9_dmarecvsetup(struct sdio_dev_s *dev,
               uint8_t *buffer, size_t buflen);
 static int  imx9_dmasendsetup(struct sdio_dev_s *dev,
@@ -441,6 +445,9 @@ struct imx9_dev_s g_sdhcdev[IMX9_MAX_SDHC_DEV_SLOTS] =
       .registercallback = imx9_registercallback,
 #ifdef CONFIG_SDIO_DMA
 #ifdef CONFIG_IMX9_USDHC_DMA
+#  if defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
+      .dmapreflight     = imx9_dmapreflight,
+#  endif
       .dmarecvsetup     = imx9_dmarecvsetup,
       .dmasendsetup     = imx9_dmasendsetup,
 #else
@@ -500,6 +507,9 @@ struct imx9_dev_s g_sdhcdev[IMX9_MAX_SDHC_DEV_SLOTS] =
       .registercallback = imx9_registercallback,
 #ifdef CONFIG_SDIO_DMA
 #ifdef CONFIG_IMX9_USDHC_DMA
+#  if defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
+      .dmapreflight     = imx9_dmapreflight,
+#  endif
       .dmarecvsetup     = imx9_dmarecvsetup,
       .dmasendsetup     = imx9_dmasendsetup,
 #else
@@ -2950,6 +2960,60 @@ static int imx9_registercallback(struct sdio_dev_s *dev,
 }
 
 /****************************************************************************
+ * Name: imx9_dmapreflight
+ *
+ * Description:
+ *   Preflight an SDIO DMA operation.  If the buffer is not well-formed for
+ *   SDIO DMA transfer (alignment, size, etc.) returns an error.
+ *
+ * Input Parameters:
+ *   dev    - An instance of the SDIO device interface
+ *   buffer - The memory to DMA to/from
+ *   buflen - The size of the DMA transfer in bytes
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure
+ ****************************************************************************/
+
+#if defined(CONFIG_IMX9_USDHC_DMA) && defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
+static int imx9_dmapreflight(struct sdio_dev_s *dev,
+                              const uint8_t *buffer, size_t buflen)
+{
+  struct imx9_dev_s *priv = (struct imx9_dev_s *)dev;
+  DEBUGASSERT(priv != NULL && buflen > 0);
+
+  /* DMA must be possible to the buffer and it must be word (4 bytes) aligned
+   */
+
+  if (buffer != priv->rxbuffer && ((uintptr_t)buffer & 3) != 0)
+    {
+      mcerr("non word aligned buffer:%p\n", buffer);
+      return -EFAULT;
+    }
+
+#if !defined(CONFIG_ARM64_DCACHE_DISABLE)
+  /* buffer alignment is required for DMA transfers with dcache in buffered
+   * mode (not write-through) because a) arch_invalidate_dcache could lose
+   * buffered writes and b) arch_flush_dcache could corrupt adjacent memory
+   * if the maddr and the mend+1, the next next address are not on
+   * ARMV8A_DCACHE_LINESIZE boundaries.
+   */
+
+  if (buffer != priv->rxbuffer &&
+      (((uintptr_t)buffer & (ARMV8A_DCACHE_LINESIZE - 1)) != 0 ||
+      ((uintptr_t)(buffer + buflen) & (ARMV8A_DCACHE_LINESIZE - 1)) != 0))
+    {
+      mcerr("dcache unaligned buffer:%p end:%p\n",
+            buffer, buffer + buflen - 1);
+      return -EFAULT;
+    }
+#endif
+
+  return 0;
+}
+#endif
+
+/****************************************************************************
  * Name: imx9_dmarecvsetup
  *
  * Description:
@@ -2974,7 +3038,20 @@ static int imx9_dmarecvsetup(struct sdio_dev_s *dev,
 {
   struct imx9_dev_s *priv = (struct imx9_dev_s *)dev;
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
-  DEBUGASSERT(((uint64_t) buffer & 3) == 0);
+
+#if defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
+  /* Normaly imx9_dmapreflight is called prior to imx9_dmarecvsetup
+   * except for the case where the CSR read is done at initalization
+   *
+   * With a total read  size of less then priv->rxbuffer we can
+   * handle the unaligned case herein, using the rxbuffer.
+   *
+   * Any other case is a fault.
+   */
+
+  DEBUGASSERT(buflen <= sizeof(priv->rxbuffer) ||
+         imx9_dmapreflight(dev, buffer, buflen) == 0);
+#endif
 
   /* Begin sampling register values */
 
@@ -2985,8 +3062,8 @@ static int imx9_dmarecvsetup(struct sdio_dev_s *dev,
   if (((uintptr_t)buffer & (ARMV8A_DCACHE_LINESIZE - 1)) != 0 ||
        (buflen & (ARMV8A_DCACHE_LINESIZE - 1)) != 0)
     {
-      /* The read buffer is not cache-line aligned. Read to an internal
-       * buffer instead.
+      /* The read buffer is not cache-line aligned, but will fit in
+       * the rxbuffer. So read to an internal buffer instead.
        */
 
       up_invalidate_dcache((uintptr_t)priv->rxbuffer,
