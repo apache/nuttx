@@ -59,6 +59,7 @@ menu "USDHC"
 config IMX9_USDHC
 	bool
 	default n
+	select ARCH_HAVE_SDIO_PREFLIGHT
 
 config IMX9_USDHC1
 	bool "USDHC1"
