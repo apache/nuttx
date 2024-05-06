@@ -55,6 +55,12 @@ static int pci_ecam_write_config(FAR struct pci_bus_s *bus,
                                  unsigned int devfn, int where, int size,
                                  uint32_t val);
 
+static int pci_ecam_read_io(FAR struct pci_bus_s *bus, uintptr_t addr,
+                            int size, FAR uint32_t *val);
+
+static int pci_ecam_write_io(FAR struct pci_bus_s *bus, uintptr_t addr,
+                             int size, uint32_t val);
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -71,8 +77,10 @@ struct pci_ecam_s
 
 static const struct pci_ops_s g_pci_ecam_ops =
 {
-  .read  = pci_ecam_read_config,
-  .write = pci_ecam_write_config,
+  .read     = pci_ecam_read_config,
+  .write    = pci_ecam_write_config,
+  .read_io  = pci_ecam_read_io,
+  .write_io = pci_ecam_write_io,
 };
 
 /****************************************************************************
@@ -242,6 +250,100 @@ static int pci_ecam_write_config(FAR struct pci_bus_s *bus,
   addr = pci_ecam_conf_address(bus, devfn, where);
 
   if (!IS_ALIGNED((uintptr_t)addr, size))
+    {
+      return -EINVAL;
+    }
+
+  if (size == 4)
+    {
+      writel(val, addr);
+    }
+  else if (size == 2)
+    {
+      writew(val, addr);
+    }
+  else if (size == 1)
+    {
+      writeb(val, addr);
+    }
+  else
+    {
+      return -EINVAL;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: pci_ecam_read_io
+ *
+ * Description:
+ *   Read data from the specific address.
+ *
+ * Input Parameters:
+ *   bus  - The bus on this to read reg data
+ *   addr - Data address
+ *   size - Data size
+ *   val  - Return value to this var
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  A negated errno value is returned
+ *   on failure.
+ *
+ ****************************************************************************/
+
+static int pci_ecam_read_io(FAR struct pci_bus_s *bus, uintptr_t addr,
+                            int size, FAR uint32_t *val)
+{
+  if (!IS_ALIGNED(addr, size))
+    {
+      *val = 0;
+      return -EINVAL;
+    }
+
+  if (size == 4)
+    {
+      *val = readl(addr);
+    }
+  else if (size == 2)
+    {
+      *val = readw(addr);
+    }
+  else if (size == 1)
+    {
+      *val = readb(addr);
+    }
+  else
+    {
+      *val = 0;
+      return -EINVAL;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: pci_ecam_read_io
+ *
+ * Description:
+ *   Write data to the specific address.
+ *
+ * Input Parameters:
+ *   bus  - The bus on this to read reg data
+ *   addr - Data address
+ *   size - Data size
+ *   val  - Write this value to specific address
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  A negated errno value is returned
+ *   on failure.
+ *
+ ****************************************************************************/
+
+static int pci_ecam_write_io(FAR struct pci_bus_s *bus, uintptr_t addr,
+                             int size, uint32_t val)
+{
+  if (!IS_ALIGNED(addr, size))
     {
       return -EINVAL;
     }
