@@ -939,10 +939,10 @@ static int icjx_detach(FAR struct ioexpander_dev_s *dev, FAR void *handle)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_ICJX_INT_ENABLE
 static void icjx_interrupt_worker(void *arg)
 {
   FAR struct icjx_dev_s *priv = (FAR struct icjx_dev_s *)arg;
-  uint8_t regaddr;
   uint16_t change_of_input;
   uint16_t isr;
   ioe_pinset_t irq_match;
@@ -1001,7 +1001,8 @@ static int icjx_interrupt(int irq, FAR void *context, FAR void *arg)
   return OK;
 }
 
-#endif
+#endif /* CONFIG_ICJX_INT_ENABLE */
+#endif /* CONFIG_IOEXPANDER_INT_ENABLE */
 
 /****************************************************************************
  * Public Functions
