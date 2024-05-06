@@ -128,14 +128,20 @@ uint64_t riscv_sbi_get_time(void)
 uintptr_t riscv_sbi_send_ipi(uint32_t hmask, uintptr_t hbase)
 {
   return sbi_ecall(SBI_EXT_IPI, SBI_EXT_IPI_SEND_IPI,
-      hmask, hbase, 0, 0, 0, 0);
+                   hmask, hbase, 0, 0, 0, 0);
 }
 
 #ifndef CONFIG_NUTTSBI
+uintptr_t riscv_sbi_system_reset(uint32_t type, uint32_t reason)
+{
+  return sbi_ecall(SBI_EXT_SRST, SBI_EXT_SRST_SYS_RESET,
+                   type, reason, 0, 0, 0, 0);
+}
+
 uintptr_t riscv_sbi_boot_secondary(uint32_t hartid, uintptr_t addr,
                                    uintptr_t a1)
 {
   return sbi_ecall(SBI_EXT_HSM, SBI_EXT_HSM_HART_START,
-      hartid, addr, a1, 0, 0, 0);
+                   hartid, addr, a1, 0, 0, 0);
 }
 #endif /* CONFIG_NUTTSBI */
