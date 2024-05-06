@@ -36,6 +36,7 @@
 
 #include <sys/mount.h>
 
+#include "riscv_internal.h"
 #include "romfs.h"
 
 /****************************************************************************
@@ -177,3 +178,17 @@ void board_late_initialize(void)
 
 #endif
 }
+
+#ifdef CONFIG_BOARDCTL_POWEROFF
+int board_power_off(int status)
+{
+#ifdef CONFIG_BUILD_KERNEL
+  riscv_sbi_system_reset(SBI_SRST_TYPE_SHUTDOWN, SBI_SRST_REASON_NONE);
+#else
+  #warning "to be done"
+#endif
+
+  UNUSED(status);
+  return 0;
+}
+#endif
