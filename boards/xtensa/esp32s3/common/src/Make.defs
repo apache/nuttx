@@ -60,6 +60,10 @@ ifeq ($(CONFIG_ESP32S3_OTG),y)
   CSRCS += esp32s3_board_usb.c
 endif
 
+ifeq ($(CONFIG_ESP32S3_ADC),y)
+  CSRCS += esp32s3_board_adc.c
+endif
+
 ifeq ($(CONFIG_NET_LAN9250),y)
   CSRCS += esp32s3_lan9250.c
 endif
