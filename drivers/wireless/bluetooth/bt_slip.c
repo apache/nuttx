@@ -36,7 +36,6 @@
 #include <nuttx/net/bluetooth.h>
 #include <nuttx/semaphore.h>
 
-#include <nuttx/wireless/bluetooth/bt_ioctl.h>
 #include <nuttx/wireless/bluetooth/bt_slip.h>
 
 /****************************************************************************
@@ -127,7 +126,6 @@ struct sliphci_s
   } linkstate;
 
   bool dipresent; /* Data integrity check */
-  bool nonblock;  /* Send hci in noblock mode */
 
   uint8_t rxack; /* Last ack number received */
   uint8_t txseq; /* Next seq number to send */
@@ -522,7 +520,6 @@ static void bt_slip_unack_handle(FAR struct sliphci_s *priv)
 {
   size_t to_remove;
   uint8_t seq;
-  int semcount = 0;
 
   to_remove = bt_slip_unack_size(priv);
   if (to_remove == 0)
@@ -553,12 +550,14 @@ static void bt_slip_unack_handle(FAR struct sliphci_s *priv)
     {
       bt_slip_unack_dtor(priv);
 
-      /* When in blocked hci write mode, we needs to notifiy bt_slip_send
-       * if it was blocked by full tx window.
+      /* When it was blocked by full tx window, we needs to notifiy
+       * bt_slip_send.
        */
 
-      if ((bt_slip_unack_size(priv) == priv->txwin - 1) && !priv->nonblock)
+      if (bt_slip_unack_size(priv) == priv->txwin - 1)
         {
+          int semcount;
+
           nxsem_get_value(&priv->sem, &semcount);
           if (semcount < 0)
             {
@@ -570,7 +569,6 @@ static void bt_slip_unack_handle(FAR struct sliphci_s *priv)
     }
 
   to_remove = bt_slip_unack_size(priv);
-
   if (!to_remove)
     {
       work_cancel(HPWORK, &priv->retxworker);
@@ -708,20 +706,13 @@ static int bt_slip_send(FAR struct bt_driver_s *dev,
   if (bt_slip_unack_size(priv) >= priv->txwin)
     {
       bt_slip_send_ack(priv);
-      if (priv->nonblock)
+
+      nxmutex_unlock(&priv->sliplock);
+      nxsem_wait_uninterruptible(&priv->sem);
+      ret = nxmutex_lock(&priv->sliplock);
+      if (ret < 0)
         {
-          ret = -EAGAIN;
-          goto end;
-        }
-      else
-        {
-          nxmutex_unlock(&priv->sliplock);
-          nxsem_wait_uninterruptible(&priv->sem);
-          ret = nxmutex_lock(&priv->sliplock);
-          if (ret < 0)
-            {
-              return ret;
-            }
+          return ret;
         }
     }
 
@@ -988,36 +979,18 @@ static int bt_slip_ioctl(FAR struct bt_driver_s *dev, int cmd,
 {
   FAR struct sliphci_s *priv;
   FAR struct bt_driver_s *drv;
-  int ret;
 
   DEBUGASSERT(dev != NULL);
 
   priv = (FAR struct sliphci_s *)dev;
   drv = priv->drv;
 
-  switch (cmd)
+  if (!drv->ioctl)
     {
-    case FIONBIO:
-      {
-        FAR int *nonblock = (FAR int *)(uintptr_t)arg;
-        if (nonblock && *nonblock)
-          {
-            priv->nonblock = true;
-          }
-        else
-          {
-            priv->nonblock = false;
-          }
-      }
-
-      ret = OK;
-      break;
-    default:
-      ret = drv->ioctl(drv, cmd, arg);
-      break;
+      return -ENOTTY;
     }
 
-  return ret;
+  return drv->ioctl(drv, cmd, arg);
 }
 
 static void bt_slip_close(FAR struct bt_driver_s *dev)
