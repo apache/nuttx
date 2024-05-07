@@ -3529,6 +3529,32 @@ static int s32k3xx_ioctl(struct file *filep, int cmd, unsigned long arg)
         spin_unlock_irqrestore(NULL, flags);
       }
       break;
+
+    case TIOCSSINGLEWIREDUPLEX:
+      {
+        uint32_t regval;
+        irqstate_t flags;
+        struct s32k3xx_uart_s *priv = (struct s32k3xx_uart_s *)dev->priv;
+
+        flags  = spin_lock_irqsave(NULL);
+        regval   = s32k3xx_serialin(priv, S32K3XX_LPUART_CTRL_OFFSET);
+
+        if ((arg & SER_SINGLEWIRE_DUPLEX_TX) != 0)
+          {
+            regval &= ~(LPUART_CTRL_RSRC);
+            regval |= (LPUART_CTRL_TXDIR);
+          }
+        else /* RX Mode */
+          {
+            regval |= LPUART_CTRL_RSRC;
+            regval &= ~(LPUART_CTRL_TXDIR);
+          }
+
+        s32k3xx_serialout(priv, S32K3XX_LPUART_CTRL_OFFSET, regval);
+
+        spin_unlock_irqrestore(NULL, flags);
+      }
+      break;
 #endif
 
 #ifdef CONFIG_S32K3XX_LPUART_INVERT

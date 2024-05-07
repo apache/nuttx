@@ -2629,7 +2629,7 @@ static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
 
         if ((arg & SER_SINGLEWIRE_ENABLED) != 0)
           {
-            uint32_t gpio_val = IOMUX_OPENDRAIN;
+            uint32_t gpio_val = 0;
             gpio_val |= (arg & SER_SINGLEWIRE_PULL_MASK) ==
                          SER_SINGLEWIRE_PULLUP ?
                                         IOMUX_PULL_UP : IOMUX_PULL_NONE;
@@ -2646,6 +2646,32 @@ static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
                                                  IOMUX_OPENDRAIN)) |
                                                  IOMUX_PULL_NONE);
             regval &= ~(LPUART_CTRL_LOOPS | LPUART_CTRL_RSRC);
+          }
+
+        imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, regval);
+
+        spin_unlock_irqrestore(NULL, flags);
+      }
+      break;
+
+    case TIOCSSINGLEWIREDUPLEX:
+      {
+        uint32_t regval;
+        irqstate_t flags;
+        struct imxrt_uart_s *priv = (struct imxrt_uart_s *)dev;
+
+        flags  = spin_lock_irqsave(NULL);
+        regval   = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET);
+
+        if ((arg & SER_SINGLEWIRE_DUPLEX_TX) != 0)
+          {
+            regval &= ~(LPUART_CTRL_RSRC);
+            regval |= (LPUART_CTRL_TXDIR);
+          }
+        else /* RX Mode */
+          {
+            regval |= LPUART_CTRL_RSRC;
+            regval &= ~(LPUART_CTRL_TXDIR);
           }
 
         imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, regval);
