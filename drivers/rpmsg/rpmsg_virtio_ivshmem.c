@@ -32,6 +32,7 @@
 #include <nuttx/pci/pci_ivshmem.h>
 #include <nuttx/rpmsg/rpmsg_virtio.h>
 #include <nuttx/rpmsg/rpmsg_virtio_ivshmem.h>
+#include <nuttx/wdog.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -40,7 +41,7 @@
 #define rpmsg_virtio_ivshmem_from(dev) \
   container_of(ivshmem_get_driver(dev), struct rpmsg_virtio_ivshmem_dev_s, drv)
 
-#define RPMSG_VIRTIO_IVSHMEM_WORK_DELAY    1
+#define RPMSG_VIRTIO_IVSHMEM_WORK_DELAY    MSEC2TICK(1)
 
 #define RPMSG_VIRTIO_VRING_ALIGNMENT       8
 
@@ -73,9 +74,9 @@ struct rpmsg_virtio_ivshmem_dev_s
   char                                   cpuname[RPMSG_NAME_SIZE + 1];
   FAR struct pci_device_s               *ivshmem;
 
-  /* Work queue for transmit */
+  /* Wdog for transmit */
 
-  struct work_s                          worker;
+  struct wdog_s                          wdog;
 };
 
 /****************************************************************************
@@ -236,9 +237,10 @@ static int rpmsg_virtio_ivshmem_interrupt(int irq, FAR void *context,
  * Name: rpmsg_virtio_ivshmem_work
  ****************************************************************************/
 
-static void rpmsg_virtio_ivshmem_work(FAR void *arg)
+static void rpmsg_virtio_ivshmem_work(wdparm_t arg)
 {
-  FAR struct rpmsg_virtio_ivshmem_dev_s *priv = arg;
+  FAR struct rpmsg_virtio_ivshmem_dev_s *priv =
+    (FAR struct rpmsg_virtio_ivshmem_dev_s *)arg;
   bool should_notify = false;
 
   if (priv->master && priv->seq != priv->shmem->seqs)
@@ -257,8 +259,8 @@ static void rpmsg_virtio_ivshmem_work(FAR void *arg)
       priv->callback(priv->arg, RPMSG_VIRTIO_NOTIFY_ALL);
     }
 
-  work_queue(HPWORK, &priv->worker, rpmsg_virtio_ivshmem_work, priv,
-             RPMSG_VIRTIO_IVSHMEM_WORK_DELAY);
+  wd_start(&priv->wdog, RPMSG_VIRTIO_IVSHMEM_WORK_DELAY,
+           rpmsg_virtio_ivshmem_work, (wdparm_t)priv);
 }
 
 /****************************************************************************
@@ -285,13 +287,18 @@ static int rpmsg_virtio_ivshmem_probe(FAR struct ivshmem_device_s *ivdev)
   ret = rpmsg_virtio_initialize(&priv->dev);
   if (ret < 0)
     {
-      pcierr("rpmsg virtio intialize failed, ret=%d\n", ret);
+      pcierr("Rpmsg virtio intialize failed, ret=%d\n", ret);
       goto err;
     }
 
   if (!ivshmem_support_irq(ivdev))
     {
-      work_queue(HPWORK, &priv->worker, rpmsg_virtio_ivshmem_work, priv, 0);
+      ret = wd_start(&priv->wdog, RPMSG_VIRTIO_IVSHMEM_WORK_DELAY,
+                     rpmsg_virtio_ivshmem_work, (wdparm_t)priv);
+      if (ret < 0)
+        {
+          pcierr("ERROR: wd_start failed: %d\n", ret);
+        }
     }
 
   return ret;
@@ -312,7 +319,11 @@ static void rpmsg_virtio_ivshmem_remove(FAR struct ivshmem_device_s *ivdev)
   FAR struct rpmsg_virtio_ivshmem_dev_s *priv =
     rpmsg_virtio_ivshmem_from(ivdev);
 
-  work_cancel_sync(HPWORK, &priv->worker);
+  if (!ivshmem_support_irq(ivdev))
+    {
+      wd_cancel(&priv->wdog);
+    }
+
   ivshmem_control_irq(ivdev, false);
   ivshmem_detach_irq(ivdev);
   kmm_free(priv);
