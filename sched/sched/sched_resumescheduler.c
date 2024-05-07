@@ -33,7 +33,7 @@
 #include "irq/irq.h"
 #include "sched/sched.h"
 
-#if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_RESUMESCHEDULER)
+#if defined(CONFIG_SCHED_RESUMESCHEDULER)
 
 /****************************************************************************
  * Public Functions
