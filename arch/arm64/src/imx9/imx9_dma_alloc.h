@@ -80,9 +80,4 @@ void *imx9_dma_alloc(size_t size);
 
 void imx9_dma_free(void *memory, size_t size);
 
-#ifdef CONFIG_FAT_DMAMEMORY
-#  define fat_dma_alloc(s)  imx9_dma_alloc(s)
-#  define fat_dma_free(m,s) imx9_dma_free(m,s)
-#endif
-
 #endif /* __ARCH_ARM64_SRC_IMX9_IMX9_DMA_ALLOC_H */
