@@ -29,6 +29,7 @@
 
 #include <nuttx/net/net.h>
 #include <nuttx/net/netfilter/ip_tables.h>
+#include <nuttx/net/netfilter/ip6_tables.h>
 
 #ifdef CONFIG_NET_IPTABLES
 
@@ -44,8 +45,14 @@
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_IPv4
 int ipt_setsockopt(FAR struct socket *psock, int option,
                    FAR const void *value, socklen_t value_len);
+#endif
+#ifdef CONFIG_NET_IPv6
+int ip6t_setsockopt(FAR struct socket *psock, int option,
+                    FAR const void *value, socklen_t value_len);
+#endif
 
 /****************************************************************************
  * Name: ipt_getsockopt
@@ -55,8 +62,14 @@ int ipt_setsockopt(FAR struct socket *psock, int option,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_IPv4
 int ipt_getsockopt(FAR struct socket *psock, int option,
                    FAR void *value, FAR socklen_t *value_len);
+#endif
+#ifdef CONFIG_NET_IPv6
+int ip6t_getsockopt(FAR struct socket *psock, int option,
+                    FAR void *value, FAR socklen_t *value_len);
+#endif
 
 /****************************************************************************
  * Name: ipt_alloc_table
@@ -75,8 +88,14 @@ int ipt_getsockopt(FAR struct socket *psock, int option,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_IPv4
 FAR struct ipt_replace *ipt_alloc_table(FAR const char *table,
                                         unsigned int valid_hooks);
+#endif
+#ifdef CONFIG_NET_IPv6
+FAR struct ip6t_replace *ip6t_alloc_table(FAR const char *table,
+                                          unsigned int valid_hooks);
+#endif
 
 /****************************************************************************
  * Name: ipt_nat_init

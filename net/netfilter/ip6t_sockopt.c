@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/netfilter/ipt_sockopt.c
+ * net/netfilter/ip6t_sockopt.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -47,11 +47,11 @@
  * init/apply functions.
  */
 
-struct ipt_table_s
+struct ip6t_table_s
 {
-  FAR struct ipt_replace *repl;
-  FAR struct ipt_replace *(*init_func)(void);
-  FAR int (*apply_func)(FAR const struct ipt_replace *);
+  FAR struct ip6t_replace *repl;
+  FAR struct ip6t_replace *(*init_func)(void);
+  FAR int (*apply_func)(FAR const struct ip6t_replace *);
 };
 
 /* Following structs represent the layout of an entry with standard/error
@@ -60,15 +60,15 @@ struct ipt_table_s
  * might be matches between entry and target in data from user space.
  */
 
-struct ipt_standard_entry_s
+struct ip6t_standard_entry_s
 {
-  struct ipt_entry entry;
+  struct ip6t_entry entry;
   struct xt_standard_target target;
 };
 
-struct ipt_error_entry_s
+struct ip6t_error_entry_s
 {
-  struct ipt_entry entry;
+  struct ip6t_entry entry;
   struct xt_error_target target;
 };
 
@@ -76,14 +76,8 @@ struct ipt_error_entry_s
  * Private Data
  ****************************************************************************/
 
-static struct ipt_table_s g_tables[] =
+static struct ip6t_table_s g_tables[] =
 {
-#ifdef CONFIG_NET_NAT
-  {NULL, ipt_nat_init, ipt_nat_apply},
-#endif
-#ifdef CONFIG_NET_IPFILTER
-  {NULL, ipt_filter_init, ipt_filter_apply},
-#endif
 };
 
 /****************************************************************************
@@ -91,14 +85,14 @@ static struct ipt_table_s g_tables[] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ipt_table_init
+ * Name: ip6t_table_init
  *
  * Description:
  *   Try initialize the table data if not initialized.
  *
  ****************************************************************************/
 
-static void ipt_table_init(FAR struct ipt_table_s *table)
+static void ip6t_table_init(FAR struct ip6t_table_s *table)
 {
   if (table->repl == NULL && table->init_func != NULL)
     {
@@ -107,19 +101,19 @@ static void ipt_table_init(FAR struct ipt_table_s *table)
 }
 
 /****************************************************************************
- * Name: ipt_table
+ * Name: ip6t_table
  *
  * Description:
  *   Find table data by table name.
  *
  ****************************************************************************/
 
-static FAR struct ipt_table_s *ipt_table(FAR const char *name)
+static FAR struct ip6t_table_s *ip6t_table(FAR const char *name)
 {
   int i;
   for (i = 0; i < nitems(g_tables); i++)
     {
-      ipt_table_init(&g_tables[i]);
+      ip6t_table_init(&g_tables[i]);
       if (g_tables[i].repl != NULL &&
           strcmp(g_tables[i].repl->name, name) == 0)
         {
@@ -131,16 +125,16 @@ static FAR struct ipt_table_s *ipt_table(FAR const char *name)
 }
 
 /****************************************************************************
- * Name: ipt_table_repl
+ * Name: ip6t_table_repl
  *
  * Description:
  *   Find table data by table name.
  *
  ****************************************************************************/
 
-static FAR struct ipt_replace *ipt_table_repl(FAR const char *name)
+static FAR struct ip6t_replace *ip6t_table_repl(FAR const char *name)
 {
-  FAR struct ipt_table_s *table = ipt_table(name);
+  FAR struct ip6t_table_s *table = ip6t_table(name);
   if (table)
     {
       return table->repl;
@@ -153,23 +147,23 @@ static FAR struct ipt_replace *ipt_table_repl(FAR const char *name)
  * Name: get_info
  *
  * Description:
- *   Fill table info into ipt_getinfo structure.
+ *   Fill table info into ip6t_getinfo structure.
  *
  * Input Parameters:
  *   get, len - The parameters from getsockopt.
  *
  ****************************************************************************/
 
-static int get_info(FAR struct ipt_getinfo *get, FAR socklen_t *len)
+static int get_info(FAR struct ip6t_getinfo *get, FAR socklen_t *len)
 {
-  FAR struct ipt_replace *repl;
+  FAR struct ip6t_replace *repl;
 
   if (*len != sizeof(*get))
     {
       return -EINVAL;
     }
 
-  repl = ipt_table_repl(get->name);
+  repl = ip6t_table_repl(get->name);
   if (repl == NULL)
     {
       return -ENOENT;
@@ -188,23 +182,23 @@ static int get_info(FAR struct ipt_getinfo *get, FAR socklen_t *len)
  * Name: get_entries
  *
  * Description:
- *   Fill entry info into ipt_get_entries structure.
+ *   Fill entry info into ip6t_get_entries structure.
  *
  * Input Parameters:
  *   get, len - The parameters from getsockopt.
  *
  ****************************************************************************/
 
-static int get_entries(FAR struct ipt_get_entries *get, FAR socklen_t *len)
+static int get_entries(FAR struct ip6t_get_entries *get, FAR socklen_t *len)
 {
-  FAR struct ipt_replace *repl;
+  FAR struct ip6t_replace *repl;
 
   if (*len < sizeof(*get) || *len != sizeof(*get) + get->size)
     {
       return -EINVAL;
     }
 
-  repl = ipt_table_repl(get->name);
+  repl = ip6t_table_repl(get->name);
   if (repl == NULL)
     {
       return -ENOENT;
@@ -224,22 +218,22 @@ static int get_entries(FAR struct ipt_get_entries *get, FAR socklen_t *len)
  * Name: check_replace
  *
  * Description:
- *   Check whether an ipt_replace structure from user space is valid.
+ *   Check whether an ip6t_replace structure from user space is valid.
  *
  * Input Parameters:
- *   repl - The ipt_replace structure to check.
+ *   repl - The ip6t_replace structure to check.
  *
  * Returned Value:
  *   OK if repl is valid, otherwise -EINVAL.
  *
  ****************************************************************************/
 
-static int check_replace(FAR const struct ipt_replace *repl)
+static int check_replace(FAR const struct ip6t_replace *repl)
 {
-  FAR struct ipt_entry *entry;
+  FAR struct ip6t_entry *entry;
   unsigned int entry_count = 0;
 
-  ipt_entry_for_every(entry, repl->entries, repl->size)
+  ip6t_entry_for_every(entry, repl->entries, repl->size)
     {
       entry_count++;
       if (entry->next_offset == 0)
@@ -269,11 +263,12 @@ static int check_replace(FAR const struct ipt_replace *repl)
  *
  ****************************************************************************/
 
-static int replace_entries(FAR const struct ipt_replace *repl, socklen_t len)
+static int replace_entries(FAR const struct ip6t_replace *repl,
+                           socklen_t len)
 {
   int ret;
-  FAR struct ipt_replace *new_repl;
-  FAR struct ipt_table_s *table = ipt_table(repl->name);
+  FAR struct ip6t_replace *new_repl;
+  FAR struct ip6t_table_s *table = ip6t_table(repl->name);
 
   if (table == NULL || table->repl == NULL)
     {
@@ -321,7 +316,7 @@ static int replace_entries(FAR const struct ipt_replace *repl, socklen_t len)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ipt_alloc_table
+ * Name: ip6t_alloc_table
  *
  * Description:
  *   Allocate an initial table info with valid_hooks specified.
@@ -333,16 +328,16 @@ static int replace_entries(FAR const struct ipt_replace *repl, socklen_t len)
  *   valid_hooks - The valid_hooks of the table, it's a bitmask.
  *
  * Returned Value:
- *   Newly generated ipt_replace structure.
+ *   Newly generated ip6t_replace structure.
  *
  ****************************************************************************/
 
-FAR struct ipt_replace *ipt_alloc_table(FAR const char *table,
-                                        unsigned int valid_hooks)
+FAR struct ip6t_replace *ip6t_alloc_table(FAR const char *table,
+                                          unsigned int valid_hooks)
 {
-  FAR struct ipt_replace *repl;
-  FAR struct ipt_standard_entry_s *entry;
-  FAR struct ipt_error_entry_s *error_entry;
+  FAR struct ip6t_replace *repl;
+  FAR struct ip6t_standard_entry_s *entry;
+  FAR struct ip6t_error_entry_s *error_entry;
   size_t entry_size;
   unsigned int hook;
   unsigned int num_hooks;
@@ -356,11 +351,11 @@ FAR struct ipt_replace *ipt_alloc_table(FAR const char *table,
 
   /* There will be num_hooks entries with standard target (ACCEPT). */
 
-  entry_size = num_hooks * sizeof(struct ipt_standard_entry_s);
+  entry_size = num_hooks * sizeof(struct ip6t_standard_entry_s);
 
   /* An error target as final entry. */
 
-  entry_size += sizeof(struct ipt_error_entry_s);
+  entry_size += sizeof(struct ip6t_error_entry_s);
 
   repl = kmm_zalloc(sizeof(*repl) + entry_size);
   if (repl == NULL)
@@ -373,7 +368,7 @@ FAR struct ipt_replace *ipt_alloc_table(FAR const char *table,
   repl->num_entries = num_hooks + 1;
   repl->size = entry_size;
 
-  entry = (FAR struct ipt_standard_entry_s *)(repl->entries);
+  entry = (FAR struct ip6t_standard_entry_s *)(repl->entries);
 
   for (hook = 0; hook < NF_INET_NUMHOOKS; hook++)
     {
@@ -391,7 +386,7 @@ FAR struct ipt_replace *ipt_alloc_table(FAR const char *table,
       entry++;
     }
 
-  error_entry = (FAR struct ipt_error_entry_s *)entry;
+  error_entry = (FAR struct ip6t_error_entry_s *)entry;
   strlcpy(error_entry->target.errorname, XT_ERROR_TARGET,
           sizeof(error_entry->target.errorname));
   IPT_FILL_ENTRY(error_entry, XT_ERROR_TARGET);
@@ -400,19 +395,19 @@ FAR struct ipt_replace *ipt_alloc_table(FAR const char *table,
 }
 
 /****************************************************************************
- * Name: ipt_setsockopt
+ * Name: ip6t_setsockopt
  *
  * Description:
  *   setsockopt function of iptables.
  *
  ****************************************************************************/
 
-int ipt_setsockopt(FAR struct socket *psock, int option,
-                   FAR const void *value, socklen_t value_len)
+int ip6t_setsockopt(FAR struct socket *psock, int option,
+                    FAR const void *value, socklen_t value_len)
 {
   switch (option)
     {
-      case IPT_SO_SET_REPLACE:
+      case IP6T_SO_SET_REPLACE:
         return replace_entries(value, value_len);
 
       default:
@@ -421,22 +416,22 @@ int ipt_setsockopt(FAR struct socket *psock, int option,
 }
 
 /****************************************************************************
- * Name: ipt_getsockopt
+ * Name: ip6t_getsockopt
  *
  * Description:
  *   getsockopt function of iptables.
  *
  ****************************************************************************/
 
-int ipt_getsockopt(FAR struct socket *psock, int option,
-                   FAR void *value, FAR socklen_t *value_len)
+int ip6t_getsockopt(FAR struct socket *psock, int option,
+                    FAR void *value, FAR socklen_t *value_len)
 {
   switch (option)
     {
-      case IPT_SO_GET_INFO:
+      case IP6T_SO_GET_INFO:
         return get_info(value, value_len);
 
-      case IPT_SO_GET_ENTRIES:
+      case IP6T_SO_GET_ENTRIES:
         return get_entries(value, value_len);
 
       default:
