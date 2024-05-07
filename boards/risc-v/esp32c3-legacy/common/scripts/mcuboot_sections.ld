@@ -144,32 +144,6 @@ SECTIONS
     . = ORIGIN(dram0_0_seg) + _iram_end - _iram_start;
   } >dram0_0_seg
 
-  /* Shared RAM */
-
-  .dram0.bss (NOLOAD) :
-  {
-    /* .bss initialized on power-up */
-
-    . = ALIGN (8);
-    _sbss = ABSOLUTE(.);
-    *(.dynsbss)
-    *(.sbss)
-    *(.sbss.*)
-    *(.gnu.linkonce.sb.*)
-    *(.scommon)
-    *(.sbss2)
-    *(.sbss2.*)
-    *(.gnu.linkonce.sb2.*)
-    *(.dynbss)
-    KEEP (*(.bss))
-    *(.bss.*)
-    *(.share.mem)
-    *(.gnu.linkonce.b.*)
-    *(COMMON)
-    . = ALIGN(8);
-    _ebss = ABSOLUTE(.);
-  } >dram0_0_seg
-
   .noinit (NOLOAD):
   {
     /* This section contains data that is not initialized during load,
@@ -205,11 +179,33 @@ SECTIONS
     esp32c3_start.*(.rodata .rodata.*)
     _edata = ABSOLUTE(.);
     . = ALIGN(4);
-
-    /* Heap starts at the end of .data */
-
-    _sheap = ABSOLUTE(.);
   } >dram0_0_seg AT>ROM
+
+  /* Shared RAM */
+
+  .dram0.bss (NOLOAD) :
+  {
+    /* .bss initialized on power-up */
+
+    . = ALIGN (8);
+    _sbss = ABSOLUTE(.);
+    *(.dynsbss)
+    *(.sbss)
+    *(.sbss.*)
+    *(.gnu.linkonce.sb.*)
+    *(.scommon)
+    *(.sbss2)
+    *(.sbss2.*)
+    *(.gnu.linkonce.sb2.*)
+    *(.dynbss)
+    KEEP (*(.bss))
+    *(.bss.*)
+    *(.share.mem)
+    *(.gnu.linkonce.b.*)
+    *(COMMON)
+    . = ALIGN(8);
+    _ebss = ABSOLUTE(.);
+  } >dram0_0_seg
 
   /* Marks the end of IRAM code segment */
 

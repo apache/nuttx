@@ -174,11 +174,7 @@ HDR_ATTR static void (*_entry_point)(void) = __start;
  * Public Data
  ****************************************************************************/
 
-/* Address of the IDLE thread */
-
-uint8_t g_idlestack[SMP_STACK_SIZE]
-  aligned_data(16) locate_data(".noinit");
-uintptr_t g_idle_topstack = ESP_IDLESTACK_TOP;
+uintptr_t g_idle_topstack = (uintptr_t)_ebss + SMP_STACK_SIZE;
 
 /****************************************************************************
  * Private Functions
@@ -461,7 +457,7 @@ void __esp_start(void)
 
   /* Setup base stack */
 
-  riscv_set_basestack(ESP_IDLESTACK_BASE, SMP_STACK_SIZE);
+  riscv_set_basestack((uintptr_t)_ebss, SMP_STACK_SIZE);
 
   /* Setup the syscall table needed by the ROM code */
 

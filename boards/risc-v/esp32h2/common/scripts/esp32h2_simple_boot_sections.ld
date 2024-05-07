@@ -137,33 +137,6 @@ SECTIONS
     . = ORIGIN(dram0_0_seg) + _iram_end - _iram_start;
   } >dram0_0_seg
 
-  /* Shared RAM */
-
-  .dram0.bss (NOLOAD) :
-  {
-    . = ALIGN (8);
-    _bss_start = ABSOLUTE(.);
-    _sbss = ABSOLUTE(.);
-    *(.dynsbss)
-    *(.sbss)
-    *(.sbss.*)
-    *(.gnu.linkonce.sb.*)
-    *(.scommon)
-    *(.sbss2)
-    *(.sbss2.*)
-    *(.gnu.linkonce.sb2.*)
-    *(.dynbss)
-    *(.bss)
-    *(.bss.*)
-    *(.share.mem)
-    *(.gnu.linkonce.b.*)
-    *(COMMON)
-
-    . = ALIGN (8);
-    _ebss = ABSOLUTE(.);
-    _bss_end = ABSOLUTE(.);
-  } >dram0_0_seg
-
   .noinit (NOLOAD):
   {
     /* This section contains data that is not initialized during load,
@@ -263,11 +236,34 @@ SECTIONS
     . = ALIGN(4);
     _edata = ABSOLUTE(.);
     _data_end = ABSOLUTE(.);
-
-    /* Heap starts at the end of .data */
-
-    _sheap = ABSOLUTE(.);
   } >dram0_0_seg AT > ROM
+
+  /* Shared RAM */
+
+  .dram0.bss (NOLOAD) :
+  {
+    . = ALIGN (8);
+    _bss_start = ABSOLUTE(.);
+    _sbss = ABSOLUTE(.);
+    *(.dynsbss)
+    *(.sbss)
+    *(.sbss.*)
+    *(.gnu.linkonce.sb.*)
+    *(.scommon)
+    *(.sbss2)
+    *(.sbss2.*)
+    *(.gnu.linkonce.sb2.*)
+    *(.dynbss)
+    *(.bss)
+    *(.bss.*)
+    *(.share.mem)
+    *(.gnu.linkonce.b.*)
+    *(COMMON)
+
+    . = ALIGN (32);
+    _ebss = ABSOLUTE(.);
+    _bss_end = ABSOLUTE(.);
+  } >dram0_0_seg
 
   _image_irom_vma = ADDR(.flash.text);
   _image_irom_lma = LOADADDR(.flash.text);

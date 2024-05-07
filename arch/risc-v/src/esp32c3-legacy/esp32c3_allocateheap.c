@@ -36,6 +36,7 @@
 #include <arch/board/board_memorymap.h>
 #endif
 
+#include "riscv_internal.h"
 #include "esp32c3.h"
 #include "hardware/esp32c3_rom_layout.h"
 
@@ -91,14 +92,13 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
    * Check boards/risc-v/esp32c3-legacy.
    */
 
-  extern uint8_t _sheap[];
   extern const struct esp32c3_rom_layout_s *ets_rom_layout_p;
 
   board_autoled_on(LED_HEAPALLOCATE);
 
-  *heap_start = _sheap;
-  *heap_size  = ets_rom_layout_p->dram0_rtos_reserved_start -
-                (uintptr_t)_sheap;
+  *heap_start = (void *)g_idle_topstack;
+  *heap_size  = (uintptr_t)ets_rom_layout_p->dram0_rtos_reserved_start -
+                           g_idle_topstack;
 #endif /* CONFIG_BUILD_PROTECTED && CONFIG_MM_KERNEL_HEAP */
 }
 
@@ -123,9 +123,7 @@ void up_allocate_kheap(void **heap_start, size_t *heap_size)
    * Check boards/risc-v/esp32c3-legacy.
    */
 
-  extern uint8_t _sheap[];
-
-  uintptr_t kbase = (uintptr_t)_sheap;
+  uintptr_t kbase = g_idle_topstack;
   uintptr_t ktop  = KDRAM_END;
   size_t    ksize = ktop - kbase;
 
