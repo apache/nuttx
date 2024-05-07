@@ -65,6 +65,7 @@
 #define XT_MATCH_NAME_TCP       "tcp"
 #define XT_MATCH_NAME_UDP       "udp"
 #define XT_MATCH_NAME_ICMP      "icmp"
+#define XT_MATCH_NAME_ICMP6     "icmp6"
 
 /* Table name to simplify our code */
 
