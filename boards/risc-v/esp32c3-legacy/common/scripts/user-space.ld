@@ -147,31 +147,6 @@ SECTIONS
     . = ORIGIN(UDRAM) + _iram_end - _iram_start;
   } >UDRAM
 
-  /* Shared RAM */
-
-  .bss (NOLOAD) :
-  {
-    . = ALIGN (8);
-    _sbss = ABSOLUTE(.);
-    *(.dynsbss)
-    *(.sbss)
-    *(.sbss.*)
-    *(.gnu.linkonce.sb.*)
-    *(.scommon)
-    *(.sbss2)
-    *(.sbss2.*)
-    *(.gnu.linkonce.sb2.*)
-    *(.dynbss)
-    *(.bss)
-    *(.bss.*)
-    *(.share.mem)
-    *(.gnu.linkonce.b.*)
-    *(COMMON)
-
-    . = ALIGN (8);
-    _ebss = ABSOLUTE(.);
-  } >UDRAM
-
   .noinit (NOLOAD):
   {
     /* This section contains data that is not initialized during load,
@@ -201,6 +176,31 @@ SECTIONS
     . = ALIGN(4);
     _edata = ABSOLUTE(.);
   } >UDRAM AT>ROM
+
+  /* Shared RAM */
+
+  .bss (NOLOAD) :
+  {
+    . = ALIGN (8);
+    _sbss = ABSOLUTE(.);
+    *(.dynsbss)
+    *(.sbss)
+    *(.sbss.*)
+    *(.gnu.linkonce.sb.*)
+    *(.scommon)
+    *(.sbss2)
+    *(.sbss2.*)
+    *(.gnu.linkonce.sb2.*)
+    *(.dynbss)
+    *(.bss)
+    *(.bss.*)
+    *(.share.mem)
+    *(.gnu.linkonce.b.*)
+    *(COMMON)
+
+    . = ALIGN (32);
+    _ebss = ABSOLUTE(.);
+  } >UDRAM
 
   .flash_text_dummy (NOLOAD) : ALIGN(0x00010000)
   {

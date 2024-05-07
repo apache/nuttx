@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 #include <arch/irq.h>
 
+#include "riscv_internal.h"
 #include "chip.h"
 
 /****************************************************************************
@@ -49,8 +50,9 @@ __start:
 
   /* Set stack pointer to the idle thread stack */
 
-  lui  sp, %hi(ESP32C3_IDLESTACK_TOP)
-  addi sp, sp, %lo(ESP32C3_IDLESTACK_TOP)
+  la   sp, _ebss
+  li   t0, SMP_STACK_SIZE
+  add  sp, sp, t0
 
   /* Set gp pointer */
 
