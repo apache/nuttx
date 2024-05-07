@@ -142,4 +142,16 @@ void imx9_dma_free(void *memory, size_t size)
   gran_free(dma_allocator, memory, size);
 }
 
+#ifdef CONFIG_FAT_DMAMEMORY
+FAR void *fat_dma_alloc(size_t size)
+{
+  return imx9_dma_alloc(size);
+}
+
+void fat_dma_free(FAR void *memory, size_t size)
+{
+  imx9_dma_free(memory, size);
+}
+#endif
+
 #endif /* CONFIG_IMX9_DMA_ALLOC */
