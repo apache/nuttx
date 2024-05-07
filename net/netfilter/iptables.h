@@ -133,7 +133,12 @@ int ipt_nat_apply(FAR const struct ipt_replace *repl);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPFILTER
+#  ifdef CONFIG_NET_IPv4
 FAR struct ipt_replace *ipt_filter_init(void);
+#  endif
+#  ifdef CONFIG_NET_IPv6
+FAR struct ip6t_replace *ip6t_filter_init(void);
+#  endif
 #endif
 
 /****************************************************************************
@@ -148,7 +153,12 @@ FAR struct ipt_replace *ipt_filter_init(void);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPFILTER
+#  ifdef CONFIG_NET_IPv4
 int ipt_filter_apply(FAR const struct ipt_replace *repl);
+#  endif
+#  ifdef CONFIG_NET_IPv6
+int ip6t_filter_apply(FAR const struct ip6t_replace *repl);
+#  endif
 #endif
 
 #endif /* CONFIG_NET_IPTABLES */

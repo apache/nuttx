@@ -199,8 +199,9 @@ static uint8_t convert_target(FAR const struct xt_entry_target *target)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_IPv4
 static FAR struct ipv4_filter_entry_s *
-convert_entry(FAR const struct ipt_entry *entry)
+convert_ipv4entry(FAR const struct ipt_entry *entry)
 {
   FAR const struct xt_entry_match *match;
   FAR const struct xt_entry_target *target;
@@ -271,6 +272,83 @@ convert_entry(FAR const struct ipt_entry *entry)
 skip_match:
   return filter;
 }
+#endif
+
+#ifdef CONFIG_NET_IPv6
+static FAR struct ipv6_filter_entry_s *
+convert_ipv6entry(FAR const struct ip6t_entry *entry)
+{
+  FAR const struct xt_entry_match *match;
+  FAR const struct xt_entry_target *target;
+  FAR struct ipv6_filter_entry_s *filter =
+              (FAR struct ipv6_filter_entry_s *)ipfilter_cfg_alloc(PF_INET6);
+  if (filter == NULL)
+    {
+      return NULL;
+    }
+
+  match  = IP6T_MATCH(entry);
+  target = IP6T_TARGET(entry);
+
+  /* Convert common fields */
+
+  net_ipv6addr_copy(filter->sip, entry->ipv6.src.s6_addr16);
+  net_ipv6addr_copy(filter->dip, entry->ipv6.dst.s6_addr16);
+  net_ipv6addr_copy(filter->smsk, entry->ipv6.smsk.s6_addr16);
+  net_ipv6addr_copy(filter->dmsk, entry->ipv6.dmsk.s6_addr16);
+
+  filter->common.indev  = netdev_findbyname(entry->ipv6.iniface);
+  filter->common.outdev = netdev_findbyname(entry->ipv6.outiface);
+  filter->common.proto  = entry->ipv6.proto;
+  filter->common.target = convert_target(target);
+
+  convert_invflags(&filter->common, entry->ipv6.invflags);
+
+  /* Convert match fields */
+
+  if (entry->target_offset < sizeof(struct xt_entry_match))
+    {
+      ninfo("No match inside entry, skip match conversion.\n");
+      goto skip_match;
+    }
+
+  switch (entry->ipv6.proto)
+    {
+      case IPPROTO_TCP:
+        if (strcmp(match->u.user.name, XT_MATCH_NAME_TCP) == 0)
+          {
+            FAR struct xt_tcp *tcp = (FAR struct xt_tcp *)(match + 1);
+            convert_tcpudp(&filter->common, tcp->spts, tcp->dpts,
+                           tcp->invflags);
+          }
+        break;
+
+      case IPPROTO_UDP:
+        if (strcmp(match->u.user.name, XT_MATCH_NAME_TCP) == 0)
+          {
+            FAR struct xt_udp *udp = (FAR struct xt_udp *)(match + 1);
+            convert_tcpudp(&filter->common, udp->spts, udp->dpts,
+                           udp->invflags);
+          }
+        break;
+
+      case IPPROTO_ICMP6:
+        if (strcmp(match->u.user.name, XT_MATCH_NAME_ICMP6) == 0)
+          {
+            FAR struct ip6t_icmp *icmp6 =
+                                        (FAR struct ip6t_icmp *)(match + 1);
+            convert_icmp(&filter->common, icmp6->type, icmp6->invflags);
+          }
+        break;
+
+      default:
+        break;
+    }
+
+skip_match:
+  return filter;
+}
+#endif
 
 /****************************************************************************
  * Name: adjust_filter
@@ -283,7 +361,8 @@ skip_match:
  *
  ****************************************************************************/
 
-static void adjust_filter(FAR const struct ipt_replace *repl)
+#ifdef CONFIG_NET_IPv4
+static void adjust_ipv4filter(FAR const struct ipt_replace *repl)
 {
   FAR const struct ipt_entry *entry;
   FAR const uint8_t *head;
@@ -309,7 +388,7 @@ static void adjust_filter(FAR const struct ipt_replace *repl)
 
       ipt_entry_for_every(entry, head, size)
         {
-          FAR struct ipv4_filter_entry_s *filter = convert_entry(entry);
+          FAR struct ipv4_filter_entry_s *filter = convert_ipv4entry(entry);
           if (filter != NULL)
             {
               ipfilter_cfg_add(&filter->common, PF_INET, chain);
@@ -321,6 +400,48 @@ static void adjust_filter(FAR const struct ipt_replace *repl)
         }
     }
 }
+#endif
+
+#ifdef CONFIG_NET_IPv6
+static void adjust_ipv6filter(FAR const struct ip6t_replace *repl)
+{
+  FAR const struct ip6t_entry *entry;
+  FAR const uint8_t *head;
+  enum ipfilter_chain_e chain;
+  enum nf_inet_hooks hook;
+  size_t size;
+
+  for (hook = NF_INET_LOCAL_IN; hook <= NF_INET_LOCAL_OUT; hook++)
+    {
+      /* Clear all filter config first. */
+
+      chain = convert_chain(hook);
+      ipfilter_cfg_clear(PF_INET6, chain);
+
+      /* Set filter config according to iptables config. */
+
+      head = (FAR const uint8_t *)repl->entries + repl->hook_entry[hook];
+      size = repl->underflow[hook] - repl->hook_entry[hook];
+
+      /* We need the underflow entry as the default of the chain. */
+
+      size++;
+
+      ip6t_entry_for_every(entry, head, size)
+        {
+          FAR struct ipv6_filter_entry_s *filter = convert_ipv6entry(entry);
+          if (filter != NULL)
+            {
+              ipfilter_cfg_add(&filter->common, PF_INET6, chain);
+            }
+          else
+            {
+              nwarn("WARNING: Failed to convert entry!\n");
+            }
+        }
+    }
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -334,10 +455,19 @@ static void adjust_filter(FAR const struct ipt_replace *repl)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_IPv4
 FAR struct ipt_replace *ipt_filter_init(void)
 {
   return ipt_alloc_table(XT_TABLE_NAME_FILTER, FILTER_VALID_HOOKS);
 }
+#endif
+
+#ifdef CONFIG_NET_IPv6
+FAR struct ip6t_replace *ip6t_filter_init(void)
+{
+  return ip6t_alloc_table(XT_TABLE_NAME_FILTER, FILTER_VALID_HOOKS);
+}
+#endif
 
 /****************************************************************************
  * Name: ipt_filter_apply
@@ -350,6 +480,7 @@ FAR struct ipt_replace *ipt_filter_init(void)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_IPv4
 int ipt_filter_apply(FAR const struct ipt_replace *repl)
 {
   FAR const struct ipt_entry *entry;
@@ -402,7 +533,67 @@ int ipt_filter_apply(FAR const struct ipt_replace *repl)
 
   /* Set config table into ip filter. */
 
-  adjust_filter(repl);
+  adjust_ipv4filter(repl);
 
   return OK;
 }
+#endif
+
+#ifdef CONFIG_NET_IPv6
+int ip6t_filter_apply(FAR const struct ip6t_replace *repl)
+{
+  FAR const struct ip6t_entry *entry;
+  FAR const struct xt_entry_match *match;
+  FAR const struct xt_entry_target *target;
+
+  /* Check config first. */
+
+  ip6t_entry_for_every(entry, repl->entries, repl->size)
+    {
+      match  = IP6T_MATCH(entry);
+      target = IP6T_TARGET(entry);
+
+      /* Check match type matches the protocol */
+
+      if (entry->target_offset >= sizeof(struct xt_entry_match))
+        {
+          if (strcmp(match->u.user.name, XT_MATCH_NAME_TCP) == 0 &&
+              entry->ipv6.proto != IPPROTO_TCP)
+            {
+              nwarn("WARNING: TCP match for non-TCP protocol\n");
+              return -EINVAL;
+            }
+
+          if (strcmp(match->u.user.name, XT_MATCH_NAME_UDP) == 0 &&
+              entry->ipv6.proto != IPPROTO_UDP)
+            {
+              nwarn("WARNING: UDP match for non-UDP protocol\n");
+              return -EINVAL;
+            }
+
+          if (strcmp(match->u.user.name, XT_MATCH_NAME_ICMP6) == 0 &&
+              entry->ipv6.proto != IPPROTO_ICMP6)
+            {
+              nwarn("WARNING: ICMP6 match for non-ICMP6 protocol\n");
+              return -EINVAL;
+            }
+        }
+
+      /* Check target type */
+
+      if (strcmp(target->u.user.name, XT_REJECT_TARGET) != 0 &&
+          strcmp(target->u.user.name, XT_STANDARD_TARGET) != 0 &&
+          strcmp(target->u.user.name, XT_ERROR_TARGET) != 0)
+        {
+          nwarn("WARNING: Unsupported target %s\n", target->u.user.name);
+          return -EINVAL;
+        }
+    }
+
+  /* Set config table into ip filter. */
+
+  adjust_ipv6filter(repl);
+
+  return OK;
+}
+#endif

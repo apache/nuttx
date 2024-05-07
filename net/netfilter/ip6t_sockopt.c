@@ -78,6 +78,9 @@ struct ip6t_error_entry_s
 
 static struct ip6t_table_s g_tables[] =
 {
+#ifdef CONFIG_NET_IPFILTER
+  {NULL, ip6t_filter_init, ip6t_filter_apply},
+#endif
 };
 
 /****************************************************************************
@@ -381,7 +384,7 @@ FAR struct ip6t_replace *ip6t_alloc_table(FAR const char *table,
       repl->underflow[hook] = repl->hook_entry[hook];
 
       entry->target.verdict = -NF_ACCEPT - 1;
-      IPT_FILL_ENTRY(entry, XT_STANDARD_TARGET);
+      IP6T_FILL_ENTRY(entry, XT_STANDARD_TARGET);
 
       entry++;
     }
@@ -389,7 +392,7 @@ FAR struct ip6t_replace *ip6t_alloc_table(FAR const char *table,
   error_entry = (FAR struct ip6t_error_entry_s *)entry;
   strlcpy(error_entry->target.errorname, XT_ERROR_TARGET,
           sizeof(error_entry->target.errorname));
-  IPT_FILL_ENTRY(error_entry, XT_ERROR_TARGET);
+  IP6T_FILL_ENTRY(error_entry, XT_ERROR_TARGET);
 
   return repl;
 }
