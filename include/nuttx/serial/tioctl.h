@@ -202,6 +202,14 @@
 
 #define TIOCSLINID      _TIOC(0x0037) /* Master send one LIN header with specified LIN identifier: uint8_t */
 
+/* Single-wire UART Duplex */
+
+#define TIOCSSINGLEWIREDUPLEX _TIOC(0x0038)  /* Set single-wire duplex mode */
+#define TIOCGSINGLEWIREDUPLEX _TIOC(0x0039)  /* Get single-wire duplex mode */
+
+#  define SER_SINGLEWIRE_DUPLEX_TX       (1 << 0)  /* Single-wire run in TX Mode */
+#  define SER_SINGLEWIRE_DUPLEX_RX       (0)       /* Single-wire run in RX Mode */
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
