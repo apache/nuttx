@@ -71,6 +71,14 @@
 #define ip6t_entry_target               xt_entry_target
 #define ip6t_entry_match                xt_entry_match
 
+/* Foreach macro for entries. */
+
+#define ip6t_entry_for_every(entry, head, size) \
+  for ((entry) = (FAR struct ip6t_entry *)(head); \
+       (entry) < (FAR struct ip6t_entry *)((FAR uint8_t *)(head) + (size)); \
+       (entry) = (FAR struct ip6t_entry *) \
+                     ((FAR uint8_t *)(entry) + (entry)->next_offset))
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

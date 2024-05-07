@@ -33,6 +33,7 @@
 #include <nuttx/net/net.h>
 
 #include "netdev/netdev.h"
+#include "netfilter/iptables.h"
 #include "mld/mld.h"
 #include "inet/inet.h"
 #include "socket/socket.h"
@@ -215,6 +216,12 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
             }
         }
         break;
+
+#ifdef CONFIG_NET_IPTABLES
+      case IP6T_SO_SET_REPLACE:
+        ret = ip6t_setsockopt(psock, option, value, value_len);
+        break;
+#endif
 
       default:
         nerr("ERROR: Unrecognized IPv6 option: %d\n", option);
