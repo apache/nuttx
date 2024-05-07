@@ -97,4 +97,8 @@ if(CONFIG_ARCH_HAVE_FORK)
   list(APPEND SRCS lib_fork.c)
 endif()
 
+if(CONFIG_CRYPTO)
+  list(APPEND SRCS lib_crypt.c lib_crypt_r.c)
+endif()
+
 target_sources(c PRIVATE ${SRCS})
