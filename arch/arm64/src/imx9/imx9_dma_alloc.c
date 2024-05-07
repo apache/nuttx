@@ -89,11 +89,7 @@ int imx9_dma_alloc_init(void)
 {
   /* Allocate 64B granules with 64B alignment */
 
-  /* REVISIT: Use 256B granule size to get 8K maximum allocation. This is a
-   * limitation in the granule allocator itself.
-   */
-
-  dma_allocator = gran_initialize(g_dma_heap, sizeof(g_dma_heap), 8, 6);
+  dma_allocator = gran_initialize(g_dma_heap, sizeof(g_dma_heap), 6, 6);
 
   if (dma_allocator == NULL)
     {
