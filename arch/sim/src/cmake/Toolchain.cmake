@@ -75,6 +75,7 @@ endif()
 
 if(CONFIG_SIM_ASAN)
   add_compile_options(-fsanitize=address)
+  add_link_options(-fsanitize=address)
   add_compile_options(-fsanitize-address-use-after-scope)
   add_compile_options(-fsanitize=pointer-compare)
   add_compile_options(-fsanitize=pointer-subtract)
