@@ -84,6 +84,6 @@ int getpwuid_r(uid_t uid, FAR struct passwd *pwd, FAR char *buf,
     }
 
   return getpwbuf_r(ROOT_UID, ROOT_GID, ROOT_NAME, ROOT_GEOCS, ROOT_DIR,
-                    ROOT_SHELL, pwd, buf, buflen, result);
+                    ROOT_SHELL, ROOT_PASSWD, pwd, buf, buflen, result);
 #endif
 }

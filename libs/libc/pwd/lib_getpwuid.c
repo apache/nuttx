@@ -73,6 +73,6 @@ FAR struct passwd *getpwuid(uid_t uid)
     }
 
   return getpwbuf(ROOT_UID, ROOT_GID, ROOT_NAME, ROOT_GEOCS, ROOT_DIR,
-                  ROOT_SHELL);
+                  ROOT_SHELL, ROOT_PASSWD);
 #endif
 }
