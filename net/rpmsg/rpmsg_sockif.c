@@ -36,6 +36,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/circbuf.h>
+#include <nuttx/crc32.h>
 #include <nuttx/rpmsg/rpmsg.h>
 #include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
@@ -53,12 +54,9 @@
 #define RPMSG_SOCKET_CMD_SYNC           1
 #define RPMSG_SOCKET_CMD_DATA           2
 #define RPMSG_SOCKET_CMD_SHUTDOWN       3
-#define RPMSG_SOCKET_NAME_PREFIX        "sk:"
-#define RPMSG_SOCKET_NAME_PREFIX_LEN    3
-#define RPMSG_SOCKET_NAME_ID_LEN        13
-
-static_assert(RPMSG_SOCKET_NAME_SIZE + RPMSG_SOCKET_NAME_PREFIX_LEN
-              <= RPMSG_NAME_SIZE, "socket name size config error");
+#define RPMSG_SOCKET_NAME_PREFIX        "s:"
+#define RPMSG_SOCKET_NAME_PREFIX_LEN    2
+#define RPMSG_SOCKET_NAME_LEN           10
 
 /****************************************************************************
  * Private Types
@@ -100,7 +98,7 @@ struct rpmsg_socket_conn_s
   struct rpmsg_endpoint          ept;
 
   struct sockaddr_rpmsg          rpaddr;
-  char                           nameid[RPMSG_SOCKET_NAME_ID_LEN];
+  char                           nameid[RPMSG_SOCKET_NAME_LEN];
   uint16_t                       crefs;
   uint32_t                       how;
 
@@ -222,7 +220,7 @@ const struct sock_intf_s g_rpmsg_sockif =
  * Private Data
  ****************************************************************************/
 
-static uint64_t g_rpmsg_id;
+static uint32_t g_rpmsg_id;
 
 /****************************************************************************
  * Private Functions
@@ -496,11 +494,30 @@ static void rpmsg_socket_ept_release(FAR struct rpmsg_endpoint *ept)
     }
 }
 
+static void rpmsg_socket_format_name(FAR struct rpmsg_socket_conn_s *conn,
+                                     FAR char *namebuf)
+{
+  if (strlen(conn->rpaddr.rp_name) > RPMSG_SOCKET_NAME_LEN)
+    {
+      uint32_t crc = crc32((const uint8_t *)conn->rpaddr.rp_name,
+                           strlen(conn->rpaddr.rp_name));
+      snprintf(namebuf, RPMSG_NAME_SIZE, "%s%.2s%08" PRIx32 "%s",
+               RPMSG_SOCKET_NAME_PREFIX, conn->rpaddr.rp_name,
+               crc, conn->nameid);
+    }
+  else
+    {
+      snprintf(namebuf, RPMSG_NAME_SIZE, "%s%.*s%s",
+               RPMSG_SOCKET_NAME_PREFIX, RPMSG_SOCKET_NAME_LEN,
+               conn->rpaddr.rp_name, conn->nameid);
+    }
+}
+
 static void rpmsg_socket_device_created(FAR struct rpmsg_device *rdev,
                                         FAR void *priv)
 {
   FAR struct rpmsg_socket_conn_s *conn = priv;
-  char buf[RPMSG_NAME_SIZE];
+  char namebuf[RPMSG_NAME_SIZE];
 
   if (conn->ept.rdev)
     {
@@ -512,10 +529,9 @@ static void rpmsg_socket_device_created(FAR struct rpmsg_device *rdev,
       conn->ept.priv = conn;
       conn->ept.ns_bound_cb = rpmsg_socket_ns_bound;
       conn->ept.release_cb = rpmsg_socket_ept_release;
-      snprintf(buf, sizeof(buf), "%s%s%s", RPMSG_SOCKET_NAME_PREFIX,
-               conn->rpaddr.rp_name, conn->nameid);
+      rpmsg_socket_format_name(conn, namebuf);
 
-      rpmsg_create_ept(&conn->ept, rdev, buf,
+      rpmsg_create_ept(&conn->ept, rdev, namebuf,
                        RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
                        rpmsg_socket_ept_cb, rpmsg_socket_ns_unbind);
     }
@@ -526,11 +542,10 @@ static bool rpmsg_socket_ns_match(FAR struct rpmsg_device *rdev,
                                   uint32_t dest)
 {
   FAR struct rpmsg_socket_conn_s *server = priv;
-  char buf[RPMSG_NAME_SIZE];
+  char namebuf[RPMSG_NAME_SIZE];
 
-  snprintf(buf, sizeof(buf), "%s%s", RPMSG_SOCKET_NAME_PREFIX,
-           server->rpaddr.rp_name);
-  if (strncmp(name, buf, strlen(buf)))
+  rpmsg_socket_format_name(server, namebuf);
+  if (strncmp(name, namebuf, strlen(namebuf)))
     {
       return false;
     }
@@ -640,7 +655,7 @@ static int rpmsg_socket_setaddr(FAR struct rpmsg_socket_conn_s *conn,
 
   if (suffix)
     {
-      snprintf(conn->nameid, sizeof(conn->nameid), ":%" PRIx64,
+      snprintf(conn->nameid, sizeof(conn->nameid), ":%" PRIx32,
                g_rpmsg_id++);
     }
   else
