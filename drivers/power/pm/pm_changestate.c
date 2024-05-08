@@ -67,12 +67,14 @@ static void pm_stats(FAR struct pm_domain_s *dom, int curstate, int newstate)
       /* Wakeup from WFI */
 
       clock_timespec_add(&ts, &dom->sleep[curstate], &dom->sleep[curstate]);
+      dom->in_sleep = false;
     }
   else
     {
       /* Sleep to WFI */
 
       clock_timespec_add(&ts, &dom->wake[curstate], &dom->wake[curstate]);
+      dom->in_sleep = true;
     }
 
   /* Update start */

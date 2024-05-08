@@ -62,6 +62,10 @@ struct pm_domain_s
   struct timespec start;
   struct timespec wake[PM_COUNT];
   struct timespec sleep[PM_COUNT];
+
+  /* When procfs read update wake or sleep up-to-now */
+
+  bool in_sleep;
 #endif
 
   /* Auto update or not */
