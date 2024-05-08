@@ -70,7 +70,7 @@ static void register_virtio_devices_from_fdt(const void *fdt)
           break;
         }
 
-      addr = fdt_get_reg_base(fdt, offset);
+      addr = fdt_get_reg_base(fdt, offset, 0);
       irqnum = fdt_get_irq(fdt, offset, 1, QEMU_SPI_IRQ_BASE);
       if (addr > 0 && irqnum >= 0)
         {
