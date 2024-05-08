@@ -657,7 +657,7 @@ FAR struct mtd_dev_s *w25qxxxjv_initialize(FAR struct qspi_dev_s *qspi,
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *filemtd_initialize(FAR const char *path, size_t offset,
+FAR struct mtd_dev_s *filemtd_initialize(FAR const char *path, off_t offset,
                                          int16_t sectsize,
                                          int32_t erasesize);
 
