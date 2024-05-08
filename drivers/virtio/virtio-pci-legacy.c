@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/virtio/virtio-pci.c
+ * drivers/virtio/virtio-pci-legacy.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,165 +22,77 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
 #include <debug.h>
 #include <errno.h>
 #include <stdint.h>
 #include <sys/param.h>
 
-#include <nuttx/pci/pci.h>
-#include <nuttx/virtio/virtio.h>
-#include <nuttx/virtio/virtio-pci.h>
+#include "virtio-pci.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define VIRTIO_PCI_VRING_ALIGN           (1 << 12)
+#define VIRTIO_PCI_LEGACY_IO_BAR            0
 
-#define VIRTIO_PCI_MSI_NO_VECTOR         0xffff
+/* A 32-bit r/o bitmask of the features supported by the host */
 
-#define VIRTIO_PCI_INT_CFG               0
-#define VIRTIO_PCI_INT_VQ                1
-#define VIRTIO_PCI_INT_NUM               2
+#define VIRTIO_PCI_HOST_FEATURES            0
 
-/* Common configuration */
+/* A 32-bit r/w bitmask of features activated by the guest */
 
-#define VIRTIO_PCI_CAP_COMMON_CFG        1
+#define VIRTIO_PCI_GUEST_FEATURES           4
 
-/* Notifications */
+/* A 32-bit r/w PFN for the currently selected queue */
 
-#define VIRTIO_PCI_CAP_NOTIFY_CFG        2
+#define VIRTIO_PCI_QUEUE_PFN                8
 
-/* ISR Status */
+/* A 16-bit r/o queue size for the currently selected queue */
 
-#define VIRTIO_PCI_CAP_ISR_CFG           3
+#define VIRTIO_PCI_QUEUE_NUM                12
 
-/* Device specific configuration */
+/* A 16-bit r/w queue selector */
 
-#define VIRTIO_PCI_CAP_DEVICE_CFG        4
+#define VIRTIO_PCI_QUEUE_SEL                14
 
-/* PCI configuration access */
+/* A 16-bit r/w queue notifier */
 
-#define VIRTIO_PCI_CAP_PCI_CFG           5
+#define VIRTIO_PCI_QUEUE_NOTIFY             16
 
-/* Shared memory region */
+/* An 8-bit device status register.  */
 
-#define VIRTIO_PCI_CAP_SHARED_MEMORY_CFG 8
+#define VIRTIO_PCI_STATUS                   18
 
-/* Vendor-specific data */
+/* An 8-bit r/o interrupt status register.  Reading the value will return the
+ * current contents of the ISR and will also clear it.  This is effectively
+ * a read-and-acknowledge.
+ */
 
-#define VIRTIO_PCI_CAP_VENDOR_CFG        9
+#define VIRTIO_PCI_ISR                      19
 
-/****************************************************************************
- * Private Types
- ****************************************************************************/
+/* MSI-X registers: only enabled if MSI-X is enabled. */
 
-begin_packed_struct struct virtio_pci_cap_s
-{
-  uint8_t  cap_vndr;   /* Generic PCI field: PCI_CAP_ID_VNDR */
-  uint8_t  cap_next;   /* Generic PCI field: next ptr. */
-  uint8_t  cap_len;    /* Generic PCI field: capability length */
-  uint8_t  cfg_type;   /* Identifies the structure. */
-  uint8_t  bar;        /* Where to find it. */
-  uint8_t  id;         /* Multiple capabilities of the same type */
-  uint8_t  padding[2]; /* Pad to full dword. */
-  uint32_t offset;     /* Offset within bar. */
-  uint32_t length;     /* Length of the structure, in bytes. */
-} end_packed_struct;
+#define VIRTIO_MSI_CONFIG_VECTOR            20
 
-begin_packed_struct struct virtio_pci_cap64_s
-{
-  struct virtio_pci_cap_s cap;
-  uint32_t                offset_hi;
-  uint32_t                length_hi;
-} end_packed_struct;
+/* A 16-bit vector for selected queue notifications. */
 
-/* VIRTIO_PCI_CAP_COMMON_CFG */
+#define VIRTIO_MSI_QUEUE_VECTOR             22
 
-begin_packed_struct struct virtio_pci_common_cfg_s
-{
-  /* About the whole device. */
+/* The remaining space is defined by each driver as the per-driver
+ * configuration space
+ */
 
-  uint32_t device_feature_select; /* read-write */
-  uint32_t device_feature;        /* read-only for driver */
-  uint32_t driver_feature_select; /* read-write */
-  uint32_t driver_feature;        /* read-write */
-  uint16_t config_msix_vector;    /* read-write */
-  uint16_t num_queues;            /* read-only for driver */
-  uint8_t  device_status;         /* read-write */
-  uint8_t  config_generation;     /* read-only for driver */
+#define VIRTIO_PCI_CONFIG_OFF(msix_enabled) ((msix_enabled) ? 24 : 20)
 
-  /* About a specific virtqueue. */
+/* Virtio ABI version, this must match exactly */
 
-  uint16_t queue_select;          /* read-write */
-  uint16_t queue_size;            /* read-write */
-  uint16_t queue_msix_vector;     /* read-write */
-  uint16_t queue_enable;          /* read-write */
-  uint16_t queue_notify_off;      /* read-only for driver */
-  uint64_t queue_desc;            /* read-write */
-  uint64_t queue_avail;           /* read-write */
-  uint64_t queue_used;            /* read-write */
-  uint16_t queue_notify_data;     /* read-only for driver */
-  uint16_t queue_reset;           /* read-write */
-} end_packed_struct;
+#define VIRTIO_PCI_ABI_VERSION              0
 
-/* VIRTIO_PCI_CAP_NOTIFY_CFG */
+/* How many bits to shift physical queue address written to QUEUE_PFN.
+ * 12 is historical, and due to x86 page size.
+ */
 
-begin_packed_struct struct virtio_pci_notify_cap_s
-{
-  struct virtio_pci_cap_s cap;
-
-  /* Multiplier for queue_notify_off. */
-
-  uint32_t                notify_off_multiplier;
-} end_packed_struct;
-
-/* VIRTIO_PCI_CAP_VENDOR_CFG */
-
-begin_packed_struct struct virtio_pci_vndr_data_s
-{
-  uint8_t  cap_vndr;   /* Generic PCI field: PCI_CAP_ID_VNDR */
-  uint8_t  cap_next;   /* Generic PCI field: next ptr. */
-  uint8_t  cao_len;    /* Generic PCI field: capability length */
-  uint8_t  cfg_type;   /* Identifies the structure. */
-  uint16_t vendor_id;  /* Identifies the vendor-specific format. */
-
-  /* For Vendor Definition
-   * Pads structure to a multiple of 4 bytes
-   * Reads must not have side effects
-   */
-} end_packed_struct;
-
-/* VIRTIO_PCI_CAP_PCI_CFG */
-
-begin_packed_struct struct virtio_pci_cfg_cap_s
-{
-  struct virtio_pci_cap_s cap;
-  uint8_t                 pci_cfg_data[4]; /* Data for BAR access. */
-} end_packed_struct;
-
-struct virtio_pci_device_s
-{
-  struct virtio_device     vdev;       /* Virtio deivce */
-  FAR struct pci_device_s *dev;        /* PCI device */
-  metal_phys_addr_t        shm_phy;
-  struct metal_io_region   shm_io;     /* Share memory io region, virtqueue
-                                        * use this io.
-                                        */
-  FAR void                *common;
-  size_t                   common_len;
-
-  FAR void                *notify;
-  size_t                   notify_len;
-  uint32_t                 notify_off_multiplier;
-
-  FAR void                *device;
-  size_t                   device_len;
-
-  int                      irq[VIRTIO_PCI_INT_NUM];
-};
+#define VIRTIO_PCI_QUEUE_ADDR_SHIFT         12
 
 /****************************************************************************
  * Private Function Prototypes
@@ -226,9 +138,6 @@ static void virtio_pci_notify(FAR struct virtqueue *vq);
 
 static int virtio_pci_interrupt(int irq, FAR void *context, FAR void *arg);
 
-static int virtio_pci_probe(FAR struct pci_device_s *dev);
-static void virtio_pci_remove(FAR struct pci_device_s *dev);
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -248,105 +157,9 @@ static const struct virtio_dispatch g_virtio_pci_dispatch =
   virtio_pci_notify,             /* notify */
 };
 
-static const struct pci_device_id_s g_virtio_pci_id_table[] =
-{
-  { PCI_DEVICE(PCI_VENDOR_ID_REDHAT_QUMRANET, PCI_ANY_ID) },
-  { 0, }
-};
-
-static struct pci_driver_s g_virtio_pci_drv =
-{
-  g_virtio_pci_id_table,
-  virtio_pci_probe,
-  virtio_pci_remove
-};
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: virtio_pci_find_capability
- ****************************************************************************/
-
-static uint8_t virtio_pci_find_capability(FAR struct pci_device_s *dev,
-                                          uint8_t cfg_type,
-                                          unsigned int flags)
-{
-  uint8_t type;
-  uint8_t bar;
-  uint8_t pos;
-
-  for (pos = pci_find_capability(dev, PCI_CAP_ID_VNDR); pos > 0;
-       pos = pci_find_next_capability(dev, pos, PCI_CAP_ID_VNDR))
-    {
-      pci_read_config_byte(dev,
-                           pos + offsetof(struct virtio_pci_cap_s, cfg_type),
-                           &type);
-      pci_read_config_byte(dev,
-                           pos + offsetof(struct virtio_pci_cap_s, bar),
-                           &bar);
-
-      /* VirtIO Spec v1.2: The driver MUST ignore any vendor-specific
-       * capability structure which has a reserved cfg_type value.
-       */
-
-      if (bar >= PCI_STD_NUM_BARS)
-        {
-          continue;
-        }
-
-      if (type == cfg_type && pci_resource_len(dev, bar) &&
-          (pci_resource_flags(dev, bar) & flags))
-        {
-          return pos;
-        }
-    }
-
-  return 0;
-}
-
-/****************************************************************************
- * Name: virtio_pci_map_capability
- ****************************************************************************/
-
-static FAR void *
-virtio_pci_map_capability(FAR struct virtio_pci_device_s *vpdev, uint8_t pos,
-                          size_t *len)
-{
-  FAR struct pci_device_s *dev = vpdev->dev;
-  FAR void *ptr;
-  uint32_t offset;
-  uint32_t length;
-  uint8_t bar;
-
-  pci_read_config_byte(dev, pos + offsetof(struct virtio_pci_cap_s, bar),
-                       &bar);
-  pci_read_config_dword(dev, pos + offsetof(struct virtio_pci_cap_s, offset),
-                        &offset);
-  pci_read_config_dword(dev, pos + offsetof(struct virtio_pci_cap_s, length),
-                        &length);
-
-  if (bar >= PCI_STD_NUM_BARS)
-    {
-      vrterr("Bar error bard=%u\n", bar);
-      return NULL;
-    }
-
-  ptr = pci_map_bar_region(dev, bar, offset, length);
-  if (ptr == NULL)
-    {
-      vrterr("Unable to map virtio on bar %u\n", bar);
-      return NULL;
-    }
-
-  if (len)
-    {
-      *len = length;
-    }
-
-  return ptr;
-}
 
 /****************************************************************************
  * Name: virtio_pci_get_queue_len
@@ -355,12 +168,16 @@ virtio_pci_map_capability(FAR struct virtio_pci_device_s *vpdev, uint8_t pos,
 static uint16_t
 virtio_pci_get_queue_len(FAR struct virtio_pci_device_s *vpdev, int idx)
 {
-  FAR struct virtio_pci_common_cfg_s *cfg = vpdev->common;
-  uint16_t size;
+  uint16_t num;
 
-  pci_write_io_word(vpdev->dev, &cfg->queue_select, idx);
-  pci_read_io_word(vpdev->dev, &cfg->queue_size, &size);
-  return size;
+  pci_write_io_word(vpdev->dev, vpdev->ioaddr + VIRTIO_PCI_QUEUE_SEL, idx);
+  pci_read_io_word(vpdev->dev, vpdev->ioaddr + VIRTIO_PCI_QUEUE_NUM, &num);
+  if (num == 0)
+    {
+      pcierr("Queue is not available num=%d\n", num);
+    }
+
+  return num;
 }
 
 /****************************************************************************
@@ -370,71 +187,46 @@ virtio_pci_get_queue_len(FAR struct virtio_pci_device_s *vpdev, int idx)
 static int virtio_pci_config_virtqueue(FAR struct virtio_pci_device_s *vpdev,
                                        FAR struct virtqueue *vq)
 {
-  FAR struct virtio_pci_common_cfg_s *cfg = vpdev->common;
   uint16_t msix_vector;
 
-  /* Activate the queue */
+  /* Set the pci virtqueue register, active vq, enable vq */
 
-  pci_write_io_word(vpdev->dev, &cfg->queue_select, vq->vq_queue_index);
-  pci_write_io_word(vpdev->dev, &cfg->queue_size, vq->vq_ring.num);
+  pci_write_io_word(vpdev->dev, vpdev->ioaddr + VIRTIO_PCI_QUEUE_SEL,
+                    vq->vq_queue_index);
 
-  pci_write_io_qword(vpdev->dev, &cfg->queue_desc,
-                     up_addrenv_va_to_pa(vq->vq_ring.desc));
-  pci_write_io_qword(vpdev->dev, &cfg->queue_avail,
-                     up_addrenv_va_to_pa(vq->vq_ring.avail));
-  pci_write_io_qword(vpdev->dev, &cfg->queue_used,
-                     up_addrenv_va_to_pa(vq->vq_ring.used));
+  /* activate the queue */
 
-  pci_write_io_word(vpdev->dev, &cfg->queue_msix_vector,
+  pci_write_io_dword(vpdev->dev, vpdev->ioaddr + VIRTIO_PCI_QUEUE_PFN,
+                     up_addrenv_va_to_pa(vq->vq_ring.desc) >>
+                     VIRTIO_PCI_QUEUE_ADDR_SHIFT);
+  pci_write_io_word(vpdev->dev, vpdev->ioaddr + VIRTIO_MSI_QUEUE_VECTOR,
                     VIRTIO_PCI_INT_VQ);
-  pci_read_io_word(vpdev->dev, &cfg->queue_msix_vector, &msix_vector);
+  pci_read_io_word(vpdev->dev, vpdev->ioaddr + VIRTIO_MSI_QUEUE_VECTOR,
+                   &msix_vector);
   if (msix_vector == VIRTIO_PCI_MSI_NO_VECTOR)
     {
-      vrterr("Msix_vector is no vector\n");
+      pci_write_io_dword(vpdev->dev,
+                         vpdev->ioaddr + VIRTIO_PCI_QUEUE_PFN, 0);
+      vrterr("Msix vector is 0\n");
       return -EBUSY;
     }
 
-  /* Enable vq */
-
-  pci_write_io_word(vpdev->dev, &cfg->queue_enable, 1);
   return OK;
 }
 
 /****************************************************************************
- * Name: virtio_pci_get_notify_offset
- ****************************************************************************/
-
-static int virtio_pci_get_notify_offset(FAR struct virtqueue *vq)
-{
-  FAR struct virtio_pci_device_s *vpdev =
-    (FAR struct virtio_pci_device_s *)vq->vq_dev;
-  FAR struct virtio_pci_common_cfg_s *cfg = vpdev->common;
-  uint16_t off;
-
-  pci_write_io_word(vpdev->dev, &cfg->queue_select, vq->vq_queue_index);
-  pci_read_io_word(vpdev->dev, &cfg->queue_notify_off, &off);
-
-  if (off * vpdev->notify_off_multiplier + 2 > vpdev->notify_len)
-    {
-      return -EINVAL;
-    }
-
-  return off * vpdev->notify_off_multiplier;
-}
-
-/****************************************************************************
- * Name: virtio_pci_config_virtdevice
+ * Name: virtio_pci_config_vector
  ****************************************************************************/
 
 static int
-virtio_pci_config_virtdevice(FAR struct virtio_pci_device_s *vpdev)
+virtio_pci_config_vector(FAR struct virtio_pci_device_s *vpdev)
 {
-  FAR struct virtio_pci_common_cfg_s *cfg = vpdev->common;
   uint16_t rvector;
 
-  pci_write_io_word(vpdev->dev, &cfg->config_msix_vector,
+  pci_write_io_word(vpdev->dev, vpdev->ioaddr + VIRTIO_MSI_CONFIG_VECTOR,
                     VIRTIO_PCI_INT_CFG);
-  pci_read_io_word(vpdev->dev, &cfg->config_msix_vector, &rvector);
+  pci_read_io_word(vpdev->dev, vpdev->ioaddr + VIRTIO_MSI_CONFIG_VECTOR,
+                   &rvector);
   if (rvector == VIRTIO_PCI_MSI_NO_VECTOR)
     {
       return -EINVAL;
@@ -497,24 +289,18 @@ virtio_pci_create_virtqueue(FAR struct virtio_pci_device_s *vpdev,
 
   virtqueue_set_shmem_io(vq, &vpdev->shm_io);
 
-  /* Set the pci virtqueue register, active vq, enable vq */
-
   ret = virtio_pci_config_virtqueue(vpdev, vq);
   if (ret < 0)
     {
       vrterr("Virtio_pci_config_virtqueue failed, ret=%d\n", ret);
-      return ret;
+      goto err;
     }
 
-  ret = virtio_pci_get_notify_offset(vq);
-  if (ret < 0)
-    {
-      vrterr("Get virtio pci offset error\n");
-      return ret;
-    }
-
-  vrinfo->notifyid = ret;
   return OK;
+
+err:
+  pci_write_io_dword(vpdev->dev, vpdev->ioaddr + VIRTIO_PCI_QUEUE_PFN, 0);
+  return ret;
 }
 
 /****************************************************************************
@@ -542,7 +328,7 @@ static int virtio_pci_create_virtqueues(FAR struct virtio_device *vdev,
       return -ENOMEM;
     }
 
-  ret = virtio_pci_config_virtdevice(vpdev);
+  ret = virtio_pci_config_vector(vpdev);
   if (ret < 0)
     {
       vrterr("read virtio pci config msix vector failed\n");
@@ -579,9 +365,9 @@ static void virtio_pci_delete_virtqueues(FAR struct virtio_device *vdev)
 {
   FAR struct virtio_pci_device_s *vpdev =
     (FAR struct virtio_pci_device_s *)vdev;
-  FAR struct virtio_pci_common_cfg_s *cfg = vpdev->common;
   FAR struct virtio_vring_info *vrinfo;
   unsigned int i;
+  uint8_t isr;
 
   /* Disable interrupt first */
 
@@ -596,10 +382,20 @@ static void virtio_pci_delete_virtqueues(FAR struct virtio_device *vdev)
         {
           vrinfo = &vdev->vrings_info[i];
 
-          pci_write_io_word(vpdev->dev, &cfg->queue_select,
-                            vrinfo->vq->vq_queue_index);
-          pci_write_io_word(vpdev->dev, &cfg->queue_msix_vector,
+          pci_write_io_word(vpdev->dev,
+                            vpdev->ioaddr + VIRTIO_PCI_QUEUE_SEL, i);
+          pci_write_io_word(vpdev->dev,
+                            vpdev->ioaddr + VIRTIO_MSI_QUEUE_VECTOR,
                             VIRTIO_PCI_MSI_NO_VECTOR);
+
+          /* Flush the write out to device */
+
+          pci_read_io_byte(vpdev->dev, vpdev->ioaddr + VIRTIO_PCI_ISR, &isr);
+
+          /* Select and deactivate the queue */
+
+          pci_write_io_dword(vpdev->dev,
+                             vpdev->ioaddr + VIRTIO_PCI_QUEUE_PFN, 0);
 
           /* Free the vring buffer and virtqueue */
 
@@ -627,9 +423,8 @@ static void virtio_pci_set_status(FAR struct virtio_device *vdev,
 {
   FAR struct virtio_pci_device_s *vpdev =
     (FAR struct virtio_pci_device_s *)vdev;
-  FAR struct virtio_pci_common_cfg_s *cfg = vpdev->common;
 
-  pci_write_io_byte(vpdev->dev, &cfg->device_status, status);
+  pci_write_io_byte(vpdev->dev, vpdev->ioaddr + VIRTIO_PCI_STATUS, status);
 }
 
 /****************************************************************************
@@ -640,10 +435,9 @@ static uint8_t virtio_pci_get_status(FAR struct virtio_device *vdev)
 {
   FAR struct virtio_pci_device_s *vpdev =
     (FAR struct virtio_pci_device_s *)vdev;
-  FAR struct virtio_pci_common_cfg_s *cfg = vpdev->common;
   uint8_t status;
 
-  pci_read_io_byte(vpdev->dev, &cfg->device_status, &status);
+  pci_read_io_byte(vpdev->dev, vpdev->ioaddr + VIRTIO_PCI_STATUS, &status);
   return status;
 }
 
@@ -657,44 +451,13 @@ static void virtio_pci_write_config(FAR struct virtio_device *vdev,
 {
   FAR struct virtio_pci_device_s *vpdev =
     (FAR struct virtio_pci_device_s *)vdev;
-  uint64_t u64data;
-  uint32_t u32data;
-  uint16_t u16data;
-  uint8_t u8data;
+  FAR uint8_t *s = src;
+  int i;
 
-  if (offset + length > vpdev->device_len)
+  for (i = 0; i < length; i++)
     {
-      return;
-    }
-
-  switch (length)
-    {
-      case 1:
-        memcpy(&u8data, src, sizeof(u8data));
-        pci_write_io_byte(vpdev->dev, vpdev->device + offset, u8data);
-        break;
-      case 2:
-        memcpy(&u16data, src, sizeof(u16data));
-        pci_write_io_word(vpdev->dev, vpdev->device + offset, u16data);
-        break;
-      case 4:
-        memcpy(&u32data, src, sizeof(u32data));
-        pci_write_io_dword(vpdev->dev, vpdev->device + offset, u32data);
-        break;
-      case 8:
-        memcpy(&u64data, src, sizeof(u64data));
-        pci_write_io_qword(vpdev->dev, vpdev->device + offset, u64data);
-        break;
-      default:
-        {
-          FAR char *s = src;
-          int i;
-          for (i = 0; i < length; i++)
-            {
-              pci_write_io_byte(vpdev->dev, vpdev->device + offset + i,
-                                s[i]);
-            }
-        }
+      pci_write_io_byte(vpdev->dev, vpdev->ioaddr +
+                        VIRTIO_PCI_CONFIG_OFF(true) + offset + i, s[i]);
     }
 }
 
@@ -708,44 +471,13 @@ static void virtio_pci_read_config(FAR struct virtio_device *vdev,
 {
   FAR struct virtio_pci_device_s *vpdev =
     (FAR struct virtio_pci_device_s *)vdev;
-  uint64_t u64data;
-  uint32_t u32data;
-  uint16_t u16data;
-  uint8_t u8data;
+  FAR uint8_t *d = dst;
+  int i;
 
-  if (offset + length > vpdev->device_len)
+  for (i = 0; i < length; i++)
     {
-      return;
-    }
-
-  switch (length)
-    {
-      case 1:
-        pci_read_io_byte(vpdev->dev, vpdev->device + offset, &u8data);
-        memcpy(dst, &u8data, sizeof(u8data));
-        break;
-      case 2:
-        pci_read_io_word(vpdev->dev, vpdev->device + offset, &u16data);
-        memcpy(dst, &u16data, sizeof(u16data));
-        break;
-      case 4:
-        pci_read_io_dword(vpdev->dev, vpdev->device + offset, &u32data);
-        memcpy(dst, &u32data, sizeof(u32data));
-        break;
-      case 8:
-        pci_read_io_qword(vpdev->dev, vpdev->device + offset, &u64data);
-        memcpy(dst, &u64data, sizeof(u64data));
-        break;
-      default:
-        {
-          FAR char *d = dst;
-          int i;
-          for (i = 0; i < length; i++)
-            {
-              pci_read_io_byte(vpdev->dev, vpdev->device + offset + i,
-                               &d[i]);
-            }
-        }
+      pci_read_io_byte(vpdev->dev, vpdev->ioaddr +
+                       VIRTIO_PCI_CONFIG_OFF(true) + offset + i, &d[i]);
     }
 }
 
@@ -757,11 +489,10 @@ static uint32_t virtio_pci_get_features(FAR struct virtio_device *vdev)
 {
   FAR struct virtio_pci_device_s *vpdev =
     (FAR struct virtio_pci_device_s *)vdev;
-  FAR struct virtio_pci_common_cfg_s *cfg = vpdev->common;
   uint32_t feature;
 
-  pci_write_io_dword(vpdev->dev, &cfg->device_feature_select, 0);
-  pci_read_io_dword(vpdev->dev, &cfg->device_feature, &feature);
+  pci_read_io_dword(vpdev->dev, vpdev->ioaddr + VIRTIO_PCI_HOST_FEATURES,
+                    &feature);
   return feature;
 }
 
@@ -774,12 +505,9 @@ static void virtio_pci_set_features(FAR struct virtio_device *vdev,
 {
   FAR struct virtio_pci_device_s *vpdev =
     (FAR struct virtio_pci_device_s *)vdev;
-  FAR struct virtio_pci_common_cfg_s *cfg = vpdev->common;
 
-  pci_write_io_dword(vpdev->dev, &cfg->driver_feature_select, 0);
-  pci_write_io_dword(vpdev->dev, &cfg->driver_feature, features);
-  pci_write_io_dword(vpdev->dev, &cfg->driver_feature_select, 1);
-  pci_write_io_dword(vpdev->dev, &cfg->driver_feature, 0);
+  pci_write_io_dword(vpdev->dev, vpdev->ioaddr + VIRTIO_PCI_GUEST_FEATURES,
+                     vdev->features);
 }
 
 /****************************************************************************
@@ -811,11 +539,8 @@ static void virtio_pci_notify(FAR struct virtqueue *vq)
 {
   FAR struct virtio_pci_device_s *vpdev =
     (FAR struct virtio_pci_device_s *)vq->vq_dev;
-  FAR struct virtio_vring_info *vrinfo;
 
-  vrinfo = &vpdev->vdev.vrings_info[vq->vq_queue_index];
-
-  pci_write_io_word(vpdev->dev, vpdev->notify + vrinfo->notifyid,
+  pci_write_io_word(vpdev->dev, vpdev->ioaddr + VIRTIO_PCI_QUEUE_NOTIFY,
                     vq->vq_queue_index);
 }
 
@@ -856,94 +581,39 @@ static int virtio_pci_interrupt(int irq, FAR void *context, FAR void *arg)
 }
 
 /****************************************************************************
- * Name: virtio_pci_probe
+ * Name: virtio_pci_init_device
  ****************************************************************************/
 
 static int virtio_pci_init_device(FAR struct virtio_pci_device_s *vpdev)
 {
   FAR struct virtio_device *vdev = &vpdev->vdev;
   FAR struct pci_device_s *dev = vpdev->dev;
-  uint8_t common;
-  uint8_t notify;
-  uint8_t device;
 
-  if (dev->device < 0x1040)
+  if (dev->revision != VIRTIO_PCI_ABI_VERSION)
     {
-      /* Transitional devices: use the PCI subsystem device id as
-       * virtio device id, same as legacy driver always did.
-       */
-
-      vdev->id.device = dev->subsystem_device;
-    }
-  else
-    {
-      /* Modern devices: simply use PCI device id, but start from 0x1040. */
-
-      vdev->id.device = dev->device - 0x1040;
-    }
-
-  vdev->id.vendor = dev->subsystem_vendor;
-
-  /* Find pci capabilities */
-
-  common = virtio_pci_find_capability(dev, VIRTIO_PCI_CAP_COMMON_CFG,
-                                      PCI_RESOURCE_MEM);
-  if (common == 0)
-    {
-      vrtinfo("Leaving for legacy driver\n");
+      pcierr("Virtio_pci: expected ABI version %d, got %u\n",
+              VIRTIO_PCI_ABI_VERSION, dev->revision);
       return -ENODEV;
     }
 
-  notify = virtio_pci_find_capability(dev, VIRTIO_PCI_CAP_NOTIFY_CFG,
-                                      PCI_RESOURCE_MEM);
-  if (notify == 0)
+  vpdev->ioaddr = pci_map_bar(dev, VIRTIO_PCI_LEGACY_IO_BAR);
+  if (vpdev->ioaddr == NULL)
     {
-      vrterr("Missing capabilities %d %d\n", common, notify);
+      vrterr("Unable to map virtio on bar\n");
       return -EINVAL;
     }
 
-  device = virtio_pci_find_capability(dev, VIRTIO_PCI_CAP_DEVICE_CFG,
-                                      PCI_RESOURCE_MEM);
-
-  /* Map the BAR */
-
-  vpdev->common = virtio_pci_map_capability(vpdev, common,
-                                            &vpdev->common_len);
-  if (vpdev->common == NULL)
-    {
-      return -EINVAL;
-    }
-
-  pci_read_config_dword(dev, notify +
-                        offsetof(struct virtio_pci_notify_cap_s,
-                                 notify_off_multiplier),
-                        &vpdev->notify_off_multiplier);
-
-  vpdev->notify = virtio_pci_map_capability(vpdev, notify,
-                                            &vpdev->notify_len);
-  if (vpdev->notify == NULL)
-    {
-      return -EINVAL;
-    }
-
-  if (device != 0)
-    {
-      vpdev->device = virtio_pci_map_capability(vpdev, device,
-                                                &vpdev->device_len);
-      if (vpdev->device == NULL)
-        {
-          return -EINVAL;
-        }
-    }
+  vdev->id.vendor = dev->subsystem_vendor;
+  vdev->id.device = dev->subsystem_device;
 
   return OK;
 }
 
 /****************************************************************************
- * Name: virtio_pci_probe
+ * Name: virtio_pci_legacy_probe
  ****************************************************************************/
 
-static int virtio_pci_probe(FAR struct pci_device_s *dev)
+int virtio_pci_legacy_probe(FAR struct pci_device_s *dev)
 {
   FAR struct virtio_pci_device_s *vpdev;
   FAR struct virtio_device *vdev;
@@ -951,7 +621,7 @@ static int virtio_pci_probe(FAR struct pci_device_s *dev)
 
   /* We only own devices >= 0x1000 and <= 0x107f: leave the rest. */
 
-  if (dev->device < 0x1000 || dev->device > 0x107f)
+  if (dev->device < 0x1000 || dev->device > 0x103f)
     {
       return -ENODEV;
     }
@@ -983,10 +653,11 @@ static int virtio_pci_probe(FAR struct pci_device_s *dev)
     }
 
   pci_set_master(dev);
+
   ret = virtio_pci_init_device(vpdev);
   if (ret < 0)
     {
-      vrterr("Virtio pci device init failed, ret=%d\n", ret);
+      vrterr("Virtio pci legacy device init failed, ret=%d\n", ret);
       goto err_with_enable;
     }
 
@@ -1037,32 +708,4 @@ err_with_enable:
 err:
   kmm_free(vpdev);
   return ret;
-}
-
-/****************************************************************************
- * Name: virtio_pci_remove
- ****************************************************************************/
-
-static void virtio_pci_remove(FAR struct pci_device_s *dev)
-{
-  FAR struct virtio_pci_device_s *vpdev = dev->priv;
-
-  virtio_unregister_device(&vpdev->vdev);
-
-  irq_detach(vpdev->irq[VIRTIO_PCI_INT_CFG]);
-  irq_detach(vpdev->irq[VIRTIO_PCI_INT_VQ]);
-  pci_release_irq(vpdev->dev, vpdev->irq, VIRTIO_PCI_INT_NUM);
-
-  pci_clear_master(dev);
-  pci_disable_device(dev);
-  kmm_free(vpdev);
-}
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-int register_virtio_pci_driver(void)
-{
-  return pci_register_driver(&g_virtio_pci_drv);
 }

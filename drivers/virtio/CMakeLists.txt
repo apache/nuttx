@@ -28,7 +28,7 @@ if(CONFIG_DRIVERS_VIRTIO_MMIO)
 endif()
 
 if(CONFIG_DRIVERS_VIRTIO_PCI)
-  list(APPEND SRCS virtio-pci.c)
+  list(APPEND SRCS virtio-pci-legacy.c virtio-pci-modern.c)
 endif()
 
 if(CONFIG_DRIVERS_VIRTIO_BLK)
