@@ -260,11 +260,21 @@ static int pm_close(FAR struct file *filep)
   return OK;
 }
 
+/****************************************************************************
+ * Name: pm_read_state
+ *
+ * Description:
+ *   The statistic values about every domain states.
+ *
+ ****************************************************************************/
+
 static ssize_t pm_read_state(FAR struct file *filep, FAR char *buffer,
                              size_t buflen)
 {
   FAR struct pm_domain_s *dom;
   FAR struct pm_file_s *pmfile;
+  time_t sleep[PM_COUNT];
+  time_t wake[PM_COUNT];
   irqstate_t flags;
   size_t totalsize = 0;
   size_t linesize;
@@ -298,7 +308,26 @@ static ssize_t pm_read_state(FAR struct file *filep, FAR char *buffer,
 
   for (state = 0; state < PM_COUNT; state++)
     {
-      sum += dom->wake[state].tv_sec + dom->sleep[state].tv_sec;
+      wake[state] = dom->wake[state].tv_sec;
+      sleep[state] = dom->sleep[state].tv_sec;
+
+      if (state == dom->state)
+        {
+          struct timespec ts;
+
+          clock_systime_timespec(&ts);
+          clock_timespec_subtract(&ts, &dom->start, &ts);
+          if (dom->in_sleep)
+            {
+              sleep[state] += ts.tv_sec;
+            }
+          else
+            {
+              wake[state] += ts.tv_sec;
+            }
+        }
+
+      sum += wake[state] + sleep[state];
     }
 
   sum = sum ? sum : 1;
@@ -307,14 +336,14 @@ static ssize_t pm_read_state(FAR struct file *filep, FAR char *buffer,
     {
       time_t total;
 
-      total = dom->wake[state].tv_sec + dom->sleep[state].tv_sec;
+      total = wake[state] + sleep[state];
 
       linesize = snprintf(pmfile->line, PM_LINELEN, STFMT,
                           g_pm_state[state],
-                          dom->wake[state].tv_sec,
-                          100 * dom->wake[state].tv_sec / sum,
-                          dom->sleep[state].tv_sec,
-                          100 * dom->sleep[state].tv_sec / sum,
+                          wake[state],
+                          100 * wake[state] / sum,
+                          sleep[state],
+                          100 * sleep[state] / sum,
                           total,
                           100 * total / sum);
       buffer += copysize;
