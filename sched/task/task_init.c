@@ -103,7 +103,7 @@ int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
 #ifdef CONFIG_ARCH_ADDRENV
   /* Kernel threads do not own any address environment */
 
-  if ((ttype & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
+  if (ttype == TCB_FLAG_TTYPE_KERNEL)
     {
       tcb->cmn.addrenv_own = NULL;
     }
@@ -199,7 +199,7 @@ errout_with_group:
        * user memory region that will be destroyed anyway (and the
        * address environment has probably already been destroyed at
        * this point.. so we would crash if we even tried it).  But if
-       * this is a privileged group, when we still have to release the
+       * this is a privileged group, then we still have to release the
        * memory using the kernel allocator.
        */
 
@@ -224,8 +224,8 @@ errout_with_group:
  * Description:
  *   Undo all operations on a TCB performed by task_init() and release the
  *   TCB by calling kmm_free().  This is intended primarily to support
- *   error recovery operations after a successful call to task_init() such
- *   was when a subsequent call to task_activate fails.
+ *   error recovery operations after a successful call to task_init()
+ *   when a subsequent call to task_activate fails.
  *
  *   Caution:  Freeing of the TCB itself might be an unexpected side-effect.
  *
