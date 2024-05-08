@@ -36,6 +36,10 @@
 
 #include <sys/mount.h>
 
+#ifndef CONFIG_BUILD_KERNEL
+#include "hardware/qemu_rv_memorymap.h"
+#include "qemu_rv_memorymap.h"
+#endif
 #include "riscv_internal.h"
 #include "romfs.h"
 
@@ -185,7 +189,7 @@ int board_power_off(int status)
 #ifdef CONFIG_BUILD_KERNEL
   riscv_sbi_system_reset(SBI_SRST_TYPE_SHUTDOWN, SBI_SRST_REASON_NONE);
 #else
-  #warning "to be done"
+  *(FAR volatile uint32_t *)QEMU_RV_RESET_BASE = QEMU_RV_RESET_DONE;
 #endif
 
   UNUSED(status);
