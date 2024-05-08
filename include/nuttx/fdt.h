@@ -28,6 +28,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <nuttx/compiler.h>
 
 /****************************************************************************
@@ -187,6 +188,31 @@ int fdt_get_parent_size_cells(FAR const void *fdt, int offset);
 uintptr_t fdt_ld_by_cells(FAR const void *value, int cells);
 
 /****************************************************************************
+ * Name: fdt_get_reg_base_by_name
+ *
+ * Description:
+ *   Get the value of the "reg" property by its offset in the "reg-names"
+ *   property
+ *
+ * Input Parameters:
+ *   fdt       - The pointer to the raw FDT.
+ *   offset    - The offset to the node.
+ *   reg_name  - The name of the register
+ *
+ * Returned Value:
+ *   The register address determined by its name. Returns 0 if:
+ *    - The reg-names property doesn't exist.
+ *    - The reg property doesn't exits.
+ *    - The reg-names property doesn't contain the "reg_name".
+ *    - The offset combined with the size is larger than the width of the
+ *      "reg" field
+ *
+ ****************************************************************************/
+
+uintptr_t fdt_get_reg_base_by_name(FAR const void *fdt, int offset,
+                                   const char *reg_name);
+
+/****************************************************************************
  * Name: fdt_get_reg_base
  *
  * Description:
@@ -195,13 +221,14 @@ uintptr_t fdt_ld_by_cells(FAR const void *value, int cells);
  * Input Parameters:
  *   fdt - The pointer to the raw FDT.
  *   offset - The offset of the node
+ *   index -  The index of the register in the reg field.
  *
  * Return:
  *   The base address of the register space
  *
  ****************************************************************************/
 
-uintptr_t fdt_get_reg_base(FAR const void *fdt, int offset);
+uintptr_t fdt_get_reg_base(FAR const void *fdt, int offset, int index);
 
 /****************************************************************************
  * Name: fdt_get_reg_size
@@ -237,5 +264,90 @@ uintptr_t fdt_get_reg_size(FAR const void *fdt, int offset);
 
 uintptr_t fdt_get_reg_base_by_path(FAR const void *fdt,
                                    FAR const char *path);
+
+/****************************************************************************
+ * Name: fdt_device_is_available
+ *
+ * Description:
+ *   Test if node contains the "status" property with field set to okay or
+ *   ok.
+ *
+ * Input Parameters:
+ *   fdt - The pointer to the raw FDT.
+ *   offset - The offset to the node to query.
+ *
+ * Returned Value:
+ *   true:  The node contains the status propertry, and is set to okay or
+ *          ok.
+ *   false: The node contains the status propertry, but it is set to
+ *          something other than ok or okay.
+ *   Always returns true if the node doesn't contain a status property.
+ *
+ ****************************************************************************/
+
+bool fdt_device_is_available(FAR const void * fdt, int offset);
+
+/****************************************************************************
+ * Name: fdt_get_node_label
+ *
+ * Description:
+ *   Get the label for a given node. The device tree must be compiled with
+ *   the -@ option in order for the symbol table to be generated.
+ *
+ * Input Parameters:
+ *   fdt - The pointer to the raw FDT.
+ *   offset - The offset to the node to query.
+ *
+ * Returned Value:
+ *   Node label if found. NULL is returned if no label if found for the given
+ *   node.
+ *
+ ****************************************************************************/
+
+const char *fdt_get_node_label(FAR const void *fdt, int offset);
+
+/****************************************************************************
+ * Name: fdt_get_clock_frequency
+ *
+ * Description:
+ *   Get the value of the "clock-frequency" value for the given node.
+ *
+ * Input Parameters:
+ *   fdt - The pointer to the raw FDT.
+ *   offset - The offset to the node to query.
+ *
+ * Returned Value:
+ *   The value of the clock-frequency property of the node. Zero is
+ *   returned if the node doesn't contain a clock-frequency property.
+ *
+ ****************************************************************************/
+
+uintptr_t fdt_get_clock_frequency(FAR const void *fdt, int offset);
+
+/****************************************************************************
+ * Name: fdt_get_clock_frequency_from_clocks
+ *
+ * Description:
+ *   Get the "clock-frequency" property for the given node, using the phandle
+ *   specified in the "clocks" property
+ *
+ * Input Parameters:
+ *   fdt - The pointer to the raw FDT.
+ *   node - The offset to the node to query.
+ *   offset - The offset of the phandle in the clocks property
+ *
+ * Returned Value:
+ *   The value of the clock-frequency property of the node, following the
+ *   specified phandle in the "clocks"' property. Returns 0 if:
+ *    - The node doesn't have a "clocks" property
+ *    - The offset given is larger than the length of the "clocks" property
+ *    - The phandle specified by the "clocks" property doesn't contain a
+ *      "clock-frequency" property.
+ *
+ ****************************************************************************/
+
+uintptr_t fdt_get_clock_frequency_from_clocks(FAR const void *fdt,
+                                              int offset,
+                                              int index);
 
 #endif /* __INCLUDE_NUTTX_FDT_H */
