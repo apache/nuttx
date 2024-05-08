@@ -483,7 +483,7 @@ struct task_group_s
 #ifndef CONFIG_DISABLE_PTHREAD
   /* Pthreads ***************************************************************/
 
-  rmutex_t   tg_joinlock;           /* Mutually exclusive access to join queue */
+  rmutex_t   tg_joinlock;           /* Synchronize access to tg_joinqueue   */
   sq_queue_t tg_joinqueue;          /* List of join status of tcb           */
 #endif
 
@@ -529,7 +529,7 @@ struct task_group_s
 
   /* Virtual memory mapping info ********************************************/
 
-  struct mm_map_s tg_mm_map;    /* Task mmappings */
+  struct mm_map_s tg_mm_map;        /* Task group virtual memory mappings   */
 };
 
 /* struct tcb_s *************************************************************/
@@ -549,7 +549,7 @@ struct tcb_s
 
   /* Task Group *************************************************************/
 
-  FAR struct task_group_s *group;        /* Pointer to shared task group data */
+  FAR struct task_group_s *group;        /* Pointer to shared task group    */
 
   /* Group membership *******************************************************/
 
@@ -569,8 +569,8 @@ struct tcb_s
   /* Address Environment ****************************************************/
 
 #ifdef CONFIG_ARCH_ADDRENV
-  FAR struct addrenv_s *addrenv_own;     /* Task (group) own memory mappings */
-  FAR struct addrenv_s *addrenv_curr;    /* Current active memory mappings   */
+  FAR struct addrenv_s *addrenv_own;     /* Task(group) own memory mappings */
+  FAR struct addrenv_s *addrenv_curr;    /* Current active memory mappings  */
 #endif
 
   /* Task Management Fields *************************************************/
@@ -585,8 +585,8 @@ struct tcb_s
   uint8_t  task_state;                   /* Current state of the thread     */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-  uint8_t  boost_priority;               /* "Boosted" priority of the thread */
-  uint8_t  base_priority;                /* "Normal" priority of the thread */
+  uint8_t  boost_priority;               /* Boosted priority of the thread  */
+  uint8_t  base_priority;                /* Normal priority of the thread   */
   FAR struct semholder_s *holdsem;       /* List of held semaphores         */
 #endif
 
@@ -625,7 +625,7 @@ struct tcb_s
   /* External Module Support ************************************************/
 
 #ifdef CONFIG_PIC
-  FAR struct dspace_s *dspace;           /* Allocated area for .bss and .data */
+  FAR struct dspace_s *dspace;           /* Area for .bss and .data         */
 #endif
 
   /* POSIX Semaphore and Message Queue Control Fields ***********************/
@@ -649,19 +649,19 @@ struct tcb_s
   /* CPU load monitoring support ********************************************/
 
 #ifndef CONFIG_SCHED_CPULOAD_NONE
-  clock_t ticks;                         /* Number of ticks on this thread */
+  clock_t ticks;                         /* Number of ticks on this thread  */
 #endif
 
   /* Pre-emption monitor support ********************************************/
 
 #ifdef CONFIG_SCHED_CRITMONITOR
-  clock_t premp_start;             /* Time when preemption disabled   */
-  clock_t premp_max;               /* Max time preemption disabled    */
-  clock_t crit_start;              /* Time critical section entered   */
-  clock_t crit_max;                /* Max time in critical section    */
-  clock_t run_start;               /* Time when thread begin run      */
-  clock_t run_max;                 /* Max time thread run             */
-  clock_t run_time;                /* Total time thread run           */
+  clock_t premp_start;                   /* Time when preemption disabled   */
+  clock_t premp_max;                     /* Max time preemption disabled    */
+  clock_t crit_start;                    /* Time critical section entered   */
+  clock_t crit_max;                      /* Max time in critical section    */
+  clock_t run_start;                     /* Time when thread begin run      */
+  clock_t run_max;                       /* Max time thread run             */
+  clock_t run_time;                      /* Total time thread run           */
 #endif
 
   /* State save areas *******************************************************/
@@ -671,7 +671,7 @@ struct tcb_s
   struct xcptcontext xcp;                /* Interrupt register save area    */
 
 #if CONFIG_TASK_NAME_SIZE > 0
-  char name[CONFIG_TASK_NAME_SIZE + 1];  /* Task name (with NUL terminator  */
+  char name[CONFIG_TASK_NAME_SIZE + 1];  /* Task name (with NUL terminator) */
 #endif
 
 #if CONFIG_SCHED_STACK_RECORD > 0
@@ -706,13 +706,13 @@ struct task_tcb_s
 
   /* Task Group *************************************************************/
 
-  struct task_group_s group;            /* Pointer to shared task group data */
+  struct task_group_s group;             /* Shared task group data          */
 
   /* Task Management Fields *************************************************/
 
 #ifdef CONFIG_SCHED_STARTHOOK
-  starthook_t starthook;                 /* Task startup function               */
-  FAR void *starthookarg;                /* The argument passed to the function */
+  starthook_t starthook;                 /* Task startup function           */
+  FAR void *starthookarg;                /* The argument passed to the hook */
 #endif
 };
 
@@ -736,8 +736,8 @@ struct pthread_tcb_s
 
   /* Task Management Fields *************************************************/
 
-  pthread_trampoline_t trampoline;       /* User-space pthread startup function */
-  pthread_addr_t arg;                    /* Startup argument                    */
+  pthread_trampoline_t trampoline;       /* User-space startup function     */
+  pthread_addr_t arg;                    /* Startup argument                */
 };
 #endif /* !CONFIG_DISABLE_PTHREAD */
 
