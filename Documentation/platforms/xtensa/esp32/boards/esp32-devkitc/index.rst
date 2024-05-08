@@ -881,7 +881,7 @@ This example uses littlefs on ESP32's SPI flash to store wasm modules.
 
       % python3 mkfsimg.py \
         --img-filename ..../littlefs.bin \
-        --img-size 3080192 \
+        --img-size 2621440 \
         --block-size 4096 \
         --prog-size 256 \
         --read-size 256 \
