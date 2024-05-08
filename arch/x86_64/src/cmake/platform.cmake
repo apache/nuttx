@@ -70,6 +70,15 @@ if(CONFIG_SCHED_GCOV)
   list(APPEND EXTRA_LIB ${extra_library})
 endif()
 
+if(CONFIG_CXX_EXCEPTION)
+  execute_process(
+    COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
+            --print-file-name=libgcc_eh.a
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    OUTPUT_VARIABLE extra_library)
+  list(APPEND EXTRA_LIB ${extra_library})
+endif()
+
 nuttx_add_extra_library(${EXTRA_LIB})
 
 set(PREPROCESS ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} -E -P -x c)
