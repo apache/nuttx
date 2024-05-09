@@ -40,7 +40,8 @@ set(SRCS
     arm_tcbinfo.c
     arm_trigger_irq.c
     arm_usagefault.c
-    arm_vectors.c)
+    arm_vectors.c
+    arm_dbgmonitor.c)
 
 if(CONFIG_ARMV7M_SYSTICK)
   list(APPEND SRCS arm_systick.c)
