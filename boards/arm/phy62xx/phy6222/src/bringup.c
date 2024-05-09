@@ -65,8 +65,8 @@ extern int phyplus_timer_initialize(const char *devpath, int timer);
  *     Called from the NSH library
  *
  ****************************************************************************/
-#define PPLUS_MTD_START_OFFSET  0x60000   //start from 384k offset
-#define PPLUS_MTD_SIZE          0x20000   //mtd size is 128k bytes
+#define PPLUS_MTD_START_OFFSET  0x60000  /* start from 384k offset */
+#define PPLUS_MTD_SIZE          0x20000  /* mtd size is 128k bytes */
 
 int phy62xx_bringup(void)
 {
