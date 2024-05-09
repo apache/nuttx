@@ -161,6 +161,17 @@
 #define pci_read_io_dword(dev, addr, val) \
   pci_bus_read_io_dword((dev)->bus, addr, val)
 
+#define pci_read_io_qword(dev, addr, val) \
+  do \
+    { \
+      uint32_t valhi; \
+      uint32_t vallo; \
+      pci_bus_read_io_dword((dev)->bus, addr, &vallo); \
+      pci_bus_read_io_dword((dev)->bus, (uintptr_t)(addr) + sizeof(uint32_t), &valhi); \
+      *(val) = ((uint64_t)valhi << 32) | (uint64_t)vallo; \
+    } \
+  while (0)
+
 #define pci_write_io_byte(dev, addr, val) \
   pci_bus_write_io_byte((dev)->bus, addr, val)
 
@@ -169,6 +180,14 @@
 
 #define pci_write_io_dword(dev, addr, val) \
   pci_bus_write_io_dword((dev)->bus, addr, val)
+
+#define pci_write_io_qword(dev, addr, val) \
+  do \
+    { \
+      pci_bus_write_io_dword((dev)->bus, addr, (uint32_t)(val)); \
+      pci_bus_write_io_dword((dev)->bus, (uintptr_t)(addr) + sizeof(uint32_t), (val) >> 32); \
+    } \
+  while (0)
 
 #define pci_write_mmio_byte(dev, addr, val)  \
   (*((FAR volatile uint8_t *)(addr))) = val
