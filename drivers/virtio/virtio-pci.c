@@ -358,8 +358,8 @@ virtio_pci_get_queue_len(FAR struct virtio_pci_device_s *vpdev, int idx)
   FAR struct virtio_pci_common_cfg_s *cfg = vpdev->common;
   uint16_t size;
 
-  pci_write_mmio_word(vpdev->dev, &cfg->queue_select, idx);
-  pci_read_mmio_word(vpdev->dev, &cfg->queue_size, &size);
+  pci_write_io_word(vpdev->dev, &cfg->queue_select, idx);
+  pci_read_io_word(vpdev->dev, &cfg->queue_size, &size);
   return size;
 }
 
@@ -375,19 +375,19 @@ static int virtio_pci_config_virtqueue(FAR struct virtio_pci_device_s *vpdev,
 
   /* Activate the queue */
 
-  pci_write_mmio_word(vpdev->dev, &cfg->queue_select, vq->vq_queue_index);
-  pci_write_mmio_word(vpdev->dev, &cfg->queue_size, vq->vq_ring.num);
+  pci_write_io_word(vpdev->dev, &cfg->queue_select, vq->vq_queue_index);
+  pci_write_io_word(vpdev->dev, &cfg->queue_size, vq->vq_ring.num);
 
-  pci_write_mmio_qword(vpdev, &cfg->queue_desc,
-                       up_addrenv_va_to_pa(vq->vq_ring.desc));
-  pci_write_mmio_qword(vpdev, &cfg->queue_avail,
-                       up_addrenv_va_to_pa(vq->vq_ring.avail));
-  pci_write_mmio_qword(vpdev, &cfg->queue_used,
-                       up_addrenv_va_to_pa(vq->vq_ring.used));
+  pci_write_io_qword(vpdev->dev, &cfg->queue_desc,
+                     up_addrenv_va_to_pa(vq->vq_ring.desc));
+  pci_write_io_qword(vpdev->dev, &cfg->queue_avail,
+                     up_addrenv_va_to_pa(vq->vq_ring.avail));
+  pci_write_io_qword(vpdev->dev, &cfg->queue_used,
+                     up_addrenv_va_to_pa(vq->vq_ring.used));
 
-  pci_write_mmio_word(vpdev->dev, &cfg->queue_msix_vector,
-                      VIRTIO_PCI_INT_VQ);
-  pci_read_mmio_word(vpdev->dev, &cfg->queue_msix_vector, &msix_vector);
+  pci_write_io_word(vpdev->dev, &cfg->queue_msix_vector,
+                    VIRTIO_PCI_INT_VQ);
+  pci_read_io_word(vpdev->dev, &cfg->queue_msix_vector, &msix_vector);
   if (msix_vector == VIRTIO_PCI_MSI_NO_VECTOR)
     {
       vrterr("Msix_vector is no vector\n");
@@ -396,7 +396,7 @@ static int virtio_pci_config_virtqueue(FAR struct virtio_pci_device_s *vpdev,
 
   /* Enable vq */
 
-  pci_write_mmio_word(vpdev->dev, &cfg->queue_enable, 1);
+  pci_write_io_word(vpdev->dev, &cfg->queue_enable, 1);
   return OK;
 }
 
@@ -411,8 +411,8 @@ static int virtio_pci_get_notify_offset(FAR struct virtqueue *vq)
   FAR struct virtio_pci_common_cfg_s *cfg = vpdev->common;
   uint16_t off;
 
-  pci_write_mmio_word(vpdev->dev, &cfg->queue_select, vq->vq_queue_index);
-  pci_read_mmio_word(vpdev->dev, &cfg->queue_notify_off, &off);
+  pci_write_io_word(vpdev->dev, &cfg->queue_select, vq->vq_queue_index);
+  pci_read_io_word(vpdev->dev, &cfg->queue_notify_off, &off);
 
   if (off * vpdev->notify_off_multiplier + 2 > vpdev->notify_len)
     {
@@ -432,9 +432,9 @@ virtio_pci_config_virtdevice(FAR struct virtio_pci_device_s *vpdev)
   FAR struct virtio_pci_common_cfg_s *cfg = vpdev->common;
   uint16_t rvector;
 
-  pci_write_mmio_word(vpdev->dev, &cfg->config_msix_vector,
-                      VIRTIO_PCI_INT_CFG);
-  pci_read_mmio_word(vpdev->dev, &cfg->config_msix_vector, &rvector);
+  pci_write_io_word(vpdev->dev, &cfg->config_msix_vector,
+                    VIRTIO_PCI_INT_CFG);
+  pci_read_io_word(vpdev->dev, &cfg->config_msix_vector, &rvector);
   if (rvector == VIRTIO_PCI_MSI_NO_VECTOR)
     {
       return -EINVAL;
@@ -596,10 +596,10 @@ static void virtio_pci_delete_virtqueues(FAR struct virtio_device *vdev)
         {
           vrinfo = &vdev->vrings_info[i];
 
-          pci_write_mmio_word(vpdev->dev, &cfg->queue_select,
-                              vrinfo->vq->vq_queue_index);
-          pci_write_mmio_word(vpdev->dev, &cfg->queue_msix_vector,
-                              VIRTIO_PCI_MSI_NO_VECTOR);
+          pci_write_io_word(vpdev->dev, &cfg->queue_select,
+                            vrinfo->vq->vq_queue_index);
+          pci_write_io_word(vpdev->dev, &cfg->queue_msix_vector,
+                            VIRTIO_PCI_MSI_NO_VECTOR);
 
           /* Free the vring buffer and virtqueue */
 
@@ -629,7 +629,7 @@ static void virtio_pci_set_status(FAR struct virtio_device *vdev,
     (FAR struct virtio_pci_device_s *)vdev;
   FAR struct virtio_pci_common_cfg_s *cfg = vpdev->common;
 
-  pci_write_mmio_byte(vpdev->dev, &cfg->device_status, status);
+  pci_write_io_byte(vpdev->dev, &cfg->device_status, status);
 }
 
 /****************************************************************************
@@ -643,7 +643,7 @@ static uint8_t virtio_pci_get_status(FAR struct virtio_device *vdev)
   FAR struct virtio_pci_common_cfg_s *cfg = vpdev->common;
   uint8_t status;
 
-  pci_read_mmio_byte(vpdev->dev, &cfg->device_status, &status);
+  pci_read_io_byte(vpdev->dev, &cfg->device_status, &status);
   return status;
 }
 
@@ -671,19 +671,19 @@ static void virtio_pci_write_config(FAR struct virtio_device *vdev,
     {
       case 1:
         memcpy(&u8data, src, sizeof(u8data));
-        pci_write_mmio_byte(vpdev->dev, vpdev->device + offset, u8data);
+        pci_write_io_byte(vpdev->dev, vpdev->device + offset, u8data);
         break;
       case 2:
         memcpy(&u16data, src, sizeof(u16data));
-        pci_write_mmio_word(vpdev->dev, vpdev->device + offset, u16data);
+        pci_write_io_word(vpdev->dev, vpdev->device + offset, u16data);
         break;
       case 4:
         memcpy(&u32data, src, sizeof(u32data));
-        pci_write_mmio_dword(vpdev->dev, vpdev->device + offset, u32data);
+        pci_write_io_dword(vpdev->dev, vpdev->device + offset, u32data);
         break;
       case 8:
         memcpy(&u64data, src, sizeof(u64data));
-        pci_write_mmio_dword(vpdev->dev, vpdev->device + offset, u64data);
+        pci_write_io_qword(vpdev->dev, vpdev->device + offset, u64data);
         break;
       default:
         {
@@ -691,8 +691,8 @@ static void virtio_pci_write_config(FAR struct virtio_device *vdev,
           int i;
           for (i = 0; i < length; i++)
             {
-              pci_write_mmio_byte(&vmdev->cfg_io, vpdev->device + offset + i,
-                                  s[i]);
+              pci_write_io_byte(vpdev->dev, vpdev->device + offset + i,
+                                s[i]);
             }
         }
     }
@@ -721,19 +721,19 @@ static void virtio_pci_read_config(FAR struct virtio_device *vdev,
   switch (length)
     {
       case 1:
-        pci_read_mmio_byte(vpdev->dev, vpdev->device + offset, &u8data);
+        pci_read_io_byte(vpdev->dev, vpdev->device + offset, &u8data);
         memcpy(dst, &u8data, sizeof(u8data));
         break;
       case 2:
-        pci_read_mmio_word(vpdev->dev, vpdev->device + offset, &u16data);
+        pci_read_io_word(vpdev->dev, vpdev->device + offset, &u16data);
         memcpy(dst, &u16data, sizeof(u16data));
         break;
       case 4:
-        pci_read_mmio_dword(vpdev->dev, vpdev->device + offset, &u32data);
+        pci_read_io_dword(vpdev->dev, vpdev->device + offset, &u32data);
         memcpy(dst, &u32data, sizeof(u32data));
         break;
       case 8:
-        pci_read_mmio_qword(vpdev->dev, vpdev->device + offset, &u64data);
+        pci_read_io_qword(vpdev->dev, vpdev->device + offset, &u64data);
         memcpy(dst, &u64data, sizeof(u64data));
         break;
       default:
@@ -742,8 +742,8 @@ static void virtio_pci_read_config(FAR struct virtio_device *vdev,
           int i;
           for (i = 0; i < length; i++)
             {
-              pci_read_mmio_byte(&vmdev->cfg_io, vpdev->device + offset + i,
-                                 &d[i]);
+              pci_read_io_byte(vpdev->dev, vpdev->device + offset + i,
+                               &d[i]);
             }
         }
     }
@@ -760,8 +760,8 @@ static uint32_t virtio_pci_get_features(FAR struct virtio_device *vdev)
   FAR struct virtio_pci_common_cfg_s *cfg = vpdev->common;
   uint32_t feature;
 
-  pci_write_mmio_dword(vpdev->dev, &cfg->device_feature_select, 0);
-  pci_read_mmio_dword(vpdev->dev, &cfg->device_feature, &feature);
+  pci_write_io_dword(vpdev->dev, &cfg->device_feature_select, 0);
+  pci_read_io_dword(vpdev->dev, &cfg->device_feature, &feature);
   return feature;
 }
 
@@ -776,10 +776,10 @@ static void virtio_pci_set_features(FAR struct virtio_device *vdev,
     (FAR struct virtio_pci_device_s *)vdev;
   FAR struct virtio_pci_common_cfg_s *cfg = vpdev->common;
 
-  pci_write_mmio_dword(vpdev->dev, &cfg->driver_feature_select, 0);
-  pci_write_mmio_dword(vpdev->dev, &cfg->driver_feature, features);
-  pci_write_mmio_dword(vpdev->dev, &cfg->driver_feature_select, 1);
-  pci_write_mmio_dword(vpdev->dev, &cfg->driver_feature, 0);
+  pci_write_io_dword(vpdev->dev, &cfg->driver_feature_select, 0);
+  pci_write_io_dword(vpdev->dev, &cfg->driver_feature, features);
+  pci_write_io_dword(vpdev->dev, &cfg->driver_feature_select, 1);
+  pci_write_io_dword(vpdev->dev, &cfg->driver_feature, 0);
 }
 
 /****************************************************************************
@@ -815,8 +815,8 @@ static void virtio_pci_notify(FAR struct virtqueue *vq)
 
   vrinfo = &vpdev->vdev.vrings_info[vq->vq_queue_index];
 
-  pci_write_mmio_word(vpdev->dev, vpdev->notify + vrinfo->notifyid,
-                      vq->vq_queue_index);
+  pci_write_io_word(vpdev->dev, vpdev->notify + vrinfo->notifyid,
+                    vq->vq_queue_index);
 }
 
 /****************************************************************************
