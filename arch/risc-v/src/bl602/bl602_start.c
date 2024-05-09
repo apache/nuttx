@@ -66,8 +66,6 @@ static struct boot2_partition_table_s g_boot2_partition_table used_data;
  * Public Data
  ****************************************************************************/
 
-uintptr_t g_idle_topstack = (uintptr_t)_ebss + SMP_STACK_SIZE;
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
