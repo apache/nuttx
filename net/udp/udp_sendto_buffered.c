@@ -720,6 +720,13 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
        * unlocked here.
        */
 
+#ifdef CONFIG_NET_JUMBO_FRAME
+
+      /* alloc iob of gso pkt for udp data */
+
+      wrb = udp_wrbuffer_tryalloc(len + udpip_hdrsize(conn) +
+                                  CONFIG_NET_LL_GUARDSIZE);
+#else
       if (nonblock)
         {
           wrb = udp_wrbuffer_tryalloc();
@@ -729,6 +736,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
           wrb = udp_wrbuffer_timedalloc(udp_send_gettimeout(start,
                                                             timeout));
         }
+#endif
 
       if (wrb == NULL)
         {

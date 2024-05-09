@@ -747,6 +747,15 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 
           tcp_setsequence(conn->sndseq, TCP_WBSEQNO(wrb));
 
+#ifdef CONFIG_NET_JUMBO_FRAME
+          if (sndlen <= conn->mss)
+            {
+              /* alloc iob */
+
+              netdev_iob_prepare_dynamic(dev, sndlen + tcpip_hdrsize(conn));
+            }
+#endif
+
           ret = devif_iob_send(dev, TCP_WBIOB(wrb), sndlen,
                                0, tcpip_hdrsize(conn));
           if (ret <= 0)
@@ -1073,6 +1082,15 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
            * corresponding to the amount of data already sent. (this
            * won't actually happen until the polling cycle completes).
            */
+
+#ifdef CONFIG_NET_JUMBO_FRAME
+          if (sndlen <= conn->mss)
+            {
+              /* alloc iob */
+
+              netdev_iob_prepare_dynamic(dev, sndlen + tcpip_hdrsize(conn));
+            }
+#endif
 
           ret = devif_iob_send(dev, TCP_WBIOB(wrb), sndlen,
                                TCP_WBSENT(wrb), tcpip_hdrsize(conn));

@@ -998,6 +998,21 @@ int netdev_iob_prepare(FAR struct net_driver_s *dev, bool throttled,
                        unsigned int timeout);
 
 /****************************************************************************
+ * Name: netdev_iob_prepare_dynamic
+ *
+ * Description:
+ *   Pre-alloc the iob for the data to be sent.
+ *
+ * Assumptions:
+ *   The caller has locked the network.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IOB_ALLOC
+void netdev_iob_prepare_dynamic(FAR struct net_driver_s *dev, uint16_t size);
+#endif
+
+/****************************************************************************
  * Name: netdev_iob_replace
  *
  * Description:
