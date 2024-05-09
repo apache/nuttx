@@ -85,7 +85,7 @@
  * The unit is 10 millisecond.
  */
 
-#define AK09912_POLLING_TIMEOUT (1)  // 10 ms
+#define AK09912_POLLING_TIMEOUT (1)  /* 10 ms */
 
 /* The parameter for compensating. */
 
