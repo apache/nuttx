@@ -85,6 +85,43 @@ int netdev_iob_prepare(FAR struct net_driver_s *dev, bool throttled,
 }
 
 /****************************************************************************
+ * Name: netdev_iob_prepare_dynamic
+ *
+ * Description:
+ *   Pre-alloc the iob for the data to be sent.
+ *
+ * Assumptions:
+ *   The caller has locked the network.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IOB_ALLOC
+void netdev_iob_prepare_dynamic(FAR struct net_driver_s *dev, uint16_t size)
+{
+  FAR struct iob_s *iob;
+  size += CONFIG_NET_LL_GUARDSIZE;
+
+  if (dev->d_iob && size <= IOB_BUFSIZE(dev->d_iob))
+    {
+      return;
+    }
+
+  /* alloc new iob for jumbo frame */
+
+  iob = iob_alloc_dynamic(size);
+  if (iob == NULL)
+    {
+      nerr("ERROR: Failed to allocate an I/O buffer.");
+      return;
+    }
+
+  iob_reserve(iob, CONFIG_NET_LL_GUARDSIZE);
+
+  netdev_iob_replace(dev, iob);
+}
+#endif
+
+/****************************************************************************
  * Name: netdev_iob_replace
  *
  * Description:

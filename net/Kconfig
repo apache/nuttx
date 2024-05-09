@@ -146,6 +146,13 @@ config NET_LL_GUARDSIZE
 		the L2/L3 (MAC/IP) data on Network layer, which will be beneficial
 		to L3 network layer protocol transparent transmission and forwarding
 
+config NET_JUMBO_FRAME
+	bool "Net jumbo frame"
+	depends on IOB_ALLOC
+	default n
+	---help---
+		Optimize the sending of the JUMBO frame in network stack.
+
 config NET_RECV_BUFSIZE
 	int "Net Default Receive buffer size"
 	default 0

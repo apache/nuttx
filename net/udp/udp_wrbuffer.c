@@ -235,7 +235,11 @@ FAR struct udp_wrbuffer_s *udp_wrbuffer_timedalloc(unsigned int timeout)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_JUMBO_FRAME
+FAR struct udp_wrbuffer_s *udp_wrbuffer_tryalloc(int len)
+#else
 FAR struct udp_wrbuffer_s *udp_wrbuffer_tryalloc(void)
+#endif
 {
   FAR struct udp_wrbuffer_s *wrb;
 
@@ -262,7 +266,12 @@ FAR struct udp_wrbuffer_s *udp_wrbuffer_tryalloc(void)
 
   /* Now get the first I/O buffer for the write buffer structure */
 
-  wrb->wb_iob = iob_tryalloc(false);
+  wrb->wb_iob =
+#ifdef CONFIG_NET_JUMBO_FRAME
+    iob_alloc_dynamic(len);
+#else
+    iob_tryalloc(false);
+#endif
   if (!wrb->wb_iob)
     {
       nerr("ERROR: Failed to allocate I/O buffer\n");

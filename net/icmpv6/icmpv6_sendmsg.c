@@ -98,6 +98,10 @@ static void sendto_request(FAR struct net_driver_s *dev,
 {
   FAR struct icmpv6_echo_request_s *icmpv6;
 
+#ifdef CONFIG_NET_JUMBO_FRAME
+  netdev_iob_prepare_dynamic(dev, pstate->snd_buflen + IPv6_HDRLEN);
+#endif
+
   /* Set-up to send that amount of data. */
 
   devif_send(dev, pstate->snd_buf, pstate->snd_buflen, IPv6_HDRLEN);
