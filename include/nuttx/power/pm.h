@@ -145,6 +145,8 @@ enum pm_state_e
   PM_COUNT,
 };
 
+typedef void (*pm_idle_handler_t)(enum pm_state_e);
+
 #ifdef CONFIG_PM_PROCFS
 struct pm_preparefail_s
 {
@@ -816,6 +818,22 @@ enum pm_state_e pm_querystate(int domain);
  ****************************************************************************/
 
 void pm_auto_updatestate(int domain);
+
+/****************************************************************************
+ * Name: pm_idle
+ *
+ * Description:
+ *   Standard pm idle work flow for up_idle, for not smp case.
+ *
+ * Input Parameters:
+ *   handler - The execution after PM_IDLE_DOMAIN state changed.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void pm_idle(pm_idle_handler_t handler);
 
 #undef EXTERN
 #ifdef __cplusplus
