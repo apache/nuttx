@@ -31,13 +31,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define GDBSTUB_STOPREASON_NONE          0x00
-#define GDBSTUB_STOPREASON_WATCHPOINT_RO 0x01
-#define GDBSTUB_STOPREASON_WATCHPOINT_WO 0x02
-#define GDBSTUB_STOPREASON_WATCHPOINT_RW 0x03
-#define GDBSTUB_STOPREASON_BREAKPOINT    0x04
-#define GDBSTUB_STOPREASON_STEPPOINT     0x05
-#define GDBSTUB_STOPREASON_CTRLC         0x06
+#define GDB_STOPREASON_NONE          0x00
+#define GDB_STOPREASON_WATCHPOINT_RO 0x01
+#define GDB_STOPREASON_WATCHPOINT_WO 0x02
+#define GDB_STOPREASON_WATCHPOINT_RW 0x03
+#define GDB_STOPREASON_BREAKPOINT    0x04
+#define GDB_STOPREASON_STEPPOINT     0x05
+#define GDB_STOPREASON_CTRLC         0x06
 
 /****************************************************************************
  * Type Definitions
