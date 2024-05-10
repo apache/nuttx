@@ -50,8 +50,6 @@
 
 #define MPS_IRQ_FIRST                (16) /* Vector number of the first external interrupt */
 
-#define NVIC_SYSH_PRIORITY_DEFAULT (0x80) /* Midpoint is the default */
-
 #ifndef __ASSEMBLY__
 
 #undef EXTERN
