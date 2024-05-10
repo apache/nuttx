@@ -952,6 +952,7 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           user->event = 0;
           nxrmutex_unlock(&upper->lock);
         }
+        break;
 
      case SNIOC_FLUSH:
         {
