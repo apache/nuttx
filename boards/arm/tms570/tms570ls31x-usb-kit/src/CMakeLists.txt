@@ -1,5 +1,5 @@
 # ##############################################################################
-# boards/arm/tms570/tms570ls31x-usb-kit/CMakeLists.txt
+# boards/arm/tms570/tms570ls31x-usb-kit/src/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
