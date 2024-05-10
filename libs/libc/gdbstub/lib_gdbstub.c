@@ -1422,32 +1422,32 @@ static int gdb_send_stop(FAR struct gdb_state_s *state, int stopreason,
 retry:
   switch (stopreason)
     {
-      case GDBSTUB_STOPREASON_WATCHPOINT_RO:
+      case GDB_STOPREASON_WATCHPOINT_RO:
         ret = sprintf(state->pkt_buf, "T05thread:%x;rwatch:%" PRIxPTR ";",
                       state->pid + 1, (uintptr_t)stopaddr);
         break;
-      case GDBSTUB_STOPREASON_WATCHPOINT_WO:
+      case GDB_STOPREASON_WATCHPOINT_WO:
         ret = sprintf(state->pkt_buf, "T05thread:%x;awatch:%" PRIxPTR ";",
                       state->pid + 1, (uintptr_t)stopaddr);
         break;
-      case GDBSTUB_STOPREASON_WATCHPOINT_RW:
+      case GDB_STOPREASON_WATCHPOINT_RW:
         ret = sprintf(state->pkt_buf, "T05thread:%x;watch:%" PRIxPTR ";",
                       state->pid + 1, (uintptr_t)stopaddr);
         break;
-      case GDBSTUB_STOPREASON_BREAKPOINT:
+      case GDB_STOPREASON_BREAKPOINT:
         ret = sprintf(state->pkt_buf, "T05thread:%x;hwbreak:;",
                       state->pid + 1);
         break;
-      case GDBSTUB_STOPREASON_STEPPOINT:
-        if (state->last_stopreason == GDBSTUB_STOPREASON_WATCHPOINT_RW ||
-            state->last_stopreason == GDBSTUB_STOPREASON_WATCHPOINT_WO)
+      case GDB_STOPREASON_STEPPOINT:
+        if (state->last_stopreason == GDB_STOPREASON_WATCHPOINT_RW ||
+            state->last_stopreason == GDB_STOPREASON_WATCHPOINT_WO)
           {
             stopreason = state->last_stopreason;
             stopaddr = state->last_stopaddr;
             goto retry;
           }
 
-      case GDBSTUB_STOPREASON_CTRLC:
+      case GDB_STOPREASON_CTRLC:
       default:
         ret = sprintf(state->pkt_buf, "T05thread:%d;", state->pid + 1);
     }
@@ -1479,19 +1479,19 @@ static void gdbstub_debugpoint_callback(int type, FAR void *addr,
   switch (type)
     {
       case DEBUGPOINT_BREAKPOINT:
-        stopreason = GDBSTUB_STOPREASON_BREAKPOINT;
+        stopreason = GDB_STOPREASON_BREAKPOINT;
         break;
       case DEBUGPOINT_WATCHPOINT_RO:
-        stopreason = GDBSTUB_STOPREASON_WATCHPOINT_RO;
+        stopreason = GDB_STOPREASON_WATCHPOINT_RO;
         break;
       case DEBUGPOINT_WATCHPOINT_WO:
-        stopreason = GDBSTUB_STOPREASON_WATCHPOINT_WO;
+        stopreason = GDB_STOPREASON_WATCHPOINT_WO;
         break;
       case DEBUGPOINT_WATCHPOINT_RW:
-        stopreason = GDBSTUB_STOPREASON_WATCHPOINT_RW;
+        stopreason = GDB_STOPREASON_WATCHPOINT_RW;
         break;
       case DEBUGPOINT_STEPPOINT:
-        stopreason = GDBSTUB_STOPREASON_STEPPOINT;
+        stopreason = GDB_STOPREASON_STEPPOINT;
         up_debugpoint_remove(DEBUGPOINT_STEPPOINT, NULL, 0);
         break;
       default:
@@ -1785,7 +1785,7 @@ int gdb_process(FAR struct gdb_state_s *state, int stopreason,
 {
   int ret;
 
-  if (stopreason != GDBSTUB_STOPREASON_NONE)
+  if (stopreason != GDB_STOPREASON_NONE)
     {
       gdb_send_stop(state, stopreason, stopaddr);
     }
