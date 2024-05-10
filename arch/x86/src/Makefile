@@ -53,6 +53,20 @@ OBJS = $(AOBJS) $(COBJS)
 
 # Override in Make.defs if linker is not 'ld'
 
+$(foreach lib,$(notdir $(wildcard $(APPDIR)$(DELIM)staging$(DELIM)*$(LIBEXT))), \
+  $(foreach elib,$(EXTRA_LIBS), \
+    $(if $(filter $(notdir $(elib)),$(lib)), \
+      $(eval NAMEFULL_LIBS+=$(elib)), \
+      $(if $(filter $(notdir $(elib)),$(patsubst lib%$(LIBEXT),-l%,$(lib))), \
+        $(eval NAMESPEC_LIBS+=$(elib)) \
+       ) \
+     ) \
+   ) \
+ )
+
+EXTRA_LIBS := $(filter-out $(NAMEFULL_LIBS) $(NAMESPEC_LIBS),$(EXTRA_LIBS))
+EXTRA_LIBS += $(wildcard $(APPDIR)$(DELIM)staging$(DELIM)*$(LIBEXT))
+
 LDSTARTGROUP ?= --start-group
 LDENDGROUP ?= --end-group
 LDFLAGS += $(addprefix -T,$(call CONVERT_PATH,$(ARCHSCRIPT))) -static
