@@ -84,7 +84,8 @@ static int rpmsg_ping_ept_cb(FAR struct rpmsg_endpoint *ept,
         {
           if (msg->data[i] != RPMSG_PING_CHECK_DATA)
             {
-              syslog(LOG_ERR, "rptun ping remote receive data error!\n");
+              syslog(LOG_ERR, "receive data error at %zu of %zu\n",
+                     i, data_len);
               break;
             }
 
@@ -233,7 +234,10 @@ int rpmsg_ping(FAR struct rpmsg_endpoint *ept,
       max    = MAX(max, tm);
       total += tm;
 
-      nxsig_usleep(ping->sleep * USEC_PER_MSEC);
+      if (ping->sleep > 0)
+        {
+          nxsig_usleep(ping->sleep * USEC_PER_MSEC);
+        }
     }
 
   syslog(LOG_INFO, "ping times: %d\n", ping->times);
