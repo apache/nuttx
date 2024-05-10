@@ -1,5 +1,5 @@
 # ##############################################################################
-# arch/arm/src/common/supervisor/CMakeLists.txt
+# arch/risc-v/src/common/supervisor/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for

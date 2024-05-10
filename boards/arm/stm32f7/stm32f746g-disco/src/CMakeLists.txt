@@ -1,5 +1,5 @@
 # ##############################################################################
-# boards/arm/stm32f7/stm32f746-disco/src/CMakeLists.txt
+# boards/arm/stm32f7/stm32f746g-disco/src/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -27,7 +27,7 @@ else()
 endif()
 
 if(CONFIG_ARCH_BUTTONS)
-  list(APPEND SRCS  stm32_buttons.c)
+  list(APPEND SRCS stm32_buttons.c)
 endif()
 
 if(CONFIG_BOARDCTL)
