@@ -71,6 +71,13 @@
 #endif
 
 #define DUMP_PTR(p, x) ((uintptr_t)(&(p)[(x)]) < stack_top ? (p)[(x)] : 0)
+#define DUMP_STRIDE    (sizeof(FAR void *) * 8)
+
+#if UINTPTR_MAX <= UINT32_MAX
+#  define DUMP_FORMAT " %08" PRIxPTR ""
+#elif UINTPTR_MAX <= UINT64_MAX
+#  define DUMP_FORMAT " %016" PRIxPTR ""
+#endif
 
 /****************************************************************************
  * Private Data
@@ -128,13 +135,12 @@ static void stack_dump(uintptr_t sp, uintptr_t stack_top)
 {
   uintptr_t stack;
 
-  for (stack = sp; stack <= stack_top; stack += 32)
+  for (stack = sp; stack <= stack_top; stack += DUMP_STRIDE)
     {
-      FAR uint32_t *ptr = (FAR uint32_t *)stack;
+      FAR uintptr_t *ptr = (FAR uintptr_t *)stack;
 
-      _alert("%p: %08" PRIx32 " %08" PRIx32 " %08" PRIx32
-             " %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " %08" PRIx32
-             " %08" PRIx32 "\n",
+      _alert("%p:"DUMP_FORMAT DUMP_FORMAT DUMP_FORMAT DUMP_FORMAT
+             DUMP_FORMAT DUMP_FORMAT DUMP_FORMAT DUMP_FORMAT "\n",
              (FAR void *)stack, DUMP_PTR(ptr, 0), DUMP_PTR(ptr , 1),
              DUMP_PTR(ptr, 2), DUMP_PTR(ptr, 3), DUMP_PTR(ptr, 4),
              DUMP_PTR(ptr, 5), DUMP_PTR(ptr , 6), DUMP_PTR(ptr, 7));
@@ -160,9 +166,9 @@ static void dump_stack(FAR const char *tag, uintptr_t sp,
 
       /* Get more information */
 
-      if (sp - 32 >= base)
+      if (sp - DUMP_STRIDE >= base)
         {
-          sp -= 32;
+          sp -= DUMP_STRIDE;
         }
 
       stack_dump(sp, top);
