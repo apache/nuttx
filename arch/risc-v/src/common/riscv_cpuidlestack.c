@@ -47,9 +47,6 @@
  * Public Data
  ****************************************************************************/
 
-uintptr_t g_idle_topstack = (uintptr_t)_ebss +
-                                       SMP_STACK_SIZE * CONFIG_SMP_NCPUS;
-
 const uint8_t *g_cpux_idlestack[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
