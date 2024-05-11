@@ -60,10 +60,22 @@ extern "C"
  * Public Types
  ****************************************************************************/
 
+struct virtio_pci_device_s;
+struct virtio_pci_ops_s
+{
+  CODE uint16_t (*get_queue_len)(FAR struct virtio_pci_device_s *vpdev,
+                                 int idx);
+  CODE int (*config_vector)(FAR struct virtio_pci_device_s *vpdev);
+  CODE int (*create_virtqueue)(FAR struct virtio_pci_device_s *vpdev,
+                               FAR struct virtqueue *vq);
+  CODE void (*delete_virtqueue)(FAR struct virtio_device *vdev, int index);
+};
+
 struct virtio_pci_device_s
 {
   struct virtio_device               vdev;    /* Virtio deivce */
   FAR struct pci_device_s           *dev;     /* PCI device */
+  FAR const struct virtio_pci_ops_s *ops;
   metal_phys_addr_t                  shm_phy;
   struct metal_io_region             shm_io;  /* Share memory io region,
                                                * virtqueue use this io.
@@ -89,6 +101,18 @@ struct virtio_pci_device_s
  * Public Function Prototypes
  ****************************************************************************/
 
+void virtio_pci_reset_device(FAR struct virtio_device *vdev);
+uint32_t
+virtio_pci_negotiate_features(FAR struct virtio_device *vdev,
+                              uint32_t features);
+int virtio_pci_create_virtqueues(FAR struct virtio_device *vdev,
+                                 unsigned int flags,
+                                 unsigned int nvqs,
+                                 FAR const char *names[],
+                                 vq_callback callbacks[]);
+void virtio_pci_delete_virtqueues(FAR struct virtio_device *vdev);
+
+int virtio_pci_modern_probe(FAR struct pci_device_s *dev);
 int virtio_pci_legacy_probe(FAR struct pci_device_s *dev);
 
 #undef EXTERN
