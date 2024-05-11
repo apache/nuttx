@@ -1716,6 +1716,15 @@ config ARCH_BOARD_NUCLEO_G071RB
 		This is a minimal configuration that supports low-level test of the
 		Nucleo G071RB in the NuttX source tree.
 
+config ARCH_BOARD_WEACT_STM32H743
+	bool "WeAct Studio STM32H743"
+	depends on ARCH_CHIP_STM32H743VI
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This is WeAct MiniSTM32H7xx (STM32H743VIT6) board.
+
 config ARCH_BOARD_NUCLEO_H743ZI
 	bool "STM32H743 Nucleo H743ZI"
 	depends on ARCH_CHIP_STM32H743ZI
@@ -3287,6 +3296,7 @@ config ARCH_BOARD
 	default "stm32g071b-disco"          if ARCH_BOARD_STM32G071B_DISCO
 	default "nucleo-g070rb"             if ARCH_BOARD_NUCLEO_G070RB
 	default "nucleo-g071rb"             if ARCH_BOARD_NUCLEO_G071RB
+	default "weact-stm32h743"           if ARCH_BOARD_WEACT_STM32H743
 	default "nucleo-h743zi"             if ARCH_BOARD_NUCLEO_H743ZI
 	default "nucleo-h743zi2"            if ARCH_BOARD_NUCLEO_H743ZI2
 	default "nucleo-h745zi"             if ARCH_BOARD_NUCLEO_H745ZI
@@ -3920,6 +3930,9 @@ source "boards/arm/stm32f7/steval-eth001v1/Kconfig"
 endif
 if ARCH_BOARD_STM32H747I_DISCO
 source "boards/arm/stm32h7/stm32h747i-disco/Kconfig"
+endif
+if ARCH_BOARD_WEACT_STM32H743
+source "boards/arm/stm32h7/weact-stm32h743/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_H743ZI
 source "boards/arm/stm32h7/nucleo-h743zi/Kconfig"
