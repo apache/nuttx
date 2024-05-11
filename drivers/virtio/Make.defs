@@ -29,7 +29,7 @@ ifeq ($(CONFIG_DRIVERS_VIRTIO_MMIO),y)
 endif
 
 ifeq ($(CONFIG_DRIVERS_VIRTIO_PCI),y)
-  CSRCS += virtio-pci-legacy.c virtio-pci-modern.c
+  CSRCS += virtio-pci.c virtio-pci-legacy.c virtio-pci-modern.c
 endif
 
 ifeq ($(CONFIG_DRIVERS_VIRTIO_BLK),y)

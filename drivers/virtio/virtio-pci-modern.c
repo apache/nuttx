@@ -27,8 +27,6 @@
 #include <stdint.h>
 #include <sys/param.h>
 
-#include <nuttx/virtio/virtio-pci.h>
-
 #include "virtio-pci.h"
 
 /****************************************************************************
@@ -158,45 +156,30 @@ begin_packed_struct struct virtio_pci_cfg_cap_s
 /* Helper functions */
 
 static uint16_t
-virtio_pci_get_queue_len(FAR struct virtio_pci_device_s *vpdev, int idx);
-static int virtio_pci_config_virtqueue(FAR struct virtio_pci_device_s *vpdev,
-                                       FAR struct virtqueue *vq);
-static int virtio_pci_init_device(FAR struct virtio_pci_device_s *vpdev);
-static int virtio_pci_create_virtqueue(FAR struct virtio_pci_device_s *vpdev,
-                                       unsigned int i, FAR const char *name,
-                                       vq_callback callback);
-
-/* Virtio pci dispatch functions */
-
-static int virtio_pci_create_virtqueues(FAR struct virtio_device *vdev,
-                                        unsigned int flags,
-                                        unsigned int nvqs,
-                                        FAR const char *names[],
-                                        vq_callback callbacks[]);
-static void virtio_pci_delete_virtqueues(FAR struct virtio_device *vdev);
-static void virtio_pci_set_status(FAR struct virtio_device *vdev,
-                                  uint8_t status);
-static uint8_t virtio_pci_get_status(FAR struct virtio_device *vdev);
-static void virtio_pci_write_config(FAR struct virtio_device *vdev,
-                                    uint32_t offset, FAR void *dst,
-                                    int length);
-static void virtio_pci_read_config(FAR struct virtio_device *vdev,
-                                   uint32_t offset, FAR void *dst,
-                                   int length);
-static uint32_t virtio_pci_get_features(FAR struct virtio_device *vdev);
-static void virtio_pci_set_features(FAR struct virtio_device *vdev,
-                                    uint32_t features);
-static uint32_t virtio_pci_negotiate_features(FAR struct virtio_device *vdev,
-                                              uint32_t features);
-static void virtio_pci_reset_device(FAR struct virtio_device *vdev);
-static void virtio_pci_notify(FAR struct virtqueue *vq);
-
-/* Interrupt */
-
-static int virtio_pci_interrupt(int irq, FAR void *context, FAR void *arg);
-
-static int virtio_pci_probe(FAR struct pci_device_s *dev);
-static void virtio_pci_remove(FAR struct pci_device_s *dev);
+virtio_pci_modern_get_queue_len(FAR struct virtio_pci_device_s *vpdev,
+                                int idx);
+static int
+virtio_pci_modern_config_vector(FAR struct virtio_pci_device_s *vpdev);
+static int
+virtio_pci_modern_create_virtqueue(FAR struct virtio_pci_device_s *vpdev,
+                                   FAR struct virtqueue *vq);
+static void
+virtio_pci_modern_delete_virtqueue(FAR struct virtio_device *vdev,
+                                   int index);
+static void virtio_pci_modern_set_status(FAR struct virtio_device *vdev,
+                                         uint8_t status);
+static uint8_t virtio_pci_modern_get_status(FAR struct virtio_device *vdev);
+static void virtio_pci_modern_write_config(FAR struct virtio_device *vdev,
+                                           uint32_t offset, FAR void *dst,
+                                           int length);
+static void virtio_pci_modern_read_config(FAR struct virtio_device *vdev,
+                                          uint32_t offset, FAR void *dst,
+                                          int length);
+static uint32_t
+virtio_pci_modern_get_features(FAR struct virtio_device *vdev);
+static void virtio_pci_modern_set_features(FAR struct virtio_device *vdev,
+                                           uint32_t features);
+static void virtio_pci_modern_notify(FAR struct virtqueue *vq);
 
 /****************************************************************************
  * Private Data
@@ -204,30 +187,25 @@ static void virtio_pci_remove(FAR struct pci_device_s *dev);
 
 static const struct virtio_dispatch g_virtio_pci_dispatch =
 {
-  virtio_pci_create_virtqueues,  /* create_virtqueues */
-  virtio_pci_delete_virtqueues,  /* delete_virtqueues */
-  virtio_pci_get_status,         /* get_status */
-  virtio_pci_set_status,         /* set_status */
-  virtio_pci_get_features,       /* get_features */
-  virtio_pci_set_features,       /* set_features */
-  virtio_pci_negotiate_features, /* negotiate_features */
-  virtio_pci_read_config,        /* read_config */
-  virtio_pci_write_config,       /* write_config */
-  virtio_pci_reset_device,       /* reset_device */
-  virtio_pci_notify,             /* notify */
+  virtio_pci_create_virtqueues,          /* create_virtqueues */
+  virtio_pci_delete_virtqueues,          /* delete_virtqueues */
+  virtio_pci_modern_get_status,          /* get_status */
+  virtio_pci_modern_set_status,          /* set_status */
+  virtio_pci_modern_get_features,        /* get_features */
+  virtio_pci_modern_set_features,        /* set_features */
+  virtio_pci_negotiate_features,         /* negotiate_features */
+  virtio_pci_modern_read_config,         /* read_config */
+  virtio_pci_modern_write_config,        /* write_config */
+  virtio_pci_reset_device,               /* reset_device */
+  virtio_pci_modern_notify,              /* notify */
 };
 
-static const struct pci_device_id_s g_virtio_pci_id_table[] =
+static const struct virtio_pci_ops_s g_virtio_pci_modern_ops =
 {
-  { PCI_DEVICE(PCI_VENDOR_ID_REDHAT_QUMRANET, PCI_ANY_ID) },
-  { 0, }
-};
-
-static struct pci_driver_s g_virtio_pci_drv =
-{
-  g_virtio_pci_id_table,
-  virtio_pci_probe,
-  virtio_pci_remove
+  virtio_pci_modern_get_queue_len,      /* get_queue_len */
+  virtio_pci_modern_config_vector,      /* config_vector */
+  virtio_pci_modern_create_virtqueue,   /* create_virtqueue */
+  virtio_pci_modern_delete_virtqueue,   /* delete_virtqueue */
 };
 
 /****************************************************************************
@@ -318,11 +296,12 @@ virtio_pci_map_capability(FAR struct virtio_pci_device_s *vpdev, uint8_t pos,
 }
 
 /****************************************************************************
- * Name: virtio_pci_get_queue_len
+ * Name: virtio_pci_modern_get_queue_len
  ****************************************************************************/
 
 static uint16_t
-virtio_pci_get_queue_len(FAR struct virtio_pci_device_s *vpdev, int idx)
+virtio_pci_modern_get_queue_len(FAR struct virtio_pci_device_s *vpdev,
+                                int idx)
 {
   FAR struct virtio_pci_common_cfg_s *cfg = vpdev->common;
   uint16_t size;
@@ -333,14 +312,17 @@ virtio_pci_get_queue_len(FAR struct virtio_pci_device_s *vpdev, int idx)
 }
 
 /****************************************************************************
- * Name: virtio_pci_config_virtqueue
+ * Name: virtio_pci_modern_create_virtqueue
  ****************************************************************************/
 
-static int virtio_pci_config_virtqueue(FAR struct virtio_pci_device_s *vpdev,
-                                       FAR struct virtqueue *vq)
+static int
+virtio_pci_modern_create_virtqueue(FAR struct virtio_pci_device_s *vpdev,
+                                   FAR struct virtqueue *vq)
 {
   FAR struct virtio_pci_common_cfg_s *cfg = vpdev->common;
+  FAR struct virtio_vring_info *vrinfo;
   uint16_t msix_vector;
+  uint16_t off;
 
   /* Activate the queue */
 
@@ -366,19 +348,6 @@ static int virtio_pci_config_virtqueue(FAR struct virtio_pci_device_s *vpdev,
   /* Enable vq */
 
   pci_write_io_word(vpdev->dev, &cfg->queue_enable, 1);
-  return OK;
-}
-
-/****************************************************************************
- * Name: virtio_pci_get_notify_offset
- ****************************************************************************/
-
-static int virtio_pci_get_notify_offset(FAR struct virtqueue *vq)
-{
-  FAR struct virtio_pci_device_s *vpdev =
-    (FAR struct virtio_pci_device_s *)vq->vq_dev;
-  FAR struct virtio_pci_common_cfg_s *cfg = vpdev->common;
-  uint16_t off;
 
   pci_write_io_word(vpdev->dev, &cfg->queue_select, vq->vq_queue_index);
   pci_read_io_word(vpdev->dev, &cfg->queue_notify_off, &off);
@@ -388,15 +357,18 @@ static int virtio_pci_get_notify_offset(FAR struct virtqueue *vq)
       return -EINVAL;
     }
 
-  return off * vpdev->notify_off_multiplier;
+  vrinfo = &vpdev->vdev.vrings_info[vq->vq_queue_index];
+  vrinfo->notifyid = off * vpdev->notify_off_multiplier;
+
+  return OK;
 }
 
 /****************************************************************************
- * Name: virtio_pci_config_virtdevice
+ * Name: virtio_pci_modern_config_vector
  ****************************************************************************/
 
 static int
-virtio_pci_config_virtdevice(FAR struct virtio_pci_device_s *vpdev)
+virtio_pci_modern_config_vector(FAR struct virtio_pci_device_s *vpdev)
 {
   FAR struct virtio_pci_common_cfg_s *cfg = vpdev->common;
   uint16_t rvector;
@@ -413,185 +385,27 @@ virtio_pci_config_virtdevice(FAR struct virtio_pci_device_s *vpdev)
 }
 
 /****************************************************************************
- * Name: virtio_pci_create_virtqueue
+ * Name: virtio_pci_modern_delete_virtqueue
  ****************************************************************************/
 
-static int
-virtio_pci_create_virtqueue(FAR struct virtio_pci_device_s *vpdev,
-                            unsigned int i, FAR const char *name,
-                            vq_callback callback)
-{
-  FAR struct virtio_device *vdev = &vpdev->vdev;
-  FAR struct virtio_vring_info *vrinfo;
-  FAR struct vring_alloc_info *vralloc;
-  FAR struct virtqueue *vq;
-  int vringsize;
-  int ret;
-
-  /* Alloc virtqueue and init the vring info and vring alloc info */
-
-  vrinfo  = &vdev->vrings_info[i];
-  vralloc = &vrinfo->info;
-  vralloc->num_descs = virtio_pci_get_queue_len(vpdev, i);
-  vq = virtqueue_allocate(vralloc->num_descs);
-  if (vq == NULL)
-    {
-      vrterr("Virtqueue_allocate failed\n");
-      return -ENOMEM;
-    }
-
-  /* Init the vring info and vring alloc info */
-
-  vrinfo->vq = vq;
-  vrinfo->io = &vpdev->shm_io;
-  vralloc->align = VIRTIO_PCI_VRING_ALIGN;
-  vringsize = vring_size(vralloc->num_descs, VIRTIO_PCI_VRING_ALIGN);
-  vralloc->vaddr = virtio_zalloc_buf(vdev, vringsize,
-                                     VIRTIO_PCI_VRING_ALIGN);
-  if (vralloc->vaddr == NULL)
-    {
-      vrterr("Vring alloc failed\n");
-      return -ENOMEM;
-    }
-
-  /* Initialize the virtio queue */
-
-  ret = virtqueue_create(vdev, i, name, vralloc, callback,
-                         vdev->func->notify, vq);
-  if (ret < 0)
-    {
-      vrterr("Virtqueue create error, ret=%d\n", ret);
-      return ret;
-    }
-
-  virtqueue_set_shmem_io(vq, &vpdev->shm_io);
-
-  /* Set the pci virtqueue register, active vq, enable vq */
-
-  ret = virtio_pci_config_virtqueue(vpdev, vq);
-  if (ret < 0)
-    {
-      vrterr("Virtio_pci_config_virtqueue failed, ret=%d\n", ret);
-      return ret;
-    }
-
-  ret = virtio_pci_get_notify_offset(vq);
-  if (ret < 0)
-    {
-      vrterr("Get virtio pci offset error\n");
-      return ret;
-    }
-
-  vrinfo->notifyid = ret;
-  return OK;
-}
-
-/****************************************************************************
- * Name: virtio_pci_create_virtqueues
- ****************************************************************************/
-
-static int virtio_pci_create_virtqueues(FAR struct virtio_device *vdev,
-                                        unsigned int flags,
-                                        unsigned int nvqs,
-                                        FAR const char *names[],
-                                        vq_callback callbacks[])
-{
-  FAR struct virtio_pci_device_s *vpdev =
-    (FAR struct virtio_pci_device_s *)vdev;
-  unsigned int i;
-  int ret = OK;
-
-  /* Alloc vring info */
-
-  vdev->vrings_num = nvqs;
-  vdev->vrings_info = kmm_zalloc(sizeof(struct virtio_vring_info) * nvqs);
-  if (vdev->vrings_info == NULL)
-    {
-      vrterr("alloc vrings info failed\n");
-      return -ENOMEM;
-    }
-
-  ret = virtio_pci_config_virtdevice(vpdev);
-  if (ret < 0)
-    {
-      vrterr("read virtio pci config msix vector failed\n");
-      return ret;
-    }
-
-  /* Alloc and init the virtqueue */
-
-  for (i = 0; i < nvqs; i++)
-    {
-      ret = virtio_pci_create_virtqueue(vpdev, i, names[i], callbacks[i]);
-      if (ret < 0)
-        {
-          goto err;
-        }
-    }
-
-  /* Finally, enable the interrupt */
-
-  up_enable_irq(vpdev->irq[VIRTIO_PCI_INT_CFG]);
-  up_enable_irq(vpdev->irq[VIRTIO_PCI_INT_VQ]);
-  return ret;
-
-err:
-  virtio_pci_delete_virtqueues(vdev);
-  return ret;
-}
-
-/****************************************************************************
- * Name: virtio_pci_delete_virtqueues
- ****************************************************************************/
-
-static void virtio_pci_delete_virtqueues(FAR struct virtio_device *vdev)
+void virtio_pci_modern_delete_virtqueue(FAR struct virtio_device *vdev,
+                                        int index)
 {
   FAR struct virtio_pci_device_s *vpdev =
     (FAR struct virtio_pci_device_s *)vdev;
   FAR struct virtio_pci_common_cfg_s *cfg = vpdev->common;
-  FAR struct virtio_vring_info *vrinfo;
-  unsigned int i;
 
-  /* Disable interrupt first */
-
-  up_disable_irq(vpdev->irq[VIRTIO_PCI_INT_CFG]);
-  up_disable_irq(vpdev->irq[VIRTIO_PCI_INT_VQ]);
-
-  /* Free the memory */
-
-  if (vdev->vrings_info != NULL)
-    {
-      for (i = 0; i < vdev->vrings_num; i++)
-        {
-          vrinfo = &vdev->vrings_info[i];
-
-          pci_write_io_word(vpdev->dev, &cfg->queue_select, i);
-          pci_write_io_word(vpdev->dev, &cfg->queue_msix_vector,
-                            VIRTIO_PCI_MSI_NO_VECTOR);
-
-          /* Free the vring buffer and virtqueue */
-
-          if (vrinfo->info.vaddr != NULL)
-            {
-              virtio_free_buf(vdev, vrinfo->info.vaddr);
-            }
-
-          if (vrinfo->vq != NULL)
-            {
-              virtqueue_free(vrinfo->vq);
-            }
-        }
-
-      kmm_free(vdev->vrings_info);
-    }
+  pci_write_io_word(vpdev->dev, &cfg->queue_select, index);
+  pci_write_io_word(vpdev->dev, &cfg->queue_msix_vector,
+                    VIRTIO_PCI_MSI_NO_VECTOR);
 }
 
 /****************************************************************************
- * Name: virtio_pci_set_status
+ * Name: virtio_pci_modern_set_status
  ****************************************************************************/
 
-static void virtio_pci_set_status(FAR struct virtio_device *vdev,
-                                  uint8_t status)
+static void virtio_pci_modern_set_status(FAR struct virtio_device *vdev,
+                                         uint8_t status)
 {
   FAR struct virtio_pci_device_s *vpdev =
     (FAR struct virtio_pci_device_s *)vdev;
@@ -601,10 +415,10 @@ static void virtio_pci_set_status(FAR struct virtio_device *vdev,
 }
 
 /****************************************************************************
- * Name: virtio_pci_get_status
+ * Name: virtio_pci_modern_get_status
  ****************************************************************************/
 
-static uint8_t virtio_pci_get_status(FAR struct virtio_device *vdev)
+static uint8_t virtio_pci_modern_get_status(FAR struct virtio_device *vdev)
 {
   FAR struct virtio_pci_device_s *vpdev =
     (FAR struct virtio_pci_device_s *)vdev;
@@ -616,12 +430,12 @@ static uint8_t virtio_pci_get_status(FAR struct virtio_device *vdev)
 }
 
 /****************************************************************************
- * Name: virtio_pci_write_config
+ * Name: virtio_pci_modern_write_config
  ****************************************************************************/
 
-static void virtio_pci_write_config(FAR struct virtio_device *vdev,
-                                    uint32_t offset, FAR void *src,
-                                    int length)
+static void virtio_pci_modern_write_config(FAR struct virtio_device *vdev,
+                                           uint32_t offset, FAR void *src,
+                                           int length)
 {
   FAR struct virtio_pci_device_s *vpdev =
     (FAR struct virtio_pci_device_s *)vdev;
@@ -667,12 +481,12 @@ static void virtio_pci_write_config(FAR struct virtio_device *vdev,
 }
 
 /****************************************************************************
- * Name: virtio_pci_read_config
+ * Name: virtio_pci_modern_read_config
  ****************************************************************************/
 
-static void virtio_pci_read_config(FAR struct virtio_device *vdev,
-                                   uint32_t offset, FAR void *dst,
-                                   int length)
+static void virtio_pci_modern_read_config(FAR struct virtio_device *vdev,
+                                          uint32_t offset, FAR void *dst,
+                                          int length)
 {
   FAR struct virtio_pci_device_s *vpdev =
     (FAR struct virtio_pci_device_s *)vdev;
@@ -718,10 +532,11 @@ static void virtio_pci_read_config(FAR struct virtio_device *vdev,
 }
 
 /****************************************************************************
- * Name: virtio_pci_get_features
+ * Name: virtio_pci_modern_get_features
  ****************************************************************************/
 
-static uint32_t virtio_pci_get_features(FAR struct virtio_device *vdev)
+static uint32_t
+virtio_pci_modern_get_features(FAR struct virtio_device *vdev)
 {
   FAR struct virtio_pci_device_s *vpdev =
     (FAR struct virtio_pci_device_s *)vdev;
@@ -734,11 +549,11 @@ static uint32_t virtio_pci_get_features(FAR struct virtio_device *vdev)
 }
 
 /****************************************************************************
- * Name: virtio_pci_set_features
+ * Name: virtio_pci_modern_set_features
  ****************************************************************************/
 
-static void virtio_pci_set_features(FAR struct virtio_device *vdev,
-                                    uint32_t features)
+static void virtio_pci_modern_set_features(FAR struct virtio_device *vdev,
+                                           uint32_t features)
 {
   FAR struct virtio_pci_device_s *vpdev =
     (FAR struct virtio_pci_device_s *)vdev;
@@ -751,31 +566,10 @@ static void virtio_pci_set_features(FAR struct virtio_device *vdev,
 }
 
 /****************************************************************************
- * Name: virtio_pci_negotiate_features
+ * Name: virtio_pci_modern_notify
  ****************************************************************************/
 
-static uint32_t virtio_pci_negotiate_features(FAR struct virtio_device *vdev,
-                                              uint32_t features)
-{
-  features = features & virtio_pci_get_features(vdev);
-  virtio_pci_set_features(vdev, features);
-  return features;
-}
-
-/****************************************************************************
- * Name: virtio_pci_reset_device
- ****************************************************************************/
-
-static void virtio_pci_reset_device(FAR struct virtio_device *vdev)
-{
-  virtio_pci_set_status(vdev, VIRTIO_CONFIG_STATUS_RESET);
-}
-
-/****************************************************************************
- * Name: virtio_pci_notify
- ****************************************************************************/
-
-static void virtio_pci_notify(FAR struct virtqueue *vq)
+static void virtio_pci_modern_notify(FAR struct virtqueue *vq)
 {
   FAR struct virtio_pci_device_s *vpdev =
     (FAR struct virtio_pci_device_s *)vq->vq_dev;
@@ -785,42 +579,6 @@ static void virtio_pci_notify(FAR struct virtqueue *vq)
 
   pci_write_io_word(vpdev->dev, vpdev->notify + vrinfo->notifyid,
                     vq->vq_queue_index);
-}
-
-/****************************************************************************
- * Name: virtio_pci_config_changed
- ****************************************************************************/
-
-static int virtio_pci_config_changed(int irq, FAR void *context,
-                                     FAR void *arg)
-{
-  /* TODO: not support config changed notification */
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: virtio_pci_interrupt
- ****************************************************************************/
-
-static int virtio_pci_interrupt(int irq, FAR void *context, FAR void *arg)
-{
-  FAR struct virtio_pci_device_s *vpdev = arg;
-  FAR struct virtio_vring_info *vrings_info = vpdev->vdev.vrings_info;
-  FAR struct virtqueue *vq;
-  unsigned int i;
-
-  for (i = 0; i < vpdev->vdev.vrings_num; i++)
-    {
-      vq = vrings_info[i].vq;
-      if (vq->vq_used_cons_idx != vq->vq_ring.used->idx &&
-          vq->callback != NULL)
-        {
-          vq->callback(vq);
-        }
-    }
-
-  return OK;
 }
 
 /****************************************************************************
@@ -908,13 +666,13 @@ static int virtio_pci_init_device(FAR struct virtio_pci_device_s *vpdev)
 }
 
 /****************************************************************************
- * Name: virtio_pci_probe
+ * Name: virtio_pci_modern_probe
  ****************************************************************************/
 
-static int virtio_pci_modern_probe(FAR struct pci_device_s *dev)
+int virtio_pci_modern_probe(FAR struct pci_device_s *dev)
 {
-  FAR struct virtio_pci_device_s *vpdev;
-  FAR struct virtio_device *vdev;
+  FAR struct virtio_pci_device_s *vpdev = dev->priv;
+  FAR struct virtio_device *vdev = &vpdev->vdev;
   int ret;
 
   /* We only own devices >= 0x1000 and <= 0x107f: leave the rest. */
@@ -924,134 +682,18 @@ static int virtio_pci_modern_probe(FAR struct pci_device_s *dev)
       return -ENODEV;
     }
 
-  vpdev = kmm_zalloc(sizeof(*vpdev));
-  if (vpdev == NULL)
-    {
-      vrterr("No enough memory\n");
-      return -ENOMEM;
-    }
-
-  dev->priv = vpdev;
-  vpdev->dev = dev;
-  vdev = &vpdev->vdev;
-
-  /* Virtio device initialize */
-
-  metal_io_init(&vpdev->shm_io, NULL, &vpdev->shm_phy,
-                SIZE_MAX, UINT_MAX, 0, metal_io_get_ops());
-
+  vpdev->ops = &g_virtio_pci_modern_ops;
   vdev->func = &g_virtio_pci_dispatch;
   vdev->role = VIRTIO_DEV_DRIVER;
 
-  ret = pci_enable_device(dev);
-  if (ret < 0)
-    {
-      vrterr("Enable virtio pci device failed, ret=%d\n", ret);
-      goto err;
-    }
-
-  pci_set_master(dev);
   ret = virtio_pci_init_device(vpdev);
   if (ret < 0)
     {
       if (ret != -ENODEV)
         {
-          vrterr("Virtio pci modern device init failed, ret=%d\n", ret);
+          pcierr("Virtio pci modern device init failed, ret=%d\n", ret);
         }
-
-      goto err_with_enable;
-    }
-
-  /* Irq init */
-
-  ret = pci_alloc_irq(vpdev->dev, vpdev->irq, VIRTIO_PCI_INT_NUM);
-  if (ret != VIRTIO_PCI_INT_NUM)
-    {
-      vrterr("Failed to allocate MSI %d\n", ret);
-      goto err_with_enable;
-    }
-
-  vrtinfo("Attaching MSI %d to %p,  %d to %p\n",
-          vpdev->irq[VIRTIO_PCI_INT_CFG], virtio_pci_config_changed,
-          vpdev->irq[VIRTIO_PCI_INT_VQ], virtio_pci_interrupt);
-
-  ret = pci_connect_irq(vpdev->dev, vpdev->irq, VIRTIO_PCI_INT_NUM);
-  if (ret < 0)
-    {
-      vrterr("Failed to connect MSI %d\n", ret);
-      goto err_with_irq;
-    }
-
-  irq_attach(vpdev->irq[VIRTIO_PCI_INT_CFG],
-             virtio_pci_config_changed, vpdev);
-  irq_attach(vpdev->irq[VIRTIO_PCI_INT_VQ], virtio_pci_interrupt, vpdev);
-
-  virtio_set_status(vdev, VIRTIO_CONFIG_STATUS_RESET);
-  virtio_set_status(vdev, VIRTIO_CONFIG_STATUS_ACK);
-
-  ret = virtio_register_device(&vpdev->vdev);
-  if (ret < 0)
-    {
-      vrterr("Register virtio device failed, ret=%d\n", ret);
-      goto err_with_attach;
     }
 
   return ret;
-
-err_with_attach:
-  irq_detach(vpdev->irq[VIRTIO_PCI_INT_CFG]);
-  irq_detach(vpdev->irq[VIRTIO_PCI_INT_VQ]);
-err_with_irq:
-  pci_release_irq(vpdev->dev, vpdev->irq, VIRTIO_PCI_INT_NUM);
-err_with_enable:
-  pci_clear_master(dev);
-  pci_disable_device(dev);
-err:
-  kmm_free(vpdev);
-  return ret;
-}
-
-/****************************************************************************
- * Name: virtio_pci_probe
- ****************************************************************************/
-
-static int virtio_pci_probe(FAR struct pci_device_s *dev)
-{
-  int ret;
-
-  ret = virtio_pci_modern_probe(dev);
-  if (ret == -ENODEV)
-    {
-      ret = virtio_pci_legacy_probe(dev);
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: virtio_pci_remove
- ****************************************************************************/
-
-static void virtio_pci_remove(FAR struct pci_device_s *dev)
-{
-  FAR struct virtio_pci_device_s *vpdev = dev->priv;
-
-  virtio_unregister_device(&vpdev->vdev);
-
-  irq_detach(vpdev->irq[VIRTIO_PCI_INT_CFG]);
-  irq_detach(vpdev->irq[VIRTIO_PCI_INT_VQ]);
-  pci_release_irq(vpdev->dev, vpdev->irq, VIRTIO_PCI_INT_NUM);
-
-  pci_clear_master(dev);
-  pci_disable_device(dev);
-  kmm_free(vpdev);
-}
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-int register_virtio_pci_driver(void)
-{
-  return pci_register_driver(&g_virtio_pci_drv);
 }
