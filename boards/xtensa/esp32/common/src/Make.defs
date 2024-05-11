@@ -148,6 +148,10 @@ endif
   CSRCS += esp32_board_dac.c
 #endif
 
+ifeq ($(CONFIG_SENSORS_ZEROCROSS),y)
+  CSRCS += esp32_zerocross.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src
