@@ -91,6 +91,10 @@ ifeq ($(CONFIG_ARCH_RV_ISA_A),y)
 CMN_ASRCS += riscv_testset.S
 endif
 
+ifeq ($(CONFIG_ARCH_RV_HAVE_APLIC),y)
+CMN_CSRCS += riscv_aia.c
+endif
+
 ifeq ($(CONFIG_RISCV_SEMIHOSTING_HOSTFS),y)
 CMN_ASRCS += riscv_semihost.S
 CMN_CSRCS += riscv_hostfs.c

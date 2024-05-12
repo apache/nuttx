@@ -88,6 +88,14 @@ if(CONFIG_ARCH_RV_ISA_A)
   list(APPEND SRCS riscv_testset.S)
 endif()
 
+if(CONFIG_ARCH_RV_HAVE_APLIC)
+  list(APPEND SRCS riscv_aplic.c)
+endif()
+
+if(CONFIG_ARCH_RV_HAVE_IMSIC)
+  list(APPEND SRCS riscv_imsic.c)
+endif()
+
 if(CONFIG_RISCV_SEMIHOSTING_HOSTFS)
   list(APPEND SRCS riscv_semihost.S riscv_hostfs.c)
 endif()
