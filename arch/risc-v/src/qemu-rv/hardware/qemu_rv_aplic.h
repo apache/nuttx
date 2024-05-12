@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/qemu-rv/hardware/qemu_rv_memorymap.h
+ * arch/risc-v/src/qemu-rv/hardware/qemu_rv_aplic.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,27 +18,19 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_QEMU_RV_HARDWARE_QEMU_RV_MEMORYMAP_H
-#define __ARCH_RISCV_SRC_QEMU_RV_HARDWARE_QEMU_RV_MEMORYMAP_H
+#ifndef __ARCH_RISCV_SRC_QEMU_RV_HARDWARE_QEMU_RV_APLIC_H
+#define __ARCH_RISCV_SRC_QEMU_RV_HARDWARE_QEMU_RV_APLIC_H
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Register Base Address ****************************************************/
+#define QEMU_RV_APLIC_NR_IRQ      0x60
 
-#define QEMU_RV_CLINT_BASE   0x02000000
-#define QEMU_RV_ACLINT_BASE  0x02f00000
-#define QEMU_RV_PLIC_BASE    0x0c000000
-
-#define QEMU_RV_RESET_BASE   0x100000
-
-#ifdef CONFIG_ARCH_USE_S_MODE
-#  define QEMU_RV_APLIC_BASE   0x0d000000
-#  define QEMU_RV_IMSIC_BASE   0x28000000
-#else
-#  define QEMU_RV_APLIC_BASE   0x0c000000
-#  define QEMU_RV_IMSIC_BASE   0x24000000
-#endif
-
-#endif /* __ARCH_RISCV_SRC_QEMU_RV_HARDWARE_QEMU_RV_MEMORYMAP_H */
+#endif /* __ARCH_RISCV_SRC_QEMU_RV_HARDWARE_QEMU_RV_APLIC_H */
