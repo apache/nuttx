@@ -213,6 +213,16 @@
                                            */
 #endif
 
+#define FIOC_SETLK          _FIOC(0x0012) /* IN:  Pointer to flock
+                                           * OUT: None
+                                           */
+#define FIOC_GETLK          _FIOC(0x0013) /* IN:  Pointer to flock
+                                           * OUT: None
+                                           */
+#define FIOC_SETLKW         _FIOC(0x0014) /* IN:  Pointer to flock
+                                           * OUT: None
+                                           */
+
 /* NuttX file system ioctl definitions **************************************/
 
 #define _DIOCVALID(c)   (_IOC_TYPE(c)==_DIOCBASE)
