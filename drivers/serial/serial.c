@@ -85,6 +85,11 @@
  * Private Function Prototypes
  ****************************************************************************/
 
+/* Poll support */
+
+static void    uart_poll_notify(FAR uart_dev_t *dev, unsigned int min,
+                                unsigned int max, pollevent_t eventset);
+
 /* Write support */
 
 static int     uart_putxmitchar(FAR uart_dev_t *dev, int ch,
@@ -153,6 +158,28 @@ static struct work_s g_serial_work;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: uart_poll_notify
+ ****************************************************************************/
+
+static void uart_poll_notify(FAR uart_dev_t *dev, unsigned int min,
+                             unsigned int max, pollevent_t eventset)
+{
+  irqstate_t flags;
+
+  DEBUGASSERT(max > min && max - min <= CONFIG_SERIAL_NPOLLWAITERS);
+
+  flags = enter_critical_section();
+  nxsched_lock_irq();
+
+  /* Notify the fds in range dev->fds[min] - dev->fds[max] */
+
+  poll_notify(&dev->fds[min], max - min, eventset);
+
+  nxsched_unlock_irq();
+  leave_critical_section(flags);
+}
 
 /****************************************************************************
  * Name: uart_putxmitchar
@@ -762,7 +789,6 @@ static int uart_close(FAR struct file *filep)
       nxmutex_destroy(&dev->xmit.lock);
       nxmutex_destroy(&dev->recv.lock);
       nxmutex_destroy(&dev->closelock);
-      nxmutex_destroy(&dev->polllock);
       nxsem_destroy(&dev->xmitsem);
       nxsem_destroy(&dev->recvsem);
       uart_release(dev);
@@ -1629,8 +1655,9 @@ static int uart_poll(FAR struct file *filep,
   FAR struct inode *inode = filep->f_inode;
   FAR uart_dev_t   *dev   = inode->i_private;
   pollevent_t       eventset;
+  irqstate_t        flags;
   int               ndx;
-  int               ret;
+  int               ret = OK;
   int               i;
 
   /* Some sanity checking */
@@ -1642,17 +1669,9 @@ static int uart_poll(FAR struct file *filep,
     }
 #endif
 
+  flags = enter_critical_section();
+
   /* Are we setting up the poll?  Or tearing it down? */
-
-  ret = nxmutex_lock(&dev->polllock);
-  if (ret < 0)
-    {
-      /* A signal received while waiting for access to the poll data
-       * will abort the operation.
-       */
-
-      return ret;
-    }
 
   if (setup)
     {
@@ -1680,6 +1699,8 @@ static int uart_poll(FAR struct file *filep,
           ret       = -EBUSY;
           goto errout;
         }
+
+      leave_critical_section(flags);
 
       /* Should we immediately notify on any of the requested events?
        * First, check if the xmit buffer is full.
@@ -1729,7 +1750,7 @@ static int uart_poll(FAR struct file *filep,
         }
 #endif
 
-      poll_notify(&fds, 1, eventset);
+      uart_poll_notify(dev, i, i + 1, eventset);
     }
   else if (fds->priv != NULL)
     {
@@ -1749,10 +1770,14 @@ static int uart_poll(FAR struct file *filep,
 
       *slot     = NULL;
       fds->priv = NULL;
+
+      leave_critical_section(flags);
     }
 
+  return ret;
+
 errout:
-  nxmutex_unlock(&dev->polllock);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -1783,7 +1808,6 @@ static int uart_unlink(FAR struct inode *inode)
       nxmutex_destroy(&dev->xmit.lock);
       nxmutex_destroy(&dev->recv.lock);
       nxmutex_destroy(&dev->closelock);
-      nxmutex_destroy(&dev->polllock);
       nxsem_destroy(&dev->xmitsem);
       nxsem_destroy(&dev->recvsem);
       uart_release(dev);
@@ -1918,7 +1942,6 @@ int uart_register(FAR const char *path, FAR uart_dev_t *dev)
   nxmutex_init(&dev->closelock);
   nxsem_init(&dev->xmitsem, 0, 0);
   nxsem_init(&dev->recvsem, 0, 0);
-  nxmutex_init(&dev->polllock);
 
 #ifdef CONFIG_SERIAL_TERMIOS
   dev->timeout = 0;
@@ -1954,7 +1977,7 @@ void uart_datareceived(FAR uart_dev_t *dev)
 {
   /* Notify all poll/select waiters that they can read from the recv buffer */
 
-  poll_notify(dev->fds, CONFIG_SERIAL_NPOLLWAITERS, POLLIN);
+  uart_poll_notify(dev, 0, CONFIG_SERIAL_NPOLLWAITERS, POLLIN);
 
   /* Is there a thread waiting for read data?  */
 
@@ -1988,7 +2011,7 @@ void uart_datasent(FAR uart_dev_t *dev)
 {
   /* Notify all poll/select waiters that they can write to xmit buffer */
 
-  poll_notify(dev->fds, CONFIG_SERIAL_NPOLLWAITERS, POLLOUT);
+  uart_poll_notify(dev, 0, CONFIG_SERIAL_NPOLLWAITERS, POLLOUT);
 
   /* Is there a thread waiting for space in xmit.buffer?  */
 
@@ -2027,6 +2050,7 @@ void uart_connected(FAR uart_dev_t *dev, bool connected)
    */
 
   flags = enter_critical_section();
+  nxsched_lock_irq();
   dev->disconnected = !connected;
   if (!connected)
     {
@@ -2047,6 +2071,7 @@ void uart_connected(FAR uart_dev_t *dev, bool connected)
       uart_wakeup(&dev->recvsem);
     }
 
+  nxsched_unlock_irq();
   leave_critical_section(flags);
 }
 #endif
@@ -2067,7 +2092,6 @@ void uart_reset_sem(FAR uart_dev_t *dev)
   nxsem_reset(&dev->recvsem,  0);
   nxmutex_reset(&dev->xmit.lock);
   nxmutex_reset(&dev->recv.lock);
-  nxmutex_reset(&dev->polllock);
 }
 
 /****************************************************************************
