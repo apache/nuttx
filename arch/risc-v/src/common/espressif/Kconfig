@@ -302,6 +302,13 @@ config ESPRESSIF_GPIO_IRQ
 	---help---
 		Enable support for interrupting GPIO pins
 
+config ESPRESSIF_RTCIO_IRQ
+	bool "RTC IO interrupts"
+	default n
+	depends on !ARCH_CHIP_ESP32H2 && !ARCH_CHIP_ESP32C6
+	---help---
+		Enable support for RTC peripherals interrupts.
+
 config ESPRESSIF_LEDC
 	bool "LEDC (PWM)"
 	default n
