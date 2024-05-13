@@ -490,7 +490,7 @@ static void esp32_timer_setcallback(struct timer_lowerhalf_s *lower,
     }
 
   spin_unlock_irqrestore(&priv->lock, flags);
-  assert(ret == OK);
+  ASSERT(ret == OK);
 }
 
 /****************************************************************************

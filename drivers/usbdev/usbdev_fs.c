@@ -476,7 +476,7 @@ static int usbdev_fs_open(FAR struct file *filep)
 
   fs_ep->crefs += 1;
 
-  assert(fs_ep->crefs != 0);
+  ASSERT(fs_ep->crefs != 0);
 
   nxmutex_unlock(&fs_ep->lock);
   return ret;
@@ -510,7 +510,7 @@ static int usbdev_fs_close(FAR struct file *filep)
 
   fs_ep->crefs -= 1;
 
-  assert(fs_ep->crefs >= 0);
+  ASSERT(fs_ep->crefs >= 0);
 
   if (fs_ep->unlinked && fs_ep->crefs == 0)
     {

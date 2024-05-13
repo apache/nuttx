@@ -351,7 +351,7 @@ static int rt_timer_thread(int argc, char *argv[])
       if (ret)
         {
           tmrerr("ERROR: Wait priv->toutsem error=%d\n", ret);
-          assert(0);
+          ASSERT(0);
         }
 
       flags = enter_critical_section();

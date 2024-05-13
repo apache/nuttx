@@ -372,7 +372,7 @@ void lc823450_gpio_write(uint16_t gpiocfg, bool value)
 #ifdef CONFIG_LC823450_VGPIO
   if (port == (GPIO_PORTV >> GPIO_PORT_SHIFT))
     {
-      assert(pin < GPIO_VIRTUAL_NUM);
+      ASSERT(pin < GPIO_VIRTUAL_NUM);
       if (vgpio_ops[pin] && vgpio_ops[pin]->write)
         {
           vgpio_ops[pin]->write(pin, value);
@@ -437,7 +437,7 @@ bool lc823450_gpio_read(uint16_t gpiocfg)
 #ifdef CONFIG_LC823450_VGPIO
   if (port == (GPIO_PORTV >> GPIO_PORT_SHIFT))
     {
-      assert(pin < GPIO_VIRTUAL_NUM);
+      ASSERT(pin < GPIO_VIRTUAL_NUM);
       if (vgpio_ops[pin] && vgpio_ops[pin]->read)
         {
           return vgpio_ops[pin]->read(pin);
@@ -506,7 +506,7 @@ int lc823450_gpio_initialize(void)
 #ifdef CONFIG_LC823450_VGPIO
 int lc823450_vgpio_register(unsigned int pin, struct vgpio_ops_s *ops)
 {
-  assert(pin < GPIO_VIRTUAL_NUM);
+  ASSERT(pin < GPIO_VIRTUAL_NUM);
   vgpio_ops[pin] = ops;
   return OK;
 }

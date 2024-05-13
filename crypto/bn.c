@@ -58,7 +58,7 @@
 
 /* Custom assert macro - easy to disable */
 
-#define require(p, msg) assert(p && msg)
+#define require(p, msg) ASSERT(p && msg)
 
 /****************************************************************************
  * Private Functions Prototype
