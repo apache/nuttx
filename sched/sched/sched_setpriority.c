@@ -70,7 +70,7 @@ static FAR struct tcb_s *nxsched_nexttcb(FAR struct tcb_s *tcb)
    * then use the 'nxttcb' which will probably be the IDLE thread.
    */
 
-  if (!nxsched_islocked_global())
+  if (!nxsched_islocked_tcb(this_task()))
     {
       /* Search for the highest priority task that can run on tcb->cpu. */
 
