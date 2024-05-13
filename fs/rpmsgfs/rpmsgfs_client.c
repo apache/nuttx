@@ -174,6 +174,7 @@ static int rpmsgfs_ioctl_handler(FAR struct rpmsg_endpoint *ept,
       (FAR struct rpmsgfs_cookie_s *)(uintptr_t)header->cookie;
   FAR struct rpmsgfs_ioctl_s *rsp = data;
 
+  cookie->result = header->result;
   if (cookie->result >= 0 && rsp->arglen > 0)
     {
       memcpy(cookie->data, (FAR void *)(uintptr_t)rsp->buf, rsp->arglen);
