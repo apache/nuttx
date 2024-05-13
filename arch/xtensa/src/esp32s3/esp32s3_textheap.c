@@ -45,7 +45,7 @@
 #error "No suitable heap available. Enable ESP32S3_RTC_HEAP."
 #endif
 
-#define D_I_BUS_OFFSET  0x700000
+#define D_I_BUS_OFFSET  0x6f0000
 
 /****************************************************************************
  * Public Functions
