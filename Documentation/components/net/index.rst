@@ -12,6 +12,7 @@ Network Support
   netdev.rst
   netdriver.rst
   netguardsize.rst
+  netlink.rst
   slip.rst
   wqueuedeadlocks.rst
 
