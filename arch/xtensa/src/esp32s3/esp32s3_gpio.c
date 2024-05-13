@@ -528,7 +528,6 @@ void esp32s3_gpioirqdisable(int irq)
       putreg32(1 << (pin - 32), GPIO_STATUS1_W1TC_REG);
     }
 
-
   /* Configuration done. Re-enable the GPIO interrupt. */
 
   up_enable_irq(ESP32S3_IRQ_GPIO_INT_CPU);
