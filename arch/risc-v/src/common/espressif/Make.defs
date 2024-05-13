@@ -31,7 +31,7 @@ CHIP_ASRCS  = esp_vectors.S
 # Required Espressif chip's files (arch/risc-v/src/common/espressif)
 
 CHIP_CSRCS  = esp_allocateheap.c esp_start.c esp_idle.c
-CHIP_CSRCS += esp_irq.c esp_gpio.c esp_libc_stubs.c
+CHIP_CSRCS += esp_irq.c esp_gpio.c esp_rtc_gpio.c esp_libc_stubs.c
 CHIP_CSRCS += esp_lowputc.c esp_serial.c
 CHIP_CSRCS += esp_systemreset.c
 
@@ -107,7 +107,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = 581540ed0a5ce9674da44f9ece6a63d052058985
+	ESP_HAL_3RDPARTY_VERSION = ee8c7b0ad6a117465312d4c9a6e654cb7b2b9469
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL

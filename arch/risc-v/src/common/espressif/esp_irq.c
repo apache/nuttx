@@ -37,6 +37,7 @@
 
 #include "esp_gpio.h"
 #include "esp_irq.h"
+#include "esp_rtc_gpio.h"
 
 #include "esp_attr.h"
 #include "esp_bit_defs.h"
@@ -319,6 +320,10 @@ void up_irqinitialize(void)
 #ifdef CONFIG_ESPRESSIF_GPIO_IRQ
   esp_gpioirqinitialize();
 #endif
+
+  /* Initialize RTCIO interrupt support */
+
+  esp_rtcioirqinitialize();
 
   /* Attach the common interrupt handler */
 
