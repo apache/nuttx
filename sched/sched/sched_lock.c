@@ -42,30 +42,6 @@
  * Public Data
  ****************************************************************************/
 
-/* Pre-emption is disabled via the interface sched_lock(). sched_lock()
- * works by preventing context switches from the currently executing tasks.
- * This prevents other tasks from running (without disabling interrupts) and
- * gives the currently executing task exclusive access to the (single) CPU
- * resources. Thus, sched_lock() and its companion, sched_unlock(), are
- * used to implement some critical sections.
- *
- * In the single CPU case, pre-emption is disabled using a simple lockcount
- * in the TCB. When the scheduling is locked, the lockcount is incremented;
- * when the scheduler is unlocked, the lockcount is decremented. If the
- * lockcount for the task at the head of the g_readytorun list has a
- * lockcount > 0, then pre-emption is disabled.
- *
- * No special protection is required since only the executing task can
- * modify its lockcount.
- */
-
-#ifdef CONFIG_SMP
-/* Used to keep track of which CPU(s) hold the IRQ lock. */
-
-volatile cpu_set_t g_cpu_lockset;
-
-#endif /* CONFIG_SMP */
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -93,7 +69,6 @@ volatile cpu_set_t g_cpu_lockset;
 int sched_lock(void)
 {
   FAR struct tcb_s *rtcb;
-  int cpu;
 
   /* If the CPU supports suppression of interprocessor interrupts, then
    * simple disabling interrupts will provide sufficient protection for
@@ -118,36 +93,9 @@ int sched_lock(void)
       DEBUGASSERT(rtcb->lockcount < MAX_LOCK_COUNT);
 
       flags = enter_critical_section();
-      cpu = this_cpu();
-
-      /* We must hold the lock on this CPU before we increment the lockcount
-       * for the first time. Holding the lock is sufficient to lockout
-       * context switching.
-       */
-
-      if (rtcb->lockcount == 0)
-        {
-          /* We don't have the scheduler locked.  But logic running on a
-           * different CPU may have the scheduler locked.  It is not
-           * possible for some other task on this CPU to have the scheduler
-           * locked (or we would not be executing!).
-           */
-
-          DEBUGASSERT((g_cpu_lockset & (1 << cpu)) == 0);
-          g_cpu_lockset |= (1 << cpu);
-        }
-      else
-        {
-          /* If this thread already has the scheduler locked, then
-           * g_cpu_lockset should indicate that the scheduler is locked
-           * and g_cpu_lockset should include the bit setting for this CPU.
-           */
-
-          DEBUGASSERT((g_cpu_lockset & (1 << cpu)) != 0);
-        }
 
       /* A counter is used to support locking.  This allows nested lock
-       * operations on this thread (on any CPU)
+       * operations on this thread
        */
 
       rtcb->lockcount++;

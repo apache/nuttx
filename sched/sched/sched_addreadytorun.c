@@ -194,7 +194,7 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
    * situation.
    */
 
-  if (nxsched_islocked_global())
+  if (nxsched_islocked_tcb(this_task()))
     {
       /* Add the new ready-to-run task to the g_pendingtasks task list for
        * now.
@@ -275,14 +275,6 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
       btcb->task_state = TSTATE_TASK_RUNNING;
 
       doswitch = true;
-
-      /* Resume scheduling lock */
-
-      DEBUGASSERT(g_cpu_lockset == 0);
-      if (btcb->lockcount > 0)
-        {
-          g_cpu_lockset |= (1 << cpu);
-        }
     }
 
   return doswitch;
