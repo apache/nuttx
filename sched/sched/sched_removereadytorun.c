@@ -262,23 +262,6 @@ void nxsched_remove_running(FAR struct tcb_s *tcb)
       nxttcb = rtrtcb;
     }
 
-  /* Will pre-emption be disabled after the switch?  If the lockcount is
-   * greater than zero, then this task/this CPU holds the scheduler lock.
-   */
-
-  if (nxttcb->lockcount > 0)
-    {
-      /* Yes... make sure that scheduling logic knows about this */
-
-      g_cpu_lockset |= (1 << cpu);
-    }
-  else
-    {
-      /* No.. we may need to perform release our hold on the lock. */
-
-      g_cpu_lockset &= ~(1 << cpu);
-    }
-
   /* NOTE: If the task runs on another CPU(cpu), adjusting global IRQ
    * controls will be done in the pause handler on the new CPU(cpu).
    * If the task is scheduled on this CPU(me), do nothing because
