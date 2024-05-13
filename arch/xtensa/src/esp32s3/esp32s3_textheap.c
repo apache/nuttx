@@ -45,7 +45,7 @@
 #error "No suitable heap available. Enable ESP32S3_RTC_HEAP."
 #endif
 
-#define D_I_BUS_OFFSET  0x6f0000
+#define EXTRAM_D_I_BUS_OFFSET  0x6000000
 
 /****************************************************************************
  * Public Functions
@@ -92,7 +92,19 @@ void *up_textheap_memalign(size_t align, size_t size)
            * can access it from the Instruction bus.
            */
 
-          ret += D_I_BUS_OFFSET;
+          uintptr_t addr = (uintptr_t)ret;
+          if (SOC_DIRAM_DRAM_LOW <= addr && addr <= SOC_DIRAM_DRAM_HIGH)
+            {
+              addr = MAP_DRAM_TO_IRAM(addr);
+            }
+          else
+            {
+              /* extram */
+
+              addr += EXTRAM_D_I_BUS_OFFSET;
+            }
+
+          ret = (void *)addr;
         }
     }
 
@@ -122,7 +134,19 @@ void up_textheap_free(void *p)
       else
 #endif
         {
-          p -= D_I_BUS_OFFSET;
+          uintptr_t addr = (uintptr_t)p;
+          if (SOC_DIRAM_IRAM_LOW <= addr && addr <= SOC_DIRAM_IRAM_HIGH)
+            {
+              addr = MAP_IRAM_TO_DRAM(addr);
+            }
+          else
+            {
+              /* extram */
+
+              addr -= EXTRAM_D_I_BUS_OFFSET;
+            }
+
+          p = (void *)addr;
           kmm_free(p);
         }
     }
@@ -156,6 +180,18 @@ bool up_textheap_heapmember(void *p)
     }
 #endif
 
-  p -= D_I_BUS_OFFSET;
+  uintptr_t addr = (uintptr_t)p;
+  if (SOC_DIRAM_IRAM_LOW <= addr && addr <= SOC_DIRAM_IRAM_HIGH)
+    {
+      addr = MAP_IRAM_TO_DRAM(addr);
+    }
+  else
+    {
+      /* extram */
+
+      addr -= EXTRAM_D_I_BUS_OFFSET;
+    }
+
+  p = (void *)addr;
   return kmm_heapmember(p);
 }
