@@ -15,7 +15,7 @@ if RPTUN
 config RPTUN_IVSHMEM
 	bool "rptun ivshmem support"
 	default n
-	depends on PCI
+	depends on PCI_IVSHMEM
 	---help---
 		This is rptun driver based on pci ivshmem.
 
@@ -26,10 +26,10 @@ config RPTUN_IVSHMEM_NAME
 	---help---
 		Using this config to custom the rptun ivshmem cpuname and role,
 		using ";" to split the names.
-		For example, if RPTUN_IVSHMEM_CPUNAME = "cpu1:m;cpu2:s" and pass
+		For example, if RPTUN_IVSHMEM_CPUNAME = "0:cpu1:m;1:cpu2:s" and pass
 		two ivshmem devices to the qemu, we will get two rptun ivshmem
-		drivers with remote cpu names: ["cpu1", "cpu2"] and
-		roles: ["master", "slave"']
+		drivers with ivshmem device match id: [0, 1],
+		remote cpu names: ["cpu1", "cpu2"] and roles: ["master", "slave"']
 
 config RPTUN_IVSHMEM_BUFFSIZE
 	int "rptun ivshmem rpmsg buffer size"

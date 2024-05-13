@@ -29,7 +29,7 @@
 #include <stdio.h>
 
 #include <nuttx/drivers/addrenv.h>
-#include <nuttx/pci/pci.h>
+#include <nuttx/pci/pci_ivshmem.h>
 #include <nuttx/rptun/rptun.h>
 #include <nuttx/rptun/rptun_ivshmem.h>
 #include <nuttx/wqueue.h>
@@ -38,9 +38,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define rptun_ivshmem_from_ivdev(dev) \
+  container_of(ivshmem_get_driver(dev), struct rptun_ivshmem_dev_s, drv)
+
 #define RPTUN_IVSHMEM_SHMEM_BAR   2
 #define RPTUN_IVSHMEM_READY       1
-#define RPTUN_IVSHMEM_WORK_DELAY  1
+#define RPTUN_IVSHMEM_WORK_DELAY  MSEC2TICK(1)
 
 /****************************************************************************
  * Private Types
@@ -61,6 +64,7 @@ struct rptun_ivshmem_mem_s
 struct rptun_ivshmem_dev_s
 {
   struct rptun_dev_s              rptun;
+  struct ivshmem_driver_s         drv;
   rptun_callback_t                callback;
   FAR void                       *arg;
   uint32_t                        seq;
@@ -70,7 +74,7 @@ struct rptun_ivshmem_dev_s
   struct rptun_addrenv_s          raddrenv;
   bool                            master;
   char                            cpuname[RPMSG_NAME_SIZE + 1];
-  FAR struct pci_device_s        *ivshmem;
+  FAR struct ivshmem_device_s    *ivdev;
 
   /* Work queue for transmit */
 
@@ -97,8 +101,8 @@ static int rptun_ivshmem_register_callback(FAR struct rptun_dev_s *dev,
                                            FAR void *arg);
 
 static void rptun_ivshmem_work(FAR void *arg);
-static int rptun_ivshmem_probe(FAR struct pci_device_s *dev);
-static void rptun_ivshmem_remove(FAR struct pci_device_s *dev);
+static int rptun_ivshmem_probe(FAR struct ivshmem_device_s *dev);
+static void rptun_ivshmem_remove(FAR struct ivshmem_device_s *dev);
 
 /****************************************************************************
  * Private Data
@@ -116,21 +120,6 @@ static const struct rptun_ops_s g_rptun_ivshmem_ops =
   .notify            = rptun_ivshmem_notify,
   .register_callback = rptun_ivshmem_register_callback,
 };
-
-static const struct pci_device_id_s g_rptun_ivshmem_ids[] =
-{
-  { PCI_DEVICE(0x1af4, 0x1110) },
-  { 0, }
-};
-
-static struct pci_driver_s g_rptun_ivshmem_drv =
-{
-  g_rptun_ivshmem_ids,  /* PCI id_tables */
-  rptun_ivshmem_probe,  /* Probe function */
-  rptun_ivshmem_remove, /* Remove function */
-};
-
-static int g_rptun_ivshmem_idx = 0;
 
 /****************************************************************************
  * Private Functions
@@ -158,11 +147,12 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
     (FAR struct rptun_ivshmem_dev_s *)dev;
 
   priv->raddrenv.da   = 0;
-  priv->raddrenv.pa   = (uintptr_t)priv->shmem;
   priv->raddrenv.size = priv->shmem_size;
 
   if (priv->master)
     {
+      priv->raddrenv.pa = (uintptr_t)priv->shmem;
+
       /* Wait untils salve is ready */
 
       while (priv->shmem->cmds != RPTUN_IVSHMEM_READY)
@@ -214,6 +204,8 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
           usleep(1000);
         }
 
+      priv->raddrenv.pa  = (uintptr_t)priv->shmem->basem;
+
       priv->addrenv.va   = (uint64_t)(uintptr_t)priv->shmem;
       priv->addrenv.pa   = priv->shmem->basem;
       priv->addrenv.size = priv->shmem_size;
@@ -240,6 +232,12 @@ static int rptun_ivshmem_start(FAR struct rptun_dev_s *dev)
 {
   FAR struct rptun_ivshmem_dev_s *priv =
     (FAR struct rptun_ivshmem_dev_s *)dev;
+
+  if (ivshmem_support_irq(priv->ivdev))
+    {
+      return 0;
+    }
+
   return work_queue(HPWORK, &priv->worker, rptun_ivshmem_work, priv, 0);
 }
 
@@ -247,6 +245,12 @@ static int rptun_ivshmem_stop(FAR struct rptun_dev_s *dev)
 {
   FAR struct rptun_ivshmem_dev_s *priv =
     (FAR struct rptun_ivshmem_dev_s *)dev;
+
+  if (ivshmem_support_irq(priv->ivdev))
+    {
+      return 0;
+    }
+
   return work_cancel_sync(HPWORK, &priv->worker);
 }
 
@@ -255,7 +259,11 @@ static int rptun_ivshmem_notify(FAR struct rptun_dev_s *dev, uint32_t vqid)
   FAR struct rptun_ivshmem_dev_s *priv =
     (FAR struct rptun_ivshmem_dev_s *)dev;
 
-  if (priv->master)
+  if (ivshmem_support_irq(priv->ivdev))
+    {
+      ivshmem_kick_peer(priv->ivdev);
+    }
+  else if (priv->master)
     {
       priv->shmem->seqm++;
     }
@@ -276,6 +284,22 @@ static int rptun_ivshmem_register_callback(FAR struct rptun_dev_s *dev,
 
   priv->callback = callback;
   priv->arg      = arg;
+  return 0;
+}
+
+/****************************************************************************
+ * Name: rptun_ivshmem_interrupt
+ ****************************************************************************/
+
+static int rptun_ivshmem_interrupt(int irq, FAR void *context, FAR void *arg)
+{
+  FAR struct rptun_ivshmem_dev_s *priv = arg;
+
+  if (priv->callback != NULL)
+    {
+      priv->callback(priv->arg, RPTUN_NOTIFY_ALL);
+    }
+
   return 0;
 }
 
@@ -309,81 +333,22 @@ static void rptun_ivshmem_work(FAR void *arg)
 }
 
 /****************************************************************************
- * Name: rptun_ivshmem_get_info
- ****************************************************************************/
-
-static int rptun_ivshmem_get_info(FAR char *cpuname, FAR bool *master)
-{
-  FAR const char *name = CONFIG_RPTUN_IVSHMEM_NAME;
-  int start = 0;
-  int i;
-  int j;
-
-  for (i = 0, j = 0; name[start] != '\0'; i++)
-    {
-      if (name[i] == ';' || name[i] == '\0')
-        {
-          if (j++ == g_rptun_ivshmem_idx)
-            {
-              snprintf(cpuname, RPMSG_NAME_SIZE, "%.*s", i - start - 2,
-                       &name[start]);
-              *master = name[i - 1] == 'm';
-              return 0;
-            }
-
-          start = i + 1;
-        }
-    }
-
-  return -ENODEV;
-}
-
-/****************************************************************************
  * Name: rptun_ivshmem_probe
  ****************************************************************************/
 
-static int rptun_ivshmem_probe(FAR struct pci_device_s *dev)
+static int rptun_ivshmem_probe(FAR struct ivshmem_device_s *ivdev)
 {
-  FAR struct rptun_ivshmem_dev_s *priv;
+  FAR struct rptun_ivshmem_dev_s *priv = rptun_ivshmem_from_ivdev(ivdev);
   int ret;
-
-  priv = kmm_zalloc(sizeof(*priv));
-  if (priv == NULL)
-    {
-      return -ENOMEM;
-    }
 
   /* Do the rptun ivshmem init */
 
   priv->rptun.ops = &g_rptun_ivshmem_ops;
-  priv->ivshmem = dev;
-  ret = rptun_ivshmem_get_info(priv->cpuname, &priv->master);
-  if (ret < 0)
-    {
-      goto err_priv;
-    }
+  priv->ivdev = ivdev;
+  priv->shmem = ivshmem_get_shmem(ivdev, &priv->shmem_size);
 
-  /* Configure the ivshmem device and get share memory address */
-
-  ret = pci_enable_device(dev);
-  if (ret < 0)
-    {
-      pcierr("Enable device failed, ret=%d\n", ret);
-      goto err_priv;
-    }
-
-  pci_set_master(dev);
-
-  priv->shmem = (FAR struct rptun_ivshmem_mem_s *)
-    pci_map_bar(dev, RPTUN_IVSHMEM_SHMEM_BAR);
-  if (priv->shmem == NULL)
-    {
-      ret = -ENOTSUP;
-      pcierr("Device not support share memory bar\n");
-      goto err_master;
-    }
-
-  priv->shmem_size = pci_resource_len(dev, RPTUN_IVSHMEM_SHMEM_BAR);
+  ivshmem_attach_irq(ivdev, rptun_ivshmem_interrupt, priv);
+  ivshmem_control_irq(ivdev, true);
 
   pciinfo("shmem addr=%p size=%zu\n", priv->shmem, priv->shmem_size);
 
@@ -393,24 +358,24 @@ static int rptun_ivshmem_probe(FAR struct pci_device_s *dev)
   if (ret < 0)
     {
       pcierr("rptun intialize failed, ret=%d\n", ret);
-      goto err_master;
+      goto err;
     }
 
-  if (!priv->master)
+  if (!priv->master && !ivshmem_support_irq(ivdev))
     {
+      pciinfo("queue the worker\n");
+
       /* Queue the worker for slave, master will do this in ops->start() */
 
       work_queue(HPWORK, &priv->worker, rptun_ivshmem_work, priv, 0);
     }
 
-  g_rptun_ivshmem_idx++;
   return ret;
 
-err_master:
-  pci_clear_master(dev);
-  pci_disable_device(dev);
-err_priv:
-  kmm_free(priv);
+err:
+  ivshmem_unregister_driver(&priv->drv);
+  ivshmem_control_irq(ivdev, false);
+  ivshmem_detach_irq(ivdev);
   return ret;
 }
 
@@ -418,9 +383,13 @@ err_priv:
  * Name: rptun_ivshmem_remove
  ****************************************************************************/
 
-static void rptun_ivshmem_remove(FAR struct pci_device_s *dev)
+static void rptun_ivshmem_remove(FAR struct ivshmem_device_s *ivdev)
 {
-  pciwarn("Not support remove for now\n");
+  FAR struct rptun_ivshmem_dev_s *priv = rptun_ivshmem_from_ivdev(ivdev);
+
+  ivshmem_unregister_driver(&priv->drv);
+  ivshmem_control_irq(ivdev, false);
+  kmm_free(priv);
 }
 
 /****************************************************************************
@@ -429,6 +398,41 @@ static void rptun_ivshmem_remove(FAR struct pci_device_s *dev)
 
 int pci_register_rptun_ivshmem_driver(void)
 {
-  return pci_register_driver(&g_rptun_ivshmem_drv);
+  FAR struct rptun_ivshmem_dev_s *priv;
+  FAR const char *str;
+  FAR char *name = CONFIG_RPTUN_IVSHMEM_NAME;
+
+  while (name != NULL)
+    {
+      priv = kmm_zalloc(sizeof(*priv));
+      if (priv == NULL)
+        {
+          return -ENOMEM;
+        }
+
+      priv->drv.id = strtoul(name, &name, 0);
+      str = strchr(++name, ':');
+      snprintf(priv->cpuname, RPMSG_NAME_SIZE, "%.*s", (int)(str - name),
+               name);
+      priv->master = *(str + 1) == 'm';
+
+      pciinfo("Register ivshmem driver, id=%d, cpuname=%s, master=%d\n",
+              priv->drv.id, priv->cpuname, priv->master);
+
+      priv->drv.probe = rptun_ivshmem_probe;
+      priv->drv.remove = rptun_ivshmem_remove;
+      if (ivshmem_register_driver(&priv->drv) < 0)
+        {
+          kmm_free(priv);
+        }
+
+      name = strchr(str, ';');
+      if (name != NULL)
+        {
+          name++;
+        }
+    }
+
+  return 0;
 }
 
