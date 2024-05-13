@@ -26,7 +26,7 @@
 #include <nuttx/drivers/addrenv.h>
 #include <nuttx/rptun/rptun.h>
 #include <nuttx/list.h>
-#include <nuttx/wqueue.h>
+#include <nuttx/wdog.h>
 
 #include "sim_internal.h"
 
@@ -76,9 +76,9 @@ struct sim_rptun_dev_s
   char                      shmemname[RPMSG_NAME_SIZE + 1];
   pid_t                     pid;
 
-  /* Work queue for transmit */
+  /* Wdog for transmit */
 
-  struct work_s             worker;
+  struct wdog_s             wdog;
 };
 
 /****************************************************************************
@@ -324,9 +324,9 @@ static void sim_rptun_check_reset(struct sim_rptun_dev_s *priv)
     }
 }
 
-static void sim_rptun_work(void *arg)
+static void sim_rptun_work(wdparm_t arg)
 {
-  struct sim_rptun_dev_s *dev = arg;
+  struct sim_rptun_dev_s *dev = (struct sim_rptun_dev_s *)arg;
 
   if (dev->shmem != NULL)
     {
@@ -355,8 +355,7 @@ static void sim_rptun_work(void *arg)
         }
     }
 
-  work_queue(HPWORK, &dev->worker,
-            sim_rptun_work, dev, SIM_RPTUN_WORK_DELAY);
+  wd_start(&dev->wdog, SIM_RPTUN_WORK_DELAY, sim_rptun_work, (wdparm_t)dev);
 }
 
 /****************************************************************************
@@ -403,5 +402,5 @@ int sim_rptun_init(const char *shmemname, const char *cpuname, int master)
       return ret;
     }
 
-  return work_queue(HPWORK, &dev->worker, sim_rptun_work, dev, 0);
+  return wd_start(&dev->wdog, 0, sim_rptun_work, (wdparm_t)dev);
 }
