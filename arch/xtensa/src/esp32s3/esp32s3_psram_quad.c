@@ -397,7 +397,7 @@ static void psram_gpio_config(void)
 
 int psram_enable(int mode, int vaddrmode)
 {
-  assert(mode < PSRAM_CACHE_MAX && \
+  ASSERT(mode < PSRAM_CACHE_MAX && \
          "we don't support any other mode for now.");
 
   psram_gpio_config();

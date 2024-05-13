@@ -418,7 +418,7 @@ static reg_errcode_t tre_stack_push(tre_stack_t *s,
               return REG_ESPACE;
             }
 
-          assert(new_size > s->size);
+          ASSERT(new_size > s->size);
           s->size   = new_size;
           s->stack  = new_buffer;
           tre_stack_push(s, value);
@@ -1802,7 +1802,7 @@ static reg_errcode_t tre_add_tags(tre_mem_t mem, tre_stack_t *stack,
                           break;
                         }
 
-                      assert(tnfa->submatch_data[id].parents == NULL);
+                      ASSERT(tnfa->submatch_data[id].parents == NULL);
                       tnfa->submatch_data[id].parents = p;
                       for (i = 0; parents[i] >= 0; i++)
                         {
@@ -1870,7 +1870,7 @@ static reg_errcode_t tre_add_tags(tre_mem_t mem, tre_stack_t *stack,
                 }
               else
                 {
-                  assert(!IS_TAG(lit));
+                  ASSERT(!IS_TAG(lit));
                 }
               break;
             }
@@ -2219,7 +2219,7 @@ static reg_errcode_t tre_add_tags(tre_mem_t mem, tre_stack_t *stack,
 
         default:
         {
-          assert(0);
+          ASSERT(0);
         }
         break;
 
@@ -2250,7 +2250,7 @@ static reg_errcode_t tre_add_tags(tre_mem_t mem, tre_stack_t *stack,
       num_minimals++;
     }
 
-  assert(tree->num_tags == num_tags);
+  ASSERT(tree->num_tags == num_tags);
   tnfa->end_tag         = num_tags;
   tnfa->num_tags        = num_tags;
   tnfa->num_minimals    = num_minimals;
@@ -2424,7 +2424,7 @@ static reg_errcode_t tre_copy_ast(tre_mem_t mem, tre_stack_t *stack,
 
             default:
             {
-              assert(0);
+              ASSERT(0);
               break;
             }
             }
@@ -2537,7 +2537,7 @@ static reg_errcode_t tre_expand_ast(tre_mem_t mem, tre_stack_t *stack,
 
             default:
             {
-              assert(0);
+              ASSERT(0);
               break;
             }
             }
@@ -2684,7 +2684,7 @@ static reg_errcode_t tre_expand_ast(tre_mem_t mem, tre_stack_t *stack,
 
         default:
         {
-          assert(0);
+          ASSERT(0);
           break;
         }
         }
@@ -2935,7 +2935,7 @@ static reg_errcode_t tre_match_empty(tre_stack_t *stack,
 
             case ASSERTION:
             {
-              assert(lit->code_max >= 1 || lit->code_max <= ASSERT_LAST);
+              ASSERT(lit->code_max >= 1 || lit->code_max <= ASSERT_LAST);
               if (assertions != NULL)
                 {
                   *assertions |= lit->code_max;
@@ -2950,7 +2950,7 @@ static reg_errcode_t tre_match_empty(tre_stack_t *stack,
 
             default:
             {
-              assert(0);
+              ASSERT(0);
             }
             break;
             }
@@ -2970,7 +2970,7 @@ static reg_errcode_t tre_match_empty(tre_stack_t *stack,
           else if (uni->right->nullable)
               STACK_PUSHX(stack, voidptr, uni->right)
           else
-              assert(0);
+              ASSERT(0);
         }
         break;
 
@@ -2979,8 +2979,8 @@ static reg_errcode_t tre_match_empty(tre_stack_t *stack,
           /* The path must go through both children. */
 
           cat = (tre_catenation_t *)node->obj;
-          assert(cat->left->nullable);
-          assert(cat->right->nullable);
+          ASSERT(cat->left->nullable);
+          ASSERT(cat->right->nullable);
           STACK_PUSHX(stack, voidptr, cat->left);
           STACK_PUSHX(stack, voidptr, cat->right);
         }
@@ -3002,7 +3002,7 @@ static reg_errcode_t tre_match_empty(tre_stack_t *stack,
 
         default:
         {
-          assert(0);
+          ASSERT(0);
         }
         break;
         }
@@ -3323,7 +3323,7 @@ static reg_errcode_t tre_compute_nfl(tre_mem_t mem, tre_stack_t *stack,
 
         default:
         {
-          assert(0);
+          ASSERT(0);
         }
         break;
         }
@@ -3419,8 +3419,8 @@ static reg_errcode_t tre_make_trans(tre_pos_and_tags_t *p1,
                                    NULL ? ASSERT_CHAR_CLASS_NEG : 0);
               if (p1->backref >= 0)
                 {
-                  assert((trans->assertions & ASSERT_CHAR_CLASS) == 0);
-                  assert(p2->backref < 0);
+                  ASSERT((trans->assertions & ASSERT_CHAR_CLASS) == 0);
+                  ASSERT(p2->backref < 0);
                   trans->u.backref  = p1->backref;
                   trans->assertions |= ASSERT_BACKREF;
                 }
@@ -3627,11 +3627,11 @@ static reg_errcode_t tre_ast_to_tnfa(tre_ast_node_t *node,
     case ITERATION:
     {
       iter = (tre_iteration_t *)node->obj;
-      assert(iter->max == -1 || iter->max == 1);
+      ASSERT(iter->max == -1 || iter->max == 1);
 
       if (iter->max == -1)
         {
-          assert(iter->min == 0 || iter->min == 1);
+          ASSERT(iter->min == 0 || iter->min == 1);
 
           /* Add a transition from each last position in the iterated
            * expression to each first position.

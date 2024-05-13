@@ -111,7 +111,7 @@ bool rp2040_clock_configure(int clk_index,
 {
   uint32_t div;
 
-  assert(src_freq >= freq);
+  ASSERT(src_freq >= freq);
 
   if (freq > src_freq)
     {

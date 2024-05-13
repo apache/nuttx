@@ -361,7 +361,7 @@ static int arm64_gic_send_sgi(unsigned int sgi_id, uint64_t target_aff,
   unsigned long base;
 
   base = gic_get_rdist() + GICR_SGI_BASE_OFF;
-  assert(GIC_IS_SGI(sgi_id));
+  ASSERT(GIC_IS_SGI(sgi_id));
 
   /* Extract affinity fields from target */
 
@@ -505,7 +505,7 @@ static void gicv3_cpuif_init(void)
       write_sysreg(icc_sre, ICC_SRE_EL1);
       icc_sre = read_sysreg(ICC_SRE_EL1);
 
-      assert(icc_sre & ICC_SRE_ELX_SRE_BIT);
+      ASSERT(icc_sre & ICC_SRE_ELX_SRE_BIT);
     }
 
   write_sysreg(GIC_IDLE_PRIO, ICC_PMR_EL1);

@@ -397,7 +397,7 @@ static void phyplus_setcallback(struct timer_lowerhalf_s *lower,
     }
 
   leave_critical_section(flags);
-  assert(ret == OK);
+  ASSERT(ret == OK);
 
   /* #if 0
    *  irqstate_t flags = enter_critical_section();
