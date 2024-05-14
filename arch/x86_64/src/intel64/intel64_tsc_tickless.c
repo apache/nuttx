@@ -74,7 +74,7 @@
  * Private Data
  ****************************************************************************/
 
-unsigned long g_x86_64_timer_freq;
+extern unsigned long g_x86_64_timer_freq;
 
 static struct timespec g_goal_time_ts;
 static uint64_t g_last_stop_time;
