@@ -71,6 +71,18 @@
     kasan_check_report(addr, size, true, return_address(0)); \
   }
 
+#ifdef CONFIG_MM_KASAN_DISABLE_READ_PANIC
+#  define MM_KASAN_DISABLE_READ_PANIC 1
+#else
+#  define MM_KASAN_DISABLE_READ_PANIC 0
+#endif
+
+#ifdef CONFIG_MM_KASAN_DISABLE_WRITE_PANIC
+#  define MM_KASAN_DISABLE_WRITE_PANIC 1
+#else
+#  define MM_KASAN_DISABLE_WRITE_PANIC 0
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -130,11 +142,16 @@ static void kasan_report(FAR const void *addr, size_t size,
          addr, size, return_address);
 
   kasan_show_memory(addr, size, 80);
-#ifndef CONFIG_MM_KASAN_DISABLE_PANIC
-  PANIC();
-#else
-  dump_stack();
-#endif
+
+  if ((is_write && MM_KASAN_DISABLE_WRITE_PANIC) ||
+      (!is_write && MM_KASAN_DISABLE_READ_PANIC))
+    {
+      dump_stack();
+    }
+  else
+    {
+      PANIC();
+    }
 
   leave_critical_section(flags);
 }
