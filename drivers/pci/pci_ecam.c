@@ -25,6 +25,7 @@
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/pci/pci.h>
 #include <nuttx/pci/pci_ecam.h>
 
