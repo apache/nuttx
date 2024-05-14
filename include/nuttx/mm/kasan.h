@@ -34,14 +34,17 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define kasan_init_early() kasan_stop()
+
 #ifndef CONFIG_MM_KASAN
 #  define kasan_is_poisoned(addr, size) false
 #  define kasan_poison(addr, size)
 #  define kasan_unpoison(addr, size) addr
 #  define kasan_register(addr, size)
 #  define kasan_unregister(addr)
-#  define kasan_init_early()
+#  define kasan_stop()
 #  define kasan_reset_tag(addr) addr
+#  define kasan_start()
 #else
 
 /****************************************************************************
@@ -144,10 +147,26 @@ void kasan_register(FAR void *addr, FAR size_t *size);
 void kasan_unregister(FAR void *addr);
 
 /****************************************************************************
- * Name: kasan_init_early
+ * Name: kasan_start
  *
  * Description:
- *   Initialize the kasan early, setup g_region_init variable.
+ *   Let kasan start check.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void kasan_start(void);
+
+/****************************************************************************
+ * Name: kasan_stop
+ *
+ * Description:
+ *   Stop kasan check, setup g_region_init variable.
  *   This used for some platfroms clear bss late, and error use kasan before
  *   called kasan_register().
  *
@@ -159,7 +178,7 @@ void kasan_unregister(FAR void *addr);
  *
  ****************************************************************************/
 
-void kasan_init_early(void);
+void kasan_stop(void);
 
 /****************************************************************************
  * Name: kasan_reset_tag
