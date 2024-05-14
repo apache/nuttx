@@ -303,7 +303,12 @@ void kasan_unregister(FAR void *addr)
   spin_unlock_irqrestore(&g_lock, flags);
 }
 
-void kasan_init_early(void)
+void kasan_start(void)
+{
+  g_region_init = KASAN_INIT_VALUE;
+}
+
+void kasan_stop(void)
 {
   g_region_init = 0;
 }

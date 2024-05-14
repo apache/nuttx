@@ -192,7 +192,12 @@ void kasan_register(FAR void *addr, FAR size_t *size)
   *size -= KASAN_REGION_SIZE(*size);
 }
 
-void kasan_init_early(void)
+void kasan_start(void)
+{
+  g_region_init = KASAN_INIT_VALUE;
+}
+
+void kasan_stop(void)
 {
   g_region_init = 0;
 }
