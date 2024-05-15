@@ -93,7 +93,7 @@ void *up_textheap_memalign(size_t align, size_t size)
            */
 
           uintptr_t addr = (uintptr_t)ret;
-          if (SOC_DIRAM_DRAM_LOW <= addr && addr <= SOC_DIRAM_DRAM_HIGH)
+          if (SOC_DIRAM_DRAM_LOW <= addr && addr < SOC_DIRAM_DRAM_HIGH)
             {
               addr = MAP_DRAM_TO_IRAM(addr);
             }
@@ -135,7 +135,7 @@ void up_textheap_free(void *p)
 #endif
         {
           uintptr_t addr = (uintptr_t)p;
-          if (SOC_DIRAM_IRAM_LOW <= addr && addr <= SOC_DIRAM_IRAM_HIGH)
+          if (SOC_DIRAM_IRAM_LOW <= addr && addr < SOC_DIRAM_IRAM_HIGH)
             {
               addr = MAP_IRAM_TO_DRAM(addr);
             }
@@ -181,7 +181,7 @@ bool up_textheap_heapmember(void *p)
 #endif
 
   uintptr_t addr = (uintptr_t)p;
-  if (SOC_DIRAM_IRAM_LOW <= addr && addr <= SOC_DIRAM_IRAM_HIGH)
+  if (SOC_DIRAM_IRAM_LOW <= addr && addr < SOC_DIRAM_IRAM_HIGH)
     {
       addr = MAP_IRAM_TO_DRAM(addr);
     }
