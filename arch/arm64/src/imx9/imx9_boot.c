@@ -50,13 +50,13 @@
 
 static const struct arm_mmu_region g_mmu_regions[] =
 {
-    MMU_REGION_FLAT_ENTRY("DEVICE_REGION",
-                          CONFIG_DEVICEIO_BASEADDR, CONFIG_DEVICEIO_SIZE,
-                          MT_DEVICE_NGNRNE | MT_RW | MT_SECURE),
+  MMU_REGION_FLAT_ENTRY("DEVICE_REGION",
+                        CONFIG_DEVICEIO_BASEADDR, CONFIG_DEVICEIO_SIZE,
+                        MT_DEVICE_NGNRNE | MT_RW | MT_SECURE),
 
-    MMU_REGION_FLAT_ENTRY("DRAM0_S0",
-                          CONFIG_RAMBANK1_ADDR, CONFIG_RAMBANK1_SIZE,
-                          MT_NORMAL | MT_RW | MT_SECURE),
+  MMU_REGION_FLAT_ENTRY("DRAM0_S0",
+                        CONFIG_RAMBANK1_ADDR, CONFIG_RAMBANK1_SIZE,
+                        MT_NORMAL | MT_RW | MT_SECURE),
 };
 
 const struct arm_mmu_config g_mmu_config =
@@ -84,6 +84,11 @@ const struct arm_mmu_config g_mmu_config =
 
 void arm64_el_init(void)
 {
+#if (CONFIG_ARCH_ARM64_EXCEPTION_LEVEL == 3)
+  /* At EL3, cntfrq_el0 is uninitialized. It must be set. */
+
+  write_sysreg(CONFIG_BOOTLOADER_SYS_CLOCK, cntfrq_el0);
+#endif
 }
 
 /****************************************************************************

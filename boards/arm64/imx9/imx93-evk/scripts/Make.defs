@@ -20,9 +20,14 @@
 
 include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
+include $(TOPDIR)/tools/imx9/Config.mk
 include $(TOPDIR)/arch/arm64/src/Toolchain.defs
 
-LDSCRIPT = dramboot.ld
+ifeq ($(CONFIG_IMX9_BOOTLOADER),y)
+  LDSCRIPT = ocramboot.ld
+else
+  LDSCRIPT = dramboot.ld
+endif
 
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 

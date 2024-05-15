@@ -16,7 +16,7 @@ config ARCH_CHIP_IMX93
 	select ARCH_HAVE_MULTICPU
 	select ARMV8A_HAVE_GICv3
 	select ARCH_CORTEX_A55
-	select ARCH_HAVE_PSCI
+	select ARCH_HAVE_PSCI if !ARCH_BOOT_EL3
 	select ARCH_HAVE_PWM_MULTICHAN
 	select ARCH_HAVE_RESET
 
@@ -46,6 +46,22 @@ config IMX9_FLEXIO_PWM
 	bool
 	select PWM_MULTICHAN
 	default n
+
+config IMX9_BOOTLOADER
+	bool "Bootloader"
+	select ARM64_DECODEFIQ
+	default n
+	---help---
+		Configure NuttX as the bootloader. NuttX will be compiled
+		into OCRAM. It will run in EL3 secure state.
+
+config BOOTLOADER_SYS_CLOCK
+	int "Bootloader system clock for timer"
+	default 1700000000
+	depends on IMX9_BOOTLOADER
+	---help---
+		If the sysclk is set to a certain value, this should be it.
+		The value is used by the timer interrupt infrastructure.
 
 menu "i.MX9 Peripheral Selection"
 
