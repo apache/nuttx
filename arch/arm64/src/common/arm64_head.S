@@ -235,6 +235,15 @@ switch_el:
 
     bl    arm64_boot_el3_init
 
+#ifdef CONFIG_ARCH_BOOT_EL3
+    msr   SPSel, #1
+
+    /* Set SP_EL3 (with SPSel = 1) */
+
+    mov   sp, x24
+    b     el3_boot
+#endif
+
     /* Get next EL */
 
     adr   x0, switch_el
@@ -268,6 +277,8 @@ switch_el:
 
     msr   SPSel, #1
     msr   DAIFClr, #(DAIFCLR_ABT_BIT)
+
+el3_boot:
     isb
 
 jump_to_c_entry:
