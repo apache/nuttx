@@ -48,7 +48,9 @@
  *
  ****************************************************************************/
 
+#ifdef CONFIG_HAVE_DOUBLE
 double wcstod(FAR const wchar_t *nptr, FAR wchar_t **endptr)
 {
   return strtod((FAR const char *)nptr, (FAR char **)endptr);
 }
+#endif

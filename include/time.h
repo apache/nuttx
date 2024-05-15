@@ -217,7 +217,7 @@ time_t time(FAR time_t *timep);
 
 #ifdef CONFIG_HAVE_DOUBLE
 double difftime(time_t time1, time_t time0);
-#else
+#elif defined(CONFIG_HAVE_FLOAT)
 float difftime(time_t time1, time_t time0);
 #endif
 
