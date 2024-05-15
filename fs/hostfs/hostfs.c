@@ -604,14 +604,21 @@ static int hostfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   /* Call our internal routine to perform the ioctl */
 
   ret = host_ioctl(hf->fd, cmd, arg);
-
-  if (ret < 0 && cmd == FIOC_FILEPATH)
+  if (ret < 0)
     {
-      FAR char *path = (FAR char *)(uintptr_t)arg;
-      ret = inode_getpath(filep->f_inode, path, PATH_MAX);
-      if (ret >= 0)
+      switch (cmd)
         {
-          strlcat(path, hf->relpath, PATH_MAX);
+          case FIOC_FILEPATH:
+            FAR char *path = (FAR char *)(uintptr_t)arg;
+            ret = inode_getpath(filep->f_inode, path, PATH_MAX);
+            if (ret >= 0)
+              {
+                strlcat(path, hf->relpath, PATH_MAX);
+              }
+
+            break;
+          default:
+            ret = -ENOTTY;
         }
     }
 
