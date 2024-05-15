@@ -71,6 +71,9 @@
 
 #define SMP_FUNC_CALL_IPI GIC_IRQ_SGI3
 
+#define PENDING_GRP1NS_INTID 1021
+#define SPURIOUS_INT         1023
+
 /***************************************************************************
  * Private Data
  ***************************************************************************/
@@ -765,7 +768,7 @@ uint64_t * arm64_decodeirq(uint64_t * regs)
    * interrupt.
    */
 
-  DEBUGASSERT(irq < NR_IRQS || irq == 1023);
+  DEBUGASSERT(irq < NR_IRQS || irq == SPURIOUS_INT);
   if (irq < NR_IRQS)
     {
       /* Dispatch the interrupt */
@@ -789,11 +792,33 @@ uint64_t * arm64_decodefiq(uint64_t * regs)
 
   irq = arm64_gic_get_active_fiq();
 
+#ifdef CONFIG_ARCH_BOOT_EL3
+  /* FIQ is group0 interrupt */
+
+  if (irq == PENDING_GRP1NS_INTID)
+    {
+      /* irq 1021 indicates that the irq being acked is expected at EL1/EL2.
+       * However, EL3 has no interrupts, only FIQs, see:
+       * 'Arm® Generic Interrupt Controller, Architecture Specification GIC
+       *  architecture version 3 and version 4' Arm IHI 0069G (ID011821)
+       * 'Table 4-3 Interrupt signals for two Security states when EL3 is
+       *  using AArch64 state'
+       *
+       * Thus we know there's an interrupt so let's handle it from group1.
+       */
+
+      regs = arm64_decodeirq(regs);
+      arm64_gic_eoi_fiq(irq);
+
+      return regs;
+    }
+#endif
+
   /* Ignore spurions IRQs.  ICCIAR will report 1023 if there is no pending
    * interrupt.
    */
 
-  DEBUGASSERT(irq < NR_IRQS || irq == 1023);
+  DEBUGASSERT(irq < NR_IRQS || irq == SPURIOUS_INT);
   if (irq < NR_IRQS)
     {
       /* Dispatch the interrupt */
