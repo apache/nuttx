@@ -45,6 +45,8 @@ namespace std
   using ::clock_gettime;
   using ::mktime;
   using ::gmtime_r;
+  using ::gmtime;
+  using ::strftime;
   using ::timer_create;
   using ::timer_delete;
   using ::timer_settime;
