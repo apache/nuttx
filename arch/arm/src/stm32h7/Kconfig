@@ -266,6 +266,18 @@ config ARCH_CHIP_STM32H7B3LI
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1376 Kb SRAM,
 		with cryptographic accelerator, TFBGA225
 
+config ARCH_CHIP_STM32H755II
+	bool "STM32H755II"
+	select STM32H7_STM32H7X5XX
+	select STM32H7_FLASH_CONFIG_I
+	select STM32H7_IO_CONFIG_I
+	select STM32H7_HAVE_FDCAN1
+	select STM32H7_HAVE_FDCAN2
+	select STM32H7_HAVE_SMPS
+	---help---
+		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
+		with cryptographic accelerator, LQFP176/UFBGA176
+
 endchoice # STM32 H7 Chip Selection
 
 config STM32H7_HAVE_SMPS
