@@ -40,6 +40,7 @@ CHIP_ASRCS += litex_cache.S
 ifeq ($(CONFIG_SCHED_TICKLESS),y)
 ifeq ($(CONFIG_SCHED_TICKLESS_ALARM),y)
 CHIP_CSRCS += litex_arch_alarm.c
+CHIP_CSRCS += riscv_perf_time.c
 else
 CHIP_CSRCS += litex_tickless.c
 endif
