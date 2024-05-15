@@ -94,6 +94,8 @@
  * Private Functions
  ****************************************************************************/
 
+#ifdef CONFIG_HAVE_LONG_DOUBLE
+
 /****************************************************************************
  * Name: scanexp
  *
@@ -769,14 +771,10 @@ float strtof(FAR const char *str, FAR char **endptr)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_HAVE_DOUBLE
-
 double strtod(FAR const char *str, FAR char **endptr)
 {
   return strtox(str, endptr, 2);
 }
-
-#endif /* CONFIG_HAVE_DOUBLE */
 
 /****************************************************************************
  * Name: strtold
@@ -793,11 +791,8 @@ double strtod(FAR const char *str, FAR char **endptr)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_HAVE_LONG_DOUBLE
-
 long double strtold(FAR const char *str, FAR char **endptr)
 {
   return strtox(str, endptr, 3);
 }
-
 #endif /* CONFIG_HAVE_LONG_DOUBLE */
