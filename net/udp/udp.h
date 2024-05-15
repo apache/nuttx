@@ -897,7 +897,7 @@ int udp_writebuffer_notifier_setup(worker_t worker,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_UDP_NOTIFIER
-void udp_notifier_teardown(int key);
+void udp_notifier_teardown(FAR void *key);
 #endif
 
 /****************************************************************************
