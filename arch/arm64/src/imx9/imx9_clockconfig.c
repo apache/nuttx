@@ -376,9 +376,9 @@ void imx9_clockconfig(void)
 
   /* Set the CPU clock */
 
-  putreg32(IMX9_CCM_GPR_SH_CLR(CCM_SHARED_A55_CLK), CCM_GPR_A55_CLK_SEL_PLL);
+  putreg32(CCM_GPR_A55_CLK_SEL_PLL, IMX9_CCM_GPR_SH_CLR(CCM_SHARED_A55_CLK));
   pll_init(pll_arm.reg, pll_arm.frac, &pll_arm.parms);
-  putreg32(IMX9_CCM_GPR_SH_SET(CCM_SHARED_A55_CLK), CCM_GPR_A55_CLK_SEL_PLL);
+  putreg32(CCM_GPR_A55_CLK_SEL_PLL, IMX9_CCM_GPR_SH_SET(CCM_SHARED_A55_CLK));
 
   /* Run the PLL configuration */
 
