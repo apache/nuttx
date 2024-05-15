@@ -119,6 +119,8 @@
 #define SPSR_MODE_EL1H      (0x5)
 #define SPSR_MODE_EL2T      (0x8)
 #define SPSR_MODE_EL2H      (0x9)
+#define SPSR_MODE_EL3T      (0xc)
+#define SPSR_MODE_EL3H      (0xd)
 #define SPSR_MODE_MASK      (0xf)
 
 /* CurrentEL: Current Exception Level */

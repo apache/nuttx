@@ -225,7 +225,11 @@ pid_t arm64_fork(const struct fork_s *context)
   pforkctx->regs[REG_X28]  = context->regs[FORK_REG_X28];
   pforkctx->regs[REG_X29]  = newfp;
 
+#ifdef CONFIG_ARCH_BOOT_EL3
+  pforkctx->spsr = SPSR_MODE_EL3H;
+#else
   pforkctx->spsr = SPSR_MODE_EL1H;
+#endif
 
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   pforkctx->spsr       |= (DAIF_IRQ_BIT | DAIF_FIQ_BIT);

@@ -146,6 +146,15 @@ config ARCH_HAVE_EL3
 		runing at EL3 is not necessary and system register for EL3
 		is not accessible
 
+config ARCH_BOOT_EL3
+	bool "Boot in EL3"
+	default n
+	depends on ARCH_HAVE_EL3
+	---help---
+		If NuttX works as the primary bootloader, give option to
+		stay in EL3. This will prevent it to switching into EL2/EL1
+		levels.
+
 config ARCH_SET_VMPIDR_EL2
 	bool "Set VMPIDR_EL2 at EL2 stage"
 	---help---
