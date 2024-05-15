@@ -782,6 +782,50 @@ bool up_textheap_heapmember(FAR void *p);
 #endif
 
 /****************************************************************************
+ * Name: up_textheap_data_address
+ *
+ * Description:
+ *   If an instruction bus address is specified, return the corresponding
+ *   data bus address. Otherwise, return the given address as it is.
+ *
+ *   For some platforms, up_textheap_memalign() might return memory regions
+ *   with separate instruction/data bus mappings. In that case,
+ *   up_textheap_memalign() returns the address of the instruction bus
+ *   mapping.
+ *   The instruction bus mapping might provide only limited data access.
+ *   (For example, only read-only, word-aligned access.)
+ *   You can use up_textheap_data_address() to query the corresponding data
+ *   bus mapping.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
+#if defined(CONFIG_ARCH_TEXT_HEAP_SEPARATE_DATA_ADDRESS)
+FAR void *up_textheap_data_address(FAR void *p);
+#else
+#define up_textheap_data_address(p) ((FAR void *)p)
+#endif
+#endif
+
+/****************************************************************************
+ * Name: up_textheap_data_sync
+ *
+ * Description:
+ *   Ensure modifications made on the data bus addresses (the addresses
+ *   returned by up_textheap_data_address) fully visible on the corresponding
+ *   instruction bus addresses.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
+#if defined(CONFIG_ARCH_TEXT_HEAP_SEPARATE_DATA_ADDRESS)
+void up_textheap_data_sync(void);
+#else
+#define up_textheap_data_sync() do {} while (0)
+#endif
+#endif
+
+/****************************************************************************
  * Name: up_dataheap_memalign
  *
  * Description:
