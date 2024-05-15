@@ -108,6 +108,11 @@ static void allsyms_relocate(void)
  ****************************************************************************/
 
 #ifdef CONFIG_SIM_ASAN
+const char *__asan_default_suppressions(void)
+{
+  return "interceptor_via_lib:libasan.so";
+}
+
 const char *__asan_default_options(void)
 {
   return "abort_on_error=1"
