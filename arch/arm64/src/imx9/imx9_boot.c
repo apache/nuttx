@@ -57,6 +57,10 @@ static const struct arm_mmu_region g_mmu_regions[] =
   MMU_REGION_FLAT_ENTRY("DRAM0_S0",
                         CONFIG_RAMBANK1_ADDR, CONFIG_RAMBANK1_SIZE,
                         MT_NORMAL | MT_RW | MT_SECURE),
+
+  MMU_REGION_FLAT_ENTRY("OCRAM",
+                        CONFIG_OCRAM_BASE_ADDR, CONFIG_OCRAM_SIZE,
+                        MT_NORMAL | MT_RW | MT_SECURE),
 };
 
 const struct arm_mmu_config g_mmu_config =

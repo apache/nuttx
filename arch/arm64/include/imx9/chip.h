@@ -62,6 +62,9 @@
 #define CONFIG_DEVICEIO_BASEADDR  0x40000000
 #define CONFIG_DEVICEIO_SIZE      MB(512)
 
+#define CONFIG_OCRAM_BASE_ADDR    0x20480000
+#define CONFIG_OCRAM_SIZE         KB(640)
+
 #define MPID_TO_CLUSTER_ID(mpid)  ((mpid) & ~0xff)
 
 #define IMX9_GPIO_NPORTS          4
