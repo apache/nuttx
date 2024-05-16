@@ -42,6 +42,10 @@ ifeq ($(CONFIG_NETDEV_STATISTICS),y)
 NETDEV_CSRCS += netdev_stats.c
 endif
 
+ifeq ($(CONFIG_NETDEV_RSS),y)
+NETDEV_CSRCS += netdev_notify_recvcpu.c
+endif
+
 # Include netdev build support
 
 DEPPATH += --dep-path netdev
