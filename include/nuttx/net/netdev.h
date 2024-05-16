@@ -280,6 +280,14 @@ struct netdev_ifaddr6_s
   net_ipv6addr_t mask; /* Network IPv6 subnet mask */
 };
 
+#ifdef CONFIG_NETDEV_RSS
+struct netdev_rss_s
+{
+  int      cpu;  /* CPU ID */
+  uint32_t hash; /* Hash value with packet */
+};
+#endif // CONFIG_NETDEV_RSS
+
 /* This structure collects information that is specific to a specific network
  * interface driver.  If the hardware platform supports only a single
  * instance of this structure.

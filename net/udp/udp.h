@@ -124,7 +124,9 @@ struct udp_conn_s
   int32_t  sndbufs;       /* Maximum amount of bytes queued in send */
   sem_t    sndsem;        /* Semaphore signals send completion */
 #endif
-
+#ifdef CONFIG_NETDEV_RSS
+  int      rcvcpu;        /* Last recvfrom cpuid */
+#endif
   /* Read-ahead buffering.
    *
    *   readahead - An IOB chain where the UDP/IP read-ahead data is retained.
