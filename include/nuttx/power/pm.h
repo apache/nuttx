@@ -145,6 +145,15 @@ enum pm_state_e
   PM_COUNT,
 };
 
+#ifdef CONFIG_PM_PROCFS
+struct pm_preparefail_s
+{
+  enum pm_state_e state;
+  struct timespec start;
+  struct timespec duration[PM_COUNT];
+};
+#endif
+
 /* This structure contain pointers callback functions in the driver.  These
  * callback functions can be used to provide power management information
  * to the driver.
@@ -211,6 +220,10 @@ struct pm_callback_s
 
   CODE void (*notify)(FAR struct pm_callback_s *cb, int domain,
                       enum pm_state_e pmstate);
+
+#ifdef CONFIG_PM_PROCFS
+  struct pm_preparefail_s preparefail[CONFIG_PM_NDOMAINS];
+#endif
 };
 
 /* An instance of a given PM governor */

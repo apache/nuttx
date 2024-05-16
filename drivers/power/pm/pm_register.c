@@ -64,6 +64,14 @@ int pm_register(FAR struct pm_callback_s *callbacks)
 
   flags = pm_lock(&g_pmglobals.reglock);
   dq_addlast(&callbacks->entry, &g_pmglobals.registry);
+
+#ifdef CONFIG_PM_PROCFS
+  for (int domain = 0; domain < CONFIG_PM_NDOMAINS; domain++)
+    {
+      callbacks->preparefail[domain].state = PM_RESTORE;
+    }
+#endif
+
   pm_unlock(&g_pmglobals.reglock, flags);
 
   return 0;
