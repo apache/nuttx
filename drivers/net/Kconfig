@@ -60,6 +60,11 @@ config NETDEV_WIRELESS_HANDLER
 	---help---
 		Enable the wireless handler support in upper-half driver.
 
+config NETDEV_RSS
+	bool "Using hardware RSS (Receive Side Scaling) with network card"
+	default n
+	depends on SMP && NETDEV_IOCTL && NETDEV_WORK_THREAD
+
 comment "General Ethernet MAC Driver Options"
 
 config NET_RPMSG_DRV

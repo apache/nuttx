@@ -146,6 +146,10 @@
 #define SIOCATMARK         _SIOC(0x003E)  /* Determine whether socket is at
                                            * out-of-band mark */
 
+/* RSS notify recv cpu calls ************************************************/
+
+#define SIOCNOTIFYRECVCPU  _SIOC(0x003F)  /* RSS notify recv cpu */
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
