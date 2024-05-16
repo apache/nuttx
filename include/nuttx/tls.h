@@ -219,6 +219,7 @@ struct tls_info_s
   int16_t tl_cpcount;                  /* Nested cancellation point count */
 #endif
 
+  uint16_t tl_size;                    /* Actual size with alignments */
   int tl_errno;                        /* Per-thread error number */
 };
 
