@@ -63,7 +63,7 @@ struct sim_rpmsg_virtio_dev_s
   int                             master;
   uint32_t                        seq;
   struct sim_rpmsg_virtio_shmem_s *shmem;
-  struct simple_addrenv_s         addrenv;
+  struct simple_addrenv_s         addrenv[2];
   char                            cpuname[RPMSG_NAME_SIZE + 1];
   char                            shmemname[RPMSG_NAME_SIZE + 1];
 
@@ -127,11 +127,11 @@ sim_rpmsg_virtio_get_resource(struct rpmsg_virtio_s *dev)
           usleep(1000);
         }
 
-      priv->addrenv.va   = (uintptr_t)priv->shmem;
-      priv->addrenv.pa   = priv->shmem->base;
-      priv->addrenv.size = sizeof(*priv->shmem);
+      priv->addrenv[0].va   = (uintptr_t)priv->shmem;
+      priv->addrenv[0].pa   = priv->shmem->base;
+      priv->addrenv[0].size = sizeof(*priv->shmem);
 
-      simple_addrenv_initialize(&priv->addrenv);
+      simple_addrenv_initialize(&priv->addrenv[0]);
     }
 
   return rsc;

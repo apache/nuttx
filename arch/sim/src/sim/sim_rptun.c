@@ -170,7 +170,7 @@ sim_rptun_get_resource(struct rptun_dev_s *dev)
       priv->addrenv[0].pa          = priv->shmem->base;
       priv->addrenv[0].size        = sizeof(*priv->shmem);
 
-      simple_addrenv_initialize(priv->addrenv);
+      simple_addrenv_initialize(&priv->addrenv[0]);
     }
 
   return &priv->shmem->rsc;

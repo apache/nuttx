@@ -70,8 +70,8 @@ struct rptun_ivshmem_dev_s
   uint32_t                        seq;
   FAR struct rptun_ivshmem_mem_s *shmem;
   size_t                          shmem_size;
-  struct simple_addrenv_s         addrenv;
-  struct rptun_addrenv_s          raddrenv;
+  struct simple_addrenv_s         addrenv[2];
+  struct rptun_addrenv_s          raddrenv[2];
   bool                            master;
   char                            cpuname[RPMSG_NAME_SIZE + 1];
   FAR struct ivshmem_device_s    *ivdev;
@@ -137,7 +137,7 @@ rptun_ivshmem_get_addrenv(FAR struct rptun_dev_s *dev)
 {
   FAR struct rptun_ivshmem_dev_s *priv =
     (FAR struct rptun_ivshmem_dev_s *)dev;
-  return &priv->raddrenv;
+  return &priv->raddrenv[0];
 }
 
 static FAR struct rptun_rsc_s *
@@ -146,12 +146,12 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
   FAR struct rptun_ivshmem_dev_s *priv =
     (FAR struct rptun_ivshmem_dev_s *)dev;
 
-  priv->raddrenv.da   = 0;
-  priv->raddrenv.size = priv->shmem_size;
+  priv->raddrenv[0].da   = 0;
+  priv->raddrenv[0].size = priv->shmem_size;
 
   if (priv->master)
     {
-      priv->raddrenv.pa = (uintptr_t)priv->shmem;
+      priv->raddrenv[0].pa = (uintptr_t)priv->shmem;
 
       /* Wait untils salve is ready */
 
@@ -204,13 +204,13 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
           usleep(1000);
         }
 
-      priv->raddrenv.pa  = (uintptr_t)priv->shmem->basem;
+      priv->raddrenv[0].pa  = (uintptr_t)priv->shmem->basem;
 
-      priv->addrenv.va   = (uint64_t)(uintptr_t)priv->shmem;
-      priv->addrenv.pa   = priv->shmem->basem;
-      priv->addrenv.size = priv->shmem_size;
+      priv->addrenv[0].va   = (uint64_t)(uintptr_t)priv->shmem;
+      priv->addrenv[0].pa   = priv->shmem->basem;
+      priv->addrenv[0].size = priv->shmem_size;
 
-      simple_addrenv_initialize(&priv->addrenv);
+      simple_addrenv_initialize(&priv->addrenv[0]);
     }
 
   return &priv->shmem->rsc;
