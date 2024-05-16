@@ -47,8 +47,8 @@
  ****************************************************************************/
 
 static int file_mmap_(FAR struct file *filep, FAR void *start,
-                      size_t length, int prot, int flags,
-                      off_t offset, bool kernel, FAR void **mapped)
+                      size_t length, int prot, int flags, off_t offset,
+                      enum mm_map_type_e type, FAR void **mapped)
 {
   int ret = -ENOTTY;
 
@@ -107,7 +107,7 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
 
   if ((flags & MAP_ANONYMOUS) != 0)
     {
-      ret = map_anonymous(&entry, kernel);
+      ret = map_anonymous(&entry, type);
       goto out;
     }
 
@@ -150,7 +150,7 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
        * do much better in the KERNEL build using the MMU.
        */
 
-      ret = rammap(filep, &entry, kernel);
+      ret = rammap(filep, &entry, type);
     }
 
   /* Return */
@@ -182,7 +182,7 @@ int file_mmap(FAR struct file *filep, FAR void *start, size_t length,
               int prot, int flags, off_t offset, FAR void **mapped)
 {
   return file_mmap_(filep, start, length,
-                    prot, flags, offset, true, mapped);
+                    prot, flags, offset, MAP_KERNEL, mapped);
 }
 
 /****************************************************************************
@@ -274,7 +274,7 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
     }
 
   ret = file_mmap_(filep, start, length,
-                   prot, flags, offset, false, &mapped);
+                   prot, flags, offset, MAP_USER, &mapped);
   if (ret < 0)
     {
       goto errout;

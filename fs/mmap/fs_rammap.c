@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <sys/ioctl.h>
 
 #include <assert.h>
 #include <debug.h>
@@ -54,7 +55,7 @@ static int unmap_rammap(FAR struct task_group_s *group,
 {
   FAR void *newaddr = NULL;
   off_t offset;
-  bool kernel = entry->priv.i;
+  enum mm_map_type_e type = entry->priv.i;
   int ret = OK;
 
   /* Get the offset from the beginning of the region and the actual number
@@ -83,11 +84,11 @@ static int unmap_rammap(FAR struct task_group_s *group,
     {
       /* Free the region */
 
-      if (kernel)
+      if (type == MAP_KERNEL)
         {
           kmm_free(entry->vaddr);
         }
-      else
+      else if (type == MAP_USER)
         {
           kumm_free(entry->vaddr);
         }
@@ -103,11 +104,11 @@ static int unmap_rammap(FAR struct task_group_s *group,
 
   else
     {
-      if (kernel)
+      if (type == MAP_KERNEL)
         {
           newaddr = kmm_realloc(entry->vaddr, length);
         }
-      else
+      else if (type == MAP_USER)
         {
           newaddr = kumm_realloc(entry->vaddr, length);
         }
@@ -134,7 +135,7 @@ static int unmap_rammap(FAR struct task_group_s *group,
  *   filep   file descriptor of the backing file -- required.
  *   entry   mmap entry information.
  *           field offset and length must be initialized correctly.
- *   kernel  kmm_zalloc or kumm_zalloc
+ *   type    kmm_zalloc or kumm_zalloc or xip_base
  *
  * Returned Value:
  *  On success, rammap returns 0 and entry->vaddr points to memory mapped.
@@ -150,13 +151,20 @@ static int unmap_rammap(FAR struct task_group_s *group,
  ****************************************************************************/
 
 int rammap(FAR struct file *filep, FAR struct mm_map_entry_s *entry,
-           bool kernel)
+           enum mm_map_type_e type)
 {
   FAR uint8_t *rdbuffer;
   ssize_t nread;
   off_t fpos;
   int ret;
   size_t length = entry->length;
+
+  ret = file_ioctl(filep, BIOC_XIPBASE, (unsigned long)&entry->vaddr);
+  if (ret == OK)
+    {
+      type = MAP_XIP;
+      goto out;
+    }
 
   /* There is a major design flaw that I have not yet thought of fix for:
    * The goal is to have a single region of memory that represents a single
@@ -173,7 +181,7 @@ int rammap(FAR struct file *filep, FAR struct mm_map_entry_s *entry,
 
   /* Allocate a region of memory of the specified size */
 
-  rdbuffer = kernel ? kmm_malloc(length) : kumm_malloc(length);
+  rdbuffer = type == MAP_KERNEL ? kmm_malloc(length) : kumm_malloc(length);
   if (!rdbuffer)
     {
       ferr("ERROR: Region allocation failed, length: %zu\n", length);
@@ -238,7 +246,8 @@ int rammap(FAR struct file *filep, FAR struct mm_map_entry_s *entry,
 
   /* Add the buffer to the list of regions */
 
-  entry->priv.i = kernel;
+out:
+  entry->priv.i = type;
   entry->munmap = unmap_rammap;
 
   ret = mm_map_add(get_current_mm(), entry);
@@ -250,11 +259,11 @@ int rammap(FAR struct file *filep, FAR struct mm_map_entry_s *entry,
   return OK;
 
 errout_with_region:
-  if (kernel)
+  if (type == MAP_KERNEL)
     {
       kmm_free(entry->vaddr);
     }
-  else
+  else if (type == MAP_USER)
     {
       kumm_free(entry->vaddr);
     }
