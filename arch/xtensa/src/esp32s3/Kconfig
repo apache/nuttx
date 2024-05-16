@@ -289,10 +289,10 @@ menu "ESP32-S3 Peripheral Selection"
 source "arch/xtensa/src/common/espressif/Kconfig"
 
 config ESP32S3_ADC
-        bool "ADC"
-        default n
-        select ANALOG
-        select ADC
+	bool "ADC"
+	default n
+	select ANALOG
+	select ADC
 
 config ESP32S3_UART
 	bool
@@ -748,7 +748,7 @@ config ESP32S3_XTWDT_BACKUP_CLK_ENABLE
 	bool "Automatically switch to BACKUP32K_CLK when timer expires"
 	depends on ESP32S3_XTWDT
 	default y
-	help
+	---help---
 		Enable this to automatically switch to BACKUP32K_CLK as the source of
 		RTC_SLOW_CLK when the watchdog timer expires.
 
@@ -770,7 +770,6 @@ config ESP32S3_LCD
 	select DRIVERS_VIDEO
 	select VIDEO_FB
 	select FB_UPDATE
-	help
 	---help---
 		LCD controller that outputs parallel data and supports RGB interface.
 
@@ -1297,62 +1296,62 @@ menu "ADC Configuration"
 if ESP32S3_ADC
 
 choice ESP32S3_ADC_VOL_RANGES
-        prompt "ADC voltage ranges"
-        default ESP32S3_ADC_VOL_3100
+	prompt "ADC voltage ranges"
+	default ESP32S3_ADC_VOL_3100
 
 config ESP32S3_ADC_VOL_950
-        bool "0~950mV"
+	bool "0~950mV"
 
 config ESP32S3_ADC_VOL_1250
-        bool "0~1250mV"
+	bool "0~1250mV"
 
 config ESP32S3_ADC_VOL_1750
-        bool "0~1750mV"
+	bool "0~1750mV"
 
 config ESP32S3_ADC_VOL_3100
-        bool "0~3100mV"
+	bool "0~3100mV"
 
-endchoice
+endchoice # ADC voltage ranges
 
 config ESP32S3_ADC1_CHANNEL0
-        bool "ADC1 channel 0"
-        default n
+	bool "ADC1 channel 0"
+	default n
 
 config ESP32S3_ADC1_CHANNEL1
-        bool "ADC1 channel 1"
-        default n
+	bool "ADC1 channel 1"
+	default n
 
 config ESP32S3_ADC1_CHANNEL2
-        bool "ADC1 channel 2"
-        default n
+	bool "ADC1 channel 2"
+	default n
 
 config ESP32S3_ADC1_CHANNEL3
-        bool "ADC1 channel 3"
-        default n
+	bool "ADC1 channel 3"
+	default n
 
 config ESP32S3_ADC1_CHANNEL4
-        bool "ADC1 channel 4"
-        default n
+	bool "ADC1 channel 4"
+	default n
 
 config ESP32S3_ADC1_CHANNEL5
-        bool "ADC1 channel 5"
-        default n
+	bool "ADC1 channel 5"
+	default n
 
 config ESP32S3_ADC1_CHANNEL6
-        bool "ADC1 channel 6"
-        default n
+	bool "ADC1 channel 6"
+	default n
 
 config ESP32S3_ADC1_CHANNEL7
-        bool "ADC1 channel 7"
-        default n
+	bool "ADC1 channel 7"
+	default n
 
 config ESP32S3_ADC1_CHANNEL8
-        bool "ADC1 channel 8"
-        default n
+	bool "ADC1 channel 8"
+	default n
 
 config ESP32S3_ADC1_CHANNEL9
-        bool "ADC1 channel 9"
-        default n
+	bool "ADC1 channel 9"
+	default n
 
 endif # ESP32S3_ADC
 
