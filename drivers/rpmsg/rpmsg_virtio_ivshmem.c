@@ -69,7 +69,7 @@ struct rpmsg_virtio_ivshmem_dev_s
   uint32_t                               seq;
   FAR struct rpmsg_virtio_ivshmem_mem_s *shmem;
   size_t                                 shmem_size;
-  struct simple_addrenv_s                addrenv;
+  struct simple_addrenv_s                addrenv[2];
   int                                    master;
   char                                   cpuname[RPMSG_NAME_SIZE + 1];
   FAR struct pci_device_s               *ivshmem;
@@ -162,11 +162,11 @@ rpmsg_virtio_ivshmem_get_resource(FAR struct rpmsg_virtio_s *dev)
           usleep(1000);
         }
 
-      priv->addrenv.va   = (uint64_t)(uintptr_t)priv->shmem;
-      priv->addrenv.pa   = priv->shmem->basem;
-      priv->addrenv.size = priv->shmem_size;
+      priv->addrenv[0].va   = (uint64_t)(uintptr_t)priv->shmem;
+      priv->addrenv[0].pa   = priv->shmem->basem;
+      priv->addrenv[0].size = priv->shmem_size;
 
-      simple_addrenv_initialize(&priv->addrenv);
+      simple_addrenv_initialize(&priv->addrenv[0]);
 
       priv->shmem->basem = 0;
     }
