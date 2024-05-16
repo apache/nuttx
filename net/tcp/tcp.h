@@ -283,6 +283,9 @@ struct tcp_conn_s
 #ifdef CONFIG_NET_SOLINGER
   sclock_t ltimeout;      /* Linger timeout expiration */
 #endif
+#ifdef CONFIG_NETDEV_RSS
+  int      rcvcpu;        /* Currect cpu id */
+#endif
   /* If the TCP socket is bound to a local address, then this is
    * a reference to the device that routes traffic on the corresponding
    * network.
