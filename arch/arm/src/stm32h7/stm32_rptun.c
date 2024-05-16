@@ -47,7 +47,7 @@
 #    error CONFIG_OPENAMP_CACHE must be set
 #  endif
 #  if defined(CONFIG_ARMV7M_DCACHE) && !defined(CONFIG_ARM_MPU)
-#    erro CONFIG_ARM_MPU must be enabled
+#    error CONFIG_ARM_MPU must be enabled
 #  endif
 #endif
 
