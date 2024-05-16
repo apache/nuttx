@@ -53,3 +53,25 @@ FAR struct tls_info_s *nxsched_get_tls(FAR struct tcb_s *tcb)
 
   return (FAR struct tls_info_s *)tcb->stack_alloc_ptr;
 }
+
+/****************************************************************************
+ * Name: nxsched_get_stackargs
+ *
+ * Description:
+ *   Get args from thread's stack w/o security checks. The args are setup in
+ *   nxtask_setup_stackargs().
+ *
+ * Input Parameters:
+ *   tcb - The tcb to query.
+ *
+ * Returned Value:
+ *   Pointer to a list of stack arguments ended by a NULL pointer.
+ *
+ ****************************************************************************/
+
+FAR char **nxsched_get_stackargs(FAR struct tcb_s *tcb)
+{
+  /* The args data follows the TLS data */
+
+  return (FAR char**)(tcb->stack_alloc_ptr + nxsched_get_tls(tcb)->tl_size);
+}

@@ -393,5 +393,6 @@ bool nxsched_verify_tcb(FAR struct tcb_s *tcb);
 
 struct tls_info_s; /* Forward declare */
 FAR struct tls_info_s *nxsched_get_tls(FAR struct tcb_s *tcb);
+FAR char **nxsched_get_stackargs(FAR struct tcb_s *tcb);
 
 #endif /* __SCHED_SCHED_SCHED_H */
