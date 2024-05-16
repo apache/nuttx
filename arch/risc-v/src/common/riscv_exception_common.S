@@ -72,6 +72,7 @@
 
   .section EXCEPTION_SECTION
   .global exception_common
+  .global return_from_exception
   .align  8
 
 exception_common:
@@ -141,6 +142,8 @@ exception_common:
 
   addi       sp, sp, XCPTCONTEXT_SIZE
 #endif
+
+return_from_exception:
 
   /* If context switch is needed, return a new sp */
 
