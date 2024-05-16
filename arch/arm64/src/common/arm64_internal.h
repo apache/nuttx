@@ -165,7 +165,7 @@ extern "C"
     EXTERN char sym[n][size]
 
 #define STACK_PTR_TO_FRAME(type, ptr) \
-    (type *)((uintptr_t)(ptr) - sizeof(type))
+    (type *)STACK_ALIGN_DOWN((uintptr_t)(ptr) - sizeof(type))
 
 #define INTSTACK_SIZE        (CONFIG_ARCH_INTERRUPTSTACK & ~STACK_ALIGN_MASK)
 
