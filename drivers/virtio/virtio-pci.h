@@ -31,6 +31,7 @@
 
 #include <nuttx/pci/pci.h>
 #include <nuttx/virtio/virtio.h>
+#include <nuttx/wdog.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -65,7 +66,8 @@ struct virtio_pci_ops_s
 {
   CODE uint16_t (*get_queue_len)(FAR struct virtio_pci_device_s *vpdev,
                                  int idx);
-  CODE int (*config_vector)(FAR struct virtio_pci_device_s *vpdev);
+  CODE int (*config_vector)(FAR struct virtio_pci_device_s *vpdev,
+                            bool enable);
   CODE int (*create_virtqueue)(FAR struct virtio_pci_device_s *vpdev,
                                FAR struct virtqueue *vq);
   CODE void (*delete_virtqueue)(FAR struct virtio_device *vdev, int index);
@@ -80,7 +82,11 @@ struct virtio_pci_device_s
   struct metal_io_region             shm_io;  /* Share memory io region,
                                                * virtqueue use this io.
                                                */
+#if CONFIG_DRIVERS_VIRTIO_PCI_POLLING_PERIOD <= 0
   int                                irq[VIRTIO_PCI_INT_NUM];
+#else
+  struct wdog_s                      wdog;
+#endif
 
   /* for modern */
 

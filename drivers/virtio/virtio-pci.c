@@ -29,9 +29,17 @@
 #include <stdint.h>
 #include <sys/param.h>
 
+#include <nuttx/clock.h>
 #include <nuttx/virtio/virtio-pci.h>
 
 #include "virtio-pci.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define VIRTIO_PCI_WORK_DELAY \
+  USEC2TICK(CONFIG_DRIVERS_VIRTIO_PCI_POLLING_PERIOD)
 
 /****************************************************************************
  * Private Function Prototypes
@@ -66,24 +74,11 @@ static struct pci_driver_s g_virtio_pci_drv =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: virtio_pci_config_changed
+ * Name: virtio_pci_vq_callback
  ****************************************************************************/
 
-static int virtio_pci_config_changed(int irq, FAR void *context,
-                                     FAR void *arg)
+static void virtio_pci_vq_callback(FAR struct virtio_pci_device_s *vpdev)
 {
-  /* TODO: not support config changed notification */
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: virtio_pci_interrupt
- ****************************************************************************/
-
-static int virtio_pci_interrupt(int irq, FAR void *context, FAR void *arg)
-{
-  FAR struct virtio_pci_device_s *vpdev = arg;
   FAR struct virtio_vring_info *vrings_info = vpdev->vdev.vrings_info;
   FAR struct virtqueue *vq;
   unsigned int i;
@@ -97,9 +92,48 @@ static int virtio_pci_interrupt(int irq, FAR void *context, FAR void *arg)
           vq->callback(vq);
         }
     }
+}
+
+#if CONFIG_DRIVERS_VIRTIO_PCI_POLLING_PERIOD <= 0
+/****************************************************************************
+ * Name: virtio_pci_interrupt
+ ****************************************************************************/
+
+static int virtio_pci_interrupt(int irq, FAR void *context, FAR void *arg)
+{
+  FAR struct virtio_pci_device_s *vpdev = arg;
+
+  virtio_pci_vq_callback(vpdev);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: virtio_pci_config_changed
+ ****************************************************************************/
+
+static int virtio_pci_config_changed(int irq, FAR void *context,
+                                     FAR void *arg)
+{
+  /* TODO: not support config changed notification */
 
   return OK;
 }
+
+#else
+/****************************************************************************
+ * Name: virtio_pci_wdog
+ ****************************************************************************/
+
+static void virtio_pci_wdog(wdparm_t arg)
+{
+  FAR struct virtio_pci_device_s *vpdev =
+    (FAR struct virtio_pci_device_s *)arg;
+
+  virtio_pci_vq_callback(vpdev);
+  wd_start(&vpdev->wdog, VIRTIO_PCI_WORK_DELAY, virtio_pci_wdog,
+           (wdparm_t)vpdev);
+}
+#endif
 
 /****************************************************************************
  * Name: virtio_pci_probe
@@ -154,16 +188,18 @@ static int virtio_pci_probe(FAR struct pci_device_s *dev)
         }
     }
 
+#if CONFIG_DRIVERS_VIRTIO_PCI_POLLING_PERIOD <= 0
+
   /* Irq init */
 
   ret = pci_alloc_irq(vpdev->dev, vpdev->irq, VIRTIO_PCI_INT_NUM);
   if (ret != VIRTIO_PCI_INT_NUM)
     {
-      vrterr("Failed to allocate MSI %d\n", ret);
+      vrterr("Failed to allocate MSI, ret=%d\n", ret);
       goto err_with_enable;
     }
 
-  vrtinfo("Attaching MSI %d to %p,  %d to %p\n",
+  vrtinfo("Interrupt mode: attaching MSI %d to %p, %d to %p\n",
           vpdev->irq[VIRTIO_PCI_INT_CFG], virtio_pci_config_changed,
           vpdev->irq[VIRTIO_PCI_INT_VQ], virtio_pci_interrupt);
 
@@ -177,6 +213,9 @@ static int virtio_pci_probe(FAR struct pci_device_s *dev)
   irq_attach(vpdev->irq[VIRTIO_PCI_INT_CFG],
              virtio_pci_config_changed, vpdev);
   irq_attach(vpdev->irq[VIRTIO_PCI_INT_VQ], virtio_pci_interrupt, vpdev);
+#else
+  vrtinfo("Polling mode\n");
+#endif
 
   virtio_set_status(vdev, VIRTIO_CONFIG_STATUS_RESET);
   virtio_set_status(vdev, VIRTIO_CONFIG_STATUS_ACK);
@@ -191,10 +230,12 @@ static int virtio_pci_probe(FAR struct pci_device_s *dev)
   return ret;
 
 err_with_attach:
+#if CONFIG_DRIVERS_VIRTIO_PCI_POLLING_PERIOD <= 0
   irq_detach(vpdev->irq[VIRTIO_PCI_INT_CFG]);
   irq_detach(vpdev->irq[VIRTIO_PCI_INT_VQ]);
 err_with_irq:
   pci_release_irq(vpdev->dev, vpdev->irq, VIRTIO_PCI_INT_NUM);
+#endif
 err_with_enable:
   pci_clear_master(dev);
   pci_disable_device(dev);
@@ -213,9 +254,11 @@ static void virtio_pci_remove(FAR struct pci_device_s *dev)
 
   virtio_unregister_device(&vpdev->vdev);
 
+#if CONFIG_DRIVERS_VIRTIO_PCI_POLLING_PERIOD <= 0
   irq_detach(vpdev->irq[VIRTIO_PCI_INT_CFG]);
   irq_detach(vpdev->irq[VIRTIO_PCI_INT_VQ]);
   pci_release_irq(vpdev->dev, vpdev->irq, VIRTIO_PCI_INT_NUM);
+#endif
 
   pci_clear_master(dev);
   pci_disable_device(dev);
@@ -313,15 +356,8 @@ int virtio_pci_create_virtqueues(FAR struct virtio_device *vdev,
   vdev->vrings_info = kmm_zalloc(sizeof(struct virtio_vring_info) * nvqs);
   if (vdev->vrings_info == NULL)
     {
-      vrterr("alloc vrings info failed\n");
+      vrterr("Alloc vrings info failed\n");
       return -ENOMEM;
-    }
-
-  ret = vpdev->ops->config_vector(vpdev);
-  if (ret < 0)
-    {
-      vrterr("read virtio pci config msix vector failed\n");
-      return ret;
     }
 
   /* Alloc and init the virtqueue */
@@ -335,10 +371,26 @@ int virtio_pci_create_virtqueues(FAR struct virtio_device *vdev,
         }
     }
 
-  /* Finally, enable the interrupt */
+#if CONFIG_DRIVERS_VIRTIO_PCI_POLLING_PERIOD <= 0
+  ret = vpdev->ops->config_vector(vpdev, true);
+  if (ret < 0)
+    {
+      vrterr("Config vector failed, vector=%u\n", ret);
+      goto err;
+    }
 
   up_enable_irq(vpdev->irq[VIRTIO_PCI_INT_CFG]);
   up_enable_irq(vpdev->irq[VIRTIO_PCI_INT_VQ]);
+#else
+  ret = wd_start(&vpdev->wdog, VIRTIO_PCI_WORK_DELAY, virtio_pci_wdog,
+                (wdparm_t)vpdev);
+  if (ret < 0)
+    {
+      pcierr("Wd_start failed: %d\n", ret);
+      goto err;
+    }
+#endif
+
   return ret;
 
 err:
@@ -357,10 +409,13 @@ void virtio_pci_delete_virtqueues(FAR struct virtio_device *vdev)
   FAR struct virtio_vring_info *vrinfo;
   unsigned int i;
 
-  /* Disable interrupt first */
-
+#if CONFIG_DRIVERS_VIRTIO_PCI_POLLING_PERIOD <= 0
   up_disable_irq(vpdev->irq[VIRTIO_PCI_INT_CFG]);
   up_disable_irq(vpdev->irq[VIRTIO_PCI_INT_VQ]);
+  vpdev->ops->config_vector(vpdev, false);
+#else
+  wd_cancel(&vpdev->wdog);
+#endif
 
   /* Free the memory */
 
