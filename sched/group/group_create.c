@@ -40,8 +40,10 @@
 #include "tls/tls.h"
 
 /****************************************************************************
- * Public Data
+ * Private Data
  ****************************************************************************/
+
+static struct task_group_s  g_kthread_group;   /* Shared among kthreads     */
 
 /****************************************************************************
  * Private Functions
@@ -119,9 +121,23 @@ int group_initialize(FAR struct task_tcb_s *tcb, uint8_t ttype)
 
   DEBUGASSERT(tcb && !tcb->cmn.group);
 
-  /* Allocate the group structure and assign it to the TCB */
+  ttype &= TCB_FLAG_TTYPE_MASK;
 
-  group = &tcb->group;
+  /* Initialize group pointer and assign to TCB */
+
+  if (ttype == TCB_FLAG_TTYPE_KERNEL)
+    {
+      group = &g_kthread_group;
+      tcb->cmn.group = group;
+      if (group->tg_info)
+        {
+          return OK;
+        }
+    }
+  else
+    {
+      group = &tcb->group;
+    }
 
 #if defined(CONFIG_MM_KERNEL_HEAP)
   /* If this group is being created for a privileged thread, then all
@@ -222,5 +238,8 @@ void group_postinitialize(FAR struct task_tcb_s *tcb)
    * task has exited.
    */
 
-  group->tg_pid = tcb->cmn.pid;
+  if (group != &g_kthread_group)
+    {
+      group->tg_pid = tcb->cmn.pid;
+    }
 }
