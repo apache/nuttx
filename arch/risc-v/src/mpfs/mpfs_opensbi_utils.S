@@ -43,17 +43,17 @@
 
   /* Add some weak default values to make this compile without */
 
-  .weak  _sbi_zerodev_loadaddr
-  .weak  _ssbi_zerodev
-  .weak  _esbi_zerodev
+  .weak  _sbi_ram_loadaddr
+  .weak  _ssbi_ram
+  .weak  _esbi_ram
 
   /* These are the weak pointless variables, only to get this PR compile */
 
-_sbi_zerodev_loadaddr:
+_sbi_ram_loadaddr:
   .dword  0x0a006000
-_ssbi_zerodev:
+_ssbi_ram:
   .dword  _stext
-_esbi_zerodev:
+_esbi_ram:
   .dword  _stext
 
 /****************************************************************************
@@ -89,9 +89,9 @@ mpfs_opensbi_relocate_from_envm:
 
   /* Relocate the code from eNVM into L2 zero device */
 
-  la    a0, _sbi_zerodev_loadaddr
-  la    a1, _ssbi_zerodev
-  la    a2, _esbi_zerodev
+  la    a0, _sbi_ram_loadaddr
+  la    a1, _ssbi_ram
+  la    a2, _esbi_ram
 .check_if_opensbi_copy_done:
   bge   a1, a2, .opensbi_copy_done
   ld    a3, 0(a0)
