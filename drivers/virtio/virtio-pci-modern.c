@@ -159,7 +159,8 @@ static uint16_t
 virtio_pci_modern_get_queue_len(FAR struct virtio_pci_device_s *vpdev,
                                 int idx);
 static int
-virtio_pci_modern_config_vector(FAR struct virtio_pci_device_s *vpdev);
+virtio_pci_modern_config_vector(FAR struct virtio_pci_device_s *vpdev,
+                                bool enable);
 static int
 virtio_pci_modern_create_virtqueue(FAR struct virtio_pci_device_s *vpdev,
                                    FAR struct virtqueue *vq);
@@ -321,7 +322,9 @@ virtio_pci_modern_create_virtqueue(FAR struct virtio_pci_device_s *vpdev,
 {
   FAR struct virtio_pci_common_cfg_s *cfg = vpdev->common;
   FAR struct virtio_vring_info *vrinfo;
+#if CONFIG_DRIVERS_VIRTIO_PCI_POLLING_PERIOD <= 0
   uint16_t msix_vector;
+#endif
   uint16_t off;
 
   /* Activate the queue */
@@ -336,6 +339,7 @@ virtio_pci_modern_create_virtqueue(FAR struct virtio_pci_device_s *vpdev,
   pci_write_io_qword(vpdev->dev, &cfg->queue_used,
                      up_addrenv_va_to_pa(vq->vq_ring.used));
 
+#if CONFIG_DRIVERS_VIRTIO_PCI_POLLING_PERIOD <= 0
   pci_write_io_word(vpdev->dev, &cfg->queue_msix_vector,
                     VIRTIO_PCI_INT_VQ);
   pci_read_io_word(vpdev->dev, &cfg->queue_msix_vector, &msix_vector);
@@ -344,6 +348,7 @@ virtio_pci_modern_create_virtqueue(FAR struct virtio_pci_device_s *vpdev,
       vrterr("Msix_vector is no vector\n");
       return -EBUSY;
     }
+#endif
 
   /* Enable vq */
 
@@ -368,15 +373,16 @@ virtio_pci_modern_create_virtqueue(FAR struct virtio_pci_device_s *vpdev,
  ****************************************************************************/
 
 static int
-virtio_pci_modern_config_vector(FAR struct virtio_pci_device_s *vpdev)
+virtio_pci_modern_config_vector(FAR struct virtio_pci_device_s *vpdev,
+                                bool enable)
 {
   FAR struct virtio_pci_common_cfg_s *cfg = vpdev->common;
+  uint16_t vector = enable ? 0 : VIRTIO_PCI_MSI_NO_VECTOR;
   uint16_t rvector;
 
-  pci_write_io_word(vpdev->dev, &cfg->config_msix_vector,
-                    VIRTIO_PCI_INT_CFG);
+  pci_write_io_word(vpdev->dev, &cfg->config_msix_vector, vector);
   pci_read_io_word(vpdev->dev, &cfg->config_msix_vector, &rvector);
-  if (rvector == VIRTIO_PCI_MSI_NO_VECTOR)
+  if (rvector != vector)
     {
       return -EINVAL;
     }
@@ -396,8 +402,11 @@ void virtio_pci_modern_delete_virtqueue(FAR struct virtio_device *vdev,
   FAR struct virtio_pci_common_cfg_s *cfg = vpdev->common;
 
   pci_write_io_word(vpdev->dev, &cfg->queue_select, index);
+
+#if CONFIG_DRIVERS_VIRTIO_PCI_POLLING_PERIOD <= 0
   pci_write_io_word(vpdev->dev, &cfg->queue_msix_vector,
                     VIRTIO_PCI_MSI_NO_VECTOR);
+#endif
 }
 
 /****************************************************************************
