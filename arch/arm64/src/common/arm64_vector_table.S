@@ -69,7 +69,7 @@
     stp    x30, \xreg0,  [sp, #8 * REG_X30]
 
     /* ELR and SPSR */
-#ifdef CONFIG_ARCH_BOOT_EL3
+#if CONFIG_ARCH_ARM64_EXCEPTION_LEVEL == 3
     mrs    \xreg0, elr_el3
     mrs    \xreg1, spsr_el3
 #else
@@ -251,7 +251,7 @@ arm64_exit_exc_fpu_done:
     /* restore spsr and elr at el1*/
 
     ldp    x0, x1,   [sp, #8 * REG_ELR]
-#ifdef CONFIG_ARCH_BOOT_EL3
+#if CONFIG_ARCH_ARM64_EXCEPTION_LEVEL == 3
     msr    elr_el3,   x0
     msr    spsr_el3,  x1
 #else

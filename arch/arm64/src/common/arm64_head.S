@@ -235,7 +235,7 @@ switch_el:
 
     bl    arm64_boot_el3_init
 
-#ifdef CONFIG_ARCH_BOOT_EL3
+#if CONFIG_ARCH_ARM64_EXCEPTION_LEVEL == 3
     msr   SPSel, #1
 
     /* Set SP_EL3 (with SPSel = 1) */
