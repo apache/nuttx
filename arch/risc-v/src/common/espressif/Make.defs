@@ -41,7 +41,7 @@ else
 	CHIP_CSRCS += esp_timerisr.c
 endif
 
-ifeq ($(CONFIG_WATCHDOG),y)
+ifeq ($(CONFIG_ESPRESSIF_WDT),y)
 	CHIP_CSRCS += esp_wdt.c
 endif
 

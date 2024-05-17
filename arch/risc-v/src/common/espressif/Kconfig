@@ -328,6 +328,29 @@ config ESPRESSIF_HR_TIMER
 		The HR Timer is built on top of the System Timer (SYSTIMER) peripheral.
 		Timer callbacks are dispatched from a high-priority kernel task.
 
+config ESPRESSIF_WDT
+	bool
+	default n
+	select WATCHDOG
+
+config ESPRESSIF_MWDT
+	bool "Main System Watchdog Timer"
+	default n
+	select ESPRESSIF_WDT
+	---help---
+		Includes MWDT.
+
+config ESPRESSIF_RWDT
+	bool "RTC Watchdog Timer"
+	default n
+	select ESPRESSIF_WDT
+	---help---
+		Includes RWDT. This watchdog timer is from the RTC module.
+		When it is selected, if the developer sets it to reset on expiration
+		it will reset Main System and the RTC module. If you don't want
+		to have the RTC module reset, please, use the Timers' Module WDTs.
+		They will only reset Main System.
+
 config ESPRESSIF_BROWNOUT_DET
 	bool "Brownout Detector"
 	default y
