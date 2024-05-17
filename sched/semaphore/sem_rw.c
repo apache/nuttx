@@ -24,8 +24,9 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/rwsem.h>
 #include <nuttx/irq.h>
+#include <nuttx/rwsem.h>
+#include <nuttx/sched.h>
 #include <assert.h>
 
 /****************************************************************************
@@ -165,8 +166,9 @@ void up_read(FAR rw_semaphore_t *rwsem)
 int down_write_trylock(FAR rw_semaphore_t *rwsem)
 {
   irqstate_t flags = spin_lock_irqsave(&rwsem->protected);
+  pid_t tid = _SCHED_GETTID();
 
-  if (rwsem->writer > 0 || rwsem->reader > 0)
+  if (rwsem->reader > 0 || (rwsem->writer > 0 && tid != rwsem->holder))
     {
       spin_unlock_irqrestore(&rwsem->protected, flags);
       return 0;
@@ -175,6 +177,7 @@ int down_write_trylock(FAR rw_semaphore_t *rwsem)
   /* The check passes, then we just need the writer reference + 1 */
 
   rwsem->writer++;
+  rwsem->holder = tid;
 
   spin_unlock_irqrestore(&rwsem->protected, flags);
 
@@ -195,8 +198,9 @@ int down_write_trylock(FAR rw_semaphore_t *rwsem)
 void down_write(FAR rw_semaphore_t *rwsem)
 {
   irqstate_t flags = spin_lock_irqsave(&rwsem->protected);
+  pid_t tid = _SCHED_GETTID();
 
-  while (rwsem->reader > 0 || rwsem->writer > 0)
+  while (rwsem->reader > 0 || (rwsem->writer > 0 && rwsem->holder != tid))
     {
       rwsem->waiter++;
       spin_unlock_irqrestore(&rwsem->protected, flags);
@@ -208,6 +212,7 @@ void down_write(FAR rw_semaphore_t *rwsem)
   /* The check passes, then we just need the writer reference + 1 */
 
   rwsem->writer++;
+  rwsem->holder = tid;
 
   spin_unlock_irqrestore(&rwsem->protected, flags);
 }
@@ -228,8 +233,12 @@ void up_write(FAR rw_semaphore_t *rwsem)
   irqstate_t flags = spin_lock_irqsave(&rwsem->protected);
 
   DEBUGASSERT(rwsem->writer > 0);
+  DEBUGASSERT(rwsem->holder == _SCHED_GETTID());
 
-  rwsem->writer--;
+  if (--rwsem->writer <= 0)
+    {
+      rwsem->holder = RWSEM_NO_HOLDER;
+    }
 
   up_wait(rwsem);
 
@@ -268,6 +277,7 @@ int init_rwsem(FAR rw_semaphore_t *rwsem)
   rwsem->reader = 0;
   rwsem->writer = 0;
   rwsem->waiter = 0;
+  rwsem->holder = RWSEM_NO_HOLDER;
 
   return OK;
 }
@@ -289,7 +299,7 @@ void destroy_rwsem(FAR rw_semaphore_t *rwsem)
   /* Need to check if there is still an unlocked or waiting state */
 
   DEBUGASSERT(rwsem->waiter == 0 && rwsem->reader == 0 &&
-              rwsem->writer == 0);
+              rwsem->writer == 0 && rwsem->holder == RWSEM_NO_HOLDER);
 
   nxsem_destroy(&rwsem->waiting);
 }
