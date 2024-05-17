@@ -387,7 +387,7 @@ class DumpLogFile:
                 start = addr_start
 
         for val in match_res.groupdict()["VALS"].split():
-            data = data + struct.pack("<I", int(val, 16))
+            data = data + struct.pack("<Q", int(val, 16))
 
         return start, data
 
