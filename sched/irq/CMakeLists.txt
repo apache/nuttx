@@ -18,7 +18,8 @@
 #
 # ##############################################################################
 
-set(SRCS irq_initialize.c irq_attach.c irq_dispatch.c irq_unexpectedisr.c)
+set(SRCS irq_initialize.c irq_attach.c irq_attach_thread.c irq_dispatch.c
+         irq_unexpectedisr.c)
 
 if(CONFIG_SPINLOCK)
   list(APPEND SRCS irq_spinlock.c)

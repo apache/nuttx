@@ -50,22 +50,13 @@ int irq_attach(int irq, xcpt_t isr, FAR void *arg)
 
   if ((unsigned)irq < NR_IRQS)
     {
+      int ndx = IRQ_TO_NDX(irq);
       irqstate_t flags;
-      int ndx;
 
-#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
-      /* Is there a mapping for this IRQ number? */
-
-      ndx = g_irqmap[irq];
-      if ((unsigned)ndx >= CONFIG_ARCH_NUSER_INTERRUPTS)
+      if (ndx < 0)
         {
-          /* No.. then return failure. */
-
-          return ret;
+          return ndx;
         }
-#else
-      ndx = irq;
-#endif
 
       /* If the new ISR is NULL, then the ISR is being detached.
        * In this case, disable the ISR and direct any interrupts

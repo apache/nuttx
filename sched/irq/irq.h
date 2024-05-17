@@ -44,6 +44,13 @@
 #  error CONFIG_ARCH_NUSER_INTERRUPTS is not defined
 #endif
 
+#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
+#  define IRQ_TO_NDX(irq) \
+  (g_irqmap[(irq)] < CONFIG_ARCH_NUSER_INTERRUPTS ? g_irqmap[(irq)] : -EINVAL)
+#else
+#  define IRQ_TO_NDX(irq) (irq)
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
