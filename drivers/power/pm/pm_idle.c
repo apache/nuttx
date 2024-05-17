@@ -50,10 +50,12 @@ void pm_idle(pm_idle_handler_t handler)
   irqstate_t flags;
   int ret;
 
-  /* Disable IRQ and lock sched */
+  /* If sched lock before irq save, and irq handler do post, scheduler will
+   * be delayed after WFI until next sched unlock. which is not acceptable.
+   */
 
-  sched_lock();
   flags = up_irq_save();
+  sched_lock();
 
   newstate = pm_checkstate(PM_IDLE_DOMAIN);
   ret      = pm_changestate(PM_IDLE_DOMAIN, newstate);
@@ -66,7 +68,9 @@ void pm_idle(pm_idle_handler_t handler)
 
   pm_changestate(PM_IDLE_DOMAIN, PM_RESTORE);
 
-  /* Unlock sched and enable IRQ */
+  /* If there is pending irq, enable irq make handlers finish all execution
+   * will be better decrease scheduler context switch times.
+   */
 
   up_irq_restore(flags);
   sched_unlock();
