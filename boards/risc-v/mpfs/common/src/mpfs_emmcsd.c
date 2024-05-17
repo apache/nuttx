@@ -27,6 +27,7 @@
 #include <debug.h>
 #include <errno.h>
 #include <nuttx/mmcsd.h>
+#include <nuttx/fs/partition.h>
 
 #include "mpfs_sdio.h"
 #include "board_config.h"
@@ -38,8 +39,42 @@
 static struct sdio_dev_s *g_sdio_dev;
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static void partition_handler(FAR struct partition_s *part, FAR void *arg)
+{
+  unsigned partition = *(int *)arg;
+  char devname[] = "/dev/mmcsd0p0";
+
+  if (partition < 10 && part->index == partition)
+    {
+      devname[sizeof(devname) - 2] = partition + 48;
+      register_blockpartition(devname, 0, "/dev/mmcsd0", part->firstblock,
+                              part->nblocks);
+    }
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: mpfs_board_register_partition
+ *
+ * Description:
+ *   Register partitions found in mmcsd0
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+int mpfs_board_register_partition(unsigned partition)
+{
+  return parse_block_partition("/dev/mmcsd0", partition_handler, &partition);
+}
 
 /****************************************************************************
  * Name: board_emmcsd_init
