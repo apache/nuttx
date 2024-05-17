@@ -128,8 +128,16 @@ int esp_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_WATCHDOG
-  ret = esp_wdt_initialize();
+#ifdef CONFIG_ESPRESSIF_MWDT
+  ret = esp_wdt_initialize("/dev/watchdog0", ESP_WDT_MWDT);
+  if (ret < 0)
+    {
+      _err("Failed to initialize WDT: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_RWDT
+  ret = esp_wdt_initialize("/dev/watchdog1", ESP_WDT_RWDT);
   if (ret < 0)
     {
       _err("Failed to initialize WDT: %d\n", ret);
