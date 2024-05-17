@@ -75,7 +75,7 @@ int mpfs_board_usb_init(void)
       return ret;
     }
 
-  if (board_composite_connect(0, 0) == NULL)
+  if (board_composite_connect(0, 1) == NULL)
     {
       syslog(LOG_ERR, "Failed to connect composite: %d\n", ret);
       return ret;
