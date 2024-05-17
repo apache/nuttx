@@ -92,7 +92,7 @@ SECTION_FUNC(text, up_saveusercontext)
     stp    x30, x4,  [x0, #8 * REG_X30]
 
     /* ELR and SPSR */
-#ifdef CONFIG_ARCH_BOOT_EL3
+#if CONFIG_ARCH_ARM64_EXCEPTION_LEVEL == 3
     mrs    x4,  elr_el3
     mrs    x5,  spsr_el3
 #else
@@ -186,7 +186,7 @@ GTEXT(arm64_sync_exc)
 SECTION_FUNC(text, arm64_sync_exc)
     /* checking the EC value to see which exception need to be handle */
 
-#ifdef CONFIG_ARCH_BOOT_EL3
+#if CONFIG_ARCH_ARM64_EXCEPTION_LEVEL == 3
     mrs    x0, esr_el3
 #else
     mrs    x0, esr_el1

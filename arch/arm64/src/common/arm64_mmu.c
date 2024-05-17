@@ -523,7 +523,7 @@ static void setup_page_tables(void)
     }
 }
 
-#ifdef CONFIG_ARCH_BOOT_EL3
+#if CONFIG_ARCH_ARM64_EXCEPTION_LEVEL == 3
 static void enable_mmu_el3(unsigned int flags)
 {
   uint64_t value;
@@ -533,7 +533,7 @@ static void enable_mmu_el3(unsigned int flags)
 
   write_sysreg(MEMORY_ATTRIBUTES, mair_el3);
   write_sysreg(get_tcr(3), tcr_el3);
-  write_sysreg(((uint64_t)base_xlat_table), ttbr0_el3);
+  write_sysreg((uint64_t)base_xlat_table, ttbr0_el3);
 
   /* Ensure these changes are seen before MMU is enabled */
 
@@ -566,7 +566,7 @@ static void enable_mmu_el1(unsigned int flags)
 
   write_sysreg(MEMORY_ATTRIBUTES, mair_el1);
   write_sysreg(get_tcr(1), tcr_el1);
-  write_sysreg(((uint64_t)base_xlat_table), ttbr0_el1);
+  write_sysreg((uint64_t)base_xlat_table, ttbr0_el1);
 
   /* Ensure these changes are seen before MMU is enabled */
 
@@ -630,7 +630,7 @@ int arm64_mmu_init(bool is_primary_core)
 
   __asm__ volatile ("mrs %0, CurrentEL" : "=r" (el));
 
-#ifdef CONFIG_ARCH_BOOT_EL3
+#if CONFIG_ARCH_ARM64_EXCEPTION_LEVEL == 3
   __MMU_ASSERT(GET_EL(el) == MODE_EL3,
                "Exception level not EL3, MMU not enabled!\n");
 
@@ -665,7 +665,7 @@ int arm64_mmu_init(bool is_primary_core)
 
   /* Currently EL1 and EL3 are supported */
 
-#ifdef CONFIG_ARCH_BOOT_EL3
+#if CONFIG_ARCH_ARM64_EXCEPTION_LEVEL == 3
   enable_mmu_el3(flags);
 #else
   enable_mmu_el1(flags);

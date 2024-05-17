@@ -76,7 +76,7 @@ void arm64_new_task(struct tcb_s * tcb)
 
   /* Keep using SP_EL1 or SP_EL3 */
 
-#ifdef CONFIG_ARCH_BOOT_EL3
+#if CONFIG_ARCH_ARM64_EXCEPTION_LEVEL == 3
   pinitctx->spsr      = SPSR_MODE_EL3H;
 #else
   pinitctx->spsr      = SPSR_MODE_EL1H;

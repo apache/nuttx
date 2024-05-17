@@ -792,7 +792,7 @@ uint64_t * arm64_decodefiq(uint64_t * regs)
 
   irq = arm64_gic_get_active_fiq();
 
-#ifdef CONFIG_ARCH_BOOT_EL3
+#if CONFIG_ARCH_ARM64_EXCEPTION_LEVEL == 3
   /* FIQ is group0 interrupt */
 
   if (irq == PENDING_GRP1NS_INTID)
