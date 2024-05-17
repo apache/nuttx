@@ -352,8 +352,8 @@ static ssize_t rwb_writebuffer(FAR struct rwbuffer_s *rwb,
 
       padblocks = startblock % rwb->wralignblocks;
       rwb->wrblockstart = startblock - padblocks;
-      rwb_read_(rwb, rwb->wrblockstart, padblocks, rwb->wrbuffer);
       rwb->wrnblocks = padblocks;
+      rwb_read_(rwb, rwb->wrblockstart, padblocks, rwb->wrbuffer);
 
       if (remain > rwb->wrmaxblocks - padblocks)
         {
@@ -977,7 +977,10 @@ static ssize_t rwb_read_(FAR struct rwbuffer_s *rwb, off_t startblock,
        * the user buffer.
        */
 
-      ret = rwb->rhreload(rwb->dev, rdbuffer, startblock, nblocks);
+      if (nblocks)
+        {
+          ret = rwb->rhreload(rwb->dev, rdbuffer, startblock, nblocks);
+        }
     }
 
   return ret;
