@@ -59,6 +59,11 @@
 #  include <nuttx/usb/rndis.h>
 #endif
 
+#ifdef CONFIG_SENSORS_HCSR04
+#include "stm32_hcsr04.h"
+#endif
+
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -231,6 +236,16 @@ int stm32_bringup(void)
   mac[4] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 1)) & 0xff;
   mac[5] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 0)) & 0xff;
   usbdev_rndis_initialize(mac);
+#endif
+
+#ifdef CONFIG_SENSORS_HCSR04
+  /* Configure and initialize the HC-SR04 distance sensor */
+
+  ret = board_hcsr04_initialize(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_hcsr04_initialize() failed: %d\n", ret);
+    }
 #endif
 
   return ret;

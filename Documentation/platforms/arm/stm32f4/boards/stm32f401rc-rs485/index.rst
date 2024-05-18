@@ -539,3 +539,19 @@ NSH commands::
        mcsonn_main: Connected
 
        nsh> msdis
+
+hcs04
+-----
+
+Configures the NuttShell (nsh) over USB Serial (check usbserial configuration) and enables ultrasonic sensor HC-SR04::
+
+       nsh> cat /dev/dist0
+       6241 --> value 
+       6227
+       6241
+       6255
+
+You can convert the value using following::
+
+       Convert to cm: value/58
+       Converto to inches: value/148
