@@ -18,11 +18,26 @@
  *
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
+#define KTEXT_ADDR   0x80200000
+
+#ifdef CONFIG_ARCH_RV32
+#define KTEXT_SIZE   4194304
+#else
+#define KTEXT_SIZE   2097152
+#endif
+
+#define KSRAM_ADDR   (CONFIG_RAM_START)
+#define KSRAM_SIZE   (CONFIG_RAM_SIZE)
+#define PGRAM_ADDR   (CONFIG_ARCH_PGPOOL_PBASE)
+#define PGRAM_SIZE   (CONFIG_ARCH_PGPOOL_SIZE)
+
 MEMORY
 {
-    kflash (rx) : ORIGIN = 0x80200000, LENGTH = 4096K   /* w/ cache */
-    ksram (rwx) : ORIGIN = 0x80600000, LENGTH = 4096K   /* w/ cache */
-    pgram (rwx) : ORIGIN = 0x80a00000, LENGTH = 4096K   /* w/ cache */
+    kflash (rx) : ORIGIN = KTEXT_ADDR, LENGTH = KTEXT_SIZE   /* w/ cache */
+    ksram (rwx) : ORIGIN = KSRAM_ADDR, LENGTH = KSRAM_SIZE   /* w/ cache */
+    pgram (rwx) : ORIGIN = PGRAM_ADDR, LENGTH = PGRAM_SIZE   /* w/ cache */
 }
 
 OUTPUT_ARCH("riscv")

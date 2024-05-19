@@ -24,11 +24,7 @@ include $(TOPDIR)/arch/risc-v/src/common/Toolchain.defs
 
 ifeq ($(CONFIG_ARCH_CHIP_QEMU_RV),y)
 ifeq ($(CONFIG_BUILD_KERNEL),y)
-ifeq ($(CONFIG_ARCH_CHIP_QEMU_RV64),y)
-  LDSCRIPT = ld-kernel64.script
-else
-  LDSCRIPT = ld-kernel32.script
-endif
+  LDSCRIPT = ld-kernel.script
 else
   LDSCRIPT = ld.script
 endif
