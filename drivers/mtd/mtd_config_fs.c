@@ -73,7 +73,7 @@
  * starting.
  */
 
-#define NVS_CORRUPT_DATA_SKIP_STEP      1
+#define NVS_CORRUPT_DATA_SKIP_STEP      NVS_ALIGN_SIZE
 
 /* Gc done or close ate has the id of 0xffffffff.
  * We can tell if the ate is special by looking at its id.
