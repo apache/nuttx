@@ -267,7 +267,7 @@ RUN mkdir -p cmake && \
 RUN dpkg --add-architecture i386
 # This is used for the final images so make sure to not store apt cache
 # Note: xtensa-esp32-elf-gdb is linked to libpython2.7
-RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -qq --no-install-recommends \
+RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" TZ=Etc/UTC apt-get install -y -qq --no-install-recommends \
   -o APT::Immediate-Configure=0 \
   avr-libc \
   ccache \
@@ -306,6 +306,8 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   unzip \
   wget \
   xxd \
+  file \
+  tclsh \
   && rm -rf /var/lib/apt/lists/*
 
 # Set GCC-12 as Default compiler
