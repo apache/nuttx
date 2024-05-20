@@ -1905,6 +1905,10 @@ static ssize_t cxd5610_gnss_read(struct file *filep, char *buffer,
 
   cxd5610_gnss_buffer_unlock(priv);
 
+  /* Reset read position after read is complete */
+
+  filep->f_pos = 0;
+
   cxd5610_gnss_device_unlock(priv);
   return len;
 }
