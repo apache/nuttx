@@ -800,7 +800,7 @@ bool up_textheap_heapmember(FAR void *p);
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_USE_TEXT_HEAP)
-#if defined(CONFIG_ARCH_TEXT_HEAP_SEPARATE_DATA_ADDRESS)
+#if defined(CONFIG_ARCH_HAVE_TEXT_HEAP_SEPARATE_DATA_ADDRESS)
 FAR void *up_textheap_data_address(FAR void *p);
 #else
 #define up_textheap_data_address(p) ((FAR void *)p)
@@ -818,7 +818,7 @@ FAR void *up_textheap_data_address(FAR void *p);
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_USE_TEXT_HEAP)
-#if defined(CONFIG_ARCH_TEXT_HEAP_SEPARATE_DATA_ADDRESS)
+#if defined(CONFIG_ARCH_HAVE_TEXT_HEAP_SEPARATE_DATA_ADDRESS)
 void up_textheap_data_sync(void);
 #else
 #define up_textheap_data_sync() do {} while (0)
