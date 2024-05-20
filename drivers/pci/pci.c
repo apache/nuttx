@@ -1246,7 +1246,11 @@ static int pci_enable_msix(FAR struct pci_device_s *dev, FAR int *irq,
   /* Map MSI-X table */
 
   tblend = tbladdr + tblsize * PCI_MSIX_ENTRY_SIZE;
-  tbladdr = dev->bus->ctrl->ops->map(dev->bus, tbladdr, tblend);
+
+  if (dev->bus->ctrl->ops->map)
+    {
+      tbladdr = dev->bus->ctrl->ops->map(dev->bus, tbladdr, tblend);
+    }
 
   /* Limit tblsize */
 
@@ -1772,7 +1776,12 @@ int pci_get_irq(FAR struct pci_device_s *dev)
 
 int pci_alloc_irq(FAR struct pci_device_s *dev, FAR int *irq, int num)
 {
-  return dev->bus->ctrl->ops->alloc_irq(dev->bus, irq, num);
+  if (dev->bus->ctrl->ops->alloc_irq)
+    {
+      return dev->bus->ctrl->ops->alloc_irq(dev->bus, irq, num);
+    }
+
+  return -ENOTSUP;
 }
 
 /****************************************************************************
@@ -1793,7 +1802,10 @@ int pci_alloc_irq(FAR struct pci_device_s *dev, FAR int *irq, int num)
 
 void pci_release_irq(FAR struct pci_device_s *dev, FAR int *irq, int num)
 {
-  dev->bus->ctrl->ops->release_irq(dev->bus, irq, num);
+  if (dev->bus->ctrl->ops->release_irq)
+    {
+      dev->bus->ctrl->ops->release_irq(dev->bus, irq, num);
+    }
 }
 
 /****************************************************************************
@@ -1816,6 +1828,11 @@ int pci_connect_irq(FAR struct pci_device_s *dev, FAR int *irq, int num)
 {
   uint8_t msi = 0;
   uint8_t msix = 0;
+
+  if (dev->bus->ctrl->ops->connect_irq)
+    {
+      return -ENOTSUP;
+    }
 
   /* Get MSI base */
 
