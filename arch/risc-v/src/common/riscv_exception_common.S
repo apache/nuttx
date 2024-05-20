@@ -30,6 +30,10 @@
 
 #include <sys/types.h>
 
+#ifdef CONFIG_LIB_SYSCALL
+#  include <syscall.h>
+#endif
+
 #include "chip.h"
 
 #include "riscv_percpu.h"
@@ -73,6 +77,7 @@
   .section EXCEPTION_SECTION
   .global exception_common
   .global return_from_exception
+  .global return_from_syscall
   .align  8
 
 exception_common:
@@ -99,24 +104,69 @@ exception_common:
   addi       sp, sp, -XCPTCONTEXT_SIZE
   save_ctx   sp
 
-  csrr       s0, CSR_STATUS
-  REGSTORE   s0, REG_INT_CTX(sp)  /* status */
+  csrr       s0, CSR_STATUS       /* s0=status */
+  csrr       s1, CSR_EPC          /* s1=exception PC */
+  csrr       s2, CSR_CAUSE        /* s2=cause */
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
-  csrr       s0, CSR_SCRATCH
-  REGLOAD    s0, RISCV_PERCPU_USP(s0)
+  csrr       s3, CSR_SCRATCH
+  REGLOAD    s3, RISCV_PERCPU_USP(s3)
 #else
-  addi       s0, sp, XCPTCONTEXT_SIZE
+  addi       s3, sp, XCPTCONTEXT_SIZE
 #endif
 
-  REGSTORE   s0, REG_X2(sp)       /* original SP */
+  REGSTORE   s0, REG_INT_CTX(sp)
+  REGSTORE   s1, REG_EPC(sp)
+  REGSTORE   s3, REG_SP(sp)
 
-  csrr       s0, CSR_EPC
-  REGSTORE   s0, REG_EPC(sp)      /* exception PC */
+#ifdef CONFIG_LIB_SYSCALL
+  /* Check whether it is an exception or interrupt */
+
+  blt        s2, x0, handle_irq   /* If cause < 0 it is interrupt */
+
+  /* Is it a system call ? */
+
+  li         s3, RISCV_IRQ_ECALLU /* Is it a system call ? */
+  bne        s2, s3, handle_irq
+
+  /* Is it one of the reserved system calls ? */
+
+  li         s3, CONFIG_SYS_RESERVED
+  blt        a0, s3, handle_irq   /* If a0 < CONFIG_SYS_RESERVED */
+
+  /* It is a system call, re-enable interrupts if they were enabled */
+
+  andi       s3, s0, STATUS_PIE
+  beqz       s3, 1f
+  csrs       CSR_STATUS, STATUS_IE
+
+1:
+  addi       s1, s1, 0x4          /* Must move EPC forward by +4 */
+  REGSTORE   s1, REG_EPC(sp)      /* Updated EPC to user context */
+
+  csrr       tp, CSR_SCRATCH      /* Load kernel TP */
+  REGLOAD    tp, RISCV_PERCPU_TCB(tp)
+
+  call       x1, dispatch_syscall /* Dispatch the system call */
+
+return_from_syscall:
+
+  /* System call is done, disable interrupts */
+
+  csrc       CSR_STATUS, STATUS_IE
+
+  /* Clean up after system call */
+
+  REGSTORE   a0, REG_A0(sp)       /* Syscall return value to user context */
+  mv         a0, sp               /* Return to same context */
+  tail       return_from_exception
+
+handle_irq:
+#endif
 
   /* Setup arg0(exception cause), arg1(context) */
 
-  csrr       a0, CSR_CAUSE        /* exception cause */
+  mv         a0, s2               /* exception cause */
   mv         a1, sp               /* context = sp */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
@@ -152,8 +202,16 @@ return_from_exception:
   REGLOAD    s0, REG_EPC(sp)      /* restore sepc */
   csrw       CSR_EPC, s0
 
-  REGLOAD    s0, REG_INT_CTX(sp)  /* restore sstatus */
+  REGLOAD    s0, REG_INT_CTX(sp)  /* restore status */
   csrw       CSR_STATUS, s0
+
+#ifdef CONFIG_LIB_SYSCALL
+  /* Store tcb to scratch register */
+
+  call       x1, nxsched_self
+  csrr       s1, CSR_SCRATCH
+  REGSTORE   a0, RISCV_PERCPU_TCB(s1)
+#endif
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
   /* Returning to userspace ? */

@@ -96,14 +96,6 @@
 
 /* Configuration ************************************************************/
 
-/* If this is a kernel build, how many nested system calls should we
- * support?
- */
-
-#ifndef CONFIG_SYS_NNEST
-#  define CONFIG_SYS_NNEST  2
-#endif
-
 /* Processor PC */
 
 #define REG_EPC_NDX         0
@@ -539,18 +531,6 @@
 
 #ifndef __ASSEMBLY__
 
-/* This structure represents the return state from a system call */
-
-#ifdef CONFIG_LIB_SYSCALL
-struct xcpt_syscall_s
-{
-  uintptr_t sysreturn;   /* The return PC */
-#ifndef CONFIG_BUILD_FLAT
-  uintptr_t int_ctx;     /* Interrupt context (i.e. m-/sstatus) */
-#endif
-};
-#endif
-
 /* The following structure is included in the TCB and defines the complete
  * state of the thread.
  */
@@ -580,16 +560,6 @@ struct xcptcontext
    */
 
   uintptr_t sigreturn;
-#endif
-
-#ifdef CONFIG_LIB_SYSCALL
-  /* The following array holds information needed to return from each nested
-   * system call.
-   */
-
-  uint8_t nsyscalls;
-  struct xcpt_syscall_s syscall[CONFIG_SYS_NNEST];
-
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV

@@ -438,16 +438,6 @@ void *riscv_perform_syscall(uintptr_t *regs);
 #define riscv_switchcontext(prev, next) \
   sys_call2(SYS_switch_context, (uintptr_t)prev, (uintptr_t)next)
 
-#ifdef CONFIG_BUILD_KERNEL
-/* SYS call 3:
- *
- * void riscv_syscall_return(void);
- */
-
-#define riscv_syscall_return() sys_call0(SYS_syscall_return)
-
-#endif /* CONFIG_BUILD_KERNEL */
-
 #undef EXTERN
 #ifdef __cplusplus
 }
