@@ -430,13 +430,13 @@ config ARCH_HAVE_TEXT_HEAP
 	---help---
 		Special memory region for dynamic code loading
 
-config ARCH_TEXT_HEAP_SEPARATE_DATA_ADDRESS
+config ARCH_HAVE_TEXT_HEAP_SEPARATE_DATA_ADDRESS
 	bool
 	default n
 	---help---
 		Textheap might have separate instruction/data mappings
 
-config ARCH_TEXT_HEAP_WORD_ALIGNED_READ
+config ARCH_HAVE_TEXT_HEAP_WORD_ALIGNED_READ
 	bool
 	default n
 	---help---
