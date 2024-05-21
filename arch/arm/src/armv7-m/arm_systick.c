@@ -294,7 +294,14 @@ struct timer_lowerhalf_s *systick_initialize(bool coreclk,
       putreg32(NVIC_SYSTICK_CTRL_TICKINT, NVIC_SYSTICK_CTRL);
     }
 
+#ifdef CONFIG_ARMV7M_SYSTICK_IRQ_THREAD
+  irq_attach_thread(NVIC_IRQ_SYSTICK, NULL,
+                    systick_interrupt, lower,
+                    CONFIG_ARMV7M_SYSTICK_IRQ_THREAD_PRIORITY,
+                    CONFIG_ARMV7M_SYSTICK_IRQ_THREAD_STACK_SIZE);
+#else
   irq_attach(NVIC_IRQ_SYSTICK, systick_interrupt, lower);
+#endif
   up_enable_irq(NVIC_IRQ_SYSTICK);
 
   /* Register the timer driver if need */
