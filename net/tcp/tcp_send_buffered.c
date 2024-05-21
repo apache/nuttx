@@ -173,34 +173,6 @@ static void psock_writebuffer_notify(FAR struct tcp_conn_s *conn)
 static void retransmit_segment(FAR struct tcp_conn_s *conn,
                                FAR struct tcp_wrbuffer_s *wrb)
 {
-  uint16_t sent;
-
-  /* Reset the number of bytes sent sent from the write buffer */
-
-  sent = TCP_WBSENT(wrb);
-  if (conn->tx_unacked > sent)
-    {
-      conn->tx_unacked -= sent;
-    }
-  else
-    {
-      conn->tx_unacked = 0;
-    }
-
-  if (conn->sent > sent)
-    {
-      conn->sent -= sent;
-    }
-  else
-    {
-      conn->sent = 0;
-    }
-
-  TCP_WBSENT(wrb) = 0;
-  ninfo("REXMIT: wrb=%p sent=%u, "
-        "conn tx_unacked=%" PRId32 " sent=%" PRId32 "\n",
-        wrb, TCP_WBSENT(wrb), conn->tx_unacked, conn->sent);
-
   /* Free any write buffers that have exceed the retry count */
 
   if (++TCP_WBNRTX(wrb) >= TCP_MAXRTX)
@@ -231,6 +203,36 @@ static void retransmit_segment(FAR struct tcp_conn_s *conn,
     }
   else
     {
+      uint16_t sent;
+
+      sent = TCP_WBSENT(wrb);
+
+      ninfo("REXMIT: wrb=%p sent=%u, "
+            "conn tx_unacked=%" PRId32 " sent=%" PRId32 "\n",
+            wrb, TCP_WBSENT(wrb), conn->tx_unacked, conn->sent);
+
+      /* Reset the number of bytes sent sent from the write buffer */
+
+      if (conn->tx_unacked > sent)
+        {
+          conn->tx_unacked -= sent;
+        }
+      else
+        {
+          conn->tx_unacked = 0;
+        }
+
+      if (conn->sent > sent)
+        {
+          conn->sent -= sent;
+        }
+      else
+        {
+          conn->sent = 0;
+        }
+
+      TCP_WBSENT(wrb) = 0;
+
       /* Insert the write buffer into the write_q (in sequence
        * number order).  The retransmission will occur below
        * when the write buffer with the lowest sequence number
@@ -859,35 +861,6 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
       if (wrb != NULL && TCP_WBSENT(wrb) > 0)
         {
           FAR struct tcp_wrbuffer_s *tmp;
-          uint16_t sent;
-
-          /* Yes.. Reset the number of bytes sent sent from
-           * the write buffer
-           */
-
-          sent = TCP_WBSENT(wrb);
-          if (conn->tx_unacked > sent)
-            {
-              conn->tx_unacked -= sent;
-            }
-          else
-            {
-              conn->tx_unacked = 0;
-            }
-
-          if (conn->sent > sent)
-            {
-              conn->sent -= sent;
-            }
-          else
-            {
-              conn->sent = 0;
-            }
-
-          TCP_WBSENT(wrb) = 0;
-          ninfo("REXMIT: wrb=%p sent=%u, "
-                "conn tx_unacked=%" PRId32 " sent=%" PRId32 "\n",
-                wrb, TCP_WBSENT(wrb), conn->tx_unacked, conn->sent);
 
           /* Increment the retransmit count on this write buffer. */
 
@@ -923,6 +896,39 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                */
 
               conn->expired++;
+            }
+          else
+            {
+              uint16_t sent;
+
+              sent = TCP_WBSENT(wrb);
+              ninfo("REXMIT: wrb=%p sent=%u, "
+                    "conn tx_unacked=%" PRId32 " sent=%" PRId32 "\n",
+                    wrb, TCP_WBSENT(wrb), conn->tx_unacked, conn->sent);
+
+              /* Yes.. Reset the number of bytes sent sent from
+               * the write buffer
+               */
+
+              if (conn->tx_unacked > sent)
+                {
+                  conn->tx_unacked -= sent;
+                }
+              else
+                {
+                  conn->tx_unacked = 0;
+                }
+
+              if (conn->sent > sent)
+                {
+                  conn->sent -= sent;
+                }
+              else
+                {
+                  conn->sent = 0;
+                }
+
+              TCP_WBSENT(wrb) = 0;
             }
         }
 
