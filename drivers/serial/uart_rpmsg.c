@@ -236,7 +236,7 @@ static void uart_rpmsg_dmareceive(FAR struct uart_dev_s *dev)
   if (len > xfer->length)
     {
       memcpy(xfer->buffer, msg->data, xfer->length);
-      memcpy(xfer->nbuffer, msg->data, len - xfer->length);
+      memcpy(xfer->nbuffer, msg->data + xfer->length, len - xfer->length);
     }
   else
     {
