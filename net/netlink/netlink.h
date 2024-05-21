@@ -562,7 +562,7 @@ void netlink_neigh_notify(FAR const void *neigh, int type, int domain);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NETLINK_DISABLE_NEWPREFIX) || !defined(CONFIG_NET_IPV6)
+#if defined(CONFIG_NETLINK_DISABLE_NEWPREFIX) || !defined(CONFIG_NET_IPv6)
 #  define netlink_ipv6_prefix_notify(dev, type, pinfo)
 #else
 void netlink_ipv6_prefix_notify(FAR struct net_driver_s *dev, int type,
