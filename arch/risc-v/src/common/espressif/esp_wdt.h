@@ -35,8 +35,9 @@
 
 enum esp_wdt_inst_e
 {
-  ESP_WDT_MWDT = 0,  /* Main System Watchdog Timer (MWDT) of Timer Group 0 */
-  ESP_WDT_RWDT       /* RTC Watchdog Timer (RWDT) */
+  ESP_WDT_MWDT0 = 0,  /* Main System Watchdog Timer (MWDT) of Timer Group 0 */
+  ESP_WDT_MWDT1,      /* Main System Watchdog Timer (MWDT) of Timer Group 1 */
+  ESP_WDT_RWDT        /* RTC Watchdog Timer (RWDT) */
 };
 
 /****************************************************************************

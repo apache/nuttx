@@ -150,21 +150,39 @@ static const struct watchdog_ops_s g_esp_wdg_ops =
   .ioctl      = NULL
 };
 
-#ifdef CONFIG_ESPRESSIF_MWDT
+#ifdef CONFIG_ESPRESSIF_MWDT0
 /* Watchdog HAL context */
 
-static wdt_hal_context_t mwdt_hal_ctx;
+static wdt_hal_context_t mwdt0_hal_ctx;
 
 /* MWDT0 lower-half */
 
-static struct esp_wdt_lowerhalf_s g_esp_mwdt_lowerhalf =
+static struct esp_wdt_lowerhalf_s g_esp_mwdt0_lowerhalf =
 {
   .ops = &g_esp_wdg_ops,
   .timeout = MWDT_MAX_TIMEOUT_MS,
   .periph = TG0_WDT_LEVEL_INTR_SOURCE,
   .peripheral = TIMER,
   .irq = ESP_IRQ_TG0_WDT_LEVEL,
-  .ctx = &mwdt_hal_ctx
+  .ctx = &mwdt0_hal_ctx
+};
+#endif
+
+#ifdef CONFIG_ESPRESSIF_MWDT1
+/* Watchdog HAL context */
+
+static wdt_hal_context_t mwdt1_hal_ctx;
+
+/* MWDT1 lower-half */
+
+static struct esp_wdt_lowerhalf_s g_esp_mwdt1_lowerhalf =
+{
+  .ops = &g_esp_wdg_ops,
+  .timeout = MWDT_MAX_TIMEOUT_MS,
+  .periph = TG1_WDT_LEVEL_INTR_SOURCE,
+  .peripheral = TIMER,
+  .irq = ESP_IRQ_TG1_WDT_LEVEL,
+  .ctx = &mwdt1_hal_ctx
 };
 #endif
 
@@ -668,12 +686,25 @@ int esp_wdt_initialize(const char *devpath, enum esp_wdt_inst_e wdt_id)
 
   switch (wdt_id)
     {
-#ifdef CONFIG_ESPRESSIF_MWDT
-      case ESP_WDT_MWDT:
+#ifdef CONFIG_ESPRESSIF_MWDT0
+      case ESP_WDT_MWDT0:
         {
-          lower = &g_esp_mwdt_lowerhalf;
+          lower = &g_esp_mwdt0_lowerhalf;
           periph_module_enable(PERIPH_TIMG0_MODULE);
           wdt_hal_init(lower->ctx, WDT_MWDT0,
+                       MWDT_LL_DEFAULT_CLK_PRESCALER, true);
+
+          break;
+        }
+
+#endif
+
+#ifdef CONFIG_ESPRESSIF_MWDT1
+      case ESP_WDT_MWDT1:
+        {
+          lower = &g_esp_mwdt1_lowerhalf;
+          periph_module_enable(PERIPH_TIMG1_MODULE);
+          wdt_hal_init(lower->ctx, WDT_MWDT1,
                        MWDT_LL_DEFAULT_CLK_PRESCALER, true);
 
           break;

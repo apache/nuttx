@@ -333,12 +333,21 @@ config ESPRESSIF_WDT
 	default n
 	select WATCHDOG
 
-config ESPRESSIF_MWDT
-	bool "Main System Watchdog Timer"
+config ESPRESSIF_MWDT0
+	bool "Main System Watchdog Timer (Group 0)"
 	default n
 	select ESPRESSIF_WDT
 	---help---
-		Includes MWDT.
+		Includes MWDT0. This watchdog timer is part of the Group 0
+		timer submodule.
+
+config ESPRESSIF_MWDT1
+	bool "Main System Watchdog Timer (Group 1)"
+	default n
+	select ESPRESSIF_WDT
+	---help---
+		Includes MWDT1. This watchdog timer is part of the Group 1
+		timer submodule.
 
 config ESPRESSIF_RWDT
 	bool "RTC Watchdog Timer"
