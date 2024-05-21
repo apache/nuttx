@@ -1244,14 +1244,16 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
                             size_t buflen, off_t offset)
 {
   FAR struct task_group_s *group = tcb->group;
-  FAR struct file *filep;
-  char path[PATH_MAX];
   size_t remaining;
   size_t linesize;
   size_t copysize;
   size_t totalsize;
   int count;
   int i;
+
+  FAR struct file *filep;
+  char path[PATH_MAX];
+  char backtrace[FS_BACKTRACE_BUFFER_LEN];
 
   DEBUGASSERT(group != NULL);
 
@@ -1265,8 +1267,14 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
   totalsize = 0;
 
   linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
-                               "\n%-3s %-7s %-4s %-9s %s\n",
-                               "FD", "OFLAGS", "TYPE", "POS", "PATH");
+                               "\n%-3s %-7s %-4s %-9s %-14s %s\n",
+                               "FD", "OFLAGS", "TYPE", "POS", "PATH",
+#if CONFIG_FS_BACKTRACE > 0
+                               "BACKTRACE"
+#else
+                               ""
+#endif
+                               );
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                              &offset);
 
@@ -1298,12 +1306,22 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
         }
 
       linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
-                                   "%-3d %-7d %-4x %-9ld %s\n",
+                                   "%-3d %-7d %-4x %-9ld %-14s %s\n",
                                    i, filep->f_oflags,
                                    INODE_GET_TYPE(filep->f_inode),
-                                   (long)filep->f_pos, path);
+                                   (long)filep->f_pos, path,
+                                   file_dump_backtrace(filep,
+                                                       backtrace,
+                                                       sizeof(backtrace)
+                                                      )
+                                  );
       copysize   = procfs_memcpy(procfile->line, linesize,
                                  buffer, remaining, &offset);
+      if (linesize + 1 == STATUS_LINELEN)
+        {
+          procfile->line[STATUS_LINELEN - 2] = '\n';
+          linesize = STATUS_LINELEN;
+        }
 
       totalsize += copysize;
       buffer    += copysize;

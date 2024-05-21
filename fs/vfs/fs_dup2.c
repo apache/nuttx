@@ -174,6 +174,7 @@ int file_dup3(FAR struct file *filep1, FAR struct file *filep2, int flags)
   filep2->f_tag_fdcheck = filep1->f_tag_fdcheck;
 #endif
 
+  FS_ADD_BACKTRACE(filep2);
   return OK;
 }
 
