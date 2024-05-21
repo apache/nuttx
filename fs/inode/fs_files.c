@@ -30,6 +30,7 @@
 #include <sched.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <stdio.h>
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
@@ -460,6 +461,8 @@ found:
       inode_addref(inode);
     }
 
+  FS_ADD_BACKTRACE(filep);
+
 #ifdef CONFIG_FDCHECK
   return fdcheck_protect(i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK + j);
 #else
@@ -485,6 +488,27 @@ int file_allocate(FAR struct inode *inode, int oflags, off_t pos,
 {
   return file_allocate_from_tcb(nxsched_self(), inode, oflags,
                                 pos, priv, minfd, addref);
+}
+
+FAR char *file_dump_backtrace(FAR struct file *filep, FAR char *buffer,
+                              size_t len)
+{
+#if CONFIG_FS_BACKTRACE > 0
+  FAR const char *format = "%0*p ";
+  int k;
+
+  buffer[0] = '\0';
+  for (k = 0; k < CONFIG_FS_BACKTRACE && filep->f_backtrace[k]; k++)
+    {
+      snprintf(buffer + k * FS_BACKTRACE_WIDTH,
+               len - k * FS_BACKTRACE_WIDTH,
+               format, FS_BACKTRACE_WIDTH - 1,
+               filep->f_backtrace[k]);
+    }
+#else
+  buffer[0] = '\0';
+#endif
+  return buffer;
 }
 
 /****************************************************************************
