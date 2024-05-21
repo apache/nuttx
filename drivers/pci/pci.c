@@ -1829,7 +1829,7 @@ int pci_connect_irq(FAR struct pci_device_s *dev, FAR int *irq, int num)
   uint8_t msi = 0;
   uint8_t msix = 0;
 
-  if (dev->bus->ctrl->ops->connect_irq)
+  if (dev->bus->ctrl->ops->connect_irq == NULL)
     {
       return -ENOTSUP;
     }
