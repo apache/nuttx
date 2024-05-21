@@ -112,4 +112,12 @@ if(CONFIG_FDCHECK)
   list(APPEND SRCS lib_fdcheck.c)
 endif()
 
+if(NOT CONFIG_LIBC_UNAME_DISABLE_TIMESTAMP)
+  add_custom_target(
+    always_rebuild_lib_utsname
+    COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_SOURCE_DIR}/lib_utsname.c)
+
+  add_dependencies(c always_rebuild_lib_utsname)
+endif()
+
 target_sources(c PRIVATE ${SRCS})
