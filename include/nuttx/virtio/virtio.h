@@ -38,6 +38,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Virtio common feature bits */
+
+#define VIRTIO_F_ANY_LAYOUT   27
+
+/* Virtio helper functions */
+
 #define virtio_has_feature(vdev, fbit) \
       (((vdev)->features & (1UL << (fbit))) != 0)
 
