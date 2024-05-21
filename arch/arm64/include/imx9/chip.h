@@ -65,6 +65,9 @@
 #define CONFIG_OCRAM_BASE_ADDR    0x20480000
 #define CONFIG_OCRAM_SIZE         KB(640)
 
+#define CONFIG_FSPI_PER_BASEADDR  0x28000000
+#define CONFIG_FSPI_PER_SIZE      MB(128)
+
 #define MPID_TO_CLUSTER_ID(mpid)  ((mpid) & ~0xff)
 
 #define IMX9_GPIO_NPORTS          4
