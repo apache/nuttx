@@ -32,7 +32,7 @@
 #include <nuttx/pci/pci_ivshmem.h>
 #include <nuttx/rptun/rptun.h>
 #include <nuttx/rptun/rptun_ivshmem.h>
-#include <nuttx/wqueue.h>
+#include <nuttx/wdog.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -43,7 +43,7 @@
 
 #define RPTUN_IVSHMEM_SHMEM_BAR   2
 #define RPTUN_IVSHMEM_READY       1
-#define RPTUN_IVSHMEM_WORK_DELAY  MSEC2TICK(1)
+#define RPTUN_IVSHMEM_WDOG_DELAY  MSEC2TICK(1)
 
 /****************************************************************************
  * Private Types
@@ -76,9 +76,9 @@ struct rptun_ivshmem_dev_s
   char                            cpuname[RPMSG_NAME_SIZE + 1];
   FAR struct ivshmem_device_s    *ivdev;
 
-  /* Work queue for transmit */
+  /* Wdog for transmit */
 
-  struct work_s                   worker;
+  struct wdog_s                   wdog;
 };
 
 /****************************************************************************
@@ -100,7 +100,7 @@ static int rptun_ivshmem_register_callback(FAR struct rptun_dev_s *dev,
                                            rptun_callback_t callback,
                                            FAR void *arg);
 
-static void rptun_ivshmem_work(FAR void *arg);
+static void rptun_ivshmem_wdog(wdparm_t arg);
 static int rptun_ivshmem_probe(FAR struct ivshmem_device_s *dev);
 static void rptun_ivshmem_remove(FAR struct ivshmem_device_s *dev);
 
@@ -238,7 +238,7 @@ static int rptun_ivshmem_start(FAR struct rptun_dev_s *dev)
       return 0;
     }
 
-  return work_queue(HPWORK, &priv->worker, rptun_ivshmem_work, priv, 0);
+  return wd_start(&priv->wdog, 0, rptun_ivshmem_wdog, (wdparm_t)priv);
 }
 
 static int rptun_ivshmem_stop(FAR struct rptun_dev_s *dev)
@@ -251,7 +251,7 @@ static int rptun_ivshmem_stop(FAR struct rptun_dev_s *dev)
       return 0;
     }
 
-  return work_cancel_sync(HPWORK, &priv->worker);
+  return wd_cancel(&priv->wdog);
 }
 
 static int rptun_ivshmem_notify(FAR struct rptun_dev_s *dev, uint32_t vqid)
@@ -304,12 +304,13 @@ static int rptun_ivshmem_interrupt(int irq, FAR void *context, FAR void *arg)
 }
 
 /****************************************************************************
- * Name: rptun_ivshmem_work
+ * Name: rptun_ivshmem_wdog
  ****************************************************************************/
 
-static void rptun_ivshmem_work(FAR void *arg)
+static void rptun_ivshmem_wdog(wdparm_t arg)
 {
-  FAR struct rptun_ivshmem_dev_s *priv = arg;
+  FAR struct rptun_ivshmem_dev_s *priv =
+    (FAR struct rptun_ivshmem_dev_s *)arg;
   bool should_notify = false;
 
   if (priv->master && priv->seq != priv->shmem->seqs)
@@ -328,8 +329,8 @@ static void rptun_ivshmem_work(FAR void *arg)
       priv->callback(priv->arg, RPTUN_NOTIFY_ALL);
     }
 
-  work_queue(HPWORK, &priv->worker, rptun_ivshmem_work, priv,
-             RPTUN_IVSHMEM_WORK_DELAY);
+  wd_start(&priv->wdog, RPTUN_IVSHMEM_WDOG_DELAY, rptun_ivshmem_wdog,
+           (wdparm_t)priv);
 }
 
 /****************************************************************************
@@ -363,11 +364,8 @@ static int rptun_ivshmem_probe(FAR struct ivshmem_device_s *ivdev)
 
   if (!priv->master && !ivshmem_support_irq(ivdev))
     {
-      pciinfo("queue the worker\n");
-
-      /* Queue the worker for slave, master will do this in ops->start() */
-
-      work_queue(HPWORK, &priv->worker, rptun_ivshmem_work, priv, 0);
+      pciinfo("Start the wdog\n");
+      wd_start(&priv->wdog, 0, rptun_ivshmem_wdog, (wdparm_t)priv);
     }
 
   return ret;
