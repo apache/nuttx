@@ -108,6 +108,17 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
   if ((flags & MAP_ANONYMOUS) != 0)
     {
       ret = map_anonymous(&entry, kernel);
+
+      /* According to the mmap(2) specification, anonymous pages should be
+       * initialized to zero unless the MAP_UNINITIALIZED is specified.
+       */
+
+      if ((ret == OK) && (flags & MAP_UNINITIALIZED) == 0)
+        {
+          DEBUGASSERT(entry.vaddr != NULL);
+          memset(entry.vaddr, 0, entry.length);
+        }
+
       goto out;
     }
 
