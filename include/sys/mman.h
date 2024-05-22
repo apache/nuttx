@@ -56,7 +56,7 @@
 #define MAP_ANONYMOUS   (1 << 4)        /* Bit 4:  The mapping is not backed by any file */
 #define MAP_ANON        MAP_ANONYMOUS   /*         Alias */
 
-/* These are Linux-specific (none are implemented).  */
+/* These are Linux-specific (most are not implemented).  */
 
 #define MAP_GROWSDOWN   (1 << 5)        /* Bit 5:  Used to stack allocations */
 #define MAP_DENYWRITE   (1 << 6)        /* Bit 6:  Do not permit writes to file */
@@ -65,6 +65,8 @@
 #define MAP_NORESERVE   (1 << 9)        /* Bit 9:  Do not reserve swap space for this mapping */
 #define MAP_POPULATE    (1 << 10)       /* Bit 10: populate (prefault) page tables */
 #define MAP_NONBLOCK    (1 << 11)       /* Bit 11: Do not block on IO */
+
+#define MAP_UNINITIALIZED (1 << 26)     /* Bit 26: Do not clear the anonymous pages */
 
 /* Failure return */
 
