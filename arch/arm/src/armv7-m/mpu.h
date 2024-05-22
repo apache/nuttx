@@ -380,6 +380,7 @@ unsigned int mpu_configure_region(uintptr_t base, size_t size,
  *
  * Input Parameters:
  *   table      - MPU initialization table.
+ *   count      - Initialize the number of entries in the region table.
  *   hfnmiena   - A boolean indicating whether the MPU should enable the
  *                HFNMIENA bit.
  *   privdefena - A boolean indicating whether the MPU should enable the
@@ -390,8 +391,8 @@ unsigned int mpu_configure_region(uintptr_t base, size_t size,
  *
  ****************************************************************************/
 
-void mpu_initialize(const struct mpu_region_s *table, bool hfnmiena,
-                    bool privdefena);
+void mpu_initialize(const struct mpu_region_s *table, size_t count,
+                    bool hfnmiena, bool privdefena);
 
 /****************************************************************************
  * Inline Functions
