@@ -34,7 +34,7 @@
 #include "sam_config.h"
 #include "sam_gpio.h"
 #include "sam_periphclks.h"
-#include "sam_lowputc.h"
+#include "sam_start.h"
 
 #include "hardware/sam_uart.h"
 #include "hardware/sam_pinmap.h"
