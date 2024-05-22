@@ -42,6 +42,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#if defined(CONFIG_SAMV7_JTAG_FULL_ENABLE) && defined(CONFIG_SAMV7_USART1)
+#  error CONFIG_SAMV7_JTAG_FULL_ENABLE is incompatible with CONFIG_SAMV7_USART1.
+#  error The SYSIO Pin4 must be bound to PB4 to use USART1
+#endif
+
 #if !defined(CONFIG_SAMV7_ERASE_ENABLE) || \
     !defined(CONFIG_SAMV7_JTAG_FULL_ENABLE)
 #  if defined(CONFIG_SAMV7_ERASE_DISABLE)
@@ -51,7 +56,7 @@
 #  endif
 #  if defined(CONFIG_SAMV7_JTAG_DISABLE)
 #    define SYSIO_BITS (MATRIX_CCFG_SYSIO_SYSIO4 | MATRIX_CCFG_SYSIO_SYSIO5 | \
-               MATRIX_CCFG_SYSIO_SYSIO6 | MATRIX_CCFG_SYSIO_SYSIO7)
+                        MATRIX_CCFG_SYSIO_SYSIO6 | MATRIX_CCFG_SYSIO_SYSIO7)
 #  endif
 #  if defined(CONFIG_SAMV7_JTAG_FULL_SW_ENABLE)
 #    define SYSIO_BITS MATRIX_CCFG_SYSIO_SYSIO4
