@@ -138,6 +138,7 @@ config ARCH_X86_64
 	select ARCH_HAVE_INTERRUPTSTACK
 	select ARCH_HAVE_CUSTOMOPT
 	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF
+	select ARCH_TOOLCHAIN_GNU
 	---help---
 		x86-64 architectures.
 
