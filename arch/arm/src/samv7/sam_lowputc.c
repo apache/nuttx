@@ -249,59 +249,59 @@ void sam_lowsetup(void)
 
   /* Enable clocking for all selected UART/USARTs */
 
-#ifdef CONFIG_SAMV7_UART0
+#ifdef CONFIG_UART0_SERIALDRIVER
   sam_uart0_enableclk();
 #endif
-#ifdef CONFIG_SAMV7_UART1
+#ifdef CONFIG_UART1_SERIALDRIVER
   sam_uart1_enableclk();
 #endif
-#ifdef CONFIG_SAMV7_UART2
+#ifdef CONFIG_UART2_SERIALDRIVER
   sam_uart2_enableclk();
 #endif
-#ifdef CONFIG_SAMV7_UART3
+#ifdef CONFIG_UART3_SERIALDRIVER
   sam_uart3_enableclk();
 #endif
-#ifdef CONFIG_SAMV7_UART4
+#ifdef CONFIG_UART4_SERIALDRIVER
   sam_uart4_enableclk();
 #endif
-#ifdef CONFIG_SAMV7_USART0
+#ifdef CONFIG_USART0_SERIALDRIVER
   sam_usart0_enableclk();
 #endif
-#ifdef CONFIG_SAMV7_USART1
+#ifdef CONFIG_USART1_SERIALDRIVER
   sam_usart1_enableclk();
 #endif
-#ifdef CONFIG_SAMV7_USART2
+#ifdef CONFIG_USART2_SERIALDRIVER
   sam_usart2_enableclk();
 #endif
 
   /* Configure UART pins for all selected UART/USARTs */
 
-#ifdef CONFIG_SAMV7_UART0
+#ifdef CONFIG_UART0_SERIALDRIVER
   sam_configgpio(GPIO_UART0_RXD);
   sam_configgpio(GPIO_UART0_TXD);
 #endif
 
-#ifdef CONFIG_SAMV7_UART1
+#ifdef CONFIG_UART1_SERIALDRIVER
   sam_configgpio(GPIO_UART1_RXD);
   sam_configgpio(GPIO_UART1_TXD);
 #endif
 
-#ifdef CONFIG_SAMV7_UART2
+#ifdef CONFIG_UART2_SERIALDRIVER
   sam_configgpio(GPIO_UART2_RXD);
   sam_configgpio(GPIO_UART2_TXD);
 #endif
 
-#ifdef CONFIG_SAMV7_UART3
+#ifdef CONFIG_UART3_SERIALDRIVER
   sam_configgpio(GPIO_UART3_RXD);
   sam_configgpio(GPIO_UART3_TXD);
 #endif
 
-#ifdef CONFIG_SAMV7_UART4
+#ifdef CONFIG_UART4_SERIALDRIVER
   sam_configgpio(GPIO_UART4_RXD);
   sam_configgpio(GPIO_UART4_TXD);
 #endif
 
-#ifdef CONFIG_SAMV7_USART0
+#ifdef CONFIG_USART0_SERIALDRIVER
   sam_configgpio(GPIO_USART0_RXD);
   sam_configgpio(GPIO_USART0_TXD);
 #ifdef CONFIG_USART0_OFLOWCONTROL
@@ -312,7 +312,7 @@ void sam_lowsetup(void)
 #endif
 #endif
 
-#ifdef CONFIG_SAMV7_USART1
+#ifdef CONFIG_USART1_SERIALDRIVER
   sam_configgpio(GPIO_USART1_RXD);
   sam_configgpio(GPIO_USART1_TXD);
 #  ifdef CONFIG_USART1_OFLOWCONTROL
@@ -337,7 +337,7 @@ void sam_lowsetup(void)
 
 #endif
 
-#ifdef CONFIG_SAMV7_USART2
+#ifdef CONFIG_USART2_SERIALDRIVER
   sam_configgpio(GPIO_USART2_RXD);
   sam_configgpio(GPIO_USART2_TXD);
 #ifdef CONFIG_USART2_OFLOWCONTROL
