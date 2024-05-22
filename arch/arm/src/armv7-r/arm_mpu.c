@@ -486,19 +486,20 @@ unsigned int mpu_configure_region(uintptr_t base, size_t size,
  *
  * Input Parameters:
  *   table - MPU Initiaze table.
+ *   count - Initialize the number of entries in the region table.
  *
  * Returned Value:
  *   NULL.
  *
  ****************************************************************************/
 
-void mpu_initialize(const struct mpu_region_s *table)
+void mpu_initialize(const struct mpu_region_s *table, size_t count)
 {
   const struct mpu_region_s *conf;
-  int index;
+  size_t index;
 
   mpu_control(false);
-  for (index = 0; index < nitems(table); index++)
+  for (index = 0; index < count; index++)
     {
       conf = &table[index];
       mpu_configure_region(conf->base, conf->size, conf->flags);
