@@ -42,10 +42,16 @@
 
 #define HART_CNT    (CONFIG_SMP_NCPUS)
 
+static_assert(RISCV_PERCPU_TCB == offsetof(riscv_percpu_t, tcb),
+              "RISCV_PERCPU_TCB offset is wrong");
 static_assert(RISCV_PERCPU_HARTID == offsetof(riscv_percpu_t, hartid),
               "RISCV_PERCPU_HARTID offset is wrong");
 static_assert(RISCV_PERCPU_IRQSTACK == offsetof(riscv_percpu_t, irq_stack),
               "RISCV_PERCPU_IRQSTACK offset is wrong");
+static_assert(RISCV_PERCPU_USP == offsetof(riscv_percpu_t, usp),
+              "RISCV_PERCPU_USP offset is wrong");
+static_assert(RISCV_PERCPU_KSP == offsetof(riscv_percpu_t, ksp),
+              "RISCV_PERCPU_KSP offset is wrong");
 
 /****************************************************************************
  * Private Data
@@ -221,5 +227,37 @@ void riscv_percpu_set_kstack(uintptr_t ksp)
               scratch <  (uintptr_t) &g_percpu + sizeof(g_percpu));
 
   ((riscv_percpu_t *)scratch)->ksp = ksp;
+  leave_critical_section(flags);
+}
+
+/****************************************************************************
+ * Name: riscv_percpu_set_thread
+ *
+ * Description:
+ *   Set current thread (tcb), so it can be found quickly when a trap is
+ *   taken.
+ *
+ * Input Parameters:
+ *   tcb - Pointer to the current thread's tcb
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void riscv_percpu_set_thread(struct tcb_s *tcb)
+{
+  irqstate_t flags;
+  uintptr_t scratch;
+
+  /* This must be done with interrupts disabled */
+
+  flags   = enter_critical_section();
+  scratch = READ_CSR(CSR_SCRATCH);
+
+  DEBUGASSERT(scratch >= (uintptr_t) &g_percpu &&
+              scratch <  (uintptr_t) &g_percpu + sizeof(g_percpu));
+
+  ((riscv_percpu_t *)scratch)->tcb = tcb;
   leave_critical_section(flags);
 }
