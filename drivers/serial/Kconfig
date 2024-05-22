@@ -53,6 +53,33 @@ config SERIAL_GDBSTUB_PATH
 	---help---
 		The path to the serial device that will be used for GDB stub.
 
+config UART_HOSTFS
+	bool "Use hostfs read/write on UART_HOSTFS_DEVPATH as uart console"
+	depends on FS_HOSTFS
+	default n
+	select SERIAL_RXDMA
+	select SERIAL_TXDMA
+
+config UART_HOSTFS_DEVPATH
+	string "The host device node that will be used by"
+	depends on UART_HOSTFS
+	default "/dev/tty"
+
+config UART_HOSTFS_RXBUFSIZE
+	int "Uart hostfs receive buffer size"
+	default 256
+	depends on UART_HOSTFS
+
+config UART_HOSTFS_TXBUFSIZE
+	int "Uart hostfs transmit buffer size"
+	default 256
+	depends on UART_HOSTFS
+
+config UART_HOSTFS_DELAY_USEC
+	int "Uart hostfs polling interval in microseconds"
+	default 1000
+	depends on UART_HOSTFS
+
 menuconfig UART_PL011
 	bool "PL011 Chip support"
 	default n
