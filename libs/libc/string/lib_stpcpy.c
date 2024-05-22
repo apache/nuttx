@@ -43,7 +43,7 @@
  *
  ****************************************************************************/
 
-#ifndef CONFIG_ARCH_STPCPY
+#ifndef CONFIG_LIBC_ARCH_STPCPY
 #undef stpcpy /* See mm/README.txt */
 FAR char *stpcpy(FAR char *dest, FAR const char *src)
 {

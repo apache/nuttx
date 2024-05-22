@@ -1,5 +1,5 @@
 ############################################################################
-# libs/libc/machine/Make.defs
+# libs/libc/machine/x86_64/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -18,37 +18,58 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_LIBC_ARCH_ATOMIC),y)
-  CSRCS += arch_atomic.c
+ifeq ($(CONFIG_X86_64_MEMCMP),y)
+ASRCS += arch_memcmp.S
 endif
 
-ifeq ($(CONFIG_ARCH_ARM),y)
-include $(TOPDIR)/libs/libc/machine/arm/Make.defs
+ifeq ($(CONFIG_X86_64_MEMMOVE),y)
+ASRCS += arch_memmove.S
 endif
-ifeq ($(CONFIG_ARCH_ARM64),y)
-include $(TOPDIR)/libs/libc/machine/arm64/Make.defs
-endif
-ifeq ($(CONFIG_ARCH_RISCV),y)
-include $(TOPDIR)/libs/libc/machine/risc-v/Make.defs
-endif
-ifeq ($(CONFIG_ARCH_SIM),y)
-include $(TOPDIR)/libs/libc/machine/sim/Make.defs
-endif
-ifeq ($(CONFIG_ARCH_X86),y)
-include $(TOPDIR)/libs/libc/machine/x86/Make.defs
-endif
-ifeq ($(CONFIG_ARCH_X86_64),y)
-include $(TOPDIR)/libs/libc/machine/x86_64/Make.defs
-endif
-ifeq ($(CONFIG_ARCH_XTENSA),y)
-include $(TOPDIR)/libs/libc/machine/xtensa/Make.defs
-endif
-ifeq ($(CONFIG_ARCH_RENESAS),y)
-include $(TOPDIR)/libs/libc/machine/renesas/Make.defs
-endif
-ifeq ($(CONFIG_ARCH_SPARC),y)
-include $(TOPDIR)/libs/libc/machine/sparc/Make.defs
-endif
-DEPPATH += --dep-path machine
-VPATH += :machine
 
+ifeq ($(CONFIG_X86_64_MEMSET),y)
+  ifeq ($(CONFIG_ARCH_X86_64_AVX),y)
+    ASRCS += arch_memset_avx2.S
+  else
+    ASRCS += arch_memset_sse2.S
+  endif
+endif
+
+ifeq ($(CONFIG_X86_64_STPCPY),y)
+ASRCS += arch_stpcpy.S
+endif
+
+ifeq ($(CONFIG_X86_64_STPNCPY),y)
+ASRCS += arch_stpncpy.S
+endif
+
+ifeq ($(CONFIG_X86_64_STRCAT),y)
+ASRCS += arch_strcat.S
+endif
+
+ifeq ($(CONFIG_X86_64_STRCMP),y)
+ASRCS += arch_strcmp.S
+endif
+
+ifeq ($(CONFIG_X86_64_STRCPY),y)
+ASRCS += arch_strcpy.S
+endif
+
+ifeq ($(CONFIG_X86_64_STRLEN),y)
+ASRCS += arch_strlen.S
+endif
+
+ifeq ($(CONFIG_X86_64_STRNCPY),y)
+ASRCS += arch_strncpy.S
+endif
+
+ifeq ($(CONFIG_X86_64_STRNCMP),y)
+ASRCS += arch_strncmp.S
+endif
+
+ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
+DEPPATH += --dep-path machine/x86_64/gnu
+VPATH += :machine/x86_64/gnu
+endif
+
+DEPPATH += --dep-path machine/x86_64
+VPATH += :machine/x86_64
