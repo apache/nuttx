@@ -94,7 +94,11 @@ int riscv_exception(int mcause, void *regs, void *args)
 #ifdef CONFIG_ARCH_KERNEL_STACK
   if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
     {
+#  if CONFIG_TASK_NAME_SIZE > 0
       _alert("Segmentation fault in PID %d: %s\n", tcb->pid, tcb->name);
+#  else
+      _alert("Segmentation fault in PID %d\n", tcb->pid);
+#  endif
 
       tcb->flags |= TCB_FLAG_FORCED_CANCEL;
 
