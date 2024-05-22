@@ -46,9 +46,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define MAX_BUFFER  (16384)
-#define MAX_EXPAND  (16384)
-#define MAX_SHQUOTE (16384)
+#define MAX_BUFFER  (65536)
+#define MAX_EXPAND  (65536)
+#define MAX_SHQUOTE (65536)
 
 /* MAX_PATH might be defined in stdlib.h */
 
