@@ -241,9 +241,6 @@ void sam_lowsetup(void)
   uint64_t divb3;
   uint32_t intpart;
   uint32_t fracpart;
-#endif
-#if (defined(HAVE_SERIAL_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)) || \
-    defined(CONFIG_SAMV7_USART1)
   uint32_t regval;
 #endif
 
@@ -321,19 +318,6 @@ void sam_lowsetup(void)
 #  ifdef CONFIG_USART1_IFLOWCONTROL
   sam_configgpio(GPIO_USART1_RTS);
 #  endif
-
-  /* To use the USART1 as an USART, the SYSIO Pin4 must be bound to PB4
-   * instead of TDI
-   */
-
-#  if defined(CONFIG_SAMV7_JTAG_FULL_ENABLE)
-#    warning CONFIG_SAMV7_JTAG_FULL_ENABLE is incompatible with CONFIG_SAMV7_USART1.
-#    warning The SYSIO Pin4 must be bound to PB4 to use USART1
-#  endif
-
-  regval  = getreg32(SAM_MATRIX_CCFG_SYSIO);
-  regval |= MATRIX_CCFG_SYSIO_SYSIO4;
-  putreg32(regval, SAM_MATRIX_CCFG_SYSIO);
 
 #endif
 
