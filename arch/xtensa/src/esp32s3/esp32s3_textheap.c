@@ -43,10 +43,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_ESP32S3_RTC_HEAP
-#error "No suitable heap available. Enable ESP32S3_RTC_HEAP."
-#endif
-
 #define EXTRAM_INSTRUCTION_BUS_LOW  0x42000000
 #define EXTRAM_INSTRUCTION_BUS_HIGH 0x44000000
 
