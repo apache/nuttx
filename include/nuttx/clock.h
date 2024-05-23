@@ -33,6 +33,7 @@
 #include <time.h>
 
 #include <nuttx/compiler.h>
+#include <nuttx/lib/math32.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -177,11 +178,11 @@
 
 /* ?SEC2TIC rounds up */
 
-#define NSEC2TICK(nsec)       (((nsec) + (NSEC_PER_TICK - 1)) / NSEC_PER_TICK)
-#define USEC2TICK(usec)       (((usec) + (USEC_PER_TICK - 1)) / USEC_PER_TICK)
+#define NSEC2TICK(nsec)       div_const_roundup(nsec, NSEC_PER_TICK)
+#define USEC2TICK(usec)       div_const_roundup(usec, USEC_PER_TICK)
 
 #if (MSEC_PER_TICK * USEC_PER_MSEC) == USEC_PER_TICK
-#  define MSEC2TICK(msec)     (((msec) + (MSEC_PER_TICK - 1)) / MSEC_PER_TICK)
+#  define MSEC2TICK(msec)     div_const_roundup(msec, MSEC_PER_TICK)
 #else
 #  define MSEC2TICK(msec)     USEC2TICK((msec) * USEC_PER_MSEC)
 #endif
@@ -196,14 +197,18 @@
 #if (MSEC_PER_TICK * USEC_PER_MSEC) == USEC_PER_TICK
 #  define TICK2MSEC(tick)     ((tick) * MSEC_PER_TICK)
 #else
-#  define TICK2MSEC(tick)     (((tick) * USEC_PER_TICK) / USEC_PER_MSEC)
+#  define TICK2MSEC(tick)     div_const(((tick) * USEC_PER_TICK), USEC_PER_MSEC)
 #endif
 
 /* TIC2?SEC rounds to nearest */
 
-#define TICK2DSEC(tick)       (((tick) + (TICK_PER_DSEC / 2)) / TICK_PER_DSEC)
-#define TICK2HSEC(tick)       (((tick) + (TICK_PER_HSEC / 2)) / TICK_PER_HSEC)
-#define TICK2SEC(tick)        (((tick) + (TICK_PER_SEC / 2)) / TICK_PER_SEC)
+#define TICK2DSEC(tick)       div_const_roundnearest(tick, TICK_PER_DSEC)
+#define TICK2HSEC(tick)       div_const_roundnearest(tick, TICK_PER_HSEC)
+#define TICK2SEC(tick)        div_const_roundnearest(tick, TICK_PER_SEC)
+
+/* USEC2SEC */
+
+#define USEC2SEC(usec)        div_const(usec, USEC_PER_SEC)
 
 #if defined(CONFIG_DEBUG_SCHED) && defined(CONFIG_SYSTEM_TIME64) && \
     !defined(CONFIG_SCHED_TICKLESS)
