@@ -59,11 +59,7 @@
 #elif defined(CONFIG_STM32H7_STM32H7B3XX)
 #  include "stm32h7x3xx_rcc.c"
 #elif defined(CONFIG_STM32H7_STM32H7X5XX)
-#  if defined(CONFIG_ARCH_CHIP_STM32H755II)
-#    include "stm32h7x5xx_rcc.c"
-#  else
-#    include "stm32h7x3xx_rcc.c"
-#  endif
+#  include "stm32h7x3xx_rcc.c"
 #elif defined(CONFIG_STM32H7_STM32H7X7XX)
 #  include "stm32h7x7xx_rcc.c"
 #else

@@ -129,16 +129,18 @@
 
 #define STM32_PWR_CR3_BYPASS                (1 << 0)  /* Bit 0: Power management unit bypass */
 #define STM32_PWR_CR3_LDOEN                 (1 << 1)  /* Bit 1: Low drop-out regulator enable */
-#define STM32_PWR_CR3_SCUEN                 (1 << 2)  /* Bit 2: Supply configuration update enable */
+#ifndef CONFIG_STM32H7_HAVE_SMPS
+#  define STM32_PWR_CR3_SCUEN               (1 << 2)  /* Bit 2: Supply configuration update enable */
+#endif
 #ifdef CONFIG_STM32H7_HAVE_SMPS
-#define STM32_PWR_CR3_SDEN                  (1 << 2)  /* Bit 2: SMPS step-down converter enable */
-#define STM32_PWR_CR3_SMPSEXTHP             (1 << 3)  /* Bit 3: SMPS step-down converter external power delivery selection */
-#define STM32_PWR_CR3_SMPSLEVEL_SHIFT       (4)       /* BitS 4-5: SMPS step-down converter voltage output level selection */
-#  define STM32_PWR_CR3_SMPSLEVEL_MASK      (3 << STM32_PWR_CR3_SMPSLEVEL_SHIFT)
-#  define STM32_PWR_CR3_SMPSLEVEL_R         (0 << STM32_PWR_CR3_SMPSLEVEL_SHIFT) /* 00: */
-#  define STM32_PWR_CR3_SMPSLEVEL_1V8       (1 << STM32_PWR_CR3_SMPSLEVEL_SHIFT) /* 01 */
-#  define STM32_PWR_CR3_SMPSLEVEL_2V5       (2 << STM32_PWR_CR3_SMPSLEVEL_SHIFT) /* 10: */
-#  define STM32_PWR_CR3_SMPSLEVEL_2V5B      (3 << STM32_PWR_CR3_SMPSLEVEL_SHIFT) /* 11: */
+#  define STM32_PWR_CR3_SDEN                (1 << 2)  /* Bit 2: SMPS step-down converter enable */
+#  define STM32_PWR_CR3_SMPSEXTHP           (1 << 3)  /* Bit 3: SMPS step-down converter external power delivery selection */
+#  define STM32_PWR_CR3_SMPSLEVEL_SHIFT     (4)       /* BitS 4-5: SMPS step-down converter voltage output level selection */
+#    define STM32_PWR_CR3_SMPSLEVEL_MASK    (3 << STM32_PWR_CR3_SMPSLEVEL_SHIFT)
+#    define STM32_PWR_CR3_SMPSLEVEL_R       (0 << STM32_PWR_CR3_SMPSLEVEL_SHIFT) /* 00: */
+#    define STM32_PWR_CR3_SMPSLEVEL_1V8     (1 << STM32_PWR_CR3_SMPSLEVEL_SHIFT) /* 01 */
+#    define STM32_PWR_CR3_SMPSLEVEL_2V5     (2 << STM32_PWR_CR3_SMPSLEVEL_SHIFT) /* 10: */
+#    define STM32_PWR_CR3_SMPSLEVEL_2V5B    (3 << STM32_PWR_CR3_SMPSLEVEL_SHIFT) /* 11: */
 #endif
                                                 /* Bits 6-7: Reserved */
 #define STM32_PWR_CR3_VBE           (1 << 8)    /* Bit 8: VBAT charging enable */
