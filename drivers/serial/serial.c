@@ -909,6 +909,25 @@ static ssize_t uart_read(FAR struct file *filep,
                 }
             }
 
+          if ((dev->tc_lflag & ICANON) &&
+              (ch == ASCII_BS || ch == ASCII_DEL))
+            {
+              if (recvd > 0)
+                {
+                  *buffer-- = '\0';
+                  recvd--;
+                  if (dev->tc_lflag & ECHO)
+                    {
+                      uart_putxmitchar(dev, '\b', true);
+                      uart_putxmitchar(dev, ' ', true);
+                      uart_putxmitchar(dev, '\b', true);
+                      echoed = true;
+                    }
+                }
+
+                continue;
+            }
+
           /* Specifically not handled:
            *
            * All of the local modes; echo, line editing, etc.
@@ -967,6 +986,11 @@ static ssize_t uart_read(FAR struct file *filep,
                   echoed = true;
                 }
             }
+
+          if ((dev->tc_lflag & ICANON) && ch == '\n')
+            {
+              break;
+            }
         }
 
 #ifdef CONFIG_DEV_SERIAL_FULLBLOCKS
@@ -993,7 +1017,7 @@ static ssize_t uart_read(FAR struct file *filep,
        * to the caller?
        */
 
-      else if (recvd > 0)
+      else if (recvd > 0 && !(dev->tc_lflag & ICANON))
         {
           /* Yes.. break out of the loop and return the number of bytes
            * received up to the wait condition.
@@ -1095,26 +1119,39 @@ static ssize_t uart_read(FAR struct file *filep,
                    * thread goes to sleep.
                    */
 
+                  if (dev->tc_lflag & ICANON)
+                    {
 #ifdef CONFIG_SERIAL_TERMIOS
-                  dev->minrecv = MIN(buflen - recvd, dev->minread - recvd);
-                  if (dev->timeout)
-                    {
-                      nxmutex_unlock(&dev->recv.lock);
-                      ret = nxsem_tickwait(&dev->recvsem,
-                                           DSEC2TICK(dev->timeout));
-                    }
-                  else
+                      dev->minrecv = 0;
 #endif
-                    {
                       nxmutex_unlock(&dev->recv.lock);
                       ret = nxsem_wait(&dev->recvsem);
+                      nxmutex_lock(&dev->recv.lock);
                     }
+                  else
+                    {
+#ifdef CONFIG_SERIAL_TERMIOS
+                      dev->minrecv = MIN(buflen - recvd,
+                                         dev->minread - recvd);
+                      if (dev->timeout)
+                        {
+                          nxmutex_unlock(&dev->recv.lock);
+                          ret = nxsem_tickwait(&dev->recvsem,
+                                              DSEC2TICK(dev->timeout));
+                        }
+                      else
+#endif
+                        {
+                          nxmutex_unlock(&dev->recv.lock);
+                          ret = nxsem_wait(&dev->recvsem);
+                        }
 
-                  nxmutex_lock(&dev->recv.lock);
+                      nxmutex_lock(&dev->recv.lock);
 
 #ifdef CONFIG_SERIAL_TERMIOS
-                  dev->minrecv = dev->minread;
+                      dev->minrecv = dev->minread;
 #endif
+                    }
                 }
 
               leave_critical_section(flags);
@@ -1924,7 +1961,7 @@ int uart_register(FAR const char *path, FAR uart_dev_t *dev)
     {
       /* Enable signals and echo by default */
 
-      dev->tc_lflag |= ISIG | ECHO;
+      dev->tc_lflag |= ISIG | ECHO | ICANON;
 
       /* Enable \n -> \r\n translation for the console */
 
