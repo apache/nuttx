@@ -284,10 +284,33 @@ config STM32H7_HAVE_SMPS
 	bool
 	default n
 
+config STM32H7_HAVE_PWR_DIRECT_SMPS_SUPPLY
+	bool
+	default n
+
 config STM32H7_PWR_DIRECT_SMPS_SUPPLY
 	bool "Use direct SMPS supply mode"
 	depends on STM32H7_HAVE_SMPS
 	default n
+
+choice
+	prompt "STM32 H7 Power Supply Selection"
+	default STM32H7_PWR_DEFAULT_SUPPLY
+	depends on STM32H7_HAVE_SMPS && !STM32H7_HAVE_PWR_DIRECT_SMPS_SUPPLY
+	---help---
+	    The STM32H7x5 and STM32H7x7 support power supply configrations for the VCORE core domain and an external supply,
+	    by configuring the SMPS step-down converter and voltage regulator.
+	    Note:The SMPS step-down converter is not available on all packages.
+
+	    Currenlty the only supported modes are Direct SMPS supply and LDO supply.
+
+config STM32H7_PWR_DEFAULT_SUPPLY
+	bool "Default"
+
+config STM32H7_PWR_LDO_SUPPLY
+	bool "Use LDO supply mode"
+
+endchoice # "STM32 H7 Power Supply Selection"
 
 config STM32H7_IO_CONFIG_A
 	bool

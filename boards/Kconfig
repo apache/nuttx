@@ -1747,6 +1747,7 @@ config ARCH_BOARD_NUCLEO_H745ZI
 	depends on ARCH_CHIP_STM32H745ZI
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
+	select STM32H7_HAVE_PWR_DIRECT_SMPS_SUPPLY
 	---help---
 		STMicro Nucleo H745ZI board based on the STMicro STM32H745ZI MCU.
 
@@ -2588,6 +2589,7 @@ config ARCH_BOARD_STM32H747I_DISCO
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select STM32H7_HAVE_PWR_DIRECT_SMPS_SUPPLY
 	---help---
 		STMicro STM32H747I-DISCO development board featuring the STM32H747XIH6
 		MCU. The STM32H747XIH6 is a dual core (480MHz Cortex-M7, 240MHz Cortex-M4)
