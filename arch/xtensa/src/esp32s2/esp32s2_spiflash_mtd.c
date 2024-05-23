@@ -40,7 +40,7 @@
 
 #include "hardware/esp32s2_soc.h"
 
-#include "xtensa_attr.h"
+#include "esp_attr.h"
 #include "esp32s2_spiflash.h"
 
 #include "rom/esp32s2_spiflash.h"

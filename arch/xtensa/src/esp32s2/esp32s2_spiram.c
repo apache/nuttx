@@ -35,13 +35,15 @@
 #include <nuttx/spinlock.h>
 
 #include "xtensa.h"
-#include "xtensa_attr.h"
+#include "esp_attr.h"
 #include "esp32s2_psram.h"
 #include "esp32s2_spiram.h"
 #include "hardware/esp32s2_soc.h"
 #include "hardware/esp32s2_cache_memory.h"
-#include "hardware/esp32s2_extmem.h"
 #include "hardware/esp32s2_iomux.h"
+
+#include "soc/extmem_reg.h"
+#include "soc/ext_mem_defs.h"
 
 /****************************************************************************
  * Pre-processor Prototypes

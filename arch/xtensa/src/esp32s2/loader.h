@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32s2/common/src/esp32s2_board_twai.c
+ * arch/xtensa/src/esp32s2/loader.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,70 +18,63 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_XTENSA_SRC_ESP32S2_LOADER_H
+#define __ARCH_XTENSA_SRC_ESP32S2_LOADER_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <errno.h>
-#include <debug.h>
-
-#include <nuttx/can/can.h>
-#include <arch/board/board.h>
-
-#include "esp32s2_twai.h"
-
-#ifdef CONFIG_CAN
+#include <stdint.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ************************************************************/
-
 /****************************************************************************
- * Public Functions
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_twai_setup
+ * Public Data
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: map_rom_segments
  *
  * Description:
- *  Initialize TWAI and register the TWAI device
+ *   Configure the MMU and Cache peripherals for accessing ROM code and data.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
  *
  ****************************************************************************/
 
-int board_twai_setup(void)
-{
-#ifdef CONFIG_ESP32S2_TWAI
-  struct can_dev_s *twai;
-  int ret;
+int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
+                     uint32_t app_drom_size, uint32_t app_irom_start,
+                     uint32_t app_irom_vaddr, uint32_t app_irom_size);
 
-  /* Call esp32s2_twaiinitialize() to get an instance of the TWAI
-   * interface
-   * */
-
-  twai = esp32s2_twaiinitialize();
-  if (twai == NULL)
-    {
-      canerr("ERROR:  Failed to get TWAI interface\n");
-      return -ENODEV;
-    }
-
-  /* Register the TWAI driver at "/dev/can0" */
-
-  ret = can_register("/dev/can0", twai);
-  if (ret < 0)
-    {
-      canerr("ERROR: TWAI1 register failed: %d\n", ret);
-      return ret;
-    }
-
-  return OK;
-#else
-  return -ENODEV;
-#endif
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
 
-#endif /* CONFIG_CAN */
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_XTENSA_SRC_ESP32S2_LOADER_H */
