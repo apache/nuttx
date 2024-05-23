@@ -559,6 +559,12 @@
 #    define tz_nonsecure_call  __attribute__((cmse_nonsecure_call))
 #  endif
 
+/* GCC support expression statement, a compound statement enclosed in
+ * parentheses may appear as an expression in GNU C.
+ */
+
+#  define CONFIG_HAVE_EXPRESSION_STATEMENT 1
+
 /* SDCC-specific definitions ************************************************/
 
 #elif defined(SDCC) || defined(__SDCC)
