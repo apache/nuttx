@@ -28,6 +28,27 @@
 #include <nuttx/config.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* IOCTL Commands ***********************************************************/
+
+/* The watchdog driver uses a standard character driver framework.  However,
+ * since the watchdog driver is a device control interface and not a data
+ * transfer interface, the majority of the functionality is implemented in
+ * driver ioctl calls.
+ *
+ * See nuttx/timers/watchdog.h for the IOCTLs handled by the upper half.
+ *
+ * These are detected and handled by the "lower half" watchdog timer driver.
+ *
+ * WDIOC_RSTCLK     - Restores the xtal32k clock
+ *                    Argument: Ignored
+ */
+
+#define WDIOC_RSTCLK      _WDIOC(0x032)
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 
@@ -37,7 +58,8 @@ enum esp_wdt_inst_e
 {
   ESP_WDT_MWDT0 = 0,  /* Main System Watchdog Timer (MWDT) of Timer Group 0 */
   ESP_WDT_MWDT1,      /* Main System Watchdog Timer (MWDT) of Timer Group 1 */
-  ESP_WDT_RWDT        /* RTC Watchdog Timer (RWDT) */
+  ESP_WDT_RWDT,       /* RTC Watchdog Timer (RWDT) */
+  ESP_WDT_XTAL32K     /* XTAL32K Watchdog Timer (XTWDT) */
 };
 
 /****************************************************************************
