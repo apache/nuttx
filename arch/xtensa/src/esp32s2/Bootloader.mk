@@ -20,7 +20,7 @@
 
 .PHONY: bootloader clean_bootloader
 
-ifeq ($(CONFIG_ESP32S2_BOOTLOADER_BUILD_FROM_SOURCE),y)
+ifeq ($(CONFIG_ESPRESSIF_SIMPLE_BOOT),)
 
 TOOLSDIR           = $(TOPDIR)/tools/espressif
 CHIPDIR            = $(TOPDIR)/arch/xtensa/src/chip
@@ -114,8 +114,13 @@ else ifeq ($(CONFIG_ESP32S2_APP_FORMAT_LEGACY),y)
 		$(call cfg_val,CONFIG_PARTITION_TABLE_OFFSET,$(CONFIG_ESP32S2_PARTITION_TABLE_OFFSET)) \
 	} >> $(BOOTLOADER_CONFIG)
 endif
+endif
 
-ifeq ($(CONFIG_ESP32S2_APP_FORMAT_MCUBOOT),y)
+ifeq ($(CONFIG_ESPRESSIF_SIMPLE_BOOT),y)
+bootloader:
+	$(Q) echo "Using direct bootloader to boot NuttX."
+
+else ifeq ($(CONFIG_ESP32S2_APP_FORMAT_MCUBOOT),y)
 
 BOOTLOADER_BIN        = $(TOPDIR)/mcuboot-esp32s2.bin
 BOOTLOADER_SIGNED_BIN = $(TOPDIR)/mcuboot-esp32s2.signed.bin
@@ -179,24 +184,5 @@ clean_bootloader:
 	$(call DELDIR,$(BOOTLOADER_DIR))
 	$(call DELFILE,$(TOPDIR)/bootloader-esp32s2.bin)
 	$(call DELFILE,$(TOPDIR)/partition-table-esp32s2.bin)
-
-endif
-
-else ifeq ($(CONFIG_ESP32S2_BOOTLOADER_DOWNLOAD_PREBUILT),y)
-
-BOOTLOADER_VERSION = latest
-BOOTLOADER_URL     = https://github.com/espressif/esp-nuttx-bootloader/releases/download/$(BOOTLOADER_VERSION)
-
-ifeq ($(CONFIG_ESP32S2_APP_FORMAT_LEGACY),y)
-
-bootloader:
-	$(call DOWNLOAD,$(BOOTLOADER_URL),bootloader-esp32s2.bin,$(TOPDIR)/bootloader-esp32s2.bin)
-	$(call DOWNLOAD,$(BOOTLOADER_URL),partition-table-esp32s2.bin,$(TOPDIR)/partition-table-esp32s2.bin)
-
-clean_bootloader:
-	$(call DELFILE,$(TOPDIR)/bootloader-esp32s2.bin)
-	$(call DELFILE,$(TOPDIR)/partition-table-esp32s2.bin)
-
-endif
 
 endif

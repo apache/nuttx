@@ -90,7 +90,7 @@ Building and flashing
 
 First make sure that ``esptool.py`` is installed.  This tool is used to convert
 the ELF to a compatible ESP32 image and to flash the image into the board.
-It can be installed with: ``pip install esptool``.
+It can be installed with: ``pip install esptool==4.8.dev4``.
 
 Configure the NuttX project: ``./tools/configure.sh esp32c3-devkit:nsh``
 Run ``make`` to build the project.  Note that the conversion mentioned above is

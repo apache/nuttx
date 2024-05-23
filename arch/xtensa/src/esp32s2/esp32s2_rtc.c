@@ -45,13 +45,13 @@
 #include "hardware/esp32s2_tim.h"
 #include "hardware/regi2c_ctrl.h"
 #include "hardware/esp32s2_spi_mem_reg.h"
-#include "hardware/esp32s2_extmem.h"
 #include "hardware/esp32s2_syscon.h"
 #include "hardware/regi2c_bbpll.h"
 #include "hardware/regi2c_lp_bias.h"
 
 #include "xtensa.h"
-#include "xtensa_attr.h"
+#include "esp_attr.h"
+#include "soc/extmem_reg.h"
 
 #include "esp32s2_rtc.h"
 

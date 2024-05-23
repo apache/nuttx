@@ -359,7 +359,7 @@ Prerequisites
 First of all, we need to install ``imgtool`` (a MCUboot utility application to manipulate binary
 images) and ``esptool`` (the ESP32-S2 toolkit)::
 
-    $ pip install imgtool esptool
+    $ pip install imgtool esptool==4.8.dev4
 
 We also need to make sure that the python modules are added to ``PATH``::
 

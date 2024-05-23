@@ -143,6 +143,10 @@ ifeq ($(CONFIG_RTC_DRIVER),y)
 CHIP_CSRCS += esp32s2_rtc_lowerhalf.c
 endif
 
+ifeq ($(ESP32S2_APP_FORMAT_LEGACY), )
+CHIP_CSRCS += loader.c
+endif
+
 #############################################################################
 # Espressif HAL for 3rd Party Platforms
 #############################################################################
@@ -151,7 +155,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = 22804823777dbbb7f43925b7729b3a32331aa7cd
+	ESP_HAL_3RDPARTY_VERSION = 7247aeb8749d8c6e29f951fa499100f593042408
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32s3/common/scripts/simple_boot_sections.ld
+ * boards/xtensa/esp32s2/common/scripts/simple_boot_sections.ld
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,19 +18,15 @@
  *
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
 /* Default entry point: */
 
 ENTRY(__start);
-
-_diram_i_start = 0x40378000;
 
 SECTIONS
 {
   /* Send .iram0 code to iram */
 
-  .iram0.vectors :
+  .iram0.vectors : ALIGN(4)
   {
     _iram_start = ABSOLUTE(.);
 
@@ -63,82 +59,22 @@ SECTIONS
     . = 0x400;
     *(.*_vector.literal)
 
-    . = ALIGN(16);
-
+    . = ALIGN (16);
     *(.entry.text)
     *(.init.literal)
     *(.init)
     _init_end = ABSOLUTE(.);
   } >iram0_0_seg AT>ROM
 
-  .iram0.text :
+  .iram0.text : ALIGN(4)
   {
     /* Code marked as running out of IRAM */
 
     *(.iram1 .iram1.*)
-    esp32s3_start.*(.literal .text .literal.* .text.*)
-
-    *libarch.a:esp32s3_cpuindex.*(.literal .text .literal.* .text.*)
-    *libarch.a:esp32s3_irq.*(.literal .text .literal.* .text.*)
-    *libarch.a:esp32s3_user.*(.literal .text .literal.* .text.*)
-    *libarch.a:esp32s3_spiflash.*(.literal .text .literal.* .text.*)
-    *libarch.a:xtensa_assert.*(.literal .text .literal.* .text.*)
-    *libarch.a:xtensa_cpuint.*(.literal .text .literal.* .text.*)
-    *libarch.a:xtensa_cpupause.*(.literal .text .literal.* .text.*)
-    *libarch.a:xtensa_irqdispatch.*(.literal .text .literal.* .text.*)
-    *libarch.a:xtensa_modifyreg32.*(.literal .text .literal.* .text.*)
-    *libarch.a:xtensa_testset.*(.literal .text .literal.* .text.*)
-
-#ifdef CONFIG_ESP32S3_BLE
-    *libc.a:sq_remlast.*(.literal .text .literal.* .text.*)
-#endif
-
-    *libdrivers.a:syslog_flush.*(.literal .text .literal.* .text.*)
-
-    *libsched.a:assert.*(.literal .text .literal.* .text.*)
-    *libsched.a:irq_csection.*(.literal .text .literal.* .text.*)
-    *libsched.a:irq_dispatch.*(.literal .text .literal.* .text.*)
-    *libsched.a:irq_spinlock.*(.literal .text .literal.* .text.*)
-    *libsched.a:sched_note.*(.literal .text .literal.* .text.*)
-    *libsched.a:sched_suspendscheduler.*(.literal .text .literal.* .text.*)
-    *libsched.a:sched_thistask.*(.literal .text .literal.* .text.*)
-    *libsched.a:spinlock.*(.literal .text .literal.* .text.*)
-    *libsched.a:*sched_get_stackinfo.*(.literal .text .literal.* .text.*)
-
-#ifdef CONFIG_ESP32S3_SPEED_UP_ISR
-    *libarch.a:xtensa_switchcontext.*(.literal.up_switch_context .text.up_switch_context)
-
-    *libarch.a:esp32s3_timerisr.*(.literal.systimer_isr .text.systimer_isr)
-    *libarch.a:esp32s3_idle.*(.literal.up_idle .text.up_idle)
-    *libarch.a:esp32s3_dma.*(.literal.esp32s3_dma_load .text.esp32s3_dma_load \
-                             .literal.esp32s3_dma_enable .text.esp32s3_dma_enable)
-
-    *libsched.a:sched_processtimer.*(.literal.nxsched_process_timer .text.nxsched_process_timer)
-    *libsched.a:clock_initialize.*(.literal.clock_timer .text.clock_timer)
-    *libsched.a:wd_start.*(.literal.wd_timer .text.wd_timer)
-    *libsched.a:sched_roundrobin.*(.literal.nxsched_process_roundrobin .text.nxsched_process_roundrobin)
-    *libsched.a:sched_reprioritizertr.*(.literal.nxsched_reprioritize_rtr .text.nxsched_reprioritize_rtr)
-    *libsched.a:sched_removereadytorun.*(.literal.nxsched_remove_readytorun .text.nxsched_remove_readytorun)
-    *libsched.a:sched_addreadytorun.*(.literal.nxsched_add_readytorun .text.nxsched_add_readytorun)
-    *libsched.a:sched_addprioritized.*(.literal.nxsched_add_prioritized .text.nxsched_add_prioritized)
-    *libsched.a:sched_mergepending.*(.literal.nxsched_merge_pending .text.nxsched_merge_pending)
-    *libsched.a:sched_resumescheduler.*(.literal.nxsched_resume_scheduler .text.nxsched_resume_scheduler)
-
-    *libc.a:sq_remfirst.*(.literal.sq_remfirst .text.sq_remfirst)
-#endif
-
-    *libarch.a:esp32s3_spi_timing.*(.literal .text .literal.* .text.*)
-#ifdef CONFIG_ESP32S3_SPIRAM_MODE_QUAD
-    *libarch.a:esp32s3_psram_quad.*(.literal .text .literal.* .text.*)
-#endif
-#ifdef CONFIG_ESP32S3_SPIRAM_MODE_OCT
-    *libarch.a:esp32s3_psram_octal.*(.literal .text .literal.* .text.*)
-#endif
-#if defined(CONFIG_STACK_CANARIES) && \
-    (defined(CONFIG_ESP32S3_SPIFLASH) || \
-     defined(CONFIG_ESP32S3_SPIRAM))
-    *libc.a:lib_stackchk.*(.literal .text .literal.* .text.*)
-#endif
+    . = ALIGN (4);
+    esp32s2_start.*(.literal .text .literal.* .text.*)
+    esp32s2_region.*(.text .text.* .literal .literal.*)
+    loader.*(.literal .text .literal.* .text.*)
 
     *libarch.a:*brownout_hal.*(.text .text.* .literal .literal.*)
     *libarch.a:*cpu.*(.text .text.* .literal .literal.*)
@@ -146,6 +82,7 @@ SECTIONS
     *libarch.a:*periph_ctrl.*(.text .text.* .literal .literal.*)
     *libarch.a:*clk.*(.text .text.* .literal .literal.*)
     *libarch.a:*efuse_hal.*(.literal.is_eco0 .text.is_eco0)
+    *libarch.a:*efuse_hal.*(.text .text.* .literal .literal.*)
     *libarch.a:*esp_clk.*(.text .text.* .literal .literal.*)
     *libarch.a:*esp_clk_tree.*(.text .text.* .literal .literal.*)
     *libarch.a:*esp_clk_tree_common.*(.text .text.* .literal .literal.*)
@@ -164,9 +101,9 @@ SECTIONS
     *libarch.a:*bootloader_common_loader.*(.text .text.* .literal .literal.*)
     *libarch.a:*bootloader_console.*(.text .text.* .literal .literal.*)
     *libarch.a:*bootloader_console_loader.*(.text .text.* .literal .literal.*)
-    *libarch.a:*bootloader_esp32s3.*(.text .text.* .literal .literal.*)
+    *libarch.a:*bootloader_esp32s2.*(.text .text.* .literal .literal.*)
     *libarch.a:*bootloader_flash.*(.text .text.* .literal .literal.*)
-    *libarch.a:*bootloader_flash_config_esp32s3.*(.text .text.* .literal .literal.*)
+    *libarch.a:*bootloader_flash_config_esp32s2.*(.text .text.* .literal .literal.*)
     *libarch.a:*bootloader_clock_init.*(.text .text.* .literal .literal.*)
     *libarch.a:*bootloader_clock_loader.*(.text .text.* .literal .literal.*)
     *libarch.a:*bootloader_efuse.*(.text .text.* .literal .literal.*)
@@ -175,7 +112,7 @@ SECTIONS
     *libarch.a:*bootloader_random.*(.text .text.* .literal .literal.*)
     *libarch.a:*bootloader_random*.*(.literal.bootloader_random_disable .text.bootloader_random_disable)
     *libarch.a:*bootloader_random*.*(.literal.bootloader_random_enable .text.bootloader_random_enable)
-    *libarch.a:*bootloader_random_esp32s3.*(.text .text.* .literal .literal.*)
+    *libarch.a:*bootloader_random_esp32s2.*(.text .text.* .literal .literal.*)
     *libarch.a:*esp_image_format.*(.text .text.* .literal .literal.*)
     *libarch.a:*bootloader_soc.*(.text .text.* .literal .literal.*)
     *libarch.a:*bootloader_sha.*(.text .text.* .literal .literal.*)
@@ -184,7 +121,6 @@ SECTIONS
     *libarch.a:*uart_hal.*(.text .text.* .literal .literal.*)
     *libarch.a:*mpu_hal.*(.text .text.* .literal .literal.*)
     *libarch.a:*mmu_hal.*(.text .text.* .literal .literal.*)
-    *libarch.a:*efuse_hal.*(.text .text.* .literal .literal.*)
     *libarch.a:*uart_periph.*(.text .text.* .literal .literal.*)
     *libarch.a:*esp_rom_uart.*(.text .text.* .literal .literal.*)
     *libarch.a:*esp_rom_sys.*(.text .text.* .literal .literal.*)
@@ -196,31 +132,28 @@ SECTIONS
     *libarch.a:*log.*(.text .text.* .literal .literal.*)
     *libarch.a:*log_noos.*(.text .text.* .literal .literal.*)
     *libarch.a:*cpu_region_protect.*(.text .text.* .literal .literal.*)
-    *libarch.a:*mspi_timing_tuning.*(.text .text.* .literal .literal.*)
-
-    *libc.a:*lib_instrument.*(.text .text.* .literal .literal.*)
-
-    *(.wifirxiram .wifirxiram.*)
-    *(.wifi0iram  .wifi0iram.*)
-    *(.wifiorslpiram .wifiorslpiram.*)
-    *(.wifislpiram .wifislpiram.*)
-    *(.wifislprxiram .wifislprxiram.*)
-    *(.phyiram .phyiram.*)
 
     /* align + add 16B for CPU dummy speculative instr. fetch */
 
     . = ALIGN(4) + 16;
-
     _iram_text = ABSOLUTE(.);
-  } >iram0_0_seg AT > ROM
+  } >iram0_0_seg AT>ROM
 
-  .dram0.dummy (NOLOAD) :
+  /* Marks the end of IRAM code segment */
+
+  .iram0.text_end (NOLOAD) :
+  {
+    . = ALIGN (4);
+    _iram_end = ABSOLUTE(.);
+  } >iram0_0_seg
+
+  .dram0.dummy (NOLOAD):
   {
     /* This section is required to skip .iram0.text area because iram0_0_seg
      * and dram0_0_seg reflect the same address space on different buses.
      */
 
-    . = ORIGIN(dram0_0_seg) + MAX(_iram_end, _diram_i_start) - _diram_i_start;
+    . = ORIGIN(dram0_0_seg) + _iram_end - _iram_start;
   } >dram0_0_seg
 
   /* Shared RAM */
@@ -229,12 +162,9 @@ SECTIONS
   {
     /* .bss initialized on power-up */
 
-    . = ALIGN(8);
+    . = ALIGN (8);
     _bss_start = ABSOLUTE(.);
     _sbss = ABSOLUTE(.);
-
-    *(.bss .bss.*)
-    *(COMMON)
     *(.dynsbss)
     *(.sbss)
     *(.sbss.*)
@@ -244,31 +174,32 @@ SECTIONS
     *(.sbss2.*)
     *(.gnu.linkonce.sb2.*)
     *(.dynbss)
+    KEEP (*(.bss))
+    *(.bss.*)
     *(.share.mem)
     *(.gnu.linkonce.b.*)
-
+    *(COMMON)
     . = ALIGN(8);
     _ebss = ABSOLUTE(.);
     _bss_end = ABSOLUTE(.);
   } >dram0_0_seg
 
-  .noinit (NOLOAD) :
+  .noinit (NOLOAD):
   {
     /* This section contains data that is not initialized during load,
      * or during the application's initialization sequence.
      */
 
     . = ALIGN(4);
-
-    *(.noinit .noinit.*)
-
+    *(.noinit)
+    *(.noinit.*)
     . = ALIGN(4);
   } >dram0_0_seg
 
-  .dram0.data :
+  .dram0.data : ALIGN(4)
   {
     /* .data initialized on power-up in ROMed configurations. */
-    . = ALIGN (16);
+
     _data_start = ABSOLUTE(.);
     _sdata = ABSOLUTE(.);
     KEEP (*(.data))
@@ -283,18 +214,10 @@ SECTIONS
     KEEP (*(.gnu.linkonce.s2.*))
     KEEP (*(.jcr))
     *(.dram1 .dram1.*)
-    esp32s3_start.*(.rodata .rodata.*)
+    esp32s2_start.*(.rodata .rodata.*)
+    esp32s2_region.*(.rodata .rodata.*)
+    loader.*(.rodata .rodata.*)
 
-    *libphy.a:(.rodata  .rodata.*)
-    *libarch.a:xtensa_context.*(.rodata  .rodata.*)
-#if defined(CONFIG_STACK_CANARIES) && \
-    (defined(CONFIG_ESP32S3_SPIFLASH) || \
-     defined(CONFIG_ESP32S3_SPIRAM))
-    *libc.a:lib_stackchk.*(.rodata  .rodata.*)
-#endif
-
-    *libsched.a:*sched_get_stackinfo.*(.rodata .rodata.*)
-    *libarch.a:esp32s3_spiflash.*(.rodata .rodata.*)
     *libarch.a:*brownout.*(.rodata .rodata.*)
     *libarch.a:*cpu.*(.rodata .rodata.*)
     *libarch.a:*gpio_hal.*(.rodata .rodata.*)
@@ -318,16 +241,16 @@ SECTIONS
     *libarch.a:*bootloader_common_loader.*(.rodata .rodata.*)
     *libarch.a:*bootloader_console.*(.rodata .rodata.*)
     *libarch.a:*bootloader_console_loader.*(.rodata .rodata.*)
-    *libarch.a:*bootloader_esp32s3.*(.rodata .rodata.*)
+    *libarch.a:*bootloader_esp32s2.*(.rodata .rodata.*)
     *libarch.a:*bootloader_flash.*(.rodata .rodata.*)
-    *libarch.a:*bootloader_flash_config_esp32s3.*(.rodata .rodata.*)
+    *libarch.a:*bootloader_flash_config_esp32s2.*(.rodata .rodata.*)
     *libarch.a:*bootloader_clock_init.*(.rodata .rodata.*)
     *libarch.a:*bootloader_clock_loader.*(.rodata .rodata.*)
     *libarch.a:*bootloader_efuse.*(.rodata .rodata.*)
     *libarch.a:*bootloader_panic.*(.rodata .rodata.*)
     *libarch.a:*bootloader_mem.*(.rodata .rodata.*)
     *libarch.a:*bootloader_random.*(.rodata .rodata.*)
-    *libarch.a:*bootloader_random_esp32s3.*(.rodata .rodata.*)
+    *libarch.a:*bootloader_random_esp32s2.*(.rodata .rodata.*)
     *libarch.a:*esp_image_format.*(.rodata .rodata.*)
     *libarch.a:*bootloader_soc.*(.rodata .rodata.*)
     *libarch.a:*bootloader_sha.*(.rodata .rodata.*)
@@ -347,13 +270,6 @@ SECTIONS
     *libarch.a:*log.*(.rodata .rodata.*)
     *libarch.a:*log_noos.*(.rodata .rodata.*)
     *libarch.a:*cpu_region_protect.*(.rodata .rodata.*)
-    *libarch.a:*mspi_timing_tuning.*(.rodata .rodata.*)
-#ifdef CONFIG_ESP32S3_SPIRAM_MODE_QUAD
-    *libarch.a:esp32s3_psram_quad.*(.rodata .rodata.*)
-#endif
-#ifdef CONFIG_ESP32S3_SPIRAM_MODE_OCT
-    *libarch.a:esp32s3_psram_octal.*(.rodata .rodata.*)
-#endif
 
     . = ALIGN(4);
     _edata = ABSOLUTE(.);
@@ -386,33 +302,24 @@ SECTIONS
 
   .flash.rodata :
   {
-    _rodata_reserved_start = ABSOLUTE(.);
-
     _srodata = ABSOLUTE(.);
-    *(EXCLUDE_FILE (esp32s3_start.*) .rodata)
-    *(EXCLUDE_FILE (esp32s3_start.*) .rodata.*)
+    *(EXCLUDE_FILE (esp32s2_start.*) .rodata)
+    *(EXCLUDE_FILE (esp32s2_start.*) .rodata.*)
 
+    *(.srodata.*)
     *(.rodata)
     *(.rodata.*)
-#ifdef CONFIG_ESP32S3_WIRELESS
-    *(.rodata_wlog_verbose.*)
-    *(.rodata_wlog_debug.*)
-    *(.rodata_wlog_info.*)
-    *(.rodata_wlog_warning.*)
-    *(.rodata_wlog_error.*)
-#endif
+
     *(.irom1.text) /* catch stray ICACHE_RODATA_ATTR */
     *(.gnu.linkonce.r.*)
     *(.rodata1)
     __XT_EXCEPTION_TABLE_ = ABSOLUTE(.);
     *(.xt_except_table)
-    *(.gcc_except_table)
-    *(.gcc_except_table.*)
+    *(.gcc_except_table .gcc_except_table.*)
     *(.gnu.linkonce.e.*)
     *(.gnu.version_r)
-    *(.eh_frame)
-
-    . = ALIGN(4);
+    KEEP(*(.eh_frame))
+    . = (. + 3) & ~ 3;
 
     /* C++ constructor and destructor tables, properly ordered: */
 
@@ -436,6 +343,7 @@ SECTIONS
     *(.xt_except_desc_end)
     *(.dynamic)
     *(.gnu.version_d)
+    . = ALIGN(4);               /* This table MUST be 4-byte aligned */
     _erodata = ABSOLUTE(.);
 
     /* Literals are also RO data. */
@@ -446,23 +354,22 @@ SECTIONS
     *(.gnu.linkonce.lit4.*)
     _lit4_end = ABSOLUTE(.);
     . = ALIGN(4);
-  } >drom0_0_seg AT>ROM
-
-  .flash.rodata_noload (NOLOAD) :
-  {
-    /*
-      This is a symbol marking the flash.rodata end, this can be
-      used for mmu driver to maintain virtual address
-      We don't need to include the noload rodata in this section
-    */
-    _rodata_reserved_end = ABSOLUTE(.);
-    . = ALIGN (4);
-    mapping[rodata_noload]
-  } >drom0_0_seg
+  } >default_rodata_seg AT>ROM
 
   _image_irom_vma = ADDR(.flash.text);
   _image_irom_lma = LOADADDR(.flash.text);
   _image_irom_size = LOADADDR(.flash.text) + SIZEOF(.flash.text) - _image_irom_lma;
+
+  /* The alignment of the ".flash.text" output section is forced to
+   * 0x0000FFFF (64KB) to ensure that it will be allocated at the beginning
+   * of the next available Flash block.
+   * This is required to meet the following constraint from the external
+   * flash MMU:
+   *    VMA % 64KB == LMA % 64KB
+   * i.e. the lower 16 bits of both the virtual address (address seen by the
+   * CPU) and the load address (physical address of the external flash) must
+   * be equal.
+   */
 
   .flash.text_dummy (NOLOAD) :
   {
@@ -473,63 +380,33 @@ SECTIONS
   .flash.text :
   {
     _stext = .;
-    _instruction_reserved_start = ABSOLUTE(.);
 
     *(.literal .text .literal.* .text.* .stub .gnu.warning .gnu.linkonce.literal.* .gnu.linkonce.t.*.literal .gnu.linkonce.t.*)
     *(.irom0.text) /* catch stray ICACHE_RODATA_ATTR */
     *(.fini.literal)
     *(.fini)
     *(.gnu.version)
-
-    /* CPU will try to prefetch up to 16 bytes of instructions.
-     * This means that any configuration (e.g. MMU, PMS) must allow
-     * safe access to up to 16 bytes after the last real instruction, add
-     * dummy bytes to ensure this
-     */
+    . = ALIGN(4);
 
     . += 16;
 
-    _instruction_reserved_end = ABSOLUTE(.);
     _etext = .;
-  } >irom0_0_seg AT>ROM
-
-  /* Marks the end of IRAM code segment */
-
-  .iram0.text_end (NOLOAD) :
-  {
-    /* ESP32-S3 memprot requires 16B padding for possible CPU prefetch and
-     * 256B alignment for PMS split lines.
-     */
-
-    . += 16;
-    . = ALIGN(256);
-    _iram_end = ABSOLUTE(.);
-  } >iram0_0_seg
-
-  .iram0.data :
-  {
-    . = ALIGN(4);
-
-    *(.iram.data)
-    *(.iram.data.*)
-  } >iram0_0_seg
-
-  .iram0.bss (NOLOAD) :
-  {
-    . = ALIGN(4);
-
-    *(.iram.bss)
-    *(.iram.bss.*)
-
-    . = ALIGN(4);
-    _iram_end = ABSOLUTE(.);
-  } >iram0_0_seg
+  } >default_code_seg AT>ROM
 
   .rtc.text :
   {
     . = ALIGN(4);
     *(.rtc.literal .rtc.text)
   } >rtc_iram_seg AT>ROM
+
+  .rtc.dummy (NOLOAD) :
+  {
+    /* This section is required to skip .rtc.text area because the text and
+     * data segments reflect the same address space on different buses.
+     */
+
+    . = SIZEOF(.rtc.text);
+  } >rtc_data_seg
 
   /* RTC BSS section. */
 
@@ -540,33 +417,12 @@ SECTIONS
 
   .rtc.data :
   {
-    . = ALIGN(4);
     *(.rtc.data)
-    *(.rtc.data.*)
     *(.rtc.rodata)
-    *(.rtc.rodata.*)
 
-    /* Whatever is left from the RTC memory is used as a special heap. */
+   /* Whatever is left from the RTC memory is used as a special heap. */
 
     . = ALIGN (4);
     _srtcheap = ABSOLUTE(.);
-  } >rtc_slow_seg
-
-  /*
-   * This section holds RTC data that should have fixed addresses.
-   * The data are not initialized at power-up and are retained during deep sleep.
-   */
-  .rtc_reserved (NOLOAD):
-  {
-    . = ALIGN(4);
-    _rtc_reserved_start = ABSOLUTE(.);
-    /* New data can only be added here to ensure existing data are not moved.
-       Because data have adhered to the end of the segment and code is relied on it.
-       >> put new data here << */
-
-    *(.rtc_timer_data_in_rtc_mem .rtc_timer_data_in_rtc_mem.*)
-    KEEP(*(.bootloader_data_rtc_mem .bootloader_data_rtc_mem.*))
-    _rtc_reserved_end = ABSOLUTE(.);
-  } > rtc_reserved_seg
-
+  } >rtc_slow_seg AT>ROM
 }
