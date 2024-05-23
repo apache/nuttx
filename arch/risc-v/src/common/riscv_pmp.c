@@ -134,9 +134,9 @@ static bool pmp_check_region_attrs(uintptr_t base, uintptr_t size,
 
     case PMPCFG_A_NAPOT:
       {
-        /* For NAPOT, both base and size must be properly aligned */
+        /* For NAPOT, Naturally aligned power-of-two region, >= 8 bytes */
 
-        if ((base & 0x07) != 0 || size < 8)
+        if ((base & 0x07) != 0 || size < 8 || (size & (size - 1)) != 0)
           {
             return false;
           }
