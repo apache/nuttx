@@ -107,6 +107,172 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
+/* If the divisor happens to be constant, we determine the appropriate
+ * inverse at compile time to turn the division into a few inline
+ * multiplications which ought to be much faster.
+ *
+ * (It is unfortunate that gcc doesn't perform all this internally.)
+ */
+
+#ifdef CONFIG_HAVE_LONG_LONG
+/* Default C implementation for __umul64_const()
+ *
+ * Prototype: uint64_t __umul64_const(uint64_t retval, uint64_t m,
+ *                                    uint64_t n, bool bias);
+ * Semantic:  retval = ((bias ? m : 0) + m * n) >> 64
+ *
+ * The product is a 128-bit value, scaled down to 64 bits.
+ * Assuming constant propagation to optimize away unused conditional code.
+ * Architectures may provide their own optimized assembly implementation.
+ */
+
+#  ifdef up_umul64_const
+#    define __umul64_const(res, m, n, bias) \
+      (res) = up_umul64_const(m, n, bias)
+#  else
+#    define __umul64_const(res, m, n, bias) \
+      do \
+        { \
+          uint32_t __m_lo = (m); \
+          uint32_t __m_hi = (m) >> 32; \
+          uint32_t __n_lo = (n); \
+          uint32_t __n_hi = (n) >> 32; \
+          uint32_t __res_lo; \
+          uint32_t __res_hi; \
+          uint32_t __tmp; \
+          \
+          if (!(bias)) \
+            { \
+              (res) = ((uint64_t)__m_lo * __n_lo) >> 32; \
+            } \
+          else if (!((m) & ((1ULL << 63) | (1ULL << 31)))) \
+            { \
+              (res) = ((m) + (uint64_t)__m_lo * __n_lo) >> 32; \
+            } \
+          else \
+            { \
+              (res) = (m) + (uint64_t)__m_lo * __n_lo; \
+              __res_lo = (res) >> 32; \
+              __res_hi = (__res_lo < __m_hi); \
+              (res) = __res_lo | ((uint64_t)__res_hi << 32); \
+            } \
+          \
+          if (!((m) & ((1ULL << 63) | (1ULL << 31)))) \
+            { \
+              (res) += (uint64_t)__m_lo * __n_hi; \
+              (res) += (uint64_t)__m_hi * __n_lo; \
+              (res) >>= 32; \
+            } \
+          else \
+            { \
+              (res) += (uint64_t)__m_lo * __n_hi; \
+              __tmp = (res) >> 32; \
+              (res) += (uint64_t)__m_hi * __n_lo; \
+              __res_lo = (res) >> 32; \
+              __res_hi = (__res_lo < __tmp); \
+              (res) = __res_lo | ((uint64_t)__res_hi << 32); \
+            } \
+          \
+          (res) += (uint64_t)__m_hi * __n_hi; \
+        } \
+      while (0)
+#  endif
+
+#  define div64_const32(n, b) \
+    do \
+      { \
+        uint64_t ___res; \
+        uint64_t ___x; \
+        uint64_t ___t; \
+        uint64_t ___m; \
+        uint64_t ___n = (n); \
+        uint32_t ___p; \
+        uint32_t ___bias; \
+        uint32_t ___b = (b); \
+        ___p = 1 << LOG2_FLOOR(___b); \
+        ___m = (~0ULL / ___b) * ___p; \
+        ___m += (((~0ULL % ___b + 1) * ___p) + ___b - 1) / ___b; \
+        ___x = ~0ULL / ___b * ___b - 1; \
+        ___res = ((___m & 0xffffffff) * (___x & 0xffffffff)) >> 32; \
+        ___t = ___res += (___m & 0xffffffff) * (___x >> 32); \
+        ___res += (___x & 0xffffffff) * (___m >> 32); \
+        ___t = (___res < ___t) ? (1ULL << 32) : 0; \
+        ___res = (___res >> 32) + ___t; \
+        ___res += (___m >> 32) * (___x >> 32); \
+        ___res /= ___p; \
+        if (~0ULL % (___b / (___b & -___b)) == 0) \
+          { \
+            ___n /= (___b & -___b); \
+            ___m = ~0ULL / (___b / (___b & -___b)); \
+            ___p = 1; \
+            ___bias = 1; \
+          } \
+        else if (___res != ___x / ___b) \
+          { \
+            ___bias = 1; \
+            ___m = (~0ULL / ___b) * ___p; \
+            ___m += ((~0ULL % ___b + 1) * ___p) / ___b; \
+          } \
+        else \
+          { \
+            uint32_t ___bits = -(___m & -___m); \
+            ___bits |= ___m >> 32; \
+            ___bits = (~___bits) << 1; \
+            if (!___bits) \
+              { \
+                ___p /= (___m & -___m); \
+                ___m /= (___m & -___m); \
+              } \
+            else \
+              { \
+                ___p >>= LOG2_FLOOR(___bits); \
+                ___m >>= LOG2_FLOOR(___bits); \
+              } \
+            ___bias = 0; \
+          } \
+        __umul64_const(___res, ___m, ___n, ___bias); \
+        \
+        ___res /= ___p; \
+        (n) = ___res; \
+      } \
+    while (0)
+
+#endif
+
+#if defined(CONFIG_HAVE_LONG_LONG) && defined(CONFIG_HAVE_EXPRESSION_STATEMENT)
+#  define div64_const(n, base) \
+    ({ \
+      uint64_t __n = (n); \
+      uint32_t __base = (base); \
+      if (IS_POWER_OF_2(__base)) \
+        { \
+          (__n) >>= LOG2_FLOOR(__base); \
+        } \
+      else if (UINTPTR_MAX == UINT32_MAX) \
+        { \
+          div64_const32(__n, __base); \
+        } \
+      else \
+        { \
+          __n /= __base; \
+        } \
+        __n; \
+      })
+
+#  define div_const(n, base) \
+    ((sizeof(n) == sizeof(uint64_t)) ? div64_const(n, base) : ((n) / (base)))
+#  define div_const_roundup(n, base) \
+    ((sizeof(n) == sizeof(uint64_t)) ? div64_const((n) + (base) - 1, base) : \
+     (((n) + (base) - 1) / (base)))
+#  define div_const_roundnearest(n, base) \
+    ((sizeof(n) == sizeof(uint64_t)) ? div64_const((n) + ((base) / 2), base) : \
+     (((n) + ((base) / 2)) / (base)))
+#else
+#  define div_const(n, base) ((n) / (base))
+#  define div_const_roundup(n, base) (((n) + (base) - 1) / (base))
+#  define div_const_roundnearest(n, base) (((n) + ((base) / 2)) / (base))
+#endif
+
 /****************************************************************************
  * Name: uneg64
  *
