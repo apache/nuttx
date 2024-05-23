@@ -152,6 +152,14 @@ int esp_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_ESPRESSIF_XTWDT
+  ret = esp_wdt_initialize("/dev/watchdog3", ESP_WDT_XTAL32K);
+  if (ret < 0)
+    {
+      _err("Failed to initialize WDT: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_TIMER
   ret = esp_timer_initialize(0);
   if (ret < 0)

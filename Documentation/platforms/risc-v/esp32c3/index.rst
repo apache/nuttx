@@ -164,7 +164,7 @@ SPIFLASH     Yes
 Timers       Yes
 Touch        No
 UART         Yes
-Watchdog     Yes
+Watchdog     Yes     XTWDT supported
 Wifi         Yes     WPA3-SAE supported
 =========== ======= ====================
 
