@@ -25,6 +25,8 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
+#include <sys/pciio.h>
+#include <sys/endian.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/pci/pci.h>
@@ -114,6 +116,12 @@
    (((id)->class ^ (dev)->class) & ((id)->class_mask == 0)))
 
 /****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static int pci_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -124,6 +132,17 @@ static struct list_node g_pci_driver_list =
                         LIST_INITIAL_VALUE(g_pci_driver_list);
 static struct list_node g_pci_ctrl_list =
                         LIST_INITIAL_VALUE(g_pci_ctrl_list);
+
+static const struct file_operations g_pci_fops =
+{
+  NULL,                  /* open */
+  NULL,                  /* close */
+  NULL,                  /* read */
+  NULL,                  /* write */
+  NULL,                  /* seek */
+  pci_ioctl,             /* ioctl */
+  NULL,                  /* mmap */
+};
 
 /****************************************************************************
  * Private Functions
@@ -155,6 +174,219 @@ pci_do_find_device_from_bus(FAR struct pci_bus_s *bus, uint8_t busno,
     }
 
   return NULL;
+}
+
+static int pci_vpd_read(FAR struct pci_bus_s *bus, uint32_t devfn,
+                        int offset, int count, FAR uint32_t *data)
+{
+  uint8_t pos;
+  int i;
+
+  if (offset + count >= PCI_VPD_ADDR_MASK || data != NULL)
+    {
+      return -EINVAL;
+    }
+
+  pos = pci_bus_find_capability(bus, devfn, PCI_CAP_ID_VPD);
+  if (pos == 0)
+    {
+      return -ENOENT;
+    }
+
+  for (i = 0; i < count; i++, offset += 4)
+    {
+      int j = 0;
+
+      pci_bus_write_config_word(bus, devfn, pos + PCI_VPD_ADDR, offset);
+
+      /**
+       * PCI 2.2 does not specify how long we should poll
+       * for completion nor whether the operation can fail.
+       */
+
+      for (; ; )
+        {
+          uint16_t addr;
+
+          pci_bus_read_config_word(bus, devfn, pos + PCI_VPD_ADDR, &addr);
+          if (addr & PCI_VPD_ADDR_F)
+            {
+              break;
+            }
+
+          if (++j == 20)
+            {
+              return -EIO;
+            }
+
+          up_udelay(4);
+        }
+
+      pci_bus_read_config_dword(bus, devfn, pos + PCI_VPD_DATA, &data[i]);
+      data[i] = le32toh(data[i]);
+    }
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: pci_ioctl
+ *
+ * Description:
+ *  for lspci read/write pci config space
+ *
+ * Input Parameters:
+ *   filep - The open file description
+ *   cmd - The cmd to read/write cmd
+ *   arg - The arg to pass ioctl
+ * Returned Value:
+ *   The length of the param
+ *
+ ****************************************************************************/
+
+static int pci_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+{
+  FAR struct pci_controller_s *ctrl;
+  FAR struct pcisel *sel;
+  uint32_t devfn;
+  uint8_t i = 0;
+  int ret;
+
+  sel = (FAR struct pcisel *)arg;
+  devfn = PCI_DEVFN(sel->pc_dev, sel->pc_func);
+
+  ret = nxmutex_lock(&g_pci_lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  list_for_every_entry(&g_pci_ctrl_list, ctrl, struct pci_controller_s, node)
+    {
+      if (i == sel->pc_domain)
+        {
+          break;
+        }
+
+      i++;
+    }
+
+  nxmutex_unlock(&g_pci_lock);
+
+  if (i != sel->pc_domain)
+    {
+      return -ENODEV;
+    }
+
+  switch (cmd)
+    {
+      case PCIOCREAD:
+        {
+          FAR struct pci_io *io = (FAR struct pci_io *)arg;
+          ret = pci_bus_read_config(ctrl->bus, devfn, io->pi_reg,
+                                    io->pi_width, &io->pi_data);
+          break;
+         }
+
+      case PCIOCWRITE:
+        {
+          FAR struct pci_io *io = (FAR struct pci_io *)arg;
+          ret = pci_bus_write_config(ctrl->bus, devfn, io->pi_reg,
+                                     io->pi_width, io->pi_data);
+          break;
+        }
+
+      case PCIOCGETROMLEN:
+        {
+          FAR struct pci_rom *rom = (FAR struct pci_rom *)arg;
+          FAR struct pci_device_s *dev =
+            pci_find_device_from_bus(ctrl->bus, sel->pc_bus, devfn);
+          if (dev == NULL)
+            {
+              return -ENODEV;
+            }
+
+          rom->pr_romlen = pci_resource_len(dev, PCI_ROM_RESOURCE);
+          ret = 0;
+          break;
+        }
+
+      case PCIOCGETROM:
+        {
+          FAR void *p;
+          uint32_t addr;
+          uint32_t len;
+
+          FAR struct pci_rom *rom = (FAR struct pci_rom *)arg;
+          FAR struct pci_device_s *dev =
+            pci_find_device_from_bus(ctrl->bus, sel->pc_bus, devfn);
+          if (dev == NULL)
+            {
+              return -ENODEV;
+            }
+
+          addr = pci_resource_start(dev, PCI_ROM_RESOURCE);
+          len = pci_resource_len(dev, PCI_ROM_RESOURCE);
+          if (rom->pr_romlen < len)
+            {
+              rom->pr_romlen = len;
+              ret = -E2BIG;
+              break;
+            }
+
+          p = pci_map_bar(dev, PCI_ROM_RESOURCE);
+          if (p == NULL)
+            {
+              ret = -ENOENT;
+              break;
+            }
+
+          pci_bus_write_config_dword(ctrl->bus, devfn, PCI_ROM_ADDRESS,
+                                     addr | PCI_ROM_ADDRESS_ENABLE);
+          memcpy(rom->pr_rom, p, len);
+          pci_bus_write_config_dword(ctrl->bus, devfn,
+                                     PCI_ROM_ADDRESS, addr);
+          break;
+        }
+
+      case PCIOCREADMASK:
+        {
+          uint32_t data;
+
+          FAR struct pci_io *io = (FAR struct pci_io *)arg;
+          if (io->pi_width != 4 || (io->pi_reg & 0x3) ||
+              io->pi_reg <  PCI_BASE_ADDRESS_0 ||
+              io->pi_reg >= PCI_BASE_ADDRESS_SPACE)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          pci_bus_read_config_dword(ctrl->bus, devfn, io->pi_reg, &data);
+          pci_bus_write_config_dword(ctrl->bus, devfn, io->pi_reg,
+                                     0xffffffff);
+          pci_bus_read_config_dword(ctrl->bus, devfn,
+                                    io->pi_reg, &io->pi_data);
+          pci_bus_write_config_dword(ctrl->bus, devfn, io->pi_reg, data);
+          break;
+        }
+
+      case PCIOCGETVPD:
+        {
+          FAR struct pci_vpd_req *pv = (FAR struct pci_vpd_req *)arg;
+          ret = pci_vpd_read(ctrl->bus, devfn, pv->pv_offset,
+                             pv->pv_count, pv->pv_data);
+          break;
+        }
+
+      default:
+        {
+          ret = -ENOTTY;
+          break;
+        }
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -1425,6 +1657,22 @@ uint8_t pci_bus_find_capability(FAR struct pci_bus_s *bus,
     }
 
   return pos;
+}
+
+/****************************************************************************
+ * Name: pci_dev_register
+ *
+ * Description:
+ *   Create an pci dev driver.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; A negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int pci_dev_register(void)
+{
+  return register_driver("/dev/pci", &g_pci_fops, 0666, NULL);
 }
 
 PCI_BUS_READ_CONFIG(byte, uint8_t, 1)
