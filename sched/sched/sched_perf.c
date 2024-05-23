@@ -551,7 +551,6 @@ perf_event_alloc(FAR struct perf_event_attr_s *attr,
   pmu = perf_get_pmu(event);
   if (pmu == NULL)
     {
-      serr("perf event get pmu fail\n");
       goto nxmutex_destroy;
     }
 
@@ -1254,7 +1253,6 @@ static int perf_event_disable(FAR void *arg)
 
   if (event->state != PERF_EVENT_STATE_ACTIVE)
     {
-      serr("Perf event not active\n");
       return OK;
     }
 
