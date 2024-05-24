@@ -39,6 +39,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/mutex.h>
 #include <nuttx/timers/timer.h>
+#include <sys/poll.h>
 
 #ifdef CONFIG_TIMER
 
@@ -53,6 +54,7 @@ struct timer_upperhalf_s
   mutex_t lock;            /* Supports mutual exclusion */
   uint8_t crefs;           /* The number of times the device has been opened */
   FAR char *path;          /* Registration path */
+  FAR struct pollfd *fds;
 
   /* The contained signal info */
 
@@ -77,6 +79,8 @@ static ssize_t timer_write(FAR struct file *filep, FAR const char *buffer,
                            size_t buflen);
 static int     timer_ioctl(FAR struct file *filep, int cmd,
                            unsigned long arg);
+static int     timer_poll(FAR struct file *filep,
+                          FAR struct pollfd *fds, bool setup);
 
 /****************************************************************************
  * Private Data
@@ -90,6 +94,9 @@ static const struct file_operations g_timerops =
   timer_write, /* write */
   NULL,        /* seek */
   timer_ioctl, /* ioctl */
+  NULL,        /* mmap */
+  NULL,        /* truncate */
+  timer_poll,  /* poll */
 };
 
 /****************************************************************************
@@ -114,6 +121,8 @@ static bool timer_notifier(FAR uint32_t *next_interval_us, FAR void *arg)
   DEBUGASSERT(upper != NULL);
 
   /* Signal the waiter.. if there is one */
+
+  poll_notify(&upper->fds, 1, POLLIN);
 
   nxsig_notification(notify->pid, &notify->event, SI_QUEUE, &upper->work);
 
@@ -397,6 +406,46 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 }
 
 /****************************************************************************
+ * Name: timer_poll
+ ****************************************************************************/
+
+static int timer_poll(FAR struct file *filep,
+                      FAR struct pollfd *fds, bool setup)
+{
+  FAR struct inode             *inode = filep->f_inode;
+  FAR struct timer_upperhalf_s *upper = inode->i_private;
+  irqstate_t flags;
+  int ret = OK;
+
+  if (upper == NULL || fds == NULL)
+    {
+      return -EINVAL;
+    }
+
+  flags = enter_critical_section();
+
+  if (setup)
+    {
+      if (upper->fds)
+        {
+          ret = -EBUSY;
+          goto errout;
+        }
+
+      upper->fds = fds;
+    }
+  else
+    {
+      upper->fds = NULL;
+    }
+
+errout:
+  leave_critical_section(flags);
+
+  return ret;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -560,7 +609,7 @@ int timer_setcallback(FAR void *handle, tccb_t callback, FAR void *arg)
 
   /* Check if the lower half driver supports the setcallback method */
 
-  if (lower->ops->setcallback != NULL) /* Optional */
+  if (lower->ops->setcallback != NULL)
     {
       /* Yes.. Defer the handler attachment to the lower half driver */
 
