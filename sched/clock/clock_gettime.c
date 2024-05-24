@@ -60,7 +60,6 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
 {
 #ifndef CONFIG_CLOCK_TIMEKEEPING
   struct timespec ts;
-  uint32_t carry;
 #endif
   int ret = OK;
 
@@ -120,25 +119,8 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
            */
 
           flags = spin_lock_irqsave(NULL);
-
-          ts.tv_sec  += g_basetime.tv_sec;
-          ts.tv_nsec += g_basetime.tv_nsec;
-
+          clock_timespec_add(&g_basetime, &ts, tp);
           spin_unlock_irqrestore(NULL, flags);
-
-          /* Handle carry to seconds. */
-
-          if (ts.tv_nsec >= NSEC_PER_SEC)
-            {
-              carry       = ts.tv_nsec / NSEC_PER_SEC;
-              ts.tv_sec  += carry;
-              ts.tv_nsec -= (carry * NSEC_PER_SEC);
-            }
-
-          /* And return the result to the caller. */
-
-          tp->tv_sec  = ts.tv_sec;
-          tp->tv_nsec = ts.tv_nsec;
         }
 #endif /* CONFIG_CLOCK_TIMEKEEPING */
     }
