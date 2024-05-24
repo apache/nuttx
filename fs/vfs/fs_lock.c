@@ -767,15 +767,16 @@ void file_closelk(FAR struct file *filep)
       goto out;
     }
 
+  nxmutex_lock(&g_protect_lock);
   bucket = file_lock_find_bucket(path);
   if (bucket == NULL)
     {
       /* There is no bucket here, so we don't need to free it. */
 
+      nxmutex_unlock(&g_protect_lock);
       goto out;
     }
 
-  nxmutex_lock(&g_protect_lock);
   list_for_every_entry_safe(&bucket->list, file_lock, temp,
                             struct file_lock_s, fl_node)
     {
