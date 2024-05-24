@@ -93,6 +93,8 @@ class Nxsetregs(gdb.Command):
                 gdb.lookup_type("char").pointer()
             )
         else:
+            gdb.execute("set $_current_regs=tcbinfo_current_regs()")
+            current_regs = gdb.parse_and_eval("$_current_regs")
             regs = current_regs.cast(gdb.lookup_type("char").pointer())
 
         if regs == 0:
