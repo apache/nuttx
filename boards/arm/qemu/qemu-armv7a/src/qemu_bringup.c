@@ -74,6 +74,14 @@ static void register_devices_from_fdt(void)
     }
 #endif
 
+#ifdef CONFIG_PCI
+  ret = fdt_pci_ecam_register(fdt);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "fdt_pci_ecam_register failed, ret=%d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
 }
 
