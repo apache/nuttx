@@ -989,7 +989,6 @@ int bl_os_timer_start_once(void *timerid, long t_sec, long t_nsec)
 {
   struct timer_adpt *timer;
   struct timespec reltime;
-  int32_t tick;
 
   timer = (struct timer_adpt *)timerid;
 
@@ -1001,10 +1000,8 @@ int bl_os_timer_start_once(void *timerid, long t_sec, long t_nsec)
   reltime.tv_nsec = t_nsec;
   reltime.tv_sec = t_sec;
 
-  clock_time2ticks(&reltime, &tick);
-
   timer->mode = BL_OS_TIEMR_ONCE;
-  timer->delay = tick;
+  timer->delay = clock_time2ticks(&reltime);
 
   return wd_start(&timer->wdog,
                   timer->delay,
@@ -1027,7 +1024,6 @@ int bl_os_timer_start_periodic(void *timerid, long t_sec, long t_nsec)
 {
   struct timer_adpt *timer;
   struct timespec reltime;
-  int32_t tick;
 
   timer = (struct timer_adpt *)timerid;
 
@@ -1039,10 +1035,8 @@ int bl_os_timer_start_periodic(void *timerid, long t_sec, long t_nsec)
   reltime.tv_nsec = t_nsec;
   reltime.tv_sec = t_sec;
 
-  clock_time2ticks(&reltime, &tick);
-
   timer->mode = BL_OS_TIEMR_CYCLE;
-  timer->delay = tick;
+  timer->delay = clock_time2ticks(&reltime);
 
   return wd_start(&timer->wdog,
                   timer->delay,

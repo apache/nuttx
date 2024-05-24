@@ -100,5 +100,7 @@ int clock_abstime2ticks(clockid_t clockid,
 
   /* Convert this relative time into clock ticks. */
 
-  return clock_time2ticks(&reltime, ticks);
+  *ticks = clock_time2ticks(&reltime);
+
+  return OK;
 }

@@ -190,7 +190,7 @@ clock_t perf_gettime(void)
 
 void perf_convert(clock_t elapsed, FAR struct timespec *ts)
 {
-  clock_ticks2time(elapsed, ts);
+  clock_ticks2time(ts, elapsed);
 }
 
 /****************************************************************************
