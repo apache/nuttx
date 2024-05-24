@@ -339,19 +339,6 @@ EXTERN volatile clock_t g_system_ticks;
   ((clock_t)(ts)->tv_sec * TICK_PER_SEC + (ts)->tv_nsec / NSEC_PER_TICK)
 
 /****************************************************************************
- * Name: clock_timespec_compare
- *
- * Description:
- *    Return < 0 if time ts1 is before time ts2
- *    Return > 0 if time ts2 is before time ts1
- *    Return 0 if time ts1 is the same as time ts2
- *
- ****************************************************************************/
-
-int clock_timespec_compare(FAR const struct timespec *ts1,
-                           FAR const struct timespec *ts2);
-
-/****************************************************************************
  * Name:  clock_timespec_add
  *
  * Description:
@@ -366,9 +353,20 @@ int clock_timespec_compare(FAR const struct timespec *ts1,
  *
  ****************************************************************************/
 
-void clock_timespec_add(FAR const struct timespec *ts1,
-                        FAR const struct timespec *ts2,
-                        FAR struct timespec *ts3);
+#define clock_timespec_add(ts1, ts2, ts3) \
+  do \
+    { \
+      time_t _sec = (ts1)->tv_sec + (ts2)->tv_sec; \
+      long _nsec = (ts1)->tv_nsec + (ts2)->tv_nsec; \
+      if (_nsec >= NSEC_PER_SEC) \
+          { \
+          _nsec -= NSEC_PER_SEC; \
+          _sec++; \
+          } \
+      (ts3)->tv_sec = _sec; \
+      (ts3)->tv_nsec = _nsec; \
+    }\
+  while (0)
 
 /****************************************************************************
  * Name:  clock_timespec_subtract
@@ -386,9 +384,40 @@ void clock_timespec_add(FAR const struct timespec *ts1,
  *
  ****************************************************************************/
 
-void clock_timespec_subtract(FAR const struct timespec *ts1,
-                             FAR const struct timespec *ts2,
-                             FAR struct timespec *ts3);
+#define clock_timespec_subtract(ts1, ts2, ts3) \
+    do \
+        { \
+        time_t _sec = (ts1)->tv_sec - (ts2)->tv_sec; \
+        long _nsec = (ts1)->tv_nsec - (ts2)->tv_nsec; \
+        if (_nsec < 0) \
+            { \
+            _nsec += NSEC_PER_SEC; \
+            _sec--; \
+            } \
+        if (_sec < 0) \
+            { \
+            _sec = 0; \
+            _nsec = 0; \
+            } \
+        (ts3)->tv_sec = _sec; \
+        (ts3)->tv_nsec = _nsec; \
+        }\
+    while (0)
+
+/****************************************************************************
+ * Name: clock_timespec_compare
+ *
+ * Description:
+ *    Return < 0 if time ts1 is before time ts2
+ *    Return > 0 if time ts2 is before time ts1
+ *    Return 0 if time ts1 is the same as time ts2
+ *
+ ****************************************************************************/
+
+#define clock_timespec_compare(ts1, ts2) \
+    (((ts1)->tv_sec < (ts2)->tv_sec) ? -1 : \
+     ((ts1)->tv_sec > (ts2)->tv_sec) ? 1 : \
+     (ts1)->tv_nsec - (ts2)->tv_nsec)
 
 /****************************************************************************
  * Name: clock_compare
