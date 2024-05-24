@@ -27,7 +27,9 @@
 
 #include <nuttx/config.h>
 
+#ifdef CONFIG_LIBC_LZF
 #include <lzf.h>
+#endif
 #include <stdio.h>
 #ifndef CONFIG_DISABLE_MOUNTPOINT
 #include <nuttx/fs/fs.h>
