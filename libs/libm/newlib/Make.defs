@@ -40,6 +40,7 @@ newlib/newlib: $(NEWLIB_BASENAME)-$(NEWLIB_VERSION).tar.gz
 	$(Q) patch -p0 < newlib/0001-newlib-libm-fix-__RCSID-build-error.patch
 	$(Q) patch -p0 < newlib/0002-newlib-libm-remove-include-reent.h.patch
 	$(Q) patch -p0 < newlib/0003-newlib-fix-compilation-for-x86.patch
+	$(Q) patch -p0 < newlib/0004-newlib-disable-optmisation-for-sincos.patch
 	$(Q) touch $@
 endif
 
