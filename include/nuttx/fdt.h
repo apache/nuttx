@@ -409,4 +409,22 @@ int fdt_load_prop_u32(FAR const void *fdt, int offset,
                       FAR const char *property, int index,
                       FAR uint32_t *value);
 
+/****************************************************************************
+ * Name: pci_ecam_register_from_fdt
+ *
+ * Description:
+ *   This function is used to register an ecam driver from the device tree
+ *
+ * Input Parameters:
+ *   fdt      - Device tree handle
+ *
+ * Returned Value:
+ *   Return 0 if success, nageative if failed
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PCI
+int fdt_pci_ecam_register(FAR const void *fdt);
+#endif
+
 #endif /* __INCLUDE_NUTTX_FDT_H */

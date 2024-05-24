@@ -20,6 +20,10 @@
 if(CONFIG_DEVICE_TREE)
   set(SRCS fdt.c)
 
+  if(CONFIG_PCI)
+    list(APPEND SRCS fdt_pci.c)
+  endif()
+
   target_include_directories(drivers
                              PRIVATE ${NUTTX_DIR}/libs/libc/fdt/dtc/libfdt)
   target_sources(drivers PRIVATE ${SRCS})
