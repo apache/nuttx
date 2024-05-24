@@ -26,6 +26,10 @@ ifeq ($(CONFIG_PCI),y)
   CSRCS += fdt_pci.c
 endif
 
+ifeq ($(CONFIG_DRIVERS_VIRTIO_MMIO),y)
+  CSRCS += fdt_virtio_mmio.c
+endif
+
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)fdt$(DELIM)dtc$(DELIM)libfdt
 
 DEPPATH += --dep-path devicetree
