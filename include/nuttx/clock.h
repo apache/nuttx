@@ -334,7 +334,7 @@ EXTERN volatile clock_t g_system_ticks;
   do \
     { \
       clock_t _tick = (tick); \
-      (ts)->tv_sec = _tick / TICK_PER_SEC; \
+      (ts)->tv_sec = div_const(_tick, TICK_PER_SEC); \
       _tick -= (clock_t)(ts)->tv_sec * TICK_PER_SEC; \
       (ts)->tv_nsec = _tick * NSEC_PER_TICK; \
     } \
@@ -347,7 +347,7 @@ EXTERN volatile clock_t g_system_ticks;
   do \
     { \
       uint64_t _usec = (usec); \
-      (ts)->tv_sec = _usec / USEC_PER_SEC; \
+      (ts)->tv_sec = div_const(_usec, USEC_PER_SEC); \
       _usec -= (uint64_t)(ts)->tv_sec * USEC_PER_SEC; \
       (ts)->tv_nsec = _usec * NSEC_PER_USEC; \
     } \
@@ -360,7 +360,7 @@ EXTERN volatile clock_t g_system_ticks;
   do \
     { \
       uint64_t _nsec = (nsec); \
-      (ts)->tv_sec = _nsec / NSEC_PER_SEC; \
+      (ts)->tv_sec = div_const(_nsec, NSEC_PER_SEC); \
       _nsec -= (uint64_t)(ts)->tv_sec * NSEC_PER_SEC; \
       (ts)->tv_nsec = _nsec; \
     } \
