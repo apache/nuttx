@@ -23,8 +23,6 @@ set(SRCS
     sched_getprioritymin.c
     clock_ticks2time.c
     clock_time2ticks.c
-    clock_timespec_add.c
-    clock_timespec_subtract.c
     clock_getcpuclockid.c
     clock_getres.c
     task_cancelpt.c
