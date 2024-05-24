@@ -330,6 +330,8 @@ static ssize_t pm_read_state(FAR struct file *filep, FAR char *buffer,
       sum += wake[state] + sleep[state];
     }
 
+  pm_domain_unlock(pmfile->domain, flags);
+
   sum = sum ? sum : 1;
 
   for (state = 0; state < PM_COUNT && totalsize < buflen; state++)
@@ -354,8 +356,6 @@ static ssize_t pm_read_state(FAR struct file *filep, FAR char *buffer,
 
       totalsize += copysize;
     }
-
-  pm_domain_unlock(pmfile->domain, flags);
 
   filep->f_pos += totalsize;
   return totalsize;
