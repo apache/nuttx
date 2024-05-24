@@ -75,7 +75,7 @@ sclock_t wd_gettime(FAR struct wdog_s *wdog)
             {
               delay -= wd_elapse();
               leave_critical_section(flags);
-              return delay;
+              return delay < 0 ? 0 : delay;
             }
         }
     }
