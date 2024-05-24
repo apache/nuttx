@@ -24,6 +24,10 @@ if(CONFIG_DEVICE_TREE)
     list(APPEND SRCS fdt_pci.c)
   endif()
 
+  if(CONFIG_DRIVERS_VIRTIO_MMIO)
+    list(APPEND SRCS fdt_virtio_mmio.c)
+  endif()
+
   target_include_directories(drivers
                              PRIVATE ${NUTTX_DIR}/libs/libc/fdt/dtc/libfdt)
   target_sources(drivers PRIVATE ${SRCS})
