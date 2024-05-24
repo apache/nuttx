@@ -1,0 +1,73 @@
+From b88abc9c31c450c44c384feaf2e2653c8c4c69e4 Mon Sep 17 00:00:00 2001
+From: p-szafonimateusz <p-szafonimateusz@xiaomi.com>
+Date: Fri, 24 May 2024 09:19:03 +0200
+Subject: [PATCH] newlib: disable optmisation for sincos
+
+Change-Id: Ie571e357485384655f67cdc9af2be1c60cacfeee
+Signed-off-by: p-szafonimateusz <p-szafonimateusz@xiaomi.com>
+---
+ newlib/libm/math/w_sincos.c  |  9 +++++++++
+ newlib/libm/math/wf_sincos.c | 10 ++++++++++
+ 2 files changed, 19 insertions(+)
+
+diff --git a/newlib/newlib/newlib/libm/math/w_sincos.c newlib/newlib/newlib/libm/math/w_sincos.c
+index 491efa418..6f85c27ab 100644
+--- a/newlib/newlib/newlib/libm/math/w_sincos.c
++++ newlib/newlib/newlib/libm/math/w_sincos.c
+@@ -4,8 +4,19 @@
+ #include "fdlibm.h"
+ #include <errno.h>
+ 
++/* Disable sincos optimization for all functions in this file,
++ * otherwise gcc would generate infinite calls.
++ * Refer to gcc PR46926.
++ * -fno-builtin-sin or -fno-builtin-cos can disable sincos optimization,
++ * but these two options do not work inside optimize pragma in-file.
++ * Thus we just enforce -O0 when compiling this file.
++ */
++
+ #ifndef _DOUBLE_IS_32BITS
+ 
++#ifdef __GNUC__
++__attribute__((optimize("O0")))
++#endif
+ #ifdef __STDC__
+ 	void sincos(double x, double *sinx, double *cosx)
+ #else
+diff --git a/newlib/newlib/newlib/libm/math/wf_sincos.c newlib/newlib/newlib/libm/math/wf_sincos.c
+index 69eb922c9..2e9b5ca62 100644
+--- a/newlib/newlib/newlib/libm/math/wf_sincos.c
++++ newlib/newlib/newlib/libm/math/wf_sincos.c
+@@ -3,8 +3,19 @@
+ #include "fdlibm.h"
+ #if __OBSOLETE_MATH
+ 
++/* Disable sincos optimization for all functions in this file,
++ * otherwise gcc would generate infinite calls.
++ * Refer to gcc PR46926.
++ * -fno-builtin-sin or -fno-builtin-cos can disable sincos optimization,
++ * but these two options do not work inside optimize pragma in-file.
++ * Thus we just enforce -O0 when compiling this file.
++ */
++
+ #include <errno.h>
+ 
++#ifdef __GNUC__
++__attribute__((optimize("O0")))
++#endif
+ #ifdef __STDC__
+ 	void sincosf(float x, float *sinx, float *cosx)
+ #else
+@@ -20,6 +29,9 @@
+ 
+ #ifdef _DOUBLE_IS_32BITS
+ 
++#ifdef __GNUC__
++__attribute__((optimize("O0")))
++#endif
+ #ifdef __STDC__
+ 	void sincos(double x, double *sinx, double *cosx)
+ #else
+-- 
+2.44.0
+

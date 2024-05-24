@@ -42,7 +42,10 @@ if(CONFIG_LIBM_NEWLIB)
         && patch -p1 -d ${CMAKE_CURRENT_LIST_DIR} <
         ${CMAKE_CURRENT_LIST_DIR}/0002-newlib-libm-remove-include-reent.h.patch
         && patch -p1 -d ${CMAKE_CURRENT_LIST_DIR} <
-        ${CMAKE_CURRENT_LIST_DIR}/0003-newlib-fix-compilation-for-x86.patch)
+        ${CMAKE_CURRENT_LIST_DIR}/0003-newlib-fix-compilation-for-x86.patch &&
+        patch -p1 -d ${CMAKE_CURRENT_LIST_DIR} <
+        ${CMAKE_CURRENT_LIST_DIR}/0004-newlib-disable-optmisation-for-sincos.patch
+    )
 
     FetchContent_GetProperties(newlib_fetch)
 
