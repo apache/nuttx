@@ -325,7 +325,7 @@ EXTERN volatile clock_t g_system_ticks;
  * Public Function Prototypes
  ****************************************************************************/
 
-#define timespec_from_tick(ts, tick) \
+#define clock_ticks2time(ts, tick) \
   do \
     { \
       clock_t _tick = (tick); \
@@ -335,8 +335,34 @@ EXTERN volatile clock_t g_system_ticks;
     } \
   while (0)
 
-#define timespec_to_tick(ts) \
+#define clock_time2ticks(ts) \
   ((clock_t)(ts)->tv_sec * TICK_PER_SEC + (ts)->tv_nsec / NSEC_PER_TICK)
+
+#define clock_usec2time(ts, usec) \
+  do \
+    { \
+      uint64_t _usec = (usec); \
+      (ts)->tv_sec = _usec / USEC_PER_SEC; \
+      _usec -= (uint64_t)(ts)->tv_sec * USEC_PER_SEC; \
+      (ts)->tv_nsec = _usec * NSEC_PER_USEC; \
+    } \
+  while (0)
+
+#define clock_time2usec(ts) \
+  ((uint64_t)(ts)->tv_sec * USEC_PER_SEC + (ts)->tv_nsec / NSEC_PER_USEC)
+
+#define clock_nsec2time(ts, nsec) \
+  do \
+    { \
+      uint64_t _nsec = (nsec); \
+      (ts)->tv_sec = _nsec / NSEC_PER_SEC; \
+      _nsec -= (uint64_t)(ts)->tv_sec * NSEC_PER_SEC; \
+      (ts)->tv_nsec = _nsec; \
+    } \
+  while (0)
+
+#define clock_time2nsec(ts) \
+  ((uint64_t)(ts)->tv_sec * NSEC_PER_SEC + (ts)->tv_nsec)
 
 /****************************************************************************
  * Name:  clock_timespec_add
@@ -601,51 +627,6 @@ void clock_resynchronize(FAR struct timespec *rtc_diff);
 #if !defined(__HAVE_KERNEL_GLOBALS) || defined(CONFIG_SYSTEM_TIME64)
 clock_t clock_systime_ticks(void);
 #endif
-
-/****************************************************************************
- * Name: clock_time2ticks
- *
- * Description:
- *   Return the given struct timespec as systime ticks.
- *
- *   NOTE:  This is an internal OS interface and should not be called from
- *   application code.
- *
- * Input Parameters:
- *   reltime - Pointer to the time presented as struct timespec
- *
- * Output Parameters:
- *   ticks - Pointer to receive the time value presented as systime ticks
- *
- * Returned Value:
- *   Always returns OK (0)
- *
- ****************************************************************************/
-
-int clock_time2ticks(FAR const struct timespec *reltime,
-                     FAR sclock_t *ticks);
-
-/****************************************************************************
- * Name: clock_ticks2time
- *
- * Description:
- *   Return the given systime ticks as a struct timespec.
- *
- *   NOTE:  This is an internal OS interface and should not be called from
- *   application code.
- *
- * Input Parameters:
- *   ticks - Time presented as systime ticks
- *
- * Output Parameters:
- *   reltime - Pointer to receive the time value presented as struct timespec
- *
- * Returned Value:
- *   Always returns OK (0)
- *
- ****************************************************************************/
-
-int clock_ticks2time(sclock_t ticks, FAR struct timespec *reltime);
 
 /****************************************************************************
  * Name: clock_systime_timespec

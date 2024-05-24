@@ -244,8 +244,8 @@ int timer_settime(timer_t timerid, int flags,
 
       /* Convert that to a struct timespec and return it */
 
-      clock_ticks2time(delay, &ovalue->it_value);
-      clock_ticks2time(timer->pt_delay, &ovalue->it_interval);
+      clock_ticks2time(&ovalue->it_value, delay);
+      clock_ticks2time(&ovalue->it_interval, timer->pt_delay);
     }
 
   /* Disarm the timer (in case the timer was already armed when
@@ -271,7 +271,7 @@ int timer_settime(timer_t timerid, int flags,
 
   if (value->it_interval.tv_sec > 0 || value->it_interval.tv_nsec > 0)
     {
-      clock_time2ticks(&value->it_interval, &delay);
+      delay = clock_time2ticks(&value->it_interval);
 
       /* REVISIT: Should pt_delay be sclock_t? */
 
@@ -303,7 +303,7 @@ int timer_settime(timer_t timerid, int flags,
        * returns success.
        */
 
-      ret = clock_time2ticks(&value->it_value, &delay);
+      delay = clock_time2ticks(&value->it_value);
     }
 
   if (ret < 0)

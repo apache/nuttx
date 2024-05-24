@@ -353,7 +353,7 @@ int nxmutex_timedlock(FAR mutex_t *mutex, unsigned int timeout)
   struct timespec rqtp;
 
   clock_gettime(CLOCK_MONOTONIC, &now);
-  clock_ticks2time(MSEC2TICK(timeout), &delay);
+  clock_ticks2time(&delay, MSEC2TICK(timeout));
   clock_timespec_add(&now, &delay, &rqtp);
 
   /* Wait until we get the lock or until the timeout expires */

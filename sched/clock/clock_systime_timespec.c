@@ -120,7 +120,7 @@ int clock_systime_timespec(FAR struct timespec *ts)
       int ret;
 
       ret = up_timer_gettick(&ticks);
-      timespec_from_tick(ts, ticks);
+      clock_ticks2time(ts, ticks);
       return ret;
 #elif defined(CONFIG_SCHED_TICKLESS)
       return up_timer_gettime(ts);
@@ -129,7 +129,7 @@ int clock_systime_timespec(FAR struct timespec *ts)
        * when the clock period is in units of microseconds.
        */
 
-      timespec_from_tick(ts, clock_systime_ticks());
+      clock_ticks2time(ts, clock_systime_ticks());
       return OK;
 #endif
     }
