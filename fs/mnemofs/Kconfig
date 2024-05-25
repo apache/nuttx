@@ -1,0 +1,20 @@
+config FS_MNEMOFS
+	bool "MNEMOFS NAND Flash File System"
+	default n
+	depends on !DISABLE_MOUNTPOINT
+	---help---
+		Build the mnemofs NAND flash file system.
+
+if FS_MNEMOFS
+
+config MNEMOFS_JOURNAL_NBLKS
+	int "MNEMOFS Journal Block Count"
+	default 20
+	range 12 255
+	---help---
+		Number of blocks that mnemofs will use for the journal. Specifying
+		this will only work on formatting a NAND flash using mnemofs. If the
+		device is already formatted, the on-flash journal block count will
+		be considered instead.
+
+endif # FS_MNEMOFS
