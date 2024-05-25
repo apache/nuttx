@@ -41,7 +41,7 @@
 #define rpmsg_virtio_ivshmem_from(dev) \
   container_of(ivshmem_get_driver(dev), struct rpmsg_virtio_ivshmem_dev_s, drv)
 
-#define RPMSG_VIRTIO_IVSHMEM_WORK_DELAY    MSEC2TICK(1)
+#define RPMSG_VIRTIO_IVSHMEM_WDOG_DELAY    MSEC2TICK(1)
 
 #define RPMSG_VIRTIO_VRING_ALIGNMENT       8
 
@@ -234,10 +234,10 @@ static int rpmsg_virtio_ivshmem_interrupt(int irq, FAR void *context,
 }
 
 /****************************************************************************
- * Name: rpmsg_virtio_ivshmem_work
+ * Name: rpmsg_virtio_ivshmem_wdog
  ****************************************************************************/
 
-static void rpmsg_virtio_ivshmem_work(wdparm_t arg)
+static void rpmsg_virtio_ivshmem_wdog(wdparm_t arg)
 {
   FAR struct rpmsg_virtio_ivshmem_dev_s *priv =
     (FAR struct rpmsg_virtio_ivshmem_dev_s *)arg;
@@ -259,8 +259,8 @@ static void rpmsg_virtio_ivshmem_work(wdparm_t arg)
       priv->callback(priv->arg, RPMSG_VIRTIO_NOTIFY_ALL);
     }
 
-  wd_start(&priv->wdog, RPMSG_VIRTIO_IVSHMEM_WORK_DELAY,
-           rpmsg_virtio_ivshmem_work, (wdparm_t)priv);
+  wd_start(&priv->wdog, RPMSG_VIRTIO_IVSHMEM_WDOG_DELAY,
+           rpmsg_virtio_ivshmem_wdog, (wdparm_t)priv);
 }
 
 /****************************************************************************
@@ -293,8 +293,8 @@ static int rpmsg_virtio_ivshmem_probe(FAR struct ivshmem_device_s *ivdev)
 
   if (!ivshmem_support_irq(ivdev))
     {
-      ret = wd_start(&priv->wdog, RPMSG_VIRTIO_IVSHMEM_WORK_DELAY,
-                     rpmsg_virtio_ivshmem_work, (wdparm_t)priv);
+      ret = wd_start(&priv->wdog, RPMSG_VIRTIO_IVSHMEM_WDOG_DELAY,
+                     rpmsg_virtio_ivshmem_wdog, (wdparm_t)priv);
       if (ret < 0)
         {
           pcierr("ERROR: wd_start failed: %d\n", ret);
