@@ -268,6 +268,12 @@ file_mq_timedsend_internal(FAR struct file *mq, FAR const char *msg,
 out_send_message:
       ret = nxmq_do_send(msgq, mqmsg, msg, msglen, prio);
     }
+  else
+    {
+      /* free the message as it can't be sent */
+
+      nxmq_free_msg(mqmsg);
+    }
 
   /* Exit here with (1) the scheduler locked, (2) a message allocated, (3) a
    * wdog allocated, and (4) interrupts disabled.
