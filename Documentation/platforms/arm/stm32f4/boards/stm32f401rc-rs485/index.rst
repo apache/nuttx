@@ -554,4 +554,47 @@ Configures the NuttShell (nsh) over USB Serial (check usbserial configuration) a
 You can convert the value using following::
 
        Convert to cm: value/58
-       Converto to inches: value/148
+       Convert to inches: value/148
+
+ssd1309
+-------
+
+This config is used to enable support to the transparent OLED display powered by SSD1309.
+The resolution of this display is 128x64 (although the effective view is 128x56).
+
+You can wire the display to your board this way:
+
+======= =====
+OLED    PINS
+======= =====
+CS      PB7
+DC      PB8
+RESET   PB6
+SDA     PA7
+SCK     PA5
+======= =====
+
+The board profile configures the NSH over USB and you can use the fb command to test::
+
+        NuttShell (NSH) NuttX-12.5.1
+        nsh> fb
+        VideoInfo:
+              fmt: 0
+             xres: 128
+             yres: 64
+          nplanes: 1
+        PlaneInfo (plane 0):
+            fbmem: 0x200034f8
+            fblen: 1024
+           stride: 16
+          display: 0
+              bpp: 1
+        Mapped FB: 0x200034f8
+         0: (  0,  0) (128, 64)
+         1: ( 11,  5) (106, 54)
+         2: ( 22, 10) ( 84, 44)
+         3: ( 33, 15) ( 62, 34)
+         4: ( 44, 20) ( 40, 24)
+         5: ( 55, 25) ( 18, 14)
+        Test finished
+        nsh>

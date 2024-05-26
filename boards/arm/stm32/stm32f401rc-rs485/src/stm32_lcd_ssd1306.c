@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f401rc-rs485/src/stm32_boot.c
+ * boards/arm/stm32/stm32f401rc-rs485/src/stm32_lcd_ssd1306.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,72 +24,80 @@
 
 #include <nuttx/config.h>
 
+#include <stdio.h>
+#include <stdbool.h>
 #include <debug.h>
+#include <errno.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/board.h>
+#include <nuttx/spi/spi.h>
+#include <nuttx/lcd/lcd.h>
+#include <nuttx/lcd/ssd1306.h>
 
-#include <arch/board/board.h>
-
-#include "arm_internal.h"
+#include "stm32.h"
 #include "stm32f401rc-rs485.h"
 
-#include <nuttx/board.h>
+#include "stm32_ssd1306.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define OLED_SPI_PORT         1 /* OLED display connected to SPI1 */
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_boardinitialize
- *
- * Description:
- *   All STM32 architectures must provide the following entry point.
- *   This entry point is called early in the initialization -- after all
- *   memory has been configured and mapped but before any devices have been
- *   initialized.
- *
+ * Name: board_lcd_initialize
  ****************************************************************************/
 
-void stm32_boardinitialize(void)
+int board_lcd_initialize(void)
 {
-  /* Configure on-board LEDs if LED support has been selected. */
+  int ret;
 
-#ifdef CONFIG_ARCH_LEDS
-  board_autoled_initialize();
-#endif
+  /* Initialize the RESET and DC pins */
 
-  /* Configure SPI chip selects if
-   * 1) SPI is not disabled, and
-   * 2) the weak function stm32_spidev_initialize() has been brought into
-   * the link.
-   */
+  stm32_configgpio(GPIO_OLED_RESET);
+  stm32_configgpio(GPIO_OLED_DC);
 
-#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2)
-  stm32_spidev_initialize();
-#endif
+  /* Reset the OLED display */
+
+  stm32_gpiowrite(GPIO_OLED_RESET, 0);
+  up_mdelay(1);
+  stm32_gpiowrite(GPIO_OLED_RESET, 1);
+  up_mdelay(120);
+
+  ret = board_ssd1306_initialize(OLED_SPI_PORT);
+  if (ret < 0)
+    {
+      lcderr("ERROR: Failed to initialize SSD1306\n");
+      return ret;
+    }
+
+  return OK;
 }
 
 /****************************************************************************
- * Name: board_late_initialize
- *
- * Description:
- *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
- *   initialization call will be performed in the boot-up sequence to a
- *   function called board_late_initialize().  board_late_initialize() will
- *   be called immediately after up_initialize() is called and just before
- *   the initial application is started.  This additional initialization
- *   phase may be used, for example, to initialize board-specific device
- *   drivers.
- *
+ * Name: board_lcd_getdev
  ****************************************************************************/
 
-#ifdef CONFIG_BOARD_LATE_INITIALIZE
-void board_late_initialize(void)
+struct lcd_dev_s *board_lcd_getdev(int devno)
 {
-  /* Perform board initialization here instead of from the
-   * board_app_initialize().
-   */
-
-  stm32_bringup();
+  return board_ssd1306_getdev();
 }
-#endif
+
+/****************************************************************************
+ * Name: board_lcd_uninitialize
+ ****************************************************************************/
+
+void board_lcd_uninitialize(void)
+{
+  /* TO-FIX */
+}
