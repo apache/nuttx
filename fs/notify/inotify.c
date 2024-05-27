@@ -1001,7 +1001,7 @@ int inotify_add_watch(int fd, FAR const char *pathname, uint32_t mask)
       return ERROR;
     }
 
-  ret = stat(abspath, &buf);
+  ret = nx_stat(abspath, &buf, 1);
   if (ret < 0)
     {
       goto out_free;
