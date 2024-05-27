@@ -245,6 +245,16 @@ config DAC
 
 if DAC
 
+config DAC_FIFOSIZE
+	int "DAC buffer size"
+	default 8
+	range 1 255
+	---help---
+		This variable defines the size of the DAC ring buffer that is used
+		to queue sent DAC data until they can be retrieved by the
+		controller. This size is limited to 255 to fit uint8_t type used
+		in DAC driver.
+
 config DAC_AD5410
 	bool "AD5410 support"
 	default n
