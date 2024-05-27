@@ -822,8 +822,6 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   uint32_t arg1 = (uint32_t)arg;
   int ret = 0;
 
-  sninfo("cmd=%x arg=%08lx\n", cmd, arg);
-
   switch (cmd)
     {
       case SNIOC_GET_STATE:
