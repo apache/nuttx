@@ -10,28 +10,24 @@ if PM
 config PM_ALARM_SEC
 	int "PM_STANDBY delay (seconds)"
 	default 15
-	depends on PM
 	---help---
 		Number of seconds to wait in PM_STANDBY before going to PM_STANDBY mode.
 
 config PM_ALARM_NSEC
 	int "PM_STANDBY delay (nanoseconds)"
 	default 0
-	depends on PM
 	---help---
 		Number of additional nanoseconds to wait in PM_STANDBY before going to PM_STANDBY mode.
 
 config PM_SLEEP_WAKEUP_SEC
 	int "PM_SLEEP delay (seconds)"
 	default 20
-	depends on PM
 	---help---
 		Number of seconds to wait in PM_SLEEP.
 
 config PM_SLEEP_WAKEUP_NSEC
 	int "PM_SLEEP delay (nanoseconds)"
 	default 0
-	depends on PM
 	---help---
 		Number of additional nanoseconds to wait in PM_SLEEP.
 
