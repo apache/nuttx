@@ -31,7 +31,7 @@ EXTERN(__start)
 
 MEMORY
 {
-  ocram (rx) : ORIGIN = 0x2049a000, LENGTH = 0x37ff0
+  ocram (rx) : ORIGIN = 0x2049a000, LENGTH = 0x40000
   ocram_data (rw) : ORIGIN = 0x204e0000, LENGTH = 0x2000
   ocram_noload (rw) : ORIGIN = 0x204f0000, LENGTH = 0x30000
 }
