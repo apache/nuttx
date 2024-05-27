@@ -27,7 +27,6 @@
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 
-#include <metal/atomic.h>
 #include <metal/mutex.h>
 
 #include <rpmsg/rpmsg_internal.h>
@@ -282,7 +281,7 @@ static int rpmsg_port_send_offchannel_nocopy(FAR struct rpmsg_device *rdev,
              sizeof(struct rpmsg_hdr) + len;
 
   rpmsg_port_queue_add_buffer(&port->txq, hdr);
-  port->ops->kick(port);
+  port->ops->notify_tx_ready(port);
 
   return len;
 }
@@ -341,6 +340,7 @@ static void rpmsg_port_release_rx_buffer(FAR struct rpmsg_device *rdev,
   if ((reserved & RPMSG_BUF_HELD_MASK) == (1 << RPMSG_BUF_HELD_SHIFT))
     {
       rpmsg_port_queue_return_buffer(&port->rxq, hdr);
+      port->ops->notify_rx_free(port);
     }
 }
 
@@ -697,15 +697,6 @@ void rpmsg_port_queue_add_buffer(FAR struct rpmsg_port_queue_s *queue,
 
   rpmsg_port_add_node(&queue->ready, node);
   rpmsg_port_post(&queue->ready.sem);
-}
-
-/****************************************************************************
- * Name: rpmsg_port_queue_navail
- ****************************************************************************/
-
-uint32_t rpmsg_port_queue_navail(FAR struct rpmsg_port_queue_s *queue)
-{
-  return atomic_load(&queue->free.num);
 }
 
 /****************************************************************************
