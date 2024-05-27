@@ -26,6 +26,9 @@
  ****************************************************************************/
 
 #include <stdbool.h>
+
+#include <metal/atomic.h>
+
 #include <nuttx/list.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/semaphore.h>
@@ -90,9 +93,13 @@ typedef void (*rpmsg_port_rx_cb_t)(FAR struct rpmsg_port_s *port,
 
 struct rpmsg_port_ops_s
 {
-  /* Kick driver there is buffer to be sent of the tx queue */
+  /* Notify driver there is buffer to be sent of the tx queue */
 
-  CODE void (*kick)(FAR struct rpmsg_port_s *port);
+  CODE void (*notify_tx_ready)(FAR struct rpmsg_port_s *port);
+
+  /* Notify driver there is a buffer in rx queue is freed */
+
+  CODE void (*notify_rx_free)(FAR struct rpmsg_port_s *port);
 
   /* Register callback function which should be invoked when there is
    * date received to the rx queue by driver
@@ -224,7 +231,31 @@ void rpmsg_port_queue_add_buffer(FAR struct rpmsg_port_queue_s *queue,
  *
  ****************************************************************************/
 
-uint32_t rpmsg_port_queue_navail(FAR struct rpmsg_port_queue_s *queue);
+static inline_function
+uint32_t rpmsg_port_queue_navail(FAR struct rpmsg_port_queue_s *queue)
+{
+  return atomic_load(&queue->free.num);
+}
+
+/****************************************************************************
+ * Name: rpmsg_port_queue_nused
+ *
+ * Description:
+ *   Get used buffer number of ready list of the queue.
+ *
+ * Input Parameters:
+ *   queue - The queue is to be calculated.
+ *
+ * Returned Value:
+ *   Number of used buffers.
+ *
+ ****************************************************************************/
+
+static inline_function
+uint32_t rpmsg_port_queue_nused(FAR struct rpmsg_port_queue_s *queue)
+{
+  return atomic_load(&queue->ready.num);
+}
 
 /****************************************************************************
  * Name: rpmsg_port_initialize
