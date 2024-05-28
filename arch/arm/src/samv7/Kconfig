@@ -287,6 +287,10 @@ config SAMV7_HAVE_EBI
 	bool
 	default n
 
+config SAMV7_EEFC
+	bool
+	default n
+
 config SAMV7_EMAC
 	bool
 	default n
@@ -1786,6 +1790,7 @@ menuconfig SAMV7_PROGMEM
 	bool "FLASH program memory"
 	default n
 	select ARCH_HAVE_PROGMEM
+	select SAMV7_EEFC
 	---help---
 		Enable support FLASH interfaces as defined in include/nuttx/progmem.h
 
@@ -1803,6 +1808,16 @@ config SAMV7_PROGMEM_NSECTORS
 		prototyped in include/nuttx/progmem.h
 
 endif # SAMV7_PROGMEM
+
+config SAMV7_USER_SIGNATURE
+	bool "FLASH user signature"
+	default n
+	select SAMV7_EEFC
+	---help---
+		Each SAMv7 product contains a user signature area of 512 bytes in
+		embedded flash. It is possible to read, write and erase this area.
+		Data stored in this area are not erased by asserting ERASE pin or by
+		software ERASE command.
 
 menu "SDRAM Configuration"
 	depends on SAMV7_SDRAMC
