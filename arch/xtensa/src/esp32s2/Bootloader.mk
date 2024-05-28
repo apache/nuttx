@@ -20,7 +20,7 @@
 
 .PHONY: bootloader clean_bootloader
 
-ifeq ($(CONFIG_ESPRESSIF_SIMPLE_BOOT),)
+ifeq ($(CONFIG_ESP32S2_APP_FORMAT_MCUBOOT),y)
 
 TOOLSDIR           = $(TOPDIR)/tools/espressif
 CHIPDIR            = $(TOPDIR)/arch/xtensa/src/chip
@@ -76,9 +76,6 @@ endif
 		$(if $(CONFIG_ESP32S2_FLASH_FREQ_40M),$(call cfg_en,CONFIG_ESPTOOLPY_FLASHFREQ_40M)) \
 		$(if $(CONFIG_ESP32S2_FLASH_FREQ_26M),$(call cfg_en,CONFIG_ESPTOOLPY_FLASHFREQ_26M)) \
 		$(if $(CONFIG_ESP32S2_FLASH_FREQ_20M),$(call cfg_en,CONFIG_ESPTOOLPY_FLASHFREQ_20M)) \
-	} > $(BOOTLOADER_CONFIG)
-ifeq ($(CONFIG_ESP32S2_APP_FORMAT_MCUBOOT),y)
-	$(Q) { \
 		$(if $(CONFIG_ESP32S2_SECURE_BOOT),$(call cfg_en,CONFIG_SECURE_BOOT)$(call cfg_en,CONFIG_SECURE_BOOT_V2_ENABLED)$(call cfg_val,CONFIG_ESP_SIGN_KEY_FILE,$(abspath $(TOPDIR)/$(ESPSEC_KEYDIR)/$(subst ",,$(CONFIG_ESP32S2_SECURE_BOOT_APP_SIGNING_KEY))))) \
 		$(if $(CONFIG_ESP32S2_SECURE_SIGNED_APPS_SCHEME_RSA_2048),$(call cfg_en,CONFIG_ESP_USE_MBEDTLS)$(call cfg_en,CONFIG_ESP_SIGN_RSA)$(call cfg_val,CONFIG_ESP_SIGN_RSA_LEN,2048)) \
 		$(if $(CONFIG_ESP32S2_SECURE_SIGNED_APPS_SCHEME_RSA_3072),$(call cfg_en,CONFIG_ESP_USE_MBEDTLS)$(call cfg_en,CONFIG_ESP_SIGN_RSA)$(call cfg_val,CONFIG_ESP_SIGN_RSA_LEN,3072)) \
@@ -107,20 +104,14 @@ ifeq ($(CONFIG_ESP32S2_APP_FORMAT_MCUBOOT),y)
 		$(if $(CONFIG_UART0_SERIAL_CONSOLE),$(call cfg_val,CONFIG_ESP_CONSOLE_UART_NUM,0)) \
 		$(if $(CONFIG_UART1_SERIAL_CONSOLE),$(call cfg_val,CONFIG_ESP_CONSOLE_UART_NUM,1)) \
 	} >> $(BOOTLOADER_CONFIG)
-else ifeq ($(CONFIG_ESP32S2_APP_FORMAT_LEGACY),y)
-	$(Q) { \
-		$(call cfg_en,CONFIG_PARTITION_TABLE_CUSTOM) \
-		$(call cfg_val,CONFIG_PARTITION_TABLE_CUSTOM_FILENAME,\"partitions.csv\") \
-		$(call cfg_val,CONFIG_PARTITION_TABLE_OFFSET,$(CONFIG_ESP32S2_PARTITION_TABLE_OFFSET)) \
-	} >> $(BOOTLOADER_CONFIG)
-endif
 endif
 
 ifeq ($(CONFIG_ESPRESSIF_SIMPLE_BOOT),y)
 bootloader:
 	$(Q) echo "Using direct bootloader to boot NuttX."
 
-else ifeq ($(CONFIG_ESP32S2_APP_FORMAT_MCUBOOT),y)
+else
+# CONFIG_ESP32S2_APP_FORMAT_MCUBOOT
 
 BOOTLOADER_BIN        = $(TOPDIR)/mcuboot-esp32s2.bin
 BOOTLOADER_SIGNED_BIN = $(TOPDIR)/mcuboot-esp32s2.signed.bin
@@ -168,21 +159,5 @@ clean_bootloader:
 	$(call DELDIR,$(BOOTLOADER_DIR))
 	$(call DELFILE,$(BOOTLOADER_BIN))
 	$(if $(CONFIG_ESP32S2_SECURE_BOOT_BUILD_SIGNED_BINARIES),$(call DELFILE,$(BOOTLOADER_SIGNED_BIN)))
-
-else ifeq ($(CONFIG_ESP32S2_APP_FORMAT_LEGACY),y)
-
-$(BOOTLOADER_SRCDIR): $(BOOTLOADER_DIR)
-	$(Q) git clone $(BOOTLOADER_URL) $(BOOTLOADER_SRCDIR) -b $(BOOTLOADER_VERSION)
-
-bootloader: $(BOOTLOADER_SRCDIR) $(BOOTLOADER_CONFIG)
-	$(Q) echo "Building Bootloader binaries"
-	$(Q) $(BOOTLOADER_SRCDIR)/build_idfboot.sh -c esp32s2 -s -f $(BOOTLOADER_CONFIG)
-	$(call COPYFILE,$(BOOTLOADER_SRCDIR)/$(BOOTLOADER_OUTDIR)/bootloader-esp32s2.bin,$(TOPDIR))
-	$(call COPYFILE,$(BOOTLOADER_SRCDIR)/$(BOOTLOADER_OUTDIR)/partition-table-esp32s2.bin,$(TOPDIR))
-
-clean_bootloader:
-	$(call DELDIR,$(BOOTLOADER_DIR))
-	$(call DELFILE,$(TOPDIR)/bootloader-esp32s2.bin)
-	$(call DELFILE,$(TOPDIR)/partition-table-esp32s2.bin)
 
 endif

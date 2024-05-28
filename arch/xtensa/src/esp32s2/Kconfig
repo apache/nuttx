@@ -1225,15 +1225,7 @@ menu "Bootloader and Image Configuration"
 config ESPRESSIF_SIMPLE_BOOT
 	bool
 	depends on !ESP32S2_APP_FORMAT_MCUBOOT
-	depends on !ESP32S2_APP_FORMAT_LEGACY
 	default y
-
-config ESP32S2_APP_FORMAT_LEGACY
-	bool "Enable Legacy boot format"
-	depends on !ESP32S2_APP_FORMAT_MCUBOOT
-	---help---
-		This is the legacy application image format, as supported by the ESP-IDF
-		2nd stage bootloader.
 
 config ESP32S2_APP_FORMAT_MCUBOOT
 	bool "Enable MCUboot-bootable format"
@@ -1277,36 +1269,6 @@ config ESP32S2_APP_MCUBOOT_HEADER_SIZE
 	int "Application image header size (in bytes)"
 	default 32
 	depends on ESP32S2_APP_FORMAT_MCUBOOT
-
-config ESP32S2_PARTITION_TABLE_OFFSET_DEFAULT
-	hex
-	default 0x8000
-	depends on ESP32S2_APP_FORMAT_LEGACY
-
-config ESP32S2_CUSTOM_PARTITION_TABLE_OFFSET
-	bool "Customize partition table offset"
-	default n
-	depends on ESP32S2_APP_FORMAT_LEGACY
-	---help---
-		Enable to select the offset of the partition table in the flash.
-
-if ESP32S2_CUSTOM_PARTITION_TABLE_OFFSET
-
-config ESP32S2_PARTITION_TABLE_OFFSET
-	hex "Partition Table offset"
-	default ESP32S2_PARTITION_TABLE_OFFSET_DEFAULT
-	depends on ESP32S2_APP_FORMAT_LEGACY
-
-endif # ESP32S2_CUSTOM_PARTITION_TABLE_OFFSET
-
-if !ESP32S2_CUSTOM_PARTITION_TABLE_OFFSET
-
-config ESP32S2_PARTITION_TABLE_OFFSET
-	hex
-	default ESP32S2_PARTITION_TABLE_OFFSET_DEFAULT
-	depends on ESP32S2_APP_FORMAT_LEGACY
-
-endif # !ESP32S2_CUSTOM_PARTITION_TABLE_OFFSET
 
 source "arch/xtensa/src/esp32s2/Kconfig.security"
 
