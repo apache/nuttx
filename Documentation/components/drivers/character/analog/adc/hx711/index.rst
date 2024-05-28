@@ -1,6 +1,6 @@
-=============================
-HX711 ADC DESIGNED FOR SCALES
-=============================
+========================
+Avia Semiconductor HX711
+========================
 
 Driver contributed by Michał Łyszczek.
 
@@ -218,3 +218,4 @@ from the shell, as it can dump readings and set all options.
 
    Set value per unit, to get output in grams, and then tare with 10g precision
         hx711 -v 813 -t 10
+

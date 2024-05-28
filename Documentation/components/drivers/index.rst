@@ -37,7 +37,7 @@ Subdirectories of ``nuttx/drivers``
 
   1wire device drivers.
 
-* ``analog/`` :doc:`character/analog`
+* ``analog/`` :doc:`character/analog/index`
 
   This directory holds implementations of analog device drivers.
   This includes drivers for Analog to Digital Conversion (ADC) as
