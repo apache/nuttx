@@ -207,7 +207,7 @@
 /* Low-Power Timeout Register */
 
 #define QSPI_LPTR_TIMEOUT_SHIFT    (0)        /* Bits 0-15: Timeout period */
-#define QSPI_LPTR_TIMEOUT_MASK     (0xFFff << QSPI_PIR_INTERVAL_SHIFT)
+#define QSPI_LPTR_TIMEOUT_MASK     (0xFFff << QSPI_LPTR_TIMEOUT_SHIFT)
 
 /****************************************************************************
  * Public Types
