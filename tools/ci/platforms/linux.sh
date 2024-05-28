@@ -308,7 +308,7 @@ wasi_sdk() {
     wasibasefile=wasi-sdk-19.0-linux
     wasmbasefile=wamrc-1.1.2-x86_64-ubuntu-20.04
     cd "${NUTTXTOOLS}"
-    mkdir wamrc
+    mkdir -p wamrc
 
     # Download the latest WASI-enabled WebAssembly C/C++ toolchain prebuilt by WASM
     wget --quiet https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-19/${wasibasefile}.tar.gz
