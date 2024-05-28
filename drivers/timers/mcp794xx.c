@@ -407,11 +407,23 @@ int up_rtc_settime(FAR const struct timespec *tp)
       newtime++;
     }
 
+#ifndef CONFIG_MCP794XX_DATETIME_UTC
+  /* Save datetime in local time. */
+
   if (localtime_r(&newtime, &newtm) == NULL)
     {
       rtcerr("ERROR: localtime_r failed\n");
       return -EINVAL;
     }
+#else
+  /* Save datetime in UTC time. */
+
+  if (gmtime_r(&newtime, &newtm) == NULL)
+    {
+      rtcerr("ERROR: gmtime_r failed\n");
+      return -EINVAL;
+    }
+#endif
 
   rtc_dumptime(&newtm, "New time");
 
