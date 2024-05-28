@@ -63,6 +63,11 @@
 #include "rp2040_bmp180.h"
 #endif
 
+#ifdef CONFIG_SENSORS_BMP280
+#include <nuttx/sensors/bmp280.h>
+#include "rp2040_bmp280.h"
+#endif
+
 #ifdef CONFIG_RP2040_PWM
 #include "rp2040_pwm.h"
 #include "rp2040_pwmdev.h"
@@ -460,7 +465,16 @@ int rp2040_common_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize BMP180 driver: %d\n", ret);
-      return ret;
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_BMP280
+  /* Try to register BMP280 device in I2C0 */
+
+  ret = board_bmp280_initialize(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize BMP280 driver: %d\n", ret);
     }
 #endif
 

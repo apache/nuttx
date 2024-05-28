@@ -79,6 +79,10 @@ ifeq ($(CONFIG_SENSORS_BMP180),y)
   CSRCS += rp2040_bmp180.c
 endif
 
+ifeq ($(CONFIG_SENSORS_BMP280),y)
+  CSRCS += rp2040_bmp280.c
+endif
+
 ifeq ($(CONFIG_SENSORS_INA219),y)
   CSRCS += rp2040_ina219.c
 endif

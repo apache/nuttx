@@ -129,6 +129,18 @@ audiopack
 NuttShell configuration (console enabled in UART0, at 115200 bps) with
 support for NXPlayer audio player.
 
+bmp280
+------
+
+NuttShell configuration (console enabled in USB Port, at 115200 bps) with support for Bosch BMP280 sensor:
+
+.. code-block:: console
+
+   nsh> bmp280
+   Absolute pressure [hPa] = 1008.460022
+   Temperature [C] = 21.809999
+   nsh>
+
 composite
 ---------
 
