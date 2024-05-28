@@ -42,6 +42,30 @@ extern "C"
 #endif
 
 /****************************************************************************
+ * Name: mcp794xx_rtc_set_trim
+ *
+ * Description:
+ *   Sets the digital trimming to correct for inaccuracies of clock source.
+ *   Digital trimming consists of the MCP794XX periodically adding or
+ *   subtracting clock cycles, resulting in small adjustments in the internal
+ *   timing.
+ *
+ * Input Parameters:
+ *   trim_val    - Calculated trimming value, refer to MCP794XX reference
+ *                 manual.
+ *   rtc_slow    - True indicates RTC is behind real clock, false otherwise.
+ *                 This has to be set to ensure correct trimming direction.
+ *   coarse_mode - MCP794XX allows coarse mode that trims every second
+ *                 instead of every minute.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int mcp794xx_rtc_set_trim(uint8_t trim_val, bool rtc_slow, bool coarse_mode);
+
+/****************************************************************************
  * Name: mcp794xx_rtc_initialize
  *
  * Description:
