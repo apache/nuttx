@@ -161,6 +161,10 @@ function(nuttx_add_application)
         PRIVATE
           $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx,NUTTX_ELF_APP_COMPILE_OPTIONS>>)
     endif()
+  else()
+    set(TARGET "apps_${NAME}")
+    add_custom_target(${TARGET})
+    set_property(GLOBAL APPEND PROPERTY NUTTX_APPS_ONLY_REGISTER ${TARGET})
   endif()
 
   # store parameters into properties (used during builtin list generation)
