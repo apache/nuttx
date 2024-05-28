@@ -47,7 +47,9 @@
  *
  ****************************************************************************/
 
-/* Reference: XMC4500 Reference Manual V1.5 2014-07 Microcontrollers. */
+/* Reference: XMC4500 Reference Manual V1.5 2014-07 Microcontrollers.
+ * This memory map is valid for both XMC45 and XMC4[78] architecture
+ */
 
 #ifndef __ARCH_ARM_SRC_XMC4_HARDWARE_XMC4_MEMORYMAP_H
 #define __ARCH_ARM_SRC_XMC4_HARDWARE_XMC4_MEMORYMAP_H
@@ -223,7 +225,7 @@
 #define XMC4_USB0_EP4_BASE          0x50040980
 #define XMC4_USB0_EP5_BASE          0x500409a0
 #define XMC4_USB0_EP6_BASE          0x500409c0
-#define XMC4_ECAT0_BASE             0x50100000 /* ECAT0 */
+#define XMC4_ECAT0_BASE             0x54010000 /* ECAT0 (XMC4[78] specific) */
 
 #define XMC4_PMU0_BASE              0x58000000 /* PMU0 registers */
 #define XMC4_FLASH0_BASE            0x58001000
