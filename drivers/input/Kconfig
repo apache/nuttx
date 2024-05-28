@@ -34,6 +34,12 @@ config INPUT_FF
 
 if INPUT_FF
 
+config FF_DUMMY
+	bool "Enable dummy force feedback driver"
+	default n
+	---help---
+		Enable support for a dummy force feedback driver.
+
 config FF_AW86225
 	bool "Enable aw86225 driver"
 	default n

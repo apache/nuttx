@@ -31,6 +31,10 @@ if(CONFIG_INPUT)
     list(APPEND SRCS ff_upper.c)
   endif()
 
+  if(CONFIG_FF_DUMMY)
+    list(APPEND SRCS ff_dummy.c)
+  endif()
+
   if(CONFIG_FF_AW86225)
     list(APPEND SRCS aw86225.c)
   endif()
