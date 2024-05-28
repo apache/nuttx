@@ -96,6 +96,10 @@ endforeach()
 # RTTI is required for building the libcxxabi library
 target_compile_options(libcxxabi PRIVATE -frtti)
 
+if(CONFIG_SIM_UBSAN OR CONFIG_MM_UBSAN)
+  target_compile_options(libcxxabi PRIVATE -fno-sanitize=vptr)
+endif()
+
 target_sources(libcxxabi PRIVATE ${TARGET_SRCS})
 target_compile_options(libcxxabi PRIVATE -frtti)
 target_include_directories(
