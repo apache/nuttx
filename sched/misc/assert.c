@@ -41,6 +41,7 @@
 #include <nuttx/reboot_notifier.h>
 #include <nuttx/syslog/syslog.h>
 #include <nuttx/usb/usbdev_trace.h>
+#include <nuttx/mm/kasan.h>
 
 #include <assert.h>
 #include <debug.h>
@@ -602,6 +603,10 @@ void _assert(FAR const char *filename, int linenum,
 
   if (os_ready && fatal)
     {
+      /* Disable KASAN to avoid false positive */
+
+      kasan_stop();
+
 #ifdef CONFIG_SMP
       pause_all_cpu();
 #endif
