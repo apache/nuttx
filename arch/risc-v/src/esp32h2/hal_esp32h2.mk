@@ -52,6 +52,7 @@ INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)/chip/$(ESP_HAL_3RDPARTY_REPO)/compone
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)/chip/$(ESP_HAL_3RDPARTY_REPO)/components/spi_flash/include
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)/chip/$(ESP_HAL_3RDPARTY_REPO)/components/spi_flash/include/spi_flash
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)/chip/$(ESP_HAL_3RDPARTY_REPO)/components/driver/twai/include
+INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)/chip/$(ESP_HAL_3RDPARTY_REPO)/components/driver/spi/include
 
 ifeq ($(CONFIG_ESPRESSIF_SIMPLE_BOOT),y)
   INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)/chip/$(ESP_HAL_3RDPARTY_REPO)/components/bootloader_support/include
@@ -110,6 +111,8 @@ CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/ledc_hal.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/ledc_hal_iram.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/lp_timer_hal.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/rmt_hal.c
+CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/spi_hal.c
+CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/spi_hal_iram.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/timer_hal.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/timer_hal_iram.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/mpu_hal.c
@@ -123,6 +126,7 @@ CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/$(CHIP_SERIES)/modem_
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/log/log.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/log/log_noos.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/riscv/interrupt.c
+CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/soc/lldesc.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/soc/$(CHIP_SERIES)/gpio_periph.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/soc/$(CHIP_SERIES)/ledc_periph.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/soc/$(CHIP_SERIES)/rmt_periph.c

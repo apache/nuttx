@@ -159,7 +159,7 @@ RNG          No
 RSA          No
 RTC          Yes
 SHA          No
-SPI          No
+SPI          Yes
 SPIFLASH     Yes
 Timers       Yes
 Touch        No

@@ -185,6 +185,17 @@ You can set an alarm, check its progress and receive a notification after it exp
     Alarm 0 is active with 10 seconds to expiration
     nsh> alarm_daemon: alarm 0 received
 
+spi
+--------
+
+This configuration enables the support for the SPI driver.
+You can test it by connecting MOSI and MISO pins which are GPIO7 and GPIO2
+by default to each other and running the ``spi`` example::
+
+    nsh> spi exch -b 2 "AB"
+    Sending:	AB
+    Received:	AB
+
 spiflash
 --------
 
