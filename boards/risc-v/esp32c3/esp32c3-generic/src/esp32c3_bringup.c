@@ -65,6 +65,11 @@
 #  include "esp_board_rmt.h"
 #endif
 
+#ifdef CONFIG_ESPRESSIF_SPI
+#  include "espressif/esp_spi.h"
+#  include "esp_board_spidev.h"
+#endif
+
 #ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
 #  include "esp_coexist_internal.h"
 #endif
@@ -174,6 +179,14 @@ int esp_bringup(void)
       _err("Failed to initialize Timer 1: %d\n", ret);
     }
 #endif
+#endif
+
+#if defined(CONFIG_ESPRESSIF_SPI) && defined(CONFIG_SPI_DRIVER)
+  ret = board_spidev_initialize(ESPRESSIF_SPI2);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to init spidev 2: %d\n", ret);
+    }
 #endif
 
 #ifdef CONFIG_ESPRESSIF_SPIFLASH

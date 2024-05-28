@@ -158,7 +158,7 @@ RTC              Yes
 SD/MMC           No
 SDIO             No
 SHA              No
-SPI              No
+SPI              Yes
 SPIFLASH         Yes
 Timers           Yes
 UART             Yes

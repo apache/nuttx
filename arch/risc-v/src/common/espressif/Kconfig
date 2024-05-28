@@ -314,6 +314,16 @@ config ESPRESSIF_LEDC
 	select PWM
 	select ARCH_HAVE_PWM_MULTICHAN
 
+config ESPRESSIF_SPI
+	bool
+	default n
+
+config ESPRESSIF_SPI2
+	bool "SPI 2"
+	default n
+	select ESPRESSIF_SPI
+	select SPI
+
 config ESPRESSIF_SPIFLASH
 	bool "SPI Flash"
 	default n
@@ -840,6 +850,57 @@ config ESPRESSIF_TWAI_TEST_MODE
 		peripheral without any external connection.
 
 endmenu #ESPRESSIF_TWAI
+
+menu "SPI configuration"
+	depends on ESPRESSIF_SPI
+
+config ESPRESSIF_SPI_SWCS
+	bool "SPI software CS"
+	default n
+	---help---
+		Use SPI software CS.
+
+config ESPRESSIF_SPI_UDCS
+	bool "User defined CS"
+	default n
+	depends on ESPRESSIF_SPI_SWCS
+	---help---
+		Use user-defined CS.
+
+if ESPRESSIF_SPI2
+
+config ESPRESSIF_SPI2_CSPIN
+	int "SPI2 CS Pin"
+	default 10
+	range 0 21
+
+config ESPRESSIF_SPI2_CLKPIN
+	int "SPI2 CLK Pin"
+	default 6
+	range 0 21
+
+config ESPRESSIF_SPI2_MOSIPIN
+	int "SPI2 MOSI Pin"
+	default 7
+	range 0 21
+
+config ESPRESSIF_SPI2_MISOPIN
+	int "SPI2 MISO Pin"
+	default 2
+	range 0 21
+
+endif # ESPRESSIF_SPI2
+
+config ESPRESSIF_SPI_TEST_MODE
+	bool "SPI driver loopback test mode (for testing only)"
+	default n
+	depends on SYSTEM_SPITOOL
+	---help---
+		This enables a loopback test mode that attaches the transmitter
+		to the receiver internally, being able to test the SPI
+		peripheral without any external connection.
+
+endmenu # SPI configuration
 
 menu "SPI Flash Configuration"
 
