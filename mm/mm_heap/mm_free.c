@@ -48,6 +48,13 @@ static void add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
 
   flags = up_irq_save();
 
+#  ifdef CONFIG_DEBUG_ASSERTIONS
+  FAR struct mm_freenode_s *node;
+
+  node = (FAR struct mm_freenode_s *)((FAR char *)mem - MM_SIZEOF_ALLOCNODE);
+  DEBUGASSERT(MM_NODE_IS_ALLOC(node));
+#  endif
+
   tmp->flink = heap->mm_delaylist[this_cpu()];
   heap->mm_delaylist[this_cpu()] = tmp;
 
