@@ -47,6 +47,14 @@ endif
 ifeq ($(CONFIG_LIBCXXABI), y)
 CXXFLAGS += ${DEFINE_PREFIX}LIBCXX_BUILDING_LIBCXXABI
 CXXFLAGS += -I $(TOPDIR)/libs/libxx/libcxxabi/include
+
+# Disable dynamic type checking when enabling libcxxabi
+# It results in a recursive call:
+# cxxabiv1::__dynamic_case -> is_equal -> __ubsan::checkDynamic -> cxxabiv1::__dynamic_case
+
+ifneq ($(CONFIG_SIM_UBSAN)${CONFIG_MM_UBSAN},)
+CXXFLAGS += -fno-sanitize=vptr
+endif
 endif
 
 # C++ABI files
