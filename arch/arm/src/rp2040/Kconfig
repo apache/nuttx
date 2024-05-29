@@ -3,7 +3,7 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-		comment "RP2040 Configuration Options"
+comment "RP2040 Configuration Options"
 
 config RP2040_DMAC
 	bool "DMAC support"
@@ -377,7 +377,6 @@ config RP2040_PWM2_PHASE_CORRECT
 
 endif # RP2040_PWM2
 
-
 config RP2040_PWM3
 	bool "PWM3"
 	---help---
@@ -684,34 +683,35 @@ if RP2040_CLK_GPOUT0
 choice
 	prompt "Source Clock"
 
-	config RP2040_CLK_GPOUT0_SRC_REF
-		bool "REF (6 - 12 MHz)"
-		---help---
-			Reference clock that is always running unless in DORMANT mode. Runs from
-			Ring Oscillator (ROSC) at power-up but can be switched to Crystal
-			Oscillator (XOSC) for more accuracy.
+config RP2040_CLK_GPOUT0_SRC_REF
+	bool "REF (6 - 12 MHz)"
+	---help---
+		Reference clock that is always running unless in DORMANT mode. Runs from
+		Ring Oscillator (ROSC) at power-up but can be switched to Crystal
+		Oscillator (XOSC) for more accuracy.
 
-	config RP2040_CLK_GPOUT0_SRC_SYS
-		bool "SYS (125 MHz)"
-		---help---
-			System clock that is always running unless in DORMANT mode. Runs from
-			clk_ref at power-up but is typically switched to a PLL.
+config RP2040_CLK_GPOUT0_SRC_SYS
+	bool "SYS (125 MHz)"
+	---help---
+		System clock that is always running unless in DORMANT mode. Runs from
+		clk_ref at power-up but is typically switched to a PLL.
 
-	config RP2040_CLK_GPOUT0_SRC_USB
-		bool "USB (48 MHz)"
-		---help---
-			USB reference clock. Must be 48MHz.
+config RP2040_CLK_GPOUT0_SRC_USB
+	bool "USB (48 MHz)"
+	---help---
+		USB reference clock. Must be 48MHz.
 
-	config RP2040_CLK_GPOUT0_SRC_ADC
-		bool "ADC (48 MHz)"
-		---help---
-			ADC reference clock. Must be 48MHz.
+config RP2040_CLK_GPOUT0_SRC_ADC
+	bool "ADC (48 MHz)"
+	---help---
+		ADC reference clock. Must be 48MHz.
 
-	config RP2040_CLK_GPOUT0_SRC_RTC
-		bool "RTC (46875 Hz)"
-		---help---
-			RTC reference clock. The RTC divides this clock to generate a 1 second reference.
-endchoice
+config RP2040_CLK_GPOUT0_SRC_RTC
+	bool "RTC (46875 Hz)"
+	---help---
+		RTC reference clock. The RTC divides this clock to generate a 1 second reference.
+
+endchoice # Source Clock
 
 config RP2040_CLK_GPOUT0_DIVINT
 	int "Divisor (Integer)"
@@ -734,34 +734,35 @@ if RP2040_CLK_GPOUT1
 choice
 	prompt "Source Clock"
 
-	config RP2040_CLK_GPOUT1_SRC_REF
-		bool "REF (6 - 12 MHz)"
-		---help---
-			Reference clock that is always running unless in DORMANT mode. Runs from
-			Ring Oscillator (ROSC) at power-up but can be switched to Crystal
-			Oscillator (XOSC) for more accuracy.
+config RP2040_CLK_GPOUT1_SRC_REF
+	bool "REF (6 - 12 MHz)"
+	---help---
+		Reference clock that is always running unless in DORMANT mode. Runs from
+		Ring Oscillator (ROSC) at power-up but can be switched to Crystal
+		Oscillator (XOSC) for more accuracy.
 
-	config RP2040_CLK_GPOUT1_SRC_SYS
-		bool "SYS (125 MHz)"
-		---help---
-			System clock that is always running unless in DORMANT mode. Runs from
-			clk_ref at power-up but is typically switched to a PLL.
+config RP2040_CLK_GPOUT1_SRC_SYS
+	bool "SYS (125 MHz)"
+	---help---
+		System clock that is always running unless in DORMANT mode. Runs from
+		clk_ref at power-up but is typically switched to a PLL.
 
-	config RP2040_CLK_GPOUT1_SRC_USB
-		bool "USB (48 MHz)"
-		---help---
-			USB reference clock. Must be 48MHz.
+config RP2040_CLK_GPOUT1_SRC_USB
+	bool "USB (48 MHz)"
+	---help---
+		USB reference clock. Must be 48MHz.
 
-	config RP2040_CLK_GPOUT1_SRC_ADC
-		bool "ADC (48 MHz)"
-		---help---
-			ADC reference clock. Must be 48MHz.
+config RP2040_CLK_GPOUT1_SRC_ADC
+	bool "ADC (48 MHz)"
+	---help---
+		ADC reference clock. Must be 48MHz.
 
-	config RP2040_CLK_GPOUT1_SRC_RTC
-		bool "RTC (46875 Hz)"
-		---help---
-			RTC reference clock. The RTC divides this clock to generate a 1 second reference.
-endchoice
+config RP2040_CLK_GPOUT1_SRC_RTC
+	bool "RTC (46875 Hz)"
+	---help---
+		RTC reference clock. The RTC divides this clock to generate a 1 second reference.
+
+endchoice # Source Clock
 
 config RP2040_CLK_GPOUT1_DIVINT
 	int "Divisor (Integer)"
@@ -784,34 +785,35 @@ if RP2040_CLK_GPOUT2
 choice
 	prompt "Source Clock"
 
-	config RP2040_CLK_GPOUT2_SRC_REF
-		bool "REF (6 - 12 MHz)"
-		---help---
-			Reference clock that is always running unless in DORMANT mode. Runs from
-			Ring Oscillator (ROSC) at power-up but can be switched to Crystal
-			Oscillator (XOSC) for more accuracy.
+config RP2040_CLK_GPOUT2_SRC_REF
+	bool "REF (6 - 12 MHz)"
+	---help---
+		Reference clock that is always running unless in DORMANT mode. Runs from
+		Ring Oscillator (ROSC) at power-up but can be switched to Crystal
+		Oscillator (XOSC) for more accuracy.
 
-	config RP2040_CLK_GPOUT2_SRC_SYS
-		bool "SYS (125 MHz)"
-		---help---
-			System clock that is always running unless in DORMANT mode. Runs from
-			clk_ref at power-up but is typically switched to a PLL.
+config RP2040_CLK_GPOUT2_SRC_SYS
+	bool "SYS (125 MHz)"
+	---help---
+		System clock that is always running unless in DORMANT mode. Runs from
+		clk_ref at power-up but is typically switched to a PLL.
 
-	config RP2040_CLK_GPOUT2_SRC_USB
-		bool "USB (48 MHz)"
-		---help---
-			USB reference clock. Must be 48MHz.
+config RP2040_CLK_GPOUT2_SRC_USB
+	bool "USB (48 MHz)"
+	---help---
+		USB reference clock. Must be 48MHz.
 
-	config RP2040_CLK_GPOUT2_SRC_ADC
-		bool "ADC (48 MHz)"
-		---help---
-			ADC reference clock. Must be 48MHz.
+config RP2040_CLK_GPOUT2_SRC_ADC
+	bool "ADC (48 MHz)"
+	---help---
+		ADC reference clock. Must be 48MHz.
 
-	config RP2040_CLK_GPOUT2_SRC_RTC
-		bool "RTC (46875 Hz)"
-		---help---
-			RTC reference clock. The RTC divides this clock to generate a 1 second reference.
-endchoice
+config RP2040_CLK_GPOUT2_SRC_RTC
+	bool "RTC (46875 Hz)"
+	---help---
+		RTC reference clock. The RTC divides this clock to generate a 1 second reference.
+
+endchoice # Source Clock
 
 config RP2040_CLK_GPOUT2_DIVINT
 	int "Divisor (Integer)"
@@ -834,34 +836,35 @@ if RP2040_CLK_GPOUT3
 choice
 	prompt "Source Clock"
 
-	config RP2040_CLK_GPOUT3_SRC_REF
-		bool "REF (6 - 12 MHz)"
-		---help---
-			Reference clock that is always running unless in DORMANT mode. Runs from
-			Ring Oscillator (ROSC) at power-up but can be switched to Crystal
-			Oscillator (XOSC) for more accuracy.
+config RP2040_CLK_GPOUT3_SRC_REF
+	bool "REF (6 - 12 MHz)"
+	---help---
+		Reference clock that is always running unless in DORMANT mode. Runs from
+		Ring Oscillator (ROSC) at power-up but can be switched to Crystal
+		Oscillator (XOSC) for more accuracy.
 
-	config RP2040_CLK_GPOUT3_SRC_SYS
-		bool "SYS (125 MHz)"
-		---help---
-			System clock that is always running unless in DORMANT mode. Runs from
-			clk_ref at power-up but is typically switched to a PLL.
+config RP2040_CLK_GPOUT3_SRC_SYS
+	bool "SYS (125 MHz)"
+	---help---
+		System clock that is always running unless in DORMANT mode. Runs from
+		clk_ref at power-up but is typically switched to a PLL.
 
-	config RP2040_CLK_GPOUT3_SRC_USB
-		bool "USB (48 MHz)"
-		---help---
-			USB reference clock. Must be 48MHz.
+config RP2040_CLK_GPOUT3_SRC_USB
+	bool "USB (48 MHz)"
+	---help---
+		USB reference clock. Must be 48MHz.
 
-	config RP2040_CLK_GPOUT3_SRC_ADC
-		bool "ADC (48 MHz)"
-		---help---
-			ADC reference clock. Must be 48MHz.
+config RP2040_CLK_GPOUT3_SRC_ADC
+	bool "ADC (48 MHz)"
+	---help---
+		ADC reference clock. Must be 48MHz.
 
-	config RP2040_CLK_GPOUT3_SRC_RTC
-		bool "RTC (46875 Hz)"
-		---help---
-			RTC reference clock. The RTC divides this clock to generate a 1 second reference.
-endchoice
+config RP2040_CLK_GPOUT3_SRC_RTC
+	bool "RTC (46875 Hz)"
+	---help---
+		RTC reference clock. The RTC divides this clock to generate a 1 second reference.
+
+endchoice # Source Clock
 
 config RP2040_CLK_GPOUT3_DIVINT
 	int "Divisor (Integer)"

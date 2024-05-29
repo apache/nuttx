@@ -5534,9 +5534,9 @@ endchoice # CS0 Memory Type
 #	depends on SAMA5_EBICS0_NAND
 #
 # config SAMA5_EBICS0_ECCNONE
-# 	bool "No ECC"
-# 	---help---
-# 		Only raw transfers to/from NAND are supported
+#	bool "No ECC"
+#	---help---
+#		Only raw transfers to/from NAND are supported
 #
 # config SAMA5_EBICS0_SWECC
 #	bool "Software ECC"
