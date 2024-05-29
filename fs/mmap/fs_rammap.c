@@ -49,14 +49,84 @@
  * Private Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: msync_rammap
+ ****************************************************************************/
+
+static int msync_rammap(FAR struct mm_map_entry_s *entry, FAR void *start,
+                        size_t length, int flags)
+{
+  FAR struct file *filep = (FAR void *)((uintptr_t)entry->priv.p & ~1);
+  FAR uint8_t *wrbuffer = start;
+  ssize_t nwrite = 0;
+  off_t offset;
+  off_t fpos;
+  off_t opos;
+
+  offset = (uintptr_t)start - (uintptr_t)entry->vaddr;
+  if (length > entry->length - offset)
+    {
+      length = entry->length - offset;
+    }
+
+  opos = file_seek(filep, 0, SEEK_CUR);
+  if (opos < 0)
+    {
+      ferr("ERROR: Get current position failed\n");
+      return opos;
+    }
+
+  fpos = file_seek(filep, entry->offset + offset, SEEK_SET);
+  if (fpos < 0)
+    {
+      ferr("ERRORL Seek to position %"PRIdOFF" failed\n", fpos);
+      return fpos;
+    }
+
+  while (length > 0)
+    {
+      nwrite = file_write(filep, wrbuffer, length);
+      if (nwrite < 0)
+        {
+          /* Handle the special case where the write was interrupted by a
+           * signal.
+           */
+
+          if (nwrite != -EINTR)
+            {
+              /* All other write errors are bad. */
+
+              ferr("ERROR: Write failed: offset=%"PRIdOFF" nwrite=%zd\n",
+                   entry->offset, nwrite);
+              break;
+            }
+        }
+
+      /* Increment number of bytes written */
+
+      wrbuffer += nwrite;
+      length   -= nwrite;
+    }
+
+  /* Restore file pos */
+
+  file_seek(filep, opos, SEEK_SET);
+  return nwrite >= 0 ? 0 : nwrite;
+}
+
+/****************************************************************************
+ * Name: unmap_rammap
+ ****************************************************************************/
+
 static int unmap_rammap(FAR struct task_group_s *group,
                         FAR struct mm_map_entry_s *entry,
                         FAR void *start,
                         size_t length)
 {
+  FAR struct file *filep = (FAR void *)((uintptr_t)entry->priv.p & ~1);
+  enum mm_map_type_e type = (uintptr_t)entry->priv.p & 1;
   FAR void *newaddr = NULL;
   off_t offset;
-  enum mm_map_type_e type = entry->priv.i;
   int ret = OK;
 
   /* Get the offset from the beginning of the region and the actual number
@@ -93,6 +163,8 @@ static int unmap_rammap(FAR struct task_group_s *group,
         {
           kumm_free(entry->vaddr);
         }
+
+      fs_putfilep(filep);
 
       /* Then remove the mapping from the list */
 
@@ -248,8 +320,10 @@ int rammap(FAR struct file *filep, FAR struct mm_map_entry_s *entry,
   /* Add the buffer to the list of regions */
 
 out:
-  entry->priv.i = type;
+  fs_reffilep(filep);
+  entry->priv.p = (FAR void *)((uintptr_t)filep | type);
   entry->munmap = unmap_rammap;
+  entry->msync = msync_rammap;
 
   ret = mm_map_add(get_current_mm(), entry);
   if (ret < 0)

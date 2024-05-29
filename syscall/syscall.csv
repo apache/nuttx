@@ -77,6 +77,7 @@
 "mq_timedreceive","mqueue.h","!defined(CONFIG_DISABLE_MQUEUE)","ssize_t","mqd_t","FAR char *","size_t","FAR unsigned int *","FAR const struct timespec *"
 "mq_timedsend","mqueue.h","!defined(CONFIG_DISABLE_MQUEUE)","int","mqd_t","FAR const char *","size_t","unsigned int","FAR const struct timespec *"
 "mq_unlink","mqueue.h","!defined(CONFIG_DISABLE_MQUEUE)","int","FAR const char *"
+"msync","sys/mman.h","","int","FAR void *","size_t","int"
 "munmap","sys/mman.h","","int","FAR void *","size_t"
 "nanosleep","time.h","","int","FAR const struct timespec *","FAR struct timespec *"
 "nx_mkfifo","nuttx/fs/fs.h","defined(CONFIG_PIPES) && CONFIG_DEV_FIFO_SIZE > 0","int","FAR const char *","mode_t","size_t"
