@@ -135,7 +135,7 @@ static int systick_getstatus(struct timer_lowerhalf_s *lower_,
                              struct timer_status_s *status)
 {
   struct systick_lowerhalf_s *lower = (struct systick_lowerhalf_s *)lower_;
-  irqstate_t flags = enter_critical_section();
+  irqstate_t flags = up_irq_save();
 
   status->flags    = lower->callback ? TCFLAGS_HANDLER : 0;
   status->flags   |= systick_is_running() ? TCFLAGS_ACTIVE : 0;
@@ -161,7 +161,7 @@ static int systick_getstatus(struct timer_lowerhalf_s *lower_,
       status->timeleft = status->timeout;
     }
 
-  leave_critical_section(flags);
+  up_irq_restore(flags);
   return 0;
 }
 
@@ -169,8 +169,8 @@ static int systick_settimeout(struct timer_lowerhalf_s *lower_,
                               uint32_t timeout)
 {
   struct systick_lowerhalf_s *lower = (struct systick_lowerhalf_s *)lower_;
+  irqstate_t flags = up_irq_save();
 
-  irqstate_t flags = enter_critical_section();
   if (lower->next_interval)
     {
       /* If the timer callback is in the process,
@@ -194,7 +194,7 @@ static int systick_settimeout(struct timer_lowerhalf_s *lower_,
         }
     }
 
-  leave_critical_section(flags);
+  up_irq_restore(flags);
   return 0;
 }
 
@@ -202,11 +202,12 @@ static void systick_setcallback(struct timer_lowerhalf_s *lower_,
                                 tccb_t callback, void *arg)
 {
   struct systick_lowerhalf_s *lower = (struct systick_lowerhalf_s *)lower_;
+  irqstate_t flags = up_irq_save();
 
-  irqstate_t flags = enter_critical_section();
   lower->callback  = callback;
   lower->arg       = arg;
-  leave_critical_section(flags);
+
+  up_irq_restore(flags);
 }
 
 static int systick_maxtimeout(struct timer_lowerhalf_s *lower_,
