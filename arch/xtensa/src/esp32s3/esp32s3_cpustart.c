@@ -119,7 +119,7 @@ void xtensa_appcpu_start(void)
                  XCPTCONTEXT_SIZE;
   __asm__ __volatile__("mov sp, %0\n" : : "r"(sp));
 
-  sinfo("CPU%d Started\n", up_cpu_index());
+  sinfo("CPU%d Started\n", this_cpu());
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   /* Notify that this CPU has started */

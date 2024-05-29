@@ -317,7 +317,7 @@ static int rt_timer_setisr(xcpt_t handler, void *arg)
 
       /* Set up to receive peripheral interrupts on the current CPU */
 
-      priv->core = up_cpu_index();
+      priv->core = this_cpu();
       priv->cpuint = esp32s3_setup_irq(priv->core,
                                        ESP32S3_PERIPH_SYSTIMER_TARGET2,
                                        1, ESP32S3_CPUINT_LEVEL);

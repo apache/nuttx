@@ -1635,7 +1635,7 @@ static int esp_mcpwm_isr_register(int (*fn)(int, void *, void *), void *arg)
 {
   int cpuint;
   int ret;
-  int cpu = up_cpu_index();
+  int cpu = this_cpu();
 
   DEBUGASSERT(fn);
 

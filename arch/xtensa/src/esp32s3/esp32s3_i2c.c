@@ -1567,7 +1567,7 @@ struct i2c_master_s *esp32s3_i2cbus_initialize(int port)
 
   /* Set up to receive peripheral interrupts on the current CPU */
 
-  priv->cpu = up_cpu_index();
+  priv->cpu = this_cpu();
   priv->cpuint = esp32s3_setup_irq(priv->cpu, config->periph,
                                    1, ESP32S3_CPUINT_LEVEL);
   if (priv->cpuint < 0)

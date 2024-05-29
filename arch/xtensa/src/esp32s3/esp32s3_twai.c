@@ -472,7 +472,7 @@ static int esp32s3twai_setup(struct can_dev_s *dev)
       up_disable_irq(priv->irq);
     }
 
-  priv->cpu = up_cpu_index();
+  priv->cpu = this_cpu();
   priv->cpuint = esp32s3_setup_irq(priv->cpu, priv->periph,
                                    1, ESP32S3_CPUINT_LEVEL);
   if (priv->cpuint < 0)

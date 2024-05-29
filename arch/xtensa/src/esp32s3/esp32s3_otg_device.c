@@ -5642,7 +5642,7 @@ void xtensa_usbinitialize(void)
 
   /* Attach the OTG interrupt handler */
 
-  priv->cpu = up_cpu_index();
+  priv->cpu = this_cpu();
   priv->cpuint = esp32s3_setup_irq(priv->cpu, ESP32S3_PERIPH_USB,
                                    1, ESP32S3_CPUINT_LEVEL);
   DEBUGASSERT(priv->cpuint >= 0);

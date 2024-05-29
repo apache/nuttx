@@ -1619,7 +1619,7 @@ struct spi_dev_s *esp32s3_spibus_initialize(int port)
 
   /* Set up to receive peripheral interrupts on the current CPU */
 
-  priv->cpu = up_cpu_index();
+  priv->cpu = this_cpu();
   priv->cpuint = esp32s3_setup_irq(priv->cpu, priv->config->periph,
                                    ESP32S3_INT_PRIO_DEF,
                                    ESP32S3_CPUINT_LEVEL);

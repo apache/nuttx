@@ -749,7 +749,7 @@ static int tim_setisr(struct esp32s3_tim_dev_s *dev, xcpt_t handler,
 
       /* Set up to receive peripheral interrupts on the current CPU */
 
-      priv->core = up_cpu_index();
+      priv->core = this_cpu();
       priv->cpuint = esp32s3_setup_irq(priv->core, priv->periph,
                                        priv->priority, ESP32S3_CPUINT_LEVEL);
       if (priv->cpuint < 0)

@@ -537,7 +537,7 @@ static int esp32s3_attach(struct uart_dev_s *dev)
 
   /* Set up to receive peripheral interrupts on the current CPU */
 
-  priv->cpu = up_cpu_index();
+  priv->cpu = this_cpu();
   priv->cpuint = esp32s3_setup_irq(priv->cpu, priv->periph, priv->int_pri,
                                    ESP32S3_CPUINT_LEVEL);
   if (priv->cpuint < 0)

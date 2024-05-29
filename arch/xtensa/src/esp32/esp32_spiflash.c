@@ -472,7 +472,7 @@ static void esp32_spiflash_opstart(void)
 
   nxsched_set_priority(tcb, SCHED_PRIORITY_MAX);
 
-  cpu = up_cpu_index();
+  cpu = this_cpu();
 #ifdef CONFIG_SMP
   other_cpu = cpu == 1 ? 0 : 1;
 #endif
@@ -521,7 +521,7 @@ static void esp32_spiflash_opstart(void)
 
 static void esp32_spiflash_opdone(void)
 {
-  const int cpu = up_cpu_index();
+  const int cpu = this_cpu();
 #ifdef CONFIG_SMP
   const int other_cpu = cpu ? 0 : 1;
 #endif
@@ -2382,7 +2382,7 @@ static int esp32_ioctl_encrypt(struct mtd_dev_s *dev, int cmd,
 static int spi_flash_op_block_task(int argc, char *argv[])
 {
   struct tcb_s *tcb = this_task();
-  int cpu = up_cpu_index();
+  int cpu = this_cpu();
 
   for (; ; )
     {

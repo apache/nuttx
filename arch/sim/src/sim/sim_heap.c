@@ -86,11 +86,11 @@ static void mm_add_delaylist(struct mm_heap_s *heap, void *mem)
 
   flags = up_irq_save();
 
-  tmp->flink = heap->mm_delaylist[up_cpu_index()];
-  heap->mm_delaylist[up_cpu_index()] = tmp;
+  tmp->flink = heap->mm_delaylist[this_cpu()];
+  heap->mm_delaylist[this_cpu()] = tmp;
 
 #if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
-  heap->mm_delaycount[up_cpu_index()]++;
+  heap->mm_delaycount[this_cpu()]++;
 #endif
 
   up_irq_restore(flags);
@@ -108,20 +108,20 @@ static bool free_delaylist(struct mm_heap_s *heap, bool force)
 
   flags = up_irq_save();
 
-  tmp = heap->mm_delaylist[up_cpu_index()];
+  tmp = heap->mm_delaylist[this_cpu()];
 
 #if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
   if (tmp == NULL ||
       (!force &&
-        heap->mm_delaycount[up_cpu_index()] < CONFIG_MM_FREE_DELAYCOUNT_MAX))
+        heap->mm_delaycount[this_cpu()] < CONFIG_MM_FREE_DELAYCOUNT_MAX))
     {
       up_irq_restore(flags);
       return false;
     }
 
-  heap->mm_delaycount[up_cpu_index()] = 0;
+  heap->mm_delaycount[this_cpu()] = 0;
 #endif
-  heap->mm_delaylist[up_cpu_index()] = NULL;
+  heap->mm_delaylist[this_cpu()] = NULL;
 
   up_irq_restore(flags);
 

@@ -86,7 +86,7 @@ void up_idle(void)
   lc823450_dvfs_enter_idle();
 #endif
 
-  board_autoled_off(LED_CPU0 + up_cpu_index());
+  board_autoled_off(LED_CPU0 + this_cpu());
 
   up_irq_restore(flags);
 
@@ -94,7 +94,7 @@ void up_idle(void)
 
   asm("WFI");
 
-  g_idle_counter[up_cpu_index()]++;
+  g_idle_counter[this_cpu()]++;
 
 #endif
 }

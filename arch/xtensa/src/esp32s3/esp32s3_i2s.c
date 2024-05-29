@@ -3071,7 +3071,7 @@ static int i2s_dma_setup(struct esp32s3_i2s_s *priv)
    * will be assigned to a different CPU interrupt.
    */
 
-  priv->cpu = up_cpu_index();
+  priv->cpu = this_cpu();
 
 #ifdef I2S_HAVE_TX
   if (priv->config->tx_en)

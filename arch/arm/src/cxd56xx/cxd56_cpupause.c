@@ -315,7 +315,7 @@ int up_cpu_paused_restore(void)
 
 int arm_pause_handler(int irq, void *c, void *arg)
 {
-  int cpu = up_cpu_index();
+  int cpu = this_cpu();
   int ret = OK;
 
   DPRINTF("cpu%d will be paused\n", cpu);

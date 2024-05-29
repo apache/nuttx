@@ -1123,7 +1123,7 @@ static int rmt_isr_register(int (*fn)(int, void *, void *), void *arg,
 {
   int cpuint;
   int ret;
-  int cpu = up_cpu_index();
+  int cpu = this_cpu();
 
   DEBUGASSERT(fn);
   DEBUGASSERT(g_rmtdev_common.rmt_driver_channels == 0);
