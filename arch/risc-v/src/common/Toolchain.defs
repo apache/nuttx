@@ -114,8 +114,11 @@ ifneq ($(CONFIG_CXX_RTTI),y)
   ARCHCXXFLAGS += -fno-rtti
 endif
 
+SHMODULEFLAGS = -Bsymbolic -G -Bdynamic --entry=__start
+
 ifeq ($(CONFIG_ARCH_RV32),y)
 LDFLAGS += -melf32lriscv
+SHMODULEFLAGS += -melf32lriscv
 else
 LDFLAGS += -melf64lriscv
 endif

@@ -138,6 +138,8 @@ endif
 
 LDFLAGS += -nostdlib
 
+SHMODULEFLAGS = -Bsymbolic -G -Bdynamic --entry=__start
+
 # Optimization of unused sections
 
 ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
