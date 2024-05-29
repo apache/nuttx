@@ -63,6 +63,8 @@
 #include "hardware/mpfs_ethernet.h"
 #include "hardware/mpfs_mpucfg.h"
 
+#define SIZE_ALIGNED_64(m) (((m) + (0x3f)) & ~0x3f)
+
 #if defined(CONFIG_MPFS_ETH0_PHY_KSZ9477) ||\
     defined(CONFIG_MPFS_ETH1_PHY_KSZ9477)
 #  if !defined(CONFIG_MPFS_MAC_SGMII)
@@ -129,20 +131,17 @@
 #  define CONFIG_MPFS_ETHMAC_NTXBUFFERS  (8)
 #endif
 
-/* GMAC buffer sizes
- * REVISIT: do we want to make GMAC_RX_UNITSIZE configurable?
- * issue when using the MTU size receive block
- */
-
-#define GMAC_RX_UNITSIZE  (512)                  /* Fixed size for RX buffer */
-#define GMAC_TX_UNITSIZE  CONFIG_NET_ETH_PKTSIZE /* MAX size for Ethernet packet */
-
 /* The MAC can support frame lengths up to 1536 bytes */
 
 #define GMAC_MAX_FRAMELEN (1536)
 #if CONFIG_NET_ETH_PKTSIZE > GMAC_MAX_FRAMELEN
 #  error CONFIG_NET_ETH_PKTSIZE is too large
 #endif
+
+/* Max size of RX and TX buffers */
+
+#define GMAC_RX_UNITSIZE SIZE_ALIGNED_64(GMAC_MAX_FRAMELEN)
+#define GMAC_TX_UNITSIZE SIZE_ALIGNED_64(CONFIG_NET_ETH_PKTSIZE)
 
 /* for DMA dma_rxbuf_size */
 
