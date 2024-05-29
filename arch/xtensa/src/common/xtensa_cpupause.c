@@ -218,7 +218,7 @@ int up_cpu_paused_restore(void)
 
 void xtensa_pause_handler(void)
 {
-  int cpu = up_cpu_index();
+  int cpu = this_cpu();
 
   /* Check for false alarms.  Such false could occur as a consequence of
    * some deadlock breaking logic that might have already serviced the

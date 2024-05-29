@@ -211,7 +211,7 @@ static void dump_stack(FAR const char *tag, uintptr_t sp,
 static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
 {
 #if CONFIG_ARCH_INTERRUPTSTACK > 0
-  uintptr_t intstack_base = up_get_intstackbase(up_cpu_index());
+  uintptr_t intstack_base = up_get_intstackbase(this_cpu());
   size_t intstack_size = CONFIG_ARCH_INTERRUPTSTACK;
   uintptr_t intstack_top = intstack_base + intstack_size;
   uintptr_t intstack_sp = 0;
@@ -260,7 +260,7 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
                  intstack_base,
                  intstack_size,
 #ifdef CONFIG_STACK_COLORATION
-                 up_check_intstack(up_cpu_index())
+                 up_check_intstack(this_cpu())
 #else
                  0
 #endif

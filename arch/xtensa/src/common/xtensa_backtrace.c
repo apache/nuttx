@@ -242,7 +242,7 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
       if (up_interrupt_context())
         {
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
-          void *istackbase = (void *)up_get_intstackbase(up_cpu_index());
+          void *istackbase = (void *)up_get_intstackbase(this_cpu());
 
           xtensa_window_spill();
           ret = backtrace_stack(istackbase,

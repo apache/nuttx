@@ -187,7 +187,7 @@ void board_crashdump(uintptr_t sp, struct tcb_s *tcb,
   /* Get the limits on the interrupt stack memory */
 
   pdump->info.stacks.interrupt.top =
-    up_get_intstackbase(up_cpu_index()) + INTSTACK_SIZE;
+    up_get_intstackbase(this_cpu()) + INTSTACK_SIZE;
   pdump->info.stacks.interrupt.size = INTSTACK_SIZE;
 
   /* If In interrupt Context save the interrupt stack data centered

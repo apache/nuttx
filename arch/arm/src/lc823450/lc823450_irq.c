@@ -676,10 +676,10 @@ void arm_ack_irq(int irq)
   lc823450_dvfs_exit_idle(irq);
 #endif
 
-  board_autoled_on(LED_CPU0 + up_cpu_index());
+  board_autoled_on(LED_CPU0 + this_cpu());
 
 #ifdef CONFIG_SMP
-  if (irq > LC823450_IRQ_LPDSP0 && 1 == up_cpu_index())
+  if (irq > LC823450_IRQ_LPDSP0 && 1 == this_cpu())
     {
       /* IRQ should be handled on CPU0 */
 

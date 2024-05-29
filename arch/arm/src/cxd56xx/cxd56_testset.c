@@ -94,7 +94,7 @@ spinlock_t up_testset(volatile spinlock_t *lock)
 {
 #ifdef CONFIG_CXD56_TESTSET_WITH_HWSEM
   spinlock_t ret;
-  uint32_t sphlocked = ((up_cpu_index() + 2) << 16) | 0x1;
+  uint32_t sphlocked = ((this_cpu() + 2) << 16) | 0x1;
 
   /* Lock hardware semaphore */
 

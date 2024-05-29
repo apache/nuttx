@@ -2042,7 +2042,7 @@ int esp32_emac_init(void)
 
   memset(priv, 0, sizeof(struct esp32_emac_s));
 
-  priv->cpu = up_cpu_index();
+  priv->cpu = this_cpu();
   priv->cpuint = esp32_setup_irq(priv->cpu, ESP32_PERIPH_EMAC,
                                  1, ESP32_CPUINT_LEVEL);
   if (priv->cpuint < 0)

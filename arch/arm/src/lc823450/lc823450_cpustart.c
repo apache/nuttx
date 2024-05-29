@@ -85,7 +85,7 @@ extern int lc823450_pause_handler(int irq, void *c, void *arg);
 
 static void cpu1_boot(void)
 {
-  int cpu = up_cpu_index();
+  int cpu = this_cpu();
 
   DPRINTF("cpu = %d\n", cpu);
 

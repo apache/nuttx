@@ -1056,7 +1056,7 @@ static int esp32_attach(struct uart_dev_s *dev)
 
   /* Set up to receive peripheral interrupts on the current CPU */
 
-  priv->cpu = up_cpu_index();
+  priv->cpu = this_cpu();
   priv->cpuint = esp32_setup_irq(priv->cpu, priv->config->periph,
                                  1, ESP32_CPUINT_LEVEL);
   if (priv->cpuint < 0)
@@ -1186,7 +1186,7 @@ static void dma_attach(uint8_t dma_chan)
 
   /* Set up to receive peripheral interrupts on the current CPU */
 
-  cpu = up_cpu_index();
+  cpu = this_cpu();
   dma_cpuint = esp32_setup_irq(cpu, periph, 1, ESP32_CPUINT_LEVEL);
   if (dma_cpuint < 0)
     {

@@ -1628,7 +1628,7 @@ struct spi_slave_ctrlr_s *esp32s2_spislave_ctrlr_initialize(int port)
                          spislave_cs_interrupt,
                          priv));
 
-  priv->cpu = up_cpu_index();
+  priv->cpu = this_cpu();
   priv->cpuint = esp32s2_setup_irq(priv->config->periph,
                                    ESP32S2_INT_PRIO_DEF,
                                    ESP32S2_CPUINT_LEVEL);

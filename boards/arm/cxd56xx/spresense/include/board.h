@@ -135,7 +135,7 @@
 #define LED_CPU1                (101)
 #define LED_CPU2                (102)
 #define LED_CPU3                (103)
-#define LED_CPU                 (LED_CPU0 + up_cpu_index())
+#define LED_CPU                 (LED_CPU0 + this_cpu())
 #endif
 
 /* Buttons definitions ******************************************************/

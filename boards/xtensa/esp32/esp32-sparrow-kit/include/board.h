@@ -95,7 +95,7 @@
 #ifdef CONFIG_ARCH_LEDS_CPU_ACTIVITY
 #  define LED_CPU0        8
 #  define LED_CPU1        9
-#  define LED_CPU         (LED_CPU0 + up_cpu_index())
+#  define LED_CPU         (LED_CPU0 + this_cpu())
 #endif
 
 /* GPIO pins used by the GPIO Subsystem */

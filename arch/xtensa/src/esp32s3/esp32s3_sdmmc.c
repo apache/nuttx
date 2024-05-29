@@ -1626,7 +1626,7 @@ static int esp32s3_attach(struct sdio_dev_s *dev)
   uint32_t regval;
   struct esp32s3_dev_s *priv = (struct esp32s3_dev_s *)dev;
 
-  ret = esp32s3_setup_irq(up_cpu_index(), ESP32S3_PERIPH_SDIO_HOST,
+  ret = esp32s3_setup_irq(this_cpu(), ESP32S3_PERIPH_SDIO_HOST,
                           1, ESP32S3_CPUINT_LEVEL);
   DEBUGASSERT(ret >= 0);
 

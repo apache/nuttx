@@ -94,7 +94,7 @@ static void appdsp_boot(void)
 {
   int cpu;
 
-  cpu = up_cpu_index();
+  cpu = this_cpu();
   DPRINTF("cpu = %d\n", cpu);
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 7

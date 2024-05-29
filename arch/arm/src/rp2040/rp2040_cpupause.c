@@ -86,7 +86,7 @@ static volatile spinlock_t g_cpu_resumed[CONFIG_SMP_NCPUS];
 
 static void rp2040_handle_irqreq(int irqreq)
 {
-  DEBUGASSERT(up_cpu_index() == 0);
+  DEBUGASSERT(this_cpu() == 0);
 
   /* Unlock the spinlock first */
 
@@ -276,7 +276,7 @@ int up_cpu_paused_restore(void)
 
 int arm_pause_handler(int irq, void *c, void *arg)
 {
-  int cpu = up_cpu_index();
+  int cpu = this_cpu();
   int irqreq;
   uint32_t stat;
 
@@ -379,7 +379,7 @@ int up_cpu_pause(int cpu)
   spin_lock(&g_cpu_wait[cpu]);
   spin_lock(&g_cpu_paused[cpu]);
 
-  DEBUGASSERT(cpu != up_cpu_index());
+  DEBUGASSERT(cpu != this_cpu());
 
   /* Generate IRQ for CPU(cpu) */
 
