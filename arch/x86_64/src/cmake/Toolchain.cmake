@@ -85,38 +85,35 @@ if(CONFIG_DEBUG_LINK_MAP)
   add_link_options(-Wl,--cref -Wl,-Map=nuttx.map)
 endif()
 
-set(ARCHCFLAGS
-    "-Wstrict-prototypes -fno-common -Wall -Wshadow -Wundef -Wno-attributes -Wno-unknown-pragmas"
-)
-set(ARCHCXXFLAGS
-    "-fno-common -Wall -Wshadow -Wundef -Wno-attributes -Wno-unknown-pragmas")
+add_compile_options(
+  -fno-common
+  -Wall
+  -Wshadow
+  -Wundef
+  -Wno-attributes
+  -Wno-unknown-pragmas
+  $<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes>)
+
+if(CONFIG_CXX_STANDARD)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=${CONFIG_CXX_STANDARD}>)
+endif()
 
 if(NOT CONFIG_LIBCXXTOOLCHAIN)
-  set(ARCHCXXFLAGS "${ARCHCXXFLAGS} -nostdinc++")
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-nostdinc++>)
 endif()
 
 if(NOT CONFIG_CXX_EXCEPTION)
-  string(APPEND ARCHCXXFLAGS " -fno-exceptions -fcheck-new")
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
+                      $<$<COMPILE_LANGUAGE:CXX>:-fcheck-new>)
 endif()
 
 if(NOT CONFIG_CXX_RTTI)
-  string(APPEND ARCHCXXFLAGS " -fno-rtti")
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>)
 endif()
 
-if(NOT "${CMAKE_C_FLAGS}" STREQUAL "")
-  string(REGEX MATCH "${ARCHCFLAGS}" EXISTS_FLAGS "${CMAKE_C_FLAGS}")
-endif()
-
-if(NOT EXISTS_FLAGS)
-  set(CMAKE_ASM_FLAGS
-      "${CMAKE_ASM_FLAGS} ${ARCHCFLAGS}"
-      CACHE STRING "" FORCE)
-  set(CMAKE_C_FLAGS
-      "${CMAKE_C_FLAGS} ${ARCHCFLAGS}"
-      CACHE STRING "" FORCE)
-  set(CMAKE_CXX_FLAGS
-      "${CMAKE_CXX_FLAGS} ${ARCHCXXFLAGS}"
-      CACHE STRING "" FORCE)
+if(CONFIG_DEBUG_OPT_UNUSED_SECTIONS)
+  add_link_options(-Wl,--gc-sections)
+  add_compile_options(-ffunction-sections -fdata-sections)
 endif()
 
 if(CONFIG_ARCH_INTEL64_HAVE_RDRAND)

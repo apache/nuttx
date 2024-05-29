@@ -18,8 +18,20 @@
 #
 # ##############################################################################
 
-get_directory_property(NUTTX_EXTRA_FLAGS DIRECTORY ${CMAKE_SOURCE_DIR}
-                                                   COMPILE_OPTIONS)
+get_directory_property(TOOLCHAIN_DIR_FLAGS DIRECTORY ${CMAKE_SOURCE_DIR}
+                                                     COMPILE_OPTIONS)
+
+set(NUTTX_EXTRA_FLAGS "")
+foreach(FLAG ${TOOLCHAIN_DIR_FLAGS})
+  if(NOT FLAG MATCHES "^\\$<.*>$")
+    list(APPEND NUTTX_EXTRA_FLAGS ${FLAG})
+  else()
+    string(REGEX MATCH "\\$<\\$<COMPILE_LANGUAGE:C>:(.*)>" matched ${FLAG})
+    if(matched)
+      list(APPEND NUTTX_EXTRA_FLAGS ${CMAKE_MATCH_1})
+    endif()
+  endif()
+endforeach()
 
 execute_process(
   COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAGS} ${NUTTX_EXTRA_FLAGS}
