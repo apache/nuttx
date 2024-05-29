@@ -99,8 +99,8 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
         {
           FAR struct socket_conn_s *conn = psock->s_conn;
 
-          conn->ttl = (value_len >= sizeof(int)) ?
-                      *(FAR int *)value : (int)*(FAR unsigned char *)value;
+          conn->s_ttl = (value_len >= sizeof(int)) ?
+                        *(FAR int *)value : (int)*(FAR unsigned char *)value;
           ret = OK;
         }
         break;
@@ -152,8 +152,8 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
         {
           FAR struct socket_conn_s *conn = psock->s_conn;
 
-          conn->ttl = (value_len >= sizeof(int)) ?
-                      *(FAR int *)value : (int)*(FAR unsigned char *)value;
+          conn->s_ttl = (value_len >= sizeof(int)) ?
+                        *(FAR int *)value : (int)*(FAR unsigned char *)value;
           ret = OK;
         }
         break;
