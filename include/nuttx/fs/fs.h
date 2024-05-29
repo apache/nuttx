@@ -1160,6 +1160,22 @@ int nx_open(FAR const char *path, int oflags, ...);
 int fs_getfilep(int fd, FAR struct file **filep);
 
 /****************************************************************************
+ * Name: fs_reffilep
+ *
+ * Description:
+ *   To specify filep increase the reference count.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void fs_reffilep(FAR struct file *filep);
+
+/****************************************************************************
  * Name: fs_putfilep
  *
  * Description:
