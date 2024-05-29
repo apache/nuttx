@@ -182,7 +182,7 @@ unsigned int IRAM_ATTR cache_sram_mmu_set(int cpu_no, int pid,
 
   if (os_ready)
     {
-      cpu_to_stop = up_cpu_index() == 1 ? 0 : 1;
+      cpu_to_stop = this_cpu() == 1 ? 0 : 1;
       up_cpu_pause(cpu_to_stop);
     }
 

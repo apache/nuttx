@@ -50,7 +50,7 @@ static int qemu_ipi_handler(int mcause, void *regs, void *args)
 {
   /* Clear IPI (Inter-Processor-Interrupt) */
 
-  riscv_ipi_clear(up_cpu_index());
+  riscv_ipi_clear(this_cpu());
 
 #ifdef CONFIG_SMP
   riscv_pause_handler(mcause, regs, args);

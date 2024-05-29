@@ -234,7 +234,7 @@ int up_cpu_paused_restore(void)
 
 int up_pause_handler(int irq, void *c, void *arg)
 {
-  int cpu = up_cpu_index();
+  int cpu = this_cpu();
 
   /* Check for false alarms.  Such false could occur as a consequence of
    * some deadlock breaking logic that might have already serviced the SG2

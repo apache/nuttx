@@ -266,7 +266,7 @@ int up_backtrace(struct tcb_s *tcb,
         {
           unsigned long top =
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
-            up_get_intstackbase(up_cpu_index()) + INTSTACK_SIZE;
+            up_get_intstackbase(this_cpu()) + INTSTACK_SIZE;
 #else
             (unsigned long)rtcb->stack_base_ptr +
                            rtcb->adj_stack_size;

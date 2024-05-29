@@ -1523,7 +1523,7 @@ struct spi_dev_s *esp32_spibus_initialize(int port)
     {
       /* Set up to receive peripheral interrupts on the current CPU */
 
-      priv->cpu = up_cpu_index();
+      priv->cpu = this_cpu();
       priv->cpuint = esp32_setup_irq(priv->cpu, priv->config->periph,
                                      1, ESP32_CPUINT_LEVEL);
       if (priv->cpuint < 0)

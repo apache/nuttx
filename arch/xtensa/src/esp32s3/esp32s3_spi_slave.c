@@ -1808,7 +1808,7 @@ struct spi_slave_ctrlr_s *esp32s3_spislave_ctrlr_initialize(int port)
                          spislave_cs_interrupt,
                          priv));
 
-  priv->cpu = up_cpu_index();
+  priv->cpu = this_cpu();
   priv->cpuint = esp32s3_setup_irq(priv->cpu,
                                    priv->config->periph,
                                    ESP32S3_INT_PRIO_DEF,

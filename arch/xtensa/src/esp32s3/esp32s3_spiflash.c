@@ -241,7 +241,7 @@ static sem_t g_disable_non_iram_isr_on_core[CONFIG_SMP_NCPUS];
 
 static void spiflash_suspend_cache(void)
 {
-  int cpu = up_cpu_index();
+  int cpu = this_cpu();
 #ifdef CONFIG_SMP
   int other_cpu = cpu ? 0 : 1;
 #endif
@@ -261,7 +261,7 @@ static void spiflash_suspend_cache(void)
 
 static void spiflash_resume_cache(void)
 {
-  int cpu = up_cpu_index();
+  int cpu = this_cpu();
 #ifdef CONFIG_SMP
   int other_cpu = cpu ? 0 : 1;
 #endif
@@ -294,7 +294,7 @@ static void spiflash_start(void)
 
   nxsched_set_priority(tcb, SCHED_PRIORITY_MAX);
 
-  cpu = up_cpu_index();
+  cpu = this_cpu();
 #ifdef CONFIG_SMP
   other_cpu = cpu == 1 ? 0 : 1;
 #endif
@@ -308,7 +308,7 @@ static void spiflash_start(void)
     {
       g_flash_op_can_start = false;
 
-      cpu = up_cpu_index();
+      cpu = this_cpu();
       other_cpu = cpu ? 0 : 1;
 
       nxsem_post(&g_disable_non_iram_isr_on_core[other_cpu]);
@@ -343,7 +343,7 @@ static void spiflash_start(void)
 
 static void spiflash_end(void)
 {
-  const int cpu = up_cpu_index();
+  const int cpu = this_cpu();
 #ifdef CONFIG_SMP
   const int other_cpu = cpu ? 0 : 1;
 #endif
@@ -821,7 +821,7 @@ static void spi_flash_restore_cache(void)
 static int spi_flash_op_block_task(int argc, char *argv[])
 {
   struct tcb_s *tcb = this_task();
-  int cpu = up_cpu_index();
+  int cpu = this_cpu();
 
   for (; ; )
     {

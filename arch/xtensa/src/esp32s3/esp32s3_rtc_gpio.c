@@ -406,7 +406,7 @@ void esp32s3_rtcioirqinitialize(void)
 {
   /* Setup the RTCIO interrupt. */
 
-  int cpu = up_cpu_index();
+  int cpu = this_cpu();
   g_rtcio_cpuint = esp32s3_setup_irq(cpu, ESP32S3_PERIPH_RTC_CORE,
                                      1, ESP32S3_CPUINT_LEVEL);
   DEBUGASSERT(g_rtcio_cpuint >= 0);

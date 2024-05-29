@@ -736,7 +736,7 @@ int up_backtrace(struct tcb_s *tcb,
       if (up_interrupt_context())
         {
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
-          frame.stack_base = up_get_intstackbase(up_cpu_index());
+          frame.stack_base = up_get_intstackbase(this_cpu());
           frame.stack_top = frame.stack_base + INTSTACK_SIZE;
 #endif /* CONFIG_ARCH_INTERRUPTSTACK > 7 */
 
