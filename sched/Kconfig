@@ -1548,6 +1548,20 @@ endmenu # RTOS hooks
 
 menu "Signal Configuration"
 
+config SIG_PREALLOC_ACTIONS
+	int "Number of pre-allocated sigactions"
+	default 4
+	---help---
+		The number of pre-allocated sigaction structures.
+
+config SIG_ALLOC_ACTIONS
+	int "Num of sigactions to allocate per time"
+	default 1
+	---help---
+		The number of sigactions to allocate per time. Note that
+		if this number is larger than 1, the allocation won't be
+		returned to the heap but kept in a free list for reuse.
+
 config SIG_PREALLOC_IRQ_ACTIONS
 	int "Number of pre-allocated irq actions"
 	default 4 if DEFAULT_SMALL
