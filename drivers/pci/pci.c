@@ -556,6 +556,10 @@ static FAR struct pci_bus_s *pci_alloc_bus(void)
   FAR struct pci_bus_s *bus;
 
   bus = kmm_zalloc(sizeof(*bus));
+  if (bus == NULL)
+    {
+      return NULL;
+    }
 
   list_initialize(&bus->node);
   list_initialize(&bus->children);
@@ -580,6 +584,10 @@ static FAR struct pci_device_s *pci_alloc_device(void)
   FAR struct pci_device_s *dev;
 
   dev = kmm_zalloc(sizeof(*dev));
+  if (dev == NULL)
+    {
+      return NULL;
+    }
 
   list_initialize(&dev->node);
   list_initialize(&dev->bus_list);
@@ -2069,6 +2077,11 @@ int pci_register_controller(FAR struct pci_controller_s *ctrl)
     }
 
   bus = pci_alloc_bus();
+  if (bus == NULL)
+    {
+      return -ENOMEM;
+    }
+
   bus->ctrl = ctrl;
 
   ctrl->bus = bus;
