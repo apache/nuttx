@@ -144,7 +144,7 @@ static void rpmsg_port_destroy_queue(FAR struct rpmsg_port_queue_s *queue)
  ****************************************************************************/
 
 static int rpmsg_port_create_queue(FAR struct rpmsg_port_queue_s *queue,
-                                   uint32_t count, uint32_t len,
+                                   uint16_t count, uint16_t len,
                                    FAR void *buf)
 {
   FAR struct list_node *node;
@@ -267,16 +267,16 @@ static int rpmsg_port_send_offchannel_nocopy(FAR struct rpmsg_device *rdev,
   FAR struct rpmsg_port_s *port =
     metal_container_of(rdev, struct rpmsg_port_s, rdev);
   FAR struct rpmsg_port_header_s *hdr;
-  FAR struct rpmsg_hdr *rp_hdr;
+  FAR struct rpmsg_hdr *rphdr;
 
-  rp_hdr = RPMSG_LOCATE_HDR(data);
-  rp_hdr->dst = dst;
-  rp_hdr->src = src;
-  rp_hdr->len = len;
-  rp_hdr->reserved = 0;
-  rp_hdr->flags = 0;
+  rphdr = RPMSG_LOCATE_HDR(data);
+  rphdr->dst = dst;
+  rphdr->src = src;
+  rphdr->len = len;
+  rphdr->reserved = 0;
+  rphdr->flags = 0;
 
-  hdr = metal_container_of(rp_hdr, struct rpmsg_port_header_s, buf);
+  hdr = metal_container_of(rphdr, struct rpmsg_port_header_s, buf);
   hdr->len = sizeof(struct rpmsg_port_header_s) +
              sizeof(struct rpmsg_hdr) + len;
 
@@ -317,9 +317,9 @@ static int rpmsg_port_send_offchannel_raw(FAR struct rpmsg_device *rdev,
 static void rpmsg_port_hold_rx_buffer(FAR struct rpmsg_device *rdev,
                                       FAR void *rxbuf)
 {
-  FAR struct rpmsg_hdr *rp_hdr = RPMSG_LOCATE_HDR(rxbuf);
+  FAR struct rpmsg_hdr *rphdr = RPMSG_LOCATE_HDR(rxbuf);
 
-  atomic_fetch_add(&rp_hdr->reserved, 1 << RPMSG_BUF_HELD_SHIFT);
+  atomic_fetch_add(&rphdr->reserved, 1 << RPMSG_BUF_HELD_SHIFT);
 }
 
 /****************************************************************************
@@ -331,11 +331,11 @@ static void rpmsg_port_release_rx_buffer(FAR struct rpmsg_device *rdev,
 {
   FAR struct rpmsg_port_s *port =
     metal_container_of(rdev, struct rpmsg_port_s, rdev);
-  FAR struct rpmsg_hdr *rp_hdr = RPMSG_LOCATE_HDR(rxbuf);
+  FAR struct rpmsg_hdr *rphdr = RPMSG_LOCATE_HDR(rxbuf);
   FAR struct rpmsg_port_header_s *hdr =
-    metal_container_of(rp_hdr, struct rpmsg_port_header_s, buf);
+    metal_container_of(rphdr, struct rpmsg_port_header_s, buf);
   uint32_t reserved =
-    atomic_fetch_sub(&rp_hdr->reserved, 1 << RPMSG_BUF_HELD_SHIFT);
+    atomic_fetch_sub(&rphdr->reserved, 1 << RPMSG_BUF_HELD_SHIFT);
 
   if ((reserved & RPMSG_BUF_HELD_MASK) == (1 << RPMSG_BUF_HELD_SHIFT))
     {
@@ -353,9 +353,9 @@ static int rpmsg_port_release_tx_buffer(FAR struct rpmsg_device *rdev,
 {
   FAR struct rpmsg_port_s *port =
     metal_container_of(rdev, struct rpmsg_port_s, rdev);
-  FAR struct rpmsg_hdr *rp_hdr = RPMSG_LOCATE_HDR(txbuf);
+  FAR struct rpmsg_hdr *rphdr = RPMSG_LOCATE_HDR(txbuf);
   FAR struct rpmsg_port_header_s *hdr =
-    metal_container_of(rp_hdr, struct rpmsg_port_header_s, buf);
+    metal_container_of(rphdr, struct rpmsg_port_header_s, buf);
 
   rpmsg_port_queue_return_buffer(&port->txq, hdr);
   return RPMSG_SUCCESS;
@@ -369,13 +369,13 @@ static void rpmsg_port_rx_callback(FAR struct rpmsg_port_s *port,
                                    FAR struct rpmsg_port_header_s *hdr)
 {
   FAR struct rpmsg_device *rdev = &port->rdev;
-  FAR struct rpmsg_hdr *rp_hdr = (FAR struct rpmsg_hdr *)hdr->buf;
-  FAR void *data = RPMSG_LOCATE_DATA(rp_hdr);
+  FAR struct rpmsg_hdr *rphdr = (FAR struct rpmsg_hdr *)hdr->buf;
+  FAR void *data = RPMSG_LOCATE_DATA(rphdr);
   FAR struct rpmsg_endpoint *ept;
   int status;
 
   metal_mutex_acquire(&rdev->lock);
-  ept = rpmsg_get_ept_from_addr(rdev, rp_hdr->dst);
+  ept = rpmsg_get_ept_from_addr(rdev, rphdr->dst);
   rpmsg_ept_incref(ept);
   metal_mutex_release(&rdev->lock);
   rpmsg_port_hold_rx_buffer(rdev, data);
@@ -384,10 +384,10 @@ static void rpmsg_port_rx_callback(FAR struct rpmsg_port_s *port,
     {
       if (ept->dest_addr == RPMSG_ADDR_ANY)
         {
-          ept->dest_addr = rp_hdr->src;
+          ept->dest_addr = rphdr->src;
         }
 
-      status = ept->cb(ept, data, rp_hdr->len, rp_hdr->src, ept->priv);
+      status = ept->cb(ept, data, rphdr->len, rphdr->src, ept->priv);
       if (status < 0)
         {
           RPMSG_ASSERT(0, "unexpected callback status\n");
@@ -725,10 +725,20 @@ int rpmsg_port_register(FAR struct rpmsg_port_s *port)
 
 void rpmsg_port_unregister(FAR struct rpmsg_port_s *port)
 {
+  FAR struct rpmsg_port_header_s *hdr;
   char name[64];
-
-  rpmsg_device_destory(&port->rpmsg);
 
   snprintf(name, sizeof(name), "/dev/rpmsg/%s", port->cpuname);
   rpmsg_unregister(name, &port->rpmsg);
+
+  rpmsg_device_destory(&port->rpmsg);
+  while ((hdr = rpmsg_port_queue_get_buffer(&port->txq, false)) != NULL)
+    {
+      rpmsg_port_queue_return_buffer(&port->txq, hdr);
+    }
+
+  while ((hdr = rpmsg_port_queue_get_buffer(&port->rxq, false)) != NULL)
+    {
+      rpmsg_port_queue_return_buffer(&port->rxq, hdr);
+    }
 }

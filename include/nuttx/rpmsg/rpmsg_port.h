@@ -37,10 +37,10 @@
 struct rpmsg_port_config_s
 {
   FAR const char *remotecpu;
-  uint32_t       txnum;         /* Number of tx buffer. */
-  uint32_t       rxnum;         /* Number of rx buffer. */
-  uint32_t       txlen;         /* Length of a single tx buffer. */
-  uint32_t       rxlen;         /* Length of a single rx buffer. */
+  uint16_t       txnum;         /* Number of tx buffer. */
+  uint16_t       rxnum;         /* Number of rx buffer. */
+  uint16_t       txlen;         /* Length of a single tx buffer. */
+  uint16_t       rxlen;         /* Length of a single rx buffer. */
 
   /* Pointer to whole tx/rx buffer, if it was null, transport layer will
    * alloc internal.
