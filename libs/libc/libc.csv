@@ -52,7 +52,7 @@
 "dq_remfirst","nuttx/queue.h","","FAR dq_entry_t *","FAR dq_queue_t *"
 "dq_remlast","nuttx/queue.h","","FAR dq_entry_t *","FAR dq_queue_t *"
 "ether_ntoa","netinet/ether.h","","FAR char *","FAR const struct ether_addr *"
-"execv","unistd.h","","int","FAR const char *","FAR char *const[]|FAR char *const *"
+"execv","unistd.h","defined(CONFIG_LIBC_EXECFUNCS)","int","FAR const char *","FAR char *const[]|FAR char *const *"
 "exit","stdlib.h","","noreturn","int"
 "fchdir","unistd.h","!defined(CONFIG_DISABLE_ENVIRON)","int","int"
 "fclose","stdio.h","defined(CONFIG_FILE_STREAM)","int","FAR FILE *"
