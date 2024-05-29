@@ -703,6 +703,71 @@ int fs_getfilep(int fd, FAR struct file **filep)
 }
 
 /****************************************************************************
+ * Name: fs_reffilep
+ *
+ * Description:
+ *   To specify filep increase the reference count.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void fs_reffilep(FAR struct file *filep)
+{
+  /* This interface is used to increase the reference count of filep */
+
+  irqstate_t flags;
+
+  DEBUGASSERT(filep);
+  flags = spin_lock_irqsave(NULL);
+  filep->f_refs++;
+  spin_unlock_irqrestore(NULL, flags);
+}
+
+/****************************************************************************
+ * Name: fs_putfilep
+ *
+ * Description:
+ *   Handles reference counts for files, less than or equal to 0 and close
+ *   the file
+ *
+ * Input Parameters:
+ *   filep  - The caller provided location in which to return the 'struct
+ *            file' instance.
+ ****************************************************************************/
+
+int fs_putfilep(FAR struct file *filep)
+{
+  irqstate_t flags;
+  int ret = 0;
+  int refs;
+
+  DEBUGASSERT(filep);
+  flags = spin_lock_irqsave(NULL);
+
+  refs = --filep->f_refs;
+
+  spin_unlock_irqrestore(NULL, flags);
+
+  /* If refs is zero, the close() had called, closing it now. */
+
+  if (refs == 0)
+    {
+      ret = file_close(filep);
+      if (ret < 0)
+        {
+          ferr("ERROR: fs putfilep file_close() failed: %d\n", ret);
+        }
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: nx_dup2_from_tcb
  *
  * Description:

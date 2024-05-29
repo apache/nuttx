@@ -18,7 +18,7 @@
 #
 # ##############################################################################
 
-set(SRCS fs_mmap.c fs_munmap.c fs_mmisc.c)
+set(SRCS fs_mmap.c fs_munmap.c fs_mmisc.c fs_msync.c)
 
 if(CONFIG_FS_RAMMAP)
   list(APPEND SRCS fs_rammap.c)
