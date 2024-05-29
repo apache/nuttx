@@ -45,15 +45,14 @@ begin_packed_struct struct rpmsg_port_header_s
 {
   uint16_t crc;                   /* CRC of current port data frame */
   uint16_t cmd;                   /* Reserved for uart/spi port driver */
-  uint32_t avail;                 /* Available rx buffer of peer side */
-  uint32_t len;                   /* Data frame length */
-  uint32_t seq;                   /* Sequence number of current data frame */
+  uint16_t avail;                 /* Available rx buffer of peer side */
+  uint16_t len;                   /* Data frame length */
   uint8_t  buf[0];                /* Payload buffer */
 } end_packed_struct;
 
 struct rpmsg_port_list_s
 {
-  uint32_t         num;           /* Number of buffers */
+  uint16_t         num;           /* Number of buffers */
   sem_t            sem;           /* Used to wait for buffer */
   spinlock_t       lock;          /* List lock */
   struct list_node head;          /* List head */
@@ -75,7 +74,7 @@ struct rpmsg_port_queue_s
 
   /* Length of buffers current queue managed */
 
-  uint32_t                 len;
+  uint16_t                 len;
 
   /* Free list of buffers which have not been occupied data yet */
 
@@ -232,7 +231,7 @@ void rpmsg_port_queue_add_buffer(FAR struct rpmsg_port_queue_s *queue,
  ****************************************************************************/
 
 static inline_function
-uint32_t rpmsg_port_queue_navail(FAR struct rpmsg_port_queue_s *queue)
+uint16_t rpmsg_port_queue_navail(FAR struct rpmsg_port_queue_s *queue)
 {
   return atomic_load(&queue->free.num);
 }
@@ -252,7 +251,7 @@ uint32_t rpmsg_port_queue_navail(FAR struct rpmsg_port_queue_s *queue)
  ****************************************************************************/
 
 static inline_function
-uint32_t rpmsg_port_queue_nused(FAR struct rpmsg_port_queue_s *queue)
+uint16_t rpmsg_port_queue_nused(FAR struct rpmsg_port_queue_s *queue)
 {
   return atomic_load(&queue->ready.num);
 }
