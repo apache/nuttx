@@ -1,5 +1,5 @@
 # ##############################################################################
-# boards/risc-v/k230/canmv230/CMakeLists.txt
+# boards/risc-v/k230/canmv230/kernel/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -18,11 +18,6 @@
 #
 # ##############################################################################
 
-add_subdirectory(src)
+target_link_options(nuttx_user PRIVATE "-Wl,-melf64lriscv")
 
-if(CONFIG_BUILD_PROTECTED)
-  add_subdirectory(kernel)
-  set_property(
-    GLOBAL PROPERTY LD_SCRIPT_USER
-                    ${CMAKE_CURRENT_LIST_DIR}/scripts/ld-userland.script)
-endif()
+target_sources(nuttx_user PRIVATE k230_userspace.c)
