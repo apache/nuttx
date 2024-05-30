@@ -18,11 +18,7 @@
 #
 ############################################################################
 
-CSRCS += lib_assert.c
-
-ifeq ($(CONFIG_STACK_CANARIES),y)
-CSRCS += lib_stackchk.c
-endif
+CSRCS += lib_assert.c lib_stackchk.c
 
 ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
   ifeq ($(CONFIG_LTO_NONE),n)

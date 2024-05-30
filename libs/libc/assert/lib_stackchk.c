@@ -24,8 +24,6 @@
 
 #include <assert.h>
 
-#ifdef CONFIG_STACK_CANARIES
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -56,5 +54,3 @@ void __stack_chk_fail(void)
 {
   PANIC();
 }
-
-#endif /* CONFIG_STACK_CANARIES */
