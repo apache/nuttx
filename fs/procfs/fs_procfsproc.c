@@ -792,9 +792,10 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
 
   /* Generate output for maximum time pre-emption disabled */
 
-  linesize = procfs_snprintf(procfile->line, STATUS_LINELEN, "%lu.%09lu,",
+  linesize = procfs_snprintf(procfile->line, STATUS_LINELEN, "%lu.%09lu %p,",
                              (unsigned long)maxtime.tv_sec,
-                             (unsigned long)maxtime.tv_nsec);
+                             (unsigned long)maxtime.tv_nsec,
+                             tcb->premp_max_caller);
   copysize = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                            &offset);
 
@@ -827,9 +828,10 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
 
   /* Generate output for maximum time in a critical section */
 
-  linesize = procfs_snprintf(procfile->line, STATUS_LINELEN, "%lu.%09lu,",
+  linesize = procfs_snprintf(procfile->line, STATUS_LINELEN, "%lu.%09lu %p,",
                              (unsigned long)maxtime.tv_sec,
-                             (unsigned long)maxtime.tv_nsec);
+                             (unsigned long)maxtime.tv_nsec,
+                             tcb->crit_max_caller);
   copysize = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                            &offset);
 

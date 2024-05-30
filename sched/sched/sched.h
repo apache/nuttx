@@ -447,11 +447,13 @@ void nxsched_suspend_critmon(FAR struct tcb_s *tcb);
 #endif
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
-void nxsched_critmon_preemption(FAR struct tcb_s *tcb, bool state);
+void nxsched_critmon_preemption(FAR struct tcb_s *tcb, bool state,
+                                FAR void *caller);
 #endif
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
-void nxsched_critmon_csection(FAR struct tcb_s *tcb, bool state);
+void nxsched_critmon_csection(FAR struct tcb_s *tcb, bool state,
+                              FAR void *caller);
 #endif
 
 /* TCB operations */
