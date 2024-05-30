@@ -45,6 +45,7 @@
 #include <nuttx/binfmt/binfmt.h>
 #include <nuttx/drivers/drivers.h>
 #include <nuttx/init.h>
+#include <nuttx/lib/math32.h>
 
 #include "task/task.h"
 #include "sched/sched.h"
@@ -623,7 +624,7 @@ void nx_start(void)
 
   /* Initialize the logic that determine unique process IDs. */
 
-  g_npidhash = 4;
+  g_npidhash = 1 << LOG2_CEIL(CONFIG_PID_INITIAL_COUNT);
   while (g_npidhash <= CONFIG_SMP_NCPUS)
     {
       g_npidhash <<= 1;
