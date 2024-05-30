@@ -1939,3 +1939,12 @@ config GROUP_KILL_CHILDREN_TIMEOUT_MS
 		> 0 means wait timeout
 		= 0 means don't do kill signal
 
+config PID_INITIAL_COUNT
+	int "Initial length of pid table"
+	default 8 if DEFAULT_SMALL
+	default 16 if !DEFAULT_SMALL
+	---help---
+		This is the initial length of pid table, which the system
+		can still expand when needed. It is rounded up to power of
+		two by current implementation. If the number of threads in
+		your system is known at design time, setting this to it.
