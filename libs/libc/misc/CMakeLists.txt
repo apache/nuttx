@@ -83,6 +83,7 @@ list(
   lib_crc16ccitt.c
   lib_crc8.c
   lib_crc8ccitt.c
+  lib_crc8rohc.c
   lib_crc8table.c
   lib_glob.c
   lib_backtrace.c
