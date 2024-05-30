@@ -80,21 +80,21 @@ static int md5_init(FAR cryptodev_context_t *ctx)
   fd = open("/dev/crypto", O_RDWR, 0);
   if (fd < 0)
     {
-      return -errno;
+      return -get_errno();
     }
 
   ret = ioctl(fd, CRIOGET, &ctx->fd);
   close(fd);
   if (ret < 0)
     {
-      ret = -errno;
+      return -get_errno();
     }
 
   ctx->session.mac = CRYPTO_MD5;
   ret = ioctl(ctx->fd, CIOCGSESSION, &ctx->session);
   if (ret < 0)
     {
-      return -errno;
+      return -get_errno();
     }
 
   ctx->crypt.ses = ctx->session.ses;
@@ -111,7 +111,7 @@ static int md5_update(FAR cryptodev_context_t *ctx,
   ctx->crypt.len = ilen;
 
   ret = ioctl(ctx->fd, CIOCCRYPT, &ctx->crypt);
-  return ret < 0 ? -errno : ret;
+  return ret < 0 ? -get_errno() : ret;
 }
 
 static int md5_finish(FAR cryptodev_context_t *ctx,
@@ -125,7 +125,7 @@ static int md5_finish(FAR cryptodev_context_t *ctx,
   ret = ioctl(ctx->fd, CIOCCRYPT, &ctx->crypt);
   if (ret < 0)
     {
-      return -errno;
+      return -get_errno();
     }
 
   ioctl(ctx->fd, CIOCFSESSION, &ctx->session.ses);
