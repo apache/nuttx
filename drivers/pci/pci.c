@@ -122,8 +122,8 @@ static struct list_node g_pci_device_list =
                         LIST_INITIAL_VALUE(g_pci_device_list);
 static struct list_node g_pci_driver_list =
                         LIST_INITIAL_VALUE(g_pci_driver_list);
-static struct list_node g_pci_root_buses =
-                        LIST_INITIAL_VALUE(g_pci_root_buses);
+static struct list_node g_pci_ctrl_list =
+                        LIST_INITIAL_VALUE(g_pci_ctrl_list);
 
 /****************************************************************************
  * Private Functions
@@ -1189,7 +1189,7 @@ int pci_register_controller(FAR struct pci_controller_s *ctrl)
   pci_register_bus_devices(bus);
 
   nxmutex_lock(&g_pci_lock);
-  list_add_tail(&g_pci_root_buses, &bus->node);
+  list_add_tail(&g_pci_ctrl_list, &ctrl->node);
   nxmutex_unlock(&g_pci_lock);
 
   return 0;
