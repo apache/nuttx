@@ -315,6 +315,15 @@ mempool_multiple_get_dict(FAR struct mempool_multiple_s *mpool,
     }
 
   addr = (FAR void *)ALIGN_DOWN(blk, mpool->expandsize);
+  if (blk == addr)
+    {
+      /* It is not a memory block allocated by mempool
+       * Because the blk is need not aligned with the expandsize
+       * in head memory.
+       */
+
+      return NULL;
+    }
 
   index = *(FAR size_t *)addr;
   if (index >= mpool->dict_used)
