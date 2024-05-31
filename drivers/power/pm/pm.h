@@ -28,7 +28,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/queue.h>
-#include <nuttx/mutex.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/clock.h>
 #include <nuttx/power/pm.h>
 #include <nuttx/wqueue.h>
@@ -88,9 +88,9 @@ struct pm_domain_s
 
   FAR const struct pm_governor_s *governor;
 
-  /* Recursive lock for race condition */
+  /* Spinlock for data read/write protect inside this struct */
 
-  rmutex_t lock;
+  spinlock_t lock;
 };
 
 /****************************************************************************
@@ -128,7 +128,10 @@ EXTERN struct pm_domain_s g_pmdomains[CONFIG_PM_NDOMAINS];
  *
  ****************************************************************************/
 
-irqstate_t pm_lock(FAR rmutex_t *lock);
+static inline irqstate_t pm_lock(FAR spinlock_t *lock)
+{
+  return spin_lock_irqsave(lock);
+}
 
 /****************************************************************************
  * Name: pm_unlock
@@ -144,7 +147,10 @@ irqstate_t pm_lock(FAR rmutex_t *lock);
  *
  ****************************************************************************/
 
-void pm_unlock(FAR rmutex_t *lock, irqstate_t flags);
+static inline void pm_unlock(FAR spinlock_t *lock, irqstate_t flags)
+{
+  spin_unlock_irqrestore(lock, flags);
+}
 
 /****************************************************************************
  * Name: pm_domain_lock

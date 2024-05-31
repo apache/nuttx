@@ -92,7 +92,7 @@ void pm_initialize(void)
       clock_systime_timespec(&g_pmdomains[i].start);
 #endif
 
-      nxrmutex_init(&g_pmdomains[i].lock);
+      spin_lock_init(&g_pmdomains[i].lock);
 
 #if CONFIG_PM_GOVERNOR_EXPLICIT_RELAX
       for (state = 0; state < PM_COUNT; state++)
