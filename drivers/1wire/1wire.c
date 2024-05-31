@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/nuttx.h>
 
 #include <assert.h>
 #include <errno.h>
@@ -135,9 +136,8 @@ static inline uint32_t onewire_leuint32(uint32_t x)
 static int onewire_pm_prepare(FAR struct pm_callback_s *cb, int domain,
                               enum pm_state_e pmstate)
 {
-  struct onewire_master_s *master =
-      (struct onewire_master_s *)((char *)cb -
-                                  offsetof(struct onewire_master_s, pm_cb));
+  struct onewire_master_s *master;
+  master = container_of(cb, struct onewire_master_s, pm_cb);
 
   /* Logic to prepare for a reduced power state goes here. */
 
