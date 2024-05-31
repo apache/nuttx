@@ -53,7 +53,7 @@
                                                                                \
     if (!PCI_##len##_BAD)                                                      \
       {                                                                        \
-        ret = bus->ctrl->ops->read(bus, devfn, where, size, &data);            \
+        ret = pci_bus_read_config(bus, devfn, where, size, &data);             \
       }                                                                        \
                                                                                \
     *value = (type)data;                                                       \
@@ -68,7 +68,7 @@
                                                                                 \
     if (!PCI_##len##_BAD)                                                       \
       {                                                                         \
-        ret = bus->ctrl->ops->write(bus, devfn, where, size, value);            \
+        ret = pci_bus_write_config(bus, devfn, where, size, value);             \
       }                                                                         \
                                                                                 \
     return ret;                                                                 \
@@ -83,7 +83,7 @@
                                                                                 \
     if (!PCI_##len##_BAD)                                                       \
       {                                                                         \
-        ret = bus->ctrl->ops->read_io(bus, where, size, &data);                  \
+        ret = pci_bus_read_io(bus, where, size, &data);                         \
       }                                                                         \
                                                                                 \
     *value = (type)data;                                                        \
@@ -98,7 +98,7 @@
                                                                                 \
     if (!PCI_##len##_BAD)                                                       \
       {                                                                         \
-        ret = bus->ctrl->ops->write_io(bus, where, size, value);                \
+        ret = pci_bus_write_io(bus, where, size, value);                        \
       }                                                                         \
                                                                                 \
     return ret;                                                                 \
@@ -781,6 +781,122 @@ static void pci_scan_bus(FAR struct pci_bus_s *bus)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: pci_bus_read_config
+ *
+ * Description:
+ *  Read pci device config space
+ *
+ * Input Parameters:
+ *   bus   - The PCI device belong to
+ *   devfn - The PCI device dev number and function number
+ *   where - The register address
+ *   size  - The data length
+ *   val   - The data buffer
+ *
+ * Returned Value:
+ *   Zero if success, otherwise nagative
+ *
+ ****************************************************************************/
+
+int pci_bus_read_config(FAR struct pci_bus_s *bus,
+                        unsigned int devfn, int where,
+                        int size, FAR uint32_t *val)
+{
+  if (size != 1 && size != 2 && size != 4)
+    {
+      return -EINVAL;
+    }
+
+  return bus->ctrl->ops->read(bus, devfn, where, size, val);
+}
+
+/****************************************************************************
+ * Name: pci_bus_write_config
+ *
+ * Description:
+ *  Read pci device config space
+ *
+ * Input Parameters:
+ *   bus   - The PCI device belong to
+ *   devfn - The PCI device dev number and function number
+ *   where - The register address
+ *   size  - The data length
+ *   val   - The data
+ *
+ * Returned Value:
+ *   Zero if success, otherwise nagative
+ *
+ ****************************************************************************/
+
+int pci_bus_write_config(FAR struct pci_bus_s *bus,
+                         unsigned int devfn, int where,
+                         int size, uint32_t val)
+{
+  if (size != 1 && size != 2 && size != 4)
+    {
+      return -EINVAL;
+    }
+
+  return bus->ctrl->ops->write(bus, devfn, where, size, val);
+}
+
+/****************************************************************************
+ * Name: pci_bus_read_io
+ *
+ * Description:
+ *  Read pci device io space
+ *
+ * Input Parameters:
+ *   bus   - The PCI device belong to
+ *   addr  - The address to read
+ *   size  - The data length
+ *   val   - The data buffer
+ *
+ * Returned Value:
+ *   Zero if success, otherwise nagative
+ *
+ ****************************************************************************/
+
+int pci_bus_read_io(FAR struct pci_bus_s *bus, uintptr_t addr,
+                    int size, FAR uint32_t *val)
+{
+  if (size != 1 && size != 2 && size != 4)
+    {
+      return -EINVAL;
+    }
+
+  return bus->ctrl->ops->read_io(bus, addr, size, val);
+}
+
+/****************************************************************************
+ * Name: pci_bus_write_io
+ *
+ * Description:
+ *  Read pci device io space
+ *
+ * Input Parameters:
+ *   bus   - The PCI device belong to
+ *   addr  - The address to write
+ *   size  - The data length
+ *   val   - The data
+ *
+ * Returned Value:
+ *   Zero if success, otherwise nagative
+ *
+ ****************************************************************************/
+
+int pci_bus_write_io(FAR struct pci_bus_s *bus, uintptr_t addr,
+                     int size, uint32_t val)
+{
+  if (size != 1 && size != 2 && size != 4)
+    {
+      return -EINVAL;
+    }
+
+  return bus->ctrl->ops->write_io(bus, addr, size, val);
+}
 
 /****************************************************************************
  * Name: pci_set_master
