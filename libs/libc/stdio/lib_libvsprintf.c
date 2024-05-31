@@ -40,18 +40,14 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <limits.h>
-
-#include <nuttx/compiler.h>
 #include <nuttx/streams.h>
+#ifdef CONFIG_ALLSYMS
 #include <nuttx/allsyms.h>
 #include <nuttx/symtab.h>
+#endif
+
+#include <assert.h>
+#include <string.h>
 
 #include "lib_dtoa_engine.h"
 #include "lib_ultoa_invert.h"
