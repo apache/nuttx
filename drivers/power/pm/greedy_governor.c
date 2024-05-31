@@ -101,7 +101,7 @@ static enum pm_state_e greedy_governor_checkstate(int domain)
    * invoked, which modifies the stay count which we are about to read
    */
 
-  flags = pm_domain_lock(domain);
+  flags = pm_lock(&pdom->lock);
 
   /* Find the lowest power-level which is not locked. */
 
@@ -110,7 +110,7 @@ static enum pm_state_e greedy_governor_checkstate(int domain)
       state++;
     }
 
-  pm_domain_unlock(domain, flags);
+  pm_unlock(&pdom->lock, flags);
 
   /* Return the found state */
 
