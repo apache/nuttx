@@ -212,18 +212,27 @@ static int riscv_mtimer_start(struct oneshot_lowerhalf_s *lower,
   struct riscv_mtimer_lowerhalf_s *priv =
     (struct riscv_mtimer_lowerhalf_s *)lower;
   uint64_t mtime = riscv_mtimer_get_mtime(priv);
+  uint64_t alarm = mtime + ts->tv_sec * priv->freq +
+                   ts->tv_nsec * priv->freq / NSEC_PER_SEC;
 
-  priv->alarm = mtime + ts->tv_sec * priv->freq +
-                ts->tv_nsec * priv->freq / NSEC_PER_SEC;
-  if (priv->alarm < mtime)
+  if (alarm < mtime)
     {
-      priv->alarm = UINT64_MAX;
+      priv->alarm    = UINT64_MAX;
+      priv->callback = NULL;
+      priv->arg      = NULL;
+    }
+  else
+    {
+      priv->alarm    = alarm;
+      priv->callback = callback;
+      priv->arg      = arg;
     }
 
-  priv->callback = callback;
-  priv->arg      = arg;
+  if (!up_interrupt_context())
+    {
+      riscv_mtimer_set_mtimecmp(priv, priv->alarm);
+    }
 
-  riscv_mtimer_set_mtimecmp(priv, priv->alarm);
   return 0;
 }
 
@@ -257,15 +266,18 @@ static int riscv_mtimer_cancel(struct oneshot_lowerhalf_s *lower,
   struct riscv_mtimer_lowerhalf_s *priv =
     (struct riscv_mtimer_lowerhalf_s *)lower;
   uint64_t mtime;
+  uint64_t alarm = priv->alarm;
 
-  riscv_mtimer_set_mtimecmp(priv, UINT64_MAX);
+  priv->alarm = UINT64_MAX;
+  if (!up_interrupt_context())
+    {
+      riscv_mtimer_set_mtimecmp(priv, priv->alarm);
+    }
 
   mtime = riscv_mtimer_get_mtime(priv);
-  if (priv->alarm > mtime)
+  if (alarm > mtime)
     {
-      uint64_t nsec = (priv->alarm - mtime) *
-                      NSEC_PER_SEC / priv->freq;
-
+      uint64_t nsec = (alarm - mtime) * NSEC_PER_SEC / priv->freq;
       ts->tv_sec  = nsec / NSEC_PER_SEC;
       ts->tv_nsec = nsec % NSEC_PER_SEC;
     }
@@ -319,12 +331,14 @@ static int riscv_mtimer_interrupt(int irq, void *context, void *arg)
 {
   struct riscv_mtimer_lowerhalf_s *priv = arg;
 
-  riscv_mtimer_set_mtimecmp(priv, UINT64_MAX);
+  priv->alarm = UINT64_MAX;
+
   if (priv->callback != NULL)
     {
       priv->callback(&priv->lower, priv->arg);
     }
 
+  riscv_mtimer_set_mtimecmp(priv, priv->alarm);
   return 0;
 }
 
@@ -345,8 +359,9 @@ riscv_mtimer_initialize(uintptr_t mtime, uintptr_t mtimecmp,
       priv->mtime     = mtime;
       priv->mtimecmp  = mtimecmp;
       priv->freq      = freq;
+      priv->alarm     = UINT64_MAX;
 
-      riscv_mtimer_set_mtimecmp(priv, UINT64_MAX);
+      riscv_mtimer_set_mtimecmp(priv, priv->alarm);
       irq_attach(irq, riscv_mtimer_interrupt, priv);
       up_enable_irq(irq);
     }
