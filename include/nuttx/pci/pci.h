@@ -269,6 +269,7 @@ struct pci_controller_s
   FAR const struct pci_ops_s *ops;
 
   FAR struct pci_bus_s *bus;
+  struct list_node node;
   uint8_t busno;
 };
 
