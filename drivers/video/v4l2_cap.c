@@ -2907,7 +2907,7 @@ static int capture_s_selection(FAR struct file *filep,
   FAR capture_type_inf_t *type_inf;
   uint32_t p_u32[IMGSENSOR_CLIP_NELEM];
   imgsensor_value_t val;
-  int32_t id;
+  uint32_t id;
   int ret;
 
   if (cmng == NULL || clip == NULL)
