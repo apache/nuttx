@@ -2132,8 +2132,7 @@ static int capture_reqbufs(FAR struct file *filep,
   FAR struct inode *inode = filep->f_inode;
   FAR capture_mng_t *cmng = inode->i_private;
   FAR capture_type_inf_t *type_inf;
-  struct imgdata_s *imgdata = cmng->imgdata;
-
+  struct imgdata_s *imgdata;
   irqstate_t flags;
   int ret = OK;
 
@@ -2142,6 +2141,7 @@ static int capture_reqbufs(FAR struct file *filep,
       return -EINVAL;
     }
 
+  imgdata  = cmng->imgdata;
   type_inf = get_capture_type_inf(cmng, reqbufs->type);
   if (type_inf == NULL)
     {
