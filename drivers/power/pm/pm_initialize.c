@@ -38,16 +38,7 @@
 
 /* All PM global data: */
 
-/* Initialize the registry and the PM global data structures.  The PM
- * global data structure resides in .data which is zeroed at boot time.  So
- * it is only required to initialize non-zero elements of the PM global
- * data structure here.
- */
-
-struct pm_global_s g_pmglobals =
-{
-  NXRMUTEX_INITIALIZER
-};
+struct pm_domain_s g_pmdomains[CONFIG_PM_NDOMAINS];
 
 /****************************************************************************
  * Public Functions
@@ -98,10 +89,10 @@ void pm_initialize(void)
       pm_set_governor(i, gov);
 
 #if defined(CONFIG_PM_PROCFS)
-      clock_systime_timespec(&g_pmglobals.domain[i].start);
+      clock_systime_timespec(&g_pmdomains[i].start);
 #endif
 
-      nxrmutex_init(&g_pmglobals.domain[i].lock);
+      nxrmutex_init(&g_pmdomains[i].lock);
 
 #if CONFIG_PM_GOVERNOR_EXPLICIT_RELAX
       for (state = 0; state < PM_COUNT; state++)

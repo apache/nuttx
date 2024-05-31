@@ -288,7 +288,7 @@ static ssize_t pm_read_state(FAR struct file *filep, FAR char *buffer,
   /* Recover our private data from the struct file instance */
 
   pmfile = (FAR struct pm_file_s *)filep->f_priv;
-  dom    = &g_pmglobals.domain[pmfile->domain];
+  dom    = &g_pmdomains[pmfile->domain];
   DEBUGASSERT(pmfile);
   DEBUGASSERT(dom);
 
@@ -378,7 +378,7 @@ static ssize_t pm_read_wakelock(FAR struct file *filep, FAR char *buffer,
   /* Recover our private data from the struct file instance */
 
   pmfile = (FAR struct pm_file_s *)filep->f_priv;
-  dom    = &g_pmglobals.domain[pmfile->domain];
+  dom    = &g_pmdomains[pmfile->domain];
   DEBUGASSERT(pmfile);
   DEBUGASSERT(dom);
 
@@ -464,7 +464,7 @@ static ssize_t pm_read_preparefail(FAR struct file *filep, FAR char *buffer,
   /* Recover our private data from the struct file instance */
 
   pmfile = (FAR struct pm_file_s *)filep->f_priv;
-  dom    = &g_pmglobals.domain[pmfile->domain];
+  dom    = &g_pmdomains[pmfile->domain];
   DEBUGASSERT(pmfile);
   DEBUGASSERT(dom);
 
@@ -480,11 +480,12 @@ static ssize_t pm_read_preparefail(FAR struct file *filep, FAR char *buffer,
   totalsize += copysize;
 
   flags = pm_domain_lock(pmfile->domain);
-  for (entry = dq_peek(&g_pmglobals.registry);
+
+  for (entry = dq_peek(&dom->registry);
        entry; entry = dq_next(entry))
     {
       cb = (FAR struct pm_callback_s *)entry;
-      pf = &cb->preparefail[pmfile->domain];
+      pf = &cb->preparefail;
       for (state = 0; state < PM_COUNT; state++)
         {
           sum +=  pf->duration[state].tv_sec;
@@ -492,13 +493,13 @@ static ssize_t pm_read_preparefail(FAR struct file *filep, FAR char *buffer,
     }
 
   sum = sum ? sum : 1;
-  for (entry = dq_peek(&g_pmglobals.registry);
+  for (entry = dq_peek(&dom->registry);
        entry; entry = dq_next(entry))
     {
       time_t total = 0;
 
       cb = (FAR struct pm_callback_s *)entry;
-      pf = &cb->preparefail[pmfile->domain];
+      pf = &cb->preparefail;
       for (state = 0; state < PM_COUNT; state++)
         {
           total +=  pf->duration[state].tv_sec;

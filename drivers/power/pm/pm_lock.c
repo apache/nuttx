@@ -59,12 +59,12 @@ void pm_unlock(FAR rmutex_t *lock, irqstate_t flags)
 
 irqstate_t pm_domain_lock(int domain)
 {
-  return pm_lock(&g_pmglobals.domain[domain].lock);
+  return pm_lock(&g_pmdomains[domain].lock);
 }
 
 void pm_domain_unlock(int domain, irqstate_t flags)
 {
-  pm_unlock(&g_pmglobals.domain[domain].lock, flags);
+  pm_unlock(&g_pmdomains[domain].lock, flags);
 }
 
 #endif /* CONFIG_PM */
