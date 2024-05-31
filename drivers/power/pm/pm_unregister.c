@@ -58,12 +58,12 @@ int pm_domain_unregister(int domain, FAR struct pm_callback_s *cb)
 {
   irqstate_t flags;
   struct pm_domain_s *pdom = &g_pmdomains[domain];
-  flags = pm_lock(&pdom->lock);
+  flags = spin_lock_irqsave(&pdom->lock);
 
   /* Remove entry from the list of registered callbacks. */
 
   dq_rem(&cb->entry, &pdom->registry);
-  pm_unlock(&pdom->lock, flags);
+  spin_unlock_irqrestore(&pdom->lock, flags);
   return OK;
 }
 
