@@ -317,7 +317,7 @@ static void governor_update(int domain, int16_t accum)
 
   DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
   pdomstate = &g_pm_activity_governor.domain_states[domain];
-  state     = g_pmglobals.domain[domain].state;
+  state     = g_pmdomains[domain].state;
 
 #if CONFIG_PM_GOVERNOR_MEMORY > 1
   /* We won't bother to do anything until we have accumulated
@@ -469,7 +469,7 @@ static enum pm_state_e governor_checkstate(int domain)
   /* Get a convenience pointer to minimize all of the indexing */
 
   pdomstate = &g_pm_activity_governor.domain_states[domain];
-  pdom      = &g_pmglobals.domain[domain];
+  pdom      = &g_pmdomains[domain];
 
   /* Check for the end of the current time slice.  This must be performed
    * with interrupts disabled so that it does not conflict with the similar
@@ -563,7 +563,7 @@ static void governor_timer(int domain, enum pm_state_e newstate)
     TIME_SLICE_TICKS * CONFIG_PM_GOVERNOR_SLEEPENTER_COUNT
   };
 
-  pdom      = &g_pmglobals.domain[domain];
+  pdom      = &g_pmdomains[domain];
   pdomstate = &g_pm_activity_governor.domain_states[domain];
 
   if (newstate < PM_SLEEP && dq_empty(&pdom->wakelock[newstate]))

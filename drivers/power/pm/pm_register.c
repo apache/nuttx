@@ -39,14 +39,15 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pm_register
+ * Name: pm_domain_register
  *
  * Description:
  *   This function is called by a device driver in order to register to
  *   receive power management event callbacks.
  *
  * Input Parameters:
- *   callbacks - An instance of struct pm_callback_s providing the driver
+ *   domain - Target register domain.
+ *   cb     - An instance of struct pm_callback_s providing the driver
  *               callback functions.
  *
  * Returned Value:
@@ -54,27 +55,20 @@
  *
  ****************************************************************************/
 
-int pm_register(FAR struct pm_callback_s *callbacks)
+int pm_domain_register(int domain, FAR struct pm_callback_s *cb)
 {
   irqstate_t flags;
-
-  DEBUGASSERT(callbacks);
+  FAR struct pm_domain_s *pdom = &g_pmdomains[domain];
+  flags = pm_lock(&pdom->lock);
 
   /* Add the new entry to the end of the list of registered callbacks */
 
-  flags = pm_lock(&g_pmglobals.reglock);
-  dq_addlast(&callbacks->entry, &g_pmglobals.registry);
-
-#ifdef CONFIG_PM_PROCFS
-  for (int domain = 0; domain < CONFIG_PM_NDOMAINS; domain++)
-    {
-      callbacks->preparefail[domain].state = PM_RESTORE;
-    }
+  dq_addlast(&cb->entry, &pdom->registry);
+#if defined (CONFIG_PM_PROCFS)
+  cb->preparefail.state = PM_RESTORE;
 #endif
-
-  pm_unlock(&g_pmglobals.reglock, flags);
-
-  return 0;
+  pm_unlock(&pdom->lock, flags);
+  return OK;
 }
 
 #endif /* CONFIG_PM */

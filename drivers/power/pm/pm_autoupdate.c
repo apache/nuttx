@@ -73,7 +73,7 @@ static void pm_auto_updatestate_cb(FAR void *arg)
 void pm_auto_updatestate(int domain)
 {
   FAR struct pm_domain_s *pdom;
-  pdom = &g_pmglobals.domain[domain];
+  pdom = &g_pmdomains[domain];
 
   if (pdom->auto_update)
     {
@@ -113,7 +113,7 @@ void pm_auto_update(int domain, bool auto_update)
   irqstate_t flags;
 
   DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
-  pdom = &g_pmglobals.domain[domain];
+  pdom = &g_pmdomains[domain];
 
   flags = pm_domain_lock(domain);
   pdom->auto_update = auto_update;

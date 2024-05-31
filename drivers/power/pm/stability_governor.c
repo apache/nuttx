@@ -158,7 +158,7 @@ static enum pm_state_e stability_governor_checkstate(int domain)
   bool wdog_wakeup;
 
   gdom = &g_stability_governor.domain[domain];
-  pdom = &g_pmglobals.domain[domain];
+  pdom = &g_pmdomains[domain];
   state = PM_NORMAL;
 
   /* We disable interrupts since pm_stay()/pm_relax() could be simultaneously

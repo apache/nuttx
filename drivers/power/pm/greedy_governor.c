@@ -94,7 +94,7 @@ static enum pm_state_e greedy_governor_checkstate(int domain)
   irqstate_t flags;
   int state;
 
-  pdom = &g_pmglobals.domain[domain];
+  pdom = &g_pmdomains[domain];
   state = PM_NORMAL;
 
   /* We disable interrupts since pm_stay()/pm_relax() could be simultaneously

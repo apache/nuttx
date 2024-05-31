@@ -222,7 +222,7 @@ struct pm_callback_s
                       enum pm_state_e pmstate);
 
 #ifdef CONFIG_PM_PROCFS
-  struct pm_preparefail_s preparefail[CONFIG_PM_NDOMAINS];
+  struct pm_preparefail_s preparefail;
 #endif
 };
 
@@ -440,14 +440,15 @@ int pm_set_governor(int domain, FAR const struct pm_governor_s *gov);
 void pm_auto_update(int domain, bool auto_update);
 
 /****************************************************************************
- * Name: pm_register
+ * Name: pm_domain_register
  *
  * Description:
  *   This function is called by a device driver in order to register to
  *   receive power management event callbacks.
  *
  * Input Parameters:
- *   callbacks - An instance of struct pm_callback_s providing the driver
+ *   domain - Target register domain.
+ *   cb     - An instance of struct pm_callback_s providing the driver
  *               callback functions.
  *
  * Returned Value:
@@ -455,17 +456,20 @@ void pm_auto_update(int domain, bool auto_update);
  *
  ****************************************************************************/
 
-int pm_register(FAR struct pm_callback_s *callbacks);
+int pm_domain_register(int domain, FAR struct pm_callback_s *cb);
+
+#define pm_register(cb) pm_domain_register(PM_IDLE_DOMAIN, cb)
 
 /****************************************************************************
- * Name: pm_unregister
+ * Name: pm_domain_unregister
  *
  * Description:
  *   This function is called by a device driver in order to unregister
  *   previously registered power management event callbacks.
  *
  * Input parameters:
- *   callbacks - An instance of struct pm_callback_s providing the driver
+ *   domain - Target unregister domain.
+ *   cb     - An instance of struct pm_callback_s providing the driver
  *               callback functions.
  *
  * Returned Value:
@@ -473,7 +477,9 @@ int pm_register(FAR struct pm_callback_s *callbacks);
  *
  ****************************************************************************/
 
-int pm_unregister(FAR struct pm_callback_s *callbacks);
+int pm_domain_unregister(int domain, FAR struct pm_callback_s *cb);
+
+#define pm_unregister(cb) pm_domain_unregister(PM_IDLE_DOMAIN, cb)
 
 /****************************************************************************
  * Name: pm_activity
