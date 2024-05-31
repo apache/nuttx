@@ -58,8 +58,8 @@
 int pm_domain_register(int domain, FAR struct pm_callback_s *cb)
 {
   irqstate_t flags;
-  FAR struct pm_domain_s *pdom = &g_pmdomains[domain];
-  flags = pm_lock(&pdom->lock);
+  struct pm_domain_s *pdom = &g_pmdomains[domain];
+  flags = spin_lock_irqsave(&pdom->lock);
 
   /* Add the new entry to the end of the list of registered callbacks */
 
@@ -67,7 +67,7 @@ int pm_domain_register(int domain, FAR struct pm_callback_s *cb)
 #if defined (CONFIG_PM_PROCFS)
   cb->preparefail.state = PM_RESTORE;
 #endif
-  pm_unlock(&pdom->lock, flags);
+  spin_unlock_irqrestore(&pdom->lock, flags);
   return OK;
 }
 

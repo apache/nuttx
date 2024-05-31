@@ -115,44 +115,6 @@ EXTERN struct pm_domain_s g_pmdomains[CONFIG_PM_NDOMAINS];
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pm_lock
- *
- * Description:
- *   Lock the power management operation.
- *
- * Input Parameters:
- *   lock - The lock subjuct
- *
- * Returned Value:
- *   Return current state
- *
- ****************************************************************************/
-
-static inline irqstate_t pm_lock(FAR spinlock_t *lock)
-{
-  return spin_lock_irqsave(lock);
-}
-
-/****************************************************************************
- * Name: pm_unlock
- *
- * Description:
- *   Unlock the power management operation.
- *
- * Input Parameters:
- *   lock - The lock subjuct
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static inline void pm_unlock(FAR spinlock_t *lock, irqstate_t flags)
-{
-  spin_unlock_irqrestore(lock, flags);
-}
-
-/****************************************************************************
  * Name: pm_domain_lock
  *
  * Description:
