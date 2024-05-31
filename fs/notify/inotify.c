@@ -88,10 +88,12 @@ struct inotify_watch_s
 
 struct inotify_global_s
 {
-  mutex_t lock;               /* Enforces global exclusive access */
-  int     event_cookie;       /* Event cookie */
-  int     watch_cookie;       /* Watch cookie */
-  struct  hsearch_data hash;  /* Hash table for watch lists */
+  mutex_t  lock;               /* Enforces global exclusive access */
+  int      event_cookie;       /* Event cookie */
+  int      watch_cookie;       /* Watch cookie */
+  uint32_t read_count;         /* Number of read events */
+  uint32_t write_count;        /* Number of write events */
+  struct   hsearch_data hash;  /* Hash table for watch lists */
 };
 
 /****************************************************************************
@@ -144,6 +146,49 @@ static struct inotify_global_s g_inotify =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: notify_add_count
+ *
+ * Description:
+ *   Add the count.
+ *
+ ****************************************************************************/
+
+static void inotify_add_count(uint32_t mask)
+{
+  g_inotify.read_count += (mask & IN_ACCESS) ? 1 : 0;
+  g_inotify.write_count += (mask & IN_MODIFY) ? 1 : 0;
+}
+
+/****************************************************************************
+ * Name: inotify_sub_count
+ *
+ * Description:
+ *   Reduce the count.
+ *
+ ****************************************************************************/
+
+static void inotify_sub_count(uint32_t mask)
+{
+  g_inotify.read_count -= (mask & IN_ACCESS) ? 1 : 0;
+  g_inotify.write_count -= (mask & IN_MODIFY) ? 1 : 0;
+}
+
+/****************************************************************************
+ * Name: notify_check_mask
+ *
+ * Description:
+ *   Check if the count is valid.
+ *
+ ****************************************************************************/
+
+static int notify_check_mask(uint32_t mask)
+{
+  return (((mask & IN_ACCESS) && g_inotify.read_count == 0) ||
+          ((mask & IN_MODIFY) && g_inotify.write_count == 0)) ?
+          -EBADF : OK;
+}
 
 /****************************************************************************
  * Name: inotify_alloc_event
@@ -262,6 +307,7 @@ inotify_remove_watch_no_event(FAR struct inotify_watch_s *watch)
 
   list_delete(&watch->d_node);
   list_delete(&watch->l_node);
+  inotify_sub_count(watch->mask);
   kmm_free(watch);
 
   if (list_is_empty(&list->watches))
@@ -931,6 +977,14 @@ static inline void notify_queue_filep_event(FAR struct file *filep,
       return;
     }
 
+  nxmutex_lock(&g_inotify.lock);
+  ret = notify_check_mask(mask);
+  nxmutex_unlock(&g_inotify.lock);
+  if (ret < 0)
+    {
+      return;
+    }
+
   pathbuffer = lib_get_pathbuffer();
   if (pathbuffer == NULL)
     {
@@ -1037,6 +1091,7 @@ int inotify_add_watch(int fd, FAR const char *pathname, uint32_t mask)
   old = inotify_get_watch_from_list(dev, list);
   if (old != NULL)
     {
+      uint32_t tmpmask = old->mask;
       if (mask & IN_MASK_CREATE)
         {
           ret = -EEXIST;
@@ -1052,6 +1107,7 @@ int inotify_add_watch(int fd, FAR const char *pathname, uint32_t mask)
         }
 
       ret = old->wd;
+      inotify_add_count(tmpmask ^ old->mask);
     }
   else
     {
@@ -1066,6 +1122,7 @@ int inotify_add_watch(int fd, FAR const char *pathname, uint32_t mask)
         }
 
       ret = watch->wd;
+      inotify_add_count(mask);
     }
 
 out:
