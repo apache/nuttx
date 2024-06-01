@@ -1151,7 +1151,13 @@ static int sensor_rpmsg_publish_handler(FAR struct rpmsg_endpoint *ept,
           ret = file_open(&file, dev->path, SENSOR_REMOTE | O_CLOEXEC);
           if (ret >= 0)
             {
-              file_ioctl(&file, SNIOC_SET_BUFFER_NUMBER, cell->nbuffer);
+              ret = file_ioctl(&file, SNIOC_SET_BUFFER_NUMBER,
+                               cell->nbuffer);
+              if (ret >= 0)
+                {
+                  dev->lower.nbuffer = cell->nbuffer;
+                }
+
               file_close(&file);
             }
         }
