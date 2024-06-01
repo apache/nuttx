@@ -33,5 +33,9 @@ if(CONFIG_NET_ARP)
     list(APPEND SRCS arp_dump.c)
   endif()
 
+  if(CONFIG_NET_ARP_ACD)
+    list(APPEND SRCS arp_acd.c)
+  endif()
+
   target_sources(net PRIVATE ${SRCS})
 endif()
