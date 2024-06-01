@@ -474,7 +474,7 @@ static void foc_dummy_notifier_handler(FAR struct foc_dev_s *dev)
       /* Call FOC notifier */
 
 #ifdef CONFIG_MOTOR_FOC_BEMF_SENSE
-      sim->cb->notifier(dev, sim->current, sim->voltage);
+      sim->cb->notifier(dev, sim->current, sim->volt);
 #else
       sim->cb->notifier(dev, sim->current, NULL);
 #endif
