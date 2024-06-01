@@ -42,9 +42,6 @@ endif()
 
 if(NOT CONFIG_BUILD_KERNEL)
   list(APPEND SRCS lib_psa_getstacksize.c lib_psa_setstacksize.c)
-  if(CONFIG_LIB_SYSCALL)
-    list(APPEND SRCS lib_task_spawn.c)
-  endif()
 endif()
 
 if(CONFIG_DEBUG_FEATURES)
