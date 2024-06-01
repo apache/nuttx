@@ -22,10 +22,8 @@
  * Included Files
  ****************************************************************************/
 
-#include <string.h>
-#include <stdbool.h>
-
 #include <dsp.h>
+#include <string.h>
 
 /****************************************************************************
  * Private Functions
