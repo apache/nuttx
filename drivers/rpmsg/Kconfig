@@ -21,9 +21,12 @@ config RPMSG_PING
 		This is for debugging & profiling, create ping rpmsg
 		channel, user can use it to get send/recv speed & latency.
 
+endif # RPMSG
+
 config RPMSG_PORT
 	bool
 	default n
+	select RPMSG
 	---help---
 		Rpmsg port transport layer used for cross chip communication.
 
@@ -54,8 +57,6 @@ config RPMSG_PORT_SPI_RX_THRESHOLD
 	range 0 100
 
 endif # RPMSG_PORT_SPI
-
-endif # RPMSG
 
 config RPMSG_VIRTIO
 	bool "rpmsg virtio transport support"
