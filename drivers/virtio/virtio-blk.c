@@ -43,6 +43,7 @@
 
 /* Block feature bits */
 
+#define VIRTIO_BLK_F_RO             5  /* Disk is read-only */
 #define VIRTIO_BLK_F_FLUSH          9  /* Cache flush command support */
 
 /* Block request type */
@@ -360,6 +361,11 @@ static ssize_t virtio_blk_write(FAR struct inode *inode,
 
   DEBUGASSERT(inode->i_private);
   priv = inode->i_private;
+  if (virtio_has_feature(priv->vdev, VIRTIO_BLK_F_RO))
+    {
+      return -EPERM;
+    }
+
   return virtio_blk_rdwr(priv, (FAR void *)buffer, startsector, nsectors,
                          true);
 }
@@ -521,7 +527,8 @@ static int virtio_blk_init(FAR struct virtio_blk_priv_s *priv,
   /* Initialize the virtio device */
 
   virtio_set_status(vdev, VIRTIO_CONFIG_STATUS_DRIVER);
-  virtio_negotiate_features(vdev, 1UL << VIRTIO_BLK_F_FLUSH);
+  virtio_negotiate_features(vdev, (1UL << VIRTIO_BLK_F_RO) |
+                                  (1UL << VIRTIO_BLK_F_FLUSH));
   virtio_set_status(vdev, VIRTIO_CONFIG_FEATURES_OK);
 
   vqname[0]   = "virtio_blk_vq";
