@@ -195,17 +195,17 @@ static bool timer_callback(FAR uint32_t *next_interval, FAR void *arg)
 
 void up_timer_set_lowerhalf(FAR struct timer_lowerhalf_s *lower)
 {
-  g_timer.lower = lower;
-
 #ifdef CONFIG_SCHED_TICKLESS
   TIMER_TICK_MAXTIMEOUT(lower, &g_oneshot_maxticks);
-  TIMER_TICK_SETTIMEOUT(g_timer.lower, g_oneshot_maxticks);
+  TIMER_TICK_SETTIMEOUT(lower, g_oneshot_maxticks);
 #else
-  TIMER_TICK_SETTIMEOUT(g_timer.lower, 1);
+  TIMER_TICK_SETTIMEOUT(lower, 1);
 #endif
 
-  TIMER_SETCALLBACK(g_timer.lower, timer_callback, NULL);
-  TIMER_START(g_timer.lower);
+  TIMER_SETCALLBACK(lower, timer_callback, NULL);
+  TIMER_START(lower);
+
+  g_timer.lower = lower;
 }
 
 /****************************************************************************
