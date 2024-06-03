@@ -29,6 +29,8 @@
 #include <netinet/if_ether.h>
 #include <nuttx/wireless/wireless.h>
 #include <nuttx/net/netdev_lowerhalf.h>
+#include <netpacket/netlink.h>
+#include <nuttx/net/netlink.h>
 
 #include "sim_internal.h"
 
@@ -174,6 +176,23 @@ struct sim_netdev_s
   bool psk_flag;                /* for psk, 0: unset, 1: set */
   char host_ifname[IFNAMSIZ];   /* The wlan interface name on the host */
   uint8_t network_id;           /* for sta, default is 0 */
+};
+
+/* for wireless event */
+
+struct wireless_event_s
+{
+  struct nlmsghdr  hdr;         /* netlink message header */
+  struct ifinfomsg iface;       /* interface info */
+
+  struct rtattr    attrevent;   /* IFLA_WIRELESS */
+  struct iw_event  event;       /* wireless event */
+};
+
+struct wireless_event_list_s
+{
+  sq_entry_t flink;
+  struct wireless_event_s payload;
 };
 
 /****************************************************************************
@@ -890,6 +909,23 @@ static bool get_wpa_state(struct sim_netdev_s *wifidev)
   return false;
 }
 
+static bool get_wpa_bssid(struct sim_netdev_s *wifidev,
+                          unsigned char *bssid)
+{
+  int ret;
+  char rbuf[BUF_LEN];
+
+  ret = get_cmd(wifidev, rbuf, BUF_LEN, "%s",
+                "status | grep bssid | awk -F'=' '{print $2}'");
+  if (ret > 0)
+    {
+      mac_addr_a2n(bssid, rbuf);
+      return true;
+    }
+
+  return false;
+}
+
 static void get_wpa_ssid(struct sim_netdev_s *wifidev,
                          struct iw_point *essid)
 {
@@ -961,6 +997,59 @@ static int freq_to_channel(uint16_t freq)
       return channel;
     }
 
+  return OK;
+}
+
+static int wifi_send_event(struct net_driver_s *dev, unsigned int cmd,
+                           union iwreq_data *wrqu)
+{
+  struct wireless_event_list_s *alloc;
+  struct wireless_event_s *wev;
+
+  DEBUGASSERT(dev != NULL);
+
+  int up = IFF_IS_UP(dev->d_flags);
+
+  /* Allocate the response buffer */
+
+  alloc = (struct wireless_event_list_s *)
+          kmm_zalloc(RTA_SPACE(sizeof(struct wireless_event_list_s)));
+  if (alloc == NULL)
+    {
+      nerr("ERROR: Failed to allocate wifi event buffer.\n");
+      return -ENOMEM;
+    }
+
+  /* Initialize the response buffer */
+
+  wev                   = &alloc->payload;
+
+  wev->hdr.nlmsg_len    = sizeof(struct wireless_event_s);
+  wev->hdr.nlmsg_type   = up ? RTM_NEWLINK : RTM_DELLINK;
+  wev->hdr.nlmsg_flags  = 0;
+  wev->hdr.nlmsg_seq    = 0;
+  wev->hdr.nlmsg_pid    = 0;
+
+  wev->iface.ifi_family = AF_UNSPEC;
+  wev->iface.ifi_type   = ARPHRD_IEEE80211;
+#ifdef CONFIG_NETDEV_IFINDEX
+  wev->iface.ifi_index  = dev->d_ifindex;
+#endif
+  wev->iface.ifi_flags  = dev->d_flags;
+  wev->iface.ifi_change = 0;
+
+  /* add wireless event info */
+
+  wev->attrevent.rta_len  = RTA_SPACE(sizeof(struct iw_event));
+  wev->attrevent.rta_type = IFLA_WIRELESS;
+  wev->event.len          = sizeof(union iwreq_data);
+  wev->event.cmd          = cmd;
+
+  memset(&wev->event.u, 0, sizeof(union iwreq_data));
+  memcpy(&wev->event.u, ((char *)wrqu), sizeof(union iwreq_data));
+
+  netlink_add_broadcast(RTNLGRP_LINK,
+                        (struct netlink_response_s *)alloc);
   return OK;
 }
 
@@ -1282,8 +1371,42 @@ static int wifidriver_set_bssid(struct sim_netdev_s *wifidev,
   return ret;
 }
 
+static int wifidriver_get_bssid(struct sim_netdev_s *wifidev,
+                                struct iwreq *pwrq)
+{
+  struct sockaddr *sockaddr = &pwrq->u.ap_addr;
+  unsigned char *bssid = (unsigned char *)sockaddr->sa_data;
+  int ret;
+
+  switch (wifidev->mode)
+    {
+      case IW_MODE_INFRA:
+        if (get_wpa_state(wifidev) && get_wpa_bssid(wifidev, bssid))
+          {
+            ret = OK;
+          }
+        else
+          {
+            ret = -ENOTTY;
+          }
+        break;
+
+      case IW_MODE_MASTER:
+        ret = -ENOSYS;
+        break;
+
+      default:
+        ret = -EINVAL;
+        break;
+    }
+
+  return ret;
+}
+
 static int wifidriver_start_connect(struct sim_netdev_s *wifidev)
 {
+  int timeout = 10;
+
   switch (wifidev->mode)
     {
     case IW_MODE_INFRA:
@@ -1300,7 +1423,28 @@ static int wifidriver_start_connect(struct sim_netdev_s *wifidev)
         {
           wifidev->psk_flag = 0;
         }
-      break;
+
+      /* Wait the connect sucess. */
+
+      while (timeout--)
+        {
+           if (get_wpa_state(wifidev))
+             {
+               unsigned char bssid[ETH_ALEN];
+               union iwreq_data wrqu;
+
+               get_wpa_bssid(wifidev, bssid);
+
+               memset(&wrqu, 0, sizeof(wrqu));
+               memcpy(wrqu.ap_addr.sa_data, bssid, ETH_ALEN);
+               wifi_send_event(&wifidev->dev.netdev, SIOCGIWAP, &wrqu);
+               return OK;
+             }
+
+           sleep(1);
+        }
+
+      return ERROR;
     case IW_MODE_MASTER:
 
       set_cmd(wifidev, "disable");
@@ -1547,11 +1691,15 @@ static int wifidriver_connect(struct netdev_lowerhalf_s *dev)
 static int wifidriver_disconnect(struct netdev_lowerhalf_s *dev)
 {
   int ret;
+  union iwreq_data wrqu;
 
   ret = wifidriver_start_disconnect((struct sim_netdev_s *)dev);
   if (ret >= 0)
     {
       netdev_lower_carrier_off(dev);
+      memset(&wrqu, 0, sizeof(wrqu));
+      wrqu.ap_addr.sa_family = ARPHRD_ETHER;
+      wifi_send_event(&dev->netdev, SIOCGIWAP, &wrqu);
     }
 
   return ret;
@@ -1588,7 +1736,7 @@ static int wifidriver_bssid(struct netdev_lowerhalf_s *dev,
     }
   else
     {
-      return -ENOTTY;
+      ret = wifidriver_get_bssid(wifidev, iwr);
     }
 
   return ret;
