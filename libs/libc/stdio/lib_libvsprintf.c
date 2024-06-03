@@ -187,6 +187,9 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
   int argnumber = 0;
+#else
+  UNUSED(arglist);
+  UNUSED(numargs);
 #endif
 
   for (; ; )
