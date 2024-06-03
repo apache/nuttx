@@ -762,9 +762,9 @@ static int pl011_receive(FAR struct uart_dev_s *dev,
 
   rx = config->uart->dr;
 
-  *status = 0;
+  *status = rx & 0xf00;
 
-  return rx;
+  return rx & 0xff;
 }
 
 /***************************************************************************
