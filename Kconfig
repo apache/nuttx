@@ -567,6 +567,14 @@ config ARCH_FLOAT_H
 		there is no assurance that the settings in this float.h are actually
 		correct for your platform!
 
+config DISABLE_FLOAT
+	bool "Disable floating point"
+	default n
+	---help---
+		Disable floating point support in the compiler. This will reduce
+		code size and increase performance. This option is only available
+		on some architectures.
+
 config ARCH_HAVE_STDARG_H
 	bool
 	default n
