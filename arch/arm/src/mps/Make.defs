@@ -25,3 +25,7 @@ include armv8-m/Make.defs
 endif
 
 CHIP_CSRCS = mps_start.c mps_serial.c mps_irq.c mps_timer.c mps_allocateheap.c
+
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+CHIP_CSRCS += mps_userspace.c
+endif
