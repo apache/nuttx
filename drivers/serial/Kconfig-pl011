@@ -81,4 +81,8 @@ config UART3_CLK_FREQ
 
 endif # UART3_PL011
 
+config UART_PL011_PLATFORMIF
+	bool "PL011 platform interface"
+	default n
+
 endif # UART_PL011
