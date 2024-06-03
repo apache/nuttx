@@ -903,8 +903,19 @@ static int pl011_attach(FAR struct uart_dev_s *dev)
 
 static void pl011_shutdown(FAR struct uart_dev_s *dev)
 {
+#ifdef CONFIG_UART_PL011_PLATFORMIF
+  struct pl011_uart_port_s  *sport  = (struct pl011_uart_port_s *)dev->priv;
+  const struct pl011_config *config = &sport->config;
+
+  /* If needed, implement platform specific process such as disabling pl011
+   * to reduce power consumption.
+   */
+
+  pl011_platform_shutdown((uint32_t)config->uart);
+#else
   UNUSED(dev);
   sinfo("%s: call unexpected\n", __func__);
+#endif
 }
 
 static int pl011_setup(FAR struct uart_dev_s *dev)
@@ -915,6 +926,14 @@ static int pl011_setup(FAR struct uart_dev_s *dev)
   int                            ret;
   uint32_t                       lcrh;
   irqstate_t                     i_flags;
+
+#ifdef CONFIG_UART_PL011_PLATFORMIF
+  /* If needed, implement platform specific process such as enabling pl011
+   * to reduce power consumption.
+   */
+
+  pl011_platform_setup((uint32_t)config->uart);
+#endif
 
   i_flags = up_irq_save();
 
