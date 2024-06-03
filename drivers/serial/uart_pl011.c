@@ -587,6 +587,15 @@ static int pl011_irq_tx_complete(FAR const struct pl011_uart_port_s *sport)
   return config->uart->fr & PL011_FR_TXFE;
 }
 
+static int pl011_irq_tx_ready(const struct pl011_uart_port_s *sport)
+{
+  const struct pl011_config *config = &sport->config;
+
+  /* check for TX FIFO not full */
+
+  return ((config->uart->fr & PL011_FR_TXFF) == 0);
+}
+
 static int pl011_irq_rx_ready(FAR const struct pl011_uart_port_s *sport)
 {
   FAR const struct pl011_config *config = &sport->config;
@@ -621,7 +630,7 @@ static bool pl011_txready(FAR struct uart_dev_s *dev)
     }
 
   return (config->uart->imsc & PL011_IMSC_TXIM) &&
-         pl011_irq_tx_complete(sport);
+         pl011_irq_tx_ready(sport);
 }
 
 /***************************************************************************
