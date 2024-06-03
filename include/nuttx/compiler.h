@@ -1207,6 +1207,12 @@
 #  undef CONFIG_FS_LARGEFILE
 #endif
 
+#ifdef CONFIG_DISABLE_FLOAT
+#  undef CONFIG_HAVE_FLOAT
+#  undef CONFIG_HAVE_DOUBLE
+#  undef CONFIG_HAVE_LONG_DOUBLE
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
