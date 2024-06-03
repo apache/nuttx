@@ -114,6 +114,17 @@
 #define MADV_WILLNEED         POSIX_MADV_WILLNEED
 #define MADV_DONTNEED         POSIX_MADV_DONTNEED
 
+/* The following flags are defined since Linux 2.6.38.
+ * None of these flags have been implemented yet.
+ * MADV_HUGEPAGE
+ *   Enable Transparent Huge Pages (THP) for pages.
+ * MADV_NOHUGEPAGE
+ *   Ensure the pages will not be backed by transparent hugepages.
+ */
+
+#define MADV_HUGEPAGE         (14)
+#define MADV_NOHUGEPAGE       (15)
+
 /* The following flags are defined for posix_typed_mem_open():
  *
  * POSIX_TYPED_MEM_ALLOCATE
