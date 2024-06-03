@@ -1311,6 +1311,42 @@ int pci_register_controller(FAR struct pci_controller_s *ctrl)
   return 0;
 }
 
+/****************************************************************************
+ * Name: pci_bus_find_capability
+ *
+ * Description:
+ *   Query for devices' capabilities
+ *
+ *   Tell if a device supports a given PCI capability.
+ *
+ * Input Parameters:
+ *   bus    - PCI device bus belong to
+ *   devfn  - PCI device number and function number
+ *   cap    - Capability code
+ *
+ * Returned Value:
+ *   Returns the address of the requested capability structure within the
+ *   device's PCI configuration space or 0 in case the device does not
+ *   support it.
+ *
+ ****************************************************************************/
+
+uint8_t pci_bus_find_capability(FAR struct pci_bus_s *bus,
+                                unsigned int devfn, int cap)
+{
+  uint8_t type = 0;
+  uint8_t pos;
+
+  pci_bus_read_config_byte(bus, devfn, PCI_HEADER_TYPE, &type);
+  pos = pci_bus_find_start_cap(bus, devfn, type);
+  if (pos)
+    {
+      pos = pci_find_next_cap(bus, devfn, pos, cap);
+    }
+
+  return pos;
+}
+
 PCI_BUS_READ_CONFIG(byte, uint8_t, 1)
 PCI_BUS_READ_CONFIG(word, uint16_t, 2)
 PCI_BUS_READ_CONFIG(dword, uint32_t, 4)
