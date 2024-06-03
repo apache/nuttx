@@ -41,6 +41,10 @@
 #define VIRTIO_BLK_REQ_HEADER_SIZE  sizeof(struct virtio_blk_req_s)
 #define VIRTIO_BLK_RESP_HEADER_SIZE sizeof(struct virtio_blk_resp_s)
 
+/* Block feature bits */
+
+#define VIRTIO_BLK_F_FLUSH          9  /* Cache flush command support */
+
 /* Block request type */
 
 #define VIRTIO_BLK_T_IN             0  /* READ */
@@ -458,7 +462,10 @@ static int virtio_blk_ioctl(FAR struct inode *inode, int cmd,
   switch (cmd)
     {
       case BIOC_FLUSH:
-        ret = virtio_blk_flush(priv);
+        if (virtio_has_feature(priv->vdev, VIRTIO_BLK_F_FLUSH))
+          {
+            ret = virtio_blk_flush(priv);
+          }
         break;
     }
 
@@ -514,7 +521,7 @@ static int virtio_blk_init(FAR struct virtio_blk_priv_s *priv,
   /* Initialize the virtio device */
 
   virtio_set_status(vdev, VIRTIO_CONFIG_STATUS_DRIVER);
-  virtio_set_features(vdev, 0);
+  virtio_negotiate_features(vdev, 1UL << VIRTIO_BLK_F_FLUSH);
   virtio_set_status(vdev, VIRTIO_CONFIG_FEATURES_OK);
 
   vqname[0]   = "virtio_blk_vq";
