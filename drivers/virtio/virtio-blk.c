@@ -44,6 +44,7 @@
 /* Block feature bits */
 
 #define VIRTIO_BLK_F_RO             5  /* Disk is read-only */
+#define VIRTIO_BLK_F_BLK_SIZE       6  /* Block size of disk is available */
 #define VIRTIO_BLK_F_FLUSH          9  /* Cache flush command support */
 
 /* Block request type */
@@ -60,7 +61,8 @@
 
 /* Block device sector size */
 
-#define VIRTIO_BLK_SECTOR_SIZE      512
+#define VIRTIO_BLK_SECTOR_BITS      9
+#define VIRTIO_BLK_SECTOR_SIZE      (1UL << VIRTIO_BLK_SECTOR_BITS)
 
 /****************************************************************************
  * Private Types
@@ -117,6 +119,7 @@ struct virtio_blk_priv_s
   FAR struct virtio_blk_resp_s *resp;           /* Virtio block in header */
   mutex_t                       lock;           /* Lock */
   uint64_t                      nsectors;       /* Sectore numbers */
+  uint32_t                      block_size;     /* Block size */
   char                          name[NAME_MAX]; /* Device name */
 };
 
@@ -250,7 +253,8 @@ static ssize_t virtio_blk_rdwr(FAR struct virtio_blk_priv_s *priv,
 
   priv->req->type     = write ? VIRTIO_BLK_T_OUT : VIRTIO_BLK_T_IN;
   priv->req->reserved = 0;
-  priv->req->sector   = startsector;
+  priv->req->sector   = startsector *
+                        priv->block_size >> VIRTIO_BLK_SECTOR_BITS;
   priv->resp->status  = VIRTIO_BLK_S_IOERR;
 
   /* Fill the virtqueue buffer:
@@ -262,7 +266,7 @@ static ssize_t virtio_blk_rdwr(FAR struct virtio_blk_priv_s *priv,
   vb[0].buf = priv->req;
   vb[0].len = VIRTIO_BLK_REQ_HEADER_SIZE;
   vb[1].buf = buffer;
-  vb[1].len = nsectors * VIRTIO_BLK_SECTOR_SIZE;
+  vb[1].len = nsectors * priv->block_size;
   vb[2].buf = priv->resp;
   vb[2].len = VIRTIO_BLK_RESP_HEADER_SIZE;
   readnum = write ? 2 : 1;
@@ -392,7 +396,7 @@ static int virtio_blk_geometry(FAR struct inode *inode,
       geometry->geo_mediachanged = false;
       geometry->geo_writeenabled = true;
       geometry->geo_nsectors     = priv->nsectors;
-      geometry->geo_sectorsize   = VIRTIO_BLK_SECTOR_SIZE;
+      geometry->geo_sectorsize   = priv->block_size;
       ret = OK;
     }
 
@@ -528,6 +532,7 @@ static int virtio_blk_init(FAR struct virtio_blk_priv_s *priv,
 
   virtio_set_status(vdev, VIRTIO_CONFIG_STATUS_DRIVER);
   virtio_negotiate_features(vdev, (1UL << VIRTIO_BLK_F_RO) |
+                                  (1UL << VIRTIO_BLK_F_BLK_SIZE) |
                                   (1UL << VIRTIO_BLK_F_FLUSH));
   virtio_set_status(vdev, VIRTIO_CONFIG_FEATURES_OK);
 
@@ -600,6 +605,17 @@ static int virtio_blk_probe(FAR struct virtio_device *vdev)
   virtio_read_config_member(priv->vdev, struct virtio_blk_config_s, capacity,
                             &priv->nsectors);
   vrtinfo("Virio blk capacity=%" PRIu64 " sectors\n", priv->nsectors);
+
+  if (virtio_has_feature(vdev, VIRTIO_BLK_F_BLK_SIZE))
+    {
+      virtio_read_config_member(priv->vdev, struct virtio_blk_config_s,
+                                blk_size, &priv->block_size);
+      vrtinfo("Virio blk block_size=%" PRIu32 "\n", priv->block_size);
+    }
+  else
+    {
+      priv->block_size = VIRTIO_BLK_SECTOR_SIZE;
+    }
 
   /* Register block driver */
 
