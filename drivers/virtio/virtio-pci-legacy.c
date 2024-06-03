@@ -375,6 +375,7 @@ static void virtio_pci_legacy_set_features(FAR struct virtio_device *vdev,
 
   pci_write_io_dword(vpdev->dev, vpdev->ioaddr + VIRTIO_PCI_GUEST_FEATURES,
                      vdev->features);
+  vdev->features = features;
 }
 
 /****************************************************************************

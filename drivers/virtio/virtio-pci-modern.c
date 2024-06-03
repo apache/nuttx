@@ -572,6 +572,7 @@ static void virtio_pci_modern_set_features(FAR struct virtio_device *vdev,
   pci_write_io_dword(vpdev->dev, &cfg->driver_feature, features);
   pci_write_io_dword(vpdev->dev, &cfg->driver_feature_select, 1);
   pci_write_io_dword(vpdev->dev, &cfg->driver_feature, 0);
+  vdev->features = features;
 }
 
 /****************************************************************************
