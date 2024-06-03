@@ -66,6 +66,7 @@
 struct gran_s
 {
   uint8_t    log2gran;  /* Log base 2 of the size of one granule */
+  uint8_t    log2align; /* Log base 2 of required alignment */
   uint16_t   ngranules; /* The total number of (aligned) granules in the heap */
 #ifdef CONFIG_GRAN_INTR
   irqstate_t irqstate;  /* For exclusive access to the GAT */
