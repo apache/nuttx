@@ -54,7 +54,9 @@ int sysinfo(FAR struct sysinfo *info)
 #ifdef CONFIG_MM_PGALLOC
   struct pginfo_s pginfo;
 #endif
+#if defined(MM_KERNEL_USRHEAP_INIT) || defined(CONFIG_MM_KERNEL_HEAP)
   struct mallinfo minfo;
+#endif
 
   if (info == NULL)
     {
