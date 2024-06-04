@@ -528,6 +528,15 @@ struct xcptcontext
   uint64_t saved_rflags;
   uint64_t saved_rsp;
 
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  /* For kernel stack enabled we can't use tcb->xcp.regs[REG_RSP] as it may
+   * point to kernel stack if signaled task is waiting now in
+   * up_switch_context()
+   */
+
+  uint64_t saved_ursp;
+#endif
+
   /* Register save area - allocated from stack in up_initial_state() */
 
   uint64_t *regs;
@@ -539,6 +548,23 @@ struct xcptcontext
 
   uint8_t nsyscalls;
   struct xcpt_syscall_s syscall[CONFIG_SYS_NNEST];
+#endif
+
+#ifdef CONFIG_ARCH_ADDRENV
+#  ifdef CONFIG_ARCH_KERNEL_STACK
+  /* In this configuration, all syscalls execute from an internal kernel
+   * stack.  Why?  Because when we instantiate and initialize the address
+   * environment of the new user process, we will temporarily lose the
+   * address environment of the old user process, including its stack
+   * contents.  The kernel C logic will crash immediately with no valid
+   * stack in place.
+   */
+
+  uintptr_t *ustkptr;  /* Saved user stack pointer */
+  uintptr_t *kstack;   /* Allocate base of the (aligned) kernel stack */
+  uintptr_t *ktopstk;  /* Top of kernel stack */
+  uintptr_t *kstkptr;  /* Saved kernel stack pointer */
+#  endif
 #endif
 };
 #endif

@@ -49,8 +49,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define X86_64_CPUPRIV_USTACK_OFFSET  (16)
-#define X86_64_CPUPRIV_UVBASE_OFFSET  (24)
+#define X86_64_CPUPRIV_USTACK_OFFSET      (16)
+#define X86_64_CPUPRIV_UVBASE_OFFSET      (24)
+#define X86_64_CPUPRIV_KTOPSTK_OFFSET     (32)
 
 /****************************************************************************
  * Public Data
@@ -81,6 +82,19 @@ struct intel64_cpu_s
   /* Userspace virtual address */
 
   uint64_t *uvbase;
+#endif
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  /* Kernel stack pointer.
+   *
+   * We have to track the current kernel stack pointer to handle
+   * syscalls in kernel mode. All registers are occupied when entering
+   * syscall, so we cannot get this value from tcb in syscall handler.
+   * We keep referenve to kernel stack in CPU private data and update it
+   * at each context switch.
+   */
+
+  uint64_t *ktopstk;
 #endif
 };
 

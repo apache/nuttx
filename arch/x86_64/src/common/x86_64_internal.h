@@ -32,6 +32,7 @@
 #  include <nuttx/sched.h>
 #  include <stdint.h>
 #  include <arch/io.h>
+#  include <arch/irq.h>
 #  include <arch/multiboot2.h>
 #endif
 
@@ -191,15 +192,34 @@ extern uint8_t _stbss[];           /* Start of .tbss */
 extern uint8_t _etbss[];           /* End+1 of .tbss */
 #endif
 
+#ifndef __ASSEMBLY__
+
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+static inline_function uint64_t *x86_64_get_ktopstk(void)
+{
+  uint64_t *ktopstk;
+  __asm__ volatile("movq %%gs:(%c1), %0"
+                   : "=rm" (ktopstk)
+                   : "i" (offsetof(struct intel64_cpu_s, ktopstk)));
+  return ktopstk;
+}
+
+static inline_function void x86_64_set_ktopstk(uint64_t *ktopstk)
+{
+  __asm__ volatile("movq %0, %%gs:(%c1)"
+                   :: "r" (ktopstk), "i" (offsetof(struct intel64_cpu_s,
+                                                   ktopstk)));
+}
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
 /* Atomic modification of registers */
 
 void modifyreg8(unsigned int addr, uint8_t clearbits, uint8_t setbits);

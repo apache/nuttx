@@ -27,6 +27,8 @@
 #include <nuttx/arch.h>
 #include <assert.h>
 
+#include "sched/sched.h"
+
 #include <arch/syscall.h>
 
 #include "x86_64_internal.h"
@@ -66,6 +68,17 @@
 void up_pthread_start(pthread_trampoline_t startup,
                       pthread_startroutine_t entrypt, pthread_addr_t arg)
 {
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  struct tcb_s *tcb = this_task();
+
+  /* Make sure that kernel stack is set for current CPU */
+
+  if (x86_64_get_ktopstk() == NULL)
+    {
+      x86_64_set_ktopstk(tcb->xcp.ktopstk);
+    }
+#endif
+
   /* Let sys_call3() do all of the work */
 
   sys_call3(SYS_pthread_start, (uintptr_t)startup, (uintptr_t)entrypt,
