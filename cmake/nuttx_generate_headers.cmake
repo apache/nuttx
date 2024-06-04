@@ -152,3 +152,7 @@ add_custom_target(
     $<$<BOOL:${NEED_MATH_H}>:${CMAKE_BINARY_DIR}/include/math.h>
     $<$<BOOL:${CONFIG_ARCH_FLOAT_H}>:${CMAKE_BINARY_DIR}/include/float.h>
     $<$<BOOL:${CONFIG_ARCH_SETJMP_H}>:${CMAKE_BINARY_DIR}/include/setjmp.h>)
+
+# apps_context is a PHONY target used as an intermediate process to control the
+# time order of context preparation actions of app building
+add_custom_target(apps_context ALL DEPENDS nuttx_context)
