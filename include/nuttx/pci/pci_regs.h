@@ -106,6 +106,8 @@
 #define PCI_ROM_ADDRESS                   0x30  /* Bits 31..11 are address, 10..1 reserved */
 #define  PCI_ROM_ADDRESS_ENABLE           0x01
 #define  PCI_ROM_ADDRESS_MASK             (~0x7fful)
+#define  PCI_ROM_ADDR(x)                  ((x) & PCI_ROM_ADDRESS_MASK)
+#define  PCI_ROM_SIZE(x)                  (PCI_ROM_ADDR(x) & -PCI_ROM_ADDR(x))
 
 #define PCI_CAPABILITY_LIST               0x34  /* Offset of first capability list entry */
 
