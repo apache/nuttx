@@ -129,6 +129,34 @@ static struct list_node g_pci_ctrl_list =
  * Private Functions
  ****************************************************************************/
 
+static FAR struct pci_device_s *
+pci_do_find_device_from_bus(FAR struct pci_bus_s *bus, uint8_t busno,
+                         unsigned int devfn)
+{
+  FAR struct pci_bus_s *bus_tmp;
+  FAR struct pci_device_s *dev;
+
+  list_for_every_entry(&bus->devices, dev, struct pci_device_s, node)
+    {
+      if (dev->bus->number == busno && devfn == dev->devfn)
+        {
+          return dev;
+        }
+    }
+
+  list_for_every_entry(&bus->children, bus_tmp,
+                       struct pci_bus_s, node)
+    {
+      dev = pci_find_device_from_bus(bus_tmp, busno, devfn);
+      if (dev != NULL)
+        {
+          return dev;
+        }
+    }
+
+  return NULL;
+}
+
 /****************************************************************************
  * Name: pci_change_master
  *
@@ -781,6 +809,41 @@ static void pci_scan_bus(FAR struct pci_bus_s *bus)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: pci_find_device_from_bus
+ *
+ * Description:
+ *   To find a PCI device from the bus
+ *
+ * Input Parameters:
+ *   bus   - pci bus
+ *   busno - bus number
+ *   devfn - device number and function number
+ *
+ * Returned Value:
+ *   Failed if return NULL, otherwise return pci devices
+ *
+ ****************************************************************************/
+
+FAR struct pci_device_s *
+pci_find_device_from_bus(FAR struct pci_bus_s *bus, uint8_t busno,
+                         unsigned int devfn)
+{
+  FAR struct pci_device_s *dev;
+  int ret;
+
+  ret = nxmutex_lock(&g_pci_lock);
+  if (ret < 0)
+    {
+      return NULL;
+    }
+
+  dev = pci_do_find_device_from_bus(bus, busno, devfn);
+  nxmutex_unlock(&g_pci_lock);
+
+  return dev;
+}
 
 /****************************************************************************
  * Name: pci_bus_read_config
