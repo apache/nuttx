@@ -686,6 +686,13 @@ config ARCH_CHIP_AT32
 	---help---
 		Artery AT32 architectures (ARM Cortex-M4)
 
+config ARCH_CHIP_CXD32XX
+	bool "Sony CXD32xx"
+	select ARCH_CORTEXM4
+	select ARCH_HAVE_FPU
+	---help---
+		Sony CXD32XX (ARM Cortex-M4) architectures
+
 config ARCH_CHIP_ARM_CUSTOM
 	bool "Custom ARM chip"
 	select ARCH_CHIP_CUSTOM
@@ -1104,6 +1111,7 @@ config ARCH_CHIP
 	default "mps"		if ARCH_CHIP_MPS
 	default "goldfish"	if ARCH_CHIP_GOLDFISH_ARM
 	default "at32"		if ARCH_CHIP_AT32
+	default "cxd32xx"	if ARCH_CHIP_CXD32XX
 
 config ARM_THUMB
 	bool "Thumb Mode"
@@ -1587,5 +1595,8 @@ source "arch/arm/src/goldfish/Kconfig"
 endif
 if ARCH_CHIP_AT32
 source "arch/arm/src/at32/Kconfig"
+endif
+if ARCH_CHIP_CXD32XX
+source "arch/arm/src/cxd32xx/Kconfig"
 endif
 endif # ARCH_ARM
