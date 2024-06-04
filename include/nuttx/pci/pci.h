@@ -743,6 +743,26 @@ int pci_bus_write_config_dword(FAR struct pci_bus_s *bus, unsigned int devfn,
                                int where, uint32_t val);
 
 /****************************************************************************
+ * Name: pci_find_device_from_bus
+ *
+ * Description:
+ *   To find a PCI device from the bus
+ *
+ * Input Parameters:
+ *   bus   - pci bus
+ *   busno - bus number
+ *   devfn - device number and function number
+ *
+ * Returned Value:
+ *   Failed if return NULL, otherwise return pci devices
+ *
+ ****************************************************************************/
+
+FAR struct pci_device_s *
+pci_find_device_from_bus(FAR struct pci_bus_s *bus, uint8_t busno,
+                         unsigned int devfn);
+
+/****************************************************************************
  * Name: pci_register_drivers
  *
  * Description:
