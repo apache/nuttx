@@ -43,7 +43,7 @@ config NET_ARP_IPIN
 
 config NET_ARP_SEND
 	bool "ARP send"
-	default n
+	default y
 	---help---
 		Enable logic to send ARP requests if the target IP address mapping
 		does not appear in the ARP table.
