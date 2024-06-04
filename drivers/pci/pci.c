@@ -429,12 +429,18 @@ static uint32_t pci_size(uint32_t base, uint32_t maxbase, uint32_t mask)
  * Input Parameters:
  *   dev     - The PCI device be found
  *   max_bar - Max bar number(6 or 2)
+ *   rom_addr - The pci device rom addr
  *
  ****************************************************************************/
 
-static void pci_setup_device(FAR struct pci_device_s *dev, int max_bar)
+static void pci_setup_device(FAR struct pci_device_s *dev, int max_bar,
+                             uint8_t rom_addr)
 {
   int bar;
+  uint32_t orig;
+  uint32_t mask;
+  uint32_t size;
+  uintptr_t start;
 #ifdef CONFIG_PCI_ASSIGN_ALL_BUSES
   uint8_t cmd;
 
@@ -449,10 +455,6 @@ static void pci_setup_device(FAR struct pci_device_s *dev, int max_bar)
       int base_address_1 = PCI_BASE_ADDRESS_1 + bar * 4;
       FAR struct pci_resource_s *res;
       unsigned int flags;
-      uintptr_t start;
-      uint32_t orig;
-      uint32_t mask;
-      uint32_t size;
 
       pci_read_config_dword(dev, base_address_0, &orig);
       pci_write_config_dword(dev, base_address_0, 0xfffffffe);
@@ -544,6 +546,21 @@ static void pci_setup_device(FAR struct pci_device_s *dev, int max_bar)
         {
           dev->resource[bar++].flags |= PCI_RESOURCE_MEM_64;
         }
+    }
+
+  pci_read_config_dword(dev, rom_addr, &orig);
+  pci_write_config_dword(dev, rom_addr,
+                         ~PCI_ROM_ADDRESS_ENABLE);
+  pci_read_config_dword(dev, rom_addr, &mask);
+  pci_write_config_dword(dev, rom_addr, orig);
+  start = PCI_ROM_ADDR(orig);
+  size = PCI_ROM_SIZE(mask);
+  if (start != 0 && size != 0)
+    {
+      dev->resource[PCI_ROM_RESOURCE].flags |=
+        PCI_RESOURCE_MEM | PCI_RESOURCE_PREFETCH;
+      dev->resource[PCI_ROM_RESOURCE].start = start;
+      dev->resource[PCI_ROM_RESOURCE].end = start + size - 1;
     }
 
 #ifdef CONFIG_PCI_ASSIGN_ALL_BUSES
@@ -763,7 +780,7 @@ static void pci_scan_bus(FAR struct pci_bus_s *bus)
               goto bad;
             }
 
-          pci_setup_device(dev, 6);
+          pci_setup_device(dev, 6, PCI_ROM_ADDRESS);
 
           pci_read_config_word(dev, PCI_SUBSYSTEM_ID,
                                &dev->subsystem_device);
@@ -792,7 +809,7 @@ static void pci_scan_bus(FAR struct pci_bus_s *bus)
           pci_scan_bus(child_bus);
           pci_postsetup_bridge(dev);
 
-          pci_setup_device(dev, 2);
+          pci_setup_device(dev, 2, PCI_ROM_ADDRESS1);
           break;
 
         default:
