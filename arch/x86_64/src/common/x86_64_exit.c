@@ -89,6 +89,12 @@ void up_exit(int status)
 
   restore_critical_section(tcb, this_cpu());
 
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  /* Update kernel stack top pointer */
+
+  x86_64_set_ktopstk(tcb->xcp.ktopstk);
+#endif
+
   /* Then switch contexts */
 
   x86_64_fullcontextrestore(tcb->xcp.regs);

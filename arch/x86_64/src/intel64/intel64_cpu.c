@@ -246,6 +246,9 @@ void x86_64_cpu_init(void)
           g_cpu_priv[i].ustack    = NULL;
           g_cpu_priv[i].uvbase    = (uint64_t *)CONFIG_ARCH_TEXT_VBASE;
 #endif
+#ifdef CONFIG_ARCH_KERNEL_STACK
+          g_cpu_priv[i].ktopstk   = NULL;
+#endif
 
           /* Store private CPU in TSS */
 

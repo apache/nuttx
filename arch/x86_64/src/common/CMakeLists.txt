@@ -68,4 +68,13 @@ if(NOT CONFIG_ALARM_ARCH)
   list(APPEND SRCS x86_64_udelay.c x86_64_mdelay.c)
 endif()
 
+if(CONFIG_ARCH_KERNEL_STACK)
+  list(APPEND SRCS x86_64_addrenv_kstack.c)
+endif()
+
+if(NOT CONFIG_BUILD_FLAT)
+  list(APPEND SRCS x86_64_task_start.c x86_64_pthread_start.c
+       x86_64_signal_dispatch.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})

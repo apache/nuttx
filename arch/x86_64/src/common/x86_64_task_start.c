@@ -26,6 +26,8 @@
 #include <nuttx/arch.h>
 #include <assert.h>
 
+#include "sched/sched.h"
+
 #include <arch/syscall.h>
 
 #include "x86_64_internal.h"
@@ -63,6 +65,17 @@
 
 void up_task_start(main_t taskentry, int argc, char *argv[])
 {
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  struct tcb_s *tcb = this_task();
+
+  /* Make sure that kernel stack is set for current CPU */
+
+  if (x86_64_get_ktopstk() == NULL)
+    {
+      x86_64_set_ktopstk(tcb->xcp.ktopstk);
+    }
+#endif
+
   /* Let sys_call3() do all of the work */
 
   sys_call3(SYS_task_start, (uintptr_t)taskentry, (uintptr_t)argc,

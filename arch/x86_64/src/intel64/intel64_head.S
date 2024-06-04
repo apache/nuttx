@@ -552,10 +552,32 @@ x86_64_syscall_entry:
 	/* Store current RSP on CPU private data first */
 	movq   %rsp, %gs:X86_64_CPUPRIV_USTACK_OFFSET
 
-	/* Store return address - we need free register to store
-	 * CPU context but at this point we don't have any.
+#ifdef CONFIG_ARCH_KERNEL_STACK
+	/* If current RSP is greater than kernel stack, we have to switch stack.
+	 * Otherwise we are in nested syscall and we can't modify stack pointer
+	 */
+	cmp    %gs:X86_64_CPUPRIV_UVBASE_OFFSET, %rsp
+	jb     no_kstack_switch
+
+	/* Change to kernel stack */
+	movq   %gs:X86_64_CPUPRIV_KTOPSTK_OFFSET, %rsp
+no_kstack_switch:
+#endif
+
+	/* Store some registers on stack.
+	 * We need some free registers here to handle stored registers alignment
+	 * and kernel stack for nested syscalls but at this point we don't have any
+	 *
+	 * RDI is needed only for CONFIG_ARCH_KERNEL_STACK=y but to simplify
+	 * the logic here - we always release it.
 	 */
 	pushq   %rcx
+	pushq   %rdi
+
+	/* Get original kernel stack for this call */
+
+	movq   %rsp, %rdi
+	add    $16, %rdi
 
 	/* Get aligned registers area */
 	movq   %rsp, %rcx
@@ -566,7 +588,6 @@ x86_64_syscall_entry:
 
 	/* Syscall arguments */
 	movq    %rax, (8*REG_RAX)(%rcx)
-	movq    %rdi, (8*REG_RDI)(%rcx)
 	movq    %rsi, (8*REG_RSI)(%rcx)
 	movq    %rdx, (8*REG_RDX)(%rcx)
 	movq    %r10, (8*REG_R10)(%rcx)
@@ -602,15 +623,26 @@ x86_64_syscall_entry:
 	xsave   (%rcx)
 #endif
 
-	/* Save RCX */
+	/* Save RDI and RCX which are on stack now */
+	popq    (8*REG_RDI)(%rcx)
 	popq    (8*REG_RCX)(%rcx)
 
-	/* Store user stack pointer */
+	/* Store user stack pointer. We can't movq directly here.
+	 * NOTE: for nested syscalls this value points to kernel stack.
+	 */
 	pushq   %gs:X86_64_CPUPRIV_USTACK_OFFSET
 	popq    (8*REG_RSP)(%rcx)
 
 	/* Move stack pointer after registers area */
 	movq    %rcx, %rsp
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+	/* Update stored kernel stack */
+	movq    %rsp, %gs:X86_64_CPUPRIV_KTOPSTK_OFFSET
+
+	/* Store original kernel stack on stack which is now in RDI */
+	pushq   %rdi
+#endif
 
 	/* Return value from syscall stored in rax */
 	movq    %rcx, %rdi
@@ -624,6 +656,11 @@ x86_64_syscall_entry:
 	movl    $XSAVE_STATE_COMPONENTS, %eax
 	xor     %edx, %edx
 	xrstor  (%rdi)
+#endif
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+	/* Restore original kernel stack */
+	popq    %gs:X86_64_CPUPRIV_KTOPSTK_OFFSET
 #endif
 
 	/* Restore original user RSP */

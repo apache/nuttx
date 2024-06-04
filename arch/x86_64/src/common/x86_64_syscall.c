@@ -218,6 +218,34 @@ uint64_t *x86_64_syscall(uint64_t *regs)
           regs[REG_RDX] = arg4; /* ucontext */
           regs[REG_R10] = arg1; /* sighand */
 
+#ifdef CONFIG_ARCH_KERNEL_STACK
+          /* If we are signalling a user process, then we must be operating
+           * on the kernel stack now.  We need to switch back to the user
+           * stack before dispatching the signal handler to the user code.
+           * The existence of an allocated kernel stack is sufficient
+           * information to make this decision.
+           */
+
+          if (rtcb->xcp.kstack != NULL)
+            {
+              uint64_t usp;
+
+              /* Copy "info" into user stack */
+
+              usp = rtcb->xcp.saved_ursp - 8;
+
+              /* Create a frame for info and copy the kernel info */
+
+              usp = usp - sizeof(siginfo_t);
+              memcpy((void *)usp, (void *)regs[REG_RSI], sizeof(siginfo_t));
+
+              /* Now set the updated SP and user copy of "info" to RSI */
+
+              regs[REG_RSP] = usp;
+              regs[REG_RSI] = usp;
+            }
+#endif
+
           break;
         }
 
@@ -275,6 +303,12 @@ uint64_t *x86_64_syscall(uint64_t *regs)
 
           rtcb->xcp.syscall[rtcb->xcp.nsyscalls].sysreturn = regs[REG_RCX];
           rtcb->xcp.nsyscalls += 1;
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+          /* Store reference to user RSP for signals */
+
+          rtcb->xcp.saved_ursp = regs[REG_RSP];
+#endif
 
           /* Call syscall function */
 

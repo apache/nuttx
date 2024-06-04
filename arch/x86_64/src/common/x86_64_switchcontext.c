@@ -59,6 +59,12 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 {
   int cpu;
 
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  /* Update kernel stack top pointer */
+
+  x86_64_set_ktopstk(tcb->xcp.ktopstk);
+#endif
+
   /* Are we in an interrupt handler? */
 
   if (up_interrupt_context())
