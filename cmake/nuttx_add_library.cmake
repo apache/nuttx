@@ -79,7 +79,7 @@ endfunction()
 function(nuttx_add_user_library target)
   # declare target
   add_library(${target} OBJECT ${ARGN})
-
+  add_dependencies(${target} apps_context)
   nuttx_add_library_internal(${target} ${ARGN})
 
   # link to final libapps
@@ -180,7 +180,7 @@ define_property(
 #
 function(nuttx_add_library target)
   add_library(${target} ${ARGN})
-
+  add_dependencies(${target} apps_context)
   set_property(GLOBAL APPEND PROPERTY NUTTX_SYSTEM_LIBRARIES ${target})
 
   nuttx_add_library_internal(${target})
