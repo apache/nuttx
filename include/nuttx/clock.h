@@ -341,7 +341,7 @@ EXTERN volatile clock_t g_system_ticks;
   while (0)
 
 #define clock_time2ticks(ts) \
-  ((clock_t)(ts)->tv_sec * TICK_PER_SEC + (ts)->tv_nsec / NSEC_PER_TICK)
+  ((clock_t)(ts)->tv_sec * TICK_PER_SEC + div_const((ts)->tv_nsec, NSEC_PER_TICK))
 
 #define clock_usec2time(ts, usec) \
   do \
@@ -354,7 +354,7 @@ EXTERN volatile clock_t g_system_ticks;
   while (0)
 
 #define clock_time2usec(ts) \
-  ((uint64_t)(ts)->tv_sec * USEC_PER_SEC + (ts)->tv_nsec / NSEC_PER_USEC)
+  ((uint64_t)(ts)->tv_sec * USEC_PER_SEC + div_const((ts)->tv_nsec, NSEC_PER_USEC))
 
 #define clock_nsec2time(ts, nsec) \
   do \
