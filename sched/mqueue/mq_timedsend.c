@@ -217,7 +217,7 @@ file_mq_timedsend_internal(FAR struct file *mq, FAR const char *msg,
            * begins.
            */
 
-          ret = clock_abstime2ticks(CLOCK_REALTIME, abstime, &ticks);
+          clock_abstime2ticks(CLOCK_REALTIME, abstime, &ticks);
         }
 
       /* Handle any time-related errors */

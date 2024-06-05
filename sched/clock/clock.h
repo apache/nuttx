@@ -81,10 +81,6 @@ void clock_timer(void);
 #  define clock_timer()
 #endif
 
-int  clock_abstime2ticks(clockid_t clockid,
-                         FAR const struct timespec *abstime,
-                         FAR sclock_t *ticks);
-
 /****************************************************************************
  * perf_init
  ****************************************************************************/

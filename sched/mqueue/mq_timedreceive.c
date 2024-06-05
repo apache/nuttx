@@ -179,7 +179,7 @@ file_mq_timedreceive_internal(FAR struct file *mq, FAR char *msg,
                * this time stays valid until the wait begins.
                */
 
-              ret = clock_abstime2ticks(CLOCK_REALTIME, abstime, &ticks);
+              clock_abstime2ticks(CLOCK_REALTIME, abstime, &ticks);
             }
 
           /* Handle any time-related errors */
