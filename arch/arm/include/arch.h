@@ -62,7 +62,7 @@ do { \
     "\tmov %0, " PIC_REG_STRING "\n\t" \
     : "=r"(picbase) \
   ); \
-  *ppicbase = (void *)picbase; \
+  *(uint32_t *)ppicbase = picbase; \
 } while (0)
 
 #define up_setpicbase(picbase) \
