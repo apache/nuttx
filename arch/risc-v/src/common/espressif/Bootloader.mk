@@ -35,11 +35,6 @@ MCUBOOT_SRCDIR     = $(BOOTLOADER_SRCDIR)/mcuboot
 MCUBOOT_ESPDIR     = $(MCUBOOT_SRCDIR)/boot/espressif
 MCUBOOT_URL        = https://github.com/mcu-tools/mcuboot
 
-# IDFboot
-
-BLBIN_VERSION = latest
-BLBIN_URL     = https://github.com/espressif/esp-nuttx-bootloader/releases/download/$(BLBIN_VERSION)
-
 # Helpers for creating the configuration file
 
 cfg_en  = echo "$(1)=$(if $(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT),1,y)";
@@ -78,12 +73,6 @@ ifeq ($(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT),y)
 		$(if $(CONFIG_UART0_SERIAL_CONSOLE),$(call cfg_val,CONFIG_ESP_CONSOLE_UART_NUM,0)) \
 		$(if $(CONFIG_UART1_SERIAL_CONSOLE),$(call cfg_val,CONFIG_ESP_CONSOLE_UART_NUM,1)) \
 	} >> $(BOOTLOADER_CONFIG)
-else
-	$(Q) { \
-		$(call cfg_en,CONFIG_PARTITION_TABLE_CUSTOM) \
-		$(call cfg_val,CONFIG_PARTITION_TABLE_CUSTOM_FILENAME,\"partitions.csv\") \
-		$(call cfg_val,CONFIG_PARTITION_TABLE_OFFSET,$(CONFIG_ESPRESSIF_PARTITION_TABLE_OFFSET)) \
-	} >> $(BOOTLOADER_CONFIG)
 endif
 
 ifeq ($(CONFIG_ESPRESSIF_SIMPLE_BOOT),y)
@@ -114,17 +103,5 @@ bootloader: $(BOOTLOADER_CONFIG) $(BOOTLOADER_BIN)
 clean_bootloader:
 	$(call DELDIR,$(BOOTLOADER_SRCDIR))
 	$(call DELFILE,$(BOOTLOADER_BIN))
-
-else
-
-bootloader:
-	$(Q) echo "Downloading Bootloader binaries"
-	$(call DOWNLOAD,$(BLBIN_URL),bootloader-$(CHIP_SERIES).bin,$(TOPDIR)/bootloader-$(CHIP_SERIES).bin)
-	$(call DOWNLOAD,$(BLBIN_URL),partition-table-$(CHIP_SERIES).bin,$(TOPDIR)/partition-table-$(CHIP_SERIES).bin)
-
-clean_bootloader:
-	$(call DELFILE,$(TOPDIR)/bootloader-$(CHIP_SERIES).bin)
-	$(call DELFILE,$(TOPDIR)/partition-table-$(CHIP_SERIES).bin)
-
 endif
 endif
