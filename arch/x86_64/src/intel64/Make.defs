@@ -66,6 +66,10 @@ ifeq ($(CONFIG_INTEL64_HPET),y)
 CHIP_CSRCS += intel64_hpet.c
 endif
 
+ifeq ($(CONFIG_ARCH_INTEL64_HPET_ALARM),y)
+CHIP_CSRCS += intel64_hpet_alarm.c
+endif
+
 ifeq ($(CONFIG_INTEL64_ONESHOT),y)
 CHIP_CSRCS += intel64_oneshot.c intel64_oneshot_lower.c
 endif

@@ -168,6 +168,17 @@ int intel64_oneshot_start(struct intel64_oneshot_s *oneshot,
 int intel64_oneshot_cancel(struct intel64_oneshot_s *oneshot,
                            struct timespec *ts);
 
+/****************************************************************************
+ * Name: intel64_oneshot_current
+ *
+ * Description:
+ *   Get the current time.
+ *
+ ****************************************************************************/
+
+int intel64_oneshot_current(struct intel64_oneshot_s *oneshot,
+                            uint64_t *usec);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

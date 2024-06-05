@@ -191,6 +191,12 @@ int intel64_oneshot_initialize(struct intel64_oneshot_s *oneshot, int chan,
   oneshot->period = INTEL64_TIM_GETPERIOD(oneshot->tch);
   oneshot->frequency = 1e15 / oneshot->period;
 
+  /* Calculations in intel64_oneshot_current() requires that HPET
+   * frequency is less than 1GHz
+   */
+
+  DEBUGASSERT(oneshot->frequency < 1000000000);
+
   /* Initialize the remaining fields in the state structure. */
 
   oneshot->chan       = chan;
@@ -420,6 +426,30 @@ int intel64_oneshot_cancel(struct intel64_oneshot_s *oneshot,
       tmrinfo("remaining (%lu, %lu)\n",
              (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);
     }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: intel64_oneshot_current
+ *
+ * Description:
+ *   Get the current time.
+ *
+ ****************************************************************************/
+
+int intel64_oneshot_current(struct intel64_oneshot_s *oneshot,
+                            uint64_t *usec)
+{
+  uint64_t counter;
+
+  /* Get the current counter value */
+
+  counter = INTEL64_TIM_GETCOUNTER(oneshot->tch);
+
+  /* Use nano seconds to avoid 64-bit overflow */
+
+  *usec = (counter * (NSEC_PER_SEC / oneshot->frequency)) / 1000;
 
   return OK;
 }
