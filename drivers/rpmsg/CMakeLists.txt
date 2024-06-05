@@ -37,6 +37,10 @@ if(CONFIG_RPMSG)
     list(APPEND SRCS rpmsg_port_spi.c)
   endif()
 
+  if(CONFIG_RPMSG_PORT_SPI_SLAVE)
+    list(APPEND SRCS rpmsg_port_spi_slave.c)
+  endif()
+
   if(CONFIG_RPMSG_VIRTIO)
     list(APPEND SRCS rpmsg_virtio.c)
   endif()

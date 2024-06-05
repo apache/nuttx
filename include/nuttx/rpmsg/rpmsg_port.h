@@ -30,6 +30,7 @@
 
 #include <nuttx/ioexpander/ioexpander.h>
 #include <nuttx/spi/spi.h>
+#include <nuttx/spi/slave.h>
 
 #ifdef CONFIG_RPMSG_PORT
 
@@ -77,7 +78,7 @@ struct rpmsg_port_spi_config_s
   int             mreq_invert;
   int             sreq_invert; /* Pin options described in ioexpander.h */
 
-  enum spi_mode_e mode;
+  int             mode;        /* Mode of enum spi_mode_e */
   uint32_t        devid;       /* Device ID of enum spi_devtype_e */
   uint32_t        freq;        /* SPI frequency (Hz) */
 };
@@ -120,6 +121,34 @@ rpmsg_port_spi_initialize(FAR const struct rpmsg_port_config_s *cfg,
                           FAR const struct rpmsg_port_spi_config_s *spicfg,
                           FAR struct spi_dev_s *spi,
                           FAR struct ioexpander_dev_s *ioe);
+
+#endif
+
+#ifdef CONFIG_RPMSG_PORT_SPI_SLAVE
+
+/****************************************************************************
+ * Name: rpmsg_port_spi_slave_initialize
+ *
+ * Description:
+ *   Initialize a rpmsg_port_spi_slave device to communicate between two
+ *   chips.
+ *
+ * Input Parameters:
+ *   cfg      - Configuration of buffers needed for communication.
+ *   spicfg   - SPI device's configuration.
+ *   spictrlr - SPI slave controller used for transfer data between two
+ *              chips.
+ *   ioe      - ioexpander used to config gpios.
+ *
+ * Returned Value:
+ *   Zero on success or an negative value on failure.
+ *
+ ****************************************************************************/
+
+int
+rpmsg_port_spi_slave_initialize(FAR const struct rpmsg_port_config_s *cfg,
+  FAR const struct rpmsg_port_spi_config_s *spicfg,
+  FAR struct spi_slave_ctrlr_s *spictrlr, FAR struct ioexpander_dev_s *ioe);
 
 #endif
 
