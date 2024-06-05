@@ -306,11 +306,15 @@ static ssize_t local_sendto(FAR struct socket *psock,
       return -EISCONN;
     }
 
+  net_lock();
   if (local_findconn(conn, unaddr) == NULL)
     {
+      net_unlock();
       nerr("ERROR: No such file or directory\n");
       return -ENOENT;
     }
+
+  net_unlock();
 
   /* Make sure that dgram is sent safely */
 

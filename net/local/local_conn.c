@@ -135,6 +135,9 @@ FAR struct local_conn_s *local_peerconn(FAR struct local_conn_s *conn)
  *   This is normally something done by the implementation of the socket()
  *   API
  *
+ * Assumptions:
+ *   This function must be called with the network locked.
+ *
  ****************************************************************************/
 
 FAR struct local_conn_s *local_alloc(void)
@@ -170,9 +173,7 @@ FAR struct local_conn_s *local_alloc(void)
 
       /* Add the connection structure to the list of listeners */
 
-      net_lock();
       dq_addlast(&conn->lc_conn.node, &g_local_connections);
-      net_unlock();
     }
 
   return conn;
@@ -185,6 +186,9 @@ FAR struct local_conn_s *local_alloc(void)
  *    Called when a client calls connect and can find the appropriate
  *    connection in LISTEN. In that case, this function will create
  *    a new connection and initialize it.
+ *
+ * Assumptions:
+ *   This function must be called with the network locked.
  *
  ****************************************************************************/
 
@@ -262,6 +266,9 @@ err:
  *   Free a packet Unix domain connection structure that is no longer in use.
  *   This should be done by the implementation of close().
  *
+ * Assumptions:
+ *   This function must be called with the network locked.
+ *
  ****************************************************************************/
 
 void local_free(FAR struct local_conn_s *conn)
@@ -274,7 +281,6 @@ void local_free(FAR struct local_conn_s *conn)
 
   /* Remove the server from the list of listeners. */
 
-  net_lock();
   dq_rem(&conn->lc_conn.node, &g_local_connections);
 
   if (local_peerconn(conn) && conn->lc_peer)
@@ -282,8 +288,6 @@ void local_free(FAR struct local_conn_s *conn)
       conn->lc_peer->lc_peer = NULL;
       conn->lc_peer = NULL;
     }
-
-  net_unlock();
 
   /* Make sure that the read-only FIFO is closed */
 
