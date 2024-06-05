@@ -1061,7 +1061,7 @@ config ESP32C3_HAVE_OTA_PARTITION
 menu "Bootloader and Image Configuration"
 
 config ESP32C3_APP_FORMAT_LEGACY
-	bool
+	bool "Enable legacy IDF bootloader format"
 	default y if !ESP32C3_APP_FORMAT_MCUBOOT
 	depends on !ESP32C3_APP_FORMAT_MCUBOOT
 	---help---
