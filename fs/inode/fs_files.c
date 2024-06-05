@@ -494,17 +494,7 @@ FAR char *file_dump_backtrace(FAR struct file *filep, FAR char *buffer,
                               size_t len)
 {
 #if CONFIG_FS_BACKTRACE > 0
-  FAR const char *format = "%0*p ";
-  int k;
-
-  buffer[0] = '\0';
-  for (k = 0; k < CONFIG_FS_BACKTRACE && filep->f_backtrace[k]; k++)
-    {
-      snprintf(buffer + k * FS_BACKTRACE_WIDTH,
-               len - k * FS_BACKTRACE_WIDTH,
-               format, FS_BACKTRACE_WIDTH - 1,
-               filep->f_backtrace[k]);
-    }
+  backtrace_format(buffer, len, filep->f_backtrace, CONFIG_FS_BACKTRACE);
 #else
   buffer[0] = '\0';
 #endif

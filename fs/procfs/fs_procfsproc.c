@@ -1245,16 +1245,15 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
                             size_t buflen, off_t offset)
 {
   FAR struct task_group_s *group = tcb->group;
+  FAR struct file *filep;
+  char backtrace[BACKTRACE_BUFFER_SIZE(CONFIG_FS_BACKTRACE)];
+  char path[PATH_MAX];
   size_t remaining;
   size_t linesize;
   size_t copysize;
   size_t totalsize;
   int count;
   int i;
-
-  FAR struct file *filep;
-  char path[PATH_MAX];
-  char backtrace[FS_BACKTRACE_BUFFER_LEN];
 
   DEBUGASSERT(group != NULL);
 
