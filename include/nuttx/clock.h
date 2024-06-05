@@ -732,6 +732,29 @@ void perf_convert(clock_t elapsed, FAR struct timespec *ts);
 
 unsigned long perf_getfreq(void);
 
+/****************************************************************************
+ * Name: nxclock_settime
+ *
+ * Description:
+ *   Clock Functions based on POSIX APIs
+ *
+ *   CLOCK_REALTIME - POSIX demands this to be present. This is the wall
+ *   time clock.
+ *
+ ****************************************************************************/
+
+void nxclock_settime(clockid_t clock_id, FAR const struct timespec *tp);
+
+/****************************************************************************
+ * Name: nxclock_gettime
+ *
+ * Description:
+ *   Get the current value of the specified time clock.
+ *
+ ****************************************************************************/
+
+void nxclock_gettime(clockid_t clock_id, FAR struct timespec *tp);
+
 #undef EXTERN
 #ifdef __cplusplus
 }
