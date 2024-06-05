@@ -107,6 +107,7 @@ void mpfs_jump_to_app(void)
       "la   sp, g_mpfs_boot_stacks\n"        /* Stack area base */
       "add  sp, sp, t0\n"                    /* Set stack pointer */
       "call mpfs_board_pmp_setup\n"          /* Run PMP configuration */
+      "bne  a0, x0, mpfs_board_pmp_error\n"  /* If ret != 0, jump to errhan */
       "csrr a0, mhartid\n"                   /* Restore hartid */
 #else
       "li   t0, -1\n"                        /* Open the whole SoC */
