@@ -405,3 +405,7 @@ include $(TOPDIR)/tools/Zig.defs
 # Rust toolchain
 
 include $(TOPDIR)/tools/Rust.defs
+
+# LDC (LLVM D Compiler) toolchain
+
+include $(TOPDIR)/tools/D.defs
