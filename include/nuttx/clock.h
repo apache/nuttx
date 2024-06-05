@@ -446,6 +446,36 @@ EXTERN volatile clock_t g_system_ticks;
      (ts1)->tv_nsec - (ts2)->tv_nsec)
 
 /****************************************************************************
+ * Name: clock_abstime2ticks
+ *
+ * Description:
+ *   Convert an absolute timespec delay to system timer ticks.
+ *
+ * Input Parameters:
+ *   clockid - The timing source to use in the conversion
+ *   abstime - Convert this absolute time to ticks
+ *   ticks - Return the converted number of ticks here.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Interrupts should be disabled so that the time is not changing during
+ *   the calculation
+ *
+ ****************************************************************************/
+
+#define clock_abstime2ticks(clockid, abstime, ticks) \
+  do \
+    { \
+      struct timespec _reltime; \
+      nxclock_gettime(clockid, &_reltime); \
+      clock_timespec_subtract(abstime, &_reltime, &_reltime); \
+      *(ticks) = clock_time2ticks(&_reltime); \
+    } \
+  while (0)
+
+/****************************************************************************
  * Name: clock_compare
  *
  * Description:
