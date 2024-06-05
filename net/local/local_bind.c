@@ -64,10 +64,14 @@ int psock_local_bind(FAR struct socket *psock,
 
   /* Check if local address is already in use */
 
+  net_lock();
   if (local_findconn(conn, unaddr) != NULL)
     {
+      net_unlock();
       return -EADDRINUSE;
     }
+
+  net_unlock();
 
   /* Save the address family */
 
