@@ -109,7 +109,9 @@ static int inline local_stream_connect(FAR struct local_conn_s *client,
 
   DEBUGASSERT(client->lc_outfile.f_inode != NULL);
 
+  net_lock();
   ret = local_alloc_accept(server, client, &conn);
+  net_unlock();
   if (ret < 0)
     {
       nerr("ERROR: Failed to alloc accept conn %s: %d\n",
@@ -150,7 +152,9 @@ static int inline local_stream_connect(FAR struct local_conn_s *client,
   return ret;
 
 errout_with_conn:
+  net_lock();
   local_free(conn);
+  net_unlock();
 
 errout_with_outfd:
   file_close(&client->lc_outfile);
