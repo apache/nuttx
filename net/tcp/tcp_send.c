@@ -613,8 +613,13 @@ void tcp_synack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
   tcp->optdata[optlen++] = tcp_mss & 0xff;
 
 #ifdef CONFIG_NET_TCP_WINDOW_SCALE
-  if (tcp->flags == TCP_SYN ||
-      ((tcp->flags == (TCP_ACK | TCP_SYN)) && (conn->flags & TCP_WSCALE)))
+  if (tcp_get_recvwindow(dev, conn) < UINT16_MAX)
+    {
+      conn->rcv_scale = 0;
+    }
+  else if (tcp->flags == TCP_SYN ||
+           ((tcp->flags == (TCP_ACK | TCP_SYN)) &&
+           (conn->flags & TCP_WSCALE)))
     {
       tcp->optdata[optlen++] = TCP_OPT_NOOP;
       tcp->optdata[optlen++] = TCP_OPT_WS;
