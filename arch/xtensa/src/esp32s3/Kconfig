@@ -2275,11 +2275,12 @@ config ESP32S3_APP_FORMAT_MCUBOOT
 		Enables the Espressif port of MCUboot to be used as 2nd stage bootloader.
 
 config ESP32S3_APP_FORMAT_LEGACY
-	bool
+	bool "Enable legacy IDF bootloader format"
 	default y if BUILD_PROTECTED
 	---help---
 		This is the legacy application image format, as supported by the ESP-IDF
-		2nd stage bootloader.
+		2nd stage bootloader. Please note that this requires ESP-IDF toolchain
+		to be built properly.
 
 choice
 	prompt "Target slot for image flashing"
