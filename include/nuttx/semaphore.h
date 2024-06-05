@@ -401,7 +401,8 @@ int nxsem_get_value(FAR sem_t *sem, FAR int *sval);
  *   calls to sem_unlink()).
  *
  * Input Parameters:
- *   name  - Semaphore name
+ *   sem    - Location to return the semaphore reference.
+ *   name   - Semaphore name.
  *   oflags - Semaphore creation options.  This may either or both of the
  *     following bit settings.
  *     oflags = 0:  Connect to the semaphore only if it already exists.
@@ -417,13 +418,13 @@ int nxsem_get_value(FAR sem_t *sem, FAR int *sval);
  *        SEM_VALUE_MAX.
  *
  * Returned Value:
- *   A pointer to sem_t or negated errno if unsuccessful.
+ *   0 (OK), or negated errno if unsuccessful.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-FAR sem_t *nxsem_open(FAR const char *name, int oflags, ...);
+int nxsem_open(FAR sem_t **sem, FAR const char *name, int oflags, ...);
 
 /****************************************************************************
  * Name:  nxsem_close

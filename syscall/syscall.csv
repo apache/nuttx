@@ -84,7 +84,7 @@
 "nxsem_clockwait","nuttx/semaphore.h","","int","FAR sem_t *","clockid_t","FAR const struct timespec *"
 "nxsem_close","nuttx/semaphore.h","defined(CONFIG_FS_NAMED_SEMAPHORES)","int","FAR sem_t *"
 "nxsem_destroy","nuttx/semaphore.h","","int","FAR sem_t *"
-"nxsem_open","nuttx/semaphore.h","defined(CONFIG_FS_NAMED_SEMAPHORES)","FAR sem_t *","FAR const char *","int","...","mode_t","unsigned int"
+"nxsem_open","nuttx/semaphore.h","defined(CONFIG_FS_NAMED_SEMAPHORES)","int","FAR sem_t **","FAR const char *","int","...","mode_t","unsigned int"
 "nxsem_post","nuttx/semaphore.h","","int","FAR sem_t *"
 "nxsem_set_protocol","nuttx/semaphore.h","defined(CONFIG_PRIORITY_INHERITANCE)","int","FAR sem_t *","int"
 "nxsem_timedwait","nuttx/semaphore.h","","int","FAR sem_t *","FAR const struct timespec *"
