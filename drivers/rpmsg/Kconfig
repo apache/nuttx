@@ -44,7 +44,14 @@ config RPMSG_PORT_SPI
 	---help---
 		Rpmsg SPI Port driver used for cross chip communication.
 
-if RPMSG_PORT_SPI
+config RPMSG_PORT_SPI_SLAVE
+	bool "Rpmsg SPI Slave Port Driver Support"
+	default n
+	select RPMSG_PORT
+	---help---
+		Rpmsg SPI Slave Port driver used for cross chip communication.
+
+if RPMSG_PORT_SPI || RPMSG_PORT_SPI_SLAVE
 
 config RPMSG_PORT_SPI_THREAD_PRIORITY
 	int "Rpmsg SPI Port Thread Priority"
