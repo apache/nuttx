@@ -83,6 +83,14 @@
 #  define MM_KASAN_DISABLE_WRITE_PANIC 0
 #endif
 
+#define KASAN_INIT_VALUE 0xdeadcafe
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static uint32_t g_region_init;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -160,6 +168,11 @@ static inline void kasan_check_report(FAR const void *addr, size_t size,
                                       bool is_write,
                                       FAR void *return_address)
 {
+  if (size == 0 || g_region_init != KASAN_INIT_VALUE)
+    {
+      return;
+    }
+
   if (kasan_is_poisoned(addr, size))
     {
       kasan_report(addr, size, is_write, return_address);
@@ -169,6 +182,16 @@ static inline void kasan_check_report(FAR const void *addr, size_t size,
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+void kasan_start(void)
+{
+  g_region_init = KASAN_INIT_VALUE;
+}
+
+void kasan_stop(void)
+{
+  g_region_init = 0;
+}
 
 void __asan_before_dynamic_init(FAR const void *module_name)
 {

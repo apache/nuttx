@@ -42,9 +42,7 @@
 #  define kasan_unpoison(addr, size) addr
 #  define kasan_register(addr, size)
 #  define kasan_unregister(addr)
-#  define kasan_stop()
 #  define kasan_reset_tag(addr) addr
-#  define kasan_start()
 #else
 
 /****************************************************************************
@@ -147,6 +145,21 @@ void kasan_register(FAR void *addr, FAR size_t *size);
 void kasan_unregister(FAR void *addr);
 
 /****************************************************************************
+ * Name: kasan_reset_tag
+ *
+ * Input Parameters:
+ *   addr - The address of the memory to reset the tag.
+ *
+ * Returned Value:
+ *   Unlabeled address
+ *
+ ****************************************************************************/
+
+FAR void *kasan_reset_tag(FAR const void *addr);
+
+#endif /* CONFIG_MM_KASAN */
+
+/****************************************************************************
  * Name: kasan_start
  *
  * Description:
@@ -180,24 +193,9 @@ void kasan_start(void);
 
 void kasan_stop(void);
 
-/****************************************************************************
- * Name: kasan_reset_tag
- *
- * Input Parameters:
- *   addr - The address of the memory to reset the tag.
- *
- * Returned Value:
- *   Unlabeled address
- *
- ****************************************************************************/
-
-FAR void *kasan_reset_tag(FAR const void *addr);
-
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* CONFIG_MM_KASAN */
 
 #endif /* __INCLUDE_NUTTX_MM_KASAN_H */
