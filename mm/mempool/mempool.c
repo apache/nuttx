@@ -646,6 +646,8 @@ int mempool_deinit(FAR struct mempool_s *pool)
   while ((blk = mempool_remove_queue(pool, &pool->equeue)) != NULL)
     {
       blk = (FAR sq_entry_t *)((FAR char *)blk - count * blocksize);
+
+      kasan_unpoison(blk, count * blocksize + sizeof(sq_entry_t));
       pool->free(pool, blk);
       if (pool->expandsize >= blocksize + sizeof(sq_entry_t))
         {
@@ -655,6 +657,8 @@ int mempool_deinit(FAR struct mempool_s *pool)
 
   if (pool->ibase)
     {
+      kasan_unpoison(pool->ibase,
+                     pool->interruptsize / blocksize * blocksize);
       pool->free(pool, pool->ibase);
     }
 
