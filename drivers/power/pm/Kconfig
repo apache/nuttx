@@ -23,6 +23,8 @@ config PM_NDOMAINS
 		For example, you may want to separately manage the power from the
 		Network domain, shutting down the network when it is not be used,
 		from the UI domain, shutting down the UI when it is not in use.
+		For SMP case, should add CONFIG_SMP_NCPU manually, or will lead to
+		a static assert.
 
 config PM_PROCFS
 	bool "PM proc fs support"
