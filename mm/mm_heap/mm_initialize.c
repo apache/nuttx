@@ -197,6 +197,7 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
   /* Add the single, large free node to the nodelist */
 
   mm_addfreechunk(heap, node);
+  heap->mm_curused += 2 * MM_SIZEOF_ALLOCNODE;
   mm_unlock(heap);
 }
 
@@ -276,6 +277,7 @@ FAR struct mm_heap_s *mm_initialize(FAR const char *name,
 
   /* Add the initial region of memory to the heap */
 
+  heap->mm_curused = sizeof(struct mm_heap_s);
   mm_addregion(heap, heapstart, heapsize);
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
