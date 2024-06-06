@@ -1,5 +1,5 @@
 /****************************************************************************
- * mm/iob/iob_get_queue_size.c
+ * mm/iob/iob_get_queue_info.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -53,6 +53,25 @@ unsigned int iob_get_queue_size(FAR struct iob_queue_s *queue)
     }
 
   return total;
+}
+
+/****************************************************************************
+ * Name: iob_get_queue_entry_count
+ *
+ * Description:
+ *   Queue helper for get the iob queue entry count.
+ *
+ ****************************************************************************/
+
+unsigned int iob_get_queue_entry_count(FAR struct iob_queue_s *queue)
+{
+  FAR struct iob_qentry_s *iobq;
+  unsigned int count;
+
+  for (iobq = queue->qh_head, count = 0; iobq != NULL;
+       iobq = iobq->qe_flink, count++);
+
+  return count;
 }
 
 #endif /* CONFIG_IOB_NCHAINS > 0 */

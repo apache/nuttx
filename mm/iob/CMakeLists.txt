@@ -44,7 +44,7 @@ if(CONFIG_MM_IOB)
       iob_navail.c
       iob_free_queue_qentry.c
       iob_tailroom.c
-      iob_get_queue_size.c
+      iob_get_queue_info.c
       iob_reserve.c
       iob_update_pktlen.c
       iob_count.c)
