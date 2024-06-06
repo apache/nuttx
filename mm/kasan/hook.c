@@ -173,6 +173,11 @@ static inline void kasan_check_report(FAR const void *addr, size_t size,
       return;
     }
 
+  if (addr == NULL)
+    {
+      kasan_report(addr, size, is_write, return_address);
+    }
+
   if (kasan_is_poisoned(addr, size))
     {
       kasan_report(addr, size, is_write, return_address);
