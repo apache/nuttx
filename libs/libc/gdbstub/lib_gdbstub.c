@@ -1726,7 +1726,7 @@ int gdb_debugpoint_add(int type, FAR void *addr, size_t size,
   point.size = size;
   point.callback = callback;
   point.arg = arg;
-  retrun nxsched_smp_call((1 << CONFIG_SMP_NCPUS) - 1,
+  return nxsched_smp_call((1 << CONFIG_SMP_NCPUS) - 1,
                           gdb_smp_debugpoint_add, &point, true);
 #else
   return up_debugpoint_add(type, addr, size, callback, arg);
