@@ -178,15 +178,13 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
                       FAR const pthread_attr_t *attr,
                       pthread_startroutine_t entry, pthread_addr_t arg)
 {
+  pthread_attr_t default_attr = g_default_pthread_attr;
   FAR struct pthread_tcb_s *ptcb;
   struct sched_param param;
   FAR struct tcb_s *parent;
   int policy;
   int errcode;
-  pid_t pid;
   int ret;
-  bool group_joined = false;
-  pthread_attr_t default_attr = g_default_pthread_attr;
 
   DEBUGASSERT(trampoline != NULL);
 
@@ -226,12 +224,7 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
    * group).
    */
 
-  ret = group_bind(ptcb);
-  if (ret < 0)
-    {
-      errcode = ENOMEM;
-      goto errout_with_tcb;
-    }
+  group_bind(ptcb);
 
 #ifdef CONFIG_ARCH_ADDRENV
   /* Share the address environment of the parent task group. */
@@ -420,14 +413,7 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
 
   /* Join the parent's task group */
 
-  ret = group_join(ptcb);
-  if (ret < 0)
-    {
-      errcode = ENOMEM;
-      goto errout_with_tcb;
-    }
-
-  group_joined = true;
+  group_join(ptcb);
 
   /* Set the appropriate scheduling policy in the TCB */
 
@@ -454,47 +440,28 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
 #endif
     }
 
-  /* Get the assigned pid before we start the task (who knows what
-   * could happen to ptcb after this!).
-   */
-
-  pid = ptcb->cmn.pid;
-
   /* Then activate the task */
 
   sched_lock();
-  if (ret == OK)
+
+  nxtask_activate((FAR struct tcb_s *)ptcb);
+
+  /* Return the thread information to the caller */
+
+  if (thread != NULL)
     {
-      nxtask_activate((FAR struct tcb_s *)ptcb);
-
-      /* Return the thread information to the caller */
-
-      if (thread)
-        {
-          *thread = (pthread_t)pid;
-        }
-
-      sched_unlock();
-    }
-  else
-    {
-      sched_unlock();
-      dq_rem((FAR dq_entry_t *)ptcb, list_inactivetasks());
-
-      errcode = EIO;
-      goto errout_with_tcb;
+      *thread = (pthread_t)ptcb->cmn.pid;
     }
 
-  return ret;
+  sched_unlock();
+
+  return OK;
 
 errout_with_tcb:
 
-  /* Clear group binding */
+  /* Since we do not join the group, assign group to NULL to clear binding */
 
-  if (ptcb && !group_joined)
-    {
-      ptcb->cmn.group = NULL;
-    }
+  ptcb->cmn.group = NULL;
 
   nxsched_release_tcb((FAR struct tcb_s *)ptcb, TCB_FLAG_TTYPE_PTHREAD);
   return errcode;
