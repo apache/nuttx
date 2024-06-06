@@ -79,7 +79,6 @@ struct kasan_region_s
 
 static spinlock_t g_lock;
 static FAR struct kasan_region_s *g_region;
-static uint32_t g_region_init;
 
 /****************************************************************************
  * Public Data
@@ -98,11 +97,6 @@ static FAR uintptr_t *kasan_mem_to_shadow(FAR const void *ptr, size_t size,
 {
   FAR struct kasan_region_s *region;
   uintptr_t addr = (uintptr_t)ptr;
-
-  if (size == 0 || g_region_init != KASAN_INIT_VALUE)
-    {
-      return NULL;
-    }
 
   for (region = g_region; region != NULL; region = region->next)
     {
@@ -260,16 +254,20 @@ FAR void *kasan_unpoison(FAR const void *addr, size_t size)
 void kasan_register(FAR void *addr, FAR size_t *size)
 {
   FAR struct kasan_region_s *region;
+  irqstate_t flags;
 
   region = (FAR struct kasan_region_s *)
     ((FAR char *)addr + *size - KASAN_REGION_SIZE(*size));
 
   region->begin = (uintptr_t)addr;
   region->end   = region->begin + *size;
+
+  flags = spin_lock_irqsave(&g_lock);
   region->next  = g_region;
   g_region      = region;
-  g_region_init = KASAN_INIT_VALUE;
+  spin_unlock_irqrestore(&g_lock, flags);
 
+  kasan_start();
   kasan_poison(addr, *size);
   *size -= KASAN_REGION_SIZE(*size);
 }
@@ -301,14 +299,4 @@ void kasan_unregister(FAR void *addr)
     }
 
   spin_unlock_irqrestore(&g_lock, flags);
-}
-
-void kasan_start(void)
-{
-  g_region_init = KASAN_INIT_VALUE;
-}
-
-void kasan_stop(void)
-{
-  g_region_init = 0;
 }
