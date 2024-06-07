@@ -54,6 +54,12 @@
 #  define NETDEV_WORK LPWORK
 #endif
 
+#ifdef CONFIG_NETDEV_RSS
+#  define NETDEV_THREAD_COUNT CONFIG_SMP_NCPUS
+#else
+#  define NETDEV_THREAD_COUNT 1
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -67,9 +73,9 @@ struct netdev_upperhalf_s
   /* Deferring poll work to work queue or thread */
 
 #ifdef CONFIG_NETDEV_WORK_THREAD
-  pid_t tid;
-  sem_t sem;
-  sem_t sem_exit;
+  pid_t tid[NETDEV_THREAD_COUNT];
+  sem_t sem[NETDEV_THREAD_COUNT];
+  sem_t sem_exit[NETDEV_THREAD_COUNT];
 #else
   struct work_s work;
 #endif
@@ -654,7 +660,7 @@ static void netdev_upper_rxpoll_work(FAR struct netdev_upperhalf_s *upper)
 }
 
 /****************************************************************************
- * Name: netdev_upper_txavail_work
+ * Name: netdev_upper_work
  *
  * Description:
  *   Perform an out-of-cycle poll on a dedicated thread or the worker thread.
@@ -709,15 +715,24 @@ static int netdev_upper_loop(int argc, FAR char *argv[])
 {
   FAR struct netdev_upperhalf_s *upper =
     (FAR struct netdev_upperhalf_s *)((uintptr_t)strtoul(argv[1], NULL, 16));
+  int cpu = atoi(argv[2]);
 
-  while (netdev_upper_wait(&upper->sem) == OK &&
-         upper->tid != INVALID_PROCESS_ID)
+#ifdef CONFIG_NETDEV_RSS
+  cpu_set_t cpuset;
+
+  CPU_ZERO(&cpuset);
+  CPU_SET(cpu, &cpuset);
+  sched_setaffinity(upper->tid[cpu], sizeof(cpu_set_t), &cpuset);
+#endif
+
+  while (netdev_upper_wait(&upper->sem[cpu]) == OK &&
+         upper->tid[cpu] != INVALID_PROCESS_ID)
     {
       netdev_upper_work(upper);
     }
 
   nwarn("WARNING: Netdev work thread quitting.");
-  nxsem_post(&upper->sem_exit);
+  nxsem_post(&upper->sem_exit[cpu]);
   return 0;
 }
 #endif
@@ -738,10 +753,13 @@ static inline void netdev_upper_queue_work(FAR struct net_driver_s *dev)
   FAR struct netdev_upperhalf_s *upper = dev->d_private;
 
 #ifdef CONFIG_NETDEV_WORK_THREAD
+  int cpu = up_cpu_index();
   int semcount;
-  if (nxsem_get_value(&upper->sem, &semcount) == OK && semcount <= 0)
+
+  if (nxsem_get_value(&upper->sem[cpu], &semcount) == OK &&
+      semcount <= 0)
     {
-      nxsem_post(&upper->sem);
+      nxsem_post(&upper->sem[cpu]);
     }
 #else
   if (work_available(&upper->work))
@@ -1026,25 +1044,37 @@ static int netdev_upper_ifup(FAR struct net_driver_s *dev)
   FAR struct netdev_upperhalf_s *upper = dev->d_private;
 
 #ifdef CONFIG_NETDEV_WORK_THREAD
+  int i;
+
   /* Try to bring up a dedicated thread for work. */
 
-  if (upper->tid <= 0)
+  for (i = 0; i < NETDEV_THREAD_COUNT; i++)
     {
-      FAR char *argv[2];
-      char      arg1[32];
-      char      name[32];
-
-      snprintf(arg1, sizeof(arg1), "%p", upper);
-      snprintf(name, sizeof(name), NETDEV_THREAD_NAME_FMT, dev->d_ifname);
-      argv[0] = arg1;
-      argv[1] = NULL;
-
-      upper->tid = kthread_create(name, CONFIG_NETDEV_WORK_THREAD_PRIORITY,
-                                  CONFIG_DEFAULT_TASK_STACKSIZE,
-                                  netdev_upper_loop, argv);
-      if (upper->tid < 0)
+      if (upper->tid[i] <= 0)
         {
-          return upper->tid;
+          FAR char *argv[3];
+          char      arg1[32];
+          char      arg2[32];
+          char      name[32];
+
+          snprintf(arg1, sizeof(arg1), "%p", upper);
+          argv[0] = arg1;
+
+          snprintf(arg2, sizeof(arg2), "%d", i);
+          argv[1] = arg2;
+          argv[2] = NULL;
+
+          snprintf(name, sizeof(name), NETDEV_THREAD_NAME_FMT,
+                   dev->d_ifname);
+
+          upper->tid[i] = kthread_create(name,
+                                         CONFIG_NETDEV_WORK_THREAD_PRIORITY,
+                                         CONFIG_DEFAULT_TASK_STACKSIZE,
+                                         netdev_upper_loop, argv);
+          if (upper->tid[i] < 0)
+            {
+              return upper->tid[i];
+            }
         }
     }
 #endif
@@ -1156,6 +1186,9 @@ int netdev_lower_register(FAR struct netdev_lowerhalf_s *dev,
 {
   FAR struct netdev_upperhalf_s *upper;
   int ret;
+#ifdef CONFIG_NETDEV_WORK_THREAD
+  int i;
+#endif
 
   if (dev == NULL || quota_is_valid(dev) == false || dev->ops == NULL ||
       dev->ops->transmit == NULL || dev->ops->receive == NULL)
@@ -1188,8 +1221,12 @@ int netdev_lower_register(FAR struct netdev_lowerhalf_s *dev,
     }
 
 #ifdef CONFIG_NETDEV_WORK_THREAD
-  nxsem_init(&upper->sem, 0, 0);
-  nxsem_init(&upper->sem_exit, 0, 0);
+  for (i = 0; i < NETDEV_THREAD_COUNT; i++)
+    {
+      upper->tid[i] = INVALID_PROCESS_ID;
+      nxsem_init(&upper->sem[i], 0, 0);
+      nxsem_init(&upper->sem_exit[i], 0, 0);
+    }
 #endif
 
   return ret;
@@ -1213,6 +1250,9 @@ int netdev_lower_unregister(FAR struct netdev_lowerhalf_s *dev)
 {
   FAR struct netdev_upperhalf_s *upper;
   int ret;
+#ifdef CONFIG_NETDEV_WORK_THREAD
+  int i;
+#endif
 
   if (dev == NULL || dev->netdev.d_private == NULL)
     {
@@ -1227,17 +1267,20 @@ int netdev_lower_unregister(FAR struct netdev_lowerhalf_s *dev)
     }
 
 #ifdef CONFIG_NETDEV_WORK_THREAD
-  if (upper->tid > 0)
+  for (i = 0; i < NETDEV_THREAD_COUNT; i++)
     {
-      /* Try to tear down the dedicated thread for work. */
+      if (upper->tid[i] > 0)
+        {
+          /* Try to tear down the dedicated thread for work. */
 
-      upper->tid = INVALID_PROCESS_ID;
-      nxsem_post(&upper->sem);
-      nxsem_wait(&upper->sem_exit);
+          upper->tid[i] = INVALID_PROCESS_ID;
+          nxsem_post(&upper->sem[i]);
+          nxsem_wait(&upper->sem_exit[i]);
+        }
+
+      nxsem_destroy(&upper->sem[i]);
+      nxsem_destroy(&upper->sem_exit[i]);
     }
-
-  nxsem_destroy(&upper->sem);
-  nxsem_destroy(&upper->sem_exit);
 #endif
 
 #if CONFIG_IOB_NCHAINS > 0
