@@ -335,6 +335,7 @@ class DumpLogFile:
         self.registers = []
         self.__memories = list()
         self.reg_table = dict()
+        self.reg_len = 32
 
     def _init_register(self):
         # registers list should be able to hold the max index
@@ -353,8 +354,7 @@ class DumpLogFile:
             if reg_name in self.reg_table:
                 reg_index = self.reg_table[reg_name]
                 self.registers[reg_index] = int(reg_val, 16)
-            else:
-                raise Exception("Unknown register name: ", reg_name)
+                self.reg_len = max(self.reg_len, len(reg_val) * 4)
 
         return True
 
@@ -386,8 +386,9 @@ class DumpLogFile:
                 data = b""
                 start = addr_start
 
+        reg_fmt = "<I" if self.reg_len <= 32 else "<Q"
         for val in match_res.groupdict()["VALS"].split():
-            data = data + struct.pack("<Q", int(val, 16))
+            data = data + struct.pack(reg_fmt, int(val, 16))
 
         return start, data
 
@@ -437,6 +438,7 @@ class GDBStub:
         self.gdb_signal = GDB_SIGNAL_DEFAULT
         self.mem_regions = self.elffile.get_memories() + self.logfile.get_memories()
         self.reg_digits = elffile.xlen() // 4
+        self.reg_fmt = "<I" if elffile.xlen() <= 32 else "<Q"
 
         self.mem_regions.sort(key=lambda x: x["start"])
 
@@ -508,12 +510,11 @@ class GDBStub:
         self.put_gdb_packet(pkt)
 
     def handle_register_group_read_packet(self):
-        reg_fmt = "<Q"
         pkt = b""
 
         for reg in self.logfile.registers:
             if reg != b"x":
-                bval = struct.pack(reg_fmt, reg)
+                bval = struct.pack(self.reg_fmt, reg)
                 pkt += binascii.hexlify(bval)
             else:
                 # Register not in coredump -> unknown value
@@ -523,12 +524,11 @@ class GDBStub:
         self.put_gdb_packet(pkt)
 
     def handle_register_single_read_packet(self, pkt):
-        reg_fmt = "<Q"
         logger.debug(f"pkt: {pkt}")
 
         reg = int("0x" + pkt[1:].decode("utf8"), 16)
         if reg < len(self.logfile.registers) and self.logfile.registers[reg] != b"x":
-            bval = struct.pack(reg_fmt, self.logfile.registers[reg])
+            bval = struct.pack(self.reg_fmt, self.logfile.registers[reg])
             self.put_gdb_packet(binascii.hexlify(bval))
         else:
             self.put_gdb_packet(b"x" * self.reg_digits)
