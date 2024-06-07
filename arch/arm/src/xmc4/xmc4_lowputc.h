@@ -41,11 +41,14 @@
 
 struct uart_config_s
 {
-  uint32_t baud;         /* Desired BAUD rate */
-  uint8_t  dx;           /* Input pin 0=DXA, 1=DXB, ... 6=DXG */
-  uint8_t  parity;       /* Parity selection:  0=none, 1=odd, 2=even */
-  uint8_t  nbits;        /* Number of bits per word */
-  bool     stop2;        /* true=2 stop bits; false=1 stop bit */
+  uint32_t baud;           /* Desired BAUD rate */
+  uint8_t  dx;             /* Input pin 0=DXA, 1=DXB, ... 6=DXG */
+  uint8_t  parity;         /* Parity selection:  0=none, 1=odd, 2=even */
+  uint8_t  nbits;          /* Number of bits per word */
+  bool     stop2;          /* true=2 stop bits; false=1 stop bit */
+  uint8_t  startbufferptr; /* Hardware Tx buffer start pointer */
+  uint8_t  txbuffersize;   /* Hardware Tx Buffer Size */
+  uint8_t  rxbuffersize;   /* Hardware Rx Buffer Size */
 };
 
 /****************************************************************************
