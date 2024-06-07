@@ -199,10 +199,13 @@ endmenu
 menu "XMC4xxx USIC Configuration"
 	depends on XMC4_USIC
 
-choice
-	prompt "USIC0 Channel 0 Configuration"
-	default XMC4_USIC0_CHAN0_ISUART
+menu "USIC0 Channel 0 Configuration"
+	depends on XMC4_USIC
 	depends on XMC4_USIC0
+
+choice
+	prompt "Protocol"
+	default XMC4_USIC0_CHAN0_ISUART
 
 config XMC4_USIC0_CHAN0_NONE
 	bool "Not used"
@@ -244,12 +247,36 @@ config XMC4_USIC0_CHAN0_ISI2S
 	---help---
 		Configure USIC0 Channel 0 for I2S audio
 
-endchoice # USIC0 Channel 0 Configuration
+endchoice # USIC0 Channel 0 Protocol
+
+config XMC4_USIC0_CHAN0_TX_BUFFER_SIZE
+	int "Tx Fifo Buffer Size"
+	depends on XMC4_USIC0_CHAN0_ISUART
+	default 16
+	---help---
+		Should be a power of 2 between 2 and 64
+		The sum of Rx and Tx buffers sizes of both 
+		channels should be inferior to 64
+
+config XMC4_USIC0_CHAN0_RX_BUFFER_SIZE
+	int "Rx Fifo Buffer Size"
+	depends on XMC4_USIC0_CHAN0_ISUART
+	default 16
+	---help---
+		Should be a power of 2 between 2 and 64
+		The sum of Rx and Tx buffers sizes of both 
+		channels should be inferior to 64
+
+endmenu # USIC0 Channel 0 Configuration
+
+
+menu "USIC0 Channel 1 Configuration"
+	depends on XMC4_USIC
+	depends on XMC4_USIC0
 
 choice
-	prompt "USIC0 Channel 1 Configuration"
+	prompt "Protocol"
 	default XMC4_USIC0_CHAN1_ISUART
-	depends on XMC4_USIC0
 
 config XMC4_USIC0_CHAN1_NONE
 	bool "Not used"
@@ -291,12 +318,35 @@ config XMC4_USIC0_CHAN1_ISI2S
 	---help---
 		Configure USIC0 Channel 1 for I2S audio
 
-endchoice # USIC0 Channel 1 Configuration
+endchoice # USIC0 Channel 1 Protocol 
+
+config XMC4_USIC0_CHAN1_TX_BUFFER_SIZE
+	int "Tx Fifo Buffer Size"
+	depends on XMC4_USIC0_CHAN1_ISUART
+	default 16
+	---help---
+		Should be a power of 2 between 2 and 64
+		The sum of Rx and Tx buffers sizes of both 
+		channels should be inferior to 64
+
+config XMC4_USIC0_CHAN1_RX_BUFFER_SIZE
+	int "Rx Fifo Buffer Size"
+	depends on XMC4_USIC0_CHAN1_ISUART
+	default 16
+	---help---
+		Should be a power of 2 between 2 and 64
+		The sum of Rx and Tx buffers sizes of both 
+		channels should be inferior to 64
+
+endmenu # USIC0 Channel 1 Configuration
+
+menu "USIC1 Channel 0 Configuration"
+	depends on XMC4_USIC
+	depends on XMC4_USIC1
 
 choice
-	prompt "USIC1 Channel 0 Configuration"
+	prompt "Protocol"
 	default XMC4_USIC1_CHAN0_ISUART
-	depends on XMC4_USIC1
 
 config XMC4_USIC1_CHAN0_NONE
 	bool "Not used"
@@ -338,12 +388,35 @@ config XMC4_USIC1_CHAN0_ISI2S
 	---help---
 		Configure USIC1 Channel 0 for I2S audio
 
-endchoice # USIC1 Channel 0 Configuration
+endchoice # USIC1 Channel 0 Protocol 
+
+config XMC4_USIC1_CHAN0_TX_BUFFER_SIZE
+	int "Tx Fifo Buffer Size"
+	depends on XMC4_USIC1_CHAN0_ISUART
+	default 16
+	---help---
+		Should be a power of 2 between 2 and 64
+		The sum of Rx and Tx buffers sizes of both 
+		channels should be inferior to 64
+
+config XMC4_USIC1_CHAN0_RX_BUFFER_SIZE
+	int "Rx Fifo Buffer Size"
+	depends on XMC4_USIC1_CHAN0_ISUART
+	default 16
+	---help---
+		Should be a power of 2 between 2 and 64
+		The sum of Rx and Tx buffers sizes of both 
+		channels should be inferior to 64
+
+endmenu # USIC1 Channel 0 Configuration 
+
+menu "USIC1 Channel 1 Configuration"
+	depends on XMC4_USIC
+	depends on XMC4_USIC1
 
 choice
-	prompt "USIC1 Channel 1 Configuration"
+	prompt "Protocol"
 	default XMC4_USIC1_CHAN1_ISUART
-	depends on XMC4_USIC1
 
 config XMC4_USIC1_CHAN1_NONE
 	bool "Not used"
@@ -385,12 +458,35 @@ config XMC4_USIC1_CHAN1_ISI2S
 	---help---
 		Configure USIC1 Channel 1 for I2S audio
 
-endchoice # USIC1 Channel 1 Configuration
+endchoice # USIC1 Channel 1 Protocol
+
+config XMC4_USIC1_CHAN1_TX_BUFFER_SIZE
+	int "Tx Fifo Buffer Size"
+	depends on XMC4_USIC1_CHAN1_ISUART
+	default 16 
+	---help---
+		Should be a power of 2 between 2 and 64
+		The sum of Rx and Tx buffers sizes of both 
+		channels should be inferior to 64
+
+config XMC4_USIC1_CHAN1_RX_BUFFER_SIZE
+	int "Rx Fifo Buffer Size"
+	depends on XMC4_USIC1_CHAN1_ISUART
+	default 16 
+	---help---
+		Should be a power of 2 between 2 and 64
+		The sum of Rx and Tx buffers sizes of both 
+		channels should be inferior to 64
+
+endmenu # USIC1 Channel 1 Configuration
+
+menu "USIC2 Channel 0 Configuration"
+	depends on XMC4_USIC
+	depends on XMC4_USIC2
 
 choice
-	prompt "USIC2 Channel 0 Configuration"
+	prompt "Protocol"
 	default XMC4_USIC2_CHAN0_ISUART
-	depends on XMC4_USIC2
 
 config XMC4_USIC2_CHAN0_NONE
 	bool "Not used"
@@ -432,12 +528,35 @@ config XMC4_USIC2_CHAN0_ISI2S
 	---help---
 		Configure USIC2 Channel 0 for I2S audio
 
-endchoice # USIC2 Channel 0 Configuration
+endchoice # USIC2 Channel 0 Protocol
+
+config XMC4_USIC2_CHAN0_TX_BUFFER_SIZE
+	int "Tx Fifo Buffer Size"
+	depends on XMC4_USIC2_CHAN0_ISUART
+	default 16 
+	---help---
+		Should be a power of 2 between 2 and 64
+		The sum of Rx and Tx buffers sizes of both 
+		channels should be inferior to 64
+
+config XMC4_USIC2_CHAN0_RX_BUFFER_SIZE
+	int "Rx Fifo Buffer Size"
+	depends on XMC4_USIC2_CHAN0_ISUART
+	default 16 
+	---help---
+		Should be a power of 2 between 2 and 64
+		The sum of Rx and Tx buffers sizes of both 
+		channels should be inferior to 64
+
+endmenu # USIC2 Channel 0 Configuration
+
+menu "USIC2 Channel 1 Configuration"
+	depends on XMC4_USIC
+	depends on XMC4_USIC2
 
 choice
-	prompt "USIC2 Channel 1 Configuration"
+	prompt "Protocol"
 	default XMC4_USIC2_CHAN1_ISUART
-	depends on XMC4_USIC2
 
 config XMC4_USIC2_CHAN1_NONE
 	bool "Not used"
@@ -478,6 +597,26 @@ config XMC4_USIC2_CHAN1_ISI2S
 	select XMC4_USCI_I2S
 	---help---
 		Configure USIC2 Channel 1 for I2S audio
+endchoice # USIC2 Channel 1 Protocol
 
-endchoice # USIC2 Channel 1 Configuration
+config XMC4_USIC2_CHAN1_TX_BUFFER_SIZE
+	int "Tx Fifo Buffer Size"
+	depends on XMC4_USIC2_CHAN1_ISUART
+	default 16
+	---help---
+		Should be a power of 2 between 2 and 64
+		The sum of Rx and Tx buffers sizes of both 
+		channels should be inferior to 64
+
+config XMC4_USIC2_CHAN1_RX_BUFFER_SIZE
+	int "Rx Fifo Buffer Size"
+	depends on XMC4_USIC2_CHAN1_ISUART
+	default 16
+	---help---
+		Should be a power of 2 between 2 and 64
+		The sum of Rx and Tx buffers sizes of both 
+		channels should be inferior to 64
+
+endmenu # USIC2 Channel 1 Configuration
+
 endmenu # XMC4xxx USIC Configuration
