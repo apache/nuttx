@@ -26,6 +26,7 @@ set(CMAKE_CXX_COMPILER_FORCED TRUE)
 
 if(CONFIG_RISCV_TOOLCHAIN_GNU_RV32
    OR CONFIG_RISCV_TOOLCHAIN_GNU_RV64
+   OR CONFIG_RISCV_TOOLCHAIN_GNU_RV64ILP32
    OR CONFIG_RISCV_TOOLCHAIN_CLANG)
   if(NOT CONFIG_RISCV_TOOLCHAIN)
     set(CONFIG_RISCV_TOOLCHAIN GNU_RVG)
@@ -184,7 +185,11 @@ if(CONFIG_ARCH_RV32)
   add_link_options(-Wl,-melf32lriscv)
 elseif(CONFIG_ARCH_RV64)
   add_compile_options(-mcmodel=medany)
-  add_link_options(-Wl,-melf64lriscv)
+  if(CONFIG_ARCH_RV64ILP32)
+    add_link_options(-Wl,-melf32lriscv)
+  else()
+    add_link_options(-Wl,-melf64lriscv)
+  endif()
 endif()
 
 if(CONFIG_DEBUG_OPT_UNUSED_SECTIONS)
@@ -268,7 +273,11 @@ if(${CONFIG_RISCV_TOOLCHAIN} STREQUAL GNU_RVG)
     set(LLVM_ARCHTYPE "riscv32")
   elseif(CONFIG_ARCH_RV64)
     set(ARCHTYPE "rv64")
-    set(ARCHABITYPE "lp64")
+    if(CONFIG_ARCH_RV64ILP32)
+      set(ARCHABITYPE "ilp32")
+    else()
+      set(ARCHABITYPE "lp64")
+    endif()
     set(LLVM_ARCHTYPE "riscv64")
   endif()
 
