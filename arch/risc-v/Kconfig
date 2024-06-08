@@ -337,7 +337,12 @@ config ARCH_RV32
 config ARCH_RV64
 	bool
 	default n
-	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF
+	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF && !ARCH_RV64ILP32
+
+config ARCH_RV64ILP32
+	bool
+	depends on ARCH_RV64
+	default n
 
 config ARCH_RV_ISA_M
 	bool
@@ -546,6 +551,14 @@ config RISCV_TOOLCHAIN_GNU_RV32
 config RISCV_TOOLCHAIN_CLANG
 	bool "LLVM Clang toolchain"
 	select ARCH_TOOLCHAIN_CLANG
+
+config RISCV_TOOLCHAIN_GNU_RV64ILP32
+	bool "Generic GNU RV64ILP32 toolchain"
+	select ARCH_TOOLCHAIN_GNU
+	select ARCH_RV64ILP32
+	---help---
+		This option work with Ruyisdk toolchain (GCC 13 or newer)
+		configured for riscv64-unknown-elf.
 
 endchoice # Toolchain Selection
 

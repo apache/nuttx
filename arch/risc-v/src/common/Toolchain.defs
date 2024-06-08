@@ -29,6 +29,8 @@
 
 ifeq ($(filter y, $(CONFIG_RISCV_TOOLCHAIN_GNU_RV64)),y)
   CONFIG_RISCV_TOOLCHAIN ?= GNU_RVG
+else ifeq ($(filter y, $(CONFIG_RISCV_TOOLCHAIN_GNU_RV64ILP32)),y)
+  CONFIG_RISCV_TOOLCHAIN ?= GNU_RVG
 else ifeq ($(filter y, $(CONFIG_RISCV_TOOLCHAIN_GNU_RV32)),y)
   CONFIG_RISCV_TOOLCHAIN ?= GNU_RVG
 else ifeq ($(filter y, $(CONFIG_RISCV_TOOLCHAIN_CLANG)),y)
@@ -119,6 +121,8 @@ SHMODULEFLAGS = -Bsymbolic -G -Bdynamic --entry=__start
 ifeq ($(CONFIG_ARCH_RV32),y)
 LDFLAGS += -melf32lriscv
 SHMODULEFLAGS += -melf32lriscv
+else ifeq ($(CONFIG_ARCH_RV64ILP32),y)
+LDFLAGS += -melf32lriscv
 else
 LDFLAGS += -melf64lriscv
 endif
@@ -231,7 +235,11 @@ ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
     LLVM_ARCHTYPE := riscv32
   else ifeq ($(CONFIG_ARCH_RV64),y)
     ARCHTYPE = rv64
-    ARCHABITYPE = lp64
+    ifeq ($(CONFIG_ARCH_RV64ILP32),y)
+      ARCHABITYPE = ilp32
+    else
+      ARCHABITYPE = lp64
+    endif
     LLVM_ARCHTYPE := riscv64
     # https://www.sifive.com/blog/all-aboard-part-4-risc-v-code-models
     ARCHCPUFLAGS = -mcmodel=medany
