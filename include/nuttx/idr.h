@@ -40,6 +40,7 @@ struct idr_s;
  * Public Function Prototypes
  ****************************************************************************/
 
+FAR void *idr_find(FAR struct idr_s *idr, unsigned int id);
 FAR void *idr_get_next(FAR struct idr_s *idr, FAR int *id);
 FAR struct idr_s *idr_init_base(int base);
 void idr_destroy(FAR struct idr_s *idr);

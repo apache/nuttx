@@ -93,6 +93,32 @@ RB_GENERATE_STATIC(idr_tree_s, idr_node_s, link, idr_compare)
  * Public Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: idr_find
+ ****************************************************************************/
+
+FAR void *idr_find(FAR struct idr_s *idr, unsigned int id)
+{
+  FAR struct idr_node_s *node;
+  struct idr_node_s search;
+
+  search.id = id;
+  nxmutex_lock(&idr->lock);
+  node = RB_FIND(idr_tree_s, &idr->alloced, &search);
+  if (node == NULL)
+    {
+      nxmutex_unlock(&idr->lock);
+      return NULL;
+    }
+
+  nxmutex_unlock(&idr->lock);
+  return node->data;
+}
+
+/****************************************************************************
+ * Name: idr_get_next
+ ****************************************************************************/
+
 FAR void *idr_get_next(FAR struct idr_s *idr, FAR int *id)
 {
   FAR struct idr_node_s *node;
