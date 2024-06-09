@@ -166,7 +166,7 @@ EXTRA_LIBS += allsyms$(OBJEXT)
 endif
 
 define LINK_ALLSYMS_KASAN
-	$(if $(CONFIG_ALLSYMS),
+	$(if $(CONFIG_ALLSYMS),)
 	$(Q) $(TOPDIR)/tools/mkallsyms.py $(NUTTX) allsyms.tmp --orderbyname $(CONFIG_SYMTAB_ORDEREDBYNAME)
 	$(Q) $(call COMPILE, allsyms.tmp, allsyms$(OBJEXT), -x c)
 	$(Q) $(call DELFILE, allsyms.tmp))

@@ -373,14 +373,14 @@ EXTRALD_OBJ += allsyms$(OBJEXT)
 endif
 
 define LINK_ALLSYMS_KASAN
-	$(if $(CONFIG_ALLSYMS), \
-		$(if $(CONFIG_HOST_MACOS), \
+	$(if $(CONFIG_ALLSYMS),) \
+		$(if $(CONFIG_HOST_MACOS),) \
 			$(Q) $(TOPDIR)/tools/mkallsyms.sh noconst $(NUTTX) $(CROSSDEV) > allsyms.tmp, \
 			$(Q) $(TOPDIR)/tools/mkallsyms.py $(NUTTX) allsyms.tmp --orderbyname $(CONFIG_SYMTAB_ORDEREDBYNAME)))
-	$(if $(CONFIG_ALLSYMS), \
+	$(if $(CONFIG_ALLSYMS),) \
 		$(Q) $(call COMPILE, allsyms.tmp, allsyms$(OBJEXT), -x c)
 		$(Q) $(call DELFILE, allsyms.tmp))
-	$(if $(CONFIG_MM_KASAN_GLOBAL),
+	$(if $(CONFIG_MM_KASAN_GLOBAL),)
 	$(Q) $(TOPDIR)/tools/kasan_global.py -e $(NUTTX) -o kasan_globals.tmp
 	$(Q) $(call COMPILE, kasan_globals.tmp, kasan_globals$(OBJEXT) -fno-sanitize=kernel-address, -x c)
 	$(Q) $(call DELFILE, kasan_globals.tmp))
@@ -415,8 +415,8 @@ ifeq ($(CONFIG_MM_KASAN_GLOBAL),y)
 	            .interp : {*(.interp)}/g' nuttx.ld
 endif
 ifeq ($(CONFIG_ALLSYMS)$(CONFIG_MM_KASAN_GLOBAL),)
-	$(if $(CONFIG_HAVE_CXX),\
-	$(Q) "$(CXX)" $(CFLAGS) $(LDFLAGS) -o $(TOPDIR)/$@ $(HEADOBJ) nuttx.rel $(HOSTOBJS) $(STDLIBS),\
+	$(if $(CONFIG_HAVE_CXX),)
+	$(Q) "$(CXX)" $(CFLAGS) $(LDFLAGS) -o $(TOPDIR)/$@ $(HEADOBJ) nuttx.rel $(HOSTOBJS) $(STDLIBS)
 	$(Q) "$(CC)" $(CFLAGS) $(LDFLAGS) -o $(TOPDIR)/$@ $(HEADOBJ) nuttx.rel $(HOSTOBJS) $(STDLIBS))
 else
 	$(Q) $(call LINK_ALLSYMS_KASAN)
