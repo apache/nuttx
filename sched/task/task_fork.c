@@ -96,6 +96,7 @@ FAR struct task_tcb_s *nxtask_setup_fork(start_t retaddr)
   FAR struct tcb_s *ptcb = this_task();
   FAR struct tcb_s *parent;
   FAR struct task_tcb_s *child;
+  FAR char **argv;
   size_t stack_size;
   uint8_t ttype;
   int priority;
@@ -211,8 +212,8 @@ FAR struct task_tcb_s *nxtask_setup_fork(start_t retaddr)
 
   /* Setup to pass parameters to the new task */
 
-  ret = nxtask_setup_arguments(child, parent->group->tg_info->ta_argv[0],
-                               &parent->group->tg_info->ta_argv[1]);
+  argv = nxsched_get_stackargs(parent);
+  ret = nxtask_setup_arguments(child, argv[0], &argv[1]);
   if (ret < OK)
     {
       goto errout_with_tcb;
