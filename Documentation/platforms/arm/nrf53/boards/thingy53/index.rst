@@ -90,6 +90,53 @@ rpmsghci_sdc_cpunet
 This configuration enables RPMSG Bluetooth HCI server on the network core which
 can be accessed using RPMSG Bluetooth HCI client on the application core.
 
+sensors_cpuapp
+--------------
+
+Configuration demonstrating sensor data stream using NxScope.
+See :doc:`/applications/system/sensorscope/index` for more details.
+
+Device detection with ``nxscli`` client::
+
+    $ nxscli serial /dev/ttyACM0 pdevinfo
+    INFO:nxscli:enable (0, <class 'nxscli.plugins.devinfo.PluginDevinfo'>, {})
+    INFO:nxscli:connecting to nxs device...
+    INFO:nxscli:connected!
+    INFO:nxscli:started <nxscli.plugins.devinfo.PluginDevinfo object at 0x7f16bdec5d30>
+
+    Device Summary
+      Channels:         6
+      Divider support:  no
+      Ack support:      no
+      Flags:            0x00
+      RX padding:       0
+
+    Stream
+      Connected:        yes
+      Started:          no
+      Overflow count:   0
+      Bitrate:          0.0 B/s
+
+    Channel State
+      Applied enabled:  none
+      Buffered enabled: none
+
+    Channels
+    +----+---------------+-------+-----+-------+----+-----+
+    | ID | Name          | Type  | Dim | Valid | En | Div |
+    +====+===============+=======+=====+=======+====+=====+
+    |  0 | sensor_accel0 | FLOAT |   3 | yes   | no |   0 |
+    |  1 | sensor_accel1 | FLOAT |   3 | yes   | no |   0 |
+    |  2 | sensor_gyro0  | FLOAT |   3 | yes   | no |   0 |
+    |  3 | sensor_ir0    | FLOAT |   1 | yes   | no |   0 |
+    |  4 | sensor_mag0   | FLOAT |   3 | yes   | no |   0 |
+    |  5 | sensor_rgb0   | FLOAT |   3 | yes   | no |   0 |
+    +----+---------------+-------+-----+-------+----+-----+
+
+    closing...
+    INFO:nxscli:disconnecting from nxs device...
+    INFO:nxscli:disconnected!
+
 Flash & Debug
 =============
 
