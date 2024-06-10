@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/nrf53/thingy53/src/nrf53_boot.c
+ * boards/arm/nrf53/common/src/nrf53_adxl362.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,61 +24,56 @@
 
 #include <nuttx/config.h>
 
+#include <stdio.h>
 #include <debug.h>
+#include <errno.h>
 
-#include <nuttx/board.h>
-#include <arch/board/board.h>
+#include <nuttx/sensors/adxl362.h>
 
-#include "thingy53.h"
+#include <nuttx/spi/spi.h>
+#include "nrf53_spi.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nrf53_board_initialize
+ * Name: nrf53_adxl362_init
  *
  * Description:
- *   All NRF53xxx architectures must provide the following entry point.
- *   This entry point is called early in the initialization -- after all
- *   memory has been configured and mapped but before any devices have been
- *   initialized.
+ *   Initialize and register the ADXL362 device
+ *
+ * Input Parameters:
+ *   devno - The user specifies device number, from 0.
+ *   busno - SPI or I2C bus number
+ *   addr  - (I2C only) The I2C address
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-void nrf53_board_initialize(void)
+int nrf53_adxl362_init(int devno, int busno)
 {
-  /* Configure on-board LEDs if LED support has been selected. */
+  struct spi_dev_s *spi;
+  int ret;
 
-#ifdef CONFIG_ARCH_LEDS
-  board_autoled_initialize();
-#endif
+  sninfo("Initializing ADXL362..\n");
 
-#ifdef CONFIG_NRF53_SPI_MASTER
-  /* Configure SPI chip selects */
+  /* Initialize spi device */
 
-  nrf53_spidev_initialize();
-#endif
+  spi = nrf53_spibus_initialize(busno);
+  if (!spi)
+    {
+      snerr("ERROR: Failed to initialize spi%d.\n", busno);
+      return -ENODEV;
+    }
+
+  ret = adxl362_register(devno, spi);
+  if (ret < 0)
+    {
+      snerr("Error registering ADXL362\n");
+    }
+
+  return ret;
 }
-
-/****************************************************************************
- * Name: board_late_initialize
- *
- * Description:
- *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
- *   initialization call will be performed in the boot-up sequence to a
- *   function called board_late_initialize(). board_late_initialize() will be
- *   called immediately after up_initialize() is called and just before the
- *   initial application is started.  This additional initialization phase
- *   may be used, for example, to initialize board-specific device drivers.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_BOARD_LATE_INITIALIZE
-void board_late_initialize(void)
-{
-  /* Perform board-specific initialization */
-
-  nrf53_bringup();
-}
-#endif
