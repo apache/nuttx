@@ -233,7 +233,6 @@ static void elf_emit_tcb_note(FAR struct elf_dumpinfo_s *cinfo,
   elf_prpsinfo_t info;
   FAR uintptr_t *regs;
   Elf_Nhdr nhdr;
-  int i;
 
   memset(&info,   0x0, sizeof(info));
   memset(&status, 0x0, sizeof(status));
@@ -280,9 +279,10 @@ static void elf_emit_tcb_note(FAR struct elf_dumpinfo_s *cinfo,
       regs = (uintptr_t *)tcb->xcp.regs;
     }
 
+#if defined(ARCH_ARM) || defined(ARCH_ARM64)
   if (regs != NULL)
     {
-      for (i = 0; i < nitems(status.pr_regs); i++)
+      for (int i = 0; i < nitems(status.pr_regs); i++)
         {
           if (g_tcbinfo.reg_off.p[i] == UINT16_MAX)
             {
@@ -295,6 +295,7 @@ static void elf_emit_tcb_note(FAR struct elf_dumpinfo_s *cinfo,
             }
         }
     }
+#endif
 
   elf_emit(cinfo, &status, sizeof(status));
 }

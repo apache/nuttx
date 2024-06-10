@@ -84,7 +84,9 @@ typedef struct elf_prstatus_s
   elf_timeval_t  pr_stime;    /* System time */
   elf_timeval_t  pr_cutime;   /* Cumulative user time */
   elf_timeval_t  pr_cstime;   /* Cumulative system time */
+#if defined(ARCH_ARM) || defined(ARCH_ARM64)
   elf_gregset_t  pr_regs;
+#endif
   int            pr_fpvalid;  /* True if math co-processor being used */
 } elf_prstatus_t;
 #endif
