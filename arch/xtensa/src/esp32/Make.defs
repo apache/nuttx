@@ -208,7 +208,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = 966f1bbf7d80d3fac9a43f414e864985cbcfd680
+	ESP_HAL_3RDPARTY_VERSION = 0e6895d4ce431ce95b156027e6e3af50f9b4df37
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL
@@ -232,6 +232,10 @@ chip/$(ESP_HAL_3RDPARTY_REPO):
 
 CFLAGS += -Wno-undef -Wno-unused-variable
 
+# Enable strict volatile bitfield access
+
+CFLAGS += -fstrict-volatile-bitfields
+
 # Files that require the HAL recipe
 
 CHIP_SERIES = $(patsubst "%",%,$(CONFIG_ESPRESSIF_CHIP_SERIES))
@@ -250,9 +254,6 @@ ifeq ($(CONFIG_ESP32_WIRELESS),y)
 	$(Q) echo "Applying patches..."
 	$(Q) cd chip/$(ESP_HAL_3RDPARTY_REPO)/components/mbedtls/mbedtls && git apply ../../../nuttx/patches/components/mbedtls/mbedtls/*.patch
 endif
-
-distclean::
-	$(call DELDIR, chip/$(ESP_HAL_3RDPARTY_REPO))
 
 ifeq ($(CONFIG_ESP32_WIRELESS),y)
 include chip/Wireless.mk

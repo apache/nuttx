@@ -63,8 +63,16 @@ SECTIONS
   {
     . = ALIGN(4);
     _srodata = ABSOLUTE(.);
-    *(EXCLUDE_FILE (*libarch.a:esp32_spiflash.* esp32_start.*) .rodata)
-    *(EXCLUDE_FILE (*libarch.a:esp32_spiflash.* esp32_start.*) .rodata.*)
+    *(EXCLUDE_FILE (*libarch.a:esp32_spiflash.* esp32_start.*
+                    *libarch.a:*esp_loader.*
+                    *libarch.a:*uart_hal.*
+                    *libarch.a:*mmu_hal.*
+                    ) .rodata)
+    *(EXCLUDE_FILE (*libarch.a:esp32_spiflash.* esp32_start.*
+                    *libarch.a:*esp_loader.*
+                    *libarch.a:*uart_hal.*
+                    *libarch.a:*mmu_hal.*
+                    ) .rodata.*)
     *(.irom1.text) /* catch stray ICACHE_RODATA_ATTR */
     *(.gnu.linkonce.r.*)
     *(.rodata1)
@@ -157,12 +165,15 @@ SECTIONS
 
     _iram_text_start = ABSOLUTE(.);
     *(.iram1 .iram1.*)
+    esp32_start.*(.literal .text .literal.* .text.*)
     *libphy.a:(.literal .text .literal.* .text.*)
     *librtc.a:(.literal .text .literal.* .text.*)
     *libpp.a:(.literal .text .literal.* .text.*)
     *libhal.a:(.literal .text .literal.* .text.*)
     *libarch.a:esp32_spiflash.*(.literal .text .literal.* .text.*)
-    esp32_start.*(.literal .text .literal.* .text.*)
+    *libarch.a:*mmu_hal.*(.text .text.* .literal .literal.*)
+    *libarch.a:*uart_hal.*(.text .text.* .literal .literal.*)
+    *libarch.a:*esp_loader.*(.text .text.* .literal .literal.*)
     *(.wifirxiram .wifirxiram.*)
     *(.wifirxiram .wifi0iram.*)
     *(.wifislpiram .wifislpiram.*)
@@ -183,6 +194,7 @@ SECTIONS
     /* .bss initialized on power-up */
 
     . = ALIGN (8);
+    _bss_start = ABSOLUTE(.);
     _sbss = ABSOLUTE(.);
     *(.dynsbss)
     *(.sbss)
@@ -200,6 +212,7 @@ SECTIONS
     *(COMMON)
     . = ALIGN(8);
     _ebss = ABSOLUTE(.);
+    _bss_end = ABSOLUTE(.);
   } >dram0_0_seg
 
   .noinit (NOLOAD):
@@ -231,8 +244,11 @@ SECTIONS
     KEEP (*(.gnu.linkonce.s2.*))
     KEEP (*(.jcr))
     *(.dram1 .dram1.*)
-    *libarch.a:esp32_spiflash.*(.rodata  .rodata.*)
     esp32_start.*(.rodata  .rodata.*)
+    *libarch.a:esp32_spiflash.*(.rodata  .rodata.*)
+    *libarch.a:*esp_loader.*(.rodata .rodata.*)
+    *libarch.a:*mmu_hal.*(.rodata .rodata.*)
+    *libarch.a:*uart_hal.*(.rodata .rodata.*)
     _edata = ABSOLUTE(.);
     . = ALIGN(4);
 
@@ -256,7 +272,7 @@ SECTIONS
   _image_irom_size = LOADADDR(.flash.text) + SIZEOF(.flash.text) - _image_irom_lma;
 
   /* The alignment of the ".flash.text" output section is forced to
-   * 0x0000FFFF (64KB) to ensure that it will be allocated at the beginning
+   * 0x00010000 (64KB) to ensure that it will be allocated at the beginning
    * of the next available Flash block.
    * This is required to meet the following constraint from the external
    * flash MMU:
@@ -266,7 +282,7 @@ SECTIONS
    * be equal.
    */
 
-  .flash.text : ALIGN(0x0000FFFF)
+  .flash.text : ALIGN(0x00010000)
   {
     _stext = .;
     _text_start = ABSOLUTE(.);

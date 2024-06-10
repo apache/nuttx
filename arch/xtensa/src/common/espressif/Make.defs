@@ -30,6 +30,7 @@ CHIP_CSRCS += esp_mcpwm.c
 endif
 
 ifeq ($(filter $(CONFIG_ESPRESSIF_SIMPLE_BOOT) \
+      $(CONFIG_ESP32_APP_FORMAT_MCUBOOT) \
       $(CONFIG_ESP32S2_APP_FORMAT_MCUBOOT) \
       $(CONFIG_ESP32S3_APP_FORMAT_MCUBOOT),y),y)
 CHIP_CSRCS += esp_loader.c

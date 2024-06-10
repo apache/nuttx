@@ -35,9 +35,12 @@
 #include "hal/cache_types.h"
 #include "hal/cache_ll.h"
 #include "hal/cache_hal.h"
-#include "soc/extmem_reg.h"
 #include "rom/cache.h"
 #include "spi_flash_mmap.h"
+
+#ifndef CONFIG_ARCH_CHIP_ESP32
+#  include "soc/extmem_reg.h"
+#endif
 
 #  include "bootloader_flash_priv.h"
 #ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
@@ -107,6 +110,16 @@ extern uint8_t _image_drom_size[];
 
 extern int ets_printf(const char *fmt, ...) printf_like(1, 2);
 
+#ifdef CONFIG_ARCH_CHIP_ESP32
+extern void cache_read_enable(int cpu);
+extern void cache_read_disable(int cpu);
+extern void cache_flush(int cpu);
+extern unsigned int cache_flash_mmu_set(int cpu_no, int pid,
+                                        unsigned int vaddr,
+                                        unsigned int paddr,
+                                        int psize, int num);
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -139,6 +152,11 @@ int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
   uint32_t app_irom_vaddr_aligned = app_irom_vaddr & MMU_FLASH_MASK;
   uint32_t app_drom_start_aligned = app_drom_start & MMU_FLASH_MASK;
   uint32_t app_drom_vaddr_aligned = app_drom_vaddr & MMU_FLASH_MASK;
+
+#ifdef CONFIG_ARCH_CHIP_ESP32
+  uint32_t drom_page_count = 0;
+  uint32_t irom_page_count = 0;
+#endif
 
 #ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
   esp_image_header_t image_header; /* Header for entire image */
@@ -244,7 +262,8 @@ int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
 #endif
 
 #if defined (CONFIG_ESP32S2_APP_FORMAT_MCUBOOT) || \
-    defined (CONFIG_ESP32S3_APP_FORMAT_MCUBOOT)
+    defined (CONFIG_ESP32S3_APP_FORMAT_MCUBOOT) || \
+    defined (CONFIG_ESP32_APP_FORMAT_MCUBOOT)
   ets_printf("IROM segment aligned lma 0x%08x vma 0x%08x len 0x%06x (%u)\n",
       app_irom_start_aligned, app_irom_vaddr_aligned,
       app_irom_size, app_irom_size);
@@ -253,7 +272,12 @@ int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
       app_drom_size, app_drom_size);
 #endif
 
+#ifdef CONFIG_ARCH_CHIP_ESP32
+  cache_read_disable(0);
+  cache_flush(0);
+#else
   cache_hal_disable(CACHE_TYPE_ALL);
+#endif
 
   /* Clear the MMU entries that are already set up,
    * so the new app only has the mappings it creates.
@@ -261,6 +285,25 @@ int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
 
   mmu_hal_unmap_all();
 
+#ifdef CONFIG_ARCH_CHIP_ESP32
+  drom_page_count = (app_drom_size + SPI_FLASH_MMU_PAGE_SIZE - 1) /
+                              SPI_FLASH_MMU_PAGE_SIZE;
+  rc  = cache_flash_mmu_set(0, 0, app_drom_vaddr_aligned,
+                            app_drom_start_aligned, 64,
+                            (int)drom_page_count);
+  rc |= cache_flash_mmu_set(1, 0, app_drom_vaddr_aligned,
+                            app_drom_start_aligned, 64,
+                            (int)drom_page_count);
+
+  irom_page_count = (app_irom_size + SPI_FLASH_MMU_PAGE_SIZE - 1) /
+                              SPI_FLASH_MMU_PAGE_SIZE;
+  rc |= cache_flash_mmu_set(0, 0, app_irom_vaddr_aligned,
+                            app_irom_start_aligned, 64,
+                            (int)irom_page_count);
+  rc |= cache_flash_mmu_set(1, 0, app_irom_vaddr_aligned,
+                            app_irom_start_aligned, 64,
+                            (int)irom_page_count);
+#else
   mmu_hal_map_region(0, MMU_TARGET_FLASH0,
                      app_drom_vaddr_aligned, app_drom_start_aligned,
                      app_drom_size, &actual_mapped_len);
@@ -268,6 +311,7 @@ int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
   mmu_hal_map_region(0, MMU_TARGET_FLASH0,
                      app_irom_vaddr_aligned, app_irom_start_aligned,
                      app_irom_size, &actual_mapped_len);
+#endif
 
   /* ------------------Enable corresponding buses--------------------- */
 
@@ -285,7 +329,10 @@ int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
 
   /* ------------------Enable Cache----------------------------------- */
 
+#ifdef CONFIG_ARCH_CHIP_ESP32
+  cache_read_enable(0);
+#else
   cache_hal_enable(CACHE_TYPE_ALL);
-
+#endif
   return (int)rc;
 }
