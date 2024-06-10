@@ -103,6 +103,11 @@ config ESPRESSIF_CHIP_SERIES
 	string
 	default "esp32"
 
+config ESPRESSIF_NUM_CPUS
+	int
+	default 1 if ESP32_SINGLE_CPU
+	default 2 if ESP32_DUAL_CPU
+
 config ESP32_SINGLE_CPU
 	bool
 	default n
@@ -1890,7 +1895,6 @@ comment "Partition Table Configuration"
 config ESP32_PARTITION_TABLE
 	bool "Create MTD partitions from Partition Table"
 	default n
-	select ESP32_BOOTLOADER_BUILD_FROM_SOURCE
 	---help---
 		Decode partition table and initialize partitions as MTD.
 
@@ -2560,10 +2564,14 @@ config ESP32_HAVE_OTA_PARTITION
 
 menu "Bootloader and Image Configuration"
 
+config ESPRESSIF_SIMPLE_BOOT
+	bool
+	depends on !ESP32_APP_FORMAT_MCUBOOT && !ESP32_APP_FORMAT_LEGACY
+	default y
+
 config ESP32_APP_FORMAT_LEGACY
 	bool "Enable legacy IDF bootloader format"
-	default y if !ESP32_APP_FORMAT_MCUBOOT
-	depends on !ESP32_APP_FORMAT_MCUBOOT
+	default y if BUILD_PROTECTED
 	---help---
 		This is the legacy application image format, as supported by the ESP-IDF
 		2nd stage bootloader.
@@ -2571,27 +2579,10 @@ config ESP32_APP_FORMAT_LEGACY
 config ESP32_APP_FORMAT_MCUBOOT
 	bool "Enable MCUboot-bootable format"
 	depends on !MCUBOOT_BOOTLOADER
+	default n
 	select ESP32_HAVE_OTA_PARTITION
-	select ESP32_BOOTLOADER_BUILD_FROM_SOURCE
 	---help---
 		Enables the Espressif port of MCUboot to be used as 2nd stage bootloader.
-
-config ESP32_BOOTLOADER_DOWNLOAD_PREBUILT
-	bool
-	default y if !ESP32_BOOTLOADER_BUILD_FROM_SOURCE
-	depends on !ESP32_BOOTLOADER_BUILD_FROM_SOURCE
-	---help---
-		The build system will download the prebuilt binaries from
-		https://github.com/espressif/esp-nuttx-bootloader according to the chosen
-		Application Image Format (ESP32_APP_FORMAT_LEGACY or ESP32_APP_FORMAT_MCUBOOT)
-
-config ESP32_BOOTLOADER_BUILD_FROM_SOURCE
-	bool "Build binaries from source"
-	---help---
-		The build system will build all the required binaries from source. It will clone
-		the https://github.com/espressif/esp-nuttx-bootloader repository and build a
-		custom bootloader according to the chosen Application Image Format
-		(ESP32_APP_FORMAT_LEGACY or ESP32_APP_FORMAT_MCUBOOT) and partition information.
 
 choice
 	prompt "Target slot for image flashing"
@@ -2637,7 +2628,6 @@ config ESP32_CUSTOM_PARTITION_TABLE_OFFSET
 	bool "Customize partition table offset"
 	default n
 	depends on ESP32_APP_FORMAT_LEGACY
-	select ESP32_BOOTLOADER_BUILD_FROM_SOURCE
 	---help---
 		Enable to select the offset of the partition table in the flash.
 

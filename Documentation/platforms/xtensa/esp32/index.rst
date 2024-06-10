@@ -99,14 +99,48 @@ These steps are given in the setup guide in
 Building and flashing NuttX
 ===========================
 
-Firmware for ESP32 is flashed via the USB/UART interface using the ``esptool.py`` tool.
-It's a two step process where the first converts the ELF file into a ESP32-compatible binary
-and the second flashes it to the board.  These steps are included into the build system and you can
-flash your NuttX firmware simply by running::
+Bootloader and partitions
+-------------------------
 
-    $ make flash ESPTOOL_PORT=<port>
+NuttX can boot the ESP32 directly using the so-called "Simple Boot". An externally-built
+2nd stage bootloader is not required in this case as all functions required to boot the device
+are built within NuttX. Simple boot does not require any specific configuration (it is selectable
+by default if no other 2nd stage bootloader is used).
 
-where ``<port>`` is typically ``/dev/ttyUSB0`` or similar. You can change the baudrate by passing ``ESPTOOL_BAUD``.
+If other features are required, an externally-built 2nd stage bootloader is needed. The bootloader
+is built using the ``make bootloader`` command. This command generates the firmware in the
+``nuttx`` folder. The ``ESPTOOL_BINDIR`` is used in the ``make flash`` command to specify the path
+to the bootloader. For compatibility among other SoCs and future options of 2nd stage bootloaders,
+the commands ``make bootloader`` and the ``ESPTOOL_BINDIR`` option (for the ``make flash``) can be
+used even if no externally-built 2nd stage bootloader is being built (they will be ignored if
+Simple Boot is used, for instance)::
+
+  $ make bootloader
+
+.. note:: It is recommended that if this is the first time you are using the board with NuttX to
+   perform a complete SPI FLASH erase.
+
+    .. code-block:: console
+
+      $ esptool.py erase_flash
+
+Building and Flashing
+---------------------
+
+First, make sure that ``esptool.py`` is installed.  This tool is used to convert the ELF to a
+compatible ESP32 image and to flash the image into the board.
+It can be installed with: ``pip install esptool==4.8.dev4``.
+
+It's a two-step process where the first converts the ELF file into an ESP32 compatible binary
+and the second flashes it to the board. These steps are included in the build system and it is
+possible to build and flash the NuttX firmware simply by running::
+
+    $ make flash ESPTOOL_PORT=<port> ESPTOOL_BINDIR=./
+
+where ``<port>`` is typically ``/dev/ttyUSB0`` or similar. ``ESPTOOL_BINDIR=./`` is the path of the
+externally-built 2nd stage bootloader and the partition table (if applicable): when built using the
+``make bootloader``, these files are placed into ``nuttx`` folder. ``ESPTOOL_BAUD`` is able to
+change the flash baud rate if desired.
 
 Debugging with OpenOCD
 ======================
@@ -134,24 +168,6 @@ described for the :ref:`ESP32-DevKitC <platforms/xtensa/esp32/boards/esp32-devki
 OpenOCD can then be used::
 
   openocd -c 'set ESP_RTOS hwthread; set ESP_FLASH_SIZE 0' -f board/esp32-wrover-kit-1.8v.cfg
-
-Bootloader and partitions
--------------------------
-
-ESP32 requires a bootloader to be flashed as well as a set of FLASH partitions. This is only needed the first time
-(or any time you which to modify either of these). An easy way is to use prebuilt binaries for NuttX `from here <https://github.com/espressif/esp-nuttx-bootloader>`__. In there you will find instructions to rebuild these if necessary.
-Once you downloaded both binaries, you can flash them by adding an ``ESPTOOL_BINDIR`` parameter, pointing to the directory where these binaries were downloaded:
-
-.. code-block:: console
-
-   $ make flash ESPTOOL_PORT=<port> ESPTOOL_BINDIR=<dir>
-
-.. note:: It is recommended that if this is the first time you are using the board with NuttX that you perform a complete
-   SPI FLASH erase.
-
-   .. code-block:: console
-
-      $ esptool.py erase_flash
 
 Peripheral Support
 ==================
