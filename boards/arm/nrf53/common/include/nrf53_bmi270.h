@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/nrf53/thingy53/src/nrf53_boot.c
+ * boards/arm/nrf53/common/include/nrf53_bmi270.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,67 +18,40 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARDS_ARM_NRF53_COMMON_INCLUDE_NRF53_BMI270_H
+#define __BOARDS_ARM_NRF53_COMMON_INCLUDE_NRF53_BMI270_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <debug.h>
-
-#include <nuttx/board.h>
-#include <arch/board/board.h>
-
-#include "thingy53.h"
-
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nrf53_board_initialize
+ * Name: nrf53_bmi270spi_initialize
+ *       nrf53_bmi270i2c_initialize
  *
  * Description:
- *   All NRF53xxx architectures must provide the following entry point.
- *   This entry point is called early in the initialization -- after all
- *   memory has been configured and mapped but before any devices have been
- *   initialized.
+ *   Initialize and register the BMI270 as uorb sensor
+ *
+ * Input Parameters:
+ *   devno - The user specifies device number, from 0.
+ *   busno - SPI or I2C bus number
+ *   addr  - (I2C only) The I2C address
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-void nrf53_board_initialize(void)
-{
-  /* Configure on-board LEDs if LED support has been selected. */
-
-#ifdef CONFIG_ARCH_LEDS
-  board_autoled_initialize();
+#ifdef CONFIG_SENSORS_BMI270_SPI
+int nrf53_bmi270spi_initialize(int devno, int busno);
+#else  /* CONFIG_SENSORS_BMI270_I2C */
+int nrf53_bmi270i2c_initialize(int devno, int bus, uint8_t addr);
 #endif
 
-#ifdef CONFIG_NRF53_SPI_MASTER
-  /* Configure SPI chip selects */
-
-  nrf53_spidev_initialize();
-#endif
-}
-
-/****************************************************************************
- * Name: board_late_initialize
- *
- * Description:
- *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
- *   initialization call will be performed in the boot-up sequence to a
- *   function called board_late_initialize(). board_late_initialize() will be
- *   called immediately after up_initialize() is called and just before the
- *   initial application is started.  This additional initialization phase
- *   may be used, for example, to initialize board-specific device drivers.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_BOARD_LATE_INITIALIZE
-void board_late_initialize(void)
-{
-  /* Perform board-specific initialization */
-
-  nrf53_bringup();
-}
-#endif
+#endif /* __BOARDS_ARM_NRF53_COMMON_INCLUDE_NRF53_BMI270_H */
