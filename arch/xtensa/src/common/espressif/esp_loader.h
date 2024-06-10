@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32s2/loader.h
+ * arch/xtensa/src/common/espressif/esp_loader.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32S2_LOADER_H
-#define __ARCH_XTENSA_SRC_ESP32S2_LOADER_H
+#ifndef __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_LOADER_H
+#define __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_LOADER_H
 
 /****************************************************************************
  * Included Files
@@ -77,4 +77,4 @@ int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_XTENSA_SRC_ESP32S2_LOADER_H */
+#endif /* __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_LOADER_H */

@@ -74,8 +74,8 @@ SECTIONS
     . = ALIGN (4);
     esp32s2_start.*(.literal .text .literal.* .text.*)
     esp32s2_region.*(.text .text.* .literal .literal.*)
-    loader.*(.literal .text .literal.* .text.*)
 
+    *libarch.a:*esp_loader.*(.literal .text .literal.* .text.*)
     *libarch.a:*brownout_hal.*(.text .text.* .literal .literal.*)
     *libarch.a:*cpu.*(.text .text.* .literal .literal.*)
     *libarch.a:*gpio_hal.*(.text .text.* .literal .literal.*)
@@ -216,8 +216,8 @@ SECTIONS
     *(.dram1 .dram1.*)
     esp32s2_start.*(.rodata .rodata.*)
     esp32s2_region.*(.rodata .rodata.*)
-    loader.*(.rodata .rodata.*)
 
+    *libarch.a:*esp_loader.*(.rodata .rodata.*)
     *libarch.a:*brownout.*(.rodata .rodata.*)
     *libarch.a:*cpu.*(.rodata .rodata.*)
     *libarch.a:*gpio_hal.*(.rodata .rodata.*)
@@ -361,7 +361,7 @@ SECTIONS
   _image_irom_size = LOADADDR(.flash.text) + SIZEOF(.flash.text) - _image_irom_lma;
 
   /* The alignment of the ".flash.text" output section is forced to
-   * 0x0000FFFF (64KB) to ensure that it will be allocated at the beginning
+   * 0x00010000 (64KB) to ensure that it will be allocated at the beginning
    * of the next available Flash block.
    * This is required to meet the following constraint from the external
    * flash MMU:

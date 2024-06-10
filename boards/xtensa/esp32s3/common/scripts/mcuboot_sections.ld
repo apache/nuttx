@@ -66,8 +66,16 @@ SECTIONS
     _rodata_reserved_start = .;
 
     _srodata = ABSOLUTE(.);
-    *(EXCLUDE_FILE (esp32s3_start.*) .rodata)
-    *(EXCLUDE_FILE (esp32s3_start.*) .rodata.*)
+    *(EXCLUDE_FILE (esp32s3_start.* esp32s3_region.*
+                    *libarch.a:*esp_loader.*
+                    *libarch.a:esp32s3_spiflash.*
+                    *libarch.a:*cache_hal.* *libarch.a:*mmu_hal.*
+                    *libarch.a:*mpu_hal.*) .rodata)
+    *(EXCLUDE_FILE (esp32s3_start.* esp32s3_region.*
+                    *libarch.a:*esp_loader.*
+                    *libarch.a:esp32s3_spiflash.*
+                    *libarch.a:*cache_hal.* *libarch.a:*mmu_hal.*
+                    *libarch.a:*mpu_hal.*) .rodata.*)
 
 #ifdef CONFIG_ESP32S3_WIRELESS
     *(.rodata_wlog_verbose.*)
@@ -172,7 +180,9 @@ SECTIONS
 
     *(.iram1 .iram1.*)
     esp32s3_start.*(.literal .text .literal.* .text.*)
+    esp32s3_region.*(.literal .text .literal.* .text.*)
 
+    *libarch.a:*esp_loader.*(.text .text.* .literal .literal.*)
     *libarch.a:esp32s3_cpuindex.*(.literal .text .literal.* .text.*)
     *libarch.a:esp32s3_irq.*(.literal .text .literal.* .text.*)
     *libarch.a:esp32s3_user.*(.literal .text .literal.* .text.*)
@@ -319,8 +329,10 @@ SECTIONS
     KEEP (*(.jcr))
     *(.dram1 .dram1.*)
     esp32s3_start.*(.rodata .rodata.*)
+    esp32s3_region.*(.rodata .rodata.*)
 
     *libphy.a:(.rodata  .rodata.*)
+    *libarch.a:*esp_loader.*(.rodata .rodata.*)
     *libarch.a:xtensa_context.*(.rodata  .rodata.*)
     *libarch.a:esp32s3_spiflash.*(.rodata  .rodata.*)
     *libarch.a:*cache_hal.*(.rodata .rodata.*)
