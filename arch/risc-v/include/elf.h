@@ -25,6 +25,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define EM_ARCH  EM_RISCV
+
+#if defined(CONFIG_RISCV_TOOLCHAIN_GNU_RV64ILP32)
+#define EM_FLAG  0x25
+#elif defined(COFIG_ARCH_RISCV)
+#define EM_FLAG  5
+#else
+#define EM_FLAG  0
+#endif
+
 /* https://github.com/riscv/riscv-elf-psabi-doc/blob/master/riscv-elf.md */
 
 #define R_RISCV_NONE           0
