@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32s2/loader.c
+ * arch/xtensa/src/common/espressif/esp_loader.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -51,54 +51,48 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_ESP32S2_APP_FORMAT_MCUBOOT) || \
-    defined (CONFIG_ESPRESSIF_SIMPLE_BOOT)
-#  define HDR_ATTR              __attribute__((section(".entry_addr"))) \
-                                __attribute__((used))
-#  define MMU_BLOCK_SIZE        0x00010000  /* 64 KB */
-#  define CACHE_REG             EXTMEM_ICACHE_CTRL1_REG
-#  define CACHE_MASK            (EXTMEM_ICACHE_SHUT_IBUS_M | \
-                                 EXTMEM_ICACHE_SHUT_DBUS_M)
+#define HDR_ATTR              __attribute__((section(".entry_addr"))) \
+                              __attribute__((used))
+#define MMU_BLOCK_SIZE        0x00010000  /* 64 KB */
+#define CACHE_REG             EXTMEM_ICACHE_CTRL1_REG
+#define CACHE_MASK            (EXTMEM_ICACHE_SHUT_IBUS_M | \
+                               EXTMEM_ICACHE_SHUT_DBUS_M)
 
-#  define CHECKSUM_ALIGN        16
-#  define IS_PADD(addr) (addr == 0)
-#  define IS_DRAM(addr) (addr >= SOC_DRAM_LOW && addr < SOC_DRAM_HIGH)
-#  define IS_IRAM(addr) (addr >= SOC_IRAM_LOW && addr < SOC_IRAM_HIGH)
-#  define IS_IROM(addr) (addr >= SOC_IROM_LOW && addr < SOC_IROM_HIGH)
-#  define IS_DROM(addr) (addr >= SOC_DROM_LOW && addr < SOC_DROM_HIGH)
-#  define IS_SRAM(addr) (IS_IRAM(addr) || IS_DRAM(addr))
-#  define IS_MMAP(addr) (IS_IROM(addr) || IS_DROM(addr))
-#  ifdef SOC_RTC_FAST_MEM_SUPPORTED
-#    define IS_RTC_FAST_IRAM(addr) \
-                        (addr >= SOC_RTC_IRAM_LOW && addr < SOC_RTC_IRAM_HIGH)
-#    define IS_RTC_FAST_DRAM(addr) \
-                        (addr >= SOC_RTC_DRAM_LOW && addr < SOC_RTC_DRAM_HIGH)
-#  else
-#    define IS_RTC_FAST_IRAM(addr) 0
-#    define IS_RTC_FAST_DRAM(addr) 0
-#  endif
-#  ifdef SOC_RTC_SLOW_MEM_SUPPORTED
-#    define IS_RTC_SLOW_DRAM(addr) \
-                        (addr >= SOC_RTC_DATA_LOW && addr < SOC_RTC_DATA_HIGH)
-#  else
-#    define IS_RTC_SLOW_DRAM(addr) 0
-#  endif
-
-#  define IS_NONE(addr) (!IS_IROM(addr) && !IS_DROM(addr) \
-                      && !IS_IRAM(addr) && !IS_DRAM(addr) \
-                      && !IS_RTC_FAST_IRAM(addr) && !IS_RTC_FAST_DRAM(addr) \
-                      && !IS_RTC_SLOW_DRAM(addr) && !IS_PADD(addr))
-
-#  define IS_MAPPING(addr) IS_IROM(addr) || IS_DROM(addr)
-
+#define CHECKSUM_ALIGN        16
+#define IS_PADD(addr) (addr == 0)
+#define IS_DRAM(addr) (addr >= SOC_DRAM_LOW && addr < SOC_DRAM_HIGH)
+#define IS_IRAM(addr) (addr >= SOC_IRAM_LOW && addr < SOC_IRAM_HIGH)
+#define IS_IROM(addr) (addr >= SOC_IROM_LOW && addr < SOC_IROM_HIGH)
+#define IS_DROM(addr) (addr >= SOC_DROM_LOW && addr < SOC_DROM_HIGH)
+#define IS_SRAM(addr) (IS_IRAM(addr) || IS_DRAM(addr))
+#define IS_MMAP(addr) (IS_IROM(addr) || IS_DROM(addr))
+#ifdef SOC_RTC_FAST_MEM_SUPPORTED
+#  define IS_RTC_FAST_IRAM(addr) \
+                      (addr >= SOC_RTC_IRAM_LOW && addr < SOC_RTC_IRAM_HIGH)
+#  define IS_RTC_FAST_DRAM(addr) \
+                      (addr >= SOC_RTC_DRAM_LOW && addr < SOC_RTC_DRAM_HIGH)
+#else
+#  define IS_RTC_FAST_IRAM(addr) 0
+#  define IS_RTC_FAST_DRAM(addr) 0
 #endif
+#ifdef SOC_RTC_SLOW_MEM_SUPPORTED
+#  define IS_RTC_SLOW_DRAM(addr) \
+                      (addr >= SOC_RTC_DATA_LOW && addr < SOC_RTC_DATA_HIGH)
+#else
+#  define IS_RTC_SLOW_DRAM(addr) 0
+#endif
+
+#define IS_NONE(addr) (!IS_IROM(addr) && !IS_DROM(addr) \
+                    && !IS_IRAM(addr) && !IS_DRAM(addr) \
+                    && !IS_RTC_FAST_IRAM(addr) && !IS_RTC_FAST_DRAM(addr) \
+                    && !IS_RTC_SLOW_DRAM(addr) && !IS_PADD(addr))
+
+#define IS_MAPPING(addr) IS_IROM(addr) || IS_DROM(addr)
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-#if defined(CONFIG_ESP32S2_APP_FORMAT_MCUBOOT) || \
-    defined (CONFIG_ESPRESSIF_SIMPLE_BOOT)
 extern uint8_t _image_irom_vma[];
 extern uint8_t _image_irom_lma[];
 extern uint8_t _image_irom_size[];
@@ -106,16 +100,12 @@ extern uint8_t _image_irom_size[];
 extern uint8_t _image_drom_vma[];
 extern uint8_t _image_drom_lma[];
 extern uint8_t _image_drom_size[];
-#endif
 
 /****************************************************************************
  * ROM Function Prototypes
  ****************************************************************************/
 
-#if defined(CONFIG_ESP32S2_APP_FORMAT_MCUBOOT) || \
-    defined (CONFIG_ESPRESSIF_SIMPLE_BOOT)
 extern int ets_printf(const char *fmt, ...) printf_like(1, 2);
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -253,7 +243,8 @@ int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
   ets_printf("total segments stored %d\n", segments - 1);
 #endif
 
-#ifdef CONFIG_ESP32S2_APP_FORMAT_MCUBOOT
+#if defined (CONFIG_ESP32S2_APP_FORMAT_MCUBOOT) || \
+    defined (CONFIG_ESP32S3_APP_FORMAT_MCUBOOT)
   ets_printf("IROM segment aligned lma 0x%08x vma 0x%08x len 0x%06x (%u)\n",
       app_irom_start_aligned, app_irom_vaddr_aligned,
       app_irom_size, app_irom_size);

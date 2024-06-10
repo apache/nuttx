@@ -77,7 +77,9 @@ SECTIONS
 
     *(.iram1 .iram1.*)
     esp32s3_start.*(.literal .text .literal.* .text.*)
+    esp32s3_region.*(.text .text.* .literal .literal.*)
 
+    *libarch.a:*esp_loader.*(.literal .text .literal.* .text.*)
     *libarch.a:esp32s3_cpuindex.*(.literal .text .literal.* .text.*)
     *libarch.a:esp32s3_irq.*(.literal .text .literal.* .text.*)
     *libarch.a:esp32s3_user.*(.literal .text .literal.* .text.*)
@@ -284,6 +286,7 @@ SECTIONS
     KEEP (*(.jcr))
     *(.dram1 .dram1.*)
     esp32s3_start.*(.rodata .rodata.*)
+    esp32s3_region.*(.rodata .rodata.*)
 
     *libphy.a:(.rodata  .rodata.*)
     *libarch.a:xtensa_context.*(.rodata  .rodata.*)
@@ -294,6 +297,7 @@ SECTIONS
 #endif
 
     *libsched.a:*sched_get_stackinfo.*(.rodata .rodata.*)
+    *libarch.a:*esp_loader.*(.rodata .rodata.*)
     *libarch.a:esp32s3_spiflash.*(.rodata .rodata.*)
     *libarch.a:*brownout.*(.rodata .rodata.*)
     *libarch.a:*cpu.*(.rodata .rodata.*)

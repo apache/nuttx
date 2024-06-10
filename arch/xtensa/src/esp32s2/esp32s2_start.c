@@ -42,7 +42,7 @@
 #include "esp32s2_lowputc.h"
 #include "esp32s2_wdt.h"
 #include "esp32s2_rtc.h"
-#include "loader.h"
+#include "espressif/esp_loader.h"
 
 #include "soc/extmem_reg.h"
 #include "hal/mmu_hal.h"
@@ -52,14 +52,8 @@
 #include "hal/cache_hal.h"
 #include "rom/spi_flash.h"
 
-#  include "bootloader_flash_priv.h"
-#  include "esp_rom_efuse.h"
 #ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
 #  include "bootloader_init.h"
-#  include "bootloader_random.h"
-#  include "esp_rom_uart.h"
-#  include "esp_rom_sys.h"
-#  include "esp_app_format.h"
 #endif
 
 /****************************************************************************
