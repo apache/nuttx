@@ -26,6 +26,7 @@ CHIP_CSRCS  = xmc4_allocateheap.c xmc4_clockconfig.c xmc4_clockutils.c
 CHIP_CSRCS += xmc4_clrpend.c xmc4_flash.c xmc4_gpio.c xmc4_irq.c
 CHIP_CSRCS += xmc4_lowputc.c xmc4_serial.c xmc4_start.c xmc4_usic.c
 CHIP_CSRCS += xmc4_ccu4.c
+CHIP_CSRCS += xmc4_vadc.c
 
 # Configuration-dependent Kinetis files
 
