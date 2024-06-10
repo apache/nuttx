@@ -605,7 +605,7 @@ int xmc4_vadc_global_background_add_channel_to_sequence(const uint32_t grp_num,
  *
  ********************************************************************************************************/
 
-void xmc4_vadc_global_background_enable_autoscan();
+void xmc4_vadc_global_background_enable_autoscan(void);
 
 /********************************************************************************************************
  * Name: xmc4_vadc_global_background_start_conversion
@@ -617,7 +617,7 @@ void xmc4_vadc_global_background_enable_autoscan();
  *
  ********************************************************************************************************/
 
-void xmc4_vadc_global_background_start_conversion();
+void xmc4_vadc_global_background_start_conversion(void);
 
 /********************************************************************************************************
  * Name: xmc4_vadc_group_get_result
