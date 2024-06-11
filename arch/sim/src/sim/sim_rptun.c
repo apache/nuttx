@@ -72,6 +72,7 @@ struct sim_rptun_dev_s
   uint32_t                  seq;
   struct sim_rptun_shmem_s *shmem;
   struct simple_addrenv_s   addrenv[2];
+  struct rptun_addrenv_s    raddrenv[2];
   char                      cpuname[RPMSG_NAME_SIZE + 1];
   char                      shmemname[RPMSG_NAME_SIZE + 1];
   pid_t                     pid;
@@ -93,6 +94,15 @@ static const char *sim_rptun_get_cpuname(struct rptun_dev_s *dev)
   return priv->cpuname;
 }
 
+static const struct rptun_addrenv_s *
+sim_rptun_get_addrenv(struct rptun_dev_s *dev)
+{
+  struct sim_rptun_dev_s *priv = container_of(dev,
+                                 struct sim_rptun_dev_s, rptun);
+
+  return &priv->raddrenv[0];
+}
+
 static struct rptun_rsc_s *
 sim_rptun_get_resource(struct rptun_dev_s *dev)
 {
@@ -101,17 +111,21 @@ sim_rptun_get_resource(struct rptun_dev_s *dev)
 
   priv->shmem = host_allocshmem(priv->shmemname,
                                 sizeof(*priv->shmem));
-
   if (!priv->shmem)
     {
       return NULL;
     }
+
+  priv->raddrenv[0].da   = 0;
+  priv->raddrenv[0].size = sizeof(*priv->shmem);
 
   if (priv->master)
     {
       struct rptun_rsc_s *rsc = &priv->shmem->rsc;
       memset(priv->shmem->buf, 0, sizeof(priv->shmem->buf));
       memset(rsc, 0, sizeof(struct rptun_rsc_s));
+
+      priv->raddrenv[0].pa          = (uintptr_t)priv->shmem;
 
       rsc->rsc_tbl_hdr.ver          = 1;
       rsc->rsc_tbl_hdr.num          = 1;
@@ -164,11 +178,13 @@ sim_rptun_get_resource(struct rptun_dev_s *dev)
           usleep(1000);
         }
 
-      priv->shmem->boots = SIM_RPTUN_STATUS_OK;
+      priv->raddrenv[0].pa  = (uintptr_t)priv->shmem->base;
 
-      priv->addrenv[0].va          = (uintptr_t)priv->shmem;
-      priv->addrenv[0].pa          = priv->shmem->base;
-      priv->addrenv[0].size        = sizeof(*priv->shmem);
+      priv->shmem->boots    = SIM_RPTUN_STATUS_OK;
+
+      priv->addrenv[0].va   = (uintptr_t)priv->shmem;
+      priv->addrenv[0].pa   = priv->shmem->base;
+      priv->addrenv[0].size = sizeof(*priv->shmem);
 
       simple_addrenv_initialize(&priv->addrenv[0]);
     }
@@ -365,6 +381,7 @@ static void sim_rptun_work(wdparm_t arg)
 static const struct rptun_ops_s g_sim_rptun_ops =
 {
   .get_cpuname       = sim_rptun_get_cpuname,
+  .get_addrenv       = sim_rptun_get_addrenv,
   .get_resource      = sim_rptun_get_resource,
   .is_autostart      = sim_rptun_is_autostart,
   .is_master         = sim_rptun_is_master,
