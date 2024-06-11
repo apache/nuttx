@@ -165,5 +165,21 @@ if(CONFIG_MTD)
     list(APPEND SRCS smart.c)
   endif()
 
+  if(CONFIG_MTD_DHARA)
+    if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/dhara)
+      FetchContent_Declare(
+        dhara
+        URL https://github.com/dlbeer/dhara/archive/refs/heads/master.zip
+            SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/dhara BINARY_DIR
+            ${CMAKE_BINARY_DIR}/drivers/mtd/dhara
+        DOWNLOAD_NO_PROGRESS true)
+      FetchContent_Populate(dhara)
+    endif()
+
+    list(APPEND SRCS dhara.c mtd/dhara/dhara/map.c mtd/dhara/dhara/error.c
+         mtd/dhara/dhara/journal.c)
+    target_include_directories(drivers PRIVATE ${CMAKE_CURRENT_LIST_DIR}/dhara)
+  endif()
+
   target_sources(drivers PRIVATE ${SRCS})
 endif()
