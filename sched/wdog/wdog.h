@@ -34,10 +34,15 @@
 #include <nuttx/clock.h>
 #include <nuttx/queue.h>
 #include <nuttx/wdog.h>
+#include <nuttx/list.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Redefine to the standard list */
+
+#define list_node wdlist_node
 
 /****************************************************************************
  * Name: wd_elapse
@@ -73,7 +78,7 @@ extern "C"
  * this linked list are removed and the function is called.
  */
 
-extern sq_queue_t g_wdactivelist;
+extern struct list_node g_wdactivelist;
 
 /* This is wdog tickbase, for wd_gettime() may called many times
  * between 2 times of wd_timer(), we use it to update wd_gettime().

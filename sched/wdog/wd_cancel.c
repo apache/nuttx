@@ -57,8 +57,6 @@
 
 int wd_cancel(FAR struct wdog_s *wdog)
 {
-  FAR struct wdog_s *curr;
-  FAR struct wdog_s *prev;
   irqstate_t flags;
   int ret = -EINVAL;
 
@@ -74,59 +72,35 @@ int wd_cancel(FAR struct wdog_s *wdog)
 
   if (wdog != NULL && WDOG_ISACTIVE(wdog))
     {
-      /* Search the g_wdactivelist for the target FCB.  We can't use sq_rem
-       * to do this because there are additional operations that need to be
-       * done.
-       */
-
-      prev = NULL;
-      curr = (FAR struct wdog_s *)g_wdactivelist.head;
-
-      while ((curr) && (curr != wdog))
-        {
-          prev = curr;
-          curr = curr->next;
-        }
-
-      /* Check if the watchdog was found in the list.  If not, then an OS
-       * error has occurred because the watchdog is marked active!
-       */
-
-      DEBUGASSERT(curr);
+      bool head = list_is_head(&g_wdactivelist, &wdog->node);
+      FAR struct wdog_s *next = list_next_entry(wdog, struct wdog_s, node);
 
       /* If there is a watchdog in the timer queue after the one that
        * is being canceled, then it inherits the remaining ticks.
        */
 
-      if (curr->next)
+      if (next)
         {
-          curr->next->lag += curr->lag;
+          next->lag += wdog->lag;
         }
 
       /* Now, remove the watchdog from the timer queue */
 
-      if (prev)
-        {
-          /* Remove the watchdog from mid- or end-of-queue */
-
-          sq_remafter((FAR sq_entry_t *)prev, &g_wdactivelist);
-        }
-      else
-        {
-          /* Remove the watchdog at the head of the queue */
-
-          sq_remfirst(&g_wdactivelist);
-
-          /* Reassess the interval timer that will generate the next
-           * interval event.
-           */
-
-          nxsched_reassess_timer();
-        }
+      list_delete(&wdog->node);
 
       /* Mark the watchdog inactive */
 
       wdog->func = NULL;
+
+      if (head)
+        {
+          /* If the watchdog is at the head of the timer queue, then
+           * we will need to re-adjust the interval timer that will
+           * generate the next interval event.
+           */
+
+          nxsched_reassess_timer();
+        }
 
       /* Return success */
 
