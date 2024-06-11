@@ -112,11 +112,10 @@ config CXX_EXCEPTION
 config CXX_RTTI
 	bool "Enable RTTI Support"
 
-if UCLIBCXX
+config CXX_WCHAR
+	bool "Enable Wide Character Support"
 
-config UCLIBCXX_WCHAR
-	bool "Enable Wide Stream Support"
-	default n
+if UCLIBCXX
 
 config UCLIBCXX_BUFSIZE
 	int "IO Stream/Container Buffer Size"
