@@ -1686,6 +1686,8 @@ static int wifidriver_set_psk(FAR struct wifi_sim_s *wifidev,
         return -ENOSYS;
     }
 
+  wifidev->auth_alg = ext->alg;
+
   switch (wifidev->mode)
     {
       case IW_MODE_INFRA:
@@ -1710,6 +1712,42 @@ static int wifidriver_set_psk(FAR struct wifi_sim_s *wifidev,
     }
 
   return ret ;
+}
+
+static int wifidriver_get_psk(FAR struct wifi_sim_s *wifidev,
+                              FAR struct iwreq *pwrq)
+{
+  FAR struct iw_encode_ext *ext;
+  int ret = OK;
+  int len;
+  int size;
+
+  ext = (FAR struct iw_encode_ext *)pwrq->u.encoding.pointer;
+  len = pwrq->u.encoding.length - sizeof(*ext);
+
+  switch (wifidev->mode)
+    {
+      case IW_MODE_INFRA:
+        size = strnlen(wifidev->password, 64);
+        if (len < size)
+        {
+          return -EINVAL;
+        }
+        else
+        {
+          ext->key_len = size;
+          memcpy(ext->key, wifidev->password, ext->key_len);
+          ext->alg = wifidev->auth_alg;
+        }
+        break;
+
+      case IW_MODE_MASTER:
+      default:
+        ret = -ENOSYS;
+        break;
+    }
+
+  return ret;
 }
 
 /* iw_ops */
@@ -1774,7 +1812,7 @@ static int wifidriver_passwd(FAR struct netdev_lowerhalf_s *dev,
     }
   else
     {
-      return -ENOTTY;
+      return wifidriver_get_psk(LOWERDEV2WIFIDEV(dev), iwr);
     }
 }
 
