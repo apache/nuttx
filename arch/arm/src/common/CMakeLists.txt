@@ -95,4 +95,8 @@ if(CONFIG_ARCH_TOOLCHAIN_GHS)
   list(APPEND SRCS ghs/lib_dummy.c)
 endif()
 
+if(NOT CONFIG_SMP)
+  list(APPEND SRCS arm_cpuindex.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})

@@ -259,11 +259,7 @@ static inline uint32_t getcontrol(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
 int up_cpu_index(void) noinstrument_function;
-#else
-#  define up_cpu_index() 0
-#endif /* CONFIG_SMP */
 
 static inline_function uint32_t up_getsp(void)
 {

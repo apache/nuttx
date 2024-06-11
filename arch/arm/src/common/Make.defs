@@ -73,6 +73,10 @@ ifeq ($(CONFIG_UNWINDER_ARM),y)
   CMN_CSRCS += arm_backtrace_unwind.c
 endif
 
+ifneq ($(CONFIG_SMP),y)
+  CMN_CSRCS += arm_cpuindex.c
+endif
+
 CMN_ASRCS += fork.S
 
 ifeq ($(CONFIG_ARCH_HAVE_FETCHADD),y)

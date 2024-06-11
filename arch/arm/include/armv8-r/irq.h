@@ -455,7 +455,7 @@ static inline_function int up_cpu_index(void)
   return (mpidr & MPIDR_CPUID_MASK) >> MPIDR_CPUID_SHIFT;
 }
 #else
-#  define up_cpu_index() 0
+int up_cpu_index(void);
 #endif /* CONFIG_SMP */
 
 static inline_function uint32_t up_getsp(void)
