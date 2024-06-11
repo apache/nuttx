@@ -28,8 +28,8 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
-#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/virtio/virtio.h>
 
 #include "virtio-blk.h"
@@ -115,7 +115,7 @@ begin_packed_struct struct virtio_blk_config_s
 struct virtio_blk_priv_s
 {
   FAR struct virtio_device     *vdev;           /* Virtio deivce */
-  mutex_t                       lock;           /* Lock */
+  spinlock_t                    lock;           /* Lock */
   uint64_t                      nsectors;       /* Sectore numbers */
   uint32_t                      block_size;     /* Block size */
   char                          name[NAME_MAX]; /* Device name */
@@ -192,18 +192,24 @@ static int g_virtio_blk_idx = 0;
 static void virtio_blk_wait_complete(FAR struct virtqueue *vq,
                                      FAR sem_t *respsem)
 {
+  FAR struct virtio_blk_priv_s *priv = vq->vq_dev->priv;
+  FAR sem_t *sem;
+  irqstate_t flags;
+
   if (up_interrupt_context())
     {
       for (; ; )
         {
-          FAR sem_t * tmpsem = virtqueue_get_buffer(vq, NULL, NULL);
-          if (tmpsem == respsem)
+          flags = spin_lock_irqsave(&priv->lock);
+          sem = virtqueue_get_buffer(vq, NULL, NULL);
+          spin_unlock_irqrestore(&priv->lock, flags);
+          if (sem == respsem)
             {
               break;
             }
-          else if (tmpsem != NULL)
+          else if (sem != NULL)
             {
-              nxsem_post(tmpsem);
+              nxsem_post(sem);
             }
         }
     }
@@ -230,6 +236,7 @@ static ssize_t virtio_blk_rdwr(FAR struct virtio_blk_priv_s *priv,
   FAR struct virtqueue_buf vb[3];
   struct virtio_blk_resp_s resp;
   struct virtio_blk_req_s req;
+  irqstate_t flags;
   sem_t respsem;
   ssize_t ret;
   int readnum;
@@ -261,23 +268,18 @@ static ssize_t virtio_blk_rdwr(FAR struct virtio_blk_priv_s *priv,
     {
       virtqueue_disable_cb(vq);
     }
-  else
-    {
-      ret = nxmutex_lock(&priv->lock);
-      if (ret < 0)
-        {
-          return ret;
-        }
-    }
 
+  flags = spin_lock_irqsave(&priv->lock);
   ret = virtqueue_add_buffer(vq, vb, readnum, 3 - readnum, &respsem);
   if (ret < 0)
     {
+      spin_unlock_irqrestore(&priv->lock, flags);
       vrterr("virtqueue_add_buffer failed, ret=%zd\n", ret);
       goto err;
     }
 
   virtqueue_kick(vq);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   /* Wait for the request completion */
 
@@ -293,10 +295,6 @@ err:
   if (up_interrupt_context())
     {
       virtqueue_enable_cb(vq);
-    }
-  else
-    {
-      nxmutex_unlock(&priv->lock);
     }
 
   return ret >= 0 ? nsectors : ret;
@@ -414,6 +412,7 @@ static int virtio_blk_flush(FAR struct virtio_blk_priv_s *priv)
   FAR struct virtqueue_buf vb[2];
   struct virtio_blk_resp_s resp;
   struct virtio_blk_req_s req;
+  irqstate_t flags;
   sem_t respsem;
   int ret;
 
@@ -431,19 +430,16 @@ static int virtio_blk_flush(FAR struct virtio_blk_priv_s *priv)
   vb[1].buf = &resp;
   vb[1].len = VIRTIO_BLK_RESP_HEADER_SIZE;
 
-  ret = nxmutex_lock(&priv->lock);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
+  flags = spin_lock_irqsave(&priv->lock);
   ret = virtqueue_add_buffer(vq, vb, 1, 1, &respsem);
   if (ret < 0)
     {
-      goto err;
+      spin_unlock_irqrestore(&priv->lock, flags);
+      return ret;
     }
 
   virtqueue_kick(vq);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   /* Wait for the request completion */
 
@@ -454,8 +450,6 @@ static int virtio_blk_flush(FAR struct virtio_blk_priv_s *priv)
       ret = -EIO;
     }
 
-err:
-  nxmutex_unlock(&priv->lock);
   return ret;
 }
 
@@ -491,11 +485,20 @@ static int virtio_blk_ioctl(FAR struct inode *inode, int cmd,
 
 static void virtio_blk_done(FAR struct virtqueue *vq)
 {
+  FAR struct virtio_blk_priv_s *priv = vq->vq_dev->priv;
   FAR sem_t *respsem;
+  irqstate_t flags;
 
-  respsem = virtqueue_get_buffer(vq, NULL, NULL);
-  if (respsem != NULL)
+  for (; ; )
     {
+      flags = spin_lock_irqsave(&priv->lock);
+      respsem = virtqueue_get_buffer(vq, NULL, NULL);
+      spin_unlock_irqrestore(&priv->lock, flags);
+      if (respsem == NULL)
+        {
+          break;
+        }
+
       nxsem_post(respsem);
     }
 }
@@ -513,7 +516,7 @@ static int virtio_blk_init(FAR struct virtio_blk_priv_s *priv,
 
   priv->vdev = vdev;
   vdev->priv = priv;
-  nxmutex_init(&priv->lock);
+  spin_lock_init(&priv->lock);
 
   /* Initialize the virtio device */
 
@@ -529,15 +532,11 @@ static int virtio_blk_init(FAR struct virtio_blk_priv_s *priv,
   if (ret < 0)
     {
       vrterr("virtio_device_create_virtqueue failed, ret=%d\n", ret);
-      goto err;
+      return ret;
     }
 
   virtio_set_status(vdev, VIRTIO_CONFIG_STATUS_DRIVER_OK);
   virtqueue_enable_cb(vdev->vrings_info[0].vq);
-  return OK;
-
-err:
-  nxmutex_destroy(&priv->lock);
   return ret;
 }
 
@@ -551,7 +550,6 @@ static void virtio_blk_uninit(FAR struct virtio_blk_priv_s *priv)
 
   virtio_reset_device(vdev);
   virtio_delete_virtqueues(vdev);
-  nxmutex_destroy(&priv->lock);
 }
 
 /****************************************************************************
