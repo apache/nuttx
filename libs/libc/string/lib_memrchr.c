@@ -46,6 +46,7 @@
  *
  ****************************************************************************/
 
+#ifndef CONFIG_LIBC_ARCH_MEMRCHR
 #undef memrchr /* See mm/README.txt */
 FAR void *memrchr(FAR const void *s, int c, size_t n)
 {
@@ -61,3 +62,4 @@ FAR void *memrchr(FAR const void *s, int c, size_t n)
 
   return NULL;
 }
+#endif

@@ -60,7 +60,15 @@ config LIBC_ARCH_MEMMOVE
 	bool
 	default n
 
+config LIBC_ARCH_MEMRCHR
+	bool
+	default n
+
 config LIBC_ARCH_MEMSET
+	bool
+	default n
+
+config LIBC_ARCH_RAWMEMCHR
 	bool
 	default n
 

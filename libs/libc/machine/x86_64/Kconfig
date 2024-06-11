@@ -5,6 +5,13 @@
 
 if ARCH_TOOLCHAIN_GNU && ALLOW_BSD_COMPONENTS
 
+config X86_64_MEMCHR
+	bool "Enable optimized memchr() for X86_64"
+	default n
+	select LIBC_ARCH_MEMCHR
+	---help---
+		Enable optimized X86_64 specific memchr() library function
+
 config X86_64_MEMCMP
 	bool "Enable optimized memcmp() for X86_64"
 	select LIBC_ARCH_MEMCMP
@@ -20,12 +27,26 @@ config X86_64_MEMMOVE
 	---help---
 		Enable optimized X86_64 specific memmove()/memcpy() library function
 
+config X86_64_MEMRCHR
+	bool "Enable optimized memrchr() for X86_64"
+	default n
+	select LIBC_ARCH_MEMRCHR
+	---help---
+		Enable optimized X86_64 specific memrchr() library function
+
 config X86_64_MEMSET
 	bool "Enable optimized memset() for X86_64"
 	default n
 	select LIBC_ARCH_MEMSET
 	---help---
 		Enable optimized X86_64 specific memset() library function
+
+config X86_64_RAWMEMCHR
+	bool "Enable optimized rawmemchr() for X86_64"
+	default n
+	select LIBC_ARCH_RAWMEMCHR
+	---help---
+		Enable optimized X86_64 specific rawmemchr() library function
 
 config X86_64_STPCPY
 	bool "Enable optimized stpcpy() for X86_64"
@@ -48,6 +69,20 @@ config X86_64_STRCAT
 	---help---
 		Enable optimized X86_64 specific strcat() library function
 
+config X86_64_STRCHR
+	bool "Enable optimized strchr() for X86_64"
+	default n
+	select LIBC_ARCH_STRCHR
+	---help---
+		Enable optimized X86_64 specific strchr() library function
+
+config X86_64_STRCHRNUL
+	bool "Enable optimized strchrnul() for X86_64"
+	default n
+	select LIBC_ARCH_STRCHRNUL
+	---help---
+		Enable optimized X86_64 specific strchrnul() library function
+
 config X86_64_STRCMP
 	bool "Enable optimized strcmp() for X86_64"
 	default n
@@ -55,14 +90,6 @@ config X86_64_STRCMP
 	depends on ARCH_HAVE_SSSE3
 	---help---
 		Enable optimized X86_64 specific strcmp() library function
-
-config X86_64_STRNCMP
-	bool "Enable optimized strncmp() for X86_64"
-	default n
-	select LIBC_ARCH_STRNCMP
-	depends on ARCH_HAVE_SSSE3
-	---help---
-		Enable optimized X86_64 specific strncmp() library function
 
 config X86_64_STRCPY
 	bool "Enable optimized strcpy() for X86_64"
@@ -78,12 +105,12 @@ config X86_64_STRLEN
 	---help---
 		Enable optimized X86_64 specific strlen() library function
 
-config X86_64_STRNCPY
-	bool "Enable optimized strncpy() for X86_64"
+config X86_64_STRNCAT
+	bool "Enable optimized strncat() for X86_64"
 	default n
-	select LIBC_ARCH_STRNCPY
+	select LIBC_ARCH_STRNCAT
 	---help---
-		Enable optimized X86_64 specific strncpy() library function
+		Enable optimized X86_64 specific strncat() library function
 
 config X86_64_STRNCMP
 	bool "Enable optimized strncmp() for X86_64"
@@ -91,5 +118,19 @@ config X86_64_STRNCMP
 	select LIBC_ARCH_STRNCMP
 	---help---
 		Enable optimized X86_64 specific strncmp() library function
+
+config X86_64_STRNCPY
+	bool "Enable optimized strncpy() for X86_64"
+	default n
+	select LIBC_ARCH_STRNCPY
+	---help---
+		Enable optimized X86_64 specific strncpy() library function
+
+config X86_64_STRRCHR
+	bool "Enable optimized strrchr() for X86_64"
+	default n
+	select LIBC_ARCH_STRRCHR
+	---help---
+		Enable optimized X86_64 specific strrchr() library function
 
 endif # ARCH_TOOLCHAIN_GNU && ALLOW_BSD_COMPONENTS

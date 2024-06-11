@@ -27,6 +27,15 @@ endif
 ifeq ($(CONFIG_ARCH_SETJMP_H),y)
 ASRCS += arch_setjmp_x86_64.S
 endif
+
+ifeq ($(CONFIG_X86_64_MEMCHR),y)
+  ifeq ($(CONFIG_ARCH_X86_64_AVX),y)
+    ASRCS += arch_memchr_avx2.S
+  else
+    ASRCS += arch_memchr_sse2.S
+  endif
+endif
+
 ifeq ($(CONFIG_X86_64_MEMCMP),y)
 ASRCS += arch_memcmp.S
 endif
@@ -35,11 +44,27 @@ ifeq ($(CONFIG_X86_64_MEMMOVE),y)
 ASRCS += arch_memmove.S
 endif
 
+ifeq ($(CONFIG_X86_64_MEMRCHR),y)
+  ifeq ($(CONFIG_ARCH_X86_64_AVX),y)
+    ASRCS += arch_memrchr_avx2.S
+  else
+    ASRCS += arch_memrchr_sse2.S
+  endif
+endif
+
 ifeq ($(CONFIG_X86_64_MEMSET),y)
   ifeq ($(CONFIG_ARCH_X86_64_AVX),y)
     ASRCS += arch_memset_avx2.S
   else
     ASRCS += arch_memset_sse2.S
+  endif
+endif
+
+ifeq ($(CONFIG_X86_64_RAWMEMCHR),y)
+  ifeq ($(CONFIG_ARCH_X86_64_AVX),y)
+    ASRCS += arch_rawmemchr_avx2.S
+  else
+    ASRCS += arch_rawmemchr_sse2.S
   endif
 endif
 
@@ -55,6 +80,22 @@ ifeq ($(CONFIG_X86_64_STRCAT),y)
 ASRCS += arch_strcat.S
 endif
 
+ifeq ($(CONFIG_X86_64_STRCHR),y)
+  ifeq ($(CONFIG_ARCH_X86_64_AVX),y)
+    ASRCS += arch_strchr_avx2.S
+  else
+    ASRCS += arch_strchr_sse2.S
+  endif
+endif
+
+ifeq ($(CONFIG_X86_64_STRCHRNUL),y)
+  ifeq ($(CONFIG_ARCH_X86_64_AVX),y)
+    ASRCS += arch_strchrnul_avx2.S
+  else
+    ASRCS += arch_strchrnul_sse2.S
+  endif
+endif
+
 ifeq ($(CONFIG_X86_64_STRCMP),y)
 ASRCS += arch_strcmp.S
 endif
@@ -67,12 +108,36 @@ ifeq ($(CONFIG_X86_64_STRLEN),y)
 ASRCS += arch_strlen.S
 endif
 
-ifeq ($(CONFIG_X86_64_STRNCPY),y)
-ASRCS += arch_strncpy.S
+ifeq ($(CONFIG_X86_64_STRNCAT),y)
+  ifeq ($(CONFIG_ARCH_X86_64_AVX),y)
+    ASRCS += arch_strncat_avx2.S
+  else
+    ASRCS += arch_strncat_sse2_unaligned.S
+  endif
 endif
 
 ifeq ($(CONFIG_X86_64_STRNCMP),y)
 ASRCS += arch_strncmp.S
+endif
+
+ifeq ($(CONFIG_X86_64_STRNCPY),y)
+ASRCS += arch_strncpy.S
+endif
+
+ifeq ($(CONFIG_X86_64_STRNLEN),y)
+  ifeq ($(CONFIG_ARCH_X86_64_AVX),y)
+    ASRCS += arch_strnlen_avx2.S
+  else
+    ASRCS += arch_strnlen_sse2.S
+  endif
+endif
+
+ifeq ($(CONFIG_X86_64_STRRCHR),y)
+  ifeq ($(CONFIG_ARCH_X86_64_AVX),y)
+    ASRCS += arch_strrchr_avx2.S
+  else
+    ASRCS += arch_strrchr_sse2.S
+  endif
 endif
 
 ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
