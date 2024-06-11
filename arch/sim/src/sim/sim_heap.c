@@ -232,6 +232,31 @@ struct mm_heap_s *mm_initialize(const char *name,
 }
 
 /****************************************************************************
+ * Name: mm_uninitialize
+ *
+ * Description:
+ *   Uninitialize the selected heap data structures
+ *
+ * Input Parameters:
+ *   heap      - The selected heap
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+void mm_uninitialize(struct mm_heap_s *heap)
+{
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
+  procfs_unregister_meminfo(&heap->mm_procfs);
+#endif
+  mm_free_delaylist(heap);
+  host_free(heap);
+}
+
+/****************************************************************************
  * Name: mm_addregion
  *
  * Description:
