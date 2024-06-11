@@ -66,9 +66,7 @@ sclock_t wd_gettime(FAR struct wdog_s *wdog)
       FAR struct wdog_s *curr;
       sclock_t delay = 0;
 
-      for (curr = (FAR struct wdog_s *)g_wdactivelist.head;
-           curr != NULL;
-           curr = curr->next)
+      list_for_every_entry(&g_wdactivelist, curr, struct wdog_s, node)
         {
           delay += curr->lag;
           if (curr == wdog)

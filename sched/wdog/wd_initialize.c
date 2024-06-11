@@ -24,7 +24,7 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/queue.h>
+#include <nuttx/list.h>
 
 #include "wdog/wdog.h"
 
@@ -37,7 +37,7 @@
  * this linked list are removed and the function is called.
  */
 
-sq_queue_t g_wdactivelist;
+struct list_node g_wdactivelist = LIST_INITIAL_VALUE(g_wdactivelist);
 
 /* This is wdog tickbase, for wd_gettime() may called many times
  * between 2 times of wd_timer(), we use it to update wd_gettime().

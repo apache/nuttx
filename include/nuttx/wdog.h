@@ -60,6 +60,14 @@ typedef uint32_t  wdparm_t;
 
 typedef CODE void (*wdentry_t)(wdparm_t arg);
 
+/* Avoid the inclusion of nuttx/list.h */
+
+struct wdlist_node
+{
+  FAR struct wdlist_node *prev;
+  FAR struct wdlist_node *next;
+};
+
 /* This is the internal representation of the watchdog timer structure.
  * Notice !!!
  * Carefully with the struct wdog_s order, you may not directly modify
@@ -69,7 +77,7 @@ typedef CODE void (*wdentry_t)(wdparm_t arg);
 
 struct wdog_s
 {
-  FAR struct wdog_s *next;       /* Support for singly linked lists. */
+  struct wdlist_node node;       /* Supports a doubly linked list */
   wdparm_t           arg;        /* Callback argument */
   wdentry_t          func;       /* Function to execute when delay expires */
 #ifdef CONFIG_PIC
