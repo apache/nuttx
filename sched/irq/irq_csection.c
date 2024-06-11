@@ -613,13 +613,14 @@ void restore_critical_section(void)
    * followed by context switching.
    */
 
-  FAR struct tcb_s *tcb = this_task();
+  FAR struct tcb_s *tcb;
   int me = this_cpu();
 
   /* Adjust global IRQ controls.  If irqcount is greater than zero,
    * then this task/this CPU holds the IRQ lock
    */
 
+  tcb = current_task(me);
   if (tcb->irqcount > 0)
     {
       /* Do notihing here
