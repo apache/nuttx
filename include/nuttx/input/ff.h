@@ -69,7 +69,7 @@
 
 #define FF_MAX_EFFECTS    FF_GAIN
 
-#define FF_MAX            0x1f
+#define FF_MAX            0x7f
 #define FF_CNT            (FF_MAX + 1)
 
 /* Values describing the status of a force-feedback effect. */
