@@ -109,7 +109,7 @@ if(CONFIG_RISCV_PERCPU_SCRATCH)
   list(APPEND SRCS riscv_percpu.c)
 endif()
 
-if(CONFIG_BUILD_KERNEL)
+if(CONFIG_ARCH_USE_S_MODE)
   add_subdirectory(supervisor)
 endif()
 

@@ -45,7 +45,7 @@ __start:
   /* Preserve a1 as it contains the pointer to DTB */
   /* Load mhartid (cpuid) */
 
-#ifndef CONFIG_BUILD_KERNEL
+#ifndef CONFIG_ARCH_USE_S_MODE
   csrr a0, CSR_MHARTID
 #endif
 
