@@ -348,6 +348,11 @@ config ESPRESSIF_SPIFLASH
 	bool "SPI Flash"
 	default n
 
+config ESPRESSIF_DMA
+	bool "General DMA (GDMA)"
+	default n
+	select ARCH_DMA
+
 config ESPRESSIF_HR_TIMER
 	bool
 	default RTC_DRIVER

@@ -142,7 +142,7 @@ ADC              No
 AES              No
 Bluetooth        No
 CAN/TWAI         Yes
-DMA              No
+DMA              Yes
 ECC              No
 eFuse            No
 GPIO             Yes
