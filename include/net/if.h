@@ -198,6 +198,16 @@ struct can_ioctl_filter_s
   uint8_t  fprio; /* See CAN_MSGPRIO_* definitions */
 };
 
+/* Define an enumeration type that describes the CAN/LIN state */
+
+enum can_ioctl_state_e
+{
+  CAN_STATE_OPERATIONAL = 1, /* The can/lin controller is in the awake state */
+  CAN_STATE_SLEEP,           /* The can/lin controller is in the sleep state */
+  CAN_STATE_SPENDING,        /* The can/lin controller is preparing to enter sleep state */
+  CAN_STATE_BUSY             /* The can/lin bus is busy */
+};
+
 /* There are two forms of the I/F request structure.
  * One for IPv6 and one for IPv4.
  * Notice that they are (and must be) cast compatible and really different
@@ -224,6 +234,7 @@ struct lifreq
     struct mii_ioctl_data_s    lifru_mii_data;       /* MII request data */
     struct can_ioctl_data_s    lifru_can_data;       /* CAN bitrate request data */
     struct can_ioctl_filter_s  lifru_can_filter;     /* CAN filter request data */
+    enum   can_ioctl_state_e   lifru_can_state;      /* CAN/LIN controller state */
   } lifr_ifru;
 };
 
@@ -277,6 +288,7 @@ struct ifreq
     struct mii_ioctl_data_s    ifru_mii_data;       /* MII request data */
     struct can_ioctl_data_s    ifru_can_data;       /* CAN bitrate request data */
     struct can_ioctl_filter_s  ifru_can_filter;     /* CAN filter request data */
+    enum   can_ioctl_state_e   ifru_can_state;      /* CAN/LIN controller state */
     FAR void                  *ifru_data;           /* For use by interface */
   } ifr_ifru;
 };
