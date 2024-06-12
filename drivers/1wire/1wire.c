@@ -524,7 +524,7 @@ int onewire_search(FAR struct onewire_master_s *master,
 
       if (last_zero == last_bit || last_zero == -1)
         {
-          i2cinfo("search complete, rom=0x%llx\n", rom);
+          i2cinfo("search complete, rom=0x%" PRIx64 "\n", rom);
 
           /* Found last device, quit searching. */
 
