@@ -32,8 +32,21 @@
 #include <nuttx/board.h>
 #include <nuttx/fs/fs.h>
 
+#ifdef CONFIG_USERLED
+#  include <nuttx/leds/userled.h>
+#endif
+
+#ifdef CONFIG_EXAMPLES_LEDS_DEVPATH
+#  define LED_DRIVER_PATH CONFIG_EXAMPLES_LEDS_DEVPATH
+#else
+#  define LED_DRIVER_PATH "/dev/userleds"
+#endif
+
 #include <nuttx/spi/spi.h>
-#include <nuttx/input/buttons.h>
+
+#ifdef CONFIG_INPUT_BUTTONS
+#  include <nuttx/input/buttons.h>
+#endif
 
 #include "kinetis_spi.h"
 #include "freedom-k66f.h"
@@ -58,6 +71,17 @@ int k66_bringup(void)
   struct spi_dev_s *spi1;
 #endif
   int ret;
+
+#ifdef HAVE_LEDS
+  /* Register the LED driver */
+
+  ret = userled_lower_initialize(LED_DRIVER_PATH);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+      return ret;
+    }
+#endif
 
 #ifdef HAVE_PROC
   /* Mount the proc filesystem */
