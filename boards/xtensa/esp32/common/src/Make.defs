@@ -152,6 +152,10 @@ ifeq ($(CONFIG_SENSORS_ZEROCROSS),y)
   CSRCS += esp32_zerocross.c
 endif
 
+ifeq ($(CONFIG_ESP_MCPWM),y)
+  CSRCS += esp32_board_mcpwm.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src

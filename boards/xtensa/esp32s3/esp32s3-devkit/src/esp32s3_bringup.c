@@ -100,6 +100,10 @@
 #  include "esp32s3_board_rmt.h"
 #endif
 
+#ifdef CONFIG_ESP_MCPWM
+#  include "esp32s3_board_mcpwm.h"
+#endif
+
 #ifdef CONFIG_ESP32S3_SPI
 #include "esp32s3_spi.h"
 #include "esp32s3_board_spidev.h"
@@ -467,6 +471,14 @@ int esp32s3_bringup(void)
   if (ret)
     {
       syslog(LOG_ERR, "ERROR: board_adc_init() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESP_MCPWM_CAPTURE
+  ret = board_capture_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_capture_initialize failed: %d\n", ret);
     }
 #endif
 

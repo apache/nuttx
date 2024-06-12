@@ -173,7 +173,7 @@ GPIO         Yes
 I2C          Yes
 I2S          Yes
 LED_PWM      Yes
-MCPWM        No
+MCPWM        Yes    Capture
 Pulse_CNT    No
 RMT          Yes
 RNG          Yes

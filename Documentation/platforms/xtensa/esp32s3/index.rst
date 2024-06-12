@@ -178,7 +178,7 @@ I2C          No
 I2S          Yes
 LCD          No
 LED_PWM      No
-MCPWM        No
+MCPWM        Yes    Capture
 Pulse_CNT    No
 RMT          No
 RNG          No
