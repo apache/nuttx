@@ -58,7 +58,7 @@
  * Extern Function Declarations
  ****************************************************************************/
 
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_ARCH_USE_S_MODE
 extern void __start(void);
 #endif
 
@@ -80,7 +80,7 @@ static void qemu_rv_clear_bss(void)
     }
 }
 
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_ARCH_USE_S_MODE
 static void qemu_boot_secondary(int mhartid, uintptr_t dtb)
 {
   int i;
@@ -101,7 +101,7 @@ static void qemu_boot_secondary(int mhartid, uintptr_t dtb)
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_ARCH_USE_S_MODE
 static bool boot_secondary = false;
 #endif
 
@@ -119,7 +119,7 @@ static bool boot_secondary = false;
 
 void qemu_rv_start(int mhartid, const char *dtb)
 {
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_ARCH_USE_S_MODE
   /* Boot other cores */
 
   if (!boot_secondary)

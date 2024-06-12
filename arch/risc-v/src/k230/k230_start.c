@@ -122,7 +122,7 @@ void k230_start(int mhartid, const char *dtb)
 #endif
     }
 
-#ifndef CONFIG_BUILD_KERNEL
+#ifndef CONFIG_ARCH_USE_S_MODE
     k230_hart_init();
 #endif
 

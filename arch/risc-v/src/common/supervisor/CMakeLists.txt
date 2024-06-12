@@ -18,8 +18,7 @@
 #
 # ##############################################################################
 
-if(CONFIG_BUILD_KERNEL)
-
+if(CONFIG_ARCH_USE_S_MODE)
   set(SRCS)
 
   list(APPEND SRCS riscv_syscall.S riscv_perform_syscall.c riscv_sbi.c)

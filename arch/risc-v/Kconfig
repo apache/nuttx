@@ -516,9 +516,9 @@ config RISCV_PERCPU_SCRATCH
 #
 
 config ARCH_USE_S_MODE
-	bool "Run the NuttX kernel in S-mode"
+	bool "Run NuttX in S-mode"
 	default n
-	depends on ARCH_HAVE_S_MODE && BUILD_KERNEL && ARCH_USE_MMU
+	depends on ARCH_HAVE_S_MODE
 	select RISCV_PERCPU_SCRATCH
 	---help---
 		Most of the RISC-V implementations run in M-mode (flat addressing)
