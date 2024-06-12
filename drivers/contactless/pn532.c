@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 #include <assert.h>
+#include <debug.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -32,6 +33,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
+#include <nuttx/power/pm.h>
 
 #include "pn532.h"
 

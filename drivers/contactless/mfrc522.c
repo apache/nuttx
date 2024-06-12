@@ -39,6 +39,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
+#include <nuttx/power/pm.h>
 #include <nuttx/contactless/mfrc522.h>
 
 #include "mfrc522.h"
