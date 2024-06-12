@@ -44,6 +44,11 @@
 #define HAVE_SPI         1
 #define HAVE_USBDEV      1
 
+#undef HAVE_LEDS
+#if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
+#  define HAVE_LEDS 1
+#endif
+
 #if defined(CONFIG_KINETIS_RTC)
 #define HAVE_RTC_DRIVER  1
 #endif

@@ -30,6 +30,10 @@
 
 #include "stm32.h"
 
+#ifdef CONFIG_USERLED
+#  include <nuttx/leds/userled.h>
+#endif
+
 #ifdef CONFIG_STM32_OTGFS
 #  include "stm32_usbhost.h"
 #endif
@@ -83,6 +87,16 @@
 int stm32_bringup(void)
 {
   int ret = OK;
+
+#ifdef CONFIG_USERLED
+  /* Register the LED driver */
+
+  ret = userled_lower_initialize("/dev/userleds");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
+#endif
 
 #ifdef CONFIG_STM32F411MINIMUM_GPIO
   ret = stm32_gpio_initialize();
