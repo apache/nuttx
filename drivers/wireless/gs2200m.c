@@ -2066,7 +2066,7 @@ static enum pkt_type_e gs2200m_enable_bulk(FAR struct gs2200m_dev_s *dev,
 static enum pkt_type_e gs2200m_enable_echo(FAR struct gs2200m_dev_s *dev,
                                            uint8_t on)
 {
-  char cmd[8];
+  char cmd[9];
 
   snprintf(cmd, sizeof(cmd), "ATE%d\r\n", on);
   return gs2200m_send_cmd2(dev, cmd);
