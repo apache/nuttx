@@ -29,6 +29,7 @@
 #include <stdio.h>
 
 #include <nuttx/serial/serial.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/virtio/virtio.h>
 
 #include "virtio-serial.h"
@@ -55,6 +56,7 @@ struct virtio_serial_priv_s
 
   FAR struct uart_dev_s     udev;
   char                      name[NAME_MAX];
+  spinlock_t                lock;
 };
 
 /****************************************************************************
@@ -322,6 +324,7 @@ static void virtio_serial_dmasend(FAR struct uart_dev_s *dev)
   FAR struct virtqueue *vq = priv->vdev->vrings_info[VIRTIO_SERIAL_TX].vq;
   FAR struct uart_dmaxfer_s *xfer = &dev->dmatx;
   struct virtqueue_buf vb[2];
+  irqstate_t flags;
   uintptr_t len;
   int num = 1;
 
@@ -343,8 +346,10 @@ static void virtio_serial_dmasend(FAR struct uart_dev_s *dev)
 
   /* Add buffer to TX virtiqueue and notify the other size */
 
+  flags = spin_lock_irqsave(&priv->lock);
   virtqueue_add_buffer(vq, vb, num, 0, (FAR void *)len);
   virtqueue_kick(vq);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -369,6 +374,7 @@ static void virtio_serial_dmareceive(FAR struct uart_dev_s *dev)
   FAR struct virtqueue *vq = priv->vdev->vrings_info[VIRTIO_SERIAL_RX].vq;
   FAR struct uart_dmaxfer_s *xfer = &dev->dmarx;
   struct virtqueue_buf vb[2];
+  irqstate_t flags;
   int num = 1;
 
   vb[0].buf = xfer->buffer;
@@ -383,8 +389,10 @@ static void virtio_serial_dmareceive(FAR struct uart_dev_s *dev)
 
   /* Add buffer to the RX virtqueue and notify the device side */
 
+  flags = spin_lock_irqsave(&priv->lock);
   virtqueue_add_buffer(vq, vb, 0, num, xfer);
   virtqueue_kick(vq);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -411,11 +419,14 @@ static void virtio_serial_rxready(FAR struct virtqueue *vq)
 {
   FAR struct virtio_serial_priv_s *priv = vq->vq_dev->priv;
   FAR struct uart_dmaxfer_s *xfer;
+  irqstate_t flags;
   uint32_t len;
 
   /* Received some data, call uart_recvchars_done() */
 
+  flags = spin_lock_irqsave(&priv->lock);
   xfer = virtqueue_get_buffer(vq, &len, NULL);
+  spin_unlock_irqrestore(&priv->lock, flags);
   if (xfer == NULL)
     {
       return;
@@ -437,11 +448,15 @@ static void virtio_serial_rxready(FAR struct virtqueue *vq)
 static void virtio_serial_txdone(FAR struct virtqueue *vq)
 {
   FAR struct virtio_serial_priv_s *priv = vq->vq_dev->priv;
+  irqstate_t flags;
   uintptr_t len;
 
   /* Call uart_xmitchars_done to notify the upperhalf */
 
+  flags = spin_lock_irqsave(&priv->lock);
   len = (uintptr_t)virtqueue_get_buffer(vq, NULL, NULL);
+  spin_unlock_irqrestore(&priv->lock, flags);
+
   priv->udev.dmatx.nbytes = len;
   uart_xmitchars_done(&priv->udev);
   uart_dmatxavail(&priv->udev);
@@ -461,6 +476,7 @@ static int virtio_serial_init(FAR struct virtio_serial_priv_s *priv,
 
   priv->vdev = vdev;
   vdev->priv = priv;
+  spin_lock_init(&priv->lock);
 
   /* Uart device buffer and ops init */
 
