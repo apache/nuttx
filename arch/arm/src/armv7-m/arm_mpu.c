@@ -618,8 +618,8 @@ void mpu_dump_region(void)
       putreg32(i, MPU_RNR);
       rasr = getreg32(MPU_RASR);
       rbar = getreg32(MPU_RBAR);
-      _info("MPU-%d, alignedbase=0%08X l2size=%"PRIu32" SRD=%X"
-            "AP=%X XN=%u\n", i, rbar & MPU_RBAR_ADDR_MASK,
+      _info("MPU-%d, alignedbase=%08"PRIx32" l2size=%"PRIu32" SRD=%"PRIx32""
+            "AP=%"PRIx32" XN=%"PRIu32"\n", i, rbar & MPU_RBAR_ADDR_MASK,
             rasr & MPU_RASR_SIZE_MASK, rasr & MPU_RASR_SRD_MASK,
             rasr & MPU_RASR_AP_MASK, rasr & MPU_RASR_XN);
       if (rasr & MPU_RASR_ENABLE)
