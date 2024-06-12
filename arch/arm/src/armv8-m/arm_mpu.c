@@ -350,10 +350,10 @@ void mpu_dump_region(void)
       putreg32(i, MPU_RNR);
       rlar = getreg32(MPU_RLAR);
       rbar = getreg32(MPU_RBAR);
-      _info("MPU-%d, 0x%08X-0x%08X SH=%X AP=%X XN=%u\n",
-            i, rbar & MPU_RBAR_BASE_MASK, rlar & MPU_RLAR_LIMIT_MASK,
-            rbar & MPU_RBAR_SH_MASK, rbar & MPU_RBAR_AP_MASK,
-            rbar & MPU_RBAR_XN);
+      _info("MPU-%d, 0x%08"PRIx32"-0x%08"PRIx32" SH=%"PRIx32" AP=%"PRIx32""
+            "XN=%"PRIu32"\n", i, rbar & MPU_RBAR_BASE_MASK,
+            rlar & MPU_RLAR_LIMIT_MASK, rbar & MPU_RBAR_SH_MASK,
+            rbar & MPU_RBAR_AP_MASK, rbar & MPU_RBAR_XN);
       if (rlar & MPU_RLAR_ENABLE)
         {
           count++;
