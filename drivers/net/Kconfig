@@ -64,6 +64,9 @@ config NETDEV_RSS
 	bool "Using hardware RSS (Receive Side Scaling) with network card"
 	default n
 	depends on SMP && NETDEV_IOCTL && NETDEV_WORK_THREAD
+	---help---
+		When the hardware supports RSS/aRFS function, provide the
+		hash value and CPU ID to the hardware driver.
 
 comment "General Ethernet MAC Driver Options"
 
