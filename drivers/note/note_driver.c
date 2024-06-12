@@ -1446,7 +1446,7 @@ void sched_note_event_ip(uint32_t tag, uintptr_t ip, uint8_t event,
   FAR struct note_event_s *note;
   FAR struct note_driver_s **driver;
   bool formatted = false;
-  char data[255];
+  char data[256];
   unsigned int length;
   FAR struct tcb_s *tcb = this_task();
 
@@ -1496,7 +1496,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
   FAR struct note_printf_s *note;
   FAR struct note_driver_s **driver;
   bool formatted = false;
-  uint8_t data[255];
+  uint8_t data[256];
   size_t length = 0;
   FAR struct tcb_s *tcb = this_task();
 
