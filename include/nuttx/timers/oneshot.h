@@ -33,6 +33,7 @@
 #include <stdint.h>
 #include <time.h>
 
+#include <nuttx/clock.h>
 #include <nuttx/fs/ioctl.h>
 
 /****************************************************************************
