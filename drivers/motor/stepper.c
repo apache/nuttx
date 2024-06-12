@@ -266,7 +266,7 @@ static int stepper_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           lower->status.position = (int32_t)arg;
           ret = 0;
-          stpinfo("STEPIOC_SET_CURRENT_POS: new position is %ld\n",
+          stpinfo("STEPIOC_SET_CURRENT_POS: new position is %" PRId32 "\n",
                   lower->status.position);
         }
         break;
