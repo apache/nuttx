@@ -163,36 +163,6 @@ static FAR struct iob_s *iob_allocwait(bool throttled, unsigned int timeout)
            */
 
           iob = iob_alloc_committed();
-          if (iob == NULL)
-            {
-              /* We need release our count so that it is available to
-               * iob_tryalloc(), perhaps allowing another thread to take our
-               * count.  In that event, iob_tryalloc() will fail above and
-               * we will have to wait again.
-               */
-
-              sem->semcount++;
-              iob = iob_tryalloc(throttled);
-            }
-
-          /* REVISIT: I think this logic should be moved inside of
-           * iob_alloc_committed, so that it can exist inside of the critical
-           * section along with all other sem count changes.
-           */
-
-#if CONFIG_IOB_THROTTLE > 0
-          else
-            {
-              if (throttled)
-                {
-                  g_iob_sem.semcount--;
-                }
-              else
-                {
-                  g_throttle_sem.semcount--;
-                }
-            }
-#endif
         }
     }
 
@@ -297,8 +267,7 @@ FAR struct iob_s *iob_tryalloc(bool throttled)
 #if CONFIG_IOB_THROTTLE > 0
   /* If there are free I/O buffers for this allocation */
 
-  if (sem->semcount > 0 ||
-      (throttled && g_iob_sem.semcount - CONFIG_IOB_THROTTLE > 0))
+  if (sem->semcount > 0)
 #endif
     {
       /* Take the I/O buffer from the head of the free list */
@@ -324,14 +293,17 @@ FAR struct iob_s *iob_tryalloc(bool throttled)
           DEBUGASSERT(g_iob_sem.semcount >= 0);
 
 #if CONFIG_IOB_THROTTLE > 0
-          /* The throttle semaphore is a little more complicated because
-           * it can be negative!  Decrementing is still safe, however.
-           *
-           * Note: usually g_throttle_sem.semcount >= -CONFIG_IOB_THROTTLE.
-           * But it can be smaller than that if there are blocking threads.
+          /* The throttle semaphore is used to throttle the number of
+           * free buffers that are available.  It is used to prevent
+           * the overrunning of the free buffer list. Please note that
+           * it can only be decremented to zero, which indicates no
+           * throttled buffers are available.
            */
 
-          g_throttle_sem.semcount--;
+          if (g_throttle_sem.semcount > 0)
+            {
+              g_throttle_sem.semcount--;
+            }
 #endif
 
           spin_unlock_irqrestore(&g_iob_lock, flags);
