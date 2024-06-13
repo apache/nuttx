@@ -154,7 +154,7 @@ uintptr_t dispatch_syscall(unsigned int nbr, uintptr_t parm1,
 
 int riscv_swint(int irq, void *context, void *arg)
 {
-  uintptr_t *regs = (uintptr_t *)context;
+  uintreg_t *regs = (uintreg_t *)context;
 
   DEBUGASSERT(regs && regs == CURRENT_REGS);
 
@@ -190,7 +190,7 @@ int riscv_swint(int irq, void *context, void *arg)
 
       case SYS_restore_context:
         {
-          struct tcb_s *next = (struct tcb_s *)regs[REG_A1];
+          struct tcb_s *next = (struct tcb_s *)(uintptr_t)regs[REG_A1];
 
           DEBUGASSERT(regs[REG_A1] != 0);
           riscv_restorecontext(next);
@@ -216,8 +216,8 @@ int riscv_swint(int irq, void *context, void *arg)
 
       case SYS_switch_context:
         {
-          struct tcb_s *prev = (struct tcb_s *)regs[REG_A1];
-          struct tcb_s *next = (struct tcb_s *)regs[REG_A2];
+          struct tcb_s *prev = (struct tcb_s *)(uintptr_t)regs[REG_A1];
+          struct tcb_s *next = (struct tcb_s *)(uintptr_t)regs[REG_A2];
 
           DEBUGASSERT(regs[REG_A1] != 0 && regs[REG_A2] != 0);
           riscv_savecontext(prev);

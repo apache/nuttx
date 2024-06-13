@@ -71,10 +71,10 @@ union riscv_percpu_s
   struct
   {
     struct tcb_s       *tcb;       /* Current thread TCB */
-    uintptr_t           hartid;    /* Hart ID */
-    uintptr_t           irq_stack; /* Interrupt stack */
-    uintptr_t           usp;       /* Area to store user sp */
-    uintptr_t           ksp;       /* Area to load kernel sp */
+    uintreg_t           hartid;    /* Hart ID */
+    uintreg_t           irq_stack; /* Interrupt stack */
+    uintreg_t           usp;       /* Area to store user sp */
+    uintreg_t           ksp;       /* Area to load kernel sp */
   };
 };
 

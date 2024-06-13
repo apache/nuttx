@@ -110,7 +110,7 @@ pid_t riscv_fork(const struct fork_s *context)
   uintptr_t stacktop;
   uintptr_t stackutil;
 #ifdef CONFIG_ARCH_FPU
-  uintptr_t *fregs;
+  uintreg_t *fregs;
 #endif
 
   sinfo("s0:%" PRIxREG " s1:%" PRIxREG " s2:%" PRIxREG " s3:%" PRIxREG ""
@@ -140,7 +140,7 @@ pid_t riscv_fork(const struct fork_s *context)
 
   /* Allocate and initialize a TCB for the child task. */
 
-  child = nxtask_setup_fork((start_t)context->ra);
+  child = nxtask_setup_fork((start_t)(uintptr_t)context->ra);
   if (!child)
     {
       sinfo("nxtask_setup_fork failed\n");
@@ -159,7 +159,7 @@ pid_t riscv_fork(const struct fork_s *context)
   DEBUGASSERT(stacktop > context->sp);
   stackutil = stacktop - context->sp;
 
-  sinfo("Parent: stackutil:%" PRIxREG "\n", stackutil);
+  sinfo("Parent: stackutil:%" PRIxPTR "\n", stackutil);
 
   /* Make some feeble effort to preserve the stack contents.  This is
    * feeble because the stack surely contains invalid pointers and other
@@ -177,7 +177,7 @@ pid_t riscv_fork(const struct fork_s *context)
          child->cmn.xcp.regs, XCPTCONTEXT_SIZE);
 
   child->cmn.xcp.regs = (void *)(newsp - XCPTCONTEXT_SIZE);
-  memcpy((void *)newsp, (const void *)context->sp, stackutil);
+  memcpy((void *)newsp, (const void *)(uintptr_t)context->sp, stackutil);
 
   /* Was there a frame pointer in place before? */
 
@@ -192,14 +192,14 @@ pid_t riscv_fork(const struct fork_s *context)
       newfp = context->fp;
     }
 
-  sinfo("Old stack top:%" PRIxREG " SP:%" PRIxREG " FP:%" PRIxREG "\n",
+  sinfo("Old stack top:%" PRIxPTR " SP:%" PRIxREG " FP:%" PRIxREG "\n",
         stacktop, context->sp, context->fp);
-  sinfo("New stack top:%" PRIxREG " SP:%" PRIxREG " FP:%" PRIxREG "\n",
+  sinfo("New stack top:%" PRIxPTR " SP:%" PRIxPTR " FP:%" PRIxPTR "\n",
         newtop, newsp, newfp);
 #else
-  sinfo("Old stack top:%" PRIxREG " SP:%" PRIxREG "\n",
+  sinfo("Old stack top:%" PRIxPTR " SP:%" PRIxREG "\n",
         stacktop, context->sp);
-  sinfo("New stack top:%" PRIxREG " SP:%" PRIxREG "\n",
+  sinfo("New stack top:%" PRIxPTR " SP:%" PRIxPTR "\n",
         newtop, newsp);
 #endif
 

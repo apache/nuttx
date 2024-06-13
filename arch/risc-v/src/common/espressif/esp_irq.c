@@ -553,7 +553,7 @@ void esp_teardown_irq(int source, int cpuint)
  *
  ****************************************************************************/
 
-IRAM_ATTR uintptr_t *riscv_dispatch_irq(uintptr_t mcause, uintptr_t *regs)
+IRAM_ATTR void *riscv_dispatch_irq(uintreg_t mcause, uintreg_t *regs)
 {
   int irq;
   bool is_irq = (RISCV_IRQ_BIT & mcause) != 0;

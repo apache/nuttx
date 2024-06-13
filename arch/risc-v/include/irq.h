@@ -552,7 +552,7 @@ struct xcptcontext
    * another signal handler is executing will be ignored!
    */
 
-  uintptr_t *saved_regs;
+  uintreg_t *saved_regs;
 
 #ifndef CONFIG_BUILD_FLAT
   /* This is the saved address to use when returning from a user-space
@@ -581,21 +581,21 @@ struct xcptcontext
 
   /* Integer register save area */
 
-  uintptr_t *regs;
+  uintreg_t *regs;
 
   /* FPU register save area */
 
 #if defined(CONFIG_ARCH_FPU) && defined(CONFIG_ARCH_LAZYFPU)
-  uintptr_t fregs[FPU_XCPT_REGS];
+  uintreg_t fregs[FPU_XCPT_REGS];
 #endif
 
 #ifdef CONFIG_ARCH_RV_ISA_V
 #  if CONFIG_ARCH_RV_VECTOR_BYTE_LENGTH > 0
   /* There are 32 vector registers(v0 - v31) with vlenb length. */
 
-  uintptr_t vregs[VPU_XCPTC_SIZE];
+  uintreg_t vregs[VPU_XCPTC_SIZE];
 #  else
-  uintptr_t *vregs;
+  uintreg_t *vregs;
 #  endif
 #endif
 };
@@ -648,7 +648,7 @@ extern "C"
  * such value for each processor that can receive an interrupt.
  */
 
-EXTERN volatile uintptr_t *g_current_regs[CONFIG_SMP_NCPUS];
+EXTERN volatile uintreg_t *g_current_regs[CONFIG_SMP_NCPUS];
 #define CURRENT_REGS (g_current_regs[up_cpu_index()])
 
 /****************************************************************************

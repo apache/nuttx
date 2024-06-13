@@ -56,7 +56,7 @@
  * Public Functions
  ****************************************************************************/
 
-uintptr_t *riscv_doirq(int irq, uintptr_t *regs)
+uintreg_t *riscv_doirq(int irq, uintreg_t *regs)
 {
   board_autoled_on(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
@@ -119,7 +119,7 @@ uintptr_t *riscv_doirq(int irq, uintptr_t *regs)
        * that a context switch occurred during interrupt processing.
        */
 
-      regs = (uintptr_t *)CURRENT_REGS;
+      regs = (uintreg_t *)CURRENT_REGS;
     }
 
   /* Set CURRENT_REGS to NULL to indicate that we are no longer in an

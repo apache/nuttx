@@ -54,7 +54,7 @@
 
 /* These change on 32-bit and 64-bit platforms */
 
-#ifdef CONFIG_ARCH_RV32
+#if defined(CONFIG_ARCH_RV32) || defined(CONFIG_ARCH_RV64ILP32)
 #  define LONG_MIN  (-LONG_MAX - 1)
 #  define LONG_MAX  2147483647L
 #  define ULONG_MAX 4294967295UL

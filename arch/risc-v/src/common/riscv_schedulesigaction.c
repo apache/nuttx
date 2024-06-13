@@ -136,10 +136,10 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                * been delivered.
                */
 
-              CURRENT_REGS = (uintptr_t *)((uintptr_t)CURRENT_REGS -
+              CURRENT_REGS = (uintreg_t *)((uintptr_t)CURRENT_REGS -
                                                       XCPTCONTEXT_SIZE);
 
-              memcpy((uintptr_t *)CURRENT_REGS, tcb->xcp.saved_regs,
+              memcpy((uintreg_t *)CURRENT_REGS, tcb->xcp.saved_regs,
                      XCPTCONTEXT_SIZE);
 
               /* Then set up to vector to the trampoline with interrupts
@@ -190,7 +190,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * delivered.
            */
 
-          tcb->xcp.regs = (uintptr_t *)((uintptr_t)tcb->xcp.regs -
+          tcb->xcp.regs = (uintreg_t *)((uintptr_t)tcb->xcp.regs -
                                                    XCPTCONTEXT_SIZE);
 
           memcpy(tcb->xcp.regs, tcb->xcp.saved_regs, XCPTCONTEXT_SIZE);
@@ -301,7 +301,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                    * been delivered.
                    */
 
-                  tcb->xcp.regs = (uintptr_t *)((uintptr_t)tcb->xcp.regs -
+                  tcb->xcp.regs = (uintreg_t *)((uintptr_t)tcb->xcp.regs -
                                                            XCPTCONTEXT_SIZE);
 
                   memcpy(tcb->xcp.regs, tcb->xcp.saved_regs,
@@ -327,17 +327,17 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                    * been delivered.
                    */
 
-                  tcb->xcp.saved_regs = (uintptr_t *)CURRENT_REGS;
+                  tcb->xcp.saved_regs = (uintreg_t *)CURRENT_REGS;
 
                   /* Duplicate the register context.  These will be
                    * restored by the signal trampoline after the signal has
                    * been delivered.
                    */
 
-                  CURRENT_REGS = (uintptr_t *)((uintptr_t)CURRENT_REGS -
+                  CURRENT_REGS = (uintreg_t *)((uintptr_t)CURRENT_REGS -
                                                           XCPTCONTEXT_SIZE);
 
-                  memcpy((uintptr_t *)CURRENT_REGS, tcb->xcp.saved_regs,
+                  memcpy((uintreg_t *)CURRENT_REGS, tcb->xcp.saved_regs,
                          XCPTCONTEXT_SIZE);
 
                   CURRENT_REGS[REG_SP]      = (uintptr_t)CURRENT_REGS +
@@ -395,7 +395,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * delivered.
            */
 
-          tcb->xcp.regs              = (uintptr_t *)
+          tcb->xcp.regs              = (uintreg_t *)
                                        ((uintptr_t)tcb->xcp.regs -
                                                    XCPTCONTEXT_SIZE);
 
