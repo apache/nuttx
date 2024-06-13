@@ -192,14 +192,14 @@ typedef _wchar_t     wchar_t;
  *   An integral type capable of storing any valid value of wchar_t, or WEOF.
  */
 
-typedef int wint_t;
+typedef _wint_t wint_t;
 
 /* wctype_t
  *   A scalar type of a data object that can hold values which represent
  *   locale-specific character classification.
  */
 
-typedef int wctype_t;
+typedef _wctype_t wctype_t;
 
 #if defined(CONFIG_FS_LARGEFILE)
 /* Large file versions */

@@ -72,6 +72,9 @@ typedef __WCHAR_TYPE__     _wchar_t;
 typedef int                _wchar_t;
 #endif
 
+typedef int                _wint_t;
+typedef int                _wctype_t;
+
 #if defined(__SIZE_TYPE__)
 /* If __SIZE_TYPE__ is defined we define ssize_t based on size_t.
  * We simply change "unsigned" to "signed" for this single definition

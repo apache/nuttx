@@ -78,6 +78,9 @@ typedef __WCHAR_TYPE__     _wchar_t;
 typedef int                _wchar_t;
 #endif
 
+typedef int                _wint_t;
+typedef int                _wctype_t;
+
 /* Use uintreg_t for register-width integers */
 
 #ifdef CONFIG_ARCH_RV32
