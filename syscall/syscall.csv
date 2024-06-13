@@ -136,7 +136,7 @@
 "rmmod","nuttx/module.h","defined(CONFIG_MODULE)","int","FAR void *"
 "sched_backtrace","sched.h","defined(CONFIG_SCHED_BACKTRACE)","int","pid_t","FAR void **","int","int"
 "sched_getaffinity","sched.h","defined(CONFIG_SMP)","int","pid_t","size_t","FAR cpu_set_t *"
-"sched_getcpu","sched.h","defined(CONFIG_SMP)","int"
+"sched_getcpu","sched.h","","int"
 "sched_getparam","sched.h","","int","pid_t","FAR struct sched_param *"
 "sched_getscheduler","sched.h","","int","pid_t"
 "sched_lock","sched.h","","int"
