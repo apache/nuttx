@@ -130,13 +130,13 @@ static void vhost_defered_probe_work(FAR void *arg)
         {
           if (item->device->id.device == driver->device)
             {
+              item->device->priv = driver;
               if (driver->probe(item->device) >= 0)
                 {
                   vhosterr("device probe success device=%p\n", item->device);
                   item->driver = driver;
+                  break;
                 }
-
-              break;
             }
         }
     }
@@ -207,6 +207,7 @@ int vhost_register_driver(FAR struct vhost_driver *driver)
            * matched.
            */
 
+          item->device->priv = driver;
           if (driver->probe(item->device) >= 0)
             {
               item->driver = driver;

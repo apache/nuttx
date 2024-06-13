@@ -225,13 +225,14 @@ int virtio_register_driver(FAR struct virtio_driver *driver)
       FAR struct virtio_device_item_s *item =
         container_of(node, struct virtio_device_item_s, node);
       FAR struct virtio_device *device = item->device;
-      if (driver->device == device->id.device)
+      if (item->driver == NULL && driver->device == device->id.device)
         {
           /* If found the device in the device list, call driver probe,
            * if probe success, assign item->driver to indicate the device
            * matched.
            */
 
+          device->priv = driver;
           if (driver->probe(device) >= 0)
             {
               item->driver = driver;
@@ -327,12 +328,12 @@ int virtio_register_device(FAR struct virtio_device *device)
            * matched.
            */
 
+          device->priv = driver;
           if (driver->probe(device) >= 0)
             {
               item->driver = driver;
+              break;
             }
-
-          break;
         }
     }
 
