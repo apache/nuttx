@@ -330,8 +330,8 @@ static int net_rpmsg_drv_sockioctl_task(int argc, FAR char *argv[])
 
   /* Restore pointers from argv */
 
-  ept = (FAR struct rpmsg_endpoint *)strtoul(argv[1], NULL, 0);
-  msg = (FAR struct net_rpmsg_ioctl_s *)strtoul(argv[2], NULL, 0);
+  ept = (FAR struct rpmsg_endpoint *)strtoul(argv[1], NULL, 16);
+  msg = (FAR struct net_rpmsg_ioctl_s *)strtoul(argv[2], NULL, 16);
 
   /* We need a temporary sock for ioctl here */
 

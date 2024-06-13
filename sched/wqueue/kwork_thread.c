@@ -136,9 +136,9 @@ static int work_thread(int argc, FAR char *argv[])
   /* Get the handle from argv */
 
   wqueue  = (FAR struct kwork_wqueue_s *)
-            ((uintptr_t)strtoul(argv[1], NULL, 0));
+            ((uintptr_t)strtoul(argv[1], NULL, 16));
   kworker = (FAR struct kworker_s *)
-            ((uintptr_t)strtoul(argv[2], NULL, 0));
+            ((uintptr_t)strtoul(argv[2], NULL, 16));
 
   flags = enter_critical_section();
 
