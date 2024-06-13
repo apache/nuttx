@@ -59,11 +59,19 @@
  */
 
 #define MIN_IRQBUTTON   BUTTON_USER
-#define MAX_IRQBUTTON   BUTTON_USER
-#define NUM_IRQBUTTONS  1
+#define MAX_IRQBUTTON   BUTTON_EXTERNAL
+#define NUM_IRQBUTTONS  (BUTTON_USER - BUTTON_EXTERNAL + 1)
 
 #define GPIO_BTN_USER \
-  (GPIO_INPUT |GPIO_FLOAT |GPIO_EXTI | GPIO_PORTA | GPIO_PIN0)
+  (GPIO_INPUT |GPIO_PULLUP |GPIO_EXTI | GPIO_PORTA | GPIO_PIN0)
+
+#define GPIO_BTN_EXTERNAL \
+  (GPIO_INPUT |GPIO_FLOAT |GPIO_EXTI | GPIO_PORTA | GPIO_PIN1)
+
+/* PWM Configuration */
+
+#define STM32F411MINIMUM_PWMTIMER   3
+#define STM32F411MINIMUM_PWMCHANNEL 3
 
 /* SPI chip selects */
 
@@ -198,6 +206,38 @@ int stm32_usbhost_initialize(void);
 
 #ifdef CONFIG_STM32F411MINIMUM_GPIO
 int stm32_gpio_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PWM
+int stm32_pwm_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_rgbled_setup
+ *
+ * Description:
+ *   This function is called by board initialization logic to configure the
+ *   RGB LED driver.  This function will register the driver as /dev/rgbled0.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RGBLED
+int stm32_rgbled_setup(void);
 #endif
 
 /****************************************************************************
