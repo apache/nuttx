@@ -235,6 +235,7 @@ void   task_testcancel(void);
 
 /* Task Scheduling Interfaces (based on POSIX APIs) */
 
+int    sched_getcpu(void);
 int    sched_setparam(pid_t pid, FAR const struct sched_param *param);
 int    sched_getparam(pid_t pid, FAR struct sched_param *param);
 int    sched_setscheduler(pid_t pid, int policy,
@@ -252,12 +253,10 @@ int    sched_setaffinity(pid_t pid, size_t cpusetsize,
                          FAR const cpu_set_t *mask);
 int    sched_getaffinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask);
 int    sched_cpucount(FAR const cpu_set_t *set);
-int    sched_getcpu(void);
 #else
 #  define sched_setaffinity(p, c, m) 0
 #  define sched_getaffinity(p, c, m) (*(m) |= (1 << 0), 0)
 #  define sched_cpucount(s) 1
-#  define sched_getcpu() 0
 #endif /* CONFIG_SMP */
 
 /* Task Switching Interfaces (non-standard) */
