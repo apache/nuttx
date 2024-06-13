@@ -94,6 +94,18 @@ typedef unsigned short     _wchar_t;
 typedef int                _wchar_t;
 #endif
 
+#ifdef _MSC_VER
+typedef unsigned short     _wint_t;
+#else
+typedef int                _wint_t;
+#endif
+
+#ifdef _MSC_VER
+typedef unsigned short     _wctype_t;
+#else
+typedef int                _wctype_t;
+#endif
+
 #if defined(__SIZE_TYPE__)
 /* If __SIZE_TYPE__ is defined we define ssize_t based on size_t.
  * We simply change "unsigned" to "signed" for this single definition
