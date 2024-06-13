@@ -588,7 +588,7 @@ static int goldfish_sensor_activate(FAR struct sensor_lowerhalf_s *lower,
 static int goldfish_sensor_thread(int argc, FAR char** argv)
 {
   FAR struct goldfish_sensor_s *priv =
-    (FAR struct goldfish_sensor_s *)((uintptr_t)strtoul(argv[1], NULL, 0));
+    (FAR struct goldfish_sensor_s *)((uintptr_t)strtoul(argv[1], NULL, 16));
 
   while (true)
     {
