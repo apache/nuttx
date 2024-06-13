@@ -50,6 +50,11 @@ if(NOT WIN32)
     TARGET nuttx
     APPEND
     PROPERTY NUTTX_COMPILE_OPTIONS -fno-common)
+else()
+  set_property(
+    TARGET nuttx
+    APPEND
+    PROPERTY NUTTX_COMPILE_OPTIONS /std:c11 /experimental:c11atomics)
 endif()
 
 if(CONFIG_SIM_SANITIZE)
