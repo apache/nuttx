@@ -321,8 +321,10 @@
  */
 
 #define BUTTON_USER        0
-#define NUM_BUTTONS        1
+#define BUTTON_EXTERNAL    1  //External user button connected to PA1
+#define NUM_BUTTONS        2
 
-#define BUTTON_USER_BIT    (1 << BUTTON_USER)
+#define BUTTON_USER_BIT       (1 << BUTTON_USER)
+#define BUTTON_EXTERNAL_BIT    (1 << BUTTON_EXTERNAL)
 
 #endif /* __BOARDS_ARM_STM32_STM32F411_MINIMUM_INCLUDE_BOARD_H */
