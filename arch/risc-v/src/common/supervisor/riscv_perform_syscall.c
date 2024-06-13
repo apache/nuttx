@@ -35,7 +35,7 @@
  * Public Functions
  ****************************************************************************/
 
-void *riscv_perform_syscall(uintptr_t *regs)
+void *riscv_perform_syscall(uintreg_t *regs)
 {
   /* Set up the interrupt register set needed by swint() */
 
@@ -76,7 +76,7 @@ void *riscv_perform_syscall(uintptr_t *regs)
        * that a context switch occurred during interrupt processing.
        */
 
-      regs = (uintptr_t *)CURRENT_REGS;
+      regs = (uintreg_t *)CURRENT_REGS;
     }
 
   CURRENT_REGS = NULL;

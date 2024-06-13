@@ -49,7 +49,7 @@
  ****************************************************************************/
 
 LOCATE_ITCM
-void *rv32m1_dispatch_irq(uintptr_t vector, uintptr_t *regs)
+void *rv32m1_dispatch_irq(uintreg_t vector, uintreg_t *regs)
 {
   uint32_t vec = vector & 0x1f;
   int irq = (vector >> RV_IRQ_MASK) + vec;

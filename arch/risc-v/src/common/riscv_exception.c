@@ -84,7 +84,7 @@ int riscv_exception(int mcause, void *regs, void *args)
 #ifdef CONFIG_ARCH_KERNEL_STACK
   FAR struct tcb_s *tcb = this_task();
 #endif
-  uintptr_t cause = mcause & RISCV_IRQ_MASK;
+  uintreg_t cause = mcause & RISCV_IRQ_MASK;
 
   _alert("EXCEPTION: %s. MCAUSE: %" PRIxREG ", EPC: %" PRIxREG
          ", MTVAL: %" PRIxREG "\n",
