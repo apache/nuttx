@@ -47,6 +47,7 @@
 
 struct rpmsg_s
 {
+  bool                         init;
   struct metal_list            bind;
   rmutex_t                     lock;
   struct metal_list            node;
