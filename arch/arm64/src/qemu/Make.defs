@@ -30,3 +30,7 @@ endif
 ifeq ($(CONFIG_ARCH_USE_TEXT_HEAP),y)
 CHIP_CSRCS += qemu_textheap.c
 endif
+
+ifeq ($(CONFIG_PM), y)
+CHIP_CSRCS += qemu_initialize.c
+endif
