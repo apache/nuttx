@@ -213,6 +213,7 @@
 #define BOARDIOC_BOOT_IMAGE        _BOARDIOC(0x0014)
 #define BOARDIOC_RESET_CAUSE       _BOARDIOC(0x0015)
 #define BOARDIOC_IRQ_AFFINITY      _BOARDIOC(0x0016)
+#define BOARDIOC_START_CPU         _BOARDIOC(0x0017)
 
 /* If CONFIG_BOARDCTL_IOCTL=y, then board-specific commands will be support.
  * In this case, all commands not recognized by boardctl() will be forwarded
@@ -221,7 +222,7 @@
  * User defined board commands may begin with this value:
  */
 
-#define BOARDIOC_USER              _BOARDIOC(0x0017)
+#define BOARDIOC_USER              _BOARDIOC(0x0018)
 
 /****************************************************************************
  * Public Type Definitions

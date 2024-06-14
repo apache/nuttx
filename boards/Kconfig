@@ -4828,6 +4828,14 @@ config BOARDCTL_IRQ_AFFINITY
 	---help---
 		Enables support for Set an IRQ affinity to CPUs by software.
 
+config BOARDCTL_START_CPU
+	bool "Start slave cpu"
+	default n
+	---help---
+		Enables support for the BOARDIOC_START_CPU boardctl() command.
+		Architecture specific logic must provide the board_start_cpu()
+		interface.
+
 config BOARDCTL_IOCTL
 	bool "Board-specific boardctl() commands"
 	default n
