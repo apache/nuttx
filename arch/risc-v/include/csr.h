@@ -354,6 +354,28 @@
 #define CSR_VSIREG5         0x256 /* Virtual supervisor indirect register alias 5 */
 #define CSR_VSIREG6         0x257 /* Virtual supervisor indirect register alias 6 */
 
+/* CLIC CSRs */
+
+#define CSR_MTVT            0x307 /* Trap-handler vector table base address */
+#define CSR_MNXTI           0x345 /* Interrupt handler address and enable modifier */
+#define CSR_MINTSTATUS      0xfb1 /* Current interrupt levels */
+#define CSR_MINTTHRESH      0x347 /* Interrupt-level threshold */
+#define CSR_MSCRATCHCSW     0x348 /* Conditional scratch swap on priv mode change */
+#define CSR_MSCRATCHCSWL    0x349 /* Conditional scratch swap on level change */
+
+#define CSR_STVT            0x107 /* Trap-handler vector table base address */
+#define CSR_SNXTI           0x145 /* Interrupt handler address and enable modifier */
+#define CSR_SINTSTATUS      0xdb1 /* Current interrupt levels */
+#define CSR_SINTTHRESH      0x147 /* Interrupt-level threshold */
+#define CSR_SSCRATCHCSW     0x148 /* Conditional scratch swap on priv mode change */
+#define CSR_SSCRATCHCSWL    0x149 /* Conditional scratch swap on level change */
+
+#define CSR_UTVT            0x007 /* Trap-handler vector table base address */
+#define CSR_UNXTI           0x045 /* Interrupt handler address and enable modifier */
+#define CSR_UINTSTATUS      0xcb1 /* Current interrupt levels */
+#define CSR_UINTTHRESH      0x047 /* Interrupt-level threshold */
+#define CSR_USCRATCHCSWL    0x049 /* Conditional scratch swap on level change */
+
 /* In mstatus register */
 
 #define MSTATUS_UIE         (0x1 << 0)  /* User Interrupt Enable */
