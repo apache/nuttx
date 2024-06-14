@@ -31,6 +31,7 @@
 #include <nuttx/pgalloc.h>
 
 #include "shm/shmfs.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Public Functions
@@ -54,7 +55,7 @@ FAR struct shmfs_object_s *shmfs_alloc_object(size_t length)
       return NULL;
     }
 
-  object = kmm_zalloc(alloc_size);
+  object = fs_heap_zalloc(alloc_size);
   if (object)
     {
       object->paddr = (FAR char *)(object + 1);
@@ -156,6 +157,6 @@ void shmfs_free_object(FAR struct shmfs_object_s *object)
        * (and the shared memory in case of FLAT build)
        */
 
-      kmm_free(object);
+      fs_heap_free(object);
     }
 }

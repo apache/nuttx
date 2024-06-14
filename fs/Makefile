@@ -20,7 +20,7 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = fs_initialize.c
+CSRCS = fs_initialize.c fs_heap.c
 
 include inode/Make.defs
 include vfs/Make.defs

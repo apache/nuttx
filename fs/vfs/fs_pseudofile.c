@@ -38,6 +38,7 @@
 
 #include "inode/inode.h"
 #include "notify/notify.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Private Types
@@ -133,8 +134,8 @@ static void pseudofile_remove(FAR struct fs_pseudofile_s *pf)
 {
   nxmutex_unlock(&pf->lock);
   nxmutex_destroy(&pf->lock);
-  kmm_free(pf->content);
-  kmm_free(pf);
+  fs_heap_free(pf->content);
+  fs_heap_free(pf);
 }
 
 static int pseudofile_close(FAR struct file *filep)
@@ -170,13 +171,13 @@ static int pseudofile_expand(FAR struct inode *node,
   FAR struct fs_pseudofile_s *pf = node->i_private;
   FAR void *tmp;
 
-  if (pf->content && kmm_malloc_size(pf->content) >= size)
+  if (pf->content && fs_heap_malloc_size(pf->content) >= size)
     {
       node->i_size = size;
       return 0;
     }
 
-  tmp = kmm_realloc(pf->content, 1 << LOG2_CEIL(size));
+  tmp = fs_heap_realloc(pf->content, 1 << LOG2_CEIL(size));
   if (tmp == NULL)
     {
       return -ENOMEM;
@@ -362,7 +363,7 @@ static int pseudofile_munmap(FAR struct task_group_s *group,
 
           if (inode->i_private)
             {
-              kmm_free(inode->i_private);
+              fs_heap_free(inode->i_private);
             }
 
           inode->i_private = NULL;
@@ -402,7 +403,7 @@ static int pseudofile_truncate(FAR struct file *filep, off_t length)
     {
       FAR void *tmp;
 
-      tmp = kmm_realloc(pf->content, length);
+      tmp = fs_heap_realloc(pf->content, length);
       if (tmp == NULL)
         {
           ret = -ENOMEM;
@@ -480,7 +481,7 @@ int pseudofile_create(FAR struct inode **node, FAR const char *path,
       return -EINVAL;
     }
 
-  pf = kmm_zalloc(sizeof(struct fs_pseudofile_s));
+  pf = fs_heap_zalloc(sizeof(struct fs_pseudofile_s));
   if (pf == NULL)
     {
       return -ENOMEM;
@@ -515,7 +516,7 @@ reserve_err:
   inode_unlock();
 lock_err:
   nxmutex_destroy(&pf->lock);
-  kmm_free(pf);
+  fs_heap_free(pf);
   return ret;
 }
 
