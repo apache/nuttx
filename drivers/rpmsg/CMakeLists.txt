@@ -31,5 +31,10 @@ if(CONFIG_RPMSG)
     list(APPEND SRCS rpmsg_virtio.c)
   endif()
 
+  if(CONFIG_RPMSG_VIRTIO_IVSHMEM)
+    list(APPEND SRCS rpmsg_virtio_ivshmem.c)
+  endif()
+
+  target_include_directories(drivers PRIVATE ${NUTTX_DIR}/openamp/open-amp/lib)
   target_sources(drivers PRIVATE ${SRCS})
 endif()
