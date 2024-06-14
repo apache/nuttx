@@ -229,7 +229,7 @@ int rpmsg_register_callback(FAR void *priv,
       FAR struct rpmsg_s *rpmsg =
         metal_container_of(node, struct rpmsg_s, node);
 
-      if (rpmsg->rdev->ns_unbind_cb == NULL)
+      if (!rpmsg->init)
         {
           continue;
         }
@@ -307,7 +307,7 @@ void rpmsg_unregister_callback(FAR void *priv,
           FAR struct rpmsg_s *rpmsg =
             metal_container_of(pnode, struct rpmsg_s, node);
 
-          if (rpmsg->rdev->ns_unbind_cb)
+          if (rpmsg->init)
             {
               device_destroy(rpmsg->rdev, priv);
             }
@@ -397,6 +397,7 @@ void rpmsg_device_created(FAR struct rpmsg_s *rpmsg)
         }
     }
 
+  rpmsg->init = true;
   nxrmutex_unlock(&g_rpmsg_lock);
 
 #ifdef CONFIG_RPMSG_PING
