@@ -31,6 +31,7 @@
 #include "inode/inode.h"
 #include "aio/aio.h"
 #include "vfs/lock.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Private Functions
@@ -80,6 +81,8 @@ static struct notifier_block g_sync_nb =
 void fs_initialize(void)
 {
   fs_trace_begin();
+
+  fs_heap_initialize();
 
   /* Initial inode, file, and VFS data structures */
 
