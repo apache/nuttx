@@ -412,7 +412,7 @@ static void mpfs_interrupt_work(void *arg);
 static inline void mac_putreg(struct mpfs_ethmac_s *priv,
                               uint32_t offset, uint32_t val)
 {
-  uint32_t *addr = (uint32_t *)(priv->regbase + offset);
+  uintptr_t addr = (uintptr_t)(priv->regbase + offset);
 #if defined(CONFIG_DEBUG_NET) && defined(CONFIG_MPFS_ETHMAC_REGDEBUG)
   ninfo("0x%08x <- 0x%08x\n", addr, val);
 #endif
@@ -437,7 +437,7 @@ static inline void mac_putreg(struct mpfs_ethmac_s *priv,
 static inline uint32_t mac_getreg(struct mpfs_ethmac_s *priv,
                                   uint32_t offset)
 {
-  uint32_t *addr = (uint32_t *)(priv->regbase + offset);
+  uintptr_t addr = (uintptr_t)(priv->regbase + offset);
   uint32_t value = getreg32(addr);
 #if defined(CONFIG_DEBUG_NET) && defined(CONFIG_MPFS_ETHMAC_REGDEBUG)
   ninfo("0x%08x -> 0x%08x\n", addr, value);
