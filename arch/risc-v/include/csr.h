@@ -376,6 +376,15 @@
 #define CSR_UINTTHRESH      0x047 /* Interrupt-level threshold */
 #define CSR_USCRATCHCSWL    0x049 /* Conditional scratch swap on level change */
 
+/* CLIC Indirect CSRs */
+
+#define MISELECT_CLICCFG     0x14a0 /* MIREG */
+#define MISELECT_CLICINTCTL  0x1000 /* MIREG */
+#define MISELECT_CLICINTATTR 0x1000 /* MIREG2 */
+#define MISELECT_CLICINTIP   0x1400 /* MIREG */
+#define MISELECT_CLICINTIE   0x1400 /* MIREG2 */
+#define MISELECT_CLICINTTRIG 0x1480 /* MIREG */
+
 /* In mstatus register */
 
 #define MSTATUS_UIE         (0x1 << 0)  /* User Interrupt Enable */
