@@ -1032,7 +1032,8 @@ static int i3c_master_bus_init(FAR struct i3c_master_controller *master)
   ret = i3c_master_rstdaa_locked(master, I3C_BROADCAST_ADDR);
   if (ret && ret != I3C_ERROR_M2)
     {
-      goto err_bus_cleanup;
+      i3cerr("master_rstdaa_locked() failed:%d (no device or timeout)\n",
+             ret);
     }
 
   /* Disable all slave events before starting DAA. */
@@ -1042,7 +1043,8 @@ static int i3c_master_bus_init(FAR struct i3c_master_controller *master)
               I3C_CCC_EVENT_HJ);
   if (ret && ret != I3C_ERROR_M2)
     {
-      goto err_bus_cleanup;
+      i3cerr("master_disec_locked() failed:%d (no device or timeout)\n",
+             ret);
     }
 
   /* Reserve init_dyn_addr first, and then try to pre-assign dynamic
@@ -1055,13 +1057,11 @@ static int i3c_master_bus_init(FAR struct i3c_master_controller *master)
   ret = i3c_master_do_daa(master);
   if (ret)
     {
-      goto err_rstdaa;
+      i3c_master_rstdaa_locked(master, I3C_BROADCAST_ADDR);
+      i3cerr("master_do_daa failed:%d (no device)\n", ret);
     }
 
   return 0;
-
-err_rstdaa:
-  i3c_master_rstdaa_locked(master, I3C_BROADCAST_ADDR);
 
 err_bus_cleanup:
   if (master->ops->bus_cleanup)
