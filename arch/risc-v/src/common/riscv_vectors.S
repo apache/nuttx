@@ -23,7 +23,7 @@
  ****************************************************************************/
 
   .section .text
-  .balign  8
+  .balign  64
   .global  __trap_vec
 
 /****************************************************************************
@@ -32,6 +32,8 @@
  * Description:
  *   All M-mode exceptions and interrupts will be handled from here. If
  *   kernel is in S-mode delegated exceptions and interrupts are handled.
+ *   Bump align to 64 byte to support all interrupt mode (PLIC/CLINT/CLIC)
+ *   since 64 byte align is essential for CLIC.
  *
  ****************************************************************************/
 
