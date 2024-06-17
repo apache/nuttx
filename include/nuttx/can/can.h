@@ -589,7 +589,7 @@ begin_packed_struct struct can_hdr_s
   uint8_t      ch_brs    : 1; /* Bit Rate Switch */
   uint8_t      ch_esi    : 1; /* Error State Indicator */
 #endif
-  uint8_t      ch_unused : 1; /* FIXME: This field is useless, kept for backward compatibility */
+  uint8_t      ch_tcf    : 1; /* Tx confirmation flag */
 } end_packed_struct;
 
 #else
@@ -606,7 +606,7 @@ begin_packed_struct struct can_hdr_s
   uint8_t      ch_brs    : 1; /* Bit Rate Switch */
   uint8_t      ch_esi    : 1; /* Error State Indicator */
 #endif
-  uint8_t      ch_unused : 1; /* FIXME: This field is useless, kept for backward compatibility */
+  uint8_t      ch_tcf    : 1; /* Tx confirmation flag */
 } end_packed_struct;
 #endif
 

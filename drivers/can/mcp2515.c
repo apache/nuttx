@@ -2031,7 +2031,7 @@ static void mcp2515_error(FAR struct can_dev_s *dev, uint8_t status,
 #ifdef CONFIG_CAN_EXTID
       hdr.ch_extid  = 0;
 #endif
-      hdr.ch_unused = 0;
+      hdr.ch_tcf    = 0;
 
       /* And provide the error report to the upper half logic */
 
@@ -2141,7 +2141,7 @@ static void mcp2515_receive(FAR struct can_dev_s *dev, uint8_t offset)
 #ifdef CONFIG_CAN_ERRORS
   hdr.ch_error  = 0; /* Error reporting not supported */
 #endif
-  hdr.ch_unused = 0;
+  hdr.ch_tcf    = 0;
 
   /* Extract the RTR bit */
 
