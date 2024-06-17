@@ -37,7 +37,7 @@
  ****************************************************************************/
 
 #define CDCECM_VERSIONNO         (0x0100)
-#define CDCECM_MXDESCLEN         (80)
+#define CDCECM_MXDESCLEN         (120)
 #define CDCECM_MAXSTRLEN         (CDCECM_MXDESCLEN - 2)
 #define CDCECM_NCONFIGS          (1)
 #define CDCECM_NINTERFACES       (2)
