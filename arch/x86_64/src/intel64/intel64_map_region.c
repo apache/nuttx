@@ -26,8 +26,11 @@
 
 #include <debug.h>
 #include <nuttx/irq.h>
+#include <nuttx/pgalloc.h>
 
 #include "x86_64_internal.h"
+#include "x86_64_mmu.h"
+#include "pgalloc.h"
 
 /****************************************************************************
  * Public Functions
@@ -41,7 +44,77 @@
  *
  ****************************************************************************/
 
-int up_map_region(void *base, int size, int flags)
+#ifdef CONFIG_MM_PGALLOC
+int up_map_region(void *base, size_t size, int flags)
+{
+  uintptr_t bb;
+  int       ptlevel;
+  uintptr_t ptprev;
+  uintptr_t paddr;
+  uintptr_t vaddr;
+  size_t    nmapped;
+  int       i;
+
+  /* Round to page boundary */
+
+  bb = (uintptr_t)base & ~(PAGE_SIZE - 1);
+
+  /* Increase size if the base address is rounded off */
+
+  size += (uintptr_t)base - bb;
+
+  /* Map 1:1 */
+
+  vaddr   = bb;
+  nmapped = 0;
+
+  while (nmapped < size)
+    {
+      /* Start from PTL4 */
+
+      ptprev = x86_64_pgvaddr(get_pml4());
+
+      for (ptlevel = 0; ptlevel < X86_MMU_PT_LEVELS - 1; ptlevel++)
+        {
+          paddr = mmu_pte_to_paddr(mmu_ln_getentry(ptlevel, ptprev, vaddr));
+          if (!paddr)
+            {
+              /* Nothing yet, allocate one page for final level page table */
+
+              paddr = mm_pgalloc(1);
+              if (!paddr)
+                {
+                  return -ENOMEM;
+                }
+
+              /* Map the page table to the prior level */
+
+              mmu_ln_setentry(ptlevel, ptprev, paddr, vaddr, 0);
+
+              /* This is then used to map the final level */
+
+              x86_64_pgwipe(paddr);
+            }
+
+          ptprev = x86_64_pgvaddr(paddr);
+        }
+
+      /* Then map the virtual address to the physical address */
+
+      for (i = X86_MMU_VADDR_INDEX(vaddr, ptlevel);
+           i < X86_MMU_ENTRIES_PER_PGT && nmapped < size;
+           i++)
+        {
+          mmu_ln_setentry(ptlevel, ptprev, bb + nmapped, vaddr, flags);
+          nmapped += MM_PGSIZE;
+          vaddr   += MM_PGSIZE;
+        }
+    }
+
+  return 0;
+}
+#else
+int up_map_region(void *base, size_t size, int flags)
 {
   uint64_t bb;
   uint64_t num_of_pages;
@@ -60,7 +133,9 @@ int up_map_region(void *base, int size, int flags)
 
   if (bb > 0xffffffff)
     {
-      return -1;  /* Only < 4GB can be mapped */
+      /* More than 4GB can't be mapped with this implementtion */
+
+      PANIC();
     }
 
   curr = bb;
@@ -74,3 +149,4 @@ int up_map_region(void *base, int size, int flags)
 
   return 0;
 }
+#endif

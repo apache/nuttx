@@ -34,6 +34,7 @@
 #ifndef __ASSEMBLY__
 #  include <nuttx/compiler.h>
 #  include <stdint.h>
+#  include <stddef.h>
 #endif
 
 /****************************************************************************
@@ -494,7 +495,7 @@ extern volatile struct gdt_entry_s *g_gdt64;
  * Public Function Prototypes
  ****************************************************************************/
 
-int up_map_region(void *base, int size, int flags);
+int up_map_region(void *base, size_t size, int flags);
 void x86_64_check_and_enable_capability(void);
 
 extern void __enable_sse_avx(void);
