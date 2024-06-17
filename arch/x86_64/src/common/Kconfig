@@ -6,6 +6,13 @@
 if ARCH_X86_64
 comment "Common Configuration Options"
 
+config ARCH_X86_64_PGPOOL_SIZE
+	int "Page pool size"
+	depends on !ARCH_PGPOOL_MAPPING && MM_PGALLOC
+	default 8192000
+	---help---
+		Page pool size if ARCH_PGPOOL_MAPPING is not enabled
+
 config ARCH_X86_64_ACPI
 	bool "ACPI support"
 	default y

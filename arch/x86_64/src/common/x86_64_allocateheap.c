@@ -107,7 +107,13 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
   hstart = (topstack + PAGE_SIZE - 1) & PAGE_MASK;
   *heap_start = (void *)hstart;
 
-  /* The size is the rest of the RAM */
+  /* The size is the rest of the RAM minus page pool */
 
-  *heap_size = (size_t)(CONFIG_RAM_SIZE - (hstart - 0x100000000 - 1));
+#ifdef CONFIG_ARCH_PGPOOL_PBASE
+  *heap_size = (size_t)(CONFIG_ARCH_PGPOOL_PBASE -
+                        (hstart - X86_64_LOAD_OFFSET - 1));
+#else
+  *heap_size = (size_t)(X86_64_PGPOOL_BASE -
+                        (hstart - X86_64_LOAD_OFFSET - 1));
+#endif
 }
