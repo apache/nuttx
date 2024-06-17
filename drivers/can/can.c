@@ -408,7 +408,7 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
 #ifdef CONFIG_CAN_EXTID
           msg->cm_hdr.ch_extid  = 0;
 #endif
-          msg->cm_hdr.ch_unused = 0;
+          msg->cm_hdr.ch_tcf    = 0;
           memset(&(msg->cm_data), 0, CAN_ERROR_DLC);
           msg->cm_data[5]       = fifo->rx_error;
 
@@ -1172,7 +1172,11 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
               memcpy(&waitmsg->cm_hdr, hdr, sizeof(struct can_hdr_s));
 
               nbytes = can_dlc2bytes(hdr->ch_dlc);
-              memcpy(waitmsg->cm_data, data, nbytes);
+              if (nbytes)
+                {
+                  memcpy(waitmsg->cm_data, data, nbytes);
+                }
+
               dev->cd_npendrtr--;
 
               /* Restart the waiting thread and mark the entry unused */
@@ -1213,7 +1217,10 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
                  sizeof(struct can_hdr_s));
 
           nbytes = can_dlc2bytes(hdr->ch_dlc);
-          memcpy(fifo->rx_buffer[fifo->rx_tail].cm_data, data, nbytes);
+          if (nbytes)
+            {
+              memcpy(fifo->rx_buffer[fifo->rx_tail].cm_data, data, nbytes);
+            }
 
           /* Increment the tail of the circular buffer */
 
