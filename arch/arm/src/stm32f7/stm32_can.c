@@ -1518,7 +1518,7 @@ static int stm32can_rxinterrupt(struct can_dev_s *dev, int rxmb)
 #ifdef CONFIG_CAN_ERRORS
   hdr.ch_error  = 0; /* Error reporting not supported */
 #endif
-  hdr.ch_unused = 0;
+  hdr.ch_tcf    = 0;
 
   /* Extract the RTR bit */
 
