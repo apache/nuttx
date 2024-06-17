@@ -25,6 +25,8 @@
 #include <nuttx/config.h>
 
 #include <debug.h>
+#include <assert.h>
+#include <errno.h>
 #include <nuttx/clock.h>
 #include <nuttx/power/pm_runtime.h>
 
