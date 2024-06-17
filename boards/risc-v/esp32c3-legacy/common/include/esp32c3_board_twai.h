@@ -26,6 +26,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdint.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -41,6 +42,10 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
+
+/* TODO - expand to support both TWAI ports */
+
+#define ESP32C3_TWAI_NUM_PORTS    1
 
 /****************************************************************************
  * Public Function Prototypes
@@ -61,9 +66,9 @@ extern "C"
  *
  ****************************************************************************/
 
-#ifdef CONFIG_CAN
+#ifdef CONFIG_ESP32C3_TWAI
 int board_twai_setup(void);
-#endif
+#endif /* CONFIG_ESP32C3_TWAI */
 
 #undef EXTERN
 #if defined(__cplusplus)

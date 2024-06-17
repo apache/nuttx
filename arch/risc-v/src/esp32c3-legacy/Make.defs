@@ -66,10 +66,6 @@ ifeq ($(CONFIG_ESP32C3_I2C),y)
 CHIP_CSRCS += esp32c3_i2c.c
 endif
 
-ifeq ($(CONFIG_ESP32C3_TWAI),y)
-CHIP_CSRCS += esp32c3_twai.c
-endif
-
 ifeq ($(CONFIG_ESP32C3_SPI),y)
 CHIP_CSRCS += esp32c3_spi.c
   ifeq ($(CONFIG_SPI_SLAVE),y)
