@@ -62,6 +62,7 @@ set(SRCS
     lib_linkat.c
     lib_readlinkat.c
     lib_symlinkat.c
+    lib_flock.c
     lib_unlinkat.c)
 
 if(NOT CONFIG_SCHED_USER_IDENTITY)
