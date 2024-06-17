@@ -42,6 +42,19 @@
 
 #define X86_64_LOAD_OFFSET 0x100000000
 
+/* Page pool configuration for CONFIG_ARCH_PGPOOL_MAPPING=n */
+
+#ifndef CONFIG_ARCH_X86_64_PGPOOL_SIZE
+#  define X86_64_PGPOOL_SIZE      (0)
+#else
+#  if CONFIG_ARCH_X86_64_PGPOOL_SIZE % CONFIG_MM_PGSIZE != 0
+#    error CONFIG_ARCH_X86_64_PGPOOL_SIZE must be multiple of page size
+#  endif
+#  define X86_64_PGPOOL_SIZE      (CONFIG_ARCH_X86_64_PGPOOL_SIZE)
+#endif
+
+#define X86_64_PGPOOL_BASE        (CONFIG_RAM_SIZE - X86_64_PGPOOL_SIZE)
+
 /* RFLAGS bits */
 
 #define X86_64_RFLAGS_CF          (1 << 0)  /* Bit 0:  Carry Flag */
@@ -71,13 +84,13 @@
 
 /* Starting from third selector to confirm the syscall interface */
 
-#define X86_GDT_ENTRY_SIZE      0x8
+#define X86_GDT_ENTRY_SIZE        0x8
 
-#define X86_GDT_CODE_SEL_NUM    1
-#  define X86_GDT_CODE_SEL      (X86_GDT_CODE_SEL_NUM * X86_GDT_ENTRY_SIZE)
+#define X86_GDT_CODE_SEL_NUM      1
+#  define X86_GDT_CODE_SEL        (X86_GDT_CODE_SEL_NUM * X86_GDT_ENTRY_SIZE)
 
-#define X86_GDT_DATA_SEL_NUM    2
-#  define X86_GDT_DATA_SEL      (X86_GDT_DATA_SEL_NUM * X86_GDT_ENTRY_SIZE)
+#define X86_GDT_DATA_SEL_NUM      2
+#  define X86_GDT_DATA_SEL        (X86_GDT_DATA_SEL_NUM * X86_GDT_ENTRY_SIZE)
 
 /* The first TSS entry */
 
