@@ -1400,7 +1400,7 @@ static int ncm_notify(FAR struct cdcncm_driver_s *self)
 
           /* SPEED_CHANGE data is up/down speeds in bits/sec */
 
-          data    = (FAR uint32_t *)(self->ctrlreq->buf + sizeof(*req));
+          data    = (FAR uint32_t *)(self->notifyreq->buf + sizeof(*req));
           data[0] = self->usbdev.speed == USB_SPEED_HIGH ?
                     CDCECM_HIGH_BITRATE : CDCECM_LOW_BITRATE;
           data[1] = data[0];
